@@ -12,6 +12,7 @@
 #include <ostream>
 #include <string>
 
+#include "oops/interface/ObsSpaceBase.h"
 #include "util/DateTime.h"
 #include "util/Logger.h"
 #include "util/Printable.h"
@@ -24,8 +25,11 @@ namespace eckit {
 }
 
 namespace ufo {
+  class ObsVec;
 
-class ObsSpace : public util::Printable {
+/// Wrapper around ObsHelpQG, mostly to hide the factory
+class ObsSpace : public oops::ObsSpaceBase {
+
  public:
   ObsSpace(const eckit::Configuration &, const util::DateTime &, const util::DateTime &);
   ObsSpace(const ObsSpace &);
@@ -55,8 +59,8 @@ class ObsSpace : public util::Printable {
   const util::DateTime & windowStart() const {return winbgn_;}
   const util::DateTime & windowEnd() const {return winend_;}
 
-  int & toFortran() {return helper_->toFortran();}
-  const int & toFortran() const {return helper_->toFortran();}
+  int & toFortran() {return keyOspace_;}
+  const int & toFortran() const {return keyOspace_;}
 
  private:
   void print(std::ostream &) const;
@@ -65,6 +69,7 @@ class ObsSpace : public util::Printable {
   unsigned int nobs_;
   const util::DateTime winbgn_;
   const util::DateTime winend_;
+  F90Ospace keyOspace_;
 
   static std::map < std::string, int > theObsFileCount_;
 };

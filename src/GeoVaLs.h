@@ -38,6 +38,8 @@ class GeoVaLs : public util::Printable,
   void zero();
   void random();
   double dot_product_with(const GeoVaLs & other) const;
+  void read(const eckit::Configuration &);
+  void write(const eckit::Configuration &) const;
 
   int & toFortran() {return keyGVL_;}
   const int & toFortran() const {return keyGVL_;}
