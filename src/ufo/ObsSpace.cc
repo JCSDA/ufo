@@ -15,7 +15,7 @@
 #include "util/abor1_cpp.h"
 #include "util/Logger.h"
 
-//#include "ObsVec.h"
+//#include "ObsVector.h"
 
 namespace ufo {
 // -----------------------------------------------------------------------------
@@ -31,7 +31,7 @@ ObsSpace::ObsSpace(const eckit::Configuration & config,
 
 // -----------------------------------------------------------------------------
 
-//void ObsSpace::printJo(const ObsVec & dy, const ObsVec & grad) {
+//void ObsSpace::printJo(const ObsVector &, const ObsVector &) {
 //  oops::Log::info() << "ObsSpace::printJo not implemented" << std::endl;
 //}
 

@@ -9,19 +9,19 @@
 
 #include "util/Logger.h"
 
-#include "ObsVec.h"
+#include "ObsVector.h"
 #include "ObsSpace.h"
 #include "Fortran.h"
 
 namespace ufo {
 // -----------------------------------------------------------------------------
-ObsVec::ObsVec(const ObsSpace & obsdb)
+ObsVector::ObsVector(const ObsSpace & obsdb)
   : obsdb_(obsdb), keyOvec_(0)
 {
-  ufo_obsvec_setup_f90(keyOvec_, obsdb.nout(), obsdb.nobs());
+//  ufo_obsvec_setup_f90(keyOvec_, obsdb.nout(), obsdb.nobs());
 }
 // -----------------------------------------------------------------------------
-ObsVec::ObsVec(const ObsVec & other, const bool copy)
+ObsVector::ObsVector(const ObsVector & other, const bool copy)
   : obsdb_(other.obsdb_), keyOvec_(0) {
   ufo_obsvec_clone_f90(other.keyOvec_, keyOvec_);
   if (copy) {
@@ -31,70 +31,70 @@ ObsVec::ObsVec(const ObsVec & other, const bool copy)
   }
 }
 // -----------------------------------------------------------------------------
-ObsVec::~ObsVec() {
+ObsVector::~ObsVector() {
   ufo_obsvec_delete_f90(keyOvec_);
 }
 // -----------------------------------------------------------------------------
-ObsVec & ObsVec::operator= (const ObsVec & rhs) {
+ObsVector & ObsVector::operator= (const ObsVector & rhs) {
   const int keyOvecRhs = rhs.keyOvec_;
   ufo_obsvec_assign_f90(keyOvec_, keyOvecRhs);
   return *this;
 }
 // -----------------------------------------------------------------------------
-ObsVec & ObsVec::operator*= (const double & zz) {
+ObsVector & ObsVector::operator*= (const double & zz) {
   ufo_obsvec_mul_scal_f90(keyOvec_, zz);
   return *this;
 }
 // -----------------------------------------------------------------------------
-ObsVec & ObsVec::operator+= (const ObsVec & rhs) {
+ObsVector & ObsVector::operator+= (const ObsVector & rhs) {
   const int keyOvecRhs = rhs.keyOvec_;
   ufo_obsvec_add_f90(keyOvec_, keyOvecRhs);
   return *this;
 }
 // -----------------------------------------------------------------------------
-ObsVec & ObsVec::operator-= (const ObsVec & rhs) {
+ObsVector & ObsVector::operator-= (const ObsVector & rhs) {
   const int keyOvecRhs = rhs.keyOvec_;
   ufo_obsvec_sub_f90(keyOvec_, keyOvecRhs);
   return *this;
 }
 // -----------------------------------------------------------------------------
-ObsVec & ObsVec::operator*= (const ObsVec & rhs) {
+ObsVector & ObsVector::operator*= (const ObsVector & rhs) {
   const int keyOvecRhs = rhs.keyOvec_;
   ufo_obsvec_mul_f90(keyOvec_, keyOvecRhs);
   return *this;
 }
 // -----------------------------------------------------------------------------
-ObsVec & ObsVec::operator/= (const ObsVec & rhs) {
+ObsVector & ObsVector::operator/= (const ObsVector & rhs) {
   const int keyOvecRhs = rhs.keyOvec_;
   ufo_obsvec_div_f90(keyOvec_, keyOvecRhs);
   return *this;
 }
 // -----------------------------------------------------------------------------
-void ObsVec::zero() {
+void ObsVector::zero() {
   ufo_obsvec_zero_f90(keyOvec_);
 }
 // -----------------------------------------------------------------------------
-void ObsVec::axpy(const double & zz, const ObsVec & rhs) {
+void ObsVector::axpy(const double & zz, const ObsVector & rhs) {
   const int keyOvecRhs = rhs.keyOvec_;
   ufo_obsvec_axpy_f90(keyOvec_, zz, keyOvecRhs);
 }
 // -----------------------------------------------------------------------------
-void ObsVec::invert() {
+void ObsVector::invert() {
   ufo_obsvec_invert_f90(keyOvec_);
 }
 // -----------------------------------------------------------------------------
-void ObsVec::random() {
+void ObsVector::random() {
   ufo_obsvec_random_f90(keyOvec_);
 }
 // -----------------------------------------------------------------------------
-double ObsVec::dot_product_with(const ObsVec & other) const {
+double ObsVector::dot_product_with(const ObsVector & other) const {
   const int keyOvecOther = other.keyOvec_;
   double zz;
   ufo_obsvec_dotprod_f90(keyOvec_, keyOvecOther, zz);
   return zz;
 }
 // -----------------------------------------------------------------------------
-double ObsVec::rms() const {
+double ObsVector::rms() const {
   double zz;
   ufo_obsvec_dotprod_f90(keyOvec_, keyOvec_, zz);
   int iobs;
@@ -103,22 +103,22 @@ double ObsVec::rms() const {
   return zz;
 }
 // -----------------------------------------------------------------------------
-void ObsVec::read(const std::string & name) {
+void ObsVector::read(const std::string & name) {
   obsdb_.getdb(name, keyOvec_);
 }
 // -----------------------------------------------------------------------------
-void ObsVec::save(const std::string & name) const {
+void ObsVector::save(const std::string & name) const {
   obsdb_.putdb(name, keyOvec_);
 }
 // -----------------------------------------------------------------------------
-void ObsVec::print(std::ostream & os) const {
+void ObsVector::print(std::ostream & os) const {
   double zmin, zmax, zavg;
   ufo_obsvec_minmaxavg_f90(keyOvec_, zmin, zmax, zavg);
   os << obsdb_.obsname() << " nobs= " << size()
      << " Min=" << zmin << ", Max=" << zmax << ", Average=" << zavg;
 }
 // -----------------------------------------------------------------------------
-unsigned int ObsVec::size() const {
+unsigned int ObsVector::size() const {
   int iobs;
   ufo_obsvec_nobs_f90(keyOvec_, iobs);
   unsigned int nobs(iobs);

@@ -25,7 +25,7 @@ namespace eckit {
 }
 
 namespace ufo {
-  class ObsVec;
+  class ObsVector;
 
 /// Wrapper around ObsHelpQG, mostly to hide the factory
 class ObsSpace : public oops::ObsSpaceBase {
@@ -52,7 +52,7 @@ class ObsSpace : public oops::ObsSpaceBase {
 //    helper_->generateDistribution(conf, obsname_, winbgn_, winend_, nobs_);
   }
 
-//  void printJo(const ObsVec &, const ObsVec &);
+//  void printJo(const ObsVector &, const ObsVector &);
 
   int nobs() const {return nobs_;}
   const std::string & obsname() const {return obsname_;}
@@ -69,7 +69,7 @@ class ObsSpace : public oops::ObsSpaceBase {
   unsigned int nobs_;
   const util::DateTime winbgn_;
   const util::DateTime winend_;
-  F90Ospace keyOspace_;
+  F90odb keyOspace_;
 
   static std::map < std::string, int > theObsFileCount_;
 };
