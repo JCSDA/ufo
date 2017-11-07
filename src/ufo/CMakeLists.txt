@@ -3,8 +3,15 @@ Fortran.h
 GeoVaLs.cc
 GeoVaLs.h
 Locations.h
+ObsBias.h
+ObsSpace.cc
 ObsSpace.h
-ObsVector.h
+ObsVec.cc
+ObsVec.h
+ObsWSpeed.cc
+ObsWSpeed.h
+UfoTraits.h
+Variables.cc
 Variables.h
 ufo_variables_mod.F90
 )

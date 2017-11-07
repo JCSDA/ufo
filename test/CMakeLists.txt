@@ -21,7 +21,7 @@ file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Data)
 
 ecbuild_add_test( TARGET  test_ufo_variables
                   BOOST
-                  SOURCES executables/TestVariables.cc
+                  SOURCES mains/TestVariables.cc
                   ARGS    "testinput/ufotest.json"
                   LIBS    ufo )
 
