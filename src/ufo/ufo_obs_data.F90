@@ -8,18 +8,18 @@
 
 !> Handle observations for the QG model
 
-module qg_obs_data
+module ufo_obs_data
 
 use iso_c_binding
 use string_f_c_mod
 use config_mod
 use datetime_mod
 use duration_mod
-use qg_goms_mod
-use qg_locs_mod
-use qg_obs_vectors
-use qg_obsoper_mod
-use qg_vars_mod
+use ufo_geovals_mod
+use ufo_locs_mod
+use ufo_obs_vectors
+use ufo_obsoper_mod
+use ufo_vars_mod
 use fckit_log_module, only : fckit_log
 use kinds
 
@@ -95,7 +95,7 @@ self%filein =fin
 self%fileout=fout
 
 if (self%filein/="") call obs_read(self)
-call fckit_log%debug("TRACE: qg_obs_data:obs_setup: done")
+call fckit_log%debug("TRACE: ufo_obs_data:obs_setup: done")
 
 end subroutine obs_setup
 
@@ -157,12 +157,12 @@ if (.not.associated(jgrp)) then
   enddo
   write(record,*)"Cannot find ",req," ."
   call fckit_log%error(record)
-  call abor1_ftn("qg_obs_get: obs group not found")
+  call abor1_ftn("ufo_obs_get: obs group not found")
 endif
 
 ! Find obs column
 call findcolumn(jgrp,col,jcol)
-if (.not.associated(jcol)) call abor1_ftn("qg_obs_get: obs column not found")
+if (.not.associated(jcol)) call abor1_ftn("ufo_obs_get: obs column not found")
 
 ! Get data
 if (allocated(ovec%values)) deallocate(ovec%values)
@@ -205,13 +205,13 @@ if (.not.associated(jgrp)) then
   enddo
   write(record,*)"Cannot find ",req," ."
   call fckit_log%error(record)
-  call abor1_ftn("qg_obs_put: obs group not found")
+  call abor1_ftn("ufo_obs_put: obs group not found")
 endif
 
 ! Find obs column (and add it if not there)
 call findcolumn(jgrp,col,jcol)
 if (.not.associated(jcol)) then
-  if (.not.associated(jgrp%colhead)) call abor1_ftn("qg_obs_put: no locations")
+  if (.not.associated(jgrp%colhead)) call abor1_ftn("ufo_obs_put: no locations")
   jcol=>jgrp%colhead
   do while (associated(jcol%next))
     jcol=>jcol%next
@@ -225,8 +225,8 @@ if (.not.associated(jcol)) then
 endif
 
 ! Put data
-if (ovec%nobs/=jgrp%nobs) call abor1_ftn("qg_obs_put: error obs number")
-if (ovec%ncol/=jcol%ncol) call abor1_ftn("qg_obs_put: error col number")
+if (ovec%nobs/=jgrp%nobs) call abor1_ftn("ufo_obs_put: error obs number")
+if (ovec%ncol/=jcol%ncol) call abor1_ftn("ufo_obs_put: error col number")
 do jo=1,jgrp%nobs
   do jc=1,jcol%ncol
     jcol%values(jc,jo)=ovec%values(jc,jo)
@@ -237,7 +237,7 @@ end subroutine obs_put
 
 ! ------------------------------------------------------------------------------
 
-subroutine obs_locations(c_key_self, lreq, c_req, c_t1, c_t2, c_key_locs) bind(c,name='qg_obsdb_locations_f90')
+subroutine obs_locations(c_key_self, lreq, c_req, c_t1, c_t2, c_key_locs) bind(c,name='ufo_obsdb_locations_f90')
 implicit none
 integer(c_int), intent(in) :: c_key_self
 integer(c_int), intent(in) :: lreq
@@ -248,7 +248,7 @@ integer(c_int), intent(inout) :: c_key_locs
 type(obs_data), pointer :: self
 character(len=lreq) :: req
 type(datetime) :: t1, t2
-type(qg_locs), pointer :: locs
+type(ufo_locs), pointer :: locs
 type(obs_vect) :: ovec
 character(len=8) :: col="Location"
 
@@ -259,11 +259,11 @@ call c_f_datetime(c_t2, t2)
 
 call obs_time_get(self, req, col, t1, t2, ovec)
 
-call qg_locs_registry%init()
-call qg_locs_registry%add(c_key_locs)
-call qg_locs_registry%get(c_key_locs,locs)
+call ufo_locs_registry%init()
+call ufo_locs_registry%add(c_key_locs)
+call ufo_locs_registry%get(c_key_locs,locs)
      
-call qg_loc_setup(locs, ovec)
+call ufo_loc_setup(locs, ovec)
 
 deallocate(ovec%values)
 
@@ -271,27 +271,27 @@ end subroutine obs_locations
 
 ! ------------------------------------------------------------------------------
 
-subroutine obs_getgom(c_key_self, lreq, c_req, c_key_vars, c_t1, c_t2, c_key_gom) bind(c,name='qg_obsdb_getgom_f90')
+subroutine obs_getgeovals(c_key_self, lreq, c_req, c_key_vars, c_t1, c_t2, c_key_geovals) bind(c,name='ufo_obsdb_getgeovals_f90')
 implicit none
 integer(c_int), intent(in) :: c_key_self
 integer(c_int), intent(in) :: lreq
 character(kind=c_char,len=1), intent(in) :: c_req(lreq+1)
 integer(c_int), intent(in) :: c_key_vars
 type(c_ptr), intent(in) :: c_t1, c_t2
-integer(c_int), intent(inout) :: c_key_gom
+integer(c_int), intent(inout) :: c_key_geovals
 
 type(obs_data), pointer :: self
 character(len=lreq) :: req
-type(qg_vars), pointer :: vars
+type(ufo_vars), pointer :: vars
 type(datetime) :: t1, t2
-type(qg_goms), pointer :: gom
+type(ufo_geovals), pointer :: geovals
 
 integer :: nobs
 integer, allocatable :: mobs(:)
 
 call obs_data_registry%get(c_key_self, self)
 call c_f_string(c_req, req)
-call qg_vars_registry%get(c_key_vars, vars)
+call ufo_vars_registry%get(c_key_vars, vars)
 call c_f_datetime(c_t1, t1)
 call c_f_datetime(c_t2, t2)
 
@@ -299,20 +299,20 @@ call obs_count(self, req, t1, t2, nobs)
 allocate(mobs(nobs))
 call obs_count(self, req, t1, t2, mobs)
 
-allocate(gom)
-call qg_goms_registry%init()
-call qg_goms_registry%add(c_key_gom)
-call qg_goms_registry%get(c_key_gom,gom)
+allocate(geovals)
+call ufo_geovals_registry%init()
+call ufo_geovals_registry%add(c_key_geovals)
+call ufo_geovals_registry%get(c_key_geovals,geovals)
 
-call gom_setup(gom, vars, mobs)
+call geovals_setup(geovals, vars, mobs)
 
 deallocate(mobs)
 
-end subroutine obs_getgom
+end subroutine obs_getgeovals
 
 ! ------------------------------------------------------------------------------
 
-subroutine obs_generate(c_key_self, lreq, c_req, c_conf, c_bgn, c_step, ktimes, kobs) bind(c,name='qg_obsdb_generate_f90')
+subroutine obs_generate(c_key_self, lreq, c_req, c_conf, c_bgn, c_step, ktimes, kobs) bind(c,name='ufo_obsdb_generate_f90')
 implicit none
 integer(c_int), intent(in) :: c_key_self
 integer(c_int), intent(in) :: lreq
@@ -361,7 +361,7 @@ end subroutine obs_generate
 
 ! ------------------------------------------------------------------------------
 
-subroutine obs_nobs(c_key_self, lreq, c_req, kobs) bind(c,name='qg_obsdb_nobs_f90')
+subroutine obs_nobs(c_key_self, lreq, c_req, kobs) bind(c,name='ufo_obsdb_nobs_f90')
 implicit none
 integer(c_int), intent(in) :: c_key_self
 integer(c_int), intent(in) :: lreq
@@ -705,4 +705,4 @@ end subroutine findcolumn
 
 ! ------------------------------------------------------------------------------
 
-end module qg_obs_data
+end module ufo_obs_data
