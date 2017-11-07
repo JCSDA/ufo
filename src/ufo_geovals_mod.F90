@@ -1,0 +1,258 @@
+!
+! (C) Copyright 2017 UCAR
+! 
+! This software is licensed under the terms of the Apache Licence Version 2.0
+! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
+!
+module ufo_geovals_mod
+
+use iso_c_binding
+use ufo_vars_mod
+use kinds
+
+implicit none
+private
+public :: ufo_geovals, gom_setup
+public :: ufo_geovals_registry
+
+! ------------------------------------------------------------------------------
+
+!> Fortran derived type to hold interpolated fields required by the obs operators
+type :: ufo_geovals
+  integer :: nobs
+  integer :: nvar
+  integer :: used
+  integer, allocatable :: indx(:)
+  real(kind=kind_real), allocatable :: values(:,:)
+  character(len=1), allocatable :: variables(:)
+  logical :: lalloc
+end type ufo_geovals
+
+#define LISTED_TYPE ufo_geovals
+
+!> Linked list interface - defines registry_t type
+#include "linkedList_i.f"
+
+!> Global registry
+type(registry_t) :: ufo_geovals_registry
+
+! ------------------------------------------------------------------------------
+contains
+! ------------------------------------------------------------------------------
+!> Linked list implementation
+#include "linkedList_c.f"
+
+! ------------------------------------------------------------------------------
+
+subroutine c_ufo_geovals_create(c_key_self) bind(c,name='ufo_geovals_create_f90')
+
+implicit none
+integer(c_int), intent(inout) :: c_key_self
+
+type(ufo_geovals), pointer :: self
+call ufo_geovals_registry%init()
+call ufo_geovals_registry%add(c_key_self)
+call ufo_geovals_registry%get(c_key_self, self)
+
+self%lalloc = .false.
+
+end subroutine c_ufo_geovals_create
+
+! ------------------------------------------------------------------------------
+
+subroutine gom_setup(self, vars, kobs)
+implicit none
+type(ufo_geovals), intent(inout) :: self
+type(ufo_vars), intent(in) :: vars
+integer, intent(in) :: kobs(:)
+
+self%nobs=size(kobs)
+self%nvar=vars%nv
+self%used=0
+
+allocate(self%indx(self%nobs))
+self%indx(:)=kobs(:)
+
+allocate(self%variables(self%nvar))
+self%variables(:)=vars%fldnames(:)
+
+allocate(self%values(self%nvar,self%nobs))
+
+self%lalloc = .true.
+
+end subroutine gom_setup
+
+! ------------------------------------------------------------------------------
+
+subroutine c_ufo_geovals_delete(c_key_self) bind(c,name='qg_gom_delete_f90')
+
+implicit none
+integer(c_int), intent(inout) :: c_key_self
+
+type(ufo_geovals), pointer :: self
+
+call ufo_geovals_registry%get(c_key_self, self)
+if (self%lalloc) then
+  deallocate(self%values)
+  deallocate(self%indx)
+  deallocate(self%variables)
+endif
+call ufo_geovals_registry%remove(c_key_self)
+
+end subroutine c_qg_gom_delete
+
+! ------------------------------------------------------------------------------
+
+subroutine c_qg_gom_zero(c_key_self) bind(c,name='qg_gom_zero_f90')
+implicit none
+integer(c_int), intent(in) :: c_key_self
+type(ufo_geovals), pointer :: self
+call ufo_geovals_registry%get(c_key_self, self)
+self%values(:,:)=0.0_kind_real
+end subroutine c_qg_gom_zero
+
+! ------------------------------------------------------------------------------
+
+subroutine c_qg_gom_random(c_key_self) bind(c,name='qg_gom_random_f90')
+use random_vectors_mod
+implicit none
+integer(c_int), intent(in) :: c_key_self
+type(ufo_geovals), pointer :: self
+call ufo_geovals_registry%get(c_key_self, self)
+call random_vector(self%values(:,:))
+end subroutine c_qg_gom_random
+
+! ------------------------------------------------------------------------------
+
+subroutine c_qg_gom_dotprod(c_key_self, c_key_other, prod) bind(c,name='qg_gom_dotprod_f90')
+implicit none
+integer(c_int), intent(in) :: c_key_self, c_key_other
+real(c_double), intent(inout) :: prod
+type(ufo_geovals), pointer :: self, other
+integer :: jo, jv
+
+call ufo_geovals_registry%get(c_key_self, self)
+call ufo_geovals_registry%get(c_key_other, other)
+prod=0.0_kind_real
+do jo=1,self%nobs
+  do jv=1,self%nvar
+    prod=prod+self%values(jv,jo)*other%values(jv,jo)
+  enddo
+enddo
+
+end subroutine c_qg_gom_dotprod
+
+! ------------------------------------------------------------------------------
+
+subroutine c_qg_gom_minmaxavg(c_key_self, kobs, pmin, pmax, prms) bind(c,name='qg_gom_minmaxavg_f90')
+implicit none
+integer(c_int), intent(in) :: c_key_self
+integer(c_int), intent(inout) :: kobs
+real(c_double), intent(inout) :: pmin, pmax, prms
+type(ufo_geovals), pointer :: self
+
+call ufo_geovals_registry%get(c_key_self, self)
+
+kobs = self%nobs
+pmin=minval(self%values(:,:))
+pmax=maxval(self%values(:,:))
+prms=sqrt(sum(self%values(:,:)**2)/real(self%nobs*self%nvar,kind_real))
+
+end subroutine c_qg_gom_minmaxavg
+
+! ------------------------------------------------------------------------------
+
+subroutine qg_gom_read_file_c(c_key_self, c_conf) bind(c,name='qg_gom_read_file_f90')
+use config_mod
+use fckit_log_module, only : fckit_log
+implicit none
+integer(c_int), intent(in) :: c_key_self
+type(c_ptr), intent(in)    :: c_conf
+type(ufo_geovals), pointer :: self
+
+integer, parameter :: iunit=10
+integer, parameter :: max_string_length=250 ! Yuk!
+character(len=max_string_length) :: filename, record
+character(len=4)  :: cnx
+character(len=17) :: fmtn
+character(len=11) :: fmt1='(X,ES24.16)'
+integer :: jj, jo, jv
+
+call ufo_geovals_registry%get(c_key_self, self)
+if (self%lalloc) call abor1_ftn("qg_gom_read_file gom alredy allocated")
+
+filename = config_get_string(c_conf,len(filename),"filename")
+write(record,*)'qg_gom_read_file: opening '//trim(filename)
+call fckit_log%info(record)
+open(unit=iunit, file=trim(filename), form='formatted', action='read')
+
+read(iunit,*) self%nobs, self%nvar, self%used
+allocate(self%indx(self%nobs))
+allocate(self%variables(self%nvar))
+allocate(self%values(self%nvar,self%nobs))
+
+read(iunit,*) self%indx(:)
+do jv=1,self%nvar
+  read(iunit,*) self%variables(jv)
+enddo
+
+if (self%nvar>9999)  call abor1_ftn("Format too small")
+write(cnx,'(I4)')self%nvar
+fmtn='('//trim(cnx)//fmt1//')'
+
+do jo=1,self%nobs
+  read(iunit,fmtn) (self%values(jj,jo), jj=1,self%nvar)
+enddo
+
+close(iunit)
+self%lalloc = .true.
+
+end subroutine qg_gom_read_file_c
+
+! ------------------------------------------------------------------------------
+
+subroutine qg_gom_write_file_c(c_key_self, c_conf) bind(c,name='qg_gom_write_file_f90')
+use config_mod
+use fckit_log_module, only : fckit_log
+implicit none
+integer(c_int), intent(in) :: c_key_self
+type(c_ptr), intent(in) :: c_conf
+type(ufo_geovals), pointer :: self
+
+integer, parameter :: iunit=10
+integer, parameter :: max_string_length=250 ! Yuk!
+character(len=max_string_length) :: filename, record
+character(len=4)  :: cnx
+character(len=17) :: fmtn
+character(len=11) :: fmt1='(X,ES24.16)'
+integer :: jj, jo, jv
+
+call ufo_geovals_registry%get(c_key_self, self)
+if (.not.self%lalloc) call abor1_ftn("qg_gom_write_file gom not allocated")
+
+filename = config_get_string(c_conf,len(filename),"filename")
+write(record,*)'qg_gom_write_file: opening '//trim(filename)
+call fckit_log%info(record)
+open(unit=iunit, file=trim(filename), form='formatted', action='write')
+
+write(iunit,*) self%nobs, self%nvar, self%used
+write(iunit,*) self%indx(:)
+do jv=1,self%nvar
+  write(iunit,*) self%variables(jv)
+enddo
+
+if (self%nvar>9999) call abor1_ftn("Format too small")
+write(cnx,'(I4)')self%nvar
+fmtn='('//trim(cnx)//fmt1//')'
+
+do jo=1,self%nobs
+  write(iunit,fmtn) (self%values(jj,jo), jj=1,self%nvar)
+enddo
+
+close(iunit)
+
+end subroutine qg_gom_write_file_c
+
+! ------------------------------------------------------------------------------
+
+end module ufo_geovals_mod
