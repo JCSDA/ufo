@@ -247,7 +247,7 @@ if (self%nobs>0) then
   if (.not.allocated(self%values)) call abor1_ftn("obsvec_minmax: obs vector not allocated")
   zmin = minval(self%values)
   zmax = maxval(self%values)
-  zavg = sum(self%valures)/real(self%nobs)
+  zavg = sum(self%values)/real(self%nobs)
 else
   zmin=0.0_kind_real
   zmax=0.0_kind_real
