@@ -8,32 +8,32 @@
 
 !> Fortran module handling observation locations
 
-module qg_locs_mod
+module ufo_locs_mod
 
 use iso_c_binding
-use qg_obs_vectors
+use ufo_obs_vectors
 use kinds
 
 implicit none
 private
-public :: qg_locs, qg_loc_setup
-public :: qg_locs_registry
+public :: ufo_locs, ufo_loc_setup
+public :: ufo_locs_registry
 
 ! ------------------------------------------------------------------------------
 
 !> Fortran derived type to hold observation locations
-type :: qg_locs
+type :: ufo_locs
   integer :: nloc
   real(kind=kind_real), allocatable :: xyz(:,:)
-end type qg_locs
+end type ufo_locs
 
-#define LISTED_TYPE qg_locs
+#define LISTED_TYPE ufo_locs
 
 !> Linked list interface - defines registry_t type
 #include "linkedList_i.f"
 
 !> Global registry
-type(registry_t) :: qg_locs_registry
+type(registry_t) :: ufo_locs_registry
 
 ! ------------------------------------------------------------------------------
 contains
@@ -43,9 +43,9 @@ contains
 
 ! ------------------------------------------------------------------------------
 
-subroutine qg_loc_setup(self, lvec)
+subroutine ufo_loc_setup(self, lvec)
 implicit none
-type(qg_locs), intent(inout) :: self
+type(ufo_locs), intent(inout) :: self
 type(obs_vect), intent(in) :: lvec
 integer :: jc, jo
 
@@ -57,36 +57,36 @@ do jo=1,self%nloc
   enddo
 enddo
 
-end subroutine qg_loc_setup
+end subroutine ufo_loc_setup
 
 ! ------------------------------------------------------------------------------
 
-subroutine c_qg_loc_delete(key) bind(c,name='qg_loc_delete_f90')
+subroutine c_ufo_loc_delete(key) bind(c,name='ufo_loc_delete_f90')
 
 implicit none
 integer(c_int), intent(inout) :: key
-type(qg_locs), pointer :: self
+type(ufo_locs), pointer :: self
 
-call qg_locs_registry%get(key,self)
+call ufo_locs_registry%get(key,self)
 deallocate(self%xyz)
-call qg_locs_registry%remove(key)
+call ufo_locs_registry%remove(key)
 
-end subroutine c_qg_loc_delete
+end subroutine c_ufo_loc_delete
 
 ! ------------------------------------------------------------------------------
 
-subroutine c_qg_loc_nobs(key, kobs) bind(c,name='qg_loc_nobs_f90')
+subroutine c_ufo_loc_nobs(key, kobs) bind(c,name='ufo_loc_nobs_f90')
 
 implicit none
 integer(c_int), intent(in) :: key
 integer(c_int), intent(inout) :: kobs
-type(qg_locs), pointer :: self
+type(ufo_locs), pointer :: self
 
-call qg_locs_registry%get(key,self)
+call ufo_locs_registry%get(key,self)
 kobs = self%nloc
 
-end subroutine c_qg_loc_nobs
+end subroutine c_ufo_loc_nobs
 
 ! ------------------------------------------------------------------------------
 
-end module qg_locs_mod
+end module ufo_locs_mod
