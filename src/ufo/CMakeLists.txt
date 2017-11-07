@@ -6,12 +6,11 @@ Locations.h
 ObsBias.h
 ObsSpace.cc
 ObsSpace.h
-ObsVec.cc
-ObsVec.h
+ObsVector.cc
+ObsVector.h
 ObsWSpeed.cc
 ObsWSpeed.h
 UfoTrait.h
-Variables.cc
 Variables.h
 ufo_geovals_mod.F90
 ufo_locs_mod.F90

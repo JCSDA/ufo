@@ -28,7 +28,7 @@ namespace ufo {
   class Locations;
   class ObsBias;
   class ObsBiasIncrement;
-  class ObsVec;
+  class ObsVector;
 
 // -----------------------------------------------------------------------------
 /// Wind speed observation for UFO.
@@ -42,7 +42,7 @@ class ObsWSpeed : public oops::ObsOperatorBase<UfoTrait>,
   virtual ~ObsWSpeed();
 
 // Obs Operator
-  void obsEquiv(const GeoVaLs &, ObsVec &, const ObsBias &) const;
+  void obsEquiv(const GeoVaLs &, ObsVector &, const ObsBias &) const;
 
 // Other
   boost::shared_ptr<const Variables> variables() const {return varin_;}

@@ -5,8 +5,8 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
  */
 
-#ifndef UFO_OBSVEC_H_
-#define UFO_OBSVEC_H_
+#ifndef UFO_OBSVECTOR_H_
+#define UFO_OBSVECTOR_H_
 
 #include <ostream>
 #include <string>
@@ -19,29 +19,29 @@ namespace ufo {
   class ObsSpace;
 
 // -----------------------------------------------------------------------------
-/// ObsVec class to handle vectors in observation space for UFO.
+/// ObsVector class to handle vectors in observation space for UFO.
 
-class ObsVec : public util::Printable,
-               private util::ObjectCounter<ObsVec> {
+class ObsVector : public util::Printable,
+                  private util::ObjectCounter<ObsVector> {
  public:
-  static const std::string classname() {return "ufo::ObsVec";}
+  static const std::string classname() {return "ufo::ObsVector";}
 
-  explicit ObsVec(const ObsSpace &);
-  ObsVec(const ObsVec &, const bool copy = true);
-  ~ObsVec();
+  explicit ObsVector(const ObsSpace &);
+  ObsVector(const ObsVector &, const bool copy = true);
+  ~ObsVector();
 
-  ObsVec & operator = (const ObsVec &);
-  ObsVec & operator*= (const double &);
-  ObsVec & operator+= (const ObsVec &);
-  ObsVec & operator-= (const ObsVec &);
-  ObsVec & operator*= (const ObsVec &);
-  ObsVec & operator/= (const ObsVec &);
+  ObsVector & operator = (const ObsVector &);
+  ObsVector & operator*= (const double &);
+  ObsVector & operator+= (const ObsVector &);
+  ObsVector & operator-= (const ObsVector &);
+  ObsVector & operator*= (const ObsVector &);
+  ObsVector & operator/= (const ObsVector &);
 
   void zero();
-  void axpy(const double &, const ObsVec &);
+  void axpy(const double &, const ObsVector &);
   void invert();
   void random();
-  double dot_product_with(const ObsVec &) const;
+  double dot_product_with(const ObsVector &) const;
   double rms() const;
 
   unsigned int size() const;
@@ -63,4 +63,4 @@ class ObsVec : public util::Printable,
 
 }  // namespace ufo
 
-#endif  // UFO_OBSVEC_H_
+#endif  // UFO_OBSVECTOR_H_

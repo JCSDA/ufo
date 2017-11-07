@@ -11,7 +11,7 @@
 #include "GeoVaLs.h"
 #include "ObsBias.h"
 #include "ObsSpace.h"
-#include "ObsVec.h"
+#include "ObsVector.h"
 #include "Fortran.h"
 #include "Variables.h"
 #include "util/Logger.h"
@@ -42,9 +42,9 @@ ObsWSpeed::~ObsWSpeed() {
 
 // -----------------------------------------------------------------------------
 
-void ObsWSpeed::obsEquiv(const GeoVaLs & gom, ObsVec & ovec,
-                           const ObsBias & bias) const {
-  ufo_wspeed_eqv_f90(gom.toFortran(), ovec.toFortran(), bias.wspd());
+void ObsWSpeed::obsEquiv(const GeoVaLs & gom, ObsVector & ovec,
+                         const ObsBias & bias) const {
+  ufo_wspeed_eqv_f90(gom.toFortran(), ovec.toFortran());
 }
 
 // -----------------------------------------------------------------------------
