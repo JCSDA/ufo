@@ -19,7 +19,7 @@
 // -----------------------------------------------------------------------------
 namespace ufo {
 // -----------------------------------------------------------------------------
-static oops::ObsOperatorMaker<UFOTraits, ObsWSpeed> makerWSpeed_("WSpeed");
+static oops::ObsOperatorMaker<UfoTrait, ObsWSpeed> makerWSpeed_("WSpeed");
 // -----------------------------------------------------------------------------
 
 ObsWSpeed::ObsWSpeed(const ObsSpace & odb, const eckit::Configuration & config)

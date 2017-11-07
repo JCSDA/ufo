@@ -5,8 +5,8 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
  */
 
-#ifndef UFO_UFOTRAITS_H_
-#define UFO_UFOTRAITS_H_
+#ifndef UFO_UFOTRAIT_H_
+#define UFO_UFOTRAIT_H_
 
 #include <string>
 
@@ -19,7 +19,7 @@
 
 namespace ufo {
 
-struct UfoTraits {
+struct UfoTrait {
   static std::string name() {return "UFO";}
 
   typedef ufo::GeoVaLs             GeoVaLs;
@@ -31,4 +31,4 @@ struct UfoTraits {
 
 }  // namespace ufo
 
-#endif  // UFO_UFOTRAITS_H_
+#endif  // UFO_UFOTRAIT_H_

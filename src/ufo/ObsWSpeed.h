@@ -15,7 +15,7 @@
 
 #include "oops/interface/ObsOperatorBase.h"
 #include "ObsSpace.h"
-#include "UFOTraits.h"
+#include "UfoTrait.h"
 #include "util/ObjectCounter.h"
 
 // Forward declarations
@@ -33,7 +33,7 @@ namespace ufo {
 // -----------------------------------------------------------------------------
 /// Wind speed observation for UFO.
 
-class ObsWSpeed : public oops::ObsOperatorBase<UFOTraits>,
+class ObsWSpeed : public oops::ObsOperatorBase<UfoTrait>,
                   private util::ObjectCounter<ObsWSpeed> {
  public:
   static const std::string classname() {return "ufo::ObsWSpeed";}
