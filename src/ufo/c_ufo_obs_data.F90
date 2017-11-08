@@ -9,7 +9,6 @@ module c_ufo_obs_data
 
 use ufo_obs_data
 use ufo_obs_vectors
-use ufo_obsoper_mod
 use iso_c_binding
 use config_mod
 use fckit_log_module, only : fckit_log

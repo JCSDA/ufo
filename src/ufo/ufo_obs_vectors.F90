@@ -43,16 +43,17 @@ contains
 
 ! ------------------------------------------------------------------------------
 
-subroutine c_ufo_obsvec_setup(c_key_self, nobs) bind(c,name='ufo_obsvec_setup_f90')
+subroutine c_ufo_obsvec_setup(c_key_self, c_key_obspace) bind(c,name='ufo_obsvec_setup_f90')
 implicit none
 integer(c_int), intent(inout) :: c_key_self
-integer(c_int), intent(in) :: nobs
+integer(c_int), intent(in) :: c_key_obspace
 type(obs_vect), pointer :: self
 
 call ufo_obs_vect_registry%init()
 call ufo_obs_vect_registry%add(c_key_self)
 call ufo_obs_vect_registry%get(c_key_self,self)
-call obsvec_setup(self, nobs)
+
+call obsvec_setup(self, 1)
 
 end subroutine c_ufo_obsvec_setup
 

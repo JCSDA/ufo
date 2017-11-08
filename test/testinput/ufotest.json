@@ -3,5 +3,13 @@
   "window_begin": "2010-01-01T00:00:00Z",
   "window_end": "2010-01-02T00:00:00Z",
   "Variables": {},
-  "Observations": {}
+  "Observations": {
+    "ObsTypes": [{
+      "ObsType": "WindSpeed",
+      "GeoVaLs": {
+        "norm": "1.0"
+      },
+      "rmsequiv": "1.0"
+    }]
+  }
 }

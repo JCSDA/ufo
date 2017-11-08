@@ -11,20 +11,25 @@
 #include "ObsSpace.h"
 #include "Fortran.h"
 #include "Variables.h"
+#include "util/Logger.h"
 
 namespace ufo {
 // -----------------------------------------------------------------------------
 GeoVaLs::GeoVaLs(const ObsSpace & obsdb, const Variables & var,
                  const util::DateTime & t1, const util::DateTime & t2) {
+  oops::Log::trace() << "GeoVaLs contructor starting " << t1 << " " << t2 << std::endl;
   const util::DateTime * p1 = &t1;
   const util::DateTime * p2 = &t2;
   ufo_obsdb_getgeovals_f90(obsdb.toFortran(), var.toFortran(), &p1, &p2, keyGVL_);
+  oops::Log::trace() << "GeoVaLs contructor key = " << keyGVL_ << std::endl;
 }
 // -----------------------------------------------------------------------------
 GeoVaLs::GeoVaLs(const eckit::Configuration & config) {
+  oops::Log::trace() << "GeoVaLs contructor config starting" << std::endl;
   ufo_geovals_create_f90(keyGVL_);
   const eckit::Configuration * conf = &config;
   ufo_geovals_read_file_f90(keyGVL_, &conf);
+  oops::Log::trace() << "GeoVaLs contructor config key = " << keyGVL_ << std::endl;
 }
 // -----------------------------------------------------------------------------
 GeoVaLs::~GeoVaLs() {

@@ -68,14 +68,18 @@ type(ufo_vars), intent(in) :: vars
 integer, intent(in) :: kobs(:)
 
 self%nobs=size(kobs)
-self%nvar=vars%nv
+
+!self%nvar=vars%nv
+self%nvar=1
 self%used=0
 
 allocate(self%indx(self%nobs))
-self%indx(:)=kobs(:)
+!self%indx(:)=kobs(:)
+self%indx(1)=1
 
 allocate(self%variables(self%nvar))
-self%variables(:)=vars%fldnames(:)
+!self%variables(:)=vars%fldnames(:)
+self%variables(1)="z"
 
 allocate(self%values(self%nvar,self%nobs))
 
@@ -121,6 +125,7 @@ integer(c_int), intent(in) :: c_key_self
 type(ufo_geovals), pointer :: self
 call ufo_geovals_registry%get(c_key_self, self)
 !call random_vector(self%values(:,:))
+self%values(:,:)=1.0_kind_real
 end subroutine c_ufo_geovals_random
 
 ! ------------------------------------------------------------------------------
@@ -171,41 +176,22 @@ integer(c_int), intent(in) :: c_key_self
 type(c_ptr), intent(in)    :: c_conf
 type(ufo_geovals), pointer :: self
 
-integer, parameter :: iunit=10
-integer, parameter :: max_string_length=250 ! Yuk!
-character(len=max_string_length) :: filename, record
-character(len=4)  :: cnx
-character(len=17) :: fmtn
-character(len=11) :: fmt1='(X,ES24.16)'
-integer :: jj, jo, jv
-
 call ufo_geovals_registry%get(c_key_self, self)
-if (self%lalloc) call abor1_ftn("ufo_geovals_read_file geovals alredy allocated")
 
-filename = config_get_string(c_conf,len(filename),"filename")
-write(record,*)'ufo_geovals_read_file: opening '//trim(filename)
-call fckit_log%info(record)
-open(unit=iunit, file=trim(filename), form='formatted', action='read')
+self%nobs=1
+self%nvar=1
+self%used=0
 
-read(iunit,*) self%nobs, self%nvar, self%used
 allocate(self%indx(self%nobs))
+self%indx(1)=1
+
 allocate(self%variables(self%nvar))
+self%variables(1)="z"
+
 allocate(self%values(self%nvar,self%nobs))
 
-read(iunit,*) self%indx(:)
-do jv=1,self%nvar
-  read(iunit,*) self%variables(jv)
-enddo
+self%values(:,:)=1.0_kind_real
 
-if (self%nvar>9999)  call abor1_ftn("Format too small")
-write(cnx,'(I4)')self%nvar
-fmtn='('//trim(cnx)//fmt1//')'
-
-do jo=1,self%nobs
-  read(iunit,fmtn) (self%values(jj,jo), jj=1,self%nvar)
-enddo
-
-close(iunit)
 self%lalloc = .true.
 
 end subroutine ufo_geovals_read_file_c
@@ -220,37 +206,7 @@ integer(c_int), intent(in) :: c_key_self
 type(c_ptr), intent(in) :: c_conf
 type(ufo_geovals), pointer :: self
 
-integer, parameter :: iunit=10
-integer, parameter :: max_string_length=250 ! Yuk!
-character(len=max_string_length) :: filename, record
-character(len=4)  :: cnx
-character(len=17) :: fmtn
-character(len=11) :: fmt1='(X,ES24.16)'
-integer :: jj, jo, jv
-
 call ufo_geovals_registry%get(c_key_self, self)
-if (.not.self%lalloc) call abor1_ftn("ufo_geovals_write_file geovals not allocated")
-
-filename = config_get_string(c_conf,len(filename),"filename")
-write(record,*)'ufo_geovals_write_file: opening '//trim(filename)
-call fckit_log%info(record)
-open(unit=iunit, file=trim(filename), form='formatted', action='write')
-
-write(iunit,*) self%nobs, self%nvar, self%used
-write(iunit,*) self%indx(:)
-do jv=1,self%nvar
-  write(iunit,*) self%variables(jv)
-enddo
-
-if (self%nvar>9999) call abor1_ftn("Format too small")
-write(cnx,'(I4)')self%nvar
-fmtn='('//trim(cnx)//fmt1//')'
-
-do jo=1,self%nobs
-  write(iunit,fmtn) (self%values(jj,jo), jj=1,self%nvar)
-enddo
-
-close(iunit)
 
 end subroutine ufo_geovals_write_file_c
 

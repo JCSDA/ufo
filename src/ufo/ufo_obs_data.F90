@@ -18,7 +18,6 @@ use duration_mod
 use ufo_geovals_mod
 use ufo_locs_mod
 use ufo_obs_vectors
-use ufo_obsoper_mod
 use ufo_vars_mod
 use fckit_log_module, only : fckit_log
 use kinds
@@ -184,17 +183,14 @@ end subroutine obs_locations
 
 ! ------------------------------------------------------------------------------
 
-subroutine obs_getgeovals(c_key_self, lreq, c_req, c_key_vars, c_t1, c_t2, c_key_geovals) bind(c,name='ufo_obsdb_getgeovals_f90')
+subroutine obs_getgeovals(c_key_self, c_key_vars, c_t1, c_t2, c_key_geovals) bind(c,name='ufo_obsdb_getgeovals_f90')
 implicit none
 integer(c_int), intent(in) :: c_key_self
-integer(c_int), intent(in) :: lreq
-character(kind=c_char,len=1), intent(in) :: c_req(lreq+1)
 integer(c_int), intent(in) :: c_key_vars
 type(c_ptr), intent(in) :: c_t1, c_t2
 integer(c_int), intent(inout) :: c_key_geovals
 
 type(obs_data), pointer :: self
-character(len=lreq) :: req
 type(ufo_vars), pointer :: vars
 type(datetime) :: t1, t2
 type(ufo_geovals), pointer :: geovals
@@ -203,14 +199,16 @@ integer :: nobs
 integer, allocatable :: mobs(:)
 
 call obs_data_registry%get(c_key_self, self)
-call c_f_string(c_req, req)
+!call c_f_string(c_req, req)
 call ufo_vars_registry%get(c_key_vars, vars)
 call c_f_datetime(c_t1, t1)
 call c_f_datetime(c_t2, t2)
 
-call obs_count(self, req, t1, t2, nobs)
+!call obs_count(self, req, t1, t2, nobs)
+nobs=1
 allocate(mobs(nobs))
-call obs_count(self, req, t1, t2, mobs)
+mobs(1)=1
+!call obs_count(self, req, t1, t2, mobs)
 
 allocate(geovals)
 call ufo_geovals_registry%init()
@@ -219,7 +217,7 @@ call ufo_geovals_registry%get(c_key_geovals,geovals)
 
 call geovals_setup(geovals, vars, mobs)
 
-deallocate(mobs)
+!deallocate(mobs)
 
 end subroutine obs_getgeovals
 

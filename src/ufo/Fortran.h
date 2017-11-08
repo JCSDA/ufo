@@ -79,11 +79,12 @@ extern "C" {
 
   void ufo_wspeed_gettraj_f90(const F90hop &, const int &, F90goms &);
   void ufo_wspeed_settraj_f90(const F90goms &, const F90goms &);
+  void ufo_wspeed_inputs_f90(const F90hop &, F90vars &);
 
 // -----------------------------------------------------------------------------
 //  Observation Vectors
 // -----------------------------------------------------------------------------
-  void ufo_obsvec_setup_f90(F90ovec &, const int &, const int &);
+  void ufo_obsvec_setup_f90(F90ovec &, const F90odb &);
   void ufo_obsvec_clone_f90(const F90ovec &, F90ovec &);
   void ufo_obsvec_delete_f90(F90ovec &);
 
@@ -120,7 +121,6 @@ extern "C" {
                              const eckit::Configuration * const *, const util::DateTime * const *,
                              const util::Duration * const *, const int &, int &);
   void ufo_obsdb_nobs_f90(const F90odb &, const int &, const char *, int &);
-  void ufo_obsoper_inputs_f90(const F90hop &, F90vars &);
 
 // -----------------------------------------------------------------------------
 }  // extern C

@@ -18,7 +18,7 @@ namespace ufo {
 ObsVector::ObsVector(const ObsSpace & obsdb)
   : obsdb_(obsdb), keyOvec_(0)
 {
-//  ufo_obsvec_setup_f90(keyOvec_, obsdb.nout(), obsdb.nobs());
+  ufo_obsvec_setup_f90(keyOvec_, obsdb.toFortran());
 }
 // -----------------------------------------------------------------------------
 ObsVector::ObsVector(const ObsVector & other, const bool copy)

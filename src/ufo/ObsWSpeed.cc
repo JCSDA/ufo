@@ -19,7 +19,7 @@
 // -----------------------------------------------------------------------------
 namespace ufo {
 // -----------------------------------------------------------------------------
-static oops::ObsOperatorMaker<UfoTrait, ObsWSpeed> makerWSpeed_("WSpeed");
+static oops::ObsOperatorMaker<UfoTrait, ObsWSpeed> makerWSpeed_("WindSpeed");
 // -----------------------------------------------------------------------------
 
 ObsWSpeed::ObsWSpeed(const ObsSpace & odb, const eckit::Configuration & config)
@@ -28,7 +28,7 @@ ObsWSpeed::ObsWSpeed(const ObsSpace & odb, const eckit::Configuration & config)
   const eckit::Configuration * configc = &config;
   ufo_wspeed_setup_f90(keyOperWspeed_, &configc);
   int keyVarin;
-  ufo_obsoper_inputs_f90(keyOperWspeed_, keyVarin);
+  ufo_wspeed_inputs_f90(keyOperWspeed_, keyVarin);
   varin_.reset(new Variables(keyVarin));
   oops::Log::trace() << "ObsWSpeed created." << std::endl;
 }

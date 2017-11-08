@@ -27,6 +27,7 @@ ObsSpace::ObsSpace(const eckit::Configuration & config,
 
 // TOBEDONE: THIS IS WHERE THE NETCDF READ SHOULD LIVE
   obsname_ = config.getString("ObsType");
+  oops::Log::trace() << "ufo::ObsSpace contructed name = " << obsname_ << std::endl;
 }
 
 // -----------------------------------------------------------------------------

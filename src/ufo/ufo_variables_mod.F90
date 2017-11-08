@@ -12,7 +12,7 @@ use config_mod
 
 implicit none
 private
-public :: ufo_vars, ufo_vars_setup
+public :: ufo_vars, ufo_vars_setup, ufo_vars_clone, ufo_vars_delete
 public :: ufo_vars_registry
 
 ! ------------------------------------------------------------------------------
@@ -21,7 +21,6 @@ public :: ufo_vars_registry
 type :: ufo_vars
   integer :: nv
   character(len=1), allocatable :: fldnames(:) !< Variable identifiers
-  logical :: lbc
 end type ufo_vars
 
 #define LISTED_TYPE ufo_vars
@@ -46,6 +45,21 @@ type(ufo_vars), intent(inout) :: self
 character(len=1), intent(in) :: cvars(:)
 
 end subroutine ufo_vars_setup
+
+! ------------------------------------------------------------------------------
+
+subroutine ufo_vars_clone(self, other)
+implicit none
+type(ufo_vars), intent(inout) :: self
+type(ufo_vars), intent(in) :: other
+end subroutine ufo_vars_clone
+
+! ------------------------------------------------------------------------------
+
+subroutine ufo_vars_delete(self)
+implicit none
+type(ufo_vars), intent(inout) :: self
+end subroutine ufo_vars_delete
 
 ! ------------------------------------------------------------------------------
 
