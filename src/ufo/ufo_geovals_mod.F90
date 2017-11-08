@@ -44,6 +44,23 @@ contains
 
 ! ------------------------------------------------------------------------------
 
+subroutine c_ufo_geovals_create(c_key_self) bind(c,name='ufo_geovals_create_f90')
+
+implicit none
+integer(c_int), intent(inout) :: c_key_self
+
+type(ufo_geovals), pointer :: self
+
+call ufo_geovals_registry%init()
+call ufo_geovals_registry%add(c_key_self)
+call ufo_geovals_registry%get(c_key_self, self)
+
+self%lalloc = .false.
+
+end subroutine c_ufo_geovals_create
+
+! ------------------------------------------------------------------------------
+
 subroutine geovals_setup(self, vars, kobs)
 implicit none
 type(ufo_geovals), intent(inout) :: self

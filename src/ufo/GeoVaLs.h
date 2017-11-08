@@ -16,6 +16,10 @@
 #include "util/ObjectCounter.h"
 #include "util/Printable.h"
 
+namespace eckit {
+  class Configuration;
+}
+
 namespace ufo {
   class ObsSpace;
   class Variables;
@@ -29,6 +33,7 @@ class GeoVaLs : public util::Printable,
 
   GeoVaLs(const ObsSpace &, const Variables &,
           const util::DateTime &, const util::DateTime &);
+  GeoVaLs(const eckit::Configuration &);
 
   explicit GeoVaLs(): keyGVL_(0) {}
   explicit GeoVaLs(int & fgvl): keyGVL_(fgvl) {}

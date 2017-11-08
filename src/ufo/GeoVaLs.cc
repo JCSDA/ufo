@@ -21,6 +21,12 @@ GeoVaLs::GeoVaLs(const ObsSpace & obsdb, const Variables & var,
   ufo_obsdb_getgeovals_f90(obsdb.toFortran(), var.toFortran(), &p1, &p2, keyGVL_);
 }
 // -----------------------------------------------------------------------------
+GeoVaLs::GeoVaLs(const eckit::Configuration & config) {
+  ufo_geovals_create_f90(keyGVL_);
+  const eckit::Configuration * conf = &config;
+  ufo_geovals_read_file_f90(keyGVL_, &conf);
+}
+// -----------------------------------------------------------------------------
 GeoVaLs::~GeoVaLs() {
   ufo_geovals_delete_f90(keyGVL_);
 }

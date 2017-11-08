@@ -8,13 +8,13 @@
  * does it submit to any jurisdiction.
  */
 
-#include "UfoTraits.h"
+#include "UfoTrait.h"
 #include "oops/runs/Run.h"
 #include "test/interface/ObsVector.h"
 
 int main(int argc,  char ** argv) {
   oops::Run run(argc, argv);
-  test::ObsVector<ufo::UfoTraits> tests;
+  test::ObsVector<ufo::UfoTrait> tests;
   run.execute(tests);
   return 0;
 };
