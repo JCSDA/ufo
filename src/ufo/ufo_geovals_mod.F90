@@ -103,7 +103,7 @@ implicit none
 integer(c_int), intent(in) :: c_key_self
 type(ufo_geovals), pointer :: self
 call ufo_geovals_registry%get(c_key_self, self)
-call random_vector(self%values(:,:))
+!call random_vector(self%values(:,:))
 end subroutine c_ufo_geovals_random
 
 ! ------------------------------------------------------------------------------

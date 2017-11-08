@@ -214,8 +214,8 @@ implicit none
 integer(c_int), intent(in) :: c_key_self
 type(obs_vect), pointer :: self
 
-call ufo_obs_vect_registry%get(c_key_self,self)
-call random_vector(self%values)
+!call ufo_obs_vect_registry%get(c_key_self,self)
+!call random_vector(self%values)
 
 end subroutine c_ufo_obsvec_random
 ! ------------------------------------------------------------------------------

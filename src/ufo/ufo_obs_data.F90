@@ -136,49 +136,6 @@ type(obs_data), intent(in) :: self
 character(len=*), intent(in) :: req, col
 type(obs_vect), intent(inout) :: ovec
 
-type(group_data),  pointer :: jgrp
-type(column_data), pointer :: jcol
-integer :: jo, jc
-character(len=250) :: record
-
-write(record,*)"obs_get req=",req
-call fckit_log%info(record)
-write(record,*)"obs_get col=",col
-call fckit_log%info(record)
-
-! Find obs group
-call findgroup(self,req,jgrp)
-if (.not.associated(jgrp)) then
-  jgrp=>self%grphead
-  do while (associated(jgrp))
-    write(record,*)"Group ",jgrp%grpname," exists."
-    call fckit_log%info(record)
-    jgrp=>jgrp%next
-  enddo
-  write(record,*)"Cannot find ",req," ."
-  call fckit_log%error(record)
-  call abor1_ftn("ufo_obs_get: obs group not found")
-endif
-
-! Find obs column
-call findcolumn(jgrp,col,jcol)
-if (.not.associated(jcol)) call abor1_ftn("ufo_obs_get: obs column not found")
-
-! Get data
-if (allocated(ovec%values)) deallocate(ovec%values)
-ovec%nobs=jgrp%nobs
-ovec%ncol=jcol%ncol
-allocate(ovec%values(ovec%ncol,ovec%nobs))
-
-do jo=1,jgrp%nobs
-  do jc=1,jcol%ncol
-    ovec%values(jc,jo)=jcol%values(jc,jo)
-  enddo
-enddo
-
-write(record,*)"obs_get nobs, ncol=",jgrp%nobs,jcol%ncol
-call fckit_log%debug("TRACE: " // record)
-
 end subroutine obs_get
 
 ! ------------------------------------------------------------------------------
@@ -188,50 +145,6 @@ implicit none
 type(obs_data), intent(inout) :: self
 character(len=*), intent(in) :: req, col
 type(obs_vect), intent(in) :: ovec
-
-type(group_data),  pointer :: jgrp
-type(column_data), pointer :: jcol
-integer :: jo, jc
-character(len=250) :: record
-
-! Find obs group
-call findgroup(self,req,jgrp)
-if (.not.associated(jgrp)) then
-  jgrp=>self%grphead
-  do while (associated(jgrp))
-    write(record,*)"Group ",jgrp%grpname," exists."
-    call fckit_log%info(record)
-    jgrp=>jgrp%next
-  enddo
-  write(record,*)"Cannot find ",req," ."
-  call fckit_log%error(record)
-  call abor1_ftn("ufo_obs_put: obs group not found")
-endif
-
-! Find obs column (and add it if not there)
-call findcolumn(jgrp,col,jcol)
-if (.not.associated(jcol)) then
-  if (.not.associated(jgrp%colhead)) call abor1_ftn("ufo_obs_put: no locations")
-  jcol=>jgrp%colhead
-  do while (associated(jcol%next))
-    jcol=>jcol%next
-  enddo
-  allocate(jcol%next)
-  jcol=>jcol%next
-  
-  jcol%colname=col
-  jcol%ncol=ovec%ncol
-  allocate(jcol%values(jcol%ncol,jgrp%nobs))
-endif
-
-! Put data
-if (ovec%nobs/=jgrp%nobs) call abor1_ftn("ufo_obs_put: error obs number")
-if (ovec%ncol/=jcol%ncol) call abor1_ftn("ufo_obs_put: error col number")
-do jo=1,jgrp%nobs
-  do jc=1,jcol%ncol
-    jcol%values(jc,jo)=ovec%values(jc,jo)
-  enddo
-enddo
 
 end subroutine obs_put
 
@@ -322,40 +235,6 @@ type(c_ptr), intent(in)    :: c_bgn
 type(c_ptr), intent(in)    :: c_step
 integer(c_int), intent(in)  :: ktimes
 integer(c_int), intent(inout) :: kobs
-type(obs_data), pointer :: self
-character(len=lreq) :: req
-type(datetime) :: bgn
-type(duration) :: step
-real(c_double) :: err
-integer :: nobs, ncol
-
-integer :: nlocs
-type(datetime), allocatable :: times(:)
-type(obs_vect) :: obsloc, obserr
-
-call obs_data_registry%get(c_key_self, self)
-call c_f_string(c_req, req)
-call c_f_datetime(c_bgn, bgn)
-call c_f_duration(c_step, step)
-
-nlocs  = config_get_int(c_conf, "obs_density");
-kobs=nlocs*ktimes;
-
-allocate(times(kobs))
-
-call generate_locations(c_conf, nlocs, ktimes, bgn, step, times, obsloc)
-call obs_create(self, trim(req), times, obsloc)
-
-deallocate(times)
-deallocate(obsloc%values)
-
-! Create obs error
-err = config_get_real(c_conf, "obs_error");
-ncol = config_get_int(c_conf, "nval");
-call obsvec_setup(obserr,ncol,kobs)
-obserr%values(:,:)=err
-call obs_put(self, trim(req), "ObsErr", obserr)
-deallocate(obserr%values)
 
 end subroutine obs_generate
 
@@ -368,16 +247,6 @@ integer(c_int), intent(in) :: lreq
 character(kind=c_char,len=1), intent(in) :: c_req(lreq+1)
 integer(c_int), intent(inout) :: kobs
 
-type(obs_data), pointer :: self
-character(len=lreq) :: req
-integer :: iobs
-
-call obs_data_registry%get(c_key_self, self)
-call c_f_string(c_req, req)
-
-call obs_count(self, req, iobs)
-kobs = iobs
-
 end subroutine obs_nobs
 
 ! ------------------------------------------------------------------------------
@@ -388,42 +257,6 @@ type(obs_data), intent(in)    :: self
 character(len=*), intent(in)  :: req, col
 type(datetime), intent(in)    :: t1, t2
 type(obs_vect), intent(inout) :: ovec
-
-type(group_data),  pointer :: jgrp
-type(column_data), pointer :: jcol
-integer :: jo, jc, iobs
-
-! Find obs group
-call findgroup(self,req,jgrp)
-if (.not.associated(jgrp)) call abor1_ftn("obs_time_get: obs group not found")
-
-! Find obs column
-call findcolumn(jgrp,col,jcol)
-if (.not.associated(jcol)) call abor1_ftn("obs_time_get: obs column not found")
-
-! Time selection
-iobs=0
-do jo=1,jgrp%nobs
-  if (t1<jgrp%times(jo) .and. jgrp%times(jo)<=t2) iobs=iobs+1
-enddo
-
-! Get data
-if (ovec%nobs/=iobs .or. ovec%ncol/=jcol%ncol) then
-  if (allocated(ovec%values)) deallocate(ovec%values)
-  ovec%nobs=iobs
-  ovec%ncol=jcol%ncol
-  allocate(ovec%values(ovec%ncol,ovec%nobs))
-endif
-
-iobs=0
-do jo=1,jgrp%nobs
-  if (t1<jgrp%times(jo) .and. jgrp%times(jo)<=t2) then
-    iobs=iobs+1
-    do jc=1,jcol%ncol
-      ovec%values(jc,iobs)=jcol%values(jc,jo)
-    enddo
-  endif
-enddo
 
 end subroutine obs_time_get
 
@@ -436,19 +269,6 @@ character(len=*), intent(in) :: req
 type(datetime), intent(in)   :: t1, t2
 integer, intent(inout)       :: kobs
 
-type(group_data),  pointer :: jgrp
-integer :: jo
-
-! Find obs group
-call findgroup(self,req,jgrp)
-if (.not.associated(jgrp)) call abor1_ftn("obs_count: obs group not found")
-
-! Time selection
-kobs=0
-do jo=1,jgrp%nobs
-  if (t1<jgrp%times(jo) .and. jgrp%times(jo)<=t2) kobs=kobs+1
-enddo
-
 end subroutine obs_count_time
 
 ! ------------------------------------------------------------------------------
@@ -460,22 +280,6 @@ character(len=*), intent(in) :: req
 type(datetime), intent(in)   :: t1, t2
 integer, intent(inout)       :: kobs(:)
 
-type(group_data),  pointer :: jgrp
-integer :: jo, io
-
-! Find obs group
-call findgroup(self,req,jgrp)
-if (.not.associated(jgrp)) call abor1_ftn("obs_count: obs group not found")
-
-! Time selection
-io=0
-do jo=1,jgrp%nobs
-  if (t1<jgrp%times(jo) .and. jgrp%times(jo)<=t2) then
-    io=io+1
-    kobs(io)=jo
-  endif
-enddo
-
 end subroutine obs_count_indx
 
 ! ------------------------------------------------------------------------------
@@ -485,15 +289,6 @@ implicit none
 type(obs_data), intent(in) :: self
 character(len=*), intent(in) :: req
 integer, intent(inout) :: kobs
-type(group_data),  pointer :: jgrp
-
-call findgroup(self,req,jgrp)
-
-if (associated(jgrp)) then
-  kobs=jgrp%nobs
-else
-  kobs=0
-endif
 
 end subroutine obs_count_all
 
@@ -505,42 +300,6 @@ type(obs_data), intent(inout) :: self
 character(len=*), intent(in) :: req
 type(datetime), intent(in) :: times(:)
 type(obs_vect), intent(in) :: locs
-type(group_data), pointer :: igrp
-integer :: jo, jc
-
-call findgroup(self,req,igrp)
-if (associated(igrp)) call abor1_ftn("obs_create: obs group already exists")
-
-if (associated(self%grphead)) then
-  igrp=>self%grphead
-  do while (associated(igrp%next))
-    igrp=>igrp%next
-  enddo
-  allocate(igrp%next)
-  igrp=>igrp%next
-else
-  allocate(self%grphead)
-  igrp=>self%grphead
-endif
-
-igrp%grpname=req
-igrp%nobs=size(times)
-allocate(igrp%times(igrp%nobs))
-igrp%times(:)=times(:)
-
-allocate(igrp%colhead)
-igrp%colhead%colname="Location"
-igrp%colhead%ncol=3
-allocate(igrp%colhead%values(3,igrp%nobs))
-if (locs%ncol/=3) call abor1_ftn("obs_create: error locations not 3D")
-if (locs%nobs/=igrp%nobs) call abor1_ftn("obs_create: error locations number")
-do jo=1,igrp%nobs
-  do jc=1,3
-    igrp%colhead%values(jc,jo)=locs%values(jc,jo)
-  enddo
-enddo
-
-self%ngrp=self%ngrp+1
 
 end subroutine obs_create
 
@@ -558,60 +317,6 @@ real(kind=kind_real), allocatable :: ztmp(:)
 character(len=20) :: stime
 character(len=max_string+50) :: record
 
-iin=90
-write(record,*)'obs_read: opening ',trim(self%filein)
-call fckit_log%info(record)
-open(unit=iin, file=trim(self%filein), form='formatted', action='read')
-
-read(iin,*)self%ngrp
-do jg=1,self%ngrp
-  if (jg==1) then
-    allocate(self%grphead)
-    jgrp=>self%grphead
-  else
-    allocate(jgrp%next)
-    jgrp=>jgrp%next
-  endif
-  read(iin,*)jgrp%grpname
-  read(iin,*)jgrp%nobs
-  write(record,*)'obs_read: reading ',jgrp%nobs,' ',jgrp%grpname,' observations.'
-  call fckit_log%info(record)
-  allocate(jgrp%times(jgrp%nobs))
-
-  read(iin,*)ncol
-  icol=0
-  do jc=1,ncol
-    if (jc==1) then
-      allocate(jgrp%colhead)
-      jcol=>jgrp%colhead
-    else
-      allocate(jcol%next)
-      jcol=>jcol%next
-    endif
-    read(iin,*)jcol%colname, jcol%ncol
-    icol=icol+jcol%ncol
-    allocate(jcol%values(jcol%ncol,jgrp%nobs))
-  enddo
-
-  allocate(ztmp(icol))
-  do jo=1,jgrp%nobs
-    read(iin,*)stime,ztmp(:)
-    call datetime_create(stime,jgrp%times(jo))
-    icol=0
-    jcol=>jgrp%colhead
-    do while (associated(jcol))
-      do jc=1,jcol%ncol
-        icol=icol+1
-        jcol%values(jc,jo)=ztmp(icol)
-      enddo
-      jcol=>jcol%next
-    enddo
-  enddo
-  deallocate(ztmp)
-enddo
-
-close(iin)
-
 end subroutine obs_read
 
 ! ------------------------------------------------------------------------------
@@ -624,52 +329,6 @@ type(group_data), pointer :: jgrp
 type(column_data), pointer :: jcol
 real(kind=kind_real), allocatable :: ztmp(:)
 character(len=20) :: stime
-
-iout=91
-open(unit=iout, file=trim(self%fileout), form='formatted', action='write')
-
-write(iout,*)self%ngrp
-jgrp=>self%grphead
-do while (associated(jgrp))
-  write(iout,*)jgrp%grpname
-  write(iout,*)jgrp%nobs
-
-  icol=0
-  jcol=>jgrp%colhead
-  do while (associated(jcol))
-    icol=icol+1
-    jcol=>jcol%next
-  enddo
-  write(iout,*)icol
-
-  icol=0
-  jcol=>jgrp%colhead
-  do while (associated(jcol))
-    write(iout,*)jcol%colname, jcol%ncol
-    icol=icol+jcol%ncol
-    jcol=>jcol%next
-  enddo
-
-  allocate(ztmp(icol))
-  do jo=1,jgrp%nobs
-    icol=0
-    jcol=>jgrp%colhead
-    do while (associated(jcol))
-      do jc=1,jcol%ncol
-        icol=icol+1
-        ztmp(icol)=jcol%values(jc,jo)
-      enddo
-      jcol=>jcol%next
-    enddo
-    call datetime_to_string(jgrp%times(jo),stime)
-    write(iout,*)stime,ztmp(:)
-  enddo
-  deallocate(ztmp)
-
-  jgrp=>jgrp%next
-enddo
-
-close(iout)
 
 end subroutine obs_write
 

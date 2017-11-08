@@ -53,7 +53,7 @@ self%nloc=lvec%nobs
 allocate(self%xyz(3,self%nloc))
 do jo=1,self%nloc
   do jc=1,3
-    self%xyz(jc,jo)=lvec%values(jc,jo)
+    self%xyz(jc,jo)=lvec%values(jo)
   enddo
 enddo
 
