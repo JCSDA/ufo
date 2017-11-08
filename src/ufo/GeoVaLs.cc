@@ -51,7 +51,10 @@ double GeoVaLs::dot_product_with(const GeoVaLs & other) const {
 }
 // -----------------------------------------------------------------------------
 void GeoVaLs::print(std::ostream & os) const {
-  os << "GeoVaLs::print not implemented";
+  int nn;
+  double zmin, zmax, zrms;
+  ufo_geovals_minmaxavg_f90(keyGVL_, nn, zmin, zmax, zrms);
+  os << "GeoVaLs: nobs= " << nn << " Min=" << zmin << ", Max=" << zmax << ", RMS=" << zrms;
 }
 // -----------------------------------------------------------------------------
 void GeoVaLs::read(const eckit::Configuration & config) {
