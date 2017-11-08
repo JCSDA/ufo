@@ -44,7 +44,7 @@ contains
 
 ! ------------------------------------------------------------------------------
 
-subroutine c_ufo_geovals_create(c_key_self) bind(c,name='ufo_geovals_create_f90')
+subroutine ufo_geovals_create_c(c_key_self) bind(c,name='ufo_geovals_create_f90')
 
 implicit none
 integer(c_int), intent(inout) :: c_key_self
@@ -57,7 +57,7 @@ call ufo_geovals_registry%get(c_key_self, self)
 
 self%lalloc = .false.
 
-end subroutine c_ufo_geovals_create
+end subroutine ufo_geovals_create_c
 
 ! ------------------------------------------------------------------------------
 
@@ -89,7 +89,7 @@ end subroutine geovals_setup
 
 ! ------------------------------------------------------------------------------
 
-subroutine c_ufo_geovals_delete(c_key_self) bind(c,name='ufo_geovals_delete_f90')
+subroutine ufo_geovals_delete_c(c_key_self) bind(c,name='ufo_geovals_delete_f90')
 
 implicit none
 integer(c_int), intent(inout) :: c_key_self
@@ -104,21 +104,21 @@ if (self%lalloc) then
 endif
 call ufo_geovals_registry%remove(c_key_self)
 
-end subroutine c_ufo_geovals_delete
+end subroutine ufo_geovals_delete_c
 
 ! ------------------------------------------------------------------------------
 
-subroutine c_ufo_geovals_zero(c_key_self) bind(c,name='ufo_geovals_zero_f90')
+subroutine ufo_geovals_zero_c(c_key_self) bind(c,name='ufo_geovals_zero_f90')
 implicit none
 integer(c_int), intent(in) :: c_key_self
 type(ufo_geovals), pointer :: self
 call ufo_geovals_registry%get(c_key_self, self)
 self%values(:,:)=0.0_kind_real
-end subroutine c_ufo_geovals_zero
+end subroutine ufo_geovals_zero_c
 
 ! ------------------------------------------------------------------------------
 
-subroutine c_ufo_geovals_random(c_key_self) bind(c,name='ufo_geovals_random_f90')
+subroutine ufo_geovals_random_c(c_key_self) bind(c,name='ufo_geovals_random_f90')
 use random_vectors_mod
 implicit none
 integer(c_int), intent(in) :: c_key_self
@@ -126,11 +126,11 @@ type(ufo_geovals), pointer :: self
 call ufo_geovals_registry%get(c_key_self, self)
 !call random_vector(self%values(:,:))
 self%values(:,:)=1.0_kind_real
-end subroutine c_ufo_geovals_random
+end subroutine ufo_geovals_random_c
 
 ! ------------------------------------------------------------------------------
 
-subroutine c_ufo_geovals_dotprod(c_key_self, c_key_other, prod) bind(c,name='ufo_geovals_dotprod_f90')
+subroutine ufo_geovals_dotprod_c(c_key_self, c_key_other, prod) bind(c,name='ufo_geovals_dotprod_f90')
 implicit none
 integer(c_int), intent(in) :: c_key_self, c_key_other
 real(c_double), intent(inout) :: prod
@@ -146,11 +146,11 @@ do jo=1,self%nobs
   enddo
 enddo
 
-end subroutine c_ufo_geovals_dotprod
+end subroutine ufo_geovals_dotprod_c
 
 ! ------------------------------------------------------------------------------
 
-subroutine c_ufo_geovals_minmaxavg(c_key_self, kobs, pmin, pmax, prms) bind(c,name='ufo_geovals_minmaxavg_f90')
+subroutine ufo_geovals_minmaxavg_c(c_key_self, kobs, pmin, pmax, prms) bind(c,name='ufo_geovals_minmaxavg_f90')
 implicit none
 integer(c_int), intent(in) :: c_key_self
 integer(c_int), intent(inout) :: kobs
@@ -164,7 +164,7 @@ pmin=minval(self%values(:,:))
 pmax=maxval(self%values(:,:))
 prms=sqrt(sum(self%values(:,:)**2)/real(self%nobs*self%nvar,kind_real))
 
-end subroutine c_ufo_geovals_minmaxavg
+end subroutine ufo_geovals_minmaxavg_c
 
 ! ------------------------------------------------------------------------------
 

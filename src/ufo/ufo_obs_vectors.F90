@@ -43,7 +43,7 @@ contains
 
 ! ------------------------------------------------------------------------------
 
-subroutine c_ufo_obsvec_setup(c_key_self, c_key_obspace) bind(c,name='ufo_obsvec_setup_f90')
+subroutine ufo_obsvec_setup_c(c_key_self, c_key_obspace) bind(c,name='ufo_obsvec_setup_f90')
 implicit none
 integer(c_int), intent(inout) :: c_key_self
 integer(c_int), intent(in) :: c_key_obspace
@@ -55,7 +55,7 @@ call ufo_obs_vect_registry%get(c_key_self,self)
 
 call obsvec_setup(self, 1)
 
-end subroutine c_ufo_obsvec_setup
+end subroutine ufo_obsvec_setup_c
 
 ! ------------------------------------------------------------------------------
 
@@ -72,7 +72,7 @@ end subroutine obsvec_setup
 
 ! ------------------------------------------------------------------------------
 
-subroutine c_ufo_obsvec_clone(c_key_self, c_key_other) bind(c,name='ufo_obsvec_clone_f90')
+subroutine ufo_obsvec_clone_c(c_key_self, c_key_other) bind(c,name='ufo_obsvec_clone_f90')
 implicit none
 integer(c_int), intent(in)    :: c_key_self
 integer(c_int), intent(inout) :: c_key_other
@@ -85,11 +85,11 @@ call ufo_obs_vect_registry%get(c_key_other,other)
 other%nobs=self%nobs
 allocate(other%values(other%nobs))
 
-end subroutine c_ufo_obsvec_clone
+end subroutine ufo_obsvec_clone_c
 
 ! ------------------------------------------------------------------------------
 
-subroutine c_ufo_obsvec_delete(c_key_self) bind(c,name='ufo_obsvec_delete_f90')
+subroutine ufo_obsvec_delete_c(c_key_self) bind(c,name='ufo_obsvec_delete_f90')
 implicit none
 integer(c_int), intent(inout) :: c_key_self
 type(obs_vect), pointer :: self
@@ -98,10 +98,10 @@ call ufo_obs_vect_registry%get(c_key_self,self)
 deallocate(self%values)
 call ufo_obs_vect_registry%remove(c_key_self)
 
-end subroutine c_ufo_obsvec_delete
+end subroutine ufo_obsvec_delete_c
 
 ! ------------------------------------------------------------------------------
-subroutine c_ufo_obsvec_assign(c_key_self, c_key_rhs) bind(c,name='ufo_obsvec_assign_f90')
+subroutine ufo_obsvec_assign_c(c_key_self, c_key_rhs) bind(c,name='ufo_obsvec_assign_f90')
 implicit none
 integer(c_int), intent(in) :: c_key_self
 integer(c_int), intent(in) :: c_key_rhs
@@ -116,9 +116,9 @@ if (rhs%nobs/=self%nobs) then
 endif
 self%values(:)=rhs%values(:)
 
-end subroutine c_ufo_obsvec_assign
+end subroutine ufo_obsvec_assign_c
 ! ------------------------------------------------------------------------------
-subroutine c_ufo_obsvec_zero(c_key_self) bind(c,name='ufo_obsvec_zero_f90')
+subroutine ufo_obsvec_zero_c(c_key_self) bind(c,name='ufo_obsvec_zero_f90')
 implicit none
 integer(c_int), intent(in) :: c_key_self
 type(obs_vect), pointer :: self
@@ -126,9 +126,9 @@ type(obs_vect), pointer :: self
 call ufo_obs_vect_registry%get(c_key_self,self)
 self%values(:)=0.0_kind_real
 
-end subroutine c_ufo_obsvec_zero
+end subroutine ufo_obsvec_zero_c
 ! ------------------------------------------------------------------------------
-subroutine c_ufo_obsvec_mul_scal(c_key_self, zz) bind(c,name='ufo_obsvec_mul_scal_f90')
+subroutine ufo_obsvec_mul_scal_c(c_key_self, zz) bind(c,name='ufo_obsvec_mul_scal_f90')
 implicit none
 integer(c_int), intent(in) :: c_key_self
 real(c_double), intent(in) :: zz
@@ -137,9 +137,9 @@ type(obs_vect), pointer :: self
 call ufo_obs_vect_registry%get(c_key_self,self)
 self%values(:)=zz*self%values(:)
 
-end subroutine c_ufo_obsvec_mul_scal
+end subroutine ufo_obsvec_mul_scal_c
 ! ------------------------------------------------------------------------------
-subroutine c_ufo_obsvec_add(c_key_self, c_key_other) bind(c,name='ufo_obsvec_add_f90')
+subroutine ufo_obsvec_add_c(c_key_self, c_key_other) bind(c,name='ufo_obsvec_add_f90')
 implicit none
 integer(c_int), intent(in) :: c_key_self
 integer(c_int), intent(in) :: c_key_other
@@ -149,9 +149,9 @@ call ufo_obs_vect_registry%get(c_key_self,self)
 call ufo_obs_vect_registry%get(c_key_other,other)
 self%values(:)=self%values(:)+other%values(:)
 
-end subroutine c_ufo_obsvec_add
+end subroutine ufo_obsvec_add_c
 ! ------------------------------------------------------------------------------
-subroutine c_ufo_obsvec_sub(c_key_self, c_key_other) bind(c,name='ufo_obsvec_sub_f90')
+subroutine ufo_obsvec_sub_c(c_key_self, c_key_other) bind(c,name='ufo_obsvec_sub_f90')
 implicit none
 integer(c_int), intent(in) :: c_key_self
 integer(c_int), intent(in) :: c_key_other
@@ -161,9 +161,9 @@ call ufo_obs_vect_registry%get(c_key_self,self)
 call ufo_obs_vect_registry%get(c_key_other,other)
 self%values(:)=self%values(:)-other%values(:)
 
-end subroutine c_ufo_obsvec_sub
+end subroutine ufo_obsvec_sub_c
 ! ------------------------------------------------------------------------------
-subroutine c_ufo_obsvec_mul(c_key_self, c_key_other) bind(c,name='ufo_obsvec_mul_f90')
+subroutine ufo_obsvec_mul_c(c_key_self, c_key_other) bind(c,name='ufo_obsvec_mul_f90')
 implicit none
 integer(c_int), intent(in) :: c_key_self
 integer(c_int), intent(in) :: c_key_other
@@ -173,9 +173,9 @@ call ufo_obs_vect_registry%get(c_key_self,self)
 call ufo_obs_vect_registry%get(c_key_other,other)
 self%values(:)=self%values(:)*other%values(:)
 
-end subroutine c_ufo_obsvec_mul
+end subroutine ufo_obsvec_mul_c
 ! ------------------------------------------------------------------------------
-subroutine c_ufo_obsvec_div(c_key_self, c_key_other) bind(c,name='ufo_obsvec_div_f90')
+subroutine ufo_obsvec_div_c(c_key_self, c_key_other) bind(c,name='ufo_obsvec_div_f90')
 implicit none
 integer(c_int), intent(in) :: c_key_self
 integer(c_int), intent(in) :: c_key_other
@@ -185,9 +185,9 @@ call ufo_obs_vect_registry%get(c_key_self,self)
 call ufo_obs_vect_registry%get(c_key_other,other)
 self%values(:)=self%values(:)/other%values(:)
 
-end subroutine c_ufo_obsvec_div
+end subroutine ufo_obsvec_div_c
 ! ------------------------------------------------------------------------------
-subroutine c_ufo_obsvec_axpy(c_key_self, zz, c_key_other) bind(c,name='ufo_obsvec_axpy_f90')
+subroutine ufo_obsvec_axpy_c(c_key_self, zz, c_key_other) bind(c,name='ufo_obsvec_axpy_f90')
 implicit none
 integer(c_int), intent(in) :: c_key_self
 real(c_double), intent(in) :: zz
@@ -198,9 +198,9 @@ call ufo_obs_vect_registry%get(c_key_self,self)
 call ufo_obs_vect_registry%get(c_key_other,other)
 self%values(:)=self%values(:)+zz*other%values(:)
 
-end subroutine c_ufo_obsvec_axpy
+end subroutine ufo_obsvec_axpy_c
 ! ------------------------------------------------------------------------------
-subroutine c_ufo_obsvec_invert(c_key_self) bind(c,name='ufo_obsvec_invert_f90')
+subroutine ufo_obsvec_invert_c(c_key_self) bind(c,name='ufo_obsvec_invert_f90')
 implicit none
 integer(c_int), intent(in) :: c_key_self
 type(obs_vect), pointer :: self
@@ -208,9 +208,9 @@ type(obs_vect), pointer :: self
 call ufo_obs_vect_registry%get(c_key_self,self)
 self%values(:)=1.0_kind_real/self%values(:)
 
-end subroutine c_ufo_obsvec_invert
+end subroutine ufo_obsvec_invert_c
 ! ------------------------------------------------------------------------------
-subroutine c_ufo_obsvec_random(c_key_self) bind(c,name='ufo_obsvec_random_f90')
+subroutine ufo_obsvec_random_c(c_key_self) bind(c,name='ufo_obsvec_random_f90')
 implicit none
 integer(c_int), intent(in) :: c_key_self
 type(obs_vect), pointer :: self
@@ -218,9 +218,9 @@ type(obs_vect), pointer :: self
 !call ufo_obs_vect_registry%get(c_key_self,self)
 !call random_vector(self%values)
 
-end subroutine c_ufo_obsvec_random
+end subroutine ufo_obsvec_random_c
 ! ------------------------------------------------------------------------------
-subroutine c_ufo_obsvec_dotprod(c_key_self, c_key_other, zz) bind(c,name='ufo_obsvec_dotprod_f90')
+subroutine ufo_obsvec_dotprod_c(c_key_self, c_key_other, zz) bind(c,name='ufo_obsvec_dotprod_f90')
 implicit none
 integer(c_int), intent(in) :: c_key_self
 integer(c_int), intent(in) :: c_key_other
@@ -235,9 +235,9 @@ do jo=1,self%nobs
   zz = zz + self%values(jo)*other%values(jo)
 enddo
 
-end subroutine c_ufo_obsvec_dotprod
+end subroutine ufo_obsvec_dotprod_c
 ! ------------------------------------------------------------------------------
-subroutine c_ufo_obsvec_minmaxavg(c_key_self, zmin, zmax, zavg) bind(c,name='ufo_obsvec_minmaxavg_f90')
+subroutine ufo_obsvec_minmaxavg_c(c_key_self, zmin, zmax, zavg) bind(c,name='ufo_obsvec_minmaxavg_f90')
 implicit none
 integer(c_int), intent(in)    :: c_key_self
 real(c_double), intent(inout) :: zmin, zmax, zavg
@@ -254,9 +254,9 @@ else
   zmax=0.0_kind_real
   zavg=0.0_kind_real
 endif
-end subroutine c_ufo_obsvec_minmaxavg
+end subroutine ufo_obsvec_minmaxavg_c
 ! ------------------------------------------------------------------------------
-subroutine c_ufo_obsvec_nobs(c_key_self, kobs) bind(c,name='ufo_obsvec_nobs_f90')
+subroutine ufo_obsvec_nobs_c(c_key_self, kobs) bind(c,name='ufo_obsvec_nobs_f90')
 implicit none
 integer(c_int), intent(in)    :: c_key_self
 integer(c_int), intent(inout) :: kobs
@@ -265,7 +265,7 @@ type(obs_vect), pointer :: self
 call ufo_obs_vect_registry%get(c_key_self,self)
 kobs=self%nobs
 
-end subroutine c_ufo_obsvec_nobs
+end subroutine ufo_obsvec_nobs_c
 ! ------------------------------------------------------------------------------
 
 end module ufo_obs_vectors

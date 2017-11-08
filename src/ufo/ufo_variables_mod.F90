@@ -63,35 +63,35 @@ end subroutine ufo_vars_delete
 
 ! ------------------------------------------------------------------------------
 
-subroutine c_ufo_vars_create(c_key_self, c_conf) bind(c,name='ufo_var_create_f90')
+subroutine ufo_vars_create_c(c_key_self, c_conf) bind(c,name='ufo_var_create_f90')
 implicit none
 integer(c_int), intent(inout) :: c_key_self
 type(c_ptr), intent(in)    :: c_conf
 
 c_key_self=1
 return
-end subroutine c_ufo_vars_create
+end subroutine ufo_vars_create_c
 
 ! ------------------------------------------------------------------------------
 
-subroutine c_ufo_vars_clone(c_key_self, c_key_other) bind(c,name='ufo_var_clone_f90')
+subroutine ufo_vars_clone_c(c_key_self, c_key_other) bind(c,name='ufo_var_clone_f90')
 implicit none
 integer(c_int), intent(in)    :: c_key_self
 integer(c_int), intent(inout) :: c_key_other
 
 c_key_other=c_key_self
-end subroutine c_ufo_vars_clone
+end subroutine ufo_vars_clone_c
 
 ! ------------------------------------------------------------------------------
 
-subroutine c_ufo_vars_delete(c_key_self) bind(c,name='ufo_var_delete_f90')
+subroutine ufo_vars_delete_c(c_key_self) bind(c,name='ufo_var_delete_f90')
 
 implicit none
 integer(c_int), intent(inout) :: c_key_self
 
 c_key_self=0
 return
-end subroutine c_ufo_vars_delete
+end subroutine ufo_vars_delete_c
 
 ! ------------------------------------------------------------------------------
 

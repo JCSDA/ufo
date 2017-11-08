@@ -61,7 +61,7 @@ end subroutine ufo_loc_setup
 
 ! ------------------------------------------------------------------------------
 
-subroutine c_ufo_loc_delete(key) bind(c,name='ufo_loc_delete_f90')
+subroutine ufo_loc_delete_c(key) bind(c,name='ufo_loc_delete_f90')
 
 implicit none
 integer(c_int), intent(inout) :: key
@@ -71,11 +71,11 @@ call ufo_locs_registry%get(key,self)
 deallocate(self%xyz)
 call ufo_locs_registry%remove(key)
 
-end subroutine c_ufo_loc_delete
+end subroutine ufo_loc_delete_c
 
 ! ------------------------------------------------------------------------------
 
-subroutine c_ufo_loc_nobs(key, kobs) bind(c,name='ufo_loc_nobs_f90')
+subroutine ufo_loc_nobs_c(key, kobs) bind(c,name='ufo_loc_nobs_f90')
 
 implicit none
 integer(c_int), intent(in) :: key
@@ -85,7 +85,7 @@ type(ufo_locs), pointer :: self
 call ufo_locs_registry%get(key,self)
 kobs = self%nloc
 
-end subroutine c_ufo_loc_nobs
+end subroutine ufo_loc_nobs_c
 
 ! ------------------------------------------------------------------------------
 
