@@ -20,6 +20,7 @@ use ufo_locs_mod
 use ufo_geovals_mod
 use kinds
 
+use crtm_module
 implicit none
 private
 
@@ -88,11 +89,18 @@ real(c_double), intent(in) :: c_bias
 type(ufo_geovals), pointer  :: geovals
 type(obs_vect), pointer :: hofx
 
+character(256) :: version
 if (abs(c_bias) > epsilon(c_bias)) call abor1_ftn ("ufo_wspeed: bias not implemented")
 
 call ufo_geovals_registry%get(c_key_geovals,geovals)
 call ufo_obs_vect_registry%get(c_key_hofx,hofx)
 
+print *,'In wspeed_eq'
+print *,'geovals%values=',geovals%values
+
+call crtm_version(version)
+
+print *,'===================== CRTM VERSION:',version
 hofx%values(:) = 1.0_kind_real
 
 end subroutine ufo_wspeed_eqv

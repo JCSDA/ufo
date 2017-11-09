@@ -22,7 +22,7 @@ ufo_wspeed_mod.F90
 
 ecbuild_add_library( TARGET   ufo
                      SOURCES  ${ufo_src_files}
-                     LIBS     oops ${LAPACK_LIBRARIES} ${NETCDF_LIBRARIES}
+                     LIBS     oops ${LAPACK_LIBRARIES} ${CRTM_LIBRARIES}
                      INSTALL_HEADERS LISTED
                      LINKER_LANGUAGE ${OOPS_LINKER_LANGUAGE}
                     )
