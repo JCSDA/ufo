@@ -13,7 +13,7 @@ use config_mod
 implicit none
 private
 public :: ufo_vars, ufo_vars_setup, ufo_vars_clone, ufo_vars_delete
-public :: ufo_vars_registry
+public :: ufo_vars_registry, ufo_vars_readconfig
 
 integer, parameter :: MAXVARLEN=8
 ! ------------------------------------------------------------------------------
@@ -67,7 +67,23 @@ implicit none
 type(ufo_vars), intent(inout) :: self
 end subroutine ufo_vars_delete
 
-!integer function 
+! ------------------------------------------------------------------------------
+
+subroutine ufo_vars_readconfig(self, c_conf) 
+implicit none
+type(ufo_vars), intent(inout) :: self
+type(c_ptr), intent(in)    :: c_conf
+
+character(len=MAXVARLEN) :: svar
+
+svar = config_get_string(c_conf,len(svar),"variables")
+self%nv = 1
+allocate(self%fldnames(self%nv))
+self%fldnames(1) = svar
+
+return
+end subroutine ufo_vars_readconfig
+
 ! ------------------------------------------------------------------------------
 
 subroutine ufo_vars_create_c(c_key_self, c_conf) bind(c,name='ufo_var_create_f90')
@@ -82,10 +98,7 @@ call ufo_vars_registry%init()
 call ufo_vars_registry%add(c_key_self)
 call ufo_vars_registry%get(c_key_self, self)
 
-svar = config_get_string(c_conf,len(svar),"variables")
-self%nv = 1
-allocate(self%fldnames(self%nv))
-self%fldnames(1) = svar
+call ufo_vars_readconfig(self, c_conf)
 
 return
 end subroutine ufo_vars_create_c

@@ -209,6 +209,7 @@ type(c_ptr), intent(in)    :: c_conf
 type(ufo_geovals), pointer :: self
 integer :: i, j
 integer, allocatable :: nlen(:)
+
 call ufo_geovals_registry%get(c_key_self, self)
 
 ! config: filename; all vars to read
@@ -219,6 +220,8 @@ self%nvar=1
 allocate(self%geovals(self%nvar,self%nobs))
 
 self%lalloc = .true.
+
+call ufo_vars_readconfig(self%variables, c_conf)
 
 allocate(nlen(self%nvar))
 nlen(:) = 1

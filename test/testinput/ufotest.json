@@ -9,7 +9,8 @@
     "ObsTypes": [{
       "ObsType": "WindSpeed",
       "GeoVaLs": {
-        "norm": "1.0"
+        "norm": "1.0",
+        "variables": "vargeov"
       },
       "rmsequiv": "1.0"
     }]
