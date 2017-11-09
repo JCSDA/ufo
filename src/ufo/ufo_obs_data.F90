@@ -215,6 +215,9 @@ call ufo_geovals_registry%init()
 call ufo_geovals_registry%add(c_key_geovals)
 call ufo_geovals_registry%get(c_key_geovals,geovals)
 
+geovals%lalloc = .false. ! very bad! should just call init that adds to registry 
+geovals%linit  = .false. ! and initalizes!!!
+
 call geovals_setup(geovals, vars, mobs)
 
 !deallocate(mobs)

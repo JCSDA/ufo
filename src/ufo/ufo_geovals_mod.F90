@@ -108,9 +108,11 @@ if (self%linit) then
       deallocate(self%geovals(i,j)%vals)
     enddo
   enddo
+  self%linit = .false.
 endif
 if (self%lalloc) then
   deallocate(self%geovals)
+  self%lalloc = .false.
 endif
 call ufo_geovals_registry%remove(c_key_self)
 
