@@ -127,7 +127,13 @@ integer :: i, j
 call ufo_geovals_registry%get(c_key_self, self)
 
 if (.not. self%linit) then
-  ! abort!
+  ! TODO: abort! for now just allocating 1
+  do i = 1, self%nvar
+    do j = 1, self%nobs
+      allocate(self%geovals(i,j)%vals(1))
+    enddo
+  enddo
+  self%linit = .true.
 endif
 do i = 1, self%nvar
   do j = 1, self%nobs
@@ -150,7 +156,13 @@ call ufo_geovals_registry%get(c_key_self, self)
 !call random_vector(self%values(:,:))
 
 if (.not. self%linit) then
-  ! abort!
+  ! TODO: abort! for now just allocating 1
+  do i = 1, self%nvar
+    do j = 1, self%nobs
+      allocate(self%geovals(i,j)%vals(1))
+    enddo
+  enddo
+  self%linit = .true.
 endif
 do i = 1, self%nvar
   do j = 1, self%nobs
@@ -206,13 +218,16 @@ use fckit_log_module, only : fckit_log
 implicit none
 integer(c_int), intent(in) :: c_key_self
 type(c_ptr), intent(in)    :: c_conf
+
 type(ufo_geovals), pointer :: self
+character(128) :: filename
 integer :: i, j
 integer, allocatable :: nlen(:)
 
 call ufo_geovals_registry%get(c_key_self, self)
 
-! config: filename; all vars to read
+! read filename for config
+filename = config_get_string(c_conf,len(filename),"filename")
 
 self%nobs=1
 self%nvar=1
@@ -232,6 +247,7 @@ do i = 1, self%nvar
   enddo
 enddo
 deallocate(nlen)
+self%linit = .true.
 
 end subroutine ufo_geovals_read_file_c
 

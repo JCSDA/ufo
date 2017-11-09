@@ -10,7 +10,8 @@
       "ObsType": "WindSpeed",
       "GeoVaLs": {
         "norm": "1.0",
-        "variables": "vargeov"
+        "variables": "vargeov",
+        "filename": "amsua_n19_wprofiles.nc4"
       },
       "rmsequiv": "1.0"
     }]

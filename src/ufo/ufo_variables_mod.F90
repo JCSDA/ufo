@@ -128,14 +128,19 @@ end subroutine ufo_vars_delete_c
 
 ! ------------------------------------------------------------------------------
 
+!subroutine ufo_vars_info_c(c_key_self, c_nv, lline, c_line) bind(c,name='ufo_var_info_f90')
 subroutine ufo_vars_info_c(c_key_self, c_nv) bind(c,name='ufo_var_info_f90')
 implicit none
 integer(c_int), intent(in)    :: c_key_self
 integer(c_int), intent(inout) :: c_nv
+!integer(c_int), intent(in)    :: lline
+!character(kind=c_char,len=1), intent(inout) :: c_line(lline+1)
+
 type(ufo_vars), pointer :: self
 
 call ufo_vars_registry%get(c_key_self, self)
 
+!c_line = self%fldnames(1)
 c_nv = self%nv
 
 return
