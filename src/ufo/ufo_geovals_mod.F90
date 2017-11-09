@@ -17,15 +17,28 @@ public :: ufo_geovals_registry
 
 ! ------------------------------------------------------------------------------
 
-!> Fortran derived type to hold interpolated fields required by the obs operators
+!> type to hold interpolated field for one variable, one observation
+type :: ufo_geoval
+  real, allocatable :: vals(:)   !< values (vertical profile or single value for now)
+  integer :: nvals               !< number of values in vals array
+end type ufo_geoval
+
+!> type to hold interpolated fields required by the obs operators
 type :: ufo_geovals
-  integer :: nobs
-  integer :: nvar
-  integer :: used
-  integer, allocatable :: indx(:)
-  real(kind=kind_real), allocatable :: values(:,:)
-  character(len=1), allocatable :: variables(:)
-  logical :: lalloc
+  integer :: nobs                !< number of observations
+  integer :: nvar                !< number of variables (supposed to be the
+                                 !  same for same obs operator
+
+  type(ufo_geoval), allocatable :: geovals(:,:)  !< array of interpolated
+                                                 !  vertical profiles (nvar, nobs)
+
+  type(ufo_vars) :: variables    !< variables list
+
+  logical :: lalloc              !< .true. if type was initialized and allocated
+                                 !  (only geovals are allocated, not the arrays
+                                 !   inside of the ufo_geoval type)
+  logical :: linit               !< .true. if all the ufo_geoval arrays inside geovals
+                                 !  were allocated and have data
 end type ufo_geovals
 
 #define LISTED_TYPE ufo_geovals
@@ -56,6 +69,7 @@ call ufo_geovals_registry%add(c_key_self)
 call ufo_geovals_registry%get(c_key_self, self)
 
 self%lalloc = .false.
+self%linit  = .false.
 
 end subroutine ufo_geovals_create_c
 
@@ -67,22 +81,11 @@ type(ufo_geovals), intent(inout) :: self
 type(ufo_vars), intent(in) :: vars
 integer, intent(in) :: kobs(:)
 
-self%nobs=size(kobs)
+self%nobs = size(kobs)
+self%nvar = vars%nv
+self%variables = vars
 
-!self%nvar=vars%nv
-self%nvar=1
-self%used=0
-
-allocate(self%indx(self%nobs))
-!self%indx(:)=kobs(:)
-self%indx(1)=1
-
-allocate(self%variables(self%nvar))
-!self%variables(:)=vars%fldnames(:)
-self%variables(1)="z"
-
-allocate(self%values(self%nvar,self%nobs))
-
+allocate(self%geovals(self%nvar,self%nobs))
 self%lalloc = .true.
 
 end subroutine geovals_setup
@@ -95,12 +98,19 @@ implicit none
 integer(c_int), intent(inout) :: c_key_self
 
 type(ufo_geovals), pointer :: self
+integer :: i, j
+
 
 call ufo_geovals_registry%get(c_key_self, self)
+if (self%linit) then
+  do i = 1, self%nvar
+    do j = 1, self%nobs
+      deallocate(self%geovals(i,j)%vals)
+    enddo
+  enddo
+endif
 if (self%lalloc) then
-  deallocate(self%values)
-  deallocate(self%indx)
-  deallocate(self%variables)
+  deallocate(self%geovals)
 endif
 call ufo_geovals_registry%remove(c_key_self)
 
@@ -112,8 +122,18 @@ subroutine ufo_geovals_zero_c(c_key_self) bind(c,name='ufo_geovals_zero_f90')
 implicit none
 integer(c_int), intent(in) :: c_key_self
 type(ufo_geovals), pointer :: self
+integer :: i, j
+
 call ufo_geovals_registry%get(c_key_self, self)
-self%values(:,:)=0.0_kind_real
+
+if (.not. self%linit) then
+  ! abort!
+endif
+do i = 1, self%nvar
+  do j = 1, self%nobs
+    self%geovals(i,j)%vals = 0.0_kind_real
+  enddo
+enddo
 end subroutine ufo_geovals_zero_c
 
 ! ------------------------------------------------------------------------------
@@ -123,9 +143,21 @@ use random_vectors_mod
 implicit none
 integer(c_int), intent(in) :: c_key_self
 type(ufo_geovals), pointer :: self
+integer :: i, j
+
 call ufo_geovals_registry%get(c_key_self, self)
+
 !call random_vector(self%values(:,:))
-self%values(:,:)=1.0_kind_real
+
+if (.not. self%linit) then
+  ! abort!
+endif
+do i = 1, self%nvar
+  do j = 1, self%nobs
+    self%geovals(i,j)%vals = 1.0_kind_real
+  enddo
+enddo
+
 end subroutine ufo_geovals_random_c
 
 ! ------------------------------------------------------------------------------
@@ -139,12 +171,12 @@ integer :: jo, jv
 
 call ufo_geovals_registry%get(c_key_self, self)
 call ufo_geovals_registry%get(c_key_other, other)
-prod=0.0_kind_real
-do jo=1,self%nobs
-  do jv=1,self%nvar
-    prod=prod+self%values(jv,jo)*other%values(jv,jo)
-  enddo
-enddo
+prod=1.0_kind_real
+!do jo=1,self%nobs
+!  do jv=1,self%nvar
+!    prod=prod+self%values(jv,jo)*other%values(jv,jo)
+!  enddo
+!enddo
 
 end subroutine ufo_geovals_dotprod_c
 
@@ -160,9 +192,9 @@ type(ufo_geovals), pointer :: self
 call ufo_geovals_registry%get(c_key_self, self)
 
 kobs = self%nobs
-pmin=minval(self%values(:,:))
-pmax=maxval(self%values(:,:))
-prms=sqrt(sum(self%values(:,:)**2)/real(self%nobs*self%nvar,kind_real))
+pmin=0. !minval(self%values(:,:))
+pmax=0. !maxval(self%values(:,:))
+prms=0. !sqrt(sum(self%values(:,:)**2)/real(self%nobs*self%nvar,kind_real))
 
 end subroutine ufo_geovals_minmaxavg_c
 
@@ -175,24 +207,28 @@ implicit none
 integer(c_int), intent(in) :: c_key_self
 type(c_ptr), intent(in)    :: c_conf
 type(ufo_geovals), pointer :: self
-
+integer :: i, j
+integer, allocatable :: nlen(:)
 call ufo_geovals_registry%get(c_key_self, self)
+
+! config: filename; all vars to read
 
 self%nobs=1
 self%nvar=1
-self%used=0
 
-allocate(self%indx(self%nobs))
-self%indx(1)=1
-
-allocate(self%variables(self%nvar))
-self%variables(1)="z"
-
-allocate(self%values(self%nvar,self%nobs))
-
-self%values(:,:)=1.0_kind_real
+allocate(self%geovals(self%nvar,self%nobs))
 
 self%lalloc = .true.
+
+allocate(nlen(self%nvar))
+nlen(:) = 1
+do i = 1, self%nvar
+  do j = 1, self%nobs
+    allocate(self%geovals(i,j)%vals(nlen(i)))
+    self%geovals(i,j)%vals(:) = 1.
+  enddo
+enddo
+deallocate(nlen)
 
 end subroutine ufo_geovals_read_file_c
 

@@ -27,25 +27,18 @@ class Variables : public util::Printable,
  public:
   static const std::string classname() {return "ufo::Variables";}
 
-  explicit Variables(const eckit::Configuration & config) {
-    using oops::Log;
-    Log::debug() << "Variables config:" << config << std::endl;
-    const eckit::Configuration * conf = &config;
-    ufo_var_create_f90(keyVar_, &conf);
-  }
-  explicit Variables(const int keyVar): keyVar_(keyVar) {}
+  explicit Variables(const eckit::Configuration & config);
+  explicit Variables(const int keyVar);
 
-  ~Variables() {ufo_var_delete_f90(keyVar_);}
+  ~Variables();
 
-  Variables(const Variables & other) {ufo_var_clone_f90(other.keyVar_, keyVar_);}
+  Variables(const Variables & other);
 
   int& toFortran() {return keyVar_;}
   const int& toFortran() const {return keyVar_;}
 
  private:
-  void print(std::ostream & os) const {
-    os << "ufo::Variables::print not implemented";
-  }
+  void print(std::ostream & os) const;
   int keyVar_;
 };
 

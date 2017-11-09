@@ -12,6 +12,7 @@ ObsWSpeed.cc
 ObsWSpeed.h
 UfoTrait.h
 Variables.h
+Variables.cc
 ufo_geovals_mod.F90
 ufo_locs_mod.F90
 ufo_obs_data.F90

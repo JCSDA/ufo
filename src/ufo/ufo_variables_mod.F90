@@ -15,12 +15,13 @@ private
 public :: ufo_vars, ufo_vars_setup, ufo_vars_clone, ufo_vars_delete
 public :: ufo_vars_registry
 
+integer, parameter :: MAXVARLEN=8
 ! ------------------------------------------------------------------------------
 
 !> Fortran derived type to represent QG model variables
 type :: ufo_vars
   integer :: nv
-  character(len=1), allocatable :: fldnames(:) !< Variable identifiers
+  character(len=MAXVARLEN), allocatable :: fldnames(:) !< Variable identifiers
 end type ufo_vars
 
 #define LISTED_TYPE ufo_vars
@@ -42,7 +43,12 @@ contains
 subroutine ufo_vars_setup(self, cvars)
 implicit none
 type(ufo_vars), intent(inout) :: self
-character(len=1), intent(in) :: cvars(:)
+character(len=MAXVARLEN), intent(in) :: cvars(:)
+self%nv = size(cvars)
+
+! TODO: a check on whether this var is in the list of defined vars
+allocate(self%fldnames(self%nv))
+self%fldnames(:) = cvars(:)
 
 end subroutine ufo_vars_setup
 
@@ -61,6 +67,7 @@ implicit none
 type(ufo_vars), intent(inout) :: self
 end subroutine ufo_vars_delete
 
+!integer function 
 ! ------------------------------------------------------------------------------
 
 subroutine ufo_vars_create_c(c_key_self, c_conf) bind(c,name='ufo_var_create_f90')
@@ -68,7 +75,18 @@ implicit none
 integer(c_int), intent(inout) :: c_key_self
 type(c_ptr), intent(in)    :: c_conf
 
-c_key_self=1
+type(ufo_vars), pointer :: self
+character(len=MAXVARLEN) :: svar
+
+call ufo_vars_registry%init()
+call ufo_vars_registry%add(c_key_self)
+call ufo_vars_registry%get(c_key_self, self)
+
+svar = config_get_string(c_conf,len(svar),"variables")
+self%nv = 1
+allocate(self%fldnames(self%nv))
+self%fldnames(1) = svar
+
 return
 end subroutine ufo_vars_create_c
 
@@ -94,5 +112,20 @@ return
 end subroutine ufo_vars_delete_c
 
 ! ------------------------------------------------------------------------------
+
+! ------------------------------------------------------------------------------
+
+subroutine ufo_vars_info_c(c_key_self, c_nv) bind(c,name='ufo_var_info_f90')
+implicit none
+integer(c_int), intent(in)    :: c_key_self
+integer(c_int), intent(inout) :: c_nv
+type(ufo_vars), pointer :: self
+
+call ufo_vars_registry%get(c_key_self, self)
+
+c_nv = self%nv
+
+return
+end subroutine ufo_vars_info_c
 
 end module ufo_vars_mod
