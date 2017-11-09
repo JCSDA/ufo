@@ -203,15 +203,14 @@ implicit none
 integer(c_int), intent(in) :: c_key_self, c_key_other
 real(c_double), intent(inout) :: prod
 type(ufo_geovals), pointer :: self, other
-integer :: jo, jv
+integer :: jo
 
 call ufo_geovals_registry%get(c_key_self, self)
 call ufo_geovals_registry%get(c_key_other, other)
 prod=0.0_kind_real
+
 do jo=1,self%nobs
-  do jv=1,self%nvar
-    prod=prod+self%geovals(jv,jo)%vals(1)*other%geovals(jv,jo)%vals(1)
-  enddo
+  prod=prod+self%geovals(1,jo)%vals(1)*other%geovals(1,jo)%vals(1)
 enddo
 
 end subroutine ufo_geovals_dotprod_c
@@ -255,14 +254,14 @@ call ufo_geovals_registry%get(c_key_self, self)
 ! read filename for config
 filename = config_get_string(c_conf,len(filename),"filename")
 
+call ufo_vars_readconfig(self%variables, c_conf)
+
 self%nobs=1
-self%nvar=1
+self%nvar=self%variables%nv
 
 allocate(self%geovals(self%nvar,self%nobs))
 
 self%lalloc = .true.
-
-call ufo_vars_readconfig(self%variables, c_conf)
 
 allocate(nlen(self%nvar))
 nlen(:) = 1
@@ -277,10 +276,10 @@ deallocate(nlen)
 
 self%linit = .true.
 
-!varname = 'vargeov'
+!varname = 'u'
 !call ufo_geovals_get_var(self, 1, varname, geoval)
 !print *, 'geoval test: ', geoval%nvals, geoval%vals
-!varname = 'test'
+!varname = 'prse'
 !call ufo_geovals_get_var(self, 1, varname, geoval)
 !print *, 'geoval test: ', geoval%nvals, geoval%vals
 end subroutine ufo_geovals_read_file_c

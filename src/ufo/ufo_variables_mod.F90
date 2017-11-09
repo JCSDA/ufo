@@ -76,13 +76,14 @@ implicit none
 type(ufo_vars), intent(inout) :: self
 type(c_ptr), intent(in)    :: c_conf
 
-character(len=MAXVARLEN) :: svar
+character(len=256) :: svars
 
-svar = config_get_string(c_conf,len(svar),"variables")
-self%nv = 1
+self%nv = config_get_int(c_conf, "nvars")
+svars = config_get_string(c_conf,len(svars),"variables")
 allocate(self%fldnames(self%nv))
-self%fldnames(1) = svar
+read(svars,*) self%fldnames 
 return
+
 end subroutine ufo_vars_readconfig
 
 ! ------------------------------------------------------------------------------

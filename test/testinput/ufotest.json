@@ -3,6 +3,7 @@
   "window_begin": "2010-01-01T00:00:00Z",
   "window_end": "2010-01-02T00:00:00Z",
   "Variables": {
+     "nvars": "1",
      "variables": "testvar"
   },
   "Observations": {
@@ -10,7 +11,8 @@
       "ObsType": "WindSpeed",
       "GeoVaLs": {
         "norm": "1.0",
-        "variables": "vargeov",
+        "nvars": "4",
+        "variables": "t prse u v",
         "filename": "amsua_n19_wprofiles.nc4"
       },
       "rmsequiv": "1.0"
