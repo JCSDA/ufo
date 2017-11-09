@@ -118,6 +118,26 @@ end subroutine ufo_geovals_delete_c
 
 ! ------------------------------------------------------------------------------
 
+subroutine ufo_geovals_get_var(self, iobs, varname, geoval)
+implicit none
+type(ufo_geovals), intent(in)    :: self
+integer, intent(in)              :: iobs
+character(MAXVARLEN), intent(in) :: varname
+type(ufo_geoval), intent(out)    :: geoval
+
+integer :: ivar
+
+ivar = ufo_vars_getindex(self%variables, varname)
+if (ivar < 0) then
+  ! abort!, no such variable
+endif
+geoval = self%geovals(ivar, iobs)
+
+
+end subroutine ufo_geovals_get_var
+
+! ------------------------------------------------------------------------------
+
 subroutine ufo_geovals_zero_c(c_key_self) bind(c,name='ufo_geovals_zero_f90')
 implicit none
 integer(c_int), intent(in) :: c_key_self
@@ -130,6 +150,7 @@ if (.not. self%linit) then
   ! TODO: abort! for now just allocating 1
   do i = 1, self%nvar
     do j = 1, self%nobs
+      self%geovals(i,j)%nvals = 1
       allocate(self%geovals(i,j)%vals(1))
     enddo
   enddo
@@ -159,6 +180,7 @@ if (.not. self%linit) then
   ! TODO: abort! for now just allocating 1
   do i = 1, self%nvar
     do j = 1, self%nobs
+      self%geovals(i,j)%nvals = 1
       allocate(self%geovals(i,j)%vals(1))
     enddo
   enddo
@@ -183,12 +205,12 @@ integer :: jo, jv
 
 call ufo_geovals_registry%get(c_key_self, self)
 call ufo_geovals_registry%get(c_key_other, other)
-prod=1.0_kind_real
-!do jo=1,self%nobs
-!  do jv=1,self%nvar
-!    prod=prod+self%values(jv,jo)*other%values(jv,jo)
-!  enddo
-!enddo
+prod=0.0_kind_real
+do jo=1,self%nobs
+  do jv=1,self%nvar
+    prod=prod+self%geovals(jv,jo)%vals(1)*other%geovals(jv,jo)%vals(1)
+  enddo
+enddo
 
 end subroutine ufo_geovals_dotprod_c
 
@@ -223,6 +245,8 @@ type(ufo_geovals), pointer :: self
 character(128) :: filename
 integer :: i, j
 integer, allocatable :: nlen(:)
+type(ufo_geoval) :: geoval
+character(MAXVARLEN) :: varname
 
 call ufo_geovals_registry%get(c_key_self, self)
 
@@ -242,13 +266,21 @@ allocate(nlen(self%nvar))
 nlen(:) = 1
 do i = 1, self%nvar
   do j = 1, self%nobs
+    self%geovals(i,j)%nvals = nlen(i)
     allocate(self%geovals(i,j)%vals(nlen(i)))
-    self%geovals(i,j)%vals(:) = 1.
+    self%geovals(i,j)%vals(:) = i
   enddo
 enddo
 deallocate(nlen)
+
 self%linit = .true.
 
+!varname = 'vargeov'
+!call ufo_geovals_get_var(self, 1, varname, geoval)
+!print *, 'geoval test: ', geoval%nvals, geoval%vals
+!varname = 'test'
+!call ufo_geovals_get_var(self, 1, varname, geoval)
+!print *, 'geoval test: ', geoval%nvals, geoval%vals
 end subroutine ufo_geovals_read_file_c
 
 ! ------------------------------------------------------------------------------

@@ -14,6 +14,8 @@ implicit none
 private
 public :: ufo_vars, ufo_vars_setup, ufo_vars_clone, ufo_vars_delete
 public :: ufo_vars_registry, ufo_vars_readconfig
+public :: ufo_vars_getindex
+public :: MAXVARLEN
 
 integer, parameter :: MAXVARLEN=8
 ! ------------------------------------------------------------------------------
@@ -80,9 +82,30 @@ svar = config_get_string(c_conf,len(svar),"variables")
 self%nv = 1
 allocate(self%fldnames(self%nv))
 self%fldnames(1) = svar
-
 return
 end subroutine ufo_vars_readconfig
+
+! ------------------------------------------------------------------------------
+integer function ufo_vars_getindex(self, varname)
+implicit none
+type(ufo_vars), intent(in)       :: self
+character(MAXVARLEN), intent(in) :: varname
+
+integer :: ivar
+
+do ivar = 1, self%nv
+  if (self%fldnames(ivar) == varname) then
+    exit
+  endif
+enddo
+
+if (ivar <= self%nv) then
+  ufo_vars_getindex = ivar
+else
+  ufo_vars_getindex = -1
+endif
+
+end function ufo_vars_getindex
 
 ! ------------------------------------------------------------------------------
 
