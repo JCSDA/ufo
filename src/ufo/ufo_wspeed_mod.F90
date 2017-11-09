@@ -95,11 +95,7 @@ if (abs(c_bias) > epsilon(c_bias)) call abor1_ftn ("ufo_wspeed: bias not impleme
 call ufo_geovals_registry%get(c_key_geovals,geovals)
 call ufo_obs_vect_registry%get(c_key_hofx,hofx)
 
-print *,'In wspeed_eq'
-print *,'geovals%values=',geovals%values
-
 call crtm_version(version)
-
 print *,'===================== CRTM VERSION:',version
 hofx%values(:) = 1.0_kind_real
 

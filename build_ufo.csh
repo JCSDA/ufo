@@ -1,5 +1,9 @@
 #!/bin/csh -f
+
+#User defined stuff
 setenv BASE "/home/gvernier/Sandboxes/codesprint-ufo/jedi/"
+
+#All codes and builds
 setenv ALLSRC ${BASE}"code/"
 setenv ALLBUILDS ${BASE}"build/"
 
@@ -11,13 +15,10 @@ setenv OOPS_SRC ${ALLSRC}"oops/"
 setenv UFO_BUILD ${ALLBUILDS}"ufo/"
 setenv OOPS_BUILD ${ALLBUILDS}"oops/" 
 
-#CRTM
-setenv CRTM_PATH /home/gvernier/Sandboxes/codesprint-ufo/jedi/code/crtm-release/libsrc/
-#${ALLBUILDS}"gsi/lib/" 
-setenv CRTM_LIBRARIES /home/gvernier/Sandboxes/codesprint-ufo/jedi/code/crtm-release/libsrc/libcrtm.a
-#"$CRTM_PATH/libcrtm_v2.2.3.a"
-setenv CRTM_INCLUDE /home/gvernier/Sandboxes/codesprint-ufo/jedi/code/crtm-release/libsrc/
-#${ALLBUILDS}"gsi/include/" 
+#Point Env. var. to CRTM build ...
+setenv CRTM_PATH ${BASE}/code/crtm-release/libsrc/
+setenv CRTM_LIBRARIES ${BASE}/code/crtm-release/libsrc/libcrtm.a
+setenv CRTM_INCLUDE ${BASE}/code/crtm-release/libsrc/
 
 #CLEAN BUILD
 rm -rf ${UFO_BUILD}
@@ -31,4 +32,4 @@ ecbuild -DOOPS_PATH=${OOPS_BUILD} \
         --build=release \
 	${UFO_SRC}
 make -j4
-#exit 0
+exit 0
