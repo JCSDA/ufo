@@ -64,7 +64,7 @@ extern "C" {
   void ufo_geovals_random_f90(const F90goms &);
   void ufo_geovals_dotprod_f90(const F90goms &, const F90goms &, double &);
   void ufo_geovals_minmaxavg_f90(const F90goms &, int &, double &, double &, double &);
-  void ufo_geovals_read_file_f90(const F90goms &, const eckit::Configuration * const *);
+  void ufo_geovals_read_file_f90(const F90goms &, const eckit::Configuration * const *, const F90vars &);
   void ufo_geovals_write_file_f90(const F90goms &, const eckit::Configuration * const *);
 
 // -----------------------------------------------------------------------------

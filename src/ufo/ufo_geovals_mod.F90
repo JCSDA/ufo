@@ -235,14 +235,15 @@ end subroutine ufo_geovals_minmaxavg_c
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_geovals_read_file_c(c_key_self, c_conf) bind(c,name='ufo_geovals_read_file_f90')
+subroutine ufo_geovals_read_file_c(c_key_self, c_conf, c_key_vars) bind(c,name='ufo_geovals_read_file_f90')
 use config_mod
 use fckit_log_module, only : fckit_log
 implicit none
-integer(c_int), intent(in) :: c_key_self
+integer(c_int), intent(in) :: c_key_self, c_key_vars
 type(c_ptr), intent(in)    :: c_conf
 
 type(ufo_geovals), pointer :: self
+type(ufo_vars), pointer :: vars
 character(128) :: filename
 integer :: i, j
 integer, allocatable :: nlen(:)
@@ -250,11 +251,17 @@ type(ufo_geoval) :: geoval
 character(MAXVARLEN) :: varname
 
 call ufo_geovals_registry%get(c_key_self, self)
+call ufo_vars_registry%get(c_key_vars, vars)
 
 ! read filename for config
 filename = config_get_string(c_conf,len(filename),"filename")
 
-call ufo_vars_readconfig(self%variables, c_conf)
+! ugly copy of vars. TODO: redo (have an assignment(=) for type(ufo_vars)?
+self%variables%nv = vars%nv
+allocate(self%variables%fldnames(self%variables%nv))
+self%variables%fldnames(:) = vars%fldnames(:)
+
+!call ufo_vars_readconfig(self%variables, c_conf)
 
 self%nobs=1
 self%nvar=self%variables%nv
