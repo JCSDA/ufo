@@ -30,7 +30,7 @@ use read_diag, only: read_radiag_data,&
                      diag_data_fix_list,&
                      diag_data_extra_list,&
                      diag_data_chan_list
-use nc_diag_read_mod, only: nc_diag_read_init
+use nc_diag_read_mod, only: nc_diag_read_init, nc_diag_read_close
 use kinds
 
 implicit none
@@ -45,7 +45,6 @@ integer, parameter :: max_string=800
 
 !> A type to represent observation data
 type obs_data
-  integer :: ngrp
   integer :: nobs
   character(len=max_string) :: filein, fileout
   type(group_data), pointer :: grphead => null()  ! _RT to be removed
@@ -96,7 +95,6 @@ interface obs_count
 end interface obs_count
 
 ! ------------------------------------------------------------------------------
-character(len=*),parameter :: myname="ufo_obs_data"
 contains
 ! ------------------------------------------------------------------------------
 !> Linked list implementation
@@ -109,7 +107,6 @@ implicit none
 type(obs_data), intent(inout) :: self
 character(len=*), intent(in) :: fin, fout
 
-self%ngrp=0
 self%filein =fin
 self%fileout=fout
 
@@ -128,22 +125,6 @@ type(column_data), pointer :: jcol
 integer :: jo
 
 if (self%fileout/="") call obs_write(self)
-
-do while (associated(self%grphead))
-  jgrp=>self%grphead
-  self%grphead=>jgrp%next
-  do jo=1,jgrp%nobs
-    call datetime_delete(jgrp%times(jo))
-  enddo
-  deallocate(jgrp%times)
-  do while (associated(jgrp%colhead))
-    jcol=>jgrp%colhead
-    jgrp%colhead=>jcol%next
-    deallocate(jcol%values)
-    deallocate(jcol)
-  enddo
-  deallocate(jgrp)
-enddo
 
 end subroutine obs_delete
 
@@ -169,7 +150,7 @@ end subroutine obs_put
 
 ! ------------------------------------------------------------------------------
 
-subroutine obs_locations(c_key_self, lreq, c_req, c_t1, c_t2, c_key_locs) bind(c,name='ufo_obsdb_locations_f90')
+subroutine ufo_obsdb_locations_c(c_key_self, lreq, c_req, c_t1, c_t2, c_key_locs) bind(c,name='ufo_obsdb_locations_f90')
 implicit none
 integer(c_int), intent(in) :: c_key_self
 integer(c_int), intent(in) :: lreq
@@ -203,11 +184,11 @@ call ufo_loc_setup(locs, ovec)
 
 deallocate(ovec%values)
 
-end subroutine obs_locations
+end subroutine ufo_obsdb_locations_c
 
 ! ------------------------------------------------------------------------------
 
-subroutine obs_getgeovals(c_key_self, c_key_vars, c_t1, c_t2, c_key_geovals) bind(c,name='ufo_obsdb_getgeovals_f90')
+subroutine ufo_obsdb_getgeovals_c(c_key_self, c_key_vars, c_t1, c_t2, c_key_geovals) bind(c,name='ufo_obsdb_getgeovals_f90')
 implicit none
 integer(c_int), intent(in) :: c_key_self
 integer(c_int), intent(in) :: c_key_vars
@@ -220,7 +201,6 @@ type(datetime) :: t1, t2
 type(ufo_geovals), pointer :: geovals
 
 integer :: nobs
-integer, allocatable :: mobs(:)
 
 call obs_data_registry%get(c_key_self, self)
 !call c_f_string(c_req, req)
@@ -230,8 +210,6 @@ call c_f_datetime(c_t2, t2)
 
 !call obs_count(self, req, t1, t2, nobs)
 nobs=1
-allocate(mobs(nobs))
-mobs(1)=1
 !call obs_count(self, req, t1, t2, mobs)
 
 allocate(geovals)
@@ -239,15 +217,18 @@ call ufo_geovals_registry%init()
 call ufo_geovals_registry%add(c_key_geovals)
 call ufo_geovals_registry%get(c_key_geovals,geovals)
 
-call geovals_setup(geovals, vars, mobs)
+geovals%lalloc = .false. ! very bad! should just call init that adds to registry 
+geovals%linit  = .false. ! and initalizes!!!
+
+call ufo_geovals_setup(geovals, vars, nobs)
 
 !deallocate(mobs)
 
-end subroutine obs_getgeovals
+end subroutine ufo_obsdb_getgeovals_c
 
 ! ------------------------------------------------------------------------------
 
-subroutine obs_generate(c_key_self, lreq, c_req, c_conf, c_bgn, c_step, ktimes, kobs) bind(c,name='ufo_obsdb_generate_f90')
+subroutine ufo_obsdb_generate_c(c_key_self, lreq, c_req, c_conf, c_bgn, c_step, ktimes, kobs) bind(c,name='ufo_obsdb_generate_f90')
 implicit none
 integer(c_int), intent(in) :: c_key_self
 integer(c_int), intent(in) :: lreq
@@ -258,18 +239,18 @@ type(c_ptr), intent(in)    :: c_step
 integer(c_int), intent(in)  :: ktimes
 integer(c_int), intent(inout) :: kobs
 
-end subroutine obs_generate
+end subroutine ufo_obsdb_generate_c
 
 ! ------------------------------------------------------------------------------
 
-subroutine obs_nobs(c_key_self, lreq, c_req, kobs) bind(c,name='ufo_obsdb_nobs_f90')
+subroutine ufo_obsdb_nobs_c(c_key_self, lreq, c_req, kobs) bind(c,name='ufo_obsdb_nobs_f90')
 implicit none
 integer(c_int), intent(in) :: c_key_self
 integer(c_int), intent(in) :: lreq
 character(kind=c_char,len=1), intent(in) :: c_req(lreq+1)
 integer(c_int), intent(inout) :: kobs
 
-end subroutine obs_nobs
+end subroutine ufo_obsdb_nobs_c
 
 ! ------------------------------------------------------------------------------
 
@@ -332,7 +313,7 @@ end subroutine obs_create
 subroutine obs_read(self)
 use ncd_kinds, only: i_kind
 implicit none
-character(len=*),parameter :: myname_ =myname//"*obs_read"
+character(len=*),parameter :: myname_ ="ufo_obs_data:obs_read"
 type(obs_data), intent(inout) :: self
 !integer :: iin, icol, jo, jc, jg, ncol
 integer(i_kind) :: ier
@@ -366,6 +347,7 @@ do while (ier .ge. 0)
    self%nobs = self%nobs + 1
 enddo
 print *, myname_, ' Total number of observations in file: ', self%nobs
+call nc_diag_read_close(filename=ncfname)
 end subroutine obs_read
 
 ! ------------------------------------------------------------------------------
@@ -410,6 +392,95 @@ do while (associated(find))
 enddo
 
 end subroutine findcolumn
+
+! ------------------------------------------------------------------------------
+subroutine ufo_obsdb_setup_c(c_key_self, c_conf) bind(c,name='ufo_obsdb_setup_f90')
+implicit none
+integer(c_int), intent(inout) :: c_key_self
+type(c_ptr), intent(in)    :: c_conf !< configuration
+
+type(obs_data), pointer :: self
+character(len=max_string) :: fin, fout
+character(len=max_string+30) :: record
+
+if (config_element_exists(c_conf,"ObsData.ObsDataIn")) then
+  fin  = config_get_string(c_conf,max_string,"ObsData.ObsDataIn.obsfile")
+else
+  fin  = ""
+endif
+write(record,*)'ufo_obsdb_setup_c: file in =',trim(fin)
+call fckit_log%info(record)
+
+!fout = config_get_string(c_conf,max_string,"ObsData.ObsDataOut.obsfile")
+!write(record,*)'ufo_obsdb_setup_c: file out=',trim(fout)
+!call fckit_log%info(record)
+fout = ""
+
+call obs_data_registry%init()
+call obs_data_registry%add(c_key_self)
+call obs_data_registry%get(c_key_self, self)
+call obs_setup(trim(fin), trim(fout), self)
+
+end subroutine ufo_obsdb_setup_c
+
+! ------------------------------------------------------------------------------
+
+subroutine ufo_obsdb_delete_c(c_key_self) bind(c,name='ufo_obsdb_delete_f90')
+implicit none
+integer(c_int), intent(inout) :: c_key_self
+type(obs_data), pointer :: self
+
+call obs_data_registry%get(c_key_self, self)
+call obs_delete(self)
+call obs_data_registry%remove(c_key_self)
+
+end subroutine ufo_obsdb_delete_c
+
+! ------------------------------------------------------------------------------
+
+subroutine ufo_obsdb_get_c(c_key_self, lreq, c_req, lcol, c_col, c_key_ovec) bind(c,name='ufo_obsdb_get_f90')
+implicit none
+integer(c_int), intent(in) :: c_key_self
+integer(c_int), intent(in) :: lreq, lcol
+character(kind=c_char,len=1), intent(in) :: c_req(lreq+1), c_col(lcol+1)
+integer(c_int), intent(in) :: c_key_ovec
+
+type(obs_data), pointer :: self
+type(obs_vect), pointer :: ovec
+character(len=lreq) :: req
+character(len=lcol) :: col
+
+call obs_data_registry%get(c_key_self, self)
+call ufo_obs_vect_registry%get(c_key_ovec,ovec)
+call c_f_string(c_req, req)
+call c_f_string(c_col, col)
+
+call obs_get(self, trim(req), trim(col), ovec)
+
+end subroutine ufo_obsdb_get_c
+
+! ------------------------------------------------------------------------------
+
+subroutine ufo_obsdb_put_c(c_key_self, lreq, c_req, lcol, c_col, c_key_ovec) bind(c,name='ufo_obsdb_put_f90')
+implicit none
+integer(c_int), intent(in) :: c_key_self
+integer(c_int), intent(in) :: lreq, lcol
+character(kind=c_char,len=1), intent(in) :: c_req(lreq+1), c_col(lcol+1)
+integer(c_int), intent(in) :: c_key_ovec
+
+type(obs_data), pointer :: self
+type(obs_vect), pointer :: ovec
+character(len=lreq) :: req
+character(len=lcol) :: col
+
+call obs_data_registry%get(c_key_self, self)
+call ufo_obs_vect_registry%get(c_key_ovec,ovec)
+call c_f_string(c_req, req)
+call c_f_string(c_col, col)
+
+call obs_put(self, trim(req), trim(col), ovec)
+
+end subroutine ufo_obsdb_put_c
 
 ! ------------------------------------------------------------------------------
 

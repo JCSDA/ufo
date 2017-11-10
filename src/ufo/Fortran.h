@@ -46,7 +46,7 @@ extern "C" {
 // -----------------------------------------------------------------------------
   void ufo_var_create_f90(int & keyVars, const eckit::Configuration * const *);
   void ufo_var_clone_f90(const int & keyVars, int & keyVars_other);
-  void ufo_var_info_f90(const int & keyVars, int &, int &);
+  void ufo_var_info_f90(const int & keyVars, int &);
   void ufo_var_delete_f90(int & keyVars);
 
 // -----------------------------------------------------------------------------

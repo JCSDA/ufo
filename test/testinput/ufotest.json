@@ -2,17 +2,23 @@
   "test_framework_runtime_config": "--log_level=test_suite",
   "window_begin": "2010-01-01T00:00:00Z",
   "window_end": "2010-01-02T00:00:00Z",
-  "Variables": {},
+  "Variables": {
+     "nvars": "1",
+     "variables": "testvar"
+  },
   "Observations": {
     "ObsTypes": [{
-      "ObsType": "AMSUA",
+      "ObsType": "WindSpeed",
       "ObsData": {
         "ObsDataIn": {
-          "obsfile": "/home/rtodling/discover/nc_4emily.diag_amsua_n15_ges.20161202_00z.nc4"
+          "obsfile": "Data/amsua_n19_wprofiles.nc4"
         }
       },
       "GeoVaLs": {
-        "norm": "1.0"
+        "norm": "27687.134048",
+        "nvars": "4",
+        "variables": "t prse u v",
+        "filename": "Data/amsua_n19_wprofiles.gv.nc4"
       },
       "rmsequiv": "1.0"
     }]
