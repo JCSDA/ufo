@@ -17,7 +17,7 @@ public :: ufo_vars_registry, ufo_vars_readconfig
 public :: ufo_vars_getindex
 public :: MAXVARLEN
 
-integer, parameter :: MAXVARLEN=8
+integer, parameter :: MAXVARLEN=24
 ! ------------------------------------------------------------------------------
 
 !> Fortran derived type to represent QG model variables
@@ -76,7 +76,7 @@ implicit none
 type(ufo_vars), intent(inout) :: self
 type(c_ptr), intent(in)    :: c_conf
 
-character(len=256) :: svars
+character(len=512) :: svars
 
 self%nv = config_get_int(c_conf, "nvars")
 svars = config_get_string(c_conf,len(svars),"variables")

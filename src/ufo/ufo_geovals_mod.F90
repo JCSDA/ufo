@@ -238,43 +238,131 @@ end subroutine ufo_geovals_minmaxavg_c
 subroutine ufo_geovals_read_file_c(c_key_self, c_conf) bind(c,name='ufo_geovals_read_file_f90')
 use config_mod
 use fckit_log_module, only : fckit_log
+use nc_diag_read_mod, only: nc_diag_read_get_var,  nc_diag_read_get_global_attr
+use nc_diag_read_mod, only: nc_diag_read_get_dim
+use nc_diag_read_mod, only: nc_diag_read_init, nc_diag_read_close
+
 implicit none
 integer(c_int), intent(in) :: c_key_self
 type(c_ptr), intent(in)    :: c_conf
 
 type(ufo_geovals), pointer :: self
+
+integer :: nvar_prof, nvar_surf
+integer :: it, iwv, ipr, iprl, ioz
+
 character(128) :: filename
-integer :: i, j
-integer, allocatable :: nlen(:)
-type(ufo_geoval) :: geoval
-character(MAXVARLEN) :: varname
+
+integer :: iunit
+integer :: nobs, nsig, nsig_plus_one
+
+real, allocatable :: field(:,:)
+real, allocatable :: field1d(:)
+integer :: iobs, ivar, nval
+!type(ufo_geoval) :: geoval
+!character(MAXVARLEN) :: varname
 
 call ufo_geovals_registry%get(c_key_self, self)
+
+! variables hardcoded for the CRTM
+nvar_prof = 5
+it = 1; iwv = 2; ipr = 3; iprl = 4; ioz = 5 ! indices of vars
+nvar_surf = 0;
+
+! allocate and fill in variables
+self%nvar = nvar_prof + nvar_surf
+self%variables%nv = self%nvar
+allocate(self%variables%fldnames(nvar))
+self%variables%fldnames(it)   = 'Temperature'
+self%variables%fldnames(iwv)  = 'Water vapor'
+self%variables%fldnames(ipr)  = 'Pressure'
+self%variables%fldnames(iprl) = 'Level pressure'
+self%variables%fldnames(ioz)  = 'Ozone'
 
 ! read filename for config
 filename = config_get_string(c_conf,len(filename),"filename")
 
-call ufo_vars_readconfig(self%variables, c_conf)
+call nc_diag_read_init(filename, iunit)
+nobs = nc_diag_read_get_dim(iunit,'nobs')
+nsig = nc_diag_read_get_dim(iunit,'nsig')
+nsig_plus_one = nc_diag_read_get_dim(iunit,'nsig_plus_one')
 
-self%nobs=1
-self%nvar=self%variables%nv
-
+! allocate geovals structure TODO: need to clean it first!
+self%nobs = nobs
 allocate(self%geovals(self%nvar,self%nobs))
-
 self%lalloc = .true.
 
-allocate(nlen(self%nvar))
-nlen(:) = 1
-do i = 1, self%nvar
-  do j = 1, self%nobs
-    self%geovals(i,j)%nvals = nlen(i)
-    allocate(self%geovals(i,j)%vals(nlen(i)))
-    self%geovals(i,j)%vals(:) = i
+! read temperature
+nval = nsig; ivar = it
+allocate(field(nval, nobs))
+call nc_diag_read_get_var(iunit, 'tvp', field)
+do iobs = 1, nobs
+  self%geovals(ivar,iobs)%nval = nval
+  allocate(self%geovals(ivar,i)%vals(nval))
+  self%geovals(ivar,iobs)%vals = field(:,iobs)
+enddo
+deallocate(field)
+
+! read water vapor (humidity)
+nval = nsig; ivar = iwv
+allocate(field(nval, nobs))
+call nc_diag_read_get_var(iunit, 'tvq', field)
+do iobs = 1, nobs
+  self%geovals(ivar,iobs)%nval = nval
+  allocate(self%geovals(ivar,iobs)%vals(nval))
+  self%geovals(ivar,iobs)%vals = 1000.*field(:,iobs)/(1.-field(:,iobs))
+enddo
+deallocate(field)
+
+! read pressure
+nval = nsig; ivar = ipr
+allocate(field(nval, nobs))
+call nc_diag_read_get_var(iunit, 'prsltmp', field)
+do iobs = 1, nobs
+  self%geovals(ivar,iobs)%nval = nval
+  allocate(self%geovals(ivar,iobs)%vals(nval))
+  self%geovals(ivar,iobs)%vals = 10.*field(:,iobs)
+enddo
+deallocate(field)
+
+! read level pressure
+nval = nsig_plus_one; ivar = iprl
+allocate(field(nval, nobs))
+call nc_diag_read_get_var(iunit, 'prsitmp', field)
+do iobs = 1, nobs
+  self%geovals(ivar,iobs)%nval = nval
+  allocate(self%geovals(ivar,iobs)%vals(nval))
+  self%geovals(ivar,iobs)%vals = 10.*field(:,iobs)
+enddo
+deallocate(field)
+
+! read ozone
+nval = nsig; ivar = ioz
+allocate(field(nval, nobs))
+call nc_diag_read_get_var(iunit, 'poz', field)
+do iobs = 1, nobs
+  self%geovals(ivar,iobs)%nval = nval
+  allocate(self%geovals(ivar,iobs)%vals(nval))
+  self%geovals(ivar,iobs)%vals = field(:,iobs)
+enddo
+deallocate(field)
+
+! read surface stuff
+nval = 1
+allocate(field1d(nobs))
+do ivar = nvar_prof+1:nvar_prof+nvar_surf
+  call nc_diag_read_get_var(iunit, self%variables%fldnames(ivar), field1d)
+  do iobs = 1, nobs
+    self%geovals(ivar,iobs)%nval = nval
+    allocate(self%geovals(ivar,iobs)%vals(nval))
+    self%geovals(ivar,iobs)%vals(1) = field1(iobs)
   enddo
 enddo
-deallocate(nlen)
+deallocate(field1d)
 
 self%linit = .true.
+
+call nc_diag_read_close(filename)
 
 !varname = 'u'
 !call ufo_geovals_get_var(self, 1, varname, geoval)
