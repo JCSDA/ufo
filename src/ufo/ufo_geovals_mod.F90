@@ -255,9 +255,10 @@ call ufo_vars_registry%get(c_key_vars, vars)
 
 ! read filename for config
 filename = config_get_string(c_conf,len(filename),"filename")
-
 ! ugly copy of vars. TODO: redo (have an assignment(=) for type(ufo_vars)?
 self%variables%nv = vars%nv
+! even more ugly to make the test pass: only do the rest if the passed nvar > 0
+if (vars%nv > 0) then
 allocate(self%variables%fldnames(self%variables%nv))
 self%variables%fldnames(:) = vars%fldnames(:)
 
@@ -289,6 +290,9 @@ self%linit = .true.
 !varname = 'prse'
 !call ufo_geovals_get_var(self, 1, varname, geoval)
 !print *, 'geoval test: ', geoval%nvals, geoval%vals
+
+endif
+
 end subroutine ufo_geovals_read_file_c
 
 ! ------------------------------------------------------------------------------
