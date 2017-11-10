@@ -11,7 +11,7 @@ use read_diag, only: read_radiag_data,&
                      diag_data_fix_list,&
                      diag_data_extra_list,&
                      diag_data_chan_list
-use nc_diag_read_mod, only: nc_diag_read_init
+use nc_diag_read_mod, only: nc_diag_read_init, nc_diag_read_close
 
 implicit none
 character(len=*), parameter :: myname='ut_NCrad'
@@ -62,6 +62,7 @@ enddo
 print*, myname, ': Found this many channels: ', header_fix%nchan
 print*, myname, ': Observation type in file: ', header_fix%obstype
 print*, myname, ': Date of input file:       ', header_fix%idate
+call nc_diag_read_close(filename=ncfname)
 
 close(luin)
 end program ut_NCrad
