@@ -13,7 +13,7 @@
         "norm": "1.0",
         "nvars": "4",
         "variables": "t prse u v",
-        "filename": "amsua_n19_wprofiles.nc4"
+        "filename": "/jedi/test/ufo/amsua_n19_wprofiles.nc4"
       },
       "rmsequiv": "1.0"
     }]
