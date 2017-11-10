@@ -1,3 +1,5 @@
+include_directories( ${CMAKE_CURRENT_SOURCE_DIR} )
+
 list( APPEND lib_files
 ncd_kinds.F90
 m_diag_conv.f90
@@ -48,7 +50,7 @@ netcdf_unlimdims.F90
 read_diag.f90
 )
 
-ecbuild_add_library( TARGET     ncdiag
+ecbuild_add_library( TARGET     ioda
                      SOURCES    ${lib_files}
                      LIBS       ${NETCDF_LIBRARIES}
                      INSTALL_HEADERS LISTED
@@ -56,31 +58,31 @@ ecbuild_add_library( TARGET     ncdiag
 
 ecbuild_add_executable( TARGET  gsidiag_bin2txt.x
                         SOURCES gsidiag_bin2txt.f90
-                        LIBS    ncdiag
+                        LIBS    ioda
                       )
 
 ecbuild_add_executable( TARGET  gsidiag_conv_bin2nc4.x
                         SOURCES gsidiag_conv_bin2nc4.f90
-                        LIBS    ncdiag
+                        LIBS    ioda
                       )
 
 ecbuild_add_executable( TARGET  gsidiag_rad_bin2nc4.x
                         SOURCES gsidiag_rad_bin2nc4.f90
-                        LIBS    ncdiag
+                        LIBS    ioda
                       )
 
 ecbuild_add_executable( TARGET  nc_diag_cat.x
                         SOURCES nc_diag_cat.F90
-                        LIBS    ncdiag
+                        LIBS    ioda
                       )
 
 ecbuild_add_executable( TARGET  test_nc_unlimdims.x
                         SOURCES test_nc_unlimdims.F90
-                        LIBS    ncdiag
+                        LIBS    ioda
                       )
 
 ecbuild_add_executable( TARGET  ut_ncrad.x
                         SOURCES ut_ncrad.F90
-                        LIBS    ncdiag
+                        LIBS    ioda
                       )
 
