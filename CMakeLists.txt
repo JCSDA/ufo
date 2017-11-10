@@ -37,15 +37,19 @@ find_package( Boost ${Boost_MINIMUM_VERSION} REQUIRED
               COMPONENTS unit_test_framework )
 include_directories( ${Boost_INCLUDE_DIR} )
 
+# ioda
+ecbuild_use_package( PROJECT ioda VERSION 0.1.0 REQUIRED )
+include_directories( ${IODA_INCLUDE_DIRS} )
+
 # oops
-ecbuild_use_package( PROJECT oops VERSION 0.1.0 REQUIRED )
+ecbuild_use_package( PROJECT oops VERSION 0.2.1 REQUIRED )
 include_directories( ${OOPS_INCLUDE_DIRS} )
 
 ################################################################################
 # Export package info
 ################################################################################
 
-list( APPEND UFO_TPLS oops )
+list( APPEND UFO_TPLS ioda oops )
 
 foreach( _tpl ${UFO_TPLS} )
   string( TOUPPER ${_tpl} TPL )
