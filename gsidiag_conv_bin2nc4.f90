@@ -1,6 +1,6 @@
 program convert_and_split_conv_diag
 
-   use kinds
+   use ncd_kinds
    use m_diag_conv
 
    integer nargs, iargc, n

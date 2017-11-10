@@ -58,7 +58,7 @@ module ncdw_ciresize
     ! Load our numerical types from kinds
     ! Note that i_llong is not a type we store - it's just for keeping
     ! track of numeric indexes. (Maybe this is too excessive...)
-    use kinds, only: i_byte, i_short, i_long, i_llong, r_single, &
+    use ncd_kinds, only: i_byte, i_short, i_long, i_llong, r_single, &
         r_double
     
     ! Load state variables! We just need to know:

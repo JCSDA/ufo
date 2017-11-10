@@ -1,5 +1,5 @@
 module ncdr_realloc_mod
-    use kinds, only: i_byte, i_short, i_long, r_single, r_double
+    use ncd_kinds, only: i_byte, i_short, i_long, r_single, r_double
     use ncdr_types, only: ncdr_file
     
     implicit none

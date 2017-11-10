@@ -1,5 +1,5 @@
 program test_nc_unlimdims
-    use kinds, only: i_long
+    use ncd_kinds, only: i_long
     use ncdc_state, only: prgm_name, cli_arg_count, input_file, &
         ncid_input, num_unlims
     use ncdc_climsg, only: ncdc_error, ncdc_info, ncdc_check

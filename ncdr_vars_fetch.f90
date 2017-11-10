@@ -1,5 +1,5 @@
 module ncdr_vars_fetch
-    use kinds, only: i_byte, i_short, i_long, r_single, r_double
+    use ncd_kinds, only: i_byte, i_short, i_long, r_single, r_double
     use ncdr_state, only: ncdr_files, current_ncdr_id
     use ncdr_check, only: ncdr_nc_check, ncdr_check_ncdr_id, &
         ncdr_check_current_ncdr_id, ncdr_check_ncid

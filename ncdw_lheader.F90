@@ -1,5 +1,5 @@
 module ncdw_lheader
-    use kinds, only: i_byte, i_short, i_long, r_single, r_double
+    use ncd_kinds, only: i_byte, i_short, i_long, r_single, r_double
     use ncdw_state, only: ncid, init_done
     use ncdw_climsg, only: nclayer_error, nclayer_check
     use netcdf, only: nf90_put_att, NF90_GLOBAL

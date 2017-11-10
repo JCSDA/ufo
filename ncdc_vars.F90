@@ -1,5 +1,5 @@
 module ncdc_vars
-    use kinds, only: i_long
+    use ncd_kinds, only: i_long
     use ncdc_state, only: var_names, var_types, var_output_ids, &
         var_counters, var_hasunlim, var_dim_names, var_arr_total, &
         var_arr_size

@@ -52,7 +52,7 @@ module ncdw_climsg
     
     ! Load our numerical types from kinds - we just need our standard
     ! integer type, i_long
-    use kinds, only: i_long
+    use ncd_kinds, only: i_long
     
     use netcdf, only: nf90_noerr, nf90_strerror
     

@@ -1,5 +1,5 @@
 module ncdw_mresize
-    use kinds, only: i_byte, i_short, i_long, i_llong, r_single, &
+    use ncd_kinds, only: i_byte, i_short, i_long, i_llong, r_single, &
         r_double
     use ncdw_state, only: diag_metadata_store
     use ncdw_types, only: diag_md_iarr, NLAYER_DEFAULT_ENT, &

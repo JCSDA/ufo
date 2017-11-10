@@ -1,5 +1,5 @@
 module ncdc_state
-    use kinds, only: i_long
+    use ncd_kinds, only: i_long
     use ncdc_types, only: nc_diag_cat_dim_names, data_blob
     
     implicit none

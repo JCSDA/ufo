@@ -1,5 +1,5 @@
 module ncdc_realloc
-    use kinds, only: i_byte, i_short, i_long, r_single, r_double
+    use ncd_kinds, only: i_byte, i_short, i_long, r_single, r_double
     use ncdc_types, only: nc_diag_cat_dim_names
     
     implicit none

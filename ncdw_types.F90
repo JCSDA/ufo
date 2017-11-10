@@ -1,5 +1,5 @@
 module ncdw_types
-    use kinds, only: i_byte, i_short, i_long, i_llong, &
+    use ncd_kinds, only: i_byte, i_short, i_long, i_llong, &
         r_single, r_double
     use netcdf, only: NF90_FILL_BYTE, NF90_FILL_SHORT, NF90_FILL_INT, &
         NF90_FILL_FLOAT, NF90_FILL_DOUBLE, NF90_FILL_CHAR

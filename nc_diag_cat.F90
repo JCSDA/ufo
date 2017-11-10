@@ -1,5 +1,5 @@
 program nc_diag_cat
-    use kinds, only: r_double
+    use ncd_kinds, only: r_double
     use ncdc_climsg, only: ncdc_info, ncdc_warning, ncdc_error, &
         ncdc_check
     use ncdc_cli_process, only: nc_diag_cat_process_args

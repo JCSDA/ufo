@@ -166,7 +166,7 @@ module ncdw_data2d
     !   efficiently!
     ! 
     
-    use kinds, only: i_byte, i_short, i_long, i_llong, r_single, &
+    use ncd_kinds, only: i_byte, i_short, i_long, i_llong, r_single, &
         r_double
     use ncdw_state, only: init_done, append_only, ncid, &
         enable_trim, &

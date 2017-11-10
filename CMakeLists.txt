@@ -1,5 +1,5 @@
 list( APPEND lib_files
-kinds.F90
+ncd_kinds.F90
 m_diag_conv.f90
 nc_diag_fson.f90
 nc_diag_read_mod.F90

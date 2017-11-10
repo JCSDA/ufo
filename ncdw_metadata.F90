@@ -124,7 +124,7 @@ module ncdw_metadata
     !         reallocation when adding more elements.
     ! 
     
-    use kinds, only: i_byte, i_short, i_long, i_llong, r_single, &
+    use ncd_kinds, only: i_byte, i_short, i_long, i_llong, r_single, &
         r_double
     use ncdw_state, only: init_done, ncid, append_only, &
         enable_trim, &

@@ -1,6 +1,6 @@
 program ut_NCrad
 
-use kinds, only : i_kind
+use ncd_kinds, only : i_kind
 use read_diag, only: set_radiag,&
                      diag_header_fix_list,&
                      diag_header_chan_list,&

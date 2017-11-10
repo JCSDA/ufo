@@ -1,5 +1,5 @@
 module nc_diag_read_mod
-    use kinds, only: i_long
+    use ncd_kinds, only: i_long
     use ncdr_state, only: ncdr_files, ncdr_file_count, &
         ncdr_file_total, ncdr_file_highest, ncdr_id_stack, &
         current_ncdr_id, ncdr_id_stack_count, ncdr_id_stack_size, &

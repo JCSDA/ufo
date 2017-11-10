@@ -1,5 +1,5 @@
 module ncdc_types
-    use kinds, only: i_byte, i_short, i_long, r_single, r_double
+    use ncd_kinds, only: i_byte, i_short, i_long, r_single, r_double
     
     implicit none
     

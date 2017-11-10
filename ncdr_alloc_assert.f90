@@ -4,7 +4,7 @@ module ncdr_alloc_assert
     ! 
     ! Other parts include just assertion functions (e.g. asserting
     ! that a variable exists).
-    use kinds, only: i_byte, i_short, i_long, r_single, r_double
+    use ncd_kinds, only: i_byte, i_short, i_long, r_single, r_double
     use ncdr_state, only: ncdr_files, current_ncdr_id
     use ncdr_climsg, only: ncdr_error
     use ncdr_check, only: ncdr_nc_check, ncdr_check_ncdr_id, &

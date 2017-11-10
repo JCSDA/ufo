@@ -1,5 +1,5 @@
 module ncdw_state
-    use kinds, only: i_long
+    use ncd_kinds, only: i_long
     use ncdw_types, only: diag_chaninfo, diag_metadata, &
         diag_data2d, diag_varattr
     

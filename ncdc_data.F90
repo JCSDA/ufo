@@ -1,5 +1,5 @@
 module ncdc_data
-    use kinds, only: i_byte, i_short, i_long, r_single, r_double
+    use ncd_kinds, only: i_byte, i_short, i_long, r_single, r_double
     
     use ncdc_state, only: prgm_name, cli_arg_count, input_count, &
         input_file, output_file,  ncid_input, &

@@ -1,5 +1,5 @@
 module ncdc_metadata
-    use kinds, only: i_byte, i_short, i_long, r_single, r_double
+    use ncd_kinds, only: i_byte, i_short, i_long, r_single, r_double
     use ncdc_state, only: ncid_input, input_count, input_file, &
         ncid_output, output_file, &
         num_unlims, &

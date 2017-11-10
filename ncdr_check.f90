@@ -1,5 +1,5 @@
 module ncdr_check
-    use kinds, only: i_long
+    use ncd_kinds, only: i_long
     use ncdr_climsg, only: ncdr_error
     use ncdr_state, only: ncdr_files, current_ncdr_id, ncdr_file_count
     use netcdf, only: nf90_noerr, nf90_strerror, nf90_inquire, &

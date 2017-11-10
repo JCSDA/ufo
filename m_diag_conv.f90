@@ -1,5 +1,5 @@
 module m_diag_conv
-  use kinds, only:  i_kind,r_single,r_kind
+  use ncd_kinds, only:  i_kind,r_single,r_kind
   use nc_diag_write_mod, only: nc_diag_init, nc_diag_metadata, nc_diag_write
 
 

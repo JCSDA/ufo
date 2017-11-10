@@ -1,5 +1,5 @@
 module ncdc_climsg
-    use kinds, only: i_long
+    use ncd_kinds, only: i_long
     use netcdf, only: nf90_noerr, nf90_strerror
     
 #ifdef USE_MPI

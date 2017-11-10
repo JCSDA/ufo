@@ -1,5 +1,5 @@
 module ncdr_attrs
-    use kinds, only: i_long
+    use ncd_kinds, only: i_long
     use ncdr_state, only: ncdr_files, current_ncdr_id
     use ncdr_climsg, only: ncdr_error
     use ncdr_check, only: ncdr_nc_check, ncdr_check_ncdr_id, &

@@ -35,7 +35,7 @@
 
 module read_diag
 
-  use kinds, only:  i_kind,r_single,r_kind
+  use ncd_kinds, only:  i_kind,r_single,r_kind
   use nc_diag_read_mod, only: nc_diag_read_get_var,  nc_diag_read_get_global_attr
   use ncdr_dims, only: nc_diag_read_get_dim
   implicit none

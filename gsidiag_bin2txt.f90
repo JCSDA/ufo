@@ -3,7 +3,7 @@ program gsidiag_bin2txt
   use nc_diag_read_mod,only: nc_diag_read_init
   use read_diag,only:read_radiag_header, diag_header_fix_list, diag_header_chan_list, diag_data_name_list
   use read_diag,only:read_radiag_data, diag_data_fix_list, diag_data_extra_list, diag_data_chan_list, set_netcdf_read
-  use kinds,only: r_quad, r_single
+  use ncd_kinds,only: r_quad, r_single
 
   implicit none 
 
@@ -385,7 +385,7 @@ program gsidiag_bin2txt
 end program gsidiag_bin2txt
 
 subroutine inc_var(x,arr)
-  use kinds,only: r_quad, r_single
+  use ncd_kinds,only: r_quad, r_single
 
   real(r_single)           ,intent(in)    :: x
   real(r_quad),dimension(4),intent(inout) :: arr
@@ -398,7 +398,7 @@ subroutine inc_var(x,arr)
 end subroutine inc_var
 
 real(r_quad) function ret_var(arr)
-  use kinds,only: r_quad
+  use ncd_kinds,only: r_quad
 
   real(r_quad),dimension(4),intent(in)  :: arr
 
@@ -407,7 +407,7 @@ real(r_quad) function ret_var(arr)
 end function ret_var
 
 real(r_quad) function ret_stddev(arr)
-  use kinds,only: r_quad
+  use ncd_kinds,only: r_quad
 
   real(r_quad),dimension(4),intent(in)  :: arr
 

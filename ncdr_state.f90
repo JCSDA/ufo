@@ -1,5 +1,5 @@
 module ncdr_state
-    use kinds, only: i_long, i_short
+    use ncd_kinds, only: i_long, i_short
     use ncdr_types, only: ncdr_file
     
     implicit none

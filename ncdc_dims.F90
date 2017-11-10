@@ -1,5 +1,5 @@
 module ncdc_dims
-    use kinds, only: i_long
+    use ncd_kinds, only: i_long
     use ncdc_state, only: dim_names, dim_sizes, dim_unlim_sizes, &
         dim_counters, dim_output_ids, dim_arr_total, dim_arr_size
     use ncdc_realloc, only: nc_diag_realloc

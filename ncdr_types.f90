@@ -1,5 +1,5 @@
 module ncdr_types
-    use kinds, only: i_long
+    use ncd_kinds, only: i_long
     
     implicit none
     
