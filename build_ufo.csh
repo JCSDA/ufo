@@ -1,7 +1,7 @@
 #!/bin/csh -f
 
 #User defined stuff
-setenv BASE "/home/gvernier/Sandboxes/codesprint-ufo/jedi/"
+setenv BASE "/home/vagrant/jedi/"
 
 #All codes and builds
 setenv ALLSRC ${BASE}"code/"
@@ -16,9 +16,9 @@ setenv UFO_BUILD ${ALLBUILDS}"ufo/"
 setenv OOPS_BUILD ${ALLBUILDS}"oops/" 
 
 #Point Env. var. to CRTM build ...
-setenv CRTM_PATH ${BASE}/code/crtm-release/libsrc/
-setenv CRTM_LIBRARIES ${BASE}/code/crtm-release/libsrc/libcrtm.a
-setenv CRTM_INCLUDE ${BASE}/code/crtm-release/libsrc/
+setenv CRTM_PATH ${BASE}/code/crtm/libsrc/
+setenv CRTM_LIBRARIES ${BASE}/code/crtm/libsrc/libcrtm.a
+setenv CRTM_INCLUDE ${BASE}/code/crtm/libsrc/
 
 #CLEAN BUILD
 rm -rf ${UFO_BUILD}
