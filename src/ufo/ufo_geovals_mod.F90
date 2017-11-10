@@ -8,13 +8,15 @@ module ufo_geovals_mod
 
 use iso_c_binding
 use ufo_vars_mod
-use kinds
 
 implicit none
 private
-public :: ufo_geovals, ufo_geovals_setup
+public :: ufo_geovals
 public :: ufo_geovals_registry
-
+public :: ufo_geovals_setup, ufo_geovals_zero
+public :: ufo_geovals_random, ufo_geovals_dotprod
+public :: ufo_geovals_minmaxavg, ufo_geovals_read_netcdf
+public :: ufo_geovals_delete
 ! ------------------------------------------------------------------------------
 
 !> type to hold interpolated field for one variable, one observation
@@ -57,24 +59,6 @@ contains
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_geovals_create_c(c_key_self) bind(c,name='ufo_geovals_create_f90')
-
-implicit none
-integer(c_int), intent(inout) :: c_key_self
-
-type(ufo_geovals), pointer :: self
-
-call ufo_geovals_registry%init()
-call ufo_geovals_registry%add(c_key_self)
-call ufo_geovals_registry%get(c_key_self, self)
-
-self%lalloc = .false.
-self%linit  = .false.
-
-end subroutine ufo_geovals_create_c
-
-
-! ------------------------------------------------------------------------------
 subroutine ufo_geovals_setup(self, vars, nobs)
 implicit none
 type(ufo_geovals), intent(inout) :: self
@@ -118,22 +102,6 @@ endif
 end subroutine ufo_geovals_delete
 
 ! ------------------------------------------------------------------------------
-subroutine ufo_geovals_delete_c(c_key_self) bind(c,name='ufo_geovals_delete_f90')
-
-implicit none
-integer(c_int), intent(inout) :: c_key_self
-
-type(ufo_geovals), pointer :: self
-
-call ufo_geovals_registry%get(c_key_self, self)
-
-call ufo_geovals_delete(self)
-
-call ufo_geovals_registry%remove(c_key_self)
-
-end subroutine ufo_geovals_delete_c
-
-! ------------------------------------------------------------------------------
 
 logical function ufo_geovals_get_var(self, iobs, varname, geoval)
 implicit none
@@ -160,13 +128,10 @@ end function ufo_geovals_get_var
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_geovals_zero_c(c_key_self) bind(c,name='ufo_geovals_zero_f90')
+subroutine ufo_geovals_zero(self) 
 implicit none
-integer(c_int), intent(in) :: c_key_self
-type(ufo_geovals), pointer :: self
+type(ufo_geovals), intent(inout) :: self
 integer :: i, j
-
-call ufo_geovals_registry%get(c_key_self, self)
 
 if (.not. self%lalloc) then
   call abor1_ftn("ufo_geovals_zero: geovals not allocated")
@@ -183,21 +148,17 @@ if (.not. self%linit) then
 endif
 do i = 1, self%nvar
   do j = 1, self%nobs
-    self%geovals(i,j)%vals = 0.0_kind_real
+    self%geovals(i,j)%vals = 0.0
   enddo
 enddo
-end subroutine ufo_geovals_zero_c
+end subroutine ufo_geovals_zero
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_geovals_random_c(c_key_self) bind(c,name='ufo_geovals_random_f90')
-use random_vectors_mod
+subroutine ufo_geovals_random(self) 
 implicit none
-integer(c_int), intent(in) :: c_key_self
-type(ufo_geovals), pointer :: self
+type(ufo_geovals), intent(inout) :: self
 integer :: i, j
-
-call ufo_geovals_registry%get(c_key_self, self)
 
 if (.not. self%lalloc) then
   call abor1_ftn("ufo_geovals_random: geovals not allocated")
@@ -214,73 +175,65 @@ if (.not. self%linit) then
 endif
 do i = 1, self%nvar
   do j = 1, self%nobs
-    self%geovals(i,j)%vals = 1.0_kind_real
+    self%geovals(i,j)%vals = 1.0
   enddo
 enddo
 
-end subroutine ufo_geovals_random_c
+end subroutine ufo_geovals_random
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_geovals_dotprod_c(c_key_self, c_key_other, prod) bind(c,name='ufo_geovals_dotprod_f90')
+subroutine ufo_geovals_dotprod(self, other, prod) 
 implicit none
-integer(c_int), intent(in) :: c_key_self, c_key_other
 real(c_double), intent(inout) :: prod
-type(ufo_geovals), pointer :: self, other
+type(ufo_geovals), intent(in) :: self, other
 integer :: jo
-
-call ufo_geovals_registry%get(c_key_self, self)
-call ufo_geovals_registry%get(c_key_other, other)
 
 if (.not. self%lalloc .or. .not. self%linit) then
   call abor1_ftn("ufo_geovals_dotprod: geovals not allocated")
 endif
 
-prod=0.0_kind_real
+if (.not. other%lalloc .or. .not. other%linit) then
+  call abor1_ftn("ufo_geovals_dotprod: geovals not allocated")
+endif
+
+prod=0.0
 do jo=1,self%nobs
   prod=prod+self%geovals(1,jo)%vals(1)*other%geovals(1,jo)%vals(1)
 enddo
 
-end subroutine ufo_geovals_dotprod_c
+end subroutine ufo_geovals_dotprod
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_geovals_minmaxavg_c(c_key_self, kobs, pmin, pmax, prms) bind(c,name='ufo_geovals_minmaxavg_f90')
+subroutine ufo_geovals_minmaxavg(self, kobs, pmin, pmax, prms) 
 implicit none
-integer(c_int), intent(in) :: c_key_self
 integer(c_int), intent(inout) :: kobs
 real(c_double), intent(inout) :: pmin, pmax, prms
-type(ufo_geovals), pointer :: self
-
-call ufo_geovals_registry%get(c_key_self, self)
+type(ufo_geovals), intent(in) :: self
 
 kobs = self%nobs
 pmin=0. !minval(self%values(:,:))
 pmax=0. !maxval(self%values(:,:))
 prms=0. !sqrt(sum(self%values(:,:)**2)/real(self%nobs*self%nvar,kind_real))
 
-end subroutine ufo_geovals_minmaxavg_c
+end subroutine ufo_geovals_minmaxavg
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_geovals_read_file_c(c_key_self, c_conf) bind(c,name='ufo_geovals_read_file_f90')
-use config_mod
-use fckit_log_module, only : fckit_log
-use nc_diag_read_mod, only: nc_diag_read_get_var,  nc_diag_read_get_global_attr
+subroutine ufo_geovals_read_netcdf(self, filename)
+use nc_diag_read_mod, only: nc_diag_read_get_var
 use nc_diag_read_mod, only: nc_diag_read_get_dim
 use nc_diag_read_mod, only: nc_diag_read_init, nc_diag_read_close
 
 implicit none
-integer(c_int), intent(in) :: c_key_self
-type(c_ptr), intent(in)    :: c_conf
+type(ufo_geovals), intent(inout) :: self
+character(128), intent(in)       :: filename
 
-type(ufo_geovals), pointer :: self
 type(ufo_vars) :: vars
 
 integer :: nvar_prof, nvar_surf_real, nvar_surf_int
 integer :: it, iwv, ipr, iprl, ioz
-
-character(128) :: filename
 
 integer :: iunit
 integer :: nobs, nsig, nsig_plus_one
@@ -293,8 +246,6 @@ integer :: iobs, ivar, nval
 type(ufo_geoval) :: geoval
 character(MAXVARLEN) :: varname
 logical :: lfound
-
-call ufo_geovals_registry%get(c_key_self, self)
 
 ! variables hardcoded for the CRTM
 nvar_prof = 5
@@ -324,15 +275,13 @@ vars%fldnames(nvar_prof+8) = 'Snow_Temperature'
 vars%fldnames(nvar_prof+9) = 'Vegetation_Fraction'
 vars%fldnames(nvar_prof+nvar_surf_real+1) = 'Land_Type_Index' ! int!!!
 
-! read filename for config
-filename = config_get_string(c_conf,len(filename),"filename")
-
+! open netcdf file and read dimensions
 call nc_diag_read_init(filename, iunit)
 nobs = nc_diag_read_get_dim(iunit,'nobs')
 nsig = nc_diag_read_get_dim(iunit,'nsig')
 nsig_plus_one = nc_diag_read_get_dim(iunit,'nsig_plus_one')
 
-! allocate geovals structure TODO: need to clean it first!
+! allocate geovals structure
 call ufo_geovals_setup(self, vars, nobs)
 
 ! read temperature
@@ -422,30 +371,14 @@ self%linit = .true.
 call nc_diag_read_close(filename)
 
 ! Example of getting a variable below:
-!varname = 'Ozone'
-!lfound =  ufo_geovals_get_var(self, 1, varname, geoval)
-!if (lfound) then
-!  print *, 'geoval test: ', trim(varname), geoval%nval, geoval%vals
-!else
-!  print *, 'geoval test: ', trim(varname), ' doesnt exist'
-!endif
+varname = 'Ozone'
+lfound =  ufo_geovals_get_var(self, 1, varname, geoval)
+if (lfound) then
+  print *, 'geoval test: ', trim(varname), geoval%nval, geoval%vals
+else
+  print *, 'geoval test: ', trim(varname), ' doesnt exist'
+endif
 
-end subroutine ufo_geovals_read_file_c
-
-! ------------------------------------------------------------------------------
-
-subroutine ufo_geovals_write_file_c(c_key_self, c_conf) bind(c,name='ufo_geovals_write_file_f90')
-use config_mod
-use fckit_log_module, only : fckit_log
-implicit none
-integer(c_int), intent(in) :: c_key_self
-type(c_ptr), intent(in) :: c_conf
-type(ufo_geovals), pointer :: self
-
-call ufo_geovals_registry%get(c_key_self, self)
-
-end subroutine ufo_geovals_write_file_c
-
-! ------------------------------------------------------------------------------
+end subroutine ufo_geovals_read_netcdf
 
 end module ufo_geovals_mod
