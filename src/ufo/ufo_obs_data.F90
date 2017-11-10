@@ -196,7 +196,6 @@ type(datetime) :: t1, t2
 type(ufo_geovals), pointer :: geovals
 
 integer :: nobs
-integer, allocatable :: mobs(:)
 
 call obs_data_registry%get(c_key_self, self)
 !call c_f_string(c_req, req)
@@ -206,8 +205,6 @@ call c_f_datetime(c_t2, t2)
 
 !call obs_count(self, req, t1, t2, nobs)
 nobs=1
-allocate(mobs(nobs))
-mobs(1)=1
 !call obs_count(self, req, t1, t2, mobs)
 
 allocate(geovals)
@@ -218,7 +215,7 @@ call ufo_geovals_registry%get(c_key_geovals,geovals)
 geovals%lalloc = .false. ! very bad! should just call init that adds to registry 
 geovals%linit  = .false. ! and initalizes!!!
 
-call geovals_setup(geovals, vars, mobs)
+call ufo_geovals_setup(geovals, vars, nobs)
 
 !deallocate(mobs)
 
