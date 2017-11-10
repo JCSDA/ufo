@@ -33,7 +33,7 @@ class GeoVaLs : public util::Printable,
 
   GeoVaLs(const ObsSpace &, const Variables &,
           const util::DateTime &, const util::DateTime &);
-  GeoVaLs(const eckit::Configuration &, const Variables &);
+  GeoVaLs(const eckit::Configuration &);
 
   explicit GeoVaLs(): keyGVL_(0) {}
   explicit GeoVaLs(int & fgvl): keyGVL_(fgvl) {}
@@ -43,7 +43,7 @@ class GeoVaLs : public util::Printable,
   void zero();
   void random();
   double dot_product_with(const GeoVaLs & other) const;
-  void read(const eckit::Configuration &, const Variables &);
+  void read(const eckit::Configuration &);
   void write(const eckit::Configuration &) const;
 
   int & toFortran() {return keyGVL_;}

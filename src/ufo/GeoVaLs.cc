@@ -24,11 +24,11 @@ GeoVaLs::GeoVaLs(const ObsSpace & obsdb, const Variables & var,
   oops::Log::trace() << "GeoVaLs contructor key = " << keyGVL_ << std::endl;
 }
 // -----------------------------------------------------------------------------
-GeoVaLs::GeoVaLs(const eckit::Configuration & config, const Variables & var) {
+GeoVaLs::GeoVaLs(const eckit::Configuration & config) {
   oops::Log::trace() << "GeoVaLs contructor config starting" << std::endl;
   ufo_geovals_create_f90(keyGVL_);
   const eckit::Configuration * conf = &config;
-  ufo_geovals_read_file_f90(keyGVL_, &conf, var.toFortran());
+  ufo_geovals_read_file_f90(keyGVL_, &conf);
   oops::Log::trace() << "GeoVaLs contructor config key = " << keyGVL_ << std::endl;
 }
 // -----------------------------------------------------------------------------
@@ -57,9 +57,9 @@ void GeoVaLs::print(std::ostream & os) const {
   os << "GeoVaLs: nobs= " << nn << " Min=" << zmin << ", Max=" << zmax << ", RMS=" << zrms;
 }
 // -----------------------------------------------------------------------------
-void GeoVaLs::read(const eckit::Configuration & config, const Variables & var) {
+void GeoVaLs::read(const eckit::Configuration & config) {
   const eckit::Configuration * conf = &config;
-  ufo_geovals_read_file_f90(keyGVL_, &conf, var.toFortran());
+  ufo_geovals_read_file_f90(keyGVL_, &conf);
 }
 // -----------------------------------------------------------------------------
 void GeoVaLs::write(const eckit::Configuration & config) const {
