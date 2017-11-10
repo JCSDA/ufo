@@ -8,7 +8,7 @@
   },
   "Observations": {
     "ObsTypes": [{
-      "ObsType": "WindSpeed",
+      "ObsType": "Radiance",
       "ObsData": {
         "ObsDataIn": {
           "obsfile": "Data/amsua_n19_wprofiles.nc4"

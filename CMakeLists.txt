@@ -45,6 +45,10 @@ include_directories( ${IODA_INCLUDE_DIRS} )
 ecbuild_use_package( PROJECT oops VERSION 0.2.1 REQUIRED )
 include_directories( ${OOPS_INCLUDE_DIRS} )
 
+#crtm
+include_directories( ${CRTM_INCLUDE} )
+#/home/gvernier/Sandboxes/codesprint-ufo/jedi/build/gsi/include/ )
+
 ################################################################################
 # Export package info
 ################################################################################
