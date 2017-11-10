@@ -82,6 +82,20 @@ extern "C" {
   void ufo_wspeed_inputs_f90(const F90hop &, F90vars &);
 
 // -----------------------------------------------------------------------------
+//  Radiance observations
+// -----------------------------------------------------------------------------
+  void ufo_radiance_setup_f90(F90hop &, const eckit::Configuration * const *);
+  void ufo_radiance_delete_f90(F90hop &);
+
+  void ufo_radiance_eqv_f90(const F90goms &, const F90ovec &);
+  void ufo_radiance_equiv_tl_f90(const F90goms &, const F90ovec &, const F90goms &, const double &);
+  void ufo_radiance_equiv_ad_f90(const F90goms &, const F90ovec &, const F90goms &, double &);
+
+  void ufo_radiance_gettraj_f90(const F90hop &, const int &, F90goms &);  // copied over from wspeed, don't think it's required
+  void ufo_radiance_settraj_f90(const F90goms &, const F90goms &);   // copied over from wspeed, don't think it's required
+  void ufo_radiance_inputs_f90(const F90hop &, F90vars &);
+
+// -----------------------------------------------------------------------------
 //  Observation Vectors
 // -----------------------------------------------------------------------------
   void ufo_obsvec_setup_f90(F90ovec &, const F90odb &);

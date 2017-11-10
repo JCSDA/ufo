@@ -5,7 +5,7 @@
   "Variables": {},
   "Observations": {
     "ObsTypes": [{
-      "ObsType": "WindSpeed",
+      "ObsType": "Radiance",
       "GeoVaLs": {
         "norm": "1.0"
       },
