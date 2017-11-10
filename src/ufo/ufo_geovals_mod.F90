@@ -46,11 +46,14 @@ contains
 
 subroutine c_ufo_geovals_create(c_key_self) bind(c,name='ufo_geovals_create_f90')
 
+use fckit_log_module, only : fckit_log
 implicit none
 integer(c_int), intent(inout) :: c_key_self
+character(len=*),parameter :: myname_ = 'c_ufo_geovals_create'
 
 type(ufo_geovals), pointer :: self
 
+call fckit_log%info(myname_)
 call ufo_geovals_registry%init()
 call ufo_geovals_registry%add(c_key_self)
 call ufo_geovals_registry%get(c_key_self, self)
@@ -91,11 +94,14 @@ end subroutine geovals_setup
 
 subroutine c_ufo_geovals_delete(c_key_self) bind(c,name='ufo_geovals_delete_f90')
 
+use fckit_log_module, only : fckit_log
 implicit none
 integer(c_int), intent(inout) :: c_key_self
+character(len=*), parameter :: myname_ = 'c_ufo_geovals_delete'
 
 type(ufo_geovals), pointer :: self
 
+call fckit_log%info(myname_)
 call ufo_geovals_registry%get(c_key_self, self)
 if (self%lalloc) then
   deallocate(self%values)
@@ -112,6 +118,7 @@ subroutine c_ufo_geovals_zero(c_key_self) bind(c,name='ufo_geovals_zero_f90')
 implicit none
 integer(c_int), intent(in) :: c_key_self
 type(ufo_geovals), pointer :: self
+print *, 'I''m in ufo_geovals_zero_f90'
 call ufo_geovals_registry%get(c_key_self, self)
 self%values(:,:)=0.0_kind_real
 end subroutine c_ufo_geovals_zero
@@ -169,7 +176,6 @@ end subroutine c_ufo_geovals_minmaxavg
 ! ------------------------------------------------------------------------------
 
 subroutine ufo_geovals_read_file_c(c_key_self, c_conf) bind(c,name='ufo_geovals_read_file_f90')
-use config_mod
 use fckit_log_module, only : fckit_log
 implicit none
 integer(c_int), intent(in) :: c_key_self
@@ -199,7 +205,6 @@ end subroutine ufo_geovals_read_file_c
 ! ------------------------------------------------------------------------------
 
 subroutine ufo_geovals_write_file_c(c_key_self, c_conf) bind(c,name='ufo_geovals_write_file_f90')
-use config_mod
 use fckit_log_module, only : fckit_log
 implicit none
 integer(c_int), intent(in) :: c_key_self

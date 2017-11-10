@@ -29,20 +29,14 @@ character(len=max_string+30) :: record
 
 if (config_element_exists(c_conf,"ObsData.ObsDataIn")) then
   fin  = config_get_string(c_conf,max_string,"ObsData.ObsDataIn.obsfile")
-else
-  fin  = ""
 endif
 write(record,*)'ufo_obs_setup: file in =',trim(fin)
-call fckit_log%info(record)
-
-fout = config_get_string(c_conf,max_string,"ObsData.ObsDataOut.obsfile")
-write(record,*)'ufo_obs_setup: file out=',trim(fout)
 call fckit_log%info(record)
 
 call obs_data_registry%init()
 call obs_data_registry%add(c_key_self)
 call obs_data_registry%get(c_key_self, self)
-call obs_setup(trim(fin), trim(fout), self)
+call obs_setup(trim(fin), "", self)
 
 end subroutine ufo_obs_setup
 

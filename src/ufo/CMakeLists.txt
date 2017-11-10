@@ -18,11 +18,12 @@ ufo_obs_data.F90
 ufo_obs_vectors.F90
 ufo_variables_mod.F90
 ufo_wspeed_mod.F90
+c_ufo_obs_data.F90
 )
 
 ecbuild_add_library( TARGET   ufo
                      SOURCES  ${ufo_src_files}
-                     LIBS     oops ${LAPACK_LIBRARIES} ${NETCDF_LIBRARIES}
+                     LIBS     oops ioda ${LAPACK_LIBRARIES} ${NETCDF_LIBRARIES}
                      INSTALL_HEADERS LISTED
                      LINKER_LANGUAGE ${OOPS_LINKER_LANGUAGE}
                     )

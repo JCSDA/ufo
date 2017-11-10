@@ -5,7 +5,12 @@
   "Variables": {},
   "Observations": {
     "ObsTypes": [{
-      "ObsType": "WindSpeed",
+      "ObsType": "AMSUA",
+      "ObsData": {
+        "ObsDataIn": {
+          "obsfile": "/home/rtodling/discover/nc_4emily.diag_amsua_n15_ges.20161202_00z.nc4"
+        }
+      },
       "GeoVaLs": {
         "norm": "1.0"
       },

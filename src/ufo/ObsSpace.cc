@@ -25,7 +25,22 @@ ObsSpace::ObsSpace(const eckit::Configuration & config,
   : oops::ObsSpaceBase(config, bgn, end), winbgn_(bgn), winend_(end)
 {
 
-// TOBEDONE: THIS IS WHERE THE NETCDF READ SHOULD LIVE
+  oops::Log::trace() << "ufo::ObsSpace config  = " << config << std::endl;
+  std::string ofin("-");
+  if (config.has("ObsData.ObsDataIn")) {
+    ofin = config.getString("ObsData.ObsDataIn.obsfile");
+  }
+
+  oops::Log::trace() << "ObsSpaceQG: Obs files are: " << ofin;
+
+//ref_ = ofin + ofout;
+//if (ref_ == "--") {
+//  ABORT("Underspecified observation files.");
+//}
+
+  const eckit::Configuration * configc = &config;
+  ufo_obsdb_setup_f90(keyOspace_, &configc);
+
   obsname_ = config.getString("ObsType");
   oops::Log::trace() << "ufo::ObsSpace contructed name = " << obsname_ << std::endl;
 }
