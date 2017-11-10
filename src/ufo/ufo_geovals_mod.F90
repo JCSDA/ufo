@@ -249,30 +249,33 @@ type(c_ptr), intent(in)    :: c_conf
 
 type(ufo_geovals), pointer :: self
 
-integer :: nvar_prof, nvar_surf
+integer :: nvar_prof, nvar_surf_real, nvar_surf_int
 integer :: it, iwv, ipr, iprl, ioz
 
 character(128) :: filename
+logical :: lfound
 
 integer :: iunit
 integer :: nobs, nsig, nsig_plus_one
 
-real, allocatable :: field(:,:)
-real, allocatable :: field1d(:)
+real(8), allocatable :: field(:,:)
+real(8), allocatable :: field1d(:)
+integer, allocatable :: field1di(:)
+
 integer :: iobs, ivar, nval
-!type(ufo_geoval) :: geoval
-!character(MAXVARLEN) :: varname
+type(ufo_geoval) :: geoval
+character(MAXVARLEN) :: varname
 
 call ufo_geovals_registry%get(c_key_self, self)
 
 ! variables hardcoded for the CRTM
 nvar_prof = 5
 it = 1; iwv = 2; ipr = 3; iprl = 4; ioz = 5 ! indices of vars
-nvar_surf = 0;
-!nvar_surf = 10;
+nvar_surf_real = 9;
+nvar_surf_int = 1;
 
 ! allocate and fill in variables
-self%nvar = nvar_prof + nvar_surf
+self%nvar = nvar_prof + nvar_surf_real + nvar_surf_int
 self%variables%nv = self%nvar
 allocate(self%variables%fldnames(self%nvar))
 self%variables%fldnames(it)   = 'Temperature'
@@ -280,8 +283,18 @@ self%variables%fldnames(iwv)  = 'Water vapor'
 self%variables%fldnames(ipr)  = 'Pressure'
 self%variables%fldnames(iprl) = 'Level pressure'
 self%variables%fldnames(ioz)  = 'Ozone'
-!self%variables%fldnames(nvar_prof+1) = 'Water_Fraction'
-!self%variables%fldnames(nvar_prof+2) = 'Land_Fraction'
+
+self%variables%fldnames(nvar_prof+1) = 'Water_Fraction'
+self%variables%fldnames(nvar_prof+2) = 'Land_Fraction'
+self%variables%fldnames(nvar_prof+3) = 'Ice_Fraction'
+self%variables%fldnames(nvar_prof+4) = 'Snow_Fraction'
+self%variables%fldnames(nvar_prof+5) = 'Water_Temperature'
+self%variables%fldnames(nvar_prof+6) = 'Land_Temperature'
+self%variables%fldnames(nvar_prof+7) = 'Ice_Temperature'
+self%variables%fldnames(nvar_prof+8) = 'Snow_Temperature'
+self%variables%fldnames(nvar_prof+9) = 'Vegetation_Fraction'
+self%variables%fldnames(nvar_prof+nvar_surf_real+1) = 'Land_Type_Index' ! int!!!
+
 ! read filename for config
 filename = config_get_string(c_conf,len(filename),"filename")
 
@@ -309,7 +322,7 @@ deallocate(field)
 ! read water vapor (humidity)
 nval = nsig; ivar = iwv
 allocate(field(nval, nobs))
-call nc_diag_read_get_var(iunit, 'tvq', field)
+call nc_diag_read_get_var(iunit, 'qvp', field)
 do iobs = 1, nobs
   self%geovals(ivar,iobs)%nval = nval
   allocate(self%geovals(ivar,iobs)%vals(nval))
@@ -353,7 +366,7 @@ deallocate(field)
 ! read surface stuff
 nval = 1
 allocate(field1d(nobs))
-do ivar = nvar_prof+1, nvar_prof+nvar_surf
+do ivar = nvar_prof+1, nvar_prof+nvar_surf_real
   call nc_diag_read_get_var(iunit, self%variables%fldnames(ivar), field1d)
   do iobs = 1, nobs
     self%geovals(ivar,iobs)%nval = nval
@@ -363,16 +376,32 @@ do ivar = nvar_prof+1, nvar_prof+nvar_surf
 enddo
 deallocate(field1d)
 
+! read surface stuff (integer)
+nval = 1
+allocate(field1di(nobs))
+do ivar = nvar_prof+nvar_surf_real+1, nvar_prof+nvar_surf_real+nvar_surf_int
+  call nc_diag_read_get_var(iunit, self%variables%fldnames(ivar), field1di)
+  do iobs = 1, nobs
+    self%geovals(ivar,iobs)%nval = nval
+    allocate(self%geovals(ivar,iobs)%vals(nval))
+    self%geovals(ivar,iobs)%vals(1) = field1di(iobs)
+  enddo
+enddo
+deallocate(field1di)
+
+
 self%linit = .true.
 
 call nc_diag_read_close(filename)
 
-!varname = 'u'
-!call ufo_geovals_get_var(self, 1, varname, geoval)
-!print *, 'geoval test: ', geoval%nval, geoval%vals
-!varname = 'prse'
-!call ufo_geovals_get_var(self, 1, varname, geoval)
-!print *, 'geoval test: ', geoval%nval, geoval%vals
+! Example of getting a variable below:
+!varname = 'Ozone'
+!lfound =  ufo_geovals_get_var(self, 1, varname, geoval)
+!if (lfound) then
+!  print *, 'geoval test: ', trim(varname), geoval%nval, geoval%vals
+!else
+!  print *, 'geoval test: ', trim(varname), ' doesnt exist'
+!endif
 
 end subroutine ufo_geovals_read_file_c
 
