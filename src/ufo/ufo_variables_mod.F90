@@ -14,7 +14,7 @@ implicit none
 private
 public :: ufo_vars, ufo_vars_setup, ufo_vars_clone, ufo_vars_delete
 public :: ufo_vars_registry, ufo_vars_readconfig
-public :: ufo_vars_getindex
+public :: ufo_vars_getindex, ufo_vars_nvars
 public :: MAXVARLEN
 
 integer, parameter :: MAXVARLEN=24
@@ -46,6 +46,7 @@ subroutine ufo_vars_setup(self, cvars)
 implicit none
 type(ufo_vars), intent(inout) :: self
 character(len=MAXVARLEN), intent(in) :: cvars(:)
+
 self%nv = size(cvars)
 
 ! TODO: a check on whether this var is in the list of defined vars
@@ -58,8 +59,14 @@ end subroutine ufo_vars_setup
 
 subroutine ufo_vars_clone(self, other)
 implicit none
-type(ufo_vars), intent(inout) :: self
-type(ufo_vars), intent(in) :: other
+type(ufo_vars), intent(in)    :: self
+type(ufo_vars), intent(inout) :: other
+
+call ufo_vars_delete(other)
+other%nv = self%nv
+allocate(other%fldnames(other%nv))
+other%fldnames(:) = self%fldnames(:)
+
 end subroutine ufo_vars_clone
 
 ! ------------------------------------------------------------------------------
@@ -67,6 +74,10 @@ end subroutine ufo_vars_clone
 subroutine ufo_vars_delete(self)
 implicit none
 type(ufo_vars), intent(inout) :: self
+
+if (allocated(self%fldnames)) deallocate(self%fldnames)
+self%nv = 0
+
 end subroutine ufo_vars_delete
 
 ! ------------------------------------------------------------------------------
@@ -78,11 +89,11 @@ type(c_ptr), intent(in)    :: c_conf
 
 character(len=512) :: svars
 
+call ufo_vars_delete(self)
 self%nv = config_get_int(c_conf, "nvars")
 svars = config_get_string(c_conf,len(svars),"variables")
 allocate(self%fldnames(self%nv))
 read(svars,*) self%fldnames 
-return
 
 end subroutine ufo_vars_readconfig
 
@@ -109,65 +120,12 @@ endif
 end function ufo_vars_getindex
 
 ! ------------------------------------------------------------------------------
-
-subroutine ufo_vars_create_c(c_key_self, c_conf) bind(c,name='ufo_var_create_f90')
+integer function ufo_vars_nvars(self) 
 implicit none
-integer(c_int), intent(inout) :: c_key_self
-type(c_ptr), intent(in)    :: c_conf
+type(ufo_vars), intent(in) :: self
 
-type(ufo_vars), pointer :: self
-character(len=MAXVARLEN) :: svar
+ufo_vars_nvars = self%nv
 
-call ufo_vars_registry%init()
-call ufo_vars_registry%add(c_key_self)
-call ufo_vars_registry%get(c_key_self, self)
-
-call ufo_vars_readconfig(self, c_conf)
-
-return
-end subroutine ufo_vars_create_c
-
-! ------------------------------------------------------------------------------
-
-subroutine ufo_vars_clone_c(c_key_self, c_key_other) bind(c,name='ufo_var_clone_f90')
-implicit none
-integer(c_int), intent(in)    :: c_key_self
-integer(c_int), intent(inout) :: c_key_other
-
-c_key_other=c_key_self
-end subroutine ufo_vars_clone_c
-
-! ------------------------------------------------------------------------------
-
-subroutine ufo_vars_delete_c(c_key_self) bind(c,name='ufo_var_delete_f90')
-
-implicit none
-integer(c_int), intent(inout) :: c_key_self
-
-c_key_self=0
-return
-end subroutine ufo_vars_delete_c
-
-! ------------------------------------------------------------------------------
-
-! ------------------------------------------------------------------------------
-
-!subroutine ufo_vars_info_c(c_key_self, c_nv, lline, c_line) bind(c,name='ufo_var_info_f90')
-subroutine ufo_vars_info_c(c_key_self, c_nv) bind(c,name='ufo_var_info_f90')
-implicit none
-integer(c_int), intent(in)    :: c_key_self
-integer(c_int), intent(inout) :: c_nv
-!integer(c_int), intent(in)    :: lline
-!character(kind=c_char,len=1), intent(inout) :: c_line(lline+1)
-
-type(ufo_vars), pointer :: self
-
-call ufo_vars_registry%get(c_key_self, self)
-
-!c_line = self%fldnames(1)
-c_nv = self%nv
-
-return
-end subroutine ufo_vars_info_c
+end function ufo_vars_nvars
 
 end module ufo_vars_mod

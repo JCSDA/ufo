@@ -13,10 +13,9 @@ implicit none
 private
 public :: ufo_geovals
 public :: ufo_geovals_registry
-public :: ufo_geovals_setup, ufo_geovals_zero
-public :: ufo_geovals_random, ufo_geovals_dotprod
+public :: ufo_geovals_init, ufo_geovals_setup, ufo_geovals_delete
+public :: ufo_geovals_zero, ufo_geovals_random, ufo_geovals_dotprod
 public :: ufo_geovals_minmaxavg, ufo_geovals_read_netcdf
-public :: ufo_geovals_delete
 
 ! ------------------------------------------------------------------------------
 
@@ -60,6 +59,19 @@ contains
 
 ! ------------------------------------------------------------------------------
 
+subroutine ufo_geovals_init(self)
+implicit none
+type(ufo_geovals), intent(inout) :: self
+
+self%lalloc = .false.
+self%linit  = .false.
+self%nvar = 0
+self%nobs = 0
+
+end subroutine ufo_geovals_init
+
+! ------------------------------------------------------------------------------
+
 subroutine ufo_geovals_setup(self, vars, nobs)
 implicit none
 type(ufo_geovals), intent(inout) :: self
@@ -70,7 +82,7 @@ call ufo_geovals_delete(self)
 
 self%nobs = nobs
 self%nvar = vars%nv
-self%variables = vars
+call ufo_vars_clone(vars, self%variables) 
 
 allocate(self%geovals(self%nvar,self%nobs))
 self%lalloc = .true.
@@ -372,13 +384,13 @@ self%linit = .true.
 call nc_diag_read_close(filename)
 
 ! Example of getting a variable below:
-varname = 'Ozone'
-lfound =  ufo_geovals_get_var(self, 1, varname, geoval)
-if (lfound) then
-  print *, 'geoval test: ', trim(varname), geoval%nval, geoval%vals
-else
-  print *, 'geoval test: ', trim(varname), ' doesnt exist'
-endif
+!varname = 'Ozone'
+!lfound =  ufo_geovals_get_var(self, 1, varname, geoval)
+!if (lfound) then
+!  print *, 'geoval test: ', trim(varname), geoval%nval, geoval%vals
+!else
+!  print *, 'geoval test: ', trim(varname), ' doesnt exist'
+!endif
 
 end subroutine ufo_geovals_read_netcdf
 

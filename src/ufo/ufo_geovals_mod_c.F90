@@ -30,8 +30,7 @@ call ufo_geovals_registry%init()
 call ufo_geovals_registry%add(c_key_self)
 call ufo_geovals_registry%get(c_key_self, self)
 
-self%lalloc = .false.
-self%linit  = .false.
+call ufo_geovals_init(self)
 
 end subroutine ufo_geovals_create_c
 

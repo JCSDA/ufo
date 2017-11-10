@@ -19,6 +19,7 @@ ufo_locs_mod.F90
 ufo_obs_data.F90
 ufo_obs_vectors.F90
 ufo_variables_mod.F90
+ufo_variables_mod_c.F90
 ufo_wspeed_mod.F90
 )
 
