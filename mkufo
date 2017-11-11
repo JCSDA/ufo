@@ -1,0 +1,28 @@
+# Paths below have to be defined for each user before running the script
+#export SRC=/path/to/github/repos
+#export BUILD=/tmp/build
+
+# NOTE: the ecbuild commands only need running once
+# NOTE: after the first build, running make is enough
+
+export PATH=${PATH}:${SRC}/ecbuild/bin
+
+rm -rf ${BUILD}/oops; mkdir ${BUILD}/oops
+cd ${BUILD}/oops
+ecbuild -DFCKIT_PATH=${BUILD}/fckit -DECKIT_PATH=${BUILD}/eckit ${SRC}/oops
+make -j4
+ctest
+
+rm -rf ${BUILD}/ioda; mkdir ${BUILD}/ioda
+cd ${BUILD}/ioda
+ecbuild ${SRC}/ioda
+make
+
+rm -rf ${BUILD}/ufo; mkdir ${BUILD}/ufo
+cd ${BUILD}/ufo
+ecbuild -DOOPS_PATH=${BUILD}/oops -DIODA_PATH=${BUILD}/ioda \
+        -DCRTM_LIBRARIES=${BUILD}/crtm-v2.2.3/libsrc/libcrtm.a -DCRTM_INCLUDE=${BUILD}/crtm-v2.2.3/libsrc \
+        ${SRC}/ufo
+make -j4
+ctest
+
