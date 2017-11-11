@@ -7,16 +7,31 @@
 
 export PATH=${PATH}:${SRC}/ecbuild/bin
 
+### Build crtm ###
+
+cd ${SRC}/crtm-v2.2.3
+source config-setup/gfortran.setup
+./configure --prefix=${BUILD}/crtm-v2.2.3
+make
+make check
+make install
+
+### Build oops ###
+
 rm -rf ${BUILD}/oops; mkdir ${BUILD}/oops
 cd ${BUILD}/oops
 ecbuild -DFCKIT_PATH=${BUILD}/fckit -DECKIT_PATH=${BUILD}/eckit ${SRC}/oops
 make -j4
 ctest
 
+### Build ioda ###
+
 rm -rf ${BUILD}/ioda; mkdir ${BUILD}/ioda
 cd ${BUILD}/ioda
 ecbuild ${SRC}/ioda
 make
+
+### Build ufo ###
 
 rm -rf ${BUILD}/ufo; mkdir ${BUILD}/ufo
 cd ${BUILD}/ufo
