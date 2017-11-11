@@ -1,10 +1,7 @@
-! (C) Copyright 2009-2016 ECMWF.
+! (C) Copyright 2017 UCAR
 ! 
 ! This software is licensed under the terms of the Apache Licence Version 2.0
 ! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
-! In applying this licence, ECMWF does not waive the privileges and immunities 
-! granted to it by virtue of its status as an intergovernmental organisation nor
-! does it submit to any jurisdiction.
 
 !> Fortran module to handle radiance observations
 
@@ -28,8 +25,7 @@ module ufo_radiance_mod
   
   !> Fortran derived type for stream function observations for the QG model
   type :: ufo_obsoper
-     character(len=30) :: request
-     type(ufo_vars) :: varin
+     integer :: nothing_here_yet
   end type ufo_obsoper
   
 #define LISTED_TYPE ufo_obsoper
@@ -54,14 +50,10 @@ contains
     type(c_ptr), intent(in)    :: c_conf
     
     type(ufo_obsoper), pointer :: self
-    character(len=1) :: svars(2) = (/"u","v"/)
     
     call ufo_radiance_registry%init()
     call ufo_radiance_registry%add(c_key_self)
     call ufo_radiance_registry%get(c_key_self, self)
-    
-    self%request = config_get_string(c_conf, len(self%request), "ObsType")
-    call ufo_vars_setup(self%varin, svars)
     
   end subroutine c_ufo_radiance_setup
   
@@ -74,12 +66,20 @@ contains
     type(ufo_obsoper), pointer :: self
     
     call ufo_radiance_registry%get(c_key_self, self)
-    call ufo_vars_delete(self%varin)
     call ufo_radiance_registry%remove(c_key_self)
     
   end subroutine c_ufo_radiance_delete
   
   ! ------------------------------------------------------------------------------
+  subroutine ufo_radiance_noeqv(c_key_geovals, c_key_hofx, c_bias)
+    implicit none
+    integer(c_int), intent(in) :: c_key_geovals
+    integer(c_int), intent(in) :: c_key_hofx
+    real(c_double), intent(in) :: c_bias
+    type(obs_vector), pointer :: hofx
+    call ufo_obs_vect_registry%get(c_key_hofx,hofx)
+    hofx%values(:) = 1.0
+  end subroutine ufo_radiance_noeqv
   
   subroutine ufo_radiance_eqv(c_key_geovals, c_key_hofx, c_bias) bind(c,name='ufo_radiance_eqv_f90')
     implicit none
@@ -87,7 +87,7 @@ contains
     integer(c_int), intent(in) :: c_key_hofx
     real(c_double), intent(in) :: c_bias
     type(ufo_geovals), pointer  :: geovals
-    type(obs_vect), pointer :: hofx
+    type(obs_vector), pointer :: hofx
 
 
     !*************************************************************************************
@@ -514,7 +514,6 @@ contains
     call ufo_vars_registry%init()
     call ufo_vars_registry%add(c_key_vars)
     call ufo_vars_registry%get(c_key_vars, vars)
-    call ufo_vars_clone(self%varin, vars)
     
   end subroutine c_ufo_radiance_inputs
   
@@ -536,21 +535,6 @@ contains
     integer(c_int), intent(in) :: c_key_traj
     real(c_double), intent(inout) :: c_bias
   end subroutine ufo_radiance_equiv_ad
-  ! ------------------------------------------------------------------------------
-  subroutine ufo_radiance_gettraj(c_key_self, c_nobs, c_key_traj) bind(c,name='ufo_radiance_gettraj_f90')
-    use fckit_log_module, only : fckit_log
-    implicit none
-    integer(c_int), intent(in) :: c_key_self
-    integer(c_int), intent(in) :: c_nobs
-    integer(c_int), intent(inout) :: c_key_traj
-  end subroutine ufo_radiance_gettraj
-  ! ------------------------------------------------------------------------------
-  subroutine ufo_radiance_settraj(c_key_gom, c_key_traj) bind(c,name='ufo_radiance_settraj_f90')
-    use fckit_log_module, only : fckit_log
-    implicit none
-    integer(c_int), intent(in) :: c_key_gom
-    integer(c_int), intent(in) :: c_key_traj
-  end subroutine ufo_radiance_settraj
   ! ------------------------------------------------------------------------------
   
 end module ufo_radiance_mod

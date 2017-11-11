@@ -46,7 +46,7 @@ contains
 subroutine ufo_loc_setup(self, lvec)
 implicit none
 type(ufo_locs), intent(inout) :: self
-type(obs_vect), intent(in) :: lvec
+type(obs_vector), intent(in) :: lvec
 integer :: jc, jo
 
 self%nloc=lvec%nobs

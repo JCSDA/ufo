@@ -36,7 +36,7 @@ use kinds
 implicit none
 private
 
-public :: obs_data, obs_setup, obs_delete, obs_get, obs_put, obs_count, max_string
+public :: obs_data, obs_setup, obs_delete, obs_get, obs_put, max_string
 public :: obs_data_registry
 
 ! ------------------------------------------------------------------------------
@@ -47,7 +47,6 @@ integer, parameter :: max_string=800
 type obs_data
   integer :: nobs
   character(len=max_string) :: filein, fileout
-  type(group_data), pointer :: grphead => null()  ! _RT to be removed
   type(diag_header_fix_list )              ::  header_fix
   type(diag_header_chan_list),allocatable  ::  header_chan(:)
   type(diag_data_name_list)                ::  header_name
@@ -64,35 +63,6 @@ end type obs_data
 
 !> Global registry
 type(registry_t) :: obs_data_registry
-
-! ------------------------------------------------------------------------------
-
-!> A type to represent a linked list of observation group data
-type group_data
-  character(len=50) :: grpname
-  type(group_data), pointer :: next => null()
-  integer :: nobs
-  integer, allocatable :: seqnos(:)
-  type(datetime), allocatable :: times(:)
-  type(column_data), pointer :: colhead => null()
-end type group_data
-
-! ------------------------------------------------------------------------------
-
-!> A type to represent a linked list of observation columns
-type column_data
-  character(len=50) :: colname
-  type(column_data), pointer :: next => null()
-  integer :: ncol
-  real(kind=kind_real), allocatable :: values(:,:)
-end type column_data
-
-! ------------------------------------------------------------------------------
-
-!> Fortran generic
-interface obs_count
-  module procedure obs_count_time, obs_count_all, obs_count_indx
-end interface obs_count
 
 ! ------------------------------------------------------------------------------
 contains
@@ -120,9 +90,6 @@ end subroutine obs_setup
 subroutine obs_delete(self)
 implicit none
 type(obs_data), intent(inout) :: self
-type(group_data), pointer :: jgrp
-type(column_data), pointer :: jcol
-integer :: jo
 
 if (self%fileout/="") call obs_write(self)
 
@@ -130,47 +97,43 @@ end subroutine obs_delete
 
 ! ------------------------------------------------------------------------------
 
-subroutine obs_get(self, req, col, ovec)
+subroutine obs_get(self, col, ovec)
 implicit none
 type(obs_data), intent(in) :: self
-character(len=*), intent(in) :: req, col
-type(obs_vect), intent(inout) :: ovec
+character(len=*), intent(in) :: col
+type(obs_vector), intent(inout) :: ovec
 
 end subroutine obs_get
 
 ! ------------------------------------------------------------------------------
 
-subroutine obs_put(self, req, col, ovec)
+subroutine obs_put(self, col, ovec)
 implicit none
 type(obs_data), intent(inout) :: self
-character(len=*), intent(in) :: req, col
-type(obs_vect), intent(in) :: ovec
+character(len=*), intent(in) :: col
+type(obs_vector), intent(in) :: ovec
 
 end subroutine obs_put
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_obsdb_locations_c(c_key_self, lreq, c_req, c_t1, c_t2, c_key_locs) bind(c,name='ufo_obsdb_locations_f90')
+subroutine ufo_obsdb_locations_c(c_key_self, c_t1, c_t2, c_key_locs) bind(c,name='ufo_obsdb_locations_f90')
 implicit none
 integer(c_int), intent(in) :: c_key_self
-integer(c_int), intent(in) :: lreq
-character(kind=c_char,len=1), intent(in) :: c_req(lreq+1)
 type(c_ptr), intent(in) :: c_t1, c_t2
 integer(c_int), intent(inout) :: c_key_locs
 
 type(obs_data), pointer :: self
-character(len=lreq) :: req
 type(datetime) :: t1, t2
 type(ufo_locs), pointer :: locs
-type(obs_vect) :: ovec
+type(obs_vector) :: ovec
 character(len=8) :: col="Location"
 
 call obs_data_registry%get(c_key_self, self)
-call c_f_string(c_req, req)
 call c_f_datetime(c_t1, t1)
 call c_f_datetime(c_t2, t2)
 
-call obs_time_get(self, req, col, t1, t2, ovec)
+call obs_time_get(self, col, t1, t2, ovec)
 
 call ufo_locs_registry%init()
 call ufo_locs_registry%add(c_key_locs)
@@ -200,17 +163,10 @@ type(ufo_vars), pointer :: vars
 type(datetime) :: t1, t2
 type(ufo_geovals), pointer :: geovals
 
-integer :: nobs
-
 call obs_data_registry%get(c_key_self, self)
-!call c_f_string(c_req, req)
 call ufo_vars_registry%get(c_key_vars, vars)
 call c_f_datetime(c_t1, t1)
 call c_f_datetime(c_t2, t2)
-
-!call obs_count(self, req, t1, t2, nobs)
-nobs=1
-!call obs_count(self, req, t1, t2, mobs)
 
 allocate(geovals)
 call ufo_geovals_registry%init()
@@ -220,91 +176,31 @@ call ufo_geovals_registry%get(c_key_geovals,geovals)
 geovals%lalloc = .false. ! very bad! should just call init that adds to registry 
 geovals%linit  = .false. ! and initalizes!!!
 
-call ufo_geovals_setup(geovals, vars, nobs)
-
-!deallocate(mobs)
+call ufo_geovals_setup(geovals, vars, self%nobs)
 
 end subroutine ufo_obsdb_getgeovals_c
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_obsdb_generate_c(c_key_self, lreq, c_req, c_conf, c_bgn, c_step, ktimes, kobs) bind(c,name='ufo_obsdb_generate_f90')
+subroutine ufo_obsdb_nobs_c(c_key_self, kobs) bind(c,name='ufo_obsdb_nobs_f90')
 implicit none
 integer(c_int), intent(in) :: c_key_self
-integer(c_int), intent(in) :: lreq
-character(kind=c_char,len=1), intent(in) :: c_req(lreq+1)
-type(c_ptr), intent(in)    :: c_conf
-type(c_ptr), intent(in)    :: c_bgn
-type(c_ptr), intent(in)    :: c_step
-integer(c_int), intent(in)  :: ktimes
 integer(c_int), intent(inout) :: kobs
-
-end subroutine ufo_obsdb_generate_c
-
-! ------------------------------------------------------------------------------
-
-subroutine ufo_obsdb_nobs_c(c_key_self, lreq, c_req, kobs) bind(c,name='ufo_obsdb_nobs_f90')
-implicit none
-integer(c_int), intent(in) :: c_key_self
-integer(c_int), intent(in) :: lreq
-character(kind=c_char,len=1), intent(in) :: c_req(lreq+1)
-integer(c_int), intent(inout) :: kobs
-
+type(obs_data), pointer :: self
+call obs_data_registry%get(c_key_self, self)
+kobs = self%nobs
 end subroutine ufo_obsdb_nobs_c
 
 ! ------------------------------------------------------------------------------
 
-subroutine obs_time_get(self, req, col, t1, t2, ovec)
+subroutine obs_time_get(self, col, t1, t2, ovec)
 implicit none
 type(obs_data), intent(in)    :: self
-character(len=*), intent(in)  :: req, col
+character(len=*), intent(in)  :: col
 type(datetime), intent(in)    :: t1, t2
-type(obs_vect), intent(inout) :: ovec
+type(obs_vector), intent(inout) :: ovec
 
 end subroutine obs_time_get
-
-! ------------------------------------------------------------------------------
-
-subroutine obs_count_time(self, req, t1, t2, kobs)
-implicit none
-type(obs_data), intent(in)   :: self
-character(len=*), intent(in) :: req
-type(datetime), intent(in)   :: t1, t2
-integer, intent(inout)       :: kobs
-
-end subroutine obs_count_time
-
-! ------------------------------------------------------------------------------
-
-subroutine obs_count_indx(self, req, t1, t2, kobs)
-implicit none
-type(obs_data), intent(in)   :: self
-character(len=*), intent(in) :: req
-type(datetime), intent(in)   :: t1, t2
-integer, intent(inout)       :: kobs(:)
-
-end subroutine obs_count_indx
-
-! ------------------------------------------------------------------------------
-
-subroutine obs_count_all(self, req, kobs)
-implicit none
-type(obs_data), intent(in) :: self
-character(len=*), intent(in) :: req
-integer, intent(inout) :: kobs
-
-end subroutine obs_count_all
-
-! ------------------------------------------------------------------------------
-
-subroutine obs_create(self, req, times, locs)
-implicit none
-type(obs_data), intent(inout) :: self
-character(len=*), intent(in) :: req
-type(datetime), intent(in) :: times(:)
-type(obs_vect), intent(in) :: locs
-
-end subroutine obs_create
 
 ! ------------------------------------------------------------------------------
 !  Private
@@ -315,15 +211,12 @@ use ncd_kinds, only: i_kind
 implicit none
 character(len=*),parameter :: myname_ ="ufo_obs_data:obs_read"
 type(obs_data), intent(inout) :: self
-!integer :: iin, icol, jo, jc, jg, ncol
 integer(i_kind) :: ier
 integer(i_kind) :: luin=0
 integer(i_kind) :: npred = 7   
 integer(i_kind) :: iversion=30303
 logical :: lverbose  = .true.  ! control verbose
 logical :: retrieval = .false. ! true when dealing with SST retrievals
-!type(group_data), pointer :: jgrp
-!type(column_data), pointer :: jcol
 character(len=max_string) :: ncfname
 
 
@@ -356,8 +249,6 @@ subroutine obs_write(self)
 implicit none
 type(obs_data), intent(in) :: self
 integer :: iout, icol, jc, jo
-type(group_data), pointer :: jgrp
-type(column_data), pointer :: jcol
 real(kind=kind_real), allocatable :: ztmp(:)
 character(len=20) :: stime
 
@@ -365,35 +256,6 @@ end subroutine obs_write
 
 ! ------------------------------------------------------------------------------
 
-subroutine findgroup(self,req,find)
-type(obs_data), intent(in) :: self
-character(len=*), intent(in) :: req
-type(group_data), pointer, intent(inout) :: find
-
-find=>self%grphead
-do while (associated(find))
-  if (find%grpname==req) exit
-  find=>find%next
-enddo
-
-end subroutine findgroup
-
-! ------------------------------------------------------------------------------
-
-subroutine findcolumn(grp,col,find)
-type(group_data), intent(in) :: grp
-character(len=*), intent(in) :: col
-type(column_data), pointer, intent(inout) :: find
-
-find=>grp%colhead
-do while (associated(find))
-  if (find%colname==col) exit
-  find=>find%next
-enddo
-
-end subroutine findcolumn
-
-! ------------------------------------------------------------------------------
 subroutine ufo_obsdb_setup_c(c_key_self, c_conf) bind(c,name='ufo_obsdb_setup_f90')
 implicit none
 integer(c_int), intent(inout) :: c_key_self
@@ -438,47 +300,43 @@ end subroutine ufo_obsdb_delete_c
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_obsdb_get_c(c_key_self, lreq, c_req, lcol, c_col, c_key_ovec) bind(c,name='ufo_obsdb_get_f90')
+subroutine ufo_obsdb_get_c(c_key_self, lcol, c_col, c_key_ovec) bind(c,name='ufo_obsdb_get_f90')
 implicit none
 integer(c_int), intent(in) :: c_key_self
-integer(c_int), intent(in) :: lreq, lcol
-character(kind=c_char,len=1), intent(in) :: c_req(lreq+1), c_col(lcol+1)
+integer(c_int), intent(in) :: lcol
+character(kind=c_char,len=1), intent(in) :: c_col(lcol+1)
 integer(c_int), intent(in) :: c_key_ovec
 
 type(obs_data), pointer :: self
-type(obs_vect), pointer :: ovec
-character(len=lreq) :: req
+type(obs_vector), pointer :: ovec
 character(len=lcol) :: col
 
 call obs_data_registry%get(c_key_self, self)
 call ufo_obs_vect_registry%get(c_key_ovec,ovec)
-call c_f_string(c_req, req)
 call c_f_string(c_col, col)
 
-call obs_get(self, trim(req), trim(col), ovec)
+call obs_get(self, trim(col), ovec)
 
 end subroutine ufo_obsdb_get_c
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_obsdb_put_c(c_key_self, lreq, c_req, lcol, c_col, c_key_ovec) bind(c,name='ufo_obsdb_put_f90')
+subroutine ufo_obsdb_put_c(c_key_self, lcol, c_col, c_key_ovec) bind(c,name='ufo_obsdb_put_f90')
 implicit none
 integer(c_int), intent(in) :: c_key_self
-integer(c_int), intent(in) :: lreq, lcol
-character(kind=c_char,len=1), intent(in) :: c_req(lreq+1), c_col(lcol+1)
+integer(c_int), intent(in) :: lcol
+character(kind=c_char,len=1), intent(in) :: c_col(lcol+1)
 integer(c_int), intent(in) :: c_key_ovec
 
 type(obs_data), pointer :: self
-type(obs_vect), pointer :: ovec
-character(len=lreq) :: req
+type(obs_vector), pointer :: ovec
 character(len=lcol) :: col
 
 call obs_data_registry%get(c_key_self, self)
 call ufo_obs_vect_registry%get(c_key_ovec,ovec)
-call c_f_string(c_req, req)
 call c_f_string(c_col, col)
 
-call obs_put(self, trim(req), trim(col), ovec)
+call obs_put(self, trim(col), ovec)
 
 end subroutine ufo_obsdb_put_c
 

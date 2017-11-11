@@ -28,8 +28,7 @@ module ufo_wspeed_mod
   
   !> Fortran derived type for stream function observations for the QG model
   type :: ufo_obsoper
-     character(len=30) :: request
-     type(ufo_vars) :: varin
+    integer :: nothing_here
   end type ufo_obsoper
   
 #define LISTED_TYPE ufo_obsoper
@@ -54,14 +53,10 @@ contains
     type(c_ptr), intent(in)    :: c_conf
     
     type(ufo_obsoper), pointer :: self
-    character(len=1) :: svars(2) = (/"u","v"/)
     
     call ufo_wspeed_registry%init()
     call ufo_wspeed_registry%add(c_key_self)
     call ufo_wspeed_registry%get(c_key_self, self)
-    
-    self%request = config_get_string(c_conf, len(self%request), "ObsType")
-    call ufo_vars_setup(self%varin, svars)
     
   end subroutine c_ufo_wspeed_setup
   
@@ -74,7 +69,6 @@ contains
     type(ufo_obsoper), pointer :: self
     
     call ufo_wspeed_registry%get(c_key_self, self)
-    call ufo_vars_delete(self%varin)
     call ufo_wspeed_registry%remove(c_key_self)
     
   end subroutine c_ufo_wspeed_delete
@@ -87,8 +81,9 @@ contains
     integer(c_int), intent(in) :: c_key_hofx
     real(c_double), intent(in) :: c_bias
     type(ufo_geovals), pointer  :: geovals
-    type(obs_vect), pointer :: hofx
-    
+    type(obs_vector), pointer :: hofx
+    call ufo_obs_vect_registry%get(c_key_hofx,hofx)
+    hofx%values(:) = 1.0
   end subroutine ufo_wspeed_eqv
   
   ! ------------------------------------------------------------------------------
@@ -105,7 +100,6 @@ contains
     call ufo_vars_registry%init()
     call ufo_vars_registry%add(c_key_vars)
     call ufo_vars_registry%get(c_key_vars, vars)
-    call ufo_vars_clone(self%varin, vars)
     
   end subroutine c_ufo_wspeed_inputs
   
@@ -127,21 +121,6 @@ contains
     integer(c_int), intent(in) :: c_key_traj
     real(c_double), intent(inout) :: c_bias
   end subroutine ufo_wspeed_equiv_ad
-  ! ------------------------------------------------------------------------------
-  subroutine ufo_wspeed_gettraj(c_key_self, c_nobs, c_key_traj) bind(c,name='ufo_wspeed_gettraj_f90')
-    use fckit_log_module, only : fckit_log
-    implicit none
-    integer(c_int), intent(in) :: c_key_self
-    integer(c_int), intent(in) :: c_nobs
-    integer(c_int), intent(inout) :: c_key_traj
-  end subroutine ufo_wspeed_gettraj
-  ! ------------------------------------------------------------------------------
-  subroutine ufo_wspeed_settraj(c_key_gom, c_key_traj) bind(c,name='ufo_wspeed_settraj_f90')
-    use fckit_log_module, only : fckit_log
-    implicit none
-    integer(c_int), intent(in) :: c_key_gom
-    integer(c_int), intent(in) :: c_key_traj
-  end subroutine ufo_wspeed_settraj
   ! ------------------------------------------------------------------------------
   
 end module ufo_wspeed_mod

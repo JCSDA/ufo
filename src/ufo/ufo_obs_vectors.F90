@@ -16,18 +16,18 @@ use kinds
 
 implicit none
 private
-public :: obs_vect, obsvec_setup
+public :: obs_vector, obsvec_setup
 public :: ufo_obs_vect_registry
 
 ! ------------------------------------------------------------------------------
 
 !> Fortran derived type to represent an observation vector
-type obs_vect
+type obs_vector
   integer :: nobs=0
   real(kind=kind_real), allocatable :: values(:)
-end type obs_vect
+end type obs_vector
 
-#define LISTED_TYPE obs_vect
+#define LISTED_TYPE obs_vector
 
 !> Linked list interface - defines registry_t type
 #include "linkedList_i.f"
@@ -43,28 +43,30 @@ contains
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_obsvec_setup_c(c_key_self, c_key_obspace) bind(c,name='ufo_obsvec_setup_f90')
+subroutine ufo_obsvec_setup_c(c_key_self, c_nobs) bind(c,name='ufo_obsvec_setup_f90')
 implicit none
 integer(c_int), intent(inout) :: c_key_self
-integer(c_int), intent(in) :: c_key_obspace
-type(obs_vect), pointer :: self
+integer(c_int), intent(in) :: c_nobs
+type(obs_vector), pointer :: self
+integer :: iobs
 
 call ufo_obs_vect_registry%init()
 call ufo_obs_vect_registry%add(c_key_self)
 call ufo_obs_vect_registry%get(c_key_self,self)
+iobs = c_nobs
 
-call obsvec_setup(self, 1)
+call obsvec_setup(self, iobs)
 
 end subroutine ufo_obsvec_setup_c
 
 ! ------------------------------------------------------------------------------
 
-subroutine obsvec_setup(self, no)
+subroutine obsvec_setup(self, kobs)
 implicit none
-type(obs_vect), intent(inout) :: self
-integer(c_int), intent(in)    :: no
+type(obs_vector), intent(inout) :: self
+integer, intent(in) :: kobs
 
-self%nobs=no
+self%nobs=kobs
 if (allocated(self%values)) deallocate(self%values)
 allocate(self%values(self%nobs))
 
@@ -76,7 +78,7 @@ subroutine ufo_obsvec_clone_c(c_key_self, c_key_other) bind(c,name='ufo_obsvec_c
 implicit none
 integer(c_int), intent(in)    :: c_key_self
 integer(c_int), intent(inout) :: c_key_other
-type(obs_vect), pointer :: self, other
+type(obs_vector), pointer :: self, other
 
 call ufo_obs_vect_registry%get(c_key_self,self)
 call ufo_obs_vect_registry%init()
@@ -92,7 +94,7 @@ end subroutine ufo_obsvec_clone_c
 subroutine ufo_obsvec_delete_c(c_key_self) bind(c,name='ufo_obsvec_delete_f90')
 implicit none
 integer(c_int), intent(inout) :: c_key_self
-type(obs_vect), pointer :: self
+type(obs_vector), pointer :: self
 
 call ufo_obs_vect_registry%get(c_key_self,self)
 deallocate(self%values)
@@ -105,7 +107,7 @@ subroutine ufo_obsvec_assign_c(c_key_self, c_key_rhs) bind(c,name='ufo_obsvec_as
 implicit none
 integer(c_int), intent(in) :: c_key_self
 integer(c_int), intent(in) :: c_key_rhs
-type(obs_vect), pointer :: self, rhs
+type(obs_vector), pointer :: self, rhs
 
 call ufo_obs_vect_registry%get(c_key_self,self)
 call ufo_obs_vect_registry%get(c_key_rhs,rhs)
@@ -121,7 +123,7 @@ end subroutine ufo_obsvec_assign_c
 subroutine ufo_obsvec_zero_c(c_key_self) bind(c,name='ufo_obsvec_zero_f90')
 implicit none
 integer(c_int), intent(in) :: c_key_self
-type(obs_vect), pointer :: self
+type(obs_vector), pointer :: self
 
 call ufo_obs_vect_registry%get(c_key_self,self)
 self%values(:)=0.0_kind_real
@@ -132,7 +134,7 @@ subroutine ufo_obsvec_mul_scal_c(c_key_self, zz) bind(c,name='ufo_obsvec_mul_sca
 implicit none
 integer(c_int), intent(in) :: c_key_self
 real(c_double), intent(in) :: zz
-type(obs_vect), pointer :: self
+type(obs_vector), pointer :: self
 
 call ufo_obs_vect_registry%get(c_key_self,self)
 self%values(:)=zz*self%values(:)
@@ -143,7 +145,7 @@ subroutine ufo_obsvec_add_c(c_key_self, c_key_other) bind(c,name='ufo_obsvec_add
 implicit none
 integer(c_int), intent(in) :: c_key_self
 integer(c_int), intent(in) :: c_key_other
-type(obs_vect), pointer :: self, other
+type(obs_vector), pointer :: self, other
 
 call ufo_obs_vect_registry%get(c_key_self,self)
 call ufo_obs_vect_registry%get(c_key_other,other)
@@ -155,7 +157,7 @@ subroutine ufo_obsvec_sub_c(c_key_self, c_key_other) bind(c,name='ufo_obsvec_sub
 implicit none
 integer(c_int), intent(in) :: c_key_self
 integer(c_int), intent(in) :: c_key_other
-type(obs_vect), pointer :: self, other
+type(obs_vector), pointer :: self, other
 
 call ufo_obs_vect_registry%get(c_key_self,self)
 call ufo_obs_vect_registry%get(c_key_other,other)
@@ -167,7 +169,7 @@ subroutine ufo_obsvec_mul_c(c_key_self, c_key_other) bind(c,name='ufo_obsvec_mul
 implicit none
 integer(c_int), intent(in) :: c_key_self
 integer(c_int), intent(in) :: c_key_other
-type(obs_vect), pointer :: self, other
+type(obs_vector), pointer :: self, other
 
 call ufo_obs_vect_registry%get(c_key_self,self)
 call ufo_obs_vect_registry%get(c_key_other,other)
@@ -179,7 +181,7 @@ subroutine ufo_obsvec_div_c(c_key_self, c_key_other) bind(c,name='ufo_obsvec_div
 implicit none
 integer(c_int), intent(in) :: c_key_self
 integer(c_int), intent(in) :: c_key_other
-type(obs_vect), pointer :: self, other
+type(obs_vector), pointer :: self, other
 
 call ufo_obs_vect_registry%get(c_key_self,self)
 call ufo_obs_vect_registry%get(c_key_other,other)
@@ -192,7 +194,7 @@ implicit none
 integer(c_int), intent(in) :: c_key_self
 real(c_double), intent(in) :: zz
 integer(c_int), intent(in) :: c_key_other
-type(obs_vect), pointer :: self, other
+type(obs_vector), pointer :: self, other
 
 call ufo_obs_vect_registry%get(c_key_self,self)
 call ufo_obs_vect_registry%get(c_key_other,other)
@@ -203,7 +205,7 @@ end subroutine ufo_obsvec_axpy_c
 subroutine ufo_obsvec_invert_c(c_key_self) bind(c,name='ufo_obsvec_invert_f90')
 implicit none
 integer(c_int), intent(in) :: c_key_self
-type(obs_vect), pointer :: self
+type(obs_vector), pointer :: self
 
 call ufo_obs_vect_registry%get(c_key_self,self)
 self%values(:)=1.0_kind_real/self%values(:)
@@ -213,7 +215,7 @@ end subroutine ufo_obsvec_invert_c
 subroutine ufo_obsvec_random_c(c_key_self) bind(c,name='ufo_obsvec_random_f90')
 implicit none
 integer(c_int), intent(in) :: c_key_self
-type(obs_vect), pointer :: self
+type(obs_vector), pointer :: self
 
 !call ufo_obs_vect_registry%get(c_key_self,self)
 !call random_vector(self%values)
@@ -225,7 +227,7 @@ implicit none
 integer(c_int), intent(in) :: c_key_self
 integer(c_int), intent(in) :: c_key_other
 real(c_double), intent(inout) :: zz
-type(obs_vect), pointer :: self, other
+type(obs_vector), pointer :: self, other
 integer :: jo
 
 zz=0.0_kind_real
@@ -241,7 +243,7 @@ subroutine ufo_obsvec_minmaxavg_c(c_key_self, zmin, zmax, zavg) bind(c,name='ufo
 implicit none
 integer(c_int), intent(in)    :: c_key_self
 real(c_double), intent(inout) :: zmin, zmax, zavg
-type(obs_vect), pointer :: self
+type(obs_vector), pointer :: self
 
 call ufo_obs_vect_registry%get(c_key_self,self)
 if (self%nobs>0) then
@@ -260,7 +262,7 @@ subroutine ufo_obsvec_nobs_c(c_key_self, kobs) bind(c,name='ufo_obsvec_nobs_f90'
 implicit none
 integer(c_int), intent(in)    :: c_key_self
 integer(c_int), intent(inout) :: kobs
-type(obs_vect), pointer :: self
+type(obs_vector), pointer :: self
 
 call ufo_obs_vect_registry%get(c_key_self,self)
 kobs=self%nobs
