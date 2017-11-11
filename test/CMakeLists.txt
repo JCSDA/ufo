@@ -1,5 +1,6 @@
 list( APPEND ufo_test_input
   testinput/ufotest.json
+  amsua_n19_wprofiles.nc4
 )
 
 # Create Data directory for test input and symlink all files

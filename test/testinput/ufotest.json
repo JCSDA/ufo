@@ -18,7 +18,7 @@
         "norm": "27687.134048",
         "nvars": "4",
         "variables": "t prse u v",
-        "filename": "Data/amsua_n19_wprofiles.gv.nc4"
+        "filename": "Data/amsua_n19_wprofiles.nc4"
       },
       "rmsequiv": "1.0"
     }]
