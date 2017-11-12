@@ -173,9 +173,7 @@ call ufo_geovals_registry%init()
 call ufo_geovals_registry%add(c_key_geovals)
 call ufo_geovals_registry%get(c_key_geovals,geovals)
 
-geovals%lalloc = .false. ! very bad! should just call init that adds to registry 
-geovals%linit  = .false. ! and initalizes!!!
-
+call ufo_geovals_init(geovals)
 call ufo_geovals_setup(geovals, vars, self%nobs)
 
 end subroutine ufo_obsdb_getgeovals_c

@@ -89,7 +89,6 @@ contains
     type(ufo_geovals), pointer  :: geovals
     type(obs_vector), pointer :: hofx
 
-
     !*************************************************************************************
     !******* Begin CRTM block ************************************************************
     !*************************************************************************************
@@ -108,7 +107,7 @@ contains
     !** temporary local path for storing coefficient files (2 files per sensor), also several non-sensor specific binary files needed for other things
     !** NOTE: for some strange reason, this compiled as little endian, even though BIG_ENDIAN was specified on the compiler flags
     CHARACTER(*), PARAMETER :: ENDIAN_TYPE='little_endian'
-    CHARACTER(*), PARAMETER :: COEFFICIENT_PATH='/home/vagrant/jedi/code/crtm/libsrc/test/coefficients/little_endian/'  
+    CHARACTER(*), PARAMETER :: COEFFICIENT_PATH='Data/'
 
     ! Profile dimensions
     !** UFO to provide N_LAYERS, N_ABSORBERS, N_CLOUDS, N_AEROSOLS
@@ -136,7 +135,7 @@ contains
     CHARACTER(256) :: message, version
     INTEGER :: err_stat, alloc_stat
     INTEGER :: n_channels
-    INTEGER :: l, m, n, nc
+    INTEGER :: l, m, n, nc, i
     real(fp) :: cf
     
     
@@ -166,6 +165,11 @@ contains
     
     ! Program header
     ! --------------
+
+    ! Get pointers to geovals and hofx
+    call ufo_geovals_registry%get(c_key_geovals,geovals)
+    call ufo_obs_vect_registry%get(c_key_hofx,hofx)
+
     CALL CRTM_Version( Version )
     CALL Program_Message( PROGRAM_NAME, &
          'Check/example program for the CRTM Forward and K-Matrix functions using '//&
@@ -352,7 +356,15 @@ contains
              !print '(A,F12.3)', 'TB:', rts(l,m)%Brightness_Temperature
           END DO
        END DO
-       
+
+       ! output to hofx structure   
+       i = 1
+       do m = 1, N_PROFILES
+         do l = 1, n_Channels
+           hofx%values(i) = rts(l,m)%Brightness_Temperature !AS: I'm guessing here.
+           i = i + 1
+         enddo
+       enddo
        
        ! ==========================================================================
        ! STEP 9. **** CLEAN UP FOR NEXT SENSOR ****
