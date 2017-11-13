@@ -4,26 +4,29 @@ GeoVaLs.cc
 GeoVaLs.h
 Locations.h
 ObsBias.h
+ObsRadiance.cc
+ObsRadiance.h
 ObsSpace.cc
 ObsSpace.h
 ObsVector.cc
 ObsVector.h
 ObsWSpeed.cc
 ObsWSpeed.h
-ObsRadiance.cc
-ObsRadiance.h
 UfoTrait.h
-Variables.h
 Variables.cc
+Variables.h
+random_f.cc
+random_f.h
+random_vectors_mod.F90
 ufo_geovals_mod.F90
 ufo_geovals_mod_c.F90
 ufo_locs_mod.F90
 ufo_obs_data.F90
 ufo_obs_vectors.F90
+ufo_radiance_mod.F90
 ufo_variables_mod.F90
 ufo_variables_mod_c.F90
 ufo_wspeed_mod.F90
-ufo_radiance_mod.F90
 )
 
 ecbuild_add_library( TARGET   ufo
