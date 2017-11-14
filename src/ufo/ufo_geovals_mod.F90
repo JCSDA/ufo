@@ -219,7 +219,6 @@ prod=0.0
 do jo=1,self%nobs
   prod=prod+self%geovals(1,jo)%vals(1)*other%geovals(1,jo)%vals(1)
 enddo
-
 end subroutine ufo_geovals_dotprod
 
 ! ------------------------------------------------------------------------------
@@ -268,6 +267,7 @@ nval = nsig
 allocate(field(nval, nobs))
 do ivar = 1, vars%nv
   call nc_diag_read_get_var(iunit, varsfile%fldnames(ivar), field)
+  print *, 'reading ', trim(varsfile%fldnames(ivar)), minval(field), maxval(field)
   do iobs = 1, nobs
     self%geovals(ivar,iobs)%nval = nval
     allocate(self%geovals(ivar,iobs)%vals(nval))
@@ -275,7 +275,6 @@ do ivar = 1, vars%nv
   enddo
 enddo
 deallocate(field)
-
 self%linit = .true.
 
 call nc_diag_read_close(filename)
@@ -332,7 +331,7 @@ vars%fldnames(6) = 'Geopotential height';  varsfile%fldnames(6) = 'hsges'
 
 call ufo_geovals_read_prof_netcdf(self, filename, vars, varsfile)
 
-call ufo_geovals_print(self, 1)
+!call ufo_geovals_print(self, 1)
 
 end subroutine ufo_geovals_read_t_netcdf
 
@@ -353,21 +352,21 @@ logical :: lfound
 
 real :: z, dz
 
-! variables hardcoded for the temperature
+! variables hardcoded for the wind
 nvar_prof = 5
 
 ! allocate and fill in variables
 vars%nv = nvar_prof; varsfile%nv = nvar_prof
 allocate(vars%fldnames(vars%nv), varsfile%fldnames(varsfile%nv))
-vars%fldnames(1) = 'Virtual temperature';  varsfile%fldnames(1) = 'tges'
-vars%fldnames(2) = 'U-wind';               varsfile%fldnames(2) = 'uges'
-vars%fldnames(3) = 'V-wind';               varsfile%fldnames(3) = 'vges'
-vars%fldnames(4) = 'LogPressure';          varsfile%fldnames(4) = 'prsltmp'
-vars%fldnames(5) = 'Geopotential height';  varsfile%fldnames(5) = 'zges'
+vars%fldnames(1) = 'U-wind';               varsfile%fldnames(1) = 'uges'
+vars%fldnames(2) = 'V-wind';               varsfile%fldnames(2) = 'vges'
+vars%fldnames(3) = 'LogPressure';          varsfile%fldnames(3) = 'prsltmp'
+vars%fldnames(4) = 'Geopotential height';  varsfile%fldnames(4) = 'zges'
+vars%fldnames(5) = 'Virtual temperature';  varsfile%fldnames(5) = 'tges'
 
 call ufo_geovals_read_prof_netcdf(self, filename, vars, varsfile)
 
-call ufo_geovals_print(self, 1)
+!call ufo_geovals_print(self, 1)
 
 !varname = 'LogPressure'
 !lfound =  ufo_geovals_get_var(self, 1, varname, geoval)
@@ -411,7 +410,7 @@ vars%fldnames(3) = 'LogPressure';          varsfile%fldnames(3) = 'prsltmp'
 
 call ufo_geovals_read_prof_netcdf(self, filename, vars, varsfile)
 
-call ufo_geovals_print(self,23320)
+!call ufo_geovals_print(self,23320)
 
 end subroutine ufo_geovals_read_q_netcdf
 
@@ -447,6 +446,7 @@ allocate(vars%fldnames(vars%nv), varsfile%fldnames(varsfile%nv))
 vars%fldnames(1) = 'LogPressure';          varsfile%fldnames(1) = 'prsltmp'
 vars%fldnames(2) = 'Virtual temperature';  varsfile%fldnames(2) = 'tvtmp'
 
+! warning: LogSurface pressure isn't actually what it should be.
 vars%fldnames(3) = 'LogSurface pressure';  varsfile%fldnames(3) = 'psges'
 vars%fldnames(4) = 'Surface height';       varsfile%fldnames(4) = 'zsges'
 
@@ -462,6 +462,7 @@ nval = nsig
 allocate(field(nval, nobs))
 do ivar = 1, nvar_prof
   call nc_diag_read_get_var(iunit, varsfile%fldnames(ivar), field)
+  print *, 'reading ', trim(varsfile%fldnames(ivar)), minval(field), maxval(field)
   do iobs = 1, nobs
     self%geovals(ivar,iobs)%nval = nval
     allocate(self%geovals(ivar,iobs)%vals(nval))
@@ -474,6 +475,7 @@ nval = 1
 allocate(field1d(nobs))
 do ivar = nvar_prof+1, nvar_prof+nvar_surf
   call nc_diag_read_get_var(iunit, varsfile%fldnames(ivar), field1d)
+  print *, 'reading ', trim(varsfile%fldnames(ivar)), minval(field1d), maxval(field1d)
   do iobs = 1, nobs
     self%geovals(ivar,iobs)%nval = nval
     allocate(self%geovals(ivar,iobs)%vals(nval))
@@ -486,7 +488,7 @@ self%linit = .true.
 
 call nc_diag_read_close(filename)
 
-call ufo_geovals_print(self, 1)
+!call ufo_geovals_print(self, 1)
 
 end subroutine ufo_geovals_read_ps_netcdf
 
@@ -615,6 +617,7 @@ nval = 1
 allocate(field1d(nobs))
 do ivar = nvar_prof+1, nvar_prof+nvar_surf_real
   call nc_diag_read_get_var(iunit, self%variables%fldnames(ivar), field1d)
+  print *, 'reading ', trim(self%variables%fldnames(ivar)), minval(field1d), maxval(field1d)
   do iobs = 1, nobs
     self%geovals(ivar,iobs)%nval = nval
     allocate(self%geovals(ivar,iobs)%vals(nval))
@@ -628,6 +631,7 @@ nval = 1
 allocate(field1di(nobs))
 do ivar = nvar_prof+nvar_surf_real+1, nvar_prof+nvar_surf_real+nvar_surf_int
   call nc_diag_read_get_var(iunit, self%variables%fldnames(ivar), field1di)
+  print *, 'reading ', trim(self%variables%fldnames(ivar)), minval(field1di), maxval(field1di)
   do iobs = 1, nobs
     self%geovals(ivar,iobs)%nval = nval
     allocate(self%geovals(ivar,iobs)%vals(nval))
@@ -640,7 +644,7 @@ self%linit = .true.
 
 call nc_diag_read_close(filename)
 
-call ufo_geovals_print(self, 1)
+!call ufo_geovals_print(self, 1)
 ! Example of getting a variable below:
 !varname = 'Ozone'
 !lfound =  ufo_geovals_get_var(self, 1, varname, geoval)

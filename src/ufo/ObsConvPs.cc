@@ -5,7 +5,7 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
  */
 
-#include "ObsConvQ.h"
+#include "ObsConvPs.h"
 
 #include "eckit/config/Configuration.h"
 #include "GeoVaLs.h"
@@ -19,38 +19,38 @@
 // -----------------------------------------------------------------------------
 namespace ufo {
 // -----------------------------------------------------------------------------
-static oops::ObsOperatorMaker<UfoTrait, ObsConvQ> makerConvQ_("ConvQ");
+static oops::ObsOperatorMaker<UfoTrait, ObsConvPs> makerConvPs_("ConvPs");
 // -----------------------------------------------------------------------------
 
-ObsConvQ::ObsConvQ(const ObsSpace & odb, const eckit::Configuration & config)
-  : keyOperConvQ_(0), varin_()
+ObsConvPs::ObsConvPs(const ObsSpace & odb, const eckit::Configuration & config)
+  : keyOperConvPs_(0), varin_()
 {
   const eckit::Configuration * configc = &config;
-  ufo_conv_setup_f90(keyOperConvQ_, &configc);
+  ufo_conv_setup_f90(keyOperConvPs_, &configc);
   int keyVarin;
-  ufo_conv_inputs_f90(keyOperConvQ_, keyVarin);
+  ufo_conv_inputs_f90(keyOperConvPs_, keyVarin);
   varin_.reset(new Variables(keyVarin));
-  oops::Log::trace() << "ObsConvQ created." << std::endl;
+  oops::Log::trace() << "ObsConvPs created." << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
-ObsConvQ::~ObsConvQ() {
-  ufo_conv_delete_f90(keyOperConvQ_);
-  oops::Log::trace() << "ObsConvQ destructed" << std::endl;
+ObsConvPs::~ObsConvPs() {
+  ufo_conv_delete_f90(keyOperConvPs_);
+  oops::Log::trace() << "ObsConvPs destructed" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
-void ObsConvQ::obsEquiv(const GeoVaLs & gom, ObsVector & ovec,
+void ObsConvPs::obsEquiv(const GeoVaLs & gom, ObsVector & ovec,
                          const ObsBias & bias) const {
-  ufo_conv_q_eqv_f90(gom.toFortran(), ovec.toFortran());
+  ufo_conv_ps_eqv_f90(gom.toFortran(), ovec.toFortran());
 }
 
 // -----------------------------------------------------------------------------
 
-void ObsConvQ::print(std::ostream & os) const {
-  os << "ObsConvQ::print not implemented";
+void ObsConvPs::print(std::ostream & os) const {
+  os << "ObsConvPs::print not implemented";
 }
 
 // -----------------------------------------------------------------------------
