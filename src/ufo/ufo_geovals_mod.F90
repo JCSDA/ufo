@@ -440,17 +440,15 @@ real(8), allocatable :: field1d(:)
 integer :: iobs, ivar, nval
 
 ! variables hardcoded for the surface pressure
-nvar_prof = 2; nvar_surf = 2
+nvar_prof = 1; nvar_surf = 2
 
 ! allocate and fill in variables
 vars%nv = nvar_prof+nvar_surf; varsfile%nv = nvar_prof+nvar_surf
 allocate(vars%fldnames(vars%nv), varsfile%fldnames(varsfile%nv))
-vars%fldnames(1) = 'LogPressure';          varsfile%fldnames(1) = 'prsltmp'
-vars%fldnames(2) = 'Virtual temperature';  varsfile%fldnames(2) = 'tvtmp'
+vars%fldnames(1) = 'LogPressure';       varsfile%fldnames(1) = 'prsltmp'
 
-! warning: LogSurface pressure isn't actually what it should be.
-vars%fldnames(3) = 'LogSurface pressure';  varsfile%fldnames(3) = 'psges'
-vars%fldnames(4) = 'Surface height';       varsfile%fldnames(4) = 'zsges'
+vars%fldnames(2) = 'Surface pressure';  varsfile%fldnames(2) = 'psges'
+vars%fldnames(3) = 'Surface height';    varsfile%fldnames(3) = 'zsges'
 
 ! open netcdf file and read dimensions
 call nc_diag_read_init(filename, iunit)
