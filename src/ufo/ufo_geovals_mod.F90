@@ -11,10 +11,11 @@ use ufo_vars_mod
 
 implicit none
 private
-public :: ufo_geovals
+public :: ufo_geovals, ufo_geoval
 public :: ufo_geovals_registry
 public :: ufo_geovals_init, ufo_geovals_setup, ufo_geovals_delete
 public :: ufo_geovals_zero, ufo_geovals_random, ufo_geovals_dotprod
+public :: ufo_geovals_get_var
 public :: ufo_geovals_minmaxavg
 public :: ufo_geovals_read_t_netcdf, ufo_geovals_read_q_netcdf
 public :: ufo_geovals_read_uv_netcdf, ufo_geovals_read_ps_netcdf
@@ -283,19 +284,20 @@ end subroutine ufo_geovals_read_prof_netcdf
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_geovals_print(self)
+subroutine ufo_geovals_print(self, iobs)
 implicit none
 type(ufo_geovals), intent(inout) :: self
-
+integer, intent(in) :: iobs
 type(ufo_geoval) :: geoval
 character(MAXVARLEN) :: varname
 logical :: lfound
+
 
 integer :: ivar
 
 do ivar = 1, self%nvar
   varname = self%variables%fldnames(ivar)
-  lfound =  ufo_geovals_get_var(self, 1, varname, geoval)
+  lfound =  ufo_geovals_get_var(self, iobs, varname, geoval)
   if (lfound) then
     print *, 'geoval test: ', trim(varname), geoval%nval, geoval%vals
   else
@@ -330,7 +332,7 @@ vars%fldnames(6) = 'Geopotential height';  varsfile%fldnames(6) = 'hsges'
 
 call ufo_geovals_read_prof_netcdf(self, filename, vars, varsfile)
 
-call ufo_geovals_print(self)
+call ufo_geovals_print(self, 1)
 
 end subroutine ufo_geovals_read_t_netcdf
 
@@ -349,6 +351,8 @@ type(ufo_geoval) :: geoval
 character(MAXVARLEN) :: varname
 logical :: lfound
 
+real :: z, dz
+
 ! variables hardcoded for the temperature
 nvar_prof = 5
 
@@ -363,16 +367,30 @@ vars%fldnames(5) = 'Geopotential height';  varsfile%fldnames(5) = 'zges'
 
 call ufo_geovals_read_prof_netcdf(self, filename, vars, varsfile)
 
-call ufo_geovals_print(self)
+call ufo_geovals_print(self, 1)
+
+!varname = 'LogPressure'
+!lfound =  ufo_geovals_get_var(self, 1, varname, geoval)
+!if (lfound) then
+!  z = 1.92333756101081
+!  dz = interp_weight(z, geoval%vals, geoval%nval)
+!  print *, 'geoval pressure test: ', z, dz
+!  varname = 'U-wind'
+!  lfound = ufo_geovals_get_var(self, 1, varname, geoval)
+!  if (lfound) then
+!    z = vert_interp(geoval%vals, geoval%nval, dz)
+!    print *, 'geoval pressure test: interpolated u: ', z
+!  else
+!    print *, 'geoval test: ', trim(varname), ' doesnt exist'
+!  endif
+!else
+!  print *, 'geoval test: ', trim(varname), ' doesnt exist'
+!endif
 
 end subroutine ufo_geovals_read_uv_netcdf
 
 ! ------------------------------------------------------------------------------
 subroutine ufo_geovals_read_q_netcdf(self, filename)
-use nc_diag_read_mod, only: nc_diag_read_get_var
-use nc_diag_read_mod, only: nc_diag_read_get_dim
-use nc_diag_read_mod, only: nc_diag_read_init, nc_diag_read_close
-
 implicit none
 type(ufo_geovals), intent(inout) :: self
 character(128), intent(in)       :: filename
@@ -380,10 +398,6 @@ character(128), intent(in)       :: filename
 type(ufo_vars) :: vars, varsfile
 
 integer :: nvar_prof
-
-type(ufo_geoval) :: geoval
-character(MAXVARLEN) :: varname
-logical :: lfound
 
 ! variables hardcoded for the temperature
 nvar_prof = 3
@@ -397,7 +411,7 @@ vars%fldnames(3) = 'LogPressure';          varsfile%fldnames(3) = 'prsltmp'
 
 call ufo_geovals_read_prof_netcdf(self, filename, vars, varsfile)
 
-call ufo_geovals_print(self)
+call ufo_geovals_print(self,23320)
 
 end subroutine ufo_geovals_read_q_netcdf
 
@@ -472,7 +486,7 @@ self%linit = .true.
 
 call nc_diag_read_close(filename)
 
-call ufo_geovals_print(self)
+call ufo_geovals_print(self, 1)
 
 end subroutine ufo_geovals_read_ps_netcdf
 
@@ -626,7 +640,7 @@ self%linit = .true.
 
 call nc_diag_read_close(filename)
 
-call ufo_geovals_print(self)
+call ufo_geovals_print(self, 1)
 ! Example of getting a variable below:
 !varname = 'Ozone'
 !lfound =  ufo_geovals_get_var(self, 1, varname, geoval)

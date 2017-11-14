@@ -96,6 +96,15 @@ extern "C" {
   void ufo_radiance_inputs_f90(const F90hop &, F90vars &);
 
 // -----------------------------------------------------------------------------
+//  Conventional q observations
+// -----------------------------------------------------------------------------
+  void ufo_convq_setup_f90(F90hop &, const eckit::Configuration * const *);
+  void ufo_convq_delete_f90(F90hop &);
+
+  void ufo_convq_eqv_f90(const F90goms &, const F90ovec &);
+  void ufo_convq_inputs_f90(const F90hop &, F90vars &);
+
+// -----------------------------------------------------------------------------
 //  Observation Vectors
 // -----------------------------------------------------------------------------
   void ufo_obsvec_setup_f90(F90ovec &, const F90odb &);
