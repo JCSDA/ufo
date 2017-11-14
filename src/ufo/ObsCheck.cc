@@ -32,9 +32,8 @@ ObsCheck::ObsCheck(const ObsSpace & obsdb, const Variables & var,
 
 ObsCheck::ObsCheck(const eckit::Configuration & config) {
   oops::Log::trace() << "ObsCheck contructor config starting" << std::endl;
-//  ufo_obscheck_create_f90(keyObsCheck_);
   const eckit::Configuration * conf = &config;
-//  ufo_obscheck_read_file_f90(keyObsCheck_, &conf);
+  ufo_obscheck_setup_f90(keyObsCheck_, &conf);
   oops::Log::trace() << "ObsCheck contructor config key = " << keyObsCheck_ << std::endl;
 }
 
@@ -48,7 +47,8 @@ ObsCheck::ObsCheck(const ObsSpace & os) {
 // -----------------------------------------------------------------------------
 
 ObsCheck::~ObsCheck() {
-//  ufo_obscheck_delete_f90(keyObsCheck_);
+  ufo_obscheck_delete_f90(keyObsCheck_);
+  oops::Log::trace() << "ObsCheck destructed" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
@@ -61,15 +61,15 @@ void ObsCheck::print(std::ostream & os) const {
 
 void ObsCheck::postFilter(const GeoVaLs & gv, const ObsVector & ov, const ObsSpace & os) const {
   oops::Log::trace() << "ObsCheck postFilter starting" << std::endl;
-  ufo_postFilter_f90(gv.toFortran(), ov.toFortran());
+  ufo_postFilter_f90(gv.toFortran(), ov.toFortran(), os.toFortran());
   oops::Log::trace() << "ObsCheck postFilter end" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
-void ObsCheck::priorFilter(const GeoVaLs & gv, const ObsVector & ov, const ObsSpace & os) const {
+void ObsCheck::priorFilter(const ObsSpace & os) const {
   oops::Log::trace() << "ObsCheck priorFilter starting" << std::endl;
-  ufo_priorFilter_f90(gv.toFortran(), ov.toFortran());
+  ufo_priorFilter_f90(os.toFortran());
   oops::Log::trace() << "ObsCheck priorFilter end" << std::endl;
 }
 

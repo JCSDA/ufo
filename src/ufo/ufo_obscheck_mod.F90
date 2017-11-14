@@ -11,6 +11,7 @@ use ufo_vars_mod
 use ufo_obs_vectors
 use ufo_locs_mod
 use ufo_geovals_mod
+use ufo_obs_data, only: obs_data
 use kinds
 
 implicit none
@@ -23,11 +24,6 @@ public :: ufo_obscheck_registry
 type :: ufo_obscheck
   integer :: nobs
   integer :: nvar
-  integer :: used
-  integer, allocatable :: indx(:)
-  real(kind=kind_real), allocatable :: values(:,:)
-  character(len=1), allocatable :: variables(:)
-  logical :: lalloc
 end type ufo_obscheck
 
 #define LISTED_TYPE ufo_obscheck
@@ -46,80 +42,59 @@ contains
 
 ! ------------------------------------------------------------------------------
 
-subroutine c_ufo_obscheck_create(c_key_self) bind(c,name='ufo_obscheck_create_f90')
+subroutine c_ufo_obscheck_setup(c_key_self, c_conf) bind(c,name='ufo_obscheck_setup_f90')
+   implicit none
+   integer(c_int), intent(in) :: c_key_self
+   type(c_ptr), intent(in)    :: c_conf
+   type(ufo_obscheck), pointer :: self
 
-implicit none
-integer(c_int), intent(inout) :: c_key_self
+   call ufo_obscheck_registry%init()
+   call ufo_obscheck_registry%add(c_key_self)
+   call ufo_obscheck_registry%get(c_key_self, self)
 
-type(ufo_obscheck), pointer :: self
-
-call ufo_obscheck_registry%init()
-call ufo_obscheck_registry%add(c_key_self)
-call ufo_obscheck_registry%get(c_key_self, self)
-
-write(*,*) 'Here in c_ufo_obscheck_create ========='
-self%lalloc = .false.
-
-end subroutine c_ufo_obscheck_create
+end subroutine c_ufo_obscheck_setup
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_obscheck_read_file_c(c_key_self, c_conf) bind(c,name='ufo_obscheck_read_file_f90')
-use config_mod
-use fckit_log_module, only : fckit_log
-implicit none
-integer(c_int), intent(in) :: c_key_self
-type(c_ptr), intent(in)    :: c_conf
-type(ufo_obscheck), pointer :: self
+subroutine c_ufo_obscheck_delete(c_key_self) bind(c,name='ufo_obscheck_delete_f90')
+    implicit none
+    integer(c_int), intent(inout) :: c_key_self
 
-call ufo_obscheck_registry%get(c_key_self, self)
+    type(ufo_obscheck), pointer :: self
 
-write(*,*) 'Here in ufo_obscheck_read_file_c========='
-self%nobs=1
-self%nvar=1
-self%used=0
+    call ufo_obscheck_registry%get(c_key_self, self)
+    call ufo_obscheck_registry%remove(c_key_self)
 
-allocate(self%indx(self%nobs))
-self%indx(1)=1
-
-allocate(self%variables(self%nvar))
-self%variables(1)="z"
-
-allocate(self%values(self%nvar,self%nobs))
-
-self%values(:,:)=1.0_kind_real
-
-self%lalloc = .true.
-
-end subroutine ufo_obscheck_read_file_c
+end subroutine c_ufo_obscheck_delete
 
 ! ------------------------------------------------------------------------------
 
-subroutine c_ufo_postFilter_f90(c_key_geovals, c_key_hofx) bind(c,name='ufo_postFilter_f90')
+subroutine c_ufo_postFilter_f90(c_key_geovals, c_key_hofx,c_key_obsspace) bind(c,name='ufo_postFilter_f90')
 
     implicit none
     integer(c_int), intent(in) :: c_key_geovals
     integer(c_int), intent(in) :: c_key_hofx
+    integer(c_int), intent(in) :: c_key_obsspace
     type(ufo_geovals), pointer  :: geovals
     type(obs_vector), pointer :: hofx
 
-
-write(*,*) 'ufo_postFilter_f90_c========='
+    write(*,*) '=======Start Post Filter (observation QC)========='
+    write(*,*) '=======End Post Filter (observation QC)========='
 
 end subroutine c_ufo_postFilter_f90
 
 ! ------------------------------------------------------------------------------
 
-subroutine c_ufo_priorFilter_f90(c_key_geovals, c_key_hofx) bind(c,name='ufo_priorFilter_f90')
+subroutine c_ufo_priorFilter_f90(c_key_obsspace) bind(c,name='ufo_priorFilter_f90')
 
     implicit none
-    integer(c_int), intent(in) :: c_key_geovals
-    integer(c_int), intent(in) :: c_key_hofx
-    type(ufo_geovals), pointer  :: geovals
-    type(obs_vector), pointer :: hofx
+    integer(c_int), intent(in) :: c_key_obsspace
+    
+    type(obs_data) :: obsdata
 
-
-write(*,*) 'ufo_priorFilter_f90_c========='
+    write(*,*) '=======Start Prior Filter (observation QC)========='
+    write(*,*) 'read obs==',obsdata%nobs
+    write(*,*) '=======End Proir Filter (observation QC)========='
 
 end subroutine c_ufo_priorFilter_f90
 
