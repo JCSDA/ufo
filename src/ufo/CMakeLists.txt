@@ -4,6 +4,8 @@ GeoVaLs.cc
 GeoVaLs.h
 Locations.h
 ObsBias.h
+ObsCheck.cc
+ObsCheck.h
 ObsSpace.cc
 ObsSpace.h
 ObsVector.cc
@@ -18,6 +20,7 @@ Variables.cc
 ufo_geovals_mod.F90
 ufo_geovals_mod_c.F90
 ufo_locs_mod.F90
+ufo_obscheck_mod.F90
 ufo_obs_data.F90
 ufo_obs_vectors.F90
 ufo_variables_mod.F90

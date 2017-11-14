@@ -50,6 +50,12 @@ ecbuild_add_test( TARGET  test_ufo_obsoperator
                   ARGS    "testinput/ufotest.json"
                   LIBS    ufo )
 
+ecbuild_add_test( TARGET  test_ufo_obscheck
+                  BOOST
+                  SOURCES mains/TestObsCheck.cc
+                  ARGS    "testinput/ufotest.json"
+                  LIBS    ufo )
+
 #####################################################################
 # Files for CRTM tests
 #####################################################################

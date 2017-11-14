@@ -32,6 +32,8 @@ typedef int F90ovec;
 typedef int F90hop;
 // Observation space type
 typedef int F90odb;
+// Observation check key type
+typedef int F90ocheck;
 
 /// Interface to Fortran UFO routines
 /*!
@@ -94,6 +96,11 @@ extern "C" {
   void ufo_radiance_gettraj_f90(const F90hop &, const int &, F90goms &);  // copied over from wspeed, don't think it's required
   void ufo_radiance_settraj_f90(const F90goms &, const F90goms &);   // copied over from wspeed, don't think it's required
   void ufo_radiance_inputs_f90(const F90hop &, F90vars &);
+
+// -----------------------------------------------------------------------------
+//  Observation Check
+// -----------------------------------------------------------------------------
+  void ufo_postFilter_f90(const F90goms &, const F90ovec &);
 
 // -----------------------------------------------------------------------------
 //  Observation Vectors
