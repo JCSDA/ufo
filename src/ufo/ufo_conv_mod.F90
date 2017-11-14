@@ -191,6 +191,81 @@ print *, 'conv q test: max diff: ', maxval(abs(hofx%values-(obs-omf))/abs(hofx%v
 deallocate(obstype, obs, omf, pres)
 
 end subroutine ufo_conv_q_eqv_c
+
+! ------------------------------------------------------------------------------
+subroutine ufo_conv_t_eqv_c(c_key_geovals, c_key_hofx, c_bias) bind(c,name='ufo_conv_t_eqv_f90')
+use nc_diag_read_mod, only: nc_diag_read_get_var
+use nc_diag_read_mod, only: nc_diag_read_get_dim
+use nc_diag_read_mod, only: nc_diag_read_init, nc_diag_read_close
+
+implicit none
+integer(c_int), intent(in) :: c_key_geovals
+integer(c_int), intent(in) :: c_key_hofx
+real(c_double), intent(in) :: c_bias
+type(ufo_geovals), pointer  :: geovals
+type(obs_vector), pointer :: hofx
+
+character(128) :: filename
+integer :: iunit
+
+real(8), allocatable :: pres(:), omf(:), obs(:)
+integer, allocatable :: obstype(:)
+
+integer :: iobs, nobs
+real :: z, dz
+
+logical :: lfound
+type(ufo_geoval) :: geoval
+character(MAXVARLEN) :: varname
+
+! Get pointers to geovals and hofx
+call ufo_geovals_registry%get(c_key_geovals,geovals)
+call ufo_obs_vect_registry%get(c_key_hofx,hofx)
+
+! open netcdf file and read some stuff (it should be in the obs_data)
+filename='Data/diag_t_01_wprofiles.nc4'
+call nc_diag_read_init(filename, iunit)
+nobs = nc_diag_read_get_dim(iunit,'nobs')
+allocate(pres(nobs))
+call nc_diag_read_get_var(iunit, "Pressure", pres)
+allocate(obstype(nobs))
+call nc_diag_read_get_var(iunit, "Observation_Type", obstype)
+allocate(obs(nobs), omf(nobs))
+call nc_diag_read_get_var(iunit, "Observation", obs)
+call nc_diag_read_get_var(iunit, "Obs_Minus_Forecast_unadjusted", omf)
+call nc_diag_read_close(filename)
+
+if (nobs /= geovals%nobs) then
+  print *, 'convt: error: nobs inconsistent!'
+endif
+
+print *, 'ufoconvt: nobs ', nobs, geovals%nobs, hofx%nobs
+do iobs = 1, nobs
+  varname = 'LogPressure'
+  lfound =  ufo_geovals_get_var(geovals, iobs, varname, geoval)
+  if (lfound) then
+    z = log(pres(iobs)/10.)
+    dz = interp_weight(z, geoval%vals, geoval%nval)
+    ! hardcoded for ships, buoys (?)
+    if((obstype(iobs) > 179 .and. obstype(iobs) < 186) .or. obstype(iobs) == 199) dz=1.
+    varname = 'Virtual temperature'
+    lfound = ufo_geovals_get_var(geovals, iobs, varname, geoval)
+    if (lfound) then
+      hofx%values(iobs) = vert_interp(geoval%vals, geoval%nval, dz)
+!      print *, 'convt test: interpolated q: ', hofx%values(iobs)
+!      print *, 'convt test: from gsi: ', obs(iobs) - omf(iobs)
+    else
+      print *, 'convt test: ', trim(varname), ' doesnt exist'
+    endif
+  else
+    print *, 'convt test: ', trim(varname), ' doesnt exist'
+  endif
+enddo
+print *, 'conv t test: max diff: ', maxval(abs(hofx%values-(obs-omf))/abs(hofx%values))
+
+deallocate(obstype, obs, omf, pres)
+
+end subroutine ufo_conv_t_eqv_c
   
 ! ------------------------------------------------------------------------------
 subroutine ufo_conv_u_eqv_c(c_key_geovals, c_key_hofx, c_bias) bind(c,name='ufo_conv_u_eqv_f90')

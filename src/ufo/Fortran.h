@@ -104,6 +104,7 @@ extern "C" {
   void ufo_conv_q_eqv_f90(const F90goms &, const F90ovec &);
   void ufo_conv_u_eqv_f90(const F90goms &, const F90ovec &);
   void ufo_conv_ps_eqv_f90(const F90goms &, const F90ovec &);
+  void ufo_conv_t_eqv_f90(const F90goms &, const F90ovec &);
 
   void ufo_conv_inputs_f90(const F90hop &, F90vars &);
 

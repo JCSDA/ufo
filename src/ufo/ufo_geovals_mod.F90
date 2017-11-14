@@ -219,6 +219,8 @@ prod=0.0
 do jo=1,self%nobs
   prod=prod+self%geovals(1,jo)%vals(1)*other%geovals(1,jo)%vals(1)
 enddo
+prod = prod / real(self%nobs)
+
 end subroutine ufo_geovals_dotprod
 
 ! ------------------------------------------------------------------------------
