@@ -16,7 +16,9 @@
 #include "util/Logger.h"
 
 namespace ufo {
+
 // -----------------------------------------------------------------------------
+
 ObsCheck::ObsCheck(const ObsSpace & obsdb, const Variables & var,
                  const util::DateTime & t1, const util::DateTime & t2) {
   oops::Log::trace() << "ObsCheck contructor starting " << t1 << " " << t2 << std::endl;
@@ -25,7 +27,9 @@ ObsCheck::ObsCheck(const ObsSpace & obsdb, const Variables & var,
 //  ufo_obsdb_getobscheck_f90(obsdb.toFortran(), var.toFortran(), &p1, &p2, keyObsCheck_);
   oops::Log::trace() << "ObsCheck contructor key = " << keyObsCheck_ << std::endl;
 }
+
 // -----------------------------------------------------------------------------
+
 ObsCheck::ObsCheck(const eckit::Configuration & config) {
   oops::Log::trace() << "ObsCheck contructor config starting" << std::endl;
 //  ufo_obscheck_create_f90(keyObsCheck_);
@@ -33,24 +37,41 @@ ObsCheck::ObsCheck(const eckit::Configuration & config) {
 //  ufo_obscheck_read_file_f90(keyObsCheck_, &conf);
   oops::Log::trace() << "ObsCheck contructor config key = " << keyObsCheck_ << std::endl;
 }
+
 // -----------------------------------------------------------------------------
+
 ObsCheck::ObsCheck(const ObsSpace & os) {
   oops::Log::trace() << "ObsCheck ObsSpace starting" << std::endl;
   oops::Log::trace() << "ObsCheck ObsSpace end " << std::endl;
 }
+
 // -----------------------------------------------------------------------------
+
 ObsCheck::~ObsCheck() {
 //  ufo_obscheck_delete_f90(keyObsCheck_);
 }
+
 // -----------------------------------------------------------------------------
+
 void ObsCheck::print(std::ostream & os) const {
   os << "ObsCheck::print not implemented";
 }
+
 // -----------------------------------------------------------------------------
+
 void ObsCheck::postFilter(const GeoVaLs & gv, const ObsVector & ov, const ObsSpace & os) const {
   oops::Log::trace() << "ObsCheck postFilter starting" << std::endl;
   ufo_postFilter_f90(gv.toFortran(), ov.toFortran());
   oops::Log::trace() << "ObsCheck postFilter end" << std::endl;
 }
+
+// -----------------------------------------------------------------------------
+
+void ObsCheck::priorFilter(const GeoVaLs & gv, const ObsVector & ov, const ObsSpace & os) const {
+  oops::Log::trace() << "ObsCheck priorFilter starting" << std::endl;
+  ufo_priorFilter_f90(gv.toFortran(), ov.toFortran());
+  oops::Log::trace() << "ObsCheck priorFilter end" << std::endl;
+}
+
 // -----------------------------------------------------------------------------
 }  // namespace ufo

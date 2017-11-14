@@ -41,6 +41,7 @@ class ObsCheck : public util::Printable,
   ~ObsCheck();
 
   void postFilter(const GeoVaLs &, const ObsVector &, const ObsSpace &) const;
+  void priorFilter(const GeoVaLs &, const ObsVector &, const ObsSpace &) const;
 
   int & toFortran() {return keyObsCheck_;}
   const int & toFortran() const {return keyObsCheck_;}

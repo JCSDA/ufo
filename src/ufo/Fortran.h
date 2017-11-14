@@ -98,9 +98,10 @@ extern "C" {
   void ufo_radiance_inputs_f90(const F90hop &, F90vars &);
 
 // -----------------------------------------------------------------------------
-//  Observation Check
+//  Check Observations
 // -----------------------------------------------------------------------------
   void ufo_postFilter_f90(const F90goms &, const F90ovec &);
+  void ufo_priorFilter_f90(const F90goms &, const F90ovec &);
 
 // -----------------------------------------------------------------------------
 //  Observation Vectors

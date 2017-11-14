@@ -110,4 +110,19 @@ end subroutine c_ufo_postFilter_f90
 
 ! ------------------------------------------------------------------------------
 
+subroutine c_ufo_priorFilter_f90(c_key_geovals, c_key_hofx) bind(c,name='ufo_priorFilter_f90')
+
+    implicit none
+    integer(c_int), intent(in) :: c_key_geovals
+    integer(c_int), intent(in) :: c_key_hofx
+    type(ufo_geovals), pointer  :: geovals
+    type(obs_vector), pointer :: hofx
+
+
+write(*,*) 'ufo_priorFilter_f90_c========='
+
+end subroutine c_ufo_priorFilter_f90
+
+! ------------------------------------------------------------------------------
+
 end module ufo_obscheck_mod
