@@ -48,7 +48,7 @@ integer(c_int), intent(inout) :: c_key_self
 type(c_ptr), intent(in)    :: c_conf
     
 type(ufo_obsoper), pointer :: self
-    
+
 call ufo_convq_registry%init()
 call ufo_convq_registry%add(c_key_self)
 call ufo_convq_registry%get(c_key_self, self)
@@ -62,7 +62,7 @@ implicit none
 integer(c_int), intent(inout) :: c_key_self
     
 type(ufo_obsoper), pointer :: self
-    
+
 call ufo_convq_registry%get(c_key_self, self)
 call ufo_convq_registry%remove(c_key_self)
     
@@ -148,6 +148,7 @@ call ufo_geovals_registry%get(c_key_geovals,geovals)
 call ufo_obs_vect_registry%get(c_key_hofx,hofx)
 
 ! open netcdf file and read some stuff (it should be in the obs_data)
+filename='Data/diag_q_01_wprofiles.nc4'
 call nc_diag_read_init(filename, iunit)
 nobs = nc_diag_read_get_dim(iunit,'nobs')
 allocate(pres(nobs))
@@ -163,6 +164,7 @@ if (nobs /= geovals%nobs) then
   print *, 'convq: error: nobs inconsistent!'
 endif
 
+print *, 'ufoconvq: nobs ', nobs, geovals%nobs, hofx%nobs
 do iobs = 1, nobs
   varname = 'LogPressure'
   lfound =  ufo_geovals_get_var(geovals, iobs, varname, geoval)
@@ -171,13 +173,12 @@ do iobs = 1, nobs
     dz = interp_weight(z, geoval%vals, geoval%nval)
     ! hardcoded for ships, buoys (?)
     if((obstype(iobs) > 179 .and. obstype(iobs) < 186) .or. obstype(iobs) == 199) dz=1.
-    !print *, 'geoval q test: ', z, dz, ' gsi: ', dz_gsi(iobs), dz_gsi2(iobs)
     varname = 'Specific humidity'
     lfound = ufo_geovals_get_var(geovals, iobs, varname, geoval)
     if (lfound) then
       hofx%values(iobs) = vert_interp(geoval%vals, geoval%nval, dz)
-      !print *, 'convq test: interpolated q: ', hofx%values(iobs)
-      !print *, 'convq test: from gsi: ', obs(iobs) - omf(iobs)
+!      !print *, 'convq test: interpolated q: ', hofx%values(iobs)
+!      !print *, 'convq test: from gsi: ', obs(iobs) - omf(iobs)
     else
       print *, 'convq test: ', trim(varname), ' doesnt exist'
     endif
@@ -186,6 +187,8 @@ do iobs = 1, nobs
   endif
 enddo
 print *, 'conv q test: max diff: ', maxval(abs(hofx%values-(obs-omf))/abs(hofx%values))
+
+deallocate(obstype, obs, omf, pres)
 
 end subroutine ufo_convq_eqv_c
   

@@ -25,7 +25,9 @@ use read_diag, only: set_radiag,&
                      diag_header_chan_list,&
                      diag_data_name_list,&
                      read_radiag_header,&
-                     set_netcdf_read
+                     set_netcdf_read, &
+                     open_radiag, &
+                     close_radiag
 use read_diag, only: read_radiag_data,&
                      diag_data_fix_list,&
                      diag_data_extra_list,&
@@ -80,7 +82,22 @@ character(len=*), intent(in) :: fin, fout
 self%filein =fin
 self%fileout=fout
 
-if (self%filein/="") call obs_read(self)
+! ugly fix for conventional for now
+if (self%filein == 'Data/amsua_n19_wprofiles.nc4') then
+  call obs_read(self)
+  self%nobs = 15
+elseif (self%filein == 'Data/diag_t_01_wprofiles.nc4') then
+  self%nobs = 86366
+elseif (self%filein == 'Data/diag_q_01_wprofiles.nc4') then
+  self%nobs = 73651
+elseif (self%filein == 'Data/diag_uv_01_wprofiles.nc4') then
+  self%nobs = 110119
+elseif (self%filein == 'Data/diag_ps_01_wprofiles.nc4') then
+  self%nobs = 84283
+else
+  print *, 'Error: dont know how to read ', trim(self%filein)
+endif
+
 call fckit_log%debug("TRACE: ufo_obs_data:obs_setup: done")
 
 end subroutine obs_setup
@@ -168,7 +185,6 @@ call ufo_vars_registry%get(c_key_vars, vars)
 call c_f_datetime(c_t1, t1)
 call c_f_datetime(c_t2, t2)
 
-allocate(geovals)
 call ufo_geovals_registry%init()
 call ufo_geovals_registry%add(c_key_geovals)
 call ufo_geovals_registry%get(c_key_geovals,geovals)
@@ -220,7 +236,7 @@ character(len=max_string) :: ncfname
 
 ncfname = self%filein
 call set_netcdf_read(.true.)
-call nc_diag_read_init(ncfname, luin)
+call open_radiag(ncfname,luin)
 call set_radiag("version",iversion,ier)
 
 call read_radiag_header(luin,npred,retrieval,self%header_fix,self%header_chan,self%header_name,ier,lverbose)
@@ -238,7 +254,7 @@ do while (ier .ge. 0)
    self%nobs = self%nobs + 1
 enddo
 print *, myname_, ' Total number of observations in file: ', self%nobs
-call nc_diag_read_close(filename=ncfname)
+call close_radiag(ncfname, luin)
 end subroutine obs_read
 
 ! ------------------------------------------------------------------------------
@@ -268,6 +284,7 @@ if (config_element_exists(c_conf,"ObsData.ObsDataIn")) then
 else
   fin  = ""
 endif
+
 write(record,*)'ufo_obsdb_setup_c: file in =',trim(fin)
 call fckit_log%info(record)
 
