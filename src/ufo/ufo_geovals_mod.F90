@@ -24,8 +24,9 @@ public :: ufo_geovals_read_rad_netcdf
 
 !> type to hold interpolated field for one variable, one observation
 type :: ufo_geoval
-  real, allocatable :: vals(:)   !< values (vertical profile or single value for now)
-  integer :: nval                !< number of values in vals array
+  real, allocatable :: vals(:,:) !< values (nval, nobs)
+  integer :: nval                !< number of values in profile
+  integer :: nobs                !< number of observations
 end type ufo_geoval
 
 !> type to hold interpolated fields required by the obs operators
@@ -34,8 +35,8 @@ type :: ufo_geovals
   integer :: nvar                !< number of variables (supposed to be the
                                  !  same for same obs operator
 
-  type(ufo_geoval), allocatable :: geovals(:,:)  !< array of interpolated
-                                                 !  vertical profiles (nvar, nobs)
+  type(ufo_geoval), allocatable :: geovals(:)  !< array of interpolated
+                                               !  vertical profiles for all obs (nvar)
 
   type(ufo_vars) :: variables    !< variables list
 
@@ -87,7 +88,7 @@ self%nobs = nobs
 self%nvar = vars%nv
 call ufo_vars_clone(vars, self%variables) 
 
-allocate(self%geovals(self%nvar,self%nobs))
+allocate(self%geovals(self%nvar))
 self%lalloc = .true.
 
 end subroutine ufo_geovals_setup
@@ -98,13 +99,11 @@ subroutine ufo_geovals_delete(self)
 implicit none
 type(ufo_geovals), intent(inout) :: self
 
-integer :: i, j
+integer :: ivar
 
 if (self%linit) then
-  do i = 1, self%nvar
-    do j = 1, self%nobs
-      deallocate(self%geovals(i,j)%vals)
-    enddo
+  do ivar = 1, self%nvar
+    deallocate(self%geovals(ivar)%vals)
   enddo
   self%linit = .false.
 endif
@@ -119,10 +118,9 @@ end subroutine ufo_geovals_delete
 
 ! ------------------------------------------------------------------------------
 
-logical function ufo_geovals_get_var(self, iobs, varname, geoval)
+logical function ufo_geovals_get_var(self, varname, geoval)
 implicit none
 type(ufo_geovals), intent(in)    :: self
-integer, intent(in)              :: iobs
 character(MAXVARLEN), intent(in) :: varname
 type(ufo_geoval), intent(out)    :: geoval
 
@@ -137,7 +135,7 @@ if (ivar < 0) then
   ufo_geovals_get_var = .false.
 else
   ufo_geovals_get_var = .true.
-  geoval = self%geovals(ivar, iobs)
+  geoval = self%geovals(ivar)
 endif
 
 end function ufo_geovals_get_var
@@ -147,25 +145,21 @@ end function ufo_geovals_get_var
 subroutine ufo_geovals_zero(self) 
 implicit none
 type(ufo_geovals), intent(inout) :: self
-integer :: i, j
+integer :: ivar
 
 if (.not. self%lalloc) then
   call abor1_ftn("ufo_geovals_zero: geovals not allocated")
 endif
 if (.not. self%linit) then
   ! TODO: abort! for now just allocating 1
-  do i = 1, self%nvar
-    do j = 1, self%nobs
-      self%geovals(i,j)%nval = 1
-      allocate(self%geovals(i,j)%vals(1))
-    enddo
+  do ivar = 1, self%nvar
+    self%geovals(ivar)%nval = 1
+    allocate(self%geovals(ivar)%vals(1,self%nobs))
   enddo
   self%linit = .true.
 endif
-do i = 1, self%nvar
-  do j = 1, self%nobs
-    self%geovals(i,j)%vals = 0.0
-  enddo
+do ivar = 1, self%nvar
+  self%geovals(ivar)%vals = 0.0
 enddo
 
 end subroutine ufo_geovals_zero
@@ -175,25 +169,21 @@ end subroutine ufo_geovals_zero
 subroutine ufo_geovals_random(self) 
 implicit none
 type(ufo_geovals), intent(inout) :: self
-integer :: i, j
+integer :: ivar
 
 if (.not. self%lalloc) then
   call abor1_ftn("ufo_geovals_random: geovals not allocated")
 endif
 if (.not. self%linit) then
   ! TODO: abort! for now just allocating 1
-  do i = 1, self%nvar
-    do j = 1, self%nobs
-      self%geovals(i,j)%nval = 1
-      allocate(self%geovals(i,j)%vals(1))
-    enddo
+  do ivar = 1, self%nvar
+    self%geovals(ivar)%nval = 1
+    allocate(self%geovals(ivar)%vals(1,self%nobs))
   enddo
   self%linit = .true.
 endif
-do i = 1, self%nvar
-  do j = 1, self%nobs
-    self%geovals(i,j)%vals = 1.0
-  enddo
+do ivar = 1, self%nvar
+  self%geovals(ivar)%vals = 1.0
 enddo
 
 end subroutine ufo_geovals_random
@@ -214,9 +204,10 @@ if (.not. other%lalloc .or. .not. other%linit) then
   call abor1_ftn("ufo_geovals_dotprod: geovals not allocated")
 endif
 
+! just something to put in (dot product of the 1st var and 1st element in the profile
 prod=0.0
 do jo=1,self%nobs
-  prod=prod+self%geovals(1,jo)%vals(1)*other%geovals(1,jo)%vals(1)
+  prod=prod+self%geovals(1)%vals(1,jo)*other%geovals(1)%vals(1,jo)
 enddo
 
 end subroutine ufo_geovals_dotprod
@@ -253,7 +244,7 @@ integer :: nobs, nsig
 
 real(8), allocatable :: field(:,:)
 
-integer :: iobs, ivar, nval
+integer :: ivar, nval
 
 ! open netcdf file and read dimensions
 call nc_diag_read_init(filename, iunit)
@@ -267,11 +258,9 @@ nval = nsig
 allocate(field(nval, nobs))
 do ivar = 1, vars%nv
   call nc_diag_read_get_var(iunit, varsfile%fldnames(ivar), field)
-  do iobs = 1, nobs
-    self%geovals(ivar,iobs)%nval = nval
-    allocate(self%geovals(ivar,iobs)%vals(nval))
-    self%geovals(ivar,iobs)%vals(:) = field(:,iobs)
-  enddo
+  self%geovals(ivar)%nval = nval
+  allocate(self%geovals(ivar)%vals(nval,nobs))
+  self%geovals(ivar)%vals = field
 enddo
 deallocate(field)
 
@@ -283,9 +272,10 @@ end subroutine ufo_geovals_read_prof_netcdf
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_geovals_print(self)
+subroutine ufo_geovals_print(self, iobs)
 implicit none
-type(ufo_geovals), intent(inout) :: self
+type(ufo_geovals), intent(in) :: self
+integer, intent(in) :: iobs
 
 type(ufo_geoval) :: geoval
 character(MAXVARLEN) :: varname
@@ -295,9 +285,9 @@ integer :: ivar
 
 do ivar = 1, self%nvar
   varname = self%variables%fldnames(ivar)
-  lfound =  ufo_geovals_get_var(self, 1, varname, geoval)
+  lfound =  ufo_geovals_get_var(self, varname, geoval)
   if (lfound) then
-    print *, 'geoval test: ', trim(varname), geoval%nval, geoval%vals
+    print *, 'geoval test: ', trim(varname), geoval%nval, geoval%vals(:,iobs)
   else
     print *, 'geoval test: ', trim(varname), ' doesnt exist'
   endif
@@ -330,7 +320,7 @@ vars%fldnames(6) = 'Geopotential height';  varsfile%fldnames(6) = 'hsges'
 
 call ufo_geovals_read_prof_netcdf(self, filename, vars, varsfile)
 
-call ufo_geovals_print(self)
+call ufo_geovals_print(self, 1)
 
 end subroutine ufo_geovals_read_t_netcdf
 
@@ -363,7 +353,7 @@ vars%fldnames(5) = 'Geopotential height';  varsfile%fldnames(5) = 'zges'
 
 call ufo_geovals_read_prof_netcdf(self, filename, vars, varsfile)
 
-call ufo_geovals_print(self)
+call ufo_geovals_print(self, 1)
 
 end subroutine ufo_geovals_read_uv_netcdf
 
@@ -397,7 +387,7 @@ vars%fldnames(3) = 'LogPressure';          varsfile%fldnames(3) = 'prsltmp'
 
 call ufo_geovals_read_prof_netcdf(self, filename, vars, varsfile)
 
-call ufo_geovals_print(self)
+call ufo_geovals_print(self, 1)
 
 end subroutine ufo_geovals_read_q_netcdf
 
@@ -422,7 +412,7 @@ integer :: nobs, nsig
 real(8), allocatable :: field(:,:)
 real(8), allocatable :: field1d(:)
 
-integer :: iobs, ivar, nval
+integer :: ivar, nval
 
 ! variables hardcoded for the surface pressure
 nvar_prof = 2; nvar_surf = 2
@@ -448,11 +438,9 @@ nval = nsig
 allocate(field(nval, nobs))
 do ivar = 1, nvar_prof
   call nc_diag_read_get_var(iunit, varsfile%fldnames(ivar), field)
-  do iobs = 1, nobs
-    self%geovals(ivar,iobs)%nval = nval
-    allocate(self%geovals(ivar,iobs)%vals(nval))
-    self%geovals(ivar,iobs)%vals(:) = field(:,iobs)
-  enddo
+  self%geovals(ivar)%nval = nval
+  allocate(self%geovals(ivar)%vals(nval,nobs))
+  self%geovals(ivar)%vals = field
 enddo
 deallocate(field)
 
@@ -460,11 +448,9 @@ nval = 1
 allocate(field1d(nobs))
 do ivar = nvar_prof+1, nvar_prof+nvar_surf
   call nc_diag_read_get_var(iunit, varsfile%fldnames(ivar), field1d)
-  do iobs = 1, nobs
-    self%geovals(ivar,iobs)%nval = nval
-    allocate(self%geovals(ivar,iobs)%vals(nval))
-    self%geovals(ivar,iobs)%vals(1) = field1d(iobs)
-  enddo
+  self%geovals(ivar)%nval = nval
+  allocate(self%geovals(ivar)%vals(nval,nobs))
+  self%geovals(ivar)%vals(1,:) = field1d(:)
 enddo
 deallocate(field1d)
 
@@ -472,7 +458,7 @@ self%linit = .true.
 
 call nc_diag_read_close(filename)
 
-call ufo_geovals_print(self)
+call ufo_geovals_print(self, 1)
 
 end subroutine ufo_geovals_read_ps_netcdf
 
@@ -499,7 +485,7 @@ real(8), allocatable :: field(:,:)
 real(8), allocatable :: field1d(:)
 integer, allocatable :: field1di(:)
 
-integer :: iobs, ivar, nval
+integer :: ivar, nval
 type(ufo_geoval) :: geoval
 character(MAXVARLEN) :: varname
 logical :: lfound
@@ -545,55 +531,45 @@ call ufo_geovals_setup(self, vars, nobs)
 nval = nsig; ivar = it
 allocate(field(nval, nobs))
 call nc_diag_read_get_var(iunit, 'tvp', field)
-do iobs = 1, nobs
-  self%geovals(ivar,iobs)%nval = nval
-  allocate(self%geovals(ivar,iobs)%vals(nval))
-  self%geovals(ivar,iobs)%vals = field(:,iobs)
-enddo
+self%geovals(ivar)%nval = nval
+allocate(self%geovals(ivar)%vals(nval,nobs))
+self%geovals(ivar)%vals = field
 deallocate(field)
 
 ! read water vapor (humidity)
 nval = nsig; ivar = iwv
 allocate(field(nval, nobs))
 call nc_diag_read_get_var(iunit, 'qvp', field)
-do iobs = 1, nobs
-  self%geovals(ivar,iobs)%nval = nval
-  allocate(self%geovals(ivar,iobs)%vals(nval))
-  self%geovals(ivar,iobs)%vals = 1000.*field(:,iobs)/(1.-field(:,iobs))
-enddo
+self%geovals(ivar)%nval = nval
+allocate(self%geovals(ivar)%vals(nval,nobs))
+self%geovals(ivar)%vals = 1000.*field / (1.-field)
 deallocate(field)
 
 ! read pressure
 nval = nsig; ivar = ipr
 allocate(field(nval, nobs))
 call nc_diag_read_get_var(iunit, 'prsltmp', field)
-do iobs = 1, nobs
-  self%geovals(ivar,iobs)%nval = nval
-  allocate(self%geovals(ivar,iobs)%vals(nval))
-  self%geovals(ivar,iobs)%vals = 10.*field(:,iobs)
-enddo
+self%geovals(ivar)%nval = nval
+allocate(self%geovals(ivar)%vals(nval,nobs))
+self%geovals(ivar)%vals = 10.*field
 deallocate(field)
 
 ! read level pressure
 nval = nsig_plus_one; ivar = iprl
 allocate(field(nval, nobs))
 call nc_diag_read_get_var(iunit, 'prsitmp', field)
-do iobs = 1, nobs
-  self%geovals(ivar,iobs)%nval = nval
-  allocate(self%geovals(ivar,iobs)%vals(nval))
-  self%geovals(ivar,iobs)%vals = 10.*field(:,iobs)
-enddo
+self%geovals(ivar)%nval = nval
+allocate(self%geovals(ivar)%vals(nval,nobs))
+self%geovals(ivar)%vals = 10.*field
 deallocate(field)
 
 ! read ozone
 nval = nsig; ivar = ioz
 allocate(field(nval, nobs))
 call nc_diag_read_get_var(iunit, 'poz', field)
-do iobs = 1, nobs
-  self%geovals(ivar,iobs)%nval = nval
-  allocate(self%geovals(ivar,iobs)%vals(nval))
-  self%geovals(ivar,iobs)%vals = field(:,iobs)
-enddo
+self%geovals(ivar)%nval = nval
+allocate(self%geovals(ivar)%vals(nval,nobs))
+self%geovals(ivar)%vals = field
 deallocate(field)
 
 ! read surface stuff
@@ -601,11 +577,9 @@ nval = 1
 allocate(field1d(nobs))
 do ivar = nvar_prof+1, nvar_prof+nvar_surf_real
   call nc_diag_read_get_var(iunit, self%variables%fldnames(ivar), field1d)
-  do iobs = 1, nobs
-    self%geovals(ivar,iobs)%nval = nval
-    allocate(self%geovals(ivar,iobs)%vals(nval))
-    self%geovals(ivar,iobs)%vals(1) = field1d(iobs)
-  enddo
+  self%geovals(ivar)%nval = nval
+  allocate(self%geovals(ivar)%vals(nval,nobs))
+  self%geovals(ivar)%vals(1,:) = field1d(:)
 enddo
 deallocate(field1d)
 
@@ -614,11 +588,9 @@ nval = 1
 allocate(field1di(nobs))
 do ivar = nvar_prof+nvar_surf_real+1, nvar_prof+nvar_surf_real+nvar_surf_int
   call nc_diag_read_get_var(iunit, self%variables%fldnames(ivar), field1di)
-  do iobs = 1, nobs
-    self%geovals(ivar,iobs)%nval = nval
-    allocate(self%geovals(ivar,iobs)%vals(nval))
-    self%geovals(ivar,iobs)%vals(1) = field1di(iobs)
-  enddo
+  self%geovals(ivar)%nval = nval
+  allocate(self%geovals(ivar)%vals(nval,nobs))
+  self%geovals(ivar)%vals(1,:) = field1di
 enddo
 deallocate(field1di)
 
@@ -626,12 +598,12 @@ self%linit = .true.
 
 call nc_diag_read_close(filename)
 
-call ufo_geovals_print(self)
+call ufo_geovals_print(self,1)
 ! Example of getting a variable below:
 !varname = 'Ozone'
-!lfound =  ufo_geovals_get_var(self, 1, varname, geoval)
+!lfound =  ufo_geovals_get_var(self, varname, geoval)
 !if (lfound) then
-!  print *, 'geoval rad test: ', trim(varname), geoval%nval, geoval%vals
+!  print *, 'geoval rad test: ', trim(varname), geoval%nval, geoval%vals(:,1) ! print the 1st obs
 !else
 !  print *, 'geoval rad test: ', trim(varname), ' doesnt exist'
 !endif
