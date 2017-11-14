@@ -37,7 +37,8 @@ module read_diag
 
   use ncd_kinds, only:  i_kind,r_single,r_kind
   use nc_diag_read_mod, only: nc_diag_read_get_var,  nc_diag_read_get_global_attr
-  use ncdr_dims, only: nc_diag_read_get_dim
+  use nc_diag_read_mod, only: nc_diag_read_get_dim
+  use nc_diag_read_mod, only: nc_diag_read_init, nc_diag_read_close
   implicit none
 
 ! Declare public and private
@@ -49,6 +50,8 @@ module read_diag
   public :: diag_data_fix_list
   public :: diag_data_chan_list
   public :: diag_data_extra_list
+  public :: open_radiag
+  public :: close_radiag
   public :: read_radiag_header
   public :: read_radiag_data
   public :: set_netcdf_read
@@ -176,13 +179,21 @@ module read_diag
   real(r_single),parameter::  rmiss_radiag    = -9.9e11_r_single
 
   logical,save            ::  netcdf = .false. 
-  logical,save            ::  nc_read = .false.
-  integer,save            ::  cur_ob_idx = -9999
-  integer,save            ::  num_records = -9999
 
-  type(diag_data_fix_list)   ,allocatable, save :: all_data_fix(:)
-  type(diag_data_chan_list)  ,allocatable, save :: all_data_chan(:,:)
+  type ncdiag_status
+     logical :: nc_read
+     integer(i_kind) :: cur_ob_idx
+     integer(i_kind) :: num_records
+     type(diag_data_fix_list),  allocatable  :: all_data_fix(:)
+     type(diag_data_chan_list), allocatable  :: all_data_chan(:,:)
+     type(diag_data_extra_list), allocatable :: all_data_extra(:,:,:)
+  end type ncdiag_status
 
+  integer(i_kind), parameter :: MAX_OPEN_NCDIAG = 2
+  integer(i_kind), save :: nopen_ncdiag = 0
+  integer(i_kind), dimension(MAX_OPEN_NCDIAG), save     :: ncdiag_open_id = (/-1, -1/)
+  type(ncdiag_status), dimension(MAX_OPEN_NCDIAG), save :: ncdiag_open_status
+      
 contains
 
 subroutine set_radiag_int_ (what,iv,ier)
@@ -230,6 +241,79 @@ subroutine set_netcdf_read(use_netcdf)
   netcdf = use_netcdf
 end subroutine set_netcdf_read
 
+
+subroutine open_radiag(filename, ftin)
+   character*500,   intent(in) :: filename
+   integer(i_kind), intent(inout) :: ftin
+
+   integer(i_kind) :: i
+
+   if (netcdf) then
+      if (nopen_ncdiag >= MAX_OPEN_NCDIAG) then
+         write(6,*) 'OPEN_RADIAG:  ***ERROR*** Cannot open more than ', &
+                    MAX_OPEN_NCDIAG, ' netcdf diag files.'
+         call abort
+      endif
+      call nc_diag_read_init(filename,ftin)
+      do i = 1, MAX_OPEN_NCDIAG
+        if (ncdiag_open_id(i) < 0) then
+           ncdiag_open_id(i) = ftin
+           ncdiag_open_status(i)%nc_read = .false.
+           ncdiag_open_status(i)%cur_ob_idx = -9999
+           ncdiag_open_status(i)%num_records = -9999
+           if (allocated(ncdiag_open_status(i)%all_data_fix)) then
+              deallocate(ncdiag_open_status(i)%all_data_fix)
+           endif
+           if (allocated(ncdiag_open_status(i)%all_data_chan)) then
+              deallocate(ncdiag_open_status(i)%all_data_chan)
+           endif
+           if (allocated(ncdiag_open_status(i)%all_data_extra)) then
+              deallocate(ncdiag_open_status(i)%all_data_extra)
+           endif
+           nopen_ncdiag = nopen_ncdiag + 1
+           exit
+        endif
+      enddo
+   else
+      open(ftin,form="unformatted",file=filename)
+      rewind(ftin)
+   endif
+
+end subroutine open_radiag
+
+subroutine close_radiag(filename, ftin)
+   character*500,   intent(in) :: filename
+   integer(i_kind), intent(inout) :: ftin
+
+   integer(i_kind) :: id
+
+   if (netcdf) then
+      id = find_ncdiag_id(ftin)
+      if (id < 0) then
+         write(6,*) 'CLOSE_RADIAG:  ***ERROR*** ncdiag file ', filename,   &
+                    ' was not opened'
+         call abort
+      endif
+      call nc_diag_read_close(filename)
+      ncdiag_open_id(id) = -1
+      ncdiag_open_status(id)%nc_read = .false.
+      ncdiag_open_status(id)%cur_ob_idx = -9999
+      ncdiag_open_status(id)%num_records = -9999
+      if (allocated(ncdiag_open_status(id)%all_data_fix)) then
+         deallocate(ncdiag_open_status(id)%all_data_fix)
+      endif
+      if (allocated(ncdiag_open_status(id)%all_data_chan)) then
+         deallocate(ncdiag_open_status(id)%all_data_chan)
+      endif
+      if (allocated(ncdiag_open_status(id)%all_data_extra)) then
+         deallocate(ncdiag_open_status(id)%all_data_extra)
+      endif
+      nopen_ncdiag = nopen_ncdiag - 1
+   else
+      close(ftin)
+   endif
+
+end subroutine close_radiag
 
 subroutine read_radiag_header(ftin,npred_radiag,retrieval,header_fix,header_chan,data_name,iflag,lverbose)
 !                .      .    .                                       .
@@ -333,8 +417,8 @@ subroutine read_radiag_header_nc(ftin,npred_radiag,retrieval,header_fix,header_c
   iflag = 0
 !  allocate(nchan_diag(1) )
   nchan_dim = nc_diag_read_get_dim(ftin,'nchans')
-  header_fix%nchan = nchan_dim
   write(*,*)'Number of channels=',nchan_dim
+  header_fix%nchan = nchan_dim
   
   call nc_diag_read_get_global_attr(ftin, "Number_of_channels", nchan_diag)
 
@@ -365,14 +449,14 @@ subroutine read_radiag_header_nc(ftin,npred_radiag,retrieval,header_fix,header_c
   allocate(r_var_stor(nchan_dim), &
            i_var_stor(nchan_dim)  )
 !  call nc_diag_read_get_var('Var', var_stor)
-  call nc_diag_read_get_var('frequency',r_var_stor)      ; header_chan%freq     = r_var_stor
-  call nc_diag_read_get_var('polarization',i_var_stor)   ; header_chan%polar    = i_var_stor
-  call nc_diag_read_get_var('wavenumber',r_var_stor)     ; header_chan%wave     = r_var_stor
-  call nc_diag_read_get_var('error_variance',r_var_stor) ; header_chan%varch    = r_var_stor
-  call nc_diag_read_get_var('mean_lapse_rate',r_var_stor); header_chan%tlapmean = r_var_stor
-  call nc_diag_read_get_var('use_flag',i_var_stor)       ; header_chan%iuse     = i_var_stor
-  call nc_diag_read_get_var('sensor_chan',i_var_stor)    ; header_chan%nuchan   = i_var_stor
-  call nc_diag_read_get_var('satinfo_chan',i_var_stor)   ; header_chan%iochan   = i_var_stor
+  call nc_diag_read_get_var(ftin, 'frequency',r_var_stor)      ; header_chan%freq     = r_var_stor
+  call nc_diag_read_get_var(ftin, 'polarization',i_var_stor)   ; header_chan%polar    = i_var_stor
+  call nc_diag_read_get_var(ftin, 'wavenumber',r_var_stor)     ; header_chan%wave     = r_var_stor
+  call nc_diag_read_get_var(ftin, 'error_variance',r_var_stor) ; header_chan%varch    = r_var_stor
+  call nc_diag_read_get_var(ftin, 'mean_lapse_rate',r_var_stor); header_chan%tlapmean = r_var_stor
+  call nc_diag_read_get_var(ftin, 'use_flag',i_var_stor)       ; header_chan%iuse     = i_var_stor
+  call nc_diag_read_get_var(ftin, 'sensor_chan',i_var_stor)    ; header_chan%nuchan   = i_var_stor
+  call nc_diag_read_get_var(ftin, 'satinfo_chan',i_var_stor)   ; header_chan%iochan   = i_var_stor
 
 
 end subroutine read_radiag_header_nc
@@ -435,7 +519,7 @@ subroutine read_radiag_header_bin(ftin,npred_radiag,retrieval,header_fix,header_
 
 ! Read header (fixed_part).
   read(ftin,IOSTAT=iflag)  sensat,satid,sentype,jiter,nchanl,npred,ianldate,&
-          ireal,ipchan,iextra,jextra,idiag,angord,iversion,inewpc,isens
+       ireal,ipchan,iextra,jextra,idiag,angord,iversion,inewpc,isens
   if (iflag/=0) then
      rewind(ftin)
      read(ftin,IOSTAT=iflag) sensat,satid,sentype,jiter,nchanl,npred,ianldate,&
@@ -623,6 +707,22 @@ subroutine read_radiag_header_bin(ftin,npred_radiag,retrieval,header_fix,header_
      
 end subroutine read_radiag_header_bin
 
+integer(i_kind) function find_ncdiag_id(ftin)
+  integer, intent(in) :: ftin
+
+  integer :: i
+
+  find_ncdiag_id = -1
+  do i = 1, MAX_OPEN_NCDIAG
+     if (ncdiag_open_id(i) == ftin) then
+        find_ncdiag_id = i
+        return
+     endif
+  enddo
+  return
+
+end function find_ncdiag_id
+
 subroutine read_radiag_data(ftin,header_fix,retrieval,data_fix,data_chan,data_extra,iflag )
 !                .      .    .                                       .
 ! subprogram:    read_radiag_dat                    read rad diag data
@@ -662,18 +762,31 @@ subroutine read_radiag_data(ftin,header_fix,retrieval,data_fix,data_chan,data_ex
   type(diag_data_extra_list) ,allocatable :: data_extra(:,:)
   integer(i_kind),intent(out)            :: iflag
 
-  if (netcdf) then
-     if (.not. nc_read) call read_radiag_data_nc_init(ftin, header_fix, retrieval)
+  integer(i_kind) :: id
 
-     if (cur_ob_idx .eq. num_records ) then
+  if (netcdf) then
+
+     id = find_ncdiag_id(ftin)
+     if (id < 0) then
+        write(6,*) 'READ_RADIAG_DATA:  ***ERROR*** netcdf diag file ', ftin, ' has not been opened yet.'
+        call abort
+     endif
+
+     if (.not. ncdiag_open_status(id)%nc_read) then
+        call read_radiag_data_nc_init(ftin, ncdiag_open_status(id), header_fix, retrieval)
+     endif
+
+     if (ncdiag_open_status(id)%cur_ob_idx .eq. ncdiag_open_status(id)%num_records ) then
        iflag = 0
-     else if (cur_ob_idx .gt. num_records) then
+     else if (ncdiag_open_status(id)%cur_ob_idx .gt. ncdiag_open_status(id)%num_records) then
        iflag = -1
      else
        iflag = 1
      endif
 
-     if (iflag .ge. 0) call read_radiag_data_nc(ftin,header_fix,retrieval,data_fix,data_chan,data_extra,iflag)
+     if (iflag .ge. 0) then
+        call read_radiag_data_nc(ftin,ncdiag_open_status(id),header_fix,retrieval,data_fix,data_chan,data_extra,iflag)
+     endif
 
   else
      call read_radiag_data_bin(ftin,header_fix,retrieval,data_fix,data_chan,data_extra,iflag )
@@ -681,7 +794,7 @@ subroutine read_radiag_data(ftin,header_fix,retrieval,data_fix,data_chan,data_ex
 
 end subroutine read_radiag_data
 
-subroutine read_radiag_data_nc_init(ftin, header_fix, retrieval)
+subroutine read_radiag_data_nc_init(ftin, diag_status, header_fix, retrieval)
 !                .      .    .                                       .
 ! subprogram:    read_radiag_data_nc_init           read rad diag data
 !   prgmmr: mccarty          org: np20                date: 2015-08-10
@@ -710,6 +823,7 @@ subroutine read_radiag_data_nc_init(ftin, header_fix, retrieval)
 
 ! Declare passed arguments
   integer(i_kind),intent(in)             :: ftin
+  type(ncdiag_status), intent(inout)     :: diag_status
   type(diag_header_fix_list ),intent(in) :: header_fix
   logical,intent(in)                     :: retrieval
 
@@ -740,9 +854,7 @@ subroutine read_radiag_data_nc_init(ftin, header_fix, retrieval)
   end if
 
   nrecord = ndatum / header_fix%nchan
-  num_records = nrecord
-
-  write(*,*)'Reading ndatum, nrecord=',ndatum,nrecord
+  diag_status%num_records = nrecord
 
   allocate( Channel_Index(ndatum),                                                                                                     &
             Latitude(ndatum),                 Longitude(ndatum),                        Elevation(ndatum),                             &
@@ -770,74 +882,77 @@ subroutine read_radiag_data_nc_init(ftin, header_fix, retrieval)
      allocate( BC_angord(nangord, ndatum)    )
   end if
 
-  allocate(  all_data_fix(nrecord)        )
-  allocate(  all_data_chan(nrecord, header_fix%nchan))
+  if (allocated(diag_status%all_data_fix))   deallocate(diag_status%all_data_fix)
+  if (allocated(diag_status%all_data_chan))  deallocate(diag_status%all_data_chan)
+  if (allocated(diag_status%all_data_extra)) deallocate(diag_status%all_data_extra)
+  allocate(  diag_status%all_data_fix(nrecord)        )
+  allocate(  diag_status%all_data_chan(nrecord, header_fix%nchan))
+  allocate(  diag_status%all_data_extra(nrecord, header_fix%iextra, header_fix%jextra) )
 
-  call nc_diag_read_get_var('Channel_Index', Channel_Index)
-  call nc_diag_read_get_var('Latitude', Latitude)
-  call nc_diag_read_get_var('Longitude', Longitude)
-  call nc_diag_read_get_var('Elevation', Elevation)
-  call nc_diag_read_get_var('Obs_Time', Obs_Time)
-  call nc_diag_read_get_var('Scan_Position', Scan_Position)
-  call nc_diag_read_get_var('Sat_Zenith_Angle', Sat_Zenith_Angle)
-  call nc_diag_read_get_var('Sat_Azimuth_Angle', Sat_Azimuth_Angle)
-  call nc_diag_read_get_var('Sol_Zenith_Angle', Sol_Zenith_Angle)
-  call nc_diag_read_get_var('Sol_Azimuth_Angle', Sol_Azimuth_Angle)
-  call nc_diag_read_get_var('Sun_Glint_Angle', Sun_Glint_Angle)
-  call nc_diag_read_get_var('Water_Fraction', Water_Fraction)
-  call nc_diag_read_get_var('Land_Fraction', Land_Fraction)
-  call nc_diag_read_get_var('Ice_Fraction', Ice_Fraction)
-  call nc_diag_read_get_var('Snow_Fraction', Snow_Fraction)
-  call nc_diag_read_get_var('Water_Temperature', Water_Temperature)
-  call nc_diag_read_get_var('Land_Temperature', Land_Temperature)
-  call nc_diag_read_get_var('Ice_Temperature', Ice_Temperature)
-  call nc_diag_read_get_var('Snow_Temperature', Snow_Temperature)
-  call nc_diag_read_get_var('Soil_Temperature', Soil_Temperature)
-  call nc_diag_read_get_var('Soil_Moisture', Soil_Moisture)
-  call nc_diag_read_get_var('tsavg5', tsavg5)
-  call nc_diag_read_get_var('sstcu', sstcu)
-  call nc_diag_read_get_var('sstph', sstph)
-  call nc_diag_read_get_var('sstnv', sstnv)
-  call nc_diag_read_get_var('dta', dta)
-  call nc_diag_read_get_var('dqa', dqa)
-  call nc_diag_read_get_var('dtp_avh', dtp_avh)
-  call nc_diag_read_get_var('Vegetation_Fraction', Vegetation_Fraction)
-  call nc_diag_read_get_var('Snow_Depth', Snow_Depth)
-  call nc_diag_read_get_var('tpwc_amsua', tpwc_amsua)
-  call nc_diag_read_get_var('clw_guess_retrieval', clw_guess_retrieval)
-  call nc_diag_read_get_var('Sfc_Wind_Speed', Sfc_Wind_Speed)
-  call nc_diag_read_get_var('Cloud_Frac', Cloud_Frac)
-  call nc_diag_read_get_var('CTP', CTP)
-  call nc_diag_read_get_var('CLW', CLW)
-  call nc_diag_read_get_var('TPWC', TPWC)
-  call nc_diag_read_get_var('clw_obs', clw_obs)
-  call nc_diag_read_get_var('clw_guess', clw_guess)
-  call nc_diag_read_get_var('Foundation_Temperature', Foundation_Temperature)
-  call nc_diag_read_get_var('SST_Warm_layer_dt', SST_Warm_layer_dt)
-  call nc_diag_read_get_var('SST_Cool_layer_tdrop', SST_Cool_layer_tdrop)
-  call nc_diag_read_get_var('SST_dTz_dTfound', SST_dTz_dTfound)
-  call nc_diag_read_get_var('Observation', Observation)
-  call nc_diag_read_get_var('Obs_Minus_Forecast_adjusted', Obs_Minus_Forecast_adjusted)
-  call nc_diag_read_get_var('Obs_Minus_Forecast_unadjusted', Obs_Minus_Forecast_unadjusted)
-  call nc_diag_read_get_var('Inverse_Observation_Error', Inverse_Observation_Error)
-  call nc_diag_read_get_var('QC_Flag', QC_Flag)
-  call nc_diag_read_get_var('Emissivity', Emissivity)
-  call nc_diag_read_get_var('Weighted_Lapse_Rate', Weighted_Lapse_Rate)
-  call nc_diag_read_get_var('dTb_dTs', dTb_dTs)
-  call nc_diag_read_get_var('BC_Constant', BC_Constant)
-  call nc_diag_read_get_var('BC_Scan_Angle', BC_Scan_Angle)
-  call nc_diag_read_get_var('BC_Cloud_Liquid_Water', BC_Cloud_Liquid_Water)
-  call nc_diag_read_get_var('BC_Lapse_Rate_Squared', BC_Lapse_Rate_Squared)
-  call nc_diag_read_get_var('BC_Lapse_Rate', BC_Lapse_Rate)
-  call nc_diag_read_get_var('BC_Cosine_Latitude_times_Node', BC_Cosine_Latitude_times_Node)
-  call nc_diag_read_get_var('BC_Sine_Latitude', BC_Sine_Latitude)
-  call nc_diag_read_get_var('BC_Emissivity', BC_Emissivity)
-  call nc_diag_read_get_var('BC_Fixed_Scan_Position', BC_Fixed_Scan_Position)
-  call nc_diag_read_get_var('Land_Type_Index', Land_Type_Index)
+  call nc_diag_read_get_var(ftin, 'Channel_Index', Channel_Index)
+  call nc_diag_read_get_var(ftin, 'Latitude', Latitude)
+  call nc_diag_read_get_var(ftin, 'Longitude', Longitude)
+  call nc_diag_read_get_var(ftin, 'Elevation', Elevation)
+  call nc_diag_read_get_var(ftin, 'Obs_Time', Obs_Time)
+  call nc_diag_read_get_var(ftin, 'Scan_Position', Scan_Position)
+  call nc_diag_read_get_var(ftin, 'Sat_Zenith_Angle', Sat_Zenith_Angle)
+  call nc_diag_read_get_var(ftin, 'Sat_Azimuth_Angle', Sat_Azimuth_Angle)
+  call nc_diag_read_get_var(ftin, 'Sol_Zenith_Angle', Sol_Zenith_Angle)
+  call nc_diag_read_get_var(ftin, 'Sol_Azimuth_Angle', Sol_Azimuth_Angle)
+  call nc_diag_read_get_var(ftin, 'Sun_Glint_Angle', Sun_Glint_Angle)
+  call nc_diag_read_get_var(ftin, 'Water_Fraction', Water_Fraction)
+  call nc_diag_read_get_var(ftin, 'Land_Fraction', Land_Fraction)
+  call nc_diag_read_get_var(ftin, 'Ice_Fraction', Ice_Fraction)
+  call nc_diag_read_get_var(ftin, 'Snow_Fraction', Snow_Fraction)
+  call nc_diag_read_get_var(ftin, 'Water_Temperature', Water_Temperature)
+  call nc_diag_read_get_var(ftin, 'Land_Temperature', Land_Temperature)
+  call nc_diag_read_get_var(ftin, 'Ice_Temperature', Ice_Temperature)
+  call nc_diag_read_get_var(ftin, 'Snow_Temperature', Snow_Temperature)
+  call nc_diag_read_get_var(ftin, 'Soil_Temperature', Soil_Temperature)
+  call nc_diag_read_get_var(ftin, 'Soil_Moisture', Soil_Moisture)
+  call nc_diag_read_get_var(ftin, 'tsavg5', tsavg5)
+  call nc_diag_read_get_var(ftin, 'sstcu', sstcu)
+  call nc_diag_read_get_var(ftin, 'sstph', sstph)
+  call nc_diag_read_get_var(ftin, 'sstnv', sstnv)
+  call nc_diag_read_get_var(ftin, 'dta', dta)
+  call nc_diag_read_get_var(ftin, 'dqa', dqa)
+  call nc_diag_read_get_var(ftin, 'dtp_avh', dtp_avh)
+  call nc_diag_read_get_var(ftin, 'Vegetation_Fraction', Vegetation_Fraction)
+  call nc_diag_read_get_var(ftin, 'Snow_Depth', Snow_Depth)
+  call nc_diag_read_get_var(ftin, 'tpwc_amsua', tpwc_amsua)
+  call nc_diag_read_get_var(ftin, 'clw_guess_retrieval', clw_guess_retrieval)
+  call nc_diag_read_get_var(ftin, 'Sfc_Wind_Speed', Sfc_Wind_Speed)
+  call nc_diag_read_get_var(ftin, 'Cloud_Frac', Cloud_Frac)
+  call nc_diag_read_get_var(ftin,'CTP', CTP)
+  call nc_diag_read_get_var(ftin, 'CLW', CLW)
+  call nc_diag_read_get_var(ftin, 'TPWC', TPWC)
+  call nc_diag_read_get_var(ftin, 'clw_obs', clw_obs)
+  call nc_diag_read_get_var(ftin, 'clw_guess', clw_guess)
+  call nc_diag_read_get_var(ftin, 'Foundation_Temperature', Foundation_Temperature)
+  call nc_diag_read_get_var(ftin, 'SST_Warm_layer_dt', SST_Warm_layer_dt)
+  call nc_diag_read_get_var(ftin, 'SST_Cool_layer_tdrop', SST_Cool_layer_tdrop)
+  call nc_diag_read_get_var(ftin, 'SST_dTz_dTfound', SST_dTz_dTfound)
+  call nc_diag_read_get_var(ftin, 'Observation', Observation)
+  call nc_diag_read_get_var(ftin, 'Obs_Minus_Forecast_adjusted', Obs_Minus_Forecast_adjusted)
+  call nc_diag_read_get_var(ftin, 'Obs_Minus_Forecast_unadjusted', Obs_Minus_Forecast_unadjusted)
+  call nc_diag_read_get_var(ftin, 'Inverse_Observation_Error', Inverse_Observation_Error)
+  call nc_diag_read_get_var(ftin, 'QC_Flag', QC_Flag)
+  call nc_diag_read_get_var(ftin, 'Emissivity', Emissivity)
+  call nc_diag_read_get_var(ftin, 'Weighted_Lapse_Rate', Weighted_Lapse_Rate)
+  call nc_diag_read_get_var(ftin, 'dTb_dTs', dTb_dTs)
+  call nc_diag_read_get_var(ftin, 'BC_Constant', BC_Constant)
+  call nc_diag_read_get_var(ftin, 'BC_Scan_Angle', BC_Scan_Angle)
+  call nc_diag_read_get_var(ftin, 'BC_Cloud_Liquid_Water', BC_Cloud_Liquid_Water)
+  call nc_diag_read_get_var(ftin, 'BC_Lapse_Rate_Squared', BC_Lapse_Rate_Squared)
+  call nc_diag_read_get_var(ftin, 'BC_Lapse_Rate', BC_Lapse_Rate)
+  call nc_diag_read_get_var(ftin, 'BC_Cosine_Latitude_times_Node', BC_Cosine_Latitude_times_Node)
+  call nc_diag_read_get_var(ftin, 'BC_Sine_Latitude', BC_Sine_Latitude)
+  call nc_diag_read_get_var(ftin, 'BC_Emissivity', BC_Emissivity)
+  call nc_diag_read_get_var(ftin, 'BC_Fixed_Scan_Position', BC_Fixed_Scan_Position)
+  call nc_diag_read_get_var(ftin, 'Land_Type_Index', Land_Type_Index)
   if (header_fix%angord > 0) then
-     call nc_diag_read_get_var('BC_angord ', BC_angord )
+     call nc_diag_read_get_var(ftin, 'BC_angord ', BC_angord )
   end if
-  
   cdatum = 1
 
 !  allocate(  all_data_fix(nrecord)        )
@@ -847,45 +962,45 @@ subroutine read_radiag_data_nc_init(ftin, header_fix, retrieval)
   do ir=1,nrecord
     clat = Latitude(cdatum)
     clon = Longitude(cdatum)
-    all_data_fix(ir)%lat               = Latitude(cdatum)
-    all_data_fix(ir)%lon               = Longitude(cdatum)     
-    all_data_fix(ir)%zsges             = Elevation(cdatum)
-    all_data_fix(ir)%obstime           = Obs_Time(cdatum)
-    all_data_fix(ir)%senscn_pos        = Scan_Position(cdatum)
-    all_data_fix(ir)%satzen_ang        = Sat_Zenith_Angle(cdatum)
-    all_data_fix(ir)%satazm_ang        = Sat_Azimuth_Angle(cdatum)
-    all_data_fix(ir)%solzen_ang        = Sol_Zenith_Angle(cdatum)
-    all_data_fix(ir)%solazm_ang        = Sol_Azimuth_Angle(cdatum)
-    all_data_fix(ir)%sungln_ang        = Sun_Glint_Angle(cdatum)
-    all_data_fix(ir)%water_frac        = Water_Fraction(cdatum)
-    all_data_fix(ir)%land_frac         = Land_Fraction(cdatum)
-    all_data_fix(ir)%ice_frac          = Ice_Fraction(cdatum)
-    all_data_fix(ir)%snow_frac         = Snow_Fraction(cdatum)
-    all_data_fix(ir)%water_temp        = Water_Temperature(cdatum)
-    all_data_fix(ir)%land_temp         = Land_Temperature(cdatum)
-    all_data_fix(ir)%ice_temp          = Ice_Temperature(cdatum)
-    all_data_fix(ir)%snow_temp         = Snow_Temperature(cdatum)
-    all_data_fix(ir)%soil_temp         = Soil_Temperature(cdatum)
-    all_data_fix(ir)%soil_mois         = Soil_Moisture(cdatum)
-    all_data_fix(ir)%land_type         = Land_Type_Index(cdatum)
-    all_data_fix(ir)%veg_frac          = Vegetation_Fraction(cdatum)
-    all_data_fix(ir)%snow_depth        = Snow_Depth(cdatum)
-    all_data_fix(ir)%sfc_wndspd        = Sfc_Wind_Speed(cdatum)
-    all_data_fix(ir)%qcdiag1           = Cloud_Frac(cdatum)
-    all_data_fix(ir)%qcdiag2           = CTP(cdatum)
-    all_data_fix(ir)%tref              = Foundation_Temperature(cdatum)
-    all_data_fix(ir)%dtw               = SST_Warm_layer_dt(cdatum)
-    all_data_fix(ir)%dtc               = SST_Cool_layer_tdrop(cdatum)
-    all_data_fix(ir)%tz_tr             = SST_dTz_dTfound(cdatum)
+    diag_status%all_data_fix(ir)%lat               = Latitude(cdatum)
+    diag_status%all_data_fix(ir)%lon               = Longitude(cdatum)     
+    diag_status%all_data_fix(ir)%zsges             = Elevation(cdatum)
+    diag_status%all_data_fix(ir)%obstime           = Obs_Time(cdatum)
+    diag_status%all_data_fix(ir)%senscn_pos        = Scan_Position(cdatum)
+    diag_status%all_data_fix(ir)%satzen_ang        = Sat_Zenith_Angle(cdatum)
+    diag_status%all_data_fix(ir)%satazm_ang        = Sat_Azimuth_Angle(cdatum)
+    diag_status%all_data_fix(ir)%solzen_ang        = Sol_Zenith_Angle(cdatum)
+    diag_status%all_data_fix(ir)%solazm_ang        = Sol_Azimuth_Angle(cdatum)
+    diag_status%all_data_fix(ir)%sungln_ang        = Sun_Glint_Angle(cdatum)
+    diag_status%all_data_fix(ir)%water_frac        = Water_Fraction(cdatum)
+    diag_status%all_data_fix(ir)%land_frac         = Land_Fraction(cdatum)
+    diag_status%all_data_fix(ir)%ice_frac          = Ice_Fraction(cdatum)
+    diag_status%all_data_fix(ir)%snow_frac         = Snow_Fraction(cdatum)
+    diag_status%all_data_fix(ir)%water_temp        = Water_Temperature(cdatum)
+    diag_status%all_data_fix(ir)%land_temp         = Land_Temperature(cdatum)
+    diag_status%all_data_fix(ir)%ice_temp          = Ice_Temperature(cdatum)
+    diag_status%all_data_fix(ir)%snow_temp         = Snow_Temperature(cdatum)
+    diag_status%all_data_fix(ir)%soil_temp         = Soil_Temperature(cdatum)
+    diag_status%all_data_fix(ir)%soil_mois         = Soil_Moisture(cdatum)
+    diag_status%all_data_fix(ir)%land_type         = Land_Type_Index(cdatum)
+    diag_status%all_data_fix(ir)%veg_frac          = Vegetation_Fraction(cdatum)
+    diag_status%all_data_fix(ir)%snow_depth        = Snow_Depth(cdatum)
+    diag_status%all_data_fix(ir)%sfc_wndspd        = Sfc_Wind_Speed(cdatum)
+    diag_status%all_data_fix(ir)%qcdiag1           = Cloud_Frac(cdatum)
+    diag_status%all_data_fix(ir)%qcdiag2           = CTP(cdatum)
+    diag_status%all_data_fix(ir)%tref              = Foundation_Temperature(cdatum)
+    diag_status%all_data_fix(ir)%dtw               = SST_Warm_layer_dt(cdatum)
+    diag_status%all_data_fix(ir)%dtc               = SST_Cool_layer_tdrop(cdatum)
+    diag_status%all_data_fix(ir)%tz_tr             = SST_dTz_dTfound(cdatum)
 
     if (retrieval) then
-      all_data_fix(ir)%water_temp        = tsavg5(cdatum)
-      all_data_fix(ir)%land_temp         = sstcu(cdatum)
-      all_data_fix(ir)%ice_temp          = sstph(cdatum)
-      all_data_fix(ir)%snow_temp         = sstnv(cdatum)
-      all_data_fix(ir)%soil_temp         = dta(cdatum)
-      all_data_fix(ir)%soil_mois         = dqa(cdatum)
-      all_data_fix(ir)%land_type         = dtp_avh(cdatum)
+      diag_status%all_data_fix(ir)%water_temp        = tsavg5(cdatum)
+      diag_status%all_data_fix(ir)%land_temp         = sstcu(cdatum)
+      diag_status%all_data_fix(ir)%ice_temp          = sstph(cdatum)
+      diag_status%all_data_fix(ir)%snow_temp         = sstnv(cdatum)
+      diag_status%all_data_fix(ir)%soil_temp         = dta(cdatum)
+      diag_status%all_data_fix(ir)%soil_mois         = dqa(cdatum)
+      diag_status%all_data_fix(ir)%land_type         = dtp_avh(cdatum)
     endif
 
     do ic=1,header_fix%nchan
@@ -897,45 +1012,44 @@ subroutine read_radiag_data_nc_init(ftin, header_fix, retrieval)
         call abort
       endif
       cch = Channel_Index(cdatum)
-      if (allocated(all_data_chan(ir,cch)%bifix)) deallocate(all_data_chan(ir,cch)%bifix )
+      if (allocated(diag_status%all_data_chan(ir,cch)%bifix)) deallocate(diag_status%all_data_chan(ir,cch)%bifix )
       if (header_fix%angord > 0) then
-         allocate(all_data_chan(ir,cch)%bifix(nangord))
+         allocate(diag_status%all_data_chan(ir,cch)%bifix(nangord))
       else
-         allocate(all_data_chan(ir,cch)%bifix(1))
+         allocate(diag_status%all_data_chan(ir,cch)%bifix(1))
       end if
 
-      all_data_chan(ir,cch)%tbobs = Observation(cdatum)
-      all_data_chan(ir,cch)%omgbc = Obs_Minus_Forecast_adjusted(cdatum)
-      all_data_chan(ir,cch)%omgnbc= Obs_Minus_Forecast_unadjusted(cdatum)
-      all_data_chan(ir,cch)%errinv= Inverse_Observation_Error(cdatum)
-      all_data_chan(ir,cch)%qcmark= QC_Flag(cdatum)
-      all_data_chan(ir,cch)%emiss = Emissivity(cdatum)
-      all_data_chan(ir,cch)%tlap  = Weighted_Lapse_Rate(cdatum)
-      all_data_chan(ir,cch)%tb_tz = dTb_dTs(cdatum)
-      all_data_chan(ir,cch)%bicons= BC_Constant(cdatum)
-      all_data_chan(ir,cch)%biang = BC_Scan_Angle(cdatum)
-      all_data_chan(ir,cch)%biclw = BC_Cloud_Liquid_Water(cdatum)
-      all_data_chan(ir,cch)%bilap2= BC_Lapse_Rate_Squared(cdatum)
-      all_data_chan(ir,cch)%bilap = BC_Lapse_Rate(cdatum)
-      all_data_chan(ir,cch)%bicos = BC_Cosine_Latitude_times_Node(cdatum)
-      all_data_chan(ir,cch)%bisin = BC_Sine_Latitude(cdatum)
-      all_data_chan(ir,cch)%biemis= BC_Emissivity(cdatum)
+      diag_status%all_data_chan(ir,cch)%tbobs = Observation(cdatum)
+      diag_status%all_data_chan(ir,cch)%omgbc = Obs_Minus_Forecast_adjusted(cdatum)
+      diag_status%all_data_chan(ir,cch)%omgnbc= Obs_Minus_Forecast_unadjusted(cdatum)
+      diag_status%all_data_chan(ir,cch)%errinv= Inverse_Observation_Error(cdatum)
+      diag_status%all_data_chan(ir,cch)%qcmark= QC_Flag(cdatum)
+      diag_status%all_data_chan(ir,cch)%emiss = Emissivity(cdatum)
+      diag_status%all_data_chan(ir,cch)%tlap  = Weighted_Lapse_Rate(cdatum)
+      diag_status%all_data_chan(ir,cch)%tb_tz = dTb_dTs(cdatum)
+      diag_status%all_data_chan(ir,cch)%bicons= BC_Constant(cdatum)
+      diag_status%all_data_chan(ir,cch)%biang = BC_Scan_Angle(cdatum)
+      diag_status%all_data_chan(ir,cch)%biclw = BC_Cloud_Liquid_Water(cdatum)
+      diag_status%all_data_chan(ir,cch)%bilap2= BC_Lapse_Rate_Squared(cdatum)
+      diag_status%all_data_chan(ir,cch)%bilap = BC_Lapse_Rate(cdatum)
+      diag_status%all_data_chan(ir,cch)%bicos = BC_Cosine_Latitude_times_Node(cdatum)
+      diag_status%all_data_chan(ir,cch)%bisin = BC_Sine_Latitude(cdatum)
+      diag_status%all_data_chan(ir,cch)%biemis= BC_Emissivity(cdatum)
       if (header_fix%angord > 0) then
-         all_data_chan(ir,cch)%bifix = BC_angord(1:nangord,cdatum)
+         diag_status%all_data_chan(ir,cch)%bifix = BC_angord(1:nangord,cdatum)
       else
-         all_data_chan(ir,cch)%bifix(1) = BC_Fixed_Scan_Position(cdatum)
+         diag_status%all_data_chan(ir,cch)%bifix(1) = BC_Fixed_Scan_Position(cdatum)
       endif
       ! placeholder for SST BC
-
       cdatum = cdatum + 1
     enddo
   enddo
 
-  nc_read = .true.
-  cur_ob_idx = 1
+  diag_status%nc_read = .true.
+  diag_status%cur_ob_idx = 1
 end subroutine read_radiag_data_nc_init
 
-subroutine read_radiag_data_nc(ftin,header_fix,retrieval,data_fix,data_chan,data_extra,iflag )
+subroutine read_radiag_data_nc(ftin,diag_status,header_fix,retrieval,data_fix,data_chan,data_extra,iflag )
 !                .      .    .                                       .
 ! subprogram:    read_radiag_dat                    read rad diag data
 !   prgmmr: tahara           org: np20                date: 2015-08-10
@@ -964,6 +1078,7 @@ subroutine read_radiag_data_nc(ftin,header_fix,retrieval,data_fix,data_chan,data
 
 ! Declare passed arguments
   integer(i_kind),intent(in)             :: ftin
+  type(ncdiag_status), intent(inout)     :: diag_status
   type(diag_header_fix_list ),intent(in) :: header_fix
   logical,intent(in)                     :: retrieval
   type(diag_data_fix_list)   ,intent(out):: data_fix
@@ -973,14 +1088,13 @@ subroutine read_radiag_data_nc(ftin,header_fix,retrieval,data_fix,data_chan,data
 
   iflag = 0
   if (.not. allocated(data_chan)) allocate(data_chan(header_fix%nchan) )
+  if (.not. allocated(data_extra)) allocate(data_extra(header_fix%iextra, header_fix%nchan) )
 
-  data_fix     = all_data_fix(cur_ob_idx)
-  data_chan(:) = all_data_chan(cur_ob_idx,:) 
+  data_fix        = diag_status%all_data_fix(diag_status%cur_ob_idx)
+  data_chan(:)    = diag_status%all_data_chan(diag_status%cur_ob_idx,:)
+  data_extra(:,:) = diag_status%all_data_extra(diag_status%cur_ob_idx,:,:) 
 
-  cur_ob_idx = cur_ob_idx + 1
-
-
-
+  diag_status%cur_ob_idx = diag_status%cur_ob_idx + 1
 
 end subroutine read_radiag_data_nc
 
@@ -1060,6 +1174,7 @@ subroutine read_radiag_data_bin(ftin,header_fix,retrieval,data_fix,data_chan,dat
      read(ftin,IOSTAT=iflag) fix_tmp, data_tmp, extra_tmp
   endif
 
+  if (iflag /= 0) return
 
 ! Transfer fix_tmp record to output structure
   data_fix%lat = fix_tmp(1)
@@ -1178,7 +1293,7 @@ subroutine read_radiag_data_bin(ftin,header_fix,retrieval,data_fix,data_chan,dat
         data_chan(ich)%biclw =data_tmp(11,ich)
         data_chan(ich)%bilap2=data_tmp(12,ich)
         data_chan(ich)%bilap =data_tmp(13,ich)
-        data_chan(ich)%bicos =data_tmp(14,ich) 
+        data_chan(ich)%bicos =data_tmp(14,ich)
         data_chan(ich)%bisin =data_tmp(15,ich)
         data_chan(ich)%biemis=data_tmp(16,ich)
      end do
@@ -1188,6 +1303,7 @@ subroutine read_radiag_data_bin(ftin,header_fix,retrieval,data_fix,data_chan,dat
         end do
         data_chan(ich)%bisst = data_tmp(16+header_fix%angord+2,ich)  
      end do
+
   endif
 
   if (header_fix%iextra > 0) then
