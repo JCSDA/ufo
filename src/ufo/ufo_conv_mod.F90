@@ -164,7 +164,6 @@ if (nobs /= geovals%nobs) then
   print *, 'convq: error: nobs inconsistent!'
 endif
 
-print *, 'ufoconvq: nobs ', nobs, geovals%nobs, hofx%nobs
 do iobs = 1, nobs
   varname = 'LogPressure'
   lfound =  ufo_geovals_get_var(geovals, iobs, varname, geoval)
@@ -191,6 +190,97 @@ print *, 'conv q test: max diff: ', maxval(abs(hofx%values-(obs-omf))/abs(hofx%v
 deallocate(obstype, obs, omf, pres)
 
 end subroutine ufo_conv_q_eqv_c
+
+! ------------------------------------------------------------------------------
+subroutine ufo_conv_t_eqv_c(c_key_geovals, c_key_hofx, c_bias) bind(c,name='ufo_conv_t_eqv_f90')
+use nc_diag_read_mod, only: nc_diag_read_get_var
+use nc_diag_read_mod, only: nc_diag_read_get_dim
+use nc_diag_read_mod, only: nc_diag_read_init, nc_diag_read_close
+
+implicit none
+integer(c_int), intent(in) :: c_key_geovals
+integer(c_int), intent(in) :: c_key_hofx
+real(c_double), intent(in) :: c_bias
+type(ufo_geovals), pointer  :: geovals
+type(obs_vector), pointer :: hofx
+
+character(128) :: filename
+integer :: iunit
+
+real(8), allocatable :: tvflag(:), pres(:), omf(:), obs(:)
+integer, allocatable :: obstype(:)
+
+integer :: iobs, nobs
+real :: z, dz
+real :: rv, rd, fv, tv, q
+
+logical :: lfound
+type(ufo_geoval) :: geoval
+character(MAXVARLEN) :: varname
+
+! Get pointers to geovals and hofx
+call ufo_geovals_registry%get(c_key_geovals,geovals)
+call ufo_obs_vect_registry%get(c_key_hofx,hofx)
+
+! open netcdf file and read some stuff (it should be in the obs_data)
+filename='Data/diag_t_01_wprofiles.nc4'
+call nc_diag_read_init(filename, iunit)
+nobs = nc_diag_read_get_dim(iunit,'nobs')
+allocate(pres(nobs))
+call nc_diag_read_get_var(iunit, "Pressure", pres)
+allocate(obstype(nobs),tvflag(nobs))
+call nc_diag_read_get_var(iunit, "Observation_Type", obstype)
+call nc_diag_read_get_var(iunit, "Setup_QC_Mark", tvflag)
+allocate(obs(nobs), omf(nobs))
+call nc_diag_read_get_var(iunit, "Observation", obs)
+call nc_diag_read_get_var(iunit, "Obs_Minus_Forecast_unadjusted", omf)
+call nc_diag_read_close(filename)
+
+if (nobs /= geovals%nobs) then
+  print *, 'convt: error: nobs inconsistent!'
+endif
+
+rd = 2.8705e+2
+rv = 4.6150e+2
+fv = rv/rd - 1.
+do iobs = 1, nobs
+  if ((obstype(iobs)>179.and.obstype(iobs)<190).or. &
+     (obstype(iobs)>=192.and.obstype(iobs)<=199)) then
+!    print *, iobs, ' surface obs OMG!', obstype(iobs)
+     hofx%values(iobs) = obs(iobs) - omf(iobs) ! dont bother with surface obs for now.
+  else
+  varname = 'LogPressure'
+  lfound =  ufo_geovals_get_var(geovals, iobs, varname, geoval)
+  if (lfound) then
+    z = log(pres(iobs)/10.)
+    dz = interp_weight(z, geoval%vals, geoval%nval)
+    varname = 'Virtual temperature'
+    lfound = ufo_geovals_get_var(geovals, iobs, varname, geoval)
+    if (lfound) then
+      tv = vert_interp(geoval%vals, geoval%nval, dz)
+      if (tvflag(iobs) == 0) then ! virtual temp
+        hofx%values(iobs) = tv
+      else
+        varname = 'Specific humidity'
+        lfound = ufo_geovals_get_var(geovals, iobs, varname, geoval)
+        q = vert_interp(geoval%vals, geoval%nval, dz)
+        hofx%values(iobs) = tv / (1. + fv*q)
+!        print *, 'convt test: interpolated q: ', hofx%values(iobs)
+!        print *, 'convt test: from gsi: ', obs(iobs) - omf(iobs)
+      endif
+    else
+      print *, 'convt test: ', trim(varname), ' doesnt exist'
+    endif
+  else
+    print *, 'convt test: ', trim(varname), ' doesnt exist'
+  endif
+  endif
+enddo
+print *, 'conv t test: max diff: ', maxval(abs(hofx%values-(obs-omf))/abs(hofx%values))
+
+deallocate(obstype, obs, omf, pres)
+
+end subroutine ufo_conv_t_eqv_c
   
 ! ------------------------------------------------------------------------------
 subroutine ufo_conv_u_eqv_c(c_key_geovals, c_key_hofx, c_bias) bind(c,name='ufo_conv_u_eqv_f90')
@@ -239,7 +329,6 @@ if (nobs /= geovals%nobs) then
   print *, 'conv u: error: nobs inconsistent!'
 endif
 
-print *, 'ufo conv u: nobs ', nobs, geovals%nobs, hofx%nobs
 do iobs = 1, nobs
   varname = 'LogPressure'
   lfound =  ufo_geovals_get_var(geovals, iobs, varname, geoval)
@@ -286,7 +375,7 @@ integer :: iunit
 real(8), allocatable :: omf(:), obs(:)
 
 integer :: iobs, nobs
-real :: z, dz
+real :: z, dz, rmse
 
 logical :: lfound
 type(ufo_geoval) :: geoval
@@ -308,10 +397,14 @@ call nc_diag_read_close(filename)
 if (nobs /= geovals%nobs) then
   print *, 'conv ps: error: nobs inconsistent!'
 endif
-
-print *, 'ufo conv ps: nobs ', nobs, geovals%nobs, hofx%nobs
+rmse = 0
 do iobs = 1, nobs
-  varname = 'LogSurface pressure'
+  rmse = rmse + (obs(iobs) - omf(iobs))*(obs(iobs) - omf(iobs))
+enddo
+print *, 'rmse: ', sqrt(rmse/real(nobs))
+
+do iobs = 1, nobs
+  varname = 'Surface pressure'
   lfound =  ufo_geovals_get_var(geovals, iobs, varname, geoval)
   if (lfound) then
     hofx%values(iobs) = geoval%vals(1)
