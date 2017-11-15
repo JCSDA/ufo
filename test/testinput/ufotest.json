@@ -27,7 +27,7 @@
         "ObsType": "Radiosonde",
         "ObsData": {
           "ObsDataIn": {
-            "obsfile": "/home/rtodling/discover/data/ncdiag_conv_nc4/diag_t_01_wprofiles.nc4"
+            "obsfile": "/home/rtodling/discover/data/nc_4emily.diag_conv_t_ges.20161202_00z.nc4"
           }
         },
         "GeoVaLs": {
