@@ -452,10 +452,10 @@ contains
 
 !!$      !       varname = geovals%variables%fldnames(1)
        lfound = ufo_geovals_get_var(geovals,'Temperature             ', geoval)
-       atm(1)%Temperature(N_LAYERS:1:-1) = geoval%vals(N_LAYERS:1:-1,1) !** 1 == iobs, hardcoding for testing
+       atm(1)%Temperature(1:N_LAYERS) = geoval%vals(N_LAYERS:1:-1,1) !** 1 == iobs, hardcoding for testing
        print *, 'Temperature:', atm(1)%Temperature(1:2), geoval%vals(1:2,1)
        lfound = ufo_geovals_get_var(geovals,'Pressure                ', geoval)
-       atm(1)%Pressure(N_LAYERS:1:-1) = geoval%vals(N_LAYERS:1:-1,1) !** 1 == iobs, hardcoding for testing
+       atm(1)%Pressure(1:N_LAYERS) = geoval%vals(N_LAYERS:1:-1,1) !** 1 == iobs, hardcoding for testing
        print *, 'Pressure:', atm(1)%Pressure(1:2), geoval%vals(1:2,1)
        lfound = ufo_geovals_get_var(geovals,'Level pressure          ', geoval)
        atm(1)%Level_Pressure(0:N_LAYERS) = geoval%vals(N_LAYERS+1:1:-1,1) !** 1 == iobs, hardcoding for testing
@@ -464,12 +464,12 @@ contains
        atm(1)%Absorber_Id(1:1)    = (/ H2O_ID /)
        atm(1)%Absorber_Units(1:1) = (/ MASS_MIXING_RATIO_UNITS /)
        lfound = ufo_geovals_get_var(geovals,'Water vapor             ', geoval)
-       atm(1)%Absorber(:,1)       = geoval%vals(N_LAYERS:1:-1,1) !** 1 == iobs, hardcoding for testing
+       atm(1)%Absorber(1:N_LAYERS,1)       = geoval%vals(N_LAYERS:1:-1,1) !** 1 == iobs, hardcoding for testing
        print *, 'water vapor:', atm(1)%Absorber(1:2,1), geoval%vals(1:2,1)
        atm(1)%Absorber_Id(2:2)    = (/ O3_ID /)
        atm(1)%Absorber_Units(2:2) = (/ VOLUME_MIXING_RATIO_UNITS /)
        lfound = ufo_geovals_get_var(geovals,'Ozone                   ', geoval)
-       atm(1)%Absorber(:,2)       = geoval%vals(N_LAYERS:1:-1,1) !** 1 == iobs, hardcoding for testing
+       atm(1)%Absorber(1:N_LAYERS,2)       = geoval%vals(N_LAYERS:1:-1,1) !** 1 == iobs, hardcoding for testing
        print *, 'Ozone:', atm(1)%Absorber(1:2,2), geoval%vals(1:2,1)
 
 
