@@ -4,14 +4,10 @@ GeoVaLs.cc
 GeoVaLs.h
 Locations.h
 ObsBias.h
-ObsRadiance.cc
-ObsRadiance.h
 ObsSpace.cc
 ObsSpace.h
 ObsVector.cc
 ObsVector.h
-ObsWSpeed.cc
-ObsWSpeed.h
 ObsRadiance.cc
 ObsRadiance.h
 ObsRadiosonde.cc
@@ -32,7 +28,6 @@ ufo_radiance_mod.F90
 ufo_radiosonde_mod.F90
 ufo_variables_mod.F90
 ufo_variables_mod_c.F90
-ufo_wspeed_mod.F90
 raobDiag_mod.F90
 radDiag_mod.F90
 )

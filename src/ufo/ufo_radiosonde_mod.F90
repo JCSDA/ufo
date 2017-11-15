@@ -150,7 +150,8 @@ character(MAXVARLEN) :: varname
 call ufo_geovals_registry%get(c_key_geovals,geovals)
 call ufo_obs_vect_registry%get(c_key_hofx,hofx)
 
-! open netcdf file and read some stuff (it should be in the obs_data)
+! open netcdf file and read some stuff (it should be in the obs_data), 
+! but read it just for now (later take from obsspace)
 filename='Data/diag_t_01_wprofiles.nc4'
 call nc_diag_read_init(filename, iunit)
 nobs = nc_diag_read_get_dim(iunit,'nobs')
