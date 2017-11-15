@@ -88,6 +88,7 @@ module m_diag_raob
   integer           :: nobstype
   integer           :: raob_mass_type = 120 ! type for RAOB T and Q
   integer           :: raob_wind_type = 220 ! type for RAOB U and V
+  integer           :: t_qcmark       = 0   ! 0=tv; 1=tdry
 
 contains
 
@@ -281,11 +282,19 @@ contains
      deallocate(i_var)
      deallocate(c_var)
       
-     ncount = count(rtmp_mass(:)%Observation_Type==raob_mass_type,1); nraob = ncount(1) 
+     ic=0
+     do ii=1,nobs
+        if(rtmp_mass(ii)%Observation_Type==raob_mass_type.and.&
+           rtmp_mass(ii)%Setup_QC_Mark==t_qcmark) then
+          ic=ic+1
+        endif
+     enddo
+     nraob=ic
      allocate(indx(nraob))
      ic=0
      do ii=1,nobs
-        if(rtmp_mass(ii)%Observation_Type==raob_mass_type) then
+        if(rtmp_mass(ii)%Observation_Type==raob_mass_type.and.&
+           rtmp_mass(ii)%Setup_QC_Mark==t_qcmark) then
           ic=ic+1
           indx(ic)=ii 
         endif
