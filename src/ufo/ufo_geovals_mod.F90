@@ -468,7 +468,7 @@ character(128), intent(in)       :: filename
 type(ufo_vars) :: vars
 
 integer :: nvar_prof, nvar_surf_real, nvar_surf_int
-integer :: it, iwv, ipr, iprl, ioz
+integer :: it, iwv, ipr, iprl, ioz, icl1, icl2
 
 integer :: iunit
 integer :: nobs, nsig, nsig_plus_one
@@ -483,9 +483,9 @@ character(MAXVARLEN) :: varname
 logical :: lfound
 
 ! variables hardcoded for the CRTM  !** Note: we'll need to revisit these in the future -BTJ 11.15.2017
-nvar_prof = 5
-it = 1; iwv = 2; ipr = 3; iprl = 4; ioz = 5 ! indices of vars
-nvar_surf_real = 9;
+nvar_prof = 7
+it = 1; iwv = 2; ipr = 3; iprl = 4; ioz = 5; icl1 = 6; icl2 = 7 ! indices of vars
+nvar_surf_real = 11;
 nvar_surf_int = 1;
 
 ! allocate and fill in variables
@@ -498,6 +498,8 @@ vars%fldnames(iwv)  = 'Water vapor'
 vars%fldnames(ipr)  = 'Pressure'
 vars%fldnames(iprl) = 'Level pressure'
 vars%fldnames(ioz)  = 'Ozone'
+vars%fldnames(icl1) = 'Cloud liquid'
+vars%fldnames(icl2) = 'Cloud ice'
 
 vars%fldnames(nvar_prof+1) = 'Water_Fraction'
 vars%fldnames(nvar_prof+2) = 'Land_Fraction'
@@ -508,6 +510,8 @@ vars%fldnames(nvar_prof+6) = 'Land_Temperature'
 vars%fldnames(nvar_prof+7) = 'Ice_Temperature'
 vars%fldnames(nvar_prof+8) = 'Snow_Temperature'
 vars%fldnames(nvar_prof+9) = 'Vegetation_Fraction'
+vars%fldnames(nvar_prof+10) = 'Sfc_Wind_Speed'
+vars%fldnames(nvar_prof+11) = 'Sfc_Wind_Direction'
 vars%fldnames(nvar_prof+nvar_surf_real+1) = 'Land_Type_Index' ! int!!!
 
 ! open netcdf file and read dimensions
@@ -559,6 +563,24 @@ deallocate(field)
 nval = nsig; ivar = ioz
 allocate(field(nval, nobs))
 call nc_diag_read_get_var(iunit, 'poz', field)
+self%geovals(ivar)%nval = nval
+allocate(self%geovals(ivar)%vals(nval,nobs))
+self%geovals(ivar)%vals = field
+deallocate(field)
+
+! read liquid cloud
+nval = nsig; ivar = icl1
+allocate(field(nval, nobs))
+call nc_diag_read_get_var(iunit, 'cloud1', field)
+self%geovals(ivar)%nval = nval
+allocate(self%geovals(ivar)%vals(nval,nobs))
+self%geovals(ivar)%vals = field
+deallocate(field)
+
+! read ice cloud
+nval = nsig; ivar = icl2
+allocate(field(nval, nobs))
+call nc_diag_read_get_var(iunit, 'cloud2', field)
 self%geovals(ivar)%nval = nval
 allocate(self%geovals(ivar)%vals(nval,nobs))
 self%geovals(ivar)%vals = field
