@@ -3,6 +3,7 @@ include_directories( ${CMAKE_CURRENT_SOURCE_DIR} )
 list( APPEND lib_files
 ncd_kinds.F90
 m_diag_conv.f90
+m_diag_raob.f90
 nc_diag_fson.f90
 nc_diag_read_mod.F90
 nc_diag_res.f90
@@ -86,3 +87,7 @@ ecbuild_add_executable( TARGET  ut_ncrad.x
                         LIBS    ioda
                       )
 
+ecbuild_add_executable( TARGET  ut_ncmass.x
+                        SOURCES ut_ncmass.F90
+                        LIBS    ioda
+                      )

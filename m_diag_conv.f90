@@ -1,7 +1,11 @@
 module m_diag_conv
-  use ncd_kinds, only:  i_kind,r_single,r_kind
+  use ncd_kinds, only:  i_kind,r_single,r_kind,r_double
   use nc_diag_write_mod, only: nc_diag_init, nc_diag_metadata, nc_diag_write
 
+  use nc_diag_read_mod, only: nc_diag_read_get_dim
+  use nc_diag_read_mod, only: nc_diag_read_init, nc_diag_read_close
+  use nc_diag_read_mod, only: nc_diag_read_get_var
+  use nc_diag_read_mod, only: nc_diag_read_get_global_attr
 
   implicit none
 
@@ -17,6 +21,8 @@ module m_diag_conv
 
   public :: write_split_conv_diag_nc
 
+  public :: read_conv_diag_nc_header
+  public :: read_conv_diag_nc_mass
 
   type diag_conv_header
     character(3),    dimension(:), allocatable :: ObsType
@@ -390,6 +396,69 @@ contains
 
      enddo
   end subroutine write_split_conv_diag_nc
+
+  subroutine read_conv_diag_nc_header(infn,conv_header,nobs)
+     character(len=*),       intent(in)    :: infn
+     type(diag_conv_header), intent(inout) :: conv_header
+     integer(i_kind),        intent(inout) :: nobs
+
+     integer(i_kind) :: fid
+
+     nobs=0
+     call nc_diag_read_init(infn,fid)
+     nobs = nc_diag_read_get_dim(fid,'nobs')
+     call nc_diag_read_get_global_attr(fid,"date_time", conv_header%date  )
+     conv_header%n_Observations_Mass = nobs
+     call nc_diag_read_close(infn)
+
+  end subroutine read_conv_diag_nc_header
+
+  subroutine read_conv_diag_nc_mass(infn, conv_header, conv_mass)
+     character(len=*),                                               intent(in)    :: infn
+     type(diag_conv_header),                                         intent(inout) :: conv_header
+     type(diag_conv_mass),dimension(conv_header%n_Observations_Mass),intent(inout) :: conv_mass
+
+     character(20)   :: str, str2
+     integer(i_kind) :: i, itype, fid, nobs
+     character(len=8),allocatable, dimension(:) :: c_var
+     integer(i_kind), allocatable, dimension(:) :: i_var
+     real(r_kind),    allocatable, dimension(:) :: r_var
+
+     call nc_diag_read_init(infn,fid)
+     
+     nobs=conv_header%n_Observations_Mass
+     allocate(c_var(nobs))
+     allocate(i_var(nobs))
+     allocate(r_var(nobs))
+
+!    if (conv_mass(i)%Observation_Class .eq. conv_header%ObsType(itype) ) then
+!       call nc_diag_read_get_var(fid,"Station_ID",                   c_var ); conv_mass(:)%Station_ID = c_var
+!       call nc_diag_read_get_var(fid,"Observation_Class",            c_var ); conv_mass(:)%Observation_Class = c_var
+        call nc_diag_read_get_var(fid,"Observation_Type",             i_var ); conv_mass(:)%Observation_Type    = i_var
+        call nc_diag_read_get_var(fid,"Observation_Subtype",          i_var ); conv_mass(:)%Observation_Subtype = i_var
+        call nc_diag_read_get_var(fid,"Latitude",                     r_var ); conv_mass(:)%Latitude   = r_var
+        call nc_diag_read_get_var(fid,"Longitude",                    r_var ); conv_mass(:)%Longitude  = r_var
+        call nc_diag_read_get_var(fid,"Pressure",                     r_var ); conv_mass(:)%Pressure  = r_var
+        call nc_diag_read_get_var(fid,"Height",                       r_var ); conv_mass(:)%Height  = r_var
+        call nc_diag_read_get_var(fid,"Time",                         r_var ); conv_mass(:)%Time  = r_var
+        call nc_diag_read_get_var(fid,"Prep_QC_Mark",                 r_var ); conv_mass(:)%Prep_QC_Mark  = r_var
+        call nc_diag_read_get_var(fid,"Setup_QC_Mark",                r_var ); conv_mass(:)%Setup_QC_Mark  = r_var
+        call nc_diag_read_get_var(fid,"Prep_Use_Flag",                r_var ); conv_mass(:)%Prep_Use_Flag  = r_var
+        call nc_diag_read_get_var(fid,"Analysis_Use_Flag",            r_var ); conv_mass(:)%Analysis_Use_Flag  = r_var
+        call nc_diag_read_get_var(fid,"Nonlinear_QC_Rel_Wgt",         r_var ); conv_mass(:)%Nonlinear_QC_Rel_Wgt  = r_var
+        call nc_diag_read_get_var(fid,"Errinv_Input",                 r_var ); conv_mass(:)%Errinv_Input         = r_var
+        call nc_diag_read_get_var(fid,"Errinv_Adjust",                r_var ); conv_mass(:)%Errinv_Adjust       = r_var
+        call nc_diag_read_get_var(fid,"Errinv_Final",                 r_var ); conv_mass(:)%Errinv_Final       = r_var
+        call nc_diag_read_get_var(fid,"Observation",                  r_var ); conv_mass(:)%Observation      = r_var
+        call nc_diag_read_get_var(fid,"Obs_Minus_Forecast_adjusted",  r_var ); conv_mass(:)%Obs_Minus_Forecast_adjusted   = r_var
+        call nc_diag_read_get_var(fid,"Obs_Minus_Forecast_unadjusted",r_var ); conv_mass(:)%Obs_Minus_Forecast_unadjusted   = r_var
+!    endif
+     deallocate(r_var)
+     deallocate(i_var)
+     deallocate(c_var)
+
+     call nc_diag_read_close(infn)
+  end subroutine read_conv_diag_nc_mass
 
   function replace_text (s,text,rep)  result(outs)
      character(*)        :: s,text,rep
