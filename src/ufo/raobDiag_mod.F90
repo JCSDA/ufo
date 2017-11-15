@@ -40,7 +40,8 @@ print*, myname_, ': Found this many observations: ', nobs
 print*, myname_, ': Size of type holding RAOB:    ', size(self%mass)
 print*, myname_, ': Date of input file:           ', self%header%date
 if(nobs>0)&
-print*, myname_, ': Mean observations:            ', sum(self%mass%Observation)/nobs
+print*, myname_, ': Mean observations:            ', sum(self%mass(:)%Observation)/nobs
+print*, self%mass(1:20)%Observation
 
 end subroutine this_read_
 
