@@ -16,7 +16,8 @@ public :: ufo_geovals_registry
 public :: ufo_geovals_init, ufo_geovals_setup, ufo_geovals_delete, ufo_geovals_print
 public :: ufo_geovals_zero, ufo_geovals_random, ufo_geovals_dotprod
 public :: ufo_geovals_minmaxavg
-public :: ufo_geovals_read_t_netcdf, ufo_geovals_read_q_netcdf
+public :: ufo_geovals_read_t_netcdf, ufo_geovals_read_raob_t_netcdf
+public :: ufo_geovals_read_q_netcdf
 public :: ufo_geovals_read_uv_netcdf, ufo_geovals_read_ps_netcdf
 public :: ufo_geovals_read_rad_netcdf
 
@@ -324,6 +325,82 @@ call ufo_geovals_read_prof_netcdf(self, filename, vars, varsfile)
 !call ufo_geovals_print(self, 1)
 
 end subroutine ufo_geovals_read_t_netcdf
+
+! ------------------------------------------------------------------------------
+subroutine ufo_geovals_read_raob_t_netcdf(self, filename)
+use nc_diag_read_mod, only: nc_diag_read_get_var
+use nc_diag_read_mod, only: nc_diag_read_get_dim
+use nc_diag_read_mod, only: nc_diag_read_init, nc_diag_read_close
+
+implicit none
+type(ufo_geovals), intent(inout) :: self
+character(128), intent(in)       :: filename
+
+type(ufo_vars) :: vars, varsfile
+
+integer :: iunit
+integer :: nobs, nobs_raob, nsig
+integer :: iobs, iobs_raob
+
+real(8), allocatable :: field(:,:)
+integer, allocatable :: obstype(:)
+real(8), allocatable :: tvflag(:)
+
+integer :: ivar, nval
+
+integer :: nvar_prof
+
+integer, parameter :: raobtype = 120
+
+! variables hardcoded for the temperature
+nvar_prof = 6
+
+! allocate and fill in variables
+vars%nv = nvar_prof; varsfile%nv = nvar_prof
+allocate(vars%fldnames(vars%nv), varsfile%fldnames(varsfile%nv))
+vars%fldnames(1) = 'Virtual temperature';  varsfile%fldnames(1) = 'tvtmp'
+vars%fldnames(2) = 'Specific humidity';    varsfile%fldnames(2) = 'qtmp'
+vars%fldnames(3) = 'U-wind';               varsfile%fldnames(3) = 'utmp'
+vars%fldnames(4) = 'V-wind';               varsfile%fldnames(4) = 'vtmp'
+vars%fldnames(5) = 'LogPressure';          varsfile%fldnames(5) = 'prsltmp'
+vars%fldnames(6) = 'Geopotential height';  varsfile%fldnames(6) = 'hsges'
+
+
+! open netcdf file and read dimensions
+call nc_diag_read_init(filename, iunit)
+nobs = nc_diag_read_get_dim(iunit,'nobs')
+nsig = nc_diag_read_get_dim(iunit,'nsig')
+
+allocate(obstype(nobs), tvflag(nobs))
+call nc_diag_read_get_var(iunit, "Observation_Type", obstype)
+call nc_diag_read_get_var(iunit, "Setup_QC_Mark", tvflag)
+
+nobs_raob = count(obstype == raobtype .and. tvflag == 0)
+! allocate geovals structure
+call ufo_geovals_setup(self, vars, nobs_raob)
+
+nval = nsig
+allocate(field(nval, nobs))
+do ivar = 1, vars%nv
+  call nc_diag_read_get_var(iunit, varsfile%fldnames(ivar), field)
+  self%geovals(ivar)%nval = nval
+  allocate(self%geovals(ivar)%vals(nval,nobs_raob))
+  iobs_raob = 1
+  do iobs = 1, nobs
+    if (obstype(iobs) == raobtype .and. tvflag(iobs) == 0) then
+      self%geovals(ivar)%vals(:,iobs_raob) = field(:,iobs)
+      iobs_raob = iobs_raob + 1
+    endif
+  enddo
+enddo
+deallocate(field)
+self%linit = .true.
+
+call nc_diag_read_close(filename)
+
+!call ufo_geovals_print(self, 1)
+
+end subroutine ufo_geovals_read_raob_t_netcdf
 
 ! ------------------------------------------------------------------------------
 

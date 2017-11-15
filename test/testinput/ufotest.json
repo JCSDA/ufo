@@ -22,17 +22,17 @@
         "rmsequiv": "253.803797241769"
       },
       {
-        "ObsType": "ConvT",
+        "ObsType": "Radiosonde",
         "ObsData": {
           "ObsDataIn": {
             "obsfile": "Data/diag_t_01_wprofiles.nc4"
           }
         },
         "GeoVaLs": {
-          "norm": "280.81528974238182",
+          "norm": "280.07183510087037",
           "filename": "Data/diag_t_01_wprofiles.nc4"
         },
-        "rmsequiv": "279.52518367034639"
+        "rmsequiv": "254.46418485798108"
       }
     ]
   }

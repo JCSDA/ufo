@@ -128,7 +128,7 @@ filename = config_get_string(c_conf,len(filename),"filename")
 if (filename == 'Data/amsua_n19_wprofiles.nc4') then
   call ufo_geovals_read_rad_netcdf(self, filename)
 elseif (filename == 'Data/diag_t_01_wprofiles.nc4') then
-  call ufo_geovals_read_t_netcdf(self, filename)
+  call ufo_geovals_read_raob_t_netcdf(self, filename)
 elseif (filename == 'Data/diag_q_01_wprofiles.nc4') then
   call ufo_geovals_read_q_netcdf(self, filename)
 elseif (filename == 'Data/diag_uv_01_wprofiles.nc4') then
