@@ -11,9 +11,9 @@ use ufo_vars_mod
 
 implicit none
 private
-public :: ufo_geovals
+public :: ufo_geovals, ufo_geoval, ufo_geovals_get_var
 public :: ufo_geovals_registry
-public :: ufo_geovals_init, ufo_geovals_setup, ufo_geovals_delete
+public :: ufo_geovals_init, ufo_geovals_setup, ufo_geovals_delete, ufo_geovals_print
 public :: ufo_geovals_zero, ufo_geovals_random, ufo_geovals_dotprod
 public :: ufo_geovals_minmaxavg
 public :: ufo_geovals_read_t_netcdf, ufo_geovals_read_q_netcdf
@@ -320,7 +320,7 @@ vars%fldnames(6) = 'Geopotential height';  varsfile%fldnames(6) = 'hsges'
 
 call ufo_geovals_read_prof_netcdf(self, filename, vars, varsfile)
 
-call ufo_geovals_print(self, 1)
+!call ufo_geovals_print(self, 1)
 
 end subroutine ufo_geovals_read_t_netcdf
 
@@ -353,7 +353,7 @@ vars%fldnames(5) = 'Geopotential height';  varsfile%fldnames(5) = 'zges'
 
 call ufo_geovals_read_prof_netcdf(self, filename, vars, varsfile)
 
-call ufo_geovals_print(self, 1)
+!call ufo_geovals_print(self, 1)
 
 end subroutine ufo_geovals_read_uv_netcdf
 
@@ -387,7 +387,7 @@ vars%fldnames(3) = 'LogPressure';          varsfile%fldnames(3) = 'prsltmp'
 
 call ufo_geovals_read_prof_netcdf(self, filename, vars, varsfile)
 
-call ufo_geovals_print(self, 1)
+!call ufo_geovals_print(self, 1)
 
 end subroutine ufo_geovals_read_q_netcdf
 
@@ -458,7 +458,7 @@ self%linit = .true.
 
 call nc_diag_read_close(filename)
 
-call ufo_geovals_print(self, 1)
+!call ufo_geovals_print(self, 1)
 
 end subroutine ufo_geovals_read_ps_netcdf
 
@@ -490,7 +490,7 @@ type(ufo_geoval) :: geoval
 character(MAXVARLEN) :: varname
 logical :: lfound
 
-! variables hardcoded for the CRTM
+! variables hardcoded for the CRTM  !** Note: we'll need to revisit these in the future -BTJ 11.15.2017
 nvar_prof = 5
 it = 1; iwv = 2; ipr = 3; iprl = 4; ioz = 5 ! indices of vars
 nvar_surf_real = 9;
@@ -598,7 +598,7 @@ self%linit = .true.
 
 call nc_diag_read_close(filename)
 
-call ufo_geovals_print(self,1)
+!call ufo_geovals_print(self,1)
 ! Example of getting a variable below:
 !varname = 'Ozone'
 !lfound =  ufo_geovals_get_var(self, varname, geoval)
