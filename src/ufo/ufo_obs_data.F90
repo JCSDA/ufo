@@ -87,7 +87,7 @@ if (self%filein == 'Data/amsua_n19_wprofiles.nc4') then
   call obs_read(self)
   self%nobs = 15
 elseif (self%filein == 'Data/diag_t_01_wprofiles.nc4') then
-  self%nobs = 86366
+  self%nobs = 915
 elseif (self%filein == 'Data/diag_q_01_wprofiles.nc4') then
   self%nobs = 73651
 elseif (self%filein == 'Data/diag_uv_01_wprofiles.nc4') then

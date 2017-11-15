@@ -134,11 +134,13 @@ character(128) :: filename
 integer :: iunit
 
 real(8), allocatable :: tvflag(:), pres(:), omf(:), obs(:)
+real(8), allocatable :: pres_raob(:), omf_raob(:), obs_raob(:)
 integer, allocatable :: obstype(:)
 
-integer :: iobs, nobs
+integer :: iobs, nobs, iobs_raob, nobs_raob
 real :: z, dz
-
+real(8) :: rmse
+integer, parameter :: raobtype = 120
 logical :: lfound
 type(ufo_geoval) :: geoval_pr, geoval_tv
 character(MAXVARLEN) :: varname
@@ -161,7 +163,27 @@ call nc_diag_read_get_var(iunit, "Observation", obs)
 call nc_diag_read_get_var(iunit, "Obs_Minus_Forecast_unadjusted", omf)
 call nc_diag_read_close(filename)
 
-if (nobs /= geovals%nobs) then
+nobs_raob = count(obstype == raobtype .and. tvflag == 0)
+allocate(pres_raob(nobs_raob), obs_raob(nobs_raob))
+allocate(omf_raob(nobs_raob))
+iobs_raob = 1
+do iobs = 1, nobs
+  if (obstype(iobs) == raobtype .and. tvflag(iobs) == 0) then
+    !print *, iobs, obstype(iobs), tvflag(iobs)
+    pres_raob(iobs_raob) = pres(iobs)
+    obs_raob(iobs_raob) = obs(iobs)
+    omf_raob(iobs_raob) = omf(iobs)
+    iobs_raob = iobs_raob + 1
+  endif
+enddo
+
+rmse = 0.
+do iobs = 1, nobs_raob
+  rmse = rmse + (obs_raob(iobs)-omf_raob(iobs))*(obs_raob(iobs)-omf_raob(iobs))
+enddo
+print *, 'rmse=', sqrt(rmse/real(nobs_raob, 8))
+
+if (nobs_raob /= geovals%nobs) then
   print *, 'convt: error: nobs inconsistent!'
 endif
 
@@ -171,16 +193,10 @@ if (lfound) then
   varname = 'Virtual temperature'
   lfound = ufo_geovals_get_var(geovals, varname, geoval_tv)
   if (lfound) then
-    do iobs = 1, nobs
-      if ((obstype(iobs)>179.and.obstype(iobs)<190).or. &
-         (obstype(iobs)>=192.and.obstype(iobs)<=199) .or. &
-         (tvflag(iobs) /= 0)) then ! don't bother with surface and tsen obs
-         hofx%values(iobs) = obs(iobs) - omf(iobs) 
-      else 
-        z = log(pres(iobs)/10.)
-        dz = interp_weight(z, geoval_pr%vals(:,iobs), geoval_pr%nval)
-        hofx%values(iobs) = vert_interp(geoval_tv%vals(:,iobs), geoval_tv%nval, dz)
-      endif
+    do iobs = 1, nobs_raob
+      z = log(pres_raob(iobs)/10.)
+      dz = interp_weight(z, geoval_pr%vals(:,iobs), geoval_pr%nval)
+      hofx%values(iobs) = vert_interp(geoval_tv%vals(:,iobs), geoval_tv%nval, dz)
     enddo
   else
     print *, 'convt test: ', trim(varname), ' doesnt exist'
@@ -188,9 +204,10 @@ if (lfound) then
 else
   print *, 'convt test: ', trim(varname), ' doesnt exist'
 endif
-print *, 'conv t test: max diff: ', maxval(abs(hofx%values-(obs-omf))/abs(hofx%values))
+print *, 'conv t test: max diff: ', maxval(abs(hofx%values-(obs_raob-omf_raob))/abs(hofx%values))
 
-deallocate(obstype, obs, omf, pres)
+deallocate(obstype, obs, omf, pres, tvflag)
+deallocate(obs_raob, omf_raob, pres_raob)
 
 end subroutine ufo_conv_t_eqv_c
 
