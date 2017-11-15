@@ -7,20 +7,33 @@
      "variables": "testvar"
   },
   "Observations": {
-    "ObsTypes": [{
-      "ObsType": "Radiance",
-      "ObsData": {
-        "ObsDataIn": {
-          "obsfile": "Data/amsua_n19_wprofiles.nc4"
-        }
+    "ObsTypes": [
+      {
+        "ObsType": "Radiance",
+        "ObsData": {
+          "ObsDataIn": {
+            "obsfile": "Data/amsua_n19_wprofiles.nc4"
+          }
+        },
+        "GeoVaLs": {
+          "norm": "280.87991249861761",
+          "filename": "Data/amsua_n19_wprofiles.nc4"
+        },
+        "rmsequiv": "253.803797241769"
       },
-      "GeoVaLs": {
-        "norm": "27687.134048",
-        "nvars": "4",
-        "variables": "t prse u v",
-        "filename": "Data/amsua_n19_wprofiles.nc4"
-      },
-      "rmsequiv": "1.0"
-    }]
+      {
+        "ObsType": "Radiosonde",
+        "ObsData": {
+          "ObsDataIn": {
+            "obsfile": "Data/diag_t_01_wprofiles.nc4"
+          }
+        },
+        "GeoVaLs": {
+          "norm": "280.07183510087037",
+          "filename": "Data/diag_t_01_wprofiles.nc4"
+        },
+        "rmsequiv": "254.46418485798108"
+      }
+    ]
   }
 }

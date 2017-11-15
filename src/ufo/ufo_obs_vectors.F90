@@ -54,7 +54,6 @@ call ufo_obs_vect_registry%init()
 call ufo_obs_vect_registry%add(c_key_self)
 call ufo_obs_vect_registry%get(c_key_self,self)
 iobs = c_nobs
-
 call obsvec_setup(self, iobs)
 
 end subroutine ufo_obsvec_setup_c
