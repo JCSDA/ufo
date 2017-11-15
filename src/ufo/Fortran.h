@@ -32,6 +32,8 @@ typedef int F90ovec;
 typedef int F90hop;
 // Observation space type
 typedef int F90odb;
+// Observation check key type
+typedef int F90ocheck;
 
 /// Interface to Fortran UFO routines
 /*!
@@ -96,13 +98,19 @@ extern "C" {
   void ufo_radiance_inputs_f90(const F90hop &, F90vars &);
 
 // -----------------------------------------------------------------------------
+//  Check Observations
+// -----------------------------------------------------------------------------
+  void ufo_obscheck_setup_f90(F90ocheck &, const eckit::Configuration * const *);
+  void ufo_obscheck_delete_f90(F90ocheck &);
+  void ufo_postFilter_f90(const F90goms &, const F90ovec &, const F90odb &);
+  void ufo_priorFilter_f90(const F90odb &);
+
+// -----------------------------------------------------------------------------
 //  Radiosonde t observations
 // -----------------------------------------------------------------------------
   void ufo_radiosonde_setup_f90(F90hop &, const eckit::Configuration * const *);
   void ufo_radiosonde_delete_f90(F90hop &);
-
   void ufo_radiosonde_t_eqv_f90(const F90goms &, const F90odb &, const F90ovec &);
-
   void ufo_radiosonde_inputs_f90(const F90hop &, F90vars &);
 
 // -----------------------------------------------------------------------------
