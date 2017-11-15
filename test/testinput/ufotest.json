@@ -22,7 +22,7 @@
         "rmsequiv": "253.803797241769"
       },
       {
-        "ObsType": "ConvT",
+        "ObsType": "Radiosonde",
         "ObsData": {
           "ObsDataIn": {
             "obsfile": "Data/diag_t_01_wprofiles.nc4"

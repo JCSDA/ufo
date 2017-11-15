@@ -3,9 +3,9 @@
 ! This software is licensed under the terms of the Apache Licence Version 2.0
 ! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 
-!> Fortran module to handle conventional observations
+!> Fortran module to handle radiosondeentional observations
 
-module ufo_conv_mod
+module ufo_radiosonde_mod
   
   use iso_c_binding
   use config_mod
@@ -32,7 +32,7 @@ module ufo_conv_mod
 #include "linkedList_i.f"
   
   !> Global registry
-  type(registry_t) :: ufo_conv_registry
+  type(registry_t) :: ufo_radiosonde_registry
   
   ! ------------------------------------------------------------------------------
 contains
@@ -42,31 +42,31 @@ contains
   
 ! ------------------------------------------------------------------------------
   
-subroutine ufo_conv_setup_c(c_key_self, c_conf) bind(c,name='ufo_conv_setup_f90')
+subroutine ufo_radiosonde_setup_c(c_key_self, c_conf) bind(c,name='ufo_radiosonde_setup_f90')
 implicit none
 integer(c_int), intent(inout) :: c_key_self
 type(c_ptr), intent(in)    :: c_conf
     
 type(ufo_obsoper), pointer :: self
 
-call ufo_conv_registry%init()
-call ufo_conv_registry%add(c_key_self)
-call ufo_conv_registry%get(c_key_self, self)
+call ufo_radiosonde_registry%init()
+call ufo_radiosonde_registry%add(c_key_self)
+call ufo_radiosonde_registry%get(c_key_self, self)
     
-end subroutine ufo_conv_setup_c
+end subroutine ufo_radiosonde_setup_c
   
 ! ------------------------------------------------------------------------------
   
-subroutine ufo_conv_delete_c(c_key_self) bind(c,name='ufo_conv_delete_f90')
+subroutine ufo_radiosonde_delete_c(c_key_self) bind(c,name='ufo_radiosonde_delete_f90')
 implicit none
 integer(c_int), intent(inout) :: c_key_self
     
 type(ufo_obsoper), pointer :: self
 
-call ufo_conv_registry%get(c_key_self, self)
-call ufo_conv_registry%remove(c_key_self)
+call ufo_radiosonde_registry%get(c_key_self, self)
+call ufo_radiosonde_registry%remove(c_key_self)
     
-end subroutine ufo_conv_delete_c
+end subroutine ufo_radiosonde_delete_c
 
 ! ------------------------------------------------------------------------------
 real function interp_weight(d, x, nx) 
@@ -118,7 +118,7 @@ vert_interp = f(iz)*delzp + f(izp)*delz
 end function vert_interp
   
 ! ------------------------------------------------------------------------------
-subroutine ufo_conv_t_eqv_c(c_key_geovals, c_key_hofx, c_bias) bind(c,name='ufo_conv_t_eqv_f90')
+subroutine ufo_radiosonde_t_eqv_c(c_key_geovals, c_key_obsspace, c_key_hofx, c_bias) bind(c,name='ufo_radiosonde_t_eqv_f90')
 use nc_diag_read_mod, only: nc_diag_read_get_var
 use nc_diag_read_mod, only: nc_diag_read_get_dim
 use nc_diag_read_mod, only: nc_diag_read_init, nc_diag_read_close
@@ -126,6 +126,7 @@ use nc_diag_read_mod, only: nc_diag_read_init, nc_diag_read_close
 implicit none
 integer(c_int), intent(in) :: c_key_geovals
 integer(c_int), intent(in) :: c_key_hofx
+integer(c_int), intent(in) :: c_key_obsspace
 real(c_double), intent(in) :: c_bias
 type(ufo_geovals), pointer  :: geovals
 type(obs_vector), pointer :: hofx
@@ -177,6 +178,8 @@ do iobs = 1, nobs
   endif
 enddo
 
+print *, 'nobs: ', iobs_raob, nobs_raob, geovals%nobs, hofx%nobs
+
 rmse = 0.
 do iobs = 1, nobs_raob
   rmse = rmse + (obs_raob(iobs)-omf_raob(iobs))*(obs_raob(iobs)-omf_raob(iobs))
@@ -184,7 +187,7 @@ enddo
 print *, 'rmse=', sqrt(rmse/real(nobs_raob, 8))
 
 if (nobs_raob /= geovals%nobs) then
-  print *, 'convt: error: nobs inconsistent!'
+  print *, 'radiosondet: error: nobs inconsistent!'
 endif
 
 varname = 'LogPressure'
@@ -199,22 +202,22 @@ if (lfound) then
       hofx%values(iobs) = vert_interp(geoval_tv%vals(:,iobs), geoval_tv%nval, dz)
     enddo
   else
-    print *, 'convt test: ', trim(varname), ' doesnt exist'
+    print *, 'radiosondet test: ', trim(varname), ' doesnt exist'
   endif
 else
-  print *, 'convt test: ', trim(varname), ' doesnt exist'
+  print *, 'radiosondet test: ', trim(varname), ' doesnt exist'
 endif
-print *, 'conv t test: max diff: ', maxval(abs(hofx%values-(obs_raob-omf_raob))/abs(hofx%values))
+print *, 'radiosonde t test: max diff: ', maxval(abs(hofx%values-(obs_raob-omf_raob))/abs(hofx%values))
 
 deallocate(obstype, obs, omf, pres, tvflag)
 deallocate(obs_raob, omf_raob, pres_raob)
 
-end subroutine ufo_conv_t_eqv_c
+end subroutine ufo_radiosonde_t_eqv_c
 
   
 ! ------------------------------------------------------------------------------
   
-subroutine ufo_conv_inputs_c(c_key_self, c_key_vars) bind(c,name='ufo_conv_inputs_f90')
+subroutine ufo_radiosonde_inputs_c(c_key_self, c_key_vars) bind(c,name='ufo_radiosonde_inputs_f90')
 implicit none
 integer(c_int), intent(in)    :: c_key_self
 integer(c_int), intent(inout) :: c_key_vars
@@ -222,12 +225,12 @@ integer(c_int), intent(inout) :: c_key_vars
 type(ufo_obsoper), pointer :: self
 type(ufo_vars), pointer :: vars
     
-call ufo_conv_registry%get(c_key_self, self)
+call ufo_radiosonde_registry%get(c_key_self, self)
 call ufo_vars_registry%init()
 call ufo_vars_registry%add(c_key_vars)
 call ufo_vars_registry%get(c_key_vars, vars)
     
-end subroutine ufo_conv_inputs_c
+end subroutine ufo_radiosonde_inputs_c
   
   
-end module ufo_conv_mod
+end module ufo_radiosonde_mod

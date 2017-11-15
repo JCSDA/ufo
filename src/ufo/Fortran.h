@@ -96,14 +96,14 @@ extern "C" {
   void ufo_radiance_inputs_f90(const F90hop &, F90vars &);
 
 // -----------------------------------------------------------------------------
-//  Conventional q observations
+//  Radiosonde t observations
 // -----------------------------------------------------------------------------
-  void ufo_conv_setup_f90(F90hop &, const eckit::Configuration * const *);
-  void ufo_conv_delete_f90(F90hop &);
+  void ufo_radiosonde_setup_f90(F90hop &, const eckit::Configuration * const *);
+  void ufo_radiosonde_delete_f90(F90hop &);
 
-  void ufo_conv_t_eqv_f90(const F90goms &, const F90ovec &);
+  void ufo_radiosonde_t_eqv_f90(const F90goms &, const F90odb &, const F90ovec &);
 
-  void ufo_conv_inputs_f90(const F90hop &, F90vars &);
+  void ufo_radiosonde_inputs_f90(const F90hop &, F90vars &);
 
 // -----------------------------------------------------------------------------
 //  Observation Vectors
