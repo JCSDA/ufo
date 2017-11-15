@@ -434,43 +434,50 @@ contains
       ! ---------------
       ! ...Profile and absorber definitions (fake/placeholder()
 
-!!$ 1   Temperature
-!!$ 2   Water vapor
-!!$ 3   Pressure
-!!$ 4   Level pressure
-!!$ 5   Ozone
-!!$ 6   Water_Fraction
-!!$ 7   Land_Fraction
-!!$ 8   Ice_Fraction
-!!$ 9   Snow_Fraction
-!!$ 10  Water_Temperature
-!!$ 11  Land_Temperature
-!!$ 12  Ice_Temperature
-!!$ 13  Snow_Temperature
-!!$ 14  Vegetation_Fraction
-!!$ 15  Land_Type_Index
-
-!!$      !       varname = geovals%variables%fldnames(1)
-       lfound = ufo_geovals_get_var(geovals,'Temperature             ', geoval)
-       atm(1)%Temperature(1:N_LAYERS) = geoval%vals(N_LAYERS:1:-1,1) !** 1 == iobs, hardcoding for testing
-       print *, 'Temperature:', atm(1)%Temperature(1:2), geoval%vals(1:2,1)
-       lfound = ufo_geovals_get_var(geovals,'Pressure                ', geoval)
-       atm(1)%Pressure(1:N_LAYERS) = geoval%vals(N_LAYERS:1:-1,1) !** 1 == iobs, hardcoding for testing
-       print *, 'Pressure:', atm(1)%Pressure(1:2), geoval%vals(1:2,1)
-       lfound = ufo_geovals_get_var(geovals,'Level pressure          ', geoval)
-       atm(1)%Level_Pressure(0:N_LAYERS) = geoval%vals(N_LAYERS+1:1:-1,1) !** 1 == iobs, hardcoding for testing
-       print *, 'level_pressure:', atm(1)%Level_Pressure(0:1), geoval%vals(1:2,1)
-       atm(1)%Climatology         = US_STANDARD_ATMOSPHERE
-       atm(1)%Absorber_Id(1:1)    = (/ H2O_ID /)
-       atm(1)%Absorber_Units(1:1) = (/ MASS_MIXING_RATIO_UNITS /)
-       lfound = ufo_geovals_get_var(geovals,'Water vapor             ', geoval)
-       atm(1)%Absorber(1:N_LAYERS,1)       = geoval%vals(N_LAYERS:1:-1,1) !** 1 == iobs, hardcoding for testing
-       print *, 'water vapor:', atm(1)%Absorber(1:2,1), geoval%vals(1:2,1)
-       atm(1)%Absorber_Id(2:2)    = (/ O3_ID /)
-       atm(1)%Absorber_Units(2:2) = (/ VOLUME_MIXING_RATIO_UNITS /)
-       lfound = ufo_geovals_get_var(geovals,'Ozone                   ', geoval)
-       atm(1)%Absorber(1:N_LAYERS,2)       = geoval%vals(N_LAYERS:1:-1,1) !** 1 == iobs, hardcoding for testing
-       print *, 'Ozone:', atm(1)%Absorber(1:2,2), geoval%vals(1:2,1)
+!!$ 1     Temperature
+!!$ 2     Water vapor
+!!$ 3     Pressure
+!!$ 4     Level pressure
+!!$ 5     Ozone
+!!$ 6     Cloud liquid
+!!$ 7     Cloud ice
+!!$ 8     Water_Fraction
+!!$ 9     Land_Fraction
+!!$ 10    Ice_Fraction
+!!$ 11    Snow_Fraction
+!!$ 12    Water_Temperature
+!!$ 13    Land_Temperature
+!!$ 14    Ice_Temperature
+!!$ 15    Snow_Temperature
+!!$ 16    Vegetation_Fraction
+!!$ 17    Sfc_Wind_Speed
+!!$ 18    Sfc_Wind_Direction
+!!$ 19    Land_Type_Index
+      
+      do k1 = 1,geovals%nvar
+         varname = geovals%variables%fldnames(k1)
+         print *, k1, varname
+      end do
+      lfound = ufo_geovals_get_var(geovals,'Temperature             ', geoval)
+      atm(1)%Temperature(1:N_LAYERS) = geoval%vals(N_LAYERS:1:-1,1) !** 1 == iobs, hardcoding for testing
+      print *, 'Temperature:', atm(1)%Temperature(1:2), geoval%vals(1:2,1)
+      lfound = ufo_geovals_get_var(geovals,'Pressure                ', geoval)
+      atm(1)%Pressure(1:N_LAYERS) = geoval%vals(N_LAYERS:1:-1,1) !** 1 == iobs, hardcoding for testing
+      print *, 'Pressure:', atm(1)%Pressure(1:2), geoval%vals(1:2,1)
+      lfound = ufo_geovals_get_var(geovals,'Level pressure          ', geoval)
+      atm(1)%Level_Pressure(0:N_LAYERS) = geoval%vals(N_LAYERS+1:1:-1,1) !** 1 == iobs, hardcoding for testing
+      print *, 'level_pressure:', atm(1)%Level_Pressure(0:1), geoval%vals(1:2,1)
+      atm(1)%Climatology         = US_STANDARD_ATMOSPHERE
+      atm(1)%Absorber_Id(1:1)    = (/ H2O_ID /)
+      atm(1)%Absorber_Units(1:1) = (/ MASS_MIXING_RATIO_UNITS /)
+      lfound = ufo_geovals_get_var(geovals,'Water vapor             ', geoval)
+      atm(1)%Absorber(1:N_LAYERS,1)       = geoval%vals(N_LAYERS:1:-1,1) !** 1 == iobs, hardcoding for testing
+      print *, 'water vapor:', atm(1)%Absorber(1:2,1), geoval%vals(1:2,1)
+      atm(1)%Absorber_Id(2:2)    = (/ O3_ID /)
+      atm(1)%Absorber_Units(2:2) = (/ VOLUME_MIXING_RATIO_UNITS /)
+      lfound = ufo_geovals_get_var(geovals,'Ozone                   ', geoval)
+      atm(1)%Absorber(1:N_LAYERS,2)       = geoval%vals(N_LAYERS:1:-1,1) !** 1 == iobs, hardcoding for testing
+      print *, 'Ozone:', atm(1)%Absorber(1:2,2), geoval%vals(1:2,1)
 
 
       
@@ -579,48 +586,56 @@ contains
       !** loop over all surface fractions (need a way to generalize this to avoid changes in indices)
       sfc_types(1:4) = (/'Water_Fraction          ','Land_Fraction           ', 'Ice_Fraction            ', &
            'Snow_Fraction           '/)
-      
+
+      !** Water Surface
       lfound = ufo_geovals_get_var(geovals,sfc_types(1), geoval)
       if (geoval%vals(1,1) > 0.0_fp) then
          sfc(1)%Water_Type        = SEA_WATER_TYPE    !** need to check how to determine fresh vs sea water types (salinity???)
-         lfound = ufo_geovals_get_var(geovals,'Water_Fraction          ', geoval)
+         lfound                   = ufo_geovals_get_var(geovals,'Sfc_Wind_Speed          ', geoval)
+         sfc(1)%Wind_Speed        = geoval%vals(1,1) !** 1 == iobs, hardcoding for testing
+         lfound                   = ufo_geovals_get_var(geovals,'Sfc_Wind_Direction      ', geoval)
+         sfc(1)%Wind_Direction    = geoval%vals(1,1) !** 1 == iobs, hardcoding for testing
+         lfound                   = ufo_geovals_get_var(geovals,'Water_Fraction          ', geoval)
          sfc(1)%Water_Coverage    = geoval%vals(1,1) !** 1 == iobs, hardcoding for testing
          print '(A,2F12.3)', 'Water Coverage:', sfc(1)%Water_Coverage, geoval%vals(1,1)
-         lfound = ufo_geovals_get_var(geovals,'Water_Temperature       ', geoval)
+         lfound                   = ufo_geovals_get_var(geovals,'Water_Temperature       ', geoval)
          sfc(1)%Water_Temperature = geoval%vals(1,1) !** 1 == iobs, hardcoding for testing
          print '(A,2F12.3)', 'Water Temperature:', sfc(1)%Water_Temperature, geoval%vals(1,1)
       end if
+      !** Ice Surface
       lfound = ufo_geovals_get_var(geovals,sfc_types(3), geoval)
       if (geoval%vals(1,1) > 0.0_fp) then
-         lfound = ufo_geovals_get_var(geovals,'Ice_Fraction            ', geoval)
-         sfc(1)%Ice_Coverage    = geoval%vals(1,1) !** 1 == iobs, hardcoding for testing
+         lfound                   = ufo_geovals_get_var(geovals,'Ice_Fraction            ', geoval)
+         sfc(1)%Ice_Coverage      = geoval%vals(1,1) !** 1 == iobs, hardcoding for testing
          print '(A,2F12.3)', 'Ice Coverage:', sfc(1)%Ice_Coverage, geoval%vals(1,1)
-         lfound = ufo_geovals_get_var(geovals,'Ice_Temperature         ', geoval)
-         sfc(1)%Ice_Temperature = geoval%vals(1,1) !** 1 == iobs, hardcoding for testing
+         lfound                   = ufo_geovals_get_var(geovals,'Ice_Temperature         ', geoval)
+         sfc(1)%Ice_Temperature   = geoval%vals(1,1) !** 1 == iobs, hardcoding for testing
          print '(A,2F12.3)', 'Ice Temperature:', sfc(1)%Ice_Temperature, geoval%vals(1,1)
       end if
+      !** Snow Surface
       lfound = ufo_geovals_get_var(geovals,sfc_types(4), geoval)
       if (geoval%vals(1,1) > 0.0_fp) then
-         lfound = ufo_geovals_get_var(geovals,'Snow_Fraction           ', geoval)
-         sfc(1)%Snow_Coverage    = geoval%vals(1,1) !** 1 == iobs, hardcoding for testing
+         lfound                   = ufo_geovals_get_var(geovals,'Snow_Fraction           ', geoval)
+         sfc(1)%Snow_Coverage     = geoval%vals(1,1) !** 1 == iobs, hardcoding for testing
          print '(A,2F12.3)', 'Snow Coverage:', sfc(1)%Snow_Coverage, geoval%vals(1,1)
-         lfound = ufo_geovals_get_var(geovals,'Snow_Temperature        ', geoval)
-         sfc(1)%Snow_Temperature = geoval%vals(1,1) !** 1 == iobs, hardcoding for testing
+         lfound                   = ufo_geovals_get_var(geovals,'Snow_Temperature        ', geoval)
+         sfc(1)%Snow_Temperature  = geoval%vals(1,1) !** 1 == iobs, hardcoding for testing
          print '(A,2F12.3)', 'Snow Temperature:', sfc(1)%Snow_Temperature, geoval%vals(1,1)
       end if
+      !** Land Surface
       lfound = ufo_geovals_get_var(geovals,sfc_types(2), geoval)
       if (geoval%vals(1,1) > 0.0_fp) then
-         lfound = ufo_geovals_get_var(geovals,'Land_Type_Index         ', geoval)
-         sfc(1)%Land_Type        = geoval%vals(1,1)    !** is this land_type same as CRTM's land type??
+         lfound                   = ufo_geovals_get_var(geovals,'Land_Type_Index         ', geoval)
+         sfc(1)%Land_Type         = geoval%vals(1,1)    !** is this land_type same as CRTM's land type??
          print '(A,2F12.3)', 'Land Type:', sfc(1)%Land_Type, geoval%vals(1,1)
-         lfound = ufo_geovals_get_var(geovals,'Land_Fraction           ', geoval)
-         sfc(1)%Land_Coverage    = geoval%vals(1,1) !** 1 == iobs, hardcoding for testing
+         lfound                   = ufo_geovals_get_var(geovals,'Land_Fraction           ', geoval)
+         sfc(1)%Land_Coverage     = geoval%vals(1,1) !** 1 == iobs, hardcoding for testing
          print '(A,2F12.3)', 'Land Temperature:', sfc(1)%Land_Coverage, geoval%vals(1,1)
-         lfound = ufo_geovals_get_var(geovals,'Land_Temperature        ', geoval)
-         sfc(1)%Land_Temperature = geoval%vals(1,1) !** 1 == iobs, hardcoding for testing
+         lfound                   = ufo_geovals_get_var(geovals,'Land_Temperature        ', geoval)
+         sfc(1)%Land_Temperature  = geoval%vals(1,1) !** 1 == iobs, hardcoding for testing
          print '(A,2F12.3)', 'Land Temperature:', sfc(1)%Land_Temperature, geoval%vals(1,1)
-         lfound = ufo_geovals_get_var(geovals,'Vegetation_Fraction     ', geoval)
-         sfc(1)%Lai  = geoval%vals(1,1) !** 1 == iobs, hardcoding for testing
+         lfound                   = ufo_geovals_get_var(geovals,'Vegetation_Fraction     ', geoval)
+         sfc(1)%Lai               = geoval%vals(1,1) !** 1 == iobs, hardcoding for testing
          print '(A,2F12.3)', 'Vegetation Fraction:', sfc(1)%Lai, geoval%vals(1,1)
 
          !** this wasn't provide by the netcdf file, guessing.  
