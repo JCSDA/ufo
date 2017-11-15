@@ -12,9 +12,12 @@ ObsWSpeed.cc
 ObsWSpeed.h
 ObsRadiance.cc
 ObsRadiance.h
+ObsRadiosonde.cc
+ObsRadiosonde.h
 UfoTrait.h
 Variables.h
 Variables.cc
+obs_read_mod.F90
 ufo_geovals_mod.F90
 ufo_geovals_mod_c.F90
 ufo_locs_mod.F90
@@ -24,6 +27,8 @@ ufo_variables_mod.F90
 ufo_variables_mod_c.F90
 ufo_wspeed_mod.F90
 ufo_radiance_mod.F90
+raobDiag_mod.F90
+radDiag_mod.F90
 )
 
 ecbuild_add_library( TARGET   ufo

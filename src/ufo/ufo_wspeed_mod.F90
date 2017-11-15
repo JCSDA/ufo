@@ -13,7 +13,6 @@ module ufo_wspeed_mod
   use iso_c_binding
   use config_mod
   use duration_mod
-  use ufo_obs_data
   use ufo_obs_vectors
   use ufo_vars_mod
   use ufo_locs_mod

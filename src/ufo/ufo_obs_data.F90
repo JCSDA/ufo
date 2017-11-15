@@ -20,17 +20,7 @@ use ufo_locs_mod
 use ufo_obs_vectors
 use ufo_vars_mod
 use fckit_log_module, only : fckit_log
-use read_diag, only: set_radiag,&
-                     diag_header_fix_list,&
-                     diag_header_chan_list,&
-                     diag_data_name_list,&
-                     read_radiag_header,&
-                     set_netcdf_read
-use read_diag, only: read_radiag_data,&
-                     diag_data_fix_list,&
-                     diag_data_extra_list,&
-                     diag_data_chan_list
-use nc_diag_read_mod, only: nc_diag_read_init, nc_diag_read_close
+use obs_read_mod, only: obs_read_setup, obs_read_delete
 use kinds
 
 implicit none
@@ -45,15 +35,8 @@ integer, parameter :: max_string=800
 
 !> A type to represent observation data
 type obs_data
-  integer :: nobs
+  integer(c_int) :: nobs
   character(len=max_string) :: filein, fileout
-  type(diag_header_fix_list )              ::  header_fix
-  type(diag_header_chan_list),allocatable  ::  header_chan(:)
-  type(diag_data_name_list)                ::  header_name
-
-  type(diag_data_fix_list)                 ::  datafix
-  type(diag_data_chan_list)  ,allocatable  ::  datachan(:)
-  type(diag_data_extra_list) ,allocatable  ::  dataextra(:,:)
 end type obs_data
 
 #define LISTED_TYPE obs_data
@@ -72,15 +55,16 @@ contains
 
 ! ------------------------------------------------------------------------------
 
-subroutine obs_setup(fin, fout, self)
+subroutine obs_setup(fin, fout, obtype, self)
 implicit none
 type(obs_data), intent(inout) :: self
 character(len=*), intent(in) :: fin, fout
+character(len=*), intent(in) :: obtype
 
 self%filein =fin
 self%fileout=fout
 
-if (self%filein/="") call obs_read(self)
+call obs_read_setup(self%filein,obtype,self%nobs)
 call fckit_log%debug("TRACE: ufo_obs_data:obs_setup: done")
 
 end subroutine obs_setup
@@ -92,6 +76,7 @@ implicit none
 type(obs_data), intent(inout) :: self
 
 if (self%fileout/="") call obs_write(self)
+call obs_read_delete()
 
 end subroutine obs_delete
 
@@ -206,45 +191,6 @@ end subroutine obs_time_get
 !  Private
 ! ------------------------------------------------------------------------------
 
-subroutine obs_read(self)
-use ncd_kinds, only: i_kind
-implicit none
-character(len=*),parameter :: myname_ ="ufo_obs_data:obs_read"
-type(obs_data), intent(inout) :: self
-integer(i_kind) :: ier
-integer(i_kind) :: luin=0
-integer(i_kind) :: npred = 7   
-integer(i_kind) :: iversion=30303
-logical :: lverbose  = .true.  ! control verbose
-logical :: retrieval = .false. ! true when dealing with SST retrievals
-character(len=max_string) :: ncfname
-
-
-ncfname = self%filein
-call set_netcdf_read(.true.)
-call nc_diag_read_init(ncfname, luin)
-call set_radiag("version",iversion,ier)
-
-call read_radiag_header(luin,npred,retrieval,self%header_fix,self%header_chan,self%header_name,ier,lverbose)
-
-print*, myname_, ': Found this many channels: ', self%header_fix%nchan
-print*, myname_, ': Observation type in file: ', self%header_fix%obstype
-print*, myname_, ': Date of input file:       ', self%header_fix%idate
-
-self%nobs=0
-do while (ier .ge. 0)
-   call read_radiag_data ( luin, self%header_fix, .false., self%datafix, self%datachan, &
-                           self%dataextra, ier )
-
-   if (ier .lt. 0) cycle
-   self%nobs = self%nobs + 1
-enddo
-print *, myname_, ' Total number of observations in file: ', self%nobs
-call nc_diag_read_close(filename=ncfname)
-end subroutine obs_read
-
-! ------------------------------------------------------------------------------
-
 subroutine obs_write(self)
 implicit none
 type(obs_data), intent(in) :: self
@@ -264,12 +210,14 @@ type(c_ptr), intent(in)    :: c_conf !< configuration
 type(obs_data), pointer :: self
 character(len=max_string) :: fin, fout
 character(len=max_string+30) :: record
+character(len=max_string) :: MyObsType
 
 if (config_element_exists(c_conf,"ObsData.ObsDataIn")) then
   fin  = config_get_string(c_conf,max_string,"ObsData.ObsDataIn.obsfile")
 else
   fin  = ""
 endif
+MyObsType = trim(config_get_string(c_conf,max_string,"ObsType"))
 write(record,*)'ufo_obsdb_setup_c: file in =',trim(fin)
 call fckit_log%info(record)
 
@@ -281,7 +229,7 @@ fout = ""
 call obs_data_registry%init()
 call obs_data_registry%add(c_key_self)
 call obs_data_registry%get(c_key_self, self)
-call obs_setup(trim(fin), trim(fout), self)
+call obs_setup(trim(fin), trim(fout), MyObsType, self)
 
 end subroutine ufo_obsdb_setup_c
 

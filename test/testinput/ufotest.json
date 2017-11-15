@@ -7,20 +7,37 @@
      "variables": "testvar"
   },
   "Observations": {
-    "ObsTypes": [{
-      "ObsType": "Radiance",
-      "ObsData": {
-        "ObsDataIn": {
-          "obsfile": "Data/amsua_n19_wprofiles.nc4"
-        }
+    "ObsTypes": [
+      {
+        "ObsType": "Radiance",
+        "ObsData": {
+          "ObsDataIn": {
+            "obsfile": "/home/rtodling/discover/data/nc_4emily.diag_amsua_n15_ges.20161202_00z.nc4"
+          }
+        },
+        "GeoVaLs": {
+          "norm": "27687.134048",
+          "nvars": "4",
+          "variables": "t prse u v",
+          "filename": "/home/rtodling/discover/data/amsua_n19_wprofiles.nc4"
+        },
+        "rmsequiv": "1.0"
       },
-      "GeoVaLs": {
-        "norm": "27687.134048",
-        "nvars": "4",
-        "variables": "t prse u v",
-        "filename": "Data/amsua_n19_wprofiles.nc4"
-      },
-      "rmsequiv": "1.0"
-    }]
+      {
+        "ObsType": "Radiosonde",
+        "ObsData": {
+          "ObsDataIn": {
+            "obsfile": "/home/rtodling/discover/data/ncdiag_conv_nc4/diag_t_01_wprofiles.nc4"
+          }
+        },
+        "GeoVaLs": {
+          "norm": "27687.134048",
+          "nvars": "4",
+          "variables": "t prse u v",
+          "filename": "/home/rtodling/discover/data/amsua_n19_wprofiles.nc4"
+        },
+        "rmsequiv": "1.0"
+      }
+    ]
   }
 }
