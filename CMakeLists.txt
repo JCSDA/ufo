@@ -48,6 +48,7 @@ ncdw_types.F90
 ncdw_varattr.F90
 netcdf_unlimdims.F90
 read_diag.f90
+read_aod_diag.f90
 )
 
 ecbuild_add_library( TARGET     ioda
@@ -71,6 +72,10 @@ ecbuild_add_executable( TARGET  gsidiag_rad_bin2nc4.x
                         LIBS    ioda
                       )
 
+ecbuild_add_executable( TARGET  gsidiag_aod_bin2nc4.x
+                        SOURCES gsidiag_aod_bin2nc4.f90
+                        LIBS    ioda
+                      )
 ecbuild_add_executable( TARGET  nc_diag_cat.x
                         SOURCES nc_diag_cat.F90
                         LIBS    ioda

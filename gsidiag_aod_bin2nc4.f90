@@ -1,7 +1,7 @@
 PROGRAM convert_aod_diag
 
-  USE read_aod_diag,ONLY:read_aoddiag_header, diag_header_fix_list, diag_header_chan_list, diag_data_name_list
-  USE read_aod_diag,ONLY:read_aoddiag_data, diag_data_fix_list, diag_data_chan_list
+  USE read_aod_diag,ONLY:read_aoddiag_header, diag_header_fix_list_aod, diag_header_chan_list_aod, diag_data_name_list_aod
+  USE read_aod_diag,ONLY:read_aoddiag_data, diag_data_fix_list_aod, diag_data_chan_list_aod
   USE ncd_kinds,ONLY: r_quad, r_single
 
   USE nc_diag_write_mod, ONLY: nc_diag_init, nc_diag_header, nc_diag_metadata, &
@@ -15,12 +15,12 @@ PROGRAM convert_aod_diag
   INTEGER nargs, iargc, n
   CHARACTER*256, ALLOCATABLE ::   arg(:)
 
-  TYPE(diag_header_fix_list )          ::  header_fix
-  TYPE(diag_header_chan_list),ALLOCATABLE  ::  header_chan(:)
-  TYPE(diag_data_name_list)            ::  headname
+  TYPE(diag_header_fix_list_aod )          ::  header_fix
+  TYPE(diag_header_chan_list_aod),ALLOCATABLE  ::  header_chan(:)
+  TYPE(diag_data_name_list_aod)            ::  headname
 
-  TYPE(diag_data_fix_list)             ::  data_fix
-  TYPE(diag_data_chan_list)  ,ALLOCATABLE  ::  data_chan(:)
+  TYPE(diag_data_fix_list_aod)             ::  data_fix
+  TYPE(diag_data_chan_list_aod)  ,ALLOCATABLE  ::  data_chan(:)
 
 
   INTEGER i

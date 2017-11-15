@@ -43,14 +43,14 @@ MODULE read_aod_diag
 ! Declare public and private
   PRIVATE
 
-  PUBLIC :: diag_header_fix_list
-  PUBLIC :: diag_header_chan_list
-  PUBLIC :: diag_data_name_list
-  PUBLIC :: diag_data_fix_list
-  PUBLIC :: diag_data_chan_list
+  PUBLIC :: diag_header_fix_list_aod
+  PUBLIC :: diag_header_chan_list_aod
+  PUBLIC :: diag_data_name_list_aod
+  PUBLIC :: diag_data_fix_list_aod
+  PUBLIC :: diag_data_chan_list_aod
   PUBLIC :: read_aoddiag_header
   PUBLIC :: read_aoddiag_data
-  PUBLIC :: set_netcdf_read
+  PUBLIC :: set_netcdf_read_aod
   PUBLIC :: ireal_aod
   PUBLIC :: ipchan_aod
   PUBLIC :: set_aoddiag
@@ -68,7 +68,7 @@ MODULE read_aod_diag
 
 !@for aod remove npred i/jextra some other terms
 ! Declare structures for radiance diagnostic file information
-  TYPE diag_header_fix_list
+  TYPE diag_header_fix_list_aod
      CHARACTER(len=20) :: isis           ! sat and sensor type
      CHARACTER(len=10) :: id             ! sat type
      CHARACTER(len=10) :: obstype        ! observation type
@@ -79,16 +79,16 @@ MODULE read_aod_diag
      INTEGER(i_kind) :: ipchan           ! # of elements for each channel except for bias correction terms
      INTEGER(i_kind) :: nsig             ! # of sigma levels (layers?)
      INTEGER(i_kind) :: isens            ! sensitivity index
-  END TYPE diag_header_fix_list
+  END TYPE diag_header_fix_list_aod
 
-  TYPE diag_data_name_list
+  TYPE diag_data_name_list_aod
      CHARACTER(len=10),DIMENSION(ireal_aod) :: fix
      CHARACTER(len=10),DIMENSION(:),ALLOCATABLE :: chn
-  END TYPE diag_data_name_list
+  END TYPE diag_data_name_list_aod
 
 
-!for aod diag_header_chan_list is same as for radiance  
-  TYPE diag_header_chan_list
+!for aod diag_header_chan_list_aod is same as for radiance  
+  TYPE diag_header_chan_list_aod
      REAL(r_single) :: freq              ! frequency (Hz)
      REAL(r_single) :: polar             ! polarization
      REAL(r_single) :: wave              ! wave number (cm^-1)
@@ -97,25 +97,25 @@ MODULE read_aod_diag
      INTEGER(i_kind):: iuse              ! use flag
      INTEGER(i_kind):: nuchan            ! sensor relative channel number
      INTEGER(i_kind):: iochan            ! satinfo relative channel number
-  END TYPE diag_header_chan_list
+  END TYPE diag_header_chan_list_aod
 
 !@some changes
-  TYPE diag_data_fix_list
+  TYPE diag_data_fix_list_aod
      REAL(r_single) :: lat               ! latitude (deg)
      REAL(r_single) :: lon               ! longitude (deg)
      REAL(r_single) :: psfc              ! psfc (hPa)
      REAL(r_single) :: obstime           ! observation time relative to analysis
      REAL(r_single) :: solzen_ang        ! solar zenith angle (deg)
      REAL(r_single) :: solazm_ang        ! solar azimumth angle (deg)
-  END TYPE diag_data_fix_list
+  END TYPE diag_data_fix_list_aod
 
 !@some changes to aod
-  TYPE diag_data_chan_list
+  TYPE diag_data_chan_list_aod
      REAL(r_single) :: aodobs             ! AOD (obs) 
      REAL(r_single) :: omgaod             ! AOD (obs) - AOD (guess)
      REAL(r_single) :: errinv             ! inverse error (K**(-1))
      REAL(r_single) :: qcmark             ! quality control mark
-  END TYPE diag_data_chan_list
+  END TYPE diag_data_chan_list_aod
 
   REAL(r_single),PARAMETER::  rmiss_aoddiag    = -9.9e11_r_single
 
@@ -124,8 +124,8 @@ MODULE read_aod_diag
   INTEGER,SAVE            ::  cur_ob_idx = -9999
   INTEGER,SAVE            ::  num_records = -9999
 
-  TYPE(diag_data_fix_list)   ,ALLOCATABLE, SAVE :: all_data_fix(:)
-  TYPE(diag_data_chan_list)  ,ALLOCATABLE, SAVE :: all_data_chan(:,:)
+  TYPE(diag_data_fix_list_aod)   ,ALLOCATABLE, SAVE :: all_data_fix(:)
+  TYPE(diag_data_chan_list_aod)  ,ALLOCATABLE, SAVE :: all_data_chan(:,:)
 
 CONTAINS
 
@@ -143,7 +143,7 @@ CONTAINS
     ier=0
   END SUBROUTINE get_aoddiag_int_
 
-  SUBROUTINE set_netcdf_read(use_netcdf)
+  SUBROUTINE set_netcdf_read_aod(use_netcdf)
 !                .      .    .                                       .
 ! subprogram:    read_diag_header_bin             read rad diag header
 !   prgmmr: mccarty           org: gmao                date: 2015-08-06
@@ -154,7 +154,7 @@ CONTAINS
 ! program history log:
 !   2015-08-06 mccarty - created routine 
 !
-! input argument list:
+! input argument list_aod:
 !   use_netcdf    - logical .true. tells routine to read netcdf diag 
 ! attributes:
 !   language: f90
@@ -164,7 +164,7 @@ CONTAINS
     LOGICAL,INTENT(in)                     :: use_netcdf
 
     netcdf = use_netcdf
-  END SUBROUTINE set_netcdf_read
+  END SUBROUTINE set_netcdf_read_aod
 
 
   SUBROUTINE read_aoddiag_header(ftin,header_fix,header_chan,data_name,iflag,lverbose)
@@ -178,10 +178,10 @@ CONTAINS
 ! program history log:
 !   2015-08-06 mccarty - created routine w/ fork for ncdiag or binary
 !
-! input argument list:
+! input argument list_aod:
 !   ftin          - unit number connected to diagnostic file 
 !
-! output argument list:
+! output argument list_aod:
 !   header_fix    - header information structure
 !   header_chan   - channel information structure
 !   data_name     - diag file data names
@@ -196,9 +196,9 @@ CONTAINS
 
 ! Declare passed arguments
     INTEGER(i_kind),INTENT(in)             :: ftin
-    TYPE(diag_header_fix_list ),INTENT(out):: header_fix
-    TYPE(diag_header_chan_list),ALLOCATABLE :: header_chan(:)
-    TYPE(diag_data_name_list)              :: data_name
+    TYPE(diag_header_fix_list_aod ),INTENT(out):: header_fix
+    TYPE(diag_header_chan_list_aod),ALLOCATABLE :: header_chan(:)
+    TYPE(diag_data_name_list_aod)              :: data_name
     INTEGER(i_kind),INTENT(out)            :: iflag
     LOGICAL,OPTIONAL,INTENT(in)            :: lverbose
 
@@ -225,10 +225,10 @@ CONTAINS
 ! program history log:
 !   2015-08-06 mccarty - Created routine for ncdiag header reading
 !
-! input argument list:
+! input argument list_aod:
 !   ftin          - unit number connected to diagnostic file 
 !
-! output argument list:
+! output argument list_aod:
 !   header_fix    - header information structure
 !   header_chan   - channel information structure
 !   data_name     - diag file data names
@@ -242,15 +242,15 @@ CONTAINS
 !$$$
 ! Declare passed arguments
     INTEGER(i_kind),INTENT(in)             :: ftin
-    TYPE(diag_header_fix_list ),INTENT(out):: header_fix
-    TYPE(diag_header_chan_list),ALLOCATABLE :: header_chan(:)
-    TYPE(diag_data_name_list)              :: data_name
+    TYPE(diag_header_fix_list_aod ),INTENT(out):: header_fix
+    TYPE(diag_header_chan_list_aod),ALLOCATABLE :: header_chan(:)
+    TYPE(diag_data_name_list_aod)              :: data_name
     INTEGER(i_kind),INTENT(out)            :: iflag
     LOGICAL,OPTIONAL,INTENT(in)            :: lverbose
 
 ! local variables
     INTEGER(i_kind)                        :: nchan_dim
-    REAL(r_kind),ALLOCATABLE,DIMENSION(:)               :: r_var_stor
+    REAL(r_single),ALLOCATABLE,DIMENSION(:)               :: r_var_stor
     INTEGER(i_kind),ALLOCATABLE,DIMENSION(:)            :: i_var_stor
     CHARACTER(20)                          :: isis
     CHARACTER(10)                          :: id, obstype
@@ -276,17 +276,17 @@ CONTAINS
     CALL nc_diag_read_get_global_attr(ftin, "Observation_type", obstype)   ; header_fix%obstype = obstype
     CALL nc_diag_read_get_global_attr(ftin, "Outer_Loop_Iteration", jiter) ; header_fix%jiter = jiter
     CALL nc_diag_read_get_global_attr(ftin, "date_time", idate)            ; header_fix%idate = idate
-    CALL nc_diag_read_get_global_attr(ftin, "ireal_aod", ireal)         ; header_fix%ireal = ireal
-    CALL nc_diag_read_get_global_attr(ftin, "ipchan_aod", ipchan)       ; header_fix%ipchan = ipchan
+    CALL nc_diag_read_get_global_attr(ftin, "ireal_aoddiag", ireal)         ; header_fix%ireal = ireal
+    CALL nc_diag_read_get_global_attr(ftin, "ipchan_aoddiag", ipchan)       ; header_fix%ipchan = ipchan
     CALL nc_diag_read_get_global_attr(ftin, "ioff0", isens)                ; header_fix%isens = isens
-
 
     ALLOCATE(header_chan(nchan_dim)   )
 
     ALLOCATE(r_var_stor(nchan_dim), &
          i_var_stor(nchan_dim)  )
+
     CALL nc_diag_read_get_var('frequency',r_var_stor)      ; header_chan%freq     = r_var_stor
-    CALL nc_diag_read_get_var('polarization',i_var_stor)   ; header_chan%polar    = i_var_stor
+    CALL nc_diag_read_get_var('polarization',r_var_stor)   ; header_chan%polar    = r_var_stor
     CALL nc_diag_read_get_var('wavenumber',r_var_stor)     ; header_chan%wave     = r_var_stor
     CALL nc_diag_read_get_var('error_variance',r_var_stor) ; header_chan%varch    = r_var_stor
     CALL nc_diag_read_get_var('use_flag',i_var_stor)       ; header_chan%iuse     = i_var_stor
@@ -310,10 +310,10 @@ CONTAINS
 !   2014-07-25 sienkiewicz - supress warning if npred_aoddiag == 0
 !   2017-07-17 mccarty - renamed routine to _bin suffix for ncdiag
 !
-! input argument list:
+! input argument list_aod:
 !   ftin          - unit number connected to diagnostic file 
 !
-! output argument list:
+! output argument list_aod:
 !   header_fix    - header information structure
 !   header_chan   - channel information structure
 !   data_name     - diag file data names
@@ -328,9 +328,9 @@ CONTAINS
 
 ! Declare passed arguments
     INTEGER(i_kind),INTENT(in)             :: ftin
-    TYPE(diag_header_fix_list ),INTENT(out):: header_fix
-    TYPE(diag_header_chan_list),ALLOCATABLE :: header_chan(:)
-    TYPE(diag_data_name_list)              :: data_name
+    TYPE(diag_header_fix_list_aod ),INTENT(out):: header_fix
+    TYPE(diag_header_chan_list_aod),ALLOCATABLE :: header_chan(:)
+    TYPE(diag_data_name_list_aod)              :: data_name
     INTEGER(i_kind),INTENT(out)            :: iflag
     LOGICAL,OPTIONAL,INTENT(in)            :: lverbose    
 
@@ -422,11 +422,11 @@ CONTAINS
 !   2011-02-22 kleist  - changes related to memory allocation
 !   2017-07-17 mccarty - change routine to be generalized for bin/nc4 files
 !
-! input argument list:
+! input argument list_aod:
 !   ftin - unit number connected to diagnostic file
 !   header_fix - header information structure
 !
-! output argument list:
+! output argument list_aod:
 !   data_fix   - spot header information structure
 !   data_chan  - spot channel information structure
 !   iflag      - error code
@@ -440,9 +440,9 @@ CONTAINS
 
 ! Declare passed arguments
     INTEGER(i_kind),INTENT(in)             :: ftin
-    TYPE(diag_header_fix_list ),INTENT(in) :: header_fix
-    TYPE(diag_data_fix_list)   ,INTENT(out):: data_fix
-    TYPE(diag_data_chan_list)  ,ALLOCATABLE :: data_chan(:)
+    TYPE(diag_header_fix_list_aod ),INTENT(in) :: header_fix
+    TYPE(diag_data_fix_list_aod)   ,INTENT(out):: data_fix
+    TYPE(diag_data_chan_list_aod)  ,ALLOCATABLE :: data_chan(:)
     INTEGER(i_kind),INTENT(out)            :: iflag
 
     IF (netcdf) THEN
@@ -475,11 +475,11 @@ CONTAINS
 ! program history log:
 !   2015-06-10 mccarty  - create routine
 !
-! input argument list:
+! input argument list_aod:
 !   ftin - unit number connected to diagnostic file
 !   header_fix - header information structure
 !
-! output argument list:
+! output argument list_aod:
 !   data_fix   - spot header information structure
 !   data_chan  - spot channel information structure
 !   iflag      - error code
@@ -492,19 +492,19 @@ CONTAINS
 
 ! Declare passed arguments
     INTEGER(i_kind),INTENT(in)             :: ftin
-    TYPE(diag_header_fix_list ),INTENT(in) :: header_fix
+    TYPE(diag_header_fix_list_aod ),INTENT(in) :: header_fix
 
 ! Declare local variables
     INTEGER(i_kind)                          :: nrecord, ndatum, nangord
     INTEGER(i_kind)                          :: cch, ic, ir, cdatum
-    REAL(r_kind), ALLOCATABLE, DIMENSION(:)  :: Latitude, Longitude, &
+    REAL(r_single), ALLOCATABLE, DIMENSION(:)  :: Latitude, Longitude, &
          &Obs_Time,  Psfc, Sol_Zenith_Angle, Sol_Azimuth_Angle,&
          &Observation, Obs_Minus_Forecast_unadjusted,  &
          &Inverse_Observation_Error, QC_Flag
 
     INTEGER(i_kind), ALLOCATABLE, DIMENSION(:)  :: Channel_Index
 
-    REAL(r_kind)                                :: clat, clon
+    REAL(r_single)                                :: clat, clon
 
     ndatum = nc_diag_read_get_dim(ftin,'nobs')
     nrecord = ndatum / header_fix%nchan
@@ -582,11 +582,11 @@ CONTAINS
 ! program history log:
 !   2015-08-10 mccarty  - create routine
 !
-! input argument list:
+! input argument list_aod:
 !   ftin - unit number connected to diagnostic file
 !   header_fix - header information structure
 !
-! output argument list:
+! output argument list_aod:
 !   data_fix   - spot header information structure
 !   data_chan  - spot channel information structure
 !   iflag      - error code
@@ -599,9 +599,9 @@ CONTAINS
 
 ! Declare passed arguments
     INTEGER(i_kind),INTENT(in)             :: ftin
-    TYPE(diag_header_fix_list ),INTENT(in) :: header_fix
-    TYPE(diag_data_fix_list)   ,INTENT(out):: data_fix
-    TYPE(diag_data_chan_list)  ,ALLOCATABLE :: data_chan(:)
+    TYPE(diag_header_fix_list_aod ),INTENT(in) :: header_fix
+    TYPE(diag_data_fix_list_aod)   ,INTENT(out):: data_fix
+    TYPE(diag_data_chan_list_aod)  ,ALLOCATABLE :: data_chan(:)
     INTEGER(i_kind),INTENT(out)            :: iflag
 
     iflag = 0
@@ -627,11 +627,11 @@ CONTAINS
 !   2011-02-22 kleist  - changes related to memory allocation
 !   2017-07-17 mccarty - rename binary-specific procedure
 !
-! input argument list:
+! input argument list_aod:
 !   ftin - unit number connected to diagnostic file
 !   header_fix - header information structure
 !
-! output argument list:
+! output argument list_aod:
 !   data_fix   - spot header information structure
 !   data_chan  - spot channel information structure
 !   iflag      - error code
@@ -645,9 +645,9 @@ CONTAINS
 
 ! Declare passed arguments
     INTEGER(i_kind),INTENT(in)             :: ftin
-    TYPE(diag_header_fix_list ),INTENT(in) :: header_fix
-    TYPE(diag_data_fix_list)   ,INTENT(out):: data_fix
-    TYPE(diag_data_chan_list)  ,ALLOCATABLE :: data_chan(:)
+    TYPE(diag_header_fix_list_aod ),INTENT(in) :: header_fix
+    TYPE(diag_data_fix_list_aod)   ,INTENT(out):: data_fix
+    TYPE(diag_data_chan_list_aod)  ,ALLOCATABLE :: data_chan(:)
     INTEGER(i_kind),INTENT(out)            :: iflag
 
     INTEGER(i_kind) :: ich,iang,i,j
