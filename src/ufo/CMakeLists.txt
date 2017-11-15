@@ -12,6 +12,12 @@ ObsVector.cc
 ObsVector.h
 ObsWSpeed.cc
 ObsWSpeed.h
+ObsConvQ.cc
+ObsConvQ.h
+ObsConvU.cc
+ObsConvU.h
+ObsConvPs.cc
+ObsConvPs.h
 UfoTrait.h
 Variables.cc
 Variables.h
@@ -24,6 +30,7 @@ ufo_locs_mod.F90
 ufo_obs_data.F90
 ufo_obs_vectors.F90
 ufo_radiance_mod.F90
+ufo_conv_mod.F90
 ufo_variables_mod.F90
 ufo_variables_mod_c.F90
 ufo_wspeed_mod.F90

@@ -25,12 +25,38 @@
         "ObsType": "ConvQ",
         "ObsData": {
           "ObsDataIn": {
-            "obsfile": "Data/diag_q_01_wprofiles.nc4"
+            "obsfile": "Data/amsua_n19_wprofiles.nc4"
           }
         },
         "GeoVaLs": {
           "norm": "1.7659345436",
           "filename": "Data/diag_q_01_wprofiles.nc4"
+        },
+        "rmsequiv": "6.73124893E-03"
+      },
+      {
+        "ObsType": "ConvU",
+        "ObsData": {
+          "ObsDataIn": {
+            "obsfile": "Data/diag_uv_01_wprofiles.nc4"
+          }
+        },
+        "GeoVaLs": {
+          "norm": "1.7659345436",
+          "filename": "Data/diag_uv_01_wprofiles.nc4"
+        },
+        "rmsequiv": "6.73124893E-03"
+      },
+      {
+        "ObsType": "ConvPs",
+        "ObsData": {
+          "ObsDataIn": {
+            "obsfile": "Data/diag_ps_01_wprofiles.nc4"
+          }
+        },
+        "GeoVaLs": {
+          "norm": "1327.2380276986273",
+          "filename": "Data/diag_ps_01_wprofiles.nc4"
         },
         "rmsequiv": "6.73124893E-03"
       }
