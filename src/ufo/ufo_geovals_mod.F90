@@ -15,7 +15,6 @@ public :: ufo_geovals, ufo_geoval, ufo_geovals_get_var
 public :: ufo_geovals_registry
 public :: ufo_geovals_init, ufo_geovals_setup, ufo_geovals_delete, ufo_geovals_print
 public :: ufo_geovals_zero, ufo_geovals_random, ufo_geovals_dotprod
-public :: ufo_geovals_get_var
 public :: ufo_geovals_minmaxavg
 public :: ufo_geovals_read_t_netcdf, ufo_geovals_read_q_netcdf
 public :: ufo_geovals_read_uv_netcdf, ufo_geovals_read_ps_netcdf

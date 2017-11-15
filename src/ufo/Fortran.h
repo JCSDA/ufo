@@ -101,9 +101,6 @@ extern "C" {
   void ufo_conv_setup_f90(F90hop &, const eckit::Configuration * const *);
   void ufo_conv_delete_f90(F90hop &);
 
-  void ufo_conv_q_eqv_f90(const F90goms &, const F90ovec &);
-  void ufo_conv_u_eqv_f90(const F90goms &, const F90ovec &);
-  void ufo_conv_ps_eqv_f90(const F90goms &, const F90ovec &);
   void ufo_conv_t_eqv_f90(const F90goms &, const F90ovec &);
 
   void ufo_conv_inputs_f90(const F90hop &, F90vars &);

@@ -17,7 +17,7 @@ module ufo_radiance_mod
   use ufo_geovals_mod
   use kinds
   
-!  use crtm_module
+  use crtm_module
   implicit none
   private
   
@@ -71,15 +71,6 @@ contains
   end subroutine c_ufo_radiance_delete
   
   ! ------------------------------------------------------------------------------
-  subroutine ufo_radiance_noeqv(c_key_geovals, c_key_hofx, c_bias) bind(c,name='ufo_radiance_eqv_f90')
-    implicit none
-    integer(c_int), intent(in) :: c_key_geovals
-    integer(c_int), intent(in) :: c_key_hofx
-    real(c_double), intent(in) :: c_bias
-    type(obs_vector), pointer :: hofx
-    call ufo_obs_vect_registry%get(c_key_hofx,hofx)
-    hofx%values(:) = 1.0
-  end subroutine ufo_radiance_noeqv
 
   subroutine ufo_radiance_eqv(c_key_geovals, c_key_hofx, c_bias) bind(c,name='ufo_radiance_eqv_f90')
     implicit none

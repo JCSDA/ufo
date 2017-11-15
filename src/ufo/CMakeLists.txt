@@ -12,14 +12,8 @@ ObsVector.cc
 ObsVector.h
 ObsWSpeed.cc
 ObsWSpeed.h
-ObsConvQ.cc
-ObsConvQ.h
 ObsConvT.cc
 ObsConvT.h
-ObsConvU.cc
-ObsConvU.h
-ObsConvPs.cc
-ObsConvPs.h
 UfoTrait.h
 Variables.cc
 Variables.h
