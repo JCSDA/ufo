@@ -16,10 +16,11 @@
           }
         },
         "GeoVaLs": {
-          "norm": "280.87991249861761",
+          "norm": "280.87991270213405",
           "filename": "Data/amsua_n19_wprofiles.nc4"
         },
-        "rmsequiv": "253.803797241769"
+        "rmsequiv": "253.803797241769",
+        "tolerance": "999."
       },
       {
         "ObsType": "Radiosonde",
@@ -29,10 +30,11 @@
           }
         },
         "GeoVaLs": {
-          "norm": "280.07183510087037",
+          "norm": "280.07183547780136",
           "filename": "Data/diag_t_01_wprofiles.nc4"
         },
-        "rmsequiv": "254.46418485798108"
+        "rmsequiv": "254.46418485798108",
+        "tolerance": "1.0e-8"
       }
     ]
   }

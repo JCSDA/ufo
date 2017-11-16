@@ -34,21 +34,22 @@ module ufo_obs_data_mod
   type(RaobDiag), pointer, save::  Raob
 contains
 
-  subroutine Setup(self, filein,obstype,nobs)
+  subroutine Setup(self, filein,obstype,nobs,nlocs)
     class(Obs_Data), intent(inout) :: self
     character(len=*), intent(in)    :: filein
     character(len=*), intent(in)    :: obstype
     integer(c_int),   intent(inout) :: nobs
+    integer(c_int),   intent(inout) :: nlocs
 
     select case(trim(obstype))
       case("Radiance")
         allocate(Rad)
         self%Obspoint => Rad
-        call SetupRadiance(self, Rad, filein,nobs)
+        call SetupRadiance(self, Rad, filein,nobs,nlocs)
       case("Radiosonde")
         allocate(Raob)
         self%Obspoint => Raob
-        call SetupRaob(self, Raob, filein,nobs)
+        call SetupRaob(self, Raob, filein,nobs,nlocs)
     end select
 
   end subroutine Setup
@@ -57,31 +58,35 @@ contains
     class(Obs_Data), intent(inout) :: self
   end subroutine Delete
 
-  subroutine SetupRadiance(self, mytype, filein,nobs)
+  subroutine SetupRadiance(self, mytype, filein,nobs,nlocs)
     class(Obs_Data), intent(inout) :: self
     type(RadDiag), pointer, intent(inout)    :: mytype
     character(len=*), intent(in)    :: filein
     integer(c_int),   intent(inout) :: nobs
+    integer(c_int),   intent(inout) :: nlocs
 
     character(len=*),parameter:: myname_=myname//"::SetupRadiance"
 
     print *, trim(myname_)
-    call radDiag_read(mytype,filein,'Radiance',nobs)
+    call radDiag_read(mytype,filein,'Radiance',nobs,nlocs)
     self%Nobs = nobs
+    self%Nlocs= nlocs
 
   end subroutine SetupRadiance
 
-  subroutine SetupRaob(self, mytype, filein,nobs)
+  subroutine SetupRaob(self, mytype, filein,nobs,nlocs)
     class(Obs_Data), intent(inout) :: self
     type(RaobDiag), pointer, intent(inout)   :: mytype
     character(len=*), intent(in)    :: filein
     integer(c_int),   intent(inout) :: nobs
+    integer(c_int),   intent(inout) :: nlocs
 
     character(len=*),parameter:: myname_=myname//"::SetupRaob"
 
     print *, trim(myname_)
-    call raobDiag_read(mytype,filein,'Radiosonde',nobs)
+    call raobDiag_read(mytype,filein,'Radiosonde',nobs,nlocs)
     self%Nobs = nobs
+    self%Nlocs= nlocs
 
   end subroutine SetupRaob
 

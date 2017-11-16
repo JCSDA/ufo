@@ -26,12 +26,13 @@ interface raobDiag_read  ; module procedure this_read_  ; end interface
 
 contains
 
-subroutine this_read_(self,filein,obstype,nobs)
+subroutine this_read_(self,filein,obstype,nobs,nlocs)
 use ncd_kinds, only: i_kind
 implicit none
 character(len=*),parameter :: myname_ =myname//"*raod_read"
 class(raobDiag),  intent(inout) :: self
 integer(i_kind), intent(inout) :: nobs
+integer(i_kind), intent(inout) :: nlocs
 character(len=*),intent(in)    :: filein
 character(len=*),intent(in)    :: obstype
 integer(i_kind) :: ier
@@ -41,8 +42,10 @@ nobs=self%header%n_Observations_Mass
 allocate(self%mass(nobs))
 call read_raob_diag_nc_mass(filein,self%header,self%mass,ier)
 nobs=self%header%n_Observations_Mass
+nlocs = nobs
 
 print*, myname_, ': Found this many observations: ', nobs
+print*, myname_, ': Found this many instances:    ', nlocs
 print*, myname_, ': Size of type holding RAOB:    ', size(self%mass)
 print*, myname_, ': Date of input file:           ', self%header%date
 if(nobs>0)&

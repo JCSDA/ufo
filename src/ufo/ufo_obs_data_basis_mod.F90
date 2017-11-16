@@ -11,7 +11,8 @@ module ufo_obs_data_basis_mod
 
   character(len=*), parameter :: MyName='basis_obs_data_mod'
   type, abstract :: BasisObsData
-    integer :: nobs=0
+    integer :: nobs =0
+    integer :: nlocs=0
     character(len=800) :: filein, fileout
     class(BasisObsData),pointer :: Obspoint => NULL()
     contains
@@ -24,12 +25,13 @@ module ufo_obs_data_basis_mod
 
   abstract interface 
     ! Interface for setup
-    subroutine Setup_(self, filein,obstype,nobs)
+    subroutine Setup_(self, filein,obstype,nobs,nlocs)
       import
       class(BasisObsData), intent(inout) :: self
       character(len=*), intent(in)    :: filein
       character(len=*), intent(in)    :: obstype
       integer(c_int),   intent(inout) :: nobs
+      integer(c_int),   intent(inout) :: nlocs
     end subroutine Setup_
     ! Interface for setup
     subroutine Delete_(self)
