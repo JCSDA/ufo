@@ -119,6 +119,7 @@ module read_diag
      real(r_single) :: zsges             ! guess elevation at obs location (m)
      real(r_single) :: obstime           ! observation time relative to analysis
      real(r_single) :: senscn_pos        ! sensor scan position (integer(i_kind))
+     real(r_single) :: senscn_ang        ! sensor scan angle
      real(r_single) :: satzen_ang        ! satellite zenith angle (deg)
      real(r_single) :: satazm_ang        ! satellite azimuth angle (deg)
      real(r_single) :: solzen_ang        ! solar zenith angle (deg)
@@ -871,7 +872,7 @@ subroutine read_radiag_data_nc_init(ftin, diag_status, header_fix, retrieval)
 ! Declare local variables
   integer(i_kind)                          :: nrecord, ndatum, nangord
   integer(i_kind)                          :: cch, ic, ir, cdatum
-  real(r_kind), allocatable, dimension(:)  :: Latitude, Longitude, Elevation, Obs_Time, Scan_Position, &
+  real(r_kind), allocatable, dimension(:)  :: Latitude, Longitude, Elevation, Obs_Time, Scan_Position, Scan_Angle, &
                                               Sat_Zenith_Angle, Sat_Azimuth_Angle, Sol_Zenith_Angle, Sol_Azimuth_Angle,  &
                                               Sun_Glint_Angle, Water_Fraction, Land_Fraction, Ice_Fraction,  &
                                               Snow_Fraction, Water_Temperature, Land_Temperature, Ice_Temperature,  &
@@ -917,7 +918,8 @@ subroutine read_radiag_data_nc_init(ftin, diag_status, header_fix, retrieval)
             Weighted_Lapse_Rate(ndatum),      dTb_dTs(ndatum),                          BC_Constant(ndatum),                           &
             BC_Scan_Angle(ndatum),            BC_Cloud_Liquid_Water(ndatum),            BC_Lapse_Rate_Squared(ndatum),                 &
             BC_Lapse_Rate(ndatum),            BC_Cosine_Latitude_times_Node(ndatum),    BC_Sine_Latitude(ndatum),                      &
-            BC_Emissivity(ndatum),            BC_Fixed_Scan_Position(ndatum),           Land_Type_Index(ndatum)                        )
+            BC_Emissivity(ndatum),            BC_Fixed_Scan_Position(ndatum),           Land_Type_Index(ndatum),                       &
+            Scan_Angle(ndatum)                        )
 
   if (header_fix%angord > 0) then
      allocate( BC_angord(nangord, ndatum)    )
@@ -936,6 +938,7 @@ subroutine read_radiag_data_nc_init(ftin, diag_status, header_fix, retrieval)
   call nc_diag_read_get_var(ftin, 'Elevation', Elevation)
   call nc_diag_read_get_var(ftin, 'Obs_Time', Obs_Time)
   call nc_diag_read_get_var(ftin, 'Scan_Position', Scan_Position)
+  call nc_diag_read_get_var(ftin, 'Scan_Angle', Scan_Angle)
   call nc_diag_read_get_var(ftin, 'Sat_Zenith_Angle', Sat_Zenith_Angle)
   call nc_diag_read_get_var(ftin, 'Sat_Azimuth_Angle', Sat_Azimuth_Angle)
   call nc_diag_read_get_var(ftin, 'Sol_Zenith_Angle', Sol_Zenith_Angle)
@@ -1008,6 +1011,7 @@ subroutine read_radiag_data_nc_init(ftin, diag_status, header_fix, retrieval)
     diag_status%all_data_fix(ir)%zsges             = Elevation(cdatum)
     diag_status%all_data_fix(ir)%obstime           = Obs_Time(cdatum)
     diag_status%all_data_fix(ir)%senscn_pos        = Scan_Position(cdatum)
+    diag_status%all_data_fix(ir)%senscn_ang        = Scan_Angle(cdatum)
     diag_status%all_data_fix(ir)%satzen_ang        = Sat_Zenith_Angle(cdatum)
     diag_status%all_data_fix(ir)%satazm_ang        = Sat_Azimuth_Angle(cdatum)
     diag_status%all_data_fix(ir)%solzen_ang        = Sol_Zenith_Angle(cdatum)
