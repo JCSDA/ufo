@@ -102,7 +102,7 @@ contains
 
     ! Profile dimensions
     !** UFO to provide N_LAYERS, N_ABSORBERS, N_CLOUDS, N_AEROSOLS
-    INTEGER, PARAMETER :: N_PROFILES  = 1  !** required because of the rank of the atm and sfc structures
+    INTEGER, PARAMETER :: N_PROFILES  = 806  !** required because of the rank of the atm and sfc structures
     INTEGER, PARAMETER :: N_LAYERS    = 64 !** UFO  !** need a way to populate this... 
     INTEGER, PARAMETER :: N_ABSORBERS = 2  !** UFO
     INTEGER, PARAMETER :: N_CLOUDS    = 0  !** UFO
@@ -115,8 +115,18 @@ contains
     
     ! Some pretend geometry angles. The scan angle is based
     ! on the default Re (earth radius) and h (satellite height)
-    REAL(fp), PARAMETER :: ZENITH_ANGLE = 30.0_fp   !** UFO to provide (however, I would not be against creating a geometry database...--BTJ)
-    REAL(fp), PARAMETER :: SCAN_ANGLE   = 26.37293341421_fp  !** UFO to provide 
+    REAL(fp), PARAMETER :: ZENITH_ANGLE      = -44.65_fp   !** UFO to provide (however, I would not be against creating a geometry database...--BTJ)
+    REAL(fp), PARAMETER :: SCAN_ANGLE        = -35.0_fp  !** UFO to provide
+    REAL(fp), PARAMETER :: Latitude          = 46.3369
+    REAL(fp), PARAMETER :: Longitude         = 354.4514
+    REAL(fp), PARAMETER :: Elevation         = 161
+    REAL(fp), PARAMETER :: Obs_Time          = -1.83777777777778
+    REAL(fp), PARAMETER :: Scan_Position     = 4
+    REAL(fp), PARAMETER :: Sat_Zenith_Angle  = -44.65
+    REAL(fp), PARAMETER :: Sat_Azimuth_Angle = 290.23
+    REAL(fp), PARAMETER :: Sol_Zenith_Angle  = 118.88
+    REAL(fp), PARAMETER :: Sol_Azimuth_Angle = 66.63
+                
     !** NOTE: From CRTM_Parameters.f90, the maximum zenith angle is fixed at:
     !** REAL(fp), PUBLIC, PARAMETER :: MAX_TRANS_ZENITH_ANGLE = 63.6122_fp !corresponding to amass 2.25
     !**   I will try to figure out why this is the maximum. --BTJ
@@ -211,10 +221,10 @@ contains
     ! 4b. Output some channel information
     ! -----------------------------------
     n_channels = SUM(CRTM_ChannelInfo_n_Channels(chinfo))
-    WRITE( *,'(/5x,"Processing a total of ",i0," channels...", i0, " layers..")' ) n_channels, N_LAYERS
+    !WRITE( *,'(/5x,"Processing a total of ",i0," channels...", i0, " layers..")' ) n_channels, N_LAYERS
     DO n = 1, N_SENSORS
-       WRITE( *,'(7x,i0," from ",a)' ) &
-            CRTM_ChannelInfo_n_Channels(chinfo(n)), TRIM(SENSOR_ID(n))
+       !WRITE( *,'(7x,i0," from ",a)' ) &
+       !     CRTM_ChannelInfo_n_Channels(chinfo(n)), TRIM(SENSOR_ID(n))
     END DO
     ! ============================================================================
     ! Begin loop over sensors
@@ -295,6 +305,16 @@ contains
        CALL CRTM_Geometry_SetValue( geo, &
             Sensor_Zenith_Angle = ZENITH_ANGLE, &
             Sensor_Scan_Angle   = SCAN_ANGLE )
+!!$       REAL(fp), PARAMETER :: Latitude          = 46.3369
+!!$       REAL(fp), PARAMETER :: Longitude         = 354.4514
+!!$       REAL(fp), PARAMETER :: Elevation         = 161
+!!$       REAL(fp), PARAMETER :: Obs_Time          = -1.83777777777778
+!!$       REAL(fp), PARAMETER :: Scan_Position     = 4  !** at 3.333 degrees per scan position, starting at 48.333, so this is -48.333+4*3.333 = 
+!!$       REAL(fp), PARAMETER :: Sat_Zenith_Angle  = -44.65
+!!$       REAL(fp), PARAMETER :: Sat_Azimuth_Angle = 290.23
+!!$       REAL(fp), PARAMETER :: Sol_Zenith_Angle  = 118.88
+!!$       REAL(fp), PARAMETER :: Sol_Azimuth_Angle = 66.63
+       
        ! ==========================================================================
        
        ! ==========================================================================
@@ -317,10 +337,10 @@ contains
        ! ==========================================================================
        ! STEP 8. **** CALL THE CRTM FUNCTIONS FOR THE CURRENT SENSOR ****
        !
-       call CRTM_Atmosphere_Inspect(atm)
-       call CRTM_Surface_Inspect(sfc(1))
-
-       WRITE( *, '( /5x, "Calling the CRTM functions for ",a,"..." )' ) TRIM(SENSOR_ID(n))
+!       call CRTM_Atmosphere_Inspect(atm)
+!       call CRTM_Surface_Inspect(sfc(22))
+!       call CRTM_Geometry_Inspect(geo(1))
+!       WRITE( *, '( /5x, "Calling the CRTM functions for ",a,"..." )' ) TRIM(SENSOR_ID(n))
        
        ! 8a. The forward model call for each sensor
        ! -----------------------------------------------
@@ -360,11 +380,12 @@ contains
        ! select the needed variables for outputs.  These variables are contained
        ! in the structure RTSolution.
        DO m = 1, N_PROFILES
-          WRITE( *,'(//7x,"Profile ",i0," output for ",a )') m, TRIM(Sensor_Id(n))
+!          WRITE( *,'(//7x,"Profile ",i0," output for ",a )') m, TRIM(Sensor_Id(n))
           DO l = 1, n_Channels
-!             WRITE( *, '(/5x,"Channel ",i0," results")') chinfo(n)%Sensor_Channel(l)
+             !             WRITE( *, '(/5x,"Channel ",i0," results")') chinfo(n)%Sensor_Channel(l)
              !CALL CRTM_RTSolution_Inspect(rts(l,m))
-             print '(A,I4,A2,F12.3)', '[Ch] TB: [', chinfo(n)%Sensor_Channel(l), '] ', rts(l,m)%Brightness_Temperature
+             !print '(A,I4,A2,F12.3)', '[Ch] TB: [', chinfo(n)%Sensor_Channel(l), '] ', rts(l,m)%Brightness_Temperature
+             !print '(F7.3)', rts(l,m)%Brightness_Temperature
           END DO
        END DO
 
@@ -458,27 +479,31 @@ contains
          varname = geovals%variables%fldnames(k1)
          print *, k1, varname
       end do
-      lfound = ufo_geovals_get_var(geovals,'Temperature             ', geoval)
-      atm(1)%Temperature(1:N_LAYERS) = geoval%vals(N_LAYERS:1:-1,1) !** 1 == iobs, hardcoding for testing
-      print *, 'Temperature:', atm(1)%Temperature(1:2), geoval%vals(1:2,1)
-      lfound = ufo_geovals_get_var(geovals,'Pressure                ', geoval)
-      atm(1)%Pressure(1:N_LAYERS) = geoval%vals(N_LAYERS:1:-1,1) !** 1 == iobs, hardcoding for testing
-      print *, 'Pressure:', atm(1)%Pressure(1:2), geoval%vals(1:2,1)
-      lfound = ufo_geovals_get_var(geovals,'Level pressure          ', geoval)
-      atm(1)%Level_Pressure(0:N_LAYERS) = geoval%vals(N_LAYERS+1:1:-1,1) !** 1 == iobs, hardcoding for testing
-      print *, 'level_pressure:', atm(1)%Level_Pressure(0:1), geoval%vals(1:2,1)
-      atm(1)%Climatology         = US_STANDARD_ATMOSPHERE
-      atm(1)%Absorber_Id(1:1)    = (/ H2O_ID /)
-      atm(1)%Absorber_Units(1:1) = (/ MASS_MIXING_RATIO_UNITS /)
-      lfound = ufo_geovals_get_var(geovals,'Water vapor             ', geoval)
-      atm(1)%Absorber(1:N_LAYERS,1)       = geoval%vals(N_LAYERS:1:-1,1) !** 1 == iobs, hardcoding for testing
-      print *, 'water vapor:', atm(1)%Absorber(1:2,1), geoval%vals(1:2,1)
-      atm(1)%Absorber_Id(2:2)    = (/ O3_ID /)
-      atm(1)%Absorber_Units(2:2) = (/ VOLUME_MIXING_RATIO_UNITS /)
-      lfound = ufo_geovals_get_var(geovals,'Ozone                   ', geoval)
-      atm(1)%Absorber(1:N_LAYERS,2)       = geoval%vals(N_LAYERS:1:-1,1) !** 1 == iobs, hardcoding for testing
-      print *, 'Ozone:', atm(1)%Absorber(1:2,2), geoval%vals(1:2,1)
-
+      do k1 = 1,N_PROFILES
+         lfound = ufo_geovals_get_var(geovals,'Temperature             ', geoval)
+         !** NOTE: the *15 parts of this are to account for the fact that the test netcdf file contains an atmospheric
+         !**       and surface profile data for each channel, it's not clear why the data was stored this way.  --BTJ
+        
+         atm(k1)%Temperature(1:N_LAYERS) = geoval%vals(N_LAYERS:1:-1,k1*15) !** 1 == iobs, hardcoding for testing
+         !print *, 'Temperature:', atm(k1)%Temperature(1:2), geoval%vals(1:2,k1*15)
+         lfound = ufo_geovals_get_var(geovals,'Pressure                ', geoval)
+         atm(k1)%Pressure(1:N_LAYERS) = geoval%vals(N_LAYERS:1:-1,k1*15) !** 1 == iobs, hardcoding for testing
+         !print *, 'Pressure:', atm(k1)%Pressure(1:2), geoval%vals(1:2,k1*15)
+         lfound = ufo_geovals_get_var(geovals,'Level pressure          ', geoval)
+         atm(k1)%Level_Pressure(0:N_LAYERS) = geoval%vals(N_LAYERS+1:1:-1,k1*15) !** 1 == iobs, hardcoding for testing
+         !print *, 'level_pressure:', atm(k1)%Level_Pressure(0:1), geoval%vals(1:2,k1*15)
+         atm(k1)%Climatology         = US_STANDARD_ATMOSPHERE
+         atm(k1)%Absorber_Id(1:1)    = (/ H2O_ID /)
+         atm(k1)%Absorber_Units(1:1) = (/ MASS_MIXING_RATIO_UNITS /)
+         lfound = ufo_geovals_get_var(geovals,'Water vapor             ', geoval)
+         atm(k1)%Absorber(1:N_LAYERS,1)       = geoval%vals(N_LAYERS:1:-1,k1*15) !** 1 == iobs, hardcoding for testing
+         !print *, 'water vapor:', atm(k1)%Absorber(1:2,1), geoval%vals(1:2,k1*15)
+         atm(k1)%Absorber_Id(2:2)    = (/ O3_ID /)
+         atm(k1)%Absorber_Units(2:2) = (/ VOLUME_MIXING_RATIO_UNITS /)
+         lfound = ufo_geovals_get_var(geovals,'Ozone                   ', geoval)
+         atm(k1)%Absorber(1:N_LAYERS,2)       = geoval%vals(N_LAYERS:1:-1,k1*15) !** 1 == iobs, hardcoding for testing
+         !print *, 'Ozone:', atm(k1)%Absorber(1:2,2), geoval%vals(1:2,k1*15)
+      end do
 
       
 !!$      atm(1)%Climatology       = US_STANDARD_ATMOSPHERE
@@ -586,63 +611,64 @@ contains
       !** loop over all surface fractions (need a way to generalize this to avoid changes in indices)
       sfc_types(1:4) = (/'Water_Fraction          ','Land_Fraction           ', 'Ice_Fraction            ', &
            'Snow_Fraction           '/)
-
-      !** Water Surface
-      lfound = ufo_geovals_get_var(geovals,sfc_types(1), geoval)
-      if (geoval%vals(1,1) > 0.0_fp) then
-         sfc(1)%Water_Type        = SEA_WATER_TYPE    !** need to check how to determine fresh vs sea water types (salinity???)
-         lfound                   = ufo_geovals_get_var(geovals,'Sfc_Wind_Speed          ', geoval)
-         sfc(1)%Wind_Speed        = geoval%vals(1,1) !** 1 == iobs, hardcoding for testing
-         lfound                   = ufo_geovals_get_var(geovals,'Sfc_Wind_Direction      ', geoval)
-         sfc(1)%Wind_Direction    = geoval%vals(1,1) !** 1 == iobs, hardcoding for testing
-         lfound                   = ufo_geovals_get_var(geovals,'Water_Fraction          ', geoval)
-         sfc(1)%Water_Coverage    = geoval%vals(1,1) !** 1 == iobs, hardcoding for testing
-         print '(A,2F12.3)', 'Water Coverage:', sfc(1)%Water_Coverage, geoval%vals(1,1)
-         lfound                   = ufo_geovals_get_var(geovals,'Water_Temperature       ', geoval)
-         sfc(1)%Water_Temperature = geoval%vals(1,1) !** 1 == iobs, hardcoding for testing
-         print '(A,2F12.3)', 'Water Temperature:', sfc(1)%Water_Temperature, geoval%vals(1,1)
-      end if
-      !** Ice Surface
-      lfound = ufo_geovals_get_var(geovals,sfc_types(3), geoval)
-      if (geoval%vals(1,1) > 0.0_fp) then
-         lfound                   = ufo_geovals_get_var(geovals,'Ice_Fraction            ', geoval)
-         sfc(1)%Ice_Coverage      = geoval%vals(1,1) !** 1 == iobs, hardcoding for testing
-         print '(A,2F12.3)', 'Ice Coverage:', sfc(1)%Ice_Coverage, geoval%vals(1,1)
-         lfound                   = ufo_geovals_get_var(geovals,'Ice_Temperature         ', geoval)
-         sfc(1)%Ice_Temperature   = geoval%vals(1,1) !** 1 == iobs, hardcoding for testing
-         print '(A,2F12.3)', 'Ice Temperature:', sfc(1)%Ice_Temperature, geoval%vals(1,1)
-      end if
-      !** Snow Surface
-      lfound = ufo_geovals_get_var(geovals,sfc_types(4), geoval)
-      if (geoval%vals(1,1) > 0.0_fp) then
-         lfound                   = ufo_geovals_get_var(geovals,'Snow_Fraction           ', geoval)
-         sfc(1)%Snow_Coverage     = geoval%vals(1,1) !** 1 == iobs, hardcoding for testing
-         print '(A,2F12.3)', 'Snow Coverage:', sfc(1)%Snow_Coverage, geoval%vals(1,1)
-         lfound                   = ufo_geovals_get_var(geovals,'Snow_Temperature        ', geoval)
-         sfc(1)%Snow_Temperature  = geoval%vals(1,1) !** 1 == iobs, hardcoding for testing
-         print '(A,2F12.3)', 'Snow Temperature:', sfc(1)%Snow_Temperature, geoval%vals(1,1)
-      end if
-      !** Land Surface
-      lfound = ufo_geovals_get_var(geovals,sfc_types(2), geoval)
-      if (geoval%vals(1,1) > 0.0_fp) then
-         lfound                   = ufo_geovals_get_var(geovals,'Land_Type_Index         ', geoval)
-         sfc(1)%Land_Type         = geoval%vals(1,1)    !** is this land_type same as CRTM's land type??
-         print '(A,2F12.3)', 'Land Type:', sfc(1)%Land_Type, geoval%vals(1,1)
-         lfound                   = ufo_geovals_get_var(geovals,'Land_Fraction           ', geoval)
-         sfc(1)%Land_Coverage     = geoval%vals(1,1) !** 1 == iobs, hardcoding for testing
-         print '(A,2F12.3)', 'Land Temperature:', sfc(1)%Land_Coverage, geoval%vals(1,1)
-         lfound                   = ufo_geovals_get_var(geovals,'Land_Temperature        ', geoval)
-         sfc(1)%Land_Temperature  = geoval%vals(1,1) !** 1 == iobs, hardcoding for testing
-         print '(A,2F12.3)', 'Land Temperature:', sfc(1)%Land_Temperature, geoval%vals(1,1)
-         lfound                   = ufo_geovals_get_var(geovals,'Vegetation_Fraction     ', geoval)
-         sfc(1)%Lai               = geoval%vals(1,1) !** 1 == iobs, hardcoding for testing
-         print '(A,2F12.3)', 'Vegetation Fraction:', sfc(1)%Lai, geoval%vals(1,1)
-
-         !** this wasn't provide by the netcdf file, guessing.  
-         sfc(1)%Soil_Type         = COARSE_SOIL_TYPE
-         sfc(1)%Vegetation_Type   = GROUNDCOVER_VEGETATION_TYPE
-      end if
       
+      !** Water Surface
+      !      lfound = ufo_geovals_get_var(geovals,sfc_types(1), geoval)
+      !      if (geoval%vals(1,1:N_PROFILES) > 0.0_fp) then
+      do k1 = 1,N_PROFILES
+         sfc(k1)%Water_Type        = SEA_WATER_TYPE    !** need to check how to determine fresh vs sea water types (salinity???)
+         lfound                              = ufo_geovals_get_var(geovals,'Sfc_Wind_Speed          ', geoval)
+         sfc(k1)%Wind_Speed        = geoval%vals(1,k1*15) !** 1 == iobs, hardcoding for testing
+         lfound                              = ufo_geovals_get_var(geovals,'Sfc_Wind_Direction      ', geoval)
+         sfc(k1)%Wind_Direction    = geoval%vals(1,k1*15) !** 1 == iobs, hardcoding for testing
+         lfound                              = ufo_geovals_get_var(geovals,'Water_Fraction          ', geoval)
+         sfc(k1)%Water_Coverage    = geoval%vals(1,k1*15) !** 1 == iobs, hardcoding for testing
+         !print '(A,2F12.3)', 'Water Coverage:', sfc(k1)%Water_Coverage, geoval%vals(1,k1*15)
+         lfound                              = ufo_geovals_get_var(geovals,'Water_Temperature       ', geoval)
+         sfc(k1)%Water_Temperature = geoval%vals(1,k1*15) !** 1 == iobs, hardcoding for testing
+         !print '(A,2F12.3)', 'Water Temperature:', sfc(k1)%Water_Temperature, geoval%vals(1,k1*15)
+         !      end if
+         !** Ice Surface
+         !      lfound = ufo_geovals_get_var(geovals,sfc_types(3), geoval)
+         !      if (geoval%vals(1,k1*15) > 0.0_fp) then
+         lfound                              = ufo_geovals_get_var(geovals,'Ice_Fraction            ', geoval)
+         sfc(k1)%Ice_Coverage      = geoval%vals(1,k1*15) !** 1 == iobs, hardcoding for testing
+         !print '(A,2F12.3)', 'Ice Coverage:', sfc(k1)%Ice_Coverage, geoval%vals(1,k1*15)
+         lfound                              = ufo_geovals_get_var(geovals,'Ice_Temperature         ', geoval)
+         sfc(k1)%Ice_Temperature   = geoval%vals(1,k1*15) !** 1 == iobs, hardcoding for testing
+         !print '(A,2F12.3)', 'Ice Temperature:', sfc(k1)%Ice_Temperature, geoval%vals(1,k1*15)
+         !      end if
+         !** Snow Surface
+         !      lfound = ufo_geovals_get_var(geovals,sfc_types(4), geoval)
+         !      if (geoval%vals(1,k1*15) > 0.0_fp) then
+         lfound                              = ufo_geovals_get_var(geovals,'Snow_Fraction           ', geoval)
+         sfc(k1)%Snow_Coverage     = geoval%vals(1,k1*15) !** 1 == iobs, hardcoding for testing
+         !print '(A,2F12.3)', 'Snow Coverage:', sfc(k1)%Snow_Coverage, geoval%vals(1,k1*15)
+         lfound                              = ufo_geovals_get_var(geovals,'Snow_Temperature        ', geoval)
+         sfc(k1)%Snow_Temperature  = geoval%vals(1,k1*15) !** 1 == iobs, hardcoding for testing
+         !print '(A,2F12.3)', 'Snow Temperature:', sfc(k1)%Snow_Temperature, geoval%vals(1,k1*15)
+         !      end if
+         !** Land Surface
+         !      lfound = ufo_geovals_get_var(geovals,sfc_types(2), geoval)
+         !      if (geoval%vals(1,k1*15) > 0.0_fp) then
+         lfound                              = ufo_geovals_get_var(geovals,'Land_Type_Index         ', geoval)
+         sfc(k1)%Land_Type         = geoval%vals(1,k1*15)    !** is this land_type same as CRTM's land type??
+         !print '(A,1I5,1F12.3)', 'Land Type:', sfc(k1)%Land_Type, geoval%vals(1,k1*15)
+         lfound                              = ufo_geovals_get_var(geovals,'Land_Fraction           ', geoval)
+         sfc(k1)%Land_Coverage     = geoval%vals(1,k1*15) !** 1 == iobs, hardcoding for testing
+         !print '(A,2F12.3)', 'Land Coverage:', sfc(k1)%Land_Coverage, geoval%vals(1,k1*15)
+         lfound                              = ufo_geovals_get_var(geovals,'Land_Temperature        ', geoval)
+         sfc(k1)%Land_Temperature  = geoval%vals(1,k1*15) !** 1 == iobs, hardcoding for testing
+         !print '(A,2F12.3)', 'Land Temperature:', sfc(k1)%Land_Temperature, geoval%vals(1,k1*15)
+         lfound                              = ufo_geovals_get_var(geovals,'Vegetation_Fraction     ', geoval)
+         sfc(k1)%Lai               = geoval%vals(1,k1*15) !** 1 == iobs, hardcoding for testing
+         !print '(A,2F12.3)', 'Vegetation Fraction:', sfc(k1)%Lai, geoval%vals(1,k1*15)
+         
+         !** this wasn't provide by the netcdf file, guessing.  
+         sfc(k1)%Soil_Type         = COARSE_SOIL_TYPE
+         sfc(k1)%Vegetation_Type   = GROUNDCOVER_VEGETATION_TYPE
+         !      end if
+      end do
     END SUBROUTINE Load_Sfc_Data
     
   end subroutine ufo_radiance_eqv
