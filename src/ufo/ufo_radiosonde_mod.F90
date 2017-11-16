@@ -69,12 +69,12 @@ call ufo_radiosonde_registry%remove(c_key_self)
 end subroutine ufo_radiosonde_delete_c
 
 ! ------------------------------------------------------------------------------
-real function interp_weight(d, x, nx) 
+real(kind_real) function interp_weight(d, x, nx) 
 implicit none
 
 integer, intent(in) :: nx
-real, intent(in)    :: x(nx)
-real, intent(in)    :: d
+real(kind_real), intent(in)    :: x(nx)
+real(kind_real), intent(in)    :: d
 
 integer ::  ix  
 
@@ -90,20 +90,20 @@ else
   enddo
   ix = ix - 1 
 endif
-interp_weight = real(ix) + (d-x(ix)) / (x(ix+1)-x(ix))
+interp_weight = real(ix,kind_real) + (d-x(ix)) / (x(ix+1)-x(ix))
 
 end function interp_weight
 
 ! ------------------------------------------------------------------------------
-real function vert_interp(f, nsig, dz) 
+real(kind_real) function vert_interp(f, nsig, dz) 
 implicit none
 
 integer :: nsig
-real, intent(in)  :: f(nsig)
-real, intent(in)  :: dz
+real(kind_real), intent(in)  :: f(nsig)
+real(kind_real), intent(in)  :: dz
 
 integer :: iz, izp 
-real    :: delz, delzp
+real(kind_real) :: delz, delzp
 
 iz=int(dz)
 iz=max(1,min(iz,nsig))
@@ -134,13 +134,13 @@ type(obs_vector), pointer :: hofx
 character(128) :: filename
 integer :: iunit
 
-real(8), allocatable :: tvflag(:), pres(:), omf(:), obs(:)
-real(8), allocatable :: pres_raob(:), omf_raob(:), obs_raob(:)
+real(kind_real), allocatable :: tvflag(:), pres(:), omf(:), obs(:)
+real(kind_real), allocatable :: pres_raob(:), omf_raob(:), obs_raob(:)
 integer, allocatable :: obstype(:)
 
 integer :: iobs, nobs, iobs_raob, nobs_raob
-real :: z, dz
-real(8) :: rmse
+real(kind_real) :: z, dz
+real(kind_real) :: rmse
 integer, parameter :: raobtype = 120
 logical :: lfound
 type(ufo_geoval) :: geoval_pr, geoval_tv
@@ -183,7 +183,7 @@ rmse = 0.
 do iobs = 1, nobs_raob
   rmse = rmse + (obs_raob(iobs)-omf_raob(iobs))*(obs_raob(iobs)-omf_raob(iobs))
 enddo
-print *, 'rmse=', sqrt(rmse/real(nobs_raob, 8))
+print *, 'rmse=', sqrt(rmse/real(nobs_raob, kind_real))
 
 if (nobs_raob /= geovals%nobs) then
   print *, 'radiosondet: error: nobs inconsistent!'

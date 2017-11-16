@@ -8,6 +8,7 @@ module ufo_geovals_mod
 
 use iso_c_binding
 use ufo_vars_mod
+use kinds
 
 implicit none
 private
@@ -25,7 +26,7 @@ public :: ufo_geovals_read_rad_netcdf
 
 !> type to hold interpolated field for one variable, one observation
 type :: ufo_geoval
-  real, allocatable :: vals(:,:) !< values (nval, nobs)
+  real(kind_real), allocatable :: vals(:,:) !< values (nval, nobs)
   integer :: nval                !< number of values in profile
   integer :: nobs                !< number of observations
 end type ufo_geoval
@@ -193,7 +194,7 @@ end subroutine ufo_geovals_random
 
 subroutine ufo_geovals_dotprod(self, other, prod) 
 implicit none
-real(c_double), intent(inout) :: prod
+real(kind_real), intent(inout) :: prod
 type(ufo_geovals), intent(in) :: self, other
 integer :: jo
 
@@ -210,7 +211,7 @@ prod=0.0
 do jo=1,self%nobs
   prod=prod+self%geovals(1)%vals(1,jo)*other%geovals(1)%vals(1,jo)
 enddo
-prod = prod / real(self%nobs)
+prod = prod / real(self%nobs,kind_real)
 
 end subroutine ufo_geovals_dotprod
 
@@ -219,7 +220,7 @@ end subroutine ufo_geovals_dotprod
 subroutine ufo_geovals_minmaxavg(self, kobs, pmin, pmax, prms) 
 implicit none
 integer(c_int), intent(inout) :: kobs
-real(c_double), intent(inout) :: pmin, pmax, prms
+real(kind_real), intent(inout) :: pmin, pmax, prms
 type(ufo_geovals), intent(in) :: self
 
 kobs = self%nobs
@@ -244,7 +245,7 @@ type(ufo_vars), intent(in)       :: vars, varsfile
 integer :: iunit
 integer :: nobs, nsig
 
-real(8), allocatable :: field(:,:)
+real(kind_real), allocatable :: field(:,:)
 
 integer :: ivar, nval
 
@@ -342,9 +343,9 @@ integer :: iunit
 integer :: nobs, nobs_raob, nsig
 integer :: iobs, iobs_raob
 
-real(8), allocatable :: field(:,:)
-integer, allocatable :: obstype(:)
-real(8), allocatable :: tvflag(:)
+real(kind_real), allocatable :: field(:,:)
+integer, allocatable         :: obstype(:)
+real(kind_real), allocatable :: tvflag(:)
 
 integer :: ivar, nval
 
@@ -413,13 +414,6 @@ type(ufo_vars) :: vars, varsfile
 
 integer :: nvar_prof
 
-type(ufo_geoval) :: geoval
-character(MAXVARLEN) :: varname
-logical :: lfound
-
-real :: z, dz
-
-! variables hardcoded for the wind
 nvar_prof = 5
 
 ! allocate and fill in variables
@@ -479,8 +473,8 @@ integer :: nvar_prof, nvar_surf
 integer :: iunit
 integer :: nobs, nsig
 
-real(8), allocatable :: field(:,:)
-real(8), allocatable :: field1d(:)
+real(kind_real), allocatable :: field(:,:)
+real(kind_real), allocatable :: field1d(:)
 
 integer :: ivar, nval
 
@@ -551,14 +545,11 @@ integer :: iunit
 integer :: nobs, nchans, nobs_all
 integer :: nsig, nsig_plus_one
 
-real(8), allocatable :: field(:,:)
-real(8), allocatable :: field1d(:)
+real(kind_real), allocatable :: field(:,:)
+real(kind_real), allocatable :: field1d(:)
 integer, allocatable :: field1di(:)
 
 integer :: ivar, iobs, nval
-type(ufo_geoval) :: geoval
-character(MAXVARLEN) :: varname
-logical :: lfound
 
 ! variables hardcoded for the CRTM  !** Note: we'll need to revisit these in the future -BTJ 11.15.2017
 nvar_prof = 7
@@ -717,8 +708,6 @@ deallocate(field1di)
 self%linit = .true.
 
 call nc_diag_read_close(filename)
-
-!call ufo_geovals_print(self, 1)
 
 end subroutine ufo_geovals_read_rad_netcdf
 
