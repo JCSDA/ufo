@@ -718,9 +718,8 @@ self%linit = .true.
 
 call nc_diag_read_close(filename)
 
-call ufo_geovals_print(self, 1)
-call ufo_geovals_print(self, 2)
-call ufo_geovals_print(self, 806)
+!call ufo_geovals_print(self, 1)
+
 end subroutine ufo_geovals_read_rad_netcdf
 
 ! ------------------------------------------------------------------------------
