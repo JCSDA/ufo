@@ -479,6 +479,8 @@ contains
          varname = geovals%variables%fldnames(k1)
          print *, k1, varname
       end do
+
+      !** populate the atmosphere structures for CRTM (atm(k1), for the k1-th profile)
       do k1 = 1,N_PROFILES
          lfound = ufo_geovals_get_var(geovals,'Temperature             ', geoval)
          !** NOTE: the *15 parts of this are to account for the fact that the test netcdf file contains an atmospheric
