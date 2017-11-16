@@ -44,7 +44,7 @@ ObsRadiosonde::~ObsRadiosonde() {
 
 void ObsRadiosonde::obsEquiv(const GeoVaLs & gom, ObsVector & ovec,
                          const ObsBias & bias) const {
-  ufo_radiosonde_t_eqv_f90(gom.toFortran(), odb_.toFortran(), ovec.toFortran());
+  ufo_radiosonde_t_eqv_f90(gom.toFortran(), odb_.toFortran(), ovec.toFortran(), bias.toFortran());
 }
 
 // -----------------------------------------------------------------------------

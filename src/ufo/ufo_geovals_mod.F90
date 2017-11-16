@@ -584,7 +584,6 @@ vars%fldnames(nvar_prof+11) = 'Sfc_Wind_Direction'
 vars%fldnames(nvar_prof+12) = "Lai"
 vars%fldnames(nvar_prof+13) = "Soil_Moisture"
 vars%fldnames(nvar_prof+14) = "Soil_Temperature"
-
 vars%fldnames(nvar_prof+nvar_surf_real+1) = 'Land_Type_Index' ! int!!!
 vars%fldnames(nvar_prof+nvar_surf_real+2) = "Vegetation_Type"
 vars%fldnames(nvar_prof+nvar_surf_real+3) = "Soil_Type"

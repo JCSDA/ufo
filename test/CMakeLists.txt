@@ -1,8 +1,13 @@
+# (C) Copyright 2017 UCAR.
+#
+# This software is licensed under the terms of the Apache Licence Version 2.0
+# which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+
+# Create Data directory for test input config and symlink all files
 list( APPEND ufo_test_input
   testinput/ufotest.json
 )
 
-# Create Data directory for test input and symlink all files
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/testinput)
 foreach(FILENAME ${ufo_test_input})
     execute_process( COMMAND ${CMAKE_COMMAND} -E create_symlink
@@ -10,11 +15,11 @@ foreach(FILENAME ${ufo_test_input})
            ${CMAKE_CURRENT_BINARY_DIR}/${FILENAME} )
 endforeach(FILENAME)
 
+# Add files to cmake resources
 ecbuild_add_resources( TARGET ufo_test_scripts
                        SOURCES_PACK
                        ${ufo_test_input}
                      )
-
 
 # Create Data directory for test data and symlink files
 list( APPEND ufo_test_data
@@ -90,6 +95,6 @@ TauCoeff/ODPS/Little_Endian/amsua_n19.TauCoeff.bin
 
 # Create Data directory for test input and symlink all files
 foreach(FILENAME ${crtm_test_input})
-   execute_process( COMMAND ln -s ${CRTM_INCLUDE}/../fix/${FILENAME} ${CMAKE_CURRENT_BINARY_DIR}/Data )
+   execute_process( COMMAND ln -s ${crtm_SOURCE_DIR}/fix/${FILENAME} ${CMAKE_CURRENT_BINARY_DIR}/Data )
 endforeach(FILENAME)
 

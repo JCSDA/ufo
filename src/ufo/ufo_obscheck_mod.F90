@@ -11,7 +11,7 @@ use ufo_vars_mod
 use ufo_obs_vectors
 use ufo_locs_mod
 use ufo_geovals_mod
-use ufo_obs_data, only: obs_data
+use ufo_obs_data_mod
 use kinds
 
 implicit none
@@ -90,10 +90,10 @@ subroutine c_ufo_priorFilter_f90(c_key_obsspace) bind(c,name='ufo_priorFilter_f9
     implicit none
     integer(c_int), intent(in) :: c_key_obsspace
     
-    type(obs_data) :: obsdata
+!_RT    type(obs_data) :: obsdata
 
     write(*,*) '=======Start Prior Filter (observation QC)========='
-    write(*,*) 'read obs==',obsdata%nobs
+!   write(*,*) 'read obs==',obsdata%nobs
     write(*,*) '=======End Proir Filter (observation QC)========='
 
 end subroutine c_ufo_priorFilter_f90
