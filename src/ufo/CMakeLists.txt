@@ -15,8 +15,11 @@ ObsRadiance.h
 ObsRadiosonde.cc
 ObsRadiosonde.h
 UfoTrait.h
-Variables.h
 Variables.cc
+Variables.h
+random_f.cc
+random_f.h
+random_vectors_mod.F90
 ufo_geovals_mod.F90
 ufo_geovals_mod_c.F90
 ufo_locs_mod.F90
@@ -24,6 +27,7 @@ ufo_obs_data_mod.F90
 ufo_obs_data_basis_mod.F90
 ufo_obs_data.F90
 ufo_obs_vectors.F90
+ufo_radiance_mod.F90
 ufo_variables_mod.F90
 ufo_variables_mod_c.F90
 ufo_wspeed_mod.F90

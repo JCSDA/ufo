@@ -19,7 +19,6 @@ module ufo_wspeed_mod
   use ufo_geovals_mod
   use kinds
   
-  use crtm_module
   implicit none
   private
   

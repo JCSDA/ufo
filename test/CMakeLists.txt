@@ -1,6 +1,5 @@
 list( APPEND ufo_test_input
   testinput/ufotest.json
-  testinput/amsua_n19_wprofiles.nc4
 )
 
 # Create Data directory for test input and symlink all files
@@ -16,7 +15,18 @@ ecbuild_add_resources( TARGET ufo_test_scripts
                        ${ufo_test_input}
                      )
 
+
+# Create Data directory for test data and symlink files
+list( APPEND ufo_test_data
+  amsua_n19_wprofiles.nc4
+)
+
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Data)
+foreach(FILENAME ${ufo_test_data})
+    execute_process( COMMAND ${CMAKE_COMMAND} -E create_symlink
+           ${CMAKE_CURRENT_SOURCE_DIR}/testinput/${FILENAME}
+           ${CMAKE_CURRENT_BINARY_DIR}/Data/${FILENAME} )
+endforeach(FILENAME)
 
 #####################################################################
 
