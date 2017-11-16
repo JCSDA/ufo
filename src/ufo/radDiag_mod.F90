@@ -36,12 +36,12 @@ interface radDiag_read  ; module procedure this_read_  ; end interface
 
 contains
 
-subroutine this_read_(self,ncfname,nobs)
+subroutine this_read_(self,ncfname,nobs,nlocs)
 use ncd_kinds, only: i_kind
 implicit none
 character(len=*),parameter :: myname_ =myname//"*rad_read"
 type(radDiag), intent(inout)  :: self
-integer(i_kind), intent(inout) :: nobs
+integer(i_kind), intent(inout) :: nobs,nlocs
 character(len=*),intent(in)    :: ncfname
 integer(i_kind) :: ier
 integer(i_kind) :: luin=0
@@ -70,6 +70,8 @@ do while (ier .ge. 0)
    nobs = nobs + 1
 enddo
 print *, myname_, ' Total number of observations in file: ', nobs
+nlocs = nobs
+nobs = nobs * self%header_fix%nchan
 call close_radiag(ncfname,luin)
 end subroutine this_read_
 

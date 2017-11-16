@@ -35,7 +35,7 @@ integer, parameter :: max_string=800
 
 !> A type to represent observation data
 type obs_data
-  integer(c_int) :: nobs
+  integer(c_int) :: nobs, nlocs
   character(len=max_string) :: filein, fileout
 end type obs_data
 
@@ -64,7 +64,7 @@ character(len=*), intent(in) :: obtype
 self%filein =fin
 self%fileout=fout
 
-call obs_read_setup(self%filein,obtype,self%nobs)
+call obs_read_setup(self%filein,obtype,self%nobs,self%nlocs)
 call fckit_log%debug("TRACE: ufo_obs_data:obs_setup: done")
 
 end subroutine obs_setup
@@ -158,7 +158,7 @@ call ufo_geovals_registry%add(c_key_geovals)
 call ufo_geovals_registry%get(c_key_geovals,geovals)
 
 call ufo_geovals_init(geovals)
-call ufo_geovals_setup(geovals, vars, self%nobs)
+call ufo_geovals_setup(geovals, vars, self%nlocs)
 
 end subroutine ufo_obsdb_getgeovals_c
 

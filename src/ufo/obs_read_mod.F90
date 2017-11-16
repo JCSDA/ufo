@@ -20,20 +20,20 @@ interface obs_read_setup; procedure setup_; end interface
 interface obs_read_delete; procedure delete_; end interface
 
 contains
-   subroutine setup_(filein,obstype,nobs)
+   subroutine setup_(filein,obstype,nobs,nlocs)
    character(len=*),intent(in) :: filein
    character(len=*),intent(in) :: obstype
-   integer(c_int),intent(inout) :: nobs
+   integer(c_int),intent(inout) :: nobs,nlocs
 
    type(all_obs_type) :: obs_type
 
    if (trim(obstype) == "Radiance"   ) then
        allocate(obs_type%Rad)
-       call radDiag_read (obs_type%Rad,filein,nobs)
+       call radDiag_read (obs_type%Rad,filein,nobs,nlocs)
    endif
    if (trim(obstype) == "Radiosonde" ) then
        allocate(obs_type%Raob)
-      call raobDiag_read(obs_type%Raob,filein,nobs)
+      call raobDiag_read(obs_type%Raob,filein,nobs,nlocs)
    endif
    end subroutine setup_
 
