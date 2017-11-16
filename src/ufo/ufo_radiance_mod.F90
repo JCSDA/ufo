@@ -102,7 +102,7 @@ contains
 
     ! Profile dimensions
     !** UFO to provide N_LAYERS, N_ABSORBERS, N_CLOUDS, N_AEROSOLS
-    INTEGER, PARAMETER :: N_PROFILES  = 806  !** required because of the rank of the atm and sfc structures
+    INTEGER, PARAMETER :: N_PROFILES  = 2  !** required because of the rank of the atm and sfc structures
     INTEGER, PARAMETER :: N_LAYERS    = 64 !** UFO  !** need a way to populate this... 
     INTEGER, PARAMETER :: N_ABSORBERS = 2  !** UFO
     INTEGER, PARAMETER :: N_CLOUDS    = 0  !** UFO
@@ -183,16 +183,26 @@ contains
 !!$ 3   Pressure
 !!$ 4   Level pressure
 !!$ 5   Ozone
-!!$ 6   Water_Fraction
-!!$ 7   Land_Fraction
-!!$ 8   Ice_Fraction
-!!$ 9   Snow_Fraction
-!!$ 10  Water_Temperature
-!!$ 11  Land_Temperature
-!!$ 12  Ice_Temperature
-!!$ 13  Snow_Temperature
-!!$ 14  Vegetation_Fraction
-!!$ 15  Land_Type_Index
+!!$ 6   Cloud liquid
+!!$ 7   Cloud ice
+!!$ 8   Water_Fraction
+!!$ 9   Land_Fraction
+!!$ 10  Ice_Fraction
+!!$ 11  Snow_Fraction
+!!$ 12  Water_Temperature
+!!$ 13  Land_Temperature
+!!$ 14  Ice_Temperature
+!!$ 15  Snow_Temperature
+!!$ 16  Vegetation_Fraction
+!!$ 17  Sfc_Wind_Speed
+!!$ 18  Sfc_Wind_Direction
+!!$ 19  Lai
+!!$ 20  Soil_Moisture
+!!$ 21  Soil_Temperature
+!!$ 22  Land_Type_Index
+!!$ 23  Vegetation_Type
+!!$ 24  Soil_Type
+
     
     CALL CRTM_Version( Version )
     CALL Program_Message( PROGRAM_NAME, &
@@ -527,6 +537,10 @@ contains
 !!$      end do
 !!$
 !!$      ! Cloud data
+
+!!$ 6   Cloud liquid
+!!$ 7   Cloud ice
+
 !!$      IF ( atm(1)%n_Clouds > 0 ) THEN
 !!$         k1 = 75
 !!$         k2 = 79
@@ -594,16 +608,6 @@ contains
 !!$      sfc(1)%Ice_Type        = FRESH_ICE_TYPE
 !!$      sfc(1)%Ice_Temperature = 269.0_fp
 
-!!$ 6   Water_Fraction
-!!$ 7   Land_Fraction
-!!$ 8   Ice_Fraction
-!!$ 9   Snow_Fraction
-!!$ 10  Water_Temperature
-!!$ 11  Land_Temperature
-!!$ 12  Ice_Temperature
-!!$ 13  Snow_Temperature
-!!$ 14  Vegetation_Fraction
-!!$ 15  Land_Type_Index
 
       !       varname = geovals%variables%fldnames(1)
        !******                               123456789012345678901234'
@@ -612,63 +616,44 @@ contains
       sfc_types(1:4) = (/'Water_Fraction          ','Land_Fraction           ', 'Ice_Fraction            ', &
            'Snow_Fraction           '/)
       
-      !** Water Surface
-      !      lfound = ufo_geovals_get_var(geovals,sfc_types(1), geoval)
-      !      if (geoval%vals(1,1:N_PROFILES) > 0.0_fp) then
       do k1 = 1,N_PROFILES
-         sfc(k1)%Water_Type        = SEA_WATER_TYPE    !** need to check how to determine fresh vs sea water types (salinity???)
-         lfound                              = ufo_geovals_get_var(geovals,'Sfc_Wind_Speed          ', geoval)
-         sfc(k1)%Wind_Speed        = geoval%vals(1,k1) !** 1 == iobs, hardcoding for testing
-         lfound                              = ufo_geovals_get_var(geovals,'Sfc_Wind_Direction      ', geoval)
-         sfc(k1)%Wind_Direction    = geoval%vals(1,k1) !** 1 == iobs, hardcoding for testing
-         lfound                              = ufo_geovals_get_var(geovals,'Water_Fraction          ', geoval)
-         sfc(k1)%Water_Coverage    = geoval%vals(1,k1) !** 1 == iobs, hardcoding for testing
-         !print '(A,2F12.3)', 'Water Coverage:', sfc(k1)%Water_Coverage, geoval%vals(1,k1)
-         lfound                              = ufo_geovals_get_var(geovals,'Water_Temperature       ', geoval)
-         sfc(k1)%Water_Temperature = geoval%vals(1,k1) !** 1 == iobs, hardcoding for testing
-         !print '(A,2F12.3)', 'Water Temperature:', sfc(k1)%Water_Temperature, geoval%vals(1,k1)
-         !      end if
-         !** Ice Surface
-         !      lfound = ufo_geovals_get_var(geovals,sfc_types(3), geoval)
-         !      if (geoval%vals(1,k1) > 0.0_fp) then
-         lfound                              = ufo_geovals_get_var(geovals,'Ice_Fraction            ', geoval)
-         sfc(k1)%Ice_Coverage      = geoval%vals(1,k1) !** 1 == iobs, hardcoding for testing
-         !print '(A,2F12.3)', 'Ice Coverage:', sfc(k1)%Ice_Coverage, geoval%vals(1,k1)
-         lfound                              = ufo_geovals_get_var(geovals,'Ice_Temperature         ', geoval)
-         sfc(k1)%Ice_Temperature   = geoval%vals(1,k1) !** 1 == iobs, hardcoding for testing
-         !print '(A,2F12.3)', 'Ice Temperature:', sfc(k1)%Ice_Temperature, geoval%vals(1,k1)
-         !      end if
-         !** Snow Surface
-         !      lfound = ufo_geovals_get_var(geovals,sfc_types(4), geoval)
-         !      if (geoval%vals(1,k1) > 0.0_fp) then
-         lfound                              = ufo_geovals_get_var(geovals,'Snow_Fraction           ', geoval)
-         sfc(k1)%Snow_Coverage     = geoval%vals(1,k1) !** 1 == iobs, hardcoding for testing
-         !print '(A,2F12.3)', 'Snow Coverage:', sfc(k1)%Snow_Coverage, geoval%vals(1,k1)
-         lfound                              = ufo_geovals_get_var(geovals,'Snow_Temperature        ', geoval)
-         sfc(k1)%Snow_Temperature  = geoval%vals(1,k1) !** 1 == iobs, hardcoding for testing
-         !print '(A,2F12.3)', 'Snow Temperature:', sfc(k1)%Snow_Temperature, geoval%vals(1,k1)
-         !      end if
-         !** Land Surface
-         !      lfound = ufo_geovals_get_var(geovals,sfc_types(2), geoval)
-         !      if (geoval%vals(1,k1) > 0.0_fp) then
-         lfound                              = ufo_geovals_get_var(geovals,'Land_Type_Index         ', geoval)
-         sfc(k1)%Land_Type         = geoval%vals(1,k1)    !** is this land_type same as CRTM's land type??
-         !print '(A,1I5,1F12.3)', 'Land Type:', sfc(k1)%Land_Type, geoval%vals(1,k1)
-         lfound                              = ufo_geovals_get_var(geovals,'Land_Fraction           ', geoval)
-         sfc(k1)%Land_Coverage     = geoval%vals(1,k1) !** 1 == iobs, hardcoding for testing
-         !print '(A,2F12.3)', 'Land Coverage:', sfc(k1)%Land_Coverage, geoval%vals(1,k1)
-         lfound                              = ufo_geovals_get_var(geovals,'Land_Temperature        ', geoval)
-         sfc(k1)%Land_Temperature  = geoval%vals(1,k1) !** 1 == iobs, hardcoding for testing
-         !print '(A,2F12.3)', 'Land Temperature:', sfc(k1)%Land_Temperature, geoval%vals(1,k1)
-         lfound                              = ufo_geovals_get_var(geovals,'Vegetation_Fraction     ', geoval)
-         sfc(k1)%Lai               = geoval%vals(1,k1) !** 1 == iobs, hardcoding for testing
-         !print '(A,2F12.3)', 'Vegetation Fraction:', sfc(k1)%Lai, geoval%vals(1,k1)
-         
-         !** this wasn't provide by the netcdf file, guessing.  
-         sfc(k1)%Soil_Type         = COARSE_SOIL_TYPE
-         sfc(k1)%Vegetation_Type   = GROUNDCOVER_VEGETATION_TYPE
-         !      end if
+         sfc(k1)%Water_Type         = SEA_WATER_TYPE    !** NOTE: need to check how to determine fresh vs sea water types (salinity???)
+         lfound                     = ufo_geovals_get_var(geovals,'Sfc_Wind_Speed          ', geoval)
+         sfc(k1)%Wind_Speed         = geoval%vals(1,k1) 
+         lfound                     = ufo_geovals_get_var(geovals,'Sfc_Wind_Direction      ', geoval)
+         sfc(k1)%Wind_Direction     = geoval%vals(1,k1) 
+         lfound                     = ufo_geovals_get_var(geovals,'Water_Fraction          ', geoval)
+         sfc(k1)%Water_Coverage     = geoval%vals(1,k1) 
+         lfound                     = ufo_geovals_get_var(geovals,'Water_Temperature       ', geoval)
+         sfc(k1)%Water_Temperature  = geoval%vals(1,k1) 
+         lfound                     = ufo_geovals_get_var(geovals,'Ice_Fraction            ', geoval)
+         sfc(k1)%Ice_Coverage       = geoval%vals(1,k1) 
+         lfound                     = ufo_geovals_get_var(geovals,'Ice_Temperature         ', geoval)
+         sfc(k1)%Ice_Temperature    = geoval%vals(1,k1) 
+         lfound                     = ufo_geovals_get_var(geovals,'Snow_Fraction           ', geoval)
+         sfc(k1)%Snow_Coverage      = geoval%vals(1,k1) 
+         lfound                     = ufo_geovals_get_var(geovals,'Snow_Temperature        ', geoval)
+         sfc(k1)%Snow_Temperature   = geoval%vals(1,k1) 
+         lfound                     = ufo_geovals_get_var(geovals,'Land_Type_Index         ', geoval)
+         sfc(k1)%Land_Type          = geoval%vals(1,k1)    !** NOTE:  is this Land_Type same as CRTM's land type??
+         lfound                     = ufo_geovals_get_var(geovals,'Land_Fraction           ', geoval)
+         sfc(k1)%Land_Coverage      = geoval%vals(1,k1) 
+         lfound                     = ufo_geovals_get_var(geovals,'Land_Temperature        ', geoval)
+         sfc(k1)%Land_Temperature   = geoval%vals(1,k1) 
+         lfound                     = ufo_geovals_get_var(geovals,'Lai                     ', geoval)
+         sfc(k1)%Lai                = geoval%vals(1,k1) 
+         lfound                     = ufo_geovals_get_var(geovals,'Vegetation_Fraction     ', geoval)
+         sfc(k1)%Vegetation_Fraction = geoval%vals(1,k1) 
+         lfound                     = ufo_geovals_get_var(geovals,'Vegetation_Type         ', geoval)
+         sfc(k1)%Vegetation_Type    = geoval%vals(1,k1) 
+         lfound                     = ufo_geovals_get_var(geovals,'Soil_Type               ', geoval)
+         sfc(k1)%Soil_Type          = geoval%vals(1,k1) 
+         lfound                     = ufo_geovals_get_var(geovals,'Soil_Moisture           ', geoval)
+         sfc(k1)%Soil_Moisture_Content = geoval%vals(1,k1) 
+         lfound                     = ufo_geovals_get_var(geovals,'Soil_Temperature        ', geoval)
+         sfc(k1)%Soil_Temperature   = geoval%vals(1,k1) 
       end do
+
     END SUBROUTINE Load_Sfc_Data
     
   end subroutine ufo_radiance_eqv
