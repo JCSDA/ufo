@@ -562,8 +562,8 @@ logical :: lfound
 ! variables hardcoded for the CRTM  !** Note: we'll need to revisit these in the future -BTJ 11.15.2017
 nvar_prof = 7
 it = 1; iwv = 2; ipr = 3; iprl = 4; ioz = 5; icl1 = 6; icl2 = 7 ! indices of vars
-nvar_surf_real = 11;
-nvar_surf_int = 1;
+nvar_surf_real = 14;
+nvar_surf_int = 3;
 
 ! allocate and fill in variables
 self%nvar = nvar_prof + nvar_surf_real + nvar_surf_int
@@ -589,7 +589,13 @@ vars%fldnames(nvar_prof+8) = 'Snow_Temperature'
 vars%fldnames(nvar_prof+9) = 'Vegetation_Fraction'
 vars%fldnames(nvar_prof+10) = 'Sfc_Wind_Speed'
 vars%fldnames(nvar_prof+11) = 'Sfc_Wind_Direction'
+vars%fldnames(nvar_prof+12) = "Lai"
+vars%fldnames(nvar_prof+13) = "Soil_Moisture"
+vars%fldnames(nvar_prof+14) = "Soil_Temperature"
+
 vars%fldnames(nvar_prof+nvar_surf_real+1) = 'Land_Type_Index' ! int!!!
+vars%fldnames(nvar_prof+nvar_surf_real+2) = "Vegetation_Type"
+vars%fldnames(nvar_prof+nvar_surf_real+3) = "Soil_Type"
 
 ! open netcdf file and read dimensions
 call nc_diag_read_init(filename, iunit)
@@ -688,6 +694,8 @@ deallocate(field1di)
 self%linit = .true.
 
 call nc_diag_read_close(filename)
+
+call ufo_geovals_print(self, 1)
 
 end subroutine ufo_geovals_read_rad_netcdf
 
