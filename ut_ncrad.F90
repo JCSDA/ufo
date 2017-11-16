@@ -57,8 +57,8 @@ do while (ier .ge. 0)
 
    if (ier .lt. 0) cycle
    icnt = icnt + 1
-   print *, 'icnt = ', icnt
 enddo
+print*, myname, ': Found this many records:  ', icnt
 print*, myname, ': Found this many channels: ', header_fix%nchan
 print*, myname, ': Observation type in file: ', header_fix%obstype
 print*, myname, ': Date of input file:       ', header_fix%idate
