@@ -44,8 +44,12 @@ class ObsBias : public util::Printable,
   void write(const eckit::Configuration &) const {}
   double norm() const {return 0;}
 
+  int & toFortran() {return keyBias_;}
+  const int & toFortran() const {return keyBias_;}
+
  private:
   void print(std::ostream &) const{}
+  int keyBias_;
 };
 
 // -----------------------------------------------------------------------------

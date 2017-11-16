@@ -8,6 +8,7 @@ module ufo_geovals_mod
 
 use iso_c_binding
 use ufo_vars_mod
+use kinds
 
 implicit none
 private
@@ -25,7 +26,7 @@ public :: ufo_geovals_read_rad_netcdf
 
 !> type to hold interpolated field for one variable, one observation
 type :: ufo_geoval
-  real, allocatable :: vals(:,:) !< values (nval, nobs)
+  real(kind_real), allocatable :: vals(:,:) !< values (nval, nobs)
   integer :: nval                !< number of values in profile
   integer :: nobs                !< number of observations
 end type ufo_geoval
@@ -193,7 +194,7 @@ end subroutine ufo_geovals_random
 
 subroutine ufo_geovals_dotprod(self, other, prod) 
 implicit none
-real(c_double), intent(inout) :: prod
+real(kind_real), intent(inout) :: prod
 type(ufo_geovals), intent(in) :: self, other
 integer :: jo
 
@@ -210,7 +211,7 @@ prod=0.0
 do jo=1,self%nobs
   prod=prod+self%geovals(1)%vals(1,jo)*other%geovals(1)%vals(1,jo)
 enddo
-prod = prod / real(self%nobs)
+prod = prod / real(self%nobs,kind_real)
 
 end subroutine ufo_geovals_dotprod
 
@@ -219,7 +220,7 @@ end subroutine ufo_geovals_dotprod
 subroutine ufo_geovals_minmaxavg(self, kobs, pmin, pmax, prms) 
 implicit none
 integer(c_int), intent(inout) :: kobs
-real(c_double), intent(inout) :: pmin, pmax, prms
+real(kind_real), intent(inout) :: pmin, pmax, prms
 type(ufo_geovals), intent(in) :: self
 
 kobs = self%nobs
@@ -244,7 +245,7 @@ type(ufo_vars), intent(in)       :: vars, varsfile
 integer :: iunit
 integer :: nobs, nsig
 
-real(8), allocatable :: field(:,:)
+real(kind_real), allocatable :: field(:,:)
 
 integer :: ivar, nval
 
@@ -342,9 +343,9 @@ integer :: iunit
 integer :: nobs, nobs_raob, nsig
 integer :: iobs, iobs_raob
 
-real(8), allocatable :: field(:,:)
-integer, allocatable :: obstype(:)
-real(8), allocatable :: tvflag(:)
+real(kind_real), allocatable :: field(:,:)
+integer, allocatable         :: obstype(:)
+real(kind_real), allocatable :: tvflag(:)
 
 integer :: ivar, nval
 
@@ -413,13 +414,6 @@ type(ufo_vars) :: vars, varsfile
 
 integer :: nvar_prof
 
-type(ufo_geoval) :: geoval
-character(MAXVARLEN) :: varname
-logical :: lfound
-
-real :: z, dz
-
-! variables hardcoded for the wind
 nvar_prof = 5
 
 ! allocate and fill in variables
@@ -479,8 +473,8 @@ integer :: nvar_prof, nvar_surf
 integer :: iunit
 integer :: nobs, nsig
 
-real(8), allocatable :: field(:,:)
-real(8), allocatable :: field1d(:)
+real(kind_real), allocatable :: field(:,:)
+real(kind_real), allocatable :: field1d(:)
 
 integer :: ivar, nval
 
@@ -548,22 +542,20 @@ integer :: nvar_prof, nvar_surf_real, nvar_surf_int
 integer :: it, iwv, ipr, iprl, ioz, icl1, icl2
 
 integer :: iunit
-integer :: nobs, nsig, nsig_plus_one
+integer :: nobs, nchans, nobs_all
+integer :: nsig, nsig_plus_one
 
-real(8), allocatable :: field(:,:)
-real(8), allocatable :: field1d(:)
+real(kind_real), allocatable :: field(:,:)
+real(kind_real), allocatable :: field1d(:)
 integer, allocatable :: field1di(:)
 
-integer :: ivar, nval
-type(ufo_geoval) :: geoval
-character(MAXVARLEN) :: varname
-logical :: lfound
+integer :: ivar, iobs, nval
 
 ! variables hardcoded for the CRTM  !** Note: we'll need to revisit these in the future -BTJ 11.15.2017
 nvar_prof = 7
 it = 1; iwv = 2; ipr = 3; iprl = 4; ioz = 5; icl1 = 6; icl2 = 7 ! indices of vars
-nvar_surf_real = 11;
-nvar_surf_int = 1;
+nvar_surf_real = 14;
+nvar_surf_int = 3;
 
 ! allocate and fill in variables
 self%nvar = nvar_prof + nvar_surf_real + nvar_surf_int
@@ -589,11 +581,20 @@ vars%fldnames(nvar_prof+8) = 'Snow_Temperature'
 vars%fldnames(nvar_prof+9) = 'Vegetation_Fraction'
 vars%fldnames(nvar_prof+10) = 'Sfc_Wind_Speed'
 vars%fldnames(nvar_prof+11) = 'Sfc_Wind_Direction'
+vars%fldnames(nvar_prof+12) = "Lai"
+vars%fldnames(nvar_prof+13) = "Soil_Moisture"
+vars%fldnames(nvar_prof+14) = "Soil_Temperature"
 vars%fldnames(nvar_prof+nvar_surf_real+1) = 'Land_Type_Index' ! int!!!
+vars%fldnames(nvar_prof+nvar_surf_real+2) = "Vegetation_Type"
+vars%fldnames(nvar_prof+nvar_surf_real+3) = "Soil_Type"
 
 ! open netcdf file and read dimensions
 call nc_diag_read_init(filename, iunit)
-nobs = nc_diag_read_get_dim(iunit,'nobs')
+nobs_all = nc_diag_read_get_dim(iunit,'nobs')
+nchans = nc_diag_read_get_dim(iunit, 'nchans')
+
+nobs = nobs_all / nchans
+
 nsig = nc_diag_read_get_dim(iunit,'nsig')
 nsig_plus_one = nc_diag_read_get_dim(iunit,'nsig_plus_one')
 
@@ -602,86 +603,104 @@ call ufo_geovals_setup(self, vars, nobs)
 
 ! read temperature
 nval = nsig; ivar = it
-allocate(field(nval, nobs))
+allocate(field(nval, nobs_all))
 call nc_diag_read_get_var(iunit, 'tvp', field)
 self%geovals(ivar)%nval = nval
 allocate(self%geovals(ivar)%vals(nval,nobs))
-self%geovals(ivar)%vals = field
+do iobs = 1, nobs
+  self%geovals(ivar)%vals(:,iobs) = field(:,iobs*nchans)
+enddo
 deallocate(field)
 
 ! read water vapor (humidity)
 nval = nsig; ivar = iwv
-allocate(field(nval, nobs))
+allocate(field(nval, nobs_all))
 call nc_diag_read_get_var(iunit, 'qvp', field)
 self%geovals(ivar)%nval = nval
 allocate(self%geovals(ivar)%vals(nval,nobs))
-self%geovals(ivar)%vals = 1000.*field / (1.-field)
+do iobs = 1, nobs
+  self%geovals(ivar)%vals(:,iobs) = 1000.*field(:,iobs*nchans) / (1.-field(:,iobs*nchans))
+enddo
 deallocate(field)
 
 ! read pressure
 nval = nsig; ivar = ipr
-allocate(field(nval, nobs))
+allocate(field(nval, nobs_all))
 call nc_diag_read_get_var(iunit, 'prsltmp', field)
 self%geovals(ivar)%nval = nval
 allocate(self%geovals(ivar)%vals(nval,nobs))
-self%geovals(ivar)%vals = 10.*field
+do iobs = 1, nobs
+  self%geovals(ivar)%vals(:,iobs) = 10.*field(:,iobs*nchans)
+enddo
 deallocate(field)
 
 ! read level pressure
 nval = nsig_plus_one; ivar = iprl
-allocate(field(nval, nobs))
+allocate(field(nval, nobs_all))
 call nc_diag_read_get_var(iunit, 'prsitmp', field)
 self%geovals(ivar)%nval = nval
 allocate(self%geovals(ivar)%vals(nval,nobs))
-self%geovals(ivar)%vals = 10.*field
+do iobs = 1, nobs
+  self%geovals(ivar)%vals(:,iobs) = 10.*field(:,iobs*nchans)
+enddo
 deallocate(field)
 
 ! read ozone
 nval = nsig; ivar = ioz
-allocate(field(nval, nobs))
+allocate(field(nval, nobs_all))
 call nc_diag_read_get_var(iunit, 'poz', field)
 self%geovals(ivar)%nval = nval
 allocate(self%geovals(ivar)%vals(nval,nobs))
-self%geovals(ivar)%vals = field
+do iobs = 1, nobs
+  self%geovals(ivar)%vals(:,iobs) = field(:,iobs*nchans)
+enddo
 deallocate(field)
 
 ! read liquid cloud
 nval = nsig; ivar = icl1
-allocate(field(nval, nobs))
+allocate(field(nval, nobs_all))
 call nc_diag_read_get_var(iunit, 'cloud1', field)
 self%geovals(ivar)%nval = nval
 allocate(self%geovals(ivar)%vals(nval,nobs))
-self%geovals(ivar)%vals = field
+do iobs = 1, nobs
+  self%geovals(ivar)%vals(:,iobs) = field(:,iobs*nchans)
+enddo
 deallocate(field)
 
 ! read ice cloud
 nval = nsig; ivar = icl2
-allocate(field(nval, nobs))
+allocate(field(nval, nobs_all))
 call nc_diag_read_get_var(iunit, 'cloud2', field)
 self%geovals(ivar)%nval = nval
 allocate(self%geovals(ivar)%vals(nval,nobs))
-self%geovals(ivar)%vals = field
+do iobs = 1, nobs
+  self%geovals(ivar)%vals(:,iobs) = field(:,iobs*nchans)
+enddo
 deallocate(field)
 
 ! read surface stuff
 nval = 1
-allocate(field1d(nobs))
+allocate(field1d(nobs_all))
 do ivar = nvar_prof+1, nvar_prof+nvar_surf_real
   call nc_diag_read_get_var(iunit, self%variables%fldnames(ivar), field1d)
   self%geovals(ivar)%nval = nval
   allocate(self%geovals(ivar)%vals(nval,nobs))
-  self%geovals(ivar)%vals(1,:) = field1d(:)
+  do iobs = 1, nobs
+    self%geovals(ivar)%vals(1,iobs) = field1d(iobs*nchans)
+  enddo
 enddo
 deallocate(field1d)
 
 ! read surface stuff (integer)
 nval = 1
-allocate(field1di(nobs))
+allocate(field1di(nobs_all))
 do ivar = nvar_prof+nvar_surf_real+1, nvar_prof+nvar_surf_real+nvar_surf_int
   call nc_diag_read_get_var(iunit, self%variables%fldnames(ivar), field1di)
   self%geovals(ivar)%nval = nval
   allocate(self%geovals(ivar)%vals(nval,nobs))
-  self%geovals(ivar)%vals(1,:) = field1di
+  do iobs = 1, nobs
+    self%geovals(ivar)%vals(1,iobs) = field1di(iobs*nchans)
+  enddo
 enddo
 deallocate(field1di)
 

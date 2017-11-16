@@ -23,7 +23,7 @@ static oops::ObsOperatorMaker<UfoTrait, ObsRadiance> makerRadiance_("Radiance");
 // -----------------------------------------------------------------------------
 
 ObsRadiance::ObsRadiance(const ObsSpace & odb, const eckit::Configuration & config)
-  : keyOperRadiance_(0), varin_()
+  : keyOperRadiance_(0), varin_(), odb_(odb)
 {
   const eckit::Configuration * configc = &config;
   ufo_radiance_setup_f90(keyOperRadiance_, &configc);
@@ -44,7 +44,7 @@ ObsRadiance::~ObsRadiance() {
 
 void ObsRadiance::obsEquiv(const GeoVaLs & gom, ObsVector & ovec,
                          const ObsBias & bias) const {
-  ufo_radiance_eqv_f90(gom.toFortran(), ovec.toFortran());
+  ufo_radiance_eqv_f90(gom.toFortran(), odb_.toFortran(), ovec.toFortran(), bias.toFortran());
 }
 
 // -----------------------------------------------------------------------------

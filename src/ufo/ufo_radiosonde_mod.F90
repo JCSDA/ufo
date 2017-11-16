@@ -10,6 +10,7 @@ module ufo_radiosonde_mod
   use iso_c_binding
   use config_mod
   use ufo_obs_data
+  use ufo_obs_data_mod
   use ufo_obs_vectors
   use ufo_vars_mod
   use ufo_locs_mod
@@ -69,12 +70,12 @@ call ufo_radiosonde_registry%remove(c_key_self)
 end subroutine ufo_radiosonde_delete_c
 
 ! ------------------------------------------------------------------------------
-real function interp_weight(d, x, nx) 
+real(kind_real) function interp_weight(d, x, nx) 
 implicit none
 
 integer, intent(in) :: nx
-real, intent(in)    :: x(nx)
-real, intent(in)    :: d
+real(kind_real), intent(in)    :: x(nx)
+real(kind_real), intent(in)    :: d
 
 integer ::  ix  
 
@@ -90,20 +91,20 @@ else
   enddo
   ix = ix - 1 
 endif
-interp_weight = real(ix) + (d-x(ix)) / (x(ix+1)-x(ix))
+interp_weight = real(ix,kind_real) + (d-x(ix)) / (x(ix+1)-x(ix))
 
 end function interp_weight
 
 ! ------------------------------------------------------------------------------
-real function vert_interp(f, nsig, dz) 
+real(kind_real) function vert_interp(f, nsig, dz) 
 implicit none
 
 integer :: nsig
-real, intent(in)  :: f(nsig)
-real, intent(in)  :: dz
+real(kind_real), intent(in)  :: f(nsig)
+real(kind_real), intent(in)  :: dz
 
 integer :: iz, izp 
-real    :: delz, delzp
+real(kind_real) :: delz, delzp
 
 iz=int(dz)
 iz=max(1,min(iz,nsig))
@@ -122,48 +123,49 @@ subroutine ufo_radiosonde_t_eqv_c(c_key_geovals, c_key_obsspace, c_key_hofx, c_b
 use nc_diag_read_mod, only: nc_diag_read_get_var
 use nc_diag_read_mod, only: nc_diag_read_get_dim
 use nc_diag_read_mod, only: nc_diag_read_init, nc_diag_read_close
+use raobDiag_mod, only: RaobDiag
+use ufo_obs_data_mod, only: Radiosonde
 
 implicit none
 integer(c_int), intent(in) :: c_key_geovals
 integer(c_int), intent(in) :: c_key_hofx
 integer(c_int), intent(in) :: c_key_obsspace
-real(c_double), intent(in) :: c_bias
+integer(c_int), intent(in) :: c_bias
 type(ufo_geovals), pointer  :: geovals
 type(obs_vector), pointer :: hofx
+type(obs_data), pointer :: obss
 
-character(128) :: filename
+character(len=*), parameter :: myname_="ufo_radiosonde_t_eqv_c"
 integer :: iunit
 
-real(8), allocatable :: tvflag(:), pres(:), omf(:), obs(:)
-real(8), allocatable :: pres_raob(:), omf_raob(:), obs_raob(:)
+real(kind_real), allocatable :: tvflag(:), pres(:), omf(:), obs(:)
+real(kind_real), allocatable :: pres_raob(:), omf_raob(:), obs_raob(:)
 integer, allocatable :: obstype(:)
 
 integer :: iobs, nobs, iobs_raob, nobs_raob
-real :: z, dz
-real(8) :: rmse
+real(kind_real) :: z, dz
+real(kind_real) :: rmse
 integer, parameter :: raobtype = 120
 logical :: lfound
 type(ufo_geoval) :: geoval_pr, geoval_tv
 character(MAXVARLEN) :: varname
 
-! Get pointers to geovals and hofx
+! Get pointers to geovals, observations and hofx
 call ufo_geovals_registry%get(c_key_geovals,geovals)
 call ufo_obs_vect_registry%get(c_key_hofx,hofx)
+call ufo_obs_data_registry%get(c_key_obsspace,obss)
 
-! open netcdf file and read some stuff (it should be in the obs_data), 
-! but read it just for now (later take from obsspace)
-filename='Data/diag_t_01_wprofiles.nc4'
-call nc_diag_read_init(filename, iunit)
-nobs = nc_diag_read_get_dim(iunit,'nobs')
+! Get observations from obs-structure
+nobs = obss%nobs
 allocate(pres(nobs))
-call nc_diag_read_get_var(iunit, "Pressure", pres)
 allocate(obstype(nobs),tvflag(nobs))
-call nc_diag_read_get_var(iunit, "Observation_Type", obstype)
-call nc_diag_read_get_var(iunit, "Setup_QC_Mark", tvflag)
 allocate(obs(nobs), omf(nobs))
-call nc_diag_read_get_var(iunit, "Observation", obs)
-call nc_diag_read_get_var(iunit, "Obs_Minus_Forecast_unadjusted", omf)
-call nc_diag_read_close(filename)
+obss%Obspoint => Radiosonde
+pres=Radiosonde%mass(:)%Pressure
+obstype=Radiosonde%mass(:)%Observation_Type
+tvflag=Radiosonde%mass(:)%Setup_QC_Mark
+obs=Radiosonde%mass(:)%Observation
+omf=Radiosonde%mass(:)%Obs_Minus_Forecast_unadjusted
 
 nobs_raob = count(obstype == raobtype .and. tvflag == 0)
 allocate(pres_raob(nobs_raob), obs_raob(nobs_raob))
@@ -179,16 +181,16 @@ do iobs = 1, nobs
   endif
 enddo
 
-print *, 'nobs: ', iobs_raob, nobs_raob, geovals%nobs, hofx%nobs
+print *, myname_, ' nobs: ', iobs_raob, nobs_raob, geovals%nobs, hofx%nobs
 
 rmse = 0.
 do iobs = 1, nobs_raob
   rmse = rmse + (obs_raob(iobs)-omf_raob(iobs))*(obs_raob(iobs)-omf_raob(iobs))
 enddo
-print *, 'rmse=', sqrt(rmse/real(nobs_raob, 8))
+print *, 'rmse=', sqrt(rmse/real(nobs_raob, kind_real))
 
 if (nobs_raob /= geovals%nobs) then
-  print *, 'radiosondet: error: nobs inconsistent!'
+  print *, myname_, ' radiosondet: error: nobs inconsistent!'
 endif
 
 varname = 'LogPressure'
@@ -203,12 +205,12 @@ if (lfound) then
       hofx%values(iobs) = vert_interp(geoval_tv%vals(:,iobs), geoval_tv%nval, dz)
     enddo
   else
-    print *, 'radiosondet test: ', trim(varname), ' doesnt exist'
+    print *, myname_, ' radiosondet test: ', trim(varname), ' doesnt exist'
   endif
 else
-  print *, 'radiosondet test: ', trim(varname), ' doesnt exist'
+  print *, myname_, ' radiosondet test: ', trim(varname), ' doesnt exist'
 endif
-print *, 'radiosonde t test: max diff: ', maxval(abs(hofx%values-(obs_raob-omf_raob))/abs(hofx%values))
+print *, myname_, ' radiosonde t test: max diff: ', maxval(abs(hofx%values-(obs_raob-omf_raob))/abs(hofx%values))
 
 deallocate(obstype, obs, omf, pres, tvflag)
 deallocate(obs_raob, omf_raob, pres_raob)
