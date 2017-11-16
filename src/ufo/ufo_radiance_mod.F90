@@ -390,6 +390,7 @@ contains
        END DO
 
        ! output to hofx structure   
+       hofx%values(:) = 0.0
        i = 1
        do m = 1, N_PROFILES
          do l = 1, n_Channels
