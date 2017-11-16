@@ -102,7 +102,7 @@ contains
 
     ! Profile dimensions
     !** UFO to provide N_LAYERS, N_ABSORBERS, N_CLOUDS, N_AEROSOLS
-    INTEGER, PARAMETER :: N_PROFILES  = 806  !** required because of the rank of the atm and sfc structures
+    INTEGER, PARAMETER :: N_PROFILES  = 1  !** required because of the rank of the atm and sfc structures
     INTEGER, PARAMETER :: N_LAYERS    = 64 !** UFO  !** need a way to populate this... 
     INTEGER, PARAMETER :: N_ABSORBERS = 2  !** UFO
     INTEGER, PARAMETER :: N_CLOUDS    = 0  !** UFO
