@@ -179,8 +179,6 @@ do iobs = 1, nobs
   endif
 enddo
 
-print *, 'nobs: ', iobs_raob, nobs_raob, geovals%nobs, hofx%nobs
-
 rmse = 0.
 do iobs = 1, nobs_raob
   rmse = rmse + (obs_raob(iobs)-omf_raob(iobs))*(obs_raob(iobs)-omf_raob(iobs))
