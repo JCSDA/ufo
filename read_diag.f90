@@ -64,6 +64,7 @@ module read_diag
   public :: ipchan_radiag
   public :: set_radiag
   public :: get_radiag
+  public :: read_all_radiag
 
   interface set_radiag
          module procedure set_radiag_int_ ! internal procedure for integers
@@ -793,6 +794,46 @@ subroutine read_radiag_data(ftin,header_fix,retrieval,data_fix,data_chan,data_ex
   endif
 
 end subroutine read_radiag_data
+
+subroutine read_all_radiag(ftin, header_fix, retrieval, all_data_fix, &
+                           all_data_chan, all_data_extra, &
+                           nobs, iflag)
+
+  integer(i_kind),intent(in)             :: ftin
+  type(diag_header_fix_list ),intent(in) :: header_fix
+  logical,intent(in)                     :: retrieval
+  integer(i_kind),intent(out)            :: iflag
+  type(diag_data_fix_list),  allocatable  :: all_data_fix(:)
+  type(diag_data_chan_list), allocatable  :: all_data_chan(:,:)
+  type(diag_data_extra_list), allocatable :: all_data_extra(:,:,:)
+  integer(i_kind), intent(out) :: nobs
+
+  integer(i_kind) :: id
+
+  if (netcdf) then
+     id = find_ncdiag_id(ftin)
+     if (id < 0) then
+        write(6,*) 'READ_RADIAG_DATA:  ***ERROR*** netcdf diag file ', ftin, ' has not been opened yet.'
+        call abort
+     endif
+
+     if (.not. ncdiag_open_status(id)%nc_read) then
+        call read_radiag_data_nc_init(ftin, ncdiag_open_status(id), header_fix, retrieval)
+     endif
+     nobs = ncdiag_open_status(id)%num_records
+
+     iflag = 0
+     if (.not. allocated(all_data_fix)) allocate(all_data_fix(nobs))
+     if (.not. allocated(all_data_chan)) allocate(all_data_chan(nobs,header_fix%nchan) )
+     if (.not. allocated(all_data_extra)) allocate(all_data_extra(nobs,header_fix%iextra, header_fix%nchan) )
+
+     all_data_fix   = ncdiag_open_status(id)%all_data_fix
+     all_data_chan  = ncdiag_open_status(id)%all_data_chan
+     all_data_extra = ncdiag_open_status(id)%all_data_extra
+  else
+    iflag = -1
+  endif
+end subroutine read_all_radiag
 
 subroutine read_radiag_data_nc_init(ftin, diag_status, header_fix, retrieval)
 !                .      .    .                                       .
