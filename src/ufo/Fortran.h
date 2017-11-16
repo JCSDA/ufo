@@ -34,6 +34,8 @@ typedef int F90hop;
 typedef int F90odb;
 // Observation check key type
 typedef int F90ocheck;
+// Observation bias key type
+typedef int F90obias;
 
 /// Interface to Fortran UFO routines
 /*!
@@ -89,7 +91,7 @@ extern "C" {
   void ufo_radiance_setup_f90(F90hop &, const eckit::Configuration * const *);
   void ufo_radiance_delete_f90(F90hop &);
 
-  void ufo_radiance_eqv_f90(const F90goms &, const F90ovec &);
+  void ufo_radiance_eqv_f90(const F90goms &, const F90odb &, const F90ovec &, const F90obias &);
   void ufo_radiance_equiv_tl_f90(const F90goms &, const F90ovec &, const F90goms &, const double &);
   void ufo_radiance_equiv_ad_f90(const F90goms &, const F90ovec &, const F90goms &, double &);
 
@@ -110,7 +112,7 @@ extern "C" {
 // -----------------------------------------------------------------------------
   void ufo_radiosonde_setup_f90(F90hop &, const eckit::Configuration * const *);
   void ufo_radiosonde_delete_f90(F90hop &);
-  void ufo_radiosonde_t_eqv_f90(const F90goms &, const F90odb &, const F90ovec &);
+  void ufo_radiosonde_t_eqv_f90(const F90goms &, const F90odb &, const F90ovec &, const F90obias &);
   void ufo_radiosonde_inputs_f90(const F90hop &, F90vars &);
 
 // -----------------------------------------------------------------------------

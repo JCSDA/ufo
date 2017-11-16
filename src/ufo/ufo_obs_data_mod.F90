@@ -30,8 +30,8 @@ module ufo_obs_data_mod
     procedure :: Delete
   end type Obs_Data
 
-  type(RadDiag),  pointer, save::   Rad
-  type(RaobDiag), pointer, save::  Raob
+  type(RadDiag),  pointer, save::  Radiance
+  type(RaobDiag), pointer, save::  Radiosonde
 contains
 
   subroutine Setup(self, filein,obstype,nobs,nlocs)
@@ -43,13 +43,13 @@ contains
 
     select case(trim(obstype))
       case("Radiance")
-        allocate(Rad)
-        self%Obspoint => Rad
-        call SetupRadiance(self, Rad, filein,nobs,nlocs)
+        allocate(Radiance)
+        self%Obspoint => Radiance
+        call SetupRadiance(self, Radiance, filein,nobs,nlocs)
       case("Radiosonde")
-        allocate(Raob)
-        self%Obspoint => Raob
-        call SetupRaob(self, Raob, filein,nobs,nlocs)
+        allocate(Radiosonde)
+        self%Obspoint => Radiosonde
+        call SetupRaob(self, Radiosonde, filein,nobs,nlocs)
     end select
 
   end subroutine Setup
@@ -99,8 +99,8 @@ contains
 
     obsmold_=>NUll()
     select case(trim(vname))
-      case("Radiance");   obsmold_%Obspoint => Rad
-      case("Radiosonde"); obsmold_%Obspoint => Raob
+      case("Radiance");   obsmold_%Obspoint => Radiance
+      case("Radiosonde"); obsmold_%Obspoint => Radiosonde
     end select
   end function vname2vmold_
 

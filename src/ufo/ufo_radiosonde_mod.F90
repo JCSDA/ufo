@@ -124,19 +124,18 @@ use nc_diag_read_mod, only: nc_diag_read_get_var
 use nc_diag_read_mod, only: nc_diag_read_get_dim
 use nc_diag_read_mod, only: nc_diag_read_init, nc_diag_read_close
 use raobDiag_mod, only: RaobDiag
-use ufo_obs_data_mod, only: Raob
+use ufo_obs_data_mod, only: Radiosonde
 
 implicit none
 integer(c_int), intent(in) :: c_key_geovals
 integer(c_int), intent(in) :: c_key_hofx
 integer(c_int), intent(in) :: c_key_obsspace
-real(c_double), intent(in) :: c_bias
+integer(c_int), intent(in) :: c_bias
 type(ufo_geovals), pointer  :: geovals
 type(obs_vector), pointer :: hofx
 type(obs_data), pointer :: obss
 
 character(len=*), parameter :: myname_="ufo_radiosonde_t_eqv_c"
-character(128) :: filename
 integer :: iunit
 
 real(kind_real), allocatable :: tvflag(:), pres(:), omf(:), obs(:)
@@ -151,25 +150,22 @@ logical :: lfound
 type(ufo_geoval) :: geoval_pr, geoval_tv
 character(MAXVARLEN) :: varname
 
-! Get pointers to geovals and hofx
+! Get pointers to geovals, observations and hofx
 call ufo_geovals_registry%get(c_key_geovals,geovals)
 call ufo_obs_vect_registry%get(c_key_hofx,hofx)
-
 call ufo_obs_data_registry%get(c_key_obsspace,obss)
-! open netcdf file and read some stuff (it should be in the obs_data), 
-! but read it just for now (later take from obsspace)
-filename=trim(obss%filein)
+
+! Get observations from obs-structure
 nobs = obss%nobs
 allocate(pres(nobs))
 allocate(obstype(nobs),tvflag(nobs))
 allocate(obs(nobs), omf(nobs))
-obss%Obspoint => Raob
-pres=Raob%mass(:)%Pressure
-obstype=Raob%mass(:)%Observation_Type
-tvflag=Raob%mass(:)%Setup_QC_Mark
-obs=Raob%mass(:)%Observation
-omf=Raob%mass(:)%Obs_Minus_Forecast_unadjusted
-print*, myname_, ': Mean observations:            ', sum(Raob%mass(:)%Observation)/nobs
+obss%Obspoint => Radiosonde
+pres=Radiosonde%mass(:)%Pressure
+obstype=Radiosonde%mass(:)%Observation_Type
+tvflag=Radiosonde%mass(:)%Setup_QC_Mark
+obs=Radiosonde%mass(:)%Observation
+omf=Radiosonde%mass(:)%Obs_Minus_Forecast_unadjusted
 
 nobs_raob = count(obstype == raobtype .and. tvflag == 0)
 allocate(pres_raob(nobs_raob), obs_raob(nobs_raob))

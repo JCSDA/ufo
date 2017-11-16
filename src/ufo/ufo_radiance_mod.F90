@@ -11,6 +11,7 @@ module ufo_radiance_mod
   use config_mod
   use duration_mod
   use ufo_obs_data
+  use ufo_obs_data_mod
   use ufo_obs_vectors
   use ufo_vars_mod
   use ufo_locs_mod
@@ -72,13 +73,17 @@ contains
   
   ! ------------------------------------------------------------------------------
 
-  subroutine ufo_radiance_eqv(c_key_geovals, c_key_hofx, c_bias) bind(c,name='ufo_radiance_eqv_f90')
+  subroutine ufo_radiance_eqv(c_key_geovals, c_key_obsspace, c_key_hofx, c_bias) bind(c,name='ufo_radiance_eqv_f90')
+    use radDiag_mod, only: RadDiag
+    use ufo_obs_data_mod, only: Radiance
     implicit none
     integer(c_int), intent(in) :: c_key_geovals
+    integer(c_int), intent(in) :: c_key_obsspace
     integer(c_int), intent(in) :: c_key_hofx
-    real(c_double), intent(in) :: c_bias
+    integer(c_int), intent(in) :: c_bias
     type(ufo_geovals), pointer  :: geovals
     type(obs_vector), pointer :: hofx
+    type(obs_data), pointer :: obss
 
     !*************************************************************************************
     !******* Begin CRTM block ************************************************************
@@ -170,12 +175,23 @@ contains
     logical              :: lfound
     integer              :: ivar
 
+    integer              :: nobs
+    integer              :: nlocs
+
     ! Program header
     ! --------------
 
-    ! Get pointers to geovals and hofx
+    ! Get pointers to geovals, observations and hofx
     call ufo_geovals_registry%get(c_key_geovals,geovals)
     call ufo_obs_vect_registry%get(c_key_hofx,hofx)
+    call ufo_obs_data_registry%get(c_key_obsspace,obss)
+
+    nobs=obss%nobs; nlocs=obss%nlocs
+    obss%Obspoint => Radiance
+
+    ! RT: The following is an example of how to get a handle on what is in the pointer Radiance
+    !     that is, how to tap on the observation structure ...
+    print *, 'Header Name: ', nobs, nlocs,  size(Radiance%header_name%fix)
 
 !** geovals index and variable names:
 !!$ 1   Temperature
