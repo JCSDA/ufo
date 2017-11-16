@@ -11,7 +11,8 @@ use read_diag, only: read_radiag_data,&
                      diag_data_extra_list,&
                      diag_data_chan_list,&
                      open_radiag, &
-                     close_radiag
+                     close_radiag, &
+                     read_all_radiag
 
 implicit none
 private
@@ -27,9 +28,9 @@ type :: radDiag
   type(diag_header_chan_list),allocatable  ::  header_chan(:)
   type(diag_data_name_list)                ::  header_name
 
-  type(diag_data_fix_list)                 ::  datafix
-  type(diag_data_chan_list)  ,allocatable  ::  datachan(:)
-  type(diag_data_extra_list) ,allocatable  ::  dataextra(:,:)
+  type(diag_data_fix_list)   ,allocatable  ::  datafix(:)
+  type(diag_data_chan_list)  ,allocatable  ::  datachan(:,:)
+  type(diag_data_extra_list) ,allocatable  ::  dataextra(:,:,:)
 end type radDiag
 
 interface radDiag_read  ; module procedure this_read_  ; end interface
@@ -61,14 +62,9 @@ print*, myname_, ': Found this many channels: ', self%header_fix%nchan
 print*, myname_, ': Observation type in file: ', self%header_fix%obstype
 print*, myname_, ': Date of input file:       ', self%header_fix%idate
 
-nobs=0
-do while (ier .ge. 0)
-   call read_radiag_data ( luin, self%header_fix, .false., self%datafix, self%datachan, &
-                           self%dataextra, ier )
 
-   if (ier .lt. 0) cycle
-   nobs = nobs + 1
-enddo
+call read_all_radiag(luin, self%header_fix, retrieval, self%datafix, &
+                     self%datachan, self%dataextra, nobs, ier)
 print *, myname_, ' Total number of observations in file: ', nobs
 nlocs = nobs
 nobs = nobs * self%header_fix%nchan
