@@ -125,8 +125,19 @@ call ufo_geovals_registry%get(c_key_self, self)
 ! read filename for config
 filename = config_get_string(c_conf,len(filename),"filename")
 
-call ufo_geovals_read_netcdf(self, filename)
-
+if (filename == 'Data/amsua_n19_wprofiles.nc4') then
+  call ufo_geovals_read_rad_netcdf(self, filename)
+elseif (filename == 'Data/diag_t_01_wprofiles.nc4') then
+  call ufo_geovals_read_raob_t_netcdf(self, filename)
+elseif (filename == 'Data/diag_q_01_wprofiles.nc4') then
+  call ufo_geovals_read_q_netcdf(self, filename)
+elseif (filename == 'Data/diag_uv_01_wprofiles.nc4') then
+  call ufo_geovals_read_uv_netcdf(self, filename)
+elseif (filename == 'Data/diag_ps_01_wprofiles.nc4') then
+  call ufo_geovals_read_ps_netcdf(self, filename)
+else
+  print *, 'Error: dont know how to read ', trim(filename)
+endif
 end subroutine ufo_geovals_read_file_c
 
 ! ------------------------------------------------------------------------------

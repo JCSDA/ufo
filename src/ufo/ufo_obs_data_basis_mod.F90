@@ -1,3 +1,10 @@
+! (C) Copyright 2017 UCAR
+! 
+! This software is licensed under the terms of the Apache Licence Version 2.0
+! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
+
+!> Fortran module to handle radiosondeentional observations
+
 module ufo_obs_data_basis_mod
   use iso_c_binding
   implicit none
@@ -6,28 +13,29 @@ module ufo_obs_data_basis_mod
   type, abstract :: BasisObsData
     integer :: nobs=0
     character(len=800) :: filein, fileout
+    class(BasisObsData),pointer :: Obspoint => NULL()
     contains
       procedure, nopass :: echoMyname
-      procedure(SetupSomethingInterface), deferred :: SetupSomething
-      procedure(DeleteInterface), deferred :: Delete
-      generic :: SetupBasis => SetupSomething
+      procedure(Setup_),  deferred :: Setup
+      procedure(Delete_), deferred :: Delete
+      generic :: SetupBasis => Setup
       generic :: DeleteBasis => Delete
   end type BasisObsData
 
-  interface 
+  abstract interface 
     ! Interface for setup
-    subroutine SetupSomethingInterface(self, filein,obstype,nobs)
+    subroutine Setup_(self, filein,obstype,nobs)
       import
       class(BasisObsData), intent(inout) :: self
       character(len=*), intent(in)    :: filein
       character(len=*), intent(in)    :: obstype
       integer(c_int),   intent(inout) :: nobs
-    end subroutine SetupSomethingInterface
+    end subroutine Setup_
     ! Interface for setup
-    subroutine DeleteInterface(self)
+    subroutine Delete_(self)
       import
       class(BasisObsData), intent(inout) :: self
-    end subroutine DeleteInterface
+    end subroutine Delete_
   end interface
 
 contains

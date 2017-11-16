@@ -27,7 +27,7 @@ implicit none
 private
 
 public :: obs_setup, obs_delete, obs_get, obs_put, max_string
-public :: obs_data_registry
+public :: ufo_obs_data_registry
 
 ! ------------------------------------------------------------------------------
 integer, parameter :: max_string=800
@@ -45,7 +45,7 @@ integer, parameter :: max_string=800
 #include "linkedList_i.f"
 
 !> Global registry
-type(registry_t) :: obs_data_registry
+type(registry_t) :: ufo_obs_data_registry
 
 ! ------------------------------------------------------------------------------
 contains
@@ -114,7 +114,7 @@ type(ufo_locs), pointer :: locs
 type(obs_vector) :: ovec
 character(len=8) :: col="Location"
 
-call obs_data_registry%get(c_key_self, self)
+call ufo_obs_data_registry%get(c_key_self, self)
 call c_f_datetime(c_t1, t1)
 call c_f_datetime(c_t2, t2)
 
@@ -148,19 +148,16 @@ type(ufo_vars), pointer :: vars
 type(datetime) :: t1, t2
 type(ufo_geovals), pointer :: geovals
 
-call obs_data_registry%get(c_key_self, self)
+call ufo_obs_data_registry%get(c_key_self, self)
 call ufo_vars_registry%get(c_key_vars, vars)
 call c_f_datetime(c_t1, t1)
 call c_f_datetime(c_t2, t2)
 
-allocate(geovals)
 call ufo_geovals_registry%init()
 call ufo_geovals_registry%add(c_key_geovals)
 call ufo_geovals_registry%get(c_key_geovals,geovals)
 
-geovals%lalloc = .false. ! very bad! should just call init that adds to registry 
-geovals%linit  = .false. ! and initalizes!!!
-
+call ufo_geovals_init(geovals)
 call ufo_geovals_setup(geovals, vars, self%nobs)
 
 end subroutine ufo_obsdb_getgeovals_c
@@ -172,7 +169,7 @@ implicit none
 integer(c_int), intent(in) :: c_key_self
 integer(c_int), intent(inout) :: kobs
 type(obs_data), pointer :: self
-call obs_data_registry%get(c_key_self, self)
+call ufo_obs_data_registry%get(c_key_self, self)
 kobs = self%nobs
 end subroutine ufo_obsdb_nobs_c
 
@@ -226,9 +223,9 @@ call fckit_log%info(record)
 !call fckit_log%info(record)
 fout = ""
 
-call obs_data_registry%init()
-call obs_data_registry%add(c_key_self)
-call obs_data_registry%get(c_key_self, self)
+call ufo_obs_data_registry%init()
+call ufo_obs_data_registry%add(c_key_self)
+call ufo_obs_data_registry%get(c_key_self, self)
 call obs_setup(trim(fin), trim(fout), MyObsType, self)
 
 end subroutine ufo_obsdb_setup_c
@@ -240,9 +237,9 @@ implicit none
 integer(c_int), intent(inout) :: c_key_self
 type(obs_data), pointer :: self
 
-call obs_data_registry%get(c_key_self, self)
+call ufo_obs_data_registry%get(c_key_self, self)
 call obs_delete(self)
-call obs_data_registry%remove(c_key_self)
+call ufo_obs_data_registry%remove(c_key_self)
 
 end subroutine ufo_obsdb_delete_c
 
@@ -259,7 +256,7 @@ type(obs_data), pointer :: self
 type(obs_vector), pointer :: ovec
 character(len=lcol) :: col
 
-call obs_data_registry%get(c_key_self, self)
+call ufo_obs_data_registry%get(c_key_self, self)
 call ufo_obs_vect_registry%get(c_key_ovec,ovec)
 call c_f_string(c_col, col)
 
@@ -280,7 +277,7 @@ type(obs_data), pointer :: self
 type(obs_vector), pointer :: ovec
 character(len=lcol) :: col
 
-call obs_data_registry%get(c_key_self, self)
+call ufo_obs_data_registry%get(c_key_self, self)
 call ufo_obs_vect_registry%get(c_key_ovec,ovec)
 call c_f_string(c_col, col)
 

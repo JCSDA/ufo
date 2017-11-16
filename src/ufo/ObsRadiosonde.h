@@ -5,8 +5,8 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
  */
 
-#ifndef UFO_OBSRADIANCE_H_
-#define UFO_OBSRADIANCE_H_
+#ifndef UFO_OBSRADIOSONDE_H_
+#define UFO_OBSRADIOSONDE_H_
 
 #include <ostream>
 #include <string>
@@ -53,9 +53,10 @@ class ObsRadiosonde : public oops::ObsOperatorBase<UfoTrait>,
  private:
   void print(std::ostream &) const;
   F90hop keyOperRadiosonde_;
+  const ObsSpace& odb_;
   boost::shared_ptr<const Variables> varin_;
 };
 // -----------------------------------------------------------------------------
 
 }  // namespace ufo
-#endif  // UFO_OBSRADIANCE_H_
+#endif  // UFO_OBSRADIOSONDE_H_

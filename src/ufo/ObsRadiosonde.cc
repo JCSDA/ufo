@@ -23,12 +23,12 @@ static oops::ObsOperatorMaker<UfoTrait, ObsRadiosonde> makerRadiosonde_("Radioso
 // -----------------------------------------------------------------------------
 
 ObsRadiosonde::ObsRadiosonde(const ObsSpace & odb, const eckit::Configuration & config)
-  : keyOperRadiosonde_(0), varin_()
+  : keyOperRadiosonde_(0), varin_(), odb_(odb)
 {
   const eckit::Configuration * configc = &config;
-  ufo_radiance_setup_f90(keyOperRadiosonde_, &configc);
+  ufo_radiosonde_setup_f90(keyOperRadiosonde_, &configc);
   int keyVarin;
-  ufo_radiance_inputs_f90(keyOperRadiosonde_, keyVarin);
+  ufo_radiosonde_inputs_f90(keyOperRadiosonde_, keyVarin);
   varin_.reset(new Variables(keyVarin));
   oops::Log::trace() << "ObsRadiosonde created." << std::endl;
 }
@@ -36,7 +36,7 @@ ObsRadiosonde::ObsRadiosonde(const ObsSpace & odb, const eckit::Configuration & 
 // -----------------------------------------------------------------------------
 
 ObsRadiosonde::~ObsRadiosonde() {
-  ufo_radiance_delete_f90(keyOperRadiosonde_);
+  ufo_radiosonde_delete_f90(keyOperRadiosonde_);
   oops::Log::trace() << "ObsRadiosonde destructed" << std::endl;
 }
 
@@ -44,7 +44,7 @@ ObsRadiosonde::~ObsRadiosonde() {
 
 void ObsRadiosonde::obsEquiv(const GeoVaLs & gom, ObsVector & ovec,
                          const ObsBias & bias) const {
-  ufo_radiance_eqv_f90(gom.toFortran(), ovec.toFortran());
+  ufo_radiosonde_t_eqv_f90(gom.toFortran(), odb_.toFortran(), ovec.toFortran());
 }
 
 // -----------------------------------------------------------------------------
