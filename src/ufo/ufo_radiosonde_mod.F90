@@ -138,14 +138,12 @@ type(obs_data), pointer :: obss
 character(len=*), parameter :: myname_="ufo_radiosonde_t_eqv_c"
 integer :: iunit
 
-real(kind_real), allocatable :: tvflag(:), pres(:), omf(:), obs(:)
-real(kind_real), allocatable :: pres_raob(:), omf_raob(:), obs_raob(:)
-integer, allocatable :: obstype(:)
+real(kind_real), allocatable :: pres(:), omf(:), obs(:)
 
-integer :: iobs, nobs, iobs_raob, nobs_raob
+integer :: iobs, nobs
 real(kind_real) :: z, dz
 real(kind_real) :: rmse
-integer, parameter :: raobtype = 120
+
 logical :: lfound
 type(ufo_geoval) :: geoval_pr, geoval_tv
 character(MAXVARLEN) :: varname
@@ -158,39 +156,22 @@ call ufo_obs_data_registry%get(c_key_obsspace,obss)
 ! Get observations from obs-structure
 nobs = obss%nobs
 allocate(pres(nobs))
-allocate(obstype(nobs),tvflag(nobs))
 allocate(obs(nobs), omf(nobs))
 obss%Obspoint => Radiosonde
 pres=Radiosonde%mass(:)%Pressure
-obstype=Radiosonde%mass(:)%Observation_Type
-tvflag=Radiosonde%mass(:)%Setup_QC_Mark
 obs=Radiosonde%mass(:)%Observation
 omf=Radiosonde%mass(:)%Obs_Minus_Forecast_unadjusted
 
-nobs_raob = count(obstype == raobtype .and. tvflag == 0)
-allocate(pres_raob(nobs_raob), obs_raob(nobs_raob))
-allocate(omf_raob(nobs_raob))
-iobs_raob = 1
-do iobs = 1, nobs
-  if (obstype(iobs) == raobtype .and. tvflag(iobs) == 0) then
-    !print *, iobs, obstype(iobs), tvflag(iobs)
-    pres_raob(iobs_raob) = pres(iobs)
-    obs_raob(iobs_raob) = obs(iobs)
-    omf_raob(iobs_raob) = omf(iobs)
-    iobs_raob = iobs_raob + 1
-  endif
-enddo
-
-print *, myname_, ' nobs: ', iobs_raob, nobs_raob, geovals%nobs, hofx%nobs
+print *, myname_, ' nobs: ', nobs, geovals%nobs, hofx%nobs
 
 rmse = 0.
-do iobs = 1, nobs_raob
-  rmse = rmse + (obs_raob(iobs)-omf_raob(iobs))*(obs_raob(iobs)-omf_raob(iobs))
+do iobs = 1, nobs
+  rmse = rmse + (obs(iobs)-omf(iobs))*(obs(iobs)-omf(iobs))
 enddo
-print *, 'rmse=', sqrt(rmse/real(nobs_raob, kind_real))
+print *, 'rmse=', sqrt(rmse/real(nobs, kind_real))
 
-if (nobs_raob /= geovals%nobs) then
-  print *, myname_, ' radiosondet: error: nobs inconsistent!'
+if (nobs /= geovals%nobs) then
+  print *, myname_, ' error: nobs inconsistent!'
 endif
 
 varname = 'LogPressure'
@@ -199,21 +180,20 @@ if (lfound) then
   varname = 'Virtual temperature'
   lfound = ufo_geovals_get_var(geovals, varname, geoval_tv)
   if (lfound) then
-    do iobs = 1, nobs_raob
-      z = log(pres_raob(iobs)/10.)
+    do iobs = 1, nobs
+      z = log(pres(iobs)/10.)
       dz = interp_weight(z, geoval_pr%vals(:,iobs), geoval_pr%nval)
       hofx%values(iobs) = vert_interp(geoval_tv%vals(:,iobs), geoval_tv%nval, dz)
     enddo
   else
-    print *, myname_, ' radiosondet test: ', trim(varname), ' doesnt exist'
+    print *, myname_, trim(varname), ' doesnt exist'
   endif
 else
-  print *, myname_, ' radiosondet test: ', trim(varname), ' doesnt exist'
+  print *, myname_, trim(varname), ' doesnt exist'
 endif
-print *, myname_, ' radiosonde t test: max diff: ', maxval(abs(hofx%values-(obs_raob-omf_raob))/abs(hofx%values))
+print *, myname_, ' radiosonde t test: max diff: ', maxval(abs(hofx%values-(obs-omf))/abs(hofx%values))
 
-deallocate(obstype, obs, omf, pres, tvflag)
-deallocate(obs_raob, omf_raob, pres_raob)
+deallocate(obs, omf, pres)
 
 end subroutine ufo_radiosonde_t_eqv_c
 
