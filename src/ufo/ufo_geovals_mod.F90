@@ -84,6 +84,8 @@ type(ufo_geovals), intent(inout) :: self
 type(ufo_vars), intent(in) :: vars
 integer, intent(in) :: nobs
 
+integer :: ivar
+
 call ufo_geovals_delete(self)
 
 self%nobs = nobs
@@ -91,6 +93,10 @@ self%nvar = vars%nv
 call ufo_vars_clone(vars, self%variables) 
 
 allocate(self%geovals(self%nvar))
+do ivar = 1, nvar
+  self%geovals(ivar)%nobs = nobs
+  self%geovals(ivar)%nval = 0
+enddo
 self%lalloc = .true.
 
 end subroutine ufo_geovals_setup
