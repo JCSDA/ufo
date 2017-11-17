@@ -24,6 +24,7 @@ ecbuild_add_resources( TARGET ufo_test_scripts
 # Create Data directory for test data and symlink files
 list( APPEND ufo_test_data
   amsua_n19_wprofiles.nc4
+  diag_t_01_wprofiles.nc4
 )
 
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Data)

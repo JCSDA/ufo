@@ -93,7 +93,7 @@ self%nvar = vars%nv
 call ufo_vars_clone(vars, self%variables) 
 
 allocate(self%geovals(self%nvar))
-do ivar = 1, nvar
+do ivar = 1, self%nvar
   self%geovals(ivar)%nobs = nobs
   self%geovals(ivar)%nval = 0
 enddo
