@@ -53,6 +53,7 @@ class ObsRadiance : public oops::ObsOperatorBase<UfoTrait>,
  private:
   void print(std::ostream &) const;
   F90hop keyOperRadiance_;
+  const ObsSpace& odb_;
   boost::shared_ptr<const Variables> varin_;
 };
 // -----------------------------------------------------------------------------

@@ -1,0 +1,107 @@
+! (C) Copyright 2017 UCAR
+! 
+! This software is licensed under the terms of the Apache Licence Version 2.0
+! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
+
+!> Fortran module to handle radiosondeentional observations
+
+module ufo_obs_data_mod
+  use iso_c_binding
+
+  use ufo_obs_data_basis_mod
+
+  use radDiag_mod,  only: RadDiag
+  use radDiag_mod,  only: RadDiag_read
+  use raobDiag_mod, only: RaobDiag
+  use raobDiag_mod, only: RaobDiag_read
+
+  implicit none
+
+  type, extends(BasisObsData) :: Obs_Data
+  contains
+    ! Extending the mapping SetupBasis => SetupRaob
+    ! the parent type.
+    generic :: SetupBasis => SetupRaob
+    generic :: SetupBasis => SetupRadiance
+    procedure :: SetupRaob
+    procedure :: SetupRadiance
+    ! Implementation for the deferred procedure in Basis
+    procedure :: Setup
+    procedure :: Delete
+  end type Obs_Data
+
+  type(RadDiag),  pointer, save::  Radiance
+  type(RaobDiag), pointer, save::  Radiosonde
+contains
+
+  subroutine Setup(self, filein,obstype,nobs,nlocs)
+    class(Obs_Data), intent(inout) :: self
+    character(len=*), intent(in)    :: filein
+    character(len=*), intent(in)    :: obstype
+    integer(c_int),   intent(inout) :: nobs
+    integer(c_int),   intent(inout) :: nlocs
+
+    select case(trim(obstype))
+      case("Radiance")
+        allocate(Radiance)
+        self%Obspoint => Radiance
+        call SetupRadiance(self, Radiance, filein,nobs,nlocs)
+      case("Radiosonde")
+        allocate(Radiosonde)
+        self%Obspoint => Radiosonde
+        call SetupRaob(self, Radiosonde, filein,nobs,nlocs)
+    end select
+
+  end subroutine Setup
+
+  subroutine Delete(self)
+    class(Obs_Data), intent(inout) :: self
+  end subroutine Delete
+
+  subroutine SetupRadiance(self, mytype, filein,nobs,nlocs)
+    class(Obs_Data), intent(inout) :: self
+    type(RadDiag), pointer, intent(inout)    :: mytype
+    character(len=*), intent(in)    :: filein
+    integer(c_int),   intent(inout) :: nobs
+    integer(c_int),   intent(inout) :: nlocs
+
+    character(len=*),parameter:: myname_=myname//"::SetupRadiance"
+
+    print *, trim(myname_)
+    call radDiag_read(mytype,filein,'Radiance',nobs,nlocs)
+    self%Nobs = nobs
+    self%Nlocs= nlocs
+
+  end subroutine SetupRadiance
+
+  subroutine SetupRaob(self, mytype, filein,nobs,nlocs)
+    class(Obs_Data), intent(inout) :: self
+    type(RaobDiag), pointer, intent(inout)   :: mytype
+    character(len=*), intent(in)    :: filein
+    integer(c_int),   intent(inout) :: nobs
+    integer(c_int),   intent(inout) :: nlocs
+
+    character(len=*),parameter:: myname_=myname//"::SetupRaob"
+
+    print *, trim(myname_)
+    call raobDiag_read(mytype,filein,'Radiosonde',nobs,nlocs)
+    self%Nobs = nobs
+    self%Nlocs= nlocs
+
+  end subroutine SetupRaob
+
+  function vname2vmold_(vname) result(obsmold_)
+    implicit none
+    class(BasisObsData),pointer:: obsmold_
+    character(len=*),intent(in):: vname
+
+    character(len=*),parameter:: myname_=myname//"::vname2vmold_"
+
+    obsmold_=>NUll()
+    select case(trim(vname))
+      case("Radiance");   obsmold_%Obspoint => Radiance
+      case("Radiosonde"); obsmold_%Obspoint => Radiosonde
+    end select
+  end function vname2vmold_
+
+end module ufo_obs_data_mod
