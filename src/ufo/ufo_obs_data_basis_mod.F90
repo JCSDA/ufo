@@ -15,9 +15,10 @@ module ufo_obs_data_basis_mod
     integer :: nobs =0
     integer :: nlocs=0
     character(len=800) :: filein, fileout
-    real(kind_real), pointer :: lat(:) => NULL()  ! latitude
-    real(kind_real), pointer :: lon(:) => NULL()  ! longuitude
-    real(kind_real), pointer :: lev(:) => NULL()  ! levels
+    real(kind_real), pointer :: lat(:)  => NULL()  ! latitude
+    real(kind_real), pointer :: lon(:)  => NULL()  ! longuitude
+    real(kind_real), pointer :: lev(:)  => NULL()  ! levels
+    real(kind_real), pointer :: time(:) => NULL()  ! obs-time
     class(BasisObsData),pointer :: Obspoint => NULL()
     contains
       procedure, nopass :: echoMyname
