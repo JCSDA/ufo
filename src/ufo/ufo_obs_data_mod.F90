@@ -19,12 +19,6 @@ module ufo_obs_data_mod
 
   type, extends(BasisObsData) :: Obs_Data
   contains
-    ! Extending the mapping SetupBasis => SetupRaob
-    ! the parent type.
-    generic :: SetupBasis => SetupRaob
-    generic :: SetupBasis => SetupRadiance
-    procedure :: SetupRaob
-    procedure :: SetupRadiance
     ! Implementation for the deferred procedure in Basis
     procedure :: Setup
     procedure :: Delete
@@ -54,10 +48,6 @@ contains
 
   end subroutine Setup
 
-  subroutine Delete(self)
-    class(Obs_Data), intent(inout) :: self
-  end subroutine Delete
-
   subroutine SetupRadiance(self, mytype, filein,nobs,nlocs)
     class(Obs_Data), intent(inout) :: self
     type(RadDiag), pointer, intent(inout)    :: mytype
@@ -71,6 +61,7 @@ contains
     call radDiag_read(mytype,filein,'Radiance',nobs,nlocs)
     self%Nobs = nobs
     self%Nlocs= nlocs
+    allocate(self%lon(nobs))
 
   end subroutine SetupRadiance
 
@@ -82,13 +73,38 @@ contains
     integer(c_int),   intent(inout) :: nlocs
 
     character(len=*),parameter:: myname_=myname//"::SetupRaob"
+    logical :: failed 
 
     print *, trim(myname_)
     call raobDiag_read(mytype,filein,'Radiosonde',nobs,nlocs)
     self%Nobs = nobs
     self%Nlocs= nlocs
 
+    failed=.false.
+    if(.not.failed .and. size(mytype%mass(:)%Longitude)==nobs) then
+       allocate(self%lon(nobs))
+       self%lon(:) = mytype%mass(:)%Longitude
+    else
+       failed=.true.
+    endif
+    if(.not.failed .and. size(mytype%mass(:)%Latitude) ==nobs) then
+       allocate(self%lat(nobs))
+       self%lat(:) = mytype%mass(:)%Latitude
+    else
+       failed=.true.
+    endif
+    if(.not.failed .and. size(mytype%mass(:)%Pressure) ==nobs) then
+       allocate(self%lev(nobs))
+       self%lev(:) = mytype%mass(:)%Pressure
+    else
+       failed=.true.
+    endif
+
   end subroutine SetupRaob
+
+  subroutine Delete(self)
+    class(Obs_Data), intent(inout) :: self
+  end subroutine Delete
 
   function vname2vmold_(vname) result(obsmold_)
     implicit none

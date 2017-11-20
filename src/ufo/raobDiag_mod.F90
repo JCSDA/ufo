@@ -18,15 +18,15 @@ type, extends(BasisObsData) :: raobDiag
   type(diag_raob_header)        ::  header
   type(diag_raob_mass),pointer  ::  mass(:)
   contains
-    procedure :: Setup => this_read_
-    procedure :: Delete => this_delete_
+    procedure :: Setup  => read_
+    procedure :: Delete => delete_
 end type raobDiag
 
-interface raobDiag_read  ; module procedure this_read_  ; end interface
+interface raobDiag_read  ; module procedure read_  ; end interface
 
 contains
 
-subroutine this_read_(self,filein,obstype,nobs,nlocs)
+subroutine read_(self,filein,obstype,nobs,nlocs)
 use ncd_kinds, only: i_kind
 implicit none
 character(len=*),parameter :: myname_ =myname//"*raod_read"
@@ -51,15 +51,15 @@ print*, myname_, ': Date of input file:           ', self%header%date
 if(nobs>0)&
 print*, myname_, ': Mean observations:            ', sum(self%mass(:)%Observation)/nobs
 
-end subroutine this_read_
+end subroutine read_
 
-subroutine this_delete_(self)
+subroutine delete_(self)
 implicit none
 class(raobDiag), intent(inout) :: self
-end subroutine this_delete_
+end subroutine delete_
 
-subroutine this_write_(self)
+subroutine write_(self)
 class(raobDiag), intent(inout) :: self
-end subroutine this_write_
+end subroutine write_
 
 end module raobDiag_mod

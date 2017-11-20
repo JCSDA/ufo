@@ -138,7 +138,8 @@ type(obs_data), pointer :: obss
 character(len=*), parameter :: myname_="ufo_radiosonde_t_eqv_c"
 integer :: iunit
 
-real(kind_real), allocatable :: pres(:), omf(:), obs(:)
+real(kind_real), allocatable :: omf(:), obs(:)
+real(kind_real), pointer :: pres(:)
 
 integer :: iobs, nobs
 real(kind_real) :: z, dz
@@ -155,10 +156,9 @@ call ufo_obs_data_registry%get(c_key_obsspace,obss)
 
 ! Get observations from obs-structure
 nobs = obss%nobs
-allocate(pres(nobs))
 allocate(obs(nobs), omf(nobs))
 obss%Obspoint => Radiosonde
-pres=Radiosonde%mass(:)%Pressure
+pres=>obss%lev
 obs=Radiosonde%mass(:)%Observation
 omf=Radiosonde%mass(:)%Obs_Minus_Forecast_unadjusted
 
@@ -193,7 +193,8 @@ else
 endif
 print *, myname_, ' radiosonde t test: max diff: ', maxval(abs(hofx%values-(obs-omf))/abs(hofx%values))
 
-deallocate(obs, omf, pres)
+nullify(pres)
+deallocate(obs, omf)
 
 end subroutine ufo_radiosonde_t_eqv_c
 
