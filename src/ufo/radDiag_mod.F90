@@ -34,15 +34,15 @@ type, extends(BasisObsData) :: radDiag
   type(diag_data_chan_list)  ,allocatable  ::  datachan(:,:)
   type(diag_data_extra_list) ,allocatable  ::  dataextra(:,:,:)
   contains
-    procedure :: Setup => this_read_
-    procedure :: Delete => this_delete_
+    procedure :: Setup  => read_
+    procedure :: Delete => delete_
 end type radDiag
 
-interface radDiag_read  ; module procedure this_read_  ; end interface
+interface radDiag_read  ; module procedure read_  ; end interface
 
 contains
 
-subroutine this_read_(self,filein,obstype,nobs,nlocs)
+subroutine read_(self,filein,obstype,nobs,nlocs)
 use ncd_kinds, only: i_kind
 implicit none
 class(radDiag), intent(inout)  :: self
@@ -78,15 +78,15 @@ nlocs = nobs
 nobs  = nobs * self%header_fix%nchan
 call close_radiag(filein,luin)
 print *, myname_, ' Total number of observations in file: (nobs,nlocs) ', nobs, nlocs
-end subroutine this_read_
+end subroutine read_
 
-subroutine this_delete_(self)
+subroutine delete_(self)
 implicit none
 class(radDiag), intent(inout) :: self
-end subroutine this_delete_
+end subroutine delete_
 
-subroutine this_write_(self)
+subroutine write_(self)
 type(radDiag), intent(inout) :: self
-end subroutine this_write_
+end subroutine write_
 
 end module radDiag_mod

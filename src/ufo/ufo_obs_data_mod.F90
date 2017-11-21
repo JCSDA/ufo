@@ -7,6 +7,7 @@
 
 module ufo_obs_data_mod
   use iso_c_binding
+  use fckit_log_module, only : fckit_log
 
   use ufo_obs_data_basis_mod
 
@@ -19,12 +20,6 @@ module ufo_obs_data_mod
 
   type, extends(BasisObsData) :: Obs_Data
   contains
-    ! Extending the mapping SetupBasis => SetupRaob
-    ! the parent type.
-    generic :: SetupBasis => SetupRaob
-    generic :: SetupBasis => SetupRadiance
-    procedure :: SetupRaob
-    procedure :: SetupRadiance
     ! Implementation for the deferred procedure in Basis
     procedure :: Setup
     procedure :: Delete
@@ -54,10 +49,6 @@ contains
 
   end subroutine Setup
 
-  subroutine Delete(self)
-    class(Obs_Data), intent(inout) :: self
-  end subroutine Delete
-
   subroutine SetupRadiance(self, mytype, filein,nobs,nlocs)
     class(Obs_Data), intent(inout) :: self
     type(RadDiag), pointer, intent(inout)    :: mytype
@@ -66,11 +57,40 @@ contains
     integer(c_int),   intent(inout) :: nlocs
 
     character(len=*),parameter:: myname_=myname//"::SetupRadiance"
+    character(len=255) :: record
+    integer :: failed
 
-    print *, trim(myname_)
     call radDiag_read(mytype,filein,'Radiance',nobs,nlocs)
     self%Nobs = nobs
     self%Nlocs= nlocs
+
+    failed=0
+    if(failed==0 .and. size(mytype%datafix(:)%Lat)==nlocs) then
+       allocate(self%lat(nlocs))
+       self%lat(:) = mytype%datafix(:)%Lat
+    else
+       failed=1
+    endif
+    if(failed==0 .and. size(mytype%datafix(:)%Lon)==nlocs) then
+       allocate(self%lon(nlocs))
+       self%lon(:) = mytype%datafix(:)%Lon
+    else
+       failed=2
+    endif
+    if(failed==0 .and. size(mytype%datafix(:)%obstime)==nlocs) then
+       allocate(self%time(nlocs))
+       self%time(:) = mytype%datafix(:)%obstime
+    else
+       failed=3
+    endif
+    if(failed==0)then
+      write(record,*)myname_,': allocated/assinged obs-data'
+      call fckit_log%info(record)
+    else
+      write(record,*)myname_,': failed allocation/assignment of obs-data, ier: ', failed
+      call fckit_log%info(record)
+      ! should exit in error here
+    endif
 
   end subroutine SetupRadiance
 
@@ -82,13 +102,52 @@ contains
     integer(c_int),   intent(inout) :: nlocs
 
     character(len=*),parameter:: myname_=myname//"::SetupRaob"
+    character(len=255) :: record
+    integer :: failed 
 
-    print *, trim(myname_)
     call raobDiag_read(mytype,filein,'Radiosonde',nobs,nlocs)
     self%Nobs = nobs
     self%Nlocs= nlocs
 
+    failed=0
+    if(failed==0 .and. size(mytype%mass(:)%Longitude)==nlocs) then
+       allocate(self%lon(nlocs))
+       self%lon(:) = mytype%mass(:)%Longitude
+    else
+       failed=1
+    endif
+    if(failed==0 .and. size(mytype%mass(:)%Latitude) ==nlocs) then
+       allocate(self%lat(nlocs))
+       self%lat(:) = mytype%mass(:)%Latitude
+    else
+       failed=2
+    endif
+    if(failed==0 .and. size(mytype%mass(:)%Pressure) ==nlocs) then
+       allocate(self%lev(nlocs))
+       self%lev(:) = mytype%mass(:)%Pressure
+    else
+       failed=3
+    endif
+    if(failed==0 .and. size(mytype%mass(:)%Time) ==nlocs) then
+       allocate(self%time(nlocs))
+       self%time(:) = mytype%mass(:)%Time
+    else
+       failed=4
+    endif
+    if(failed==0)then
+      write(record,*)myname_,': allocated/assinged obs-data'
+      call fckit_log%info(record)
+    else
+      write(record,*)myname_,': failed allocation/assignment of obs-data, ier: ', failed
+      call fckit_log%info(record)
+      ! should exit in error here
+    endif
+
   end subroutine SetupRaob
+
+  subroutine Delete(self)
+    class(Obs_Data), intent(inout) :: self
+  end subroutine Delete
 
   function vname2vmold_(vname) result(obsmold_)
     implicit none

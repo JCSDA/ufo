@@ -7,6 +7,7 @@
 
 module ufo_obs_data_basis_mod
   use iso_c_binding
+  use kinds, only: kind_real
   implicit none
 
   character(len=*), parameter :: MyName='basis_obs_data_mod'
@@ -14,12 +15,16 @@ module ufo_obs_data_basis_mod
     integer :: nobs =0
     integer :: nlocs=0
     character(len=800) :: filein, fileout
+    real(kind_real), pointer :: lat(:)  => NULL()  ! latitude
+    real(kind_real), pointer :: lon(:)  => NULL()  ! longuitude
+    real(kind_real), pointer :: lev(:)  => NULL()  ! levels
+    real(kind_real), pointer :: time(:) => NULL()  ! obs-time
     class(BasisObsData),pointer :: Obspoint => NULL()
     contains
       procedure, nopass :: echoMyname
       procedure(Setup_),  deferred :: Setup
       procedure(Delete_), deferred :: Delete
-      generic :: SetupBasis => Setup
+      generic :: SetupBasis  => Setup
       generic :: DeleteBasis => Delete
   end type BasisObsData
 
@@ -33,7 +38,7 @@ module ufo_obs_data_basis_mod
       integer(c_int),   intent(inout) :: nobs
       integer(c_int),   intent(inout) :: nlocs
     end subroutine Setup_
-    ! Interface for setup
+    ! Interface for delete
     subroutine Delete_(self)
       import
       class(BasisObsData), intent(inout) :: self
