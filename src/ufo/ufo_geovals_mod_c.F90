@@ -12,11 +12,24 @@ use ufo_vars_mod
 use kinds
 
 implicit none
+
+public :: ufo_geovals_registry
+
 private
+
+#define LISTED_TYPE ufo_geovals
+
+!> Linked list interface - defines registry_t type
+#include "linkedList_i.f"
+
+!> Global registry
+type(registry_t) :: ufo_geovals_registry
+
 ! ------------------------------------------------------------------------------
-
 contains
-
+! ------------------------------------------------------------------------------
+!> Linked list implementation
+#include "linkedList_c.f"
 ! ------------------------------------------------------------------------------
 
 subroutine ufo_geovals_create_c(c_key_self) bind(c,name='ufo_geovals_create_f90')

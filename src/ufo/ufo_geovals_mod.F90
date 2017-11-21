@@ -6,14 +6,12 @@
 !
 module ufo_geovals_mod
 
-use iso_c_binding
 use ufo_vars_mod
 use kinds
 
 implicit none
 private
 public :: ufo_geovals, ufo_geoval, ufo_geovals_get_var
-public :: ufo_geovals_registry
 public :: ufo_geovals_init, ufo_geovals_setup, ufo_geovals_delete, ufo_geovals_print
 public :: ufo_geovals_zero, ufo_geovals_random, ufo_geovals_dotprod
 public :: ufo_geovals_minmaxavg
@@ -49,19 +47,9 @@ type :: ufo_geovals
                                  !  were allocated and have data
 end type ufo_geovals
 
-#define LISTED_TYPE ufo_geovals
-
-!> Linked list interface - defines registry_t type
-#include "linkedList_i.f"
-
-!> Global registry
-type(registry_t) :: ufo_geovals_registry
 
 ! ------------------------------------------------------------------------------
 contains
-! ------------------------------------------------------------------------------
-!> Linked list implementation
-#include "linkedList_c.f"
 
 ! ------------------------------------------------------------------------------
 
@@ -225,7 +213,7 @@ end subroutine ufo_geovals_dotprod
 
 subroutine ufo_geovals_minmaxavg(self, kobs, pmin, pmax, prms) 
 implicit none
-integer(c_int), intent(inout) :: kobs
+integer, intent(inout) :: kobs
 real(kind_real), intent(inout) :: pmin, pmax, prms
 type(ufo_geovals), intent(in) :: self
 

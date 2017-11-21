@@ -13,8 +13,10 @@ module ufo_radiosonde_mod
   use ufo_obs_data_mod
   use ufo_obs_vectors
   use ufo_vars_mod
+  use ufo_vars_mod_c, only: ufo_vars_registry
   use ufo_locs_mod
   use ufo_geovals_mod
+  use ufo_geovals_mod_c, only: ufo_geovals_registry
   use kinds
   
   implicit none
