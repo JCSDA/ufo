@@ -7,71 +7,23 @@
 
 module ufo_radiosonde_mod
   
-  use iso_c_binding
-  use config_mod
   use ufo_obs_data
   use ufo_obs_data_mod
   use ufo_obs_vectors
   use ufo_vars_mod
-  use ufo_vars_mod_c, only: ufo_vars_registry
   use ufo_locs_mod
   use ufo_geovals_mod
-  use ufo_geovals_mod_c, only: ufo_geovals_registry
   use kinds
   
   implicit none
+  public :: ufo_radiosonde_t_eqv
   private
-  
-  ! ------------------------------------------------------------------------------
-  
-  !> Fortran derived type for stream function observations for the QG model
-  type :: ufo_obsoper
-     integer :: nothing_here_yet
-  end type ufo_obsoper
-  
-#define LISTED_TYPE ufo_obsoper
-  
-  !> Linked list interface - defines registry_t type
-#include "linkedList_i.f"
-  
-  !> Global registry
-  type(registry_t) :: ufo_radiosonde_registry
-  
+
   ! ------------------------------------------------------------------------------
 contains
-  ! ------------------------------------------------------------------------------
-  !> Linked list implementation
-#include "linkedList_c.f"
   
 ! ------------------------------------------------------------------------------
   
-subroutine ufo_radiosonde_setup_c(c_key_self, c_conf) bind(c,name='ufo_radiosonde_setup_f90')
-implicit none
-integer(c_int), intent(inout) :: c_key_self
-type(c_ptr), intent(in)    :: c_conf
-    
-type(ufo_obsoper), pointer :: self
-
-call ufo_radiosonde_registry%init()
-call ufo_radiosonde_registry%add(c_key_self)
-call ufo_radiosonde_registry%get(c_key_self, self)
-    
-end subroutine ufo_radiosonde_setup_c
-  
-! ------------------------------------------------------------------------------
-  
-subroutine ufo_radiosonde_delete_c(c_key_self) bind(c,name='ufo_radiosonde_delete_f90')
-implicit none
-integer(c_int), intent(inout) :: c_key_self
-    
-type(ufo_obsoper), pointer :: self
-
-call ufo_radiosonde_registry%get(c_key_self, self)
-call ufo_radiosonde_registry%remove(c_key_self)
-    
-end subroutine ufo_radiosonde_delete_c
-
-! ------------------------------------------------------------------------------
 real(kind_real) function interp_weight(d, x, nx) 
 implicit none
 
@@ -121,23 +73,16 @@ vert_interp = f(iz)*delzp + f(izp)*delz
 end function vert_interp
   
 ! ------------------------------------------------------------------------------
-subroutine ufo_radiosonde_t_eqv_c(c_key_geovals, c_key_obsspace, c_key_hofx, c_bias) bind(c,name='ufo_radiosonde_t_eqv_f90')
-use nc_diag_read_mod, only: nc_diag_read_get_var
-use nc_diag_read_mod, only: nc_diag_read_get_dim
-use nc_diag_read_mod, only: nc_diag_read_init, nc_diag_read_close
+subroutine ufo_radiosonde_t_eqv(geovals, obss, hofx)
 use raobDiag_mod, only: RaobDiag
 use ufo_obs_data_mod, only: Radiosonde
 
 implicit none
-integer(c_int), intent(in) :: c_key_geovals
-integer(c_int), intent(in) :: c_key_hofx
-integer(c_int), intent(in) :: c_key_obsspace
-integer(c_int), intent(in) :: c_bias
-type(ufo_geovals), pointer  :: geovals
-type(obs_vector), pointer :: hofx
-type(obs_data), pointer :: obss
+type(ufo_geovals), intent(in)    :: geovals
+type(obs_data),    intent(inout) :: obss
+type(obs_vector),  intent(inout) :: hofx
 
-character(len=*), parameter :: myname_="ufo_radiosonde_t_eqv_c"
+character(len=*), parameter :: myname_="ufo_radiosonde_t_eqv"
 integer :: iunit
 
 real(kind_real), allocatable :: omf(:), obs(:)
@@ -150,11 +95,6 @@ real(kind_real) :: rmse
 logical :: lfound
 type(ufo_geoval) :: geoval_pr, geoval_tv
 character(MAXVARLEN) :: varname
-
-! Get pointers to geovals, observations and hofx
-call ufo_geovals_registry%get(c_key_geovals,geovals)
-call ufo_obs_vect_registry%get(c_key_hofx,hofx)
-call ufo_obs_data_registry%get(c_key_obsspace,obss)
 
 ! Get observations from obs-structure
 nobs = obss%nobs
@@ -198,25 +138,6 @@ print *, myname_, ' radiosonde t test: max diff: ', maxval(abs(hofx%values-(obs-
 nullify(pres)
 deallocate(obs, omf)
 
-end subroutine ufo_radiosonde_t_eqv_c
+end subroutine ufo_radiosonde_t_eqv
 
-  
-! ------------------------------------------------------------------------------
-  
-subroutine ufo_radiosonde_inputs_c(c_key_self, c_key_vars) bind(c,name='ufo_radiosonde_inputs_f90')
-implicit none
-integer(c_int), intent(in)    :: c_key_self
-integer(c_int), intent(inout) :: c_key_vars
-    
-type(ufo_obsoper), pointer :: self
-type(ufo_vars), pointer :: vars
-    
-call ufo_radiosonde_registry%get(c_key_self, self)
-call ufo_vars_registry%init()
-call ufo_vars_registry%add(c_key_vars)
-call ufo_vars_registry%get(c_key_vars, vars)
-    
-end subroutine ufo_radiosonde_inputs_c
-  
-  
 end module ufo_radiosonde_mod

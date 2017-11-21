@@ -24,6 +24,7 @@ ufo_obscheck_mod.F90
 ufo_geovals_mod.F90
 ufo_geovals_mod_c.F90
 ufo_locs_mod.F90
+ufo_locs_mod_c.F90
 ufo_obs_data_mod.F90
 ufo_obs_data_basis_mod.F90
 ufo_obs_data.F90
@@ -32,6 +33,7 @@ ufo_radiance_mod.F90
 ufo_variables_mod.F90
 ufo_variables_mod_c.F90
 ufo_radiosonde_mod.F90
+ufo_radiosonde_mod_c.F90
 ufo_radiance_mod.F90
 raobDiag_mod.F90
 radDiag_mod.F90
