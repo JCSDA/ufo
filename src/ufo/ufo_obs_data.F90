@@ -16,9 +16,12 @@ use config_mod
 use datetime_mod
 use duration_mod
 use ufo_geovals_mod
+use ufo_geovals_mod_c, only : ufo_geovals_registry
 use ufo_locs_mod
+use ufo_locs_mod_c, only : ufo_locs_registry
 use ufo_obs_vectors
 use ufo_vars_mod
+use ufo_vars_mod_c, only : ufo_vars_registry
 use ufo_obs_data_mod
 use fckit_log_module, only : fckit_log
 use kinds
@@ -118,7 +121,7 @@ call ufo_locs_registry%init()
 call ufo_locs_registry%add(c_key_locs)
 call ufo_locs_registry%get(c_key_locs,locs)
      
-call ufo_loc_setup(locs, ovec)
+call ufo_locs_setup(locs, ovec)
 
 !diag_data_fix_list%lon
 !diag_data_fix_list%lat

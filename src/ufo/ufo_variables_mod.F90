@@ -7,13 +7,9 @@
 
 module ufo_vars_mod
 
-use iso_c_binding
-use config_mod
-
 implicit none
 private
 public :: ufo_vars, ufo_vars_setup, ufo_vars_clone, ufo_vars_delete
-public :: ufo_vars_registry, ufo_vars_readconfig
 public :: ufo_vars_getindex, ufo_vars_nvars
 public :: MAXVARLEN
 
@@ -26,19 +22,8 @@ type :: ufo_vars
   character(len=MAXVARLEN), allocatable :: fldnames(:) !< Variable identifiers
 end type ufo_vars
 
-#define LISTED_TYPE ufo_vars
-
-!> Linked list interface - defines registry_t type
-#include "linkedList_i.f"
-
-!> Global registry
-type(registry_t) :: ufo_vars_registry
-
 ! ------------------------------------------------------------------------------
 contains
-! ------------------------------------------------------------------------------
-!> Linked list implementation
-#include "linkedList_c.f"
 
 ! ------------------------------------------------------------------------------
 
@@ -79,23 +64,6 @@ if (allocated(self%fldnames)) deallocate(self%fldnames)
 self%nv = 0
 
 end subroutine ufo_vars_delete
-
-! ------------------------------------------------------------------------------
-
-subroutine ufo_vars_readconfig(self, c_conf) 
-implicit none
-type(ufo_vars), intent(inout) :: self
-type(c_ptr), intent(in)    :: c_conf
-
-character(len=512) :: svars
-
-call ufo_vars_delete(self)
-self%nv = config_get_int(c_conf, "nvars")
-svars = config_get_string(c_conf,len(svars),"variables")
-allocate(self%fldnames(self%nv))
-read(svars,*) self%fldnames 
-
-end subroutine ufo_vars_readconfig
 
 ! ------------------------------------------------------------------------------
 integer function ufo_vars_getindex(self, varname)

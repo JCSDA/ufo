@@ -12,10 +12,24 @@ use config_mod
 use ufo_vars_mod
 
 implicit none
+
+public :: ufo_vars_registry
+
 private
+
+#define LISTED_TYPE ufo_vars
+
+!> Linked list interface - defines registry_t type
+#include "linkedList_i.f"
+
+!> Global registry
+type(registry_t) :: ufo_vars_registry
 
 ! ------------------------------------------------------------------------------
 contains
+! ------------------------------------------------------------------------------
+!> Linked list implementation
+#include "linkedList_c.f"
 
 ! ------------------------------------------------------------------------------
 
@@ -25,13 +39,24 @@ integer(c_int), intent(inout) :: c_key_self
 type(c_ptr), intent(in)    :: c_conf
 
 type(ufo_vars), pointer :: self
-character(len=MAXVARLEN) :: svar
+character(len=512) :: svars
+integer :: nvar
+character(len=MAXVARLEN), allocatable :: cvars(:)
 
 call ufo_vars_registry%init()
 call ufo_vars_registry%add(c_key_self)
 call ufo_vars_registry%get(c_key_self, self)
 
-call ufo_vars_readconfig(self, c_conf)
+nvar = config_get_int(c_conf, "nvars")
+allocate(cvars(nvar))
+
+svars = config_get_string(c_conf,len(svars),"variables")
+read(svars,*) cvars
+
+call ufo_vars_setup(self, cvars)
+
+deallocate(cvars)
+
 
 end subroutine ufo_vars_create_c
 
