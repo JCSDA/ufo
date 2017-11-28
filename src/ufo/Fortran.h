@@ -56,8 +56,8 @@ extern "C" {
 // -----------------------------------------------------------------------------
 //  Locations
 // -----------------------------------------------------------------------------
-  void ufo_loc_delete_f90(F90locs &);
-  void ufo_loc_nobs_f90(const F90locs &, int &);
+  void ufo_locs_delete_f90(F90locs &);
+  void ufo_locs_nobs_f90(const F90locs &, int &);
 
 // -----------------------------------------------------------------------------
 //  Local Values (GOM)
@@ -145,11 +145,13 @@ extern "C" {
                         const int &, const char *, const F90ovec &);
   void ufo_obsdb_put_f90(const F90odb &, const int &, const char *,
                         const int &, const char *, const F90ovec &);
-  void ufo_obsdb_locations_f90(const F90odb &, const int &, const char *,
-                              const util::DateTime * const *, const util::DateTime * const *,
-                              F90locs &);
+  void ufo_obsdb_getlocations_f90(const F90odb &, 
+                                  const util::DateTime * const *, 
+                                  const util::DateTime * const *,
+                                  F90locs &);
   void ufo_obsdb_getgeovals_f90(const F90odb &, const F90vars &,
-                                const util::DateTime * const *, const util::DateTime * const *,
+                                const util::DateTime * const *, 
+                                const util::DateTime * const *,
                                 F90goms &);
   void ufo_obsdb_generate_f90(const F90odb &, const int &, const char *,
                              const eckit::Configuration * const *, const util::DateTime * const *,

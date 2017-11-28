@@ -21,28 +21,28 @@ public :: ufo_locs, ufo_locs_setup, ufo_locs_delete
 
 !> Fortran derived type to hold observation locations
 type :: ufo_locs
-  integer :: nloc
-  real(kind=kind_real), allocatable :: xyz(:,:)
+  integer :: nlocs
+  real(kind_real), allocatable, dimension(:) :: lat     !< latitude
+  real(kind_real), allocatable, dimension(:) :: lon     !< longitude
+  real(kind_real), allocatable, dimension(:) :: time    !< obs-time
 end type ufo_locs
+
 
 ! ------------------------------------------------------------------------------
 contains
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_locs_setup(self, lvec)
+subroutine ufo_locs_setup(self, nlocs)
 implicit none
 type(ufo_locs), intent(inout) :: self
-type(obs_vector), intent(in) :: lvec
-integer :: jc, jo
+integer, intent(in)           :: nlocs
 
-self%nloc=lvec%nobs
-allocate(self%xyz(3,self%nloc))
-do jo=1,self%nloc
-  do jc=1,3
-    self%xyz(jc,jo)=lvec%values(jo)
-  enddo
-enddo
+  self%nlocs = nlocs
+  allocate(self%lat(nlocs), self%lon(nlocs), self%time(nlocs))
+  self%lat = 0.
+  self%lon = 0.
+  self%time = 0.
 
 end subroutine ufo_locs_setup
 
@@ -52,7 +52,10 @@ subroutine ufo_locs_delete(self)
 implicit none
 type(ufo_locs), intent(inout) :: self
 
-deallocate(self%xyz)
+  self%nlocs = 0
+  if (allocated(self%lat)) deallocate(self%lat)
+  if (allocated(self%lon)) deallocate(self%lon)
+  if (allocated(self%time)) deallocate(self%time)
 
 end subroutine ufo_locs_delete
 
