@@ -13,7 +13,9 @@ use read_diag, only: read_radiag_data,&
                      open_radiag, &
                      close_radiag, &
                      read_all_radiag
-use ufo_locs_mod, only: ufo_locs
+use ufo_locs_mod, only: ufo_locs, &
+                        ufo_locs_setup
+use fckit_log_module, only : fckit_log
 use ufo_obs_data_basis_mod, only:  BasisObsData
 
 implicit none
@@ -91,34 +93,33 @@ character(len=*),parameter:: myname_=myname//"*rad_getlocs"
 character(len=255) :: record
 integer :: failed
 
-locs%nlocs = nlocs
+
+call ufo_locs_setup(locs, nlocs)
+
 failed=0
 if(failed==0 .and. size(self%datafix(:)%Lat)==nlocs) then
-       allocate(locs%lat(nlocs))
-       locs%lat(:) = self%datafix(:)%Lat
-    else
-       failed=1
-    endif
-    if(failed==0 .and. size(self%datafix(:)%Lon)==nlocs) then
-       allocate(locs%lon(nlocs))
-       locs%lon(:) = self%datafix(:)%Lon
-    else
-       failed=2
-    endif
-    if(failed==0 .and. size(self%datafix(:)%obstime)==nlocs) then
-       allocate(locs%time(nlocs))
-       locs%time(:) = self%datafix(:)%obstime
-    else
-       failed=3
-    endif
-    if(failed==0)then
-      write(record,*)myname_,': allocated/assinged obs-data'
-!      call fckit_log%info(record)
-    else
-      write(record,*)myname_,': failed allocation/assignment of obs-data, ier: ', failed
-!      call fckit_log%info(record)
-      ! should exit in error here
-    endif
+  locs%lat(:) = self%datafix(:)%Lat
+else
+  failed=1
+endif
+if(failed==0 .and. size(self%datafix(:)%Lon)==nlocs) then
+  locs%lon(:) = self%datafix(:)%Lon
+else
+  failed=2
+endif
+if(failed==0 .and. size(self%datafix(:)%obstime)==nlocs) then
+  locs%time(:) = self%datafix(:)%obstime
+else
+  failed=3
+endif
+if(failed==0)then
+  write(record,*)myname_,': allocated/assinged obs-data'
+  call fckit_log%info(record)
+else
+  write(record,*)myname_,': failed allocation/assignment of obs-data, ier: ', failed
+  call fckit_log%info(record)
+  ! should exit in error here
+endif
 
 end subroutine getlocs_
 

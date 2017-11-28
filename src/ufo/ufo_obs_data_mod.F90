@@ -7,7 +7,6 @@
 
 module ufo_obs_data_mod
   use iso_c_binding
-  use fckit_log_module, only : fckit_log
 
   use ufo_obs_data_basis_mod
 

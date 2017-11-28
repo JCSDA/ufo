@@ -36,11 +36,13 @@ implicit none
 type(ufo_locs), intent(inout) :: self
 integer, intent(in)           :: nlocs
 
-  self%nlocs = nlocs
-  allocate(self%lat(nlocs), self%lon(nlocs), self%time(nlocs))
-  self%lat = 0.
-  self%lon = 0.
-  self%time = 0.
+call ufo_locs_delete(self)
+
+self%nlocs = nlocs
+allocate(self%lat(nlocs), self%lon(nlocs), self%time(nlocs))
+self%lat = 0.
+self%lon = 0.
+self%time = 0.
 
 end subroutine ufo_locs_setup
 
@@ -50,10 +52,10 @@ subroutine ufo_locs_delete(self)
 implicit none
 type(ufo_locs), intent(inout) :: self
 
-  self%nlocs = 0
-  if (allocated(self%lat)) deallocate(self%lat)
-  if (allocated(self%lon)) deallocate(self%lon)
-  if (allocated(self%time)) deallocate(self%time)
+self%nlocs = 0
+if (allocated(self%lat)) deallocate(self%lat)
+if (allocated(self%lon)) deallocate(self%lon)
+if (allocated(self%time)) deallocate(self%time)
 
 end subroutine ufo_locs_delete
 

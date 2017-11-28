@@ -2,7 +2,9 @@ module raobDiag_mod
 
 use m_diag_raob, only: diag_raob_header, diag_raob_mass
 use m_diag_raob, only: read_raob_diag_nc_header, read_raob_diag_nc_mass
-use ufo_locs_mod, only: ufo_locs
+use ufo_locs_mod, only: ufo_locs, &
+                        ufo_locs_setup
+use fckit_log_module, only : fckit_log
 use ufo_obs_data_basis_mod, only:  BasisObsData
 
 implicit none
@@ -54,47 +56,44 @@ print*, myname_, ': Mean observations:            ', sum(self%mass(:)%Observatio
 
 end subroutine read_
 
-  subroutine getlocs_(self, nlocs, locs)
-    class(RaobDiag), intent(in) :: self
-    integer, intent(in)        :: nlocs
-    type(ufo_locs), intent(inout) :: locs
+subroutine getlocs_(self, nlocs, locs)
+implicit none
+class(RaobDiag), intent(in) :: self
+integer, intent(in)         :: nlocs
+type(ufo_locs), intent(inout) :: locs
 
-    character(len=*),parameter:: myname_=myname//"::GetLocsRaob"
-    character(len=255) :: record
-    integer :: failed
+character(len=*),parameter:: myname_=myname//"*raob_getlocs"
+character(len=255) :: record
+integer :: failed
 
-    locs%nlocs = nlocs
-    failed=0
-    if(failed==0 .and. size(self%mass(:)%Longitude)==nlocs) then
-       allocate(locs%lon(nlocs))
-       locs%lon(:) = self%mass(:)%Longitude
-    else
-       failed=1
-    endif
-    if(failed==0 .and. size(self%mass(:)%Latitude) ==nlocs) then
-       allocate(locs%lat(nlocs))
-       locs%lat(:) = self%mass(:)%Latitude
-    else
-       failed=2
-    endif
-    if(failed==0 .and. size(self%mass(:)%Time) ==nlocs) then
-       allocate(locs%time(nlocs))
-       locs%time(:) = self%mass(:)%Time
-    else
-       failed=3
-    endif
-    if(failed==0)then
-      write(record,*)myname_,': allocated/assinged obs-data'
-!      call fckit_log%info(record)
-    else
-      write(record,*)myname_,': failed allocation/assignment of obs-data, ier: ', failed
-!      call fckit_log%info(record)
-      ! should exit in error here
-    endif
+call ufo_locs_setup(locs, nlocs)
 
+failed=0
+if(failed==0 .and. size(self%mass(:)%Longitude)==nlocs) then
+  locs%lon(:) = self%mass(:)%Longitude
+else
+  failed=1
+endif
+if(failed==0 .and. size(self%mass(:)%Latitude) ==nlocs) then
+  locs%lat(:) = self%mass(:)%Latitude
+else
+  failed=2
+endif
+if(failed==0 .and. size(self%mass(:)%Time) ==nlocs) then
+  locs%time(:) = self%mass(:)%Time
+else
+  failed=3
+endif
+if(failed==0)then
+  write(record,*)myname_,': allocated/assinged obs-data'
+  call fckit_log%info(record)
+else
+  write(record,*)myname_,': failed allocation/assignment of obs-data, ier: ', failed
+  call fckit_log%info(record)
+  ! should exit in error here
+endif
 
-  end subroutine getlocs_
-
+end subroutine getlocs_
 
 
 subroutine delete_(self)
