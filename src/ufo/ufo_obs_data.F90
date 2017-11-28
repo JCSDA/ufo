@@ -99,7 +99,7 @@ end subroutine obs_put
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_obsdb_locations_c(c_key_self, c_t1, c_t2, c_key_locs) bind(c,name='ufo_obsdb_locations_f90')
+subroutine ufo_obsdb_getlocations_c(c_key_self, c_t1, c_t2, c_key_locs) bind(c,name='ufo_obsdb_getlocations_f90')
 implicit none
 integer(c_int), intent(in) :: c_key_self
 type(c_ptr), intent(in) :: c_t1, c_t2
@@ -108,28 +108,19 @@ integer(c_int), intent(inout) :: c_key_locs
 type(obs_data), pointer :: self
 type(datetime) :: t1, t2
 type(ufo_locs), pointer :: locs
-type(obs_vector) :: ovec
-character(len=8) :: col="Location"
 
 call ufo_obs_data_registry%get(c_key_self, self)
 call c_f_datetime(c_t1, t1)
 call c_f_datetime(c_t2, t2)
 
-call obs_time_get(self, col, t1, t2, ovec)
-
 call ufo_locs_registry%init()
 call ufo_locs_registry%add(c_key_locs)
 call ufo_locs_registry%get(c_key_locs,locs)
-     
-call ufo_locs_setup(locs, ovec)
 
-!diag_data_fix_list%lon
-!diag_data_fix_list%lat
-!diag_data_fix_list%obstime
+call self%Obspoint%GetLocs(self%nlocs, locs)
+!print *, 'getlocs: ', locs%nlocs, locs%lat(1:10)
 
-deallocate(ovec%values)
-
-end subroutine ufo_obsdb_locations_c
+end subroutine ufo_obsdb_getlocations_c
 
 ! ------------------------------------------------------------------------------
 

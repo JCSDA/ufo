@@ -7,7 +7,6 @@
 
 module ufo_obs_data_mod
   use iso_c_binding
-  use fckit_log_module, only : fckit_log
 
   use ufo_obs_data_basis_mod
 
@@ -23,6 +22,7 @@ module ufo_obs_data_mod
     ! Implementation for the deferred procedure in Basis
     procedure :: Setup
     procedure :: Delete
+    procedure :: GetLocs
   end type Obs_Data
 
   type(RadDiag),  pointer, save::  Radiance
@@ -57,40 +57,10 @@ contains
     integer(c_int),   intent(inout) :: nlocs
 
     character(len=*),parameter:: myname_=myname//"::SetupRadiance"
-    character(len=255) :: record
-    integer :: failed
 
     call radDiag_read(mytype,filein,'Radiance',nobs,nlocs)
     self%Nobs = nobs
     self%Nlocs= nlocs
-
-    failed=0
-    if(failed==0 .and. size(mytype%datafix(:)%Lat)==nlocs) then
-       allocate(self%lat(nlocs))
-       self%lat(:) = mytype%datafix(:)%Lat
-    else
-       failed=1
-    endif
-    if(failed==0 .and. size(mytype%datafix(:)%Lon)==nlocs) then
-       allocate(self%lon(nlocs))
-       self%lon(:) = mytype%datafix(:)%Lon
-    else
-       failed=2
-    endif
-    if(failed==0 .and. size(mytype%datafix(:)%obstime)==nlocs) then
-       allocate(self%time(nlocs))
-       self%time(:) = mytype%datafix(:)%obstime
-    else
-       failed=3
-    endif
-    if(failed==0)then
-      write(record,*)myname_,': allocated/assinged obs-data'
-      call fckit_log%info(record)
-    else
-      write(record,*)myname_,': failed allocation/assignment of obs-data, ier: ', failed
-      call fckit_log%info(record)
-      ! should exit in error here
-    endif
 
   end subroutine SetupRadiance
 
@@ -102,52 +72,22 @@ contains
     integer(c_int),   intent(inout) :: nlocs
 
     character(len=*),parameter:: myname_=myname//"::SetupRaob"
-    character(len=255) :: record
-    integer :: failed 
 
     call raobDiag_read(mytype,filein,'Radiosonde',nobs,nlocs)
     self%Nobs = nobs
     self%Nlocs= nlocs
-
-    failed=0
-    if(failed==0 .and. size(mytype%mass(:)%Longitude)==nlocs) then
-       allocate(self%lon(nlocs))
-       self%lon(:) = mytype%mass(:)%Longitude
-    else
-       failed=1
-    endif
-    if(failed==0 .and. size(mytype%mass(:)%Latitude) ==nlocs) then
-       allocate(self%lat(nlocs))
-       self%lat(:) = mytype%mass(:)%Latitude
-    else
-       failed=2
-    endif
-    if(failed==0 .and. size(mytype%mass(:)%Pressure) ==nlocs) then
-       allocate(self%lev(nlocs))
-       self%lev(:) = mytype%mass(:)%Pressure
-    else
-       failed=3
-    endif
-    if(failed==0 .and. size(mytype%mass(:)%Time) ==nlocs) then
-       allocate(self%time(nlocs))
-       self%time(:) = mytype%mass(:)%Time
-    else
-       failed=4
-    endif
-    if(failed==0)then
-      write(record,*)myname_,': allocated/assinged obs-data'
-      call fckit_log%info(record)
-    else
-      write(record,*)myname_,': failed allocation/assignment of obs-data, ier: ', failed
-      call fckit_log%info(record)
-      ! should exit in error here
-    endif
 
   end subroutine SetupRaob
 
   subroutine Delete(self)
     class(Obs_Data), intent(inout) :: self
   end subroutine Delete
+
+  subroutine GetLocs(self, nlocs, locs)
+    class(Obs_Data), intent(in) :: self
+    integer, intent(in) :: nlocs
+    type(ufo_locs), intent(inout) :: locs
+  end subroutine GetLocs
 
   function vname2vmold_(vname) result(obsmold_)
     implicit none

@@ -1,9 +1,9 @@
-! (C) Copyright 2017 UCAR
-! 
-! This software is licensed under the terms of the Apache Licence Version 2.0
-! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-
-!> Fortran module handling observation locations
+!
+!  (C) Copyright 2017 UCAR
+!  
+!  This software is licensed under the terms of the Apache Licence Version 2.0
+!  which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
+!
 
 module ufo_locs_mod_c
 
@@ -56,7 +56,7 @@ integer(c_int), intent(inout) :: kobs
 type(ufo_locs), pointer :: self
 
 call ufo_locs_registry%get(key,self)
-kobs = self%nloc
+kobs = self%nlocs
 
 end subroutine ufo_locs_nobs_c
 

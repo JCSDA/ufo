@@ -35,13 +35,22 @@ ObsSpace::ObsSpace(const eckit::Configuration & config,
 
 // -----------------------------------------------------------------------------
 
-//void ObsSpace::printJo(const ObsVector &, const ObsVector &) {
-//  oops::Log::info() << "ObsSpace::printJo not implemented" << std::endl;
-//}
+ObsSpace::~ObsSpace() {
+}
 
 // -----------------------------------------------------------------------------
 
-ObsSpace::~ObsSpace() {
+void ObsSpace::getdb(const std::string & col, int & keyData) const {
+}
+
+// -----------------------------------------------------------------------------
+
+void ObsSpace::putdb(const std::string & col, const int & keyData) const {
+}
+
+// -----------------------------------------------------------------------------
+
+void ObsSpace::generateDistribution(const eckit::Configuration & conf) {
 }
 
 // -----------------------------------------------------------------------------
