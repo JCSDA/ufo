@@ -193,7 +193,6 @@ contains
 
     ! RT: The following is an example of how to get a handle on what is in the pointer Radiance
     !     that is, how to tap on the observation structure ...
-    print *, 'Header Name: ', nobs, nlocs,  size(Radiance%header_name%fix)
 
 !** geovals index and variable names:
 !!$ 1   Temperature
@@ -330,9 +329,8 @@ contains
        !  The Sensor_Scan_Angle is optional.
        ! ** UFO NOTE: sensor geometry information will need to be provided by calling
        !          routines -- we can't use hardcoded values.  
-       CALL CRTM_Geometry_SetValue( geo, &
-            Sensor_Zenith_Angle = ZENITH_ANGLE, &
-            Sensor_Scan_Angle   = SCAN_ANGLE )
+       CALL Load_Geom_Data()
+
 !!$       REAL(fp), PARAMETER :: Latitude          = 46.3369
 !!$       REAL(fp), PARAMETER :: Longitude         = 354.4514
 !!$       REAL(fp), PARAMETER :: Elevation         = 161
@@ -413,7 +411,7 @@ contains
 !             WRITE( *, '(/5x,"Channel ",i0," results")') chinfo(n)%Sensor_Channel(l)
              !CALL CRTM_RTSolution_Inspect(rts(l,m))
              !print '(A,I4,A2,F12.3)', '[Ch] TB: [', chinfo(n)%Sensor_Channel(l), '] ', rts(l,m)%Brightness_Temperature
-             print '(F7.3)', rts(l,m)%Brightness_Temperature
+             print '(2F10.3)', rts(l,m)%Brightness_Temperature, Radiance%datachan(m,l)%tbobs - Radiance%datachan(m,l)%omgnbc
           END DO
        END DO
 
@@ -673,6 +671,23 @@ contains
       end do
 
     END SUBROUTINE Load_Sfc_Data
+
+    !
+    ! Internal subprogam to load some test geometry data
+    !
+    SUBROUTINE Load_Geom_Data()
+      implicit none
+      integer :: k1
+      do k1 = 1,N_PROFILES
+         geo(k1)%Sensor_Zenith_Angle = Radiance%datafix(k1)%satzen_ang
+         geo(k1)%Sensor_Scan_Angle   = Radiance%datafix(k1)%senscn_ang
+         geo(k1)%Source_Zenith_Angle = Radiance%datafix(k1)%solzen_ang
+         geo(k1)%Sensor_Azimuth_Angle = Radiance%datafix(k1)%satazm_ang
+         geo(k1)%Source_Azimuth_Angle = Radiance%datafix(k1)%solazm_ang
+         geo(k1)%Ifov = Radiance%datafix(k1)%senscn_pos
+      enddo
+
+    END SUBROUTINE Load_Geom_Data
     
   end subroutine ufo_radiance_eqv
 
