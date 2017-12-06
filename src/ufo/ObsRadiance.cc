@@ -7,13 +7,13 @@
 
 #include "ObsRadiance.h"
 
+#include "oops/base/Variables.h"
 #include "eckit/config/Configuration.h"
 #include "GeoVaLs.h"
 #include "ObsBias.h"
 #include "ObsSpace.h"
 #include "ObsVector.h"
 #include "Fortran.h"
-#include "Variables.h"
 #include "util/Logger.h"
 
 // -----------------------------------------------------------------------------
@@ -27,9 +27,8 @@ ObsRadiance::ObsRadiance(const ObsSpace & odb, const eckit::Configuration & conf
 {
   const eckit::Configuration * configc = &config;
   ufo_radiance_setup_f90(keyOperRadiance_, &configc);
-  int keyVarin;
-  ufo_radiance_inputs_f90(keyOperRadiance_, keyVarin);
-  varin_.reset(new Variables(keyVarin));
+  const std::vector<std::string> vv{"u","v"};
+  varin_.reset(new oops::Variables(vv));
   oops::Log::trace() << "ObsRadiance created." << std::endl;
 }
 

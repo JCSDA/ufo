@@ -7,10 +7,10 @@
 
 #include "ObsCheck.h"
 
+#include "oops/base/Variables.h"
 #include "eckit/config/Configuration.h"
 #include "ObsSpace.h"
 #include "Fortran.h"
-#include "Variables.h"
 #include "GeoVaLs.h"
 #include "ObsVector.h"
 #include "util/Logger.h"
@@ -19,8 +19,8 @@ namespace ufo {
 
 // -----------------------------------------------------------------------------
 
-ObsCheck::ObsCheck(const ObsSpace & obsdb, const Variables & var,
-                 const util::DateTime & t1, const util::DateTime & t2) {
+ObsCheck::ObsCheck(const ObsSpace & obsdb, const oops::Variables & var,
+                   const util::DateTime & t1, const util::DateTime & t2) {
   oops::Log::trace() << "ObsCheck contructor starting " << t1 << " " << t2 << std::endl;
   const util::DateTime * p1 = &t1;
   const util::DateTime * p2 = &t2;

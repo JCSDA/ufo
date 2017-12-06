@@ -11,8 +11,9 @@
 #include <ostream>
 #include <string>
 
-#include <boost/shared_ptr.hpp>
+#include <boost/scoped_ptr.hpp>
 
+#include "oops/base/Variables.h"
 #include "oops/interface/ObsOperatorBase.h"
 #include "ObsSpace.h"
 #include "UfoTrait.h"
@@ -45,7 +46,7 @@ class ObsRadiance : public oops::ObsOperatorBase<UfoTrait>,
   void obsEquiv(const GeoVaLs &, ObsVector &, const ObsBias &) const;
 
 // Other
-  boost::shared_ptr<const Variables> variables() const {return varin_;}
+  const oops::Variables & variables() const {return *varin_;}
 
   int & toFortran() {return keyOperRadiance_;}
   const int & toFortran() const {return keyOperRadiance_;}
@@ -54,7 +55,7 @@ class ObsRadiance : public oops::ObsOperatorBase<UfoTrait>,
   void print(std::ostream &) const;
   F90hop keyOperRadiance_;
   const ObsSpace& odb_;
-  boost::shared_ptr<const Variables> varin_;
+  boost::scoped_ptr<const oops::Variables> varin_;
 };
 // -----------------------------------------------------------------------------
 

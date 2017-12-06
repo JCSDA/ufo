@@ -5,7 +5,7 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
  */
 
-#include "UfoTrait.h"
+#include "ufo/UfoTrait.h"
 #include "oops/runs/Run.h"
 #include "test/interface/ObsCheck.h"
 

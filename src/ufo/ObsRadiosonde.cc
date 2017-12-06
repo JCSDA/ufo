@@ -7,13 +7,13 @@
 
 #include "ObsRadiosonde.h"
 
+#include "oops/base/Variables.h"
 #include "eckit/config/Configuration.h"
 #include "GeoVaLs.h"
 #include "ObsBias.h"
 #include "ObsSpace.h"
 #include "ObsVector.h"
 #include "Fortran.h"
-#include "Variables.h"
 #include "util/Logger.h"
 
 // -----------------------------------------------------------------------------
@@ -27,9 +27,8 @@ ObsRadiosonde::ObsRadiosonde(const ObsSpace & odb, const eckit::Configuration & 
 {
   const eckit::Configuration * configc = &config;
   ufo_radiosonde_setup_f90(keyOperRadiosonde_, &configc);
-  int keyVarin;
-  ufo_radiosonde_inputs_f90(keyOperRadiosonde_, keyVarin);
-  varin_.reset(new Variables(keyVarin));
+  const std::vector<std::string> vv{"u","v"};
+  varin_.reset(new oops::Variables(vv));
   oops::Log::trace() << "ObsRadiosonde created." << std::endl;
 }
 

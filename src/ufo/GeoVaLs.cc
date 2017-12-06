@@ -7,15 +7,15 @@
 
 #include "GeoVaLs.h"
 
+#include "oops/base/Variables.h"
 #include "eckit/config/Configuration.h"
 #include "ObsSpace.h"
 #include "Fortran.h"
-#include "Variables.h"
 #include "util/Logger.h"
 
 namespace ufo {
 // -----------------------------------------------------------------------------
-GeoVaLs::GeoVaLs(const ObsSpace & obsdb, const Variables & var,
+GeoVaLs::GeoVaLs(const ObsSpace & obsdb, const oops::Variables & var,
                  const util::DateTime & t1, const util::DateTime & t2) {
   oops::Log::trace() << "GeoVaLs contructor starting " << t1 << " " << t2 << std::endl;
   const util::DateTime * p1 = &t1;

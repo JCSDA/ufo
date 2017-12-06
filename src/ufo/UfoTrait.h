@@ -17,7 +17,6 @@
 #include "ObsCheck.h"
 #include "ObsSpace.h"
 #include "ObsVector.h"
-#include "Variables.h"
 
 namespace ufo {
 
@@ -29,7 +28,6 @@ struct UfoTrait {
   typedef ufo::ObsCheck            ObsCheck;
   typedef ufo::ObsSpace            ObsSpace;
   typedef ufo::ObsVector           ObsVector;
-  typedef ufo::Variables           Variables;
   typedef ufo::ObsBias             ObsAuxControl;
 };
 
