@@ -11,6 +11,7 @@
 #include "eckit/config/Configuration.h"
 #include "ObsSpace.h"
 #include "Fortran.h"
+#include "Variables.h"
 #include "util/Logger.h"
 
 namespace ufo {
@@ -20,7 +21,8 @@ GeoVaLs::GeoVaLs(const ObsSpace & obsdb, const oops::Variables & var,
   oops::Log::trace() << "GeoVaLs contructor starting " << t1 << " " << t2 << std::endl;
   const util::DateTime * p1 = &t1;
   const util::DateTime * p2 = &t2;
-  ufo_obsdb_getgeovals_f90(obsdb.toFortran(), var.toFortran(), &p1, &p2, keyGVL_);
+  const Variables ufovar(var);
+  ufo_obsdb_getgeovals_f90(obsdb.toFortran(), ufovar.toFortran(), &p1, &p2, keyGVL_);
   oops::Log::trace() << "GeoVaLs contructor key = " << keyGVL_ << std::endl;
 }
 // -----------------------------------------------------------------------------

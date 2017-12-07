@@ -18,6 +18,8 @@ ObsRadiance.h
 ObsRadiosonde.cc
 ObsRadiosonde.h
 UfoTrait.h
+Variables.h
+Variables.cc
 random_f.cc
 random_f.h
 random_vectors_mod.F90

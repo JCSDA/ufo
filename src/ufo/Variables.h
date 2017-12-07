@@ -11,11 +11,17 @@
 #include <ostream>
 #include <string>
 
-#include "eckit/config/Configuration.h"
-#include "util/Logger.h"
 #include "util/ObjectCounter.h"
 #include "util/Printable.h"
 #include "Fortran.h"
+
+namespace eckit {
+  class Configuration;
+}
+
+namespace oops {
+  class Variables;
+}
 
 namespace ufo {
 
@@ -27,6 +33,7 @@ class Variables : public util::Printable,
  public:
   static const std::string classname() {return "ufo::Variables";}
 
+  explicit Variables(const oops::Variables &);
   explicit Variables(const eckit::Configuration & config);
   explicit Variables(const int keyVar);
 
@@ -34,8 +41,8 @@ class Variables : public util::Printable,
 
   Variables(const Variables & other);
 
-  int& toFortran() {return keyVar_;}
-  const int& toFortran() const {return keyVar_;}
+  F90vars & toFortran() {return keyVar_;}
+  const F90vars & toFortran() const {return keyVar_;}
 
  private:
   void print(std::ostream & os) const;

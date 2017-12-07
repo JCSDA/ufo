@@ -83,7 +83,7 @@ extern "C" {
 
   void ufo_wspeed_gettraj_f90(const F90hop &, const int &, F90goms &);
   void ufo_wspeed_settraj_f90(const F90goms &, const F90goms &);
-  void ufo_wspeed_inputs_f90(const F90hop &, F90vars *);
+  void ufo_wspeed_inputs_f90(const F90hop &, F90vars &);
 
 // -----------------------------------------------------------------------------
 //  Radiance observations
@@ -97,7 +97,7 @@ extern "C" {
 
   void ufo_radiance_gettraj_f90(const F90hop &, const int &, F90goms &);  // copied over from wspeed, don't think it's required
   void ufo_radiance_settraj_f90(const F90goms &, const F90goms &);   // copied over from wspeed, don't think it's required
-  void ufo_radiance_inputs_f90(const F90hop &, F90vars *);
+  void ufo_radiance_inputs_f90(const F90hop &, F90vars &);
 
 // -----------------------------------------------------------------------------
 //  Check Observations
@@ -113,7 +113,7 @@ extern "C" {
   void ufo_radiosonde_setup_f90(F90hop &, const eckit::Configuration * const *);
   void ufo_radiosonde_delete_f90(F90hop &);
   void ufo_radiosonde_t_eqv_f90(const F90goms &, const F90odb &, const F90ovec &, const F90obias &);
-  void ufo_radiosonde_inputs_f90(const F90hop &, F90vars *);
+  void ufo_radiosonde_inputs_f90(const F90hop &, F90vars &);
 
 // -----------------------------------------------------------------------------
 //  Observation Vectors
@@ -149,7 +149,7 @@ extern "C" {
                                   const util::DateTime * const *, 
                                   const util::DateTime * const *,
                                   F90locs &);
-  void ufo_obsdb_getgeovals_f90(const F90odb &, const F90vars *,
+  void ufo_obsdb_getgeovals_f90(const F90odb &, const F90vars &,
                                 const util::DateTime * const *, 
                                 const util::DateTime * const *,
                                 F90goms &);
