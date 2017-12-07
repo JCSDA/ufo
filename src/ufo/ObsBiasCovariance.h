@@ -41,8 +41,11 @@ class ObsBiasCovariance : public util::Printable,
   void inverseMultiply(const ObsBiasIncrement &, ObsBiasIncrement &) const {}
   void randomize(ObsBiasIncrement &) const {}
 
+  const eckit::Configuration & config() const {return conf_;}
+
  private:
   void print(std::ostream &) const {}
+  const eckit::LocalConfiguration conf_;
 };
 
 // -----------------------------------------------------------------------------
