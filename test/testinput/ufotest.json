@@ -4,7 +4,7 @@
   "window_end": "2010-01-02T00:00:00Z",
   "Variables": {
      "nvars": "1",
-     "variables": "testvar"
+     "variables": ["testvar"]
   },
   "Observations": {
     "ObsTypes": [

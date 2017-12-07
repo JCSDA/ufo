@@ -5,6 +5,8 @@ GeoVaLs.h
 Locations.cc
 Locations.h
 ObsBias.h
+ObsBiasCovariance.h
+ObsBiasIncrement.h
 ObsCheck.cc
 ObsCheck.h
 ObsSpace.cc
