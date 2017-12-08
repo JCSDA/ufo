@@ -5,6 +5,8 @@ GeoVaLs.h
 Locations.cc
 Locations.h
 ObsBias.h
+ObsBiasCovariance.h
+ObsBiasIncrement.h
 ObsCheck.cc
 ObsCheck.h
 ObsSpace.cc
@@ -16,8 +18,8 @@ ObsRadiance.h
 ObsRadiosonde.cc
 ObsRadiosonde.h
 UfoTrait.h
-Variables.cc
 Variables.h
+Variables.cc
 random_f.cc
 random_f.h
 random_vectors_mod.F90

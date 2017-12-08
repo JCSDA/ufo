@@ -36,12 +36,6 @@ endforeach(FILENAME)
 
 #####################################################################
 
-ecbuild_add_test( TARGET  test_ufo_variables
-                  BOOST
-                  SOURCES mains/TestVariables.cc
-                  ARGS    "testinput/ufotest.json"
-                  LIBS    ufo )
-
 ecbuild_add_test( TARGET  test_ufo_geovals
                   BOOST
                   SOURCES mains/TestGeoVaLs.cc

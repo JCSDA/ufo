@@ -8,7 +8,7 @@
  * does it submit to any jurisdiction.
  */
 
-#include "UfoTrait.h"
+#include "ufo/UfoTrait.h"
 #include "oops/runs/Run.h"
 #include "test/interface/ObsVector.h"
 

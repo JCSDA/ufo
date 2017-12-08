@@ -20,9 +20,12 @@ namespace eckit {
   class Configuration;
 }
 
+namespace oops {
+  class Variables;
+}
+
 namespace ufo {
   class ObsSpace;
-  class Variables;
 
 /// GeoVaLs: geophysical values at locations
 
@@ -31,7 +34,7 @@ class GeoVaLs : public util::Printable,
  public:
   static const std::string classname() {return "ufo::GeoVaLs";}
 
-  GeoVaLs(const ObsSpace &, const Variables &,
+  GeoVaLs(const ObsSpace &, const oops::Variables &,
           const util::DateTime &, const util::DateTime &);
   GeoVaLs(const eckit::Configuration &);
 

@@ -57,7 +57,6 @@ call ufo_vars_setup(self, cvars)
 
 deallocate(cvars)
 
-
 end subroutine ufo_vars_create_c
 
 ! ------------------------------------------------------------------------------

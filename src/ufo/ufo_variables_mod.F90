@@ -16,7 +16,7 @@ public :: MAXVARLEN
 integer, parameter :: MAXVARLEN=24
 ! ------------------------------------------------------------------------------
 
-!> Fortran derived type to represent QG model variables
+!> Fortran derived type to represent model variables
 type :: ufo_vars
   integer :: nv
   character(len=MAXVARLEN), allocatable :: fldnames(:) !< Variable identifiers
@@ -24,7 +24,6 @@ end type ufo_vars
 
 ! ------------------------------------------------------------------------------
 contains
-
 ! ------------------------------------------------------------------------------
 
 subroutine ufo_vars_setup(self, cvars)
@@ -66,6 +65,7 @@ self%nv = 0
 end subroutine ufo_vars_delete
 
 ! ------------------------------------------------------------------------------
+
 integer function ufo_vars_getindex(self, varname)
 implicit none
 type(ufo_vars), intent(in)       :: self
@@ -73,21 +73,19 @@ character(MAXVARLEN), intent(in) :: varname
 
 integer :: ivar
 
+ufo_vars_getindex = -1
+
 do ivar = 1, self%nv
   if (self%fldnames(ivar) == varname) then
+    ufo_vars_getindex = ivar
     exit
   endif
 enddo
 
-if (ivar <= self%nv) then
-  ufo_vars_getindex = ivar
-else
-  ufo_vars_getindex = -1
-endif
-
 end function ufo_vars_getindex
 
 ! ------------------------------------------------------------------------------
+
 integer function ufo_vars_nvars(self) 
 implicit none
 type(ufo_vars), intent(in) :: self
@@ -95,5 +93,7 @@ type(ufo_vars), intent(in) :: self
 ufo_vars_nvars = self%nv
 
 end function ufo_vars_nvars
+
+! ------------------------------------------------------------------------------
 
 end module ufo_vars_mod

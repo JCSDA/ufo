@@ -20,7 +20,7 @@ namespace ufo {
 /// Locations class to handle locations for UFO.
 
 class Locations : public util::Printable,
-              private util::ObjectCounter<Locations> {
+                  private util::ObjectCounter<Locations> {
  public:
   static const std::string classname() {return "ufo::Locations";}
 

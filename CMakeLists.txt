@@ -80,7 +80,7 @@ endforeach()
 
 include( ufo_compiler_flags )
 include_directories( ${UFO_INCLUDE_DIRS} ${UFO_EXTRA_INCLUDE_DIRS}
-                     ${CMAKE_CURRENT_SOURCE_DIR}/src/ufo )
+                     ${CMAKE_CURRENT_SOURCE_DIR}/src )
 
 add_subdirectory( src )
 add_subdirectory( test )
