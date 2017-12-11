@@ -533,7 +533,7 @@ character(128), intent(in)       :: filename
 type(ufo_vars) :: vars
 
 integer :: nvar_prof, nvar_surf_real, nvar_surf_int
-integer :: it, iwv, ipr, iprl, ioz, icl1, icl2
+integer :: it, iwv, ipr, iprl, ioz, icl1, icl2, iclefr1, iclefr2, ico2
 
 integer :: iunit
 integer :: nobs, nchans, nobs_all
@@ -546,8 +546,8 @@ integer, allocatable :: field1di(:)
 integer :: ivar, iobs, nval
 
 ! variables hardcoded for the CRTM  !** Note: we'll need to revisit these in the future -BTJ 11.15.2017
-nvar_prof = 7
-it = 1; iwv = 2; ipr = 3; iprl = 4; ioz = 5; icl1 = 6; icl2 = 7 ! indices of vars
+nvar_prof = 10
+it = 1; iwv = 2; ipr = 3; iprl = 4; ioz = 5; icl1 = 6; icl2 = 7; iclefr1 = 8; iclefr2 = 9; ico2 = 10 ! indices of vars
 nvar_surf_real = 14;
 nvar_surf_int = 3;
 
@@ -563,6 +563,9 @@ vars%fldnames(iprl) = 'Level pressure'
 vars%fldnames(ioz)  = 'Ozone'
 vars%fldnames(icl1) = 'Cloud liquid'
 vars%fldnames(icl2) = 'Cloud ice'
+vars%fldnames(iclefr1) = 'Cloud liquid efr'
+vars%fldnames(iclefr2) = 'Cloud ice efr'
+vars%fldnames(ico2) = 'CO2'
 
 vars%fldnames(nvar_prof+1) = 'Water_Fraction'
 vars%fldnames(nvar_prof+2) = 'Land_Fraction'
@@ -665,6 +668,40 @@ deallocate(field)
 nval = nsig; ivar = icl2
 allocate(field(nval, nobs_all))
 call nc_diag_read_get_var(iunit, 'cloud2', field)
+self%geovals(ivar)%nval = nval
+allocate(self%geovals(ivar)%vals(nval,nobs))
+do iobs = 1, nobs
+  self%geovals(ivar)%vals(:,iobs) = field(:,iobs*nchans)
+enddo
+deallocate(field)
+
+! read liquid cloud efr
+nval = nsig; ivar = iclefr1
+allocate(field(nval, nobs_all))
+call nc_diag_read_get_var(iunit, 'cloudefr1', field)
+self%geovals(ivar)%nval = nval
+allocate(self%geovals(ivar)%vals(nval,nobs))
+do iobs = 1, nobs
+  self%geovals(ivar)%vals(:,iobs) = field(:,iobs*nchans)
+enddo
+deallocate(field)
+
+! read ice cloud efr
+nval = nsig; ivar = iclefr2
+allocate(field(nval, nobs_all))
+call nc_diag_read_get_var(iunit, 'cloudefr2', field)
+self%geovals(ivar)%nval = nval
+allocate(self%geovals(ivar)%vals(nval,nobs))
+do iobs = 1, nobs
+  self%geovals(ivar)%vals(:,iobs) = field(:,iobs*nchans)
+enddo
+deallocate(field)
+
+
+! read co2
+nval = nsig; ivar = ico2
+allocate(field(nval, nobs_all))
+call nc_diag_read_get_var(iunit, 'tgas1d', field)
 self%geovals(ivar)%nval = nval
 allocate(self%geovals(ivar)%vals(nval,nobs))
 do iobs = 1, nobs

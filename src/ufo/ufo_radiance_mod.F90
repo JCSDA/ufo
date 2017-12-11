@@ -7,85 +7,34 @@
 
 module ufo_radiance_mod
   
-  use iso_c_binding
-  use config_mod
-  use duration_mod
   use ufo_obs_data
   use ufo_obs_data_mod
   use ufo_obs_vectors
   use ufo_vars_mod
-  use ufo_vars_mod_c, only: ufo_vars_registry
   use ufo_locs_mod
   use ufo_geovals_mod
-  use ufo_geovals_mod_c, only: ufo_geovals_registry
   use kinds
   
   use crtm_module
   implicit none
+
+  public :: ufo_radiance_eqv
+
   private
   
-  ! ------------------------------------------------------------------------------
-  
-  !> Fortran derived type for stream function observations for the QG model
-  type :: ufo_obsoper
-     integer :: nothing_here_yet
-  end type ufo_obsoper
-  
-#define LISTED_TYPE ufo_obsoper
-  
-  !> Linked list interface - defines registry_t type
-#include "linkedList_i.f"
-  
-  !> Global registry
-  type(registry_t) :: ufo_radiance_registry
   
   ! ------------------------------------------------------------------------------
 contains
-  ! ------------------------------------------------------------------------------
-  !> Linked list implementation
-#include "linkedList_c.f"
-  
-  ! ------------------------------------------------------------------------------
-  
-  subroutine c_ufo_radiance_setup(c_key_self, c_conf) bind(c,name='ufo_radiance_setup_f90')
-    implicit none
-    integer(c_int), intent(inout) :: c_key_self
-    type(c_ptr), intent(in)    :: c_conf
-    
-    type(ufo_obsoper), pointer :: self
-    
-    call ufo_radiance_registry%init()
-    call ufo_radiance_registry%add(c_key_self)
-    call ufo_radiance_registry%get(c_key_self, self)
-    
-  end subroutine c_ufo_radiance_setup
-  
-  ! ------------------------------------------------------------------------------
-  
-  subroutine c_ufo_radiance_delete(c_key_self) bind(c,name='ufo_radiance_delete_f90')
-    implicit none
-    integer(c_int), intent(inout) :: c_key_self
-    
-    type(ufo_obsoper), pointer :: self
-    
-    call ufo_radiance_registry%get(c_key_self, self)
-    call ufo_radiance_registry%remove(c_key_self)
-    
-  end subroutine c_ufo_radiance_delete
   
   ! ------------------------------------------------------------------------------
 
-  subroutine ufo_radiance_eqv(c_key_geovals, c_key_obsspace, c_key_hofx, c_bias) bind(c,name='ufo_radiance_eqv_f90')
+  subroutine ufo_radiance_eqv(geovals, obss, hofx) 
     use radDiag_mod, only: RadDiag
     use ufo_obs_data_mod, only: Radiance
     implicit none
-    integer(c_int), intent(in) :: c_key_geovals
-    integer(c_int), intent(in) :: c_key_obsspace
-    integer(c_int), intent(in) :: c_key_hofx
-    integer(c_int), intent(in) :: c_bias
-    type(ufo_geovals), pointer  :: geovals
-    type(obs_vector), pointer :: hofx
-    type(obs_data), pointer :: obss
+    type(ufo_geovals), intent(in)    :: geovals
+    type(obs_data),    intent(inout) :: obss
+    type(obs_vector),  intent(inout) :: hofx
 
     !*************************************************************************************
     !******* Begin CRTM block ************************************************************
@@ -109,10 +58,10 @@ contains
 
     ! Profile dimensions
     !** UFO to provide N_LAYERS, N_ABSORBERS, N_CLOUDS, N_AEROSOLS
-    INTEGER, PARAMETER :: N_PROFILES  = 1 !806  !** required because of the rank of the atm and sfc structures
+    INTEGER, PARAMETER :: N_PROFILES  = 12  !** required because of the rank of the atm and sfc structures
     INTEGER, PARAMETER :: N_LAYERS    = 71 !64 !** UFO  !** need a way to populate this... 
-    INTEGER, PARAMETER :: N_ABSORBERS = 2  !** UFO
-    INTEGER, PARAMETER :: N_CLOUDS    = 0  !** UFO
+    INTEGER, PARAMETER :: N_ABSORBERS = 3  !** UFO
+    INTEGER, PARAMETER :: N_CLOUDS    = 2  !** UFO
     INTEGER, PARAMETER :: N_AEROSOLS  = 0  !** UFO
     
     ! Sensor information
@@ -179,21 +128,13 @@ contains
 
     integer              :: nobs
     integer              :: nlocs
+    real(fp) :: rmse
 
     ! Program header
     ! --------------
 
-    ! Get pointers to geovals, observations and hofx
-    call ufo_geovals_registry%get(c_key_geovals,geovals)
-    call ufo_obs_vect_registry%get(c_key_hofx,hofx)
-    call ufo_obs_data_registry%get(c_key_obsspace,obss)
-
     nobs=obss%nobs; nlocs=obss%nlocs
     obss%Obspoint => Radiance
-
-    ! RT: The following is an example of how to get a handle on what is in the pointer Radiance
-    !     that is, how to tap on the observation structure ...
-    print *, 'Header Name: ', nobs, nlocs,  size(Radiance%header_name%fix)
 
 !** geovals index and variable names:
 !!$ 1   Temperature
@@ -330,9 +271,8 @@ contains
        !  The Sensor_Scan_Angle is optional.
        ! ** UFO NOTE: sensor geometry information will need to be provided by calling
        !          routines -- we can't use hardcoded values.  
-       CALL CRTM_Geometry_SetValue( geo, &
-            Sensor_Zenith_Angle = ZENITH_ANGLE, &
-            Sensor_Scan_Angle   = SCAN_ANGLE )
+       CALL Load_Geom_Data()
+
 !!$       REAL(fp), PARAMETER :: Latitude          = 46.3369
 !!$       REAL(fp), PARAMETER :: Longitude         = 354.4514
 !!$       REAL(fp), PARAMETER :: Elevation         = 161
@@ -365,9 +305,11 @@ contains
        ! ==========================================================================
        ! STEP 8. **** CALL THE CRTM FUNCTIONS FOR THE CURRENT SENSOR ****
        !
-!       call CRTM_Atmosphere_Inspect(atm)
-!       call CRTM_Surface_Inspect(sfc(22))
+       call CRTM_Atmosphere_Inspect(atm(12))
+       call CRTM_Surface_Inspect(sfc(12))
 !       call CRTM_Geometry_Inspect(geo(1))
+!       call CRTM_ChannelInfo_Inspect(chinfo(1))
+
 !       WRITE( *, '( /5x, "Calling the CRTM functions for ",a,"..." )' ) TRIM(SENSOR_ID(n))
        
        ! 8a. The forward model call for each sensor
@@ -382,7 +324,7 @@ contains
           CALL Display_Message( PROGRAM_NAME, message, FAILURE )
           STOP
        END IF
-       
+
        ! 8b. The K-matrix model
        ! ----------------------
        err_stat = CRTM_K_Matrix( atm, &  ! FORWARD  Input
@@ -407,26 +349,34 @@ contains
        ! CRTM_RTSolution_Inspect in the file CRTM_RTSolution_Define.f90 to
        ! select the needed variables for outputs.  These variables are contained
        ! in the structure RTSolution.
+
+       rmse = 0
        DO m = 1, N_PROFILES
           WRITE( *,'(//7x,"Profile ",i0," output for ",a )') m, TRIM(Sensor_Id(n))
           DO l = 1, n_Channels
 !             WRITE( *, '(/5x,"Channel ",i0," results")') chinfo(n)%Sensor_Channel(l)
              !CALL CRTM_RTSolution_Inspect(rts(l,m))
              !print '(A,I4,A2,F12.3)', '[Ch] TB: [', chinfo(n)%Sensor_Channel(l), '] ', rts(l,m)%Brightness_Temperature
-             print '(F7.3)', rts(l,m)%Brightness_Temperature
+             print *, rts(l,m)%Brightness_Temperature, Radiance%datachan(m,l)%tbobs - Radiance%datachan(m,l)%omgnbc
+             rmse = rmse + (Radiance%datachan(m,l)%tbobs - Radiance%datachan(m,l)%omgnbc) * (Radiance%datachan(m,l)%tbobs - Radiance%datachan(m,l)%omgnbc)
           END DO
        END DO
+
+       rmse = sqrt(rmse / (n_profiles * n_channels))
+       print *, 'rmse: ', rmse
+     
 
        ! output to hofx structure   
        hofx%values(:) = 0.0
        i = 1
        do m = 1, N_PROFILES
          do l = 1, n_Channels
-           hofx%values(i) = rts(l,m)%Brightness_Temperature !AS: I'm guessing here.
+           hofx%values(i) = rts(l,m)%Brightness_Temperature - (Radiance%datachan(m,l)%tbobs - Radiance%datachan(m,l)%omgnbc) !AS: I'm guessing here.
            i = i + 1
          enddo
+         print *, m, ' profile: ', minval(hofx%values( (m-1)*n_channels+1 : m*n_channels)), maxval(hofx%values( (m-1)*n_channels+1 : m*n_channels))
        enddo
-       
+       print *, 'maxdiff: ', minval(hofx%values), maxval(hofx%values)
        ! ==========================================================================
        ! STEP 9. **** CLEAN UP FOR NEXT SENSOR ****
        !
@@ -531,33 +481,25 @@ contains
          lfound = ufo_geovals_get_var(geovals,'Ozone                   ', geoval)
          atm(k1)%Absorber(1:N_LAYERS,2)       = geoval%vals(:,k1) !geoval%vals(N_LAYERS:1:-1,k1) !** 1 == iobs, hardcoding for testing
          !print *, 'Ozone:', atm(k1)%Absorber(1:2,2), geoval%vals(1:2,k1)
-      end do
 
-      
-!!$      atm(1)%Climatology       = US_STANDARD_ATMOSPHERE
-!!$      atm(1)%Absorber_Id(1:1)       = (/ H2O_ID /)
-!!$      atm(1)%Absorber_Units(1:1)    = (/ MASS_MIXING_RATIO_UNITS /)
-!!$      atm(1)%Absorber(:,1)     = 1.0E+00_fp  !** broadcast fill with some value
+         atm(k1)%Absorber_Id(3:3)    = (/ CO2_ID /)
+         atm(k1)%Absorber_Units(3:3) = (/ VOLUME_MIXING_RATIO_UNITS /)
+         lfound = ufo_geovals_get_var(geovals,'CO2                     ', geoval)
+         atm(k1)%Absorber(1:N_LAYERS,3)       = geoval%vals(:,k1) !N_LAYERS:1:-1,k1) !** 1 == iobs, hardcoding for testing
 
-!!$      atm(1)%Absorber_Id(2:2)       = (/ O3_ID /)
-!!$      atm(1)%Absorber_Units(2:2)    = (/ VOLUME_MIXING_RATIO_UNITS /)
-!!$      atm(1)%Absorber(:,2)     = 1.0E-03_fp !** broadcast fill with some fake value
-!!$
-!!$      ! ...make fake Profile data -- this is where UFO/OOPS will populate the various atm objects needed. 
-!!$      do NL = 0,N_LAYERS
-!!$         !** generate level pressures according to number of layers (faked)
-!!$         atm(1)%Level_Pressure(NL) = 0.714_fp*exp(dble(NL)/(dble(N_LAYERS)/7.34_fp))  !** fake pressure generator
-!!$         if (NL >= 1) then
-!!$            atm(1)%Pressure(NL) = 0.5_fp * (atm(1)%Level_Pressure(NL) - atm(1)%Level_Pressure(NL-1)) + atm(1)%Level_Pressure(NL-1) !** fake pressure profile
-!!$            atm(1)%Temperature(NL) = 40*sin(-4.0_fp*ATAN(1.0_fp)+0.1_fp+dble(NL)/20.0_fp)+267.15_fp  !** fake temperature profile generator
-!!$            !          print *, NL, atm(1)%Pressure(NL), atm(1)%Temperature(NL)
-!!$         end if
-!!$      end do
-!!$
-!!$      ! Cloud data
 
-!!$ 6   Cloud liquid
-!!$ 7   Cloud ice
+         atm(k1)%Cloud(1)%Type = WATER_CLOUD
+         lfound = ufo_geovals_get_var(geovals,'Cloud liquid            ', geoval)
+         atm(k1)%Cloud(1)%Water_Content = geoval%vals(:,k1)
+         lfound = ufo_geovals_get_var(geovals,'Cloud liquid efr        ', geoval)
+         atm(k1)%Cloud(1)%Effective_Radius = geoval%vals(:,k1)
+
+         atm(k1)%Cloud(2)%Type = ICE_CLOUD
+         lfound = ufo_geovals_get_var(geovals,'Cloud ice               ', geoval)
+         atm(k1)%Cloud(2)%Water_Content = geoval%vals(:,k1)
+         lfound = ufo_geovals_get_var(geovals,'Cloud ice efr           ', geoval)
+         atm(k1)%Cloud(2)%Effective_Radius = geoval%vals(:,k1)
+
 
 !!$      IF ( atm(1)%n_Clouds > 0 ) THEN
 !!$         k1 = 75
@@ -569,6 +511,9 @@ contains
 !!$!            atm(1)%Cloud_Fraction = 0.25 !*** when 2.3.0 is released, uncomment this line.  
 !!$         END DO
 !!$      END IF
+
+         !print *, 'Ozone:', atm(k1)%Absorber(1:2,2), geoval%vals(1:2,k1)
+      enddo
 
       !*** example of loading aerosol data
 !!$      Load_Aerosol_Data_1: IF ( atm(1)%n_Aerosols > 0 ) THEN
@@ -673,44 +618,24 @@ contains
       end do
 
     END SUBROUTINE Load_Sfc_Data
+
+    !
+    ! Internal subprogam to load some test geometry data
+    !
+    SUBROUTINE Load_Geom_Data()
+      implicit none
+      integer :: k1
+      do k1 = 1,N_PROFILES
+         geo(k1)%Sensor_Zenith_Angle = Radiance%datafix(k1)%satzen_ang
+         geo(k1)%Sensor_Scan_Angle   = Radiance%datafix(k1)%senscn_ang
+         geo(k1)%Source_Zenith_Angle = Radiance%datafix(k1)%solzen_ang
+         geo(k1)%Sensor_Azimuth_Angle = Radiance%datafix(k1)%satazm_ang
+         geo(k1)%Source_Azimuth_Angle = Radiance%datafix(k1)%solazm_ang
+         geo(k1)%Ifov = Radiance%datafix(k1)%senscn_pos
+      enddo
+
+    END SUBROUTINE Load_Geom_Data
     
   end subroutine ufo_radiance_eqv
 
-  ! ------------------------------------------------------------------------------
-  
-  subroutine c_ufo_radiance_inputs(c_key_self, c_key_vars) bind(c,name='ufo_radiance_inputs_f90')
-    implicit none
-    integer(c_int), intent(in)    :: c_key_self
-    integer(c_int), intent(inout) :: c_key_vars
-    
-    type(ufo_obsoper), pointer :: self
-    type(ufo_vars), pointer :: vars
-    
-    call ufo_radiance_registry%get(c_key_self, self)
-    call ufo_vars_registry%init()
-    call ufo_vars_registry%add(c_key_vars)
-    call ufo_vars_registry%get(c_key_vars, vars)
-    
-  end subroutine c_ufo_radiance_inputs
-  
-  ! ------------------------------------------------------------------------------
-  subroutine ufo_radiance_equiv_tl(c_key_geovals, c_key_hofx, c_key_traj, c_bias) &
-       & bind(c,name='ufo_radiance_equiv_tl_f90')
-    implicit none
-    integer(c_int), intent(in) :: c_key_geovals
-    integer(c_int), intent(in) :: c_key_hofx
-    integer(c_int), intent(in) :: c_key_traj
-    real(c_double), intent(in) :: c_bias
-  end subroutine ufo_radiance_equiv_tl
-  ! ------------------------------------------------------------------------------
-  subroutine ufo_radiance_equiv_ad(c_key_gom, c_key_hofx, c_key_traj, c_bias) &
-       & bind(c,name='ufo_radiance_equiv_ad_f90')
-    implicit none
-    integer(c_int), intent(in) :: c_key_gom
-    integer(c_int), intent(in) :: c_key_hofx
-    integer(c_int), intent(in) :: c_key_traj
-    real(c_double), intent(inout) :: c_bias
-  end subroutine ufo_radiance_equiv_ad
-  ! ------------------------------------------------------------------------------
-  
 end module ufo_radiance_mod
