@@ -109,8 +109,8 @@ contains
 
     ! Profile dimensions
     !** UFO to provide N_LAYERS, N_ABSORBERS, N_CLOUDS, N_AEROSOLS
-    INTEGER, PARAMETER :: N_PROFILES  = 806  !** required because of the rank of the atm and sfc structures
-    INTEGER, PARAMETER :: N_LAYERS    = 64 !** UFO  !** need a way to populate this... 
+    INTEGER, PARAMETER :: N_PROFILES  = 1 !806  !** required because of the rank of the atm and sfc structures
+    INTEGER, PARAMETER :: N_LAYERS    = 71 !64 !** UFO  !** need a way to populate this... 
     INTEGER, PARAMETER :: N_ABSORBERS = 2  !** UFO
     INTEGER, PARAMETER :: N_CLOUDS    = 0  !** UFO
     INTEGER, PARAMETER :: N_AEROSOLS  = 0  !** UFO
@@ -512,24 +512,24 @@ contains
       !** populate the atmosphere structures for CRTM (atm(k1), for the k1-th profile)
       do k1 = 1,N_PROFILES
          lfound = ufo_geovals_get_var(geovals,'Temperature             ', geoval)
-         atm(k1)%Temperature(1:N_LAYERS) = geoval%vals(N_LAYERS:1:-1,k1) !** 1 == iobs, hardcoding for testing
+         atm(k1)%Temperature(1:N_LAYERS) = geoval%vals(:,k1) !geoval%vals(N_LAYERS:1:-1,k1) !** 1 == iobs, hardcoding for testing
          !print *, 'Temperature:', atm(k1)%Temperature(1:2), geoval%vals(1:2,k1)
          lfound = ufo_geovals_get_var(geovals,'Pressure                ', geoval)
-         atm(k1)%Pressure(1:N_LAYERS) = geoval%vals(N_LAYERS:1:-1,k1) !** 1 == iobs, hardcoding for testing
+         atm(k1)%Pressure(1:N_LAYERS) = geoval%vals(:,k1) !geoval%vals(N_LAYERS:1:-1,k1) !** 1 == iobs, hardcoding for testing
          !print *, 'Pressure:', atm(k1)%Pressure(1:2), geoval%vals(1:2,k1)
          lfound = ufo_geovals_get_var(geovals,'Level pressure          ', geoval)
-         atm(k1)%Level_Pressure(0:N_LAYERS) = geoval%vals(N_LAYERS+1:1:-1,k1) !** 1 == iobs, hardcoding for testing
+         atm(k1)%Level_Pressure(0:N_LAYERS) = geoval%vals(:,k1) !geoval%vals(N_LAYERS+1:1:-1,k1) !** 1 == iobs, hardcoding for testing
          !print *, 'level_pressure:', atm(k1)%Level_Pressure(0:1), geoval%vals(1:2,k1)
          atm(k1)%Climatology         = US_STANDARD_ATMOSPHERE
          atm(k1)%Absorber_Id(1:1)    = (/ H2O_ID /)
          atm(k1)%Absorber_Units(1:1) = (/ MASS_MIXING_RATIO_UNITS /)
          lfound = ufo_geovals_get_var(geovals,'Water vapor             ', geoval)
-         atm(k1)%Absorber(1:N_LAYERS,1)       = geoval%vals(N_LAYERS:1:-1,k1) !** 1 == iobs, hardcoding for testing
+         atm(k1)%Absorber(1:N_LAYERS,1)       = geoval%vals(:,k1) !geoval%vals(N_LAYERS:1:-1,k1) !** 1 == iobs, hardcoding for testing
          !print *, 'water vapor:', atm(k1)%Absorber(1:2,1), geoval%vals(1:2,k1)
          atm(k1)%Absorber_Id(2:2)    = (/ O3_ID /)
          atm(k1)%Absorber_Units(2:2) = (/ VOLUME_MIXING_RATIO_UNITS /)
          lfound = ufo_geovals_get_var(geovals,'Ozone                   ', geoval)
-         atm(k1)%Absorber(1:N_LAYERS,2)       = geoval%vals(N_LAYERS:1:-1,k1) !** 1 == iobs, hardcoding for testing
+         atm(k1)%Absorber(1:N_LAYERS,2)       = geoval%vals(:,k1) !geoval%vals(N_LAYERS:1:-1,k1) !** 1 == iobs, hardcoding for testing
          !print *, 'Ozone:', atm(k1)%Absorber(1:2,2), geoval%vals(1:2,k1)
       end do
 

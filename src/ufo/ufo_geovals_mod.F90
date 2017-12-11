@@ -613,7 +613,7 @@ call nc_diag_read_get_var(iunit, 'qvp', field)
 self%geovals(ivar)%nval = nval
 allocate(self%geovals(ivar)%vals(nval,nobs))
 do iobs = 1, nobs
-  self%geovals(ivar)%vals(:,iobs) = 1000.*field(:,iobs*nchans) / (1.-field(:,iobs*nchans))
+  self%geovals(ivar)%vals(:,iobs) = field(:,iobs*nchans) !1000.*field(:,iobs*nchans) / (1.-field(:,iobs*nchans))
 enddo
 deallocate(field)
 
@@ -624,7 +624,7 @@ call nc_diag_read_get_var(iunit, 'prsltmp', field)
 self%geovals(ivar)%nval = nval
 allocate(self%geovals(ivar)%vals(nval,nobs))
 do iobs = 1, nobs
-  self%geovals(ivar)%vals(:,iobs) = 10.*field(:,iobs*nchans)
+  self%geovals(ivar)%vals(:,iobs) = field(:,iobs*nchans) !10.*field(:,iobs*nchans)
 enddo
 deallocate(field)
 
@@ -635,7 +635,7 @@ call nc_diag_read_get_var(iunit, 'prsitmp', field)
 self%geovals(ivar)%nval = nval
 allocate(self%geovals(ivar)%vals(nval,nobs))
 do iobs = 1, nobs
-  self%geovals(ivar)%vals(:,iobs) = 10.*field(:,iobs*nchans)
+  self%geovals(ivar)%vals(:,iobs) = field(:,iobs*nchans) !10.*field(:,iobs*nchans)
 enddo
 deallocate(field)
 
