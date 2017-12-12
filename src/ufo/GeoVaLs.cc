@@ -20,10 +20,7 @@ GeoVaLs::GeoVaLs(const ObsSpace & obsdb, const oops::Variables & var,
   oops::Log::trace() << "GeoVaLs contructor starting " << t1 << " " << t2 << std::endl;
   const util::DateTime * p1 = &t1;
   const util::DateTime * p2 = &t2;
-  eckit::LocalConfiguration config;
-  config.set("nvars", var.variables().size());
-  config.set("variables", var.variables());
-  const eckit::Configuration * conf = &config;
+  const eckit::Configuration * conf = &var.asConfig();
   ufo_obsdb_getgeovals_f90(obsdb.toFortran(), &conf, &p1, &p2, keyGVL_);
   oops::Log::trace() << "GeoVaLs contructor key = " << keyGVL_ << std::endl;
 }
