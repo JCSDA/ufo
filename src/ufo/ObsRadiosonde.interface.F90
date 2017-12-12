@@ -9,8 +9,6 @@ module ufo_radiosonde_mod_c
   
   use iso_c_binding
   use config_mod
-  use ufo_vars_mod,      only: ufo_vars
-  use ufo_vars_mod_c,    only: ufo_vars_registry
   use ufo_obs_vectors,   only: obs_vector, ufo_obs_vect_registry
   use ufo_geovals_mod,   only: ufo_geovals
   use ufo_geovals_mod_c, only: ufo_geovals_registry
@@ -70,6 +68,7 @@ call ufo_radiosonde_registry%remove(c_key_self)
 end subroutine ufo_radiosonde_delete_c
   
 ! ------------------------------------------------------------------------------
+
 subroutine ufo_radiosonde_t_eqv_c(c_key_geovals, c_key_obsspace, c_key_hofx, c_bias) bind(c,name='ufo_radiosonde_t_eqv_f90')
 
 implicit none
@@ -93,23 +92,6 @@ call ufo_radiosonde_t_eqv(geovals, obss, hofx)
 
 end subroutine ufo_radiosonde_t_eqv_c
 
-  
 ! ------------------------------------------------------------------------------
-  
-subroutine ufo_radiosonde_inputs_c(c_key_self, c_key_vars) bind(c,name='ufo_radiosonde_inputs_f90')
-implicit none
-integer(c_int), intent(in)    :: c_key_self
-integer(c_int), intent(inout) :: c_key_vars
-    
-type(ufo_obsoper), pointer :: self
-type(ufo_vars), pointer :: vars
-    
-call ufo_radiosonde_registry%get(c_key_self, self)
-call ufo_vars_registry%init()
-call ufo_vars_registry%add(c_key_vars)
-call ufo_vars_registry%get(c_key_vars, vars)
-    
-end subroutine ufo_radiosonde_inputs_c
-  
   
 end module ufo_radiosonde_mod_c
