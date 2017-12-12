@@ -8,7 +8,6 @@ module ufo_geovals_mod_c
 
 use iso_c_binding
 use ufo_geovals_mod
-use ufo_vars_mod
 use kinds
 
 implicit none

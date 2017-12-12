@@ -21,7 +21,6 @@ use ufo_locs_mod
 use ufo_locs_mod_c, only : ufo_locs_registry
 use ufo_obs_vectors
 use ufo_vars_mod
-use ufo_vars_mod_c, only : ufo_vars_registry
 use ufo_obs_data_mod
 use fckit_log_module, only : fckit_log
 use kinds
@@ -124,22 +123,30 @@ end subroutine ufo_obsdb_getlocations_c
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_obsdb_getgeovals_c(c_key_self, c_key_vars, c_t1, c_t2, c_key_geovals) bind(c,name='ufo_obsdb_getgeovals_f90')
+subroutine ufo_obsdb_getgeovals_c(c_key_self, c_vars, c_t1, c_t2, c_key_geovals) bind(c,name='ufo_obsdb_getgeovals_f90')
 implicit none
 integer(c_int), intent(in) :: c_key_self
-integer(c_int), intent(in) :: c_key_vars
+type(c_ptr), intent(in)    :: c_vars
 type(c_ptr), intent(in) :: c_t1, c_t2
 integer(c_int), intent(inout) :: c_key_geovals
 
 type(obs_data), pointer :: self
-type(ufo_vars), pointer :: vars
 type(datetime) :: t1, t2
 type(ufo_geovals), pointer :: geovals
+integer :: nvar
+character(len=max_string) :: svars
+character(len=MAXVARLEN), allocatable :: cvars(:)
+type(ufo_vars) :: vars
 
 call ufo_obs_data_registry%get(c_key_self, self)
-call ufo_vars_registry%get(c_key_vars, vars)
 call c_f_datetime(c_t1, t1)
 call c_f_datetime(c_t2, t2)
+
+nvar = config_get_int(c_vars, "nvars")
+allocate(cvars(nvar))
+svars = config_get_string(c_vars,len(svars),"variables")
+read(svars,*) cvars
+call ufo_vars_setup(vars, cvars)
 
 call ufo_geovals_registry%init()
 call ufo_geovals_registry%add(c_key_geovals)
