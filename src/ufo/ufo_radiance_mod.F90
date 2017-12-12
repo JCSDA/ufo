@@ -13,11 +13,10 @@ module ufo_radiance_mod
   use ufo_obs_data
   use ufo_obs_data_mod
   use ufo_obs_vectors
-  use ufo_vars_mod
-  use ufo_vars_mod_c, only: ufo_vars_registry
   use ufo_locs_mod
   use ufo_geovals_mod
   use ufo_geovals_mod_c, only: ufo_geovals_registry
+  use ufo_vars_mod
   use kinds
   
   use crtm_module
@@ -678,22 +677,6 @@ contains
 
   ! ------------------------------------------------------------------------------
   
-  subroutine c_ufo_radiance_inputs(c_key_self, c_key_vars) bind(c,name='ufo_radiance_inputs_f90')
-    implicit none
-    integer(c_int), intent(in)    :: c_key_self
-    integer(c_int), intent(inout) :: c_key_vars
-    
-    type(ufo_obsoper), pointer :: self
-    type(ufo_vars), pointer :: vars
-    
-    call ufo_radiance_registry%get(c_key_self, self)
-    call ufo_vars_registry%init()
-    call ufo_vars_registry%add(c_key_vars)
-    call ufo_vars_registry%get(c_key_vars, vars)
-    
-  end subroutine c_ufo_radiance_inputs
-  
-  ! ------------------------------------------------------------------------------
   subroutine ufo_radiance_equiv_tl(c_key_geovals, c_key_hofx, c_key_traj, c_bias) &
        & bind(c,name='ufo_radiance_equiv_tl_f90')
     implicit none
@@ -702,7 +685,9 @@ contains
     integer(c_int), intent(in) :: c_key_traj
     real(c_double), intent(in) :: c_bias
   end subroutine ufo_radiance_equiv_tl
+
   ! ------------------------------------------------------------------------------
+
   subroutine ufo_radiance_equiv_ad(c_key_gom, c_key_hofx, c_key_traj, c_bias) &
        & bind(c,name='ufo_radiance_equiv_ad_f90')
     implicit none
@@ -711,6 +696,7 @@ contains
     integer(c_int), intent(in) :: c_key_traj
     real(c_double), intent(inout) :: c_bias
   end subroutine ufo_radiance_equiv_ad
+
   ! ------------------------------------------------------------------------------
   
 end module ufo_radiance_mod
