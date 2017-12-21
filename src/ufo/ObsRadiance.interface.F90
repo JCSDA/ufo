@@ -13,7 +13,6 @@ module ufo_radiance_mod_c
   use ufo_obs_data, only: ufo_obs_data_registry
   use ufo_obs_vectors
   use ufo_vars_mod, only: ufo_vars
-  use ufo_vars_mod_c, only: ufo_vars_registry
   use ufo_geovals_mod, only: ufo_geovals
   use ufo_geovals_mod_c, only: ufo_geovals_registry
   use ufo_radiance_mod
@@ -96,24 +95,6 @@ contains
 
   ! ------------------------------------------------------------------------------
   
-  subroutine ufo_radiance_inputs_c(c_key_self, c_key_vars) bind(c,name='ufo_radiance_inputs_f90')
-    implicit none
-    integer(c_int), intent(in)    :: c_key_self
-    integer(c_int), intent(inout) :: c_key_vars
-    
-    type(ufo_obsoper), pointer :: self
-    type(ufo_vars), pointer :: vars
-    
-    call ufo_radiance_registry%get(c_key_self, self)
-    call ufo_vars_registry%init()
-    call ufo_vars_registry%add(c_key_vars)
-    call ufo_vars_registry%get(c_key_vars, vars)
-
-    ! call routine to set variables (for interpolator)
-    
-  end subroutine ufo_radiance_inputs_c
-  
-  ! ------------------------------------------------------------------------------
   subroutine ufo_radiance_equiv_tl_c(c_key_geovals, c_key_hofx, c_key_traj, c_bias) &
        & bind(c,name='ufo_radiance_equiv_tl_f90')
     implicit none

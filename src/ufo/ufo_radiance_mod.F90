@@ -59,7 +59,7 @@ contains
 
     ! Profile dimensions
     !** UFO to provide N_LAYERS, N_ABSORBERS, N_CLOUDS, N_AEROSOLS
-    INTEGER, PARAMETER :: N_PROFILES  = 12  !** required because of the rank of the atm and sfc structures
+    INTEGER, PARAMETER :: N_PROFILES  = 23 !806  !** required because of the rank of the atm and sfc structures
     INTEGER, PARAMETER :: N_LAYERS    = 71 !64 !** UFO  !** need a way to populate this... 
     INTEGER, PARAMETER :: N_ABSORBERS = 3  !** UFO
     INTEGER, PARAMETER :: N_CLOUDS    = 2  !** UFO
@@ -306,9 +306,9 @@ contains
        ! ==========================================================================
        ! STEP 8. **** CALL THE CRTM FUNCTIONS FOR THE CURRENT SENSOR ****
        !
-       call CRTM_Atmosphere_Inspect(atm(12))
-       call CRTM_Surface_Inspect(sfc(12))
-!       call CRTM_Geometry_Inspect(geo(1))
+!       call CRTM_Atmosphere_Inspect(atm(12))
+!       call CRTM_Surface_Inspect(sfc(12))
+!       call CRTM_Geometry_Inspect(geo(12))
 !       call CRTM_ChannelInfo_Inspect(chinfo(1))
 
 !       WRITE( *, '( /5x, "Calling the CRTM functions for ",a,"..." )' ) TRIM(SENSOR_ID(n))
@@ -325,6 +325,7 @@ contains
           CALL Display_Message( PROGRAM_NAME, message, FAILURE )
           STOP
        END IF
+
 
        ! 8b. The K-matrix model
        ! ----------------------
@@ -365,7 +366,7 @@ contains
 
        rmse = sqrt(rmse / (n_profiles * n_channels))
        print *, 'rmse: ', rmse
-     
+       print *, 'lon: ', Radiance%datafix(12)%lon, ', lat: ', Radiance%datafix(12)%lat
 
        ! output to hofx structure   
        hofx%values(:) = 0.0
@@ -598,6 +599,8 @@ contains
          sfc(k1)%Snow_Coverage      = geoval%vals(1,k1) 
          lfound                     = ufo_geovals_get_var(geovals,'Snow_Temperature        ', geoval)
          sfc(k1)%Snow_Temperature   = geoval%vals(1,k1) 
+         lfound                     = ufo_geovals_get_var(geovals,'Snow_Depth              ', geoval)
+         sfc(k1)%Snow_Depth         = geoval%vals(1,k1)
          lfound                     = ufo_geovals_get_var(geovals,'Land_Type_Index         ', geoval)
          sfc(k1)%Land_Type          = geoval%vals(1,k1)    !** NOTE:  is this Land_Type same as CRTM's land type??
          lfound                     = ufo_geovals_get_var(geovals,'Land_Fraction           ', geoval)
@@ -638,28 +641,6 @@ contains
     END SUBROUTINE Load_Geom_Data
     
   end subroutine ufo_radiance_eqv
-
-  ! ------------------------------------------------------------------------------
-  
-  subroutine ufo_radiance_equiv_tl(c_key_geovals, c_key_hofx, c_key_traj, c_bias) &
-       & bind(c,name='ufo_radiance_equiv_tl_f90')
-    implicit none
-    integer(c_int), intent(in) :: c_key_geovals
-    integer(c_int), intent(in) :: c_key_hofx
-    integer(c_int), intent(in) :: c_key_traj
-    real(c_double), intent(in) :: c_bias
-  end subroutine ufo_radiance_equiv_tl
-
-  ! ------------------------------------------------------------------------------
-
-  subroutine ufo_radiance_equiv_ad(c_key_gom, c_key_hofx, c_key_traj, c_bias) &
-       & bind(c,name='ufo_radiance_equiv_ad_f90')
-    implicit none
-    integer(c_int), intent(in) :: c_key_gom
-    integer(c_int), intent(in) :: c_key_hofx
-    integer(c_int), intent(in) :: c_key_traj
-    real(c_double), intent(inout) :: c_bias
-  end subroutine ufo_radiance_equiv_ad
 
   ! ------------------------------------------------------------------------------
   
