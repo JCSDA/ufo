@@ -8,6 +8,9 @@ module ufo_geovals_mod_c
 
 use iso_c_binding
 use ufo_geovals_mod
+use ufo_locs_mod
+use ufo_locs_mod_c, only : ufo_locs_registry
+use ufo_vars_mod
 use kinds
 
 implicit none
@@ -15,6 +18,7 @@ implicit none
 public :: ufo_geovals_registry
 
 private
+integer, parameter :: max_string=800
 
 #define LISTED_TYPE ufo_geovals
 
@@ -29,6 +33,39 @@ contains
 ! ------------------------------------------------------------------------------
 !> Linked list implementation
 #include "linkedList_c.f"
+! ------------------------------------------------------------------------------
+
+subroutine ufo_geovals_setup_c(c_key_self, c_key_locs, c_vars) bind(c,name='ufo_geovals_setup_f90')
+use config_mod
+implicit none
+integer(c_int), intent(in) :: c_key_self
+integer(c_int), intent(in) :: c_key_locs
+type(c_ptr), intent(in)    :: c_vars
+
+type(ufo_geovals), pointer :: self
+type(ufo_locs), pointer :: locs
+integer :: nvar
+character(len=max_string) :: svars
+character(len=MAXVARLEN), allocatable :: cvars(:)
+type(ufo_vars) :: vars
+
+call ufo_geovals_registry%init()
+call ufo_geovals_registry%add(c_key_self)
+call ufo_geovals_registry%get(c_key_self, self)
+
+call ufo_locs_registry%get(c_key_locs,locs)
+
+nvar = config_get_int(c_vars, "nvars")
+allocate(cvars(nvar))
+svars = config_get_string(c_vars,len(svars),"variables")
+read(svars,*) cvars
+call ufo_vars_setup(vars, cvars)
+
+call ufo_geovals_init(self)
+call ufo_geovals_setup(self, vars, locs%nlocs)
+
+end subroutine ufo_geovals_setup_c
+
 ! ------------------------------------------------------------------------------
 
 subroutine ufo_geovals_create_c(c_key_self) bind(c,name='ufo_geovals_create_f90')

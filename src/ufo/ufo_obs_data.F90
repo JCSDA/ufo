@@ -117,45 +117,8 @@ call ufo_locs_registry%add(c_key_locs)
 call ufo_locs_registry%get(c_key_locs,locs)
 
 call self%Obspoint%GetLocs(self%nlocs, locs)
-!print *, 'getlocs: ', locs%nlocs, locs%lat(1:10)
 
 end subroutine ufo_obsdb_getlocations_c
-
-! ------------------------------------------------------------------------------
-
-subroutine ufo_obsdb_getgeovals_c(c_key_self, c_vars, c_t1, c_t2, c_key_geovals) bind(c,name='ufo_obsdb_getgeovals_f90')
-implicit none
-integer(c_int), intent(in) :: c_key_self
-type(c_ptr), intent(in)    :: c_vars
-type(c_ptr), intent(in) :: c_t1, c_t2
-integer(c_int), intent(inout) :: c_key_geovals
-
-type(obs_data), pointer :: self
-type(datetime) :: t1, t2
-type(ufo_geovals), pointer :: geovals
-integer :: nvar
-character(len=max_string) :: svars
-character(len=MAXVARLEN), allocatable :: cvars(:)
-type(ufo_vars) :: vars
-
-call ufo_obs_data_registry%get(c_key_self, self)
-call c_f_datetime(c_t1, t1)
-call c_f_datetime(c_t2, t2)
-
-nvar = config_get_int(c_vars, "nvars")
-allocate(cvars(nvar))
-svars = config_get_string(c_vars,len(svars),"variables")
-read(svars,*) cvars
-call ufo_vars_setup(vars, cvars)
-
-call ufo_geovals_registry%init()
-call ufo_geovals_registry%add(c_key_geovals)
-call ufo_geovals_registry%get(c_key_geovals,geovals)
-
-call ufo_geovals_init(geovals)
-call ufo_geovals_setup(geovals, vars, self%nlocs)
-
-end subroutine ufo_obsdb_getgeovals_c
 
 ! ------------------------------------------------------------------------------
 

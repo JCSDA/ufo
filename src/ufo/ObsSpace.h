@@ -25,6 +25,7 @@ namespace eckit {
 }
 
 namespace ufo {
+  class Locations;
   class ObsVector;
 
 /// Wrapper around ObsHelpQG, mostly to hide the factory
@@ -35,11 +36,13 @@ class ObsSpace : public oops::ObsSpaceBase {
   ObsSpace(const ObsSpace &);
   ~ObsSpace();
 
-  void getdb(const std::string & col, int & keyData) const;
+  void getdb(const std::string &, int &) const;
 
-  void putdb(const std::string & col, const int & keyData) const; 
+  void putdb(const std::string &, const int &) const; 
 
-  void generateDistribution(const eckit::Configuration & conf);
+  Locations * locations(const util::DateTime &, const util::DateTime &) const;
+
+  void generateDistribution(const eckit::Configuration &);
 
   const std::string & obsname() const {return obsname_;}
   const util::DateTime & windowStart() const {return winbgn_;}

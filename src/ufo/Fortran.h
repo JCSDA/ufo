@@ -52,6 +52,7 @@ extern "C" {
 // -----------------------------------------------------------------------------
 //  Local Values (GOM)
 // -----------------------------------------------------------------------------
+  void ufo_geovals_setup_f90(F90goms &, const F90locs &, const eckit::Configuration * const *);
   void ufo_geovals_create_f90(F90goms &);
   void ufo_geovals_delete_f90(F90goms &);
   void ufo_geovals_zero_f90(const F90goms &);
@@ -123,10 +124,6 @@ extern "C" {
                                   const util::DateTime * const *, 
                                   const util::DateTime * const *,
                                   F90locs &);
-  void ufo_obsdb_getgeovals_f90(const F90odb &, const eckit::Configuration * const *,
-                                const util::DateTime * const *, 
-                                const util::DateTime * const *,
-                                F90goms &);
   void ufo_obsdb_generate_f90(const F90odb &, const int &, const char *,
                              const eckit::Configuration * const *, const util::DateTime * const *,
                              const util::Duration * const *, const int &, int &);
