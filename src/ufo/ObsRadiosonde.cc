@@ -27,7 +27,7 @@ ObsRadiosonde::ObsRadiosonde(const ObsSpace & odb, const eckit::Configuration & 
 {
   const eckit::Configuration * configc = &config;
   ufo_radiosonde_setup_f90(keyOperRadiosonde_, &configc);
-  const std::vector<std::string> vv{"u","v"};
+  const std::vector<std::string> vv{"prse","tv"};
   varin_.reset(new oops::Variables(vv));
   oops::Log::trace() << "ObsRadiosonde created." << std::endl;
 }
@@ -42,7 +42,7 @@ ObsRadiosonde::~ObsRadiosonde() {
 // -----------------------------------------------------------------------------
 
 void ObsRadiosonde::obsEquiv(const GeoVaLs & gom, ObsVector & ovec,
-                         const ObsBias & bias) const {
+                             const ObsBias & bias) const {
   ufo_radiosonde_t_eqv_f90(gom.toFortran(), odb_.toFortran(), ovec.toFortran(), bias.toFortran());
 }
 
