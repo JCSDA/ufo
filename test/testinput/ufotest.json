@@ -12,16 +12,16 @@
         "ObsType": "Radiance",
         "ObsData": {
           "ObsDataIn": {
-            "obsfile": "Data/amsua_n19_wprofiles.nc4"
+            "obsfile": "Data/amsua_n19_obs.nc4"
           }
         },
         "GeoVaLs": {
           "norm": "249.06991902297807",
-          "filename": "Data/amsua_n19_wprofiles.nc4",
+          "filename": "Data/amsua_n19_geovals.nc4",
           "nvars": "28",
           "variables": ["virtual_temperature, humidity_mixing_ratio, air_pressure, air_pressure_levels, mass_concentration_of_ozone_in_air, mass_concentration_of_carbon_dioxide_in_air, atmosphere_mass_content_of_cloud_liquid_water, atmosphere_mass_content_of_cloud_ice, effective_radius_of_cloud_liquid_water_particle, effective_radius_of_cloud_ice_particle, Water_Fraction,Land_Fraction,Ice_Fraction,Snow_Fraction,Water_Temperature,Land_Temperature,Ice_Temperature,Snow_Temperature,Vegetation_Fraction,Sfc_Wind_Speed,Sfc_Wind_Direction,Lai,Soil_Moisture,Soil_Temperature,Land_Type_Index,Vegetation_Type,Soil_Type, Snow_Depth"]
         },
-        "rmsequiv": "253.803797241769",
+        "rmsequiv": "228.32019688865083",
         "tolerance": "999."
       },
       {

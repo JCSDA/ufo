@@ -324,9 +324,6 @@ self%linit = .true.
 
 call nc_diag_read_close(filename)
 
-print *, 'nobs: ', self%nobs
-call ufo_geovals_print(self,1)
-
 end subroutine ufo_geovals_read_netcdf
 
 ! ------------------------------------------------------------------------------

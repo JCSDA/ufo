@@ -59,7 +59,7 @@ contains
 
     ! Profile dimensions
     !** UFO to provide N_LAYERS, N_ABSORBERS, N_CLOUDS, N_AEROSOLS
-    INTEGER, PARAMETER :: N_PROFILES  = 23 !806  !** required because of the rank of the atm and sfc structures
+    INTEGER, PARAMETER :: N_PROFILES  = 806  !** required because of the rank of the atm and sfc structures
     INTEGER, PARAMETER :: N_LAYERS    = 71 !64 !** UFO  !** need a way to populate this... 
     INTEGER, PARAMETER :: N_ABSORBERS = 3  !** UFO
     INTEGER, PARAMETER :: N_CLOUDS    = 2  !** UFO
@@ -129,7 +129,8 @@ contains
 
     integer              :: nobs
     integer              :: nlocs
-    real(fp) :: rmse
+    real(fp)              :: rmse
+    real(fp), allocatable :: diff(:,:)
 
     ! Program header
     ! --------------
@@ -352,33 +353,31 @@ contains
        ! select the needed variables for outputs.  These variables are contained
        ! in the structure RTSolution.
 
+       allocate(diff(n_channels,n_profiles))
        rmse = 0
        DO m = 1, N_PROFILES
-          WRITE( *,'(//7x,"Profile ",i0," output for ",a )') m, TRIM(Sensor_Id(n))
           DO l = 1, n_Channels
-!             WRITE( *, '(/5x,"Channel ",i0," results")') chinfo(n)%Sensor_Channel(l)
-             !CALL CRTM_RTSolution_Inspect(rts(l,m))
-             !print '(A,I4,A2,F12.3)', '[Ch] TB: [', chinfo(n)%Sensor_Channel(l), '] ', rts(l,m)%Brightness_Temperature
-             print *, rts(l,m)%Brightness_Temperature, Radiance%datachan(m,l)%tbobs - Radiance%datachan(m,l)%omgnbc
+             diff(l,m) = rts(l,m)%Brightness_Temperature - (Radiance%datachan(m,l)%tbobs - Radiance%datachan(m,l)%omgnbc)
+!             print *, rts(l,m)%Brightness_Temperature, Radiance%datachan(m,l)%tbobs - Radiance%datachan(m,l)%omgnbc
              rmse = rmse + (Radiance%datachan(m,l)%tbobs - Radiance%datachan(m,l)%omgnbc) * (Radiance%datachan(m,l)%tbobs - Radiance%datachan(m,l)%omgnbc)
           END DO
+          WRITE( *,'(//7x,"Profile ",i0," output for ",a, " difference:",f12.6 )') m, TRIM(Sensor_Id(n)), maxval(abs(diff(:,m)))
        END DO
+       print *, 'Max difference: ', maxval(abs(diff))
+       deallocate(diff)
 
        rmse = sqrt(rmse / (n_profiles * n_channels))
        print *, 'rmse: ', rmse
-       print *, 'lon: ', Radiance%datafix(12)%lon, ', lat: ', Radiance%datafix(12)%lat
 
        ! output to hofx structure   
        hofx%values(:) = 0.0
        i = 1
        do m = 1, N_PROFILES
          do l = 1, n_Channels
-           hofx%values(i) = rts(l,m)%Brightness_Temperature - (Radiance%datachan(m,l)%tbobs - Radiance%datachan(m,l)%omgnbc) !AS: I'm guessing here.
+           hofx%values(i) = rts(l,m)%Brightness_Temperature
            i = i + 1
          enddo
-         print *, m, ' profile: ', minval(hofx%values( (m-1)*n_channels+1 : m*n_channels)), maxval(hofx%values( (m-1)*n_channels+1 : m*n_channels))
        enddo
-       print *, 'maxdiff: ', minval(hofx%values), maxval(hofx%values)
        ! ==========================================================================
        ! STEP 9. **** CLEAN UP FOR NEXT SENSOR ****
        !

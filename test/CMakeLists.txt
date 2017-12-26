@@ -23,7 +23,8 @@ ecbuild_add_resources( TARGET ufo_test_scripts
 
 # Create Data directory for test data and symlink files
 list( APPEND ufo_test_data
-  amsua_n19_wprofiles.nc4
+  amsua_n19_obs.nc4
+  amsua_n19_geovals.nc4
   diag_t_01_wprofiles.nc4
 )
 
