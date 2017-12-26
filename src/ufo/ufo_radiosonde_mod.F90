@@ -76,7 +76,7 @@ end function vert_interp
 subroutine ufo_radiosonde_t_eqv(geovals, obss, hofx)
 use raobDiag_mod, only: RaobDiag
 use ufo_obs_data_mod, only: Radiosonde
-
+use ufo_vars_mod, only: var_prsl, var_tv
 implicit none
 type(ufo_geovals), intent(in)    :: geovals
 type(obs_data),    intent(inout) :: obss
@@ -94,7 +94,6 @@ real(kind_real) :: rmse
 
 logical :: lfound
 type(ufo_geoval) :: geoval_pr, geoval_tv
-character(MAXVARLEN) :: varname
 
 ! Get observations from obs-structure
 nobs = obss%nobs
@@ -113,25 +112,25 @@ print *, 'rmse=', sqrt(rmse/real(nobs, kind_real))
 
 if (nobs /= geovals%nobs) then
   print *, myname_, ' error: nobs inconsistent!'
+  stop 6
 endif
 
-varname = 'LogPressure'
-lfound =  ufo_geovals_get_var(geovals, varname, geoval_pr)
-if (lfound) then
-  varname = 'Virtual temperature'
-  lfound = ufo_geovals_get_var(geovals, varname, geoval_tv)
-  if (lfound) then
-    do iobs = 1, nobs
-      z = log(pres(iobs)/10.)
-      dz = interp_weight(z, geoval_pr%vals(:,iobs), geoval_pr%nval)
-      hofx%values(iobs) = vert_interp(geoval_tv%vals(:,iobs), geoval_tv%nval, dz)
-    enddo
-  else
-    print *, myname_, trim(varname), ' doesnt exist'
-  endif
-else
-  print *, myname_, trim(varname), ' doesnt exist'
+if (.not. ufo_geovals_get_var(geovals, var_prsl, geoval_pr)) then
+  print *, myname_, trim(var_prsl), ' doesnt exist'
+  stop 5
 endif
+
+if (.not. ufo_geovals_get_var(geovals, var_tv, geoval_tv)) then
+  print *, myname_, trim(var_tv), ' doesnt exist'
+  stop 5
+endif
+
+do iobs = 1, nobs
+  z = log(pres(iobs)/10.)
+  dz = interp_weight(z, geoval_pr%vals(:,iobs), geoval_pr%nval)
+  hofx%values(iobs) = vert_interp(geoval_tv%vals(:,iobs), geoval_tv%nval, dz)
+enddo
+
 print *, myname_, ' radiosonde t test: max diff: ', maxval(abs(hofx%values-(obs-omf))/abs(hofx%values))
 
 deallocate(obs, omf, pres)

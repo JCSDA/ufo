@@ -60,6 +60,7 @@ allocate(cvars(nvar))
 svars = config_get_string(c_vars,len(svars),"variables")
 read(svars,*) cvars
 call ufo_vars_setup(vars, cvars)
+deallocate(cvars)
 
 call ufo_geovals_init(self)
 call ufo_geovals_setup(self, vars, locs%nlocs)
@@ -167,26 +168,31 @@ type(c_ptr), intent(in)    :: c_conf
 
 type(ufo_geovals), pointer :: self
 
-character(128) :: filename
+integer :: nvar
+character(len=max_string) :: svars
+character(len=MAXVARLEN), allocatable :: cvars(:)
+type(ufo_vars) :: vars
 
+character(max_string) :: filename
+
+call ufo_geovals_registry%init()
+call ufo_geovals_registry%add(c_key_self)
 call ufo_geovals_registry%get(c_key_self, self)
+
+!> read variables
+nvar = config_get_int(c_conf, "nvars")
+allocate(cvars(nvar))
+svars = config_get_string(c_conf,len(svars),"variables")
+read(svars,*) cvars
+call ufo_vars_setup(vars, cvars)
+deallocate(cvars)
 
 ! read filename for config
 filename = config_get_string(c_conf,len(filename),"filename")
 
-if (filename == 'Data/amsua_n19_wprofiles.nc4') then
-  call ufo_geovals_read_rad_netcdf(self, filename)
-elseif (filename == 'Data/diag_t_01_wprofiles.nc4') then
-  call ufo_geovals_read_raob_t_netcdf(self, filename)
-elseif (filename == 'Data/diag_q_01_wprofiles.nc4') then
-  call ufo_geovals_read_q_netcdf(self, filename)
-elseif (filename == 'Data/diag_uv_01_wprofiles.nc4') then
-  call ufo_geovals_read_uv_netcdf(self, filename)
-elseif (filename == 'Data/diag_ps_01_wprofiles.nc4') then
-  call ufo_geovals_read_ps_netcdf(self, filename)
-else
-  print *, 'Error: dont know how to read ', trim(filename)
-endif
+! read geovals
+call ufo_geovals_read_netcdf(self, filename, vars)
+
 end subroutine ufo_geovals_read_file_c
 
 ! ------------------------------------------------------------------------------

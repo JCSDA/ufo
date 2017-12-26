@@ -11,9 +11,12 @@ implicit none
 private
 public :: ufo_vars, ufo_vars_setup, ufo_vars_clone, ufo_vars_delete
 public :: ufo_vars_getindex, ufo_vars_nvars
-public :: MAXVARLEN
 
-integer, parameter :: MAXVARLEN=24
+integer, parameter, public :: MAXVARLEN=56
+character(len=MAXVARLEN), public :: var_tv   = "virtual_temperature"
+character(len=MAXVARLEN), public :: var_prsl = "atmosphere_ln_pressure_coordinate"
+
+
 ! ------------------------------------------------------------------------------
 
 !> Fortran derived type to represent model variables
