@@ -27,7 +27,18 @@ ObsRadiance::ObsRadiance(const ObsSpace & odb, const eckit::Configuration & conf
 {
   const eckit::Configuration * configc = &config;
   ufo_radiance_setup_f90(keyOperRadiance_, &configc);
-  const std::vector<std::string> vv{"u","v"};
+  const std::vector<std::string> vv{"virtual_temperature", "humidity_mixing_ratio", "air_pressure", 
+                                    "air_pressure_levels", "mass_concentration_of_ozone_in_air", 
+                                    "mass_concentration_of_carbon_dioxide_in_air", 
+                                    "atmosphere_mass_content_of_cloud_liquid_water", 
+                                    "atmosphere_mass_content_of_cloud_ice", 
+                                    "effective_radius_of_cloud_liquid_water_particle", 
+                                    "effective_radius_of_cloud_ice_particle", 
+                                    "Water_Fraction", "Land_Fraction", "Ice_Fraction", "Snow_Fraction",
+                                    "Water_Temperature", "Land_Temperature", "Ice_Temperature", "Snow_Temperature",
+                                    "Vegetation_Fraction", "Sfc_Wind_Speed", "Sfc_Wind_Direction", "Lai",
+                                    "Soil_Moisture", "Soil_Temperature", "Land_Type_Index", "Vegetation_Type",
+                                    "Soil_Type", "Snow_Depth"};
   varin_.reset(new oops::Variables(vv));
   oops::Log::trace() << "ObsRadiance created." << std::endl;
 }

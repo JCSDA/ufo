@@ -27,7 +27,7 @@ ObsRadiosonde::ObsRadiosonde(const ObsSpace & odb, const eckit::Configuration & 
 {
   const eckit::Configuration * configc = &config;
   ufo_radiosonde_setup_f90(keyOperRadiosonde_, &configc);
-  const std::vector<std::string> vv{"prse","tv"};
+  const std::vector<std::string> vv{"virtual_temperature", "atmosphere_ln_pressure_coordinate"};
   varin_.reset(new oops::Variables(vv));
   oops::Log::trace() << "ObsRadiosonde created." << std::endl;
 }

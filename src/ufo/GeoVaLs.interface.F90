@@ -180,9 +180,9 @@ call ufo_geovals_registry%add(c_key_self)
 call ufo_geovals_registry%get(c_key_self, self)
 
 !> read variables
-nvar = config_get_int(c_conf, "nvars")
+nvar = config_get_int(c_conf, "Variables.nvars")
 allocate(cvars(nvar))
-svars = config_get_string(c_conf,len(svars),"variables")
+svars = config_get_string(c_conf,len(svars),"Variables.variables")
 read(svars,*) cvars
 call ufo_vars_setup(vars, cvars)
 deallocate(cvars)
