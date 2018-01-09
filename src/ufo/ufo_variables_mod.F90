@@ -42,6 +42,7 @@ character(len=MAXVARLEN), public :: var_sfc_soilt   = "Soil_Temperature"
 character(len=MAXVARLEN), public :: var_sfc_landtyp = "Land_Type_Index"
 character(len=MAXVARLEN), public :: var_sfc_vegtyp  = "Vegetation_Type"
 character(len=MAXVARLEN), public :: var_sfc_soiltyp = "Soil_Type"
+character(len=MAXVARLEN), public :: var_seaicefrac  = "ice_concentration"
 ! ------------------------------------------------------------------------------
 
 !> Fortran derived type to represent model variables

@@ -116,6 +116,42 @@ end subroutine ufo_geovals_zero_c
 
 ! ------------------------------------------------------------------------------
 
+subroutine ufo_geovals_setup_random_c(c_key_self, c_conf) bind(c,name='ufo_geovals_setup_random_f90')
+use config_mod
+implicit none
+integer(c_int), intent(in) :: c_key_self
+type(c_ptr), intent(in)    :: c_conf
+
+type(ufo_geovals), pointer :: self
+
+integer :: nvar
+character(len=max_string) :: svars
+character(len=MAXVARLEN), allocatable :: cvars(:)
+type(ufo_vars) :: vars
+
+integer :: nobs
+
+call ufo_geovals_registry%init()
+call ufo_geovals_registry%add(c_key_self)
+call ufo_geovals_registry%get(c_key_self, self)
+
+!> read variables
+nvar = config_get_int(c_conf, "Variables.nvars")
+allocate(cvars(nvar))
+svars = config_get_string(c_conf,len(svars),"Variables.variables")
+read(svars,*) cvars
+call ufo_vars_setup(vars, cvars)
+deallocate(cvars)
+
+! randomize
+nobs = config_get_int(c_conf, "nobs")
+call ufo_geovals_setup(self, vars, nobs)
+call ufo_geovals_random(self)
+
+end subroutine ufo_geovals_setup_random_c
+
+! ------------------------------------------------------------------------------
+
 subroutine ufo_geovals_random_c(c_key_self) bind(c,name='ufo_geovals_random_f90')
 implicit none
 integer(c_int), intent(in) :: c_key_self
