@@ -15,6 +15,7 @@
 #include "util/abor1_cpp.h"
 #include "util/Logger.h"
 
+#include "Locations.h"
 //#include "ObsVector.h"
 
 namespace ufo {
@@ -46,6 +47,16 @@ void ObsSpace::getdb(const std::string & col, int & keyData) const {
 // -----------------------------------------------------------------------------
 
 void ObsSpace::putdb(const std::string & col, const int & keyData) const {
+}
+
+// -----------------------------------------------------------------------------
+
+Locations * ObsSpace::locations(const util::DateTime & t1, const util::DateTime & t2) const {
+  const util::DateTime * p1 = &t1;
+  const util::DateTime * p2 = &t2;
+  int keylocs;
+  ufo_obsdb_getlocations_f90(keyOspace_, &p1, &p2, keylocs);
+  return new Locations(keylocs);
 }
 
 // -----------------------------------------------------------------------------

@@ -6,6 +6,7 @@
 # Create Data directory for test input config and symlink all files
 list( APPEND ufo_test_input
   testinput/ufotest.json
+  testinput/ufocrtm.json
 )
 
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/testinput)
@@ -42,11 +43,11 @@ ecbuild_add_test( TARGET  test_ufo_geovals
                   ARGS    "testinput/ufotest.json"
                   LIBS    ufo )
 
-ecbuild_add_test( TARGET  test_ufo_locations
-                  BOOST
-                  SOURCES mains/TestLocations.cc
-                  ARGS    "testinput/ufotest.json"
-                  LIBS    ufo )
+#ecbuild_add_test( TARGET  test_ufo_locations
+#                  BOOST
+#                  SOURCES mains/TestLocations.cc
+#                  ARGS    "testinput/ufotest.json"
+#                  LIBS    ufo )
 
 ecbuild_add_test( TARGET test_ufo_observationspace
                   BOOST

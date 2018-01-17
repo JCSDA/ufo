@@ -12,7 +12,6 @@
 #include <string>
 
 #include "Fortran.h"
-#include "util/DateTime.h"
 #include "util/ObjectCounter.h"
 #include "util/Printable.h"
 
@@ -25,7 +24,7 @@ namespace oops {
 }
 
 namespace ufo {
-  class ObsSpace;
+  class Locations;
 
 /// GeoVaLs: geophysical values at locations
 
@@ -34,8 +33,7 @@ class GeoVaLs : public util::Printable,
  public:
   static const std::string classname() {return "ufo::GeoVaLs";}
 
-  GeoVaLs(const ObsSpace &, const oops::Variables &,
-          const util::DateTime &, const util::DateTime &);
+  GeoVaLs(const Locations &, const oops::Variables &);
   GeoVaLs(const eckit::Configuration &);
 
   explicit GeoVaLs(): keyGVL_(0) {}
