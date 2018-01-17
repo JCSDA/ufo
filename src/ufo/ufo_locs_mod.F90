@@ -13,7 +13,7 @@ use kinds
 
 implicit none
 private
-public :: ufo_locs, ufo_locs_setup, ufo_locs_delete
+public :: ufo_locs, ufo_locs_create, ufo_locs_setup, ufo_locs_delete
 
 ! ------------------------------------------------------------------------------
 
@@ -25,9 +25,24 @@ type :: ufo_locs
   real(kind_real), allocatable, dimension(:) :: time    !< obs-time
 end type ufo_locs
 
-
 ! ------------------------------------------------------------------------------
 contains
+! ------------------------------------------------------------------------------
+
+subroutine ufo_locs_create(self, nlocs, lats, lons)
+implicit none
+type(ufo_locs), intent(inout) :: self
+integer, intent(in)           :: nlocs
+real(kind_real), intent(in) :: lats(nlocs)
+real(kind_real), intent(in) :: lons(nlocs)
+
+self%nlocs = nlocs
+allocate(self%lat(nlocs), self%lon(nlocs), self%time(nlocs))
+self%lat(:) = lats(:)
+self%lon(:) = lons(:)
+self%time(:) = 0.0
+
+end subroutine ufo_locs_create
 
 ! ------------------------------------------------------------------------------
 
@@ -40,9 +55,9 @@ call ufo_locs_delete(self)
 
 self%nlocs = nlocs
 allocate(self%lat(nlocs), self%lon(nlocs), self%time(nlocs))
-self%lat = 0.
-self%lon = 0.
-self%time = 0.
+self%lat(:) = 0.0
+self%lon(:) = 0.0
+self%time(:) = 0.0
 
 end subroutine ufo_locs_setup
 

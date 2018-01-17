@@ -12,6 +12,16 @@ namespace ufo {
 
 // -----------------------------------------------------------------------------
 
+Locations::Locations(const eckit::Configuration & conf) {
+  std::vector<double> lats = conf.getDoubleVector("lats");
+  std::vector<double> lons = conf.getDoubleVector("lons");
+  ASSERT(lats.size() == lons.size());
+  const int nloc = lats.size();
+  ufo_locs_create_f90(keyLoc_, nloc, &lats[0], &lons[0]);
+}
+
+// -----------------------------------------------------------------------------
+
 Locations::~Locations() {
   ufo_locs_delete_f90(keyLoc_);
 }

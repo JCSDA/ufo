@@ -25,6 +25,7 @@ class Locations : public util::Printable,
   static const std::string classname() {return "ufo::Locations";}
 
   explicit Locations(const F90locs key): keyLoc_(key) {}
+  explicit Locations(const eckit::Configuration &);
   ~Locations();
 
   int nobs() const;

@@ -6,6 +6,10 @@
      "nvars": "1",
      "variables": ["testvar"]
   },
+  "Locations": {
+    "lats": [45.0, 40.0],
+    "lons": [0.0, -100.0]
+  },
   "Observations": {
     "ObsTypes": [
       {
