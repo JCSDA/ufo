@@ -2,24 +2,20 @@
   "test_framework_runtime_config": "--log_level=test_suite",
   "window_begin": "2010-01-01T00:00:00Z",
   "window_end": "2010-01-02T00:00:00Z",
-  "Variables": {
-     "nvars": "1",
-     "variables": ["testvar"]
-  },
   "Observations": {
     "ObsTypes": [
       {
         "ObsType": "Radiance",
         "ObsData": {
           "ObsDataIn": {
-            "obsfile": "Data/amsua_n19_wprofiles.nc4"
+            "obsfile": "Data/amsua_n19_obs.nc4"
           }
         },
         "GeoVaLs": {
-          "norm": "280.87991270213405",
-          "filename": "Data/amsua_n19_wprofiles.nc4"
+          "norm": "249.06991902297807",
+          "filename": "Data/amsua_n19_geovals.nc4"
         },
-        "rmsequiv": "253.803797241769",
+        "rmsequiv": "228.32019688865083",
         "tolerance": "999."
       },
       {

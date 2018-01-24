@@ -11,9 +11,37 @@ implicit none
 private
 public :: ufo_vars, ufo_vars_setup, ufo_vars_clone, ufo_vars_delete
 public :: ufo_vars_getindex, ufo_vars_nvars
-public :: MAXVARLEN
 
-integer, parameter :: MAXVARLEN=24
+integer, parameter, public :: MAXVARLEN=56
+character(len=MAXVARLEN), public :: var_tv   = "virtual_temperature"
+character(len=MAXVARLEN), public :: var_prsl = "atmosphere_ln_pressure_coordinate"
+character(len=MAXVARLEN), public :: var_mixr = "humidity_mixing_ratio"
+character(len=MAXVARLEN), public :: var_prs  = "air_pressure"
+character(len=MAXVARLEN), public :: var_prsi = "air_pressure_levels"
+character(len=MAXVARLEN), public :: var_oz   = "mass_concentration_of_ozone_in_air"
+character(len=MAXVARLEN), public :: var_co2  = "mass_concentration_of_carbon_dioxide_in_air"
+character(len=MAXVARLEN), public :: var_clw  = "atmosphere_mass_content_of_cloud_liquid_water"
+character(len=MAXVARLEN), public :: var_cli  = "atmosphere_mass_content_of_cloud_ice"
+character(len=MAXVARLEN), public :: var_clwefr = "effective_radius_of_cloud_liquid_water_particle"
+character(len=MAXVARLEN), public :: var_cliefr = "effective_radius_of_cloud_ice_particle"
+character(len=MAXVARLEN), public :: var_sfc_wfrac = "Water_Fraction"
+character(len=MAXVARLEN), public :: var_sfc_lfrac = "Land_Fraction"
+character(len=MAXVARLEN), public :: var_sfc_ifrac = "Ice_Fraction"
+character(len=MAXVARLEN), public :: var_sfc_sfrac = "Snow_Fraction"
+character(len=MAXVARLEN), public :: var_sfc_wtmp  = "Water_Temperature"
+character(len=MAXVARLEN), public :: var_sfc_ltmp  = "Land_Temperature"
+character(len=MAXVARLEN), public :: var_sfc_itmp  = "Ice_Temperature"
+character(len=MAXVARLEN), public :: var_sfc_stmp  = "Snow_Temperature"
+character(len=MAXVARLEN), public :: var_sfc_sdepth  = "Snow_Depth"
+character(len=MAXVARLEN), public :: var_sfc_vegfrac = "Vegetation_Fraction"
+character(len=MAXVARLEN), public :: var_sfc_wspeed  = "Sfc_Wind_Speed"
+character(len=MAXVARLEN), public :: var_sfc_wdir    = "Sfc_Wind_Direction"
+character(len=MAXVARLEN), public :: var_sfc_lai     = "Lai"
+character(len=MAXVARLEN), public :: var_sfc_soilm   = "Soil_Moisture"
+character(len=MAXVARLEN), public :: var_sfc_soilt   = "Soil_Temperature"
+character(len=MAXVARLEN), public :: var_sfc_landtyp = "Land_Type_Index"
+character(len=MAXVARLEN), public :: var_sfc_vegtyp  = "Vegetation_Type"
+character(len=MAXVARLEN), public :: var_sfc_soiltyp = "Soil_Type"
 ! ------------------------------------------------------------------------------
 
 !> Fortran derived type to represent model variables
