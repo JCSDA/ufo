@@ -244,6 +244,8 @@ integer, allocatable, dimension(:) :: vardims
 real(kind_real), allocatable :: fieldr2d(:,:), fieldr1d(:)
 integer, allocatable :: fieldi2d(:,:), fieldi1d(:)
 
+character(max_string) :: err_msg
+
 ! open netcdf file and read dimensions
 call nc_diag_read_init(filename, iunit)
 nobs = nc_diag_read_get_dim(iunit,'nobs')
@@ -253,8 +255,8 @@ call ufo_geovals_setup(self, vars, nobs)
 
 do ivar = 1, vars%nv
   if (.not. nc_diag_read_check_var(iunit, vars%fldnames(ivar))) then
-     print *, 'ERROR reading geovals: var ', trim(vars%fldnames(ivar)), ' doesnt exist'
-     stop 1
+     write(err_msg,*) 'ufo_geovals_read_netcdf: var ', trim(vars%fldnames(ivar)), ' doesnt exist'
+     call abor1_ftn(err_msg)
   endif
   !> get dimensions of variable
   if (allocated(vardims)) deallocate(vardims)
@@ -263,10 +265,7 @@ do ivar = 1, vars%nv
   vartype = nc_diag_read_get_var_type(iunit, vars%fldnames(ivar))
   !> read 1d vars (only double precision and integer for now)
   if (nvardim == 1) then
-    if (vardims(1) /= nobs) then
-       print *, 'ERROR reading geovals: var dim /= nobs'
-       stop 2
-    endif
+    if (vardims(1) /= nobs) call abor1_ftn('ufo_geovals_read_netcdf: var dim /= nobs')
     nval = 1
 
     !> allocate geoval for this variable
@@ -284,15 +283,11 @@ do ivar = 1, vars%nv
        self%geovals(ivar)%vals(1,:) = fieldi1d
        deallocate(fieldi1d)
     else
-       print *, 'ERROR reading geovals: only can read double and int'
-       stop 3
+       call abor1_ftn('ufo_geovals_read_netcdf: can only read double and int')
     endif
   !> read 2d vars (only double precision and integer for now)
   elseif (nvardim == 2) then
-    if (vardims(2) /= nobs) then
-       print *, 'ERROR reading geovals: var dim /= nobs'
-       stop 2
-    endif
+    if (vardims(2) /= nobs) call abor1_ftn('ufo_geovals_read_netcdf: var dim /= nobs')
     nval = vardims(1)
 
     !> allocate geoval for this variable
@@ -310,13 +305,11 @@ do ivar = 1, vars%nv
        self%geovals(ivar)%vals = fieldi2d
        deallocate(fieldi2d)
     else
-       print *, 'ERROR reading geovals: only can read double and int'
-       stop 3
+       call abor1_ftn('ufo_geovals_read_netcdf: can only read double and int')
     endif
   !> only 1d & 2d vars
   else
-    print *, 'ERROR reading geovals: only can read 1d and 2d fields'
-    stop 4
+    call abor1_ftn('ufo_geovals_read_netcdf: can only read 1d and 2d fields')
   endif
 enddo
 

@@ -85,6 +85,8 @@ type(obs_vector),  intent(inout) :: hofx
 character(len=*), parameter :: myname_="ufo_radiosonde_t_eqv"
 integer :: iunit
 
+character(max_string) :: err_msg
+
 real(kind_real), allocatable :: omf(:), obs(:)
 real(kind_real), allocatable :: pres(:)
 
@@ -110,18 +112,18 @@ enddo
 print *, 'rmse=', sqrt(rmse/real(nobs, kind_real))
 
 if (nobs /= geovals%nobs) then
-  print *, myname_, ' error: nobs inconsistent!'
-  stop 6
+  write(err_msg,*) myname_, ' error: nobs inconsistent!'
+  call abor1_ftn(err_msg)
 endif
 
 if (.not. ufo_geovals_get_var(geovals, var_prsl, geoval_pr)) then
-  print *, myname_, trim(var_prsl), ' doesnt exist'
-  stop 5
+  write(err_msg,*) myname_, trim(var_prsl), ' doesnt exist'
+  call abor1_ftn(err_msg)
 endif
 
 if (.not. ufo_geovals_get_var(geovals, var_tv, geoval_tv)) then
-  print *, myname_, trim(var_tv), ' doesnt exist'
-  stop 5
+  write(err_msg,*) myname_, trim(var_tv), ' doesnt exist'
+  call abor1_ftn(err_msg)
 endif
 
 do iobs = 1, nobs
