@@ -14,6 +14,7 @@
 #include "GeoVaLs.h"
 #include "Locations.h"
 #include "ObsBias.h"
+#include "ObsBiasIncrement.h"
 #include "ObsSpace.h"
 #include "ObsVector.h"
 #include "ObsCheck.h"
