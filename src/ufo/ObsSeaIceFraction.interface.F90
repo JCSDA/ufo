@@ -79,19 +79,60 @@ integer(c_int), intent(in) :: c_bias
 
 type(ufo_geovals), pointer  :: geovals
 type(obs_vector), pointer :: hofx
-type(ufo_obs_seaicefrac), pointer :: obss
 
 character(len=*), parameter :: myname_="ufo_seaicefrac_eqv_c"
 
 ! Get pointers to geovals, observations and hofx
 call ufo_geovals_registry%get(c_key_geovals,geovals)
-call ufo_obs_seaicefrac_registry%get(c_key_obsspace,obss)
 call ufo_obs_vect_registry%get(c_key_hofx,hofx)
 
-call ufo_seaicefrac_eqv(geovals, obss, hofx)
+call ufo_seaicefrac_eqv(geovals, hofx)
 
 end subroutine ufo_seaicefrac_eqv_c
 
 ! ------------------------------------------------------------------------------
+
+subroutine ufo_seaicefrac_eqv_tl_c(c_key_geovals, c_key_hofx) bind(c,name='ufo_seaicefrac_eqv_tl_f90')
+
+implicit none
+integer(c_int), intent(in) :: c_key_geovals
+integer(c_int), intent(in) :: c_key_hofx
+
+type(ufo_geovals), pointer  :: geovals
+type(obs_vector), pointer :: hofx
+
+character(len=*), parameter :: myname_="ufo_seaicefrac_eqv_tl_c"
+
+! Get pointers to geovals, observations and hofx
+call ufo_geovals_registry%get(c_key_geovals,geovals)
+call ufo_obs_vect_registry%get(c_key_hofx,hofx)
+
+call ufo_seaicefrac_eqv_tl(geovals, hofx)
+
+end subroutine ufo_seaicefrac_eqv_tl_c
+
+! ------------------------------------------------------------------------------
+
+subroutine ufo_seaicefrac_eqv_ad_c(c_key_geovals, c_key_hofx) bind(c,name='ufo_seaicefrac_eqv_ad_f90')
+
+implicit none
+integer(c_int), intent(in) :: c_key_geovals
+integer(c_int), intent(in) :: c_key_hofx
+
+type(ufo_geovals), pointer  :: geovals
+type(obs_vector), pointer :: hofx
+
+character(len=*), parameter :: myname_="ufo_seaicefrac_eqv_ad_c"
+
+! Get pointers to geovals, observations and hofx
+call ufo_geovals_registry%get(c_key_geovals,geovals)
+call ufo_obs_vect_registry%get(c_key_hofx,hofx)
+
+call ufo_seaicefrac_eqv_ad(geovals, hofx)
+
+end subroutine ufo_seaicefrac_eqv_ad_c
+
+! ------------------------------------------------------------------------------
+
   
 end module ufo_seaicefrac_mod_c

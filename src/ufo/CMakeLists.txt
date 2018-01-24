@@ -19,6 +19,8 @@ ObsVector.h
 #ObsRadiosonde.h
 ObsSeaIceFraction.cc
 ObsSeaIceFraction.h
+ObsSeaIceFractionTLAD.cc
+ObsSeaIceFractionTLAD.h
 UfoTrait.h
 random_f.cc
 random_f.h

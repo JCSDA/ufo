@@ -97,6 +97,9 @@ extern "C" {
   void ufo_seaicefrac_setup_f90(F90hop &, const eckit::Configuration * const *);
   void ufo_seaicefrac_delete_f90(F90hop &);
   void ufo_seaicefrac_eqv_f90(const F90goms &, const F90odb &, const F90ovec &, const F90obias &);
+  void ufo_seaicefrac_eqv_tl_f90(const F90goms &, const F90ovec &);
+  void ufo_seaicefrac_eqv_ad_f90(const F90goms &, const F90ovec &);
+
 
 // -----------------------------------------------------------------------------
 //  Observation Vectors

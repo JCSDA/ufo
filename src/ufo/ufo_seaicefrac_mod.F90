@@ -7,65 +7,122 @@
 
 module ufo_seaicefrac_mod
   
-  use ufo_obs_seaicefrac_mod
-  use ufo_obs_vectors
-  use ufo_vars_mod
-  use ufo_locs_mod
-  use ufo_geovals_mod
-  use kinds
+use ufo_obs_seaicefrac_mod
+use ufo_obs_vectors
+use ufo_vars_mod
+use ufo_locs_mod
+use ufo_geovals_mod
+use kinds
   
-  implicit none
-  public :: ufo_seaicefrac_eqv
-  private
+implicit none
+public :: ufo_seaicefrac_eqv
+public :: ufo_seaicefrac_eqv_tl
+public :: ufo_seaicefrac_eqv_ad
+private
+integer, parameter :: max_string=800
 
-  ! ------------------------------------------------------------------------------
-contains
-  
-  
 ! ------------------------------------------------------------------------------
-subroutine ufo_seaicefrac_eqv(geovals, obss, hofx)
+
+contains
+ 
+! ------------------------------------------------------------------------------
+
+subroutine ufo_seaicefrac_eqv(geovals, hofx)
 implicit none
 type(ufo_geovals), intent(in)    :: geovals
-type(ufo_obs_seaicefrac), intent(inout) :: obss
 type(obs_vector),  intent(inout) :: hofx
 
 character(len=*), parameter :: myname_="ufo_seaicefrac_eqv"
-integer :: iunit
+character(max_string) :: err_msg
 
-real(kind_real), allocatable :: omf(:), obs(:)
-
-integer :: iobs, nobs
-real(kind_real)  :: rmse
-
+integer :: iobs
 type(ufo_geoval) :: geoval
 
-! Get observations from obs-structure
-nobs = obss%nobs
-print *, myname_, ' nobs: ', nobs, geovals%nobs, hofx%nobs
+print *, myname_, ' nobs: ', geovals%nobs, hofx%nobs
 
-if (nobs /= geovals%nobs .or. nobs /= hofx%nobs) then
-  print *, myname_, ' error: nobs inconsistent!'
-  stop 6
+! check if nobs is consistent in geovals & hofx
+if (geovals%nobs /= hofx%nobs) then
+  write(err_msg,*) myname_, ' error: nobs inconsistent!'
+  call abor1_ftn(err_msg)
 endif
 
+! check if sea ice fraction variables is in geovals and get it
 if (.not. ufo_geovals_get_var(geovals, var_seaicefrac, geoval)) then
-  print *, myname_, trim(var_seaicefrac), ' doesnt exist'
-  stop 5
+  write(err_msg,*) myname_, trim(var_seaicefrac), ' doesnt exist'
+  call abor1_ftn(err_msg)
 endif
 
-do iobs = 1, nobs
+! total sea ice fraction obs operator
+do iobs = 1, hofx%nobs
   hofx%values(iobs) = sum(geoval%vals(:,iobs))
 enddo
 
-!rmse = 0.
-!do iobs = 1, nobs
-!  rmse = rmse + (obs(iobs)-omf(iobs))*(obs(iobs)-omf(iobs))
-!enddo
-!print *, 'rmse=', sqrt(rmse/real(nobs, kind_real))
-
-!print *, myname_, ' seaicefrac t test: max diff: ', maxval(abs(hofx%values-(obs-omf))/abs(hofx%values))
-
-
 end subroutine ufo_seaicefrac_eqv
+
+! ------------------------------------------------------------------------------
+
+subroutine ufo_seaicefrac_eqv_tl(geovals, hofx)
+implicit none
+type(ufo_geovals), intent(in)    :: geovals
+type(obs_vector),  intent(inout) :: hofx
+
+character(len=*), parameter :: myname_="ufo_seaicefrac_eqv_tl"
+character(max_string) :: err_msg
+
+integer :: iobs
+type(ufo_geoval) :: geoval
+
+print *, myname_, ' nobs: ', geovals%nobs, hofx%nobs
+
+! check if nobs is consistent in geovals & hofx
+if (geovals%nobs /= hofx%nobs) then
+  write(err_msg,*) myname_, ' error: nobs inconsistent!'
+  call abor1_ftn(err_msg)
+endif
+
+! check if sea ice fraction variables is in geovals and get it
+if (.not. ufo_geovals_get_var(geovals, var_seaicefrac, geoval)) then
+  write(err_msg,*) myname_, trim(var_seaicefrac), ' doesnt exist'
+  call abor1_ftn(err_msg)
+endif
+
+! total sea ice fraction obs operator
+do iobs = 1, hofx%nobs
+  hofx%values(iobs) = sum(geoval%vals(:,iobs))
+enddo
+
+end subroutine ufo_seaicefrac_eqv_tl
+
+! ------------------------------------------------------------------------------
+
+subroutine ufo_seaicefrac_eqv_ad(geovals, hofx)
+implicit none
+type(ufo_geovals), intent(inout) :: geovals
+type(obs_vector),  intent(in)    :: hofx
+
+character(len=*), parameter :: myname_="ufo_seaicefrac_eqv_ad"
+character(max_string) :: err_msg
+
+integer :: iobs
+type(ufo_geoval) :: geoval
+
+! check if nobs is consistent in geovals & hofx
+if (geovals%nobs /= hofx%nobs) then
+  write(err_msg,*) myname_, ' error: nobs inconsistent!'
+  call abor1_ftn(err_msg)
+endif
+
+! check if sea ice fraction variables is in geovals and get it
+if (.not. ufo_geovals_get_var(geovals, var_seaicefrac, geoval)) then
+  write(err_msg,*) myname_, trim(var_seaicefrac), ' doesnt exist'
+  call abor1_ftn(err_msg)
+endif
+
+! total sea ice fraction obs operator
+do iobs = 1, hofx%nobs
+  geoval%vals(:,iobs) = hofx%values(iobs)
+enddo
+
+end subroutine ufo_seaicefrac_eqv_ad
 
 end module ufo_seaicefrac_mod
