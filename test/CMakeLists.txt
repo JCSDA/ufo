@@ -68,6 +68,12 @@ ecbuild_add_test( TARGET  test_ufo_obsoperator
                   ARGS    "testinput/ufotest.json"
                   LIBS    ufo )
 
+ecbuild_add_test( TARGET  test_ufo_obsoperator_tlad
+                  BOOST
+                  SOURCES mains/TestObsOperatorTLAD.cc
+                  ARGS    "testinput/ufotest.json"
+                  LIBS    ufo )
+
 ecbuild_add_test( TARGET  test_ufo_obscheck
                   BOOST
                   SOURCES mains/TestObsCheck.cc
