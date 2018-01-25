@@ -135,9 +135,9 @@ extern "C" {
                                   const util::DateTime * const *, 
                                   const util::DateTime * const *,
                                   F90locs &);
-  void ufo_obsdb_generate_f90(const F90odb &, const int &, const char *,
-                             const eckit::Configuration * const *, const util::DateTime * const *,
-                             const util::Duration * const *, const int &, int &);
+  void ufo_obsdb_generate_f90(const F90odb &, const eckit::Configuration * const *, 
+                              const util::DateTime * const *,
+                              const util::DateTime * const *);
   void ufo_obsdb_nobs_f90(const F90odb &, int &);
 
 // -----------------------------------------------------------------------------

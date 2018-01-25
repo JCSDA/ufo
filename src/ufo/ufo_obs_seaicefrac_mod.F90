@@ -16,7 +16,7 @@ integer, parameter :: max_string=800
 
 public ufo_obs_seaicefrac
 public ufo_obs_seaicefrac_setup, ufo_obs_seaicefrac_delete
-public ufo_obs_seaicefrac_read
+public ufo_obs_seaicefrac_read, ufo_obs_seaicefrac_generate
 public ufo_obs_seaicefrac_getlocs
 
 ! ------------------------------------------------------------------------------
@@ -74,6 +74,31 @@ end subroutine ufo_obs_seaicefrac_delete
 
 ! ------------------------------------------------------------------------------
 
+subroutine ufo_obs_seaicefrac_generate(self, nobs, lat, lon1, lon2)
+implicit none
+type(ufo_obs_seaicefrac), intent(inout) :: self
+integer, intent(in) :: nobs
+real, intent(in) :: lat, lon1, lon2
+
+integer :: i
+
+call ufo_obs_seaicefrac_setup(self, nobs)
+
+self%icefrac(:) = 1.
+self%icetmp(:)  = 0.
+self%qc(:)      = 1.
+
+self%lat(:)     = lat
+do i = 1, nobs
+  self%lon(i) = lon1 + (i-1)*(lon2-lon1)/(nobs-1)
+enddo
+
+print *, 'in random:', self%nobs, self%lon, self%lat
+
+end subroutine ufo_obs_seaicefrac_generate
+
+! ------------------------------------------------------------------------------
+
 subroutine ufo_obs_seaicefrac_read(filename, self)
 use nc_diag_read_mod, only: nc_diag_read_get_var, nc_diag_read_get_dim
 use nc_diag_read_mod, only: nc_diag_read_init, nc_diag_read_close
@@ -115,6 +140,8 @@ self%qc = reshape(ifield, (/nobs/))
 deallocate(field, ifield)
 
 call nc_diag_read_close(filename)
+
+print *, 'in read: ', self%nobs
 
 end subroutine ufo_obs_seaicefrac_read
 
