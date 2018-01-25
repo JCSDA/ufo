@@ -88,7 +88,7 @@ endif
 
 ! total sea ice fraction obs operator
 do iobs = 1, hofx%nobs
-  hofx%values(iobs) = sum(geoval%vals(:,iobs))
+  hofx%values(iobs) = geoval%vals(1,iobs)!sum(geoval%vals(:,iobs))
 enddo
 
 end subroutine ufo_seaicefrac_eqv_tl
@@ -118,10 +118,11 @@ if (.not. ufo_geovals_get_var(geovals, var_seaicefrac, geoval)) then
   call abor1_ftn(err_msg)
 endif
 
-! total sea ice fraction obs operator
+! backward sea ice fraction obs operator
 do iobs = 1, hofx%nobs
-  geoval%vals(:,iobs) = hofx%values(iobs)
+   geovals%geovals(1)%vals(:,iobs) = hofx%values(iobs)
 enddo
+
 
 end subroutine ufo_seaicefrac_eqv_ad
 

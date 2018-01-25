@@ -204,7 +204,6 @@ prod=0.0
 do jo=1,self%nobs
   prod=prod+self%geovals(1)%vals(1,jo)*other%geovals(1)%vals(1,jo)
 enddo
-prod = prod / real(self%nobs,kind_real)
 
 end subroutine ufo_geovals_dotprod
 
@@ -217,8 +216,8 @@ real(kind_real), intent(inout) :: pmin, pmax, prms
 type(ufo_geovals), intent(in) :: self
 
 kobs = self%nobs
-pmin=0. !minval(self%values(:,:))
-pmax=0. !maxval(self%values(:,:))
+pmin=minval(self%geovals(1)%vals)
+pmax=maxval(self%geovals(1)%vals)
 prms=0. !sqrt(sum(self%values(:,:)**2)/real(self%nobs*self%nvar,kind_real))
 
 end subroutine ufo_geovals_minmaxavg
