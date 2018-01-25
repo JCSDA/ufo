@@ -28,15 +28,23 @@ ObsSpace::ObsSpace(const eckit::Configuration & config,
   oops::Log::trace() << "ufo::ObsSpace config  = " << config << std::endl;
 
   const eckit::Configuration * configc = &config;
-  ufo_obsdb_setup_f90(keyOspace_, &configc);
-
   obsname_ = config.getString("ObsType");
+
+  if (obsname_ == "Radiance" || obsname_ == "Radiosonde") 
+    ufo_obsdb_setup_f90(keyOspace_, &configc);
+  else if (obsname_ == "SeaIceFraction")
+    ufo_obsdb_seaice_setup_f90(keyOspace_, &configc);
+
   oops::Log::trace() << "ufo::ObsSpace contructed name = " << obsname_ << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
 ObsSpace::~ObsSpace() {
+  if (obsname_ == "Radiance" || obsname_ == "Radiosonde")
+    ufo_obsdb_delete_f90(keyOspace_);
+  else if (obsname_ == "SeaIceFraction")
+    ufo_obsdb_seaice_delete_f90(keyOspace_);
 }
 
 // -----------------------------------------------------------------------------
@@ -55,11 +63,23 @@ Locations * ObsSpace::locations(const util::DateTime & t1, const util::DateTime 
   const util::DateTime * p1 = &t1;
   const util::DateTime * p2 = &t2;
   int keylocs;
-  ufo_obsdb_getlocations_f90(keyOspace_, &p1, &p2, keylocs);
+  if (obsname_ == "Radiance" || obsname_ == "Radiosonde")
+    ufo_obsdb_getlocations_f90(keyOspace_, &p1, &p2, keylocs);
+  else if (obsname_ == "SeaIceFraction")
+    ufo_obsdb_seaice_getlocations_f90(keyOspace_, &p1, &p2, keylocs);
   return new Locations(keylocs);
 }
 
 // -----------------------------------------------------------------------------
+
+int ObsSpace::nobs() const {
+  int n;
+  if (obsname_ == "Radiance" || obsname_ == "Radiosonde")
+    ufo_obsdb_nobs_f90(keyOspace_, n);
+  else if (obsname_ == "SeaIceFraction")
+    ufo_obsdb_seaice_nobs_f90(keyOspace_, n);
+  return n;
+}
 
 void ObsSpace::generateDistribution(const eckit::Configuration & conf) {
 }

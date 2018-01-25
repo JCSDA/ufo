@@ -18,8 +18,7 @@ namespace ufo {
 ObsVector::ObsVector(const ObsSpace & obsdb)
   : obsdb_(obsdb), keyOvec_(0)
 {
-  int nobs;
-  ufo_obsdb_nobs_f90(obsdb_.toFortran(), nobs); 
+  int nobs = obsdb_.nobs();
   ufo_obsvec_setup_f90(keyOvec_, nobs);
 }
 // -----------------------------------------------------------------------------

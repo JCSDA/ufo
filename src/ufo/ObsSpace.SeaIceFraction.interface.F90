@@ -47,7 +47,7 @@ contains
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_obsdb_setup_c(c_key_self, c_conf) bind(c,name='ufo_obsdb_setup_f90')
+subroutine ufo_obsdb_seaice_setup_c(c_key_self, c_conf) bind(c,name='ufo_obsdb_seaice_setup_f90')
 implicit none
 integer(c_int), intent(inout) :: c_key_self
 type(c_ptr), intent(in)       :: c_conf !< configuration
@@ -63,19 +63,19 @@ else
   fin  = ""
 endif
 MyObsType = trim(config_get_string(c_conf,max_string,"ObsType"))
-write(record,*) 'ufo_obsdb_setup_c: ', trim(MyObsType), ' file in =',trim(fin)
+write(record,*) 'ufo_obsdb_seaice_setup_c: ', trim(MyObsType), ' file in =',trim(fin)
 call fckit_log%info(record)
 
 call ufo_obs_seaicefrac_registry%init()
 call ufo_obs_seaicefrac_registry%add(c_key_self)
 call ufo_obs_seaicefrac_registry%get(c_key_self, self)
-call ufo_obs_seaicefrac_read(trim(fin), self)
+call ufo_obs_seaicefrac_read(fin, self)
 
-end subroutine ufo_obsdb_setup_c
+end subroutine ufo_obsdb_seaice_setup_c
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_obsdb_getlocations_c(c_key_self, c_t1, c_t2, c_key_locs) bind(c,name='ufo_obsdb_getlocations_f90')
+subroutine ufo_obsdb_seaice_getlocations_c(c_key_self, c_t1, c_t2, c_key_locs) bind(c,name='ufo_obsdb_seaice_getlocations_f90')
 implicit none
 integer(c_int), intent(in)    :: c_key_self
 type(c_ptr), intent(in)       :: c_t1, c_t2
@@ -95,11 +95,11 @@ call ufo_locs_registry%get(c_key_locs,locs)
 
 call ufo_obs_seaicefrac_getlocs(self, locs)
 
-end subroutine ufo_obsdb_getlocations_c
+end subroutine ufo_obsdb_seaice_getlocations_c
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_obsdb_nobs_c(c_key_self, kobs) bind(c,name='ufo_obsdb_nobs_f90')
+subroutine ufo_obsdb_seaice_nobs_c(c_key_self, kobs) bind(c,name='ufo_obsdb_seaice_nobs_f90')
 implicit none
 integer(c_int), intent(in) :: c_key_self
 integer(c_int), intent(inout) :: kobs
@@ -108,11 +108,11 @@ type(ufo_obs_seaicefrac), pointer :: self
 call ufo_obs_seaicefrac_registry%get(c_key_self, self)
 kobs = self%nobs
 
-end subroutine ufo_obsdb_nobs_c
+end subroutine ufo_obsdb_seaice_nobs_c
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_obsdb_delete_c(c_key_self) bind(c,name='ufo_obsdb_delete_f90')
+subroutine ufo_obsdb_seaice_delete_c(c_key_self) bind(c,name='ufo_obsdb_seaice_delete_f90')
 implicit none
 integer(c_int), intent(inout) :: c_key_self
 type(ufo_obs_seaicefrac), pointer :: self
@@ -121,7 +121,7 @@ call ufo_obs_seaicefrac_registry%get(c_key_self, self)
 call ufo_obs_seaicefrac_delete(self)
 call ufo_obs_seaicefrac_registry%remove(c_key_self)
 
-end subroutine ufo_obsdb_delete_c
+end subroutine ufo_obsdb_seaice_delete_c
 
 ! ------------------------------------------------------------------------------
 
