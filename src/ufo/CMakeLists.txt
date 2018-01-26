@@ -22,6 +22,7 @@ ObsSeaIceFraction.h
 ObsSeaIceFractionTLAD.cc
 ObsSeaIceFractionTLAD.h
 UfoTrait.h
+instantiateObsOperatorFactory.h
 random_f.cc
 random_f.h
 random_vectors_mod.F90

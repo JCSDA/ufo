@@ -19,8 +19,6 @@
 // -----------------------------------------------------------------------------
 namespace ufo {
 // -----------------------------------------------------------------------------
-static oops::ObsOperatorMaker<UfoTrait, ObsSeaIceFraction> makerSeaIceFraction_("SeaIceFraction");
-// -----------------------------------------------------------------------------
 
 ObsSeaIceFraction::ObsSeaIceFraction(const ObsSpace & odb, const eckit::Configuration & config)
   : keyOperSeaIceFraction_(0), varin_(), odb_(odb)
