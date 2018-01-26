@@ -11,7 +11,7 @@
 namespace ufo {
 
 template<typename MODEL> void instantiateLinearObsOpFactory() {
-  static oops::LinearObsOpMaker<MODEL, ObsSeaIceFractionTLAD> makerFractionTL_("SeaIceFraction");
+  static oops::LinearObsOpMaker<MODEL, ObsSeaIceFractionTLAD<MODEL>> makerFractionTL_("SeaIceFraction");
 }
 
 }

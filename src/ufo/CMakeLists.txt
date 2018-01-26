@@ -18,7 +18,6 @@ ObsVector.h
 #ObsRadiosonde.cc
 #ObsRadiosonde.h
 ObsSeaIceFraction.h
-ObsSeaIceFractionTLAD.cc
 ObsSeaIceFractionTLAD.h
 UfoTrait.h
 instantiateObsOperatorFactory.h
