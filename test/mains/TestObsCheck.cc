@@ -9,7 +9,10 @@
 #include "oops/runs/Run.h"
 #include "test/interface/ObsCheck.h"
 
+#include "ufo/instantiateObsOperatorFactory.h"
+
 int main(int argc,  char ** argv) {
+  ufo::instantiateObsOperatorFactory<ufo::UfoTrait>();
   oops::Run run(argc, argv);
   test::ObsCheck<ufo::UfoTrait> tests;
   run.execute(tests);

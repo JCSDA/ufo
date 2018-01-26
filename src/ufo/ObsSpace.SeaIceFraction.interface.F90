@@ -69,7 +69,9 @@ call fckit_log%info(record)
 call ufo_obs_seaicefrac_registry%init()
 call ufo_obs_seaicefrac_registry%add(c_key_self)
 call ufo_obs_seaicefrac_registry%get(c_key_self, self)
-call ufo_obs_seaicefrac_read(fin, self)
+if (trim(fin) /= "") then
+  call ufo_obs_seaicefrac_read(fin, self)
+endif
 
 end subroutine ufo_obsdb_seaice_setup_c
 
@@ -96,6 +98,32 @@ call ufo_locs_registry%get(c_key_locs,locs)
 call ufo_obs_seaicefrac_getlocs(self, locs)
 
 end subroutine ufo_obsdb_seaice_getlocations_c
+
+! ------------------------------------------------------------------------------
+
+subroutine ufo_obsdb_seaice_generate_c(c_key_self, c_conf, c_t1, c_t2) bind(c,name='ufo_obsdb_seaice_generate_f90')
+implicit none
+integer(c_int), intent(inout) :: c_key_self
+type(c_ptr), intent(in)       :: c_conf !< configuration
+type(c_ptr), intent(in)       :: c_t1, c_t2
+
+type(ufo_obs_seaicefrac), pointer :: self
+type(datetime) :: t1, t2
+integer :: nobs
+real :: lat, lon1, lon2
+
+call ufo_obs_seaicefrac_registry%get(c_key_self, self)
+call c_f_datetime(c_t1, t1)
+call c_f_datetime(c_t2, t2)
+
+nobs = config_get_int(c_conf, "nobs")
+lat  = config_get_real(c_conf, "lat")
+lon1 = config_get_real(c_conf, "lon1")
+lon2 = config_get_real(c_conf, "lon2")
+
+call ufo_obs_seaicefrac_generate(self, nobs, lat, lon1, lon2)
+
+end subroutine ufo_obsdb_seaice_generate_c
 
 ! ------------------------------------------------------------------------------
 

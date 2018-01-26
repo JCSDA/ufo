@@ -81,7 +81,17 @@ int ObsSpace::nobs() const {
   return n;
 }
 
+// -----------------------------------------------------------------------------
+
 void ObsSpace::generateDistribution(const eckit::Configuration & conf) {
+  const eckit::Configuration * configc = &conf;
+
+  const util::DateTime * p1 = &winbgn_;
+  const util::DateTime * p2 = &winend_;
+//  if (obsname_ == "Radiance" || obsname_ == "Radiosonde")
+//    ufo_obsdb_generate_f90(keyOspace_, &configc, &p1, &p2);
+  if (obsname_ == "SeaIceFraction")
+    ufo_obsdb_seaice_generate_f90(keyOspace_, &configc, &p1, &p2);
 }
 
 // -----------------------------------------------------------------------------

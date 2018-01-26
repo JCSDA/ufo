@@ -13,15 +13,13 @@ ObsSpace.cc
 ObsSpace.h
 ObsVector.cc
 ObsVector.h
-ObsRadiance.cc
 ObsRadiance.h
-ObsRadiosonde.cc
 ObsRadiosonde.h
-ObsSeaIceFraction.cc
 ObsSeaIceFraction.h
-ObsSeaIceFractionTLAD.cc
 ObsSeaIceFractionTLAD.h
 UfoTrait.h
+instantiateObsOperatorFactory.h
+instantiateLinearObsOpFactory.h
 random_f.cc
 random_f.h
 random_vectors_mod.F90

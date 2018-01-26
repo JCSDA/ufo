@@ -16,7 +16,6 @@
 #include "oops/base/Variables.h"
 #include "oops/interface/ObsOperatorBase.h"
 #include "ObsSpace.h"
-#include "UfoTrait.h"
 #include "util/ObjectCounter.h"
 
 // Forward declarations
@@ -32,10 +31,10 @@ namespace ufo {
   class ObsVector;
 
 // -----------------------------------------------------------------------------
-/// Wind speed observation for UFO.
-
-class ObsRadiosonde : public oops::ObsOperatorBase<UfoTrait>,
-                  private util::ObjectCounter<ObsRadiosonde> {
+/// Radiosonde (currently only temperature) observation for UFO.
+template <typename MODEL>
+class ObsRadiosonde : public oops::ObsOperatorBase<MODEL>,
+                  private util::ObjectCounter<ObsRadiosonde<MODEL>> {
  public:
   static const std::string classname() {return "ufo::ObsRadiosonde";}
 
@@ -57,6 +56,38 @@ class ObsRadiosonde : public oops::ObsOperatorBase<UfoTrait>,
   const ObsSpace& odb_;
   boost::scoped_ptr<const oops::Variables> varin_;
 };
+
+// -----------------------------------------------------------------------------
+template <typename MODEL>
+ObsRadiosonde<MODEL>::ObsRadiosonde(const ObsSpace & odb, const eckit::Configuration & config)
+  : keyOperRadiosonde_(0), varin_(), odb_(odb)
+{
+  const eckit::Configuration * configc = &config;
+  ufo_radiosonde_setup_f90(keyOperRadiosonde_, &configc);
+  const std::vector<std::string> vv{"virtual_temperature", "atmosphere_ln_pressure_coordinate"};
+  varin_.reset(new oops::Variables(vv));
+  oops::Log::trace() << "ObsRadiosonde created." << std::endl;
+}
+
+// -----------------------------------------------------------------------------
+template <typename MODEL>
+ObsRadiosonde<MODEL>::~ObsRadiosonde() {
+  ufo_radiosonde_delete_f90(keyOperRadiosonde_);
+  oops::Log::trace() << "ObsRadiosonde destructed" << std::endl;
+}
+
+// -----------------------------------------------------------------------------
+template <typename MODEL>
+void ObsRadiosonde<MODEL>::obsEquiv(const GeoVaLs & gom, ObsVector & ovec,
+                             const ObsBias & bias) const {
+  ufo_radiosonde_t_eqv_f90(gom.toFortran(), odb_.toFortran(), ovec.toFortran(), bias.toFortran());
+}
+
+// -----------------------------------------------------------------------------
+template <typename MODEL>
+void ObsRadiosonde<MODEL>::print(std::ostream & os) const {
+  os << "ObsRadiosonde::print not implemented";
+}
 // -----------------------------------------------------------------------------
 
 }  // namespace ufo
