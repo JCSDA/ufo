@@ -20,8 +20,6 @@ using oops::Log;
 // -----------------------------------------------------------------------------
 namespace ufo {
 // -----------------------------------------------------------------------------
-static oops::LinearObsOpMaker<UfoTrait, ObsSeaIceFractionTLAD> makerFractionTL_("SeaIceFraction");
-// -----------------------------------------------------------------------------
 
 ObsSeaIceFractionTLAD::ObsSeaIceFractionTLAD(const ObsSpace & odb, const eckit::Configuration & config)
   : keyOperSeaIceFraction_(0), varin_()
