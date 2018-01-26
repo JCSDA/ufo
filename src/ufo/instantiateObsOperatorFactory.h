@@ -13,9 +13,9 @@
 namespace ufo {
 
 template<typename MODEL> void instantiateObsOperatorFactory() {
-  static oops::ObsOperatorMaker<MODEL, ObsSeaIceFraction> makerSeaIceFraction_("SeaIceFraction");
-//  static oops::ObsOperatorMaker<MODEL, ObsRadiance>       makerRadiance_("Radiance");
-//  static oops::ObsOperatorMaker<MODEL, ObsRadiosonde>     makerRadiosonde_("Radiosonde");
+  static oops::ObsOperatorMaker<MODEL, ObsSeaIceFraction<MODEL>> makerSeaIceFraction_("SeaIceFraction");
+//  static oops::ObsOperatorMaker<MODEL, ObsRadiance<MODEL>>       makerRadiance_("Radiance");
+//  static oops::ObsOperatorMaker<MODEL, ObsRadiosonde<MODEL>>     makerRadiosonde_("Radiosonde");
 }
 
 }

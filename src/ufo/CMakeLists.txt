@@ -17,7 +17,6 @@ ObsVector.h
 #ObsRadiance.h
 #ObsRadiosonde.cc
 #ObsRadiosonde.h
-ObsSeaIceFraction.cc
 ObsSeaIceFraction.h
 ObsSeaIceFractionTLAD.cc
 ObsSeaIceFractionTLAD.h
