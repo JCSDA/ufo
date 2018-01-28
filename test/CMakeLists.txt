@@ -6,6 +6,7 @@
 # Create Data directory for test input config and symlink all files
 list( APPEND ufo_test_input
   testinput/ufotest.json
+  testinput/ufocrtm.json
 )
 
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/testinput)

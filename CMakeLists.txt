@@ -37,11 +37,11 @@ set( UFO_LINKER_LANGUAGE CXX )
 # Dependencies
 ################################################################################
 
-## Boost
-#set( Boost_MINIMUM_VERSION "1.47" )
-#find_package( Boost ${Boost_MINIMUM_VERSION} REQUIRED
-#              COMPONENTS unit_test_framework )
-#include_directories( ${Boost_INCLUDE_DIR} )
+# Boost
+set( Boost_MINIMUM_VERSION "1.47" )
+find_package( Boost ${Boost_MINIMUM_VERSION} REQUIRED
+              COMPONENTS unit_test_framework )
+include_directories( ${Boost_INCLUDE_DIR} )
 
 # ioda
 ecbuild_use_package( PROJECT ioda VERSION 0.1.0 REQUIRED )

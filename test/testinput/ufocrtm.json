@@ -1,0 +1,24 @@
+{
+  "Assimilation Window": {
+    "Begin": "2010-01-01T00:00:00Z",
+    "Length": "PT6H"
+  },
+  "Observations": {
+    "ObsTypes": [
+      {
+        "ObsType": "Radiance",
+        "ObsData": {
+          "ObsDataIn": {
+            "obsfile": "Data/amsua_n19_wprofiles.nc4"
+          }
+        },
+        "GeoVaLs": {
+          "norm": "280.87991270213405",
+          "filename": "Data/amsua_n19_wprofiles.nc4"
+        },
+        "rmsequiv": "253.803797241769",
+        "tolerance": "999."
+      }
+    ]
+  }
+}

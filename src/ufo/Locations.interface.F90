@@ -9,6 +9,7 @@ module ufo_locs_mod_c
 
 use iso_c_binding
 use ufo_locs_mod
+use kinds
 
 implicit none
 
@@ -31,6 +32,31 @@ contains
 ! ------------------------------------------------------------------------------
 !> Linked list implementation
 #include "linkedList_c.f"
+
+! ------------------------------------------------------------------------------
+
+subroutine ufo_locs_create_c(key, klocs, klats, klons) bind(c,name='ufo_locs_create_f90')
+
+implicit none
+integer(c_int), intent(inout) :: key
+integer(c_int), intent(in) :: klocs
+real(c_double), intent(in) :: klats(klocs)
+real(c_double), intent(in) :: klons(klocs)
+
+type(ufo_locs), pointer :: self
+real(kind_real) :: lats(klocs)
+real(kind_real) :: lons(klocs)
+
+call ufo_locs_registry%init()
+call ufo_locs_registry%add(key)
+call ufo_locs_registry%get(key, self)
+
+lats(:) = klats(:)
+lons(:) = klons(:)
+
+call ufo_locs_create(self, klocs, lats, lons)
+
+end subroutine ufo_locs_create_c
 
 ! ------------------------------------------------------------------------------
 
