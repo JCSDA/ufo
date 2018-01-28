@@ -11,7 +11,6 @@ use ufo_vars_mod
 use ufo_obs_vectors
 use ufo_locs_mod
 use ufo_geovals_mod
-use ufo_obs_data_mod
 use kinds
 
 implicit none
@@ -75,8 +74,8 @@ subroutine c_ufo_postFilter_f90(c_key_geovals, c_key_hofx,c_key_obsspace) bind(c
     integer(c_int), intent(in) :: c_key_geovals
     integer(c_int), intent(in) :: c_key_hofx
     integer(c_int), intent(in) :: c_key_obsspace
-    type(ufo_geovals), pointer  :: geovals
-    type(obs_vector), pointer :: hofx
+!    type(ufo_geovals), pointer  :: geovals
+!    type(obs_vector), pointer :: hofx
 
     write(*,*) '=======Start Post Filter (observation QC)========='
     write(*,*) '=======End Post Filter (observation QC)========='

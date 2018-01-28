@@ -15,7 +15,7 @@ integer, parameter :: max_string=800
 
 public :: ufo_geovals, ufo_geoval, ufo_geovals_get_var
 public :: ufo_geovals_init, ufo_geovals_setup, ufo_geovals_delete, ufo_geovals_print
-public :: ufo_geovals_zero, ufo_geovals_random, ufo_geovals_dotprod
+public :: ufo_geovals_zero, ufo_geovals_random, ufo_geovals_dotprod, ufo_geovals_scalmult
 public :: ufo_geovals_minmaxavg
 public :: ufo_geovals_read_netcdf
 
@@ -46,10 +46,8 @@ type :: ufo_geovals
                                  !  were allocated and have data
 end type ufo_geovals
 
-
 ! ------------------------------------------------------------------------------
 contains
-
 ! ------------------------------------------------------------------------------
 
 subroutine ufo_geovals_init(self)
@@ -182,6 +180,28 @@ do ivar = 1, self%nvar
 enddo
 
 end subroutine ufo_geovals_random
+
+! ------------------------------------------------------------------------------
+
+subroutine ufo_geovals_scalmult(self, zz) 
+implicit none
+type(ufo_geovals), intent(inout) :: self
+real(kind_real), intent(in) :: zz
+integer :: jv, jo, jz
+
+if (.not. self%lalloc .or. .not. self%linit) then
+  call abor1_ftn("ufo_geovals_scalmult: geovals not allocated")
+endif
+
+do jv=1,self%nvar
+  do jo=1,self%nobs
+    do jz = 1, self%geovals(jv)%nval
+      self%geovals(jv)%vals(jz,jo) = zz * self%geovals(jv)%vals(jz,jo)
+    enddo
+  enddo
+enddo
+
+end subroutine ufo_geovals_scalmult
 
 ! ------------------------------------------------------------------------------
 
@@ -328,8 +348,6 @@ integer, intent(in) :: iobs
 type(ufo_geoval) :: geoval
 character(MAXVARLEN) :: varname
 logical :: lfound
-
-
 integer :: ivar
 
 do ivar = 1, self%nvar

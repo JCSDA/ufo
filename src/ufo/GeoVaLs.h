@@ -12,15 +12,12 @@
 #include <string>
 
 #include "Fortran.h"
+#include "oops/base/Variables.h"
 #include "util/ObjectCounter.h"
 #include "util/Printable.h"
 
 namespace eckit {
   class Configuration;
-}
-
-namespace oops {
-  class Variables;
 }
 
 namespace ufo {
@@ -34,15 +31,16 @@ class GeoVaLs : public util::Printable,
   static const std::string classname() {return "ufo::GeoVaLs";}
 
   GeoVaLs(const Locations &, const oops::Variables &);
-  GeoVaLs(const eckit::Configuration &);
+  GeoVaLs(const eckit::Configuration &, const oops::Variables &);
 
-  explicit GeoVaLs(): keyGVL_(0) {}
-  explicit GeoVaLs(int & fgvl): keyGVL_(fgvl) {}
+//  explicit GeoVaLs(): keyGVL_(0) {}
+//  explicit GeoVaLs(int & fgvl): keyGVL_(fgvl) {}
 
   ~GeoVaLs();
 
   void zero();
   void random();
+  GeoVaLs & operator*=(const double);
   double dot_product_with(const GeoVaLs & other) const;
   void read(const eckit::Configuration &);
   void write(const eckit::Configuration &) const;
@@ -52,7 +50,9 @@ class GeoVaLs : public util::Printable,
 
  private:
   void print(std::ostream &) const;
+
   F90goms keyGVL_;
+  oops::Variables vars_;
 };
 
 }  // namespace ufo

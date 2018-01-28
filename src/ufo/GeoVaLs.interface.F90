@@ -116,11 +116,12 @@ end subroutine ufo_geovals_zero_c
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_geovals_setup_random_c(c_key_self, c_conf) bind(c,name='ufo_geovals_setup_random_f90')
+subroutine ufo_geovals_setup_random_c(c_key_self, c_conf, c_vars) bind(c,name='ufo_geovals_setup_random_f90')
 use config_mod
 implicit none
 integer(c_int), intent(in) :: c_key_self
 type(c_ptr), intent(in)    :: c_conf
+type(c_ptr), intent(in)    :: c_vars
 
 type(ufo_geovals), pointer :: self
 
@@ -136,9 +137,9 @@ call ufo_geovals_registry%add(c_key_self)
 call ufo_geovals_registry%get(c_key_self, self)
 
 !> read variables
-nvar = config_get_int(c_conf, "Variables.nvars")
+nvar = config_get_int(c_vars, "nvars")
 allocate(cvars(nvar))
-svars = config_get_string(c_conf,len(svars),"Variables.variables")
+svars = config_get_string(c_vars,len(svars),"variables")
 read(svars,*) cvars
 call ufo_vars_setup(vars, cvars)
 deallocate(cvars)
@@ -162,6 +163,20 @@ call ufo_geovals_registry%get(c_key_self, self)
 call ufo_geovals_random(self)
 
 end subroutine ufo_geovals_random_c
+
+! ------------------------------------------------------------------------------
+
+subroutine ufo_geovals_scalmult_c(c_key_self, zz) bind(c,name='ufo_geovals_scalmult_f90')
+implicit none
+integer(c_int), intent(in) :: c_key_self
+real(c_double), intent(in) :: zz
+type(ufo_geovals), pointer :: self
+
+call ufo_geovals_registry%get(c_key_self, self)
+
+call ufo_geovals_scalmult(self, zz)
+
+end subroutine ufo_geovals_scalmult_c
 
 ! ------------------------------------------------------------------------------
 
@@ -195,12 +210,13 @@ end subroutine ufo_geovals_minmaxavg_c
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_geovals_read_file_c(c_key_self, c_conf) bind(c,name='ufo_geovals_read_file_f90')
+subroutine ufo_geovals_read_file_c(c_key_self, c_conf, c_vars) bind(c,name='ufo_geovals_read_file_f90')
 use config_mod
 
 implicit none
 integer(c_int), intent(in) :: c_key_self
 type(c_ptr), intent(in)    :: c_conf
+type(c_ptr), intent(in)    :: c_vars
 
 type(ufo_geovals), pointer :: self
 
@@ -216,9 +232,9 @@ call ufo_geovals_registry%add(c_key_self)
 call ufo_geovals_registry%get(c_key_self, self)
 
 !> read variables
-nvar = config_get_int(c_conf, "Variables.nvars")
+nvar = config_get_int(c_vars, "nvars")
 allocate(cvars(nvar))
-svars = config_get_string(c_conf,len(svars),"Variables.variables")
+svars = config_get_string(c_vars,len(svars),"variables")
 read(svars,*) cvars
 call ufo_vars_setup(vars, cvars)
 deallocate(cvars)
