@@ -19,8 +19,6 @@
 // -----------------------------------------------------------------------------
 namespace ufo {
 // -----------------------------------------------------------------------------
-static oops::ObsOperatorMaker<UfoTrait, ObsRadiance> makerRadiance_("Radiance");
-// -----------------------------------------------------------------------------
 
 ObsRadiance::ObsRadiance(const ObsSpace & odb, const eckit::Configuration & config)
   : keyOperRadiance_(0), varin_(), odb_(odb)

@@ -57,6 +57,7 @@ extern "C" {
   void ufo_geovals_create_f90(F90goms &);
   void ufo_geovals_delete_f90(F90goms &);
   void ufo_geovals_zero_f90(const F90goms &);
+  void ufo_geovals_setup_random_f90(const F90goms &, const eckit::Configuration * const *);
   void ufo_geovals_random_f90(const F90goms &);
   void ufo_geovals_dotprod_f90(const F90goms &, const F90goms &, double &);
   void ufo_geovals_minmaxavg_f90(const F90goms &, int &, double &, double &, double &);
@@ -92,6 +93,16 @@ extern "C" {
   void ufo_radiosonde_t_eqv_f90(const F90goms &, const F90odb &, const F90ovec &, const F90obias &);
 
 // -----------------------------------------------------------------------------
+//  Ice concentration observations
+// -----------------------------------------------------------------------------
+  void ufo_seaicefrac_setup_f90(F90hop &, const eckit::Configuration * const *);
+  void ufo_seaicefrac_delete_f90(F90hop &);
+  void ufo_seaicefrac_eqv_f90(const F90goms &, const F90odb &, const F90ovec &, const F90obias &);
+  void ufo_seaicefrac_eqv_tl_f90(const F90goms &, const F90ovec &);
+  void ufo_seaicefrac_eqv_ad_f90(const F90goms &, const F90ovec &);
+
+
+// -----------------------------------------------------------------------------
 //  Observation Vectors
 // -----------------------------------------------------------------------------
   void ufo_obsvec_setup_f90(F90ovec &, const F90odb &);
@@ -125,9 +136,9 @@ extern "C" {
                                   const util::DateTime * const *, 
                                   const util::DateTime * const *,
                                   F90locs &);
-  void ufo_obsdb_generate_f90(const F90odb &, const int &, const char *,
-                             const eckit::Configuration * const *, const util::DateTime * const *,
-                             const util::Duration * const *, const int &, int &);
+  void ufo_obsdb_generate_f90(const F90odb &, const eckit::Configuration * const *, 
+                              const util::DateTime * const *,
+                              const util::DateTime * const *);
   void ufo_obsdb_nobs_f90(const F90odb &, int &);
 
 // -----------------------------------------------------------------------------

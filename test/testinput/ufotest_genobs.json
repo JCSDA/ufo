@@ -2,27 +2,22 @@
   "test_framework_runtime_config": "--log_level=test_suite",
   "window_begin": "2010-01-01T00:00:00Z",
   "window_end": "2010-01-02T00:00:00Z",
-  "Variables": {
-     "nvars": "1",
-     "variables": ["testvar"]
-  },
-  "Locations": {
-    "lats": [45.0, 40.0],
-    "lons": [0.0, -100.0]
-  },
   "Observations": {
     "ObsTypes": [
       {
         "ObsType": "SeaIceFraction",
         "ObsData": {
-          "ObsDataIn": {
-            "obsfile": "Data/seaice_obs.nc"
-          }
+        },
+        "Generate": {
+          "nobs": "9",
+          "lat": "60",
+          "lon1": "10",
+          "lon2": "30"
         },
         "GeoVaLs": {
-          "norm": "1567.673435381234",
+          "norm": "3",
           "random": "1",
-          "nobs": "2457600"
+          "nobs": "9"
         },
         "ObsBias": {},
         "rmsequiv": "1.",

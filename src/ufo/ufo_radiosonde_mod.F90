@@ -94,7 +94,6 @@ integer :: iobs, nobs
 real(kind_real) :: z, dz
 real(kind_real) :: rmse
 
-logical :: lfound
 type(ufo_geoval) :: geoval_pr, geoval_tv
 
 ! Get observations from obs-structure

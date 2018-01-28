@@ -19,8 +19,6 @@
 // -----------------------------------------------------------------------------
 namespace ufo {
 // -----------------------------------------------------------------------------
-static oops::ObsOperatorMaker<UfoTrait, ObsRadiosonde> makerRadiosonde_("Radiosonde");
-// -----------------------------------------------------------------------------
 
 ObsRadiosonde::ObsRadiosonde(const ObsSpace & odb, const eckit::Configuration & config)
   : keyOperRadiosonde_(0), varin_(), odb_(odb)

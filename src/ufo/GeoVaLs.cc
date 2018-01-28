@@ -25,8 +25,13 @@ GeoVaLs::GeoVaLs(const Locations & locs, const oops::Variables & var) {
 GeoVaLs::GeoVaLs(const eckit::Configuration & config) {
   oops::Log::trace() << "GeoVaLs contructor config starting" << std::endl;
   ufo_geovals_create_f90(keyGVL_);
+  int irandom = 0;
+  config.get("random", irandom);
   const eckit::Configuration * conf = &config;
-  ufo_geovals_read_file_f90(keyGVL_, &conf);
+  if (irandom) 
+    ufo_geovals_setup_random_f90(keyGVL_, &conf);
+  else 
+    ufo_geovals_read_file_f90(keyGVL_, &conf);
   oops::Log::trace() << "GeoVaLs contructor config key = " << keyGVL_ << std::endl;
 }
 // -----------------------------------------------------------------------------

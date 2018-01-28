@@ -62,6 +62,12 @@ Locations * ObsSpace::locations(const util::DateTime & t1, const util::DateTime 
 // -----------------------------------------------------------------------------
 
 void ObsSpace::generateDistribution(const eckit::Configuration & conf) {
+  const eckit::Configuration * configc = &conf;
+
+  const util::DateTime * p1 = &winbgn_;
+  const util::DateTime * p2 = &winend_;
+
+  ufo_obsdb_generate_f90(keyOspace_, &configc, &p1, &p2);
 }
 
 // -----------------------------------------------------------------------------

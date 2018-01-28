@@ -27,6 +27,7 @@ list( APPEND ufo_test_data
   amsua_n19_obs.nc4
   amsua_n19_geovals.nc4
   diag_t_01_wprofiles.nc4
+  seaice_obs.nc
 )
 
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Data)
@@ -65,6 +66,12 @@ ecbuild_add_test( TARGET test_ufo_obsvector
 ecbuild_add_test( TARGET  test_ufo_obsoperator
                   BOOST
                   SOURCES mains/TestObsOperator.cc
+                  ARGS    "testinput/ufotest.json"
+                  LIBS    ufo )
+
+ecbuild_add_test( TARGET  test_ufo_obsoperator_tlad
+                  BOOST
+                  SOURCES mains/TestObsOperatorTLAD.cc
                   ARGS    "testinput/ufotest.json"
                   LIBS    ufo )
 
