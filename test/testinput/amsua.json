@@ -1,0 +1,23 @@
+{
+  "test_framework_runtime_config": "--log_level=test_suite",
+  "Observations": {
+    "ObsTypes": [
+      {
+        "ObsType": "Radiance",
+        "ObsData": {
+          "ObsDataIn": {
+            "obsfile": "Data/amsua_n19_obs.nc4"
+          }
+        },
+        "GeoVaLs": {
+          "norm": "7071.1296549464405",
+          "filename": "Data/amsua_n19_geovals.nc4",
+          "random": "0"
+        },
+        "rmsequiv": "228.32019688865083",
+        "tolerance": "999.",
+        "ObsBias": {}
+      }
+    ]
+  }
+}

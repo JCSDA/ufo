@@ -626,7 +626,7 @@ contains
       integer :: k1
       do k1 = 1,N_PROFILES
          geo(k1)%Sensor_Zenith_Angle = Radiance%datafix(k1)%satzen_ang
-         geo(k1)%Sensor_Scan_Angle   = Radiance%datafix(k1)%senscn_ang
+!YT ???         geo(k1)%Sensor_Scan_Angle   = Radiance%datafix(k1)%senscn_ang
          geo(k1)%Source_Zenith_Angle = Radiance%datafix(k1)%solzen_ang
          geo(k1)%Sensor_Azimuth_Angle = Radiance%datafix(k1)%satazm_ang
          geo(k1)%Source_Azimuth_Angle = Radiance%datafix(k1)%solazm_ang

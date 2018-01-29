@@ -42,7 +42,7 @@ endforeach(FILENAME)
 ecbuild_add_test( TARGET  test_ufo_geovals
                   BOOST
                   SOURCES mains/TestGeoVaLs.cc
-                  ARGS    "testinput/ufotest.json"
+                  ARGS    "testinput/geovals.json"
                   LIBS    ufo )
 
 #ecbuild_add_test( TARGET  test_ufo_locations
@@ -54,32 +54,44 @@ ecbuild_add_test( TARGET  test_ufo_geovals
 ecbuild_add_test( TARGET test_ufo_observationspace
                   BOOST
                   SOURCES mains/TestObservationSpace.cc
-                  ARGS "testinput/ufotest.json"
+                  ARGS "testinput/obsspace.json"
                   LIBS    ufo )
 
 ecbuild_add_test( TARGET test_ufo_obsvector
                   BOOST
                   SOURCES mains/TestObsVector.cc
-                  ARGS "testinput/ufotest.json"
+                  ARGS "testinput/obsvector.json"
                   LIBS    ufo )
 
-ecbuild_add_test( TARGET  test_ufo_obsoperator
+ecbuild_add_test( TARGET  test_ufo_amsua
                   BOOST
                   SOURCES mains/TestObsOperator.cc
-                  ARGS    "testinput/ufotest.json"
+                  ARGS    "testinput/amsua.json"
+                  LIBS    ufo )
+
+ecbuild_add_test( TARGET  test_ufo_radiosonde
+                  BOOST
+                  SOURCES mains/TestObsOperator.cc
+                  ARGS    "testinput/radiosonde.json"
+                  LIBS    ufo )
+
+ecbuild_add_test( TARGET  test_ufo_seaice
+                  BOOST
+                  SOURCES mains/TestObsOperator.cc
+                  ARGS    "testinput/seaice.json"
                   LIBS    ufo )
 
 ecbuild_add_test( TARGET  test_ufo_obsoperator_tlad
                   BOOST
                   SOURCES mains/TestObsOperatorTLAD.cc
-                  ARGS    "testinput/ufotest.json"
+                  ARGS    "testinput/seaice.json"
                   LIBS    ufo )
 
-ecbuild_add_test( TARGET  test_ufo_obscheck
-                  BOOST
-                  SOURCES mains/TestObsCheck.cc
-                  ARGS    "testinput/ufotest.json"
-                  LIBS    ufo )
+#ecbuild_add_test( TARGET  test_ufo_obscheck
+#                  BOOST
+#                  SOURCES mains/TestObsCheck.cc
+#                  ARGS    "testinput/ufotest.json"
+#                  LIBS    ufo )
 
 #####################################################################
 # Files for CRTM tests
