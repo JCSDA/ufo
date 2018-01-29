@@ -7,6 +7,9 @@
 list( APPEND ufo_test_input
   testinput/ufotest.json
   testinput/ufocrtm.json
+  testinput/amsua.json
+  testinput/radiosonde.json
+  testinput/seaice.json
 )
 
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/testinput)
