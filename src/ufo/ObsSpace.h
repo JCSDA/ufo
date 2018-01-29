@@ -48,6 +48,8 @@ class ObsSpace : public oops::ObsSpaceBase {
   const util::DateTime & windowStart() const {return winbgn_;}
   const util::DateTime & windowEnd() const {return winend_;}
 
+  int nobs() const;
+
   int & toFortran() {return keyOspace_;}
   const int & toFortran() const {return keyOspace_;}
 

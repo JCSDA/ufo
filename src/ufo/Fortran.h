@@ -145,6 +145,22 @@ extern "C" {
   void ufo_obsdb_nobs_f90(const F90odb &, int &);
 
 // -----------------------------------------------------------------------------
+//  Observation Handler (for sea ice)
+// -----------------------------------------------------------------------------
+
+  void ufo_obsdb_seaice_setup_f90(F90odb &, const eckit::Configuration * const *);
+  void ufo_obsdb_seaice_delete_f90(F90odb &);
+  void ufo_obsdb_seaice_getlocations_f90(const F90odb &,
+                                  const util::DateTime * const *,
+                                  const util::DateTime * const *,
+                                  F90locs &);
+  void ufo_obsdb_seaice_generate_f90(const F90odb &, const eckit::Configuration * const *,
+                              const util::DateTime * const *,
+                              const util::DateTime * const *);
+  void ufo_obsdb_seaice_nobs_f90(const F90odb &, int &);
+
+
+// -----------------------------------------------------------------------------
 }  // extern C
 
 }  // namespace ufo
