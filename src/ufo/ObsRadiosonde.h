@@ -13,22 +13,18 @@
 
 #include <boost/scoped_ptr.hpp>
 
+#include "eckit/config/Configuration.h"
 #include "oops/base/Variables.h"
 #include "oops/interface/ObsOperatorBase.h"
 #include "ObsSpace.h"
+#include "GeoVaLs.h"
+#include "Locations.h"
+#include "ObsBias.h"
+#include "ObsBiasIncrement.h"
+#include "ObsVector.h"
 #include "util/ObjectCounter.h"
 
-// Forward declarations
-namespace eckit {
-  class Configuration;
-}
-
 namespace ufo {
-  class GeoVaLs;
-  class Locations;
-  class ObsBias;
-  class ObsBiasIncrement;
-  class ObsVector;
 
 // -----------------------------------------------------------------------------
 /// Radiosonde (currently only temperature) observation for UFO.
