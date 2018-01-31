@@ -44,9 +44,6 @@ type(c_ptr), intent(in)    :: c_vars
 
 type(ufo_geovals), pointer :: self
 type(ufo_locs), pointer :: locs
-integer :: nvar
-character(len=max_string) :: svars
-character(len=MAXVARLEN), allocatable :: cvars(:)
 type(ufo_vars) :: vars
 
 call ufo_geovals_registry%init()
@@ -55,12 +52,7 @@ call ufo_geovals_registry%get(c_key_self, self)
 
 call ufo_locs_registry%get(c_key_locs,locs)
 
-nvar = config_get_int(c_vars, "nvars")
-allocate(cvars(nvar))
-svars = config_get_string(c_vars,len(svars),"variables")
-read(svars,*) cvars
-call ufo_vars_setup(vars, cvars)
-deallocate(cvars)
+call ufo_vars_setup(vars, c_vars)
 
 call ufo_geovals_init(self)
 call ufo_geovals_setup(self, vars, locs%nlocs)
@@ -124,12 +116,7 @@ type(c_ptr), intent(in)    :: c_conf
 type(c_ptr), intent(in)    :: c_vars
 
 type(ufo_geovals), pointer :: self
-
-integer :: nvar
-character(len=max_string) :: svars
-character(len=MAXVARLEN), allocatable :: cvars(:)
 type(ufo_vars) :: vars
-
 integer :: nobs
 
 call ufo_geovals_registry%init()
@@ -137,12 +124,7 @@ call ufo_geovals_registry%add(c_key_self)
 call ufo_geovals_registry%get(c_key_self, self)
 
 !> read variables
-nvar = config_get_int(c_vars, "nvars")
-allocate(cvars(nvar))
-svars = config_get_string(c_vars,len(svars),"variables")
-read(svars,*) cvars
-call ufo_vars_setup(vars, cvars)
-deallocate(cvars)
+call ufo_vars_setup(vars, c_vars)
 
 ! randomize
 nobs = config_get_int(c_conf, "nobs")
@@ -219,12 +201,7 @@ type(c_ptr), intent(in)    :: c_conf
 type(c_ptr), intent(in)    :: c_vars
 
 type(ufo_geovals), pointer :: self
-
-integer :: nvar
-character(len=max_string) :: svars
-character(len=MAXVARLEN), allocatable :: cvars(:)
 type(ufo_vars) :: vars
-
 character(max_string) :: filename
 
 call ufo_geovals_registry%init()
@@ -232,12 +209,7 @@ call ufo_geovals_registry%add(c_key_self)
 call ufo_geovals_registry%get(c_key_self, self)
 
 !> read variables
-nvar = config_get_int(c_vars, "nvars")
-allocate(cvars(nvar))
-svars = config_get_string(c_vars,len(svars),"variables")
-read(svars,*) cvars
-call ufo_vars_setup(vars, cvars)
-deallocate(cvars)
+call ufo_vars_setup(vars, c_vars)
 
 ! read filename for config
 filename = config_get_string(c_conf,len(filename),"filename")

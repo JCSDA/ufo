@@ -55,16 +55,21 @@ end type ufo_vars
 contains
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_vars_setup(self, cvars)
+subroutine ufo_vars_setup(self, c_vars)
+use iso_c_binding
+use config_mod
 implicit none
 type(ufo_vars), intent(inout) :: self
-character(len=MAXVARLEN), intent(in) :: cvars(:)
+type(c_ptr), intent(in)       :: c_vars
+character(len=30*MAXVARLEN) :: svars
 
-self%nv = size(cvars)
+self%nv = config_get_int(c_vars, "nvars")
+
+allocate(self%fldnames(self%nv))
+svars = config_get_string(c_vars,len(svars),"variables")
+read(svars,*) self%fldnames
 
 ! TODO: a check on whether this var is in the list of defined vars
-allocate(self%fldnames(self%nv))
-self%fldnames(:) = cvars(:)
 
 end subroutine ufo_vars_setup
 
