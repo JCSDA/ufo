@@ -286,7 +286,7 @@ contains
      do ii=1,nobs
         if(rtmp_mass(ii)%Observation_Type==raob_mass_type.and.&
            rtmp_mass(ii)%Setup_QC_Mark==t_qcmark) then
-          ic=ic+1
+           ic=ic+1
         endif
      enddo
      nraob=ic

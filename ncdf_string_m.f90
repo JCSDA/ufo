@@ -172,6 +172,7 @@ contains
         type(ncdf_string), pointer :: this
         character(len = *), intent(inout) :: to
         integer :: length
+        integer :: i
 
         length = min(ncdf_string_length(this), len(to))
 
