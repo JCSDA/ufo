@@ -19,7 +19,7 @@ GeoVaLs::GeoVaLs(const Locations & locs, const oops::Variables & vars)
  : keyGVL_(-1), vars_(vars)
 {
   oops::Log::trace() << "GeoVaLs contructor starting" << std::endl;
-  const eckit::Configuration * cvar = &vars_.asConfig();
+  const eckit::Configuration * cvar = &vars_.toFortran();
   ufo_geovals_setup_f90(keyGVL_, locs.toFortran(), &cvar);
   oops::Log::trace() << "GeoVaLs contructor key = " << keyGVL_ << std::endl;
 }
@@ -32,7 +32,7 @@ GeoVaLs::GeoVaLs(const eckit::Configuration & config, const oops::Variables & va
   int irandom = 0;
   config.get("random", irandom);
   const eckit::Configuration * conf = &config;
-  const eckit::Configuration * cvar = &vars_.asConfig();
+  const eckit::Configuration * cvar = &vars_.toFortran();
   if (irandom == 0) {
     ufo_geovals_read_file_f90(keyGVL_, &conf, &cvar);
   } else {
@@ -73,7 +73,7 @@ void GeoVaLs::print(std::ostream & os) const {
 // -----------------------------------------------------------------------------
 void GeoVaLs::read(const eckit::Configuration & config) {
   const eckit::Configuration * conf = &config;
-  const eckit::Configuration * cvar = &vars_.asConfig();
+  const eckit::Configuration * cvar = &vars_.toFortran();
   ufo_geovals_read_file_f90(keyGVL_, &conf, &cvar);
 }
 // -----------------------------------------------------------------------------
