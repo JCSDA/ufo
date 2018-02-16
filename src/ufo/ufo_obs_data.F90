@@ -1,12 +1,7 @@
-! (C) Copyright 2009-2016 ECMWF.
+! (C) Copyright 2017 UCAR
 ! 
 ! This software is licensed under the terms of the Apache Licence Version 2.0
 ! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
-! In applying this licence, ECMWF does not waive the privileges and immunities 
-! granted to it by virtue of its status as an intergovernmental organisation nor
-! does it submit to any jurisdiction.
-
-!> Handle observations for the QG model
 
 module ufo_obs_data
 
@@ -16,7 +11,6 @@ use config_mod
 use datetime_mod
 use duration_mod
 use ufo_geovals_mod
-use ufo_geovals_mod_c, only : ufo_geovals_registry
 use ufo_locs_mod
 use ufo_locs_mod_c, only : ufo_locs_registry
 use ufo_obs_vectors

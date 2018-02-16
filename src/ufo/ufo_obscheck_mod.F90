@@ -11,6 +11,7 @@ use ufo_vars_mod
 use ufo_obs_vectors
 use ufo_locs_mod
 use ufo_geovals_mod
+use ufo_geovals_mod_c, only: ufo_geovals_registry
 use ufo_obs_data_mod, only: obs_data
 use kinds
 
@@ -90,7 +91,7 @@ subroutine c_ufo_postFilter_f90(c_key_geovals, c_key_hofx,c_key_obsspace) bind(c
    write(*,*) 'read obs_vector  =========================='
    write(*,*) 'hofx%nobs=',hofx%nobs
    write(*,*) 'hofx%nobs=',hofx%values(1:10)
-   if(geovals%lalloc .and. geovals%linit) then
+   if (geovals%lalloc .and. geovals%linit) then
       write(*,*) 'read geovals  =========================='
       write(*,*) 'nobs=',geovals%nobs
       write(*,*) 'nvar=',geovals%nvar

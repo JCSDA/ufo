@@ -12,7 +12,6 @@ module ufo_radiance_mod
   use ufo_obs_vectors
   use ufo_locs_mod
   use ufo_geovals_mod
-  use ufo_geovals_mod_c, only: ufo_geovals_registry
   use ufo_vars_mod
   use kinds
   
