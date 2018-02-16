@@ -102,4 +102,10 @@ void ObsSpace::print(std::ostream & os) const {
 
 // -----------------------------------------------------------------------------
 
+void ObsSpace::printJo(const ObsVector & dy, const ObsVector & grad) {
+oops::Log::info() << "ObsSpaceQG::printJo not implemented" << std::endl;
+}
+
+// -----------------------------------------------------------------------------
+
 }  // namespace ufo

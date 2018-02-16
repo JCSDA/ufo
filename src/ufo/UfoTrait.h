@@ -18,6 +18,7 @@
 #include "ObsSpace.h"
 #include "ObsVector.h"
 #include "ObsCheck.h"
+#include "ObsBiasCovariance.h"
 
 namespace ufo {
 
@@ -31,6 +32,7 @@ struct UfoTrait {
 
   typedef ufo::ObsBias             ObsAuxControl;
   typedef ufo::ObsBiasIncrement    ObsAuxIncrement;
+  typedef ufo::ObsBiasCovariance   ObsAuxCovariance;
 
   typedef ufo::ObsCheck            ObsCheck;
 };

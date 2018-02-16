@@ -83,6 +83,8 @@ type(obs_data), pointer :: obss
 
 character(len=*), parameter :: myname_="ufo_radiosonde_t_eqv_c"
 
+write(*,*)'ufo_radiosonde_t_eqv_c keys gom, obspace, hofx = ',c_key_geovals, c_key_obsspace, c_key_hofx
+
 ! Get pointers to geovals, observations and hofx
 call ufo_geovals_registry%get(c_key_geovals,geovals)
 call ufo_obs_data_registry%get(c_key_obsspace,obss)
