@@ -6,6 +6,10 @@
 # Create Data directory for test input config and symlink all files
 list( APPEND ufo_test_input
   testinput/ufotest.json
+  testinput/ufocrtm.json
+  testinput/amsua.json
+  testinput/radiosonde.json
+  testinput/seaice.json
 )
 
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/testinput)
@@ -23,8 +27,10 @@ ecbuild_add_resources( TARGET ufo_test_scripts
 
 # Create Data directory for test data and symlink files
 list( APPEND ufo_test_data
-  amsua_n19_wprofiles.nc4
+  amsua_n19_obs.nc4
+  amsua_n19_geovals.nc4
   diag_t_01_wprofiles.nc4
+  seaice_obs.nc
 )
 
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Data)
@@ -36,17 +42,17 @@ endforeach(FILENAME)
 
 #####################################################################
 
-ecbuild_add_test( TARGET  test_ufo_variables
-                  BOOST
-                  SOURCES mains/TestVariables.cc
-                  ARGS    "testinput/ufotest.json"
-                  LIBS    ufo )
-
 ecbuild_add_test( TARGET  test_ufo_geovals
                   BOOST
                   SOURCES mains/TestGeoVaLs.cc
                   ARGS    "testinput/ufotest.json"
                   LIBS    ufo )
+
+#ecbuild_add_test( TARGET  test_ufo_locations
+#                  BOOST
+#                  SOURCES mains/TestLocations.cc
+#                  ARGS    "testinput/ufotest.json"
+#                  LIBS    ufo )
 
 ecbuild_add_test( TARGET test_ufo_observationspace
                   BOOST
@@ -60,17 +66,35 @@ ecbuild_add_test( TARGET test_ufo_obsvector
                   ARGS "testinput/ufotest.json"
                   LIBS    ufo )
 
-ecbuild_add_test( TARGET  test_ufo_obsoperator
+ecbuild_add_test( TARGET  test_ufo_amsua
                   BOOST
                   SOURCES mains/TestObsOperator.cc
-                  ARGS    "testinput/ufotest.json"
+                  ARGS    "testinput/amsua.json"
                   LIBS    ufo )
 
-ecbuild_add_test( TARGET  test_ufo_obscheck
+ecbuild_add_test( TARGET  test_ufo_radiosonde
                   BOOST
-                  SOURCES mains/TestObsCheck.cc
-                  ARGS    "testinput/ufotest.json"
+                  SOURCES mains/TestObsOperator.cc
+                  ARGS    "testinput/radiosonde.json"
                   LIBS    ufo )
+
+ecbuild_add_test( TARGET  test_ufo_seaice
+                  BOOST
+                  SOURCES mains/TestObsOperator.cc
+                  ARGS    "testinput/seaice.json"
+                  LIBS    ufo )
+
+ecbuild_add_test( TARGET  test_ufo_obsoperator_tlad
+                  BOOST
+                  SOURCES mains/TestObsOperatorTLAD.cc
+                  ARGS    "testinput/seaice.json"
+                  LIBS    ufo )
+
+#ecbuild_add_test( TARGET  test_ufo_obscheck
+#                  BOOST
+#                  SOURCES mains/TestObsCheck.cc
+#                  ARGS    "testinput/ufotest.json"
+#                  LIBS    ufo )
 
 #####################################################################
 # Files for CRTM tests

@@ -7,51 +7,69 @@
 
 module ufo_vars_mod
 
-use iso_c_binding
-use config_mod
-
 implicit none
 private
 public :: ufo_vars, ufo_vars_setup, ufo_vars_clone, ufo_vars_delete
-public :: ufo_vars_registry, ufo_vars_readconfig
 public :: ufo_vars_getindex, ufo_vars_nvars
-public :: MAXVARLEN
 
-integer, parameter :: MAXVARLEN=24
+integer, parameter, public :: MAXVARLEN=56
+character(len=MAXVARLEN), public :: var_tv   = "virtual_temperature"
+character(len=MAXVARLEN), public :: var_prsl = "atmosphere_ln_pressure_coordinate"
+character(len=MAXVARLEN), public :: var_mixr = "humidity_mixing_ratio"
+character(len=MAXVARLEN), public :: var_prs  = "air_pressure"
+character(len=MAXVARLEN), public :: var_prsi = "air_pressure_levels"
+character(len=MAXVARLEN), public :: var_oz   = "mass_concentration_of_ozone_in_air"
+character(len=MAXVARLEN), public :: var_co2  = "mass_concentration_of_carbon_dioxide_in_air"
+character(len=MAXVARLEN), public :: var_clw  = "atmosphere_mass_content_of_cloud_liquid_water"
+character(len=MAXVARLEN), public :: var_cli  = "atmosphere_mass_content_of_cloud_ice"
+character(len=MAXVARLEN), public :: var_clwefr = "effective_radius_of_cloud_liquid_water_particle"
+character(len=MAXVARLEN), public :: var_cliefr = "effective_radius_of_cloud_ice_particle"
+character(len=MAXVARLEN), public :: var_sfc_wfrac = "Water_Fraction"
+character(len=MAXVARLEN), public :: var_sfc_lfrac = "Land_Fraction"
+character(len=MAXVARLEN), public :: var_sfc_ifrac = "Ice_Fraction"
+character(len=MAXVARLEN), public :: var_sfc_sfrac = "Snow_Fraction"
+character(len=MAXVARLEN), public :: var_sfc_wtmp  = "Water_Temperature"
+character(len=MAXVARLEN), public :: var_sfc_ltmp  = "Land_Temperature"
+character(len=MAXVARLEN), public :: var_sfc_itmp  = "Ice_Temperature"
+character(len=MAXVARLEN), public :: var_sfc_stmp  = "Snow_Temperature"
+character(len=MAXVARLEN), public :: var_sfc_sdepth  = "Snow_Depth"
+character(len=MAXVARLEN), public :: var_sfc_vegfrac = "Vegetation_Fraction"
+character(len=MAXVARLEN), public :: var_sfc_wspeed  = "Sfc_Wind_Speed"
+character(len=MAXVARLEN), public :: var_sfc_wdir    = "Sfc_Wind_Direction"
+character(len=MAXVARLEN), public :: var_sfc_lai     = "Lai"
+character(len=MAXVARLEN), public :: var_sfc_soilm   = "Soil_Moisture"
+character(len=MAXVARLEN), public :: var_sfc_soilt   = "Soil_Temperature"
+character(len=MAXVARLEN), public :: var_sfc_landtyp = "Land_Type_Index"
+character(len=MAXVARLEN), public :: var_sfc_vegtyp  = "Vegetation_Type"
+character(len=MAXVARLEN), public :: var_sfc_soiltyp = "Soil_Type"
+character(len=MAXVARLEN), public :: var_seaicefrac  = "ice_concentration"
 ! ------------------------------------------------------------------------------
 
-!> Fortran derived type to represent QG model variables
+!> Fortran derived type to represent model variables
 type :: ufo_vars
   integer :: nv
   character(len=MAXVARLEN), allocatable :: fldnames(:) !< Variable identifiers
 end type ufo_vars
 
-#define LISTED_TYPE ufo_vars
-
-!> Linked list interface - defines registry_t type
-#include "linkedList_i.f"
-
-!> Global registry
-type(registry_t) :: ufo_vars_registry
-
 ! ------------------------------------------------------------------------------
 contains
 ! ------------------------------------------------------------------------------
-!> Linked list implementation
-#include "linkedList_c.f"
 
-! ------------------------------------------------------------------------------
-
-subroutine ufo_vars_setup(self, cvars)
+subroutine ufo_vars_setup(self, c_vars)
+use iso_c_binding
+use config_mod
 implicit none
 type(ufo_vars), intent(inout) :: self
-character(len=MAXVARLEN), intent(in) :: cvars(:)
+type(c_ptr), intent(in)       :: c_vars
+character(len=30*MAXVARLEN) :: svars
 
-self%nv = size(cvars)
+self%nv = config_get_int(c_vars, "nvars")
+
+allocate(self%fldnames(self%nv))
+svars = config_get_string(c_vars,len(svars),"variables")
+read(svars,*) self%fldnames
 
 ! TODO: a check on whether this var is in the list of defined vars
-allocate(self%fldnames(self%nv))
-self%fldnames(:) = cvars(:)
 
 end subroutine ufo_vars_setup
 
@@ -82,22 +100,6 @@ end subroutine ufo_vars_delete
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_vars_readconfig(self, c_conf) 
-implicit none
-type(ufo_vars), intent(inout) :: self
-type(c_ptr), intent(in)    :: c_conf
-
-character(len=512) :: svars
-
-call ufo_vars_delete(self)
-self%nv = config_get_int(c_conf, "nvars")
-svars = config_get_string(c_conf,len(svars),"variables")
-allocate(self%fldnames(self%nv))
-read(svars,*) self%fldnames 
-
-end subroutine ufo_vars_readconfig
-
-! ------------------------------------------------------------------------------
 integer function ufo_vars_getindex(self, varname)
 implicit none
 type(ufo_vars), intent(in)       :: self
@@ -105,21 +107,19 @@ character(MAXVARLEN), intent(in) :: varname
 
 integer :: ivar
 
+ufo_vars_getindex = -1
+
 do ivar = 1, self%nv
   if (self%fldnames(ivar) == varname) then
+    ufo_vars_getindex = ivar
     exit
   endif
 enddo
 
-if (ivar <= self%nv) then
-  ufo_vars_getindex = ivar
-else
-  ufo_vars_getindex = -1
-endif
-
 end function ufo_vars_getindex
 
 ! ------------------------------------------------------------------------------
+
 integer function ufo_vars_nvars(self) 
 implicit none
 type(ufo_vars), intent(in) :: self
@@ -127,5 +127,7 @@ type(ufo_vars), intent(in) :: self
 ufo_vars_nvars = self%nv
 
 end function ufo_vars_nvars
+
+! ------------------------------------------------------------------------------
 
 end module ufo_vars_mod

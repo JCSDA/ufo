@@ -20,9 +20,12 @@ namespace eckit {
   class Configuration;
 }
 
+namespace oops {
+  class Variables;
+}
+
 namespace ufo {
   class ObsSpace;
-  class Variables;
   class GeoVaLs;
   class ObsVector;
 
@@ -33,7 +36,7 @@ class ObsCheck : public util::Printable,
  public:
   static const std::string classname() {return "ufo::ObsCheck";}
 
-  ObsCheck(const ObsSpace &, const Variables &,
+  ObsCheck(const ObsSpace &, const oops::Variables &,
           const util::DateTime &, const util::DateTime &);
   ObsCheck(const ObsSpace &);
   ObsCheck(const eckit::Configuration &);

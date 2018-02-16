@@ -7,6 +7,8 @@
 
 module ufo_obs_data_basis_mod
   use iso_c_binding
+  use kinds, only: kind_real
+  use ufo_locs_mod, only: ufo_locs
   implicit none
 
   character(len=*), parameter :: MyName='basis_obs_data_mod'
@@ -19,7 +21,8 @@ module ufo_obs_data_basis_mod
       procedure, nopass :: echoMyname
       procedure(Setup_),  deferred :: Setup
       procedure(Delete_), deferred :: Delete
-      generic :: SetupBasis => Setup
+      procedure(GetLocs_),deferred :: GetLocs
+      generic :: SetupBasis  => Setup
       generic :: DeleteBasis => Delete
   end type BasisObsData
 
@@ -33,11 +36,17 @@ module ufo_obs_data_basis_mod
       integer(c_int),   intent(inout) :: nobs
       integer(c_int),   intent(inout) :: nlocs
     end subroutine Setup_
-    ! Interface for setup
+    ! Interface for delete
     subroutine Delete_(self)
       import
       class(BasisObsData), intent(inout) :: self
     end subroutine Delete_
+    subroutine GetLocs_(self,nlocs,locs)
+      import
+      class(BasisObsData), intent(in) :: self
+      integer, intent(in) :: nlocs
+      type(ufo_locs), intent(inout) :: locs
+    end subroutine GetLocs_
   end interface
 
 contains

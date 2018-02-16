@@ -4,7 +4,11 @@
   "window_end": "2010-01-02T00:00:00Z",
   "Variables": {
      "nvars": "1",
-     "variables": "testvar"
+     "variables": ["testvar"]
+  },
+  "Locations": {
+    "lats": [45.0, 40.0],
+    "lons": [0.0, -100.0]
   },
   "Observations": {
     "ObsTypes": [
@@ -12,15 +16,17 @@
         "ObsType": "Radiance",
         "ObsData": {
           "ObsDataIn": {
-            "obsfile": "Data/amsua_n19_wprofiles.nc4"
+            "obsfile": "Data/amsua_n19_obs.nc4"
           }
         },
         "GeoVaLs": {
-          "norm": "280.87991270213405",
-          "filename": "Data/amsua_n19_wprofiles.nc4"
+          "norm": "7071.1296549464405",
+          "filename": "Data/amsua_n19_geovals.nc4",
+          "random": "0"
         },
-        "rmsequiv": "253.803797241769",
-        "tolerance": "999."
+        "rmsequiv": "228.32019688865083",
+        "tolerance": "999.",
+        "ObsBias": {}
       },
       {
         "ObsType": "Radiosonde",
@@ -30,10 +36,28 @@
           }
         },
         "GeoVaLs": {
-          "norm": "280.07183547780136",
+          "norm": "8471.883687854357",
+          "random": "0",
           "filename": "Data/diag_t_01_wprofiles.nc4"
         },
         "rmsequiv": "254.46418485798108",
+        "tolerance": "1.0e-8",
+        "ObsBias": {}
+      },
+      {
+        "ObsType": "SeaIceFraction",
+        "ObsData": {
+          "ObsDataIn": {
+            "obsfile": "Data/seaice_obs.nc"
+          }
+        },
+        "GeoVaLs": {
+          "norm": "1567.673435381234",
+          "random": "1",
+          "nobs": "2457600"
+        },
+        "ObsBias": {},
+        "rmsequiv": "1.",
         "tolerance": "1.0e-8"
       }
     ]

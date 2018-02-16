@@ -13,7 +13,9 @@ use read_diag, only: read_radiag_data,&
                      open_radiag, &
                      close_radiag, &
                      read_all_radiag
-
+use ufo_locs_mod, only: ufo_locs, &
+                        ufo_locs_setup
+use fckit_log_module, only : fckit_log
 use ufo_obs_data_basis_mod, only:  BasisObsData
 
 implicit none
@@ -34,15 +36,16 @@ type, extends(BasisObsData) :: radDiag
   type(diag_data_chan_list)  ,allocatable  ::  datachan(:,:)
   type(diag_data_extra_list) ,allocatable  ::  dataextra(:,:,:)
   contains
-    procedure :: Setup => this_read_
-    procedure :: Delete => this_delete_
+    procedure :: Setup  => read_
+    procedure :: Delete => delete_
+    procedure :: GetLocs => getlocs_
 end type radDiag
 
-interface radDiag_read  ; module procedure this_read_  ; end interface
+interface radDiag_read  ; module procedure read_  ; end interface
 
 contains
 
-subroutine this_read_(self,filein,obstype,nobs,nlocs)
+subroutine read_(self,filein,obstype,nobs,nlocs)
 use ncd_kinds, only: i_kind
 implicit none
 class(radDiag), intent(inout)  :: self
@@ -78,15 +81,56 @@ nlocs = nobs
 nobs  = nobs * self%header_fix%nchan
 call close_radiag(filein,luin)
 print *, myname_, ' Total number of observations in file: (nobs,nlocs) ', nobs, nlocs
-end subroutine this_read_
+end subroutine read_
 
-subroutine this_delete_(self)
+
+subroutine getlocs_(self, nlocs, locs)
+class(RadDiag), intent(in) :: self
+type(ufo_locs), intent(inout) :: locs
+integer, intent(in) :: nlocs
+
+character(len=*),parameter:: myname_=myname//"*rad_getlocs"
+character(len=255) :: record
+integer :: failed
+
+
+call ufo_locs_setup(locs, nlocs)
+
+failed=0
+if(failed==0 .and. size(self%datafix(:)%Lat)==nlocs) then
+  locs%lat(:) = self%datafix(:)%Lat
+else
+  failed=1
+endif
+if(failed==0 .and. size(self%datafix(:)%Lon)==nlocs) then
+  locs%lon(:) = self%datafix(:)%Lon
+else
+  failed=2
+endif
+if(failed==0 .and. size(self%datafix(:)%obstime)==nlocs) then
+  locs%time(:) = self%datafix(:)%obstime
+else
+  failed=3
+endif
+if(failed==0)then
+  write(record,*)myname_,': allocated/assinged obs-data'
+  call fckit_log%info(record)
+else
+  write(record,*)myname_,': failed allocation/assignment of obs-data, ier: ', failed
+  call fckit_log%info(record)
+  ! should exit in error here
+endif
+
+end subroutine getlocs_
+
+
+subroutine delete_(self)
 implicit none
 class(radDiag), intent(inout) :: self
-end subroutine this_delete_
+end subroutine delete_
 
-subroutine this_write_(self)
+subroutine write_(self)
 type(radDiag), intent(inout) :: self
-end subroutine this_write_
+end subroutine write_
 
 end module radDiag_mod

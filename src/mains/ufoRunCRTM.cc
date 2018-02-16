@@ -8,14 +8,13 @@
  * does it submit to any jurisdiction.
  */
 
-#include "UfoTrait.h"
+#include "./RunCRTM.h"
+#include "ufo/UfoTrait.h"
 #include "oops/runs/Run.h"
-#include "test/interface/Variables.h"
 
 int main(int argc,  char ** argv) {
   oops::Run run(argc, argv);
-  test::Variables<ufo::UfoTrait> tests;
-  run.execute(tests);
+  ufo::RunCRTM<ufo::UfoTrait> var;
+  run.execute(var);
   return 0;
 };
-

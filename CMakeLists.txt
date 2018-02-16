@@ -37,11 +37,11 @@ set( UFO_LINKER_LANGUAGE CXX )
 # Dependencies
 ################################################################################
 
-## Boost
-#set( Boost_MINIMUM_VERSION "1.47" )
-#find_package( Boost ${Boost_MINIMUM_VERSION} REQUIRED
-#              COMPONENTS unit_test_framework )
-#include_directories( ${Boost_INCLUDE_DIR} )
+# Boost
+set( Boost_MINIMUM_VERSION "1.47" )
+find_package( Boost ${Boost_MINIMUM_VERSION} REQUIRED
+              COMPONENTS unit_test_framework )
+include_directories( ${Boost_INCLUDE_DIR} )
 
 # ioda
 ecbuild_use_package( PROJECT ioda VERSION 0.1.0 REQUIRED )
@@ -80,7 +80,7 @@ endforeach()
 
 include( ufo_compiler_flags )
 include_directories( ${UFO_INCLUDE_DIRS} ${UFO_EXTRA_INCLUDE_DIRS}
-                     ${CMAKE_CURRENT_SOURCE_DIR}/src/ufo )
+                     ${CMAKE_CURRENT_SOURCE_DIR}/src )
 
 add_subdirectory( src )
 add_subdirectory( test )

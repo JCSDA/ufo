@@ -87,7 +87,7 @@ subroutine c_ufo_postFilter_f90(c_key_geovals, c_key_hofx,c_key_obsspace) bind(c
 !
 ! working
 !
-      write(*,*) 'read obs_vector  =========================='
+   write(*,*) 'read obs_vector  =========================='
    write(*,*) 'hofx%nobs=',hofx%nobs
    write(*,*) 'hofx%nobs=',hofx%values(1:10)
    if(geovals%lalloc .and. geovals%linit) then

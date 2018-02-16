@@ -19,15 +19,10 @@ module ufo_obs_data_mod
 
   type, extends(BasisObsData) :: Obs_Data
   contains
-    ! Extending the mapping SetupBasis => SetupRaob
-    ! the parent type.
-    generic :: SetupBasis => SetupRaob
-    generic :: SetupBasis => SetupRadiance
-    procedure :: SetupRaob
-    procedure :: SetupRadiance
     ! Implementation for the deferred procedure in Basis
     procedure :: Setup
     procedure :: Delete
+    procedure :: GetLocs
   end type Obs_Data
 
   type(RadDiag),  pointer, save::  Radiance
@@ -54,10 +49,6 @@ contains
 
   end subroutine Setup
 
-  subroutine Delete(self)
-    class(Obs_Data), intent(inout) :: self
-  end subroutine Delete
-
   subroutine SetupRadiance(self, mytype, filein,nobs,nlocs)
     class(Obs_Data), intent(inout) :: self
     type(RadDiag), pointer, intent(inout)    :: mytype
@@ -67,7 +58,6 @@ contains
 
     character(len=*),parameter:: myname_=myname//"::SetupRadiance"
 
-    print *, trim(myname_)
     call radDiag_read(mytype,filein,'Radiance',nobs,nlocs)
     self%Nobs = nobs
     self%Nlocs= nlocs
@@ -83,12 +73,21 @@ contains
 
     character(len=*),parameter:: myname_=myname//"::SetupRaob"
 
-    print *, trim(myname_)
     call raobDiag_read(mytype,filein,'Radiosonde',nobs,nlocs)
     self%Nobs = nobs
     self%Nlocs= nlocs
 
   end subroutine SetupRaob
+
+  subroutine Delete(self)
+    class(Obs_Data), intent(inout) :: self
+  end subroutine Delete
+
+  subroutine GetLocs(self, nlocs, locs)
+    class(Obs_Data), intent(in) :: self
+    integer, intent(in) :: nlocs
+    type(ufo_locs), intent(inout) :: locs
+  end subroutine GetLocs
 
   function vname2vmold_(vname) result(obsmold_)
     implicit none

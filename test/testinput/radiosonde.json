@@ -1,0 +1,25 @@
+{
+  "test_framework_runtime_config": "--log_level=test_suite",
+  "window_begin": "2010-01-01T00:00:00Z",
+  "window_end": "2010-01-02T00:00:00Z",
+  "Observations": {
+    "ObsTypes": [
+      {
+        "ObsType": "Radiosonde",
+        "ObsData": {
+          "ObsDataIn": {
+            "obsfile": "Data/diag_t_01_wprofiles.nc4"
+          }
+        },
+        "GeoVaLs": {
+          "norm": "8471.883687854357",
+          "random": "0",
+          "filename": "Data/diag_t_01_wprofiles.nc4"
+        },
+        "rmsequiv": "254.46418485798108",
+        "tolerance": "1.0e-8",
+        "ObsBias": {}
+      }
+    ]
+  }
+}

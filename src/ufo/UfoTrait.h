@@ -14,10 +14,11 @@
 #include "GeoVaLs.h"
 #include "Locations.h"
 #include "ObsBias.h"
-#include "ObsCheck.h"
+#include "ObsBiasIncrement.h"
 #include "ObsSpace.h"
 #include "ObsVector.h"
-#include "Variables.h"
+#include "ObsCheck.h"
+#include "ObsBiasCovariance.h"
 
 namespace ufo {
 
@@ -26,11 +27,14 @@ struct UfoTrait {
 
   typedef ufo::GeoVaLs             GeoVaLs;
   typedef ufo::Locations           Locations;
-  typedef ufo::ObsCheck            ObsCheck;
   typedef ufo::ObsSpace            ObsSpace;
   typedef ufo::ObsVector           ObsVector;
-  typedef ufo::Variables           Variables;
+
   typedef ufo::ObsBias             ObsAuxControl;
+  typedef ufo::ObsBiasIncrement    ObsAuxIncrement;
+  typedef ufo::ObsBiasCovariance   ObsAuxCovariance;
+
+  typedef ufo::ObsCheck            ObsCheck;
 };
 
 }  // namespace ufo

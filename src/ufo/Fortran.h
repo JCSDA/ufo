@@ -20,8 +20,6 @@ namespace util {
 
 namespace ufo {
 
-// Variables key type
-typedef int F90vars;
 // Locations key type
 typedef int F90locs;
 // Goms key type
@@ -46,44 +44,28 @@ typedef int F90obias;
 extern "C" {
 
 // -----------------------------------------------------------------------------
-//  Variables
-// -----------------------------------------------------------------------------
-  void ufo_var_create_f90(int & keyVars, const eckit::Configuration * const *);
-  void ufo_var_clone_f90(const int & keyVars, int & keyVars_other);
-  void ufo_var_info_f90(const int & keyVars, int &);
-  void ufo_var_delete_f90(int & keyVars);
-
-// -----------------------------------------------------------------------------
 //  Locations
 // -----------------------------------------------------------------------------
-  void ufo_loc_delete_f90(F90locs &);
-  void ufo_loc_nobs_f90(const F90locs &, int &);
+  void ufo_locs_create_f90(F90locs &, const int  &, const double *, const double *);
+  void ufo_locs_delete_f90(F90locs &);
+  void ufo_locs_nobs_f90(const F90locs &, int &);
 
 // -----------------------------------------------------------------------------
 //  Local Values (GOM)
 // -----------------------------------------------------------------------------
+  void ufo_geovals_setup_f90(F90goms &, const F90locs &, const eckit::Configuration * const *);
   void ufo_geovals_create_f90(F90goms &);
   void ufo_geovals_delete_f90(F90goms &);
   void ufo_geovals_zero_f90(const F90goms &);
+  void ufo_geovals_setup_random_f90(const F90goms &, const eckit::Configuration * const *,
+                                    const eckit::Configuration * const *);
   void ufo_geovals_random_f90(const F90goms &);
+  void ufo_geovals_scalmult_f90(const F90goms &, const double &);
   void ufo_geovals_dotprod_f90(const F90goms &, const F90goms &, double &);
   void ufo_geovals_minmaxavg_f90(const F90goms &, int &, double &, double &, double &);
-  void ufo_geovals_read_file_f90(const F90goms &, const eckit::Configuration * const *);
+  void ufo_geovals_read_file_f90(const F90goms &, const eckit::Configuration * const *,
+                                 const eckit::Configuration * const *);
   void ufo_geovals_write_file_f90(const F90goms &, const eckit::Configuration * const *);
-
-// -----------------------------------------------------------------------------
-//  Wind speed observations
-// -----------------------------------------------------------------------------
-  void ufo_wspeed_setup_f90(F90hop &, const eckit::Configuration * const *);
-  void ufo_wspeed_delete_f90(F90hop &);
-
-  void ufo_wspeed_eqv_f90(const F90goms &, const F90ovec &);
-  void ufo_wspeed_equiv_tl_f90(const F90goms &, const F90ovec &, const F90goms &, const double &);
-  void ufo_wspeed_equiv_ad_f90(const F90goms &, const F90ovec &, const F90goms &, double &);
-
-  void ufo_wspeed_gettraj_f90(const F90hop &, const int &, F90goms &);
-  void ufo_wspeed_settraj_f90(const F90goms &, const F90goms &);
-  void ufo_wspeed_inputs_f90(const F90hop &, F90vars &);
 
 // -----------------------------------------------------------------------------
 //  Radiance observations
@@ -97,7 +79,6 @@ extern "C" {
 
   void ufo_radiance_gettraj_f90(const F90hop &, const int &, F90goms &);  // copied over from wspeed, don't think it's required
   void ufo_radiance_settraj_f90(const F90goms &, const F90goms &);   // copied over from wspeed, don't think it's required
-  void ufo_radiance_inputs_f90(const F90hop &, F90vars &);
 
 // -----------------------------------------------------------------------------
 //  Check Observations
@@ -113,7 +94,16 @@ extern "C" {
   void ufo_radiosonde_setup_f90(F90hop &, const eckit::Configuration * const *);
   void ufo_radiosonde_delete_f90(F90hop &);
   void ufo_radiosonde_t_eqv_f90(const F90goms &, const F90odb &, const F90ovec &, const F90obias &);
-  void ufo_radiosonde_inputs_f90(const F90hop &, F90vars &);
+
+// -----------------------------------------------------------------------------
+//  Ice concentration observations
+// -----------------------------------------------------------------------------
+  void ufo_seaicefrac_setup_f90(F90hop &, const eckit::Configuration * const *);
+  void ufo_seaicefrac_delete_f90(F90hop &);
+  void ufo_seaicefrac_eqv_f90(const F90goms &, const F90odb &, const F90ovec &, const F90obias &);
+  void ufo_seaicefrac_eqv_tl_f90(const F90goms &, const F90ovec &);
+  void ufo_seaicefrac_eqv_ad_f90(const F90goms &, const F90ovec &);
+
 
 // -----------------------------------------------------------------------------
 //  Observation Vectors
@@ -145,16 +135,30 @@ extern "C" {
                         const int &, const char *, const F90ovec &);
   void ufo_obsdb_put_f90(const F90odb &, const int &, const char *,
                         const int &, const char *, const F90ovec &);
-  void ufo_obsdb_locations_f90(const F90odb &, const int &, const char *,
-                              const util::DateTime * const *, const util::DateTime * const *,
-                              F90locs &);
-  void ufo_obsdb_getgeovals_f90(const F90odb &, const F90vars &,
-                                const util::DateTime * const *, const util::DateTime * const *,
-                                F90goms &);
-  void ufo_obsdb_generate_f90(const F90odb &, const int &, const char *,
-                             const eckit::Configuration * const *, const util::DateTime * const *,
-                             const util::Duration * const *, const int &, int &);
+  void ufo_obsdb_getlocations_f90(const F90odb &, 
+                                  const util::DateTime * const *, 
+                                  const util::DateTime * const *,
+                                  F90locs &);
+  void ufo_obsdb_generate_f90(const F90odb &, const eckit::Configuration * const *, 
+                              const util::DateTime * const *,
+                              const util::DateTime * const *);
   void ufo_obsdb_nobs_f90(const F90odb &, int &);
+
+// -----------------------------------------------------------------------------
+//  Observation Handler (for sea ice)
+// -----------------------------------------------------------------------------
+
+  void ufo_obsdb_seaice_setup_f90(F90odb &, const eckit::Configuration * const *);
+  void ufo_obsdb_seaice_delete_f90(F90odb &);
+  void ufo_obsdb_seaice_getlocations_f90(const F90odb &,
+                                  const util::DateTime * const *,
+                                  const util::DateTime * const *,
+                                  F90locs &);
+  void ufo_obsdb_seaice_generate_f90(const F90odb &, const eckit::Configuration * const *,
+                              const util::DateTime * const *,
+                              const util::DateTime * const *);
+  void ufo_obsdb_seaice_nobs_f90(const F90odb &, int &);
+
 
 // -----------------------------------------------------------------------------
 }  // extern C

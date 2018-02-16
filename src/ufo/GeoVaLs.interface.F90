@@ -8,14 +8,56 @@ module ufo_geovals_mod_c
 
 use iso_c_binding
 use ufo_geovals_mod
+use ufo_locs_mod
+use ufo_locs_mod_c, only : ufo_locs_registry
 use ufo_vars_mod
 use kinds
 
 implicit none
+
+public :: ufo_geovals_registry
+
 private
+integer, parameter :: max_string=800
+
+#define LISTED_TYPE ufo_geovals
+
+!> Linked list interface - defines registry_t type
+#include "linkedList_i.f"
+
+!> Global registry
+type(registry_t) :: ufo_geovals_registry
+
+! ------------------------------------------------------------------------------
+contains
+! ------------------------------------------------------------------------------
+!> Linked list implementation
+#include "linkedList_c.f"
 ! ------------------------------------------------------------------------------
 
-contains
+subroutine ufo_geovals_setup_c(c_key_self, c_key_locs, c_vars) bind(c,name='ufo_geovals_setup_f90')
+use config_mod
+implicit none
+integer(c_int), intent(in) :: c_key_self
+integer(c_int), intent(in) :: c_key_locs
+type(c_ptr), intent(in)    :: c_vars
+
+type(ufo_geovals), pointer :: self
+type(ufo_locs), pointer :: locs
+type(ufo_vars) :: vars
+
+call ufo_geovals_registry%init()
+call ufo_geovals_registry%add(c_key_self)
+call ufo_geovals_registry%get(c_key_self, self)
+
+call ufo_locs_registry%get(c_key_locs,locs)
+
+call ufo_vars_setup(vars, c_vars)
+
+call ufo_geovals_init(self)
+call ufo_geovals_setup(self, vars, locs%nlocs)
+
+end subroutine ufo_geovals_setup_c
 
 ! ------------------------------------------------------------------------------
 
@@ -66,6 +108,33 @@ end subroutine ufo_geovals_zero_c
 
 ! ------------------------------------------------------------------------------
 
+subroutine ufo_geovals_setup_random_c(c_key_self, c_conf, c_vars) bind(c,name='ufo_geovals_setup_random_f90')
+use config_mod
+implicit none
+integer(c_int), intent(in) :: c_key_self
+type(c_ptr), intent(in)    :: c_conf
+type(c_ptr), intent(in)    :: c_vars
+
+type(ufo_geovals), pointer :: self
+type(ufo_vars) :: vars
+integer :: nobs
+
+call ufo_geovals_registry%init()
+call ufo_geovals_registry%add(c_key_self)
+call ufo_geovals_registry%get(c_key_self, self)
+
+!> read variables
+call ufo_vars_setup(vars, c_vars)
+
+! randomize
+nobs = config_get_int(c_conf, "nobs")
+call ufo_geovals_setup(self, vars, nobs)
+call ufo_geovals_random(self)
+
+end subroutine ufo_geovals_setup_random_c
+
+! ------------------------------------------------------------------------------
+
 subroutine ufo_geovals_random_c(c_key_self) bind(c,name='ufo_geovals_random_f90')
 implicit none
 integer(c_int), intent(in) :: c_key_self
@@ -76,6 +145,20 @@ call ufo_geovals_registry%get(c_key_self, self)
 call ufo_geovals_random(self)
 
 end subroutine ufo_geovals_random_c
+
+! ------------------------------------------------------------------------------
+
+subroutine ufo_geovals_scalmult_c(c_key_self, zz) bind(c,name='ufo_geovals_scalmult_f90')
+implicit none
+integer(c_int), intent(in) :: c_key_self
+real(c_double), intent(in) :: zz
+type(ufo_geovals), pointer :: self
+
+call ufo_geovals_registry%get(c_key_self, self)
+
+call ufo_geovals_scalmult(self, zz)
+
+end subroutine ufo_geovals_scalmult_c
 
 ! ------------------------------------------------------------------------------
 
@@ -109,35 +192,31 @@ end subroutine ufo_geovals_minmaxavg_c
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_geovals_read_file_c(c_key_self, c_conf) bind(c,name='ufo_geovals_read_file_f90')
+subroutine ufo_geovals_read_file_c(c_key_self, c_conf, c_vars) bind(c,name='ufo_geovals_read_file_f90')
 use config_mod
 
 implicit none
 integer(c_int), intent(in) :: c_key_self
 type(c_ptr), intent(in)    :: c_conf
+type(c_ptr), intent(in)    :: c_vars
 
 type(ufo_geovals), pointer :: self
+type(ufo_vars) :: vars
+character(max_string) :: filename
 
-character(128) :: filename
-
+call ufo_geovals_registry%init()
+call ufo_geovals_registry%add(c_key_self)
 call ufo_geovals_registry%get(c_key_self, self)
+
+!> read variables
+call ufo_vars_setup(vars, c_vars)
 
 ! read filename for config
 filename = config_get_string(c_conf,len(filename),"filename")
 
-if (filename == 'Data/amsua_n19_wprofiles.nc4') then
-  call ufo_geovals_read_rad_netcdf(self, filename)
-elseif (filename == 'Data/diag_t_01_wprofiles.nc4') then
-  call ufo_geovals_read_raob_t_netcdf(self, filename)
-elseif (filename == 'Data/diag_q_01_wprofiles.nc4') then
-  call ufo_geovals_read_q_netcdf(self, filename)
-elseif (filename == 'Data/diag_uv_01_wprofiles.nc4') then
-  call ufo_geovals_read_uv_netcdf(self, filename)
-elseif (filename == 'Data/diag_ps_01_wprofiles.nc4') then
-  call ufo_geovals_read_ps_netcdf(self, filename)
-else
-  print *, 'Error: dont know how to read ', trim(filename)
-endif
+! read geovals
+call ufo_geovals_read_netcdf(self, filename, vars)
+
 end subroutine ufo_geovals_read_file_c
 
 ! ------------------------------------------------------------------------------
