@@ -1,0 +1,4 @@
+# Ignore directories created by rendering process
+build
+_static
+_templates
