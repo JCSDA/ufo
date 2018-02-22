@@ -165,7 +165,7 @@ PROGRAM convert_aod_diag
      DO ich=1,nch
         lqcpass = luse(ich) .AND. data_chan(ich)%qcmark .EQ. 0 
 
-        CALL nc_diag_metadata("Channel_Index",         i                                   )
+        CALL nc_diag_metadata("Channel_Index",         ich                                 )
         CALL nc_diag_metadata("Observation_Class",     '    aod'                           )
         CALL nc_diag_metadata("Latitude",              data_fix%lat                              ) ! observation latitude (degrees)
         CALL nc_diag_metadata("Longitude",             data_fix%lon                        ) ! observation longitude (degrees)
