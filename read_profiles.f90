@@ -3,7 +3,7 @@
 ! subprogram:    read_aoddiag                       read rad diag file
 !   prgmmr: tahara           org: np20                date: 2003-01-01
 !
-! abstract:  This module contains code to process radiance
+! abstract:  This module contains code to process aod
 !            diagnostic files.  The module defines structures
 !            to contain information from the radiance
 !            diagnostic files and then provides two routines
