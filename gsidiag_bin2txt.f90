@@ -369,8 +369,8 @@ program gsidiag_bin2txt
     endif
     if (ich .eq. 1) then
       ! write header
-      write(unit=outlun,fmt='(A1,A19,3x,A10,3x,A5)'),'!','Satellite/Sensor','YYYYMMDDHH','#chan'
-      write(unit=outlun,fmt='(A20,3x,I10,3x,I5)'),trim(headfix%isis), headfix%idate, headfix%nchan
+      write(unit=outlun,fmt='(A1,A19,3x,A10,3x,A5)')'!','Satellite/Sensor','YYYYMMDDHH','#chan'
+      write(unit=outlun,fmt='(A20,3x,I10,3x,I5)')trim(headfix%isis), headfix%idate, headfix%nchan
 
 !_RT  write(unit=outlun,fmt='(A6,A1,A13,A1,A4,A1,A12,A1,A12,30(A1,A9))')'!ichan','|','freq/wavenum','|','iuse','|','#total obs','|', &
 !_RT             '#assim obs','|','Tb-Total','|','Tb-Assim','|','O-F noBC','|','','|','O-F BC','|','','|','Obs Error','|','Cost (Jo)','|','bc_total','|','','|',   &

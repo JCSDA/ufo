@@ -55,6 +55,8 @@ MODULE read_aod_diag
   PUBLIC :: ipchan_aod
   PUBLIC :: set_aoddiag
   PUBLIC :: get_aoddiag
+  PUBLIC :: read_all_aoddiag
+
 
   INTERFACE set_aoddiag
      MODULE PROCEDURE set_aoddiag_int_ ! internal procedure for integers
@@ -464,6 +466,110 @@ CONTAINS
 
   END SUBROUTINE read_aoddiag_data
 
+
+  SUBROUTINE read_all_aoddiag(ftin,header_fix,all_data_fix,all_data_chan,nlocs,iflag)
+!                .      .    .                                       .
+! subprogram:    read_all_aoddiag                    read read_all_aoddiag
+!   prgmmr: tahara           org: np20                date: 2003-01-01
+!   mzp based on template
+!
+! abstract:  This routine reads the data record from a aod
+!            diagnostic file
+!
+! program history log:
+!   2010-10-05 treadon - add this doc block
+!   2011-02-22 kleist  - changes related to memory allocation
+!   2017-07-17 mccarty - change routine to be generalized for bin/nc4 files
+!
+! input argument list_aod:
+!   ftin - unit number connected to diagnostic file
+!   header_fix - header information structure
+!
+! output argument list_aod:
+!   data_fix   - spot header information structure
+!   data_chan  - spot channel information structure
+!   iflag      - error code
+!
+! attributes:
+!   language: f90
+!   machine:  ibm RS/6000 SP
+!
+!$$$
+
+
+! Declare passed arguments
+    INTEGER(i_kind),INTENT(in)             :: ftin
+    TYPE(diag_header_fix_list_aod ),INTENT(in) :: header_fix
+    INTEGER(i_kind),INTENT(out)            :: iflag
+    TYPE(diag_data_fix_list_aod),  ALLOCATABLE, INTENT(inout) :: all_data_fix(:)
+    TYPE(diag_data_chan_list_aod) ,ALLOCATABLE, INTENT(inout) :: all_data_chan(:,:)
+    INTEGER(i_kind),INTENT(out) :: nlocs
+
+!locals
+
+    REAL(r_single), ALLOCATABLE, DIMENSION(:)  :: Latitude, Longitude, &
+         &Obs_Time,  Psfc, Sol_Zenith_Angle, Sol_Azimuth_Angle,&
+         &Observation, Obs_Minus_Forecast_unadjusted,  &
+         &Inverse_Observation_Error, QC_Flag
+
+    INTEGER(i_kind), ALLOCATABLE, DIMENSION(:)  :: Channel_Index
+
+    INTEGER(i_kind) :: i,ic,ii,ci,ndatum
+
+    IF (netcdf) THEN
+
+       ndatum = nc_diag_read_get_dim(ftin,'nobs')
+       nlocs = ndatum / header_fix%nchan
+       
+       ALLOCATE( &
+            &Channel_Index(ndatum), Latitude(ndatum), Longitude(ndatum), &
+            &Obs_Time(ndatum), Psfc(ndatum),&
+            &Sol_Zenith_Angle(ndatum), Sol_Azimuth_Angle(ndatum),&
+            &Observation(ndatum), Obs_Minus_Forecast_unadjusted(ndatum),&
+            &Inverse_Observation_Error(ndatum),QC_Flag(ndatum))
+
+       ALLOCATE(all_data_fix(nlocs),all_data_chan(nlocs,header_fix%nchan))
+
+       CALL nc_diag_read_get_var('Channel_Index', Channel_Index)
+       CALL nc_diag_read_get_var('Latitude', Latitude)
+       CALL nc_diag_read_get_var('Longitude', Longitude)
+       CALL nc_diag_read_get_var('Psfc', Psfc)
+       CALL nc_diag_read_get_var('Obs_Time', Obs_Time)
+       CALL nc_diag_read_get_var('Sol_Zenith_Angle', Sol_Zenith_Angle)
+       CALL nc_diag_read_get_var('Sol_Azimuth_Angle', Sol_Azimuth_Angle)
+       CALL nc_diag_read_get_var('Observation', Observation)
+       CALL nc_diag_read_get_var('Obs_Minus_Forecast_unadjusted', Obs_Minus_Forecast_unadjusted)
+       CALL nc_diag_read_get_var('Inverse_Observation_Error', Inverse_Observation_Error)
+       CALL nc_diag_read_get_var('QC_Flag', QC_Flag)
+       
+       ii=1
+
+       DO i=1,nlocs
+          all_data_fix(i)%lat               = Latitude(ii)
+          all_data_fix(i)%lon               = Longitude(ii)
+          all_data_fix(i)%psfc              = psfc(ii)
+          all_data_fix(i)%obstime           = Obs_Time(ii)
+          all_data_fix(i)%solzen_ang        = Sol_Zenith_Angle(ii)
+          all_data_fix(i)%solazm_ang        = Sol_Azimuth_Angle(ii)
+          
+          DO ic=1,header_fix%nchan
+             ci = Channel_Index(ii)
+             all_data_chan(i,ci)%aodobs = Observation(ii)
+             all_data_chan(i,ci)%omgaod = Obs_Minus_Forecast_unadjusted(ii)
+             all_data_chan(i,ci)%errinv= Inverse_Observation_Error(ii)
+             all_data_chan(i,ci)%qcmark= QC_Flag(ii)
+             ii=ii+1
+          ENDDO
+       ENDDO
+
+    ELSE
+       PRINT *,'read_aod_diag binary not working - stopping'
+       iflag=-1
+       STOP
+    ENDIF
+
+  END SUBROUTINE read_all_aoddiag
+
   SUBROUTINE read_aoddiag_data_nc_init(ftin, header_fix)
 !                .      .    .                                       .
 ! subprogram:    read_aoddiag_data_nc_init           read rad diag data
@@ -534,10 +640,6 @@ CONTAINS
     CALL nc_diag_read_get_var('Inverse_Observation_Error', Inverse_Observation_Error)
     CALL nc_diag_read_get_var('QC_Flag', QC_Flag)
     cdatum = 1
-
-!  allocate(  all_data_fix(nrecord)        )
-!  allocate(  all_data_chan(nrecord, nchan))
-
 
     DO ir=1,nrecord
        clat = Latitude(cdatum)
