@@ -4,7 +4,7 @@ PROGRAM convert_profiles
 
   USE read_profiles_mod, ONLY : read_profiles_header, read_profiles, &
        &max_name_length,max_vars
-  USE ncd_kinds,ONLY: r_quad, r_single
+  USE ncd_kinds,ONLY: r_quad, r_single, r_kind
 
   IMPLICIT NONE 
 
@@ -110,21 +110,21 @@ PROGRAM convert_profiles
 
   dimid_2d=(/dimid_nsig,dimid_nobs/)
 
-  ncstatus    = nf90_def_var(ncfileid,'tvp',nf90_float,dimid_2d,&
+  ncstatus    = nf90_def_var(ncfileid,"temperature",nf90_double,dimid_2d,&
        &ncid_tvp)
-  ncstatus    = nf90_def_var(ncfileid,'qvp',nf90_float,dimid_2d,&
+  ncstatus    = nf90_def_var(ncfileid,"humidity_mixing_ratio",nf90_double,dimid_2d,&
        &ncid_qvp)
-  ncstatus    = nf90_def_var(ncfileid,'prsltmp',nf90_float,dimid_2d,&
+  ncstatus    = nf90_def_var(ncfileid,"air_pressure",nf90_double,dimid_2d,&
        &ncid_prsltmp)
 
   DO i=1,naeros
      ncstatus    = nf90_def_var(ncfileid,TRIM(varnames(nvarsphys+i)),&
-          &nf90_float,dimid_2d,ncid_aeros(i))
+          &nf90_double,dimid_2d,ncid_aeros(i))
   ENDDO
 
   dimid_2d=(/dimid_nsig_plus_one,dimid_nobs/)
 
-  ncstatus    = nf90_def_var(ncfileid,'prsitmp',nf90_float,dimid_2d,&
+  ncstatus    = nf90_def_var(ncfileid,"air_pressure_levels",nf90_double,dimid_2d,&
        &ncid_prsitmp)
   
   ncstatus    = nf90_put_att(ncfileid, NF90_GLOBAL, 'date_time', idate)

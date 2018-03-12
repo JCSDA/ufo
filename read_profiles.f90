@@ -95,11 +95,11 @@ MODULE read_profiles_mod
 
 !for aod diag_header_chan_list_aod is same as for radiance  
   TYPE diag_header_chan_list_aod
-     REAL(r_single) :: freq              ! frequency (Hz)
-     REAL(r_single) :: polar             ! polarization
-     REAL(r_single) :: wave              ! wave number (cm^-1)
-     REAL(r_single) :: varch             ! error variance (or SD error?)
-     REAL(r_single) :: tlapmean          ! mean lapse rate
+     REAL(r_kind) :: freq              ! frequency (Hz)
+     REAL(r_kind) :: polar             ! polarization
+     REAL(r_kind) :: wave              ! wave number (cm^-1)
+     REAL(r_kind) :: varch             ! error variance (or SD error?)
+     REAL(r_kind) :: tlapmean          ! mean lapse rate
      INTEGER(i_kind):: iuse              ! use flag
      INTEGER(i_kind):: nuchan            ! sensor relative channel number
      INTEGER(i_kind):: iochan            ! satinfo relative channel number
@@ -107,23 +107,23 @@ MODULE read_profiles_mod
 
 !@some changes
   TYPE diag_data_fix_list_aod
-     REAL(r_single) :: lat               ! latitude (deg)
-     REAL(r_single) :: lon               ! longitude (deg)
-     REAL(r_single) :: psfc              ! psfc (hPa)
-     REAL(r_single) :: obstime           ! observation time relative to analysis
-     REAL(r_single) :: solzen_ang        ! solar zenith angle (deg)
-     REAL(r_single) :: solazm_ang        ! solar azimumth angle (deg)
+     REAL(r_kind) :: lat               ! latitude (deg)
+     REAL(r_kind) :: lon               ! longitude (deg)
+     REAL(r_kind) :: psfc              ! psfc (hPa)
+     REAL(r_kind) :: obstime           ! observation time relative to analysis
+     REAL(r_kind) :: solzen_ang        ! solar zenith angle (deg)
+     REAL(r_kind) :: solazm_ang        ! solar azimumth angle (deg)
   END TYPE diag_data_fix_list_aod
 
 !@some changes to aod
   TYPE diag_data_chan_list_aod
-     REAL(r_single) :: aodobs             ! AOD (obs) 
-     REAL(r_single) :: omgaod             ! AOD (obs) - AOD (guess)
-     REAL(r_single) :: errinv             ! inverse error (K**(-1))
-     REAL(r_single) :: qcmark             ! quality control mark
+     REAL(r_kind) :: aodobs             ! AOD (obs) 
+     REAL(r_kind) :: omgaod             ! AOD (obs) - AOD (guess)
+     REAL(r_kind) :: errinv             ! inverse error (K**(-1))
+     REAL(r_kind) :: qcmark             ! quality control mark
   END TYPE diag_data_chan_list_aod
 
-  REAL(r_single),PARAMETER::  rmiss_aoddiag    = -9.9e11_r_single
+  REAL(r_kind),PARAMETER::  rmiss_aoddiag    = -9.9e11_r_kind
 
   LOGICAL,SAVE            ::  netcdf = .FALSE. 
   LOGICAL,SAVE            ::  nc_read = .FALSE.
@@ -256,7 +256,7 @@ CONTAINS
 
 ! local variables
     INTEGER(i_kind)                        :: nchan_dim
-    REAL(r_single),ALLOCATABLE,DIMENSION(:)               :: r_var_stor
+    REAL(r_kind),ALLOCATABLE,DIMENSION(:)               :: r_var_stor
     INTEGER(i_kind),ALLOCATABLE,DIMENSION(:)            :: i_var_stor
     CHARACTER(20)                          :: isis
     CHARACTER(10)                          :: id, obstype
@@ -503,14 +503,14 @@ CONTAINS
 ! Declare local variables
     INTEGER(i_kind)                          :: nrecord, ndatum, nangord
     INTEGER(i_kind)                          :: cch, ic, ir, cdatum
-    REAL(r_single), ALLOCATABLE, DIMENSION(:)  :: Latitude, Longitude, &
+    REAL(r_kind), ALLOCATABLE, DIMENSION(:)  :: Latitude, Longitude, &
          &Obs_Time,  Psfc, Sol_Zenith_Angle, Sol_Azimuth_Angle,&
          &Observation, Obs_Minus_Forecast_unadjusted,  &
          &Inverse_Observation_Error, QC_Flag
 
     INTEGER(i_kind), ALLOCATABLE, DIMENSION(:)  :: Channel_Index
 
-    REAL(r_single)                                :: clat, clon
+    REAL(r_kind)                                :: clat, clon
 
     ndatum = nc_diag_read_get_dim(ftin,'nobs')
     nrecord = ndatum / header_fix%nchan
