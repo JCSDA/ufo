@@ -87,7 +87,7 @@ PROGRAM convert_profiles
 
   WRITE(*,*)'Output NC4 diag: ',TRIM(outfn)
   INQUIRE(file=TRIM(outfn), exist=loutfile)
-  IF (loutfile) WRITE(*,*)'WARNING: ' // TRIM(infn) // ' exists - overwriting'
+  IF (loutfile) WRITE(*,*)'WARNING: ' // TRIM(outfn) // ' exists - overwriting'
 
   iflag = 0
 
@@ -150,6 +150,12 @@ PROGRAM convert_profiles
 
      CALL read_profiles(inlun,nsig,nvarsphys,naeros,&
        &tvp,qvp,prsltmp,prsitmp,aeros,iflag,debug)
+
+     tvp(1:nsig)=tvp(nsig:1:-1)
+     qvp(1:nsig)=qvp(nsig:1:-1)
+     prsltmp(1:nsig)=prsltmp(nsig:1:-1)
+     prsitmp(1:nsig+1)=prsitmp(nsig+1:1:-1)
+     aeros(1:nsig,:)=aeros(nsig:1:-1,:)
 
      IF (iflag /= 0) EXIT
 
