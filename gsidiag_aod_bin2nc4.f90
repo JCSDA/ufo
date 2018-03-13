@@ -163,7 +163,7 @@ PROGRAM convert_aod_diag
      IF (iflag .LT. 0) CYCLE
 
      DO ich=1,nch
-        lqcpass = luse(ich) .AND. data_chan(ich)%qcmark .EQ. 0 
+        lqcpass = luse(ich) .AND. NINT(data_chan(ich)%qcmark) .EQ. 0 
 
         CALL nc_diag_metadata("Channel_Index",         ich                                 )
         CALL nc_diag_metadata("Observation_Class",     '    aod'                           )

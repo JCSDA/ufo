@@ -152,7 +152,7 @@ PROGRAM convert_profiles
        &tvp,qvp,prsltmp,prsitmp,aeros,iflag,debug)
 
      tvp(1:nsig)=tvp(nsig:1:-1)
-     qvp(1:nsig)=qvp(nsig:1:-1)
+     qvp(1:nsig)=qvp(nsig:1:-1)*1000_r_single
      prsltmp(1:nsig)=prsltmp(nsig:1:-1) * 10_r_single
      prsitmp(1:nsig+1)=prsitmp(nsig+1:1:-1) *10_r_single
      aeros(1:nsig,:)=aeros(nsig:1:-1,:)
