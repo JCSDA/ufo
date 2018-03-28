@@ -52,9 +52,12 @@ class ObsSpace : public oops::ObsSpaceBase {
 
   int & toFortran() {return keyOspace_;}
   const int & toFortran() const {return keyOspace_;}
+
   void printJo(const ObsVector &, const ObsVector &);
+
  private:
   void print(std::ostream &) const;
+
   ObsSpace & operator= (const ObsSpace &);
   std::string obsname_;
   const util::DateTime winbgn_;

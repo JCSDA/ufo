@@ -20,7 +20,7 @@
           }
         },
         "GeoVaLs": {
-          "norm": "7071.1296549464405",
+          "norm": "204106.68591620424",
           "filename": "Data/amsua_n19_geovals.nc4",
           "random": "0"
         },
@@ -36,7 +36,7 @@
           }
         },
         "GeoVaLs": {
-          "norm": "8471.883687854357",
+          "norm": "58658.435118029556",
           "random": "0",
           "filename": "Data/diag_t_01_wprofiles.nc4"
         },
@@ -52,14 +52,34 @@
           }
         },
         "GeoVaLs": {
-          "norm": "1567.673435381234",
+          "norm": "556.09158888203285",
           "random": "1",
-          "nobs": "2457600"
+          "nobs": 309091
+        },
+        "ObsBias": {},
+        "rmsequiv": "1.",
+        "tolerance": "1.0e-8"
+      },
+      {
+        "ObsType": "SeaIceThickness",
+        "ObsData": {
+        },
+        "Generate": {
+          "nobs": "9",
+          "lat": "60",
+          "lon1": "10",
+          "lon2": "30"
+        },
+        "GeoVaLs": {
+          "norm": "3.4473212171208147",
+          "random": "1",
+          "nobs": "9"
         },
         "ObsBias": {},
         "rmsequiv": "1.",
         "tolerance": "1.0e-8"
       }
+
     ]
   }
 }

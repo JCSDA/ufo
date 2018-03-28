@@ -163,6 +163,38 @@ end subroutine ufo_geovals_scalmult_c
 
 ! ------------------------------------------------------------------------------
 
+subroutine ufo_geovals_assign_c(c_key_self, c_key_rhs) bind(c,name='ufo_geovals_assign_f90')
+implicit none
+integer(c_int), intent(in) :: c_key_self
+integer(c_int), intent(in) :: c_key_rhs
+type(ufo_geovals), pointer :: self
+type(ufo_geovals), pointer :: rhs
+
+call ufo_geovals_registry%get(c_key_self, self)
+call ufo_geovals_registry%get(c_key_rhs, rhs)
+
+call ufo_geovals_assign(self, rhs)
+
+end subroutine ufo_geovals_assign_c
+
+! ------------------------------------------------------------------------------
+
+subroutine ufo_geovals_add_c(c_key_self, c_key_other) bind(c,name='ufo_geovals_add_f90')
+implicit none
+integer(c_int), intent(in) :: c_key_self
+integer(c_int), intent(in) :: c_key_other
+type(ufo_geovals), pointer :: self
+type(ufo_geovals), pointer :: other
+
+call ufo_geovals_registry%get(c_key_self, self)
+call ufo_geovals_registry%get(c_key_other, other)
+
+call ufo_geovals_add(self, other)
+
+end subroutine ufo_geovals_add_c
+
+! ------------------------------------------------------------------------------
+
 subroutine ufo_geovals_dotprod_c(c_key_self, c_key_other, prod) bind(c,name='ufo_geovals_dotprod_f90')
 implicit none
 integer(c_int), intent(in) :: c_key_self, c_key_other

@@ -121,7 +121,7 @@ contains
     TYPE(CRTM_RTSolution_type), ALLOCATABLE :: rts_K(:,:)
     ! ============================================================================
 
-    type(ufo_geoval)     :: geoval
+    type(ufo_geoval), pointer :: geoval
     character(MAXVARLEN) :: varname
     logical              :: lfound
     integer              :: ivar

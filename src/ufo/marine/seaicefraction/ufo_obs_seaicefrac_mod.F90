@@ -27,10 +27,10 @@ type :: ufo_obs_seaicefrac
   real(kind_real), allocatable, dimension(:) :: lat      !< latitude
   real(kind_real), allocatable, dimension(:) :: lon      !< longitude
   real(kind_real), allocatable, dimension(:) :: icefrac  !< total ice concentration
+  real(kind_real), allocatable, dimension(:) :: icefrac_err  !< total ice concentration  
   real(kind_real), allocatable, dimension(:) :: icetmp   !< ice temperature (?)
   integer,         allocatable, dimension(:) :: qc       !< QC flag (from file?)
 end type ufo_obs_seaicefrac
-
 
 ! ------------------------------------------------------------------------------
 contains
@@ -47,7 +47,7 @@ call ufo_obs_seaicefrac_delete(self)
 
 self%nobs = nobs
 allocate(self%lat(nobs), self%lon(nobs))
-allocate(self%icefrac(nobs), self%icetmp(nobs))
+allocate(self%icefrac(nobs), self%icetmp(nobs), self%icefrac_err(nobs))
 allocate(self%qc(nobs))
 self%lat = 0.
 self%lon = 0.
@@ -67,6 +67,7 @@ self%nobs = 0
 if (allocated(self%lat)) deallocate(self%lat)
 if (allocated(self%lon)) deallocate(self%lon)
 if (allocated(self%icefrac)) deallocate(self%icefrac)
+if (allocated(self%icefrac_err)) deallocate(self%icefrac_err)
 if (allocated(self%icetmp))  deallocate(self%icetmp)
 if (allocated(self%qc))  deallocate(self%qc)
 
@@ -84,7 +85,9 @@ integer :: i
 
 call ufo_obs_seaicefrac_setup(self, nobs)
 
-self%icefrac(:) = 1.
+self%icefrac(:) = 0.0
+self%icefrac_err(:) = 0.1
+!call random_number(self%icefrac(:))
 self%icetmp(:)  = 0.
 self%qc(:)      = 1.
 
@@ -106,9 +109,13 @@ implicit none
 character(max_string), intent(in)   :: filename
 type(ufo_obs_seaicefrac), intent(inout) :: self
 
-integer :: iunit, nr, nc, nobs
+integer :: iunit, nr, nc, nobs, qcnobs
 real, allocatable, dimension(:,:)    :: field
+real, allocatable, dimension(:)    :: lon, lat, icefrac, qc
 integer, allocatable, dimension(:,:) :: ifield
+
+integer :: i, qci
+real :: undef = -99999.9
 
 call ufo_obs_seaicefrac_delete(self)
 
@@ -118,31 +125,47 @@ nr = nc_diag_read_get_dim(iunit,'Rows')
 nc = nc_diag_read_get_dim(iunit,'Columns')
 nobs = nc * nr
 
-! allocate geovals structure
-call ufo_obs_seaicefrac_setup(self, nobs)
-
-allocate(field(nc, nr), ifield(nc, nr))
+allocate(field(nc, nr), ifield(nc, nr), lon(nobs), lat(nobs), icefrac(nobs), qc(nobs))
 
 call nc_diag_read_get_var(iunit, "Latitude", field)
-self%lat = reshape(field, (/nobs/))
+lat = reshape(field, (/nobs/))
 
 call nc_diag_read_get_var(iunit, "Longitude", field)
-self%lon = reshape(field, (/nobs/))
+lon = reshape(field, (/nobs/))
 
 call nc_diag_read_get_var(iunit, "IceConc", field)
-self%icefrac = reshape(field, (/nobs/))
-
-call nc_diag_read_get_var(iunit, "IceSrfTemp", field)
-self%icetmp = reshape(field, (/nobs/))
-
-call nc_diag_read_get_var(iunit, "QCFlags", ifield)
-self%qc = reshape(ifield, (/nobs/))
-deallocate(field, ifield)
+icefrac = reshape(field, (/nobs/))
 
 call nc_diag_read_close(filename)
 
-print *, 'in read: ', self%nobs
+qc = 1
+where ( (icefrac.gt.100.0).or.(icefrac.lt.0.0))
+   qc=0
+end where
+qcnobs = sum(qc)
+self%nobs = qcnobs
 
+! allocate geovals structure
+call ufo_obs_seaicefrac_setup(self, qcnobs)
+
+qci = 0
+do i = 1, nobs
+   if ( qc(i).eq.1 ) then
+      qci = qci + 1
+      self%lat(qci) = lat(i)
+      self%lon(qci) = lon(i)      
+      self%icefrac(qci) = icefrac(i)/100.0
+      self%icefrac_err(qci) = 0.1  !< total ice concentration        
+      write(101,*)lon(i),lat(i),icefrac(i)
+   end if
+end do
+
+self%icetmp = 0.0
+self%qc = 1
+deallocate(field, ifield)
+
+print *, 'in read: ', self%nobs, nobs
+!call abor1_ftn("======================")
 end subroutine ufo_obs_seaicefrac_read
 
 ! ------------------------------------------------------------------------------

@@ -94,7 +94,7 @@ integer :: iobs, nobs
 real(kind_real) :: z, dz
 real(kind_real) :: rmse
 
-type(ufo_geoval) :: geoval_pr, geoval_tv
+type(ufo_geoval), pointer :: geoval_pr, geoval_tv
 
 ! Get observations from obs-structure
 nobs = obss%nobs

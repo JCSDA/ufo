@@ -16,6 +16,7 @@ integer, parameter :: max_string=800
 public :: ufo_geovals, ufo_geoval, ufo_geovals_get_var
 public :: ufo_geovals_init, ufo_geovals_setup, ufo_geovals_delete, ufo_geovals_print
 public :: ufo_geovals_zero, ufo_geovals_random, ufo_geovals_dotprod, ufo_geovals_scalmult
+public :: ufo_geovals_assign, ufo_geovals_add
 public :: ufo_geovals_minmaxavg
 public :: ufo_geovals_read_netcdf
 
@@ -71,19 +72,18 @@ integer, intent(in) :: nobs
 
 integer :: ivar
 
+print *,"---------- IN GEOVALS SETUP",nobs,vars%nv,vars%fldnames
 call ufo_geovals_delete(self)
-
 self%nobs = nobs
 self%nvar = vars%nv
 call ufo_vars_clone(vars, self%variables) 
-
 allocate(self%geovals(self%nvar))
 do ivar = 1, self%nvar
   self%geovals(ivar)%nobs = nobs
   self%geovals(ivar)%nval = 0
 enddo
 self%lalloc = .true.
-
+print *,"---------- IN GEOVALS SETUP"
 end subroutine ufo_geovals_setup
 
 ! ------------------------------------------------------------------------------
@@ -113,22 +113,24 @@ end subroutine ufo_geovals_delete
 
 logical function ufo_geovals_get_var(self, varname, geoval)
 implicit none
-type(ufo_geovals), intent(in)    :: self
+type(ufo_geovals), target, intent(in)    :: self
 character(MAXVARLEN), intent(in) :: varname
-type(ufo_geoval), intent(out)    :: geoval
+type(ufo_geoval), pointer, intent(out)    :: geoval
 
 integer :: ivar
-
+print *,'============================================= get var'
+print *,varname
 if (.not. self%lalloc .or. .not. self%linit) then
-  call abor1_ftn("ufo_geovals_get_var: geovals not allocated")
+   !call abor1_ftn("ufo_geovals_get_var: geovals not allocated")
 endif
 
 ivar = ufo_vars_getindex(self%variables, varname)
+print *,'============================================= get var',ivar
 if (ivar < 0) then
   ufo_geovals_get_var = .false.
 else
   ufo_geovals_get_var = .true.
-  geoval = self%geovals(ivar)
+  geoval => self%geovals(ivar)
 endif
 
 end function ufo_geovals_get_var
@@ -160,6 +162,7 @@ end subroutine ufo_geovals_zero
 ! ------------------------------------------------------------------------------
 
 subroutine ufo_geovals_random(self) 
+use random_vectors_mod
 implicit none
 type(ufo_geovals), intent(inout) :: self
 integer :: ivar
@@ -176,7 +179,7 @@ if (.not. self%linit) then
   self%linit = .true.
 endif
 do ivar = 1, self%nvar
-  self%geovals(ivar)%vals = 1.0
+  call random_vector(self%geovals(ivar)%vals)
 enddo
 
 end subroutine ufo_geovals_random
@@ -205,11 +208,61 @@ end subroutine ufo_geovals_scalmult
 
 ! ------------------------------------------------------------------------------
 
+subroutine ufo_geovals_assign(self, rhs) 
+implicit none
+type(ufo_geovals), intent(inout) :: self
+type(ufo_geovals), intent(in) :: rhs
+integer :: jv, jo, jz
+
+if (.not. self%lalloc .or. .not. self%linit) then
+  call abor1_ftn("ufo_geovals_scalmult: geovals not allocated")
+endif
+if (.not. rhs%lalloc .or. .not. rhs%linit) then
+  call abor1_ftn("ufo_geovals_scalmult: geovals not allocated")
+endif
+
+do jv=1,self%nvar
+  do jo=1,self%nobs
+    do jz = 1, self%geovals(jv)%nval
+      self%geovals(jv)%vals(jz,jo) = rhs%geovals(jv)%vals(jz,jo)
+    enddo
+  enddo
+enddo
+
+end subroutine ufo_geovals_assign
+
+! ------------------------------------------------------------------------------
+
+subroutine ufo_geovals_add(self, other) 
+implicit none
+type(ufo_geovals), intent(inout) :: self
+type(ufo_geovals), intent(in) :: other
+integer :: jv, jo, jz
+
+if (.not. self%lalloc .or. .not. self%linit) then
+  call abor1_ftn("ufo_geovals_scalmult: geovals not allocated")
+endif
+if (.not. other%lalloc .or. .not. other%linit) then
+  call abor1_ftn("ufo_geovals_scalmult: geovals not allocated")
+endif
+
+do jv=1,self%nvar
+  do jo=1,self%nobs
+    do jz = 1, self%geovals(jv)%nval
+      self%geovals(jv)%vals(jz,jo) = self%geovals(jv)%vals(jz,jo) + other%geovals(jv)%vals(jz,jo)
+    enddo
+  enddo
+enddo
+
+end subroutine ufo_geovals_add
+
+! ------------------------------------------------------------------------------
+
 subroutine ufo_geovals_dotprod(self, other, prod) 
 implicit none
 real(kind_real), intent(inout) :: prod
 type(ufo_geovals), intent(in) :: self, other
-integer :: jo
+integer :: ivar, iobs, ival, nval
 
 if (.not. self%lalloc .or. .not. self%linit) then
   call abor1_ftn("ufo_geovals_dotprod: geovals not allocated")
@@ -221,8 +274,14 @@ endif
 
 ! just something to put in (dot product of the 1st var and 1st element in the profile
 prod=0.0
-do jo=1,self%nobs
-  prod=prod+self%geovals(1)%vals(1,jo)*other%geovals(1)%vals(1,jo)
+do ivar = 1, self%nvar
+  nval = self%geovals(ivar)%nval
+  do ival = 1, nval
+    do iobs = 1, self%nobs
+      prod = prod + self%geovals(ivar)%vals(ival,iobs) * &
+                    other%geovals(ivar)%vals(ival,iobs)
+    enddo
+  enddo
 enddo
 
 end subroutine ufo_geovals_dotprod
@@ -346,7 +405,7 @@ implicit none
 type(ufo_geovals), intent(in) :: self
 integer, intent(in) :: iobs
 
-type(ufo_geoval) :: geoval
+type(ufo_geoval), pointer :: geoval
 character(MAXVARLEN) :: varname
 logical :: lfound
 integer :: ivar

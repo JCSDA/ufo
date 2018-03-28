@@ -58,6 +58,16 @@ GeoVaLs & GeoVaLs::operator*=(const double zz) {
   return *this;
 }
 // -----------------------------------------------------------------------------
+GeoVaLs & GeoVaLs::operator=(const GeoVaLs & rhs) {
+  ufo_geovals_assign_f90(keyGVL_, rhs.keyGVL_);
+  return *this;
+}
+// -----------------------------------------------------------------------------
+GeoVaLs & GeoVaLs::operator+=(const GeoVaLs & other) {
+  ufo_geovals_add_f90(keyGVL_, other.keyGVL_);
+  return *this;
+}
+// -----------------------------------------------------------------------------
 double GeoVaLs::dot_product_with(const GeoVaLs & other) const {
   double zz;
   ufo_geovals_dotprod_f90(keyGVL_, other.keyGVL_, zz);

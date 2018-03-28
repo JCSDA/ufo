@@ -16,12 +16,12 @@
 #include "eckit/config/Configuration.h"
 #include "oops/base/Variables.h"
 #include "oops/interface/ObsOperatorBase.h"
-#include "ObsSpace.h"
-#include "GeoVaLs.h"
-#include "Locations.h"
-#include "ObsBias.h"
-#include "ObsBiasIncrement.h"
-#include "ObsVector.h"
+#include "ufo/ObsSpace.h"
+#include "ufo/GeoVaLs.h"
+#include "ufo/Locations.h"
+#include "ufo/ObsBias.h"
+#include "ufo/ObsBiasIncrement.h"
+#include "ufo/ObsVector.h"
 #include "util/ObjectCounter.h"
 
 namespace ufo {
@@ -76,7 +76,7 @@ ObsSeaIceFraction<MODEL>::~ObsSeaIceFraction() {
 template <typename MODEL>
 void ObsSeaIceFraction<MODEL>::obsEquiv(const GeoVaLs & gom, ObsVector & ovec,
                              const ObsBias & bias) const {
-  ufo_seaicefrac_eqv_f90(gom.toFortran(), odb_.toFortran(), ovec.toFortran(), bias.toFortran());
+  ufo_seaicefrac_eqv_f90(keyOperSeaIceFraction_, gom.toFortran(), odb_.toFortran(), ovec.toFortran(), bias.toFortran());
 }
 
 // -----------------------------------------------------------------------------

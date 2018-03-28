@@ -40,7 +40,9 @@ class GeoVaLs : public util::Printable,
 
   void zero();
   void random();
+  GeoVaLs & operator = (const GeoVaLs &);    
   GeoVaLs & operator*=(const double);
+  GeoVaLs & operator += (const GeoVaLs &);
   double dot_product_with(const GeoVaLs & other) const;
   void read(const eckit::Configuration &);
   void write(const eckit::Configuration &) const;

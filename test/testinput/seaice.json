@@ -2,6 +2,9 @@
   "test_framework_runtime_config": "--log_level=test_suite",
   "window_begin": "2010-01-01T00:00:00Z",
   "window_end": "2010-01-02T00:00:00Z",
+  "LinObsOpTest": {
+    "tlm_tol": "1e-8"
+  },  
   "Observations": {
     "ObsTypes": [
       {
@@ -12,12 +15,31 @@
           }
         },
         "GeoVaLs": {
-          "norm": "1567.673435381234",
+          "norm": "555.95953090130581",
           "random": "1",
-          "nobs": "2457600"
+          "nobs": "309091"
         },
         "ObsBias": {},
-        "rmsequiv": "1.",
+        "rmsequiv": "1.0008155136698333",
+        "tolerance": "1.0e-8"
+      },
+      {
+        "ObsType": "SeaIceThickness",
+        "ObsData": {
+        },
+        "Generate": {
+          "nobs": "90",
+          "lat": "60",
+          "lon1": "10",
+          "lon2": "30"
+        },
+        "GeoVaLs": {
+          "norm": "3",
+          "random": "1",
+          "nobs": "90"
+        },
+        "ObsBias": {},
+        "rmsequiv": "1.0186368962265382",
         "tolerance": "1.0e-8"
       }
     ]

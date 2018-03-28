@@ -6,12 +6,16 @@
  */
 
 #include "oops/interface/LinearObsOperBase.h"
-#include "ObsSeaIceFractionTLAD.h"
+#include "marine/seaicefraction/ObsSeaIceFractionTLAD.h"
+#include "marine/seaicethickness/ObsSeaIceThicknessTLAD.h"
+#include "marine/stericheight/ObsStericHeightTLAD.h"
 
 namespace ufo {
 
 template<typename MODEL> void instantiateLinearObsOpFactory() {
-  static oops::LinearObsOpMaker<MODEL, ObsSeaIceFractionTLAD<MODEL>> makerFractionTL_("SeaIceFraction");
+  static oops::LinearObsOpMaker<MODEL, ObsStericHeightTLAD<MODEL>> makerStericHeightTL_("StericHeight");
+  static oops::LinearObsOpMaker<MODEL, ObsSeaIceFractionTLAD<MODEL>> makerFractionTL_("SeaIceFraction");  
+  static oops::LinearObsOpMaker<MODEL, ObsSeaIceThicknessTLAD<MODEL>> makerThicknessTL("SeaIceThickness");
 }
 
 }

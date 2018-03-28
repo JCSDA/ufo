@@ -15,7 +15,7 @@
 
 #include "oops/base/Variables.h"
 #include "oops/interface/LinearObsOperBase.h"
-#include "ObsSpace.h"
+#include "ufo/ObsSpace.h"
 #include "util/ObjectCounter.h"
 #include "util/Logger.h"
 
@@ -78,20 +78,22 @@ ObsSeaIceFractionTLAD<MODEL>::~ObsSeaIceFractionTLAD() {
 
 // -----------------------------------------------------------------------------
 template <typename MODEL>
-void ObsSeaIceFractionTLAD<MODEL>::setTrajectory(const GeoVaLs &, const ObsBias &) {}
+void ObsSeaIceFractionTLAD<MODEL>::setTrajectory(const GeoVaLs & geovals, const ObsBias & bias) {
+  ufo_seaicefrac_settraj_f90(keyOperSeaIceFraction_, geovals.toFortran());
+}
 
 // -----------------------------------------------------------------------------
 template <typename MODEL>
 void ObsSeaIceFractionTLAD<MODEL>::obsEquivTL(const GeoVaLs & geovals, ObsVector & ovec,
                                const ObsBiasIncrement & bias) const {
-  ufo_seaicefrac_eqv_tl_f90(geovals.toFortran(), ovec.toFortran());
+  ufo_seaicefrac_eqv_tl_f90(keyOperSeaIceFraction_, geovals.toFortran(), ovec.toFortran());
 }
 
 // -----------------------------------------------------------------------------
 template <typename MODEL>
 void ObsSeaIceFractionTLAD<MODEL>::obsEquivAD(GeoVaLs & geovals, const ObsVector & ovec,
                                ObsBiasIncrement & bias) const {
-  ufo_seaicefrac_eqv_ad_f90(geovals.toFortran(), ovec.toFortran());
+  ufo_seaicefrac_eqv_ad_f90(keyOperSeaIceFraction_, geovals.toFortran(), ovec.toFortran());
 }
 
 // -----------------------------------------------------------------------------

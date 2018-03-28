@@ -42,7 +42,14 @@ character(len=MAXVARLEN), public :: var_sfc_soilt   = "Soil_Temperature"
 character(len=MAXVARLEN), public :: var_sfc_landtyp = "Land_Type_Index"
 character(len=MAXVARLEN), public :: var_sfc_vegtyp  = "Vegetation_Type"
 character(len=MAXVARLEN), public :: var_sfc_soiltyp = "Soil_Type"
-character(len=MAXVARLEN), public :: var_seaicefrac  = "ice_concentration"
+character(len=MAXVARLEN), public :: var_seaicefrac    = "ice_concentration"
+character(len=MAXVARLEN), public :: var_stericheight  = "steric_height"
+character(len=MAXVARLEN), public :: var_seaicethick   = "ice_thickness"
+character(len=MAXVARLEN), public :: var_abs_topo      = "sea_surface_height_above_geoid"
+character(len=MAXVARLEN), public :: var_ocn_pot_temp  = "ocean_potential_temperature"
+character(len=MAXVARLEN), public :: var_ocn_con_temp  = "ocean_conservative_temperature"
+character(len=MAXVARLEN), public :: var_ocn_abs_salt  = "ocean_absolute_salinity"
+character(len=MAXVARLEN), public :: var_ocn_salt      = "ocean_salinity"
 ! ------------------------------------------------------------------------------
 
 !> Fortran derived type to represent model variables
@@ -110,6 +117,7 @@ integer :: ivar
 ufo_vars_getindex = -1
 
 do ivar = 1, self%nv
+   print *,'--------------------',self%fldnames(ivar),varname
   if (self%fldnames(ivar) == varname) then
     ufo_vars_getindex = ivar
     exit
