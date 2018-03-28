@@ -128,6 +128,7 @@ call ufo_vars_setup(vars, c_vars)
 
 ! randomize
 nobs = config_get_int(c_conf, "nobs")
+call ufo_geovals_init(self)
 call ufo_geovals_setup(self, vars, nobs)
 call ufo_geovals_random(self)
 

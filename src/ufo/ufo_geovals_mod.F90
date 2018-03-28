@@ -270,6 +270,7 @@ call nc_diag_read_init(filename, iunit)
 nobs = nc_diag_read_get_dim(iunit,'nobs')
 
 ! allocate geovals structure
+call ufo_geovals_init(self)
 call ufo_geovals_setup(self, vars, nobs)
 
 do ivar = 1, vars%nv
