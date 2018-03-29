@@ -50,7 +50,6 @@ ncdw_varattr.F90
 netcdf_unlimdims.F90
 read_diag.f90
 read_aod_diag.f90
-read_profiles.f90
 )
 
 ecbuild_add_library( TARGET     ioda

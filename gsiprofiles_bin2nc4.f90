@@ -2,9 +2,7 @@ PROGRAM gsiprofiles_bin2nc4
 
   USE netcdf
 
-  USE read_profiles_mod, ONLY : read_profiles_header, read_profiles, &
-       &max_name_length,max_vars
-  USE ncd_kinds,ONLY: r_quad, r_single, r_kind
+  USE ncd_kinds,ONLY: r_single, r_kind, i_kind
 
   IMPLICIT NONE 
 
@@ -13,6 +11,8 @@ PROGRAM gsiprofiles_bin2nc4
 
   INTEGER nargs, iargc, n,i
   CHARACTER*256, ALLOCATABLE ::   arg(:)
+
+  INTEGER(i_kind),PARAMETER :: max_name_length=56,max_vars=50
 
 ! commandline variables
   LOGICAL                              ::  debug 
@@ -186,25 +186,71 @@ PROGRAM gsiprofiles_bin2nc4
 
   DEALLOCATE(ncid_aeros,tvp,qvp,prsltmp,prsitmp,aeros)
 
-END PROGRAM gsiprofiles_bin2nc4
+CONTAINS
 
-SUBROUTINE usage
+  SUBROUTINE usage
 
-  WRITE(6,100)
+    WRITE(6,100)
 100 FORMAT( "Usage:  ",/,/ &
-       "  convert_aod_diag.x <options> <filename>",/,/ &
-       "where options:",/ &
-       "  -debug              :  Set debug verbosity",/ &
-       "  -append_txt         :  Append .txt suffix, instead of replace last three",/ &
-       "                             characters (default: replaced)",/ &
-       "                             Note:  The GMAO diag files end with .bin or .nc4,",/ &
-       "                               which is where fixed 3-char truncation originates",/,/,/ &
-       "  Example:",/ &
-       "     convert_aod_diag.x nc_4emily.diag_hirs4_n19_ges.20161202_00z.bin",/ &
-       "  Output file:",/ &
-       "     nc_4emily.diag_hirs4_n19_ges.20161202_00z.nc4",/ &
-       )
-  STOP
+         "  convert_aod_diag.x <options> <filename>",/,/ &
+         "where options:",/ &
+         "  -debug              :  Set debug verbosity",/ &
+         "  -append_txt         :  Append .txt suffix, instead of replace last three",/ &
+         "                             characters (default: replaced)",/ &
+         "                             Note:  The GMAO diag files end with .bin or .nc4,",/ &
+         "                               which is where fixed 3-char truncation originates",/,/,/ &
+         "  Example:",/ &
+         "     convert_aod_diag.x nc_4emily.diag_hirs4_n19_ges.20161202_00z.bin",/ &
+         "  Output file:",/ &
+         "     nc_4emily.diag_hirs4_n19_ges.20161202_00z.nc4",/ &
+         )
+    STOP
 
-END SUBROUTINE usage
+  END SUBROUTINE usage
 
+
+  SUBROUTINE read_profiles_header(ftin,idate,nsig,nvars,naeros,varnames,iflag,lverbose)
+!                .      .    .                                       .
+! Declare passed arguments
+    INTEGER,INTENT(in)             :: ftin
+    INTEGER,INTENT(out) :: idate,nsig,nvars,naeros
+    CHARACTER(len=max_name_length), DIMENSION(max_vars) :: &
+         &varnames
+    INTEGER,INTENT(out)            :: iflag
+    LOGICAL,OPTIONAL,INTENT(in)            :: lverbose    
+
+    LOGICAL loutall
+
+    loutall=.TRUE.
+    IF(PRESENT(lverbose)) loutall=lverbose
+
+! Read header (fixed_part).
+
+    READ(ftin,IOSTAT=iflag)  nsig,nvars,naeros,idate
+    READ(ftin,IOSTAT=iflag)  varnames(1:nvars)
+
+  END SUBROUTINE read_profiles_header
+
+  SUBROUTINE read_profiles(ftin,nsig,nvarsphys,naeros,&
+       &tvp,qvp,prsltmp,prsitmp,aeros,iflag,lverbose)
+!                .      .    .                                       .
+! Declare passed arguments
+    INTEGER,INTENT(in)             :: ftin
+    INTEGER,INTENT(in) :: nsig,nvarsphys,naeros
+    REAL(r_single), DIMENSION(nsig) :: tvp,qvp,prsltmp
+    REAL(r_single), DIMENSION(nsig+1) :: prsitmp
+    REAL(r_single), DIMENSION(nsig,naeros) :: aeros
+    INTEGER,INTENT(out)            :: iflag
+    LOGICAL,OPTIONAL,INTENT(in)            :: lverbose    
+
+    LOGICAL loutall
+
+    loutall=.TRUE.
+    IF(PRESENT(lverbose)) loutall=lverbose
+
+    READ(ftin,IOSTAT=iflag) tvp,qvp,prsltmp,prsitmp
+    READ(ftin,IOSTAT=iflag) aeros
+
+  END SUBROUTINE read_profiles
+
+END PROGRAM gsiprofiles_bin2nc4
