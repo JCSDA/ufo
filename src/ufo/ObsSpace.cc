@@ -58,7 +58,6 @@ ObsSpace::~ObsSpace() {
 // -----------------------------------------------------------------------------
 
 void ObsSpace::getdb(const std::string & col, int & keyData) const {
-  //Log::trace() << "getdb obsname = " << obsname << ", col = " << col << std::endl;
   if (obsname_ == "SeaIceFraction")
     ufo_obsdbsic_get_f90(keyOspace_, col.size(), col.c_str(), keyData);
   if (obsname_ == "SeaIceThickness")
@@ -70,7 +69,7 @@ void ObsSpace::getdb(const std::string & col, int & keyData) const {
 // -----------------------------------------------------------------------------
 
 void ObsSpace::putdb(const std::string & col, const int & keyData) const {
-  Log::trace() << "In putdb obsname = " << std::endl;
+  oops::Log::trace() << "In putdb obsname = " << std::endl;
 }
 
 // -----------------------------------------------------------------------------
@@ -131,7 +130,7 @@ void ObsSpace::print(std::ostream & os) const {
 // -----------------------------------------------------------------------------
 
 void ObsSpace::printJo(const ObsVector & dy, const ObsVector & grad) {
-oops::Log::info() << "ObsSpace::printJo not implemented" << std::endl;
+  oops::Log::info() << "ObsSpace::printJo not implemented" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
