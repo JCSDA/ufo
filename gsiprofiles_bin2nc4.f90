@@ -1,4 +1,4 @@
-PROGRAM convert_profiles
+PROGRAM gsiprofiles_bin2nc4
 
   USE netcdf
 
@@ -186,7 +186,7 @@ PROGRAM convert_profiles
 
   DEALLOCATE(ncid_aeros,tvp,qvp,prsltmp,prsitmp,aeros)
 
-END PROGRAM convert_profiles
+END PROGRAM gsiprofiles_bin2nc4
 
 SUBROUTINE usage
 
