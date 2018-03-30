@@ -86,7 +86,7 @@ contains
     !** temporary local path for storing coefficient files (2 files per sensor), also several non-sensor specific binary files needed for other things
     !** NOTE: for some strange reason, this compiled as little endian, even though BIG_ENDIAN was specified on the compiler flags --BTJ
     CHARACTER(*), PARAMETER :: ENDIAN_TYPE='little_endian'
-    CHARACTER(*), PARAMETER :: COEFFICIENT_PATH='/jedi/data/crtm_coeffs/Little_Endian/'
+    CHARACTER(*), PARAMETER :: COEFFICIENT_PATH='Data/'
 
     ! Profile dimensions
     !** UFO to provide N_LAYERS, N_ABSORBERS, N_CLOUDS, N_AEROSOLS
