@@ -12,6 +12,8 @@ private
 public :: ufo_vars, ufo_vars_setup, ufo_vars_clone, ufo_vars_delete
 public :: ufo_vars_getindex, ufo_vars_nvars
 
+integer, parameter, public :: naerosols_gocart_esrl=15
+
 integer, parameter, public :: MAXVARLEN=56
 character(len=MAXVARLEN), public :: var_tv   = "virtual_temperature"
 character(len=MAXVARLEN), public :: var_prsl = "atmosphere_ln_pressure_coordinate"
@@ -42,6 +44,27 @@ character(len=MAXVARLEN), public :: var_sfc_soilt   = "Soil_Temperature"
 character(len=MAXVARLEN), public :: var_sfc_landtyp = "Land_Type_Index"
 character(len=MAXVARLEN), public :: var_sfc_vegtyp  = "Vegetation_Type"
 character(len=MAXVARLEN), public :: var_sfc_soiltyp = "Soil_Type"
+
+!@mzp strings have to be same MAXVARLEN length for array constructor
+CHARACTER(len=MAXVARLEN), DIMENSION(naerosols_gocart_esrl), PUBLIC :: var_aerosols =[&
+     &"sulf                                                    ",&
+     &"bc1                                                     ",&
+     &"bc2                                                     ",&
+     &"oc1                                                     ",&
+     &"oc2                                                     ",&
+     &"dust1                                                   ",&
+     &"dust2                                                   ",&
+     &"dust3                                                   ",&
+     &"dust4                                                   ",&
+     &"dust5                                                   ",&
+     &"seas1                                                   ",&
+     &"seas2                                                   ",&
+     &"seas3                                                   ",&
+     &"seas4                                                   ",&
+     &"p25                                                     "]
+
+CHARACTER(len=MAXVARLEN), PUBLIC :: var_t="temperature"
+
 character(len=MAXVARLEN), public :: var_seaicefrac    = "ice_concentration"
 character(len=MAXVARLEN), public :: var_stericheight  = "steric_height"
 character(len=MAXVARLEN), public :: var_seaicethick   = "ice_thickness"
@@ -50,6 +73,7 @@ character(len=MAXVARLEN), public :: var_ocn_pot_temp  = "ocean_potential_tempera
 character(len=MAXVARLEN), public :: var_ocn_con_temp  = "ocean_conservative_temperature"
 character(len=MAXVARLEN), public :: var_ocn_abs_salt  = "ocean_absolute_salinity"
 character(len=MAXVARLEN), public :: var_ocn_salt      = "ocean_salinity"
+
 ! ------------------------------------------------------------------------------
 
 !> Fortran derived type to represent model variables

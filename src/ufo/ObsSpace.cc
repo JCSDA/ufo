@@ -30,7 +30,7 @@ ObsSpace::ObsSpace(const eckit::Configuration & config,
   const eckit::Configuration * configc = &config;
   obsname_ = config.getString("ObsType");
 
-  if (obsname_ == "Radiance" || obsname_ == "Radiosonde") 
+  if (obsname_ == "Radiance" || obsname_ == "Radiosonde" || obsname_ == "Aod") 
     ufo_obsdb_setup_f90(keyOspace_, &configc);
   else if (obsname_ == "SeaIceFraction")
     ufo_obsdb_seaice_setup_f90(keyOspace_, &configc);
@@ -45,7 +45,7 @@ ObsSpace::ObsSpace(const eckit::Configuration & config,
 // -----------------------------------------------------------------------------
 
 ObsSpace::~ObsSpace() {
-  if (obsname_ == "Radiance" || obsname_ == "Radiosonde")
+  if (obsname_ == "Radiance" || obsname_ == "Radiosonde" || obsname_ == "Aod")
     ufo_obsdb_delete_f90(keyOspace_);
   else if (obsname_ == "SeaIceFraction")
     ufo_obsdb_seaice_delete_f90(keyOspace_);
@@ -78,7 +78,7 @@ Locations * ObsSpace::locations(const util::DateTime & t1, const util::DateTime 
   const util::DateTime * p1 = &t1;
   const util::DateTime * p2 = &t2;
   int keylocs;
-  if (obsname_ == "Radiance" || obsname_ == "Radiosonde")
+  if (obsname_ == "Radiance" || obsname_ == "Radiosonde" || obsname_ == "Aod")
     ufo_obsdb_getlocations_f90(keyOspace_, &p1, &p2, keylocs);
   else if (obsname_ == "SeaIceFraction")
     ufo_obsdb_seaice_getlocations_f90(keyOspace_, &p1, &p2, keylocs);
@@ -93,7 +93,7 @@ Locations * ObsSpace::locations(const util::DateTime & t1, const util::DateTime 
 
 int ObsSpace::nobs() const {
   int n;
-  if (obsname_ == "Radiance" || obsname_ == "Radiosonde")
+  if (obsname_ == "Radiance" || obsname_ == "Radiosonde" || obsname_ == "Aod")
     ufo_obsdb_nobs_f90(keyOspace_, n);
   else if (obsname_ == "SeaIceFraction")
     ufo_obsdb_seaice_nobs_f90(keyOspace_, n);
@@ -111,7 +111,7 @@ void ObsSpace::generateDistribution(const eckit::Configuration & conf) {
 
   const util::DateTime * p1 = &winbgn_;
   const util::DateTime * p2 = &winend_;
-//  if (obsname_ == "Radiance" || obsname_ == "Radiosonde")
+//  if (obsname_ == "Radiance" || obsname_ == "Radiosonde" || obsname_ == "Aod")
 //    ufo_obsdb_generate_f90(keyOspace_, &configc, &p1, &p2);
   if (obsname_ == "SeaIceFraction")
     ufo_obsdb_seaice_generate_f90(keyOspace_, &configc, &p1, &p2);

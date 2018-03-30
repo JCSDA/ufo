@@ -45,6 +45,16 @@ ObsRadiosonde.interface.F90
 ufo_radiosonde_mod.F90
 raobDiag_mod.F90
 
+#Aod
+ObsAod.interface.F90
+ufo_aod_mod.F90
+aodDiag_mod.F90
+ufo_misc.F90
+
+ufo_obs_data_mod.F90
+ufo_obs_data_basis_mod.F90
+ufo_obs_data.F90
+
 #Marine ufo
 # Sea-ice fraction
 ./marine/seaicefraction/ObsSeaIceFraction.h

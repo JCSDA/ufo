@@ -98,6 +98,15 @@ extern "C" {
   void ufo_radiosonde_t_eqv_f90(const F90goms &, const F90odb &, const F90ovec &, const F90obias &);
 
 // -----------------------------------------------------------------------------
+//  Aod observations
+// -----------------------------------------------------------------------------
+  void ufo_aod_setup_f90(F90hop &, const eckit::Configuration * const *);
+  void ufo_aod_delete_f90(F90hop &);
+  void ufo_aod_eqv_f90(const F90goms &, const F90odb &, const F90ovec &, const F90obias &);
+  void ufo_aod_equiv_tl_f90(const F90goms &, const F90ovec &, const F90goms &, const double &);
+  void ufo_aod_equiv_ad_f90(const F90goms &, const F90ovec &, const F90goms &, double &);
+
+// -----------------------------------------------------------------------------
 //  Ice concentration observations
 // -----------------------------------------------------------------------------
   void ufo_seaicefrac_setup_f90(F90hop &, const eckit::Configuration * const *);
@@ -132,7 +141,6 @@ extern "C" {
   void ufo_stericheight_eqv_tl_f90(const F90hop &, const F90goms &, const F90ovec &);
   void ufo_stericheight_eqv_ad_f90(const F90hop &, const F90goms &, const F90ovec &);
   
-
 // -----------------------------------------------------------------------------
 //  Observation Vectors
 // -----------------------------------------------------------------------------

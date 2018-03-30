@@ -14,6 +14,9 @@ module ufo_obs_data_mod
   use radDiag_mod,  only: RadDiag_read
   use raobDiag_mod, only: RaobDiag
   use raobDiag_mod, only: RaobDiag_read
+  use aodDiag_mod,  only: AodDiag
+  use aodDiag_mod,  only: AodDiag_read
+  
 
   implicit none
 
@@ -27,6 +30,8 @@ module ufo_obs_data_mod
 
   type(RadDiag),  pointer, save::  Radiance
   type(RaobDiag), pointer, save::  Radiosonde
+  type(AodDiag),  pointer, save::  Aod
+
 contains
 
   subroutine Setup(self, filein,obstype,nobs,nlocs)
@@ -45,6 +50,10 @@ contains
         allocate(Radiosonde)
         self%Obspoint => Radiosonde
         call SetupRaob(self, Radiosonde, filein,nobs,nlocs)
+      case("Aod")
+        allocate(Aod)
+        self%Obspoint => Aod
+        call SetupAod(self, Aod, filein,nobs,nlocs)
     end select
 
   end subroutine Setup
@@ -79,6 +88,21 @@ contains
 
   end subroutine SetupRaob
 
+  subroutine SetupAod(self, mytype, filein,nobs,nlocs)
+    class(Obs_Data), intent(inout) :: self
+    type(AodDiag), pointer, intent(inout)    :: mytype
+    character(len=*), intent(in)    :: filein
+    integer(c_int),   intent(inout) :: nobs
+    integer(c_int),   intent(inout) :: nlocs
+
+    character(len=*),parameter:: myname_=myname//"::SetupAod"
+
+    call aodDiag_read(mytype,filein,'Aod',nobs,nlocs)
+    self%Nobs = nobs
+    self%Nlocs= nlocs
+
+  end subroutine SetupAod
+
   subroutine Delete(self)
     class(Obs_Data), intent(inout) :: self
   end subroutine Delete
@@ -100,6 +124,7 @@ contains
     select case(trim(vname))
       case("Radiance");   obsmold_%Obspoint => Radiance
       case("Radiosonde"); obsmold_%Obspoint => Radiosonde
+      case("Aod");   obsmold_%Obspoint => Aod
     end select
   end function vname2vmold_
 

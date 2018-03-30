@@ -304,7 +304,7 @@ end subroutine ufo_geovals_minmaxavg
 ! ------------------------------------------------------------------------------
 
 subroutine ufo_geovals_read_netcdf(self, filename, vars)
-use netcdf, only: NF90_DOUBLE, NF90_INT
+USE netcdf, ONLY: NF90_DOUBLE, NF90_INT
 use nc_diag_read_mod, only: nc_diag_read_get_var
 use nc_diag_read_mod, only: nc_diag_read_get_dim
 use nc_diag_read_mod, only: nc_diag_read_get_var_dims, nc_diag_read_check_var

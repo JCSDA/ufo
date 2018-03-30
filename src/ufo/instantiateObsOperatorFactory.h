@@ -11,6 +11,7 @@
 #include "marine/stericheight/ObsStericHeight.h"
 #include "ObsRadiance.h"
 #include "ObsRadiosonde.h"
+#include "ObsAod.h"
 
 namespace ufo {
 
@@ -20,6 +21,7 @@ template<typename MODEL> void instantiateObsOperatorFactory() {
   static oops::ObsOperatorMaker<MODEL, ObsSeaIceThickness<MODEL>> makerSeaIceThickness_("SeaIceThickness");
   static oops::ObsOperatorMaker<MODEL, ObsRadiance<MODEL>>       makerRadiance_("Radiance");
   static oops::ObsOperatorMaker<MODEL, ObsRadiosonde<MODEL>>     makerRadiosonde_("Radiosonde");
+  static oops::ObsOperatorMaker<MODEL, ObsAod<MODEL>>            makerAod_("Aod");
 }
 
 }

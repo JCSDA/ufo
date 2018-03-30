@@ -10,6 +10,7 @@ list( APPEND ufo_test_input
   testinput/amsua.json
   testinput/radiosonde.json
   testinput/seaice.json
+  testinput/aod.json
 )
 
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/testinput)
@@ -31,6 +32,8 @@ list( APPEND ufo_test_data
   amsua_n19_geovals.nc4
   diag_t_01_wprofiles.nc4
   seaice_obs.nc
+  diag_viirs_ges.2015081000_dbl_subset.nc4  
+  vars_ges.2015081000_dbl_subset.nc4
 )
 
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Data)
@@ -84,6 +87,12 @@ ecbuild_add_test( TARGET  test_ufo_seaice
                   ARGS    "testinput/seaice.json"
                   LIBS    ufo )
 
+ecbuild_add_test( TARGET  test_ufo_aod
+                  BOOST
+                  SOURCES mains/TestObsOperator.cc
+                  ARGS    "testinput/aod.json"
+                  LIBS    ufo )
+
 ecbuild_add_test( TARGET  test_ufo_obsoperator_tlad
                   BOOST
                   SOURCES mains/TestObsOperatorTLAD.cc
@@ -116,6 +125,8 @@ EmisCoeff/IR_Land/SEcategory/Little_Endian/USGS.IRland.EmisCoeff.bin
 EmisCoeff/VIS_Land/SEcategory/Little_Endian/USGS.VISland.EmisCoeff.bin
 SpcCoeff/Little_Endian/amsua_n19.SpcCoeff.bin
 TauCoeff/ODPS/Little_Endian/amsua_n19.TauCoeff.bin
+SpcCoeff/Little_Endian/v.viirs-m_npp.SpcCoeff.bin
+TauCoeff/ODAS/Little_Endian/v.viirs-m_npp.TauCoeff.bin
 )
 
 # Create Data directory for test input and symlink all files
