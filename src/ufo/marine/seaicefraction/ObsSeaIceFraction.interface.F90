@@ -9,7 +9,6 @@ module ufo_seaicefrac_mod_c
   
   use iso_c_binding
   use config_mod
-  use ufo_obs_data
   use ufo_obs_vectors,   only: obs_vector, ufo_obs_vect_registry
   use ufo_geovals_mod,   only: ufo_geovals
   use ufo_geovals_mod_c, only: ufo_geovals_registry

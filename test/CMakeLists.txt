@@ -93,10 +93,16 @@ ecbuild_add_test( TARGET  test_ufo_aod
                   ARGS    "testinput/aod.json"
                   LIBS    ufo )
 
-ecbuild_add_test( TARGET  test_ufo_obsoperator_tlad
+ecbuild_add_test( TARGET  test_ufo_obsop_seaice_tlad
                   BOOST
                   SOURCES mains/TestObsOperatorTLAD.cc
                   ARGS    "testinput/seaice.json"
+                  LIBS    ufo )
+
+ecbuild_add_test( TARGET  test_ufo_obsop_rsonde_tlad
+                  BOOST
+                  SOURCES mains/TestObsOperatorTLAD.cc
+                  ARGS    "testinput/radiosonde.json"
                   LIBS    ufo )
 
 #ecbuild_add_test( TARGET  test_ufo_obscheck

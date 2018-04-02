@@ -70,19 +70,6 @@ extern "C" {
   void ufo_geovals_write_file_f90(const F90goms &, const eckit::Configuration * const *);
 
 // -----------------------------------------------------------------------------
-//  Radiance observations
-// -----------------------------------------------------------------------------
-  void ufo_radiance_setup_f90(F90hop &, const eckit::Configuration * const *);
-  void ufo_radiance_delete_f90(F90hop &);
-
-  void ufo_radiance_eqv_f90(const F90goms &, const F90odb &, const F90ovec &, const F90obias &);
-  void ufo_radiance_equiv_tl_f90(const F90goms &, const F90ovec &, const F90goms &, const double &);
-  void ufo_radiance_equiv_ad_f90(const F90goms &, const F90ovec &, const F90goms &, double &);
-
-  void ufo_radiance_gettraj_f90(const F90hop &, const int &, F90goms &);  // copied over from wspeed, don't think it's required
-  void ufo_radiance_settraj_f90(const F90goms &, const F90goms &);   // copied over from wspeed, don't think it's required
-
-// -----------------------------------------------------------------------------
 //  Check Observations
 // -----------------------------------------------------------------------------
   void ufo_obscheck_setup_f90(F90ocheck &, const eckit::Configuration * const *);
@@ -95,25 +82,27 @@ extern "C" {
 // -----------------------------------------------------------------------------
   void ufo_radiosonde_setup_f90(F90hop &, const eckit::Configuration * const *);
   void ufo_radiosonde_delete_f90(F90hop &);
-  void ufo_radiosonde_t_eqv_f90(const F90goms &, const F90odb &, const F90ovec &, const F90obias &);
+  void ufo_radiosonde_t_eqv_f90(const F90hop &, const F90goms &, const F90odb &, const F90ovec &, const F90obias &);
+  void ufo_radiosonde_settraj_f90(const F90hop &, const F90goms &);
+  void ufo_radiosonde_t_eqv_tl_f90(const F90hop &, const F90goms &, const F90odb &, const F90ovec &);
+  void ufo_radiosonde_t_eqv_ad_f90(const F90hop &, const F90goms &, const F90odb &, const F90ovec &);
 
 // -----------------------------------------------------------------------------
-//  Aod observations
+//  Radiance observations
 // -----------------------------------------------------------------------------
-  void ufo_aod_setup_f90(F90hop &, const eckit::Configuration * const *);
-  void ufo_aod_delete_f90(F90hop &);
-  void ufo_aod_eqv_f90(const F90goms &, const F90odb &, const F90ovec &, const F90obias &);
-  void ufo_aod_equiv_tl_f90(const F90goms &, const F90ovec &, const F90goms &, const double &);
-  void ufo_aod_equiv_ad_f90(const F90goms &, const F90ovec &, const F90goms &, double &);
+  void ufo_radiance_setup_f90(F90hop &, const eckit::Configuration * const *);
+  void ufo_radiance_delete_f90(F90hop &);
+  void ufo_radiance_eqv_f90(const F90hop &, const F90goms &, const F90odb &, const F90ovec &, const F90obias &);
+  void ufo_radiance_settraj_f90(const F90hop &, const F90goms &);
+  void ufo_radiance_eqv_tl_f90(const F90hop &, const F90goms &, const F90odb &, const F90ovec &);
+  void ufo_radiance_eqv_ad_f90(const F90hop &, const F90goms &, const F90odb &, const F90ovec &);
 
 // -----------------------------------------------------------------------------
 //  Ice concentration observations
 // -----------------------------------------------------------------------------
   void ufo_seaicefrac_setup_f90(F90hop &, const eckit::Configuration * const *);
   void ufo_seaicefrac_delete_f90(F90hop &);
-
   void ufo_seaicefrac_eqv_f90(const F90hop &, const F90goms &, const F90odb &, const F90ovec &, const F90obias &);
-
   void ufo_seaicefrac_settraj_f90(const F90hop &, const F90goms &);
   void ufo_seaicefrac_eqv_tl_f90(const F90hop &, const F90goms &, const F90ovec &);
   void ufo_seaicefrac_eqv_ad_f90(const F90hop &, const F90goms &, const F90ovec &);
@@ -123,9 +112,7 @@ extern "C" {
 // -----------------------------------------------------------------------------
   void ufo_seaicethick_setup_f90(F90hop &, const eckit::Configuration * const *);
   void ufo_seaicethick_delete_f90(F90hop &);
-
   void ufo_seaicethick_eqv_f90(const F90hop &, const F90goms &, const F90odb &, const F90ovec &, const F90obias &);
-
   void ufo_seaicethick_settraj_f90(const F90hop &, const F90goms &);
   void ufo_seaicethick_eqv_tl_f90(const F90hop &, const F90goms &, const F90ovec &);
   void ufo_seaicethick_eqv_ad_f90(const F90hop &, const F90goms &, const F90ovec &);
@@ -140,7 +127,17 @@ extern "C" {
   void ufo_stericheight_gettraj_f90(const F90hop &, const int &, const int &, F90goms &);
   void ufo_stericheight_eqv_tl_f90(const F90hop &, const F90goms &, const F90ovec &);
   void ufo_stericheight_eqv_ad_f90(const F90hop &, const F90goms &, const F90ovec &);
-  
+ 
+// -----------------------------------------------------------------------------
+//  AOD observations
+// -----------------------------------------------------------------------------
+  void ufo_aod_setup_f90(F90hop &, const eckit::Configuration * const *);
+  void ufo_aod_delete_f90(F90hop &);
+  void ufo_aod_eqv_f90(const F90hop &, const F90goms &, const F90odb &, const F90ovec &, const F90obias &);
+  void ufo_aod_settraj_f90(const F90hop &, const F90goms &);
+  void ufo_aod_eqv_tl_f90(const F90hop &, const F90goms &, const F90odb &, const F90ovec &);
+  void ufo_aod_eqv_ad_f90(const F90hop &, const F90goms &, const F90odb &, const F90ovec &);
+
 // -----------------------------------------------------------------------------
 //  Observation Vectors
 // -----------------------------------------------------------------------------
@@ -163,22 +160,30 @@ extern "C" {
   void ufo_obsvec_nobs_f90(const F90ovec &, int &);
 
 // -----------------------------------------------------------------------------
-//  Observation Handler
+//  Observation Handler (for radiosondes)
 // -----------------------------------------------------------------------------
-  void ufo_obsdb_setup_f90(F90odb &, const eckit::Configuration * const *);
-  void ufo_obsdb_delete_f90(F90odb &);
-  void ufo_obsdb_get_f90(const F90odb &, const int &, const char *,
-                        const int &, const char *, const F90ovec &);
-  void ufo_obsdb_put_f90(const F90odb &, const int &, const char *,
-                        const int &, const char *, const F90ovec &);
-  void ufo_obsdb_getlocations_f90(const F90odb &, 
-                                  const util::DateTime * const *, 
-                                  const util::DateTime * const *,
-                                  F90locs &);
-  void ufo_obsdb_generate_f90(const F90odb &, const eckit::Configuration * const *, 
-                              const util::DateTime * const *,
-                              const util::DateTime * const *);
-  void ufo_obsdb_nobs_f90(const F90odb &, int &);
+
+  void ufo_obsdb_radiosonde_setup_f90(F90odb &, const eckit::Configuration * const *);
+  void ufo_obsdb_radiosonde_delete_f90(F90odb &);
+  void ufo_obsdb_radiosonde_getlocations_f90(const F90odb &,const util::DateTime * const *,
+                                             const util::DateTime * const *,F90locs &);
+  void ufo_obsdb_radiosonde_generate_f90(const F90odb &, const eckit::Configuration * const *,
+                                         const util::DateTime * const *,const util::DateTime * const *);
+  void ufo_obsdb_radiosonde_nobs_f90(const F90odb &, int &);
+  void ufo_obsdb_radiosonde_get_f90(const F90odb &, const int &, const char *, const F90ovec &);
+
+// -----------------------------------------------------------------------------
+//  Observation Handler (for radiances)
+// -----------------------------------------------------------------------------
+
+  void ufo_obsdb_radiance_setup_f90(F90odb &, const eckit::Configuration * const *);
+  void ufo_obsdb_radiance_delete_f90(F90odb &);
+  void ufo_obsdb_radiance_getlocations_f90(const F90odb &,const util::DateTime * const *,
+                                           const util::DateTime * const *,F90locs &);
+  void ufo_obsdb_radiance_generate_f90(const F90odb &, const eckit::Configuration * const *,
+                                       const util::DateTime * const *,const util::DateTime * const *);
+  void ufo_obsdb_radiance_nobs_f90(const F90odb &, int &);
+  void ufo_obsdb_radiance_get_f90(const F90odb &, const int &, const char *, const F90ovec &);
 
 // -----------------------------------------------------------------------------
 //  Observation Handler (for sea ice)
@@ -232,6 +237,23 @@ extern "C" {
 // -----------------------------------------------------------------------------  
 
 // -----------------------------------------------------------------------------
+//  Observation Handler (for AOD)
+// -----------------------------------------------------------------------------
+
+  void ufo_obsdb_aod_setup_f90(F90odb &, const eckit::Configuration * const *);
+  void ufo_obsdb_aod_delete_f90(F90odb &);
+  void ufo_obsdb_aod_getlocations_f90(const F90odb &,
+                                  const util::DateTime * const *,
+                                  const util::DateTime * const *,
+                                  F90locs &);
+  void ufo_obsdb_aod_generate_f90(const F90odb &, const eckit::Configuration * const *,
+                              const util::DateTime * const *,
+                              const util::DateTime * const *);
+  void ufo_obsdb_aod_nobs_f90(const F90odb &, int &);
+  void ufo_obsdb_aod_get_f90(const F90odb &, const int &, const char *, const F90ovec &);
+
+// -----------------------------------------------------------------------------  
+
 }  // extern C
 
 }  // namespace ufo

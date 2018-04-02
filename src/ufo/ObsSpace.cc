@@ -30,14 +30,18 @@ ObsSpace::ObsSpace(const eckit::Configuration & config,
   const eckit::Configuration * configc = &config;
   obsname_ = config.getString("ObsType");
 
-  if (obsname_ == "Radiance" || obsname_ == "Radiosonde" || obsname_ == "Aod") 
-    ufo_obsdb_setup_f90(keyOspace_, &configc);
+  if (obsname_ == "Radiance") 
+    ufo_obsdb_radiance_setup_f90(keyOspace_, &configc);
+  else if (obsname_ == "Radiosonde")
+    ufo_obsdb_radiosonde_setup_f90(keyOspace_, &configc);
   else if (obsname_ == "SeaIceFraction")
     ufo_obsdb_seaice_setup_f90(keyOspace_, &configc);
   else if (obsname_ == "StericHeight")
     ufo_obsdb_stericheight_setup_f90(keyOspace_, &configc);  
   else if (obsname_ == "SeaIceThickness")
     ufo_obsdb_seaicethick_setup_f90(keyOspace_, &configc);
+  else if (obsname_ == "Aod")
+    ufo_obsdb_aod_setup_f90(keyOspace_, &configc);
 
   oops::Log::trace() << "ufo::ObsSpace contructed name = " << obsname_ << std::endl;
 }
@@ -45,25 +49,35 @@ ObsSpace::ObsSpace(const eckit::Configuration & config,
 // -----------------------------------------------------------------------------
 
 ObsSpace::~ObsSpace() {
-  if (obsname_ == "Radiance" || obsname_ == "Radiosonde" || obsname_ == "Aod")
-    ufo_obsdb_delete_f90(keyOspace_);
+  if (obsname_ == "Radiance")
+    ufo_obsdb_radiance_delete_f90(keyOspace_);
+  else if (obsname_ == "Radiosonde")
+    ufo_obsdb_radiosonde_delete_f90(keyOspace_);
   else if (obsname_ == "SeaIceFraction")
     ufo_obsdb_seaice_delete_f90(keyOspace_);
   else if (obsname_ == "StericHeight")
     ufo_obsdb_stericheight_delete_f90(keyOspace_);  
   else if (obsname_ == "SeaIceThickness")
     ufo_obsdb_seaicethick_delete_f90(keyOspace_);
+  else if (obsname_ == "Aod")
+    ufo_obsdb_aod_delete_f90(keyOspace_);
 }
 
 // -----------------------------------------------------------------------------
 
 void ObsSpace::getdb(const std::string & col, int & keyData) const {
-  if (obsname_ == "SeaIceFraction")
+  if (obsname_ == "Radiance")
+    ufo_obsdb_radiance_get_f90(keyOspace_, col.size(), col.c_str(), keyData);
+  else if (obsname_ == "Radiosonde")
+    ufo_obsdb_radiosonde_get_f90(keyOspace_, col.size(), col.c_str(), keyData);
+  else if (obsname_ == "SeaIceFraction")
     ufo_obsdbsic_get_f90(keyOspace_, col.size(), col.c_str(), keyData);
-  if (obsname_ == "SeaIceThickness")
+  else if (obsname_ == "SeaIceThickness")
     ufo_obsdbsit_get_f90(keyOspace_, col.size(), col.c_str(), keyData);  
   else if (obsname_ == "StericHeight")
     ufo_obsdbsteric_get_f90(keyOspace_, col.size(), col.c_str(), keyData);      
+  else if (obsname_ == "Aod")
+    ufo_obsdb_aod_get_f90(keyOspace_, col.size(), col.c_str(), keyData);      
 }
 
 // -----------------------------------------------------------------------------
@@ -78,14 +92,19 @@ Locations * ObsSpace::locations(const util::DateTime & t1, const util::DateTime 
   const util::DateTime * p1 = &t1;
   const util::DateTime * p2 = &t2;
   int keylocs;
-  if (obsname_ == "Radiance" || obsname_ == "Radiosonde" || obsname_ == "Aod")
-    ufo_obsdb_getlocations_f90(keyOspace_, &p1, &p2, keylocs);
+  if (obsname_ == "Radiance")
+    ufo_obsdb_radiance_getlocations_f90(keyOspace_, &p1, &p2, keylocs);
+  else if (obsname_ == "Radiosonde")
+    ufo_obsdb_radiosonde_getlocations_f90(keyOspace_, &p1, &p2, keylocs);
   else if (obsname_ == "SeaIceFraction")
     ufo_obsdb_seaice_getlocations_f90(keyOspace_, &p1, &p2, keylocs);
   else if (obsname_ == "StericHeight")
     ufo_obsdb_stericheight_getlocations_f90(keyOspace_, &p1, &p2, keylocs);  
   else if (obsname_ == "SeaIceThickness")
     ufo_obsdb_seaicethick_getlocations_f90(keyOspace_, &p1, &p2, keylocs);
+  else if (obsname_ == "Aod")
+    ufo_obsdb_aod_getlocations_f90(keyOspace_, &p1, &p2, keylocs);
+
   return new Locations(keylocs);
 }
 
@@ -93,14 +112,19 @@ Locations * ObsSpace::locations(const util::DateTime & t1, const util::DateTime 
 
 int ObsSpace::nobs() const {
   int n;
-  if (obsname_ == "Radiance" || obsname_ == "Radiosonde" || obsname_ == "Aod")
-    ufo_obsdb_nobs_f90(keyOspace_, n);
+  if (obsname_ == "Radiance")
+    ufo_obsdb_radiance_nobs_f90(keyOspace_, n);
+  else if (obsname_ == "Radiosonde")
+    ufo_obsdb_radiosonde_nobs_f90(keyOspace_, n);
   else if (obsname_ == "SeaIceFraction")
     ufo_obsdb_seaice_nobs_f90(keyOspace_, n);
   else if (obsname_ == "StericHeight")
     ufo_obsdb_stericheight_nobs_f90(keyOspace_, n);  
   else if (obsname_ == "SeaIceThickness")
     ufo_obsdb_seaicethick_nobs_f90(keyOspace_, n);
+  else if (obsname_ == "Aod")
+    ufo_obsdb_aod_nobs_f90(keyOspace_, n);
+
   return n;
 }
 
@@ -111,14 +135,19 @@ void ObsSpace::generateDistribution(const eckit::Configuration & conf) {
 
   const util::DateTime * p1 = &winbgn_;
   const util::DateTime * p2 = &winend_;
-//  if (obsname_ == "Radiance" || obsname_ == "Radiosonde" || obsname_ == "Aod")
-//    ufo_obsdb_generate_f90(keyOspace_, &configc, &p1, &p2);
-  if (obsname_ == "SeaIceFraction")
+  if (obsname_ == "Radiance")
+    ufo_obsdb_radiance_generate_f90(keyOspace_, &configc, &p1, &p2);
+  else if (obsname_ == "Radiosonde")
+    ufo_obsdb_radiosonde_generate_f90(keyOspace_, &configc, &p1, &p2);
+  else if (obsname_ == "SeaIceFraction")
     ufo_obsdb_seaice_generate_f90(keyOspace_, &configc, &p1, &p2);
   else if (obsname_ == "StericHeight")
     ufo_obsdb_stericheight_generate_f90(keyOspace_, &configc, &p1, &p2);  
   else if (obsname_ == "SeaIceThickness")
     ufo_obsdb_seaicethick_generate_f90(keyOspace_, &configc, &p1, &p2);
+  else if (obsname_ == "Aod")
+    ufo_obsdb_aod_generate_f90(keyOspace_, &configc, &p1, &p2);
+
 }
 
 // -----------------------------------------------------------------------------

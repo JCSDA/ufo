@@ -1,53 +1,58 @@
 /*
- * (C) Copyright 2017 UCAR
- * 
+ * (C) Copyright 2017-2018 UCAR
+ *
  * This software is licensed under the terms of the Apache Licence Version 2.0
- * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#ifndef UFO_OBSRADIANCE_H_
-#define UFO_OBSRADIANCE_H_
+#ifndef UFO_OBSRADIANCETLAD_H_
+#define UFO_OBSRADIANCETLAD_H_
 
 #include <ostream>
 #include <string>
 
 #include <boost/scoped_ptr.hpp>
 
-#include "eckit/config/Configuration.h"
 #include "oops/base/Variables.h"
-#include "oops/interface/ObsOperatorBase.h"
-#include "ObsSpace.h"
-#include "GeoVaLs.h"
-#include "Locations.h"
-#include "ObsBias.h"
-#include "ObsBiasIncrement.h"
-#include "ObsVector.h"
-#include "oops/base/Variables.h"
+#include "oops/interface/LinearObsOperBase.h"
+#include "ufo/ObsSpace.h"
 #include "util/ObjectCounter.h"
+#include "util/Logger.h"
+
+// Forward declarations
+namespace util {
+  class DateTime;
+}
 
 namespace ufo {
+  class GeoVaLs;
+  class ObsBias;
+  class ObsBiasIncrement;
+  class ObsVector;
 
 // -----------------------------------------------------------------------------
-/// Radiance observation for UFO.
+/// Radiance (currently only temperature) observation for UFO.
 template <typename MODEL>
-class ObsRadiance : public oops::ObsOperatorBase<MODEL>,
-                  private util::ObjectCounter<ObsRadiance<MODEL>> {
- public:
-  static const std::string classname() {return "ufo::ObsRadiance";}
+class ObsRadianceTLAD : public oops::LinearObsOperBase<MODEL>,
+                          private util::ObjectCounter<ObsRadianceTLAD<MODEL>> {
+public:
+  static const std::string classname() {return "ufo::ObsRadianceTLAD";}
 
-  ObsRadiance(const ObsSpace &, const eckit::Configuration &);
-  virtual ~ObsRadiance();
+  ObsRadianceTLAD(const ObsSpace &, const eckit::Configuration &);
+  virtual ~ObsRadianceTLAD();
 
-// Obs Operator
-  void obsEquiv(const GeoVaLs &, ObsVector &, const ObsBias &) const;
+  // Obs Operators
+  void setTrajectory(const GeoVaLs &, const ObsBias &);
+  void obsEquivTL(const GeoVaLs &, ObsVector &, const ObsBiasIncrement &) const;
+  void obsEquivAD(GeoVaLs &, const ObsVector &, ObsBiasIncrement &) const;
 
-// Other
+  // Other
   const oops::Variables & variables() const {return *varin_;}
 
   int & toFortran() {return keyOperRadiance_;}
   const int & toFortran() const {return keyOperRadiance_;}
 
- private:
+private:
   void print(std::ostream &) const;
   F90hop keyOperRadiance_;
   const ObsSpace& odb_;
@@ -56,7 +61,7 @@ class ObsRadiance : public oops::ObsOperatorBase<MODEL>,
 
 // -----------------------------------------------------------------------------
 template <typename MODEL>
-ObsRadiance<MODEL>::ObsRadiance(const ObsSpace & odb, const eckit::Configuration & config)
+ObsRadianceTLAD<MODEL>::ObsRadianceTLAD(const ObsSpace & odb, const eckit::Configuration & config)
   : keyOperRadiance_(0), varin_(), odb_(odb)
 {
   const eckit::Configuration * configc = &config;
@@ -74,30 +79,41 @@ ObsRadiance<MODEL>::ObsRadiance(const ObsSpace & odb, const eckit::Configuration
                                     "Soil_Moisture", "Soil_Temperature", "Land_Type_Index", "Vegetation_Type",
                                     "Soil_Type", "Snow_Depth"};
   varin_.reset(new oops::Variables(vv));
-  oops::Log::trace() << "ObsRadiance created." << std::endl;
+  oops::Log::trace() << "ObsRadianceTLAD created" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 template <typename MODEL>
-ObsRadiance<MODEL>::~ObsRadiance() {
-  ufo_radiance_delete_f90(keyOperRadiance_);
-  oops::Log::trace() << "ObsRadiance destructed" << std::endl;
+ObsRadianceTLAD<MODEL>::~ObsRadianceTLAD() {
+  oops::Log::trace() << "ObsRadianceTLAD destructed" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 template <typename MODEL>
-void ObsRadiance<MODEL>::obsEquiv(const GeoVaLs & gom, ObsVector & ovec,
-                         const ObsBias & bias) const {
-  ufo_radiance_eqv_f90(gom.toFortran(), odb_.toFortran(), ovec.toFortran(), bias.toFortran());
+void ObsRadianceTLAD<MODEL>::setTrajectory(const GeoVaLs & geovals, const ObsBias & bias) {
+  ufo_radiance_settraj_f90(keyOperRadiance_, geovals.toFortran());
 }
 
 // -----------------------------------------------------------------------------
 template <typename MODEL>
-void ObsRadiance<MODEL>::print(std::ostream & os) const {
-  os << "ObsRadiance::print not implemented";
+void ObsRadianceTLAD<MODEL>::obsEquivTL(const GeoVaLs & geovals, ObsVector & ovec,
+                               const ObsBiasIncrement & bias) const {
+  ufo_radiance_eqv_tl_f90(keyOperRadiance_, geovals.toFortran(), odb_.toFortran(), ovec.toFortran());
 }
 
+// -----------------------------------------------------------------------------
+template <typename MODEL>
+void ObsRadianceTLAD<MODEL>::obsEquivAD(GeoVaLs & geovals, const ObsVector & ovec,
+                               ObsBiasIncrement & bias) const {
+  ufo_radiance_eqv_ad_f90(keyOperRadiance_, geovals.toFortran(), odb_.toFortran(), ovec.toFortran());
+}
+
+// -----------------------------------------------------------------------------
+template <typename MODEL>
+void ObsRadianceTLAD<MODEL>::print(std::ostream & os) const {
+  os << "ObsRadianceTLAD::print not implemented" << std::endl;
+}
 // -----------------------------------------------------------------------------
 
 }  // namespace ufo
-#endif  // UFO_OBSRADIANCE_H_
+#endif  // UFO_OBSRADIANCETLAD_H_

@@ -6,16 +6,26 @@
  */
 
 #include "oops/interface/LinearObsOperBase.h"
+
+//Atmosphere
+#include "atmosphere/radiosonde/ObsRadiosondeTLAD.h"
+#include "atmosphere/radiance/ObsRadianceTLAD.h"
+//Marine
 #include "marine/seaicefraction/ObsSeaIceFractionTLAD.h"
 #include "marine/seaicethickness/ObsSeaIceThicknessTLAD.h"
 #include "marine/stericheight/ObsStericHeightTLAD.h"
+//Constituents
+#include "constituents/aod/ObsAodTLAD.h"
 
 namespace ufo {
 
 template<typename MODEL> void instantiateLinearObsOpFactory() {
+  static oops::LinearObsOpMaker<MODEL, ObsRadiosondeTLAD<MODEL>> makerRadiosondeTL_("Radiosonde");
+  static oops::LinearObsOpMaker<MODEL, ObsRadianceTLAD<MODEL>> makerRadianceTL_("Radiance");
   static oops::LinearObsOpMaker<MODEL, ObsStericHeightTLAD<MODEL>> makerStericHeightTL_("StericHeight");
   static oops::LinearObsOpMaker<MODEL, ObsSeaIceFractionTLAD<MODEL>> makerFractionTL_("SeaIceFraction");  
   static oops::LinearObsOpMaker<MODEL, ObsSeaIceThicknessTLAD<MODEL>> makerThicknessTL("SeaIceThickness");
+  static oops::LinearObsOpMaker<MODEL, ObsAodTLAD<MODEL>> makerAodTL_("Aod");
 }
 
 }

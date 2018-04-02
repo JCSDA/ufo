@@ -9,9 +9,9 @@
 #include "marine/seaicefraction/ObsSeaIceFraction.h"
 #include "marine/seaicethickness/ObsSeaIceThickness.h"
 #include "marine/stericheight/ObsStericHeight.h"
-#include "ObsRadiance.h"
-#include "ObsRadiosonde.h"
-#include "ObsAod.h"
+#include "atmosphere/radiance/ObsRadiance.h"
+#include "atmosphere/radiosonde/ObsRadiosonde.h"
+#include "constituents/aod/ObsAod.h"
 
 namespace ufo {
 

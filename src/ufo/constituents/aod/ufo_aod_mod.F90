@@ -7,24 +7,22 @@
 
 MODULE ufo_aod_mod
   
-  use ufo_obs_data
-  use ufo_obs_data_mod
+  use ufo_obs_aod_mod
   use ufo_obs_vectors
+  use ufo_vars_mod
   use ufo_locs_mod
   use ufo_geovals_mod
-  use ufo_vars_mod
   use kinds
-  
+  USE ufo_aod_misc
   use crtm_module
-
-  USE ufo_misc
+  USE ufo_aod_misc
 
   implicit none
 
-  public :: ufo_aod_eqv
+  public :: ufo_aod_eqv, ufo_aod
 
   private
-  
+  integer, parameter :: max_string=800  
   LOGICAL, PARAMETER :: ice4qsat=.TRUE.
 
   REAL(fp),PARAMETER:: &
@@ -55,17 +53,22 @@ MODULE ufo_aod_mod
   LOGICAL :: flip_vertical
 
   
-  ! ------------------------------------------------------------------------------
+!> Fortran derived type for aod trajectory
+type :: ufo_aod
+   logical :: ltraj = .false. !< trajectory set?
+end type ufo_aod
+
+! ------------------------------------------------------------------------------
+
 contains
   
-  ! ------------------------------------------------------------------------------
+! ------------------------------------------------------------------------------
 
-  SUBROUTINE ufo_aod_eqv(geovals, obss, hofx) 
-    use aodDiag_mod, only: AodDiag
-    use ufo_obs_data_mod, only: Aod
+  SUBROUTINE ufo_aod_eqv(self, geovals, hofx, obss) 
     implicit none
+    type(ufo_aod),     intent(in)    :: self
     type(ufo_geovals), intent(in)    :: geovals
-    type(obs_data),    intent(inout) :: obss
+    type(ufo_obs_aod), intent(inout) :: obss
     type(obs_vector),  intent(inout) :: hofx
 
     !*************************************************************************************
@@ -155,7 +158,6 @@ contains
     ! --------------
 
     nobs=obss%nobs; nlocs=obss%nlocs
-    obss%Obspoint => Aod
 
     n_profiles=geovals%nobs
 
@@ -323,7 +325,7 @@ contains
        rmse = 0
        DO m = 1, N_PROFILES
           DO l = 1, n_Channels
-             diff(l,m) = SUM(rts(l,m)%layer_optical_depth(:)) - (Aod%datachan(m,l)%aodobs - Aod%datachan(m,l)%omgaod)
+             diff(l,m) = SUM(rts(l,m)%layer_optical_depth(:)) - (obss%datachan(m,l)%aodobs - obss%datachan(m,l)%omgaod)
              rmse(l) = rmse(l) + diff(l,m)**2
           END DO
        ENDDO

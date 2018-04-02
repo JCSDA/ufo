@@ -16,12 +16,12 @@
 #include "eckit/config/Configuration.h"
 #include "oops/base/Variables.h"
 #include "oops/interface/ObsOperatorBase.h"
-#include "ObsSpace.h"
-#include "GeoVaLs.h"
-#include "Locations.h"
-#include "ObsBias.h"
-#include "ObsBiasIncrement.h"
-#include "ObsVector.h"
+#include "ufo/ObsSpace.h"
+#include "ufo/GeoVaLs.h"
+#include "ufo/Locations.h"
+#include "ufo/ObsBias.h"
+#include "ufo/ObsBiasIncrement.h"
+#include "ufo/ObsVector.h"
 #include "util/ObjectCounter.h"
 
 namespace ufo {
@@ -76,7 +76,7 @@ ObsRadiosonde<MODEL>::~ObsRadiosonde() {
 template <typename MODEL>
 void ObsRadiosonde<MODEL>::obsEquiv(const GeoVaLs & gom, ObsVector & ovec,
                              const ObsBias & bias) const {
-  ufo_radiosonde_t_eqv_f90(gom.toFortran(), odb_.toFortran(), ovec.toFortran(), bias.toFortran());
+  ufo_radiosonde_t_eqv_f90(keyOperRadiosonde_, gom.toFortran(), odb_.toFortran(), ovec.toFortran(), bias.toFortran());
 }
 
 // -----------------------------------------------------------------------------
@@ -84,6 +84,7 @@ template <typename MODEL>
 void ObsRadiosonde<MODEL>::print(std::ostream & os) const {
   os << "ObsRadiosonde::print not implemented";
 }
+
 // -----------------------------------------------------------------------------
 
 }  // namespace ufo

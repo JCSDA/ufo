@@ -1,4 +1,4 @@
-MODULE ufo_misc
+MODULE ufo_aod_misc
 
   USE netcdf
 
@@ -13,4 +13,4 @@ MODULE ufo_misc
        &max_name_length=56,&
        &max_vars=50
  
-END MODULE ufo_misc
+END MODULE ufo_aod_misc

@@ -7,34 +7,41 @@
 
 module ufo_radiance_mod
   
-  use ufo_obs_data
-  use ufo_obs_data_mod
+  use ufo_obs_radiance_mod
   use ufo_obs_vectors
+  use ufo_vars_mod
   use ufo_locs_mod
   use ufo_geovals_mod
-  use ufo_vars_mod
-  use kinds
-  
+  use kinds  
+
   use crtm_module
+
   implicit none
-
+  public :: ufo_radiance
   public :: ufo_radiance_eqv
-
+  public :: ufo_radiance_settraj
+  public :: ufo_radiance_eqv_tl
+  public :: ufo_radiance_eqv_ad
   private
+  integer, parameter :: max_string=800
+
+!> Fortran derived type for radiance trajectory
+type :: ufo_radiance
+   logical :: ltraj = .false. !< trajectory set?
+end type ufo_radiance
   
-  
-  ! ------------------------------------------------------------------------------
+! ------------------------------------------------------------------------------
+
 contains
   
-  ! ------------------------------------------------------------------------------
+! ------------------------------------------------------------------------------
 
-  subroutine ufo_radiance_eqv(geovals, obss, hofx) 
-    use radDiag_mod, only: RadDiag
-    use ufo_obs_data_mod, only: Radiance
+  subroutine ufo_radiance_eqv(self, geovals, hofx, Radiance) 
     implicit none
-    type(ufo_geovals), intent(in)    :: geovals
-    type(obs_data),    intent(inout) :: obss
-    type(obs_vector),  intent(inout) :: hofx
+    type(ufo_radiance), intent(in)     :: self
+    type(ufo_geovals), intent(in)      :: geovals
+    type(obs_vector),  intent(inout)   :: hofx
+    type(ufo_obs_radiance), intent(in) :: Radiance
 
     !*************************************************************************************
     !******* Begin CRTM block ************************************************************
@@ -134,8 +141,8 @@ contains
     ! Program header
     ! --------------
 
-    nobs=obss%nobs; nlocs=obss%nlocs
-    obss%Obspoint => Radiance
+    !nobs=obss%nobs; nlocs=obss%nlocs
+    !obss%Obspoint => obss%Radiance
 
 !** geovals index and variable names:
 !!$ 1   Temperature
@@ -636,6 +643,54 @@ contains
     
   end subroutine ufo_radiance_eqv
 
-  ! ------------------------------------------------------------------------------
-  
+! ------------------------------------------------------------------------------
+ 
+subroutine ufo_radiance_settraj(self, geovals)
+implicit none
+type(ufo_radiance), intent(inout) :: self
+type(ufo_geovals), intent(in)       :: geovals
+
+character(len=*), parameter :: myname_="ufo_radiance_settraj"
+character(max_string) :: err_msg
+
+! Nothing here yet
+
+ self%ltraj = .false. !.true.
+
+end subroutine ufo_radiance_settraj
+
+! ------------------------------------------------------------------------------
+
+subroutine ufo_radiance_eqv_tl(self, geovals, hofx, obss)
+implicit none
+type(ufo_radiance), intent(in)     :: self
+type(ufo_geovals),    intent(in)     :: geovals
+type(obs_vector),     intent(inout)  :: hofx
+type(ufo_obs_radiance), intent(in) :: obss
+
+character(len=*), parameter :: myname_="ufo_radiance_eqv_tl"
+character(max_string) :: err_msg
+
+! Nothing here yet
+
+end subroutine ufo_radiance_eqv_tl
+
+! ------------------------------------------------------------------------------
+
+subroutine ufo_radiance_eqv_ad(self, geovals, hofx, obss)
+implicit none
+type(ufo_radiance), intent(in)     :: self
+type(ufo_geovals),    intent(in)     :: geovals
+type(obs_vector),     intent(inout)  :: hofx
+type(ufo_obs_radiance), intent(in) :: obss
+
+character(len=*), parameter :: myname_="ufo_radiance_eqv_ad"
+character(max_string) :: err_msg
+
+! Nothing here yet
+
+end subroutine ufo_radiance_eqv_ad
+
+! ------------------------------------------------------------------------------
+ 
 end module ufo_radiance_mod
