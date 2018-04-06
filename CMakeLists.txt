@@ -3,6 +3,7 @@ include_directories( ${CMAKE_CURRENT_SOURCE_DIR} )
 list( APPEND lib_files
 ncd_kinds.F90
 m_diag_conv.f90
+m_diag_aircft.f90
 m_diag_raob.f90
 nc_diag_fson.f90
 nc_diag_read_mod.F90
