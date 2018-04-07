@@ -79,8 +79,6 @@ do i = 1, nobs
   self%mass(i)%Longitude = lon1 + (i-1)*(lon2-lon1)/(nobs-1)
 enddo
 
-print *, myname, self%nobs, self%mass%longitude, self%mass%latitude
-
 end subroutine ufo_obs_radiosonde_generate
 
 ! ------------------------------------------------------------------------------
@@ -96,10 +94,13 @@ character(max_string), intent(in)   :: filename
 type(ufo_obs_radiosonde), intent(inout), target :: self
 
 character(len=*),parameter :: myname = "ufo_obs_radiosonde_read"
+character(len=255) :: record
 integer :: ier
 
+!Clear workspace
 call ufo_obs_radiosonde_delete(self)
 
+!Read radiosondes using ioda and put in local space
 call read_raob_diag_nc_header(filename,self%header)
 self%nobs=self%header%n_Observations_Mass
 allocate(self%mass(self%nobs))
@@ -107,12 +108,19 @@ call read_raob_diag_nc_mass(filename,self%header,self%mass,ier)
 self%nobs=self%header%n_Observations_Mass
 self%nlocs = self%nobs
 
-print*, myname, ': Found this many observations: ', self%nobs
-print*, myname, ': Found this many instances:    ', self%nlocs
-print*, myname, ': Size of type holding RAOB:    ', size(self%mass)
-print*, myname, ': Date of input file:           ', self%header%date
-if(self%nobs>0)&
-print*, myname, ': Mean observations:            ', sum(self%mass(:)%Observation)/self%nobs
+!Record some information about the observations found
+write(record,*) myname,': Found this many observations: ', self%nobs
+call fckit_log%info(record)
+write(record,*) myname,': Found this many instances:    ', self%nlocs
+call fckit_log%info(record)
+write(record,*) myname,': Size of type holding RAOB:    ', size(self%mass)
+call fckit_log%info(record)
+write(record,*) myname,': Date of input file:           ', self%header%date
+call fckit_log%info(record)
+if (self%nobs>0) then
+write(record,*) myname,':  Mean observations:           ', sum(self%mass(:)%Observation)/self%nobs
+call fckit_log%info(record)
+endif
 
 end subroutine ufo_obs_radiosonde_read
 
@@ -128,8 +136,10 @@ character(len=*),parameter:: myname = "ufo_obs_radiosonde_getlocs"
 character(len=255) :: record
 integer :: failed
 
+!Setup ufo locations
 call ufo_locs_setup(locs, self%nlocs)
 
+!Copy locations keeping track of success/failure
 failed=0
 if(failed==0 .and. size(self%mass(:)%Longitude)==self%nlocs) then
   locs%lon(:) = self%mass(:)%Longitude
@@ -146,13 +156,15 @@ if(failed==0 .and. size(self%mass(:)%Time) == self%nlocs) then
 else
   failed=3
 endif
+
+!Receord success/failure
 if(failed==0)then
-  write(record,*)myname,': allocated/assinged obs-data'
+  write(record,*) myname,': allocated/assinged obs-data'
   call fckit_log%info(record)
 else
-  write(record,*)myname,': failed allocation/assignment of obs-data, ier: ', failed
+  write(record,*) myname,': failed allocation/assignment of obs-data, ier: ', failed
   call fckit_log%info(record)
-  ! should exit in error here
+  call abor1_ftn(myname//" failed")
 endif
 
 end subroutine ufo_obs_radiosonde_getlocs

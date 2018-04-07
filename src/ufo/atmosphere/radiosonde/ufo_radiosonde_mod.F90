@@ -13,20 +13,24 @@ module ufo_radiosonde_mod
   use ufo_locs_mod
   use ufo_geovals_mod
   use kinds
-  
+  use vert_interp_mod
+
   implicit none
   public :: ufo_radiosonde
   public :: ufo_radiosonde_t_eqv
   public :: ufo_radiosonde_settraj
   public :: ufo_radiosonde_t_eqv_tl
   public :: ufo_radiosonde_t_eqv_ad
+  public :: ufo_radiosonde_delete
   private
   integer, parameter :: max_string=800
 
 !> Fortran derived type for radiosonde_t trajectory
 type :: ufo_radiosonde
-   type(ufo_geoval) :: prsl   !< as a vertical coordinate
+   integer :: nval, nobs
    logical :: ltraj = .false. !< trajectory set?
+   real(kind_real), allocatable :: wf(:)
+   integer, allocatable :: wi(:)
 end type ufo_radiosonde
 
 ! ------------------------------------------------------------------------------
@@ -46,18 +50,15 @@ type(ufo_obs_radiosonde), intent(in) :: obss
 character(len=*), parameter :: myname_="ufo_radiosonde_t_eqv"
 character(max_string) :: err_msg
 
-real(kind_real), allocatable :: omf(:), obs(:)
-
 integer :: iobs
-real(kind_real) :: z, dz
+real(kind_real) :: wf
+integer :: wi
 real(kind_real), allocatable :: pressure(:)
 type(ufo_geoval), pointer :: prsl, tv
 
 integer, save :: run = 0
 
 run = run + 1
-
-print *, myname_, ' nobs: ', geovals%nobs, hofx%nobs
 
 ! check if nobs is consistent in geovals & hofx
 if (geovals%nobs /= hofx%nobs) then
@@ -83,10 +84,8 @@ pressure = obss%mass(:)%pressure
 
 ! obs operator
 do iobs = 1, hofx%nobs
-  z = log(pressure(iobs)/10.)
-  dz = interp_weight(z, prsl%vals(:,iobs), prsl%nval)
-  hofx%values(iobs) = vert_interp(tv%vals(:,iobs), tv%nval, dz)
-  write(102,*)hofx%values(iobs)
+  call vert_interp_weights(prsl%nval,log(pressure(iobs)/10.),prsl%vals(:,iobs),wi,wf)
+  call vert_interp_apply(tv%nval, tv%vals(:,iobs), hofx%values(iobs), wi, wf)
 enddo
 
 deallocate(pressure)
@@ -95,15 +94,18 @@ end subroutine ufo_radiosonde_t_eqv
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_radiosonde_settraj(self, geovals)
+subroutine ufo_radiosonde_settraj(self, geovals, obss)
 implicit none
 type(ufo_radiosonde), intent(inout) :: self
 type(ufo_geovals), intent(in)       :: geovals
+type(ufo_obs_radiosonde), intent(in) :: obss
 
 character(len=*), parameter :: myname_="ufo_radiosonde_settraj"
 character(max_string) :: err_msg
 
-type(ufo_geoval), pointer :: prsl, tv
+real(kind_real), allocatable :: pressure(:)
+type(ufo_geoval), pointer :: prsl
+integer :: iobs
 
 !Check if radiosondes in geovals and get it
 if (.not. ufo_geovals_get_var(geovals, var_prsl, prsl)) then
@@ -111,7 +113,25 @@ if (.not. ufo_geovals_get_var(geovals, var_prsl, prsl)) then
   call abor1_ftn(err_msg)
 endif
 
-self%prsl  = prsl
+!Keep copy of dimensions
+self%nobs = prsl%nobs
+self%nval = prsl%nval
+
+!Allocate weight and index
+allocate(self%wi(self%nobs))
+allocate(self%wf(self%nobs))
+
+! observation of pressure (for vertical interpolation)
+allocate(pressure(geovals%nobs))
+pressure = obss%mass(:)%pressure
+
+! compute interpolation weights
+do iobs = 1, self%nobs
+  call vert_interp_weights(self%nval,log(pressure(iobs)/10.),prsl%vals(:,iobs),self%wi(iobs),self%wf(iobs))
+enddo
+
+deallocate(pressure)
+
 self%ltraj = .true.
 
 end subroutine ufo_radiosonde_settraj
@@ -128,14 +148,8 @@ type(ufo_obs_radiosonde), intent(in) :: obss
 character(len=*), parameter :: myname_="ufo_radiosonde_t_eqv_tl"
 character(max_string) :: err_msg
 
-real(kind_real), allocatable :: pres(:)
-
 integer :: iobs
-real(kind_real) :: z, dz
-real(kind_real), allocatable :: pressure(:)
 type(ufo_geoval), pointer :: tv_d
-
-print *, myname_, ' nobs: ', geovals%nobs, hofx%nobs
 
 ! check if trajectory was set
 if (.not. self%ltraj) then
@@ -155,18 +169,10 @@ if (.not. ufo_geovals_get_var(geovals, var_tv, tv_d)) then
   call abor1_ftn(err_msg)
 endif
 
-! observation of pressure (for vertical interpolation)
-allocate(pressure(geovals%nobs))
-pressure = obss%mass(:)%pressure
-
-! tangent linear obs operator
+! tangent linear obs operator (linear)
 do iobs = 1, hofx%nobs
-  z = log(pressure(iobs)/10.)
-  dz = interp_weight(z, self%prsl%vals(:,iobs), self%prsl%nval)
-  hofx%values(iobs) = vert_interp_tl(tv_d%vals(:,iobs), tv_d%nval, dz)
+  call vert_interp_apply_tl(tv_d%nval, tv_d%vals(:,iobs), hofx%values(iobs), self%wi(iobs), self%wf(iobs))
 enddo
-
-deallocate(pressure)
 
 end subroutine ufo_radiosonde_t_eqv_tl
 
@@ -183,11 +189,7 @@ character(len=*), parameter :: myname_="ufo_radiosonde_t_eqv_ad"
 character(max_string) :: err_msg
 
 integer :: iobs
-real(kind_real) :: z, dz
-real(kind_real), allocatable :: pressure(:)
 type(ufo_geoval), pointer :: tv_d, prsl_d
-
-print *, myname_, ' nobs: ', geovals%nobs, hofx%nobs
 
 ! check if trajectory was set
 if (.not. self%ltraj) then
@@ -213,121 +215,43 @@ if (.not. ufo_geovals_get_var(geovals, var_tv, tv_d)) then
   call abor1_ftn(err_msg)
 endif
 
-! observation of pressure (for vertical interpolation)
-allocate(pressure(geovals%nobs))
-pressure = obss%mass(:)%pressure
+! allocate if not yet allocated
+if (.not. allocated(tv_d%vals)) then
+   tv_d%nobs = self%nobs
+   tv_d%nval = self%nval
+   allocate(tv_d%vals(tv_d%nval,tv_d%nobs))
+endif
+if (.not. allocated(prsl_d%vals)) then
+   prsl_d%nobs = self%nobs
+   prsl_d%nval = self%nval
+   allocate(prsl_d%vals(prsl_d%nval,prsl_d%nobs))
+endif
 
 ! adjoint obs operator
 tv_d%vals = 0.0
 prsl_d%vals = 0.0
 do iobs = 1, hofx%nobs
-  z = log(pressure(iobs)/10.)
-  dz = interp_weight(z, self%prsl%vals(:,iobs), self%prsl%nval)
-  call vert_interp_ad(tv_d%vals(:,iobs), tv_d%nval, dz, hofx%values(iobs))
+  call vert_interp_apply_ad(tv_d%nval, tv_d%vals(:,iobs), hofx%values(iobs), self%wi(iobs), self%wf(iobs))
 enddo
-
-deallocate(pressure)
 
 end subroutine ufo_radiosonde_t_eqv_ad
 
 ! ------------------------------------------------------------------------------
-  
-real(kind_real) function interp_weight(d, x, nx) 
+
+subroutine ufo_radiosonde_delete(self)
 implicit none
+type(ufo_radiosonde), intent(inout) :: self
 
-integer, intent(in) :: nx
-real(kind_real), intent(in)    :: x(nx)
-real(kind_real), intent(in)    :: d
+character(len=*), parameter :: myname_="ufo_radiosonde_delete"
 
-integer ::  ix  
+self%nval = 0
+self%nobs = 0
+if (allocated(self%wi)) deallocate(self%wi)
+if (allocated(self%wf)) deallocate(self%wf)
+self%ltraj = .false.
 
-! Case in which x is in decreasing order
-if(d>=x(1)) then
-  ix = 1 
-else
-  ix = 1 
-  do while (d < x(ix))
-    ix = ix + 1 
-    if (ix == nx) exit
-  enddo
-  ix = ix - 1 
-endif
-interp_weight = real(ix,kind_real) + (d-x(ix)) / (x(ix+1)-x(ix))
-
-end function interp_weight
+end subroutine ufo_radiosonde_delete
 
 ! ------------------------------------------------------------------------------
-
-real(kind_real) function vert_interp(f, nsig, dz) 
-implicit none
-
-integer :: nsig
-real(kind_real), intent(in)  :: f(nsig)
-real(kind_real), intent(in)  :: dz
-
-integer :: iz, izp 
-real(kind_real) :: delz, delzp
-
-iz=int(dz)
-iz=max(1,min(iz,nsig))
-izp=min(iz+1,nsig)
-
-delz=dz-float(iz)
-delz=max(0.,min(delz,1.))
-delzp=1.-delz
-
-vert_interp = f(iz)*delzp + f(izp)*delz
-
-end function vert_interp
-
-! ------------------------------------------------------------------------------
-
-real(kind_real) function vert_interp_tl(f_tl, nsig, dz) 
-implicit none
-
-integer :: nsig
-real(kind_real), intent(in)  :: f_tl(nsig)
-real(kind_real), intent(in)  :: dz
-
-integer :: iz, izp 
-real(kind_real) :: delz, delzp
-
-iz=int(dz)
-iz=max(1,min(iz,nsig))
-izp=min(iz+1,nsig)
-
-delz=dz-float(iz)
-delz=max(0.,min(delz,1.))
-delzp=1.-delz
-
-vert_interp_tl = f_tl(iz)*delzp + f_tl(izp)*delz
-
-end function vert_interp_tl
-
-! ------------------------------------------------------------------------------
-
-subroutine vert_interp_ad(f_ad, nsig, dz, hofx_ad) 
-implicit none
-
-integer        , intent(in)    :: nsig
-real(kind_real), intent(inout) :: f_ad(nsig)
-real(kind_real), intent(in)    :: dz
-real(kind_real), intent(in)    :: hofx_ad
-
-integer :: iz, izp 
-real(kind_real) :: delz, delzp
-
-iz=int(dz)
-iz=max(1,min(iz,nsig))
-izp=min(iz+1,nsig)
-
-delz=dz-float(iz)
-delz=max(0.,min(delz,1.))
-delzp=1.-delz
-
-f_ad(iz)  = f_ad(iz)  + hofx_ad * delzp
-f_ad(izp) = f_ad(izp) + hofx_ad * delz
-
-end subroutine vert_interp_ad
 
 end module ufo_radiosonde_mod

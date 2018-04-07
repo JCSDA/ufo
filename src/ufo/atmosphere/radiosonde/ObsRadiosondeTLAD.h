@@ -75,12 +75,13 @@ ObsRadiosondeTLAD<MODEL>::ObsRadiosondeTLAD(const ObsSpace & odb, const eckit::C
 template <typename MODEL>
 ObsRadiosondeTLAD<MODEL>::~ObsRadiosondeTLAD() {
   oops::Log::trace() << "ObsRadiosondeTLAD destructed" << std::endl;
+  ufo_radiosonde_delete_f90(keyOperRadiosonde_);
 }
 
 // -----------------------------------------------------------------------------
 template <typename MODEL>
 void ObsRadiosondeTLAD<MODEL>::setTrajectory(const GeoVaLs & geovals, const ObsBias & bias) {
-  ufo_radiosonde_settraj_f90(keyOperRadiosonde_, geovals.toFortran());
+  ufo_radiosonde_settraj_f90(keyOperRadiosonde_, geovals.toFortran(), odb_.toFortran());
 }
 
 // -----------------------------------------------------------------------------

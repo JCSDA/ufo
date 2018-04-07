@@ -32,6 +32,8 @@ ufo_variables_mod.F90
 ufo_obs_data_basis_mod.F90
 ufo_obs_data.F90
 ufo_obs_data_mod.F90
+# Atmos: utils
+atmosphere/utils/vert_interp.F90
 # Atmos: Radiosondes
 atmosphere/radiosonde/ObsRadiosonde.h
 atmosphere/radiosonde/ObsRadiosondeTLAD.h

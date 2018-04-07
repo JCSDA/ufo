@@ -56,6 +56,7 @@ integer(c_int), intent(inout) :: c_key_self
 type(ufo_radiosonde), pointer :: self
 
 call ufo_radiosonde_registry%get(c_key_self, self)
+call ufo_radiosonde_delete(self)
 call ufo_radiosonde_registry%remove(c_key_self)
     
 end subroutine ufo_radiosonde_delete_c
@@ -89,21 +90,24 @@ end subroutine ufo_radiosonde_t_eqv_c
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_radiosonde_settraj_c(c_key_self, c_key_geovals) bind(c,name='ufo_radiosonde_settraj_f90')
+subroutine ufo_radiosonde_settraj_c(c_key_self, c_key_geovals, c_key_obsspace) bind(c,name='ufo_radiosonde_settraj_f90')
 
 implicit none
 integer(c_int), intent(in) :: c_key_self
 integer(c_int), intent(in) :: c_key_geovals
+integer(c_int), intent(in) :: c_key_obsspace
 
 type(ufo_radiosonde), pointer :: self
 type(ufo_geovals),    pointer :: geovals
+type(ufo_obs_radiosonde), pointer :: obss
 
 character(len=*), parameter :: myname_="ufo_radiosonde_settraj_c"
 
 call ufo_radiosonde_registry%get(c_key_self, self)
 call ufo_geovals_registry%get(c_key_geovals,geovals)
+call ufo_obs_radiosonde_registry%get(c_key_obsspace,obss)
 
-call ufo_radiosonde_settraj(self, geovals)
+call ufo_radiosonde_settraj(self, geovals, obss)
 
 end subroutine ufo_radiosonde_settraj_c
 
@@ -171,7 +175,6 @@ integer(c_int), intent(in) :: c_key_ovec
 
 type(ufo_obs_radiosonde), pointer :: self
 type(obs_vector), pointer :: ovec
-character(len=lcol) :: col
 
 call ufo_obs_radiosonde_registry%get(c_key_self, self)
 call ufo_obs_vect_registry%get(c_key_ovec,ovec)
