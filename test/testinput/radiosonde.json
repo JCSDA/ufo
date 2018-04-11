@@ -2,9 +2,11 @@
   "test_framework_runtime_config": "--log_level=test_suite",
   "window_begin": "2010-01-01T00:00:00Z",
   "window_end": "2010-01-02T00:00:00Z",
-  "LinObsOpTest": {
-    "tlm_tol": "1e-4"
-  },  
+  "LinearObsOpTest": {
+    "testiterTL": "10",
+    "toleranceTL": "1.0e-8",
+    "toleranceAD": "1.0e-12"
+  },
   "Observations": {
     "ObsTypes": [
       {
