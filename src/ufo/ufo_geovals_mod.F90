@@ -304,7 +304,7 @@ end subroutine ufo_geovals_minmaxavg
 ! ------------------------------------------------------------------------------
 
 subroutine ufo_geovals_read_netcdf(self, filename, vars)
-USE netcdf, ONLY: NF90_DOUBLE, NF90_INT
+USE netcdf, ONLY: NF90_FLOAT, NF90_DOUBLE, NF90_INT
 use nc_diag_read_mod, only: nc_diag_read_get_var
 use nc_diag_read_mod, only: nc_diag_read_get_dim
 use nc_diag_read_mod, only: nc_diag_read_get_var_dims, nc_diag_read_check_var
@@ -320,6 +320,7 @@ integer :: nvardim, vartype
 integer, allocatable, dimension(:) :: vardims
 
 real(kind_real), allocatable :: fieldr2d(:,:), fieldr1d(:)
+real, allocatable :: fieldf2d(:,:), fieldf1d(:)
 integer, allocatable :: fieldi2d(:,:), fieldi1d(:)
 
 character(max_string) :: err_msg
@@ -335,7 +336,7 @@ call ufo_geovals_setup(self, vars, nobs)
 do ivar = 1, vars%nv
   if (.not. nc_diag_read_check_var(iunit, vars%fldnames(ivar))) then
      write(err_msg,*) 'ufo_geovals_read_netcdf: var ', trim(vars%fldnames(ivar)), ' doesnt exist'
-     call abor1_ftn(err_msg)
+     call abor1_ftn(trim(err_msg))
   endif
   !> get dimensions of variable
   if (allocated(vardims)) deallocate(vardims)
@@ -356,13 +357,18 @@ do ivar = 1, vars%nv
        call nc_diag_read_get_var(iunit, vars%fldnames(ivar), fieldr1d)  
        self%geovals(ivar)%vals(1,:) = fieldr1d
        deallocate(fieldr1d)
+    elseif (vartype == NF90_FLOAT) then
+       allocate(fieldf1d(vardims(1)))
+       call nc_diag_read_get_var(iunit, vars%fldnames(ivar), fieldf1d)  
+       self%geovals(ivar)%vals(1,:) = dble(fieldf1d)
+       deallocate(fieldf1d)
     elseif (vartype == NF90_INT) then
        allocate(fieldi1d(vardims(1)))
        call nc_diag_read_get_var(iunit, vars%fldnames(ivar), fieldi1d)
        self%geovals(ivar)%vals(1,:) = fieldi1d
        deallocate(fieldi1d)
     else
-       call abor1_ftn('ufo_geovals_read_netcdf: can only read double and int')
+       call abor1_ftn('ufo_geovals_read_netcdf: can only read double, float and int')
     endif
   !> read 2d vars (only double precision and integer for now)
   elseif (nvardim == 2) then
@@ -378,13 +384,18 @@ do ivar = 1, vars%nv
        call nc_diag_read_get_var(iunit, vars%fldnames(ivar), fieldr2d)
        self%geovals(ivar)%vals = fieldr2d
        deallocate(fieldr2d)
+    elseif (vartype == NF90_FLOAT) then
+       allocate(fieldf2d(vardims(1), vardims(2)))
+       call nc_diag_read_get_var(iunit, vars%fldnames(ivar), fieldf2d)  
+       self%geovals(ivar)%vals = dble(fieldf2d)
+       deallocate(fieldf2d)
     elseif (vartype == NF90_INT) then
        allocate(fieldi2d(vardims(1), vardims(2)))
        call nc_diag_read_get_var(iunit, vars%fldnames(ivar), fieldi2d)
        self%geovals(ivar)%vals = fieldi2d
        deallocate(fieldi2d)
     else
-       call abor1_ftn('ufo_geovals_read_netcdf: can only read double and int')
+       call abor1_ftn('ufo_geovals_read_netcdf: can only read double, float and int')
     endif
   !> only 1d & 2d vars
   else
