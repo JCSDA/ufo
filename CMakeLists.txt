@@ -55,7 +55,7 @@ read_aod_diag.f90
 
 ecbuild_add_library( TARGET     ioda
                      SOURCES    ${lib_files}
-                     LIBS       ${NETCDF_LIBRARIES}
+                     LIBS       fckit oops ${NETCDF_LIBRARIES}
                      INSTALL_HEADERS LISTED
                    )
 

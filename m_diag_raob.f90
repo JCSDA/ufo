@@ -1,4 +1,5 @@
 module m_diag_raob
+  use fckit_log_module, only: fckit_log
   use ncd_kinds, only:  i_kind,r_single,r_kind,r_double
   use nc_diag_write_mod, only: nc_diag_init, nc_diag_metadata, nc_diag_write
 
@@ -6,6 +7,8 @@ module m_diag_raob
   use nc_diag_read_mod, only: nc_diag_read_init, nc_diag_read_close
   use nc_diag_read_mod, only: nc_diag_read_get_var
   use nc_diag_read_mod, only: nc_diag_read_get_global_attr
+
+  use type_distribution, only: random_distribution
 
   implicit none
 
@@ -221,11 +224,14 @@ contains
      character(len=*),       intent(in)    :: infn
      type(diag_raob_header), intent(inout) :: raob_header
 
-     integer(i_kind) :: fid,nobs
+     integer(i_kind) :: fid,nobs, gnobs
+     type(random_distribution)             :: distribution
 
      nobs=0
      call nc_diag_read_init(infn,fid)
-     nobs = nc_diag_read_get_dim(fid,'nobs')
+     gnobs = nc_diag_read_get_dim(fid,'nobs')
+     distribution=random_distribution(gnobs)
+     nobs=distribution%nobs_pe()
      call nc_diag_read_get_global_attr(fid,"date_time", raob_header%date  )
      raob_header%n_Observations_Mass = nobs
      call nc_diag_read_close(infn)
@@ -240,17 +246,18 @@ contains
 
      character(20)   :: str, str2
      integer(i_kind) :: ii, ic, fid, nobs, nraob, ncount(1)
-     integer(i_kind), allocatable :: indx(:)
      character(len=8),allocatable, dimension(:) :: c_var
      integer(i_kind), allocatable, dimension(:) :: i_var
      real(r_kind),    allocatable, dimension(:) :: r_var
 
      type(diag_raob_mass), pointer :: rtmp_mass(:)
 
+     type(random_distribution)                  :: distribution
+
      ierr=0
      call nc_diag_read_init(infn,fid)
      
-     nobs=raob_header%n_Observations_Mass
+     nobs = nc_diag_read_get_dim(fid,'nobs')
      allocate(rtmp_mass(nobs))
      allocate(c_var(nobs))
      allocate(i_var(nobs))
@@ -289,20 +296,22 @@ contains
            ic=ic+1
         endif
      enddo
-     nraob=ic
-     allocate(indx(nraob))
+     !> randomly distribution among PEs 
+     distribution=random_distribution(ic)
+     nraob=distribution%nobs_pe()
      ic=0
+     call distribution%reset()
      do ii=1,nobs
         if(rtmp_mass(ii)%Observation_Type==raob_mass_type.and.&
            rtmp_mass(ii)%Setup_QC_Mark==t_qcmark) then
           ic=ic+1
-          indx(ic)=ii 
+          if (distribution%received(ic)) &
+              distribution%indx(distribution%nobs_pe())=ii 
         endif
      enddo
-     print *, 'found this many raob ', nraob
-     if(ic /= nraob) then
-       print *, 'error determining Raob, inconsistent nraob, ic=', nraob, ic
-       deallocate(indx)
+     print *, 'found this many raob ', nraob, ' on PE ', distribution%mype()
+     if(distribution%nobs_pe() /= size(distribution%indx)) then
+       print *, 'error determining Raob, inconsistent nraob, nobs_pe=', nraob, distribution%nobs_pe()
        deallocate(raob_mass)
        ierr = 99
        return
@@ -312,28 +321,27 @@ contains
      allocate  (raob_mass(nraob))
      raob_header%n_Observations_Mass = nraob
 
-!    raob_mass(:)%Station_ID = rtmp_mass(indx)
+!    raob_mass(:)%Station_ID = rtmp_mass(distribution%indx)
 !    raob_mass(:)%Observation_Class = c_var
-     raob_mass(:)%Observation_Type    = rtmp_mass(indx)%Observation_Type
-     raob_mass(:)%Observation_Subtype = rtmp_mass(indx)%Observation_Subtype
-     raob_mass(:)%Latitude            = rtmp_mass(indx)%Latitude 
-     raob_mass(:)%Longitude           = rtmp_mass(indx)%Longitude
-     raob_mass(:)%Pressure            = rtmp_mass(indx)%Pressure
-     raob_mass(:)%Height              = rtmp_mass(indx)%Height
-     raob_mass(:)%Time                = rtmp_mass(indx)%Time
-     raob_mass(:)%Prep_QC_Mark        = rtmp_mass(indx)%Prep_QC_Mark
-     raob_mass(:)%Setup_QC_Mark       = rtmp_mass(indx)%Setup_QC_Mark
-     raob_mass(:)%Prep_Use_Flag       = rtmp_mass(indx)%Prep_Use_Flag 
-     raob_mass(:)%Analysis_Use_Flag   = rtmp_mass(indx)%Analysis_Use_Flag 
-     raob_mass(:)%Nonlinear_QC_Rel_Wgt= rtmp_mass(indx)%Nonlinear_QC_Rel_Wgt
-     raob_mass(:)%Errinv_Input        = rtmp_mass(indx)%Errinv_Input
-     raob_mass(:)%Errinv_Adjust       = rtmp_mass(indx)%Errinv_Adjust 
-     raob_mass(:)%Errinv_Final        = rtmp_mass(indx)%Errinv_Final
-     raob_mass(:)%Observation         = rtmp_mass(indx)%Observation 
-     raob_mass(:)%Obs_Minus_Forecast_adjusted   = rtmp_mass(indx)%Obs_Minus_Forecast_adjusted
-     raob_mass(:)%Obs_Minus_Forecast_unadjusted = rtmp_mass(indx)%Obs_Minus_Forecast_unadjusted
+     raob_mass(:)%Observation_Type    = rtmp_mass(distribution%indx)%Observation_Type
+     raob_mass(:)%Observation_Subtype = rtmp_mass(distribution%indx)%Observation_Subtype
+     raob_mass(:)%Latitude            = rtmp_mass(distribution%indx)%Latitude 
+     raob_mass(:)%Longitude           = rtmp_mass(distribution%indx)%Longitude
+     raob_mass(:)%Pressure            = rtmp_mass(distribution%indx)%Pressure
+     raob_mass(:)%Height              = rtmp_mass(distribution%indx)%Height
+     raob_mass(:)%Time                = rtmp_mass(distribution%indx)%Time
+     raob_mass(:)%Prep_QC_Mark        = rtmp_mass(distribution%indx)%Prep_QC_Mark
+     raob_mass(:)%Setup_QC_Mark       = rtmp_mass(distribution%indx)%Setup_QC_Mark
+     raob_mass(:)%Prep_Use_Flag       = rtmp_mass(distribution%indx)%Prep_Use_Flag 
+     raob_mass(:)%Analysis_Use_Flag   = rtmp_mass(distribution%indx)%Analysis_Use_Flag 
+     raob_mass(:)%Nonlinear_QC_Rel_Wgt= rtmp_mass(distribution%indx)%Nonlinear_QC_Rel_Wgt
+     raob_mass(:)%Errinv_Input        = rtmp_mass(distribution%indx)%Errinv_Input
+     raob_mass(:)%Errinv_Adjust       = rtmp_mass(distribution%indx)%Errinv_Adjust 
+     raob_mass(:)%Errinv_Final        = rtmp_mass(distribution%indx)%Errinv_Final
+     raob_mass(:)%Observation         = rtmp_mass(distribution%indx)%Observation 
+     raob_mass(:)%Obs_Minus_Forecast_adjusted   = rtmp_mass(distribution%indx)%Obs_Minus_Forecast_adjusted
+     raob_mass(:)%Obs_Minus_Forecast_unadjusted = rtmp_mass(distribution%indx)%Obs_Minus_Forecast_unadjusted
 
-     deallocate(indx)
      deallocate(rtmp_mass)
 
      call nc_diag_read_close(infn)
