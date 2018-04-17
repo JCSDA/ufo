@@ -88,8 +88,6 @@ do i = 1, nobs
   self%lon(i) = lon1 + (i-1)*(lon2-lon1)/(nobs-1)
 enddo
 
-print *, 'in random:', self%nobs, self%lon, self%lat
-
 end subroutine ufo_obs_seaicethick_generate
 
 ! ------------------------------------------------------------------------------
@@ -124,7 +122,6 @@ call nc_diag_read_get_var(iunit, "freeboard", field)
 self%freeboard = field
 call nc_diag_read_close(filename)
 self%icethick_err = 0.1
-print *, 'in read: ', self%nobs, nobs
 end subroutine ufo_obs_seaicethick_read
 
 ! ------------------------------------------------------------------------------

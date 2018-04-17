@@ -169,7 +169,6 @@ character(len=lcol) :: col
 call ufo_obs_seaicethick_registry%get(c_key_self, self)
 call ufo_obs_vect_registry%get(c_key_ovec,ovec)
 
-
 ovec%nobs = self%nobs
 if (c_col(5)//c_col(6)=='rr') then
    ovec%values = self%icethick_err

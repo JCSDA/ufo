@@ -37,7 +37,7 @@ class ObsBias : public util::Printable,
   ObsBias(const ObsBias &, const bool){}
   ~ObsBias() {}
 
-  ObsBias & operator+=(const ObsBiasIncrement &){}
+  ObsBias & operator+=(const ObsBiasIncrement &){return *this;}
 
 /// I/O and diagnostics
   void read(const eckit::Configuration &) {}

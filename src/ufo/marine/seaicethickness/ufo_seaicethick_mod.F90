@@ -49,8 +49,6 @@ character(max_string) :: err_msg
 integer :: iobs, icat, ncat
 type(ufo_geoval), pointer :: icethick, icefrac
 
-print *, myname_, ' nobs: ', geovals%nobs, hofx%nobs
-
 ! check if nobs is consistent in geovals & hofx
 if (geovals%nobs /= hofx%nobs) then
   write(err_msg,*) myname_, ' error: nobs inconsistent!'
@@ -108,9 +106,6 @@ self%icethick = icethick
 self%icefrac  = icefrac
 self%ltraj    = .true.
 
-!print *, 'in selftraj: thick=', icethick%vals(:,1)
-!print *, 'in selftraj: frac=', icefrac%vals(:,1)
-
 end subroutine ufo_seaicethick_settraj
 
 
@@ -127,8 +122,6 @@ character(max_string) :: err_msg
 
 integer :: iobs, icat, ncat
 type(ufo_geoval), pointer :: icethick_d, icefrac_d
-
-print *, myname_, ' nobs: ', geovals%nobs, hofx%nobs
 
 ! check if trajectory was set
 if (.not. self%ltraj) then
@@ -154,9 +147,6 @@ if (.not. ufo_geovals_get_var(geovals, var_seaicethick, icethick_d)) then
   call abor1_ftn(err_msg)
 endif
 
-print *, 'in tl: thick=', icethick_d%vals(:,:)
-print *, 'in tl: frac=', icefrac_d%vals(:,:)
-
 ! sea ice thickness obs operator
 ncat = icefrac_d%nval
 hofx%values = 0.0
@@ -166,7 +156,6 @@ do iobs = 1, hofx%nobs
                          self%icefrac%vals(icat,iobs) * icethick_d%vals(icat,iobs) / 905.0 + &
                          icefrac_d%vals(icat,iobs) * self%icethick%vals(icat,iobs) /905.0
    enddo
-   print *,'in tl, hofx=',hofx%values(iobs)
 enddo
 
 end subroutine ufo_seaicethick_eqv_tl
@@ -219,28 +208,19 @@ if (.not.(allocated(icefrac_d%vals) .or. .not. allocated(icethick_d%vals))) then
    if (.not. allocated(icethick_d%vals)) allocate(icethick_d%vals(ncat, hofx%nobs))
 end if
 
-!print *, 'in ad: hofx=', hofx%values
-
 ! backward sea ice thickness obs operator
 
-print *,'ncat=',ncat
 if (.not. allocated(icefrac_d%vals))  allocate(icefrac_d%vals(ncat,hofx%nobs))
 if (.not. allocated(icethick_d%vals)) allocate(icethick_d%vals(ncat, hofx%nobs))
-!print *,icethick_d%vals
-!print *,'================================================='
 icethick_d%vals = 0.0
 icefrac_d%vals = 0.0
 do iobs = 1, hofx%nobs
    do icat = 1, ncat
       icefrac_d%vals(icat,iobs)  = icefrac_d%vals(icat,iobs) + self%icethick%vals(icat,iobs) * hofx%values(iobs) / 905.0
       icethick_d%vals(icat,iobs) = icethick_d%vals(icat,iobs) + self%icefrac%vals(icat,iobs) * hofx%values(iobs) / 905.0
-      !print *, 'in ad: thick=', icethick_d%vals(:,iobs)
-      !print *, 'in ad: frac=', icefrac_d%vals(:,iobs)
    enddo
 enddo
-!hofx%values = 0.0
-print *,icethick_d%vals
-!call abor1_ftn("end adjoint")
+
 end subroutine ufo_seaicethick_eqv_ad
 
 end module ufo_seaicethick_mod

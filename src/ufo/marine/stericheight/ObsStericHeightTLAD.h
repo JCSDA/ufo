@@ -62,7 +62,7 @@ namespace ufo {
   // -----------------------------------------------------------------------------
   template <typename MODEL>
     ObsStericHeightTLAD<MODEL>::ObsStericHeightTLAD(const ObsSpace & odb, const eckit::Configuration & config)
-    : keyOperStericHeight_(0), varin_(), traj_()
+    : keyOperStericHeight_(0), varin_()
     {
       std::cout << "steric height tlad =============================" << std::endl;
       const eckit::Configuration * configc = &config;
@@ -71,11 +71,6 @@ namespace ufo {
 	  "ocean_potential_temperature",
 	  "ocean_salinity"};
       varin_.reset(new oops::Variables(vv));
-      traj_.reset(new GeoVaLs(config, oops::Variables(vv)));
-
-      oops::Variables vars(vv);
-      GeoVaLs traj(config,vars);  
-      //ufo_stericheight_gettraj_f90(keyOperStericHeight_, odb.nobs(), vars.toFortran(), traj.toFortran());
       oops::Log::trace() << "ObsStericHeightTLAD created" << std::endl;
     }
 
@@ -88,7 +83,6 @@ namespace ufo {
   // -----------------------------------------------------------------------------
   template <typename MODEL>
     void ObsStericHeightTLAD<MODEL>::setTrajectory(const GeoVaLs & geovals, const ObsBias & bias) {
-    std::cout << "steric height tlad settraj =============================" << std::endl;  
     ufo_stericheight_settraj_f90(keyOperStericHeight_, geovals.toFortran());
     oops::Log::trace() << "ObsStericHeightTLAD trajectory was set " << geovals << std::endl;  
   }

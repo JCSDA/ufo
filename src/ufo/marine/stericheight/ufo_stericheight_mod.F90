@@ -149,7 +149,7 @@ if (.not. ufo_geovals_get_var(geovals, var_abs_topo, geoval)) then
   call abor1_ftn(err_msg)
 endif
 
-! total sea ice fraction obs operator
+! total sea level obs operator
 do iobs = 1, hofx%nobs
    hofx%values(iobs) = geoval%vals(1,iobs)
 enddo

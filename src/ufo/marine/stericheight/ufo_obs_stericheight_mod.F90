@@ -150,7 +150,7 @@ do i = 1, nobs
       if (self%lon(qci)>80.0) self%lon(qci) = self%lon(qci) - 360.0
       self%adt(qci) = ssh(i)*0.001 + mdt(i)*0.0001
       self%adt_err(qci) = 0.1
-      write(101,*)self%lon(i),self%lat(i),self%adt(i)
+      write(101,*)self%lon(qci),self%lat(qci),self%adt(qci)
    end if
 end do
 

@@ -72,7 +72,6 @@ integer, intent(in) :: nobs
 
 integer :: ivar
 
-print *,"---------- IN GEOVALS SETUP",nobs,vars%nv,vars%fldnames
 call ufo_geovals_delete(self)
 self%nobs = nobs
 self%nvar = vars%nv
@@ -83,7 +82,6 @@ do ivar = 1, self%nvar
   self%geovals(ivar)%nval = 0
 enddo
 self%lalloc = .true.
-print *,"---------- IN GEOVALS SETUP"
 end subroutine ufo_geovals_setup
 
 ! ------------------------------------------------------------------------------
