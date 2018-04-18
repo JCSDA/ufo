@@ -13,7 +13,7 @@ module ufo_obs_vectors
 use iso_c_binding
 use random_vectors_mod
 use kinds
-use type_mpl, only: mpl_allreduce_sum
+use fckit_mpi_module
 
 implicit none
 private
@@ -229,7 +229,7 @@ integer(c_int), intent(in) :: c_key_other
 real(c_double), intent(inout) :: zz
 type(obs_vector), pointer :: self, other
 integer :: jo
-real(kind=kind_real) :: dummy
+type(fckit_mpi_comm) :: comm
 
 zz=0.0_kind_real
 call ufo_obs_vect_registry%get(c_key_self,self)
@@ -238,8 +238,8 @@ do jo=1,self%nobs
   zz = zz + self%values(jo)*other%values(jo)
 enddo
 ! Allreduce
-call mpl_allreduce_sum(zz, dummy)
-zz=dummy
+comm = fckit_mpi_comm("world")
+call comm%allreduce(zz,fckit_mpi_sum())
 
 end subroutine ufo_obsvec_dotprod_c
 ! ------------------------------------------------------------------------------
@@ -267,13 +267,13 @@ implicit none
 integer(c_int), intent(in)    :: c_key_self
 integer(c_int), intent(inout) :: kobs
 type(obs_vector), pointer :: self
-real(kind=kind_real) :: dummy
+type(fckit_mpi_comm) :: comm
 
 call ufo_obs_vect_registry%get(c_key_self,self)
 kobs=self%nobs
 ! Allreduce
-call mpl_allreduce_sum(real(kobs,kind_real), dummy)
-kobs=int(dummy)
+comm = fckit_mpi_comm("world")
+call comm%allreduce(kobs,fckit_mpi_sum())
 
 end subroutine ufo_obsvec_nobs_c
 ! ------------------------------------------------------------------------------

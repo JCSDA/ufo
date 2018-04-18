@@ -9,7 +9,6 @@ module ufo_geovals_mod
 use ufo_vars_mod
 use kinds
 use type_distribution, only: random_distribution
-use fckit_log_module, only: fckit_log
 
 implicit none
 private
