@@ -2,6 +2,7 @@ include_directories( ${CMAKE_CURRENT_SOURCE_DIR} )
 
 list( APPEND lib_files
 ncd_kinds.F90
+m_distribution.f90
 m_diag_conv.f90
 m_diag_aircft.f90
 m_diag_raob.f90
@@ -55,7 +56,7 @@ read_aod_diag.f90
 
 ecbuild_add_library( TARGET     ioda
                      SOURCES    ${lib_files}
-                     LIBS       fckit oops ${NETCDF_LIBRARIES}
+                     LIBS       fckit ${NETCDF_LIBRARIES}
                      INSTALL_HEADERS LISTED
                    )
 
