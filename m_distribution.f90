@@ -62,7 +62,9 @@ module type_distribution
 
       subroutine destructor(this)
          type(random_distribution), intent(inout):: this
-         deallocate(this%indx) 
+         if (allocated (this%indx)) then
+           deallocate(this%indx)
+         end if
          call fckit_log%debug('random_distribution object finalized')
       end subroutine
 
