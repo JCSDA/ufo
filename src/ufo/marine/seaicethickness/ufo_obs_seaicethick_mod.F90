@@ -99,7 +99,7 @@ implicit none
 character(max_string), intent(in)   :: filename
 type(ufo_obs_seaicethick), intent(inout) :: self
 
-integer :: iunit, nobs
+integer :: iunit, nobs, i
 real, dimension(:), allocatable :: field
 
 call ufo_obs_seaicethick_delete(self)
@@ -121,7 +121,11 @@ self%icethick = field
 call nc_diag_read_get_var(iunit, "freeboard", field)
 self%freeboard = field
 call nc_diag_read_close(filename)
-self%icethick_err = 0.1
+self%icethick_err = 0.01
+
+do i=1,nobs
+   write(301,*)self%lon(i),self%lat(i),self%icethick(i)
+end do
 end subroutine ufo_obs_seaicethick_read
 
 ! ------------------------------------------------------------------------------

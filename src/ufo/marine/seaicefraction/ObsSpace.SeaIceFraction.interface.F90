@@ -70,7 +70,8 @@ call ufo_obs_seaicefrac_registry%init()
 call ufo_obs_seaicefrac_registry%add(c_key_self)
 call ufo_obs_seaicefrac_registry%get(c_key_self, self)
 if (trim(fin) /= "") then
-  call ufo_obs_seaicefrac_read(fin, self)
+   !call ufo_obs_seaicefrac_read(fin, self)
+   call ufo_obs_seaicefrac_read_oisic(fin, self)   
 endif
 
 end subroutine ufo_obsdb_seaice_setup_c

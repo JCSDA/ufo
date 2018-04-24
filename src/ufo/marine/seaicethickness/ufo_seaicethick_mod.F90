@@ -73,7 +73,7 @@ do iobs = 1, hofx%nobs
    do icat = 1, ncat
      hofx%values(iobs) = hofx%values(iobs) + icefrac%vals(icat,iobs) * icethick%vals(icat,iobs) / 905.0
    enddo
-   write(102,*)hofx%values(iobs)
+   write(302,*)hofx%values(iobs)
 enddo
 
 end subroutine ufo_seaicethick_eqv
