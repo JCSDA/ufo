@@ -167,6 +167,7 @@ end subroutine ufo_radiosonde_t_eqv_ad_c
 
 subroutine ufo_obs_get(c_key_self, lcol, c_col, c_key_ovec) bind(c,name='ufo_obsdb_radiosonde_get_f90')  
 use  ufo_obs_radiosonde_mod
+use  kinds, only : kind_real
 implicit none
 integer(c_int), intent(in) :: c_key_self
 integer(c_int), intent(in) :: lcol
@@ -181,7 +182,7 @@ call ufo_obs_vect_registry%get(c_key_ovec,ovec)
 
 ovec%nobs = self%nobs
 if (c_col(5)//c_col(6)=='rr') then
-   ovec%values = 0.1 !TODO, needs finalizing 
+   ovec%values = 1.0_kind_real / self%mass(:)%Errinv_Input  !TODO, needs finalizing, can change further w/ IODA
 else
    ovec%values = self%mass(:)%Observation
 end if
