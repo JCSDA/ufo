@@ -4,11 +4,11 @@
 ! This software is licensed under the terms of the Apache Licence Version 2.0
 ! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 
-!> Fortran template module for observation space
+!> Fortran example module for observation space
 
-! TODO: replace template with your_obsspace_name through the file
+! TODO: replace example with your_obsspace_name through the file
 
-module ufo_obs_template_mod
+module ufo_obs_example_mod
 
 use kinds
 use fckit_log_module, only : fckit_log
@@ -17,71 +17,71 @@ implicit none
 private
 integer, parameter :: max_string=800
 
-public ufo_obs_template
-public ufo_obs_template_setup, ufo_obs_template_delete
-public ufo_obs_template_read, ufo_obs_template_generate
-public ufo_obs_template_getlocs
+public ufo_obs_example
+public ufo_obs_example_setup, ufo_obs_example_delete
+public ufo_obs_example_read, ufo_obs_example_generate
+public ufo_obs_example_getlocs
 
 ! ------------------------------------------------------------------------------
 
 !> Fortran derived type to hold observation space info
 ! TODO: fill in, below is just an example
-type :: ufo_obs_template
+type :: ufo_obs_example
   integer :: nobs
-end type ufo_obs_template
+end type ufo_obs_example
 
 ! ------------------------------------------------------------------------------
 
 contains
 ! ------------------------------------------------------------------------------
 ! TODO: replace the below function with your constructor of obsspace
-subroutine ufo_obs_template_setup(self, nobs)
+subroutine ufo_obs_example_setup(self, nobs)
 implicit none
-type(ufo_obs_template), intent(inout) :: self
+type(ufo_obs_example), intent(inout) :: self
 integer, intent(in) :: nobs
 
-call ufo_obs_template_delete(self)
+call ufo_obs_example_delete(self)
 
 self%nobs = nobs
 
-end subroutine ufo_obs_template_setup
+end subroutine ufo_obs_example_setup
 
 ! ------------------------------------------------------------------------------
 ! TODO: replace the below function with your destructor of obsspace
-subroutine ufo_obs_template_delete(self)
+subroutine ufo_obs_example_delete(self)
 implicit none
-type(ufo_obs_template), intent(inout) :: self
+type(ufo_obs_example), intent(inout) :: self
 
-end subroutine ufo_obs_template_delete
+end subroutine ufo_obs_example_delete
 
 ! ------------------------------------------------------------------------------
 ! TODO: replace the below function with your random obs generator
-subroutine ufo_obs_template_generate(self, nobs)
+subroutine ufo_obs_example_generate(self, nobs)
 implicit none
-type(ufo_obs_template), intent(inout) :: self
+type(ufo_obs_example), intent(inout) :: self
 integer, intent(in) :: nobs
 
-end subroutine ufo_obs_template_generate
+end subroutine ufo_obs_example_generate
 
 ! ------------------------------------------------------------------------------
 ! TODO: replace the below function with your obsspace read
-subroutine ufo_obs_template_read(filename, self)
+subroutine ufo_obs_example_read(filename, self)
 implicit none
 character(max_string), intent(in)   :: filename
-type(ufo_obs_template), intent(inout), target :: self
+type(ufo_obs_example), intent(inout), target :: self
 
-end subroutine ufo_obs_template_read
+end subroutine ufo_obs_example_read
 
 ! ------------------------------------------------------------------------------
 ! TODO: replace the below function with your obsspace get locations function
-subroutine ufo_obs_template_getlocs(self, locs)
+subroutine ufo_obs_example_getlocs(self, locs)
 use ufo_locs_mod
 implicit none
-type(ufo_obs_template), intent(in) :: self
+type(ufo_obs_example), intent(in) :: self
 type(ufo_locs), intent(inout) :: locs
 
-end subroutine ufo_obs_template_getlocs
+end subroutine ufo_obs_example_getlocs
 
 ! ------------------------------------------------------------------------------
 
-end module ufo_obs_template_mod
+end module ufo_obs_example_mod

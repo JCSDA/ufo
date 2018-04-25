@@ -3,13 +3,13 @@
 ! This software is licensed under the terms of the Apache Licence Version 2.0
 ! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 
-!> Fortran template module for observation operator
+!> Fortran example module for observation operator
 
-! TODO: replace template with your_observation_operator_name through the file
+! TODO: replace example with your_observation_operator_name through the file
 
-module ufo_template_mod
+module ufo_example_mod
   
-  use ufo_obs_template_mod
+  use ufo_obs_example_mod
   use ufo_obs_vectors
   use ufo_vars_mod
   use ufo_locs_mod
@@ -18,14 +18,14 @@ module ufo_template_mod
   use vert_interp_mod
 
   implicit none
-  public :: ufo_template
-  public :: ufo_template_eqv
+  public :: ufo_example
+  public :: ufo_example_eqv
   private
 
 !> Fortran derived type for the observation type
 ! TODO: fill in if needed
-type :: ufo_template
-end type ufo_template
+type :: ufo_example
+end type ufo_example
 
 ! ------------------------------------------------------------------------------
 
@@ -34,15 +34,15 @@ contains
 ! ------------------------------------------------------------------------------
 ! TODO: replace below function with your observation operator.
 ! Some sample code is provided and should be removed/replaced/altered to your needs
-subroutine ufo_template_eqv(self, geovals, hofx, obss)
+subroutine ufo_example_eqv(self, geovals, hofx, obss)
 
 implicit none
-type(ufo_template), intent(in)     :: self
+type(ufo_example), intent(in)     :: self
 type(ufo_geovals), intent(in)      :: geovals
 type(obs_vector),  intent(inout)   :: hofx
-type(ufo_obs_template), intent(in) :: obss
+type(ufo_obs_example), intent(in) :: obss
 
-character(len=*), parameter :: myname_="ufo_template_eqv"
+character(len=*), parameter :: myname_="ufo_example_eqv"
 
 type(ufo_geoval), pointer :: geoval
 
@@ -60,8 +60,8 @@ endif
 
 ! put observation operator code here
 
-end subroutine ufo_template_eqv
+end subroutine ufo_example_eqv
 
 ! ------------------------------------------------------------------------------
 
-end module ufo_template_mod
+end module ufo_example_mod

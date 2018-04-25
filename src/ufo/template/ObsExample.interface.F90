@@ -3,30 +3,30 @@
 ! This software is licensed under the terms of the Apache Licence Version 2.0
 ! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 
-!> Fortran template module for functions on the interface between C++ and Fortran
+!> Fortran example module for functions on the interface between C++ and Fortran
 !  to handle observation operators
 
-! TODO: replace template with your_observation_operator_name through the file
+! TODO: replace "example" with your_observation_operator_name through the file
 
-module ufo_template_mod_c
+module ufo_example_mod_c
   
   use iso_c_binding
   use config_mod
   use ufo_obs_vectors,   only: obs_vector, ufo_obs_vect_registry
   use ufo_geovals_mod,   only: ufo_geovals
   use ufo_geovals_mod_c, only: ufo_geovals_registry
-  use ufo_obs_template_mod,   only: ufo_obs_template
-  use ufo_obs_template_mod_c, only: ufo_obs_template_registry 
-  use ufo_template_mod 
+  use ufo_obs_example_mod,   only: ufo_obs_example
+  use ufo_obs_example_mod_c, only: ufo_obs_example_registry 
+  use ufo_example_mod 
   implicit none
   private
   
-#define LISTED_TYPE ufo_template
+#define LISTED_TYPE ufo_example
   !> Linked list interface - defines registry_t type
 #include "../../linkedList_i.f"
   
   !> Global registry
-  type(registry_t) :: ufo_template_registry
+  type(registry_t) :: ufo_example_registry
   
   ! ------------------------------------------------------------------------------
 contains
@@ -36,44 +36,44 @@ contains
   
 ! ------------------------------------------------------------------------------
   
-subroutine ufo_template_setup_c(c_key_self, c_conf) bind(c,name='ufo_template_setup_f90')
+subroutine ufo_example_setup_c(c_key_self, c_conf) bind(c,name='ufo_example_setup_f90')
 implicit none
 integer(c_int), intent(inout) :: c_key_self
 type(c_ptr), intent(in)    :: c_conf
     
-type(ufo_template), pointer :: self
+type(ufo_example), pointer :: self
 
-call ufo_template_registry%init()
-call ufo_template_registry%add(c_key_self)
-call ufo_template_registry%get(c_key_self, self)
+call ufo_example_registry%init()
+call ufo_example_registry%add(c_key_self)
+call ufo_example_registry%get(c_key_self, self)
 
 ! TODO: add call to your Fortran routine to setup the observation operator, if needed
 !       (defined in ufo_<your_obs_operator_name>_mod.F90)
-! example: call ufo_template_setup(self)
+! example: call ufo_example_setup(self)
     
-end subroutine ufo_template_setup_c
+end subroutine ufo_example_setup_c
   
 ! ------------------------------------------------------------------------------
   
-subroutine ufo_template_delete_c(c_key_self) bind(c,name='ufo_template_delete_f90')
+subroutine ufo_example_delete_c(c_key_self) bind(c,name='ufo_example_delete_f90')
 implicit none
 integer(c_int), intent(inout) :: c_key_self
     
-type(ufo_template), pointer :: self
+type(ufo_example), pointer :: self
 
-call ufo_template_registry%get(c_key_self, self)
+call ufo_example_registry%get(c_key_self, self)
 
 ! TODO: add call to your Fortran routine to destruct the observation operator, if needed
 !       (defined in ufo_<your_obs_operator_name>_mod.F90)
-! example: call ufo_template_delete(self)
+! example: call ufo_example_delete(self)
 
-call ufo_template_registry%remove(c_key_self)
+call ufo_example_registry%remove(c_key_self)
     
-end subroutine ufo_template_delete_c
+end subroutine ufo_example_delete_c
   
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_template_eqv_c(c_key_self, c_key_geovals, c_key_obsspace, c_key_hofx, c_bias) bind(c,name='ufo_template_eqv_f90')
+subroutine ufo_example_eqv_c(c_key_self, c_key_geovals, c_key_obsspace, c_key_hofx, c_bias) bind(c,name='ufo_example_eqv_f90')
 
 implicit none
 integer(c_int), intent(in) :: c_key_self
@@ -82,22 +82,22 @@ integer(c_int), intent(in) :: c_key_hofx
 integer(c_int), intent(in) :: c_key_obsspace
 integer(c_int), intent(in) :: c_bias
 
-type(ufo_template),     pointer :: self
+type(ufo_example),     pointer :: self
 type(ufo_geovals),        pointer :: geovals
 type(obs_vector),         pointer :: hofx
-type(ufo_obs_template), pointer :: obss
+type(ufo_obs_example), pointer :: obss
 
-character(len=*), parameter :: myname_="ufo_template_eqv_c"
+character(len=*), parameter :: myname_="ufo_example_eqv_c"
 
-call ufo_template_registry%get(c_key_self, self)
+call ufo_example_registry%get(c_key_self, self)
 call ufo_geovals_registry%get(c_key_geovals,geovals)
 call ufo_obs_vect_registry%get(c_key_hofx,hofx)
-call ufo_obs_template_registry%get(c_key_obsspace,obss)
+call ufo_obs_example_registry%get(c_key_obsspace,obss)
 
 ! TODO: replace with the call to your Fortran routine for observation operator
 !       (defined in ufo_<your_obs_operator_name>_mod.F90)
-call ufo_template_eqv(self, geovals, hofx, obss)
+call ufo_example_eqv(self, geovals, hofx, obss)
 
-end subroutine ufo_template_eqv_c
+end subroutine ufo_example_eqv_c
   
-end module ufo_template_mod_c
+end module ufo_example_mod_c
