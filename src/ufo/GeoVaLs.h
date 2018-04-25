@@ -32,6 +32,8 @@ class GeoVaLs : public util::Printable,
 
   GeoVaLs(const Locations &, const oops::Variables &);
   GeoVaLs(const eckit::Configuration &, const oops::Variables &);
+  GeoVaLs(const Locations &, const oops::Variables &,
+	  const eckit::Configuration &);
 
 //  explicit GeoVaLs(): keyGVL_(0) {}
 //  explicit GeoVaLs(int & fgvl): keyGVL_(fgvl) {}
