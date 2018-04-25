@@ -1,0 +1,114 @@
+! (C) Copyright 2017 UCAR
+! 
+! This software is licensed under the terms of the Apache Licence Version 2.0
+! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
+
+!> Fortran template module for tl/ad observation operator
+
+! TODO: replace template with your_observation_operator_name through the file
+
+module ufo_template_tlad_mod
+  
+  use ufo_obs_template_mod
+  use ufo_obs_vectors
+  use ufo_vars_mod
+  use ufo_locs_mod
+  use ufo_geovals_mod
+  use kinds
+  use vert_interp_mod
+
+  implicit none
+  public :: ufo_template_tlad
+  public :: ufo_template_tlad_settraj
+  public :: ufo_template_tlad_tl
+  public :: ufo_template_tlad_ad
+  public :: ufo_template_tlad_delete
+  private
+
+!> Fortran derived type for the tl/ad observation operator
+! TODO: replace below type with what you need for your tl/ad observation operator
+!       this type can hold information on trajectory, for example
+! TODO: the below code is only an example and should be removed/replaced/altered 
+!       to your needs
+type :: ufo_template_tlad
+   logical :: ltraj = .false. !< flag if trajectory was set
+   type(geoval) :: gv         !< geoval for some variable from the trajectory
+                              !  that is needed in tl/ad
+   integer :: nval
+   integer, allocatable :: wi(:) !< some array that is needed in tl/ad
+end type ufo_template_tlad
+
+! ------------------------------------------------------------------------------
+
+contains
+    
+! ------------------------------------------------------------------------------
+! TODO: replace below function with destructing your ufo_template_tlad type
+!       (deallocating arrays, calling delete for type members, etc.)
+! Some sample code is provided and should be removed/replaced/altered to your needs
+subroutine ufo_template_tlad_delete(self)
+implicit none
+type(ufo_template_tlad), intent(inout) :: self
+
+if (allocated(self%wi)) deallocate(self%wi)
+self%ltraj = .false.
+
+end subroutine ufo_template_tlad_delete
+
+! ------------------------------------------------------------------------------
+! TODO: replace below function with your set trajectory for tl/ad code
+! TODO: the below code is only an example and should be removed/replaced/altered 
+!       to your needs
+subroutine ufo_template_tlad_settraj(self, geovals, obss)
+implicit none
+type(ufo_template_tlad), intent(inout) :: self
+type(ufo_geovals), intent(in)       :: geovals
+type(ufo_obs_template), intent(in) :: obss
+
+character(len=*), parameter :: myname_="ufo_template_tlad_settraj"
+
+type(ufo_geoval), pointer :: geoval
+
+!Check if some variable is in geovals and get it
+if (.not. ufo_geovals_get_var(geovals, "VariableName", geoval)) then
+  write(err_msg,*) myname_, trim(var_prsl), ' doesnt exist'
+  call abor1_ftn(err_msg)
+endif
+
+!Copy the variable to the ufo_template_tlad type (save for future tl/ad)
+self%gv = geoval
+!Flag that trajectory was set
+self%ltraj = .true.
+
+end subroutine ufo_template_tlad_settraj
+
+! ------------------------------------------------------------------------------
+! TODO: replace below function with your tl observation operator.
+! Note: this can use information saved from trajectory in your ufo_template_tlad type
+! Input geovals parameter represents dx for tangent linear model
+subroutine ufo_template_eqv_tl(self, geovals, hofx, obss)
+implicit none
+type(ufo_template_tlad), intent(in)     :: self
+type(ufo_geovals),    intent(in)     :: geovals
+type(obs_vector),     intent(inout)  :: hofx
+type(ufo_obs_template_tlad), intent(in) :: obss
+
+
+end subroutine ufo_template_eqv_tl
+
+! ------------------------------------------------------------------------------
+! TODO: replace below function with your ad observation operator.
+! Note: this can use information saved from trajectory in your ufo_template_tlad type
+subroutine ufo_template_eqv_ad(self, geovals, hofx, obss)
+implicit none
+type(ufo_template_tlad), intent(in)     :: self
+type(ufo_geovals),    intent(in)     :: geovals
+type(obs_vector),     intent(inout)  :: hofx
+type(ufo_obs_template_tlad), intent(in) :: obss
+
+
+end subroutine ufo_template_tlad_t_eqv_ad
+
+! ------------------------------------------------------------------------------
+
+end module ufo_template_tlad_mod
