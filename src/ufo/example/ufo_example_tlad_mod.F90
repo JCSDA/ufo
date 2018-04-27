@@ -65,13 +65,15 @@ type(ufo_example_tlad), intent(inout) :: self
 type(ufo_geovals), intent(in)       :: geovals
 type(ufo_obs_example), intent(in) :: obss
 
+character(len=MAXVARLEN) :: varname
 character(len=*), parameter :: myname_="ufo_example_tlad_settraj"
 
 type(ufo_geoval), pointer :: geoval
 
 !Check if some variable is in geovals and get it
-if (.not. ufo_geovals_get_var(geovals, "VariableName", geoval)) then
-  write(err_msg,*) myname_, trim(var_prsl), ' doesnt exist'
+varname = "some_variable_name"
+if (.not. ufo_geovals_get_var(geovals, varname, geoval)) then
+  write(err_msg,*) myname_, trim(varname), ' doesnt exist'
   call abor1_ftn(err_msg)
 endif
 
@@ -86,7 +88,7 @@ end subroutine ufo_example_tlad_settraj
 ! TODO: replace below function with your tl observation operator.
 ! Note: this can use information saved from trajectory in your ufo_example_tlad type
 ! Input geovals parameter represents dx for tangent linear model
-subroutine ufo_example_eqv_tl(self, geovals, hofx, obss)
+subroutine ufo_example_tlad_eqv_tl(self, geovals, hofx, obss)
 implicit none
 type(ufo_example_tlad), intent(in)     :: self
 type(ufo_geovals),    intent(in)     :: geovals
@@ -94,12 +96,12 @@ type(obs_vector),     intent(inout)  :: hofx
 type(ufo_obs_example_tlad), intent(in) :: obss
 
 
-end subroutine ufo_example_eqv_tl
+end subroutine ufo_example_tlad_eqv_tl
 
 ! ------------------------------------------------------------------------------
 ! TODO: replace below function with your ad observation operator.
 ! Note: this can use information saved from trajectory in your ufo_example_tlad type
-subroutine ufo_example_eqv_ad(self, geovals, hofx, obss)
+subroutine ufo_example_tlad_eqv_ad(self, geovals, hofx, obss)
 implicit none
 type(ufo_example_tlad), intent(in)     :: self
 type(ufo_geovals),    intent(in)     :: geovals
@@ -107,7 +109,7 @@ type(obs_vector),     intent(inout)  :: hofx
 type(ufo_obs_example_tlad), intent(in) :: obss
 
 
-end subroutine ufo_example_tlad_t_eqv_ad
+end subroutine ufo_example_tlad_eqv_ad
 
 ! ------------------------------------------------------------------------------
 

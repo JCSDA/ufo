@@ -35,12 +35,13 @@ contains
 ! TODO: replace below function with your observation operator.
 ! Some sample code is provided and should be removed/replaced/altered to your needs
 subroutine ufo_example_eqv(self, geovals, hofx, obss)
-
 implicit none
 type(ufo_example), intent(in)     :: self
 type(ufo_geovals), intent(in)      :: geovals
 type(obs_vector),  intent(inout)   :: hofx
 type(ufo_obs_example), intent(in) :: obss
+
+character(len=MAXVARLEN) :: varname
 
 character(len=*), parameter :: myname_="ufo_example_eqv"
 
@@ -52,9 +53,10 @@ if (geovals%nobs /= hofx%nobs) then
   call abor1_ftn(err_msg)
 endif
 
+varname = "some_variable_name"
 ! check if some variable is in geovals and get it
-if (.not. ufo_geovals_get_var(geovals, "VariableName", geoval)) then
-  write(err_msg,*) myname_, trim(var_prsl), ' doesnt exist'
+if (.not. ufo_geovals_get_var(geovals, varname, geoval)) then
+  write(err_msg,*) myname_, trim(varname), ' doesnt exist'
   call abor1_ftn(err_msg)
 endif
 

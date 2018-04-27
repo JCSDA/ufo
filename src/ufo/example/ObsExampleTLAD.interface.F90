@@ -99,7 +99,7 @@ end subroutine ufo_example_tlad_settraj_c
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_example_eqv_tl_c(c_key_self, c_key_geovals, c_key_obsspace, c_key_hofx) bind(c,name='ufo_example_eqv_tl_f90')
+subroutine ufo_example_tlad_eqv_tl_c(c_key_self, c_key_geovals, c_key_obsspace, c_key_hofx) bind(c,name='ufo_example_tlad_eqv_tl_f90')
 
 implicit none
 integer(c_int), intent(in) :: c_key_self
@@ -112,7 +112,7 @@ type(ufo_geovals),      pointer :: geovals
 type(obs_vector),       pointer :: hofx
 type(ufo_obs_example), pointer :: obss
 
-character(len=*), parameter :: myname_="ufo_example_eqv_tl_c"
+character(len=*), parameter :: myname_="ufo_example_tlad_eqv_tl_c"
 
 call ufo_example_tlad_registry%get(c_key_self, self)
 call ufo_geovals_registry%get(c_key_geovals,geovals)
@@ -121,13 +121,13 @@ call ufo_obs_example_registry%get(c_key_obsspace,obss)
 
 ! TODO: replace with the call to your Fortran routine for tl obs operator
 !       (defined in ufo_<your_obs_operator_name>_tlad_mod.F90)
-call ufo_example_eqv_tl(self, geovals, hofx, obss)
+call ufo_example_tlad_eqv_tl(self, geovals, hofx, obss)
 
-end subroutine ufo_example_eqv_tl_c
+end subroutine ufo_example_tlad_eqv_tl_c
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_example_eqv_ad_c(c_key_self, c_key_geovals, c_key_obsspace, c_key_hofx) bind(c,name='ufo_example_eqv_ad_f90')
+subroutine ufo_example_tlad_eqv_ad_c(c_key_self, c_key_geovals, c_key_obsspace, c_key_hofx) bind(c,name='ufo_example_tlad_eqv_ad_f90')
 
 implicit none
 integer(c_int), intent(in) :: c_key_self
@@ -140,7 +140,7 @@ type(ufo_geovals),       pointer :: geovals
 type(obs_vector),        pointer :: hofx
 type(ufo_obs_example),  pointer :: obss
 
-character(len=*), parameter :: myname_="ufo_example_eqv_ad_c"
+character(len=*), parameter :: myname_="ufo_example_tlad_eqv_ad_c"
 
 call ufo_example_tlad_registry%get(c_key_self, self)
 call ufo_geovals_registry%get(c_key_geovals,geovals)
@@ -149,9 +149,9 @@ call ufo_obs_example_registry%get(c_key_obsspace,obss)
 
 ! TODO: replace with the call to your Fortran routine for ad obs operator
 !       (defined in ufo_<your_obs_operator_name>_tlad_mod.F90)
-call ufo_example_eqv_ad(self, geovals, hofx, obss)
+call ufo_example_tlad_eqv_ad(self, geovals, hofx, obss)
 
-end subroutine ufo_example_eqv_ad_c
+end subroutine ufo_example_tlad_eqv_ad_c
 
   
 end module ufo_example_tlad_mod_c

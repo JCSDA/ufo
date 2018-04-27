@@ -137,7 +137,8 @@ integer(c_int), intent(inout) :: kobs
 type(ufo_obs_example), pointer :: self
 
 call ufo_obs_example_registry%get(c_key_self, self)
-kobs = self%nobs
+
+!TODO: call your function to inquire nobs from obsspace
 
 end subroutine ufo_obsdb_example_nobs_c
 
@@ -153,6 +154,7 @@ call ufo_obs_example_registry%get(c_key_self, self)
 ! TODO: replace with the call to your Fortran routine to destruct the obsspace
 !       (defined in ufo_obs_<your_obs_space_name>_mod.F90)
 call ufo_obs_example_delete(self)
+
 call ufo_obs_example_registry%remove(c_key_self)
 
 end subroutine ufo_obsdb_example_delete_c
