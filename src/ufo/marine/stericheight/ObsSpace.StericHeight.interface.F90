@@ -154,4 +154,35 @@ end subroutine ufo_obsdb_stericheight_delete_c
 
 ! ------------------------------------------------------------------------------
 
+subroutine ufo_obsdb_stericheight_get_c(c_key_self, lcol, c_col, c_key_ovec) bind(c,name='ufo_obsdb_stericheight_get_f90')
+use  ufo_obs_stericheight_mod
+implicit none
+integer(c_int), intent(in) :: c_key_self
+integer(c_int), intent(in) :: lcol
+character(kind=c_char,len=1), intent(in) :: c_col(lcol+1)
+integer(c_int), intent(in) :: c_key_ovec
+
+type(ufo_obs_stericheight), pointer :: self
+type(obs_vector), pointer :: ovec
+character(len=lcol) :: col
+
+call ufo_obs_stericheight_registry%get(c_key_self, self)
+call ufo_obs_vect_registry%get(c_key_ovec,ovec)
+!call c_f_string(c_req, req)
+!call c_f_string(c_col, col)
+
+!call obs_get(self, trim(req), trim(col), ovec)
+
+
+ovec%nobs = self%nobs
+if (c_col(5)//c_col(6)=='rr') then
+   ovec%values = 0.1 !self%icefrac_err
+!   print *, self%icefrac_err
+else
+   ovec%values = self%adt
+end if
+
+
+end subroutine ufo_obsdb_stericheight_get_c
+
 end module ufo_obs_stericheight_mod_c

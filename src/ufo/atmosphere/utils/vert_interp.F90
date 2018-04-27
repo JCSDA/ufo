@@ -100,7 +100,7 @@ integer,         intent(in)    :: nlev
 real(kind_real), intent(inout) :: fvec_ad(nlev)
 integer,         intent(in)    :: wi
 real(kind_real), intent(in)    :: wf
-real(kind_real), intent(inout) :: f_ad
+real(kind_real), intent(in)    :: f_ad
 
 fvec_ad(wi  ) = fvec_ad(wi  ) + f_ad*wf
 fvec_ad(wi+1) = fvec_ad(wi+1) + f_ad*(1.0_kind_real-wf)
