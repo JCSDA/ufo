@@ -86,5 +86,5 @@ call ufo_obs_radiosonde_registry%get(c_key_obsspace,obss)
 call ufo_radiosonde_t_eqv(self, geovals, hofx, obss)
 
 end subroutine ufo_radiosonde_t_eqv_c
-  
+
 end module ufo_radiosonde_mod_c

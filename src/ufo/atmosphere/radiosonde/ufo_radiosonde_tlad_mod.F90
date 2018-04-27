@@ -124,9 +124,9 @@ end subroutine ufo_radiosonde_tlad_t_eqv_tl
 
 subroutine ufo_radiosonde_tlad_t_eqv_ad(self, geovals, hofx, obss)
 implicit none
-type(ufo_radiosonde_tlad), intent(in)     :: self
-type(ufo_geovals),    intent(in)     :: geovals
-type(obs_vector),     intent(inout)  :: hofx
+type(ufo_radiosonde_tlad), intent(in):: self
+type(ufo_geovals),    intent(inout)  :: geovals
+type(obs_vector),     intent(in)     :: hofx
 type(ufo_obs_radiosonde), intent(in) :: obss
 
 character(len=*), parameter :: myname_="ufo_radiosonde_tlad_t_eqv_ad"
@@ -170,10 +170,11 @@ if (.not. allocated(prsl_d%vals)) then
    prsl_d%nval = self%nval
    allocate(prsl_d%vals(prsl_d%nval,prsl_d%nobs))
 endif
+if (.not. geovals%linit ) geovals%linit=.true.
 
 ! adjoint obs operator
-tv_d%vals = 0.0
-prsl_d%vals = 0.0
+tv_d%vals = 0.0_kind_real
+prsl_d%vals = 0.0_kind_real
 do iobs = 1, hofx%nobs
   call vert_interp_apply_ad(tv_d%nval, tv_d%vals(:,iobs), hofx%values(iobs), self%wi(iobs), self%wf(iobs))
 enddo
