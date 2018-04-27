@@ -71,11 +71,11 @@ void ObsSpace::getdb(const std::string & col, int & keyData) const {
   else if (obsname_ == "Radiosonde")
     ufo_obsdb_radiosonde_get_f90(keyOspace_, col.size(), col.c_str(), keyData);
   else if (obsname_ == "SeaIceFraction")
-    ufo_obsdbsic_get_f90(keyOspace_, col.size(), col.c_str(), keyData);
+    ufo_obsdb_seaice_get_f90(keyOspace_, col.size(), col.c_str(), keyData);
   else if (obsname_ == "SeaIceThickness")
-    ufo_obsdbsit_get_f90(keyOspace_, col.size(), col.c_str(), keyData);  
+    ufo_obsdb_seaicethick_get_f90(keyOspace_, col.size(), col.c_str(), keyData);  
   else if (obsname_ == "StericHeight")
-    ufo_obsdbsteric_get_f90(keyOspace_, col.size(), col.c_str(), keyData);      
+    ufo_obsdb_stericheight_get_f90(keyOspace_, col.size(), col.c_str(), keyData);      
   else if (obsname_ == "Aod")
     ufo_obsdb_aod_get_f90(keyOspace_, col.size(), col.c_str(), keyData);      
 }

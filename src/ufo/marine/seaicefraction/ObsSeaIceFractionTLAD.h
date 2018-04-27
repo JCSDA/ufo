@@ -64,7 +64,7 @@ ObsSeaIceFractionTLAD<MODEL>::ObsSeaIceFractionTLAD(const ObsSpace & odb, const 
   : keyOperSeaIceFraction_(0), varin_()
 {
   const eckit::Configuration * configc = &config;
-  ufo_seaicefrac_setup_f90(keyOperSeaIceFraction_, &configc);
+  ufo_seaicefrac_tlad_setup_f90(keyOperSeaIceFraction_, &configc);
   const std::vector<std::string> vv{"ice_concentration"};
   varin_.reset(new oops::Variables(vv));
   oops::Log::trace() << "ObsSeaIceFractionTLAD created" << std::endl;
@@ -73,27 +73,28 @@ ObsSeaIceFractionTLAD<MODEL>::ObsSeaIceFractionTLAD(const ObsSpace & odb, const 
 // -----------------------------------------------------------------------------
 template <typename MODEL>
 ObsSeaIceFractionTLAD<MODEL>::~ObsSeaIceFractionTLAD() {
+  ufo_seaicefrac_tlad_delete_f90(keyOperSeaIceFraction_);
   oops::Log::trace() << "ObsSeaIceFractionTLAD destrcuted" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 template <typename MODEL>
 void ObsSeaIceFractionTLAD<MODEL>::setTrajectory(const GeoVaLs & geovals, const ObsBias & bias) {
-  ufo_seaicefrac_settraj_f90(keyOperSeaIceFraction_, geovals.toFortran());
+  ufo_seaicefrac_tlad_settraj_f90(keyOperSeaIceFraction_, geovals.toFortran());
 }
 
 // -----------------------------------------------------------------------------
 template <typename MODEL>
 void ObsSeaIceFractionTLAD<MODEL>::obsEquivTL(const GeoVaLs & geovals, ObsVector & ovec,
                                const ObsBiasIncrement & bias) const {
-  ufo_seaicefrac_eqv_tl_f90(keyOperSeaIceFraction_, geovals.toFortran(), ovec.toFortran());
+  ufo_seaicefrac_tlad_eqv_tl_f90(keyOperSeaIceFraction_, geovals.toFortran(), ovec.toFortran());
 }
 
 // -----------------------------------------------------------------------------
 template <typename MODEL>
 void ObsSeaIceFractionTLAD<MODEL>::obsEquivAD(GeoVaLs & geovals, const ObsVector & ovec,
                                ObsBiasIncrement & bias) const {
-  ufo_seaicefrac_eqv_ad_f90(keyOperSeaIceFraction_, geovals.toFortran(), ovec.toFortran());
+  ufo_seaicefrac_tlad_eqv_ad_f90(keyOperSeaIceFraction_, geovals.toFortran(), ovec.toFortran());
 }
 
 // -----------------------------------------------------------------------------

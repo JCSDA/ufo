@@ -65,7 +65,7 @@ ObsRadianceTLAD<MODEL>::ObsRadianceTLAD(const ObsSpace & odb, const eckit::Confi
   : keyOperRadiance_(0), varin_(), odb_(odb)
 {
   const eckit::Configuration * configc = &config;
-  ufo_radiance_setup_f90(keyOperRadiance_, &configc);
+  ufo_radiance_tlad_setup_f90(keyOperRadiance_, &configc);
   const std::vector<std::string> vv{"virtual_temperature", "humidity_mixing_ratio", "air_pressure",
                                     "air_pressure_levels", "mass_concentration_of_ozone_in_air",
                                     "mass_concentration_of_carbon_dioxide_in_air",
@@ -85,27 +85,28 @@ ObsRadianceTLAD<MODEL>::ObsRadianceTLAD(const ObsSpace & odb, const eckit::Confi
 // -----------------------------------------------------------------------------
 template <typename MODEL>
 ObsRadianceTLAD<MODEL>::~ObsRadianceTLAD() {
+  ufo_radiance_tlad_delete_f90(keyOperRadiance_);
   oops::Log::trace() << "ObsRadianceTLAD destructed" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 template <typename MODEL>
 void ObsRadianceTLAD<MODEL>::setTrajectory(const GeoVaLs & geovals, const ObsBias & bias) {
-  ufo_radiance_settraj_f90(keyOperRadiance_, geovals.toFortran());
+  ufo_radiance_tlad_settraj_f90(keyOperRadiance_, geovals.toFortran());
 }
 
 // -----------------------------------------------------------------------------
 template <typename MODEL>
 void ObsRadianceTLAD<MODEL>::obsEquivTL(const GeoVaLs & geovals, ObsVector & ovec,
                                const ObsBiasIncrement & bias) const {
-  ufo_radiance_eqv_tl_f90(keyOperRadiance_, geovals.toFortran(), odb_.toFortran(), ovec.toFortran());
+  ufo_radiance_tlad_eqv_tl_f90(keyOperRadiance_, geovals.toFortran(), odb_.toFortran(), ovec.toFortran());
 }
 
 // -----------------------------------------------------------------------------
 template <typename MODEL>
 void ObsRadianceTLAD<MODEL>::obsEquivAD(GeoVaLs & geovals, const ObsVector & ovec,
                                ObsBiasIncrement & bias) const {
-  ufo_radiance_eqv_ad_f90(keyOperRadiance_, geovals.toFortran(), odb_.toFortran(), ovec.toFortran());
+  ufo_radiance_tlad_eqv_ad_f90(keyOperRadiance_, geovals.toFortran(), odb_.toFortran(), ovec.toFortran());
 }
 
 // -----------------------------------------------------------------------------

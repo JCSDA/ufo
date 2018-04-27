@@ -65,7 +65,7 @@ ObsRadiosondeTLAD<MODEL>::ObsRadiosondeTLAD(const ObsSpace & odb, const eckit::C
   : keyOperRadiosonde_(0), varin_(), odb_(odb)
 {
   const eckit::Configuration * configc = &config;
-  ufo_radiosonde_setup_f90(keyOperRadiosonde_, &configc);
+  ufo_radiosonde_tlad_setup_f90(keyOperRadiosonde_, &configc);
   const std::vector<std::string> vv{"virtual_temperature", "atmosphere_ln_pressure_coordinate"};
   varin_.reset(new oops::Variables(vv));
   oops::Log::trace() << "ObsRadiosondeTLAD created" << std::endl;
@@ -74,28 +74,28 @@ ObsRadiosondeTLAD<MODEL>::ObsRadiosondeTLAD(const ObsSpace & odb, const eckit::C
 // -----------------------------------------------------------------------------
 template <typename MODEL>
 ObsRadiosondeTLAD<MODEL>::~ObsRadiosondeTLAD() {
+  ufo_radiosonde_tlad_delete_f90(keyOperRadiosonde_);
   oops::Log::trace() << "ObsRadiosondeTLAD destructed" << std::endl;
-  ufo_radiosonde_delete_f90(keyOperRadiosonde_);
 }
 
 // -----------------------------------------------------------------------------
 template <typename MODEL>
 void ObsRadiosondeTLAD<MODEL>::setTrajectory(const GeoVaLs & geovals, const ObsBias & bias) {
-  ufo_radiosonde_settraj_f90(keyOperRadiosonde_, geovals.toFortran(), odb_.toFortran());
+  ufo_radiosonde_tlad_settraj_f90(keyOperRadiosonde_, geovals.toFortran(), odb_.toFortran());
 }
 
 // -----------------------------------------------------------------------------
 template <typename MODEL>
 void ObsRadiosondeTLAD<MODEL>::obsEquivTL(const GeoVaLs & geovals, ObsVector & ovec,
                              const ObsBiasIncrement & bias) const {
-  ufo_radiosonde_t_eqv_tl_f90(keyOperRadiosonde_, geovals.toFortran(), odb_.toFortran(), ovec.toFortran());
+  ufo_radiosonde_tlad_t_eqv_tl_f90(keyOperRadiosonde_, geovals.toFortran(), odb_.toFortran(), ovec.toFortran());
 }
 
 // -----------------------------------------------------------------------------
 template <typename MODEL>
 void ObsRadiosondeTLAD<MODEL>::obsEquivAD(GeoVaLs & geovals, const ObsVector & ovec,
                              ObsBiasIncrement & bias) const {
-  ufo_radiosonde_t_eqv_ad_f90(keyOperRadiosonde_, geovals.toFortran(), odb_.toFortran(), ovec.toFortran());
+  ufo_radiosonde_tlad_t_eqv_ad_f90(keyOperRadiosonde_, geovals.toFortran(), odb_.toFortran(), ovec.toFortran());
 }
 
 // -----------------------------------------------------------------------------

@@ -153,4 +153,27 @@ end subroutine ufo_obsdb_radiosonde_delete_c
 
 ! ------------------------------------------------------------------------------
 
+subroutine ufo_obs_get(c_key_self, lcol, c_col, c_key_ovec) bind(c,name='ufo_obsdb_radiosonde_get_f90')  
+use  ufo_obs_radiosonde_mod
+implicit none
+integer(c_int), intent(in) :: c_key_self
+integer(c_int), intent(in) :: lcol
+character(kind=c_char,len=1), intent(in) :: c_col(lcol+1)
+integer(c_int), intent(in) :: c_key_ovec
+
+type(ufo_obs_radiosonde), pointer :: self
+type(obs_vector), pointer :: ovec
+
+call ufo_obs_radiosonde_registry%get(c_key_self, self)
+call ufo_obs_vect_registry%get(c_key_ovec,ovec)
+
+ovec%nobs = self%nobs
+if (c_col(5)//c_col(6)=='rr') then
+   ovec%values = 0.1 !TODO, needs finalizing 
+else
+   ovec%values = self%mass(:)%Observation
+end if
+
+end subroutine ufo_obs_get
+
 end module ufo_obs_radiosonde_mod_c
