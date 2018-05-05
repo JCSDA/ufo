@@ -66,7 +66,7 @@ namespace ufo {
     {
       std::cout << "steric height tlad =============================" << std::endl;
       const eckit::Configuration * configc = &config;
-      ufo_stericheight_setup_f90(keyOperStericHeight_, &configc);
+      ufo_stericheight_tlad_setup_f90(keyOperStericHeight_, &configc);
       const std::vector<std::string> vv{"sea_surface_height_above_geoid",
 	  "ocean_potential_temperature",
 	  "ocean_salinity"};
@@ -77,13 +77,14 @@ namespace ufo {
   // -----------------------------------------------------------------------------
   template <typename MODEL>
     ObsStericHeightTLAD<MODEL>::~ObsStericHeightTLAD() {
+    ufo_stericheight_tlad_delete_f90(keyOperStericHeight_);
     oops::Log::trace() << "ObsStericHeightTLAD destrcuted" << std::endl;  
   }
 
   // -----------------------------------------------------------------------------
   template <typename MODEL>
     void ObsStericHeightTLAD<MODEL>::setTrajectory(const GeoVaLs & geovals, const ObsBias & bias) {
-    ufo_stericheight_settraj_f90(keyOperStericHeight_, geovals.toFortran());
+    ufo_stericheight_tlad_settraj_f90(keyOperStericHeight_, geovals.toFortran());
     oops::Log::trace() << "ObsStericHeightTLAD trajectory was set " << geovals << std::endl;  
   }
 
@@ -91,14 +92,14 @@ namespace ufo {
   template <typename MODEL>
     void ObsStericHeightTLAD<MODEL>::obsEquivTL(const GeoVaLs & geovals, ObsVector & ovec,
 						const ObsBiasIncrement & bias) const {
-    ufo_stericheight_eqv_tl_f90(keyOperStericHeight_, geovals.toFortran(), ovec.toFortran());
+    ufo_stericheight_tlad_eqv_tl_f90(keyOperStericHeight_, geovals.toFortran(), ovec.toFortran());
   }
 
   // -----------------------------------------------------------------------------
   template <typename MODEL>
     void ObsStericHeightTLAD<MODEL>::obsEquivAD(GeoVaLs & geovals, const ObsVector & ovec,
 						ObsBiasIncrement & bias) const {
-    ufo_stericheight_eqv_ad_f90(keyOperStericHeight_, geovals.toFortran(), ovec.toFortran());
+    ufo_stericheight_tlad_eqv_ad_f90(keyOperStericHeight_, geovals.toFortran(), ovec.toFortran());
   }
 
   // -----------------------------------------------------------------------------

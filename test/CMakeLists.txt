@@ -89,6 +89,7 @@ ecbuild_add_test( TARGET  test_ufo_amsua
 
 ecbuild_add_test( TARGET  test_ufo_radiosonde
                   BOOST
+                  MPI     6
                   SOURCES mains/TestObsOperator.cc
                   ARGS    "testinput/radiosonde.json"
                   LIBS    ufo )

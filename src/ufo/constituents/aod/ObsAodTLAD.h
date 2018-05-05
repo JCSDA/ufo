@@ -65,7 +65,7 @@ ObsAodTLAD<MODEL>::ObsAodTLAD(const ObsSpace & odb, const eckit::Configuration &
   : keyOperAod_(0), varin_(), odb_(odb)
 {
   const eckit::Configuration * configc = &config;
-  ufo_aod_setup_f90(keyOperAod_, &configc);
+  ufo_aod_tlad_setup_f90(keyOperAod_, &configc);
   const std::vector<std::string> vv{"temperature","humidity_mixing_ratio",
       "air_pressure","air_pressure_levels",
       "sulf","bc1","bc2","oc1","oc2","dust1","dust2","dust3","dust4","dust5",
@@ -83,21 +83,21 @@ ObsAodTLAD<MODEL>::~ObsAodTLAD() {
 // -----------------------------------------------------------------------------
 template <typename MODEL>
 void ObsAodTLAD<MODEL>::setTrajectory(const GeoVaLs & geovals, const ObsBias & bias) {
-  ufo_aod_settraj_f90(keyOperAod_, geovals.toFortran());
+  ufo_aod_tlad_settraj_f90(keyOperAod_, geovals.toFortran());
 }
 
 // -----------------------------------------------------------------------------
 template <typename MODEL>
 void ObsAodTLAD<MODEL>::obsEquivTL(const GeoVaLs & geovals, ObsVector & ovec,
                                const ObsBiasIncrement & bias) const {
-  ufo_aod_eqv_tl_f90(keyOperAod_, geovals.toFortran(), odb_.toFortran(), ovec.toFortran());
+  ufo_aod_tlad_eqv_tl_f90(keyOperAod_, geovals.toFortran(), odb_.toFortran(), ovec.toFortran());
 }
 
 // -----------------------------------------------------------------------------
 template <typename MODEL>
 void ObsAodTLAD<MODEL>::obsEquivAD(GeoVaLs & geovals, const ObsVector & ovec,
                                ObsBiasIncrement & bias) const {
-  ufo_aod_eqv_ad_f90(keyOperAod_, geovals.toFortran(), odb_.toFortran(), ovec.toFortran());
+  ufo_aod_tlad_eqv_ad_f90(keyOperAod_, geovals.toFortran(), odb_.toFortran(), ovec.toFortran());
 }
 
 // -----------------------------------------------------------------------------

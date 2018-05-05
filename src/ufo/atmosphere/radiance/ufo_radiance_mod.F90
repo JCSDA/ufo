@@ -19,15 +19,11 @@ module ufo_radiance_mod
   implicit none
   public :: ufo_radiance
   public :: ufo_radiance_eqv
-  public :: ufo_radiance_settraj
-  public :: ufo_radiance_eqv_tl
-  public :: ufo_radiance_eqv_ad
   private
   integer, parameter :: max_string=800
 
 !> Fortran derived type for radiance trajectory
 type :: ufo_radiance
-   logical :: ltraj = .false. !< trajectory set?
 end type ufo_radiance
   
 ! ------------------------------------------------------------------------------
@@ -642,54 +638,6 @@ contains
     END SUBROUTINE Load_Geom_Data
     
   end subroutine ufo_radiance_eqv
-
-! ------------------------------------------------------------------------------
- 
-subroutine ufo_radiance_settraj(self, geovals)
-implicit none
-type(ufo_radiance), intent(inout) :: self
-type(ufo_geovals), intent(in)       :: geovals
-
-character(len=*), parameter :: myname_="ufo_radiance_settraj"
-character(max_string) :: err_msg
-
-! Nothing here yet
-
- self%ltraj = .false. !.true.
-
-end subroutine ufo_radiance_settraj
-
-! ------------------------------------------------------------------------------
-
-subroutine ufo_radiance_eqv_tl(self, geovals, hofx, obss)
-implicit none
-type(ufo_radiance), intent(in)     :: self
-type(ufo_geovals),    intent(in)     :: geovals
-type(obs_vector),     intent(inout)  :: hofx
-type(ufo_obs_radiance), intent(in) :: obss
-
-character(len=*), parameter :: myname_="ufo_radiance_eqv_tl"
-character(max_string) :: err_msg
-
-! Nothing here yet
-
-end subroutine ufo_radiance_eqv_tl
-
-! ------------------------------------------------------------------------------
-
-subroutine ufo_radiance_eqv_ad(self, geovals, hofx, obss)
-implicit none
-type(ufo_radiance), intent(in)     :: self
-type(ufo_geovals),    intent(in)     :: geovals
-type(obs_vector),     intent(inout)  :: hofx
-type(ufo_obs_radiance), intent(in) :: obss
-
-character(len=*), parameter :: myname_="ufo_radiance_eqv_ad"
-character(max_string) :: err_msg
-
-! Nothing here yet
-
-end subroutine ufo_radiance_eqv_ad
 
 ! ------------------------------------------------------------------------------
  
