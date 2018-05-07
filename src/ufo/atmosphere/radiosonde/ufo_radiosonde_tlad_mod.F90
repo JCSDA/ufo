@@ -62,6 +62,9 @@ self%nobs = prsl%nobs
 self%nval = prsl%nval
 
 !Allocate weight and index
+if (allocated(self%wi)) deallocate(self%wi)
+if (allocated(self%wf)) deallocate(self%wf)
+
 allocate(self%wi(self%nobs))
 allocate(self%wf(self%nobs))
 
