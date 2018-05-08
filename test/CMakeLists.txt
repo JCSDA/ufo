@@ -47,6 +47,7 @@ endforeach(FILENAME)
 list( APPEND ufo_marine_test_data
   marineobs/Jason-3-2018-04-15.nc
   marineobs/seaice_obs-2018-04-15.nc
+  marineobs/cryosat2-2018-04-15.nc
 )
 foreach(FILENAME ${ufo_marine_test_data})
     get_filename_component(filename ${FILENAME} NAME )

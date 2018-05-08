@@ -4,8 +4,8 @@
   "window_end": "2018-04-16T00:00:00Z",
   "LinearObsOpTest": {
     "testiterTL": "10",
-    "toleranceTL": "1.0e-14",
-    "toleranceAD": "1.0e-14"
+    "toleranceTL": "1.0e-8",
+    "toleranceAD": "1.0e-8"
   },
   "Observations": {
     "ObsTypes": [
@@ -17,7 +17,7 @@
           }
         },
         "GeoVaLs": {
-          "norm": "555.95953090130581",
+          "norm": "356.57419032817091",
           "random": "1",
           "nobs": "126753"
         },
@@ -36,7 +36,7 @@
           "lon2": "30"
         },
         "GeoVaLs": {
-          "norm": "3",
+          "norm": "14.159112038621867",
           "random": "1",
           "nobs": "90"
         },
