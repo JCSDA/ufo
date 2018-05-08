@@ -57,11 +57,13 @@ if (.not. ufo_geovals_get_var(geovals, var_prsl, prsl)) then
   call abor1_ftn(err_msg)
 endif
 
+!Make sure nothing already allocated
+call ufo_radiosonde_tlad_delete(self)
+
 !Keep copy of dimensions
 self%nobs = prsl%nobs
 self%nval = prsl%nval
 
-!Allocate weight and index
 allocate(self%wi(self%nobs))
 allocate(self%wf(self%nobs))
 
