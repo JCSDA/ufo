@@ -8,7 +8,7 @@
 module ufo_obs_data_basis_mod
   use iso_c_binding
   use kinds, only: kind_real
-  use ufo_locs_mod, only: ufo_locs
+  use ioda_locs_mod, only: ioda_locs
   implicit none
 
   character(len=*), parameter :: MyName='basis_obs_data_mod'
@@ -45,7 +45,7 @@ module ufo_obs_data_basis_mod
       import
       class(BasisObsData), intent(in) :: self
       integer, intent(in) :: nlocs
-      type(ufo_locs), intent(inout) :: locs
+      type(ioda_locs), intent(inout) :: locs
     end subroutine GetLocs_
   end interface
 

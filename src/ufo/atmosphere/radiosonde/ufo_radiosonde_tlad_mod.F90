@@ -7,10 +7,10 @@
 
 module ufo_radiosonde_tlad_mod
   
-  use ufo_obs_radiosonde_mod
-  use ufo_obs_vectors
+  use ioda_obs_radiosonde_mod
+  use ioda_obs_vectors
   use ufo_vars_mod
-  use ufo_locs_mod
+  use ioda_locs_mod
   use ufo_geovals_mod
   use kinds
   use vert_interp_mod
@@ -42,7 +42,7 @@ subroutine ufo_radiosonde_tlad_settraj(self, geovals, obss)
 implicit none
 type(ufo_radiosonde_tlad), intent(inout) :: self
 type(ufo_geovals), intent(in)       :: geovals
-type(ufo_obs_radiosonde), intent(in) :: obss
+type(ioda_obs_radiosonde), intent(in) :: obss
 
 character(len=*), parameter :: myname_="ufo_radiosonde_tlad_settraj"
 character(max_string) :: err_msg
@@ -89,7 +89,7 @@ implicit none
 type(ufo_radiosonde_tlad), intent(in)     :: self
 type(ufo_geovals),    intent(in)     :: geovals
 type(obs_vector),     intent(inout)  :: hofx
-type(ufo_obs_radiosonde), intent(in) :: obss
+type(ioda_obs_radiosonde), intent(in) :: obss
 
 character(len=*), parameter :: myname_="ufo_radiosonde_tlad_t_eqv_tl"
 character(max_string) :: err_msg
@@ -129,7 +129,7 @@ implicit none
 type(ufo_radiosonde_tlad), intent(in):: self
 type(ufo_geovals),    intent(inout)  :: geovals
 type(obs_vector),     intent(in)     :: hofx
-type(ufo_obs_radiosonde), intent(in) :: obss
+type(ioda_obs_radiosonde), intent(in) :: obss
 
 character(len=*), parameter :: myname_="ufo_radiosonde_tlad_t_eqv_ad"
 character(max_string) :: err_msg

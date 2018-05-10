@@ -8,8 +8,8 @@ module ufo_geovals_mod_c
 
 use iso_c_binding
 use ufo_geovals_mod
-use ufo_locs_mod
-use ufo_locs_mod_c, only : ufo_locs_registry
+use ioda_locs_mod
+use ioda_locs_mod_c, only : ioda_locs_registry
 use ufo_vars_mod
 use kinds
 
@@ -43,14 +43,14 @@ integer(c_int), intent(in) :: c_key_locs
 type(c_ptr), intent(in)    :: c_vars
 
 type(ufo_geovals), pointer :: self
-type(ufo_locs), pointer :: locs
+type(ioda_locs), pointer :: locs
 type(ufo_vars) :: vars
 
 call ufo_geovals_registry%init()
 call ufo_geovals_registry%add(c_key_self)
 call ufo_geovals_registry%get(c_key_self, self)
 
-call ufo_locs_registry%get(c_key_locs,locs)
+call ioda_locs_registry%get(c_key_locs,locs)
 
 call ufo_vars_setup(vars, c_vars)
 

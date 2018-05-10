@@ -7,10 +7,10 @@
 
 module ufo_radiance_mod
   
-  use ufo_obs_radiance_mod
-  use ufo_obs_vectors
+  use ioda_obs_radiance_mod
+  use ioda_obs_vectors
   use ufo_vars_mod
-  use ufo_locs_mod
+  use ioda_locs_mod
   use ufo_geovals_mod
   use kinds  
 
@@ -37,7 +37,7 @@ contains
     type(ufo_radiance), intent(in)     :: self
     type(ufo_geovals), intent(in)      :: geovals
     type(obs_vector),  intent(inout)   :: hofx
-    type(ufo_obs_radiance), intent(in) :: Radiance
+    type(ioda_obs_radiance), intent(in) :: Radiance
 
     !*************************************************************************************
     !******* Begin CRTM block ************************************************************

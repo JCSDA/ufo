@@ -9,11 +9,11 @@ module ufo_stericheight_mod_c
   
   use iso_c_binding
   use config_mod
-  use ufo_obs_vectors,   only: obs_vector, ufo_obs_vect_registry
+  use ioda_obs_vectors,   only: obs_vector, ioda_obs_vect_registry
   use ufo_geovals_mod,   only: ufo_geovals, ufo_geovals_setup
   use ufo_geovals_mod_c, only: ufo_geovals_registry
-  use ufo_obs_stericheight_mod,   only: ufo_obs_stericheight
-  use ufo_obs_stericheight_mod_c, only: ufo_obs_stericheight_registry 
+  use ioda_obs_stericheight_mod,   only: ioda_obs_stericheight
+  use ioda_obs_stericheight_mod_c, only: ioda_obs_stericheight_registry 
   use ufo_stericheight_mod
   use ufo_vars_mod
   implicit none
@@ -82,7 +82,7 @@ print *,myname_
 
 call ufo_stericheight_registry%get(c_key_self, self)
 call ufo_geovals_registry%get(c_key_geovals,geovals)
-call ufo_obs_vect_registry%get(c_key_hofx,hofx)
+call ioda_obs_vect_registry%get(c_key_hofx,hofx)
 
 call ufo_stericheight_eqv(self, geovals, hofx)
 

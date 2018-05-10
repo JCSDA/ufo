@@ -20,8 +20,11 @@ namespace eckit {
   class Configuration;
 }
 
-namespace ufo {
+namespace ioda {
   class Locations;
+}
+
+namespace ufo {
 
 /// GeoVaLs: geophysical values at locations
 
@@ -30,7 +33,7 @@ class GeoVaLs : public util::Printable,
  public:
   static const std::string classname() {return "ufo::GeoVaLs";}
 
-  GeoVaLs(const Locations &, const oops::Variables &);
+  GeoVaLs(const ioda::Locations &, const oops::Variables &);
   GeoVaLs(const eckit::Configuration &, const oops::Variables &);
 
 //  explicit GeoVaLs(): keyGVL_(0) {}
