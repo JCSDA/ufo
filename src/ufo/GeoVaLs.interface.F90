@@ -270,6 +270,21 @@ end subroutine ufo_geovals_minmaxavg_c
 
 ! ------------------------------------------------------------------------------
 
+subroutine ufo_geovals_maxloc_c(c_key_self, mxval, iobs, ivar) bind(c,name='ufo_geovals_maxloc_f90')
+implicit none
+integer(c_int), intent(in) :: c_key_self 
+real(c_double), intent(inout) :: mxval
+integer(c_int), intent(inout) :: iobs, ivar
+type(ufo_geovals), pointer :: self
+
+call ufo_geovals_registry%get(c_key_self, self)
+
+call ufo_geovals_maxloc(self, mxval, iobs, ivar)
+
+end subroutine ufo_geovals_maxloc_c
+
+! ------------------------------------------------------------------------------
+
 subroutine ufo_geovals_read_file_c(c_key_self, c_conf, c_vars) bind(c,name='ufo_geovals_read_file_f90')
 use config_mod
 

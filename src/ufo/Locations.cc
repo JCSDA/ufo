@@ -40,6 +40,16 @@ void Locations::print(std::ostream & os) const {
   int nobs;
   ufo_locs_nobs_f90(keyLoc_, nobs);
   os << "Locations: " << nobs << " locations";
+
+  // Write lat and lon to debug stream
+  double lat, lon;
+
+  for (int i=0; i < nobs; ++i) {
+    ufo_locs_coords_f90(keyLoc_,i,lat,lon);
+    oops::Log::debug() << std::setprecision(2) << "lat = " << lat
+		       << ", lon = " << lon << std::endl;
+  }
+  
 }
 
 // -----------------------------------------------------------------------------

@@ -49,6 +49,7 @@ extern "C" {
   void ufo_locs_create_f90(F90locs &, const int  &, const double *, const double *);
   void ufo_locs_delete_f90(F90locs &);
   void ufo_locs_nobs_f90(const F90locs &, int &);
+  void ufo_locs_coords_f90(const F90locs &, const int &, double &, double &);
 
 // -----------------------------------------------------------------------------
 //  Local Values (GOM)
@@ -68,6 +69,7 @@ extern "C" {
   void ufo_geovals_normalize_f90(const F90goms &, const F90goms &);    
   void ufo_geovals_dotprod_f90(const F90goms &, const F90goms &, double &);
   void ufo_geovals_minmaxavg_f90(const F90goms &, int &, double &, double &, double &);
+  void ufo_geovals_maxloc_f90(const F90goms &, double &, int &, int &);
   void ufo_geovals_read_file_f90(const F90goms &, const eckit::Configuration * const *,
                                  const eckit::Configuration * const *);
   void ufo_geovals_write_file_f90(const F90goms &, const eckit::Configuration * const *);

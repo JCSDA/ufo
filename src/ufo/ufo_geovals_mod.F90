@@ -18,7 +18,7 @@ public :: ufo_geovals, ufo_geoval, ufo_geovals_get_var
 public :: ufo_geovals_init, ufo_geovals_setup, ufo_geovals_delete, ufo_geovals_print
 public :: ufo_geovals_zero, ufo_geovals_random, ufo_geovals_dotprod, ufo_geovals_scalmult
 public :: ufo_geovals_assign, ufo_geovals_add, ufo_geovals_diff, ufo_geovals_abs
-public :: ufo_geovals_minmaxavg, ufo_geovals_normalize
+public :: ufo_geovals_minmaxavg, ufo_geovals_normalize, ufo_geovals_maxloc
 public :: ufo_geovals_read_netcdf
 
 ! ------------------------------------------------------------------------------
@@ -413,6 +413,49 @@ pmax=maxval(self%geovals(1)%vals)
 prms=0. !sqrt(sum(self%values(:,:)**2)/real(self%nobs*self%nvar,kind_real))
 
 end subroutine ufo_geovals_minmaxavg
+
+! ------------------------------------------------------------------------------
+!> Location where the summed geovals value is maximum
+!!
+!! \details This routine computes the rms value over the vertical profile for 
+!! each location and observation then returns the location number and the 
+!! variable number where this rms value is maximum.  Intended for use with
+!! the State interpotation test in which the input GeoVaLs object is a
+!! nondimensional, positive-definite error measurement.
+
+subroutine ufo_geovals_maxloc(self, mxval, iobs, ivar)
+implicit none
+real(kind_real), intent(inout) :: mxval
+integer, intent(inout) :: iobs, ivar
+
+type(ufo_geovals), intent(in) :: self
+real(kind_real) :: vrms
+integer :: jv, jo, jz
+
+if (.not. self%lalloc .or. .not. self%linit) then
+  call abor1_ftn("ufo_geovals_maxloc: geovals not allocated")
+endif
+
+mxval = 0.0_kind_real
+
+do jv = 1,self%nvar
+   do jo = 1, self%nobs
+
+      vrms = 0.0_kind_real
+      do jz = 1, self%geovals(jv)%nval
+         vrms = vrms + self%geovals(jv)%vals(jz,jo)**2
+      enddo
+      vrms = sqrt(vrms/real(self%geovals(jv)%nval,kind_real))
+      if (vrms > mxval) then
+         vrms = mxval
+         iobs = jo
+         ivar = jv
+      endif
+
+   enddo
+enddo
+
+end subroutine ufo_geovals_maxloc
 
 ! ------------------------------------------------------------------------------
 
