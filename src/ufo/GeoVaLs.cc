@@ -67,6 +67,11 @@ void GeoVaLs::zero() {
   ufo_geovals_zero_f90(keyGVL_);
 }
 // -----------------------------------------------------------------------------
+/*! Absolute value */
+void GeoVaLs::abs() {
+  ufo_geovals_abs_f90(keyGVL_);
+}
+// -----------------------------------------------------------------------------
 void GeoVaLs::random() {
   ufo_geovals_random_f90(keyGVL_);
 }
@@ -83,6 +88,22 @@ GeoVaLs & GeoVaLs::operator=(const GeoVaLs & rhs) {
 // -----------------------------------------------------------------------------
 GeoVaLs & GeoVaLs::operator+=(const GeoVaLs & other) {
   ufo_geovals_add_f90(keyGVL_, other.keyGVL_);
+  return *this;
+}
+// -----------------------------------------------------------------------------
+GeoVaLs & GeoVaLs::operator-=(const GeoVaLs & other) {
+  ufo_geovals_diff_f90(keyGVL_, other.keyGVL_);
+  return *this;
+}
+// -----------------------------------------------------------------------------
+/*! GeoVaLs normalization
+ *
+ * \details This operator is used to normalize each element of the input GeoVaLs
+ * object (LHS) with the rms values of each variable on the RHS, across all 
+ * locations
+ */
+GeoVaLs & GeoVaLs::operator/=(const GeoVaLs & other) {
+  ufo_geovals_normalize_f90(keyGVL_, other.keyGVL_);
   return *this;
 }
 // -----------------------------------------------------------------------------

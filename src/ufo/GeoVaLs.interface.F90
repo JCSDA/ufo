@@ -108,6 +108,19 @@ end subroutine ufo_geovals_zero_c
 
 ! ------------------------------------------------------------------------------
 
+subroutine ufo_geovals_abs_c(c_key_self) bind(c,name='ufo_geovals_abs_f90')
+implicit none
+integer(c_int), intent(in) :: c_key_self
+type(ufo_geovals), pointer :: self
+
+call ufo_geovals_registry%get(c_key_self, self)
+
+call ufo_geovals_abs(self)
+
+end subroutine ufo_geovals_abs_c
+
+! ------------------------------------------------------------------------------
+
 subroutine ufo_geovals_setup_random_c(c_key_self, c_conf, c_vars) bind(c,name='ufo_geovals_setup_random_f90')
 use config_mod
 implicit none
@@ -192,6 +205,38 @@ call ufo_geovals_registry%get(c_key_other, other)
 call ufo_geovals_add(self, other)
 
 end subroutine ufo_geovals_add_c
+
+! ------------------------------------------------------------------------------
+
+subroutine ufo_geovals_diff_c(c_key_self, c_key_other) bind(c,name='ufo_geovals_diff_f90')
+implicit none
+integer(c_int), intent(in) :: c_key_self
+integer(c_int), intent(in) :: c_key_other
+type(ufo_geovals), pointer :: self
+type(ufo_geovals), pointer :: other
+
+call ufo_geovals_registry%get(c_key_self, self)
+call ufo_geovals_registry%get(c_key_other, other)
+
+call ufo_geovals_diff(self, other)
+
+end subroutine ufo_geovals_diff_c
+
+! ------------------------------------------------------------------------------
+
+subroutine ufo_geovals_normalize_c(c_key_self, c_key_other) bind(c,name='ufo_geovals_normalize_f90')
+implicit none
+integer(c_int), intent(in) :: c_key_self
+integer(c_int), intent(in) :: c_key_other
+type(ufo_geovals), pointer :: self
+type(ufo_geovals), pointer :: other
+
+call ufo_geovals_registry%get(c_key_self, self)
+call ufo_geovals_registry%get(c_key_other, other)
+
+call ufo_geovals_normalize(self, other)
+
+end subroutine ufo_geovals_normalize_c
 
 ! ------------------------------------------------------------------------------
 
