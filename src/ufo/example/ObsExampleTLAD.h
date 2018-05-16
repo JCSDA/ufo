@@ -16,7 +16,7 @@
 
 #include "oops/base/Variables.h"
 #include "oops/interface/LinearObsOperBase.h"
-#include "ufo/ObsSpace.h"
+#include "ioda/ObsSpace.h"
 #include "util/ObjectCounter.h"
 #include "util/Logger.h"
 
@@ -25,11 +25,14 @@ namespace util {
   class DateTime;
 }
 
+namespace ioda {
+  class ObsVector;
+}
+
 namespace ufo {
   class GeoVaLs;
   class ObsBias;
   class ObsBiasIncrement;
-  class ObsVector;
 
 // -----------------------------------------------------------------------------
 /// Example for observation operator TL and AD class
@@ -40,13 +43,13 @@ class ObsExampleTLAD : public oops::LinearObsOperBase<MODEL>,
 public:
   static const std::string classname() {return "ufo::ObsExampleTLAD";}
 
-  ObsExampleTLAD(const ObsSpace &, const eckit::Configuration &);
+  ObsExampleTLAD(const ioda::ObsSpace &, const eckit::Configuration &);
   virtual ~ObsExampleTLAD();
 
   // Obs Operators
   void setTrajectory(const GeoVaLs &, const ObsBias &);
-  void obsEquivTL(const GeoVaLs &, ObsVector &, const ObsBiasIncrement &) const;
-  void obsEquivAD(GeoVaLs &, const ObsVector &, ObsBiasIncrement &) const;
+  void obsEquivTL(const GeoVaLs &, ioda::ObsVector &, const ObsBiasIncrement &) const;
+  void obsEquivAD(GeoVaLs &, const ioda::ObsVector &, ObsBiasIncrement &) const;
 
   // Other
   const oops::Variables & variables() const {return *varin_;}
@@ -57,13 +60,13 @@ public:
 private:
   void print(std::ostream &) const;
   F90hop keyOper_;
-  const ObsSpace& odb_;
+  const ioda::ObsSpace& odb_;
   boost::scoped_ptr<const oops::Variables> varin_;
 };
 
 // -----------------------------------------------------------------------------
 template <typename MODEL>
-ObsExampleTLAD<MODEL>::ObsExampleTLAD(const ObsSpace & odb, const eckit::Configuration & config)
+ObsExampleTLAD<MODEL>::ObsExampleTLAD(const ioda::ObsSpace & odb, const eckit::Configuration & config)
   : keyOper_(0), varin_(), odb_(odb)
 {
   const eckit::Configuration * configc = &config;
@@ -97,7 +100,7 @@ void ObsExampleTLAD<MODEL>::setTrajectory(const GeoVaLs & geovals, const ObsBias
 
 // -----------------------------------------------------------------------------
 template <typename MODEL>
-void ObsExampleTLAD<MODEL>::obsEquivTL(const GeoVaLs & geovals, ObsVector & ovec,
+void ObsExampleTLAD<MODEL>::obsEquivTL(const GeoVaLs & geovals, ioda::ObsVector & ovec,
                              const ObsBiasIncrement & bias) const {
   // TODO: replace ufo_example_tlad_eqv_tl_f90 with the call to your Fortran routine
   //       to apply tl observation operator (defined in ObsExampleTLAD.interface.F90)
@@ -107,7 +110,7 @@ void ObsExampleTLAD<MODEL>::obsEquivTL(const GeoVaLs & geovals, ObsVector & ovec
 
 // -----------------------------------------------------------------------------
 template <typename MODEL>
-void ObsExampleTLAD<MODEL>::obsEquivAD(GeoVaLs & geovals, const ObsVector & ovec,
+void ObsExampleTLAD<MODEL>::obsEquivAD(GeoVaLs & geovals, const ioda::ObsVector & ovec,
                              ObsBiasIncrement & bias) const {
   // TODO: replace ufo_example_tlad_eqv_ad_f90 with the call to your Fortran routine
   //       to apply ad observation operator (defined in ObsExampleTLAD.interface.F90)

@@ -7,10 +7,10 @@
 
 module ufo_radiosonde_mod
   
-  use ufo_obs_radiosonde_mod
-  use ufo_obs_vectors
+  use ioda_obs_radiosonde_mod
+  use ioda_obs_vectors
   use ufo_vars_mod
-  use ufo_locs_mod
+  use ioda_locs_mod
   use ufo_geovals_mod
   use kinds
   use vert_interp_mod
@@ -37,7 +37,7 @@ implicit none
 type(ufo_radiosonde), intent(in)     :: self
 type(ufo_geovals), intent(in)        :: geovals
 type(obs_vector),  intent(inout)     :: hofx
-type(ufo_obs_radiosonde), intent(in) :: obss
+type(ioda_obs_radiosonde), intent(in) :: obss
 
 character(len=*), parameter :: myname_="ufo_radiosonde_t_eqv"
 character(max_string) :: err_msg

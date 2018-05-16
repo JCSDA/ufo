@@ -16,12 +16,12 @@
 #include "eckit/config/Configuration.h"
 #include "oops/base/Variables.h"
 #include "oops/interface/ObsOperatorBase.h"
-#include "ufo/ObsSpace.h"
+#include "ioda/ObsSpace.h"
 #include "ufo/GeoVaLs.h"
-#include "ufo/Locations.h"
+#include "ioda/Locations.h"
 #include "ufo/ObsBias.h"
 #include "ufo/ObsBiasIncrement.h"
-#include "ufo/ObsVector.h"
+#include "ioda/ObsVector.h"
 #include "util/ObjectCounter.h"
 
 namespace ufo {
@@ -34,11 +34,11 @@ class ObsSeaIceThickness : public oops::ObsOperatorBase<MODEL>,
  public:
   static const std::string classname() {return "ufo::ObsSeaIceThickness";}
 
-  ObsSeaIceThickness(const ObsSpace &, const eckit::Configuration &);
+  ObsSeaIceThickness(const ioda::ObsSpace &, const eckit::Configuration &);
   virtual ~ObsSeaIceThickness();
 
 // Obs Operator
-  void obsEquiv(const GeoVaLs &, ObsVector &, const ObsBias &) const;
+  void obsEquiv(const GeoVaLs &, ioda::ObsVector &, const ObsBias &) const;
 
 // Other
   const oops::Variables & variables() const {return *varin_;}
@@ -49,13 +49,13 @@ class ObsSeaIceThickness : public oops::ObsOperatorBase<MODEL>,
  private:
   void print(std::ostream &) const;
   F90hop keyOperSeaIceThickness_;
-  const ObsSpace& odb_;
+  const ioda::ObsSpace& odb_;
   boost::scoped_ptr<const oops::Variables> varin_;
 };
 
 // -----------------------------------------------------------------------------
 template <typename MODEL>
-ObsSeaIceThickness<MODEL>::ObsSeaIceThickness(const ObsSpace & odb, const eckit::Configuration & config)
+ObsSeaIceThickness<MODEL>::ObsSeaIceThickness(const ioda::ObsSpace & odb, const eckit::Configuration & config)
   : keyOperSeaIceThickness_(0), varin_(), odb_(odb)
 {
   const eckit::Configuration * configc = &config;
@@ -74,7 +74,7 @@ ObsSeaIceThickness<MODEL>::~ObsSeaIceThickness() {
 
 // -----------------------------------------------------------------------------
 template <typename MODEL>
-void ObsSeaIceThickness<MODEL>::obsEquiv(const GeoVaLs & gom, ObsVector & ovec,
+void ObsSeaIceThickness<MODEL>::obsEquiv(const GeoVaLs & gom, ioda::ObsVector & ovec,
                              const ObsBias & bias) const {
   ufo_seaicethick_eqv_f90(keyOperSeaIceThickness_, gom.toFortran(), odb_.toFortran(), ovec.toFortran(), bias.toFortran());
 }

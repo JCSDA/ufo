@@ -24,10 +24,13 @@ namespace oops {
   class Variables;
 }
 
-namespace ufo {
+namespace ioda {
   class ObsSpace;
-  class GeoVaLs;
   class ObsVector;
+}
+
+namespace ufo {
+  class GeoVaLs;
 
 /// ObsCheck: check observation for quality
 
@@ -36,15 +39,15 @@ class ObsCheck : public util::Printable,
  public:
   static const std::string classname() {return "ufo::ObsCheck";}
 
-  ObsCheck(const ObsSpace &, const oops::Variables &,
+  ObsCheck(const ioda::ObsSpace &, const oops::Variables &,
           const util::DateTime &, const util::DateTime &);
-  ObsCheck(const ObsSpace &);
+  ObsCheck(const ioda::ObsSpace &);
   ObsCheck(const eckit::Configuration &);
 
   ~ObsCheck();
 
-  void postFilter(const GeoVaLs &, const ObsVector &, const ObsSpace &) const;
-  void priorFilter(const ObsSpace &) const;
+  void postFilter(const GeoVaLs &, const ioda::ObsVector &, const ioda::ObsSpace &) const;
+  void priorFilter(const ioda::ObsSpace &) const;
 
   int & toFortran() {return keyObsCheck_;}
   const int & toFortran() const {return keyObsCheck_;}

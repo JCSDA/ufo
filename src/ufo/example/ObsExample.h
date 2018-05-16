@@ -18,12 +18,12 @@
 #include "eckit/config/Configuration.h"
 #include "oops/base/Variables.h"
 #include "oops/interface/ObsOperatorBase.h"
-#include "ufo/ObsSpace.h"
+#include "ioda/ObsSpace.h"
 #include "ufo/GeoVaLs.h"
-#include "ufo/Locations.h"
+#include "ioda/Locations.h"
 #include "ufo/ObsBias.h"
 #include "ufo/ObsBiasIncrement.h"
-#include "ufo/ObsVector.h"
+#include "ioda/ObsVector.h"
 #include "util/ObjectCounter.h"
 
 namespace ufo {
@@ -37,11 +37,11 @@ class ObsExample : public oops::ObsOperatorBase<MODEL>,
  public:
   static const std::string classname() {return "ufo::ObsExample";}
 
-  ObsExample(const ObsSpace &, const eckit::Configuration &);
+  ObsExample(const ioda::ObsSpace &, const eckit::Configuration &);
   virtual ~ObsExample();
 
   // Obs Operator
-  void obsEquiv(const GeoVaLs &, ObsVector &, const ObsBias &) const;
+  void obsEquiv(const GeoVaLs &, ioda::ObsVector &, const ObsBias &) const;
 
   // Other
   const oops::Variables & variables() const {return *varin_;}
@@ -52,13 +52,13 @@ class ObsExample : public oops::ObsOperatorBase<MODEL>,
  private:
   void print(std::ostream &) const;
   F90hop keyOper_;
-  const ObsSpace& odb_;
+  const ioda::ObsSpace& odb_;
   boost::scoped_ptr<const oops::Variables> varin_;
 };
 
 // -----------------------------------------------------------------------------
 template <typename MODEL>
-ObsExample<MODEL>::ObsExample(const ObsSpace & odb, const eckit::Configuration & config)
+ObsExample<MODEL>::ObsExample(const ioda::ObsSpace & odb, const eckit::Configuration & config)
   : keyOper_(0), varin_(), odb_(odb)
 {
   const eckit::Configuration * configc = &config;
@@ -83,7 +83,7 @@ ObsExample<MODEL>::~ObsExample() {
 
 // -----------------------------------------------------------------------------
 template <typename MODEL>
-void ObsExample<MODEL>::obsEquiv(const GeoVaLs & gv, ObsVector & ovec,
+void ObsExample<MODEL>::obsEquiv(const GeoVaLs & gv, ioda::ObsVector & ovec,
                                   const ObsBias & bias) const {
   // TODO: replace ufo_example_eqv_f90 with the call to your Fortran routine
   //       to apply observation operator (defined in ObsExample.interface.F90)

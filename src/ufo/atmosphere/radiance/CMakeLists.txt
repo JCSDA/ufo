@@ -3,8 +3,6 @@ set ( radiance_files
 	ObsRadiance.interface.F90
 	ObsRadianceTLAD.h
 	ObsRadianceTLAD.interface.F90
-	ObsSpace.Radiance.interface.F90
-	ufo_obs_radiance_mod.F90
 	ufo_radiance_mod.F90
 	ufo_radiance_tlad_mod.F90
 	PARENT_SCOPE

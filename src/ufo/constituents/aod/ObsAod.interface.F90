@@ -9,11 +9,11 @@ module ufo_aod_mod_c
   
   use iso_c_binding
   use config_mod
-  use ufo_obs_vectors,   only: obs_vector, ufo_obs_vect_registry
+  use ioda_obs_vectors,   only: obs_vector, ioda_obs_vect_registry
   use ufo_geovals_mod,   only: ufo_geovals
   use ufo_geovals_mod_c, only: ufo_geovals_registry
-  use ufo_obs_aod_mod,   only: ufo_obs_aod
-  use ufo_obs_aod_mod_c, only: ufo_obs_aod_registry 
+  use ioda_obs_aod_mod,   only: ioda_obs_aod
+  use ioda_obs_aod_mod_c, only: ioda_obs_aod_registry 
   use ufo_aod_mod 
   implicit none
   private
@@ -74,14 +74,14 @@ integer(c_int), intent(in) :: c_bias
 type(ufo_aod),     pointer :: self
 type(ufo_geovals),        pointer :: geovals
 type(obs_vector),         pointer :: hofx
-type(ufo_obs_aod), pointer :: obss
+type(ioda_obs_aod), pointer :: obss
 
 character(len=*), parameter :: myname_="ufo_aod_eqv_c"
 
 call ufo_aod_registry%get(c_key_self, self)
 call ufo_geovals_registry%get(c_key_geovals,geovals)
-call ufo_obs_vect_registry%get(c_key_hofx,hofx)
-call ufo_obs_aod_registry%get(c_key_obsspace,obss)
+call ioda_obs_vect_registry%get(c_key_hofx,hofx)
+call ioda_obs_aod_registry%get(c_key_obsspace,obss)
 
 call ufo_aod_eqv(self, geovals, hofx, obss)
 

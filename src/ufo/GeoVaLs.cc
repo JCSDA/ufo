@@ -9,13 +9,13 @@
 
 #include "oops/base/Variables.h"
 #include "eckit/config/Configuration.h"
-#include "Locations.h"
+#include "ioda/Locations.h"
 #include "Fortran.h"
 #include "util/Logger.h"
 
 namespace ufo {
 // -----------------------------------------------------------------------------
-GeoVaLs::GeoVaLs(const Locations & locs, const oops::Variables & vars)
+GeoVaLs::GeoVaLs(const ioda::Locations & locs, const oops::Variables & vars)
  : keyGVL_(-1), vars_(vars)
 {
   oops::Log::trace() << "GeoVaLs contructor starting" << std::endl;
