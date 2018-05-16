@@ -64,7 +64,7 @@ ObsSeaIceThicknessTLAD<MODEL>::ObsSeaIceThicknessTLAD(const ObsSpace & odb, cons
   : keyOperSeaIceThickness_(0), varin_()
 {
   const eckit::Configuration * configc = &config;
-  ufo_seaicethick_setup_f90(keyOperSeaIceThickness_, &configc);
+  ufo_seaicethick_tlad_setup_f90(keyOperSeaIceThickness_, &configc);
   const std::vector<std::string> vv{"ice_concentration", "ice_thickness"};
   varin_.reset(new oops::Variables(vv));
   oops::Log::trace() << "ObsSeaIceThicknessTLAD created" << std::endl;
@@ -73,27 +73,28 @@ ObsSeaIceThicknessTLAD<MODEL>::ObsSeaIceThicknessTLAD(const ObsSpace & odb, cons
 // -----------------------------------------------------------------------------
 template <typename MODEL>
 ObsSeaIceThicknessTLAD<MODEL>::~ObsSeaIceThicknessTLAD() {
+  ufo_seaicethick_tlad_delete_f90(keyOperSeaIceThickness_);
   oops::Log::trace() << "ObsSeaIceThicknessTLAD destrcuted" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 template <typename MODEL>
 void ObsSeaIceThicknessTLAD<MODEL>::setTrajectory(const GeoVaLs & geovals, const ObsBias & bias) {
-  ufo_seaicethick_settraj_f90(keyOperSeaIceThickness_, geovals.toFortran());
+  ufo_seaicethick_tlad_settraj_f90(keyOperSeaIceThickness_, geovals.toFortran());
 }
 
 // -----------------------------------------------------------------------------
 template <typename MODEL>
 void ObsSeaIceThicknessTLAD<MODEL>::obsEquivTL(const GeoVaLs & geovals, ObsVector & ovec,
                                const ObsBiasIncrement & bias) const {
-  ufo_seaicethick_eqv_tl_f90(keyOperSeaIceThickness_, geovals.toFortran(), ovec.toFortran());
+  ufo_seaicethick_tlad_eqv_tl_f90(keyOperSeaIceThickness_, geovals.toFortran(), ovec.toFortran());
 }
 
 // -----------------------------------------------------------------------------
 template <typename MODEL>
 void ObsSeaIceThicknessTLAD<MODEL>::obsEquivAD(GeoVaLs & geovals, const ObsVector & ovec,
                                ObsBiasIncrement & bias) const {
-  ufo_seaicethick_eqv_ad_f90(keyOperSeaIceThickness_, geovals.toFortran(), ovec.toFortran());
+  ufo_seaicethick_tlad_eqv_ad_f90(keyOperSeaIceThickness_, geovals.toFortran(), ovec.toFortran());
 }
 
 // -----------------------------------------------------------------------------

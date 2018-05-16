@@ -153,4 +153,40 @@ end subroutine ufo_obsdb_seaice_delete_c
 
 ! ------------------------------------------------------------------------------
 
+subroutine ufo_obsdb_seaice_get_c(c_key_self, lcol, c_col, c_key_ovec) bind(c,name='ufo_obsdb_seaice_get_f90')
+use  ufo_obs_seaicefrac_mod
+implicit none
+integer(c_int), intent(in) :: c_key_self
+integer(c_int), intent(in) :: lcol
+character(kind=c_char,len=1), intent(in) :: c_col(lcol+1)
+integer(c_int), intent(in) :: c_key_ovec
+
+type(ufo_obs_seaicefrac), pointer :: self
+type(obs_vector), pointer :: ovec
+character(len=lcol) :: col
+
+print *,'.................................in ufo_obsdbsic_get'
+
+call ufo_obs_seaicefrac_registry%get(c_key_self, self)
+call ufo_obs_vect_registry%get(c_key_ovec,ovec)
+!call c_f_string(c_req, req)
+!call c_f_string(c_col, col)
+
+!call obs_get(self, trim(req), trim(col), ovec)
+
+
+ovec%nobs = self%nobs
+if (c_col(5)//c_col(6)=='rr') then
+   ovec%values = 0.1 !self%icefrac_err
+!   print *, self%icefrac_err
+else
+   ovec%values = self%icefrac
+end if
+
+print *,'................................. out of ufo_obsdbsic_get'
+
+end subroutine ufo_obsdb_seaice_get_c
+
+
+
 end module ufo_obs_seaicefrac_mod_c

@@ -153,4 +153,20 @@ end subroutine ufo_obsdb_radiance_delete_c
 
 ! ------------------------------------------------------------------------------
 
+subroutine ufo_obsdb_radiance_get_c(c_key_self, lcol, c_col, c_key_ovec) bind(c,name='ufo_obsdb_radiance_get_f90')  
+implicit none
+integer(c_int), intent(in) :: c_key_self
+integer(c_int), intent(in) :: lcol
+character(kind=c_char,len=1), intent(in) :: c_col(lcol+1)
+integer(c_int), intent(in) :: c_key_ovec
+
+type(ufo_obs_radiance), pointer :: self
+type(obs_vector), pointer :: ovec
+character(len=lcol) :: col
+
+call ufo_obs_radiance_registry%get(c_key_self, self)
+call ufo_obs_vect_registry%get(c_key_ovec,ovec)
+
+end subroutine ufo_obsdb_radiance_get_c
+
 end module ufo_obs_radiance_mod_c

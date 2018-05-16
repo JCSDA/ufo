@@ -56,7 +56,6 @@ integer(c_int), intent(inout) :: c_key_self
 type(ufo_radiosonde), pointer :: self
 
 call ufo_radiosonde_registry%get(c_key_self, self)
-call ufo_radiosonde_delete(self)
 call ufo_radiosonde_registry%remove(c_key_self)
     
 end subroutine ufo_radiosonde_delete_c
@@ -88,104 +87,4 @@ call ufo_radiosonde_t_eqv(self, geovals, hofx, obss)
 
 end subroutine ufo_radiosonde_t_eqv_c
 
-! ------------------------------------------------------------------------------
-
-subroutine ufo_radiosonde_settraj_c(c_key_self, c_key_geovals, c_key_obsspace) bind(c,name='ufo_radiosonde_settraj_f90')
-
-implicit none
-integer(c_int), intent(in) :: c_key_self
-integer(c_int), intent(in) :: c_key_geovals
-integer(c_int), intent(in) :: c_key_obsspace
-
-type(ufo_radiosonde), pointer :: self
-type(ufo_geovals),    pointer :: geovals
-type(ufo_obs_radiosonde), pointer :: obss
-
-character(len=*), parameter :: myname_="ufo_radiosonde_settraj_c"
-
-call ufo_radiosonde_registry%get(c_key_self, self)
-call ufo_geovals_registry%get(c_key_geovals,geovals)
-call ufo_obs_radiosonde_registry%get(c_key_obsspace,obss)
-
-call ufo_radiosonde_settraj(self, geovals, obss)
-
-end subroutine ufo_radiosonde_settraj_c
-
-! ------------------------------------------------------------------------------
-
-subroutine ufo_radiosonde_t_eqv_tl_c(c_key_self, c_key_geovals, c_key_obsspace, c_key_hofx) bind(c,name='ufo_radiosonde_t_eqv_tl_f90')
-
-implicit none
-integer(c_int), intent(in) :: c_key_self
-integer(c_int), intent(in) :: c_key_geovals
-integer(c_int), intent(in) :: c_key_hofx
-integer(c_int), intent(in) :: c_key_obsspace
-
-type(ufo_radiosonde), pointer :: self
-type(ufo_geovals),    pointer :: geovals
-type(obs_vector),     pointer :: hofx
-type(ufo_obs_radiosonde), pointer :: obss
-
-character(len=*), parameter :: myname_="ufo_radiosonde_t_eqv_tl_c"
-
-call ufo_radiosonde_registry%get(c_key_self, self)
-call ufo_geovals_registry%get(c_key_geovals,geovals)
-call ufo_obs_vect_registry%get(c_key_hofx,hofx)
-call ufo_obs_radiosonde_registry%get(c_key_obsspace,obss)
-
-call ufo_radiosonde_t_eqv_tl(self, geovals, hofx, obss)
-
-end subroutine ufo_radiosonde_t_eqv_tl_c
-
-! ------------------------------------------------------------------------------
-
-subroutine ufo_radiosonde_t_eqv_ad_c(c_key_self, c_key_geovals, c_key_obsspace, c_key_hofx) bind(c,name='ufo_radiosonde_t_eqv_ad_f90')
-
-implicit none
-integer(c_int), intent(in) :: c_key_self
-integer(c_int), intent(in) :: c_key_geovals
-integer(c_int), intent(in) :: c_key_hofx
-integer(c_int), intent(in) :: c_key_obsspace
-
-type(ufo_radiosonde), pointer :: self
-type(ufo_geovals),    pointer :: geovals
-type(obs_vector),     pointer :: hofx
-type(ufo_obs_radiosonde), pointer :: obss
-
-character(len=*), parameter :: myname_="ufo_radiosonde_t_eqv_ad_c"
-
-call ufo_radiosonde_registry%get(c_key_self, self)
-call ufo_geovals_registry%get(c_key_geovals,geovals)
-call ufo_obs_vect_registry%get(c_key_hofx,hofx)
-call ufo_obs_radiosonde_registry%get(c_key_obsspace,obss)
-
-call ufo_radiosonde_t_eqv_ad(self, geovals, hofx, obss)
-
-end subroutine ufo_radiosonde_t_eqv_ad_c
-
-! ------------------------------------------------------------------------------
-
-subroutine ufo_obs_get(c_key_self, lcol, c_col, c_key_ovec) bind(c,name='ufo_obsdb_radiosonde_get_f90')  
-use  ufo_obs_radiosonde_mod
-implicit none
-integer(c_int), intent(in) :: c_key_self
-integer(c_int), intent(in) :: lcol
-character(kind=c_char,len=1), intent(in) :: c_col(lcol+1)
-integer(c_int), intent(in) :: c_key_ovec
-
-type(ufo_obs_radiosonde), pointer :: self
-type(obs_vector), pointer :: ovec
-
-call ufo_obs_radiosonde_registry%get(c_key_self, self)
-call ufo_obs_vect_registry%get(c_key_ovec,ovec)
-
-ovec%nobs = self%nobs
-if (c_col(5)//c_col(6)=='rr') then
-   ovec%values = 0.1 !TODO, needs finalizing 
-else
-   ovec%values = self%mass(:)%Observation
-end if
-
-end subroutine ufo_obs_get
-  
 end module ufo_radiosonde_mod_c
