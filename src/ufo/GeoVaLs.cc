@@ -72,6 +72,12 @@ void GeoVaLs::abs() {
   ufo_geovals_abs_f90(keyGVL_);
 }
 // -----------------------------------------------------------------------------
+double GeoVaLs::norm() const {
+  double zz;
+  ufo_geovals_rms_f90(keyGVL_,zz);
+  return zz;
+}
+// -----------------------------------------------------------------------------
 void GeoVaLs::random() {
   ufo_geovals_random_f90(keyGVL_);
 }

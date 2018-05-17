@@ -121,6 +121,20 @@ end subroutine ufo_geovals_abs_c
 
 ! ------------------------------------------------------------------------------
 
+subroutine ufo_geovals_rms_c(c_key_self,vrms) bind(c,name='ufo_geovals_rms_f90')
+implicit none
+integer(c_int), intent(in) :: c_key_self
+real(c_double), intent(inout) :: vrms
+type(ufo_geovals), pointer :: self
+
+call ufo_geovals_registry%get(c_key_self, self)
+
+call ufo_geovals_rms(self,vrms)
+
+end subroutine ufo_geovals_rms_c
+
+! ------------------------------------------------------------------------------
+
 subroutine ufo_geovals_setup_random_c(c_key_self, c_conf, c_vars) bind(c,name='ufo_geovals_setup_random_f90')
 use config_mod
 implicit none

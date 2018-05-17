@@ -19,7 +19,7 @@ public :: ufo_geovals_init, ufo_geovals_setup, ufo_geovals_delete, ufo_geovals_p
 public :: ufo_geovals_zero, ufo_geovals_random, ufo_geovals_dotprod, ufo_geovals_scalmult
 public :: ufo_geovals_assign, ufo_geovals_add, ufo_geovals_diff, ufo_geovals_abs
 public :: ufo_geovals_minmaxavg, ufo_geovals_normalize, ufo_geovals_maxloc
-public :: ufo_geovals_read_netcdf
+public :: ufo_geovals_read_netcdf, ufo_geovals_rms
 
 ! ------------------------------------------------------------------------------
 
@@ -178,6 +178,34 @@ do ivar = 1, self%nvar
 enddo
 
 end subroutine ufo_geovals_abs
+
+! ------------------------------------------------------------------------------
+
+subroutine ufo_geovals_rms(self,vrms) 
+implicit none
+type(ufo_geovals), intent(in) :: self
+real(kind_real), intent(inout) :: vrms
+integer :: jv, jo
+real(kind_real) :: N
+
+if (.not. self%lalloc) then
+  call abor1_ftn("ufo_geovals_rms: geovals not allocated")
+endif
+if (.not. self%linit) then
+  call abor1_ftn("ufo_geovals_rms: geovals not initialized")
+endif
+vrms=0.0_kind_real
+N=0.0_kind_real
+do jv = 1, self%nvar
+   do jo = 1, self%nobs
+      vrms = vrms + Sum(self%geovals(jv)%vals(:,jo)**2)
+      N=N+self%geovals(jv)%nval
+   enddo   
+enddo
+
+vrms = sqrt(vrms/N)
+
+end subroutine ufo_geovals_rms
 
 ! ------------------------------------------------------------------------------
 
