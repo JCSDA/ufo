@@ -9,10 +9,10 @@
 
 module ufo_example_tlad_mod
   
-  use ufo_obs_example_mod
-  use ufo_obs_vectors
+  use ioda_obs_example_mod
+  use ioda_obs_vectors
   use ufo_vars_mod
-  use ufo_locs_mod
+  use ioda_locs_mod
   use ufo_geovals_mod
   use kinds
   use vert_interp_mod
@@ -63,7 +63,7 @@ subroutine ufo_example_tlad_settraj(self, geovals, obss)
 implicit none
 type(ufo_example_tlad), intent(inout) :: self
 type(ufo_geovals), intent(in)       :: geovals
-type(ufo_obs_example), intent(in) :: obss
+type(ioda_obs_example), intent(in) :: obss
 
 character(len=MAXVARLEN) :: varname
 character(len=*), parameter :: myname_="ufo_example_tlad_settraj"
@@ -93,7 +93,7 @@ implicit none
 type(ufo_example_tlad), intent(in)     :: self
 type(ufo_geovals),    intent(in)     :: geovals
 type(obs_vector),     intent(inout)  :: hofx
-type(ufo_obs_example_tlad), intent(in) :: obss
+type(ioda_obs_example), intent(in) :: obss
 
 
 end subroutine ufo_example_tlad_eqv_tl
@@ -106,7 +106,7 @@ implicit none
 type(ufo_example_tlad), intent(in)     :: self
 type(ufo_geovals),    intent(in)     :: geovals
 type(obs_vector),     intent(inout)  :: hofx
-type(ufo_obs_example_tlad), intent(in) :: obss
+type(ioda_obs_example), intent(in) :: obss
 
 
 end subroutine ufo_example_tlad_eqv_ad

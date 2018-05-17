@@ -51,24 +51,6 @@ ecbuild_add_test( TARGET  test_ufo_geovals
                   ARGS    "testinput/ufotest.json"
                   LIBS    ufo )
 
-#ecbuild_add_test( TARGET  test_ufo_locations
-#                  BOOST
-#                  SOURCES mains/TestLocations.cc
-#                  ARGS    "testinput/ufotest.json"
-#                  LIBS    ufo )
-
-ecbuild_add_test( TARGET test_ufo_observationspace
-                  BOOST
-                  SOURCES mains/TestObservationSpace.cc
-                  ARGS "testinput/ufotest.json"
-                  LIBS    ufo )
-
-ecbuild_add_test( TARGET test_ufo_obsvector
-                  BOOST
-                  SOURCES mains/TestObsVector.cc
-                  ARGS "testinput/ufotest.json"
-                  LIBS    ufo )
-
 ecbuild_add_test( TARGET  test_ufo_amsua
                   BOOST
                   SOURCES mains/TestObsOperator.cc

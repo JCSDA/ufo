@@ -16,12 +16,12 @@
 #include "eckit/config/Configuration.h"
 #include "oops/base/Variables.h"
 #include "oops/interface/ObsOperatorBase.h"
-#include "ufo/ObsSpace.h"
+#include "ioda/ObsSpace.h"
 #include "ufo/GeoVaLs.h"
-#include "ufo/Locations.h"
+#include "ioda/Locations.h"
 #include "ufo/ObsBias.h"
 #include "ufo/ObsBiasIncrement.h"
-#include "ufo/ObsVector.h"
+#include "ioda/ObsVector.h"
 #include "util/ObjectCounter.h"
 
 namespace ufo {
@@ -34,11 +34,11 @@ class ObsRadiance : public oops::ObsOperatorBase<MODEL>,
  public:
   static const std::string classname() {return "ufo::ObsRadiance";}
 
-  ObsRadiance(const ObsSpace &, const eckit::Configuration &);
+  ObsRadiance(const ioda::ObsSpace &, const eckit::Configuration &);
   virtual ~ObsRadiance();
 
 // Obs Operator
-  void obsEquiv(const GeoVaLs &, ObsVector &, const ObsBias &) const;
+  void obsEquiv(const GeoVaLs &, ioda::ObsVector &, const ObsBias &) const;
 
 // Other
   const oops::Variables & variables() const {return *varin_;}
@@ -49,13 +49,13 @@ class ObsRadiance : public oops::ObsOperatorBase<MODEL>,
  private:
   void print(std::ostream &) const;
   F90hop keyOperRadiance_;
-  const ObsSpace& odb_;
+  const ioda::ObsSpace& odb_;
   boost::scoped_ptr<const oops::Variables> varin_;
 };
 
 // -----------------------------------------------------------------------------
 template <typename MODEL>
-ObsRadiance<MODEL>::ObsRadiance(const ObsSpace & odb, const eckit::Configuration & config)
+ObsRadiance<MODEL>::ObsRadiance(const ioda::ObsSpace & odb, const eckit::Configuration & config)
   : keyOperRadiance_(0), varin_(), odb_(odb)
 {
   const eckit::Configuration * configc = &config;
@@ -85,7 +85,7 @@ ObsRadiance<MODEL>::~ObsRadiance() {
 
 // -----------------------------------------------------------------------------
 template <typename MODEL>
-void ObsRadiance<MODEL>::obsEquiv(const GeoVaLs & gom, ObsVector & ovec,
+void ObsRadiance<MODEL>::obsEquiv(const GeoVaLs & gom, ioda::ObsVector & ovec,
                          const ObsBias & bias) const {
   ufo_radiance_eqv_f90(keyOperRadiance_, gom.toFortran(), odb_.toFortran(), ovec.toFortran(), bias.toFortran());
 }

@@ -9,17 +9,17 @@
 
 #include "oops/base/Variables.h"
 #include "eckit/config/Configuration.h"
-#include "ObsSpace.h"
+#include "ioda/ObsSpace.h"
 #include "Fortran.h"
 #include "GeoVaLs.h"
-#include "ObsVector.h"
+#include "ioda/ObsVector.h"
 #include "util/Logger.h"
 
 namespace ufo {
 
 // -----------------------------------------------------------------------------
 
-ObsCheck::ObsCheck(const ObsSpace & obsdb, const oops::Variables & var,
+ObsCheck::ObsCheck(const ioda::ObsSpace & obsdb, const oops::Variables & var,
                    const util::DateTime & t1, const util::DateTime & t2) {
   oops::Log::trace() << "ObsCheck contructor starting " << t1 << " " << t2 << std::endl;
   const util::DateTime * p1 = &t1;
@@ -39,7 +39,7 @@ ObsCheck::ObsCheck(const eckit::Configuration & config) {
 
 // -----------------------------------------------------------------------------
 
-ObsCheck::ObsCheck(const ObsSpace & os) {
+ObsCheck::ObsCheck(const ioda::ObsSpace & os) {
   oops::Log::trace() << "ObsCheck ObsSpace starting" << std::endl;
   oops::Log::trace() << "ObsCheck ObsSpace end " << std::endl;
 }
@@ -59,7 +59,7 @@ void ObsCheck::print(std::ostream & os) const {
 
 // -----------------------------------------------------------------------------
 
-void ObsCheck::postFilter(const GeoVaLs & gv, const ObsVector & ov, const ObsSpace & os) const {
+void ObsCheck::postFilter(const GeoVaLs & gv, const ioda::ObsVector & ov, const ioda::ObsSpace & os) const {
   oops::Log::trace() << "ObsCheck postFilter starting" << std::endl;
   ufo_postFilter_f90(gv.toFortran(), ov.toFortran(), os.toFortran());
   oops::Log::trace() << "ObsCheck postFilter end" << std::endl;
@@ -67,7 +67,7 @@ void ObsCheck::postFilter(const GeoVaLs & gv, const ObsVector & ov, const ObsSpa
 
 // -----------------------------------------------------------------------------
 
-void ObsCheck::priorFilter(const ObsSpace & os) const {
+void ObsCheck::priorFilter(const ioda::ObsSpace & os) const {
   oops::Log::trace() << "ObsCheck priorFilter starting" << std::endl;
   ufo_priorFilter_f90(os.toFortran());
   oops::Log::trace() << "ObsCheck priorFilter end" << std::endl;

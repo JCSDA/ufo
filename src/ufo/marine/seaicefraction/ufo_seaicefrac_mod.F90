@@ -7,10 +7,10 @@
 
 module ufo_seaicefrac_mod
   
-use ufo_obs_seaicefrac_mod
-use ufo_obs_vectors
+use ioda_obs_seaicefrac_mod
+use ioda_obs_vectors
 use ufo_vars_mod
-use ufo_locs_mod
+use ioda_locs_mod
 use ufo_geovals_mod
 use kinds
   

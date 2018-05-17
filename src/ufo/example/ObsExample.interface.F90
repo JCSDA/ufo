@@ -12,11 +12,11 @@ module ufo_example_mod_c
   
   use iso_c_binding
   use config_mod
-  use ufo_obs_vectors,   only: obs_vector, ufo_obs_vect_registry
+  use ioda_obs_vectors,   only: obs_vector, ioda_obs_vect_registry
   use ufo_geovals_mod,   only: ufo_geovals
   use ufo_geovals_mod_c, only: ufo_geovals_registry
-  use ufo_obs_example_mod,   only: ufo_obs_example
-  use ufo_obs_example_mod_c, only: ufo_obs_example_registry 
+  use ioda_obs_example_mod,   only: ioda_obs_example
+  use ioda_obs_example_mod_c, only: ioda_obs_example_registry 
   use ufo_example_mod 
   implicit none
   private
@@ -85,14 +85,14 @@ integer(c_int), intent(in) :: c_bias
 type(ufo_example),     pointer :: self
 type(ufo_geovals),        pointer :: geovals
 type(obs_vector),         pointer :: hofx
-type(ufo_obs_example), pointer :: obss
+type(ioda_obs_example), pointer :: obss
 
 character(len=*), parameter :: myname_="ufo_example_eqv_c"
 
 call ufo_example_registry%get(c_key_self, self)
 call ufo_geovals_registry%get(c_key_geovals,geovals)
-call ufo_obs_vect_registry%get(c_key_hofx,hofx)
-call ufo_obs_example_registry%get(c_key_obsspace,obss)
+call ioda_obs_vect_registry%get(c_key_hofx,hofx)
+call ioda_obs_example_registry%get(c_key_obsspace,obss)
 
 ! TODO: replace with the call to your Fortran routine for observation operator
 !       (defined in ufo_<your_obs_operator_name>_mod.F90)

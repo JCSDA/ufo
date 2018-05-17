@@ -11,9 +11,9 @@ use config_mod
 use datetime_mod
 use duration_mod
 use ufo_geovals_mod
-use ufo_locs_mod
-use ufo_locs_mod_c, only : ufo_locs_registry
-use ufo_obs_vectors
+use ioda_locs_mod
+use ioda_locs_mod_c, only : ioda_locs_registry
+use ioda_obs_vectors
 use ufo_vars_mod
 use ufo_obs_data_mod
 use fckit_log_module, only : fckit_log
@@ -100,15 +100,15 @@ integer(c_int), intent(inout) :: c_key_locs
 
 type(obs_data), pointer :: self
 type(datetime) :: t1, t2
-type(ufo_locs), pointer :: locs
+type(ioda_locs), pointer :: locs
 
 call ufo_obs_data_registry%get(c_key_self, self)
 call c_f_datetime(c_t1, t1)
 call c_f_datetime(c_t2, t2)
 
-call ufo_locs_registry%init()
-call ufo_locs_registry%add(c_key_locs)
-call ufo_locs_registry%get(c_key_locs,locs)
+call ioda_locs_registry%init()
+call ioda_locs_registry%add(c_key_locs)
+call ioda_locs_registry%get(c_key_locs,locs)
 
 call self%Obspoint%GetLocs(self%nlocs, locs)
 
@@ -209,7 +209,7 @@ type(obs_vector), pointer :: ovec
 character(len=lcol) :: col
 
 call ufo_obs_data_registry%get(c_key_self, self)
-call ufo_obs_vect_registry%get(c_key_ovec,ovec)
+call ioda_obs_vect_registry%get(c_key_ovec,ovec)
 call c_f_string(c_col, col)
 
 call obs_get(self, trim(col), ovec)
@@ -230,7 +230,7 @@ type(obs_vector), pointer :: ovec
 character(len=lcol) :: col
 
 call ufo_obs_data_registry%get(c_key_self, self)
-call ufo_obs_vect_registry%get(c_key_ovec,ovec)
+call ioda_obs_vect_registry%get(c_key_ovec,ovec)
 call c_f_string(c_col, col)
 
 call obs_put(self, trim(col), ovec)

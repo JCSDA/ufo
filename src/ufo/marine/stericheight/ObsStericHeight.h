@@ -15,7 +15,7 @@
 
 #include "oops/base/Variables.h"
 #include "oops/interface/ObsOperatorBase.h"
-#include "ufo/ObsSpace.h"
+#include "ioda/ObsSpace.h"
 #include "util/ObjectCounter.h"
 
 // Forward declarations
@@ -23,12 +23,15 @@ namespace eckit {
   class Configuration;
 }
 
+namespace ioda {
+  class Locations;
+  class ObsVector;
+}
+
 namespace ufo {
   class GeoVaLs;
-  class Locations;
   class ObsBias;
   class ObsBiasIncrement;
-  class ObsVector;
 
 // -----------------------------------------------------------------------------
 /// Steric height/ sea-level observation for UFO.
@@ -38,11 +41,11 @@ class ObsStericHeight : public oops::ObsOperatorBase<MODEL>,
  public:
   static const std::string classname() {return "ufo::ObsStericHeight";}
 
-  ObsStericHeight(const ObsSpace &, const eckit::Configuration &);
+  ObsStericHeight(const ioda::ObsSpace &, const eckit::Configuration &);
   virtual ~ObsStericHeight();
 
 // Obs Operator
-  void obsEquiv(const GeoVaLs &, ObsVector &, const ObsBias &) const;
+  void obsEquiv(const GeoVaLs &, ioda::ObsVector &, const ObsBias &) const;
 
 // Other
   const oops::Variables & variables() const {return *varin_;}
@@ -53,13 +56,13 @@ class ObsStericHeight : public oops::ObsOperatorBase<MODEL>,
  private:
   void print(std::ostream &) const;
   F90hop keyOperStericHeight_;
-  const ObsSpace& odb_;
+  const ioda::ObsSpace& odb_;
   boost::scoped_ptr<const oops::Variables> varin_;
 };
 
 // -----------------------------------------------------------------------------
 template <typename MODEL>
-ObsStericHeight<MODEL>::ObsStericHeight(const ObsSpace & odb, const eckit::Configuration & config)
+ObsStericHeight<MODEL>::ObsStericHeight(const ioda::ObsSpace & odb, const eckit::Configuration & config)
   : keyOperStericHeight_(0), varin_(), odb_(odb)
 {
   const eckit::Configuration * configc = &config;
@@ -80,7 +83,7 @@ ObsStericHeight<MODEL>::~ObsStericHeight() {
 
 // -----------------------------------------------------------------------------
 template <typename MODEL>
-void ObsStericHeight<MODEL>::obsEquiv(const GeoVaLs & gom, ObsVector & ovec,
+void ObsStericHeight<MODEL>::obsEquiv(const GeoVaLs & gom, ioda::ObsVector & ovec,
                              const ObsBias & bias) const {
   ufo_stericheight_eqv_f90(keyOperStericHeight_, gom.toFortran(), odb_.toFortran(), ovec.toFortran(), bias.toFortran());
 }

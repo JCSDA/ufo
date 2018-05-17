@@ -7,10 +7,10 @@
 
 MODULE ufo_aod_mod
   
-  use ufo_obs_aod_mod
-  use ufo_obs_vectors
+  use ioda_obs_aod_mod
+  use ioda_obs_vectors
   use ufo_vars_mod
-  use ufo_locs_mod
+  use ioda_locs_mod
   use ufo_geovals_mod
   use kinds
   USE ufo_aod_misc
@@ -68,7 +68,7 @@ contains
     implicit none
     type(ufo_aod),     intent(in)    :: self
     type(ufo_geovals), intent(in)    :: geovals
-    type(ufo_obs_aod), intent(inout) :: obss
+    type(ioda_obs_aod), intent(inout) :: obss
     type(obs_vector),  intent(inout) :: hofx
 
     !*************************************************************************************

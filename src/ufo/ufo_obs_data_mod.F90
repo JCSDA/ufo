@@ -38,7 +38,7 @@ contains
   subroutine GetLocs(self, nlocs, locs)
     class(Obs_Data), intent(in) :: self
     integer, intent(in) :: nlocs
-    type(ufo_locs), intent(inout) :: locs
+    type(ioda_locs), intent(inout) :: locs
   end subroutine GetLocs
 
   function vname2vmold_(vname) result(obsmold_)

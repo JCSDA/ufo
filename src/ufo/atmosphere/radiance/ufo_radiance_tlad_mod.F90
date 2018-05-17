@@ -7,10 +7,10 @@
 
 module ufo_radiance_tlad_mod
   
-  use ufo_obs_radiance_mod
-  use ufo_obs_vectors
+  use ioda_obs_radiance_mod
+  use ioda_obs_vectors
   use ufo_vars_mod
-  use ufo_locs_mod
+  use ioda_locs_mod
   use ufo_geovals_mod
   use kinds  
 
@@ -67,7 +67,7 @@ implicit none
 type(ufo_radiance_tlad), intent(in)     :: self
 type(ufo_geovals),    intent(in)     :: geovals
 type(obs_vector),     intent(inout)  :: hofx
-type(ufo_obs_radiance), intent(in) :: obss
+type(ioda_obs_radiance), intent(in) :: obss
 
 character(len=*), parameter :: myname_="ufo_radiance_tlad_eqv_tl"
 character(max_string) :: err_msg
@@ -83,7 +83,7 @@ implicit none
 type(ufo_radiance_tlad), intent(in)     :: self
 type(ufo_geovals),    intent(in)     :: geovals
 type(obs_vector),     intent(inout)  :: hofx
-type(ufo_obs_radiance), intent(in) :: obss
+type(ioda_obs_radiance), intent(in) :: obss
 
 character(len=*), parameter :: myname_="ufo_radiance_tlad_eqv_ad"
 character(max_string) :: err_msg

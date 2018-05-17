@@ -8,8 +8,8 @@ module ufo_obscheck_mod
 
 use iso_c_binding
 use ufo_vars_mod
-use ufo_obs_vectors
-use ufo_locs_mod
+use ioda_obs_vectors
+use ioda_locs_mod
 use ufo_geovals_mod
 use ufo_geovals_mod_c, only: ufo_geovals_registry
 use ufo_obs_data_mod, only: obs_data
@@ -83,7 +83,7 @@ subroutine c_ufo_postFilter_f90(c_key_geovals, c_key_hofx,c_key_obsspace) bind(c
    write(*,*) '=======Start Post Filter (observation QC)========='
 ! Get pointers to geovals, hofx, and obsdata
    call ufo_geovals_registry%get(c_key_geovals,geovals)
-   call ufo_obs_vect_registry%get(c_key_hofx,hofx)
+   call ioda_obs_vect_registry%get(c_key_hofx,hofx)
 !   call obs_data_registry%get(c_key_obsspace,obsdata)
 !
 ! working

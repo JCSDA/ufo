@@ -15,7 +15,7 @@
 
 #include "oops/base/Variables.h"
 #include "oops/interface/LinearObsOperBase.h"
-#include "ufo/ObsSpace.h"
+#include "ioda/ObsSpace.h"
 #include "util/ObjectCounter.h"
 #include "util/Logger.h"
 
@@ -24,11 +24,14 @@ namespace util {
   class DateTime;
 }
 
+namespace ioda {
+  class ObsVector;
+}
+
 namespace ufo {
   class GeoVaLs;
   class ObsBias;
   class ObsBiasIncrement;
-  class ObsVector;
 
   // -----------------------------------------------------------------------------
   /// Simulated Steric height for  model.
@@ -38,13 +41,13 @@ namespace ufo {
   public:
       static const std::string classname() {return "ufo::ObsStericHeightTLAD";}
 
-      ObsStericHeightTLAD(const ObsSpace &, const eckit::Configuration &);    
+      ObsStericHeightTLAD(const ioda::ObsSpace &, const eckit::Configuration &);    
       virtual ~ObsStericHeightTLAD();
 
       // Obs Operators
       void setTrajectory(const GeoVaLs &, const ObsBias &);
-      void obsEquivTL(const GeoVaLs &, ObsVector &, const ObsBiasIncrement &) const;
-      void obsEquivAD(GeoVaLs &, const ObsVector &, ObsBiasIncrement &) const;
+      void obsEquivTL(const GeoVaLs &, ioda::ObsVector &, const ObsBiasIncrement &) const;
+      void obsEquivAD(GeoVaLs &, const ioda::ObsVector &, ObsBiasIncrement &) const;
 
       // Other
       const oops::Variables & variables() const {return *varin_;}
@@ -61,7 +64,7 @@ namespace ufo {
 
   // -----------------------------------------------------------------------------
   template <typename MODEL>
-    ObsStericHeightTLAD<MODEL>::ObsStericHeightTLAD(const ObsSpace & odb, const eckit::Configuration & config)
+    ObsStericHeightTLAD<MODEL>::ObsStericHeightTLAD(const ioda::ObsSpace & odb, const eckit::Configuration & config)
     : keyOperStericHeight_(0), varin_(), traj_()
     {
       std::cout << "steric height tlad =============================" << std::endl;
@@ -96,14 +99,14 @@ namespace ufo {
 
   // -----------------------------------------------------------------------------
   template <typename MODEL>
-    void ObsStericHeightTLAD<MODEL>::obsEquivTL(const GeoVaLs & geovals, ObsVector & ovec,
+    void ObsStericHeightTLAD<MODEL>::obsEquivTL(const GeoVaLs & geovals, ioda::ObsVector & ovec,
 						const ObsBiasIncrement & bias) const {
     ufo_stericheight_tlad_eqv_tl_f90(keyOperStericHeight_, geovals.toFortran(), ovec.toFortran());
   }
 
   // -----------------------------------------------------------------------------
   template <typename MODEL>
-    void ObsStericHeightTLAD<MODEL>::obsEquivAD(GeoVaLs & geovals, const ObsVector & ovec,
+    void ObsStericHeightTLAD<MODEL>::obsEquivAD(GeoVaLs & geovals, const ioda::ObsVector & ovec,
 						ObsBiasIncrement & bias) const {
     ufo_stericheight_tlad_eqv_ad_f90(keyOperStericHeight_, geovals.toFortran(), ovec.toFortran());
   }
