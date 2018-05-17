@@ -4,7 +4,7 @@
 # which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 
 ################################################################################
-# UFO 
+# UFO
 ################################################################################
 
 cmake_minimum_required( VERSION 3.3.2 FATAL_ERROR )
@@ -55,11 +55,15 @@ include_directories( ${OOPS_INCLUDE_DIRS} )
 ecbuild_use_package( PROJECT crtm VERSION 2.2.3 REQUIRED )
 include_directories( ${CRTM_INCLUDE_DIRS} )
 
+# GSW
+ecbuild_use_package( PROJECT gsw REQUIRED )
+include_directories( ${GSW_INCLUDE_DIRS} )
+
 ################################################################################
 # Export package info
 ################################################################################
 
-list( APPEND UFO_TPLS ioda crtm oops )
+list( APPEND UFO_TPLS oops ioda crtm gsw )
 
 set( UFO_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/src ${CMAKE_CURRENT_BINARY_DIR}/src
                       ${CMAKE_Fortran_MODULE_DIRECTORY} )
