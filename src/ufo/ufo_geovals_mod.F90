@@ -17,8 +17,8 @@ integer, parameter :: max_string=800
 public :: ufo_geovals, ufo_geoval, ufo_geovals_get_var
 public :: ufo_geovals_init, ufo_geovals_setup, ufo_geovals_delete, ufo_geovals_print
 public :: ufo_geovals_zero, ufo_geovals_random, ufo_geovals_dotprod, ufo_geovals_scalmult
-public :: ufo_geovals_assign, ufo_geovals_add
-public :: ufo_geovals_minmaxavg
+public :: ufo_geovals_assign, ufo_geovals_add, ufo_geovals_diff, ufo_geovals_abs
+public :: ufo_geovals_minmaxavg, ufo_geovals_normalize, ufo_geovals_maxloc
 public :: ufo_geovals_read_netcdf
 
 ! ------------------------------------------------------------------------------
@@ -162,6 +162,25 @@ end subroutine ufo_geovals_zero
 
 ! ------------------------------------------------------------------------------
 
+subroutine ufo_geovals_abs(self) 
+implicit none
+type(ufo_geovals), intent(inout) :: self
+integer :: ivar
+
+if (.not. self%lalloc) then
+  call abor1_ftn("ufo_geovals_abs: geovals not allocated")
+endif
+if (.not. self%linit) then
+  call abor1_ftn("ufo_geovals_abs: geovals not initialized")
+endif
+do ivar = 1, self%nvar
+  self%geovals(ivar)%vals = abs(self%geovals(ivar)%vals)
+enddo
+
+end subroutine ufo_geovals_abs
+
+! ------------------------------------------------------------------------------
+
 subroutine ufo_geovals_random(self) 
 use random_vectors_mod
 implicit none
@@ -233,6 +252,7 @@ enddo
 end subroutine ufo_geovals_assign
 
 ! ------------------------------------------------------------------------------
+!> Sum of two GeoVaLs objects
 
 subroutine ufo_geovals_add(self, other) 
 implicit none
@@ -241,10 +261,10 @@ type(ufo_geovals), intent(in) :: other
 integer :: jv, jo, jz
 
 if (.not. self%lalloc .or. .not. self%linit) then
-  call abor1_ftn("ufo_geovals_scalmult: geovals not allocated")
+  call abor1_ftn("ufo_geovals_add: geovals not allocated")
 endif
 if (.not. other%lalloc .or. .not. other%linit) then
-  call abor1_ftn("ufo_geovals_scalmult: geovals not allocated")
+  call abor1_ftn("ufo_geovals_add: geovals not allocated")
 endif
 
 do jv=1,self%nvar
@@ -256,6 +276,98 @@ do jv=1,self%nvar
 enddo
 
 end subroutine ufo_geovals_add
+
+! ------------------------------------------------------------------------------
+!> Difference between two GeoVaLs objects
+
+subroutine ufo_geovals_diff(self, other) 
+implicit none
+type(ufo_geovals), intent(inout) :: self
+type(ufo_geovals), intent(in) :: other
+integer :: jv, jo, jz
+
+if (.not. self%lalloc .or. .not. self%linit) then
+  call abor1_ftn("ufo_geovals_diff: geovals not allocated")
+endif
+if (.not. other%lalloc .or. .not. other%linit) then
+  call abor1_ftn("ufo_geovals_diff: geovals not allocated")
+endif
+
+do jv=1,self%nvar
+  do jo=1,self%nobs
+    do jz = 1, self%geovals(jv)%nval
+      self%geovals(jv)%vals(jz,jo) = self%geovals(jv)%vals(jz,jo) - other%geovals(jv)%vals(jz,jo)
+    enddo
+  enddo
+enddo
+
+end subroutine ufo_geovals_diff
+
+! ------------------------------------------------------------------------------
+!> Normalization of one GeoVaLs object by another
+!!
+!! \details This is a normalization operator that first computes the normalization 
+!! factor for each variable based on the rms amplitude of that variable across 
+!! all locations in the reference GeoVaLs object (other).  Then each element of 
+!! the input GeoVals object (self) is divided by these normalization factors.
+!! The operation is done in place.  So, after execution, the input GeoVaLs
+!! object will be nondimensional.
+!!
+!! \warning If the reference variable is identially zero across all
+!! locations, then the result of this operatution is set to zero for that
+!! variable.  This is to used to bypass variables that do not have a reference
+!! value in the State interpolation test.
+!!
+
+subroutine ufo_geovals_normalize(self, other) 
+implicit none
+type(ufo_geovals), intent(inout) :: self !> Input GeoVaLs object (LHS)
+type(ufo_geovals), intent(in) :: other   !> Reference GeoVaLs object (RHS)
+integer :: jv, jo, jz
+real(kind_real) :: over_nloc, vrms, norm
+
+if (.not. self%lalloc .or. .not. self%linit) then
+  call abor1_ftn("ufo_geovals_normalize: geovals not allocated")
+endif
+if (.not. other%lalloc .or. .not. other%linit) then
+  call abor1_ftn("ufo_geovals_normalize: geovals not allocated")
+endif
+if (self%nvar /= other%nvar) then
+  call abor1_ftn("ufo_geovals_normalize: reference geovals object must have the same variables as the original")
+endif
+
+
+do jv=1,self%nvar
+
+   !> Compute normalization factors for the errors based on the rms amplitude of 
+   !! each variable across all of the selected locations.  Use the "other" GeoVaLs
+   !! object as a reference, since this may be the exact analytic answer
+
+   over_nloc = 1.0_kind_real / &
+        (real(other%nobs,kind_real)*real(other%geovals(jv)%nval,kind_real))
+
+   vrms = 0.0_kind_real
+   do jo = 1, other%nobs
+      do jz = 1, other%geovals(jv)%nval
+         vrms = vrms + other%geovals(jv)%vals(jz,jo)**2
+      enddo
+   enddo
+
+   if (vrms > 0.0_kind_real) then
+      norm = 1.0_kind_real / sqrt(vrms*over_nloc)
+   else
+      norm = 0.0_kind_real
+   endif
+
+   ! Now loop through the LHS locations to compute the normalized value
+   do jo=1,self%nobs
+      do jz = 1, self%geovals(jv)%nval
+         self%geovals(jv)%vals(jz,jo) = norm*self%geovals(jv)%vals(jz,jo)
+      enddo
+   enddo
+enddo
+
+end subroutine ufo_geovals_normalize
 
 ! ------------------------------------------------------------------------------
 
@@ -301,6 +413,49 @@ pmax=maxval(self%geovals(1)%vals)
 prms=0. !sqrt(sum(self%values(:,:)**2)/real(self%nobs*self%nvar,kind_real))
 
 end subroutine ufo_geovals_minmaxavg
+
+! ------------------------------------------------------------------------------
+!> Location where the summed geovals value is maximum
+!!
+!! \details This routine computes the rms value over the vertical profile for 
+!! each location and observation then returns the location number and the 
+!! variable number where this rms value is maximum.  Intended for use with
+!! the State interpotation test in which the input GeoVaLs object is a
+!! nondimensional, positive-definite error measurement.
+
+subroutine ufo_geovals_maxloc(self, mxval, iobs, ivar)
+implicit none
+real(kind_real), intent(inout) :: mxval
+integer, intent(inout) :: iobs, ivar
+
+type(ufo_geovals), intent(in) :: self
+real(kind_real) :: vrms
+integer :: jv, jo, jz
+
+if (.not. self%lalloc .or. .not. self%linit) then
+  call abor1_ftn("ufo_geovals_maxloc: geovals not allocated")
+endif
+
+mxval = 0.0_kind_real
+
+do jv = 1,self%nvar
+   do jo = 1, self%nobs
+
+      vrms = 0.0_kind_real
+      do jz = 1, self%geovals(jv)%nval
+         vrms = vrms + self%geovals(jv)%vals(jz,jo)**2
+      enddo
+      vrms = sqrt(vrms/real(self%geovals(jv)%nval,kind_real))
+      if (vrms > mxval) then
+         vrms = mxval
+         iobs = jo
+         ivar = jv
+      endif
+
+   enddo
+enddo
+
+end subroutine ufo_geovals_maxloc
 
 ! ------------------------------------------------------------------------------
 

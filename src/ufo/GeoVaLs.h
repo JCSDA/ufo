@@ -35,17 +35,22 @@ class GeoVaLs : public util::Printable,
 
   GeoVaLs(const ioda::Locations &, const oops::Variables &);
   GeoVaLs(const eckit::Configuration &, const oops::Variables &);
+  GeoVaLs(const ioda::Locations &, const oops::Variables &,
+	  const eckit::Configuration &);
 
 //  explicit GeoVaLs(): keyGVL_(0) {}
 //  explicit GeoVaLs(int & fgvl): keyGVL_(fgvl) {}
 
   ~GeoVaLs();
 
+  void abs();
   void zero();
   void random();
   GeoVaLs & operator = (const GeoVaLs &);    
   GeoVaLs & operator*=(const double);
   GeoVaLs & operator += (const GeoVaLs &);
+  GeoVaLs & operator -= (const GeoVaLs &);
+  GeoVaLs & operator /= (const GeoVaLs &);
   double dot_product_with(const GeoVaLs & other) const;
   void read(const eckit::Configuration &);
   void write(const eckit::Configuration &) const;
