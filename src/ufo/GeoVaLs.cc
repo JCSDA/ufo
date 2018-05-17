@@ -41,7 +41,7 @@ GeoVaLs::GeoVaLs(const eckit::Configuration & config, const oops::Variables & va
   oops::Log::trace() << "GeoVaLs contructor config key = " << keyGVL_ << std::endl;
 }
 // -----------------------------------------------------------------------------
-GeoVaLs::GeoVaLs(const Locations & locs, const oops::Variables & vars,
+GeoVaLs::GeoVaLs(const ioda::Locations & locs, const oops::Variables & vars,
 		 const eckit::Configuration & config)
  : keyGVL_(-1), vars_(vars)
 {
