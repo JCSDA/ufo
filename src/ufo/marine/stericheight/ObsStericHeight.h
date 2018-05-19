@@ -16,7 +16,7 @@
 #include "oops/base/Variables.h"
 #include "oops/interface/ObsOperatorBase.h"
 #include "ioda/ObsSpace.h"
-#include "util/ObjectCounter.h"
+#include "oops/util/ObjectCounter.h"
 
 // Forward declarations
 namespace eckit {

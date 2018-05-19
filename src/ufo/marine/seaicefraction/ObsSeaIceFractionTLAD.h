@@ -16,8 +16,8 @@
 #include "oops/base/Variables.h"
 #include "oops/interface/LinearObsOperBase.h"
 #include "ioda/ObsSpace.h"
-#include "util/ObjectCounter.h"
-#include "util/Logger.h"
+#include "oops/util/ObjectCounter.h"
+#include "oops/util/Logger.h"
 
 // Forward declarations
 namespace util {

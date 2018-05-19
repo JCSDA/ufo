@@ -12,15 +12,15 @@
 #include <vector>
 
 #include "eckit/config/LocalConfiguration.h"
-#include "util/Logger.h"
+#include "oops/util/Logger.h"
 #include "oops/base/Observations.h"
 #include "oops/base/ObsSpaces.h"
 #include "oops/interface/ObsAuxControl.h"
 #include "oops/interface/ObsOperator.h"
 #include "oops/interface/ObsVector.h"
 #include "oops/runs/Application.h"
-#include "util/DateTime.h"
-#include "util/Duration.h"
+#include "oops/util/DateTime.h"
+#include "oops/util/Duration.h"
 
 namespace ufo {
 

@@ -20,7 +20,7 @@ set( ENABLE_MPI ON CACHE BOOL "Compile with MPI" )
 
 include( ecbuild_system NO_POLICY_SCOPE )
 
-ecbuild_requires_macro_version( 2.5 )
+ecbuild_requires_macro_version( 2.7 )
 
 ################################################################################
 # Project

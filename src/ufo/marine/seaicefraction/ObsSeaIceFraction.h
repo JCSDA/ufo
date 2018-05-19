@@ -22,7 +22,7 @@
 #include "ufo/ObsBias.h"
 #include "ufo/ObsBiasIncrement.h"
 #include "ioda/ObsVector.h"
-#include "util/ObjectCounter.h"
+#include "oops/util/ObjectCounter.h"
 
 namespace ufo {
 

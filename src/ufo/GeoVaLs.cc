@@ -11,7 +11,7 @@
 #include "eckit/config/Configuration.h"
 #include "ioda/Locations.h"
 #include "Fortran.h"
-#include "util/Logger.h"
+#include "oops/util/Logger.h"
 
 namespace ufo {
 // -----------------------------------------------------------------------------

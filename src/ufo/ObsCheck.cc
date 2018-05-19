@@ -13,7 +13,7 @@
 #include "Fortran.h"
 #include "GeoVaLs.h"
 #include "ioda/ObsVector.h"
-#include "util/Logger.h"
+#include "oops/util/Logger.h"
 
 namespace ufo {
 
