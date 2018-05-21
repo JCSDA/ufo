@@ -64,11 +64,11 @@
         "ObsType": "SeaIceFraction",
         "ObsData": {
           "ObsDataIn": {
-            "obsfile": "Data/seaice_obs.nc"
+            "obsfile": "Data/seaice_obs-2018-04-15.nc"
           }
         },
         "GeoVaLs": {
-          "norm": "556.08282359559064",
+          "norm": "556.82045213222068",
           "random": "1",
           "nobs": 309091
         },
@@ -87,7 +87,7 @@
           "lon2": "30"
         },
         "GeoVaLs": {
-          "norm": "4.5931200476946756",
+          "norm": "4.1577761471926129",
           "random": "1",
           "nobs": "9"
         },

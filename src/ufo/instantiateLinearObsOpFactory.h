@@ -14,6 +14,7 @@
 #include "marine/seaicefraction/ObsSeaIceFractionTLAD.h"
 #include "marine/seaicethickness/ObsSeaIceThicknessTLAD.h"
 #include "marine/stericheight/ObsStericHeightTLAD.h"
+#include "marine/insitutemperature/ObsInsituTemperatureTLAD.h"
 //Constituents
 #include "constituents/aod/ObsAodTLAD.h"
 
@@ -25,6 +26,7 @@ template<typename MODEL> void instantiateLinearObsOpFactory() {
   static oops::LinearObsOpMaker<MODEL, ObsStericHeightTLAD<MODEL>> makerStericHeightTL_("StericHeight");
   static oops::LinearObsOpMaker<MODEL, ObsSeaIceFractionTLAD<MODEL>> makerFractionTL_("SeaIceFraction");  
   static oops::LinearObsOpMaker<MODEL, ObsSeaIceThicknessTLAD<MODEL>> makerThicknessTL("SeaIceThickness");
+  static oops::LinearObsOpMaker<MODEL, ObsInsituTemperatureTLAD<MODEL>> makerInsituTemperatureTL("InsituTemperature");
   static oops::LinearObsOpMaker<MODEL, ObsAodTLAD<MODEL>> makerAodTL_("Aod");
 }
 
