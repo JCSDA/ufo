@@ -6,7 +6,7 @@
 !> Fortran module to handle temperature profile observations
 
 module ufo_insitutemperature_mod_c
-  
+
   use iso_c_binding
   use config_mod
   use ioda_obs_vectors,   only: obs_vector, ioda_obs_vect_registry
@@ -74,13 +74,13 @@ integer(c_int), intent(in) :: c_bias
 type(ufo_insitutemperature), pointer :: self
 type(ufo_geovals),    pointer :: geovals
 type(obs_vector),     pointer :: hofx
-type(ufo_obs_insitutemperature), pointer :: obs_ti
+type(ioda_obs_insitutemperature), pointer :: obs_ti
 character(len=*), parameter :: myname_="ufo_insitutemperature_eqv_c"
 
 call ufo_insitutemperature_registry%get(c_key_self, self)
 call ufo_geovals_registry%get(c_key_geovals,geovals)
 call ioda_obs_vect_registry%get(c_key_hofx,hofx)
-call ufo_obs_insitutemperature_registry%get(c_key_obsspace,obs_ti)
+call ioda_obs_insitutemperature_registry%get(c_key_obsspace,obs_ti)
 
 call ufo_insitutemperature_eqv(self, geovals, hofx, obs_ti)
 

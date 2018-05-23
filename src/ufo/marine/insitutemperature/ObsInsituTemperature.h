@@ -22,7 +22,7 @@
 #include "ufo/ObsBias.h"
 #include "ufo/ObsBiasIncrement.h"
 #include "ioda/ObsVector.h"
-#include "util/ObjectCounter.h"
+#include "oops/util/ObjectCounter.h"
 
 namespace ufo {
 
@@ -59,7 +59,7 @@ template <typename MODEL>
   : keyOperInsituTemperature_(0), varin_(), odb_(odb)
 {
   const eckit::Configuration * configc = &config;
-  //ufo_insitutemperature_setup_f90(keyOperInsituTemperature_, &configc);
+  ufo_insitutemperature_setup_f90(keyOperInsituTemperature_, &configc);
   const std::vector<std::string> vv{"ocean_potential_temperature", "ocean_salinity", "ocean_layer_thickness"};
   varin_.reset(new oops::Variables(vv));
   oops::Log::trace() << "ObsInsituTemperature created." << std::endl;
@@ -68,14 +68,14 @@ template <typename MODEL>
 // -----------------------------------------------------------------------------
 template <typename MODEL>
 ObsInsituTemperature<MODEL>::~ObsInsituTemperature() {
-  //ufo_insitutemperature_delete_f90(keyOperInsituTemperature_);
+  ufo_insitutemperature_delete_f90(keyOperInsituTemperature_);
   oops::Log::trace() << "ObsInsituTemperature destructed" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 template <typename MODEL>
   void ObsInsituTemperature<MODEL>::obsEquiv(const GeoVaLs & gom, ioda::ObsVector & ovec, const ObsBias & bias) const {
-  //ufo_insitutemperature_eqv_f90(keyOperInsituTemperature_, gom.toFortran(), odb_.toFortran(), ovec.toFortran(), bias.toFortran());
+  ufo_insitutemperature_eqv_f90(keyOperInsituTemperature_, gom.toFortran(), odb_.toFortran(), ovec.toFortran(), bias.toFortran());
 }
 
 // -----------------------------------------------------------------------------

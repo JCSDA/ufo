@@ -7,10 +7,10 @@
 
 module ufo_insitutemperature_mod
 
-  use ufo_obs_insitutemperature_mod
-  use ufo_obs_vectors
+  use ioda_obs_insitutemperature_mod
+  use ioda_obs_vectors
   use ufo_vars_mod
-  use ufo_locs_mod
+  use ioda_locs_mod
   use ufo_geovals_mod
   use kinds
 
@@ -31,7 +31,7 @@ contains
   ! ------------------------------------------------------------------------------
 
   subroutine ufo_insitutemperature_eqv(self, geovals, hofx, obs_ti)
-    use m_diag_argo
+    use m_diag_marine_conv
     use nc_diag_write_mod, only: nc_diag_init, nc_diag_metadata, nc_diag_write
     use gsw_pot_to_insitu
     !use insitu_temperature_mod
@@ -41,7 +41,7 @@ contains
     implicit none
     type(ufo_insitutemperature), intent(in)     :: self       !< Trajectory !!!! REMOVE, NOT USED!!!! 
     type(ufo_geovals), intent(in)                :: geovals    !< Model's Tp, Sp, h interpolated at obs location 
-    type(ufo_obs_insitutemperature), intent(in) :: obs_ti     !< Insitu temperature observations
+    type(ioda_obs_insitutemperature), intent(in) :: obs_ti     !< Insitu temperature observations
     type(obs_vector),  intent(inout)             :: hofx       !< Ti(Tp,Sp,h)
 
     character(len=*), parameter :: myname_="ufo_insitutemperature_eqv"
@@ -60,12 +60,10 @@ contains
     ! nc_diag stuff
     logical :: append
     character(len=120) :: filename !< name of outpu file for omf, lon, lat, ...
-    type(diag_argo_tracer), allocatable :: Argo(:)
-    type(diag_argo_header) :: Argo_header
+    type(diag_marine_conv_tracer), allocatable :: Argo(:)
 
-    ! check if nobs is consistent in geovals & hofx    
+    ! check if nobs is consistent in geovals & hofx
     if (geovals%nobs /= hofx%nobs) then
-       print *,geovals%nobs,hofx%nobs
        write(err_msg,*) myname_, ' error: nobs inconsistent!'
        call abor1_ftn(err_msg)
     endif
@@ -88,17 +86,9 @@ contains
        call abor1_ftn(err_msg)
     endif
 
-    filename="test.nc"
-    allocate(Argo(hofx%nobs))
-    allocate(Argo_header%ObsType(1))
-    Argo_header%ObsType(1)            = 'aaa'
-    Argo_header%n_ObsType             = 1 
-    Argo_header%n_Observations_Tracer = hofx%nobs
-    Argo_header%date                  = 20180415
-
     nlev = temp%nval
     nobs = temp%nobs        
-    !allocate(tempi(nlev,nobs))
+    allocate(tempi(nlev,nobs))
     allocate(pressure(nlev,nobs), depth(nlev,nobs))
     do iobs = 1,hofx%nobs
        !< Depth from layer thickness
@@ -108,6 +98,15 @@ contains
        end do          
     end do
 
+    do iobs = 1,hofx%nobs
+       do ilev = 1, nlev
+          lono = obs_ti%lon(iobs)
+          lato = obs_ti%lat(iobs)          
+          call insitu_t_nl(tempi(ilev,iobs),temp%vals(ilev,iobs),salt%vals(ilev,iobs),lono,lato,depth(ilev,iobs))
+       end do
+    end do
+
+    allocate(Argo(hofx%nobs))    
     hofx%values = 0.0
     ! insitu temperature profile obs operator
     do iobs = 1,hofx%nobs
@@ -129,53 +128,38 @@ contains
 
        ! Get insitu temp at model levels and obs location (lono, lato, zo)
        call insitu_t_nl(hofx%values(iobs),tp,sp,lono,lato,deptho)
-       print *,'hofx%values(iobs)=',hofx%values(iobs)
+
        if (isnan(hofx%values(iobs))) then !!!!!! HACK !!!!!!!!!!!!!!!!!!!!!
-          print *,'in nl:',iobs,deptho
           hofx%values(iobs)=0.0 !!!! NEED TO QC OUT BAD OBS LOCATION !!!!!!
        end if
+       
+       Argo(iobs)%Station_ID                     = obs_ti%idx(iobs)
+       Argo(iobs)%Observation_Type               = 1.0
+       Argo(iobs)%Latitude                       = obs_ti%lat(iobs)
+       Argo(iobs)%Longitude                      = obs_ti%lon(iobs)
+       Argo(iobs)%Station_Depth                  = obs_ti%depth(iobs)
+       Argo(iobs)%Time                           = 1.0
+       Argo(iobs)%Observation                    = obs_ti%val(iobs)
+       Argo(iobs)%Obs_Minus_Forecast_adjusted    = obs_ti%val(iobs) - hofx%values(iobs) 
+       Argo(iobs)%Obs_Minus_Forecast_unadjusted  = obs_ti%val(iobs) - hofx%values(iobs) 
 
-!!$       Argo(iobs)%Station_ID                     = obs_ti%idx(iobs)
-!!$       Argo(iobs)%Observation_Type               = 1.0
-!!$       Argo(iobs)%Latitude                       = obs_ti%lat(iobs)
-!!$       Argo(iobs)%Longitude                      = obs_ti%lon(iobs)
-!!$       Argo(iobs)%Station_Depth                  = obs_ti%depth(iobs)
-!!$       Argo(iobs)%Time                           = 1.0
-!!$       Argo(iobs)%Observation                    = obs_ti%val(iobs)
-!!$       Argo(iobs)%Obs_Minus_Forecast_adjusted    = obs_ti%val(iobs) - hofx%values(iobs) 
-!!$       Argo(iobs)%Obs_Minus_Forecast_unadjusted  = obs_ti%val(iobs) - hofx%values(iobs) 
-!!$
-       print *, "==================================================="
-       print *, "iobs = ", iobs
-       print *, "lono,lato,deptho = ",lono,lato,deptho
-       print *, "model max depth:",sum(h%vals(:,iobs))
-       print *, "Ti_o = ",obs_ti%val(iobs)      
-       print *, "hofx(iobs) = ", hofx%values(iobs)      
-       print *, "==================================================="
-!!$       write(401,*)hofx%values(iobs)
+       write(402,*)hofx%values(iobs)
        
     enddo
 
-    !filename='test-obs-geovals.nc'
-    !append=.false.
-    !call write_split_argo_diag_nc(filename,Argo_header, Argo, append)
-    !call nc_diag_init(filename)
-    !call nc_diag_metadata("Longitude",                     Argo(1)%Longitude                      ) 
-    !call nc_diag_write
-    !read(*,*)
-
-     !    call tonc(filename,Argo,tempi,temp,salt,h)
+    filename='test-obs-geovals.nc'
+    call tonc(filename,Argo,tempi,temp,salt,h)
     deallocate(Argo)
 
   end subroutine ufo_insitutemperature_eqv
 
   subroutine tonc(filename,argo,tempi,temp,salt,h)
     use netcdf
-    use m_diag_argo
+    use m_diag_marine_conv
     implicit none
 
     character(len=120), intent(in)           :: filename !< name of outpu file for omf, lon, lat, ...
-    type(diag_argo_tracer), intent(in)       :: Argo(:)  !< Argo obs
+    type(diag_marine_conv_tracer), intent(in)       :: Argo(:)  !< Argo obs
     real(kind_real), allocatable, intent(in) :: tempi(:,:)
     type(ufo_geoval), pointer, intent(in)    :: temp, salt, h
 
@@ -232,17 +216,17 @@ contains
     ! Writing
     allocate(obsid(size(Argo(:),1)))
     obsid=3073
-    call check(nf90_put_var(iNcid, iVarLON_ID , obsid(:)))!Argo(:)%Station_ID))    
+    call check(nf90_put_var(iNcid, iVarLON_ID , obsid(:)))!Argo(:)%Station_ID))
     call check(nf90_put_var(iNcid, iVarLON_ID , Argo(:)%Longitude))
     call check(nf90_put_var(iNcid, iVarLAT_ID , Argo(:)%Latitude))    
     call check(nf90_put_var(iNcid, iVarLev_ID , Argo(:)%Station_Depth))
     call check(nf90_put_var(iNcid, iVarObs_ID , Argo(:)%Observation))
     call check(nf90_put_var(iNcid, iVarOMF_ID , Argo(:)%Obs_Minus_Forecast_adjusted))
     call check(nf90_put_var(iNcid, iVarOMA_ID , Argo(:)%Obs_Minus_Forecast_adjusted))
-
     call check(nf90_put_var(iNcid, iVartemp_ID , temp%vals))
     call check(nf90_put_var(iNcid, iVarsalt_ID , salt%vals))
-    call check(nf90_put_var(iNcid, iVarh_ID , h%vals))     
+    call check(nf90_put_var(iNcid, iVarh_ID , h%vals))
+    !call check(nf90_put_var(iNcid, iVarSIGO_ID , Argo%sigo))    
     call check(nf90_put_var(iNcid, iVartempi_ID , tempi))
 
     ! Close file.
@@ -253,14 +237,7 @@ contains
   subroutine check(status)
     use netcdf
     IMPLICIT NONE
-    !---------------------------------------------------------------------
     integer(4), intent ( in) :: status
-    !
-    !- End of header -----------------------------------------------------
-    !---------------------------------------------------------------------
-    ! Subroutine Body
-    !---------------------------------------------------------------------
-
     if(status /= nf90_noerr) then
        print *, trim(nf90_strerror(status))
        stop "Stopped"

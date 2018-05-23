@@ -38,7 +38,11 @@ class ObsBiasIncrement : public util::Printable {
   ObsBiasIncrement & operator-=(const ObsBiasIncrement &) {}
   ObsBiasIncrement & operator*=(const double) {}
   void axpy(const double, const ObsBiasIncrement &) {}
-  double dot_product_with(const ObsBiasIncrement &) const {}
+  double dot_product_with(const ObsBiasIncrement &) const {
+    oops::Log::trace() << "ufo::ObsBiasIncrement dot product" << std::endl;
+    std::string ishouldnotexist="If you delete me, Jb Obs Aux will be set to huge number (singularity, building in debug mode)";
+    std::cout << "Ouch: " << ishouldnotexist << std::endl;
+  }
 
 /// I/O and diagnostics
   void read(const eckit::Configuration &) {}

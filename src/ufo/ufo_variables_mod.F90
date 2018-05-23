@@ -73,6 +73,7 @@ character(len=MAXVARLEN), public :: var_ocn_pot_temp  = "ocean_potential_tempera
 character(len=MAXVARLEN), public :: var_ocn_con_temp  = "ocean_conservative_temperature"
 character(len=MAXVARLEN), public :: var_ocn_abs_salt  = "ocean_absolute_salinity"
 character(len=MAXVARLEN), public :: var_ocn_salt      = "ocean_salinity"
+character(len=MAXVARLEN), public :: var_ocn_lay_thick = "ocean_layer_thickness"
 
 ! ------------------------------------------------------------------------------
 
@@ -141,7 +142,6 @@ integer :: ivar
 ufo_vars_getindex = -1
 
 do ivar = 1, self%nv
-   print *,'--------------------',self%fldnames(ivar),varname
   if (self%fldnames(ivar) == varname) then
     ufo_vars_getindex = ivar
     exit
