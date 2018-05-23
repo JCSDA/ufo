@@ -11,7 +11,6 @@ PREPEND( _p_seaicethickness_files  "marine/seaicethickness"  ${seaicethickness_f
 PREPEND( _p_seaicefraction_files   "marine/seaicefraction"   ${seaicefraction_files} )
 PREPEND( _p_stericheight_files     "marine/stericheight"     ${stericheight_files} )
 PREPEND( _p_insitutemperature_files     "marine/insitutemperature"     ${insitutemperature_files} )
-PREPEND( _p_test     "marine/insitutemperature"     ${insitutemperature_files} )
 
 set ( marine_src_files
     ${_p_gsw_files}
