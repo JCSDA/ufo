@@ -46,10 +46,11 @@ endforeach(FILENAME)
 
 # Add marine test data
 list( APPEND ufo_marine_test_data
-  marineobs/t0n156e_dy.cdf
+  marineobs/t0n156e_dy.nc
+  marineobs/t0n156e_dy_geovals.nc  
   marineobs/Jason-3-2018-04-15.nc
   marineobs/seaice_obs-2018-04-15.nc
-  marineobs/cryosat2-2018-04-15.nc
+  marineobs/cryosat2-2018-04-15.nc  
 )
 foreach(FILENAME ${ufo_marine_test_data})
     get_filename_component(filename ${FILENAME} NAME )
