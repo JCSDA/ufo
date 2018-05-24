@@ -38,7 +38,7 @@ class ObsSeaSurfaceTemp : public oops::ObsOperatorBase<MODEL>,
   virtual ~ObsSeaSurfaceTemp();
 
 // Obs Operator
-  void obsEquiv(const GeoVaLs &, ObsVector &, const ObsBias &) const;
+  void obsEquiv(const GeoVaLs &, ioda::ObsVector &, const ObsBias &) const;
 
 // Other
   const oops::Variables & variables() const {return *varin_;}
@@ -74,7 +74,7 @@ ObsSeaSurfaceTemp<MODEL>::~ObsSeaSurfaceTemp() {
 
 // -----------------------------------------------------------------------------
 template <typename MODEL>
-void ObsSeaSurfaceTemp<MODEL>::obsEquiv(const GeoVaLs & gom, ObsVector & ovec,
+  void ObsSeaSurfaceTemp<MODEL>::obsEquiv(const GeoVaLs & gom, ioda::ObsVector & ovec,
                              const ObsBias & bias) const {
   ufo_seasurfacetemp_eqv_f90(keyOperSeaSurfaceTemp_, gom.toFortran(), odb_.toFortran(), ovec.toFortran(), bias.toFortran());
 }

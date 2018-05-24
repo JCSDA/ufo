@@ -41,7 +41,7 @@ class ObsSeaSurfaceTempTLAD : public oops::LinearObsOperBase<MODEL>,
 public:
   static const std::string classname() {return "ufo::ObsSeaSurfaceTempTLAD";}
 
-  ObsSeaSurfaceTempTLAD(const ObsSpace &, const eckit::Configuration &);    
+  ObsSeaSurfaceTempTLAD(const ioda::ObsSpace &, const eckit::Configuration &);    
   virtual ~ObsSeaSurfaceTempTLAD();
 
   // Obs Operators
@@ -63,7 +63,7 @@ private:
 
 // -----------------------------------------------------------------------------
 template <typename MODEL>
-ObsSeaSurfaceTempTLAD<MODEL>::ObsSeaSurfaceTempTLAD(const ObsSpace & odb, const eckit::Configuration & config)
+  ObsSeaSurfaceTempTLAD<MODEL>::ObsSeaSurfaceTempTLAD(const ioda::ObsSpace & odb, const eckit::Configuration & config)
   : keyOperSeaSurfaceTemp_(0), varin_()
 {
   const eckit::Configuration * configc = &config;

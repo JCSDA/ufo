@@ -97,7 +97,7 @@ character(len=*), parameter :: myname_="ufo_seasurfacetemp_tlad_eqv_tl_c"
 
 call ufo_seasurfacetemp_tlad_registry%get(c_key_self, self)
 call ufo_geovals_registry%get(c_key_geovals,geovals)
-call ufo_obs_vect_registry%get(c_key_hofx,hofx)
+call ioda_obs_vect_registry%get(c_key_hofx,hofx)
 
 call ufo_seasurfacetemp_tlad_eqv_tl(self, geovals, hofx)
 
@@ -121,7 +121,7 @@ character(len=*), parameter :: myname_="ufo_seasurfacetemp_tlad_eqv_ad_c"
 
 call ufo_seasurfacetemp_tlad_registry%get(c_key_self, self)
 call ufo_geovals_registry%get(c_key_geovals,geovals)
-call ufo_obs_vect_registry%get(c_key_hofx,hofx)
+call ioda_obs_vect_registry%get(c_key_hofx,hofx)
 
 call ufo_seasurfacetemp_tlad_eqv_ad(self, geovals, hofx)
 

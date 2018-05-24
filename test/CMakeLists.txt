@@ -11,6 +11,7 @@ list( APPEND ufo_test_input
   testinput/radiosonde.json
   testinput/tprof.json
   testinput/seaice.json
+  testinput/sea_surface_temp.json  
   testinput/aod.json
 )
 
@@ -50,7 +51,8 @@ list( APPEND ufo_marine_test_data
   marineobs/t0n156e_dy_geovals.nc  
   marineobs/Jason-3-2018-04-15.nc
   marineobs/seaice_obs-2018-04-15.nc
-  marineobs/cryosat2-2018-04-15.nc  
+  marineobs/cryosat2-2018-04-15.nc
+  marineobs/sst_obs-2018-04-15.nc
 )
 foreach(FILENAME ${ufo_marine_test_data})
     get_filename_component(filename ${FILENAME} NAME )
@@ -97,6 +99,12 @@ ecbuild_add_test( TARGET  test_ufo_seaice
                   ARGS    "testinput/seaice.json"
                   LIBS    ufo )
 
+ecbuild_add_test( TARGET  test_ufo_sst
+                  BOOST
+                  SOURCES mains/TestObsOperator.cc
+                  ARGS    "testinput/sea_surface_temp.json"
+                  LIBS    ufo )
+
 ecbuild_add_test( TARGET  test_ufo_aod
                   BOOST
                   SOURCES mains/TestObsOperator.cc
@@ -107,6 +115,12 @@ ecbuild_add_test( TARGET  test_ufo_obsop_seaice_tlad
                   BOOST
                   SOURCES mains/TestObsOperatorTLAD.cc
                   ARGS    "testinput/seaice.json"
+                  LIBS    ufo )
+
+ecbuild_add_test( TARGET  test_ufo_obsop_sst_tlad
+                  BOOST
+                  SOURCES mains/TestObsOperatorTLAD.cc
+                  ARGS    "testinput/sea_surface_temp.json"
                   LIBS    ufo )
 
 ecbuild_add_test( TARGET  test_ufo_obsop_rsonde_tlad

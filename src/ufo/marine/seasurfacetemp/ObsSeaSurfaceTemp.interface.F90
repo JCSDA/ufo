@@ -79,7 +79,7 @@ character(len=*), parameter :: myname_="ufo_seasurfacetemp_eqv_c"
 
 call ufo_seasurfacetemp_registry%get(c_key_self, self)
 call ufo_geovals_registry%get(c_key_geovals,geovals)
-call ufo_obs_vect_registry%get(c_key_hofx,hofx)
+call ioda_obs_vect_registry%get(c_key_hofx,hofx)
 
 call ufo_seasurfacetemp_eqv(self, geovals, hofx)
 
