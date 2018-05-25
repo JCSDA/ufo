@@ -19,7 +19,8 @@ public :: ufo_geovals_init, ufo_geovals_setup, ufo_geovals_delete, ufo_geovals_p
 public :: ufo_geovals_zero, ufo_geovals_random, ufo_geovals_dotprod, ufo_geovals_scalmult
 public :: ufo_geovals_assign, ufo_geovals_add, ufo_geovals_diff, ufo_geovals_abs
 public :: ufo_geovals_minmaxavg, ufo_geovals_normalize, ufo_geovals_maxloc
-public :: ufo_geovals_read_netcdf, ufo_geovals_rms
+public :: ufo_geovals_read_netcdf, ufo_geovals_rms, ufo_geovals_copy
+public :: ufo_geovals_analytic_init
 
 ! ------------------------------------------------------------------------------
 
@@ -329,6 +330,143 @@ enddo
 end subroutine ufo_geovals_diff
 
 ! ------------------------------------------------------------------------------
+!> Copy one GeoVaLs object into another
+!!
+
+subroutine ufo_geovals_copy(self, other) 
+implicit none
+type(ufo_geovals), intent(in) :: self
+type(ufo_geovals), intent(inout) :: other
+integer :: jv
+
+if (.not. self%lalloc .or. .not. self%linit) then
+  call abor1_ftn("ufo_geovals_copy: geovals not defined")
+endif
+
+call ufo_geovals_delete(other)
+
+call ufo_vars_clone(self%variables,other%variables)
+
+other%nobs = self%nobs
+other%nvar = self%nvar
+
+allocate(other%geovals(other%nvar))
+do jv = 1, other%nvar
+   other%geovals(jv)%nval = self%geovals(jv)%nval
+   other%geovals(jv)%nobs = self%geovals(jv)%nobs
+   allocate(other%geovals(jv)%vals(other%geovals(jv)%nval, &
+                                     other%geovals(jv)%nobs))
+   other%geovals(jv)%vals = self%geovals(jv)%vals
+enddo
+
+other%lalloc = .true.
+other%linit = .true.
+
+end subroutine ufo_geovals_copy
+
+! ------------------------------------------------------------------------------
+!> Initialize a GeoVaLs object based on an analytic state
+!!
+!! \details **ufo_geovals_analytic_init_c()** takes an existing ufo::GeoVaLs object 
+!! and fills in values based on one of several analytic solutions.  This initialization
+!! is intended to be used with the **TestStateInterpolation()** test; see there for
+!! further information.
+!!
+!! Currently implemented options for analytic_init include:
+!! * dcmip-test-1-1: 3D deformational flow
+!! * dcmip-test-1-2: 3D Hadley-like meridional circulation
+!!
+!! \warning Currently only temperature is implemented.  For variables other than
+!! temperature, the input GeoVaLs object is not changed.  This effectively
+!! disables the interpolation test for that variable by setting the normalized
+!! error to zero.
+!!
+!! \warning Currently there is no conversion between temperature and virtual
+!! temperature
+!!
+!! \date May, 2018: Created by M. Miesch (JCSDA)
+!!
+!! \sa test::TestStateInterpolation()
+!!
+
+subroutine ufo_geovals_analytic_init(self, locs, ic) 
+use ioda_locs_mod, only : ioda_locs
+use dcmip_initial_conditions_test_1_2_3, only : test1_advection_deformation, &
+                                  test1_advection_hadley, test3_gravity_wave  
+implicit none
+type(ufo_geovals), intent(inout) :: self
+type(ioda_locs), intent(in)      :: locs
+character(*), intent(in)         :: ic
+
+real(kind_real) :: pi = acos(-1.0_kind_real)
+real(kind_real) :: deg_to_rad,rlat, rlon
+real(kind_real) :: p0, kz, u0, v0, w0, t0, phis0, ps0, rho0, hum0
+real(kind_real) :: q1, q2, q3, q4
+integer :: ivar, iloc, ival
+
+if (.not. self%lalloc .or. .not. self%linit) then
+  call abor1_ftn("ufo_geovals_analytic_init: geovals not defined")
+endif
+
+! The last variable should be the ln pressure coordinate.  That's
+! where we get the height information for the analytic init
+if (trim(self%variables%fldnames(self%nvar)) /= trim(var_prsl)) then
+  call abor1_ftn("ufo_geovals_analytic_init: pressure coordinate not defined")
+endif
+
+deg_to_rad = pi/180.0_kind_real
+
+do ivar = 1, self%nvar-1
+
+   do iloc = 1, self%geovals(ivar)%nobs
+
+      ! convert lat and lon to radians
+      rlat = deg_to_rad * locs%lat(iloc)
+      rlon = deg_to_rad*modulo(locs%lon(iloc)+180.0_kind_real,360.0_kind_real) - pi
+    
+      do ival = 1, self%geovals(ivar)%nval                  
+
+         ! obtain height from the existing GeoVaLs object, which should be an
+         ! output of the State::getValues() method
+         p0 = exp(self%geovals(ivar)%vals(ival,iloc))
+
+         init_option: select case (trim(ic))
+
+         case ("dcmip-test-1-1")
+
+            call test1_advection_deformation(rlon,rlat,p0,kz,0,u0,v0,w0,&
+                                             t0,phis0,ps0,rho0,hum0,q1,q2,q3,q4)
+            
+         case ("dcmip-test-1-2")
+
+            call test1_advection_hadley(rlon,rlat,p0,kz,0,u0,v0,w0,&
+                                        t0,phis0,ps0,rho0,hum0,q1)
+
+         case ("dcmip-test-3-1")
+
+            call test3_gravity_wave(rlon,rlat,p0,kz,0,u0,v0,w0,&
+                                        t0,phis0,ps0,rho0,hum0)
+
+         case default
+
+            call abor1_ftn("ufo_geovals_analytic_init: invalid analytic_init")
+
+         end select init_option
+
+         ! currently only temperture is implemented         
+         if (trim(self%variables%fldnames(ivar)) == trim(var_tv)) then
+            ! Warning: we may need a conversion from temperature to
+            ! virtual temperture here
+            self%geovals(ivar)%vals(ival,iloc) = t0
+         endif
+         
+      enddo      
+   enddo
+enddo
+
+end subroutine ufo_geovals_analytic_init
+
+! ------------------------------------------------------------------------------
 !> Normalization of one GeoVaLs object by another
 !!
 !! \details This is a normalization operator that first computes the normalization 
@@ -462,6 +600,8 @@ if (.not. self%lalloc .or. .not. self%linit) then
 endif
 
 mxval = 0.0_kind_real
+iobs = 1
+ivar = 1
 
 do jv = 1,self%nvar
    do jo = 1, self%nobs
@@ -472,7 +612,7 @@ do jv = 1,self%nvar
       enddo
       vrms = sqrt(vrms/real(self%geovals(jv)%nval,kind_real))
       if (vrms > mxval) then
-         vrms = mxval
+         mxval = vrms
          iobs = jo
          ivar = jv
       endif
