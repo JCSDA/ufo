@@ -73,7 +73,6 @@ integer, intent(in) :: nobs
 
 integer :: ivar
 
-print *,"---------- IN GEOVALS SETUP",nobs,vars%nv,vars%fldnames
 call ufo_geovals_delete(self)
 self%nobs = nobs
 self%nvar = vars%nv
@@ -84,7 +83,6 @@ do ivar = 1, self%nvar
   self%geovals(ivar)%nval = 0
 enddo
 self%lalloc = .true.
-print *,"---------- IN GEOVALS SETUP"
 end subroutine ufo_geovals_setup
 
 ! ------------------------------------------------------------------------------
@@ -119,14 +117,13 @@ character(MAXVARLEN), intent(in) :: varname
 type(ufo_geoval), pointer, intent(out)    :: geoval
 
 integer :: ivar
-print *,'============================================= get var'
-print *,varname
+
 if (.not. self%lalloc .or. .not. self%linit) then
    !call abor1_ftn("ufo_geovals_get_var: geovals not allocated")
 endif
 
 ivar = ufo_vars_getindex(self%variables, varname)
-print *,'============================================= get var',ivar
+
 if (ivar < 0) then
   ufo_geovals_get_var = .false.
 else
@@ -418,7 +415,7 @@ prod=0.0
 do ivar = 1, self%nvar
   nval = self%geovals(ivar)%nval
   do ival = 1, nval
-    do iobs = 1, self%nobs
+     do iobs = 1, self%nobs
       prod = prod + self%geovals(ivar)%vals(ival,iobs) * &
                     other%geovals(ivar)%vals(ival,iobs)
     enddo

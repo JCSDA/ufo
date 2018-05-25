@@ -9,6 +9,7 @@ list( APPEND ufo_test_input
   testinput/ufocrtm.json
   testinput/amsua.json
   testinput/radiosonde.json
+  testinput/tprof.json
   testinput/seaice.json
   testinput/aod.json
 )
@@ -43,6 +44,20 @@ foreach(FILENAME ${ufo_test_data})
            ${CMAKE_CURRENT_BINARY_DIR}/Data/${FILENAME} )
 endforeach(FILENAME)
 
+# Add marine test data
+list( APPEND ufo_marine_test_data
+  marineobs/t0n156e_dy.nc
+  marineobs/t0n156e_dy_geovals.nc  
+  marineobs/Jason-3-2018-04-15.nc
+  marineobs/seaice_obs-2018-04-15.nc
+  marineobs/cryosat2-2018-04-15.nc  
+)
+foreach(FILENAME ${ufo_marine_test_data})
+    get_filename_component(filename ${FILENAME} NAME )
+    execute_process( COMMAND ${CMAKE_COMMAND} -E create_symlink
+           ${CMAKE_CURRENT_SOURCE_DIR}/testinput/${FILENAME}
+           ${CMAKE_CURRENT_BINARY_DIR}/Data/${filename} )
+endforeach(FILENAME)
 #####################################################################
 
 ecbuild_add_test( TARGET  test_ufo_geovals
@@ -62,6 +77,18 @@ ecbuild_add_test( TARGET  test_ufo_radiosonde
                   MPI     6
                   SOURCES mains/TestObsOperator.cc
                   ARGS    "testinput/radiosonde.json"
+                  LIBS    ufo )
+
+ecbuild_add_test( TARGET  test_ufo_insitutemperature
+                  BOOST
+                  SOURCES mains/TestObsOperator.cc
+                  ARGS    "testinput/tprof.json"
+                  LIBS    ufo )
+
+ecbuild_add_test( TARGET  test_ufo_insitutemperature_tlad
+                  BOOST
+                  SOURCES mains/TestObsOperatorTLAD.cc
+                  ARGS    "testinput/tprof.json"
                   LIBS    ufo )
 
 ecbuild_add_test( TARGET  test_ufo_seaice

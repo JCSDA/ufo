@@ -38,7 +38,10 @@ class ObsBiasIncrement : public util::Printable {
   ObsBiasIncrement & operator-=(const ObsBiasIncrement &) {}
   ObsBiasIncrement & operator*=(const double) {}
   void axpy(const double, const ObsBiasIncrement &) {}
-  double dot_product_with(const ObsBiasIncrement &) const {}
+  double dot_product_with(const ObsBiasIncrement &) const {
+    oops::Log::trace() << "ufo::ObsBiasIncrement dot product" << std::endl;
+    return 0;
+  }
 
 /// I/O and diagnostics
   void read(const eckit::Configuration &) {}

@@ -1,0 +1,31 @@
+{
+  "test_framework_runtime_config": "--log_level=test_suite",
+  "window_begin": "2018-04-15T00:00:00Z",
+  "window_end": "2018-04-16T00:00:00Z",
+  "LinearObsOpTest": {
+    "testiterTL": "10",
+    "toleranceTL": "1.0e-7",
+    "toleranceAD": "1.0e-7"
+  },
+  "Observations": {
+    "ObsTypes": [
+      {
+        "ObsType": "InsituTemperature",
+        "ObsData": {
+          "ObsDataIn": {
+            "obsfile": "./Data/t0n156e_dy.nc"
+          }
+        },
+        "GeoVaLs": {
+          "norm": "1",
+          "random": "0",
+            "nobs": "26335",
+	    "filename":"./Data/t0n156e_dy_geovals.nc"
+        },
+        "ObsBias": {},
+        "rmsequiv": "24.136239493433276",
+        "tolerance": "1.0e-8"
+      }
+    ]
+  }
+}

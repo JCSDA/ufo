@@ -4,8 +4,8 @@
   "window_end": "2010-01-02T00:00:00Z",
   "LinearObsOpTest": {
     "testiterTL": "10",
-    "toleranceTL": "1.0e-14",
-    "toleranceAD": "1.0e-14"
+    "toleranceTL": "1.0e-10",
+    "toleranceAD": "1.0e-10"
   },
   "Observations": {
     "ObsTypes": [
@@ -13,16 +13,16 @@
         "ObsType": "SeaIceFraction",
         "ObsData": {
           "ObsDataIn": {
-            "obsfile": "Data/seaice_obs.nc"
+            "obsfile": "Data/seaice_obs-2018-04-15.nc"
           }
         },
         "GeoVaLs": {
           "norm": "555.95953090130581",
           "random": "1",
-          "nobs": "309091"
+          "nobs": "126753"
         },
         "ObsBias": {},
-        "rmsequiv": "1.0008155136698333",
+        "rmsequiv": "0.99861697149938122",
         "tolerance": "1.0e-8"
       },
       {
@@ -41,7 +41,7 @@
           "nobs": "90"
         },
         "ObsBias": {},
-        "rmsequiv": "0.0011255656311895449",
+        "rmsequiv": "0.00083014911722215361",
         "tolerance": "1.0e-8"
       }
     ]
