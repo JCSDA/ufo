@@ -43,8 +43,6 @@ character(max_string) :: err_msg
 integer :: iobs
 type(ufo_geoval), pointer :: geoval
 
-print *, myname_, ' nobs: ', geovals%nobs, hofx%nobs
-
 ! check if nobs is consistent in geovals & hofx
 if (geovals%nobs /= hofx%nobs) then
   write(err_msg,*) myname_, ' error: nobs inconsistent!'
@@ -52,15 +50,15 @@ if (geovals%nobs /= hofx%nobs) then
 endif
 
 ! check if sst variables is in geovals and get it
-if (.not. ufo_geovals_get_var(geovals, var_ocn_pot_temp, geoval)) then
-  write(err_msg,*) myname_, trim(var_ocn_pot_temp), ' doesnt exist'
+if (.not. ufo_geovals_get_var(geovals, var_ocn_sst, geoval)) then
+  write(err_msg,*) myname_, trim(var_ocn_sst), ' doesnt exist'
   call abor1_ftn(err_msg)
 endif
 
 ! sst obs operator
 do iobs = 1, hofx%nobs
    hofx%values(iobs) = geoval%vals(1,iobs)
-   write(102,*)hofx%values(iobs)
+   write(602,*)hofx%values(iobs)
 enddo
 
 end subroutine ufo_seasurfacetemp_eqv

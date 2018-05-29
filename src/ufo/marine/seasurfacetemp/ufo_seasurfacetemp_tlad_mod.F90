@@ -72,8 +72,8 @@ if (geovals%nobs /= hofx%nobs) then
 endif
 
 ! check if sst variables is in geovals and get it
-if (.not. ufo_geovals_get_var(geovals, var_ocn_pot_temp, geoval)) then
-  write(err_msg,*) myname_, trim(var_ocn_pot_temp), ' doesnt exist'
+if (.not. ufo_geovals_get_var(geovals, var_ocn_sst, geoval)) then
+  write(err_msg,*) myname_, trim(var_ocn_sst), ' doesnt exist'
   call abor1_ftn(err_msg)
 endif
 
@@ -105,15 +105,17 @@ if (geovals%nobs /= hofx%nobs) then
 endif
 
 ! check if sst variables is in geovals and get it
-if (.not. ufo_geovals_get_var(geovals, var_ocn_pot_temp, geoval)) then
-  write(err_msg,*) myname_, trim(var_ocn_pot_temp), ' doesnt exist'
+if (.not. ufo_geovals_get_var(geovals, var_ocn_sst, geoval)) then
+  write(err_msg,*) myname_, trim(var_ocn_sst), ' doesnt exist'
   call abor1_ftn(err_msg)
 endif
 
 if (.not.(allocated(geoval%vals))) then
+   geoval%nval=1
    allocate(geoval%vals(1,hofx%nobs))
 end if
-
+!print *,'in ad:',geoval%nval
+!read(*,*)
 ! backward sst obs operator
 geoval%vals=0.0
 do iobs = 1, hofx%nobs

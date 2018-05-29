@@ -68,7 +68,7 @@ template <typename MODEL>
 {
   const eckit::Configuration * configc = &config;
   ufo_seasurfacetemp_tlad_setup_f90(keyOperSeaSurfaceTemp_, &configc);
-  const std::vector<std::string> vv{"ocean_potential_temperature"};
+  const std::vector<std::string> vv{"ocean_upper_level_temperature"};
   varin_.reset(new oops::Variables(vv));
   oops::Log::trace() << "ObsSeaSurfaceTempTLAD created" << std::endl;
 }
