@@ -328,6 +328,7 @@ contains
 
        allocate(Aod_Obs(n_channels, n_profiles))
        allocate(Omg_Aod(n_channels, n_profiles))
+       call ioda_obsvec_setup(TmpOvec, obss%nobs)
        call ioda_obsdb_var_to_ovec(obss, TmpOvec, "Observation")
        Aod_Obs = reshape(TmpOvec%values, (/n_channels, n_profiles/))
        call ioda_obsdb_var_to_ovec(obss, TmpOvec, "Obs_Minus_Forecast_unadjusted")
@@ -354,6 +355,7 @@ contains
 
        deallocate(Aod_Obs)
        deallocate(Omg_Aod)
+       call ioda_obsvec_delete(TmpOvec)
 
        ! output to hofx structure   
        hofx%values(:) = 0.0

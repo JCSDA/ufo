@@ -362,6 +362,7 @@ contains
 
        allocate(Radiance_Tbobs(n_channels, n_profiles))
        allocate(Radiance_Omgnbc(n_channels, n_profiles))
+       call ioda_obsvec_setup(TmpOvec, Radiance%nobs)
        call ioda_obsdb_var_to_ovec(Radiance, TmpOvec, "Observation")
        Radiance_Tbobs = reshape(TmpOvec%values, (/n_channels, n_profiles/))
        call ioda_obsdb_var_to_ovec(Radiance, TmpOvec, "Obs_Minus_Forecast_unadjusted")
@@ -380,6 +381,7 @@ contains
        deallocate(diff)
        deallocate(Radiance_Tbobs)
        deallocate(Radiance_Omgnbc)
+       call ioda_obsvec_delete(TmpOvec)
 
        rmse = sqrt(rmse / (n_profiles * n_channels))
        print *, 'rmse: ', rmse
@@ -652,6 +654,7 @@ contains
       allocate(Radiance_SatAzmAng(n_profiles))
       allocate(Radiance_SolAzmAng(n_profiles))
       allocate(Radiance_SenScnPos(n_profiles))
+      call ioda_obsvec_setup(TmpOvec, n_profiles)
 
       call ioda_obsdb_var_to_ovec(Radiance, TmpOvec, "Sat_Zenith_Angle")
       Radiance_SatZenAng = TmpOvec%values
@@ -677,6 +680,7 @@ contains
       deallocate(Radiance_SatAzmAng)
       deallocate(Radiance_SolAzmAng)
       deallocate(Radiance_SenScnPos)
+      call ioda_obsvec_delete(TmpOvec)
 
     END SUBROUTINE Load_Geom_Data
     
