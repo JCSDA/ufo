@@ -12,8 +12,8 @@ module ufo_radiosonde_tlad_mod_c
   use ioda_obs_vectors,   only: obs_vector, ioda_obs_vect_registry
   use ufo_geovals_mod,   only: ufo_geovals
   use ufo_geovals_mod_c, only: ufo_geovals_registry
-  use ioda_obs_radiosonde_mod,   only: ioda_obs_radiosonde
-  use ioda_obs_radiosonde_mod_c, only: ioda_obs_radiosonde_registry 
+  use ioda_obsdb_mod,   only: ioda_obsdb
+  use ioda_obsdb_mod_c, only: ioda_obsdb_registry 
   use ufo_radiosonde_tlad_mod 
   implicit none
   private
@@ -71,14 +71,14 @@ integer(c_int), intent(in) :: c_key_geovals
 integer(c_int), intent(in) :: c_key_obsspace
 
 type(ufo_radiosonde_tlad), pointer :: self
-type(ufo_geovals),    pointer :: geovals
-type(ioda_obs_radiosonde), pointer :: obss
+type(ufo_geovals),         pointer :: geovals
+type(ioda_obsdb),          pointer :: obss
 
 character(len=*), parameter :: myname_="ufo_radiosonde_tlad_settraj_c"
 
 call ufo_radiosonde_tlad_registry%get(c_key_self, self)
 call ufo_geovals_registry%get(c_key_geovals,geovals)
-call ioda_obs_radiosonde_registry%get(c_key_obsspace,obss)
+call ioda_obsdb_registry%get(c_key_obsspace,obss)
 
 call ufo_radiosonde_tlad_settraj(self, geovals, obss)
 
@@ -95,16 +95,16 @@ integer(c_int), intent(in) :: c_key_hofx
 integer(c_int), intent(in) :: c_key_obsspace
 
 type(ufo_radiosonde_tlad), pointer :: self
-type(ufo_geovals),    pointer :: geovals
-type(obs_vector),     pointer :: hofx
-type(ioda_obs_radiosonde), pointer :: obss
+type(ufo_geovals),         pointer :: geovals
+type(obs_vector),          pointer :: hofx
+type(ioda_obsdb),          pointer :: obss
 
 character(len=*), parameter :: myname_="ufo_radiosonde_tlad_t_eqv_tl_c"
 
 call ufo_radiosonde_tlad_registry%get(c_key_self, self)
 call ufo_geovals_registry%get(c_key_geovals,geovals)
 call ioda_obs_vect_registry%get(c_key_hofx,hofx)
-call ioda_obs_radiosonde_registry%get(c_key_obsspace,obss)
+call ioda_obsdb_registry%get(c_key_obsspace,obss)
 
 call ufo_radiosonde_tlad_t_eqv_tl(self, geovals, hofx, obss)
 
@@ -121,16 +121,16 @@ integer(c_int), intent(in) :: c_key_hofx
 integer(c_int), intent(in) :: c_key_obsspace
 
 type(ufo_radiosonde_tlad), pointer :: self
-type(ufo_geovals),    pointer :: geovals
-type(obs_vector),     pointer :: hofx
-type(ioda_obs_radiosonde), pointer :: obss
+type(ufo_geovals),         pointer :: geovals
+type(obs_vector),          pointer :: hofx
+type(ioda_obsdb),          pointer :: obss
 
 character(len=*), parameter :: myname_="ufo_radiosonde_tlad_t_eqv_ad_c"
 
 call ufo_radiosonde_tlad_registry%get(c_key_self, self)
 call ufo_geovals_registry%get(c_key_geovals,geovals)
 call ioda_obs_vect_registry%get(c_key_hofx,hofx)
-call ioda_obs_radiosonde_registry%get(c_key_obsspace,obss)
+call ioda_obsdb_registry%get(c_key_obsspace,obss)
 
 call ufo_radiosonde_tlad_t_eqv_ad(self, geovals, hofx, obss)
 
