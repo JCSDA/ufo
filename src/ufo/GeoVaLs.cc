@@ -45,7 +45,7 @@ GeoVaLs::GeoVaLs(const ioda::Locations & locs, const oops::Variables & vars,
 		 const eckit::Configuration & config)
  : keyGVL_(-1), vars_(vars)
 {
-  oops::Log::trace() << "GeoVaLs contructor config starting" << std::endl;
+  oops::Log::trace() << "GeoVaLs constructor config starting" << std::endl;
   ufo_geovals_create_f90(keyGVL_);
   int irandom = 0;
   config.get("random", irandom);
@@ -57,6 +57,32 @@ GeoVaLs::GeoVaLs(const ioda::Locations & locs, const oops::Variables & vars,
     ufo_geovals_setup_random_f90(keyGVL_, &conf, &cvar);
   }
   oops::Log::trace() << "GeoVaLs contructor config key = " << keyGVL_ << std::endl;
+}
+// -----------------------------------------------------------------------------
+/*! \brief GomQG Copy constructor with locs and config
+ *
+ * \details This ufo::GeoVaLs constructor was introduced in May, 2018 for use with
+ * the interpolation test.   If "analytic_init" is not specified in the 
+ * configuration then this defaults to a copy constructor.  If "analytic_init"
+ * **is** specified, then the values are replaced by values computed directly
+ * from one of several idealized analytic states.
+ *
+ */
+GeoVaLs::GeoVaLs(const GeoVaLs & other, const ioda::Locations & locs, 
+		 const eckit::Configuration & config)
+ : keyGVL_(-1), vars_(other.vars_)
+{
+  oops::Log::trace() << "GeoVaLs copy config constructor starting" << std::endl;
+
+  ufo_geovals_create_f90(keyGVL_);
+  ufo_geovals_copy_f90(other.keyGVL_, keyGVL_);
+
+  const eckit::Configuration * conf = &config;
+  if (config.has("analytic_init")) { 
+      ufo_geovals_analytic_init_f90(keyGVL_, locs.toFortran(), &conf);
+    }
+
+  oops::Log::trace() << "GeoVaLs copy config constructor key = " << keyGVL_ << std::endl;
 }
 // -----------------------------------------------------------------------------
 GeoVaLs::~GeoVaLs() {
@@ -123,7 +149,8 @@ void GeoVaLs::print(std::ostream & os) const {
   int nn;
   double zmin, zmax, zrms;
   ufo_geovals_minmaxavg_f90(keyGVL_, nn, zmin, zmax, zrms);
-  os << "GeoVaLs: nobs= " << nn << " Min=" << zmin << ", Max=" << zmax << ", RMS=" << zrms;
+  os << "GeoVaLs: nobs= " << nn << " Min=" << zmin << ", Max=" << zmax 
+     << ", RMS=" << zrms << std::endl;
 
   /*! Verbose print statement (debug mode)
    *

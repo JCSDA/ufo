@@ -60,6 +60,45 @@ call ufo_geovals_setup(self, vars, locs%nlocs)
 end subroutine ufo_geovals_setup_c
 
 ! ------------------------------------------------------------------------------
+!> Copy one GeoVaLs object into another
+
+subroutine ufo_geovals_copy_c(c_key_self, c_key_other) bind(c,name='ufo_geovals_copy_f90')
+implicit none
+integer(c_int), intent(in) :: c_key_self
+integer(c_int), intent(in) :: c_key_other
+type(ufo_geovals), pointer :: self
+type(ufo_geovals), pointer :: other
+
+call ufo_geovals_registry%get(c_key_self, self)
+call ufo_geovals_registry%get(c_key_other, other)
+
+call ufo_geovals_copy(self, other)
+
+end subroutine ufo_geovals_copy_c
+
+! ------------------------------------------------------------------------------
+
+subroutine ufo_geovals_analytic_init_c(c_key_self, c_key_locs, c_conf) bind(c,name='ufo_geovals_analytic_init_f90')
+use config_mod
+implicit none
+integer(c_int), intent(in) :: c_key_self
+integer(c_int), intent(in) :: c_key_locs
+type(c_ptr), intent(in)    :: c_conf
+
+type(ufo_geovals), pointer :: self
+type(ioda_locs), pointer :: locs
+character(len=30) :: ic
+
+call ufo_geovals_registry%get(c_key_self, self)
+call ioda_locs_registry%get(c_key_locs,locs)
+
+ic = config_get_string(c_conf,len(ic),"analytic_init")
+
+call ufo_geovals_analytic_init(self,locs,ic)
+
+end subroutine ufo_geovals_analytic_init_c
+
+! ------------------------------------------------------------------------------
 
 subroutine ufo_geovals_create_c(c_key_self) bind(c,name='ufo_geovals_create_f90')
 

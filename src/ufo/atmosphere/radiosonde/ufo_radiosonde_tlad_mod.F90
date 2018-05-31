@@ -7,7 +7,7 @@
 
 module ufo_radiosonde_tlad_mod
   
-  use ioda_obs_radiosonde_mod
+  use ioda_obsdb_mod
   use ioda_obs_vectors
   use ufo_vars_mod
   use ioda_locs_mod
@@ -41,13 +41,13 @@ contains
 subroutine ufo_radiosonde_tlad_settraj(self, geovals, obss)
 implicit none
 type(ufo_radiosonde_tlad), intent(inout) :: self
-type(ufo_geovals), intent(in)       :: geovals
-type(ioda_obs_radiosonde), intent(in) :: obss
+type(ufo_geovals),         intent(in)    :: geovals
+type(ioda_obsdb),          intent(in)    :: obss
 
 character(len=*), parameter :: myname_="ufo_radiosonde_tlad_settraj"
 character(max_string) :: err_msg
 
-real(kind_real), allocatable :: pressure(:)
+type(obs_vector) :: pressure
 type(ufo_geoval), pointer :: prsl
 integer :: iobs
 
@@ -68,15 +68,12 @@ allocate(self%wi(self%nobs))
 allocate(self%wf(self%nobs))
 
 ! observation of pressure (for vertical interpolation)
-allocate(pressure(geovals%nobs))
-pressure = obss%mass(:)%pressure
+call ioda_obsdb_var_to_ovec(obss, pressure, "Pressure")
 
 ! compute interpolation weights
 do iobs = 1, self%nobs
-  call vert_interp_weights(self%nval,log(pressure(iobs)/10.),prsl%vals(:,iobs),self%wi(iobs),self%wf(iobs))
+  call vert_interp_weights(self%nval,log(pressure%values(iobs)/10.),prsl%vals(:,iobs),self%wi(iobs),self%wf(iobs))
 enddo
-
-deallocate(pressure)
 
 self%ltraj = .true.
 
@@ -87,9 +84,9 @@ end subroutine ufo_radiosonde_tlad_settraj
 subroutine ufo_radiosonde_tlad_t_eqv_tl(self, geovals, hofx, obss)
 implicit none
 type(ufo_radiosonde_tlad), intent(in)     :: self
-type(ufo_geovals),    intent(in)     :: geovals
-type(obs_vector),     intent(inout)  :: hofx
-type(ioda_obs_radiosonde), intent(in) :: obss
+type(ufo_geovals),         intent(in)     :: geovals
+type(obs_vector),          intent(inout)  :: hofx
+type(ioda_obsdb),          intent(in)     :: obss
 
 character(len=*), parameter :: myname_="ufo_radiosonde_tlad_t_eqv_tl"
 character(max_string) :: err_msg
@@ -126,10 +123,10 @@ end subroutine ufo_radiosonde_tlad_t_eqv_tl
 
 subroutine ufo_radiosonde_tlad_t_eqv_ad(self, geovals, hofx, obss)
 implicit none
-type(ufo_radiosonde_tlad), intent(in):: self
-type(ufo_geovals),    intent(inout)  :: geovals
-type(obs_vector),     intent(in)     :: hofx
-type(ioda_obs_radiosonde), intent(in) :: obss
+type(ufo_radiosonde_tlad), intent(in)     :: self
+type(ufo_geovals),         intent(inout)  :: geovals
+type(obs_vector),          intent(in)     :: hofx
+type(ioda_obsdb),          intent(in)     :: obss
 
 character(len=*), parameter :: myname_="ufo_radiosonde_tlad_t_eqv_ad"
 character(max_string) :: err_msg

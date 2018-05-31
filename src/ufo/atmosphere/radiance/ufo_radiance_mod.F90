@@ -7,7 +7,7 @@
 
 module ufo_radiance_mod
   
-  use ioda_obs_radiance_mod
+  use ioda_obsdb_mod
   use ioda_obs_vectors
   use ufo_vars_mod
   use ioda_locs_mod
@@ -34,10 +34,14 @@ contains
 
   subroutine ufo_radiance_eqv(self, geovals, hofx, Radiance) 
     implicit none
-    type(ufo_radiance), intent(in)     :: self
-    type(ufo_geovals), intent(in)      :: geovals
-    type(obs_vector),  intent(inout)   :: hofx
-    type(ioda_obs_radiance), intent(in) :: Radiance
+    type(ufo_radiance), intent(in)    :: self
+    type(ufo_geovals),  intent(in)    :: geovals
+    type(obs_vector),   intent(inout) :: hofx
+    type(ioda_obsdb),   intent(in)    :: Radiance
+
+    type(obs_vector) :: TmpOvec
+    real(kind_real), allocatable :: Radiance_Tbobs(:,:)
+    real(kind_real), allocatable :: Radiance_Omgnbc(:,:)
 
     !*************************************************************************************
     !******* Begin CRTM block ************************************************************
@@ -166,7 +170,6 @@ contains
 !!$ 23  Vegetation_Type
 !!$ 24  Soil_Type
 
-    
     CALL CRTM_Version( Version )
     CALL Program_Message( PROGRAM_NAME, &
          'Check/example program for the CRTM Forward and K-Matrix functions using '//&
@@ -228,7 +231,7 @@ contains
           CALL Display_Message( PROGRAM_NAME, message, FAILURE )
           STOP
        END IF
-       
+
        ! 5c. Allocate the STRUCTURE INTERNALS
        !     NOTE: Only the Atmosphere structures
        !           are allocated in this example
@@ -356,17 +359,29 @@ contains
        ! in the structure RTSolution.
 
        allocate(diff(n_channels,n_profiles))
+
+       allocate(Radiance_Tbobs(n_channels, n_profiles))
+       allocate(Radiance_Omgnbc(n_channels, n_profiles))
+       call ioda_obsvec_setup(TmpOvec, Radiance%nobs)
+       call ioda_obsdb_var_to_ovec(Radiance, TmpOvec, "Observation")
+       Radiance_Tbobs = reshape(TmpOvec%values, (/n_channels, n_profiles/))
+       call ioda_obsdb_var_to_ovec(Radiance, TmpOvec, "Obs_Minus_Forecast_unadjusted")
+       Radiance_Omgnbc = reshape(TmpOvec%values, (/n_channels, n_profiles/))
+
        rmse = 0
        DO m = 1, N_PROFILES
           DO l = 1, n_Channels
-             diff(l,m) = rts(l,m)%Brightness_Temperature - (Radiance%datachan(m,l)%tbobs - Radiance%datachan(m,l)%omgnbc)
-!             print *, rts(l,m)%Brightness_Temperature, Radiance%datachan(m,l)%tbobs - Radiance%datachan(m,l)%omgnbc
-             rmse = rmse + (Radiance%datachan(m,l)%tbobs - Radiance%datachan(m,l)%omgnbc) * (Radiance%datachan(m,l)%tbobs - Radiance%datachan(m,l)%omgnbc)
+             diff(l,m) = rts(l,m)%Brightness_Temperature - (Radiance_Tbobs(l,m) - Radiance_Omgnbc(l,m))
+!             print *, rts(l,m)%Brightness_Temperature, Radiance_Tbobs(l,m) - Radiance_Omgnbc(l,m)
+             rmse = rmse + (Radiance_Tbobs(l,m) - Radiance_Omgnbc(l,m)) * (Radiance_Tbobs(l,m) - Radiance_Omgnbc(l,m))
           END DO
           WRITE( *,'(//7x,"Profile ",i0," output for ",a, " difference:",f12.6 )') m, TRIM(Sensor_Id(n)), maxval(abs(diff(:,m)))
        END DO
        print *, 'Max difference: ', maxval(abs(diff))
        deallocate(diff)
+       deallocate(Radiance_Tbobs)
+       deallocate(Radiance_Omgnbc)
+       call ioda_obsvec_delete(TmpOvec)
 
        rmse = sqrt(rmse / (n_profiles * n_channels))
        print *, 'rmse: ', rmse
@@ -626,14 +641,46 @@ contains
     SUBROUTINE Load_Geom_Data()
       implicit none
       integer :: k1
+
+      type(obs_vector) :: TmpOvec
+      real(kind_real), allocatable :: Radiance_SatZenAng(:)
+      real(kind_real), allocatable :: Radiance_SolZenAng(:)
+      real(kind_real), allocatable :: Radiance_SatAzmAng(:)
+      real(kind_real), allocatable :: Radiance_SolAzmAng(:)
+      real(kind_real), allocatable :: Radiance_SenScnPos(:)
+
+      allocate(Radiance_SatZenAng(n_profiles))
+      allocate(Radiance_SolZenAng(n_profiles))
+      allocate(Radiance_SatAzmAng(n_profiles))
+      allocate(Radiance_SolAzmAng(n_profiles))
+      allocate(Radiance_SenScnPos(n_profiles))
+      call ioda_obsvec_setup(TmpOvec, n_profiles)
+
+      call ioda_obsdb_var_to_ovec(Radiance, TmpOvec, "Sat_Zenith_Angle")
+      Radiance_SatZenAng = TmpOvec%values
+      call ioda_obsdb_var_to_ovec(Radiance, TmpOvec, "Sol_Zenith_Angle")
+      Radiance_SolZenAng = TmpOvec%values
+      call ioda_obsdb_var_to_ovec(Radiance, TmpOvec, "Sat_Azimuth_Angle")
+      Radiance_SatAzmAng = TmpOvec%values
+      call ioda_obsdb_var_to_ovec(Radiance, TmpOvec, "Sol_Azimuth_Angle")
+      Radiance_SolAzmAng = TmpOvec%values
+      call ioda_obsdb_var_to_ovec(Radiance, TmpOvec, "Scan_Position")
+      Radiance_SenScnPos = TmpOvec%values
+
       do k1 = 1,N_PROFILES
-         geo(k1)%Sensor_Zenith_Angle = Radiance%datafix(k1)%satzen_ang
+         geo(k1)%Sensor_Zenith_Angle = Radiance_SatZenAng(k1)
 !YT ???         geo(k1)%Sensor_Scan_Angle   = Radiance%datafix(k1)%senscn_ang
-         geo(k1)%Source_Zenith_Angle = Radiance%datafix(k1)%solzen_ang
-         geo(k1)%Sensor_Azimuth_Angle = Radiance%datafix(k1)%satazm_ang
-         geo(k1)%Source_Azimuth_Angle = Radiance%datafix(k1)%solazm_ang
-         geo(k1)%Ifov = Radiance%datafix(k1)%senscn_pos
+         geo(k1)%Source_Zenith_Angle = Radiance_SolZenAng(k1)
+         geo(k1)%Sensor_Azimuth_Angle = Radiance_SatAzmAng(k1)
+         geo(k1)%Source_Azimuth_Angle = Radiance_SolAzmAng(k1)
+         geo(k1)%Ifov = Radiance_SenScnPos(k1)
       enddo
+      deallocate(Radiance_SatZenAng)
+      deallocate(Radiance_SolZenAng)
+      deallocate(Radiance_SatAzmAng)
+      deallocate(Radiance_SolAzmAng)
+      deallocate(Radiance_SenScnPos)
+      call ioda_obsvec_delete(TmpOvec)
 
     END SUBROUTINE Load_Geom_Data
     

@@ -7,7 +7,7 @@
 
 MODULE ufo_aod_mod
   
-  use ioda_obs_aod_mod
+  use ioda_obsdb_mod
   use ioda_obs_vectors
   use ufo_vars_mod
   use ioda_locs_mod
@@ -68,8 +68,12 @@ contains
     implicit none
     type(ufo_aod),     intent(in)    :: self
     type(ufo_geovals), intent(in)    :: geovals
-    type(ioda_obs_aod), intent(inout) :: obss
+    type(ioda_obsdb), intent(inout)  :: obss
     type(obs_vector),  intent(inout) :: hofx
+
+    type(obs_vector) :: TmpOvec
+    real(kind_real), allocatable :: Aod_Obs(:,:)
+    real(kind_real), allocatable :: Omg_Aod(:,:)
 
     !*************************************************************************************
     !******* Begin CRTM block ************************************************************
@@ -322,10 +326,18 @@ contains
 
        ALLOCATE(diff(n_channels,n_profiles),rmse(n_channels))
 
+       allocate(Aod_Obs(n_channels, n_profiles))
+       allocate(Omg_Aod(n_channels, n_profiles))
+       call ioda_obsvec_setup(TmpOvec, obss%nobs)
+       call ioda_obsdb_var_to_ovec(obss, TmpOvec, "Observation")
+       Aod_Obs = reshape(TmpOvec%values, (/n_channels, n_profiles/))
+       call ioda_obsdb_var_to_ovec(obss, TmpOvec, "Obs_Minus_Forecast_unadjusted")
+       Omg_Aod = reshape(TmpOvec%values, (/n_channels, n_profiles/))
+
        rmse = 0
        DO m = 1, N_PROFILES
           DO l = 1, n_Channels
-             diff(l,m) = SUM(rts(l,m)%layer_optical_depth(:)) - (obss%datachan(m,l)%aodobs - obss%datachan(m,l)%omgaod)
+             diff(l,m) = SUM(rts(l,m)%layer_optical_depth(:)) - (Aod_Obs(l,m) - Omg_Aod(l,m))
              rmse(l) = rmse(l) + diff(l,m)**2
           END DO
        ENDDO
@@ -340,6 +352,10 @@ contains
        ENDDO
 
        DEALLOCATE(diff,rmse)
+
+       deallocate(Aod_Obs)
+       deallocate(Omg_Aod)
+       call ioda_obsvec_delete(TmpOvec)
 
        ! output to hofx structure   
        hofx%values(:) = 0.0
