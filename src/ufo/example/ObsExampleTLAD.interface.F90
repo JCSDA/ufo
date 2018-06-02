@@ -15,8 +15,8 @@ module ufo_example_tlad_mod_c
   use ioda_obs_vectors,   only: obs_vector, ioda_obs_vect_registry
   use ufo_geovals_mod,   only: ufo_geovals
   use ufo_geovals_mod_c, only: ufo_geovals_registry
-  use ioda_obs_example_mod,   only: ioda_obs_example
-  use ioda_obs_example_mod_c, only: ioda_obs_example_registry 
+  use ioda_obsdb_mod,   only: ioda_obsdb
+  use ioda_obsdb_mod_c, only: ioda_obsdb_registry 
   use ufo_example_tlad_mod 
   implicit none
   private
@@ -82,14 +82,14 @@ integer(c_int), intent(in) :: c_key_geovals
 integer(c_int), intent(in) :: c_key_obsspace
 
 type(ufo_example_tlad), pointer :: self
-type(ufo_geovals),    pointer :: geovals
-type(ioda_obs_example), pointer :: obss
+type(ufo_geovals),      pointer :: geovals
+type(ioda_obsdb),       pointer :: obss
 
 character(len=*), parameter :: myname_="ufo_example_tlad_settraj_c"
 
 call ufo_example_tlad_registry%get(c_key_self, self)
 call ufo_geovals_registry%get(c_key_geovals,geovals)
-call ioda_obs_example_registry%get(c_key_obsspace,obss)
+call ioda_obsdb_registry%get(c_key_obsspace,obss)
 
 ! TODO: replace with the call to your Fortran routine for setting tl/ad trajectory
 !       (defined in ufo_<your_obs_operator_name>_tlad_mod.F90)
@@ -110,14 +110,14 @@ integer(c_int), intent(in) :: c_key_obsspace
 type(ufo_example_tlad), pointer :: self
 type(ufo_geovals),      pointer :: geovals
 type(obs_vector),       pointer :: hofx
-type(ioda_obs_example), pointer :: obss
+type(ioda_obsdb),       pointer :: obss
 
 character(len=*), parameter :: myname_="ufo_example_tlad_eqv_tl_c"
 
 call ufo_example_tlad_registry%get(c_key_self, self)
 call ufo_geovals_registry%get(c_key_geovals,geovals)
 call ioda_obs_vect_registry%get(c_key_hofx,hofx)
-call ioda_obs_example_registry%get(c_key_obsspace,obss)
+call ioda_obsdb_registry%get(c_key_obsspace,obss)
 
 ! TODO: replace with the call to your Fortran routine for tl obs operator
 !       (defined in ufo_<your_obs_operator_name>_tlad_mod.F90)
@@ -136,16 +136,16 @@ integer(c_int), intent(in) :: c_key_hofx
 integer(c_int), intent(in) :: c_key_obsspace
 
 type(ufo_example_tlad), pointer :: self
-type(ufo_geovals),       pointer :: geovals
-type(obs_vector),        pointer :: hofx
-type(ioda_obs_example),  pointer :: obss
+type(ufo_geovals),      pointer :: geovals
+type(obs_vector),       pointer :: hofx
+type(ioda_obsdb),       pointer :: obss
 
 character(len=*), parameter :: myname_="ufo_example_tlad_eqv_ad_c"
 
 call ufo_example_tlad_registry%get(c_key_self, self)
 call ufo_geovals_registry%get(c_key_geovals,geovals)
 call ioda_obs_vect_registry%get(c_key_hofx,hofx)
-call ioda_obs_example_registry%get(c_key_obsspace,obss)
+call ioda_obsdb_registry%get(c_key_obsspace,obss)
 
 ! TODO: replace with the call to your Fortran routine for ad obs operator
 !       (defined in ufo_<your_obs_operator_name>_tlad_mod.F90)

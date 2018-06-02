@@ -67,6 +67,7 @@ if (.not. ufo_geovals_get_var(geovals, var_tv, tv)) then
 endif
 
 ! observation of pressure (for vertical interpolation)
+call ioda_obsvec_setup(pressure, obss%nobs)
 call ioda_obsdb_var_to_ovec(obss, pressure, "Pressure")
 
 ! obs operator
@@ -74,6 +75,7 @@ do iobs = 1, hofx%nobs
   call vert_interp_weights(prsl%nval,log(pressure%values(iobs)/10.),prsl%vals(:,iobs),wi,wf)
   call vert_interp_apply(tv%nval, tv%vals(:,iobs), hofx%values(iobs), wi, wf)
 enddo
+call ioda_obsvec_delete(pressure)
 
 end subroutine ufo_radiosonde_t_eqv
 

@@ -9,7 +9,7 @@
 
 module ufo_example_tlad_mod
   
-  use ioda_obs_example_mod
+  use ioda_obsdb_mod
   use ioda_obs_vectors
   use ufo_vars_mod
   use ioda_locs_mod
@@ -62,10 +62,10 @@ end subroutine ufo_example_tlad_delete
 subroutine ufo_example_tlad_settraj(self, geovals, obss)
 implicit none
 type(ufo_example_tlad), intent(inout) :: self
-type(ufo_geovals), intent(in)       :: geovals
-type(ioda_obs_example), intent(in) :: obss
+type(ufo_geovals),      intent(in)    :: geovals
+type(ioda_obsdb),       intent(in)    :: obss
 
-character(len=MAXVARLEN) :: varname
+character(len=MAXVARLEN)    :: varname
 character(len=*), parameter :: myname_="ufo_example_tlad_settraj"
 
 type(ufo_geoval), pointer :: geoval
@@ -91,9 +91,9 @@ end subroutine ufo_example_tlad_settraj
 subroutine ufo_example_tlad_eqv_tl(self, geovals, hofx, obss)
 implicit none
 type(ufo_example_tlad), intent(in)     :: self
-type(ufo_geovals),    intent(in)     :: geovals
-type(obs_vector),     intent(inout)  :: hofx
-type(ioda_obs_example), intent(in) :: obss
+type(ufo_geovals),      intent(in)     :: geovals
+type(obs_vector),       intent(inout)  :: hofx
+type(ioda_obsdb),       intent(in) :: obss
 
 
 end subroutine ufo_example_tlad_eqv_tl
@@ -104,9 +104,9 @@ end subroutine ufo_example_tlad_eqv_tl
 subroutine ufo_example_tlad_eqv_ad(self, geovals, hofx, obss)
 implicit none
 type(ufo_example_tlad), intent(in)     :: self
-type(ufo_geovals),    intent(in)     :: geovals
-type(obs_vector),     intent(inout)  :: hofx
-type(ioda_obs_example), intent(in) :: obss
+type(ufo_geovals),      intent(in)     :: geovals
+type(obs_vector),       intent(inout)  :: hofx
+type(ioda_obsdb),       intent(in)     :: obss
 
 
 end subroutine ufo_example_tlad_eqv_ad

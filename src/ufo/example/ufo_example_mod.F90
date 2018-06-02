@@ -9,7 +9,7 @@
 
 module ufo_example_mod
   
-  use ioda_obs_example_mod
+  use ioda_obsdb_mod
   use ioda_obs_vectors
   use ufo_vars_mod
   use ioda_locs_mod
@@ -36,16 +36,17 @@ contains
 ! Some sample code is provided and should be removed/replaced/altered to your needs
 subroutine ufo_example_eqv(self, geovals, hofx, obss)
 implicit none
-type(ufo_example), intent(in)     :: self
-type(ufo_geovals), intent(in)      :: geovals
-type(obs_vector),  intent(inout)   :: hofx
-type(ioda_obs_example), intent(in) :: obss
+type(ufo_example), intent(in)    :: self
+type(ufo_geovals), intent(in)    :: geovals
+type(obs_vector),  intent(inout) :: hofx
+type(ioda_obsdb),  intent(in)    :: obss
 
 character(len=MAXVARLEN) :: varname
 
 character(len=*), parameter :: myname_="ufo_example_eqv"
 
 type(ufo_geoval), pointer :: geoval
+type(obs_vector)  :: obsvec
 
 ! check if nobs is consistent in geovals & hofx
 if (geovals%nobs /= hofx%nobs) then
@@ -60,7 +61,17 @@ if (.not. ufo_geovals_get_var(geovals, varname, geoval)) then
   call abor1_ftn(err_msg)
 endif
 
+! get some metadata from obsspace
+varname = "SomeMetadata"
+call ioda_obsvec_setup(obsvec, obss%nobs)
+call ioda_obsdb_var_to_ovec(obss, obsvec, varname)
+
+
 ! put observation operator code here
+
+
+! cleanup local variables
+call ioda_obsvec_delete(obsvec)
 
 end subroutine ufo_example_eqv
 
