@@ -68,12 +68,14 @@ allocate(self%wi(self%nobs))
 allocate(self%wf(self%nobs))
 
 ! observation of pressure (for vertical interpolation)
+call ioda_obsvec_setup(pressure, obss%nobs)
 call ioda_obsdb_var_to_ovec(obss, pressure, "Pressure")
 
 ! compute interpolation weights
 do iobs = 1, self%nobs
   call vert_interp_weights(self%nval,log(pressure%values(iobs)/10.),prsl%vals(:,iobs),self%wi(iobs),self%wf(iobs))
 enddo
+call ioda_obsvec_delete(pressure)
 
 self%ltraj = .true.
 
