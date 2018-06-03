@@ -118,11 +118,16 @@ character(max_string) :: err_msg
 integer :: iobs
 type(ufo_geoval), pointer :: geoval
 
+print *,'&&&&&&&&&&&&7 in adjoint'
+read(*,*)
+
 ! check if nobs is consistent in geovals & hofx
 if (geovals%nobs /= hofx%nobs) then
   write(err_msg,*) myname_, ' error: nobs inconsistent!'
   call abor1_ftn(err_msg)
 endif
+
+if (.not. geovals%linit ) geovals%linit=.true.
 
 if (.not. ufo_geovals_get_var(geovals, var_abs_topo, geoval)) then
   write(err_msg,*) myname_, trim(var_abs_topo), ' doesnt exist'
@@ -143,6 +148,9 @@ if (.not.(allocated(geoval%vals))) then
    !allocate(geoval%vals(self%ncat,hofx%nobs))
    allocate(geoval%vals(1,hofx%nobs))   
 end if
+
+if (.not. geovals%linit ) geovals%linit=.true.
+
 ! backward steric height obs operator
 geoval%vals=0.0
 do iobs = 1, hofx%nobs

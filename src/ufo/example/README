@@ -1,11 +1,5 @@
 This directory contains example files for new observation operator implementation:
 
-Observation space files:
-These files live in the ioda repository, under the src/ioda/example subdirectory.
-    ObsSpace.Example.interface.F90 -- Fortran functions on the interface between C++ and Fortran (called from ObsSpace.cc, calling functions in ufo_obs_example_mod.F90)
-    ioda_obs_example_mod.F90 -- Fortran module for observation space
-    Note: in some cases one may use already existing obsspace (different obs operators on the same data)
-
 Observation operator files:
 ObsExample.h -- C++ class for the observation operator
 ObsExample.interface.F90 -- Fortran functions on the interface between C++ and Fortran (called from ObsExample.h, calling functions in ufo_example_mod.F90)
@@ -18,9 +12,8 @@ ufo_example_tlad_mod.F90 -- Fortran module for tl/ad observation operator
 
 Other files that need to be updated when implementing new observation operator:
 src/ufo/CMakeLists.txt: add files to makelist
-src/ufo/Fortran.h: add definitions of Fortran routines called from C++ (the ones in the *.interface.F90 files, for example see radiosonde observation operator and obsspace definitions in Fortran.h)
-src/ufo/ObsSpace.cc: add calls to your obsspace routines depending on your observation operator name (this a-bunch-of-ifs approach is to be fixed, it's temporary. In the future there will be separate ObsSpace classes for different obsspaces)
+src/ufo/Fortran.h: add definitions of Fortran routines called from C++ (the ones in the *.interface.F90 files, for example see radiosonde observation operator definitions in Fortran.h)
 src/ufo/instantiateObsOperatorFactory.h: add instantiating of your observation operator (see examples there)
 src/ufo/instantiateLinearObsOperatorFactory.h: same as above, for tl/ad.
 
-Also, add tests (for nonlinear and tl/ad and for obsspace) for your observation operator.
+Also, add tests (for nonlinear and tl/ad) for your observation operator.

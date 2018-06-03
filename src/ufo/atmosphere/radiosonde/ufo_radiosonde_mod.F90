@@ -7,7 +7,7 @@
 
 module ufo_radiosonde_mod
   
-  use ioda_obs_radiosonde_mod
+  use ioda_obsdb_mod
   use ioda_obs_vectors
   use ufo_vars_mod
   use ioda_locs_mod
@@ -34,10 +34,10 @@ contains
 subroutine ufo_radiosonde_t_eqv(self, geovals, hofx, obss)
 
 implicit none
-type(ufo_radiosonde), intent(in)     :: self
-type(ufo_geovals), intent(in)        :: geovals
-type(obs_vector),  intent(inout)     :: hofx
-type(ioda_obs_radiosonde), intent(in) :: obss
+type(ufo_radiosonde), intent(in)  :: self
+type(ufo_geovals), intent(in)     :: geovals
+type(obs_vector),  intent(inout)  :: hofx
+type(ioda_obsdb),  intent(in)     :: obss
 
 character(len=*), parameter :: myname_="ufo_radiosonde_t_eqv"
 character(max_string) :: err_msg
@@ -45,7 +45,7 @@ character(max_string) :: err_msg
 integer :: iobs
 real(kind_real) :: wf
 integer :: wi
-real(kind_real), allocatable :: pressure(:)
+type(obs_vector) :: pressure
 type(ufo_geoval), pointer :: prsl, tv
 
 ! check if nobs is consistent in geovals & hofx
@@ -67,16 +67,15 @@ if (.not. ufo_geovals_get_var(geovals, var_tv, tv)) then
 endif
 
 ! observation of pressure (for vertical interpolation)
-allocate(pressure(geovals%nobs))
-pressure = obss%mass(:)%pressure
+call ioda_obsvec_setup(pressure, obss%nobs)
+call ioda_obsdb_var_to_ovec(obss, pressure, "Pressure")
 
 ! obs operator
 do iobs = 1, hofx%nobs
-  call vert_interp_weights(prsl%nval,log(pressure(iobs)/10.),prsl%vals(:,iobs),wi,wf)
+  call vert_interp_weights(prsl%nval,log(pressure%values(iobs)/10.),prsl%vals(:,iobs),wi,wf)
   call vert_interp_apply(tv%nval, tv%vals(:,iobs), hofx%values(iobs), wi, wf)
 enddo
-
-deallocate(pressure)
+call ioda_obsvec_delete(pressure)
 
 end subroutine ufo_radiosonde_t_eqv
 

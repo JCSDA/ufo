@@ -271,6 +271,8 @@ contains
        call abor1_ftn(err_msg)
     endif
 
+    if (.not. geovals%linit ) geovals%linit=.true.
+    
     ! check if sea temperature profile variable is in geovals and get it
     if (.not. ufo_geovals_get_var(geovals, var_ocn_pot_temp, dtemp)) then
        write(err_msg,*) myname_, trim(var_ocn_pot_temp), ' doesnt exist'
@@ -295,7 +297,7 @@ contains
     if (.not. allocated(dtemp%vals)) allocate(dtemp%vals(nlev, hofx%nobs))
     if (.not. allocated(dsalt%vals)) allocate(dsalt%vals(nlev, hofx%nobs))
     if (.not. allocated(dlayerthick%vals)) allocate(dlayerthick%vals(nlev, hofx%nobs))    
-    
+
     ! backward sea temperature profile obs operator
     dtemp%vals = 0.0
     dsalt%vals = 0.0

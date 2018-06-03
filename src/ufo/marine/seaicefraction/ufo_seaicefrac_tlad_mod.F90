@@ -114,6 +114,8 @@ if (geovals%nobs /= hofx%nobs) then
   call abor1_ftn(err_msg)
 endif
 
+if (.not. geovals%linit ) geovals%linit=.true.
+
 ! check if sea ice fraction variables is in geovals and get it
 if (.not. ufo_geovals_get_var(geovals, var_seaicefrac, geoval)) then
   write(err_msg,*) myname_, trim(var_seaicefrac), ' doesnt exist'
@@ -127,6 +129,9 @@ if (.not.(allocated(geoval%vals))) then
    endif
    allocate(geoval%vals(self%ncat,hofx%nobs))
 end if
+
+if (.not. geovals%linit ) geovals%linit=.true.
+
 ! backward sea ice fraction obs operator
 geoval%vals=0.0
 do iobs = 1, hofx%nobs
