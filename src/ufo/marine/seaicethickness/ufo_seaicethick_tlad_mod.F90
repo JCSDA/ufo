@@ -159,6 +159,8 @@ if (geovals%nobs /= hofx%nobs) then
   call abor1_ftn(err_msg)
 endif
 
+if (.not. geovals%linit ) geovals%linit=.true.
+
 ! check if sea ice fraction variable is in geovals and get it
 if (.not. ufo_geovals_get_var(geovals, var_seaicefrac, icefrac_d)) then
   write(err_msg,*) myname_, trim(var_seaicefrac), ' doesnt exist'
@@ -188,8 +190,7 @@ end if
 print *,'ncat=',ncat
 if (.not. allocated(icefrac_d%vals))  allocate(icefrac_d%vals(ncat,hofx%nobs))
 if (.not. allocated(icethick_d%vals)) allocate(icethick_d%vals(ncat, hofx%nobs))
-!print *,icethick_d%vals
-!print *,'================================================='
+
 icethick_d%vals = 0.0
 icefrac_d%vals = 0.0
 do iobs = 1, hofx%nobs

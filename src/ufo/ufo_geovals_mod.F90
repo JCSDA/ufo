@@ -120,7 +120,8 @@ type(ufo_geoval), pointer, intent(out)    :: geoval
 integer :: ivar
 
 if (.not. self%lalloc .or. .not. self%linit) then
-   !call abor1_ftn("ufo_geovals_get_var: geovals not allocated")
+   print *,'lalloc:',self%lalloc,' linit:',self%linit
+   call abor1_ftn("ufo_geovals_get_var: geovals not allocated")
 endif
 
 ivar = ufo_vars_getindex(self%variables, varname)
@@ -596,7 +597,7 @@ real(kind_real) :: vrms
 integer :: jv, jo, jz
 
 if (.not. self%lalloc .or. .not. self%linit) then
-  call abor1_ftn("ufo_geovals_maxloc: geovals not allocated")
+  !call abor1_ftn("ufo_geovals_maxloc: geovals not allocated")
 endif
 
 mxval = 0.0_kind_real
