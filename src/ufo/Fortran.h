@@ -149,7 +149,20 @@ extern "C" {
   void ufo_insitutemperature_tlad_settraj_f90(const F90hop &, const F90goms &, const F90odb &);
   void ufo_insitutemperature_tlad_eqv_tl_f90(const F90hop &, const F90goms &, const F90odb &, const F90ovec &);
   void ufo_insitutemperature_tlad_eqv_ad_f90(const F90hop &, const F90goms &, const F90odb &, const F90ovec &);
- 
+
+// -----------------------------------------------------------------------------
+//  Ocean ADT observation operator and its tl/ad
+// -----------------------------------------------------------------------------
+
+  void ufo_adt_setup_f90(F90hop &, const eckit::Configuration * const *);
+  void ufo_adt_delete_f90(F90hop &);
+  void ufo_adt_eqv_f90(const F90hop &, const F90goms &, const F90odb &, const F90ovec &, const F90obias &);
+  void ufo_adt_tlad_setup_f90(F90hop &, const eckit::Configuration * const *);
+  void ufo_adt_tlad_delete_f90(F90hop &);
+  void ufo_adt_tlad_settraj_f90(const F90hop &, const F90goms &);
+  void ufo_adt_tlad_eqv_tl_f90(const F90hop &, const F90goms &, const F90ovec &);
+  void ufo_adt_tlad_eqv_ad_f90(const F90hop &, const F90goms &, const F90ovec &);
+  
 // -----------------------------------------------------------------------------
 //  AOD observation operator and its tl/ad 
 // -----------------------------------------------------------------------------
