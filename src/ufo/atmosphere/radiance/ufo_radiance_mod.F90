@@ -52,7 +52,6 @@ contains
     ! --------------------------
     CHARACTER(*), PARAMETER :: PROGRAM_NAME   = 'ufo_radiance_mod.F90'
     
-    
     ! ============================================================================
     ! STEP 2. **** SET UP SOME PARAMETERS FOR THE CRTM RUN ****
     !
@@ -251,6 +250,10 @@ contains
           CALL Display_Message( PROGRAM_NAME, message, FAILURE )
           STOP
        END IF
+
+       do i = 1, n_profiles
+         call CRTM_Surface_Create(sfc(i), n_channels)
+       enddo
        ! ==========================================================================
        
        ! ==========================================================================
@@ -375,7 +378,7 @@ contains
 !             print *, rts(l,m)%Brightness_Temperature, Radiance_Tbobs(l,m) - Radiance_Omgnbc(l,m)
              rmse = rmse + (Radiance_Tbobs(l,m) - Radiance_Omgnbc(l,m)) * (Radiance_Tbobs(l,m) - Radiance_Omgnbc(l,m))
           END DO
-          WRITE( *,'(//7x,"Profile ",i0," output for ",a, " difference:",f12.6 )') m, TRIM(Sensor_Id(n)), maxval(abs(diff(:,m)))
+!          WRITE( *,'(//7x,"Profile ",i0," output for ",a, " difference:",f12.6 )') m, TRIM(Sensor_Id(n)), maxval(abs(diff(:,m)))
        END DO
        print *, 'Max difference: ', maxval(abs(diff))
        deallocate(diff)
@@ -564,7 +567,9 @@ contains
       INTEGER, PARAMETER :: FRESH_SNOW_TYPE             =  2  ! NPOESS Snow type         for IR/VIS SfcOptics
       INTEGER, PARAMETER :: FRESH_ICE_TYPE              =  1  ! NPOESS Ice type          for IR/VIS SfcOptics
       
-      
+      type(obs_vector) :: TmpOvec
+      real(kind_real), allocatable :: Radiance_Tbobs(:,:)
+      integer :: ch
       
       ! 4a.1 Profile #1  !** UFO: to be provided by UFO
       ! ---------------
@@ -592,8 +597,17 @@ contains
       !       varname = geovals%variables%fldnames(1)
        !******                               123456789012345678901234'
 
-      
+      allocate(Radiance_Tbobs(n_channels, n_profiles))
+      call ioda_obsvec_setup(TmpOvec, Radiance%nobs)
+      call ioda_obsdb_var_to_ovec(Radiance, TmpOvec, "Observation")
+      Radiance_Tbobs = reshape(TmpOvec%values, (/n_channels, n_profiles/))
+     
       do k1 = 1,N_PROFILES
+         sfc(k1)%sensordata%sensor_id        = chinfo(1)%sensor_id
+         sfc(k1)%sensordata%wmo_sensor_id    = chinfo(1)%wmo_sensor_id
+         sfc(k1)%sensordata%wmo_satellite_id = chinfo(1)%wmo_satellite_id
+         sfc(k1)%sensordata%sensor_channel   = chinfo(1)%sensor_channel
+
          sfc(k1)%Water_Type         = SEA_WATER_TYPE    !** NOTE: need to check how to determine fresh vs sea water types (salinity???)
          lfound                     = ufo_geovals_get_var(geovals, var_sfc_wspeed, geoval)
          sfc(k1)%Wind_Speed         = geoval%vals(1,k1) 
@@ -631,7 +645,12 @@ contains
          sfc(k1)%Soil_Moisture_Content = geoval%vals(1,k1) 
          lfound                     = ufo_geovals_get_var(geovals, var_sfc_soilt, geoval)
          sfc(k1)%Soil_Temperature   = geoval%vals(1,k1) 
+         do ch = 1, n_channels
+           sfc(k1)%sensordata%tb(ch) = Radiance_TbObs(ch, k1)
+         enddo
       end do
+      deallocate(Radiance_Tbobs)
+      call ioda_obsvec_delete(TmpOvec)
 
     END SUBROUTINE Load_Sfc_Data
 
