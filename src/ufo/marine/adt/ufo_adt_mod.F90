@@ -104,7 +104,7 @@ do iobs = 1, hofx%nobs
 !   hofx%values(iobs) = adt%vals(1,iobs)
 ! remove offset from hofx
    hofx%values(iobs) = adt%vals(1,iobs)+(sum_obs-sum_hofx)/hofx%nobs
-   write(302,*)hofx%values(iobs)
+   write(702,*)hofx%values(iobs)
 
   ! Output information:
   adt_out(iobs)%Station_ID                     = 1 
