@@ -197,10 +197,10 @@ contains
     ! -----------------------------------
     n_channels = SUM(CRTM_ChannelInfo_n_Channels(chinfo))
     !WRITE( *,'(/5x,"Processing a total of ",i0," channels...", i0, " layers..")' ) n_channels, N_LAYERS
-    DO n = 1, N_SENSORS
-       !WRITE( *,'(7x,i0," from ",a)' ) &
-       !     CRTM_ChannelInfo_n_Channels(chinfo(n)), TRIM(SENSOR_ID(n))
-    END DO
+!!$    DO n = 1, N_SENSORS
+!!$       !WRITE( *,'(7x,i0," from ",a)' ) &
+!!$       !     CRTM_ChannelInfo_n_Channels(chinfo(n)), TRIM(SENSOR_ID(n))
+!!$    END DO
     ! ============================================================================
     ! Begin loop over sensors
     !** UFO: this loop isn't necessary if we're calling CRTM for each sensor -- it's
@@ -242,6 +242,13 @@ contains
           CALL Display_Message( PROGRAM_NAME, message, FAILURE )
           STOP
        END IF
+
+       call CRTM_Surface_Create(sfc, n_channels)
+       IF ( ANY(.NOT. CRTM_Atmosphere_Associated(sfc)) ) THEN
+          message = 'Error allocating CRTM Surface structure'
+          CALL Display_Message( PROGRAM_NAME, message, FAILURE )
+          STOP
+       END IF
        
        ! The output K-MATRIX structure
        CALL CRTM_Atmosphere_Create( atm_K, N_LAYERS, N_ABSORBERS, N_CLOUDS, N_AEROSOLS )
@@ -251,9 +258,13 @@ contains
           STOP
        END IF
 
-       do i = 1, n_profiles
-         call CRTM_Surface_Create(sfc(i), n_channels)
-       enddo
+       call CRTM_Surface_Create(sfc_K, n_channels)
+       IF ( ANY(.NOT. CRTM_Atmosphere_Associated(sfc_K)) ) THEN
+          message = 'Error allocating CRTM K-matrix Surface structure'
+          CALL Display_Message( PROGRAM_NAME, message, FAILURE )
+          STOP
+       END IF
+
        ! ==========================================================================
        
        ! ==========================================================================
@@ -646,7 +657,7 @@ contains
          lfound                     = ufo_geovals_get_var(geovals, var_sfc_soilt, geoval)
          sfc(k1)%Soil_Temperature   = geoval%vals(1,k1) 
          do ch = 1, n_channels
-           sfc(k1)%sensordata%tb(ch) = Radiance_TbObs(ch, k1)
+           sfc(k1)%sensordata%tb(ch) = Radiance_TbObs(ch, k1)  !** required to match GSI simulated TBs over snow and ice surfaces
          enddo
       end do
       deallocate(Radiance_Tbobs)
