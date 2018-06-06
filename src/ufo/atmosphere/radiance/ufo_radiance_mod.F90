@@ -244,7 +244,7 @@ contains
        END IF
 
        call CRTM_Surface_Create(sfc, n_channels)
-       IF ( ANY(.NOT. CRTM_Atmosphere_Associated(sfc)) ) THEN
+       IF ( ANY(.NOT. CRTM_Surface_Associated(sfc)) ) THEN
           message = 'Error allocating CRTM Surface structure'
           CALL Display_Message( PROGRAM_NAME, message, FAILURE )
           STOP
@@ -259,7 +259,7 @@ contains
        END IF
 
        call CRTM_Surface_Create(sfc_K, n_channels)
-       IF ( ANY(.NOT. CRTM_Atmosphere_Associated(sfc_K)) ) THEN
+       IF ( ANY(.NOT. CRTM_Surface_Associated(sfc_K)) ) THEN
           message = 'Error allocating CRTM K-matrix Surface structure'
           CALL Display_Message( PROGRAM_NAME, message, FAILURE )
           STOP
