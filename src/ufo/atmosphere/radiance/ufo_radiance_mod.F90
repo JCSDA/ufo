@@ -670,51 +670,24 @@ contains
     !
     SUBROUTINE Load_Geom_Data()
       implicit none
-      integer :: k1
 
       type(obs_vector) :: TmpOvec
-      real(kind_real), allocatable :: Radiance_SatZenAng(:)
-      real(kind_real), allocatable :: Radiance_SolZenAng(:)
-      real(kind_real), allocatable :: Radiance_SatAzmAng(:)
-      real(kind_real), allocatable :: Radiance_SolAzmAng(:)
-      real(kind_real), allocatable :: Radiance_SenScnPos(:)
-      real(kind_real), allocatable :: Radiance_SenScnAng(:)
 
-      allocate(Radiance_SatZenAng(Radiance%nobs))
-      allocate(Radiance_SolZenAng(Radiance%nobs))
-      allocate(Radiance_SatAzmAng(Radiance%nobs))
-      allocate(Radiance_SolAzmAng(Radiance%nobs))
-      allocate(Radiance_SenScnPos(Radiance%nobs))
-      allocate(Radiance_SenScnAng(Radiance%nobs))
       call ioda_obsvec_setup(TmpOvec, Radiance%nobs)
 
       call ioda_obsdb_var_to_ovec(Radiance, TmpOvec, "Sat_Zenith_Angle")
-      Radiance_SatZenAng = TmpOvec%values
+      geo(:)%Sensor_Zenith_Angle = TmpOvec%values(::n_channels)
       call ioda_obsdb_var_to_ovec(Radiance, TmpOvec, "Sol_Zenith_Angle")
-      Radiance_SolZenAng = TmpOvec%values
+      geo(:)%Source_Zenith_Angle = TmpOvec%values(::n_channels)
       call ioda_obsdb_var_to_ovec(Radiance, TmpOvec, "Sat_Azimuth_Angle")
-      Radiance_SatAzmAng = TmpOvec%values
+      geo(:)%Sensor_Azimuth_Angle = TmpOvec%values(::n_channels)
       call ioda_obsdb_var_to_ovec(Radiance, TmpOvec, "Sol_Azimuth_Angle")
-      Radiance_SolAzmAng = TmpOvec%values
+      geo(:)%Source_Azimuth_Angle = TmpOvec%values(::n_channels)
       call ioda_obsdb_var_to_ovec(Radiance, TmpOvec, "Scan_Position")
-      Radiance_SenScnPos = TmpOvec%values
+      geo(:)%Ifov = TmpOvec%values(::n_channels)
       call ioda_obsdb_var_to_ovec(Radiance, TmpOvec, "Scan_Angle")
-      Radiance_SenScnAng = TmpOvec%values
+      geo(:)%Sensor_Scan_Angle = TmpOvec%values(::n_channels)
 
-      do k1 = 1,N_PROFILES
-         geo(k1)%Sensor_Zenith_Angle = Radiance_SatZenAng((k1-1)*n_channels + 1)
-         geo(k1)%Sensor_Scan_Angle   = Radiance_SenScnAng((k1-1)*n_channels + 1)
-         geo(k1)%Source_Zenith_Angle = Radiance_SolZenAng((k1-1)*n_channels + 1)
-         geo(k1)%Sensor_Azimuth_Angle = Radiance_SatAzmAng((k1-1)*n_channels + 1)
-         geo(k1)%Source_Azimuth_Angle = Radiance_SolAzmAng((k1-1)*n_channels + 1)
-         geo(k1)%Ifov = Radiance_SenScnPos((k1-1)*n_channels + 1)
-      enddo
-      deallocate(Radiance_SatZenAng)
-      deallocate(Radiance_SolZenAng)
-      deallocate(Radiance_SatAzmAng)
-      deallocate(Radiance_SolAzmAng)
-      deallocate(Radiance_SenScnPos)
-      deallocate(Radiance_SenScnAng)
       call ioda_obsvec_delete(TmpOvec)
 
     END SUBROUTINE Load_Geom_Data
