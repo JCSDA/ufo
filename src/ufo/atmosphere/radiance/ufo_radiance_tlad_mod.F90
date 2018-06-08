@@ -13,82 +13,83 @@ module ufo_radiance_tlad_mod
   use ioda_locs_mod
   use ufo_geovals_mod
   use kinds  
+  use ufo_basis_tlad_mod, only: ufo_basis_tlad
 
   use crtm_module
 
   implicit none
+
   public :: ufo_radiance_tlad
-  public :: ufo_radiance_tlad_delete
-  public :: ufo_radiance_tlad_settraj
-  public :: ufo_radiance_tlad_eqv_tl
-  public :: ufo_radiance_tlad_eqv_ad
   private
   integer, parameter :: max_string=800
 
-!> Fortran derived type for radiance trajectory
-type :: ufo_radiance_tlad
-   logical :: ltraj = .false. !< trajectory set?
-end type ufo_radiance_tlad
+  !> Fortran derived type for radiance trajectory
+  type, extends(ufo_basis_tlad) :: ufo_radiance_tlad
+  contains
+    procedure :: delete  => ufo_radiance_tlad_delete
+    procedure :: settraj => ufo_radiance_tlad_settraj 
+    procedure :: eqv_tl  => ufo_radiance_tlad_eqv_tl
+    procedure :: eqv_ad  => ufo_radiance_tlad_eqv_ad
+  end type ufo_radiance_tlad
   
-! ------------------------------------------------------------------------------
-
 contains
-  
+
 ! ------------------------------------------------------------------------------
 
 subroutine ufo_radiance_tlad_delete(self)
-implicit none
-type(ufo_radiance_tlad), intent(inout)  :: self
+  implicit none
+  class(ufo_radiance_tlad), intent(inout)  :: self
 
-self%ltraj = .false.
+  self%ltraj = .false.
 
 end subroutine ufo_radiance_tlad_delete
 
 ! ------------------------------------------------------------------------------
  
-subroutine ufo_radiance_tlad_settraj(self, geovals)
-implicit none
-type(ufo_radiance_tlad), intent(inout) :: self
-type(ufo_geovals), intent(in)       :: geovals
+subroutine ufo_radiance_tlad_settraj(self, geovals, obss)
+  implicit none
+  class(ufo_radiance_tlad), intent(inout) :: self
+  type(ufo_geovals),     intent(in)    :: geovals
+  type(ioda_obsdb),      intent(in)    :: obss
 
-character(len=*), parameter :: myname_="ufo_radiance_tlad_settraj"
-character(max_string) :: err_msg
+  character(len=*), parameter :: myname_="ufo_radiance_tlad_settraj"
+  character(max_string) :: err_msg
 
-! Nothing here yet
+  ! Nothing here yet
 
-self%ltraj = .false. !.true.
+  self%ltraj = .false. !.true.
 
 end subroutine ufo_radiance_tlad_settraj
 
 ! ------------------------------------------------------------------------------
 
 subroutine ufo_radiance_tlad_eqv_tl(self, geovals, hofx, obss)
-implicit none
-type(ufo_radiance_tlad), intent(in)     :: self
-type(ufo_geovals),    intent(in)     :: geovals
-type(obs_vector),     intent(inout)  :: hofx
-type(ioda_obsdb), intent(in) :: obss
+  implicit none
+  class(ufo_radiance_tlad), intent(in)     :: self
+  type(ufo_geovals),     intent(in)     :: geovals
+  type(obs_vector),      intent(inout)  :: hofx
+  type(ioda_obsdb),      intent(in)     :: obss
 
-character(len=*), parameter :: myname_="ufo_radiance_tlad_eqv_tl"
-character(max_string) :: err_msg
+  character(len=*), parameter :: myname_="ufo_radiance_tlad_eqv_tl"
+  character(max_string) :: err_msg
 
-! Nothing here yet
+  ! Nothing here yet
 
 end subroutine ufo_radiance_tlad_eqv_tl
 
 ! ------------------------------------------------------------------------------
 
 subroutine ufo_radiance_tlad_eqv_ad(self, geovals, hofx, obss)
-implicit none
-type(ufo_radiance_tlad), intent(in)     :: self
-type(ufo_geovals),    intent(in)     :: geovals
-type(obs_vector),     intent(inout)  :: hofx
-type(ioda_obsdb), intent(in) :: obss
+  implicit none
+  class(ufo_radiance_tlad), intent(in) :: self
+  type(ufo_geovals),     intent(inout)    :: geovals
+  type(obs_vector),      intent(in)       :: hofx
+  type(ioda_obsdb),      intent(in)       :: obss
 
-character(len=*), parameter :: myname_="ufo_radiance_tlad_eqv_ad"
-character(max_string) :: err_msg
+  character(len=*), parameter :: myname_="ufo_radiance_tlad_eqv_ad"
+  character(max_string) :: err_msg
 
-! Nothing here yet
+  ! Nothing here yet
 
 end subroutine ufo_radiance_tlad_eqv_ad
 

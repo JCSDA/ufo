@@ -13,35 +13,36 @@ module ufo_radiance_mod
   use ioda_locs_mod
   use ufo_geovals_mod
   use kinds  
+  use ufo_basis_mod, only: ufo_basis
 
   use crtm_module
 
   implicit none
   public :: ufo_radiance
-  public :: ufo_radiance_eqv
   private
-  integer, parameter :: max_string=800
 
-!> Fortran derived type for radiance trajectory
-type :: ufo_radiance
-end type ufo_radiance
+  !> Fortran derived type for radiance trajectory
+  type, extends(ufo_basis) :: ufo_radiance
+  contains
+    procedure :: eqv => ufo_radiance_eqv
+  end type ufo_radiance
   
-! ------------------------------------------------------------------------------
-
 contains
-  
+
 ! ------------------------------------------------------------------------------
 
-  subroutine ufo_radiance_eqv(self, geovals, hofx, Radiance) 
+  subroutine ufo_radiance_eqv(self, geovals, hofx, obss) 
     implicit none
-    type(ufo_radiance), intent(in)    :: self
+    class(ufo_radiance), intent(in)    :: self
     type(ufo_geovals),  intent(in)    :: geovals
     type(obs_vector),   intent(inout) :: hofx
-    type(ioda_obsdb),   intent(in)    :: Radiance
+    type(ioda_obsdb), target, intent(in)    :: obss
 
     type(obs_vector) :: TmpOvec
     real(kind_real), allocatable :: Radiance_Tbobs(:,:)
     real(kind_real), allocatable :: Radiance_Omgnbc(:,:)
+
+    type(ioda_obsdb),  pointer  :: Radiance => NULL()
 
     !*************************************************************************************
     !******* Begin CRTM block ************************************************************
@@ -137,6 +138,8 @@ contains
     integer              :: nlocs
     real(fp)              :: rmse
     real(fp), allocatable :: diff(:,:)
+
+    Radiance => obss
 
     ! Program header
     ! --------------

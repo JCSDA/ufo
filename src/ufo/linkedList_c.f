@@ -113,3 +113,24 @@ subroutine finalize_(self)
   deallocate(current)
  enddo
 end subroutine
+
+!> linkedlist generic setup
+subroutine regstry_setup_(self, c_key_self, ptr)
+  class(registry_t) :: self
+  integer :: c_key_self
+  type (LISTED_TYPE), pointer :: ptr
+
+  call self%init()
+  call self%add(c_key_self)
+  call self%get(c_key_self, ptr)
+end subroutine
+
+!> linkedlist generic delete
+subroutine regstry_delete_(self, c_key_self, ptr)
+  class(registry_t) :: self
+  integer :: c_key_self
+  type (LISTED_TYPE), pointer :: ptr
+
+  call self%get(c_key_self, ptr)
+  call self%remove(c_key_self)
+end subroutine

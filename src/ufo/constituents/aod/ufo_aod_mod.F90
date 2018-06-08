@@ -15,11 +15,11 @@ MODULE ufo_aod_mod
   use kinds
   USE ufo_aod_misc
   use crtm_module
-  USE ufo_aod_misc
+  USE ufo_basis_mod, only: ufo_basis
 
   implicit none
 
-  public :: ufo_aod_eqv, ufo_aod
+  public :: ufo_aod
 
   private
   integer, parameter :: max_string=800  
@@ -53,12 +53,11 @@ MODULE ufo_aod_mod
   LOGICAL :: flip_vertical
 
   
-!> Fortran derived type for aod trajectory
-type :: ufo_aod
-   logical :: ltraj = .false. !< trajectory set?
-end type ufo_aod
-
-! ------------------------------------------------------------------------------
+  !> Fortran derived type for aod trajectory
+  type, extends(ufo_basis) :: ufo_aod
+  contains
+    procedure :: eqv => ufo_aod_eqv
+  end type ufo_aod
 
 contains
   
@@ -66,10 +65,10 @@ contains
 
   SUBROUTINE ufo_aod_eqv(self, geovals, hofx, obss) 
     implicit none
-    type(ufo_aod),     intent(in)    :: self
+    class(ufo_aod),    intent(in)    :: self
     type(ufo_geovals), intent(in)    :: geovals
-    type(ioda_obsdb), intent(inout)  :: obss
     type(obs_vector),  intent(inout) :: hofx
+    type(ioda_obsdb), target, intent(in)  :: obss
 
     type(obs_vector) :: TmpOvec
     real(kind_real), allocatable :: Aod_Obs(:,:)

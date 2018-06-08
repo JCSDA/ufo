@@ -5,8 +5,8 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#ifndef UFO_OBSAODTLAD_H_
-#define UFO_OBSAODTLAD_H_
+#ifndef UFO_OBSAIRCRAFTTLAD_H_
+#define UFO_OBSAIRCRAFTTLAD_H_
 
 #include <ostream>
 #include <string>
@@ -34,15 +34,15 @@ namespace ufo {
   class ObsBiasIncrement;
 
 // -----------------------------------------------------------------------------
-/// Aod (currently only temperature) observation for UFO.
+/// Aircraft (currently only temperature) observation for UFO.
 template <typename MODEL>
-class ObsAodTLAD : public oops::LinearObsOperBase<MODEL>,
-                          private util::ObjectCounter<ObsAodTLAD<MODEL>> {
+class ObsAircraftTLAD : public oops::LinearObsOperBase<MODEL>,
+                          private util::ObjectCounter<ObsAircraftTLAD<MODEL>> {
 public:
-  static const std::string classname() {return "ufo::ObsAodTLAD";}
+  static const std::string classname() {return "ufo::ObsAircraftTLAD";}
 
-  ObsAodTLAD(const ioda::ObsSpace &, const eckit::Configuration &);
-  virtual ~ObsAodTLAD();
+  ObsAircraftTLAD(const ioda::ObsSpace &, const eckit::Configuration &);
+  virtual ~ObsAircraftTLAD();
 
   // Obs Operators
   void setTrajectory(const GeoVaLs &, const ObsBias &);
@@ -52,63 +52,61 @@ public:
   // Other
   const oops::Variables & variables() const {return *varin_;}
 
-  int & toFortran() {return keyOperAod_;}
-  const int & toFortran() const {return keyOperAod_;}
+  int & toFortran() {return keyOperAircraft_;}
+  const int & toFortran() const {return keyOperAircraft_;}
 
 private:
   void print(std::ostream &) const;
-  F90hop keyOperAod_;
+  F90hop keyOperAircraft_;
   const ioda::ObsSpace& odb_;
   boost::scoped_ptr<const oops::Variables> varin_;
 };
 
 // -----------------------------------------------------------------------------
 template <typename MODEL>
-ObsAodTLAD<MODEL>::ObsAodTLAD(const ioda::ObsSpace & odb, const eckit::Configuration & config)
-  : keyOperAod_(0), varin_(), odb_(odb)
+ObsAircraftTLAD<MODEL>::ObsAircraftTLAD(const ioda::ObsSpace & odb, const eckit::Configuration & config)
+  : keyOperAircraft_(0), varin_(), odb_(odb)
 {
   const eckit::Configuration * configc = &config;
-  ufo_aod_tlad_setup_f90(keyOperAod_, &configc);
-  const std::vector<std::string> vv{"temperature","humidity_mixing_ratio",
-      "air_pressure","air_pressure_levels",
-      "sulf","bc1","bc2","oc1","oc2","dust1","dust2","dust3","dust4","dust5",
-      "seas1","seas2","seas3","seas4","p25"};
+  ufo_aircraft_tlad_setup_f90(keyOperAircraft_, &configc);
+  const std::vector<std::string> vv{"virtual_temperature", "atmosphere_ln_pressure_coordinate"};
   varin_.reset(new oops::Variables(vv));
-  oops::Log::trace() << "ObsAodTLAD created" << std::endl;
+  oops::Log::trace() << "ObsAircraftTLAD created" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 template <typename MODEL>
-ObsAodTLAD<MODEL>::~ObsAodTLAD() {
-  oops::Log::trace() << "ObsAodTLAD destructed" << std::endl;
+ObsAircraftTLAD<MODEL>::~ObsAircraftTLAD() {
+  ufo_aircraft_tlad_delete_f90(keyOperAircraft_);
+  oops::Log::trace() << "ObsAircraftTLAD destructed" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 template <typename MODEL>
-void ObsAodTLAD<MODEL>::setTrajectory(const GeoVaLs & geovals, const ObsBias & bias) {
-  ufo_aod_tlad_settraj_f90(keyOperAod_, geovals.toFortran(), odb_.toFortran());
+void ObsAircraftTLAD<MODEL>::setTrajectory(const GeoVaLs & geovals, const ObsBias & bias) {
+  ufo_aircraft_tlad_settraj_f90(keyOperAircraft_, geovals.toFortran(), odb_.toFortran());
 }
 
 // -----------------------------------------------------------------------------
 template <typename MODEL>
-void ObsAodTLAD<MODEL>::obsEquivTL(const GeoVaLs & geovals, ioda::ObsVector & ovec,
-                               const ObsBiasIncrement & bias) const {
-  ufo_aod_tlad_eqv_tl_f90(keyOperAod_, geovals.toFortran(), odb_.toFortran(), ovec.toFortran());
+void ObsAircraftTLAD<MODEL>::obsEquivTL(const GeoVaLs & geovals, ioda::ObsVector & ovec,
+                             const ObsBiasIncrement & bias) const {
+  ufo_aircraft_tlad_t_eqv_tl_f90(keyOperAircraft_, geovals.toFortran(), odb_.toFortran(), ovec.toFortran());
 }
 
 // -----------------------------------------------------------------------------
 template <typename MODEL>
-void ObsAodTLAD<MODEL>::obsEquivAD(GeoVaLs & geovals, const ioda::ObsVector & ovec,
-                               ObsBiasIncrement & bias) const {
-  ufo_aod_tlad_eqv_ad_f90(keyOperAod_, geovals.toFortran(), odb_.toFortran(), ovec.toFortran());
+void ObsAircraftTLAD<MODEL>::obsEquivAD(GeoVaLs & geovals, const ioda::ObsVector & ovec,
+                             ObsBiasIncrement & bias) const {
+  ufo_aircraft_tlad_t_eqv_ad_f90(keyOperAircraft_, geovals.toFortran(), odb_.toFortran(), ovec.toFortran());
 }
 
 // -----------------------------------------------------------------------------
 template <typename MODEL>
-void ObsAodTLAD<MODEL>::print(std::ostream & os) const {
-  os << "ObsAodTLAD::print not implemented" << std::endl;
+void ObsAircraftTLAD<MODEL>::print(std::ostream & os) const {
+  os << "ObsAircraftTLAD::print not implemented" << std::endl;
 }
 // -----------------------------------------------------------------------------
 
 }  // namespace ufo
-#endif  // UFO_OBSAODTLAD_H_
+#endif  // UFO_OBSAIRCRAFTTLAD_H_

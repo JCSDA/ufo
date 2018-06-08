@@ -9,29 +9,25 @@ module ufo_radiosonde_mod_c
   
   use iso_c_binding
   use config_mod
-  use ioda_obs_vectors,   only: obs_vector, ioda_obs_vect_registry
-  use ufo_geovals_mod,   only: ufo_geovals
-  use ufo_geovals_mod_c, only: ufo_geovals_registry
-  use ioda_obsdb_mod,   only: ioda_obsdb
-  use ioda_obsdb_mod_c, only: ioda_obsdb_registry 
   use ufo_radiosonde_mod 
   implicit none
   private
   
 #define LISTED_TYPE ufo_radiosonde
-  
+
   !> Linked list interface - defines registry_t type
 #include "../../linkedList_i.f"
-  
+
   !> Global registry
   type(registry_t) :: ufo_radiosonde_registry
-  
+
   ! ------------------------------------------------------------------------------
+
 contains
   ! ------------------------------------------------------------------------------
   !> Linked list implementation
 #include "../../linkedList_c.f"
-  
+
 ! ------------------------------------------------------------------------------
   
 subroutine ufo_radiosonde_setup_c(c_key_self, c_conf) bind(c,name='ufo_radiosonde_setup_f90')
@@ -41,9 +37,7 @@ type(c_ptr), intent(in)    :: c_conf
     
 type(ufo_radiosonde), pointer :: self
 
-call ufo_radiosonde_registry%init()
-call ufo_radiosonde_registry%add(c_key_self)
-call ufo_radiosonde_registry%get(c_key_self, self)
+call ufo_radiosonde_registry%setup(c_key_self, self)
     
 end subroutine ufo_radiosonde_setup_c
   
@@ -55,8 +49,7 @@ integer(c_int), intent(inout) :: c_key_self
     
 type(ufo_radiosonde), pointer :: self
 
-call ufo_radiosonde_registry%get(c_key_self, self)
-call ufo_radiosonde_registry%remove(c_key_self)
+call ufo_radiosonde_registry%delete(c_key_self, self)
     
 end subroutine ufo_radiosonde_delete_c
   
@@ -72,18 +65,11 @@ integer(c_int), intent(in) :: c_key_obsspace
 integer(c_int), intent(in) :: c_bias
 
 type(ufo_radiosonde), pointer :: self
-type(ufo_geovals),    pointer :: geovals
-type(obs_vector),     pointer :: hofx
-type(ioda_obsdb),     pointer :: obss
 
 character(len=*), parameter :: myname_="ufo_radiosonde_t_eqv_c"
 
 call ufo_radiosonde_registry%get(c_key_self, self)
-call ufo_geovals_registry%get(c_key_geovals,geovals)
-call ioda_obs_vect_registry%get(c_key_hofx,hofx)
-call ioda_obsdb_registry%get(c_key_obsspace,obss)
-
-call ufo_radiosonde_t_eqv(self, geovals, hofx, obss)
+call self%opr_eqv(c_key_geovals, c_key_obsspace, c_key_hofx)
 
 end subroutine ufo_radiosonde_t_eqv_c
 

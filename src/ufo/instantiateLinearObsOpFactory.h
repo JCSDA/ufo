@@ -9,6 +9,7 @@
 
 //Atmosphere
 #include "atmosphere/radiosonde/ObsRadiosondeTLAD.h"
+#include "atmosphere/aircraft/ObsAircraftTLAD.h"
 #include "atmosphere/radiance/ObsRadianceTLAD.h"
 //Marine
 #include "marine/seaicefraction/ObsSeaIceFractionTLAD.h"
@@ -22,6 +23,7 @@ namespace ufo {
 
 template<typename MODEL> void instantiateLinearObsOpFactory() {
   static oops::LinearObsOpMaker<MODEL, ObsRadiosondeTLAD<MODEL>> makerRadiosondeTL_("Radiosonde");
+  static oops::LinearObsOpMaker<MODEL, ObsAircraftTLAD<MODEL>> makerAircraftTL_("Aircraft");
   static oops::LinearObsOpMaker<MODEL, ObsRadianceTLAD<MODEL>> makerRadianceTL_("Radiance");
   static oops::LinearObsOpMaker<MODEL, ObsStericHeightTLAD<MODEL>> makerStericHeightTL_("StericHeight");
   static oops::LinearObsOpMaker<MODEL, ObsSeaIceFractionTLAD<MODEL>> makerFractionTL_("SeaIceFraction");  

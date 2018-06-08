@@ -9,25 +9,22 @@ module ufo_aod_mod_c
   
   use iso_c_binding
   use config_mod
-  use ioda_obs_vectors,   only: obs_vector, ioda_obs_vect_registry
-  use ufo_geovals_mod,   only: ufo_geovals
-  use ufo_geovals_mod_c, only: ufo_geovals_registry
-  use ioda_obsdb_mod,   only: ioda_obsdb
-  use ioda_obsdb_mod_c, only: ioda_obsdb_registry 
   use ufo_aod_mod 
   implicit none
   private
   
 #define LISTED_TYPE ufo_aod
-  
+
   !> Linked list interface - defines registry_t type
 #include "../../linkedList_i.f"
-  
+
   !> Global registry
   type(registry_t) :: ufo_aod_registry
-  
+
   ! ------------------------------------------------------------------------------
+
 contains
+
   ! ------------------------------------------------------------------------------
   !> Linked list implementation
 #include "../../linkedList_c.f"
@@ -41,9 +38,7 @@ type(c_ptr), intent(in)    :: c_conf
     
 type(ufo_aod), pointer :: self
 
-call ufo_aod_registry%init()
-call ufo_aod_registry%add(c_key_self)
-call ufo_aod_registry%get(c_key_self, self)
+call ufo_aod_registry%setup(c_key_self, self)
     
 end subroutine ufo_aod_setup_c
   
@@ -55,8 +50,7 @@ integer(c_int), intent(inout) :: c_key_self
     
 type(ufo_aod), pointer :: self
 
-call ufo_aod_registry%get(c_key_self, self)
-call ufo_aod_registry%remove(c_key_self)
+call ufo_aod_registry%delete(c_key_self, self)
     
 end subroutine ufo_aod_delete_c
   
@@ -72,18 +66,11 @@ integer(c_int), intent(in) :: c_key_obsspace
 integer(c_int), intent(in) :: c_bias
 
 type(ufo_aod),     pointer :: self
-type(ufo_geovals),        pointer :: geovals
-type(obs_vector),         pointer :: hofx
-type(ioda_obsdb), pointer :: obss
 
 character(len=*), parameter :: myname_="ufo_aod_eqv_c"
 
 call ufo_aod_registry%get(c_key_self, self)
-call ufo_geovals_registry%get(c_key_geovals,geovals)
-call ioda_obs_vect_registry%get(c_key_hofx,hofx)
-call ioda_obsdb_registry%get(c_key_obsspace,obss)
-
-call ufo_aod_eqv(self, geovals, hofx, obss)
+call self%opr_eqv(c_key_geovals, c_key_obsspace, c_key_hofx)
 
 end subroutine ufo_aod_eqv_c
 

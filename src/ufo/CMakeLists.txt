@@ -26,11 +26,13 @@ function(PREPEND var prefix )
     set ( ${var} "${listVar}" PARENT_SCOPE )
 endfunction(PREPEND)
 
+add_subdirectory( basis )
 add_subdirectory( atmosphere )
 add_subdirectory( constituents )
 add_subdirectory( marine )
 
 list( APPEND ufo_src_files
+    ${basis_src_files}
     ${atmosphere_src_files}
     ${constituents_src_files}
     ${marine_src_files}
