@@ -33,16 +33,16 @@ contains
 
   subroutine ufo_radiance_eqv(self, geovals, hofx, obss) 
     implicit none
-    class(ufo_radiance), intent(in)    :: self
-    type(ufo_geovals),  intent(in)    :: geovals
-    type(obs_vector),   intent(inout) :: hofx
+    class(ufo_radiance),      intent(in)    :: self
+    type(ufo_geovals),        intent(in)    :: geovals
+    type(obs_vector),         intent(inout) :: hofx
     type(ioda_obsdb), target, intent(in)    :: obss
 
-    type(obs_vector) :: TmpOvec
+    type(obs_vector)             :: TmpOvec
     real(kind_real), allocatable :: Radiance_Tbobs(:,:)
     real(kind_real), allocatable :: Radiance_Omgnbc(:,:)
 
-    type(ioda_obsdb),  pointer  :: Radiance => NULL()
+    type(ioda_obsdb), pointer    :: Radiance => NULL()
 
     !*************************************************************************************
     !******* Begin CRTM block ************************************************************
@@ -51,48 +51,40 @@ contains
     ! --------------------------
     ! Some non-CRTM-y Parameters
     ! --------------------------
-    CHARACTER(*), PARAMETER :: PROGRAM_NAME   = 'ufo_radiance_mod.F90'
+    CHARACTER(*), PARAMETER :: PROGRAM_NAME = 'ufo_radiance_mod.F90'
     
     ! ============================================================================
     ! STEP 2. **** SET UP SOME PARAMETERS FOR THE CRTM RUN ****
     !
 
     ! Directory location of coefficients
-    !** temporary local path for storing coefficient files (2 files per sensor), also several non-sensor specific binary files needed for other things
-    !** NOTE: for some strange reason, this compiled as little endian, even though BIG_ENDIAN was specified on the compiler flags --BTJ
     CHARACTER(*), PARAMETER :: ENDIAN_TYPE='little_endian'
-    CHARACTER(*), PARAMETER :: COEFFICIENT_PATH='Data/'
+    CHARACTER(*), PARAMETER :: COEFFICIENT_PATH='Data/'  
 
-    ! Profile dimensions
-    !** UFO to provide N_LAYERS, N_ABSORBERS, N_CLOUDS, N_AEROSOLS
-    INTEGER, PARAMETER :: N_PROFILES  = 806  !** required because of the rank of the atm and sfc structures
-    INTEGER, PARAMETER :: N_LAYERS    = 71 !64 !** UFO  !** need a way to populate this... 
-    INTEGER, PARAMETER :: N_ABSORBERS = 3  !** UFO
-    INTEGER, PARAMETER :: N_CLOUDS    = 2  !** UFO
-    INTEGER, PARAMETER :: N_AEROSOLS  = 0  !** UFO
-    
-    ! Sensor information
-    INTEGER     , PARAMETER :: N_SENSORS = 1  !** each call to CRTM will be for a single sensor type (zenith/scan angle will be different)
-    !  CHARACTER(*), PARAMETER :: SENSOR_ID(N_SENSORS) = (/'cris399_npp','atms_npp   '/)  !** example of how to list multiple sensors
-    CHARACTER(*), PARAMETER :: SENSOR_ID(N_SENSORS) = (/'amsua_n19'/)  !** UFO to provide sensor name
-    
-    ! Some pretend geometry angles. The scan angle is based
-    ! on the default Re (earth radius) and h (satellite height)
-    REAL(fp), PARAMETER :: ZENITH_ANGLE      = -44.65_fp   !** UFO to provide (however, I would not be against creating a geometry database...--BTJ)
-    REAL(fp), PARAMETER :: SCAN_ANGLE        = -35.0_fp  !** UFO to provide
-    REAL(fp), PARAMETER :: Latitude          = 46.3369
-    REAL(fp), PARAMETER :: Longitude         = 354.4514
-    REAL(fp), PARAMETER :: Elevation         = 161
-    REAL(fp), PARAMETER :: Obs_Time          = -1.83777777777778
-    REAL(fp), PARAMETER :: Scan_Position     = 4
-    REAL(fp), PARAMETER :: Sat_Zenith_Angle  = -44.65
-    REAL(fp), PARAMETER :: Sat_Azimuth_Angle = 290.23
-    REAL(fp), PARAMETER :: Sol_Zenith_Angle  = 118.88
-    REAL(fp), PARAMETER :: Sol_Azimuth_Angle = 66.63
+!!$    ! Profile dimensions
+!!$    !** UFO to provide n_Layers, n_Absorbers, n_Clouds, n_Aerosols
+
+    INTEGER, PARAMETER :: n_Absorbers = 3  !** UFO
+    INTEGER, PARAMETER :: n_Clouds    = 2  !** UFO
+    INTEGER, PARAMETER :: n_Aerosols  = 0  !** UFO
+
+    INTEGER :: n_Profiles ! = 806  !** required because of the rank of the atm and sfc structures
+    INTEGER :: n_Layers   ! = 71 !64 !** UFO  !** need a way to populate this... 
+
+      ! Sensor information
+    INTEGER     , PARAMETER :: n_Sensors = 1  !** each call to CRTM will be for a single sensor type (zenith/scan angle will be different)
+    !  CHARACTER(*), PARAMETER :: SENSOR_ID(n_Sensors) = (/'cris399_npp','atms_npp   '/)  !** example of how to list multiple sensors
+    CHARACTER(*), PARAMETER :: SENSOR_ID(n_Sensors) = (/'amsua_n19'/)  !** UFO to provide sensor name
+
+    !** these remaining items are still missing from UFO -> CRTM, likely available from locs.
+!!$    REAL(fp), PARAMETER :: Latitude  = 46.3369_fp
+!!$    REAL(fp), PARAMETER :: Longitude = 354.4514_fp
+!!$    REAL(fp), PARAMETER :: Elevation = 161_fp
+!!$    REAL(fp), PARAMETER :: Obs_Time  = -1.83777777777778_fp
                 
     !** NOTE: From CRTM_Parameters.f90, the maximum zenith angle is fixed at:
     !** REAL(fp), PUBLIC, PARAMETER :: MAX_TRANS_ZENITH_ANGLE = 63.6122_fp !corresponding to amass 2.25
-    !**   I will try to figure out why this is the maximum. --BTJ
+
     ! ============================================================================
     
     ! ---------
@@ -100,24 +92,23 @@ contains
     ! ---------
     CHARACTER(256) :: message, version
     INTEGER        :: err_stat, alloc_stat
-    INTEGER        :: n_channels
+    INTEGER        :: n_Channels
     INTEGER        :: l, m, n, nc, i
     real(fp)       :: cf
-    
-    
+       
     ! ============================================================================
     ! STEP 3. **** DEFINE THE CRTM INTERFACE STRUCTURES ****
     !
     ! 3a. Define the "non-demoninational" arguments
     ! ---------------------------------------------
-    TYPE(CRTM_ChannelInfo_type)             :: chinfo(N_SENSORS)
-    TYPE(CRTM_Geometry_type)                :: geo(N_PROFILES)
+    TYPE(CRTM_ChannelInfo_type)             :: chinfo(n_Sensors)
+    TYPE(CRTM_Geometry_type), ALLOCATABLE   :: geo(:)
     
     
     ! 3b. Define the FORWARD variables
     ! --------------------------------
-    TYPE(CRTM_Atmosphere_type)              :: atm(N_PROFILES)
-    TYPE(CRTM_Surface_type)                 :: sfc(N_PROFILES)
+    TYPE(CRTM_Atmosphere_type), ALLOCATABLE :: atm(:)
+    TYPE(CRTM_Surface_type),    ALLOCATABLE :: sfc(:)
     TYPE(CRTM_RTSolution_type), ALLOCATABLE :: rts(:,:)
     
     
@@ -129,48 +120,21 @@ contains
     ! ============================================================================
 
     type(ufo_geoval), pointer :: geoval
-    character(MAXVARLEN) :: varname
-    logical              :: lfound
-    integer              :: ivar
+    character(MAXVARLEN)      :: varname
+    logical                   :: lfound
+    integer                   :: ivar, nobs, nlocs
+    real(fp)                  :: rmse
+    real(fp), allocatable     :: diff(:,:)
 
-    integer              :: nobs
-    integer              :: nlocs
-    real(fp)              :: rmse
-    real(fp), allocatable :: diff(:,:)
-
+    !** Refer Radiance to obss 
     Radiance => obss
 
+    !** get number of profiles and number of layers from geovals input
+    n_Profiles = geovals%nobs
+    n_Layers   = geovals%geovals(1)%nval
+        
     ! Program header
     ! --------------
-
-    !nobs=obss%nobs; nlocs=obss%nlocs
-    !obss%Obspoint => obss%Radiance
-
-!** geovals index and variable names:
-!!$ 1   Temperature
-!!$ 2   Water vapor
-!!$ 3   Pressure
-!!$ 4   Level pressure
-!!$ 5   Ozone
-!!$ 6   Cloud liquid
-!!$ 7   Cloud ice
-!!$ 8   Water_Fraction
-!!$ 9   Land_Fraction
-!!$ 10  Ice_Fraction
-!!$ 11  Snow_Fraction
-!!$ 12  Water_Temperature
-!!$ 13  Land_Temperature
-!!$ 14  Ice_Temperature
-!!$ 15  Snow_Temperature
-!!$ 16  Vegetation_Fraction
-!!$ 17  Sfc_Wind_Speed
-!!$ 18  Sfc_Wind_Direction
-!!$ 19  Lai
-!!$ 20  Soil_Moisture
-!!$ 21  Soil_Temperature
-!!$ 22  Land_Type_Index
-!!$ 23  Vegetation_Type
-!!$ 24  Soil_Type
 
     CALL CRTM_Version( Version )
     CALL Program_Message( PROGRAM_NAME, &
@@ -198,9 +162,9 @@ contains
     
     ! 4b. Output some channel information
     ! -----------------------------------
-    n_channels = SUM(CRTM_ChannelInfo_n_Channels(chinfo))
-    !WRITE( *,'(/5x,"Processing a total of ",i0," channels...", i0, " layers..")' ) n_channels, N_LAYERS
-!!$    DO n = 1, N_SENSORS
+    n_Channels = SUM(CRTM_ChannelInfo_n_Channels(chinfo))
+    !WRITE( *,'(/5x,"Processing a total of ",i0," channels...", i0, " layers..")' ) n_Channels, n_Layers
+!!$    DO n = 1, n_Sensors
 !!$       !WRITE( *,'(7x,i0," from ",a)' ) &
 !!$       !     CRTM_ChannelInfo_n_Channels(chinfo(n)), TRIM(SENSOR_ID(n))
 !!$    END DO
@@ -211,7 +175,7 @@ contains
     !        or do each one individually.  I'm leaving this capability intact.  
     ! 
     ! ----------------------------------------------------------------------------
-    Sensor_Loop: DO n = 1, N_SENSORS
+    Sensor_Loop: DO n = 1, n_Sensors
        
        ! ==========================================================================
        ! STEP 5. **** ALLOCATE STRUCTURE ARRAYS ****
@@ -219,14 +183,17 @@ contains
        ! 5a. Determine the number of channels
        !     for the current sensor
        ! ------------------------------------
-       n_channels = CRTM_ChannelInfo_n_Channels(chinfo(n))
+       n_Channels = CRTM_ChannelInfo_n_Channels(chinfo(n))
        
        ! 5b. Allocate the ARRAYS
        ! -----------------------
-       ALLOCATE( rts( n_channels, N_PROFILES ), &
-            atm_K( n_channels, N_PROFILES ), &
-            sfc_K( n_channels, N_PROFILES ), &
-            rts_K( n_channels, N_PROFILES ), &
+       ALLOCATE( geo( n_Profiles ),          &
+            atm( n_Profiles ),               &
+            sfc( n_Profiles ),               &
+            rts( n_Channels, n_Profiles ),   &
+            atm_K( n_Channels, n_Profiles ), &
+            sfc_K( n_Channels, n_Profiles ), &
+            rts_K( n_Channels, n_Profiles ), &
             STAT = alloc_stat )
        IF ( alloc_stat /= 0 ) THEN
           message = 'Error allocating structure arrays'
@@ -239,14 +206,14 @@ contains
        !           are allocated in this example
        ! ----------------------------------------
        ! The input FORWARD structure
-       CALL CRTM_Atmosphere_Create( atm, N_LAYERS, N_ABSORBERS, N_CLOUDS, N_AEROSOLS )
+       CALL CRTM_Atmosphere_Create( atm, n_Layers, n_Absorbers, n_Clouds, n_Aerosols )
        IF ( ANY(.NOT. CRTM_Atmosphere_Associated(atm)) ) THEN
           message = 'Error allocating CRTM Forward Atmosphere structure'
           CALL Display_Message( PROGRAM_NAME, message, FAILURE )
           STOP
        END IF
 
-       call CRTM_Surface_Create(sfc, n_channels)
+       call CRTM_Surface_Create(sfc, n_Channels)
        IF ( ANY(.NOT. CRTM_Surface_Associated(sfc)) ) THEN
           message = 'Error allocating CRTM Surface structure'
           CALL Display_Message( PROGRAM_NAME, message, FAILURE )
@@ -254,14 +221,14 @@ contains
        END IF
        
        ! The output K-MATRIX structure
-       CALL CRTM_Atmosphere_Create( atm_K, N_LAYERS, N_ABSORBERS, N_CLOUDS, N_AEROSOLS )
+       CALL CRTM_Atmosphere_Create( atm_K, n_Layers, n_Absorbers, n_Clouds, n_Aerosols )
        IF ( ANY(.NOT. CRTM_Atmosphere_Associated(atm_K)) ) THEN
           message = 'Error allocating CRTM K-matrix Atmosphere structure'
           CALL Display_Message( PROGRAM_NAME, message, FAILURE )
           STOP
        END IF
 
-       call CRTM_Surface_Create(sfc_K, n_channels)
+       call CRTM_Surface_Create(sfc_K, n_Channels)
        IF ( ANY(.NOT. CRTM_Surface_Associated(sfc_K)) ) THEN
           message = 'Error allocating CRTM K-matrix Surface structure'
           CALL Display_Message( PROGRAM_NAME, message, FAILURE )
@@ -285,7 +252,7 @@ contains
 
        CALL Load_Atm_Data()   !** NOTE: could be moved out of sensor loop
        
-       !** NOTE:  need to add in cloud and aerosol data to read routine
+       !** NOTE:  need to add in aerosol data to read routine
        
        CALL Load_Sfc_Data()   !** NOTE: could be moved out of sensor loop
        
@@ -293,19 +260,8 @@ contains
        ! ------------------
        ! All profiles are given the same value
        !  The Sensor_Scan_Angle is optional.
-       ! ** UFO NOTE: sensor geometry information will need to be provided by calling
-       !          routines -- we can't use hardcoded values.  
        CALL Load_Geom_Data()
 
-!!$       REAL(fp), PARAMETER :: Latitude          = 46.3369
-!!$       REAL(fp), PARAMETER :: Longitude         = 354.4514
-!!$       REAL(fp), PARAMETER :: Elevation         = 161
-!!$       REAL(fp), PARAMETER :: Obs_Time          = -1.83777777777778
-!!$       REAL(fp), PARAMETER :: Scan_Position     = 4  !** at 3.333 degrees per scan position, starting at 48.333, so this is -48.333+4*3.333 = 
-!!$       REAL(fp), PARAMETER :: Sat_Zenith_Angle  = -44.65
-!!$       REAL(fp), PARAMETER :: Sat_Azimuth_Angle = 290.23
-!!$       REAL(fp), PARAMETER :: Sol_Zenith_Angle  = 118.88
-!!$       REAL(fp), PARAMETER :: Sol_Azimuth_Angle = 66.63
        
        ! ==========================================================================
        
@@ -375,18 +331,18 @@ contains
        ! select the needed variables for outputs.  These variables are contained
        ! in the structure RTSolution.
 
-       allocate(diff(n_channels,n_profiles))
+       allocate(diff(n_Channels,n_Profiles))
 
-       allocate(Radiance_Tbobs(n_channels, n_profiles))
-       allocate(Radiance_Omgnbc(n_channels, n_profiles))
+       allocate(Radiance_Tbobs(n_Channels, n_Profiles))
+       allocate(Radiance_Omgnbc(n_Channels, n_Profiles))
        call ioda_obsvec_setup(TmpOvec, Radiance%nobs)
        call ioda_obsdb_var_to_ovec(Radiance, TmpOvec, "Observation")
-       Radiance_Tbobs = reshape(TmpOvec%values, (/n_channels, n_profiles/))
+       Radiance_Tbobs = reshape(TmpOvec%values, (/n_Channels, n_Profiles/))
        call ioda_obsdb_var_to_ovec(Radiance, TmpOvec, "Obs_Minus_Forecast_unadjusted")
-       Radiance_Omgnbc = reshape(TmpOvec%values, (/n_channels, n_profiles/))
+       Radiance_Omgnbc = reshape(TmpOvec%values, (/n_Channels, n_Profiles/))
 
        rmse = 0
-       DO m = 1, N_PROFILES
+       DO m = 1, n_Profiles
           DO l = 1, n_Channels
              diff(l,m) = rts(l,m)%Brightness_Temperature - (Radiance_Tbobs(l,m) - Radiance_Omgnbc(l,m))
 !             print *, rts(l,m)%Brightness_Temperature, Radiance_Tbobs(l,m) - Radiance_Omgnbc(l,m)
@@ -400,13 +356,13 @@ contains
        deallocate(Radiance_Omgnbc)
        call ioda_obsvec_delete(TmpOvec)
 
-       rmse = sqrt(rmse / (n_profiles * n_channels))
+       rmse = sqrt(rmse / (n_Profiles * n_Channels))
        print *, 'rmse: ', rmse
 
        ! output to hofx structure   
        hofx%values(:) = 0.0
        i = 1
-       do m = 1, N_PROFILES
+       do m = 1, n_Profiles
          do l = 1, n_Channels
            hofx%values(i) = rts(l,m)%Brightness_Temperature
            i = i + 1
@@ -428,9 +384,9 @@ contains
        
        ! 9b. Deallocate the arrays !** NOTE: this is required
        ! -------------------------
-       DEALLOCATE(rts, rts_K, sfc_K, atm_K, STAT = alloc_stat)
+       DEALLOCATE(geo, atm, sfc, rts, rts_K, sfc_K, atm_K, STAT = alloc_stat)
        IF ( alloc_stat /= 0 ) THEN
-          message = 'Error allocating structure arrays'
+          message = 'Error deallocating structure arrays'
           CALL Display_Message( PROGRAM_NAME, message, FAILURE )
           STOP
        END IF
@@ -496,32 +452,32 @@ contains
       end do
 
       !** populate the atmosphere structures for CRTM (atm(k1), for the k1-th profile)
-      do k1 = 1,N_PROFILES
+      do k1 = 1,n_Profiles
          lfound = ufo_geovals_get_var(geovals, var_tv, geoval)
-         atm(k1)%Temperature(1:N_LAYERS) = geoval%vals(:,k1) 
+         atm(k1)%Temperature(1:n_Layers) = geoval%vals(:,k1) 
          !print *, 'Temperature:', atm(k1)%Temperature(1:2), geoval%vals(1:2,k1)
          lfound = ufo_geovals_get_var(geovals, var_prs, geoval)
-         atm(k1)%Pressure(1:N_LAYERS) = geoval%vals(:,k1) 
+         atm(k1)%Pressure(1:n_Layers) = geoval%vals(:,k1) 
          !print *, 'Pressure:', atm(k1)%Pressure(1:2), geoval%vals(1:2,k1)
          lfound = ufo_geovals_get_var(geovals, var_prsi, geoval)
-         atm(k1)%Level_Pressure(0:N_LAYERS) = geoval%vals(:,k1)
+         atm(k1)%Level_Pressure(0:n_Layers) = geoval%vals(:,k1)
          !print *, 'level_pressure:', atm(k1)%Level_Pressure(0:1), geoval%vals(1:2,k1)
          atm(k1)%Climatology         = US_STANDARD_ATMOSPHERE
          atm(k1)%Absorber_Id(1:1)    = (/ H2O_ID /)
          atm(k1)%Absorber_Units(1:1) = (/ MASS_MIXING_RATIO_UNITS /)
          lfound = ufo_geovals_get_var(geovals, var_mixr, geoval)
-         atm(k1)%Absorber(1:N_LAYERS,1)       = geoval%vals(:,k1) 
+         atm(k1)%Absorber(1:n_Layers,1)       = geoval%vals(:,k1) 
          !print *, 'water vapor:', atm(k1)%Absorber(1:2,1), geoval%vals(1:2,k1)
          atm(k1)%Absorber_Id(2:2)    = (/ O3_ID /)
          atm(k1)%Absorber_Units(2:2) = (/ VOLUME_MIXING_RATIO_UNITS /)
          lfound = ufo_geovals_get_var(geovals, var_oz, geoval)
-         atm(k1)%Absorber(1:N_LAYERS,2)       = geoval%vals(:,k1) 
+         atm(k1)%Absorber(1:n_Layers,2)       = geoval%vals(:,k1) 
          !print *, 'Ozone:', atm(k1)%Absorber(1:2,2), geoval%vals(1:2,k1)
 
          atm(k1)%Absorber_Id(3:3)    = (/ CO2_ID /)
          atm(k1)%Absorber_Units(3:3) = (/ VOLUME_MIXING_RATIO_UNITS /)
          lfound = ufo_geovals_get_var(geovals, var_co2, geoval)
-         atm(k1)%Absorber(1:N_LAYERS,3)       = geoval%vals(:,k1)
+         atm(k1)%Absorber(1:n_Layers,3)       = geoval%vals(:,k1)
 
          atm(k1)%Cloud(1)%Type = WATER_CLOUD
          lfound = ufo_geovals_get_var(geovals, var_clw, geoval)
@@ -611,12 +567,12 @@ contains
       !       varname = geovals%variables%fldnames(1)
        !******                               123456789012345678901234'
 
-      allocate(Radiance_Tbobs(n_channels, n_profiles))
+      allocate(Radiance_Tbobs(n_Channels, n_Profiles))
       call ioda_obsvec_setup(TmpOvec, Radiance%nobs)
       call ioda_obsdb_var_to_ovec(Radiance, TmpOvec, "Observation")
-      Radiance_Tbobs = reshape(TmpOvec%values, (/n_channels, n_profiles/))
+      Radiance_Tbobs = reshape(TmpOvec%values, (/n_Channels, n_Profiles/))
      
-      do k1 = 1,N_PROFILES
+      do k1 = 1,n_Profiles
          sfc(k1)%sensordata%sensor_id        = chinfo(1)%sensor_id
          sfc(k1)%sensordata%wmo_sensor_id    = chinfo(1)%wmo_sensor_id
          sfc(k1)%sensordata%wmo_satellite_id = chinfo(1)%wmo_satellite_id
@@ -659,7 +615,7 @@ contains
          sfc(k1)%Soil_Moisture_Content = geoval%vals(1,k1) 
          lfound                     = ufo_geovals_get_var(geovals, var_sfc_soilt, geoval)
          sfc(k1)%Soil_Temperature   = geoval%vals(1,k1) 
-         do ch = 1, n_channels
+         do ch = 1, n_Channels
            sfc(k1)%sensordata%tb(ch) = Radiance_TbObs(ch, k1)  !** required to match GSI simulated TBs over snow and ice surfaces
          enddo
       end do
@@ -679,17 +635,17 @@ contains
       call ioda_obsvec_setup(TmpOvec, Radiance%nobs)
 
       call ioda_obsdb_var_to_ovec(Radiance, TmpOvec, "Sat_Zenith_Angle")
-      geo(:)%Sensor_Zenith_Angle = TmpOvec%values(::n_channels)
+      geo(:)%Sensor_Zenith_Angle = TmpOvec%values(::n_Channels)
       call ioda_obsdb_var_to_ovec(Radiance, TmpOvec, "Sol_Zenith_Angle")
-      geo(:)%Source_Zenith_Angle = TmpOvec%values(::n_channels)
+      geo(:)%Source_Zenith_Angle = TmpOvec%values(::n_Channels)
       call ioda_obsdb_var_to_ovec(Radiance, TmpOvec, "Sat_Azimuth_Angle")
-      geo(:)%Sensor_Azimuth_Angle = TmpOvec%values(::n_channels)
+      geo(:)%Sensor_Azimuth_Angle = TmpOvec%values(::n_Channels)
       call ioda_obsdb_var_to_ovec(Radiance, TmpOvec, "Sol_Azimuth_Angle")
-      geo(:)%Source_Azimuth_Angle = TmpOvec%values(::n_channels)
+      geo(:)%Source_Azimuth_Angle = TmpOvec%values(::n_Channels)
       call ioda_obsdb_var_to_ovec(Radiance, TmpOvec, "Scan_Position")
-      geo(:)%Ifov = TmpOvec%values(::n_channels)
+      geo(:)%Ifov = TmpOvec%values(::n_Channels)
       call ioda_obsdb_var_to_ovec(Radiance, TmpOvec, "Scan_Angle")
-      geo(:)%Sensor_Scan_Angle = TmpOvec%values(::n_channels)
+      geo(:)%Sensor_Scan_Angle = TmpOvec%values(::n_Channels)
 
       call ioda_obsvec_delete(TmpOvec)
 
