@@ -6,18 +6,78 @@
 !> Fortran module to handle aod observations
 
 MODULE ufo_aod_tlad_mod
-implicit none
-
-public :: ufo_aod_tlad
+  use ioda_obsdb_mod
+  use ioda_obs_vectors
+  use ufo_vars_mod
+  use ioda_locs_mod
+  use ufo_geovals_mod
+  use kinds  
+  use ufo_basis_tlad_mod, only: ufo_basis_tlad
+  implicit none
   
-!> Fortran derived type for aod trajectory
-type :: ufo_aod_tlad
-   logical :: ltraj = .false. !< trajectory set?
-end type ufo_aod_tlad
+  public :: ufo_aod_tlad
+    
+  !> Fortran derived type for aod trajectory
+  type, extends(ufo_basis_tlad) :: ufo_aod_tlad
+  contains
+    procedure :: delete  => ufo_aod_tlad_delete
+    procedure :: settraj => ufo_aod_tlad_settraj 
+    procedure :: eqv_tl  => ufo_aod_tlad_eqv_tl
+    procedure :: eqv_ad  => ufo_aod_tlad_eqv_ad
+  end type ufo_aod_tlad
+
+contains
 
 ! ------------------------------------------------------------------------------
 
-contains
-  
+  subroutine ufo_aod_tlad_delete(self)
+    implicit none
+    class(ufo_aod_tlad), intent(inout)  :: self
+
+    ! Nothing here yet
+
+  end subroutine ufo_aod_tlad_delete
+
+! ------------------------------------------------------------------------------
+
+  subroutine ufo_aod_tlad_settraj(self, geovals, obss)
+    implicit none
+    class(ufo_aod_tlad), intent(inout) :: self
+    type(ufo_geovals),   intent(in)    :: geovals
+    type(ioda_obsdb),    intent(in)    :: obss
+
+    character(len=*), parameter :: myname_="ufo_aod_tlad_settraj"
+
+    ! Nothing here yet
+
+  end subroutine ufo_aod_tlad_settraj
+
+! ------------------------------------------------------------------------------
+
+  subroutine ufo_aod_tlad_eqv_tl(self, geovals, hofx, obss)
+    implicit none
+    class(ufo_aod_tlad), intent(in)     :: self
+    type(ufo_geovals),   intent(in)     :: geovals
+    type(obs_vector),    intent(inout)  :: hofx
+    type(ioda_obsdb),    intent(in)     :: obss
+
+    character(len=*), parameter :: myname_="ufo_aod_tlad_eqv_tl"
+
+    ! Nothing here yet
+
+  end subroutine ufo_aod_tlad_eqv_tl
+
+  subroutine ufo_aod_tlad_eqv_ad(self, geovals, hofx, obss)
+    implicit none
+    class(ufo_aod_tlad), intent(in)    :: self
+    type(ufo_geovals),   intent(inout) :: geovals
+    type(obs_vector),    intent(in)    :: hofx
+    type(ioda_obsdb),    intent(in)    :: obss
+
+    character(len=*), parameter :: myname_="ufo_aod_tlad_eqv_tl"
+
+    ! Nothing here yet
+
+  end subroutine ufo_aod_tlad_eqv_ad
 
 END MODULE ufo_aod_tlad_mod

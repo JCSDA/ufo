@@ -3,25 +3,26 @@
 ! This software is licensed under the terms of the Apache Licence Version 2.0
 ! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 
-!> Fortran module to handle radiosonde observations
+!> Fortran module to handle aircraft observations
 
-module ufo_radiosonde_mod
+module ufo_aircraft_mod
   
   use ufo_conventional_profile_mod, only: ufo_conventional_profile
 
   implicit none
-  public :: ufo_radiosonde
+  public :: ufo_aircraft
   private
 
-  !> Fortran derived type for radiosonde_t trajectory
-  type, extends(ufo_conventional_profile) :: ufo_radiosonde
+  !> Fortran derived type for aircraft_t trajectory
+  type, extends(ufo_conventional_profile) :: ufo_aircraft
   contains
-  end type ufo_radiosonde
+  end type ufo_aircraft
 
 contains
     
 ! ------------------------------------------------------------------------------
 
+
 ! ------------------------------------------------------------------------------
 
-end module ufo_radiosonde_mod
+end module ufo_aircraft_mod

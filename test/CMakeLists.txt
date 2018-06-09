@@ -9,6 +9,7 @@ list( APPEND ufo_test_input
   testinput/ufocrtm.json
   testinput/amsua.json
   testinput/radiosonde.json
+  testinput/aircraft.json
   testinput/tprof.json
   testinput/seaice.json
   testinput/aod.json
@@ -32,6 +33,7 @@ list( APPEND ufo_test_data
   amsua_n19_obs.nc4
   amsua_n19_geovals.nc4
   diag_t_01_wprofiles.nc4
+  aircraft_geovals.nc4
   seaice_obs.nc
   diag_viirs_ges.2015081000_dbl_subset.nc4  
   vars_ges.2015081000_dbl_subset.nc4
@@ -79,6 +81,13 @@ ecbuild_add_test( TARGET  test_ufo_radiosonde
                   ARGS    "testinput/radiosonde.json"
                   LIBS    ufo )
 
+ecbuild_add_test( TARGET  test_ufo_aircraft
+                  BOOST
+                  MPI     6
+                  SOURCES mains/TestObsOperator.cc
+                  ARGS    "testinput/aircraft.json"
+                  LIBS    ufo )
+
 ecbuild_add_test( TARGET  test_ufo_insitutemperature
                   BOOST
                   SOURCES mains/TestObsOperator.cc
@@ -113,6 +122,12 @@ ecbuild_add_test( TARGET  test_ufo_obsop_rsonde_tlad
                   BOOST
                   SOURCES mains/TestObsOperatorTLAD.cc
                   ARGS    "testinput/radiosonde.json"
+                  LIBS    ufo )
+
+ecbuild_add_test( TARGET  test_ufo_obsop_aircraft_tlad
+                  BOOST
+                  SOURCES mains/TestObsOperatorTLAD.cc
+                  ARGS    "testinput/aircraft.json"
                   LIBS    ufo )
 
 #ecbuild_add_test( TARGET  test_ufo_obscheck

@@ -95,7 +95,7 @@ ObsRadianceTLAD<MODEL>::~ObsRadianceTLAD() {
 // -----------------------------------------------------------------------------
 template <typename MODEL>
 void ObsRadianceTLAD<MODEL>::setTrajectory(const GeoVaLs & geovals, const ObsBias & bias) {
-  ufo_radiance_tlad_settraj_f90(keyOperRadiance_, geovals.toFortran());
+  ufo_radiance_tlad_settraj_f90(keyOperRadiance_, geovals.toFortran(), odb_.toFortran());
 }
 
 // -----------------------------------------------------------------------------
