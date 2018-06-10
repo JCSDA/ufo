@@ -50,15 +50,21 @@ contains
   
   subroutine ufo_radiance_tlad_settraj(self, geovals, obss)
     implicit none
+!!$    subroutine settraj_(self, geovals, obss)
+!!$      import ufo_basis_tlad, ufo_geovals, ioda_obsdb
+!!$      implicit none
+!!$      class(ufo_basis_tlad), intent(inout) :: self
+!!$      type(ufo_geovals),    intent(in) :: geovals
+!!$      type(ioda_obsdb),     intent(in) :: obss
+!!$    end subroutine settraj_
     
     class(ufo_radiance_tlad), intent(inout) :: self
     type(ufo_geovals),        intent(in)    :: geovals
-    type(ioda_obsdb), target, intent(in)    :: obss
+    type(ioda_obsdb),         intent(in)    :: obss
     
     character(len=*), parameter :: myname_="ufo_radiance_tlad_settraj"
     character(max_string) :: err_msg
     
-    type(ioda_obsdb), pointer    :: Radiance => NULL()
     
     !*************************************************************************************
     !******* Begin CRTM block ************************************************************
@@ -140,9 +146,6 @@ contains
     logical                   :: lfound
     integer                   :: ivar, nobs, nlocs
 
-    !** Refer Radiance to obss 
-    Radiance => obss
-    
     !** get number of profiles and number of layers from geovals input
     n_Profiles = geovals%nobs
     n_Layers   = geovals%geovals(1)%nval
@@ -443,8 +446,8 @@ contains
       ! ...Land surface characteristics
       
       allocate(Radiance_Tbobs(n_Channels, n_Profiles))
-      call ioda_obsvec_setup(TmpOvec, Radiance%nobs)
-      call ioda_obsdb_var_to_ovec(Radiance, TmpOvec, "Observation")
+      call ioda_obsvec_setup(TmpOvec, obss%nobs)
+      call ioda_obsdb_var_to_ovec(obss, TmpOvec, "Observation")
       Radiance_Tbobs = reshape(TmpOvec%values, (/n_Channels, n_Profiles/))
       
       do k1 = 1,n_Profiles
@@ -507,19 +510,19 @@ contains
       
       type(obs_vector) :: TmpOvec
       
-      call ioda_obsvec_setup(TmpOvec, Radiance%nobs)
+      call ioda_obsvec_setup(TmpOvec, obss%nobs)
       
-      call ioda_obsdb_var_to_ovec(Radiance, TmpOvec, "Sat_Zenith_Angle" )
+      call ioda_obsdb_var_to_ovec(obss, TmpOvec, "Sat_Zenith_Angle" )
       geo(:)%Sensor_Zenith_Angle  = TmpOvec%values(::n_Channels)
-      call ioda_obsdb_var_to_ovec(Radiance, TmpOvec, "Sol_Zenith_Angle" )
+      call ioda_obsdb_var_to_ovec(obss, TmpOvec, "Sol_Zenith_Angle" )
       geo(:)%Source_Zenith_Angle  = TmpOvec%values(::n_Channels)
-      call ioda_obsdb_var_to_ovec(Radiance, TmpOvec, "Sat_Azimuth_Angle")
+      call ioda_obsdb_var_to_ovec(obss, TmpOvec, "Sat_Azimuth_Angle")
       geo(:)%Sensor_Azimuth_Angle = TmpOvec%values(::n_Channels)
-      call ioda_obsdb_var_to_ovec(Radiance, TmpOvec, "Sol_Azimuth_Angle")
+      call ioda_obsdb_var_to_ovec(obss, TmpOvec, "Sol_Azimuth_Angle")
       geo(:)%Source_Azimuth_Angle = TmpOvec%values(::n_Channels)
-      call ioda_obsdb_var_to_ovec(Radiance, TmpOvec, "Scan_Position"    )
+      call ioda_obsdb_var_to_ovec(obss, TmpOvec, "Scan_Position"    )
       geo(:)%Ifov = TmpOvec%values(::n_Channels) 
-      call ioda_obsdb_var_to_ovec(Radiance, TmpOvec, "Scan_Angle"       )
+      call ioda_obsdb_var_to_ovec(obss, TmpOvec, "Scan_Angle"       )
       geo(:)%Sensor_Scan_Angle    = TmpOvec%values(::n_Channels)
       
       call ioda_obsvec_delete(TmpOvec)

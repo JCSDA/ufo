@@ -57,7 +57,7 @@ contains
 
   ! ------------------------------------------------------------------------------
 
-  subroutine ufo_radiance_eqv_c(c_key_self, c_key_geovals, c_key_obsspace, c_key_hofx, c_bias) bind(c,name='ufo_radiance_eqv_f90')
+  subroutine ufo_radiance_eqv_c(c_key_self, c_key_geovals, c_key_hofx, c_key_obsspace,  c_bias) bind(c,name='ufo_radiance_eqv_f90')
 
     implicit none
     integer(c_int), intent(in) :: c_key_self
@@ -71,7 +71,7 @@ contains
     character(len=*), parameter :: myname_="ufo_radiance_eqv_c"
 
     call ufo_radiance_registry%get(c_key_self, self)
-    call self%opr_eqv(c_key_geovals, c_key_obsspace, c_key_hofx)
+    call self%opr_eqv(c_key_geovals, c_key_hofx, c_key_obsspace)
 
   end subroutine ufo_radiance_eqv_c
 
