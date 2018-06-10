@@ -115,7 +115,7 @@ subroutine finalize_(self)
 end subroutine
 
 !> linkedlist generic setup
-subroutine regstry_setup_(self, c_key_self, ptr)
+subroutine registry_setup_(self, c_key_self, ptr)
   class(registry_t) :: self
   integer :: c_key_self
   type (LISTED_TYPE), pointer :: ptr
@@ -126,7 +126,7 @@ subroutine regstry_setup_(self, c_key_self, ptr)
 end subroutine
 
 !> linkedlist generic delete
-subroutine regstry_delete_(self, c_key_self, ptr)
+subroutine registry_delete_(self, c_key_self, ptr)
   class(registry_t) :: self
   integer :: c_key_self
   type (LISTED_TYPE), pointer :: ptr
