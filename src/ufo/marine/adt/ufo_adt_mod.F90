@@ -98,7 +98,7 @@ adt_out_header%date                  = 20120729
 hofx%values = 0.0
 sum_hofx=sum(adt%vals(1,:))
 sum_obs=sum(obs_adt%adt(:))
-print *,'offset',(sum_obs-sum_hofx)/hofx%nobs
+print *,'ssh offset',(sum_obs-sum_hofx)/hofx%nobs
 ! adt obs operator
 do iobs = 1, hofx%nobs
 !   hofx%values(iobs) = adt%vals(1,iobs)
