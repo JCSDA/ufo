@@ -130,8 +130,6 @@ if (.not.(allocated(geoval%vals))) then
    allocate(geoval%vals(self%ncat,hofx%nobs))
 end if
 
-if (.not. geovals%linit ) geovals%linit=.true.
-
 ! backward sea ice fraction obs operator
 geoval%vals=0.0
 do iobs = 1, hofx%nobs
