@@ -1,5 +1,9 @@
 list( APPEND ufo_src_files
     Fortran.h
+    FortranGeoVals.h
+    FortranObsCheck.h
+    FortranAtmosphere.h
+    FortranConstituents.h
     GeoVaLs.cc
     GeoVaLs.h
     ObsBias.h
@@ -16,6 +20,10 @@ list( APPEND ufo_src_files
     ufo_variables_mod.F90
 )
 
+if( ${GSW_FOUND} )
+    list( APPEND ufo_src_files FortranMarine.h )
+endif( ${GSW_FOUND} )
+
 # macro to prepend a prefix with relative path
 # can this be added to ecbuild for use elsewhere?
 function(PREPEND var prefix )
@@ -29,19 +37,28 @@ endfunction(PREPEND)
 add_subdirectory( basis )
 add_subdirectory( atmosphere )
 add_subdirectory( constituents )
-add_subdirectory( marine )
+if( ${GSW_FOUND} )
+    add_subdirectory( marine )
+endif( ${GSW_FOUND} )
 
 list( APPEND ufo_src_files
     ${basis_src_files}
     ${atmosphere_src_files}
     ${constituents_src_files}
-    ${marine_src_files}
 )
+if( ${GSW_FOUND} )
+    list( APPEND ufo_src_files ${marine_src_files} )
+endif( ${GSW_FOUND} )
+
+list( APPEND UFO_LIBS_DEP oops ioda crtm ${LAPACK_LIBRARIES} ${NETCDF_LIBRARIES} )
+if( ${GSW_FOUND} )
+    list( APPEND UFO_LIBS_DEP gsw )
+endif( ${GSW_FOUND} )
 
 message(STATUS ${ufo_src_files})
 ecbuild_add_library( TARGET   ufo
                      SOURCES  ${ufo_src_files}
-                     LIBS     oops ioda crtm gsw ${LAPACK_LIBRARIES} ${NETCDF_LIBRARIES}
+                     LIBS     ${UFO_LIBS_DEP}
                      INSTALL_HEADERS LISTED
                      LINKER_LANGUAGE ${OOPS_LINKER_LANGUAGE}
                     )

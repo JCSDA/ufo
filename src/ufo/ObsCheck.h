@@ -12,6 +12,7 @@
 #include <string>
 
 #include "Fortran.h"
+#include "FortranObsCheck.h"
 #include "oops/util/DateTime.h"
 #include "oops/util/ObjectCounter.h"
 #include "oops/util/Printable.h"

@@ -10,8 +10,6 @@ list( APPEND ufo_test_input
   testinput/amsua.json
   testinput/radiosonde.json
   testinput/aircraft.json
-  testinput/tprof.json
-  testinput/seaice.json
   testinput/aod.json
 )
 
@@ -35,7 +33,7 @@ list( APPEND ufo_test_data
   diag_t_01_wprofiles.nc4
   aircraft_geovals.nc4
   seaice_obs.nc
-  diag_viirs_ges.2015081000_dbl_subset.nc4  
+  diag_viirs_ges.2015081000_dbl_subset.nc4
   vars_ges.2015081000_dbl_subset.nc4
 )
 
@@ -47,19 +45,41 @@ foreach(FILENAME ${ufo_test_data})
 endforeach(FILENAME)
 
 # Add marine test data
-list( APPEND ufo_marine_test_data
-  marineobs/t0n156e_dy.nc
-  marineobs/t0n156e_dy_geovals.nc  
-  marineobs/Jason-3-2018-04-15.nc
-  marineobs/seaice_obs-2018-04-15.nc
-  marineobs/cryosat2-2018-04-15.nc  
-)
-foreach(FILENAME ${ufo_marine_test_data})
-    get_filename_component(filename ${FILENAME} NAME )
-    execute_process( COMMAND ${CMAKE_COMMAND} -E create_symlink
-           ${CMAKE_CURRENT_SOURCE_DIR}/testinput/${FILENAME}
-           ${CMAKE_CURRENT_BINARY_DIR}/Data/${filename} )
-endforeach(FILENAME)
+if( ${GSW_FOUND} )
+
+    list( APPEND ufo_marine_test_input
+      testinput/tprof.json
+      testinput/seaice.json
+    )
+
+    foreach(FILENAME ${ufo_marine_test_input})
+        execute_process( COMMAND ${CMAKE_COMMAND} -E create_symlink
+               ${CMAKE_CURRENT_SOURCE_DIR}/${FILENAME}
+               ${CMAKE_CURRENT_BINARY_DIR}/${FILENAME} )
+    endforeach(FILENAME)
+
+    ecbuild_add_resources( TARGET ufo_marine_test_scripts
+                           SOURCES_PACK
+                           ${ufo_marine_test_input}
+                         )
+
+    list( APPEND ufo_marine_test_data
+      marineobs/t0n156e_dy.nc
+      marineobs/t0n156e_dy_geovals.nc
+      marineobs/Jason-3-2018-04-15.nc
+      marineobs/seaice_obs-2018-04-15.nc
+      marineobs/cryosat2-2018-04-15.nc
+    )
+
+    foreach(FILENAME ${ufo_marine_test_data})
+        get_filename_component(filename ${FILENAME} NAME )
+        execute_process( COMMAND ${CMAKE_COMMAND} -E create_symlink
+               ${CMAKE_CURRENT_SOURCE_DIR}/testinput/${FILENAME}
+               ${CMAKE_CURRENT_BINARY_DIR}/Data/${filename} )
+    endforeach(FILENAME)
+
+endif( ${GSW_FOUND} )
+
 #####################################################################
 
 ecbuild_add_test( TARGET  test_ufo_geovals
@@ -88,36 +108,40 @@ ecbuild_add_test( TARGET  test_ufo_aircraft
                   ARGS    "testinput/aircraft.json"
                   LIBS    ufo )
 
-ecbuild_add_test( TARGET  test_ufo_insitutemperature
-                  BOOST
-                  SOURCES mains/TestObsOperator.cc
-                  ARGS    "testinput/tprof.json"
-                  LIBS    ufo )
+# Marine UFO tests
+if( ${GSW_FOUND} )
 
-ecbuild_add_test( TARGET  test_ufo_insitutemperature_tlad
-                  BOOST
-                  SOURCES mains/TestObsOperatorTLAD.cc
-                  ARGS    "testinput/tprof.json"
-                  LIBS    ufo )
+    ecbuild_add_test( TARGET  test_ufo_insitutemperature
+                      BOOST
+                      SOURCES mains/TestObsOperator.cc
+                      ARGS    "testinput/tprof.json"
+                      LIBS    ufo )
 
-ecbuild_add_test( TARGET  test_ufo_seaice
-                  BOOST
-                  SOURCES mains/TestObsOperator.cc
-                  ARGS    "testinput/seaice.json"
-                  LIBS    ufo )
+    ecbuild_add_test( TARGET  test_ufo_insitutemperature_tlad
+                      BOOST
+                      SOURCES mains/TestObsOperatorTLAD.cc
+                      ARGS    "testinput/tprof.json"
+                      LIBS    ufo )
+
+    ecbuild_add_test( TARGET  test_ufo_seaice
+                      BOOST
+                      SOURCES mains/TestObsOperator.cc
+                      ARGS    "testinput/seaice.json"
+                      LIBS    ufo )
+
+    ecbuild_add_test( TARGET  test_ufo_obsop_seaice_tlad
+                      BOOST
+                      SOURCES mains/TestObsOperatorTLAD.cc
+                      ARGS    "testinput/seaice.json"
+                      LIBS    ufo )
+
+endif( ${GSW_FOUND} )
 
 ecbuild_add_test( TARGET  test_ufo_aod
                   BOOST
                   SOURCES mains/TestObsOperator.cc
                   ARGS    "testinput/aod.json"
                   LIBS    ufo )
-
-ecbuild_add_test( TARGET  test_ufo_obsop_seaice_tlad
-                  BOOST
-                  SOURCES mains/TestObsOperatorTLAD.cc
-                  ARGS    "testinput/seaice.json"
-                  LIBS    ufo )
-
 ecbuild_add_test( TARGET  test_ufo_obsop_rsonde_tlad
                   BOOST
                   SOURCES mains/TestObsOperatorTLAD.cc

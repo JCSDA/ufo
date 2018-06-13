@@ -57,13 +57,21 @@ include_directories( ${CRTM_INCLUDE_DIRS} )
 
 # GSW
 ecbuild_use_package( PROJECT gsw REQUIRED )
-include_directories( ${GSW_INCLUDE_DIRS} )
+if( ${GSW_FOUND} )
+    message("GSW FOUND; Including Marine Observation Operators")
+    include_directories( ${GSW_INCLUDE_DIRS} )
+else( ${GSW_FOUND} )
+    message("GSW NOT FOUND: Excluding Marine Observation Operators")
+endif( ${GSW_FOUND} )
 
 ################################################################################
 # Export package info
 ################################################################################
 
-list( APPEND UFO_TPLS oops ioda crtm gsw )
+list( APPEND UFO_TPLS oops ioda crtm )
+if( ${GSW_FOUND} )
+    list ( APPEND UFO_TPLS gsw)
+endif( ${GSW_FOUND} )
 
 set( UFO_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/src ${CMAKE_CURRENT_BINARY_DIR}/src
                       ${CMAKE_Fortran_MODULE_DIRECTORY} )
