@@ -116,9 +116,6 @@ if (.not. ufo_geovals_get_var(geovals, var_seaicethick, icethick_d)) then
   call abor1_ftn(err_msg)
 endif
 
-print *, 'in tl: thick=', icethick_d%vals(:,:)
-print *, 'in tl: frac=', icefrac_d%vals(:,:)
-
 ! sea ice thickness obs operator
 ncat = icefrac_d%nval
 hofx%values = 0.0
@@ -128,7 +125,6 @@ do iobs = 1, hofx%nobs
                          self%icefrac%vals(icat,iobs) * icethick_d%vals(icat,iobs) / 905.0 + &
                          icefrac_d%vals(icat,iobs) * self%icethick%vals(icat,iobs) /905.0
    enddo
-   print *,'in tl, hofx=',hofx%values(iobs)
 enddo
 
 end subroutine ufo_seaicethick_tlad_eqv_tl
@@ -202,7 +198,7 @@ do iobs = 1, hofx%nobs
    enddo
 enddo
 !hofx%values = 0.0
-print *,icethick_d%vals
+
 !call abor1_ftn("end adjoint")
 end subroutine ufo_seaicethick_tlad_eqv_ad
 

@@ -11,6 +11,7 @@
 #include "marine/stericheight/ObsStericHeight.h"
 #include "marine/insitutemperature/ObsInsituTemperature.h"
 #include "marine/seasurfacetemp/ObsSeaSurfaceTemp.h"
+#include "marine/adt/ObsADT.h"
 #include "atmosphere/radiance/ObsRadiance.h"
 #include "atmosphere/radiosonde/ObsRadiosonde.h"
 #include "constituents/aod/ObsAod.h"
@@ -23,6 +24,7 @@ template<typename MODEL> void instantiateObsOperatorFactory() {
   static oops::ObsOperatorMaker<MODEL, ObsSeaIceThickness<MODEL>> makerSeaIceThickness_("SeaIceThickness");
   static oops::ObsOperatorMaker<MODEL, ObsInsituTemperature<MODEL>> makerInsituTemperature_("InsituTemperature");
   static oops::ObsOperatorMaker<MODEL, ObsSeaSurfaceTemp<MODEL>> makerSeaSurfaceTemp_("SeaSurfaceTemp");
+  static oops::ObsOperatorMaker<MODEL, ObsADT<MODEL>> makerADT_("ADT");  
   static oops::ObsOperatorMaker<MODEL, ObsRadiance<MODEL>>       makerRadiance_("Radiance");
   static oops::ObsOperatorMaker<MODEL, ObsRadiosonde<MODEL>>     makerRadiosonde_("Radiosonde");
   static oops::ObsOperatorMaker<MODEL, ObsAod<MODEL>>            makerAod_("Aod");
