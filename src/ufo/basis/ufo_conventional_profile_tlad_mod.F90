@@ -20,7 +20,7 @@ module ufo_conventional_profile_tlad_mod
 
   type, extends(ufo_basis_tlad) :: ufo_conventional_profile_tlad
    private
-     integer :: nval, nobs
+     integer :: nval
      real(kind_real), allocatable :: wf(:)
      integer, allocatable :: wi(:)
   contains
@@ -56,18 +56,17 @@ contains
       call self%delete()
       
       !Keep copy of dimensions
-      self%nobs = prsl%nobs
       self%nval = prsl%nval
       
-      allocate(self%wi(self%nobs))
-      allocate(self%wf(self%nobs))
+      allocate(self%wi(obss%nobs))
+      allocate(self%wf(obss%nobs))
       
       ! observation of pressure (for vertical interpolation)
       call ioda_obsvec_setup(pressure, obss%nobs)
       call ioda_obsdb_var_to_ovec(obss, pressure, "Pressure")
       
       ! compute interpolation weights
-      do iobs = 1, self%nobs
+      do iobs = 1, obss%nobs
         call vert_interp_weights(self%nval,log(pressure%values(iobs)/10.),prsl%vals(:,iobs),self%wi(iobs),self%wf(iobs))
       enddo
       
@@ -156,22 +155,6 @@ contains
         call abor1_ftn(err_msg)
       endif
       
-      ! allocate if not yet allocated
-      if (.not. allocated(tv_d%vals)) then
-         tv_d%nobs = self%nobs
-         tv_d%nval = self%nval
-         allocate(tv_d%vals(tv_d%nval,tv_d%nobs))
-      endif
-      if (.not. allocated(prsl_d%vals)) then
-         prsl_d%nobs = self%nobs
-         prsl_d%nval = self%nval
-         allocate(prsl_d%vals(prsl_d%nval,prsl_d%nobs))
-      endif
-      if (.not. geovals%linit ) geovals%linit=.true.
-      
-      ! adjoint obs operator
-      tv_d%vals = 0.0_kind_real
-      prsl_d%vals = 0.0_kind_real
       do iobs = 1, hofx%nobs
         call vert_interp_apply_ad(tv_d%nval, tv_d%vals(:,iobs), hofx%values(iobs), self%wi(iobs), self%wf(iobs))
       enddo
@@ -187,7 +170,6 @@ contains
       character(len=*), parameter :: myname_="ufo_conventional_profile_tlad_delete"
       
       self%nval = 0
-      self%nobs = 0
       if (allocated(self%wi)) deallocate(self%wi)
       if (allocated(self%wf)) deallocate(self%wf)
       self%ltraj = .false.
