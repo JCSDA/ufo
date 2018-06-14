@@ -20,7 +20,7 @@ module ufo_conventional_profile_tlad_mod
 
   type, extends(ufo_basis_tlad) :: ufo_conventional_profile_tlad
    private
-     integer :: nval
+     integer :: nval, nobs
      real(kind_real), allocatable :: wf(:)
      integer, allocatable :: wi(:)
   contains
@@ -57,6 +57,7 @@ contains
       
       !Keep copy of dimensions
       self%nval = prsl%nval
+      self%nobs = obss%nobs
       
       allocate(self%wi(obss%nobs))
       allocate(self%wf(obss%nobs))
@@ -154,7 +155,22 @@ contains
         write(err_msg,*) myname_, trim(var_tv), ' doesnt exist'
         call abor1_ftn(err_msg)
       endif
-      
+     
+      ! allocate if not yet allocated	
+      if (.not. allocated(tv_d%vals)) then
+         tv_d%nobs = self%nobs
+         tv_d%nval = self%nval
+         allocate(tv_d%vals(tv_d%nval,tv_d%nobs))
+         tv_d%vals = 0.0_kind_real
+      endif
+      if (.not. allocated(prsl_d%vals)) then
+         prsl_d%nobs = self%nobs
+         prsl_d%nval = self%nval
+         allocate(prsl_d%vals(prsl_d%nval,prsl_d%nobs))
+         prsl_d%vals = 0.0_kind_real
+      endif
+      if (.not. geovals%linit ) geovals%linit=.true.
+ 
       do iobs = 1, hofx%nobs
         call vert_interp_apply_ad(tv_d%nval, tv_d%vals(:,iobs), hofx%values(iobs), self%wi(iobs), self%wf(iobs))
       enddo
