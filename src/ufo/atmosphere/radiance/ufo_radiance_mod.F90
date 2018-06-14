@@ -38,10 +38,6 @@ contains
     type(obs_vector),   intent(inout) :: hofx
     type(ioda_obsdb), target, intent(in)    :: obss
 
-    type(obs_vector) :: TmpOvec
-    real(kind_real), allocatable :: Radiance_Tbobs(:,:)
-    real(kind_real), allocatable :: Radiance_Omgnbc(:,:)
-
     type(ioda_obsdb),  pointer  :: Radiance => NULL()
 
     !*************************************************************************************
@@ -52,7 +48,6 @@ contains
     ! Some non-CRTM-y Parameters
     ! --------------------------
     CHARACTER(*), PARAMETER :: PROGRAM_NAME   = 'ufo_radiance_mod.F90'
-    
     
     ! ============================================================================
     ! STEP 2. **** SET UP SOME PARAMETERS FOR THE CRTM RUN ****
@@ -136,8 +131,6 @@ contains
 
     integer              :: nobs
     integer              :: nlocs
-    real(fp)              :: rmse
-    real(fp), allocatable :: diff(:,:)
 
     Radiance => obss
 
@@ -201,10 +194,10 @@ contains
     ! -----------------------------------
     n_channels = SUM(CRTM_ChannelInfo_n_Channels(chinfo))
     !WRITE( *,'(/5x,"Processing a total of ",i0," channels...", i0, " layers..")' ) n_channels, N_LAYERS
-    DO n = 1, N_SENSORS
-       !WRITE( *,'(7x,i0," from ",a)' ) &
-       !     CRTM_ChannelInfo_n_Channels(chinfo(n)), TRIM(SENSOR_ID(n))
-    END DO
+!!$    DO n = 1, N_SENSORS
+!!$       !WRITE( *,'(7x,i0," from ",a)' ) &
+!!$       !     CRTM_ChannelInfo_n_Channels(chinfo(n)), TRIM(SENSOR_ID(n))
+!!$    END DO
     ! ============================================================================
     ! Begin loop over sensors
     !** UFO: this loop isn't necessary if we're calling CRTM for each sensor -- it's
@@ -246,6 +239,13 @@ contains
           CALL Display_Message( PROGRAM_NAME, message, FAILURE )
           STOP
        END IF
+
+       call CRTM_Surface_Create(sfc, n_channels)
+       IF ( ANY(.NOT. CRTM_Surface_Associated(sfc)) ) THEN
+          message = 'Error allocating CRTM Surface structure'
+          CALL Display_Message( PROGRAM_NAME, message, FAILURE )
+          STOP
+       END IF
        
        ! The output K-MATRIX structure
        CALL CRTM_Atmosphere_Create( atm_K, N_LAYERS, N_ABSORBERS, N_CLOUDS, N_AEROSOLS )
@@ -254,6 +254,14 @@ contains
           CALL Display_Message( PROGRAM_NAME, message, FAILURE )
           STOP
        END IF
+
+       call CRTM_Surface_Create(sfc_K, n_channels)
+       IF ( ANY(.NOT. CRTM_Surface_Associated(sfc_K)) ) THEN
+          message = 'Error allocating CRTM K-matrix Surface structure'
+          CALL Display_Message( PROGRAM_NAME, message, FAILURE )
+          STOP
+       END IF
+
        ! ==========================================================================
        
        ! ==========================================================================
@@ -360,34 +368,6 @@ contains
        ! CRTM_RTSolution_Inspect in the file CRTM_RTSolution_Define.f90 to
        ! select the needed variables for outputs.  These variables are contained
        ! in the structure RTSolution.
-
-       allocate(diff(n_channels,n_profiles))
-
-       allocate(Radiance_Tbobs(n_channels, n_profiles))
-       allocate(Radiance_Omgnbc(n_channels, n_profiles))
-       call ioda_obsvec_setup(TmpOvec, Radiance%nobs)
-       call ioda_obsdb_var_to_ovec(Radiance, TmpOvec, "Observation")
-       Radiance_Tbobs = reshape(TmpOvec%values, (/n_channels, n_profiles/))
-       call ioda_obsdb_var_to_ovec(Radiance, TmpOvec, "Obs_Minus_Forecast_unadjusted")
-       Radiance_Omgnbc = reshape(TmpOvec%values, (/n_channels, n_profiles/))
-
-       rmse = 0
-       DO m = 1, N_PROFILES
-          DO l = 1, n_Channels
-             diff(l,m) = rts(l,m)%Brightness_Temperature - (Radiance_Tbobs(l,m) - Radiance_Omgnbc(l,m))
-!             print *, rts(l,m)%Brightness_Temperature, Radiance_Tbobs(l,m) - Radiance_Omgnbc(l,m)
-             rmse = rmse + (Radiance_Tbobs(l,m) - Radiance_Omgnbc(l,m)) * (Radiance_Tbobs(l,m) - Radiance_Omgnbc(l,m))
-          END DO
-          WRITE( *,'(//7x,"Profile ",i0," output for ",a, " difference:",f12.6 )') m, TRIM(Sensor_Id(n)), maxval(abs(diff(:,m)))
-       END DO
-       print *, 'Max difference: ', maxval(abs(diff))
-       deallocate(diff)
-       deallocate(Radiance_Tbobs)
-       deallocate(Radiance_Omgnbc)
-       call ioda_obsvec_delete(TmpOvec)
-
-       rmse = sqrt(rmse / (n_profiles * n_channels))
-       print *, 'rmse: ', rmse
 
        ! output to hofx structure   
        hofx%values(:) = 0.0
@@ -567,7 +547,9 @@ contains
       INTEGER, PARAMETER :: FRESH_SNOW_TYPE             =  2  ! NPOESS Snow type         for IR/VIS SfcOptics
       INTEGER, PARAMETER :: FRESH_ICE_TYPE              =  1  ! NPOESS Ice type          for IR/VIS SfcOptics
       
-      
+      type(obs_vector) :: TmpOvec
+      real(kind_real), allocatable :: Radiance_Tbobs(:,:)
+      integer :: ch
       
       ! 4a.1 Profile #1  !** UFO: to be provided by UFO
       ! ---------------
@@ -595,8 +577,17 @@ contains
       !       varname = geovals%variables%fldnames(1)
        !******                               123456789012345678901234'
 
-      
+      allocate(Radiance_Tbobs(n_channels, n_profiles))
+      call ioda_obsvec_setup(TmpOvec, Radiance%nobs)
+      call ioda_obsdb_var_to_ovec(Radiance, TmpOvec, "Observation")
+      Radiance_Tbobs = reshape(TmpOvec%values, (/n_channels, n_profiles/))
+     
       do k1 = 1,N_PROFILES
+         sfc(k1)%sensordata%sensor_id        = chinfo(1)%sensor_id
+         sfc(k1)%sensordata%wmo_sensor_id    = chinfo(1)%wmo_sensor_id
+         sfc(k1)%sensordata%wmo_satellite_id = chinfo(1)%wmo_satellite_id
+         sfc(k1)%sensordata%sensor_channel   = chinfo(1)%sensor_channel
+
          sfc(k1)%Water_Type         = SEA_WATER_TYPE    !** NOTE: need to check how to determine fresh vs sea water types (salinity???)
          lfound                     = ufo_geovals_get_var(geovals, var_sfc_wspeed, geoval)
          sfc(k1)%Wind_Speed         = geoval%vals(1,k1) 
@@ -634,7 +625,12 @@ contains
          sfc(k1)%Soil_Moisture_Content = geoval%vals(1,k1) 
          lfound                     = ufo_geovals_get_var(geovals, var_sfc_soilt, geoval)
          sfc(k1)%Soil_Temperature   = geoval%vals(1,k1) 
+         do ch = 1, n_channels
+           sfc(k1)%sensordata%tb(ch) = Radiance_TbObs(ch, k1)  !** required to match GSI simulated TBs over snow and ice surfaces
+         enddo
       end do
+      deallocate(Radiance_Tbobs)
+      call ioda_obsvec_delete(TmpOvec)
 
     END SUBROUTINE Load_Sfc_Data
 
@@ -643,46 +639,24 @@ contains
     !
     SUBROUTINE Load_Geom_Data()
       implicit none
-      integer :: k1
 
       type(obs_vector) :: TmpOvec
-      real(kind_real), allocatable :: Radiance_SatZenAng(:)
-      real(kind_real), allocatable :: Radiance_SolZenAng(:)
-      real(kind_real), allocatable :: Radiance_SatAzmAng(:)
-      real(kind_real), allocatable :: Radiance_SolAzmAng(:)
-      real(kind_real), allocatable :: Radiance_SenScnPos(:)
 
-      allocate(Radiance_SatZenAng(n_profiles))
-      allocate(Radiance_SolZenAng(n_profiles))
-      allocate(Radiance_SatAzmAng(n_profiles))
-      allocate(Radiance_SolAzmAng(n_profiles))
-      allocate(Radiance_SenScnPos(n_profiles))
-      call ioda_obsvec_setup(TmpOvec, n_profiles)
+      call ioda_obsvec_setup(TmpOvec, Radiance%nobs)
 
       call ioda_obsdb_var_to_ovec(Radiance, TmpOvec, "Sat_Zenith_Angle")
-      Radiance_SatZenAng = TmpOvec%values
+      geo(:)%Sensor_Zenith_Angle = TmpOvec%values(::n_channels)
       call ioda_obsdb_var_to_ovec(Radiance, TmpOvec, "Sol_Zenith_Angle")
-      Radiance_SolZenAng = TmpOvec%values
+      geo(:)%Source_Zenith_Angle = TmpOvec%values(::n_channels)
       call ioda_obsdb_var_to_ovec(Radiance, TmpOvec, "Sat_Azimuth_Angle")
-      Radiance_SatAzmAng = TmpOvec%values
+      geo(:)%Sensor_Azimuth_Angle = TmpOvec%values(::n_channels)
       call ioda_obsdb_var_to_ovec(Radiance, TmpOvec, "Sol_Azimuth_Angle")
-      Radiance_SolAzmAng = TmpOvec%values
+      geo(:)%Source_Azimuth_Angle = TmpOvec%values(::n_channels)
       call ioda_obsdb_var_to_ovec(Radiance, TmpOvec, "Scan_Position")
-      Radiance_SenScnPos = TmpOvec%values
+      geo(:)%Ifov = TmpOvec%values(::n_channels)
+      call ioda_obsdb_var_to_ovec(Radiance, TmpOvec, "Scan_Angle")
+      geo(:)%Sensor_Scan_Angle = TmpOvec%values(::n_channels)
 
-      do k1 = 1,N_PROFILES
-         geo(k1)%Sensor_Zenith_Angle = Radiance_SatZenAng(k1)
-!YT ???         geo(k1)%Sensor_Scan_Angle   = Radiance%datafix(k1)%senscn_ang
-         geo(k1)%Source_Zenith_Angle = Radiance_SolZenAng(k1)
-         geo(k1)%Sensor_Azimuth_Angle = Radiance_SatAzmAng(k1)
-         geo(k1)%Source_Azimuth_Angle = Radiance_SolAzmAng(k1)
-         geo(k1)%Ifov = Radiance_SenScnPos(k1)
-      enddo
-      deallocate(Radiance_SatZenAng)
-      deallocate(Radiance_SolZenAng)
-      deallocate(Radiance_SatAzmAng)
-      deallocate(Radiance_SolAzmAng)
-      deallocate(Radiance_SenScnPos)
       call ioda_obsvec_delete(TmpOvec)
 
     END SUBROUTINE Load_Geom_Data
