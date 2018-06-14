@@ -375,6 +375,8 @@ end subroutine ufo_geovals_copy
 !! Currently implemented options for analytic_init include:
 !! * dcmip-test-1-1: 3D deformational flow
 !! * dcmip-test-1-2: 3D Hadley-like meridional circulation
+!! * dcmip-test-3-1: Non-orographic gravity waves on a small planet
+!! * dcmip-test-4-0: Baroclinic instability
 !!
 !! \warning Currently only temperature is implemented.  For variables other than
 !! temperature, the input GeoVaLs object is not changed.  This effectively
@@ -385,6 +387,7 @@ end subroutine ufo_geovals_copy
 !! temperature
 !!
 !! \date May, 2018: Created by M. Miesch (JCSDA)
+!! \date June, 2018: Added dcmip-test-4.0 (M. Miesch, JCSDA)
 !!
 !! \sa test::TestStateInterpolation()
 !!
@@ -393,6 +396,8 @@ subroutine ufo_geovals_analytic_init(self, locs, ic)
 use ioda_locs_mod, only : ioda_locs
 use dcmip_initial_conditions_test_1_2_3, only : test1_advection_deformation, &
                                   test1_advection_hadley, test3_gravity_wave  
+use dcmip_initial_conditions_test_4, only : test4_baroclinic_wave
+
 implicit none
 type(ufo_geovals), intent(inout) :: self
 type(ioda_locs), intent(in)      :: locs
@@ -428,7 +433,8 @@ do ivar = 1, self%nvar-1
 
          ! obtain height from the existing GeoVaLs object, which should be an
          ! output of the State::getValues() method
-         p0 = exp(self%geovals(ivar)%vals(ival,iloc))
+         ! convert from KPa (ufo standard) to Pa (dcmip standard)
+         p0 = exp(self%geovals(self%nvar)%vals(ival,iloc))*1.0e3_kind_real
 
          init_option: select case (trim(ic))
 
@@ -446,6 +452,11 @@ do ivar = 1, self%nvar-1
 
             call test3_gravity_wave(rlon,rlat,p0,kz,0,u0,v0,w0,&
                                         t0,phis0,ps0,rho0,hum0)
+
+         case ("dcmip-test-4-0")
+
+            call test4_baroclinic_wave(0,1.0_kind_real,rlon,rlat,p0,kz,0,u0,v0,w0,&
+                                        t0,phis0,ps0,rho0,hum0,q1,q2)
 
          case default
 
