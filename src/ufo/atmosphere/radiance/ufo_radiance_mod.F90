@@ -61,8 +61,8 @@ contains
 
     ! Profile dimensions
     !** UFO to provide N_LAYERS, N_ABSORBERS, N_CLOUDS, N_AEROSOLS
-    INTEGER, PARAMETER :: N_PROFILES  = 806  !** required because of the rank of the atm and sfc structures
-    INTEGER, PARAMETER :: N_LAYERS    = 71 !64 !** UFO  !** need a way to populate this... 
+    INTEGER            :: N_PROFILES
+    INTEGER            :: N_LAYERS
     INTEGER, PARAMETER :: N_ABSORBERS = 3  !** UFO
     INTEGER, PARAMETER :: N_CLOUDS    = 2  !** UFO
     INTEGER, PARAMETER :: N_AEROSOLS  = 0  !** UFO
@@ -107,13 +107,13 @@ contains
     ! 3a. Define the "non-demoninational" arguments
     ! ---------------------------------------------
     TYPE(CRTM_ChannelInfo_type)             :: chinfo(N_SENSORS)
-    TYPE(CRTM_Geometry_type)                :: geo(N_PROFILES)
+    TYPE(CRTM_Geometry_type), ALLOCATABLE   :: geo(:)
     
     
     ! 3b. Define the FORWARD variables
     ! --------------------------------
-    TYPE(CRTM_Atmosphere_type)              :: atm(N_PROFILES)
-    TYPE(CRTM_Surface_type)                 :: sfc(N_PROFILES)
+    TYPE(CRTM_Atmosphere_type), ALLOCATABLE :: atm(:)
+    TYPE(CRTM_Surface_type),    ALLOCATABLE :: sfc(:)
     TYPE(CRTM_RTSolution_type), ALLOCATABLE :: rts(:,:)
     
     
@@ -133,6 +133,18 @@ contains
     integer              :: nlocs
 
     Radiance => obss
+
+
+    !Allocate CRTM structures
+    N_PROFILES = Radiance%nlocs
+
+    lfound = ufo_geovals_get_var(geovals, var_tv, geoval)
+    N_LAYERS = size(geoval%vals,1)
+
+    ALLOCATE(geo(N_PROFILES))
+    ALLOCATE(atm(N_PROFILES))
+    ALLOCATE(sfc(N_PROFILES))
+
 
     ! Program header
     ! --------------
@@ -415,7 +427,9 @@ contains
        STOP
     END IF
     ! ==========================================================================
-    
+   
+    DEALLOCATE(geo,atm,sfc)
+ 
   CONTAINS
     
     ! ==========================================================================
