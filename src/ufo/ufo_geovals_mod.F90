@@ -123,7 +123,7 @@ integer :: ivar, status_
 status_ = 1
 geoval => NULL()
 if (.not. self%lalloc .or. .not. self%linit) then
-   return
+   !return
 endif
 
 ivar = ufo_vars_getindex(self%variables, varname)
