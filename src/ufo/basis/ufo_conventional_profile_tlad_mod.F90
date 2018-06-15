@@ -44,10 +44,11 @@ contains
       
       type(obs_vector) :: pressure
       type(ufo_geoval), pointer :: prsl
-      integer :: iobs
+      integer :: iobs, ierr
       
       !Check if conventional_profiles in geovals and get it
-      if (.not. ufo_geovals_get_var(geovals, var_prsl, prsl)) then
+      call ufo_geovals_get_var(geovals, var_prsl, prsl, status=ierr)
+      if (ierr/=0) then
         write(err_msg,*) myname_, trim(var_prsl), ' doesnt exist'
         call abor1_ftn(err_msg)
       endif
@@ -89,7 +90,7 @@ contains
       character(len=*), parameter :: myname_="ufo_conventional_profile_tlad_t_eqv_tl"
       character(max_string) :: err_msg
       
-      integer :: iobs
+      integer :: iobs,ierr
       type(ufo_geoval), pointer :: tv_d
       
       ! check if trajectory was set
@@ -105,7 +106,8 @@ contains
       endif
       
       ! check if tv variable is in geovals and get it
-      if (.not. ufo_geovals_get_var(geovals, var_tv, tv_d)) then
+      call ufo_geovals_get_var(geovals, var_tv, tv_d, status=ierr )
+      if (ierr/=0) then
         write(err_msg,*) myname_, trim(var_tv), ' doesnt exist'
         call abor1_ftn(err_msg)
       endif
@@ -129,7 +131,7 @@ contains
       character(len=*), parameter :: myname_="ufo_conventional_profile_tlad_t_eqv_ad"
       character(max_string) :: err_msg
       
-      integer :: iobs
+      integer :: iobs,ierr
       type(ufo_geoval), pointer :: tv_d, prsl_d
       
       ! check if trajectory was set
@@ -145,13 +147,15 @@ contains
       endif
       
       ! check if tv variable is in geovals and get it
-      if (.not. ufo_geovals_get_var(geovals, var_prsl, prsl_d)) then
+      call ufo_geovals_get_var(geovals, var_prsl, prsl_d, status=ierr)
+      if (ierr/=0) then
         write(err_msg,*) myname_, trim(var_prsl), ' doesnt exist'
         call abor1_ftn(err_msg)
       endif
       
       ! check if tv variable is in geovals and get it
-      if (.not. ufo_geovals_get_var(geovals, var_tv, tv_d)) then
+      call ufo_geovals_get_var(geovals, var_tv, tv_d, status=ierr)
+      if (ierr/=0) then
         write(err_msg,*) myname_, trim(var_tv), ' doesnt exist'
         call abor1_ftn(err_msg)
       endif

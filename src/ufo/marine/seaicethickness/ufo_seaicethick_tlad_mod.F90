@@ -58,16 +58,10 @@ character(max_string) :: err_msg
 type(ufo_geoval), pointer :: icethick, icefrac
 
 ! check if sea ice thickness variables is in geovals and get it
-if (.not. ufo_geovals_get_var(geovals, var_seaicethick, icethick)) then
-  write(err_msg,*) myname_, trim(var_seaicethick), ' doesnt exist'
-  call abor1_ftn(err_msg)
-endif
+call ufo_geovals_get_var(geovals, var_seaicethick, icethick)
 
 ! check if sea ice fraction variables is in geovals and get it
-if (.not. ufo_geovals_get_var(geovals, var_seaicefrac, icefrac)) then
-  write(err_msg,*) myname_, trim(var_seaicefrac), ' doesnt exist'
-  call abor1_ftn(err_msg)
-endif
+call ufo_geovals_get_var(geovals, var_seaicefrac, icefrac)
 
 self%icethick = icethick
 self%icefrac  = icefrac
@@ -105,16 +99,10 @@ if (geovals%nobs /= hofx%nobs) then
 endif
 
 ! check if sea ice fraction variable is in geovals and get it
-if (.not. ufo_geovals_get_var(geovals, var_seaicefrac, icefrac_d)) then
-  write(err_msg,*) myname_, trim(var_seaicefrac), ' doesnt exist'
-  call abor1_ftn(err_msg)
-endif
+call ufo_geovals_get_var(geovals, var_seaicefrac, icefrac_d)
 
 ! check if sea ice thickness variable is in geovals and get it
-if (.not. ufo_geovals_get_var(geovals, var_seaicethick, icethick_d)) then
-  write(err_msg,*) myname_, trim(var_seaicethick), ' doesnt exist'
-  call abor1_ftn(err_msg)
-endif
+call ufo_geovals_get_var(geovals, var_seaicethick, icethick_d)
 
 print *, 'in tl: thick=', icethick_d%vals(:,:)
 print *, 'in tl: frac=', icefrac_d%vals(:,:)
@@ -160,16 +148,10 @@ if (geovals%nobs /= hofx%nobs) then
 endif
 
 ! check if sea ice fraction variable is in geovals and get it
-if (.not. ufo_geovals_get_var(geovals, var_seaicefrac, icefrac_d)) then
-  write(err_msg,*) myname_, trim(var_seaicefrac), ' doesnt exist'
-  call abor1_ftn(err_msg)
-endif
+call ufo_geovals_get_var(geovals, var_seaicefrac, icefrac_d)
 
 ! check if sea ice thickness variable is in geovals and get it
-if (.not. ufo_geovals_get_var(geovals, var_seaicethick, icethick_d)) then
-  write(err_msg,*) myname_, trim(var_seaicethick), ' doesnt exist'
-  call abor1_ftn(err_msg)
-endif
+call ufo_geovals_get_var(geovals, var_seaicethick, icethick_d)
 
 ncat = self%icethick%nval
 if (.not.(allocated(icefrac_d%vals) .or. .not. allocated(icethick_d%vals))) then

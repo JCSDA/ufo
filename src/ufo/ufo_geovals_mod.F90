@@ -111,28 +111,34 @@ end subroutine ufo_geovals_delete
 
 ! ------------------------------------------------------------------------------
 
-logical function ufo_geovals_get_var(self, varname, geoval)
+subroutine ufo_geovals_get_var(self, varname, geoval, status)
 implicit none
 type(ufo_geovals), target, intent(in)    :: self
 character(MAXVARLEN), intent(in) :: varname
 type(ufo_geoval), pointer, intent(out)    :: geoval
+integer, optional, intent(out) :: status
 
-integer :: ivar
+integer :: ivar, status_
 
+status_ = 1
+geoval => NULL()
 if (.not. self%lalloc .or. .not. self%linit) then
-   !call abor1_ftn("ufo_geovals_get_var: geovals not allocated")
+   return
 endif
 
 ivar = ufo_vars_getindex(self%variables, varname)
 
 if (ivar < 0) then
-  ufo_geovals_get_var = .false.
+   status_ = 2
 else
-  ufo_geovals_get_var = .true.
   geoval => self%geovals(ivar)
+  status_ = 0
 endif
 
-end function ufo_geovals_get_var
+if(present(status)) then
+  status=status_
+endif
+end subroutine ufo_geovals_get_var
 
 ! ------------------------------------------------------------------------------
 
@@ -757,13 +763,12 @@ integer, intent(in) :: iobs
 
 type(ufo_geoval), pointer :: geoval
 character(MAXVARLEN) :: varname
-logical :: lfound
 integer :: ivar
 
 do ivar = 1, self%nvar
   varname = self%variables%fldnames(ivar)
-  lfound =  ufo_geovals_get_var(self, varname, geoval)
-  if (lfound) then
+  call ufo_geovals_get_var(self, varname, geoval)
+  if (associated(geoval)) then
     print *, 'geoval test: ', trim(varname), geoval%nval, geoval%vals(:,iobs)
   else
     print *, 'geoval test: ', trim(varname), ' doesnt exist'

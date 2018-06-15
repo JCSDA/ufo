@@ -47,17 +47,9 @@ type(ufo_geoval), pointer :: geoval
 print *, myname_, ' nobs: ', geovals%nobs
 
 
-if (.not. ufo_geovals_get_var(geovals, var_abs_topo, geoval)) then
-  write(err_msg,*) myname_, trim(var_abs_topo), ' doesnt exist'
-  call abor1_ftn(err_msg)
-endif
+call ufo_geovals_get_var(geovals, var_abs_topo, geoval)
 
-!if (.not. ufo_geovals_get_var(geovals, var_stericheight, geoval)) then
-!   print *,'===========================================',var_stericheight
-!   write(err_msg,*) myname_, trim(var_stericheight), ' doesnt exist'
-!   print *,'==========================================='
-!  call abor1_ftn(err_msg)
-!endif
+!call ufo_geovals_get_var(geovals, var_stericheight, geoval)
 print *,'==========================================='
 self%nl = geoval%nval
 print *, myname_, ' nval: ', geoval%nval
@@ -90,12 +82,8 @@ if (geovals%nobs /= hofx%nobs) then
 endif
 
 ! check if sea ice fraction variables is in geovals and get it
-!if (.not. ufo_geovals_get_var(geovals, var_stericheight, geoval)) then
-!  write(err_msg,*) myname_, trim(var_stericheight), ' doesnt exist'
-if (.not. ufo_geovals_get_var(geovals, var_abs_topo, geoval)) then
-  write(err_msg,*) myname_, trim(var_abs_topo), ' doesnt exist'
-  call abor1_ftn(err_msg)
-endif
+!call ufo_geovals_get_var(geovals, var_stericheight, geoval)
+call ufo_geovals_get_var(geovals, var_abs_topo, geoval)
 
 ! total sea ice fraction obs operator
 do iobs = 1, hofx%nobs
@@ -124,16 +112,10 @@ if (geovals%nobs /= hofx%nobs) then
   call abor1_ftn(err_msg)
 endif
 
-if (.not. ufo_geovals_get_var(geovals, var_abs_topo, geoval)) then
-  write(err_msg,*) myname_, trim(var_abs_topo), ' doesnt exist'
-  call abor1_ftn(err_msg)
-endif
+call ufo_geovals_get_var(geovals, var_abs_topo, geoval)
 
 ! check if sea ice fraction variables is in geovals and get it
-!if (.not. ufo_geovals_get_var(geovals, var_stericheight, geoval)) then
-!  write(err_msg,*) myname_, trim(var_stericheight), ' doesnt exist'
-!  call abor1_ftn(err_msg)
-!endif
+!call ufo_geovals_get_var(geovals, var_stericheight, geoval)
 
 if (.not.(allocated(geoval%vals))) then
    if (self%nl < 1) then

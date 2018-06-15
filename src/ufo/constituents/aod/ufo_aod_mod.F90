@@ -149,13 +149,14 @@ contains
 
     TYPE(ufo_geoval), pointer :: geoval
     character(MAXVARLEN) :: varname
-    logical              :: lfound
     integer              :: ivar
+    integer              :: ierr
 
     integer              :: nobs
     integer              :: nlocs
     REAL(fp), allocatable :: rmse(:)
     real(fp), allocatable :: diff(:,:)
+
 
     ! Program header
     ! --------------
@@ -166,13 +167,14 @@ contains
 
     varname=var_aerosols(1)
 
-    lfound = ufo_geovals_get_var(geovals,varname, geoval)
-    IF (lfound) THEN
+    call ufo_geovals_get_var(geovals,varname, geoval,status=ierr)
+    IF (ierr==0) THEN
        n_layers=SIZE(geoval%vals,1)
     ELSE
        err_msg=TRIM(varname)//' not found - Stopping'
        CALL abor1_ftn(err_msg)
     ENDIF
+    
 
     ALLOCATE(atm(n_profiles),aerosols(n_aerosols))
 
@@ -433,7 +435,7 @@ contains
       k1=1
 
       varname=var_prs
-      lfound = ufo_geovals_get_var(geovals, varname, geoval)
+      call ufo_geovals_get_var(geovals, varname, geoval)
 
       IF (geoval%vals(1,k1) > geoval%vals(N_LAYERS,k1)) THEN 
          flip_vertical=.TRUE.
@@ -444,7 +446,7 @@ contains
       DO k1 = 1,N_PROFILES
 
          varname=var_t
-         lfound = ufo_geovals_get_var(geovals, varname, geoval)
+         call ufo_geovals_get_var(geovals, varname, geoval)
          IF (flip_vertical) THEN
             atm(k1)%Temperature(1:N_LAYERS) = geoval%vals(N_LAYERS:1:-1,k1)
          ELSE             
@@ -453,7 +455,7 @@ contains
 !         print *, 'Temperature:', atm(k1)%Temperature(1:2), geoval%vals(1:2,k1)
 
          varname=var_prs
-         lfound = ufo_geovals_get_var(geovals, varname, geoval)
+         call ufo_geovals_get_var(geovals, varname, geoval)
          IF (flip_vertical) THEN
             atm(k1)%Pressure(1:N_LAYERS) = geoval%vals(N_LAYERS:1:-1,k1)
          ELSE
@@ -463,7 +465,7 @@ contains
 
 
          varname=var_prsi
-         lfound = ufo_geovals_get_var(geovals, varname, geoval)
+         call ufo_geovals_get_var(geovals, varname, geoval)
          IF (flip_vertical) THEN
             atm(k1)%Level_Pressure(0:N_LAYERS) = geoval%vals(N_LAYERS+1:1:-1,k1)
          ELSE
@@ -476,7 +478,7 @@ contains
          atm(k1)%Absorber_Id(1:1)    = (/ H2O_ID /)
          atm(k1)%Absorber_Units(1:1) = (/ MASS_MIXING_RATIO_UNITS /)
          varname=var_mixr
-         lfound = ufo_geovals_get_var(geovals, varname, geoval)
+         call ufo_geovals_get_var(geovals, varname, geoval)
          IF (flip_vertical) THEN
             atm(k1)%Absorber(1:N_LAYERS,1)       = geoval%vals(N_LAYERS:1:-1,k1)
          ELSE
@@ -534,16 +536,10 @@ contains
          
          IF (n_aerosols_all == naerosols_gocart_esrl) THEN
             
-            lfound=.FALSE.
-
             DO i=1,n_aerosols_all
                varname=var_aerosols(i)
                IF (TRIM(varname) == 'p25') THEN
-                  lfound = ufo_geovals_get_var(geovals,varname, geoval)
-                  IF (.NOT. lfound) THEN
-                     err_msg=TRIM(var_aerosols(i))//' not found - Stopping'
-                     CALL abor1_ftn(err_msg)
-                  ENDIF
+                  call ufo_geovals_get_var(geovals,varname, geoval)
                   
                   IF (flip_vertical) THEN
                      p25(1:N_LAYERS)=geoval%vals(N_LAYERS:1:-1,m)
@@ -556,11 +552,6 @@ contains
                   EXIT
                ENDIF
             ENDDO
-            
-            IF (.NOT. lfound) THEN
-               err_msg='Unknown aerosol module - Stopping'
-               CALL abor1_ftn(err_msg)
-            ENDIF
         
          ELSE
             p25=0_fp
@@ -572,11 +563,7 @@ contains
             varname=var_aerosols(i)
             IF (TRIM(varname) == 'p25') CYCLE
             ii=ii+1
-            lfound = ufo_geovals_get_var(geovals,varname, geoval)
-            IF (.NOT. lfound) THEN
-               err_msg=TRIM(var_aerosols(i))//' not found - Stopping'
-               CALL abor1_ftn(err_msg)
-            ENDIF
+            call ufo_geovals_get_var(geovals,varname, geoval)
 
             IF (flip_vertical) THEN
                atm(m)%aerosol(ii)%Concentration(1:N_LAYERS)=geoval%vals(N_LAYERS:1:-1,m)
