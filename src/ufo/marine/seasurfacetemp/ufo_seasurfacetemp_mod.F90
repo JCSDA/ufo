@@ -1,19 +1,19 @@
 ! (C) Copyright 2017 UCAR
-! 
+!
 ! This software is licensed under the terms of the Apache Licence Version 2.0
-! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
+! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 
 !> Fortran module to handle ice concentration observations
 
 module ufo_seasurfacetemp_mod
-  
+
 use ioda_obs_seasurfacetemp_mod
 use ioda_obs_vectors
 use ufo_vars_mod
 use ioda_locs_mod
 use ufo_geovals_mod
 use kinds
-  
+
 implicit none
 public :: ufo_seasurfacetemp
 public :: ufo_seasurfacetemp_eqv
@@ -28,7 +28,7 @@ end type ufo_seasurfacetemp
 ! ------------------------------------------------------------------------------
 
 contains
- 
+
 ! ------------------------------------------------------------------------------
 
 subroutine ufo_seasurfacetemp_eqv(self, geovals, hofx)
@@ -41,7 +41,7 @@ character(len=*), parameter :: myname_="ufo_seasurfacetemp_eqv"
 character(max_string) :: err_msg
 
 integer :: iobs
-type(ufo_geoval), pointer :: geoval
+type(ufo_geoval), pointer :: geoval_sst
 
 ! check if nobs is consistent in geovals & hofx
 if (geovals%nobs /= hofx%nobs) then
@@ -50,14 +50,11 @@ if (geovals%nobs /= hofx%nobs) then
 endif
 
 ! check if sst variables is in geovals and get it
-if (.not. ufo_geovals_get_var(geovals, var_ocn_sst, geoval)) then
-  write(err_msg,*) myname_, trim(var_ocn_sst), ' doesnt exist'
-  call abor1_ftn(err_msg)
-endif
+call ufo_geovals_get_var(geovals, var_ocn_sst, geoval_sst)
 
 ! sst obs operator
 do iobs = 1, hofx%nobs
-   hofx%values(iobs) = geoval%vals(1,iobs)
+   hofx%values(iobs) = geoval_sst%vals(1,iobs)
    write(602,*)hofx%values(iobs)
 enddo
 

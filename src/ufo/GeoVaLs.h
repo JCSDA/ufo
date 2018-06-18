@@ -12,6 +12,7 @@
 #include <string>
 
 #include "Fortran.h"
+#include "FortranGeoVals.h"
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
 #include "oops/util/Printable.h"

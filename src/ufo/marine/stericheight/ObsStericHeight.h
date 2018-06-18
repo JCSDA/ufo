@@ -17,6 +17,7 @@
 #include "oops/interface/ObsOperatorBase.h"
 #include "ioda/ObsSpace.h"
 #include "oops/util/ObjectCounter.h"
+#include "ufo/FortranMarine.h"
 
 // Forward declarations
 namespace eckit {

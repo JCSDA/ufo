@@ -16,8 +16,8 @@
           "filename": "Data/amsua_n19_geovals.nc4",
           "random": "0"
         },
-        "rmsequiv": "228.32019688865083",
-        "tolerance": "999.",
+        "rmsequiv": "228.38998190355065",
+        "tolerance": "1.e-8",
         "ObsBias": {}
       }
     ]

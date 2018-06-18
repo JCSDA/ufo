@@ -1,19 +1,19 @@
 ! (C) Copyright 2017 UCAR
-! 
+!
 ! This software is licensed under the terms of the Apache Licence Version 2.0
-! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
+! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 
-!> Fortran module to handle ice concentration observations
+!> Fortran module to handle sea-surface temperature observations
 
 module ufo_seasurfacetemp_tlad_mod
-  
+
 use ioda_obs_seasurfacetemp_mod
 use ioda_obs_vectors
 use ufo_vars_mod
 use ioda_locs_mod
 use ufo_geovals_mod
 use kinds
-  
+
 implicit none
 public :: ufo_seasurfacetemp_tlad
 public :: ufo_seasurfacetemp_tlad_settraj
@@ -22,7 +22,7 @@ public :: ufo_seasurfacetemp_tlad_eqv_ad
 private
 integer, parameter :: max_string=800
 
-!> Fortran derived type for sea ice fraction observation operator
+!> Fortran derived type for sea-surface temperature observation operator
 type :: ufo_seasurfacetemp_tlad
 end type ufo_seasurfacetemp_tlad
 
@@ -30,7 +30,7 @@ end type ufo_seasurfacetemp_tlad
 ! ------------------------------------------------------------------------------
 
 contains
- 
+
 
 ! ------------------------------------------------------------------------------
 
@@ -42,7 +42,7 @@ type(ufo_geovals), intent(in)       :: geovals
 character(len=*), parameter :: myname_="ufo_seasurfacetemp_tlad_settraj"
 character(max_string) :: err_msg
 
-type(ufo_geoval), pointer :: geoval
+type(ufo_geoval), pointer :: geoval_sst
 
 ! since observation operator is linear, don't care about trajectory itself
 
@@ -61,7 +61,7 @@ character(len=*), parameter :: myname_="ufo_seasurfacetemp_tlad_eqv_tl"
 character(max_string) :: err_msg
 
 integer :: iobs
-type(ufo_geoval), pointer :: geoval
+type(ufo_geoval), pointer :: geoval_sst
 
 print *, myname_, ' nobs: ', geovals%nobs, hofx%nobs
 
@@ -72,14 +72,11 @@ if (geovals%nobs /= hofx%nobs) then
 endif
 
 ! check if sst variables is in geovals and get it
-if (.not. ufo_geovals_get_var(geovals, var_ocn_sst, geoval)) then
-  write(err_msg,*) myname_, trim(var_ocn_sst), ' doesnt exist'
-  call abor1_ftn(err_msg)
-endif
+call ufo_geovals_get_var(geovals, var_ocn_sst, geoval_sst)
 
 ! sst obs operator
 do iobs = 1, hofx%nobs
-   hofx%values(iobs) = geoval%vals(1,iobs)
+   hofx%values(iobs) = geoval_sst%vals(1,iobs)
 enddo
 
 end subroutine ufo_seasurfacetemp_tlad_eqv_tl
@@ -96,7 +93,7 @@ character(len=*), parameter :: myname_="ufo_seasurfacetemp_tlad_eqv_ad"
 character(max_string) :: err_msg
 
 integer :: iobs
-type(ufo_geoval), pointer :: geoval
+type(ufo_geoval), pointer :: geoval_sst
 
 ! check if nobs is consistent in geovals & hofx
 if (geovals%nobs /= hofx%nobs) then
@@ -107,20 +104,17 @@ endif
 if (.not. geovals%linit ) geovals%linit=.true.
 
 ! check if sst variables is in geovals and get it
-if (.not. ufo_geovals_get_var(geovals, var_ocn_sst, geoval)) then
-  write(err_msg,*) myname_, trim(var_ocn_sst), ' doesnt exist'
-  call abor1_ftn(err_msg)
-endif
+call ufo_geovals_get_var(geovals, var_ocn_sst, geoval_sst)
 
-if (.not.(allocated(geoval%vals))) then
-   geoval%nval=1
-   allocate(geoval%vals(1,hofx%nobs))
+if (.not.(allocated(geoval_sst%vals))) then
+   geoval_sst%nval=1
+   allocate(geoval_sst%vals(1,hofx%nobs))
 end if
 
 ! backward sst obs operator
-geoval%vals=0.0
+geoval_sst%vals=0.0
 do iobs = 1, hofx%nobs
-   geoval%vals(1,iobs) = geoval%vals(1,iobs) + hofx%values(iobs)
+   geoval_sst%vals(1,iobs) = geoval_sst%vals(1,iobs) + hofx%values(iobs)
 enddo
 
 end subroutine ufo_seasurfacetemp_tlad_eqv_ad

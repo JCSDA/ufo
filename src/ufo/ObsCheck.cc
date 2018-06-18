@@ -11,6 +11,7 @@
 #include "eckit/config/Configuration.h"
 #include "ioda/ObsSpace.h"
 #include "Fortran.h"
+#include "FortranObsCheck.h"
 #include "GeoVaLs.h"
 #include "ioda/ObsVector.h"
 #include "oops/util/Logger.h"

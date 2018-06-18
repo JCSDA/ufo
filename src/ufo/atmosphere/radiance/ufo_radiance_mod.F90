@@ -13,35 +13,32 @@ module ufo_radiance_mod
   use ioda_locs_mod
   use ufo_geovals_mod
   use kinds  
+  use ufo_basis_mod, only: ufo_basis
 
   use crtm_module
 
   implicit none
   public :: ufo_radiance
-  public :: ufo_radiance_eqv
   private
-  integer, parameter :: max_string=800
 
-!> Fortran derived type for radiance trajectory
-type :: ufo_radiance
-end type ufo_radiance
+  !> Fortran derived type for radiance trajectory
+  type, extends(ufo_basis) :: ufo_radiance
+  contains
+    procedure :: eqv => ufo_radiance_eqv
+  end type ufo_radiance
   
-! ------------------------------------------------------------------------------
-
 contains
-  
+
 ! ------------------------------------------------------------------------------
 
-  subroutine ufo_radiance_eqv(self, geovals, hofx, Radiance) 
+  subroutine ufo_radiance_eqv(self, geovals, hofx, obss) 
     implicit none
-    type(ufo_radiance), intent(in)    :: self
+    class(ufo_radiance), intent(in)    :: self
     type(ufo_geovals),  intent(in)    :: geovals
     type(obs_vector),   intent(inout) :: hofx
-    type(ioda_obsdb),   intent(in)    :: Radiance
+    type(ioda_obsdb), target, intent(in)    :: obss
 
-    type(obs_vector) :: TmpOvec
-    real(kind_real), allocatable :: Radiance_Tbobs(:,:)
-    real(kind_real), allocatable :: Radiance_Omgnbc(:,:)
+    type(ioda_obsdb),  pointer  :: Radiance => NULL()
 
     !*************************************************************************************
     !******* Begin CRTM block ************************************************************
@@ -51,7 +48,6 @@ contains
     ! Some non-CRTM-y Parameters
     ! --------------------------
     CHARACTER(*), PARAMETER :: PROGRAM_NAME   = 'ufo_radiance_mod.F90'
-    
     
     ! ============================================================================
     ! STEP 2. **** SET UP SOME PARAMETERS FOR THE CRTM RUN ****
@@ -65,8 +61,8 @@ contains
 
     ! Profile dimensions
     !** UFO to provide N_LAYERS, N_ABSORBERS, N_CLOUDS, N_AEROSOLS
-    INTEGER, PARAMETER :: N_PROFILES  = 806  !** required because of the rank of the atm and sfc structures
-    INTEGER, PARAMETER :: N_LAYERS    = 71 !64 !** UFO  !** need a way to populate this... 
+    INTEGER            :: N_PROFILES
+    INTEGER            :: N_LAYERS
     INTEGER, PARAMETER :: N_ABSORBERS = 3  !** UFO
     INTEGER, PARAMETER :: N_CLOUDS    = 2  !** UFO
     INTEGER, PARAMETER :: N_AEROSOLS  = 0  !** UFO
@@ -111,13 +107,13 @@ contains
     ! 3a. Define the "non-demoninational" arguments
     ! ---------------------------------------------
     TYPE(CRTM_ChannelInfo_type)             :: chinfo(N_SENSORS)
-    TYPE(CRTM_Geometry_type)                :: geo(N_PROFILES)
+    TYPE(CRTM_Geometry_type), ALLOCATABLE   :: geo(:)
     
     
     ! 3b. Define the FORWARD variables
     ! --------------------------------
-    TYPE(CRTM_Atmosphere_type)              :: atm(N_PROFILES)
-    TYPE(CRTM_Surface_type)                 :: sfc(N_PROFILES)
+    TYPE(CRTM_Atmosphere_type), ALLOCATABLE :: atm(:)
+    TYPE(CRTM_Surface_type),    ALLOCATABLE :: sfc(:)
     TYPE(CRTM_RTSolution_type), ALLOCATABLE :: rts(:,:)
     
     
@@ -130,13 +126,24 @@ contains
 
     type(ufo_geoval), pointer :: geoval
     character(MAXVARLEN) :: varname
-    logical              :: lfound
     integer              :: ivar
 
     integer              :: nobs
     integer              :: nlocs
-    real(fp)              :: rmse
-    real(fp), allocatable :: diff(:,:)
+
+    Radiance => obss
+
+
+    !Allocate CRTM structures
+    N_PROFILES = Radiance%nlocs
+
+    call ufo_geovals_get_var(geovals, var_tv, geoval)
+    N_LAYERS = size(geoval%vals,1)
+
+    ALLOCATE(geo(N_PROFILES))
+    ALLOCATE(atm(N_PROFILES))
+    ALLOCATE(sfc(N_PROFILES))
+
 
     ! Program header
     ! --------------
@@ -198,10 +205,10 @@ contains
     ! -----------------------------------
     n_channels = SUM(CRTM_ChannelInfo_n_Channels(chinfo))
     !WRITE( *,'(/5x,"Processing a total of ",i0," channels...", i0, " layers..")' ) n_channels, N_LAYERS
-    DO n = 1, N_SENSORS
-       !WRITE( *,'(7x,i0," from ",a)' ) &
-       !     CRTM_ChannelInfo_n_Channels(chinfo(n)), TRIM(SENSOR_ID(n))
-    END DO
+!!$    DO n = 1, N_SENSORS
+!!$       !WRITE( *,'(7x,i0," from ",a)' ) &
+!!$       !     CRTM_ChannelInfo_n_Channels(chinfo(n)), TRIM(SENSOR_ID(n))
+!!$    END DO
     ! ============================================================================
     ! Begin loop over sensors
     !** UFO: this loop isn't necessary if we're calling CRTM for each sensor -- it's
@@ -243,6 +250,13 @@ contains
           CALL Display_Message( PROGRAM_NAME, message, FAILURE )
           STOP
        END IF
+
+       call CRTM_Surface_Create(sfc, n_channels)
+       IF ( ANY(.NOT. CRTM_Surface_Associated(sfc)) ) THEN
+          message = 'Error allocating CRTM Surface structure'
+          CALL Display_Message( PROGRAM_NAME, message, FAILURE )
+          STOP
+       END IF
        
        ! The output K-MATRIX structure
        CALL CRTM_Atmosphere_Create( atm_K, N_LAYERS, N_ABSORBERS, N_CLOUDS, N_AEROSOLS )
@@ -251,6 +265,14 @@ contains
           CALL Display_Message( PROGRAM_NAME, message, FAILURE )
           STOP
        END IF
+
+       call CRTM_Surface_Create(sfc_K, n_channels)
+       IF ( ANY(.NOT. CRTM_Surface_Associated(sfc_K)) ) THEN
+          message = 'Error allocating CRTM K-matrix Surface structure'
+          CALL Display_Message( PROGRAM_NAME, message, FAILURE )
+          STOP
+       END IF
+
        ! ==========================================================================
        
        ! ==========================================================================
@@ -358,34 +380,6 @@ contains
        ! select the needed variables for outputs.  These variables are contained
        ! in the structure RTSolution.
 
-       allocate(diff(n_channels,n_profiles))
-
-       allocate(Radiance_Tbobs(n_channels, n_profiles))
-       allocate(Radiance_Omgnbc(n_channels, n_profiles))
-       call ioda_obsvec_setup(TmpOvec, Radiance%nobs)
-       call ioda_obsdb_var_to_ovec(Radiance, TmpOvec, "Observation")
-       Radiance_Tbobs = reshape(TmpOvec%values, (/n_channels, n_profiles/))
-       call ioda_obsdb_var_to_ovec(Radiance, TmpOvec, "Obs_Minus_Forecast_unadjusted")
-       Radiance_Omgnbc = reshape(TmpOvec%values, (/n_channels, n_profiles/))
-
-       rmse = 0
-       DO m = 1, N_PROFILES
-          DO l = 1, n_Channels
-             diff(l,m) = rts(l,m)%Brightness_Temperature - (Radiance_Tbobs(l,m) - Radiance_Omgnbc(l,m))
-!             print *, rts(l,m)%Brightness_Temperature, Radiance_Tbobs(l,m) - Radiance_Omgnbc(l,m)
-             rmse = rmse + (Radiance_Tbobs(l,m) - Radiance_Omgnbc(l,m)) * (Radiance_Tbobs(l,m) - Radiance_Omgnbc(l,m))
-          END DO
-          WRITE( *,'(//7x,"Profile ",i0," output for ",a, " difference:",f12.6 )') m, TRIM(Sensor_Id(n)), maxval(abs(diff(:,m)))
-       END DO
-       print *, 'Max difference: ', maxval(abs(diff))
-       deallocate(diff)
-       deallocate(Radiance_Tbobs)
-       deallocate(Radiance_Omgnbc)
-       call ioda_obsvec_delete(TmpOvec)
-
-       rmse = sqrt(rmse / (n_profiles * n_channels))
-       print *, 'rmse: ', rmse
-
        ! output to hofx structure   
        hofx%values(:) = 0.0
        i = 1
@@ -432,7 +426,9 @@ contains
        STOP
     END IF
     ! ==========================================================================
-    
+   
+    DEALLOCATE(geo,atm,sfc)
+ 
   CONTAINS
     
     ! ==========================================================================
@@ -480,42 +476,42 @@ contains
 
       !** populate the atmosphere structures for CRTM (atm(k1), for the k1-th profile)
       do k1 = 1,N_PROFILES
-         lfound = ufo_geovals_get_var(geovals, var_tv, geoval)
+         call ufo_geovals_get_var(geovals, var_tv, geoval)
          atm(k1)%Temperature(1:N_LAYERS) = geoval%vals(:,k1) 
          !print *, 'Temperature:', atm(k1)%Temperature(1:2), geoval%vals(1:2,k1)
-         lfound = ufo_geovals_get_var(geovals, var_prs, geoval)
+         call ufo_geovals_get_var(geovals, var_prs, geoval)
          atm(k1)%Pressure(1:N_LAYERS) = geoval%vals(:,k1) 
          !print *, 'Pressure:', atm(k1)%Pressure(1:2), geoval%vals(1:2,k1)
-         lfound = ufo_geovals_get_var(geovals, var_prsi, geoval)
+         call ufo_geovals_get_var(geovals, var_prsi, geoval)
          atm(k1)%Level_Pressure(0:N_LAYERS) = geoval%vals(:,k1)
          !print *, 'level_pressure:', atm(k1)%Level_Pressure(0:1), geoval%vals(1:2,k1)
          atm(k1)%Climatology         = US_STANDARD_ATMOSPHERE
          atm(k1)%Absorber_Id(1:1)    = (/ H2O_ID /)
          atm(k1)%Absorber_Units(1:1) = (/ MASS_MIXING_RATIO_UNITS /)
-         lfound = ufo_geovals_get_var(geovals, var_mixr, geoval)
+         call ufo_geovals_get_var(geovals, var_mixr, geoval)
          atm(k1)%Absorber(1:N_LAYERS,1)       = geoval%vals(:,k1) 
          !print *, 'water vapor:', atm(k1)%Absorber(1:2,1), geoval%vals(1:2,k1)
          atm(k1)%Absorber_Id(2:2)    = (/ O3_ID /)
          atm(k1)%Absorber_Units(2:2) = (/ VOLUME_MIXING_RATIO_UNITS /)
-         lfound = ufo_geovals_get_var(geovals, var_oz, geoval)
+         call ufo_geovals_get_var(geovals, var_oz, geoval)
          atm(k1)%Absorber(1:N_LAYERS,2)       = geoval%vals(:,k1) 
          !print *, 'Ozone:', atm(k1)%Absorber(1:2,2), geoval%vals(1:2,k1)
 
          atm(k1)%Absorber_Id(3:3)    = (/ CO2_ID /)
          atm(k1)%Absorber_Units(3:3) = (/ VOLUME_MIXING_RATIO_UNITS /)
-         lfound = ufo_geovals_get_var(geovals, var_co2, geoval)
+         call ufo_geovals_get_var(geovals, var_co2, geoval)
          atm(k1)%Absorber(1:N_LAYERS,3)       = geoval%vals(:,k1)
 
          atm(k1)%Cloud(1)%Type = WATER_CLOUD
-         lfound = ufo_geovals_get_var(geovals, var_clw, geoval)
+         call ufo_geovals_get_var(geovals, var_clw, geoval)
          atm(k1)%Cloud(1)%Water_Content = geoval%vals(:,k1)
-         lfound = ufo_geovals_get_var(geovals, var_clwefr, geoval)
+         call ufo_geovals_get_var(geovals, var_clwefr, geoval)
          atm(k1)%Cloud(1)%Effective_Radius = geoval%vals(:,k1)
 
          atm(k1)%Cloud(2)%Type = ICE_CLOUD
-         lfound = ufo_geovals_get_var(geovals, var_cli, geoval)
+         call ufo_geovals_get_var(geovals, var_cli, geoval)
          atm(k1)%Cloud(2)%Water_Content = geoval%vals(:,k1)
-         lfound = ufo_geovals_get_var(geovals, var_cliefr, geoval)
+         call ufo_geovals_get_var(geovals, var_cliefr, geoval)
          atm(k1)%Cloud(2)%Effective_Radius = geoval%vals(:,k1)
 
 
@@ -564,7 +560,9 @@ contains
       INTEGER, PARAMETER :: FRESH_SNOW_TYPE             =  2  ! NPOESS Snow type         for IR/VIS SfcOptics
       INTEGER, PARAMETER :: FRESH_ICE_TYPE              =  1  ! NPOESS Ice type          for IR/VIS SfcOptics
       
-      
+      type(obs_vector) :: TmpOvec
+      real(kind_real), allocatable :: Radiance_Tbobs(:,:)
+      integer :: ch
       
       ! 4a.1 Profile #1  !** UFO: to be provided by UFO
       ! ---------------
@@ -592,46 +590,60 @@ contains
       !       varname = geovals%variables%fldnames(1)
        !******                               123456789012345678901234'
 
-      
+      allocate(Radiance_Tbobs(n_channels, n_profiles))
+      call ioda_obsvec_setup(TmpOvec, Radiance%nobs)
+      call ioda_obsdb_var_to_ovec(Radiance, TmpOvec, "Observation")
+      Radiance_Tbobs = reshape(TmpOvec%values, (/n_channels, n_profiles/))
+     
       do k1 = 1,N_PROFILES
+         sfc(k1)%sensordata%sensor_id        = chinfo(1)%sensor_id
+         sfc(k1)%sensordata%wmo_sensor_id    = chinfo(1)%wmo_sensor_id
+         sfc(k1)%sensordata%wmo_satellite_id = chinfo(1)%wmo_satellite_id
+         sfc(k1)%sensordata%sensor_channel   = chinfo(1)%sensor_channel
+
          sfc(k1)%Water_Type         = SEA_WATER_TYPE    !** NOTE: need to check how to determine fresh vs sea water types (salinity???)
-         lfound                     = ufo_geovals_get_var(geovals, var_sfc_wspeed, geoval)
+         call                         ufo_geovals_get_var(geovals, var_sfc_wspeed, geoval)
          sfc(k1)%Wind_Speed         = geoval%vals(1,k1) 
-         lfound                     = ufo_geovals_get_var(geovals, var_sfc_wdir, geoval)
+         call                         ufo_geovals_get_var(geovals, var_sfc_wdir, geoval)
          sfc(k1)%Wind_Direction     = geoval%vals(1,k1) 
-         lfound                     = ufo_geovals_get_var(geovals, var_sfc_wfrac, geoval)
+         call                         ufo_geovals_get_var(geovals, var_sfc_wfrac, geoval)
          sfc(k1)%Water_Coverage     = geoval%vals(1,k1) 
-         lfound                     = ufo_geovals_get_var(geovals, var_sfc_wtmp, geoval)
+         call                         ufo_geovals_get_var(geovals, var_sfc_wtmp, geoval)
          sfc(k1)%Water_Temperature  = geoval%vals(1,k1) 
-         lfound                     = ufo_geovals_get_var(geovals, var_sfc_ifrac, geoval)
+         call                         ufo_geovals_get_var(geovals, var_sfc_ifrac, geoval)
          sfc(k1)%Ice_Coverage       = geoval%vals(1,k1) 
-         lfound                     = ufo_geovals_get_var(geovals, var_sfc_itmp, geoval)
+         call                         ufo_geovals_get_var(geovals, var_sfc_itmp, geoval)
          sfc(k1)%Ice_Temperature    = geoval%vals(1,k1) 
-         lfound                     = ufo_geovals_get_var(geovals, var_sfc_sfrac, geoval)
+         call                         ufo_geovals_get_var(geovals, var_sfc_sfrac, geoval)
          sfc(k1)%Snow_Coverage      = geoval%vals(1,k1) 
-         lfound                     = ufo_geovals_get_var(geovals, var_sfc_stmp, geoval)
+         call                         ufo_geovals_get_var(geovals, var_sfc_stmp, geoval)
          sfc(k1)%Snow_Temperature   = geoval%vals(1,k1) 
-         lfound                     = ufo_geovals_get_var(geovals, var_sfc_sdepth, geoval)
+         call                         ufo_geovals_get_var(geovals, var_sfc_sdepth, geoval)
          sfc(k1)%Snow_Depth         = geoval%vals(1,k1)
-         lfound                     = ufo_geovals_get_var(geovals, var_sfc_landtyp, geoval)
+         call                         ufo_geovals_get_var(geovals, var_sfc_landtyp, geoval)
          sfc(k1)%Land_Type          = geoval%vals(1,k1)    !** NOTE:  is this Land_Type same as CRTM's land type??
-         lfound                     = ufo_geovals_get_var(geovals, var_sfc_lfrac, geoval)
+         call                         ufo_geovals_get_var(geovals, var_sfc_lfrac, geoval)
          sfc(k1)%Land_Coverage      = geoval%vals(1,k1) 
-         lfound                     = ufo_geovals_get_var(geovals, var_sfc_ltmp, geoval)
+         call                         ufo_geovals_get_var(geovals, var_sfc_ltmp, geoval)
          sfc(k1)%Land_Temperature   = geoval%vals(1,k1) 
-         lfound                     = ufo_geovals_get_var(geovals, var_sfc_lai, geoval)
+         call                         ufo_geovals_get_var(geovals, var_sfc_lai, geoval)
          sfc(k1)%Lai                = geoval%vals(1,k1) 
-         lfound                     = ufo_geovals_get_var(geovals, var_sfc_vegfrac, geoval)
+         call                         ufo_geovals_get_var(geovals, var_sfc_vegfrac, geoval)
          sfc(k1)%Vegetation_Fraction = geoval%vals(1,k1) 
-         lfound                     = ufo_geovals_get_var(geovals, var_sfc_vegtyp, geoval)
+         call                         ufo_geovals_get_var(geovals, var_sfc_vegtyp, geoval)
          sfc(k1)%Vegetation_Type    = geoval%vals(1,k1) 
-         lfound                     = ufo_geovals_get_var(geovals, var_sfc_soiltyp, geoval)
+         call                         ufo_geovals_get_var(geovals, var_sfc_soiltyp, geoval)
          sfc(k1)%Soil_Type          = geoval%vals(1,k1) 
-         lfound                     = ufo_geovals_get_var(geovals, var_sfc_soilm, geoval)
+         call                         ufo_geovals_get_var(geovals, var_sfc_soilm, geoval)
          sfc(k1)%Soil_Moisture_Content = geoval%vals(1,k1) 
-         lfound                     = ufo_geovals_get_var(geovals, var_sfc_soilt, geoval)
+         call                         ufo_geovals_get_var(geovals, var_sfc_soilt, geoval)
          sfc(k1)%Soil_Temperature   = geoval%vals(1,k1) 
+         do ch = 1, n_channels
+           sfc(k1)%sensordata%tb(ch) = Radiance_TbObs(ch, k1)  !** required to match GSI simulated TBs over snow and ice surfaces
+         enddo
       end do
+      deallocate(Radiance_Tbobs)
+      call ioda_obsvec_delete(TmpOvec)
 
     END SUBROUTINE Load_Sfc_Data
 
@@ -640,46 +652,24 @@ contains
     !
     SUBROUTINE Load_Geom_Data()
       implicit none
-      integer :: k1
 
       type(obs_vector) :: TmpOvec
-      real(kind_real), allocatable :: Radiance_SatZenAng(:)
-      real(kind_real), allocatable :: Radiance_SolZenAng(:)
-      real(kind_real), allocatable :: Radiance_SatAzmAng(:)
-      real(kind_real), allocatable :: Radiance_SolAzmAng(:)
-      real(kind_real), allocatable :: Radiance_SenScnPos(:)
 
-      allocate(Radiance_SatZenAng(n_profiles))
-      allocate(Radiance_SolZenAng(n_profiles))
-      allocate(Radiance_SatAzmAng(n_profiles))
-      allocate(Radiance_SolAzmAng(n_profiles))
-      allocate(Radiance_SenScnPos(n_profiles))
-      call ioda_obsvec_setup(TmpOvec, n_profiles)
+      call ioda_obsvec_setup(TmpOvec, Radiance%nobs)
 
       call ioda_obsdb_var_to_ovec(Radiance, TmpOvec, "Sat_Zenith_Angle")
-      Radiance_SatZenAng = TmpOvec%values
+      geo(:)%Sensor_Zenith_Angle = TmpOvec%values(::n_channels)
       call ioda_obsdb_var_to_ovec(Radiance, TmpOvec, "Sol_Zenith_Angle")
-      Radiance_SolZenAng = TmpOvec%values
+      geo(:)%Source_Zenith_Angle = TmpOvec%values(::n_channels)
       call ioda_obsdb_var_to_ovec(Radiance, TmpOvec, "Sat_Azimuth_Angle")
-      Radiance_SatAzmAng = TmpOvec%values
+      geo(:)%Sensor_Azimuth_Angle = TmpOvec%values(::n_channels)
       call ioda_obsdb_var_to_ovec(Radiance, TmpOvec, "Sol_Azimuth_Angle")
-      Radiance_SolAzmAng = TmpOvec%values
+      geo(:)%Source_Azimuth_Angle = TmpOvec%values(::n_channels)
       call ioda_obsdb_var_to_ovec(Radiance, TmpOvec, "Scan_Position")
-      Radiance_SenScnPos = TmpOvec%values
+      geo(:)%Ifov = TmpOvec%values(::n_channels)
+      call ioda_obsdb_var_to_ovec(Radiance, TmpOvec, "Scan_Angle")
+      geo(:)%Sensor_Scan_Angle = TmpOvec%values(::n_channels)
 
-      do k1 = 1,N_PROFILES
-         geo(k1)%Sensor_Zenith_Angle = Radiance_SatZenAng(k1)
-!YT ???         geo(k1)%Sensor_Scan_Angle   = Radiance%datafix(k1)%senscn_ang
-         geo(k1)%Source_Zenith_Angle = Radiance_SolZenAng(k1)
-         geo(k1)%Sensor_Azimuth_Angle = Radiance_SatAzmAng(k1)
-         geo(k1)%Source_Azimuth_Angle = Radiance_SolAzmAng(k1)
-         geo(k1)%Ifov = Radiance_SenScnPos(k1)
-      enddo
-      deallocate(Radiance_SatZenAng)
-      deallocate(Radiance_SolZenAng)
-      deallocate(Radiance_SatAzmAng)
-      deallocate(Radiance_SolAzmAng)
-      deallocate(Radiance_SenScnPos)
       call ioda_obsvec_delete(TmpOvec)
 
     END SUBROUTINE Load_Geom_Data

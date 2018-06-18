@@ -55,22 +55,13 @@ if (geovals%nobs /= hofx%nobs) then
 endif
 
 ! Sea surface height above geoid (absolute dynamic topography)
-if (.not. ufo_geovals_get_var(geovals, var_abs_topo, geoval_adt)) then
-  write(err_msg,*) myname_, trim(var_abs_topo), ' doesnt exist'
-  call abor1_ftn(err_msg)
-endif
+call ufo_geovals_get_var(geovals, var_abs_topo, geoval_adt)
 
 ! Potential Temperature
-if (.not. ufo_geovals_get_var(geovals, var_ocn_pot_temp, geoval_temp)) then
-  write(err_msg,*) myname_, trim(var_ocn_pot_temp), ' doesnt exist'
-  call abor1_ftn(err_msg)
-endif
+call ufo_geovals_get_var(geovals, var_ocn_pot_temp, geoval_temp)
 
 ! Salinity
-if (.not. ufo_geovals_get_var(geovals, var_ocn_salt, geoval_salt)) then
-  write(err_msg,*) myname_, trim(var_ocn_salt), ' doesnt exist'
-  call abor1_ftn(err_msg)
-endif
+call ufo_geovals_get_var(geovals, var_ocn_salt, geoval_salt)
 
 ! Steric height obs operator
 do iobs = 1, hofx%nobs

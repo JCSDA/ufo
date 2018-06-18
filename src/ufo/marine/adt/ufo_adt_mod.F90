@@ -1,12 +1,12 @@
 ! (C) Copyright 2017 UCAR
-! 
+!
 ! This software is licensed under the terms of the Apache Licence Version 2.0
-! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
+! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 
 !> Fortran module to handle adt observations
 
 module ufo_adt_mod
-  
+
 use ioda_obs_adt_mod
 use ioda_obs_vectors
 use ufo_vars_mod
@@ -14,7 +14,7 @@ use ioda_locs_mod
 use ufo_geovals_mod
 use kinds
 use ncd_kinds, only:  i_kind,r_single,r_kind,r_double
-  
+
 implicit none
 public :: ufo_adt
 public :: ufo_adt_eqv
@@ -49,7 +49,7 @@ end type ufo_adt
 ! ------------------------------------------------------------------------------
 
 contains
- 
+
 ! ------------------------------------------------------------------------------
 
 subroutine ufo_adt_eqv(self, geovals, hofx, obs_adt)
@@ -69,9 +69,9 @@ type(diag_adt_tracer), allocatable :: adt_out(:)
 type(diag_adt_header) :: adt_out_header
 
 
-integer :: iobs 
+integer :: iobs
 real :: sum_obs,sum_hofx
-type(ufo_geoval), pointer :: adt 
+type(ufo_geoval), pointer :: geoval_adt
 
 ! check if nobs is consistent in geovals & hofx
 if (geovals%nobs /= hofx%nobs) then
@@ -80,10 +80,7 @@ if (geovals%nobs /= hofx%nobs) then
 endif
 
 ! check if adt variable is in geovals and get it
-if (.not. ufo_geovals_get_var(geovals, var_abs_topo, adt)) then
-  write(err_msg,*) myname_, trim(var_abs_topo), ' doesnt exist'
-  call abor1_ftn(err_msg)
-endif
+call ufo_geovals_get_var(geovals, var_abs_topo, geoval_adt)
 
 ! Information for temporary output file ---------------------------------------!
 allocate(adt_out(hofx%nobs))
@@ -96,22 +93,22 @@ adt_out_header%date                  = 20120729
 
 
 hofx%values = 0.0
-sum_hofx=sum(adt%vals(1,:))
+sum_hofx=sum(geoval_adt%vals(1,:))
 sum_obs=sum(obs_adt%adt(:))
 print *,'ssh offset',(sum_obs-sum_hofx)/hofx%nobs
 ! adt obs operator
 do iobs = 1, hofx%nobs
-!   hofx%values(iobs) = adt%vals(1,iobs)
+!   hofx%values(iobs) = geoval_adt%vals(1,iobs)
 ! remove offset from hofx
-   hofx%values(iobs) = adt%vals(1,iobs)+(sum_obs-sum_hofx)/hofx%nobs
+   hofx%values(iobs) = geoval_adt%vals(1,iobs)+(sum_obs-sum_hofx)/hofx%nobs
    write(702,*)hofx%values(iobs)
 
   ! Output information:
-  adt_out(iobs)%Station_ID                     = 1 
+  adt_out(iobs)%Station_ID                     = 1
   adt_out(iobs)%Observation_Type               = 1.0
   adt_out(iobs)%Latitude                       = obs_adt%lat(iobs)
   adt_out(iobs)%Longitude                      = obs_adt%lon(iobs)
-  adt_out(iobs)%Station_Depth                  = 0 
+  adt_out(iobs)%Station_Depth                  = 0
   adt_out(iobs)%Time                           = 1.0
   adt_out(iobs)%Observation                    = obs_adt%adt(iobs)
   adt_out(iobs)%Obs_Minus_Forecast_adjusted    = obs_adt%adt(iobs) - hofx%values(iobs)
@@ -172,7 +169,7 @@ call check(nf90_enddef(iNcid))
 ! Writing
 allocate(obsid(size(adt_out(:),1)))
 obsid=1073
-call check(nf90_put_var(iNcid, iVarLON_ID , obsid(:)))!adt_out(:)%Station_ID))    
+call check(nf90_put_var(iNcid, iVarLON_ID , obsid(:)))!adt_out(:)%Station_ID))
 call check(nf90_put_var(iNcid, iVarLON_ID , adt_out(:)%Longitude))
 call check(nf90_put_var(iNcid, iVarLAT_ID , adt_out(:)%Latitude))
 call check(nf90_put_var(iNcid, iVarLev_ID , adt_out(:)%Station_Depth))

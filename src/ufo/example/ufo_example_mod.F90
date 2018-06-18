@@ -56,10 +56,7 @@ endif
 
 varname = "some_variable_name"
 ! check if some variable is in geovals and get it
-if (.not. ufo_geovals_get_var(geovals, varname, geoval)) then
-  write(err_msg,*) myname_, trim(varname), ' doesnt exist'
-  call abor1_ftn(err_msg)
-endif
+call ufo_geovals_get_var(geovals, varname, geoval)
 
 ! get some metadata from obsspace
 varname = "SomeMetadata"

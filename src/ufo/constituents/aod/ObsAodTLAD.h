@@ -18,6 +18,7 @@
 #include "ioda/ObsSpace.h"
 #include "oops/util/ObjectCounter.h"
 #include "oops/util/Logger.h"
+#include "ufo/FortranConstituents.h"
 
 // Forward declarations
 namespace util {
@@ -86,7 +87,7 @@ ObsAodTLAD<MODEL>::~ObsAodTLAD() {
 // -----------------------------------------------------------------------------
 template <typename MODEL>
 void ObsAodTLAD<MODEL>::setTrajectory(const GeoVaLs & geovals, const ObsBias & bias) {
-  ufo_aod_tlad_settraj_f90(keyOperAod_, geovals.toFortran());
+  ufo_aod_tlad_settraj_f90(keyOperAod_, geovals.toFortran(), odb_.toFortran());
 }
 
 // -----------------------------------------------------------------------------

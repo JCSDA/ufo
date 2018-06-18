@@ -49,10 +49,7 @@ type(ufo_geoval), pointer :: geoval
 ! of ice categories here, don't care about trajectory itself
 
 ! check if sea ice fraction variables is in geovals and get it
-if (.not. ufo_geovals_get_var(geovals, var_seaicefrac, geoval)) then
-  write(err_msg,*) myname_, trim(var_seaicefrac), ' doesnt exist'
-  call abor1_ftn(err_msg)
-endif
+call ufo_geovals_get_var(geovals, var_seaicefrac, geoval)
 
 self%ncat = geoval%nval
 
@@ -82,10 +79,7 @@ if (geovals%nobs /= hofx%nobs) then
 endif
 
 ! check if sea ice fraction variables is in geovals and get it
-if (.not. ufo_geovals_get_var(geovals, var_seaicefrac, geoval)) then
-  write(err_msg,*) myname_, trim(var_seaicefrac), ' doesnt exist'
-  call abor1_ftn(err_msg)
-endif
+call ufo_geovals_get_var(geovals, var_seaicefrac, geoval)
 
 ! total sea ice fraction obs operator
 do iobs = 1, hofx%nobs
@@ -117,10 +111,7 @@ endif
 if (.not. geovals%linit ) geovals%linit=.true.
 
 ! check if sea ice fraction variables is in geovals and get it
-if (.not. ufo_geovals_get_var(geovals, var_seaicefrac, geoval)) then
-  write(err_msg,*) myname_, trim(var_seaicefrac), ' doesnt exist'
-  call abor1_ftn(err_msg)
-endif
+call ufo_geovals_get_var(geovals, var_seaicefrac, geoval)
 
 if (.not.(allocated(geoval%vals))) then
    if (self%ncat < 1) then

@@ -52,15 +52,9 @@ if (geovals%nobs /= hofx%nobs) then
 endif
 
 ! check if sea ice fraction variable is in geovals and get it
-if (.not. ufo_geovals_get_var(geovals, var_seaicefrac, icefrac)) then
-  write(err_msg,*) myname_, trim(var_seaicefrac), ' doesnt exist'
-  call abor1_ftn(err_msg)
-endif
+call ufo_geovals_get_var(geovals, var_seaicefrac, icefrac)
 ! check if sea ice thickness variable is in geovals and get it
-if (.not. ufo_geovals_get_var(geovals, var_seaicethick, icethick)) then
-  write(err_msg,*) myname_, trim(var_seaicethick), ' doesnt exist'
-  call abor1_ftn(err_msg)
-endif
+call ufo_geovals_get_var(geovals, var_seaicethick, icethick)
 
 ncat = icefrac%nval
 hofx%values = 0.0
