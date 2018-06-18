@@ -84,14 +84,14 @@ extern "C" {
 // -----------------------------------------------------------------------------
 //  Ocean Sea-Surface Temperature observation operator and its tl/ad
 // -----------------------------------------------------------------------------
-//  void ufo_seasurfacetemp_setup_f90(F90hop &, const eckit::Configuration * const *);
-//  void ufo_seasurfacetemp_delete_f90(F90hop &);
-//  void ufo_seasurfacetemp_eqv_f90(const F90hop &, const F90goms &, const F90odb &, const F90ovec &, const F90obias &);
-//  void ufo_seasurfacetemp_tlad_setup_f90(F90hop &, const eckit::Configuration * const *);
-//  void ufo_seasurfacetemp_tlad_delete_f90(F90hop &);
-//  void ufo_seasurfacetemp_tlad_settraj_f90(const F90hop &, const F90goms &);
-//  void ufo_seasurfacetemp_tlad_eqv_tl_f90(const F90hop &, const F90goms &, const F90ovec &);
-//  void ufo_seasurfacetemp_tlad_eqv_ad_f90(const F90hop &, const F90goms &, const F90ovec &);
+  void ufo_seasurfacetemp_setup_f90(F90hop &, const eckit::Configuration * const *);
+  void ufo_seasurfacetemp_delete_f90(F90hop &);
+  void ufo_seasurfacetemp_eqv_f90(const F90hop &, const F90goms &, const F90odb &, const F90ovec &, const F90obias &);
+  void ufo_seasurfacetemp_tlad_setup_f90(F90hop &, const eckit::Configuration * const *);
+  void ufo_seasurfacetemp_tlad_delete_f90(F90hop &);
+  void ufo_seasurfacetemp_tlad_settraj_f90(const F90hop &, const F90goms &);
+  void ufo_seasurfacetemp_tlad_eqv_tl_f90(const F90hop &, const F90goms &, const F90ovec &);
+  void ufo_seasurfacetemp_tlad_eqv_ad_f90(const F90hop &, const F90goms &, const F90ovec &);
 
 // -----------------------------------------------------------------------------
 
