@@ -15,7 +15,7 @@
 
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
-#include "ufo/FortranAtmosphere.h"
+#include "ufo/atmosphere/FortranAtmosphere.h"
 #include "ufo/LinearObsOperatorBase.h"
 
 // Forward declarations

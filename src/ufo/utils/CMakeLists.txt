@@ -4,6 +4,12 @@
 # which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 
 set ( utils_files
-	vert_interp.F90
-	PARENT_SCOPE
+      vert_interp.F90
+)
+
+PREPEND( _p_utils_files       "utils"       ${utils_files} )
+
+set ( utils_src_files
+      ${_p_utils_files}
+      PARENT_SCOPE
 )

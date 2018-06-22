@@ -7,8 +7,6 @@ list( APPEND ufo_src_files
     Fortran.h
     FortranGeoVals.h
     FortranObsCheck.h
-    FortranAtmosphere.h
-    FortranConstituents.h
     GeoVaLs.cc
     GeoVaLs.h
     LinearObsOperator.cc
@@ -31,10 +29,6 @@ list( APPEND ufo_src_files
     ufo_variables_mod.F90
 )
 
-if( ${GSW_FOUND} )
-    list( APPEND ufo_src_files FortranMarine.h )
-endif( ${GSW_FOUND} )
-
 # macro to prepend a prefix with relative path
 # can this be added to ecbuild for use elsewhere?
 function(PREPEND var prefix )
@@ -45,6 +39,7 @@ function(PREPEND var prefix )
     set ( ${var} "${listVar}" PARENT_SCOPE )
 endfunction(PREPEND)
 
+add_subdirectory( utils )
 add_subdirectory( basis )
 add_subdirectory( atmosphere )
 add_subdirectory( constituents )
@@ -53,6 +48,7 @@ if( ${GSW_FOUND} )
 endif( ${GSW_FOUND} )
 
 list( APPEND ufo_src_files
+    ${utils_src_files}
     ${basis_src_files}
     ${atmosphere_src_files}
     ${constituents_src_files}

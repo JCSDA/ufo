@@ -15,9 +15,8 @@
 
 #include "oops/base/Variables.h"
 #include "ufo/ObsOperatorBase.h"
-#include "ioda/ObsSpace.h"
 #include "oops/util/ObjectCounter.h"
-#include "ufo/FortranMarine.h"
+#include "ufo/marine/FortranMarine.h"
 
 // Forward declarations
 namespace eckit {
@@ -26,12 +25,12 @@ namespace eckit {
 
 namespace ioda {
   class ObsVector;
+  class ObsSpace;
 }
 
 namespace ufo {
   class GeoVaLs;
   class ObsBias;
-  class ObsBiasIncrement;
 
 // -----------------------------------------------------------------------------
 /// Steric height/ sea-level observation for UFO.

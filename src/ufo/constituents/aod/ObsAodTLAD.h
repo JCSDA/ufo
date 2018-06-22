@@ -15,11 +15,14 @@
 
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
-#include "oops/util/Logger.h"
-#include "ufo/FortranConstituents.h"
+#include "ufo/constituents/FortranConstituents.h"
 #include "ufo/LinearObsOperatorBase.h"
 
 // Forward declarations
+namespace eckit {
+  class Configuration;
+}
+
 namespace ioda {
   class ObsSpace;
   class ObsVector;

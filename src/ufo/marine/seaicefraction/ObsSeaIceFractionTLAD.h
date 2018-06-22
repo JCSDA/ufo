@@ -15,10 +15,8 @@
 
 #include "oops/base/Variables.h"
 #include "ufo/LinearObsOperatorBase.h"
-#include "ioda/ObsSpace.h"
 #include "oops/util/ObjectCounter.h"
-#include "oops/util/Logger.h"
-#include "ufo/FortranMarine.h"
+#include "ufo/marine/FortranMarine.h"
 
 // Forward declarations
 namespace util {
@@ -27,6 +25,7 @@ namespace util {
 
 namespace ioda {
   class ObsVector;
+  class ObsSpace;
 }
 
 namespace ufo {
