@@ -37,7 +37,7 @@ contains
 subroutine ufo_insitutemperature_tlad_setup_c(c_key_self, c_conf) bind(c,name='ufo_insitutemperature_tlad_setup_f90')
 implicit none
 integer(c_int), intent(inout) :: c_key_self
-type(c_ptr), intent(in)    :: c_conf
+type(c_ptr), intent(in)       :: c_conf
     
 type(ufo_insitutemperature_tlad), pointer :: self
 
@@ -50,7 +50,8 @@ end subroutine ufo_insitutemperature_tlad_setup_c
 ! ------------------------------------------------------------------------------
   
 subroutine ufo_insitutemperature_tlad_delete_c(c_key_self) bind(c,name='ufo_insitutemperature_tlad_delete_f90')
-implicit none
+  implicit none
+  
 integer(c_int), intent(inout) :: c_key_self
     
 type(ufo_insitutemperature_tlad), pointer :: self
@@ -71,7 +72,7 @@ integer(c_int), intent(in) :: c_key_geovals
 integer(c_int), intent(in) :: c_key_obsspace
 
 type(ufo_insitutemperature_tlad), pointer :: self
-type(ufo_geovals),    pointer :: geovals
+type(ufo_geovals),                pointer :: geovals
 type(ioda_obs_insitutemperature), pointer :: obs_ti
 
 character(len=*), parameter :: myname_="ufo_insitutemperature_tlad_settraj_c"
@@ -98,7 +99,6 @@ integer(c_int), intent(in) :: c_bias
 type(ufo_insitutemperature_tlad), pointer :: self
 type(ufo_geovals),    pointer :: geovals
 type(obs_vector),     pointer :: hofx
-type(ioda_obs_insitutemperature), pointer :: obs_ti
 
 character(len=*), parameter :: myname_="ufo_insitutemperature_tlad_eqv_tl_c"
 
@@ -106,7 +106,7 @@ call ufo_insitutemperature_tlad_registry%get(c_key_self, self)
 call ufo_geovals_registry%get(c_key_geovals,geovals)
 call ioda_obs_vect_registry%get(c_key_hofx,hofx)
 
-call ufo_insitutemperature_tlad_eqv_tl(self, geovals, hofx, obs_ti)
+call ufo_insitutemperature_tlad_eqv_tl(self, geovals, hofx)!, obs_ti)
 
 end subroutine ufo_insitutemperature_tlad_eqv_tl_c
 
@@ -129,9 +129,8 @@ type(ioda_obs_insitutemperature), pointer :: obs_ti     !< Insitu temperature ob
 call ufo_insitutemperature_tlad_registry%get(c_key_self, self)
 call ufo_geovals_registry%get(c_key_geovals,geovals)
 call ioda_obs_vect_registry%get(c_key_hofx,hofx)
-call ioda_obs_insitutemperature_registry%get(c_key_obsspace,obs_ti)
 
-call ufo_insitutemperature_tlad_eqv_ad(self, geovals, hofx, obs_ti)
+call ufo_insitutemperature_tlad_eqv_ad(self, geovals, hofx)
 
 end subroutine ufo_insitutemperature_tlad_eqv_ad_c
   
