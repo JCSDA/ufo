@@ -1,12 +1,14 @@
 This directory contains example files for new observation operator implementation:
 
 Observation operator files:
-ObsExample.h -- C++ class for the observation operator
+ObsExample.h -- C++ class header for the observation operator
+ObsExample.cc -- C++ class implementation for the observation operator
 ObsExample.interface.F90 -- Fortran functions on the interface between C++ and Fortran (called from ObsExample.h, calling functions in ufo_example_mod.F90)
 ufo_example_mod.F90 -- Fortran module for observation operator
 
 Tl/ad observation operator files:
-ObsExampleTLAD.h -- C++ class for the tl/ad observation operator
+ObsExampleTLAD.h -- C++ class header for the tl/ad observation operator
+ObsExampleTLAD.cc -- C++ class implementation for the tl/ad observation operator
 ObsExampleTLAD.interface.F90 -- Fortran functions on the interface between C++ and Fortran (called from ObsExampleTLAD.h, calling functions in ufo_example_tlad_mod.F90)
 ufo_example_tlad_mod.F90 -- Fortran module for tl/ad observation operator
 

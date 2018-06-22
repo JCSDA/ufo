@@ -1,6 +1,6 @@
 /*
- * (C) Copyright 2017 UCAR
- *
+ * (C) Copyright 2017-2018 UCAR
+ * 
  * This software is licensed under the terms of the Apache Licence Version 2.0
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
@@ -60,7 +60,7 @@ GeoVaLs::GeoVaLs(const ioda::Locations & locs, const oops::Variables & vars,
   oops::Log::trace() << "GeoVaLs contructor config key = " << keyGVL_ << std::endl;
 }
 // -----------------------------------------------------------------------------
-/*! \brief GomQG Copy constructor with locs and config
+/*! \brief Copy constructor with locs and config
  *
  * \details This ufo::GeoVaLs constructor was introduced in May, 2018 for use with
  * the interpolation test.   If "analytic_init" is not specified in the

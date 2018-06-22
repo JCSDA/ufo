@@ -1,3 +1,8 @@
+# (C) Copyright 2017-2018 UCAR.
+#
+# This software is licensed under the terms of the Apache Licence Version 2.0
+# which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+
 list( APPEND ufo_src_files
     Fortran.h
     FortranGeoVals.h
@@ -6,14 +11,20 @@ list( APPEND ufo_src_files
     FortranConstituents.h
     GeoVaLs.cc
     GeoVaLs.h
+    LinearObsOperator.cc
+    LinearObsOperator.h
+    LinearObsOperatorBase.cc
+    LinearObsOperatorBase.h
     ObsBias.h
     ObsBiasCovariance.h
     ObsBiasIncrement.h
     ObsCheck.cc
     ObsCheck.h
+    ObsOperator.cc
+    ObsOperator.h
+    ObsOperatorBase.cc
+    ObsOperatorBase.h
     UfoTrait.h
-    instantiateObsOperatorFactory.h
-    instantiateLinearObsOpFactory.h
     ufo_obscheck_mod.F90
     GeoVaLs.interface.F90
     ufo_geovals_mod.F90

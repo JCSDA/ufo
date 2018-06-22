@@ -66,7 +66,7 @@ template <typename MODEL> class RunCRTM : public oops::Application {
   
       ObsVector_ ovec(obsdb[jj]);
   
-      hop.obsEquiv(gval, ovec, ybias);
+      hop.simulateObs(gval, ovec, ybias);
   
       const double zz = ovec.rms();
       const double xx = conf[jj].getDouble("rmsequiv");
