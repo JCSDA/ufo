@@ -68,7 +68,7 @@
           }
         },
         "GeoVaLs": {
-          "norm": "556.82045213222068",
+          "norm": "555.7569808064045",
           "random": "1",
           "nobs": 309091
         },
@@ -79,17 +79,14 @@
       {
         "ObsType": "SeaIceThickness",
         "ObsData": {
-        },
-        "Generate": {
-          "nobs": "9",
-          "lat": "60",
-          "lon1": "10",
-          "lon2": "30"
+          "ObsDataIn": {
+            "obsfile": "Data/cryosat2-2018-04-15.nc"
+          }
         },
         "GeoVaLs": {
-          "norm": "4.1577761471926129",
+          "norm": "126.93229646296739",
           "random": "1",
-          "nobs": "9"
+          "nobs": "8065"
         },
         "ObsBias": {},
         "rmsequiv": "1.",
