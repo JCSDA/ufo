@@ -1,4 +1,2 @@
-test/testinput/marineobs/Jason-3-2018-04-15.nc filter=lfs diff=lfs merge=lfs -text
-test/testinput/marineobs/seaice_obs-2018-04-15.nc filter=lfs diff=lfs merge=lfs -text
-test/testinput/marineobs/cryosat2-2018-04-15.nc filter=lfs diff=lfs merge=lfs -text
-./test/testinput/marineobs/t0n156e_dy_geovals.nc filter=lfs diff=lfs merge=lfs -text
+*.nc filter=lfs diff=lfs merge=lfs -text
+*.nc4 filter=lfs diff=lfs merge=lfs -text
