@@ -14,18 +14,17 @@
 #include <boost/scoped_ptr.hpp>
 
 #include "oops/base/Variables.h"
-#include "oops/interface/LinearObsOperBase.h"
-#include "ioda/ObsSpace.h"
 #include "oops/util/ObjectCounter.h"
-#include "oops/util/Logger.h"
 #include "ufo/FortranAtmosphere.h"
+#include "ufo/LinearObsOperatorBase.h"
 
 // Forward declarations
-namespace util {
-  class DateTime;
+namespace eckit {
+  class Configuration;
 }
 
 namespace ioda {
+  class ObsSpace;
   class ObsVector;
 }
 
@@ -35,10 +34,9 @@ namespace ufo {
   class ObsBiasIncrement;
 
 // -----------------------------------------------------------------------------
-/// Radiosonde (currently only temperature) observation for UFO.
-template <typename MODEL>
-class ObsRadiosondeTLAD : public oops::LinearObsOperBase<MODEL>,
-                          private util::ObjectCounter<ObsRadiosondeTLAD<MODEL>> {
+/// Radiosonde observation operator
+class ObsRadiosondeTLAD : public LinearObsOperatorBase,
+                          private util::ObjectCounter<ObsRadiosondeTLAD> {
 public:
   static const std::string classname() {return "ufo::ObsRadiosondeTLAD";}
 
@@ -47,8 +45,8 @@ public:
 
   // Obs Operators
   void setTrajectory(const GeoVaLs &, const ObsBias &);
-  void obsEquivTL(const GeoVaLs &, ioda::ObsVector &, const ObsBiasIncrement &) const;
-  void obsEquivAD(GeoVaLs &, const ioda::ObsVector &, ObsBiasIncrement &) const;
+  void simulateObsTL(const GeoVaLs &, ioda::ObsVector &, const ObsBiasIncrement &) const;
+  void simulateObsAD(GeoVaLs &, const ioda::ObsVector &, ObsBiasIncrement &) const;
 
   // Other
   const oops::Variables & variables() const {return *varin_;}
@@ -63,50 +61,6 @@ private:
   boost::scoped_ptr<const oops::Variables> varin_;
 };
 
-// -----------------------------------------------------------------------------
-template <typename MODEL>
-ObsRadiosondeTLAD<MODEL>::ObsRadiosondeTLAD(const ioda::ObsSpace & odb, const eckit::Configuration & config)
-  : keyOperRadiosonde_(0), varin_(), odb_(odb)
-{
-  const eckit::Configuration * configc = &config;
-  ufo_radiosonde_tlad_setup_f90(keyOperRadiosonde_, &configc);
-  const std::vector<std::string> vv{"virtual_temperature", "atmosphere_ln_pressure_coordinate"};
-  varin_.reset(new oops::Variables(vv));
-  oops::Log::trace() << "ObsRadiosondeTLAD created" << std::endl;
-}
-
-// -----------------------------------------------------------------------------
-template <typename MODEL>
-ObsRadiosondeTLAD<MODEL>::~ObsRadiosondeTLAD() {
-  ufo_radiosonde_tlad_delete_f90(keyOperRadiosonde_);
-  oops::Log::trace() << "ObsRadiosondeTLAD destructed" << std::endl;
-}
-
-// -----------------------------------------------------------------------------
-template <typename MODEL>
-void ObsRadiosondeTLAD<MODEL>::setTrajectory(const GeoVaLs & geovals, const ObsBias & bias) {
-  ufo_radiosonde_tlad_settraj_f90(keyOperRadiosonde_, geovals.toFortran(), odb_.toFortran());
-}
-
-// -----------------------------------------------------------------------------
-template <typename MODEL>
-void ObsRadiosondeTLAD<MODEL>::obsEquivTL(const GeoVaLs & geovals, ioda::ObsVector & ovec,
-                             const ObsBiasIncrement & bias) const {
-  ufo_radiosonde_tlad_t_eqv_tl_f90(keyOperRadiosonde_, geovals.toFortran(), odb_.toFortran(), ovec.toFortran());
-}
-
-// -----------------------------------------------------------------------------
-template <typename MODEL>
-void ObsRadiosondeTLAD<MODEL>::obsEquivAD(GeoVaLs & geovals, const ioda::ObsVector & ovec,
-                             ObsBiasIncrement & bias) const {
-  ufo_radiosonde_tlad_t_eqv_ad_f90(keyOperRadiosonde_, geovals.toFortran(), odb_.toFortran(), ovec.toFortran());
-}
-
-// -----------------------------------------------------------------------------
-template <typename MODEL>
-void ObsRadiosondeTLAD<MODEL>::print(std::ostream & os) const {
-  os << "ObsRadiosondeTLAD::print not implemented" << std::endl;
-}
 // -----------------------------------------------------------------------------
 
 }  // namespace ufo

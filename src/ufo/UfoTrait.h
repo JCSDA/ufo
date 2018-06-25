@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2017 UCAR
+ * (C) Copyright 2017-2018 UCAR
  * 
  * This software is licensed under the terms of the Apache Licence Version 2.0
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
@@ -10,15 +10,16 @@
 
 #include <string>
 
-
-#include "GeoVaLs.h"
 #include "ioda/Locations.h"
-#include "ObsBias.h"
-#include "ObsBiasIncrement.h"
 #include "ioda/ObsSpace.h"
 #include "ioda/ObsVector.h"
-#include "ObsCheck.h"
+#include "GeoVaLs.h"
+#include "ObsBias.h"
 #include "ObsBiasCovariance.h"
+#include "ObsBiasIncrement.h"
+#include "ObsCheck.h"
+#include "ObsOperator.h"
+#include "LinearObsOperator.h"
 
 namespace ufo {
 
@@ -29,6 +30,9 @@ struct UfoTrait {
   typedef ioda::Locations          Locations;
   typedef ioda::ObsSpace           ObsSpace;
   typedef ioda::ObsVector          ObsVector;
+
+  typedef ufo::ObsOperator         ObsOperator;
+  typedef ufo::LinearObsOperator   LinearObsOperator;
 
   typedef ufo::ObsBias             ObsAuxControl;
   typedef ufo::ObsBiasIncrement    ObsAuxIncrement;
