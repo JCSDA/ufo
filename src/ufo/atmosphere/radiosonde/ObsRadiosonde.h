@@ -15,7 +15,7 @@
 
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
-#include "ufo/FortranAtmosphere.h"
+#include "ufo/atmosphere/FortranAtmosphere.h"
 #include "ufo/ObsOperatorBase.h"
 
 namespace eckit {
@@ -23,7 +23,6 @@ namespace eckit {
 }
 
 namespace ioda {
-  class Locations;
   class ObsSpace;
   class ObsVector;
 }
@@ -31,7 +30,6 @@ namespace ioda {
 namespace ufo {
   class GeoVaLs;
   class ObsBias;
-  class ObsBiasIncrement;
 
 // -----------------------------------------------------------------------------
 

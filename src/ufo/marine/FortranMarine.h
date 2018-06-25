@@ -8,7 +8,7 @@
 #ifndef UFO_FORTRANMARINE_H_
 #define UFO_FORTRANMARINE_H_
 
-#include "Fortran.h"
+#include "ufo/Fortran.h"
 
 namespace ufo {
 
