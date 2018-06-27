@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2017 UCAR
+ * (C) Copyright 2017-2018 UCAR
  * 
  * This software is licensed under the terms of the Apache Licence Version 2.0
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
@@ -11,6 +11,7 @@
 #include "eckit/config/Configuration.h"
 #include "ioda/ObsSpace.h"
 #include "Fortran.h"
+#include "FortranObsCheck.h"
 #include "GeoVaLs.h"
 #include "ioda/ObsVector.h"
 #include "oops/util/Logger.h"

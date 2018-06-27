@@ -1,5 +1,5 @@
 !
-! (C) Copyright 2017 UCAR
+! (C) Copyright 2017-2018 UCAR
 ! 
 ! This software is licensed under the terms of the Apache Licence Version 2.0
 ! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
@@ -111,28 +111,34 @@ end subroutine ufo_geovals_delete
 
 ! ------------------------------------------------------------------------------
 
-logical function ufo_geovals_get_var(self, varname, geoval)
+subroutine ufo_geovals_get_var(self, varname, geoval, status)
 implicit none
 type(ufo_geovals), target, intent(in)    :: self
 character(MAXVARLEN), intent(in) :: varname
 type(ufo_geoval), pointer, intent(out)    :: geoval
+integer, optional, intent(out) :: status
 
-integer :: ivar
+integer :: ivar, status_
 
+status_ = 1
+geoval => NULL()
 if (.not. self%lalloc .or. .not. self%linit) then
-   !call abor1_ftn("ufo_geovals_get_var: geovals not allocated")
+   !return
 endif
 
 ivar = ufo_vars_getindex(self%variables, varname)
 
 if (ivar < 0) then
-  ufo_geovals_get_var = .false.
+   status_ = 2
 else
-  ufo_geovals_get_var = .true.
   geoval => self%geovals(ivar)
+  status_ = 0
 endif
 
-end function ufo_geovals_get_var
+if(present(status)) then
+  status=status_
+endif
+end subroutine ufo_geovals_get_var
 
 ! ------------------------------------------------------------------------------
 
@@ -375,6 +381,8 @@ end subroutine ufo_geovals_copy
 !! Currently implemented options for analytic_init include:
 !! * dcmip-test-1-1: 3D deformational flow
 !! * dcmip-test-1-2: 3D Hadley-like meridional circulation
+!! * dcmip-test-3-1: Non-orographic gravity waves on a small planet
+!! * dcmip-test-4-0: Baroclinic instability
 !!
 !! \warning Currently only temperature is implemented.  For variables other than
 !! temperature, the input GeoVaLs object is not changed.  This effectively
@@ -385,6 +393,7 @@ end subroutine ufo_geovals_copy
 !! temperature
 !!
 !! \date May, 2018: Created by M. Miesch (JCSDA)
+!! \date June, 2018: Added dcmip-test-4.0 (M. Miesch, JCSDA)
 !!
 !! \sa test::TestStateInterpolation()
 !!
@@ -393,6 +402,8 @@ subroutine ufo_geovals_analytic_init(self, locs, ic)
 use ioda_locs_mod, only : ioda_locs
 use dcmip_initial_conditions_test_1_2_3, only : test1_advection_deformation, &
                                   test1_advection_hadley, test3_gravity_wave  
+use dcmip_initial_conditions_test_4, only : test4_baroclinic_wave
+
 implicit none
 type(ufo_geovals), intent(inout) :: self
 type(ioda_locs), intent(in)      :: locs
@@ -428,7 +439,8 @@ do ivar = 1, self%nvar-1
 
          ! obtain height from the existing GeoVaLs object, which should be an
          ! output of the State::getValues() method
-         p0 = exp(self%geovals(ivar)%vals(ival,iloc))
+         ! convert from KPa (ufo standard) to Pa (dcmip standard)
+         p0 = exp(self%geovals(self%nvar)%vals(ival,iloc))*1.0e3_kind_real
 
          init_option: select case (trim(ic))
 
@@ -446,6 +458,11 @@ do ivar = 1, self%nvar-1
 
             call test3_gravity_wave(rlon,rlat,p0,kz,0,u0,v0,w0,&
                                         t0,phis0,ps0,rho0,hum0)
+
+         case ("dcmip-test-4-0")
+
+            call test4_baroclinic_wave(0,1.0_kind_real,rlon,rlat,p0,kz,0,u0,v0,w0,&
+                                        t0,phis0,ps0,rho0,hum0,q1,q2)
 
          case default
 
@@ -746,13 +763,12 @@ integer, intent(in) :: iobs
 
 type(ufo_geoval), pointer :: geoval
 character(MAXVARLEN) :: varname
-logical :: lfound
 integer :: ivar
 
 do ivar = 1, self%nvar
   varname = self%variables%fldnames(ivar)
-  lfound =  ufo_geovals_get_var(self, varname, geoval)
-  if (lfound) then
+  call ufo_geovals_get_var(self, varname, geoval)
+  if (associated(geoval)) then
     print *, 'geoval test: ', trim(varname), geoval%nval, geoval%vals(:,iobs)
   else
     print *, 'geoval test: ', trim(varname), ' doesnt exist'

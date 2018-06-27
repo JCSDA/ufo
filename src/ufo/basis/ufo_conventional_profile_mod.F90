@@ -1,4 +1,4 @@
-! (C) Copyright 2017 UCAR
+! (C) Copyright 2017-2018 UCAR
 ! 
 ! This software is licensed under the terms of the Apache Licence Version 2.0
 ! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
@@ -43,7 +43,7 @@ contains
       
       integer :: iobs
       real(kind_real) :: wf
-      integer :: wi
+      integer :: wi,ierr
       type(obs_vector) :: pressure
       type(ufo_geoval), pointer :: prsl, tv
       
@@ -54,15 +54,17 @@ contains
       endif
       
       ! check if prsl variable is in geovals and get it
-      if (.not. ufo_geovals_get_var(geovals, var_prsl, prsl)) then
-        write(err_msg,*) myname_, trim(var_prsl), ' doesnt exist'
-        call abor1_ftn(err_msg)
+      call ufo_geovals_get_var(geovals, var_prsl, prsl,status=ierr)
+      if (ierr/=0) then
+         write(err_msg,*) myname_, trim(var_prsl), ' doesnt exist'
+         call abor1_ftn(err_msg)
       endif
-      
+
       ! check if tv variable is in geovals and get it
-      if (.not. ufo_geovals_get_var(geovals, var_tv, tv)) then
-        write(err_msg,*) myname_, trim(var_tv), ' doesnt exist'
-        call abor1_ftn(err_msg)
+      call ufo_geovals_get_var(geovals, var_tv, tv,status=ierr)
+      if (ierr/=0) then
+         write(err_msg,*) myname_, trim(var_tv), ' doesnt exist'
+         call abor1_ftn(err_msg)
       endif
       
       ! observation of pressure (for vertical interpolation)

@@ -1,4 +1,4 @@
-! (C) Copyright 2017 UCAR
+! (C) Copyright 2017-2018 UCAR
 ! 
 ! This software is licensed under the terms of the Apache Licence Version 2.0
 ! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
@@ -87,22 +87,13 @@ contains
     integer :: nobs, nlev, iobs, ilev
     
     ! check if sea temperature profile variable is in geovals and get it
-    if (.not. ufo_geovals_get_var(geovals, var_ocn_pot_temp, temp)) then
-       write(err_msg,*) myname_, trim(var_ocn_pot_temp), ' doesnt exist'
-       call abor1_ftn(err_msg)
-    endif
+    call ufo_geovals_get_var(geovals, var_ocn_pot_temp, temp)
 
     ! check if sea salinity profile variable is in geovals and get it
-    if (.not. ufo_geovals_get_var(geovals, var_ocn_salt, salt)) then
-       write(err_msg,*) myname_, trim(var_ocn_salt), ' doesnt exist'
-       call abor1_ftn(err_msg)
-    endif
+    call ufo_geovals_get_var(geovals, var_ocn_salt, salt)
 
     ! check if ocean layer thickness variable is in geovals and get it
-    if (.not. ufo_geovals_get_var(geovals, var_ocn_lay_thick, h)) then
-       write(err_msg,*) myname_, trim(var_ocn_lay_thick), ' does not exist'
-       call abor1_ftn(err_msg)
-    endif
+    call ufo_geovals_get_var(geovals, var_ocn_lay_thick, h)
 
     call ufo_insitutemperature_tlad_delete(traj)
 
@@ -195,22 +186,13 @@ contains
     endif
 
     ! check if sea temperature profile variable is in geovals and get it
-    if (.not. ufo_geovals_get_var(geovals, var_ocn_pot_temp, temp_d)) then
-       write(err_msg,*) myname_, trim(var_ocn_pot_temp), ' doesnt exist'
-       call abor1_ftn(err_msg)
-    endif
+    call ufo_geovals_get_var(geovals, var_ocn_pot_temp, temp_d)
 
     ! check if sea salinity profile variable is in geovals and get it
-    if (.not. ufo_geovals_get_var(geovals, var_ocn_salt, salt_d)) then
-       write(err_msg,*) myname_, trim(var_ocn_salt), ' doesnt exist'
-       call abor1_ftn(err_msg)
-    endif
+    call ufo_geovals_get_var(geovals, var_ocn_salt, salt_d)
 
     ! check if sea layer thickness variable is in geovals get it and zero it out
-    if (.not. ufo_geovals_get_var(geovals, var_ocn_lay_thick, dlayerthick)) then
-       write(err_msg,*) myname_, trim(var_ocn_salt), ' doesnt exist'
-       call abor1_ftn(err_msg)
-    endif
+    call ufo_geovals_get_var(geovals, var_ocn_lay_thick, dlayerthick)
     ! Make sure thickness is not perturbed
     dlayerthick%vals=0.0
     
@@ -272,22 +254,13 @@ contains
     endif
 
     ! check if sea temperature profile variable is in geovals and get it
-    if (.not. ufo_geovals_get_var(geovals, var_ocn_pot_temp, dtemp)) then
-       write(err_msg,*) myname_, trim(var_ocn_pot_temp), ' doesnt exist'
-       call abor1_ftn(err_msg)
-    endif
+    call ufo_geovals_get_var(geovals, var_ocn_pot_temp, dtemp)
 
     ! check if sea salinity profile variable is in geovals and get it
-    if (.not. ufo_geovals_get_var(geovals, var_ocn_salt, dsalt)) then
-       write(err_msg,*) myname_, trim(var_ocn_salt), ' doesnt exist'
-       call abor1_ftn(err_msg)
-    endif
+    call ufo_geovals_get_var(geovals, var_ocn_salt, dsalt)
 
     ! check if sea layer thickness variable is in geovals get it and zero it out
-    if (.not. ufo_geovals_get_var(geovals, var_ocn_lay_thick, dlayerthick)) then
-       write(err_msg,*) myname_, trim(var_ocn_salt), ' doesnt exist'
-       call abor1_ftn(err_msg)
-    endif
+    call ufo_geovals_get_var(geovals, var_ocn_lay_thick, dlayerthick)
     
     nlev = traj%nval
     nobs = traj%nobs

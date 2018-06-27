@@ -1,4 +1,4 @@
-!a(C) Copyright 2017 UCAR
+!a(C) Copyright 2017-2018 UCAR
 ! 
 ! This software is licensed under the terms of the Apache Licence Version 2.0
 ! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
@@ -56,10 +56,7 @@ endif
 
 varname = "some_variable_name"
 ! check if some variable is in geovals and get it
-if (.not. ufo_geovals_get_var(geovals, varname, geoval)) then
-  write(err_msg,*) myname_, trim(varname), ' doesnt exist'
-  call abor1_ftn(err_msg)
-endif
+call ufo_geovals_get_var(geovals, varname, geoval)
 
 ! get some metadata from obsspace
 varname = "SomeMetadata"

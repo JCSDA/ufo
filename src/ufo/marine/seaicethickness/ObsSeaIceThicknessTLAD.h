@@ -14,10 +14,9 @@
 #include <boost/scoped_ptr.hpp>
 
 #include "oops/base/Variables.h"
-#include "oops/interface/LinearObsOperBase.h"
-#include "ioda/ObsSpace.h"
+#include "ufo/LinearObsOperatorBase.h"
 #include "oops/util/ObjectCounter.h"
-#include "oops/util/Logger.h"
+#include "ufo/marine/FortranMarine.h"
 
 // Forward declarations
 namespace util {
@@ -26,6 +25,7 @@ namespace util {
 
 namespace ioda {
   class ObsVector;
+  class ObsSpace;
 }
 
 namespace ufo {
@@ -35,9 +35,8 @@ namespace ufo {
 
 // -----------------------------------------------------------------------------
 /// Sea-ice fraction observation for  model.
-template <typename MODEL>
-class ObsSeaIceThicknessTLAD : public oops::LinearObsOperBase<MODEL>, 
-                              private util::ObjectCounter<ObsSeaIceThicknessTLAD<MODEL>> {
+class ObsSeaIceThicknessTLAD : public LinearObsOperatorBase, 
+                               private util::ObjectCounter<ObsSeaIceThicknessTLAD> {
 public:
   static const std::string classname() {return "ufo::ObsSeaIceThicknessTLAD";}
 
@@ -46,8 +45,8 @@ public:
 
   // Obs Operators
   void setTrajectory(const GeoVaLs &, const ObsBias &);
-  void obsEquivTL(const GeoVaLs &, ioda::ObsVector &, const ObsBiasIncrement &) const;
-  void obsEquivAD(GeoVaLs &, const ioda::ObsVector &, ObsBiasIncrement &) const;
+  void simulateObsTL(const GeoVaLs &, ioda::ObsVector &, const ObsBiasIncrement &) const;
+  void simulateObsAD(GeoVaLs &, const ioda::ObsVector &, ObsBiasIncrement &) const;
 
   // Other
   const oops::Variables & variables() const {return *varin_;}
@@ -61,50 +60,6 @@ private:
   boost::scoped_ptr<const oops::Variables> varin_;
 };
 
-// -----------------------------------------------------------------------------
-template <typename MODEL>
-ObsSeaIceThicknessTLAD<MODEL>::ObsSeaIceThicknessTLAD(const ioda::ObsSpace & odb, const eckit::Configuration & config)
-  : keyOperSeaIceThickness_(0), varin_()
-{
-  const eckit::Configuration * configc = &config;
-  ufo_seaicethick_tlad_setup_f90(keyOperSeaIceThickness_, &configc);
-  const std::vector<std::string> vv{"ice_concentration", "ice_thickness"};
-  varin_.reset(new oops::Variables(vv));
-  oops::Log::trace() << "ObsSeaIceThicknessTLAD created" << std::endl;
-}
-
-// -----------------------------------------------------------------------------
-template <typename MODEL>
-ObsSeaIceThicknessTLAD<MODEL>::~ObsSeaIceThicknessTLAD() {
-  ufo_seaicethick_tlad_delete_f90(keyOperSeaIceThickness_);
-  oops::Log::trace() << "ObsSeaIceThicknessTLAD destrcuted" << std::endl;
-}
-
-// -----------------------------------------------------------------------------
-template <typename MODEL>
-void ObsSeaIceThicknessTLAD<MODEL>::setTrajectory(const GeoVaLs & geovals, const ObsBias & bias) {
-  ufo_seaicethick_tlad_settraj_f90(keyOperSeaIceThickness_, geovals.toFortran());
-}
-
-// -----------------------------------------------------------------------------
-template <typename MODEL>
-void ObsSeaIceThicknessTLAD<MODEL>::obsEquivTL(const GeoVaLs & geovals, ioda::ObsVector & ovec,
-                               const ObsBiasIncrement & bias) const {
-  ufo_seaicethick_tlad_eqv_tl_f90(keyOperSeaIceThickness_, geovals.toFortran(), ovec.toFortran());
-}
-
-// -----------------------------------------------------------------------------
-template <typename MODEL>
-void ObsSeaIceThicknessTLAD<MODEL>::obsEquivAD(GeoVaLs & geovals, const ioda::ObsVector & ovec,
-                               ObsBiasIncrement & bias) const {
-  ufo_seaicethick_tlad_eqv_ad_f90(keyOperSeaIceThickness_, geovals.toFortran(), ovec.toFortran());
-}
-
-// -----------------------------------------------------------------------------
-template <typename MODEL>
-void ObsSeaIceThicknessTLAD<MODEL>::print(std::ostream & os) const {
-  os << "ObsSeaIceThicknessTLAD::print not implemented" << std::endl;
-}
 // -----------------------------------------------------------------------------
 
 }  // namespace ufo

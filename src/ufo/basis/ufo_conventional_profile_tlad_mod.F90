@@ -1,4 +1,4 @@
-! (C) Copyright 2017 UCAR
+! (C) Copyright 2017-2018 UCAR
 ! 
 ! This software is licensed under the terms of the Apache Licence Version 2.0
 ! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
@@ -44,10 +44,11 @@ contains
       
       type(obs_vector) :: pressure
       type(ufo_geoval), pointer :: prsl
-      integer :: iobs
+      integer :: iobs, ierr
       
       !Check if conventional_profiles in geovals and get it
-      if (.not. ufo_geovals_get_var(geovals, var_prsl, prsl)) then
+      call ufo_geovals_get_var(geovals, var_prsl, prsl, status=ierr)
+      if (ierr/=0) then
         write(err_msg,*) myname_, trim(var_prsl), ' doesnt exist'
         call abor1_ftn(err_msg)
       endif
@@ -56,18 +57,18 @@ contains
       call self%delete()
       
       !Keep copy of dimensions
-      self%nobs = prsl%nobs
       self%nval = prsl%nval
+      self%nobs = obss%nobs
       
-      allocate(self%wi(self%nobs))
-      allocate(self%wf(self%nobs))
+      allocate(self%wi(obss%nobs))
+      allocate(self%wf(obss%nobs))
       
       ! observation of pressure (for vertical interpolation)
       call ioda_obsvec_setup(pressure, obss%nobs)
       call ioda_obsdb_var_to_ovec(obss, pressure, "Pressure")
       
       ! compute interpolation weights
-      do iobs = 1, self%nobs
+      do iobs = 1, obss%nobs
         call vert_interp_weights(self%nval,log(pressure%values(iobs)/10.),prsl%vals(:,iobs),self%wi(iobs),self%wf(iobs))
       enddo
       
@@ -89,7 +90,7 @@ contains
       character(len=*), parameter :: myname_="ufo_conventional_profile_tlad_t_eqv_tl"
       character(max_string) :: err_msg
       
-      integer :: iobs
+      integer :: iobs,ierr
       type(ufo_geoval), pointer :: tv_d
       
       ! check if trajectory was set
@@ -105,7 +106,8 @@ contains
       endif
       
       ! check if tv variable is in geovals and get it
-      if (.not. ufo_geovals_get_var(geovals, var_tv, tv_d)) then
+      call ufo_geovals_get_var(geovals, var_tv, tv_d, status=ierr )
+      if (ierr/=0) then
         write(err_msg,*) myname_, trim(var_tv), ' doesnt exist'
         call abor1_ftn(err_msg)
       endif
@@ -129,7 +131,7 @@ contains
       character(len=*), parameter :: myname_="ufo_conventional_profile_tlad_t_eqv_ad"
       character(max_string) :: err_msg
       
-      integer :: iobs
+      integer :: iobs,ierr
       type(ufo_geoval), pointer :: tv_d, prsl_d
       
       ! check if trajectory was set
@@ -145,33 +147,34 @@ contains
       endif
       
       ! check if tv variable is in geovals and get it
-      if (.not. ufo_geovals_get_var(geovals, var_prsl, prsl_d)) then
+      call ufo_geovals_get_var(geovals, var_prsl, prsl_d, status=ierr)
+      if (ierr/=0) then
         write(err_msg,*) myname_, trim(var_prsl), ' doesnt exist'
         call abor1_ftn(err_msg)
       endif
       
       ! check if tv variable is in geovals and get it
-      if (.not. ufo_geovals_get_var(geovals, var_tv, tv_d)) then
+      call ufo_geovals_get_var(geovals, var_tv, tv_d, status=ierr)
+      if (ierr/=0) then
         write(err_msg,*) myname_, trim(var_tv), ' doesnt exist'
         call abor1_ftn(err_msg)
       endif
-      
-      ! allocate if not yet allocated
+     
+      ! allocate if not yet allocated	
       if (.not. allocated(tv_d%vals)) then
          tv_d%nobs = self%nobs
          tv_d%nval = self%nval
          allocate(tv_d%vals(tv_d%nval,tv_d%nobs))
+         tv_d%vals = 0.0_kind_real
       endif
       if (.not. allocated(prsl_d%vals)) then
          prsl_d%nobs = self%nobs
          prsl_d%nval = self%nval
          allocate(prsl_d%vals(prsl_d%nval,prsl_d%nobs))
+         prsl_d%vals = 0.0_kind_real
       endif
       if (.not. geovals%linit ) geovals%linit=.true.
-      
-      ! adjoint obs operator
-      tv_d%vals = 0.0_kind_real
-      prsl_d%vals = 0.0_kind_real
+ 
       do iobs = 1, hofx%nobs
         call vert_interp_apply_ad(tv_d%nval, tv_d%vals(:,iobs), hofx%values(iobs), self%wi(iobs), self%wf(iobs))
       enddo
@@ -187,7 +190,6 @@ contains
       character(len=*), parameter :: myname_="ufo_conventional_profile_tlad_delete"
       
       self%nval = 0
-      self%nobs = 0
       if (allocated(self%wi)) deallocate(self%wi)
       if (allocated(self%wf)) deallocate(self%wf)
       self%ltraj = .false.

@@ -1,4 +1,4 @@
-! (C) Copyright 2017 UCAR
+! (C) Copyright 2017-2018 UCAR
 ! 
 ! This software is licensed under the terms of the Apache Licence Version 2.0
 ! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
@@ -52,10 +52,7 @@ if (geovals%nobs /= hofx%nobs) then
 endif
 
 ! check if sea ice fraction variables is in geovals and get it
-if (.not. ufo_geovals_get_var(geovals, var_seaicefrac, geoval)) then
-  write(err_msg,*) myname_, trim(var_seaicefrac), ' doesnt exist'
-  call abor1_ftn(err_msg)
-endif
+call ufo_geovals_get_var(geovals, var_seaicefrac, geoval)
 
 ! total sea ice fraction obs operator
 do iobs = 1, hofx%nobs

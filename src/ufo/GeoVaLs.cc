@@ -1,8 +1,8 @@
 /*
- * (C) Copyright 2017 UCAR
+ * (C) Copyright 2017-2018 UCAR
  * 
  * This software is licensed under the terms of the Apache Licence Version 2.0
- * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
 #include "GeoVaLs.h"
@@ -11,6 +11,7 @@
 #include "eckit/config/Configuration.h"
 #include "ioda/Locations.h"
 #include "Fortran.h"
+#include "FortranGeoVals.h"
 #include "oops/util/Logger.h"
 
 namespace ufo {
@@ -59,16 +60,16 @@ GeoVaLs::GeoVaLs(const ioda::Locations & locs, const oops::Variables & vars,
   oops::Log::trace() << "GeoVaLs contructor config key = " << keyGVL_ << std::endl;
 }
 // -----------------------------------------------------------------------------
-/*! \brief GomQG Copy constructor with locs and config
+/*! \brief Copy constructor with locs and config
  *
  * \details This ufo::GeoVaLs constructor was introduced in May, 2018 for use with
- * the interpolation test.   If "analytic_init" is not specified in the 
+ * the interpolation test.   If "analytic_init" is not specified in the
  * configuration then this defaults to a copy constructor.  If "analytic_init"
  * **is** specified, then the values are replaced by values computed directly
  * from one of several idealized analytic states.
  *
  */
-GeoVaLs::GeoVaLs(const GeoVaLs & other, const ioda::Locations & locs, 
+GeoVaLs::GeoVaLs(const GeoVaLs & other, const ioda::Locations & locs,
 		 const eckit::Configuration & config)
  : keyGVL_(-1), vars_(other.vars_)
 {
@@ -78,7 +79,7 @@ GeoVaLs::GeoVaLs(const GeoVaLs & other, const ioda::Locations & locs,
   ufo_geovals_copy_f90(other.keyGVL_, keyGVL_);
 
   const eckit::Configuration * conf = &config;
-  if (config.has("analytic_init")) { 
+  if (config.has("analytic_init")) {
       ufo_geovals_analytic_init_f90(keyGVL_, locs.toFortran(), &conf);
     }
 
@@ -131,7 +132,7 @@ GeoVaLs & GeoVaLs::operator-=(const GeoVaLs & other) {
 /*! GeoVaLs normalization
  *
  * \details This operator is used to normalize each element of the input GeoVaLs
- * object (LHS) with the rms values of each variable on the RHS, across all 
+ * object (LHS) with the rms values of each variable on the RHS, across all
  * locations
  */
 GeoVaLs & GeoVaLs::operator/=(const GeoVaLs & other) {
@@ -149,18 +150,18 @@ void GeoVaLs::print(std::ostream & os) const {
   int nn;
   double zmin, zmax, zrms;
   ufo_geovals_minmaxavg_f90(keyGVL_, nn, zmin, zmax, zrms);
-  os << "GeoVaLs: nobs= " << nn << " Min=" << zmin << ", Max=" << zmax 
+  os << "GeoVaLs: nobs= " << nn << " Min=" << zmin << ", Max=" << zmax
      << ", RMS=" << zrms << std::endl;
 
   /*! Verbose print statement (debug mode)
    *
    * \detail If the min value across all variables is positive, then this may be
-   * an error measurement.  If so, compute the rms over the vertical profile and 
-   * tell the user where the maximum rms value occurs, in terms of the 
-   * observation number and the variable number.  This is intended to help 
+   * an error measurement.  If so, compute the rms over the vertical profile and
+   * tell the user where the maximum rms value occurs, in terms of the
+   * observation number and the variable number.  This is intended to help
    * with debugging.
-   */ 
-  
+   */
+
   if (zmin >= 0.0) {
     double mxval;
     int ivar,iobs;
@@ -170,9 +171,9 @@ void GeoVaLs::print(std::ostream & os) const {
     oops::Log::debug() << "GeoVaLs: Maximum Value (vertical rms) = "
 		       << std::setprecision(4)
 		       << mxval << " for observation = " << iobs
-		       << " and variable = " << ivar << std::endl;          
-    
-  }  
+		       << " and variable = " << ivar << std::endl;
+
+  }
 
 }
 // -----------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-! (C) Copyright 2017 UCAR
+! (C) Copyright 2017-2018 UCAR
 ! 
 ! This software is licensed under the terms of the Apache Licence Version 2.0
 ! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
@@ -72,10 +72,7 @@ type(ufo_geoval), pointer :: geoval
 
 !Check if some variable is in geovals and get it
 varname = "some_variable_name"
-if (.not. ufo_geovals_get_var(geovals, varname, geoval)) then
-  write(err_msg,*) myname_, trim(varname), ' doesnt exist'
-  call abor1_ftn(err_msg)
-endif
+call ufo_geovals_get_var(geovals, varname, geoval)
 
 !Copy the variable to the ufo_example_tlad type (save for future tl/ad)
 self%gv = geoval

@@ -1,4 +1,4 @@
-! (C) Copyright 2017 UCAR
+! (C) Copyright 2017-2018 UCAR
 ! 
 ! This software is licensed under the terms of the Apache Licence Version 2.0
 ! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
@@ -69,22 +69,13 @@ contains
     endif
 
     ! check if sea temperature profile variable is in geovals and get it
-    if (.not. ufo_geovals_get_var(geovals, var_ocn_pot_temp, temp)) then
-       write(err_msg,*) myname_, trim(var_ocn_pot_temp), ' does not exist'
-       call abor1_ftn(err_msg)
-    endif
+    call ufo_geovals_get_var(geovals, var_ocn_pot_temp, temp)
 
     ! check if sea salinity profile variable is in geovals and get it
-    if (.not. ufo_geovals_get_var(geovals, var_ocn_salt, salt)) then
-       write(err_msg,*) myname_, trim(var_ocn_salt), ' does not exist'
-       call abor1_ftn(err_msg)
-    endif
+    call ufo_geovals_get_var(geovals, var_ocn_salt, salt)
 
     ! check if ocean layer thickness variable is in geovals and get it
-    if (.not. ufo_geovals_get_var(geovals, var_ocn_lay_thick, h)) then
-       write(err_msg,*) myname_, trim(var_ocn_lay_thick), ' does not exist'
-       call abor1_ftn(err_msg)
-    endif
+    call ufo_geovals_get_var(geovals, var_ocn_lay_thick, h)
 
     nlev = temp%nval
     nobs = temp%nobs        
