@@ -121,19 +121,11 @@ contains
     ! ============================================================================
 
     type(ufo_geoval), pointer :: geoval
-<<<<<<< variant A
-    character(MAXVARLEN)      :: varname
-    logical                   :: lfound
-    integer                   :: ivar, nobs, nlocs
-    real(fp)                  :: rmse
-    real(fp), allocatable     :: diff(:,:)
->>>>>>> variant B
     character(MAXVARLEN) :: varname
     integer              :: ivar
 
     integer              :: nobs
     integer              :: nlocs
-======= end
 
     !** Refer Radiance to obss 
     Radiance => obss
@@ -222,13 +214,8 @@ contains
           STOP
        END IF
 
-<<<<<<< variant A
        call CRTM_Surface_Create(sfc, n_Channels)
-       if ( ANY(.NOT. CRTM_Surface_Associated(sfc)) ) THEN
->>>>>>> variant B
-       call CRTM_Surface_Create(sfc, n_channels)
        IF ( ANY(.NOT. CRTM_Surface_Associated(sfc)) ) THEN
-======= end
           message = 'Error allocating CRTM Surface structure'
           CALL Display_Message( PROGRAM_NAME, message, FAILURE )
           STOP
