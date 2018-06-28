@@ -18,7 +18,7 @@
 #include "ioda/ObsSpace.h"
 #include "oops/util/ObjectCounter.h"
 #include "oops/util/Logger.h"
-#include "ufo/FortranMarine.h"
+#include "ufo/marine/FortranMarine.h"
 
 // Forward declarations
 namespace util {

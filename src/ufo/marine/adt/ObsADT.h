@@ -23,7 +23,7 @@
 #include "ufo/ObsBiasIncrement.h"
 #include "ioda/ObsVector.h"
 #include "oops/util/ObjectCounter.h"
-#include "ufo/FortranMarine.h"
+#include "ufo/marine/FortranMarine.h"
 
 namespace ufo {
 
