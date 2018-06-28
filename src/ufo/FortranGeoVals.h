@@ -20,9 +20,6 @@ namespace ufo {
 
 extern "C" {
 
-// -----------------------------------------------------------------------------
-//  Local Values (GOM)
-// -----------------------------------------------------------------------------
   void ufo_geovals_setup_f90(F90goms &, const F90locs &, const eckit::Configuration * const *);
   void ufo_geovals_create_f90(F90goms &);
   void ufo_geovals_delete_f90(F90goms &);
@@ -46,15 +43,6 @@ extern "C" {
                                  const eckit::Configuration * const *);
   void ufo_geovals_write_file_f90(const F90goms &, const eckit::Configuration * const *);
 
-// -----------------------------------------------------------------------------
-//  Check Observations
-// -----------------------------------------------------------------------------
-  void ufo_obscheck_setup_f90(F90ocheck &, const eckit::Configuration * const *);
-  void ufo_obscheck_delete_f90(F90ocheck &);
-  void ufo_postFilter_f90(const F90goms &, const F90ovec &, const F90odb &);
-  void ufo_priorFilter_f90(const F90odb &);
-
-// -----------------------------------------------------------------------------
 
 }  // extern C
 

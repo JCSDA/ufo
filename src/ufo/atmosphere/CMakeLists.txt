@@ -3,18 +3,19 @@
 # This software is licensed under the terms of the Apache Licence Version 2.0
 # which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 
-add_subdirectory( utils )
+list( APPEND atmosphere_src_files
+    FortranAtmosphere.h
+)
+
 add_subdirectory( radiosonde )
 add_subdirectory( radiance )
 add_subdirectory( aircraft )
 
-PREPEND( _p_utils_files       "atmosphere/utils"       ${utils_files} )
 PREPEND( _p_radiosonde_files  "atmosphere/radiosonde"  ${radiosonde_files} )
 PREPEND( _p_radiance_files    "atmosphere/radiance"    ${radiance_files} )
 PREPEND( _p_aircraft_files    "atmosphere/aircraft"    ${aircraft_files} )
 
 set ( atmosphere_src_files
-    ${_p_utils_files}
     ${_p_radiosonde_files}
     ${_p_radiance_files}
     ${_p_aircraft_files}

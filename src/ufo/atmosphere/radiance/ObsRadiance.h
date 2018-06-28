@@ -13,21 +13,23 @@
 
 #include <boost/scoped_ptr.hpp>
 
-#include "eckit/config/Configuration.h"
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
-#include "ufo/FortranAtmosphere.h"
+#include "ufo/atmosphere/FortranAtmosphere.h"
 #include "ufo/ObsOperatorBase.h"
 
+namespace eckit {
+  class Configuration;
+}
+
 namespace ioda {
-class ObsSpace;
-class ObsVector;
+  class ObsSpace;
+  class ObsVector;
 }
 
 namespace ufo {
-class GeoVaLs;
-class ObsBias;
-class ObsBiasIncrement;
+  class GeoVaLs;
+  class ObsBias;
 
 // -----------------------------------------------------------------------------
 /// Radiance observation for UFO.

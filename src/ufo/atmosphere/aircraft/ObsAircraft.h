@@ -15,7 +15,7 @@
 
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
-#include "ufo/FortranAtmosphere.h"
+#include "ufo/atmosphere/FortranAtmosphere.h"
 #include "ufo/ObsOperatorBase.h"
 
 namespace eckit {
@@ -30,7 +30,6 @@ class ObsVector;
 namespace ufo {
 class GeoVaLs;
 class ObsBias;
-class ObsBiasIncrement;
 
 // -----------------------------------------------------------------------------
 /// Aircraft (currently only temperature) observation for UFO.

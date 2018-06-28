@@ -13,18 +13,23 @@
 
 #include <boost/scoped_ptr.hpp>
 
-#include "eckit/config/Configuration.h"
 #include "oops/base/Variables.h"
 #include "ufo/ObsOperatorBase.h"
-#include "ioda/ObsSpace.h"
-#include "ufo/FortranMarine.h"
-#include "ufo/GeoVaLs.h"
-#include "ufo/ObsBias.h"
-#include "ufo/ObsBiasIncrement.h"
-#include "ioda/ObsVector.h"
+#include "ufo/marine/FortranMarine.h"
 #include "oops/util/ObjectCounter.h"
 
+namespace eckit {
+  class Configuration;
+}
+
+namespace ioda {
+  class ObsSpace;
+  class ObsVector;
+}
+
 namespace ufo {
+  class GeoVaLs;
+  class ObsBias;
 
 // -----------------------------------------------------------------------------
 /// Total ice concentration observation for UFO.
