@@ -1,28 +1,33 @@
+# (C) Copyright 2017-2018 UCAR.
+#
+# This software is licensed under the terms of the Apache Licence Version 2.0
+# which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+
 list( APPEND ufo_src_files
     Fortran.h
     FortranGeoVals.h
     FortranObsCheck.h
-    FortranAtmosphere.h
-    FortranConstituents.h
     GeoVaLs.cc
     GeoVaLs.h
+    LinearObsOperator.cc
+    LinearObsOperator.h
+    LinearObsOperatorBase.cc
+    LinearObsOperatorBase.h
     ObsBias.h
     ObsBiasCovariance.h
     ObsBiasIncrement.h
     ObsCheck.cc
     ObsCheck.h
+    ObsOperator.cc
+    ObsOperator.h
+    ObsOperatorBase.cc
+    ObsOperatorBase.h
     UfoTrait.h
-    instantiateObsOperatorFactory.h
-    instantiateLinearObsOpFactory.h
     ufo_obscheck_mod.F90
     GeoVaLs.interface.F90
     ufo_geovals_mod.F90
     ufo_variables_mod.F90
 )
-
-if( ${GSW_FOUND} )
-    list( APPEND ufo_src_files FortranMarine.h )
-endif( ${GSW_FOUND} )
 
 # macro to prepend a prefix with relative path
 # can this be added to ecbuild for use elsewhere?
@@ -34,6 +39,7 @@ function(PREPEND var prefix )
     set ( ${var} "${listVar}" PARENT_SCOPE )
 endfunction(PREPEND)
 
+add_subdirectory( utils )
 add_subdirectory( basis )
 add_subdirectory( atmosphere )
 add_subdirectory( constituents )
@@ -42,6 +48,7 @@ if( ${GSW_FOUND} )
 endif( ${GSW_FOUND} )
 
 list( APPEND ufo_src_files
+    ${utils_src_files}
     ${basis_src_files}
     ${atmosphere_src_files}
     ${constituents_src_files}
