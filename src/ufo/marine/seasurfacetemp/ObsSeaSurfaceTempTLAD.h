@@ -14,7 +14,7 @@
 #include <boost/scoped_ptr.hpp>
 
 #include "oops/base/Variables.h"
-#include "oops/interface/LinearObsOperBase.h"
+#include "ufo/LinearObsOperatorBase.h"
 #include "ioda/ObsSpace.h"
 #include "oops/util/ObjectCounter.h"
 #include "oops/util/Logger.h"
@@ -35,10 +35,9 @@ namespace ufo {
   class ObsBiasIncrement;
 
 // -----------------------------------------------------------------------------
-/// Sea-ice fraction observation for  model.
-template <typename MODEL>
-class ObsSeaSurfaceTempTLAD : public oops::LinearObsOperBase<MODEL>, 
-                              private util::ObjectCounter<ObsSeaSurfaceTempTLAD<MODEL>> {
+
+class ObsSeaSurfaceTempTLAD : public LinearObsOperatorBase, 
+                              private util::ObjectCounter<ObsSeaSurfaceTempTLAD> {
 public:
   static const std::string classname() {return "ufo::ObsSeaSurfaceTempTLAD";}
 
@@ -47,8 +46,8 @@ public:
 
   // Obs Operators
   void setTrajectory(const GeoVaLs &, const ObsBias &);
-  void obsEquivTL(const GeoVaLs &, ioda::ObsVector &, const ObsBiasIncrement &) const;
-  void obsEquivAD(GeoVaLs &, const ioda::ObsVector &, ObsBiasIncrement &) const;
+  void simulateObsTL(const GeoVaLs &, ioda::ObsVector &, const ObsBiasIncrement &) const;
+  void simulateObsAD(GeoVaLs &, const ioda::ObsVector &, ObsBiasIncrement &) const;
 
   // Other
   const oops::Variables & variables() const {return *varin_;}
@@ -59,11 +58,12 @@ public:
 private:
   void print(std::ostream &) const;
   F90hop keyOperSeaSurfaceTemp_;
+  const ioda::ObsSpace& odb_;    
   boost::scoped_ptr<const oops::Variables> varin_;
 };
 
 // -----------------------------------------------------------------------------
-template <typename MODEL>
+/*template <typename MODEL>
   ObsSeaSurfaceTempTLAD<MODEL>::ObsSeaSurfaceTempTLAD(const ioda::ObsSpace & odb, const eckit::Configuration & config)
   : keyOperSeaSurfaceTemp_(0), varin_()
 {
@@ -107,6 +107,6 @@ void ObsSeaSurfaceTempTLAD<MODEL>::print(std::ostream & os) const {
   os << "ObsSeaSurfaceTempTLAD::print not implemented" << std::endl;
 }
 // -----------------------------------------------------------------------------
-
+*/
 }  // namespace ufo
 #endif  // UFO_OBSSEASURFACETEMPTLAD_H_

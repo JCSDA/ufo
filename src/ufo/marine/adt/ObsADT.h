@@ -15,7 +15,7 @@
 
 #include "eckit/config/Configuration.h"
 #include "oops/base/Variables.h"
-#include "oops/interface/ObsOperatorBase.h"
+#include "ufo/ObsOperatorBase.h"
 #include "ioda/ObsSpace.h"
 #include "ufo/GeoVaLs.h"
 #include "ioda/Locations.h"
@@ -29,9 +29,8 @@ namespace ufo {
 
 // -----------------------------------------------------------------------------
 /// adt observation for UFO.
-template <typename MODEL>
-class ObsADT : public oops::ObsOperatorBase<MODEL>,
-                  private util::ObjectCounter<ObsADT<MODEL>> {
+class ObsADT : public ObsOperatorBase,
+               private util::ObjectCounter<ObsADT> {		    
  public:
   static const std::string classname() {return "ufo::ObsADT";}
 
@@ -39,7 +38,7 @@ class ObsADT : public oops::ObsOperatorBase<MODEL>,
   virtual ~ObsADT();
 
 // Obs Operator
-  void obsEquiv(const GeoVaLs &, ioda::ObsVector &, const ObsBias &) const;
+  void simulateObs(const GeoVaLs &, ioda::ObsVector &, const ObsBias &) const;
 
 // Other
   const oops::Variables & variables() const {return *varin_;}
@@ -53,38 +52,6 @@ class ObsADT : public oops::ObsOperatorBase<MODEL>,
   const ioda::ObsSpace& odb_;
   boost::scoped_ptr<const oops::Variables> varin_;
 };
-
-// -----------------------------------------------------------------------------
-template <typename MODEL>
-  ObsADT<MODEL>::ObsADT(const ioda::ObsSpace & odb, const eckit::Configuration & config)
-  : keyOperADT_(0), varin_(), odb_(odb)
-{
-  const eckit::Configuration * configc = &config;
-  ufo_adt_setup_f90(keyOperADT_, &configc);
-  const std::vector<std::string> vv{"sea_surface_height_above_geoid"};
-  varin_.reset(new oops::Variables(vv));
-  oops::Log::trace() << "ObsADT created." << std::endl;
-}
-
-// -----------------------------------------------------------------------------
-template <typename MODEL>
-ObsADT<MODEL>::~ObsADT() {
-  ufo_adt_delete_f90(keyOperADT_);
-  oops::Log::trace() << "ObsADT destructed" << std::endl;
-}
-
-// -----------------------------------------------------------------------------
-template <typename MODEL>
-  void ObsADT<MODEL>::obsEquiv(const GeoVaLs & gom, ioda::ObsVector & ovec,
-                             const ObsBias & bias) const {
-  ufo_adt_eqv_f90(keyOperADT_, gom.toFortran(), odb_.toFortran(), ovec.toFortran(), bias.toFortran());
-}
-
-// -----------------------------------------------------------------------------
-template <typename MODEL>
-void ObsADT<MODEL>::print(std::ostream & os) const {
-  os << "ObsADT::print not implemented";
-}
 
 // -----------------------------------------------------------------------------
 
