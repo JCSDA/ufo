@@ -232,6 +232,7 @@ if (.not. self%linit) then
 endif
 do ivar = 1, self%nvar
   call random_vector(self%geovals(ivar)%vals)
+  self%geovals(ivar)%vals(:,:) = 0.00000001 * abs(self%geovals(ivar)%vals(:,:))
 enddo
 
 end subroutine ufo_geovals_random

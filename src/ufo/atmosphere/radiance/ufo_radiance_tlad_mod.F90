@@ -547,9 +547,73 @@ contains
       self%nchannels = n_Channels
       call ufo_geovals_init(self%crtm_K)
       call ufo_geovals_setup(self%crtm_K, geovals%variables, n_Profiles*n_Channels) !** setup jacobian structure using geovals structure.
+
+            !** atmosphere
+            ivar = ufo_vars_getindex(geovals%variables, var_tv  )
+            self%crtm_K%geovals(ivar)%nval = n_Layers
+            ivar = ufo_vars_getindex(geovals%variables, var_prs )
+            self%crtm_K%geovals(ivar)%nval = n_Layers
+            ivar = ufo_vars_getindex(geovals%variables, var_prsi)
+            self%crtm_K%geovals(ivar)%nval = n_Layers+1
+            ivar = ufo_vars_getindex(geovals%variables, var_mixr)
+            self%crtm_K%geovals(ivar)%nval = n_Layers
+            ivar = ufo_vars_getindex(geovals%variables, var_oz  )
+            self%crtm_K%geovals(ivar)%nval = n_Layers
+            ivar = ufo_vars_getindex(geovals%variables, var_co2 )
+            self%crtm_K%geovals(ivar)%nval = n_Layers
+
+            !** cloud 1 
+            ivar = ufo_vars_getindex(geovals%variables, var_clw )
+            self%crtm_K%geovals(ivar)%nval = n_Layers
+            ivar = ufo_vars_getindex(geovals%variables, var_clwefr)
+            self%crtm_K%geovals(ivar)%nval = n_Layers
+
+            !** cloud 2
+            ivar = ufo_vars_getindex(geovals%variables, var_cli )
+            self%crtm_K%geovals(ivar)%nval = n_Layers
+            ivar = ufo_vars_getindex(geovals%variables, var_cliefr)
+            self%crtm_K%geovals(ivar)%nval = n_Layers
+
+            !** surface
+            ivar = ufo_vars_getindex(geovals%variables, var_sfc_wspeed )
+            self%crtm_K%geovals(ivar)%nval = 1
+            ivar = ufo_vars_getindex(geovals%variables, var_sfc_wdir   )
+            self%crtm_K%geovals(ivar)%nval = 1
+            ivar = ufo_vars_getindex(geovals%variables, var_sfc_wfrac  )
+            self%crtm_K%geovals(ivar)%nval = 1
+            ivar = ufo_vars_getindex(geovals%variables, var_sfc_wtmp   )
+            self%crtm_K%geovals(ivar)%nval = 1
+            ivar = ufo_vars_getindex(geovals%variables, var_sfc_ifrac  )
+            self%crtm_K%geovals(ivar)%nval = 1
+            ivar = ufo_vars_getindex(geovals%variables, var_sfc_itmp   )
+            self%crtm_K%geovals(ivar)%nval = 1
+            ivar = ufo_vars_getindex(geovals%variables, var_sfc_sfrac  )
+            self%crtm_K%geovals(ivar)%nval = 1
+            ivar = ufo_vars_getindex(geovals%variables, var_sfc_stmp   )
+            self%crtm_K%geovals(ivar)%nval = 1
+            ivar = ufo_vars_getindex(geovals%variables, var_sfc_sdepth )
+            self%crtm_K%geovals(ivar)%nval = 1
+            ivar = ufo_vars_getindex(geovals%variables, var_sfc_landtyp)
+            self%crtm_K%geovals(ivar)%nval = 1
+            ivar = ufo_vars_getindex(geovals%variables, var_sfc_lfrac  )
+            self%crtm_K%geovals(ivar)%nval = 1
+            ivar = ufo_vars_getindex(geovals%variables, var_sfc_ltmp   )
+            self%crtm_K%geovals(ivar)%nval = 1
+            ivar = ufo_vars_getindex(geovals%variables, var_sfc_lai    )
+            self%crtm_K%geovals(ivar)%nval = 1
+            ivar = ufo_vars_getindex(geovals%variables, var_sfc_vegfrac)
+            self%crtm_K%geovals(ivar)%nval = 1
+            ivar = ufo_vars_getindex(geovals%variables, var_sfc_vegtyp )
+            self%crtm_K%geovals(ivar)%nval = 1
+            ivar = ufo_vars_getindex(geovals%variables, var_sfc_soiltyp)
+            self%crtm_K%geovals(ivar)%nval = 1
+            ivar = ufo_vars_getindex(geovals%variables, var_sfc_soilm  )
+            self%crtm_K%geovals(ivar)%nval = 1
+            ivar = ufo_vars_getindex(geovals%variables, var_sfc_soilt  )
+            self%crtm_K%geovals(ivar)%nval = 1
+
       do k3 = 1,geovals%nvar
-         self%crtm_K%geovals(k3)%nval = n_Layers                                 !!! WRONG: not always n_Layers
-         allocate(self%crtm_K%geovals(k3)%vals(n_Layers,n_Profiles*n_Channels))  !!! WRONG: not always n_Layers
+         allocate(self%crtm_K%geovals(k3)%vals(self%crtm_K%geovals(k3)%nval,n_Profiles*n_Channels))
          self%crtm_K%geovals(k3)%vals(:,:) = 0.0_fp
       end do
       self%crtm_K%linit = .true.
@@ -600,7 +664,7 @@ contains
             ivar = ufo_vars_getindex(geovals%variables, var_prs )
             self%crtm_K%geovals(ivar)%vals(1:n_Layers,k3)   = atm_K(k2,k1)%Pressure(1:n_Layers) 
             ivar = ufo_vars_getindex(geovals%variables, var_prsi)
-            self%crtm_K%geovals(ivar)%vals(1:n_Layers,k3)   = atm_K(k2,k1)%Level_Pressure(1:n_Layers) 
+            self%crtm_K%geovals(ivar)%vals(1:n_Layers+1,k3)   = atm_K(k2,k1)%Level_Pressure(1:n_Layers+1) 
             ivar = ufo_vars_getindex(geovals%variables, var_mixr)
             self%crtm_K%geovals(ivar)%vals(1:n_Layers,k3)   = atm_K(k2,k1)%Absorber(1:n_Layers,1)
             ivar = ufo_vars_getindex(geovals%variables, var_oz  )
@@ -677,7 +741,6 @@ contains
     type(ioda_obsdb),      intent(in)     :: obss
     
     character(len=*), parameter :: myname_="ufo_radiance_tlad_eqv_tl"
-    character(max_string) :: err_msg
     integer jvar, jobs, jprofile, jchannel, jlev, ivar
 
     if (geovals%nvar /= self%crtm_K%nvar) call abor1_ftn("radiance_tl: error nvar")
@@ -691,6 +754,8 @@ contains
       write(*,*)'radiance_tl crtm_K ivar fldname ', ivar, self%crtm_K%variables%fldnames(ivar)
       write(*,*)'radiance_tl nval ', geovals%geovals(jvar)%nval, self%crtm_K%geovals(ivar)%nval
       if (geovals%geovals(jvar)%nval /= self%crtm_K%geovals(ivar)%nval) call abor1_ftn("radiance_tl: error nval")
+      write(*,*)'radiance_tl geovals ',geovals%variables%fldnames(jvar),' min max = ', &
+              & minval(geovals%geovals(jvar)%vals(:,:)),maxval(geovals%geovals(jvar)%vals(:,:))
       jobs = 0
       do jprofile = 1, self%nprofiles
       do jchannel = 1, self%nchannels
@@ -701,6 +766,7 @@ contains
       enddo
       enddo
     enddo
+    write(*,*)'radiance_tl hofx min max = ',minval(hofx%values(:)),maxval(hofx%values(:))
 
   end subroutine ufo_radiance_tlad_eqv_tl
   
@@ -714,9 +780,35 @@ contains
     type(ioda_obsdb),      intent(in)    :: obss
     
     character(len=*), parameter :: myname_="ufo_radiance_tlad_eqv_ad"
-    character(max_string) :: err_msg
+    integer jvar, jobs, jprofile, jchannel, jlev, ivar
+
+    if (geovals%nvar /= self%crtm_K%nvar) call abor1_ftn("radiance_ad: error nvar")
+    if (hofx%nobs /= self%nprofiles*self%nchannels) call abor1_ftn("radiance_ad: obsvector wrong size")
+
+    write(*,*)'radiance_ad starting'
+    write(*,*)'radiance_ad hofx min max = ',minval(hofx%values(:)),maxval(hofx%values(:))
+
+    do jvar = 1, geovals%nvar
+      ivar = ufo_vars_getindex(self%crtm_K%variables, geovals%variables%fldnames(jvar))
+      write(*,*)'radiance_ad geovals nvar fldname ', geovals%nvar, geovals%variables%fldnames(jvar)
+      write(*,*)'radiance_ad crtm_K ivar fldname ', ivar, self%crtm_K%variables%fldnames(ivar)
+      write(*,*)'radiance_ad nval ', geovals%geovals(jvar)%nval, self%crtm_K%geovals(ivar)%nval
+      if (geovals%geovals(jvar)%nval /= self%crtm_K%geovals(ivar)%nval) call abor1_ftn("radiance_ad: error nval")
+      jobs = 0
+      do jprofile = 1, self%nprofiles
+      do jchannel = 1, self%nchannels
+        jobs = jobs + 1
+        do jlev = 1, geovals%geovals(jvar)%nval
+          geovals%geovals(jvar)%vals(jlev,jprofile) = geovals%geovals(jvar)%vals(jlev,jprofile) &
+            & + self%crtm_K%geovals(ivar)%vals(jlev,jobs) * hofx%values(jobs)
+        enddo
+      enddo
+      enddo
+      write(*,*)'radiance_ad geovals ',geovals%variables%fldnames(jvar),' min max = ', &
+              & minval(geovals%geovals(jvar)%vals(:,:)),maxval(geovals%geovals(jvar)%vals(:,:))
+    enddo
     
-    ! Nothing here yet
+    write(*,*)'radiance_ad finished'
     
   end subroutine ufo_radiance_tlad_eqv_ad
   

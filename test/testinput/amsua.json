@@ -3,9 +3,9 @@
   "window_begin": "2010-01-01T00:00:00Z",
   "window_end": "2010-01-02T00:00:00Z",
   "LinearObsOpTest": {
-    "testiterTL": "4",
+    "testiterTL": "10",
     "toleranceTL": "1.0e-8",
-    "toleranceAD": "1.0e-12"
+    "toleranceAD": "1.0e-10"
   },
   "Observations": {
     "ObsTypes": [
