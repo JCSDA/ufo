@@ -1,0 +1,53 @@
+{
+  "test_framework_runtime_config": "--log_level=test_suite",
+  "window_begin": "2015-08-09T21:00:00Z",
+  "window_end": "2015-08-10T03:00:00Z",
+  "Variables": {
+     "nvars": "1",
+     "variables": ["testvar"]
+  },
+  "Locations": {
+    "lats": [45.0, 40.0],
+    "lons": [0.0, -100.0]
+  },
+  "Observations": {
+    "ObsTypes": [
+      {
+        "ObsType": "SeaIceFraction",
+        "ObsData": {
+          "ObsDataIn": {
+            "obsfile": "Data/seaice_obs-2018-04-15.nc"
+          }
+        },
+        "GeoVaLs": {
+          "norm": "557.10631879369089",
+          "random": "1",
+          "nobs": 309091
+        },
+        "ObsBias": {},
+        "rmsequiv": "1.",
+        "tolerance": "1.0e-8"
+      },
+      {
+        "ObsType": "SeaIceThickness",
+        "ObsData": {
+        },
+        "Generate": {
+          "nobs": "9",
+          "lat": "60",
+          "lon1": "10",
+          "lon2": "30"
+        },
+        "GeoVaLs": {
+          "norm": "3.5176013393240804",
+          "random": "1",
+          "nobs": "9"
+        },
+        "ObsBias": {},
+        "rmsequiv": "1.",
+        "tolerance": "1.0e-8"
+      }
+    ]
+  }
+}
+
