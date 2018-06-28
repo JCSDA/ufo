@@ -150,7 +150,7 @@ contains
 
   ! ------------------------------------------------------------------------------
 
-  subroutine ufo_insitutemperature_tlad_eqv_tl(traj, geovals, hofx, obs_ti)
+  subroutine ufo_insitutemperature_tlad_eqv_tl(traj, geovals, hofx)
 
     use ufo_tpsp2ti_mod
     use gsw_pot_to_insitu
@@ -160,7 +160,6 @@ contains
     type(ufo_insitutemperature_tlad), intent(in) :: traj !< Trajectory
     type(ufo_geovals), intent(in)    :: geovals           !< Increments (dtp, dsp)
     type(obs_vector),  intent(inout) :: hofx              !< dti
-    type(ioda_obs_insitutemperature), intent(in) :: obs_ti     !< Insitu temperature observations
 
     character(len=*), parameter :: myname_="ufo_insitutemperature_tlad_eqv_tl"
     character(max_string) :: err_msg
@@ -220,17 +219,16 @@ contains
 
   ! ------------------------------------------------------------------------------
 
-  subroutine ufo_insitutemperature_tlad_eqv_ad(traj, geovals, hofx, obs_ti)
+  subroutine ufo_insitutemperature_tlad_eqv_ad(traj, geovals, hofx)
 
     use ufo_tpsp2ti_mod
     use gsw_pot_to_insitu
     use vert_interp_mod    
     
     implicit none
-    type(ufo_insitutemperature_tlad), intent(in) :: traj
+    type(ufo_insitutemperature_tlad), intent(in)  :: traj
     type(ufo_geovals), intent(inout)              :: geovals
     type(obs_vector),  intent(in)                 :: hofx
-    type(ioda_obs_insitutemperature), intent(in)  :: obs_ti     !< Insitu temperature observations
 
     character(len=*), parameter :: myname_="ufo_insitutemperature_tlad_eqv_ad"
     character(max_string) :: err_msg

@@ -32,7 +32,6 @@ list( APPEND ufo_test_data
   amsua_n19_geovals.nc4
   diag_t_01_wprofiles.nc4
   aircraft_geovals.nc4
-  seaice_obs.nc
   diag_viirs_ges.2015081000_dbl_subset.nc4
   vars_ges.2015081000_dbl_subset.nc4
 )

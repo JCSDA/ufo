@@ -14,7 +14,7 @@
 #include <boost/scoped_ptr.hpp>
 
 #include "oops/base/Variables.h"
-#include "oops/interface/LinearObsOperBase.h"
+#include "ufo/LinearObsOperatorBase.h"
 #include "ioda/ObsSpace.h"
 #include "oops/util/ObjectCounter.h"
 #include "oops/util/Logger.h"
@@ -36,9 +36,9 @@ namespace ufo {
 
 // -----------------------------------------------------------------------------
 /// ADT observation for  model.
-template <typename MODEL>
-class ObsADTTLAD : public oops::LinearObsOperBase<MODEL>, 
-                              private util::ObjectCounter<ObsADTTLAD<MODEL>> {
+class ObsADTTLAD : public LinearObsOperatorBase, 
+                   private util::ObjectCounter<ObsADTTLAD> {
+				
 public:
   static const std::string classname() {return "ufo::ObsADTTLAD";}
 
@@ -47,8 +47,8 @@ public:
 
   // Obs Operators
   void setTrajectory(const GeoVaLs &, const ObsBias &);
-  void obsEquivTL(const GeoVaLs &, ioda::ObsVector &, const ObsBiasIncrement &) const;
-  void obsEquivAD(GeoVaLs &, const ioda::ObsVector &, ObsBiasIncrement &) const;
+  void simulateObsTL(const GeoVaLs &, ioda::ObsVector &, const ObsBiasIncrement &) const;
+  void simulateObsAD(GeoVaLs &, const ioda::ObsVector &, ObsBiasIncrement &) const;
 
   // Other
   const oops::Variables & variables() const {return *varin_;}
@@ -59,53 +59,10 @@ public:
 private:
   void print(std::ostream &) const;
   F90hop keyOperADT_;
+  const ioda::ObsSpace& odb_;  
   boost::scoped_ptr<const oops::Variables> varin_;
 };
 
-// -----------------------------------------------------------------------------
-template <typename MODEL>
-  ObsADTTLAD<MODEL>::ObsADTTLAD(const ioda::ObsSpace & odb, const eckit::Configuration & config)
-  : keyOperADT_(0), varin_()
-{
-  const eckit::Configuration * configc = &config;
-  ufo_adt_tlad_setup_f90(keyOperADT_, &configc);
-  const std::vector<std::string> vv{"sea_surface_height_above_geoid"};
-  varin_.reset(new oops::Variables(vv));
-  oops::Log::trace() << "ObsADTTLAD created" << std::endl;
-}
-
-// -----------------------------------------------------------------------------
-template <typename MODEL>
-ObsADTTLAD<MODEL>::~ObsADTTLAD() {
-  ufo_adt_tlad_delete_f90(keyOperADT_);
-  oops::Log::trace() << "ObsADTTLAD destrcuted" << std::endl;
-}
-
-// -----------------------------------------------------------------------------
-template <typename MODEL>
-void ObsADTTLAD<MODEL>::setTrajectory(const GeoVaLs & geovals, const ObsBias & bias) {
-  ufo_adt_tlad_settraj_f90(keyOperADT_, geovals.toFortran());
-}
-
-// -----------------------------------------------------------------------------
-template <typename MODEL>
-  void ObsADTTLAD<MODEL>::obsEquivTL(const GeoVaLs & geovals, ioda::ObsVector & ovec,
-                               const ObsBiasIncrement & bias) const {
-  ufo_adt_tlad_eqv_tl_f90(keyOperADT_, geovals.toFortran(), ovec.toFortran());
-}
-
-// -----------------------------------------------------------------------------
-template <typename MODEL>
-  void ObsADTTLAD<MODEL>::obsEquivAD(GeoVaLs & geovals, const ioda::ObsVector & ovec,
-                               ObsBiasIncrement & bias) const {
-  ufo_adt_tlad_eqv_ad_f90(keyOperADT_, geovals.toFortran(), ovec.toFortran());
-}
-
-// -----------------------------------------------------------------------------
-template <typename MODEL>
-void ObsADTTLAD<MODEL>::print(std::ostream & os) const {
-  os << "ObsADTTLAD::print not implemented" << std::endl;
-}
 // -----------------------------------------------------------------------------
 
 }  // namespace ufo
