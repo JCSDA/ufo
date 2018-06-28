@@ -65,6 +65,7 @@ subroutine get_(self,key,ptr)
    exit
   endif
  enddo
+ if (.not.associated(ptr)) call abor1_ftn("registry_t%get_: key not found")
 end subroutine
 
 !> Remove element of the linked list

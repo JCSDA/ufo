@@ -137,11 +137,6 @@ contains
     call ufo_geovals_get_var(geovals, var_tv, geoval)
     N_LAYERS = size(geoval%vals,1)
 
-    ALLOCATE(geo(N_PROFILES))
-    ALLOCATE(atm(N_PROFILES))
-    ALLOCATE(sfc(N_PROFILES))
-
-
     ! Program header
     ! --------------
 
@@ -379,8 +374,6 @@ contains
     end if
     ! ==========================================================================
    
-    DEALLOCATE(geo,atm,sfc)
- 
   CONTAINS
     
     ! ==========================================================================
