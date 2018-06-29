@@ -3,9 +3,29 @@
 # This software is licensed under the terms of the Apache Licence Version 2.0
 # which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 
+# macro to create a symlink from src to dst
+function(CREATE_SYMLINK src dst)
+    foreach (FILENAME ${ARGN})
+        execute_process( COMMAND ${CMAKE_COMMAND} -E create_symlink
+            ${src}/${FILENAME}
+            ${dst}/${FILENAME} )
+        endforeach(FILENAME)
+endfunction(CREATE_SYMLINK)
+
+# macro to create a symlink from src to dst with just filename
+function(CREATE_SYMLINK_FILENAME src dst)
+    foreach (FILENAME ${ARGN})
+        get_filename_component(filename ${FILENAME} NAME )
+        execute_process( COMMAND ${CMAKE_COMMAND} -E create_symlink
+            ${src}/${FILENAME}
+            ${dst}/${filename} )
+        endforeach(FILENAME)
+endfunction(CREATE_SYMLINK_FILENAME)
+
 # Create Data directory for test input config and symlink all files
 list( APPEND ufo_test_input
-  testinput/ufotest.json
+  testinput/ufotest_atmosphere.json
+  testinput/ufotest_constituents.json
   testinput/ufocrtm.json
   testinput/amsua.json
   testinput/radiosonde.json
@@ -14,11 +34,7 @@ list( APPEND ufo_test_input
 )
 
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/testinput)
-foreach(FILENAME ${ufo_test_input})
-    execute_process( COMMAND ${CMAKE_COMMAND} -E create_symlink
-           ${CMAKE_CURRENT_SOURCE_DIR}/${FILENAME}
-           ${CMAKE_CURRENT_BINARY_DIR}/${FILENAME} )
-endforeach(FILENAME)
+CREATE_SYMLINK( ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR} ${ufo_test_input} )
 
 # Add files to cmake resources
 ecbuild_add_resources( TARGET ufo_test_scripts
@@ -32,31 +48,23 @@ list( APPEND ufo_test_data
   amsua_n19_geovals.nc4
   diag_t_01_wprofiles.nc4
   aircraft_geovals.nc4
-  seaice_obs.nc
   diag_viirs_ges.2015081000_dbl_subset.nc4
   vars_ges.2015081000_dbl_subset.nc4
 )
 
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Data)
-foreach(FILENAME ${ufo_test_data})
-    execute_process( COMMAND ${CMAKE_COMMAND} -E create_symlink
-           ${CMAKE_CURRENT_SOURCE_DIR}/testinput/${FILENAME}
-           ${CMAKE_CURRENT_BINARY_DIR}/Data/${FILENAME} )
-endforeach(FILENAME)
+CREATE_SYMLINK( ${CMAKE_CURRENT_SOURCE_DIR}/testinput ${CMAKE_CURRENT_BINARY_DIR}/Data ${ufo_test_data} )
 
 # Add marine test data
 if( ${GSW_FOUND} )
 
     list( APPEND ufo_marine_test_input
+      testinput/ufotest_marine.json
       testinput/tprof.json
       testinput/seaice.json
     )
 
-    foreach(FILENAME ${ufo_marine_test_input})
-        execute_process( COMMAND ${CMAKE_COMMAND} -E create_symlink
-               ${CMAKE_CURRENT_SOURCE_DIR}/${FILENAME}
-               ${CMAKE_CURRENT_BINARY_DIR}/${FILENAME} )
-    endforeach(FILENAME)
+	CREATE_SYMLINK( ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR} ${ufo_marine_test_input} )
 
     ecbuild_add_resources( TARGET ufo_marine_test_scripts
                            SOURCES_PACK
@@ -71,30 +79,27 @@ if( ${GSW_FOUND} )
       marineobs/cryosat2-2018-04-15.nc
     )
 
-    foreach(FILENAME ${ufo_marine_test_data})
-        get_filename_component(filename ${FILENAME} NAME )
-        execute_process( COMMAND ${CMAKE_COMMAND} -E create_symlink
-               ${CMAKE_CURRENT_SOURCE_DIR}/testinput/${FILENAME}
-               ${CMAKE_CURRENT_BINARY_DIR}/Data/${filename} )
-    endforeach(FILENAME)
+	CREATE_SYMLINK_FILENAME( ${CMAKE_CURRENT_SOURCE_DIR}/testinput
+                             ${CMAKE_CURRENT_BINARY_DIR}/Data
+                             ${ufo_marine_test_data} )
 
 endif( ${GSW_FOUND} )
 
 #####################################################################
 
-ecbuild_add_test( TARGET  test_ufo_geovals
+ecbuild_add_test( TARGET  test_ufo_geovals_atmosphere
                   BOOST
                   SOURCES mains/TestGeoVaLs.cc
-                  ARGS    "testinput/ufotest.json"
+                  ARGS    "testinput/ufotest_atmosphere.json"
                   LIBS    ufo )
 
-ecbuild_add_test( TARGET  test_ufo_amsua_tlad
+ecbuild_add_test( TARGET  test_ufo_geovals_constituents
                   BOOST
-                  SOURCES mains/TestObsOperatorTLAD.cc
-                  ARGS    "testinput/amsua.json"
+                  SOURCES mains/TestGeoVaLs.cc
+                  ARGS    "testinput/ufotest_constituents.json"
                   LIBS    ufo )
 
-		ecbuild_add_test( TARGET  test_ufo_amsua
+ecbuild_add_test( TARGET  test_ufo_amsua
                   BOOST
                   SOURCES mains/TestObsOperator.cc
                   ARGS    "testinput/amsua.json"
@@ -116,6 +121,12 @@ ecbuild_add_test( TARGET  test_ufo_aircraft
 
 # Marine UFO tests
 if( ${GSW_FOUND} )
+
+    ecbuild_add_test( TARGET  test_ufo_geovals_marine
+                      BOOST
+                      SOURCES mains/TestGeoVaLs.cc
+                      ARGS    "testinput/ufotest_marine.json"
+                      LIBS    ufo )
 
     ecbuild_add_test( TARGET  test_ufo_insitutemperature
                       BOOST
@@ -148,7 +159,6 @@ ecbuild_add_test( TARGET  test_ufo_aod
                   SOURCES mains/TestObsOperator.cc
                   ARGS    "testinput/aod.json"
                   LIBS    ufo )
-
 ecbuild_add_test( TARGET  test_ufo_obsop_rsonde_tlad
                   BOOST
                   SOURCES mains/TestObsOperatorTLAD.cc
@@ -159,12 +169,6 @@ ecbuild_add_test( TARGET  test_ufo_obsop_aircraft_tlad
                   BOOST
                   SOURCES mains/TestObsOperatorTLAD.cc
                   ARGS    "testinput/aircraft.json"
-                  LIBS    ufo )
-
-ecbuild_add_test( TARGET  test_ufo_obsop_amsua_tlad
-                  BOOST
-                  SOURCES mains/TestObsOperatorTLAD.cc
-                  ARGS    "testinput/amsua.json"
                   LIBS    ufo )
 
 #ecbuild_add_test( TARGET  test_ufo_obscheck
@@ -197,8 +201,7 @@ SpcCoeff/Little_Endian/v.viirs-m_npp.SpcCoeff.bin
 TauCoeff/ODAS/Little_Endian/v.viirs-m_npp.TauCoeff.bin
 )
 
-# Create Data directory for test input and symlink all files
-foreach(FILENAME ${crtm_test_input})
-   execute_process( COMMAND ln -s ${crtm_SOURCE_DIR}/fix/${FILENAME} ${CMAKE_CURRENT_BINARY_DIR}/Data )
-endforeach(FILENAME)
-
+# Symlink all CRTM files
+CREATE_SYMLINK_FILENAME( ${crtm_SOURCE_DIR}/fix
+                         ${CMAKE_CURRENT_BINARY_DIR}/Data
+                         ${crtm_test_input} )
