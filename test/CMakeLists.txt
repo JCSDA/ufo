@@ -99,7 +99,13 @@ ecbuild_add_test( TARGET  test_ufo_geovals_constituents
                   ARGS    "testinput/ufotest_constituents.json"
                   LIBS    ufo )
 
-ecbuild_add_test( TARGET  test_ufo_amsua
+ecbuild_add_test( TARGET  test_ufo_amsua_tlad
+                  BOOST
+                  SOURCES mains/TestObsOperatorTLAD.cc
+                  ARGS    "testinput/amsua.json"
+                  LIBS    ufo )
+
+		ecbuild_add_test( TARGET  test_ufo_amsua
                   BOOST
                   SOURCES mains/TestObsOperator.cc
                   ARGS    "testinput/amsua.json"
