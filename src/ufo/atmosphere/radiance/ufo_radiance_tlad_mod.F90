@@ -664,7 +664,7 @@ contains
             ivar = ufo_vars_getindex(geovals%variables, var_prs )
             self%crtm_K%geovals(ivar)%vals(1:n_Layers,k3)   = atm_K(k2,k1)%Pressure(1:n_Layers) 
             ivar = ufo_vars_getindex(geovals%variables, var_prsi)
-            self%crtm_K%geovals(ivar)%vals(1:n_Layers+1,k3)   = atm_K(k2,k1)%Level_Pressure(1:n_Layers+1) 
+            self%crtm_K%geovals(ivar)%vals(1:n_Layers+1,k3)   = atm_K(k2,k1)%Level_Pressure(0:n_Layers) 
             ivar = ufo_vars_getindex(geovals%variables, var_mixr)
             self%crtm_K%geovals(ivar)%vals(1:n_Layers,k3)   = atm_K(k2,k1)%Absorber(1:n_Layers,1)
             ivar = ufo_vars_getindex(geovals%variables, var_oz  )
@@ -725,7 +725,7 @@ contains
       end do
 
       self%ltraj = .true.  !** set trajectory is true
-      print '(A,I5,2G12.4)', 'xjacobian1:', k3, maxval(abs(self%crtm_K%geovals(1)%vals(:,k3))), maxval(abs(geovals%geovals(1)%vals(:,k3)))
+      !print '(A,I5,2G12.4)', 'xjacobian1:', k3, maxval(abs(self%crtm_K%geovals(1)%vals(:,k3))), maxval(abs(geovals%geovals(1)%vals(:,k3)))
 
     END SUBROUTINE populate_crtm_K
     
