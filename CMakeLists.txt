@@ -56,7 +56,7 @@ ecbuild_use_package( PROJECT crtm VERSION 2.2.3 REQUIRED )
 include_directories( ${CRTM_INCLUDE_DIRS} )
 
 # GSW
-ecbuild_use_package( PROJECT gsw REQUIRED )
+ecbuild_use_package( PROJECT gsw )
 if( ${GSW_FOUND} )
     message("GSW FOUND; Including Marine Observation Operators")
     include_directories( ${GSW_INCLUDE_DIRS} )

@@ -1,0 +1,34 @@
+{
+  "test_framework_runtime_config": "--log_level=test_suite",
+  "window_begin": "2015-08-09T21:00:00Z",
+  "window_end": "2015-08-10T03:00:00Z",
+  "Variables": {
+     "nvars": "1",
+     "variables": ["testvar"]
+  },
+  "Locations": {
+    "lats": [45.0, 40.0],
+    "lons": [0.0, -100.0]
+  },
+  "Observations": {
+    "ObsTypes": [
+      {
+        "ObsType": "Aod",
+        "ObsData": {
+          "ObsDataIn": {
+            "obsfile": "Data/diag_viirs_ges.2015081000_dbl_subset.nc4"
+          }
+        },
+        "GeoVaLs": {
+          "norm": "64245.637566836311",
+          "filename": "Data/vars_ges.2015081000_dbl_subset.nc4",
+          "random": "0"
+        },
+        "rmsequiv":"0.025691325227768444",
+        "tolerance": "999.999",
+        "ObsBias": {}
+      }
+    ]
+  }
+}
+
