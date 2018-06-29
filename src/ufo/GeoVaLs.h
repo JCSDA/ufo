@@ -36,10 +36,7 @@ class GeoVaLs : public util::Printable,
 
   GeoVaLs(const ioda::Locations &, const oops::Variables &);
   GeoVaLs(const eckit::Configuration &, const oops::Variables &);
-  GeoVaLs(const ioda::Locations &, const oops::Variables &,
-	  const eckit::Configuration &);
-  GeoVaLs(const GeoVaLs &, const ioda::Locations &, 
-	  const eckit::Configuration &);
+  GeoVaLs(const GeoVaLs &);
 
 //  explicit GeoVaLs(): keyGVL_(0) {}
 //  explicit GeoVaLs(int & fgvl): keyGVL_(fgvl) {}
@@ -57,6 +54,7 @@ class GeoVaLs : public util::Printable,
   GeoVaLs & operator /= (const GeoVaLs &);
   double dot_product_with(const GeoVaLs & other) const;
   void read(const eckit::Configuration &);
+  void analytic_init(const ioda::Locations &, const eckit::Configuration &);
   void write(const eckit::Configuration &) const;
 
   int & toFortran() {return keyGVL_;}
