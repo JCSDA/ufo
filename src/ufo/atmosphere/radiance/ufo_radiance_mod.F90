@@ -128,7 +128,7 @@ contains
     integer              :: nlocs
 
     !** Refer Radiance to obss 
-    Radiance => obss
+    Radiance => obss   ! WHY?????
 
 
     !Allocate CRTM structures

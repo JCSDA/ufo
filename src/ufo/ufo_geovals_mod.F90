@@ -115,7 +115,7 @@ subroutine ufo_geovals_get_var(self, varname, geoval, status)
 implicit none
 type(ufo_geovals), target, intent(in)    :: self
 character(MAXVARLEN), intent(in) :: varname
-type(ufo_geoval), pointer, intent(out)    :: geoval
+type(ufo_geoval), pointer, intent(inout)    :: geoval
 integer, optional, intent(out) :: status
 
 integer :: ivar, status_
@@ -147,20 +147,17 @@ implicit none
 type(ufo_geovals), intent(inout) :: self
 integer :: ivar
 
+write(*,*)'ufo_geovals_zero start'
 if (.not. self%lalloc) then
   call abor1_ftn("ufo_geovals_zero: geovals not allocated")
 endif
 if (.not. self%linit) then
-  ! TODO: abort! for now just allocating 1
-  do ivar = 1, self%nvar
-    self%geovals(ivar)%nval = 1
-    allocate(self%geovals(ivar)%vals(1,self%nobs))
-  enddo
-  self%linit = .true.
+  call abor1_ftn("ufo_geovals_zero: geovals not initialized")
 endif
 do ivar = 1, self%nvar
-  self%geovals(ivar)%vals = 0.0
+  self%geovals(ivar)%vals(:,:) = 0.0
 enddo
+write(*,*)'ufo_geovals_zero done'
 
 end subroutine ufo_geovals_zero
 
@@ -223,12 +220,7 @@ if (.not. self%lalloc) then
   call abor1_ftn("ufo_geovals_random: geovals not allocated")
 endif
 if (.not. self%linit) then
-  ! TODO: abort! for now just allocating 1
-  do ivar = 1, self%nvar
-    self%geovals(ivar)%nval = 1
-    allocate(self%geovals(ivar)%vals(1,self%nobs))
-  enddo
-  self%linit = .true.
+  call abor1_ftn("ufo_geovals_random: geovals not initialized")
 endif
 do ivar = 1, self%nvar
   call random_vector(self%geovals(ivar)%vals)
@@ -391,6 +383,7 @@ type(ufo_geovals), intent(in) :: self
 type(ufo_geovals), intent(inout) :: other
 integer :: jv
 
+write(*,*)'ufo_geovals_copy start'
 if (.not. self%lalloc .or. .not. self%linit) then
   call abor1_ftn("ufo_geovals_copy: geovals not defined")
 endif
@@ -399,20 +392,22 @@ call ufo_geovals_delete(other)
 
 call ufo_vars_clone(self%variables,other%variables)
 
+write(*,*)'ufo_geovals_copy nobs, nvar = ', self%nobs, self%nvar
 other%nobs = self%nobs
 other%nvar = self%nvar
 
 allocate(other%geovals(other%nvar))
 do jv = 1, other%nvar
-   other%geovals(jv)%nval = self%geovals(jv)%nval
-   other%geovals(jv)%nobs = self%geovals(jv)%nobs
-   allocate(other%geovals(jv)%vals(other%geovals(jv)%nval, &
-                                     other%geovals(jv)%nobs))
-   other%geovals(jv)%vals = self%geovals(jv)%vals
+  write(*,*)'ufo_geovals_copy jv, nobs, nval = ', jv, self%geovals(jv)%nobs, self%geovals(jv)%nval
+  other%geovals(jv)%nval = self%geovals(jv)%nval
+  other%geovals(jv)%nobs = self%geovals(jv)%nobs
+  allocate(other%geovals(jv)%vals(other%geovals(jv)%nval, other%geovals(jv)%nobs))
+  other%geovals(jv)%vals(:,:) = self%geovals(jv)%vals(:,:)
 enddo
 
 other%lalloc = .true.
 other%linit = .true.
+write(*,*)'ufo_geovals_copy done'
 
 end subroutine ufo_geovals_copy
 
