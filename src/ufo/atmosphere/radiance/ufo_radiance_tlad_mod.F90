@@ -385,7 +385,6 @@ contains
       !** populate the atmosphere structures for CRTM (atm(k1), for the k1-th profile)
       do k1 = 1,n_Profiles
          call ufo_geovals_get_var(geovals, var_tv, geoval)
-         call ufo_geovals_get_var(geovals, var_tv, geoval)
          atm(k1)%Temperature(1:n_Layers) = geoval%vals(:,k1) 
          
          call ufo_geovals_get_var(geovals, var_prs, geoval)
@@ -422,6 +421,16 @@ contains
          atm(k1)%Cloud(2)%Water_Content    = geoval%vals(:,k1)
          call ufo_geovals_get_var(geovals, var_cliefr, geoval)
          atm(k1)%Cloud(2)%Effective_Radius = geoval%vals(:,k1)
+
+!        where(atm(k1)%Absorber < 0.0)
+           atm(k1)%Absorber = 0.0
+!        end where
+!        where (atm(k1)%Cloud(1)%Water_Content < 0.0)
+           atm(k1)%Cloud(1)%Water_Content = 0.0
+!        end where
+!        where (atm(k1)%Cloud(2)%Water_Content < 0.0)
+           atm(k1)%Cloud(2)%Water_Content = 0.0
+!        end where
       end do
       
     end subroutine Load_Atm_Data
@@ -672,7 +681,7 @@ contains
             ivar = ufo_vars_getindex(geovals%variables, var_prsi)
             self%crtm_K%geovals(ivar)%vals(1:n_Layers+1,k3)   = 0.0 !atm_K(k2,k1)%Level_Pressure(0:n_Layers) 
             ivar = ufo_vars_getindex(geovals%variables, var_mixr)
-            self%crtm_K%geovals(ivar)%vals(1:n_Layers,k3)   = atm_K(k2,k1)%Absorber(1:n_Layers,1)
+            self%crtm_K%geovals(ivar)%vals(1:n_Layers,k3)   = 0.0 !atm_K(k2,k1)%Absorber(1:n_Layers,1)
             ivar = ufo_vars_getindex(geovals%variables, var_oz  )
             self%crtm_K%geovals(ivar)%vals(1:n_Layers,k3)   = 0.0 !atm_K(k2,k1)%Absorber(1:n_Layers,2)
             ivar = ufo_vars_getindex(geovals%variables, var_co2 )
