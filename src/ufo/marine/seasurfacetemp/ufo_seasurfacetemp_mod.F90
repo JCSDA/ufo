@@ -7,57 +7,86 @@
 
 module ufo_seasurfacetemp_mod
 
-use ioda_obs_seasurfacetemp_mod
-use ioda_obs_vectors
-use ufo_vars_mod
-use ioda_locs_mod
-use ufo_geovals_mod
-use kinds
+  use ioda_obs_seasurfacetemp_mod
+  use ioda_obs_vectors
+  use ufo_vars_mod
+  use ioda_locs_mod
+  use ufo_geovals_mod
+  use kinds
 
-implicit none
-public :: ufo_seasurfacetemp
-public :: ufo_seasurfacetemp_eqv
-private
-integer, parameter :: max_string=800
+  implicit none
+  public :: ufo_seasurfacetemp
+  public :: ufo_seasurfacetemp_eqv
+  private
+  integer, parameter :: max_string=800
 
-!> Fortran derived type for sea surface temperature observation operator
-type :: ufo_seasurfacetemp
-end type ufo_seasurfacetemp
+  !> Fortran derived type for sea surface temperature observation operator
+  type :: ufo_seasurfacetemp
+  end type ufo_seasurfacetemp
 
 
-! ------------------------------------------------------------------------------
+  ! ------------------------------------------------------------------------------
 
 contains
 
-! ------------------------------------------------------------------------------
+  ! ------------------------------------------------------------------------------
+  !!!!!!!!!!!!!!! TODO: PASS OBS to operator !!!!!!!!!!!!!!!!!!!!
+  subroutine ufo_seasurfacetemp_eqv(self, geovals, hofx)
 
-subroutine ufo_seasurfacetemp_eqv(self, geovals, hofx)
-implicit none
-type(ufo_seasurfacetemp), intent(in) :: self
-type(ufo_geovals), intent(in)    :: geovals
-type(obs_vector),  intent(inout) :: hofx
+    use ufo_marine_ncutils
+    
+    implicit none
+    type(ufo_seasurfacetemp) ,intent(in) :: self
+    type(ufo_geovals)        ,intent(in) :: geovals
+    type(obs_vector)      ,intent(inout) :: hofx
 
-character(len=*), parameter :: myname_="ufo_seasurfacetemp_eqv"
-character(max_string) :: err_msg
+    character(len=*), parameter :: myname_="ufo_seasurfacetemp_eqv"
+    character(max_string) :: err_msg
 
-integer :: iobs
-type(ufo_geoval), pointer :: geoval_sst
+    integer :: iobs
+    type(ufo_geoval), pointer :: geoval_sst
 
-! check if nobs is consistent in geovals & hofx
-if (geovals%nobs /= hofx%nobs) then
-  write(err_msg,*) myname_, ' error: nobs inconsistent!'
-  call abor1_ftn(err_msg)
-endif
+    ! Netcdf stuff to write out geovals
+    character(len=120) :: filename="sst_obs-2018-04-15_geovals.nc"
+    integer(kind=4) :: iNcid
+    integer(kind=4) :: iDimStation_ID, iDimLev_ID
+    integer(kind=4) :: iVarLev_ID, iVarGOM_ID
+    integer :: nlev,nobs
 
-! check if sst variables is in geovals and get it
-call ufo_geovals_get_var(geovals, var_ocn_sst, geoval_sst)
+    type(diag_marine_obs) :: sst_out 
+    
+    ! check if nobs is consistent in geovals & hofx
+    if (geovals%nobs /= hofx%nobs) then
+       write(err_msg,*) myname_, ' error: nobs inconsistent!'
+       call abor1_ftn(err_msg)
+    endif
 
-! sst obs operator
-do iobs = 1, hofx%nobs
-   hofx%values(iobs) = geoval_sst%vals(1,iobs)
-   write(602,*)hofx%values(iobs)
-enddo
+    ! check if sst variables is in geovals and get it
+    call ufo_geovals_get_var(geovals, var_ocn_sst, geoval_sst)
 
-end subroutine ufo_seasurfacetemp_eqv
+    ! Information for temporary output file ---------------------------------------!
+    filename='sst-test.nc'    
+    call sst_out%init(hofx%nobs,filename)
+    
+    ! sst obs operator
+    do iobs = 1, hofx%nobs
+       hofx%values(iobs) = geoval_sst%vals(1,iobs)
+
+       ! Output information:
+       sst_out%diag(iobs)%Station_ID         = 9999
+       sst_out%diag(iobs)%Observation_Type   = 999.9
+       sst_out%diag(iobs)%Latitude           = 999.9
+       sst_out%diag(iobs)%Longitude          = 999.9
+       sst_out%diag(iobs)%Depth              = 999.9
+       sst_out%diag(iobs)%Time               = 999.9
+       sst_out%diag(iobs)%Observation        = 999.9
+       sst_out%diag(iobs)%Obs_Minus_Forecast = 999.9
+    enddo
+
+    call sst_out%write_diag()
+    call sst_out%write_geoval(var_ocn_sst,geoval_sst)
+    call sst_out%finalize()
+
+  end subroutine ufo_seasurfacetemp_eqv
 
 end module ufo_seasurfacetemp_mod
