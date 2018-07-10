@@ -8,8 +8,6 @@ module m_diag_marine_conv
   use nc_diag_read_mod, only: nc_diag_read_get_var
   use nc_diag_read_mod, only: nc_diag_read_get_global_attr
 
-  use type_distribution, only: random_distribution
-
   implicit none
 
   private
