@@ -6,6 +6,7 @@
 list( APPEND marine_src_files
     FortranMarine.h
 )
+add_subdirectory( utils )
 add_subdirectory( obsop )
 add_subdirectory( seaicethickness )
 add_subdirectory( seaicefraction )
@@ -21,8 +22,10 @@ PREPEND( _p_stericheight_files        "marine/stericheight"        ${stericheigh
 PREPEND( _p_insitutemperature_files   "marine/insitutemperature"   ${insitutemperature_files} )
 PREPEND( _p_adt_files                 "marine/adt"                 ${adt_files} )
 PREPEND( _p_seasurfacetemp_files      "marine/seasurfacetemp"      ${seasurfacetemp_files} )
+PREPEND( _p_marine_utils_files        "marine/utils"               ${marine_utils_files} )
 
 set ( marine_src_files
+    ${_p_marine_utils_files}
     ${_p_obsop_files}
     ${_p_seaicethickness_files}
     ${_p_seaicefraction_files}
