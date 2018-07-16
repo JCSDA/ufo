@@ -67,7 +67,7 @@ contains
 
     ! check if sea temperature profile variable is in geovals and get it
     call ufo_geovals_get_var(geovals, var_ocn_pot_temp, temp)
-
+    
     ! check if sea salinity profile variable is in geovals and get it
     call ufo_geovals_get_var(geovals, var_ocn_salt, salt)
 
@@ -125,18 +125,17 @@ contains
        end if
 
        ! Output information:
-       insitu_out%diag(iobs)%Station_ID         = obs_ti%idx(iobs)
+       insitu_out%diag(iobs)%Station_ID         = 1234!obs_ti%idx(iobs)
        insitu_out%diag(iobs)%Observation_Type   = 1.0
        insitu_out%diag(iobs)%Latitude           = obs_ti%lat(iobs)
        insitu_out%diag(iobs)%Longitude          = obs_ti%lon(iobs)
        insitu_out%diag(iobs)%Depth              = obs_ti%depth(iobs)
        insitu_out%diag(iobs)%Time               = 1.0
        insitu_out%diag(iobs)%Observation        = obs_ti%val(iobs)
-       insitu_out%diag(iobs)%Obs_Minus_Forecast = obs_ti%val(iobs) - hofx%values(iobs) 
-       
+       insitu_out%diag(iobs)%Obs_Minus_Forecast = obs_ti%val(iobs) - hofx%values(iobs)
     enddo
 
-    call insitu_out%write_diag()
+    !call insitu_out%write_diag()
     call insitu_out%write_geoval(var_ocn_pot_temp,temp)
     call insitu_out%write_geoval(var_ocn_salt,salt)
     call insitu_out%write_geoval(var_ocn_lay_thick,h)
