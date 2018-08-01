@@ -31,6 +31,7 @@ list( APPEND ufo_test_input
   testinput/radiosonde.json
   testinput/aircraft.json
   testinput/aod.json
+  testinput/gnssroref.json
 )
 
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/testinput)
@@ -50,6 +51,7 @@ list( APPEND ufo_test_data
   aircraft_geovals.nc4
   diag_viirs_ges.2015081000_dbl_subset.nc4
   vars_ges.2015081000_dbl_subset.nc4
+  gnssro_ref_geovals.nc4
 )
 
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Data)
@@ -117,6 +119,18 @@ ecbuild_add_test( TARGET  test_ufo_aircraft
                   MPI     6
                   SOURCES mains/TestObsOperator.cc
                   ARGS    "testinput/aircraft.json"
+                  LIBS    ufo )
+
+ecbuild_add_test( TARGET  test_ufo_obsop_gnssroRef_opr
+                  BOOST
+                  SOURCES mains/TestObsOperator.cc
+                  ARGS    "testinput/gnssroref.json"
+                  LIBS    ufo )
+
+ecbuild_add_test( TARGET  test_ufo_obsop_gnssroRef_tlad
+                  BOOST
+                  SOURCES mains/TestObsOperatorTLAD.cc
+                  ARGS    "testinput/gnssroref.json"
                   LIBS    ufo )
 
 # Marine UFO tests
