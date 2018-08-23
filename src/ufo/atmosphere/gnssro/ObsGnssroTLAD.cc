@@ -31,7 +31,7 @@ ObsGnssroRefTLAD::ObsGnssroRefTLAD(const ioda::ObsSpace & odb, const eckit::Conf
 {
   const eckit::Configuration * configc = &config;
   ufo_gnssro_tlad_setup_f90(keyOperGnssroRef_, &configc);
-const std::vector<std::string> vv{"temperature", "humidity_mixing_ratio", "air_pressure","geopotential_height"};
+const std::vector<std::string> vv{"temperature", "specific_humidity", "air_pressure","geopotential_height"};
   varin_.reset(new oops::Variables(vv));
   oops::Log::trace() << "ObsGnssroRefTLAD created" << std::endl;
 }

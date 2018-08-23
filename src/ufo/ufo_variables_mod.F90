@@ -18,6 +18,7 @@ integer, parameter, public :: MAXVARLEN=56
 character(len=MAXVARLEN), public :: var_tv   = "virtual_temperature"
 character(len=MAXVARLEN), public :: var_prsl = "atmosphere_ln_pressure_coordinate"
 character(len=MAXVARLEN), public :: var_mixr = "humidity_mixing_ratio"
+character(len=MAXVARLEN), public :: var_q    = "specific_humidity"
 character(len=MAXVARLEN), public :: var_prs  = "air_pressure"
 character(len=MAXVARLEN), public :: var_prsi = "air_pressure_levels"
 character(len=MAXVARLEN), public :: var_z    = "geopotential_height"

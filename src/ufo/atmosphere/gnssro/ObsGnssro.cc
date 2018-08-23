@@ -27,7 +27,7 @@ static ObsOperatorMaker<ObsGnssroRef> makerGnssroRef_("GnssroRef");
 ObsGnssroRef::ObsGnssroRef(const ioda::ObsSpace & odb, const eckit::Configuration & config)
   : keyOperGnssroRef_(0), varin_(), odb_(odb)
 {
-  const std::vector<std::string> vv{"temperature", "humidity_mixing_ratio", "air_pressure","geopotential_height"};
+  const std::vector<std::string> vv{"temperature", "specific_humidity", "air_pressure","geopotential_height"};
   varin_.reset(new oops::Variables(vv));
   const eckit::Configuration * configc = &config;
   ufo_gnssro_setup_f90(keyOperGnssroRef_, &configc);

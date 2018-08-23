@@ -25,7 +25,7 @@ module ufo_gnssro_ref_tlad_mod
      integer                       :: nval, nobs
      real(kind_real), allocatable  :: wf(:)
      integer,         allocatable  :: wi(:)
-     real(kind_real), allocatable  :: prs_traj(:), t_traj(:), mixr_traj(:), gph_traj(:,:)
+     real(kind_real), allocatable  :: prs(:), t(:), q(:), gph(:,:)
      real(kind_real), allocatable  :: obsH(:)
   contains
     procedure :: delete  => ufo_gnssro_ref_tlad_delete
@@ -49,7 +49,7 @@ contains
       character(len=*), parameter :: myname_="ufo_gnssro_ref_tlad_settraj"
       character(max_string)       :: err_msg
       
-      type(ufo_geoval), pointer :: t,mixr,prs,gph
+      type(ufo_geoval), pointer :: t,q,prs,gph
       integer          :: iobs, ierr
       type(obs_vector) :: obsZ, obsLat  ! observation vector
       real(kind_real)  :: Tv_traj, Tv_traj0
@@ -62,14 +62,14 @@ contains
         write(err_msg,*) myname_, trim(var_prs), ' doesnt exist'
         call abor1_ftn(err_msg)
       endif
-      call ufo_geovals_get_var(geovals, var_t, t,status=ierr)
+      call ufo_geovals_get_var(geovals, var_t, t, status=ierr)
       if (ierr/=0) then
          write(err_msg,*) myname_, trim(var_t), ' doesnt exist'
          call abor1_ftn(err_msg)
       endif
-      call ufo_geovals_get_var(geovals, var_mixr, mixr,status=ierr)
+      call ufo_geovals_get_var(geovals, var_q, q, status=ierr)
        if (ierr/=0) then
-         write(err_msg,*) myname_, trim(var_mixr), ' doesnt exist'
+         write(err_msg,*) myname_, trim(var_q), ' doesnt exist'
          call abor1_ftn(err_msg)
       endif     
       call ufo_geovals_get_var(geovals, var_z, gph,status=ierr)
@@ -87,15 +87,15 @@ contains
  
       allocate(self%wi(obss%nobs))
       allocate(self%wf(obss%nobs))
-      allocate(self%t_traj(obss%nobs))
-      allocate(self%mixr_traj(obss%nobs))
-      allocate(self%prs_traj(obss%nobs))
-      allocate(self%gph_traj(prs%nval, obss%nobs))
+      allocate(self%t(obss%nobs))
+      allocate(self%q(obss%nobs))
+      allocate(self%prs(obss%nobs))
+      allocate(self%gph(prs%nval, obss%nobs))
       allocate(self%obsH(obss%nobs))
 
       ! observation of altitude (MSL) (for vertical interpolation)
       call ioda_obsvec_setup(obsZ, obss%nobs)
-      call ioda_obsdb_var_to_ovec(obss, obsZ, "HEIT")
+      call ioda_obsdb_var_to_ovec(obss, obsZ, "MSL_ALT")
       ! observation of Latitude (degree) (for geometric to geopotential height transform)
       call ioda_obsvec_setup(obsLat, obss%nobs)
       call ioda_obsdb_var_to_ovec(obss, obsLat, "Latitude")
@@ -106,19 +106,18 @@ contains
         call vert_interp_weights(self%nval, self%obsH(iobs), gph%vals(:,iobs),self%wi(iobs),self%wf(iobs))
         wi0 = self%wi(iobs)
         wf0 = self%wf(iobs)
-        call vert_interp_apply(t%nval,   t%vals(:,iobs), self%t_traj(iobs),    self%wi(iobs),self%wf(iobs))   
-        call vert_interp_apply(t%nval,mixr%vals(:,iobs), self%mixr_traj(iobs), self%wi(iobs),self%wf(iobs))
-!        call vert_interp_apply(t%nval, prs%vals(:,iobs), self%prs_traj(iobs),  self%wi(iobs),self%wf(iobs))
+        call vert_interp_apply(t%nval,  t%vals(:,iobs), self%t(iobs), self%wi(iobs),self%wf(iobs))   
+        call vert_interp_apply(q%nval,  q%vals(:,iobs), self%q(iobs), self%wi(iobs),self%wf(iobs))
        ! use  hypsometric equation to calculate pressure 
         Tv_traj  = 0.0
         Tv_traj0 = 0.0
-        Tv_traj  = self%t_traj(iobs)*(one + (rv_over_rd-one)*self%mixr_traj(iobs) )
-        Tv_traj0 = t%vals(wi0,iobs)*(one + (rv_over_rd-one)*mixr%vals(wi0,iobs) )
-        self%prs_traj(iobs) = prs%vals(wi0,iobs)/exp(two*grav*(self%obsH(iobs)-gph%vals(wi0,iobs))/(rd*(Tv_traj+Tv_traj0)))
+        Tv_traj  = self%t(iobs)*(one + (rv_over_rd-one)*self%q(iobs)/(1.0-self%q(iobs)) )
+        Tv_traj0 = t%vals(wi0,iobs)*(one + (rv_over_rd-one)*q%vals(wi0,iobs)/(1.0-q%vals(wi0,iobs) ))
+        self%prs(iobs) = prs%vals(wi0,iobs)/exp(two*grav*(self%obsH(iobs)-gph%vals(wi0,iobs))/(rd*(Tv_traj+Tv_traj0)))
 
       enddo
   
-       self%gph_traj=gph%vals
+       self%gph=gph%vals
        self%ltraj = .true.
       ! cleanup
       call ioda_obsvec_delete(obsZ)
@@ -140,8 +139,8 @@ contains
       character(max_string)       :: err_msg
       
       integer                   :: iobs,ierr
-      type(ufo_geoval), pointer :: t_d, mixr_d, prs_d
-      real(kind_real)           :: t_coeff, prs_coeff, mixr_coeff
+      type(ufo_geoval), pointer :: t_d, q_d, prs_d
+      real(kind_real)           :: t_coeff, prs_coeff, q_coeff
       real(kind_real)           :: gesT_d, gesQ_d, gesP_d,gesTv_d, gesTv0_d
       real(kind_real)           :: wf0
       integer                   :: wi0
@@ -168,9 +167,9 @@ contains
          write(err_msg,*) myname_, trim(var_t), ' doesnt exist'
          call abor1_ftn(err_msg)
       endif
-      call ufo_geovals_get_var(geovals, var_mixr, mixr_d,status=ierr)
+      call ufo_geovals_get_var(geovals, var_q, q_d,status=ierr)
       if (ierr/=0) then
-         write(err_msg,*) myname_, trim(var_mixr), ' doesnt exist'
+         write(err_msg,*) myname_, trim(var_q), ' doesnt exist'
          call abor1_ftn(err_msg)
       endif
   
@@ -180,26 +179,25 @@ contains
       ! tangent linear obs operator (linear)
       do iobs = 1, hofx%nobs
         wi0 = self%wi(iobs)
-        wf0 = self%wf(iobs)
-        call vert_interp_apply(t_d%nval,   t_d%vals(:,iobs), gesT_d, self%wi(iobs),self%wf(iobs))
-        call vert_interp_apply(t_d%nval,mixr_d%vals(:,iobs), gesQ_d, self%wi(iobs),self%wf(iobs))
-        call vert_interp_apply(t_d%nval,prs_d%vals(:,iobs), gesP_d, self%wi(iobs),self%wf(iobs))
-
-        prs_coeff  =   n_a/self%t_traj(iobs)   &
-                     + n_b*self%mixr_traj(iobs)/((self%mixr_traj(iobs)+rd_over_rv)*self%t_traj(iobs)**2)   &
-                     + n_c*self%mixr_traj(iobs)/((self%mixr_traj(iobs)+rd_over_rv)*self%t_traj(iobs))
-        t_coeff    = - n_a*self%prs_traj(iobs)/self%t_traj(iobs)**2           &
-                     - n_b*two*self%prs_traj(iobs)*self%mixr_traj(iobs)/  &
-                          ( (self%mixr_traj(iobs)+rd_over_rv)*self%t_traj(iobs)**3  )   &
-                     - n_c*self%prs_traj(iobs)*self%mixr_traj(iobs)/((self%mixr_traj(iobs)+rd_over_rv)*self%t_traj(iobs)**2)
-        mixr_coeff =   n_b*self%prs_traj(iobs)/( self%t_traj(iobs)**2*(self%mixr_traj(iobs)+rd_over_rv)**2 ) *  &
+        wf0 = self%wf(iobs)  
+        call vert_interp_apply_tl(  t_d%nval,  t_d%vals(:,iobs), gesT_d, self%wi(iobs),self%wf(iobs)) 
+        call vert_interp_apply_tl(  q_d%nval,  q_d%vals(:,iobs), gesQ_d, self%wi(iobs),self%wf(iobs))
+        call vert_interp_apply_tl(prs_d%nval,prs_d%vals(:,iobs), gesP_d, self%wi(iobs),self%wf(iobs))
+        prs_coeff  =   n_a/self%t(iobs)   &
+                     + n_b*self%q(iobs)/ ( ((1-rd_over_rv)*self%q(iobs)+rd_over_rv)*self%t(iobs)**2 )   &
+                     + n_c*self%q(iobs)/ ( ((1-rd_over_rv)*self%q(iobs)+rd_over_rv)*self%t(iobs) )
+        t_coeff    = - n_a*self%prs(iobs)/self%t(iobs)**2           &
+                     - n_b*two*self%prs(iobs)*self%q(iobs)/  &
+                           ( ((1-rd_over_rv)*self%q(iobs)+rd_over_rv)*self%t(iobs)**3  )   &
+                     - n_c*self%prs(iobs)*self%q(iobs)/      &
+                           ( ((1-rd_over_rv)*self%q(iobs)+rd_over_rv)*self%t(iobs)**2 )
+        q_coeff =   n_b*self%prs(iobs)/( self%t(iobs)**2*( (1-rd_over_rv)*self%q(iobs)+rd_over_rv)**2 ) *  &
                        rd_over_rv                        &
-                     + n_c*self%prs_traj(iobs)/( self%t_traj(iobs)**2*(self%mixr_traj(iobs)+rd_over_rv) ) *  &
+                  + n_c*self%prs(iobs)/( self%t(iobs)   *( (1-rd_over_rv)*self%q(iobs)+rd_over_rv)**2 ) *  &
                        rd_over_rv          
         hofx%values(iobs)   = prs_coeff*gesP_d  +                     &
-                              t_coeff*gesT_d    +   mixr_coeff*gesQ_d
-
-      enddo
+                              t_coeff*gesT_d    +   q_coeff*gesQ_d
+      enddo 
     
     end subroutine ufo_gnssro_ref_tlad_tl
     
@@ -218,8 +216,8 @@ contains
       character(max_string) :: err_msg
       
       integer :: iobs,ierr
-      type(ufo_geoval), pointer :: t_d, mixr_d, prs_d
-      real(kind_real) :: t_coeff, prs_coeff, mixr_coeff
+      type(ufo_geoval), pointer :: t_d, q_d, prs_d,gph_d
+      real(kind_real) :: t_coeff, prs_coeff, q_coeff
       real(kind_real) :: gesT_d, gesQ_d, gesP_d,gesTv_d, gesTv0_d
 
       ! check if trajectory was set
@@ -247,11 +245,16 @@ contains
         call abor1_ftn(err_msg)
       endif 
       
-      call ufo_geovals_get_var(geovals, var_mixr, mixr_d, status=ierr)
+      call ufo_geovals_get_var(geovals, var_q, q_d, status=ierr)
       if (ierr/=0) then
-        write(err_msg,*) myname_, trim(var_mixr), ' doesnt exist'
+        write(err_msg,*) myname_, trim(var_q), ' doesnt exist'
         call abor1_ftn(err_msg)
       endif    
+      call ufo_geovals_get_var(geovals, var_z, gph_d, status=ierr)
+      if (ierr/=0) then
+        write(err_msg,*) myname_, trim(var_z), ' doesnt exist'
+        call abor1_ftn(err_msg)
+      endif
       ! allocate if not yet allocated	
       if (.not. allocated(t_d%vals)) then
          t_d%nobs = self%nobs
@@ -267,40 +270,49 @@ contains
       endif
       prs_d%vals = 0.0_kind_real
 
-      if (.not. allocated(mixr_d%vals)) then
-         mixr_d%nobs = self%nobs
-         mixr_d%nval = self%nval
-         allocate(mixr_d%vals(mixr_d%nval,mixr_d%nobs))
+      if (.not. allocated(q_d%vals)) then
+         q_d%nobs = self%nobs
+         q_d%nval = self%nval
+         allocate(q_d%vals(q_d%nval,q_d%nobs))
       endif
-      mixr_d%vals = 0.0_kind_real
+      q_d%vals = 0.0_kind_real
+
+      if (.not. allocated(gph_d%vals)) then
+         gph_d%nobs = self%nobs
+         gph_d%nval = self%nval 
+         allocate(gph_d%vals(gph_d%nval,gph_d%nobs))
+      endif
+      gph_d%vals = 0.0_kind_real
 
       if (.not. geovals%linit ) geovals%linit=.true.
 
       call gnssro_ref_constants(use_compress)
+ 
 
       do iobs = 1, hofx%nobs
 
-        prs_coeff  =   n_a/self%t_traj(iobs)   &
-                     + n_b*self%mixr_traj(iobs)/((self%mixr_traj(iobs)+rd_over_rv)*self%t_traj(iobs)**2)   &
-                     + n_c*self%mixr_traj(iobs)/((self%mixr_traj(iobs)+rd_over_rv)*self%t_traj(iobs))
-        t_coeff    = - n_a*self%prs_traj(iobs)/self%t_traj(iobs)**2           &
-                     - n_b*two*self%prs_traj(iobs)*self%mixr_traj(iobs)/  &
-                          ( (self%mixr_traj(iobs)+rd_over_rv)*self%t_traj(iobs)**3  )   &
-                     - n_c*self%prs_traj(iobs)*self%mixr_traj(iobs)/((self%mixr_traj(iobs)+rd_over_rv)*self%t_traj(iobs)**2)
-        mixr_coeff =   n_b*self%prs_traj(iobs)/( self%t_traj(iobs)**2*(self%mixr_traj(iobs)+rd_over_rv)**2 ) *  &
+        prs_coeff  =   n_a/self%t(iobs)   &
+                     + n_b*self%q(iobs)/ ( ((1-rd_over_rv)*self%q(iobs)+rd_over_rv)*self%t(iobs)**2 )   &
+                     + n_c*self%q(iobs)/ ( ((1-rd_over_rv)*self%q(iobs)+rd_over_rv)*self%t(iobs) )
+        t_coeff    = - n_a*self%prs(iobs)/self%t(iobs)**2           &
+                     - n_b*two*self%prs(iobs)*self%q(iobs)/  &
+                           ( ((1-rd_over_rv)*self%q(iobs)+rd_over_rv)*self%t(iobs)**3  )   &
+                     - n_c*self%prs(iobs)*self%q(iobs)/      &
+                           ( ((1-rd_over_rv)*self%q(iobs)+rd_over_rv)*self%t(iobs)**2 )
+        q_coeff =   n_b*self%prs(iobs)/( self%t(iobs)**2*( (1-rd_over_rv)*self%q(iobs)+rd_over_rv)**2 ) *  &
                        rd_over_rv                        &
-                     + n_c*self%prs_traj(iobs)/( self%t_traj(iobs)**2*(self%mixr_traj(iobs)+rd_over_rv) ) *  &
+                  + n_c*self%prs(iobs)/( self%t(iobs)   *( (1-rd_over_rv)*self%q(iobs)+rd_over_rv)**2 ) *  &
                        rd_over_rv
-
+  
         gesT_d = 0.0_kind_real
         gesQ_d = 0.0_kind_real
         gesP_d = 0.0_kind_real
         gesT_d = gesT_d + hofx%values(iobs)*t_coeff
-        gesQ_d = gesQ_d + hofx%values(iobs)*mixr_coeff
+        gesQ_d = gesQ_d + hofx%values(iobs)*q_coeff
         gesP_d = gesP_d + hofx%values(iobs)*prs_coeff
-        call vert_interp_apply_ad(t_d%nval,    t_d%vals(:,iobs),    gesT_d, self%wi(iobs), self%wf(iobs))
-        call vert_interp_apply_ad(mixr_d%nval, mixr_d%vals(:,iobs), gesQ_d, self%wi(iobs), self%wf(iobs))
-        call vert_interp_apply_ad(prs_d%nval,  prs_d%vals(:,iobs),  gesP_d, self%wi(iobs), self%wf(iobs))
+        call vert_interp_apply_ad(  t_d%nval,  t_d%vals(:,iobs), gesT_d, self%wi(iobs), self%wf(iobs))
+        call vert_interp_apply_ad(  q_d%nval,  q_d%vals(:,iobs), gesQ_d, self%wi(iobs), self%wf(iobs))
+        call vert_interp_apply_ad(prs_d%nval,prs_d%vals(:,iobs), gesP_d, self%wi(iobs), self%wf(iobs))
 
       enddo
 
@@ -314,13 +326,13 @@ contains
       character(len=*), parameter :: myname_="ufo_gnssro_ref_tlad_delete"
       
       self%nval = 0
-      if (allocated(self%wi)) deallocate(self%wi)
-      if (allocated(self%wf)) deallocate(self%wf)
-      if (allocated(self%prs_traj))  deallocate(self%prs_traj)
-      if (allocated(self%t_traj))    deallocate(self%t_traj)
-      if (allocated(self%mixr_traj)) deallocate(self%mixr_traj)
-      if (allocated(self%gph_traj))    deallocate(self%gph_traj)
-      if (allocated(self%obsH))    deallocate(self%obsH)
+      if (allocated(self%wi))  deallocate(self%wi)
+      if (allocated(self%wf))  deallocate(self%wf)
+      if (allocated(self%prs)) deallocate(self%prs)
+      if (allocated(self%t))   deallocate(self%t)
+      if (allocated(self%q))   deallocate(self%q)
+      if (allocated(self%gph)) deallocate(self%gph)
+      if (allocated(self%obsH))deallocate(self%obsH)
       self%ltraj = .false. 
     end subroutine ufo_gnssro_ref_tlad_delete
     

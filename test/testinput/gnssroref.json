@@ -23,7 +23,7 @@
 	    "filename":"Data/gnssro_ref_geovals.nc4"
         },
         "ObsBias": {},
-        "rmsequiv": "244.09365547760723",
+        "rmsequiv": "244.27864904801481",
         "tolerance": "1.0e-7"
       }
     ]

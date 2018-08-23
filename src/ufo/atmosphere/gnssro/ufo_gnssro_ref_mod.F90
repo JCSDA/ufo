@@ -46,7 +46,7 @@ contains
       integer         :: iobs,k
       real(kind_real) :: wf
       integer         :: wi,ierr
-      type(ufo_geoval), pointer ::t ,mixr,prs,gph
+      type(ufo_geoval), pointer ::t,q,prs,gph
       real(kind_real)            ::refr1, refr2,refr3
       type(obs_vector) :: obsZ, obsLat
       real(kind_real)  :: obsH, gesT,gesQ, gesTv, gesTv0,gesP
@@ -67,9 +67,9 @@ contains
          write(err_msg,*) myname_, trim(var_t), ' doesnt exist'
          call abor1_ftn(err_msg)
       endif
-      call ufo_geovals_get_var(geovals, var_mixr, mixr,status=ierr)
+      call ufo_geovals_get_var(geovals, var_q, q,status=ierr)
        if (ierr/=0) then
-         write(err_msg,*) myname_, trim(var_mixr), ' doesnt exist'
+         write(err_msg,*) myname_, trim(var_q), ' doesnt exist'
          call abor1_ftn(err_msg)
       endif
       call ufo_geovals_get_var(geovals, var_z, gph,status=ierr)
@@ -79,7 +79,7 @@ contains
        endif
 
       call ioda_obsvec_setup(obsZ, obss%nobs)
-      call ioda_obsdb_var_to_ovec(obss, obsZ, "HEIT")
+      call ioda_obsdb_var_to_ovec(obss, obsZ, "MSL_ALT")
       call ioda_obsvec_setup(obsLat, obss%nobs)
       call ioda_obsdb_var_to_ovec(obss, obsLat, "Latitude")
       call gnssro_ref_constants(use_compress)
@@ -88,19 +88,19 @@ contains
       do iobs = 1, hofx%nobs
       ! Convert geometric height at observation to geopotential height 
         call geometric2geop(obsLat%values(iobs), obsZ%values(iobs), obsH)
-        call vert_interp_weights(t%nval,obsH, gph%vals(:,iobs),wi,wf)  ! calculate weights 
+        call vert_interp_weights(gph%nval,obsH, gph%vals(:,iobs),wi,wf)  ! calculate weights 
         call vert_interp_apply(t%nval,   t%vals(:,iobs), gesT, wi, wf)
-        call vert_interp_apply(t%nval,mixr%vals(:,iobs), gesQ, wi, wf)
-!        call vert_interp_apply(t%nval, prs%vals(:,iobs), gesP, wi, wf)
+        call vert_interp_apply(q%nval,   q%vals(:,iobs), gesQ, wi, wf)
+
       ! use  hypsometric equation to calculate pressure 
         gesTv  = 0.0
         gesTv0 = 0.0
-        gesTv  = gesT*(one + (rv_over_rd-one)*gesQ)
-        gesTv0 = t%vals(wi,iobs)*(one + (rv_over_rd-one)*mixr%vals(wi,iobs))
+        gesTv  = gesT*(one + (rv_over_rd-one)* (gesQ/(1-gesQ) ) )
+        gesTv0 = t%vals(wi,iobs)*(one + (rv_over_rd-one) * (q%vals(wi,iobs)/(1-q%vals(wi,iobs)) ))
         gesP   = prs%vals(wi,iobs)/exp(two*grav*(obsH-gph%vals(wi,iobs))/(rd*(gesTv+gesTv0)))
-        refr1  = n_a*gesP/(gesT)
-        refr2  = n_b*gesP*gesQ/(gesT)**2/(gesQ+rd_over_rv)
-        refr3  = n_c*gesP*gesQ/gesT/(gesQ+rd_over_rv)
+        refr1  = n_a*gesP/gesT
+        refr2  = n_b*gesP*gesQ/ ( gesT**2 * (rd_over_rv+(1-rd_over_rv)*gesQ) )
+        refr3  = n_c*gesP*gesQ/ ( gesT    * (rd_over_rv+(1-rd_over_rv)*gesQ) )
         hofx%values(iobs)  = refr1 + refr2 + refr3
       enddo
 
