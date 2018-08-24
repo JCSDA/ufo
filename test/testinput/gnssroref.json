@@ -24,7 +24,7 @@
         },
         "ObsBias": {},
         "rmsequiv": "244.27864904801481",
-        "tolerance": "1.0e-7"
+        "tolerance": "5.0e-5"
       }
     ]
   }
