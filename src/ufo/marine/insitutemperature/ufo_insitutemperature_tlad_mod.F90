@@ -150,7 +150,7 @@ contains
 
   ! ------------------------------------------------------------------------------
 
-  subroutine ufo_insitutemperature_tlad_eqv_tl(traj, geovals, hofx, obs_ti)
+  subroutine ufo_insitutemperature_tlad_eqv_tl(traj, geovals, hofx)
 
     use ufo_tpsp2ti_mod
     use gsw_pot_to_insitu
@@ -160,7 +160,6 @@ contains
     type(ufo_insitutemperature_tlad), intent(in) :: traj !< Trajectory
     type(ufo_geovals), intent(in)    :: geovals           !< Increments (dtp, dsp)
     type(obs_vector),  intent(inout) :: hofx              !< dti
-    type(ioda_obs_insitutemperature), intent(in) :: obs_ti     !< Insitu temperature observations
 
     character(len=*), parameter :: myname_="ufo_insitutemperature_tlad_eqv_tl"
     character(max_string) :: err_msg
@@ -220,17 +219,16 @@ contains
 
   ! ------------------------------------------------------------------------------
 
-  subroutine ufo_insitutemperature_tlad_eqv_ad(traj, geovals, hofx, obs_ti)
+  subroutine ufo_insitutemperature_tlad_eqv_ad(traj, geovals, hofx)
 
     use ufo_tpsp2ti_mod
     use gsw_pot_to_insitu
     use vert_interp_mod    
     
     implicit none
-    type(ufo_insitutemperature_tlad), intent(in) :: traj
+    type(ufo_insitutemperature_tlad), intent(in)  :: traj
     type(ufo_geovals), intent(inout)              :: geovals
     type(obs_vector),  intent(in)                 :: hofx
-    type(ioda_obs_insitutemperature), intent(in)  :: obs_ti     !< Insitu temperature observations
 
     character(len=*), parameter :: myname_="ufo_insitutemperature_tlad_eqv_ad"
     character(max_string) :: err_msg
@@ -253,6 +251,8 @@ contains
        call abor1_ftn(err_msg)
     endif
 
+    if (.not. geovals%linit ) geovals%linit=.true.
+    
     ! check if sea temperature profile variable is in geovals and get it
     call ufo_geovals_get_var(geovals, var_ocn_pot_temp, dtemp)
 
@@ -268,7 +268,7 @@ contains
     if (.not. allocated(dtemp%vals)) allocate(dtemp%vals(nlev, hofx%nobs))
     if (.not. allocated(dsalt%vals)) allocate(dsalt%vals(nlev, hofx%nobs))
     if (.not. allocated(dlayerthick%vals)) allocate(dlayerthick%vals(nlev, hofx%nobs))    
-    
+
     ! backward sea temperature profile obs operator
     dtemp%vals = 0.0
     dsalt%vals = 0.0

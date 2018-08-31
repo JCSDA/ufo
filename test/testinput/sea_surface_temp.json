@@ -4,26 +4,25 @@
   "window_end": "2018-04-16T00:00:00Z",
   "LinearObsOpTest": {
     "testiterTL": "10",
-    "toleranceTL": "1.0e-7",
-    "toleranceAD": "1.0e-7"
+    "toleranceTL": "1.0e-8",
+    "toleranceAD": "1.0e-8"
   },
   "Observations": {
     "ObsTypes": [
       {
-        "ObsType": "InsituTemperature",
+        "ObsType": "SeaSurfaceTemp",
         "ObsData": {
           "ObsDataIn": {
-            "obsfile": "./Data/t0n156e_dy.nc"
+            "obsfile": "./Data/sst_obs-2018-04-15.nc"
           }
         },
         "GeoVaLs": {
-          "norm": "1",
-          "random": "0",
-            "nobs": "26335",
-	    "filename":"./Data/t0n156e_dy_geovals.nc"
+          "norm": "356",
+          "random": "1",
+          "nobs": "223966"
         },
         "ObsBias": {},
-        "rmsequiv": "24.136239493433276",
+        "rmsequiv": "1.000491832844",
         "tolerance": "1.0e-8"
       }
     ]

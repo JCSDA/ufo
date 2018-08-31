@@ -104,9 +104,6 @@ call ufo_geovals_get_var(geovals, var_seaicefrac, icefrac_d)
 ! check if sea ice thickness variable is in geovals and get it
 call ufo_geovals_get_var(geovals, var_seaicethick, icethick_d)
 
-print *, 'in tl: thick=', icethick_d%vals(:,:)
-print *, 'in tl: frac=', icefrac_d%vals(:,:)
-
 ! sea ice thickness obs operator
 ncat = icefrac_d%nval
 hofx%values = 0.0
@@ -116,7 +113,6 @@ do iobs = 1, hofx%nobs
                          self%icefrac%vals(icat,iobs) * icethick_d%vals(icat,iobs) / 905.0 + &
                          icefrac_d%vals(icat,iobs) * self%icethick%vals(icat,iobs) /905.0
    enddo
-   print *,'in tl, hofx=',hofx%values(iobs)
 enddo
 
 end subroutine ufo_seaicethick_tlad_eqv_tl
@@ -147,6 +143,8 @@ if (geovals%nobs /= hofx%nobs) then
   call abor1_ftn(err_msg)
 endif
 
+if (.not. geovals%linit ) geovals%linit=.true.
+
 ! check if sea ice fraction variable is in geovals and get it
 call ufo_geovals_get_var(geovals, var_seaicefrac, icefrac_d)
 
@@ -170,8 +168,7 @@ end if
 print *,'ncat=',ncat
 if (.not. allocated(icefrac_d%vals))  allocate(icefrac_d%vals(ncat,hofx%nobs))
 if (.not. allocated(icethick_d%vals)) allocate(icethick_d%vals(ncat, hofx%nobs))
-!print *,icethick_d%vals
-!print *,'================================================='
+
 icethick_d%vals = 0.0
 icefrac_d%vals = 0.0
 do iobs = 1, hofx%nobs
@@ -183,7 +180,7 @@ do iobs = 1, hofx%nobs
    enddo
 enddo
 !hofx%values = 0.0
-print *,icethick_d%vals
+
 !call abor1_ftn("end adjoint")
 end subroutine ufo_seaicethick_tlad_eqv_ad
 

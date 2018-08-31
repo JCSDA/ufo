@@ -1,19 +1,19 @@
 ! (C) Copyright 2017-2018 UCAR
-! 
+!
 ! This software is licensed under the terms of the Apache Licence Version 2.0
-! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
+! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 
 !> Fortran module to handle steric height operator
 
 module ufo_stericheight_tlad_mod
-  
+
 use ioda_obs_stericheight_mod
 use ioda_obs_vectors
 use ufo_vars_mod
 use ioda_locs_mod
 use ufo_geovals_mod
 use kinds
-  
+
 implicit none
 public :: ufo_stericheight_tlad
 public :: ufo_stericheight_tlad_settraj
@@ -31,7 +31,7 @@ end type ufo_stericheight_tlad
 ! ------------------------------------------------------------------------------
 
 contains
- 
+
 ! ------------------------------------------------------------------------------
 
 subroutine ufo_stericheight_tlad_settraj(self, geovals)
@@ -106,6 +106,9 @@ character(max_string) :: err_msg
 integer :: iobs
 type(ufo_geoval), pointer :: geoval
 
+print *,'&&&&&&&&&&&&7 in adjoint'
+read(*,*)
+
 ! check if nobs is consistent in geovals & hofx
 if (geovals%nobs /= hofx%nobs) then
   write(err_msg,*) myname_, ' error: nobs inconsistent!'
@@ -123,8 +126,11 @@ if (.not.(allocated(geoval%vals))) then
       !call abor1_ftn(err_msg)
    endif
    !allocate(geoval%vals(self%ncat,hofx%nobs))
-   allocate(geoval%vals(1,hofx%nobs))   
+   allocate(geoval%vals(1,hofx%nobs))
 end if
+
+if (.not. geovals%linit ) geovals%linit=.true.
+
 ! backward steric height obs operator
 geoval%vals=0.0
 do iobs = 1, hofx%nobs

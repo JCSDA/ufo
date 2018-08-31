@@ -76,6 +76,7 @@ character(len=MAXVARLEN), public :: var_ocn_con_temp  = "ocean_conservative_temp
 character(len=MAXVARLEN), public :: var_ocn_abs_salt  = "ocean_absolute_salinity"
 character(len=MAXVARLEN), public :: var_ocn_salt      = "ocean_salinity"
 character(len=MAXVARLEN), public :: var_ocn_lay_thick = "ocean_layer_thickness"
+character(len=MAXVARLEN), public :: var_ocn_sst       = "ocean_upper_level_temperature"
 
 ! ------------------------------------------------------------------------------
 

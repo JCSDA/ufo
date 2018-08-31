@@ -1,0 +1,20 @@
+---
+test_framework_runtime_config: "--log_level=test_suite"
+window_begin: 2018-04-15T00:00:00Z
+window_end: 2018-04-16T00:00:00Z
+LinearObsOpTest:
+  testiterTL: 10
+  toleranceTL: 1.0e-8
+  toleranceAD: 1.0e-8
+Observations:
+  ObsTypes:
+  - ObsType: SeaSurfaceTemp
+    ObsData:
+      ObsDataIn:
+        obsfile: Data/sst_obs-2018-04-15.nc
+    GeoVaLs:
+      random: 0
+      filename: Data/sst_obs-2018-04-15_geovals.nc
+    ObsBias: {}
+    rmsequiv: 22.244315376882486
+    tolerance: 1.0e-8
