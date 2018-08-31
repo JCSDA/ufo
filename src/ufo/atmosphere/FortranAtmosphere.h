@@ -57,6 +57,24 @@ extern "C" {
   void ufo_radiance_tlad_eqv_ad_f90(const F90hop &, const F90goms &, const F90odb &, const F90ovec &);
 
 // -----------------------------------------------------------------------------
+//  Gnssro observation operators and their tl/ad
+// -----------------------------------------------------------------------------
+  void ufo_gnssro_setup_f90(F90hop &, const eckit::Configuration * const *);
+  void ufo_gnssro_delete_f90(F90hop &);
+  void ufo_gnssro_tlad_setup_f90(F90hop &, const eckit::Configuration * const *);
+  void ufo_gnssro_tlad_delete_f90(F90hop &);
+  void ufo_gnssro_tlad_settraj_f90(const F90hop &, const F90goms &, const F90odb &);
+  void ufo_gnssro_ref_f90(const F90hop &, const F90goms &, const F90odb &, const F90ovec &, const F90obias &);
+  void ufo_gnssro_ref_tlad_tl_f90(const F90hop &, const F90goms &, const F90odb &, const F90ovec &);
+  void ufo_gnssro_ref_tlad_ad_f90(const F90hop &, const F90goms &, const F90odb &, const F90ovec &);
+// bending angle computed at tangent point-GSI implementation 2018
+//HS: activiate when ready
+//  void ufo_gnssro_bendangleGSI_f90(const F90hop &, const F90goms &, const F90odb &, const F90ovec &, const F90obias &);
+//  void ufo_gnssro_bendangleGSI_tlad_settraj_f90(const F90hop &, const F90goms &, const F90odb &);
+//  void ufo_gnssro_bendangleGSI_tlad_tl_f90(const F90hop &, const F90goms &, const F90odb &, const F90ovec &);
+//  void ufo_gnssro_bendangleGSI_tlad_ad_f90(const F90hop &, const F90goms &, const F90odb &, const F90ovec &);
+// -----------------------------------------------------------------------------  
+
 
 }  // extern C
 
