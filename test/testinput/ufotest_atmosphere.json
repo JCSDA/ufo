@@ -16,12 +16,12 @@
         "ObsType": "Radiance",
         "ObsData": {
           "ObsDataIn": {
-            "obsfile": "Data/amsua_n19_obs.nc4"
+            "obsfile": "Data/amsua_obs_n19_2018041500_m.nc4"
           }
         },
         "GeoVaLs": {
-          "norm": "204106.68591620424",
-          "filename": "Data/amsua_n19_geovals.nc4",
+          "norm": "62753.542028673342",
+          "filename": "Data/amsua_geoval_n19_2018041500_m.nc4",
           "random": "0"
         },
         "rmsequiv": "228.32019688865083",
@@ -32,13 +32,13 @@
         "ObsType": "Radiosonde",
         "ObsData": {
           "ObsDataIn": {
-            "obsfile": "Data/diag_t_01_wprofiles.nc4"
+            "obsfile": "Data/sondes_obs_2018041500_m.nc4"
           }
         },
         "GeoVaLs": {
-          "norm": "58658.435118029556",
+          "norm": "24080.310581728769",
           "random": "0",
-          "filename": "Data/diag_t_01_wprofiles.nc4"
+          "filename": "Data/sondes_geoval_2018041500_m.nc4"
         },
         "rmsequiv": "254.46418485798108",
         "tolerance": "1.0e-8",

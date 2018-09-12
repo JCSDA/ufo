@@ -45,17 +45,19 @@ ecbuild_add_resources( TARGET ufo_test_scripts
 
 # Create Data directory for test data and symlink files
 list( APPEND ufo_test_data
-  amsua_n19_obs.nc4
-  amsua_n19_geovals.nc4
-  diag_t_01_wprofiles.nc4
-  aircraft_geovals.nc4
-  diag_viirs_ges.2015081000_dbl_subset.nc4
-  vars_ges.2015081000_dbl_subset.nc4
-  gnssro_ref_geovals.nc4
+  atmosphere/aircraft_geoval_2018041500_m.nc4
+  atmosphere/aircraft_geoval_2018041500_s.nc4
+  atmosphere/amsua_geoval_n19_2018041500_m.nc4
+  atmosphere/amsua_geoval_n19_2018041500_s.nc4
+  atmosphere/sondes_geoval_2018041500_m.nc4
+  atmosphere/sondes_geoval_2018041500_s.nc4
+  atmosphere/gnssro_ref_geovals.nc4
+
+  constituents/vars_ges.2015081000_dbl_subset.nc4
 )
 
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Data)
-CREATE_SYMLINK( ${CMAKE_CURRENT_SOURCE_DIR}/testinput ${CMAKE_CURRENT_BINARY_DIR}/Data ${ufo_test_data} )
+CREATE_SYMLINK_FILENAME( ${CMAKE_CURRENT_SOURCE_DIR}/testinput ${CMAKE_CURRENT_BINARY_DIR}/Data ${ufo_test_data} )
 
 # Add marine test data
 if( ${GSW_FOUND} )
@@ -76,16 +78,11 @@ if( ${GSW_FOUND} )
                          )
 
     list( APPEND ufo_marine_test_data
-      marineobs/t0n156e_dy.nc
-      marineobs/t0n156e_dy_geovals.nc
-      marineobs/Jason-3-2018-04-15.nc
-      marineobs/Jason-3-2018-04-15_geovals.nc      
-      marineobs/seaice_obs-2018-04-15.nc
-      marineobs/seaice_obs-2018-04-15_geovals.nc
-      marineobs/cryosat2-2018-04-15.nc
-      marineobs/cryosat2-2018-04-15_geovals.nc      
-      marineobs/sst_obs-2018-04-15.nc
-      marineobs/sst_obs-2018-04-15_geovals.nc      
+      marine/Jason-3-2018-04-15_geovals.nc
+      marine/cryosat2-2018-04-15_geovals.nc
+      marine/seaice_obs-2018-04-15_geovals.nc
+      marine/sst_obs-2018-04-15_geovals.nc
+      marine/t0n156e_dy_geovals.nc
     )
 
 	CREATE_SYMLINK_FILENAME( ${CMAKE_CURRENT_SOURCE_DIR}/testinput
@@ -93,6 +90,32 @@ if( ${GSW_FOUND} )
                              ${ufo_marine_test_data} )
 
 endif( ${GSW_FOUND} )
+
+# Add ioda obs test data
+list (APPEND ioda_obs_test_data
+  atmosphere/aircraft_obs_2018041500_m.nc4
+  atmosphere/aircraft_obs_2018041500_s.nc4
+  atmosphere/amsua_obs_n19_2018041500_m.nc4
+  atmosphere/amsua_obs_n19_2018041500_s.nc4
+  atmosphere/sondes_obs_2018041500_m.nc4
+  atmosphere/sondes_obs_2018041500_s.nc4
+  atmosphere/gnssro_ref_obs.nc4
+  atmosphere/diag_t_obs_01_wprofiles.odb
+  atmosphere/diag_t_obs_01_wprofiles_odb
+
+  constituents/diag_viirs_ges.2015081000_dbl_subset.nc4
+
+  marine/Jason-3-2018-04-15.nc
+  marine/cryosat2-2018-04-15.nc
+  marine/sea-ice-con-l2.nc
+  marine/seaice_obs-2018-04-15.nc4
+  marine/sst_obs-2018-04-15.nc4
+  marine/t0n156e_dy_obs.nc
+  )
+
+CREATE_SYMLINK_FILENAME( ${ioda_SOURCE_DIR}/test/testinput
+                         ${CMAKE_CURRENT_BINARY_DIR}/Data
+                         ${ioda_obs_test_data} )
 
 #####################################################################
 

@@ -11,7 +11,7 @@ Observations:
   - ObsType: InsituTemperature
     ObsData:
       ObsDataIn:
-        obsfile: Data/t0n156e_dy.nc
+        obsfile: Data/t0n156e_dy_obs.nc
     GeoVaLs:
       random: 0
       filename: Data/t0n156e_dy_geovals.nc

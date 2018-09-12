@@ -69,7 +69,7 @@ contains
       
       ! observation of pressure (for vertical interpolation)
       call ioda_obsvec_setup(pressure, obss%nobs)
-      call ioda_obsdb_var_to_ovec(obss, pressure, "Pressure")
+      call ioda_obsdb_var_to_ovec(obss, pressure, "air_pressure")
       
       ! obs operator
       do iobs = 1, hofx%nobs

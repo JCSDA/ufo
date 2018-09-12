@@ -8,15 +8,15 @@
         "ObsType": "Radiance",
         "ObsData": {
           "ObsDataIn": {
-            "obsfile": "Data/amsua_n19_obs.nc4"
+            "obsfile": "Data/amsua_obs_n19_2018041500_m.nc4"
           }
         },
         "GeoVaLs": {
           "norm": "7071.1296549464405",
-          "filename": "Data/amsua_n19_geovals.nc4",
+          "filename": "Data/amsua_geoval_n19_2018041500_m.nc4",
           "random": "0"
         },
-        "rmsequiv": "228.38998190355065",
+        "rmsequiv": "229.75327592263585",
         "tolerance": "1.e-8",
         "ObsBias": {}
       }
