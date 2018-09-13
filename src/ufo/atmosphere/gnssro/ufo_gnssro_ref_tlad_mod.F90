@@ -216,7 +216,7 @@ contains
       character(max_string) :: err_msg
       
       integer :: iobs,ierr
-      type(ufo_geoval), pointer :: t_d, q_d, prs_d,gph_d
+      type(ufo_geoval), pointer :: t_d, q_d, prs_d, gph_d
       real(kind_real) :: t_coeff, prs_coeff, q_coeff
       real(kind_real) :: gesT_d, gesQ_d, gesP_d,gesTv_d, gesTv0_d
 
@@ -276,6 +276,13 @@ contains
          allocate(q_d%vals(q_d%nval,q_d%nobs))
       endif
       q_d%vals = 0.0_kind_real
+
+      if (.not. allocated(gph_d%vals)) then
+         gph_d%nobs = self%nobs
+         gph_d%nval = self%nval 
+         allocate(gph_d%vals(gph_d%nval,gph_d%nobs))
+      endif
+      gph_d%vals = 0.0_kind_real
 
       if (.not. allocated(gph_d%vals)) then
          gph_d%nobs = self%nobs
