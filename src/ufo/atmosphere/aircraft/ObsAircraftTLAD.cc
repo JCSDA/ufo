@@ -5,20 +5,19 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#include "ObsAircraftTLAD.h"
+#include "ufo/atmosphere/aircraft/ObsAircraftTLAD.h"
 
 #include <ostream>
 #include <string>
+#include <vector>
 
-#include <boost/scoped_ptr.hpp>
-
-#include "ioda/ObsSpace.h"
 #include "ioda/ObsVector.h"
+
 #include "oops/base/Variables.h"
 #include "oops/util/Logger.h"
+
 #include "ufo/GeoVaLs.h"
 #include "ufo/ObsBias.h"
-#include "ufo/ObsBiasIncrement.h"
 
 namespace ufo {
 
@@ -53,14 +52,16 @@ void ObsAircraftTLAD::setTrajectory(const GeoVaLs & geovals, const ObsBias & bia
 
 void ObsAircraftTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec,
                                     const ObsBiasIncrement & bias) const {
-  ufo_aircraft_tlad_t_eqv_tl_f90(keyOperAircraft_, geovals.toFortran(), odb_.toFortran(), ovec.toFortran());
+  ufo_aircraft_tlad_t_eqv_tl_f90(keyOperAircraft_, geovals.toFortran(), odb_.toFortran(),
+                                 ovec.toFortran());
 }
 
 // -----------------------------------------------------------------------------
 
 void ObsAircraftTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec,
                                     ObsBiasIncrement & bias) const {
-  ufo_aircraft_tlad_t_eqv_ad_f90(keyOperAircraft_, geovals.toFortran(), odb_.toFortran(), ovec.toFortran());
+  ufo_aircraft_tlad_t_eqv_ad_f90(keyOperAircraft_, geovals.toFortran(), odb_.toFortran(),
+                                 ovec.toFortran());
 }
 
 // -----------------------------------------------------------------------------

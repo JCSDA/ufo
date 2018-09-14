@@ -5,21 +5,19 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#include "ObsADTTLAD.h"
+#include "ufo/marine/adt/ObsADTTLAD.h"
 
 #include <ostream>
 #include <string>
+#include <vector>
 
-#include <boost/scoped_ptr.hpp>
-
-#include "ioda/ObsSpace.h"
 #include "ioda/ObsVector.h"
+
 #include "oops/base/Variables.h"
-#include "oops/util/ObjectCounter.h"
 #include "oops/util/Logger.h"
+
 #include "ufo/GeoVaLs.h"
 #include "ufo/ObsBias.h"
-#include "ufo/ObsBiasIncrement.h"
 
 namespace ufo {
 
@@ -47,18 +45,20 @@ ObsADTTLAD::~ObsADTTLAD() {
 // -----------------------------------------------------------------------------
 
 void ObsADTTLAD::setTrajectory(const GeoVaLs & geovals, const ObsBias & bias) {
-  ufo_adt_tlad_settraj_f90(keyOperADT_, geovals.toFortran());//, odb_.toFortran());
+  ufo_adt_tlad_settraj_f90(keyOperADT_, geovals.toFortran());  //, odb_.toFortran());
 }
 
 // -----------------------------------------------------------------------------
 
-  void ObsADTTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec, const ObsBiasIncrement & bias) const {
+  void ObsADTTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec,
+                                 const ObsBiasIncrement & bias) const {
   ufo_adt_tlad_eqv_tl_f90(keyOperADT_, geovals.toFortran(), ovec.toFortran());
 }
 
 // -----------------------------------------------------------------------------
 
-  void ObsADTTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec, ObsBiasIncrement & bias) const {
+  void ObsADTTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec,
+                                 ObsBiasIncrement & bias) const {
   ufo_adt_tlad_eqv_ad_f90(keyOperADT_, geovals.toFortran(), ovec.toFortran());
 }
 

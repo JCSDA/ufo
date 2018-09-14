@@ -5,18 +5,20 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#include "ObsInsituTemperatureTLAD.h"
+#include "ufo/marine/insitutemperature/ObsInsituTemperatureTLAD.h"
 
 #include <ostream>
 #include <string>
+#include <vector>
 
 #include <boost/scoped_ptr.hpp>
 
 #include "ioda/ObsSpace.h"
 #include "ioda/ObsVector.h"
+
 #include "oops/base/Variables.h"
-#include "oops/util/ObjectCounter.h"
 #include "oops/util/Logger.h"
+
 #include "ufo/GeoVaLs.h"
 #include "ufo/ObsBias.h"
 #include "ufo/ObsBiasIncrement.h"
@@ -24,15 +26,18 @@
 namespace ufo {
 
 // -----------------------------------------------------------------------------
-static LinearObsOperatorMaker<ObsInsituTemperatureTLAD> makerInsituTemperatureTLAD_("InsituTemperature");
+static LinearObsOperatorMaker<ObsInsituTemperatureTLAD>
+              makerInsituTemperatureTLAD_("InsituTemperature");
 // -----------------------------------------------------------------------------
 
-  ObsInsituTemperatureTLAD::ObsInsituTemperatureTLAD(const ioda::ObsSpace & odb, const eckit::Configuration & config)
+ObsInsituTemperatureTLAD::ObsInsituTemperatureTLAD(const ioda::ObsSpace & odb,
+                                                   const eckit::Configuration & config)
   : keyOperInsituTemperature_(0), varin_(), odb_(odb)
 {
   const eckit::Configuration * configc = &config;
   ufo_insitutemperature_tlad_setup_f90(keyOperInsituTemperature_, &configc);
-  const std::vector<std::string> vv{"ocean_potential_temperature", "ocean_salinity", "ocean_layer_thickness"};
+  const std::vector<std::string> vv{"ocean_potential_temperature", "ocean_salinity",
+                                    "ocean_layer_thickness"};
   varin_.reset(new oops::Variables(vv));
   oops::Log::trace() << "ObsInsituTemperatureTLAD created" << std::endl;
 }
@@ -47,19 +52,24 @@ ObsInsituTemperatureTLAD::~ObsInsituTemperatureTLAD() {
 // -----------------------------------------------------------------------------
 
 void ObsInsituTemperatureTLAD::setTrajectory(const GeoVaLs & geovals, const ObsBias & bias) {
-  ufo_insitutemperature_tlad_settraj_f90(keyOperInsituTemperature_, geovals.toFortran(), odb_.toFortran());
+  ufo_insitutemperature_tlad_settraj_f90(keyOperInsituTemperature_, geovals.toFortran(),
+                                         odb_.toFortran());
 }
 
 // -----------------------------------------------------------------------------
 
-  void ObsInsituTemperatureTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec, const ObsBiasIncrement & bias) const {
-  ufo_insitutemperature_tlad_eqv_tl_f90(keyOperInsituTemperature_, geovals.toFortran(), odb_.toFortran(), ovec.toFortran());
+void ObsInsituTemperatureTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec,
+                                             const ObsBiasIncrement & bias) const {
+  ufo_insitutemperature_tlad_eqv_tl_f90(keyOperInsituTemperature_, geovals.toFortran(),
+                                        odb_.toFortran(), ovec.toFortran());
 }
 
 // -----------------------------------------------------------------------------
 
-  void ObsInsituTemperatureTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec, ObsBiasIncrement & bias) const {
-  ufo_insitutemperature_tlad_eqv_ad_f90(keyOperInsituTemperature_, geovals.toFortran(), odb_.toFortran(), ovec.toFortran());
+void ObsInsituTemperatureTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec,
+                                             ObsBiasIncrement & bias) const {
+  ufo_insitutemperature_tlad_eqv_ad_f90(keyOperInsituTemperature_, geovals.toFortran(),
+                                        odb_.toFortran(), ovec.toFortran());
 }
 
 // -----------------------------------------------------------------------------

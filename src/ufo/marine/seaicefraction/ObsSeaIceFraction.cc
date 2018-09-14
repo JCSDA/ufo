@@ -5,21 +5,23 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
  */
 
-#include "ObsSeaIceFraction.h"
+#include "ufo/marine/seaicefraction/ObsSeaIceFraction.h"
 
 #include <ostream>
 #include <string>
+#include <vector>
 
 #include <boost/scoped_ptr.hpp>
 
 #include "eckit/config/Configuration.h"
-#include "oops/base/Variables.h"
-#include "ufo/ObsOperatorBase.h"
+
 #include "ioda/ObsSpace.h"
+#include "ioda/ObsVector.h"
+
+#include "oops/base/Variables.h"
+
 #include "ufo/GeoVaLs.h"
 #include "ufo/ObsBias.h"
-#include "ufo/ObsBiasIncrement.h"
-#include "ioda/ObsVector.h"
 
 namespace ufo {
 
@@ -27,7 +29,8 @@ namespace ufo {
 static ObsOperatorMaker<ObsSeaIceFraction> makerSeaIceFraction_("SeaIceFraction");
 // -----------------------------------------------------------------------------
 
-ObsSeaIceFraction::ObsSeaIceFraction(const ioda::ObsSpace & odb, const eckit::Configuration & config)
+ObsSeaIceFraction::ObsSeaIceFraction(const ioda::ObsSpace & odb,
+                                     const eckit::Configuration & config)
   : keyOperSeaIceFraction_(0), varin_(), odb_(odb)
 {
   const eckit::Configuration * configc = &config;
@@ -48,7 +51,8 @@ ObsSeaIceFraction::~ObsSeaIceFraction() {
 
 void ObsSeaIceFraction::simulateObs(const GeoVaLs & gom, ioda::ObsVector & ovec,
                              const ObsBias & bias) const {
-  ufo_seaicefrac_eqv_f90(keyOperSeaIceFraction_, gom.toFortran(), odb_.toFortran(), ovec.toFortran(), bias.toFortran());
+  ufo_seaicefrac_eqv_f90(keyOperSeaIceFraction_, gom.toFortran(), odb_.toFortran(),
+                         ovec.toFortran(), bias.toFortran());
 }
 
 // -----------------------------------------------------------------------------

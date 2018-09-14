@@ -5,19 +5,23 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#include "GeoVaLs.h"
+#include "ufo/GeoVaLs.h"
+
+#include "eckit/config/Configuration.h"
+
+#include "ioda/Locations.h"
 
 #include "oops/base/Variables.h"
-#include "eckit/config/Configuration.h"
-#include "ioda/Locations.h"
-#include "Fortran.h"
-#include "FortranGeoVals.h"
 #include "oops/util/Logger.h"
 
+#include "ufo/Fortran.h"
+#include "ufo/FortranGeoVals.h"
+
 namespace ufo {
+
 // -----------------------------------------------------------------------------
 GeoVaLs::GeoVaLs(const ioda::Locations & locs, const oops::Variables & vars)
- : keyGVL_(-1), vars_(vars)
+  : keyGVL_(-1), vars_(vars)
 {
   oops::Log::trace() << "GeoVaLs contructor starting" << std::endl;
   const eckit::Configuration * cvar = &vars_.toFortran();
@@ -25,7 +29,7 @@ GeoVaLs::GeoVaLs(const ioda::Locations & locs, const oops::Variables & vars)
   oops::Log::trace() << "GeoVaLs contructor key = " << keyGVL_ << std::endl;
 }
 // -----------------------------------------------------------------------------
-  GeoVaLs::GeoVaLs(const eckit::Configuration & config, const oops::Variables & vars)
+GeoVaLs::GeoVaLs(const eckit::Configuration & config, const oops::Variables & vars)
 : keyGVL_(-1), vars_(vars)
 {
   oops::Log::trace() << "GeoVaLs constructor config starting" << std::endl;
@@ -72,13 +76,12 @@ GeoVaLs::~GeoVaLs() {
  *                   (M. Miesch, JCSDA)
  */
 void GeoVaLs::analytic_init(const ioda::Locations & locs,
-			    const eckit::Configuration & config)
+                            const eckit::Configuration & config)
   {
   const eckit::Configuration * conf = &config;
   if (config.has("analytic_init")) {
       ufo_geovals_analytic_init_f90(keyGVL_, locs.toFortran(), &conf);
     }
-
   }
 // -----------------------------------------------------------------------------
 void GeoVaLs::zero() {
@@ -92,7 +95,7 @@ void GeoVaLs::abs() {
 // -----------------------------------------------------------------------------
 double GeoVaLs::norm() const {
   double zz;
-  ufo_geovals_rms_f90(keyGVL_,zz);
+  ufo_geovals_rms_f90(keyGVL_, zz);
   return zz;
 }
 // -----------------------------------------------------------------------------
@@ -155,17 +158,15 @@ void GeoVaLs::print(std::ostream & os) const {
 
   if (zmin >= 0.0) {
     double mxval;
-    int ivar,iobs;
+    int ivar, iobs;
 
     ufo_geovals_maxloc_f90(keyGVL_, mxval, iobs, ivar);
 
     oops::Log::debug() << "GeoVaLs: Maximum Value (vertical rms) = "
-		       << std::setprecision(4)
-		       << mxval << " for observation = " << iobs
-		       << " and variable = " << ivar << std::endl;
-
+                       << std::setprecision(4)
+                       << mxval << " for observation = " << iobs
+                       << " and variable = " << ivar << std::endl;
   }
-
 }
 // -----------------------------------------------------------------------------
 void GeoVaLs::read(const eckit::Configuration & config) {

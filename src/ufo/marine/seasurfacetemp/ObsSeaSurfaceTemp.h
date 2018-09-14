@@ -5,8 +5,8 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
  */
 
-#ifndef UFO_OBSSEASURFACETEMP_H_
-#define UFO_OBSSEASURFACETEMP_H_
+#ifndef UFO_MARINE_SEASURFACETEMP_OBSSEASURFACETEMP_H_
+#define UFO_MARINE_SEASURFACETEMP_OBSSEASURFACETEMP_H_
 
 #include <ostream>
 #include <string>
@@ -14,23 +14,25 @@
 #include <boost/scoped_ptr.hpp>
 
 #include "eckit/config/Configuration.h"
-#include "oops/base/Variables.h"
-#include "ufo/ObsOperatorBase.h"
-#include "ioda/ObsSpace.h"
-#include "ufo/GeoVaLs.h"
+
 #include "ioda/Locations.h"
-#include "ufo/ObsBias.h"
-#include "ufo/ObsBiasIncrement.h"
+#include "ioda/ObsSpace.h"
 #include "ioda/ObsVector.h"
+
+#include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
+
+#include "ufo/GeoVaLs.h"
 #include "ufo/marine/FortranMarine.h"
+#include "ufo/ObsBias.h"
+#include "ufo/ObsOperatorBase.h"
 
 namespace ufo {
 
 // -----------------------------------------------------------------------------
 
 class ObsSeaSurfaceTemp : public ObsOperatorBase,
-                          private util::ObjectCounter<ObsSeaSurfaceTemp> {		    
+                          private util::ObjectCounter<ObsSeaSurfaceTemp> {
  public:
   static const std::string classname() {return "ufo::ObsSeaSurfaceTemp";}
 
@@ -55,5 +57,5 @@ class ObsSeaSurfaceTemp : public ObsOperatorBase,
 
 }  // namespace ufo
 
-#endif  // UFO_OBSSEASURFACETEMP_H_
+#endif  // UFO_MARINE_SEASURFACETEMP_OBSSEASURFACETEMP_H_
 

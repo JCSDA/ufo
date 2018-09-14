@@ -5,20 +5,16 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
  */
 
-#include "ObsRadiosonde.h"
+#include "ufo/atmosphere/radiosonde/ObsRadiosonde.h"
 
 #include <ostream>
 #include <string>
+#include <vector>
 
-#include "eckit/config/Configuration.h"
-#include "oops/base/Variables.h"
-#include "ioda/Locations.h"
-#include "ioda/ObsSpace.h"
 #include "ioda/ObsVector.h"
-#include "ufo/Fortran.h"
+
 #include "ufo/GeoVaLs.h"
 #include "ufo/ObsBias.h"
-#include "ufo/ObsBiasIncrement.h"
 
 namespace ufo {
 

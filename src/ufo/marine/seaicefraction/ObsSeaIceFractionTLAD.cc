@@ -5,18 +5,19 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#include "ObsSeaIceFractionTLAD.h"
+#include "ufo/marine/seaicefraction/ObsSeaIceFractionTLAD.h"
 
 #include <ostream>
 #include <string>
+#include <vector>
+
+#include "ioda/ObsVector.h"
 
 #include "oops/base/Variables.h"
-#include "ioda/ObsSpace.h"
-#include "ioda/ObsVector.h"
 #include "oops/util/Logger.h"
+
 #include "ufo/GeoVaLs.h"
 #include "ufo/ObsBias.h"
-#include "ufo/ObsBiasIncrement.h"
 
 namespace ufo {
 
@@ -24,7 +25,8 @@ namespace ufo {
 static LinearObsOperatorMaker<ObsSeaIceFractionTLAD> makerSeaIceFractionTLAD_("SeaIceFraction");
 // -----------------------------------------------------------------------------
 
-ObsSeaIceFractionTLAD::ObsSeaIceFractionTLAD(const ioda::ObsSpace & odb, const eckit::Configuration & config)
+ObsSeaIceFractionTLAD::ObsSeaIceFractionTLAD(const ioda::ObsSpace & odb,
+                                             const eckit::Configuration & config)
   : keyOperSeaIceFraction_(0), varin_()
 {
   const eckit::Configuration * configc = &config;

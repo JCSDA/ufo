@@ -5,8 +5,8 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#ifndef UFO_OBSINSITUTEMPERATURETLAD_H_
-#define UFO_OBSINSITUTEMPERATURETLAD_H_
+#ifndef UFO_MARINE_INSITUTEMPERATURE_OBSINSITUTEMPERATURETLAD_H_
+#define UFO_MARINE_INSITUTEMPERATURE_OBSINSITUTEMPERATURETLAD_H_
 
 #include <ostream>
 #include <string>
@@ -14,8 +14,9 @@
 #include <boost/scoped_ptr.hpp>
 
 #include "oops/base/Variables.h"
-#include "ufo/LinearObsOperatorBase.h"
 #include "oops/util/ObjectCounter.h"
+
+#include "ufo/LinearObsOperatorBase.h"
 #include "ufo/marine/FortranMarine.h"
 
 // Forward declarations
@@ -35,12 +36,12 @@ namespace ufo {
 
 // -----------------------------------------------------------------------------
 /// Temperature Profile observation for model.
-class ObsInsituTemperatureTLAD : public LinearObsOperatorBase, 
+class ObsInsituTemperatureTLAD : public LinearObsOperatorBase,
                                  private util::ObjectCounter<ObsInsituTemperatureTLAD> {
-public:
+ public:
   static const std::string classname() {return "ufo::ObsInsituTemperatureTLAD";}
 
-  ObsInsituTemperatureTLAD(const ioda::ObsSpace &, const eckit::Configuration &);    
+  ObsInsituTemperatureTLAD(const ioda::ObsSpace &, const eckit::Configuration &);
   virtual ~ObsInsituTemperatureTLAD();
 
   // Obs Operators
@@ -54,7 +55,7 @@ public:
   int & toFortran() {return keyOperInsituTemperature_;}
   const int & toFortran() const {return keyOperInsituTemperature_;}
 
-private:
+ private:
   void print(std::ostream &) const;
   F90hop keyOperInsituTemperature_;
   const ioda::ObsSpace& odb_;
@@ -64,4 +65,4 @@ private:
 // -----------------------------------------------------------------------------
 
 }  // namespace ufo
-#endif  // UFO_OBSINSITUTEMPERATURETLAD_H_
+#endif  // UFO_MARINE_INSITUTEMPERATURE_OBSINSITUTEMPERATURETLAD_H_

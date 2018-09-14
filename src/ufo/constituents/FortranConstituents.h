@@ -5,8 +5,8 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#ifndef UFO_FORTRANCONSTITUENTS_H_
-#define UFO_FORTRANCONSTITUENTS_H_
+#ifndef UFO_CONSTITUENTS_FORTRANCONSTITUENTS_H_
+#define UFO_CONSTITUENTS_FORTRANCONSTITUENTS_H_
 
 #include "ufo/Fortran.h"
 
@@ -25,7 +25,8 @@ extern "C" {
 // -----------------------------------------------------------------------------
   void ufo_aod_setup_f90(F90hop &, const eckit::Configuration * const *);
   void ufo_aod_delete_f90(F90hop &);
-  void ufo_aod_eqv_f90(const F90hop &, const F90goms &, const F90odb &, const F90ovec &, const F90obias &);
+  void ufo_aod_eqv_f90(const F90hop &, const F90goms &, const F90odb &, const F90ovec &,
+                       const F90obias &);
   void ufo_aod_tlad_setup_f90(F90hop &, const eckit::Configuration * const *);
   void ufo_aod_tlad_delete_f90(F90hop &);
   void ufo_aod_tlad_settraj_f90(const F90hop &, const F90goms &, const F90odb &);
@@ -37,4 +38,4 @@ extern "C" {
 }  // extern C
 
 }  // namespace ufo
-#endif  // UFO_FORTRANCONSTITUENTS_H_
+#endif  // UFO_CONSTITUENTS_FORTRANCONSTITUENTS_H_

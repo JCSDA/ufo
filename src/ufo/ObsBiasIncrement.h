@@ -24,7 +24,7 @@ namespace ufo {
 class ObsBiasIncrement : public util::Printable {
  public:
 /// Constructor, destructor
-  explicit ObsBiasIncrement() {}
+  ObsBiasIncrement() {}
   explicit ObsBiasIncrement(const eckit::Configuration &) {}
   ObsBiasIncrement(const ObsBiasIncrement &, const bool copy = true) {}
   ObsBiasIncrement(const ObsBiasIncrement &, const eckit::Configuration &) {}

@@ -29,7 +29,8 @@ ObsOperator::~ObsOperator() {}
 
 // -----------------------------------------------------------------------------
 
-void ObsOperator::simulateObs(const GeoVaLs & gvals, ioda::ObsVector & yy, const ObsBias & bias) const {
+void ObsOperator::simulateObs(const GeoVaLs & gvals, ioda::ObsVector & yy,
+                              const ObsBias & bias) const {
   oper_->simulateObs(gvals, yy, bias);
 }
 

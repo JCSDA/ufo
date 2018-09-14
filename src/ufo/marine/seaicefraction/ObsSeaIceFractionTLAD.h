@@ -5,8 +5,8 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#ifndef UFO_OBSSEAICEFRACTIONTLAD_H_
-#define UFO_OBSSEAICEFRACTIONTLAD_H_
+#ifndef UFO_MARINE_SEAICEFRACTION_OBSSEAICEFRACTIONTLAD_H_
+#define UFO_MARINE_SEAICEFRACTION_OBSSEAICEFRACTIONTLAD_H_
 
 #include <ostream>
 #include <string>
@@ -14,8 +14,8 @@
 #include <boost/scoped_ptr.hpp>
 
 #include "oops/base/Variables.h"
-#include "ufo/LinearObsOperatorBase.h"
 #include "oops/util/ObjectCounter.h"
+#include "ufo/LinearObsOperatorBase.h"
 #include "ufo/marine/FortranMarine.h"
 
 // Forward declarations
@@ -35,12 +35,12 @@ namespace ufo {
 
 // -----------------------------------------------------------------------------
 /// Sea-ice fraction observation for  model.
-class ObsSeaIceFractionTLAD : public LinearObsOperatorBase, 
+class ObsSeaIceFractionTLAD : public LinearObsOperatorBase,
                               private util::ObjectCounter<ObsSeaIceFractionTLAD> {
-public:
+ public:
   static const std::string classname() {return "ufo::ObsSeaIceFractionTLAD";}
 
-  ObsSeaIceFractionTLAD(const ioda::ObsSpace &, const eckit::Configuration &);    
+  ObsSeaIceFractionTLAD(const ioda::ObsSpace &, const eckit::Configuration &);
   virtual ~ObsSeaIceFractionTLAD();
 
   // Obs Operators
@@ -54,7 +54,7 @@ public:
   int & toFortran() {return keyOperSeaIceFraction_;}
   const int & toFortran() const {return keyOperSeaIceFraction_;}
 
-private:
+ private:
   void print(std::ostream &) const;
   F90hop keyOperSeaIceFraction_;
   boost::scoped_ptr<const oops::Variables> varin_;
@@ -63,4 +63,4 @@ private:
 // -----------------------------------------------------------------------------
 
 }  // namespace ufo
-#endif  // UFO_OBSSEAICEFRACTIONTLAD_H_
+#endif  // UFO_MARINE_SEAICEFRACTION_OBSSEAICEFRACTIONTLAD_H_

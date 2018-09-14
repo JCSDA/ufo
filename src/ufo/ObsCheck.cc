@@ -5,16 +5,18 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
  */
 
-#include "ObsCheck.h"
+#include "ufo/ObsCheck.h"
 
-#include "oops/base/Variables.h"
 #include "eckit/config/Configuration.h"
+
 #include "ioda/ObsSpace.h"
-#include "Fortran.h"
-#include "FortranObsCheck.h"
-#include "GeoVaLs.h"
 #include "ioda/ObsVector.h"
+
 #include "oops/util/Logger.h"
+
+#include "ufo/Fortran.h"
+#include "ufo/FortranObsCheck.h"
+#include "ufo/GeoVaLs.h"
 
 namespace ufo {
 
@@ -60,7 +62,8 @@ void ObsCheck::print(std::ostream & os) const {
 
 // -----------------------------------------------------------------------------
 
-void ObsCheck::postFilter(const GeoVaLs & gv, const ioda::ObsVector & ov, const ioda::ObsSpace & os) const {
+void ObsCheck::postFilter(const GeoVaLs & gv, const ioda::ObsVector & ov,
+                          const ioda::ObsSpace & os) const {
   oops::Log::trace() << "ObsCheck postFilter starting" << std::endl;
   ufo_postFilter_f90(gv.toFortran(), ov.toFortran(), os.toFortran());
   oops::Log::trace() << "ObsCheck postFilter end" << std::endl;

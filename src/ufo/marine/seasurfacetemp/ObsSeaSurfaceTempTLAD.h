@@ -5,19 +5,21 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#ifndef UFO_OBSSEASURFACETEMPTLAD_H_
-#define UFO_OBSSEASURFACETEMPTLAD_H_
+#ifndef UFO_MARINE_SEASURFACETEMP_OBSSEASURFACETEMPTLAD_H_
+#define UFO_MARINE_SEASURFACETEMP_OBSSEASURFACETEMPTLAD_H_
 
 #include <ostream>
 #include <string>
 
 #include <boost/scoped_ptr.hpp>
 
-#include "oops/base/Variables.h"
-#include "ufo/LinearObsOperatorBase.h"
 #include "ioda/ObsSpace.h"
-#include "oops/util/ObjectCounter.h"
+
+#include "oops/base/Variables.h"
 #include "oops/util/Logger.h"
+#include "oops/util/ObjectCounter.h"
+
+#include "ufo/LinearObsOperatorBase.h"
 #include "ufo/marine/FortranMarine.h"
 
 // Forward declarations
@@ -36,12 +38,12 @@ namespace ufo {
 
 // -----------------------------------------------------------------------------
 
-class ObsSeaSurfaceTempTLAD : public LinearObsOperatorBase, 
+class ObsSeaSurfaceTempTLAD : public LinearObsOperatorBase,
                               private util::ObjectCounter<ObsSeaSurfaceTempTLAD> {
-public:
+ public:
   static const std::string classname() {return "ufo::ObsSeaSurfaceTempTLAD";}
 
-  ObsSeaSurfaceTempTLAD(const ioda::ObsSpace &, const eckit::Configuration &);    
+  ObsSeaSurfaceTempTLAD(const ioda::ObsSpace &, const eckit::Configuration &);
   virtual ~ObsSeaSurfaceTempTLAD();
 
   // Obs Operators
@@ -55,10 +57,10 @@ public:
   int & toFortran() {return keyOperSeaSurfaceTemp_;}
   const int & toFortran() const {return keyOperSeaSurfaceTemp_;}
 
-private:
+ private:
   void print(std::ostream &) const;
   F90hop keyOperSeaSurfaceTemp_;
-  const ioda::ObsSpace& odb_;    
+  const ioda::ObsSpace& odb_;
   boost::scoped_ptr<const oops::Variables> varin_;
 };
 
@@ -109,4 +111,4 @@ void ObsSeaSurfaceTempTLAD<MODEL>::print(std::ostream & os) const {
 // -----------------------------------------------------------------------------
 */
 }  // namespace ufo
-#endif  // UFO_OBSSEASURFACETEMPTLAD_H_
+#endif  // UFO_MARINE_SEASURFACETEMP_OBSSEASURFACETEMPTLAD_H_

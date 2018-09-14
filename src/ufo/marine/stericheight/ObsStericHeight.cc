@@ -5,19 +5,23 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
  */
 
-#include "ObsStericHeight.h"
+#include "ufo/marine/stericheight/ObsStericHeight.h"
 
 #include <ostream>
 #include <string>
+#include <vector>
+
+#include "eckit/config/Configuration.h"
+
+#include "ioda/ObsSpace.h"
+#include "ioda/ObsVector.h"
 
 #include "oops/base/Variables.h"
-#include "ufo/ObsOperatorBase.h"
-#include "ioda/ObsSpace.h"
-#include "eckit/config/Configuration.h"
-#include "ioda/ObsVector.h"
+
 #include "ufo/GeoVaLs.h"
 #include "ufo/ObsBias.h"
 #include "ufo/ObsBiasIncrement.h"
+#include "ufo/ObsOperatorBase.h"
 
 namespace ufo {
 
@@ -48,7 +52,8 @@ ObsStericHeight::~ObsStericHeight() {
 
 void ObsStericHeight::simulateObs(const GeoVaLs & gom, ioda::ObsVector & ovec,
                              const ObsBias & bias) const {
-  ufo_stericheight_eqv_f90(keyOperStericHeight_, gom.toFortran(), odb_.toFortran(), ovec.toFortran(), bias.toFortran());
+  ufo_stericheight_eqv_f90(keyOperStericHeight_, gom.toFortran(),
+                           odb_.toFortran(), ovec.toFortran(), bias.toFortran());
 }
 
 // -----------------------------------------------------------------------------

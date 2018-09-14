@@ -5,8 +5,8 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
  */
 
-#ifndef UFO_OBSSEAICEFRACTION_H_
-#define UFO_OBSSEAICEFRACTION_H_
+#ifndef UFO_MARINE_SEAICEFRACTION_OBSSEAICEFRACTION_H_
+#define UFO_MARINE_SEAICEFRACTION_OBSSEAICEFRACTION_H_
 
 #include <ostream>
 #include <string>
@@ -14,9 +14,10 @@
 #include <boost/scoped_ptr.hpp>
 
 #include "oops/base/Variables.h"
-#include "ufo/ObsOperatorBase.h"
-#include "ufo/marine/FortranMarine.h"
 #include "oops/util/ObjectCounter.h"
+
+#include "ufo/marine/FortranMarine.h"
+#include "ufo/ObsOperatorBase.h"
 
 namespace eckit {
   class Configuration;
@@ -60,4 +61,4 @@ class ObsSeaIceFraction : public ObsOperatorBase,
 // -----------------------------------------------------------------------------
 
 }  // namespace ufo
-#endif  // UFO_OBSSEAICEFRACTION_H_
+#endif  // UFO_MARINE_SEAICEFRACTION_OBSSEAICEFRACTION_H_

@@ -96,6 +96,7 @@ include_directories( ${UFO_INCLUDE_DIRS} ${UFO_EXTRA_INCLUDE_DIRS}
 
 add_subdirectory( src )
 add_subdirectory( test )
+add_subdirectory( tools )
 
 ################################################################################
 # Finalise configuration

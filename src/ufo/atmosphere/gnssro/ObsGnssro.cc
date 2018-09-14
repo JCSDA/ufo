@@ -5,18 +5,19 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
  */
 
-#include "ObsGnssro.h"
+#include "ufo/atmosphere/gnssro/ObsGnssro.h"
 
 #include <ostream>
 #include <string>
+#include <vector>
 
-#include "eckit/config/Configuration.h"
-#include "oops/base/Variables.h"
-#include "ioda/ObsSpace.h"
 #include "ioda/ObsVector.h"
+
+#include "oops/base/Variables.h"
+#include "oops/util/Logger.h"
+
 #include "ufo/GeoVaLs.h"
 #include "ufo/ObsBias.h"
-#include "ufo/ObsBiasIncrement.h"
 
 namespace ufo {
 
@@ -27,7 +28,8 @@ static ObsOperatorMaker<ObsGnssroRef> makerGnssroRef_("GnssroRef");
 ObsGnssroRef::ObsGnssroRef(const ioda::ObsSpace & odb, const eckit::Configuration & config)
   : keyOperGnssroRef_(0), varin_(), odb_(odb)
 {
-  const std::vector<std::string> vv{"temperature", "specific_humidity", "air_pressure","geopotential_height"};
+  const std::vector<std::string> vv{"temperature", "specific_humidity", "air_pressure",
+                                    "geopotential_height"};
   varin_.reset(new oops::Variables(vv));
   const eckit::Configuration * configc = &config;
   ufo_gnssro_setup_f90(keyOperGnssroRef_, &configc);

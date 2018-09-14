@@ -5,21 +5,18 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
  */
 
-#include "ObsAod.h"
+#include "ufo/constituents/aod/ObsAod.h"
 
 #include <ostream>
 #include <string>
+#include <vector>
 
-#include <boost/scoped_ptr.hpp>
+#include "ioda/ObsVector.h"
 
-#include "eckit/config/Configuration.h"
 #include "oops/base/Variables.h"
-#include "ufo/ObsOperatorBase.h"
-#include "ioda/ObsSpace.h"
+
 #include "ufo/GeoVaLs.h"
 #include "ufo/ObsBias.h"
-#include "ufo/ObsBiasIncrement.h"
-#include "ioda/ObsVector.h"
 
 namespace ufo {
 
@@ -32,10 +29,10 @@ ObsAod::ObsAod(const ioda::ObsSpace & odb, const eckit::Configuration & config)
 {
   const eckit::Configuration * configc = &config;
   ufo_aod_setup_f90(keyOperAod_, &configc);
-  const std::vector<std::string> vv{"temperature","humidity_mixing_ratio",
-      "air_pressure","air_pressure_levels",
-      "sulf","bc1","bc2","oc1","oc2","dust1","dust2","dust3","dust4","dust5",
-      "seas1","seas2","seas3","seas4","p25"};
+  const std::vector<std::string> vv{"temperature", "humidity_mixing_ratio",
+      "air_pressure", "air_pressure_levels",
+      "sulf", "bc1", "bc2", "oc1", "oc2", "dust1", "dust2", "dust3", "dust4", "dust5",
+      "seas1", "seas2", "seas3", "seas4", "p25"};
   varin_.reset(new oops::Variables(vv));
   oops::Log::trace() << "ObsAod created." << std::endl;
 }
@@ -51,7 +48,8 @@ ObsAod::~ObsAod() {
 
 void ObsAod::simulateObs(const GeoVaLs & gom, ioda::ObsVector & ovec,
                          const ObsBias & bias) const {
-  ufo_aod_eqv_f90(keyOperAod_, gom.toFortran(), odb_.toFortran(), ovec.toFortran(), bias.toFortran());
+  ufo_aod_eqv_f90(keyOperAod_, gom.toFortran(), odb_.toFortran(), ovec.toFortran(),
+                  bias.toFortran());
 }
 
 // -----------------------------------------------------------------------------

@@ -5,8 +5,8 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#ifndef UFO_OBSGNSSROTLAD_H_
-#define UFO_OBSGNSSROTLAD_H_
+#ifndef UFO_ATMOSPHERE_GNSSRO_OBSGNSSROTLAD_H_
+#define UFO_ATMOSPHERE_GNSSRO_OBSGNSSROTLAD_H_
 
 #include <ostream>
 #include <string>
@@ -37,7 +37,7 @@ namespace ufo {
 /// GnssroRef observation operator
 class ObsGnssroRefTLAD : public LinearObsOperatorBase,
                           private util::ObjectCounter<ObsGnssroRefTLAD> {
-public:
+ public:
   static const std::string classname() {return "ufo::ObsGnssroRefTLAD";}
 
   ObsGnssroRefTLAD(const ioda::ObsSpace &, const eckit::Configuration &);
@@ -54,7 +54,7 @@ public:
   int & toFortran() {return keyOperGnssroRef_;}
   const int & toFortran() const {return keyOperGnssroRef_;}
 
-private:
+ private:
   void print(std::ostream &) const;
   F90hop keyOperGnssroRef_;
   const ioda::ObsSpace& odb_;
@@ -64,4 +64,4 @@ private:
 // -----------------------------------------------------------------------------
 
 }  // namespace ufo
-#endif  // UFO_OBSGNSSROTLAD_H_
+#endif  // UFO_ATMOSPHERE_GNSSRO_OBSGNSSROTLAD_H_

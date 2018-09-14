@@ -5,21 +5,18 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
  */
 
-#include "ObsSeaSurfaceTemp.h"
+#include "ufo/marine/seasurfacetemp/ObsSeaSurfaceTemp.h"
 
 #include <ostream>
 #include <string>
+#include <vector>
 
-#include <boost/scoped_ptr.hpp>
-
-#include "eckit/config/Configuration.h"
-#include "oops/base/Variables.h"
 #include "ioda/ObsSpace.h"
-#include "ufo/GeoVaLs.h"
-#include "ufo/ObsBias.h"
-#include "ufo/ObsBiasIncrement.h"
 #include "ioda/ObsVector.h"
-#include "oops/util/ObjectCounter.h"
+
+#include "oops/base/Variables.h"
+
+#include "ufo/GeoVaLs.h"
 
 namespace ufo {
 
@@ -27,7 +24,8 @@ namespace ufo {
 static ObsOperatorMaker<ObsSeaSurfaceTemp> makerSeaSurfaceTemp_("SeaSurfaceTemp");
 // -----------------------------------------------------------------------------
 
-ObsSeaSurfaceTemp::ObsSeaSurfaceTemp(const ioda::ObsSpace & odb, const eckit::Configuration & config)
+ObsSeaSurfaceTemp::ObsSeaSurfaceTemp(const ioda::ObsSpace & odb,
+                                     const eckit::Configuration & config)
   : keyOperSeaSurfaceTemp_(0), varin_(), odb_(odb)
 {
   const eckit::Configuration * configc = &config;
@@ -46,8 +44,10 @@ ObsSeaSurfaceTemp::~ObsSeaSurfaceTemp() {
 
 // -----------------------------------------------------------------------------
 
-void ObsSeaSurfaceTemp::simulateObs(const GeoVaLs & gom, ioda::ObsVector & ovec, const ObsBias & bias) const {
-  ufo_seasurfacetemp_eqv_f90(keyOperSeaSurfaceTemp_, gom.toFortran(), odb_.toFortran(), ovec.toFortran(), bias.toFortran());
+void ObsSeaSurfaceTemp::simulateObs(const GeoVaLs & gom, ioda::ObsVector & ovec,
+                                    const ObsBias & bias) const {
+  ufo_seasurfacetemp_eqv_f90(keyOperSeaSurfaceTemp_, gom.toFortran(), odb_.toFortran(),
+                             ovec.toFortran(), bias.toFortran());
 }
 
 // -----------------------------------------------------------------------------

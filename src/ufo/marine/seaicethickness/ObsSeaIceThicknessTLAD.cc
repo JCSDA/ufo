@@ -5,22 +5,18 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#include "ObsSeaIceThicknessTLAD.h"
+#include "ufo/marine/seaicethickness/ObsSeaIceThicknessTLAD.h"
 
 #include <ostream>
 #include <string>
-
-#include <boost/scoped_ptr.hpp>
+#include <vector>
 
 #include "oops/base/Variables.h"
-#include "ufo/LinearObsOperatorBase.h"
-#include "ioda/ObsSpace.h"
-#include "oops/util/ObjectCounter.h"
 #include "oops/util/Logger.h"
+
 #include "ioda/ObsVector.h"
+
 #include "ufo/GeoVaLs.h"
-#include "ufo/ObsBias.h"
-#include "ufo/ObsBiasIncrement.h"
 
 namespace ufo {
 
@@ -28,7 +24,8 @@ namespace ufo {
 static LinearObsOperatorMaker<ObsSeaIceThicknessTLAD> makerSeaIceThicknessTLAD_("SeaIceThickness");
 // -----------------------------------------------------------------------------
 
-ObsSeaIceThicknessTLAD::ObsSeaIceThicknessTLAD(const ioda::ObsSpace & odb, const eckit::Configuration & config)
+ObsSeaIceThicknessTLAD::ObsSeaIceThicknessTLAD(const ioda::ObsSpace & odb,
+                                               const eckit::Configuration & config)
   : keyOperSeaIceThickness_(0), varin_()
 {
   const eckit::Configuration * configc = &config;

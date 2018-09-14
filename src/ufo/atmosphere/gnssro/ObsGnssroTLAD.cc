@@ -5,20 +5,20 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#include "ObsGnssroTLAD.h"
+#include "ufo/atmosphere/gnssro/ObsGnssroTLAD.h"
 
 #include <ostream>
 #include <string>
+#include <vector>
 
-#include <boost/scoped_ptr.hpp>
+
+#include "ioda/ObsSpace.h"
+#include "ioda/ObsVector.h"
 
 #include "oops/base/Variables.h"
 #include "oops/util/Logger.h"
-#include "ioda/ObsSpace.h"
-#include "ioda/ObsVector.h"
+
 #include "ufo/GeoVaLs.h"
-#include "ufo/ObsBias.h"
-#include "ufo/ObsBiasIncrement.h"
 
 namespace ufo {
 
@@ -31,7 +31,8 @@ ObsGnssroRefTLAD::ObsGnssroRefTLAD(const ioda::ObsSpace & odb, const eckit::Conf
 {
   const eckit::Configuration * configc = &config;
   ufo_gnssro_tlad_setup_f90(keyOperGnssroRef_, &configc);
-const std::vector<std::string> vv{"temperature", "specific_humidity", "air_pressure","geopotential_height"};
+  const std::vector<std::string> vv{"temperature", "specific_humidity", "air_pressure",
+                                    "geopotential_height"};
   varin_.reset(new oops::Variables(vv));
   oops::Log::trace() << "ObsGnssroRefTLAD created" << std::endl;
 }
@@ -53,14 +54,16 @@ void ObsGnssroRefTLAD::setTrajectory(const GeoVaLs & geovals, const ObsBias & bi
 
 void ObsGnssroRefTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec,
                                       const ObsBiasIncrement & bias) const {
-  ufo_gnssro_ref_tlad_tl_f90(keyOperGnssroRef_, geovals.toFortran(), odb_.toFortran(), ovec.toFortran());
+  ufo_gnssro_ref_tlad_tl_f90(keyOperGnssroRef_, geovals.toFortran(), odb_.toFortran(),
+                             ovec.toFortran());
 }
 
 // -----------------------------------------------------------------------------
 
 void ObsGnssroRefTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec,
                                       ObsBiasIncrement & bias) const {
-  ufo_gnssro_ref_tlad_ad_f90(keyOperGnssroRef_, geovals.toFortran(), odb_.toFortran(), ovec.toFortran());
+  ufo_gnssro_ref_tlad_ad_f90(keyOperGnssroRef_, geovals.toFortran(), odb_.toFortran(),
+                             ovec.toFortran());
 }
 
 // -----------------------------------------------------------------------------

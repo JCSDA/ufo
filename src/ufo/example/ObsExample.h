@@ -5,19 +5,22 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
  */
 
-//TODO: through the file replace UFO_OBSEXAMPLE_H with the unique string (e.g. UFO_<YOUR_OBS_OPERATOR_NAME>_H
-#ifndef UFO_OBSEXAMPLE_H_
-#define UFO_OBSEXAMPLE_H_
+// TODO(anyone): through the file replace UFO_EXAMPLE_OBSEXAMPLE_H with the unique string
+// (e.g. UFO_EXAMPLE_<YOUR_OBS_OPERATOR_NAME>_H
+#ifndef UFO_EXAMPLE_OBSEXAMPLE_H_
+#define UFO_EXAMPLE_OBSEXAMPLE_H_
 
 #include <ostream>
 #include <string>
 
 #include <boost/scoped_ptr.hpp>
 
-#include "oops/base/Variables.h"
-#include "ufo/ObsOperatorBase.h"
 #include "ioda/ObsSpace.h"
+
+#include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
+
+#include "ufo/ObsOperatorBase.h"
 
 /// Forward declarations
 namespace eckit {
@@ -34,7 +37,7 @@ class ObsBias;
 
 // -----------------------------------------------------------------------------
 /// Example for the observation operator class.
-//  TODO: through the file replace ObsExample with <Your_Obs_Operator_Name>
+// TODO(anyone): through the file replace ObsExample with <Your_Obs_Operator_Name>
 class ObsExample : public ObsOperatorBase,
                    private util::ObjectCounter<ObsExample> {
  public:
@@ -62,4 +65,4 @@ class ObsExample : public ObsOperatorBase,
 // -----------------------------------------------------------------------------
 
 }  // namespace ufo
-#endif  // UFO_OBSEXAMPLE_H_
+#endif  // UFO_EXAMPLE_OBSEXAMPLE_H_

@@ -39,7 +39,8 @@ class LinearObsOperatorBase : public util::Printable,
 
 /// Obs Operator
   virtual void setTrajectory(const GeoVaLs &, const ObsBias &) = 0;
-  virtual void simulateObsTL(const GeoVaLs &, ioda::ObsVector &, const ObsBiasIncrement &) const = 0;
+  virtual void simulateObsTL(const GeoVaLs &, ioda::ObsVector &,
+                             const ObsBiasIncrement &) const = 0;
   virtual void simulateObsAD(GeoVaLs &, const ioda::ObsVector &, ObsBiasIncrement &) const = 0;
 
 /// Operator input required from Model

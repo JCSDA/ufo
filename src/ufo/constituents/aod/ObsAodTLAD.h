@@ -5,8 +5,8 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#ifndef UFO_OBSAODTLAD_H_
-#define UFO_OBSAODTLAD_H_
+#ifndef UFO_CONSTITUENTS_AOD_OBSAODTLAD_H_
+#define UFO_CONSTITUENTS_AOD_OBSAODTLAD_H_
 
 #include <ostream>
 #include <string>
@@ -37,7 +37,7 @@ namespace ufo {
 /// Aod (currently only temperature) observation for UFO.
 class ObsAodTLAD : public LinearObsOperatorBase,
                    private util::ObjectCounter<ObsAodTLAD> {
-public:
+ public:
   static const std::string classname() {return "ufo::ObsAodTLAD";}
 
   ObsAodTLAD(const ioda::ObsSpace &, const eckit::Configuration &);
@@ -54,7 +54,7 @@ public:
   int & toFortran() {return keyOperAod_;}
   const int & toFortran() const {return keyOperAod_;}
 
-private:
+ private:
   void print(std::ostream &) const;
   F90hop keyOperAod_;
   const ioda::ObsSpace& odb_;
@@ -64,4 +64,4 @@ private:
 // -----------------------------------------------------------------------------
 
 }  // namespace ufo
-#endif  // UFO_OBSAODTLAD_H_
+#endif  // UFO_CONSTITUENTS_AOD_OBSAODTLAD_H_

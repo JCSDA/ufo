@@ -5,21 +5,11 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
  */
 
-#include "ObsADT.h"
+#include "ufo/marine/adt/ObsADT.h"
 
 #include <ostream>
 #include <string>
-
-#include <boost/scoped_ptr.hpp>
-
-#include "eckit/config/Configuration.h"
-#include "oops/base/Variables.h"
-#include "ioda/ObsSpace.h"
-#include "ufo/GeoVaLs.h"
-#include "ufo/ObsBias.h"
-#include "ufo/ObsBiasIncrement.h"
-#include "ioda/ObsVector.h"
-#include "oops/util/ObjectCounter.h"
+#include <vector>
 
 namespace ufo {
 
@@ -47,7 +37,8 @@ ObsADT::~ObsADT() {
 // -----------------------------------------------------------------------------
 
 void ObsADT::simulateObs(const GeoVaLs & gom, ioda::ObsVector & ovec, const ObsBias & bias) const {
-  ufo_adt_eqv_f90(keyOperADT_, gom.toFortran(), odb_.toFortran(), ovec.toFortran(), bias.toFortran());
+  ufo_adt_eqv_f90(keyOperADT_, gom.toFortran(), odb_.toFortran(), ovec.toFortran(),
+                  bias.toFortran());
 }
 
 // -----------------------------------------------------------------------------

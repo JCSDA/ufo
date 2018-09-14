@@ -5,18 +5,19 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
  */
 
-#include "ObsRadiance.h"
+#include "ufo/atmosphere/radiance/ObsRadiance.h"
 
 #include <ostream>
 #include <string>
+#include <vector>
 
-#include "eckit/config/Configuration.h"
-#include "oops/base/Variables.h"
-#include "ioda/ObsSpace.h"
 #include "ioda/ObsVector.h"
+
+#include "oops/base/Variables.h"
+
 #include "ufo/GeoVaLs.h"
 #include "ufo/ObsBias.h"
-#include "ufo/ObsBiasIncrement.h"
+
 
 namespace ufo {
 
@@ -34,10 +35,11 @@ ObsRadiance::ObsRadiance(const ioda::ObsSpace & odb, const eckit::Configuration 
                                     "atmosphere_mass_content_of_cloud_ice",
                                     "effective_radius_of_cloud_liquid_water_particle",
                                     "effective_radius_of_cloud_ice_particle",
-                                    "Water_Fraction", "Land_Fraction", "Ice_Fraction", "Snow_Fraction",
-                                    "Water_Temperature", "Land_Temperature", "Ice_Temperature", "Snow_Temperature",
-                                    "Vegetation_Fraction", "Sfc_Wind_Speed", "Sfc_Wind_Direction", "Lai",
-                                    "Soil_Moisture", "Soil_Temperature", "Land_Type_Index", "Vegetation_Type",
+                                    "Water_Fraction", "Land_Fraction", "Ice_Fraction",
+                                    "Snow_Fraction", "Water_Temperature", "Land_Temperature",
+                                    "Ice_Temperature", "Snow_Temperature", "Vegetation_Fraction",
+                                    "Sfc_Wind_Speed", "Sfc_Wind_Direction", "Lai", "Soil_Moisture",
+                                    "Soil_Temperature", "Land_Type_Index", "Vegetation_Type",
                                     "Soil_Type", "Snow_Depth"};
   varin_.reset(new oops::Variables(vv));
   const eckit::Configuration * configc = &config;
@@ -56,7 +58,8 @@ ObsRadiance::~ObsRadiance() {
 
 void ObsRadiance::simulateObs(const GeoVaLs & gom, ioda::ObsVector & ovec,
                               const ObsBias & bias) const {
-  ufo_radiance_eqv_f90(keyOperRadiance_, gom.toFortran(), odb_.toFortran(), ovec.toFortran(), bias.toFortran());
+  ufo_radiance_eqv_f90(keyOperRadiance_, gom.toFortran(), odb_.toFortran(), ovec.toFortran(),
+                       bias.toFortran());
 }
 
 // -----------------------------------------------------------------------------

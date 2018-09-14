@@ -5,22 +5,19 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
  */
 
-#include "ObsSeaIceThickness.h"
+#include "ufo/marine/seaicethickness/ObsSeaIceThickness.h"
 
 #include <ostream>
 #include <string>
+#include <vector>
 
-#include <boost/scoped_ptr.hpp>
+#include "ioda/ObsVector.h"
 
-#include "eckit/config/Configuration.h"
 #include "oops/base/Variables.h"
-#include "ufo/ObsOperatorBase.h"
-#include "ioda/ObsSpace.h"
+#include "oops/util/Logger.h"
+
 #include "ufo/GeoVaLs.h"
 #include "ufo/ObsBias.h"
-#include "ufo/ObsBiasIncrement.h"
-#include "ioda/ObsVector.h"
-#include "oops/util/ObjectCounter.h"
 
 namespace ufo {
 
@@ -28,7 +25,8 @@ namespace ufo {
 static ObsOperatorMaker<ObsSeaIceThickness> makerSeaIceThickness_("SeaIceThickness");
 // -----------------------------------------------------------------------------
 
-ObsSeaIceThickness::ObsSeaIceThickness(const ioda::ObsSpace & odb, const eckit::Configuration & config)
+ObsSeaIceThickness::ObsSeaIceThickness(const ioda::ObsSpace & odb,
+                                       const eckit::Configuration & config)
   : keyOperSeaIceThickness_(0), varin_(), odb_(odb)
 {
   const eckit::Configuration * configc = &config;
@@ -49,7 +47,8 @@ ObsSeaIceThickness::~ObsSeaIceThickness() {
 
 void ObsSeaIceThickness::simulateObs(const GeoVaLs & gom, ioda::ObsVector & ovec,
                              const ObsBias & bias) const {
-  ufo_seaicethick_eqv_f90(keyOperSeaIceThickness_, gom.toFortran(), odb_.toFortran(), ovec.toFortran(), bias.toFortran());
+  ufo_seaicethick_eqv_f90(keyOperSeaIceThickness_, gom.toFortran(), odb_.toFortran(),
+                          ovec.toFortran(), bias.toFortran());
 }
 
 // -----------------------------------------------------------------------------

@@ -5,20 +5,19 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
  */
 
-//  TODO: through the file replace ObsExample with <Your_Obs_Operator_Name>
-#include "ObsExample.h"
+// TODO(anyone): through the file replace ObsExample with <Your_Obs_Operator_Name>
+#include "ufo/example/ObsExample.h"
 
 #include <ostream>
 #include <string>
+#include <vector>
 
-#include "eckit/config/Configuration.h"
-#include "ioda/ObsSpace.h"
 #include "ioda/ObsVector.h"
+
 #include "oops/base/Variables.h"
+
 #include "ufo/GeoVaLs.h"
 #include "ufo/ObsBias.h"
-#include "ufo/ObsBiasIncrement.h"
-#include "ufo/ObsOperatorBase.h"
 
 namespace ufo {
 
@@ -28,10 +27,10 @@ ObsExample::ObsExample(const ioda::ObsSpace & odb, const eckit::Configuration & 
   : keyOper_(0), varin_(), odb_(odb)
 {
   const eckit::Configuration * configc = &config;
-  // TODO: replace ufo_example_setup_f90 with the call to your Fortran routine
+  // TODO(anyone): replace ufo_example_setup_f90 with the call to your Fortran routine
   //       to setup obs operator (defined in ObsExample.interface.F90)
   ufo_example_setup_f90(keyOper_, &configc);
-  // TODO: list the variables for GeoVaLs that are needed for the observation 
+  // TODO(anyone): list the variables for GeoVaLs that are needed for the observation
   //       operator below in vv (e.g., vv{"temperature", "humidity"})
   const std::vector<std::string> vv{""};
   varin_.reset(new oops::Variables(vv));
@@ -41,7 +40,7 @@ ObsExample::ObsExample(const ioda::ObsSpace & odb, const eckit::Configuration & 
 // -----------------------------------------------------------------------------
 
 ObsExample::~ObsExample() {
-  // TODO: replace ufo_example_delete_f90 with the call to your Fortran routine
+  // TODO(anyone): replace ufo_example_delete_f90 with the call to your Fortran routine
   //       to destruct observation operator (defined in ObsExample.interface.F90)
   ufo_example_delete_f90(keyOper_);
   oops::Log::trace() << "ObsExample destructed" << std::endl;
@@ -51,10 +50,11 @@ ObsExample::~ObsExample() {
 
 void ObsExample::simulateObs(const GeoVaLs & gv, ioda::ObsVector & ovec,
                                   const ObsBias & bias) const {
-  // TODO: replace ufo_example_eqv_f90 with the call to your Fortran routine
+  // TODO(anyone): replace ufo_example_eqv_f90 with the call to your Fortran routine
   //       to apply observation operator (defined in ObsExample.interface.F90)
 
-  ufo_example_eqv_f90(keyOper_, gv.toFortran(), odb_.toFortran(), ovec.toFortran(), bias.toFortran());
+  ufo_example_eqv_f90(keyOper_, gv.toFortran(), odb_.toFortran(), ovec.toFortran(),
+                      bias.toFortran());
   oops::Log::trace() << "ObsExample: observation operator run" << std::endl;
 }
 
