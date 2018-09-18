@@ -98,6 +98,10 @@ add_subdirectory( src )
 add_subdirectory( test )
 add_subdirectory( tools )
 
+if(ECBUILD_INSTALL_FORTRAN_MODULES)
+  install(DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}/${CMAKE_CFG_INTDIR} DESTINATION ${INSTALL_INCLUDE_DIR} )
+endif()
+
 ################################################################################
 # Finalise configuration
 ################################################################################
