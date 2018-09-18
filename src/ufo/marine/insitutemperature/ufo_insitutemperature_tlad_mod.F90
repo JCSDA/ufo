@@ -18,8 +18,8 @@ module ufo_insitutemperature_tlad_mod
   public :: ufo_insitutemperature_tlad
   public :: ufo_insitutemperature_tlad_delete
   public :: ufo_insitutemperature_tlad_settraj
-  public :: ufo_insitutemperature_tlad_eqv_tl
-  public :: ufo_insitutemperature_tlad_eqv_ad
+  public :: ufo_insitutemperature_simobs_tl
+  public :: ufo_insitutemperature_simobs_ad
   private
   integer, parameter :: max_string=800
 
@@ -150,7 +150,7 @@ contains
 
   ! ------------------------------------------------------------------------------
 
-  subroutine ufo_insitutemperature_tlad_eqv_tl(traj, geovals, hofx)
+  subroutine ufo_insitutemperature_simobs_tl(traj, geovals, hofx)
 
     use ufo_tpsp2ti_mod
     use gsw_pot_to_insitu
@@ -161,7 +161,7 @@ contains
     type(ufo_geovals), intent(in)    :: geovals           !< Increments (dtp, dsp)
     type(obs_vector),  intent(inout) :: hofx              !< dti
 
-    character(len=*), parameter :: myname_="ufo_insitutemperature_tlad_eqv_tl"
+    character(len=*), parameter :: myname_="ufo_insitutemperature_simobs_tl"
     character(max_string) :: err_msg
 
     integer :: iobs, ilev, nlev, nobs
@@ -215,11 +215,11 @@ contains
 
     enddo
 
-  end subroutine ufo_insitutemperature_tlad_eqv_tl
+  end subroutine ufo_insitutemperature_simobs_tl
 
   ! ------------------------------------------------------------------------------
 
-  subroutine ufo_insitutemperature_tlad_eqv_ad(traj, geovals, hofx)
+  subroutine ufo_insitutemperature_simobs_ad(traj, geovals, hofx)
 
     use ufo_tpsp2ti_mod
     use gsw_pot_to_insitu
@@ -230,7 +230,7 @@ contains
     type(ufo_geovals), intent(inout)              :: geovals
     type(obs_vector),  intent(in)                 :: hofx
 
-    character(len=*), parameter :: myname_="ufo_insitutemperature_tlad_eqv_ad"
+    character(len=*), parameter :: myname_="ufo_insitutemperature_simobs_ad"
     character(max_string) :: err_msg
 
     real (kind=kind_real) :: lono, lato, deptho !< Observation location
@@ -292,6 +292,6 @@ contains
        
     enddo
 
-  end subroutine ufo_insitutemperature_tlad_eqv_ad
+  end subroutine ufo_insitutemperature_simobs_ad
 
 end module ufo_insitutemperature_tlad_mod

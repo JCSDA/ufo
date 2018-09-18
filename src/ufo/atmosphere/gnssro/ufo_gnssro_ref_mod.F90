@@ -25,12 +25,12 @@ module ufo_gnssro_ref_mod
   !> Fortran derived type for gnssro trajectory
   type, extends(ufo_basis) :: ufo_gnssro
   contains
-   procedure :: eqv    => ufo_gnssro_ref_eqv
+   procedure :: simobs    => ufo_gnssro_ref_simobs
   end type ufo_gnssro
 
 contains
 ! ------------------------------------------------------------------------------
-   subroutine ufo_gnssro_ref_eqv(self, geovals, hofx, obss)
+   subroutine ufo_gnssro_ref_simobs(self, geovals, hofx, obss)
     use gnssro_mod_constants
     use gnssro_mod_transform, only: geometric2geop
       implicit none
@@ -40,7 +40,7 @@ contains
       type(obs_vector),  intent(inout)             :: hofx
       type(ioda_obsdb), target, intent(in)         :: obss
 
-      character(len=*), parameter :: myname_="ufo_gnssro_ref_eqv"
+      character(len=*), parameter :: myname_="ufo_gnssro_ref_simobs"
       character(max_string) :: err_msg
 
       integer         :: iobs,k
@@ -107,7 +107,7 @@ contains
       ! cleanup 
       call ioda_obsvec_delete(obsZ)
       call ioda_obsvec_delete(obsLat)
-    end subroutine ufo_gnssro_ref_eqv
+    end subroutine ufo_gnssro_ref_simobs
 
                          
 ! ------------------------------------------------------------------------------

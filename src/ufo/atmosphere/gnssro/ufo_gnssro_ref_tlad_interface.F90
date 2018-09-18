@@ -87,7 +87,7 @@ type(ufo_gnssro_tlad), pointer :: self
 character(len=*), parameter :: myname_="ufo_gnssro_ref_tlad_tl_c"
 
 call ufo_gnssro_tlad_registry%get(c_key_self, self)
-call self%opr_eqv_tl(c_key_geovals, c_key_obsspace, c_key_hofx)
+call self%opr_simobs_tl(c_key_geovals, c_key_obsspace, c_key_hofx)
 
 end subroutine ufo_gnssro_ref_tlad_tl_c
 
@@ -106,7 +106,7 @@ type(ufo_gnssro_tlad), pointer :: self
 character(len=*), parameter :: myname_="ufo_gnssro_ref_tlad_ad_c"
 
 call ufo_gnssro_tlad_registry%get(c_key_self, self)
-call self%opr_eqv_ad(c_key_geovals, c_key_obsspace, c_key_hofx)
+call self%opr_simobs_ad(c_key_geovals, c_key_obsspace, c_key_hofx)
 
 end subroutine ufo_gnssro_ref_tlad_ad_c
   

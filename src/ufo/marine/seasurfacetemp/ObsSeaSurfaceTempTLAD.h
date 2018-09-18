@@ -63,52 +63,5 @@ class ObsSeaSurfaceTempTLAD : public LinearObsOperatorBase,
   const ioda::ObsSpace& odb_;
   boost::scoped_ptr<const oops::Variables> varin_;
 };
-
-// -----------------------------------------------------------------------------
-/*template <typename MODEL>
-  ObsSeaSurfaceTempTLAD<MODEL>::ObsSeaSurfaceTempTLAD(const ioda::ObsSpace & odb, const eckit::Configuration & config)
-  : keyOperSeaSurfaceTemp_(0), varin_()
-{
-  const eckit::Configuration * configc = &config;
-  ufo_seasurfacetemp_tlad_setup_f90(keyOperSeaSurfaceTemp_, &configc);
-  const std::vector<std::string> vv{"ocean_upper_level_temperature"};
-  varin_.reset(new oops::Variables(vv));
-  oops::Log::trace() << "ObsSeaSurfaceTempTLAD created" << std::endl;
-}
-
-// -----------------------------------------------------------------------------
-template <typename MODEL>
-ObsSeaSurfaceTempTLAD<MODEL>::~ObsSeaSurfaceTempTLAD() {
-  ufo_seasurfacetemp_tlad_delete_f90(keyOperSeaSurfaceTemp_);
-  oops::Log::trace() << "ObsSeaSurfaceTempTLAD destrcuted" << std::endl;
-}
-
-// -----------------------------------------------------------------------------
-template <typename MODEL>
-void ObsSeaSurfaceTempTLAD<MODEL>::setTrajectory(const GeoVaLs & geovals, const ObsBias & bias) {
-  ufo_seasurfacetemp_tlad_settraj_f90(keyOperSeaSurfaceTemp_, geovals.toFortran());
-}
-
-// -----------------------------------------------------------------------------
-template <typename MODEL>
-  void ObsSeaSurfaceTempTLAD<MODEL>::obsEquivTL(const GeoVaLs & geovals, ioda::ObsVector & ovec,
-                               const ObsBiasIncrement & bias) const {
-  ufo_seasurfacetemp_tlad_eqv_tl_f90(keyOperSeaSurfaceTemp_, geovals.toFortran(), ovec.toFortran());
-}
-
-// -----------------------------------------------------------------------------
-template <typename MODEL>
-  void ObsSeaSurfaceTempTLAD<MODEL>::obsEquivAD(GeoVaLs & geovals, const ioda::ObsVector & ovec,
-                               ObsBiasIncrement & bias) const {
-  ufo_seasurfacetemp_tlad_eqv_ad_f90(keyOperSeaSurfaceTemp_, geovals.toFortran(), ovec.toFortran());
-}
-
-// -----------------------------------------------------------------------------
-template <typename MODEL>
-void ObsSeaSurfaceTempTLAD<MODEL>::print(std::ostream & os) const {
-  os << "ObsSeaSurfaceTempTLAD::print not implemented" << std::endl;
-}
-// -----------------------------------------------------------------------------
-*/
 }  // namespace ufo
 #endif  // UFO_MARINE_SEASURFACETEMP_OBSSEASURFACETEMPTLAD_H_

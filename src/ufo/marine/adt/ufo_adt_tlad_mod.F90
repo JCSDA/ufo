@@ -18,8 +18,8 @@ implicit none
 public :: ufo_adt_tlad
 public :: ufo_adt_tlad_delete
 public :: ufo_adt_tlad_settraj
-public :: ufo_adt_tlad_eqv_tl
-public :: ufo_adt_tlad_eqv_ad
+public :: ufo_adt_simobs_tl
+public :: ufo_adt_simobs_ad
 private
 integer, parameter :: max_string=800
 
@@ -67,13 +67,13 @@ end subroutine ufo_adt_tlad_settraj
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_adt_tlad_eqv_tl(self, geovals, hofx)
+subroutine ufo_adt_simobs_tl(self, geovals, hofx)
 implicit none
 type(ufo_adt_tlad), intent(in) :: self
 type(ufo_geovals), intent(in)    :: geovals
 type(obs_vector),  intent(inout) :: hofx
 
-character(len=*), parameter :: myname_="ufo_adt_tlad_eqv_tl"
+character(len=*), parameter :: myname_="ufo_adt_simobs_tl"
 character(max_string) :: err_msg
 
 integer :: iobs, icat, ncat
@@ -102,17 +102,17 @@ enddo
 
 print *,'tl hx done!'
 
-end subroutine ufo_adt_tlad_eqv_tl
+end subroutine ufo_adt_simobs_tl
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_adt_tlad_eqv_ad(self, geovals, hofx)
+subroutine ufo_adt_simobs_ad(self, geovals, hofx)
 implicit none
 type(ufo_adt_tlad), intent(in) :: self
 type(ufo_geovals), intent(inout) :: geovals
 type(obs_vector),  intent(inout)    :: hofx
 
-character(len=*), parameter :: myname_="ufo_adt_tlad_eqv_ad"
+character(len=*), parameter :: myname_="ufo_adt_simobs_ad"
 character(max_string) :: err_msg
 
 integer :: iobs, icat, ncat
@@ -145,6 +145,6 @@ enddo
 
 print *,'ad hx done!'
 
-end subroutine ufo_adt_tlad_eqv_ad
+end subroutine ufo_adt_simobs_ad
 
 end module ufo_adt_tlad_mod

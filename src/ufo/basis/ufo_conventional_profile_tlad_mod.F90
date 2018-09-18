@@ -26,8 +26,8 @@ module ufo_conventional_profile_tlad_mod
   contains
     procedure :: delete => conventional_profile_tlad_delete_
     procedure :: settraj => conventional_profile_tlad_settraj_
-    procedure :: eqv_tl => conventional_profile_tlad_t_eqv_tl_
-    procedure :: eqv_ad => conventional_profile_tlad_t_eqv_ad_
+    procedure :: simobs_tl => conventional_profile_simobs_tl_
+    procedure :: simobs_ad => conventional_profile_simobs_ad_
   end type ufo_conventional_profile_tlad
 contains
 
@@ -80,14 +80,14 @@ contains
     
 ! ------------------------------------------------------------------------------
     
-    subroutine conventional_profile_tlad_t_eqv_tl_(self, geovals, hofx, obss)
+    subroutine conventional_profile_simobs_tl_(self, geovals, hofx, obss)
       implicit none
       class(ufo_conventional_profile_tlad), intent(in)     :: self
       type(ufo_geovals),         intent(in)     :: geovals
       type(obs_vector),          intent(inout)  :: hofx
       type(ioda_obsdb),          intent(in)     :: obss
       
-      character(len=*), parameter :: myname_="ufo_conventional_profile_tlad_t_eqv_tl"
+      character(len=*), parameter :: myname_="ufo_conventional_profile_simobs_tl"
       character(max_string) :: err_msg
       
       integer :: iobs,ierr
@@ -117,18 +117,18 @@ contains
         call vert_interp_apply_tl(tv_d%nval, tv_d%vals(:,iobs), hofx%values(iobs), self%wi(iobs), self%wf(iobs))
       enddo
     
-    end subroutine conventional_profile_tlad_t_eqv_tl_
+    end subroutine conventional_profile_simobs_tl_
     
 ! ------------------------------------------------------------------------------
     
-    subroutine conventional_profile_tlad_t_eqv_ad_(self, geovals, hofx, obss)
+    subroutine conventional_profile_simobs_ad_(self, geovals, hofx, obss)
       implicit none
       class(ufo_conventional_profile_tlad), intent(in)     :: self
       type(ufo_geovals),         intent(inout)  :: geovals
       type(obs_vector),          intent(in)     :: hofx
       type(ioda_obsdb),          intent(in)     :: obss
       
-      character(len=*), parameter :: myname_="ufo_conventional_profile_tlad_t_eqv_ad"
+      character(len=*), parameter :: myname_="ufo_conventional_profile_simobs_ad"
       character(max_string) :: err_msg
       
       integer :: iobs,ierr
@@ -179,7 +179,7 @@ contains
         call vert_interp_apply_ad(tv_d%nval, tv_d%vals(:,iobs), hofx%values(iobs), self%wi(iobs), self%wf(iobs))
       enddo
     
-    end subroutine conventional_profile_tlad_t_eqv_ad_
+    end subroutine conventional_profile_simobs_ad_
     
 ! ------------------------------------------------------------------------------
     

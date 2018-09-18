@@ -85,7 +85,7 @@ end subroutine ufo_example_tlad_settraj
 ! TODO: replace below function with your tl observation operator.
 ! Note: this can use information saved from trajectory in your ufo_example_tlad type
 ! Input geovals parameter represents dx for tangent linear model
-subroutine ufo_example_tlad_eqv_tl(self, geovals, hofx, obss)
+subroutine ufo_example_simobs_tl(self, geovals, hofx, obss)
 implicit none
 type(ufo_example_tlad), intent(in)     :: self
 type(ufo_geovals),      intent(in)     :: geovals
@@ -93,12 +93,12 @@ type(obs_vector),       intent(inout)  :: hofx
 type(ioda_obsdb),       intent(in) :: obss
 
 
-end subroutine ufo_example_tlad_eqv_tl
+end subroutine ufo_example_simobs_tl
 
 ! ------------------------------------------------------------------------------
 ! TODO: replace below function with your ad observation operator.
 ! Note: this can use information saved from trajectory in your ufo_example_tlad type
-subroutine ufo_example_tlad_eqv_ad(self, geovals, hofx, obss)
+subroutine ufo_example_simobs_ad(self, geovals, hofx, obss)
 implicit none
 type(ufo_example_tlad), intent(in)     :: self
 type(ufo_geovals),      intent(in)     :: geovals
@@ -106,7 +106,7 @@ type(obs_vector),       intent(inout)  :: hofx
 type(ioda_obsdb),       intent(in)     :: obss
 
 
-end subroutine ufo_example_tlad_eqv_ad
+end subroutine ufo_example_simobs_ad
 
 ! ------------------------------------------------------------------------------
 

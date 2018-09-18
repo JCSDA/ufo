@@ -6,11 +6,11 @@
 set ( seaicethickness_files
     ObsSeaIceThickness.h
     ObsSeaIceThickness.cc
-    ObsSeaIceThickness.interface.F90
     ObsSeaIceThicknessTLAD.h
     ObsSeaIceThicknessTLAD.cc
-    ObsSeaIceThicknessTLAD.interface.F90
+    ufo_seaicethick_interface.F90
     ufo_seaicethick_mod.F90
+    ufo_seaicethick_tlad_interface.F90
     ufo_seaicethick_tlad_mod.F90
     PARENT_SCOPE
 )

@@ -24,14 +24,14 @@ module ufo_radiance_mod
   !> Fortran derived type for radiance trajectory
   type, extends(ufo_basis) :: ufo_radiance
   contains
-    procedure :: eqv => ufo_radiance_eqv
+    procedure :: simobs => ufo_radiance_simobs
   end type ufo_radiance
   
 contains
 
 ! ------------------------------------------------------------------------------
 
-  subroutine ufo_radiance_eqv(self, geovals, hofx, obss) 
+  subroutine ufo_radiance_simobs(self, geovals, hofx, obss) 
     implicit none
     class(ufo_radiance), intent(in)    :: self
     type(ufo_geovals),  intent(in)    :: geovals
@@ -684,7 +684,7 @@ contains
 
     END SUBROUTINE Load_Geom_Data
     
-  end subroutine ufo_radiance_eqv
+  end subroutine ufo_radiance_simobs
 
 ! ------------------------------------------------------------------------------
  

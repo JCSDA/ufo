@@ -57,7 +57,7 @@ void ObsRadiosondeTLAD::setTrajectory(const GeoVaLs & geovals, const ObsBias & b
 
 void ObsRadiosondeTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec,
                                       const ObsBiasIncrement & bias) const {
-  ufo_radiosonde_tlad_t_eqv_tl_f90(keyOperRadiosonde_, geovals.toFortran(), odb_.toFortran(),
+  ufo_radiosonde_simobs_tl_f90(keyOperRadiosonde_, geovals.toFortran(), odb_.toFortran(),
                                    ovec.toFortran());
 }
 
@@ -65,7 +65,7 @@ void ObsRadiosondeTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector &
 
 void ObsRadiosondeTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec,
                                       ObsBiasIncrement & bias) const {
-  ufo_radiosonde_tlad_t_eqv_ad_f90(keyOperRadiosonde_, geovals.toFortran(), odb_.toFortran(),
+  ufo_radiosonde_simobs_ad_f90(keyOperRadiosonde_, geovals.toFortran(), odb_.toFortran(),
                                    ovec.toFortran());
 }
 

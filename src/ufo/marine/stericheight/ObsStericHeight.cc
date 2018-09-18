@@ -52,7 +52,7 @@ ObsStericHeight::~ObsStericHeight() {
 
 void ObsStericHeight::simulateObs(const GeoVaLs & gom, ioda::ObsVector & ovec,
                              const ObsBias & bias) const {
-  ufo_stericheight_eqv_f90(keyOperStericHeight_, gom.toFortran(),
+  ufo_stericheight_simobs_f90(keyOperStericHeight_, gom.toFortran(),
                            odb_.toFortran(), ovec.toFortran(), bias.toFortran());
 }
 

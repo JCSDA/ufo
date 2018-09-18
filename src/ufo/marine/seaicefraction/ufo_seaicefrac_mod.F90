@@ -16,7 +16,7 @@ module ufo_seaicefrac_mod
 
   implicit none
   public :: ufo_seaicefrac
-  public :: ufo_seaicefrac_eqv
+  public :: ufo_seaicefrac_simobs
   private
   integer, parameter :: max_string=800
 
@@ -31,7 +31,7 @@ contains
 
   ! ------------------------------------------------------------------------------
 
-  subroutine ufo_seaicefrac_eqv(self, geovals, hofx)
+  subroutine ufo_seaicefrac_simobs(self, geovals, hofx)
     use ufo_marine_ncutils
     use ufo_vars_mod
         
@@ -40,7 +40,7 @@ contains
     type(ufo_geovals), intent(in)    :: geovals
     type(obs_vector),  intent(inout) :: hofx
 
-    character(len=*), parameter :: myname_="ufo_seaicefrac_eqv"
+    character(len=*), parameter :: myname_="ufo_seaicefrac_simobs"
     character(max_string) :: err_msg
 
     integer :: iobs
@@ -79,6 +79,6 @@ contains
     call sic_out%write_geoval(var_seaicefrac,geoval,arg_dim_name=dim_name)
     call sic_out%finalize()
 
-  end subroutine ufo_seaicefrac_eqv
+  end subroutine ufo_seaicefrac_simobs
 
 end module ufo_seaicefrac_mod

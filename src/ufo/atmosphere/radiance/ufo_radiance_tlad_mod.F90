@@ -28,8 +28,8 @@ module ufo_radiance_tlad_mod
   contains
     procedure :: delete  => ufo_radiance_tlad_delete
     procedure :: settraj => ufo_radiance_tlad_settraj 
-    procedure :: eqv_tl  => ufo_radiance_tlad_eqv_tl
-    procedure :: eqv_ad  => ufo_radiance_tlad_eqv_ad
+    procedure :: simobs_tl  => ufo_radiance_simobs_tl
+    procedure :: simobs_ad  => ufo_radiance_simobs_ad
   end type ufo_radiance_tlad
   
 contains
@@ -63,35 +63,35 @@ end subroutine ufo_radiance_tlad_settraj
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_radiance_tlad_eqv_tl(self, geovals, hofx, obss)
+subroutine ufo_radiance_simobs_tl(self, geovals, hofx, obss)
   implicit none
   class(ufo_radiance_tlad), intent(in)     :: self
   type(ufo_geovals),     intent(in)     :: geovals
   type(obs_vector),      intent(inout)  :: hofx
   type(ioda_obsdb),      intent(in)     :: obss
 
-  character(len=*), parameter :: myname_="ufo_radiance_tlad_eqv_tl"
+  character(len=*), parameter :: myname_="ufo_radiance_simobs_tl"
   character(max_string) :: err_msg
 
   ! Nothing here yet
 
-end subroutine ufo_radiance_tlad_eqv_tl
+end subroutine ufo_radiance_simobs_tl
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_radiance_tlad_eqv_ad(self, geovals, hofx, obss)
+subroutine ufo_radiance_simobs_ad(self, geovals, hofx, obss)
   implicit none
   class(ufo_radiance_tlad), intent(in) :: self
   type(ufo_geovals),     intent(inout)    :: geovals
   type(obs_vector),      intent(in)       :: hofx
   type(ioda_obsdb),      intent(in)       :: obss
 
-  character(len=*), parameter :: myname_="ufo_radiance_tlad_eqv_ad"
+  character(len=*), parameter :: myname_="ufo_radiance_simobs_ad"
   character(max_string) :: err_msg
 
   ! Nothing here yet
 
-end subroutine ufo_radiance_tlad_eqv_ad
+end subroutine ufo_radiance_simobs_ad
 
 ! ------------------------------------------------------------------------------
  

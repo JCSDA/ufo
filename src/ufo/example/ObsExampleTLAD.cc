@@ -60,9 +60,9 @@ void ObsExampleTLAD::setTrajectory(const GeoVaLs & geovals, const ObsBias & bias
 
 void ObsExampleTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec,
                              const ObsBiasIncrement & bias) const {
-  // TODO(anyone): replace ufo_example_tlad_eqv_tl_f90 with the call to your Fortran routine
+  // TODO(anyone): replace ufo_example_simobs_tl_f90 with the call to your Fortran routine
   //       to apply tl observation operator (defined in ObsExampleTLAD.interface.F90)
-  ufo_example_tlad_eqv_tl_f90(keyOper_, geovals.toFortran(), odb_.toFortran(), ovec.toFortran());
+  ufo_example_simobs_tl_f90(keyOper_, geovals.toFortran(), odb_.toFortran(), ovec.toFortran());
   oops::Log::trace() << "ObsExampleTLAD: tangent linear observation operator run" << std::endl;
 }
 
@@ -70,9 +70,9 @@ void ObsExampleTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ov
 
 void ObsExampleTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec,
                              ObsBiasIncrement & bias) const {
-  // TODO(anyone): replace ufo_example_tlad_eqv_ad_f90 with the call to your Fortran routine
+  // TODO(anyone): replace ufo_example_simobs_ad_f90 with the call to your Fortran routine
   //       to apply ad observation operator (defined in ObsExampleTLAD.interface.F90)
-  ufo_example_tlad_eqv_ad_f90(keyOper_, geovals.toFortran(), odb_.toFortran(), ovec.toFortran());
+  ufo_example_simobs_ad_f90(keyOper_, geovals.toFortran(), odb_.toFortran(), ovec.toFortran());
   oops::Log::trace() << "ObsExampleTLAD: adjoint observation operator run" << std::endl;
 }
 

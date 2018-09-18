@@ -15,15 +15,15 @@ module ufo_basis_mod
   type, abstract :: ufo_basis
     private
   contains
-    procedure, non_overridable :: opr_eqv  => opr_eqv_
-    procedure(eqv_), deferred  :: eqv
+    procedure, non_overridable :: opr_simobs  => opr_simobs_
+    procedure(simobs_), deferred  :: simobs
   end type ufo_basis
 
   abstract interface
 
   ! ------------------------------------------------------------------------------
 
-    subroutine eqv_(self, geovals, hofx, obss)
+    subroutine simobs_(self, geovals, hofx, obss)
       import ufo_basis, ufo_geovals, obs_vector, ioda_obsdb
       implicit none
       class(ufo_basis),         intent(in)    :: self
@@ -40,7 +40,7 @@ contains
 
 ! ------------------------------------------------------------------------------
     
-    subroutine opr_eqv_(self, c_key_geovals, c_key_obsspace, c_key_hofx)
+    subroutine opr_simobs_(self, c_key_geovals, c_key_obsspace, c_key_hofx)
       implicit none
     
       class(ufo_basis), intent(in)    :: self
@@ -56,9 +56,9 @@ contains
       call ioda_obs_vect_registry%get(c_key_hofx,hofx)
       call ioda_obsdb_registry%get(c_key_obsspace,obss)
     
-      call self%eqv(geovals, hofx, obss)
+      call self%simobs(geovals, hofx, obss)
     
-    end subroutine opr_eqv_
+    end subroutine opr_simobs_
     
 ! ------------------------------------------------------------------------------
 

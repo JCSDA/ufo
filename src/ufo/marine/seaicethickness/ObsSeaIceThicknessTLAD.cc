@@ -52,14 +52,16 @@ void ObsSeaIceThicknessTLAD::setTrajectory(const GeoVaLs & geovals, const ObsBia
 
 void ObsSeaIceThicknessTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec,
                                const ObsBiasIncrement & bias) const {
-  ufo_seaicethick_tlad_eqv_tl_f90(keyOperSeaIceThickness_, geovals.toFortran(), ovec.toFortran());
+  ufo_seaicethick_simobs_tl_f90(keyOperSeaIceThickness_, geovals.toFortran(),
+                                     ovec.toFortran());
 }
 
 // -----------------------------------------------------------------------------
 
 void ObsSeaIceThicknessTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec,
                                ObsBiasIncrement & bias) const {
-  ufo_seaicethick_tlad_eqv_ad_f90(keyOperSeaIceThickness_, geovals.toFortran(), ovec.toFortran());
+  ufo_seaicethick_simobs_ad_f90(keyOperSeaIceThickness_, geovals.toFortran(),
+                                     ovec.toFortran());
 }
 
 // -----------------------------------------------------------------------------

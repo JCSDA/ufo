@@ -73,7 +73,7 @@ end subroutine ufo_example_delete_c
   
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_example_eqv_c(c_key_self, c_key_geovals, c_key_obsspace, c_key_hofx, c_bias) bind(c,name='ufo_example_eqv_f90')
+subroutine ufo_example_simobs_c(c_key_self, c_key_geovals, c_key_obsspace, c_key_hofx, c_bias) bind(c,name='ufo_example_simobs_f90')
 
 implicit none
 integer(c_int), intent(in) :: c_key_self
@@ -87,7 +87,7 @@ type(ufo_geovals), pointer :: geovals
 type(obs_vector),  pointer :: hofx
 type(ioda_obsdb),  pointer :: obss
 
-character(len=*), parameter :: myname_="ufo_example_eqv_c"
+character(len=*), parameter :: myname_="ufo_example_simobs_c"
 
 call ufo_example_registry%get(c_key_self, self)
 call ufo_geovals_registry%get(c_key_geovals,geovals)
@@ -96,8 +96,8 @@ call ioda_obsdb_registry%get(c_key_obsspace,obss)
 
 ! TODO: replace with the call to your Fortran routine for observation operator
 !       (defined in ufo_<your_obs_operator_name>_mod.F90)
-call ufo_example_eqv(self, geovals, hofx, obss)
+call ufo_example_simobs(self, geovals, hofx, obss)
 
-end subroutine ufo_example_eqv_c
+end subroutine ufo_example_simobs_c
   
 end module ufo_example_mod_c

@@ -50,10 +50,10 @@ ObsExample::~ObsExample() {
 
 void ObsExample::simulateObs(const GeoVaLs & gv, ioda::ObsVector & ovec,
                                   const ObsBias & bias) const {
-  // TODO(anyone): replace ufo_example_eqv_f90 with the call to your Fortran routine
+  // TODO(anyone): replace ufo_example_simobs_f90 with the call to your Fortran routine
   //       to apply observation operator (defined in ObsExample.interface.F90)
 
-  ufo_example_eqv_f90(keyOper_, gv.toFortran(), odb_.toFortran(), ovec.toFortran(),
+  ufo_example_simobs_f90(keyOper_, gv.toFortran(), odb_.toFortran(), ovec.toFortran(),
                       bias.toFortran());
   oops::Log::trace() << "ObsExample: observation operator run" << std::endl;
 }

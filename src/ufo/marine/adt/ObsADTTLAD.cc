@@ -52,14 +52,14 @@ void ObsADTTLAD::setTrajectory(const GeoVaLs & geovals, const ObsBias & bias) {
 
   void ObsADTTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec,
                                  const ObsBiasIncrement & bias) const {
-  ufo_adt_tlad_eqv_tl_f90(keyOperADT_, geovals.toFortran(), ovec.toFortran());
+  ufo_adt_simobs_tl_f90(keyOperADT_, geovals.toFortran(), ovec.toFortran());
 }
 
 // -----------------------------------------------------------------------------
 
   void ObsADTTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec,
                                  ObsBiasIncrement & bias) const {
-  ufo_adt_tlad_eqv_ad_f90(keyOperADT_, geovals.toFortran(), ovec.toFortran());
+  ufo_adt_simobs_ad_f90(keyOperADT_, geovals.toFortran(), ovec.toFortran());
 }
 
 // -----------------------------------------------------------------------------

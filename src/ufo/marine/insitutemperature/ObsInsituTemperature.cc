@@ -53,7 +53,7 @@ ObsInsituTemperature::~ObsInsituTemperature() {
 
 void ObsInsituTemperature::simulateObs(const GeoVaLs & gom, ioda::ObsVector & ovec,
                                        const ObsBias & bias) const {
-  ufo_insitutemperature_eqv_f90(keyOperInsituTemperature_, gom.toFortran(),
+  ufo_insitutemperature_simobs_f90(keyOperInsituTemperature_, gom.toFortran(),
                                 odb_.toFortran(), ovec.toFortran(), bias.toFortran());
 }
 

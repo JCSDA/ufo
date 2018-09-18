@@ -16,7 +16,7 @@ module ufo_seaicethick_mod
 
   implicit none
   public :: ufo_seaicethick
-  public :: ufo_seaicethick_eqv
+  public :: ufo_seaicethick_simobs
   private
   integer, parameter :: max_string=800
 
@@ -31,7 +31,7 @@ contains
 
   ! ------------------------------------------------------------------------------
 
-  subroutine ufo_seaicethick_eqv(self, geovals, hofx)
+  subroutine ufo_seaicethick_simobs(self, geovals, hofx)
     use ufo_marine_ncutils
     use ufo_vars_mod
     
@@ -40,7 +40,7 @@ contains
     type(ufo_geovals), intent(in)    :: geovals
     type(obs_vector),  intent(inout) :: hofx
 
-    character(len=*), parameter :: myname_="ufo_seaicethick_eqv"
+    character(len=*), parameter :: myname_="ufo_seaicethick_simobs"
     character(max_string) :: err_msg
 
     integer :: iobs, icat, ncat
@@ -80,6 +80,6 @@ contains
     call sit_out%write_geoval(var_seaicethick,icethick,arg_dim_name=dim_name)    
     call sit_out%finalize()
 
-  end subroutine ufo_seaicethick_eqv
+  end subroutine ufo_seaicethick_simobs
 
 end module ufo_seaicethick_mod

@@ -16,7 +16,7 @@ module ufo_seasurfacetemp_mod
 
   implicit none
   public :: ufo_seasurfacetemp
-  public :: ufo_seasurfacetemp_eqv
+  public :: ufo_seasurfacetemp_simobs
   private
   integer, parameter :: max_string=800
 
@@ -31,7 +31,7 @@ contains
 
   ! ------------------------------------------------------------------------------
   !!!!!!!!!!!!!!! TODO: PASS OBS to operator !!!!!!!!!!!!!!!!!!!!
-  subroutine ufo_seasurfacetemp_eqv(self, geovals, hofx)
+  subroutine ufo_seasurfacetemp_simobs(self, geovals, hofx)
 
     use ufo_marine_ncutils
     
@@ -40,7 +40,7 @@ contains
     type(ufo_geovals)        ,intent(in) :: geovals
     type(obs_vector)      ,intent(inout) :: hofx
 
-    character(len=*), parameter :: myname_="ufo_seasurfacetemp_eqv"
+    character(len=*), parameter :: myname_="ufo_seasurfacetemp_simobs"
     character(max_string) :: err_msg
 
     integer :: iobs
@@ -87,6 +87,6 @@ contains
     call sst_out%write_geoval(var_ocn_sst,geoval_sst)
     call sst_out%finalize()
 
-  end subroutine ufo_seasurfacetemp_eqv
+  end subroutine ufo_seasurfacetemp_simobs
 
 end module ufo_seasurfacetemp_mod

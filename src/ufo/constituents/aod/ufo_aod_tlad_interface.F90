@@ -77,7 +77,7 @@ end subroutine ufo_aod_tlad_settraj_c
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_aod_tlad_eqv_tl_c(c_key_self, c_key_geovals, c_key_obsspace, c_key_hofx) bind(c,name='ufo_aod_tlad_eqv_tl_f90')
+subroutine ufo_aod_simobs_tl_c(c_key_self, c_key_geovals, c_key_obsspace, c_key_hofx) bind(c,name='ufo_aod_simobs_tl_f90')
 
 implicit none
 integer(c_int), intent(in) :: c_key_self
@@ -87,16 +87,16 @@ integer(c_int), intent(in) :: c_key_obsspace
 
 type(ufo_aod_tlad), pointer :: self
 
-character(len=*), parameter :: myname_="ufo_aod_tlad_eqv_tl_c"
+character(len=*), parameter :: myname_="ufo_aod_simobs_tl_c"
 
 call ufo_aod_tlad_registry%get(c_key_self, self)
-call self%opr_eqv_tl(c_key_geovals, c_key_obsspace, c_key_hofx)
+call self%opr_simobs_tl(c_key_geovals, c_key_obsspace, c_key_hofx)
 
-end subroutine ufo_aod_tlad_eqv_tl_c
+end subroutine ufo_aod_simobs_tl_c
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_aod_tlad_eqv_ad_c(c_key_self, c_key_geovals, c_key_obsspace, c_key_hofx) bind(c,name='ufo_aod_tlad_eqv_ad_f90')
+subroutine ufo_aod_simobs_ad_c(c_key_self, c_key_geovals, c_key_obsspace, c_key_hofx) bind(c,name='ufo_aod_simobs_ad_f90')
 
 implicit none
 integer(c_int), intent(in) :: c_key_self
@@ -106,12 +106,12 @@ integer(c_int), intent(in) :: c_key_obsspace
 
 type(ufo_aod_tlad), pointer :: self
 
-character(len=*), parameter :: myname_="ufo_aod_tlad_eqv_ad_c"
+character(len=*), parameter :: myname_="ufo_aod_simobs_ad_c"
 
 call ufo_aod_tlad_registry%get(c_key_self, self)
-call self%opr_eqv_ad(c_key_geovals, c_key_obsspace, c_key_hofx)
+call self%opr_simobs_ad(c_key_geovals, c_key_obsspace, c_key_hofx)
 
-end subroutine ufo_aod_tlad_eqv_ad_c
+end subroutine ufo_aod_simobs_ad_c
 
 ! ------------------------------------------------------------------------------
 

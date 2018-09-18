@@ -51,7 +51,7 @@ ObsSeaIceFraction::~ObsSeaIceFraction() {
 
 void ObsSeaIceFraction::simulateObs(const GeoVaLs & gom, ioda::ObsVector & ovec,
                              const ObsBias & bias) const {
-  ufo_seaicefrac_eqv_f90(keyOperSeaIceFraction_, gom.toFortran(), odb_.toFortran(),
+  ufo_seaicefrac_simobs_f90(keyOperSeaIceFraction_, gom.toFortran(), odb_.toFortran(),
                          ovec.toFortran(), bias.toFortran());
 }
 

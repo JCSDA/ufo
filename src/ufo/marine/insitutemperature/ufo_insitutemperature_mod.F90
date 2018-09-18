@@ -16,7 +16,7 @@ module ufo_insitutemperature_mod
 
   implicit none
   public :: ufo_insitutemperature
-  public :: ufo_insitutemperature_eqv
+  public :: ufo_insitutemperature_simobs
   private
   integer, parameter :: max_string=800
 
@@ -30,7 +30,7 @@ contains
 
   ! ------------------------------------------------------------------------------
 
-  subroutine ufo_insitutemperature_eqv(self, geovals, hofx, obs_ti)
+  subroutine ufo_insitutemperature_simobs(self, geovals, hofx, obs_ti)
     use gsw_pot_to_insitu
     use vert_interp_mod    
     use ufo_tpsp2ti_mod
@@ -42,7 +42,7 @@ contains
     type(ioda_obs_insitutemperature), intent(in) :: obs_ti     !< Insitu temperature observations
     type(obs_vector),  intent(inout)             :: hofx       !< Ti(Tp,Sp,h)
 
-    character(len=*), parameter :: myname_="ufo_insitutemperature_eqv"
+    character(len=*), parameter :: myname_="ufo_insitutemperature_simobs"
     character(max_string)  :: err_msg
 
     integer :: iobs, ilev, nlev, nobs
@@ -143,6 +143,6 @@ contains
 
     deallocate(tempi, pressure, depth)
     
-  end subroutine ufo_insitutemperature_eqv
+  end subroutine ufo_insitutemperature_simobs
 
 end module ufo_insitutemperature_mod

@@ -48,7 +48,7 @@ ObsAod::~ObsAod() {
 
 void ObsAod::simulateObs(const GeoVaLs & gom, ioda::ObsVector & ovec,
                          const ObsBias & bias) const {
-  ufo_aod_eqv_f90(keyOperAod_, gom.toFortran(), odb_.toFortran(), ovec.toFortran(),
+  ufo_aod_simobs_f90(keyOperAod_, gom.toFortran(), odb_.toFortran(), ovec.toFortran(),
                   bias.toFortran());
 }
 

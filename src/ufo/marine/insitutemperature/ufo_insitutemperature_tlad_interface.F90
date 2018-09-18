@@ -87,7 +87,7 @@ end subroutine ufo_insitutemperature_tlad_settraj_c
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_insitutemperature_tlad_eqv_tl_c(c_key_self, c_key_geovals, c_key_obsspace, c_key_hofx, c_bias) bind(c,name='ufo_insitutemperature_tlad_eqv_tl_f90')
+subroutine ufo_insitutemperature_simobs_tl_c(c_key_self, c_key_geovals, c_key_obsspace, c_key_hofx, c_bias) bind(c,name='ufo_insitutemperature_simobs_tl_f90')
 
 implicit none
 integer(c_int), intent(in) :: c_key_self
@@ -100,19 +100,19 @@ type(ufo_insitutemperature_tlad), pointer :: self
 type(ufo_geovals),    pointer :: geovals
 type(obs_vector),     pointer :: hofx
 
-character(len=*), parameter :: myname_="ufo_insitutemperature_tlad_eqv_tl_c"
+character(len=*), parameter :: myname_="ufo_insitutemperature_simobs_tl_c"
 
 call ufo_insitutemperature_tlad_registry%get(c_key_self, self)
 call ufo_geovals_registry%get(c_key_geovals,geovals)
 call ioda_obs_vect_registry%get(c_key_hofx,hofx)
 
-call ufo_insitutemperature_tlad_eqv_tl(self, geovals, hofx)!, obs_ti)
+call ufo_insitutemperature_simobs_tl(self, geovals, hofx)!, obs_ti)
 
-end subroutine ufo_insitutemperature_tlad_eqv_tl_c
+end subroutine ufo_insitutemperature_simobs_tl_c
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_insitutemperature_tlad_eqv_ad_c(c_key_self, c_key_geovals, c_key_obsspace, c_key_hofx, c_key_bias) bind(c,name='ufo_insitutemperature_tlad_eqv_ad_f90')
+subroutine ufo_insitutemperature_simobs_ad_c(c_key_self, c_key_geovals, c_key_obsspace, c_key_hofx, c_key_bias) bind(c,name='ufo_insitutemperature_simobs_ad_f90')
 
 implicit none
 integer(c_int), intent(in) :: c_key_self
@@ -130,8 +130,8 @@ call ufo_insitutemperature_tlad_registry%get(c_key_self, self)
 call ufo_geovals_registry%get(c_key_geovals,geovals)
 call ioda_obs_vect_registry%get(c_key_hofx,hofx)
 
-call ufo_insitutemperature_tlad_eqv_ad(self, geovals, hofx)
+call ufo_insitutemperature_simobs_ad(self, geovals, hofx)
 
-end subroutine ufo_insitutemperature_tlad_eqv_ad_c
+end subroutine ufo_insitutemperature_simobs_ad_c
   
 end module ufo_insitutemperature_tlad_mod_c

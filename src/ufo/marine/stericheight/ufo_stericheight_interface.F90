@@ -63,7 +63,7 @@ end subroutine ufo_stericheight_delete_c
   
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_stericheight_eqv_c(c_key_self, c_key_geovals, c_key_obsspace, c_key_hofx, c_bias) bind(c,name='ufo_stericheight_eqv_f90')
+subroutine ufo_stericheight_simobs_c(c_key_self, c_key_geovals, c_key_obsspace, c_key_hofx, c_bias) bind(c,name='ufo_stericheight_simobs_f90')
 
 implicit none
 integer(c_int), intent(in) :: c_key_self
@@ -76,7 +76,7 @@ type(ufo_stericheight), pointer :: self
 type(ufo_geovals),    pointer :: geovals
 type(obs_vector),     pointer :: hofx
 
-character(len=*), parameter :: myname_="ufo_stericheight_eqv_c"
+character(len=*), parameter :: myname_="ufo_stericheight_simobs_c"
 
 print *,myname_
 
@@ -84,8 +84,8 @@ call ufo_stericheight_registry%get(c_key_self, self)
 call ufo_geovals_registry%get(c_key_geovals,geovals)
 call ioda_obs_vect_registry%get(c_key_hofx,hofx)
 
-call ufo_stericheight_eqv(self, geovals, hofx)
+call ufo_stericheight_simobs(self, geovals, hofx)
 
-end subroutine ufo_stericheight_eqv_c
+end subroutine ufo_stericheight_simobs_c
   
 end module ufo_stericheight_mod_c

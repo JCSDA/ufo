@@ -17,7 +17,7 @@ module ufo_adt_mod
 
   implicit none
   public :: ufo_adt
-  public :: ufo_adt_eqv
+  public :: ufo_adt_simobs
   private
   integer, parameter :: max_string=800
 
@@ -41,7 +41,7 @@ contains
 
   ! ------------------------------------------------------------------------------
 
-  subroutine ufo_adt_eqv(self, geovals, hofx, obs_adt)
+  subroutine ufo_adt_simobs(self, geovals, hofx, obs_adt)
 
     use ufo_marine_ncutils
     
@@ -52,7 +52,7 @@ contains
     type(ioda_obs_adt), intent(in) :: obs_adt     !< adt observations
     type(obs_vector),  intent(inout) :: hofx
 
-    character(len=*), parameter :: myname_="ufo_adt_eqv"
+    character(len=*), parameter :: myname_="ufo_adt_simobs"
     character(max_string) :: err_msg
 
     ! nc_diag stuff
@@ -104,6 +104,6 @@ contains
     call adt_out%write_geoval(var_abs_topo,geoval_adt)
     call adt_out%finalize()
 
-  end subroutine ufo_adt_eqv
+  end subroutine ufo_adt_simobs
 
 end module ufo_adt_mod

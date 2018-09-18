@@ -30,8 +30,8 @@ module ufo_gnssro_ref_tlad_mod
   contains
     procedure :: delete  => ufo_gnssro_ref_tlad_delete
     procedure :: settraj => ufo_gnssro_ref_tlad_settraj
-    procedure :: eqv_tl  => ufo_gnssro_ref_tlad_tl
-    procedure :: eqv_ad  => ufo_gnssro_ref_tlad_ad
+    procedure :: simobs_tl  => ufo_gnssro_ref_tlad_tl
+    procedure :: simobs_ad  => ufo_gnssro_ref_tlad_ad
   end type ufo_gnssro_tlad
 
 contains

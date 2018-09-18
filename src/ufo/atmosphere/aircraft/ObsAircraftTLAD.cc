@@ -52,7 +52,7 @@ void ObsAircraftTLAD::setTrajectory(const GeoVaLs & geovals, const ObsBias & bia
 
 void ObsAircraftTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec,
                                     const ObsBiasIncrement & bias) const {
-  ufo_aircraft_tlad_t_eqv_tl_f90(keyOperAircraft_, geovals.toFortran(), odb_.toFortran(),
+  ufo_aircraft_simobs_tl_f90(keyOperAircraft_, geovals.toFortran(), odb_.toFortran(),
                                  ovec.toFortran());
 }
 
@@ -60,7 +60,7 @@ void ObsAircraftTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & o
 
 void ObsAircraftTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec,
                                     ObsBiasIncrement & bias) const {
-  ufo_aircraft_tlad_t_eqv_ad_f90(keyOperAircraft_, geovals.toFortran(), odb_.toFortran(),
+  ufo_aircraft_simobs_ad_f90(keyOperAircraft_, geovals.toFortran(), odb_.toFortran(),
                                  ovec.toFortran());
 }
 

@@ -53,14 +53,14 @@ void ObsSeaIceFractionTLAD::setTrajectory(const GeoVaLs & geovals, const ObsBias
 
 void ObsSeaIceFractionTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec,
                                const ObsBiasIncrement & bias) const {
-  ufo_seaicefrac_tlad_eqv_tl_f90(keyOperSeaIceFraction_, geovals.toFortran(), ovec.toFortran());
+  ufo_seaicefrac_simobs_tl_f90(keyOperSeaIceFraction_, geovals.toFortran(), ovec.toFortran());
 }
 
 // -----------------------------------------------------------------------------
 
 void ObsSeaIceFractionTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec,
                                ObsBiasIncrement & bias) const {
-  ufo_seaicefrac_tlad_eqv_ad_f90(keyOperSeaIceFraction_, geovals.toFortran(), ovec.toFortran());
+  ufo_seaicefrac_simobs_ad_f90(keyOperSeaIceFraction_, geovals.toFortran(), ovec.toFortran());
 }
 
 // -----------------------------------------------------------------------------
