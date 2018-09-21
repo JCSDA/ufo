@@ -56,8 +56,8 @@ void ObsGnssroRefTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & 
                                       const ObsBiasIncrement & bias) const {
   ufo_gnssro_ref_simobs_tl_f90(keyOperGnssroRef_, geovals.toFortran(), odb_.toFortran(),
                                ovec.toFortran());
-}    
- 
+}
+
 // -----------------------------------------------------------------------------
 
 void ObsGnssroRefTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec,
