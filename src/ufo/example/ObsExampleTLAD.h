@@ -5,20 +5,22 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-//TODO: through the file replace UFO_OBSEXAMPLETLAD_H with the unique string (e.g. UFO_<YOUR_OBS_OPERATOR_NAME>TLAD_H
-#ifndef UFO_OBSEXAMPLETLAD_H_
-#define UFO_OBSEXAMPLETLAD_H_
+// TODO(anyone): through the file replace UFO_EXAMPLE_OBSEXAMPLETLAD_H with the unique string
+#ifndef UFO_EXAMPLE_OBSEXAMPLETLAD_H_
+#define UFO_EXAMPLE_OBSEXAMPLETLAD_H_
 
 #include <ostream>
 #include <string>
 
 #include <boost/scoped_ptr.hpp>
 
-#include "oops/base/Variables.h"
-#include "ufo/LinearObsOperatorBase.h"
 #include "ioda/ObsSpace.h"
-#include "oops/util/ObjectCounter.h"
+
+#include "oops/base/Variables.h"
 #include "oops/util/Logger.h"
+#include "oops/util/ObjectCounter.h"
+
+#include "ufo/LinearObsOperatorBase.h"
 
 // Forward declarations
 namespace eckit {
@@ -36,10 +38,10 @@ namespace ufo {
 
 // -----------------------------------------------------------------------------
 /// Example for observation operator TL and AD class
-//  TODO: through the file replace ObsExampleTLAD with <Your_Obs_Operator_Name>TLAD
+// TODO(anyone): through the file replace ObsExampleTLAD with <Your_Obs_Operator_Name>TLAD
 class ObsExampleTLAD : public oops::LinearObsOperatorBase,
                        private util::ObjectCounter<ObsExampleTLAD> {
-public:
+ public:
   static const std::string classname() {return "ufo::ObsExampleTLAD";}
 
   ObsExampleTLAD(const ioda::ObsSpace &, const eckit::Configuration &);
@@ -56,7 +58,7 @@ public:
   int & toFortran() {return keyOper_;}
   const int & toFortran() const {return keyOper_;}
 
-private:
+ private:
   void print(std::ostream &) const;
   F90hop keyOper_;
   const ioda::ObsSpace& odb_;
@@ -66,4 +68,4 @@ private:
 // -----------------------------------------------------------------------------
 
 }  // namespace ufo
-#endif  // UFO_OBSEXAMPLETLAD_H_
+#endif  // UFO_EXAMPLE_OBSEXAMPLETLAD_H_

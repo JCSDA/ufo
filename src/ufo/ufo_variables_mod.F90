@@ -18,8 +18,10 @@ integer, parameter, public :: MAXVARLEN=56
 character(len=MAXVARLEN), public :: var_tv   = "virtual_temperature"
 character(len=MAXVARLEN), public :: var_prsl = "atmosphere_ln_pressure_coordinate"
 character(len=MAXVARLEN), public :: var_mixr = "humidity_mixing_ratio"
+character(len=MAXVARLEN), public :: var_q    = "specific_humidity"
 character(len=MAXVARLEN), public :: var_prs  = "air_pressure"
 character(len=MAXVARLEN), public :: var_prsi = "air_pressure_levels"
+character(len=MAXVARLEN), public :: var_z    = "geopotential_height"
 character(len=MAXVARLEN), public :: var_oz   = "mass_concentration_of_ozone_in_air"
 character(len=MAXVARLEN), public :: var_co2  = "mass_concentration_of_carbon_dioxide_in_air"
 character(len=MAXVARLEN), public :: var_clw  = "atmosphere_mass_content_of_cloud_liquid_water"
@@ -74,6 +76,7 @@ character(len=MAXVARLEN), public :: var_ocn_con_temp  = "ocean_conservative_temp
 character(len=MAXVARLEN), public :: var_ocn_abs_salt  = "ocean_absolute_salinity"
 character(len=MAXVARLEN), public :: var_ocn_salt      = "ocean_salinity"
 character(len=MAXVARLEN), public :: var_ocn_lay_thick = "ocean_layer_thickness"
+character(len=MAXVARLEN), public :: var_ocn_sst       = "ocean_upper_level_temperature"
 
 ! ------------------------------------------------------------------------------
 

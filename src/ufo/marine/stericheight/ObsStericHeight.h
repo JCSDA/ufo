@@ -5,8 +5,8 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
  */
 
-#ifndef UFO_OBSSTERICHEIGHT_H_
-#define UFO_OBSSTERICHEIGHT_H_
+#ifndef UFO_MARINE_STERICHEIGHT_OBSSTERICHEIGHT_H_
+#define UFO_MARINE_STERICHEIGHT_OBSSTERICHEIGHT_H_
 
 #include <ostream>
 #include <string>
@@ -14,9 +14,10 @@
 #include <boost/scoped_ptr.hpp>
 
 #include "oops/base/Variables.h"
-#include "ufo/ObsOperatorBase.h"
 #include "oops/util/ObjectCounter.h"
+
 #include "ufo/marine/FortranMarine.h"
+#include "ufo/ObsOperatorBase.h"
 
 // Forward declarations
 namespace eckit {
@@ -61,4 +62,4 @@ class ObsStericHeight : public ObsOperatorBase,
 // -----------------------------------------------------------------------------
 
 }  // namespace ufo
-#endif  // UFO_OBSSTERICHEIGHT_H_
+#endif  // UFO_MARINE_STERICHEIGHT_OBSSTERICHEIGHT_H_

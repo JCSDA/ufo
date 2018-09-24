@@ -19,7 +19,7 @@ module ufo_example_mod
 
   implicit none
   public :: ufo_example
-  public :: ufo_example_eqv
+  public :: ufo_example_simobs
   private
 
 !> Fortran derived type for the observation type
@@ -34,7 +34,7 @@ contains
 ! ------------------------------------------------------------------------------
 ! TODO: replace below function with your observation operator.
 ! Some sample code is provided and should be removed/replaced/altered to your needs
-subroutine ufo_example_eqv(self, geovals, hofx, obss)
+subroutine ufo_example_simobs(self, geovals, hofx, obss)
 implicit none
 type(ufo_example), intent(in)    :: self
 type(ufo_geovals), intent(in)    :: geovals
@@ -43,7 +43,7 @@ type(ioda_obsdb),  intent(in)    :: obss
 
 character(len=MAXVARLEN) :: varname
 
-character(len=*), parameter :: myname_="ufo_example_eqv"
+character(len=*), parameter :: myname_="ufo_example_simobs"
 
 type(ufo_geoval), pointer :: geoval
 type(obs_vector)  :: obsvec
@@ -70,7 +70,7 @@ call ioda_obsdb_var_to_ovec(obss, obsvec, varname)
 ! cleanup local variables
 call ioda_obsvec_delete(obsvec)
 
-end subroutine ufo_example_eqv
+end subroutine ufo_example_simobs
 
 ! ------------------------------------------------------------------------------
 

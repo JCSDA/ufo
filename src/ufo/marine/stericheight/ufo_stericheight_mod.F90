@@ -16,7 +16,7 @@ use kinds
   
 implicit none
 public :: ufo_stericheight
-public :: ufo_stericheight_eqv
+public :: ufo_stericheight_simobs
 private
 integer, parameter :: max_string=800
 
@@ -31,13 +31,13 @@ contains
  
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_stericheight_eqv(self, geovals, hofx)
+subroutine ufo_stericheight_simobs(self, geovals, hofx)
 implicit none
 type(ufo_stericheight), intent(in) :: self
 type(ufo_geovals), intent(in)    :: geovals
 type(obs_vector),  intent(inout) :: hofx
 
-character(len=*), parameter :: myname_="ufo_stericheight_eqv"
+character(len=*), parameter :: myname_="ufo_stericheight_simobs"
 character(max_string) :: err_msg
 
 integer :: iobs
@@ -69,7 +69,7 @@ do iobs = 1, hofx%nobs
    write(102,*)hofx%values(iobs)
 enddo
 
-end subroutine ufo_stericheight_eqv
+end subroutine ufo_stericheight_simobs
 
 
 end module ufo_stericheight_mod

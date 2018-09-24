@@ -5,14 +5,14 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
  */
 
-#ifndef UFO_MAINS_RUNCRTM_H_
-#define UFO_MAINS_RUNCRTM_H_
+#ifndef MAINS_RUNCRTM_H_
+#define MAINS_RUNCRTM_H_
 
 #include <string>
 #include <vector>
 
 #include "eckit/config/LocalConfiguration.h"
-#include "oops/util/Logger.h"
+
 #include "oops/base/Observations.h"
 #include "oops/base/ObsSpaces.h"
 #include "oops/interface/ObsAuxControl.h"
@@ -21,6 +21,7 @@
 #include "oops/runs/Application.h"
 #include "oops/util/DateTime.h"
 #include "oops/util/Duration.h"
+#include "oops/util/Logger.h"
 
 namespace ufo {
 
@@ -53,21 +54,21 @@ template <typename MODEL> class RunCRTM : public oops::Application {
 
     std::vector<eckit::LocalConfiguration> conf;
     obsconf.get("ObsTypes", conf);
-  
+
     for (std::size_t jj = 0; jj < obsdb.size(); ++jj) {
       ObsOperator_ hop(obsdb[jj]);
-  
+
       const eckit::LocalConfiguration gconf(conf[jj], "GeoVaLs");
       const GeoVaLs_ gval(gconf, hop.variables());
-  
+
       eckit::LocalConfiguration biasConf;
       conf[jj].get("ObsBias", biasConf);
       const ObsAuxCtrl_ ybias(biasConf);
-  
+
       ObsVector_ ovec(obsdb[jj]);
-  
+
       hop.simulateObs(gval, ovec, ybias);
-  
+
       const double zz = ovec.rms();
       const double xx = conf[jj].getDouble("rmsequiv");
       const double tol = conf[jj].getDouble("tolerance");
@@ -86,4 +87,4 @@ template <typename MODEL> class RunCRTM : public oops::Application {
 
 }  // namespace ufo
 
-#endif  // UFO_MAINS_RUNCRTM_H_
+#endif  // MAINS_RUNCRTM_H_

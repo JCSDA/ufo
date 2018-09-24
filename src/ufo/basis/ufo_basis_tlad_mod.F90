@@ -18,12 +18,12 @@ module ufo_basis_tlad_mod
   contains
     procedure, non_overridable    :: opr_delete  => opr_delete_
     procedure, non_overridable    :: opr_settraj => opr_settraj_
-    procedure, non_overridable    :: opr_eqv_tl  => opr_eqv_tl_
-    procedure, non_overridable    :: opr_eqv_ad  => opr_eqv_ad_
+    procedure, non_overridable    :: opr_simobs_tl  => opr_simobs_tl_
+    procedure, non_overridable    :: opr_simobs_ad  => opr_simobs_ad_
     procedure(delete_),  deferred :: delete
     procedure(settraj_), deferred :: settraj
-    procedure(eqv_tl_),  deferred :: eqv_tl
-    procedure(eqv_ad_),  deferred :: eqv_ad
+    procedure(simobs_tl_),  deferred :: simobs_tl
+    procedure(simobs_ad_),  deferred :: simobs_ad
   end type ufo_basis_tlad
 
   abstract interface
@@ -48,7 +48,7 @@ module ufo_basis_tlad_mod
 
 ! ------------------------------------------------------------------------------
 
-    subroutine eqv_tl_(self, geovals, hofx, obss)
+    subroutine simobs_tl_(self, geovals, hofx, obss)
       import ufo_basis_tlad, ufo_geovals, obs_vector, ioda_obsdb
       implicit none
       class(ufo_basis_tlad), intent(in) :: self
@@ -59,7 +59,7 @@ module ufo_basis_tlad_mod
 
 ! ------------------------------------------------------------------------------
 
-    subroutine eqv_ad_(self, geovals, hofx, obss)
+    subroutine simobs_ad_(self, geovals, hofx, obss)
       import ufo_basis_tlad, ufo_geovals, obs_vector, ioda_obsdb
       implicit none
       class(ufo_basis_tlad), intent(in)    :: self
@@ -104,7 +104,7 @@ contains
     
 ! ------------------------------------------------------------------------------
     
-    subroutine opr_eqv_tl_(self, c_key_geovals, c_key_obsspace, c_key_hofx)
+    subroutine opr_simobs_tl_(self, c_key_geovals, c_key_obsspace, c_key_hofx)
       implicit none
     
       class(ufo_basis_tlad), intent(in) :: self
@@ -120,13 +120,13 @@ contains
       call ioda_obs_vect_registry%get(c_key_hofx,hofx)
       call ioda_obsdb_registry%get(c_key_obsspace,obss)
       
-      call self%eqv_tl(geovals, hofx, obss)
+      call self%simobs_tl(geovals, hofx, obss)
       
-    end subroutine opr_eqv_tl_
+    end subroutine opr_simobs_tl_
     
 ! ------------------------------------------------------------------------------
     
-    subroutine opr_eqv_ad_(self, c_key_geovals, c_key_obsspace, c_key_hofx)
+    subroutine opr_simobs_ad_(self, c_key_geovals, c_key_obsspace, c_key_hofx)
       implicit none
     
       class(ufo_basis_tlad), intent(in) :: self
@@ -142,9 +142,9 @@ contains
       call ioda_obs_vect_registry%get(c_key_hofx,hofx)
       call ioda_obsdb_registry%get(c_key_obsspace,obss)
       
-      call self%eqv_ad(geovals, hofx, obss)
+      call self%simobs_ad(geovals, hofx, obss)
       
-    end subroutine opr_eqv_ad_
+    end subroutine opr_simobs_ad_
 
 ! ------------------------------------------------------------------------------
 

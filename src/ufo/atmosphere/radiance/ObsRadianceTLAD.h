@@ -5,8 +5,8 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#ifndef UFO_OBSRADIANCETLAD_H_
-#define UFO_OBSRADIANCETLAD_H_
+#ifndef UFO_ATMOSPHERE_RADIANCE_OBSRADIANCETLAD_H_
+#define UFO_ATMOSPHERE_RADIANCE_OBSRADIANCETLAD_H_
 
 #include <ostream>
 #include <string>
@@ -37,7 +37,7 @@ namespace ufo {
 /// Radiance (currently only temperature) observation for UFO.
 class ObsRadianceTLAD : public LinearObsOperatorBase,
                         private util::ObjectCounter<ObsRadianceTLAD> {
-public:
+ public:
   static const std::string classname() {return "ufo::ObsRadianceTLAD";}
 
   ObsRadianceTLAD(const ioda::ObsSpace &, const eckit::Configuration &);
@@ -54,7 +54,7 @@ public:
   int & toFortran() {return keyOperRadiance_;}
   const int & toFortran() const {return keyOperRadiance_;}
 
-private:
+ private:
   void print(std::ostream &) const;
   F90hop keyOperRadiance_;
   const ioda::ObsSpace& odb_;
@@ -64,4 +64,4 @@ private:
 // -----------------------------------------------------------------------------
 
 }  // namespace ufo
-#endif  // UFO_OBSRADIANCETLAD_H_
+#endif  // UFO_ATMOSPHERE_RADIANCE_OBSRADIANCETLAD_H_

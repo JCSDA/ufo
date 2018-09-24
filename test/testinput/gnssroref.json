@@ -1,0 +1,31 @@
+{
+  "test_framework_runtime_config": "--log_level=test_suite",
+  "window_begin": "2017-08-01T00:00:00Z",
+  "window_end": "2017-08-01T00:00:00Z",
+  "LinearObsOpTest": {
+    "testiterTL": "10",
+    "toleranceTL": "1.0e-8",
+    "toleranceAD": "1.0e-11"
+  },
+  "Observations": {
+    "ObsTypes": [
+      {
+        "ObsType": "GnssroRef",
+        "ObsData": {
+          "ObsDataIn": {
+            "obsfile":"Data/gnssro_ref_obs.nc4"
+          }
+        },
+        "GeoVaLs": {
+          "norm": "8000000.0",
+          "random": "0",
+            "nobs": "4",
+	    "filename":"Data/gnssro_ref_geovals.nc4"
+        },
+        "ObsBias": {},
+        "rmsequiv": "244.27864904801481",
+        "tolerance": "5.0e-5"
+      }
+    ]
+  }
+}

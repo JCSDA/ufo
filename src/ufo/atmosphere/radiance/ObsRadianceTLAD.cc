@@ -5,10 +5,11 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#include "ObsRadianceTLAD.h"
+#include "ufo/atmosphere/radiance/ObsRadianceTLAD.h"
 
 #include <ostream>
 #include <string>
+#include <vector>
 
 #include <boost/scoped_ptr.hpp>
 
@@ -36,10 +37,11 @@ ObsRadianceTLAD::ObsRadianceTLAD(const ioda::ObsSpace & odb, const eckit::Config
                                     "atmosphere_mass_content_of_cloud_ice",
                                     "effective_radius_of_cloud_liquid_water_particle",
                                     "effective_radius_of_cloud_ice_particle",
-                                    "Water_Fraction", "Land_Fraction", "Ice_Fraction", "Snow_Fraction",
-                                    "Water_Temperature", "Land_Temperature", "Ice_Temperature", "Snow_Temperature",
-                                    "Vegetation_Fraction", "Sfc_Wind_Speed", "Sfc_Wind_Direction", "Lai",
-                                    "Soil_Moisture", "Soil_Temperature", "Land_Type_Index", "Vegetation_Type",
+                                    "Water_Fraction", "Land_Fraction", "Ice_Fraction",
+                                    "Snow_Fraction", "Water_Temperature", "Land_Temperature",
+                                    "Ice_Temperature", "Snow_Temperature", "Vegetation_Fraction",
+                                    "Sfc_Wind_Speed", "Sfc_Wind_Direction", "Lai", "Soil_Moisture",
+                                    "Soil_Temperature", "Land_Type_Index", "Vegetation_Type",
                                     "Soil_Type", "Snow_Depth"};
   varin_.reset(new oops::Variables(vv));
   const eckit::Configuration * configc = &config;
@@ -64,14 +66,16 @@ void ObsRadianceTLAD::setTrajectory(const GeoVaLs & geovals, const ObsBias & bia
 
 void ObsRadianceTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec,
                                     const ObsBiasIncrement & bias) const {
-  ufo_radiance_tlad_eqv_tl_f90(keyOperRadiance_, geovals.toFortran(), odb_.toFortran(), ovec.toFortran());
+  ufo_radiance_simobs_tl_f90(keyOperRadiance_, geovals.toFortran(), odb_.toFortran(),
+                               ovec.toFortran());
 }
 
 // -----------------------------------------------------------------------------
 
 void ObsRadianceTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec,
                                     ObsBiasIncrement & bias) const {
-  ufo_radiance_tlad_eqv_ad_f90(keyOperRadiance_, geovals.toFortran(), odb_.toFortran(), ovec.toFortran());
+  ufo_radiance_simobs_ad_f90(keyOperRadiance_, geovals.toFortran(), odb_.toFortran(),
+                               ovec.toFortran());
 }
 
 // -----------------------------------------------------------------------------

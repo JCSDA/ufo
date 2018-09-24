@@ -13,15 +13,15 @@
         "ObsType": "Aircraft",
         "ObsData": {
           "ObsDataIn": {
-            "obsfile": "Data/aircraft_geovals.nc4"
+            "obsfile": "Data/aircraft_obs_2018041500_m.nc4"
           }
         },
         "GeoVaLs": {
           "norm": "8471.883687854357",
           "random": "0",
-          "filename": "Data/aircraft_geovals.nc4"
+          "filename": "Data/aircraft_geoval_2018041500_m.nc4"
         },
-        "rmsequiv": "254.50117867804789",
+        "rmsequiv": "250.24634938465377",
         "tolerance": "1.0e-8",
         "ObsBias": {}
       }

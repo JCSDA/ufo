@@ -5,8 +5,8 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
  */
 
-#ifndef UFO_OBSRADIOSONDE_H_
-#define UFO_OBSRADIOSONDE_H_
+#ifndef UFO_ATMOSPHERE_RADIOSONDE_OBSRADIOSONDE_H_
+#define UFO_ATMOSPHERE_RADIOSONDE_OBSRADIOSONDE_H_
 
 #include <ostream>
 #include <string>
@@ -61,4 +61,4 @@ class ObsRadiosonde : public ObsOperatorBase,
 // -----------------------------------------------------------------------------
 
 }  // namespace ufo
-#endif  // UFO_OBSRADIOSONDE_H_
+#endif  // UFO_ATMOSPHERE_RADIOSONDE_OBSRADIOSONDE_H_

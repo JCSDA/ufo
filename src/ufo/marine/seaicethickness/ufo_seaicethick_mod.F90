@@ -6,66 +6,80 @@
 !> Fortran module to handle ice concentration observations
 
 module ufo_seaicethick_mod
-  
-use ioda_obs_seaicethick_mod
-use ioda_obs_vectors
-use ufo_vars_mod
-use ioda_locs_mod
-use ufo_geovals_mod
-use kinds
-  
-implicit none
-public :: ufo_seaicethick
-public :: ufo_seaicethick_eqv
-private
-integer, parameter :: max_string=800
 
-!> Fortran derived type for sea ice fraction observation operator
-type :: ufo_seaicethick
-end type ufo_seaicethick
+  use ioda_obs_seaicethick_mod
+  use ioda_obs_vectors
+  use ufo_vars_mod
+  use ioda_locs_mod
+  use ufo_geovals_mod
+  use kinds
+
+  implicit none
+  public :: ufo_seaicethick
+  public :: ufo_seaicethick_simobs
+  private
+  integer, parameter :: max_string=800
+
+  !> Fortran derived type for sea ice fraction observation operator
+  type :: ufo_seaicethick
+  end type ufo_seaicethick
 
 
-! ------------------------------------------------------------------------------
+  ! ------------------------------------------------------------------------------
 
 contains
- 
-! ------------------------------------------------------------------------------
 
-subroutine ufo_seaicethick_eqv(self, geovals, hofx)
-implicit none
-type(ufo_seaicethick), intent(in) :: self
-type(ufo_geovals), intent(in)    :: geovals
-type(obs_vector),  intent(inout) :: hofx
+  ! ------------------------------------------------------------------------------
 
-character(len=*), parameter :: myname_="ufo_seaicethick_eqv"
-character(max_string) :: err_msg
+  subroutine ufo_seaicethick_simobs(self, geovals, hofx)
+    use ufo_marine_ncutils
+    use ufo_vars_mod
+    
+    implicit none
+    type(ufo_seaicethick), intent(in) :: self
+    type(ufo_geovals), intent(in)    :: geovals
+    type(obs_vector),  intent(inout) :: hofx
 
-integer :: iobs, icat, ncat
-type(ufo_geoval), pointer :: icethick, icefrac
+    character(len=*), parameter :: myname_="ufo_seaicethick_simobs"
+    character(max_string) :: err_msg
 
-print *, myname_, ' nobs: ', geovals%nobs, hofx%nobs
+    integer :: iobs, icat, ncat
+    type(ufo_geoval), pointer :: icethick, icefrac
 
-! check if nobs is consistent in geovals & hofx
-if (geovals%nobs /= hofx%nobs) then
-  write(err_msg,*) myname_, ' error: nobs inconsistent!'
-  call abor1_ftn(err_msg)
-endif
+    ! Netcdf stuff 
+    character(len=120) :: filename !< name of outpu file for omf, lon, lat, ...
+    character(len=MAXVARLEN) :: dim_name    
+    type(diag_marine_obs) :: sit_out    
+    
+    ! check if nobs is consistent in geovals & hofx
+    if (geovals%nobs /= hofx%nobs) then
+       write(err_msg,*) myname_, ' error: nobs inconsistent!'
+       call abor1_ftn(err_msg)
+    endif
 
-! check if sea ice fraction variable is in geovals and get it
-call ufo_geovals_get_var(geovals, var_seaicefrac, icefrac)
-! check if sea ice thickness variable is in geovals and get it
-call ufo_geovals_get_var(geovals, var_seaicethick, icethick)
+    ! check if sea ice fraction variable is in geovals and get it
+    call ufo_geovals_get_var(geovals, var_seaicefrac, icefrac)
+    ! check if sea ice thickness variable is in geovals and get it
+    call ufo_geovals_get_var(geovals, var_seaicethick, icethick)
 
-ncat = icefrac%nval
-hofx%values = 0.0
-! total sea ice fraction obs operator
-do iobs = 1, hofx%nobs
-   do icat = 1, ncat
-     hofx%values(iobs) = hofx%values(iobs) + icefrac%vals(icat,iobs) * icethick%vals(icat,iobs) / 905.0
-   enddo
-   write(102,*)hofx%values(iobs)
-enddo
+    ! Information for temporary output file
+    filename='sit-test.nc'    
+    call sit_out%init(hofx%nobs,filename)
+    
+    ncat = icefrac%nval
+    hofx%values = 0.0
+    ! total sea ice fraction obs operator
+    do iobs = 1, hofx%nobs
+       do icat = 1, ncat
+          hofx%values(iobs) = hofx%values(iobs) + icefrac%vals(icat,iobs) * icethick%vals(icat,iobs) / 905.0
+       enddo
+    enddo
 
-end subroutine ufo_seaicethick_eqv
+    dim_name="ncat"
+    call sit_out%write_geoval(var_seaicefrac,icefrac,arg_dim_name=dim_name)
+    call sit_out%write_geoval(var_seaicethick,icethick,arg_dim_name=dim_name)    
+    call sit_out%finalize()
+
+  end subroutine ufo_seaicethick_simobs
 
 end module ufo_seaicethick_mod

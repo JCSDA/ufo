@@ -5,19 +5,19 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
  */
 
-#include "ObsAircraft.h"
+#include "ufo/atmosphere/aircraft/ObsAircraft.h"
 
 #include <ostream>
 #include <string>
+#include <vector>
 
-#include "eckit/config/Configuration.h"
-#include "ioda/ObsSpace.h"
 #include "ioda/ObsVector.h"
+
 #include "oops/base/Variables.h"
+#include "oops/util/Logger.h"
+
 #include "ufo/GeoVaLs.h"
 #include "ufo/ObsBias.h"
-#include "ufo/ObsBiasIncrement.h"
-#include "ufo/ObsOperatorBase.h"
 
 namespace ufo {
 
@@ -46,7 +46,7 @@ ObsAircraft::~ObsAircraft() {
 
 void ObsAircraft::simulateObs(const GeoVaLs & gom, ioda::ObsVector & ovec,
                               const ObsBias & bias) const {
-  ufo_aircraft_t_eqv_f90(keyOperAircraft_, gom.toFortran(), odb_.toFortran(),
+  ufo_aircraft_simobs_f90(keyOperAircraft_, gom.toFortran(), odb_.toFortran(),
                          ovec.toFortran(), bias.toFortran());
 }
 

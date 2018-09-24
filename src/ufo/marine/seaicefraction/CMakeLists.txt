@@ -6,11 +6,11 @@
 set ( seaicefraction_files
     ObsSeaIceFraction.h
     ObsSeaIceFraction.cc
-    ObsSeaIceFraction.interface.F90
     ObsSeaIceFractionTLAD.h
     ObsSeaIceFractionTLAD.cc
-    ObsSeaIceFractionTLAD.interface.F90
+    ufo_seaicefrac_interface.F90
     ufo_seaicefrac_mod.F90
+    ufo_seaicefrac_tlad_interface.F90
     ufo_seaicefrac_tlad_mod.F90
     PARENT_SCOPE
 )

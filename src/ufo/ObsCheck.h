@@ -42,8 +42,8 @@ class ObsCheck : public util::Printable,
 
   ObsCheck(const ioda::ObsSpace &, const oops::Variables &,
           const util::DateTime &, const util::DateTime &);
-  ObsCheck(const ioda::ObsSpace &);
-  ObsCheck(const eckit::Configuration &);
+  explicit ObsCheck(const ioda::ObsSpace &);
+  explicit ObsCheck(const eckit::Configuration &);
 
   ~ObsCheck();
 

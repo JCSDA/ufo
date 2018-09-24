@@ -5,8 +5,8 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#ifndef UFO_OBSSTERICHEIGHTTLAD_H_
-#define UFO_OBSSTERICHEIGHTTLAD_H_
+#ifndef UFO_MARINE_STERICHEIGHT_OBSSTERICHEIGHTTLAD_H_
+#define UFO_MARINE_STERICHEIGHT_OBSSTERICHEIGHTTLAD_H_
 
 #include <ostream>
 #include <string>
@@ -14,8 +14,9 @@
 #include <boost/scoped_ptr.hpp>
 
 #include "oops/base/Variables.h"
-#include "ufo/LinearObsOperatorBase.h"
 #include "oops/util/ObjectCounter.h"
+
+#include "ufo/LinearObsOperatorBase.h"
 #include "ufo/marine/FortranMarine.h"
 
 // Forward declarations
@@ -35,12 +36,12 @@ namespace ufo {
 
   // -----------------------------------------------------------------------------
   /// Simulated Steric height for  model.
-    class ObsStericHeightTLAD : public LinearObsOperatorBase, 
+    class ObsStericHeightTLAD : public LinearObsOperatorBase,
                                 private util::ObjectCounter<ObsStericHeightTLAD> {
-  public:
+     public:
       static const std::string classname() {return "ufo::ObsStericHeightTLAD";}
 
-      ObsStericHeightTLAD(const ioda::ObsSpace &, const eckit::Configuration &);    
+      ObsStericHeightTLAD(const ioda::ObsSpace &, const eckit::Configuration &);
       virtual ~ObsStericHeightTLAD();
 
       // Obs Operators
@@ -52,9 +53,9 @@ namespace ufo {
       const oops::Variables & variables() const {return *varin_;}
       int & toFortran() {return keyOperStericHeight_;}
       const int & toFortran() const {return keyOperStericHeight_;}
-      //const GeoVaLs * traj_;
-  
-  private:
+      // const GeoVaLs * traj_;
+
+     private:
       void print(std::ostream &) const;
       F90hop keyOperStericHeight_;
       boost::scoped_ptr<const GeoVaLs> traj_;
@@ -64,4 +65,4 @@ namespace ufo {
   // -----------------------------------------------------------------------------
 
 }  // namespace ufo
-#endif  // UFO_OBSSTERICHEIGHTTLAD_H_
+#endif  // UFO_MARINE_STERICHEIGHT_OBSSTERICHEIGHTTLAD_H_

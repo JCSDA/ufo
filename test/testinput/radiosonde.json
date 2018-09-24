@@ -13,15 +13,15 @@
         "ObsType": "Radiosonde",
         "ObsData": {
           "ObsDataIn": {
-            "obsfile": "Data/diag_t_01_wprofiles.nc4"
+            "obsfile": "Data/sondes_obs_2018041500_m.nc4"
           }
         },
         "GeoVaLs": {
           "norm": "8471.883687854357",
           "random": "0",
-          "filename": "Data/diag_t_01_wprofiles.nc4"
+          "filename": "Data/sondes_geoval_2018041500_m.nc4"
         },
-        "rmsequiv": "254.50117867804789",
+        "rmsequiv": "240.40430841402502",
         "tolerance": "1.0e-8",
         "ObsBias": {}
       }

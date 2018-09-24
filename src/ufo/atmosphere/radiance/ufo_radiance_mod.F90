@@ -25,14 +25,14 @@ module ufo_radiance_mod
   !> Fortran derived type for radiance trajectory
   type, extends(ufo_basis) :: ufo_radiance
   contains
-    procedure :: eqv => ufo_radiance_eqv
+    procedure :: simobs => ufo_radiance_simobs
   end type ufo_radiance
   
 contains
 
 ! ------------------------------------------------------------------------------
 
-  subroutine ufo_radiance_eqv(self, geovals, hofx, obss) 
+  subroutine ufo_radiance_simobs(self, geovals, hofx, obss) 
     implicit none
     class(ufo_radiance),      intent(in)    :: self
     type(ufo_geovals),        intent(in)    :: geovals
@@ -463,18 +463,19 @@ contains
       INTEGER, PARAMETER :: FRESH_SNOW_TYPE             =  2  ! NPOESS Snow type         for IR/VIS SfcOptics
       INTEGER, PARAMETER :: FRESH_ICE_TYPE              =  1  ! NPOESS Ice type          for IR/VIS SfcOptics
       
-      type(obs_vector) :: TmpOvec
-      real(kind_real), allocatable :: Radiance_Tbobs(:,:)
+! SRH - see comment below
+!      type(obs_vector) :: TmpOvec
+!      real(kind_real), allocatable :: Radiance_Tbobs(:,:)
       integer :: ch
       
       ! 4a.1 Surface Characteristics
       ! ---------------
       ! ...Land surface characteristics
 
-      allocate(Radiance_Tbobs(n_channels, n_profiles))
-      call ioda_obsvec_setup(TmpOvec, Radiance%nobs)
-      call ioda_obsdb_var_to_ovec(Radiance, TmpOvec, "Observation")
-      Radiance_Tbobs = reshape(TmpOvec%values, (/n_channels, n_profiles/))
+!      allocate(Radiance_Tbobs(n_channels, n_profiles))
+!      call ioda_obsvec_setup(TmpOvec, Radiance%nobs)
+!      call ioda_obsdb_var_to_ovec(Radiance, TmpOvec, "Observation")
+!      Radiance_Tbobs = reshape(TmpOvec%values, (/n_channels, n_profiles/))
      
       do k1 = 1,N_PROFILES
          sfc(k1)%sensordata%sensor_id        = chinfo(1)%sensor_id
@@ -519,12 +520,21 @@ contains
          sfc(k1)%Soil_Moisture_Content = geoval%vals(1,k1) 
          call                         ufo_geovals_get_var(geovals, var_sfc_soilt, geoval)
          sfc(k1)%Soil_Temperature   = geoval%vals(1,k1) 
-         do ch = 1, n_channels
-           sfc(k1)%sensordata%tb(ch) = Radiance_TbObs(ch, k1)  !** required to match GSI simulated TBs over snow and ice surfaces
-         enddo
+! SRH
+!
+! This is commented out, instead of deleted, in case we want to recover it in the future.
+! The new April 15, 2018 00Z observation data contains only 12 channels (omits channels
+! 7, 8 and 14) since that is what the April 15 GSI run assimilated. Rather than put
+! in contrived data to fill in all 15 channels, it seemed better to disable it
+! until we know the correct way to approach this.
+!
+!         do ch = 1, n_channels
+!           sfc(k1)%sensordata%tb(ch) = Radiance_Tbobs(ch, k1)  !** required to match GSI simulated TBs over snow and ice surfaces
+!         enddo
       end do
-      deallocate(Radiance_Tbobs)
-      call ioda_obsvec_delete(TmpOvec)
+! SRH - see comment above
+!      deallocate(Radiance_Tbobs)
+!      call ioda_obsvec_delete(TmpOvec)
 
     end subroutine Load_Sfc_Data
 
@@ -536,26 +546,26 @@ contains
 
       type(obs_vector) :: TmpOvec
 
-      call ioda_obsvec_setup(TmpOvec, Radiance%nobs)
+      call ioda_obsvec_setup(TmpOvec, Radiance%nlocs)
 
       call ioda_obsdb_var_to_ovec(Radiance, TmpOvec, "Sat_Zenith_Angle")
-      geo(:)%Sensor_Zenith_Angle = TmpOvec%values(::n_channels)
+      geo(:)%Sensor_Zenith_Angle = TmpOvec%values(:)
       call ioda_obsdb_var_to_ovec(Radiance, TmpOvec, "Sol_Zenith_Angle")
-      geo(:)%Source_Zenith_Angle = TmpOvec%values(::n_channels)
+      geo(:)%Source_Zenith_Angle = TmpOvec%values(:)
       call ioda_obsdb_var_to_ovec(Radiance, TmpOvec, "Sat_Azimuth_Angle")
-      geo(:)%Sensor_Azimuth_Angle = TmpOvec%values(::n_channels)
+      geo(:)%Sensor_Azimuth_Angle = TmpOvec%values(:)
       call ioda_obsdb_var_to_ovec(Radiance, TmpOvec, "Sol_Azimuth_Angle")
-      geo(:)%Source_Azimuth_Angle = TmpOvec%values(::n_channels)
+      geo(:)%Source_Azimuth_Angle = TmpOvec%values(:)
       call ioda_obsdb_var_to_ovec(Radiance, TmpOvec, "Scan_Position")
-      geo(:)%Ifov = TmpOvec%values(::n_channels)
+      geo(:)%Ifov = TmpOvec%values(:)
       call ioda_obsdb_var_to_ovec(Radiance, TmpOvec, "Scan_Angle")
-      geo(:)%Sensor_Scan_Angle = TmpOvec%values(::n_channels)
+      geo(:)%Sensor_Scan_Angle = TmpOvec%values(:)
 
       call ioda_obsvec_delete(TmpOvec)
 
     end subroutine Load_Geom_Data
     
-  end subroutine ufo_radiance_eqv
+  end subroutine ufo_radiance_simobs
 
 ! ------------------------------------------------------------------------------
  

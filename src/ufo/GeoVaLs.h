@@ -47,7 +47,7 @@ class GeoVaLs : public util::Printable,
   void zero();
   void random();
   double norm() const;
-  GeoVaLs & operator = (const GeoVaLs &);    
+  GeoVaLs & operator = (const GeoVaLs &);
   GeoVaLs & operator*=(const double);
   GeoVaLs & operator += (const GeoVaLs &);
   GeoVaLs & operator -= (const GeoVaLs &);

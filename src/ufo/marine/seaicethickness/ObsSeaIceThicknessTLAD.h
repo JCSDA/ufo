@@ -5,8 +5,8 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#ifndef UFO_OBSSEAICETHICKNESSTLAD_H_
-#define UFO_OBSSEAICETHICKNESSTLAD_H_
+#ifndef UFO_MARINE_SEAICETHICKNESS_OBSSEAICETHICKNESSTLAD_H_
+#define UFO_MARINE_SEAICETHICKNESS_OBSSEAICETHICKNESSTLAD_H_
 
 #include <ostream>
 #include <string>
@@ -14,8 +14,9 @@
 #include <boost/scoped_ptr.hpp>
 
 #include "oops/base/Variables.h"
-#include "ufo/LinearObsOperatorBase.h"
 #include "oops/util/ObjectCounter.h"
+
+#include "ufo/LinearObsOperatorBase.h"
 #include "ufo/marine/FortranMarine.h"
 
 // Forward declarations
@@ -35,12 +36,12 @@ namespace ufo {
 
 // -----------------------------------------------------------------------------
 /// Sea-ice fraction observation for  model.
-class ObsSeaIceThicknessTLAD : public LinearObsOperatorBase, 
+class ObsSeaIceThicknessTLAD : public LinearObsOperatorBase,
                                private util::ObjectCounter<ObsSeaIceThicknessTLAD> {
-public:
+ public:
   static const std::string classname() {return "ufo::ObsSeaIceThicknessTLAD";}
 
-  ObsSeaIceThicknessTLAD(const ioda::ObsSpace &, const eckit::Configuration &);    
+  ObsSeaIceThicknessTLAD(const ioda::ObsSpace &, const eckit::Configuration &);
   virtual ~ObsSeaIceThicknessTLAD();
 
   // Obs Operators
@@ -54,7 +55,7 @@ public:
   int & toFortran() {return keyOperSeaIceThickness_;}
   const int & toFortran() const {return keyOperSeaIceThickness_;}
 
-private:
+ private:
   void print(std::ostream &) const;
   F90hop keyOperSeaIceThickness_;
   boost::scoped_ptr<const oops::Variables> varin_;
@@ -63,4 +64,4 @@ private:
 // -----------------------------------------------------------------------------
 
 }  // namespace ufo
-#endif  // UFO_OBSSEAICETHICKNESSTLAD_H_
+#endif  // UFO_MARINE_SEAICETHICKNESS_OBSSEAICETHICKNESSTLAD_H_

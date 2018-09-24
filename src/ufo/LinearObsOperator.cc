@@ -7,13 +7,6 @@
 
 #include "ufo/LinearObsOperator.h"
 
-#include "eckit/config/Configuration.h"
-#include "ioda/ObsSpace.h"
-#include "ioda/ObsVector.h"
-#include "oops/base/Variables.h"
-#include "ufo/GeoVaLs.h"
-#include "ufo/ObsBias.h"
-#include "ufo/ObsBiasIncrement.h"
 #include "ufo/LinearObsOperatorBase.h"
 
 namespace ufo {

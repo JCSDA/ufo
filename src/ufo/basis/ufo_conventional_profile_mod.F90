@@ -24,13 +24,13 @@ module ufo_conventional_profile_mod
      real(kind_real), allocatable :: wf(:)
      integer, allocatable :: wi(:)
   contains
-    procedure :: eqv    => conventional_profile_t_eqv_
+    procedure :: simobs    => conventional_profile_simobs_
   end type ufo_conventional_profile
 contains
 
 ! ------------------------------------------------------------------------------
 
-    subroutine conventional_profile_t_eqv_(self, geovals, hofx, obss)
+    subroutine conventional_profile_simobs_(self, geovals, hofx, obss)
     
       implicit none
       class(ufo_conventional_profile), intent(in)  :: self
@@ -38,7 +38,7 @@ contains
       type(obs_vector),  intent(inout)             :: hofx
       type(ioda_obsdb), target, intent(in)         :: obss
       
-      character(len=*), parameter :: myname_="ufo_conventional_profile_t_eqv"
+      character(len=*), parameter :: myname_="ufo_conventional_profile_simobs"
       character(max_string) :: err_msg
       
       integer :: iobs
@@ -69,7 +69,7 @@ contains
       
       ! observation of pressure (for vertical interpolation)
       call ioda_obsvec_setup(pressure, obss%nobs)
-      call ioda_obsdb_var_to_ovec(obss, pressure, "Pressure")
+      call ioda_obsdb_var_to_ovec(obss, pressure, "air_pressure")
       
       ! obs operator
       do iobs = 1, hofx%nobs
@@ -80,7 +80,7 @@ contains
       ! cleanup
       call ioda_obsvec_delete(pressure)
     
-    end subroutine conventional_profile_t_eqv_
+    end subroutine conventional_profile_simobs_
 
 ! ------------------------------------------------------------------------------
 

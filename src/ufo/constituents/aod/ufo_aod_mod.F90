@@ -56,14 +56,14 @@ MODULE ufo_aod_mod
   !> Fortran derived type for aod trajectory
   type, extends(ufo_basis) :: ufo_aod
   contains
-    procedure :: eqv => ufo_aod_eqv
+    procedure :: simobs => ufo_aod_simobs
   end type ufo_aod
 
 contains
   
 ! ------------------------------------------------------------------------------
 
-  SUBROUTINE ufo_aod_eqv(self, geovals, hofx, obss) 
+  SUBROUTINE ufo_aod_simobs(self, geovals, hofx, obss) 
     implicit none
     class(ufo_aod),    intent(in)    :: self
     type(ufo_geovals), intent(in)    :: geovals
@@ -799,7 +799,7 @@ contains
 
     END SUBROUTINE genqsat
 
-  END SUBROUTINE ufo_aod_eqv
+  END SUBROUTINE ufo_aod_simobs
 
 ! ------------------------------------------------------------------------------
 

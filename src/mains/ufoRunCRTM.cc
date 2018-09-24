@@ -9,12 +9,12 @@
  */
 
 #include "./RunCRTM.h"
-#include "ufo/UfoTrait.h"
 #include "oops/runs/Run.h"
+#include "ufo/UfoTrait.h"
 
 int main(int argc,  char ** argv) {
   oops::Run run(argc, argv);
   ufo::RunCRTM<ufo::UfoTrait> var;
   run.execute(var);
   return 0;
-};
+}

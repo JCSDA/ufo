@@ -33,8 +33,8 @@ module ufo_radiance_tlad_mod
    contains
      procedure :: delete  => ufo_radiance_tlad_delete
      procedure :: settraj => ufo_radiance_tlad_settraj 
-     procedure :: eqv_tl  => ufo_radiance_tlad_eqv_tl
-     procedure :: eqv_ad  => ufo_radiance_tlad_eqv_ad
+     procedure :: simobs_tl  => ufo_radiance_simobs_tl
+     procedure :: simobs_ad  => ufo_radiance_simobs_ad
   end type ufo_radiance_tlad
 
 contains
@@ -748,7 +748,7 @@ contains
 
   ! ------------------------------------------------------------------------------
   
-  subroutine ufo_radiance_tlad_eqv_tl(self, geovals, hofx, obss)
+  subroutine ufo_radiance_simobs_tl(self, geovals, hofx, obss)
     use ufo_vars_mod
     implicit none
     class(ufo_radiance_tlad), intent(in)  :: self
@@ -756,7 +756,7 @@ contains
     type(obs_vector),      intent(inout)  :: hofx
     type(ioda_obsdb),      intent(in)     :: obss
     
-    character(len=*), parameter :: myname_="ufo_radiance_tlad_eqv_tl"
+    character(len=*), parameter :: myname_="ufo_radiance_simobs_tl"
     character(len=MAXVARLEN) :: fldname
     integer jvar, jobs, jprofile, jchannel, jlev, ivar
 
@@ -789,18 +789,18 @@ contains
     enddo
     write(*,*)'radiance_tl hofx min max = ',minval(hofx%values(:)),maxval(hofx%values(:))
 
-  end subroutine ufo_radiance_tlad_eqv_tl
+  end subroutine ufo_radiance_simobs_tl
   
   ! ------------------------------------------------------------------------------
   
-  subroutine ufo_radiance_tlad_eqv_ad(self, geovals, hofx, obss)
+  subroutine ufo_radiance_simobs_ad(self, geovals, hofx, obss)
     implicit none
     class(ufo_radiance_tlad), intent(in) :: self
     type(ufo_geovals),     intent(inout) :: geovals
     type(obs_vector),      intent(in)    :: hofx
     type(ioda_obsdb),      intent(in)    :: obss
     
-    character(len=*), parameter :: myname_="ufo_radiance_tlad_eqv_ad"
+    character(len=*), parameter :: myname_="ufo_radiance_simobs_ad"
     integer jvar, jobs, jprofile, jchannel, jlev, ivar, jj, iavg
     real(kind_real) :: zmin, zmax, zavg
     character(len=MAXVARLEN) :: fldname
@@ -854,7 +854,7 @@ contains
     
     write(*,*)'radiance_ad finished'
     
-  end subroutine ufo_radiance_tlad_eqv_ad
+  end subroutine ufo_radiance_simobs_ad
   
 ! ------------------------------------------------------------------------------
   
