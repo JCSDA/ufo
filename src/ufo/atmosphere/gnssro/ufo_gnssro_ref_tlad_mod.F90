@@ -172,12 +172,9 @@ contains
         wi0 = self%wi(iobs)
         call vert_interp_apply_tl(  t_d%nval,  t_d%vals(:,iobs), gesT_d, self%wi(iobs),self%wf(iobs)) 
         call vert_interp_apply_tl(  q_d%nval,  q_d%vals(:,iobs), gesQ_d, self%wi(iobs),self%wf(iobs))
-!       call vert_interp_apply_tl(prs_d%nval,prs_d%vals(:,iobs), gesP_d, self%wi(iobs),self%wf(iobs))
+
 !       pressure does not change during minimization
 
-!       prs_coeff  =   n_a/self%t(iobs)   &
-!                    + n_b*self%q(iobs)/ ( ((1-rd_over_rv)*self%q(iobs)+rd_over_rv)*self%t(iobs)**2 )   &
-!                    + n_c*self%q(iobs)/ ( ((1-rd_over_rv)*self%q(iobs)+rd_over_rv)*self%t(iobs) )
         t_coeff    = - n_a*self%prs(iobs)/self%t(iobs)**2           &
                      - n_b*two*self%prs(iobs)*self%q(iobs)/  &
                            ( ((1-rd_over_rv)*self%q(iobs)+rd_over_rv)*self%t(iobs)**3  )   &
@@ -284,9 +281,6 @@ contains
       do iobs = 1, hofx%nobs
 
 ! zero impct on pressure during minimization
-!       prs_coeff  =   n_a/self%t(iobs)   &
-!                    + n_b*self%q(iobs)/ ( ((1-rd_over_rv)*self%q(iobs)+rd_over_rv)*self%t(iobs)**2 )   &
-!                    + n_c*self%q(iobs)/ ( ((1-rd_over_rv)*self%q(iobs)+rd_over_rv)*self%t(iobs) )
         t_coeff    = - n_a*self%prs(iobs)/self%t(iobs)**2           &
                      - n_b*two*self%prs(iobs)*self%q(iobs)/  &
                            ( ((1-rd_over_rv)*self%q(iobs)+rd_over_rv)*self%t(iobs)**3  )   &
@@ -299,13 +293,10 @@ contains
   
         gesT_d = 0.0_kind_real
         gesQ_d = 0.0_kind_real
-!       gesP_d = 0.0_kind_real
         gesT_d = gesT_d + hofx%values(iobs)*t_coeff
         gesQ_d = gesQ_d + hofx%values(iobs)*q_coeff
-!       gesP_d = gesP_d + hofx%values(iobs)*prs_coeff
         call vert_interp_apply_ad(  t_d%nval,  t_d%vals(:,iobs), gesT_d, self%wi(iobs), self%wf(iobs))
         call vert_interp_apply_ad(  q_d%nval,  q_d%vals(:,iobs), gesQ_d, self%wi(iobs), self%wf(iobs))
-!       call vert_interp_apply_ad(prs_d%nval,prs_d%vals(:,iobs), gesP_d, self%wi(iobs), self%wf(iobs))
 
       enddo
 
