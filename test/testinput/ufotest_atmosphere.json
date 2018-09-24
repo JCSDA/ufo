@@ -20,7 +20,7 @@
           }
         },
         "GeoVaLs": {
-          "norm": "62753.542028673342",
+          "norm": "62902.291784229797",
           "filename": "Data/amsua_geoval_n19_2018041500_m.nc4",
           "random": "0"
         },
@@ -36,7 +36,7 @@
           }
         },
         "GeoVaLs": {
-          "norm": "24080.310581728769",
+          "norm": "64095.620998649632",
           "random": "0",
           "filename": "Data/sondes_geoval_2018041500_m.nc4"
         },
