@@ -21,7 +21,7 @@
           "random": "0",
           "filename": "Data/aircraft_geoval_2018041500_m.nc4"
         },
-        "rmsequiv": "250.24634938465377",
+        "rmsequiv": "279.15503417874464",
         "tolerance": "1.0e-8",
         "ObsBias": {}
       }
