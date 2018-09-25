@@ -19,14 +19,14 @@ module ufo_gnssro_ref_mod
   
   implicit none
   integer, parameter :: max_string=800
-  public             :: ufo_gnssro
+  public             :: ufo_gnssro_Ref
   private
 
   !> Fortran derived type for gnssro trajectory
-  type, extends(ufo_basis) :: ufo_gnssro
+  type, extends(ufo_basis) :: ufo_gnssro_Ref
   contains
    procedure :: simobs    => ufo_gnssro_ref_simobs
-  end type ufo_gnssro
+  end type ufo_gnssro_Ref
 
 contains
 ! ------------------------------------------------------------------------------
@@ -34,20 +34,20 @@ contains
     use gnssro_mod_constants
     use gnssro_mod_transform, only: geometric2geop
       implicit none
-      logical,parameter                   :: use_compress=.true.
-      class(ufo_gnssro), intent(in)       :: self
-      type(ufo_geovals), intent(in)                :: geovals
-      type(obs_vector),  intent(inout)             :: hofx
-      type(ioda_obsdb), target, intent(in)         :: obss
+      logical,parameter                          :: use_compress=.true.
+      class(ufo_gnssro_Ref), intent(in)          :: self
+      type(ufo_geovals), intent(in)              :: geovals
+      type(obs_vector),  intent(inout)           :: hofx
+      type(ioda_obsdb), target, intent(in)       :: obss
 
       character(len=*), parameter :: myname_="ufo_gnssro_ref_simobs"
       character(max_string) :: err_msg
 
       integer         :: iobs,k
-      real(kind_real) :: wf
+      real(kind_real) :: wf 
       integer         :: wi,ierr
-      type(ufo_geoval), pointer ::t,q,prs,gph
-      real(kind_real)            ::refr1, refr2,refr3
+      type(ufo_geoval), pointer  :: t,q,prs,gph
+      real(kind_real)            :: refr1, refr2,refr3
       type(obs_vector) :: obsZ, obsLat
       real(kind_real)  :: obsH, gesT,gesQ, gesTv, gesTv0,gesP
       ! check if nobs is consistent in geovals & hofx
@@ -109,6 +109,5 @@ contains
       call ioda_obsvec_delete(obsLat)
     end subroutine ufo_gnssro_ref_simobs
 
-                         
 ! ------------------------------------------------------------------------------
 end module ufo_gnssro_ref_mod
