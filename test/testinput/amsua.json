@@ -21,7 +21,7 @@
           "filename": "Data/amsua_geoval_n19_2018041500_m.nc4",
           "random": "0"
         },
-        "rmsequiv": "229.75327592263585",
+        "rmsequiv": "231.55408240934727",
         "tolerance": "1.e-8",
         "ObsBias": {}
       }

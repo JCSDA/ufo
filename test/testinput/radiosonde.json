@@ -3,7 +3,7 @@
   "window_begin": "2010-01-01T00:00:00Z",
   "window_end": "2010-01-02T00:00:00Z",
   "LinearObsOpTest": {
-    "testiterTL": "10",
+    "testiterTL": "12",
     "toleranceTL": "1.0e-8",
     "toleranceAD": "1.0e-12"
   },
@@ -21,7 +21,7 @@
           "random": "0",
           "filename": "Data/sondes_geoval_2018041500_m.nc4"
         },
-        "rmsequiv": "240.40430841402502",
+        "rmsequiv": "242.094973499492",
         "tolerance": "1.0e-8",
         "ObsBias": {}
       }

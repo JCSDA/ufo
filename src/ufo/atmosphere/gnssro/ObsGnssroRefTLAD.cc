@@ -5,7 +5,7 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#include "ufo/atmosphere/gnssro/ObsGnssroTLAD.h"
+#include "ufo/atmosphere/gnssro/ObsGnssroRefTLAD.h"
 
 #include <ostream>
 #include <string>
@@ -30,7 +30,7 @@ ObsGnssroRefTLAD::ObsGnssroRefTLAD(const ioda::ObsSpace & odb, const eckit::Conf
   : keyOperGnssroRef_(0), varin_(), odb_(odb)
 {
   const eckit::Configuration * configc = &config;
-  ufo_gnssro_tlad_setup_f90(keyOperGnssroRef_, &configc);
+  ufo_gnssro_ref_tlad_setup_f90(keyOperGnssroRef_, &configc);
   const std::vector<std::string> vv{"temperature", "specific_humidity", "air_pressure",
                                     "geopotential_height"};
   varin_.reset(new oops::Variables(vv));
@@ -40,30 +40,30 @@ ObsGnssroRefTLAD::ObsGnssroRefTLAD(const ioda::ObsSpace & odb, const eckit::Conf
 // -----------------------------------------------------------------------------
 
 ObsGnssroRefTLAD::~ObsGnssroRefTLAD() {
-  ufo_gnssro_tlad_delete_f90(keyOperGnssroRef_);
+  ufo_gnssro_ref_tlad_delete_f90(keyOperGnssroRef_);
   oops::Log::trace() << "ObsGnssroRefTLAD destructed" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
 void ObsGnssroRefTLAD::setTrajectory(const GeoVaLs & geovals, const ObsBias & bias) {
-  ufo_gnssro_tlad_settraj_f90(keyOperGnssroRef_, geovals.toFortran(), odb_.toFortran());
+  ufo_gnssro_ref_tlad_settraj_f90(keyOperGnssroRef_, geovals.toFortran(), odb_.toFortran());
 }
 
 // -----------------------------------------------------------------------------
 
 void ObsGnssroRefTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec,
                                       const ObsBiasIncrement & bias) const {
-  ufo_gnssro_ref_tlad_tl_f90(keyOperGnssroRef_, geovals.toFortran(), odb_.toFortran(),
-                             ovec.toFortran());
+  ufo_gnssro_ref_simobs_tl_f90(keyOperGnssroRef_, geovals.toFortran(), odb_.toFortran(),
+                               ovec.toFortran());
 }
 
 // -----------------------------------------------------------------------------
 
 void ObsGnssroRefTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec,
                                       ObsBiasIncrement & bias) const {
-  ufo_gnssro_ref_tlad_ad_f90(keyOperGnssroRef_, geovals.toFortran(), odb_.toFortran(),
-                             ovec.toFortran());
+  ufo_gnssro_ref_simobs_ad_f90(keyOperGnssroRef_, geovals.toFortran(), odb_.toFortran(),
+                               ovec.toFortran());
 }
 
 // -----------------------------------------------------------------------------
