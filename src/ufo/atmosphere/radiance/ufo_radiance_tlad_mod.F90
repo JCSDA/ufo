@@ -3,858 +3,602 @@
 ! This software is licensed under the terms of the Apache Licence Version 2.0
 ! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 
-!> Fortran module to handle radiance observations
+!> Fortran module to handle tl/ad for radiance observations
 
 module ufo_radiance_tlad_mod
   
-  use ioda_obsdb_mod
-  use ioda_obs_vectors
-  use ufo_vars_mod
-  use ioda_locs_mod
-  use ufo_geovals_mod
-  use kinds  
-  use ufo_basis_tlad_mod, only: ufo_basis_tlad
-  
-  use crtm_module
-  
-  implicit none
-  
-  public :: ufo_radiance_tlad
-  private
-  integer, parameter :: max_string=800
-  real(kind=kind_real), parameter :: rmissing = -9.9e10_kind_real
-  
-  !> Fortran derived type for radiance trajectory
-  type, extends(ufo_basis_tlad) :: ufo_radiance_tlad
-     type(ufo_geovals) :: crtm_K
-     integer :: nprofiles
-     integer :: nchannels
-     type(ufo_geovals) :: geohack
-   contains
-     procedure :: delete  => ufo_radiance_tlad_delete
-     procedure :: settraj => ufo_radiance_tlad_settraj 
-     procedure :: simobs_tl  => ufo_radiance_simobs_tl
-     procedure :: simobs_ad  => ufo_radiance_simobs_ad
-  end type ufo_radiance_tlad
+ use iso_c_binding
+ use config_mod
+ use kinds
+
+ use ioda_obsdb_mod, only: ioda_obsdb
+ use ioda_obs_vectors, only: obs_vector
+
+ use ufo_geovals_mod, only: ufo_geovals
+ use ufo_basis_tlad_mod, only: ufo_basis_tlad
+ use ufo_vars_mod
+
+ !YT hack needs
+ use ufo_geovals_mod, only: ufo_geovals_init, ufo_geovals_zero, ufo_geovals_copy, ufo_geovals_setup
+
+ use ufo_radiance_utils_mod
+
+ use crtm_module
+
+ implicit none
+ private
+
+ real(kind=kind_real), parameter :: rmissing = -9.9e10_kind_real
+
+ !> Fortran derived type for radiance trajectory
+ type, extends(ufo_basis_tlad), public :: ufo_radiance_tlad
+ private
+  type(rad_conf) :: rc
+  integer :: n_Profiles
+  integer :: n_Channels
+  integer :: n_Layers
+  type(ufo_geovals) :: crtm_K
+  type(ufo_geovals) :: geohack
+ contains
+  procedure :: setup  => ufo_radiance_tlad_setup
+  procedure :: delete  => ufo_radiance_tlad_delete
+  procedure :: settraj => ufo_radiance_tlad_settraj 
+  procedure :: simobs_tl  => ufo_radiance_simobs_tl
+  procedure :: simobs_ad  => ufo_radiance_simobs_ad
+ end type ufo_radiance_tlad
 
 contains
 
-  ! ------------------------------------------------------------------------------
+! ------------------------------------------------------------------------------
+
+subroutine ufo_radiance_tlad_setup(self, c_conf)
+
+implicit none
+class(ufo_radiance_tlad), intent(inout) :: self
+type(c_ptr),              intent(in)    :: c_conf
+
+ call rad_conf_setup(self%rc,c_conf)
+
+end subroutine ufo_radiance_tlad_setup
+
+! ------------------------------------------------------------------------------
+
+subroutine ufo_radiance_tlad_delete(self)
+
+implicit none
+class(ufo_radiance_tlad), intent(inout) :: self
+
+ self%ltraj = .false.
+ call rad_conf_delete(self%rc)
+
+end subroutine ufo_radiance_tlad_delete
   
-  subroutine ufo_radiance_tlad_delete(self)
-    implicit none
-    class(ufo_radiance_tlad), intent(inout)  :: self
-    
-    self%ltraj = .false.
-    
-  end subroutine ufo_radiance_tlad_delete
+! ------------------------------------------------------------------------------
   
-  ! ------------------------------------------------------------------------------
+subroutine ufo_radiance_tlad_settraj(self, geovals, obss)
+
+implicit none
+
+class(ufo_radiance_tlad), intent(inout) :: self
+type(ufo_geovals),        intent(in)    :: geovals
+type(ioda_obsdb),         intent(in)    :: obss
+
+! Local Variables
+character(*), parameter :: PROGRAM_NAME = 'ufo_radiance_mod.F90'
+character(255) :: message, version
+integer        :: err_stat, alloc_stat
+integer        :: l, m, n
+
+! Define the "non-demoninational" arguments
+type(CRTM_ChannelInfo_type)             :: chinfo(self%rc%n_Sensors)
+type(CRTM_Geometry_type),   allocatable :: geo(:)
+
+! Define the FORWARD variables
+type(CRTM_Atmosphere_type), allocatable :: atm(:)
+type(CRTM_Surface_type),    allocatable :: sfc(:)
+type(CRTM_RTSolution_type), allocatable :: rts(:,:)
+
+! Define the K-MATRIX variables
+type(CRTM_Atmosphere_type), allocatable :: atm_K(:,:)
+type(CRTM_Surface_type)   , allocatable :: sfc_K(:,:)
+type(CRTM_RTSolution_type), allocatable :: rts_K(:,:)
+
+
+ ! Get number of profile and layers from geovals
+ ! ---------------------------------------------
+ self%n_Profiles = geovals%nobs
+ self%n_Layers   = geovals%geovals(1)%nval
+
+
+ ! Program header
+ ! --------------
+ call CRTM_Version( Version )
+ call Program_Message( PROGRAM_NAME, &
+                       'Check/example program for the CRTM Forward and K-Matrix (setTraj) functions using '//&
+                       trim(self%rc%ENDIAN_type)//' coefficient datafiles', &
+                       'CRTM Version: '//TRIM(Version) )    
+    
+
+ ! Initialise all the sensors at once
+ ! ----------------------------------
+ !** NOTE: CRTM_Init points to the various binary files needed for CRTM.  See the
+ !**       CRTM_Lifecycle.f90 for more details. 
+
+ write( *,'(/5x,"Initializing the CRTM (setTraj) ...")' )
+ err_stat = CRTM_Init( self%rc%SENSOR_ID, &
+            chinfo, &
+            File_Path=trim(self%rc%COEFFICIENT_PATH), &
+            Quiet=.TRUE.)
+ if ( err_stat /= SUCCESS ) THEN
+   message = 'Error initializing CRTM (setTraj)'
+   call Display_Message( PROGRAM_NAME, message, FAILURE )
+   stop
+ end if
+
+ ! Loop over all sensors. Not necessary if we're calling CRTM for each sensor
+ ! ----------------------------------------------------------------------------
+ Sensor_Loop:do n = 1, self%rc%n_Sensors
+
+
+   ! Determine the number of channels for the current sensor
+   ! -------------------------------------------------------
+   self%N_Channels = CRTM_ChannelInfo_n_Channels(chinfo(n))       
+
+
+   ! Allocate the ARRAYS
+   ! -------------------
+   allocate( geo( self%n_Profiles ),               &
+             atm( self%n_Profiles ),               &
+             sfc( self%n_Profiles ),               &
+             rts( self%N_Channels, self%n_Profiles ),   &
+             atm_K( self%N_Channels, self%n_Profiles ), &
+             sfc_K( self%N_Channels, self%n_Profiles ), &
+             rts_K( self%N_Channels, self%n_Profiles ), &
+             STAT = alloc_stat )
+   if ( alloc_stat /= 0 ) THEN
+      message = 'Error allocating structure arrays (setTraj)'
+      call Display_Message( PROGRAM_NAME, message, FAILURE )
+      stop
+   end if
+
+
+   ! Create the input FORWARD structure (atm)
+   ! ----------------------------------------
+   call CRTM_Atmosphere_Create( atm, self%n_Layers, self%rc%n_Absorbers, self%rc%n_Clouds, self%rc%n_Aerosols )
+   if ( ANY(.NOT. CRTM_Atmosphere_Associated(atm)) ) THEN
+      message = 'Error allocating CRTM Forward Atmosphere structure (setTraj)'
+      CALL Display_Message( PROGRAM_NAME, message, FAILURE )
+      STOP
+   END IF
+
+       
+   ! Create the input FORWARD structure (sfc)
+   ! ----------------------------------------
+   call CRTM_Surface_Create(sfc, self%N_Channels)
+   IF ( ANY(.NOT. CRTM_Surface_Associated(sfc)) ) THEN
+      message = 'Error allocating CRTM Surface structure (setTraj)'
+      CALL Display_Message( PROGRAM_NAME, message, FAILURE )
+      STOP
+   END IF
+
+
+   ! Create output K-MATRIX structure (atm)
+   ! --------------------------------------
+   call CRTM_Atmosphere_Create( atm_K, self%n_Layers, self%rc%n_Absorbers, self%rc%n_Clouds, self%rc%n_Aerosols )
+   if ( ANY(.NOT. CRTM_Atmosphere_Associated(atm_K)) ) THEN
+      message = 'Error allocating CRTM K-matrix Atmosphere structure (setTraj)'
+      CALL Display_Message( PROGRAM_NAME, message, FAILURE )
+      STOP
+   END IF
+
+
+   ! Create output K-MATRIX structure (sfc)
+   ! --------------------------------------
+   call CRTM_Surface_Create(sfc_K, self%N_Channels)
+   IF ( ANY(.NOT. CRTM_Surface_Associated(sfc_K)) ) THEN
+      message = 'Error allocating CRTM K-matrix Surface structure (setTraj)'
+      CALL Display_Message( PROGRAM_NAME, message, FAILURE )
+      STOP
+   END IF
+
+
+   !Assign the data from the GeoVaLs
+   !--------------------------------
+   call Load_Atm_Data(self%N_PROFILES,self%N_LAYERS,geovals,atm)
+   call Load_Sfc_Data(self%N_PROFILES,self%N_LAYERS,geovals,sfc,chinfo)
+   call Load_Geom_Data(obss,geo)
+
+
+   ! Zero the K-matrix OUTPUT structures
+   ! -----------------------------------
+   call CRTM_Atmosphere_Zero( atm_K )
+   call CRTM_Surface_Zero( sfc_K )
+
+
+   ! Inintialize the K-matrix INPUT so that the results are dTb/dx
+   ! -------------------------------------------------------------
+   rts_K%Radiance               = ZERO
+   rts_K%Brightness_Temperature = ONE
+
+
+   ! Call the K-matrix model (really need this here or just in settraj?)
+   ! ----------------------
+   err_stat = CRTM_K_Matrix( atm, &  ! FORWARD  Input
+        sfc                     , &  ! FORWARD  Input
+        rts_K                   , &  ! K-MATRIX Input
+        geo                     , &  ! Input
+        chinfo(n:n)             , &  ! Input
+        atm_K                   , &  ! K-MATRIX Output
+        sfc_K                   , &  ! K-MATRIX Output
+        rts          )               ! FORWARD  Output
+   if ( err_stat /= SUCCESS ) THEN
+      message = 'Error calling CRTM (setTraj) K-Matrix Model for '//TRIM(self%rc%SENSOR_ID(n))
+      call Display_Message( PROGRAM_NAME, message, FAILURE )
+      stop
+   end if
+
+
+   ! Populate the CRTM K matrix
+   ! --------------------------
+   call populate_crtm_K(self,geovals,atm_K,sfc_K)
+
+
+   ! Deallocate the structures
+   ! -------------------------
+   call CRTM_Geometry_Destroy(geo)
+   call CRTM_Atmosphere_Destroy(atm_K)
+   call CRTM_Atmosphere_Destroy(atm)
+   call CRTM_RTSolution_Destroy(rts_K)
+   call CRTM_RTSolution_Destroy(rts)
+   call CRTM_Surface_Destroy(sfc)
+   call CRTM_Surface_Destroy(sfc_K)
+
+
+   ! Deallocate all arrays
+   ! ---------------------
+   deallocate(geo, atm, sfc, rts, rts_K, sfc_K, atm_K, STAT = alloc_stat)
+   if ( alloc_stat /= 0 ) THEN
+      message = 'Error deallocating structure arrays (setTraj)'
+      call Display_Message( PROGRAM_NAME, message, FAILURE )
+      stop
+   end if
+
+ end do Sensor_Loop
+
+
+ ! Destroy CRTM instance
+ ! ---------------------
+ write( *, '( /5x, "Destroying the CRTM (setTraj)..." )' )
+ err_stat = CRTM_Destroy( chinfo )
+ if ( err_stat /= SUCCESS ) THEN
+    message = 'Error destroying CRTM (setTraj)'
+    call Display_Message( PROGRAM_NAME, message, FAILURE )
+    stop
+ end if
+
+ 
+ ! Hack | Save a copy of the geovals for the tl/ad 
+ call ufo_geovals_init(self%geohack)
+ call ufo_geovals_copy(geovals, self%geohack)
+ call ufo_geovals_zero(self%geohack)
+
+
+end subroutine ufo_radiance_tlad_settraj
+
+! ------------------------------------------------------------------------------
+
+subroutine populate_crtm_K(self,geovals,atm_k,sfc_k)
+
+implicit none
+
+class(ufo_radiance_tlad),   intent(inout) :: self
+type(ufo_geovals),          intent(in)    :: geovals
+type(CRTM_Atmosphere_type), intent(inout) :: atm_K(:,:)
+type(CRTM_Surface_type),    intent(inout) :: sfc_K(:,:)
+
+! Local variables
+integer :: k1, k2, k3, ivar
+
+ !** NOTES: this is to populate the jacobian structures, using exactly the same structures as geovals, including variable names.
+ !**        this is the laziest possible way to do this, and will likely need to be changed.
+ !**        use public subroutine ufo_geovals_assign to initialize crtm_K with the exact same values geovals?
+
+ call ufo_geovals_init(self%crtm_K)
+ call ufo_geovals_setup(self%crtm_K, geovals%variables, self%n_Profiles*self%n_Channels) !** setup jacobian structure using geovals structure.
+
+ !** atmosphere
+ ivar = ufo_vars_getindex(geovals%variables, var_tv  )
+ self%crtm_K%geovals(ivar)%nval = self%n_Layers
+ ivar = ufo_vars_getindex(geovals%variables, var_prs )
+ self%crtm_K%geovals(ivar)%nval = self%n_Layers
+ ivar = ufo_vars_getindex(geovals%variables, var_prsi)
+ self%crtm_K%geovals(ivar)%nval = self%n_Layers+1
+ ivar = ufo_vars_getindex(geovals%variables, var_mixr)
+ self%crtm_K%geovals(ivar)%nval = self%n_Layers
+ ivar = ufo_vars_getindex(geovals%variables, var_oz  )
+ self%crtm_K%geovals(ivar)%nval = self%n_Layers
+ ivar = ufo_vars_getindex(geovals%variables, var_co2 )
+ self%crtm_K%geovals(ivar)%nval = self%n_Layers
+
+ !** cloud 1 
+ ivar = ufo_vars_getindex(geovals%variables, var_clw )
+ self%crtm_K%geovals(ivar)%nval = self%n_Layers
+ ivar = ufo_vars_getindex(geovals%variables, var_clwefr)
+ self%crtm_K%geovals(ivar)%nval = self%n_Layers
+
+ !** cloud 2
+ ivar = ufo_vars_getindex(geovals%variables, var_cli )
+ self%crtm_K%geovals(ivar)%nval = self%n_Layers
+ ivar = ufo_vars_getindex(geovals%variables, var_cliefr)
+ self%crtm_K%geovals(ivar)%nval = self%n_Layers
+
+ !** surface
+ ivar = ufo_vars_getindex(geovals%variables, var_sfc_wspeed )
+ self%crtm_K%geovals(ivar)%nval = 1
+ ivar = ufo_vars_getindex(geovals%variables, var_sfc_wdir   )
+ self%crtm_K%geovals(ivar)%nval = 1
+ ivar = ufo_vars_getindex(geovals%variables, var_sfc_wfrac  )
+ self%crtm_K%geovals(ivar)%nval = 1
+ ivar = ufo_vars_getindex(geovals%variables, var_sfc_wtmp   )
+ self%crtm_K%geovals(ivar)%nval = 1
+ ivar = ufo_vars_getindex(geovals%variables, var_sfc_ifrac  )
+ self%crtm_K%geovals(ivar)%nval = 1
+ ivar = ufo_vars_getindex(geovals%variables, var_sfc_itmp   )
+ self%crtm_K%geovals(ivar)%nval = 1
+ ivar = ufo_vars_getindex(geovals%variables, var_sfc_sfrac  )
+ self%crtm_K%geovals(ivar)%nval = 1
+ ivar = ufo_vars_getindex(geovals%variables, var_sfc_stmp   )
+ self%crtm_K%geovals(ivar)%nval = 1
+ ivar = ufo_vars_getindex(geovals%variables, var_sfc_sdepth )
+ self%crtm_K%geovals(ivar)%nval = 1
+ ivar = ufo_vars_getindex(geovals%variables, var_sfc_landtyp)
+ self%crtm_K%geovals(ivar)%nval = 1
+ ivar = ufo_vars_getindex(geovals%variables, var_sfc_lfrac  )
+ self%crtm_K%geovals(ivar)%nval = 1
+ ivar = ufo_vars_getindex(geovals%variables, var_sfc_ltmp   )
+ self%crtm_K%geovals(ivar)%nval = 1
+ ivar = ufo_vars_getindex(geovals%variables, var_sfc_lai    )
+ self%crtm_K%geovals(ivar)%nval = 1
+ ivar = ufo_vars_getindex(geovals%variables, var_sfc_vegfrac)
+ self%crtm_K%geovals(ivar)%nval = 1
+ ivar = ufo_vars_getindex(geovals%variables, var_sfc_vegtyp )
+ self%crtm_K%geovals(ivar)%nval = 1
+ ivar = ufo_vars_getindex(geovals%variables, var_sfc_soiltyp)
+ self%crtm_K%geovals(ivar)%nval = 1
+ ivar = ufo_vars_getindex(geovals%variables, var_sfc_soilm  )
+ self%crtm_K%geovals(ivar)%nval = 1
+ ivar = ufo_vars_getindex(geovals%variables, var_sfc_soilt  )
+ self%crtm_K%geovals(ivar)%nval = 1
+
+ do k3 = 1,geovals%nvar
+    allocate(self%crtm_K%geovals(k3)%vals(self%crtm_K%geovals(k3)%nval,self%n_Profiles*self%n_Channels))
+    self%crtm_K%geovals(k3)%vals(:,:) = 0.0_fp
+ end do
+ self%crtm_K%linit = .true.
+
+ !** atm_K and sfc_K contain the jacobian structures, and are populated prior to this subroutine being called.
+ !** next step is to copy the values into the self%crtm_K structure, with appropriate unit conversions.
+ !** the purpose is to have an exact mapping between geovals and the jacobians.  I will eventually need an automated
+ !** method to copy the values from atm_K and sfc_K into self%crtm_K.
+
+ !** populate the atmosphere K-matrix (jacobian) structures for CRTM (self%crtm_K(k1), for the k1-th profile)
+ !!$      var_tv     atm%Temperature
+ !!$      var_prs    atm%Pressure
+ !!$      var_prsi   atm%Level_Pressure
+ !!$      var_mixr   atm%Absorber(1) !** verify
+ !!$      var_oz     atm%Absorber(2) !** verify
+ !!$      var_co2    atm%Absorber(3) !** verify
+ !!$      var_clw    atm%Cloud(1)%Water_Content !** water cloud content
+ !!$      var_clwefr atm%Cloud(1)%Effective_Radius !** water cloud effective radius 
+ !!$      var_cli    atm%Cloud(2)%Water_Content !** ice cloud content
+ !!$      var_cliefr atm%Cloud(2)%Effective_Radius !** ice cloud effective radius 
+ 
+ !!$      var_sfc_wspeed     sfc%Wind_Speed
+ !!$      var_sfc_wdir       sfc%Wind_Direction
+ !!$      var_sfc_wfrac      sfc%Water_Coverage
+ !!$      var_sfc_wtmp       sfc%Water_Temperature
+ !!$      var_sfc_ifrac      sfc%Ice_Coverage 
+ !!$      var_sfc_itmp       sfc%Ice_Temperature
+ !!$      var_sfc_sfrac      sfc%Snow_Coverage
+ !!$      var_sfc_stmp       sfc%Snow_Temperature
+ !!$      var_sfc_sdepth     sfc%Snow_Depth
+ !!$      var_sfc_landtyp    sfc%Land_Type
+ !!$      var_sfc_lfrac      sfc%Land_Coverage 
+ !!$      var_sfc_ltmp       sfc%Land_Temperature
+ !!$      var_sfc_lai        sfc%Lai       
+ !!$      var_sfc_vegfrac    sfc%Vegetation_Fraction
+ !!$      var_sfc_vegtyp     sfc%Vegetation_Type
+ !!$      var_sfc_soiltyp    sfc%Soil_Type
+ !!$      var_sfc_soilm      sfc%Soil_Moisture
+ !!$      var_sfc_soilt      sfc%Soil_Temperature
+
+ k3 = 0
+
+ do k1 = 1,self%n_Profiles
+   do k2 = 1,self%n_Channels
+     k3 = k3 + 1  !** jacobian is self%n_profiles, self%n_channels, geoval is self%n_layers, self%n_obs.  
+                  !** k3 flattens self%n_profiles,self%n_channels.
+     !** atmosphere
+     ivar = ufo_vars_getindex(geovals%variables, var_tv  )
+     self%crtm_K%geovals(ivar)%vals(1:self%n_Layers,k3)   = atm_K(k2,k1)%Temperature(1:self%n_Layers)
+     ivar = ufo_vars_getindex(geovals%variables, var_prs )
+     self%crtm_K%geovals(ivar)%vals(1:self%n_Layers,k3)   = 0.0 !atm_K(k2,k1)%Pressure(1:self%n_Layers) 
+     ivar = ufo_vars_getindex(geovals%variables, var_prsi)
+     self%crtm_K%geovals(ivar)%vals(1:self%n_Layers+1,k3)   = 0.0 !atm_K(k2,k1)%Level_Pressure(0:self%n_Layers) 
+     ivar = ufo_vars_getindex(geovals%variables, var_mixr)
+     self%crtm_K%geovals(ivar)%vals(1:self%n_Layers,k3)   = 0.0 !atm_K(k2,k1)%Absorber(1:self%n_Layers,1)
+     ivar = ufo_vars_getindex(geovals%variables, var_oz  )
+     self%crtm_K%geovals(ivar)%vals(1:self%n_Layers,k3)   = 0.0 !atm_K(k2,k1)%Absorber(1:self%n_Layers,2)
+     ivar = ufo_vars_getindex(geovals%variables, var_co2 )
+     self%crtm_K%geovals(ivar)%vals(1:self%n_Layers,k3)   = 0.0 !atm_K(k2,k1)%Absorber(1:self%n_Layers,3)
+
+     !** cloud 1 
+     ivar = ufo_vars_getindex(geovals%variables, var_clw )
+     self%crtm_K%geovals(ivar)%vals(1:self%n_Layers,k3)   = 0.0 !atm_K(k2,k1)%Cloud(1)%Water_Content(1:self%n_Layers)
+     ivar = ufo_vars_getindex(geovals%variables, var_clwefr)
+     self%crtm_K%geovals(ivar)%vals(1:self%n_Layers,k3)   = 0.0 !atm_K(k2,k1)%Cloud(1)%Effective_Radius(1:self%n_Layers)
+
+     !** cloud 2
+     ivar = ufo_vars_getindex(geovals%variables, var_cli )
+     self%crtm_K%geovals(ivar)%vals(1:self%n_Layers,k3)   = 0.0 !atm_K(k2,k1)%Cloud(2)%Water_Content(1:self%n_Layers)
+     ivar = ufo_vars_getindex(geovals%variables, var_cliefr)
+     self%crtm_K%geovals(ivar)%vals(1:self%n_Layers,k3)   = 0.0 !atm_K(k2,k1)%Cloud(2)%Effective_Radius(1:self%n_Layers) 
+
+     !** surface
+     ivar = ufo_vars_getindex(geovals%variables, var_sfc_wspeed )
+     self%crtm_K%geovals(ivar)%vals(1,k3)      = 0.0 !sfc_K(k2,k1)%Wind_Speed        
+     ivar = ufo_vars_getindex(geovals%variables, var_sfc_wdir   )
+     self%crtm_K%geovals(ivar)%vals(1,k3)      = 0.0 !sfc_K(k2,k1)%Wind_Direction    
+     ivar = ufo_vars_getindex(geovals%variables, var_sfc_wfrac  )
+     self%crtm_K%geovals(ivar)%vals(1,k3)      = 0.0 !sfc_K(k2,k1)%Water_Coverage    
+     ivar = ufo_vars_getindex(geovals%variables, var_sfc_wtmp   )
+     self%crtm_K%geovals(ivar)%vals(1,k3)      = 0.0 !sfc_K(k2,k1)%Water_Temperature 
+     ivar = ufo_vars_getindex(geovals%variables, var_sfc_ifrac  )
+     self%crtm_K%geovals(ivar)%vals(1,k3)      = 0.0 !sfc_K(k2,k1)%Ice_Coverage      
+     ivar = ufo_vars_getindex(geovals%variables, var_sfc_itmp   )
+     self%crtm_K%geovals(ivar)%vals(1,k3)      = 0.0 !sfc_K(k2,k1)%Ice_Temperature   
+     ivar = ufo_vars_getindex(geovals%variables, var_sfc_sfrac  )
+     self%crtm_K%geovals(ivar)%vals(1,k3)      = 0.0 !sfc_K(k2,k1)%Snow_Coverage     
+     ivar = ufo_vars_getindex(geovals%variables, var_sfc_stmp   )
+     self%crtm_K%geovals(ivar)%vals(1,k3)      = 0.0 !sfc_K(k2,k1)%Snow_Temperature 
+     ivar = ufo_vars_getindex(geovals%variables, var_sfc_sdepth )
+     self%crtm_K%geovals(ivar)%vals(1,k3)      = 0.0 !sfc_K(k2,k1)%Snow_Depth       
+     ivar = ufo_vars_getindex(geovals%variables, var_sfc_landtyp)
+     self%crtm_K%geovals(ivar)%vals(1,k3)      = 0.0 !sfc_K(k2,k1)%Land_Type        
+     ivar = ufo_vars_getindex(geovals%variables, var_sfc_lfrac  )
+     self%crtm_K%geovals(ivar)%vals(1,k3)      = 0.0 !sfc_K(k2,k1)%Land_Coverage    
+     ivar = ufo_vars_getindex(geovals%variables, var_sfc_ltmp   )
+     self%crtm_K%geovals(ivar)%vals(1,k3)      = 0.0 !sfc_K(k2,k1)%Land_Temperature  
+     ivar = ufo_vars_getindex(geovals%variables, var_sfc_lai    )
+     self%crtm_K%geovals(ivar)%vals(1,k3)      = 0.0 !sfc_K(k2,k1)%Lai               
+     ivar = ufo_vars_getindex(geovals%variables, var_sfc_vegfrac)
+     self%crtm_K%geovals(ivar)%vals(1,k3)      = 0.0 !sfc_K(k2,k1)%Vegetation_Fraction
+     ivar = ufo_vars_getindex(geovals%variables, var_sfc_vegtyp )
+     self%crtm_K%geovals(ivar)%vals(1,k3)      = 0.0 !sfc_K(k2,k1)%Vegetation_Type   
+     ivar = ufo_vars_getindex(geovals%variables, var_sfc_soiltyp)
+     self%crtm_K%geovals(ivar)%vals(1,k3)      = 0.0 !sfc_K(k2,k1)%Soil_Type        
+     ivar = ufo_vars_getindex(geovals%variables, var_sfc_soilm  )
+     self%crtm_K%geovals(ivar)%vals(1,k3)      = 0.0 !sfc_K(k2,k1)%Soil_Moisture_Content
+     ivar = ufo_vars_getindex(geovals%variables, var_sfc_soilt  )
+     self%crtm_K%geovals(ivar)%vals(1,k3)      = 0.0 !sfc_K(k2,k1)%Soil_Temperature
+   end do
+ end do
+
+ self%ltraj = .true.  !** set trajectory is true
+ !print '(A,I5,2G12.4)', 'xjacobian1:', k3, maxval(abs(self%crtm_K%geovals(1)%vals(:,k3))), maxval(abs(geovals%geovals(1)%vals(:,k3)))
+
+end subroutine populate_crtm_k
+    
+! ------------------------------------------------------------------------------
   
-  subroutine ufo_radiance_tlad_settraj(self, geovals, obss)
-    implicit none
-!!$    subroutine settraj_(self, geovals, obss)
-!!$      import ufo_basis_tlad, ufo_geovals, ioda_obsdb
-!!$      implicit none
-!!$      class(ufo_basis_tlad), intent(inout) :: self
-!!$      type(ufo_geovals),    intent(in) :: geovals
-!!$      type(ioda_obsdb),     intent(in) :: obss
-!!$    end subroutine settraj_
-    
-    class(ufo_radiance_tlad), intent(inout) :: self
-    type(ufo_geovals),        intent(in)    :: geovals
-    type(ioda_obsdb),         intent(in)    :: obss
-    
-    character(len=*), parameter :: myname_="ufo_radiance_tlad_settraj"
-    character(max_string) :: err_msg
-    
-    
-    !*************************************************************************************
-    !******* Begin CRTM block ************************************************************
-    !*************************************************************************************
-    
-    ! --------------------------
-    ! Some non-CRTM-y Parameters
-    ! --------------------------
-    character(*), parameter :: PROGRAM_NAME = 'ufo_radiance_tlad_mod.F90'
-    
-    ! ============================================================================
-    ! STEP 2. **** SET UP SOME parameterS FOR THE CRTM RUN ****
-    !
-    
-    ! Directory location of coefficients
-    character(*), parameter :: ENDIAN_TYPE='little_endian'
-    character(*), parameter :: COEFFICIENT_PATH='Data/'  
-    
-!!$    ! Profile dimensions
-!!$    !** UFO to provide n_Layers, n_Absorbers, n_Clouds, n_Aerosols
-    
-    integer, parameter :: n_Absorbers = 3  !** UFO
-    integer, parameter :: n_Clouds    = 2  !** UFO
-    integer, parameter :: n_Aerosols  = 0  !** UFO
-    
-    integer :: n_Profiles ! = 806  !** required because of the rank of the atm and sfc structures
-    integer :: n_Layers   ! = 71 !64 !** UFO  !** need a way to populate this... 
-    
-    ! Sensor information
-    integer     , parameter :: n_Sensors = 1  !** each call to CRTM will be for a single sensor type (zenith/scan angle will be diffrent)
-    !  character(*), parameter :: SENSOR_ID(n_Sensors) = (/'cris399_npp','atms_npp   '/)  !** example of how to list multiple sensors
-    character(*), parameter :: SENSOR_ID(n_Sensors) = (/'amsua_n19'/)  !** UFO to provide sensor name
-    
-    !** these remaining items are still missing from UFO -> CRTM, likely available from locs.
-!!$    REAL(fp), parameter :: Latitude  = 46.3369_fp
-!!$    REAL(fp), parameter :: Longitude = 354.4514_fp
-!!$    REAL(fp), parameter :: Elevation = 161_fp
-!!$    REAL(fp), parameter :: Obs_Time  = -1.83777777777778_fp
-    
-    !** NOTE: From CRTM_Parameters.f90, the maximum zenith angle is fixed at:
-    !** REAL(fp), PUBLIC, parameter :: MAX_TRANS_ZENITH_ANGLE = 63.6122_fp !corresponding to amass 2.25
-    
-    ! ============================================================================
-    
-    ! ---------
-    ! Local Variables
-    ! ---------
-    CHARACTER(256) :: message, version
-    INTEGER        :: err_stat, alloc_stat
-    INTEGER        :: N_CHANNELS
-    INTEGER        :: l, m, n, nc, i
-    real(fp)       :: cf
-    
-    ! ============================================================================
-    ! STEP 3. **** DEFINE THE CRTM INTERFACE STRUCTURES ****
-    !
-    ! 3a. Define the "non-demoninational" arguments
-    ! ---------------------------------------------
-    type(CRTM_ChannelInfo_type)             :: chinfo(n_Sensors)
-    type(CRTM_Geometry_type),   allocatable :: geo(:)
-    
-    
-    ! 3b. Define the FORWARD variables
-    ! --------------------------------
-    type(CRTM_Atmosphere_type), allocatable :: atm(:)
-    type(CRTM_Surface_type),    allocatable :: sfc(:)
-    type(CRTM_RTSolution_type), allocatable :: rts(:,:)
-    
-    
-    ! 3c. Define the K-MATRIX variables
-    ! ---------------------------------
-    type(CRTM_Atmosphere_type), allocatable :: atm_K(:,:)
-    type(CRTM_Surface_type)   , allocatable :: sfc_K(:,:)
-    type(CRTM_RTSolution_type), allocatable :: rts_K(:,:)
-    ! ============================================================================
-    
-    type(ufo_geoval), pointer :: geoval
-    character(MAXVARLEN)      :: varname
-    logical                   :: lfound
-    integer                   :: ivar, nobs, nlocs
+subroutine ufo_radiance_simobs_tl(self, geovals, hofx, obss)
 
-    !** get number of profiles and number of layers from geovals input
-    n_Profiles = geovals%nobs
-    n_Layers   = geovals%geovals(1)%nval
-    
-    ! Program header
-    ! --------------
-    
-    call CRTM_Version( Version )
-    call Program_Message( PROGRAM_NAME, &
-         'Check/example program for the CRTM Forward and K-Matrix functions using '//&
-         ENDIAN_type//' coefficient datafiles', &
-         'CRTM Version: '//TRIM(Version) )
-    
-    ! ============================================================================
-    ! STEP 4. **** INITIALIZE THE CRTM ****
-    !
-    ! 4a. Initialise all the sensors at once
-    ! --------------------------------------
-    !** NOTE: CRTM_Init points to the various binary files needed for CRTM.  See the
-    !**       CRTM_Lifecycle.f90 for more details. 
-    write( *,'(/5x,"Initializing the CRTM...")' )
-    err_stat = CRTM_Init( SENSOR_ID, &
-         chinfo, &
-         File_Path=COEFFICIENT_PATH, &
-         Quiet=.TRUE.)
-    if ( err_stat /= SUCCESS ) THEN
-       message = 'Error initializing CRTM'
-       call Display_Message( PROGRAM_NAME, message, FAILURE )
-       stop
-    end if
-    
-    ! ============================================================================
-    ! Begin loop over sensors
-    !** UFO: this loop isn't necessary if we're calling CRTM for each sensor -- it's
-    !        not clear to me whether it's more efficient to call all sensors at once
-    !        or do each one individually.  I'm leaving this capability intact. BTJ 
-    ! 
-    ! ----------------------------------------------------------------------------
-    Sensor_Loop:do n = 1, n_Sensors
-       
-       ! ==========================================================================
-       ! STEP 5. **** ALLOCATE STRUCTURE ARRAYS ****
-       !
-       ! 5a. Determine the number of channels
-       !     for the current sensor
-       ! ------------------------------------
-       n_Channels = CRTM_ChannelInfo_n_Channels(chinfo(n))
-       
-       ! 5b. Allocate the ARRAYS
-       ! -----------------------
-       write(*,*)'ufo_radiance_tlad_settraj n_Profiles, n_Channels = ', n_Profiles, n_Channels
-       allocate( geo( n_Profiles ),          &
-            atm( n_Profiles ),               &
-            sfc( n_Profiles ),               &
-            rts( n_Channels, n_Profiles ),   &
-            atm_K( n_Channels, n_Profiles ), &
-            sfc_K( n_Channels, n_Profiles ), &
-            rts_K( n_Channels, n_Profiles ), &
-            STAT = alloc_stat )
-       if ( alloc_stat /= 0 ) THEN
-          message = 'Error allocating structure arrays TLAD'
-          call Display_Message( PROGRAM_NAME, message, FAILURE )
-          stop
-       end if
-       
-       ! 5c. Allocate the STRUCTURE INTERNALS
-       !     NOTE: Only the Atmosphere structures
-       !           are allocated in this example
-       ! ----------------------------------------
-       ! The input FORWARD structure
-       call CRTM_Atmosphere_Create( atm, n_Layers, n_Absorbers, n_Clouds, n_Aerosols )
-       if ( ANY(.NOT. CRTM_Atmosphere_Associated(atm)) ) THEN
-          message = 'Error allocating CRTM Forward Atmosphere structure'
-          call Display_Message( PROGRAM_NAME, message, FAILURE )
-          stop
-       end if
-       
-       call CRTM_Surface_Create(sfc, n_Channels)
-       if ( ANY(.NOT. CRTM_Surface_Associated(sfc)) ) THEN
-          message = 'Error allocating CRTM Surface structure'
-          call Display_Message( PROGRAM_NAME, message, FAILURE )
-          stop
-       end if
-       
-       ! The output K-MATRIX structure
-       call CRTM_Atmosphere_Create( atm_K, n_Layers, n_Absorbers, n_Clouds, n_Aerosols )
-       if ( ANY(.NOT. CRTM_Atmosphere_Associated(atm_K)) ) THEN
-          message = 'Error allocating CRTM K-matrix Atmosphere structure'
-          call Display_Message( PROGRAM_NAME, message, FAILURE )
-          stop
-       end if
-       
-       call CRTM_Surface_Create(sfc_K, n_Channels)
-       if ( ANY(.NOT. CRTM_Surface_Associated(sfc_K)) ) THEN
-          message = 'Error allocating CRTM K-matrix Surface structure'
-          call Display_Message( PROGRAM_NAME, message, FAILURE )
-          stop
-       end if
-       
-       ! ==========================================================================
-       
-       ! ==========================================================================
-       ! STEP 6. **** ASSIGN INPUT DATA ****
-       !
-       ! 6a. Atmosphere and Surface input
-       !     NOTE: that this is the hard part (in my opinion :o). The mechanism by
-       !     by which the atmosphere and surface data are loaded in to their
-       !     respective structures below was done purely to keep the step-by-step
-       !     instructions in this program relatively "clean".
-       ! ------------------------------------------------------------------------
-       !** UFO NOTE: this is where input data from UFO/OOPS will be loaded
-       !**           subroutines not necessary, but helps cleanly separate atmos
-       !**           and surface data. 
-       
-       call Load_Atm_Data()   !** NOTE: could be moved out of sensor loop
-       
-       !** NOTE:  need to add in aerosol data to read routine
-       
-       call Load_Sfc_Data()   !** NOTE: could be moved out of sensor loop
-       
-       ! 6b. Geometry input
-       ! ------------------
-       ! All profiles are given the same value
-       !  The Sensor_Scan_Angle is optional.
-       call Load_Geom_Data()
-       
-       ! ==========================================================================
-       
-       ! ==========================================================================
-       ! STEP 7. **** INITIALIZE THE K-MATRIX ARGUMENTS ****
-       !
-       ! 7a. Zero the K-matrix OUTPUT structures
-       ! ---------------------------------------
-       !** UFO: these structures will be used in the adjoint, so will need to be
-       !**      passed back out. 
-       call CRTM_Atmosphere_Zero( atm_K )
-       call CRTM_Surface_Zero( sfc_K )
-       
-       ! 7b. Inintialize the K-matrix INPUT so
-       !     that the results are dTb/dx
-       ! -------------------------------------
-       rts_K%Radiance               = ZERO
-       rts_K%Brightness_Temperature = ONE
-       ! ==========================================================================
+implicit none
+class(ufo_radiance_tlad), intent(in)  :: self
+type(ufo_geovals),     intent(in)     :: geovals
+type(obs_vector),      intent(inout)  :: hofx
+type(ioda_obsdb),      intent(in)     :: obss
 
-       ! 8b. The K-matrix model
-       ! ----------------------
-       err_stat = CRTM_K_Matrix( atm, &  ! FORWARD  Input
-            sfc                     , &  ! FORWARD  Input
-            rts_K                   , &  ! K-MATRIX Input
-            geo                     , &  ! Input
-            chinfo(n:n)             , &  ! Input
-            atm_K                   , &  ! K-MATRIX Output
-            sfc_K                   , &  ! K-MATRIX Output
-            rts          )               ! FORWARD  Output
-       if ( err_stat /= SUCCESS ) THEN
-          message = 'Error calling CRTM K-Matrix Model for '//TRIM(SENSOR_ID(n))
-          call Display_Message( PROGRAM_NAME, message, FAILURE )
-          stop
-       end if
-       ! ==========================================================================
+character(len=*), parameter :: myname_="ufo_radiance_simobs_tl"
+character(len=MAXVARLEN) :: fldname
+integer jvar, jobs, jprofile, jchannel, jlev, ivar
 
-       i = 1
-       call populate_crtm_K() !** populate the K-matrix structure.
+ if (geovals%nvar /= self%crtm_K%nvar) call abor1_ftn("radiance_tl: error nvar")
+ if (hofx%nobs /= self%n_Profiles*self%n_Channels) call abor1_ftn("radiance_tl: obsvector wrong size")
 
-       ! ==========================================================================
-       ! STEP 9. **** CLEAN UP FOR NEXT SENSOR ****
-       !
-       ! 9a. Deallocate the structures
-       ! -----------------------------
-       call CRTM_Geometry_Destroy(geo)
-       call CRTM_Atmosphere_Destroy(atm_K)
-       call CRTM_Atmosphere_Destroy(atm)
-       call CRTM_RTSolution_Destroy(rts_K)
-       call CRTM_RTSolution_Destroy(rts)
-       call CRTM_Surface_Destroy(sfc)
-       call CRTM_Surface_Destroy(sfc_K)
+ hofx%values(:) = 0.0
 
-       ! ==========================================================================
-       
-       ! 9b. Deallocate the arrays !** NOTE: this is required
-       ! -------------------------
-       deallocate(geo, atm, sfc, rts, rts_K, sfc_K, atm_K, STAT = alloc_stat)
-       if ( alloc_stat /= 0 ) THEN
-          message = 'Error deallocating structure arrays'
-          call Display_Message( PROGRAM_NAME, message, FAILURE )
-          stop
-       end if
-       ! ==========================================================================
-       
-    end do Sensor_Loop
-    
-    ! ==========================================================================
-    ! 10. **** DESTROY THE CRTM ****
-    !
-    write( *, '( /5x, "Destroying the CRTM..." )' )
-    err_stat = CRTM_Destroy( chinfo )
-    if ( err_stat /= SUCCESS ) THEN
-       message = 'Error destroying CRTM'
-       call Display_Message( PROGRAM_NAME, message, FAILURE )
-       stop
-    end if
-    ! ==========================================================================
+ do jvar = 1, geovals%nvar
+ fldname=geovals%variables%fldnames(jvar)
+ if (trim(fldname)=="temperature" .or. trim(fldname)=="virtual_temperature" .or. &
+   & trim(fldname)=="humidity_mixing_ratio") then
+   ivar = ufo_vars_getindex(self%crtm_K%variables, geovals%variables%fldnames(jvar))
+   write(*,*)'radiance_tl geovals nvar fldname ', geovals%nvar, geovals%variables%fldnames(jvar)
+   write(*,*)'radiance_tl crtm_K ivar fldname ', ivar, self%crtm_K%variables%fldnames(ivar)
+   write(*,*)'radiance_tl nval ', geovals%geovals(jvar)%nval, self%crtm_K%geovals(ivar)%nval
+   if (geovals%geovals(jvar)%nval /= self%crtm_K%geovals(ivar)%nval) call abor1_ftn("radiance_tl: error nval")
+   write(*,*)'radiance_tl geovals ',geovals%variables%fldnames(jvar),' min max = ', &
+           & minval(geovals%geovals(jvar)%vals(:,:)),maxval(geovals%geovals(jvar)%vals(:,:))
+   jobs = 0
+   do jprofile = 1, self%n_Profiles
+   do jchannel = 1, self%n_Channels
+     jobs = jobs + 1
+     do jlev = 1, geovals%geovals(jvar)%nval
+       hofx%values(jobs) = hofx%values(jobs) + self%crtm_K%geovals(ivar)%vals(jlev,jobs) * geovals%geovals(jvar)%vals(jlev,jprofile)
+     enddo
+   enddo
+   enddo
+ endif
+ enddo
+ write(*,*)'radiance_tl hofx min max = ',minval(hofx%values(:)),maxval(hofx%values(:))
 
-    call ufo_geovals_init(self%geohack)
-    call ufo_geovals_copy(geovals, self%geohack)
-    call ufo_geovals_zero(self%geohack)
-
-  contains
-    
-    ! ==========================================================================
-    !                Below are some internal procedures that load the
-    !                necessary input structures with some pretend data
-    ! ==========================================================================
-    
-    !
-    ! Internal subprogam to load some test profile data
-    !
-    subroutine Load_Atm_Data()
-      implicit none
-      ! Local variables
-      integer :: nc, NL
-      integer :: k1, k2
-      
-      ! 4a.1 Profile #1
-      ! ---------------
-      ! ...Profile and absorber definitions
-      
-      do k1 = 1,geovals%nvar
-         varname = geovals%variables%fldnames(k1)
-         print *, k1, varname
-      end do
-      
-      !** populate the atmosphere structures for CRTM (atm(k1), for the k1-th profile)
-      do k1 = 1,n_Profiles
-         call ufo_geovals_get_var(geovals, var_tv, geoval)
-         atm(k1)%Temperature(1:n_Layers) = geoval%vals(:,k1) 
-         
-         call ufo_geovals_get_var(geovals, var_prs, geoval)
-         atm(k1)%Pressure(1:n_Layers) = geoval%vals(:,k1) 
-         
-         call ufo_geovals_get_var(geovals, var_prsi, geoval)
-         atm(k1)%Level_Pressure(:) = geoval%vals(:,k1)
-         
-         atm(k1)%Climatology            = US_STANDARD_ATMOSPHERE
-         
-         atm(k1)%Absorber_Id(1:1)       = (/ H2O_ID /)
-         atm(k1)%Absorber_Units(1:1)    = (/ MASS_MIXING_RATIO_UNITS /)
-         call ufo_geovals_get_var(geovals, var_mixr, geoval)
-         atm(k1)%Absorber(1:n_Layers,1) = geoval%vals(:,k1) 
-         
-         atm(k1)%Absorber_Id(2:2)       = (/ O3_ID /)
-         atm(k1)%Absorber_Units(2:2)    = (/ VOLUME_MIXING_RATIO_UNITS /)
-         call ufo_geovals_get_var(geovals, var_oz, geoval)
-         atm(k1)%Absorber(1:n_Layers,2) = geoval%vals(:,k1) 
-         
-         atm(k1)%Absorber_Id(3:3)       = (/ CO2_ID /)
-         atm(k1)%Absorber_Units(3:3)    = (/ VOLUME_MIXING_RATIO_UNITS /)
-         call ufo_geovals_get_var(geovals, var_co2, geoval)
-         atm(k1)%Absorber(1:n_Layers,3) = geoval%vals(:,k1)
-         
-         atm(k1)%Cloud(1)%Type = WATER_CLOUD
-         call ufo_geovals_get_var(geovals, var_clw, geoval)
-         atm(k1)%Cloud(1)%Water_Content    = geoval%vals(:,k1)
-         call ufo_geovals_get_var(geovals, var_clwefr, geoval)
-         atm(k1)%Cloud(1)%Effective_Radius = geoval%vals(:,k1)
-         
-         atm(k1)%Cloud(2)%Type = ICE_CLOUD
-         call ufo_geovals_get_var(geovals, var_cli, geoval)
-         atm(k1)%Cloud(2)%Water_Content    = geoval%vals(:,k1)
-         call ufo_geovals_get_var(geovals, var_cliefr, geoval)
-         atm(k1)%Cloud(2)%Effective_Radius = geoval%vals(:,k1)
-
-!        where(atm(k1)%Absorber < 0.0)
-           atm(k1)%Absorber = 0.0
-!        end where
-!        where (atm(k1)%Cloud(1)%Water_Content < 0.0)
-           atm(k1)%Cloud(1)%Water_Content = 0.0
-!        end where
-!        where (atm(k1)%Cloud(2)%Water_Content < 0.0)
-           atm(k1)%Cloud(2)%Water_Content = 0.0
-!        end where
-      end do
-      
-    end subroutine Load_Atm_Data
-    
-    
-    !
-    ! Internal subprogam to load some test surface data
-    !
-    subroutine Load_Sfc_Data()
-      implicit none
-      integer  :: k1
-      real(fp) :: sfrac
-      
-      ! 4a.0 Surface type definitions for default SfcOptics definitions
-      !      For IR and VIS, this is the NPOESS reflectivities.
-      ! ---------------------------------------------------------------
-      integer, parameter :: TUNDRA_SURFACE_type         = 10  ! NPOESS Land surface type for IR/VIS Land SfcOptics
-      integer, parameter :: SCRUB_SURFACE_type          =  7  ! NPOESS Land surface type for IR/VIS Land SfcOptics
-      integer, parameter :: COARSE_SOIL_type            =  1  ! Soil type                for MW land SfcOptics
-      integer, parameter :: GROUNDCOVER_VEGETATION_type =  7  ! Vegetation type          for MW Land SfcOptics
-      integer, parameter :: BARE_SOIL_VEGETATION_type   = 11  ! Vegetation type          for MW Land SfcOptics
-      integer, parameter :: SEA_WATER_type              =  1  ! Water type               for all SfcOptics
-      integer, parameter :: FRESH_SNOW_type             =  2  ! NPOESS Snow type         for IR/VIS SfcOptics
-      integer, parameter :: FRESH_ICE_type              =  1  ! NPOESS Ice type          for IR/VIS SfcOptics
-      
-      real(kind_real), allocatable :: Radiance_Tbobs(:,:)
-      type(obs_vector)             :: TmpOvec
-      integer                      :: ch
-      
-      ! 4a.1 Surface Characteristics
-      ! ---------------
-      ! ...Land surface characteristics
-      
-      allocate(Radiance_Tbobs(n_Channels, n_Profiles))
-      call ioda_obsvec_setup(TmpOvec, obss%nobs)
-      call ioda_obsdb_var_to_ovec(obss, TmpOvec, "brightness_temperature_ch6")
-      Radiance_Tbobs = reshape(TmpOvec%values, (/n_Channels, n_Profiles/))
-      
-      do k1 = 1,n_Profiles
-         sfc(k1)%sensordata%sensor_id        = chinfo(1)%sensor_id
-         sfc(k1)%sensordata%wmo_sensor_id    = chinfo(1)%wmo_sensor_id
-         sfc(k1)%sensordata%wmo_satellite_id = chinfo(1)%wmo_satellite_id
-         sfc(k1)%sensordata%sensor_channel   = chinfo(1)%sensor_channel
-         
-         sfc(k1)%Water_Type         = SEA_WATER_type    !** NOTE: need to check how to determine fresh vs sea water types (salinity???)
-         call ufo_geovals_get_var(geovals, var_sfc_wspeed, geoval)
-         sfc(k1)%Wind_Speed         = geoval%vals(1,k1) 
-         call ufo_geovals_get_var(geovals, var_sfc_wdir, geoval)
-         sfc(k1)%Wind_Direction     = geoval%vals(1,k1) 
-         call ufo_geovals_get_var(geovals, var_sfc_wfrac, geoval)
-         sfc(k1)%Water_Coverage     = geoval%vals(1,k1) 
-         call ufo_geovals_get_var(geovals, var_sfc_wtmp, geoval)
-         sfc(k1)%Water_Temperature  = geoval%vals(1,k1) 
-         call ufo_geovals_get_var(geovals, var_sfc_ifrac, geoval)
-         sfc(k1)%Ice_Coverage       = geoval%vals(1,k1) 
-         call ufo_geovals_get_var(geovals, var_sfc_itmp, geoval)
-         sfc(k1)%Ice_Temperature    = geoval%vals(1,k1) 
-         call ufo_geovals_get_var(geovals, var_sfc_sfrac, geoval)
-         sfc(k1)%Snow_Coverage      = geoval%vals(1,k1) 
-         call ufo_geovals_get_var(geovals, var_sfc_stmp, geoval)
-         sfc(k1)%Snow_Temperature   = geoval%vals(1,k1) 
-         call ufo_geovals_get_var(geovals, var_sfc_sdepth, geoval)
-         sfc(k1)%Snow_Depth         = geoval%vals(1,k1)
-         call ufo_geovals_get_var(geovals, var_sfc_landtyp, geoval)
-         sfc(k1)%Land_Type          = geoval%vals(1,k1)    !** NOTE:  is this Land_Type same as CRTM's land type??
-         call ufo_geovals_get_var(geovals, var_sfc_lfrac, geoval)
-         sfc(k1)%Land_Coverage      = geoval%vals(1,k1) 
-         call ufo_geovals_get_var(geovals, var_sfc_ltmp, geoval)
-         sfc(k1)%Land_Temperature   = geoval%vals(1,k1) 
-         call ufo_geovals_get_var(geovals, var_sfc_lai, geoval)
-         sfc(k1)%Lai                = geoval%vals(1,k1) 
-         call ufo_geovals_get_var(geovals, var_sfc_vegfrac, geoval)
-         sfc(k1)%Vegetation_Fraction = geoval%vals(1,k1) 
-         call ufo_geovals_get_var(geovals, var_sfc_vegtyp, geoval)
-         sfc(k1)%Vegetation_Type    = geoval%vals(1,k1) 
-         call ufo_geovals_get_var(geovals, var_sfc_soiltyp, geoval)
-         sfc(k1)%Soil_Type          = geoval%vals(1,k1) 
-         call ufo_geovals_get_var(geovals, var_sfc_soilm, geoval)
-         sfc(k1)%Soil_Moisture_Content = geoval%vals(1,k1) 
-         call ufo_geovals_get_var(geovals, var_sfc_soilt, geoval)
-         sfc(k1)%Soil_Temperature   = geoval%vals(1,k1) 
-         do ch = 1, n_Channels
-            sfc(k1)%sensordata%tb(ch) = Radiance_TbObs(ch, k1)  !** required to match GSI simulated TBs over snow and ice surfaces
-         end do
-      end do
-      deallocate(Radiance_Tbobs)
-      call ioda_obsvec_delete(TmpOvec)
-      
-    end subroutine Load_Sfc_Data
-    
-    !
-    ! Internal subprogam to load some test geometry data
-    !
-    subroutine Load_Geom_Data()
-      implicit none
-      
-      type(obs_vector) :: TmpOvec
-      
-      call ioda_obsvec_setup(TmpOvec, obss%nobs)
-      
-      call ioda_obsdb_var_to_ovec(obss, TmpOvec, "Sat_Zenith_Angle" )
-      geo(:)%Sensor_Zenith_Angle  = TmpOvec%values(::n_Channels)
-      call ioda_obsdb_var_to_ovec(obss, TmpOvec, "Sol_Zenith_Angle" )
-      geo(:)%Source_Zenith_Angle  = TmpOvec%values(::n_Channels)
-      call ioda_obsdb_var_to_ovec(obss, TmpOvec, "Sat_Azimuth_Angle")
-      geo(:)%Sensor_Azimuth_Angle = TmpOvec%values(::n_Channels)
-      call ioda_obsdb_var_to_ovec(obss, TmpOvec, "Sol_Azimuth_Angle")
-      geo(:)%Source_Azimuth_Angle = TmpOvec%values(::n_Channels)
-      call ioda_obsdb_var_to_ovec(obss, TmpOvec, "Scan_Position"    )
-      geo(:)%Ifov = TmpOvec%values(::n_Channels) 
-      call ioda_obsdb_var_to_ovec(obss, TmpOvec, "Scan_Angle"       )
-      geo(:)%Sensor_Scan_Angle    = TmpOvec%values(::n_Channels)
-      
-      call ioda_obsvec_delete(TmpOvec)
-      
-    end subroutine Load_Geom_Data
-
-    subroutine populate_crtm_K()
-      implicit none
-      ! Local variables
-      INTEGER :: nc, NL
-      INTEGER :: k1, k2, k3, ivar, itmp
-
-      !** NOTES: this is to populate the jacobian structures, using exactly the same structures as geovals, including variable names.
-      !**        this is the laziest possible way to do this, and will likely need to be changed.
-      !**        use public subroutine ufo_geovals_assign to initialize crtm_K with the exact same values geovals?
-
-      self%nprofiles = n_Profiles
-      self%nchannels = n_Channels
-      call ufo_geovals_init(self%crtm_K)
-      call ufo_geovals_setup(self%crtm_K, geovals%variables, n_Profiles*n_Channels) !** setup jacobian structure using geovals structure.
-
-            !** atmosphere
-            ivar = ufo_vars_getindex(geovals%variables, var_tv  )
-            self%crtm_K%geovals(ivar)%nval = n_Layers
-            ivar = ufo_vars_getindex(geovals%variables, var_prs )
-            self%crtm_K%geovals(ivar)%nval = n_Layers
-            ivar = ufo_vars_getindex(geovals%variables, var_prsi)
-            self%crtm_K%geovals(ivar)%nval = n_Layers+1
-            ivar = ufo_vars_getindex(geovals%variables, var_mixr)
-            self%crtm_K%geovals(ivar)%nval = n_Layers
-            ivar = ufo_vars_getindex(geovals%variables, var_oz  )
-            self%crtm_K%geovals(ivar)%nval = n_Layers
-            ivar = ufo_vars_getindex(geovals%variables, var_co2 )
-            self%crtm_K%geovals(ivar)%nval = n_Layers
-
-            !** cloud 1 
-            ivar = ufo_vars_getindex(geovals%variables, var_clw )
-            self%crtm_K%geovals(ivar)%nval = n_Layers
-            ivar = ufo_vars_getindex(geovals%variables, var_clwefr)
-            self%crtm_K%geovals(ivar)%nval = n_Layers
-
-            !** cloud 2
-            ivar = ufo_vars_getindex(geovals%variables, var_cli )
-            self%crtm_K%geovals(ivar)%nval = n_Layers
-            ivar = ufo_vars_getindex(geovals%variables, var_cliefr)
-            self%crtm_K%geovals(ivar)%nval = n_Layers
-
-            !** surface
-            ivar = ufo_vars_getindex(geovals%variables, var_sfc_wspeed )
-            self%crtm_K%geovals(ivar)%nval = 1
-            ivar = ufo_vars_getindex(geovals%variables, var_sfc_wdir   )
-            self%crtm_K%geovals(ivar)%nval = 1
-            ivar = ufo_vars_getindex(geovals%variables, var_sfc_wfrac  )
-            self%crtm_K%geovals(ivar)%nval = 1
-            ivar = ufo_vars_getindex(geovals%variables, var_sfc_wtmp   )
-            self%crtm_K%geovals(ivar)%nval = 1
-            ivar = ufo_vars_getindex(geovals%variables, var_sfc_ifrac  )
-            self%crtm_K%geovals(ivar)%nval = 1
-            ivar = ufo_vars_getindex(geovals%variables, var_sfc_itmp   )
-            self%crtm_K%geovals(ivar)%nval = 1
-            ivar = ufo_vars_getindex(geovals%variables, var_sfc_sfrac  )
-            self%crtm_K%geovals(ivar)%nval = 1
-            ivar = ufo_vars_getindex(geovals%variables, var_sfc_stmp   )
-            self%crtm_K%geovals(ivar)%nval = 1
-            ivar = ufo_vars_getindex(geovals%variables, var_sfc_sdepth )
-            self%crtm_K%geovals(ivar)%nval = 1
-            ivar = ufo_vars_getindex(geovals%variables, var_sfc_landtyp)
-            self%crtm_K%geovals(ivar)%nval = 1
-            ivar = ufo_vars_getindex(geovals%variables, var_sfc_lfrac  )
-            self%crtm_K%geovals(ivar)%nval = 1
-            ivar = ufo_vars_getindex(geovals%variables, var_sfc_ltmp   )
-            self%crtm_K%geovals(ivar)%nval = 1
-            ivar = ufo_vars_getindex(geovals%variables, var_sfc_lai    )
-            self%crtm_K%geovals(ivar)%nval = 1
-            ivar = ufo_vars_getindex(geovals%variables, var_sfc_vegfrac)
-            self%crtm_K%geovals(ivar)%nval = 1
-            ivar = ufo_vars_getindex(geovals%variables, var_sfc_vegtyp )
-            self%crtm_K%geovals(ivar)%nval = 1
-            ivar = ufo_vars_getindex(geovals%variables, var_sfc_soiltyp)
-            self%crtm_K%geovals(ivar)%nval = 1
-            ivar = ufo_vars_getindex(geovals%variables, var_sfc_soilm  )
-            self%crtm_K%geovals(ivar)%nval = 1
-            ivar = ufo_vars_getindex(geovals%variables, var_sfc_soilt  )
-            self%crtm_K%geovals(ivar)%nval = 1
-
-      do k3 = 1,geovals%nvar
-         allocate(self%crtm_K%geovals(k3)%vals(self%crtm_K%geovals(k3)%nval,n_Profiles*n_Channels))
-         self%crtm_K%geovals(k3)%vals(:,:) = 0.0_fp
-      end do
-      self%crtm_K%linit = .true.
-
-      !** atm_K and sfc_K contain the jacobian structures, and are populated prior to this subroutine being called.
-      !** next step is to copy the values into the self%crtm_K structure, with appropriate unit conversions.
-      !** the purpose is to have an exact mapping between geovals and the jacobians.  I will eventually need an automated
-      !** method to copy the values from atm_K and sfc_K into self%crtm_K.
-
-      !** populate the atmosphere K-matrix (jacobian) structures for CRTM (self%crtm_K(k1), for the k1-th profile)
-!!$      var_tv     atm%Temperature
-!!$      var_prs    atm%Pressure
-!!$      var_prsi   atm%Level_Pressure
-!!$      var_mixr   atm%Absorber(1) !** verify
-!!$      var_oz     atm%Absorber(2) !** verify
-!!$      var_co2    atm%Absorber(3) !** verify
-!!$      var_clw    atm%Cloud(1)%Water_Content !** water cloud content
-!!$      var_clwefr atm%Cloud(1)%Effective_Radius !** water cloud effective radius 
-!!$      var_cli    atm%Cloud(2)%Water_Content !** ice cloud content
-!!$      var_cliefr atm%Cloud(2)%Effective_Radius !** ice cloud effective radius 
-
-!!$      var_sfc_wspeed     sfc%Wind_Speed
-!!$      var_sfc_wdir       sfc%Wind_Direction
-!!$      var_sfc_wfrac      sfc%Water_Coverage
-!!$      var_sfc_wtmp       sfc%Water_Temperature
-!!$      var_sfc_ifrac      sfc%Ice_Coverage 
-!!$      var_sfc_itmp       sfc%Ice_Temperature
-!!$      var_sfc_sfrac      sfc%Snow_Coverage
-!!$      var_sfc_stmp       sfc%Snow_Temperature
-!!$      var_sfc_sdepth     sfc%Snow_Depth
-!!$      var_sfc_landtyp    sfc%Land_Type
-!!$      var_sfc_lfrac      sfc%Land_Coverage 
-!!$      var_sfc_ltmp       sfc%Land_Temperature
-!!$      var_sfc_lai        sfc%Lai       
-!!$      var_sfc_vegfrac    sfc%Vegetation_Fraction
-!!$      var_sfc_vegtyp     sfc%Vegetation_Type
-!!$      var_sfc_soiltyp    sfc%Soil_Type
-!!$      var_sfc_soilm      sfc%Soil_Moisture
-!!$      var_sfc_soilt      sfc%Soil_Temperature
-      k3 = 0
-
-      do k1 = 1,n_Profiles
-         do k2 = 1,n_Channels
-            k3 = k3 + 1  !** jacobian is n_profiles, n_channels, geoval is n_layers, n_obs.  k3 flattens n_profiles,n_channels.
-            !** atmosphere
-            ivar = ufo_vars_getindex(geovals%variables, var_tv  )
-            self%crtm_K%geovals(ivar)%vals(1:n_Layers,k3)   = atm_K(k2,k1)%Temperature(1:n_Layers)
-            ivar = ufo_vars_getindex(geovals%variables, var_prs )
-            self%crtm_K%geovals(ivar)%vals(1:n_Layers,k3)   = 0.0 !atm_K(k2,k1)%Pressure(1:n_Layers) 
-            ivar = ufo_vars_getindex(geovals%variables, var_prsi)
-            self%crtm_K%geovals(ivar)%vals(1:n_Layers+1,k3)   = 0.0 !atm_K(k2,k1)%Level_Pressure(0:n_Layers) 
-            ivar = ufo_vars_getindex(geovals%variables, var_mixr)
-            self%crtm_K%geovals(ivar)%vals(1:n_Layers,k3)   = 0.0 !atm_K(k2,k1)%Absorber(1:n_Layers,1)
-            ivar = ufo_vars_getindex(geovals%variables, var_oz  )
-            self%crtm_K%geovals(ivar)%vals(1:n_Layers,k3)   = 0.0 !atm_K(k2,k1)%Absorber(1:n_Layers,2)
-            ivar = ufo_vars_getindex(geovals%variables, var_co2 )
-            self%crtm_K%geovals(ivar)%vals(1:n_Layers,k3)   = 0.0 !atm_K(k2,k1)%Absorber(1:n_Layers,3)
-
-            !** cloud 1 
-            ivar = ufo_vars_getindex(geovals%variables, var_clw )
-            self%crtm_K%geovals(ivar)%vals(1:n_Layers,k3)   = 0.0 !atm_K(k2,k1)%Cloud(1)%Water_Content(1:n_Layers)
-            ivar = ufo_vars_getindex(geovals%variables, var_clwefr)
-            self%crtm_K%geovals(ivar)%vals(1:n_Layers,k3)   = 0.0 !atm_K(k2,k1)%Cloud(1)%Effective_Radius(1:n_Layers)
-
-            !** cloud 2
-            ivar = ufo_vars_getindex(geovals%variables, var_cli )
-            self%crtm_K%geovals(ivar)%vals(1:n_Layers,k3)   = 0.0 !atm_K(k2,k1)%Cloud(2)%Water_Content(1:n_Layers)
-            ivar = ufo_vars_getindex(geovals%variables, var_cliefr)
-            self%crtm_K%geovals(ivar)%vals(1:n_Layers,k3)   = 0.0 !atm_K(k2,k1)%Cloud(2)%Effective_Radius(1:n_Layers) 
-
-            !** surface
-            ivar = ufo_vars_getindex(geovals%variables, var_sfc_wspeed )
-            self%crtm_K%geovals(ivar)%vals(1,k3)      = 0.0 !sfc_K(k2,k1)%Wind_Speed        
-            ivar = ufo_vars_getindex(geovals%variables, var_sfc_wdir   )
-            self%crtm_K%geovals(ivar)%vals(1,k3)      = 0.0 !sfc_K(k2,k1)%Wind_Direction    
-            ivar = ufo_vars_getindex(geovals%variables, var_sfc_wfrac  )
-            self%crtm_K%geovals(ivar)%vals(1,k3)      = 0.0 !sfc_K(k2,k1)%Water_Coverage    
-            ivar = ufo_vars_getindex(geovals%variables, var_sfc_wtmp   )
-            self%crtm_K%geovals(ivar)%vals(1,k3)      = 0.0 !sfc_K(k2,k1)%Water_Temperature 
-            ivar = ufo_vars_getindex(geovals%variables, var_sfc_ifrac  )
-            self%crtm_K%geovals(ivar)%vals(1,k3)      = 0.0 !sfc_K(k2,k1)%Ice_Coverage      
-            ivar = ufo_vars_getindex(geovals%variables, var_sfc_itmp   )
-            self%crtm_K%geovals(ivar)%vals(1,k3)      = 0.0 !sfc_K(k2,k1)%Ice_Temperature   
-            ivar = ufo_vars_getindex(geovals%variables, var_sfc_sfrac  )
-            self%crtm_K%geovals(ivar)%vals(1,k3)      = 0.0 !sfc_K(k2,k1)%Snow_Coverage     
-            ivar = ufo_vars_getindex(geovals%variables, var_sfc_stmp   )
-            self%crtm_K%geovals(ivar)%vals(1,k3)      = 0.0 !sfc_K(k2,k1)%Snow_Temperature 
-            ivar = ufo_vars_getindex(geovals%variables, var_sfc_sdepth )
-            self%crtm_K%geovals(ivar)%vals(1,k3)      = 0.0 !sfc_K(k2,k1)%Snow_Depth       
-            ivar = ufo_vars_getindex(geovals%variables, var_sfc_landtyp)
-            self%crtm_K%geovals(ivar)%vals(1,k3)      = 0.0 !sfc_K(k2,k1)%Land_Type        
-            ivar = ufo_vars_getindex(geovals%variables, var_sfc_lfrac  )
-            self%crtm_K%geovals(ivar)%vals(1,k3)      = 0.0 !sfc_K(k2,k1)%Land_Coverage    
-            ivar = ufo_vars_getindex(geovals%variables, var_sfc_ltmp   )
-            self%crtm_K%geovals(ivar)%vals(1,k3)      = 0.0 !sfc_K(k2,k1)%Land_Temperature  
-            ivar = ufo_vars_getindex(geovals%variables, var_sfc_lai    )
-            self%crtm_K%geovals(ivar)%vals(1,k3)      = 0.0 !sfc_K(k2,k1)%Lai               
-            ivar = ufo_vars_getindex(geovals%variables, var_sfc_vegfrac)
-            self%crtm_K%geovals(ivar)%vals(1,k3)      = 0.0 !sfc_K(k2,k1)%Vegetation_Fraction
-            ivar = ufo_vars_getindex(geovals%variables, var_sfc_vegtyp )
-            self%crtm_K%geovals(ivar)%vals(1,k3)      = 0.0 !sfc_K(k2,k1)%Vegetation_Type   
-            ivar = ufo_vars_getindex(geovals%variables, var_sfc_soiltyp)
-            self%crtm_K%geovals(ivar)%vals(1,k3)      = 0.0 !sfc_K(k2,k1)%Soil_Type        
-            ivar = ufo_vars_getindex(geovals%variables, var_sfc_soilm  )
-            self%crtm_K%geovals(ivar)%vals(1,k3)      = 0.0 !sfc_K(k2,k1)%Soil_Moisture_Content
-            ivar = ufo_vars_getindex(geovals%variables, var_sfc_soilt  )
-            self%crtm_K%geovals(ivar)%vals(1,k3)      = 0.0 !sfc_K(k2,k1)%Soil_Temperature
-         end do
-      end do
-
-      self%ltraj = .true.  !** set trajectory is true
-      !print '(A,I5,2G12.4)', 'xjacobian1:', k3, maxval(abs(self%crtm_K%geovals(1)%vals(:,k3))), maxval(abs(geovals%geovals(1)%vals(:,k3)))
-
-    END SUBROUTINE populate_crtm_K
-    
-  end subroutine ufo_radiance_tlad_settraj
-
-  ! ------------------------------------------------------------------------------
+end subroutine ufo_radiance_simobs_tl
   
-  subroutine ufo_radiance_simobs_tl(self, geovals, hofx, obss)
-    use ufo_vars_mod
-    implicit none
-    class(ufo_radiance_tlad), intent(in)  :: self
-    type(ufo_geovals),     intent(in)     :: geovals
-    type(obs_vector),      intent(inout)  :: hofx
-    type(ioda_obsdb),      intent(in)     :: obss
-    
-    character(len=*), parameter :: myname_="ufo_radiance_simobs_tl"
-    character(len=MAXVARLEN) :: fldname
-    integer jvar, jobs, jprofile, jchannel, jlev, ivar
-
-    if (geovals%nvar /= self%crtm_K%nvar) call abor1_ftn("radiance_tl: error nvar")
-    if (hofx%nobs /= self%nprofiles*self%nchannels) call abor1_ftn("radiance_tl: obsvector wrong size")
-
-    hofx%values(:) = 0.0
-
-    do jvar = 1, geovals%nvar
-    fldname=geovals%variables%fldnames(jvar)
-    if (trim(fldname)=="temperature" .or. trim(fldname)=="virtual_temperature" .or. &
-      & trim(fldname)=="humidity_mixing_ratio") then
-      ivar = ufo_vars_getindex(self%crtm_K%variables, geovals%variables%fldnames(jvar))
-      write(*,*)'radiance_tl geovals nvar fldname ', geovals%nvar, geovals%variables%fldnames(jvar)
-      write(*,*)'radiance_tl crtm_K ivar fldname ', ivar, self%crtm_K%variables%fldnames(ivar)
-      write(*,*)'radiance_tl nval ', geovals%geovals(jvar)%nval, self%crtm_K%geovals(ivar)%nval
-      if (geovals%geovals(jvar)%nval /= self%crtm_K%geovals(ivar)%nval) call abor1_ftn("radiance_tl: error nval")
-      write(*,*)'radiance_tl geovals ',geovals%variables%fldnames(jvar),' min max = ', &
-              & minval(geovals%geovals(jvar)%vals(:,:)),maxval(geovals%geovals(jvar)%vals(:,:))
-      jobs = 0
-      do jprofile = 1, self%nprofiles
-      do jchannel = 1, self%nchannels
-        jobs = jobs + 1
-        do jlev = 1, geovals%geovals(jvar)%nval
-          hofx%values(jobs) = hofx%values(jobs) + self%crtm_K%geovals(ivar)%vals(jlev,jobs) * geovals%geovals(jvar)%vals(jlev,jprofile)
-        enddo
-      enddo
-      enddo
-    endif
-    enddo
-    write(*,*)'radiance_tl hofx min max = ',minval(hofx%values(:)),maxval(hofx%values(:))
-
-  end subroutine ufo_radiance_simobs_tl
+! ------------------------------------------------------------------------------
   
-  ! ------------------------------------------------------------------------------
-  
-  subroutine ufo_radiance_simobs_ad(self, geovals, hofx, obss)
-    implicit none
-    class(ufo_radiance_tlad), intent(in) :: self
-    type(ufo_geovals),     intent(inout) :: geovals
-    type(obs_vector),      intent(in)    :: hofx
-    type(ioda_obsdb),      intent(in)    :: obss
+subroutine ufo_radiance_simobs_ad(self, geovals, hofx, obss)
+
+implicit none
+class(ufo_radiance_tlad), intent(in) :: self
+type(ufo_geovals),     intent(inout) :: geovals
+type(obs_vector),      intent(in)    :: hofx
+type(ioda_obsdb),      intent(in)    :: obss
+
+character(len=*), parameter :: myname_="ufo_radiance_simobs_ad"
+integer jvar, jobs, jprofile, jchannel, jlev, ivar, jj, iavg
+real(kind_real) :: zmin, zmax, zavg
+character(len=MAXVARLEN) :: fldname
+
+ call ufo_geovals_copy(self%geohack, geovals)
+
+ if (geovals%nvar /= self%crtm_K%nvar) call abor1_ftn("radiance_ad: error nvar")
+ if (hofx%nobs /= self%n_Profiles*self%n_Channels) call abor1_ftn("radiance_ad: obsvector wrong size")
+
+ write(*,*)'radiance_ad starting'
+ zmin = huge(zmin)
+ zmax = -huge(zmax)
+ zavg = 0.0_kind_real
+ iavg = 0
+ do jj=1,hofx%nobs
+   if (hofx%values(jj)>rmissing) then
+     zmin = min(hofx%values(jj), zmin)
+     zmax = max(hofx%values(jj), zmax)
+     zavg = zavg + hofx%values(jj)
+     iavg = iavg + 1
+   endif
+ enddo
+ zavg = zavg/real(iavg)
+ write(*,*)'radiance_ad hofx min max avg = ',zmin,zmax,zavg
+
+ do jvar = 1, geovals%nvar
+ fldname=geovals%variables%fldnames(jvar)
+ if (trim(fldname)=="temperature" .or. trim(fldname)=="virtual_temperature" .or. &
+   & trim(fldname)=="humidity_mixing_ratio") then
+   ivar = ufo_vars_getindex(self%crtm_K%variables, geovals%variables%fldnames(jvar))
+   write(*,*)'radiance_ad geovals nvar fldname ', geovals%nvar, geovals%variables%fldnames(jvar)
+   write(*,*)'radiance_ad crtm_K ivar fldname ', ivar, self%crtm_K%variables%fldnames(ivar)
+   write(*,*)'radiance_ad nval ', geovals%geovals(jvar)%nval, self%crtm_K%geovals(ivar)%nval
+   if (geovals%geovals(jvar)%nval /= self%crtm_K%geovals(ivar)%nval) call abor1_ftn("radiance_ad: error nval")
+   jobs = 0
+   do jprofile = 1, self%n_Profiles
+   do jchannel = 1, self%n_Channels
+     jobs = jobs + 1
+     if (hofx%values(jobs)>rmissing) then
+       do jlev = 1, geovals%geovals(jvar)%nval
+         geovals%geovals(jvar)%vals(jlev,jprofile) = geovals%geovals(jvar)%vals(jlev,jprofile) &
+           & + self%crtm_K%geovals(ivar)%vals(jlev,jobs) * hofx%values(jobs)
+       enddo
+     endif
+   enddo
+   enddo
+   write(*,*)'radiance_ad geovals ',geovals%variables%fldnames(jvar),' min max = ', &
+           & minval(geovals%geovals(jvar)%vals(:,:)),maxval(geovals%geovals(jvar)%vals(:,:))
+ endif
+ enddo
     
-    character(len=*), parameter :: myname_="ufo_radiance_simobs_ad"
-    integer jvar, jobs, jprofile, jchannel, jlev, ivar, jj, iavg
-    real(kind_real) :: zmin, zmax, zavg
-    character(len=MAXVARLEN) :: fldname
-
-    call ufo_geovals_copy(self%geohack, geovals)
-
-    if (geovals%nvar /= self%crtm_K%nvar) call abor1_ftn("radiance_ad: error nvar")
-    if (hofx%nobs /= self%nprofiles*self%nchannels) call abor1_ftn("radiance_ad: obsvector wrong size")
-
-    write(*,*)'radiance_ad starting'
-    zmin = huge(zmin)
-    zmax = -huge(zmax)
-    zavg = 0.0_kind_real
-    iavg = 0
-    do jj=1,hofx%nobs
-      if (hofx%values(jj)>rmissing) then
-        zmin = min(hofx%values(jj), zmin)
-        zmax = max(hofx%values(jj), zmax)
-        zavg = zavg + hofx%values(jj)
-        iavg = iavg + 1
-      endif
-    enddo
-    zavg = zavg/real(iavg)
-    write(*,*)'radiance_ad hofx min max avg = ',zmin,zmax,zavg
-
-    do jvar = 1, geovals%nvar
-    fldname=geovals%variables%fldnames(jvar)
-    if (trim(fldname)=="temperature" .or. trim(fldname)=="virtual_temperature" .or. &
-      & trim(fldname)=="humidity_mixing_ratio") then
-      ivar = ufo_vars_getindex(self%crtm_K%variables, geovals%variables%fldnames(jvar))
-      write(*,*)'radiance_ad geovals nvar fldname ', geovals%nvar, geovals%variables%fldnames(jvar)
-      write(*,*)'radiance_ad crtm_K ivar fldname ', ivar, self%crtm_K%variables%fldnames(ivar)
-      write(*,*)'radiance_ad nval ', geovals%geovals(jvar)%nval, self%crtm_K%geovals(ivar)%nval
-      if (geovals%geovals(jvar)%nval /= self%crtm_K%geovals(ivar)%nval) call abor1_ftn("radiance_ad: error nval")
-      jobs = 0
-      do jprofile = 1, self%nprofiles
-      do jchannel = 1, self%nchannels
-        jobs = jobs + 1
-        if (hofx%values(jobs)>rmissing) then
-          do jlev = 1, geovals%geovals(jvar)%nval
-            geovals%geovals(jvar)%vals(jlev,jprofile) = geovals%geovals(jvar)%vals(jlev,jprofile) &
-              & + self%crtm_K%geovals(ivar)%vals(jlev,jobs) * hofx%values(jobs)
-          enddo
-        endif
-      enddo
-      enddo
-      write(*,*)'radiance_ad geovals ',geovals%variables%fldnames(jvar),' min max = ', &
-              & minval(geovals%geovals(jvar)%vals(:,:)),maxval(geovals%geovals(jvar)%vals(:,:))
-    endif
-    enddo
+ write(*,*)'radiance_ad finished'
     
-    write(*,*)'radiance_ad finished'
-    
-  end subroutine ufo_radiance_simobs_ad
+end subroutine ufo_radiance_simobs_ad
   
 ! ------------------------------------------------------------------------------
   

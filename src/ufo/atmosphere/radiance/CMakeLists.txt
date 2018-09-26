@@ -12,5 +12,6 @@ set ( radiance_files
   ufo_radiance_mod.F90
   ufo_radiance_tlad_interface.F90
   ufo_radiance_tlad_mod.F90
+  ufo_radiance_utils_mod.F90
   PARENT_SCOPE
 )
