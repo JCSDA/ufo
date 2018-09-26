@@ -466,7 +466,7 @@ contains
       
       allocate(Radiance_Tbobs(n_Channels, n_Profiles))
       call ioda_obsvec_setup(TmpOvec, obss%nobs)
-      call ioda_obsdb_var_to_ovec(obss, TmpOvec, "Observation")
+      call ioda_obsdb_var_to_ovec(obss, TmpOvec, "brightness_temperature_ch6")
       Radiance_Tbobs = reshape(TmpOvec%values, (/n_Channels, n_Profiles/))
       
       do k1 = 1,n_Profiles
