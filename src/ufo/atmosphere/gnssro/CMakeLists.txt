@@ -7,7 +7,13 @@ set ( gnssro_files
 	ufo_gnssro_ref_mod.F90
         ufo_gnssro_ref_tlad_interface.F90
         ufo_gnssro_ref_tlad_mod.F90
+        ObsGnssroBndGSI.h
+        ObsGnssroBndGSI.cc
+        ufo_gnssro_bndgsi_interface.F90
+        ufo_gnssro_bndgsi_mod.F90
         gnssro_mod_constants.F90
         gnssro_mod_transform.F90
+        gnssro_mod_grids.F90
+        lag_interp.F90
 	PARENT_SCOPE
 )
