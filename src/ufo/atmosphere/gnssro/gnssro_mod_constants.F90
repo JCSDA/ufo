@@ -5,6 +5,7 @@ module gnssro_mod_constants
 use kinds
 implicit none
 public   :: gnssro_ref_constants
+real(kind_real), parameter, public :: zero    = 0.0_kind_real
 real(kind_real), parameter, public :: one     = 1.0_kind_real
 real(kind_real), parameter, public :: two     = 2.0_kind_real
 real(kind_real), parameter, public :: half    = 0.5_kind_real
@@ -16,6 +17,7 @@ real(kind_real), parameter, public :: rd     = 2.8705e2_kind_real
 real(kind_real), parameter, public :: rv     = 4.6150e2_kind_real
 real(kind_real), parameter, public :: rd_over_rv = rd/rv
 real(kind_real), parameter, public :: rv_over_rd = rv/rd
+real(kind_real), parameter, public :: rd_over_g  = rd/grav
 real(kind_real),            public :: n_a, n_b,n_c
 
 contains
