@@ -37,7 +37,9 @@ type(c_ptr), intent(in)    :: c_conf
 type(ufo_radiance_tlad), pointer :: self
 
 call ufo_radiance_tlad_registry%setup(c_key_self, self)
-    
+
+call self%setup(c_conf)
+ 
 end subroutine ufo_radiance_tlad_setup_c
   
 ! ------------------------------------------------------------------------------

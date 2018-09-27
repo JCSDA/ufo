@@ -42,7 +42,8 @@ ObsRadiance::ObsRadiance(const ioda::ObsSpace & odb, const eckit::Configuration 
                                     "Soil_Temperature", "Land_Type_Index", "Vegetation_Type",
                                     "Soil_Type", "Snow_Depth"};
   varin_.reset(new oops::Variables(vv));
-  const eckit::Configuration * configc = &config;
+  const eckit::LocalConfiguration obsOptions(config, "ObsOptions");
+  const eckit::Configuration * configc = &obsOptions;
   ufo_radiance_setup_f90(keyOperRadiance_, &configc);
   oops::Log::trace() << "ObsRadiance created." << std::endl;
 }

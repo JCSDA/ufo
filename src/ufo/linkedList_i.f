@@ -28,6 +28,6 @@ contains
   procedure :: add => add_
   procedure :: get => get_
   procedure :: remove => remove_
-  procedure :: setup => regstry_setup_
-  procedure :: delete => regstry_delete_
+  procedure :: setup => registry_setup_
+  procedure :: delete => registry_delete_
 end type

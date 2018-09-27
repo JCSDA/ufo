@@ -6,13 +6,13 @@
 !> Fortran module to handle radiance observations
 
 module ufo_radiance_mod_c
-  
+
   use iso_c_binding
   use config_mod
   use ufo_radiance_mod 
   implicit none
   private
-  
+
   ! ------------------------------------------------------------------------------
 #define LISTED_TYPE ufo_radiance
 
@@ -35,12 +35,14 @@ contains
 subroutine ufo_radiance_setup_c(c_key_self, c_conf) bind(c,name='ufo_radiance_setup_f90')
 implicit none
 integer(c_int), intent(inout) :: c_key_self
-type(c_ptr), intent(in)    :: c_conf
+type(c_ptr),    intent(in)    :: c_conf
     
 type(ufo_radiance), pointer :: self
 
 call ufo_radiance_registry%setup(c_key_self, self)
-    
+ 
+call self%setup(c_conf)
+
 end subroutine ufo_radiance_setup_c
   
 ! ------------------------------------------------------------------------------
@@ -51,7 +53,11 @@ integer(c_int), intent(inout) :: c_key_self
     
 type(ufo_radiance), pointer :: self
 
-call ufo_radiance_registry%delete(c_key_self, self)
+call ufo_radiance_registry%get(c_key_self, self)
+
+call self%delete()
+
+call ufo_radiance_registry%remove(c_key_self)
     
 end subroutine ufo_radiance_delete_c
   
