@@ -73,7 +73,8 @@ type(ioda_obsdb), target, intent(in)    :: obss
 character(*), parameter :: PROGRAM_NAME = 'ufo_radiance_mod.F90'
 character(255) :: message, version
 integer        :: err_stat, alloc_stat
-integer        :: l, m, n, i
+integer        :: l, m, n, i, s
+logical        :: skipchan
 
 integer :: n_Profiles
 integer :: n_Channels
@@ -129,7 +130,7 @@ type(CRTM_RTSolution_type), allocatable :: rts(:,:)
    ! Determine the number of channels for the current sensor
    ! -------------------------------------------------------
    N_Channels = CRTM_ChannelInfo_n_Channels(chinfo(n))
-   
+  
 
    ! Allocate the ARRAYS
    ! -------------------
@@ -168,7 +169,7 @@ type(CRTM_RTSolution_type), allocatable :: rts(:,:)
    !Assign the data from the GeoVaLs
    !--------------------------------
    call Load_Atm_Data(n_Profiles,n_Layers,geovals,atm)
-   call Load_Sfc_Data(n_Profiles,n_Layers,geovals,sfc,chinfo)
+   call Load_Sfc_Data(n_Profiles,n_Layers,n_Channels,geovals,sfc,chinfo,obss)
    call Load_Geom_Data(obss,geo)
 
 
@@ -196,12 +197,35 @@ type(CRTM_RTSolution_type), allocatable :: rts(:,:)
 
    ! Put simulated brightness temperature into hofx
    ! ----------------------------------------------   
-   hofx%values(:) = 0.0
+
+   !Reduce size of hofx if some channels are skipped
+   if (size(self%rc%skiplist) > 0) then
+     hofx%nobs = (N_channels-size(self%rc%skiplist))*(hofx%nobs/N_Channels)
+     deallocate(hofx%values)
+     allocate(hofx%values(hofx%nobs))
+   endif
+
+   !Set to zero and initializ counter
+   hofx%values(:) = 0.0_kind_real
    i = 1
+
    do m = 1, n_Profiles
      do l = 1, N_Channels
-       hofx%values(i) = rts(l,m)%Brightness_Temperature
-       i = i + 1
+
+       !Check if channel skipped
+       skipchan = .false.
+       do s = 1,size(self%rc%skiplist)
+         if (l == self%rc%skiplist(s)) then
+           skipchan = .true.
+         endif
+       enddo
+
+       !If not skipped then fill hofx
+       if (.not.skipchan) then
+         hofx%values(i) = rts(l,m)%Brightness_Temperature
+         i = i + 1
+       endif
+
      end do
    end do
 

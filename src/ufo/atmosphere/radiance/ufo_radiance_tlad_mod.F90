@@ -87,7 +87,7 @@ type(ioda_obsdb),         intent(in)    :: obss
 character(*), parameter :: PROGRAM_NAME = 'ufo_radiance_mod.F90'
 character(255) :: message, version
 integer        :: err_stat, alloc_stat
-integer        :: l, m, n
+integer        :: n, k1
 
 ! Define the "non-demoninational" arguments
 type(CRTM_ChannelInfo_type)             :: chinfo(self%rc%n_Sensors)
@@ -205,9 +205,15 @@ type(CRTM_RTSolution_type), allocatable :: rts_K(:,:)
    !Assign the data from the GeoVaLs
    !--------------------------------
    call Load_Atm_Data(self%N_PROFILES,self%N_LAYERS,geovals,atm)
-   call Load_Sfc_Data(self%N_PROFILES,self%N_LAYERS,geovals,sfc,chinfo)
+   call Load_Sfc_Data(self%N_PROFILES,self%N_LAYERS,self%N_Channels,geovals,sfc,chinfo,obss)
    call Load_Geom_Data(obss,geo)
 
+   !Hack absorbers and clouds
+   do k1 = 1,self%N_PROFILES
+     atm(k1)%Absorber = 0.0
+     atm(k1)%Cloud(1)%Water_Content = 0.0
+     atm(k1)%Cloud(2)%Water_Content = 0.0
+   enddo
 
    ! Zero the K-matrix OUTPUT structures
    ! -----------------------------------

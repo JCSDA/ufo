@@ -36,6 +36,7 @@ type rad_conf
  integer :: n_Absorbers
  integer :: n_Clouds
  integer :: n_Aerosols
+ integer, allocatable :: skiplist(:)
  character(len=255), allocatable :: SENSOR_ID(:)
  character(len=255) :: ENDIAN_TYPE
  character(len=255) :: COEFFICIENT_PATH
@@ -51,6 +52,9 @@ implicit none
 type(rad_conf), intent(inout) :: rc
 type(c_ptr),    intent(in)    :: c_conf
 
+character(len=1023) :: SkipChannels
+integer :: nskip, i
+character(len=100), allocatable :: skiplist_str(:)
 
  !Some config needs to come from user
  !-----------------------------------
@@ -76,9 +80,23 @@ type(c_ptr),    intent(in)    :: c_conf
  !Path to coefficient files
  rc%COEFFICIENT_PATH = config_get_string(c_conf,len(rc%COEFFICIENT_PATH),"CoefficientPath")
 
+ !Channels to skip
+ if (config_element_exists(c_conf,"SkipChannels")) then
+   SkipChannels = config_get_string(c_conf,len(SkipChannels),"SkipChannels")
+   nskip = 1 + count(transfer(SkipChannels, 'a', len(SkipChannels)) == ",")
+   allocate(skiplist_str(nskip))
+   read(SkipChannels,*) skiplist_str
+ else
+   nskip = 0
+ endif
+ allocate(rc%skiplist(nskip))
+ do i = 1,nskip
+   read(skiplist_str(i),*)  rc%skiplist(i)
+ enddo
+
 end subroutine rad_conf_setup
 
-! ------------------------------------------------------------------------------
+! -----------------------------------------------------------------------------
 
 subroutine rad_conf_delete(rc)
 
@@ -86,6 +104,7 @@ implicit none
 type(rad_conf), intent(inout) :: rc
 
  deallocate(rc%SENSOR_ID)
+ deallocate(rc%skiplist)
 
 end subroutine rad_conf_delete
 
@@ -120,7 +139,7 @@ character(MAXVARLEN) :: varname
     call ufo_geovals_get_var(geovals, var_prs, geoval)
     atm(k1)%Pressure(1:N_LAYERS) = geoval%vals(:,k1) 
     call ufo_geovals_get_var(geovals, var_prsi, geoval)
-    atm(k1)%Level_Pressure(0:N_LAYERS) = geoval%vals(:,k1)
+    atm(k1)%Level_Pressure(:) = geoval%vals(:,k1)
     atm(k1)%Climatology         = US_STANDARD_ATMOSPHERE
     atm(k1)%Absorber_Id(1:1)    = (/ H2O_ID /)
     atm(k1)%Absorber_Units(1:1) = (/ MASS_MIXING_RATIO_UNITS /)
@@ -153,17 +172,18 @@ character(MAXVARLEN) :: varname
 
 ! ------------------------------------------------------------------------------
 
-subroutine Load_Sfc_Data(N_PROFILES,N_LAYERS,geovals,sfc,chinfo)
+subroutine Load_Sfc_Data(n_Profiles,n_Layers,N_Channels,geovals,sfc,chinfo,obss)
 
 !Internal subprogam to load some test profile data
 implicit none
-integer,                     intent(in)    :: N_PROFILES, N_LAYERS
+integer,                     intent(in)    :: n_Profiles, n_Layers, N_Channels
 type(ufo_geovals),           intent(in)    :: geovals   
 type(CRTM_Surface_type),     intent(inout) :: sfc(:)
 type(CRTM_ChannelInfo_type), intent(in)    :: chinfo(:)
+type(ioda_obsdb),            intent(in)    :: obss
 
 type(ufo_geoval), pointer :: geoval
-integer  :: k1
+integer  :: k1, n1
       
 ! Surface type definitions for default SfcOptics definitions
 ! for IR and VIS, this is the NPOESS reflectivities.
@@ -175,65 +195,117 @@ integer, parameter :: BARE_SOIL_VEGETATION_TYPE   = 11  ! Vegetation type       
 integer, parameter :: SEA_WATER_TYPE              =  1  ! Water type               for all SfcOptics
 integer, parameter :: FRESH_SNOW_TYPE             =  2  ! NPOESS Snow type         for IR/VIS SfcOptics
 integer, parameter :: FRESH_ICE_TYPE              =  1  ! NPOESS Ice type          for IR/VIS SfcOptics
-      
+
+character(len=100) :: varname_tmplate
+character(len=200) :: varname
+
+real(kind_real), allocatable :: ObsTb(:,:)
+type(obs_vector) :: TmpOvec
+
+ varname_tmplate = "brightness_temperature_CCC_"
+
+ allocate(ObsTb(n_channels, N_PROFILES))
+ call ioda_obsvec_setup(TmpOvec, n_profiles)
+ 
+ do n1 = 1,n_Channels
+   !Get the variable name for this channel
+   call get_var_name(varname_tmplate,n1,varname)
+   call ioda_obsdb_var_to_ovec(obss, TmpOvec, varname)
+   ObsTb(n1,:) = TmpOvec%values
+ enddo
+
+ !Loop over all n_Profiles, i.e. number of locations
  do k1 = 1,N_PROFILES
 
+   !Pass sensor information
    sfc(k1)%sensordata%sensor_id        = chinfo(1)%sensor_id
    sfc(k1)%sensordata%wmo_sensor_id    = chinfo(1)%wmo_sensor_id
    sfc(k1)%sensordata%wmo_satellite_id = chinfo(1)%wmo_satellite_id
    sfc(k1)%sensordata%sensor_channel   = chinfo(1)%sensor_channel
 
-   sfc(k1)%Water_Type         = SEA_WATER_TYPE    !** NOTE: need to check how to determine fresh vs sea water types (salinity???)
-   call                         ufo_geovals_get_var(geovals, var_sfc_wspeed, geoval)
-   sfc(k1)%Wind_Speed         = geoval%vals(1,k1) 
-   call                         ufo_geovals_get_var(geovals, var_sfc_wdir, geoval)
-   sfc(k1)%Wind_Direction     = geoval%vals(1,k1) 
-   call                         ufo_geovals_get_var(geovals, var_sfc_wfrac, geoval)
-   sfc(k1)%Water_Coverage     = geoval%vals(1,k1) 
-   call                         ufo_geovals_get_var(geovals, var_sfc_wtmp, geoval)
-   sfc(k1)%Water_Temperature  = geoval%vals(1,k1) 
-   call                         ufo_geovals_get_var(geovals, var_sfc_ifrac, geoval)
-   sfc(k1)%Ice_Coverage       = geoval%vals(1,k1) 
-   call                         ufo_geovals_get_var(geovals, var_sfc_itmp, geoval)
-   sfc(k1)%Ice_Temperature    = geoval%vals(1,k1) 
-   call                         ufo_geovals_get_var(geovals, var_sfc_sfrac, geoval)
-   sfc(k1)%Snow_Coverage      = geoval%vals(1,k1) 
-   call                         ufo_geovals_get_var(geovals, var_sfc_stmp, geoval)
-   sfc(k1)%Snow_Temperature   = geoval%vals(1,k1) 
-   call                         ufo_geovals_get_var(geovals, var_sfc_sdepth, geoval)
-   sfc(k1)%Snow_Depth         = geoval%vals(1,k1)
-   call                         ufo_geovals_get_var(geovals, var_sfc_landtyp, geoval)
-   sfc(k1)%Land_Type          = geoval%vals(1,k1)    !** NOTE:  is this Land_Type same as CRTM's land type??
-   call                         ufo_geovals_get_var(geovals, var_sfc_lfrac, geoval)
-   sfc(k1)%Land_Coverage      = geoval%vals(1,k1) 
-   call                         ufo_geovals_get_var(geovals, var_sfc_ltmp, geoval)
-   sfc(k1)%Land_Temperature   = geoval%vals(1,k1) 
-   call                         ufo_geovals_get_var(geovals, var_sfc_lai, geoval)
-   sfc(k1)%Lai                = geoval%vals(1,k1) 
-   call                         ufo_geovals_get_var(geovals, var_sfc_vegfrac, geoval)
-   sfc(k1)%Vegetation_Fraction = geoval%vals(1,k1) 
-   call                         ufo_geovals_get_var(geovals, var_sfc_vegtyp, geoval)
-   sfc(k1)%Vegetation_Type    = geoval%vals(1,k1) 
-   call                         ufo_geovals_get_var(geovals, var_sfc_soiltyp, geoval)
-   sfc(k1)%Soil_Type          = geoval%vals(1,k1) 
-   call                         ufo_geovals_get_var(geovals, var_sfc_soilm, geoval)
-   sfc(k1)%Soil_Moisture_Content = geoval%vals(1,k1) 
-   call                         ufo_geovals_get_var(geovals, var_sfc_soilt, geoval)
-   sfc(k1)%Soil_Temperature   = geoval%vals(1,k1) 
+   !Pass observation value
+   do n1 = 1, n_channels
+     sfc(k1)%sensordata%tb(n1) = ObsTb(n1, k1)
+   enddo
 
-   ! SRH
-   !
-   ! This is commented out, instead of deleted, in case we want to recover it in the future.
-   ! The new April 15, 2018 00Z observation data contains only 12 channels (omits channels
-   ! 7, 8 and 14) since that is what the April 15 GSI run assimilated. Rather than put
-   ! in contrived data to fill in all 15 channels, it seemed better to disable it
-   ! until we know the correct way to approach this.
-   !
-   ! do ch = 1, n_channels
-   !   sfc(k1)%sensordata%tb(ch) = Radiance_Tbobs(ch, k1)  !** required to match GSI simulated TBs over snow and ice surfaces
-   ! enddo
+   !Water_type
+   sfc(k1)%Water_Type         = SEA_WATER_TYPE    !** NOTE: need to check how to determine fresh vs sea water types (salinity???)
+
+   !Wind_Speed
+   call ufo_geovals_get_var(geovals, var_sfc_wspeed, geoval)
+   sfc(k1)%Wind_Speed = geoval%vals(1,k1) 
+
+   !Wind_Direction
+   call ufo_geovals_get_var(geovals, var_sfc_wdir, geoval)
+   sfc(k1)%Wind_Direction = geoval%vals(1,k1) 
+
+   !Water_Coverage
+   call ufo_geovals_get_var(geovals, var_sfc_wfrac, geoval)
+   sfc(k1)%Water_Coverage = geoval%vals(1,k1)
+
+   !Water_Temperature
+   call ufo_geovals_get_var(geovals, var_sfc_wtmp, geoval)
+   sfc(k1)%Water_Temperature = geoval%vals(1,k1)
+
+   !Ice_Coverage
+   call ufo_geovals_get_var(geovals, var_sfc_ifrac, geoval)
+   sfc(k1)%Ice_Coverage = geoval%vals(1,k1)
+
+   !Ice_Temperature
+   call ufo_geovals_get_var(geovals, var_sfc_itmp, geoval)
+   sfc(k1)%Ice_Temperature = geoval%vals(1,k1)
+
+   !Snow_Coverage
+   call ufo_geovals_get_var(geovals, var_sfc_sfrac, geoval)
+   sfc(k1)%Snow_Coverage      = geoval%vals(1,k1)
+
+   !Snow_Temperature
+   call ufo_geovals_get_var(geovals, var_sfc_stmp, geoval)
+   sfc(k1)%Snow_Temperature = geoval%vals(1,k1)
+
+   !Snow_Depth
+   call ufo_geovals_get_var(geovals, var_sfc_sdepth, geoval)
+   sfc(k1)%Snow_Depth = geoval%vals(1,k1)
+
+   !Land_Type
+   call ufo_geovals_get_var(geovals, var_sfc_landtyp, geoval)
+   sfc(k1)%Land_Type = int(geoval%vals(1,k1))
+
+   !Land_Coverage
+   call ufo_geovals_get_var(geovals, var_sfc_lfrac, geoval)
+   sfc(k1)%Land_Coverage = geoval%vals(1,k1)
+
+   !Land_Temperature
+   call ufo_geovals_get_var(geovals, var_sfc_ltmp, geoval)
+   sfc(k1)%Land_Temperature = geoval%vals(1,k1)
+
+   !Lai
+   call ufo_geovals_get_var(geovals, var_sfc_lai, geoval)
+   sfc(k1)%Lai = geoval%vals(1,k1)
+
+   !Vegetation_Fraction
+   call ufo_geovals_get_var(geovals, var_sfc_vegfrac, geoval)
+   sfc(k1)%Vegetation_Fraction = geoval%vals(1,k1)
+
+   !Vegetation_Type
+   call ufo_geovals_get_var(geovals, var_sfc_vegtyp, geoval)
+   sfc(k1)%Vegetation_Type = int(geoval%vals(1,k1))
+
+   !Soil_Type
+   call ufo_geovals_get_var(geovals, var_sfc_soiltyp, geoval)
+   sfc(k1)%Soil_Type = int(geoval%vals(1,k1))
+
+   !Soil_Moisture_Content
+   call ufo_geovals_get_var(geovals, var_sfc_soilm, geoval)
+   sfc(k1)%Soil_Moisture_Content = geoval%vals(1,k1)
+
+   !Soil_Temperature
+   call ufo_geovals_get_var(geovals, var_sfc_soilt, geoval)
+   sfc(k1)%Soil_Temperature = geoval%vals(1,k1) 
 
  end do
+
+ deallocate(ObsTb)
 
 end subroutine Load_Sfc_Data
 
@@ -268,6 +340,49 @@ type(obs_vector) :: TmpOvec
  call ioda_obsvec_delete(TmpOvec)
 
 end subroutine Load_Geom_Data
+
+! ------------------------------------------------------------------------------
+
+subroutine get_var_name(varname_tmplate,n,varname)
+
+character(len=*), intent(in) :: varname_tmplate
+integer, intent(in) :: n
+character(len=*), intent(out) :: varname
+
+character(len=3) :: chan
+character(len=1024) :: format_string
+
+ !Set the format
+ if (n < 10) then
+   format_string = "(I1)"
+ elseif (n < 100) then
+   format_string = "(I2)"
+ elseif (n < 1000) then
+   format_string = "(I3)"
+ else
+   call abor1_ftn('Load_Sfc_Data: too many channels for file format')
+ endif
+
+ !Integer to string
+ write (chan,format_string) n
+
+ varname = replace_text (varname_tmplate,'CCC',chan)
+
+end subroutine get_var_name
+
+! -----------------------------------------------------------------------------
+
+function replace_text (s,text,rep)  result(outs)
+character(*)        :: s,text,rep
+character(len(s)+100) :: outs     ! provide outs with extra 100 char len
+integer             :: i, nt, nr
+
+outs = s ; nt = len_trim(text) ; nr = len_trim(rep)
+do
+   i = index(outs,text(:nt)) ; if (i == 0) exit
+   outs = outs(:i-1) // rep(:nr) // outs(i+nt:)
+end do
+end function replace_text
 
 ! ------------------------------------------------------------------------------
 
