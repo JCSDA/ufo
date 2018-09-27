@@ -13,6 +13,11 @@
   "Observations": {
     "ObsTypes": [
       {
+        "ObsType": "Radiance",
+        "ObsData": {
+          "ObsDataIn": {
+            "obsfile": "Data/amsua_obs_n19_2018041500_m.nc4"
+          },
         "ObsOptions": {
           "n_Absorbers": "3",
           "n_Clouds": "2",
@@ -20,12 +25,7 @@
           "Sensor_ID": "amsua_n19",
           "EndianType": "little_endian",
           "CoefficientPath": "Data/"
-        },
-        "ObsType": "Radiance",
-        "ObsData": {
-          "ObsDataIn": {
-            "obsfile": "Data/amsua_obs_n19_2018041500_m.nc4"
-          }
+        }
         },
         "GeoVaLs": {
           "norm": "62902.291784229797",
