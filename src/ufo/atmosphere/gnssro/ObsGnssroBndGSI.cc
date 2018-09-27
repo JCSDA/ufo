@@ -28,7 +28,9 @@ static ObsOperatorMaker<ObsGnssroBndGSI> makerGnssroBndGSI_("GnssroBndGSI");
 ObsGnssroBndGSI::ObsGnssroBndGSI(const ioda::ObsSpace & odb, const eckit::Configuration & config)
   : keyOperGnssroBndGSI_(0), varin_(), odb_(odb)
 {
-  const std::vector<std::string> vv{"temperature", "specific_humidity", "air_pressure","air_pressure_levels", "geopotential_height_levels"};
+  const std::vector<std::string> vv{"temperature", "specific_humidity", "air_pressure",
+                                    "air_pressure_levels", "geopotential_height_levels"};
+
   varin_.reset(new oops::Variables(vv));
   const eckit::Configuration * configc = &config;
   ufo_gnssro_bndgsi_setup_f90(keyOperGnssroBndGSI_, &configc);
