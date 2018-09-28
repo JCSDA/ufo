@@ -349,18 +349,6 @@ integer, intent(in) :: n
 character(len=*), intent(out) :: varname
 
 character(len=3) :: chan
-character(len=1024) :: format_string
-
- !Set the format
- if (n < 10) then
-   format_string = "(I1)"
- elseif (n < 100) then
-   format_string = "(I2)"
- elseif (n < 1000) then
-   format_string = "(I3)"
- else
-   call abor1_ftn('Load_Sfc_Data: too many channels for file format')
- endif
 
  ! pass in varname_tmplate = "brigtness_temperature"
  write(chan, '(I0)') n
