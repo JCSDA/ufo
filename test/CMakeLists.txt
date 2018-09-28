@@ -26,7 +26,6 @@ endfunction(CREATE_SYMLINK_FILENAME)
 list( APPEND ufo_test_input
   testinput/ufotest_atmosphere.json
   testinput/ufotest_constituents.json
-  testinput/ufocrtm.json
   testinput/amsua.json
   testinput/radiosonde.json
   testinput/aircraft.json
