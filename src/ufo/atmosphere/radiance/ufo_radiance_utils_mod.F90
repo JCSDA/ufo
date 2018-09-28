@@ -202,7 +202,7 @@ character(len=200) :: varname
 real(kind_real), allocatable :: ObsTb(:,:)
 type(obs_vector) :: TmpOvec
 
- varname_tmplate = "brightness_temperature_CCC_"
+ varname_tmplate = "brightness_temperature"
 
  allocate(ObsTb(n_channels, N_PROFILES))
  call ioda_obsvec_setup(TmpOvec, n_profiles)
@@ -362,27 +362,12 @@ character(len=1024) :: format_string
    call abor1_ftn('Load_Sfc_Data: too many channels for file format')
  endif
 
- !Integer to string
- write (chan,format_string) n
-
- varname = replace_text (varname_tmplate,'CCC',chan)
+ ! pass in varname_tmplate = "brigtness_temperature"
+ write(chan, '(I0)') n
+ varname = trim(varname_tmplate) // '_' // trim(chan) // '_'
 
 end subroutine get_var_name
 
 ! -----------------------------------------------------------------------------
-
-function replace_text (s,text,rep)  result(outs)
-character(*)        :: s,text,rep
-character(len(s)+100) :: outs     ! provide outs with extra 100 char len
-integer             :: i, nt, nr
-
-outs = s ; nt = len_trim(text) ; nr = len_trim(rep)
-do
-   i = index(outs,text(:nt)) ; if (i == 0) exit
-   outs = outs(:i-1) // rep(:nr) // outs(i+nt:)
-end do
-end function replace_text
-
-! ------------------------------------------------------------------------------
 
 end module ufo_radiance_utils_mod
