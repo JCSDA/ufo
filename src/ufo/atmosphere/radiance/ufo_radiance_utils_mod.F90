@@ -114,7 +114,6 @@ end subroutine rad_conf_delete
 
 subroutine Load_Atm_Data(N_PROFILES,N_LAYERS,geovals,atm)
 
-!Internal subprogam to load some test profile data
 implicit none
 integer, intent(in) :: N_PROFILES, N_LAYERS
 type(ufo_geovals), intent(in) :: geovals   
@@ -176,7 +175,6 @@ character(MAXVARLEN) :: varname
 
 subroutine Load_Sfc_Data(n_Profiles,n_Layers,N_Channels,geovals,sfc,chinfo,obss)
 
-!Internal subprogam to load some test profile data
 implicit none
 integer,                     intent(in)    :: n_Profiles, n_Layers, N_Channels
 type(ufo_geovals),           intent(in)    :: geovals   
@@ -316,9 +314,6 @@ end subroutine Load_Sfc_Data
 ! ------------------------------------------------------------------------------
 
 subroutine Load_Geom_Data(obss,geo)
-
-!Internal subprogam to load some test geometry data
-!All profiles are given the same value
 
 implicit none
 type(ioda_obsdb),         intent(in)    :: obss
