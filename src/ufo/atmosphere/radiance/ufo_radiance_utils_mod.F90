@@ -216,6 +216,8 @@ type(obs_vector) :: TmpOvec
    ObsTb(n1,:) = TmpOvec%values
  enddo
 
+ call ioda_obsvec_delete(TmpOvec)
+
  !Loop over all n_Profiles, i.e. number of locations
  do k1 = 1,N_PROFILES
 
