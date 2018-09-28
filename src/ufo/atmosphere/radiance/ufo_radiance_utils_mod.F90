@@ -32,6 +32,7 @@ public Load_Geom_Data
 
 !Type for general config
 type rad_conf
+ integer :: n_Layers
  integer :: n_Sensors
  integer :: n_Absorbers
  integer :: n_Clouds
@@ -64,6 +65,7 @@ character(len=100), allocatable :: skiplist_str(:)
  rc%n_Sensors = 1
 
  !Number of absorbers, clouds and aerosols (should match what model will provide)
+ rc%n_Layers    = config_get_int(c_conf,"n_Layers"   )
  rc%n_Absorbers = config_get_int(c_conf,"n_Absorbers")
  rc%n_Clouds    = config_get_int(c_conf,"n_Clouds"   )
  rc%n_Aerosols  = config_get_int(c_conf,"n_Aerosols" )

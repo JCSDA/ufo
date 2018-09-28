@@ -15,6 +15,7 @@
       {
         "ObsType": "Radiance",
         "ObsOptions": {
+          "n_Layers": "71",
           "n_Absorbers": "3",
           "n_Clouds": "2",
           "n_Aerosols": "0",

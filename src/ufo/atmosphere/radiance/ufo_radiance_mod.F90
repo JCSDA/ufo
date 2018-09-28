@@ -78,7 +78,6 @@ logical        :: skipchan
 
 integer :: n_Profiles
 integer :: n_Channels
-integer :: n_Layers
 
 ! Define the "non-demoninational" arguments
 type(CRTM_ChannelInfo_type)             :: chinfo(self%rc%n_Sensors)
@@ -93,7 +92,6 @@ type(CRTM_RTSolution_type), allocatable :: rts(:,:)
  ! Get number of profile and layers from geovals
  ! ---------------------------------------------
  n_Profiles = geovals%nobs
- n_Layers   = geovals%geovals(1)%nval
 
 
  ! Program header
@@ -148,7 +146,7 @@ type(CRTM_RTSolution_type), allocatable :: rts(:,:)
 
    ! Create the input FORWARD structure (atm)
    ! ----------------------------------------
-   call CRTM_Atmosphere_Create( atm, n_Layers, self%rc%n_Absorbers, self%rc%n_Clouds, self%rc%n_Aerosols )
+   call CRTM_Atmosphere_Create( atm, self%rc%n_Layers, self%rc%n_Absorbers, self%rc%n_Clouds, self%rc%n_Aerosols )
    if ( ANY(.NOT. CRTM_Atmosphere_Associated(atm)) ) THEN
       message = 'Error allocating CRTM Forward Atmosphere structure'
       CALL Display_Message( PROGRAM_NAME, message, FAILURE )
@@ -168,8 +166,8 @@ type(CRTM_RTSolution_type), allocatable :: rts(:,:)
 
    !Assign the data from the GeoVaLs
    !--------------------------------
-   call Load_Atm_Data(n_Profiles,n_Layers,geovals,atm)
-   call Load_Sfc_Data(n_Profiles,n_Layers,n_Channels,geovals,sfc,chinfo,obss)
+   call Load_Atm_Data(n_Profiles,self%rc%n_Layers,geovals,atm)
+   call Load_Sfc_Data(n_Profiles,self%rc%n_Layers,n_Channels,geovals,sfc,chinfo,obss)
    call Load_Geom_Data(obss,geo)
 
 

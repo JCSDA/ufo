@@ -36,7 +36,6 @@ module ufo_radiance_tlad_mod
   type(rad_conf) :: rc
   integer :: n_Profiles
   integer :: n_Channels
-  integer :: n_Layers
   type(ufo_geovals) :: crtm_K
   type(ufo_geovals) :: geohack
  contains
@@ -107,7 +106,6 @@ type(CRTM_RTSolution_type), allocatable :: rts_K(:,:)
  ! Get number of profile and layers from geovals
  ! ---------------------------------------------
  self%n_Profiles = geovals%nobs
- self%n_Layers   = geovals%geovals(1)%nval
 
 
  ! Program header
@@ -164,7 +162,7 @@ type(CRTM_RTSolution_type), allocatable :: rts_K(:,:)
 
    ! Create the input FORWARD structure (atm)
    ! ----------------------------------------
-   call CRTM_Atmosphere_Create( atm, self%n_Layers, self%rc%n_Absorbers, self%rc%n_Clouds, self%rc%n_Aerosols )
+   call CRTM_Atmosphere_Create( atm, self%rc%n_Layers, self%rc%n_Absorbers, self%rc%n_Clouds, self%rc%n_Aerosols )
    if ( ANY(.NOT. CRTM_Atmosphere_Associated(atm)) ) THEN
       message = 'Error allocating CRTM Forward Atmosphere structure (setTraj)'
       CALL Display_Message( PROGRAM_NAME, message, FAILURE )
@@ -184,7 +182,7 @@ type(CRTM_RTSolution_type), allocatable :: rts_K(:,:)
 
    ! Create output K-MATRIX structure (atm)
    ! --------------------------------------
-   call CRTM_Atmosphere_Create( atm_K, self%n_Layers, self%rc%n_Absorbers, self%rc%n_Clouds, self%rc%n_Aerosols )
+   call CRTM_Atmosphere_Create( atm_K, self%rc%n_Layers, self%rc%n_Absorbers, self%rc%n_Clouds, self%rc%n_Aerosols )
    if ( ANY(.NOT. CRTM_Atmosphere_Associated(atm_K)) ) THEN
       message = 'Error allocating CRTM K-matrix Atmosphere structure (setTraj)'
       CALL Display_Message( PROGRAM_NAME, message, FAILURE )
@@ -204,8 +202,8 @@ type(CRTM_RTSolution_type), allocatable :: rts_K(:,:)
 
    !Assign the data from the GeoVaLs
    !--------------------------------
-   call Load_Atm_Data(self%N_PROFILES,self%N_LAYERS,geovals,atm)
-   call Load_Sfc_Data(self%N_PROFILES,self%N_LAYERS,self%N_Channels,geovals,sfc,chinfo,obss)
+   call Load_Atm_Data(self%N_PROFILES,self%rc%N_LAYERS,geovals,atm)
+   call Load_Sfc_Data(self%N_PROFILES,self%rc%N_LAYERS,self%N_Channels,geovals,sfc,chinfo,obss)
    call Load_Geom_Data(obss,geo)
 
    !Hack absorbers and clouds
@@ -314,29 +312,29 @@ integer :: k1, k2, k3, ivar
 
  !** atmosphere
  ivar = ufo_vars_getindex(geovals%variables, var_tv  )
- self%crtm_K%geovals(ivar)%nval = self%n_Layers
+ self%crtm_K%geovals(ivar)%nval = self%rc%n_Layers
  ivar = ufo_vars_getindex(geovals%variables, var_prs )
- self%crtm_K%geovals(ivar)%nval = self%n_Layers
+ self%crtm_K%geovals(ivar)%nval = self%rc%n_Layers
  ivar = ufo_vars_getindex(geovals%variables, var_prsi)
- self%crtm_K%geovals(ivar)%nval = self%n_Layers+1
+ self%crtm_K%geovals(ivar)%nval = self%rc%n_Layers+1
  ivar = ufo_vars_getindex(geovals%variables, var_mixr)
- self%crtm_K%geovals(ivar)%nval = self%n_Layers
+ self%crtm_K%geovals(ivar)%nval = self%rc%n_Layers
  ivar = ufo_vars_getindex(geovals%variables, var_oz  )
- self%crtm_K%geovals(ivar)%nval = self%n_Layers
+ self%crtm_K%geovals(ivar)%nval = self%rc%n_Layers
  ivar = ufo_vars_getindex(geovals%variables, var_co2 )
- self%crtm_K%geovals(ivar)%nval = self%n_Layers
+ self%crtm_K%geovals(ivar)%nval = self%rc%n_Layers
 
  !** cloud 1 
  ivar = ufo_vars_getindex(geovals%variables, var_clw )
- self%crtm_K%geovals(ivar)%nval = self%n_Layers
+ self%crtm_K%geovals(ivar)%nval = self%rc%n_Layers
  ivar = ufo_vars_getindex(geovals%variables, var_clwefr)
- self%crtm_K%geovals(ivar)%nval = self%n_Layers
+ self%crtm_K%geovals(ivar)%nval = self%rc%n_Layers
 
  !** cloud 2
  ivar = ufo_vars_getindex(geovals%variables, var_cli )
- self%crtm_K%geovals(ivar)%nval = self%n_Layers
+ self%crtm_K%geovals(ivar)%nval = self%rc%n_Layers
  ivar = ufo_vars_getindex(geovals%variables, var_cliefr)
- self%crtm_K%geovals(ivar)%nval = self%n_Layers
+ self%crtm_K%geovals(ivar)%nval = self%rc%n_Layers
 
  !** surface
  ivar = ufo_vars_getindex(geovals%variables, var_sfc_wspeed )
@@ -422,33 +420,33 @@ integer :: k1, k2, k3, ivar
 
  do k1 = 1,self%n_Profiles
    do k2 = 1,self%n_Channels
-     k3 = k3 + 1  !** jacobian is self%n_profiles, self%n_channels, geoval is self%n_layers, self%n_obs.  
+     k3 = k3 + 1  !** jacobian is self%n_profiles, self%n_channels, geoval is self%rc%n_layers, self%n_obs.  
                   !** k3 flattens self%n_profiles,self%n_channels.
      !** atmosphere
      ivar = ufo_vars_getindex(geovals%variables, var_tv  )
-     self%crtm_K%geovals(ivar)%vals(1:self%n_Layers,k3)   = atm_K(k2,k1)%Temperature(1:self%n_Layers)
+     self%crtm_K%geovals(ivar)%vals(1:self%rc%n_Layers,k3)   = atm_K(k2,k1)%Temperature(1:self%rc%n_Layers)
      ivar = ufo_vars_getindex(geovals%variables, var_prs )
-     self%crtm_K%geovals(ivar)%vals(1:self%n_Layers,k3)   = 0.0 !atm_K(k2,k1)%Pressure(1:self%n_Layers) 
+     self%crtm_K%geovals(ivar)%vals(1:self%rc%n_Layers,k3)   = 0.0 !atm_K(k2,k1)%Pressure(1:self%rc%n_Layers) 
      ivar = ufo_vars_getindex(geovals%variables, var_prsi)
-     self%crtm_K%geovals(ivar)%vals(1:self%n_Layers+1,k3)   = 0.0 !atm_K(k2,k1)%Level_Pressure(0:self%n_Layers) 
+     self%crtm_K%geovals(ivar)%vals(1:self%rc%n_Layers+1,k3)   = 0.0 !atm_K(k2,k1)%Level_Pressure(0:self%rc%n_Layers) 
      ivar = ufo_vars_getindex(geovals%variables, var_mixr)
-     self%crtm_K%geovals(ivar)%vals(1:self%n_Layers,k3)   = 0.0 !atm_K(k2,k1)%Absorber(1:self%n_Layers,1)
+     self%crtm_K%geovals(ivar)%vals(1:self%rc%n_Layers,k3)   = 0.0 !atm_K(k2,k1)%Absorber(1:self%rc%n_Layers,1)
      ivar = ufo_vars_getindex(geovals%variables, var_oz  )
-     self%crtm_K%geovals(ivar)%vals(1:self%n_Layers,k3)   = 0.0 !atm_K(k2,k1)%Absorber(1:self%n_Layers,2)
+     self%crtm_K%geovals(ivar)%vals(1:self%rc%n_Layers,k3)   = 0.0 !atm_K(k2,k1)%Absorber(1:self%rc%n_Layers,2)
      ivar = ufo_vars_getindex(geovals%variables, var_co2 )
-     self%crtm_K%geovals(ivar)%vals(1:self%n_Layers,k3)   = 0.0 !atm_K(k2,k1)%Absorber(1:self%n_Layers,3)
+     self%crtm_K%geovals(ivar)%vals(1:self%rc%n_Layers,k3)   = 0.0 !atm_K(k2,k1)%Absorber(1:self%rc%n_Layers,3)
 
      !** cloud 1 
      ivar = ufo_vars_getindex(geovals%variables, var_clw )
-     self%crtm_K%geovals(ivar)%vals(1:self%n_Layers,k3)   = 0.0 !atm_K(k2,k1)%Cloud(1)%Water_Content(1:self%n_Layers)
+     self%crtm_K%geovals(ivar)%vals(1:self%rc%n_Layers,k3)   = 0.0 !atm_K(k2,k1)%Cloud(1)%Water_Content(1:self%rc%n_Layers)
      ivar = ufo_vars_getindex(geovals%variables, var_clwefr)
-     self%crtm_K%geovals(ivar)%vals(1:self%n_Layers,k3)   = 0.0 !atm_K(k2,k1)%Cloud(1)%Effective_Radius(1:self%n_Layers)
+     self%crtm_K%geovals(ivar)%vals(1:self%rc%n_Layers,k3)   = 0.0 !atm_K(k2,k1)%Cloud(1)%Effective_Radius(1:self%rc%n_Layers)
 
      !** cloud 2
      ivar = ufo_vars_getindex(geovals%variables, var_cli )
-     self%crtm_K%geovals(ivar)%vals(1:self%n_Layers,k3)   = 0.0 !atm_K(k2,k1)%Cloud(2)%Water_Content(1:self%n_Layers)
+     self%crtm_K%geovals(ivar)%vals(1:self%rc%n_Layers,k3)   = 0.0 !atm_K(k2,k1)%Cloud(2)%Water_Content(1:self%rc%n_Layers)
      ivar = ufo_vars_getindex(geovals%variables, var_cliefr)
-     self%crtm_K%geovals(ivar)%vals(1:self%n_Layers,k3)   = 0.0 !atm_K(k2,k1)%Cloud(2)%Effective_Radius(1:self%n_Layers) 
+     self%crtm_K%geovals(ivar)%vals(1:self%rc%n_Layers,k3)   = 0.0 !atm_K(k2,k1)%Cloud(2)%Effective_Radius(1:self%rc%n_Layers) 
 
      !** surface
      ivar = ufo_vars_getindex(geovals%variables, var_sfc_wspeed )
