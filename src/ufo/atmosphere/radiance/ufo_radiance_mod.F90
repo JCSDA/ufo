@@ -197,11 +197,12 @@ type(CRTM_RTSolution_type), allocatable :: rts(:,:)
    ! ----------------------------------------------   
 
    !Reduce size of hofx if some channels are skipped
-   if (size(self%rc%skiplist) > 0) then
-     hofx%nobs = (N_channels-size(self%rc%skiplist))*(hofx%nobs/N_Channels)
-     deallocate(hofx%values)
-     allocate(hofx%values(hofx%nobs))
-   endif
+   !DH, commenting this out for now as may not be safe
+   !if (size(self%rc%skiplist) > 0) then
+   !  hofx%nobs = (N_channels-size(self%rc%skiplist))*(hofx%nobs/N_Channels)
+   !  deallocate(hofx%values)
+   !  allocate(hofx%values(hofx%nobs))
+   !endif
 
    !Set to zero and initializ counter
    hofx%values(:) = 0.0_kind_real
@@ -211,12 +212,12 @@ type(CRTM_RTSolution_type), allocatable :: rts(:,:)
      do l = 1, N_Channels
 
        !Check if channel skipped
-       skipchan = .false.
-       do s = 1,size(self%rc%skiplist)
-         if (l == self%rc%skiplist(s)) then
-           skipchan = .true.
-         endif
-       enddo
+       !skipchan = .false.
+       !do s = 1,size(self%rc%skiplist)
+       !  if (l == self%rc%skiplist(s)) then
+       !    skipchan = .true.
+       !  endif
+       !enddo
 
        !If not skipped then fill hofx
        if (.not.skipchan) then
