@@ -74,7 +74,6 @@ character(*), parameter :: PROGRAM_NAME = 'ufo_radiance_mod.F90'
 character(255) :: message, version
 integer        :: err_stat, alloc_stat
 integer        :: l, m, n, i, s
-logical        :: skipchan
 
 integer :: n_Profiles
 integer :: n_Channels
@@ -196,14 +195,6 @@ type(CRTM_RTSolution_type), allocatable :: rts(:,:)
    ! Put simulated brightness temperature into hofx
    ! ----------------------------------------------   
 
-   !Reduce size of hofx if some channels are skipped
-   !DH, commenting this out for now as may not be safe
-   !if (size(self%rc%skiplist) > 0) then
-   !  hofx%nobs = (N_channels-size(self%rc%skiplist))*(hofx%nobs/N_Channels)
-   !  deallocate(hofx%values)
-   !  allocate(hofx%values(hofx%nobs))
-   !endif
-
    !Set to zero and initializ counter
    hofx%values(:) = 0.0_kind_real
    i = 1
@@ -211,19 +202,8 @@ type(CRTM_RTSolution_type), allocatable :: rts(:,:)
    do m = 1, n_Profiles
      do l = 1, N_Channels
 
-       !Check if channel skipped
-       !skipchan = .false.
-       !do s = 1,size(self%rc%skiplist)
-       !  if (l == self%rc%skiplist(s)) then
-       !    skipchan = .true.
-       !  endif
-       !enddo
-
-       !If not skipped then fill hofx
-       if (.not.skipchan) then
-         hofx%values(i) = rts(l,m)%Brightness_Temperature
-         i = i + 1
-       endif
+       hofx%values(i) = rts(l,m)%Brightness_Temperature
+       i = i + 1
 
      end do
    end do
