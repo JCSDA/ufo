@@ -132,7 +132,7 @@ contains
       character(max_string) :: err_msg
       
       integer :: iobs,ierr
-      type(ufo_geoval), pointer :: tv_d, prsl_d
+      type(ufo_geoval), pointer :: tv_d
       
       ! check if trajectory was set
       if (.not. self%ltraj) then
@@ -145,14 +145,7 @@ contains
         write(err_msg,*) myname_, ' error: nobs inconsistent!'
         call abor1_ftn(err_msg)
       endif
-      
-      ! check if tv variable is in geovals and get it
-      call ufo_geovals_get_var(geovals, var_prsl, prsl_d, status=ierr)
-      if (ierr/=0) then
-        write(err_msg,*) myname_, trim(var_prsl), ' doesnt exist'
-        call abor1_ftn(err_msg)
-      endif
-      
+           
       ! check if tv variable is in geovals and get it
       call ufo_geovals_get_var(geovals, var_tv, tv_d, status=ierr)
       if (ierr/=0) then
@@ -166,12 +159,6 @@ contains
          tv_d%nval = self%nval
          allocate(tv_d%vals(tv_d%nval,tv_d%nobs))
          tv_d%vals = 0.0_kind_real
-      endif
-      if (.not. allocated(prsl_d%vals)) then
-         prsl_d%nobs = self%nobs
-         prsl_d%nval = self%nval
-         allocate(prsl_d%vals(prsl_d%nval,prsl_d%nobs))
-         prsl_d%vals = 0.0_kind_real
       endif
       if (.not. geovals%linit ) geovals%linit=.true.
  

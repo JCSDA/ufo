@@ -14,8 +14,9 @@ module ufo_radiance_mod
  use ioda_obsdb_mod, only: ioda_obsdb
  use ioda_obs_vectors, only: obs_vector
 
- use ufo_geovals_mod, only: ufo_geovals
+ use ufo_geovals_mod, only: ufo_geovals, ufo_geoval, ufo_geovals_get_var
  use ufo_basis_mod, only: ufo_basis
+ use ufo_vars_mod
 
  use ufo_radiance_utils_mod
 
@@ -73,9 +74,11 @@ type(ioda_obsdb), target, intent(in)    :: obss
 character(*), parameter :: PROGRAM_NAME = 'ufo_radiance_mod.F90'
 character(255) :: message, version
 integer        :: err_stat, alloc_stat
-integer        :: l, m, n, i, s
+integer        :: l, m, n, i, s, ierr
+type(ufo_geoval), pointer :: temp
 
 integer :: n_Profiles
+integer :: n_Layers
 integer :: n_Channels
 
 ! Define the "non-demoninational" arguments
@@ -91,6 +94,9 @@ type(CRTM_RTSolution_type), allocatable :: rts(:,:)
  ! Get number of profile and layers from geovals
  ! ---------------------------------------------
  n_Profiles = geovals%nobs
+ call ufo_geovals_get_var(geovals, var_tv, temp, status=ierr)
+ n_Layers = temp%nval
+ nullify(temp)
 
 
  ! Program header
@@ -145,7 +151,7 @@ type(CRTM_RTSolution_type), allocatable :: rts(:,:)
 
    ! Create the input FORWARD structure (atm)
    ! ----------------------------------------
-   call CRTM_Atmosphere_Create( atm, self%rc%n_Layers, self%rc%n_Absorbers, self%rc%n_Clouds, self%rc%n_Aerosols )
+   call CRTM_Atmosphere_Create( atm, n_Layers, self%rc%n_Absorbers, self%rc%n_Clouds, self%rc%n_Aerosols )
    if ( ANY(.NOT. CRTM_Atmosphere_Associated(atm)) ) THEN
       message = 'Error allocating CRTM Forward Atmosphere structure'
       CALL Display_Message( PROGRAM_NAME, message, FAILURE )
@@ -165,8 +171,8 @@ type(CRTM_RTSolution_type), allocatable :: rts(:,:)
 
    !Assign the data from the GeoVaLs
    !--------------------------------
-   call Load_Atm_Data(n_Profiles,self%rc%n_Layers,geovals,atm)
-   call Load_Sfc_Data(n_Profiles,self%rc%n_Layers,n_Channels,geovals,sfc,chinfo,obss)
+   call Load_Atm_Data(n_Profiles,n_Layers,geovals,atm)
+   call Load_Sfc_Data(n_Profiles,n_Layers,n_Channels,geovals,sfc,chinfo,obss)
    call Load_Geom_Data(obss,geo)
 
 

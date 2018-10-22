@@ -30,7 +30,7 @@ ObsAircraftTLAD::ObsAircraftTLAD(const ioda::ObsSpace & odb, const eckit::Config
 {
   const eckit::Configuration * configc = &config;
   ufo_aircraft_tlad_setup_f90(keyOperAircraft_, &configc);
-  const std::vector<std::string> vv{"virtual_temperature", "atmosphere_ln_pressure_coordinate"};
+  const std::vector<std::string> vv{"virtual_temperature"};
   varin_.reset(new oops::Variables(vv));
   oops::Log::trace() << "ObsAircraftTLAD created" << std::endl;
 }

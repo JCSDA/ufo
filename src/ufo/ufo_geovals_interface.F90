@@ -134,6 +134,34 @@ end subroutine ufo_geovals_delete_c
 
 ! ------------------------------------------------------------------------------
 
+subroutine ufo_geovals_setup_allocone_c(c_key_self, c_conf, c_vars) bind(c,name='ufo_geovals_setup_allocone_f90')
+use config_mod
+implicit none
+integer(c_int), intent(in) :: c_key_self
+type(c_ptr), intent(in)    :: c_conf
+type(c_ptr), intent(in)    :: c_vars
+
+type(ufo_geovals), pointer :: self
+type(ufo_vars) :: vars
+integer :: nobs
+
+call ufo_geovals_registry%init()
+call ufo_geovals_registry%add(c_key_self)
+call ufo_geovals_registry%get(c_key_self, self)
+
+!> read variables
+call ufo_vars_setup(vars, c_vars)
+
+! allocate one
+nobs = config_get_int(c_conf, "nobs")
+call ufo_geovals_init(self)
+call ufo_geovals_setup(self, vars, nobs)
+call ufo_geovals_allocone(self)
+
+end subroutine ufo_geovals_setup_allocone_c
+
+! ------------------------------------------------------------------------------
+
 subroutine ufo_geovals_zero_c(c_key_self) bind(c,name='ufo_geovals_zero_f90')
 implicit none
 integer(c_int), intent(in) :: c_key_self

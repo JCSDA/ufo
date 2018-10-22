@@ -4,15 +4,14 @@
   "window_end": "2010-01-02T00:00:00Z",
   "LinearObsOpTest": {
     "testiterTL": "10",
-    "toleranceTL": "1.0e-8",
-    "toleranceAD": "1.0e-10"
+    "toleranceTL": "1.0e-10",
+    "toleranceAD": "1.0e-12"
   },
   "Observations": {
     "ObsTypes": [
       {
         "ObsType": "Radiance",
         "ObsOptions": {
-          "n_Layers": "71",
           "n_Absorbers": "3",
           "n_Clouds": "2",
           "n_Aerosols": "0",

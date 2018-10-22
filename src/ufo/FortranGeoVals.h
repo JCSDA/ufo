@@ -29,6 +29,8 @@ extern "C" {
   void ufo_geovals_rms_f90(const F90goms &, double &);
   void ufo_geovals_setup_random_f90(const F90goms &, const eckit::Configuration * const *,
                                     const eckit::Configuration * const *);
+  void ufo_geovals_setup_allocone_f90(const F90goms &, const eckit::Configuration * const *,
+                                    const eckit::Configuration * const *);
   void ufo_geovals_analytic_init_f90(F90goms &, const F90locs &,
                                      const eckit::Configuration * const *);
   void ufo_geovals_random_f90(const F90goms &);

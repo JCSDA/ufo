@@ -30,9 +30,10 @@ public Load_Atm_Data
 public Load_Sfc_Data
 public Load_Geom_Data
 
+integer, parameter, public :: max_string=800
+
 !Type for general config
 type rad_conf
- integer :: n_Layers
  integer :: n_Sensors
  integer :: n_Absorbers
  integer :: n_Clouds
@@ -65,7 +66,6 @@ character(len=100), allocatable :: skiplist_str(:)
  rc%n_Sensors = 1
 
  !Number of absorbers, clouds and aerosols (should match what model will provide)
- rc%n_Layers    = config_get_int(c_conf,"n_Layers"   )
  rc%n_Absorbers = config_get_int(c_conf,"n_Absorbers")
  rc%n_Clouds    = config_get_int(c_conf,"n_Clouds"   )
  rc%n_Aerosols  = config_get_int(c_conf,"n_Aerosols" )
@@ -123,7 +123,7 @@ type(CRTM_Atmosphere_type), intent(inout) :: atm(:)
 integer :: k1
 type(ufo_geoval), pointer :: geoval
 character(MAXVARLEN) :: varname
-
+character(max_string) :: err_msg
 
  ! Print profile and absorber definitions
  ! --------------------------------------
@@ -136,7 +136,17 @@ character(MAXVARLEN) :: varname
  ! ----------------------------------------------------------------------------
  do k1 = 1,N_PROFILES
     call ufo_geovals_get_var(geovals, var_tv, geoval)
-    atm(k1)%Temperature(1:N_LAYERS) = geoval%vals(:,k1) 
+
+    ! Check model levels is consistent in geovals & crtm
+    if (k1 == 1) then
+      if (geoval%nval /= n_Layers) then
+        write(err_msg,*) 'Load_Atm_Data error: layers inconsistent!'
+        call abor1_ftn(err_msg)
+      endif
+    endif
+
+    atm(k1)%Temperature(1:N_LAYERS) = geoval%vals(:,k1)
+
     call ufo_geovals_get_var(geovals, var_prs, geoval)
     atm(k1)%Pressure(1:N_LAYERS) = geoval%vals(:,k1) 
     call ufo_geovals_get_var(geovals, var_prsi, geoval)

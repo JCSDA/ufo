@@ -30,19 +30,7 @@ static LinearObsOperatorMaker<ObsRadianceTLAD> makerRadianceTL_("Radiance");
 ObsRadianceTLAD::ObsRadianceTLAD(const ioda::ObsSpace & odb, const eckit::Configuration & config)
   : keyOperRadiance_(0), varin_(), odb_(odb)
 {
-  const std::vector<std::string> vv{"virtual_temperature", "humidity_mixing_ratio", "air_pressure",
-                                    "air_pressure_levels", "mass_concentration_of_ozone_in_air",
-                                    "mass_concentration_of_carbon_dioxide_in_air",
-                                    "atmosphere_mass_content_of_cloud_liquid_water",
-                                    "atmosphere_mass_content_of_cloud_ice",
-                                    "effective_radius_of_cloud_liquid_water_particle",
-                                    "effective_radius_of_cloud_ice_particle",
-                                    "Water_Fraction", "Land_Fraction", "Ice_Fraction",
-                                    "Snow_Fraction", "Water_Temperature", "Land_Temperature",
-                                    "Ice_Temperature", "Snow_Temperature", "Vegetation_Fraction",
-                                    "Sfc_Wind_Speed", "Sfc_Wind_Direction", "Lai", "Soil_Moisture",
-                                    "Soil_Temperature", "Land_Type_Index", "Vegetation_Type",
-                                    "Soil_Type", "Snow_Depth"};
+  const std::vector<std::string> vv{"virtual_temperature"};
   varin_.reset(new oops::Variables(vv));
   const eckit::LocalConfiguration obsOptions(config, "ObsOptions");
   const eckit::Configuration * configc = &obsOptions;

@@ -35,7 +35,7 @@ ObsRadiosondeTLAD::ObsRadiosondeTLAD(const ioda::ObsSpace & odb,
 {
   const eckit::Configuration * configc = &config;
   ufo_radiosonde_tlad_setup_f90(keyOperRadiosonde_, &configc);
-  const std::vector<std::string> vv{"virtual_temperature", "atmosphere_ln_pressure_coordinate"};
+  const std::vector<std::string> vv{"virtual_temperature"};
   varin_.reset(new oops::Variables(vv));
   oops::Log::trace() << "ObsRadiosondeTLAD created" << std::endl;
 }

@@ -130,26 +130,32 @@ ecbuild_add_test( TARGET  test_ufo_geovals_constituents
                   ARGS    "testinput/ufotest_constituents.json"
                   LIBS    ufo )
 
-ecbuild_add_test( TARGET  test_ufo_amsua
+ecbuild_add_test( TARGET  test_ufo_amsua_opr
                   BOOST
                   SOURCES mains/TestObsOperator.cc
                   ARGS    "testinput/amsua.json"
                   LIBS    ufo )
 
-ecbuild_add_test( TARGET  test_ufo_radiosonde
+ecbuild_add_test( TARGET  test_ufo_amsua_tlad
+                  BOOST
+                  SOURCES mains/TestObsOperatorTLAD.cc
+                  ARGS    "testinput/amsua.json"
+                  LIBS    ufo )
+
+ecbuild_add_test( TARGET  test_ufo_radiosonde_opr
                   BOOST
                   MPI     6
                   SOURCES mains/TestObsOperator.cc
                   ARGS    "testinput/radiosonde.json"
                   LIBS    ufo )
 
-ecbuild_add_test( TARGET  test_ufo_obsop_rsonde_tlad
+ecbuild_add_test( TARGET  test_ufo_radiosonde_tlad
                   BOOST
                   SOURCES mains/TestObsOperatorTLAD.cc
                   ARGS    "testinput/radiosonde.json"
                   LIBS    ufo )
 
-ecbuild_add_test( TARGET  test_ufo_aircraft
+ecbuild_add_test( TARGET  test_ufo_aircraft_opr
                   BOOST
                   MPI     6
                   SOURCES mains/TestObsOperator.cc

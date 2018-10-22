@@ -21,6 +21,7 @@ public :: ufo_geovals_assign, ufo_geovals_add, ufo_geovals_diff, ufo_geovals_abs
 public :: ufo_geovals_minmaxavg, ufo_geovals_normalize, ufo_geovals_maxloc
 public :: ufo_geovals_read_netcdf, ufo_geovals_rms, ufo_geovals_copy
 public :: ufo_geovals_analytic_init
+public :: ufo_geovals_allocone
 
 ! ------------------------------------------------------------------------------
 
@@ -115,7 +116,7 @@ subroutine ufo_geovals_get_var(self, varname, geoval, status)
 implicit none
 type(ufo_geovals), target, intent(in)    :: self
 character(MAXVARLEN), intent(in) :: varname
-type(ufo_geoval), pointer, intent(out)    :: geoval
+type(ufo_geoval), pointer, intent(inout)    :: geoval
 integer, optional, intent(out) :: status
 
 integer :: ivar, status_
@@ -142,6 +143,25 @@ end subroutine ufo_geovals_get_var
 
 ! ------------------------------------------------------------------------------
 
+subroutine ufo_geovals_allocone(self) 
+implicit none
+type(ufo_geovals), intent(inout) :: self
+integer :: ivar
+
+if (.not. self%lalloc) then
+  call abor1_ftn("ufo_geovals_zero: geovals not allocated")
+endif
+
+do ivar = 1,self%nvar
+  self%geovals(ivar)%nval = 1
+  allocate(self%geovals(ivar)%vals(1,self%nobs))
+enddo
+self%linit = .true.
+
+end subroutine ufo_geovals_allocone
+
+! ------------------------------------------------------------------------------
+
 subroutine ufo_geovals_zero(self) 
 implicit none
 type(ufo_geovals), intent(inout) :: self
@@ -151,15 +171,10 @@ if (.not. self%lalloc) then
   call abor1_ftn("ufo_geovals_zero: geovals not allocated")
 endif
 if (.not. self%linit) then
-  ! TODO: abort! for now just allocating 1
-  do ivar = 1, self%nvar
-    self%geovals(ivar)%nval = 1
-    allocate(self%geovals(ivar)%vals(1,self%nobs))
-  enddo
-  self%linit = .true.
+  call abor1_ftn("ufo_geovals_zero: geovals not initialized")
 endif
 do ivar = 1, self%nvar
-  self%geovals(ivar)%vals = 0.0
+  self%geovals(ivar)%vals(:,:) = 0.0
 enddo
 
 end subroutine ufo_geovals_zero
@@ -223,12 +238,7 @@ if (.not. self%lalloc) then
   call abor1_ftn("ufo_geovals_random: geovals not allocated")
 endif
 if (.not. self%linit) then
-  ! TODO: abort! for now just allocating 1
-  do ivar = 1, self%nvar
-    self%geovals(ivar)%nval = 1
-    allocate(self%geovals(ivar)%vals(1,self%nobs))
-  enddo
-  self%linit = .true.
+  call abor1_ftn("ufo_geovals_random: geovals not initialized")
 endif
 do ivar = 1, self%nvar
   call random_vector(self%geovals(ivar)%vals)
@@ -265,6 +275,8 @@ implicit none
 type(ufo_geovals), intent(inout) :: self
 type(ufo_geovals), intent(in) :: rhs
 integer :: jv, jo, jz
+integer :: iv
+character(max_string) :: err_msg
 
 if (.not. self%lalloc .or. .not. self%linit) then
   call abor1_ftn("ufo_geovals_scalmult: geovals not allocated")
@@ -273,10 +285,23 @@ if (.not. rhs%lalloc .or. .not. rhs%linit) then
   call abor1_ftn("ufo_geovals_scalmult: geovals not allocated")
 endif
 
+if (self%nobs /= rhs%nobs) then
+  call abor1_ftn("ufo_geovals_assign: nobs different between lhs and rhs")
+endif
+
 do jv=1,self%nvar
+  iv = ufo_vars_getindex(rhs%variables, self%variables%fldnames(jv))
+  if (iv < 0) then
+    write(err_msg,*) 'ufo_geovals_assign: var ', trim(self%variables%fldnames(jv)), ' doesnt exist in rhs'
+    call abor1_ftn(trim(err_msg))
+  endif
+  if (self%geovals(jv)%nval /= rhs%geovals(iv)%nval) then
+    write(err_msg,*) 'ufo_geovals_assign: nvals for var ', trim(self%variables%fldnames(jv)), ' are different in lhs and rhs'
+    call abor1_ftn(trim(err_msg))
+  endif
   do jo=1,self%nobs
     do jz = 1, self%geovals(jv)%nval
-      self%geovals(jv)%vals(jz,jo) = rhs%geovals(jv)%vals(jz,jo)
+      self%geovals(jv)%vals(jz,jo) = rhs%geovals(iv)%vals(jz,jo)
     enddo
   enddo
 enddo
@@ -291,6 +316,8 @@ implicit none
 type(ufo_geovals), intent(inout) :: self
 type(ufo_geovals), intent(in) :: other
 integer :: jv, jo, jz
+integer :: iv
+character(max_string) :: err_msg
 
 if (.not. self%lalloc .or. .not. self%linit) then
   call abor1_ftn("ufo_geovals_add: geovals not allocated")
@@ -299,12 +326,23 @@ if (.not. other%lalloc .or. .not. other%linit) then
   call abor1_ftn("ufo_geovals_add: geovals not allocated")
 endif
 
+if (self%nobs /= other%nobs) then
+  call abor1_ftn("ufo_geovals_assign: nobs different between lhs and rhs")
+endif
+
 do jv=1,self%nvar
-  do jo=1,self%nobs
-    do jz = 1, self%geovals(jv)%nval
-      self%geovals(jv)%vals(jz,jo) = self%geovals(jv)%vals(jz,jo) + other%geovals(jv)%vals(jz,jo)
+  iv = ufo_vars_getindex(other%variables, self%variables%fldnames(jv))
+  if (iv .ne. -1) then !Only add if exists in RHS
+    if (self%geovals(jv)%nval /= other%geovals(iv)%nval) then
+      write(err_msg,*) 'ufo_geovals_assign: nvals for var ', trim(self%variables%fldnames(jv)), ' are different in lhs and rhs'
+      call abor1_ftn(trim(err_msg))
+    endif
+    do jo=1,self%nobs
+      do jz = 1, self%geovals(jv)%nval
+        self%geovals(jv)%vals(jz,jo) = self%geovals(jv)%vals(jz,jo) + other%geovals(iv)%vals(jz,jo)
+      enddo
     enddo
-  enddo
+  endif
 enddo
 
 end subroutine ufo_geovals_add
@@ -317,6 +355,8 @@ implicit none
 type(ufo_geovals), intent(inout) :: self
 type(ufo_geovals), intent(in) :: other
 integer :: jv, jo, jz
+integer :: iv
+character(max_string) :: err_msg
 
 if (.not. self%lalloc .or. .not. self%linit) then
   call abor1_ftn("ufo_geovals_diff: geovals not allocated")
@@ -325,12 +365,23 @@ if (.not. other%lalloc .or. .not. other%linit) then
   call abor1_ftn("ufo_geovals_diff: geovals not allocated")
 endif
 
+if (self%nobs /= other%nobs) then
+  call abor1_ftn("ufo_geovals_assign: nobs different between lhs and rhs")
+endif
+
 do jv=1,self%nvar
-  do jo=1,self%nobs
-    do jz = 1, self%geovals(jv)%nval
-      self%geovals(jv)%vals(jz,jo) = self%geovals(jv)%vals(jz,jo) - other%geovals(jv)%vals(jz,jo)
+  iv = ufo_vars_getindex(other%variables, self%variables%fldnames(jv))
+  if (iv .ne. -1) then !Only subtract if exists in RHS
+    if (self%geovals(jv)%nval /= other%geovals(iv)%nval) then
+      write(err_msg,*) 'ufo_geovals_assign: nvals for var ', trim(self%variables%fldnames(jv)), ' are different in lhs and rhs'
+      call abor1_ftn(trim(err_msg))
+    endif
+    do jo=1,self%nobs
+      do jz = 1, self%geovals(jv)%nval
+        self%geovals(jv)%vals(jz,jo) = self%geovals(jv)%vals(jz,jo) - other%geovals(iv)%vals(jz,jo)
+      enddo
     enddo
-  enddo
+  endif
 enddo
 
 end subroutine ufo_geovals_diff
@@ -358,11 +409,10 @@ other%nvar = self%nvar
 
 allocate(other%geovals(other%nvar))
 do jv = 1, other%nvar
-   other%geovals(jv)%nval = self%geovals(jv)%nval
-   other%geovals(jv)%nobs = self%geovals(jv)%nobs
-   allocate(other%geovals(jv)%vals(other%geovals(jv)%nval, &
-                                     other%geovals(jv)%nobs))
-   other%geovals(jv)%vals = self%geovals(jv)%vals
+  other%geovals(jv)%nval = self%geovals(jv)%nval
+  other%geovals(jv)%nobs = self%geovals(jv)%nobs
+  allocate(other%geovals(jv)%vals(other%geovals(jv)%nval, other%geovals(jv)%nobs))
+  other%geovals(jv)%vals(:,:) = self%geovals(jv)%vals(:,:)
 enddo
 
 other%lalloc = .true.
