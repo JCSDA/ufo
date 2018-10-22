@@ -17,7 +17,7 @@ module ufo_gnssro_bndgsi_mod_c
 #define LISTED_TYPE ufo_gnssro_BndGSI
   
   !> Linked list interface - defines registry_t type
-#include "../../linkedList_i.f"
+#include "../../../linkedList_i.f"
   
   !> Global registry
   type(registry_t) :: ufo_gnssro_BndGSI_registry
@@ -26,7 +26,7 @@ module ufo_gnssro_bndgsi_mod_c
 contains
   ! ------------------------------------------------------------------------------
   !> Linked list implementation
-#include "../../linkedList_c.f"
+#include "../../../linkedList_c.f"
   
 ! ------------------------------------------------------------------------------
   

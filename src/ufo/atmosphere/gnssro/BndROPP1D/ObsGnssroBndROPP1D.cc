@@ -5,7 +5,7 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
  */
 
-#include "ufo/atmosphere/gnssro/ObsGnssroRef.h"
+#include "ufo/atmosphere/gnssro/BndROPP1D/ObsGnssroBndROPP1D.h"
 
 #include <ostream>
 #include <string>
@@ -22,39 +22,41 @@
 namespace ufo {
 
 // -----------------------------------------------------------------------------
-static ObsOperatorMaker<ObsGnssroRef> makerGnssroRef_("GnssroRef");
+static ObsOperatorMaker<ObsGnssroBndROPP1D> makerGnssroBndROPP1D_("GnssroBndROPP1D");
 // -----------------------------------------------------------------------------
 
-ObsGnssroRef::ObsGnssroRef(const ioda::ObsSpace & odb, const eckit::Configuration & config)
-  : keyOperGnssroRef_(0), varin_(), odb_(odb)
+ObsGnssroBndROPP1D::ObsGnssroBndROPP1D(const ioda::ObsSpace & odb,
+                                       const eckit::Configuration & config)
+  : keyOperGnssroBndROPP1D_(0), varin_(), odb_(odb)
 {
   const std::vector<std::string> vv{"temperature", "specific_humidity", "air_pressure",
-                                    "geopotential_height"};
+                                    "geopotential_height", "sfc_geopotential_height"};
+
   varin_.reset(new oops::Variables(vv));
   const eckit::Configuration * configc = &config;
-  ufo_gnssro_ref_setup_f90(keyOperGnssroRef_, &configc);
-  oops::Log::trace() << "ObsGnssroRef created." << std::endl;
+  ufo_gnssro_bndropp1d_setup_f90(keyOperGnssroBndROPP1D_, &configc);
+  oops::Log::trace() << "ObsGnssroBndROPP1D created." << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
-ObsGnssroRef::~ObsGnssroRef() {
-  ufo_gnssro_ref_delete_f90(keyOperGnssroRef_);
-  oops::Log::trace() << "ObsGnssroRef destructed" << std::endl;
+ObsGnssroBndROPP1D::~ObsGnssroBndROPP1D() {
+  ufo_gnssro_bndropp1d_delete_f90(keyOperGnssroBndROPP1D_);
+  oops::Log::trace() << "ObsGnssroBndROPP1D destructed" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
-void ObsGnssroRef::simulateObs(const GeoVaLs & gom, ioda::ObsVector & ovec,
+void ObsGnssroBndROPP1D::simulateObs(const GeoVaLs & gom, ioda::ObsVector & ovec,
                                 const ObsBias & bias) const {
-  ufo_gnssro_ref_simobs_f90(keyOperGnssroRef_, gom.toFortran(), odb_.toFortran(),
+  ufo_gnssro_bndropp1d_simobs_f90(keyOperGnssroBndROPP1D_, gom.toFortran(), odb_.toFortran(),
                            ovec.toFortran(), bias.toFortran());
 }
 
 // -----------------------------------------------------------------------------
 
-void ObsGnssroRef::print(std::ostream & os) const {
-  os << "ObsGnssroRef::print not implemented";
+void ObsGnssroBndROPP1D::print(std::ostream & os) const {
+  os << "ObsGnssroBndROPP1D::print not implemented";
 }
 
 // -----------------------------------------------------------------------------

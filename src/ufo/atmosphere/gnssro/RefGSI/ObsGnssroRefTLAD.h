@@ -5,8 +5,8 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#ifndef UFO_ATMOSPHERE_GNSSRO_OBSGNSSROREFTLAD_H_
-#define UFO_ATMOSPHERE_GNSSRO_OBSGNSSROREFTLAD_H_
+#ifndef UFO_ATMOSPHERE_GNSSRO_REFGSI_OBSGNSSROREFTLAD_H_
+#define UFO_ATMOSPHERE_GNSSRO_REFGSI_OBSGNSSROREFTLAD_H_
 
 #include <ostream>
 #include <string>
@@ -15,7 +15,7 @@
 
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
-#include "ufo/atmosphere/FortranAtmosphere.h"
+#include "ufo/atmosphere/gnssro/RefGSI/FortranRefGSI.h"
 #include "ufo/LinearObsOperatorBase.h"
 
 // Forward declarations
@@ -64,4 +64,4 @@ class ObsGnssroRefTLAD : public LinearObsOperatorBase,
 // -----------------------------------------------------------------------------
 
 }  // namespace ufo
-#endif  // UFO_ATMOSPHERE_GNSSRO_OBSGNSSROREFTLAD_H_
+#endif  // UFO_ATMOSPHERE_GNSSRO_REFGSI_OBSGNSSROREFTLAD_H_

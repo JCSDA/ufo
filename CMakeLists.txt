@@ -64,6 +64,14 @@ else( ${GSW_FOUND} )
     message("GSW NOT FOUND: Excluding Marine Observation Operators")
 endif( ${GSW_FOUND} )
 
+# ROPP-UFO
+ecbuild_use_package( PROJECT ropp-ufo )
+if( ${ROPP-UFO_FOUND} )
+    message("ROPP FOUND; Including GNSSRO Bending angle ROPP Operators")
+else( ${ROPP-UFO_FOUND} )
+    message("ROPP NOT FOUND: Excluding  GNSSRO Bending angle ROPP Operators")
+endif( ${ROPP-UFO_FOUND} )
+
 ################################################################################
 # Export package info
 ################################################################################
@@ -72,6 +80,10 @@ list( APPEND UFO_TPLS oops ioda crtm )
 if( ${GSW_FOUND} )
     list ( APPEND UFO_TPLS gsw)
 endif( ${GSW_FOUND} )
+
+if( ${ROPP-UFO_FOUND} )
+    list ( APPEND UFO_TPLS ropp-ufo )
+endif( ${ROPP-UFO_FOUND} )
 
 set( UFO_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/src ${CMAKE_CURRENT_BINARY_DIR}/src
                       ${CMAKE_Fortran_MODULE_DIRECTORY} )

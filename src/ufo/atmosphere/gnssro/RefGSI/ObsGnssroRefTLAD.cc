@@ -5,7 +5,7 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#include "ufo/atmosphere/gnssro/ObsGnssroRefTLAD.h"
+#include "ufo/atmosphere/gnssro/RefGSI/ObsGnssroRefTLAD.h"
 
 #include <ostream>
 #include <string>

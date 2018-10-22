@@ -5,8 +5,8 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
  */
 
-#ifndef UFO_ATMOSPHERE_GNSSRO_OBSGNSSROBNDGSI_H_
-#define UFO_ATMOSPHERE_GNSSRO_OBSGNSSROBNDGSI_H_
+#ifndef UFO_ATMOSPHERE_GNSSRO_BNDGSI_OBSGNSSROBNDGSI_H_
+#define UFO_ATMOSPHERE_GNSSRO_BNDGSI_OBSGNSSROBNDGSI_H_
 
 #include <ostream>
 #include <string>
@@ -15,7 +15,7 @@
 
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
-#include "ufo/atmosphere/FortranAtmosphere.h"
+#include "ufo/atmosphere/gnssro/BndGSI/FortranBndGSI.h"
 #include "ufo/ObsOperatorBase.h"
 
 namespace eckit {
@@ -62,4 +62,4 @@ class ObsGnssroBndGSI : public ObsOperatorBase,
 
 }  // namespace ufo
 
-#endif  // UFO_ATMOSPHERE_GNSSRO_OBSGNSSROBNDGSI_H_
+#endif  // UFO_ATMOSPHERE_GNSSRO_BNDGSI_OBSGNSSROBNDGSI_H_

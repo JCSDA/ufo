@@ -5,8 +5,8 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
  */
 
-#ifndef UFO_ATMOSPHERE_GNSSRO_OBSGNSSROREF_H_
-#define UFO_ATMOSPHERE_GNSSRO_OBSGNSSROREF_H_
+#ifndef UFO_ATMOSPHERE_GNSSRO_BNDROPP1D_OBSGNSSROBNDROPP1D_H_
+#define UFO_ATMOSPHERE_GNSSRO_BNDROPP1D_OBSGNSSROBNDROPP1D_H_
 
 #include <ostream>
 #include <string>
@@ -15,7 +15,7 @@
 
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
-#include "ufo/atmosphere/FortranAtmosphere.h"
+#include "ufo/atmosphere/gnssro/BndROPP1D/FortranBndROPP1D.h"
 #include "ufo/ObsOperatorBase.h"
 
 namespace eckit {
@@ -33,14 +33,14 @@ namespace ufo {
 
 // -----------------------------------------------------------------------------
 
-/// GnssroRef observation operator
-class ObsGnssroRef : public ObsOperatorBase,
-                      private util::ObjectCounter<ObsGnssroRef> {
+/// GnssroBndROPP1D observation operator
+class ObsGnssroBndROPP1D : public ObsOperatorBase,
+                        private util::ObjectCounter<ObsGnssroBndROPP1D> {
  public:
-  static const std::string classname() {return "ufo::ObsGnssroRef";}
+  static const std::string classname() {return "ufo::ObsGnssroBndROPP1D";}
 
-  ObsGnssroRef(const ioda::ObsSpace &, const eckit::Configuration &);
-  virtual ~ObsGnssroRef();
+  ObsGnssroBndROPP1D(const ioda::ObsSpace &, const eckit::Configuration &);
+  virtual ~ObsGnssroBndROPP1D();
 
 // Obs Operator
   void simulateObs(const GeoVaLs &, ioda::ObsVector &, const ObsBias &) const;
@@ -48,12 +48,12 @@ class ObsGnssroRef : public ObsOperatorBase,
 // Other
   const oops::Variables & variables() const {return *varin_;}
 
-  int & toFortran() {return keyOperGnssroRef_;}
-  const int & toFortran() const {return keyOperGnssroRef_;}
+  int & toFortran() {return keyOperGnssroBndROPP1D_;}
+  const int & toFortran() const {return keyOperGnssroBndROPP1D_;}
 
  private:
   void print(std::ostream &) const;
-  F90hop keyOperGnssroRef_;
+  F90hop keyOperGnssroBndROPP1D_;
   const ioda::ObsSpace& odb_;
   boost::scoped_ptr<const oops::Variables> varin_;
 };
@@ -62,4 +62,4 @@ class ObsGnssroRef : public ObsOperatorBase,
 
 }  // namespace ufo
 
-#endif  // UFO_ATMOSPHERE_GNSSRO_OBSGNSSROREF_H_
+#endif  // UFO_ATMOSPHERE_GNSSRO_BNDROPP1D_OBSGNSSROBNDROPP1D_H_
