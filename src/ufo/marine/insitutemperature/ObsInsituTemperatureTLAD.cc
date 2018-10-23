@@ -53,7 +53,7 @@ ObsInsituTemperatureTLAD::~ObsInsituTemperatureTLAD() {
 
 void ObsInsituTemperatureTLAD::setTrajectory(const GeoVaLs & geovals, const ObsBias & bias) {
   ufo_insitutemperature_tlad_settraj_f90(keyOperInsituTemperature_, geovals.toFortran(),
-                                         odb_.toFortran());
+                                         odb_);
 }
 
 // -----------------------------------------------------------------------------
@@ -61,7 +61,7 @@ void ObsInsituTemperatureTLAD::setTrajectory(const GeoVaLs & geovals, const ObsB
 void ObsInsituTemperatureTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec,
                                              const ObsBiasIncrement & bias) const {
   ufo_insitutemperature_simobs_tl_f90(keyOperInsituTemperature_, geovals.toFortran(),
-                                        odb_.toFortran(), ovec.toFortran());
+                                        odb_, ovec.toFortran());
 }
 
 // -----------------------------------------------------------------------------
@@ -69,7 +69,7 @@ void ObsInsituTemperatureTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsV
 void ObsInsituTemperatureTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec,
                                              ObsBiasIncrement & bias) const {
   ufo_insitutemperature_simobs_ad_f90(keyOperInsituTemperature_, geovals.toFortran(),
-                                        odb_.toFortran(), ovec.toFortran());
+                                        odb_, ovec.toFortran());
 }
 
 // -----------------------------------------------------------------------------

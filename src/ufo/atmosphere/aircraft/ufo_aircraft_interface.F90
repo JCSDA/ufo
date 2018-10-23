@@ -54,13 +54,13 @@ end subroutine ufo_aircraft_delete_c
   
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_aircraft_simobs_c(c_key_self, c_key_geovals, c_key_obsspace, c_key_hofx, c_bias) bind(c,name='ufo_aircraft_simobs_f90')
+subroutine ufo_aircraft_simobs_c(c_key_self, c_key_geovals, c_obsspace, c_key_hofx, c_bias) bind(c,name='ufo_aircraft_simobs_f90')
 
 implicit none
 integer(c_int), intent(in) :: c_key_self
 integer(c_int), intent(in) :: c_key_geovals
 integer(c_int), intent(in) :: c_key_hofx
-integer(c_int), intent(in) :: c_key_obsspace
+type(c_ptr), value, intent(in) :: c_obsspace
 integer(c_int), intent(in) :: c_bias
 
 type(ufo_aircraft), pointer :: self
@@ -69,7 +69,7 @@ character(len=*), parameter :: myname_="ufo_aircraft_simobs_c"
 
 call ufo_aircraft_registry%get(c_key_self, self)
 
-call self%opr_simobs(c_key_geovals, c_key_obsspace, c_key_hofx)
+call self%opr_simobs(c_key_geovals, c_obsspace, c_key_hofx)
 
 end subroutine ufo_aircraft_simobs_c
 

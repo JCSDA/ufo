@@ -48,14 +48,14 @@ ObsRadianceTLAD::~ObsRadianceTLAD() {
 // -----------------------------------------------------------------------------
 
 void ObsRadianceTLAD::setTrajectory(const GeoVaLs & geovals, const ObsBias & bias) {
-  ufo_radiance_tlad_settraj_f90(keyOperRadiance_, geovals.toFortran(), odb_.toFortran());
+  ufo_radiance_tlad_settraj_f90(keyOperRadiance_, geovals.toFortran(), odb_);
 }
 
 // -----------------------------------------------------------------------------
 
 void ObsRadianceTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec,
                                     const ObsBiasIncrement & bias) const {
-  ufo_radiance_simobs_tl_f90(keyOperRadiance_, geovals.toFortran(), odb_.toFortran(),
+  ufo_radiance_simobs_tl_f90(keyOperRadiance_, geovals.toFortran(), odb_,
                                ovec.toFortran());
 }
 
@@ -63,7 +63,7 @@ void ObsRadianceTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & o
 
 void ObsRadianceTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec,
                                     ObsBiasIncrement & bias) const {
-  ufo_radiance_simobs_ad_f90(keyOperRadiance_, geovals.toFortran(), odb_.toFortran(),
+  ufo_radiance_simobs_ad_f90(keyOperRadiance_, geovals.toFortran(), odb_,
                                ovec.toFortran());
 }
 

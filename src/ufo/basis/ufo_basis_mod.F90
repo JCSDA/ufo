@@ -9,8 +9,6 @@ module ufo_basis_mod
   use ufo_geovals_mod
   use ufo_geovals_mod_c,   only: ufo_geovals_registry
   use ioda_obs_vectors
-  use ioda_obsdb_mod, only: ioda_obsdb
-  use ioda_obsdb_mod_c, only: ioda_obsdb_registry
 
   type, abstract :: ufo_basis
     private
@@ -24,12 +22,12 @@ module ufo_basis_mod
   ! ------------------------------------------------------------------------------
 
     subroutine simobs_(self, geovals, hofx, obss)
-      import ufo_basis, ufo_geovals, obs_vector, ioda_obsdb
+      import ufo_basis, ufo_geovals, obs_vector, c_ptr
       implicit none
       class(ufo_basis),         intent(in)    :: self
       type(ufo_geovals),        intent(in)    :: geovals
       type(obs_vector),         intent(inout) :: hofx
-      type(ioda_obsdb), target, intent(in)    :: obss
+      type(c_ptr), value,       intent(in)    :: obss
     end subroutine
   
   ! ------------------------------------------------------------------------------
@@ -40,23 +38,21 @@ contains
 
 ! ------------------------------------------------------------------------------
     
-    subroutine opr_simobs_(self, c_key_geovals, c_key_obsspace, c_key_hofx)
+    subroutine opr_simobs_(self, c_key_geovals, c_obsspace, c_key_hofx)
       implicit none
     
       class(ufo_basis), intent(in)    :: self
       integer(c_int), intent(in) :: c_key_geovals
       integer(c_int), intent(in) :: c_key_hofx
-      integer(c_int), intent(in) :: c_key_obsspace
+      type(c_ptr), value, intent(in) :: c_obsspace
     
       type(ufo_geovals), pointer :: geovals
       type(obs_vector),  pointer :: hofx
-      type(ioda_obsdb),  pointer :: obss
     
       call ufo_geovals_registry%get(c_key_geovals,geovals)
       call ioda_obs_vect_registry%get(c_key_hofx,hofx)
-      call ioda_obsdb_registry%get(c_key_obsspace,obss)
     
-      call self%simobs(geovals, hofx, obss)
+      call self%simobs(geovals, hofx, c_obsspace)
     
     end subroutine opr_simobs_
     

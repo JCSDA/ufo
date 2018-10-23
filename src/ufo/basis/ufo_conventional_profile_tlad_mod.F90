@@ -10,9 +10,8 @@ module ufo_conventional_profile_tlad_mod
   use ufo_vars_mod
   use ufo_geovals_mod
   use ufo_geovals_mod_c,   only: ufo_geovals_registry
+  use obsspace_mod
   use ioda_obs_vectors
-  use ioda_obsdb_mod
-  use ioda_obsdb_mod_c, only: ioda_obsdb_registry
   use vert_interp_mod
   use ufo_basis_tlad_mod, only: ufo_basis_tlad
 
@@ -37,12 +36,12 @@ contains
       implicit none
       class(ufo_conventional_profile_tlad), intent(inout) :: self
       type(ufo_geovals),         intent(in)    :: geovals
-      type(ioda_obsdb),          intent(in)    :: obss
+      type(c_ptr), value,        intent(in)    :: obss
       
       character(len=*), parameter :: myname_="ufo_conventional_profile_tlad_settraj"
       character(max_string) :: err_msg
       
-      type(obs_vector) :: pressure
+      real(kind_real), allocatable :: pressure(:)
       type(ufo_geoval), pointer :: prsl
       integer :: iobs, ierr
       
@@ -58,23 +57,23 @@ contains
       
       !Keep copy of dimensions
       self%nval = prsl%nval
-      self%nobs = obss%nobs
+      self%nobs = obsspace_get_nobs(obss)
       
-      allocate(self%wi(obss%nobs))
-      allocate(self%wf(obss%nobs))
+      allocate(self%wi(self%nobs))
+      allocate(self%wf(self%nobs))
       
       ! observation of pressure (for vertical interpolation)
-      call ioda_obsvec_setup(pressure, obss%nobs)
-      call ioda_obsdb_var_to_ovec(obss, pressure, "air_pressure")
+      allocate(pressure(self%nobs))
+      call obsspace_get_var(obss, pressure, "air_pressure", self%nobs)
       
       ! compute interpolation weights
-      do iobs = 1, obss%nobs
-        call vert_interp_weights(self%nval,log(pressure%values(iobs)/10.),prsl%vals(:,iobs),self%wi(iobs),self%wf(iobs))
+      do iobs = 1, self%nobs
+        call vert_interp_weights(self%nval,log(pressure(iobs)/10.),prsl%vals(:,iobs),self%wi(iobs),self%wf(iobs))
       enddo
       
       self%ltraj = .true.
       ! cleanup
-      call ioda_obsvec_delete(pressure)
+      deallocate(pressure)
     
     end subroutine conventional_profile_tlad_settraj_
     
@@ -85,7 +84,7 @@ contains
       class(ufo_conventional_profile_tlad), intent(in)     :: self
       type(ufo_geovals),         intent(in)     :: geovals
       type(obs_vector),          intent(inout)  :: hofx
-      type(ioda_obsdb),          intent(in)     :: obss
+      type(c_ptr), value,        intent(in)     :: obss
       
       character(len=*), parameter :: myname_="ufo_conventional_profile_simobs_tl"
       character(max_string) :: err_msg
@@ -126,7 +125,7 @@ contains
       class(ufo_conventional_profile_tlad), intent(in)     :: self
       type(ufo_geovals),         intent(inout)  :: geovals
       type(obs_vector),          intent(in)     :: hofx
-      type(ioda_obsdb),          intent(in)     :: obss
+      type(c_ptr), value,        intent(in)     :: obss
       
       character(len=*), parameter :: myname_="ufo_conventional_profile_simobs_ad"
       character(max_string) :: err_msg

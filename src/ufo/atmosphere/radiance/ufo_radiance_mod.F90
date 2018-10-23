@@ -11,7 +11,6 @@ module ufo_radiance_mod
  use config_mod
  use kinds
 
- use ioda_obsdb_mod, only: ioda_obsdb
  use ioda_obs_vectors, only: obs_vector
 
  use ufo_geovals_mod, only: ufo_geovals, ufo_geoval, ufo_geovals_get_var
@@ -68,7 +67,7 @@ implicit none
 class(ufo_radiance),      intent(in)    :: self
 type(ufo_geovals),        intent(in)    :: geovals
 type(obs_vector),         intent(inout) :: hofx
-type(ioda_obsdb), target, intent(in)    :: obss
+type(c_ptr), value,       intent(in)    :: obss
 
 ! Local Variables
 character(*), parameter :: PROGRAM_NAME = 'ufo_radiance_mod.F90'

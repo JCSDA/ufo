@@ -56,57 +56,57 @@ end subroutine ufo_radiosonde_tlad_delete_c
   
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_radiosonde_tlad_settraj_c(c_key_self, c_key_geovals, c_key_obsspace) bind(c,name='ufo_radiosonde_tlad_settraj_f90')
+subroutine ufo_radiosonde_tlad_settraj_c(c_key_self, c_key_geovals, c_obsspace) bind(c,name='ufo_radiosonde_tlad_settraj_f90')
 
 implicit none
 integer(c_int), intent(in) :: c_key_self
 integer(c_int), intent(in) :: c_key_geovals
-integer(c_int), intent(in) :: c_key_obsspace
+type(c_ptr), value, intent(in) :: c_obsspace
 
 type(ufo_radiosonde_tlad), pointer :: self
 
 character(len=*), parameter :: myname_="ufo_radiosonde_tlad_settraj_c"
 
 call ufo_radiosonde_tlad_registry%get(c_key_self, self)
-call self%opr_settraj(c_key_geovals, c_key_obsspace)
+call self%opr_settraj(c_key_geovals, c_obsspace)
 
 end subroutine ufo_radiosonde_tlad_settraj_c
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_radiosonde_simobs_tl_c(c_key_self, c_key_geovals, c_key_obsspace, c_key_hofx) bind(c,name='ufo_radiosonde_simobs_tl_f90')
+subroutine ufo_radiosonde_simobs_tl_c(c_key_self, c_key_geovals, c_obsspace, c_key_hofx) bind(c,name='ufo_radiosonde_simobs_tl_f90')
 
 implicit none
 integer(c_int), intent(in) :: c_key_self
 integer(c_int), intent(in) :: c_key_geovals
 integer(c_int), intent(in) :: c_key_hofx
-integer(c_int), intent(in) :: c_key_obsspace
+type(c_ptr), value, intent(in) :: c_obsspace
 
 type(ufo_radiosonde_tlad), pointer :: self
 
 character(len=*), parameter :: myname_="ufo_radiosonde_simobs_tl_c"
 
 call ufo_radiosonde_tlad_registry%get(c_key_self, self)
-call self%opr_simobs_tl(c_key_geovals, c_key_obsspace, c_key_hofx)
+call self%opr_simobs_tl(c_key_geovals, c_obsspace, c_key_hofx)
 
 end subroutine ufo_radiosonde_simobs_tl_c
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_radiosonde_simobs_ad_c(c_key_self, c_key_geovals, c_key_obsspace, c_key_hofx) bind(c,name='ufo_radiosonde_simobs_ad_f90')
+subroutine ufo_radiosonde_simobs_ad_c(c_key_self, c_key_geovals, c_obsspace, c_key_hofx) bind(c,name='ufo_radiosonde_simobs_ad_f90')
 
 implicit none
 integer(c_int), intent(in) :: c_key_self
 integer(c_int), intent(in) :: c_key_geovals
 integer(c_int), intent(in) :: c_key_hofx
-integer(c_int), intent(in) :: c_key_obsspace
+type(c_ptr), value, intent(in) :: c_obsspace
 
 type(ufo_radiosonde_tlad), pointer :: self
 
 character(len=*), parameter :: myname_="ufo_radiosonde_simobs_ad_c"
 
 call ufo_radiosonde_tlad_registry%get(c_key_self, self)
-call self%opr_simobs_ad(c_key_geovals, c_key_obsspace, c_key_hofx)
+call self%opr_simobs_ad(c_key_geovals, c_obsspace, c_key_hofx)
 
 end subroutine ufo_radiosonde_simobs_ad_c
   

@@ -11,10 +11,9 @@ module ufo_conventional_profile_mod
   use ufo_geovals_mod
   use ufo_geovals_mod_c,   only: ufo_geovals_registry
   use ioda_obs_vectors
-  use ioda_obsdb_mod
-  use ioda_obsdb_mod_c, only: ioda_obsdb_registry
   use vert_interp_mod
   use ufo_basis_mod, only: ufo_basis
+  use obsspace_mod
 
   integer, parameter :: max_string=800
 
@@ -34,9 +33,9 @@ contains
     
       implicit none
       class(ufo_conventional_profile), intent(in)  :: self
-      type(ufo_geovals), intent(in)                :: geovals
-      type(obs_vector),  intent(inout)             :: hofx
-      type(ioda_obsdb), target, intent(in)         :: obss
+      type(ufo_geovals),  intent(in)               :: geovals
+      type(obs_vector),   intent(inout)            :: hofx
+      type(c_ptr), value, intent(in)               :: obss
       
       character(len=*), parameter :: myname_="ufo_conventional_profile_simobs"
       character(max_string) :: err_msg
@@ -44,9 +43,10 @@ contains
       integer :: iobs
       real(kind_real) :: wf
       integer :: wi,ierr
-      type(obs_vector) :: pressure
+      real(kind_real), allocatable :: pressure(:)
       type(ufo_geoval), pointer :: prsl, tv
-      
+      integer :: nobs
+
       ! check if nobs is consistent in geovals & hofx
       if (geovals%nobs /= hofx%nobs) then
         write(err_msg,*) myname_, ' error: nobs inconsistent!'
@@ -68,17 +68,18 @@ contains
       endif
       
       ! observation of pressure (for vertical interpolation)
-      call ioda_obsvec_setup(pressure, obss%nobs)
-      call ioda_obsdb_var_to_ovec(obss, pressure, "air_pressure")
+      nobs = obsspace_get_nobs(obss)
+      allocate(pressure(nobs))
+      call obsspace_get_var(obss, pressure, "air_pressure", nobs)
       
       ! obs operator
       do iobs = 1, hofx%nobs
-        call vert_interp_weights(prsl%nval,log(pressure%values(iobs)/10.),prsl%vals(:,iobs),wi,wf)
+        call vert_interp_weights(prsl%nval,log(pressure(iobs)/10.),prsl%vals(:,iobs),wi,wf)
         call vert_interp_apply(tv%nval, tv%vals(:,iobs), hofx%values(iobs), wi, wf)
       enddo
 
       ! cleanup
-      call ioda_obsvec_delete(pressure)
+      deallocate(pressure)
     
     end subroutine conventional_profile_simobs_
 

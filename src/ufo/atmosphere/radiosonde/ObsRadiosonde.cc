@@ -11,6 +11,8 @@
 #include <string>
 #include <vector>
 
+#include "oops/util/Logger.h"
+
 #include "ioda/ObsVector.h"
 
 #include "ufo/GeoVaLs.h"
@@ -43,7 +45,7 @@ ObsRadiosonde::~ObsRadiosonde() {
 
 void ObsRadiosonde::simulateObs(const GeoVaLs & gom, ioda::ObsVector & ovec,
                                 const ObsBias & bias) const {
-  ufo_radiosonde_simobs_f90(keyOperRadiosonde_, gom.toFortran(), odb_.toFortran(),
+  ufo_radiosonde_simobs_f90(keyOperRadiosonde_, gom.toFortran(), odb_,
                            ovec.toFortran(), bias.toFortran());
 }
 

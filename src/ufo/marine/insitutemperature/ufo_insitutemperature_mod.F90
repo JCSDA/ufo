@@ -7,7 +7,8 @@
 
 module ufo_insitutemperature_mod
 
-  use ioda_obs_insitutemperature_mod
+  use iso_c_binding
+  use obsspace_mod
   use ioda_obs_vectors
   use ufo_vars_mod
   use ioda_locs_mod
@@ -30,17 +31,17 @@ contains
 
   ! ------------------------------------------------------------------------------
 
-  subroutine ufo_insitutemperature_simobs(self, geovals, hofx, obs_ti)
+  subroutine ufo_insitutemperature_simobs(self, geovals, hofx, obss)
     use gsw_pot_to_insitu
     use vert_interp_mod    
     use ufo_tpsp2ti_mod
     use ufo_marine_ncutils
     
     implicit none
-    type(ufo_insitutemperature), intent(in)     :: self       !< Trajectory
-    type(ufo_geovals), intent(in)                :: geovals    !< Model's Tp, Sp, h interpolated at obs location 
-    type(ioda_obs_insitutemperature), intent(in) :: obs_ti     !< Insitu temperature observations
-    type(obs_vector),  intent(inout)             :: hofx       !< Ti(Tp,Sp,h)
+    type(ufo_insitutemperature), intent(in)  :: self       !< Trajectory
+    type(ufo_geovals), intent(in)            :: geovals    !< Model's Tp, Sp, h interpolated at obs location 
+    type(c_ptr), value, intent(in)           :: obss       !< Insitu temperature observations
+    type(obs_vector),  intent(inout)         :: hofx       !< Ti(Tp,Sp,h)
 
     character(len=*), parameter :: myname_="ufo_insitutemperature_simobs"
     character(max_string)  :: err_msg
@@ -50,6 +51,12 @@ contains
     real(kind_real), allocatable :: tempi(:,:)
     real (kind_real), allocatable :: pressure(:,:), depth(:,:)
     real(kind_real) :: lono, lato, deptho
+
+    real(kind_real), allocatable :: obs_lon(:)
+    real(kind_real), allocatable :: obs_lat(:)
+    real(kind_real), allocatable :: obs_depth(:)
+    real(kind_real), allocatable :: obs_val(:)
+    integer :: obss_nobs
     
     ! Vertical interpolation
     real(kind_real) :: wf, tp, sp, prs
@@ -74,6 +81,18 @@ contains
     ! check if ocean layer thickness variable is in geovals and get it
     call ufo_geovals_get_var(geovals, var_ocn_lay_thick, h)
 
+    ! Read in obs data
+    obss_nobs = obsspace_get_nobs(obss)
+    allocate(obs_lon(obss_nobs))
+    allocate(obs_lat(obss_nobs))
+    allocate(obs_depth(obss_nobs))
+    allocate(obs_val(obss_nobs))
+
+    call obsspace_get_var(obss, obs_lon, "longitude", obss_nobs)
+    call obsspace_get_var(obss, obs_lat, "latitude", obss_nobs)
+    call obsspace_get_var(obss, obs_depth, "depth", obss_nobs)
+    call obsspace_get_var(obss, obs_val, "in_situ_temperature", obss_nobs)
+
     nlev = temp%nval
     nobs = temp%nobs        
     allocate(tempi(nlev,nobs))
@@ -88,8 +107,8 @@ contains
 
     do iobs = 1,hofx%nobs
        do ilev = 1, nlev
-          lono = obs_ti%lon(iobs)
-          lato = obs_ti%lat(iobs)          
+          lono = obs_lon(iobs)
+          lato = obs_lat(iobs)          
           call insitu_t_nl(tempi(ilev,iobs),temp%vals(ilev,iobs),salt%vals(ilev,iobs),lono,lato,depth(ilev,iobs))
        end do
     end do
@@ -102,9 +121,9 @@ contains
     ! insitu temperature profile obs operator
     do iobs = 1,hofx%nobs
 
-       lono = obs_ti%lon(iobs)
-       lato = obs_ti%lat(iobs)
-       deptho = obs_ti%depth(iobs)
+       lono = obs_lon(iobs)
+       lato = obs_lat(iobs)
+       deptho = obs_depth(iobs)
     
        !< Interpolation weight
        call vert_interp_weights(nlev,deptho,depth(:,iobs),wi,wf)
@@ -127,12 +146,12 @@ contains
        ! Output information:
        insitu_out%diag(iobs)%Station_ID         = 1234!obs_ti%idx(iobs)
        insitu_out%diag(iobs)%Observation_Type   = 1.0
-       insitu_out%diag(iobs)%Latitude           = obs_ti%lat(iobs)
-       insitu_out%diag(iobs)%Longitude          = obs_ti%lon(iobs)
-       insitu_out%diag(iobs)%Depth              = obs_ti%depth(iobs)
+       insitu_out%diag(iobs)%Latitude           = obs_lat(iobs)
+       insitu_out%diag(iobs)%Longitude          = obs_lon(iobs)
+       insitu_out%diag(iobs)%Depth              = obs_depth(iobs)
        insitu_out%diag(iobs)%Time               = 1.0
-       insitu_out%diag(iobs)%Observation        = obs_ti%val(iobs)
-       insitu_out%diag(iobs)%Obs_Minus_Forecast = obs_ti%val(iobs) - hofx%values(iobs)
+       insitu_out%diag(iobs)%Observation        = obs_val(iobs)
+       insitu_out%diag(iobs)%Obs_Minus_Forecast = obs_val(iobs) - hofx%values(iobs)
     enddo
 
     !call insitu_out%write_diag()
@@ -142,6 +161,11 @@ contains
     call insitu_out%finalize()
 
     deallocate(tempi, pressure, depth)
+
+    deallocate(obs_lon)
+    deallocate(obs_lat)
+    deallocate(obs_depth)
+    deallocate(obs_val)
     
   end subroutine ufo_insitutemperature_simobs
 

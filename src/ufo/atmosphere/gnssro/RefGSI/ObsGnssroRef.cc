@@ -47,7 +47,7 @@ ObsGnssroRef::~ObsGnssroRef() {
 
 void ObsGnssroRef::simulateObs(const GeoVaLs & gom, ioda::ObsVector & ovec,
                                 const ObsBias & bias) const {
-  ufo_gnssro_ref_simobs_f90(keyOperGnssroRef_, gom.toFortran(), odb_.toFortran(),
+  ufo_gnssro_ref_simobs_f90(keyOperGnssroRef_, gom.toFortran(), odb_,
                            ovec.toFortran(), bias.toFortran());
 }
 

@@ -9,8 +9,6 @@ module ufo_basis_tlad_mod
   use ufo_geovals_mod
   use ufo_geovals_mod_c,   only: ufo_geovals_registry
   use ioda_obs_vectors
-  use ioda_obsdb_mod, only: ioda_obsdb
-  use ioda_obsdb_mod_c, only: ioda_obsdb_registry
 
   type, abstract :: ufo_basis_tlad
     private
@@ -39,33 +37,33 @@ module ufo_basis_tlad_mod
 ! ------------------------------------------------------------------------------
 
     subroutine settraj_(self, geovals, obss)
-      import ufo_basis_tlad, ufo_geovals, ioda_obsdb
+      import ufo_basis_tlad, ufo_geovals, c_ptr
       implicit none
       class(ufo_basis_tlad), intent(inout) :: self
       type(ufo_geovals),    intent(in) :: geovals
-      type(ioda_obsdb),     intent(in) :: obss
+      type(c_ptr), value,   intent(in) :: obss
     end subroutine
 
 ! ------------------------------------------------------------------------------
 
     subroutine simobs_tl_(self, geovals, hofx, obss)
-      import ufo_basis_tlad, ufo_geovals, obs_vector, ioda_obsdb
+      import ufo_basis_tlad, ufo_geovals, obs_vector, c_ptr
       implicit none
       class(ufo_basis_tlad), intent(in) :: self
       type(ufo_geovals),     intent(in)    :: geovals
       type(obs_vector),      intent(inout) :: hofx
-      type(ioda_obsdb),      intent(in)    :: obss
+      type(c_ptr), value,    intent(in)    :: obss
     end subroutine
 
 ! ------------------------------------------------------------------------------
 
     subroutine simobs_ad_(self, geovals, hofx, obss)
-      import ufo_basis_tlad, ufo_geovals, obs_vector, ioda_obsdb
+      import ufo_basis_tlad, ufo_geovals, obs_vector, c_ptr
       implicit none
       class(ufo_basis_tlad), intent(in)    :: self
       type(ufo_geovals),     intent(inout)    :: geovals
       type(obs_vector),      intent(in)    :: hofx
-      type(ioda_obsdb),      intent(in)    :: obss
+      type(c_ptr), value,    intent(in)    :: obss
     end subroutine
 
   ! ------------------------------------------------------------------------------
@@ -85,64 +83,58 @@ contains
     
 ! ------------------------------------------------------------------------------
     
-    subroutine opr_settraj_(self, c_key_geovals, c_key_obsspace)
+    subroutine opr_settraj_(self, c_key_geovals, c_obsspace)
       implicit none
     
       class(ufo_basis_tlad), intent(inout) :: self
       integer(c_int), intent(in) :: c_key_geovals
-      integer(c_int), intent(in) :: c_key_obsspace
+      type(c_ptr), value, intent(in) :: c_obsspace
       
       type(ufo_geovals),    pointer :: geovals
-      type(ioda_obsdb),     pointer :: obss
     
       call ufo_geovals_registry%get(c_key_geovals,geovals)
-      call ioda_obsdb_registry%get(c_key_obsspace,obss)
       
-      call self%settraj(geovals, obss)
+      call self%settraj(geovals, c_obsspace)
       
     end subroutine opr_settraj_
     
 ! ------------------------------------------------------------------------------
     
-    subroutine opr_simobs_tl_(self, c_key_geovals, c_key_obsspace, c_key_hofx)
+    subroutine opr_simobs_tl_(self, c_key_geovals, c_obsspace, c_key_hofx)
       implicit none
     
       class(ufo_basis_tlad), intent(in) :: self
       integer(c_int), intent(in) :: c_key_geovals
       integer(c_int), intent(in) :: c_key_hofx
-      integer(c_int), intent(in) :: c_key_obsspace
+      type(c_ptr), value, intent(in) :: c_obsspace
       
       type(ufo_geovals),    pointer :: geovals
       type(obs_vector),     pointer :: hofx
-      type(ioda_obsdb),     pointer :: obss
       
       call ufo_geovals_registry%get(c_key_geovals,geovals)
       call ioda_obs_vect_registry%get(c_key_hofx,hofx)
-      call ioda_obsdb_registry%get(c_key_obsspace,obss)
       
-      call self%simobs_tl(geovals, hofx, obss)
+      call self%simobs_tl(geovals, hofx, c_obsspace)
       
     end subroutine opr_simobs_tl_
     
 ! ------------------------------------------------------------------------------
     
-    subroutine opr_simobs_ad_(self, c_key_geovals, c_key_obsspace, c_key_hofx)
+    subroutine opr_simobs_ad_(self, c_key_geovals, c_obsspace, c_key_hofx)
       implicit none
     
       class(ufo_basis_tlad), intent(in) :: self
       integer(c_int), intent(in) :: c_key_geovals
       integer(c_int), intent(in) :: c_key_hofx
-      integer(c_int), intent(in) :: c_key_obsspace
+      type(c_ptr), value, intent(in) :: c_obsspace
       
       type(ufo_geovals),    pointer :: geovals
       type(obs_vector),     pointer :: hofx
-      type(ioda_obsdb),     pointer :: obss
     
       call ufo_geovals_registry%get(c_key_geovals,geovals)
       call ioda_obs_vect_registry%get(c_key_hofx,hofx)
-      call ioda_obsdb_registry%get(c_key_obsspace,obss)
       
-      call self%simobs_ad(geovals, hofx, obss)
+      call self%simobs_ad(geovals, hofx, c_obsspace)
       
     end subroutine opr_simobs_ad_
 

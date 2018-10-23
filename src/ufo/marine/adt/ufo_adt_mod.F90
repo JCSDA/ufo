@@ -7,7 +7,8 @@
 
 module ufo_adt_mod
 
-  use ioda_obs_adt_mod
+  use iso_c_binding
+  use obsspace_mod
   use ioda_obs_vectors
   use ufo_vars_mod
   use ioda_locs_mod
@@ -41,7 +42,7 @@ contains
 
   ! ------------------------------------------------------------------------------
 
-  subroutine ufo_adt_simobs(self, geovals, hofx, obs_adt)
+  subroutine ufo_adt_simobs(self, geovals, hofx, obss)
 
     use ufo_marine_ncutils
     
@@ -49,7 +50,7 @@ contains
     
     type(ufo_adt), intent(in) :: self
     type(ufo_geovals), intent(in)    :: geovals
-    type(ioda_obs_adt), intent(in) :: obs_adt     !< adt observations
+    type(c_ptr), value,   intent(in) :: obss     !< adt observations
     type(obs_vector),  intent(inout) :: hofx
 
     character(len=*), parameter :: myname_="ufo_adt_simobs"
@@ -64,6 +65,11 @@ contains
     integer :: iobs
     real :: sum_obs,sum_hofx
     type(ufo_geoval), pointer :: geoval_adt
+
+    real(kind_real), allocatable :: obs_lat(:)
+    real(kind_real), allocatable :: obs_lon(:)
+    real(kind_real), allocatable :: obs_adt(:)
+    integer :: nobs
 
     ! check if nobs is consistent in geovals & hofx
     if (geovals%nobs /= hofx%nobs) then
@@ -80,9 +86,19 @@ contains
 
     hofx%values = 0.0
 
+    ! Read in obs vars
+    nobs = obsspace_get_nobs(obss)
+    allocate(obs_lat(nobs))
+    allocate(obs_lon(nobs))
+    allocate(obs_adt(nobs))
+
+    call obsspace_get_var(obss, obs_lat, "latitude", nobs)
+    call obsspace_get_var(obss, obs_lon, "longitude", nobs)
+    call obsspace_get_var(obss, obs_adt, "adt", nobs)
+
     ! Compute offset
     sum_hofx=sum(geoval_adt%vals(1,:))
-    sum_obs=sum(obs_adt%adt(:))
+    sum_obs=sum(obs_adt(:))
     print *,'ssh offset',(sum_obs-sum_hofx)/hofx%nobs
 
     ! adt obs operator
@@ -93,17 +109,20 @@ contains
        ! Output information:
        adt_out%diag(iobs)%Station_ID            = 1
        adt_out%diag(iobs)%Observation_Type      = 1.0
-       adt_out%diag(iobs)%Latitude              = obs_adt%lat(iobs)
-       adt_out%diag(iobs)%Longitude             = obs_adt%lon(iobs)
+       adt_out%diag(iobs)%Latitude              = obs_lat(iobs)
+       adt_out%diag(iobs)%Longitude             = obs_lon(iobs)
        adt_out%diag(iobs)%Time                  = 1.0
-       adt_out%diag(iobs)%Observation           = obs_adt%adt(iobs)
-       adt_out%diag(iobs)%Obs_Minus_Forecast    = obs_adt%adt(iobs) - hofx%values(iobs)
+       adt_out%diag(iobs)%Observation           = obs_adt(iobs)
+       adt_out%diag(iobs)%Obs_Minus_Forecast    = obs_adt(iobs) - hofx%values(iobs)
     enddo
 
     call adt_out%write_diag()
     call adt_out%write_geoval(var_abs_topo,geoval_adt)
     call adt_out%finalize()
 
+    deallocate(obs_lat)
+    deallocate(obs_lon)
+    deallocate(obs_adt)
   end subroutine ufo_adt_simobs
 
 end module ufo_adt_mod

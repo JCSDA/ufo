@@ -7,7 +7,8 @@
 
 MODULE ufo_aod_mod
   
-  use ioda_obsdb_mod
+  use iso_c_binding
+  use obsspace_mod
   use ioda_obs_vectors
   use ufo_vars_mod
   use ioda_locs_mod
@@ -65,12 +66,11 @@ contains
 
   SUBROUTINE ufo_aod_simobs(self, geovals, hofx, obss) 
     implicit none
-    class(ufo_aod),    intent(in)    :: self
-    type(ufo_geovals), intent(in)    :: geovals
-    type(obs_vector),  intent(inout) :: hofx
-    type(ioda_obsdb), target, intent(in)  :: obss
+    class(ufo_aod),     intent(in)    :: self
+    type(ufo_geovals),  intent(in)    :: geovals
+    type(obs_vector),   intent(inout) :: hofx
+    type(c_ptr), value, intent(in)    :: obss
 
-    type(obs_vector) :: TmpOvec
     real(kind_real), allocatable :: Aod_Obs(:,:)
     real(kind_real), allocatable :: Omg_Aod(:,:)
 
@@ -161,7 +161,8 @@ contains
     ! Program header
     ! --------------
 
-    nobs=obss%nobs; nlocs=obss%nlocs
+    nobs  = obsspace_get_nobs(obss)
+    nlocs = obsspace_get_nlocs(obss)
 
     n_profiles=geovals%nobs
 
@@ -329,11 +330,8 @@ contains
 
        allocate(Aod_Obs(n_channels, n_profiles))
        allocate(Omg_Aod(n_channels, n_profiles))
-       call ioda_obsvec_setup(TmpOvec, obss%nobs)
-       call ioda_obsdb_var_to_ovec(obss, TmpOvec, "Observation")
-       Aod_Obs = reshape(TmpOvec%values, (/n_channels, n_profiles/))
-       call ioda_obsdb_var_to_ovec(obss, TmpOvec, "Obs_Minus_Forecast_unadjusted")
-       Omg_Aod = reshape(TmpOvec%values, (/n_channels, n_profiles/))
+       call obsspace_get_var(obss, Aod_Obs(1,1), "Observation", nobs)
+       call obsspace_get_var(obss, Omg_Aod(1,1), "Obs_Minus_Forecast_unadjusted", nobs)
 
        rmse = 0
        DO m = 1, N_PROFILES
@@ -356,7 +354,6 @@ contains
 
        deallocate(Aod_Obs)
        deallocate(Omg_Aod)
-       call ioda_obsvec_delete(TmpOvec)
 
        ! output to hofx structure   
        hofx%values(:) = 0.0

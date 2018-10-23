@@ -13,8 +13,7 @@ use kinds
 
 use crtm_module
 
-use ioda_obsdb_mod, only: ioda_obsdb, ioda_obsdb_var_to_ovec
-use ioda_obs_vectors, only: obs_vector, ioda_obsvec_setup, ioda_obsvec_delete
+use obsspace_mod
 
 use ufo_vars_mod
 use ufo_geovals_mod, only: ufo_geovals, ufo_geoval, ufo_geovals_get_var
@@ -190,7 +189,7 @@ integer,                     intent(in)    :: n_Profiles, n_Layers, N_Channels
 type(ufo_geovals),           intent(in)    :: geovals   
 type(CRTM_Surface_type),     intent(inout) :: sfc(:)
 type(CRTM_ChannelInfo_type), intent(in)    :: chinfo(:)
-type(ioda_obsdb),            intent(in)    :: obss
+type(c_ptr), value,          intent(in)    :: obss
 
 type(ufo_geoval), pointer :: geoval
 integer  :: k1, n1
@@ -210,21 +209,16 @@ character(len=100) :: varname_tmplate
 character(len=200) :: varname
 
 real(kind_real), allocatable :: ObsTb(:,:)
-type(obs_vector) :: TmpOvec
 
  varname_tmplate = "brightness_temperature"
 
- allocate(ObsTb(n_channels, N_PROFILES))
- call ioda_obsvec_setup(TmpOvec, n_profiles)
+ allocate(ObsTb(n_profiles, n_channels))
  
  do n1 = 1,n_Channels
    !Get the variable name for this channel
    call get_var_name(varname_tmplate,n1,varname)
-   call ioda_obsdb_var_to_ovec(obss, TmpOvec, varname)
-   ObsTb(n1,:) = TmpOvec%values
+   call obsspace_get_var(obss, ObsTb(1,n1), varname, n_profiles)
  enddo
-
- call ioda_obsvec_delete(TmpOvec)
 
  !Loop over all n_Profiles, i.e. number of locations
  do k1 = 1,N_PROFILES
@@ -237,7 +231,7 @@ type(obs_vector) :: TmpOvec
 
    !Pass observation value
    do n1 = 1, n_channels
-     sfc(k1)%sensordata%tb(n1) = ObsTb(n1, k1)
+     sfc(k1)%sensordata%tb(n1) = ObsTb(k1,n1)
    enddo
 
    !Water_type
@@ -326,27 +320,29 @@ end subroutine Load_Sfc_Data
 subroutine Load_Geom_Data(obss,geo)
 
 implicit none
-type(ioda_obsdb),         intent(in)    :: obss
+type(c_ptr), value,       intent(in)    :: obss
 type(CRTM_Geometry_type), intent(inout) :: geo(:)
 
-type(obs_vector) :: TmpOvec
+real(kind_real), allocatable :: TmpVar(:)
+integer :: nlocs
 
- call ioda_obsvec_setup(TmpOvec, obss%nlocs)
+ nlocs = obsspace_get_nlocs(obss)
+ allocate(TmpVar(nlocs))
 
- call ioda_obsdb_var_to_ovec(obss, TmpOvec, "Sat_Zenith_Angle")
- geo(:)%Sensor_Zenith_Angle = TmpOvec%values(:)
- call ioda_obsdb_var_to_ovec(obss, TmpOvec, "Sol_Zenith_Angle")
- geo(:)%Source_Zenith_Angle = TmpOvec%values(:)
- call ioda_obsdb_var_to_ovec(obss, TmpOvec, "Sat_Azimuth_Angle")
- geo(:)%Sensor_Azimuth_Angle = TmpOvec%values(:)
- call ioda_obsdb_var_to_ovec(obss, TmpOvec, "Sol_Azimuth_Angle")
- geo(:)%Source_Azimuth_Angle = TmpOvec%values(:)
- call ioda_obsdb_var_to_ovec(obss, TmpOvec, "Scan_Position")
- geo(:)%Ifov = TmpOvec%values(:)
- call ioda_obsdb_var_to_ovec(obss, TmpOvec, "Scan_Angle") !The Sensor_Scan_Angle is optional
- geo(:)%Sensor_Scan_Angle = TmpOvec%values(:)
+ call obsspace_get_var(obss, TmpVar, "Sat_Zenith_Angle", nlocs)
+ geo(:)%Sensor_Zenith_Angle = TmpVar(:)
+ call obsspace_get_var(obss, TmpVar, "Sol_Zenith_Angle", nlocs)
+ geo(:)%Source_Zenith_Angle = TmpVar(:)
+ call obsspace_get_var(obss, TmpVar, "Sat_Azimuth_Angle", nlocs)
+ geo(:)%Sensor_Azimuth_Angle = TmpVar(:)
+ call obsspace_get_var(obss, TmpVar, "Sol_Azimuth_Angle", nlocs)
+ geo(:)%Source_Azimuth_Angle = TmpVar(:)
+ call obsspace_get_var(obss, TmpVar, "Scan_Position", nlocs)
+ geo(:)%Ifov = TmpVar(:)
+ call obsspace_get_var(obss, TmpVar, "Scan_Angle", nlocs) !The Sensor_Scan_Angle is optional
+ geo(:)%Sensor_Scan_Angle = TmpVar(:)
 
- call ioda_obsvec_delete(TmpOvec)
+ deallocate(TmpVar)
 
 end subroutine Load_Geom_Data
 

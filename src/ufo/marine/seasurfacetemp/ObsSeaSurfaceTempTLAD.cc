@@ -47,7 +47,7 @@ ObsSeaSurfaceTempTLAD::~ObsSeaSurfaceTempTLAD() {
 
 void ObsSeaSurfaceTempTLAD::setTrajectory(const GeoVaLs & geovals, const ObsBias & bias) {
   ufo_seasurfacetemp_tlad_settraj_f90(keyOperSeaSurfaceTemp_,
-                                      geovals.toFortran());  //, odb_.toFortran());
+                                      geovals.toFortran());  //, odb_);
 }
 
 // -----------------------------------------------------------------------------

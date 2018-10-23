@@ -11,9 +11,8 @@ module ufo_gnssro_bndgsi_mod
   use ufo_vars_mod
   use ufo_geovals_mod
   use ufo_geovals_mod_c,   only: ufo_geovals_registry
+  use obsspace_mod
   use ioda_obs_vectors
-  use ioda_obsdb_mod
-  use ioda_obsdb_mod_c,   only: ioda_obsdb_registry
   use vert_interp_mod
   use ufo_basis_mod,      only: ufo_basis
   use lag_interp_mod,     only: lag_interp_const, lag_interp_smthWeights
@@ -38,7 +37,7 @@ module ufo_gnssro_bndgsi_mod
       class(ufo_gnssro_bndGSI), intent(in)    :: self
       type(ufo_geovals),        intent(in)    :: geovals
       type(obs_vector),         intent(inout) :: hofx
-      type(ioda_obsdb), target, intent(in)    :: obss
+      type(c_ptr), value,       intent(in)    :: obss
     
       character(len=*), parameter     :: myname_ ="ufo_gnssro_bndgsi_simobs"
       logical, parameter              :: use_compress = .true.
@@ -64,7 +63,7 @@ module ufo_gnssro_bndgsi_mod
       real(kind_real), allocatable    :: refr(:,:), radius(:,:)
       real(kind_real), allocatable    :: refrIndex(:), refrXrad(:), geomzi(:), refrXrad_new(:)
       real(kind_real), allocatable    :: lagConst(:,:)
-      type(obs_vector)                :: obsLat, obsImpP, obsLocR, obsGeoid
+      real(kind_real), allocatable    :: obsLat(:), obsImpP(:), obsLocR(:), obsGeoid(:)
       real(kind_real)                 :: specHmean, tmean
       real(kind_real)                 :: d_refrXrad
       real(kind_real)                 :: derivRefr_s(ngrd),grids(ngrd),refrXrad_s(ngrd)
@@ -153,14 +152,15 @@ module ufo_gnssro_bndgsi_mod
       allocate(lagConst(3,nlevExt))   !x=nr, r: radius
       allocate(refrXrad_new(nlevExt+newAdd))
 
-      call ioda_obsvec_setup(obsLat, obss%nobs)
-      call ioda_obsdb_var_to_ovec(obss, obsLat, "Latitude")
-      call ioda_obsvec_setup(obsImpP, obss%nobs)
-      call ioda_obsdb_var_to_ovec(obss, obsImpP, "IMPP")   !observed impact parameter; meter
-      call ioda_obsvec_setup(obsLocR, obss%nobs)
-      call ioda_obsdb_var_to_ovec(obss, obsLocR, "ELRC")   !local radius of earth; meter
-      call ioda_obsvec_setup(obsGeoid, obss%nobs)
-      call ioda_obsdb_var_to_ovec(obss, obsGeoid, "GEODU") !Geoid; meter
+      allocate(obsLat(nobs))
+      allocate(obsImpP(nobs))
+      allocate(obsLocR(nobs))
+      allocate(obsGeoid(nobs))
+
+      call obsspace_get_var(obss, obsLat, "Latitude", nobs)
+      call obsspace_get_var(obss, obsImpP, "IMPP", nobs)   !observed impact parameter; meter
+      call obsspace_get_var(obss, obsLocR, "ELRC", nobs)   !local radius of earth; meter
+      call obsspace_get_var(obss, obsGeoid, "GEODU", nobs) !Geoid; meter
 
 
       nobs_outIntgl = 0 !initialize count of observations out of integral grids  
@@ -170,10 +170,10 @@ module ufo_gnssro_bndgsi_mod
          do ilev = 1,nlev 
 
          ! compute guess geometric height from geopotential height at model interface levels
-            call geop2geometric( obsLat%values(iobs), gesZi(ilev,iobs), geomzi(ilev), jacob)
+            call geop2geometric( obsLat(iobs), gesZi(ilev,iobs), geomzi(ilev), jacob)
 
          ! compute guess radius 
-            radius(ilev,iobs) = geomzi(ilev) + obsGeoid%values(iobs) + obsLocR%values(iobs)   ! radius r
+            radius(ilev,iobs) = geomzi(ilev) + obsGeoid(iobs) + obsLocR(iobs)   ! radius r
 
          ! compute guess refractivity and refractivity index at model interface levels
             if(ilev > 1) then
@@ -191,7 +191,7 @@ module ufo_gnssro_bndgsi_mod
 
          ! data rejection based on model background !
          ! (1) skip data below the model levels
-         call get_coordinate_value(obsImpP%values(iobs), sIndx,refrXrad(1),nlev,"increasing")
+         call get_coordinate_value(obsImpP(iobs), sIndx,refrXrad(1),nlev,"increasing")
          if (sIndx < one .or. sIndx > float(nlev)) then 
              count_rejection = count_rejection + 1
              cycle
@@ -202,7 +202,7 @@ module ufo_gnssro_bndgsi_mod
          count_SR=0
          top_layer_SR=0
          bot_layer_SR=0
-         obsImpH = (obsImpP%values(iobs) - obsLocR%values(iobs)) * r1em3 !impact heigt: a-r_earth
+         obsImpH = (obsImpP(iobs) - obsLocR(iobs)) * r1em3 !impact heigt: a-r_earth
          if (obsImpH <= six) then
             do klev=nlevCheck,1,-1
 
@@ -227,7 +227,7 @@ module ufo_gnssro_bndgsi_mod
 
                endif
             end do
-            if (top_layer_SR >= 1 .and. obsImpP%values(iobs) <= refrXrad(top_layer_SR+2)) then !obs inside model SR layer
+            if (top_layer_SR >= 1 .and. obsImpP(iobs) <= refrXrad(top_layer_SR+2)) then !obs inside model SR layer
                count_rejection = count_rejection + 1
                cycle
             end if
@@ -253,7 +253,7 @@ module ufo_gnssro_bndgsi_mod
          derivRefr_s = zero
          grids_loop: do igrd =1,ngrd
          !use the new grids (s) for bending angle computation
-           refrXrad_s(igrd)=sqrt(grids(igrd)**2 + obsImpP%values(iobs)**2) !x_s^2=s^2+a^2
+           refrXrad_s(igrd)=sqrt(grids(igrd)**2 + obsImpP(iobs)**2) !x_s^2=s^2+a^2
 
            call get_coordinate_value(refrXrad_s(igrd), sIndx,refrXrad(1:nlevExt),nlevExt,"increasing")
 
@@ -302,7 +302,7 @@ module ufo_gnssro_bndgsi_mod
             bndIntgd     = ds*derivRefr_s(igrd)/refrXrad_s(igrd)
             bendingAngle = bendingAngle + two*bndIntgd
          end do
-         bendingAngle=r1em6 * obsImpP%values(iobs) * bendingAngle
+         bendingAngle=r1em6 * obsImpP(iobs) * bendingAngle
          hofx%values(iobs) = bendingAngle
 
       end do obs_loop
@@ -318,10 +318,10 @@ module ufo_gnssro_bndgsi_mod
          int(sIndxExt)
       endif
 
-      call ioda_obsvec_delete(obsLat) 
-      call ioda_obsvec_delete(obsImpP)
-      call ioda_obsvec_delete(obsLocR)
-      call ioda_obsvec_delete(obsGeoid)
+      deallocate(obsLat)
+      deallocate(obsImpP)
+      deallocate(obsLocR)
+      deallocate(obsGeoid)
 
       deallocate(gesPi) 
       deallocate(gesZi) 

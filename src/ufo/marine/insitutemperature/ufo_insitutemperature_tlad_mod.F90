@@ -7,7 +7,8 @@
 
 module ufo_insitutemperature_tlad_mod
 
-  use ioda_obs_insitutemperature_mod
+  use iso_c_binding
+  use obsspace_mod
   use ioda_obs_vectors
   use ufo_vars_mod
   use ioda_locs_mod
@@ -71,20 +72,25 @@ contains
 
   ! ------------------------------------------------------------------------------
 
-  subroutine ufo_insitutemperature_tlad_settraj(traj, geovals, obs_ti)
+  subroutine ufo_insitutemperature_tlad_settraj(traj, geovals, obss)
     use vert_interp_mod
     use ufo_tpsp2ti_mod
         
     implicit none
     type(ufo_insitutemperature_tlad), intent(inout)  :: traj    !< Complete trajectory needed by the operator
     type(ufo_geovals), intent(in)                    :: geovals !< Model background
-    type(ioda_obs_insitutemperature), intent(in)     :: obs_ti  !< Insitu temperature observations
+    type(c_ptr), value, intent(in)                   :: obss    !< Insitu temperature observations
 
     character(len=*), parameter :: myname_="ufo_insitutemperature_tlad_settraj"
     character(max_string) :: err_msg
 
     type(ufo_geoval), pointer :: temp, salt, h
     integer :: nobs, nlev, iobs, ilev
+
+    real(kind_real), allocatable :: obs_lat(:)
+    real(kind_real), allocatable :: obs_lon(:)
+    real(kind_real), allocatable :: obs_depth(:)
+    integer :: obss_nobs
     
     ! check if sea temperature profile variable is in geovals and get it
     call ufo_geovals_get_var(geovals, var_ocn_pot_temp, temp)
@@ -107,13 +113,22 @@ contains
     traj%salt = salt
     traj%h    = h
 
-    allocate(traj%lono(obs_ti%nobs))
-    allocate(traj%lato(obs_ti%nobs))
-    allocate(traj%deptho(obs_ti%nobs))
+    allocate(traj%lono(nobs))
+    allocate(traj%lato(nobs))
+    allocate(traj%deptho(nobs))
 
-    traj%lono = obs_ti%lon
-    traj%lato = obs_ti%lat
-    traj%deptho = obs_ti%depth
+    obss_nobs = obsspace_get_nobs(obss)
+    allocate(obs_lat(obss_nobs))
+    allocate(obs_lon(obss_nobs))
+    allocate(obs_depth(obss_nobs))
+
+    call obsspace_get_var(obss, obs_lat, "latitude", obss_nobs)
+    call obsspace_get_var(obss, obs_lon, "longitude", obss_nobs)
+    call obsspace_get_var(obss, obs_depth, "depth", obss_nobs)
+
+    traj%lono = obs_lon
+    traj%lato = obs_lat
+    traj%deptho = obs_depth
 
     !< Depth from layer thickness
     allocate(traj%depth(nlev,nobs))
@@ -146,6 +161,9 @@ contains
        call insitu_t_jac(traj%jac(:,iobs), traj%tempo(iobs), traj%salto(iobs), traj%lono(iobs), traj%lato(iobs), traj%deptho(iobs))
     end do
     
+    deallocate(obs_lat)
+    deallocate(obs_lon)
+    deallocate(obs_depth)
   end subroutine ufo_insitutemperature_tlad_settraj
 
   ! ------------------------------------------------------------------------------

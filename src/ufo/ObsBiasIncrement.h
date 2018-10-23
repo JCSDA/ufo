@@ -10,6 +10,7 @@
 
 #include <iostream>
 
+#include "oops/util/Logger.h"
 #include "oops/util/Printable.h"
 
 namespace eckit {

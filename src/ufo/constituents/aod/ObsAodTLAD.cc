@@ -47,21 +47,21 @@ ObsAodTLAD::~ObsAodTLAD() {
 // -----------------------------------------------------------------------------
 
 void ObsAodTLAD::setTrajectory(const GeoVaLs & geovals, const ObsBias & bias) {
-  ufo_aod_tlad_settraj_f90(keyOperAod_, geovals.toFortran(), odb_.toFortran());
+  ufo_aod_tlad_settraj_f90(keyOperAod_, geovals.toFortran(), odb_);
 }
 
 // -----------------------------------------------------------------------------
 
 void ObsAodTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec,
                                const ObsBiasIncrement & bias) const {
-  ufo_aod_simobs_tl_f90(keyOperAod_, geovals.toFortran(), odb_.toFortran(), ovec.toFortran());
+  ufo_aod_simobs_tl_f90(keyOperAod_, geovals.toFortran(), odb_, ovec.toFortran());
 }
 
 // -----------------------------------------------------------------------------
 
 void ObsAodTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec,
                                ObsBiasIncrement & bias) const {
-  ufo_aod_simobs_ad_f90(keyOperAod_, geovals.toFortran(), odb_.toFortran(), ovec.toFortran());
+  ufo_aod_simobs_ad_f90(keyOperAod_, geovals.toFortran(), odb_, ovec.toFortran());
 }
 
 // -----------------------------------------------------------------------------

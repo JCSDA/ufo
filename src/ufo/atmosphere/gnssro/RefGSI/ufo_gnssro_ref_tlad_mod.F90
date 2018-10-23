@@ -11,9 +11,8 @@ module ufo_gnssro_ref_tlad_mod
   use ufo_vars_mod
   use ufo_geovals_mod
   use ufo_geovals_mod_c,   only: ufo_geovals_registry
+  use obsspace_mod
   use ioda_obs_vectors
-  use ioda_obsdb_mod
-  use ioda_obsdb_mod_c,    only: ioda_obsdb_registry
   use vert_interp_mod
   use ufo_basis_tlad_mod,  only: ufo_basis_tlad
 
@@ -44,14 +43,14 @@ contains
       implicit none
       class(ufo_gnssro_Ref_tlad), intent(inout) :: self
       type(ufo_geovals),         intent(in)     :: geovals
-      type(ioda_obsdb),          intent(in)     :: obss
+      type(c_ptr), value,        intent(in)     :: obss
       
       character(len=*), parameter :: myname_="ufo_gnssro_ref_tlad_settraj"
       character(max_string)       :: err_msg
       
       type(ufo_geoval), pointer :: t,q,prs,gph
       integer          :: iobs, ierr
-      type(obs_vector) :: obsZ, obsLat  ! observation vector
+      real(kind_real), allocatable :: obsZ(:), obsLat(:)  ! observation vector
       real(kind_real)  :: Tv, Tv0
       integer          :: wi0
 
@@ -82,26 +81,27 @@ contains
 
       !Keep copy of dimensions
       self%nval = prs%nval
-      self%nobs = obss%nobs
+      self%nobs = obsspace_get_nobs(obss)
  
-      allocate(self%wi(obss%nobs))
-      allocate(self%wf(obss%nobs))
-      allocate(self%t(obss%nobs))
-      allocate(self%q(obss%nobs))
-      allocate(self%prs(obss%nobs))
-      allocate(self%obsH(obss%nobs))
+      allocate(self%wi(self%nobs))
+      allocate(self%wf(self%nobs))
+      allocate(self%t(self%nobs))
+      allocate(self%q(self%nobs))
+      allocate(self%prs(self%nobs))
+      allocate(self%obsH(self%nobs))
+
+      allocate(obsZ(self%nobs))
+      allocate(obsLat(self%nobs))
 
       ! observation of altitude (MSL) (for vertical interpolation)
-      call ioda_obsvec_setup(obsZ, obss%nobs)
-      call ioda_obsdb_var_to_ovec(obss, obsZ, "MSL_ALT")
+      call obsspace_get_var(obss, obsZ, "MSL_ALT", self%nobs)
       ! observation of Latitude (degree) (for geometric to geopotential height transform)
-      call ioda_obsvec_setup(obsLat, obss%nobs)
-      call ioda_obsdb_var_to_ovec(obss, obsLat, "Latitude")
+      call obsspace_get_var(obss, obsLat, "Latitude", self%nobs)
 
-      do iobs = 1, obss%nobs
+      do iobs = 1, self%nobs
 
         !  calculate observation geopotential height using  MJ Mahoney's (2001)
-        call geometric2geop(obsLat%values(iobs), obsZ%values(iobs), self%obsH(iobs))
+        call geometric2geop(obsLat(iobs), obsZ(iobs), self%obsH(iobs))
         call vert_interp_weights(self%nval, self%obsH(iobs), gph%vals(:,iobs),self%wi(iobs),self%wf(iobs))
         wi0 = self%wi(iobs)
         call vert_interp_apply(t%nval, t%vals(:,iobs), self%t(iobs), self%wi(iobs),self%wf(iobs))
@@ -117,8 +117,8 @@ contains
   
        self%ltraj = .true.
       ! cleanup
-      call ioda_obsvec_delete(obsZ)
-      call ioda_obsvec_delete(obsLat)
+      deallocate(obsZ)
+      deallocate(obsLat)
     end subroutine ufo_gnssro_ref_tlad_settraj
     
 ! ------------------------------------------------------------------------------
@@ -129,7 +129,7 @@ contains
       class(ufo_gnssro_Ref_tlad), intent(in) :: self
       type(ufo_geovals),      intent(in)     :: geovals
       type(obs_vector),       intent(inout)  :: hofx
-      type(ioda_obsdb),       intent(in)     :: obss
+      type(c_ptr), value,     intent(in)     :: obss
       logical,                parameter      :: use_compress=.true.
      
       character(len=*), parameter :: myname_="ufo_gnssro_ref_tlad_tl"
@@ -198,7 +198,7 @@ contains
       class(ufo_gnssro_Ref_tlad), intent(in)   :: self
       type(ufo_geovals),         intent(inout) :: geovals
       type(obs_vector),          intent(in)    :: hofx
-      type(ioda_obsdb),          intent(in)    :: obss
+      type(c_ptr), value,        intent(in)    :: obss
       logical,                   parameter     :: use_compress=.true.
 
       character(len=*), parameter :: myname_="ufo_gnssro_ref_tlad_ad"

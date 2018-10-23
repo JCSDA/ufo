@@ -13,8 +13,7 @@ module ufo_gnssro_bndropp1d_mod
   use ufo_geovals_mod_c, only: ufo_geovals_registry
   use ufo_basis_mod,     only: ufo_basis
   use ioda_obs_vectors
-  use ioda_obsdb_mod
-  use ioda_obsdb_mod_c,  only: ioda_obsdb_registry
+  use obsspace_mod
   use vert_interp_mod
   use lag_interp_mod, only: lag_interp_const, lag_interp_smthWeights
   
@@ -39,7 +38,7 @@ module ufo_gnssro_bndropp1d_mod
       class(ufo_gnssro_BndROPP1D), intent(in):: self
       type(ufo_geovals), intent(in)          :: geovals
       type(obs_vector),  intent(inout)       :: hofx
-      type(ioda_obsdb), target, intent(in)   :: obss
+      type(c_ptr), value, intent(in)         :: obss
 
       type(State1dFM)                 :: x
       type(Obs1dBangle)               :: y
@@ -56,8 +55,9 @@ module ufo_gnssro_bndropp1d_mod
       integer                         :: nvprof
       integer, allocatable, dimension(:)      :: ichk
       type(ufo_geoval), pointer       :: t, q, prs, z, z_sfc
-      type(obs_vector)                :: obsLat, obsLon, obsImpP, obsLocR, obsGeoid
-      type(obs_vector)                :: obsYYYY, obsMM, obsDD, obsHH, obsMN, obsSS
+      real(kind_real), allocatable    :: obsLat(:), obsLon(:), obsImpP(:), obsLocR(:), obsGeoid(:)
+      real(kind_real), allocatable    :: obsYYYY(:), obsMM(:), obsDD(:), obsHH(:), obsMN(:), obsSS(:)
+      integer :: obss_nobs
 
       write(*,*) "TRACE: ufo_gnssro_bndropp1d_simobs: begin"
       ! check if nobs is consistent in geovals & hofx
@@ -100,29 +100,30 @@ module ufo_gnssro_bndropp1d_mod
       nobs  = geovals%nobs ! number of observations
 
       ! read observation vectors
+      obss_nobs = obsspace_get_nobs(obss)
+      !allocate(obsYYYY(obss_nobs))
+      !allocate(obsMM(obss_nobs))
+      !allocate(obsDD(obss_nobs))
+      !allocate(obsHH(obss_nobs))
+      !allocate(obsMN(obss_nobs))
+      !allocate(obsSS(obss_nobs))
+      allocate(obsLon(obss_nobs))
+      allocate(obsLat(obss_nobs))
+      allocate(obsImpP(obss_nobs))
+      allocate(obsLocR(obss_nobs))
+      allocate(obsGeoid(obss_nobs))
 
-!      call ioda_obsvec_setup(obsYYYY, obss%nobs)
-!      call ioda_obsdb_var_to_ovec(obss, obsYYYY, "year") !Note: variable name not consistent with BUFR table
-!      call ioda_obsvec_setup(obsMM, obss%nobs)
-!      call ioda_obsdb_var_to_ovec(obss, obsMM, "month") !Note: variable name not consistent with BUFR table
-!      call ioda_obsvec_setup(obsDD, obss%nobs)
-!      call ioda_obsdb_var_to_ovec(obss, obsDD, "day") !Note: variable name not consistent with BUFR table
-!      call ioda_obsvec_setup(obsHH, obss%nobs)
-!      call ioda_obsdb_var_to_ovec(obss, obsHH, "hour") !Note: variable name not consistent with BUFR table
-!      call ioda_obsvec_setup(obsMN, obss%nobs)
-!      call ioda_obsdb_var_to_ovec(obss, obsMN, "minute") !Note: variable name not consistent with BUFR table
-!      call ioda_obsvec_setup(obsSS, obss%nobs)
-!      call ioda_obsdb_var_to_ovec(obss, obsSS, "second") !Note: variable name not consistent with BUFR table
-      call ioda_obsvec_setup(obsLon, obss%nobs)
-      call ioda_obsdb_var_to_ovec(obss, obsLon, "Longitude") !Note: variable name not consistent with BUFR table
-      call ioda_obsvec_setup(obsLat, obss%nobs)
-      call ioda_obsdb_var_to_ovec(obss, obsLat, "Latitude") !Note: variable name not consistent with BUFR table
-      call ioda_obsvec_setup(obsImpP, obss%nobs)
-      call ioda_obsdb_var_to_ovec(obss, obsImpP, "IMPP") !observed impact parameter
-      call ioda_obsvec_setup(obsLocR, obss%nobs)
-      call ioda_obsdb_var_to_ovec(obss, obsLocR, "ELRC") !local radius of earth. Note: need add to test data
-      call ioda_obsvec_setup(obsGeoid, obss%nobs)
-      call ioda_obsdb_var_to_ovec(obss, obsGeoid, "GEODU") !Geoid. Note: need add to test data
+      !call obsspace_get_var(obss, obsYYYY, "year", obss_nobs) !Note: variable name not consistent with BUFR table
+      !call obsspace_get_var(obss, obsMM, "month", obss_nobs) !Note: variable name not consistent with BUFR table
+      !call obsspace_get_var(obss, obsDD, "day", obss_nobs) !Note: variable name not consistent with BUFR table
+      !call obsspace_get_var(obss, obsHH, "hour", obss_nobs) !Note: variable name not consistent with BUFR table
+      !call obsspace_get_var(obss, obsMN, "minute", obss_nobs) !Note: variable name not consistent with BUFR table
+      !call obsspace_get_var(obss, obsSS, "second", obss_nobs) !Note: variable name not consistent with BUFR table
+      call obsspace_get_var(obss, obsLon, "Longitude", obss_nobs) !Note: variable name not consistent with BUFR table
+      call obsspace_get_var(obss, obsLat, "Latitude", obss_nobs) !Note: variable name not consistent with BUFR table
+      call obsspace_get_var(obss, obsImpP, "IMPP", obss_nobs) !observed impact parameter
+      call obsspace_get_var(obss, obsLocR, "ELRC", obss_nobs) !local radius of earth. Note: need add to test data
+      call obsspace_get_var(obss, obsGeoid, "GEODU", obss_nobs) !Geoid. Note: need add to test data
 
       nvprof = 1 ! number of vertical profiles (occultation points)
       allocate(ichk(nvprof))
@@ -131,18 +132,18 @@ module ufo_gnssro_bndropp1d_mod
       write(record,*) "DEBUG: ufo_gnssro_bndropp1d_simobs: begin observation loop  ", nobs
       obs_loop: do iobs = 1, nobs 
 
-!         call init_ob_time(int(obsYYYY%values(iobs)),   &
-!                           int(obsMM%values(iobs)),     &
-!                           int(obsDD%values(iobs)),     &
-!                           int(obsHH%values(iobs)),     &
-!                           int(obsMN%values(iobs)),     &
-!                           int(obsSS%values(iobs)),     &
+!         call init_ob_time(int(obsYYYY(iobs)),   &
+!                           int(obsMM(iobs)),     &
+!                           int(obsDD(iobs)),     &
+!                           int(obsHH(iobs)),     &
+!                           int(obsMN(iobs)),     &
+!                           int(obsSS(iobs)),     &
 !                           ob_time)
                             ob_time = 0.0
          ! alternatively you can use the analysis time and the observation value of time
          call init_ropp_1d_statevec(ob_time,               &
-                                    obsLon%values(iobs),   &
-                                    obsLat%values(iobs),   &
+                                    obsLon(iobs),   &
+                                    obsLat(iobs),   &
                                     t%vals(:,iobs),        &
                                     q%vals(:,iobs),        &
                                     prs%vals(:,iobs),      &
@@ -151,12 +152,12 @@ module ufo_gnssro_bndropp1d_mod
                                     z_sfc%vals(1,iobs),    &
                                     x)
          call init_ropp_1d_obvec(nvprof,                &
-                                 obsImpP%values(iobs),  &
+                                 obsImpP(iobs),  &
                                  ichk, ob_time,         &
-                                 obsLat%values(iobs),   &
-                                 obsLon%values(iobs),   &
-                                 obsLocR%values(iobs),  &  
-                                 obsGeoid%values(iobs), &
+                                 obsLat(iobs),   &
+                                 obsLon(iobs),   &
+                                 obsLocR(iobs),  &  
+                                 obsGeoid(iobs), &
                                  y)
 
          call ropp_fm_bangle_1d(x,y)
@@ -165,17 +166,17 @@ module ufo_gnssro_bndropp1d_mod
 
       end do obs_loop
       
-      call ioda_obsvec_delete(obsLat) !Note: to be removed
-      call ioda_obsvec_delete(obsLon)
-      call ioda_obsvec_delete(obsImpP)
-      call ioda_obsvec_delete(obsLocR)
-      call ioda_obsvec_delete(obsGeoid)
-      call ioda_obsvec_delete(obsYYYY)
-      call ioda_obsvec_delete(obsMM)
-      call ioda_obsvec_delete(obsDD)
-      call ioda_obsvec_delete(obsHH)
-      call ioda_obsvec_delete(obsMN)
-      call ioda_obsvec_delete(obsSS)
+      deallocate(obsLat) !Note: to be removed
+      deallocate(obsLon)
+      deallocate(obsImpP)
+      deallocate(obsLocR)
+      deallocate(obsGeoid)
+      !deallocate(obsYYYY)
+      !deallocate(obsMM)
+      !deallocate(obsDD)
+      !deallocate(obsHH)
+      !deallocate(obsMN)
+      !deallocate(obsSS)
       write(*,*) "TRACE: ufo_gnssro_bndropp1d_simobs: completed"
 
    end subroutine ufo_gnssro_bndropp1d_simobs

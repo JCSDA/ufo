@@ -8,6 +8,7 @@
 #ifndef UFO_ATMOSPHERE_GNSSRO_BNDROPP1D_FORTRANBNDROPP1D_H_
 #define UFO_ATMOSPHERE_GNSSRO_BNDROPP1D_FORTRANBNDROPP1D_H_
 
+#include "ioda/ObsSpace.h"
 #include "ufo/Fortran.h"
 
 namespace ufo {
@@ -24,16 +25,16 @@ extern "C" {
 // -----------------------------------------------------------------------------
   void ufo_gnssro_bndropp1d_setup_f90(F90hop &, const eckit::Configuration * const *);
   void ufo_gnssro_bndropp1d_delete_f90(F90hop &);
-  void ufo_gnssro_bndropp1d_simobs_f90(const F90hop &, const F90goms &, const F90odb &,
-                          const F90ovec &,
-                          const F90obias &);
+  void ufo_gnssro_bndropp1d_simobs_f90(const F90hop &, const F90goms &, const ioda::ObsSpace &,
+                          const F90ovec &, const F90obias &);
   void ufo_gnssro_bndropp1d_tlad_setup_f90(F90hop &, const eckit::Configuration * const *);
   void ufo_gnssro_bndropp1d_tlad_delete_f90(F90hop &);
-  void ufo_gnssro_bndropp1d_tlad_settraj_f90(const F90hop &, const F90goms &, const F90odb &);
-  void ufo_gnssro_bndropp1d_simobs_tl_f90(const F90hop &, const F90goms &, const F90odb &,
-                                       const F90ovec &);
-  void ufo_gnssro_bndropp1d_simobs_ad_f90(const F90hop &, const F90goms &, const F90odb &,
-                                       const F90ovec &);
+  void ufo_gnssro_bndropp1d_tlad_settraj_f90(const F90hop &, const F90goms &,
+                                             const ioda::ObsSpace &);
+  void ufo_gnssro_bndropp1d_simobs_tl_f90(const F90hop &, const F90goms &,
+                                       const ioda::ObsSpace &, const F90ovec &);
+  void ufo_gnssro_bndropp1d_simobs_ad_f90(const F90hop &, const F90goms &,
+                                       const ioda::ObsSpace &, const F90ovec &);
 // -----------------------------------------------------------------------------
 
 

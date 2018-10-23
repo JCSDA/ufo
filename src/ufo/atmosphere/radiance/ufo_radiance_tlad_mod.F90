@@ -11,7 +11,6 @@ module ufo_radiance_tlad_mod
  use config_mod
  use kinds
 
- use ioda_obsdb_mod, only: ioda_obsdb
  use ioda_obs_vectors, only: obs_vector
 
  use ufo_geovals_mod, only: ufo_geovals, ufo_geoval, ufo_geovals_get_var
@@ -86,7 +85,7 @@ implicit none
 
 class(ufo_radiance_tlad), intent(inout) :: self
 type(ufo_geovals),        intent(in)    :: geovals
-type(ioda_obsdb),         intent(in)    :: obss
+type(c_ptr), value,       intent(in)    :: obss
 
 ! Local Variables
 character(*), parameter :: PROGRAM_NAME = 'ufo_radiance_mod.F90'
@@ -286,10 +285,10 @@ end subroutine ufo_radiance_tlad_settraj
 subroutine ufo_radiance_simobs_tl(self, geovals, hofx, obss)
 
 implicit none
-class(ufo_radiance_tlad), intent(in)    :: self
-type(ufo_geovals),        intent(in)    :: geovals
-type(obs_vector),         intent(inout) :: hofx
-type(ioda_obsdb),         intent(in)    :: obss
+class(ufo_radiance_tlad), intent(in)  :: self
+type(ufo_geovals),     intent(in)     :: geovals
+type(obs_vector),      intent(inout)  :: hofx
+type(c_ptr), value,    intent(in)     :: obss
 
 character(len=*), parameter :: myname_="ufo_radiance_simobs_tl"
 character(max_string) :: err_msg
@@ -353,10 +352,10 @@ end subroutine ufo_radiance_simobs_tl
 subroutine ufo_radiance_simobs_ad(self, geovals, hofx, obss)
 
 implicit none
-class(ufo_radiance_tlad), intent(in)    :: self
-type(ufo_geovals),        intent(inout) :: geovals
-type(obs_vector),         intent(in)    :: hofx
-type(ioda_obsdb),         intent(in)    :: obss
+class(ufo_radiance_tlad), intent(in) :: self
+type(ufo_geovals),     intent(inout) :: geovals
+type(obs_vector),      intent(in)    :: hofx
+type(c_ptr), value,    intent(in)    :: obss
 
 character(len=*), parameter :: myname_="ufo_radiance_simobs_ad"
 character(max_string) :: err_msg

@@ -11,9 +11,8 @@ module ufo_gnssro_ref_mod
   use ufo_vars_mod
   use ufo_geovals_mod
   use ufo_geovals_mod_c, only: ufo_geovals_registry
+  use obsspace_mod
   use ioda_obs_vectors
-  use ioda_obsdb_mod
-  use ioda_obsdb_mod_c,  only: ioda_obsdb_registry
   use vert_interp_mod
   use ufo_basis_mod,     only: ufo_basis
   
@@ -38,7 +37,7 @@ contains
       class(ufo_gnssro_Ref), intent(in)          :: self
       type(ufo_geovals), intent(in)              :: geovals
       type(obs_vector),  intent(inout)           :: hofx
-      type(ioda_obsdb), target, intent(in)       :: obss
+      type(c_ptr), value,       intent(in)       :: obss
 
       character(len=*), parameter :: myname_="ufo_gnssro_ref_simobs"
       character(max_string) :: err_msg
@@ -46,9 +45,10 @@ contains
       integer         :: iobs,k
       real(kind_real) :: wf 
       integer         :: wi,ierr
+      integer         :: nobs
       type(ufo_geoval), pointer  :: t,q,prs,gph
       real(kind_real)            :: refr1, refr2,refr3
-      type(obs_vector) :: obsZ, obsLat
+      real(kind_real), allocatable :: obsZ(:), obsLat(:)
       real(kind_real)  :: obsH, gesT,gesQ, gesTv, gesTv0,gesP
       ! check if nobs is consistent in geovals & hofx
       if (geovals%nobs /= hofx%nobs) then
@@ -78,16 +78,18 @@ contains
          call abor1_ftn(err_msg)
        endif
 
-      call ioda_obsvec_setup(obsZ, obss%nobs)
-      call ioda_obsdb_var_to_ovec(obss, obsZ, "MSL_ALT")
-      call ioda_obsvec_setup(obsLat, obss%nobs)
-      call ioda_obsdb_var_to_ovec(obss, obsLat, "Latitude")
+      nobs = obsspace_get_nobs(obss)
+      allocate(obsZ(nobs))
+      allocate(obsLat(nobs))
+
+      call obsspace_get_var(obss, obsZ, "MSL_ALT", nobs)
+      call obsspace_get_var(obss, obsLat, "Latitude", nobs)
       call gnssro_ref_constants(use_compress)
 
       ! obs operator
       do iobs = 1, hofx%nobs
       ! Convert geometric height at observation to geopotential height 
-        call geometric2geop(obsLat%values(iobs), obsZ%values(iobs), obsH)
+        call geometric2geop(obsLat(iobs), obsZ(iobs), obsH)
         call vert_interp_weights(gph%nval,obsH, gph%vals(:,iobs),wi,wf)  ! calculate weights 
         call vert_interp_apply(t%nval,   t%vals(:,iobs), gesT, wi, wf)
         call vert_interp_apply(q%nval,   q%vals(:,iobs), gesQ, wi, wf)
@@ -105,8 +107,8 @@ contains
       enddo
 
       ! cleanup 
-      call ioda_obsvec_delete(obsZ)
-      call ioda_obsvec_delete(obsLat)
+      deallocate(obsZ)
+      deallocate(obsLat)
     end subroutine ufo_gnssro_ref_simobs
 
 ! ------------------------------------------------------------------------------

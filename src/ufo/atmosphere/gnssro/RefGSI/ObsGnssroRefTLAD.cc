@@ -47,14 +47,14 @@ ObsGnssroRefTLAD::~ObsGnssroRefTLAD() {
 // -----------------------------------------------------------------------------
 
 void ObsGnssroRefTLAD::setTrajectory(const GeoVaLs & geovals, const ObsBias & bias) {
-  ufo_gnssro_ref_tlad_settraj_f90(keyOperGnssroRef_, geovals.toFortran(), odb_.toFortran());
+  ufo_gnssro_ref_tlad_settraj_f90(keyOperGnssroRef_, geovals.toFortran(), odb_);
 }
 
 // -----------------------------------------------------------------------------
 
 void ObsGnssroRefTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec,
                                       const ObsBiasIncrement & bias) const {
-  ufo_gnssro_ref_simobs_tl_f90(keyOperGnssroRef_, geovals.toFortran(), odb_.toFortran(),
+  ufo_gnssro_ref_simobs_tl_f90(keyOperGnssroRef_, geovals.toFortran(), odb_,
                                ovec.toFortran());
 }
 
@@ -62,7 +62,7 @@ void ObsGnssroRefTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & 
 
 void ObsGnssroRefTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec,
                                       ObsBiasIncrement & bias) const {
-  ufo_gnssro_ref_simobs_ad_f90(keyOperGnssroRef_, geovals.toFortran(), odb_.toFortran(),
+  ufo_gnssro_ref_simobs_ad_f90(keyOperGnssroRef_, geovals.toFortran(), odb_,
                                ovec.toFortran());
 }
 

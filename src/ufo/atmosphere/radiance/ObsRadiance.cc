@@ -59,7 +59,7 @@ ObsRadiance::~ObsRadiance() {
 
 void ObsRadiance::simulateObs(const GeoVaLs & gom, ioda::ObsVector & ovec,
                               const ObsBias & bias) const {
-  ufo_radiance_simobs_f90(keyOperRadiance_, gom.toFortran(), odb_.toFortran(), ovec.toFortran(),
+  ufo_radiance_simobs_f90(keyOperRadiance_, gom.toFortran(), odb_, ovec.toFortran(),
                        bias.toFortran());
 }
 

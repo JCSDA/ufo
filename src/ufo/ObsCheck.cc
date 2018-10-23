@@ -27,7 +27,7 @@ ObsCheck::ObsCheck(const ioda::ObsSpace & obsdb, const oops::Variables & var,
   oops::Log::trace() << "ObsCheck contructor starting " << t1 << " " << t2 << std::endl;
   const util::DateTime * p1 = &t1;
   const util::DateTime * p2 = &t2;
-//  ufo_obsdb_getobscheck_f90(obsdb.toFortran(), var.toFortran(), &p1, &p2, keyObsCheck_);
+//  ufo_obsdb_getobscheck_f90(obsdb, var.toFortran(), &p1, &p2, keyObsCheck_);
   oops::Log::trace() << "ObsCheck contructor key = " << keyObsCheck_ << std::endl;
 }
 
@@ -65,7 +65,7 @@ void ObsCheck::print(std::ostream & os) const {
 void ObsCheck::postFilter(const GeoVaLs & gv, const ioda::ObsVector & ov,
                           const ioda::ObsSpace & os) const {
   oops::Log::trace() << "ObsCheck postFilter starting" << std::endl;
-  ufo_postFilter_f90(gv.toFortran(), ov.toFortran(), os.toFortran());
+  ufo_postFilter_f90(gv.toFortran(), ov.toFortran(), os);
   oops::Log::trace() << "ObsCheck postFilter end" << std::endl;
 }
 
@@ -73,7 +73,7 @@ void ObsCheck::postFilter(const GeoVaLs & gv, const ioda::ObsVector & ov,
 
 void ObsCheck::priorFilter(const ioda::ObsSpace & os) const {
   oops::Log::trace() << "ObsCheck priorFilter starting" << std::endl;
-  ufo_priorFilter_f90(os.toFortran());
+  ufo_priorFilter_f90(os);
   oops::Log::trace() << "ObsCheck priorFilter end" << std::endl;
 }
 

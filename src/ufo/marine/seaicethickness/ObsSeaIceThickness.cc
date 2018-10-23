@@ -47,7 +47,7 @@ ObsSeaIceThickness::~ObsSeaIceThickness() {
 
 void ObsSeaIceThickness::simulateObs(const GeoVaLs & gom, ioda::ObsVector & ovec,
                              const ObsBias & bias) const {
-  ufo_seaicethick_simobs_f90(keyOperSeaIceThickness_, gom.toFortran(), odb_.toFortran(),
+  ufo_seaicethick_simobs_f90(keyOperSeaIceThickness_, gom.toFortran(), odb_,
                           ovec.toFortran(), bias.toFortran());
 }
 

@@ -48,7 +48,7 @@ ObsGnssroBndGSI::~ObsGnssroBndGSI() {
 
 void ObsGnssroBndGSI::simulateObs(const GeoVaLs & gom, ioda::ObsVector & ovec,
                                 const ObsBias & bias) const {
-  ufo_gnssro_bndgsi_simobs_f90(keyOperGnssroBndGSI_, gom.toFortran(), odb_.toFortran(),
+  ufo_gnssro_bndgsi_simobs_f90(keyOperGnssroBndGSI_, gom.toFortran(), odb_,
                            ovec.toFortran(), bias.toFortran());
 }
 

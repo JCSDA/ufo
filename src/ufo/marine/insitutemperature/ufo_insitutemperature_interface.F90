@@ -62,27 +62,25 @@ end subroutine ufo_insitutemperature_delete_c
   
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_insitutemperature_simobs_c(c_key_self, c_key_geovals, c_key_obsspace, c_key_hofx, c_bias) bind(c,name='ufo_insitutemperature_simobs_f90')
+subroutine ufo_insitutemperature_simobs_c(c_key_self, c_key_geovals, c_obsspace, c_key_hofx, c_bias) bind(c,name='ufo_insitutemperature_simobs_f90')
 
 implicit none
-integer(c_int), intent(in) :: c_key_self
-integer(c_int), intent(in) :: c_key_geovals
-integer(c_int), intent(in) :: c_key_hofx
-integer(c_int), intent(in) :: c_key_obsspace
-integer(c_int), intent(in) :: c_bias
+integer(c_int),     intent(in) :: c_key_self
+integer(c_int),     intent(in) :: c_key_geovals
+integer(c_int),     intent(in) :: c_key_hofx
+type(c_ptr), value, intent(in) :: c_obsspace
+integer(c_int),     intent(in) :: c_bias
 
 type(ufo_insitutemperature), pointer :: self
 type(ufo_geovals),    pointer :: geovals
 type(obs_vector),     pointer :: hofx
-type(ioda_obs_insitutemperature), pointer :: obs_ti
 character(len=*), parameter :: myname_="ufo_insitutemperature_simobs_c"
 
 call ufo_insitutemperature_registry%get(c_key_self, self)
 call ufo_geovals_registry%get(c_key_geovals,geovals)
 call ioda_obs_vect_registry%get(c_key_hofx,hofx)
-call ioda_obs_insitutemperature_registry%get(c_key_obsspace,obs_ti)
 
-call ufo_insitutemperature_simobs(self, geovals, hofx, obs_ti)
+call ufo_insitutemperature_simobs(self, geovals, hofx, c_obsspace)
 
 end subroutine ufo_insitutemperature_simobs_c
 

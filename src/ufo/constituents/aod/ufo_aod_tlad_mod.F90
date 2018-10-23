@@ -6,7 +6,8 @@
 !> Fortran module to handle aod observations
 
 MODULE ufo_aod_tlad_mod
-  use ioda_obsdb_mod
+  use iso_c_binding
+  use obsspace_mod
   use ioda_obs_vectors
   use ufo_vars_mod
   use ioda_locs_mod
@@ -44,7 +45,7 @@ contains
     implicit none
     class(ufo_aod_tlad), intent(inout) :: self
     type(ufo_geovals),   intent(in)    :: geovals
-    type(ioda_obsdb),    intent(in)    :: obss
+    type(c_ptr), value,  intent(in)    :: obss
 
     character(len=*), parameter :: myname_="ufo_aod_tlad_settraj"
 
@@ -59,7 +60,7 @@ contains
     class(ufo_aod_tlad), intent(in)     :: self
     type(ufo_geovals),   intent(in)     :: geovals
     type(obs_vector),    intent(inout)  :: hofx
-    type(ioda_obsdb),    intent(in)     :: obss
+    type(c_ptr), value,  intent(in)     :: obss
 
     character(len=*), parameter :: myname_="ufo_aod_simobs_tl"
 
@@ -72,7 +73,7 @@ contains
     class(ufo_aod_tlad), intent(in)    :: self
     type(ufo_geovals),   intent(inout) :: geovals
     type(obs_vector),    intent(in)    :: hofx
-    type(ioda_obsdb),    intent(in)    :: obss
+    type(c_ptr), value,  intent(in)    :: obss
 
     character(len=*), parameter :: myname_="ufo_aod_simobs_tl"
 

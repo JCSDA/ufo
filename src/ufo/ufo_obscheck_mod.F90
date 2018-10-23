@@ -69,12 +69,12 @@ end subroutine c_ufo_obscheck_delete
 
 ! ------------------------------------------------------------------------------
 
-subroutine c_ufo_postFilter_f90(c_key_geovals, c_key_hofx,c_key_obsspace) bind(c,name='ufo_postFilter_f90')
+subroutine c_ufo_postFilter_f90(c_key_geovals, c_key_hofx, c_obsspace) bind(c,name='ufo_postFilter_f90')
 
    implicit none
    integer(c_int), intent(in) :: c_key_geovals
    integer(c_int), intent(in) :: c_key_hofx
-   integer(c_int), intent(in) :: c_key_obsspace
+   type(c_ptr), value, intent(in) :: c_obsspace
    type(ufo_geovals), pointer  :: geovals
    type(obs_vector), pointer :: hofx
 
@@ -109,10 +109,10 @@ end subroutine c_ufo_postFilter_f90
 
 ! ------------------------------------------------------------------------------
 
-subroutine c_ufo_priorFilter_f90(c_key_obsspace) bind(c,name='ufo_priorFilter_f90')
+subroutine c_ufo_priorFilter_f90(c_obsspace) bind(c,name='ufo_priorFilter_f90')
 
     implicit none
-    integer(c_int), intent(in) :: c_key_obsspace
+    type(c_ptr), value, intent(in) :: c_obsspace
     
 
     write(*,*) '=======Start Prior Filter (observation QC)========='

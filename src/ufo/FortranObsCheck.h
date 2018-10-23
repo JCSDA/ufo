@@ -10,6 +10,8 @@
 
 #include "Fortran.h"
 
+#include "ioda/ObsSpace.h"
+
 namespace ufo {
 
 /// Interface to Fortran UFO routines
@@ -25,8 +27,8 @@ extern "C" {
 // -----------------------------------------------------------------------------
   void ufo_obscheck_setup_f90(F90ocheck &, const eckit::Configuration * const *);
   void ufo_obscheck_delete_f90(F90ocheck &);
-  void ufo_postFilter_f90(const F90goms &, const F90ovec &, const F90odb &);
-  void ufo_priorFilter_f90(const F90odb &);
+  void ufo_postFilter_f90(const F90goms &, const F90ovec &, const ioda::ObsSpace &);
+  void ufo_priorFilter_f90(const ioda::ObsSpace &);
 
 // -----------------------------------------------------------------------------
 
