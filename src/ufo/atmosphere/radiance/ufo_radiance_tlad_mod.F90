@@ -1,17 +1,15 @@
 ! (C) Copyright 2017-2018 UCAR
-! 
+!
 ! This software is licensed under the terms of the Apache Licence Version 2.0
-! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
+! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 
 !> Fortran module to handle tl/ad for radiance observations
 
 module ufo_radiance_tlad_mod
-  
+
  use iso_c_binding
  use config_mod
  use kinds
-
- use ioda_obs_vectors, only: obs_vector
 
  use ufo_geovals_mod, only: ufo_geovals, ufo_geoval, ufo_geovals_get_var
  use ufo_basis_tlad_mod, only: ufo_basis_tlad
@@ -36,7 +34,7 @@ module ufo_radiance_tlad_mod
  contains
   procedure :: setup  => ufo_radiance_tlad_setup
   procedure :: delete  => ufo_radiance_tlad_delete
-  procedure :: settraj => ufo_radiance_tlad_settraj 
+  procedure :: settraj => ufo_radiance_tlad_settraj
   procedure :: simobs_tl  => ufo_radiance_simobs_tl
   procedure :: simobs_ad  => ufo_radiance_simobs_ad
  end type ufo_radiance_tlad
@@ -76,9 +74,9 @@ class(ufo_radiance_tlad), intent(inout) :: self
  endif
 
 end subroutine ufo_radiance_tlad_delete
-  
+
 ! ------------------------------------------------------------------------------
-  
+
 subroutine ufo_radiance_tlad_settraj(self, geovals, obss)
 
 implicit none
@@ -120,13 +118,13 @@ type(CRTM_RTSolution_type), allocatable :: rts_K(:,:)
  call Program_Message( PROGRAM_NAME, &
                        'Check/example program for the CRTM Forward and K-Matrix (setTraj) functions using '//&
                        trim(self%rc%ENDIAN_type)//' coefficient datafiles', &
-                       'CRTM Version: '//TRIM(Version) )    
-    
+                       'CRTM Version: '//TRIM(Version) )
+
 
  ! Initialise all the sensors at once
  ! ----------------------------------
  !** NOTE: CRTM_Init points to the various binary files needed for CRTM.  See the
- !**       CRTM_Lifecycle.f90 for more details. 
+ !**       CRTM_Lifecycle.f90 for more details.
 
  write( *,'(/5x,"Initializing the CRTM (setTraj) ...")' )
  err_stat = CRTM_Init( self%rc%SENSOR_ID, &
@@ -146,7 +144,7 @@ type(CRTM_RTSolution_type), allocatable :: rts_K(:,:)
 
    ! Determine the number of channels for the current sensor
    ! -------------------------------------------------------
-   self%N_Channels = CRTM_ChannelInfo_n_Channels(chinfo(n))       
+   self%N_Channels = CRTM_ChannelInfo_n_Channels(chinfo(n))
 
 
    ! Allocate the ARRAYS
@@ -175,7 +173,7 @@ type(CRTM_RTSolution_type), allocatable :: rts_K(:,:)
       STOP
    END IF
 
-       
+
    ! Create the input FORWARD structure (sfc)
    ! ----------------------------------------
    call CRTM_Surface_Create(sfc, self%N_Channels)
@@ -279,16 +277,16 @@ type(CRTM_RTSolution_type), allocatable :: rts_K(:,:)
  self%ltraj = .true.
 
 end subroutine ufo_radiance_tlad_settraj
-    
+
 ! ------------------------------------------------------------------------------
-  
+
 subroutine ufo_radiance_simobs_tl(self, geovals, hofx, obss)
 
 implicit none
-class(ufo_radiance_tlad), intent(in)  :: self
-type(ufo_geovals),     intent(in)     :: geovals
-type(obs_vector),      intent(inout)  :: hofx
-type(c_ptr), value,    intent(in)     :: obss
+class(ufo_radiance_tlad), intent(in) :: self
+type(ufo_geovals),        intent(in) :: geovals
+real(c_double),        intent(inout) :: hofx(:)
+type(c_ptr), value,    intent(in)    :: obss
 
 character(len=*), parameter :: myname_="ufo_radiance_simobs_tl"
 character(max_string) :: err_msg
@@ -313,7 +311,7 @@ type(ufo_geoval), pointer :: tv_d
 
  ! Initialize hofx
  ! ---------------
- hofx%values = 0.0_kind_real
+ hofx(:) = 0.0_kind_real
 
 
  ! Temperature
@@ -338,23 +336,23 @@ type(ufo_geoval), pointer :: tv_d
    do jchannel = 1, self%n_Channels
      job = job + 1
      do jlevel = 1, tv_d%nval
-       hofx%values(job) = hofx%values(job) + &
-                          self%atm_K(jchannel,jprofile)%Temperature(jlevel) * tv_d%vals(jlevel,jprofile)
+       hofx(job) = hofx(job) + &
+                    self%atm_K(jchannel,jprofile)%Temperature(jlevel) * tv_d%vals(jlevel,jprofile)
      enddo
    enddo
  enddo
 
 
 end subroutine ufo_radiance_simobs_tl
-  
+
 ! ------------------------------------------------------------------------------
-  
+
 subroutine ufo_radiance_simobs_ad(self, geovals, hofx, obss)
 
 implicit none
 class(ufo_radiance_tlad), intent(in) :: self
 type(ufo_geovals),     intent(inout) :: geovals
-type(obs_vector),      intent(in)    :: hofx
+real(c_double),           intent(in) :: hofx(:)
 type(c_ptr), value,    intent(in)    :: obss
 
 character(len=*), parameter :: myname_="ufo_radiance_simobs_ad"
@@ -389,7 +387,7 @@ type(ufo_geoval), pointer :: tv_d
    call abor1_ftn(err_msg)
  endif
 
- ! allocate if not yet allocated	
+ ! allocate if not yet allocated
  if (.not. allocated(tv_d%vals)) then
     tv_d%nobs = self%n_Profiles
     tv_d%nval = self%n_Layers
@@ -405,7 +403,7 @@ type(ufo_geoval), pointer :: tv_d
      job = job + 1
      do jlevel = 1, tv_d%nval
        tv_d%vals(jlevel,jprofile) = tv_d%vals(jlevel,jprofile) + &
-                                    self%atm_K(jchannel,jprofile)%Temperature(jlevel) * hofx%values(job)
+                                    self%atm_K(jchannel,jprofile)%Temperature(jlevel) * hofx(job)
      enddo
    enddo
  enddo
@@ -415,9 +413,9 @@ type(ufo_geoval), pointer :: tv_d
  ! ---------------------------------
  if (.not. geovals%linit ) geovals%linit=.true.
 
-    
+
 end subroutine ufo_radiance_simobs_ad
-  
+
 ! ------------------------------------------------------------------------------
-  
+
 end module ufo_radiance_tlad_mod

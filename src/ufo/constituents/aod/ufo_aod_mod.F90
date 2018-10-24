@@ -8,8 +8,6 @@
 MODULE ufo_aod_mod
   
   use iso_c_binding
-  use obsspace_mod
-  use ioda_obs_vectors
   use ufo_vars_mod
   use ioda_locs_mod
   use ufo_geovals_mod
@@ -17,6 +15,7 @@ MODULE ufo_aod_mod
   USE ufo_aod_misc
   use crtm_module
   USE ufo_basis_mod, only: ufo_basis
+use obsspace_mod
 
   implicit none
 
@@ -66,9 +65,9 @@ contains
 
   SUBROUTINE ufo_aod_simobs(self, geovals, hofx, obss) 
     implicit none
-    class(ufo_aod),     intent(in)    :: self
-    type(ufo_geovals),  intent(in)    :: geovals
-    type(obs_vector),   intent(inout) :: hofx
+    class(ufo_aod),    intent(in)    :: self
+    type(ufo_geovals), intent(in)    :: geovals
+    real(kind_real),  intent(inout) :: hofx(:)
     type(c_ptr), value, intent(in)    :: obss
 
     real(kind_real), allocatable :: Aod_Obs(:,:)
@@ -156,7 +155,7 @@ contains
     integer              :: nlocs
     REAL(fp), allocatable :: rmse(:)
     real(fp), allocatable :: diff(:,:)
-
+    real(kind_real), allocatable :: ztmp(:)
 
     ! Program header
     ! --------------
@@ -356,11 +355,11 @@ contains
        deallocate(Omg_Aod)
 
        ! output to hofx structure   
-       hofx%values(:) = 0.0
+       hofx(:) = 0.0
        i = 1
        do m = 1, N_PROFILES
          do l = 1, n_Channels
-            hofx%values(i) = SUM(rts(l,m)%layer_optical_depth)
+            hofx(i) = SUM(rts(l,m)%layer_optical_depth)
            i = i + 1
          enddo
        enddo

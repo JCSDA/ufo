@@ -25,47 +25,52 @@ extern "C" {
 // -----------------------------------------------------------------------------
 //  Aircraft t observation operator and its tl/ad
 // -----------------------------------------------------------------------------
+
   void ufo_aircraft_setup_f90(F90hop &, const eckit::Configuration * const *);
   void ufo_aircraft_delete_f90(F90hop &);
   void ufo_aircraft_simobs_f90(const F90hop &, const F90goms &, const ioda::ObsSpace &,
-                               const F90ovec &, const F90obias &);
+                               const int &, double &, const F90obias &);
   void ufo_aircraft_tlad_setup_f90(F90hop &, const eckit::Configuration * const *);
   void ufo_aircraft_tlad_delete_f90(F90hop &);
   void ufo_aircraft_tlad_settraj_f90(const F90hop &, const F90goms &, const ioda::ObsSpace &);
   void ufo_aircraft_simobs_tl_f90(const F90hop &, const F90goms &, const ioda::ObsSpace &,
-                                      const F90ovec &);
+                                  const int &, double &);
   void ufo_aircraft_simobs_ad_f90(const F90hop &, const F90goms &, const ioda::ObsSpace &,
-                                      const F90ovec &);
+                                  const int &, const double &);
 
 // -----------------------------------------------------------------------------
 //  Radiosonde t observation operator and its tl/ad
 // -----------------------------------------------------------------------------
+
   void ufo_radiosonde_setup_f90(F90hop &, const eckit::Configuration * const *);
   void ufo_radiosonde_delete_f90(F90hop &);
   void ufo_radiosonde_simobs_f90(const F90hop &, const F90goms &, const ioda::ObsSpace &,
-                                 const F90ovec &, const F90obias &);
+                                 const int &, double &, const F90obias &);
   void ufo_radiosonde_tlad_setup_f90(F90hop &, const eckit::Configuration * const *);
   void ufo_radiosonde_tlad_delete_f90(F90hop &);
   void ufo_radiosonde_tlad_settraj_f90(const F90hop &, const F90goms &, const ioda::ObsSpace &);
   void ufo_radiosonde_simobs_tl_f90(const F90hop &, const F90goms &, const ioda::ObsSpace &,
-                                        const F90ovec &);
+                                    const int &, double &);
   void ufo_radiosonde_simobs_ad_f90(const F90hop &, const F90goms &, const ioda::ObsSpace &,
-                                        const F90ovec &);
+                                    const int &, const double &);
 
 // -----------------------------------------------------------------------------
 //  Radiance observation operator and its tl/ad
 // -----------------------------------------------------------------------------
+
   void ufo_radiance_setup_f90(F90hop &, const eckit::Configuration * const *);
   void ufo_radiance_delete_f90(F90hop &);
   void ufo_radiance_simobs_f90(const F90hop &, const F90goms &, const ioda::ObsSpace &,
-                               const F90ovec &, const F90obias &);
+                               const int &, double &, const F90obias &);
   void ufo_radiance_tlad_setup_f90(F90hop &, const eckit::Configuration * const *);
   void ufo_radiance_tlad_delete_f90(F90hop &);
   void ufo_radiance_tlad_settraj_f90(const F90hop &, const F90goms &, const ioda::ObsSpace &);
   void ufo_radiance_simobs_tl_f90(const F90hop &, const F90goms &, const ioda::ObsSpace &,
-                                    const F90ovec &);
+                                  const int &, double &);
   void ufo_radiance_simobs_ad_f90(const F90hop &, const F90goms &, const ioda::ObsSpace &,
-                                    const F90ovec &);
+                                  const int &, const double &);
+// -----------------------------------------------------------------------------
+
 }  // extern C
 
 }  // namespace ufo

@@ -46,7 +46,7 @@ ObsRadiosonde::~ObsRadiosonde() {
 void ObsRadiosonde::simulateObs(const GeoVaLs & gom, ioda::ObsVector & ovec,
                                 const ObsBias & bias) const {
   ufo_radiosonde_simobs_f90(keyOperRadiosonde_, gom.toFortran(), odb_,
-                           ovec.toFortran(), bias.toFortran());
+                            ovec.size(), ovec.toFortran(), bias.toFortran());
 }
 
 // -----------------------------------------------------------------------------

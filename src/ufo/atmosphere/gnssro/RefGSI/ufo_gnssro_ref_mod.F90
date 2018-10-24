@@ -11,10 +11,9 @@ module ufo_gnssro_ref_mod
   use ufo_vars_mod
   use ufo_geovals_mod
   use ufo_geovals_mod_c, only: ufo_geovals_registry
-  use obsspace_mod
-  use ioda_obs_vectors
   use vert_interp_mod
   use ufo_basis_mod,     only: ufo_basis
+  use obsspace_mod
   
   implicit none
   integer, parameter :: max_string=800
@@ -36,7 +35,7 @@ contains
       logical,parameter                          :: use_compress=.true.
       class(ufo_gnssro_Ref), intent(in)          :: self
       type(ufo_geovals), intent(in)              :: geovals
-      type(obs_vector),  intent(inout)           :: hofx
+      real(kind_real),   intent(inout)           :: hofx(:)
       type(c_ptr), value,       intent(in)       :: obss
 
       character(len=*), parameter :: myname_="ufo_gnssro_ref_simobs"
@@ -51,7 +50,7 @@ contains
       real(kind_real), allocatable :: obsZ(:), obsLat(:)
       real(kind_real)  :: obsH, gesT,gesQ, gesTv, gesTv0,gesP
       ! check if nobs is consistent in geovals & hofx
-      if (geovals%nobs /= hofx%nobs) then
+      if (geovals%nobs /= size(hofx)) then
         write(err_msg,*) myname_, ' error: nobs inconsistent!'
         call abor1_ftn(err_msg)
       endif
@@ -87,7 +86,7 @@ contains
       call gnssro_ref_constants(use_compress)
 
       ! obs operator
-      do iobs = 1, hofx%nobs
+      do iobs = 1, geovals%nobs
       ! Convert geometric height at observation to geopotential height 
         call geometric2geop(obsLat(iobs), obsZ(iobs), obsH)
         call vert_interp_weights(gph%nval,obsH, gph%vals(:,iobs),wi,wf)  ! calculate weights 
@@ -103,7 +102,7 @@ contains
         refr1  = n_a*gesP/gesT
         refr2  = n_b*gesP*gesQ/ ( gesT**2 * (rd_over_rv+(1-rd_over_rv)*gesQ) )
         refr3  = n_c*gesP*gesQ/ ( gesT    * (rd_over_rv+(1-rd_over_rv)*gesQ) )
-        hofx%values(iobs)  = refr1 + refr2 + refr3
+        hofx(iobs)  = refr1 + refr2 + refr3
       enddo
 
       ! cleanup 

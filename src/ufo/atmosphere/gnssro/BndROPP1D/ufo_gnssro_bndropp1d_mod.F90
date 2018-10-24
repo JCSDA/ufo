@@ -12,8 +12,6 @@ module ufo_gnssro_bndropp1d_mod
   use ufo_geovals_mod
   use ufo_geovals_mod_c, only: ufo_geovals_registry
   use ufo_basis_mod,     only: ufo_basis
-  use ioda_obs_vectors
-  use obsspace_mod
   use vert_interp_mod
   use lag_interp_mod, only: lag_interp_const, lag_interp_smthWeights
   
@@ -37,7 +35,7 @@ module ufo_gnssro_bndropp1d_mod
       implicit none
       class(ufo_gnssro_BndROPP1D), intent(in):: self
       type(ufo_geovals), intent(in)          :: geovals
-      type(obs_vector),  intent(inout)       :: hofx
+      real(kind_real),   intent(inout)       :: hofx(:)
       type(c_ptr), value, intent(in)         :: obss
 
       type(State1dFM)                 :: x
@@ -61,7 +59,7 @@ module ufo_gnssro_bndropp1d_mod
 
       write(*,*) "TRACE: ufo_gnssro_bndropp1d_simobs: begin"
       ! check if nobs is consistent in geovals & hofx
-      if (geovals%nobs /= hofx%nobs) then
+      if (geovals%nobs /= size(hofx)) then
         write(err_msg,*) myname_, ' error: nobs inconsistent!'
         call abor1_ftn(err_msg)
       endif
@@ -162,7 +160,7 @@ module ufo_gnssro_bndropp1d_mod
 
          call ropp_fm_bangle_1d(x,y)
 
-         hofx%values(iobs) = y%bangle(nvprof)  ! nvprof is just one point
+         hofx(iobs) = y%bangle(nvprof)  ! nvprof is just one point
 
       end do obs_loop
       

@@ -8,7 +8,6 @@ module ufo_basis_mod
   use iso_c_binding
   use ufo_geovals_mod
   use ufo_geovals_mod_c,   only: ufo_geovals_registry
-  use ioda_obs_vectors
 
   type, abstract :: ufo_basis
     private
@@ -22,13 +21,14 @@ module ufo_basis_mod
   ! ------------------------------------------------------------------------------
 
     subroutine simobs_(self, geovals, hofx, obss)
-      import ufo_basis, ufo_geovals, obs_vector, c_ptr
+      use iso_c_binding
+      import ufo_basis, ufo_geovals
       implicit none
       class(ufo_basis),         intent(in)    :: self
       type(ufo_geovals),        intent(in)    :: geovals
-      type(obs_vector),         intent(inout) :: hofx
+      real(c_double),           intent(inout) :: hofx(:)
       type(c_ptr), value,       intent(in)    :: obss
-    end subroutine
+    end subroutine simobs_
   
   ! ------------------------------------------------------------------------------
 
@@ -38,23 +38,21 @@ contains
 
 ! ------------------------------------------------------------------------------
     
-    subroutine opr_simobs_(self, c_key_geovals, c_obsspace, c_key_hofx)
-      implicit none
-    
-      class(ufo_basis), intent(in)    :: self
-      integer(c_int), intent(in) :: c_key_geovals
-      integer(c_int), intent(in) :: c_key_hofx
-      type(c_ptr), value, intent(in) :: c_obsspace
-    
-      type(ufo_geovals), pointer :: geovals
-      type(obs_vector),  pointer :: hofx
-    
-      call ufo_geovals_registry%get(c_key_geovals,geovals)
-      call ioda_obs_vect_registry%get(c_key_hofx,hofx)
-    
-      call self%simobs(geovals, hofx, c_obsspace)
-    
-    end subroutine opr_simobs_
+  subroutine opr_simobs_(self, c_key_geovals, c_obsspace, c_hofx)
+    implicit none
+  
+    class(ufo_basis), intent(in)    :: self
+    integer(c_int), intent(in) :: c_key_geovals
+    type(c_ptr), value, intent(in) :: c_obsspace
+    real(c_double), intent(inout) :: c_hofx(:)
+  
+    type(ufo_geovals), pointer :: geovals
+  
+    call ufo_geovals_registry%get(c_key_geovals,geovals)
+  
+    call self%simobs(geovals, c_hofx, c_obsspace)
+  
+  end subroutine opr_simobs_
     
 ! ------------------------------------------------------------------------------
 

@@ -8,7 +8,6 @@ module ufo_obscheck_mod
 
 use iso_c_binding
 use ufo_vars_mod
-use ioda_obs_vectors
 use ioda_locs_mod
 use ufo_geovals_mod
 use ufo_geovals_mod_c, only: ufo_geovals_registry
@@ -69,26 +68,23 @@ end subroutine c_ufo_obscheck_delete
 
 ! ------------------------------------------------------------------------------
 
-subroutine c_ufo_postFilter_f90(c_key_geovals, c_key_hofx, c_obsspace) bind(c,name='ufo_postFilter_f90')
+subroutine c_ufo_postFilter_f90(c_key_geovals, c_nobs, c_hofx, c_obsspace) bind(c,name='ufo_postFilter_f90')
 
    implicit none
    integer(c_int), intent(in) :: c_key_geovals
-   integer(c_int), intent(in) :: c_key_hofx
+   integer(c_int), intent(in) :: c_nobs
+   real(c_double), intent(in) :: c_hofx(c_nobs)
    type(c_ptr), value, intent(in) :: c_obsspace
+
    type(ufo_geovals), pointer  :: geovals
-   type(obs_vector), pointer :: hofx
 
    write(*,*) '=======Start Post Filter (observation QC)========='
-! Get pointers to geovals, hofx, and obsdata
+! Get pointers to geovals and obsdata
    call ufo_geovals_registry%get(c_key_geovals,geovals)
-   call ioda_obs_vect_registry%get(c_key_hofx,hofx)
 !   call obs_data_registry%get(c_key_obsspace,obsdata)
 !
 ! working
 !
-   write(*,*) 'read obs_vector  =========================='
-   write(*,*) 'hofx%nobs=',hofx%nobs
-   write(*,*) 'hofx%nobs=',hofx%values(1:10)
    if (geovals%lalloc .and. geovals%linit) then
       write(*,*) 'read geovals  =========================='
       write(*,*) 'nobs=',geovals%nobs

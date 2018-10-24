@@ -65,7 +65,7 @@ void ObsCheck::print(std::ostream & os) const {
 void ObsCheck::postFilter(const GeoVaLs & gv, const ioda::ObsVector & ov,
                           const ioda::ObsSpace & os) const {
   oops::Log::trace() << "ObsCheck postFilter starting" << std::endl;
-  ufo_postFilter_f90(gv.toFortran(), ov.toFortran(), os);
+//  ufo_postFilter_f90(gv.toFortran(), ov.toFortran(), os);
   oops::Log::trace() << "ObsCheck postFilter end" << std::endl;
 }
 
@@ -73,7 +73,7 @@ void ObsCheck::postFilter(const GeoVaLs & gv, const ioda::ObsVector & ov,
 
 void ObsCheck::priorFilter(const ioda::ObsSpace & os) const {
   oops::Log::trace() << "ObsCheck priorFilter starting" << std::endl;
-  ufo_priorFilter_f90(os);
+//  ufo_priorFilter_f90(os);
   oops::Log::trace() << "ObsCheck priorFilter end" << std::endl;
 }
 

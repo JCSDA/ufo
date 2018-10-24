@@ -11,8 +11,6 @@ module ufo_gnssro_bndgsi_mod
   use ufo_vars_mod
   use ufo_geovals_mod
   use ufo_geovals_mod_c,   only: ufo_geovals_registry
-  use obsspace_mod
-  use ioda_obs_vectors
   use vert_interp_mod
   use ufo_basis_mod,      only: ufo_basis
   use lag_interp_mod,     only: lag_interp_const, lag_interp_smthWeights
@@ -33,10 +31,11 @@ module ufo_gnssro_bndgsi_mod
       use gnssro_mod_constants
       use gnssro_mod_transform
       use gnssro_mod_grids, only: get_coordinate_value
+      use obsspace_mod, only: obsspace_get_var
       implicit none
       class(ufo_gnssro_bndGSI), intent(in)    :: self
       type(ufo_geovals),        intent(in)    :: geovals
-      type(obs_vector),         intent(inout) :: hofx
+      real(kind_real),          intent(inout) :: hofx(:)
       type(c_ptr), value,       intent(in)    :: obss
     
       character(len=*), parameter     :: myname_ ="ufo_gnssro_bndgsi_simobs"
@@ -80,10 +79,10 @@ module ufo_gnssro_bndgsi_mod
       nlev1 = 0
       nlevExt = 0
       sIndxExt = one
-      hofx%values = miss_values
+      hofx(:) = miss_values
 
       ! check if nobs is consistent in geovals & hofx
-      if (geovals%nobs /= hofx%nobs) then
+      if (geovals%nobs /= size(hofx)) then
         write(err_msg,*) myname_, ' error: nobs inconsistent!'
         call abor1_ftn(err_msg)
       endif
@@ -161,7 +160,6 @@ module ufo_gnssro_bndgsi_mod
       call obsspace_get_var(obss, obsImpP, "IMPP", nobs)   !observed impact parameter; meter
       call obsspace_get_var(obss, obsLocR, "ELRC", nobs)   !local radius of earth; meter
       call obsspace_get_var(obss, obsGeoid, "GEODU", nobs) !Geoid; meter
-
 
       nobs_outIntgl = 0 !initialize count of observations out of integral grids  
       count_rejection = 0
@@ -303,13 +301,13 @@ module ufo_gnssro_bndgsi_mod
             bendingAngle = bendingAngle + two*bndIntgd
          end do
          bendingAngle=r1em6 * obsImpP(iobs) * bendingAngle
-         hofx%values(iobs) = bendingAngle
+         hofx(iobs) = bendingAngle
 
       end do obs_loop
 
       write(6,*) 'bndGSI: hofx ', &
-                 'min = ', minval(hofx%values, mask=hofx%values > miss_values), 'min index = ', minloc(hofx%values), &
-                 'max = ', maxval(hofx%values, mask=hofx%values > miss_values), 'max index = ', maxloc(hofx%values)
+                 'min = ', minval(hofx, mask=hofx > miss_values), 'min index = ', minloc(hofx), &
+                 'max = ', maxval(hofx, mask=hofx > miss_values), 'max index = ', maxloc(hofx)
       write(6,*) 'bndGSI: ', count_rejection, ' out of ', nobs, ' rejected due to model vertical range and super refraction'
 
       !for tuning the nlevExt. New grids (s) should be in range  with nlevExt. If not, adjust the hardwired 

@@ -1,7 +1,7 @@
 ! (C) Copyright 2017-2018 UCAR
-! 
+!
 ! This software is licensed under the terms of the Apache Licence Version 2.0
-! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
+! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 
 !> Fortran module to handle radiance observations
 
@@ -10,8 +10,6 @@ module ufo_radiance_mod
  use iso_c_binding
  use config_mod
  use kinds
-
- use ioda_obs_vectors, only: obs_vector
 
  use ufo_geovals_mod, only: ufo_geovals, ufo_geoval, ufo_geovals_get_var
  use ufo_basis_mod, only: ufo_basis
@@ -33,7 +31,7 @@ module ufo_radiance_mod
    procedure :: delete => ufo_radiance_delete
    procedure :: simobs => ufo_radiance_simobs
  end type ufo_radiance
-  
+
 contains
 
 ! ------------------------------------------------------------------------------
@@ -64,10 +62,10 @@ end subroutine ufo_radiance_delete
 subroutine ufo_radiance_simobs(self, geovals, hofx, obss)
 
 implicit none
-class(ufo_radiance),      intent(in)    :: self
-type(ufo_geovals),        intent(in)    :: geovals
-type(obs_vector),         intent(inout) :: hofx
-type(c_ptr), value,       intent(in)    :: obss
+class(ufo_radiance),      intent(in) :: self
+type(ufo_geovals),        intent(in) :: geovals
+real(c_double),        intent(inout) :: hofx(:)
+type(c_ptr), value,       intent(in) :: obss
 
 ! Local Variables
 character(*), parameter :: PROGRAM_NAME = 'ufo_radiance_mod.F90'
@@ -105,12 +103,12 @@ type(CRTM_RTSolution_type), allocatable :: rts(:,:)
                        'Check/example program for the CRTM Forward and K-Matrix functions using '//&
                        trim(self%rc%ENDIAN_type)//' coefficient datafiles', &
                        'CRTM Version: '//TRIM(Version) )
- 
+
 
  ! Initialise all the sensors at once
  ! ----------------------------------
  !** NOTE: CRTM_Init points to the various binary files needed for CRTM.  See the
- !**       CRTM_Lifecycle.f90 for more details. 
+ !**       CRTM_Lifecycle.f90 for more details.
 
  write( *,'(/5x,"Initializing the CRTM...")' )
  err_stat = CRTM_Init( self%rc%SENSOR_ID, &
@@ -132,7 +130,7 @@ type(CRTM_RTSolution_type), allocatable :: rts(:,:)
    ! Determine the number of channels for the current sensor
    ! -------------------------------------------------------
    N_Channels = CRTM_ChannelInfo_n_Channels(chinfo(n))
-  
+
 
    ! Allocate the ARRAYS
    ! -------------------
@@ -182,7 +180,7 @@ type(CRTM_RTSolution_type), allocatable :: rts(:,:)
    call CRTM_Geometry_Inspect(geo(12))
    call CRTM_ChannelInfo_Inspect(chinfo(1))
 
-   
+
    ! Call the forward model call for each sensor
    ! -------------------------------------------
    err_stat = CRTM_Forward( atm        , &  ! Input
@@ -198,16 +196,16 @@ type(CRTM_RTSolution_type), allocatable :: rts(:,:)
 
 
    ! Put simulated brightness temperature into hofx
-   ! ----------------------------------------------   
+   ! ----------------------------------------------
 
    !Set to zero and initializ counter
-   hofx%values(:) = 0.0_kind_real
+   hofx(:) = 0.0_kind_real
    i = 1
 
    do m = 1, n_Profiles
      do l = 1, N_Channels
 
-       hofx%values(i) = rts(l,m)%Brightness_Temperature
+       hofx(i) = rts(l,m)%Brightness_Temperature
        i = i + 1
 
      end do
@@ -220,8 +218,8 @@ type(CRTM_RTSolution_type), allocatable :: rts(:,:)
    call CRTM_Atmosphere_Destroy(atm)
    call CRTM_RTSolution_Destroy(rts)
    call CRTM_Surface_Destroy(sfc)
-   
-   
+
+
    ! Deallocate all arrays
    ! ---------------------
    deallocate(geo, atm, sfc, rts, STAT = alloc_stat)
@@ -230,7 +228,7 @@ type(CRTM_RTSolution_type), allocatable :: rts(:,:)
       call Display_Message( PROGRAM_NAME, message, FAILURE )
       stop
    end if
-   
+
  end do Sensor_Loop
 
 
@@ -247,5 +245,5 @@ type(CRTM_RTSolution_type), allocatable :: rts(:,:)
 end subroutine ufo_radiance_simobs
 
 ! ------------------------------------------------------------------------------
- 
+
 end module ufo_radiance_mod

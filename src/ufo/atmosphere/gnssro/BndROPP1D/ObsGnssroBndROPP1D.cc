@@ -50,7 +50,7 @@ ObsGnssroBndROPP1D::~ObsGnssroBndROPP1D() {
 void ObsGnssroBndROPP1D::simulateObs(const GeoVaLs & gom, ioda::ObsVector & ovec,
                                 const ObsBias & bias) const {
   ufo_gnssro_bndropp1d_simobs_f90(keyOperGnssroBndROPP1D_, gom.toFortran(), odb_,
-                           ovec.toFortran(), bias.toFortran());
+                                  ovec.size(), ovec.toFortran(), bias.toFortran());
 }
 
 // -----------------------------------------------------------------------------

@@ -11,10 +11,9 @@ module ufo_gnssro_ref_tlad_mod
   use ufo_vars_mod
   use ufo_geovals_mod
   use ufo_geovals_mod_c,   only: ufo_geovals_registry
-  use obsspace_mod
-  use ioda_obs_vectors
   use vert_interp_mod
   use ufo_basis_tlad_mod,  only: ufo_basis_tlad
+  use obsspace_mod
 
   integer, parameter :: max_string=800
 
@@ -128,7 +127,7 @@ contains
       implicit none
       class(ufo_gnssro_Ref_tlad), intent(in) :: self
       type(ufo_geovals),      intent(in)     :: geovals
-      type(obs_vector),       intent(inout)  :: hofx
+      real(kind_real),        intent(inout)  :: hofx(:)
       type(c_ptr), value,     intent(in)     :: obss
       logical,                parameter      :: use_compress=.true.
      
@@ -147,7 +146,7 @@ contains
       endif
       
       ! check if nobs is consistent in geovals & hofx
-      if (geovals%nobs /= hofx%nobs) then
+      if (geovals%nobs /= size(hofx)) then
         write(err_msg,*) myname_, ' error: nobs inconsistent!'
         call abor1_ftn(err_msg)
       endif
@@ -168,7 +167,7 @@ contains
       call gnssro_ref_constants(use_compress)
 
       ! tangent linear obs operator (linear)
-      do iobs = 1, hofx%nobs
+      do iobs = 1, geovals%nobs
         wi0 = self%wi(iobs)
         call vert_interp_apply_tl(  t_d%nval,  t_d%vals(:,iobs), gesT_d, self%wi(iobs),self%wf(iobs)) 
         call vert_interp_apply_tl(  q_d%nval,  q_d%vals(:,iobs), gesQ_d, self%wi(iobs),self%wf(iobs))
@@ -184,7 +183,7 @@ contains
                        rd_over_rv                        &
                   + n_c*self%prs(iobs)/( self%t(iobs)   *( (1-rd_over_rv)*self%q(iobs)+rd_over_rv)**2 ) *  &
                        rd_over_rv          
-        hofx%values(iobs)   =  t_coeff*gesT_d  + q_coeff*gesQ_d !+ prs_coeff*gesP_d
+        hofx(iobs)   =  t_coeff*gesT_d  + q_coeff*gesQ_d !+ prs_coeff*gesP_d
 
       enddo 
     
@@ -197,7 +196,7 @@ contains
       implicit none
       class(ufo_gnssro_Ref_tlad), intent(in)   :: self
       type(ufo_geovals),         intent(inout) :: geovals
-      type(obs_vector),          intent(in)    :: hofx
+      real(kind_real),           intent(in)    :: hofx(:)
       type(c_ptr), value,        intent(in)    :: obss
       logical,                   parameter     :: use_compress=.true.
 
@@ -216,7 +215,7 @@ contains
       endif
       
       ! check if nobs is consistent in geovals & hofx
-      if (geovals%nobs /= hofx%nobs) then
+      if (geovals%nobs /= size(hofx)) then
         write(err_msg,*) myname_, ' error: nobs inconsistent!'
         call abor1_ftn(err_msg)
       endif
@@ -278,7 +277,7 @@ contains
       call gnssro_ref_constants(use_compress)
 
 
-      do iobs = 1, hofx%nobs
+      do iobs = 1, geovals%nobs
 
 ! zero impct on pressure during minimization
         t_coeff    = - n_a*self%prs(iobs)/self%t(iobs)**2           &
@@ -293,8 +292,8 @@ contains
   
         gesT_d = 0.0_kind_real
         gesQ_d = 0.0_kind_real
-        gesT_d = gesT_d + hofx%values(iobs)*t_coeff
-        gesQ_d = gesQ_d + hofx%values(iobs)*q_coeff
+        gesT_d = gesT_d + hofx(iobs)*t_coeff
+        gesQ_d = gesQ_d + hofx(iobs)*q_coeff
         call vert_interp_apply_ad(  t_d%nval,  t_d%vals(:,iobs), gesT_d, self%wi(iobs), self%wf(iobs))
         call vert_interp_apply_ad(  q_d%nval,  q_d%vals(:,iobs), gesQ_d, self%wi(iobs), self%wf(iobs))
 

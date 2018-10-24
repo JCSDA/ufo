@@ -1,7 +1,7 @@
 ! (C) Copyright 2018 UCAR
-! 
+!
 ! This software is licensed under the terms of the Apache Licence Version 2.0
-! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
+! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 
 !> Fortran module to provide code shared between nonlinear and tlm/adm radiance calculations
 
@@ -13,11 +13,10 @@ use kinds
 
 use crtm_module
 
-use obsspace_mod
-
 use ufo_vars_mod
 use ufo_geovals_mod, only: ufo_geovals, ufo_geoval, ufo_geovals_get_var
 use ufo_basis_mod, only: ufo_basis
+use obsspace_mod
 
 implicit none
 private
@@ -60,7 +59,7 @@ character(len=100), allocatable :: skiplist_str(:)
  !Some config needs to come from user
  !-----------------------------------
 
- !Number of sensors, each call to CRTM will be for a single sensor 
+ !Number of sensors, each call to CRTM will be for a single sensor
  !type (zenith/scan angle will be different)
  rc%n_Sensors = 1
 
@@ -115,7 +114,7 @@ subroutine Load_Atm_Data(N_PROFILES,N_LAYERS,geovals,atm)
 
 implicit none
 integer, intent(in) :: N_PROFILES, N_LAYERS
-type(ufo_geovals), intent(in) :: geovals   
+type(ufo_geovals), intent(in) :: geovals
 type(CRTM_Atmosphere_type), intent(inout) :: atm(:)
 
 ! Local variables
@@ -147,18 +146,18 @@ character(max_string) :: err_msg
     atm(k1)%Temperature(1:N_LAYERS) = geoval%vals(:,k1)
 
     call ufo_geovals_get_var(geovals, var_prs, geoval)
-    atm(k1)%Pressure(1:N_LAYERS) = geoval%vals(:,k1) 
+    atm(k1)%Pressure(1:N_LAYERS) = geoval%vals(:,k1)
     call ufo_geovals_get_var(geovals, var_prsi, geoval)
     atm(k1)%Level_Pressure(:) = geoval%vals(:,k1)
     atm(k1)%Climatology         = US_STANDARD_ATMOSPHERE
     atm(k1)%Absorber_Id(1:1)    = (/ H2O_ID /)
     atm(k1)%Absorber_Units(1:1) = (/ MASS_MIXING_RATIO_UNITS /)
     call ufo_geovals_get_var(geovals, var_mixr, geoval)
-    atm(k1)%Absorber(1:N_LAYERS,1)       = geoval%vals(:,k1) 
+    atm(k1)%Absorber(1:N_LAYERS,1)       = geoval%vals(:,k1)
     atm(k1)%Absorber_Id(2:2)    = (/ O3_ID /)
     atm(k1)%Absorber_Units(2:2) = (/ VOLUME_MIXING_RATIO_UNITS /)
     call ufo_geovals_get_var(geovals, var_oz, geoval)
-    atm(k1)%Absorber(1:N_LAYERS,2)       = geoval%vals(:,k1) 
+    atm(k1)%Absorber(1:N_LAYERS,2)       = geoval%vals(:,k1)
 
     atm(k1)%Absorber_Id(3:3)    = (/ CO2_ID /)
     atm(k1)%Absorber_Units(3:3) = (/ VOLUME_MIXING_RATIO_UNITS /)
@@ -186,14 +185,14 @@ subroutine Load_Sfc_Data(n_Profiles,n_Layers,N_Channels,geovals,sfc,chinfo,obss)
 
 implicit none
 integer,                     intent(in)    :: n_Profiles, n_Layers, N_Channels
-type(ufo_geovals),           intent(in)    :: geovals   
+type(ufo_geovals),           intent(in)    :: geovals
 type(CRTM_Surface_type),     intent(inout) :: sfc(:)
 type(CRTM_ChannelInfo_type), intent(in)    :: chinfo(:)
 type(c_ptr), value,          intent(in)    :: obss
 
 type(ufo_geoval), pointer :: geoval
 integer  :: k1, n1
-      
+
 ! Surface type definitions for default SfcOptics definitions
 ! for IR and VIS, this is the NPOESS reflectivities.
 integer, parameter :: TUNDRA_SURFACE_TYPE         = 10  ! NPOESS Land surface type for IR/VIS Land SfcOptics
@@ -239,11 +238,11 @@ real(kind_real), allocatable :: ObsTb(:,:)
 
    !Wind_Speed
    call ufo_geovals_get_var(geovals, var_sfc_wspeed, geoval)
-   sfc(k1)%Wind_Speed = geoval%vals(1,k1) 
+   sfc(k1)%Wind_Speed = geoval%vals(1,k1)
 
    !Wind_Direction
    call ufo_geovals_get_var(geovals, var_sfc_wdir, geoval)
-   sfc(k1)%Wind_Direction = geoval%vals(1,k1) 
+   sfc(k1)%Wind_Direction = geoval%vals(1,k1)
 
    !Water_Coverage
    call ufo_geovals_get_var(geovals, var_sfc_wfrac, geoval)
@@ -307,7 +306,7 @@ real(kind_real), allocatable :: ObsTb(:,:)
 
    !Soil_Temperature
    call ufo_geovals_get_var(geovals, var_sfc_soilt, geoval)
-   sfc(k1)%Soil_Temperature = geoval%vals(1,k1) 
+   sfc(k1)%Soil_Temperature = geoval%vals(1,k1)
 
  end do
 
@@ -322,7 +321,6 @@ subroutine Load_Geom_Data(obss,geo)
 implicit none
 type(c_ptr), value,       intent(in)    :: obss
 type(CRTM_Geometry_type), intent(inout) :: geo(:)
-
 real(kind_real), allocatable :: TmpVar(:)
 integer :: nlocs
 

@@ -7,8 +7,6 @@
 
 MODULE ufo_aod_tlad_mod
   use iso_c_binding
-  use obsspace_mod
-  use ioda_obs_vectors
   use ufo_vars_mod
   use ioda_locs_mod
   use ufo_geovals_mod
@@ -59,7 +57,7 @@ contains
     implicit none
     class(ufo_aod_tlad), intent(in)     :: self
     type(ufo_geovals),   intent(in)     :: geovals
-    type(obs_vector),    intent(inout)  :: hofx
+    real(kind_real),     intent(inout)  :: hofx(:)
     type(c_ptr), value,  intent(in)     :: obss
 
     character(len=*), parameter :: myname_="ufo_aod_simobs_tl"
@@ -68,11 +66,13 @@ contains
 
   end subroutine ufo_aod_simobs_tl
 
+! ------------------------------------------------------------------------------
+
   subroutine ufo_aod_simobs_ad(self, geovals, hofx, obss)
     implicit none
     class(ufo_aod_tlad), intent(in)    :: self
     type(ufo_geovals),   intent(inout) :: geovals
-    type(obs_vector),    intent(in)    :: hofx
+    real(kind_real),     intent(in)    :: hofx(:)
     type(c_ptr), value,  intent(in)    :: obss
 
     character(len=*), parameter :: myname_="ufo_aod_simobs_tl"
@@ -80,5 +80,7 @@ contains
     ! Nothing here yet
 
   end subroutine ufo_aod_simobs_ad
+
+! ------------------------------------------------------------------------------
 
 END MODULE ufo_aod_tlad_mod

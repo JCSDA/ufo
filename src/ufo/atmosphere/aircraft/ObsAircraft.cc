@@ -47,7 +47,7 @@ ObsAircraft::~ObsAircraft() {
 void ObsAircraft::simulateObs(const GeoVaLs & gom, ioda::ObsVector & ovec,
                               const ObsBias & bias) const {
   ufo_aircraft_simobs_f90(keyOperAircraft_, gom.toFortran(), odb_,
-                         ovec.toFortran(), bias.toFortran());
+                          ovec.size(), ovec.toFortran(), bias.toFortran());
 }
 
 // -----------------------------------------------------------------------------

@@ -55,22 +55,24 @@ end subroutine ufo_gnssro_bndgsi_delete_c
   
 ! ------------------------------------------------------------------------------
 
-
-subroutine ufo_gnssro_bndgsi_simobs_c(c_key_self, c_key_geovals, c_obsspace, c_key_hofx, c_bias) bind(c,name='ufo_gnssro_bndgsi_simobs_f90')
+subroutine ufo_gnssro_bndgsi_simobs_c(c_key_self, c_key_geovals, c_obsspace, c_nobs, c_hofx, c_bias) bind(c,name='ufo_gnssro_bndgsi_simobs_f90')
 
 implicit none
-integer(c_int),     intent(in) :: c_key_self
-integer(c_int),     intent(in) :: c_key_geovals
-integer(c_int),     intent(in) :: c_key_hofx
+integer(c_int), intent(in) :: c_key_self
+integer(c_int), intent(in) :: c_key_geovals
 type(c_ptr), value, intent(in) :: c_obsspace
-integer(c_int),     intent(in) :: c_bias
+integer(c_int), intent(in) :: c_nobs
+real(c_double), intent(inout) :: c_hofx(c_nobs)
+integer(c_int), intent(in) :: c_bias
 
 type(ufo_gnssro_BndGSI),     pointer :: self
 
 character(len=*), parameter :: myname_="ufo_gnssro_bndgsi_simobs_c"
 call ufo_gnssro_BndGSI_registry%get(c_key_self, self)
-call self%opr_simobs(c_key_geovals, c_obsspace, c_key_hofx)
+call self%opr_simobs(c_key_geovals, c_obsspace, c_hofx)
 
 end subroutine ufo_gnssro_bndgsi_simobs_c
+
+! ------------------------------------------------------------------------------
 
 end module ufo_gnssro_bndgsi_mod_c
