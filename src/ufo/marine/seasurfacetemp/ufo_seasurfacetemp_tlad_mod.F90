@@ -7,10 +7,8 @@
 
 module ufo_seasurfacetemp_tlad_mod
 
-use ioda_obs_seasurfacetemp_mod
-use ioda_obs_vectors
+use iso_c_binding
 use ufo_vars_mod
-use ioda_locs_mod
 use ufo_geovals_mod
 use kinds
 
@@ -55,7 +53,7 @@ subroutine ufo_seasurfacetemp_simobs_tl(self, geovals, hofx)
 implicit none
 type(ufo_seasurfacetemp_tlad), intent(in) :: self
 type(ufo_geovals), intent(in)    :: geovals
-type(obs_vector),  intent(inout) :: hofx
+real(c_double),intent(inout) :: hofx(:)
 
 character(len=*), parameter :: myname_="ufo_seasurfacetemp_simobs_tl"
 character(max_string) :: err_msg
@@ -63,10 +61,10 @@ character(max_string) :: err_msg
 integer :: iobs
 type(ufo_geoval), pointer :: geoval_sst
 
-print *, myname_, ' nobs: ', geovals%nobs, hofx%nobs
+print *, myname_, ' nobs: ', geovals%nobs, size(hofx,1)
 
 ! check if nobs is consistent in geovals & hofx
-if (geovals%nobs /= hofx%nobs) then
+if (geovals%nobs /= size(hofx,1)) then
   write(err_msg,*) myname_, ' error: nobs inconsistent!'
   call abor1_ftn(err_msg)
 endif
@@ -75,8 +73,8 @@ endif
 call ufo_geovals_get_var(geovals, var_ocn_sst, geoval_sst)
 
 ! sst obs operator
-do iobs = 1, hofx%nobs
-   hofx%values(iobs) = geoval_sst%vals(1,iobs)
+do iobs = 1, size(hofx,1)
+   hofx(iobs) = geoval_sst%vals(1,iobs)
 enddo
 
 end subroutine ufo_seasurfacetemp_simobs_tl
@@ -87,7 +85,7 @@ subroutine ufo_seasurfacetemp_simobs_ad(self, geovals, hofx)
 implicit none
 type(ufo_seasurfacetemp_tlad), intent(in) :: self
 type(ufo_geovals), intent(inout) :: geovals
-type(obs_vector),  intent(in)    :: hofx
+real(c_double),intent(inout) :: hofx(:)
 
 character(len=*), parameter :: myname_="ufo_seasurfacetemp_simobs_ad"
 character(max_string) :: err_msg
@@ -96,7 +94,7 @@ integer :: iobs
 type(ufo_geoval), pointer :: geoval_sst
 
 ! check if nobs is consistent in geovals & hofx
-if (geovals%nobs /= hofx%nobs) then
+if (geovals%nobs /= size(hofx,1)) then
   write(err_msg,*) myname_, ' error: nobs inconsistent!'
   call abor1_ftn(err_msg)
 endif
@@ -108,13 +106,13 @@ call ufo_geovals_get_var(geovals, var_ocn_sst, geoval_sst)
 
 if (.not.(allocated(geoval_sst%vals))) then
    geoval_sst%nval=1
-   allocate(geoval_sst%vals(1,hofx%nobs))
+   allocate(geoval_sst%vals(1,size(hofx,1)))
 end if
 
 ! backward sst obs operator
 geoval_sst%vals=0.0
-do iobs = 1, hofx%nobs
-   geoval_sst%vals(1,iobs) = geoval_sst%vals(1,iobs) + hofx%values(iobs)
+do iobs = 1, size(hofx,1)
+   geoval_sst%vals(1,iobs) = geoval_sst%vals(1,iobs) + hofx(iobs)
 enddo
 
 end subroutine ufo_seasurfacetemp_simobs_ad

@@ -6,11 +6,9 @@
 !> Fortran module to handle ice concentration observations
 
 module ufo_seaicefrac_tlad_mod
-  
-use ioda_obs_seaicefrac_mod
-use ioda_obs_vectors
+
+use iso_c_binding  
 use ufo_vars_mod
-use ioda_locs_mod
 use ufo_geovals_mod
 use kinds
   
@@ -62,7 +60,7 @@ subroutine ufo_seaicefrac_simobs_tl(self, geovals, hofx)
 implicit none
 type(ufo_seaicefrac_tlad), intent(in) :: self
 type(ufo_geovals), intent(in)    :: geovals
-type(obs_vector),  intent(inout) :: hofx
+real(c_double),  intent(inout) :: hofx(:)
 
 character(len=*), parameter :: myname_="ufo_seaicefrac_simobs_tl"
 character(max_string) :: err_msg
@@ -70,10 +68,10 @@ character(max_string) :: err_msg
 integer :: iobs
 type(ufo_geoval), pointer :: geoval
 
-print *, myname_, ' nobs: ', geovals%nobs, hofx%nobs
+print *, myname_, ' nobs: ', geovals%nobs, size(hofx,1)
 
 ! check if nobs is consistent in geovals & hofx
-if (geovals%nobs /= hofx%nobs) then
+if (geovals%nobs /= size(hofx,1)) then
   write(err_msg,*) myname_, ' error: nobs inconsistent!'
   call abor1_ftn(err_msg)
 endif
@@ -82,8 +80,8 @@ endif
 call ufo_geovals_get_var(geovals, var_seaicefrac, geoval)
 
 ! total sea ice fraction obs operator
-do iobs = 1, hofx%nobs
-   hofx%values(iobs) = sum(geoval%vals(:,iobs))
+do iobs = 1, size(hofx,1)
+   hofx(iobs) = sum(geoval%vals(:,iobs))
 enddo
 
 end subroutine ufo_seaicefrac_simobs_tl
@@ -94,7 +92,7 @@ subroutine ufo_seaicefrac_simobs_ad(self, geovals, hofx)
 implicit none
 type(ufo_seaicefrac_tlad), intent(in) :: self
 type(ufo_geovals), intent(inout) :: geovals
-type(obs_vector),  intent(in)    :: hofx
+real(c_double),  intent(inout) :: hofx(:)
 
 character(len=*), parameter :: myname_="ufo_seaicefrac_simobs_ad"
 character(max_string) :: err_msg
@@ -103,7 +101,7 @@ integer :: iobs
 type(ufo_geoval), pointer :: geoval
 
 ! check if nobs is consistent in geovals & hofx
-if (geovals%nobs /= hofx%nobs) then
+if (geovals%nobs /= size(hofx,1)) then
   write(err_msg,*) myname_, ' error: nobs inconsistent!'
   call abor1_ftn(err_msg)
 endif
@@ -118,13 +116,13 @@ if (.not.(allocated(geoval%vals))) then
      write(err_msg,*) myname_, ' unknown number of categories'
      call abor1_ftn(err_msg)
    endif
-   allocate(geoval%vals(self%ncat,hofx%nobs))
+   allocate(geoval%vals(self%ncat,size(hofx,1)))
 end if
 
 ! backward sea ice fraction obs operator
 geoval%vals=0.0
-do iobs = 1, hofx%nobs
-   geoval%vals(:,iobs) = geoval%vals(:,iobs) + hofx%values(iobs)
+do iobs = 1, size(hofx,1)
+   geoval%vals(:,iobs) = geoval%vals(:,iobs) + hofx(iobs)
 enddo
 
 end subroutine ufo_seaicefrac_simobs_ad

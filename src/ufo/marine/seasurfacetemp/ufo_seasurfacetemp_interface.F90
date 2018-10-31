@@ -9,11 +9,8 @@ module ufo_seasurfacetemp_mod_c
   
   use iso_c_binding
   use config_mod
-  use ioda_obs_vectors,   only: obs_vector, ioda_obs_vect_registry
   use ufo_geovals_mod,   only: ufo_geovals
   use ufo_geovals_mod_c, only: ufo_geovals_registry
-  use ioda_obs_seasurfacetemp_mod,   only: ioda_obs_seasurfacetemp
-  use ioda_obs_seasurfacetemp_mod_c, only: ioda_obs_seasurfacetemp_registry 
   use ufo_seasurfacetemp_mod 
   implicit none
   private
@@ -62,26 +59,25 @@ end subroutine ufo_seasurfacetemp_delete_c
   
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_seasurfacetemp_simobs_c(c_key_self, c_key_geovals, c_obsspace, c_key_hofx, c_bias) bind(c,name='ufo_seasurfacetemp_simobs_f90')
+subroutine ufo_seasurfacetemp_simobs_c(c_key_self, c_key_geovals, c_obsspace, c_nobs, c_hofx, c_bias) bind(c,name='ufo_seasurfacetemp_simobs_f90')
 
 implicit none
 integer(c_int),     intent(in) :: c_key_self
 integer(c_int),     intent(in) :: c_key_geovals
-integer(c_int),     intent(in) :: c_key_hofx
 type(c_ptr), value, intent(in) :: c_obsspace
+integer(c_int),     intent(in) :: c_nobs
+real(c_double),     intent(inout) :: c_hofx(c_nobs)
 integer(c_int),     intent(in) :: c_bias
 
 type(ufo_seasurfacetemp), pointer :: self
 type(ufo_geovals),    pointer :: geovals
-type(obs_vector),     pointer :: hofx
 
 character(len=*), parameter :: myname_="ufo_seasurfacetemp_simobs_c"
 
 call ufo_seasurfacetemp_registry%get(c_key_self, self)
 call ufo_geovals_registry%get(c_key_geovals,geovals)
-call ioda_obs_vect_registry%get(c_key_hofx,hofx)
 
-call ufo_seasurfacetemp_simobs(self, geovals, hofx)
+call ufo_seasurfacetemp_simobs(self, geovals, c_hofx)
 
 end subroutine ufo_seasurfacetemp_simobs_c
   

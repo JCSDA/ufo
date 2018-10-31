@@ -16,7 +16,7 @@
         "ObsType": "Aod",
         "ObsData": {
           "ObsDataIn": {
-            "obsfile": "Data/diag_viirs_ges.2015081000_dbl_subset.nc4"
+            "obsfile": "Data/aod_obs_2015081000_m.nc4"
           }
         },
         "GeoVaLs": {

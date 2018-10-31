@@ -77,11 +77,11 @@ if( ${GSW_FOUND} )
                          )
 
     list( APPEND ufo_marine_test_data
-      marine/Jason-3-2018-04-15_geovals.nc
+      marine/Jason-2-2018-04-15_geovals.nc
+      marine/profile_2018-04-15_geovals.nc
       marine/cryosat2-2018-04-15_geovals.nc
-      marine/seaice_obs-2018-04-15_geovals.nc
+      marine/icec-2018-04-15_geovals.nc
       marine/sst_obs-2018-04-15_geovals.nc
-      marine/t0n156e_dy_geovals.nc
     )
 
 	CREATE_SYMLINK_FILENAME( ${CMAKE_CURRENT_SOURCE_DIR}/testinput
@@ -103,13 +103,13 @@ list (APPEND ioda_obs_test_data
   atmosphere/diag_t_obs_01_wprofiles_odb
 
   constituents/diag_viirs_ges.2015081000_dbl_subset.nc4
+  constituents/aod_obs_2015081000_m.nc4
 
-  marine/Jason-3-2018-04-15.nc
+  marine/Jason-2-2018-04-15.nc
+  marine/profile_2018-04-15.nc
   marine/cryosat2-2018-04-15.nc
-  marine/sea-ice-con-l2.nc
-  marine/seaice_obs-2018-04-15.nc4
+  marine/icec-2018-04-15.nc
   marine/sst_obs-2018-04-15.nc4
-  marine/t0n156e_dy_obs.nc
   )
 
 CREATE_SYMLINK_FILENAME( ${ioda_SOURCE_DIR}/test/testinput
@@ -189,11 +189,14 @@ if( ${GSW_FOUND} )
                       ARGS    "testinput/tprof.yml"
                       LIBS    ufo )
 
-    ecbuild_add_test( TARGET  test_ufo_insitutemperature_tlad
-                      BOOST
-                      SOURCES mains/TestObsOperatorTLAD.cc
-                      ARGS    "testinput/tprof.yml"
-                      LIBS    ufo )
+# SRH: This test works, but it take 5 minutes to run. Thought it would be good
+# to comment this test out until the performance issue can be addressed.
+#
+#    ecbuild_add_test( TARGET  test_ufo_insitutemperature_tlad
+#                      BOOST
+#                      SOURCES mains/TestObsOperatorTLAD.cc
+#                      ARGS    "testinput/tprof.yml"
+#                      LIBS    ufo )
 
     ecbuild_add_test( TARGET  test_ufo_seaice
                       BOOST

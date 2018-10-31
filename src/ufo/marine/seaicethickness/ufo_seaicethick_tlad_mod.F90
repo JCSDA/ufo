@@ -6,11 +6,9 @@
 !> Fortran module to handle ice concentration observations
 
 module ufo_seaicethick_tlad_mod
-  
-use ioda_obs_seaicethick_mod
-use ioda_obs_vectors
+
+use iso_c_binding  
 use ufo_vars_mod
-use ioda_locs_mod
 use ufo_geovals_mod
 use kinds
   
@@ -76,7 +74,7 @@ subroutine ufo_seaicethick_simobs_tl(self, geovals, hofx)
 implicit none
 type(ufo_seaicethick_tlad), intent(in) :: self
 type(ufo_geovals), intent(in)    :: geovals
-type(obs_vector),  intent(inout) :: hofx
+real(c_double),  intent(inout) :: hofx(:)
 
 character(len=*), parameter :: myname_="ufo_seaicethick_simobs_tl"
 character(max_string) :: err_msg
@@ -84,7 +82,7 @@ character(max_string) :: err_msg
 integer :: iobs, icat, ncat
 type(ufo_geoval), pointer :: icethick_d, icefrac_d
 
-print *, myname_, ' nobs: ', geovals%nobs, hofx%nobs
+print *, myname_, ' nobs: ', geovals%nobs, size(hofx,1)
 
 ! check if trajectory was set
 if (.not. self%ltraj) then
@@ -93,7 +91,7 @@ if (.not. self%ltraj) then
 endif
 
 ! check if nobs is consistent in geovals & hofx
-if (geovals%nobs /= hofx%nobs) then
+if (geovals%nobs /= size(hofx,1)) then
   write(err_msg,*) myname_, ' error: nobs inconsistent!'
   call abor1_ftn(err_msg)
 endif
@@ -106,12 +104,12 @@ call ufo_geovals_get_var(geovals, var_seaicethick, icethick_d)
 
 ! sea ice thickness obs operator
 ncat = icefrac_d%nval
-hofx%values = 0.0
-do iobs = 1, hofx%nobs
+hofx = 0.0
+do iobs = 1, size(hofx,1)
    do icat = 1, ncat
-     hofx%values(iobs) = hofx%values(iobs) +                                         &
-                         self%icefrac%vals(icat,iobs) * icethick_d%vals(icat,iobs) / 905.0 + &
-                         icefrac_d%vals(icat,iobs) * self%icethick%vals(icat,iobs) /905.0
+     hofx(iobs) = hofx(iobs) +                                         &
+                  self%icefrac%vals(icat,iobs) * icethick_d%vals(icat,iobs) / 905.0 + &
+                  icefrac_d%vals(icat,iobs) * self%icethick%vals(icat,iobs) /905.0
    enddo
 enddo
 
@@ -123,7 +121,7 @@ subroutine ufo_seaicethick_simobs_ad(self, geovals, hofx)
 implicit none
 type(ufo_seaicethick_tlad), intent(in) :: self
 type(ufo_geovals), intent(inout) :: geovals
-type(obs_vector),  intent(inout)    :: hofx
+real(c_double),  intent(inout)    :: hofx(:)
 
 character(len=*), parameter :: myname_="ufo_seaicethick_simobs_ad"
 character(max_string) :: err_msg
@@ -138,7 +136,7 @@ if (.not. self%ltraj) then
 endif
 
 ! check if nobs is consistent in geovals & hofx
-if (geovals%nobs /= hofx%nobs) then
+if (geovals%nobs /= size(hofx,1)) then
   write(err_msg,*) myname_, ' error: nobs inconsistent!'
   call abor1_ftn(err_msg)
 endif
@@ -157,29 +155,29 @@ if (.not.(allocated(icefrac_d%vals) .or. .not. allocated(icethick_d%vals))) then
      write(err_msg,*) myname_, ' unknown number of categories'
      call abor1_ftn(err_msg)
    endif
-   if (.not. allocated(icefrac_d%vals))  allocate(icefrac_d%vals(ncat,hofx%nobs))
-   if (.not. allocated(icethick_d%vals)) allocate(icethick_d%vals(ncat, hofx%nobs))
+   if (.not. allocated(icefrac_d%vals))  allocate(icefrac_d%vals(ncat,size(hofx,1)))
+   if (.not. allocated(icethick_d%vals)) allocate(icethick_d%vals(ncat, size(hofx,1)))
 end if
 
-!print *, 'in ad: hofx=', hofx%values
+!print *, 'in ad: hofx=', hofx
 
 ! backward sea ice thickness obs operator
 
 print *,'ncat=',ncat
-if (.not. allocated(icefrac_d%vals))  allocate(icefrac_d%vals(ncat,hofx%nobs))
-if (.not. allocated(icethick_d%vals)) allocate(icethick_d%vals(ncat, hofx%nobs))
+if (.not. allocated(icefrac_d%vals))  allocate(icefrac_d%vals(ncat,size(hofx,1)))
+if (.not. allocated(icethick_d%vals)) allocate(icethick_d%vals(ncat, size(hofx,1)))
 
 icethick_d%vals = 0.0
 icefrac_d%vals = 0.0
-do iobs = 1, hofx%nobs
+do iobs = 1, size(hofx,1)
    do icat = 1, ncat
-      icefrac_d%vals(icat,iobs)  = icefrac_d%vals(icat,iobs) + self%icethick%vals(icat,iobs) * hofx%values(iobs) / 905.0
-      icethick_d%vals(icat,iobs) = icethick_d%vals(icat,iobs) + self%icefrac%vals(icat,iobs) * hofx%values(iobs) / 905.0
+      icefrac_d%vals(icat,iobs)  = icefrac_d%vals(icat,iobs) + self%icethick%vals(icat,iobs) * hofx(iobs) / 905.0
+      icethick_d%vals(icat,iobs) = icethick_d%vals(icat,iobs) + self%icefrac%vals(icat,iobs) * hofx(iobs) / 905.0
       !print *, 'in ad: thick=', icethick_d%vals(:,iobs)
       !print *, 'in ad: frac=', icefrac_d%vals(:,iobs)
    enddo
 enddo
-!hofx%values = 0.0
+!hofx = 0.0
 
 !call abor1_ftn("end adjoint")
 end subroutine ufo_seaicethick_simobs_ad

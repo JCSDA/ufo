@@ -55,7 +55,7 @@ void ObsSeaSurfaceTempTLAD::setTrajectory(const GeoVaLs & geovals, const ObsBias
   void ObsSeaSurfaceTempTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec,
                                             const ObsBiasIncrement & bias) const {
   ufo_seasurfacetemp_simobs_tl_f90(keyOperSeaSurfaceTemp_, geovals.toFortran(),
-                                     ovec.toFortran());
+                                    ovec.size(), ovec.toFortran());
 }
 
 // -----------------------------------------------------------------------------
@@ -63,7 +63,7 @@ void ObsSeaSurfaceTempTLAD::setTrajectory(const GeoVaLs & geovals, const ObsBias
   void ObsSeaSurfaceTempTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec,
                                             ObsBiasIncrement & bias) const {
   ufo_seasurfacetemp_simobs_ad_f90(keyOperSeaSurfaceTemp_, geovals.toFortran(),
-                                        ovec.toFortran());
+                                        ovec.size(), ovec.toFortran());
 }
 
 // -----------------------------------------------------------------------------

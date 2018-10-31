@@ -15,7 +15,7 @@ MODULE ufo_aod_mod
   USE ufo_aod_misc
   use crtm_module
   USE ufo_basis_mod, only: ufo_basis
-use obsspace_mod
+  use obsspace_mod
 
   implicit none
 
@@ -153,6 +153,8 @@ contains
 
     integer              :: nobs
     integer              :: nlocs
+    character(len=3)     :: chan_num
+    character(len=100)   :: var_name
     REAL(fp), allocatable :: rmse(:)
     real(fp), allocatable :: diff(:,:)
     real(kind_real), allocatable :: ztmp(:)
@@ -327,15 +329,22 @@ contains
 
        ALLOCATE(diff(n_channels,n_profiles),rmse(n_channels))
 
-       allocate(Aod_Obs(n_channels, n_profiles))
-       allocate(Omg_Aod(n_channels, n_profiles))
-       call obsspace_get_var(obss, Aod_Obs(1,1), "Observation", nobs)
-       call obsspace_get_var(obss, Omg_Aod(1,1), "Obs_Minus_Forecast_unadjusted", nobs)
+       allocate(Aod_Obs(n_profiles, n_channels))
+       allocate(Omg_Aod(n_profiles, n_channels))
+       do l = 1, n_channels
+         write(chan_num, '(I0)') l
+
+         var_name = 'aerosol_optical_depth_' // trim(chan_num) // '_'
+         call obsspace_get_db(obss, "ObsValue", var_name, n_profiles, Aod_Obs(:,l))
+
+         var_name = 'obs_minus_forecast_unadjusted_' // trim(chan_num) // '_'
+         call obsspace_get_db(obss, "OmF", var_name, n_profiles, Omg_Aod(:,l))
+       enddo
 
        rmse = 0
        DO m = 1, N_PROFILES
           DO l = 1, n_Channels
-             diff(l,m) = SUM(rts(l,m)%layer_optical_depth(:)) - (Aod_Obs(l,m) - Omg_Aod(l,m))
+             diff(l,m) = SUM(rts(l,m)%layer_optical_depth(:)) - (Aod_Obs(m,l) - Omg_Aod(m,l))
              rmse(l) = rmse(l) + diff(l,m)**2
           END DO
        ENDDO

@@ -3,19 +3,20 @@ test_framework_runtime_config: "--log_level=test_suite"
 window_begin: 2018-04-15T00:00:00Z
 window_end: 2018-04-16T00:00:00Z
 LinearObsOpTest:
-  testiterTL: 10
-  toleranceTL: 1.0e-7
-  toleranceAD: 1.0e-7
+  testiterTL: 1
+  toleranceTL: 1.0e-10
+  toleranceAD: 1.0e-10
 Observations:
   ObsTypes:
   - ObsType: ADT
     ObsData:
       ObsDataIn:
-        obsfile: Data/Jason-3-2018-04-15.nc
+        obsfile: Data/Jason-2-2018-04-15.nc
     GeoVaLs:
       random: 0
       nobs: 19266
-      filename: Data/Jason-3-2018-04-15_geovals.nc
+      filename: Data/Jason-2-2018-04-15_geovals.nc
     ObsBias: {}
-    rmsequiv: 0.80114003705029235
+    #rmsequiv: 0.80114003705029235
+    rmsequiv: 0.0  # for testing with bogus geoval data
     tolerance: 1.0e-8

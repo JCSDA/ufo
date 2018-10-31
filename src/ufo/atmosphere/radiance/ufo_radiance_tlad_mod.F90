@@ -14,10 +14,9 @@ module ufo_radiance_tlad_mod
  use ufo_geovals_mod, only: ufo_geovals, ufo_geoval, ufo_geovals_get_var
  use ufo_basis_tlad_mod, only: ufo_basis_tlad
  use ufo_vars_mod
-
  use ufo_radiance_utils_mod
-
  use crtm_module
+ use obsspace_mod
 
  implicit none
  private

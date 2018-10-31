@@ -11,12 +11,12 @@ Observations:
   - ObsType: SeaIceFraction
     ObsData:
       ObsDataIn:
-        obsfile: Data/seaice_obs-2018-04-15.nc4
+        obsfile: Data/icec-2018-04-15.nc
     GeoVaLs:
       random: 0
-      filename: Data/seaice_obs-2018-04-15_geovals.nc
+      filename: Data/icec-2018-04-15_geovals.nc
     ObsBias: {}
-    rmsequiv: 0.3278957284818223
+    rmsequiv: 2.5
     tolerance: 1.0e-8
   - ObsType: SeaIceThickness
     ObsData:
@@ -26,5 +26,5 @@ Observations:
       random: 0
       filename: Data/cryosat2-2018-04-15_geovals.nc
     ObsBias: {}
-    rmsequiv: 1.6672399183236846
+    rmsequiv: 0.0013812154696133147
     tolerance: 1.0e-8

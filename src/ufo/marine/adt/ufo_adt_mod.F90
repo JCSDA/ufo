@@ -8,13 +8,12 @@
 module ufo_adt_mod
 
   use iso_c_binding
-  use obsspace_mod
-  use ioda_obs_vectors
   use ufo_vars_mod
   use ioda_locs_mod
   use ufo_geovals_mod
   use kinds
   use ncd_kinds, only:  i_kind,r_single,r_kind,r_double
+  use obsspace_mod 
 
   implicit none
   public :: ufo_adt
@@ -26,16 +25,6 @@ module ufo_adt_mod
   type :: ufo_adt
   end type ufo_adt
 
-  type diag_adt_altimeter
-     integer      :: Station_ID
-     real(r_kind) :: Observation_Type
-     real(r_kind) :: Latitude
-     real(r_kind) :: Longitude
-     real(r_kind) :: Time
-     real(r_kind) :: Observation
-     real(r_kind) :: Obs_Minus_Forecast
-  end type diag_adt_altimeter
-
   ! ------------------------------------------------------------------------------
 
 contains
@@ -45,84 +34,51 @@ contains
   subroutine ufo_adt_simobs(self, geovals, hofx, obss)
 
     use ufo_marine_ncutils
+    use iso_c_binding
     
     implicit none
     
-    type(ufo_adt), intent(in) :: self
-    type(ufo_geovals), intent(in)    :: geovals
-    type(c_ptr), value,   intent(in) :: obss     !< adt observations
-    type(obs_vector),  intent(inout) :: hofx
+    type(ufo_adt),      intent(in) :: self
+    type(ufo_geovals),  intent(in) :: geovals
+    type(c_ptr), value, intent(in) :: obss     !< adt observations
+    real(c_double),  intent(inout) :: hofx(:)
 
     character(len=*), parameter :: myname_="ufo_adt_simobs"
     character(max_string) :: err_msg
 
-    ! nc_diag stuff
-    logical :: append
-    character(len=120) :: filename !< name of outpu file for omf, lon, lat, ...
-    !type(diag_adt_altimeter), allocatable :: adt_out(:)
-    type(diag_marine_obs) :: adt_out    
-
     integer :: iobs
-    real :: sum_obs,sum_hofx
+    real(kind_real) :: offset_obs, offset_hofx
     type(ufo_geoval), pointer :: geoval_adt
 
-    real(kind_real), allocatable :: obs_lat(:)
-    real(kind_real), allocatable :: obs_lon(:)
     real(kind_real), allocatable :: obs_adt(:)
     integer :: nobs
-
+    
     ! check if nobs is consistent in geovals & hofx
-    if (geovals%nobs /= hofx%nobs) then
-       write(err_msg,*) myname_, ' error: nobs inconsistent!',geovals%nobs,hofx%nobs
+    nobs = size(hofx,1)
+    if (geovals%nobs /= size(hofx,1)) then
+       write(err_msg,*) myname_, ' error: nobs inconsistent!'
        call abor1_ftn(err_msg)
     endif
 
     ! check if adt variable is in geovals and get it
     call ufo_geovals_get_var(geovals, var_abs_topo, geoval_adt)
 
-    ! Information for temporary output file ---------------------------------------!
-    filename='adt-test.nc'    
-    call adt_out%init(hofx%nobs,filename)
+    hofx = 0.0
 
-    hofx%values = 0.0
-
-    ! Read in obs vars
-    nobs = obsspace_get_nobs(obss)
-    allocate(obs_lat(nobs))
-    allocate(obs_lon(nobs))
-    allocate(obs_adt(nobs))
-
-    call obsspace_get_var(obss, obs_lat, "latitude", nobs)
-    call obsspace_get_var(obss, obs_lon, "longitude", nobs)
-    call obsspace_get_var(obss, obs_adt, "adt", nobs)
+    !call obsspace_get_db(obss, "ObsValue", "adt", nobs, obs_adt)
 
     ! Compute offset
-    sum_hofx=sum(geoval_adt%vals(1,:))
-    sum_obs=sum(obs_adt(:))
-    print *,'ssh offset',(sum_obs-sum_hofx)/hofx%nobs
+    offset_hofx=sum(geoval_adt%vals(1,:))/nobs
+    offset_obs=0.0!sum(obs_adt(:))/nobs
 
     ! adt obs operator
-    do iobs = 1, hofx%nobs
+    do iobs = 1, nobs
        ! remove offset from hofx
-       hofx%values(iobs) = geoval_adt%vals(1,iobs)+(sum_obs-sum_hofx)/hofx%nobs
-
-       ! Output information:
-       adt_out%diag(iobs)%Station_ID            = 1
-       adt_out%diag(iobs)%Observation_Type      = 1.0
-       adt_out%diag(iobs)%Latitude              = obs_lat(iobs)
-       adt_out%diag(iobs)%Longitude             = obs_lon(iobs)
-       adt_out%diag(iobs)%Time                  = 1.0
-       adt_out%diag(iobs)%Observation           = obs_adt(iobs)
-       adt_out%diag(iobs)%Obs_Minus_Forecast    = obs_adt(iobs) - hofx%values(iobs)
+       hofx(iobs) = geoval_adt%vals(1,iobs)+(offset_obs-offset_hofx)
     enddo
 
-    call adt_out%write_diag()
-    call adt_out%write_geoval(var_abs_topo,geoval_adt)
-    call adt_out%finalize()
-
-    deallocate(obs_lat)
-    deallocate(obs_lon)
-    deallocate(obs_adt)
+    !deallocate(obs_adt)
+    
   end subroutine ufo_adt_simobs
 
 end module ufo_adt_mod

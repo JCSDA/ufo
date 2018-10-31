@@ -63,7 +63,7 @@ contains
 
       ! observation of pressure (for vertical interpolation)
       allocate(pressure(self%nobs))
-      call obsspace_get_var(obss, pressure, "air_pressure", self%nobs)
+      call obsspace_get_db(obss, "ObsValue", "air_pressure", self%nobs, pressure)
 
       ! compute interpolation weights
       do iobs = 1, self%nobs

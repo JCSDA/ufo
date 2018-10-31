@@ -37,8 +37,9 @@ ObsADT::~ObsADT() {
 // -----------------------------------------------------------------------------
 
 void ObsADT::simulateObs(const GeoVaLs & gom, ioda::ObsVector & ovec, const ObsBias & bias) const {
-  ufo_adt_simobs_f90(keyOperADT_, gom.toFortran(), odb_, ovec.toFortran(),
-                  bias.toFortran());
+  ufo_adt_simobs_f90(keyOperADT_, gom.toFortran(), odb_,
+                     ovec.size(), ovec.toFortran(),
+                     bias.toFortran());
 }
 
 // -----------------------------------------------------------------------------

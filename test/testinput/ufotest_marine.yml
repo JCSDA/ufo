@@ -7,11 +7,11 @@ Observations:
   - ObsType: SeaIceFraction
     ObsData:
       ObsDataIn:
-        obsfile: Data/seaice_obs-2018-04-15.nc4
+        obsfile: Data/icec-2018-04-15.nc
     GeoVaLs:
-      norm: 299.15958927031789
+      norm: 299.07774908876121
       random: 0
-      filename: Data/seaice_obs-2018-04-15_geovals.nc
+      filename: Data/icec-2018-04-15_geovals.nc
     ObsBias: {}
     rmsequiv: 1.
     tolerance: 1.0e-8
@@ -20,7 +20,7 @@ Observations:
       ObsDataIn:
         obsfile: Data/cryosat2-2018-04-15.nc
     GeoVaLs:
-      norm: 154114.52524253263
+      norm: 141.99471821162928
       random: 0
       filename: Data/cryosat2-2018-04-15_geovals.nc
     ObsBias: {}
@@ -29,22 +29,22 @@ Observations:
   - ObsType: InsituTemperature
     ObsData:
       ObsDataIn:
-        obsfile: Data/t0n156e_dy_obs.nc
+        obsfile: Data/profile_2018-04-15.nc
     GeoVaLs:
-      norm: 1752.4863847557222
+      norm: 42052.887172080402
       random: 0
-      filename: Data/t0n156e_dy_geovals.nc
+      filename: Data/profile_2018-04-15_geovals.nc
     ObsBias: {}
     rmsequiv: 1.
     tolerance: 1.0e-8
   - ObsType: ADT
     ObsData:
       ObsDataIn:
-        obsfile: Data/Jason-3-2018-04-15.nc
+        obsfile: Data/Jason-2-2018-04-15.nc
     GeoVaLs:
-      norm: 115.51226734562076
+      norm: 0.0
       random: 0
-      filename: Data/Jason-3-2018-04-15_geovals.nc
+      filename: Data/Jason-2-2018-04-15_geovals.nc
     ObsBias: {}
     rmsequiv: 1.
     tolerance: 1.0e-8
@@ -53,7 +53,7 @@ Observations:
       ObsDataIn:
         obsfile: Data/sst_obs-2018-04-15.nc4
     GeoVaLs:
-      norm: 10527.132534078179
+      norm: 7098.7569334355994
       random: 0
       filename: Data/sst_obs-2018-04-15_geovals.nc
     ObsBias: {}

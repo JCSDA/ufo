@@ -65,7 +65,7 @@ static LinearObsOperatorMaker<ObsStericHeightTLAD> makerObsStericHeightTLAD_("Ob
     void ObsStericHeightTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec,
                                             const ObsBiasIncrement & bias) const {
     ufo_stericheight_simobs_tl_f90(keyOperStericHeight_, geovals.toFortran(),
-                                        ovec.toFortran());
+                                        ovec.size(), ovec.toFortran());
   }
 
   // -----------------------------------------------------------------------------
@@ -73,7 +73,7 @@ static LinearObsOperatorMaker<ObsStericHeightTLAD> makerObsStericHeightTLAD_("Ob
     void ObsStericHeightTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec,
                                             ObsBiasIncrement & bias) const {
     ufo_stericheight_simobs_ad_f90(keyOperStericHeight_, geovals.toFortran(),
-                                        ovec.toFortran());
+                                      ovec.size(), ovec.toFortran());
   }
 
   // -----------------------------------------------------------------------------

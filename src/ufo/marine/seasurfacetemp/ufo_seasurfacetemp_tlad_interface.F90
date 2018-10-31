@@ -9,11 +9,8 @@ module ufo_seasurfacetemp_tlad_mod_c
   
   use iso_c_binding
   use config_mod
-  use ioda_obs_vectors,   only: obs_vector, ioda_obs_vect_registry
   use ufo_geovals_mod,   only: ufo_geovals
   use ufo_geovals_mod_c, only: ufo_geovals_registry
-  use ioda_obs_seasurfacetemp_mod,   only: ioda_obs_seasurfacetemp
-  use ioda_obs_seasurfacetemp_mod_c, only: ioda_obs_seasurfacetemp_registry 
   use ufo_seasurfacetemp_tlad_mod 
   implicit none
   private
@@ -82,48 +79,45 @@ end subroutine ufo_seasurfacetemp_tlad_settraj_c
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_seasurfacetemp_simobs_tl_c(c_key_self, c_key_geovals, c_key_hofx) bind(c,name='ufo_seasurfacetemp_simobs_tl_f90')
+subroutine ufo_seasurfacetemp_simobs_tl_c(c_key_self, c_key_geovals, c_nobs, c_hofx) bind(c,name='ufo_seasurfacetemp_simobs_tl_f90')
 
 implicit none
 integer(c_int), intent(in) :: c_key_self
 integer(c_int), intent(in) :: c_key_geovals
-integer(c_int), intent(in) :: c_key_hofx
+integer(c_int),     intent(in) :: c_nobs
+real(c_double),     intent(inout) :: c_hofx(c_nobs)
 
 type(ufo_seasurfacetemp_tlad), pointer :: self
 type(ufo_geovals),    pointer :: geovals
-type(obs_vector),     pointer :: hofx
 
 character(len=*), parameter :: myname_="ufo_seasurfacetemp_simobs_tl_c"
 
 call ufo_seasurfacetemp_tlad_registry%get(c_key_self, self)
 call ufo_geovals_registry%get(c_key_geovals,geovals)
-call ioda_obs_vect_registry%get(c_key_hofx,hofx)
 
-call ufo_seasurfacetemp_simobs_tl(self, geovals, hofx)
+call ufo_seasurfacetemp_simobs_tl(self, geovals, c_hofx)
 
 end subroutine ufo_seasurfacetemp_simobs_tl_c
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_seasurfacetemp_simobs_ad_c(c_key_self, c_key_geovals, c_key_hofx) bind(c,name='ufo_seasurfacetemp_simobs_ad_f90')
+subroutine ufo_seasurfacetemp_simobs_ad_c(c_key_self, c_key_geovals, c_nobs, c_hofx) bind(c,name='ufo_seasurfacetemp_simobs_ad_f90')
 
 implicit none
 integer(c_int), intent(in) :: c_key_self
 integer(c_int), intent(in) :: c_key_geovals
-integer(c_int), intent(in) :: c_key_hofx
+integer(c_int),     intent(in) :: c_nobs
+real(c_double),     intent(inout) :: c_hofx(c_nobs)
 
 type(ufo_seasurfacetemp_tlad), pointer :: self
 type(ufo_geovals),    pointer :: geovals
-type(obs_vector),     pointer :: hofx
-
 
 character(len=*), parameter :: myname_="ufo_seasurfacetemp_simobs_ad_c"
 
 call ufo_seasurfacetemp_tlad_registry%get(c_key_self, self)
 call ufo_geovals_registry%get(c_key_geovals,geovals)
-call ioda_obs_vect_registry%get(c_key_hofx,hofx)
 
-call ufo_seasurfacetemp_simobs_ad(self, geovals, hofx)
+call ufo_seasurfacetemp_simobs_ad(self, geovals, c_hofx)
 
 end subroutine ufo_seasurfacetemp_simobs_ad_c
 

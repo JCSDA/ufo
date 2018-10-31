@@ -7,10 +7,8 @@
 
 module ufo_seaicethick_mod
 
-  use ioda_obs_seaicethick_mod
-  use ioda_obs_vectors
+  use iso_c_binding
   use ufo_vars_mod
-  use ioda_locs_mod
   use ufo_geovals_mod
   use kinds
 
@@ -38,7 +36,7 @@ contains
     implicit none
     type(ufo_seaicethick), intent(in) :: self
     type(ufo_geovals), intent(in)    :: geovals
-    type(obs_vector),  intent(inout) :: hofx
+    real(c_double),  intent(inout) :: hofx(:)
 
     character(len=*), parameter :: myname_="ufo_seaicethick_simobs"
     character(max_string) :: err_msg
@@ -52,7 +50,7 @@ contains
     type(diag_marine_obs) :: sit_out    
     
     ! check if nobs is consistent in geovals & hofx
-    if (geovals%nobs /= hofx%nobs) then
+    if (geovals%nobs /= size(hofx,1)) then
        write(err_msg,*) myname_, ' error: nobs inconsistent!'
        call abor1_ftn(err_msg)
     endif
@@ -64,14 +62,14 @@ contains
 
     ! Information for temporary output file
     filename='sit-test.nc'    
-    call sit_out%init(hofx%nobs,filename)
+    call sit_out%init(size(hofx,1),filename)
     
     ncat = icefrac%nval
-    hofx%values = 0.0
+    hofx = 0.0
     ! total sea ice fraction obs operator
-    do iobs = 1, hofx%nobs
+    do iobs = 1, size(hofx,1)
        do icat = 1, ncat
-          hofx%values(iobs) = hofx%values(iobs) + icefrac%vals(icat,iobs) * icethick%vals(icat,iobs) / 905.0
+          hofx(iobs) = hofx(iobs) + icefrac%vals(icat,iobs) * icethick%vals(icat,iobs) / 905.0
        enddo
     enddo
 

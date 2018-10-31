@@ -7,10 +7,8 @@
 
 module ufo_seasurfacetemp_mod
 
-  use ioda_obs_seasurfacetemp_mod
-  use ioda_obs_vectors
+  use iso_c_binding
   use ufo_vars_mod
-  use ioda_locs_mod
   use ufo_geovals_mod
   use kinds
 
@@ -38,7 +36,7 @@ contains
     implicit none
     type(ufo_seasurfacetemp) ,intent(in) :: self
     type(ufo_geovals)        ,intent(in) :: geovals
-    type(obs_vector)      ,intent(inout) :: hofx
+    real(c_double)           ,intent(inout) :: hofx(:)
 
     character(len=*), parameter :: myname_="ufo_seasurfacetemp_simobs"
     character(max_string) :: err_msg
@@ -56,7 +54,7 @@ contains
     type(diag_marine_obs) :: sst_out 
     
     ! check if nobs is consistent in geovals & hofx
-    if (geovals%nobs /= hofx%nobs) then
+    if (geovals%nobs /= size(hofx,1)) then
        write(err_msg,*) myname_, ' error: nobs inconsistent!'
        call abor1_ftn(err_msg)
     endif
@@ -66,11 +64,11 @@ contains
 
     ! Information for temporary output file ---------------------------------------!
     filename='sst-test.nc'    
-    call sst_out%init(hofx%nobs,filename)
+    call sst_out%init(size(hofx,1),filename)
     
     ! sst obs operator
-    do iobs = 1, hofx%nobs
-       hofx%values(iobs) = geoval_sst%vals(1,iobs)
+    do iobs = 1, size(hofx,1)
+       hofx(iobs) = geoval_sst%vals(1,iobs)
 
        ! Output information:
        sst_out%diag(iobs)%Station_ID         = 9999

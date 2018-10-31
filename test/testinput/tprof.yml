@@ -11,10 +11,10 @@ Observations:
   - ObsType: InsituTemperature
     ObsData:
       ObsDataIn:
-        obsfile: Data/t0n156e_dy_obs.nc
+        obsfile: Data/profile_2018-04-15.nc
     GeoVaLs:
       random: 0
-      filename: Data/t0n156e_dy_geovals.nc
+      filename: Data/profile_2018-04-15_geovals.nc
     ObsBias: {}
-    rmsequiv: 24.136239493433276
+    rmsequiv: 424.2018299696291
     tolerance: 1.0e-8

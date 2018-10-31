@@ -81,8 +81,9 @@ contains
       allocate(obsZ(nobs))
       allocate(obsLat(nobs))
 
-      call obsspace_get_var(obss, obsZ, "MSL_ALT", nobs)
-      call obsspace_get_var(obss, obsLat, "Latitude", nobs)
+      call obsspace_get_db(obss, "Metadata", "altitude", nobs, obsZ)
+      call obsspace_get_db(obss, "Metadata", "latitude", nobs, obsLat)
+
       call gnssro_ref_constants(use_compress)
 
       ! obs operator

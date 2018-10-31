@@ -68,7 +68,7 @@ contains
       ! observation of pressure (for vertical interpolation)
       nobs = obsspace_get_nobs(obss)
       allocate(pressure(nobs))
-      call obsspace_get_var(obss, pressure, "air_pressure", nobs)
+      call obsspace_get_db(obss, "ObsValue", "air_pressure", nobs, pressure)
 
       ! obs operator
       do iobs = 1, geovals%nobs

@@ -9,7 +9,6 @@ module ufo_insitutemperature_mod
 
   use iso_c_binding
   use obsspace_mod
-  use ioda_obs_vectors
   use ufo_vars_mod
   use ioda_locs_mod
   use ufo_geovals_mod
@@ -41,7 +40,7 @@ contains
     type(ufo_insitutemperature), intent(in)  :: self       !< Trajectory
     type(ufo_geovals), intent(in)            :: geovals    !< Model's Tp, Sp, h interpolated at obs location 
     type(c_ptr), value, intent(in)           :: obss       !< Insitu temperature observations
-    type(obs_vector),  intent(inout)         :: hofx       !< Ti(Tp,Sp,h)
+    real(c_double),  intent(inout)           :: hofx(:)    !< Ti(Tp,Sp,h)
 
     character(len=*), parameter :: myname_="ufo_insitutemperature_simobs"
     character(max_string)  :: err_msg
@@ -67,7 +66,7 @@ contains
     type(diag_marine_obs) :: insitu_out    
 
     ! check if nobs is consistent in geovals & hofx
-    if (geovals%nobs /= hofx%nobs) then
+    if (geovals%nobs /= size(hofx,1)) then
        write(err_msg,*) myname_, ' error: nobs inconsistent!'
        call abor1_ftn(err_msg)
     endif
@@ -88,16 +87,16 @@ contains
     allocate(obs_depth(obss_nobs))
     allocate(obs_val(obss_nobs))
 
-    call obsspace_get_var(obss, obs_lon, "longitude", obss_nobs)
-    call obsspace_get_var(obss, obs_lat, "latitude", obss_nobs)
-    call obsspace_get_var(obss, obs_depth, "depth", obss_nobs)
-    call obsspace_get_var(obss, obs_val, "in_situ_temperature", obss_nobs)
+    call obsspace_get_db(obss, "Metadata", "longitude", obss_nobs, obs_lon)
+    call obsspace_get_db(obss, "Metadata", "latitude", obss_nobs, obs_lat)
+    call obsspace_get_db(obss, "Metadata", "ocean_depth", obss_nobs, obs_depth)
+    call obsspace_get_db(obss, "ObsValue", "insitu_temperature", obss_nobs, obs_val)
 
     nlev = temp%nval
     nobs = temp%nobs        
     allocate(tempi(nlev,nobs))
     allocate(pressure(nlev,nobs), depth(nlev,nobs))
-    do iobs = 1,hofx%nobs
+    do iobs = 1,size(hofx,1)
        !< Depth from layer thickness
        depth(1,iobs)=0.5*h%vals(1,iobs)
        do ilev = 2, nlev
@@ -105,7 +104,7 @@ contains
        end do          
     end do
 
-    do iobs = 1,hofx%nobs
+    do iobs = 1,size(hofx,1)
        do ilev = 1, nlev
           lono = obs_lon(iobs)
           lato = obs_lat(iobs)          
@@ -115,11 +114,11 @@ contains
 
     ! Information for temporary output file
     filename='insitu-test.nc'    
-    call insitu_out%init(hofx%nobs,filename)
+    call insitu_out%init(size(hofx,1),filename)
     
-    hofx%values = 0.0
+    hofx = 0.0
     ! insitu temperature profile obs operator
-    do iobs = 1,hofx%nobs
+    do iobs = 1,size(hofx,1)
 
        lono = obs_lon(iobs)
        lato = obs_lat(iobs)
@@ -137,10 +136,10 @@ contains
        call vert_interp_apply(nlev, salt%vals(:,iobs), sp, wi, wf)
 
        ! Get insitu temp at model levels and obs location (lono, lato, zo)
-       call insitu_t_nl(hofx%values(iobs),tp,sp,lono,lato,deptho)
+       call insitu_t_nl(hofx(iobs),tp,sp,lono,lato,deptho)
 
-       if (isnan(hofx%values(iobs))) then !!!!!! HACK !!!!!!!!!!!!!!!!!!!!!
-          hofx%values(iobs)=0.0 !!!! NEED TO QC OUT BAD OBS LOCATION !!!!!!
+       if (isnan(hofx(iobs))) then !!!!!! HACK !!!!!!!!!!!!!!!!!!!!!
+          hofx(iobs)=0.0 !!!! NEED TO QC OUT BAD OBS LOCATION !!!!!!
        end if
 
        ! Output information:
@@ -151,7 +150,7 @@ contains
        insitu_out%diag(iobs)%Depth              = obs_depth(iobs)
        insitu_out%diag(iobs)%Time               = 1.0
        insitu_out%diag(iobs)%Observation        = obs_val(iobs)
-       insitu_out%diag(iobs)%Obs_Minus_Forecast = obs_val(iobs) - hofx%values(iobs)
+       insitu_out%diag(iobs)%Obs_Minus_Forecast = obs_val(iobs) - hofx(iobs)
     enddo
 
     !call insitu_out%write_diag()

@@ -14,6 +14,7 @@ module ufo_gnssro_bndgsi_mod
   use vert_interp_mod
   use ufo_basis_mod,      only: ufo_basis
   use lag_interp_mod,     only: lag_interp_const, lag_interp_smthWeights
+  use obsspace_mod
 
   implicit none
   public             :: ufo_gnssro_BndGSI
@@ -31,7 +32,7 @@ module ufo_gnssro_bndgsi_mod
       use gnssro_mod_constants
       use gnssro_mod_transform
       use gnssro_mod_grids, only: get_coordinate_value
-      use obsspace_mod, only: obsspace_get_var
+      use obsspace_mod, only: obsspace_get_db
       implicit none
       class(ufo_gnssro_bndGSI), intent(in)    :: self
       type(ufo_geovals),        intent(in)    :: geovals
@@ -156,10 +157,10 @@ module ufo_gnssro_bndgsi_mod
       allocate(obsLocR(nobs))
       allocate(obsGeoid(nobs))
 
-      call obsspace_get_var(obss, obsLat, "Latitude", nobs)
-      call obsspace_get_var(obss, obsImpP, "IMPP", nobs)   !observed impact parameter; meter
-      call obsspace_get_var(obss, obsLocR, "ELRC", nobs)   !local radius of earth; meter
-      call obsspace_get_var(obss, obsGeoid, "GEODU", nobs) !Geoid; meter
+      call obsspace_get_db(obss, "Metadata", "Latitude", nobs, obsLat)
+      call obsspace_get_db(obss, "Metadata", "IMPP", nobs, obsImpP)   !observed impact parameter; meter
+      call obsspace_get_db(obss, "Metadata", "ELRC", nobs, obsLocR)   !local radius of earth; meter
+      call obsspace_get_db(obss, "Metadata", "GEODU", nobs, obsGeoid) !Geoid; meter
 
       nobs_outIntgl = 0 !initialize count of observations out of integral grids  
       count_rejection = 0

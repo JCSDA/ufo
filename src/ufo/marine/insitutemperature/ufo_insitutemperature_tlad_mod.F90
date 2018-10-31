@@ -9,7 +9,6 @@ module ufo_insitutemperature_tlad_mod
 
   use iso_c_binding
   use obsspace_mod
-  use ioda_obs_vectors
   use ufo_vars_mod
   use ioda_locs_mod
   use ufo_geovals_mod
@@ -122,9 +121,9 @@ contains
     allocate(obs_lon(obss_nobs))
     allocate(obs_depth(obss_nobs))
 
-    call obsspace_get_var(obss, obs_lat, "latitude", obss_nobs)
-    call obsspace_get_var(obss, obs_lon, "longitude", obss_nobs)
-    call obsspace_get_var(obss, obs_depth, "depth", obss_nobs)
+    call obsspace_get_db(obss, "Metadata", "longitude", obss_nobs, obs_lon)
+    call obsspace_get_db(obss, "Metadata", "latitude", obss_nobs, obs_lat)
+    call obsspace_get_db(obss, "Metadata", "ocean_depth", obss_nobs, obs_depth)
 
     traj%lono = obs_lon
     traj%lato = obs_lat
@@ -177,7 +176,7 @@ contains
     implicit none
     type(ufo_insitutemperature_tlad), intent(in) :: traj !< Trajectory
     type(ufo_geovals), intent(in)    :: geovals           !< Increments (dtp, dsp)
-    type(obs_vector),  intent(inout) :: hofx              !< dti
+    real(c_double),  intent(inout) :: hofx(:)              !< dti
 
     character(len=*), parameter :: myname_="ufo_insitutemperature_simobs_tl"
     character(max_string) :: err_msg
@@ -197,7 +196,7 @@ contains
     endif
 
     ! check if nobs is consistent in geovals & hofx
-    if (geovals%nobs /= hofx%nobs) then
+    if (geovals%nobs /= size(hofx,1)) then
        write(err_msg,*) myname_, ' error: nobs inconsistent!'
        call abor1_ftn(err_msg)
     endif
@@ -217,7 +216,7 @@ contains
     nobs = temp_d%nobs        
 
     ! linear sea temperature profile obs operator
-    hofx%values = 0.0
+    hofx = 0.0
     do iobs = 1,nobs
 
        lono = traj%lono(iobs)
@@ -229,7 +228,7 @@ contains
        call vert_interp_apply(nlev, salt_d%vals(:,iobs), dsp, traj%wi(iobs), traj%wf(iobs))
 
        ! Get insitu temp at model levels and obs location (lono, lato, zo)
-       call insitu_t_tl(hofx%values(iobs),dtp,dsp,traj%tempo(iobs),traj%salto(iobs),lono,lato,deptho,traj%jac(:,iobs))
+       call insitu_t_tl(hofx(iobs),dtp,dsp,traj%tempo(iobs),traj%salto(iobs),lono,lato,deptho,traj%jac(:,iobs))
 
     enddo
 
@@ -246,7 +245,7 @@ contains
     implicit none
     type(ufo_insitutemperature_tlad), intent(in)  :: traj
     type(ufo_geovals), intent(inout)              :: geovals
-    type(obs_vector),  intent(in)                 :: hofx
+    real(c_double),  intent(in)                   :: hofx(:)
 
     character(len=*), parameter :: myname_="ufo_insitutemperature_simobs_ad"
     character(max_string) :: err_msg
@@ -264,7 +263,7 @@ contains
     endif
 
     ! check if nobs is consistent in geovals & hofx
-    if (geovals%nobs /= hofx%nobs) then
+    if (geovals%nobs /= size(hofx,1)) then
        write(err_msg,*) myname_, ' error: nobs inconsistent!'
        call abor1_ftn(err_msg)
     endif
@@ -283,14 +282,14 @@ contains
     nlev = traj%nval
     nobs = traj%nobs
     
-    if (.not. allocated(dtemp%vals)) allocate(dtemp%vals(nlev, hofx%nobs))
-    if (.not. allocated(dsalt%vals)) allocate(dsalt%vals(nlev, hofx%nobs))
-    if (.not. allocated(dlayerthick%vals)) allocate(dlayerthick%vals(nlev, hofx%nobs))    
+    if (.not. allocated(dtemp%vals)) allocate(dtemp%vals(nlev, size(hofx,1)))
+    if (.not. allocated(dsalt%vals)) allocate(dsalt%vals(nlev, size(hofx,1)))
+    if (.not. allocated(dlayerthick%vals)) allocate(dlayerthick%vals(nlev, size(hofx,1)))    
 
     ! backward sea temperature profile obs operator
     dtemp%vals = 0.0
     dsalt%vals = 0.0
-    do iobs = 1, hofx%nobs
+    do iobs = 1, size(hofx,1)
 
        lono = traj%lono(iobs)
        lato = traj%lato(iobs)
@@ -299,7 +298,7 @@ contains
        ! Adjoint obs operator
        dtp = 0.0
        dsp = 0.0
-       call insitu_t_tlad(hofx%values(iobs),dtp,dsp,traj%tempo(iobs),traj%salto(iobs),lono,lato,deptho,traj%jac(:,iobs))
+       call insitu_t_tlad(hofx(iobs),dtp,dsp,traj%tempo(iobs),traj%salto(iobs),lono,lato,deptho,traj%jac(:,iobs))
 
        ! Backward interpolate
        call vert_interp_apply_ad(nlev, dtemp%vals(:,iobs), dtp, traj%wi(iobs), traj%wf(iobs))

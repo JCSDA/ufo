@@ -47,7 +47,7 @@ ObsSeaSurfaceTemp::~ObsSeaSurfaceTemp() {
 void ObsSeaSurfaceTemp::simulateObs(const GeoVaLs & gom, ioda::ObsVector & ovec,
                                     const ObsBias & bias) const {
   ufo_seasurfacetemp_simobs_f90(keyOperSeaSurfaceTemp_, gom.toFortran(), odb_,
-                             ovec.toFortran(), bias.toFortran());
+                             ovec.size(), ovec.toFortran(), bias.toFortran());
 }
 
 // -----------------------------------------------------------------------------
