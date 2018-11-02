@@ -90,7 +90,7 @@ contains
     real(kind_real), allocatable :: obs_lon(:)
     real(kind_real), allocatable :: obs_depth(:)
     integer :: obss_nobs
-    
+
     ! check if sea temperature profile variable is in geovals and get it
     call ufo_geovals_get_var(geovals, var_ocn_pot_temp, temp)
 
@@ -159,7 +159,7 @@ contains
        ! Compute jacobian
        call insitu_t_jac(traj%jac(:,iobs), traj%tempo(iobs), traj%salto(iobs), traj%lono(iobs), traj%lato(iobs), traj%deptho(iobs))
     end do
-    
+
     deallocate(obs_lat)
     deallocate(obs_lon)
     deallocate(obs_depth)

@@ -47,10 +47,8 @@ contains
 
     integer :: iobs, ilev, nlev, nobs
     type(ufo_geoval), pointer :: temp, salt, h
-    real(kind_real), allocatable :: tempi(:,:)
-    real (kind_real), allocatable :: pressure(:,:), depth(:,:)
+    real (kind_real), allocatable :: depth(:,:)
     real(kind_real) :: lono, lato, deptho
-
     real(kind_real), allocatable :: obs_lon(:)
     real(kind_real), allocatable :: obs_lat(:)
     real(kind_real), allocatable :: obs_depth(:)
@@ -94,8 +92,7 @@ contains
 
     nlev = temp%nval
     nobs = temp%nobs        
-    allocate(tempi(nlev,nobs))
-    allocate(pressure(nlev,nobs), depth(nlev,nobs))
+    allocate(depth(nlev,nobs))
     do iobs = 1,size(hofx,1)
        !< Depth from layer thickness
        depth(1,iobs)=0.5*h%vals(1,iobs)
@@ -104,17 +101,7 @@ contains
        end do          
     end do
 
-    do iobs = 1,size(hofx,1)
-       do ilev = 1, nlev
-          lono = obs_lon(iobs)
-          lato = obs_lat(iobs)          
-          call insitu_t_nl(tempi(ilev,iobs),temp%vals(ilev,iobs),salt%vals(ilev,iobs),lono,lato,depth(ilev,iobs))
-       end do
-    end do
-
     ! Information for temporary output file
-    filename='insitu-test.nc'    
-    call insitu_out%init(size(hofx,1),filename)
     
     hofx = 0.0
     ! insitu temperature profile obs operator
@@ -125,7 +112,7 @@ contains
        deptho = obs_depth(iobs)
     
        !< Interpolation weight
-       call vert_interp_weights(nlev,deptho,depth(:,iobs),wi,wf)
+       call vert_interp_weights(nlev, deptho, depth(:,iobs), wi, wf)
        if (deptho.ge.maxval(depth)) then
           wi=nlev-1
           wf=0.0
@@ -136,31 +123,11 @@ contains
        call vert_interp_apply(nlev, salt%vals(:,iobs), sp, wi, wf)
 
        ! Get insitu temp at model levels and obs location (lono, lato, zo)
-       call insitu_t_nl(hofx(iobs),tp,sp,lono,lato,deptho)
+       call insitu_t_nl(hofx(iobs), tp, sp, lono, lato, deptho)
 
-       if (isnan(hofx(iobs))) then !!!!!! HACK !!!!!!!!!!!!!!!!!!!!!
-          hofx(iobs)=0.0 !!!! NEED TO QC OUT BAD OBS LOCATION !!!!!!
-       end if
-
-       ! Output information:
-       insitu_out%diag(iobs)%Station_ID         = 1234!obs_ti%idx(iobs)
-       insitu_out%diag(iobs)%Observation_Type   = 1.0
-       insitu_out%diag(iobs)%Latitude           = obs_lat(iobs)
-       insitu_out%diag(iobs)%Longitude          = obs_lon(iobs)
-       insitu_out%diag(iobs)%Depth              = obs_depth(iobs)
-       insitu_out%diag(iobs)%Time               = 1.0
-       insitu_out%diag(iobs)%Observation        = obs_val(iobs)
-       insitu_out%diag(iobs)%Obs_Minus_Forecast = obs_val(iobs) - hofx(iobs)
     enddo
 
-    !call insitu_out%write_diag()
-    call insitu_out%write_geoval(var_ocn_pot_temp,temp)
-    call insitu_out%write_geoval(var_ocn_salt,salt)
-    call insitu_out%write_geoval(var_ocn_lay_thick,h)
-    call insitu_out%finalize()
-
-    deallocate(tempi, pressure, depth)
-
+    deallocate(depth)
     deallocate(obs_lon)
     deallocate(obs_lat)
     deallocate(obs_depth)

@@ -31,7 +31,7 @@ Observations:
       ObsDataIn:
         obsfile: Data/profile_2018-04-15.nc
     GeoVaLs:
-      norm: 42052.887172080402
+      norm: 10343.737235641671
       random: 0
       filename: Data/profile_2018-04-15_geovals.nc
     ObsBias: {}

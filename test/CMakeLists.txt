@@ -192,11 +192,11 @@ if( ${GSW_FOUND} )
 # SRH: This test works, but it take 5 minutes to run. Thought it would be good
 # to comment this test out until the performance issue can be addressed.
 #
-#    ecbuild_add_test( TARGET  test_ufo_insitutemperature_tlad
-#                      BOOST
-#                      SOURCES mains/TestObsOperatorTLAD.cc
-#                      ARGS    "testinput/tprof.yml"
-#                      LIBS    ufo )
+    ecbuild_add_test( TARGET  test_ufo_insitutemperature_tlad
+                      BOOST
+                      SOURCES mains/TestObsOperatorTLAD.cc
+                      ARGS    "testinput/tprof.yml"
+                      LIBS    ufo )
 
     ecbuild_add_test( TARGET  test_ufo_seaice
                       BOOST

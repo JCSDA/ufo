@@ -16,5 +16,5 @@ Observations:
       random: 0
       filename: Data/profile_2018-04-15_geovals.nc
     ObsBias: {}
-    rmsequiv: 424.2018299696291
+    rmsequiv: 15.020734025831988              
     tolerance: 1.0e-8
