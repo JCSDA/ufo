@@ -10,6 +10,8 @@ use ufo_vars_mod
 use kinds
 use type_distribution, only: random_distribution
 
+use fckit_mpi_module, only: fckit_mpi_comm, fckit_mpi_sum
+
 implicit none
 private
 integer, parameter :: max_string=800
@@ -601,11 +603,16 @@ end subroutine ufo_geovals_normalize
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_geovals_dotprod(self, other, prod) 
+subroutine ufo_geovals_dotprod(self, other, gprod) 
 implicit none
-real(kind_real), intent(inout) :: prod
+real(kind_real), intent(inout) :: gprod
 type(ufo_geovals), intent(in) :: self, other
 integer :: ivar, iobs, ival, nval
+real(kind_real) :: prod
+
+type(fckit_mpi_comm) :: f_comm
+
+f_comm = fckit_mpi_comm()
 
 if (.not. self%lalloc .or. .not. self%linit) then
   call abor1_ftn("ufo_geovals_dotprod: geovals not allocated")
@@ -626,6 +633,9 @@ do ivar = 1, self%nvar
     enddo
   enddo
 enddo
+
+!Get global dot product
+call f_comm%allreduce(prod,gprod,fckit_mpi_sum())
 
 end subroutine ufo_geovals_dotprod
 
