@@ -112,17 +112,17 @@ module ufo_gnssro_bndropp1d_mod
       allocate(obsLocR(obss_nobs))
       allocate(obsGeoid(obss_nobs))
 
-     !call obsspace_get_db(obss, "Metadata", "year", obss_nobs, obsYYYY) !Note: variable name not consistent with BUFR table
-     !call obsspace_get_db(obss, "Metadata", "month", obss_nobs, obsMM) !Note: variable name not consistent with BUFR table
-     !call obsspace_get_db(obss, "Metadata", "day", obss_nobs, obsDD) !Note: variable name not consistent with BUFR table
-     !call obsspace_get_db(obss, "Metadata", "hour", obss_nobs, obsHH) !Note: variable name not consistent with BUFR table
-     !call obsspace_get_db(obss, "Metadata", "minute", obss_nobs, obsMN) !Note: variable name not consistent with BUFR table
-     !call obsspace_get_db(obss, "Metadata", "second", obss_nobs, obsSS) !Note: variable name not consistent with BUFR table
-      call obsspace_get_db(obss, "Metadata", "Longitude", obss_nobs, obsLon) !Note: variable name not consistent with BUFR table
-      call obsspace_get_db(obss, "Metadata", "Latitude", obss_nobs, obsLat) !Note: variable name not consistent with BUFR table
-      call obsspace_get_db(obss, "Metadata", "IMPP", obss_nobs, obsImpP) !observed impact parameter
-      call obsspace_get_db(obss, "Metadata", "ELRC", obss_nobs, obsLocR) !local radius of earth. Note: need add to test data
-      call obsspace_get_db(obss, "Metadata", "GEODU", obss_nobs, obsGeoid) !Geoid. Note: need add to test data
+     !call obsspace_get_db(obss, "Metadata", "year", obsYYYY) !Note: variable name not consistent with BUFR table
+     !call obsspace_get_db(obss, "Metadata", "month", obsMM) !Note: variable name not consistent with BUFR table
+     !call obsspace_get_db(obss, "Metadata", "day", obsDD) !Note: variable name not consistent with BUFR table
+     !call obsspace_get_db(obss, "Metadata", "hour", obsHH) !Note: variable name not consistent with BUFR table
+     !call obsspace_get_db(obss, "Metadata", "minute", obsMN) !Note: variable name not consistent with BUFR table
+     !call obsspace_get_db(obss, "Metadata", "second", obsSS) !Note: variable name not consistent with BUFR table
+      call obsspace_get_db(obss, "Metadata", "Longitude", obsLon) !Note: variable name not consistent with BUFR table
+      call obsspace_get_db(obss, "Metadata", "Latitude", obsLat) !Note: variable name not consistent with BUFR table
+      call obsspace_get_db(obss, "Metadata", "IMPP", obsImpP) !observed impact parameter
+      call obsspace_get_db(obss, "Metadata", "ELRC", obsLocR) !local radius of earth. Note: need add to test data
+      call obsspace_get_db(obss, "Metadata", "GEODU", obsGeoid) !Geoid. Note: need add to test data
 
       nvprof = 1 ! number of vertical profiles (occultation points)
       allocate(ichk(nvprof))

@@ -335,10 +335,10 @@ contains
          write(chan_num, '(I0)') l
 
          var_name = 'aerosol_optical_depth_' // trim(chan_num) // '_'
-         call obsspace_get_db(obss, "ObsValue", var_name, n_profiles, Aod_Obs(:,l))
+         call obsspace_get_db(obss, "ObsValue", var_name, Aod_Obs(:,l))
 
          var_name = 'obs_minus_forecast_unadjusted_' // trim(chan_num) // '_'
-         call obsspace_get_db(obss, "OmF", var_name, n_profiles, Omg_Aod(:,l))
+         call obsspace_get_db(obss, "OmF", var_name, Omg_Aod(:,l))
        enddo
 
        rmse = 0

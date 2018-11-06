@@ -157,10 +157,10 @@ module ufo_gnssro_bndgsi_mod
       allocate(obsLocR(nobs))
       allocate(obsGeoid(nobs))
 
-      call obsspace_get_db(obss, "Metadata", "Latitude", nobs, obsLat)
-      call obsspace_get_db(obss, "Metadata", "IMPP", nobs, obsImpP)   !observed impact parameter; meter
-      call obsspace_get_db(obss, "Metadata", "ELRC", nobs, obsLocR)   !local radius of earth; meter
-      call obsspace_get_db(obss, "Metadata", "GEODU", nobs, obsGeoid) !Geoid; meter
+      call obsspace_get_db(obss, "Metadata", "Latitude", obsLat)
+      call obsspace_get_db(obss, "Metadata", "IMPP", obsImpP)   !observed impact parameter; meter
+      call obsspace_get_db(obss, "Metadata", "ELRC", obsLocR)   !local radius of earth; meter
+      call obsspace_get_db(obss, "Metadata", "GEODU", obsGeoid) !Geoid; meter
 
       nobs_outIntgl = 0 !initialize count of observations out of integral grids  
       count_rejection = 0

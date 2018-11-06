@@ -81,8 +81,8 @@ contains
       allocate(obsZ(nobs))
       allocate(obsLat(nobs))
 
-      call obsspace_get_db(obss, "Metadata", "altitude", nobs, obsZ)
-      call obsspace_get_db(obss, "Metadata", "latitude", nobs, obsLat)
+      call obsspace_get_db(obss, "Metadata", "altitude", obsZ)
+      call obsspace_get_db(obss, "Metadata", "latitude", obsLat)
 
       call gnssro_ref_constants(use_compress)
 

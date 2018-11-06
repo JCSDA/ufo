@@ -216,7 +216,7 @@ real(kind_real), allocatable :: ObsTb(:,:)
  do n1 = 1,n_Channels
    !Get the variable name for this channel
    call get_var_name(varname_tmplate,n1,varname)
-   call obsspace_get_db(obss, "ObsValue", varname, n_profiles, ObsTb(:,n1))
+   call obsspace_get_db(obss, "ObsValue", varname, ObsTb(:,n1))
  enddo
 
  !Loop over all n_Profiles, i.e. number of locations
@@ -327,22 +327,22 @@ integer :: nlocs
  nlocs = obsspace_get_nlocs(obss)
  allocate(TmpVar(nlocs))
 
- call obsspace_get_db(obss, "ObsValue", "Sat_Zenith_Angle", nlocs, TmpVar)
+ call obsspace_get_db(obss, "ObsValue", "Sat_Zenith_Angle", TmpVar)
  geo(:)%Sensor_Zenith_Angle = TmpVar(:)
 
- call obsspace_get_db(obss, "ObsValue", "Sol_Zenith_Angle", nlocs, TmpVar)
+ call obsspace_get_db(obss, "ObsValue", "Sol_Zenith_Angle", TmpVar)
  geo(:)%Source_Zenith_Angle = TmpVar(:)
 
- call obsspace_get_db(obss, "ObsValue", "Sat_Azimuth_Angle", nlocs, TmpVar)
+ call obsspace_get_db(obss, "ObsValue", "Sat_Azimuth_Angle", TmpVar)
  geo(:)%Sensor_Azimuth_Angle = TmpVar(:)
 
- call obsspace_get_db(obss, "ObsValue", "Sol_Azimuth_Angle", nlocs, TmpVar)
+ call obsspace_get_db(obss, "ObsValue", "Sol_Azimuth_Angle", TmpVar)
  geo(:)%Source_Azimuth_Angle = TmpVar(:)
 
- call obsspace_get_db(obss, "ObsValue", "Scan_Position", nlocs, TmpVar)
+ call obsspace_get_db(obss, "ObsValue", "Scan_Position", TmpVar)
  geo(:)%Ifov = TmpVar(:)
 
- call obsspace_get_db(obss, "ObsValue", "Scan_Angle", nlocs, TmpVar) !The Sensor_Scan_Angle is optional
+ call obsspace_get_db(obss, "ObsValue", "Scan_Angle", TmpVar) !The Sensor_Scan_Angle is optional
  geo(:)%Sensor_Scan_Angle = TmpVar(:)
 
  deallocate(TmpVar)

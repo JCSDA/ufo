@@ -65,7 +65,7 @@ contains
 
     hofx = 0.0
 
-    !call obsspace_get_db(obss, "ObsValue", "adt", nobs, obs_adt)
+    !call obsspace_get_db(obss, "ObsValue", "adt", obs_adt)
 
     ! Compute offset
     offset_hofx=sum(geoval_adt%vals(1,:))/nobs

@@ -85,10 +85,10 @@ contains
     allocate(obs_depth(obss_nobs))
     allocate(obs_val(obss_nobs))
 
-    call obsspace_get_db(obss, "Metadata", "longitude", obss_nobs, obs_lon)
-    call obsspace_get_db(obss, "Metadata", "latitude", obss_nobs, obs_lat)
-    call obsspace_get_db(obss, "Metadata", "ocean_depth", obss_nobs, obs_depth)
-    call obsspace_get_db(obss, "ObsValue", "insitu_temperature", obss_nobs, obs_val)
+    call obsspace_get_db(obss, "Metadata", "longitude", obs_lon)
+    call obsspace_get_db(obss, "Metadata", "latitude", obs_lat)
+    call obsspace_get_db(obss, "Metadata", "ocean_depth", obs_depth)
+    call obsspace_get_db(obss, "ObsValue", "insitu_temperature", obs_val)
 
     nlev = temp%nval
     nobs = temp%nobs        
