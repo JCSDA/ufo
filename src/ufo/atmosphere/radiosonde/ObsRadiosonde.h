@@ -47,6 +47,7 @@ class ObsRadiosonde : public ObsOperatorBase,
 
 // Other
   const oops::Variables & variables() const {return *varin_;}
+  const oops::Variables & observed() const {return *varout_;}
 
   int & toFortran() {return keyOperRadiosonde_;}
   const int & toFortran() const {return keyOperRadiosonde_;}
@@ -56,6 +57,7 @@ class ObsRadiosonde : public ObsOperatorBase,
   F90hop keyOperRadiosonde_;
   const ioda::ObsSpace& odb_;
   boost::scoped_ptr<const oops::Variables> varin_;
+  boost::scoped_ptr<const oops::Variables> varout_;
 };
 
 // -----------------------------------------------------------------------------

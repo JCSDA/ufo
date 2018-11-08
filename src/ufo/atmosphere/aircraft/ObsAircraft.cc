@@ -26,13 +26,19 @@ static ObsOperatorMaker<ObsAircraft> makerAircraft_("Aircraft");
 // -----------------------------------------------------------------------------
 
 ObsAircraft::ObsAircraft(const ioda::ObsSpace & odb, const eckit::Configuration & config)
-  : keyOperAircraft_(0), varin_(), odb_(odb)
+  : keyOperAircraft_(0), odb_(odb), varin_(), varout_()
 {
   const std::vector<std::string> vv{"virtual_temperature", "eastward_wind", "northward_wind",
                                     "specific_humidity", "atmosphere_ln_pressure_coordinate"};
   const eckit::Configuration * configc = &config;
   ufo_aircraft_setup_f90(keyOperAircraft_, &configc);
-  varin_.reset(new oops::Variables(vv));
+
+  std::vector<std::string> vin{"virtual_temperature", "atmosphere_ln_pressure_coordinate"};
+  varin_.reset(new oops::Variables(vin));
+
+  std::vector<std::string> vout{"air_temperature"};
+  varout_.reset(new oops::Variables(vout));
+
   oops::Log::trace() << "ObsAircraft created." << std::endl;
 }
 

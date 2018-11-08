@@ -25,13 +25,17 @@ static ObsOperatorMaker<ObsRadiosonde> makerRadiosonde_("Radiosonde");
 // -----------------------------------------------------------------------------
 
 ObsRadiosonde::ObsRadiosonde(const ioda::ObsSpace & odb, const eckit::Configuration & config)
-  : keyOperRadiosonde_(0), varin_(), odb_(odb)
+  : keyOperRadiosonde_(0), odb_(odb), varin_(), varout_()
 {
   const eckit::Configuration * configc = &config;
   ufo_radiosonde_setup_f90(keyOperRadiosonde_, &configc);
   const std::vector<std::string> vv{"virtual_temperature", "eastward_wind", "northward_wind",
                                     "specific_humidity", "atmosphere_ln_pressure_coordinate"};
   varin_.reset(new oops::Variables(vv));
+
+  const std::vector<std::string> vout{"air_temperature"};
+  varout_.reset(new oops::Variables(vout));
+
   oops::Log::trace() << "ObsRadiosonde created." << std::endl;
 }
 

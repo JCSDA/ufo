@@ -42,6 +42,9 @@ class ObsOperatorBase : public util::Printable,
 /// Operator input required from Model
   virtual const oops::Variables & variables() const = 0;
 
+/// Operator output variables
+  virtual const oops::Variables & observed() const = 0;
+
  private:
   virtual void print(std::ostream &) const = 0;
 };

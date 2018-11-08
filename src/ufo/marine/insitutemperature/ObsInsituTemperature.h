@@ -47,6 +47,7 @@ class ObsInsituTemperature : public ObsOperatorBase,
 
 // Other
   const oops::Variables & variables() const {return *varin_;}
+  const oops::Variables & observed() const {return *varout_;}
 
   int & toFortran() {return keyOperInsituTemperature_;}
   const int & toFortran() const {return keyOperInsituTemperature_;}
@@ -56,6 +57,7 @@ class ObsInsituTemperature : public ObsOperatorBase,
   F90hop keyOperInsituTemperature_;
   const ioda::ObsSpace& odb_;
   boost::scoped_ptr<const oops::Variables> varin_;
+  boost::scoped_ptr<const oops::Variables> varout_;
 };
 
 // -----------------------------------------------------------------------------
