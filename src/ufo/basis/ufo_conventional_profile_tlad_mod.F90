@@ -174,7 +174,6 @@ contains
       character(max_string) :: err_msg
 
       integer :: iobs, ierr, ivar, geo_ivar, jj, nlocs, nvars
-      type(ufo_geoval), pointer :: tv_d
 
       type ufo_geoval_ptr
          type(ufo_geoval), pointer :: ptr
@@ -214,13 +213,6 @@ contains
          endif
       enddo
 
-      ! check if tv variable is in geovals and get it
-      ! call ufo_geovals_get_var(geovals, var_tv, tv_d, status=ierr)
-      ! if (ierr/=0) then
-      !   write(err_msg,*) myname_, trim(var_tv), ' doesnt exist'
-      !   call abor1_ftn(err_msg)
-      ! endif
-
       ! **********************************************************
       !                           STEP 2
       ! **********************************************************
@@ -246,9 +238,9 @@ contains
       
         ! allocate if not yet allocated
         if (.not. allocated(vals(geo_ivar)%ptr%vals)) then
-           vals(geo_ivar)%ptr%nobs = nlocs
-           vals(geo_ivar)%ptr%nval = nvars
-           allocate(vals(geo_ivar)%ptr%vals(tv_d%nval, vals(geo_ivar)%ptr%nobs))
+           vals(geo_ivar)%ptr%nobs = self%nlocs
+           vals(geo_ivar)%ptr%nval = self%nval
+           allocate(vals(geo_ivar)%ptr%vals(vals(geo_ivar)%ptr%nval, vals(geo_ivar)%ptr%nobs))
            vals(geo_ivar)%ptr%vals = 0.0_kind_real
         endif
         if (.not. geovals%linit ) geovals%linit=.true.
