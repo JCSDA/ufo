@@ -630,7 +630,7 @@ do ivar = 1, self%nvar
   nval = self%geovals(ivar)%nval
   do ival = 1, nval
      do iobs = 1, self%nobs
-      if (self%geovals(ivar)%vals(ival,iobs) < missing_value .and. other%geovals(ivar)%vals(ival,iobs) < missing_value ) then
+      if (self%geovals(ivar)%vals(ival,iobs) /= obspace_missing_value() .and. other%geovals(ivar)%vals(ival,iobs) /= obspace_missing_value() ) then
         prod = prod + self%geovals(ivar)%vals(ival,iobs) * &
                       other%geovals(ivar)%vals(ival,iobs)
       endif
