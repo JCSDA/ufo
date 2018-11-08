@@ -7,11 +7,12 @@
 
 #include "ufo/UfoTrait.h"
 #include "oops/runs/Run.h"
-#include "test/interface/ObsCheck.h"
+
+#include "test/base/ObsFilters.h"
 
 int main(int argc,  char ** argv) {
   oops::Run run(argc, argv);
-  test::ObsCheck<ufo::UfoTrait> tests;
+  test::ObsFilters<ufo::UfoTrait> tests;
   run.execute(tests);
   return 0;
 };

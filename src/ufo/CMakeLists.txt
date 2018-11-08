@@ -4,9 +4,12 @@
 # which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 
 list( APPEND ufo_src_files
+    BackgroundCheck.cc
+    BackgroundCheck.h
+    BackgroundCheck.interface.F90
+    BackgroundCheck.interface.h
     Fortran.h
     FortranGeoVals.h
-    FortranObsCheck.h
     GeoVaLs.cc
     GeoVaLs.h
     LinearObsOperator.cc
@@ -16,14 +19,12 @@ list( APPEND ufo_src_files
     ObsBias.h
     ObsBiasCovariance.h
     ObsBiasIncrement.h
-    ObsCheck.cc
-    ObsCheck.h
     ObsOperator.cc
     ObsOperator.h
     ObsOperatorBase.cc
     ObsOperatorBase.h
     UfoTrait.h
-    ufo_obscheck_mod.F90
+    ufo_bgcheck_mod.F90
     ufo_geovals_interface.F90
     ufo_geovals_mod.F90
     ufo_variables_mod.F90

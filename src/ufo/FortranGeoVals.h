@@ -10,6 +10,11 @@
 
 #include "Fortran.h"
 
+// Forward declarations
+namespace eckit {
+  class Configuration;
+}
+
 namespace ufo {
 
 /// Interface to Fortran UFO GeoVals routines

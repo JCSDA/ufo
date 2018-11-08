@@ -27,7 +27,7 @@ list( APPEND ufo_test_input
   testinput/ufotest_atmosphere.json
   testinput/ufotest_constituents.json
   testinput/amsua.json
-  testinput/radiosonde.json
+  testinput/radiosonde.yaml
   testinput/aircraft.json
   testinput/aod.json
   testinput/gnssroref.json
@@ -146,13 +146,20 @@ ecbuild_add_test( TARGET  test_ufo_radiosonde_opr
                   BOOST
                   MPI     6
                   SOURCES mains/TestObsOperator.cc
-                  ARGS    "testinput/radiosonde.json"
+                  ARGS    "testinput/radiosonde.yaml"
+                  LIBS    ufo )
+
+ecbuild_add_test( TARGET  test_ufo_radiosonde_qc
+                  BOOST
+                  MPI     6
+                  SOURCES mains/TestObsFilters.cc
+                  ARGS    "testinput/radiosonde.yaml"
                   LIBS    ufo )
 
 ecbuild_add_test( TARGET  test_ufo_radiosonde_tlad
                   BOOST
                   SOURCES mains/TestObsOperatorTLAD.cc
-                  ARGS    "testinput/radiosonde.json"
+                  ARGS    "testinput/radiosonde.yaml"
                   LIBS    ufo )
 
 ecbuild_add_test( TARGET  test_ufo_aircraft_opr

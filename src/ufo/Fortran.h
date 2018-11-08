@@ -8,30 +8,16 @@
 #ifndef UFO_FORTRAN_H_
 #define UFO_FORTRAN_H_
 
-// Forward declarations
-namespace eckit {
-  class Configuration;
-}
-
-namespace util {
-  class DateTime;
-  class Duration;
-}
-
 namespace ufo {
 
 // Locations key type
 typedef int F90locs;
-// Goms key type
+// GeoVaLs key type
 typedef int F90goms;
-// Observation vector key type
-typedef int F90ovec;
 // Obs operator key type
 typedef int F90hop;
 // Observation space type
 typedef int F90odb;
-// Observation check key type
-typedef int F90ocheck;
 // Observation bias key type
 typedef int F90obias;
 

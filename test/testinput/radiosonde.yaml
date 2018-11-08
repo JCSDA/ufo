@@ -1,0 +1,25 @@
+---
+test_framework_runtime_config: "--log_level=test_suite"
+window_begin: '2018-04-14T21:00:00Z'
+window_end: '2018-04-15T03:00:00Z'
+LinearObsOpTest:
+  testiterTL: 12
+  toleranceTL: 1.0e-10
+  toleranceAD: 1.0e-12
+Observations:
+  ObsTypes:
+  - ObsType: Radiosonde
+    ObsData:
+      ObsDataIn:
+        obsfile: Data/sondes_obs_2018041500_m.nc4
+    GeoVaLs:
+      norm: 8471.883687854357
+      random: 0
+      filename: Data/sondes_geoval_2018041500_m.nc4
+    ObsFilters:
+    - Filter: Background Check
+      variable: air_temperature
+      threshold: 3
+    rmsequiv: 242.094973499492
+    tolerance: 1.0e-08
+    ObsBias: {}
