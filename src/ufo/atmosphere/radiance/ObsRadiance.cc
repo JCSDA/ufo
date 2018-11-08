@@ -43,7 +43,12 @@ ObsRadiance::ObsRadiance(const ioda::ObsSpace & odb, const eckit::Configuration 
                                     "Soil_Type", "Snow_Depth"};
   varin_.reset(new oops::Variables(vv));
 
-  const std::vector<std::string> vout{"zz"};
+  const std::vector<std::string> vout{
+    "temperature_brightness_1_", "temperature_brightness_2_", "temperature_brightness_3_",
+    "temperature_brightness_4_", "temperature_brightness_5_", "temperature_brightness_6_",
+    "temperature_brightness_7_", "temperature_brightness_8_", "temperature_brightness_9_",
+    "temperature_brightness_10_", "temperature_brightness_11_", "temperature_brightness_12_",
+    "temperature_brightness_13_", "temperature_brightness_14_", "temperature_brightness_15_"};
   varout_.reset(new oops::Variables(vout));
 
   const eckit::LocalConfiguration obsOptions(config, "ObsOptions");
