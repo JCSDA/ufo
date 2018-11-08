@@ -67,7 +67,7 @@ integer(c_int), intent(in) :: c_key_self
 integer(c_int), intent(in) :: c_key_geovals
 
 type(ufo_adt_tlad), pointer :: self
-type(ufo_geovals),    pointer :: geovals
+type(ufo_geovals),  pointer :: geovals
 
 character(len=*), parameter :: myname_="ufo_adt_tlad_settraj_c"
 

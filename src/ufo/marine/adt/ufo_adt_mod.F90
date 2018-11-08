@@ -51,7 +51,7 @@ contains
     type(ufo_geoval), pointer :: geoval_adt
 
     real(kind_real), allocatable :: obs_adt(:)
-    integer :: nobs
+    integer :: nobs, obss_nobs
     
     ! check if nobs is consistent in geovals & hofx
     nobs = size(hofx,1)
@@ -63,21 +63,22 @@ contains
     ! check if adt variable is in geovals and get it
     call ufo_geovals_get_var(geovals, var_abs_topo, geoval_adt)
 
-    hofx = 0.0
+    ! Read in obs data
+    obss_nobs = obsspace_get_nobs(obss)
+    allocate(obs_adt(obss_nobs))
+    
+    call obsspace_get_db(obss, "ObsValue", "obs_absolute_dynamic_topography", obs_adt)
 
-    !call obsspace_get_db(obss, "ObsValue", "adt", obs_adt)
+    ! Compute obs and model offset 
+    offset_hofx = sum(geoval_adt%vals(1,:))/nobs
+    offset_obs  = sum(obs_adt(:))/nobs
 
-    ! Compute offset
-    offset_hofx=sum(geoval_adt%vals(1,:))/nobs
-    offset_obs=0.0!sum(obs_adt(:))/nobs
-
-    ! adt obs operator
+    ! Adjust simulated obs to obs offset
     do iobs = 1, nobs
-       ! remove offset from hofx
-       hofx(iobs) = geoval_adt%vals(1,iobs)+(offset_obs-offset_hofx)
+       hofx(iobs) = geoval_adt%vals(1,iobs) + (offset_obs-offset_hofx)
     enddo
 
-    !deallocate(obs_adt)
+    deallocate(obs_adt)
     
   end subroutine ufo_adt_simobs
 
