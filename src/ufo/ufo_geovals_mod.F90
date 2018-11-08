@@ -9,7 +9,7 @@ module ufo_geovals_mod
 use ufo_vars_mod
 use kinds
 use type_distribution, only: random_distribution
-use ioda_constants_mod, only: missing_value
+use ioda_utils_mod, only: missing_value
 use obsspace_mod, only: obspace_missing_value
 
 use fckit_mpi_module, only: fckit_mpi_comm, fckit_mpi_sum
