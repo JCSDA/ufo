@@ -51,6 +51,9 @@ class ObsOperator : public util::Printable,
 /// Operator input required from Model
   const oops::Variables & variables() const;
 
+/// Operator output variables
+  const oops::Variables & observed() const;
+
 // TODO(YT): move locations method down to actual obs operators
 //           and remove obsdb_ from here
   ioda::Locations * locations(const util::DateTime &, const util::DateTime &) const;

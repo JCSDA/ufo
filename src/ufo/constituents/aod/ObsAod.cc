@@ -25,7 +25,7 @@ static ObsOperatorMaker<ObsAod> makerAOD_("Aod");
 // -----------------------------------------------------------------------------
 
 ObsAod::ObsAod(const ioda::ObsSpace & odb, const eckit::Configuration & config)
-  : keyOperAod_(0), varin_(), odb_(odb)
+  : keyOperAod_(0), odb_(odb), varin_(), varout_()
 {
   const eckit::Configuration * configc = &config;
   ufo_aod_setup_f90(keyOperAod_, &configc);
@@ -34,6 +34,10 @@ ObsAod::ObsAod(const ioda::ObsSpace & odb, const eckit::Configuration & config)
       "sulf", "bc1", "bc2", "oc1", "oc2", "dust1", "dust2", "dust3", "dust4", "dust5",
       "seas1", "seas2", "seas3", "seas4", "p25"};
   varin_.reset(new oops::Variables(vv));
+
+  const std::vector<std::string> vout{"zz"};
+  varout_.reset(new oops::Variables(vout));
+
   oops::Log::trace() << "ObsAod created." << std::endl;
 }
 

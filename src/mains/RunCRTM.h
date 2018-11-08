@@ -61,7 +61,7 @@ template <typename MODEL> class RunCRTM : public oops::Application {
       conf[jj].get("ObsBias", biasConf);
       const ObsAuxCtrl_ ybias(biasConf);
 
-      ObsVector_ ovec(hop[jj].obspace());
+      ObsVector_ ovec(hop[jj].obspace(), hop[jj].observed());
 
       hop[jj].simulateObs(gval, ovec, ybias);
 

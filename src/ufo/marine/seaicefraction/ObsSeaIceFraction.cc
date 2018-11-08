@@ -31,12 +31,17 @@ static ObsOperatorMaker<ObsSeaIceFraction> makerSeaIceFraction_("SeaIceFraction"
 
 ObsSeaIceFraction::ObsSeaIceFraction(const ioda::ObsSpace & odb,
                                      const eckit::Configuration & config)
-  : keyOperSeaIceFraction_(0), varin_(), odb_(odb)
+  : keyOperSeaIceFraction_(0), odb_(odb), varin_(), varout_()
 {
   const eckit::Configuration * configc = &config;
   ufo_seaicefrac_setup_f90(keyOperSeaIceFraction_, &configc);
+
   const std::vector<std::string> vv{"ice_concentration"};
   varin_.reset(new oops::Variables(vv));
+
+  const std::vector<std::string> vout{"zz"};
+  varout_.reset(new oops::Variables(vout));
+
   oops::Log::trace() << "ObsSeaIceFraction created." << std::endl;
 }
 

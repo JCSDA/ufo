@@ -26,7 +26,7 @@ static ObsOperatorMaker<ObsRadiance> makerRadiance_("Radiance");
 // -----------------------------------------------------------------------------
 
 ObsRadiance::ObsRadiance(const ioda::ObsSpace & odb, const eckit::Configuration & config)
-  : keyOperRadiance_(0), varin_(), odb_(odb)
+  : keyOperRadiance_(0), odb_(odb), varin_(), varout_()
 {
   const std::vector<std::string> vv{"virtual_temperature", "humidity_mixing_ratio", "air_pressure",
                                     "air_pressure_levels", "mass_concentration_of_ozone_in_air",
@@ -42,6 +42,10 @@ ObsRadiance::ObsRadiance(const ioda::ObsSpace & odb, const eckit::Configuration 
                                     "Soil_Temperature", "Land_Type_Index", "Vegetation_Type",
                                     "Soil_Type", "Snow_Depth"};
   varin_.reset(new oops::Variables(vv));
+
+  const std::vector<std::string> vout{"zz"};
+  varout_.reset(new oops::Variables(vout));
+
   const eckit::LocalConfiguration obsOptions(config, "ObsOptions");
   const eckit::Configuration * configc = &obsOptions;
   ufo_radiance_setup_f90(keyOperRadiance_, &configc);
