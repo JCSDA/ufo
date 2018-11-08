@@ -32,7 +32,7 @@ class GeoVaLs;
 class ObsBias;
 
 // -----------------------------------------------------------------------------
-/// Aircraft (currently only temperature) observation for UFO.
+/// Aircraft observation for UFO.
 class ObsAircraft : public ObsOperatorBase,
                     private util::ObjectCounter<ObsAircraft> {
  public:

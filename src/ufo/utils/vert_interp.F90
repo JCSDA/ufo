@@ -8,6 +8,7 @@
 module vert_interp_mod
 
 use kinds, only: kind_real
+use obsspace_mod, only: obspace_missing_value
 
 implicit none
 public
@@ -72,7 +73,11 @@ integer,         intent(in ) :: wi          !Index for interpolation
 real(kind_real), intent(in ) :: wf          !Weight for interpolation
 real(kind_real), intent(out) :: f           !Output at obs location using linear interp
 
-f = fvec(wi)*wf + fvec(wi+1)*(1.0-wf)
+if (fvec(wi) == obspace_missing_value() .or. fvec(wi+1) == obspace_missing_value()) then
+  f = max(fvec(wi), fvec(wi+1))
+else
+  f = fvec(wi)*wf + fvec(wi+1)*(1.0-wf)
+endif
 
 end subroutine vert_interp_apply
 
@@ -87,7 +92,11 @@ integer,         intent(in)  :: wi
 real(kind_real), intent(in)  :: wf
 real(kind_real), intent(out) :: f_tl
 
-f_tl = fvec_tl(wi)*wf + fvec_tl(wi+1)*(1.0_kind_real-wf)
+if (fvec_tl(wi) == obspace_missing_value() .or. fvec_tl(wi+1) == obspace_missing_value()) then
+  f_tl = max(fvec_tl(wi), fvec_tl(wi+1))
+else
+  f_tl = fvec_tl(wi)*wf + fvec_tl(wi+1)*(1.0_kind_real-wf)
+endif
 
 end subroutine vert_interp_apply_tl
 
@@ -102,8 +111,16 @@ integer,         intent(in)    :: wi
 real(kind_real), intent(in)    :: wf
 real(kind_real), intent(in)    :: f_ad
 
-fvec_ad(wi  ) = fvec_ad(wi  ) + f_ad*wf
-fvec_ad(wi+1) = fvec_ad(wi+1) + f_ad*(1.0_kind_real-wf)
+if (fvec_ad(wi) == obspace_missing_value() .or. f_ad == obspace_missing_value()) then
+  fvec_ad(wi  ) = 0.0_kind_real
+else
+  fvec_ad(wi  ) = fvec_ad(wi  ) + f_ad*wf
+endif
+if (fvec_ad(wi+1) == obspace_missing_value() .or. f_ad == obspace_missing_value()) then
+  fvec_ad(wi+1) = 0.0_kind_real
+else
+  fvec_ad(wi+1) = fvec_ad(wi+1) + f_ad*(1.0_kind_real-wf)
+endif
 
 end subroutine vert_interp_apply_ad
 

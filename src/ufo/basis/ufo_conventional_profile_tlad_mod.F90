@@ -13,12 +13,13 @@ module ufo_conventional_profile_tlad_mod
   use vert_interp_mod
   use ufo_basis_tlad_mod, only: ufo_basis_tlad
   use obsspace_mod
+  use ufo_conventional_profile_mod, only: find_position
 
   integer, parameter :: max_string=800
 
   type, extends(ufo_basis_tlad) :: ufo_conventional_profile_tlad
    private
-     integer :: nval, nobs
+     integer :: nval, nlocs
      real(kind_real), allocatable :: wf(:)
      integer, allocatable :: wi(:)
   contains
@@ -56,18 +57,18 @@ contains
 
       !Keep copy of dimensions
       self%nval = prsl%nval
-      self%nobs = obsspace_get_nobs(obss)
+      self%nlocs = obsspace_get_nlocs(obss)
 
-      allocate(self%wi(self%nobs))
-      allocate(self%wf(self%nobs))
+      allocate(self%wi(self%nlocs))
+      allocate(self%wf(self%nlocs))
 
       ! observation of pressure (for vertical interpolation)
-      allocate(pressure(self%nobs))
-      call obsspace_get_db(obss, "ObsValue", "air_pressure", pressure)
+      allocate(pressure(self%nlocs))
+      call obsspace_get_db(obss, "4DLocation", "air_pressure", pressure)
 
       ! compute interpolation weights
-      do iobs = 1, self%nobs
-        call vert_interp_weights(self%nval,log(pressure(iobs)/10.),prsl%vals(:,iobs),self%wi(iobs),self%wf(iobs))
+      do iobs = 1, self%nlocs
+        call vert_interp_weights(self%nval,log(DBLE(pressure(iobs))/10.),prsl%vals(:,iobs),self%wi(iobs),self%wf(iobs))
       enddo
 
       self%ltraj = .true.
@@ -87,8 +88,16 @@ contains
       character(len=*), parameter :: myname_="ufo_conventional_profile_simobs_tl"
       character(max_string) :: err_msg
 
-      integer :: iobs,ierr
-      type(ufo_geoval), pointer :: tv_d
+      integer :: iobs, ierr, ivar, geo_ivar, jj, nlocs, nvars
+
+      type ufo_geoval_ptr
+         type(ufo_geoval), pointer :: ptr
+      end type ufo_geoval_ptr
+      type(ufo_geoval_ptr), dimension(:), allocatable :: vals
+
+      character(len=MAXVARLEN), allocatable :: geovnames(:)
+      character(len=MAXVARLEN), allocatable :: obsvnames(:)
+
 
       ! check if trajectory was set
       if (.not. self%ltraj) then
@@ -102,16 +111,52 @@ contains
 !        call abor1_ftn(err_msg)
 !      endif
 
-      ! check if tv variable is in geovals and get it
-      call ufo_geovals_get_var(geovals, var_tv, tv_d, status=ierr )
-      if (ierr/=0) then
-        write(err_msg,*) myname_, trim(var_tv), ' doesnt exist'
-        call abor1_ftn(err_msg)
-      endif
+      ! **********************************************************
+      !                           STEP 1
+      ! **********************************************************
 
-      ! tangent linear obs operator (linear)
-      do iobs = 1, geovals%nobs
-        call vert_interp_apply_tl(tv_d%nval, tv_d%vals(:,iobs), hofx(iobs), self%wi(iobs), self%wf(iobs))
+      ! Retrieving the required variables names for this ObsOperator
+      geovnames = ufo_vars_vnames(geovals%variables)
+      nvars = size(geovnames)
+    
+      ! Checking if all required model variables are in geovals and get its pointer.
+      allocate(vals(nvars))
+      do ivar = 1, nvars
+         call ufo_geovals_get_var(geovals, geovnames(ivar), vals(ivar)%ptr, status=ierr)
+         if (ierr/=0) then
+            write(err_msg,*) myname_, " : ", trim(geovnames(ivar)), ' doesnt exist'
+            call abor1_ftn(err_msg)
+         endif
+      enddo
+      
+      ! **********************************************************
+      !                           STEP 2
+      ! **********************************************************
+
+      ! Get the variable names we wwant to caculate the hofx
+      obsvnames = obsspace_get_vnames(obss, MAXVARLEN)
+      nvars = size(obsvnames)
+
+      nlocs = obsspace_get_nlocs(obss)
+
+      jj = 1
+      do ivar = 1, nvars
+       ! Determine the location of this variable in geovals
+        if (trim(obsvnames(ivar)) == "air_temperature") then ! not match, to be solved
+          geo_ivar = find_position("virtual_temperature", size(geovnames), geovnames)
+        else
+          geo_ivar = find_position(obsvnames(ivar), size(geovnames), geovnames)
+        endif
+        if (geo_ivar == -999 ) then
+          write(err_msg,*) myname_, " : ", trim(obsvnames(ivar)), ' is not in geovals'
+          call abor1_ftn(err_msg)
+        endif
+
+        ! tangent linear obs operator (linear)
+        do iobs = 1, nlocs
+          call vert_interp_apply_tl(vals(geo_ivar)%ptr%nval, vals(geo_ivar)%ptr%vals(:,iobs), hofx(jj), self%wi(iobs), self%wf(iobs))
+          jj = jj + 1
+        enddo
       enddo
 
     end subroutine conventional_profile_simobs_tl_
@@ -128,8 +173,16 @@ contains
       character(len=*), parameter :: myname_="ufo_conventional_profile_simobs_ad"
       character(max_string) :: err_msg
 
-      integer :: iobs,ierr
+      integer :: iobs, ierr, ivar, geo_ivar, jj, nlocs, nvars
       type(ufo_geoval), pointer :: tv_d
+
+      type ufo_geoval_ptr
+         type(ufo_geoval), pointer :: ptr
+      end type ufo_geoval_ptr
+      type(ufo_geoval_ptr), dimension(:), allocatable :: vals
+
+      character(len=MAXVARLEN), allocatable :: geovnames(:)
+      character(len=MAXVARLEN), allocatable :: obsvnames(:)
 
       ! check if trajectory was set
       if (.not. self%ltraj) then
@@ -143,24 +196,67 @@ contains
 !        call abor1_ftn(err_msg)
 !      endif
 
+      ! **********************************************************
+      !                           STEP 1
+      ! **********************************************************
+
+      ! Retrieving the required variables names for this ObsOperator
+      geovnames = ufo_vars_vnames(geovals%variables)
+      nvars = size(geovnames)
+    
+      ! Checking if all required model variables are in geovals and get its pointer.
+      allocate(vals(nvars))
+      do ivar = 1, nvars
+         call ufo_geovals_get_var(geovals, geovnames(ivar), vals(ivar)%ptr, status=ierr)
+         if (ierr/=0) then
+            write(err_msg,*) myname_, " : ", trim(geovnames(ivar)), ' doesnt exist'
+            call abor1_ftn(err_msg)
+         endif
+      enddo
+
       ! check if tv variable is in geovals and get it
-      call ufo_geovals_get_var(geovals, var_tv, tv_d, status=ierr)
-      if (ierr/=0) then
-        write(err_msg,*) myname_, trim(var_tv), ' doesnt exist'
-        call abor1_ftn(err_msg)
-      endif
+      ! call ufo_geovals_get_var(geovals, var_tv, tv_d, status=ierr)
+      ! if (ierr/=0) then
+      !   write(err_msg,*) myname_, trim(var_tv), ' doesnt exist'
+      !   call abor1_ftn(err_msg)
+      ! endif
 
-      ! allocate if not yet allocated
-      if (.not. allocated(tv_d%vals)) then
-         tv_d%nobs = self%nobs
-         tv_d%nval = self%nval
-         allocate(tv_d%vals(tv_d%nval,tv_d%nobs))
-         tv_d%vals = 0.0_kind_real
-      endif
-      if (.not. geovals%linit ) geovals%linit=.true.
+      ! **********************************************************
+      !                           STEP 2
+      ! **********************************************************
 
-      do iobs = 1, geovals%nobs
-        call vert_interp_apply_ad(tv_d%nval, tv_d%vals(:,iobs), hofx(iobs), self%wi(iobs), self%wf(iobs))
+      ! Get the variable names we wwant to caculate the hofx
+      obsvnames = obsspace_get_vnames(obss, MAXVARLEN)
+      nvars = size(obsvnames)
+
+      nlocs = obsspace_get_nlocs(obss)
+
+      jj = 1
+      do ivar = 1, nvars
+       ! Determine the location of this variable in geovals
+        if (trim(obsvnames(ivar)) == "air_temperature") then ! not match, to be solved
+          geo_ivar = find_position("virtual_temperature", size(geovnames), geovnames)
+        else
+          geo_ivar = find_position(obsvnames(ivar), size(geovnames), geovnames)
+        endif
+        if (geo_ivar == -999 ) then
+          write(err_msg,*) myname_, " : ", trim(obsvnames(ivar)), ' is not in geovals'
+          call abor1_ftn(err_msg)
+        endif
+      
+        ! allocate if not yet allocated
+        if (.not. allocated(vals(geo_ivar)%ptr%vals)) then
+           vals(geo_ivar)%ptr%nobs = nlocs
+           vals(geo_ivar)%ptr%nval = nvars
+           allocate(vals(geo_ivar)%ptr%vals(tv_d%nval, vals(geo_ivar)%ptr%nobs))
+           vals(geo_ivar)%ptr%vals = 0.0_kind_real
+        endif
+        if (.not. geovals%linit ) geovals%linit=.true.
+
+        do iobs = 1, nlocs
+          call vert_interp_apply_ad(vals(geo_ivar)%ptr%nval, vals(geo_ivar)%ptr%vals(:,iobs), hofx(jj), self%wi(iobs), self%wf(iobs))
+          jj = jj + 1
+        enddo
       enddo
 
     end subroutine conventional_profile_simobs_ad_

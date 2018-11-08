@@ -14,6 +14,8 @@ module ufo_conventional_profile_mod
   use ufo_basis_mod, only: ufo_basis
   use obsspace_mod
 
+  public find_position
+
   integer, parameter :: max_string=800
 
   type, extends(ufo_basis) :: ufo_conventional_profile
@@ -39,46 +41,129 @@ contains
       character(len=*), parameter :: myname_="ufo_conventional_profile_simobs"
       character(max_string) :: err_msg
 
-      integer :: iobs
+      integer :: iobs, nvars, ivar, ivar_prsl, geo_ivar, jj
       real(kind_real) :: wf
-      integer :: wi, ierr, nobs
-      real(kind_real), allocatable :: pressure(:)
-      type(ufo_geoval), pointer :: prsl, tv
+      integer :: wi, ierr, nlocs
+      real(kind_real), dimension(:), allocatable :: pressure, hofxv
+      type(ufo_geoval), pointer :: prsl
+
+      type ufo_geoval_ptr
+         type(ufo_geoval), pointer :: ptr
+      end type ufo_geoval_ptr
+      type(ufo_geoval_ptr), dimension(:), allocatable :: vals
+
+      character(len=MAXVARLEN), allocatable :: geovnames(:)
+      character(len=MAXVARLEN), allocatable :: obsvnames(:)
 
       ! check if nobs is consistent in geovals & hofx
-      if (geovals%nobs /= size(hofx)) then
-        write(err_msg,*) myname_, ' error: nobs inconsistent!'
+      !if (geovals%nobs /= size(hofx)) then
+      !  write(err_msg,*) myname_, ' error: nobs inconsistent!'
+      !  call abor1_ftn(err_msg)
+      !endif
+
+      ! **********************************************************
+      !                           STEP 1
+      ! **********************************************************
+
+      ! Retrieving the required variables names for this ObsOperator
+      geovnames = ufo_vars_vnames(geovals%variables)
+      nvars = size(geovnames)
+    
+      ! Checking if all required model variables are in geovals and get its pointer.
+      ! also, locating the $var_prsl (vertical coordinates of model) from geovals for 
+      ! vertical interpolation.
+      ivar_prsl = -999
+      allocate(vals(nvars))
+      do ivar = 1, nvars
+         call ufo_geovals_get_var(geovals, geovnames(ivar), vals(ivar)%ptr, status=ierr)
+         if (ierr/=0) then
+            write(err_msg,*) myname_, " : ", trim(geovnames(ivar)), ' doesnt exist'
+            call abor1_ftn(err_msg)
+         endif
+         if (trim(geovnames(ivar)) == trim(var_prsl)) ivar_prsl = ivar
+      enddo
+      
+      if (ivar_prsl == -999 ) then
+        write(err_msg,*) myname_, " : ", trim(var_prsl), ' is not in geovals'
         call abor1_ftn(err_msg)
       endif
 
-      ! check if prsl variable is in geovals and get it
-      call ufo_geovals_get_var(geovals, var_prsl, prsl,status=ierr)
-      if (ierr/=0) then
-         write(err_msg,*) myname_, trim(var_prsl), ' doesnt exist'
-         call abor1_ftn(err_msg)
-      endif
+      ! **********************************************************
+      !                           STEP 2
+      ! **********************************************************
 
-      ! check if tv variable is in geovals and get it
-      call ufo_geovals_get_var(geovals, var_tv, tv,status=ierr)
-      if (ierr/=0) then
-         write(err_msg,*) myname_, trim(var_tv), ' doesnt exist'
-         call abor1_ftn(err_msg)
-      endif
+      ! Retrieving the observation vertical coordinate from ObsSpace.
+      ! Different observation type variables may have different vertical 
+      ! coordinate vector, because of the missing values layout.
 
-      ! observation of pressure (for vertical interpolation)
-      nobs = obsspace_get_nobs(obss)
-      allocate(pressure(nobs))
-      call obsspace_get_db(obss, "ObsValue", "air_pressure", pressure)
+      obsvnames = obsspace_get_vnames(obss, MAXVARLEN)
+      nvars = size(obsvnames)
 
-      ! obs operator
-      do iobs = 1, geovals%nobs
-        call vert_interp_weights(prsl%nval,log(pressure(iobs)/10.),prsl%vals(:,iobs),wi,wf)
-        call vert_interp_apply(tv%nval, tv%vals(:,iobs), hofx(iobs), wi, wf)
+      ! Because the vertical coordinate information is likely different 
+      ! for different variabls, here, we use the maximum number to allocat
+      ! the pressure 
+      nlocs = obsspace_get_nlocs(obss)
+      allocate(pressure(nlocs))
+
+      jj = 1
+      do ivar = 1, nvars
+        ! Get the vertical coordinate and its dimension for this variable
+        ! To be revisited, should not use this hard-wired name
+        call obsspace_get_db(obss, "4DLocation", "air_pressure", pressure)
+
+        ! Determine the location of this variable in geovals
+        if (trim(obsvnames(ivar)) == "air_temperature") then ! not match, to be solved
+          geo_ivar = find_position("virtual_temperature", size(geovnames), geovnames)
+        else
+          geo_ivar = find_position(obsvnames(ivar), size(geovnames), geovnames)
+        endif
+        if (geo_ivar == -999 ) then
+          write(err_msg,*) myname_, " : ", trim(obsvnames(ivar)), ' is not in geovals'
+          call abor1_ftn(err_msg)
+        endif
+
+        ! Interpolation
+        allocate(hofxv(nlocs))
+        do iobs = 1, nlocs
+          ! Calculate the interpolation weights 
+          call vert_interp_weights(vals(ivar_prsl)%ptr%nval, log(DBLE(pressure(iobs))/10.), &
+                                   vals(ivar_prsl)%ptr%vals(:,iobs), wi, wf)
+          ! Interpolate from geovals to observational location.
+          call vert_interp_apply(vals(geo_ivar)%ptr%nval, vals(geo_ivar)%ptr%vals(:,iobs), hofx(jj), wi, wf)
+          hofxv(iobs) = hofx(jj)
+          jj = jj + 1
+        enddo
+
+        ! Store the hofx back to C++ ObsSpace
+        ! call obsspace_put_db(obss, "HofX", trim(obsvnames(ivar)), nlocs, hofxv)
+
+        ! Clean up for next variable
+        deallocate(hofxv)
       enddo
 
       ! cleanup
-      deallocate(pressure)
+      if (allocated(geovnames)) deallocate(geovnames)
+      if (allocated(obsvnames)) deallocate(obsvnames)
+      if (allocated(pressure)) deallocate(pressure)
+      if (allocated(vals)) deallocate(vals)
+    
     end subroutine conventional_profile_simobs_
+
+! ------------------------------------------------------------------------------
+
+    integer function find_position(str, length, strList)
+      implicit none
+      integer, intent(in) :: length
+      character(len=*), intent(in) :: str
+      character(len=*), dimension(length), intent(in) :: strList
+
+      integer :: i
+
+      find_position = -999
+      do i = 1, length
+        if (trim(str) == trim(strList(i))) find_position = i
+      enddo
+    end function find_position
 
 ! ------------------------------------------------------------------------------
 
