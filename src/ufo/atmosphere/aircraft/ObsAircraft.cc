@@ -28,8 +28,6 @@ static ObsOperatorMaker<ObsAircraft> makerAircraft_("Aircraft");
 ObsAircraft::ObsAircraft(const ioda::ObsSpace & odb, const eckit::Configuration & config)
   : keyOperAircraft_(0), odb_(odb), varin_(), varout_()
 {
-  const std::vector<std::string> vv{"virtual_temperature", "eastward_wind", "northward_wind",
-                                    "specific_humidity", "atmosphere_ln_pressure_coordinate"};
   const eckit::Configuration * configc = &config;
   ufo_aircraft_setup_f90(keyOperAircraft_, &configc);
 
