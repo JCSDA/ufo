@@ -32,13 +32,18 @@ static ObsOperatorMaker<ObsInsituTemperature> makerInsituTemperature_("InsituTem
 
 ObsInsituTemperature::ObsInsituTemperature(const ioda::ObsSpace & odb,
                                            const eckit::Configuration & config)
-  : keyOperInsituTemperature_(0), varin_(), odb_(odb)
+  : keyOperInsituTemperature_(0), odb_(odb), varin_(), varout_()
 {
   const eckit::Configuration * configc = &config;
   ufo_insitutemperature_setup_f90(keyOperInsituTemperature_, &configc);
+
   const std::vector<std::string> vv{"ocean_potential_temperature", "ocean_salinity",
                                     "ocean_layer_thickness"};
   varin_.reset(new oops::Variables(vv));
+
+  const std::vector<std::string> vout{"zz"};
+  varout_.reset(new oops::Variables(vout));
+
   oops::Log::trace() << "ObsInsituTemperature created." << std::endl;
 }
 

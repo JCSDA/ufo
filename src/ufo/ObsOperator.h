@@ -22,7 +22,12 @@ namespace oops {
   class Variables;
 }
 
+namespace util {
+  class DateTime;
+}
+
 namespace ioda {
+  class Locations;
   class ObsSpace;
   class ObsVector;
 }
@@ -46,8 +51,16 @@ class ObsOperator : public util::Printable,
 /// Operator input required from Model
   const oops::Variables & variables() const;
 
+/// Operator output variables
+  const oops::Variables & observed() const;
+
+// TODO(YT): move locations method down to actual obs operators
+//           and remove obsdb_ from here
+  ioda::Locations * locations(const util::DateTime &, const util::DateTime &) const;
+
  private:
   void print(std::ostream &) const;
+  const ioda::ObsSpace & obsdb_;
   boost::scoped_ptr<ObsOperatorBase> oper_;
 };
 

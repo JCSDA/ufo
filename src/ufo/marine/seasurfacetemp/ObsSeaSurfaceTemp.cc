@@ -26,12 +26,17 @@ static ObsOperatorMaker<ObsSeaSurfaceTemp> makerSeaSurfaceTemp_("SeaSurfaceTemp"
 
 ObsSeaSurfaceTemp::ObsSeaSurfaceTemp(const ioda::ObsSpace & odb,
                                      const eckit::Configuration & config)
-  : keyOperSeaSurfaceTemp_(0), varin_(), odb_(odb)
+  : keyOperSeaSurfaceTemp_(0), odb_(odb), varin_(), varout_()
 {
   const eckit::Configuration * configc = &config;
   ufo_seasurfacetemp_setup_f90(keyOperSeaSurfaceTemp_, &configc);
+
   const std::vector<std::string> vv{"ocean_upper_level_temperature"};
   varin_.reset(new oops::Variables(vv));
+
+  const std::vector<std::string> vout{"zz"};
+  varout_.reset(new oops::Variables(vout));
+
   oops::Log::trace() << "ObsSeaSurfaceTemp created." << std::endl;
 }
 

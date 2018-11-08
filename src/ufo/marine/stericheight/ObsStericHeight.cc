@@ -30,14 +30,19 @@ static ObsOperatorMaker<ObsStericHeight> makerObsStericHeight_("ObsStericHeight"
 // -----------------------------------------------------------------------------
 
 ObsStericHeight::ObsStericHeight(const ioda::ObsSpace & odb, const eckit::Configuration & config)
-  : keyOperStericHeight_(0), varin_(), odb_(odb)
+  : keyOperStericHeight_(0), odb_(odb), varin_(), varout_()
 {
   const eckit::Configuration * configc = &config;
   ufo_stericheight_setup_f90(keyOperStericHeight_, &configc);
+
   const std::vector<std::string> vv{"sea_surface_height_above_geoid",
                                     "ocean_potential_temperature",
                                     "ocean_salinity"};
   varin_.reset(new oops::Variables(vv));
+
+  const std::vector<std::string> vout{"zz"};
+  varout_.reset(new oops::Variables(vout));
+
   oops::Log::trace() << "ObsStericHeight created." << std::endl;
 }
 

@@ -14,9 +14,8 @@
 #include "eckit/config/LocalConfiguration.h"
 
 #include "oops/base/Observations.h"
-#include "oops/base/ObsSpaces.h"
+#include "oops/base/ObsOperators.h"
 #include "oops/interface/ObsAuxControl.h"
-#include "oops/interface/ObsOperator.h"
 #include "oops/interface/ObsVector.h"
 #include "oops/runs/Application.h"
 #include "oops/util/DateTime.h"
@@ -29,8 +28,7 @@ template <typename MODEL> class RunCRTM : public oops::Application {
   typedef oops::GeoVaLs<MODEL>           GeoVaLs_;
   typedef oops::ObsAuxControl<MODEL>     ObsAuxCtrl_;
   typedef oops::Observations<MODEL>      Observations_;
-  typedef oops::ObsOperator<MODEL>       ObsOperator_;
-  typedef oops::ObsSpaces<MODEL>         ObsSpace_;
+  typedef oops::ObsOperators<MODEL>      ObsOperators_;
   typedef oops::ObsVector<MODEL>         ObsVector_;
 
  public:
@@ -50,24 +48,22 @@ template <typename MODEL> class RunCRTM : public oops::Application {
 //  Setup observations
     eckit::LocalConfiguration obsconf(fullConfig, "Observations");
     oops::Log::debug() << "Observations configuration is:" << obsconf << std::endl;
-    ObsSpace_ obsdb(obsconf, winbgn, winend);
+    ObsOperators_ hop(obsconf, winbgn, winend);
 
     std::vector<eckit::LocalConfiguration> conf;
     obsconf.get("ObsTypes", conf);
 
-    for (std::size_t jj = 0; jj < obsdb.size(); ++jj) {
-      ObsOperator_ hop(obsdb[jj]);
-
+    for (std::size_t jj = 0; jj < hop.size(); ++jj) {
       const eckit::LocalConfiguration gconf(conf[jj], "GeoVaLs");
-      const GeoVaLs_ gval(gconf, hop.variables());
+      const GeoVaLs_ gval(gconf, hop[jj].variables());
 
       eckit::LocalConfiguration biasConf;
       conf[jj].get("ObsBias", biasConf);
       const ObsAuxCtrl_ ybias(biasConf);
 
-      ObsVector_ ovec(obsdb[jj]);
+      ObsVector_ ovec(hop[jj].obspace(), hop[jj].observed());
 
-      hop.simulateObs(gval, ovec, ybias);
+      hop[jj].simulateObs(gval, ovec, ybias);
 
       const double zz = ovec.rms();
       const double xx = conf[jj].getDouble("rmsequiv");

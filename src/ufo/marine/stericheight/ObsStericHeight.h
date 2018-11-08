@@ -48,6 +48,7 @@ class ObsStericHeight : public ObsOperatorBase,
 
 // Other
   const oops::Variables & variables() const {return *varin_;}
+  const oops::Variables & observed() const {return *varout_;}
 
   int & toFortran() {return keyOperStericHeight_;}
   const int & toFortran() const {return keyOperStericHeight_;}
@@ -57,6 +58,7 @@ class ObsStericHeight : public ObsOperatorBase,
   F90hop keyOperStericHeight_;
   const ioda::ObsSpace& odb_;
   boost::scoped_ptr<const oops::Variables> varin_;
+  boost::scoped_ptr<const oops::Variables> varout_;
 };
 
 // -----------------------------------------------------------------------------
