@@ -34,9 +34,9 @@ ObsRadiosonde::ObsRadiosonde(const ioda::ObsSpace & odb, const eckit::Configurat
   char *buffin;
   char *buffout;
   ufo_radiosonde_getvars_f90(&configc,buffin,buffout);
-  std::string vstr_in(buffin), vstr_out(buffout);
 
   std::vector<std::string> vv,vout;
+  std::string vstr_in(buffin), vstr_out(buffout);
   boost::split(vv, vstr_in, boost::is_any_of("\t"));
   boost::split(vout, vstr_out, boost::is_any_of("\t"));
 
