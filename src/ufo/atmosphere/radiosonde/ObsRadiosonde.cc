@@ -10,6 +10,7 @@
 #include <ostream>
 #include <string>
 #include <vector>
+#include <boost/algorithm/string.hpp> 
 
 #include "oops/util/Logger.h"
 
@@ -29,12 +30,24 @@ ObsRadiosonde::ObsRadiosonde(const ioda::ObsSpace & odb, const eckit::Configurat
 {
   const eckit::Configuration * configc = &config;
   ufo_radiosonde_setup_f90(keyOperRadiosonde_, &configc);
+  
+  char *buffin;
+  char *buffout;
+  ufo_radiosonde_getvars_f90(&configc,buffin,buffout);
+  std::string vstr_in(buffin), vstr_out(buffout);
 
-  const std::vector<std::string> vv{"virtual_temperature", "atmosphere_ln_pressure_coordinate"};
+  std::vector<std::string> vv,vout;
+  boost::split(vv, vstr_in, boost::is_any_of("\t"));
+  boost::split(vout, vstr_out, boost::is_any_of("\t"));
+
   varin_.reset(new oops::Variables(vv));
-
-  const std::vector<std::string> vout{"air_temperature"};
   varout_.reset(new oops::Variables(vout));
+
+  // Specify variables in C++ - should this be an option?
+  //const std::vector<std::string> vv{"virtual_temperature", "atmosphere_ln_pressure_coordinate"};
+  //varin_.reset(new oops::Variables(vv));
+  //const std::vector<std::string> vout{"air_temperature"};
+  //varout_.reset(new oops::Variables(vout));
 
   oops::Log::trace() << "ObsRadiosonde created." << std::endl;
 }
