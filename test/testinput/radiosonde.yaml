@@ -14,7 +14,6 @@ Observations:
         obsfile: Data/sondes_obs_2018041500_m.nc4
         variables:
         - air_temperature
-        - eastward_wind
     GeoVaLs:
       norm: 8471.883687854357
       random: 0
