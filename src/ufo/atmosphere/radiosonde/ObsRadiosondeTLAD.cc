@@ -35,8 +35,21 @@ ObsRadiosondeTLAD::ObsRadiosondeTLAD(const ioda::ObsSpace & odb,
 {
   const eckit::Configuration * configc = &config;
   ufo_radiosonde_tlad_setup_f90(keyOperRadiosonde_, &configc);
-  const std::vector<std::string> vv{"virtual_temperature"};
+
+  // Read in vout list from configuration, vout in Forward Operator
+  // is the vin in Adjoint Operator
+  eckit::LocalConfiguration conf(config, "ObsData.ObsDataIn");
+  // varin_.reset(new oops::Variables(conf));
+
+  // name change , hard-wired at this moment, we should make the GeoVals
+  // file naming convention consistent with Observation file
+  std::vector<std::string> vv{conf.getStringVector("variables")};
+  for (std::size_t ii=0; ii < vv.size(); ii++) {
+    if (vv[ii] == "air_temperature")
+      vv[ii] = "virtual_temperature";
+  }
   varin_.reset(new oops::Variables(vv));
+
   oops::Log::trace() << "ObsRadiosondeTLAD created" << std::endl;
 }
 

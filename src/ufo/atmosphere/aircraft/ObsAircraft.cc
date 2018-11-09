@@ -34,8 +34,9 @@ ObsAircraft::ObsAircraft(const ioda::ObsSpace & odb, const eckit::Configuration 
   std::vector<std::string> vin{"virtual_temperature", "atmosphere_ln_pressure_coordinate"};
   varin_.reset(new oops::Variables(vin));
 
-  std::vector<std::string> vout{"air_temperature"};
-  varout_.reset(new oops::Variables(vout));
+  // Read in vout list from configuration
+  eckit::LocalConfiguration conf(config, "ObsData.ObsDataIn");
+  varout_.reset(new oops::Variables(conf));
 
   oops::Log::trace() << "ObsAircraft created." << std::endl;
 }

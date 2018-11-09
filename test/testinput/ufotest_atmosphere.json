@@ -40,7 +40,10 @@
         "ObsType": "Radiosonde",
         "ObsData": {
           "ObsDataIn": {
-            "obsfile": "Data/sondes_obs_2018041500_m.nc4"
+            "obsfile": "Data/sondes_obs_2018041500_m.nc4",
+            "variables":[
+              "air_temperature"
+            ]
           }
         },
         "GeoVaLs": {

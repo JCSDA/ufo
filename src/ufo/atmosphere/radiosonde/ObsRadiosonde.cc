@@ -33,8 +33,9 @@ ObsRadiosonde::ObsRadiosonde(const ioda::ObsSpace & odb, const eckit::Configurat
   const std::vector<std::string> vv{"virtual_temperature", "atmosphere_ln_pressure_coordinate"};
   varin_.reset(new oops::Variables(vv));
 
-  const std::vector<std::string> vout{"air_temperature"};
-  varout_.reset(new oops::Variables(vout));
+  // Read in vout list from configuration
+  eckit::LocalConfiguration conf(config, "ObsData.ObsDataIn");
+  varout_.reset(new oops::Variables(conf));
 
   oops::Log::trace() << "ObsRadiosonde created." << std::endl;
 }

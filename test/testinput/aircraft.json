@@ -13,7 +13,10 @@
         "ObsType": "Aircraft",
         "ObsData": {
           "ObsDataIn": {
-            "obsfile": "Data/aircraft_obs_2018041500_m.nc4"
+            "obsfile": "Data/aircraft_obs_2018041500_m.nc4",
+            "variables": [
+              "air_temperature"
+            ]
           }
         },
         "Variables": [
