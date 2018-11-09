@@ -44,19 +44,18 @@ end subroutine ufo_radiosonde_setup_c
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_radiosonde_getvars_c(c_conf,csin,csout) bind(c,name='ufo_radiosonde_getvars_f90')
+subroutine ufo_radiosonde_getvars_c(c_conf,csin,csout,c_str_size) bind(c,name='ufo_radiosonde_getvars_f90')
 implicit none
 type(c_ptr), intent(in) :: c_conf ! config here in case we want to read vars from file
-integer, parameter :: buff_size=200 ! increase buffer size if needed
-!character(kind=c_char,len=1) :: csin(buff_size),csout(buff_size) 
-character(kind=c_char,len=1) :: csin(200),csout(200) 
+character(kind=c_char,len=1),intent(inout) :: csin(c_str_size+1),csout(c_str_size+1) 
+integer(c_int), intent(in) :: c_str_size
 character(len=40), allocatable :: vars_in(:), vars_out(:)
 
 allocate(vars_in(2))
 vars_in(1) = "virtual_temperature"
 vars_in(2) = "atmosphere_ln_pressure_coordinate"
 call f_c_string_vector(vars_in,csin)
-
+   
 allocate(vars_out(1))
 vars_out(1) = "air_temperature"
 call f_c_string_vector(vars_out,csout)

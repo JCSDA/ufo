@@ -31,17 +31,18 @@ ObsRadiosonde::ObsRadiosonde(const ioda::ObsSpace & odb, const eckit::Configurat
   const eckit::Configuration * configc = &config;
   ufo_radiosonde_setup_f90(keyOperRadiosonde_, &configc);
   
-  char *buffin;
-  char *buffout;
-  ufo_radiosonde_getvars_f90(&configc,buffin,buffout);
+  int c_name_size=200;
+  char *buffin = new char[c_name_size];
+  char *buffout = new char[c_name_size];
+  ufo_radiosonde_getvars_f90(&configc,buffin,buffout,c_name_size);
 
-  std::vector<std::string> vv,vout;
+  std::vector<std::string> vvin,vvout;
   std::string vstr_in(buffin), vstr_out(buffout);
-  boost::split(vv, vstr_in, boost::is_any_of("\t"));
-  boost::split(vout, vstr_out, boost::is_any_of("\t"));
+  boost::split(vvin, vstr_in, boost::is_any_of("\t"));
+  boost::split(vvout, vstr_out, boost::is_any_of("\t"));
 
-  varin_.reset(new oops::Variables(vv));
-  varout_.reset(new oops::Variables(vout));
+  varin_.reset(new oops::Variables(vvin));
+  varout_.reset(new oops::Variables(vvout));
 
   // Specify variables in C++ - should this be an option?
   //const std::vector<std::string> vv{"virtual_temperature", "atmosphere_ln_pressure_coordinate"};
