@@ -131,6 +131,8 @@ contains
       integer :: iobs,ierr
       type(ufo_geoval), pointer :: tv_d
 
+      real(c_double) :: missing_value
+
       ! check if trajectory was set
       if (.not. self%ltraj) then
         write(err_msg,*) myname_, ' trajectory wasnt set!'
@@ -159,8 +161,11 @@ contains
       endif
       if (.not. geovals%linit ) geovals%linit=.true.
 
+      missing_value = obspace_missing_value()
       do iobs = 1, geovals%nobs
-        call vert_interp_apply_ad(tv_d%nval, tv_d%vals(:,iobs), hofx(iobs), self%wi(iobs), self%wf(iobs))
+        if (hofx(iobs) .ne. missing_value) then
+          call vert_interp_apply_ad(tv_d%nval, tv_d%vals(:,iobs), hofx(iobs), self%wi(iobs), self%wf(iobs))
+        endif
       enddo
 
     end subroutine conventional_profile_simobs_ad_
