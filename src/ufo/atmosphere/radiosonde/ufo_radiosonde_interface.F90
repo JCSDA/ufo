@@ -11,6 +11,9 @@ module ufo_radiosonde_mod_c
   use config_mod
   use ufo_radiosonde_mod
   implicit none
+
+  integer, parameter :: max_string=800
+
   private
 
 #define LISTED_TYPE ufo_radiosonde
@@ -38,6 +41,13 @@ type(c_ptr), intent(in)    :: c_conf
 type(ufo_radiosonde), pointer :: self
 
 call ufo_radiosonde_registry%setup(c_key_self, self)
+
+if (config_element_exists(c_conf,"ObsData.ObsDataIn.variables")) then
+     self%nvars = size(config_get_string_vector(c_conf, max_string, "ObsData.ObsDataIn.variables"))
+     if (allocated(self%varout)) deallocate(self%varout)
+     allocate(self%varout(self%nvars))
+     self%varout = config_get_string_vector(c_conf, max_string, "ObsData.ObsDataIn.variables")
+endif
 
 end subroutine ufo_radiosonde_setup_c
 

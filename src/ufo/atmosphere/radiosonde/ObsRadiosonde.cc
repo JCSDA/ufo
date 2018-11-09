@@ -30,12 +30,22 @@ ObsRadiosonde::ObsRadiosonde(const ioda::ObsSpace & odb, const eckit::Configurat
   const eckit::Configuration * configc = &config;
   ufo_radiosonde_setup_f90(keyOperRadiosonde_, &configc);
 
-  const std::vector<std::string> vv{"virtual_temperature", "atmosphere_ln_pressure_coordinate"};
-  varin_.reset(new oops::Variables(vv));
-
   // Read in vout list from configuration
   eckit::LocalConfiguration conf(config, "ObsData.ObsDataIn");
   varout_.reset(new oops::Variables(conf));
+
+  // Decide the vin based on vout
+  // We always need vertical coordinates
+  std::vector<std::string> vv{"atmosphere_ln_pressure_coordinate"};
+
+  for (std::size_t ii=0; ii < varout_->variables().size(); ++ii) {
+    // To be revisited here, it should not be hard-wired.
+    if (varout_->variables()[ii] == "air_temperature")
+      vv.push_back("virtual_temperature");
+    else
+      vv.push_back(varout_->variables()[ii]);
+  }
+  varin_.reset(new oops::Variables(vv));
 
   oops::Log::trace() << "ObsRadiosonde created." << std::endl;
 }

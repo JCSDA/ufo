@@ -31,12 +31,22 @@ ObsAircraft::ObsAircraft(const ioda::ObsSpace & odb, const eckit::Configuration 
   const eckit::Configuration * configc = &config;
   ufo_aircraft_setup_f90(keyOperAircraft_, &configc);
 
-  std::vector<std::string> vin{"virtual_temperature", "atmosphere_ln_pressure_coordinate"};
-  varin_.reset(new oops::Variables(vin));
-
   // Read in vout list from configuration
   eckit::LocalConfiguration conf(config, "ObsData.ObsDataIn");
   varout_.reset(new oops::Variables(conf));
+
+  // Decide the vin based on vout
+  // We always need vertical coordinates
+  std::vector<std::string> vin{"atmosphere_ln_pressure_coordinate"};
+
+  for (std::size_t ii=0; ii < varout_->variables().size(); ++ii) {
+    // To be revisited here, it should not be hard-wired.
+    if (varout_->variables()[ii] == "air_temperature")
+      vin.push_back("virtual_temperature");
+    else
+      vin.push_back(varout_->variables()[ii]);
+  }
+  varin_.reset(new oops::Variables(vin));
 
   oops::Log::trace() << "ObsAircraft created." << std::endl;
 }

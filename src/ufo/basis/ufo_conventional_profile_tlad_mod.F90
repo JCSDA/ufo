@@ -22,11 +22,14 @@ module ufo_conventional_profile_tlad_mod
      integer :: nval, nlocs
      real(kind_real), allocatable :: wf(:)
      integer, allocatable :: wi(:)
+     integer, public :: nvars
+     character(len=max_string), public, allocatable :: varin(:)
   contains
     procedure :: delete => conventional_profile_tlad_delete_
     procedure :: settraj => conventional_profile_tlad_settraj_
     procedure :: simobs_tl => conventional_profile_simobs_tl_
     procedure :: simobs_ad => conventional_profile_simobs_ad_
+    final :: destructor
   end type ufo_conventional_profile_tlad
 contains
 
@@ -96,7 +99,6 @@ contains
       type(ufo_geoval_ptr), dimension(:), allocatable :: vals
 
       character(len=MAXVARLEN), allocatable :: geovnames(:)
-      character(len=MAXVARLEN), allocatable :: obsvnames(:)
 
 
       ! check if trajectory was set
@@ -133,22 +135,18 @@ contains
       !                           STEP 2
       ! **********************************************************
 
-      ! Get the variable names we wwant to caculate the hofx
-      obsvnames = obsspace_get_vnames(obss, MAXVARLEN)
-      nvars = size(obsvnames)
-
       nlocs = obsspace_get_nlocs(obss)
 
       jj = 1
-      do ivar = 1, nvars
+      do ivar = 1, self%nvars
        ! Determine the location of this variable in geovals
-        if (trim(obsvnames(ivar)) == "air_temperature") then ! not match, to be solved
+        if (trim(self%varin(ivar)) == "air_temperature") then ! not match, to be solved
           geo_ivar = find_position("virtual_temperature", size(geovnames), geovnames)
         else
-          geo_ivar = find_position(obsvnames(ivar), size(geovnames), geovnames)
+          geo_ivar = find_position(self%varin(ivar), size(geovnames), geovnames)
         endif
         if (geo_ivar == -999 ) then
-          write(err_msg,*) myname_, " : ", trim(obsvnames(ivar)), ' is not in geovals'
+          write(err_msg,*) myname_, " : ", trim(self%varin(ivar)), ' is not in geovals'
           call abor1_ftn(err_msg)
         endif
 
@@ -158,6 +156,11 @@ contains
           jj = jj + 1
         enddo
       enddo
+
+      ! cleanup
+      if (allocated(geovnames)) deallocate(geovnames)
+      if (allocated(vals)) deallocate(vals)
+
 
     end subroutine conventional_profile_simobs_tl_
 
@@ -181,7 +184,6 @@ contains
       type(ufo_geoval_ptr), dimension(:), allocatable :: vals
 
       character(len=MAXVARLEN), allocatable :: geovnames(:)
-      character(len=MAXVARLEN), allocatable :: obsvnames(:)
 
       real(c_double) :: missing_value
 
@@ -219,22 +221,18 @@ contains
       !                           STEP 2
       ! **********************************************************
 
-      ! Get the variable names we wwant to caculate the hofx
-      obsvnames = obsspace_get_vnames(obss, MAXVARLEN)
-      nvars = size(obsvnames)
-
       nlocs = obsspace_get_nlocs(obss)
 
       jj = 1
-      do ivar = 1, nvars
+      do ivar = 1, self%nvars
        ! Determine the location of this variable in geovals
-        if (trim(obsvnames(ivar)) == "air_temperature") then ! not match, to be solved
+        if (trim(self%varin(ivar)) == "air_temperature") then ! not match, to be solved
           geo_ivar = find_position("virtual_temperature", size(geovnames), geovnames)
         else
-          geo_ivar = find_position(obsvnames(ivar), size(geovnames), geovnames)
+          geo_ivar = find_position(self%varin(ivar), size(geovnames), geovnames)
         endif
         if (geo_ivar == -999 ) then
-          write(err_msg,*) myname_, " : ", trim(obsvnames(ivar)), ' is not in geovals'
+          write(err_msg,*) myname_, " : ", trim(self%varin(ivar)), ' is not in geovals'
           call abor1_ftn(err_msg)
         endif
       
@@ -253,6 +251,10 @@ contains
         enddo
       enddo
 
+      ! cleanup
+      if (allocated(geovnames)) deallocate(geovnames)
+      if (allocated(vals)) deallocate(vals)
+
     end subroutine conventional_profile_simobs_ad_
 
 ! ------------------------------------------------------------------------------
@@ -269,6 +271,14 @@ contains
       self%ltraj = .false.
 
     end subroutine conventional_profile_tlad_delete_
+
+
+! ------------------------------------------------------------------------------
+
+    subroutine  destructor(self)
+      type(ufo_conventional_profile_tlad), intent(inout)  :: self
+      if (allocated(self%varin)) deallocate(self%varin)
+    end subroutine destructor
 
 ! ------------------------------------------------------------------------------
 

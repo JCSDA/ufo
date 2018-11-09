@@ -23,8 +23,11 @@ module ufo_conventional_profile_mod
      integer :: nval, nobs
      real(kind_real), allocatable :: wf(:)
      integer, allocatable :: wi(:)
+     integer, public :: nvars
+     character(len=max_string), public, allocatable :: varout(:)
   contains
     procedure :: simobs    => conventional_profile_simobs_
+    final :: destructor
   end type ufo_conventional_profile
 contains
 
@@ -41,7 +44,7 @@ contains
       character(len=*), parameter :: myname_="ufo_conventional_profile_simobs"
       character(max_string) :: err_msg
 
-      integer :: iobs, nvars, ivar, ivar_prsl, geo_ivar, jj
+      integer :: iobs, ivar, nvars, ivar_prsl, geo_ivar, jj
       real(kind_real) :: wf
       integer :: wi, ierr, nlocs
       real(kind_real), dimension(:), allocatable :: pressure, hofxv
@@ -53,7 +56,6 @@ contains
       type(ufo_geoval_ptr), dimension(:), allocatable :: vals
 
       character(len=MAXVARLEN), allocatable :: geovnames(:)
-      character(len=MAXVARLEN), allocatable :: obsvnames(:)
 
       ! check if nobs is consistent in geovals & hofx
       !if (geovals%nobs /= size(hofx)) then
@@ -96,9 +98,6 @@ contains
       ! Different observation type variables may have different vertical 
       ! coordinate vector, because of the missing values layout.
 
-      obsvnames = obsspace_get_vnames(obss, MAXVARLEN)
-      nvars = size(obsvnames)
-
       ! Because the vertical coordinate information is likely different 
       ! for different variabls, here, we use the maximum number to allocat
       ! the pressure 
@@ -106,19 +105,19 @@ contains
       allocate(pressure(nlocs))
 
       jj = 1
-      do ivar = 1, nvars
+      do ivar = 1, self%nvars
         ! Get the vertical coordinate and its dimension for this variable
         ! To be revisited, should not use this hard-wired name
         call obsspace_get_db(obss, "MetaData", "air_pressure", pressure)
 
         ! Determine the location of this variable in geovals
-        if (trim(obsvnames(ivar)) == "air_temperature") then ! not match, to be solved
+        if (trim(self%varout(ivar)) == "air_temperature") then ! not match, to be solved
           geo_ivar = find_position("virtual_temperature", size(geovnames), geovnames)
         else
-          geo_ivar = find_position(obsvnames(ivar), size(geovnames), geovnames)
+          geo_ivar = find_position(self%varout(ivar), size(geovnames), geovnames)
         endif
         if (geo_ivar == -999 ) then
-          write(err_msg,*) myname_, " : ", trim(obsvnames(ivar)), ' is not in geovals'
+          write(err_msg,*) myname_, " : ", trim(self%varout(ivar)), ' is not in geovals'
           call abor1_ftn(err_msg)
         endif
 
@@ -143,11 +142,17 @@ contains
 
       ! cleanup
       if (allocated(geovnames)) deallocate(geovnames)
-      if (allocated(obsvnames)) deallocate(obsvnames)
       if (allocated(pressure)) deallocate(pressure)
       if (allocated(vals)) deallocate(vals)
     
     end subroutine conventional_profile_simobs_
+
+! ------------------------------------------------------------------------------
+    
+    subroutine  destructor(self)
+      type(ufo_conventional_profile), intent(inout)  :: self
+      if (allocated(self%varout)) deallocate(self%varout)
+    end subroutine destructor
 
 ! ------------------------------------------------------------------------------
 

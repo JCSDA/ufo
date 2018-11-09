@@ -19,9 +19,6 @@
             ]
           }
         },
-        "Variables": [
-          "air_temperature"
-        ],
         "GeoVaLs": {
           "norm": "8471.883687854357",
           "random": "0",
