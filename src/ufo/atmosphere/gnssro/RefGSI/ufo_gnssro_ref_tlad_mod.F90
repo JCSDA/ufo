@@ -93,9 +93,9 @@ contains
       allocate(obsLat(self%nobs))
 
       ! observation of altitude (MSL) (for vertical interpolation)
-      call obsspace_get_db(obss, "Metadata", "altitude", obsZ)
+      call obsspace_get_db(obss, "", "altitude", obsZ)
       ! observation of Latitude (degree) (for geometric to geopotential height transform)
-      call obsspace_get_db(obss, "Metadata", "latitude", obsLat)
+      call obsspace_get_db(obss, "", "latitude", obsLat)
 
       do iobs = 1, self%nobs
 
