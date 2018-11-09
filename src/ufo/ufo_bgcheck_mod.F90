@@ -70,7 +70,6 @@ real(kind_real) :: zmax
 real(kind_real), allocatable :: yobs(:), yerr(:)
 integer(c_int32_t), allocatable :: flags(:)
 real(kind_real) :: missing
-character(len=max_string_length) :: cerr
 
 missing = obspace_missing_value()
 iobs = size(hofx)
@@ -80,8 +79,7 @@ allocate(flags(iobs))
 flags(:) = 0
 
 call obsspace_get_db(self%obsdb, "ObsValue", trim(self%variable), yobs)
-cerr = trim(self%variable)//'_err'
-call obsspace_get_db(self%obsdb, "ObsError", trim(cerr), yerr)
+call obsspace_get_db(self%obsdb, "ObsError", trim(self%variable), yerr)
 
 zmax = 0.0
 ireject = 0
@@ -98,8 +96,7 @@ do jobs = 1, iobs
 enddo
 write(0,*)'ufo_bgcheck_post reject = ',iobs,ireject,zmax
 
-cerr = trim(self%variable)//'_qg'
-call obsspace_put_db(self%obsdb, "QC", trim(cerr), flags)
+call obsspace_put_db(self%obsdb, "QC", trim(self%variable), flags)
 
 deallocate(yobs)
 deallocate(yerr)

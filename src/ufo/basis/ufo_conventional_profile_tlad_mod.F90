@@ -64,7 +64,7 @@ contains
 
       ! observation of pressure (for vertical interpolation)
       allocate(pressure(self%nlocs))
-      call obsspace_get_db(obss, "4DLocation", "air_pressure", pressure)
+      call obsspace_get_db(obss, "MetaData", "air_pressure", pressure)
 
       ! compute interpolation weights
       do iobs = 1, self%nlocs
@@ -182,6 +182,8 @@ contains
 
       character(len=MAXVARLEN), allocatable :: geovnames(:)
       character(len=MAXVARLEN), allocatable :: obsvnames(:)
+
+      real(c_double) :: missing_value
 
       ! check if trajectory was set
       if (.not. self%ltraj) then

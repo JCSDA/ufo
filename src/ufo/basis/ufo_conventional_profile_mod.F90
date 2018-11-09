@@ -109,7 +109,7 @@ contains
       do ivar = 1, nvars
         ! Get the vertical coordinate and its dimension for this variable
         ! To be revisited, should not use this hard-wired name
-        call obsspace_get_db(obss, "4DLocation", "air_pressure", pressure)
+        call obsspace_get_db(obss, "MetaData", "air_pressure", pressure)
 
         ! Determine the location of this variable in geovals
         if (trim(obsvnames(ivar)) == "air_temperature") then ! not match, to be solved

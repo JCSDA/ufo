@@ -121,9 +121,9 @@ contains
     allocate(obs_lon(obss_nobs))
     allocate(obs_depth(obss_nobs))
 
-    call obsspace_get_db(obss, "Metadata", "longitude", obs_lon)
-    call obsspace_get_db(obss, "Metadata", "latitude", obs_lat)
-    call obsspace_get_db(obss, "Metadata", "ocean_depth", obs_depth)
+    call obsspace_get_db(obss, "", "longitude", obs_lon)
+    call obsspace_get_db(obss, "", "latitude", obs_lat)
+    call obsspace_get_db(obss, "", "ocean_depth", obs_depth)
 
     traj%lono = obs_lon
     traj%lato = obs_lat
