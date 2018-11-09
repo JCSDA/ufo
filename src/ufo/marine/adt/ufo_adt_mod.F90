@@ -67,7 +67,7 @@ contains
     obss_nobs = obsspace_get_nobs(obss)
     allocate(obs_adt(obss_nobs))
     
-    call obsspace_get_db(obss, "ObsValue", "obs_absolute_dynamic_topography", obs_adt)
+    call obsspace_get_db(obss, "", "obs_absolute_dynamic_topography", obs_adt)
 
     ! Compute obs and model offset 
     offset_hofx = sum(geoval_adt%vals(1,:))/nobs
