@@ -20,9 +20,6 @@ module ufo_conventional_profile_mod
 
   type, extends(ufo_basis) :: ufo_conventional_profile
    private
-     integer :: nval, nobs
-     real(kind_real), allocatable :: wf(:)
-     integer, allocatable :: wi(:)
      integer, public :: nvars
      character(len=max_string), public, allocatable :: varout(:)
   contains
@@ -45,10 +42,12 @@ contains
       character(max_string) :: err_msg
 
       integer :: iobs, ivar, nvars, ivar_prsl, geo_ivar
-      real(kind_real) :: wf
-      integer :: wi, ierr, nlocs
+      integer :: ierr, nlocs
       real(kind_real), dimension(:), allocatable :: pressure
       type(ufo_geoval), pointer :: prsl
+
+      real(kind_real), allocatable :: wf(:)
+      integer, allocatable :: wi(:)
 
       type ufo_geoval_ptr
          type(ufo_geoval), pointer :: ptr
@@ -112,9 +111,11 @@ contains
       call obsspace_get_db(obss, "MetaData", "air_pressure", pressure)
 
       ! Calculate the interpolation weights 
+      if(.not. allocated(wi)) allocate(wi(nlocs))
+      if(.not. allocated(wf)) allocate(wf(nlocs))
       do iobs = 1, nlocs
         call vert_interp_weights(vals(ivar_prsl)%ptr%nval, log(pressure(iobs)/10.), &
-                                 vals(ivar_prsl)%ptr%vals(:,iobs), wi, wf)
+                                 vals(ivar_prsl)%ptr%vals(:,iobs), wi(iobs), wf(iobs))
       enddo
 
       ! Here we assume the order of self%varout list is the same as 
@@ -134,7 +135,8 @@ contains
         ! Interpolation
         do iobs = 1, nlocs
           ! Interpolate from geovals to observational location.
-          call vert_interp_apply(vals(geo_ivar)%ptr%nval, vals(geo_ivar)%ptr%vals(:,iobs), hofx(ivar+(iobs-1)*self%nvars), wi, wf)
+          call vert_interp_apply(vals(geo_ivar)%ptr%nval, vals(geo_ivar)%ptr%vals(:,iobs), &
+                                 hofx(ivar+(iobs-1)*self%nvars), wi(iobs), wf(iobs))
         enddo
 
       enddo
@@ -143,6 +145,8 @@ contains
       if (allocated(geovnames)) deallocate(geovnames)
       if (allocated(pressure)) deallocate(pressure)
       if (allocated(vals)) deallocate(vals)
+      if (allocated(wi)) deallocate(wi)
+      if (allocated(wf)) deallocate(wf)
     
     end subroutine conventional_profile_simobs_
 

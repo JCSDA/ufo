@@ -62,8 +62,8 @@ contains
       self%nval = prsl%nval
       self%nlocs = obsspace_get_nlocs(obss)
 
-      allocate(self%wi(self%nlocs))
-      allocate(self%wf(self%nlocs))
+      if(.not. allocated(self%wi)) allocate(self%wi(self%nlocs))
+      if(.not. allocated(self%wf)) allocate(self%wf(self%nlocs))
 
       ! observation of pressure (for vertical interpolation)
       allocate(pressure(self%nlocs))
@@ -273,7 +273,11 @@ contains
 
     subroutine  destructor(self)
       type(ufo_conventional_profile_tlad), intent(inout)  :: self
+      self%nval = 0
+      self%ltraj = .false.
       if (allocated(self%varin)) deallocate(self%varin)
+      if (allocated(self%wi)) deallocate(self%wi)
+      if (allocated(self%wf)) deallocate(self%wf)
     end subroutine destructor
 
 ! ------------------------------------------------------------------------------
