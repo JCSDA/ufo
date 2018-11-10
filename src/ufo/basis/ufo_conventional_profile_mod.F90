@@ -63,6 +63,10 @@ contains
       !  call abor1_ftn(err_msg)
       !endif
 
+      if ( self%nvars < 1 ) then
+        write(err_msg,*) myname_, ' error: no Variable in ObsOperator !'
+        call abor1_ftn(err_msg)
+      endif 
       ! **********************************************************
       !                           STEP 1
       ! **********************************************************
@@ -104,11 +108,18 @@ contains
       nlocs = obsspace_get_nlocs(obss)
       allocate(pressure(nlocs))
 
-      do ivar = 1, self%nvars
-        ! Get the vertical coordinate and its dimension for this variable
-        ! To be revisited, should not use this hard-wired name
-        call obsspace_get_db(obss, "MetaData", "air_pressure", pressure)
+      ! Get the vertical coordinate and its dimension for this variable
+      call obsspace_get_db(obss, "MetaData", "air_pressure", pressure)
 
+      ! Calculate the interpolation weights 
+      do iobs = 1, nlocs
+        call vert_interp_weights(vals(ivar_prsl)%ptr%nval, log(pressure(iobs)/10.), &
+                                 vals(ivar_prsl)%ptr%vals(:,iobs), wi, wf)
+      enddo
+
+      ! Here we assume the order of self%varout list is the same as 
+      ! which in ObsVector, so we can put the data in hofx in corrent order.
+      do ivar = 1, self%nvars
         ! Determine the location of this variable in geovals
         if (trim(self%varout(ivar)) == "air_temperature") then ! not match, to be solved
           geo_ivar = find_position("virtual_temperature", size(geovnames), geovnames)
@@ -122,9 +133,6 @@ contains
 
         ! Interpolation
         do iobs = 1, nlocs
-          ! Calculate the interpolation weights 
-          call vert_interp_weights(vals(ivar_prsl)%ptr%nval, log(DBLE(pressure(iobs))/10.), &
-                                   vals(ivar_prsl)%ptr%vals(:,iobs), wi, wf)
           ! Interpolate from geovals to observational location.
           call vert_interp_apply(vals(geo_ivar)%ptr%nval, vals(geo_ivar)%ptr%vals(:,iobs), hofx(ivar+(iobs-1)*self%nvars), wi, wf)
         enddo

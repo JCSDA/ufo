@@ -31,14 +31,11 @@ ObsAircraftTLAD::ObsAircraftTLAD(const ioda::ObsSpace & odb, const eckit::Config
   const eckit::Configuration * configc = &config;
 
   ufo_aircraft_tlad_setup_f90(keyOperAircraft_, &configc);
-  // Read in vout list from configuration, vout in Forward Operator
+  // Read in vout list from configuration; vout in Forward Operator
   // is the vin in Adjoint Operator
-  eckit::LocalConfiguration conf(config, "ObsData.ObsDataIn");
-  // varin_.reset(new oops::Variables(conf));
-
   // name change , hard-wired at this moment, we should make the GeoVals
   // file naming convention consistent with Observation file
-  std::vector<std::string> vv{conf.getStringVector("variables")};
+  std::vector<std::string> vv{config.getStringVector("variables")};
   for (std::size_t ii=0; ii < vv.size(); ii++) {
     if (vv[ii] == "air_temperature")
       vv[ii] = "virtual_temperature";

@@ -5,7 +5,7 @@
   "LinearObsOpTest": {
     "testiterTL": "10",
     "toleranceTL": "1.0e-8",
-    "toleranceAD": "1.0e-12"
+    "toleranceAD": "1.0e-11"
   },
   "Observations": {
     "ObsTypes": [
@@ -13,12 +13,12 @@
         "ObsType": "Aircraft",
         "ObsData": {
           "ObsDataIn": {
-            "obsfile": "Data/aircraft_obs_2018041500_m.nc4",
-            "variables": [
-              "air_temperature"
-            ]
+            "obsfile": "Data/aircraft_obs_2018041500_m.nc4"
           }
         },
+        "variables": [
+          "air_temperature"
+        ],
         "GeoVaLs": {
           "norm": "8471.883687854357",
           "random": "0",

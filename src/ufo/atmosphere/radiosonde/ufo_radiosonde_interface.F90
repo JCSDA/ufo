@@ -42,11 +42,11 @@ type(ufo_radiosonde), pointer :: self
 
 call ufo_radiosonde_registry%setup(c_key_self, self)
 
-if (config_element_exists(c_conf,"ObsData.ObsDataIn.variables")) then
-     self%nvars = size(config_get_string_vector(c_conf, max_string, "ObsData.ObsDataIn.variables"))
+if (config_element_exists(c_conf,"variables")) then
+     self%nvars = size(config_get_string_vector(c_conf, max_string, "variables"))
      if (allocated(self%varout)) deallocate(self%varout)
      allocate(self%varout(self%nvars))
-     self%varout = config_get_string_vector(c_conf, max_string, "ObsData.ObsDataIn.variables")
+     self%varout = config_get_string_vector(c_conf, max_string, "variables")
 endif
 
 end subroutine ufo_radiosonde_setup_c

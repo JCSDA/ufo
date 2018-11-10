@@ -162,6 +162,12 @@ ecbuild_add_test( TARGET  test_ufo_radiosonde_tlad
                   ARGS    "testinput/radiosonde.yaml"
                   LIBS    ufo )
 
+ecbuild_add_test( TARGET  test_ufo_aircraft_tlad
+                  BOOST
+                  SOURCES mains/TestObsOperatorTLAD.cc
+                  ARGS    "testinput/aircraft.json"
+                  LIBS    ufo )
+
 ecbuild_add_test( TARGET  test_ufo_aircraft_opr
                   BOOST
                   MPI     6

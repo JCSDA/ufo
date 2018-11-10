@@ -32,8 +32,7 @@ ObsAircraft::ObsAircraft(const ioda::ObsSpace & odb, const eckit::Configuration 
   ufo_aircraft_setup_f90(keyOperAircraft_, &configc);
 
   // Read in vout list from configuration
-  eckit::LocalConfiguration conf(config, "ObsData.ObsDataIn");
-  varout_.reset(new oops::Variables(conf));
+  varout_.reset(new oops::Variables(config));
 
   // Decide the vin based on vout
   // We always need vertical coordinates
