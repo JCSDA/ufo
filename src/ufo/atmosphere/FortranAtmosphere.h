@@ -43,6 +43,8 @@ extern "C" {
 // -----------------------------------------------------------------------------
 
   void ufo_radiosonde_setup_f90(F90hop &, const eckit::Configuration * const *);
+  void ufo_radiosonde_getvars_f90(F90hop &, const eckit::Configuration * const *, char *,
+                                  char *, const int &);
   void ufo_radiosonde_delete_f90(F90hop &);
   void ufo_radiosonde_simobs_f90(const F90hop &, const F90goms &, const ioda::ObsSpace &,
                                  const int &, double &, const F90obias &);

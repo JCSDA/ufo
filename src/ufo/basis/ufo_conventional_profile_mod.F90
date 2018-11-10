@@ -21,6 +21,7 @@ module ufo_conventional_profile_mod
   type, extends(ufo_basis) :: ufo_conventional_profile
    private
      integer, public :: nvars
+     character(len=max_string), public, allocatable :: varin(:)
      character(len=max_string), public, allocatable :: varout(:)
   contains
     procedure :: simobs    => conventional_profile_simobs_
@@ -155,6 +156,7 @@ contains
     subroutine  destructor(self)
       type(ufo_conventional_profile), intent(inout)  :: self
       if (allocated(self%varout)) deallocate(self%varout)
+      if (allocated(self%varin)) deallocate(self%varin)
     end subroutine destructor
 
 ! ------------------------------------------------------------------------------
