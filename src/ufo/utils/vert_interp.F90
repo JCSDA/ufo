@@ -74,7 +74,7 @@ real(kind_real), intent(in ) :: wf          !Weight for interpolation
 real(kind_real), intent(out) :: f           !Output at obs location using linear interp
 
 if (fvec(wi) == obspace_missing_value() .or. fvec(wi+1) == obspace_missing_value()) then
-  f = max(fvec(wi), fvec(wi+1))
+  f = obspace_missing_value()
 else
   f = fvec(wi)*wf + fvec(wi+1)*(1.0-wf)
 endif
@@ -93,7 +93,7 @@ real(kind_real), intent(in)  :: wf
 real(kind_real), intent(out) :: f_tl
 
 if (fvec_tl(wi) == obspace_missing_value() .or. fvec_tl(wi+1) == obspace_missing_value()) then
-  f_tl = max(fvec_tl(wi), fvec_tl(wi+1))
+  f_tl = obspace_missing_value()
 else
   f_tl = fvec_tl(wi)*wf + fvec_tl(wi+1)*(1.0_kind_real-wf)
 endif
