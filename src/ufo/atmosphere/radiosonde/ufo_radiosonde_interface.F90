@@ -10,6 +10,7 @@ module ufo_radiosonde_mod_c
   use iso_c_binding
   use config_mod
   use ufo_radiosonde_mod
+  use string_f_c_mod
   implicit none
   private
 
@@ -40,6 +41,28 @@ type(ufo_radiosonde), pointer :: self
 call ufo_radiosonde_registry%setup(c_key_self, self)
 
 end subroutine ufo_radiosonde_setup_c
+
+! ------------------------------------------------------------------------------
+
+subroutine ufo_radiosonde_getvars_c(c_conf,csin,csout,c_str_size) bind(c,name='ufo_radiosonde_getvars_f90')
+implicit none
+type(c_ptr), intent(in) :: c_conf ! config here in case we want to read vars from file
+character(kind=c_char,len=1),intent(inout) :: csin(c_str_size+1),csout(c_str_size+1) 
+integer(c_int), intent(in) :: c_str_size
+character(len=40), allocatable :: vars_in(:), vars_out(:)
+
+allocate(vars_in(2))
+vars_in(1) = "virtual_temperature"
+vars_in(2) = "atmosphere_ln_pressure_coordinate"
+call f_c_string_vector(vars_in,csin)
+   
+allocate(vars_out(1))
+vars_out(1) = "air_temperature"
+call f_c_string_vector(vars_out,csout)
+
+deallocate(vars_in,vars_out)
+
+end subroutine ufo_radiosonde_getvars_c
 
 ! ------------------------------------------------------------------------------
 
