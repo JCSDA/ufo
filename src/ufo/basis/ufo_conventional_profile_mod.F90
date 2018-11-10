@@ -44,10 +44,10 @@ contains
       character(len=*), parameter :: myname_="ufo_conventional_profile_simobs"
       character(max_string) :: err_msg
 
-      integer :: iobs, ivar, nvars, ivar_prsl, geo_ivar, jj
+      integer :: iobs, ivar, nvars, ivar_prsl, geo_ivar
       real(kind_real) :: wf
       integer :: wi, ierr, nlocs
-      real(kind_real), dimension(:), allocatable :: pressure, hofxv
+      real(kind_real), dimension(:), allocatable :: pressure
       type(ufo_geoval), pointer :: prsl
 
       type ufo_geoval_ptr
@@ -104,7 +104,6 @@ contains
       nlocs = obsspace_get_nlocs(obss)
       allocate(pressure(nlocs))
 
-      jj = 1
       do ivar = 1, self%nvars
         ! Get the vertical coordinate and its dimension for this variable
         ! To be revisited, should not use this hard-wired name
@@ -122,22 +121,14 @@ contains
         endif
 
         ! Interpolation
-        allocate(hofxv(nlocs))
         do iobs = 1, nlocs
           ! Calculate the interpolation weights 
           call vert_interp_weights(vals(ivar_prsl)%ptr%nval, log(DBLE(pressure(iobs))/10.), &
                                    vals(ivar_prsl)%ptr%vals(:,iobs), wi, wf)
           ! Interpolate from geovals to observational location.
-          call vert_interp_apply(vals(geo_ivar)%ptr%nval, vals(geo_ivar)%ptr%vals(:,iobs), hofx(jj), wi, wf)
-          hofxv(iobs) = hofx(jj)
-          jj = jj + 1
+          call vert_interp_apply(vals(geo_ivar)%ptr%nval, vals(geo_ivar)%ptr%vals(:,iobs), hofx(ivar+(iobs-1)*self%nvars), wi, wf)
         enddo
 
-        ! Store the hofx back to C++ ObsSpace
-        ! call obsspace_put_db(obss, "HofX", trim(obsvnames(ivar)), nlocs, hofxv)
-
-        ! Clean up for next variable
-        deallocate(hofxv)
       enddo
 
       ! cleanup

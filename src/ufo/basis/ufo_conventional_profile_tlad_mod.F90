@@ -91,7 +91,7 @@ contains
       character(len=*), parameter :: myname_="ufo_conventional_profile_simobs_tl"
       character(max_string) :: err_msg
 
-      integer :: iobs, ierr, ivar, geo_ivar, jj, nlocs, nvars
+      integer :: iobs, ierr, ivar, geo_ivar, nlocs, nvars
 
       type ufo_geoval_ptr
          type(ufo_geoval), pointer :: ptr
@@ -137,7 +137,6 @@ contains
 
       nlocs = obsspace_get_nlocs(obss)
 
-      jj = 1
       do ivar = 1, self%nvars
        ! Determine the location of this variable in geovals
         if (trim(self%varin(ivar)) == "air_temperature") then ! not match, to be solved
@@ -152,8 +151,7 @@ contains
 
         ! tangent linear obs operator (linear)
         do iobs = 1, nlocs
-          call vert_interp_apply_tl(vals(geo_ivar)%ptr%nval, vals(geo_ivar)%ptr%vals(:,iobs), hofx(jj), self%wi(iobs), self%wf(iobs))
-          jj = jj + 1
+          call vert_interp_apply_tl(vals(geo_ivar)%ptr%nval, vals(geo_ivar)%ptr%vals(:,iobs), hofx(ivar+(iobs-1)*self%nvars), self%wi(iobs), self%wf(iobs))
         enddo
       enddo
 
@@ -176,7 +174,7 @@ contains
       character(len=*), parameter :: myname_="ufo_conventional_profile_simobs_ad"
       character(max_string) :: err_msg
 
-      integer :: iobs, ierr, ivar, geo_ivar, jj, nlocs, nvars
+      integer :: iobs, ierr, ivar, geo_ivar, nlocs, nvars
 
       type ufo_geoval_ptr
          type(ufo_geoval), pointer :: ptr
@@ -223,7 +221,6 @@ contains
 
       nlocs = obsspace_get_nlocs(obss)
 
-      jj = 1
       do ivar = 1, self%nvars
        ! Determine the location of this variable in geovals
         if (trim(self%varin(ivar)) == "air_temperature") then ! not match, to be solved
@@ -246,8 +243,7 @@ contains
         if (.not. geovals%linit ) geovals%linit=.true.
 
         do iobs = 1, nlocs
-          call vert_interp_apply_ad(vals(geo_ivar)%ptr%nval, vals(geo_ivar)%ptr%vals(:,iobs), hofx(jj), self%wi(iobs), self%wf(iobs))
-          jj = jj + 1
+          call vert_interp_apply_ad(vals(geo_ivar)%ptr%nval, vals(geo_ivar)%ptr%vals(:,iobs), hofx(ivar+(iobs-1)*self%nvars), self%wi(iobs), self%wf(iobs))
         enddo
       enddo
 

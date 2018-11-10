@@ -798,9 +798,7 @@ do ivar = 1, vars%nv
     endif
 
     ! set the missing value equal to IODA missing_value
-    if (vartype == NF90_DOUBLE .or. vartype == NF90_FLOAT) then
-      where (self%geovals(ivar)%vals(1,:) > 1.0e08) self%geovals(ivar)%vals(1,:) = self%missing_value
-    endif
+    where (self%geovals(ivar)%vals(1,:) > 1.0e08) self%geovals(ivar)%vals(1,:) = self%missing_value
 
   !> read 2d vars (only double precision and integer for now)
   elseif (nvardim == 2) then
@@ -831,9 +829,7 @@ do ivar = 1, vars%nv
     endif
 
     ! set the missing value equal to IODA missing_value
-    if (vartype == NF90_DOUBLE .or. vartype == NF90_FLOAT) then
-      where (self%geovals(ivar)%vals > 1.0e08) self%geovals(ivar)%vals = self%missing_value
-    endif
+    where (self%geovals(ivar)%vals > 1.0e08) self%geovals(ivar)%vals = self%missing_value
     
   !> only 1d & 2d vars
   else
