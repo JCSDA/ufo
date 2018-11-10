@@ -10,6 +10,7 @@
 
 #include <ostream>
 #include <string>
+#include <vector>
 
 #include <boost/scoped_ptr.hpp>
 
@@ -54,6 +55,8 @@ class ObsRadiosonde : public ObsOperatorBase,
 
  private:
   void print(std::ostream &) const;
+  void get_vars_from_f90(const eckit::Configuration &, std::vector<std::string> &,
+                         std::vector<std::string> &) const;
   F90hop keyOperRadiosonde_;
   const ioda::ObsSpace& odb_;
   boost::scoped_ptr<const oops::Variables> varin_;
