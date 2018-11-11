@@ -23,7 +23,7 @@ Observations:
     ObsFilters:
     - Filter: Background Check
       variable: air_temperature
-      threshold: 3
+      threshold: 3.0
     rmsequiv: 242.21818
-    tolerance: 1.0e-03
+    tolerance: 1.0e-03  # in % so that corresponds to 10^-5
     ObsBias: {}

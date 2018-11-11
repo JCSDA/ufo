@@ -125,6 +125,7 @@ subroutine conventional_profile_simobs_ad_(self, geovals, hofx, obss)
   character(len=*), parameter :: myname_="ufo_conventional_profile_simobs_ad"
   character(max_string) :: err_msg
   integer :: iobs, ivar
+  real(c_double) :: missing_value
 
   type(ufo_geoval), pointer :: profile
   character(len=MAXVARLEN) :: geovar
@@ -133,6 +134,8 @@ subroutine conventional_profile_simobs_ad_(self, geovals, hofx, obss)
     write(err_msg,*) myname_, ' trajectory wasnt set!'
     call abor1_ftn(err_msg)
   endif
+
+  missing_value = obspace_missing_value()
 
   do ivar = 1, self%nvars
     ! Get the name of input variable in geovals
@@ -153,9 +156,11 @@ subroutine conventional_profile_simobs_ad_(self, geovals, hofx, obss)
 
     ! Interpolate from geovals to observational location into hofx
     do iobs = 1, self%nlocs
-      call vert_interp_apply_ad(profile%nval, profile%vals(:,iobs), &
-                              & hofx(ivar+(iobs-1)*self%nvars), &
-                              & self%wi(iobs), self%wf(iobs))
+      if (hofx(ivar+(iobs-1)*self%nvars) /= missing_value) then
+        call vert_interp_apply_ad(profile%nval, profile%vals(:,iobs), &
+                                & hofx(ivar+(iobs-1)*self%nvars), &
+                                & self%wi(iobs), self%wf(iobs))
+      endif
     enddo
   enddo
 
