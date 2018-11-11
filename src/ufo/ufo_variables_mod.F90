@@ -10,7 +10,7 @@ module ufo_vars_mod
 implicit none
 private
 public :: ufo_vars, ufo_vars_setup, ufo_vars_clone, ufo_vars_delete
-public :: ufo_vars_getindex, ufo_vars_nvars
+public :: ufo_vars_getindex, ufo_vars_nvars, ufo_vars_vnames
 
 integer, parameter, public :: naerosols_gocart_esrl=15
 
@@ -164,6 +164,18 @@ type(ufo_vars), intent(in) :: self
 ufo_vars_nvars = self%nv
 
 end function ufo_vars_nvars
+
+! ------------------------------------------------------------------------------
+
+function ufo_vars_vnames(self) 
+implicit none
+type(ufo_vars), intent(in) :: self
+
+character(len=MAXVARLEN), dimension(self%nv) :: ufo_vars_vnames
+
+ufo_vars_vnames(1:self%nv) = self%fldnames
+
+end function ufo_vars_vnames
 
 ! ------------------------------------------------------------------------------
 

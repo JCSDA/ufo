@@ -12,6 +12,9 @@ module ufo_radiosonde_mod_c
   use ufo_radiosonde_mod
   use string_f_c_mod
   implicit none
+
+  integer, parameter :: max_string=800
+
   private
 
 #define LISTED_TYPE ufo_radiosonde
@@ -44,23 +47,42 @@ end subroutine ufo_radiosonde_setup_c
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_radiosonde_getvars_c(c_conf,csin,csout,c_str_size) bind(c,name='ufo_radiosonde_getvars_f90')
+subroutine ufo_radiosonde_getvars_c(c_key_self, c_conf, csin, csout, c_str_size) bind(c,name='ufo_radiosonde_getvars_f90')
 implicit none
+integer(c_int), intent(in) :: c_key_self
 type(c_ptr), intent(in) :: c_conf ! config here in case we want to read vars from file
 character(kind=c_char,len=1),intent(inout) :: csin(c_str_size+1),csout(c_str_size+1) 
 integer(c_int), intent(in) :: c_str_size
-character(len=40), allocatable :: vars_in(:), vars_out(:)
 
-allocate(vars_in(2))
-vars_in(1) = "virtual_temperature"
-vars_in(2) = "atmosphere_ln_pressure_coordinate"
-call f_c_string_vector(vars_in,csin)
-   
-allocate(vars_out(1))
-vars_out(1) = "air_temperature"
-call f_c_string_vector(vars_out,csout)
+integer :: ii
 
-deallocate(vars_in,vars_out)
+type(ufo_radiosonde), pointer :: self
+
+call ufo_radiosonde_registry%get(c_key_self, self)
+
+if (config_element_exists(c_conf,"variables")) then
+     !> Size of variables
+     self%nvars = size(config_get_string_vector(c_conf, max_string, "variables"))
+     !> Allicate varin, need additional slot to hold vertical coord.
+     allocate(self%varin(self%nvars+1))
+     !> Allicate varout
+     allocate(self%varout(self%nvars))
+     !> Read variable list and store in varout
+     self%varout = config_get_string_vector(c_conf, max_string, "variables")
+     !> Set vars_out
+     call f_c_string_vector(self%varout, csout)
+     !> Set vars_in based on vars_out
+     do ii = 1, self%nvars
+        if (trim(self%varout(ii)) .eq. "air_temperature") then
+          self%varin(ii) = "virtual_temperature"
+        else
+          self%varin(ii) = self%varout(ii)
+        endif
+     enddo
+     self%varin(self%nvars+1) = "atmosphere_ln_pressure_coordinate"
+     !> Set vars_in
+     call f_c_string_vector(self%varin, csin) 
+endif
 
 end subroutine ufo_radiosonde_getvars_c
 

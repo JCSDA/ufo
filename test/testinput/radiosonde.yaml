@@ -4,8 +4,8 @@ window_begin: '2018-04-14T21:00:00Z'
 window_end: '2018-04-15T03:00:00Z'
 LinearObsOpTest:
   testiterTL: 12
-  toleranceTL: 1.0e-10
-  toleranceAD: 1.0e-12
+  toleranceTL: 1.0e-9
+  toleranceAD: 1.0e-11
 Observations:
   ObsTypes:
   - ObsType: Radiosonde
@@ -14,6 +14,8 @@ Observations:
         obsfile: Data/sondes_obs_2018041500_m.nc4
       ObsDataOut:
         obsfile: Data/sondes_obs_2018041500_m_out.nc4
+    variables:
+    - air_temperature
     GeoVaLs:
       norm: 8471.883687854357
       random: 0
