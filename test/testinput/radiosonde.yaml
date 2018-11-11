@@ -22,6 +22,6 @@ Observations:
     - Filter: Background Check
       variable: air_temperature
       threshold: 3
-    rmsequiv: 242.094973499492
-    tolerance: 1.0e-08
+    rmsequiv: 242.21818
+    tolerance: 1.0e-03
     ObsBias: {}

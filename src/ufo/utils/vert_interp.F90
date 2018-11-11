@@ -31,33 +31,37 @@ if (vec(1) < vec(nlev)) then !Pressure increases with index
 
   if (obl < vec(1)) then
      wi = 1
+     wf = 1.0
   elseif (obl > vec(nlev)) then
      wi = nlev - 1
+     wf = 0.0
   else
      do k = 1,nlev-1
         if (obl >= vec(k) .and. obl <= vec(k+1)) then
            wi = k
         endif
      enddo
+     wf = (vec(wi+1) - obl)/(vec(wi+1) - vec(wi))
   endif
 
 else !Pressure decreases with index
 
   if (obl > vec(1)) then
      wi = 1
+     wf = 1.0
   elseif (obl < vec(nlev)) then
      wi = nlev - 1
+     wf = 0.0
   else
      do k = 1,nlev-1
         if (obl >= vec(k+1) .and. obl <= vec(k)) then
            wi = k
         endif
      enddo
+     wf = (vec(wi+1) - obl)/(vec(wi+1) - vec(wi))
   endif
 
 endif
-
-wf = (vec(wi+1) - obl)/(vec(wi+1) - vec(wi))
 
 end subroutine vert_interp_weights
 
