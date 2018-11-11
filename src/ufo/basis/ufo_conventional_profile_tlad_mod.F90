@@ -42,14 +42,10 @@ contains
 
       real(kind_real), allocatable :: pressure(:)
       type(ufo_geoval), pointer :: prsl
-      integer :: iobs, ierr
+      integer :: iobs
 
-      !Check if conventional_profiles in geovals and get it
-      call ufo_geovals_get_var(geovals, var_prsl, prsl, status=ierr)
-      if (ierr/=0) then
-        write(err_msg,*) myname_, trim(var_prsl), ' doesnt exist'
-        call abor1_ftn(err_msg)
-      endif
+      ! Get pressure from geovals
+      call ufo_geovals_get_var(geovals, var_prsl, prsl)
 
       !Make sure nothing already allocated
       call self%delete()
@@ -87,7 +83,7 @@ contains
       character(len=*), parameter :: myname_="ufo_conventional_profile_simobs_tl"
       character(max_string) :: err_msg
 
-      integer :: iobs,ierr
+      integer :: iobs
       type(ufo_geoval), pointer :: tv_d
 
       ! check if trajectory was set
@@ -96,18 +92,8 @@ contains
         call abor1_ftn(err_msg)
       endif
 
-      ! check if nobs is consistent in geovals & hofx
-!      if (geovals%nobs /= hofx%nobs) then
-!        write(err_msg,*) myname_, ' error: nobs inconsistent!'
-!        call abor1_ftn(err_msg)
-!      endif
-
-      ! check if tv variable is in geovals and get it
-      call ufo_geovals_get_var(geovals, var_tv, tv_d, status=ierr )
-      if (ierr/=0) then
-        write(err_msg,*) myname_, trim(var_tv), ' doesnt exist'
-        call abor1_ftn(err_msg)
-      endif
+      ! get tv from geovals
+      call ufo_geovals_get_var(geovals, var_tv, tv_d)
 
       ! tangent linear obs operator (linear)
       do iobs = 1, geovals%nobs
@@ -128,7 +114,7 @@ contains
       character(len=*), parameter :: myname_="ufo_conventional_profile_simobs_ad"
       character(max_string) :: err_msg
 
-      integer :: iobs,ierr
+      integer :: iobs
       type(ufo_geoval), pointer :: tv_d
 
       real(c_double) :: missing_value
@@ -139,18 +125,8 @@ contains
         call abor1_ftn(err_msg)
       endif
 
-      ! check if nobs is consistent in geovals & hofx
-!      if (geovals%nobs /= hofx%nobs) then
-!        write(err_msg,*) myname_, ' error: nobs inconsistent!'
-!        call abor1_ftn(err_msg)
-!      endif
-
-      ! check if tv variable is in geovals and get it
-      call ufo_geovals_get_var(geovals, var_tv, tv_d, status=ierr)
-      if (ierr/=0) then
-        write(err_msg,*) myname_, trim(var_tv), ' doesnt exist'
-        call abor1_ftn(err_msg)
-      endif
+      ! get tv from geovals
+      call ufo_geovals_get_var(geovals, var_tv, tv_d)
 
       ! allocate if not yet allocated
       if (.not. allocated(tv_d%vals)) then

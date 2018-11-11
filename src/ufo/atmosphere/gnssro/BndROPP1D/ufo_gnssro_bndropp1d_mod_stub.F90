@@ -51,7 +51,6 @@ module ufo_gnssro_bndropp1d_mod
       character(len=250)              :: record
       integer                         :: iobs
       integer                         :: nlev, nobs
-      integer                         :: ierr
       integer                         :: nvprof
       integer, allocatable, dimension(:)      :: ichk
       type(ufo_geoval), pointer       :: t, q, prs, z, z_sfc
@@ -66,35 +65,15 @@ module ufo_gnssro_bndropp1d_mod
         call abor1_ftn(err_msg)
       endif
       ! check if prs (pressure at model levels)  variable is in geovals and get it
-      call ufo_geovals_get_var(geovals, var_prs, prs,status=ierr)
-      if (ierr/=0) then
-         write(err_msg,*) myname_, trim(var_prs), ' doesnt exist'
-         call abor1_ftn(err_msg)
-      endif
+      call ufo_geovals_get_var(geovals, var_prs, prs)
       ! check if specific humidity variable is in geovals and get it
-      call ufo_geovals_get_var(geovals, var_q, q,status=ierr)
-       if (ierr/=0) then
-         write(err_msg,*) myname_, trim(var_q), ' doesnt exist'
-         call abor1_ftn(err_msg)
-      endif
+      call ufo_geovals_get_var(geovals, var_q, q)
       ! check if geopotential height variable is in geovals and get it
-      call ufo_geovals_get_var(geovals, var_z, z,status=ierr) 
-      if (ierr/=0) then
-         write(err_msg,*) myname_, trim(var_z), ' doesnt exist'
-         call abor1_ftn(err_msg)
-      endif
+      call ufo_geovals_get_var(geovals, var_z, z)
       ! check if surface geopotential height variable is in geovals and get it
-      call ufo_geovals_get_var(geovals, var_sfc_z, z_sfc,status=ierr) 
-      if (ierr/=0) then
-         write(err_msg,*) myname_, trim(var_sfc_z), ' doesnt exist'
-         call abor1_ftn(err_msg)
-      endif
+      call ufo_geovals_get_var(geovals, var_sfc_z, z_sfc)
       ! check if t variable is in geovals and get it
-      call ufo_geovals_get_var(geovals, var_t, t,status=ierr)
-      if (ierr/=0) then
-         write(err_msg,*) myname_, trim(var_t), ' doesnt exist'
-         call abor1_ftn(err_msg)
-      endif
+      call ufo_geovals_get_var(geovals, var_t, t)
 
       nlev  = q%nval ! number of model levels
       nobs  = geovals%nobs ! number of observations

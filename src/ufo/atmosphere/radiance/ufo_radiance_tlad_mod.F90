@@ -88,7 +88,7 @@ type(c_ptr), value,       intent(in)    :: obss
 character(*), parameter :: PROGRAM_NAME = 'ufo_radiance_mod.F90'
 character(255) :: message, version
 integer        :: err_stat, alloc_stat
-integer        :: n, k1, ierr
+integer        :: n, k1
 type(ufo_geoval), pointer :: temp
 
 ! Define the "non-demoninational" arguments
@@ -107,7 +107,7 @@ type(CRTM_RTSolution_type), allocatable :: rts_K(:,:)
  ! Get number of profile and layers from geovals
  ! ---------------------------------------------
  self%n_Profiles = geovals%nobs
- call ufo_geovals_get_var(geovals, var_tv, temp, status=ierr)
+ call ufo_geovals_get_var(geovals, var_tv, temp)
  self%n_Layers = temp%nval
  nullify(temp)
 
@@ -289,7 +289,7 @@ type(c_ptr), value,    intent(in)    :: obss
 
 character(len=*), parameter :: myname_="ufo_radiance_simobs_tl"
 character(max_string) :: err_msg
-integer :: job, jprofile, jchannel, jlevel, ierr
+integer :: job, jprofile, jchannel, jlevel
 type(ufo_geoval), pointer :: tv_d
 
 
@@ -316,12 +316,8 @@ type(ufo_geoval), pointer :: tv_d
  ! Temperature
  ! -----------
 
- ! Check if variable is in geovals and get it
- call ufo_geovals_get_var(geovals, var_tv, tv_d, status=ierr )
- if (ierr/=0) then
-   write(err_msg,*) myname_, trim(var_tv), ' doesnt exist'
-   call abor1_ftn(err_msg)
- endif
+ ! Get tv from geovals
+ call ufo_geovals_get_var(geovals, var_tv, tv_d)
 
  ! Check model levels is consistent in geovals & crtm
  if (tv_d%nval /= self%n_Layers) then
@@ -356,7 +352,7 @@ type(c_ptr), value,    intent(in)    :: obss
 
 character(len=*), parameter :: myname_="ufo_radiance_simobs_ad"
 character(max_string) :: err_msg
-integer :: job, jprofile, jchannel, jlevel, ierr
+integer :: job, jprofile, jchannel, jlevel
 type(ufo_geoval), pointer :: tv_d
 
 
@@ -379,12 +375,8 @@ type(ufo_geoval), pointer :: tv_d
  ! Temperature
  ! -----------
 
- ! Check if variable is in geovals and get it
- call ufo_geovals_get_var(geovals, var_tv, tv_d, status=ierr )
- if (ierr/=0) then
-   write(err_msg,*) myname_, trim(var_tv), ' doesnt exist'
-   call abor1_ftn(err_msg)
- endif
+ ! Get tv from geovals
+ call ufo_geovals_get_var(geovals, var_tv, tv_d)
 
  ! allocate if not yet allocated
  if (.not. allocated(tv_d%vals)) then

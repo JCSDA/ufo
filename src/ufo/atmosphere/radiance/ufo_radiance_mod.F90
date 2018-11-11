@@ -70,7 +70,7 @@ type(c_ptr), value,       intent(in) :: obss
 character(*), parameter :: PROGRAM_NAME = 'ufo_radiance_mod.F90'
 character(255) :: message, version
 integer        :: err_stat, alloc_stat
-integer        :: l, m, n, i, s, ierr
+integer        :: l, m, n, i, s
 type(ufo_geoval), pointer :: temp
 
 integer :: n_Profiles
@@ -90,7 +90,7 @@ type(CRTM_RTSolution_type), allocatable :: rts(:,:)
  ! Get number of profile and layers from geovals
  ! ---------------------------------------------
  n_Profiles = geovals%nobs
- call ufo_geovals_get_var(geovals, var_tv, temp, status=ierr)
+ call ufo_geovals_get_var(geovals, var_tv, temp)
  n_Layers = temp%nval
  nullify(temp)
 

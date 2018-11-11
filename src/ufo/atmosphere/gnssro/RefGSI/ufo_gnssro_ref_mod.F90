@@ -43,7 +43,7 @@ contains
 
       integer         :: iobs,k
       real(kind_real) :: wf 
-      integer         :: wi,ierr
+      integer         :: wi
       integer         :: nobs
       type(ufo_geoval), pointer  :: t,q,prs,gph
       real(kind_real)            :: refr1, refr2,refr3
@@ -54,28 +54,11 @@ contains
         write(err_msg,*) myname_, ' error: nobs inconsistent!'
         call abor1_ftn(err_msg)
       endif
-      ! check if prs variable is in geovals and get it
-      call ufo_geovals_get_var(geovals, var_prs, prs,status=ierr)
-      if (ierr/=0) then
-         write(err_msg,*) myname_, trim(var_prs), ' doesnt exist'
-         call abor1_ftn(err_msg)
-      endif
-       ! check if t variable is in geovals and get it
-      call ufo_geovals_get_var(geovals, var_t, t,status=ierr)
-      if (ierr/=0) then
-         write(err_msg,*) myname_, trim(var_t), ' doesnt exist'
-         call abor1_ftn(err_msg)
-      endif
-      call ufo_geovals_get_var(geovals, var_q, q,status=ierr)
-       if (ierr/=0) then
-         write(err_msg,*) myname_, trim(var_q), ' doesnt exist'
-         call abor1_ftn(err_msg)
-      endif
-      call ufo_geovals_get_var(geovals, var_z, gph,status=ierr)
-      if (ierr/=0) then
-         write(err_msg,*) myname_, trim(var_z), ' doesnt exist'
-         call abor1_ftn(err_msg)
-       endif
+      ! get variables from geovals
+      call ufo_geovals_get_var(geovals, var_prs, prs)
+      call ufo_geovals_get_var(geovals, var_t, t)
+      call ufo_geovals_get_var(geovals, var_q, q)
+      call ufo_geovals_get_var(geovals, var_z, gph)
 
       nobs = obsspace_get_nobs(obss)
       allocate(obsZ(nobs))

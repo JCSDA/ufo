@@ -41,29 +41,15 @@ contains
 
       integer :: iobs
       real(kind_real) :: wf
-      integer :: wi, ierr, nobs
+      integer :: wi, nobs
       real(kind_real), allocatable :: pressure(:)
       type(ufo_geoval), pointer :: prsl, tv
 
-      ! check if nobs is consistent in geovals & hofx
-      if (geovals%nobs /= size(hofx)) then
-        write(err_msg,*) myname_, ' error: nobs inconsistent!'
-        call abor1_ftn(err_msg)
-      endif
+      ! get pressure from geovals
+      call ufo_geovals_get_var(geovals, var_prsl, prsl)
 
-      ! check if prsl variable is in geovals and get it
-      call ufo_geovals_get_var(geovals, var_prsl, prsl,status=ierr)
-      if (ierr/=0) then
-         write(err_msg,*) myname_, trim(var_prsl), ' doesnt exist'
-         call abor1_ftn(err_msg)
-      endif
-
-      ! check if tv variable is in geovals and get it
-      call ufo_geovals_get_var(geovals, var_tv, tv,status=ierr)
-      if (ierr/=0) then
-         write(err_msg,*) myname_, trim(var_tv), ' doesnt exist'
-         call abor1_ftn(err_msg)
-      endif
+      ! get tv from geovals
+      call ufo_geovals_get_var(geovals, var_tv, tv)
 
       ! observation of pressure (for vertical interpolation)
       nobs = obsspace_get_nobs(obss)

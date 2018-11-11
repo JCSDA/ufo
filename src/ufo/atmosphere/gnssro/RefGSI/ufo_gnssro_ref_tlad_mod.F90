@@ -48,32 +48,16 @@ contains
       character(max_string)       :: err_msg
       
       type(ufo_geoval), pointer :: t,q,prs,gph
-      integer          :: iobs, ierr
+      integer          :: iobs
       real(kind_real), allocatable :: obsZ(:), obsLat(:)  ! observation vector
       real(kind_real)  :: Tv, Tv0
       integer          :: wi0
 
-      !Check if variables are in geovals and get them
-      call ufo_geovals_get_var(geovals, var_prs, prs, status=ierr)
-      if (ierr/=0) then
-        write(err_msg,*) myname_, trim(var_prs), ' doesnt exist'
-        call abor1_ftn(err_msg)
-      endif
-      call ufo_geovals_get_var(geovals, var_t, t, status=ierr)
-      if (ierr/=0) then
-         write(err_msg,*) myname_, trim(var_t), ' doesnt exist'
-         call abor1_ftn(err_msg)
-      endif
-      call ufo_geovals_get_var(geovals, var_q, q, status=ierr)
-       if (ierr/=0) then
-         write(err_msg,*) myname_, trim(var_q), ' doesnt exist'
-         call abor1_ftn(err_msg)
-      endif     
-      call ufo_geovals_get_var(geovals, var_z, gph,status=ierr)
-       if (ierr/=0) then
-         write(err_msg,*) myname_, trim(var_z), ' doesnt exist'
-         call abor1_ftn(err_msg)
-      endif
+      !Get variables from geovals
+      call ufo_geovals_get_var(geovals, var_prs, prs)
+      call ufo_geovals_get_var(geovals, var_t, t)
+      call ufo_geovals_get_var(geovals, var_q, q)
+      call ufo_geovals_get_var(geovals, var_z, gph)
 
       !Make sure nothing already allocated
       call self%delete()
@@ -151,17 +135,9 @@ contains
         call abor1_ftn(err_msg)
       endif
      
-      ! check if variables are in geovals and get them 
-      call ufo_geovals_get_var(geovals, var_t, t_d,status=ierr)
-      if (ierr/=0) then
-         write(err_msg,*) myname_, trim(var_t), ' doesnt exist'
-         call abor1_ftn(err_msg)
-      endif
-      call ufo_geovals_get_var(geovals, var_q, q_d,status=ierr)
-      if (ierr/=0) then
-         write(err_msg,*) myname_, trim(var_q), ' doesnt exist'
-         call abor1_ftn(err_msg)
-      endif
+      ! get variables from geovals
+      call ufo_geovals_get_var(geovals, var_t, t_d)
+      call ufo_geovals_get_var(geovals, var_q, q_d)
   
 
       call gnssro_ref_constants(use_compress)
@@ -220,29 +196,11 @@ contains
         call abor1_ftn(err_msg)
       endif
       
-      ! check if variables are in geovals and get them
-      call ufo_geovals_get_var(geovals, var_prs, prs_d, status=ierr)
-      if (ierr/=0) then
-        write(err_msg,*) myname_, trim(var_prs), ' doesnt exist'
-        call abor1_ftn(err_msg)
-      endif
-      
-      call ufo_geovals_get_var(geovals, var_t, t_d, status=ierr)
-      if (ierr/=0) then
-        write(err_msg,*) myname_, trim(var_t), ' doesnt exist'
-        call abor1_ftn(err_msg)
-      endif 
-      
-      call ufo_geovals_get_var(geovals, var_q, q_d, status=ierr)
-      if (ierr/=0) then
-        write(err_msg,*) myname_, trim(var_q), ' doesnt exist'
-        call abor1_ftn(err_msg)
-      endif    
-      call ufo_geovals_get_var(geovals, var_z, gph_d, status=ierr)
-      if (ierr/=0) then
-        write(err_msg,*) myname_, trim(var_z), ' doesnt exist'
-        call abor1_ftn(err_msg)
-      endif
+      ! get variables from geovals
+      call ufo_geovals_get_var(geovals, var_prs, prs_d)
+      call ufo_geovals_get_var(geovals, var_t, t_d)
+      call ufo_geovals_get_var(geovals, var_q, q_d)
+      call ufo_geovals_get_var(geovals, var_z, gph_d)
       ! allocate if not yet allocated	
       if (.not. allocated(t_d%vals)) then
          t_d%nobs = self%nobs

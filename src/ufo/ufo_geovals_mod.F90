@@ -119,16 +119,17 @@ end subroutine ufo_geovals_delete
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_geovals_get_var(self, varname, geoval, status)
+subroutine ufo_geovals_get_var(self, varname, geoval)
 implicit none
 type(ufo_geovals), target, intent(in)    :: self
 character(MAXVARLEN), intent(in) :: varname
 type(ufo_geoval), pointer, intent(inout)    :: geoval
-integer, optional, intent(out) :: status
 
-integer :: ivar, status_
+character(len=*), parameter :: myname_="ufo_geovals_get_var"
 
-status_ = 1
+character(max_string) :: err_msg
+integer :: ivar
+
 geoval => NULL()
 if (.not. self%lalloc .or. .not. self%linit) then
    !return
@@ -137,15 +138,12 @@ endif
 ivar = ufo_vars_getindex(self%variables, varname)
 
 if (ivar < 0) then
-   status_ = 2
+  write(err_msg,*) myname_, trim(varname), ' doesnt exist'
+  call abor1_ftn(err_msg)
 else
   geoval => self%geovals(ivar)
-  status_ = 0
 endif
 
-if(present(status)) then
-  status=status_
-endif
 end subroutine ufo_geovals_get_var
 
 ! ------------------------------------------------------------------------------

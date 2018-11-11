@@ -57,7 +57,6 @@ module ufo_gnssro_bndgsi_mod
       integer                         :: nlev, nlev1, nobs, nlevExt, nlevCheck
       real(kind_real)                 :: rnlevExt
       real(kind_real)                 :: w4(4), dw4(4)
-      integer                         :: ierr
       type(ufo_geoval), pointer       :: t, gphi, prsi, q
       real(kind_real), allocatable    :: gesT(:,:), gesZi(:,:), gesPi(:,:), gesQ(:,:)
       real(kind_real), allocatable    :: refr(:,:), radius(:,:)
@@ -88,29 +87,13 @@ module ufo_gnssro_bndgsi_mod
         call abor1_ftn(err_msg)
       endif
       ! check if prsi (pressure at model interface levels) variable is in geovals and get it
-      call ufo_geovals_get_var(geovals, var_prsi, prsi,status=ierr)
-      if (ierr/=0) then
-         write(err_msg,*) myname_, trim(var_prsi), ' doesnt exist'
-         call abor1_ftn(err_msg)
-      endif
+      call ufo_geovals_get_var(geovals, var_prsi, prsi)
       ! check if t (temperature) variable is in geovals and get it
-      call ufo_geovals_get_var(geovals, var_t, t,status=ierr)  
-      if (ierr/=0) then
-         write(err_msg,*) myname_, trim(var_t), ' doesnt exist'
-         call abor1_ftn(err_msg)
-      endif
+      call ufo_geovals_get_var(geovals, var_t, t)
       ! check if q(specific humidity) variable is in geovals and get it
-      call ufo_geovals_get_var(geovals, var_q, q,status=ierr)
-       if (ierr/=0) then
-         write(err_msg,*) myname_, trim(var_q), ' doesnt exist'
-         call abor1_ftn(err_msg)
-      endif
+      call ufo_geovals_get_var(geovals, var_q, q)
       ! check if gphi (geopotential height at model interface levels) variable is in geovals and get it
-      call ufo_geovals_get_var(geovals, var_zi, gphi,status=ierr) 
-      if (ierr/=0) then
-         write(err_msg,*) myname_, trim(var_zi), ' doesnt exist'
-         call abor1_ftn(err_msg)
-      endif
+      call ufo_geovals_get_var(geovals, var_zi, gphi)
 
  
       nlev  = t%nval ! number of model levels

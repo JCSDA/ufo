@@ -149,7 +149,6 @@ contains
     TYPE(ufo_geoval), pointer :: geoval
     character(MAXVARLEN) :: varname
     integer              :: ivar
-    integer              :: ierr
 
     integer              :: nobs
     integer              :: nlocs
@@ -169,13 +168,8 @@ contains
 
     varname=var_aerosols(1)
 
-    call ufo_geovals_get_var(geovals,varname, geoval,status=ierr)
-    IF (ierr==0) THEN
-       n_layers=SIZE(geoval%vals,1)
-    ELSE
-       err_msg=TRIM(varname)//' not found - Stopping'
-       CALL abor1_ftn(err_msg)
-    ENDIF
+    call ufo_geovals_get_var(geovals,varname, geoval)
+    n_layers=SIZE(geoval%vals,1)
     
 
     ALLOCATE(atm(n_profiles),aerosols(n_aerosols))
