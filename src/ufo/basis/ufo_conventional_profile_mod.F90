@@ -14,8 +14,6 @@ module ufo_conventional_profile_mod
   use ufo_basis_mod, only: ufo_basis
   use obsspace_mod
 
-  public find_position
-
   integer, parameter :: max_string=800
 
   type, extends(ufo_basis) :: ufo_conventional_profile
@@ -31,139 +29,69 @@ contains
 
 ! ------------------------------------------------------------------------------
 
-    subroutine conventional_profile_simobs_(self, geovals, hofx, obss)
+subroutine conventional_profile_simobs_(self, geovals, hofx, obss)
 
-      implicit none
-      class(ufo_conventional_profile), intent(in)  :: self
-      type(ufo_geovals), intent(in)                :: geovals
-      real(c_double),  intent(inout)               :: hofx(:)
-      type(c_ptr), value, intent(in)               :: obss
+  implicit none
+  class(ufo_conventional_profile), intent(in) :: self
+  type(ufo_geovals), intent(in)               :: geovals
+  real(c_double),  intent(inout)              :: hofx(:)
+  type(c_ptr), value, intent(in)              :: obss
 
-      character(len=*), parameter :: myname_="ufo_conventional_profile_simobs"
-      character(max_string) :: err_msg
+  integer :: iobs, ivar, nlocs
+  real(kind_real), dimension(:), allocatable :: obspressure
+  type(ufo_geoval), pointer :: presprofile, profile
+  real(kind_real), allocatable :: wf(:)
+  integer, allocatable :: wi(:)
+  character(len=MAXVARLEN) :: geovar
 
-      integer :: iobs, ivar, nvars, ivar_prsl, geo_ivar
-      integer :: ierr, nlocs
-      real(kind_real), dimension(:), allocatable :: pressure
-      type(ufo_geoval), pointer :: prsl
+  ! Get pressure profiles from geovals
+  call ufo_geovals_get_var(geovals, var_prsl, presprofile)
 
-      real(kind_real), allocatable :: wf(:)
-      integer, allocatable :: wi(:)
+  ! Get the vertical coordinate and its dimension for this variable
+  nlocs = obsspace_get_nlocs(obss)
+  allocate(obspressure(nlocs))
+  call obsspace_get_db(obss, "MetaData", "air_pressure", obspressure)
 
-      type ufo_geoval_ptr
-         type(ufo_geoval), pointer :: ptr
-      end type ufo_geoval_ptr
-      type(ufo_geoval_ptr), dimension(:), allocatable :: vals
+  ! Allocate arrays for vertical coordinate (pressure) and interpolation weights
+  allocate(wi(nlocs))
+  allocate(wf(nlocs))
 
-      character(len=MAXVARLEN), allocatable :: geovnames(:)
+  ! Calculate the interpolation weights
+  do iobs = 1, nlocs
+    call vert_interp_weights(presprofile%nval, log(obspressure(iobs)/10.), &
+                             presprofile%vals(:,iobs), wi(iobs), wf(iobs))
+  enddo
 
-      if ( self%nvars < 1 ) then
-        write(err_msg,*) myname_, ' error: no Variable in ObsOperator !'
-        call abor1_ftn(err_msg)
-      endif 
-      ! **********************************************************
-      !                           STEP 1
-      ! **********************************************************
+  do ivar = 1, self%nvars
+    ! Get the name of input variable in geovals
+    geovar = self%varout(ivar)
+    if (trim(geovar) == "air_temperature") geovar = "virtual_temperature"
 
-      ! Retrieving the required variables names for this ObsOperator
-      geovnames = ufo_vars_vnames(geovals%variables)
-      nvars = size(geovnames)
-    
-      ! Checking if all required model variables are in geovals and get its pointer.
-      ! also, locating the $var_prsl (vertical coordinates of model) from geovals for 
-      ! vertical interpolation.
-      ivar_prsl = -999
-      allocate(vals(nvars))
-      do ivar = 1, nvars
-         call ufo_geovals_get_var(geovals, geovnames(ivar), vals(ivar)%ptr)
-         if (trim(geovnames(ivar)) == trim(var_prsl)) ivar_prsl = ivar
-      enddo
-      
-      if (ivar_prsl == -999 ) then
-        write(err_msg,*) myname_, " : ", trim(var_prsl), ' is not in geovals'
-        call abor1_ftn(err_msg)
-      endif
+    ! Get profile for this variable in geovals
+    call ufo_geovals_get_var(geovals, geovar, profile)
 
-      ! **********************************************************
-      !                           STEP 2
-      ! **********************************************************
+    ! Interpolate from geovals to observational location into hofx
+    do iobs = 1, nlocs
+      call vert_interp_apply(profile%nval, profile%vals(:,iobs), &
+                           & hofx(ivar+(iobs-1)*self%nvars), &
+                           & wi(iobs), wf(iobs))
+    enddo
+  enddo
 
-      ! Retrieving the observation vertical coordinate from ObsSpace.
-      ! Different observation type variables may have different vertical 
-      ! coordinate vector, because of the missing values layout.
+  ! Cleanup memory
+  deallocate(obspressure)
+  deallocate(wi)
+  deallocate(wf)
 
-      ! Because the vertical coordinate information is likely different 
-      ! for different variabls, here, we use the maximum number to allocat
-      ! the pressure 
-      nlocs = obsspace_get_nlocs(obss)
-      allocate(pressure(nlocs))
-
-      ! Get the vertical coordinate and its dimension for this variable
-      call obsspace_get_db(obss, "MetaData", "air_pressure", pressure)
-
-      ! Calculate the interpolation weights 
-      if(.not. allocated(wi)) allocate(wi(nlocs))
-      if(.not. allocated(wf)) allocate(wf(nlocs))
-      do iobs = 1, nlocs
-        call vert_interp_weights(vals(ivar_prsl)%ptr%nval, log(pressure(iobs)/10.), &
-                                 vals(ivar_prsl)%ptr%vals(:,iobs), wi(iobs), wf(iobs))
-      enddo
-
-      ! Here we assume the order of self%varout list is the same as 
-      ! which in ObsVector, so we can put the data in hofx in corrent order.
-      do ivar = 1, self%nvars
-        ! Determine the location of this variable in geovals
-        if (trim(self%varout(ivar)) == "air_temperature") then ! not match, to be solved
-          geo_ivar = find_position("virtual_temperature", size(geovnames), geovnames)
-        else
-          geo_ivar = find_position(self%varout(ivar), size(geovnames), geovnames)
-        endif
-        if (geo_ivar == -999 ) then
-          write(err_msg,*) myname_, " : ", trim(self%varout(ivar)), ' is not in geovals'
-          call abor1_ftn(err_msg)
-        endif
-
-        ! Interpolation
-        do iobs = 1, nlocs
-          ! Interpolate from geovals to observational location.
-          call vert_interp_apply(vals(geo_ivar)%ptr%nval, vals(geo_ivar)%ptr%vals(:,iobs), &
-                                 hofx(ivar+(iobs-1)*self%nvars), wi(iobs), wf(iobs))
-        enddo
-
-      enddo
-
-      ! cleanup
-      if (allocated(geovnames)) deallocate(geovnames)
-      if (allocated(pressure)) deallocate(pressure)
-      if (allocated(vals)) deallocate(vals)
-      if (allocated(wi)) deallocate(wi)
-      if (allocated(wf)) deallocate(wf)
-    
-    end subroutine conventional_profile_simobs_
-
-! ------------------------------------------------------------------------------
-    
-    subroutine  destructor(self)
-      type(ufo_conventional_profile), intent(inout)  :: self
-      if (allocated(self%varout)) deallocate(self%varout)
-      if (allocated(self%varin)) deallocate(self%varin)
-    end subroutine destructor
+end subroutine conventional_profile_simobs_
 
 ! ------------------------------------------------------------------------------
 
-    integer function find_position(str, length, strList)
-      implicit none
-      integer, intent(in) :: length
-      character(len=*), intent(in) :: str
-      character(len=*), dimension(length), intent(in) :: strList
-
-      integer :: i
-
-      find_position = -999
-      do i = 1, length
-        if (trim(str) == trim(strList(i))) find_position = i
-      enddo
-    end function find_position
+subroutine  destructor(self)
+  type(ufo_conventional_profile), intent(inout) :: self
+  if (allocated(self%varout)) deallocate(self%varout)
+  if (allocated(self%varin)) deallocate(self%varin)
+end subroutine destructor
 
 ! ------------------------------------------------------------------------------
 
