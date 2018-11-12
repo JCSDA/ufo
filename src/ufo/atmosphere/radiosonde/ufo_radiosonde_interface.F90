@@ -34,20 +34,7 @@ contains
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_radiosonde_setup_c(c_key_self, c_conf) bind(c,name='ufo_radiosonde_setup_f90')
-implicit none
-integer(c_int), intent(inout) :: c_key_self
-type(c_ptr), intent(in)    :: c_conf
-
-type(ufo_radiosonde), pointer :: self
-
-call ufo_radiosonde_registry%setup(c_key_self, self)
-
-end subroutine ufo_radiosonde_setup_c
-
-! ------------------------------------------------------------------------------
-
-subroutine ufo_radiosonde_getvars_c(c_key_self, c_conf, csin, csout, c_str_size) bind(c,name='ufo_radiosonde_getvars_f90')
+subroutine ufo_radiosonde_setup_c(c_key_self, c_conf, csin, csout, c_str_size) bind(c,name='ufo_radiosonde_setup_f90')
 implicit none
 integer(c_int), intent(in) :: c_key_self
 type(c_ptr), intent(in) :: c_conf ! config here in case we want to read vars from file
@@ -58,7 +45,7 @@ integer :: ii
 
 type(ufo_radiosonde), pointer :: self
 
-call ufo_radiosonde_registry%get(c_key_self, self)
+call ufo_radiosonde_registry%setup(c_key_self, self)
 
 if (config_element_exists(c_conf,"variables")) then
   !> Size of variables
@@ -84,7 +71,7 @@ if (config_element_exists(c_conf,"variables")) then
   call f_c_string_vector(self%varin, csin) 
 endif
 
-end subroutine ufo_radiosonde_getvars_c
+end subroutine ufo_radiosonde_setup_c
 
 ! ------------------------------------------------------------------------------
 

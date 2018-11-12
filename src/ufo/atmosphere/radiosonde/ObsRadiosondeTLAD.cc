@@ -10,6 +10,7 @@
 #include <ostream>
 #include <string>
 #include <vector>
+#include <boost/algorithm/string.hpp>
 
 #include <boost/scoped_ptr.hpp>
 
@@ -33,19 +34,20 @@ ObsRadiosondeTLAD::ObsRadiosondeTLAD(const ioda::ObsSpace & odb,
                                      const eckit::Configuration & config)
   : keyOperRadiosonde_(0), varin_(), odb_(odb)
 {
+  int c_name_size = 200;
+  char *buffin = new char[c_name_size];
+  char *buffout = new char[c_name_size];
   const eckit::Configuration * configc = &config;
-  ufo_radiosonde_tlad_setup_f90(keyOperRadiosonde_, &configc);
 
-  // Read in vout list from configuration, vout in Forward Operator
-  // is the vin in Adjoint Operator
-  // name change , hard-wired at this moment, we should make the GeoVals
-  // file naming convention consistent with Observation file
-  std::vector<std::string> vv{config.getStringVector("variables")};
-  for (std::size_t ii=0; ii < vv.size(); ii++) {
-    if (vv[ii] == "air_temperature")
-      vv[ii] = "virtual_temperature";
-  }
-  varin_.reset(new oops::Variables(vv));
+  ufo_radiosonde_tlad_setup_f90(keyOperRadiosonde_, &configc, buffin, buffout, c_name_size);
+
+  std::string vstr_in(buffin), vstr_out(buffout);
+  std::vector<std::string> vvin;
+  std::vector<std::string> vvout;
+  boost::split(vvin, vstr_in, boost::is_any_of("\t"));
+  boost::split(vvout, vstr_out, boost::is_any_of("\t"));
+  varin_.reset(new oops::Variables(vvin));
+  varout_.reset(new oops::Variables(vvout));
 
   oops::Log::trace() << "ObsRadiosondeTLAD created" << std::endl;
 }

@@ -55,9 +55,6 @@ class ObsRadiosonde : public ObsOperatorBase,
 
  private:
   void print(std::ostream &) const;
-  void get_vars_from_f90(const eckit::Configuration &,
-                         std::vector<std::string> &,
-                         std::vector<std::string> &);
   F90hop keyOperRadiosonde_;
   const ioda::ObsSpace& odb_;
   boost::scoped_ptr<const oops::Variables> varin_;

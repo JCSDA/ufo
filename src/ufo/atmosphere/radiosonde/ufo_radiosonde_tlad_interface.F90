@@ -10,6 +10,7 @@ module ufo_radiosonde_tlad_mod_c
   use iso_c_binding
   use config_mod
   use ufo_radiosonde_tlad_mod
+  use string_f_c_mod
   implicit none
 
   integer, parameter :: max_string=800
@@ -32,10 +33,12 @@ contains
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_radiosonde_tlad_setup_c(c_key_self, c_conf) bind(c,name='ufo_radiosonde_tlad_setup_f90')
+subroutine ufo_radiosonde_tlad_setup_c(c_key_self, c_conf, csin, csout, c_str_size) bind(c,name='ufo_radiosonde_tlad_setup_f90')
 implicit none
-integer(c_int), intent(inout) :: c_key_self
-type(c_ptr), intent(in)    :: c_conf
+integer(c_int), intent(in) :: c_key_self
+type(c_ptr), intent(in) :: c_conf ! config here in case we want to read vars from file
+character(kind=c_char,len=1),intent(inout) :: csin(c_str_size+1),csout(c_str_size+1) 
+integer(c_int), intent(in) :: c_str_size
 
 type(ufo_radiosonde_tlad), pointer :: self
 integer :: ii
@@ -50,7 +53,7 @@ if (config_element_exists(c_conf,"variables")) then
   !> Read variable list and store in varout
   self%varout = config_get_string_vector(c_conf, max_string, "variables")
   !> Set vars_out
-!  call f_c_string_vector(self%varout, csout)
+  call f_c_string_vector(self%varout, csout)
   !> Allicate varin, need additional slot to hold vertical coord.
   allocate(self%varin(self%nvars+1))
   !> Set vars_in based on vars_out
@@ -63,7 +66,7 @@ if (config_element_exists(c_conf,"variables")) then
   enddo
   self%varin(self%nvars+1) = "atmosphere_ln_pressure_coordinate"
   !> Set vars_in
-!  call f_c_string_vector(self%varin, csin) 
+  call f_c_string_vector(self%varin, csin) 
 endif
 
 end subroutine ufo_radiosonde_tlad_setup_c
