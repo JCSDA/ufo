@@ -47,11 +47,12 @@ subroutine conventional_profile_tlad_settraj_(self, geovals, obss)
 
   ! Make sure nothing already allocated
   call self%delete()
-  self%nval = presprofile%nval
-  self%nlocs = obsspace_get_nlocs(obss)
 
   ! Get pressure profiles from geovals
   call ufo_geovals_get_var(geovals, var_prsl, presprofile)
+
+  self%nval = presprofile%nval
+  self%nlocs = obsspace_get_nlocs(obss)
 
   ! Get the vertical coordinate and its dimension for this variable
   allocate(obspressure(self%nlocs))

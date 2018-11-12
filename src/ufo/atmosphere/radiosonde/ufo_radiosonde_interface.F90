@@ -38,8 +38,8 @@ subroutine ufo_radiosonde_setup_c(c_key_self, c_conf, csin, csout, c_str_size) b
 implicit none
 integer(c_int), intent(in) :: c_key_self
 type(c_ptr), intent(in) :: c_conf ! config here in case we want to read vars from file
-character(kind=c_char,len=1),intent(inout) :: csin(c_str_size+1),csout(c_str_size+1) 
 integer(c_int), intent(in) :: c_str_size
+character(kind=c_char,len=1),intent(inout) :: csin(c_str_size+1),csout(c_str_size+1) 
 
 integer :: ii
 
