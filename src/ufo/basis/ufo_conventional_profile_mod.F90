@@ -16,6 +16,8 @@ module ufo_conventional_profile_mod
 
   integer, parameter :: max_string=800
 
+! ------------------------------------------------------------------------------
+
   type, extends(ufo_basis) :: ufo_conventional_profile
    private
      integer, public :: nvars
@@ -25,8 +27,9 @@ module ufo_conventional_profile_mod
     procedure :: simobs    => conventional_profile_simobs_
     final :: destructor
   end type ufo_conventional_profile
-contains
 
+! ------------------------------------------------------------------------------
+contains
 ! ------------------------------------------------------------------------------
 
 subroutine conventional_profile_simobs_(self, geovals, hofx, obss)
@@ -47,12 +50,12 @@ subroutine conventional_profile_simobs_(self, geovals, hofx, obss)
   ! Get pressure profiles from geovals
   call ufo_geovals_get_var(geovals, var_prsl, presprofile)
 
-  ! Get the vertical coordinate and its dimension for this variable
+  ! Get the observation vertical coordinates
   nlocs = obsspace_get_nlocs(obss)
   allocate(obspressure(nlocs))
   call obsspace_get_db(obss, "MetaData", "air_pressure", obspressure)
 
-  ! Allocate arrays for vertical coordinate (pressure) and interpolation weights
+  ! Allocate arrays for interpolation weights
   allocate(wi(nlocs))
   allocate(wf(nlocs))
 
@@ -67,7 +70,7 @@ subroutine conventional_profile_simobs_(self, geovals, hofx, obss)
     geovar = self%varout(ivar)
     if (trim(geovar) == "air_temperature") geovar = "virtual_temperature"
 
-    ! Get profile for this variable in geovals
+    ! Get profile for this variable from geovals
     call ufo_geovals_get_var(geovals, geovar, profile)
 
     ! Interpolate from geovals to observational location into hofx
