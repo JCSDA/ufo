@@ -778,7 +778,7 @@ do ivar = 1, vars%nv
 
     if (vartype == NF90_DOUBLE) then
        allocate(fieldr1d(vardims(1)))
-       call nc_diag_read_get_var(iunit, vars%fldnames(ivar), fieldr1d)  
+       call nc_diag_read_get_var(iunit, vars%fldnames(ivar), fieldr1d)
        self%geovals(ivar)%vals(1,:) = fieldr1d(dist_indx)
        deallocate(fieldr1d)
     elseif (vartype == NF90_FLOAT) then
@@ -794,6 +794,9 @@ do ivar = 1, vars%nv
     else
        call abor1_ftn('ufo_geovals_read_netcdf: can only read double, float and int')
     endif
+
+    ! set the missing value equal to IODA missing_value
+    where (self%geovals(ivar)%vals(1,:) > 1.0e08) self%geovals(ivar)%vals(1,:) = self%missing_value
 
   !> read 2d vars (only double precision and integer for now)
   elseif (nvardim == 2) then
@@ -811,8 +814,8 @@ do ivar = 1, vars%nv
        deallocate(fieldr2d)
     elseif (vartype == NF90_FLOAT) then
        allocate(fieldf2d(vardims(1), vardims(2)))
-       call nc_diag_read_get_var(iunit, vars%fldnames(ivar), fieldf2d)  
-       self%geovals(ivar)%vals = dble(fieldf2d(:,dist_indx))
+       call nc_diag_read_get_var(iunit, vars%fldnames(ivar), fieldf2d)
+       self%geovals(ivar)%vals = fieldf2d(:,dist_indx)
        deallocate(fieldf2d)
     elseif (vartype == NF90_INT) then
        allocate(fieldi2d(vardims(1), vardims(2)))
@@ -823,15 +826,9 @@ do ivar = 1, vars%nv
        call abor1_ftn('ufo_geovals_read_netcdf: can only read double, float and int')
     endif
 
-  ! replace the netcdf missing values with the obsspace missing value mark
-  do j = 1, nobs
-    do i = 1, nval
-      if (self%geovals(ivar)%vals(i,j) > 1.0e08) then
-        self%geovals(ivar)%vals(i,j) = self%missing_value
-      endif
-    enddo 
-  enddo 
-
+    ! set the missing value equal to IODA missing_value
+    where (self%geovals(ivar)%vals > 1.0e08) self%geovals(ivar)%vals = self%missing_value
+    
   !> only 1d & 2d vars
   else
     call abor1_ftn('ufo_geovals_read_netcdf: can only read 1d and 2d fields')

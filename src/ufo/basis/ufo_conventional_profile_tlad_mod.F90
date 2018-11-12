@@ -18,148 +18,178 @@ module ufo_conventional_profile_tlad_mod
 
   type, extends(ufo_basis_tlad) :: ufo_conventional_profile_tlad
    private
-     integer :: nval, nobs
+     integer :: nval, nlocs
      real(kind_real), allocatable :: wf(:)
      integer, allocatable :: wi(:)
+     integer, public :: nvars
+     character(len=max_string), public, allocatable :: varin(:)
+     character(len=max_string), public, allocatable :: varout(:)
   contains
     procedure :: delete => conventional_profile_tlad_delete_
     procedure :: settraj => conventional_profile_tlad_settraj_
     procedure :: simobs_tl => conventional_profile_simobs_tl_
     procedure :: simobs_ad => conventional_profile_simobs_ad_
+    final :: destructor
   end type ufo_conventional_profile_tlad
 contains
 
 ! ------------------------------------------------------------------------------
 
-    subroutine conventional_profile_tlad_settraj_(self, geovals, obss)
-      implicit none
-      class(ufo_conventional_profile_tlad), intent(inout) :: self
-      type(ufo_geovals),         intent(in)    :: geovals
-      type(c_ptr), value,        intent(in)    :: obss
+subroutine conventional_profile_tlad_settraj_(self, geovals, obss)
+  implicit none
+  class(ufo_conventional_profile_tlad), intent(inout) :: self
+  type(ufo_geovals),         intent(in)    :: geovals
+  type(c_ptr), value,        intent(in)    :: obss
 
-      character(len=*), parameter :: myname_="ufo_conventional_profile_tlad_settraj"
-      character(max_string) :: err_msg
+  real(kind_real), allocatable :: obspressure(:)
+  type(ufo_geoval), pointer :: presprofile
+  integer :: iobs
 
-      real(kind_real), allocatable :: pressure(:)
-      type(ufo_geoval), pointer :: prsl
-      integer :: iobs
+  ! Make sure nothing already allocated
+  call self%delete()
 
-      ! Get pressure from geovals
-      call ufo_geovals_get_var(geovals, var_prsl, prsl)
+  ! Get pressure profiles from geovals
+  call ufo_geovals_get_var(geovals, var_prsl, presprofile)
 
-      !Make sure nothing already allocated
-      call self%delete()
+  self%nval = presprofile%nval
+  self%nlocs = obsspace_get_nlocs(obss)
 
-      !Keep copy of dimensions
-      self%nval = prsl%nval
-      self%nobs = obsspace_get_nobs(obss)
+  ! Get the vertical coordinate and its dimension for this variable
+  allocate(obspressure(self%nlocs))
+  call obsspace_get_db(obss, "MetaData", "air_pressure", obspressure)
 
-      allocate(self%wi(self%nobs))
-      allocate(self%wf(self%nobs))
+  ! Allocate arrays for vertical coordinate (pressure) and interpolation weights
+  allocate(self%wi(self%nlocs))
+  allocate(self%wf(self%nlocs))
 
-      ! observation of pressure (for vertical interpolation)
-      allocate(pressure(self%nobs))
-      call obsspace_get_db(obss, "MetaData", "air_pressure", pressure)
+  ! Calculate the interpolation weights
+  do iobs = 1, self%nlocs
+    call vert_interp_weights(presprofile%nval, log(obspressure(iobs)/10.), &
+                             presprofile%vals(:,iobs), self%wi(iobs), self%wf(iobs))
+  enddo
 
-      ! compute interpolation weights
-      do iobs = 1, self%nobs
-        call vert_interp_weights(self%nval,log(pressure(iobs)/10.),prsl%vals(:,iobs),self%wi(iobs),self%wf(iobs))
-      enddo
-
-      self%ltraj = .true.
-      ! cleanup
-      deallocate(pressure)
-    end subroutine conventional_profile_tlad_settraj_
+  self%ltraj = .true.
+  ! Cleanup memory
+  deallocate(obspressure)
+end subroutine conventional_profile_tlad_settraj_
 
 ! ------------------------------------------------------------------------------
 
-    subroutine conventional_profile_simobs_tl_(self, geovals, hofx, obss)
-      implicit none
-      class(ufo_conventional_profile_tlad), intent(in)     :: self
-      type(ufo_geovals),         intent(in) :: geovals
-      real(c_double),         intent(inout) :: hofx(:)
-      type(c_ptr), value,        intent(in) :: obss
+subroutine conventional_profile_simobs_tl_(self, geovals, hofx, obss)
+  implicit none
+  class(ufo_conventional_profile_tlad), intent(in) :: self
+  type(ufo_geovals),         intent(in) :: geovals
+  real(c_double),         intent(inout) :: hofx(:)
+  type(c_ptr), value,        intent(in) :: obss
+  
+  character(len=*), parameter :: myname_="ufo_conventional_profile_simobs_tl"
+  character(max_string) :: err_msg
+
+  integer :: iobs, ivar
+
+  type(ufo_geoval), pointer :: profile
+  character(len=MAXVARLEN) :: geovar
+
+  ! check if trajectory was set
+  if (.not. self%ltraj) then
+    write(err_msg,*) myname_, ' trajectory wasnt set!'
+    call abor1_ftn(err_msg)
+  endif
+
+  do ivar = 1, self%nvars
+    ! Get the name of input variable in geovals
+    geovar = self%varout(ivar)
+    if (trim(geovar) == "air_temperature") geovar = "virtual_temperature"
+
+    ! Get profile for this variable in geovals
+    call ufo_geovals_get_var(geovals, geovar, profile)
+
+    ! Interpolate from geovals to observational location into hofx
+    do iobs = 1, self%nlocs
+      call vert_interp_apply_tl(profile%nval, profile%vals(:,iobs), &
+                              & hofx(ivar+(iobs-1)*self%nvars), &
+                              & self%wi(iobs), self%wf(iobs))
+    enddo
+  enddo
+
+end subroutine conventional_profile_simobs_tl_
+
+! ------------------------------------------------------------------------------
+
+subroutine conventional_profile_simobs_ad_(self, geovals, hofx, obss)
+  implicit none
+  class(ufo_conventional_profile_tlad), intent(in)     :: self
+  type(ufo_geovals),         intent(inout)  :: geovals
+  real(c_double),            intent(in)     :: hofx(:)
+  type(c_ptr), value,        intent(in)     :: obss
+  
+  character(len=*), parameter :: myname_="ufo_conventional_profile_simobs_ad"
+  character(max_string) :: err_msg
+  integer :: iobs, ivar
+  real(c_double) :: missing_value
+
+  type(ufo_geoval), pointer :: profile
+  character(len=MAXVARLEN) :: geovar
+
+  if (.not. self%ltraj) then
+    write(err_msg,*) myname_, ' trajectory wasnt set!'
+    call abor1_ftn(err_msg)
+  endif
+
+  missing_value = obspace_missing_value()
+
+  do ivar = 1, self%nvars
+    ! Get the name of input variable in geovals
+    geovar = self%varout(ivar)
+    if (trim(geovar) == "air_temperature") geovar = "virtual_temperature"
+
+    ! Get profile for this variable in geovals
+    call ufo_geovals_get_var(geovals, geovar, profile)
       
-      character(len=*), parameter :: myname_="ufo_conventional_profile_simobs_tl"
-      character(max_string) :: err_msg
+    ! Allocate geovals profile if not yet allocated
+    if (.not. allocated(profile%vals)) then
+       profile%nobs = self%nlocs
+       profile%nval = self%nval
+       allocate(profile%vals(profile%nval, profile%nobs))
+       profile%vals(:,:) = 0.0_kind_real
+    endif
+    if (.not. geovals%linit ) geovals%linit=.true.
 
-      integer :: iobs
-      type(ufo_geoval), pointer :: tv_d
-
-      ! check if trajectory was set
-      if (.not. self%ltraj) then
-        write(err_msg,*) myname_, ' trajectory wasnt set!'
-        call abor1_ftn(err_msg)
+    ! Interpolate from geovals to observational location into hofx
+    do iobs = 1, self%nlocs
+      if (hofx(ivar+(iobs-1)*self%nvars) /= missing_value) then
+        call vert_interp_apply_ad(profile%nval, profile%vals(:,iobs), &
+                                & hofx(ivar+(iobs-1)*self%nvars), &
+                                & self%wi(iobs), self%wf(iobs))
       endif
+    enddo
+  enddo
 
-      ! get tv from geovals
-      call ufo_geovals_get_var(geovals, var_tv, tv_d)
-
-      ! tangent linear obs operator (linear)
-      do iobs = 1, geovals%nobs
-        call vert_interp_apply_tl(tv_d%nval, tv_d%vals(:,iobs), hofx(iobs), self%wi(iobs), self%wf(iobs))
-      enddo
-
-    end subroutine conventional_profile_simobs_tl_
+end subroutine conventional_profile_simobs_ad_
 
 ! ------------------------------------------------------------------------------
 
-    subroutine conventional_profile_simobs_ad_(self, geovals, hofx, obss)
-      implicit none
-      class(ufo_conventional_profile_tlad), intent(in)     :: self
-      type(ufo_geovals),         intent(inout)  :: geovals
-      real(c_double),            intent(in)     :: hofx(:)
-      type(c_ptr), value,        intent(in)     :: obss
-      
-      character(len=*), parameter :: myname_="ufo_conventional_profile_simobs_ad"
-      character(max_string) :: err_msg
-
-      integer :: iobs
-      type(ufo_geoval), pointer :: tv_d
-
-      real(c_double) :: missing_value
-
-      ! check if trajectory was set
-      if (.not. self%ltraj) then
-        write(err_msg,*) myname_, ' trajectory wasnt set!'
-        call abor1_ftn(err_msg)
-      endif
-
-      ! get tv from geovals
-      call ufo_geovals_get_var(geovals, var_tv, tv_d)
-
-      ! allocate if not yet allocated
-      if (.not. allocated(tv_d%vals)) then
-         tv_d%nobs = self%nobs
-         tv_d%nval = self%nval
-         allocate(tv_d%vals(tv_d%nval,tv_d%nobs))
-         tv_d%vals = 0.0_kind_real
-      endif
-      if (.not. geovals%linit ) geovals%linit=.true.
-
-      missing_value = obspace_missing_value()
-      do iobs = 1, geovals%nobs
-        if (hofx(iobs) .ne. missing_value) then
-          call vert_interp_apply_ad(tv_d%nval, tv_d%vals(:,iobs), hofx(iobs), self%wi(iobs), self%wf(iobs))
-        endif
-      enddo
-
-    end subroutine conventional_profile_simobs_ad_
+subroutine conventional_profile_tlad_delete_(self)
+  implicit none
+  class(ufo_conventional_profile_tlad), intent(inout) :: self
+  self%nval = 0
+  self%ltraj = .false.
+! Only deleting trajectory
+  if (allocated(self%wi)) deallocate(self%wi)
+  if (allocated(self%wf)) deallocate(self%wf)
+end subroutine conventional_profile_tlad_delete_
 
 ! ------------------------------------------------------------------------------
 
-    subroutine conventional_profile_tlad_delete_(self)
-      implicit none
-      class(ufo_conventional_profile_tlad), intent(inout) :: self
-
-      character(len=*), parameter :: myname_="ufo_conventional_profile_tlad_delete"
-
-      self%nval = 0
-      if (allocated(self%wi)) deallocate(self%wi)
-      if (allocated(self%wf)) deallocate(self%wf)
-      self%ltraj = .false.
-
-    end subroutine conventional_profile_tlad_delete_
+subroutine  destructor(self)
+  type(ufo_conventional_profile_tlad), intent(inout)  :: self
+  self%nval = 0
+  self%ltraj = .false.
+  if (allocated(self%varin)) deallocate(self%varin)
+  if (allocated(self%varout)) deallocate(self%varout)
+  if (allocated(self%wi)) deallocate(self%wi)
+  if (allocated(self%wf)) deallocate(self%wf)
+end subroutine destructor
 
 ! ------------------------------------------------------------------------------
 
