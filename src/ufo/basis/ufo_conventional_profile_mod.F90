@@ -65,20 +65,20 @@ subroutine conventional_profile_simobs_(self, geovals, hofx, obss)
                              presprofile%vals(:,iobs), wi(iobs), wf(iobs))
   enddo
 
-  do ivar = 1, self%nvars
-    ! Get the name of input variable in geovals
-    geovar = self%varout(ivar)
-    if (trim(geovar) == "air_temperature") geovar = "virtual_temperature"
+  ivar = 1
 
-    ! Get profile for this variable from geovals
-    call ufo_geovals_get_var(geovals, geovar, profile)
+  ! Get the name of input variable in geovals
+  geovar = self%varout(ivar)
+  if (trim(geovar) == "air_temperature") geovar = "virtual_temperature"
 
-    ! Interpolate from geovals to observational location into hofx
-    do iobs = 1, nlocs
-      call vert_interp_apply(profile%nval, profile%vals(:,iobs), &
-                           & hofx(ivar+(iobs-1)*self%nvars), &
-                           & wi(iobs), wf(iobs))
-    enddo
+  ! Get profile for this variable from geovals
+  call ufo_geovals_get_var(geovals, geovar, profile)
+
+  ! Interpolate from geovals to observational location into hofx
+  do iobs = 1, nlocs
+    call vert_interp_apply(profile%nval, profile%vals(:,iobs), &
+                             & hofx(ivar+(iobs-1)*self%nvars), &
+                             & wi(iobs), wf(iobs))
   enddo
 
   ! Cleanup memory

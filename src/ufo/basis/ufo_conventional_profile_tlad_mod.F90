@@ -93,20 +93,19 @@ subroutine conventional_profile_simobs_tl_(self, geovals, hofx, obss)
     call abor1_ftn('conventional_profile_simobs_tl: trajectory not set!')
   endif
 
-  do ivar = 1, self%nvars
-    ! Get the name of input variable in geovals
-    geovar = self%varout(ivar)
-    if (trim(geovar) == "air_temperature") geovar = "virtual_temperature"
+  ivar = 1
+  ! Get the name of input variable in geovals
+  geovar = self%varout(ivar)
+  if (trim(geovar) == "air_temperature") geovar = "virtual_temperature"
 
-    ! Get profile for this variable from geovals
-    call ufo_geovals_get_var(geovals, geovar, profile)
+  ! Get profile for this variable from geovals
+  call ufo_geovals_get_var(geovals, geovar, profile)
 
-    ! Interpolate from geovals to observational location into hofx
-    do iobs = 1, self%nlocs
-      call vert_interp_apply_tl(profile%nval, profile%vals(:,iobs), &
-                              & hofx(ivar+(iobs-1)*self%nvars), &
-                              & self%wi(iobs), self%wf(iobs))
-    enddo
+  ! Interpolate from geovals to observational location into hofx
+  do iobs = 1, self%nlocs
+    call vert_interp_apply_tl(profile%nval, profile%vals(:,iobs), &
+                                & hofx(ivar+(iobs-1)*self%nvars), &
+                                & self%wi(iobs), self%wf(iobs))
   enddo
 
 end subroutine conventional_profile_simobs_tl_
@@ -132,31 +131,30 @@ subroutine conventional_profile_simobs_ad_(self, geovals, hofx, obss)
 
   missing_value = obspace_missing_value()
 
-  do ivar = 1, self%nvars
-    ! Get the name of input variable in geovals
-    geovar = self%varout(ivar)
-    if (trim(geovar) == "air_temperature") geovar = "virtual_temperature"
+  ivar = 1
+  ! Get the name of input variable in geovals
+  geovar = self%varout(ivar)
+  if (trim(geovar) == "air_temperature") geovar = "virtual_temperature"
 
-    ! Get pointer to profile for this variable in geovals
-    call ufo_geovals_get_var(geovals, geovar, profile)
+  ! Get pointer to profile for this variable in geovals
+  call ufo_geovals_get_var(geovals, geovar, profile)
       
-    ! Allocate geovals profile if not yet allocated
-    if (.not. allocated(profile%vals)) then
-       profile%nobs = self%nlocs
-       profile%nval = self%nval
-       allocate(profile%vals(profile%nval, profile%nobs))
-       profile%vals(:,:) = 0.0_kind_real
-    endif
-    if (.not. geovals%linit ) geovals%linit=.true.
+  ! Allocate geovals profile if not yet allocated
+  if (.not. allocated(profile%vals)) then
+     profile%nobs = self%nlocs
+     profile%nval = self%nval
+     allocate(profile%vals(profile%nval, profile%nobs))
+     profile%vals(:,:) = 0.0_kind_real
+  endif
+  if (.not. geovals%linit ) geovals%linit=.true.
 
-    ! Adjoint of interpolate, from hofx into geovals
-    do iobs = 1, self%nlocs
-      if (hofx(ivar+(iobs-1)*self%nvars) /= missing_value) then
-        call vert_interp_apply_ad(profile%nval, profile%vals(:,iobs), &
+  ! Adjoint of interpolate, from hofx into geovals
+  do iobs = 1, self%nlocs
+    if (hofx(ivar+(iobs-1)*self%nvars) /= missing_value) then
+      call vert_interp_apply_ad(profile%nval, profile%vals(:,iobs), &
                                 & hofx(ivar+(iobs-1)*self%nvars), &
                                 & self%wi(iobs), self%wf(iobs))
-      endif
-    enddo
+    endif
   enddo
 
 end subroutine conventional_profile_simobs_ad_
