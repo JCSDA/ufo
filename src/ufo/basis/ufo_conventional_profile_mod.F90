@@ -75,7 +75,7 @@ subroutine conventional_profile_simobs_(self, geovals, hofx, obss)
   real(c_double),  intent(inout)              :: hofx(:)
   type(c_ptr), value, intent(in)              :: obss
 
-  integer :: iobs, nlocs
+  integer :: iobs, ivar, nlocs
   real(kind_real), dimension(:), allocatable :: obspressure
   type(ufo_geoval), pointer :: presprofile, profile
   real(kind_real), allocatable :: wf(:)
@@ -100,20 +100,21 @@ subroutine conventional_profile_simobs_(self, geovals, hofx, obss)
                              presprofile%vals(:,iobs), wi(iobs), wf(iobs))
   enddo
 
-  ! Get the name of input variable in geovals
-  geovar = self%varin(1)
+  do ivar = 1, self%nvars
+    ! Get the name of input variable in geovals
+    geovar = self%varin(ivar)
 
-  ! Get profile for this variable from geovals
-  call ufo_geovals_get_var(geovals, geovar, profile)
+    ! Get profile for this variable from geovals
+    call ufo_geovals_get_var(geovals, geovar, profile)
 
-  ! Interpolate from geovals to observational location into hofx
-  ! Note: hofx holds all variables (varin) for location 1
-  ! then all variables for location 2, and so on
-  do iobs = 1, nlocs
-    call vert_interp_apply(profile%nval, profile%vals(:,iobs), &
-                             & hofx(iobs), wi(iobs), wf(iobs))
+    ! Interpolate from geovals to observational location into hofx
+    ! Note: hofx holds all variables (varin) for location 1
+    ! then all variables for location 2, and so on
+    do iobs = 1, nlocs
+      call vert_interp_apply(profile%nval, profile%vals(:,iobs), &
+                             & hofx(ivar + (iobs-1)*self%nvars), wi(iobs), wf(iobs))
+    enddo
   enddo
-
   ! Cleanup memory
   deallocate(obspressure)
   deallocate(wi)
