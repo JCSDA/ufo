@@ -27,6 +27,7 @@ module ufo_conventional_profile_tlad_mod
      character(len=max_string), public, allocatable :: varin(:)
      character(len=max_string), public, allocatable :: varout(:)
   contains
+    procedure :: setup => conventional_profile_tlad_setup_
     procedure :: delete => conventional_profile_tlad_delete_
     procedure :: settraj => conventional_profile_tlad_settraj_
     procedure :: simobs_tl => conventional_profile_simobs_tl_
@@ -36,6 +37,37 @@ module ufo_conventional_profile_tlad_mod
 
 ! ------------------------------------------------------------------------------
 contains
+! ------------------------------------------------------------------------------
+
+subroutine conventional_profile_tlad_setup_(self, c_conf)
+  use config_mod
+  implicit none
+  class(ufo_conventional_profile_tlad), intent(inout) :: self
+  type(c_ptr), intent(in)    :: c_conf
+
+  integer :: ii
+
+  if (config_element_exists(c_conf,"variables")) then
+    !> Size of variables
+    self%nvars = size(config_get_string_vector(c_conf, max_string, "variables"))
+    !> Allocate varout
+    allocate(self%varout(self%nvars))
+    !> Read variable list and store in varout
+    self%varout = config_get_string_vector(c_conf, max_string, "variables")
+    !> Allocate varin, need additional slot to hold vertical coord.
+    allocate(self%varin(self%nvars))
+    !> Set vars_in based on vars_out
+    do ii = 1, self%nvars
+       if (trim(self%varout(ii)) .eq. "air_temperature") then
+         self%varin(ii) = "virtual_temperature"
+       else
+         self%varin(ii) = self%varout(ii)
+       endif
+    enddo
+  endif
+
+end subroutine conventional_profile_tlad_setup_
+
 ! ------------------------------------------------------------------------------
 
 subroutine conventional_profile_tlad_settraj_(self, geovals, obss)
@@ -84,7 +116,7 @@ subroutine conventional_profile_simobs_tl_(self, geovals, hofx, obss)
   real(c_double),         intent(inout) :: hofx(:)
   type(c_ptr), value,        intent(in) :: obss
   
-  integer :: iobs, ivar
+  integer :: iobs
   type(ufo_geoval), pointer :: profile
   character(len=MAXVARLEN) :: geovar
 
@@ -93,10 +125,8 @@ subroutine conventional_profile_simobs_tl_(self, geovals, hofx, obss)
     call abor1_ftn('conventional_profile_simobs_tl: trajectory not set!')
   endif
 
-  ivar = 1
   ! Get the name of input variable in geovals
-  geovar = self%varout(ivar)
-  if (trim(geovar) == "air_temperature") geovar = "virtual_temperature"
+  geovar = self%varin(1)
 
   ! Get profile for this variable from geovals
   call ufo_geovals_get_var(geovals, geovar, profile)
@@ -104,8 +134,7 @@ subroutine conventional_profile_simobs_tl_(self, geovals, hofx, obss)
   ! Interpolate from geovals to observational location into hofx
   do iobs = 1, self%nlocs
     call vert_interp_apply_tl(profile%nval, profile%vals(:,iobs), &
-                                & hofx(ivar+(iobs-1)*self%nvars), &
-                                & self%wi(iobs), self%wf(iobs))
+                                & hofx(iobs), self%wi(iobs), self%wf(iobs))
   enddo
 
 end subroutine conventional_profile_simobs_tl_
@@ -119,7 +148,7 @@ subroutine conventional_profile_simobs_ad_(self, geovals, hofx, obss)
   real(c_double),            intent(in)    :: hofx(:)
   type(c_ptr), value,        intent(in)    :: obss
   
-  integer :: iobs, ivar
+  integer :: iobs
   type(ufo_geoval), pointer :: profile
   character(len=MAXVARLEN) :: geovar
   real(c_double) :: missing_value
@@ -131,10 +160,8 @@ subroutine conventional_profile_simobs_ad_(self, geovals, hofx, obss)
 
   missing_value = obspace_missing_value()
 
-  ivar = 1
   ! Get the name of input variable in geovals
-  geovar = self%varout(ivar)
-  if (trim(geovar) == "air_temperature") geovar = "virtual_temperature"
+  geovar = self%varin(1)
 
   ! Get pointer to profile for this variable in geovals
   call ufo_geovals_get_var(geovals, geovar, profile)
@@ -150,10 +177,9 @@ subroutine conventional_profile_simobs_ad_(self, geovals, hofx, obss)
 
   ! Adjoint of interpolate, from hofx into geovals
   do iobs = 1, self%nlocs
-    if (hofx(ivar+(iobs-1)*self%nvars) /= missing_value) then
+    if (hofx(iobs) /= missing_value) then
       call vert_interp_apply_ad(profile%nval, profile%vals(:,iobs), &
-                                & hofx(ivar+(iobs-1)*self%nvars), &
-                                & self%wi(iobs), self%wf(iobs))
+                                & hofx(iobs), self%wi(iobs), self%wf(iobs))
     endif
   enddo
 
