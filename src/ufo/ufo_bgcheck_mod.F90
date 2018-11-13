@@ -72,7 +72,7 @@ integer(c_int32_t), allocatable :: flags(:)
 real(kind_real) :: missing
 
 missing = obspace_missing_value()
-iobs = size(hofx)
+iobs = obsspace_get_nlocs(self%obsdb)
 allocate(yobs(iobs))
 allocate(yerr(iobs))
 allocate(flags(iobs))
