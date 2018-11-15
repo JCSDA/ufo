@@ -41,35 +41,15 @@ type(c_ptr), intent(in) :: c_conf ! config here in case we want to read vars fro
 integer(c_int), intent(in) :: c_str_size
 character(kind=c_char,len=1),intent(inout) :: csin(c_str_size+1),csout(c_str_size+1) 
 
-integer :: ii
-
 type(ufo_radiosonde), pointer :: self
 
 call ufo_radiosonde_registry%setup(c_key_self, self)
 
-if (config_element_exists(c_conf,"variables")) then
-  !> Size of variables
-  self%nvars = size(config_get_string_vector(c_conf, max_string, "variables"))
-  !> Allicate varout
-  allocate(self%varout(self%nvars))
-  !> Read variable list and store in varout
-  self%varout = config_get_string_vector(c_conf, max_string, "variables")
-  !> Set vars_out
-  call f_c_string_vector(self%varout, csout)
-  !> Allicate varin, need additional slot to hold vertical coord.
-  allocate(self%varin(self%nvars+1))
-  !> Set vars_in based on vars_out
-  do ii = 1, self%nvars
-     if (trim(self%varout(ii)) .eq. "air_temperature") then
-       self%varin(ii) = "virtual_temperature"
-     else
-       self%varin(ii) = self%varout(ii)
-     endif
-  enddo
-  self%varin(self%nvars+1) = "atmosphere_ln_pressure_coordinate"
-  !> Set vars_in
-  call f_c_string_vector(self%varin, csin) 
-endif
+call self%setup(c_conf)
+
+!> Set vars_out
+call f_c_string_vector(self%varout, csout)
+call f_c_string_vector(self%varin, csin) 
 
 end subroutine ufo_radiosonde_setup_c
 

@@ -24,12 +24,47 @@ module ufo_conventional_profile_mod
      character(len=max_string), public, allocatable :: varin(:)
      character(len=max_string), public, allocatable :: varout(:)
   contains
-    procedure :: simobs    => conventional_profile_simobs_
+    procedure :: setup  => conventional_profile_setup_
+    procedure :: simobs => conventional_profile_simobs_
     final :: destructor
   end type ufo_conventional_profile
 
 ! ------------------------------------------------------------------------------
 contains
+! ------------------------------------------------------------------------------
+
+subroutine conventional_profile_setup_(self, c_conf)
+  use config_mod
+  implicit none
+  class(ufo_conventional_profile), intent(inout) :: self
+  type(c_ptr), intent(in)    :: c_conf
+
+  integer :: ii
+
+  if (config_element_exists(c_conf,"variables")) then
+    !> Size of variables
+    self%nvars = size(config_get_string_vector(c_conf, max_string, "variables"))
+    !> Allocate varout: variables in the observation vector
+    allocate(self%varout(self%nvars))
+    !> Read variable list and store in varout
+    self%varout = config_get_string_vector(c_conf, max_string, "variables")
+    !> Allocate varin: variables we need from the model
+    !  need additional slot to hold vertical coord.
+    allocate(self%varin(self%nvars+1))
+    !> Set vars_in based on vars_out
+    do ii = 1, self%nvars
+       if (trim(self%varout(ii)) .eq. "air_temperature") then
+         self%varin(ii) = "virtual_temperature"
+       else
+         self%varin(ii) = self%varout(ii)
+       endif
+    enddo
+    !> Put log pressure to the varin (vars from the model) list
+    self%varin(self%nvars+1) = "atmosphere_ln_pressure_coordinate"
+  endif
+
+end subroutine conventional_profile_setup_
+
 ! ------------------------------------------------------------------------------
 
 subroutine conventional_profile_simobs_(self, geovals, hofx, obss)
@@ -67,20 +102,19 @@ subroutine conventional_profile_simobs_(self, geovals, hofx, obss)
 
   do ivar = 1, self%nvars
     ! Get the name of input variable in geovals
-    geovar = self%varout(ivar)
-    if (trim(geovar) == "air_temperature") geovar = "virtual_temperature"
+    geovar = self%varin(ivar)
 
     ! Get profile for this variable from geovals
     call ufo_geovals_get_var(geovals, geovar, profile)
 
     ! Interpolate from geovals to observational location into hofx
+    ! Note: hofx holds all variables (varin) for location 1
+    ! then all variables for location 2, and so on
     do iobs = 1, nlocs
       call vert_interp_apply(profile%nval, profile%vals(:,iobs), &
-                           & hofx(ivar+(iobs-1)*self%nvars), &
-                           & wi(iobs), wf(iobs))
+                             & hofx(ivar + (iobs-1)*self%nvars), wi(iobs), wf(iobs))
     enddo
   enddo
-
   ! Cleanup memory
   deallocate(obspressure)
   deallocate(wi)
