@@ -30,8 +30,10 @@ ObsExample::ObsExample(const ioda::ObsSpace & odb, const eckit::Configuration & 
 {
   // TODO(anyone): list the variables for GeoVaLs that are needed for the observation
   //       operator below in vv (e.g., vv{"temperature", "humidity"})
-  const std::vector<std::string> vv{""};
-  varin_.reset(new oops::Variables(vv));
+  const std::vector<std::string> vvin{""};
+  varin_.reset(new oops::Variables(vvin));
+  const std::vector<std::string> vvout{""};
+  varout_.reset(new oops::Variables(vvout));
   const eckit::Configuration * configc = &config;
   ufo_example_setup_f90(keyOper_, &configc);
   oops::Log::trace() << "ObsExample created." << std::endl;
