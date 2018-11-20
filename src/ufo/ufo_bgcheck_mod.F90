@@ -94,9 +94,8 @@ do jobs = 1, iobs
     flags(jobs) = 1
   endif
 enddo
-print *,"***********************************************"
 write(0,*)'ufo_bgcheck_post reject = ',iobs,ireject,zmax
-print *,"***********************************************"
+
 call obsspace_put_db(self%obsdb, "QC", trim(self%variable), flags)
 
 deallocate(yobs)
