@@ -42,8 +42,7 @@ contains
     
     type(ufo_adt),      intent(in) :: self
     type(ufo_geovals),  intent(in) :: geovals
-    type(c_ptr), value, intent(in) :: obss     !< adt observations
-    !type(ioda_obsdb),  intent(in)    :: obss    
+    type(c_ptr), value, intent(in) :: obss
     real(c_double),  intent(inout) :: hofx(:)
 
     character(len=*), parameter :: myname_="ufo_adt_simobs"
@@ -76,10 +75,6 @@ contains
     allocate(obs_adt(obss_nobs))
     
     call obsspace_get_db(obss, "ObsValue", "obs_absolute_dynamic_topography", obs_adt)
-
-    ! Compute obs and model offset    
-    !offset_hofx = sum(geoval_adt%vals(1,:))/nobs
-    !offset_obs  = sum(obs_adt(:))/nobs
 
     ! Local offset
     pe_offset_hofx = 0.0

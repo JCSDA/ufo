@@ -24,13 +24,12 @@ public :: ufo_adt_simobs_ad
 private
 integer, parameter :: max_string=800
 
-!> Fortran derived type for adt observation operator
+!> Fortran derived type for linear and adjoint adt observation operator
 type :: ufo_adt_tlad
-   integer          :: nlocs
-   !integer          :: nlocs_valid   
-   !real(kind_real)  :: offset_hofx
-   type(ufo_geoval) :: geoval_adt !< adt (traj)
-   logical          :: ltraj = .false.   !< trajectory set?
+   integer          :: nlocs           !< Local number of obs
+   real(kind_real)  :: r_miss_val      !< Missing value flag  
+   type(ufo_geoval) :: geoval_adt      !< adt (traj)
+   logical          :: ltraj = .false. !< trajectory set?
 end type ufo_adt_tlad
 
 
@@ -53,54 +52,36 @@ end subroutine ufo_adt_tlad_delete
 subroutine ufo_adt_tlad_settraj(self, geovals, obss)
 implicit none
 type(ufo_adt_tlad), intent(inout) :: self
-type(ufo_geovals), intent(in)       :: geovals
-type(c_ptr), value,        intent(in)    :: obss
+type(ufo_geovals),     intent(in) :: geovals
+type(c_ptr),    value, intent(in) :: obss
 
 character(len=*), parameter :: myname_="ufo_adt_tlad_settraj"
-character(max_string) :: err_msg
 type(ufo_geoval), pointer :: geoval_adt
-integer :: ilocs, cnt
-real(kind_real) :: offset_obs, offset_hofx
-real(kind_real) :: local_offset_obs, local_offset_hofx
 type(fckit_mpi_comm) :: f_comm
-real(c_double) :: missing_value
 
 f_comm = fckit_mpi_comm()
 
 self%nlocs = obsspace_get_nlocs(obss)
-print *,'-----------------------------------------------------------'
-print *,'in settraj, nlocs=',self%nlocs
+
 ! check if adt variables is in geovals and get it
 call ufo_geovals_get_var(geovals, var_abs_topo, geoval_adt)
 
 self%geoval_adt = geoval_adt
 self%ltraj    = .true.
 
-! Get missing flag
-!missing_value = obspace_missing_value()
-
-! Compute local offset
-!offset_hofx = 0.0
-!cnt = 0
-!do ilocs = 1, self%nlocs
-!   offset_hofx = offset_hofx + geoval_adt%vals(1,ilocs)
-!end do
-!
-!call f_comm%allreduce(prod,gprod,fckit_mpi_sum())
-
-
+! Set missing flag
+self%r_miss_val = 9999.9
 
 end subroutine ufo_adt_tlad_settraj
 
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_adt_simobs_tl(self, geovals, hofx) !, obss)
+subroutine ufo_adt_simobs_tl(self, geovals, hofx)
 implicit none
 type(ufo_adt_tlad), intent(in) :: self
 type(ufo_geovals),  intent(in) :: geovals
 real(c_double),  intent(inout) :: hofx(:)
-!type(c_ptr), value,        intent(in) :: obss
 
 character(len=*), parameter :: myname_="ufo_adt_simobs_tl"
 character(max_string) :: err_msg
@@ -108,8 +89,6 @@ integer :: iobs, nobs, cnt, cnt_glb
 type(ufo_geoval), pointer :: geoval_adt
 real(kind_real) :: offset_hofx, pe_offset_hofx
 type(fckit_mpi_comm) :: f_comm
-real(c_double) :: missing_value
-real(kind_real) :: r_miss_val = 9999.9
 
 f_comm = fckit_mpi_comm()
 
@@ -130,14 +109,11 @@ endif
 ! check if adt variable is in geovals and get it
 call ufo_geovals_get_var(geovals, var_abs_topo, geoval_adt)
 
-! Missing flag
-missing_value = obspace_missing_value()
-
 ! Local offset
 pe_offset_hofx = 0.0
 cnt = 0
 do iobs = 1, self%nlocs
-   if (abs(hofx(iobs)).lt.r_miss_val) then      
+   if (abs(hofx(iobs)).lt.self%r_miss_val) then      
       pe_offset_hofx = pe_offset_hofx + geoval_adt%vals(1,iobs)
       cnt = cnt + 1
    end if
@@ -171,8 +147,6 @@ integer :: iobs, nobs, cnt, cnt_glb
 type(ufo_geoval), pointer :: geoval_adt
 real(kind_real) :: offset_hofx, pe_offset_hofx
 type(fckit_mpi_comm) :: f_comm
-real(c_double) :: missing_value
-real(kind_real) :: r_miss_val = 9999.9
 
 ! check if trajectory was set
 if (.not. self%ltraj) then
@@ -194,14 +168,11 @@ if (.not. geovals%linit ) geovals%linit=.true.
 ! check if adt variable is in geovals and get it
 call ufo_geovals_get_var(geovals, var_abs_topo, geoval_adt)
 
-! Missing flag
-missing_value = obspace_missing_value()
-
 ! Local offset
 pe_offset_hofx = 0.0
 cnt = 0
 do iobs = 1, self%nlocs
-   if (abs(hofx(iobs)).lt.r_miss_val) then
+   if (abs(hofx(iobs)).lt.self%r_miss_val) then
       pe_offset_hofx = pe_offset_hofx + hofx(iobs)
       cnt = cnt + 1
    end if
@@ -215,7 +186,7 @@ offset_hofx = offset_hofx/cnt_glb
 if (.not. allocated(geoval_adt%vals))  allocate(geoval_adt%vals(1,nobs))
 geoval_adt%vals = 0.0
 do iobs = 1, nobs
-   if (abs(hofx(iobs)).lt.r_miss_val) then
+   if (abs(hofx(iobs)).lt.self%r_miss_val) then
       geoval_adt%vals(1,iobs) = geoval_adt%vals(1,iobs) + hofx(iobs) - offset_hofx
    end if
 enddo
