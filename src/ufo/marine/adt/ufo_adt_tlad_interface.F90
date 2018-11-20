@@ -60,11 +60,13 @@ end subroutine ufo_adt_tlad_delete_c
   
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_adt_tlad_settraj_c(c_key_self, c_key_geovals) bind(c,name='ufo_adt_tlad_settraj_f90')
+subroutine ufo_adt_tlad_settraj_c(c_key_self, c_key_geovals, c_obsspace) &
+     &bind(c,name='ufo_adt_tlad_settraj_f90')
 
 implicit none
 integer(c_int), intent(in) :: c_key_self
 integer(c_int), intent(in) :: c_key_geovals
+type(c_ptr), value,    intent(in) :: c_obsspace
 
 type(ufo_adt_tlad), pointer :: self
 type(ufo_geovals),  pointer :: geovals
@@ -74,7 +76,7 @@ character(len=*), parameter :: myname_="ufo_adt_tlad_settraj_c"
 call ufo_adt_tlad_registry%get(c_key_self, self)
 call ufo_geovals_registry%get(c_key_geovals,geovals)
 
-call ufo_adt_tlad_settraj(self, geovals)
+call ufo_adt_tlad_settraj(self, geovals, c_obsspace)
 
 end subroutine ufo_adt_tlad_settraj_c
 

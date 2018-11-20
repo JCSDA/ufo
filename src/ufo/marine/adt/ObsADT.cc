@@ -23,10 +23,10 @@ ObsADT::ObsADT(const ioda::ObsSpace & odb, const eckit::Configuration & config)
   const eckit::Configuration * configc = &config;
   ufo_adt_setup_f90(keyOperADT_, &configc);
 
-  const std::vector<std::string> vv{"sea_surface_height_above_geoid"};
-  varin_.reset(new oops::Variables(vv));
+  const std::vector<std::string> vin{"sea_surface_height_above_geoid"};
+  varin_.reset(new oops::Variables(vin));
 
-  const std::vector<std::string> vout{"zz"};
+  const std::vector<std::string> vout{"obs_absolute_dynamic_topography"};
   varout_.reset(new oops::Variables(vout));
 
   oops::Log::trace() << "ObsADT created." << std::endl;

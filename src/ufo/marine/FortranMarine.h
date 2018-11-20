@@ -96,7 +96,7 @@ extern "C" {
                           const int &, const double &, const F90obias &);
   void ufo_adt_tlad_setup_f90(F90hop &, const eckit::Configuration * const *);
   void ufo_adt_tlad_delete_f90(F90hop &);
-  void ufo_adt_tlad_settraj_f90(const F90hop &, const F90goms &);
+  void ufo_adt_tlad_settraj_f90(const F90hop &, const F90goms &, const ioda::ObsSpace &);
   void ufo_adt_simobs_tl_f90(const F90hop &, const F90goms &, const int &, const double &);
   void ufo_adt_simobs_ad_f90(const F90hop &, const F90goms &, const int &, const double &);
 
