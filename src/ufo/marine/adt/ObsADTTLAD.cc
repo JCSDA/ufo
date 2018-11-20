@@ -45,7 +45,7 @@ ObsADTTLAD::~ObsADTTLAD() {
 // -----------------------------------------------------------------------------
 
 void ObsADTTLAD::setTrajectory(const GeoVaLs & geovals, const ObsBias & bias) {
-  ufo_adt_tlad_settraj_f90(keyOperADT_, geovals.toFortran());  //, odb_);
+  ufo_adt_tlad_settraj_f90(keyOperADT_, geovals.toFortran(), odb_);
 }
 
 // -----------------------------------------------------------------------------
