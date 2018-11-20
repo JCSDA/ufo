@@ -27,7 +27,7 @@ integer, parameter :: max_string=800
 !> Fortran derived type for linear and adjoint adt observation operator
 type :: ufo_adt_tlad
    integer          :: nlocs           !< Local number of obs
-   real(kind_real)  :: r_miss_val      !< Missing value flag  
+   real(c_double)   :: r_miss_val      !< Missing value flag  
    type(ufo_geoval) :: geoval_adt      !< adt (traj)
    logical          :: ltraj = .false. !< trajectory set?
 end type ufo_adt_tlad
@@ -57,6 +57,7 @@ type(c_ptr),    value, intent(in) :: obss
 
 character(len=*), parameter :: myname_="ufo_adt_tlad_settraj"
 type(ufo_geoval), pointer :: geoval_adt
+real(c_double) :: missing_value
 
 self%nlocs = obsspace_get_nlocs(obss)
 
@@ -67,7 +68,7 @@ self%geoval_adt = geoval_adt
 self%ltraj    = .true.
 
 ! Set missing flag
-self%r_miss_val = 9999.9
+self%r_miss_val = abs(obspace_missing_value())
 
 end subroutine ufo_adt_tlad_settraj
 
@@ -110,7 +111,7 @@ call ufo_geovals_get_var(geovals, var_abs_topo, geoval_adt)
 pe_offset_hofx = 0.0
 cnt = 0
 do iobs = 1, self%nlocs
-   if (abs(hofx(iobs)).lt.self%r_miss_val) then      
+   if (abs(hofx(iobs)).lt.self%r_miss_val) then
       pe_offset_hofx = pe_offset_hofx + geoval_adt%vals(1,iobs)
       cnt = cnt + 1
    end if
