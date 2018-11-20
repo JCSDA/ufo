@@ -57,9 +57,6 @@ type(c_ptr),    value, intent(in) :: obss
 
 character(len=*), parameter :: myname_="ufo_adt_tlad_settraj"
 type(ufo_geoval), pointer :: geoval_adt
-type(fckit_mpi_comm) :: f_comm
-
-f_comm = fckit_mpi_comm()
 
 self%nlocs = obsspace_get_nlocs(obss)
 
