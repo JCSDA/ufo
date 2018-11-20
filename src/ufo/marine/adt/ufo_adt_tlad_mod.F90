@@ -57,7 +57,6 @@ type(c_ptr),    value, intent(in) :: obss
 
 character(len=*), parameter :: myname_="ufo_adt_tlad_settraj"
 type(ufo_geoval), pointer :: geoval_adt
-real(c_double) :: missing_value
 
 self%nlocs = obsspace_get_nlocs(obss)
 
@@ -68,7 +67,7 @@ self%geoval_adt = geoval_adt
 self%ltraj    = .true.
 
 ! Set missing flag
-self%r_miss_val = abs(obspace_missing_value())
+self%r_miss_val = obspace_missing_value()
 
 end subroutine ufo_adt_tlad_settraj
 
@@ -111,7 +110,7 @@ call ufo_geovals_get_var(geovals, var_abs_topo, geoval_adt)
 pe_offset_hofx = 0.0
 cnt = 0
 do iobs = 1, self%nlocs
-   if (abs(hofx(iobs)).lt.self%r_miss_val) then
+   if (hofx(iobs)/=self%r_miss_val) then
       pe_offset_hofx = pe_offset_hofx + geoval_adt%vals(1,iobs)
       cnt = cnt + 1
    end if
@@ -170,7 +169,7 @@ call ufo_geovals_get_var(geovals, var_abs_topo, geoval_adt)
 pe_offset_hofx = 0.0
 cnt = 0
 do iobs = 1, self%nlocs
-   if (abs(hofx(iobs)).lt.self%r_miss_val) then
+   if (hofx(iobs)/=self%r_miss_val) then
       pe_offset_hofx = pe_offset_hofx + hofx(iobs)
       cnt = cnt + 1
    end if
@@ -184,7 +183,7 @@ offset_hofx = offset_hofx/cnt_glb
 if (.not. allocated(geoval_adt%vals))  allocate(geoval_adt%vals(1,nobs))
 geoval_adt%vals = 0.0
 do iobs = 1, nobs
-   if (abs(hofx(iobs)).lt.self%r_miss_val) then
+   if (hofx(iobs)/=self%r_miss_val) then
       geoval_adt%vals(1,iobs) = geoval_adt%vals(1,iobs) + hofx(iobs) - offset_hofx
    end if
 enddo
