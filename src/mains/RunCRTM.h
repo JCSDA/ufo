@@ -56,7 +56,7 @@ template <typename MODEL> class RunCRTM : public oops::Application {
     obsconf.get("ObsTypes", conf);
 
     for (std::size_t jj = 0; jj < obsdb.size(); ++jj) {
-      ObsOperator_ hop(obsdb[jj]);
+      ObsOperator_ hop(obsdb[jj], conf[jj]);
 
       const eckit::LocalConfiguration gconf(conf[jj], "GeoVaLs");
       const GeoVaLs_ gval(gconf, hop.variables());
