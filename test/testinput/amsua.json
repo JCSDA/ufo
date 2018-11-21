@@ -11,6 +11,7 @@
     "ObsTypes": [
       {
         "ObsType": "Radiance",
+        "channels": "1-15",
         "ObsOptions": {
           "n_Absorbers": "3",
           "n_Clouds": "2",

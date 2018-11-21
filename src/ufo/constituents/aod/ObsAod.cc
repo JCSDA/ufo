@@ -17,6 +17,7 @@
 
 #include "ufo/GeoVaLs.h"
 #include "ufo/ObsBias.h"
+#include "ufo/utils/ChannelsParser.h"
 
 namespace ufo {
 
@@ -35,14 +36,16 @@ ObsAod::ObsAod(const ioda::ObsSpace & odb, const eckit::Configuration & config)
       "seas1", "seas2", "seas3", "seas4", "p25"};
   varin_.reset(new oops::Variables(vv));
 
-  const std::vector<std::string> vout{
-    "aerosol_optical_depth_1_", "aerosol_optical_depth_2_", "aerosol_optical_depth_3_",
-    "aerosol_optical_depth_4_", "aerosol_optical_depth_5_", "aerosol_optical_depth_6_",
-    "aerosol_optical_depth_7_", "aerosol_optical_depth_8_", "aerosol_optical_depth_9_",
-    "aerosol_optical_depth_10_", "aerosol_optical_depth_11_" };
-
+  // parse channels from the config and create variable names
+  std::string chlist = config.getString("channels");
+  std::vector<int> channels = parseChannels(chlist);
+  std::vector<std::string> vout;
+  for (int i = 0; i < channels.size(); i++) {
+     vout.push_back("aerosol_optical_depth_"+std::to_string(channels[i])+"_");
+  }
   varout_.reset(new oops::Variables(vout));
 
+  oops::Log::info() << "ObsAod channels: " << channels << std::endl;
   oops::Log::trace() << "ObsAod created." << std::endl;
 }
 

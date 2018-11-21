@@ -255,6 +255,10 @@ ecbuild_add_test( TARGET  test_ufo_aod
                   ARGS    "testinput/aod.json"
                   LIBS    ufo )
 
+ecbuild_add_test( TARGET  test_ufo_channels_parser
+                  SOURCES mains/TestChannelsParser.cc
+                  LIBS    ufo )
+
 #ecbuild_add_test( TARGET  test_ufo_obscheck
 #                  BOOST
 #                  SOURCES mains/TestObsCheck.cc
