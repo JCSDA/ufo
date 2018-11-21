@@ -14,8 +14,9 @@
 #include "eckit/config/LocalConfiguration.h"
 
 #include "oops/base/Observations.h"
-#include "oops/base/ObsOperators.h"
+#include "oops/base/ObsSpaces.h"
 #include "oops/interface/ObsAuxControl.h"
+#include "oops/interface/ObsOperator.h"
 #include "oops/interface/ObsVector.h"
 #include "oops/runs/Application.h"
 #include "oops/util/DateTime.h"
@@ -28,7 +29,8 @@ template <typename MODEL> class RunCRTM : public oops::Application {
   typedef oops::GeoVaLs<MODEL>           GeoVaLs_;
   typedef oops::ObsAuxControl<MODEL>     ObsAuxCtrl_;
   typedef oops::Observations<MODEL>      Observations_;
-  typedef oops::ObsOperators<MODEL>      ObsOperators_;
+  typedef oops::ObsOperator<MODEL>       ObsOperator_;
+  typedef oops::ObsSpaces<MODEL>         ObsSpaces_;
   typedef oops::ObsVector<MODEL>         ObsVector_;
 
  public:
@@ -48,22 +50,24 @@ template <typename MODEL> class RunCRTM : public oops::Application {
 //  Setup observations
     eckit::LocalConfiguration obsconf(fullConfig, "Observations");
     oops::Log::debug() << "Observations configuration is:" << obsconf << std::endl;
-    ObsOperators_ hop(obsconf, winbgn, winend);
+    ObsSpaces_ obsdb(obsconf, winbgn, winend);
 
     std::vector<eckit::LocalConfiguration> conf;
     obsconf.get("ObsTypes", conf);
 
-    for (std::size_t jj = 0; jj < hop.size(); ++jj) {
+    for (std::size_t jj = 0; jj < obsdb.size(); ++jj) {
+      ObsOperator_ hop(obsdb[jj]);
+
       const eckit::LocalConfiguration gconf(conf[jj], "GeoVaLs");
-      const GeoVaLs_ gval(gconf, hop[jj].variables());
+      const GeoVaLs_ gval(gconf, hop.variables());
 
       eckit::LocalConfiguration biasConf;
       conf[jj].get("ObsBias", biasConf);
       const ObsAuxCtrl_ ybias(biasConf);
 
-      ObsVector_ ovec(hop[jj].obspace(), hop[jj].observed());
+      ObsVector_ ovec(obsdb[jj], hop.observed());
 
-      hop[jj].simulateObs(gval, ovec, ybias);
+      hop.simulateObs(gval, ovec, ybias);
 
       const double zz = ovec.rms();
       const double xx = conf[jj].getDouble("rmsequiv");
