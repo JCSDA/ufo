@@ -707,8 +707,12 @@ end subroutine ufo_geovals_maxloc
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_geovals_read_netcdf(self, filename, vars)
+subroutine ufo_geovals_read_netcdf(self, filename, vars, t1, t2)
+use datetime_mod
+use duration_mod
+
 USE netcdf, ONLY: NF90_FLOAT, NF90_DOUBLE, NF90_INT
+use nc_diag_read_mod, only: nc_diag_read_get_global_attr
 use nc_diag_read_mod, only: nc_diag_read_get_var
 use nc_diag_read_mod, only: nc_diag_read_get_dim
 use nc_diag_read_mod, only: nc_diag_read_get_var_dims, nc_diag_read_check_var
@@ -719,6 +723,8 @@ implicit none
 type(ufo_geovals), intent(inout)  :: self
 character(max_string), intent(in) :: filename
 type(ufo_vars), intent(in)        :: vars
+type(datetime), intent(in)        :: t1
+type(datetime), intent(in)        :: t2
 
 integer :: iunit, ivar, nobs, nval, fvlen
 integer :: nvardim, vartype
@@ -733,8 +739,24 @@ character(max_string) :: err_msg
 type(random_distribution) :: distribution
 integer, allocatable, dimension(:) :: dist_indx
 
+integer :: date_time_attr
+type(datetime) :: refdate
+integer :: tw_nobs
+integer, allocatable :: tw_indx(:)
+type(duration), dimension(:), allocatable :: dt
+type(datetime), dimension(:), allocatable :: t
+
 integer :: i
 integer :: j
+
+!DEBUG:!
+character(max_string) :: tstr
+
+call datetime_to_string(t1, tstr)
+print*, "DEBUG: read_file: t1: ", trim(tstr)
+call datetime_to_string(t2, tstr)
+print*, "DEBUG: read_file: t2: ", trim(tstr)
+!DEBUG:!
 
 ! open netcdf file and read dimensions
 call nc_diag_read_init(filename, iunit)
@@ -752,6 +774,51 @@ distribution=random_distribution(fvlen)
 nobs=distribution%nobs_pe()
 allocate(dist_indx(nobs))
 dist_indx = distribution%indx
+
+! Strip out obs that fall outside the timing window.
+
+! Read in the date_time attribute and for a datetime object
+call nc_diag_read_get_global_attr(iunit, "date_time", date_time_attr)
+
+! Create the datetime object with a dummy date, then set it from the
+! date_time attribute.
+call datetime_create("1000-01-01T00:00:00Z", refdate)
+call datetime_from_ifs(refdate, date_time_attr/100, 0)
+
+!DEBUG:!
+call datetime_to_string(refdate, tstr)
+print*, "DEBUG: read_file: refdate: ", trim(tstr)
+!DEBUG:!
+
+! Read in the time variable
+allocate(fieldr1d(nobs))
+call nc_diag_read_get_var(iunit, "time", fieldr1d)
+print*, "DEBUG: read_file: time: ", fieldr1d(1:3)
+
+! Remove any obs that are outside the timing window.
+allocate(tw_indx(nobs))
+allocate(dt(nobs))
+allocate(t(nobs))
+
+do i = 1, nobs
+  dt(i) = int(3600*fieldr1d(i))
+  t(i) = refdate
+  call datetime_update(t(i), dt(i))
+enddo
+
+! Find number of locations in this timeframe
+tw_nobs = 0
+do i = 1, nobs
+  if (t(i) > t1 .and. t(i) <= t2) then
+    tw_nobs = tw_nobs + 1
+    tw_indx(tw_nobs) = i
+  endif
+enddo
+
+deallocate(fieldr1d)
+deallocate(tw_indx)
+deallocate(dt)
+deallocate(t)
 
 ! allocate geovals structure
 call ufo_geovals_init(self)

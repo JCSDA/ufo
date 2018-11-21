@@ -1,7 +1,7 @@
 {
   "test_framework_runtime_config": "--log_level=test_suite",
-  "window_begin": "2017-08-01T00:00:00Z",
-  "window_end": "2017-08-01T00:00:00Z",
+  "window_begin": "2017-07-31T21:00:00Z",
+  "window_end": "2017-08-01T03:00:00Z",
   "LinearObsOpTest": {
     "testiterTL": "10",
     "toleranceTL": "1.0e-8",
