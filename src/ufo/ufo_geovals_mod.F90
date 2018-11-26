@@ -743,6 +743,7 @@ integer :: date_time_attr
 type(datetime) :: refdate
 integer :: tw_nobs
 integer, allocatable :: tw_indx(:)
+real(kind_real), allocatable :: time_offset(:)
 type(duration), dimension(:), allocatable :: dt
 type(datetime), dimension(:), allocatable :: t
 
@@ -791,9 +792,20 @@ print*, "DEBUG: read_file: refdate: ", trim(tstr)
 !DEBUG:!
 
 ! Read in the time variable
-allocate(fieldr1d(nobs))
-call nc_diag_read_get_var(iunit, "time", fieldr1d)
-print*, "DEBUG: read_file: time: ", fieldr1d(1:3)
+allocate(time_offset(nobs))
+vartype = nc_diag_read_get_var_type(iunit, "time")
+if (vartype == NF90_DOUBLE) then
+   allocate(fieldr1d(fvlen))
+   call nc_diag_read_get_var(iunit, "time", fieldr1d)
+   time_offset(:) = fieldr1d(dist_indx)
+   deallocate(fieldr1d)
+elseif (vartype == NF90_FLOAT) then
+   allocate(fieldf1d(fvlen))
+   call nc_diag_read_get_var(iunit, "time", fieldf1d)  
+   time_offset(:) = dble(fieldf1d(dist_indx))
+   deallocate(fieldf1d)
+endif
+print*, "DEBUG: read_file: time: ", time_offset(1:3)
 
 ! Remove any obs that are outside the timing window.
 allocate(tw_indx(nobs))
@@ -801,7 +813,7 @@ allocate(dt(nobs))
 allocate(t(nobs))
 
 do i = 1, nobs
-  dt(i) = int(3600*fieldr1d(i))
+  dt(i) = int(3600*time_offset(i))
   t(i) = refdate
   call datetime_update(t(i), dt(i))
 enddo
@@ -815,7 +827,23 @@ do i = 1, nobs
   endif
 enddo
 
-deallocate(fieldr1d)
+print*, "DEBUG: nobs, tw_nobs: ", nobs, tw_nobs
+print*, "DEBUG: dist_indx: ", dist_indx
+print*, "DEBUG: tw_indx: ", tw_indx
+
+! Adjust dist_indx if tw_nobs is different than original nobs
+if (tw_nobs .ne. nobs) then
+  nobs = tw_nobs
+  if (allocated(dist_indx)) deallocate(dist_indx)
+  allocate(dist_indx(nobs))
+  do i = 1, nobs
+    dist_indx(i) = distribution%indx(tw_indx(i))
+  enddo
+endif
+print*, "DEBUG: nobs, size(dist_indx) (after): ", nobs, size(dist_indx)
+print*, "DEBUG: dist_indx (after): ", dist_indx
+
+deallocate(time_offset)
 deallocate(tw_indx)
 deallocate(dt)
 deallocate(t)

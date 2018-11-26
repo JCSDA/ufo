@@ -12,6 +12,8 @@ Observations:
       norm: 299.07774908876121
       random: 0
       filename: Data/icec-2018-04-15_geovals.nc
+      window_begin: 2018-04-14T21:00:00Z
+      window_end: 2018-04-15T03:00:00Z
     ObsBias: {}
     rmsequiv: 1.
     tolerance: 1.0e-8
@@ -23,6 +25,8 @@ Observations:
       norm: 141.99471821162928
       random: 0
       filename: Data/cryosat2-2018-04-15_geovals.nc
+      window_begin: 2018-04-14T21:00:00Z
+      window_end: 2018-04-15T03:00:00Z
     ObsBias: {}
     rmsequiv: 1.
     tolerance: 1.0e-8
@@ -34,6 +38,8 @@ Observations:
       norm: 10343.737235641671
       random: 0
       filename: Data/profile_2018-04-15_geovals.nc
+      window_begin: 2018-04-14T21:00:00Z
+      window_end: 2018-04-15T03:00:00Z
     ObsBias: {}
     rmsequiv: 1.
     tolerance: 1.0e-8
@@ -45,6 +51,8 @@ Observations:
       norm: 0.0
       random: 0
       filename: Data/Jason-2-2018-04-15_geovals.nc
+      window_begin: 2018-04-14T21:00:00Z
+      window_end: 2018-04-15T03:00:00Z
     ObsBias: {}
     rmsequiv: 1.
     tolerance: 1.0e-8
@@ -56,6 +64,8 @@ Observations:
       norm: 7098.7569334355994
       random: 0
       filename: Data/sst_obs-2018-04-15_geovals.nc
+      window_begin: 2018-04-14T21:00:00Z
+      window_end: 2018-04-15T03:00:00Z
     ObsBias: {}
     rmsequiv: 1.
     tolerance: 1.0e-8        

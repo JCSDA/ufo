@@ -30,7 +30,9 @@
         "GeoVaLs": {
           "norm": "62902.291784229797",
           "filename": "Data/amsua_geoval_n19_2018041500_m.nc4",
-          "random": "0"
+          "random": "0",
+          "window_begin": "2018-04-14T21:00:00Z",
+          "window_end": "2018-04-15T03:00:00Z"
         },
         "rmsequiv": "228.32019688865083",
         "tolerance": "999.",
@@ -49,7 +51,9 @@
         "GeoVaLs": {
           "norm": "64102.13571856729",
           "random": "0",
-          "filename": "Data/sondes_geoval_2018041500_m.nc4"
+          "filename": "Data/sondes_geoval_2018041500_m.nc4",
+          "window_begin": "2018-04-14T21:00:00Z",
+          "window_end": "2018-04-15T03:00:00Z"
         },
         "rmsequiv": "254.46418485798108",
         "tolerance": "1.0e-8",

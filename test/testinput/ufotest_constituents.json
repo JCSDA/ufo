@@ -20,9 +20,11 @@
           }
         },
         "GeoVaLs": {
-          "norm": "64245.637566836311",
-          "filename": "Data/vars_ges.2015081000_dbl_subset.nc4",
-          "random": "0"
+          "norm": "63048.611659261347",
+          "filename": "Data/aod_geoval_2018041500_m.nc4",
+          "random": "0",
+          "window_begin": "2018-04-14T21:00:00Z",
+          "window_end": "2018-04-15T03:00:00Z"
         },
         "rmsequiv":"0.025691325227768444",
         "tolerance": "999.999",

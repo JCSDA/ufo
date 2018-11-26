@@ -16,6 +16,8 @@ Observations:
       random: 0
       #nobs: 19266
       filename: Data/Jason-2-2018-04-15_geovals.nc
+      window_begin: 2018-04-14T21:00:00Z
+      window_end: 2018-04-15T03:00:00Z
     ObsBias: {}
     #rmsequiv: 0.80114003705029235
     rmsequiv: 0.20601693262068568  # for testing with bogus geoval data
