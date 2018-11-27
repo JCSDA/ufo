@@ -5,7 +5,6 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
  */
 
-
 #include "eckit/config/YAMLConfiguration.h"
 #include "eckit/exception/Exceptions.h"
 
@@ -14,7 +13,6 @@
 #include "ufo/utils/ChannelsParser.h"
 
 int main(int argc,  char ** argv) {
-
 // Get configuration file from command line
   ASSERT(argc >= 2);
   eckit::PathName configfile = argv[argc - 1];
@@ -25,10 +23,14 @@ int main(int argc,  char ** argv) {
   oops::Log::info() << "Configuration input file is: " << configfile << std::endl;
   oops::Log::info() << "Full configuration is:"  << config << std::endl;
 
-  std::string chlist = config.getString("channels"); //"1, 7-11, 22, 5-8";
+// Read channels list
+  std::string chlist = config.getString("channels");
   std::vector<int> channels = ufo::parseChannels(chlist);
-  std::vector<int> expected = config.getIntVector("parsed_channels"); //{1, 5, 6, 7, 8, 9, 10, 11, 22};
+// Read expected output of parseChannels
+  std::vector<int> expected = config.getIntVector("parsed_channels");
+
   ASSERT(std::equal(expected.begin(), expected.end(), channels.begin()));
+  ASSERT(std::equal(channels.begin(), channels.end(), expected.begin()));
   return 0;
 };
 
