@@ -709,7 +709,7 @@ end subroutine ufo_geovals_maxloc
 
 subroutine ufo_geovals_read_netcdf(self, filename, vars, t1, t2)
 use datetime_mod
-use duration_mod
+use twindow_utils_mod
 
 USE netcdf, ONLY: NF90_FLOAT, NF90_DOUBLE, NF90_INT
 use nc_diag_read_mod, only: nc_diag_read_get_global_attr
@@ -744,20 +744,9 @@ type(datetime) :: refdate
 integer :: tw_nobs
 integer, allocatable :: tw_indx(:)
 real(kind_real), allocatable :: time_offset(:)
-type(duration), dimension(:), allocatable :: dt
-type(datetime), dimension(:), allocatable :: t
 
 integer :: i
 integer :: j
-
-!DEBUG:!
-character(max_string) :: tstr
-
-call datetime_to_string(t1, tstr)
-print*, "DEBUG: read_file: t1: ", trim(tstr)
-call datetime_to_string(t2, tstr)
-print*, "DEBUG: read_file: t2: ", trim(tstr)
-!DEBUG:!
 
 ! open netcdf file and read dimensions
 call nc_diag_read_init(filename, iunit)
@@ -786,11 +775,6 @@ call nc_diag_read_get_global_attr(iunit, "date_time", date_time_attr)
 call datetime_create("1000-01-01T00:00:00Z", refdate)
 call datetime_from_ifs(refdate, date_time_attr/100, 0)
 
-!DEBUG:!
-call datetime_to_string(refdate, tstr)
-print*, "DEBUG: read_file: refdate: ", trim(tstr)
-!DEBUG:!
-
 ! Read in the time variable
 allocate(time_offset(nobs))
 vartype = nc_diag_read_get_var_type(iunit, "time")
@@ -805,31 +789,10 @@ elseif (vartype == NF90_FLOAT) then
    time_offset(:) = dble(fieldf1d(dist_indx))
    deallocate(fieldf1d)
 endif
-print*, "DEBUG: read_file: time: ", time_offset(1:3)
 
-! Remove any obs that are outside the timing window.
+! Generate the timing window indices
 allocate(tw_indx(nobs))
-allocate(dt(nobs))
-allocate(t(nobs))
-
-do i = 1, nobs
-  dt(i) = int(3600*time_offset(i))
-  t(i) = refdate
-  call datetime_update(t(i), dt(i))
-enddo
-
-! Find number of locations in this timeframe
-tw_nobs = 0
-do i = 1, nobs
-  if (t(i) > t1 .and. t(i) <= t2) then
-    tw_nobs = tw_nobs + 1
-    tw_indx(tw_nobs) = i
-  endif
-enddo
-
-print*, "DEBUG: nobs, tw_nobs: ", nobs, tw_nobs
-print*, "DEBUG: dist_indx: ", dist_indx
-print*, "DEBUG: tw_indx: ", tw_indx
+call gen_twindow_index(refdate, t1, t2, nobs, time_offset, tw_indx, tw_nobs)
 
 ! Adjust dist_indx if tw_nobs is different than original nobs
 if (tw_nobs .ne. nobs) then
@@ -840,13 +803,9 @@ if (tw_nobs .ne. nobs) then
     dist_indx(i) = distribution%indx(tw_indx(i))
   enddo
 endif
-print*, "DEBUG: nobs, size(dist_indx) (after): ", nobs, size(dist_indx)
-print*, "DEBUG: dist_indx (after): ", dist_indx
 
 deallocate(time_offset)
 deallocate(tw_indx)
-deallocate(dt)
-deallocate(t)
 
 ! allocate geovals structure
 call ufo_geovals_init(self)
