@@ -17,6 +17,7 @@
 
 #include "ufo/GeoVaLs.h"
 #include "ufo/ObsBias.h"
+#include "ufo/utils/ChannelsParser.h"
 
 
 namespace ufo {
@@ -43,17 +44,20 @@ ObsRadiance::ObsRadiance(const ioda::ObsSpace & odb, const eckit::Configuration 
                                     "Soil_Type", "Snow_Depth"};
   varin_.reset(new oops::Variables(vv));
 
-  const std::vector<std::string> vout{
-    "temperature_brightness_1_", "temperature_brightness_2_", "temperature_brightness_3_",
-    "temperature_brightness_4_", "temperature_brightness_5_", "temperature_brightness_6_",
-    "temperature_brightness_7_", "temperature_brightness_8_", "temperature_brightness_9_",
-    "temperature_brightness_10_", "temperature_brightness_11_", "temperature_brightness_12_",
-    "temperature_brightness_13_", "temperature_brightness_14_", "temperature_brightness_15_"};
+  // parse channels from the config and create variable names
+  std::string chlist = config.getString("channels");
+  std::vector<int> channels = parseChannels(chlist);
+  std::vector<std::string> vout;
+  for (int i = 0; i < channels.size(); i++) {
+    vout.push_back("temperature_brightness_"+std::to_string(channels[i])+"_");
+  }
   varout_.reset(new oops::Variables(vout));
 
+  // call Fortran setup routine
   const eckit::LocalConfiguration obsOptions(config, "ObsOptions");
   const eckit::Configuration * configc = &obsOptions;
   ufo_radiance_setup_f90(keyOperRadiance_, &configc);
+  oops::Log::info() << "ObsRadiance channels: " << channels << std::endl;
   oops::Log::trace() << "ObsRadiance created." << std::endl;
 }
 

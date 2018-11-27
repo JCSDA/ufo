@@ -6,6 +6,7 @@
     "ObsTypes": [
       {
         "ObsType": "Aod",
+        "channels" : "1-11",
         "ObsData": {
           "ObsDataIn": {
             "obsfile": "Data/aod_obs_2018041500_m.nc4"
