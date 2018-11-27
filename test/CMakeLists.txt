@@ -31,6 +31,7 @@ list( APPEND ufo_test_input
   testinput/aircraft.yaml
   testinput/aod.json
   testinput/gnssroref.json
+  testinput/channelsparser.yaml
 )
 
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/testinput)
@@ -253,6 +254,11 @@ ecbuild_add_test( TARGET  test_ufo_aod
                   BOOST
                   SOURCES mains/TestObsOperator.cc
                   ARGS    "testinput/aod.json"
+                  LIBS    ufo )
+
+ecbuild_add_test( TARGET  test_ufo_channels_parser
+                  SOURCES mains/TestChannelsParser.cc
+                  ARGS    "testinput/channelsparser.yaml"
                   LIBS    ufo )
 
 #ecbuild_add_test( TARGET  test_ufo_obscheck
