@@ -368,6 +368,7 @@ end subroutine ufo_geovals_maxloc_c
 
 subroutine ufo_geovals_read_file_c(c_key_self, c_conf, c_vars) bind(c,name='ufo_geovals_read_file_f90')
 use config_mod
+use datetime_mod
 
 implicit none
 integer(c_int), intent(in) :: c_key_self
@@ -377,6 +378,12 @@ type(c_ptr), intent(in)    :: c_vars
 type(ufo_geovals), pointer :: self
 type(ufo_vars) :: vars
 character(max_string) :: filename
+
+character(max_string) :: t1str
+character(max_string) :: t2str
+type(datetime)        :: t1
+type(datetime)        :: t2
+
 
 call ufo_geovals_registry%init()
 call ufo_geovals_registry%add(c_key_self)
@@ -388,8 +395,14 @@ call ufo_vars_setup(vars, c_vars)
 ! read filename for config
 filename = config_get_string(c_conf,len(filename),"filename")
 
+! read timing window edges
+t1str = config_get_string(c_conf, len(t1str), "window_begin")
+t2str = config_get_string(c_conf, len(t1str), "window_end")
+call datetime_create(trim(t1str), t1)
+call datetime_create(trim(t2str), t2)
+
 ! read geovals
-call ufo_geovals_read_netcdf(self, filename, vars)
+call ufo_geovals_read_netcdf(self, filename, vars, t1, t2)
 
 end subroutine ufo_geovals_read_file_c
 

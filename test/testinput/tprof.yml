@@ -1,7 +1,7 @@
 ---
 test_framework_runtime_config: "--log_level=test_suite"
-window_begin: 2018-04-15T00:00:00Z
-window_end: 2018-04-16T00:00:00Z
+window_begin: 2018-04-14T21:00:00Z
+window_end: 2018-04-15T03:00:00Z
 LinearObsOpTest:
   testiterTL: 10
   toleranceTL: 1.0e-7
@@ -15,6 +15,8 @@ Observations:
     GeoVaLs:
       random: 0
       filename: Data/profile_2018-04-15_geovals.nc
+      window_begin: 2018-04-14T21:00:00Z
+      window_end: 2018-04-15T03:00:00Z
     ObsBias: {}
     rmsequiv: 15.020734025831988              
     tolerance: 1.0e-8

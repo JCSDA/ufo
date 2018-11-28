@@ -1,7 +1,7 @@
 ---
 test_framework_runtime_config: "--log_level=test_suite"
-window_begin: 2018-04-15T00:00:00Z
-window_end: 2018-04-16T00:00:00Z
+window_begin: 2018-04-14T21:00:00Z
+window_end: 2018-04-15T03:00:00Z
 LinearObsOpTest:
   testiterTL: 1
   toleranceTL: 1.0e-10
@@ -16,6 +16,8 @@ Observations:
       random: 0
       #nobs: 19266
       filename: Data/Jason-2-2018-04-15_geovals.nc
+      window_begin: 2018-04-14T21:00:00Z
+      window_end: 2018-04-15T03:00:00Z
     ObsBias: {}
     #rmsequiv: 0.80114003705029235
     rmsequiv: 0.20601693262068568  # for testing with bogus geoval data

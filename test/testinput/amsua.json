@@ -28,7 +28,9 @@
         "GeoVaLs": {
           "norm": "7071.1296549464405",
           "filename": "Data/amsua_geoval_n19_2018041500_m.nc4",
-          "random": "0"
+          "random": "0",
+          "window_begin": "2018-04-14T21:00:00Z",
+          "window_end": "2018-04-15T03:00:00Z"
         },
         "rmsequiv": "232.24322957204942",
         "tolerance": "1.e-8",
