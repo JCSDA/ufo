@@ -40,7 +40,7 @@ contains
 ! ------------------------------------------------------------------------------
    subroutine ufo_gnssro_ref_tlad_setup(self, c_conf)
     implicit none
-    class(ufo_gnssro_tlad_Ref), intent(inout) :: self
+    class(ufo_gnssro_Ref_tlad), intent(inout) :: self
     type(c_ptr),         intent(in)    :: c_conf
 
     call gnssro_conf_setup(self%roconf,c_conf)
