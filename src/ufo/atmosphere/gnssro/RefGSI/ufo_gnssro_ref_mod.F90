@@ -57,8 +57,8 @@ contains
       integer,parameter :: ro_top_flag =8
       real(kind_real)   :: wf 
       integer           :: wi
-      type(ufo_geoval), pointer  :: t,q,prs,gph
-      real(kind_real)            :: refr1, refr2,refr3
+      type(ufo_geoval), pointer    :: t,q,prs,gph
+      real(kind_real)              :: refr1, refr2,refr3
       real(kind_real), allocatable :: obsZ(:), obsLat(:)
       real(kind_real), allocatable :: obsQC(:)
       real(kind_real)  :: obsH, gesT,gesQ, gesTv, gesTv0,gesP
@@ -79,6 +79,7 @@ contains
       allocate(obsZ(nobs))
       allocate(obsLat(nobs))
       allocate(obsQC(nobs))
+
       obsQC = 0
 
       call obsspace_get_db(obss, "", "altitude", obsZ)
