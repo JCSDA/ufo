@@ -14,18 +14,21 @@ module ufo_gnssro_ref_tlad_mod
   use vert_interp_mod
   use ufo_basis_tlad_mod,  only: ufo_basis_tlad
   use obsspace_mod
-
+  use config_mod
+  use gnssro_mod_conf
   integer, parameter :: max_string=800
 
   !> Fortran derived type for gnssro trajectory
   type, extends(ufo_basis_tlad) :: ufo_gnssro_Ref_tlad
    private
+  type(gnssro_conf) :: roconf
      integer                       :: nval, nobs
      real(kind_real), allocatable  :: wf(:)
      integer,         allocatable  :: wi(:)
      real(kind_real), allocatable  :: prs(:), t(:), q(:)
      real(kind_real), allocatable  :: obsH(:)
   contains
+    procedure :: setup     => ufo_gnssro_ref_tlad_setup
     procedure :: delete  => ufo_gnssro_ref_tlad_delete
     procedure :: settraj => ufo_gnssro_ref_tlad_settraj
     procedure :: simobs_tl  => ufo_gnssro_ref_simobs_tl
@@ -34,7 +37,14 @@ module ufo_gnssro_ref_tlad_mod
 
 contains
 ! ------------------------------------------------------------------------------
-    
+   subroutine ufo_gnssro_ref_tlad_setup(self, c_conf)
+    implicit none
+    class(ufo_gnssro_tlad_Ref), intent(inout) :: self
+    type(c_ptr),         intent(in)    :: c_conf
+
+    call gnssro_conf_setup(self%roconf,c_conf)
+   end subroutine ufo_gnssro_ref_tlad_setup
+   
     subroutine ufo_gnssro_ref_tlad_settraj(self, geovals, obss)
       use gnssro_mod_constants
       use gnssro_mod_transform, only: geometric2geop
@@ -113,7 +123,6 @@ contains
       type(ufo_geovals),      intent(in)     :: geovals
       real(kind_real),        intent(inout)  :: hofx(:)
       type(c_ptr), value,     intent(in)     :: obss
-      logical,                parameter      :: use_compress=.true.
      
       character(len=*), parameter :: myname_="ufo_gnssro_ref_tlad_tl"
       character(max_string)       :: err_msg
@@ -140,7 +149,7 @@ contains
       call ufo_geovals_get_var(geovals, var_q, q_d)
       call ufo_geovals_get_var(geovals, var_prs, prs_d)
  
-      call gnssro_ref_constants(use_compress)
+      call gnssro_ref_constants(self%roconf%use_compress)
 
       ! tangent linear obs operator (linear)
       do iobs = 1, geovals%nobs
@@ -179,7 +188,6 @@ contains
       type(ufo_geovals),         intent(inout) :: geovals
       real(kind_real),           intent(in)    :: hofx(:)
       type(c_ptr), value,        intent(in)    :: obss
-      logical,                   parameter     :: use_compress=.true.
 
       character(len=*), parameter :: myname_="ufo_gnssro_ref_tlad_ad"
       character(max_string) :: err_msg
@@ -230,7 +238,7 @@ contains
 
       if (.not. geovals%linit ) geovals%linit=.true.
 
-      call gnssro_ref_constants(use_compress)
+      call gnssro_ref_constants(self%roconf%use_compress)
 
 
       do iobs = 1, geovals%nobs
