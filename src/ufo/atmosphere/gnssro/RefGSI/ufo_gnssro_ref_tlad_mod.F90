@@ -64,7 +64,7 @@ contains
 
       !Keep copy of dimensions
       self%nval = prs%nval
-      self%nobs = obsspace_get_nobs(obss)
+      self%nobs = obsspace_get_nlocs(obss)
  
       allocate(self%wi(self%nobs))
       allocate(self%wf(self%nobs))
@@ -119,9 +119,9 @@ contains
       character(max_string)       :: err_msg
       
       integer                   :: iobs,ierr
-      type(ufo_geoval), pointer :: t_d, q_d                          !, prs_d 
-      real(kind_real)           :: t_coeff, q_coeff                  !, prs_coeff
-      real(kind_real)           :: gesT_d, gesQ_d, gesTv_d, gesTv0_d !, gesP_d
+      type(ufo_geoval), pointer :: t_d, q_d, prs_d 
+      real(kind_real)           :: t_coeff, q_coeff, p_coeff
+      real(kind_real)           :: gesT_d, gesQ_d, gesP_d
       integer                   :: wi0
       ! check if trajectory was set
       if (.not. self%ltraj) then
@@ -138,8 +138,8 @@ contains
       ! get variables from geovals
       call ufo_geovals_get_var(geovals, var_t, t_d)
       call ufo_geovals_get_var(geovals, var_q, q_d)
-  
-
+      call ufo_geovals_get_var(geovals, var_prs, prs_d)
+ 
       call gnssro_ref_constants(use_compress)
 
       ! tangent linear obs operator (linear)
@@ -147,19 +147,24 @@ contains
         wi0 = self%wi(iobs)
         call vert_interp_apply_tl(  t_d%nval,  t_d%vals(:,iobs), gesT_d, self%wi(iobs),self%wf(iobs)) 
         call vert_interp_apply_tl(  q_d%nval,  q_d%vals(:,iobs), gesQ_d, self%wi(iobs),self%wf(iobs))
-
+        call vert_interp_apply_tl(prs_d%nval,prs_d%vals(:,iobs), gesP_d, self%wi(iobs),self%wf(iobs))
 !       pressure does not change during minimization
 
-        t_coeff    = - n_a*self%prs(iobs)/self%t(iobs)**2           &
-                     - n_b*two*self%prs(iobs)*self%q(iobs)/  &
-                           ( ((1-rd_over_rv)*self%q(iobs)+rd_over_rv)*self%t(iobs)**3  )   &
-                     - n_c*self%prs(iobs)*self%q(iobs)/      &
+        t_coeff = - n_a*self%prs(iobs)/self%t(iobs)**2           &
+                  - n_b*two*self%prs(iobs)*self%q(iobs)/  &
+                       ( ((1-rd_over_rv)*self%q(iobs)+rd_over_rv)*self%t(iobs)**3  )   &
+                  - n_c*self%prs(iobs)*self%q(iobs)/      &
                            ( ((1-rd_over_rv)*self%q(iobs)+rd_over_rv)*self%t(iobs)**2 )
         q_coeff =   n_b*self%prs(iobs)/( self%t(iobs)**2*( (1-rd_over_rv)*self%q(iobs)+rd_over_rv)**2 ) *  &
                        rd_over_rv                        &
                   + n_c*self%prs(iobs)/( self%t(iobs)   *( (1-rd_over_rv)*self%q(iobs)+rd_over_rv)**2 ) *  &
                        rd_over_rv          
-        hofx(iobs)   =  t_coeff*gesT_d  + q_coeff*gesQ_d !+ prs_coeff*gesP_d
+        p_coeff =   n_a/self%t(iobs)   &
+                  + n_b*self%q(iobs)/ ( ((1-rd_over_rv)*self%q(iobs)+rd_over_rv)*self%t(iobs)**2 )   &
+                  + n_c*self%q(iobs)/ ( ((1-rd_over_rv)*self%q(iobs)+rd_over_rv)*self%t(iobs) )
+
+     
+        hofx(iobs)  =  t_coeff*gesT_d  + q_coeff*gesQ_d + p_coeff*gesP_d
 
       enddo 
     
@@ -180,9 +185,9 @@ contains
       character(max_string) :: err_msg
       
       integer :: iobs,ierr
-      type(ufo_geoval), pointer :: t_d, q_d, prs_d, gph_d
-      real(kind_real)           :: t_coeff, q_coeff                    !, prs_coeff
-      real(kind_real)           :: gesT_d, gesQ_d !, gesTv_d,gesTv0_d    !, gesP_d
+      type(ufo_geoval), pointer :: t_d, q_d, prs_d
+      real(kind_real)           :: t_coeff, q_coeff, p_coeff
+      real(kind_real)           :: gesT_d, gesQ_d, gesP_d
 
       ! check if trajectory was set
       if (.not. self%ltraj) then
@@ -200,7 +205,7 @@ contains
       call ufo_geovals_get_var(geovals, var_prs, prs_d)
       call ufo_geovals_get_var(geovals, var_t, t_d)
       call ufo_geovals_get_var(geovals, var_q, q_d)
-      call ufo_geovals_get_var(geovals, var_z, gph_d)
+
       ! allocate if not yet allocated	
       if (.not. allocated(t_d%vals)) then
          t_d%nobs = self%nobs
@@ -223,13 +228,6 @@ contains
       endif
       q_d%vals = 0.0_kind_real
 
-      if (.not. allocated(gph_d%vals)) then
-         gph_d%nobs = self%nobs
-         gph_d%nval = self%nval 
-         allocate(gph_d%vals(gph_d%nval,gph_d%nobs))
-      endif
-      gph_d%vals = 0.0_kind_real
-
       if (.not. geovals%linit ) geovals%linit=.true.
 
       call gnssro_ref_constants(use_compress)
@@ -238,22 +236,28 @@ contains
       do iobs = 1, geovals%nobs
 
 ! zero impct on pressure during minimization
-        t_coeff    = - n_a*self%prs(iobs)/self%t(iobs)**2           &
+           t_coeff = - n_a*self%prs(iobs)/self%t(iobs)**2           &
                      - n_b*two*self%prs(iobs)*self%q(iobs)/  &
                            ( ((1-rd_over_rv)*self%q(iobs)+rd_over_rv)*self%t(iobs)**3  )   &
                      - n_c*self%prs(iobs)*self%q(iobs)/      &
                            ( ((1-rd_over_rv)*self%q(iobs)+rd_over_rv)*self%t(iobs)**2 )
-        q_coeff =   n_b*self%prs(iobs)/( self%t(iobs)**2*( (1-rd_over_rv)*self%q(iobs)+rd_over_rv)**2 ) *  &
-                       rd_over_rv                        &
-                  + n_c*self%prs(iobs)/( self%t(iobs)   *( (1-rd_over_rv)*self%q(iobs)+rd_over_rv)**2 ) *  &
-                       rd_over_rv
-  
+           q_coeff =   n_b*self%prs(iobs)/( self%t(iobs)**2*( (1-rd_over_rv)*self%q(iobs)+rd_over_rv)**2 ) *  &
+                           rd_over_rv                        &
+                     + n_c*self%prs(iobs)/( self%t(iobs)   *( (1-rd_over_rv)*self%q(iobs)+rd_over_rv)**2 ) *  &
+                           rd_over_rv
+           p_coeff =   n_a/self%t(iobs)   &
+                     + n_b*self%q(iobs)/ ( ((1-rd_over_rv)*self%q(iobs)+rd_over_rv)*self%t(iobs)**2 )   &
+                     + n_c*self%q(iobs)/ ( ((1-rd_over_rv)*self%q(iobs)+rd_over_rv)*self%t(iobs) )
+
         gesT_d = 0.0_kind_real
         gesQ_d = 0.0_kind_real
+        gesP_d = 0.0_kind_real
         gesT_d = gesT_d + hofx(iobs)*t_coeff
         gesQ_d = gesQ_d + hofx(iobs)*q_coeff
+        gesP_d = gesP_d + hofx(iobs)*p_coeff
         call vert_interp_apply_ad(  t_d%nval,  t_d%vals(:,iobs), gesT_d, self%wi(iobs), self%wf(iobs))
         call vert_interp_apply_ad(  q_d%nval,  q_d%vals(:,iobs), gesQ_d, self%wi(iobs), self%wf(iobs))
+        call vert_interp_apply_ad(prs_d%nval,prs_d%vals(:,iobs), gesP_d, self%wi(iobs), self%wf(iobs))
 
       enddo
 
