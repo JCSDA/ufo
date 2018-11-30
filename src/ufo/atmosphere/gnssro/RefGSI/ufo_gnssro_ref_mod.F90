@@ -52,14 +52,15 @@ contains
 
       character(len=*), parameter :: myname_="ufo_gnssro_ref_simobs"
       character(max_string) :: err_msg
-
-      integer         :: iobs,k
-      real(kind_real) :: wf 
-      integer         :: wi
-      integer         :: nobs
+      real(c_double)    :: missing_value
+      integer           :: iobs,k,nobs
+      integer,parameter :: ro_top_flag =8
+      real(kind_real)   :: wf 
+      integer           :: wi
       type(ufo_geoval), pointer  :: t,q,prs,gph
       real(kind_real)            :: refr1, refr2,refr3
       real(kind_real), allocatable :: obsZ(:), obsLat(:)
+      real(kind_real), allocatable :: obsQC(:)
       real(kind_real)  :: obsH, gesT,gesQ, gesTv, gesTv0,gesP
       ! check if nobs is consistent in geovals & hofx
       if (geovals%nobs /= size(hofx)) then
@@ -72,9 +73,13 @@ contains
       call ufo_geovals_get_var(geovals, var_q, q)
       call ufo_geovals_get_var(geovals, var_z, gph)
 
-      nobs = obsspace_get_nobs(obss)
+      missing_value = obspace_missing_value()
+      nobs = obsspace_get_nlocs(obss)
+
       allocate(obsZ(nobs))
       allocate(obsLat(nobs))
+      allocate(obsQC(nobs))
+      obsQC = 0
 
       call obsspace_get_db(obss, "", "altitude", obsZ)
       call obsspace_get_db(obss, "", "latitude", obsLat)
@@ -83,23 +88,30 @@ contains
 
       ! obs operator
       do iobs = 1, geovals%nobs
-      ! Convert geometric height at observation to geopotential height 
-        call geometric2geop(obsLat(iobs), obsZ(iobs), obsH)
-        call vert_interp_weights(gph%nval,obsH, gph%vals(:,iobs),wi,wf)  ! calculate weights 
-        call vert_interp_apply(t%nval,   t%vals(:,iobs), gesT, wi, wf)
-        call vert_interp_apply(q%nval,   q%vals(:,iobs), gesQ, wi, wf)
+         if ( obsH > self%roconf%ro_top_meter ) then
+           hofx(iobs)  = missing_value
+           obsQC(iobs) = ro_top_flag
+         else
+      !   Convert geometric height at observation to geopotential height 
+           call geometric2geop(obsLat(iobs), obsZ(iobs), obsH)
+           call vert_interp_weights(gph%nval,obsH, gph%vals(:,iobs),wi,wf)  ! calculate weights 
+           call vert_interp_apply(t%nval,   t%vals(:,iobs), gesT, wi, wf)
+           call vert_interp_apply(q%nval,   q%vals(:,iobs), gesQ, wi, wf)
 
-      ! use  hypsometric equation to calculate pressure 
-        gesTv  = 0.0
-        gesTv0 = 0.0
-        gesTv  = gesT*(one + (rv_over_rd-one)* (gesQ/(1-gesQ) ) )
-        gesTv0 = t%vals(wi,iobs)*(one + (rv_over_rd-one) * (q%vals(wi,iobs)/(1-q%vals(wi,iobs)) ))
-        gesP   = prs%vals(wi,iobs)/exp(two*grav*(obsH-gph%vals(wi,iobs))/(rd*(gesTv+gesTv0)))
-        refr1  = n_a*gesP/gesT
-        refr2  = n_b*gesP*gesQ/ ( gesT**2 * (rd_over_rv+(1-rd_over_rv)*gesQ) )
-        refr3  = n_c*gesP*gesQ/ ( gesT    * (rd_over_rv+(1-rd_over_rv)*gesQ) )
-        hofx(iobs)  = refr1 + refr2 + refr3
+      !    use  hypsometric equation to calculate pressure 
+           gesTv  = 0.0
+           gesTv0 = 0.0
+           gesTv  = gesT*(one + (rv_over_rd-one)* (gesQ/(1-gesQ) ) )
+           gesTv0 = t%vals(wi,iobs)*(one + (rv_over_rd-one) * (q%vals(wi,iobs)/(1-q%vals(wi,iobs)) ))
+           gesP   = prs%vals(wi,iobs)/exp(two*grav*(obsH-gph%vals(wi,iobs))/(rd*(gesTv+gesTv0)))
+           refr1  = n_a*gesP/gesT
+           refr2  = n_b*gesP*gesQ/ ( gesT**2 * (rd_over_rv+(1-rd_over_rv)*gesQ) )
+           refr3  = n_c*gesP*gesQ/ ( gesT    * (rd_over_rv+(1-rd_over_rv)*gesQ) )
+           hofx(iobs)  = refr1 + refr2 + refr3
+        endif
       enddo
+
+      call obsspace_put_db(obss, "QC", "refractivity", obsQC)
 
       ! cleanup 
       deallocate(obsZ)
