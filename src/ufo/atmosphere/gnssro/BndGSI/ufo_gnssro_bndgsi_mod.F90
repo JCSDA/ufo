@@ -7,6 +7,7 @@
 
 module ufo_gnssro_bndgsi_mod
   use iso_c_binding
+  use config_mod
   use kinds
   use ufo_vars_mod
   use ufo_geovals_mod
@@ -15,6 +16,8 @@ module ufo_gnssro_bndgsi_mod
   use ufo_basis_mod,      only: ufo_basis
   use lag_interp_mod,     only: lag_interp_const, lag_interp_smthWeights
   use obsspace_mod
+  use gnssro_mod_conf
+  use gnssro_mod_constants
 
   implicit none
   public             :: ufo_gnssro_BndGSI
@@ -22,17 +25,25 @@ module ufo_gnssro_bndgsi_mod
 
   !> Fortran derived type for gnssro trajectory
   type, extends(ufo_basis) :: ufo_gnssro_BndGSI
+   type(gnssro_conf) :: roconf
   contains
+   procedure :: setup     => ufo_gnssro_bndgsi_setup
    procedure :: simobs    => ufo_gnssro_bndgsi_simobs
   end type ufo_gnssro_BndGSI
 
   contains
 ! ------------------------------------------------------------------------------
+subroutine ufo_gnssro_bndgsi_setup(self, c_conf)
+
+implicit none
+class(ufo_gnssro_BndGSI), intent(inout) :: self
+type(c_ptr),              intent(in)    :: c_conf
+call gnssro_conf_setup(self%roconf,c_conf)
+end subroutine ufo_gnssro_bndgsi_setup
+
   subroutine ufo_gnssro_bndgsi_simobs(self, geovals, hofx, obss)
-      use gnssro_mod_constants
       use gnssro_mod_transform
       use gnssro_mod_grids, only: get_coordinate_value
-      use obsspace_mod, only: obsspace_get_db
       implicit none
       class(ufo_gnssro_bndGSI), intent(in)    :: self
       type(ufo_geovals),        intent(in)    :: geovals
@@ -40,7 +51,7 @@ module ufo_gnssro_bndgsi_mod
       type(c_ptr), value,       intent(in)    :: obss
     
       character(len=*), parameter     :: myname_ ="ufo_gnssro_bndgsi_simobs"
-      logical, parameter              :: use_compress = .true.
+!      logical, parameter              :: use_compress = .true.
       real(kind_real), parameter      :: r1em6 = 1.0e-6_kind_real
       real(kind_real), parameter      :: r1em3 = 1.0e-3_kind_real
       real(kind_real), parameter      :: six   = 6.0_kind_real
@@ -165,7 +176,7 @@ module ufo_gnssro_bndgsi_mod
                specHmean = gesQ(1,iobs)
                tmean = gesT(1,iobs)
             endif
-            call compute_refractivity(tmean, specHmean, gesPi(ilev,iobs), refr(ilev,iobs),use_compress) !refr N
+            call compute_refractivity(tmean, specHmean, gesPi(ilev,iobs), refr(ilev,iobs),self%roconf%use_compress) !refr N
             refrIndex(ilev) = one + (r1em6*refr(ilev,iobs))         ! refr index n
             refrXrad(ilev)  = refrIndex(ilev) * radius(ilev,iobs)   ! x=nr
 
