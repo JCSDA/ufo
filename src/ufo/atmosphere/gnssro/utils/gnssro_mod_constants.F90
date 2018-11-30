@@ -3,6 +3,8 @@ module gnssro_mod_constants
 !==========================================================================
 
 use kinds
+use iso_c_binding
+
 implicit none
 public   :: gnssro_ref_constants
 real(kind_real), parameter, public :: zero    = 0.0_kind_real
@@ -23,9 +25,10 @@ real(kind_real),            public :: n_a, n_b,n_c
 contains
 subroutine gnssro_ref_constants(use_compress)
 implicit none
-logical,intent(in) :: use_compress
+integer(c_int),intent(in) :: use_compress
+
 ! cucurull 2010, Healy 2011
-if (use_compress) then
+if (use_compress .eq. 1) then
        ! Constants for gpsro refractivity (Rueger 2002)
        n_a = 77.6890_kind_real    
        n_b = 3.75463e5_kind_real  
