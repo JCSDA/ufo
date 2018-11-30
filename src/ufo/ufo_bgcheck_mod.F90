@@ -80,6 +80,10 @@ flags(:) = 0
 
 call obsspace_get_db(self%obsdb, "ObsValue", trim(self%variable), yobs)
 call obsspace_get_db(self%obsdb, "ObsError", trim(self%variable), yerr)
+! if another QC check was already done previously
+if (obsspace_has(self%obsdb,"QC", trim(self%variable))) then 
+   call obsspace_get_db(self%obsdb, "QC", trim(self%variable),flags )
+endif
 
 zmax = 0.0
 ireject = 0
@@ -91,7 +95,8 @@ do jobs = 1, iobs
       ireject = ireject + 1
     endif
   else
-    flags(jobs) = 1
+! do not overwrite non zero qc flags done previously
+    if (flags(jobs) .eq. 0) flags(jobs) = 1
   endif
 enddo
 write(0,*)'ufo_bgcheck_post reject = ',iobs,ireject,zmax
