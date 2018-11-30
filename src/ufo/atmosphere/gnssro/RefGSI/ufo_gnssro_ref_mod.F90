@@ -14,7 +14,9 @@ module ufo_gnssro_ref_mod
   use vert_interp_mod
   use ufo_basis_mod,     only: ufo_basis
   use obsspace_mod
-  
+  use config_mod
+  use gnssro_mod_conf
+
   implicit none
   integer, parameter :: max_string=800
   public             :: ufo_gnssro_Ref
@@ -22,17 +24,27 @@ module ufo_gnssro_ref_mod
 
   !> Fortran derived type for gnssro trajectory
   type, extends(ufo_basis) :: ufo_gnssro_Ref
+  private
+  type(gnssro_conf) :: roconf
   contains
+   procedure :: setup     => ufo_gnssro_ref_setup
    procedure :: simobs    => ufo_gnssro_ref_simobs
   end type ufo_gnssro_Ref
 
 contains
 ! ------------------------------------------------------------------------------
+   subroutine ufo_gnssro_ref_setup(self, c_conf)
+    implicit none
+    class(ufo_gnssro_Ref), intent(inout) :: self
+    type(c_ptr),         intent(in)    :: c_conf
+
+    call gnssro_conf_setup(self%roconf,c_conf)
+   end subroutine ufo_gnssro_ref_setup
+
    subroutine ufo_gnssro_ref_simobs(self, geovals, hofx, obss)
     use gnssro_mod_constants
     use gnssro_mod_transform, only: geometric2geop
       implicit none
-      logical,parameter                          :: use_compress=.true.
       class(ufo_gnssro_Ref), intent(in)          :: self
       type(ufo_geovals), intent(in)              :: geovals
       real(kind_real),   intent(inout)           :: hofx(:)
@@ -67,7 +79,7 @@ contains
       call obsspace_get_db(obss, "", "altitude", obsZ)
       call obsspace_get_db(obss, "", "latitude", obsLat)
 
-      call gnssro_ref_constants(use_compress)
+      call gnssro_ref_constants(self%roconf%use_compress)
 
       ! obs operator
       do iobs = 1, geovals%nobs
