@@ -88,7 +88,7 @@ endif
 zmax = 0.0
 ireject = 0
 do jobs = 1, iobs
-  if (hofx(jobs)/=missing .and. yobs(jobs)/=missing .and. yerr(jobs)/=missing) then
+  if (hofx(jobs)/=missing .and. yobs(jobs)/=missing .and. yerr(jobs)/=missing .and. flags(jobs) .eq. 0) then
     zmax = max(zmax, abs(hofx(jobs)-yobs(jobs))/yerr(jobs))
     if (abs(hofx(jobs)-yobs(jobs)) > yerr(jobs)*self%threshold) then
       flags(jobs) = 2
