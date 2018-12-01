@@ -216,22 +216,22 @@ contains
          t_d%nobs = self%nobs
          t_d%nval = self%nval
          allocate(t_d%vals(t_d%nval,t_d%nobs))
+         t_d%vals = 0.0_kind_real
       endif
-      t_d%vals = 0.0_kind_real
 
       if (.not. allocated(prs_d%vals)) then
          prs_d%nobs = self%nobs
          prs_d%nval = self%nval
          allocate(prs_d%vals(prs_d%nval,prs_d%nobs))
+         prs_d%vals = 0.0_kind_real
       endif
-      prs_d%vals = 0.0_kind_real
 
       if (.not. allocated(q_d%vals)) then
          q_d%nobs = self%nobs
          q_d%nval = self%nval
          allocate(q_d%vals(q_d%nval,q_d%nobs))
+         q_d%vals = 0.0_kind_real
       endif
-      q_d%vals = 0.0_kind_real
 
       if (.not. geovals%linit ) geovals%linit=.true.
 
