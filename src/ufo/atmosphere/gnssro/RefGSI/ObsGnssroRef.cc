@@ -38,7 +38,6 @@ ObsGnssroRef::ObsGnssroRef(const ioda::ObsSpace & odb, const eckit::Configuratio
   const eckit::LocalConfiguration obsOptions(config, "ObsOptions");
   const eckit::Configuration * configc = &obsOptions;
 
-//  const eckit::Configuration * configc = &config;
   ufo_gnssro_ref_setup_f90(keyOperGnssroRef_, &configc);
   oops::Log::trace() << "ObsGnssroRef created." << std::endl;
 }

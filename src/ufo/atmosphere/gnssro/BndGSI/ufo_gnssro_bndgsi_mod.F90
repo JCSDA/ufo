@@ -51,7 +51,6 @@ end subroutine ufo_gnssro_bndgsi_setup
       type(c_ptr), value,       intent(in)    :: obss
     
       character(len=*), parameter     :: myname_ ="ufo_gnssro_bndgsi_simobs"
-!      logical, parameter              :: use_compress = .true.
       real(kind_real), parameter      :: r1em6 = 1.0e-6_kind_real
       real(kind_real), parameter      :: r1em3 = 1.0e-3_kind_real
       real(kind_real), parameter      :: six   = 6.0_kind_real

@@ -38,7 +38,6 @@ ObsGnssroBndGSI::ObsGnssroBndGSI(const ioda::ObsSpace & odb, const eckit::Config
   const eckit::LocalConfiguration obsOptions(config, "ObsOptions");
   const eckit::Configuration * configc = &obsOptions;
 
-//  const eckit::Configuration * configc = &config;
   ufo_gnssro_bndgsi_setup_f90(keyOperGnssroBndGSI_, &configc);
 
   oops::Log::trace() << "ObsGnssroBndGSI created." << std::endl;
