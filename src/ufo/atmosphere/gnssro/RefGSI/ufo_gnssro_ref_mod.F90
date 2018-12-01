@@ -16,7 +16,7 @@ module ufo_gnssro_ref_mod
   use obsspace_mod
   use config_mod
   use gnssro_mod_conf
-
+  use gnssro_mod_obserror
   implicit none
   integer, parameter :: max_string=800
   public             :: ufo_gnssro_Ref
@@ -49,10 +49,11 @@ contains
       type(ufo_geovals), intent(in)              :: geovals
       real(kind_real),   intent(inout)           :: hofx(:)
       type(c_ptr), value,       intent(in)       :: obss
-
+      
       character(len=*), parameter :: myname_="ufo_gnssro_ref_simobs"
       character(max_string) :: err_msg
       real(c_double)    :: missing_value
+      integer           :: GlobalModel = 1
       integer           :: iobs,k,nobs
       integer,parameter :: ro_top_flag =8
       real(kind_real)   :: wf 
@@ -60,7 +61,7 @@ contains
       type(ufo_geoval), pointer    :: t,q,prs,gph
       real(kind_real)              :: refr1, refr2,refr3
       real(kind_real), allocatable :: obsZ(:), obsLat(:)
-      real(kind_real), allocatable :: obsQC(:)
+      real(kind_real), allocatable :: obsQC(:), obsErr(:)
       real(kind_real)  :: obsH, gesT,gesQ, gesTv, gesTv0,gesP
       ! check if nobs is consistent in geovals & hofx
       if (geovals%nobs /= size(hofx)) then
@@ -79,7 +80,7 @@ contains
       allocate(obsZ(nobs))
       allocate(obsLat(nobs))
       allocate(obsQC(nobs))
-
+      allocate(obsErr(nobs))
       obsQC = 0
 
       call obsspace_get_db(obss, "", "altitude", obsZ)
@@ -87,14 +88,20 @@ contains
 
       call gnssro_ref_constants(self%roconf%use_compress)
 
+      if (self%roconf%obs_err .ne. "FILE") then
+        call obs_error(obsLat, obsZ, nobs, GlobalModel,self%roconf%obs_err,obsErr)
+        call obsspace_put_db(obss, "EffectiveError", "refractivity", obsErr)
+      endif
+
       ! obs operator
       do iobs = 1, geovals%nobs
+
+      !  Convert geometric height at observation to geopotential height 
+         call geometric2geop(obsLat(iobs), obsZ(iobs), obsH)
          if ( obsH > self%roconf%ro_top_meter ) then
            hofx(iobs)  = missing_value
            obsQC(iobs) = ro_top_flag
          else
-      !   Convert geometric height at observation to geopotential height 
-           call geometric2geop(obsLat(iobs), obsZ(iobs), obsH)
            call vert_interp_weights(gph%nval,obsH, gph%vals(:,iobs),wi,wf)  ! calculate weights 
            call vert_interp_apply(t%nval,   t%vals(:,iobs), gesT, wi, wf)
            call vert_interp_apply(q%nval,   q%vals(:,iobs), gesQ, wi, wf)
