@@ -14,7 +14,7 @@ public   :: gnssro_conf_setup
 type gnssro_conf
   integer(c_int) :: ro_top_meter
   integer(c_int) :: use_compress
-  character(len=255) :: obs_err
+  character(len=255) :: obserr_method
 end type gnssro_conf
 contains
 !-------------------------------
@@ -36,10 +36,10 @@ else
   roconf%use_compress  =  1
 endif
 
-if (config_element_exists(c_conf,"obs_err")) then
-  roconf%obs_err = config_get_string(c_conf,len(roconf%obs_err),"obs_err")
+if (config_element_exists(c_conf,"obserr_method")) then
+  roconf%obserr_method = config_get_string(c_conf,len(roconf%obserr_method),"obserr_method")
 else
-  roconf%obs_err = "FILE"
+  roconf%obserr_method = "FILE"
 endif
 
 end subroutine gnssro_conf_setup

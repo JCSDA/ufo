@@ -88,8 +88,8 @@ contains
 
       call gnssro_ref_constants(self%roconf%use_compress)
 
-      if (self%roconf%obs_err .ne. "FILE") then
-        call obs_error(obsLat, obsZ, nobs, GlobalModel,self%roconf%obs_err,obsErr)
+      if (self%roconf%obserr_method .ne. "FILE") then
+        call obserr_method(obsLat, obsZ, nobs, GlobalModel,self%roconf%obserr_method,obsErr)
         call obsspace_put_db(obss, "EffectiveError", "refractivity", obsErr)
       endif
 

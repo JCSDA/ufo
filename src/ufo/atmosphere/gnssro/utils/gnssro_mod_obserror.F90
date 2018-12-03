@@ -7,7 +7,7 @@ use gnssro_mod_constants
 
 contains
 
-subroutine obs_error(obsLat, obsZ, nobs, GlobalModel, ERR_TYPE, obsErr)
+subroutine obserr_method(obsLat, obsZ, nobs, GlobalModel, ERR_TYPE, obsErr)
 integer,                         intent(in)  :: nobs, GlobalModel
 real(kind_real), dimension(nobs),intent(in)  :: obsLat,  obsZ
 real(kind_real), dimension(nobs),intent(out) :: obsErr
@@ -23,7 +23,7 @@ case ("BndGSI")
 
 end select
 
-end subroutine obs_error
+end subroutine obserr_method
 
 subroutine  refractivity_err_gsi(obsLat, obsZ, nobs,GlobalModel, obsErr)
 integer,                         intent(in)  :: nobs, GlobalModel
