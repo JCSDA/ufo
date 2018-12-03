@@ -25,31 +25,31 @@ module ufo_example_tlad_mod
  type, extends(ufo_basis_tlad), public :: ufo_example_tlad
  private
  contains
-  procedure :: setup  => ufo_radiance_tlad_setup
-  procedure :: delete  => ufo_radiance_tlad_delete
-  procedure :: settraj => ufo_radiance_tlad_settraj
-  procedure :: simobs_tl  => ufo_radiance_simobs_tl
-  procedure :: simobs_ad  => ufo_radiance_simobs_ad
+  procedure :: setup  => ufo_example_tlad_setup
+  procedure :: delete  => ufo_example_tlad_delete
+  procedure :: settraj => ufo_example_tlad_settraj
+  procedure :: simobs_tl  => ufo_example_simobs_tl
+  procedure :: simobs_ad  => ufo_example_simobs_ad
  end type ufo_example_tlad
 
 contains
 
 ! ------------------------------------------------------------------------------
 ! TODO: add setup of your TL/AD observation operator (optional)
-subroutine ufo_radiance_tlad_setup(self, c_conf)
+subroutine ufo_example_tlad_setup(self, c_conf)
 implicit none
-class(ufo_radiance_tlad), intent(inout) :: self
+class(ufo_example_tlad), intent(inout) :: self
 type(c_ptr),              intent(in)    :: c_conf
 
-end subroutine ufo_radiance_tlad_setup
+end subroutine ufo_example_tlad_setup
 
 ! ------------------------------------------------------------------------------
 ! TODO: add cleanup of your TL/AD observation operator (optional)
-subroutine ufo_radiance_tlad_delete(self)
+subroutine ufo_example_tlad_delete(self)
 implicit none
-class(ufo_radiance_tlad), intent(inout) :: self
+class(ufo_example_tlad), intent(inout) :: self
 
-end subroutine ufo_radiance_tlad_delete
+end subroutine ufo_example_tlad_delete
 
 ! ------------------------------------------------------------------------------
 ! TODO: replace below function with your set trajectory for tl/ad code
