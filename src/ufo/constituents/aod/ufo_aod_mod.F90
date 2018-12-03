@@ -9,7 +9,7 @@ MODULE ufo_aod_mod
   
   use iso_c_binding
   use ufo_vars_mod
-  use ioda_locs_mod
+  use ufo_locs_mod
   use ufo_geovals_mod
   use kinds
   USE ufo_aod_misc

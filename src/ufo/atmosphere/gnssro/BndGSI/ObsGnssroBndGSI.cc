@@ -14,9 +14,11 @@
 #include "ioda/ObsVector.h"
 
 #include "oops/base/Variables.h"
+#include "oops/util/DateTime.h"
 #include "oops/util/Logger.h"
 
 #include "ufo/GeoVaLs.h"
+#include "ufo/Locations.h"
 #include "ufo/ObsBias.h"
 
 namespace ufo {
@@ -54,6 +56,18 @@ void ObsGnssroBndGSI::simulateObs(const GeoVaLs & gom, ioda::ObsVector & ovec,
                                 const ObsBias & bias) const {
   ufo_gnssro_bndgsi_simobs_f90(keyOperGnssroBndGSI_, gom.toFortran(), odb_,
                                ovec.size(), ovec.toFortran(), bias.toFortran());
+}
+
+// -----------------------------------------------------------------------------
+
+Locations * ObsGnssroBndGSI::locateObs(const util::DateTime & t1,
+                                       const util::DateTime & t2) const {
+  const util::DateTime * p1 = &t1;
+  const util::DateTime * p2 = &t2;
+  int keylocs;
+  ufo_gnssro_bndgsi_locateobs_f90(keyOperGnssroBndGSI_, odb_, &p1, &p2, keylocs);
+
+  return new Locations(keylocs);
 }
 
 // -----------------------------------------------------------------------------

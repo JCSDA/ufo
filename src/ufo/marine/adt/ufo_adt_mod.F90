@@ -9,7 +9,7 @@ module ufo_adt_mod
 
   use iso_c_binding
   use ufo_vars_mod
-  use ioda_locs_mod
+  use ufo_locs_mod
   use ufo_geovals_mod
   use kinds
   use ncd_kinds, only:  i_kind,r_single,r_kind,r_double

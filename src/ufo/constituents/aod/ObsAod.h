@@ -14,6 +14,7 @@
 #include <boost/scoped_ptr.hpp>
 
 #include "oops/base/Variables.h"
+#include "oops/util/DateTime.h"
 #include "oops/util/Logger.h"
 #include "oops/util/ObjectCounter.h"
 #include "ufo/constituents/FortranConstituents.h"
@@ -30,6 +31,7 @@ class ObsVector;
 
 namespace ufo {
 class GeoVaLs;
+class Locations;
 class ObsBias;
 
 // -----------------------------------------------------------------------------
@@ -48,6 +50,7 @@ class ObsAod : public ObsOperatorBase,
 // Other
   const oops::Variables & variables() const {return *varin_;}
   const oops::Variables & observed() const {return *varout_;}
+  Locations * locateObs(const util::DateTime &, const util::DateTime &) const;
 
   int & toFortran() {return keyOperAod_;}
   const int & toFortran() const {return keyOperAod_;}

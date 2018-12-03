@@ -8,12 +8,12 @@
 #include "ufo/ObsOperator.h"
 
 #include "eckit/config/Configuration.h"
-#include "ioda/Locations.h"
 #include "ioda/ObsSpace.h"
 #include "ioda/ObsVector.h"
 #include "oops/base/Variables.h"
 #include "oops/util/DateTime.h"
 #include "ufo/GeoVaLs.h"
+#include "ufo/Locations.h"
 #include "ufo/ObsBias.h"
 #include "ufo/ObsOperatorBase.h"
 
@@ -50,9 +50,9 @@ const oops::Variables & ObsOperator::observed() const {
 
 // -----------------------------------------------------------------------------
 
-ioda::Locations * ObsOperator::locations(const util::DateTime & t1,
-                                         const util::DateTime & t2) const {
-  return obsdb_.getLocations(t1, t2);
+Locations * ObsOperator::locations(const util::DateTime & t1,
+                                   const util::DateTime & t2) const {
+  return oper_->locateObs(t1, t2);
 }
 
 // -----------------------------------------------------------------------------

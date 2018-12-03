@@ -27,13 +27,13 @@ namespace util {
 }
 
 namespace ioda {
-  class Locations;
   class ObsSpace;
   class ObsVector;
 }
 
 namespace ufo {
   class GeoVaLs;
+  class Locations;
   class ObsBias;
   class ObsOperatorBase;
 
@@ -54,9 +54,8 @@ class ObsOperator : public util::Printable,
 /// Operator output variables
   const oops::Variables & observed() const;
 
-// TODO(YT): move locations method down to actual obs operators
-//           and remove obsdb_ from here
-  ioda::Locations * locations(const util::DateTime &, const util::DateTime &) const;
+/// Operator locations
+  Locations * locations(const util::DateTime &, const util::DateTime &) const;
 
  private:
   void print(std::ostream &) const;

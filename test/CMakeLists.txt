@@ -133,6 +133,18 @@ ecbuild_add_test( TARGET  test_ufo_geovals_constituents
                   ARGS    "testinput/ufotest_constituents.json"
                   LIBS    ufo )
 
+ecbuild_add_test( TARGET  test_ufo_locations_atmosphere
+                  BOOST
+                  SOURCES mains/TestLocations.cc
+                  ARGS    "testinput/ufotest_atmosphere.json"
+                  LIBS    ufo )
+
+ecbuild_add_test( TARGET  test_ufo_locations_constituents
+                  BOOST
+                  SOURCES mains/TestLocations.cc
+                  ARGS    "testinput/ufotest_constituents.json"
+                  LIBS    ufo )
+
 ecbuild_add_test( TARGET  test_ufo_amsua_opr
                   BOOST
                   SOURCES mains/TestObsOperator.cc
@@ -196,6 +208,12 @@ if( ${GSW_FOUND} )
     ecbuild_add_test( TARGET  test_ufo_geovals_marine
                       BOOST
                       SOURCES mains/TestGeoVaLs.cc
+                      ARGS    "testinput/ufotest_marine.yml"
+                      LIBS    ufo )
+
+    ecbuild_add_test( TARGET  test_ufo_locations_marine
+                      BOOST
+                      SOURCES mains/TestLocations.cc
                       ARGS    "testinput/ufotest_marine.yml"
                       LIBS    ufo )
 

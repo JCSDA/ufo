@@ -454,14 +454,14 @@ end subroutine ufo_geovals_copy
 !!
 
 subroutine ufo_geovals_analytic_init(self, locs, ic) 
-use ioda_locs_mod, only : ioda_locs
+use ufo_locs_mod, only : ufo_locs
 use dcmip_initial_conditions_test_1_2_3, only : test1_advection_deformation, &
                                   test1_advection_hadley, test3_gravity_wave  
 use dcmip_initial_conditions_test_4, only : test4_baroclinic_wave
 
 implicit none
 type(ufo_geovals), intent(inout) :: self
-type(ioda_locs), intent(in)      :: locs
+type(ufo_locs), intent(in)       :: locs
 character(*), intent(in)         :: ic
 
 real(kind_real) :: pi = acos(-1.0_kind_real)

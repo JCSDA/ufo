@@ -8,7 +8,7 @@
 module ufo_adt_tlad_mod
 
 use ufo_vars_mod
-use ioda_locs_mod
+use ufo_locs_mod
 use ufo_geovals_mod
 use kinds
 use iso_c_binding

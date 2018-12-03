@@ -81,4 +81,23 @@ end subroutine ufo_aircraft_simobs_c
 
 ! ------------------------------------------------------------------------------
 
+subroutine ufo_aircraft_locateobs_c(c_key_self, c_obsspace, c_t1, c_t2, c_locs) bind(c,name='ufo_aircraft_locateobs_f90')
+
+implicit none
+integer(c_int), intent(in)     :: c_key_self
+type(c_ptr), value, intent(in) :: c_obsspace
+type(c_ptr), intent(in)        :: c_t1, c_t2
+integer(c_int), intent(inout)  :: c_locs
+
+type(ufo_aircraft), pointer :: self
+
+character(len=*), parameter :: myname_="ufo_aircraft_locateobs_c"
+
+call ufo_aircraft_registry%get(c_key_self, self)
+call self%opr_locateobs(c_obsspace, c_t1, c_t2, c_locs)
+
+end subroutine ufo_aircraft_locateobs_c
+
+! ------------------------------------------------------------------------------
+
 end module ufo_aircraft_mod_c

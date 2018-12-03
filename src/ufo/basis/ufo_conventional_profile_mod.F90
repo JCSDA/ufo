@@ -10,10 +10,10 @@ module ufo_conventional_profile_mod
   use ufo_vars_mod
   use ufo_geovals_mod
   use ufo_geovals_mod_c,   only: ufo_geovals_registry
+  use ufo_locs_mod
   use vert_interp_mod
-  use ufo_basis_mod, only: ufo_basis
+  use ufo_basis_mod, only: ufo_basis, ufo_basis_locateobs
   use obsspace_mod
-
   integer, parameter :: max_string=800
 
 ! ------------------------------------------------------------------------------
@@ -26,6 +26,8 @@ module ufo_conventional_profile_mod
   contains
     procedure :: setup  => conventional_profile_setup_
     procedure :: simobs => conventional_profile_simobs_
+    procedure :: locateobs => conventional_profile_locateobs_
+
     final :: destructor
   end type ufo_conventional_profile
 
@@ -121,6 +123,66 @@ subroutine conventional_profile_simobs_(self, geovals, hofx, obss)
   deallocate(wf)
 
 end subroutine conventional_profile_simobs_
+
+! ------------------------------------------------------------------------------
+
+subroutine conventional_profile_locateobs_(self, obss, t1, t2, locs)
+  use datetime_mod
+  use twindow_utils_mod
+  use fckit_log_module, only : fckit_log
+
+  implicit none
+
+  class(ufo_conventional_profile), intent(in) :: self
+  type(c_ptr), value, intent(in)              :: obss
+  type(datetime), intent(in)                  :: t1, t2
+  type(ufo_locs), intent(inout)               :: locs
+
+  integer :: nlocs
+  type(datetime) :: refdate
+
+  character(len=*),parameter:: &
+     myname = "conventional_profile_locateobs_"
+  character(len=255) :: record
+  integer :: i
+  integer :: tw_nlocs
+  integer, dimension(:), allocatable :: tw_indx
+  real(kind_real), dimension(:), allocatable :: time, lon, lat
+
+  ! Local copies pre binning
+  nlocs = obsspace_get_nlocs(obss)
+  refdate = obsspace_get_refdate(obss)
+
+  allocate(time(nlocs), lon(nlocs), lat(nlocs))
+
+  call obsspace_get_db(obss, "MetaData", "time", time)
+
+  ! Generate the timing window indices
+  allocate(tw_indx(nlocs))
+  call gen_twindow_index(refdate, t1, t2, nlocs, time, tw_indx, tw_nlocs)
+
+  !!Each operator may have its own way to derive lon, lat from MetaData
+  !!BEGIN THIS PART CAN BE UNIQUE FOR SOME OBS OPERATORS
+  call obsspace_get_db(obss, "MetaData", "longitude", lon)
+  call obsspace_get_db(obss, "MetaData", "latitude", lat)
+
+  !Setup ufo locations
+  call ufo_locs_setup(locs, tw_nlocs)
+  do i = 1, tw_nlocs
+    locs%lon(i)  = lon(tw_indx(i))
+    locs%lat(i)  = lat(tw_indx(i))
+    locs%time(i) = time(tw_indx(i))
+  enddo
+  locs%indx = tw_indx(1:tw_nlocs)
+  !!END THIS PART CAN BE UNIQUE FOR SOME OBS OPERATORS
+
+  deallocate(time, lon, lat, tw_indx)
+
+
+  write(record,*) myname,': allocated/assigned obs locations'
+  call fckit_log%info(record)
+
+end subroutine conventional_profile_locateobs_
 
 ! ------------------------------------------------------------------------------
 

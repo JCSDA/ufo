@@ -17,6 +17,7 @@
 #include "ioda/ObsSpace.h"
 #include "oops/base/Variables.h"
 #include "oops/util/abor1_cpp.h"
+#include "oops/util/DateTime.h"
 #include "oops/util/Printable.h"
 
 namespace ioda {
@@ -26,6 +27,7 @@ class ObsVector;
 namespace ufo {
 class GeoVaLs;
 class ObsBias;
+class Locations;
 
 // -----------------------------------------------------------------------------
 /// Base class for observation operators
@@ -44,6 +46,9 @@ class ObsOperatorBase : public util::Printable,
 
 /// Operator output variables
   virtual const oops::Variables & observed() const = 0;
+
+/// Operator locations
+  virtual Locations * locateObs(const util::DateTime &, const util::DateTime &) const = 0;
 
  private:
   virtual void print(std::ostream &) const = 0;

@@ -29,6 +29,9 @@ extern "C" {
   void ufo_seaicefrac_delete_f90(F90hop &);
   void ufo_seaicefrac_simobs_f90(const F90hop &, const F90goms &, const ioda::ObsSpace &,
                                  const int &, const double &, const F90obias &);
+  void ufo_seaicefrac_locateobs_f90(const F90hop &, const ioda::ObsSpace &,
+                                    const util::DateTime * const *,
+                                    const util::DateTime * const *, F90locs &);
   void ufo_seaicefrac_tlad_setup_f90(F90hop &, const eckit::Configuration * const *);
   void ufo_seaicefrac_tlad_delete_f90(F90hop &);
   void ufo_seaicefrac_tlad_settraj_f90(const F90hop &, const F90goms &);
@@ -44,6 +47,9 @@ extern "C" {
   void ufo_seaicethick_delete_f90(F90hop &);
   void ufo_seaicethick_simobs_f90(const F90hop &, const F90goms &, const ioda::ObsSpace &,
                                   const int &, const double &, const F90obias &);
+  void ufo_seaicethick_locateobs_f90(const F90hop &, const ioda::ObsSpace &,
+                                     const util::DateTime * const *,
+                                     const util::DateTime * const *, F90locs &);
   void ufo_seaicethick_tlad_setup_f90(F90hop &, const eckit::Configuration * const *);
   void ufo_seaicethick_tlad_delete_f90(F90hop &);
   void ufo_seaicethick_tlad_settraj_f90(const F90hop &, const F90goms &);
@@ -59,6 +65,9 @@ extern "C" {
   void ufo_stericheight_delete_f90(F90hop &);
   void ufo_stericheight_simobs_f90(const F90hop &, const F90goms &, const ioda::ObsSpace &,
                                    const int &, const double &, const F90obias &);
+  void ufo_stericheight_locateobs_f90(const F90hop &, const ioda::ObsSpace &,
+                                      const util::DateTime * const *,
+                                      const util::DateTime * const *, F90locs &);
   void ufo_stericheight_tlad_setup_f90(F90hop &, const eckit::Configuration * const *);
   void ufo_stericheight_tlad_delete_f90(F90hop &);
   void ufo_stericheight_tlad_settraj_f90(const F90hop &, const F90goms &);
@@ -76,6 +85,9 @@ extern "C" {
   void ufo_insitutemperature_simobs_f90(const F90hop &, const F90goms &,
                                         const ioda::ObsSpace &, const int &, const double &,
                                         const F90obias &);
+  void ufo_insitutemperature_locateobs_f90(const F90hop &, const ioda::ObsSpace &,
+                                           const util::DateTime * const *,
+                                           const util::DateTime * const *, F90locs &);
   void ufo_insitutemperature_tlad_setup_f90(F90hop &, const eckit::Configuration * const *);
   void ufo_insitutemperature_tlad_delete_f90(F90hop &);
   void ufo_insitutemperature_tlad_settraj_f90(const F90hop &, const F90goms &,
@@ -94,6 +106,9 @@ extern "C" {
   void ufo_adt_delete_f90(F90hop &);
   void ufo_adt_simobs_f90(const F90hop &, const F90goms &, const ioda::ObsSpace &,
                           const int &, const double &, const F90obias &);
+  void ufo_adt_locateobs_f90(const F90hop &, const ioda::ObsSpace &,
+                             const util::DateTime * const *,
+                             const util::DateTime * const *, F90locs &);
   void ufo_adt_tlad_setup_f90(F90hop &, const eckit::Configuration * const *);
   void ufo_adt_tlad_delete_f90(F90hop &);
   void ufo_adt_tlad_settraj_f90(const F90hop &, const F90goms &, const ioda::ObsSpace &);
@@ -107,6 +122,9 @@ extern "C" {
   void ufo_seasurfacetemp_delete_f90(F90hop &);
   void ufo_seasurfacetemp_simobs_f90(const F90hop &, const F90goms &, const ioda::ObsSpace &,
                                      const int &, const double &, const F90obias &);
+  void ufo_seasurfacetemp_locateobs_f90(const F90hop &, const ioda::ObsSpace &,
+                                        const util::DateTime * const *,
+                                        const util::DateTime * const *, F90locs &);
   void ufo_seasurfacetemp_tlad_setup_f90(F90hop &, const eckit::Configuration * const *);
   void ufo_seasurfacetemp_tlad_delete_f90(F90hop &);
   void ufo_seasurfacetemp_tlad_settraj_f90(const F90hop &, const F90goms &);

@@ -10,7 +10,7 @@ module ufo_insitutemperature_tlad_mod
   use iso_c_binding
   use obsspace_mod
   use ufo_vars_mod
-  use ioda_locs_mod
+  use ufo_locs_mod
   use ufo_geovals_mod
   use kinds
   
