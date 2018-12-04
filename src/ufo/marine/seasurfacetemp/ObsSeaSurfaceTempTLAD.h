@@ -13,21 +13,19 @@
 
 #include <boost/scoped_ptr.hpp>
 
-#include "ioda/ObsSpace.h"
-
 #include "oops/base/Variables.h"
-#include "oops/util/Logger.h"
 #include "oops/util/ObjectCounter.h"
 
 #include "ufo/LinearObsOperatorBase.h"
-#include "ufo/marine/FortranMarine.h"
+#include "ufo/marine/seasurfacetemp/ObsSeaSurfaceTempTLAD.interface.h"
 
 // Forward declarations
-namespace util {
-  class DateTime;
+namespace eckit {
+  class Configuration;
 }
 
 namespace ioda {
+  class ObsSpace;
   class ObsVector;
 }
 
@@ -37,7 +35,7 @@ namespace ufo {
   class ObsBiasIncrement;
 
 // -----------------------------------------------------------------------------
-
+/// SeaSurfaceTemp TL/AD observation operator class
 class ObsSeaSurfaceTempTLAD : public LinearObsOperatorBase,
                               private util::ObjectCounter<ObsSeaSurfaceTempTLAD> {
  public:
@@ -54,14 +52,17 @@ class ObsSeaSurfaceTempTLAD : public LinearObsOperatorBase,
   // Other
   const oops::Variables & variables() const {return *varin_;}
 
-  int & toFortran() {return keyOperSeaSurfaceTemp_;}
-  const int & toFortran() const {return keyOperSeaSurfaceTemp_;}
+  int & toFortran() {return keyOper_;}
+  const int & toFortran() const {return keyOper_;}
 
  private:
   void print(std::ostream &) const;
-  F90hop keyOperSeaSurfaceTemp_;
+  F90hop keyOper_;
   const ioda::ObsSpace& odb_;
   boost::scoped_ptr<const oops::Variables> varin_;
 };
+
+// -----------------------------------------------------------------------------
+
 }  // namespace ufo
 #endif  // UFO_MARINE_SEASURFACETEMP_OBSSEASURFACETEMPTLAD_H_
