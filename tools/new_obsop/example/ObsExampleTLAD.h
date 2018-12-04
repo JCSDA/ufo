@@ -16,7 +16,7 @@
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
 
-#include "ufo/example/ObsExample.interface.h"
+#include "ufo/example/ObsExampleTLAD.interface.h"
 #include "ufo/LinearObsOperatorBase.h"
 
 // Forward declarations
@@ -35,7 +35,7 @@ namespace ufo {
   class ObsBiasIncrement;
 
 // -----------------------------------------------------------------------------
-/// Example for observation operator TL and AD class
+/// Example TL/AD observation operator class
 class ObsExampleTLAD : public LinearObsOperatorBase,
                        private util::ObjectCounter<ObsExampleTLAD> {
  public:
