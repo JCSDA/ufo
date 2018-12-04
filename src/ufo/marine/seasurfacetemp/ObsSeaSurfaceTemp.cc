@@ -31,7 +31,7 @@ ObsSeaSurfaceTemp::ObsSeaSurfaceTemp(const ioda::ObsSpace & odb,
 {
   const std::vector<std::string> vvin{"ocean_upper_level_temperature"};
   varin_.reset(new oops::Variables(vvin));
-  const std::vector<std::string> vvout{"zz"};
+  const std::vector<std::string> vvout{"obs_sst"};
   varout_.reset(new oops::Variables(vvout));
   const eckit::Configuration * configc = &config;
   ufo_seasurfacetemp_setup_f90(keyOper_, &configc);
