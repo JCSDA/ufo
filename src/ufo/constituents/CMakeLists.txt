@@ -4,7 +4,6 @@
 # which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 
 list( APPEND constituents_src_files
-    FortranConstituents.h
 )
 
 add_subdirectory( aod )

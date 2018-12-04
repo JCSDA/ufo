@@ -8,10 +8,12 @@ set ( aod_files
     ObsAod.cc
     ObsAodTLAD.h
     ObsAodTLAD.cc
+    ObsAod.interface.F90
+    ObsAod.interface.h
+    ObsAodTLAD.interface.F90
+    ObsAodTLAD.interface.h
     ufo_aod_misc.F90
-    ufo_aod_interface.F90
     ufo_aod_mod.F90
-    ufo_aod_tlad_interface.F90
     ufo_aod_tlad_mod.F90
     PARENT_SCOPE
 )

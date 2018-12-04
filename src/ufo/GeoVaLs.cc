@@ -15,7 +15,6 @@
 #include "oops/util/Logger.h"
 
 #include "ufo/Fortran.h"
-#include "ufo/FortranGeoVals.h"
 
 namespace ufo {
 
