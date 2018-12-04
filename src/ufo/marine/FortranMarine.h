@@ -53,22 +53,6 @@ extern "C" {
                                      const int &, const double &);
 
 // -----------------------------------------------------------------------------
-//  Steric Height observation operator and its tl/ad
-// -----------------------------------------------------------------------------
-  void ufo_stericheight_setup_f90(F90hop &, const eckit::Configuration * const *);
-  void ufo_stericheight_delete_f90(F90hop &);
-  void ufo_stericheight_simobs_f90(const F90hop &, const F90goms &, const ioda::ObsSpace &,
-                                   const int &, const double &, const F90obias &);
-  void ufo_stericheight_tlad_setup_f90(F90hop &, const eckit::Configuration * const *);
-  void ufo_stericheight_tlad_delete_f90(F90hop &);
-  void ufo_stericheight_tlad_settraj_f90(const F90hop &, const F90goms &);
-  void ufo_stericheight_tlad_gettraj_f90(const F90hop &, const int &, const int &, F90goms &);
-  void ufo_stericheight_simobs_tl_f90(const F90hop &, const F90goms &,
-                                      const int &, const double &);
-  void ufo_stericheight_simobs_ad_f90(const F90hop &, const F90goms &,
-                                      const int &, const double &);
-
-// -----------------------------------------------------------------------------
 //  Ocean Insitu Temperature observation operator and its tl/ad
 // -----------------------------------------------------------------------------
   void ufo_insitutemperature_setup_f90(F90hop &, const eckit::Configuration * const *);

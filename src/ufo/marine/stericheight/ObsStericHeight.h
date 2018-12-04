@@ -16,17 +16,17 @@
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
 
-#include "ufo/marine/FortranMarine.h"
+#include "ufo/marine/stericheight/ObsStericHeight.interface.h"
 #include "ufo/ObsOperatorBase.h"
 
-// Forward declarations
+/// Forward declarations
 namespace eckit {
   class Configuration;
 }
 
 namespace ioda {
-  class ObsVector;
   class ObsSpace;
+  class ObsVector;
 }
 
 namespace ufo {
@@ -34,7 +34,7 @@ namespace ufo {
   class ObsBias;
 
 // -----------------------------------------------------------------------------
-/// Steric height/ sea-level observation for UFO.
+/// Steric height/ sea-level observation operator class
 class ObsStericHeight : public ObsOperatorBase,
                         private util::ObjectCounter<ObsStericHeight> {
  public:
@@ -50,12 +50,12 @@ class ObsStericHeight : public ObsOperatorBase,
   const oops::Variables & variables() const {return *varin_;}
   const oops::Variables & observed() const {return *varout_;}
 
-  int & toFortran() {return keyOperStericHeight_;}
-  const int & toFortran() const {return keyOperStericHeight_;}
+  int & toFortran() {return keyOper_;}
+  const int & toFortran() const {return keyOper_;}
 
  private:
   void print(std::ostream &) const;
-  F90hop keyOperStericHeight_;
+  F90hop keyOper_;
   const ioda::ObsSpace& odb_;
   boost::scoped_ptr<const oops::Variables> varin_;
   boost::scoped_ptr<const oops::Variables> varout_;
