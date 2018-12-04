@@ -11,54 +11,48 @@
 #include <string>
 #include <vector>
 
-#include "eckit/config/Configuration.h"
-
-#include "ioda/ObsSpace.h"
 #include "ioda/ObsVector.h"
 
 #include "oops/base/Variables.h"
 
 #include "ufo/GeoVaLs.h"
 #include "ufo/ObsBias.h"
-#include "ufo/ObsBiasIncrement.h"
-#include "ufo/ObsOperatorBase.h"
+
 
 namespace ufo {
 
 // -----------------------------------------------------------------------------
-static ObsOperatorMaker<ObsStericHeight> makerObsStericHeight_("ObsStericHeight");
+static ObsOperatorMaker<ObsStericHeight> makerStericHeight_("StericHeight");
 // -----------------------------------------------------------------------------
 
 ObsStericHeight::ObsStericHeight(const ioda::ObsSpace & odb, const eckit::Configuration & config)
-  : keyOperStericHeight_(0), odb_(odb), varin_(), varout_()
+  : keyOper_(0), odb_(odb), varin_(), varout_()
 {
+  const std::vector<std::string> vvin{"sea_surface_height_above_geoid",
+                                      "ocean_potential_temperature",
+                                      "ocean_salinity"};
+  varin_.reset(new oops::Variables(vvin));
+  const std::vector<std::string> vvout{"zz"};
+  varout_.reset(new oops::Variables(vvout));
   const eckit::Configuration * configc = &config;
-  ufo_stericheight_setup_f90(keyOperStericHeight_, &configc);
-
-  const std::vector<std::string> vv{"sea_surface_height_above_geoid",
-                                    "ocean_potential_temperature",
-                                    "ocean_salinity"};
-  varin_.reset(new oops::Variables(vv));
-
-  const std::vector<std::string> vout{"zz"};
-  varout_.reset(new oops::Variables(vout));
-
+  ufo_stericheight_setup_f90(keyOper_, &configc);
   oops::Log::trace() << "ObsStericHeight created." << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
 ObsStericHeight::~ObsStericHeight() {
-  ufo_stericheight_delete_f90(keyOperStericHeight_);
+  ufo_stericheight_delete_f90(keyOper_);
   oops::Log::trace() << "ObsStericHeight destructed" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
-void ObsStericHeight::simulateObs(const GeoVaLs & gom, ioda::ObsVector & ovec,
-                             const ObsBias & bias) const {
-  ufo_stericheight_simobs_f90(keyOperStericHeight_, gom.toFortran(),
-                           odb_, ovec.size(), ovec.toFortran(), bias.toFortran());
+void ObsStericHeight::simulateObs(const GeoVaLs & gv, ioda::ObsVector & ovec,
+                              const ObsBias & bias) const {
+  ufo_stericheight_simobs_f90(keyOper_, gv.toFortran(), odb_, ovec.size(), ovec.toFortran(),
+                              bias.toFortran());
+  oops::Log::trace() << "ObsStericHeight: observation operator run" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

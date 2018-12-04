@@ -26,7 +26,7 @@ static ObsOperatorMaker<ObsExample> makerExample_("Example");
 // -----------------------------------------------------------------------------
 
 ObsExample::ObsExample(const ioda::ObsSpace & odb, const eckit::Configuration & config)
-  : keyOper_(0), varin_(), odb_(odb)
+  : keyOper_(0), odb_(odb), varin_(), varout_()
 {
   // TODO(anyone): list the variables for GeoVaLs that are needed for the observation
   //       operator below in vv (e.g., vv{"temperature", "humidity"})

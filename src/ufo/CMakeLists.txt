@@ -9,9 +9,10 @@ list( APPEND ufo_src_files
     BackgroundCheck.interface.F90
     BackgroundCheck.interface.h
     Fortran.h
-    FortranGeoVals.h
     GeoVaLs.cc
     GeoVaLs.h
+    GeoVaLs.interface.F90
+    GeoVaLs.interface.h
     LinearObsOperator.cc
     LinearObsOperator.h
     LinearObsOperatorBase.cc
@@ -25,7 +26,6 @@ list( APPEND ufo_src_files
     ObsOperatorBase.h
     UfoTrait.h
     ufo_bgcheck_mod.F90
-    ufo_geovals_interface.F90
     ufo_geovals_mod.F90
     ufo_variables_mod.F90
 )

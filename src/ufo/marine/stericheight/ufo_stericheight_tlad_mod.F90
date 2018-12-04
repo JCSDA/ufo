@@ -3,39 +3,59 @@
 ! This software is licensed under the terms of the Apache Licence Version 2.0
 ! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 
-!> Fortran module to handle steric height operator
+!> Fortran stericheight module for tl/ad observation operator
 
 module ufo_stericheight_tlad_mod
 
-use iso_c_binding
-use ufo_vars_mod
-use ufo_geovals_mod
-use kinds
+ use iso_c_binding
+ use config_mod
+ use kinds
 
-implicit none
-public :: ufo_stericheight_tlad
-public :: ufo_stericheight_tlad_settraj
-public :: ufo_stericheight_simobs_tl
-public :: ufo_stericheight_simobs_ad
-private
-integer, parameter :: max_string=800
+ use ufo_geovals_mod, only: ufo_geovals, ufo_geoval, ufo_geovals_get_var
+ use ufo_basis_tlad_mod, only: ufo_basis_tlad
+ use ufo_vars_mod
+ use obsspace_mod
 
-!> Fortran derived type for steric height observation operator
-type :: ufo_stericheight_tlad
-   integer :: nl = -1      !< number of levels for T & S
-end type ufo_stericheight_tlad
+ implicit none
+ private
 
+ integer, parameter :: max_string=800
 
-! ------------------------------------------------------------------------------
+ !> Fortran derived type for the tl/ad observation operator
+ type, extends(ufo_basis_tlad), public :: ufo_stericheight_tlad
+ private
+  integer :: nl = -1      !< number of levels for T & S
+ contains
+  procedure :: setup  => ufo_stericheight_tlad_setup
+  procedure :: delete  => ufo_stericheight_tlad_delete
+  procedure :: settraj => ufo_stericheight_tlad_settraj
+  procedure :: simobs_tl  => ufo_stericheight_simobs_tl
+  procedure :: simobs_ad  => ufo_stericheight_simobs_ad
+ end type ufo_stericheight_tlad
 
 contains
 
 ! ------------------------------------------------------------------------------
-
-subroutine ufo_stericheight_tlad_settraj(self, geovals)
+subroutine ufo_stericheight_tlad_setup(self, c_conf)
 implicit none
-type(ufo_stericheight_tlad), intent(inout) :: self
-type(ufo_geovals), intent(in)       :: geovals
+class(ufo_stericheight_tlad), intent(inout) :: self
+type(c_ptr),              intent(in)    :: c_conf
+
+end subroutine ufo_stericheight_tlad_setup
+
+! ------------------------------------------------------------------------------
+subroutine ufo_stericheight_tlad_delete(self)
+implicit none
+class(ufo_stericheight_tlad), intent(inout) :: self
+
+end subroutine ufo_stericheight_tlad_delete
+
+! ------------------------------------------------------------------------------
+subroutine ufo_stericheight_tlad_settraj(self, geovals, obss)
+implicit none
+class(ufo_stericheight_tlad), intent(inout) :: self
+type(ufo_geovals),       intent(in)    :: geovals
+type(c_ptr), value,      intent(in)    :: obss
 
 character(len=*), parameter :: myname_="ufo_stericheight_tlad_settraj"
 character(max_string) :: err_msg
@@ -54,15 +74,13 @@ print *, myname_, ' nval: ', geoval%nval
 
 end subroutine ufo_stericheight_tlad_settraj
 
-
 ! ------------------------------------------------------------------------------
-
-subroutine ufo_stericheight_simobs_tl(self, geovals, hofx)!, traj)
+subroutine ufo_stericheight_simobs_tl(self, geovals, hofx, obss)
 implicit none
-type(ufo_stericheight_tlad), intent(in) :: self
-type(ufo_geovals), intent(in)    :: geovals
-real(c_double),  intent(inout) :: hofx(:)
-!type(ufo_geovals), intent(in)    :: traj
+class(ufo_stericheight_tlad), intent(in)    :: self
+type(ufo_geovals),       intent(in)    :: geovals
+real(c_double),          intent(inout) :: hofx(:)
+type(c_ptr), value,      intent(in)    :: obss
 
 character(len=*), parameter :: myname_="ufo_stericheight_simobs_tl"
 character(max_string) :: err_msg
@@ -91,12 +109,12 @@ enddo
 end subroutine ufo_stericheight_simobs_tl
 
 ! ------------------------------------------------------------------------------
-
-subroutine ufo_stericheight_simobs_ad(self, geovals, hofx)
+subroutine ufo_stericheight_simobs_ad(self, geovals, hofx, obss)
 implicit none
-type(ufo_stericheight_tlad), intent(in) :: self
-type(ufo_geovals), intent(inout) :: geovals
-real(c_double),  intent(inout) :: hofx(:)
+class(ufo_stericheight_tlad), intent(in)    :: self
+type(ufo_geovals),       intent(inout) :: geovals
+real(c_double),          intent(in)    :: hofx(:)
+type(c_ptr), value,      intent(in)    :: obss
 
 character(len=*), parameter :: myname_="ufo_stericheight_simobs_ad"
 character(max_string) :: err_msg

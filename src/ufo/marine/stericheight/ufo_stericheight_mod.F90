@@ -1,39 +1,59 @@
 ! (C) Copyright 2017-2018 UCAR
-! 
+!
 ! This software is licensed under the terms of the Apache Licence Version 2.0
-! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
+! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 
-!> Fortran module to handle steric height operator
+!> Fortran stericheight module for observation operator
 
 module ufo_stericheight_mod
 
-use iso_c_binding
-use ufo_vars_mod
-use ufo_geovals_mod
-use kinds
-  
-implicit none
-public :: ufo_stericheight
-public :: ufo_stericheight_simobs
-private
-integer, parameter :: max_string=800
+ use iso_c_binding
+ use config_mod
+ use kinds
 
-!> Fortran derived type for steric height observation operator
-type :: ufo_stericheight
-end type ufo_stericheight
+ use ufo_geovals_mod, only: ufo_geovals, ufo_geoval, ufo_geovals_get_var
+ use ufo_basis_mod, only: ufo_basis
+ use ufo_vars_mod
+ use obsspace_mod
 
+ implicit none
+ private
 
-! ------------------------------------------------------------------------------
+ integer, parameter :: max_string=800
+
+!> Fortran derived type for the observation type
+ type, extends(ufo_basis), public :: ufo_stericheight
+ private
+ contains
+   procedure :: setup  => ufo_stericheight_setup
+   procedure :: delete => ufo_stericheight_delete
+   procedure :: simobs => ufo_stericheight_simobs
+ end type ufo_stericheight
 
 contains
- 
-! ------------------------------------------------------------------------------
 
-subroutine ufo_stericheight_simobs(self, geovals, hofx)
+! ------------------------------------------------------------------------------
+subroutine ufo_stericheight_setup(self, c_conf)
 implicit none
-type(ufo_stericheight), intent(in) :: self
-type(ufo_geovals), intent(in)    :: geovals
-real(c_double),  intent(inout) :: hofx(:)
+class(ufo_stericheight), intent(inout) :: self
+type(c_ptr),        intent(in)    :: c_conf
+
+end subroutine ufo_stericheight_setup
+
+! ------------------------------------------------------------------------------
+subroutine ufo_stericheight_delete(self)
+implicit none
+class(ufo_stericheight), intent(inout) :: self
+
+end subroutine ufo_stericheight_delete
+
+! ------------------------------------------------------------------------------
+subroutine ufo_stericheight_simobs(self, geovals, hofx, obss)
+implicit none
+class(ufo_stericheight), intent(in)    :: self
+type(ufo_geovals),  intent(in)    :: geovals
+real(c_double),     intent(inout) :: hofx(:)
+type(c_ptr), value, intent(in)    :: obss
 
 character(len=*), parameter :: myname_="ufo_stericheight_simobs"
 character(max_string) :: err_msg

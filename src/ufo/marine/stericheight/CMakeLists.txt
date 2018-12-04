@@ -8,9 +8,11 @@ set ( stericheight_files
     ObsStericHeight.cc
     ObsStericHeightTLAD.h
     ObsStericHeightTLAD.cc
-    ufo_stericheight_interface.F90
+    ObsStericHeight.interface.F90
+    ObsStericHeight.interface.h
+    ObsStericHeightTLAD.interface.F90
+    ObsStericHeightTLAD.interface.h
     ufo_stericheight_mod.F90
-    ufo_stericheight_tlad_interface.F90
     ufo_stericheight_tlad_mod.F90
     PARENT_SCOPE
 )

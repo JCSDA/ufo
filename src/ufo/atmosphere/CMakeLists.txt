@@ -4,7 +4,6 @@
 # which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 
 list( APPEND atmosphere_src_files
-    FortranAtmosphere.h
 )
 add_subdirectory( radiosonde )
 add_subdirectory( radiance )

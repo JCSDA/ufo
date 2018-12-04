@@ -17,16 +17,16 @@
 #include "oops/util/ObjectCounter.h"
 
 #include "ufo/LinearObsOperatorBase.h"
-#include "ufo/marine/FortranMarine.h"
+#include "ufo/marine/insitutemperature/ObsInsituTemperatureTLAD.interface.h"
 
 // Forward declarations
-namespace util {
-  class DateTime;
+namespace eckit {
+  class Configuration;
 }
 
 namespace ioda {
-  class ObsVector;
   class ObsSpace;
+  class ObsVector;
 }
 
 namespace ufo {
@@ -35,7 +35,7 @@ namespace ufo {
   class ObsBiasIncrement;
 
 // -----------------------------------------------------------------------------
-/// Temperature Profile observation for model.
+/// InsituTemperature for observation operator TL and AD class
 class ObsInsituTemperatureTLAD : public LinearObsOperatorBase,
                                  private util::ObjectCounter<ObsInsituTemperatureTLAD> {
  public:
@@ -52,12 +52,12 @@ class ObsInsituTemperatureTLAD : public LinearObsOperatorBase,
   // Other
   const oops::Variables & variables() const {return *varin_;}
 
-  int & toFortran() {return keyOperInsituTemperature_;}
-  const int & toFortran() const {return keyOperInsituTemperature_;}
+  int & toFortran() {return keyOper_;}
+  const int & toFortran() const {return keyOper_;}
 
  private:
   void print(std::ostream &) const;
-  F90hop keyOperInsituTemperature_;
+  F90hop keyOper_;
   const ioda::ObsSpace& odb_;
   boost::scoped_ptr<const oops::Variables> varin_;
 };
