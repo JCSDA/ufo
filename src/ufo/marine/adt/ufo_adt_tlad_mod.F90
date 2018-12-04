@@ -22,8 +22,6 @@ module ufo_adt_tlad_mod
  integer, parameter :: max_string=800
 
  !> Fortran derived type for the tl/ad observation operator
- ! TODO: add to the below type what you need for your tl/ad observation operator
- !       this type can hold information on trajectory, for adt
  type, extends(ufo_basis_tlad), public :: ufo_adt_tlad
  private
   integer          :: nlocs           !< Local number of obs
@@ -40,7 +38,6 @@ module ufo_adt_tlad_mod
 contains
 
 ! ------------------------------------------------------------------------------
-! TODO: add setup of your TL/AD observation operator (optional)
 subroutine ufo_adt_tlad_setup(self, c_conf)
 implicit none
 class(ufo_adt_tlad), intent(inout) :: self
@@ -49,7 +46,6 @@ type(c_ptr),              intent(in)    :: c_conf
 end subroutine ufo_adt_tlad_setup
 
 ! ------------------------------------------------------------------------------
-! TODO: add cleanup of your TL/AD observation operator (optional)
 subroutine ufo_adt_tlad_delete(self)
 implicit none
 class(ufo_adt_tlad), intent(inout) :: self
