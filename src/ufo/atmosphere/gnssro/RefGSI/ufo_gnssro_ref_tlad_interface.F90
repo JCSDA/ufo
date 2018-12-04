@@ -37,7 +37,8 @@ type(c_ptr), intent(in)    :: c_conf
 type(ufo_gnssro_Ref_tlad), pointer :: self
 
 call ufo_gnssro_Ref_tlad_registry%setup(c_key_self, self)
-    
+call self%setup(c_conf)
+   
 end subroutine ufo_gnssro_ref_tlad_setup_c
   
 ! ------------------------------------------------------------------------------
