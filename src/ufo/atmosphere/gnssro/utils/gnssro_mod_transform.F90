@@ -76,7 +76,7 @@ end subroutine  geometric2geop
     real(kind_real), intent(in) :: temperature, specH, pressure
     real(kind_real), intent(out) :: refr
     real(kind_real) :: fact,pw,refr1,refr2,refr3, tfact
-    logical      ,intent(in)  :: use_compress       
+    integer(c_int),intent(in)   :: use_compress
 
    ! constants needed to compute refractivity
     call gnssro_ref_constants(use_compress)
@@ -97,8 +97,7 @@ end subroutine  geometric2geop
     real(kind_real), intent(in) :: virT, specH, pressure 
     real(kind_real), intent(out) :: refr
     real(kind_real) :: fact,pw,refr1,refr2,refr3
-    logical      ,intent(in)  :: use_compress       ! use computed compressibility or value as 1
-
+    integer(c_int),intent(in)   :: use_compress
     ! constants needed to compute refractivity
     call gnssro_ref_constants(use_compress)
 

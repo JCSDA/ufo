@@ -11,6 +11,7 @@
     "ObsTypes": [
       {
         "ObsType": "GnssroRef",
+        "ObsOptions":{},
         "ObsData": {
           "ObsDataIn": {
             "obsfile":"Data/gnssro_ref_obs.nc4"

@@ -38,6 +38,7 @@ type(c_ptr), intent(in)    :: c_conf
 type(ufo_gnssro_BndGSI), pointer :: self
 
 call ufo_gnssro_BndGSI_registry%setup(c_key_self, self)
+call self%setup(c_conf)
     
 end subroutine ufo_gnssro_BndGSI_setup_c
   
