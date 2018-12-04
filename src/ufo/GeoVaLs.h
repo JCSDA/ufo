@@ -15,7 +15,7 @@
 #include "oops/util/ObjectCounter.h"
 #include "oops/util/Printable.h"
 
-#include "ufo/GeoVals.interface.h"
+#include "ufo/GeoVaLs.interface.h"
 
 namespace eckit {
   class Configuration;

@@ -11,8 +11,8 @@ list( APPEND ufo_src_files
     Fortran.h
     GeoVaLs.cc
     GeoVaLs.h
-    GeoVals.interface.F90
-    GeoVals.interface.h
+    GeoVaLs.interface.F90
+    GeoVaLs.interface.h
     LinearObsOperator.cc
     LinearObsOperator.h
     LinearObsOperatorBase.cc
