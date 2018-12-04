@@ -31,7 +31,7 @@ ObsSeaIceThickness::ObsSeaIceThickness(const ioda::ObsSpace & odb,
 {
   const std::vector<std::string> vvin{"ice_concentration", "ice_thickness"};
   varin_.reset(new oops::Variables(vvin));
-  const std::vector<std::string> vvout{"zz"};
+  const std::vector<std::string> vvout{"obs_sea_ice_thickness"};
   varout_.reset(new oops::Variables(vvout));
   const eckit::Configuration * configc = &config;
   ufo_seaicethickness_setup_f90(keyOper_, &configc);

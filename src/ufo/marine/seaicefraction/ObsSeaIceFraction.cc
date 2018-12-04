@@ -31,7 +31,7 @@ ObsSeaIceFraction::ObsSeaIceFraction(const ioda::ObsSpace & odb,
 {
   const std::vector<std::string> vvin{"ice_concentration"};
   varin_.reset(new oops::Variables(vvin));
-  const std::vector<std::string> vvout{"zz"};
+  const std::vector<std::string> vvout{"obs_sea_ice_concentration"};
   varout_.reset(new oops::Variables(vvout));
   const eckit::Configuration * configc = &config;
   ufo_seaicefraction_setup_f90(keyOper_, &configc);
