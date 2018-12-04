@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2017 UCAR
+ * (C) Copyright 2017-2018 UCAR
  * 
  * This software is licensed under the terms of the Apache Licence Version 2.0
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
@@ -13,25 +13,28 @@
 
 #include <boost/scoped_ptr.hpp>
 
-#include "eckit/config/Configuration.h"
-
-#include "ioda/Locations.h"
-#include "ioda/ObsSpace.h"
-#include "ioda/ObsVector.h"
-
 #include "oops/base/Variables.h"
-#include "oops/util/Logger.h"
 #include "oops/util/ObjectCounter.h"
 
-#include "ufo/GeoVaLs.h"
-#include "ufo/marine/FortranMarine.h"
-#include "ufo/ObsBias.h"
+#include "ufo/marine/seasurfacetemp/ObsSeaSurfaceTemp.interface.h"
 #include "ufo/ObsOperatorBase.h"
 
+/// Forward declarations
+namespace eckit {
+  class Configuration;
+}
+
+namespace ioda {
+  class ObsSpace;
+  class ObsVector;
+}
+
 namespace ufo {
+  class GeoVaLs;
+  class ObsBias;
 
 // -----------------------------------------------------------------------------
-
+/// Sea surface temperature observation operator class
 class ObsSeaSurfaceTemp : public ObsOperatorBase,
                           private util::ObjectCounter<ObsSeaSurfaceTemp> {
  public:
@@ -47,18 +50,18 @@ class ObsSeaSurfaceTemp : public ObsOperatorBase,
   const oops::Variables & variables() const {return *varin_;}
   const oops::Variables & observed() const {return *varout_;}
 
-  int & toFortran() {return keyOperSeaSurfaceTemp_;}
-  const int & toFortran() const {return keyOperSeaSurfaceTemp_;}
+  int & toFortran() {return keyOper_;}
+  const int & toFortran() const {return keyOper_;}
 
  private:
   void print(std::ostream &) const;
-  F90hop keyOperSeaSurfaceTemp_;
+  F90hop keyOper_;
   const ioda::ObsSpace& odb_;
   boost::scoped_ptr<const oops::Variables> varin_;
   boost::scoped_ptr<const oops::Variables> varout_;
 };
 
+// -----------------------------------------------------------------------------
+
 }  // namespace ufo
-
 #endif  // UFO_MARINE_SEASURFACETEMP_OBSSEASURFACETEMP_H_
-
