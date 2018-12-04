@@ -10,9 +10,8 @@ module ufo_conventional_profile_mod
   use ufo_vars_mod
   use ufo_geovals_mod
   use ufo_geovals_mod_c,   only: ufo_geovals_registry
-  use ufo_locs_mod
   use vert_interp_mod
-  use ufo_basis_mod, only: ufo_basis, ufo_basis_locateobs
+  use ufo_basis_mod, only: ufo_basis
   use obsspace_mod
   integer, parameter :: max_string=800
 
@@ -130,6 +129,7 @@ subroutine conventional_profile_locateobs_(self, obss, t1, t2, locs)
   use datetime_mod
   use twindow_utils_mod
   use fckit_log_module, only : fckit_log
+  use ufo_locs_mod, only: ufo_locs, ufo_locs_setup
 
   implicit none
 
@@ -155,16 +155,17 @@ subroutine conventional_profile_locateobs_(self, obss, t1, t2, locs)
 
   allocate(time(nlocs), lon(nlocs), lat(nlocs))
 
+  !!Each operator may have its own way to derive time, lon, lat from MetaData
+  !!BEGIN THIS PART CAN BE UNIQUE FOR SOME OBS OPERATORS
   call obsspace_get_db(obss, "MetaData", "time", time)
 
   ! Generate the timing window indices
   allocate(tw_indx(nlocs))
   call gen_twindow_index(refdate, t1, t2, nlocs, time, tw_indx, tw_nlocs)
 
-  !!Each operator may have its own way to derive lon, lat from MetaData
-  !!BEGIN THIS PART CAN BE UNIQUE FOR SOME OBS OPERATORS
   call obsspace_get_db(obss, "MetaData", "longitude", lon)
   call obsspace_get_db(obss, "MetaData", "latitude", lat)
+  !!END THIS PART CAN BE UNIQUE FOR SOME OBS OPERATORS
 
   !Setup ufo locations
   call ufo_locs_setup(locs, tw_nlocs)
@@ -174,7 +175,6 @@ subroutine conventional_profile_locateobs_(self, obss, t1, t2, locs)
     locs%time(i) = time(tw_indx(i))
   enddo
   locs%indx = tw_indx(1:tw_nlocs)
-  !!END THIS PART CAN BE UNIQUE FOR SOME OBS OPERATORS
 
   deallocate(time, lon, lat, tw_indx)
 

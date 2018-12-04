@@ -5,8 +5,8 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#ifndef UFO_FORTRANLOCATIONS_H_
-#define UFO_FORTRANLOCATIONS_H_
+#ifndef UFO_LOCATIONS_INTERFACE_H_
+#define UFO_LOCATIONS_INTERFACE_H_
 
 #include "Fortran.h"
 
@@ -31,4 +31,4 @@ extern "C" {
 }  // extern C
 
 }  // namespace ufo
-#endif  // UFO_FORTRANLOCATIONS_H_
+#endif  // UFO_LOCATIONS_INTERFACE_H_

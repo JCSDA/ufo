@@ -8,9 +8,9 @@ module ufo_basis_mod
   use iso_c_binding
   use ufo_geovals_mod
   use ufo_geovals_mod_c,   only: ufo_geovals_registry
-  use ufo_locs_mod
+  use ufo_locs_mod, only: ufo_locs, ufo_locs_setup
   use ufo_locs_mod_c, only : ufo_locs_registry
-  use datetime_mod
+  use datetime_mod, only: datetime, c_f_datetime
 
   type, abstract :: ufo_basis
     private
@@ -18,8 +18,7 @@ module ufo_basis_mod
     procedure, non_overridable :: opr_simobs  => opr_simobs_
     procedure(simobs_), deferred  :: simobs
     procedure, non_overridable :: opr_locateobs  => opr_locateobs_
-    procedure :: locateobs => ufo_basis_locateobs !Overridable in extending types
-!    procedure(locateobs_), deferred  :: locateobs 
+    procedure :: locateobs => ufo_basis_locateobs_
   end type ufo_basis
 
   abstract interface
@@ -35,20 +34,6 @@ module ufo_basis_mod
       real(c_double),           intent(inout) :: hofx(:)
       type(c_ptr), value,       intent(in)    :: obss
     end subroutine simobs_
-
-  ! ------------------------------------------------------------------------------
-
-    subroutine locateobs_(self, obss, t1, t2, locs)
-!    subroutine locateobs_(obss, t1, t2, locs)
-      use iso_c_binding
-      use datetime_mod
-      import ufo_basis, ufo_locs!, datetime_mod
-      implicit none
-      class(ufo_basis),         intent(in)    :: self
-      type(c_ptr), value,       intent(in)    :: obss
-      type(datetime),           intent(in)    :: t1, t2
-      type(ufo_locs),           intent(inout) :: locs
-    end subroutine locateobs_
 
   ! ------------------------------------------------------------------------------
 
@@ -90,9 +75,7 @@ contains
     call c_f_datetime(c_t1, t1)
     call c_f_datetime(c_t2, t2)
 
-    call ufo_locs_registry%init()
-    call ufo_locs_registry%add(c_locs)
-    call ufo_locs_registry%get(c_locs,locs)
+    call ufo_locs_registry%setup(c_locs,locs)
 
     call self%locateobs(c_obsspace, t1, t2, locs)
 
@@ -100,8 +83,7 @@ contains
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_basis_locateobs(self, obss, t1, t2, locs)
-!subroutine ufo_basis_locateobs(obss, t1, t2, locs)
+subroutine ufo_basis_locateobs_(self, obss, t1, t2, locs)
   use kinds
 !  use datetime_mod
   use twindow_utils_mod
@@ -119,7 +101,7 @@ subroutine ufo_basis_locateobs(self, obss, t1, t2, locs)
   type(datetime) :: refdate
 
   character(len=*),parameter:: &
-     myname = "ufo_basis_locateobs"
+     myname = "ufo_basis_locateobs_"
   character(len=255) :: record
   integer :: i
   integer :: tw_nlocs
@@ -129,11 +111,12 @@ subroutine ufo_basis_locateobs(self, obss, t1, t2, locs)
   ! Local copies pre binning
   nlocs = obsspace_get_nlocs(obss)
   refdate = obsspace_get_refdate(obss)  !!FUNCTION
-!  call obsspace_get_refdate(obss,refdate)  !!SUBROUTINE
 
   allocate(time(nlocs), lon(nlocs), lat(nlocs))
 
-!TODO(JG): Add "MetaData" or similar attribute to all ObsSpace's 
+  !!Each operator may have its own way to derive time, lon, lat from MetaData
+  !!BEGIN THIS PART CAN BE UNIQUE FOR SOME OBS OPERATORS
+!TODO(JG): Add "MetaData" or similar group attribute to all ioda ObsSpace objects
 !  call obsspace_get_db(obss, "MetaData", "time", time)
   call obsspace_get_db(obss, "", "time", time)
 
@@ -141,13 +124,12 @@ subroutine ufo_basis_locateobs(self, obss, t1, t2, locs)
   allocate(tw_indx(nlocs))
   call gen_twindow_index(refdate, t1, t2, nlocs, time, tw_indx, tw_nlocs)
 
-  !!Each operator may have its own way to derive lon, lat from MetaData
-  !!BEGIN THIS PART CAN BE UNIQUE FOR SOME OBS OPERATORS
-!TODO(JG): Add "MetaData" or similar attribute to all ObsSpace's 
+!TODO(JG): Add "MetaData" or similar group attribute to all ioda ObsSpace objects
 !  call obsspace_get_db(obss, "MetaData", "longitude", lon)
 !  call obsspace_get_db(obss, "MetaData", "latitude", lat)
   call obsspace_get_db(obss, "", "longitude", lon)
   call obsspace_get_db(obss, "", "latitude", lat)
+  !!END THIS PART CAN BE UNIQUE FOR SOME OBS OPERATORS
 
   !Setup ufo locations
   call ufo_locs_setup(locs, tw_nlocs)
@@ -157,14 +139,13 @@ subroutine ufo_basis_locateobs(self, obss, t1, t2, locs)
     locs%time(i) = time(tw_indx(i))
   enddo
   locs%indx = tw_indx(1:tw_nlocs)
-  !!END THIS PART CAN BE UNIQUE FOR SOME OBS OPERATORS
 
   deallocate(time, lon, lat, tw_indx)
 
   write(record,*) myname,': allocated/assigned obs locations'
   call fckit_log%info(record)
 
-end subroutine ufo_basis_locateobs
+end subroutine ufo_basis_locateobs_
 
 ! ------------------------------------------------------------------------------
 

@@ -48,9 +48,7 @@ type(ufo_locs), pointer :: self
 real(kind_real) :: lats(klocs)
 real(kind_real) :: lons(klocs)
 
-call ufo_locs_registry%init()
-call ufo_locs_registry%add(key)
-call ufo_locs_registry%get(key, self)
+call ufo_locs_registry%setup(key, self)
 
 lats(:) = klats(:)
 lons(:) = klons(:)

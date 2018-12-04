@@ -15,8 +15,7 @@
 
 #include "oops/util/Logger.h"
 
-#include "ufo/Fortran.h"
-#include "ufo/FortranLocations.h"
+#include "ufo/Locations.interface.h"
 
 namespace ufo {
 

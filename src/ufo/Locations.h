@@ -11,10 +11,10 @@
 #include <ostream>
 #include <string>
 
-#include "Fortran.h"
-#include "FortranLocations.h"
 #include "oops/util/ObjectCounter.h"
 #include "oops/util/Printable.h"
+
+#include "ufo/Locations.interface.h"
 
 namespace eckit {
   class Configuration;
