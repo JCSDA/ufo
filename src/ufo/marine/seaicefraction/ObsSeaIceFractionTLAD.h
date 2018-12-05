@@ -14,19 +14,19 @@
 #include <boost/scoped_ptr.hpp>
 
 #include "oops/base/Variables.h"
-#include "oops/util/Logger.h"
 #include "oops/util/ObjectCounter.h"
+
 #include "ufo/LinearObsOperatorBase.h"
-#include "ufo/marine/FortranMarine.h"
+#include "ufo/marine/seaicefraction/ObsSeaIceFractionTLAD.interface.h"
 
 // Forward declarations
-namespace util {
-  class DateTime;
+namespace eckit {
+  class Configuration;
 }
 
 namespace ioda {
-  class ObsVector;
   class ObsSpace;
+  class ObsVector;
 }
 
 namespace ufo {
@@ -35,7 +35,7 @@ namespace ufo {
   class ObsBiasIncrement;
 
 // -----------------------------------------------------------------------------
-/// Sea-ice fraction observation for  model.
+/// Sea-ice fraction TL/AD observation operator class
 class ObsSeaIceFractionTLAD : public LinearObsOperatorBase,
                               private util::ObjectCounter<ObsSeaIceFractionTLAD> {
  public:
@@ -52,12 +52,13 @@ class ObsSeaIceFractionTLAD : public LinearObsOperatorBase,
   // Other
   const oops::Variables & variables() const {return *varin_;}
 
-  int & toFortran() {return keyOperSeaIceFraction_;}
-  const int & toFortran() const {return keyOperSeaIceFraction_;}
+  int & toFortran() {return keyOper_;}
+  const int & toFortran() const {return keyOper_;}
 
  private:
   void print(std::ostream &) const;
-  F90hop keyOperSeaIceFraction_;
+  F90hop keyOper_;
+  const ioda::ObsSpace& odb_;
   boost::scoped_ptr<const oops::Variables> varin_;
 };
 
