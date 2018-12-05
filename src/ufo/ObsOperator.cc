@@ -22,7 +22,7 @@ namespace ufo {
 // -----------------------------------------------------------------------------
 
 ObsOperator::ObsOperator(const ioda::ObsSpace & os, const eckit::Configuration & conf)
-  : obsdb_(os), oper_(ObsOperatorFactory::create(os, conf))
+  : oper_(ObsOperatorFactory::create(os, conf))
 {}
 
 // -----------------------------------------------------------------------------
