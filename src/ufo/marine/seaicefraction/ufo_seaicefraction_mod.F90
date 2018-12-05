@@ -1,44 +1,63 @@
 ! (C) Copyright 2017-2018 UCAR
-! 
+!
 ! This software is licensed under the terms of the Apache Licence Version 2.0
-! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
+! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 
-!> Fortran module to handle ice concentration observations
+!> Fortran module for seaicefraction observation operator
 
 module ufo_seaicefraction_mod
 
-  use iso_c_binding
-  use ufo_vars_mod
-  use ufo_geovals_mod
-  use kinds
+ use iso_c_binding
+ use config_mod
+ use kinds
 
-  implicit none
-  public :: ufo_seaicefraction
-  public :: ufo_seaicefraction_simobs
-  private
-  integer, parameter :: max_string=800
+ use ufo_geovals_mod, only: ufo_geovals, ufo_geoval, ufo_geovals_get_var
+ use ufo_basis_mod, only: ufo_basis
+ use ufo_vars_mod
+ use obsspace_mod
 
-  !> Fortran derived type for sea ice fraction observation operator
-  type :: ufo_seaicefraction
-  end type ufo_seaicefraction
+ implicit none
+ private
 
+ integer, parameter :: max_string=800
 
-  ! ------------------------------------------------------------------------------
+!> Fortran derived type for the observation type
+ type, extends(ufo_basis), public :: ufo_seaicefraction
+ private
+ contains
+   procedure :: setup  => ufo_seaicefraction_setup
+   procedure :: delete => ufo_seaicefraction_delete
+   procedure :: simobs => ufo_seaicefraction_simobs
+ end type ufo_seaicefraction
 
 contains
 
-  ! ------------------------------------------------------------------------------
+! ------------------------------------------------------------------------------
+subroutine ufo_seaicefraction_setup(self, c_conf)
+implicit none
+class(ufo_seaicefraction), intent(inout) :: self
+type(c_ptr),        intent(in)    :: c_conf
 
-  subroutine ufo_seaicefraction_simobs(self, geovals, hofx)
-    use ufo_marine_ncutils
-    use ufo_vars_mod
-        
-    implicit none
-    type(ufo_seaicefraction), intent(in) :: self
-    type(ufo_geovals), intent(in)    :: geovals
-    real(c_double),  intent(inout) :: hofx(:)
+end subroutine ufo_seaicefraction_setup
 
-    character(len=*), parameter :: myname_="ufo_seaicefraction_simobs"
+! ------------------------------------------------------------------------------
+subroutine ufo_seaicefraction_delete(self)
+implicit none
+class(ufo_seaicefraction), intent(inout) :: self
+
+end subroutine ufo_seaicefraction_delete
+
+! ------------------------------------------------------------------------------
+! Code in this routine is for seaicefraction only, please remove and replace
+subroutine ufo_seaicefraction_simobs(self, geovals, hofx, obss)
+use ufo_marine_ncutils
+implicit none
+class(ufo_seaicefraction), intent(in)    :: self
+type(ufo_geovals),  intent(in)    :: geovals
+real(c_double),     intent(inout) :: hofx(:)
+type(c_ptr), value, intent(in)    :: obss
+
+    character(len=*), parameter :: myname_="ufo_seaicefrac_simobs"
     character(max_string) :: err_msg
 
     integer :: iobs
@@ -77,6 +96,6 @@ contains
     call sic_out%write_geoval(var_seaicefrac,geoval,arg_dim_name=dim_name)
     call sic_out%finalize()
 
-  end subroutine ufo_seaicefraction_simobs
+end subroutine ufo_seaicefraction_simobs
 
 end module ufo_seaicefraction_mod

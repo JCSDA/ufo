@@ -17,9 +17,10 @@
 #include "oops/util/DateTime.h"
 #include "oops/util/ObjectCounter.h"
 
-#include "ufo/marine/FortranMarine.h"
+#include "ufo/marine/seaicethickness/ObsSeaIceThickness.interface.h"
 #include "ufo/ObsOperatorBase.h"
 
+/// Forward declarations
 namespace eckit {
   class Configuration;
 }
@@ -35,7 +36,7 @@ namespace ufo {
   class ObsBias;
 
 // -----------------------------------------------------------------------------
-/// Total ice concentration observation for UFO.
+/// Sea ice thickness observation operator class
 class ObsSeaIceThickness : public ObsOperatorBase,
                            private util::ObjectCounter<ObsSeaIceThickness> {
  public:
@@ -52,12 +53,12 @@ class ObsSeaIceThickness : public ObsOperatorBase,
   const oops::Variables & observed() const {return *varout_;}
   Locations * locateObs(const util::DateTime &, const util::DateTime &) const;
 
-  int & toFortran() {return keyOperSeaIceThickness_;}
-  const int & toFortran() const {return keyOperSeaIceThickness_;}
+  int & toFortran() {return keyOper_;}
+  const int & toFortran() const {return keyOper_;}
 
  private:
   void print(std::ostream &) const;
-  F90hop keyOperSeaIceThickness_;
+  F90hop keyOper_;
   const ioda::ObsSpace& odb_;
   boost::scoped_ptr<const oops::Variables> varin_;
   boost::scoped_ptr<const oops::Variables> varout_;

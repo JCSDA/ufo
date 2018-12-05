@@ -27,7 +27,8 @@ namespace ufo {
 static ObsOperatorMaker<ObsExample> makerExample_("Example");
 // -----------------------------------------------------------------------------
 
-ObsExample::ObsExample(const ioda::ObsSpace & odb, const eckit::Configuration & config)
+ObsExample::ObsExample(const ioda::ObsSpace & odb,
+                       const eckit::Configuration & config)
   : keyOper_(0), odb_(odb), varin_(), varout_()
 {
   // TODO(anyone): list the variables for GeoVaLs that are needed for the observation
