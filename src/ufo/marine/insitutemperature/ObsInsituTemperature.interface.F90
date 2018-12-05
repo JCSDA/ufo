@@ -83,4 +83,23 @@ end subroutine ufo_insitutemperature_simobs_c
 
 ! ------------------------------------------------------------------------------
 
+subroutine ufo_insitutemperature_locateobs_c(c_key_self, c_obsspace, c_t1, c_t2, c_locs) bind(c,name='ufo_insitutemperature_locateobs_f90')
+
+implicit none
+integer(c_int), intent(in)     :: c_key_self
+type(c_ptr), value, intent(in) :: c_obsspace
+type(c_ptr), intent(in)        :: c_t1, c_t2
+integer(c_int), intent(inout)  :: c_locs
+
+type(ufo_insitutemperature), pointer :: self
+
+character(len=*), parameter :: myname_="ufo_insitutemperature_locateobs_c"
+
+call ufo_insitutemperature_registry%get(c_key_self, self)
+call self%opr_locateobs(c_obsspace, c_t1, c_t2, c_locs)
+
+end subroutine ufo_insitutemperature_locateobs_c
+
+! ------------------------------------------------------------------------------
+
 end module ufo_insitutemperature_mod_c
