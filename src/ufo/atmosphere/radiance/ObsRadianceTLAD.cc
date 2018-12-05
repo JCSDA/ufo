@@ -24,7 +24,8 @@
 namespace ufo {
 
 // -----------------------------------------------------------------------------
-static LinearObsOperatorMaker<ObsRadianceTLAD> makerRadianceTL_("Radiance");
+static LinearObsOperatorMaker<ObsRadianceTLAD> makerAmsuaTL_("AMSU-A");
+static LinearObsOperatorMaker<ObsRadianceTLAD> makerAvhrrTL_("AVHRR");
 // -----------------------------------------------------------------------------
 
 ObsRadianceTLAD::ObsRadianceTLAD(const ioda::ObsSpace & odb, const eckit::Configuration & config)

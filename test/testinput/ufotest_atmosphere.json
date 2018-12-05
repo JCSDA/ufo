@@ -13,7 +13,7 @@
   "Observations": {
     "ObsTypes": [
       {
-        "ObsType": "Radiance",
+        "ObsType": "AMSU-A",
         "channels": "1-15",
         "ObsOptions": {
           "n_Absorbers": "3",
