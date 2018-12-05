@@ -17,7 +17,7 @@
 #include "oops/util/DateTime.h"
 #include "oops/util/Logger.h"
 #include "oops/util/ObjectCounter.h"
-#include "ufo/atmosphere/FortranAtmosphere.h"
+#include "ufo/atmosphere/radiance/ObsRadiance.interface.h"
 #include "ufo/ObsOperatorBase.h"
 
 namespace eckit {

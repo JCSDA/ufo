@@ -17,6 +17,7 @@
 #include "oops/util/DateTime.h"
 #include "oops/util/ObjectCounter.h"
 
+#include "ufo/example/ObsExample.interface.h"
 #include "ufo/ObsOperatorBase.h"
 
 /// Forward declarations

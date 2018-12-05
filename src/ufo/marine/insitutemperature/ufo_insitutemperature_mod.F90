@@ -1,46 +1,63 @@
 ! (C) Copyright 2017-2018 UCAR
-! 
+!
 ! This software is licensed under the terms of the Apache Licence Version 2.0
-! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
+! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 
-!> Fortran module to handle temperature profile observations
+!> Fortran insitutemperature module for observation operator
 
 module ufo_insitutemperature_mod
 
-  use iso_c_binding
-  use obsspace_mod
-  use ufo_vars_mod
-  use ufo_locs_mod
-  use ufo_geovals_mod
-  use kinds
+ use iso_c_binding
+ use config_mod
+ use kinds
 
-  implicit none
-  public :: ufo_insitutemperature
-  public :: ufo_insitutemperature_simobs
-  private
-  integer, parameter :: max_string=800
+ use ufo_geovals_mod, only: ufo_geovals, ufo_geoval, ufo_geovals_get_var
+ use ufo_basis_mod, only: ufo_basis
+ use ufo_vars_mod
+ use obsspace_mod
 
-  !> Fortran derived type for insitu temperature profile observation operator
-  type :: ufo_insitutemperature
-  end type ufo_insitutemperature
+ implicit none
+ private
 
-  ! ------------------------------------------------------------------------------
+ integer, parameter :: max_string=800
+
+!> Fortran derived type for the observation type
+ type, extends(ufo_basis), public :: ufo_insitutemperature
+ private
+ contains
+   procedure :: setup  => ufo_insitutemperature_setup
+   procedure :: delete => ufo_insitutemperature_delete
+   procedure :: simobs => ufo_insitutemperature_simobs
+ end type ufo_insitutemperature
 
 contains
 
-  ! ------------------------------------------------------------------------------
+! ------------------------------------------------------------------------------
+subroutine ufo_insitutemperature_setup(self, c_conf)
+implicit none
+class(ufo_insitutemperature), intent(inout) :: self
+type(c_ptr),        intent(in)    :: c_conf
 
-  subroutine ufo_insitutemperature_simobs(self, geovals, hofx, obss)
-    use gsw_pot_to_insitu
-    use vert_interp_mod    
-    use ufo_tpsp2ti_mod
-    use ufo_marine_ncutils
-    
-    implicit none
-    type(ufo_insitutemperature), intent(in)  :: self       !< Trajectory
-    type(ufo_geovals), intent(in)            :: geovals    !< Model's Tp, Sp, h interpolated at obs location 
-    type(c_ptr), value, intent(in)           :: obss       !< Insitu temperature observations
-    real(c_double),  intent(inout)           :: hofx(:)    !< Ti(Tp,Sp,h)
+end subroutine ufo_insitutemperature_setup
+
+! ------------------------------------------------------------------------------
+subroutine ufo_insitutemperature_delete(self)
+implicit none
+class(ufo_insitutemperature), intent(inout) :: self
+
+end subroutine ufo_insitutemperature_delete
+
+! ------------------------------------------------------------------------------
+subroutine ufo_insitutemperature_simobs(self, geovals, hofx, obss)
+use gsw_pot_to_insitu
+use vert_interp_mod
+use ufo_tpsp2ti_mod
+use ufo_marine_ncutils
+implicit none
+class(ufo_insitutemperature), intent(in)    :: self
+type(ufo_geovals),  intent(in)    :: geovals
+real(c_double),     intent(inout) :: hofx(:)
+type(c_ptr), value, intent(in)    :: obss
 
     character(len=*), parameter :: myname_="ufo_insitutemperature_simobs"
     character(max_string)  :: err_msg

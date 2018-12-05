@@ -1,49 +1,60 @@
-! (C) Copyright 2017 UCAR
+! (C) Copyright 2017-2018 UCAR
 !
 ! This software is licensed under the terms of the Apache Licence Version 2.0
 ! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 
-!> Fortran module to handle adt observations
+!> Fortran adt module for observation operator
 
 module ufo_adt_mod
 
-  use iso_c_binding
-  use ufo_vars_mod
-  use ufo_locs_mod
-  use ufo_geovals_mod
-  use kinds
-  use ncd_kinds, only:  i_kind,r_single,r_kind,r_double
-  use obsspace_mod 
-  use ioda_obsdb_mod
-  use fckit_mpi_module, only: fckit_mpi_comm, fckit_mpi_sum
-  
-  implicit none
-  public :: ufo_adt
-  public :: ufo_adt_simobs
-  private
-  integer, parameter :: max_string=800
+ use iso_c_binding
+ use config_mod
+ use kinds
 
-  !> Fortran derived type for adt observation operator
-  type :: ufo_adt
-  end type ufo_adt
+ use ufo_geovals_mod, only: ufo_geovals, ufo_geoval, ufo_geovals_get_var
+ use ufo_basis_mod, only: ufo_basis
+ use ufo_vars_mod
+ use obsspace_mod
 
-  ! ------------------------------------------------------------------------------
+ implicit none
+ private
+
+ integer, parameter :: max_string=800
+
+!> Fortran derived type for the observation type
+ type, extends(ufo_basis), public :: ufo_adt
+ private
+ contains
+   procedure :: setup  => ufo_adt_setup
+   procedure :: delete => ufo_adt_delete
+   procedure :: simobs => ufo_adt_simobs
+ end type ufo_adt
 
 contains
 
-  ! ------------------------------------------------------------------------------
+! ------------------------------------------------------------------------------
+subroutine ufo_adt_setup(self, c_conf)
+implicit none
+class(ufo_adt), intent(inout) :: self
+type(c_ptr),        intent(in)    :: c_conf
 
-  subroutine ufo_adt_simobs(self, geovals, hofx, obss)
+end subroutine ufo_adt_setup
 
-    use ufo_marine_ncutils
-    use iso_c_binding
-    
-    implicit none
-    
-    type(ufo_adt),      intent(in) :: self
-    type(ufo_geovals),  intent(in) :: geovals
-    type(c_ptr), value, intent(in) :: obss
-    real(c_double),  intent(inout) :: hofx(:)
+! ------------------------------------------------------------------------------
+subroutine ufo_adt_delete(self)
+implicit none
+class(ufo_adt), intent(inout) :: self
+
+end subroutine ufo_adt_delete
+
+! ------------------------------------------------------------------------------
+subroutine ufo_adt_simobs(self, geovals, hofx, obss)
+use fckit_mpi_module, only: fckit_mpi_comm, fckit_mpi_sum
+implicit none
+    class(ufo_adt), intent(in)    :: self
+    type(ufo_geovals),  intent(in)    :: geovals
+    real(c_double),     intent(inout) :: hofx(:)
+    type(c_ptr), value, intent(in)    :: obss
 
     character(len=*), parameter :: myname_="ufo_adt_simobs"
     character(max_string) :: err_msg

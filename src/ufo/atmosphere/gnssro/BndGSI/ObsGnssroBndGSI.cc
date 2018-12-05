@@ -34,10 +34,12 @@ ObsGnssroBndGSI::ObsGnssroBndGSI(const ioda::ObsSpace & odb, const eckit::Config
                                     "air_pressure_levels", "geopotential_height_levels"};
   varin_.reset(new oops::Variables(vv));
 
-  const std::vector<std::string> vout{"zz"};
+  const std::vector<std::string> vout{"bending_angle"};
   varout_.reset(new oops::Variables(vout));
 
-  const eckit::Configuration * configc = &config;
+  const eckit::LocalConfiguration obsOptions(config, "ObsOptions");
+  const eckit::Configuration * configc = &obsOptions;
+
   ufo_gnssro_bndgsi_setup_f90(keyOperGnssroBndGSI_, &configc);
 
   oops::Log::trace() << "ObsGnssroBndGSI created." << std::endl;

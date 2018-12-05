@@ -16,8 +16,6 @@ typedef int F90locs;
 typedef int F90goms;
 // Obs operator key type
 typedef int F90hop;
-// Observation space type
-typedef int F90odb;
 // Observation bias key type
 typedef int F90obias;
 

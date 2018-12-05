@@ -38,7 +38,7 @@ contains
 subroutine ufo_geovals_setup_c(c_key_self, c_key_locs, c_vars) bind(c,name='ufo_geovals_setup_f90')
 use config_mod
 implicit none
-integer(c_int), intent(in) :: c_key_self
+integer(c_int), intent(inout) :: c_key_self
 integer(c_int), intent(in) :: c_key_locs
 type(c_ptr), intent(in)    :: c_vars
 
@@ -137,7 +137,7 @@ end subroutine ufo_geovals_delete_c
 subroutine ufo_geovals_setup_allocone_c(c_key_self, c_conf, c_vars) bind(c,name='ufo_geovals_setup_allocone_f90')
 use config_mod
 implicit none
-integer(c_int), intent(in) :: c_key_self
+integer(c_int), intent(inout) :: c_key_self
 type(c_ptr), intent(in)    :: c_conf
 type(c_ptr), intent(in)    :: c_vars
 
@@ -205,7 +205,7 @@ end subroutine ufo_geovals_rms_c
 subroutine ufo_geovals_setup_random_c(c_key_self, c_conf, c_vars) bind(c,name='ufo_geovals_setup_random_f90')
 use config_mod
 implicit none
-integer(c_int), intent(in) :: c_key_self
+integer(c_int), intent(inout) :: c_key_self
 type(c_ptr), intent(in)    :: c_conf
 type(c_ptr), intent(in)    :: c_vars
 
@@ -371,7 +371,7 @@ use config_mod
 use datetime_mod
 
 implicit none
-integer(c_int), intent(in) :: c_key_self
+integer(c_int), intent(inout) :: c_key_self
 type(c_ptr), intent(in)    :: c_conf
 type(c_ptr), intent(in)    :: c_vars
 

@@ -8,9 +8,11 @@ set ( example_files
     ObsExample.cc
     ObsExampleTLAD.h
     ObsExampleTLAD.cc
-    ufo_example_interface.F90
+    ObsExample.interface.F90
+    ObsExample.interface.h
+    ObsExampleTLAD.interface.F90
+    ObsExampleTLAD.interface.h
     ufo_example_mod.F90
-    ufo_example_tlad_interface.F90
     ufo_example_tlad_mod.F90
     PARENT_SCOPE
 )

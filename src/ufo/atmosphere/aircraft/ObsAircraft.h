@@ -16,7 +16,7 @@
 #include "oops/base/Variables.h"
 #include "oops/util/DateTime.h"
 #include "oops/util/ObjectCounter.h"
-#include "ufo/atmosphere/FortranAtmosphere.h"
+#include "ufo/atmosphere/aircraft/ObsAircraft.interface.h"
 #include "ufo/ObsOperatorBase.h"
 
 namespace eckit {

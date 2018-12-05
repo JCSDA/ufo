@@ -17,7 +17,7 @@
 #include "oops/util/ObjectCounter.h"
 
 #include "ufo/LinearObsOperatorBase.h"
-#include "ufo/marine/FortranMarine.h"
+#include "ufo/marine/stericheight/ObsStericHeightTLAD.interface.h"
 
 // Forward declarations
 namespace eckit {
@@ -34,35 +34,35 @@ namespace ufo {
   class ObsBias;
   class ObsBiasIncrement;
 
-  // -----------------------------------------------------------------------------
-  /// Simulated Steric height for  model.
-    class ObsStericHeightTLAD : public LinearObsOperatorBase,
-                                private util::ObjectCounter<ObsStericHeightTLAD> {
-     public:
-      static const std::string classname() {return "ufo::ObsStericHeightTLAD";}
+// -----------------------------------------------------------------------------
+/// StericHeight for observation operator TL and AD class
+class ObsStericHeightTLAD : public LinearObsOperatorBase,
+                       private util::ObjectCounter<ObsStericHeightTLAD> {
+ public:
+  static const std::string classname() {return "ufo::ObsStericHeightTLAD";}
 
-      ObsStericHeightTLAD(const ioda::ObsSpace &, const eckit::Configuration &);
-      virtual ~ObsStericHeightTLAD();
+  ObsStericHeightTLAD(const ioda::ObsSpace &, const eckit::Configuration &);
+  virtual ~ObsStericHeightTLAD();
 
-      // Obs Operators
-      void setTrajectory(const GeoVaLs &, const ObsBias &);
-      void simulateObsTL(const GeoVaLs &, ioda::ObsVector &, const ObsBiasIncrement &) const;
-      void simulateObsAD(GeoVaLs &, const ioda::ObsVector &, ObsBiasIncrement &) const;
+  // Obs Operators
+  void setTrajectory(const GeoVaLs &, const ObsBias &);
+  void simulateObsTL(const GeoVaLs &, ioda::ObsVector &, const ObsBiasIncrement &) const;
+  void simulateObsAD(GeoVaLs &, const ioda::ObsVector &, ObsBiasIncrement &) const;
 
-      // Other
-      const oops::Variables & variables() const {return *varin_;}
-      int & toFortran() {return keyOperStericHeight_;}
-      const int & toFortran() const {return keyOperStericHeight_;}
-      // const GeoVaLs * traj_;
+  // Other
+  const oops::Variables & variables() const {return *varin_;}
 
-     private:
-      void print(std::ostream &) const;
-      F90hop keyOperStericHeight_;
-      boost::scoped_ptr<const GeoVaLs> traj_;
-      boost::scoped_ptr<const oops::Variables> varin_;
-    };
+  int & toFortran() {return keyOper_;}
+  const int & toFortran() const {return keyOper_;}
 
-  // -----------------------------------------------------------------------------
+ private:
+  void print(std::ostream &) const;
+  F90hop keyOper_;
+  const ioda::ObsSpace& odb_;
+  boost::scoped_ptr<const oops::Variables> varin_;
+};
+
+// -----------------------------------------------------------------------------
 
 }  // namespace ufo
 #endif  // UFO_MARINE_STERICHEIGHT_OBSSTERICHEIGHTTLAD_H_

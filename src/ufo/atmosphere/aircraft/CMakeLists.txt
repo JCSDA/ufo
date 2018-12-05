@@ -8,9 +8,11 @@ set ( aircraft_files
   ObsAircraft.cc
   ObsAircraftTLAD.h
   ObsAircraftTLAD.cc
-  ufo_aircraft_interface.F90
+  ObsAircraft.interface.F90
+  ObsAircraft.interface.h
+  ObsAircraftTLAD.interface.F90
+  ObsAircraftTLAD.interface.h
   ufo_aircraft_mod.F90
-  ufo_aircraft_tlad_interface.F90
   ufo_aircraft_tlad_mod.F90
   PARENT_SCOPE
 )

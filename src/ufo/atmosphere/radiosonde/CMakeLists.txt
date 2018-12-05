@@ -8,9 +8,11 @@ set ( radiosonde_files
   ObsRadiosonde.h
   ObsRadiosondeTLAD.cc
   ObsRadiosondeTLAD.h
-  ufo_radiosonde_interface.F90
+  ObsRadiosonde.interface.F90
+  ObsRadiosonde.interface.h
+  ObsRadiosondeTLAD.interface.F90
+  ObsRadiosondeTLAD.interface.h
   ufo_radiosonde_mod.F90
-  ufo_radiosonde_tlad_interface.F90
   ufo_radiosonde_tlad_mod.F90
   PARENT_SCOPE
 )
