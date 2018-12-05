@@ -5,8 +5,8 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#ifndef UFO_ATMOSPHERE_AIRCRAFT_OBSAIRCRAFTTLAD_H_
-#define UFO_ATMOSPHERE_AIRCRAFT_OBSAIRCRAFTTLAD_H_
+#ifndef UFO_ATMOSPHERE_ATMPROFILE_OBSATMPROFILETLAD_H_
+#define UFO_ATMOSPHERE_ATMPROFILE_OBSATMPROFILETLAD_H_
 
 #include <ostream>
 #include <string>
@@ -15,7 +15,7 @@
 
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
-#include "ufo/atmosphere/aircraft/ObsAircraftTLAD.interface.h"
+#include "ufo/atmosphere/atmprofile/ObsAtmProfileTLAD.interface.h"
 #include "ufo/LinearObsOperatorBase.h"
 
 // Forward declarations
@@ -34,14 +34,14 @@ namespace ufo {
   class ObsBiasIncrement;
 
 // -----------------------------------------------------------------------------
-/// Aircraft (currently only temperature) observation for UFO.
-class ObsAircraftTLAD : public LinearObsOperatorBase,
-                        private util::ObjectCounter<ObsAircraftTLAD> {
+/// AtmProfile observation operator
+class ObsAtmProfileTLAD : public LinearObsOperatorBase,
+                          private util::ObjectCounter<ObsAtmProfileTLAD> {
  public:
-  static const std::string classname() {return "ufo::ObsAircraftTLAD";}
+  static const std::string classname() {return "ufo::ObsAtmProfileTLAD";}
 
-  ObsAircraftTLAD(const ioda::ObsSpace &, const eckit::Configuration &);
-  virtual ~ObsAircraftTLAD();
+  ObsAtmProfileTLAD(const ioda::ObsSpace &, const eckit::Configuration &);
+  virtual ~ObsAtmProfileTLAD();
 
   // Obs Operators
   void setTrajectory(const GeoVaLs &, const ObsBias &);
@@ -51,17 +51,18 @@ class ObsAircraftTLAD : public LinearObsOperatorBase,
   // Other
   const oops::Variables & variables() const {return *varin_;}
 
-  int & toFortran() {return keyOperAircraft_;}
-  const int & toFortran() const {return keyOperAircraft_;}
+  int & toFortran() {return keyOperAtmProfile_;}
+  const int & toFortran() const {return keyOperAtmProfile_;}
 
  private:
   void print(std::ostream &) const;
-  F90hop keyOperAircraft_;
+  F90hop keyOperAtmProfile_;
   const ioda::ObsSpace& odb_;
   boost::scoped_ptr<const oops::Variables> varin_;
+  boost::scoped_ptr<const oops::Variables> varout_;
 };
 
 // -----------------------------------------------------------------------------
 
 }  // namespace ufo
-#endif  // UFO_ATMOSPHERE_AIRCRAFT_OBSAIRCRAFTTLAD_H_
+#endif  // UFO_ATMOSPHERE_ATMPROFILE_OBSATMPROFILETLAD_H_
