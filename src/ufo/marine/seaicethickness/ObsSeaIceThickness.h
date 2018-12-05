@@ -14,6 +14,7 @@
 #include <boost/scoped_ptr.hpp>
 
 #include "oops/base/Variables.h"
+#include "oops/util/DateTime.h"
 #include "oops/util/ObjectCounter.h"
 
 #include "ufo/marine/FortranMarine.h"
@@ -30,6 +31,7 @@ namespace ioda {
 
 namespace ufo {
   class GeoVaLs;
+  class Locations;
   class ObsBias;
 
 // -----------------------------------------------------------------------------
@@ -48,6 +50,7 @@ class ObsSeaIceThickness : public ObsOperatorBase,
 // Other
   const oops::Variables & variables() const {return *varin_;}
   const oops::Variables & observed() const {return *varout_;}
+  Locations * locateObs(const util::DateTime &, const util::DateTime &) const;
 
   int & toFortran() {return keyOperSeaIceThickness_;}
   const int & toFortran() const {return keyOperSeaIceThickness_;}

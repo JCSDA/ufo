@@ -5,23 +5,23 @@
 
 !> Fortran module to handle ice concentration observations
 
-module ufo_seaicefrac_mod_c
+module ufo_seaicefraction_mod_c
   
   use iso_c_binding
   use config_mod
   use ufo_geovals_mod,   only: ufo_geovals
   use ufo_geovals_mod_c, only: ufo_geovals_registry
-  use ufo_seaicefrac_mod 
+  use ufo_seaicefraction_mod 
   implicit none
   private
   
-#define LISTED_TYPE ufo_seaicefrac
+#define LISTED_TYPE ufo_seaicefraction
   
   !> Linked list interface - defines registry_t type
 #include "../../linkedList_i.f"
   
   !> Global registry
-  type(registry_t) :: ufo_seaicefrac_registry
+  type(registry_t) :: ufo_seaicefraction_registry
   
   ! ------------------------------------------------------------------------------
 contains
@@ -31,35 +31,35 @@ contains
   
 ! ------------------------------------------------------------------------------
   
-subroutine ufo_seaicefrac_setup_c(c_key_self, c_conf) bind(c,name='ufo_seaicefrac_setup_f90')
+subroutine ufo_seaicefraction_setup_c(c_key_self, c_conf) bind(c,name='ufo_seaicefraction_setup_f90')
 implicit none
 integer(c_int), intent(inout) :: c_key_self
 type(c_ptr), intent(in)    :: c_conf
     
-type(ufo_seaicefrac), pointer :: self
+type(ufo_seaicefraction), pointer :: self
 
-call ufo_seaicefrac_registry%init()
-call ufo_seaicefrac_registry%add(c_key_self)
-call ufo_seaicefrac_registry%get(c_key_self, self)
+call ufo_seaicefraction_registry%init()
+call ufo_seaicefraction_registry%add(c_key_self)
+call ufo_seaicefraction_registry%get(c_key_self, self)
     
-end subroutine ufo_seaicefrac_setup_c
+end subroutine ufo_seaicefraction_setup_c
   
 ! ------------------------------------------------------------------------------
   
-subroutine ufo_seaicefrac_delete_c(c_key_self) bind(c,name='ufo_seaicefrac_delete_f90')
+subroutine ufo_seaicefraction_delete_c(c_key_self) bind(c,name='ufo_seaicefraction_delete_f90')
 implicit none
 integer(c_int), intent(inout) :: c_key_self
     
-type(ufo_seaicefrac), pointer :: self
+type(ufo_seaicefraction), pointer :: self
 
-call ufo_seaicefrac_registry%get(c_key_self, self)
-call ufo_seaicefrac_registry%remove(c_key_self)
+call ufo_seaicefraction_registry%get(c_key_self, self)
+call ufo_seaicefraction_registry%remove(c_key_self)
     
-end subroutine ufo_seaicefrac_delete_c
+end subroutine ufo_seaicefraction_delete_c
   
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_seaicefrac_simobs_c(c_key_self, c_key_geovals, c_obsspace, c_nobs, c_hofx, c_bias) bind(c,name='ufo_seaicefrac_simobs_f90')
+subroutine ufo_seaicefraction_simobs_c(c_key_self, c_key_geovals, c_obsspace, c_nobs, c_hofx, c_bias) bind(c,name='ufo_seaicefraction_simobs_f90')
 
 implicit none
 integer(c_int),     intent(in) :: c_key_self
@@ -69,16 +69,37 @@ real(c_double),     intent(inout) :: c_hofx(c_nobs)
 type(c_ptr), value, intent(in) :: c_obsspace
 integer(c_int),     intent(in) :: c_bias
 
-type(ufo_seaicefrac), pointer :: self
+type(ufo_seaicefraction), pointer :: self
 type(ufo_geovals),    pointer :: geovals
 
-character(len=*), parameter :: myname_="ufo_seaicefrac_simobs_c"
+character(len=*), parameter :: myname_="ufo_seaicefraction_simobs_c"
 
-call ufo_seaicefrac_registry%get(c_key_self, self)
+call ufo_seaicefraction_registry%get(c_key_self, self)
 call ufo_geovals_registry%get(c_key_geovals,geovals)
 
-call ufo_seaicefrac_simobs(self, geovals, c_hofx)
+call ufo_seaicefraction_simobs(self, geovals, c_hofx)
 
-end subroutine ufo_seaicefrac_simobs_c
+end subroutine ufo_seaicefraction_simobs_c
+
+! ------------------------------------------------------------------------------
+
+subroutine ufo_seaicefraction_locateobs_c(c_key_self, c_obsspace, c_t1, c_t2, c_locs) bind(c,name='ufo_seaicefraction_locateobs_f90')
+
+implicit none
+integer(c_int), intent(in)     :: c_key_self
+type(c_ptr), value, intent(in) :: c_obsspace
+type(c_ptr), intent(in)        :: c_t1, c_t2
+integer(c_int), intent(inout)  :: c_locs
+
+type(ufo_seaicefraction), pointer :: self
+
+character(len=*), parameter :: myname_="ufo_seaicefraction_locateobs_c"
+
+call ufo_seaicefraction_registry%get(c_key_self, self)
+call self%opr_locateobs(c_obsspace, c_t1, c_t2, c_locs)
+
+end subroutine ufo_seaicefraction_locateobs_c
+
+! ------------------------------------------------------------------------------
   
-end module ufo_seaicefrac_mod_c
+end module ufo_seaicefraction_mod_c

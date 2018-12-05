@@ -15,8 +15,10 @@
 #include "ioda/ObsVector.h"
 
 #include "oops/base/Variables.h"
+#include "oops/util/DateTime.h"
 
 #include "ufo/GeoVaLs.h"
+#include "ufo/Locations.h"
 
 namespace ufo {
 
@@ -53,6 +55,18 @@ void ObsSeaSurfaceTemp::simulateObs(const GeoVaLs & gom, ioda::ObsVector & ovec,
                                     const ObsBias & bias) const {
   ufo_seasurfacetemp_simobs_f90(keyOperSeaSurfaceTemp_, gom.toFortran(), odb_,
                              ovec.size(), ovec.toFortran(), bias.toFortran());
+}
+
+// -----------------------------------------------------------------------------
+
+Locations * ObsSeaSurfaceTemp::locateObs(const util::DateTime & t1,
+                                   const util::DateTime & t2) const {
+  const util::DateTime * p1 = &t1;
+  const util::DateTime * p2 = &t2;
+  int keylocs;
+  ufo_seasurfacetemp_locateobs_f90(keyOper_, odb_, &p1, &p2, keylocs);
+
+  return new Locations(keylocs);
 }
 
 // -----------------------------------------------------------------------------

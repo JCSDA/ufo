@@ -13,22 +13,27 @@
 
 #include <boost/scoped_ptr.hpp>
 
-#include "eckit/config/Configuration.h"
-
-#include "ioda/Locations.h"
-#include "ioda/ObsSpace.h"
-#include "ioda/ObsVector.h"
-
 #include "oops/base/Variables.h"
+#include "oops/util/DateTime.h"
 #include "oops/util/Logger.h"
 #include "oops/util/ObjectCounter.h"
 
-#include "ufo/GeoVaLs.h"
 #include "ufo/marine/FortranMarine.h"
-#include "ufo/ObsBias.h"
 #include "ufo/ObsOperatorBase.h"
 
+namespace eckit {
+  class Configuration;
+}
+
+namespace ioda {
+  class ObsSpace;
+  class ObsVector;
+}
+
 namespace ufo {
+  class GeoVaLs;
+  class Locations;
+  class ObsBias;
 
 // -----------------------------------------------------------------------------
 
@@ -46,6 +51,7 @@ class ObsSeaSurfaceTemp : public ObsOperatorBase,
 // Other
   const oops::Variables & variables() const {return *varin_;}
   const oops::Variables & observed() const {return *varout_;}
+  Locations * locateObs(const util::DateTime &, const util::DateTime &) const;
 
   int & toFortran() {return keyOperSeaSurfaceTemp_;}
   const int & toFortran() const {return keyOperSeaSurfaceTemp_;}

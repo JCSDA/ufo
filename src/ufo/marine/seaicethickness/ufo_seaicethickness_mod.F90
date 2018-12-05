@@ -5,7 +5,7 @@
 
 !> Fortran module to handle ice concentration observations
 
-module ufo_seaicethick_mod
+module ufo_seaicethickness_mod
 
   use iso_c_binding
   use ufo_vars_mod
@@ -13,14 +13,14 @@ module ufo_seaicethick_mod
   use kinds
 
   implicit none
-  public :: ufo_seaicethick
-  public :: ufo_seaicethick_simobs
+  public :: ufo_seaicethickness
+  public :: ufo_seaicethickness_simobs
   private
   integer, parameter :: max_string=800
 
   !> Fortran derived type for sea ice fraction observation operator
-  type :: ufo_seaicethick
-  end type ufo_seaicethick
+  type :: ufo_seaicethickness
+  end type ufo_seaicethickness
 
 
   ! ------------------------------------------------------------------------------
@@ -29,16 +29,16 @@ contains
 
   ! ------------------------------------------------------------------------------
 
-  subroutine ufo_seaicethick_simobs(self, geovals, hofx)
+  subroutine ufo_seaicethickness_simobs(self, geovals, hofx)
     use ufo_marine_ncutils
     use ufo_vars_mod
     
     implicit none
-    type(ufo_seaicethick), intent(in) :: self
+    type(ufo_seaicethickness), intent(in) :: self
     type(ufo_geovals), intent(in)    :: geovals
     real(c_double),  intent(inout) :: hofx(:)
 
-    character(len=*), parameter :: myname_="ufo_seaicethick_simobs"
+    character(len=*), parameter :: myname_="ufo_seaicethickness_simobs"
     character(max_string) :: err_msg
 
     integer :: iobs, icat, ncat
@@ -78,6 +78,6 @@ contains
     call sit_out%write_geoval(var_seaicethick,icethick,arg_dim_name=dim_name)    
     call sit_out%finalize()
 
-  end subroutine ufo_seaicethick_simobs
+  end subroutine ufo_seaicethickness_simobs
 
-end module ufo_seaicethick_mod
+end module ufo_seaicethickness_mod

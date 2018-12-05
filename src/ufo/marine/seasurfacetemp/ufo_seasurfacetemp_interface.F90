@@ -80,5 +80,26 @@ call ufo_geovals_registry%get(c_key_geovals,geovals)
 call ufo_seasurfacetemp_simobs(self, geovals, c_hofx)
 
 end subroutine ufo_seasurfacetemp_simobs_c
+
+! ------------------------------------------------------------------------------
+
+subroutine ufo_seasurfacetemp_locateobs_c(c_key_self, c_obsspace, c_t1, c_t2, c_locs) bind(c,name='ufo_seasurfacetemp_locateobs_f90')
+
+implicit none
+integer(c_int), intent(in)     :: c_key_self
+type(c_ptr), value, intent(in) :: c_obsspace
+type(c_ptr), intent(in)        :: c_t1, c_t2
+integer(c_int), intent(inout)  :: c_locs
+
+type(ufo_seasurfacetemp), pointer :: self
+
+character(len=*), parameter :: myname_="ufo_seasurfacetemp_locateobs_c"
+
+call ufo_seasurfacetemp_registry%get(c_key_self, self)
+call self%opr_locateobs(c_obsspace, c_t1, c_t2, c_locs)
+
+end subroutine ufo_seasurfacetemp_locateobs_c
+
+! ------------------------------------------------------------------------------
   
 end module ufo_seasurfacetemp_mod_c

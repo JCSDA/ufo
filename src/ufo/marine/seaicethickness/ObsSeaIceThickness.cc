@@ -30,7 +30,7 @@ ObsSeaIceThickness::ObsSeaIceThickness(const ioda::ObsSpace & odb,
   : keyOperSeaIceThickness_(0), odb_(odb), varin_(), varout_()
 {
   const eckit::Configuration * configc = &config;
-  ufo_seaicethick_setup_f90(keyOperSeaIceThickness_, &configc);
+  ufo_seaicethickness_setup_f90(keyOperSeaIceThickness_, &configc);
 
   const std::vector<std::string> vv{"ice_concentration", "ice_thickness"};
   varin_.reset(new oops::Variables(vv));
@@ -44,7 +44,7 @@ ObsSeaIceThickness::ObsSeaIceThickness(const ioda::ObsSpace & odb,
 // -----------------------------------------------------------------------------
 
 ObsSeaIceThickness::~ObsSeaIceThickness() {
-  ufo_seaicethick_delete_f90(keyOperSeaIceThickness_);
+  ufo_seaicethickness_delete_f90(keyOperSeaIceThickness_);
   oops::Log::trace() << "ObsSeaIceThickness destructed" << std::endl;
 }
 
@@ -52,8 +52,20 @@ ObsSeaIceThickness::~ObsSeaIceThickness() {
 
 void ObsSeaIceThickness::simulateObs(const GeoVaLs & gom, ioda::ObsVector & ovec,
                              const ObsBias & bias) const {
-  ufo_seaicethick_simobs_f90(keyOperSeaIceThickness_, gom.toFortran(), odb_,
+  ufo_seaicethickness_simobs_f90(keyOperSeaIceThickness_, gom.toFortran(), odb_,
                           ovec.size(), ovec.toFortran(), bias.toFortran());
+}
+
+// -----------------------------------------------------------------------------
+
+Locations * ObsSeaIceThickness::locateObs(const util::DateTime & t1,
+                                   const util::DateTime & t2) const {
+  const util::DateTime * p1 = &t1;
+  const util::DateTime * p2 = &t2;
+  int keylocs;
+  ufo_seaicethickness_locateobs_f90(keyOper_, odb_, &p1, &p2, keylocs);
+
+  return new Locations(keylocs);
 }
 
 // -----------------------------------------------------------------------------

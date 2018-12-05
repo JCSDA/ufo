@@ -5,23 +5,23 @@
 
 !> Fortran module to handle ice concentration observations
 
-module ufo_seaicethick_mod_c
+module ufo_seaicethickness_mod_c
   
   use iso_c_binding
   use config_mod
   use ufo_geovals_mod,   only: ufo_geovals
   use ufo_geovals_mod_c, only: ufo_geovals_registry
-  use ufo_seaicethick_mod 
+  use ufo_seaicethickness_mod 
   implicit none
   private
   
-#define LISTED_TYPE ufo_seaicethick
+#define LISTED_TYPE ufo_seaicethickness
   
   !> Linked list interface - defines registry_t type
 #include "../../linkedList_i.f"
   
   !> Global registry
-  type(registry_t) :: ufo_seaicethick_registry
+  type(registry_t) :: ufo_seaicethickness_registry
   
   ! ------------------------------------------------------------------------------
 contains
@@ -31,35 +31,35 @@ contains
   
 ! ------------------------------------------------------------------------------
   
-subroutine ufo_seaicethick_setup_c(c_key_self, c_conf) bind(c,name='ufo_seaicethick_setup_f90')
+subroutine ufo_seaicethickness_setup_c(c_key_self, c_conf) bind(c,name='ufo_seaicethickness_setup_f90')
 implicit none
 integer(c_int), intent(inout) :: c_key_self
 type(c_ptr), intent(in)    :: c_conf
     
-type(ufo_seaicethick), pointer :: self
+type(ufo_seaicethickness), pointer :: self
 
-call ufo_seaicethick_registry%init()
-call ufo_seaicethick_registry%add(c_key_self)
-call ufo_seaicethick_registry%get(c_key_self, self)
+call ufo_seaicethickness_registry%init()
+call ufo_seaicethickness_registry%add(c_key_self)
+call ufo_seaicethickness_registry%get(c_key_self, self)
     
-end subroutine ufo_seaicethick_setup_c
+end subroutine ufo_seaicethickness_setup_c
   
 ! ------------------------------------------------------------------------------
   
-subroutine ufo_seaicethick_delete_c(c_key_self) bind(c,name='ufo_seaicethick_delete_f90')
+subroutine ufo_seaicethickness_delete_c(c_key_self) bind(c,name='ufo_seaicethickness_delete_f90')
 implicit none
 integer(c_int), intent(inout) :: c_key_self
     
-type(ufo_seaicethick), pointer :: self
+type(ufo_seaicethickness), pointer :: self
 
-call ufo_seaicethick_registry%get(c_key_self, self)
-call ufo_seaicethick_registry%remove(c_key_self)
+call ufo_seaicethickness_registry%get(c_key_self, self)
+call ufo_seaicethickness_registry%remove(c_key_self)
     
-end subroutine ufo_seaicethick_delete_c
+end subroutine ufo_seaicethickness_delete_c
   
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_seaicethick_simobs_c(c_key_self, c_key_geovals, c_obsspace, c_nobs, c_hofx, c_bias) bind(c,name='ufo_seaicethick_simobs_f90')
+subroutine ufo_seaicethickness_simobs_c(c_key_self, c_key_geovals, c_obsspace, c_nobs, c_hofx, c_bias) bind(c,name='ufo_seaicethickness_simobs_f90')
 
 implicit none
 integer(c_int),     intent(in) :: c_key_self
@@ -69,16 +69,37 @@ integer(c_int),     intent(in) :: c_nobs
 real(c_double),     intent(inout) :: c_hofx(c_nobs)
 integer(c_int),     intent(in) :: c_bias
 
-type(ufo_seaicethick), pointer :: self
+type(ufo_seaicethickness), pointer :: self
 type(ufo_geovals),    pointer :: geovals
 
-character(len=*), parameter :: myname_="ufo_seaicethick_simobs_c"
+character(len=*), parameter :: myname_="ufo_seaicethickness_simobs_c"
 
-call ufo_seaicethick_registry%get(c_key_self, self)
+call ufo_seaicethickness_registry%get(c_key_self, self)
 call ufo_geovals_registry%get(c_key_geovals,geovals)
 
-call ufo_seaicethick_simobs(self, geovals, c_hofx)
+call ufo_seaicethickness_simobs(self, geovals, c_hofx)
 
-end subroutine ufo_seaicethick_simobs_c
+end subroutine ufo_seaicethickness_simobs_c
 
-end module ufo_seaicethick_mod_c
+! ------------------------------------------------------------------------------
+
+subroutine ufo_seaicethicknessness_locateobs_c(c_key_self, c_obsspace, c_t1, c_t2, c_locs) bind(c,name='ufo_seaicethickness_locateobs_f90')
+
+implicit none
+integer(c_int), intent(in)     :: c_key_self
+type(c_ptr), value, intent(in) :: c_obsspace
+type(c_ptr), intent(in)        :: c_t1, c_t2
+integer(c_int), intent(inout)  :: c_locs
+
+type(ufo_seaicethickness), pointer :: self
+
+character(len=*), parameter :: myname_="ufo_seaicethickness_locateobs_c"
+
+call ufo_seaicethickness_registry%get(c_key_self, self)
+call self%opr_locateobs(c_obsspace, c_t1, c_t2, c_locs)
+
+end subroutine ufo_seaicethickness_locateobs_c
+
+! ------------------------------------------------------------------------------
+
+end module ufo_seaicethickness_mod_c

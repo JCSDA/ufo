@@ -25,37 +25,37 @@ extern "C" {
 // -----------------------------------------------------------------------------
 //  Ice concentration observation operator and its tl/ad
 // -----------------------------------------------------------------------------
-  void ufo_seaicefrac_setup_f90(F90hop &, const eckit::Configuration * const *);
-  void ufo_seaicefrac_delete_f90(F90hop &);
-  void ufo_seaicefrac_simobs_f90(const F90hop &, const F90goms &, const ioda::ObsSpace &,
+  void ufo_seaicefraction_setup_f90(F90hop &, const eckit::Configuration * const *);
+  void ufo_seaicefraction_delete_f90(F90hop &);
+  void ufo_seaicefraction_simobs_f90(const F90hop &, const F90goms &, const ioda::ObsSpace &,
                                  const int &, const double &, const F90obias &);
-  void ufo_seaicefrac_locateobs_f90(const F90hop &, const ioda::ObsSpace &,
-                                    const util::DateTime * const *,
-                                    const util::DateTime * const *, F90locs &);
-  void ufo_seaicefrac_tlad_setup_f90(F90hop &, const eckit::Configuration * const *);
-  void ufo_seaicefrac_tlad_delete_f90(F90hop &);
-  void ufo_seaicefrac_tlad_settraj_f90(const F90hop &, const F90goms &);
-  void ufo_seaicefrac_simobs_tl_f90(const F90hop &, const F90goms &,
+  void ufo_seaicefractiontion_locateobs_f90(const F90hop &, const ioda::ObsSpace &,
+                                        const util::DateTime * const *,
+                                        const util::DateTime * const *, F90locs &);
+  void ufo_seaicefraction_tlad_setup_f90(F90hop &, const eckit::Configuration * const *);
+  void ufo_seaicefraction_tlad_delete_f90(F90hop &);
+  void ufo_seaicefraction_tlad_settraj_f90(const F90hop &, const F90goms &);
+  void ufo_seaicefraction_simobs_tl_f90(const F90hop &, const F90goms &,
                                     const int &, const double &);
-  void ufo_seaicefrac_simobs_ad_f90(const F90hop &, const F90goms &,
+  void ufo_seaicefraction_simobs_ad_f90(const F90hop &, const F90goms &,
                                     const int &, const double &);
 
 // -----------------------------------------------------------------------------
 //  Ice thickness observation operator and its tl/ad
 // -----------------------------------------------------------------------------
-  void ufo_seaicethick_setup_f90(F90hop &, const eckit::Configuration * const *);
-  void ufo_seaicethick_delete_f90(F90hop &);
-  void ufo_seaicethick_simobs_f90(const F90hop &, const F90goms &, const ioda::ObsSpace &,
+  void ufo_seaicethickness_setup_f90(F90hop &, const eckit::Configuration * const *);
+  void ufo_seaicethickness_delete_f90(F90hop &);
+  void ufo_seaicethickness_simobs_f90(const F90hop &, const F90goms &, const ioda::ObsSpace &,
                                   const int &, const double &, const F90obias &);
-  void ufo_seaicethick_locateobs_f90(const F90hop &, const ioda::ObsSpace &,
-                                     const util::DateTime * const *,
-                                     const util::DateTime * const *, F90locs &);
-  void ufo_seaicethick_tlad_setup_f90(F90hop &, const eckit::Configuration * const *);
-  void ufo_seaicethick_tlad_delete_f90(F90hop &);
-  void ufo_seaicethick_tlad_settraj_f90(const F90hop &, const F90goms &);
-  void ufo_seaicethick_simobs_tl_f90(const F90hop &, const F90goms &,
+  void ufo_seaicethickness_locateobs_f90(const F90hop &, const ioda::ObsSpace &,
+                                         const util::DateTime * const *,
+                                         const util::DateTime * const *, F90locs &);
+  void ufo_seaicethickness_tlad_setup_f90(F90hop &, const eckit::Configuration * const *);
+  void ufo_seaicethickness_tlad_delete_f90(F90hop &);
+  void ufo_seaicethickness_tlad_settraj_f90(const F90hop &, const F90goms &);
+  void ufo_seaicethickness_simobs_tl_f90(const F90hop &, const F90goms &,
                                      const int &, const double &);
-  void ufo_seaicethick_simobs_ad_f90(const F90hop &, const F90goms &,
+  void ufo_seaicethickness_simobs_ad_f90(const F90hop &, const F90goms &,
                                      const int &, const double &);
 
 // -----------------------------------------------------------------------------

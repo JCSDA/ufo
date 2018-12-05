@@ -5,7 +5,7 @@
 
 !> Fortran module to handle ice concentration observations
 
-module ufo_seaicefrac_mod
+module ufo_seaicefraction_mod
 
   use iso_c_binding
   use ufo_vars_mod
@@ -13,14 +13,14 @@ module ufo_seaicefrac_mod
   use kinds
 
   implicit none
-  public :: ufo_seaicefrac
-  public :: ufo_seaicefrac_simobs
+  public :: ufo_seaicefraction
+  public :: ufo_seaicefraction_simobs
   private
   integer, parameter :: max_string=800
 
   !> Fortran derived type for sea ice fraction observation operator
-  type :: ufo_seaicefrac
-  end type ufo_seaicefrac
+  type :: ufo_seaicefraction
+  end type ufo_seaicefraction
 
 
   ! ------------------------------------------------------------------------------
@@ -29,16 +29,16 @@ contains
 
   ! ------------------------------------------------------------------------------
 
-  subroutine ufo_seaicefrac_simobs(self, geovals, hofx)
+  subroutine ufo_seaicefraction_simobs(self, geovals, hofx)
     use ufo_marine_ncutils
     use ufo_vars_mod
         
     implicit none
-    type(ufo_seaicefrac), intent(in) :: self
+    type(ufo_seaicefraction), intent(in) :: self
     type(ufo_geovals), intent(in)    :: geovals
     real(c_double),  intent(inout) :: hofx(:)
 
-    character(len=*), parameter :: myname_="ufo_seaicefrac_simobs"
+    character(len=*), parameter :: myname_="ufo_seaicefraction_simobs"
     character(max_string) :: err_msg
 
     integer :: iobs
@@ -77,6 +77,6 @@ contains
     call sic_out%write_geoval(var_seaicefrac,geoval,arg_dim_name=dim_name)
     call sic_out%finalize()
 
-  end subroutine ufo_seaicefrac_simobs
+  end subroutine ufo_seaicefraction_simobs
 
-end module ufo_seaicefrac_mod
+end module ufo_seaicefraction_mod
