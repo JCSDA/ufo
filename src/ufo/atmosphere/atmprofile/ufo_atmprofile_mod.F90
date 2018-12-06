@@ -13,6 +13,7 @@ module ufo_atmprofile_mod
   use vert_interp_mod
   use ufo_basis_mod, only: ufo_basis
   use obsspace_mod
+
   integer, parameter :: max_string=800
 
 ! ------------------------------------------------------------------------------
@@ -25,7 +26,6 @@ module ufo_atmprofile_mod
   contains
     procedure :: setup  => atmprofile_setup_
     procedure :: simobs => atmprofile_simobs_
-    procedure :: locateobs => atmprofile_locateobs_
     final :: destructor
   end type ufo_atmprofile
 
@@ -121,67 +121,6 @@ subroutine atmprofile_simobs_(self, geovals, hofx, obss)
   deallocate(wf)
 
 end subroutine atmprofile_simobs_
-
-! ------------------------------------------------------------------------------
-
-subroutine atmprofile_locateobs_(self, obss, t1, t2, locs)
-  use datetime_mod
-  use twindow_utils_mod
-  use fckit_log_module, only : fckit_log
-  use ufo_locs_mod, only: ufo_locs, ufo_locs_setup
-
-  implicit none
-
-  class(ufo_atmprofile), intent(in) :: self
-  type(c_ptr), value, intent(in)              :: obss
-  type(datetime), intent(in)                  :: t1, t2
-  type(ufo_locs), intent(inout)               :: locs
-
-  integer :: nlocs
-  type(datetime) :: refdate
-
-  character(len=*),parameter:: &
-     myname = "atmprofile_locateobs_"
-  character(len=255) :: record
-  integer :: i
-  integer :: tw_nlocs
-  integer, dimension(:), allocatable :: tw_indx
-  real(kind_real), dimension(:), allocatable :: time, lon, lat
-
-  ! Local copies pre binning
-  nlocs = obsspace_get_nlocs(obss)
-  refdate = obsspace_get_refdate(obss)
-
-  allocate(time(nlocs), lon(nlocs), lat(nlocs))
-
-  !!Each operator may have its own way to derive time, lon, lat from MetaData
-  !!BEGIN THIS PART CAN BE UNIQUE FOR SOME OBS OPERATORS
-  call obsspace_get_db(obss, "MetaData", "time", time)
-
-  ! Generate the timing window indices
-  allocate(tw_indx(nlocs))
-  call gen_twindow_index(refdate, t1, t2, nlocs, time, tw_indx, tw_nlocs)
-
-  call obsspace_get_db(obss, "MetaData", "longitude", lon)
-  call obsspace_get_db(obss, "MetaData", "latitude", lat)
-  !!END THIS PART CAN BE UNIQUE FOR SOME OBS OPERATORS
-
-  !Setup ufo locations
-  call ufo_locs_setup(locs, tw_nlocs)
-  do i = 1, tw_nlocs
-    locs%lon(i)  = lon(tw_indx(i))
-    locs%lat(i)  = lat(tw_indx(i))
-    locs%time(i) = time(tw_indx(i))
-  enddo
-  locs%indx = tw_indx(1:tw_nlocs)
-
-  deallocate(time, lon, lat, tw_indx)
-
-
-  write(record,*) myname,': allocated/assigned obs locations'
-  call fckit_log%info(record)
-
-end subroutine atmprofile_locateobs_
 
 ! ------------------------------------------------------------------------------
 

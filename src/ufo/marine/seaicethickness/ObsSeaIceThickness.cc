@@ -16,7 +16,6 @@
 #include "oops/base/Variables.h"
 
 #include "ufo/GeoVaLs.h"
-#include "ufo/Locations.h"
 #include "ufo/ObsBias.h"
 
 

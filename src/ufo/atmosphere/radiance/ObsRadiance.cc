@@ -14,10 +14,8 @@
 #include "ioda/ObsVector.h"
 
 #include "oops/base/Variables.h"
-#include "oops/util/DateTime.h"
 
 #include "ufo/GeoVaLs.h"
-#include "ufo/Locations.h"
 #include "ufo/ObsBias.h"
 #include "ufo/utils/ChannelsParser.h"
 

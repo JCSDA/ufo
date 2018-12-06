@@ -14,7 +14,6 @@
 #include <boost/scoped_ptr.hpp>
 
 #include "oops/base/Variables.h"
-#include "oops/util/DateTime.h"
 #include "oops/util/ObjectCounter.h"
 
 #include "ufo/marine/insitutemperature/ObsInsituTemperature.interface.h"
@@ -32,7 +31,6 @@ namespace ioda {
 
 namespace ufo {
   class GeoVaLs;
-  class Locations;
   class ObsBias;
 
 // -----------------------------------------------------------------------------

@@ -12,11 +12,6 @@
 
 #include "ufo/Fortran.h"
 
-// Forward declarations
-namespace util {
-  class DateTime;
-}
-
 namespace ufo {
 
 /// Interface to Fortran UFO example routines
@@ -29,9 +24,6 @@ extern "C" {
   void ufo_example_delete_f90(F90hop &);
   void ufo_example_simobs_f90(const F90hop &, const F90goms &, const ioda::ObsSpace &,
                                const int &, double &, const F90obias &);
-  void ufo_example_locateobs_f90(const F90hop &, const ioda::ObsSpace &,
-                                 const util::DateTime * const *,
-                                 const util::DateTime * const *, F90locs &);
 
 // -----------------------------------------------------------------------------
 

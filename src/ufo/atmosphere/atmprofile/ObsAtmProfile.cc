@@ -12,13 +12,11 @@
 #include <vector>
 #include <boost/algorithm/string.hpp>
 
-#include "oops/util/DateTime.h"
 #include "oops/util/Logger.h"
 
 #include "ioda/ObsVector.h"
 
 #include "ufo/GeoVaLs.h"
-#include "ufo/Locations.h"
 #include "ufo/ObsBias.h"
 
 namespace ufo {

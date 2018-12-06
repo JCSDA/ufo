@@ -14,7 +14,6 @@
 #include <boost/scoped_ptr.hpp>
 
 #include "oops/base/Variables.h"
-#include "oops/util/DateTime.h"
 #include "oops/util/ObjectCounter.h"
 
 #include "ufo/example/ObsExample.interface.h"
@@ -32,7 +31,6 @@ namespace ioda {
 
 namespace ufo {
   class GeoVaLs;
-  class Locations;
   class ObsBias;
 
 // -----------------------------------------------------------------------------
@@ -51,7 +49,6 @@ class ObsExample : public ObsOperatorBase,
 // Other
   const oops::Variables & variables() const {return *varin_;}
   const oops::Variables & observed() const {return *varout_;}
-  Locations * locateObs(const util::DateTime &, const util::DateTime &) const;
 
   int & toFortran() {return keyOper_;}
   const int & toFortran() const {return keyOper_;}
