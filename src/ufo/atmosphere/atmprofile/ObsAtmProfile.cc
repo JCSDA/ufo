@@ -5,7 +5,7 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
  */
 
-#include "ufo/atmosphere/radiosonde/ObsRadiosonde.h"
+#include "ufo/atmosphere/atmprofile/ObsAtmProfile.h"
 
 #include <ostream>
 #include <string>
@@ -22,18 +22,20 @@
 namespace ufo {
 
 // -----------------------------------------------------------------------------
-static ObsOperatorMaker<ObsRadiosonde> makerRadiosonde_("Radiosonde");
+static ObsOperatorMaker<ObsAtmProfile> makerRadiosonde_("Radiosonde");
+static ObsOperatorMaker<ObsAtmProfile> makerAircraft_("Aircraft");
+static ObsOperatorMaker<ObsAtmProfile> makerSatwnd_("Satwind");
 // -----------------------------------------------------------------------------
 
-ObsRadiosonde::ObsRadiosonde(const ioda::ObsSpace & odb, const eckit::Configuration & config)
-  : keyOperRadiosonde_(0), odb_(odb), varin_(), varout_()
+ObsAtmProfile::ObsAtmProfile(const ioda::ObsSpace & odb, const eckit::Configuration & config)
+  : keyOperAtmProfile_(0), odb_(odb), varin_(), varout_()
 {
   int c_name_size = 200;
   char *buffin = new char[c_name_size];
   char *buffout = new char[c_name_size];
   const eckit::Configuration * configc = &config;
 
-  ufo_radiosonde_setup_f90(keyOperRadiosonde_, &configc, buffin, buffout, c_name_size);
+  ufo_atmprofile_setup_f90(keyOperAtmProfile_, &configc, buffin, buffout, c_name_size);
 
   std::string vstr_in(buffin), vstr_out(buffout);
   std::vector<std::string> vvin;
@@ -43,28 +45,28 @@ ObsRadiosonde::ObsRadiosonde(const ioda::ObsSpace & odb, const eckit::Configurat
   varin_.reset(new oops::Variables(vvin));
   varout_.reset(new oops::Variables(vvout));
 
-  oops::Log::trace() << "ObsRadiosonde created." << std::endl;
+  oops::Log::trace() << "ObsAtmProfile created." << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
-ObsRadiosonde::~ObsRadiosonde() {
-  ufo_radiosonde_delete_f90(keyOperRadiosonde_);
-  oops::Log::trace() << "ObsRadiosonde destructed" << std::endl;
+ObsAtmProfile::~ObsAtmProfile() {
+  ufo_atmprofile_delete_f90(keyOperAtmProfile_);
+  oops::Log::trace() << "ObsAtmProfile destructed" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
-void ObsRadiosonde::simulateObs(const GeoVaLs & gom, ioda::ObsVector & ovec,
+void ObsAtmProfile::simulateObs(const GeoVaLs & gom, ioda::ObsVector & ovec,
                                 const ObsBias & bias) const {
-  ufo_radiosonde_simobs_f90(keyOperRadiosonde_, gom.toFortran(), odb_,
+  ufo_atmprofile_simobs_f90(keyOperAtmProfile_, gom.toFortran(), odb_,
                             ovec.size(), ovec.toFortran(), bias.toFortran());
 }
 
 // -----------------------------------------------------------------------------
 
-void ObsRadiosonde::print(std::ostream & os) const {
-  os << "ObsRadiosonde::print not implemented";
+void ObsAtmProfile::print(std::ostream & os) const {
+  os << "ObsAtmProfile::print not implemented";
 }
 
 // -----------------------------------------------------------------------------

@@ -5,7 +5,7 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#include "ufo/atmosphere/radiosonde/ObsRadiosondeTLAD.h"
+#include "ufo/atmosphere/atmprofile/ObsAtmProfileTLAD.h"
 
 #include <ostream>
 #include <string>
@@ -27,19 +27,21 @@
 namespace ufo {
 
 // -----------------------------------------------------------------------------
-static LinearObsOperatorMaker<ObsRadiosondeTLAD> makerRadiosondeTL_("Radiosonde");
+static LinearObsOperatorMaker<ObsAtmProfileTLAD> makerRadiosondeTL_("Radiosonde");
+static LinearObsOperatorMaker<ObsAtmProfileTLAD> makerAircraftTL_("Aircraft");
+static LinearObsOperatorMaker<ObsAtmProfileTLAD> makerSatwindTL_("Satwind");
 // -----------------------------------------------------------------------------
 
-ObsRadiosondeTLAD::ObsRadiosondeTLAD(const ioda::ObsSpace & odb,
+ObsAtmProfileTLAD::ObsAtmProfileTLAD(const ioda::ObsSpace & odb,
                                      const eckit::Configuration & config)
-  : keyOperRadiosonde_(0), varin_(), odb_(odb)
+  : keyOperAtmProfile_(0), varin_(), odb_(odb)
 {
   int c_name_size = 200;
   char *buffin = new char[c_name_size];
   char *buffout = new char[c_name_size];
   const eckit::Configuration * configc = &config;
 
-  ufo_radiosonde_tlad_setup_f90(keyOperRadiosonde_, &configc, buffin, buffout, c_name_size);
+  ufo_atmprofile_tlad_setup_f90(keyOperAtmProfile_, &configc, buffin, buffout, c_name_size);
 
   std::string vstr_in(buffin), vstr_out(buffout);
   std::vector<std::string> vvin;
@@ -49,42 +51,42 @@ ObsRadiosondeTLAD::ObsRadiosondeTLAD(const ioda::ObsSpace & odb,
   varin_.reset(new oops::Variables(vvin));
   varout_.reset(new oops::Variables(vvout));
 
-  oops::Log::trace() << "ObsRadiosondeTLAD created" << std::endl;
+  oops::Log::trace() << "ObsAtmProfileTLAD created" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
-ObsRadiosondeTLAD::~ObsRadiosondeTLAD() {
-  ufo_radiosonde_tlad_delete_f90(keyOperRadiosonde_);
-  oops::Log::trace() << "ObsRadiosondeTLAD destructed" << std::endl;
+ObsAtmProfileTLAD::~ObsAtmProfileTLAD() {
+  ufo_atmprofile_tlad_delete_f90(keyOperAtmProfile_);
+  oops::Log::trace() << "ObsAtmProfileTLAD destructed" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
-void ObsRadiosondeTLAD::setTrajectory(const GeoVaLs & geovals, const ObsBias & bias) {
-  ufo_radiosonde_tlad_settraj_f90(keyOperRadiosonde_, geovals.toFortran(), odb_);
+void ObsAtmProfileTLAD::setTrajectory(const GeoVaLs & geovals, const ObsBias & bias) {
+  ufo_atmprofile_tlad_settraj_f90(keyOperAtmProfile_, geovals.toFortran(), odb_);
 }
 
 // -----------------------------------------------------------------------------
 
-void ObsRadiosondeTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec,
+void ObsAtmProfileTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec,
                                       const ObsBiasIncrement & bias) const {
-  ufo_radiosonde_simobs_tl_f90(keyOperRadiosonde_, geovals.toFortran(), odb_,
+  ufo_atmprofile_simobs_tl_f90(keyOperAtmProfile_, geovals.toFortran(), odb_,
                                ovec.size(), ovec.toFortran());
 }
 
 // -----------------------------------------------------------------------------
 
-void ObsRadiosondeTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec,
+void ObsAtmProfileTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec,
                                       ObsBiasIncrement & bias) const {
-  ufo_radiosonde_simobs_ad_f90(keyOperRadiosonde_, geovals.toFortran(), odb_,
+  ufo_atmprofile_simobs_ad_f90(keyOperAtmProfile_, geovals.toFortran(), odb_,
                                ovec.size(), ovec.toFortran());
 }
 
 // -----------------------------------------------------------------------------
 
-void ObsRadiosondeTLAD::print(std::ostream & os) const {
-  os << "ObsRadiosondeTLAD::print not implemented" << std::endl;
+void ObsAtmProfileTLAD::print(std::ostream & os) const {
+  os << "ObsAtmProfileTLAD::print not implemented" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
