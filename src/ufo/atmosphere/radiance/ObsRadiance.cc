@@ -25,7 +25,9 @@
 namespace ufo {
 
 // -----------------------------------------------------------------------------
-static ObsOperatorMaker<ObsRadiance> makerRadiance_("Radiance");
+static ObsOperatorMaker<ObsRadiance> makerAmsua_("AMSU-A");
+static ObsOperatorMaker<ObsRadiance> makerAvhrr_("AVHRR");
+
 // -----------------------------------------------------------------------------
 
 ObsRadiance::ObsRadiance(const ioda::ObsSpace & odb, const eckit::Configuration & config)

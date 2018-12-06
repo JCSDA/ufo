@@ -5,43 +5,45 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
  */
 
-#ifndef UFO_ATMOSPHERE_AIRCRAFT_OBSAIRCRAFT_H_
-#define UFO_ATMOSPHERE_AIRCRAFT_OBSAIRCRAFT_H_
+#ifndef UFO_ATMOSPHERE_ATMPROFILE_OBSATMPROFILE_H_
+#define UFO_ATMOSPHERE_ATMPROFILE_OBSATMPROFILE_H_
 
 #include <ostream>
 #include <string>
+#include <vector>
 
 #include <boost/scoped_ptr.hpp>
 
 #include "oops/base/Variables.h"
 #include "oops/util/DateTime.h"
 #include "oops/util/ObjectCounter.h"
-#include "ufo/atmosphere/aircraft/ObsAircraft.interface.h"
+#include "ufo/atmosphere/atmprofile/ObsAtmProfile.interface.h"
 #include "ufo/ObsOperatorBase.h"
 
 namespace eckit {
-class Configuration;
+  class Configuration;
 }
 
 namespace ioda {
-class ObsSpace;
-class ObsVector;
+  class ObsSpace;
+  class ObsVector;
 }
 
 namespace ufo {
-class GeoVaLs;
-class Locations;
-class ObsBias;
+  class GeoVaLs;
+  class Locations;
+  class ObsBias;
 
 // -----------------------------------------------------------------------------
-/// Aircraft observation for UFO.
-class ObsAircraft : public ObsOperatorBase,
-                    private util::ObjectCounter<ObsAircraft> {
- public:
-  static const std::string classname() {return "ufo::ObsAircraft";}
 
-  ObsAircraft(const ioda::ObsSpace &, const eckit::Configuration &);
-  virtual ~ObsAircraft();
+/// AtmProfile observation operator
+class ObsAtmProfile : public ObsOperatorBase,
+                      private util::ObjectCounter<ObsAtmProfile> {
+ public:
+  static const std::string classname() {return "ufo::ObsAtmProfile";}
+
+  ObsAtmProfile(const ioda::ObsSpace &, const eckit::Configuration &);
+  virtual ~ObsAtmProfile();
 
 // Obs Operator
   void simulateObs(const GeoVaLs &, ioda::ObsVector &, const ObsBias &) const;
@@ -51,12 +53,12 @@ class ObsAircraft : public ObsOperatorBase,
   const oops::Variables & observed() const {return *varout_;}
   Locations * locateObs(const util::DateTime &, const util::DateTime &) const;
 
-  int & toFortran() {return keyOperAircraft_;}
-  const int & toFortran() const {return keyOperAircraft_;}
+  int & toFortran() {return keyOperAtmProfile_;}
+  const int & toFortran() const {return keyOperAtmProfile_;}
 
  private:
   void print(std::ostream &) const;
-  F90hop keyOperAircraft_;
+  F90hop keyOperAtmProfile_;
   const ioda::ObsSpace& odb_;
   boost::scoped_ptr<const oops::Variables> varin_;
   boost::scoped_ptr<const oops::Variables> varout_;
@@ -65,4 +67,4 @@ class ObsAircraft : public ObsOperatorBase,
 // -----------------------------------------------------------------------------
 
 }  // namespace ufo
-#endif  // UFO_ATMOSPHERE_AIRCRAFT_OBSAIRCRAFT_H_
+#endif  // UFO_ATMOSPHERE_ATMPROFILE_OBSATMPROFILE_H_
