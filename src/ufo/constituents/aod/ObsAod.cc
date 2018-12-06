@@ -68,18 +68,6 @@ void ObsAod::simulateObs(const GeoVaLs & gom, ioda::ObsVector & ovec,
 
 // -----------------------------------------------------------------------------
 
-Locations * ObsAod::locateObs(const util::DateTime & t1,
-                              const util::DateTime & t2) const {
-  const util::DateTime * p1 = &t1;
-  const util::DateTime * p2 = &t2;
-  int keylocs;
-  ufo_aod_locateobs_f90(keyOperAod_, odb_, &p1, &p2, keylocs);
-
-  return new Locations(keylocs);
-}
-
-// -----------------------------------------------------------------------------
-
 void ObsAod::print(std::ostream & os) const {
   os << "ObsAod::print not implemented";
 }

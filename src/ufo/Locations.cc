@@ -19,6 +19,13 @@
 
 namespace ufo {
 
+Locations::Locations(const ioda::ObsSpace & odb,
+                     const util::DateTime & t1, const util::DateTime & t2) {
+  const util::DateTime * p1 = &t1;
+  const util::DateTime * p2 = &t2;
+  ufo_locs_init_f90(keyLoc_, odb, &p1, &p2);
+}
+
 // -----------------------------------------------------------------------------
 /*! UFO Locations Constructor with Configuration
  * 

@@ -61,18 +61,6 @@ void ObsGnssroRef::simulateObs(const GeoVaLs & gom, ioda::ObsVector & ovec,
 
 // -----------------------------------------------------------------------------
 
-Locations * ObsGnssroRef::locateObs(const util::DateTime & t1,
-                                    const util::DateTime & t2) const {
-  const util::DateTime * p1 = &t1;
-  const util::DateTime * p2 = &t2;
-  int keylocs;
-  ufo_gnssro_ref_locateobs_f90(keyOperGnssroRef_, odb_, &p1, &p2, keylocs);
-
-  return new Locations(keylocs);
-}
-
-// -----------------------------------------------------------------------------
-
 void ObsGnssroRef::print(std::ostream & os) const {
   os << "ObsGnssroRef::print not implemented";
 }

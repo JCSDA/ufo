@@ -50,7 +50,6 @@ class ObsGnssroBndGSI : public ObsOperatorBase,
 // Other
   const oops::Variables & variables() const {return *varin_;}
   const oops::Variables & observed() const {return *varout_;}
-  Locations * locateObs(const util::DateTime &, const util::DateTime &) const;
 
   int & toFortran() {return keyOperGnssroBndGSI_;}
   const int & toFortran() const {return keyOperGnssroBndGSI_;}

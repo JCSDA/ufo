@@ -11,8 +11,11 @@
 #include <ostream>
 #include <string>
 
+#include "oops/util/DateTime.h"
 #include "oops/util/ObjectCounter.h"
 #include "oops/util/Printable.h"
+
+#include "ioda/ObsSpace.h"
 
 #include "ufo/Locations.interface.h"
 
@@ -29,7 +32,7 @@ class Locations : public util::Printable,
  public:
   static const std::string classname() {return "ufo::Locations";}
 
-  explicit Locations(const F90locs key): keyLoc_(key) {}
+  Locations(const ioda::ObsSpace &, const util::DateTime &, const util::DateTime &);
   explicit Locations(const eckit::Configuration &);
   ~Locations();
 

@@ -8,6 +8,8 @@
 #ifndef UFO_LOCATIONS_INTERFACE_H_
 #define UFO_LOCATIONS_INTERFACE_H_
 
+#include "ioda/ObsSpace.h"
+
 #include "Fortran.h"
 
 namespace ufo {
@@ -20,6 +22,9 @@ namespace ufo {
 
 extern "C" {
 
+  void ufo_locs_init_f90(F90locs &, const ioda::ObsSpace &,
+                                    const util::DateTime * const *,
+                                    const util::DateTime * const *);
   void ufo_locs_create_f90(F90locs &, const int  &, const double *,
                             const double *, const int  &);
   void ufo_locs_delete_f90(F90locs &);

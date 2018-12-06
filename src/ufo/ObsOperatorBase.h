@@ -47,9 +47,6 @@ class ObsOperatorBase : public util::Printable,
 /// Operator output variables
   virtual const oops::Variables & observed() const = 0;
 
-/// Operator locations
-  virtual Locations * locateObs(const util::DateTime &, const util::DateTime &) const = 0;
-
  private:
   virtual void print(std::ostream &) const = 0;
 };

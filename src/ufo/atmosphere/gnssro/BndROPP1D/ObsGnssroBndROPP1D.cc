@@ -60,18 +60,6 @@ void ObsGnssroBndROPP1D::simulateObs(const GeoVaLs & gom, ioda::ObsVector & ovec
 
 // -----------------------------------------------------------------------------
 
-Locations * ObsGnssroBndROPP1D::locateObs(const util::DateTime & t1,
-                                       const util::DateTime & t2) const {
-  const util::DateTime * p1 = &t1;
-  const util::DateTime * p2 = &t2;
-  int keylocs;
-  ufo_gnssro_bndropp1d_locateobs_f90(keyOperGnssroBndROPP1D_, odb_, &p1, &p2, keylocs);
-
-  return new Locations(keylocs);
-}
-
-// -----------------------------------------------------------------------------
-
 void ObsGnssroBndROPP1D::print(std::ostream & os) const {
   os << "ObsGnssroBndROPP1D::print not implemented";
 }

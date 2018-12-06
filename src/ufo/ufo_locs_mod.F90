@@ -8,12 +8,14 @@
 
 module ufo_locs_mod
 
+use iso_c_binding
 use kinds
 use type_distribution, only: random_distribution
 
 implicit none
 private
 public :: ufo_locs, ufo_locs_create, ufo_locs_setup, ufo_locs_delete
+public :: ufo_locs_init
 
 ! ------------------------------------------------------------------------------
 
@@ -114,6 +116,74 @@ if (allocated(self%time)) deallocate(self%time)
 if (allocated(self%indx)) deallocate(self%indx)
 
 end subroutine ufo_locs_delete
+
+! ------------------------------------------------------------------------------
+    
+subroutine ufo_locs_init(self, obss, t1, t2)
+  use kinds
+  use datetime_mod
+  use twindow_utils_mod
+  use fckit_log_module, only : fckit_log
+  use obsspace_mod
+
+  implicit none
+
+  type(ufo_locs), intent(inout) :: self
+  type(c_ptr), value, intent(in)              :: obss
+  type(datetime), intent(in)                  :: t1, t2
+
+  integer :: nlocs
+  type(datetime) :: refdate
+
+  character(len=*),parameter:: &
+     myname = "ufo_basis_locateobs_"
+  character(len=255) :: record
+  integer :: i
+  integer :: tw_nlocs
+  integer, dimension(:), allocatable :: tw_indx
+  real(kind_real), dimension(:), allocatable :: time, lon, lat
+
+  ! Local copies pre binning
+  nlocs = obsspace_get_nlocs(obss)
+  refdate = obsspace_get_refdate(obss)  !!FUNCTION
+
+  allocate(time(nlocs), lon(nlocs), lat(nlocs))
+
+!TODO(JG): Add "MetaData" or similar group attribute to all ioda ObsSpace objects
+  if (obsspace_has(obss,"MetaData", "time")) then
+    call obsspace_get_db(obss, "MetaData", "time", time)
+  else
+    call obsspace_get_db(obss, "", "time", time)
+  endif
+
+  ! Generate the timing window indices
+  allocate(tw_indx(nlocs))
+  call gen_twindow_index(refdate, t1, t2, nlocs, time, tw_indx, tw_nlocs)
+
+!TODO(JG): Add "MetaData" or similar group attribute to all ioda ObsSpace objects
+  if (obsspace_has(obss,"MetaData", "longitude")) then
+    call obsspace_get_db(obss, "MetaData", "longitude", lon)
+    call obsspace_get_db(obss, "MetaData", "latitude", lat)
+  else
+    call obsspace_get_db(obss, "", "longitude", lon)
+    call obsspace_get_db(obss, "", "latitude", lat)
+  endif
+
+  !Setup ufo locations
+  call ufo_locs_setup(self, tw_nlocs)
+  do i = 1, tw_nlocs
+    self%lon(i)  = lon(tw_indx(i))
+    self%lat(i)  = lat(tw_indx(i))
+    self%time(i) = time(tw_indx(i))
+  enddo
+  self%indx = tw_indx(1:tw_nlocs)
+
+  deallocate(time, lon, lat, tw_indx)
+
+  write(record,*) myname,': allocated/assigned obs locations'
+  call fckit_log%info(record)
+
+end subroutine ufo_locs_init
 
 ! ------------------------------------------------------------------------------
 

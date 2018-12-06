@@ -58,18 +58,6 @@ void ObsSeaIceFraction::simulateObs(const GeoVaLs & gv, ioda::ObsVector & ovec,
 
 // -----------------------------------------------------------------------------
 
-Locations * ObsSeaIceFraction::locateObs(const util::DateTime & t1,
-                                   const util::DateTime & t2) const {
-  const util::DateTime * p1 = &t1;
-  const util::DateTime * p2 = &t2;
-  int keylocs;
-  ufo_seaicefraction_locateobs_f90(keyOper_, odb_, &p1, &p2, keylocs);
-
-  return new Locations(keylocs);
-}
-
-// -----------------------------------------------------------------------------
-
 void ObsSeaIceFraction::print(std::ostream & os) const {
   os << "ObsSeaIceFraction::print not implemented";
 }

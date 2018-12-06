@@ -82,18 +82,6 @@ void ObsRadiance::simulateObs(const GeoVaLs & gom, ioda::ObsVector & ovec,
 
 // -----------------------------------------------------------------------------
 
-Locations * ObsRadiance::locateObs(const util::DateTime & t1,
-                                   const util::DateTime & t2) const {
-  const util::DateTime * p1 = &t1;
-  const util::DateTime * p2 = &t2;
-  int keylocs;
-  ufo_radiance_locateobs_f90(keyOperRadiance_, odb_, &p1, &p2, keylocs);
-
-  return new Locations(keylocs);
-}
-
-// -----------------------------------------------------------------------------
-
 void ObsRadiance::print(std::ostream & os) const {
   os << "ObsRadiance::print not implemented";
 }
