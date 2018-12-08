@@ -145,7 +145,7 @@ subroutine ufo_locs_init(self, obss, t1, t2)
 
   ! Local copies pre binning
   nlocs = obsspace_get_nlocs(obss)
-  refdate = obsspace_get_refdate(obss)  !!FUNCTION
+  refdate = obsspace_get_refdate(obss)
 
   allocate(time(nlocs), lon(nlocs), lat(nlocs))
 
