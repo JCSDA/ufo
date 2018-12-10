@@ -42,16 +42,14 @@ BackgroundCheck::~BackgroundCheck() {
 
 // -----------------------------------------------------------------------------
 
-void BackgroundCheck::priorFilter(const GeoVaLs & gv) const {
-  oops::Log::debug() << "BackgroundCheck priorFilter" << std::endl;
-  ufo_bgcheck_prior_f90(key_, gv.toFortran());
-}
+void BackgroundCheck::priorFilter(const GeoVaLs & gv) const {}
 
 // -----------------------------------------------------------------------------
 
-void BackgroundCheck::postFilter(const ioda::ObsVector & hofxb) const {
+void BackgroundCheck::postFilter(const ioda::ObsVector & hofx) const {
   oops::Log::debug() << "BackgroundCheck postFilter" << std::endl;
-  ufo_bgcheck_post_f90(key_, hofxb.size(), hofxb.toFortran());
+  ufo_bgcheck_post_f90(key_, hofx.nvars(), hofx.nlocs(), hofx.toFortran(),
+                       hofx.varnames().toFortranBetter());
 }
 
 // -----------------------------------------------------------------------------

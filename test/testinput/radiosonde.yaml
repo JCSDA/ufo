@@ -26,7 +26,8 @@ Observations:
       window_end: '2018-04-15T03:00:00Z'
     ObsFilters:
     - Filter: Background Check
-      variable: air_temperature
+      variables:
+      - air_temperature
       threshold: 3.0
     rmsequiv: 118.81431
     tolerance: 1.0e-03  # in % so that corresponds to 10^-5

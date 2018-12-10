@@ -29,7 +29,8 @@ extern "C" {
   void ufo_bgcheck_create_f90(F90bgcheck &, const ioda::ObsSpace &, const eckit::Configuration *);
   void ufo_bgcheck_delete_f90(F90bgcheck &);
   void ufo_bgcheck_prior_f90(const F90bgcheck &, const F90goms &);
-  void ufo_bgcheck_post_f90(const F90bgcheck &, const int &, const double &);
+  void ufo_bgcheck_post_f90(const F90bgcheck &, const int &, const int &, const double &,
+                            const eckit::Configuration *);
 }  // extern C
 
 }  // namespace ufo
