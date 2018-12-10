@@ -5,8 +5,8 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#ifndef UFO_MARINE_SEASURFACETEMP_OBSSEASURFACETEMPTLAD_H_
-#define UFO_MARINE_SEASURFACETEMP_OBSSEASURFACETEMPTLAD_H_
+#ifndef UFO_GENERIC_IDENTITY_OBSIDENTITYTLAD_H_
+#define UFO_GENERIC_IDENTITY_OBSIDENTITYTLAD_H_
 
 #include <ostream>
 #include <string>
@@ -16,8 +16,8 @@
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
 
+#include "ufo/generic/identity/ObsIdentityTLAD.interface.h"
 #include "ufo/LinearObsOperatorBase.h"
-#include "ufo/marine/seasurfacetemp/ObsSeaSurfaceTempTLAD.interface.h"
 
 // Forward declarations
 namespace eckit {
@@ -35,14 +35,14 @@ namespace ufo {
   class ObsBiasIncrement;
 
 // -----------------------------------------------------------------------------
-/// SeaSurfaceTemp TL/AD observation operator class
-class ObsSeaSurfaceTempTLAD : public LinearObsOperatorBase,
-                              private util::ObjectCounter<ObsSeaSurfaceTempTLAD> {
+/// Identity TL/AD observation operator class
+class ObsIdentityTLAD : public LinearObsOperatorBase,
+                              private util::ObjectCounter<ObsIdentityTLAD> {
  public:
-  static const std::string classname() {return "ufo::ObsSeaSurfaceTempTLAD";}
+  static const std::string classname() {return "ufo::ObsIdentityTLAD";}
 
-  ObsSeaSurfaceTempTLAD(const ioda::ObsSpace &, const eckit::Configuration &);
-  virtual ~ObsSeaSurfaceTempTLAD();
+  ObsIdentityTLAD(const ioda::ObsSpace &, const eckit::Configuration &);
+  virtual ~ObsIdentityTLAD();
 
   // Obs Operators
   void setTrajectory(const GeoVaLs &, const ObsBias &);
@@ -65,4 +65,4 @@ class ObsSeaSurfaceTempTLAD : public LinearObsOperatorBase,
 // -----------------------------------------------------------------------------
 
 }  // namespace ufo
-#endif  // UFO_MARINE_SEASURFACETEMP_OBSSEASURFACETEMPTLAD_H_
+#endif  // UFO_GENERIC_IDENTITY_OBSIDENTITYTLAD_H_
