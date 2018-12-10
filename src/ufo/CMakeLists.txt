@@ -17,6 +17,10 @@ list( APPEND ufo_src_files
     LinearObsOperator.h
     LinearObsOperatorBase.cc
     LinearObsOperatorBase.h
+    Locations.cc
+    Locations.h
+    Locations.interface.F90
+    Locations.interface.h
     ObsBias.h
     ObsBiasCovariance.h
     ObsBiasIncrement.h
@@ -27,6 +31,7 @@ list( APPEND ufo_src_files
     UfoTrait.h
     ufo_bgcheck_mod.F90
     ufo_geovals_mod.F90
+    ufo_locs_mod.F90
     ufo_variables_mod.F90
 )
 

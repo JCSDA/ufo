@@ -9,17 +9,16 @@
 
 #include "eckit/config/Configuration.h"
 
-#include "ioda/Locations.h"
-
 #include "oops/base/Variables.h"
 #include "oops/util/Logger.h"
 
 #include "ufo/Fortran.h"
+#include "ufo/Locations.h"
 
 namespace ufo {
 
 // -----------------------------------------------------------------------------
-GeoVaLs::GeoVaLs(const ioda::Locations & locs, const oops::Variables & vars)
+GeoVaLs::GeoVaLs(const Locations & locs, const oops::Variables & vars)
   : keyGVL_(-1), vars_(vars)
 {
   oops::Log::trace() << "GeoVaLs contructor starting" << std::endl;
@@ -74,7 +73,7 @@ GeoVaLs::~GeoVaLs() {
  * \date June, 2018: Split off from constructor into independent method 
  *                   (M. Miesch, JCSDA)
  */
-void GeoVaLs::analytic_init(const ioda::Locations & locs,
+void GeoVaLs::analytic_init(const Locations & locs,
                             const eckit::Configuration & config)
   {
   const eckit::Configuration * conf = &config;
