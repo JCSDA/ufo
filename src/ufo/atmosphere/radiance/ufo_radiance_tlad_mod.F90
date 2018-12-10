@@ -18,6 +18,9 @@ module ufo_radiance_tlad_mod
  use ufo_radiance_utils_mod
 
  use crtm_module
+ USE rttov_types
+ USE rttov_const, ONLY : errorstatus_success, deg2rad
+ USE rttov_unix_env
 
  implicit none
  private
@@ -31,6 +34,8 @@ module ufo_radiance_tlad_mod
   integer :: n_Channels
   type(CRTM_Atmosphere_type), allocatable :: atm_K(:,:)
   type(CRTM_Surface_type), allocatable :: sfc_K(:,:)
+  TYPE(rttov_profile), POINTER :: profiles_k(:) => NULL()
+  TYPE(rttov_chanprof), POINTER :: chanprof(:) => NULL()
  contains
   procedure :: setup  => ufo_radiance_tlad_setup
   procedure :: delete  => ufo_radiance_tlad_delete
@@ -77,7 +82,22 @@ end subroutine ufo_radiance_tlad_delete
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_radiance_tlad_settraj(self, geovals, obss)
+SUBROUTINE ufo_radiance_tlad_settraj(self, geovals, obss)
+  CLASS(ufo_radiance_tlad), INTENT(inout) :: self
+  TYPE(ufo_geovals),        INTENT(in)    :: geovals
+  TYPE(c_ptr), VALUE,       INTENT(in)    :: obss
+  
+  IF(TRIM(self%rc%rtmodel) == 'CRTM') THEN
+    CALL ufo_radiance_tlad_settraj_crtm(self, geovals, obss)
+  ELSEIF(TRIM(self%rc%rtmodel) == 'RTTOV') THEN
+    CALL ufo_radiance_tlad_settraj_rttov(self, geovals, obss)
+  ENDIF
+  
+END SUBROUTINE ufo_radiance_tlad_settraj
+
+! ------------------------------------------------------------------------------
+
+SUBROUTINE ufo_radiance_tlad_settraj_crtm(self, geovals, obss)
 
 implicit none
 
@@ -276,21 +296,207 @@ type(CRTM_RTSolution_type), allocatable :: rts_K(:,:)
  ! ------------------------------------
  self%ltraj = .true.
 
-end subroutine ufo_radiance_tlad_settraj
+END SUBROUTINE ufo_radiance_tlad_settraj_crtm
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_radiance_simobs_tl(self, geovals, hofx, obss)
+SUBROUTINE ufo_radiance_tlad_settraj_rttov(self, geovals, obss)
+
+USE ufo_radiance_utils_mod , ONLY : rttov_config
+
+implicit none
+
+class(ufo_radiance_tlad), intent(inout) :: self
+type(ufo_geovals),        intent(in)    :: geovals
+type(c_ptr), value,       intent(in)    :: obss
+
+! Local Variables
+character(*), parameter :: PROGRAM_NAME = 'ufo_radiance_mod.F90'
+character(255) :: message, version
+integer        :: err_stat, alloc_stat
+INTEGER :: i_inst,j , jch,n_levels, nch, nchannels, nchans_total, nchans_inst, asw, ierr
+type(ufo_geoval), pointer :: temp
+
+! ============================================================================
+! STEP 3. **** DEFINE THE RTTOV INTERFACE STRUCTURES ****
+!
+
+LOGICAL(KIND=jplm),      POINTER :: calcemis(:)    => NULL() ! Flag to indicate calculation of emissivity within RTTOV
+
+TYPE(rttov_emissivity),  POINTER :: emissivity(:)  => NULL() ! Input/output surface emissivity
+TYPE(rttov_profile),     POINTER :: profiles(:)    => NULL() ! Input profiles
+TYPE(rttov_transmission)         :: transmission             ! Output transmittances
+TYPE(rttov_radiance)             :: radiance                 ! Output radiances
+
+TYPE(rttov_emissivity),  POINTER :: emissivity_k(:)  => NULL() ! Input/output surface emissivity
+TYPE(rttov_transmission)         :: transmission_k             ! Output transmittances
+TYPE(rttov_radiance)             :: radiance_k                 ! Output radiances
+
+INTEGER(KIND=jpim)               :: errorstatus              ! Return error status of RTTOV subroutine calls
+
+INCLUDE 'rttov_k.interface'
+INCLUDE 'rttov_alloc_k.interface'
+
+
+ ! Get number of profile and layers from geovals
+ ! ---------------------------------------------
+ self%n_Profiles = geovals%nobs
+ call ufo_geovals_get_var(geovals, var_tv, temp, status=ierr)
+ self%n_Layers = temp%nval
+
+ n_levels = self%n_layers + 1
+ nullify(temp)
+
+ asw = 1
+
+ IF( .NOT. rttov_config%rttov_is_setup) THEN
+   CALL rttov_config % setup(self%rc, asw)
+ ENDIF
+
+ Sensor_Loop:DO i_inst = 1, self%rc%n_Sensors
+
+  nchans_inst = rttov_config%rttov_coef_array(i_inst)%coef%fmv_chn
+  self%n_channels = nchans_inst
+    
+  ! Ensure the options and coefficients are consistent
+  CALL rttov_user_options_checkinput(errorstatus, rttov_config%opts, rttov_config%rttov_coef_array(i_inst))
+  IF (errorstatus /= errorstatus_success) THEN
+    WRITE(*,*) 'error in rttov options'
+    CALL rttov_exit(errorstatus)
+  ENDIF
+
+  ! --------------------------------------------------------------------------
+  ! 3. Allocate RTTOV input and output structures
+  ! --------------------------------------------------------------------------
+
+  ! Determine the total number of radiances to simulate (nchanprof).
+  ! In this example we simulate all specified channels for each profile, but
+  ! in general one can simulate a different number of channels for each profile.
+  nchannels = nchans_inst * self%N_PROFILES
+
+  ! Allocate structures for rttov_direct
+  CALL rttov_alloc_k( &
+        errorstatus,             &
+        1_jpim,                  &  ! 1 => allocate
+        self%N_PROFILES,              &
+        nchannels,               &
+        N_LEVELS,                &
+        self%chanprof,           &
+        rttov_config%opts,       &
+        profiles,                &
+        self%profiles_k,         &
+        rttov_config%rttov_coef_array(i_inst),&
+        transmission,            &
+        transmission_k,          &
+        radiance,                &
+        radiance_k,              &
+        calcemis=calcemis,       &
+        emissivity=emissivity,   &
+        emissivity_k=emissivity_k,   &
+        init=.TRUE._jplm)
+
+  IF (errorstatus /= errorstatus_success) THEN
+    WRITE(*,*) 'allocation error for rttov_k structures'
+    CALL rttov_exit(errorstatus)
+  ENDIF
+
+  emissivity_k % emis_out = 0
+  emissivity_k % emis_in = 0
+  emissivity % emis_out = 0
+  
+  ! Inintialize the K-matrix INPUT so that the results are dTb/dx
+  ! -------------------------------------------------------------
+
+  radiance_k % bt(:) = 1
+  radiance_k % total(:) = 1
+
+  ! --------------------------------------------------------------------------
+  ! 4. Build the list of profile/channel indices in chanprof
+  ! --------------------------------------------------------------------------
+
+  nch = 0_jpim
+  DO j = 1, self%N_PROFILES
+    DO jch = 1, nchans_inst
+      nch = nch + 1_jpim
+      self%chanprof(nch)%prof = j
+      self%chanprof(nch)%chan = jch ! only all channels for now. Look at OPS for better implementation.
+    ENDDO
+  ENDDO
+
+   !Assign the data from the GeoVaLs
+   !--------------------------------
+
+   CALL rttov_Load_Atm_Data(self%n_Profiles,self%n_Layers,geovals,obss,profiles)
+
+   call rttov_Load_Geom_Data(obss,profiles)
+
+  ! --------------------------------------------------------------------------
+  ! 6. Specify surface emissivity and reflectance
+  ! --------------------------------------------------------------------------
+
+  ! In this example we have no values for input emissivities
+  emissivity(:) % emis_in = 0._jprb
+
+  ! Calculate emissivity within RTTOV where the input emissivity value is
+  ! zero or less (all channels in this case)
+  calcemis(:) = (emissivity(:) % emis_in <= 0._jprb)
+
+  ! ! In this example we have no values for input reflectances
+  ! reflectance(:) % refl_in = 0._jprb
+
+  ! ! Calculate BRDF within RTTOV where the input BRDF value is zero or less
+  ! ! (all channels in this case)
+  ! calcrefl(:) = (reflectance(:) % refl_in <= 0._jprb)
+
+
+   ! --------------------------------------------------------------------------
+   ! 7. Call RTTOV forward model
+   ! --------------------------------------------------------------------------
+   CALL rttov_k(                &
+     errorstatus,              &! out   error flag
+     self%chanprof(nchans_total + 1:nchans_total + nchans_inst),  &! in    channel and profile index structure
+     rttov_config%opts,               &! in    options structure
+     profiles,                 &! in    profile array
+     self%profiles_k(nchans_total + 1:nchans_total + nchans_inst), &! in    profile array
+     rttov_config%rttov_coef_array(i_inst), &! in    coefficients structure
+     transmission,             &! inout computed transmittances
+     transmission_k,           &! inout computed transmittances
+     radiance,                 &! inout computed radiances
+     radiance_k,               &! inout computed radiances
+     calcemis    = calcemis(nchans_total + 1:nchans_total + nchans_inst),   &! in    flag for internal emissivity calcs
+     emissivity  = emissivity(nchans_total + 1:nchans_total + nchans_inst),  &!, &! inout input/output emissivities per channel
+     emissivity_k = emissivity_k(nchans_total + 1:nchans_total + nchans_inst))!, &! inout input/output emissivities per channel
+   ! calcrefl    = calcrefl,   &! in    flag for internal BRDF calcs
+   ! reflectance = reflectance) ! inout input/output BRDFs per channel
+       
+   IF ( errorstatus /= errorstatus_success ) THEN
+     message = 'Error calling RTTOV K Model for amsua'!//TRIM(SENSOR_ID(n))
+     WRITE(*,*) message
+     STOP
+   END IF
+
+   nchans_total = nchans_total + nchannels
+
+ end do Sensor_Loop
+
+ ! Set flag that the tracectory was set
+ ! ------------------------------------
+ self%ltraj = .true.
+
+END SUBROUTINE ufo_radiance_tlad_settraj_rttov
+
+! ------------------------------------------------------------------------------
+
+SUBROUTINE ufo_radiance_simobs_tl(self, geovals, hofx, obss)
 
 implicit none
 class(ufo_radiance_tlad), intent(in) :: self
 type(ufo_geovals),        intent(in) :: geovals
 real(c_double),        intent(inout) :: hofx(:)
 type(c_ptr), value,    intent(in)    :: obss
-
 character(len=*), parameter :: myname_="ufo_radiance_simobs_tl"
 character(max_string) :: err_msg
-integer :: job, jprofile, jchannel, jlevel, ierr
+INTEGER :: job, jprofile, jchannel, jlevel, ierr, ichan, prof
 type(ufo_geoval), pointer :: tv_d
 
 
@@ -330,24 +536,31 @@ type(ufo_geoval), pointer :: tv_d
    call abor1_ftn(err_msg)
  endif
 
- ! Multiply by Jacobian and add to hofx
- job = 0
- do jprofile = 1, self%n_Profiles
-   do jchannel = 1, self%n_Channels
-     job = job + 1
-     do jlevel = 1, tv_d%nval
-       hofx(job) = hofx(job) + &
-                    self%atm_K(jchannel,jprofile)%Temperature(jlevel) * tv_d%vals(jlevel,jprofile)
-     enddo
-   enddo
- enddo
-
+ IF(self%rc%rtmodel == 'RTTOV') THEN
+   DO ichan = 1, self%n_profiles * self%n_Channels
+     prof = self%chanprof(ichan)%prof
+     hofx(ichan) = hofx(ichan) + &
+       SUM(self%profiles_k(ichan)%t(2:) * tv_d%vals(:,prof))
+   ENDDO
+ ELSE
+   ! Multiply by Jacobian and add to hofx
+   job = 0
+   DO jprofile = 1, self%n_Profiles
+     DO jchannel = 1, self%n_Channels
+       job = job + 1
+       DO jlevel = 1, tv_d%nval
+         hofx(job) = hofx(job) + &
+           self%atm_K(jchannel,jprofile)%Temperature(jlevel) * tv_d%vals(jlevel,jprofile)
+       ENDDO
+     ENDDO
+   ENDDO
+ ENDIF
 
 end subroutine ufo_radiance_simobs_tl
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_radiance_simobs_ad(self, geovals, hofx, obss)
+SUBROUTINE ufo_radiance_simobs_ad(self, geovals, hofx, obss)
 
 implicit none
 class(ufo_radiance_tlad), intent(in) :: self
@@ -357,7 +570,7 @@ type(c_ptr), value,    intent(in)    :: obss
 
 character(len=*), parameter :: myname_="ufo_radiance_simobs_ad"
 character(max_string) :: err_msg
-integer :: job, jprofile, jchannel, jlevel, ierr
+INTEGER :: job, jprofile, jchannel, jlevel, ierr, ichan, prof
 type(ufo_geoval), pointer :: tv_d
 
 
@@ -396,17 +609,27 @@ type(ufo_geoval), pointer :: tv_d
  endif
 
 
- ! Multiply by Jacobian and add to hofx (adjoint)
- job = 0
- do jprofile = 1, self%n_Profiles
-   do jchannel = 1, self%n_Channels
-     job = job + 1
-     do jlevel = 1, tv_d%nval
-       tv_d%vals(jlevel,jprofile) = tv_d%vals(jlevel,jprofile) + &
-                                    self%atm_K(jchannel,jprofile)%Temperature(jlevel) * hofx(job)
-     enddo
-   enddo
- enddo
+ IF(self%rc%rtmodel == 'RTTOV') THEN
+   DO ichan = 1, self%n_profiles * self%n_Channels
+     prof = self%chanprof(ichan)%prof
+     tv_d%vals(:,prof) = tv_d%vals(:,prof) + &
+       self%profiles_k(ichan)%t(2:) * hofx(ichan)
+   ENDDO
+ ELSE
+   ! Multiply by Jacobian and add to hofx (adjoint)
+   job = 0
+   DO jprofile = 1, self%n_Profiles
+     DO jchannel = 1, self%n_Channels
+       job = job + 1
+       DO jlevel = 1, tv_d%nval
+         tv_d%vals(jlevel,jprofile) = tv_d%vals(jlevel,jprofile) + &
+           self%atm_K(jchannel,jprofile)%Temperature(jlevel) * hofx(job)
+       ENDDO
+     ENDDO
+   ENDDO
+ ENDIF
+
+
 
 
  ! Once all geovals set replace flag

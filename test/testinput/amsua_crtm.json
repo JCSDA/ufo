@@ -12,7 +12,7 @@
       {
         "ObsType": "Radiance",
         "ObsOptions": {
-          "RTmodel": "CRTM",
+          "RTModel": "CRTM",
           "n_Absorbers": "3",
           "n_Clouds": "2",
           "n_Aerosols": "0",

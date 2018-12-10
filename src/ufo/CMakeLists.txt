@@ -55,7 +55,7 @@ list( APPEND ufo_src_files
 if( ${GSW_FOUND} )
     list( APPEND ufo_src_files ${marine_src_files} )
 endif( ${GSW_FOUND} )
-list( APPEND UFO_LIBS_DEP oops ioda crtm ${LAPACK_LIBRARIES} ${NETCDF_LIBRARIES} )
+list( APPEND UFO_LIBS_DEP oops ioda crtm rttov ${LAPACK_LIBRARIES} ${NETCDF_LIBRARIES} )
 if( ${GSW_FOUND} )
     list( APPEND UFO_LIBS_DEP gsw )
 endif( ${GSW_FOUND} )

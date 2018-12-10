@@ -8,3 +8,8 @@ ecbuild_add_executable( TARGET  ufo_crtm.x
                         LIBS    ufo
                        )
 
+ecbuild_add_executable( TARGET  ufo_rttov.x
+                        SOURCES ufoRunRTTOV.cc
+                        LIBS    ufo
+                       )
+

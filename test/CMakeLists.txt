@@ -26,7 +26,8 @@ endfunction(CREATE_SYMLINK_FILENAME)
 list( APPEND ufo_test_input
   testinput/ufotest_atmosphere.json
   testinput/ufotest_constituents.json
-  testinput/amsua.json
+  testinput/amsua_crtm.json
+  testinput/amsua_rttov.json
   testinput/radiosonde.json
   testinput/aircraft.json
   testinput/aod.json
@@ -130,16 +131,28 @@ ecbuild_add_test( TARGET  test_ufo_geovals_constituents
                   ARGS    "testinput/ufotest_constituents.json"
                   LIBS    ufo )
 
-ecbuild_add_test( TARGET  test_ufo_amsua_opr
+ecbuild_add_test( TARGET  test_ufo_amsua_crtm_opr
                   BOOST
                   SOURCES mains/TestObsOperator.cc
-                  ARGS    "testinput/amsua.json"
+                  ARGS    "testinput/amsua_crtm.json"
                   LIBS    ufo )
 
-ecbuild_add_test( TARGET  test_ufo_amsua_tlad
+ecbuild_add_test( TARGET  test_ufo_amsua_crtm_tlad
                   BOOST
                   SOURCES mains/TestObsOperatorTLAD.cc
-                  ARGS    "testinput/amsua.json"
+                  ARGS    "testinput/amsua_crtm.json"
+                  LIBS    ufo )
+
+ecbuild_add_test( TARGET  test_ufo_amsua_rttov_opr
+                  BOOST
+                  SOURCES mains/TestObsOperator.cc
+                  ARGS    "testinput/amsua_rttov.json"
+                  LIBS    ufo )
+
+ecbuild_add_test( TARGET  test_ufo_amsua_rttov_tlad
+                  BOOST
+                  SOURCES mains/TestObsOperatorTLAD.cc
+                  ARGS    "testinput/amsua_rttov.json"
                   LIBS    ufo )
 
 ecbuild_add_test( TARGET  test_ufo_radiosonde_opr
@@ -273,3 +286,16 @@ TauCoeff/ODAS/Little_Endian/v.viirs-m_npp.TauCoeff.bin
 CREATE_SYMLINK_FILENAME( ${crtm_SOURCE_DIR}/fix
                          ${CMAKE_CURRENT_BINARY_DIR}/Data
                          ${crtm_test_input} )
+
+#####################################################################
+# Files for RTTOV tests
+#####################################################################
+
+list( APPEND rttov_test_input
+rttov7pred54L/rtcoef_noaa_19_amsua.dat
+)
+
+# Symlink all CRTM files
+CREATE_SYMLINK_FILENAME( ${rttov_SOURCE_DIR}/rtcoef_rttov12
+                         ${CMAKE_CURRENT_BINARY_DIR}/Data
+                         ${rttov_test_input} )

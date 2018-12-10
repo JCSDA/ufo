@@ -55,6 +55,10 @@ include_directories( ${OOPS_INCLUDE_DIRS} )
 ecbuild_use_package( PROJECT crtm VERSION 2.2.3 REQUIRED )
 include_directories( ${CRTM_INCLUDE_DIRS} )
 
+# rttov
+ecbuild_use_package( PROJECT rttov VERSION 12.1.0 REQUIRED )
+include_directories( ${RTTOV_INCLUDE_DIRS} )
+
 # GSW
 ecbuild_use_package( PROJECT gsw )
 if( ${GSW_FOUND} )
@@ -76,7 +80,7 @@ endif( ${ROPP-UFO_FOUND} )
 # Export package info
 ################################################################################
 
-list( APPEND UFO_TPLS oops ioda crtm )
+list( APPEND UFO_TPLS oops ioda crtm rttov)
 if( ${GSW_FOUND} )
     list ( APPEND UFO_TPLS gsw)
 endif( ${GSW_FOUND} )
