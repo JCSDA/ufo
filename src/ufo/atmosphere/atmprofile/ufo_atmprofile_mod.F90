@@ -41,27 +41,25 @@ subroutine atmprofile_setup_(self, c_conf)
 
   integer :: ii
 
-  if (config_element_exists(c_conf,"variables")) then
-    !> Size of variables
-    self%nvars = size(config_get_string_vector(c_conf, max_string, "variables"))
-    !> Allocate varout: variables in the observation vector
-    allocate(self%varout(self%nvars))
-    !> Read variable list and store in varout
-    self%varout = config_get_string_vector(c_conf, max_string, "variables")
-    !> Allocate varin: variables we need from the model
-    !  need additional slot to hold vertical coord.
-    allocate(self%varin(self%nvars+1))
-    !> Set vars_in based on vars_out
-    do ii = 1, self%nvars
-       if (trim(self%varout(ii)) .eq. "air_temperature") then
-         self%varin(ii) = "virtual_temperature"
-       else
-         self%varin(ii) = self%varout(ii)
-       endif
-    enddo
-    !> Put log pressure to the varin (vars from the model) list
-    self%varin(self%nvars+1) = "atmosphere_ln_pressure_coordinate"
-  endif
+  !> Size of variables
+  self%nvars = size(config_get_string_vector(c_conf, max_string, "variables"))
+  !> Allocate varout: variables in the observation vector
+  allocate(self%varout(self%nvars))
+  !> Read variable list and store in varout
+  self%varout = config_get_string_vector(c_conf, max_string, "variables")
+  !> Allocate varin: variables we need from the model
+  !  need additional slot to hold vertical coord.
+  allocate(self%varin(self%nvars+1))
+  !> Set vars_in based on vars_out
+  do ii = 1, self%nvars
+     if (trim(self%varout(ii)) .eq. "air_temperature") then
+       self%varin(ii) = "virtual_temperature"
+     else
+       self%varin(ii) = self%varout(ii)
+     endif
+  enddo
+  !> Put log pressure to the varin (vars from the model) list
+  self%varin(self%nvars+1) = "atmosphere_ln_pressure_coordinate"
 
 end subroutine atmprofile_setup_
 
