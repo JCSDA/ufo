@@ -136,7 +136,7 @@ subroutine ufo_locs_init(self, obss, t1, t2)
   type(datetime) :: refdate
 
   character(len=*),parameter:: &
-     myname = "ufo_basis_locateobs_"
+     myname = "ufo_locs_init"
   character(len=255) :: record
   integer :: i
   integer :: tw_nlocs
