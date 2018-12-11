@@ -423,7 +423,7 @@ character(len=10)         :: cproc
 integer                   :: ppos
 
 ! read filename for config
-filename = config_get_string(c_conf,len(filename),"filename_out")
+filename = config_get_string(c_conf,len(filename),"filename")
 
 ! get the process rank number
 comm = fckit_mpi_comm()
