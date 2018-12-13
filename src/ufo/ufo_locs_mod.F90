@@ -130,12 +130,7 @@ integer :: n
 
 if (allocated(self%lat)) deallocate(self%lat)
 if (allocated(self%lon)) deallocate(self%lon)
-if (allocated(self%time)) then
-  do n = 1, self%nlocs
-    call datetime_delete(self%time(n))
-  enddo
-  deallocate(self%time)
-endif
+if (allocated(self%time)) deallocate(self%time)
 if (allocated(self%indx)) deallocate(self%indx)
 self%nlocs = 0
 
