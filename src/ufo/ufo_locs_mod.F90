@@ -162,13 +162,13 @@ subroutine ufo_locs_init(self, obss, t1, t2)
   real(kind_real), dimension(:), allocatable :: lon, lat
   integer(c_int32_t), dimension(:), allocatable :: date
   integer(c_int32_t), dimension(:), allocatable :: time
-  type(datetime), dimension(:), allocatable :: dt
+  type(datetime), dimension(:), allocatable :: date_time
   character(len=20) :: fstring
 
   ! Local copies pre binning
   nlocs = obsspace_get_nlocs(obss)
 
-  allocate(dt(nlocs), date(nlocs), time(nlocs), lon(nlocs), lat(nlocs))
+  allocate(date_time(nlocs), date(nlocs), time(nlocs), lon(nlocs), lat(nlocs))
 
 !TODO(JG): Add "MetaData" or similar group attribute to all ioda ObsSpace objects
   if (obsspace_has(obss,"MetaData", "time")) then
@@ -184,14 +184,14 @@ subroutine ufo_locs_init(self, obss, t1, t2)
     write(fstring, "(i4.4, a, i2.2, a, i2.2, a, i2.2, a, i2.2, a, i2.2, a)") &
           date(i)/10000, '-', MOD(date(i), 10000)/100, '-', MOD(MOD(date(i), 10000), 100), 'T', &
           time(i)/10000, ':', MOD(time(i), 10000)/100, ':', MOD(MOD(time(i), 10000), 100), 'Z'
-    call datetime_create(fstring, dt(i))
+    call datetime_create(fstring, date_time(i))
   enddo
 
   ! Generate the timing window indices
   allocate(tw_indx(nlocs))
   tw_nlocs = 0
   do i = 1, nlocs
-    if (dt(i) > t1 .and. dt(i) <= t2) then
+    if (date_time(i) > t1 .and. date_time(i) <= t2) then
       tw_nlocs = tw_nlocs + 1
       tw_indx(tw_nlocs) = i
     endif
@@ -211,14 +211,14 @@ subroutine ufo_locs_init(self, obss, t1, t2)
   do i = 1, tw_nlocs
     self%lon(i)  = lon(tw_indx(i))
     self%lat(i)  = lat(tw_indx(i))
-    self%time(i) = dt(tw_indx(i))
+    self%time(i) = date_time(tw_indx(i))
   enddo
   self%indx = tw_indx(1:tw_nlocs)
 
   do i = 1, nlocs
-    call datetime_delete(dt(i))
+    call datetime_delete(date_time(i))
   enddo
-  deallocate(dt, date, time, lon, lat, tw_indx)
+  deallocate(date_time, date, time, lon, lat, tw_indx)
 
   write(record,*) myname,': allocated/assigned obs locations'
   call fckit_log%info(record)
