@@ -5,15 +5,15 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
  */
 
-#ifndef UFO_ATMOSPHERE_GNSSRO_QC_GEOREALITYCHECK_H_
-#define UFO_ATMOSPHERE_GNSSRO_QC_GEOREALITYCHECK_H_
+#ifndef UFO_ATMOSPHERE_GNSSRO_QC_ROGEOREALITYCHECK_H_
+#define UFO_ATMOSPHERE_GNSSRO_QC_ROGEOREALITYCHECK_H_
 
 #include <ostream>
 #include <string>
 
 #include "oops/util/ObjectCounter.h"
 #include "oops/util/Printable.h"
-#include "GEOrealityCheck.interface.h"
+#include "ROgeorealityCheck.interface.h"
 
 namespace eckit {
   class Configuration;
@@ -31,24 +31,24 @@ namespace ioda {
 namespace ufo {
   class GeoVaLs;
 
-/// GEOrealityCheck:RO geophysical reality check
+/// ROgeorealityCheck:RO geophysical reality check
 
-class GEOrealityCheck : public util::Printable,
-                        private util::ObjectCounter<GEOrealityCheck> {
+class ROgeorealityCheck : public util::Printable,
+                        private util::ObjectCounter<ROgeorealityCheck> {
  public:
-  static const std::string classname() {return "ufo::GEOrealityCheck";}
+  static const std::string classname() {return "ufo::ROgeorealityCheck";}
 
-  GEOrealityCheck(const ioda::ObsSpace &, const eckit::Configuration &);
-  ~GEOrealityCheck();
- 
+  ROgeorealityCheck(const ioda::ObsSpace &, const eckit::Configuration &);
+  ~ROgeorealityCheck();
+
   void priorFilter(const GeoVaLs &) const;
   void postFilter(const ioda::ObsVector &) const;
 
  private:
   void print(std::ostream &) const;
-  F90georealitycheck key_;
+  F90rogeorealitycheck key_;
 };
 
 }  // namespace ufo
 
-#endif  // UFO_ATMOSPHERE_GNSSRO_QC_GEOREALITYCHECK_H_
+#endif  // UFO_ATMOSPHERE_GNSSRO_QC_ROGEOREALITYCHECK_H_

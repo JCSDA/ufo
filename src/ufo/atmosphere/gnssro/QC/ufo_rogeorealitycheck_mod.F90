@@ -5,7 +5,7 @@
 
 !> Fortran module to implement RO geophysical reality check
 
-module ufo_georealitycheck_mod
+module ufo_rogeorealitycheck_mod
 use iso_c_binding
 use kinds
 use ufo_geovals_mod
@@ -13,27 +13,27 @@ use obsspace_mod
 use config_mod
 
 implicit none
-public :: ufo_georealitycheck, ufo_georealitycheck_create, ufo_georealitycheck_delete
-public :: ufo_georealitycheck_prior, ufo_georealitycheck_post
+public :: ufo_rogeorealitycheck, ufo_rogeorealitycheck_create, ufo_rogeorealitycheck_delete
+public :: ufo_rogeorealitycheck_prior, ufo_rogeorealitycheck_post
 public :: max_string
 private
 integer, parameter :: max_string=99 
 
 ! ------------------------------------------------------------------------------
-type :: ufo_georealitycheck
+type :: ufo_rogeorealitycheck
   character(len=max_string) :: variable
   integer(c_int)  :: ro_top_meter
   integer(c_int)  :: ro_bot_meter
   type(c_ptr)     :: obsdb
-end type ufo_georealitycheck
+end type ufo_rogeorealitycheck
 
 ! ------------------------------------------------------------------------------
 contains
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_georealitycheck_create(self, obspace, conf)
+subroutine ufo_rogeorealitycheck_create(self, obspace, conf)
 implicit none
-type(ufo_georealitycheck), intent(inout) :: self
+type(ufo_rogeorealitycheck), intent(inout) :: self
 type(c_ptr),  value,       intent(in)    :: obspace
 type(c_ptr),               intent(in)    :: conf
 
@@ -45,25 +45,25 @@ else
   self%ro_top_meter  = config_get_int(conf, "ro_top_meter", 50000)
 endif
 if (self%ro_top_meter<=self%ro_bot_meter .or. self%ro_bot_meter<0.0_kind_real)  then
-   call abor1_ftn("ufo_georealitycheck_create: Error RO RANGE threshold")
+   call abor1_ftn("ufo_rogeorealitycheck_create: Error RO RANGE threshold")
 endif 
 self%obsdb = obspace
 
-end subroutine ufo_georealitycheck_create
+end subroutine ufo_rogeorealitycheck_create
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_georealitycheck_delete(self)
+subroutine ufo_rogeorealitycheck_delete(self)
 implicit none
-type(ufo_georealitycheck), intent(inout) :: self
-end subroutine ufo_georealitycheck_delete
+type(ufo_rogeorealitycheck), intent(inout) :: self
+end subroutine ufo_rogeorealitycheck_delete
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_georealitycheck_prior(self, geovals)
+subroutine ufo_rogeorealitycheck_prior(self, geovals)
 use fckit_log_module, only : fckit_log
 implicit none
-type(ufo_georealitycheck), intent(in) :: self
+type(ufo_rogeorealitycheck), intent(in) :: self
 type(ufo_geovals),      intent(in)    :: geovals
 integer                           :: iobs, jobs,ireject
 integer, parameter                :: ro_geocheck_flag   = 76
@@ -108,7 +108,7 @@ do jobs = 1, iobs
 
 enddo
 
-write(err_msg,*)'ufo_ufo_georealitycheck_prior: ',ireject, " out of ", iobs," are rejected"
+write(err_msg,*)'ufo_ufo_rogeorealitycheck_prior: ',ireject, " out of ", iobs," are rejected"
 call fckit_log%info(err_msg)
 
 call obsspace_put_db(self%obsdb, "EffectiveQC", trim(self%variable), flags)
@@ -119,13 +119,13 @@ deallocate(yearthr)
 deallocate(yimpar)
 deallocate(flags)
 
-end subroutine ufo_georealitycheck_prior
+end subroutine ufo_rogeorealitycheck_prior
 
 ! ------------------------------------------------------------------------------
-subroutine ufo_georealitycheck_post(self, hofx)
+subroutine ufo_rogeorealitycheck_post(self, hofx)
 implicit none
-type(ufo_georealitycheck), intent(in) :: self
+type(ufo_rogeorealitycheck), intent(in) :: self
 real(c_double),  intent(in)           :: hofx(:)
-end subroutine ufo_georealitycheck_post
+end subroutine ufo_rogeorealitycheck_post
 
-end module ufo_georealitycheck_mod
+end module ufo_rogeorealitycheck_mod
