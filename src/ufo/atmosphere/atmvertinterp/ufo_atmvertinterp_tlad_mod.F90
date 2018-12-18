@@ -3,7 +3,7 @@
 ! This software is licensed under the terms of the Apache Licence Version 2.0
 ! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 
-module ufo_atmprofile_tlad_mod
+module ufo_atmvertinterp_tlad_mod
 
   use iso_c_binding
   use kinds
@@ -18,7 +18,7 @@ module ufo_atmprofile_tlad_mod
 
 ! ------------------------------------------------------------------------------
 
-  type, extends(ufo_basis_tlad) :: ufo_atmprofile_tlad
+  type, extends(ufo_basis_tlad) :: ufo_atmvertinterp_tlad
    private
      integer :: nval, nlocs
      real(kind_real), allocatable :: wf(:)
@@ -27,22 +27,22 @@ module ufo_atmprofile_tlad_mod
      character(len=max_string), public, allocatable :: varin(:)
      character(len=max_string), public, allocatable :: varout(:)
   contains
-    procedure :: setup => atmprofile_tlad_setup_
-    procedure :: delete => atmprofile_tlad_delete_
-    procedure :: settraj => atmprofile_tlad_settraj_
-    procedure :: simobs_tl => atmprofile_simobs_tl_
-    procedure :: simobs_ad => atmprofile_simobs_ad_
+    procedure :: setup => atmvertinterp_tlad_setup_
+    procedure :: delete => atmvertinterp_tlad_delete_
+    procedure :: settraj => atmvertinterp_tlad_settraj_
+    procedure :: simobs_tl => atmvertinterp_simobs_tl_
+    procedure :: simobs_ad => atmvertinterp_simobs_ad_
     final :: destructor
-  end type ufo_atmprofile_tlad
+  end type ufo_atmvertinterp_tlad
 
 ! ------------------------------------------------------------------------------
 contains
 ! ------------------------------------------------------------------------------
 
-subroutine atmprofile_tlad_setup_(self, c_conf)
+subroutine atmvertinterp_tlad_setup_(self, c_conf)
   use config_mod
   implicit none
-  class(ufo_atmprofile_tlad), intent(inout) :: self
+  class(ufo_atmvertinterp_tlad), intent(inout) :: self
   type(c_ptr), intent(in)    :: c_conf
 
   integer :: ii
@@ -64,13 +64,13 @@ subroutine atmprofile_tlad_setup_(self, c_conf)
     endif
   enddo
 
-end subroutine atmprofile_tlad_setup_
+end subroutine atmvertinterp_tlad_setup_
 
 ! ------------------------------------------------------------------------------
 
-subroutine atmprofile_tlad_settraj_(self, geovals, obss)
+subroutine atmvertinterp_tlad_settraj_(self, geovals, obss)
   implicit none
-  class(ufo_atmprofile_tlad), intent(inout) :: self
+  class(ufo_atmvertinterp_tlad), intent(inout) :: self
   type(ufo_geovals),         intent(in)    :: geovals
   type(c_ptr), value,        intent(in)    :: obss
 
@@ -103,13 +103,13 @@ subroutine atmprofile_tlad_settraj_(self, geovals, obss)
   self%ltraj = .true.
   ! Cleanup memory
   deallocate(obspressure)
-end subroutine atmprofile_tlad_settraj_
+end subroutine atmvertinterp_tlad_settraj_
 
 ! ------------------------------------------------------------------------------
 
-subroutine atmprofile_simobs_tl_(self, geovals, hofx, obss)
+subroutine atmvertinterp_simobs_tl_(self, geovals, hofx, obss)
   implicit none
-  class(ufo_atmprofile_tlad), intent(in) :: self
+  class(ufo_atmvertinterp_tlad), intent(in) :: self
   type(ufo_geovals),         intent(in) :: geovals
   real(c_double),         intent(inout) :: hofx(:)
   type(c_ptr), value,        intent(in) :: obss
@@ -120,7 +120,7 @@ subroutine atmprofile_simobs_tl_(self, geovals, hofx, obss)
 
   ! Check that trajectory was set
   if (.not. self%ltraj) then
-    call abor1_ftn('atmprofile_simobs_tl: trajectory not set!')
+    call abor1_ftn('atmvertinterp_simobs_tl: trajectory not set!')
   endif
   do ivar = 1, self%nvars
     ! Get the name of input variable in geovals
@@ -135,13 +135,13 @@ subroutine atmprofile_simobs_tl_(self, geovals, hofx, obss)
                                 & hofx(ivar + (iobs-1)*self%nvars), self%wi(iobs), self%wf(iobs))
     enddo
   enddo
-end subroutine atmprofile_simobs_tl_
+end subroutine atmvertinterp_simobs_tl_
 
 ! ------------------------------------------------------------------------------
 
-subroutine atmprofile_simobs_ad_(self, geovals, hofx, obss)
+subroutine atmvertinterp_simobs_ad_(self, geovals, hofx, obss)
   implicit none
-  class(ufo_atmprofile_tlad), intent(in) :: self
+  class(ufo_atmvertinterp_tlad), intent(in) :: self
   type(ufo_geovals),         intent(inout) :: geovals
   real(c_double),            intent(in)    :: hofx(:)
   type(c_ptr), value,        intent(in)    :: obss
@@ -153,7 +153,7 @@ subroutine atmprofile_simobs_ad_(self, geovals, hofx, obss)
 
   ! Check that trajectory was set
   if (.not. self%ltraj) then
-    call abor1_ftn('atmprofile_simobs_ad: trajectory not set!')
+    call abor1_ftn('atmvertinterp_simobs_ad: trajectory not set!')
   endif
 
   missing_value = obspace_missing_value()
@@ -182,24 +182,24 @@ subroutine atmprofile_simobs_ad_(self, geovals, hofx, obss)
       endif
     enddo
   enddo
-end subroutine atmprofile_simobs_ad_
+end subroutine atmvertinterp_simobs_ad_
 
 ! ------------------------------------------------------------------------------
 
-subroutine atmprofile_tlad_delete_(self)
+subroutine atmvertinterp_tlad_delete_(self)
   implicit none
-  class(ufo_atmprofile_tlad), intent(inout) :: self
+  class(ufo_atmvertinterp_tlad), intent(inout) :: self
   self%nval = 0
   self%ltraj = .false.
 ! Delete trajectory
   if (allocated(self%wi)) deallocate(self%wi)
   if (allocated(self%wf)) deallocate(self%wf)
-end subroutine atmprofile_tlad_delete_
+end subroutine atmvertinterp_tlad_delete_
 
 ! ------------------------------------------------------------------------------
 
 subroutine  destructor(self)
-  type(ufo_atmprofile_tlad), intent(inout)  :: self
+  type(ufo_atmvertinterp_tlad), intent(inout)  :: self
   self%nval = 0
   self%nlocs = 0
   self%nvars = 0
@@ -212,4 +212,4 @@ end subroutine destructor
 
 ! ------------------------------------------------------------------------------
 
-end module ufo_atmprofile_tlad_mod
+end module ufo_atmvertinterp_tlad_mod
