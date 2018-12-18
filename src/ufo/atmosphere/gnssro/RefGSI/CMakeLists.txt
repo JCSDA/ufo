@@ -8,9 +8,11 @@ set (  refgsi_src_files
        ObsGnssroRef.cc
        ObsGnssroRefTLAD.h
        ObsGnssroRefTLAD.cc
-       ufo_gnssro_ref_interface.F90
+       ObsGnssroRef.interface.h
+       ObsGnssroRef.interface.F90
+       ObsGnssroRefTLAD.interface.h
+       ObsGnssroRefTLAD.interface.F90
        ufo_gnssro_ref_mod.F90
-       ufo_gnssro_ref_tlad_interface.F90
        ufo_gnssro_ref_tlad_mod.F90
 PARENT_SCOPE
 )
