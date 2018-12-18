@@ -5,8 +5,8 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#ifndef UFO_ATMOSPHERE_ATMPROFILE_OBSATMPROFILE_INTERFACE_H_
-#define UFO_ATMOSPHERE_ATMPROFILE_OBSATMPROFILE_INTERFACE_H_
+#ifndef UFO_ATMOSPHERE_ATMVERTINTERP_OBSATMVERTINTERP_INTERFACE_H_
+#define UFO_ATMOSPHERE_ATMVERTINTERP_OBSATMVERTINTERP_INTERFACE_H_
 
 #include "ioda/ObsSpace.h"
 
@@ -23,17 +23,17 @@ namespace ufo {
 extern "C" {
 
 // -----------------------------------------------------------------------------
-//  AtmProfile observation operator
+//  AtmVertInterp observation operator
 // -----------------------------------------------------------------------------
 
-  void ufo_atmprofile_setup_f90(F90hop &, const eckit::Configuration * const *,
+  void ufo_atmvertinterp_setup_f90(F90hop &, const eckit::Configuration * const *,
                                 char *, char *, const int &);
-  void ufo_atmprofile_delete_f90(F90hop &);
-  void ufo_atmprofile_simobs_f90(const F90hop &, const F90goms &, const ioda::ObsSpace &,
+  void ufo_atmvertinterp_delete_f90(F90hop &);
+  void ufo_atmvertinterp_simobs_f90(const F90hop &, const F90goms &, const ioda::ObsSpace &,
                                  const int &, double &, const F90obias &);
 // -----------------------------------------------------------------------------
 
 }  // extern C
 
 }  // namespace ufo
-#endif  // UFO_ATMOSPHERE_ATMPROFILE_OBSATMPROFILE_INTERFACE_H_
+#endif  // UFO_ATMOSPHERE_ATMVERTINTERP_OBSATMVERTINTERP_INTERFACE_H_
