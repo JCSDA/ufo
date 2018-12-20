@@ -37,12 +37,12 @@ class ObsBias : public util::Printable,
   ObsBias(const ObsBias &, const bool) {}
   ~ObsBias() {}
 
-  ObsBias & operator+=(const ObsBiasIncrement &) {}
+  ObsBias & operator+=(const ObsBiasIncrement &) {return *this;}
 
 /// I/O and diagnostics
   void read(const eckit::Configuration &) {}
   void write(const eckit::Configuration &) const {}
-  double norm() const {return 0;}
+  double norm() const {return 0.0;}
 
   int & toFortran() {return keyBias_;}
   const int & toFortran() const {return keyBias_;}
