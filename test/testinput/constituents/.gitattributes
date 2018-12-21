@@ -1,0 +1,5 @@
+diag_viirs_ges.2015081000.bin filter=lfs diff=lfs merge=lfs -text
+diag_viirs_ges_p25.2015081000.bin filter=lfs diff=lfs merge=lfs -text
+vars_viirs_ges.2015081000.bin filter=lfs diff=lfs merge=lfs -text
+vars_viirs_ges_p25.2015081000.bin filter=lfs diff=lfs merge=lfs -text
+VIIRS_AOD_BUFR:2015081000 filter=lfs diff=lfs merge=lfs -text
