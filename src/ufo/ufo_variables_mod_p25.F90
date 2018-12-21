@@ -12,7 +12,7 @@ private
 public :: ufo_vars, ufo_vars_setup, ufo_vars_clone, ufo_vars_delete
 public :: ufo_vars_getindex, ufo_vars_nvars, ufo_vars_vnames
 
-INTEGER, PARAMETER, PUBLIC :: naerosols_gocart_esrl=15,naerosols_gocart_default=14
+integer, parameter, public :: naerosols_gocart_esrl=15
 
 integer, parameter, public :: MAXVARLEN=56
 character(len=MAXVARLEN), public :: var_tv   = "virtual_temperature"
@@ -50,7 +50,7 @@ character(len=MAXVARLEN), public :: var_sfc_vegtyp  = "Vegetation_Type"
 character(len=MAXVARLEN), public :: var_sfc_soiltyp = "Soil_Type"
 
 !@mzp strings have to be same MAXVARLEN length for array constructor
-CHARACTER(len=MAXVARLEN), DIMENSION(naerosols_gocart_default), PUBLIC :: var_aerosols =[&
+CHARACTER(len=MAXVARLEN), DIMENSION(naerosols_gocart_esrl), PUBLIC :: var_aerosols =[&
      &"sulf                                                    ",&
      &"bc1                                                     ",&
      &"bc2                                                     ",&
@@ -64,7 +64,8 @@ CHARACTER(len=MAXVARLEN), DIMENSION(naerosols_gocart_default), PUBLIC :: var_aer
      &"seas1                                                   ",&
      &"seas2                                                   ",&
      &"seas3                                                   ",&
-     &"seas4                                                   "]
+     &"seas4                                                   ",&
+     &"p25                                                     "]
 
 CHARACTER(len=MAXVARLEN), PUBLIC :: var_t="temperature"
 

@@ -42,7 +42,6 @@ MODULE ufo_aod_mod
        &tmix = ttp-20._fp,&
        &hsub = hvap+hfus,&
        &eps = rd/rv,&
-       &eps_p1= 1._fp+eps,&
        &omeps=one-eps,&
        &dldt =cvap-cliq,&
        &dldti = cvap-csol,&
@@ -499,7 +498,7 @@ contains
 
       USE crtm_aerosolcoeff, ONLY: AeroC
 
-      REAL(fp), DIMENSION(N_LAYERS) :: ugkg_kgm2,qsat,rh,prsl,tsen
+      REAL(fp), DIMENSION(N_LAYERS) :: ugkg_kgm2,qsat,rh,prsl,tsen,p25
 
 ! Local variables
       INTEGER :: nc, NL
@@ -513,127 +512,147 @@ contains
 
       INTEGER :: n_aerosols_all
 
-      INTEGER :: i,k,m
+      INTEGER :: i,ii,k,m
 
       DO m=1,N_PROFILES
 
 !ug2kg && hPa2Pa
          DO k=1,N_LAYERS
-!correct for mixing ratio factor ugkg_kgm2 
-!being calculated from dry pressure, cotton eq. (2.4)
-!p_dry=p_total/(1+1.61*mixing_ratio)
             ugkg_kgm2(k)=1.0e-9_fp*(atm(m)%Level_Pressure(k)-&
-                 &atm(m)%Level_Pressure(k-1))*100_fp/grav/&
-                 &(1._fp+eps_p1*atm(m)%Absorber(k,1)*1.e-3_fp)
+                 &atm(m)%Level_Pressure(k-1))*100_fp/grav
             prsl(k)=atm(m)%Pressure(N_LAYERS-k+1)*0.1_fp ! must be in cb for genqsat
             tsen(k)=atm(m)%Temperature(N_LAYERS-k+1)
          ENDDO
 
          CALL genqsat(qsat,tsen,prsl,n_layers,ice4qsat)
 
-!relative humidity is ratio of specific humidities not mixing ratios
          DO k=1,N_LAYERS
-            rh(k)=(atm(m)%Absorber(k,1)/(1._fp+atm(m)%Absorber(k,1)))*1.e-3_fp/&
+            rh(k)=atm(m)%Absorber(k,1)*1.e-3_fp/&
                  &qsat(N_LAYERS-k+1)
          ENDDO
 
          n_aerosols_all=SIZE(var_aerosols)
          
-         IF (n_aerosols_all /= n_aerosols_gocart_crtm) THEN
-            message = 'Only default GOCART with 14 species allowed for now'
-            CALL Display_Message( PROGRAM_NAME, message, FAILURE )
-            STOP
+         IF (n_aerosols_all == naerosols_gocart_esrl) THEN
+            
+            DO i=1,n_aerosols_all
+               varname=var_aerosols(i)
+               IF (TRIM(varname) == 'p25') THEN
+                  call ufo_geovals_get_var(geovals,varname, geoval)
+                  
+                  IF (flip_vertical) THEN
+                     p25(1:N_LAYERS)=geoval%vals(N_LAYERS:1:-1,m)
+                  ELSE
+                     p25(1:N_LAYERS)=geoval%vals(1:N_LAYERS,m)
+                  ENDIF
+
+                  p25=MAX(p25*ugkg_kgm2,zero)
+                  
+                  EXIT
+               ENDIF
+            ENDDO
+        
+         ELSE
+            p25=0_fp
          ENDIF
-         
+
+         ii=0
+
          DO i=1,n_aerosols_all
             varname=var_aerosols(i)
+            IF (TRIM(varname) == 'p25') CYCLE
+            ii=ii+1
             call ufo_geovals_get_var(geovals,varname, geoval)
 
             IF (flip_vertical) THEN
-               atm(m)%aerosol(i)%Concentration(1:N_LAYERS)=geoval%vals(N_LAYERS:1:-1,m)
+               atm(m)%aerosol(ii)%Concentration(1:N_LAYERS)=geoval%vals(N_LAYERS:1:-1,m)
             ELSE
-               atm(m)%aerosol(i)%Concentration(1:N_LAYERS)=geoval%vals(1:N_LAYERS,m)
+               atm(m)%aerosol(ii)%Concentration(1:N_LAYERS)=geoval%vals(1:N_LAYERS,m)
             ENDIF
 
-            atm(m)%aerosol(i)%Concentration=MAX(atm(m)%aerosol(i)%Concentration*ugkg_kgm2,&
+            atm(m)%aerosol(ii)%Concentration=MAX(atm(m)%aerosol(ii)%Concentration*ugkg_kgm2,&
                  &small_value)
 
             SELECT CASE ( TRIM(varname))
             CASE ('sulf')
-               atm(m)%aerosol(i)%type  = SULFATE_AEROSOL
+               atm(m)%aerosol(ii)%type  = SULFATE_AEROSOL
 !rh needs to be from top to bottom
                DO k=1,N_LAYERS
-                  atm(m)%Aerosol(i)%Effective_Radius(k)=&
-                       &GOCART_Aerosol_size(atm(m)%aerosol(i)%type, &
+                  atm(m)%Aerosol(ii)%Effective_Radius(k)=&
+                       &GOCART_Aerosol_size(atm(m)%aerosol(ii)%type, &
                        &rh(k))
                ENDDO
 
             CASE ('bc1')
-               atm(m)%aerosol(i)%type  = BLACK_CARBON_AEROSOL
-               atm(m)%Aerosol(i)%Effective_Radius(:)=&
-                    &AeroC%Reff(1,atm(m)%aerosol(i)%type)
+               atm(m)%aerosol(ii)%type  = BLACK_CARBON_AEROSOL
+               atm(m)%Aerosol(ii)%Effective_Radius(:)=&
+                    &AeroC%Reff(1,atm(m)%aerosol(ii)%type)
             CASE ('bc2')
-               atm(m)%aerosol(i)%type  = BLACK_CARBON_AEROSOL
+               atm(m)%aerosol(ii)%type  = BLACK_CARBON_AEROSOL
                DO k=1,N_LAYERS
-                  atm(m)%Aerosol(i)%Effective_Radius(k)=&
-                       &GOCART_Aerosol_size(atm(m)%aerosol(i)%type, &
+                  atm(m)%Aerosol(ii)%Effective_Radius(k)=&
+                       &GOCART_Aerosol_size(atm(m)%aerosol(ii)%type, &
                        &rh(k))
                ENDDO
 
             CASE ('oc1')
-               atm(m)%aerosol(i)%type  = ORGANIC_CARBON_AEROSOL
-               atm(m)%Aerosol(i)%Effective_Radius(:)=&
-                    &AeroC%Reff(1,atm(m)%aerosol(i)%type)
+               atm(m)%aerosol(ii)%type  = ORGANIC_CARBON_AEROSOL
+               atm(m)%Aerosol(ii)%Effective_Radius(:)=&
+                    &AeroC%Reff(1,atm(m)%aerosol(ii)%type)
             CASE ('oc2')
-               atm(m)%aerosol(i)%type  = ORGANIC_CARBON_AEROSOL
+               atm(m)%aerosol(ii)%type  = ORGANIC_CARBON_AEROSOL
                DO k=1,N_LAYERS
-                  atm(m)%Aerosol(i)%Effective_Radius(k)=&
-                       &GOCART_Aerosol_size(atm(m)%aerosol(i)%type, &
+                  atm(m)%Aerosol(ii)%Effective_Radius(k)=&
+                       &GOCART_Aerosol_size(atm(m)%aerosol(ii)%type, &
                        &rh(k))
                ENDDO
 
             CASE ('dust1')
-               atm(m)%aerosol(i)%type  = DUST_AEROSOL
-               atm(m)%Aerosol(i)%Effective_Radius(:)=0.55_fp
+               atm(m)%aerosol(ii)%type  = DUST_AEROSOL
+               atm(m)%Aerosol(ii)%Effective_Radius(:)=0.55_fp
+               atm(m)%aerosol(ii)%Concentration=&
+                    &atm(m)%aerosol(ii)%Concentration+0.78_fp*p25
             CASE ('dust2')
-               atm(m)%aerosol(i)%type  = DUST_AEROSOL
-               atm(m)%Aerosol(i)%Effective_Radius(:)=1.4_fp
+               atm(m)%aerosol(ii)%type  = DUST_AEROSOL
+               atm(m)%Aerosol(ii)%Effective_Radius(:)=1.4_fp
+               atm(m)%aerosol(ii)%Concentration=&
+                    &atm(m)%aerosol(ii)%Concentration+0.22_fp*p25
             CASE ('dust3')
-               atm(m)%aerosol(i)%type  = DUST_AEROSOL
-               atm(m)%Aerosol(i)%Effective_Radius(:)=2.4_fp
+               atm(m)%aerosol(ii)%type  = DUST_AEROSOL
+               atm(m)%Aerosol(ii)%Effective_Radius(:)=2.4_fp
             CASE ('dust4')
-               atm(m)%aerosol(i)%type  = DUST_AEROSOL
-               atm(m)%Aerosol(i)%Effective_Radius(:)=4.5_fp
+               atm(m)%aerosol(ii)%type  = DUST_AEROSOL
+               atm(m)%Aerosol(ii)%Effective_Radius(:)=4.5_fp
             CASE ('dust5')
-               atm(m)%aerosol(i)%type  = DUST_AEROSOL
-               atm(m)%Aerosol(i)%Effective_Radius(:)=8.0_fp
+               atm(m)%aerosol(ii)%type  = DUST_AEROSOL
+               atm(m)%Aerosol(ii)%Effective_Radius(:)=8.0_fp
 
             CASE ('seas1')
-               atm(m)%aerosol(i)%type  = SEASALT_SSAM_AEROSOL
+               atm(m)%aerosol(ii)%type  = SEASALT_SSAM_AEROSOL
                DO k=1,N_LAYERS
-                  atm(m)%Aerosol(i)%Effective_Radius(k)=&
-                       &GOCART_Aerosol_size(atm(m)%aerosol(i)%type, &
+                  atm(m)%Aerosol(ii)%Effective_Radius(k)=&
+                       &GOCART_Aerosol_size(atm(m)%aerosol(ii)%type, &
                        &rh(k))
                ENDDO
             CASE ('seas2')
-               atm(m)%aerosol(i)%type  = SEASALT_SSCM1_AEROSOL
+               atm(m)%aerosol(ii)%type  = SEASALT_SSCM1_AEROSOL
                DO k=1,N_LAYERS
-                  atm(m)%Aerosol(i)%Effective_Radius(k)=&
-                       &GOCART_Aerosol_size(atm(m)%aerosol(i)%type, &
+                  atm(m)%Aerosol(ii)%Effective_Radius(k)=&
+                       &GOCART_Aerosol_size(atm(m)%aerosol(ii)%type, &
                        &rh(k))
                ENDDO
             CASE ('seas3')
-               atm(m)%aerosol(i)%type  = SEASALT_SSCM2_AEROSOL
+               atm(m)%aerosol(ii)%type  = SEASALT_SSCM2_AEROSOL
                DO k=1,N_LAYERS
-                  atm(m)%Aerosol(i)%Effective_Radius(k)=&
-                       &GOCART_Aerosol_size(atm(m)%aerosol(i)%type, &
+                  atm(m)%Aerosol(ii)%Effective_Radius(k)=&
+                       &GOCART_Aerosol_size(atm(m)%aerosol(ii)%type, &
                        &rh(k))
                ENDDO
             CASE ('seas4')
-               atm(m)%aerosol(i)%type  = SEASALT_SSCM3_AEROSOL
+               atm(m)%aerosol(ii)%type  = SEASALT_SSCM3_AEROSOL
                DO k=1,N_LAYERS
-                  atm(m)%Aerosol(i)%Effective_Radius(k)=&
-                       &GOCART_Aerosol_size(atm(m)%aerosol(i)%type, &
+                  atm(m)%Aerosol(ii)%Effective_Radius(k)=&
+                       &GOCART_Aerosol_size(atm(m)%aerosol(ii)%type, &
                        &rh(k))
                ENDDO
             END SELECT
