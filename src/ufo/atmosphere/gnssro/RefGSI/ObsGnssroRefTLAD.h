@@ -15,7 +15,7 @@
 
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
-#include "ufo/atmosphere/gnssro/RefGSI/FortranRefGSI.h"
+#include "ufo/atmosphere/gnssro/RefGSI/ObsGnssroRefTLAD.interface.h"
 #include "ufo/LinearObsOperatorBase.h"
 
 // Forward declarations

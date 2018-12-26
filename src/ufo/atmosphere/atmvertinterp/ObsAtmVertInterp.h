@@ -5,8 +5,8 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
  */
 
-#ifndef UFO_ATMOSPHERE_ATMPROFILE_OBSATMPROFILE_H_
-#define UFO_ATMOSPHERE_ATMPROFILE_OBSATMPROFILE_H_
+#ifndef UFO_ATMOSPHERE_ATMVERTINTERP_OBSATMVERTINTERP_H_
+#define UFO_ATMOSPHERE_ATMVERTINTERP_OBSATMVERTINTERP_H_
 
 #include <ostream>
 #include <string>
@@ -16,7 +16,7 @@
 
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
-#include "ufo/atmosphere/atmprofile/ObsAtmProfile.interface.h"
+#include "ufo/atmosphere/atmvertinterp/ObsAtmVertInterp.interface.h"
 #include "ufo/ObsOperatorBase.h"
 
 namespace eckit {
@@ -34,14 +34,14 @@ namespace ufo {
 
 // -----------------------------------------------------------------------------
 
-/// AtmProfile observation operator
-class ObsAtmProfile : public ObsOperatorBase,
-                      private util::ObjectCounter<ObsAtmProfile> {
+/// AtmVertInterp observation operator
+class ObsAtmVertInterp : public ObsOperatorBase,
+                      private util::ObjectCounter<ObsAtmVertInterp> {
  public:
-  static const std::string classname() {return "ufo::ObsAtmProfile";}
+  static const std::string classname() {return "ufo::ObsAtmVertInterp";}
 
-  ObsAtmProfile(const ioda::ObsSpace &, const eckit::Configuration &);
-  virtual ~ObsAtmProfile();
+  ObsAtmVertInterp(const ioda::ObsSpace &, const eckit::Configuration &);
+  virtual ~ObsAtmVertInterp();
 
 // Obs Operator
   void simulateObs(const GeoVaLs &, ioda::ObsVector &, const ObsBias &) const;
@@ -50,12 +50,12 @@ class ObsAtmProfile : public ObsOperatorBase,
   const oops::Variables & variables() const {return *varin_;}
   const oops::Variables & observed() const {return *varout_;}
 
-  int & toFortran() {return keyOperAtmProfile_;}
-  const int & toFortran() const {return keyOperAtmProfile_;}
+  int & toFortran() {return keyOperAtmVertInterp_;}
+  const int & toFortran() const {return keyOperAtmVertInterp_;}
 
  private:
   void print(std::ostream &) const;
-  F90hop keyOperAtmProfile_;
+  F90hop keyOperAtmVertInterp_;
   const ioda::ObsSpace& odb_;
   boost::scoped_ptr<const oops::Variables> varin_;
   boost::scoped_ptr<const oops::Variables> varout_;
@@ -64,4 +64,4 @@ class ObsAtmProfile : public ObsOperatorBase,
 // -----------------------------------------------------------------------------
 
 }  // namespace ufo
-#endif  // UFO_ATMOSPHERE_ATMPROFILE_OBSATMPROFILE_H_
+#endif  // UFO_ATMOSPHERE_ATMVERTINTERP_OBSATMVERTINTERP_H_

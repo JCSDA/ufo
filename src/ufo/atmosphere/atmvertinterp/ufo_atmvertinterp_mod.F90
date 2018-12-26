@@ -3,7 +3,7 @@
 ! This software is licensed under the terms of the Apache Licence Version 2.0
 ! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 
-module ufo_atmprofile_mod
+module ufo_atmvertinterp_mod
 
   use iso_c_binding
   use kinds
@@ -18,25 +18,25 @@ module ufo_atmprofile_mod
 
 ! ------------------------------------------------------------------------------
 
-  type, extends(ufo_basis) :: ufo_atmprofile
+  type, extends(ufo_basis) :: ufo_atmvertinterp
    private
      integer, public :: nvars
      character(len=max_string), public, allocatable :: varin(:)
      character(len=max_string), public, allocatable :: varout(:)
   contains
-    procedure :: setup  => atmprofile_setup_
-    procedure :: simobs => atmprofile_simobs_
+    procedure :: setup  => atmvertinterp_setup_
+    procedure :: simobs => atmvertinterp_simobs_
     final :: destructor
-  end type ufo_atmprofile
+  end type ufo_atmvertinterp
 
 ! ------------------------------------------------------------------------------
 contains
 ! ------------------------------------------------------------------------------
 
-subroutine atmprofile_setup_(self, c_conf)
+subroutine atmvertinterp_setup_(self, c_conf)
   use config_mod
   implicit none
-  class(ufo_atmprofile), intent(inout) :: self
+  class(ufo_atmvertinterp), intent(inout) :: self
   type(c_ptr), intent(in)    :: c_conf
 
   integer :: ii
@@ -61,14 +61,14 @@ subroutine atmprofile_setup_(self, c_conf)
   !> Put log pressure to the varin (vars from the model) list
   self%varin(self%nvars+1) = "atmosphere_ln_pressure_coordinate"
 
-end subroutine atmprofile_setup_
+end subroutine atmvertinterp_setup_
 
 ! ------------------------------------------------------------------------------
 
-subroutine atmprofile_simobs_(self, geovals, hofx, obss)
+subroutine atmvertinterp_simobs_(self, geovals, hofx, obss)
 
   implicit none
-  class(ufo_atmprofile), intent(in) :: self
+  class(ufo_atmvertinterp), intent(in) :: self
   type(ufo_geovals), intent(in)               :: geovals
   real(c_double),  intent(inout)              :: hofx(:)
   type(c_ptr), value, intent(in)              :: obss
@@ -118,16 +118,16 @@ subroutine atmprofile_simobs_(self, geovals, hofx, obss)
   deallocate(wi)
   deallocate(wf)
 
-end subroutine atmprofile_simobs_
+end subroutine atmvertinterp_simobs_
 
 ! ------------------------------------------------------------------------------
 
 subroutine  destructor(self)
-  type(ufo_atmprofile), intent(inout) :: self
+  type(ufo_atmvertinterp), intent(inout) :: self
   if (allocated(self%varout)) deallocate(self%varout)
   if (allocated(self%varin)) deallocate(self%varin)
 end subroutine destructor
 
 ! ------------------------------------------------------------------------------
 
-end module ufo_atmprofile_mod
+end module ufo_atmvertinterp_mod

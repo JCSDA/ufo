@@ -5,7 +5,7 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#include "ufo/atmosphere/atmprofile/ObsAtmProfileTLAD.h"
+#include "ufo/atmosphere/atmvertinterp/ObsAtmVertInterpTLAD.h"
 
 #include <ostream>
 #include <string>
@@ -27,21 +27,21 @@
 namespace ufo {
 
 // -----------------------------------------------------------------------------
-static LinearObsOperatorMaker<ObsAtmProfileTLAD> makerRadiosondeTL_("Radiosonde");
-static LinearObsOperatorMaker<ObsAtmProfileTLAD> makerAircraftTL_("Aircraft");
-static LinearObsOperatorMaker<ObsAtmProfileTLAD> makerSatwindTL_("Satwind");
+static LinearObsOperatorMaker<ObsAtmVertInterpTLAD> makerRadiosondeTL_("Radiosonde");
+static LinearObsOperatorMaker<ObsAtmVertInterpTLAD> makerAircraftTL_("Aircraft");
+static LinearObsOperatorMaker<ObsAtmVertInterpTLAD> makerSatwindTL_("Satwind");
 // -----------------------------------------------------------------------------
 
-ObsAtmProfileTLAD::ObsAtmProfileTLAD(const ioda::ObsSpace & odb,
+ObsAtmVertInterpTLAD::ObsAtmVertInterpTLAD(const ioda::ObsSpace & odb,
                                      const eckit::Configuration & config)
-  : keyOperAtmProfile_(0), varin_(), odb_(odb)
+  : keyOperAtmVertInterp_(0), varin_(), odb_(odb)
 {
   int c_name_size = 200;
   char *buffin = new char[c_name_size];
   char *buffout = new char[c_name_size];
   const eckit::Configuration * configc = &config;
 
-  ufo_atmprofile_tlad_setup_f90(keyOperAtmProfile_, &configc, buffin, buffout, c_name_size);
+  ufo_atmvertinterp_tlad_setup_f90(keyOperAtmVertInterp_, &configc, buffin, buffout, c_name_size);
 
   std::string vstr_in(buffin), vstr_out(buffout);
   std::vector<std::string> vvin;
@@ -51,42 +51,42 @@ ObsAtmProfileTLAD::ObsAtmProfileTLAD(const ioda::ObsSpace & odb,
   varin_.reset(new oops::Variables(vvin));
   varout_.reset(new oops::Variables(vvout));
 
-  oops::Log::trace() << "ObsAtmProfileTLAD created" << std::endl;
+  oops::Log::trace() << "ObsAtmVertInterpTLAD created" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
-ObsAtmProfileTLAD::~ObsAtmProfileTLAD() {
-  ufo_atmprofile_tlad_delete_f90(keyOperAtmProfile_);
-  oops::Log::trace() << "ObsAtmProfileTLAD destructed" << std::endl;
+ObsAtmVertInterpTLAD::~ObsAtmVertInterpTLAD() {
+  ufo_atmvertinterp_tlad_delete_f90(keyOperAtmVertInterp_);
+  oops::Log::trace() << "ObsAtmVertInterpTLAD destructed" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
-void ObsAtmProfileTLAD::setTrajectory(const GeoVaLs & geovals, const ObsBias & bias) {
-  ufo_atmprofile_tlad_settraj_f90(keyOperAtmProfile_, geovals.toFortran(), odb_);
+void ObsAtmVertInterpTLAD::setTrajectory(const GeoVaLs & geovals, const ObsBias & bias) {
+  ufo_atmvertinterp_tlad_settraj_f90(keyOperAtmVertInterp_, geovals.toFortran(), odb_);
 }
 
 // -----------------------------------------------------------------------------
 
-void ObsAtmProfileTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec,
+void ObsAtmVertInterpTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec,
                                       const ObsBiasIncrement & bias) const {
-  ufo_atmprofile_simobs_tl_f90(keyOperAtmProfile_, geovals.toFortran(), odb_,
+  ufo_atmvertinterp_simobs_tl_f90(keyOperAtmVertInterp_, geovals.toFortran(), odb_,
                                ovec.size(), ovec.toFortran());
 }
 
 // -----------------------------------------------------------------------------
 
-void ObsAtmProfileTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec,
+void ObsAtmVertInterpTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec,
                                       ObsBiasIncrement & bias) const {
-  ufo_atmprofile_simobs_ad_f90(keyOperAtmProfile_, geovals.toFortran(), odb_,
+  ufo_atmvertinterp_simobs_ad_f90(keyOperAtmVertInterp_, geovals.toFortran(), odb_,
                                ovec.size(), ovec.toFortran());
 }
 
 // -----------------------------------------------------------------------------
 
-void ObsAtmProfileTLAD::print(std::ostream & os) const {
-  os << "ObsAtmProfileTLAD::print not implemented" << std::endl;
+void ObsAtmVertInterpTLAD::print(std::ostream & os) const {
+  os << "ObsAtmVertInterpTLAD::print not implemented" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

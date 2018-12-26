@@ -5,8 +5,8 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#ifndef UFO_ATMOSPHERE_ATMPROFILE_OBSATMPROFILETLAD_H_
-#define UFO_ATMOSPHERE_ATMPROFILE_OBSATMPROFILETLAD_H_
+#ifndef UFO_ATMOSPHERE_ATMVERTINTERP_OBSATMVERTINTERPTLAD_H_
+#define UFO_ATMOSPHERE_ATMVERTINTERP_OBSATMVERTINTERPTLAD_H_
 
 #include <ostream>
 #include <string>
@@ -15,7 +15,7 @@
 
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
-#include "ufo/atmosphere/atmprofile/ObsAtmProfileTLAD.interface.h"
+#include "ufo/atmosphere/atmvertinterp/ObsAtmVertInterpTLAD.interface.h"
 #include "ufo/LinearObsOperatorBase.h"
 
 // Forward declarations
@@ -34,14 +34,14 @@ namespace ufo {
   class ObsBiasIncrement;
 
 // -----------------------------------------------------------------------------
-/// AtmProfile observation operator
-class ObsAtmProfileTLAD : public LinearObsOperatorBase,
-                          private util::ObjectCounter<ObsAtmProfileTLAD> {
+/// AtmVertInterp observation operator
+class ObsAtmVertInterpTLAD : public LinearObsOperatorBase,
+                          private util::ObjectCounter<ObsAtmVertInterpTLAD> {
  public:
-  static const std::string classname() {return "ufo::ObsAtmProfileTLAD";}
+  static const std::string classname() {return "ufo::ObsAtmVertInterpTLAD";}
 
-  ObsAtmProfileTLAD(const ioda::ObsSpace &, const eckit::Configuration &);
-  virtual ~ObsAtmProfileTLAD();
+  ObsAtmVertInterpTLAD(const ioda::ObsSpace &, const eckit::Configuration &);
+  virtual ~ObsAtmVertInterpTLAD();
 
   // Obs Operators
   void setTrajectory(const GeoVaLs &, const ObsBias &);
@@ -51,12 +51,12 @@ class ObsAtmProfileTLAD : public LinearObsOperatorBase,
   // Other
   const oops::Variables & variables() const {return *varin_;}
 
-  int & toFortran() {return keyOperAtmProfile_;}
-  const int & toFortran() const {return keyOperAtmProfile_;}
+  int & toFortran() {return keyOperAtmVertInterp_;}
+  const int & toFortran() const {return keyOperAtmVertInterp_;}
 
  private:
   void print(std::ostream &) const;
-  F90hop keyOperAtmProfile_;
+  F90hop keyOperAtmVertInterp_;
   const ioda::ObsSpace& odb_;
   boost::scoped_ptr<const oops::Variables> varin_;
   boost::scoped_ptr<const oops::Variables> varout_;
@@ -65,4 +65,4 @@ class ObsAtmProfileTLAD : public LinearObsOperatorBase,
 // -----------------------------------------------------------------------------
 
 }  // namespace ufo
-#endif  // UFO_ATMOSPHERE_ATMPROFILE_OBSATMPROFILETLAD_H_
+#endif  // UFO_ATMOSPHERE_ATMVERTINTERP_OBSATMVERTINTERPTLAD_H_

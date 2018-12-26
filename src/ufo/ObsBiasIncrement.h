@@ -34,14 +34,14 @@ class ObsBiasIncrement : public util::Printable {
 /// Linear algebra operators
   void diff(const ObsBias &, const ObsBias &) {}
   void zero() {}
-  ObsBiasIncrement & operator=(const ObsBiasIncrement &) {}
-  ObsBiasIncrement & operator+=(const ObsBiasIncrement &) {}
-  ObsBiasIncrement & operator-=(const ObsBiasIncrement &) {}
-  ObsBiasIncrement & operator*=(const double) {}
+  ObsBiasIncrement & operator=(const ObsBiasIncrement &) {return *this;}
+  ObsBiasIncrement & operator+=(const ObsBiasIncrement &) {return *this;}
+  ObsBiasIncrement & operator-=(const ObsBiasIncrement &) {return *this;}
+  ObsBiasIncrement & operator*=(const double) {return *this;}
   void axpy(const double, const ObsBiasIncrement &) {}
   double dot_product_with(const ObsBiasIncrement &) const {
     oops::Log::trace() << "ufo::ObsBiasIncrement dot product" << std::endl;
-    return 0;
+    return 0.0;
   }
 
 /// I/O and diagnostics

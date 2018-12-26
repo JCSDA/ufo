@@ -3,25 +3,25 @@
 ! This software is licensed under the terms of the Apache Licence Version 2.0
 ! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 
-!> Fortran module to handle atmprofile observations
+!> Fortran module to handle atmvertinterp observations
 
-module ufo_atmprofile_tlad_mod_c
+module ufo_atmvertinterp_tlad_mod_c
 
   use iso_c_binding
   use config_mod
-  use ufo_atmprofile_tlad_mod
+  use ufo_atmvertinterp_tlad_mod
   use string_f_c_mod
   implicit none
 
   private
 
-#define LISTED_TYPE ufo_atmprofile_tlad
+#define LISTED_TYPE ufo_atmvertinterp_tlad
 
   !> Linked list interface - defines registry_t type
 #include "../../linkedList_i.f"
 
   !> Global registry
-  type(registry_t) :: ufo_atmprofile_tlad_registry
+  type(registry_t) :: ufo_atmvertinterp_tlad_registry
 
   ! ------------------------------------------------------------------------------
 contains
@@ -31,17 +31,17 @@ contains
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_atmprofile_tlad_setup_c(c_key_self, c_conf, csin, csout, c_str_size) bind(c,name='ufo_atmprofile_tlad_setup_f90')
+subroutine ufo_atmvertinterp_tlad_setup_c(c_key_self, c_conf, csin, csout, c_str_size) bind(c,name='ufo_atmvertinterp_tlad_setup_f90')
 implicit none
 integer(c_int), intent(inout) :: c_key_self
 type(c_ptr), intent(in) :: c_conf ! config here in case we want to read vars from file
 integer(c_int), intent(in) :: c_str_size
 character(kind=c_char,len=1),intent(inout) :: csin(c_str_size+1),csout(c_str_size+1) 
 
-type(ufo_atmprofile_tlad), pointer :: self
+type(ufo_atmvertinterp_tlad), pointer :: self
 integer :: ii
 
-call ufo_atmprofile_tlad_registry%setup(c_key_self, self)
+call ufo_atmvertinterp_tlad_registry%setup(c_key_self, self)
 
 call self%setup(c_conf)
 
@@ -49,43 +49,43 @@ call self%setup(c_conf)
 call f_c_string_vector(self%varout, csout)
 call f_c_string_vector(self%varin, csin)
 
-end subroutine ufo_atmprofile_tlad_setup_c
+end subroutine ufo_atmvertinterp_tlad_setup_c
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_atmprofile_tlad_delete_c(c_key_self) bind(c,name='ufo_atmprofile_tlad_delete_f90')
+subroutine ufo_atmvertinterp_tlad_delete_c(c_key_self) bind(c,name='ufo_atmvertinterp_tlad_delete_f90')
 implicit none
 integer(c_int), intent(inout) :: c_key_self
 
-type(ufo_atmprofile_tlad), pointer :: self
+type(ufo_atmvertinterp_tlad), pointer :: self
 
-call ufo_atmprofile_tlad_registry%get(c_key_self, self)
+call ufo_atmvertinterp_tlad_registry%get(c_key_self, self)
 call self%opr_delete()
-call ufo_atmprofile_tlad_registry%remove(c_key_self)
+call ufo_atmvertinterp_tlad_registry%remove(c_key_self)
 
-end subroutine ufo_atmprofile_tlad_delete_c
+end subroutine ufo_atmvertinterp_tlad_delete_c
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_atmprofile_tlad_settraj_c(c_key_self, c_key_geovals, c_obsspace) bind(c,name='ufo_atmprofile_tlad_settraj_f90')
+subroutine ufo_atmvertinterp_tlad_settraj_c(c_key_self, c_key_geovals, c_obsspace) bind(c,name='ufo_atmvertinterp_tlad_settraj_f90')
 
 implicit none
 integer(c_int), intent(in) :: c_key_self
 integer(c_int), intent(in) :: c_key_geovals
 type(c_ptr), value, intent(in) :: c_obsspace
 
-type(ufo_atmprofile_tlad), pointer :: self
+type(ufo_atmvertinterp_tlad), pointer :: self
 
-character(len=*), parameter :: myname_="ufo_atmprofile_tlad_settraj_c"
+character(len=*), parameter :: myname_="ufo_atmvertinterp_tlad_settraj_c"
 
-call ufo_atmprofile_tlad_registry%get(c_key_self, self)
+call ufo_atmvertinterp_tlad_registry%get(c_key_self, self)
 call self%opr_settraj(c_key_geovals, c_obsspace)
 
-end subroutine ufo_atmprofile_tlad_settraj_c
+end subroutine ufo_atmvertinterp_tlad_settraj_c
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_atmprofile_simobs_tl_c(c_key_self, c_key_geovals, c_obsspace, c_nobs, c_hofx) bind(c,name='ufo_atmprofile_simobs_tl_f90')
+subroutine ufo_atmvertinterp_simobs_tl_c(c_key_self, c_key_geovals, c_obsspace, c_nobs, c_hofx) bind(c,name='ufo_atmvertinterp_simobs_tl_f90')
 
 implicit none
 integer(c_int), intent(in) :: c_key_self
@@ -94,18 +94,18 @@ type(c_ptr), value, intent(in) :: c_obsspace
 integer(c_int), intent(in) :: c_nobs
 real(c_double), intent(inout) :: c_hofx(c_nobs)
 
-type(ufo_atmprofile_tlad), pointer :: self
+type(ufo_atmvertinterp_tlad), pointer :: self
 
-character(len=*), parameter :: myname_="ufo_atmprofile_simobs_tl_c"
+character(len=*), parameter :: myname_="ufo_atmvertinterp_simobs_tl_c"
 
-call ufo_atmprofile_tlad_registry%get(c_key_self, self)
+call ufo_atmvertinterp_tlad_registry%get(c_key_self, self)
 call self%opr_simobs_tl(c_key_geovals, c_obsspace, c_hofx)
 
-end subroutine ufo_atmprofile_simobs_tl_c
+end subroutine ufo_atmvertinterp_simobs_tl_c
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_atmprofile_simobs_ad_c(c_key_self, c_key_geovals, c_obsspace, c_nobs, c_hofx) bind(c,name='ufo_atmprofile_simobs_ad_f90')
+subroutine ufo_atmvertinterp_simobs_ad_c(c_key_self, c_key_geovals, c_obsspace, c_nobs, c_hofx) bind(c,name='ufo_atmvertinterp_simobs_ad_f90')
 
 implicit none
 integer(c_int), intent(in) :: c_key_self
@@ -114,15 +114,15 @@ type(c_ptr), value, intent(in) :: c_obsspace
 integer(c_int), intent(in) :: c_nobs
 real(c_double), intent(in) :: c_hofx(c_nobs)
 
-type(ufo_atmprofile_tlad), pointer :: self
+type(ufo_atmvertinterp_tlad), pointer :: self
 
-character(len=*), parameter :: myname_="ufo_atmprofile_simobs_ad_c"
+character(len=*), parameter :: myname_="ufo_atmvertinterp_simobs_ad_c"
 
-call ufo_atmprofile_tlad_registry%get(c_key_self, self)
+call ufo_atmvertinterp_tlad_registry%get(c_key_self, self)
 call self%opr_simobs_ad(c_key_geovals, c_obsspace, c_hofx)
 
-end subroutine ufo_atmprofile_simobs_ad_c
+end subroutine ufo_atmvertinterp_simobs_ad_c
 
 ! ------------------------------------------------------------------------------
 
-end module ufo_atmprofile_tlad_mod_c
+end module ufo_atmvertinterp_tlad_mod_c

@@ -5,8 +5,8 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#ifndef UFO_ATMOSPHERE_ATMPROFILE_OBSATMPROFILETLAD_INTERFACE_H_
-#define UFO_ATMOSPHERE_ATMPROFILE_OBSATMPROFILETLAD_INTERFACE_H_
+#ifndef UFO_ATMOSPHERE_ATMVERTINTERP_OBSATMVERTINTERPTLAD_INTERFACE_H_
+#define UFO_ATMOSPHERE_ATMVERTINTERP_OBSATMVERTINTERPTLAD_INTERFACE_H_
 
 #include "ioda/ObsSpace.h"
 
@@ -23,16 +23,16 @@ namespace ufo {
 extern "C" {
 
 // -----------------------------------------------------------------------------
-//  AtmProfile tl/ad observation operator
+//  AtmVertInterp tl/ad observation operator
 // -----------------------------------------------------------------------------
 
-  void ufo_atmprofile_tlad_setup_f90(F90hop &, const eckit::Configuration * const *,
+  void ufo_atmvertinterp_tlad_setup_f90(F90hop &, const eckit::Configuration * const *,
                                      char *, char *, const int &);
-  void ufo_atmprofile_tlad_delete_f90(F90hop &);
-  void ufo_atmprofile_tlad_settraj_f90(const F90hop &, const F90goms &, const ioda::ObsSpace &);
-  void ufo_atmprofile_simobs_tl_f90(const F90hop &, const F90goms &, const ioda::ObsSpace &,
+  void ufo_atmvertinterp_tlad_delete_f90(F90hop &);
+  void ufo_atmvertinterp_tlad_settraj_f90(const F90hop &, const F90goms &, const ioda::ObsSpace &);
+  void ufo_atmvertinterp_simobs_tl_f90(const F90hop &, const F90goms &, const ioda::ObsSpace &,
                                     const int &, double &);
-  void ufo_atmprofile_simobs_ad_f90(const F90hop &, const F90goms &, const ioda::ObsSpace &,
+  void ufo_atmvertinterp_simobs_ad_f90(const F90hop &, const F90goms &, const ioda::ObsSpace &,
                                     const int &, const double &);
 
 // -----------------------------------------------------------------------------
@@ -40,4 +40,4 @@ extern "C" {
 }  // extern C
 
 }  // namespace ufo
-#endif  // UFO_ATMOSPHERE_ATMPROFILE_OBSATMPROFILETLAD_INTERFACE_H_
+#endif  // UFO_ATMOSPHERE_ATMVERTINTERP_OBSATMVERTINTERPTLAD_INTERFACE_H_
