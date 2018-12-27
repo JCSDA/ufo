@@ -33,7 +33,7 @@ ObsAod::ObsAod(const ioda::ObsSpace & odb, const eckit::Configuration & config)
   const std::vector<std::string> vv{"temperature", "humidity_mixing_ratio",
       "air_pressure", "air_pressure_levels",
       "sulf", "bc1", "bc2", "oc1", "oc2", "dust1", "dust2", "dust3", "dust4", "dust5",
-      "seas1", "seas2", "seas3", "seas4", "p25"};
+      "seas1", "seas2", "seas3", "seas4"};
   varin_.reset(new oops::Variables(vv));
 
   // parse channels from the config and create variable names
