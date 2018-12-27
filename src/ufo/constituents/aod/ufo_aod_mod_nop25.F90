@@ -339,8 +339,7 @@ contains
        rmse = 0
        DO m = 1, N_PROFILES
           DO l = 1, n_Channels
-!             diff(l,m) = SUM(rts(l,m)%layer_optical_depth(:)) - (Aod_Obs(m,l) - Omg_Aod(m,l))
-             diff(l,m) = SUM(rts(l,m)%layer_optical_depth(:)) 
+             diff(l,m) = SUM(rts(l,m)%layer_optical_depth(:)) - (Aod_Obs(m,l) - Omg_Aod(m,l))
              rmse(l) = rmse(l) + diff(l,m)**2
           END DO
        ENDDO
