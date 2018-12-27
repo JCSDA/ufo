@@ -410,12 +410,38 @@ end subroutine ufo_geovals_read_file_c
 
 subroutine ufo_geovals_write_file_c(c_key_self, c_conf) bind(c,name='ufo_geovals_write_file_f90')
 use config_mod
+use fckit_mpi_module
 implicit none
 integer(c_int), intent(in) :: c_key_self
 type(c_ptr), intent(in) :: c_conf
+
 type(ufo_geovals), pointer :: self
+character(max_string) :: fout, filename
+
+type(fckit_mpi_comm)      :: comm
+character(len=10)         :: cproc
+integer                   :: ppos
+
+! read filename for config
+filename = config_get_string(c_conf,len(filename),"filename")
+
+! get the process rank number
+comm = fckit_mpi_comm()
+write(cproc,fmt='(i4.4)') comm%rank()
+
+! Find the left-most dot in the file name, and use that to pick off the file name
+! and file extension.
+ppos = scan(trim(filename), '.', BACK=.true.)
+if (ppos > 0) then
+ ! found a file extension
+ fout = filename(1:ppos-1) // '_' // trim(adjustl(cproc)) // trim(filename(ppos:))
+else
+ ! no file extension
+ fout = trim(filename) // '_' // trim(adjustl(cproc))
+endif
 
 call ufo_geovals_registry%get(c_key_self, self)
+call ufo_geovals_write_netcdf(self, fout)
 
 end subroutine ufo_geovals_write_file_c
 
