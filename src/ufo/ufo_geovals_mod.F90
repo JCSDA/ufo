@@ -11,6 +11,7 @@ use ufo_vars_mod
 use kinds
 use type_distribution, only: random_distribution
 use obsspace_mod
+use missing_values_mod
 
 use fckit_mpi_module, only: fckit_mpi_comm, fckit_mpi_sum
 
@@ -85,7 +86,7 @@ integer :: ivar
 call ufo_geovals_delete(self)
 self%nobs = nobs
 self%nvar = vars%nv
-self%missing_value = obspace_missing_value()
+self%missing_value = missing_value(self%missing_value)
 call ufo_vars_clone(vars, self%variables) 
 allocate(self%geovals(self%nvar))
 do ivar = 1, self%nvar

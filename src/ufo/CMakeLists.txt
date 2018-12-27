@@ -8,6 +8,8 @@ list( APPEND ufo_src_files
     BackgroundCheck.h
     BackgroundCheck.interface.F90
     BackgroundCheck.interface.h
+    BlackList.cc
+    BlackList.h
     Fortran.h
     GeoVaLs.cc
     GeoVaLs.h
@@ -24,10 +26,19 @@ list( APPEND ufo_src_files
     ObsBias.h
     ObsBiasCovariance.h
     ObsBiasIncrement.h
+    ObsBoundsCheck.cc
+    ObsBoundsCheck.h
+    ObsDomainCheck.cc
+    ObsDomainCheck.h
     ObsOperator.cc
     ObsOperator.h
     ObsOperatorBase.cc
     ObsOperatorBase.h
+    ObsPreQC.cc
+    ObsPreQC.h
+    processWhere.cc
+    processWhere.h
+    QCflags.h
     UfoTrait.h
     ufo_bgcheck_mod.F90
     ufo_geovals_mod.F90

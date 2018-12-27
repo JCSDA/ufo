@@ -52,7 +52,6 @@ contains
       
       character(len=*), parameter :: myname_="ufo_gnssro_ref_simobs"
       character(max_string) :: err_msg
-      real(c_double)    :: missing_value
       integer           :: GlobalModel = 1
       integer           :: iobs,k,nobs
       real(kind_real)   :: wf 
@@ -73,7 +72,6 @@ contains
       call ufo_geovals_get_var(geovals, var_q, q)
       call ufo_geovals_get_var(geovals, var_z, gph)
 
-      missing_value = obspace_missing_value()
       nobs = obsspace_get_nlocs(obss)
 
       allocate(obsZ(nobs))

@@ -5,12 +5,15 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
  */
 
+#include <set>
+#include <vector>
+
 #include "eckit/config/YAMLConfiguration.h"
 #include "eckit/exception/Exceptions.h"
 
 #include "oops/util/Logger.h"
 
-#include "ufo/utils/ChannelsParser.h"
+#include "ufo/utils/IntSetParser.h"
 
 int main(int argc,  char ** argv) {
 // Get configuration file from command line
@@ -25,7 +28,7 @@ int main(int argc,  char ** argv) {
 
 // Read channels list
   std::string chlist = config.getString("channels");
-  std::vector<int> channels = ufo::parseChannels(chlist);
+  std::set<int> channels = ufo::parseIntSet(chlist);
 // Read expected output of parseChannels
   std::vector<int> expected = config.getIntVector("parsed_channels");
 

@@ -276,8 +276,9 @@ ecbuild_add_test( TARGET  test_ufo_aod
                   ARGS    "testinput/aod.yaml"
                   LIBS    ufo )
 
-ecbuild_add_test( TARGET  test_ufo_channels_parser
-                  SOURCES mains/TestChannelsParser.cc
+ecbuild_add_test( TARGET  test_ufo_intset_parser
+                  BOOST
+                  SOURCES mains/TestIntSetParser.cc
                   ARGS    "testinput/channelsparser.yaml"
                   LIBS    ufo )
 

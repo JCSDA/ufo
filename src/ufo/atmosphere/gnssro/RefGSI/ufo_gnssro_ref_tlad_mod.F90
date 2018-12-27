@@ -17,6 +17,7 @@ module ufo_gnssro_ref_tlad_mod
   use config_mod
   use gnssro_mod_constants
   use gnssro_mod_conf
+  use missing_values_mod
   integer, parameter :: max_string=800
 
   !> Fortran derived type for gnssro trajectory
@@ -188,7 +189,7 @@ contains
 
       character(len=*), parameter :: myname_="ufo_gnssro_ref_tlad_ad"
       character(max_string)       :: err_msg
-      real(c_double)              :: missing_value
+      real(c_double)              :: missing
       integer :: iobs,ierr
       type(ufo_geoval), pointer :: t_d, q_d, prs_d
       real(kind_real)           :: t_coeff, q_coeff, p_coeff
@@ -236,11 +237,11 @@ contains
       if (.not. geovals%linit ) geovals%linit=.true.
 
       call gnssro_ref_constants(self%roconf%use_compress)
-      missing_value = obspace_missing_value()
+      missing = missing_value(missing)
 
       do iobs = 1, geovals%nobs
     
-         if (hofx(iobs) .ne. missing_value) then
+         if (hofx(iobs) .ne. missing) then
            t_coeff = - n_a*self%prs(iobs)/self%t(iobs)**2           &
                      - n_b*two*self%prs(iobs)*self%q(iobs)/  &
                            ( ((1-rd_over_rv)*self%q(iobs)+rd_over_rv)*self%t(iobs)**3  )   &
