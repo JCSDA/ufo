@@ -46,6 +46,18 @@ std::vector<bool> processWhere(ioda::ObsSpace & obsdb, const eckit::Configuratio
       }
     }
 
+    if (masks[jm].has("has")) {
+      const std::string var = masks[jm].getString("has");
+      if (obsdb.has(obgrp, var)) {
+        ioda::ObsDataVector<float> values(obsdb, var, obgrp);
+        for (size_t jj = 0; jj < nlocs; ++jj) {
+          if (values[jj] == missing) where[jj] = false;
+        }
+      } else {
+        for (size_t jj = 0; jj < nlocs; ++jj) where[jj] = false;
+      }
+    }
+
     if (masks[jm].has("is_in")) {
       ioda::ObsDataVector<int> values(obsdb, var, obgrp);
       std::set<int> whitelist = parseIntSet(masks[jm].getString("is_in"));
