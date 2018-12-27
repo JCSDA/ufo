@@ -53,8 +53,8 @@ list( APPEND ufo_test_data
   atmosphere/sondes_geoval_2018041500_s.nc4
   atmosphere/gnssro_ref_geovals.nc4
 
-  constituents/vars_ges.2015081000_dbl_subset.nc4
-  constituents/aod_geoval_2018041500_m.nc4
+  constituents/aod_geovals_viirs_2018041500_m.nc4
+  constituents/aod_geovals_viirs_2018041500_s.nc4
 )
 
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Data)
@@ -104,9 +104,8 @@ list (APPEND ioda_obs_test_data
   atmosphere/diag_t_obs_01_wprofiles.odb
   atmosphere/diag_t_obs_01_wprofiles_odb
 
-  constituents/diag_viirs_ges.2015081000_dbl_subset.nc4
-  constituents/aod_obs_2015081000_m.nc4
   constituents/aod_obs_2018041500_m.nc4
+  constituents/aod_obs_2018041500_s.nc4
 
   marine/Jason-2-2018-04-15.nc
   marine/profile_2018-04-15.nc
@@ -270,7 +269,7 @@ if( ${GSW_FOUND} )
 
 endif( ${GSW_FOUND} )
 
-ecbuild_add_test( TARGET  test_ufo_aod
+ecbuild_add_test( TARGET  test_ufo_aod_opr
                   BOOST
                   SOURCES mains/TestObsOperator.cc
                   ARGS    "testinput/aod.yaml"
