@@ -46,8 +46,7 @@ std::vector<bool> processWhere(ioda::ObsSpace & obsdb, const eckit::Configuratio
       }
     }
 
-    if (masks[jm].has("has")) {
-      const std::string var = masks[jm].getString("has");
+    if (masks[jm].has("is_defined")) {
       if (obsdb.has(obgrp, var)) {
         ioda::ObsDataVector<float> values(obsdb, var, obgrp);
         for (size_t jj = 0; jj < nlocs; ++jj) {
@@ -55,6 +54,15 @@ std::vector<bool> processWhere(ioda::ObsSpace & obsdb, const eckit::Configuratio
         }
       } else {
         for (size_t jj = 0; jj < nlocs; ++jj) where[jj] = false;
+      }
+    }
+
+    if (masks[jm].has("is_not_defined")) {
+      if (obsdb.has(obgrp, var)) {
+        ioda::ObsDataVector<float> values(obsdb, var, obgrp);
+        for (size_t jj = 0; jj < nlocs; ++jj) {
+          if (values[jj] != missing) where[jj] = false;
+        }
       }
     }
 
