@@ -10,6 +10,7 @@ use iso_c_binding
 use ufo_bgcheck_mod
 use ufo_geovals_mod
 use ufo_geovals_mod_c,   only: ufo_geovals_registry
+use config_mod
 
 implicit none
 private
@@ -63,29 +64,37 @@ implicit none
 integer(c_int), intent(in) :: c_self
 integer(c_int), intent(in) :: c_geovals
 
-type(ufo_bgcheck), pointer :: self
-type(ufo_geovals), pointer :: geovals
+! Commented code left as an example for now, to be removed
 
-call ufo_bgcheck_registry%get(c_self, self)
-call ufo_geovals_registry%get(c_geovals, geovals)
+!type(ufo_bgcheck), pointer :: self
+!type(ufo_geovals), pointer :: geovals
 
-call ufo_bgcheck_prior(self, geovals)
+!call ufo_bgcheck_registry%get(c_self, self)
+!call ufo_geovals_registry%get(c_geovals, geovals)
+
+!call ufo_bgcheck_prior(self, geovals)
 
 end subroutine ufo_bgcheck_prior_c
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_bgcheck_post_c(c_self, c_nobs, c_hofx) bind(c,name='ufo_bgcheck_post_f90')
+subroutine ufo_bgcheck_post_c(c_self, c_nvar, c_nloc, c_hofx, c_var) bind(c,name='ufo_bgcheck_post_f90')
 implicit none
 integer(c_int), intent(in) :: c_self
-integer(c_int), intent(in) :: c_nobs
-real(c_double), intent(in) :: c_hofx(c_nobs)
+integer(c_int), intent(in) :: c_nvar
+integer(c_int), intent(in) :: c_nloc
+real(c_double), intent(in) :: c_hofx(c_nvar, c_nloc)
+type(c_ptr), value, intent(in) :: c_var
 
 type(ufo_bgcheck), pointer :: self
+character(len=max_string_length), allocatable :: vars(:)
+
+allocate(vars(c_nvar))
+vars = config_get_string_vector(c_var, max_string_length, "variables")
 
 call ufo_bgcheck_registry%get(c_self, self)
 
-call ufo_bgcheck_post(self, c_hofx)
+call ufo_bgcheck_post(self, c_hofx, vars)
 
 end subroutine ufo_bgcheck_post_c
 

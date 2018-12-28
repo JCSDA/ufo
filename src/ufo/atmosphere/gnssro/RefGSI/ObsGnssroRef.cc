@@ -32,10 +32,12 @@ ObsGnssroRef::ObsGnssroRef(const ioda::ObsSpace & odb, const eckit::Configuratio
                                     "geopotential_height"};
   varin_.reset(new oops::Variables(vv));
 
-  const std::vector<std::string> vout{"zz"};
+  const std::vector<std::string> vout{"refractivity"};
   varout_.reset(new oops::Variables(vout));
 
-  const eckit::Configuration * configc = &config;
+  const eckit::LocalConfiguration obsOptions(config, "ObsOptions");
+  const eckit::Configuration * configc = &obsOptions;
+
   ufo_gnssro_ref_setup_f90(keyOperGnssroRef_, &configc);
   oops::Log::trace() << "ObsGnssroRef created." << std::endl;
 }

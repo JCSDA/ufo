@@ -17,6 +17,7 @@
 #include "ioda/ObsSpace.h"
 #include "oops/base/Variables.h"
 #include "oops/util/abor1_cpp.h"
+#include "oops/util/DateTime.h"
 #include "oops/util/Printable.h"
 
 namespace ioda {
@@ -26,6 +27,7 @@ class ObsVector;
 namespace ufo {
 class GeoVaLs;
 class ObsBias;
+class Locations;
 
 // -----------------------------------------------------------------------------
 /// Base class for observation operators

@@ -11,21 +11,20 @@
 #include <ostream>
 #include <string>
 
-#include "Fortran.h"
-#include "FortranGeoVals.h"
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
 #include "oops/util/Printable.h"
+
+#include "ufo/GeoVaLs.interface.h"
 
 namespace eckit {
   class Configuration;
 }
 
-namespace ioda {
-  class Locations;
-}
-
 namespace ufo {
+  class Locations;
+
+// -----------------------------------------------------------------------------
 
 /// GeoVaLs: geophysical values at locations
 
@@ -34,7 +33,7 @@ class GeoVaLs : public util::Printable,
  public:
   static const std::string classname() {return "ufo::GeoVaLs";}
 
-  GeoVaLs(const ioda::Locations &, const oops::Variables &);
+  GeoVaLs(const Locations &, const oops::Variables &);
   GeoVaLs(const eckit::Configuration &, const oops::Variables &);
   GeoVaLs(const GeoVaLs &);
 
@@ -54,7 +53,7 @@ class GeoVaLs : public util::Printable,
   GeoVaLs & operator /= (const GeoVaLs &);
   double dot_product_with(const GeoVaLs & other) const;
   void read(const eckit::Configuration &);
-  void analytic_init(const ioda::Locations &, const eckit::Configuration &);
+  void analytic_init(const Locations &, const eckit::Configuration &);
   void write(const eckit::Configuration &) const;
 
   int & toFortran() {return keyGVL_;}
