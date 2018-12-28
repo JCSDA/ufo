@@ -52,9 +52,8 @@ list( APPEND ufo_test_data
   atmosphere/sondes_geoval_2018041500_m.nc4
   atmosphere/sondes_geoval_2018041500_s.nc4
   atmosphere/gnssro_ref_geovals.nc4
-
-  constituents/aod_geovals_viirs_2018041500_m.nc4
-  constituents/aod_geovals_viirs_2018041500_s.nc4
+  constituents/aod_geoval_2018041500_m.nc4
+  constituents/aod_geoval_2018041500_s.nc4
 )
 
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Data)
