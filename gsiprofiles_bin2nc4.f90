@@ -31,7 +31,7 @@ PROGRAM gsiprofiles_bin2nc4
 ! single variables used later for printing purposes
   CHARACTER(len=max_name_length), DIMENSION(max_vars) :: varnames
 
-  INTEGER :: idate,nsig,nvars,naeros,nvarsphys,nsig_plus_one,nobs
+  INTEGER :: idate,nsig,nvars,naeros,nvarsphys,nsig_plus_one,nlocs
 
   REAL(r_single), ALLOCATABLE, DIMENSION(:) :: tvp,qvp,prsltmp
   REAL(r_single), ALLOCATABLE, DIMENSION(:) :: prsitmp
@@ -40,7 +40,7 @@ PROGRAM gsiprofiles_bin2nc4
   INTEGER, DIMENSION(2) :: start,count_nsig,count_nsig_plus_one
 
   INTEGER :: ncfileid,ncstatus,&
-       &dimid_nsig,dimid_nsig_plus_one,dimid_nobs
+       &dimid_nsig,dimid_nsig_plus_one,dimid_nlocs
   
   INTEGER, DIMENSION(2) :: dimid_2d
 
@@ -104,11 +104,11 @@ PROGRAM gsiprofiles_bin2nc4
   ncstatus    = nf90_def_dim(ncfileid,'nsig',nsig,dimid_nsig)
   ncstatus    = nf90_def_dim(ncfileid,'nsig_plus_one',nsig_plus_one,&
        &dimid_nsig_plus_one)
-  ncstatus    = nf90_def_dim(ncfileid,'nobs',NF90_UNLIMITED, dimid_nobs)
+  ncstatus    = nf90_def_dim(ncfileid,'nlocs',NF90_UNLIMITED, dimid_nlocs)
 
   ALLOCATE(ncid_aeros(naeros))
 
-  dimid_2d=(/dimid_nsig,dimid_nobs/)
+  dimid_2d=(/dimid_nsig,dimid_nlocs/)
 
   ncstatus    = nf90_def_var(ncfileid,"temperature",nf90_double,dimid_2d,&
        &ncid_tvp)
@@ -122,7 +122,7 @@ PROGRAM gsiprofiles_bin2nc4
           &nf90_double,dimid_2d,ncid_aeros(i))
   ENDDO
 
-  dimid_2d=(/dimid_nsig_plus_one,dimid_nobs/)
+  dimid_2d=(/dimid_nsig_plus_one,dimid_nlocs/)
 
   ncstatus    = nf90_def_var(ncfileid,"air_pressure_levels",nf90_double,dimid_2d,&
        &ncid_prsitmp)
