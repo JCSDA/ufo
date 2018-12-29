@@ -10,7 +10,7 @@ Observations:
     n_Absorbers: 2
     n_Clouds: 0
     n_Aerosols: 14
-    Sensor_ID: viirs
+    Sensor_ID: "v.viirs-m_npp"
     EndianType: little_endian
     CoefficientPath: "Data/"
    ObsData: 

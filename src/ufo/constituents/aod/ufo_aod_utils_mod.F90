@@ -63,7 +63,96 @@ MODULE ufo_aod_utils_mod
 
   CHARACTER(len=MAXVARLEN) :: varname
 
+
 CONTAINS
+
+
+  SUBROUTINE aod_conf_setup(rc, c_conf)
+
+    IMPLICIT NONE
+    TYPE(aod_conf), INTENT(inout) :: rc
+    TYPE(c_ptr),    INTENT(in)    :: c_conf
+    
+    CHARACTER(len=1023) :: skipchannels
+    INTEGER :: nskip, i
+    CHARACTER(len=100), ALLOCATABLE :: skiplist_str(:)
+    
+!some config needs to come from user
+!-----------------------------------
+    
+!number of sensors, each call to CRTM will be for a single sensor
+!type (zenith/scan angle will be different)
+    rc%n_sensors = 1
+    
+!number of absorbers, clouds and aerosols (should match what model will provide)
+
+!@mzp begin
+!    rc%n_absorbers = config_get_int(c_conf,"n_absorbers")
+!    rc%n_clouds    = config_get_int(c_conf,"n_clouds"   )
+!    rc%n_aerosols  = config_get_int(c_conf,"n_aerosols" )
+!@mzp end    
+
+!allocate sensor_id
+    ALLOCATE(rc%sensor_id(rc%n_sensors))
+    
+!get sensor id from config
+
+!@mzp begin
+!    rc%sensor_id(rc%n_sensors) = config_get_string(c_conf,LEN(rc%sensor_id(rc%n_sensors)),"sensor_id")
+!@mzp end
+    
+!endian type
+!@mzp begin
+!    rc%endian_type = config_get_string(c_conf,LEN(rc%endian_type),"endiantype")
+!@mzp end 
+   
+!path to coefficient files
+!@mzp begin
+!    rc%coefficient_path = config_get_string(c_conf,LEN(rc%coefficient_path),"coefficientpath")
+!@mzp end 
+   
+!channels to skip
+    IF (config_element_exists(c_conf,"skipchannels")) THEN
+       skipchannels = config_get_string(c_conf,LEN(skipchannels),"skipchannels")
+       nskip = 1 + COUNT(TRANSFER(skipchannels, 'a', LEN(skipchannels)) == ",")
+       ALLOCATE(skiplist_str(nskip))
+       READ(skipchannels,*) skiplist_str
+    ELSE
+       nskip = 0
+    ENDIF
+    ALLOCATE(rc%skiplist(nskip))
+    DO i = 1,nskip
+       READ(skiplist_str(i),*)  rc%skiplist(i)
+    ENDDO
+    
+  END SUBROUTINE aod_conf_setup
+  
+
+  SUBROUTINE aod_conf_delete(rc)
+    
+    IMPLICIT NONE
+    TYPE(aod_conf), INTENT(inout) :: rc
+    
+    DEALLOCATE(rc%sensor_id)
+    DEALLOCATE(rc%skiplist)
+    
+  END SUBROUTINE aod_conf_delete
+
+
+  SUBROUTINE get_var_name(varname_tmplate,n,varname)
+    
+    CHARACTER(len=*), INTENT(in) :: varname_tmplate
+    INTEGER, INTENT(in) :: n
+    CHARACTER(len=*), INTENT(out) :: varname
+    
+    CHARACTER(len=3) :: chan
+    
+! pass in varname_tmplate = "brigtness_temperature"
+    WRITE(chan, '(i0)') n
+    varname = TRIM(varname_tmplate) // '_' // TRIM(chan) // '_'
+    
+  END SUBROUTINE get_var_name
+  
 
   SUBROUTINE load_atm_data(n_profiles,n_layers,geovals,atm)
 
@@ -125,6 +214,7 @@ CONTAINS
     NULLIFY(geoval)
 
   END SUBROUTINE load_atm_data
+
 
   SUBROUTINE load_aerosol_data(n_profiles,n_layers,geovals,atm)
 
@@ -259,6 +349,7 @@ CONTAINS
 
   END SUBROUTINE load_aerosol_data
 
+
   FUNCTION gocart_aerosol_size( itype, eh ) & ! eh input in 0-1
        &RESULT(r_eff)   ! in micrometer
 
@@ -300,6 +391,7 @@ CONTAINS
     RETURN
 
   END FUNCTION gocart_aerosol_size
+
 
   SUBROUTINE genqsat(qsat,tsen,prsl,nsig,ice)
 
@@ -392,6 +484,7 @@ CONTAINS
     RETURN
 
   END SUBROUTINE genqsat
+
 
 END MODULE ufo_aod_utils_mod
 

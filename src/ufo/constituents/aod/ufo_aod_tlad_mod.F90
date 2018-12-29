@@ -39,17 +39,29 @@ MODULE ufo_aod_tlad_mod
 
 CONTAINS
   
-! ------------------------------------------------------------------------------
+  SUBROUTINE ufo_aod_tlad_setup(self)
+!optimally
+!  SUBROUTINE ufo_aod_tlad_setup(self, c_conf)
+    
+    IMPLICIT NONE
+    class(ufo_aod_tlad), INTENT(inout) :: self
+!    TYPE(c_ptr),              INTENT(in)    :: c_conf
+    
+!    CALL aod_conf_setup(self%rc,c_conf)
+ 
+!    self%rc
+   
+  END SUBROUTINE ufo_aod_tlad_setup
+  
 
-  subroutine ufo_aod_tlad_delete(self)
-    implicit none
-    class(ufo_aod_tlad), intent(inout)  :: self
+  SUBROUTINE ufo_aod_tlad_delete(self)
+    IMPLICIT NONE
+    class(ufo_aod_tlad), INTENT(inout)  :: self
+    
+! Nothing here yet
+    
+  END SUBROUTINE ufo_aod_tlad_delete
 
-    ! Nothing here yet
-
-  end subroutine ufo_aod_tlad_delete
-
-! ------------------------------------------------------------------------------
 
   SUBROUTINE ufo_aod_tlad_settraj(self, geovals, obss)
 
