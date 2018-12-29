@@ -167,7 +167,7 @@ contains
 
     n_profiles=geovals%nobs
 
-    varname=var_aerosols(1)
+    varname=var_aerosols_gocart_default(1)
 
     call ufo_geovals_get_var(geovals,varname, geoval)
     n_layers=SIZE(geoval%vals,1)
@@ -537,7 +537,7 @@ contains
                  &qsat(N_LAYERS-k+1)
          ENDDO
 
-         n_aerosols_all=SIZE(var_aerosols)
+         n_aerosols_all=SIZE(var_aerosols_gocart_default)
          
          IF (n_aerosols_all /= n_aerosols_gocart_crtm) THEN
             message = 'Only default GOCART with 14 species allowed for now'
@@ -546,7 +546,7 @@ contains
          ENDIF
          
          DO i=1,n_aerosols_all
-            varname=var_aerosols(i)
+            varname=var_aerosols_gocart_default(i)
             call ufo_geovals_get_var(geovals,varname, geoval)
 
             IF (flip_vertical) THEN

@@ -13,6 +13,7 @@ set ( aod_files
     ObsAodTLAD.interface.F90
     ObsAodTLAD.interface.h
     ufo_aod_misc.F90
+    ufo_aod_utils_mod.F90
     ufo_aod_mod.F90
     ufo_aod_tlad_mod.F90
     PARENT_SCOPE
