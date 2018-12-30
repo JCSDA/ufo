@@ -254,7 +254,7 @@ CONTAINS
                &qsat(n_layers-k+1)
        ENDDO
 
-       DO i=1,naerosols_gocart_default
+       DO i=1,n_aerosols_gocart_default
           varname=var_aerosols_gocart_default(i)
           CALL ufo_geovals_get_var(geovals,varname, geoval)
 
