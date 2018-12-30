@@ -66,7 +66,10 @@ CHARACTER(len=MAXVARLEN), DIMENSION(n_aerosols_gocart_default), PUBLIC :: var_ae
      &"seas2                                                   ",&
      &"seas3                                                   ",&
      &"seas4                                                   "]
-
+!@mzp var_aerosols_gocart_esrl =[&
+!    &var_aerosols_gocart_default,&
+!    &"p25                                                     "]
+! won't compile
 CHARACTER(len=MAXVARLEN), DIMENSION(n_aerosols_gocart_esrl), PUBLIC :: var_aerosols_gocart_esrl =[&
      &"sulf                                                    ",&
      &"bc1                                                     ",&

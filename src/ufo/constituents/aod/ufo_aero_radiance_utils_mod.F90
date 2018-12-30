@@ -142,6 +142,9 @@ character(max_string) :: err_msg
  end do
 
 !@mzp
+!var_aerosols - where to set up - declare - from ufo_vars_mod.F90
+!possibly from config
+!@mzp
  error result when not available for ufo_geovals_get_var call
  e.g.
  CALL ufo_geovals_get_var(geovals, var_oz, geoval)
@@ -442,7 +445,6 @@ SUBROUTINE load_aerosol_data_gocart_default(n_profiles,n_layers,geovals,&
           SELECT CASE ( TRIM(varname))
           CASE ('sulf')
              atm(m)%aerosol(i)%type  = SULFATE_AEROSOL
-!rh needs to be from top to bottom
              DO k=1,n_layers
                 atm(m)%aerosol(i)%effective_radius(k)=&
                      &gocart_aerosol_size(atm(m)%aerosol(i)%type, &
@@ -734,7 +736,8 @@ SUBROUTINE load_aerosol_data_gocart_default(n_profiles,n_layers,geovals,&
 
     REAL(kind_real), DIMENSION(n_layers) :: tsen,prsl
     INTEGER :: k
-    
+
+!rh, ug2kg need to be from top to bottom    
 !ug2kg && hPa2Pa
     DO k=1,n_layers
 !correct for mixing ratio factor ugkg_kgm2 
