@@ -11,6 +11,7 @@ use ufo_vars_mod
 use kinds
 use type_distribution, only: random_distribution
 use obsspace_mod
+use missing_values_mod
 
 use fckit_mpi_module, only: fckit_mpi_comm, fckit_mpi_sum
 
@@ -23,7 +24,8 @@ public :: ufo_geovals_init, ufo_geovals_setup, ufo_geovals_delete, ufo_geovals_p
 public :: ufo_geovals_zero, ufo_geovals_random, ufo_geovals_dotprod, ufo_geovals_scalmult
 public :: ufo_geovals_assign, ufo_geovals_add, ufo_geovals_diff, ufo_geovals_abs
 public :: ufo_geovals_minmaxavg, ufo_geovals_normalize, ufo_geovals_maxloc
-public :: ufo_geovals_read_netcdf, ufo_geovals_rms, ufo_geovals_copy
+public :: ufo_geovals_read_netcdf, ufo_geovals_write_netcdf
+public :: ufo_geovals_rms, ufo_geovals_copy
 public :: ufo_geovals_analytic_init
 public :: ufo_geovals_allocone
 
@@ -84,7 +86,7 @@ integer :: ivar
 call ufo_geovals_delete(self)
 self%nobs = nobs
 self%nvar = vars%nv
-self%missing_value = obspace_missing_value()
+self%missing_value = missing_value(self%missing_value)
 call ufo_vars_clone(vars, self%variables) 
 allocate(self%geovals(self%nvar))
 do ivar = 1, self%nvar
@@ -850,6 +852,59 @@ self%linit = .true.
 call nc_diag_read_close(filename)
 
 end subroutine ufo_geovals_read_netcdf
+
+! ------------------------------------------------------------------------------
+subroutine ufo_geovals_write_netcdf(self, filename)
+use netcdf
+implicit none
+type(ufo_geovals), intent(inout)  :: self
+character(max_string), intent(in) :: filename
+
+integer :: i
+integer :: ncid, dimid_nobs, dimid_nval, dims(2)
+integer, allocatable :: ncid_var(:)
+
+allocate(ncid_var(self%nvar))
+
+call check('nf90_create', nf90_create(trim(filename),nf90_hdf5,ncid))
+call check('nf90_def_dim', nf90_def_dim(ncid,'nobs',self%nobs, dimid_nobs))
+dims(2) = dimid_nobs
+
+do i = 1, self%nvar
+  call check('nf90_def_dim', &
+       nf90_def_dim(ncid,trim(self%variables%fldnames(i))//"_nval",self%geovals(i)%nval, dimid_nval))
+  dims(1) = dimid_nval
+  call check('nf90_def_var',  &
+       nf90_def_var(ncid,trim(self%variables%fldnames(i)),nf90_double,dims,ncid_var(i)))
+enddo
+
+call check('nf90_enddef', nf90_enddef(ncid))
+
+do i = 1, self%nvar
+  call check('nf90_put_var', nf90_put_var(ncid,ncid_var(i),self%geovals(i)%vals(:,:)))
+enddo
+
+call check('nf90_close', nf90_close(ncid))
+deallocate(ncid_var)
+
+end subroutine ufo_geovals_write_netcdf
+
+! ------------------------------------------------------------------------------
+subroutine check(action, status)
+
+use netcdf, only: nf90_noerr, nf90_strerror
+
+implicit none
+
+integer, intent (in) :: status
+character (len=*), intent (in) :: action
+
+if(status /= nf90_noerr) then
+   print *, "During action: ", trim(action), ", received error: ", trim(nf90_strerror(status))
+   stop 2
+end if
+
+end subroutine check
 
 ! ------------------------------------------------------------------------------
 subroutine ufo_geovals_read_nc_var(iunit, nvardim, vardims, vartype, &

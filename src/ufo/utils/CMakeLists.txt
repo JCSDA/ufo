@@ -4,8 +4,8 @@
 # which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 
 set ( utils_files
-      ChannelsParser.cc
-      ChannelsParser.h
+      IntSetParser.cc
+      IntSetParser.h
       vert_interp.F90
 )
 

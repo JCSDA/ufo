@@ -15,6 +15,7 @@ module ufo_adt_tlad_mod
  use ufo_basis_tlad_mod, only: ufo_basis_tlad
  use ufo_vars_mod
  use obsspace_mod
+ use missing_values_mod
 
  implicit none
  private
@@ -73,7 +74,7 @@ self%geoval_adt = geoval_adt
 self%ltraj    = .true.
 
 ! Set missing flag
-self%r_miss_val = obspace_missing_value()
+self%r_miss_val = missing_value(self%r_miss_val)
 
 end subroutine ufo_adt_tlad_settraj
 
