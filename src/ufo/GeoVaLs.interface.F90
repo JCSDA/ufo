@@ -11,6 +11,7 @@ use ufo_geovals_mod
 use ufo_locs_mod
 use ufo_locs_mod_c, only : ufo_locs_registry
 use ufo_vars_mod
+use string_f_c_mod
 use kinds
 
 implicit none
@@ -336,18 +337,66 @@ end subroutine ufo_geovals_dotprod_c
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_geovals_minmaxavg_c(c_key_self, kobs, pmin, pmax, prms) bind(c,name='ufo_geovals_minmaxavg_f90')
+subroutine ufo_geovals_minmaxavg_c(c_key_self, kobs, kvar, pmin, pmax, prms) bind(c,name='ufo_geovals_minmaxavg_f90')
 implicit none
 integer(c_int), intent(in) :: c_key_self
 integer(c_int), intent(inout) :: kobs
+integer(c_int), intent(in) :: kvar
 real(c_double), intent(inout) :: pmin, pmax, prms
 type(ufo_geovals), pointer :: self
 
 call ufo_geovals_registry%get(c_key_self, self)
 
-call ufo_geovals_minmaxavg(self, kobs, pmin, pmax, prms)
+call ufo_geovals_minmaxavg(self, kobs, kvar, pmin, pmax, prms)
 
 end subroutine ufo_geovals_minmaxavg_c
+
+! ------------------------------------------------------------------------------
+
+subroutine ufo_geovals_nlocs_c(c_key_self, kobs) bind(c, name='ufo_geovals_nlocs_f90')
+implicit none
+integer(c_int), intent(in) :: c_key_self
+integer(c_int), intent(inout) :: kobs
+type(ufo_geovals), pointer :: self
+call ufo_geovals_registry%get(c_key_self, self)
+kobs = self%nobs
+end subroutine ufo_geovals_nlocs_c
+
+! ------------------------------------------------------------------------------
+
+subroutine ufo_geovals_get_c(c_key_self, lvar, c_var, lev, nobs, values) bind(c, name='ufo_geovals_get_f90')
+implicit none
+integer(c_int), intent(in) :: c_key_self
+integer(c_int), intent(in) :: lvar
+character(kind=c_char, len=1), intent(in) :: c_var(lvar+1)
+integer(c_int), intent(in) :: lev
+integer(c_int), intent(in) :: nobs
+real(c_float), intent(inout) :: values(nobs)
+
+character(max_string) :: err_msg
+type(ufo_geoval), pointer :: geoval
+character(len=MAXVARLEN) :: varname
+type(ufo_geovals), pointer :: self
+integer :: jj
+
+call c_f_string(c_var, varname)
+call ufo_geovals_registry%get(c_key_self, self)
+
+call ufo_geovals_get_var(self, varname, geoval)
+
+if (lev<1 .or. lev>size(geoval%vals,1)) then
+  write(err_msg,*)'ufo_geovals_get_f90',trim(varname),'level out of range:',lev,size(geoval%vals,1)
+  call abor1_ftn(err_msg)
+endif
+if (nobs /= size(geoval%vals,2)) then
+  write(err_msg,*)'ufo_geovals_get_f90',trim(varname),'error obs number:',nobs,size(geoval%vals,2)
+  call abor1_ftn(err_msg)
+endif
+
+values(:) = geoval%vals(lev,:)
+write(0,*)'ufo_geovals_get values ',values(:)
+
+end subroutine ufo_geovals_get_c
 
 ! ------------------------------------------------------------------------------
 

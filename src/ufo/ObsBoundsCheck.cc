@@ -28,7 +28,7 @@ static oops::FilterMaker<UfoTrait, oops::ObsFilter<UfoTrait, ObsBoundsCheck> >
 // -----------------------------------------------------------------------------
 
 ObsBoundsCheck::ObsBoundsCheck(ioda::ObsSpace & obsdb, const eckit::Configuration & config)
-  : obsdb_(obsdb), config_(config)
+  : obsdb_(obsdb), config_(config), nogeovals_()
 {}
 
 // -----------------------------------------------------------------------------
@@ -37,7 +37,7 @@ ObsBoundsCheck::~ObsBoundsCheck() {}
 
 // -----------------------------------------------------------------------------
 
-void ObsBoundsCheck::priorFilter(const GeoVaLs &) const {
+void ObsBoundsCheck::priorFilter(const GeoVaLs & gv) const {
   const std::string qcgrp = config_.getString("QCname");
   const std::string obgrp = "ObsValue";
   const float missing = util::missingValue(missing);
@@ -54,7 +54,7 @@ void ObsBoundsCheck::priorFilter(const GeoVaLs &) const {
     ioda::ObsDataVector<int> flags(obsdb_, var, qcgrp);
 
 //  Select where the bounds check will apply
-    std::vector<bool> apply = processWhere(obsdb_, bounds[jj]);
+    std::vector<bool> apply = processWhere(obsdb_, gv, bounds[jj]);
 
     int ii = 0;
     for (size_t jobs = 0; jobs < obs.size(); ++jobs) {

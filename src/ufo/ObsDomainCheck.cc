@@ -29,7 +29,7 @@ static oops::FilterMaker<UfoTrait, oops::ObsFilter<UfoTrait, ObsDomainCheck>>
 // -----------------------------------------------------------------------------
 
 ObsDomainCheck::ObsDomainCheck(ioda::ObsSpace & obsdb, const eckit::Configuration & config)
-  : obsdb_(obsdb), config_(config)
+  : obsdb_(obsdb), config_(config), nogeovals_()
 {}
 
 // -----------------------------------------------------------------------------
@@ -38,12 +38,12 @@ ObsDomainCheck::~ObsDomainCheck() {}
 
 // -----------------------------------------------------------------------------
 
-void ObsDomainCheck::priorFilter(const GeoVaLs &) const {
+void ObsDomainCheck::priorFilter(const GeoVaLs & gv) const {
   const size_t nobs = obsdb_.nlocs();
   const std::string qcgrp = config_.getString("QCname");
   const std::vector<std::string> vars = config_.getStringVector("observed");
 
-  std::vector<bool> inside = processWhere(obsdb_, config_);
+  std::vector<bool> inside = processWhere(obsdb_, gv, config_);
 
   for (size_t jv = 0; jv < vars.size(); ++jv) {
     ioda::ObsDataVector<int> flags(obsdb_, vars[jv], qcgrp);

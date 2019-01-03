@@ -25,8 +25,9 @@ static oops::FilterMaker<UfoTrait, oops::ObsFilter<UfoTrait, BackgroundCheck> >
   makerBgChk_("Background Check");
 // -----------------------------------------------------------------------------
 
-BackgroundCheck::BackgroundCheck(const ioda::ObsSpace & os,
-                                 const eckit::Configuration & config) {
+BackgroundCheck::BackgroundCheck(const ioda::ObsSpace & os, const eckit::Configuration & config)
+  : key_(0), nogeovals_()
+{
   oops::Log::trace() << "BackgroundCheck contructor starting" << std::endl;
   const eckit::Configuration * conf = &config;
   ufo_bgcheck_create_f90(key_, os, conf);

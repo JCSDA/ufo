@@ -14,12 +14,14 @@
 
 #include "ioda/ObsDataVector.h"
 #include "ioda/ObsSpace.h"
+#include "oops/base/Variables.h"
 #include "oops/interface/ObsFilter.h"
 #include "oops/util/Logger.h"
 #include "oops/util/missingValues.h"
 #include "ufo/processWhere.h"
 #include "ufo/QCflags.h"
 #include "ufo/UfoTrait.h"
+#include "ufo/utils/IntSetParser.h"
 
 namespace ufo {
 
@@ -28,8 +30,26 @@ static oops::FilterMaker<UfoTrait, oops::ObsFilter<UfoTrait, BlackList>> mkBlkLs
 // -----------------------------------------------------------------------------
 
 BlackList::BlackList(ioda::ObsSpace & obsdb, const eckit::Configuration & config)
-  : obsdb_(obsdb), config_(config)
-{}
+  : obsdb_(obsdb), config_(config), geovars_()
+{
+  oops::Log::debug() << "BlackList: config = " << config_ << std::endl;
+
+  std::vector<eckit::LocalConfiguration> masks;
+  config_.get("where", masks);
+
+  std::vector<std::string> vv;
+  for (size_t jm = 0; jm < masks.size(); ++jm) {
+    const std::string vargrp(masks[jm].getString("variable"));
+    std::string var;
+    std::string grp;
+    splitVarGroup(vargrp, var, grp);
+    if (grp == "GeoVaLs") vv.push_back(var);
+  }
+
+  oops::Variables req(vv);
+  geovars_ += req;
+  oops::Log::debug() << "BlackList: geovars = " << geovars_ << std::endl;
+}
 
 // -----------------------------------------------------------------------------
 
@@ -37,12 +57,12 @@ BlackList::~BlackList() {}
 
 // -----------------------------------------------------------------------------
 
-void BlackList::priorFilter(const GeoVaLs &) const {
+void BlackList::priorFilter(const GeoVaLs & gv) const {
   const size_t nobs = obsdb_.nlocs();
   const std::string qcgrp = config_.getString("QCname");
   const std::vector<std::string> vars = config_.getStringVector("observed");
 
-  std::vector<bool> blacklisted = processWhere(obsdb_, config_);
+  std::vector<bool> blacklisted = processWhere(obsdb_, gv, config_);
 
   for (size_t jv = 0; jv < vars.size(); ++jv) {
     ioda::ObsDataVector<int> flags(obsdb_, vars[jv], qcgrp);
@@ -61,7 +81,7 @@ void BlackList::priorFilter(const GeoVaLs &) const {
 // -----------------------------------------------------------------------------
 
 void BlackList::print(std::ostream & os) const {
-  os << "BlackList: config = " << config_ << std::endl;
+  os << "BlackList: config = " << config_ << " , geovars = " << geovars_ << std::endl;
 }
 
 // -----------------------------------------------------------------------------

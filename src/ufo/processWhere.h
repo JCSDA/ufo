@@ -14,8 +14,9 @@ namespace eckit {class Configuration;}
 namespace ioda {class ObsSpace;}
 
 namespace ufo {
+  class GeoVaLs;
 
-std::vector<bool> processWhere(ioda::ObsSpace &, const eckit::Configuration &);
+std::vector<bool> processWhere(ioda::ObsSpace &, const GeoVaLs &, const eckit::Configuration &);
 
 }  // namespace ufo
 
