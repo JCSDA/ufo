@@ -11,6 +11,10 @@
 #include <string>
 #include <vector>
 
+#include <boost/algorithm/string.hpp>
+
+#include "oops/util/Logger.h"
+
 #include "ioda/ObsVector.h"
 
 #include "oops/base/Variables.h"
@@ -21,36 +25,53 @@
 
 namespace ufo {
 
+// ----------------------------------------------------------------------------
+static ObsOperatorMaker<ObsIdentity> makerSurface_("Surface");
 // -----------------------------------------------------------------------------
 
 ObsIdentity::ObsIdentity(const ioda::ObsSpace & odb,
-                                     const eckit::Configuration & config)
-  : keyOper_(0), odb_(odb), varin_(), varout_()
+                         const eckit::Configuration & config)
+  : keyOperObsIdentity_(0), odb_(odb), varin_(), varout_()
 {
-  // from config
-  const std::vector<std::string> vvin{"ocean_upper_level_temperature"};
-  varin_.reset(new oops::Variables(vvin));
-  // from config
-  const std::vector<std::string> vvout{"obs_sst"};
-  varout_.reset(new oops::Variables(vvout));
+  int c_name_size = 200;
+  char *buffin = new char[c_name_size];
+  char *buffout = new char[c_name_size];
   const eckit::Configuration * configc = &config;
-  ufo_identity_setup_f90(keyOper_, &configc);
+//  const std::vector<std::string> vvin{"ocean_upper_level_temperature"};
+//  varin_.reset(new oops::Variables(vvin));
+//  // from config
+//  const std::vector<std::string> vvout{"obs_sst"};
+//  varout_.reset(new oops::Variables(vvout));
+//  const eckit::Configuration * configc = &config;
+
+  ufo_identity_setup_f90(keyOperObsIdentity_, &configc, buffin, buffout,
+                         c_name_size);
+
+  std::string vstr_in(buffin), vstr_out(buffout);
+  std::vector<std::string> vvin;
+  std::vector<std::string> vvout;
+  boost::split(vvin, vstr_in, boost::is_any_of("\t"));
+  boost::split(vvout, vstr_out, boost::is_any_of("\t"));
+  varin_.reset(new oops::Variables(vvin));
+  varout_.reset(new oops::Variables(vvout));
+
   oops::Log::trace() << "ObsIdentity created." << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
 ObsIdentity::~ObsIdentity() {
-  ufo_identity_delete_f90(keyOper_);
+  ufo_identity_delete_f90(keyOperObsIdentity_);
   oops::Log::trace() << "ObsIdentity destructed" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
-
+// should it be GeoVaLs & gom ?
 void ObsIdentity::simulateObs(const GeoVaLs & gv, ioda::ObsVector & ovec,
-                                    const ObsBias & bias) const {
-  ufo_identity_simobs_f90(keyOper_, gv.toFortran(), odb_, ovec.size(), ovec.toFortran(),
-                      bias.toFortran());
+                              const ObsBias & bias) const {
+  ufo_identity_simobs_f90(keyOperObsIdentity_, gv.toFortran(), odb_,
+                          ovec.size(), ovec.toFortran(),
+                          bias.toFortran());
   oops::Log::trace() << "ObsIdentity: observation operator run" << std::endl;
 }
 
