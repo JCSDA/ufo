@@ -15,6 +15,7 @@ module ufo_adt_mod
  use ufo_basis_mod, only: ufo_basis
  use ufo_vars_mod
  use obsspace_mod
+ use missing_values_mod
 
  implicit none
  private
@@ -65,12 +66,12 @@ implicit none
     real(kind_real) :: offset_hofx, pe_offset_hofx
     real(kind_real) :: offset_obs, pe_offset_obs
     type(fckit_mpi_comm) :: f_comm
-    real(c_double) :: missing_value
+    real(c_double) :: missing
     
     f_comm = fckit_mpi_comm()
 
     ! Set missing flag
-    missing_value = obspace_missing_value()
+    missing = missing_value(missing)
     
     ! check if nobs is consistent in geovals & hofx
     nobs = obsspace_get_nlocs(obss)
@@ -95,7 +96,7 @@ implicit none
     pe_offset_obs = 0.0    
     cnt = 0
     do iobs = 1, nobs
-       if (hofx(iobs)/=missing_value) then      
+       if (hofx(iobs)/=missing) then      
           pe_offset_hofx = pe_offset_hofx + geoval_adt%vals(1,iobs)
           pe_offset_obs = pe_offset_obs + obs_adt(iobs)          
           cnt = cnt + 1

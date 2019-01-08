@@ -7,8 +7,9 @@
 
 module vert_interp_mod
 
+use, intrinsic :: iso_c_binding
 use kinds, only: kind_real
-use obsspace_mod, only: obspace_missing_value
+use missing_values_mod
 
 implicit none
 public
@@ -77,8 +78,8 @@ integer,         intent(in ) :: wi          !Index for interpolation
 real(kind_real), intent(in ) :: wf          !Weight for interpolation
 real(kind_real), intent(out) :: f           !Output at obs location using linear interp
 
-if (fvec(wi) == obspace_missing_value() .or. fvec(wi+1) == obspace_missing_value()) then
-  f = obspace_missing_value()
+if (fvec(wi) == missing_value(f) .or. fvec(wi+1) == missing_value(f)) then
+  f = missing_value(f)
 else
   f = fvec(wi)*wf + fvec(wi+1)*(1.0-wf)
 endif
@@ -96,8 +97,8 @@ integer,         intent(in)  :: wi
 real(kind_real), intent(in)  :: wf
 real(kind_real), intent(out) :: f_tl
 
-if (fvec_tl(wi) == obspace_missing_value() .or. fvec_tl(wi+1) == obspace_missing_value()) then
-  f_tl = obspace_missing_value()
+if (fvec_tl(wi) == missing_value(f_tl) .or. fvec_tl(wi+1) == missing_value(f_tl)) then
+  f_tl = missing_value(f_tl)
 else
   f_tl = fvec_tl(wi)*wf + fvec_tl(wi+1)*(1.0_kind_real-wf)
 endif
@@ -114,13 +115,16 @@ real(kind_real), intent(inout) :: fvec_ad(nlev)
 integer,         intent(in)    :: wi
 real(kind_real), intent(in)    :: wf
 real(kind_real), intent(in)    :: f_ad
+real(kind_real) :: missing
 
-if (fvec_ad(wi) == obspace_missing_value() .or. f_ad == obspace_missing_value()) then
+missing = missing_value(missing)
+
+if (fvec_ad(wi) == missing .or. f_ad == missing) then
   fvec_ad(wi  ) = 0.0_kind_real
 else
   fvec_ad(wi  ) = fvec_ad(wi  ) + f_ad*wf
 endif
-if (fvec_ad(wi+1) == obspace_missing_value() .or. f_ad == obspace_missing_value()) then
+if (fvec_ad(wi+1) == missing .or. f_ad == missing) then
   fvec_ad(wi+1) = 0.0_kind_real
 else
   fvec_ad(wi+1) = fvec_ad(wi+1) + f_ad*(1.0_kind_real-wf)
