@@ -169,12 +169,17 @@ character(max_string) :: err_msg
     atm(k1)%Cloud(1)%Water_Content = geoval%vals(:,k1)
     call ufo_geovals_get_var(geovals, var_clwefr, geoval)
     atm(k1)%Cloud(1)%Effective_Radius = geoval%vals(:,k1)
-
+        
     atm(k1)%Cloud(2)%Type = ICE_CLOUD
     call ufo_geovals_get_var(geovals, var_cli, geoval)
     atm(k1)%Cloud(2)%Water_Content = geoval%vals(:,k1)
     call ufo_geovals_get_var(geovals, var_cliefr, geoval)
     atm(k1)%Cloud(2)%Effective_Radius = geoval%vals(:,k1)
+
+    !** BTJ added 11/20/2018 for compatibility with CRTM REL 2.3.0+
+    !** need to map to cloud fraction geoval, if it exists.  For now assume
+    !** fully filled pixel. 
+    atm(k1)%Cloud_Fraction = 1.0_fp  
  end do
 
  end subroutine Load_Atm_Data
