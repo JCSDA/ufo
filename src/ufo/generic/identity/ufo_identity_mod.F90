@@ -38,15 +38,15 @@ module ufo_identity_mod
     character(len=max_string), public, allocatable :: varin(:)
     character(len=max_string), public, allocatable :: varout(:)
  contains
-   procedure :: setup  => ufo_identity_setup_
-   procedure :: simobs => ufo_identity_simobs_
+   procedure :: setup  => identity_setup_
+   procedure :: simobs => identity_simobs_
    final :: destructor
  end type ufo_identity
 
 contains
 
 ! ------------------------------------------------------------------------------
-subroutine ufo_identity_setup_(self, c_conf)
+subroutine identity_setup_(self, c_conf)
    use config_mod
    implicit none
    class(ufo_identity), intent(inout) :: self
@@ -76,11 +76,11 @@ subroutine ufo_identity_setup_(self, c_conf)
   enddo
   
 
-end subroutine ufo_identity_setup_
+end subroutine identity_setup_
 
 
 ! ------------------------------------------------------------------------------
-subroutine ufo_identity_simobs_(self, geovals, hofx, obss)
+subroutine identity_simobs_(self, geovals, hofx, obss)
   implicit none
   class(ufo_identity), intent(in)    :: self
   type(ufo_geovals),  intent(in)     :: geovals
@@ -108,7 +108,7 @@ subroutine ufo_identity_simobs_(self, geovals, hofx, obss)
     enddo
   enddo
 
-end subroutine ufo_identity_simobs_
+end subroutine identity_simobs_
 
 
 ! ------------------------------------------------------------------------------
