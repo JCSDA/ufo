@@ -32,7 +32,7 @@ module ufo_identity_mod
 
 ! Fortran derived type for the observation type
 !---------------------------------------------------------------------------------------------------
- type, extends(ufo_basis), public :: ufo_identity
+ type, extends(ufo_basis) :: ufo_identity
  private
     integer, public :: nvars
     character(len=max_string), public, allocatable :: varin(:)
@@ -46,7 +46,7 @@ module ufo_identity_mod
 contains
 
 ! ------------------------------------------------------------------------------
-subroutine ufo_identity_setup(self, c_conf)
+subroutine ufo_identity_setup_(self, c_conf)
    use config_mod
    implicit none
    class(ufo_identity), intent(inout) :: self
@@ -76,11 +76,11 @@ subroutine ufo_identity_setup(self, c_conf)
   enddo
   
 
-end subroutine ufo_identity_setup
+end subroutine ufo_identity_setup_
 
 
 ! ------------------------------------------------------------------------------
-subroutine ufo_identity_simobs(self, geovals, hofx, obss)
+subroutine ufo_identity_simobs_(self, geovals, hofx, obss)
   implicit none
   class(ufo_identity), intent(in)    :: self
   type(ufo_geovals),  intent(in)     :: geovals
@@ -108,7 +108,7 @@ subroutine ufo_identity_simobs(self, geovals, hofx, obss)
     enddo
   enddo
 
-end subroutine ufo_identity_simobs
+end subroutine ufo_identity_simobs_
 
 
 ! ------------------------------------------------------------------------------
