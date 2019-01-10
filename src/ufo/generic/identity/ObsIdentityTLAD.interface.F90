@@ -10,7 +10,8 @@ module ufo_identity_tlad_mod_c
 
   use iso_c_binding
   use config_mod
-  use ufo_identity_tlad_mod 
+  use ufo_identity_tlad_mod
+  use string_f_c_mod
   implicit none
   private
 
@@ -37,10 +38,10 @@ type(c_ptr), intent(in) :: c_conf ! config here in case we want to read vars fro
 integer(c_int), intent(in) :: c_str_size
 character(kind=c_char,len=1),intent(inout) :: csin(c_str_size+1),csout(c_str_size+1) 
 
-type(ufo_atmvertinterp_tlad), pointer :: self
+type(ufo_identity_tlad), pointer :: self
 integer :: ii
 
-call ufo_atmvertinterp_tlad_registry%setup(c_key_self, self)
+call ufo_identity_tlad_registry%setup(c_key_self, self)
 
 call self%setup(c_conf)
 

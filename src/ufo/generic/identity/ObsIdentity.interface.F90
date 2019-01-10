@@ -10,7 +10,8 @@ module ufo_identity_mod_c
 
   use iso_c_binding
   use config_mod
-  use ufo_identity_mod 
+  use ufo_identity_mod
+  use string_f_c_mod
   implicit none
   private
 
