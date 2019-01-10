@@ -60,6 +60,7 @@ class ObsIdentityTLAD : public LinearObsOperatorBase,
   F90hop keyOper_;
   const ioda::ObsSpace& odb_;
   boost::scoped_ptr<const oops::Variables> varin_;
+  boost::scoped_ptr<const oops::Variables> varout_;
 };
 
 // -----------------------------------------------------------------------------
