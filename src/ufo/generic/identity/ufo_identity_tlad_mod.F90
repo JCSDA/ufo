@@ -50,11 +50,11 @@ module ufo_identity_tlad_mod
 contains
 
 ! ------------------------------------------------------------------------------
-subroutine ufo_identity_tlad_setup(self, c_conf)
+subroutine ufo_identity_tlad_setup_(self, c_conf)
 
   use config_mod
   implicit none
-  class(ufo_atmvertinterp_tlad), intent(inout) :: self
+  class(ufo_identity_tlad), intent(inout) :: self
   type(c_ptr), intent(in)    :: c_conf
 
   integer :: ii
@@ -76,11 +76,11 @@ subroutine ufo_identity_tlad_setup(self, c_conf)
        self%varout(ii) = self%varin(ii)
   enddo
 
-end subroutine ufo_identity_tlad_setup
+end subroutine ufo_identity_tlad_setup_
 
 
 ! ------------------------------------------------------------------------------
-subroutine ufo_identity_tlad_settraj(self, geovals, obss)
+subroutine ufo_identity_tlad_settraj_(self, geovals, obss)
 implicit none
 class(ufo_identity_tlad), intent(inout) :: self
 type(ufo_geovals),       intent(in)    :: geovals
@@ -88,12 +88,12 @@ type(c_ptr), value,      intent(in)    :: obss
 
 ! since observation operator is linear, don't care about trajectory itself
 
-end subroutine ufo_identity_tlad_settraj
+end subroutine ufo_identity_tlad_settraj_
 
 ! ------------------------------------------------------------------------------
-subroutine ufo_identity_simobs_tl(self, geovals, hofx, obss)
+subroutine ufo_identity_simobs_tl_(self, geovals, hofx, obss)
   implicit none
-  class(ufo_identity), intent(in)    :: self
+  class(ufo_identity_tlad), intent(in)    :: self
   type(ufo_geovals),  intent(in)     :: geovals
   real(c_double),     intent(inout)  :: hofx(:)
   type(c_ptr), value, intent(in)     :: obss
@@ -119,10 +119,10 @@ subroutine ufo_identity_simobs_tl(self, geovals, hofx, obss)
     enddo
   enddo
 
-end subroutine ufo_identity_simobs_tl
+end subroutine ufo_identity_simobs_tl_
 
 ! ------------------------------------------------------------------------------
-subroutine ufo_identity_simobs_ad(self, geovals, hofx, obss)
+subroutine ufo_identity_simobs_ad_(self, geovals, hofx, obss)
   implicit none
   class(ufo_identity_tlad), intent(in)    :: self
   type(ufo_geovals),       intent(inout) :: geovals
@@ -134,7 +134,9 @@ subroutine ufo_identity_simobs_ad(self, geovals, hofx, obss)
   character(len=MAXVARLEN)  :: geovar
 
   if (.not. geovals%linit ) geovals%linit=.true.
-  
+
+  nlocs = obsspace_get_nlocs(obss)
+ 
   do ivar = 1, self%nvars
     !> Get the name of input variable in geovals
     geovar = self%varin(ivar)
@@ -143,29 +145,29 @@ subroutine ufo_identity_simobs_ad(self, geovals, hofx, obss)
     call ufo_geovals_get_var(geovals, geovar, point)
     
     
-    if (.not.(allocated(geoval%vals))) then
+    if (.not.(allocated(point%vals))) then
        point%nval=1
        allocate(point%vals(1,size(hofx,1)))
        point%vals = 0.0
     end if
 
     ! backward obs operator
-    do iobs = 1, size(hofx,1)
-       point%vals(1,iobs) = point%vals(1,iobs) + hofx(iobs)
+    do iobs = 1, nlocs
+      point%vals(1,iobs) = hofx(ivar + (iobs-1)*self%nvars) 
     enddo
   enddo
   
-end subroutine ufo_identity_simobs_ad
+end subroutine ufo_identity_simobs_ad_
 
 
 
 ! ------------------------------------------------------------------------------
-subroutine ufo_identity_tlad_delete(self)
+subroutine ufo_identity_tlad_delete_(self)
   implicit none
   class(ufo_identity_tlad), intent(inout) :: self
   self%nval = 0
   self%ltraj = .false.
-end subroutine ufo_identity_tlad_delete
+end subroutine ufo_identity_tlad_delete_
 
 ! ------------------------------------------------------------------------------
 subroutine  destructor(self)
