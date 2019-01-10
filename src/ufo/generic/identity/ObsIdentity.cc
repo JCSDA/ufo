@@ -67,9 +67,9 @@ ObsIdentity::~ObsIdentity() {
 
 // -----------------------------------------------------------------------------
 // should it be GeoVaLs & gom ?
-void ObsIdentity::simulateObs(const GeoVaLs & gv, ioda::ObsVector & ovec,
+void ObsIdentity::simulateObs(const GeoVaLs & gom, ioda::ObsVector & ovec,
                               const ObsBias & bias) const {
-  ufo_identity_simobs_f90(keyOperObsIdentity_, gv.toFortran(), odb_,
+  ufo_identity_simobs_f90(keyOperObsIdentity_, gom.toFortran(), odb_,
                           ovec.size(), ovec.toFortran(),
                           bias.toFortran());
   oops::Log::trace() << "ObsIdentity: observation operator run" << std::endl;
