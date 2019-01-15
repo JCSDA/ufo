@@ -11,14 +11,10 @@
 #include <string>
 #include <vector>
 
-#include <boost/scoped_ptr.hpp>
-
 #include "ioda/ObsSpace.h"
 #include "ioda/ObsVector.h"
-
 #include "oops/base/Variables.h"
 #include "oops/util/Logger.h"
-
 #include "ufo/GeoVaLs.h"
 #include "ufo/ObsBias.h"
 #include "ufo/ObsBiasIncrement.h"
@@ -27,49 +23,51 @@ namespace ufo {
 
 // -----------------------------------------------------------------------------
 static LinearObsOperatorMaker<ObsInsituTemperatureTLAD>
-              makerInsituTemperatureTLAD_("InsituTemperature");
+   makerInsituTemperatureTL_("InsituTemperature");
 // -----------------------------------------------------------------------------
 
 ObsInsituTemperatureTLAD::ObsInsituTemperatureTLAD(const ioda::ObsSpace & odb,
                                                    const eckit::Configuration & config)
-  : keyOperInsituTemperature_(0), varin_(), odb_(odb)
+  : keyOper_(0), varin_(), odb_(odb)
 {
-  const eckit::Configuration * configc = &config;
-  ufo_insitutemperature_tlad_setup_f90(keyOperInsituTemperature_, &configc);
-  const std::vector<std::string> vv{"ocean_potential_temperature", "ocean_salinity",
-                                    "ocean_layer_thickness"};
+  const std::vector<std::string> vv{"ocean_potential_temperature",
+                                    "ocean_salinity", "ocean_layer_thickness"};
   varin_.reset(new oops::Variables(vv));
+  const eckit::Configuration * configc = &config;
+  ufo_insitutemperature_tlad_setup_f90(keyOper_, &configc);
   oops::Log::trace() << "ObsInsituTemperatureTLAD created" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
 ObsInsituTemperatureTLAD::~ObsInsituTemperatureTLAD() {
-  ufo_insitutemperature_tlad_delete_f90(keyOperInsituTemperature_);
-  oops::Log::trace() << "ObsInsituTemperatureTLAD destrcuted" << std::endl;
+  ufo_insitutemperature_tlad_delete_f90(keyOper_);
+  oops::Log::trace() << "ObsInsituTemperatureTLAD destructed" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
 void ObsInsituTemperatureTLAD::setTrajectory(const GeoVaLs & geovals, const ObsBias & bias) {
-  ufo_insitutemperature_tlad_settraj_f90(keyOperInsituTemperature_, geovals.toFortran(),
-                                         odb_);
+  ufo_insitutemperature_tlad_settraj_f90(keyOper_, geovals.toFortran(), odb_);
+  oops::Log::trace() << "ObsInsituTemperatureTLAD: trajectory set" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
 void ObsInsituTemperatureTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec,
-                                             const ObsBiasIncrement & bias) const {
-  ufo_insitutemperature_simobs_tl_f90(keyOperInsituTemperature_, geovals.toFortran(),
-                                        odb_, ovec.toFortran());
+                             const ObsBiasIncrement & bias) const {
+  ufo_insitutemperature_simobs_tl_f90(keyOper_, geovals.toFortran(), odb_,
+                                      ovec.size(), ovec.toFortran());
+  oops::Log::trace() << "ObsInsituTemperatureTLAD: TL observation operator run" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
 void ObsInsituTemperatureTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec,
-                                             ObsBiasIncrement & bias) const {
-  ufo_insitutemperature_simobs_ad_f90(keyOperInsituTemperature_, geovals.toFortran(),
-                                        odb_, ovec.toFortran());
+                             ObsBiasIncrement & bias) const {
+  ufo_insitutemperature_simobs_ad_f90(keyOper_, geovals.toFortran(), odb_,
+                                      ovec.size(), ovec.toFortran());
+  oops::Log::trace() << "ObsInsituTemperatureTLAD: adjoint observation operator run" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

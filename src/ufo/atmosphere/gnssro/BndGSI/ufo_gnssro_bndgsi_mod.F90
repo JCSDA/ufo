@@ -7,6 +7,7 @@
 
 module ufo_gnssro_bndgsi_mod
   use iso_c_binding
+  use config_mod
   use kinds
   use ufo_vars_mod
   use ufo_geovals_mod
@@ -14,6 +15,9 @@ module ufo_gnssro_bndgsi_mod
   use vert_interp_mod
   use ufo_basis_mod,      only: ufo_basis
   use lag_interp_mod,     only: lag_interp_const, lag_interp_smthWeights
+  use obsspace_mod
+  use gnssro_mod_conf
+  use gnssro_mod_constants
 
   implicit none
   public             :: ufo_gnssro_BndGSI
@@ -21,17 +25,25 @@ module ufo_gnssro_bndgsi_mod
 
   !> Fortran derived type for gnssro trajectory
   type, extends(ufo_basis) :: ufo_gnssro_BndGSI
+   type(gnssro_conf) :: roconf
   contains
+   procedure :: setup     => ufo_gnssro_bndgsi_setup
    procedure :: simobs    => ufo_gnssro_bndgsi_simobs
   end type ufo_gnssro_BndGSI
 
   contains
 ! ------------------------------------------------------------------------------
+subroutine ufo_gnssro_bndgsi_setup(self, c_conf)
+
+implicit none
+class(ufo_gnssro_BndGSI), intent(inout) :: self
+type(c_ptr),              intent(in)    :: c_conf
+call gnssro_conf_setup(self%roconf,c_conf)
+end subroutine ufo_gnssro_bndgsi_setup
+
   subroutine ufo_gnssro_bndgsi_simobs(self, geovals, hofx, obss)
-      use gnssro_mod_constants
       use gnssro_mod_transform
       use gnssro_mod_grids, only: get_coordinate_value
-      use obsspace_mod, only: obsspace_get_var
       implicit none
       class(ufo_gnssro_bndGSI), intent(in)    :: self
       type(ufo_geovals),        intent(in)    :: geovals
@@ -39,7 +51,6 @@ module ufo_gnssro_bndgsi_mod
       type(c_ptr), value,       intent(in)    :: obss
     
       character(len=*), parameter     :: myname_ ="ufo_gnssro_bndgsi_simobs"
-      logical, parameter              :: use_compress = .true.
       real(kind_real), parameter      :: r1em6 = 1.0e-6_kind_real
       real(kind_real), parameter      :: r1em3 = 1.0e-3_kind_real
       real(kind_real), parameter      :: six   = 6.0_kind_real
@@ -56,7 +67,6 @@ module ufo_gnssro_bndgsi_mod
       integer                         :: nlev, nlev1, nobs, nlevExt, nlevCheck
       real(kind_real)                 :: rnlevExt
       real(kind_real)                 :: w4(4), dw4(4)
-      integer                         :: ierr
       type(ufo_geoval), pointer       :: t, gphi, prsi, q
       real(kind_real), allocatable    :: gesT(:,:), gesZi(:,:), gesPi(:,:), gesQ(:,:)
       real(kind_real), allocatable    :: refr(:,:), radius(:,:)
@@ -87,29 +97,13 @@ module ufo_gnssro_bndgsi_mod
         call abor1_ftn(err_msg)
       endif
       ! check if prsi (pressure at model interface levels) variable is in geovals and get it
-      call ufo_geovals_get_var(geovals, var_prsi, prsi,status=ierr)
-      if (ierr/=0) then
-         write(err_msg,*) myname_, trim(var_prsi), ' doesnt exist'
-         call abor1_ftn(err_msg)
-      endif
+      call ufo_geovals_get_var(geovals, var_prsi, prsi)
       ! check if t (temperature) variable is in geovals and get it
-      call ufo_geovals_get_var(geovals, var_t, t,status=ierr)  
-      if (ierr/=0) then
-         write(err_msg,*) myname_, trim(var_t), ' doesnt exist'
-         call abor1_ftn(err_msg)
-      endif
+      call ufo_geovals_get_var(geovals, var_t, t)
       ! check if q(specific humidity) variable is in geovals and get it
-      call ufo_geovals_get_var(geovals, var_q, q,status=ierr)
-       if (ierr/=0) then
-         write(err_msg,*) myname_, trim(var_q), ' doesnt exist'
-         call abor1_ftn(err_msg)
-      endif
+      call ufo_geovals_get_var(geovals, var_q, q)
       ! check if gphi (geopotential height at model interface levels) variable is in geovals and get it
-      call ufo_geovals_get_var(geovals, var_zi, gphi,status=ierr) 
-      if (ierr/=0) then
-         write(err_msg,*) myname_, trim(var_zi), ' doesnt exist'
-         call abor1_ftn(err_msg)
-      endif
+      call ufo_geovals_get_var(geovals, var_zi, gphi)
 
  
       nlev  = t%nval ! number of model levels
@@ -156,10 +150,10 @@ module ufo_gnssro_bndgsi_mod
       allocate(obsLocR(nobs))
       allocate(obsGeoid(nobs))
 
-      call obsspace_get_var(obss, obsLat, "Latitude", nobs)
-      call obsspace_get_var(obss, obsImpP, "IMPP", nobs)   !observed impact parameter; meter
-      call obsspace_get_var(obss, obsLocR, "ELRC", nobs)   !local radius of earth; meter
-      call obsspace_get_var(obss, obsGeoid, "GEODU", nobs) !Geoid; meter
+      call obsspace_get_db(obss, "Metadata", "Latitude", obsLat)
+      call obsspace_get_db(obss, "Metadata", "IMPP", obsImpP)   !observed impact parameter; meter
+      call obsspace_get_db(obss, "Metadata", "ELRC", obsLocR)   !local radius of earth; meter
+      call obsspace_get_db(obss, "Metadata", "GEODU", obsGeoid) !Geoid; meter
 
       nobs_outIntgl = 0 !initialize count of observations out of integral grids  
       count_rejection = 0
@@ -181,7 +175,7 @@ module ufo_gnssro_bndgsi_mod
                specHmean = gesQ(1,iobs)
                tmean = gesT(1,iobs)
             endif
-            call compute_refractivity(tmean, specHmean, gesPi(ilev,iobs), refr(ilev,iobs),use_compress) !refr N
+            call compute_refractivity(tmean, specHmean, gesPi(ilev,iobs), refr(ilev,iobs),self%roconf%use_compress) !refr N
             refrIndex(ilev) = one + (r1em6*refr(ilev,iobs))         ! refr index n
             refrXrad(ilev)  = refrIndex(ilev) * radius(ilev,iobs)   ! x=nr
 

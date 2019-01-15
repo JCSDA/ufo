@@ -14,9 +14,7 @@ module ufo_radiance_mod
  use ufo_geovals_mod, only: ufo_geovals, ufo_geoval, ufo_geovals_get_var
  use ufo_basis_mod, only: ufo_basis
  use ufo_vars_mod
-
  use ufo_radiance_utils_mod
-
  use crtm_module
  USE rttov_types
  USE rttov_const, ONLY : errorstatus_success, deg2rad
@@ -26,13 +24,13 @@ module ufo_radiance_mod
  private
 
  !> Fortran derived type for radiance trajectory
- TYPE, EXTENDS(ufo_basis), PUBLIC :: ufo_radiance
-   PRIVATE
-   TYPE(rad_conf) :: rc
- CONTAINS
-   PROCEDURE :: setup  => ufo_radiance_setup
-   PROCEDURE :: delete => ufo_radiance_delete
-   PROCEDURE :: simobs => ufo_radiance_simobs
+ type, extends(ufo_basis), public :: ufo_radiance
+ private
+  type(rad_conf) :: rc
+ contains
+   procedure :: setup  => ufo_radiance_setup
+   procedure :: delete => ufo_radiance_delete
+   procedure :: simobs => ufo_radiance_simobs
  end type ufo_radiance
 
 contains
@@ -287,7 +285,7 @@ type(c_ptr), value,       intent(in) :: obss
 character(*), parameter :: PROGRAM_NAME = 'ufo_radiance_mod.F90'
 character(255) :: message, version
 integer        :: err_stat, alloc_stat
-integer        :: l, m, n, i, s, ierr
+integer        :: l, m, n, i, s
 type(ufo_geoval), pointer :: temp
 
 integer :: n_Profiles
@@ -307,7 +305,7 @@ type(CRTM_RTSolution_type), allocatable :: rts(:,:)
  ! Get number of profile and layers from geovals
  ! ---------------------------------------------
  n_Profiles = geovals%nobs
- call ufo_geovals_get_var(geovals, var_tv, temp, status=ierr)
+ call ufo_geovals_get_var(geovals, var_tv, temp)
  n_Layers = temp%nval
  nullify(temp)
 

@@ -1,44 +1,60 @@
-! (C) Copyright 2017 UCAR
+! (C) Copyright 2017-2018 UCAR
 !
 ! This software is licensed under the terms of the Apache Licence Version 2.0
 ! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 
-!> Fortran module to handle ice concentration observations
+!> Fortran module for seasurfacetemp observation operator
 
 module ufo_seasurfacetemp_mod
 
-  use ioda_obs_seasurfacetemp_mod
-  use ioda_obs_vectors
-  use ufo_vars_mod
-  use ioda_locs_mod
-  use ufo_geovals_mod
-  use kinds
+ use iso_c_binding
+ use config_mod
+ use kinds
 
-  implicit none
-  public :: ufo_seasurfacetemp
-  public :: ufo_seasurfacetemp_simobs
-  private
-  integer, parameter :: max_string=800
+ use ufo_geovals_mod, only: ufo_geovals, ufo_geoval, ufo_geovals_get_var
+ use ufo_basis_mod, only: ufo_basis
+ use ufo_vars_mod
+ use obsspace_mod
 
-  !> Fortran derived type for sea surface temperature observation operator
-  type :: ufo_seasurfacetemp
-  end type ufo_seasurfacetemp
+ implicit none
+ private
 
+ integer, parameter :: max_string=800
 
-  ! ------------------------------------------------------------------------------
+!> Fortran derived type for the observation type
+ type, extends(ufo_basis), public :: ufo_seasurfacetemp
+ private
+ contains
+   procedure :: setup  => ufo_seasurfacetemp_setup
+   procedure :: delete => ufo_seasurfacetemp_delete
+   procedure :: simobs => ufo_seasurfacetemp_simobs
+ end type ufo_seasurfacetemp
 
 contains
 
-  ! ------------------------------------------------------------------------------
-  !!!!!!!!!!!!!!! TODO: PASS OBS to operator !!!!!!!!!!!!!!!!!!!!
-  subroutine ufo_seasurfacetemp_simobs(self, geovals, hofx)
+! ------------------------------------------------------------------------------
+subroutine ufo_seasurfacetemp_setup(self, c_conf)
+implicit none
+class(ufo_seasurfacetemp), intent(inout) :: self
+type(c_ptr),        intent(in)    :: c_conf
 
-    use ufo_marine_ncutils
-    
-    implicit none
-    type(ufo_seasurfacetemp) ,intent(in) :: self
-    type(ufo_geovals)        ,intent(in) :: geovals
-    type(obs_vector)      ,intent(inout) :: hofx
+end subroutine ufo_seasurfacetemp_setup
+
+! ------------------------------------------------------------------------------
+subroutine ufo_seasurfacetemp_delete(self)
+implicit none
+class(ufo_seasurfacetemp), intent(inout) :: self
+
+end subroutine ufo_seasurfacetemp_delete
+
+! ------------------------------------------------------------------------------
+subroutine ufo_seasurfacetemp_simobs(self, geovals, hofx, obss)
+use ufo_marine_ncutils
+implicit none
+class(ufo_seasurfacetemp), intent(in)    :: self
+type(ufo_geovals),  intent(in)    :: geovals
+real(c_double),     intent(inout) :: hofx(:)
+type(c_ptr), value, intent(in)    :: obss
 
     character(len=*), parameter :: myname_="ufo_seasurfacetemp_simobs"
     character(max_string) :: err_msg
@@ -56,7 +72,7 @@ contains
     type(diag_marine_obs) :: sst_out 
     
     ! check if nobs is consistent in geovals & hofx
-    if (geovals%nobs /= hofx%nobs) then
+    if (geovals%nobs /= size(hofx,1)) then
        write(err_msg,*) myname_, ' error: nobs inconsistent!'
        call abor1_ftn(err_msg)
     endif
@@ -66,11 +82,11 @@ contains
 
     ! Information for temporary output file ---------------------------------------!
     filename='sst-test.nc'    
-    call sst_out%init(hofx%nobs,filename)
+    call sst_out%init(size(hofx,1),filename)
     
     ! sst obs operator
-    do iobs = 1, hofx%nobs
-       hofx%values(iobs) = geoval_sst%vals(1,iobs)
+    do iobs = 1, size(hofx,1)
+       hofx(iobs) = geoval_sst%vals(1,iobs)
 
        ! Output information:
        sst_out%diag(iobs)%Station_ID         = 9999

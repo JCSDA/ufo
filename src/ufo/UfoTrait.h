@@ -10,14 +10,13 @@
 
 #include <string>
 
-#include "ioda/Locations.h"
 #include "ioda/ObsSpace.h"
 #include "ioda/ObsVector.h"
+#include "Locations.h"
 #include "GeoVaLs.h"
 #include "ObsBias.h"
 #include "ObsBiasCovariance.h"
 #include "ObsBiasIncrement.h"
-#include "ObsCheck.h"
 #include "ObsOperator.h"
 #include "LinearObsOperator.h"
 
@@ -27,7 +26,7 @@ struct UfoTrait {
   static std::string name() {return "UFO";}
 
   typedef ufo::GeoVaLs             GeoVaLs;
-  typedef ioda::Locations          Locations;
+  typedef ufo::Locations           Locations;
   typedef ioda::ObsSpace           ObsSpace;
   typedef ioda::ObsVector          ObsVector;
 
@@ -37,8 +36,6 @@ struct UfoTrait {
   typedef ufo::ObsBias             ObsAuxControl;
   typedef ufo::ObsBiasIncrement    ObsAuxIncrement;
   typedef ufo::ObsBiasCovariance   ObsAuxCovariance;
-
-  typedef ufo::ObsCheck            ObsCheck;
 };
 
 }  // namespace ufo

@@ -11,7 +11,9 @@
 #include "ioda/ObsSpace.h"
 #include "ioda/ObsVector.h"
 #include "oops/base/Variables.h"
+#include "oops/util/DateTime.h"
 #include "ufo/GeoVaLs.h"
+#include "ufo/Locations.h"
 #include "ufo/ObsBias.h"
 #include "ufo/ObsOperatorBase.h"
 
@@ -20,7 +22,7 @@ namespace ufo {
 // -----------------------------------------------------------------------------
 
 ObsOperator::ObsOperator(const ioda::ObsSpace & os, const eckit::Configuration & conf)
-  : oper_(ObsOperatorFactory::create(os, conf))
+  : os_(os), oper_(ObsOperatorFactory::create(os, conf))
 {}
 
 // -----------------------------------------------------------------------------
@@ -38,6 +40,19 @@ void ObsOperator::simulateObs(const GeoVaLs & gvals, ioda::ObsVector & yy,
 
 const oops::Variables & ObsOperator::variables() const {
   return oper_->variables();
+}
+
+// -----------------------------------------------------------------------------
+
+const oops::Variables & ObsOperator::observed() const {
+  return oper_->observed();
+}
+
+// -----------------------------------------------------------------------------
+
+Locations * ObsOperator::locations(const util::DateTime & t1,
+                                   const util::DateTime & t2) const {
+  return new Locations(os_, t1, t2);
 }
 
 // -----------------------------------------------------------------------------

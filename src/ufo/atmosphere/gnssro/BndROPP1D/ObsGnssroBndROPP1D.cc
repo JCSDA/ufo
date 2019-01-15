@@ -27,12 +27,15 @@ static ObsOperatorMaker<ObsGnssroBndROPP1D> makerGnssroBndROPP1D_("GnssroBndROPP
 
 ObsGnssroBndROPP1D::ObsGnssroBndROPP1D(const ioda::ObsSpace & odb,
                                        const eckit::Configuration & config)
-  : keyOperGnssroBndROPP1D_(0), varin_(), odb_(odb)
+  : keyOperGnssroBndROPP1D_(0), odb_(odb), varin_(), varout_()
 {
   const std::vector<std::string> vv{"temperature", "specific_humidity", "air_pressure",
                                     "geopotential_height", "sfc_geopotential_height"};
-
   varin_.reset(new oops::Variables(vv));
+
+  const std::vector<std::string> vout{"zz"};
+  varout_.reset(new oops::Variables(vout));
+
   const eckit::Configuration * configc = &config;
   ufo_gnssro_bndropp1d_setup_f90(keyOperGnssroBndROPP1D_, &configc);
   oops::Log::trace() << "ObsGnssroBndROPP1D created." << std::endl;

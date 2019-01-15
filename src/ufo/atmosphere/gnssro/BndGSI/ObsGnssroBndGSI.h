@@ -15,7 +15,7 @@
 
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
-#include "ufo/atmosphere/gnssro/BndGSI/FortranBndGSI.h"
+#include "ufo/atmosphere/gnssro/BndGSI/ObsGnssroBndGSI.interface.h"
 #include "ufo/ObsOperatorBase.h"
 
 namespace eckit {
@@ -47,6 +47,7 @@ class ObsGnssroBndGSI : public ObsOperatorBase,
 
 // Other
   const oops::Variables & variables() const {return *varin_;}
+  const oops::Variables & observed() const {return *varout_;}
 
   int & toFortran() {return keyOperGnssroBndGSI_;}
   const int & toFortran() const {return keyOperGnssroBndGSI_;}
@@ -56,6 +57,7 @@ class ObsGnssroBndGSI : public ObsOperatorBase,
   F90hop keyOperGnssroBndGSI_;
   const ioda::ObsSpace& odb_;
   boost::scoped_ptr<const oops::Variables> varin_;
+  boost::scoped_ptr<const oops::Variables> varout_;
 };
 
 // -----------------------------------------------------------------------------

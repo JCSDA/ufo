@@ -11,56 +11,61 @@
 #include <string>
 #include <vector>
 
+#include "ioda/ObsSpace.h"
 #include "ioda/ObsVector.h"
-
 #include "oops/base/Variables.h"
 #include "oops/util/Logger.h"
-
 #include "ufo/GeoVaLs.h"
 #include "ufo/ObsBias.h"
+#include "ufo/ObsBiasIncrement.h"
 
 namespace ufo {
 
 // -----------------------------------------------------------------------------
-static LinearObsOperatorMaker<ObsSeaIceFractionTLAD> makerSeaIceFractionTLAD_("SeaIceFraction");
+static LinearObsOperatorMaker<ObsSeaIceFractionTLAD> makerSeaIceFractionTL_("SeaIceFraction");
 // -----------------------------------------------------------------------------
 
 ObsSeaIceFractionTLAD::ObsSeaIceFractionTLAD(const ioda::ObsSpace & odb,
                                              const eckit::Configuration & config)
-  : keyOperSeaIceFraction_(0), varin_()
+  : keyOper_(0), varin_(), odb_(odb)
 {
-  const eckit::Configuration * configc = &config;
-  ufo_seaicefrac_tlad_setup_f90(keyOperSeaIceFraction_, &configc);
   const std::vector<std::string> vv{"ice_concentration"};
   varin_.reset(new oops::Variables(vv));
+  const eckit::Configuration * configc = &config;
+  ufo_seaicefraction_tlad_setup_f90(keyOper_, &configc);
   oops::Log::trace() << "ObsSeaIceFractionTLAD created" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
 ObsSeaIceFractionTLAD::~ObsSeaIceFractionTLAD() {
-  ufo_seaicefrac_tlad_delete_f90(keyOperSeaIceFraction_);
-  oops::Log::trace() << "ObsSeaIceFractionTLAD destrcuted" << std::endl;
+  ufo_seaicefraction_tlad_delete_f90(keyOper_);
+  oops::Log::trace() << "ObsSeaIceFractionTLAD destructed" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
 void ObsSeaIceFractionTLAD::setTrajectory(const GeoVaLs & geovals, const ObsBias & bias) {
-  ufo_seaicefrac_tlad_settraj_f90(keyOperSeaIceFraction_, geovals.toFortran());
+  ufo_seaicefraction_tlad_settraj_f90(keyOper_, geovals.toFortran(), odb_);
+  oops::Log::trace() << "ObsSeaIceFractionTLAD: trajectory set" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
 void ObsSeaIceFractionTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec,
-                               const ObsBiasIncrement & bias) const {
-  ufo_seaicefrac_simobs_tl_f90(keyOperSeaIceFraction_, geovals.toFortran(), ovec.toFortran());
+                             const ObsBiasIncrement & bias) const {
+  ufo_seaicefraction_simobs_tl_f90(keyOper_, geovals.toFortran(), odb_,
+                                   ovec.size(), ovec.toFortran());
+  oops::Log::trace() << "ObsSeaIceFractionTLAD: TL observation operator run" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
 void ObsSeaIceFractionTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec,
-                               ObsBiasIncrement & bias) const {
-  ufo_seaicefrac_simobs_ad_f90(keyOperSeaIceFraction_, geovals.toFortran(), ovec.toFortran());
+                             ObsBiasIncrement & bias) const {
+  ufo_seaicefraction_simobs_ad_f90(keyOper_, geovals.toFortran(), odb_,
+                                   ovec.size(), ovec.toFortran());
+  oops::Log::trace() << "ObsSeaIceFractionTLAD: adjoint observation operator run" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

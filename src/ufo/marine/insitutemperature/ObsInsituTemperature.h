@@ -16,9 +16,10 @@
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
 
-#include "ufo/marine/FortranMarine.h"
+#include "ufo/marine/insitutemperature/ObsInsituTemperature.interface.h"
 #include "ufo/ObsOperatorBase.h"
 
+/// Forward declarations
 namespace eckit {
   class Configuration;
 }
@@ -33,9 +34,9 @@ namespace ufo {
   class ObsBias;
 
 // -----------------------------------------------------------------------------
-/// Total ice concentration observation for UFO.
+/// InsituTemperature observation operator class
 class ObsInsituTemperature : public ObsOperatorBase,
-                             private util::ObjectCounter<ObsInsituTemperature> {
+                   private util::ObjectCounter<ObsInsituTemperature> {
  public:
   static const std::string classname() {return "ufo::ObsInsituTemperature";}
 
@@ -47,15 +48,17 @@ class ObsInsituTemperature : public ObsOperatorBase,
 
 // Other
   const oops::Variables & variables() const {return *varin_;}
+  const oops::Variables & observed() const {return *varout_;}
 
-  int & toFortran() {return keyOperInsituTemperature_;}
-  const int & toFortran() const {return keyOperInsituTemperature_;}
+  int & toFortran() {return keyOper_;}
+  const int & toFortran() const {return keyOper_;}
 
  private:
   void print(std::ostream &) const;
-  F90hop keyOperInsituTemperature_;
+  F90hop keyOper_;
   const ioda::ObsSpace& odb_;
   boost::scoped_ptr<const oops::Variables> varin_;
+  boost::scoped_ptr<const oops::Variables> varout_;
 };
 
 // -----------------------------------------------------------------------------

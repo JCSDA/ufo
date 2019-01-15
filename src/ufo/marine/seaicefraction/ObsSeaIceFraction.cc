@@ -11,17 +11,13 @@
 #include <string>
 #include <vector>
 
-#include <boost/scoped_ptr.hpp>
-
-#include "eckit/config/Configuration.h"
-
-#include "ioda/ObsSpace.h"
 #include "ioda/ObsVector.h"
 
 #include "oops/base/Variables.h"
 
 #include "ufo/GeoVaLs.h"
 #include "ufo/ObsBias.h"
+
 
 namespace ufo {
 
@@ -31,28 +27,31 @@ static ObsOperatorMaker<ObsSeaIceFraction> makerSeaIceFraction_("SeaIceFraction"
 
 ObsSeaIceFraction::ObsSeaIceFraction(const ioda::ObsSpace & odb,
                                      const eckit::Configuration & config)
-  : keyOperSeaIceFraction_(0), varin_(), odb_(odb)
+  : keyOper_(0), odb_(odb), varin_(), varout_()
 {
+  const std::vector<std::string> vvin{"ice_concentration"};
+  varin_.reset(new oops::Variables(vvin));
+  const std::vector<std::string> vvout{"obs_sea_ice_concentration"};
+  varout_.reset(new oops::Variables(vvout));
   const eckit::Configuration * configc = &config;
-  ufo_seaicefrac_setup_f90(keyOperSeaIceFraction_, &configc);
-  const std::vector<std::string> vv{"ice_concentration"};
-  varin_.reset(new oops::Variables(vv));
+  ufo_seaicefraction_setup_f90(keyOper_, &configc);
   oops::Log::trace() << "ObsSeaIceFraction created." << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
 ObsSeaIceFraction::~ObsSeaIceFraction() {
-  ufo_seaicefrac_delete_f90(keyOperSeaIceFraction_);
+  ufo_seaicefraction_delete_f90(keyOper_);
   oops::Log::trace() << "ObsSeaIceFraction destructed" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
-void ObsSeaIceFraction::simulateObs(const GeoVaLs & gom, ioda::ObsVector & ovec,
-                             const ObsBias & bias) const {
-  ufo_seaicefrac_simobs_f90(keyOperSeaIceFraction_, gom.toFortran(), odb_,
-                         ovec.toFortran(), bias.toFortran());
+void ObsSeaIceFraction::simulateObs(const GeoVaLs & gv, ioda::ObsVector & ovec,
+                              const ObsBias & bias) const {
+  ufo_seaicefraction_simobs_f90(keyOper_, gv.toFortran(), odb_, ovec.size(), ovec.toFortran(),
+                      bias.toFortran());
+  oops::Log::trace() << "ObsSeaIceFraction: observation operator run" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

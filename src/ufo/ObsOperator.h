@@ -22,6 +22,10 @@ namespace oops {
   class Variables;
 }
 
+namespace util {
+  class DateTime;
+}
+
 namespace ioda {
   class ObsSpace;
   class ObsVector;
@@ -29,6 +33,7 @@ namespace ioda {
 
 namespace ufo {
   class GeoVaLs;
+  class Locations;
   class ObsBias;
   class ObsOperatorBase;
 
@@ -46,8 +51,15 @@ class ObsOperator : public util::Printable,
 /// Operator input required from Model
   const oops::Variables & variables() const;
 
+/// Operator output variables
+  const oops::Variables & observed() const;
+
+/// Operator locations
+  Locations * locations(const util::DateTime &, const util::DateTime &) const;
+
  private:
   void print(std::ostream &) const;
+  const ioda::ObsSpace & os_;
   boost::scoped_ptr<ObsOperatorBase> oper_;
 };
 

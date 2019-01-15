@@ -7,7 +7,9 @@
 
 module vert_interp_mod
 
+use, intrinsic :: iso_c_binding
 use kinds, only: kind_real
+use missing_values_mod
 
 implicit none
 public
@@ -31,33 +33,37 @@ if (vec(1) < vec(nlev)) then !Pressure increases with index
 
   if (obl < vec(1)) then
      wi = 1
+     wf = 1.0
   elseif (obl > vec(nlev)) then
      wi = nlev - 1
+     wf = 0.0
   else
      do k = 1,nlev-1
         if (obl >= vec(k) .and. obl <= vec(k+1)) then
            wi = k
         endif
      enddo
+     wf = (vec(wi+1) - obl)/(vec(wi+1) - vec(wi))
   endif
 
 else !Pressure decreases with index
 
   if (obl > vec(1)) then
      wi = 1
+     wf = 1.0
   elseif (obl < vec(nlev)) then
      wi = nlev - 1
+     wf = 0.0
   else
      do k = 1,nlev-1
         if (obl >= vec(k+1) .and. obl <= vec(k)) then
            wi = k
         endif
      enddo
+     wf = (vec(wi+1) - obl)/(vec(wi+1) - vec(wi))
   endif
 
 endif
-
-wf = (vec(wi+1) - obl)/(vec(wi+1) - vec(wi))
 
 end subroutine vert_interp_weights
 
@@ -72,7 +78,11 @@ integer,         intent(in ) :: wi          !Index for interpolation
 real(kind_real), intent(in ) :: wf          !Weight for interpolation
 real(kind_real), intent(out) :: f           !Output at obs location using linear interp
 
-f = fvec(wi)*wf + fvec(wi+1)*(1.0-wf)
+if (fvec(wi) == missing_value(f) .or. fvec(wi+1) == missing_value(f)) then
+  f = missing_value(f)
+else
+  f = fvec(wi)*wf + fvec(wi+1)*(1.0-wf)
+endif
 
 end subroutine vert_interp_apply
 
@@ -87,7 +97,11 @@ integer,         intent(in)  :: wi
 real(kind_real), intent(in)  :: wf
 real(kind_real), intent(out) :: f_tl
 
-f_tl = fvec_tl(wi)*wf + fvec_tl(wi+1)*(1.0_kind_real-wf)
+if (fvec_tl(wi) == missing_value(f_tl) .or. fvec_tl(wi+1) == missing_value(f_tl)) then
+  f_tl = missing_value(f_tl)
+else
+  f_tl = fvec_tl(wi)*wf + fvec_tl(wi+1)*(1.0_kind_real-wf)
+endif
 
 end subroutine vert_interp_apply_tl
 
@@ -101,9 +115,20 @@ real(kind_real), intent(inout) :: fvec_ad(nlev)
 integer,         intent(in)    :: wi
 real(kind_real), intent(in)    :: wf
 real(kind_real), intent(in)    :: f_ad
+real(kind_real) :: missing
 
-fvec_ad(wi  ) = fvec_ad(wi  ) + f_ad*wf
-fvec_ad(wi+1) = fvec_ad(wi+1) + f_ad*(1.0_kind_real-wf)
+missing = missing_value(missing)
+
+if (fvec_ad(wi) == missing .or. f_ad == missing) then
+  fvec_ad(wi  ) = 0.0_kind_real
+else
+  fvec_ad(wi  ) = fvec_ad(wi  ) + f_ad*wf
+endif
+if (fvec_ad(wi+1) == missing .or. f_ad == missing) then
+  fvec_ad(wi+1) = 0.0_kind_real
+else
+  fvec_ad(wi+1) = fvec_ad(wi+1) + f_ad*(1.0_kind_real-wf)
+endif
 
 end subroutine vert_interp_apply_ad
 

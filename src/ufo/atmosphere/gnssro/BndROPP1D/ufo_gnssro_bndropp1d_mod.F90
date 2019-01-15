@@ -14,7 +14,8 @@ module ufo_gnssro_bndropp1d_mod
   use ufo_basis_mod,     only: ufo_basis
   use vert_interp_mod
   use lag_interp_mod, only: lag_interp_const, lag_interp_smthWeights
-  
+  use obsspace_mod  
+
   use kinds
   implicit none
   public             :: ufo_gnssro_bndropp1d
@@ -49,7 +50,6 @@ module ufo_gnssro_bndropp1d_mod
       character(len=250)              :: record
       integer                         :: iobs
       integer                         :: nlev, nobs
-      integer                         :: ierr
       integer                         :: nvprof
       integer, allocatable, dimension(:)      :: ichk
       type(ufo_geoval), pointer       :: t, q, prs, z, z_sfc
@@ -64,35 +64,15 @@ module ufo_gnssro_bndropp1d_mod
         call abor1_ftn(err_msg)
       endif
       ! check if prs (pressure at model levels)  variable is in geovals and get it
-      call ufo_geovals_get_var(geovals, var_prs, prs,status=ierr)
-      if (ierr/=0) then
-         write(err_msg,*) myname_, trim(var_prs), ' doesnt exist'
-         call abor1_ftn(err_msg)
-      endif
+      call ufo_geovals_get_var(geovals, var_prs, prs)
       ! check if specific humidity variable is in geovals and get it
-      call ufo_geovals_get_var(geovals, var_q, q,status=ierr)
-       if (ierr/=0) then
-         write(err_msg,*) myname_, trim(var_q), ' doesnt exist'
-         call abor1_ftn(err_msg)
-      endif
+      call ufo_geovals_get_var(geovals, var_q, q)
       ! check if geopotential height variable is in geovals and get it
-      call ufo_geovals_get_var(geovals, var_z, z,status=ierr) 
-      if (ierr/=0) then
-         write(err_msg,*) myname_, trim(var_z), ' doesnt exist'
-         call abor1_ftn(err_msg)
-      endif
+      call ufo_geovals_get_var(geovals, var_z, z)
       ! check if surface geopotential height variable is in geovals and get it
-      call ufo_geovals_get_var(geovals, var_sfc_z, z_sfc,status=ierr) 
-      if (ierr/=0) then
-         write(err_msg,*) myname_, trim(var_sfc_z), ' doesnt exist'
-         call abor1_ftn(err_msg)
-      endif
+      call ufo_geovals_get_var(geovals, var_sfc_z, z_sfc)
       ! check if t variable is in geovals and get it
-      call ufo_geovals_get_var(geovals, var_t, t,status=ierr)
-      if (ierr/=0) then
-         write(err_msg,*) myname_, trim(var_t), ' doesnt exist'
-         call abor1_ftn(err_msg)
-      endif
+      call ufo_geovals_get_var(geovals, var_t, t)
 
       nlev  = q%nval ! number of model levels
       nobs  = geovals%nobs ! number of observations
@@ -111,17 +91,17 @@ module ufo_gnssro_bndropp1d_mod
       allocate(obsLocR(obss_nobs))
       allocate(obsGeoid(obss_nobs))
 
-      !call obsspace_get_var(obss, obsYYYY, "year", obss_nobs) !Note: variable name not consistent with BUFR table
-      !call obsspace_get_var(obss, obsMM, "month", obss_nobs) !Note: variable name not consistent with BUFR table
-      !call obsspace_get_var(obss, obsDD, "day", obss_nobs) !Note: variable name not consistent with BUFR table
-      !call obsspace_get_var(obss, obsHH, "hour", obss_nobs) !Note: variable name not consistent with BUFR table
-      !call obsspace_get_var(obss, obsMN, "minute", obss_nobs) !Note: variable name not consistent with BUFR table
-      !call obsspace_get_var(obss, obsSS, "second", obss_nobs) !Note: variable name not consistent with BUFR table
-      call obsspace_get_var(obss, obsLon, "Longitude", obss_nobs) !Note: variable name not consistent with BUFR table
-      call obsspace_get_var(obss, obsLat, "Latitude", obss_nobs) !Note: variable name not consistent with BUFR table
-      call obsspace_get_var(obss, obsImpP, "IMPP", obss_nobs) !observed impact parameter
-      call obsspace_get_var(obss, obsLocR, "ELRC", obss_nobs) !local radius of earth. Note: need add to test data
-      call obsspace_get_var(obss, obsGeoid, "GEODU", obss_nobs) !Geoid. Note: need add to test data
+     !call obsspace_get_db(obss, "Metadata", "year", obsYYYY) !Note: variable name not consistent with BUFR table
+     !call obsspace_get_db(obss, "Metadata", "month", obsMM) !Note: variable name not consistent with BUFR table
+     !call obsspace_get_db(obss, "Metadata", "day", obsDD) !Note: variable name not consistent with BUFR table
+     !call obsspace_get_db(obss, "Metadata", "hour", obsHH) !Note: variable name not consistent with BUFR table
+     !call obsspace_get_db(obss, "Metadata", "minute", obsMN) !Note: variable name not consistent with BUFR table
+     !call obsspace_get_db(obss, "Metadata", "second", obsSS) !Note: variable name not consistent with BUFR table
+      call obsspace_get_db(obss, "Metadata", "Longitude", obsLon) !Note: variable name not consistent with BUFR table
+      call obsspace_get_db(obss, "Metadata", "Latitude", obsLat) !Note: variable name not consistent with BUFR table
+      call obsspace_get_db(obss, "Metadata", "IMPP", obsImpP) !observed impact parameter
+      call obsspace_get_db(obss, "Metadata", "ELRC", obsLocR) !local radius of earth. Note: need add to test data
+      call obsspace_get_db(obss, "Metadata", "GEODU", obsGeoid) !Geoid. Note: need add to test data
 
       nvprof = 1 ! number of vertical profiles (occultation points)
       allocate(ichk(nvprof))

@@ -14,9 +14,7 @@ module ufo_radiance_tlad_mod
  use ufo_geovals_mod, only: ufo_geovals, ufo_geoval, ufo_geovals_get_var
  use ufo_basis_tlad_mod, only: ufo_basis_tlad
  use ufo_vars_mod
-
  use ufo_radiance_utils_mod
-
  use crtm_module
  USE rttov_types
  USE rttov_const, ONLY : errorstatus_success, deg2rad
@@ -109,7 +107,7 @@ type(c_ptr), value,       intent(in)    :: obss
 character(*), parameter :: PROGRAM_NAME = 'ufo_radiance_mod.F90'
 character(255) :: message, version
 integer        :: err_stat, alloc_stat
-integer        :: n, k1, ierr
+integer        :: n, k1
 type(ufo_geoval), pointer :: temp
 
 ! Define the "non-demoninational" arguments
@@ -128,7 +126,7 @@ type(CRTM_RTSolution_type), allocatable :: rts_K(:,:)
  ! Get number of profile and layers from geovals
  ! ---------------------------------------------
  self%n_Profiles = geovals%nobs
- call ufo_geovals_get_var(geovals, var_tv, temp, status=ierr)
+ call ufo_geovals_get_var(geovals, var_tv, temp)
  self%n_Layers = temp%nval
  nullify(temp)
 
@@ -494,6 +492,7 @@ class(ufo_radiance_tlad), intent(in) :: self
 type(ufo_geovals),        intent(in) :: geovals
 real(c_double),        intent(inout) :: hofx(:)
 type(c_ptr), value,    intent(in)    :: obss
+
 character(len=*), parameter :: myname_="ufo_radiance_simobs_tl"
 character(max_string) :: err_msg
 INTEGER :: job, jprofile, jchannel, jlevel, ierr, ichan, prof
@@ -523,12 +522,8 @@ type(ufo_geoval), pointer :: tv_d
  ! Temperature
  ! -----------
 
- ! Check if variable is in geovals and get it
- call ufo_geovals_get_var(geovals, var_tv, tv_d, status=ierr )
- if (ierr/=0) then
-   write(err_msg,*) myname_, trim(var_tv), ' doesnt exist'
-   call abor1_ftn(err_msg)
- endif
+ ! Get tv from geovals
+ call ufo_geovals_get_var(geovals, var_tv, tv_d)
 
  ! Check model levels is consistent in geovals & crtm
  if (tv_d%nval /= self%n_Layers) then
@@ -560,7 +555,7 @@ end subroutine ufo_radiance_simobs_tl
 
 ! ------------------------------------------------------------------------------
 
-SUBROUTINE ufo_radiance_simobs_ad(self, geovals, hofx, obss)
+subroutine ufo_radiance_simobs_ad(self, geovals, hofx, obss)
 
 implicit none
 class(ufo_radiance_tlad), intent(in) :: self
@@ -593,12 +588,8 @@ type(ufo_geoval), pointer :: tv_d
  ! Temperature
  ! -----------
 
- ! Check if variable is in geovals and get it
- call ufo_geovals_get_var(geovals, var_tv, tv_d, status=ierr )
- if (ierr/=0) then
-   write(err_msg,*) myname_, trim(var_tv), ' doesnt exist'
-   call abor1_ftn(err_msg)
- endif
+ ! Get tv from geovals
+ call ufo_geovals_get_var(geovals, var_tv, tv_d)
 
  ! allocate if not yet allocated
  if (.not. allocated(tv_d%vals)) then

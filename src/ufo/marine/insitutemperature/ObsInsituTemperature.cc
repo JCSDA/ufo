@@ -11,18 +11,13 @@
 #include <string>
 #include <vector>
 
-#include <boost/scoped_ptr.hpp>
-
-#include "eckit/config/Configuration.h"
-
-#include "ioda/ObsSpace.h"
 #include "ioda/ObsVector.h"
 
 #include "oops/base/Variables.h"
 
 #include "ufo/GeoVaLs.h"
 #include "ufo/ObsBias.h"
-#include "ufo/ObsBiasIncrement.h"
+
 
 namespace ufo {
 
@@ -32,29 +27,32 @@ static ObsOperatorMaker<ObsInsituTemperature> makerInsituTemperature_("InsituTem
 
 ObsInsituTemperature::ObsInsituTemperature(const ioda::ObsSpace & odb,
                                            const eckit::Configuration & config)
-  : keyOperInsituTemperature_(0), varin_(), odb_(odb)
+  : keyOper_(0), odb_(odb), varin_(), varout_()
 {
+  const std::vector<std::string> vvin{"ocean_potential_temperature",
+                                      "ocean_salinity", "ocean_layer_thickness"};
+  varin_.reset(new oops::Variables(vvin));
+  const std::vector<std::string> vvout{"insitu_temperature"};
+  varout_.reset(new oops::Variables(vvout));
   const eckit::Configuration * configc = &config;
-  ufo_insitutemperature_setup_f90(keyOperInsituTemperature_, &configc);
-  const std::vector<std::string> vv{"ocean_potential_temperature", "ocean_salinity",
-                                    "ocean_layer_thickness"};
-  varin_.reset(new oops::Variables(vv));
+  ufo_insitutemperature_setup_f90(keyOper_, &configc);
   oops::Log::trace() << "ObsInsituTemperature created." << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
 ObsInsituTemperature::~ObsInsituTemperature() {
-  ufo_insitutemperature_delete_f90(keyOperInsituTemperature_);
+  ufo_insitutemperature_delete_f90(keyOper_);
   oops::Log::trace() << "ObsInsituTemperature destructed" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
-void ObsInsituTemperature::simulateObs(const GeoVaLs & gom, ioda::ObsVector & ovec,
-                                       const ObsBias & bias) const {
-  ufo_insitutemperature_simobs_f90(keyOperInsituTemperature_, gom.toFortran(),
-                                odb_, ovec.toFortran(), bias.toFortran());
+void ObsInsituTemperature::simulateObs(const GeoVaLs & gv, ioda::ObsVector & ovec,
+                              const ObsBias & bias) const {
+  ufo_insitutemperature_simobs_f90(keyOper_, gv.toFortran(), odb_, ovec.size(), ovec.toFortran(),
+                      bias.toFortran());
+  oops::Log::trace() << "ObsInsituTemperature: observation operator run" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

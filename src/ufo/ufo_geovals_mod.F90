@@ -6,9 +6,14 @@
 !
 module ufo_geovals_mod
 
+use iso_c_binding
 use ufo_vars_mod
 use kinds
 use type_distribution, only: random_distribution
+use obsspace_mod
+use missing_values_mod
+
+use fckit_mpi_module, only: fckit_mpi_comm, fckit_mpi_sum
 
 implicit none
 private
@@ -19,7 +24,8 @@ public :: ufo_geovals_init, ufo_geovals_setup, ufo_geovals_delete, ufo_geovals_p
 public :: ufo_geovals_zero, ufo_geovals_random, ufo_geovals_dotprod, ufo_geovals_scalmult
 public :: ufo_geovals_assign, ufo_geovals_add, ufo_geovals_diff, ufo_geovals_abs
 public :: ufo_geovals_minmaxavg, ufo_geovals_normalize, ufo_geovals_maxloc
-public :: ufo_geovals_read_netcdf, ufo_geovals_rms, ufo_geovals_copy
+public :: ufo_geovals_read_netcdf, ufo_geovals_write_netcdf
+public :: ufo_geovals_rms, ufo_geovals_copy
 public :: ufo_geovals_analytic_init
 public :: ufo_geovals_allocone
 
@@ -42,6 +48,8 @@ type :: ufo_geovals
                                                !  vertical profiles for all obs (nvar)
 
   type(ufo_vars) :: variables    !< variables list
+
+  real(c_double) :: missing_value !< obsspace missing value mark
 
   logical :: lalloc              !< .true. if type was initialized and allocated
                                  !  (only geovals are allocated, not the arrays
@@ -78,6 +86,7 @@ integer :: ivar
 call ufo_geovals_delete(self)
 self%nobs = nobs
 self%nvar = vars%nv
+self%missing_value = missing_value(self%missing_value)
 call ufo_vars_clone(vars, self%variables) 
 allocate(self%geovals(self%nvar))
 do ivar = 1, self%nvar
@@ -112,16 +121,17 @@ end subroutine ufo_geovals_delete
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_geovals_get_var(self, varname, geoval, status)
+subroutine ufo_geovals_get_var(self, varname, geoval)
 implicit none
 type(ufo_geovals), target, intent(in)    :: self
 character(MAXVARLEN), intent(in) :: varname
 type(ufo_geoval), pointer, intent(inout)    :: geoval
-integer, optional, intent(out) :: status
 
-integer :: ivar, status_
+character(len=*), parameter :: myname_="ufo_geovals_get_var"
 
-status_ = 1
+character(max_string) :: err_msg
+integer :: ivar
+
 geoval => NULL()
 if (.not. self%lalloc .or. .not. self%linit) then
    !return
@@ -130,15 +140,12 @@ endif
 ivar = ufo_vars_getindex(self%variables, varname)
 
 if (ivar < 0) then
-   status_ = 2
+  write(err_msg,*) myname_, trim(varname), ' doesnt exist'
+  call abor1_ftn(err_msg)
 else
   geoval => self%geovals(ivar)
-  status_ = 0
 endif
 
-if(present(status)) then
-  status=status_
-endif
 end subroutine ufo_geovals_get_var
 
 ! ------------------------------------------------------------------------------
@@ -449,14 +456,14 @@ end subroutine ufo_geovals_copy
 !!
 
 subroutine ufo_geovals_analytic_init(self, locs, ic) 
-use ioda_locs_mod, only : ioda_locs
+use ufo_locs_mod, only : ufo_locs
 use dcmip_initial_conditions_test_1_2_3, only : test1_advection_deformation, &
                                   test1_advection_hadley, test3_gravity_wave  
 use dcmip_initial_conditions_test_4, only : test4_baroclinic_wave
 
 implicit none
 type(ufo_geovals), intent(inout) :: self
-type(ioda_locs), intent(in)      :: locs
+type(ufo_locs), intent(in)       :: locs
 character(*), intent(in)         :: ic
 
 real(kind_real) :: pi = acos(-1.0_kind_real)
@@ -601,11 +608,16 @@ end subroutine ufo_geovals_normalize
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_geovals_dotprod(self, other, prod) 
+subroutine ufo_geovals_dotprod(self, other, gprod) 
 implicit none
-real(kind_real), intent(inout) :: prod
+real(kind_real), intent(inout) :: gprod
 type(ufo_geovals), intent(in) :: self, other
 integer :: ivar, iobs, ival, nval
+real(kind_real) :: prod
+
+type(fckit_mpi_comm) :: f_comm
+
+f_comm = fckit_mpi_comm()
 
 if (.not. self%lalloc .or. .not. self%linit) then
   call abor1_ftn("ufo_geovals_dotprod: geovals not allocated")
@@ -621,11 +633,17 @@ do ivar = 1, self%nvar
   nval = self%geovals(ivar)%nval
   do ival = 1, nval
      do iobs = 1, self%nobs
-      prod = prod + self%geovals(ivar)%vals(ival,iobs) * &
-                    other%geovals(ivar)%vals(ival,iobs)
+      if ((self%geovals(ivar)%vals(ival,iobs) .ne. self%missing_value) .and. &
+          (other%geovals(ivar)%vals(ival,iobs) .ne. self%missing_value)) then
+        prod = prod + self%geovals(ivar)%vals(ival,iobs) * &
+                      other%geovals(ivar)%vals(ival,iobs)
+      endif
     enddo
   enddo
 enddo
+
+!Get global dot product
+call f_comm%allreduce(prod,gprod,fckit_mpi_sum())
 
 end subroutine ufo_geovals_dotprod
 
@@ -691,33 +709,40 @@ end subroutine ufo_geovals_maxloc
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_geovals_read_netcdf(self, filename, vars)
-USE netcdf, ONLY: NF90_FLOAT, NF90_DOUBLE, NF90_INT
-use nc_diag_read_mod, only: nc_diag_read_get_var
+subroutine ufo_geovals_read_netcdf(self, filename, vars, t1, t2)
+use datetime_mod
+use twindow_utils_mod
+
+use nc_diag_read_mod, only: nc_diag_read_get_global_attr
 use nc_diag_read_mod, only: nc_diag_read_get_dim
 use nc_diag_read_mod, only: nc_diag_read_get_var_dims, nc_diag_read_check_var
 use nc_diag_read_mod, only: nc_diag_read_get_var_type
 use nc_diag_read_mod, only: nc_diag_read_init, nc_diag_read_close
 
-use ioda_utils_mod
-
 implicit none
 type(ufo_geovals), intent(inout)  :: self
 character(max_string), intent(in) :: filename
 type(ufo_vars), intent(in)        :: vars
+type(datetime), intent(in)        :: t1
+type(datetime), intent(in)        :: t2
 
 integer :: iunit, ivar, nobs, nval, fvlen
 integer :: nvardim, vartype
 integer, allocatable, dimension(:) :: vardims
 
-real(kind_real), allocatable :: fieldr2d(:,:), fieldr1d(:)
-real, allocatable :: fieldf2d(:,:), fieldf1d(:)
-integer, allocatable :: fieldi2d(:,:), fieldi1d(:)
-
 character(max_string) :: err_msg
 
 type(random_distribution) :: distribution
 integer, allocatable, dimension(:) :: dist_indx
+
+integer :: date_time_attr
+type(datetime) :: refdate
+integer :: tw_nobs
+integer, allocatable :: tw_indx(:)
+real(kind_real), allocatable :: time_offset(:,:)
+
+integer :: i
+integer :: j
 
 ! open netcdf file and read dimensions
 call nc_diag_read_init(filename, iunit)
@@ -733,18 +758,42 @@ endif
 !> Calculate how many obs. on each PE
 distribution=random_distribution(fvlen)
 nobs=distribution%nobs_pe()
+allocate(dist_indx(nobs))
+dist_indx = distribution%indx
 
-! Check for missing values, use virtual_temperature if it exists in the file. This will
-! catch Radiosonde and Aircraft obs types which should be the only obs types at this point
-! with missing values. This is not a good way to do this in the long run, so this needs
-! to be revisited.
-if (nc_diag_read_check_var(iunit, "virtual_temperature")) then
-  call ioda_deselect_missing_values(iunit, "virtual_temperature", distribution%indx, dist_indx)
-  nobs = size(dist_indx)
-else
+! Strip out obs that fall outside the timing window.
+
+! Read in the date_time attribute and for a datetime object
+call nc_diag_read_get_global_attr(iunit, "date_time", date_time_attr)
+
+! Create the datetime object with a dummy date, then set it from the
+! date_time attribute.
+call datetime_create("1000-01-01T00:00:00Z", refdate)
+call datetime_from_ifs(refdate, date_time_attr/100, 0)
+
+! Read in the time variable
+allocate(time_offset(1,nobs))
+if (allocated(vardims)) deallocate(vardims)
+call nc_diag_read_get_var_dims(iunit, "time", nvardim, vardims)
+vartype = nc_diag_read_get_var_type(iunit, "time")
+call ufo_geovals_read_nc_var(iunit, nvardim, vardims, vartype, dist_indx, "time", time_offset)
+
+! Generate the timing window indices
+allocate(tw_indx(nobs))
+call gen_twindow_index(refdate, t1, t2, nobs, time_offset(1,:), tw_indx, tw_nobs)
+
+! Adjust dist_indx if tw_nobs is different than original nobs
+if (tw_nobs .ne. nobs) then
+  nobs = tw_nobs
+  if (allocated(dist_indx)) deallocate(dist_indx)
   allocate(dist_indx(nobs))
-  dist_indx = distribution%indx
+  do i = 1, nobs
+    dist_indx(i) = distribution%indx(tw_indx(i))
+  enddo
 endif
+
+deallocate(time_offset)
+deallocate(tw_indx)
 
 ! allocate geovals structure
 call ufo_geovals_init(self)
@@ -769,24 +818,13 @@ do ivar = 1, vars%nv
     self%geovals(ivar)%nval = nval
     allocate(self%geovals(ivar)%vals(nval,nobs))
 
-    if (vartype == NF90_DOUBLE) then
-       allocate(fieldr1d(vardims(1)))
-       call nc_diag_read_get_var(iunit, vars%fldnames(ivar), fieldr1d)  
-       self%geovals(ivar)%vals(1,:) = fieldr1d(dist_indx)
-       deallocate(fieldr1d)
-    elseif (vartype == NF90_FLOAT) then
-       allocate(fieldf1d(vardims(1)))
-       call nc_diag_read_get_var(iunit, vars%fldnames(ivar), fieldf1d)  
-       self%geovals(ivar)%vals(1,:) = dble(fieldf1d(dist_indx))
-       deallocate(fieldf1d)
-    elseif (vartype == NF90_INT) then
-       allocate(fieldi1d(vardims(1)))
-       call nc_diag_read_get_var(iunit, vars%fldnames(ivar), fieldi1d)
-       self%geovals(ivar)%vals(1,:) = fieldi1d(dist_indx)
-       deallocate(fieldi1d)
-    else
-       call abor1_ftn('ufo_geovals_read_netcdf: can only read double, float and int')
-    endif
+    ! read the variable out of the file
+    call ufo_geovals_read_nc_var(iunit, nvardim, vardims, vartype, dist_indx, &
+                                 vars%fldnames(ivar), self%geovals(ivar)%vals)
+
+    ! set the missing value equal to IODA missing_value
+    where (self%geovals(ivar)%vals(1,:) > 1.0e08) self%geovals(ivar)%vals(1,:) = self%missing_value
+
   !> read 2d vars (only double precision and integer for now)
   elseif (nvardim == 2) then
     if (vardims(2) /= fvlen) call abor1_ftn('ufo_geovals_read_netcdf: var dim /= fvlen')
@@ -796,24 +834,13 @@ do ivar = 1, vars%nv
     self%geovals(ivar)%nval = nval
     allocate(self%geovals(ivar)%vals(nval,nobs))
 
-    if (vartype == NF90_DOUBLE) then
-       allocate(fieldr2d(vardims(1), vardims(2)))
-       call nc_diag_read_get_var(iunit, vars%fldnames(ivar), fieldr2d)
-       self%geovals(ivar)%vals = fieldr2d(:,dist_indx)
-       deallocate(fieldr2d)
-    elseif (vartype == NF90_FLOAT) then
-       allocate(fieldf2d(vardims(1), vardims(2)))
-       call nc_diag_read_get_var(iunit, vars%fldnames(ivar), fieldf2d)  
-       self%geovals(ivar)%vals = dble(fieldf2d(:,dist_indx))
-       deallocate(fieldf2d)
-    elseif (vartype == NF90_INT) then
-       allocate(fieldi2d(vardims(1), vardims(2)))
-       call nc_diag_read_get_var(iunit, vars%fldnames(ivar), fieldi2d)
-       self%geovals(ivar)%vals = fieldi2d(:,dist_indx)
-       deallocate(fieldi2d)
-    else
-       call abor1_ftn('ufo_geovals_read_netcdf: can only read double, float and int')
-    endif
+    ! read the variable out of the file
+    call ufo_geovals_read_nc_var(iunit, nvardim, vardims, vartype, dist_indx, &
+                                 vars%fldnames(ivar), self%geovals(ivar)%vals)
+
+    ! set the missing value equal to IODA missing_value
+    where (self%geovals(ivar)%vals > 1.0e08) self%geovals(ivar)%vals = self%missing_value
+    
   !> only 1d & 2d vars
   else
     call abor1_ftn('ufo_geovals_read_netcdf: can only read 1d and 2d fields')
@@ -825,6 +852,122 @@ self%linit = .true.
 call nc_diag_read_close(filename)
 
 end subroutine ufo_geovals_read_netcdf
+
+! ------------------------------------------------------------------------------
+subroutine ufo_geovals_write_netcdf(self, filename)
+use netcdf
+implicit none
+type(ufo_geovals), intent(inout)  :: self
+character(max_string), intent(in) :: filename
+
+integer :: i
+integer :: ncid, dimid_nobs, dimid_nval, dims(2)
+integer, allocatable :: ncid_var(:)
+
+allocate(ncid_var(self%nvar))
+
+call check('nf90_create', nf90_create(trim(filename),nf90_hdf5,ncid))
+call check('nf90_def_dim', nf90_def_dim(ncid,'nobs',self%nobs, dimid_nobs))
+dims(2) = dimid_nobs
+
+do i = 1, self%nvar
+  call check('nf90_def_dim', &
+       nf90_def_dim(ncid,trim(self%variables%fldnames(i))//"_nval",self%geovals(i)%nval, dimid_nval))
+  dims(1) = dimid_nval
+  call check('nf90_def_var',  &
+       nf90_def_var(ncid,trim(self%variables%fldnames(i)),nf90_double,dims,ncid_var(i)))
+enddo
+
+call check('nf90_enddef', nf90_enddef(ncid))
+
+do i = 1, self%nvar
+  call check('nf90_put_var', nf90_put_var(ncid,ncid_var(i),self%geovals(i)%vals(:,:)))
+enddo
+
+call check('nf90_close', nf90_close(ncid))
+deallocate(ncid_var)
+
+end subroutine ufo_geovals_write_netcdf
+
+! ------------------------------------------------------------------------------
+subroutine check(action, status)
+
+use netcdf, only: nf90_noerr, nf90_strerror
+
+implicit none
+
+integer, intent (in) :: status
+character (len=*), intent (in) :: action
+
+if(status /= nf90_noerr) then
+   print *, "During action: ", trim(action), ", received error: ", trim(nf90_strerror(status))
+   stop 2
+end if
+
+end subroutine check
+
+! ------------------------------------------------------------------------------
+subroutine ufo_geovals_read_nc_var(iunit, nvardim, vardims, vartype, &
+                                   dist_indx, varname, varvalues)
+  use netcdf, only: NF90_FLOAT, NF90_DOUBLE, NF90_INT
+  use nc_diag_read_mod, only: nc_diag_read_get_var
+
+  implicit none
+
+  integer, intent(in) :: iunit
+  integer, intent(in) :: nvardim
+  integer, intent(in) :: vardims(:)
+  integer, intent(in) :: vartype
+  integer, intent(in) :: dist_indx(:)
+  character(len=*)    :: varname
+  real(kind_real)     :: varvalues(:,:)
+
+  real(kind_real), allocatable :: fieldr2d(:,:), fieldr1d(:)
+  real, allocatable :: fieldf2d(:,:), fieldf1d(:)
+  integer, allocatable :: fieldi2d(:,:), fieldi1d(:)
+
+  ! The caller is responsible for making sure that only 1D or 2D vars are being read.
+  if (nvardim == 1) then
+    if (vartype == NF90_DOUBLE) then
+       allocate(fieldr1d(vardims(1)))
+       call nc_diag_read_get_var(iunit, varname, fieldr1d)
+       varvalues(1,:) = fieldr1d(dist_indx)
+       deallocate(fieldr1d)
+    elseif (vartype == NF90_FLOAT) then
+       allocate(fieldf1d(vardims(1)))
+       call nc_diag_read_get_var(iunit, varname, fieldf1d)  
+       varvalues(1,:) = dble(fieldf1d(dist_indx))
+       deallocate(fieldf1d)
+    elseif (vartype == NF90_INT) then
+       allocate(fieldi1d(vardims(1)))
+       call nc_diag_read_get_var(iunit, varname, fieldi1d)
+       varvalues(1,:) = fieldi1d(dist_indx)
+       deallocate(fieldi1d)
+    else
+       call abor1_ftn('ufo_geovals_read_netcdf: can only read double, float and int')
+    endif
+  else
+    if (vartype == NF90_DOUBLE) then
+       allocate(fieldr2d(vardims(1), vardims(2)))
+       call nc_diag_read_get_var(iunit, varname, fieldr2d)
+       varvalues = fieldr2d(:,dist_indx)
+       deallocate(fieldr2d)
+    elseif (vartype == NF90_FLOAT) then
+       allocate(fieldf2d(vardims(1), vardims(2)))
+       call nc_diag_read_get_var(iunit, varname, fieldf2d)
+       varvalues = fieldf2d(:,dist_indx)
+       deallocate(fieldf2d)
+    elseif (vartype == NF90_INT) then
+       allocate(fieldi2d(vardims(1), vardims(2)))
+       call nc_diag_read_get_var(iunit, varname, fieldi2d)
+       varvalues = fieldi2d(:,dist_indx)
+       deallocate(fieldi2d)
+    else
+       call abor1_ftn('ufo_geovals_read_netcdf: can only read double, float and int')
+    endif
+  endif
+
+end subroutine ufo_geovals_read_nc_var
 
 ! ------------------------------------------------------------------------------
 

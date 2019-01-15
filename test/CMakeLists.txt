@@ -24,14 +24,14 @@ endfunction(CREATE_SYMLINK_FILENAME)
 
 # Create Data directory for test input config and symlink all files
 list( APPEND ufo_test_input
-  testinput/ufotest_atmosphere.json
-  testinput/ufotest_constituents.json
-  testinput/amsua_crtm.json
-  testinput/amsua_rttov.json
-  testinput/radiosonde.json
-  testinput/aircraft.json
-  testinput/aod.json
-  testinput/gnssroref.json
+  testinput/ufotest_atmosphere.yaml
+  testinput/ufotest_constituents.yaml
+  testinput/amsua.yaml
+  testinput/radiosonde.yaml
+  testinput/aircraft.yaml
+  testinput/aod.yaml
+  testinput/gnssroref.yaml
+  testinput/channelsparser.yaml
 )
 
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/testinput)
@@ -54,6 +54,7 @@ list( APPEND ufo_test_data
   atmosphere/gnssro_ref_geovals.nc4
 
   constituents/vars_ges.2015081000_dbl_subset.nc4
+  constituents/aod_geoval_2018041500_m.nc4
 )
 
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Data)
@@ -63,11 +64,11 @@ CREATE_SYMLINK_FILENAME( ${CMAKE_CURRENT_SOURCE_DIR}/testinput ${CMAKE_CURRENT_B
 if( ${GSW_FOUND} )
 
     list( APPEND ufo_marine_test_input
-      testinput/ufotest_marine.yml
-      testinput/tprof.yml
-      testinput/adt.yml      
-      testinput/seaice.yml
-      testinput/sea_surface_temp.yml
+      testinput/ufotest_marine.yaml
+      testinput/tprof.yaml
+      testinput/adt.yaml
+      testinput/seaice.yaml
+      testinput/sea_surface_temp.yaml
     )
 
 	CREATE_SYMLINK( ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR} ${ufo_marine_test_input} )
@@ -78,11 +79,11 @@ if( ${GSW_FOUND} )
                          )
 
     list( APPEND ufo_marine_test_data
-      marine/Jason-3-2018-04-15_geovals.nc
+      marine/Jason-2-2018-04-15_geovals.nc
+      marine/profile_2018-04-15_geovals.nc
       marine/cryosat2-2018-04-15_geovals.nc
-      marine/seaice_obs-2018-04-15_geovals.nc
+      marine/icec-2018-04-15_geovals.nc
       marine/sst_obs-2018-04-15_geovals.nc
-      marine/t0n156e_dy_geovals.nc
     )
 
 	CREATE_SYMLINK_FILENAME( ${CMAKE_CURRENT_SOURCE_DIR}/testinput
@@ -104,13 +105,14 @@ list (APPEND ioda_obs_test_data
   atmosphere/diag_t_obs_01_wprofiles_odb
 
   constituents/diag_viirs_ges.2015081000_dbl_subset.nc4
+  constituents/aod_obs_2015081000_m.nc4
+  constituents/aod_obs_2018041500_m.nc4
 
-  marine/Jason-3-2018-04-15.nc
+  marine/Jason-2-2018-04-15.nc
+  marine/profile_2018-04-15.nc
   marine/cryosat2-2018-04-15.nc
-  marine/sea-ice-con-l2.nc
-  marine/seaice_obs-2018-04-15.nc4
+  marine/icec-2018-04-15.nc
   marine/sst_obs-2018-04-15.nc4
-  marine/t0n156e_dy_obs.nc
   )
 
 CREATE_SYMLINK_FILENAME( ${ioda_SOURCE_DIR}/test/testinput
@@ -122,69 +124,82 @@ CREATE_SYMLINK_FILENAME( ${ioda_SOURCE_DIR}/test/testinput
 ecbuild_add_test( TARGET  test_ufo_geovals_atmosphere
                   BOOST
                   SOURCES mains/TestGeoVaLs.cc
-                  ARGS    "testinput/ufotest_atmosphere.json"
+                  ARGS    "testinput/ufotest_atmosphere.yaml"
                   LIBS    ufo )
 
 ecbuild_add_test( TARGET  test_ufo_geovals_constituents
                   BOOST
                   SOURCES mains/TestGeoVaLs.cc
-                  ARGS    "testinput/ufotest_constituents.json"
+                  ARGS    "testinput/ufotest_constituents.yaml"
                   LIBS    ufo )
 
-ecbuild_add_test( TARGET  test_ufo_amsua_crtm_opr
+ecbuild_add_test( TARGET  test_ufo_locations_atmosphere
+                  BOOST
+                  SOURCES mains/TestLocations.cc
+                  ARGS    "testinput/ufotest_atmosphere.yaml"
+                  LIBS    ufo )
+
+ecbuild_add_test( TARGET  test_ufo_locations_constituents
+                  BOOST
+                  SOURCES mains/TestLocations.cc
+                  ARGS    "testinput/ufotest_constituents.yaml"
+                  LIBS    ufo )
+
+ecbuild_add_test( TARGET  test_ufo_amsua_opr
                   BOOST
                   SOURCES mains/TestObsOperator.cc
-                  ARGS    "testinput/amsua_crtm.json"
+                  ARGS    "testinput/amsua.yaml"
                   LIBS    ufo )
 
-ecbuild_add_test( TARGET  test_ufo_amsua_crtm_tlad
+ecbuild_add_test( TARGET  test_ufo_amsua_tlad
                   BOOST
                   SOURCES mains/TestObsOperatorTLAD.cc
-                  ARGS    "testinput/amsua_crtm.json"
-                  LIBS    ufo )
-
-ecbuild_add_test( TARGET  test_ufo_amsua_rttov_opr
-                  BOOST
-                  SOURCES mains/TestObsOperator.cc
-                  ARGS    "testinput/amsua_rttov.json"
-                  LIBS    ufo )
-
-ecbuild_add_test( TARGET  test_ufo_amsua_rttov_tlad
-                  BOOST
-                  SOURCES mains/TestObsOperatorTLAD.cc
-                  ARGS    "testinput/amsua_rttov.json"
+                  ARGS    "testinput/amsua.yaml"
                   LIBS    ufo )
 
 ecbuild_add_test( TARGET  test_ufo_radiosonde_opr
                   BOOST
                   MPI     6
                   SOURCES mains/TestObsOperator.cc
-                  ARGS    "testinput/radiosonde.json"
+                  ARGS    "testinput/radiosonde.yaml"
+                  LIBS    ufo )
+
+ecbuild_add_test( TARGET  test_ufo_radiosonde_qc
+                  BOOST
+                  MPI     6
+                  SOURCES mains/TestObsFilters.cc
+                  ARGS    "testinput/radiosonde.yaml"
                   LIBS    ufo )
 
 ecbuild_add_test( TARGET  test_ufo_radiosonde_tlad
                   BOOST
                   SOURCES mains/TestObsOperatorTLAD.cc
-                  ARGS    "testinput/radiosonde.json"
+                  ARGS    "testinput/radiosonde.yaml"
                   LIBS    ufo )
 
 ecbuild_add_test( TARGET  test_ufo_aircraft_opr
                   BOOST
                   MPI     6
                   SOURCES mains/TestObsOperator.cc
-                  ARGS    "testinput/aircraft.json"
+                  ARGS    "testinput/aircraft.yaml"
                   LIBS    ufo )
 
-ecbuild_add_test( TARGET  test_ufo_obsop_gnssroRef_opr
-                  BOOST
-                  SOURCES mains/TestObsOperator.cc
-                  ARGS    "testinput/gnssroref.json"
-                  LIBS    ufo )
-
-ecbuild_add_test( TARGET  test_ufo_obsop_gnssroRef_tlad
+ecbuild_add_test( TARGET  test_ufo_aircraft_tlad
                   BOOST
                   SOURCES mains/TestObsOperatorTLAD.cc
-                  ARGS    "testinput/gnssroref.json"
+                  ARGS    "testinput/aircraft.yaml"
+                  LIBS    ufo )
+
+ecbuild_add_test( TARGET  test_ufo_gnssroRef_opr
+                  BOOST
+                  SOURCES mains/TestObsOperator.cc
+                  ARGS    "testinput/gnssroref.yaml"
+                  LIBS    ufo )
+
+ecbuild_add_test( TARGET  test_ufo_gnssroRef_tlad
+                  BOOST
+                  SOURCES mains/TestObsOperatorTLAD.cc
+                  ARGS    "testinput/gnssroref.yaml"
                   LIBS    ufo )
 
 # Marine UFO tests
@@ -193,55 +208,64 @@ if( ${GSW_FOUND} )
     ecbuild_add_test( TARGET  test_ufo_geovals_marine
                       BOOST
                       SOURCES mains/TestGeoVaLs.cc
-                      ARGS    "testinput/ufotest_marine.yml"
+                      ARGS    "testinput/ufotest_marine.yaml"
                       LIBS    ufo )
 
-    ecbuild_add_test( TARGET  test_ufo_insitutemperature
+    ecbuild_add_test( TARGET  test_ufo_locations_marine
+                      BOOST
+                      SOURCES mains/TestLocations.cc
+                      ARGS    "testinput/ufotest_marine.yaml"
+                      LIBS    ufo )
+
+    ecbuild_add_test( TARGET  test_ufo_insitutemperature_opr
                       BOOST
                       SOURCES mains/TestObsOperator.cc
-                      ARGS    "testinput/tprof.yml"
+                      ARGS    "testinput/tprof.yaml"
                       LIBS    ufo )
 
+# SRH: This test works, but it take 5 minutes to run. Thought it would be good
+# to comment this test out until the performance issue can be addressed.
+#
     ecbuild_add_test( TARGET  test_ufo_insitutemperature_tlad
                       BOOST
                       SOURCES mains/TestObsOperatorTLAD.cc
-                      ARGS    "testinput/tprof.yml"
+                      ARGS    "testinput/tprof.yaml"
                       LIBS    ufo )
 
-    ecbuild_add_test( TARGET  test_ufo_seaice
+    ecbuild_add_test( TARGET  test_ufo_seaice_opr
                       BOOST
                       SOURCES mains/TestObsOperator.cc
-                      ARGS    "testinput/seaice.yml"
+                      ARGS    "testinput/seaice.yaml"
                       LIBS    ufo )
 
-    ecbuild_add_test( TARGET  test_ufo_obsop_seaice_tlad
+    ecbuild_add_test( TARGET  test_ufo_seaice_tlad
                       BOOST
                       SOURCES mains/TestObsOperatorTLAD.cc
-                      ARGS    "testinput/seaice.yml"
+                      ARGS    "testinput/seaice.yaml"
                       LIBS    ufo )
 
-    ecbuild_add_test( TARGET  test_ufo_sst
+    ecbuild_add_test( TARGET  test_ufo_sst_opr
                       BOOST
                       SOURCES mains/TestObsOperator.cc
-                      ARGS    "testinput/sea_surface_temp.yml"
+                      ARGS    "testinput/sea_surface_temp.yaml"
                       LIBS    ufo )
 
-    ecbuild_add_test( TARGET  test_ufo_obsop_sst_tlad
+    ecbuild_add_test( TARGET  test_ufo_sst_tlad
                       BOOST
                       SOURCES mains/TestObsOperatorTLAD.cc
-                      ARGS    "testinput/sea_surface_temp.yml"
+                      ARGS    "testinput/sea_surface_temp.yaml"
                       LIBS    ufo )
 
-    ecbuild_add_test( TARGET  test_ufo_adt
+    ecbuild_add_test( TARGET  test_ufo_adt_opr
                       BOOST
                       SOURCES mains/TestObsOperator.cc
-                      ARGS    "testinput/adt.yml"
+                      ARGS    "testinput/adt.yaml"
                       LIBS    ufo )
 
-    ecbuild_add_test( TARGET  test_ufo_obsop_adt_tlad
+    ecbuild_add_test( TARGET  test_ufo_adt_tlad
                       BOOST
                       SOURCES mains/TestObsOperatorTLAD.cc
-                      ARGS    "testinput/adt.yml"
+                      ARGS    "testinput/adt.yaml"
                       LIBS    ufo )		      
 
 endif( ${GSW_FOUND} )
@@ -249,14 +273,14 @@ endif( ${GSW_FOUND} )
 ecbuild_add_test( TARGET  test_ufo_aod
                   BOOST
                   SOURCES mains/TestObsOperator.cc
-                  ARGS    "testinput/aod.json"
+                  ARGS    "testinput/aod.yaml"
                   LIBS    ufo )
 
-#ecbuild_add_test( TARGET  test_ufo_obscheck
-#                  BOOST
-#                  SOURCES mains/TestObsCheck.cc
-#                  ARGS    "testinput/ufotest.json"
-#                  LIBS    ufo )
+ecbuild_add_test( TARGET  test_ufo_intset_parser
+                  BOOST
+                  SOURCES mains/TestIntSetParser.cc
+                  ARGS    "testinput/channelsparser.yaml"
+                  LIBS    ufo )
 
 #####################################################################
 # Files for CRTM tests

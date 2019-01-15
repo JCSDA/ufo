@@ -42,13 +42,14 @@ contains
     use gsw_mod_kinds
     use gsw_pot_to_insitu
     use vert_interp_mod
-
+    use kinds
+    
     implicit none
 
-    real (r8), intent(in)    :: temp_p             !< Potential temperature at observation location [C]
-    real (r8), intent(in)    :: salt_p             !< Practical Salinity at observation location [ppt]
-    real (r8), intent(in)    :: lono, lato, deptho !< Observation location    
-    real (r8), intent(inout) :: temp_i             !< Vertically interpolated Insitu temperature at
+    real(kind=kind_real), intent(in)    :: temp_p             !< Potential temperature at observation location [C]
+    real(kind=kind_real), intent(in)    :: salt_p             !< Practical Salinity at observation location [ppt]
+    real(kind=kind_real), intent(in)    :: lono, lato, deptho !< Observation location    
+    real(kind=kind_real), intent(inout) :: temp_i             !< Vertically interpolated Insitu temperature at
 
     real(kind_real) :: tp, sp, prso
 
@@ -68,18 +69,19 @@ contains
     use gsw_mod_kinds
     use gsw_pot_to_insitu
     use vert_interp_mod
-
+    use kinds
+    
     implicit none
 
-    real (r8), intent(in)    :: dtemp_p            !< Potential temperature at observation location [C]
-    real (r8), intent(in)    :: dsalt_p            !< Practical Salinity at observation location [ppt]
-    real (r8), intent(in)    :: temp_p             !< Bkg potential temperature at observation location [C]
-    real (r8), intent(in)    :: salt_p             !< Bkg practical Salinity at observation location [ppt]    
-    real (r8), intent(in)    :: lono, lato, deptho !< Observation location
-    real (r8), intent(inout) :: dtemp_i            !< Vertically interpolated Insitu temperature at
-    real (r8), intent(in), optional :: Jacobian(2) !< Precomputed Jacobian    
+    real(kind=kind_real), intent(in)    :: dtemp_p            !< Potential temperature at observation location [C]
+    real(kind=kind_real), intent(in)    :: dsalt_p            !< Practical Salinity at observation location [ppt]
+    real(kind=kind_real), intent(in)    :: temp_p             !< Bkg potential temperature at observation location [C]
+    real(kind=kind_real), intent(in)    :: salt_p             !< Bkg practical Salinity at observation location [ppt]    
+    real(kind=kind_real), intent(in)    :: lono, lato, deptho !< Observation location
+    real(kind=kind_real), intent(inout) :: dtemp_i            !< Vertically interpolated Insitu temperature at
+    real(kind=kind_real), intent(in), optional :: Jacobian(2) !< Precomputed Jacobian    
 
-    real (r8) :: prso, jac(2)    
+    real(kind=kind_real) :: prso, jac(2)    
 
     !< Pressure from depth
     prso = p_from_z(deptho,lato)
@@ -103,18 +105,19 @@ contains
     use gsw_mod_kinds
     use gsw_pot_to_insitu
     use vert_interp_mod
-
+    use kinds
+    
     implicit none
 
-    real (r8), intent(inout) :: dtemp_p            !< Potential temperature at observation location [C]
-    real (r8), intent(inout) :: dsalt_p            !< Practical Salinity at observation location [ppt]
-    real (r8), intent(in)    :: temp_p             !< Bkg potential temperature at observation location [C]
-    real (r8), intent(in)    :: salt_p             !< Bkg practical Salinity at observation location [ppt]    
-    real (r8), intent(in)    :: lono, lato, deptho !< Observation location
-    real (r8), intent(in)    :: dtemp_i            !< Insitu temperature increment at obs loc
-    real (r8), intent(in), optional :: Jacobian(2) !< Precomputed Jacobian
+    real(kind=kind_real), intent(inout) :: dtemp_p            !< Potential temperature at observation location [C]
+    real(kind=kind_real), intent(inout) :: dsalt_p            !< Practical Salinity at observation location [ppt]
+    real(kind=kind_real), intent(in)    :: temp_p             !< Bkg potential temperature at observation location [C]
+    real(kind=kind_real), intent(in)    :: salt_p             !< Bkg practical Salinity at observation location [ppt]    
+    real(kind=kind_real), intent(in)    :: lono, lato, deptho !< Observation location
+    real(kind=kind_real), intent(in)    :: dtemp_i            !< Insitu temperature increment at obs loc
+    real(kind=kind_real), intent(in), optional :: Jacobian(2) !< Precomputed Jacobian
     
-    real (r8) :: prso, jac(2)    
+    real(kind=kind_real) :: prso, jac(2)    
 
     !< Pressure from depth
     prso = p_from_z(deptho,lato)
@@ -143,17 +146,18 @@ contains
     use gsw_mod_kinds
     use gsw_pot_to_insitu
     use vert_interp_mod
-
+    use kinds
+    
     implicit none
 
-    real (r8), intent(in)    :: temp_p             !< Potential temperature at observation location [C]
-    real (r8), intent(in)    :: salt_p             !< Practical Salinity at observation location [ppt]
-    real (r8), intent(in)    :: lono, lato, deptho !< Observation location    
-    real (r8), intent(out)   :: jac(2)             !< Jacobian (dti/dtp, dti,dsp)
+    real(kind=kind_real), intent(in)    :: temp_p             !< Potential temperature at observation location [C]
+    real(kind=kind_real), intent(in)    :: salt_p             !< Practical Salinity at observation location [ppt]
+    real(kind=kind_real), intent(in)    :: lono, lato, deptho !< Observation location    
+    real(kind=kind_real), intent(out)   :: jac(2)             !< Jacobian (dti/dtp, dti,dsp)
     
-    real (r8) :: pressure
-    real (r8) :: delta=1.0e-10        
-    real (r8) :: delta_tp, delta_sp    
+    real(kind=kind_real) :: pressure
+    real(kind=kind_real) :: delta=1.0e-10        
+    real(kind=kind_real) :: delta_tp, delta_sp    
 
     ! Vertical interpolation
     real(kind_real) :: wf

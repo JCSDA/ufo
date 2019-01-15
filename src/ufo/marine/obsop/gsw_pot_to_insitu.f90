@@ -17,6 +17,8 @@ MODULE gsw_pot_to_insitu
 ! Contact: Steve.Penny@noaa.gov
 !===============================================================================
 
+use kinds
+  
 IMPLICIT NONE
 
 PUBLIC :: t_from_pt, p_from_z    ! Computing in situ from potential temperature
@@ -24,7 +26,7 @@ PUBLIC :: sa_from_sp, pt_from_t  ! Computing potential temperature from in situ
 
 PRIVATE
 
-INTEGER, PARAMETER :: r14 = selected_real_kind(14,30)
+!INTEGER, PARAMETER :: r14 = selected_real_kind(14,30)
 
 CONTAINS
 
@@ -43,10 +45,10 @@ FUNCTION t_from_pt(pt_in,sp_in,p_in,lon_in,lat_in)
   !       I'll leave it unaltered as a list of functions in order to facilitate forward compatibility.
 
   IMPLICIT NONE
-  REAL(r8) :: t_from_pt
-  REAL(r8), INTENT(IN) :: pt_in, sp_in, p_in, lon_in, lat_in
-  REAL(r8) :: pt, sp, p, lon, lat
-  REAL(r8) :: sa, ct, T
+  real(kind_real) :: t_from_pt
+  real(kind_real), INTENT(IN) :: pt_in, sp_in, p_in, lon_in, lat_in
+  real(kind_real) :: pt, sp, p, lon, lat
+  real(kind_real) :: sa, ct, T
  
   pt = pt_in
   sp = sp_in
@@ -89,11 +91,11 @@ PURE FUNCTION p_from_z(dpth,xlat)
 ! check value: p_from_z=7500.004 dbars;for lat=30 deg., depth=7321.45 meters
 ! http://sam.ucsd.edu/sio210/propseawater/ppsw_fortran/ppsw.f
   IMPLICIT NONE
-  REAL(r14) :: p_from_z
-  REAL(r14), INTENT(IN) :: dpth
-  REAL(r14), INTENT(IN) :: xlat
-  REAL(r14), PARAMETER :: pi=3.141592654
-  REAL(r14) :: plat, d, c1
+  real(kind_real) :: p_from_z
+  real(kind_real), INTENT(IN) :: dpth
+  real(kind_real), INTENT(IN) :: xlat
+  real(kind_real), PARAMETER :: pi=3.141592654
+  real(kind_real) :: plat, d, c1
 
   plat=abs(xlat*pi/180.)
   d=sin(plat)
@@ -116,9 +118,9 @@ FUNCTION sa_from_sp(sp,p,long,lat)
 ! gsw_sa_from_sp   : Absolute Salinity                     [g/kg]
 
 IMPLICIT NONE
-REAL (r14) :: sa_from_sp
-REAL (r14), INTENT(IN) :: sp, long, lat, p
-REAL (r14) :: gsw_sa_from_sp
+real(kind_real) :: sa_from_sp
+real(kind_real), INTENT(IN) :: sp, long, lat, p
+real(kind_real) :: gsw_sa_from_sp
 
 sa_from_sp = gsw_sa_from_sp(sp,p,long,lat)
 
@@ -138,9 +140,9 @@ FUNCTION pt_from_t(sa,t,p,p_ref)
 ! gsw_pt_from_t : potential temperature                    [deg C]
 
 IMPLICIT NONE
-REAL (r14) :: pt_from_t
-REAL (r14), INTENT(IN) :: sa, t, p, p_ref
-REAL (r14) :: gsw_pt_from_t
+real(kind_real) :: pt_from_t
+real(kind_real), INTENT(IN) :: sa, t, p, p_ref
+real(kind_real) :: gsw_pt_from_t
 
 pt_from_t = gsw_pt_from_t(sa,t,p,p_ref)
 

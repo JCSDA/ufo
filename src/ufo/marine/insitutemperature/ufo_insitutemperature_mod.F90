@@ -1,57 +1,71 @@
 ! (C) Copyright 2017-2018 UCAR
-! 
+!
 ! This software is licensed under the terms of the Apache Licence Version 2.0
-! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
+! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 
-!> Fortran module to handle temperature profile observations
+!> Fortran insitutemperature module for observation operator
 
 module ufo_insitutemperature_mod
 
-  use iso_c_binding
-  use obsspace_mod
-  use ioda_obs_vectors
-  use ufo_vars_mod
-  use ioda_locs_mod
-  use ufo_geovals_mod
-  use kinds
+ use iso_c_binding
+ use config_mod
+ use kinds
 
-  implicit none
-  public :: ufo_insitutemperature
-  public :: ufo_insitutemperature_simobs
-  private
-  integer, parameter :: max_string=800
+ use ufo_geovals_mod, only: ufo_geovals, ufo_geoval, ufo_geovals_get_var
+ use ufo_basis_mod, only: ufo_basis
+ use ufo_vars_mod
+ use obsspace_mod
 
-  !> Fortran derived type for insitu temperature profile observation operator
-  type :: ufo_insitutemperature
-  end type ufo_insitutemperature
+ implicit none
+ private
 
-  ! ------------------------------------------------------------------------------
+ integer, parameter :: max_string=800
+
+!> Fortran derived type for the observation type
+ type, extends(ufo_basis), public :: ufo_insitutemperature
+ private
+ contains
+   procedure :: setup  => ufo_insitutemperature_setup
+   procedure :: delete => ufo_insitutemperature_delete
+   procedure :: simobs => ufo_insitutemperature_simobs
+ end type ufo_insitutemperature
 
 contains
 
-  ! ------------------------------------------------------------------------------
+! ------------------------------------------------------------------------------
+subroutine ufo_insitutemperature_setup(self, c_conf)
+implicit none
+class(ufo_insitutemperature), intent(inout) :: self
+type(c_ptr),        intent(in)    :: c_conf
 
-  subroutine ufo_insitutemperature_simobs(self, geovals, hofx, obss)
-    use gsw_pot_to_insitu
-    use vert_interp_mod    
-    use ufo_tpsp2ti_mod
-    use ufo_marine_ncutils
-    
-    implicit none
-    type(ufo_insitutemperature), intent(in)  :: self       !< Trajectory
-    type(ufo_geovals), intent(in)            :: geovals    !< Model's Tp, Sp, h interpolated at obs location 
-    type(c_ptr), value, intent(in)           :: obss       !< Insitu temperature observations
-    type(obs_vector),  intent(inout)         :: hofx       !< Ti(Tp,Sp,h)
+end subroutine ufo_insitutemperature_setup
+
+! ------------------------------------------------------------------------------
+subroutine ufo_insitutemperature_delete(self)
+implicit none
+class(ufo_insitutemperature), intent(inout) :: self
+
+end subroutine ufo_insitutemperature_delete
+
+! ------------------------------------------------------------------------------
+subroutine ufo_insitutemperature_simobs(self, geovals, hofx, obss)
+use gsw_pot_to_insitu
+use vert_interp_mod
+use ufo_tpsp2ti_mod
+use ufo_marine_ncutils
+implicit none
+class(ufo_insitutemperature), intent(in)    :: self
+type(ufo_geovals),  intent(in)    :: geovals
+real(c_double),     intent(inout) :: hofx(:)
+type(c_ptr), value, intent(in)    :: obss
 
     character(len=*), parameter :: myname_="ufo_insitutemperature_simobs"
     character(max_string)  :: err_msg
 
     integer :: iobs, ilev, nlev, nobs
     type(ufo_geoval), pointer :: temp, salt, h
-    real(kind_real), allocatable :: tempi(:,:)
-    real (kind_real), allocatable :: pressure(:,:), depth(:,:)
+    real (kind_real), allocatable :: depth(:,:)
     real(kind_real) :: lono, lato, deptho
-
     real(kind_real), allocatable :: obs_lon(:)
     real(kind_real), allocatable :: obs_lat(:)
     real(kind_real), allocatable :: obs_depth(:)
@@ -67,7 +81,7 @@ contains
     type(diag_marine_obs) :: insitu_out    
 
     ! check if nobs is consistent in geovals & hofx
-    if (geovals%nobs /= hofx%nobs) then
+    if (geovals%nobs /= size(hofx,1)) then
        write(err_msg,*) myname_, ' error: nobs inconsistent!'
        call abor1_ftn(err_msg)
     endif
@@ -88,16 +102,15 @@ contains
     allocate(obs_depth(obss_nobs))
     allocate(obs_val(obss_nobs))
 
-    call obsspace_get_var(obss, obs_lon, "longitude", obss_nobs)
-    call obsspace_get_var(obss, obs_lat, "latitude", obss_nobs)
-    call obsspace_get_var(obss, obs_depth, "depth", obss_nobs)
-    call obsspace_get_var(obss, obs_val, "in_situ_temperature", obss_nobs)
+    call obsspace_get_db(obss, "", "longitude", obs_lon)
+    call obsspace_get_db(obss, "", "latitude", obs_lat)
+    call obsspace_get_db(obss, "", "ocean_depth", obs_depth)
+    call obsspace_get_db(obss, "ObsValue", "insitu_temperature", obs_val)
 
     nlev = temp%nval
     nobs = temp%nobs        
-    allocate(tempi(nlev,nobs))
-    allocate(pressure(nlev,nobs), depth(nlev,nobs))
-    do iobs = 1,hofx%nobs
+    allocate(depth(nlev,nobs))
+    do iobs = 1,size(hofx,1)
        !< Depth from layer thickness
        depth(1,iobs)=0.5*h%vals(1,iobs)
        do ilev = 2, nlev
@@ -105,28 +118,18 @@ contains
        end do          
     end do
 
-    do iobs = 1,hofx%nobs
-       do ilev = 1, nlev
-          lono = obs_lon(iobs)
-          lato = obs_lat(iobs)          
-          call insitu_t_nl(tempi(ilev,iobs),temp%vals(ilev,iobs),salt%vals(ilev,iobs),lono,lato,depth(ilev,iobs))
-       end do
-    end do
-
     ! Information for temporary output file
-    filename='insitu-test.nc'    
-    call insitu_out%init(hofx%nobs,filename)
     
-    hofx%values = 0.0
+    hofx = 0.0
     ! insitu temperature profile obs operator
-    do iobs = 1,hofx%nobs
+    do iobs = 1,size(hofx,1)
 
        lono = obs_lon(iobs)
        lato = obs_lat(iobs)
        deptho = obs_depth(iobs)
     
        !< Interpolation weight
-       call vert_interp_weights(nlev,deptho,depth(:,iobs),wi,wf)
+       call vert_interp_weights(nlev, deptho, depth(:,iobs), wi, wf)
        if (deptho.ge.maxval(depth)) then
           wi=nlev-1
           wf=0.0
@@ -137,31 +140,11 @@ contains
        call vert_interp_apply(nlev, salt%vals(:,iobs), sp, wi, wf)
 
        ! Get insitu temp at model levels and obs location (lono, lato, zo)
-       call insitu_t_nl(hofx%values(iobs),tp,sp,lono,lato,deptho)
+       call insitu_t_nl(hofx(iobs), tp, sp, lono, lato, deptho)
 
-       if (isnan(hofx%values(iobs))) then !!!!!! HACK !!!!!!!!!!!!!!!!!!!!!
-          hofx%values(iobs)=0.0 !!!! NEED TO QC OUT BAD OBS LOCATION !!!!!!
-       end if
-
-       ! Output information:
-       insitu_out%diag(iobs)%Station_ID         = 1234!obs_ti%idx(iobs)
-       insitu_out%diag(iobs)%Observation_Type   = 1.0
-       insitu_out%diag(iobs)%Latitude           = obs_lat(iobs)
-       insitu_out%diag(iobs)%Longitude          = obs_lon(iobs)
-       insitu_out%diag(iobs)%Depth              = obs_depth(iobs)
-       insitu_out%diag(iobs)%Time               = 1.0
-       insitu_out%diag(iobs)%Observation        = obs_val(iobs)
-       insitu_out%diag(iobs)%Obs_Minus_Forecast = obs_val(iobs) - hofx%values(iobs)
     enddo
 
-    !call insitu_out%write_diag()
-    call insitu_out%write_geoval(var_ocn_pot_temp,temp)
-    call insitu_out%write_geoval(var_ocn_salt,salt)
-    call insitu_out%write_geoval(var_ocn_lay_thick,h)
-    call insitu_out%finalize()
-
-    deallocate(tempi, pressure, depth)
-
+    deallocate(depth)
     deallocate(obs_lon)
     deallocate(obs_lat)
     deallocate(obs_depth)

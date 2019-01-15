@@ -16,7 +16,7 @@
 #include "oops/base/Variables.h"
 #include "oops/util/Logger.h"
 #include "oops/util/ObjectCounter.h"
-#include "ufo/atmosphere/FortranAtmosphere.h"
+#include "ufo/atmosphere/radiance/ObsRadiance.interface.h"
 #include "ufo/ObsOperatorBase.h"
 
 namespace eckit {
@@ -47,6 +47,7 @@ class ObsRadiance : public ObsOperatorBase,
 
 // Other
   const oops::Variables & variables() const {return *varin_;}
+  const oops::Variables & observed() const {return *varout_;}
 
   int & toFortran() {return keyOperRadiance_;}
   const int & toFortran() const {return keyOperRadiance_;}
@@ -56,6 +57,7 @@ class ObsRadiance : public ObsOperatorBase,
   F90hop keyOperRadiance_;
   const ioda::ObsSpace& odb_;
   boost::scoped_ptr<const oops::Variables> varin_;
+  boost::scoped_ptr<const oops::Variables> varout_;
 };
 
 // -----------------------------------------------------------------------------
