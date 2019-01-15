@@ -10,12 +10,12 @@
 
 #include <ostream>
 #include <string>
+#include <vector>
 
 #include <boost/scoped_ptr.hpp>
 
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
-
 #include "ufo/generic/identity/ObsIdentity.interface.h"
 #include "ufo/ObsOperatorBase.h"
 

@@ -50,7 +50,7 @@ ObsIdentityTLAD::ObsIdentityTLAD(const ioda::ObsSpace & odb,
   oops::Log::trace() << "ObsIdentityTLAD created" << std::endl;
   */
   
-  ufo_identity_setup_f90(keyOperObsIdentity_, &configc, buffin, buffout,
+  ufo_identity_tlad_setup_f90(keyOperObsIdentity_, &configc, buffin, buffout,
                          c_name_size);
 
   std::string vstr_in(buffin), vstr_out(buffout);

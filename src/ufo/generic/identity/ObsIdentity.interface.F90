@@ -13,9 +13,9 @@ module ufo_identity_mod_c
   use ufo_identity_mod
   use string_f_c_mod
   implicit none
+
   private
 
-  ! ------------------------------------------------------------------------------
 #define LISTED_TYPE ufo_identity
 
   !> Linked list interface - defines registry_t type

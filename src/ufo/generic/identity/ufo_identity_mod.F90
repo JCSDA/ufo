@@ -8,25 +8,13 @@
 module ufo_identity_mod
 
  use iso_c_binding
- use config_mod
  use kinds
-
- use ufo_geovals_mod, only: &
-    ufo_geovals,            &
-    ufo_geoval,             &
-    ufo_geovals_get_var
- 
- use ufo_geovals_mod_c, only: &
-    ufo_geovals_registry
- 
- use ufo_basis_mod, only: &
-     ufo_basis
-     
  use ufo_vars_mod
+ use ufo_geovals_mod
+ use ufo_geovals_mod_c, only: ufo_geovals_registry
+ 
+ use ufo_basis_mod, only : ufo_basis
  use obsspace_mod
-
- implicit none
- private
 
  integer, parameter :: max_string=800
 

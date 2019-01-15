@@ -13,6 +13,7 @@ module ufo_identity_tlad_mod_c
   use ufo_identity_tlad_mod
   use string_f_c_mod
   implicit none
+
   private
 
 #define LISTED_TYPE ufo_identity_tlad

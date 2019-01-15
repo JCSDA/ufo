@@ -52,12 +52,13 @@ class ObsIdentityTLAD : public LinearObsOperatorBase,
   // Other
   const oops::Variables & variables() const {return *varin_;}
 
-  int & toFortran() {return keyOper_;}
-  const int & toFortran() const {return keyOper_;}
+
+  int & toFortran() {return keyOperObsIdentity_;}
+  const int & toFortran() const {return keyOperObsIdentity_;}
 
  private:
   void print(std::ostream &) const;
-  F90hop keyOper_;
+  F90hop keyOperObsIdentity_;
   const ioda::ObsSpace& odb_;
   boost::scoped_ptr<const oops::Variables> varin_;
   boost::scoped_ptr<const oops::Variables> varout_;
