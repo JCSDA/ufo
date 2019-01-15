@@ -107,7 +107,7 @@ contains
     call check(nf90_enddef(iNcid))
 
     ! Writing
-    call check(nf90_put_var(iNcid, iVarLON_ID , self%diag(:)%Station_ID))
+    call check(nf90_put_var(iNcid, iVarOBSID_ID , self%diag(:)%Station_ID))
     call check(nf90_put_var(iNcid, iVarLON_ID , self%diag(:)%Longitude))
     call check(nf90_put_var(iNcid, iVarLAT_ID , self%diag(:)%Latitude))
     call check(nf90_put_var(iNcid, iVarLev_ID , self%diag(:)%Depth))

@@ -96,6 +96,7 @@ type(c_ptr), value, intent(in)    :: obss
        sst_out%diag(iobs)%Depth              = 999.9
        sst_out%diag(iobs)%Time               = 999.9
        sst_out%diag(iobs)%Observation        = 999.9
+       sst_out%diag(iobs)%Observation_error  = 999.9
        sst_out%diag(iobs)%Obs_Minus_Forecast = 999.9
     enddo
 
