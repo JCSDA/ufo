@@ -26,7 +26,8 @@ endfunction(CREATE_SYMLINK_FILENAME)
 list( APPEND ufo_test_input
   testinput/ufotest_atmosphere.yaml
   testinput/ufotest_constituents.yaml
-  testinput/amsua.yaml
+  testinput/amsua_crtm.yaml
+  testinput/amsua_rttov.yaml
   testinput/radiosonde.yaml
   testinput/aircraft.yaml
   testinput/aod.yaml
