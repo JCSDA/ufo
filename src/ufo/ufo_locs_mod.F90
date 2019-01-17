@@ -53,7 +53,7 @@ allocate(self%lat(nlocs), self%lon(nlocs), self%time(nlocs))
 allocate(self%indx(nlocs))
 self%lat(:) = lats(:)
 self%lon(:) = lons(:)
-fstring="2092-03-08T00:00:00Z"
+fstring="9999-09-09T09:09:09Z"
 do n = 1, self%nlocs
   call datetime_create(fstring, self%time(n))
 enddo
@@ -112,7 +112,7 @@ self%nlocs = nlocs
 allocate(self%lat(nlocs), self%lon(nlocs), self%time(nlocs), self%indx(nlocs))
 self%lat(:) = 0.0
 self%lon(:) = 0.0
-fstring="2092-03-08T00:00:00Z"
+fstring="9999-09-09T09:09:09Z"
 do n = 1, self%nlocs
   call datetime_create(fstring, self%time(n))
 enddo
@@ -160,32 +160,19 @@ subroutine ufo_locs_init(self, obss, t1, t2)
   integer :: tw_nlocs
   integer, dimension(:), allocatable :: tw_indx
   real(kind_real), dimension(:), allocatable :: lon, lat
-  integer(c_int32_t), dimension(:), allocatable :: date
-  integer(c_int32_t), dimension(:), allocatable :: time
   type(datetime), dimension(:), allocatable :: date_time
-  character(len=20) :: fstring
 
   ! Local copies pre binning
   nlocs = obsspace_get_nlocs(obss)
 
-  allocate(date_time(nlocs), date(nlocs), time(nlocs), lon(nlocs), lat(nlocs))
+  allocate(date_time(nlocs), lon(nlocs), lat(nlocs))
 
 !TODO(JG): Add "MetaData" or similar group attribute to all ioda ObsSpace objects
   if (obsspace_has(obss,"MetaData", "time")) then
-    call obsspace_get_db(obss, "MetaData", "date", date)
-    call obsspace_get_db(obss, "MetaData", "time", time)
+    call obsspace_get_db(obss, "MetaData", "datetime", date_time)
   else
-    call obsspace_get_db(obss, "", "date", date)
-    call obsspace_get_db(obss, "", "time", time)
+    call obsspace_get_db(obss, "", "datetime", date_time)
   endif
-
-  ! Constrct datatime based on date and time
-  do i = 1, nlocs
-    write(fstring, "(i4.4, a, i2.2, a, i2.2, a, i2.2, a, i2.2, a, i2.2, a)") &
-          date(i)/10000, '-', MOD(date(i), 10000)/100, '-', MOD(MOD(date(i), 10000), 100), 'T', &
-          time(i)/10000, ':', MOD(time(i), 10000)/100, ':', MOD(MOD(time(i), 10000), 100), 'Z'
-    call datetime_create(fstring, date_time(i))
-  enddo
 
   ! Generate the timing window indices
   allocate(tw_indx(nlocs))
@@ -218,7 +205,7 @@ subroutine ufo_locs_init(self, obss, t1, t2)
   do i = 1, nlocs
     call datetime_delete(date_time(i))
   enddo
-  deallocate(date_time, date, time, lon, lat, tw_indx)
+  deallocate(date_time, lon, lat, tw_indx)
 
   write(record,*) myname,': allocated/assigned obs locations'
   call fckit_log%info(record)
