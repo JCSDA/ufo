@@ -26,8 +26,6 @@
 namespace ufo {
 
 // -----------------------------------------------------------------------------
-static LinearObsOperatorMaker<ObsIdentityTLAD> makerSurfaceTL_("Surface");
-// -----------------------------------------------------------------------------
 
 ObsIdentityTLAD::ObsIdentityTLAD(const ioda::ObsSpace & odb,
                                  const eckit::Configuration & config)
