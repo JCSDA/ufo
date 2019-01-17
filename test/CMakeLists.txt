@@ -145,16 +145,28 @@ ecbuild_add_test( TARGET  test_ufo_locations_constituents
                   ARGS    "testinput/ufotest_constituents.yaml"
                   LIBS    ufo )
 
-ecbuild_add_test( TARGET  test_ufo_amsua_opr
+ecbuild_add_test( TARGET  test_ufo_amsua_opr_crtm
                   BOOST
                   SOURCES mains/TestObsOperator.cc
-                  ARGS    "testinput/amsua.yaml"
+                  ARGS    "testinput/amsua_crtm.yaml"
                   LIBS    ufo )
 
-ecbuild_add_test( TARGET  test_ufo_amsua_tlad
+ecbuild_add_test( TARGET  test_ufo_amsua_opr_rttov
+                  BOOST
+                  SOURCES mains/TestObsOperator.cc
+                  ARGS    "testinput/amsua_rttov.yaml"
+                  LIBS    ufo )
+
+ecbuild_add_test( TARGET  test_ufo_amsua_tlad_crtm
                   BOOST
                   SOURCES mains/TestObsOperatorTLAD.cc
-                  ARGS    "testinput/amsua.yaml"
+                  ARGS    "testinput/amsua_crtm.yaml"
+                  LIBS    ufo )
+
+ecbuild_add_test( TARGET  test_ufo_amsua_tlad_rttov
+                  BOOST
+                  SOURCES mains/TestObsOperatorTLAD.cc
+                  ARGS    "testinput/amsua_rttov.yaml"
                   LIBS    ufo )
 
 ecbuild_add_test( TARGET  test_ufo_radiosonde_opr
