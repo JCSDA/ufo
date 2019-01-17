@@ -15,6 +15,7 @@ module ufo_radiance_mod
  use ufo_basis_mod, only: ufo_basis
  use ufo_vars_mod
  use ufo_radiance_utils_mod
+! use obsspace_mod
  use crtm_module
  USE rttov_types
  USE rttov_const, ONLY : errorstatus_success, deg2rad
@@ -24,6 +25,7 @@ module ufo_radiance_mod
  private
 
  !> Fortran derived type for radiance trajectory
+
  type, extends(ufo_basis), public :: ufo_radiance
  private
   type(rad_conf) :: rc
@@ -117,7 +119,7 @@ SUBROUTINE ufo_radiance_simobs_rttov(self, geovals, hofx, obss)
  ! Get number of profile and layers from geovals
  ! ---------------------------------------------
  n_Profiles = geovals%nobs
- call ufo_geovals_get_var(geovals, var_tv, temp, status=ierr)
+ call ufo_geovals_get_var(geovals, var_tv, temp)
  n_Layers = temp%nval
  N_LEVELS = N_LAYERS + 1
  nullify(temp)

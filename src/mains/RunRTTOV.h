@@ -30,7 +30,7 @@ template <typename MODEL> class RunRTTOV : public oops::Application {
   typedef oops::ObsAuxControl<MODEL>     ObsAuxCtrl_;
   typedef oops::Observations<MODEL>      Observations_;
   typedef oops::ObsOperator<MODEL>       ObsOperator_;
-  typedef oops::ObsSpaces<MODEL>         ObsSpace_;
+  typedef oops::ObsSpaces<MODEL>         ObsSpaces_;
   typedef oops::ObsVector<MODEL>         ObsVector_;
 
  public:
@@ -50,13 +50,13 @@ template <typename MODEL> class RunRTTOV : public oops::Application {
 //  Setup observations
     eckit::LocalConfiguration obsconf(fullConfig, "Observations");
     oops::Log::debug() << "Observations configuration is:" << obsconf << std::endl;
-    ObsSpace_ obsdb(obsconf, winbgn, winend);
+    ObsSpaces_ obsdb(obsconf, winbgn, winend);
 
     std::vector<eckit::LocalConfiguration> conf;
     obsconf.get("ObsTypes", conf);
 
     for (std::size_t jj = 0; jj < obsdb.size(); ++jj) {
-      ObsOperator_ hop(obsdb[jj]);
+      ObsOperator_ hop(obsdb[jj], conf[jj]);
 
       const eckit::LocalConfiguration gconf(conf[jj], "GeoVaLs");
       const GeoVaLs_ gval(gconf, hop.variables());
@@ -65,7 +65,7 @@ template <typename MODEL> class RunRTTOV : public oops::Application {
       conf[jj].get("ObsBias", biasConf);
       const ObsAuxCtrl_ ybias(biasConf);
 
-      ObsVector_ ovec(obsdb[jj]);
+      ObsVector_ ovec(obsdb[jj], hop.observed());
 
       hop.simulateObs(gval, ovec, ybias);
 

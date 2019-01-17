@@ -15,6 +15,7 @@ module ufo_radiance_tlad_mod
  use ufo_basis_tlad_mod, only: ufo_basis_tlad
  use ufo_vars_mod
  use ufo_radiance_utils_mod
+! use obsspace_mod
  use crtm_module
  USE rttov_types
  USE rttov_const, ONLY : errorstatus_success, deg2rad
@@ -339,7 +340,7 @@ INCLUDE 'rttov_alloc_k.interface'
  ! Get number of profile and layers from geovals
  ! ---------------------------------------------
  self%n_Profiles = geovals%nobs
- call ufo_geovals_get_var(geovals, var_tv, temp, status=ierr)
+ call ufo_geovals_get_var(geovals, var_tv, temp)
  self%n_Layers = temp%nval
 
  n_levels = self%n_layers + 1

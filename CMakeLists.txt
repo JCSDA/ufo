@@ -60,9 +60,14 @@ include_directories( ${OOPS_INCLUDE_DIRS} )
 ecbuild_use_package( PROJECT crtm VERSION 2.2.3 REQUIRED )
 include_directories( ${CRTM_INCLUDE_DIRS} )
 
-# rttov
-ecbuild_use_package( PROJECT rttov VERSION 12.1.0 REQUIRED )
-include_directories( ${RTTOV_INCLUDE_DIRS} )
+# RTTOV
+ecbuild_use_package( PROJECT rttov VERSION 12.1.0 )
+if( ${RTTOV_FOUND} )
+    message("RTTOV FOUND; Including RTTOV Radiance Observation Operator")
+    include_directories( ${RTTOV_INCLUDE_DIRS} )
+else( ${RTTOV_FOUND} )
+    message("RTTOV NOT FOUND; Excluding RTTOV Radiance Observation Operator")
+endif( ${RTTOV_FOUND} )
 
 # GSW
 ecbuild_use_package( PROJECT gsw )
@@ -85,7 +90,8 @@ endif( ${ROPP-UFO_FOUND} )
 # Export package info
 ################################################################################
 
-list( APPEND UFO_TPLS oops ioda crtm rttov)
+list( APPEND UFO_TPLS oops ioda crtm)
+
 if( ${GSW_FOUND} )
     list ( APPEND UFO_TPLS gsw)
 endif( ${GSW_FOUND} )
@@ -93,6 +99,10 @@ endif( ${GSW_FOUND} )
 if( ${ROPP-UFO_FOUND} )
     list ( APPEND UFO_TPLS ropp-ufo )
 endif( ${ROPP-UFO_FOUND} )
+
+if( ${RTTOV_FOUND} )
+    list ( APPEND UFO_TPLS rttov)
+endif( ${RTTOV_FOUND} )
 
 set( UFO_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/src ${CMAKE_CURRENT_BINARY_DIR}/src
                       ${CMAKE_Fortran_MODULE_DIRECTORY} )
