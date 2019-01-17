@@ -11,10 +11,6 @@
 #include <string>
 #include <vector>
 #include <boost/algorithm/string.hpp>
-
-// --------------------------------
-// TODO: Not sure if we need that!
-// --------------------------------
 #include <boost/scoped_ptr.hpp>
 
 #include "ioda/ObsSpace.h"
@@ -41,17 +37,9 @@ ObsIdentityTLAD::ObsIdentityTLAD(const ioda::ObsSpace & odb,
   char *buffin = new char[c_name_size];
   char *buffout = new char[c_name_size];
   const eckit::Configuration * configc = &config;
-  
-  /*
-  const std::vector<std::string> vv{"ocean_upper_level_temperature"};
-  varin_.reset(new oops::Variables(vv));
-  const eckit::Configuration * configc = &config;
-  ufo_identity_tlad_setup_f90(keyOper_, &configc);
-  oops::Log::trace() << "ObsIdentityTLAD created" << std::endl;
-  */
-  
+
   ufo_identity_tlad_setup_f90(keyOperObsIdentity_, &configc, buffin, buffout,
-                         c_name_size);
+                             c_name_size);
 
   std::string vstr_in(buffin), vstr_out(buffout);
   std::vector<std::string> vvin;
@@ -81,7 +69,7 @@ void ObsIdentityTLAD::setTrajectory(const GeoVaLs & geovals, const ObsBias & bia
 // -----------------------------------------------------------------------------
 
 void ObsIdentityTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec,
-                             const ObsBiasIncrement & bias) const {
+                                    const ObsBiasIncrement & bias) const {
   ufo_identity_simobs_tl_f90(keyOperObsIdentity_, geovals.toFortran(), odb_,
                             ovec.size(), ovec.toFortran());
   oops::Log::trace() << "ObsIdentityTLAD: TL observation operator run" << std::endl;
@@ -90,7 +78,7 @@ void ObsIdentityTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & o
 // -----------------------------------------------------------------------------
 
 void ObsIdentityTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec,
-                             ObsBiasIncrement & bias) const {
+                                    ObsBiasIncrement & bias) const {
   ufo_identity_simobs_ad_f90(keyOperObsIdentity_, geovals.toFortran(), odb_,
                             ovec.size(), ovec.toFortran());
   oops::Log::trace() << "ObsIdentityTLAD: adjoint observation operator run" << std::endl;

@@ -46,8 +46,8 @@ subroutine identity_setup_(self, c_conf)
   self%nvars = size(config_get_string_vector(c_conf, max_string, "variables"))
   
   !> Allocate varout: variables in the observation vector
-  allocate(self%varout(self%nvars))
-  
+  allocate(self%varin(self%nvars))
+
   !> Read variable list and store in varout
   self%varin = config_get_string_vector(c_conf, max_string, "variables")
   
@@ -56,11 +56,12 @@ subroutine identity_setup_(self, c_conf)
   !> -----------------------------------------------------------------------------
   !> Allocate varin: variables we need from the model
   !> need additional slot to hold vertical coord.
-  allocate(self%varout(self%nvars+1))
+
+  allocate(self%varout(self%nvars))
   
   !> Set vars_in based on vars_out
   do ii = 1, self%nvars
-     self%varout(ii) = self%varin(ii)
+    self%varout(ii) = self%varin(ii)
   enddo
   
 
