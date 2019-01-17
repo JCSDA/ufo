@@ -25,8 +25,6 @@
 
 namespace ufo {
 
-// ----------------------------------------------------------------------------
-static ObsOperatorMaker<ObsIdentity> makerSurface_("Surface");
 // -----------------------------------------------------------------------------
 
 ObsIdentity::ObsIdentity(const ioda::ObsSpace & odb,
