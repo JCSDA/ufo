@@ -535,13 +535,13 @@ SUBROUTINE RTTOV_Load_Atm_Data(N_PROFILES,N_LAYERS,geovals,obss,profiles)
     !DAR: Could/should get emissivity here?
     ! call rttov_get_emissivity()
 
-    CALL obsspace_get_var(obss, TmpVar, "height", nlocs)
-    profiles(:)%elevation = TmpVar(:) / 1000.0 !m
+    CALL obsspace_get_db(obss, "", "height", TmpVar)
+    profiles(:)%elevation = TmpVar(:) / 1000.0 !m -> km for RTTOV
 
-    CALL obsspace_get_var(obss, TmpVar, "latitude", nlocs)
+    CALL obsspace_get_db(obss, "", "latitude", TmpVar)
     profiles(:)%latitude = TmpVar(:)
 
-    CALL obsspace_get_var(obss, TmpVar, "longitude", nlocs)
+    CALL obsspace_get_db(obss, "", "longitude", TmpVar)
     profiles(:)%longitude = TmpVar(:)
   ENDDO
 
@@ -564,16 +564,16 @@ SUBROUTINE rttov_Load_Geom_Data(obss,profiles)
   nlocs = obsspace_get_nlocs(obss)
   ALLOCATE(TmpVar(nlocs))
 
-  CALL obsspace_get_var(obss, TmpVar, "Sat_Zenith_Angle", nlocs)
+  CALL obsspace_get_db(obss, "", "Sat_Zenith_Angle", TmpVar)
   profiles(:)%zenangle = TmpVar(:)
 
-  CALL obsspace_get_var(obss, TmpVar, "Sat_Azimuth_Angle", nlocs)
+  CALL obsspace_get_db(obss, "", "Sat_Azimuth_Angle", TmpVar)
   profiles(:)%azangle = TmpVar(:)
 
-  CALL obsspace_get_var(obss, TmpVar, "Sol_Zenith_Angle", nlocs)
+  CALL obsspace_get_db(obss, "", "Sol_Zenith_Angle", TmpVar)
   profiles(:)%sunzenangle = TmpVar(:)
 
-  CALL obsspace_get_var(obss, TmpVar, "Sol_Azimuth_Angle", nlocs)
+  CALL obsspace_get_db(obss, "", "Sol_Azimuth_Angle", TmpVar)
   profiles(:)%sunazangle = TmpVar(:)
 
 
