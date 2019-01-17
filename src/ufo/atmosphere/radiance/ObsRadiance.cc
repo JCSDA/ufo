@@ -51,7 +51,7 @@ ObsRadiance::ObsRadiance(const ioda::ObsSpace & odb, const eckit::Configuration 
   std::set<int> channels = parseIntSet(chlist);
   std::vector<std::string> vout;
   for (const int jj : channels) {
-    vout.push_back("temperature_brightness_"+std::to_string(jj)+"_");
+    vout.push_back("brightness_temperature_"+std::to_string(jj)+"_");
   }
   varout_.reset(new oops::Variables(vout));
 
