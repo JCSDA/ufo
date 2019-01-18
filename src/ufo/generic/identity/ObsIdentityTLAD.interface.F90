@@ -57,16 +57,11 @@ end subroutine ufo_identity_tlad_setup_c
 subroutine ufo_identity_tlad_delete_c(c_key_self) bind(c,name='ufo_identity_tlad_delete_f90')
 implicit none
 integer(c_int), intent(inout) :: c_key_self
-    
+
 type(ufo_identity_tlad), pointer :: self
 
 call ufo_identity_tlad_registry%get(c_key_self, self)
 
-! --------------------------------
-! TODO: Not sure if we need that!
-!       It was in the interp code
-!       Commented for now
-! --------------------------------
 call self%opr_delete()
 call ufo_identity_tlad_registry%remove(c_key_self)
 

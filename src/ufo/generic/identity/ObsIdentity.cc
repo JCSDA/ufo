@@ -35,12 +35,6 @@ ObsIdentity::ObsIdentity(const ioda::ObsSpace & odb,
   char *buffin = new char[c_name_size];
   char *buffout = new char[c_name_size];
   const eckit::Configuration * configc = &config;
-//  const std::vector<std::string> vvin{"ocean_upper_level_temperature"};
-//  varin_.reset(new oops::Variables(vvin));
-//  // from config
-//  const std::vector<std::string> vvout{"obs_sst"};
-//  varout_.reset(new oops::Variables(vvout));
-//  const eckit::Configuration * configc = &config;
 
   ufo_identity_setup_f90(keyOperObsIdentity_, &configc, buffin, buffout,
                          c_name_size);
@@ -64,7 +58,7 @@ ObsIdentity::~ObsIdentity() {
 }
 
 // -----------------------------------------------------------------------------
-// should it be GeoVaLs & gom ?
+
 void ObsIdentity::simulateObs(const GeoVaLs & gom, ioda::ObsVector & ovec,
                               const ObsBias & bias) const {
   ufo_identity_simobs_f90(keyOperObsIdentity_, gom.toFortran(), odb_,

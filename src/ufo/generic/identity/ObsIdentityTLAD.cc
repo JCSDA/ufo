@@ -37,7 +37,7 @@ ObsIdentityTLAD::ObsIdentityTLAD(const ioda::ObsSpace & odb,
   const eckit::Configuration * configc = &config;
 
   ufo_identity_tlad_setup_f90(keyOperObsIdentity_, &configc, buffin, buffout,
-                             c_name_size);
+                              c_name_size);
 
   std::string vstr_in(buffin), vstr_out(buffout);
   std::vector<std::string> vvin;

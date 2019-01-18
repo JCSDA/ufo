@@ -12,7 +12,7 @@ module ufo_identity_mod
  use ufo_vars_mod
  use ufo_geovals_mod
  use ufo_geovals_mod_c, only: ufo_geovals_registry
- 
+
  use ufo_basis_mod, only : ufo_basis
  use obsspace_mod
 
@@ -44,26 +44,23 @@ subroutine identity_setup_(self, c_conf)
 
   !> Size of variables
   self%nvars = size(config_get_string_vector(c_conf, max_string, "variables"))
-  
+
   !> Allocate varout: variables in the observation vector
   allocate(self%varin(self%nvars))
 
   !> Read variable list and store in varout
   self%varin = config_get_string_vector(c_conf, max_string, "variables")
-  
-  ! -----------------------------------------------------------------------------
-  !> TODO: No need to set-up varout here
+
   !> -----------------------------------------------------------------------------
   !> Allocate varin: variables we need from the model
   !> need additional slot to hold vertical coord.
 
   allocate(self%varout(self%nvars))
-  
+
   !> Set vars_in based on vars_out
   do ii = 1, self%nvars
     self%varout(ii) = self%varin(ii)
   enddo
-  
 
 end subroutine identity_setup_
 
@@ -75,12 +72,11 @@ subroutine identity_simobs_(self, geovals, hofx, obss)
   type(ufo_geovals),  intent(in)     :: geovals
   real(c_double),     intent(inout)  :: hofx(:)
   type(c_ptr), value, intent(in)     :: obss
-  
-  
+
   integer :: iobs, ivar, nlocs
   type(ufo_geoval), pointer :: point
   character(len=MAXVARLEN) :: geovar
-  
+
   !> Get the observation vertical coordinates
   nlocs = obsspace_get_nlocs(obss)
 
@@ -90,10 +86,10 @@ subroutine identity_simobs_(self, geovals, hofx, obss)
 
     !> Get profile for this variable from geovals
     call ufo_geovals_get_var(geovals, geovar, point)
-    
+
     !> Here we just apply a identity hofx
     do iobs = 1, nlocs
-        hofx(ivar + (iobs-1)*self%nvars) = point%vals(1,iobs)
+      hofx(ivar + (iobs-1)*self%nvars) = point%vals(1,iobs)
     enddo
   enddo
 
@@ -106,7 +102,6 @@ subroutine  destructor(self)
   if (allocated(self%varout)) deallocate(self%varout)
   if (allocated(self%varin)) deallocate(self%varin)
 end subroutine destructor
-
 
 
 end module ufo_identity_mod

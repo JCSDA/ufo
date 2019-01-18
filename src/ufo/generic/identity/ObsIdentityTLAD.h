@@ -37,7 +37,7 @@ namespace ufo {
 // -----------------------------------------------------------------------------
 /// Identity TL/AD observation operator class
 class ObsIdentityTLAD : public LinearObsOperatorBase,
-                              private util::ObjectCounter<ObsIdentityTLAD> {
+                        private util::ObjectCounter<ObsIdentityTLAD> {
  public:
   static const std::string classname() {return "ufo::ObsIdentityTLAD";}
 
