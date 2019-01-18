@@ -28,8 +28,11 @@ static oops::FilterMaker<UfoTrait, oops::ObsFilter<UfoTrait, ObsBoundsCheck> >
 // -----------------------------------------------------------------------------
 
 ObsBoundsCheck::ObsBoundsCheck(ioda::ObsSpace & obsdb, const eckit::Configuration & config)
-  : obsdb_(obsdb), config_(config), nogeovals_()
-{}
+  : obsdb_(obsdb), config_(config), geovars_(preProcessWhere(config_))
+{
+  oops::Log::debug() << "ObsBoundsCheck: config = " << config_ << std::endl;
+  oops::Log::debug() << "ObsBoundsCheck: geovars = " << geovars_ << std::endl;
+}
 
 // -----------------------------------------------------------------------------
 

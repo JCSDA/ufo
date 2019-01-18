@@ -29,8 +29,11 @@ static oops::FilterMaker<UfoTrait, oops::ObsFilter<UfoTrait, ObsDomainCheck>>
 // -----------------------------------------------------------------------------
 
 ObsDomainCheck::ObsDomainCheck(ioda::ObsSpace & obsdb, const eckit::Configuration & config)
-  : obsdb_(obsdb), config_(config), nogeovals_()
-{}
+  : obsdb_(obsdb), config_(config), geovars_(preProcessWhere(config_))
+{
+  oops::Log::debug() << "ObsDomainCheck: config = " << config_ << std::endl;
+  oops::Log::debug() << "ObsDomainCheck: geovars = " << geovars_ << std::endl;
+}
 
 // -----------------------------------------------------------------------------
 

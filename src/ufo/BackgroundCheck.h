@@ -45,12 +45,12 @@ class BackgroundCheck : public util::Printable,
   void priorFilter(const GeoVaLs &) const;
   void postFilter(const ioda::ObsVector &) const;
 
-  const oops::Variables & requiredGeoVaLs() const {return nogeovals_;}
+  const oops::Variables & requiredGeoVaLs() const {return geovars_;}
 
  private:
   void print(std::ostream &) const;
   F90bgcheck key_;
-  const oops::Variables nogeovals_;
+  const oops::Variables geovars_;
 };
 
 }  // namespace ufo

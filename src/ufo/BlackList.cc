@@ -30,24 +30,9 @@ static oops::FilterMaker<UfoTrait, oops::ObsFilter<UfoTrait, BlackList>> mkBlkLs
 // -----------------------------------------------------------------------------
 
 BlackList::BlackList(ioda::ObsSpace & obsdb, const eckit::Configuration & config)
-  : obsdb_(obsdb), config_(config), geovars_()
+  : obsdb_(obsdb), config_(config), geovars_(preProcessWhere(config_))
 {
   oops::Log::debug() << "BlackList: config = " << config_ << std::endl;
-
-  std::vector<eckit::LocalConfiguration> masks;
-  config_.get("where", masks);
-
-  std::vector<std::string> vv;
-  for (size_t jm = 0; jm < masks.size(); ++jm) {
-    const std::string vargrp(masks[jm].getString("variable"));
-    std::string var;
-    std::string grp;
-    splitVarGroup(vargrp, var, grp);
-    if (grp == "GeoVaLs") vv.push_back(var);
-  }
-
-  oops::Variables req(vv);
-  geovars_ += req;
   oops::Log::debug() << "BlackList: geovars = " << geovars_ << std::endl;
 }
 

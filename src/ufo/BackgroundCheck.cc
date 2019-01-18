@@ -16,6 +16,7 @@
 #include "oops/util/Logger.h"
 
 #include "ufo/GeoVaLs.h"
+#include "ufo/processWhere.h"
 #include "ufo/UfoTrait.h"
 
 namespace ufo {
@@ -26,12 +27,15 @@ static oops::FilterMaker<UfoTrait, oops::ObsFilter<UfoTrait, BackgroundCheck> >
 // -----------------------------------------------------------------------------
 
 BackgroundCheck::BackgroundCheck(const ioda::ObsSpace & os, const eckit::Configuration & config)
-  : key_(0), nogeovals_()
+  : key_(0), geovars_(preProcessWhere(config))
 {
   oops::Log::trace() << "BackgroundCheck contructor starting" << std::endl;
   const eckit::Configuration * conf = &config;
   ufo_bgcheck_create_f90(key_, os, conf);
   oops::Log::trace() << "BackgroundCheck contructor key = " << key_ << std::endl;
+  oops::Log::debug() << "BackgroundCheck: config = " << config << std::endl;
+  oops::Log::debug() << "BackgroundCheck: geovars = " << geovars_ << std::endl;
+  ASSERT(geovars_.size() == 0);
 }
 
 // -----------------------------------------------------------------------------

@@ -14,11 +14,30 @@
 #include "eckit/config/LocalConfiguration.h"
 #include "ioda/ObsDataVector.h"
 #include "ioda/ObsSpace.h"
+#include "oops/base/Variables.h"
 #include "oops/util/missingValues.h"
 #include "ufo/GeoVaLs.h"
 #include "ufo/utils/IntSetParser.h"
 
 namespace ufo {
+
+// -----------------------------------------------------------------------------
+
+oops::Variables preProcessWhere(const eckit::Configuration & config) {
+  std::vector<eckit::LocalConfiguration> masks;
+  config.get("where", masks);
+
+  std::vector<std::string> vv;
+  for (size_t jm = 0; jm < masks.size(); ++jm) {
+    const std::string vargrp(masks[jm].getString("variable"));
+    std::string var;
+    std::string grp;
+    splitVarGroup(vargrp, var, grp);
+    if (grp == "GeoVaLs") vv.push_back(var);
+  }
+
+  return oops::Variables(vv);
+}
 
 // -----------------------------------------------------------------------------
 

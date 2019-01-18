@@ -39,14 +39,14 @@ class ObsBoundsCheck : public util::Printable,
   void priorFilter(const GeoVaLs &) const;
   void postFilter(const ioda::ObsVector &) const {}
 
-  const oops::Variables & requiredGeoVaLs() const {return nogeovals_;}
+  const oops::Variables & requiredGeoVaLs() const {return geovars_;}
 
  private:
   void print(std::ostream &) const;
 
   ioda::ObsSpace & obsdb_;
   const eckit::LocalConfiguration config_;
-  const oops::Variables nogeovals_;
+  const oops::Variables geovars_;
 };
 
 }  // namespace ufo
