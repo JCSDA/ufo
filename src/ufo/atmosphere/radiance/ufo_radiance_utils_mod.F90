@@ -133,7 +133,7 @@ character(max_string) :: err_msg
  ! Populate the atmosphere structures for CRTM (atm(k1), for the k1-th profile)
  ! ----------------------------------------------------------------------------
  do k1 = 1,N_PROFILES
-    call ufo_geovals_get_var(geovals, var_tv, geoval)
+    call ufo_geovals_get_var(geovals, var_ts, geoval)
 
     ! Check model levels is consistent in geovals & crtm
     if (k1 == 1) then
