@@ -31,7 +31,7 @@ static LinearObsOperatorMaker<ObsRadianceTLAD> makerAvhrrTL_("AVHRR");
 ObsRadianceTLAD::ObsRadianceTLAD(const ioda::ObsSpace & odb, const eckit::Configuration & config)
   : keyOperRadiance_(0), varin_(), odb_(odb)
 {
-  const std::vector<std::string> vv{"virtual_temperature"};
+  const std::vector<std::string> vv{"air_temperature"};
   varin_.reset(new oops::Variables(vv));
   const eckit::LocalConfiguration obsOptions(config, "ObsOptions");
   const eckit::Configuration * configc = &obsOptions;

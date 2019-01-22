@@ -31,7 +31,7 @@ static ObsOperatorMaker<ObsRadiance> makerAvhrr_("AVHRR");
 ObsRadiance::ObsRadiance(const ioda::ObsSpace & odb, const eckit::Configuration & config)
   : keyOperRadiance_(0), odb_(odb), varin_(), varout_()
 {
-  const std::vector<std::string> vv{"virtual_temperature", "humidity_mixing_ratio", "air_pressure",
+  const std::vector<std::string> vv{"air_temperature", "humidity_mixing_ratio", "air_pressure",
                                     "air_pressure_levels", "mass_concentration_of_ozone_in_air",
                                     "mass_concentration_of_carbon_dioxide_in_air",
                                     "atmosphere_mass_content_of_cloud_liquid_water",
