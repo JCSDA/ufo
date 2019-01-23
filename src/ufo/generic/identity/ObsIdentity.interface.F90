@@ -63,12 +63,7 @@ type(ufo_identity), pointer :: self
 
 call ufo_identity_registry%get(c_key_self, self)
 
-! --------------------------------
-! TODO: Not sure if we need that!
-!       Commentd for now
-! --------------------------------
-!call self%delete()
-!call ufo_identity_registry%remove(c_key_self)
+call ufo_identity_registry%remove(c_key_self)
 
 end subroutine ufo_identity_delete_c
 

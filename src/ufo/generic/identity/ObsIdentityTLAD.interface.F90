@@ -32,12 +32,12 @@ contains
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_identity_tlad_setup_c(c_key_self, c_conf, csin, csout, c_str_size) bind(c,name='ufo_identity_tlad_setup_f90')
+subroutine ufo_identity_tlad_setup_c(c_key_self, c_conf, csin, c_str_size) bind(c,name='ufo_identity_tlad_setup_f90')
 implicit none
 integer(c_int), intent(inout) :: c_key_self
 type(c_ptr), intent(in) :: c_conf ! config here in case we want to read vars from file
 integer(c_int), intent(in) :: c_str_size
-character(kind=c_char,len=1),intent(inout) :: csin(c_str_size+1),csout(c_str_size+1) 
+character(kind=c_char,len=1),intent(inout) :: csin(c_str_size+1)
 
 type(ufo_identity_tlad), pointer :: self
 integer :: ii
@@ -46,8 +46,7 @@ call ufo_identity_tlad_registry%setup(c_key_self, self)
 
 call self%setup(c_conf)
 
-!> Set vars_out
-call f_c_string_vector(self%varout, csout)
+!> Set varsin
 call f_c_string_vector(self%varin, csin)
 
 end subroutine ufo_identity_tlad_setup_c

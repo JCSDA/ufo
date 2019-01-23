@@ -37,7 +37,6 @@ module ufo_identity_tlad_mod
    integer          :: nval, nlocs
    integer, public  :: nvars
    character(len=max_string), public, allocatable :: varin(:)
-   character(len=max_string), public, allocatable :: varout(:)
  contains
    procedure :: setup  => identity_tlad_setup_
    procedure :: delete  => identity_tlad_delete_
@@ -62,19 +61,11 @@ subroutine identity_tlad_setup_(self, c_conf)
   !> Size of variables
   self%nvars = size(config_get_string_vector(c_conf, max_string, "variables"))
 
-  !> Allocate varout
+  !> Allocate varin
   allocate(self%varin(self%nvars))
 
-  !> Read variable list and store in varout
+  !> Read variable list and store in varin
   self%varin = config_get_string_vector(c_conf, max_string, "variables")
-
-  !> Allocate varin, need additional slot to hold vertical coord.
-  allocate(self%varout(self%nvars))
-
-  !> Set vars_in based on vars_out
-  do ii = 1, self%nvars
-    self%varout(ii) = self%varin(ii)
-  enddo
 
 end subroutine identity_tlad_setup_
 
@@ -173,7 +164,6 @@ subroutine  destructor(self)
   self%nvars = 0
   self%ltraj = .false.
   if (allocated(self%varin)) deallocate(self%varin)
-  if (allocated(self%varout)) deallocate(self%varout)
 end subroutine destructor
 
 

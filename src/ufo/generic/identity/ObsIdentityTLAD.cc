@@ -36,16 +36,13 @@ ObsIdentityTLAD::ObsIdentityTLAD(const ioda::ObsSpace & odb,
   char *buffout = new char[c_name_size];
   const eckit::Configuration * configc = &config;
 
-  ufo_identity_tlad_setup_f90(keyOperObsIdentity_, &configc, buffin, buffout,
+  ufo_identity_tlad_setup_f90(keyOperObsIdentity_, &configc, buffin,
                               c_name_size);
 
-  std::string vstr_in(buffin), vstr_out(buffout);
+  std::string vstr_in(buffin);
   std::vector<std::string> vvin;
-  std::vector<std::string> vvout;
   boost::split(vvin, vstr_in, boost::is_any_of("\t"));
-  boost::split(vvout, vstr_out, boost::is_any_of("\t"));
   varin_.reset(new oops::Variables(vvin));
-  varout_.reset(new oops::Variables(vvout));
 
   oops::Log::trace() << "ObsIdentityTLAD created." << std::endl;
 }
