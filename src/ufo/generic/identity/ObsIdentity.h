@@ -5,18 +5,18 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
  */
 
-#ifndef UFO_MARINE_SEASURFACETEMP_OBSSEASURFACETEMP_H_
-#define UFO_MARINE_SEASURFACETEMP_OBSSEASURFACETEMP_H_
+#ifndef UFO_GENERIC_IDENTITY_OBSIDENTITY_H_
+#define UFO_GENERIC_IDENTITY_OBSIDENTITY_H_
 
 #include <ostream>
 #include <string>
+#include <vector>
 
 #include <boost/scoped_ptr.hpp>
 
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
-
-#include "ufo/marine/seasurfacetemp/ObsSeaSurfaceTemp.interface.h"
+#include "ufo/generic/identity/ObsIdentity.interface.h"
 #include "ufo/ObsOperatorBase.h"
 
 /// Forward declarations
@@ -34,14 +34,14 @@ namespace ufo {
   class ObsBias;
 
 // -----------------------------------------------------------------------------
-/// Sea surface temperature observation operator class
-class ObsSeaSurfaceTemp : public ObsOperatorBase,
-                          private util::ObjectCounter<ObsSeaSurfaceTemp> {
+/// Generic identity observation operator class
+class ObsIdentity : public ObsOperatorBase,
+                          private util::ObjectCounter<ObsIdentity> {
  public:
-  static const std::string classname() {return "ufo::ObsSeaSurfaceTemp";}
+  static const std::string classname() {return "ufo::ObsIdentity";}
 
-  ObsSeaSurfaceTemp(const ioda::ObsSpace &, const eckit::Configuration &);
-  virtual ~ObsSeaSurfaceTemp();
+  ObsIdentity(const ioda::ObsSpace &, const eckit::Configuration &);
+  virtual ~ObsIdentity();
 
 // Obs Operator
   void simulateObs(const GeoVaLs &, ioda::ObsVector &, const ObsBias &) const;
@@ -50,12 +50,12 @@ class ObsSeaSurfaceTemp : public ObsOperatorBase,
   const oops::Variables & variables() const {return *varin_;}
   const oops::Variables & observed() const {return *varout_;}
 
-  int & toFortran() {return keyOper_;}
-  const int & toFortran() const {return keyOper_;}
+  int & toFortran() {return keyOperObsIdentity_;}
+  const int & toFortran() const {return keyOperObsIdentity_;}
 
  private:
   void print(std::ostream &) const;
-  F90hop keyOper_;
+  F90hop keyOperObsIdentity_;
   const ioda::ObsSpace& odb_;
   boost::scoped_ptr<const oops::Variables> varin_;
   boost::scoped_ptr<const oops::Variables> varout_;
@@ -64,4 +64,4 @@ class ObsSeaSurfaceTemp : public ObsOperatorBase,
 // -----------------------------------------------------------------------------
 
 }  // namespace ufo
-#endif  // UFO_MARINE_SEASURFACETEMP_OBSSEASURFACETEMP_H_
+#endif  // UFO_GENERIC_IDENTITY_OBSIDENTITY_H_
