@@ -5,8 +5,8 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#ifndef UFO_ATMOSPHERE_GNSSRO_BNDGSI_FORTRANBNDGSI_H_
-#define UFO_ATMOSPHERE_GNSSRO_BNDGSI_FORTRANBNDGSI_H_
+#ifndef UFO_ATMOSPHERE_GNSSRO_BNDGSI_OBSGNSSROBNDGSI_INTERFACE_H_
+#define UFO_ATMOSPHERE_GNSSRO_BNDGSI_OBSGNSSROBNDGSI_INTERFACE_H_
 
 #include "ioda/ObsSpace.h"
 #include "ufo/Fortran.h"
@@ -39,4 +39,4 @@ extern "C" {
 }  // extern C
 
 }  // namespace ufo
-#endif  // UFO_ATMOSPHERE_GNSSRO_BNDGSI_FORTRANBNDGSI_H_
+#endif  // UFO_ATMOSPHERE_GNSSRO_BNDGSI_OBSGNSSROBNDGSI_INTERFACE_H_

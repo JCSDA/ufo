@@ -8,6 +8,7 @@
 #include "ufo/constituents/aod/ObsAod.h"
 
 #include <ostream>
+#include <set>
 #include <string>
 #include <vector>
 
@@ -17,7 +18,7 @@
 
 #include "ufo/GeoVaLs.h"
 #include "ufo/ObsBias.h"
-#include "ufo/utils/ChannelsParser.h"
+#include "ufo/utils/IntSetParser.h"
 
 namespace ufo {
 
@@ -38,10 +39,10 @@ ObsAod::ObsAod(const ioda::ObsSpace & odb, const eckit::Configuration & config)
 
   // parse channels from the config and create variable names
   std::string chlist = config.getString("channels");
-  std::vector<int> channels = parseChannels(chlist);
+  std::set<int> channels = parseIntSet(chlist);
   std::vector<std::string> vout;
-  for (int i = 0; i < channels.size(); i++) {
-     vout.push_back("aerosol_optical_depth_"+std::to_string(channels[i])+"_");
+  for (const int jj : channels) {
+     vout.push_back("aerosol_optical_depth_"+std::to_string(jj)+"_");
   }
   varout_.reset(new oops::Variables(vout));
 

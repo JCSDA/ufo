@@ -15,7 +15,7 @@
 
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
-#include "ufo/atmosphere/gnssro/BndGSI/FortranBndGSI.h"
+#include "ufo/atmosphere/gnssro/BndGSI/ObsGnssroBndGSI.interface.h"
 #include "ufo/ObsOperatorBase.h"
 
 namespace eckit {

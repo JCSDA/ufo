@@ -17,6 +17,7 @@ INTEGER, PARAMETER, PUBLIC :: n_aerosols_gocart_default=14,&
 
 integer, parameter, public :: MAXVARLEN=56
 character(len=MAXVARLEN), public :: var_tv   = "virtual_temperature"
+character(len=MAXVARLEN), public :: var_ts   = "air_temperature"
 character(len=MAXVARLEN), public :: var_prsl = "atmosphere_ln_pressure_coordinate"
 character(len=MAXVARLEN), public :: var_mixr = "humidity_mixing_ratio"
 character(len=MAXVARLEN), public :: var_q    = "specific_humidity"

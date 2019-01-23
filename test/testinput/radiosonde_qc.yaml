@@ -48,6 +48,6 @@ Observations:
       variables:
       - air_temperature
       threshold: 3.0
-    rmsequiv: 118.815397173984
-    tolerance: 1.0e-01  # in % so that corresponds to 10^-3
+    rmsequiv: 118.76765474044042
+    tolerance: 1.0e-03  # in % so that corresponds to 10^-5
     ObsBias: {}

@@ -27,16 +27,16 @@ static oops::FilterMaker<UfoTrait, oops::ObsFilter<UfoTrait, BackgroundCheck> >
 
 BackgroundCheck::BackgroundCheck(const ioda::ObsSpace & os,
                                  const eckit::Configuration & config) {
-  oops::Log::debug() << "BackgroundCheck contructor starting" << std::endl;
+  oops::Log::trace() << "BackgroundCheck contructor starting" << std::endl;
   const eckit::Configuration * conf = &config;
   ufo_bgcheck_create_f90(key_, os, conf);
-  oops::Log::debug() << "BackgroundCheck contructor key = " << key_ << std::endl;
+  oops::Log::trace() << "BackgroundCheck contructor key = " << key_ << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
 BackgroundCheck::~BackgroundCheck() {
-  oops::Log::debug() << "BackgroundCheck destructor key = " << key_ << std::endl;
+  oops::Log::trace() << "BackgroundCheck destructor key = " << key_ << std::endl;
   ufo_bgcheck_delete_f90(key_);
 }
 
@@ -47,7 +47,7 @@ void BackgroundCheck::priorFilter(const GeoVaLs & gv) const {}
 // -----------------------------------------------------------------------------
 
 void BackgroundCheck::postFilter(const ioda::ObsVector & hofx) const {
-  oops::Log::debug() << "BackgroundCheck postFilter" << std::endl;
+  oops::Log::trace() << "BackgroundCheck postFilter" << std::endl;
   ufo_bgcheck_post_f90(key_, hofx.nvars(), hofx.nlocs(), hofx.toFortran(),
                        hofx.varnames().toFortranBetter());
 }

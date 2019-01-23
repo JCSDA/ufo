@@ -4,19 +4,19 @@
 # which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 if( ${ROPP-UFO_FOUND} )
 set (  bndropp1d_src_files
-       FortranBndROPP1D.h
        ObsGnssroBndROPP1D.h
        ObsGnssroBndROPP1D.cc
-       ufo_gnssro_bndropp1d_interface.F90
+       ObsGnssroBndROPP1D.interface.h
+       ObsGnssroBndROPP1D.interface.F90
        ufo_gnssro_bndropp1d_mod.F90
 PARENT_SCOPE
 )
 else( ${ROPP-UFO_FOUND} )
 set (  bndropp1d_src_files
-       FortranBndROPP1D.h
        ObsGnssroBndROPP1D.h
        ObsGnssroBndROPP1D.cc
-       ufo_gnssro_bndropp1d_interface.F90
+       ObsGnssroBndROPP1D.interface.h
+       ObsGnssroBndROPP1D.interface.F90
        ufo_gnssro_bndropp1d_mod_stub.F90
 PARENT_SCOPE
 )

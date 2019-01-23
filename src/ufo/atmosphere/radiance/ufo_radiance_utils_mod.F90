@@ -133,7 +133,7 @@ character(max_string) :: err_msg
  ! Populate the atmosphere structures for CRTM (atm(k1), for the k1-th profile)
  ! ----------------------------------------------------------------------------
  do k1 = 1,N_PROFILES
-    call ufo_geovals_get_var(geovals, var_tv, geoval)
+    call ufo_geovals_get_var(geovals, var_ts, geoval)
 
     ! Check model levels is consistent in geovals & crtm
     if (k1 == 1) then
@@ -169,12 +169,17 @@ character(max_string) :: err_msg
     atm(k1)%Cloud(1)%Water_Content = geoval%vals(:,k1)
     call ufo_geovals_get_var(geovals, var_clwefr, geoval)
     atm(k1)%Cloud(1)%Effective_Radius = geoval%vals(:,k1)
-
+        
     atm(k1)%Cloud(2)%Type = ICE_CLOUD
     call ufo_geovals_get_var(geovals, var_cli, geoval)
     atm(k1)%Cloud(2)%Water_Content = geoval%vals(:,k1)
     call ufo_geovals_get_var(geovals, var_cliefr, geoval)
     atm(k1)%Cloud(2)%Effective_Radius = geoval%vals(:,k1)
+
+    !** BTJ added 11/20/2018 for compatibility with CRTM REL 2.3.0+
+    !** need to map to cloud fraction geoval, if it exists.  For now assume
+    !** fully filled pixel. 
+    atm(k1)%Cloud_Fraction = 1.0_fp  
  end do
 
  end subroutine Load_Atm_Data
@@ -216,7 +221,7 @@ real(kind_real), allocatable :: ObsTb(:,:)
  do n1 = 1,n_Channels
    !Get the variable name for this channel
    call get_var_name(varname_tmplate,n1,varname)
-   call obsspace_get_db(obss, "", varname, ObsTb(:,n1))
+   call obsspace_get_db(obss, "ObsValue", varname, ObsTb(:,n1))
  enddo
 
  !Loop over all n_Profiles, i.e. number of locations
@@ -327,22 +332,22 @@ integer :: nlocs
  nlocs = obsspace_get_nlocs(obss)
  allocate(TmpVar(nlocs))
 
- call obsspace_get_db(obss, "", "Sat_Zenith_Angle", TmpVar)
+ call obsspace_get_db(obss, "MetaData", "Sat_Zenith_Angle", TmpVar)
  geo(:)%Sensor_Zenith_Angle = TmpVar(:)
 
- call obsspace_get_db(obss, "", "Sol_Zenith_Angle", TmpVar)
+ call obsspace_get_db(obss, "MetaData", "Sol_Zenith_Angle", TmpVar)
  geo(:)%Source_Zenith_Angle = TmpVar(:)
 
- call obsspace_get_db(obss, "", "Sat_Azimuth_Angle", TmpVar)
+ call obsspace_get_db(obss, "MetaData", "Sat_Azimuth_Angle", TmpVar)
  geo(:)%Sensor_Azimuth_Angle = TmpVar(:)
 
- call obsspace_get_db(obss, "", "Sol_Azimuth_Angle", TmpVar)
+ call obsspace_get_db(obss, "MetaData", "Sol_Azimuth_Angle", TmpVar)
  geo(:)%Source_Azimuth_Angle = TmpVar(:)
 
- call obsspace_get_db(obss, "", "Scan_Position", TmpVar)
+ call obsspace_get_db(obss, "MetaData", "Scan_Position", TmpVar)
  geo(:)%Ifov = TmpVar(:)
 
- call obsspace_get_db(obss, "", "Scan_Angle", TmpVar) !The Sensor_Scan_Angle is optional
+ call obsspace_get_db(obss, "MetaData", "Scan_Angle", TmpVar) !The Sensor_Scan_Angle is optional
  geo(:)%Sensor_Scan_Angle = TmpVar(:)
 
  deallocate(TmpVar)

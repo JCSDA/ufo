@@ -8,6 +8,7 @@
 #include "ufo/atmosphere/radiance/ObsRadiance.h"
 
 #include <ostream>
+#include <set>
 #include <string>
 #include <vector>
 
@@ -17,8 +18,7 @@
 
 #include "ufo/GeoVaLs.h"
 #include "ufo/ObsBias.h"
-#include "ufo/utils/ChannelsParser.h"
-
+#include "ufo/utils/IntSetParser.h"
 
 namespace ufo {
 
@@ -31,7 +31,7 @@ static ObsOperatorMaker<ObsRadiance> makerAvhrr_("AVHRR");
 ObsRadiance::ObsRadiance(const ioda::ObsSpace & odb, const eckit::Configuration & config)
   : keyOperRadiance_(0), odb_(odb), varin_(), varout_()
 {
-  const std::vector<std::string> vv{"virtual_temperature", "humidity_mixing_ratio", "air_pressure",
+  const std::vector<std::string> vv{"air_temperature", "humidity_mixing_ratio", "air_pressure",
                                     "air_pressure_levels", "mass_concentration_of_ozone_in_air",
                                     "mass_concentration_of_carbon_dioxide_in_air",
                                     "atmosphere_mass_content_of_cloud_liquid_water",
@@ -48,10 +48,10 @@ ObsRadiance::ObsRadiance(const ioda::ObsSpace & odb, const eckit::Configuration 
 
   // parse channels from the config and create variable names
   std::string chlist = config.getString("channels");
-  std::vector<int> channels = parseChannels(chlist);
+  std::set<int> channels = parseIntSet(chlist);
   std::vector<std::string> vout;
-  for (int i = 0; i < channels.size(); i++) {
-    vout.push_back("temperature_brightness_"+std::to_string(channels[i])+"_");
+  for (const int jj : channels) {
+    vout.push_back("brightness_temperature_"+std::to_string(jj)+"_");
   }
   varout_.reset(new oops::Variables(vout));
 

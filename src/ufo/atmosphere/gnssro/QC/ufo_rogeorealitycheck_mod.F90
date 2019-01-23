@@ -11,6 +11,7 @@ use kinds
 use ufo_geovals_mod
 use obsspace_mod
 use config_mod
+use missing_values_mod
 
 implicit none
 public :: ufo_rogeorealitycheck, ufo_rogeorealitycheck_create, ufo_rogeorealitycheck_delete
@@ -74,7 +75,7 @@ integer(c_int32_t), allocatable   :: flags(:)
 real(kind_real)                   :: missing
 character(max_string)             :: err_msg
 
-missing = obspace_missing_value()
+missing = missing_value(missing)
 iobs    = obsspace_get_nlocs(self%obsdb)
 allocate(yalt(iobs))
 allocate(ygeoid(iobs))
@@ -93,18 +94,19 @@ call obsspace_get_db(self%obsdb, "EffectiveQC", trim(self%variable),flags )
 do jobs = 1, iobs
 
    yimph = yimpar(jobs) - ygeoid(jobs) - yearthr(jobs)
-   if (    yearthr(jobs)<=6250000 .or. yearthr(jobs)>=6450000  &
-      .or. ygeoid(jobs)<=-200 .or. ygeoid(jobs)>=200           &
-      .or. yimph<=0 .or. yimph>=90000 .and. flags(jobs)<=0.01 ) then
+!   if (    yearthr(jobs)<=6250000 .or. yearthr(jobs)>=6450000  &
+!      .or. ygeoid(jobs)<=-200 .or. ygeoid(jobs)>=200           &
+!      .or. yimph<=0 .or. yimph>=90000 .and. flags(jobs)<=0.01 ) then
+   if (     yimph<=0 .or. yimph>=90000 .and. flags(jobs)<=0.01 ) then
       flags(jobs) = ro_geocheck_flag
       ireject     = ireject + 1
    endif 
 
-   if ( (yalt(jobs)>self%ro_top_meter .or. yalt(jobs)<self%ro_bot_meter)   &
-        .and. flags(jobs)<=0.01 ) then
-      flags(jobs) = ro_rangecheck_flag
-      ireject     = ireject + 1
-   endif
+!   if ( (yalt(jobs)>self%ro_top_meter .or. yalt(jobs)<self%ro_bot_meter)   &
+!        .and. flags(jobs)<=0.01 ) then
+!      flags(jobs) = ro_rangecheck_flag
+!      ireject     = ireject + 1
+!   endif
 
 enddo
 

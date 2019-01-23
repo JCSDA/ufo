@@ -13,6 +13,7 @@ module ufo_atmvertinterp_tlad_mod
   use vert_interp_mod
   use ufo_basis_tlad_mod, only: ufo_basis_tlad
   use obsspace_mod
+  use missing_values_mod
 
   integer, parameter :: max_string=800
 
@@ -149,14 +150,14 @@ subroutine atmvertinterp_simobs_ad_(self, geovals, hofx, obss)
   integer :: iobs, ivar
   type(ufo_geoval), pointer :: profile
   character(len=MAXVARLEN) :: geovar
-  real(c_double) :: missing_value
+  real(c_double) :: missing
 
   ! Check that trajectory was set
   if (.not. self%ltraj) then
     call abor1_ftn('atmvertinterp_simobs_ad: trajectory not set!')
   endif
 
-  missing_value = obspace_missing_value()
+  missing = missing_value(missing)
 
   do ivar = 1, self%nvars
     ! Get the name of input variable in geovals
@@ -176,7 +177,7 @@ subroutine atmvertinterp_simobs_ad_(self, geovals, hofx, obss)
 
     ! Adjoint of interpolate, from hofx into geovals
     do iobs = 1, self%nlocs
-      if (hofx(ivar + (iobs-1)*self%nvars) /= missing_value) then
+      if (hofx(ivar + (iobs-1)*self%nvars) /= missing) then
         call vert_interp_apply_ad(profile%nval, profile%vals(:,iobs), &
                                 & hofx(ivar + (iobs-1)*self%nvars), self%wi(iobs), self%wf(iobs))
       endif
