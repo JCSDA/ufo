@@ -107,7 +107,7 @@ type(CRTM_RTSolution_type), allocatable :: rts_K(:,:)
  ! Get number of profile and layers from geovals
  ! ---------------------------------------------
  self%n_Profiles = geovals%nobs
- call ufo_geovals_get_var(geovals, var_tv, temp)
+ call ufo_geovals_get_var(geovals, var_ts, temp)
  self%n_Layers = temp%nval
  nullify(temp)
 
@@ -316,8 +316,8 @@ type(ufo_geoval), pointer :: tv_d
  ! Temperature
  ! -----------
 
- ! Get tv from geovals
- call ufo_geovals_get_var(geovals, var_tv, tv_d)
+ ! Get t from geovals
+ call ufo_geovals_get_var(geovals, var_ts, tv_d)
 
  ! Check model levels is consistent in geovals & crtm
  if (tv_d%nval /= self%n_Layers) then
@@ -375,8 +375,8 @@ type(ufo_geoval), pointer :: tv_d
  ! Temperature
  ! -----------
 
- ! Get tv from geovals
- call ufo_geovals_get_var(geovals, var_tv, tv_d)
+ ! Get t from geovals
+ call ufo_geovals_get_var(geovals, var_ts, tv_d)
 
  ! allocate if not yet allocated
  if (.not. allocated(tv_d%vals)) then
