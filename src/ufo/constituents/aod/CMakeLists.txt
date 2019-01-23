@@ -12,7 +12,6 @@ set ( aod_files
     ObsAod.interface.h
     ObsAodTLAD.interface.F90
     ObsAodTLAD.interface.h
-    ufo_aod_misc.F90
     ufo_aod_utils_mod.F90
     ufo_aod_mod.F90
     ufo_aod_tlad_mod.F90

@@ -89,7 +89,7 @@ CONTAINS
     ENDIF
        
     self%n_profiles = geovals%nobs
-    CALL ufo_geovals_get_var(geovals, var_t, geoval)
+    CALL ufo_geovals_get_var(geovals, var_ts, geoval)
     self%n_layers = geoval%nval
     NULLIFY(geoval)
 

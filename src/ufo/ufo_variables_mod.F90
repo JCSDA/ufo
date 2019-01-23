@@ -88,8 +88,6 @@ CHARACTER(len=MAXVARLEN), DIMENSION(n_aerosols_gocart_esrl), PUBLIC :: var_aeros
      &"seas4                                                   ",&
      &"p25                                                     "]
 
-CHARACTER(len=MAXVARLEN), PUBLIC :: var_t="temperature"
-
 character(len=MAXVARLEN), public :: var_seaicefrac    = "ice_concentration"
 character(len=MAXVARLEN), public :: var_stericheight  = "steric_height"
 character(len=MAXVARLEN), public :: var_seaicethick   = "ice_thickness"

@@ -175,7 +175,7 @@ CONTAINS
 
     DO k1 = 1,n_profiles
 
-       varname=var_t
+       varname=var_ts
        CALL ufo_geovals_get_var(geovals, varname,geoval)
        atm(k1)%temperature(1:n_layers) = geoval%vals(:,k1) 
 

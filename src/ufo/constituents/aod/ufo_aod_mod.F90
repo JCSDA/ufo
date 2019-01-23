@@ -12,10 +12,11 @@ MODULE ufo_aod_mod
   use ufo_locs_mod
   use ufo_geovals_mod
   use kinds
-  USE ufo_aod_misc
+!  USE ufo_aod_misc
   use crtm_module
   USE ufo_basis_mod, only: ufo_basis
   use obsspace_mod
+  USE ufo_aod_utils_mod, only: aerosol_concentration_minvalue
 
   implicit none
 
@@ -445,7 +446,7 @@ contains
 
       DO k1 = 1,N_PROFILES
 
-         varname=var_t
+         varname=var_ts
          call ufo_geovals_get_var(geovals, varname, geoval)
          IF (flip_vertical) THEN
             atm(k1)%Temperature(1:N_LAYERS) = geoval%vals(N_LAYERS:1:-1,k1)
@@ -556,7 +557,7 @@ contains
             ENDIF
 
             atm(m)%aerosol(i)%Concentration=MAX(atm(m)%aerosol(i)%Concentration*ugkg_kgm2,&
-                 &small_value)
+                 &aerosol_concentration_minvalue)
 
             SELECT CASE ( TRIM(varname))
             CASE ('sulf')
