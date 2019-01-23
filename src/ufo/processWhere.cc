@@ -88,7 +88,7 @@ std::vector<bool> processWhere(ioda::ObsSpace & obsdb, const GeoVaLs & gvals,
 
 //    Apply mask is_defined
       if (masks[jm].has("is_defined")) {
-        if (obsdb.has(obgrp, var)) {
+        if (obsdb.has(obgrp, var) || grp == "GeoVaLs") {
           for (size_t jj = 0; jj < nlocs; ++jj) {
             if (values[jj] == missing) where[jj] = false;
           }
@@ -99,7 +99,7 @@ std::vector<bool> processWhere(ioda::ObsSpace & obsdb, const GeoVaLs & gvals,
 
 //    Apply mask is_not_defined
       if (masks[jm].has("is_not_defined")) {
-        if (obsdb.has(obgrp, var)) {
+        if (obsdb.has(obgrp, var) || grp == "GeoVaLs") {
           for (size_t jj = 0; jj < nlocs; ++jj) {
             if (values[jj] != missing) where[jj] = false;
           }
@@ -110,13 +110,13 @@ std::vector<bool> processWhere(ioda::ObsSpace & obsdb, const GeoVaLs & gvals,
 //  Process masks on integer values
     if (masks[jm].has("is_in") || masks[jm].has("is_not_in")) {
 //    Get int values
-      ioda::ObsDataVector<int> values(obsdb, var, obgrp);
+      ioda::ObsDataVector<int> valint(obsdb, var, obgrp);
 
 //    Apply mask is_in
       if (masks[jm].has("is_in")) {
         std::set<int> whitelist = parseIntSet(masks[jm].getString("is_in"));
         for (size_t jj = 0; jj < nlocs; ++jj) {
-          if (!contains(whitelist, values[jj])) where[jj] = false;
+          if (!contains(whitelist, valint[jj])) where[jj] = false;
         }
       }
 
@@ -124,7 +124,7 @@ std::vector<bool> processWhere(ioda::ObsSpace & obsdb, const GeoVaLs & gvals,
       if (masks[jm].has("is_not_in")) {
         std::set<int> blacklist = parseIntSet(masks[jm].getString("is_not_in"));
         for (size_t jj = 0; jj < nlocs; ++jj) {
-          if (contains(blacklist, values[jj])) where[jj] = false;
+          if (contains(blacklist, valint[jj])) where[jj] = false;
         }
       }
     }
