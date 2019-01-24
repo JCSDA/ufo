@@ -6,7 +6,6 @@
  */
 
 #include <memory>
-#include <random>
 #include <vector>
 
 #include "ufo/Locations.h"
@@ -14,6 +13,7 @@
 #include "eckit/config/Configuration.h"
 
 #include "oops/util/Logger.h"
+#include "oops/util/Random.h"
 
 #include "ufo/Locations.interface.h"
 
@@ -58,24 +58,20 @@ Locations::Locations(const eckit::Configuration & conf) {
   if (conf.has("Nrandom")) {
     int Nrandom = conf.getInt("Nrandom");
 
-    std::unique_ptr<std::mt19937> generator;
-
+    unsigned int rseed;
     if (conf.has("random_seed")) {
-      int rseed = conf.getInt("random_seed");
-      generator.reset(new std::mt19937(rseed));
+      rseed = conf.getInt("random_seed");
     } else {
-      generator.reset(new std::mt19937(time(0)));
+      rseed = std::time(0);
     }
 
-    static std::uniform_real_distribution<double> distribution(-90, 90);
+    // random longitudes range from 0 to 360 degrees
+    util::UniformDistribution<double> xx(Nrandom, 0.0, 360.0, rseed);
+    for (size_t jj=0; jj < Nrandom; ++jj) lons.push_back(xx[jj]);
 
     // random latitudes range from -90 to 90 degrees
-    // random longitudes range from 0 to 360 degrees
-    std::vector<double> xx(Nrandom, 0.0);
-    for (size_t jj=0; jj < Nrandom; ++jj) xx[jj] = distribution(*generator);
-    lats.insert(lats.end(), xx.begin(), xx.end());
-    for (size_t jj=0; jj < Nrandom; ++jj) xx[jj] = 2.0*distribution(*generator) + 180.0;
-    lons.insert(lons.end(), xx.begin(), xx.end());
+    util::UniformDistribution<double> yy(Nrandom, -90.0, 90.0, rseed);
+    for (size_t jj=0; jj < Nrandom; ++jj) lats.push_back(yy[jj]);
 
     nloc += Nrandom;
 
