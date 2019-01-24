@@ -13,6 +13,7 @@
 
 #include "eckit/config/LocalConfiguration.h"
 #include "ioda/ObsSpace.h"
+#include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
 #include "oops/util/Printable.h"
 
@@ -40,11 +41,14 @@ class BlackList : public util::Printable,
   void priorFilter(const GeoVaLs &) const;
   void postFilter(const ioda::ObsVector &) const {}
 
+  const oops::Variables & requiredGeoVaLs() const {return geovars_;}
+
  private:
   void print(std::ostream &) const;
 
   ioda::ObsSpace & obsdb_;
   const eckit::LocalConfiguration config_;
+  oops::Variables geovars_;
 };
 
 }  // namespace ufo
