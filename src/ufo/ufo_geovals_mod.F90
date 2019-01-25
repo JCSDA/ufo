@@ -240,10 +240,11 @@ end subroutine ufo_geovals_rms
 ! ------------------------------------------------------------------------------
 
 subroutine ufo_geovals_random(self) 
-use random_vectors_mod
+use random_mod
 implicit none
 type(ufo_geovals), intent(inout) :: self
 integer :: ivar
+integer :: rseed = 7
 
 if (.not. self%lalloc) then
   call abor1_ftn("ufo_geovals_random: geovals not allocated")
@@ -252,7 +253,7 @@ if (.not. self%linit) then
   call abor1_ftn("ufo_geovals_random: geovals not initialized")
 endif
 do ivar = 1, self%nvar
-  call random_vector(self%geovals(ivar)%vals)
+  call normal_distribution(self%geovals(ivar)%vals, 0.0_kind_real, 1.0_kind_real, rseed)
 enddo
 
 end subroutine ufo_geovals_random
