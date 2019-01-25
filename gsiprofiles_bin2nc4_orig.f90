@@ -33,7 +33,7 @@ PROGRAM gsiprofiles_bin2nc4
 
   INTEGER :: idate,nsig,nvars,naeros,nvarsphys,nsig_plus_one,nlocs
 
-  REAL(r_single), ALLOCATABLE, DIMENSION(:) :: tsen,mixr,rh,prsltmp
+  REAL(r_single), ALLOCATABLE, DIMENSION(:) :: tvp,mixr,prsltmp
   REAL(r_single), ALLOCATABLE, DIMENSION(:) :: prsitmp
   REAL(r_single), ALLOCATABLE, DIMENSION(:,:) :: aeros
 
@@ -44,7 +44,7 @@ PROGRAM gsiprofiles_bin2nc4
   
   INTEGER, DIMENSION(2) :: dimid_2d
 
-  INTEGER :: ncid_tsen,ncid_mixr,ncid_rh,ncid_prsltmp,ncid_prsitmp
+  INTEGER :: ncid_tvp,ncid_mixr,ncid_prsltmp,ncid_prsitmp
   INTEGER, ALLOCATABLE, DIMENSION(:) :: ncid_aeros
 
   nargs = iargc()
@@ -111,13 +111,9 @@ PROGRAM gsiprofiles_bin2nc4
   dimid_2d=(/dimid_nsig,dimid_nlocs/)
 
   ncstatus    = nf90_def_var(ncfileid,"air_temperature",nf90_double,dimid_2d,&
-       &ncid_tsen)
+       &ncid_tvp)
   ncstatus    = nf90_def_var(ncfileid,"humidity_mixing_ratio",nf90_double,dimid_2d,&
        &ncid_mixr)
-
-  ncstatus    = nf90_def_var(ncfileid,"relative_humidity",nf90_double,dimid_2d,&
-       &ncid_rh)
-
   ncstatus    = nf90_def_var(ncfileid,"air_pressure",nf90_double,dimid_2d,&
        &ncid_prsltmp)
 
@@ -139,7 +135,7 @@ PROGRAM gsiprofiles_bin2nc4
 
   nvarsphys=nvars-naeros
 
-  ALLOCATE(tsen(nsig),mixr(nsig),rh(nsig),prsltmp(nsig),prsitmp(nsig+1),&
+  ALLOCATE(tvp(nsig),mixr(nsig),prsltmp(nsig),prsitmp(nsig+1),&
        &aeros(nsig,naeros))
 
   n=0
@@ -153,11 +149,10 @@ PROGRAM gsiprofiles_bin2nc4
   DO WHILE (iflag == 0) 
 
      CALL read_profiles(inlun,nsig,nvarsphys,naeros,&
-       &tsen,mixr,rh,prsltmp,prsitmp,aeros,iflag,debug)
+       &tvp,mixr,prsltmp,prsitmp,aeros,iflag,debug)
 
-     tsen(1:nsig)=tsen(nsig:1:-1)
+     tvp(1:nsig)=tvp(nsig:1:-1)
      mixr(1:nsig)=mixr(nsig:1:-1)*1000_r_single
-     rh(1:nsig)=rh(nsig:1:-1)
      prsltmp(1:nsig)=prsltmp(nsig:1:-1) * 10_r_single
      prsitmp(1:nsig+1)=prsitmp(nsig+1:1:-1) *10_r_single
      aeros(1:nsig,:)=aeros(nsig:1:-1,:)
@@ -166,11 +161,9 @@ PROGRAM gsiprofiles_bin2nc4
 
      start(2)=n+1
 
-     ncstatus    = nf90_put_var(ncfileid,ncid_tsen,tsen,start=start,&
+     ncstatus    = nf90_put_var(ncfileid,ncid_tvp,tvp,start=start,&
           &count=count_nsig)
      ncstatus    = nf90_put_var(ncfileid,ncid_mixr,mixr,start=start,&
-          &count=count_nsig)
-     ncstatus    = nf90_put_var(ncfileid,ncid_rh,rh,start=start,&
           &count=count_nsig)
      ncstatus    = nf90_put_var(ncfileid,ncid_prsltmp,prsltmp,&
           &start=start,count=count_nsig)
@@ -191,7 +184,7 @@ PROGRAM gsiprofiles_bin2nc4
 
   ncstatus    = nf90_close(ncfileid)
 
-  DEALLOCATE(ncid_aeros,tsen,mixr,rh,prsltmp,prsitmp,aeros)
+  DEALLOCATE(ncid_aeros,tvp,mixr,prsltmp,prsitmp,aeros)
 
 CONTAINS
 
@@ -239,12 +232,12 @@ CONTAINS
   END SUBROUTINE read_profiles_header
 
   SUBROUTINE read_profiles(ftin,nsig,nvarsphys,naeros,&
-       &tsen,mixr,rh,prsltmp,prsitmp,aeros,iflag,lverbose)
+       &tvp,mixr,prsltmp,prsitmp,aeros,iflag,lverbose)
 !                .      .    .                                       .
 ! Declare passed arguments
     INTEGER,INTENT(in)             :: ftin
     INTEGER,INTENT(in) :: nsig,nvarsphys,naeros
-    REAL(r_single), DIMENSION(nsig) :: tsen,mixr,rh,prsltmp
+    REAL(r_single), DIMENSION(nsig) :: tvp,mixr,prsltmp
     REAL(r_single), DIMENSION(nsig+1) :: prsitmp
     REAL(r_single), DIMENSION(nsig,naeros) :: aeros
     INTEGER,INTENT(out)            :: iflag
@@ -255,7 +248,7 @@ CONTAINS
     loutall=.TRUE.
     IF(PRESENT(lverbose)) loutall=lverbose
 
-    READ(ftin,IOSTAT=iflag) tsen,mixr,rh,prsltmp,prsitmp
+    READ(ftin,IOSTAT=iflag) tvp,mixr,prsltmp,prsitmp
     READ(ftin,IOSTAT=iflag) aeros
 
   END SUBROUTINE read_profiles
