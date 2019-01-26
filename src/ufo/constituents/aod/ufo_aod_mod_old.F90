@@ -520,21 +520,27 @@ contains
 
 !ug2kg && hPa2Pa
          DO k=1,N_LAYERS
-!calculate factor for converting mixing ratio to concentration 
-!and to calculate total aerosol mass in a layer
 !correct for mixing ratio factor ugkg_kgm2 
 !being calculated from dry pressure, cotton eq. (2.4)
 !p_dry=p_total/(1+1.61*mixing_ratio)
-            ugkg_kgm2(k)=1.0e-9*(atm(m)%Level_Pressure(k)-&
-                 &atm(m)%Level_Pressure(k-1))*100./grav/&
-                 &(1.+eps_p1*atm(m)%Absorber(k,1)*1.e-3)
+            ugkg_kgm2(k)=1.0e-9_fp*(atm(m)%Level_Pressure(k)-&
+                 &atm(m)%Level_Pressure(k-1))*100_fp/grav/&
+                 &(1._fp+eps_p1*atm(m)%Absorber(k,1)*1.e-3_fp)
+            prsl(k)=atm(m)%Pressure(N_LAYERS-k+1)*0.1_fp ! must be in cb for genqsat
+            tsen(k)=atm(m)%Temperature(N_LAYERS-k+1)
          ENDDO
 
-         varname=var_rh
+!         DO k=N_LAYERS,1,-1
+!            PRINT *,'@@@1',N_LAYERS-k+1,tsen(N_LAYERS-k+1),atm(m)%Absorber(k,1)*1.e-3_fp,prsl(N_LAYERS-k+1),ugkg_kgm2(k)
+!         ENDDO
 
-         CALL ufo_geovals_get_var(geovals, varname, geoval)
+         CALL genqsat(qsat,tsen,prsl,n_layers,ice4qsat)
 
-         rh(1:N_LAYERS)=MIN(geoval%vals(1:N_LAYERS,m),1.0)
+!relative humidity is ratio of specific humidities not mixing ratios
+         DO k=1,N_LAYERS
+            rh(k)=(atm(m)%Absorber(k,1)*1.e-3_fp/(1._fp+atm(m)%Absorber(k,1)*1.e-3_fp))/&
+                 &qsat(N_LAYERS-k+1)
+         ENDDO
 
          n_aerosols_all=SIZE(var_aerosols_gocart_default)
          
@@ -684,6 +690,99 @@ contains
       RETURN
       
     END FUNCTION GOCART_Aerosol_size
+
+    SUBROUTINE genqsat(qsat,tsen,prsl,nsig,ice)
+
+!   input argument list:
+!     tsen      - input sensibile temperature field (nlat,nlon,nsig)
+!     prsl      - input layer mean pressure field (nlat,nlon,nsig)
+!     nsig      - number of levels                              
+!     ice       - logical flag:  T=include ice and ice-water effects,
+!                 depending on t, in qsat calcuations.
+!                 otherwise, compute qsat with respect to water surface
+!
+!   output argument list:
+!     qsat      - saturation specific humidity (output)
+!
+! remarks: see modules used
+!
+! attributes:
+!   language: f90
+!   machine:  ibm RS/6000 SP
+!
+
+      IMPLICIT NONE
+
+      LOGICAL                               ,INTENT(in   ) :: ice
+      REAL(fp),DIMENSION(nsig), INTENT(  out) :: qsat
+      REAL(fp),DIMENSION(nsig),INTENT(in   ) :: tsen,prsl
+      INTEGER                       ,INTENT(in   ) :: nsig
+
+
+      INTEGER k
+      REAL(fp) pw,tdry,tr,es,es2
+      REAL(fp) w,onep3,esmax
+      REAL(fp) desidt,deswdt,dwdt,desdt,esi,esw
+      REAL(fp) :: mint,estmax
+      INTEGER :: lmint
+
+      onep3 = 1.e3_fp
+
+      mint=340._fp
+      lmint=1
+
+      DO k=1,nsig
+         IF((prsl(k) < 30._fp .AND.  &
+              prsl(k) > 2._fp) .AND.  &
+              tsen(k) < mint)THEN
+            lmint=k
+            mint=tsen(k)
+         END IF
+      END DO
+
+      tdry = mint
+      tr = ttp/tdry
+
+      IF (tdry >= ttp .OR. .NOT. ice) THEN
+         estmax = psat * (tr**xa) * EXP(xb*(one-tr))
+      ELSEIF (tdry < tmix) THEN
+         estmax = psat * (tr**xai) * EXP(xbi*(one-tr))
+      ELSE
+         w  = (tdry - tmix) / (ttp - tmix)
+         estmax =  w * psat * (tr**xa) * EXP(xb*(one-tr)) &
+              + (one-w) * psat * (tr**xai) * EXP(xbi*(one-tr))
+      ENDIF
+
+      DO k = 1,nsig
+
+         tdry = tsen(k)
+         tr = ttp/tdry
+         IF (tdry >= ttp .OR. .NOT. ice) THEN
+            es = psat * (tr**xa) * EXP(xb*(one-tr))
+         ELSEIF (tdry < tmix) THEN
+            es = psat * (tr**xai) * EXP(xbi*(one-tr))
+         ELSE
+            esw = psat * (tr**xa) * EXP(xb*(one-tr)) 
+            esi = psat * (tr**xai) * EXP(xbi*(one-tr)) 
+            w  = (tdry - tmix) / (ttp - tmix)
+            es =  w * psat * (tr**xa) * EXP(xb*(one-tr)) &
+                 + (one-w) * psat * (tr**xai) * EXP(xbi*(one-tr))
+         ENDIF
+
+         pw = onep3*prsl(k)
+         esmax = es
+         IF(lmint < k)THEN
+            esmax=0.1_fp*pw
+            esmax=MIN(esmax,estmax)
+         END IF
+         es2=MIN(es,esmax)
+         qsat(k) = eps * es2 / (pw - omeps * es2)
+
+      END DO
+
+      RETURN
+
+    END SUBROUTINE genqsat
 
   END SUBROUTINE ufo_aod_simobs
 

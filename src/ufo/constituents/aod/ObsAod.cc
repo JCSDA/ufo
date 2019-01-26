@@ -31,7 +31,7 @@ ObsAod::ObsAod(const ioda::ObsSpace & odb, const eckit::Configuration & config)
 {
   const eckit::Configuration * configc = &config;
   ufo_aod_setup_f90(keyOperAod_, &configc);
-  const std::vector<std::string> vv{"air_temperature", "humidity_mixing_ratio",
+  const std::vector<std::string> vv{"air_temperature", "humidity_mixing_ratio", "relative_humidity",
       "air_pressure", "air_pressure_levels",
       "sulf", "bc1", "bc2", "oc1", "oc2", "dust1", "dust2", "dust3", "dust4", "dust5",
       "seas1", "seas2", "seas3", "seas4"};

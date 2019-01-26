@@ -53,6 +53,7 @@ character(len=MAXVARLEN), public :: var_sfc_vegtyp  = "Vegetation_Type"
 character(len=MAXVARLEN), public :: var_sfc_soiltyp = "Soil_Type"
 
 !@mzp strings have to be same MAXVARLEN length for array constructor
+CHARACTER(len=MAXVARLEN), public :: var_rh          = "relative_humidity"
 CHARACTER(len=MAXVARLEN), DIMENSION(n_aerosols_gocart_default), PUBLIC :: var_aerosols_gocart_default =[&
      &"sulf                                                    ",&
      &"bc1                                                     ",&

@@ -754,8 +754,9 @@ SUBROUTINE load_aerosol_data_gocart_default(n_profiles,n_layers,geovals,&
     
 !relative humidity is ratio of specific humidities not mixing ratios
     DO k=1,n_layers
-       rh(k)=(atm(m)%absorber(k,1)/(one+atm(m)%absorber(k,1)))*1.e-3_kind_real&
-            &qsat(n_layers-k+1)
+       rh(k)=(atm(m)%Absorber(k,1)*1.e-3_fp/(1._fp+atm(m)%Absorber(k,1)*1.e-3_fp))/&
+            &qsat(N_LAYERS-k+1)
+
     ENDDO
 
     RETURN  
