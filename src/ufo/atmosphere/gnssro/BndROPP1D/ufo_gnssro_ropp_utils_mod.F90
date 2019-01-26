@@ -234,7 +234,6 @@ subroutine init_ropp_1d_obvec(nvprof,obs_impact,ichk,ob_time,rlat,rlon,roc,undul
 !     y:     Partially filled Forward model observation vector
 !-----------------------------------------------------------------------------------
   implicit none
-
 ! Output state vector
   type(Obs1dBangle),          intent(out)   :: y
 
@@ -305,19 +304,18 @@ end subroutine init_ropp_1d_obvec
 subroutine init_ropp_1d_obvec_tlad(iloop,nvprof,obs_impact,  &
                          rlat,rlon,roc,undulat,y,y_p)
   implicit none
-
 ! Output state vector
-  type(Obs1dBangle),          intent(out)   :: y,y_p
+  type(Obs1dBangle),                       intent(out)  :: y,y_p
 
-  integer,                    intent(in)    :: iloop
-  integer,                    intent(in)    :: nvprof
-  real(kind=kind_real),    dimension(nvprof), intent(in)    :: obs_impact
-  real(kind=kind_real),    intent(in)    :: rlat,rlon
-  real(kind=kind_real),    intent(in)    :: roc, undulat
-  real(kind=wp)                             :: r8lat
-  integer                                   :: i
-  real(kind=kind_real)                      :: rlon_local
-  real(kind=dp)   :: ob_time
+  integer,                                 intent(in)   :: iloop
+  integer,                                 intent(in)   :: nvprof
+  real(kind=kind_real), dimension(nvprof), intent(in)   :: obs_impact
+  real(kind=kind_real),                    intent(in)   :: rlat,rlon
+  real(kind=kind_real),                    intent(in)   :: roc, undulat
+  real(kind=wp)              :: r8lat
+  integer                    :: i
+  real(kind=kind_real)       :: rlon_local
+  real(kind=dp)              :: ob_time
 
 !-------------------------------------------------------------------------
   y%time     = real(0.0, kind=wp)!)real(ob_time,kind=wp)
@@ -334,18 +332,14 @@ subroutine init_ropp_1d_obvec_tlad(iloop,nvprof,obs_impact,  &
 
 ! allocate bending angle, impact parameter & weights
 !---------------------------------------------------------
-
-  if (iloop ==1) then
-    allocate(y%bangle(1:nvprof))                     ! value computed in fwd model
-    allocate(y%impact(1:nvprof))
-    allocate(y%weights(1:nvprof))
-    allocate(y_p%bangle(1:nvprof))                     ! value computed in fwd model
-    allocate(y_p%impact(1:nvprof))
-    allocate(y_p%weights(1:nvprof))
-  endif
+  allocate(y%bangle(1:nvprof))                     ! value computed in fwd model
+  allocate(y%impact(1:nvprof))
+  allocate(y%weights(1:nvprof))
+  allocate(y_p%bangle(1:nvprof))                     ! value computed in fwd model
+  allocate(y_p%impact(1:nvprof))
+  allocate(y_p%weights(1:nvprof))
 
 ! number of points in profile
-
   y%nobs    = nvprof
   y_p%nobs  = nvprof
  
