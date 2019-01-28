@@ -19,7 +19,6 @@ use obsspace_mod
 use config_mod
 use gnssro_mod_conf
 use missing_values_mod
-use ufo_gnssro_ropp_utils_mod
 use fckit_log_module, only : fckit_log
 
 integer, parameter         :: max_string=800
