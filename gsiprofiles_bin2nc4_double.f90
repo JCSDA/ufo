@@ -110,25 +110,25 @@ PROGRAM gsiprofiles_bin2nc4
 
   dimid_2d=(/dimid_nsig,dimid_nlocs/)
 
-  ncstatus    = nf90_def_var(ncfileid,"air_temperature",nf90_float,dimid_2d,&
+  ncstatus    = nf90_def_var(ncfileid,"air_temperature",nf90_double,dimid_2d,&
        &ncid_tsen)
-  ncstatus    = nf90_def_var(ncfileid,"humidity_mixing_ratio",nf90_float,dimid_2d,&
+  ncstatus    = nf90_def_var(ncfileid,"humidity_mixing_ratio",nf90_double,dimid_2d,&
        &ncid_mixr)
 
-  ncstatus    = nf90_def_var(ncfileid,"relative_humidity",nf90_float,dimid_2d,&
+  ncstatus    = nf90_def_var(ncfileid,"relative_humidity",nf90_double,dimid_2d,&
        &ncid_rh)
 
-  ncstatus    = nf90_def_var(ncfileid,"air_pressure",nf90_float,dimid_2d,&
+  ncstatus    = nf90_def_var(ncfileid,"air_pressure",nf90_double,dimid_2d,&
        &ncid_prsltmp)
 
   DO i=1,naeros
      ncstatus    = nf90_def_var(ncfileid,TRIM(varnames(nvarsphys+i)),&
-          &nf90_float,dimid_2d,ncid_aeros(i))
+          &nf90_double,dimid_2d,ncid_aeros(i))
   ENDDO
 
   dimid_2d=(/dimid_nsig_plus_one,dimid_nlocs/)
 
-  ncstatus    = nf90_def_var(ncfileid,"air_pressure_levels",nf90_float,dimid_2d,&
+  ncstatus    = nf90_def_var(ncfileid,"air_pressure_levels",nf90_double,dimid_2d,&
        &ncid_prsitmp)
   
   ncstatus    = nf90_put_att(ncfileid, NF90_GLOBAL, 'date_time', idate)
