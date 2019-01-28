@@ -18,7 +18,6 @@ use vert_interp_mod
 use lag_interp_mod,    only: lag_interp_const, lag_interp_smthWeights
 use obsspace_mod   
 use missing_values_mod
-use ufo_gnssro_ropp_utils_mod
 use fckit_log_module,  only : fckit_log
 
 implicit none
