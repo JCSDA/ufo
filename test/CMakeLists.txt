@@ -209,6 +209,7 @@ ecbuild_add_test( TARGET  test_ufo_gnssroRef_tlad
                   SOURCES mains/TestObsOperatorTLAD.cc
                   ARGS    "testinput/gnssroref.yaml"
                   LIBS    ufo )
+if( ${ROPP-UFO_FOUND} )
 ecbuild_add_test( TARGET  test_ufo_gnssroBndROPP1D_opr
                   BOOST
                   SOURCES mains/TestObsOperator.cc
@@ -219,6 +220,7 @@ ecbuild_add_test( TARGET  test_ufo_gnssroBndROPP1D_tlad
                   SOURCES mains/TestObsOperatorTLAD.cc
                   ARGS    "testinput/gnssrobndropp1d.yaml"
                   LIBS    ufo )
+endif( ${ROPP-UFO_FOUND} )
 
 # Marine UFO tests
 if( ${GSW_FOUND} )
