@@ -58,11 +58,7 @@ subroutine atmvertinterp_tlad_setup_(self, c_conf)
   allocate(self%varin(self%nvars))
   !> Set vars_in based on vars_out
   do ii = 1, self%nvars
-    if (trim(self%varout(ii)) .eq. "air_temperature") then
-       self%varin(ii) = "virtual_temperature"
-    else
-       self%varin(ii) = self%varout(ii)
-    endif
+    self%varin(ii) = self%varout(ii)
   enddo
 
 end subroutine atmvertinterp_tlad_setup_

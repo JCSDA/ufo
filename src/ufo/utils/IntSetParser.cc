@@ -17,6 +17,8 @@
 
 namespace ufo {
 
+// -----------------------------------------------------------------------------
+
 /// Function to split string on delimiter
 
 std::vector<std::string> splitString(const std::string& str, char delim)
@@ -29,6 +31,8 @@ std::vector<std::string> splitString(const std::string& str, char delim)
   }
   return result;
 }
+
+// -----------------------------------------------------------------------------
 
 /// Function to parse channels (supports commas for separating channels
 //  and channel ranges and dashes for channel ranges).
@@ -62,4 +66,17 @@ std::set<int> parseIntSet(const std::string & str) {
   return channels;
 }
 
+// -----------------------------------------------------------------------------
+
+void splitVarGroup(const std::string & vargrp, std::string & var, std::string & grp) {
+  const size_t at = vargrp.find("@");
+  var = vargrp.substr(0, at);
+  if (at != std::string::npos) {
+    grp = vargrp.substr(at + 1, std::string::npos);
+    const size_t no_at = grp.find("@");
+    ASSERT(no_at == std::string::npos);
+  }
+}
+
+// -----------------------------------------------------------------------------
 }  // namespace ufo

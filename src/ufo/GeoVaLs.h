@@ -10,6 +10,7 @@
 
 #include <ostream>
 #include <string>
+#include <vector>
 
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
@@ -37,21 +38,23 @@ class GeoVaLs : public util::Printable,
   GeoVaLs(const eckit::Configuration &, const oops::Variables &);
   GeoVaLs(const GeoVaLs &);
 
-//  explicit GeoVaLs(): keyGVL_(0) {}
-//  explicit GeoVaLs(int & fgvl): keyGVL_(fgvl) {}
-
   ~GeoVaLs();
 
-  void abs();
-  void zero();
-  void random();
-  double norm() const;
   GeoVaLs & operator = (const GeoVaLs &);
   GeoVaLs & operator*=(const double);
   GeoVaLs & operator += (const GeoVaLs &);
   GeoVaLs & operator -= (const GeoVaLs &);
   GeoVaLs & operator /= (const GeoVaLs &);
-  double dot_product_with(const GeoVaLs & other) const;
+  double dot_product_with(const GeoVaLs &) const;
+
+  void abs();
+  void zero();
+  void random();
+  double norm() const;
+
+  bool has(const std::string & var) const {return vars_.has(var);}
+  void get(std::vector<float> &, const std::string &, const int lev = 1) const;
+
   void read(const eckit::Configuration &);
   void analytic_init(const Locations &, const eckit::Configuration &);
   void write(const eckit::Configuration &) const;
@@ -65,6 +68,8 @@ class GeoVaLs : public util::Printable,
   F90goms keyGVL_;
   oops::Variables vars_;
 };
+
+// -----------------------------------------------------------------------------
 
 }  // namespace ufo
 

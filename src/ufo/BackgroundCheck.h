@@ -11,6 +11,7 @@
 #include <ostream>
 #include <string>
 
+#include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
 #include "oops/util/Printable.h"
 #include "ufo/BackgroundCheck.interface.h"
@@ -44,9 +45,12 @@ class BackgroundCheck : public util::Printable,
   void priorFilter(const GeoVaLs &) const;
   void postFilter(const ioda::ObsVector &) const;
 
+  const oops::Variables & requiredGeoVaLs() const {return geovars_;}
+
  private:
   void print(std::ostream &) const;
   F90bgcheck key_;
+  const oops::Variables geovars_;
 };
 
 }  // namespace ufo

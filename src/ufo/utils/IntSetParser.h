@@ -18,6 +18,8 @@ namespace ufo {
   bool contains(std::set<TT> & set, const TT & elem) {
     return set.find(elem) != set.end();
   }
+
+  void splitVarGroup(const std::string &, std::string &, std::string &);
 }  // namespace ufo
 
 #endif  // UFO_UTILS_INTSETPARSER_H_

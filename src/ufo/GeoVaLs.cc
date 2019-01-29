@@ -7,6 +7,8 @@
 
 #include "ufo/GeoVaLs.h"
 
+#include <vector>
+
 #include "eckit/config/Configuration.h"
 
 #include "oops/base/Variables.h"
@@ -141,9 +143,14 @@ double GeoVaLs::dot_product_with(const GeoVaLs & other) const {
 void GeoVaLs::print(std::ostream & os) const {
   int nn;
   double zmin, zmax, zrms;
-  ufo_geovals_minmaxavg_f90(keyGVL_, nn, zmin, zmax, zrms);
-  os << "GeoVaLs: nobs= " << nn << " Min=" << zmin << ", Max=" << zmax
-     << ", RMS=" << zrms << std::endl;
+
+  os << "GeoVaLs: variables = " << vars_ << std::endl;
+  for (size_t jv = 0; jv < vars_.size(); ++jv) {
+    int nv = jv;
+    ufo_geovals_minmaxavg_f90(keyGVL_, nn, nv, zmin, zmax, zrms);
+    os << "GeoVaLs: nobs= " << nn << " " << vars_[jv] << " Min=" << zmin << ", Max=" << zmax
+       << ", RMS=" << zrms << std::endl;
+  }
 
   /*! Verbose print statement (debug mode)
    *
@@ -165,6 +172,14 @@ void GeoVaLs::print(std::ostream & os) const {
                        << mxval << " for observation = " << iobs
                        << " and variable = " << ivar << std::endl;
   }
+}
+// -----------------------------------------------------------------------------
+void GeoVaLs::get(std::vector<float> & vals, const std::string & var, const int lev) const {
+  int nlocs;
+  ufo_geovals_nlocs_f90(keyGVL_, nlocs);
+  ASSERT(vals.size() == nlocs);
+  ufo_geovals_get_f90(keyGVL_, var.size(), var.c_str(), lev, nlocs, vals[0]);
+  oops::Log::debug() << "GeoVaLs:get values = " << vals << std::endl;
 }
 // -----------------------------------------------------------------------------
 void GeoVaLs::read(const eckit::Configuration & config) {
