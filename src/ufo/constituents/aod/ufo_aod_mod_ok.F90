@@ -12,10 +12,11 @@ MODULE ufo_aod_mod
   use ufo_locs_mod
   use ufo_geovals_mod
   use kinds
-  USE ufo_aod_misc
+!  USE ufo_aod_misc
   use crtm_module
   USE ufo_basis_mod, only: ufo_basis
   use obsspace_mod
+  USE ufo_aod_utils_mod, only: aerosol_concentration_minvalue
 
   implicit none
 
@@ -167,7 +168,7 @@ contains
 
     n_profiles=geovals%nobs
 
-    varname=var_aerosols(1)
+    varname=var_aerosols_gocart_default(1)
 
     call ufo_geovals_get_var(geovals,varname, geoval)
     n_layers=SIZE(geoval%vals,1)
@@ -445,7 +446,7 @@ contains
 
       DO k1 = 1,N_PROFILES
 
-         varname=var_t
+         varname=var_ts
          call ufo_geovals_get_var(geovals, varname, geoval)
          IF (flip_vertical) THEN
             atm(k1)%Temperature(1:N_LAYERS) = geoval%vals(N_LAYERS:1:-1,k1)
@@ -519,25 +520,23 @@ contains
 
 !ug2kg && hPa2Pa
          DO k=1,N_LAYERS
+!calculate factor for converting mixing ratio to concentration 
+!and to calculate total aerosol mass in a layer
 !correct for mixing ratio factor ugkg_kgm2 
 !being calculated from dry pressure, cotton eq. (2.4)
 !p_dry=p_total/(1+1.61*mixing_ratio)
-            ugkg_kgm2(k)=1.0e-9_fp*(atm(m)%Level_Pressure(k)-&
-                 &atm(m)%Level_Pressure(k-1))*100_fp/grav/&
-                 &(1._fp+eps_p1*atm(m)%Absorber(k,1)*1.e-3_fp)
-            prsl(k)=atm(m)%Pressure(N_LAYERS-k+1)*0.1_fp ! must be in cb for genqsat
-            tsen(k)=atm(m)%Temperature(N_LAYERS-k+1)
+            ugkg_kgm2(k)=1.0e-9*(atm(m)%Level_Pressure(k)-&
+                 &atm(m)%Level_Pressure(k-1))*100./grav/&
+                 &(1.+eps_p1*atm(m)%Absorber(k,1)*1.e-3)
          ENDDO
 
-         CALL genqsat(qsat,tsen,prsl,n_layers,ice4qsat)
+         varname=var_rh
 
-!relative humidity is ratio of specific humidities not mixing ratios
-         DO k=1,N_LAYERS
-            rh(k)=(atm(m)%Absorber(k,1)/(1._fp+atm(m)%Absorber(k,1)))*1.e-3_fp/&
-                 &qsat(N_LAYERS-k+1)
-         ENDDO
+         CALL ufo_geovals_get_var(geovals, varname, geoval)
 
-         n_aerosols_all=SIZE(var_aerosols)
+         rh(1:N_LAYERS)=MIN(geoval%vals(1:N_LAYERS,m),1.0)
+
+         n_aerosols_all=SIZE(var_aerosols_gocart_default)
          
          IF (n_aerosols_all /= n_aerosols_gocart_crtm) THEN
             message = 'Only default GOCART with 14 species allowed for now'
@@ -546,7 +545,7 @@ contains
          ENDIF
          
          DO i=1,n_aerosols_all
-            varname=var_aerosols(i)
+            varname=var_aerosols_gocart_default(i)
             call ufo_geovals_get_var(geovals,varname, geoval)
 
             IF (flip_vertical) THEN
@@ -556,7 +555,7 @@ contains
             ENDIF
 
             atm(m)%aerosol(i)%Concentration=MAX(atm(m)%aerosol(i)%Concentration*ugkg_kgm2,&
-                 &small_value)
+                 &aerosol_concentration_minvalue)
 
             SELECT CASE ( TRIM(varname))
             CASE ('sulf')
@@ -685,99 +684,6 @@ contains
       RETURN
       
     END FUNCTION GOCART_Aerosol_size
-
-    SUBROUTINE genqsat(qsat,tsen,prsl,nsig,ice)
-
-!   input argument list:
-!     tsen      - input sensibile temperature field (nlat,nlon,nsig)
-!     prsl      - input layer mean pressure field (nlat,nlon,nsig)
-!     nsig      - number of levels                              
-!     ice       - logical flag:  T=include ice and ice-water effects,
-!                 depending on t, in qsat calcuations.
-!                 otherwise, compute qsat with respect to water surface
-!
-!   output argument list:
-!     qsat      - saturation specific humidity (output)
-!
-! remarks: see modules used
-!
-! attributes:
-!   language: f90
-!   machine:  ibm RS/6000 SP
-!
-
-      IMPLICIT NONE
-
-      LOGICAL                               ,INTENT(in   ) :: ice
-      REAL(fp),DIMENSION(nsig), INTENT(  out) :: qsat
-      REAL(fp),DIMENSION(nsig),INTENT(in   ) :: tsen,prsl
-      INTEGER                       ,INTENT(in   ) :: nsig
-
-
-      INTEGER k
-      REAL(fp) pw,tdry,tr,es,es2
-      REAL(fp) w,onep3,esmax
-      REAL(fp) desidt,deswdt,dwdt,desdt,esi,esw
-      REAL(fp) :: mint,estmax
-      INTEGER :: lmint
-
-      onep3 = 1.e3_fp
-
-      mint=340._fp
-      lmint=1
-
-      DO k=1,nsig
-         IF((prsl(k) < 30._fp .AND.  &
-              prsl(k) > 2._fp) .AND.  &
-              tsen(k) < mint)THEN
-            lmint=k
-            mint=tsen(k)
-         END IF
-      END DO
-
-      tdry = mint
-      tr = ttp/tdry
-
-      IF (tdry >= ttp .OR. .NOT. ice) THEN
-         estmax = psat * (tr**xa) * EXP(xb*(one-tr))
-      ELSEIF (tdry < tmix) THEN
-         estmax = psat * (tr**xai) * EXP(xbi*(one-tr))
-      ELSE
-         w  = (tdry - tmix) / (ttp - tmix)
-         estmax =  w * psat * (tr**xa) * EXP(xb*(one-tr)) &
-              + (one-w) * psat * (tr**xai) * EXP(xbi*(one-tr))
-      ENDIF
-
-      DO k = 1,nsig
-
-         tdry = tsen(k)
-         tr = ttp/tdry
-         IF (tdry >= ttp .OR. .NOT. ice) THEN
-            es = psat * (tr**xa) * EXP(xb*(one-tr))
-         ELSEIF (tdry < tmix) THEN
-            es = psat * (tr**xai) * EXP(xbi*(one-tr))
-         ELSE
-            esw = psat * (tr**xa) * EXP(xb*(one-tr)) 
-            esi = psat * (tr**xai) * EXP(xbi*(one-tr)) 
-            w  = (tdry - tmix) / (ttp - tmix)
-            es =  w * psat * (tr**xa) * EXP(xb*(one-tr)) &
-                 + (one-w) * psat * (tr**xai) * EXP(xbi*(one-tr))
-         ENDIF
-
-         pw = onep3*prsl(k)
-         esmax = es
-         IF(lmint < k)THEN
-            esmax=0.1_fp*pw
-            esmax=MIN(esmax,estmax)
-         END IF
-         es2=MIN(es,esmax)
-         qsat(k) = eps * es2 / (pw - omeps * es2)
-
-      END DO
-
-      RETURN
-
-    END SUBROUTINE genqsat
 
   END SUBROUTINE ufo_aod_simobs
 

@@ -5,7 +5,7 @@
 
 !> Fortran module to provide code shared between nonlinear and tlm/adm radiance calculations
 
-MODULE ufo_aero_radiance_utils_mod
+MODULE ufo_crtm_utils_mod
 
 use iso_c_binding
 use config_mod
@@ -21,26 +21,31 @@ use obsspace_mod
 implicit none
 private
 
-public aero_rad_conf
-public aero_rad_conf_setup
-public aero_rad_conf_delete
+public crtm_conf
+public crtm_conf_setup
+public crtm_conf_delete
 public Load_Atm_Data
 public Load_Sfc_Data
 public Load_Geom_Data
 
-!@mzp
-PUBLIC load_aerosol_data 
-INTERFACE load_aerosol_data
-MODULE PROCEDURE &
-     &load_aerosol_data_gocart_default,&
-     &load_aerosol_data_gocart_esrl,&
-     &load_aerosol_data_none
-END INTERFACE
+PUBLIC Load_Aerosol_Data
+
+public check_fwd
+
+REAL(kind_real), PARAMETER :: &
+     &rd = 2.8705e+2_kind_real,&
+     &rv = 4.6150e+2_kind_real,&
+     &eps_p1 = one+rd/rv,&
+     &grav = 9.81_kind_real,&
+     &aerosol_concentration_minvalue=1.e-16
+
+INTEGER, PARAMETER, public :: min_crtm_n_absorbers = 2
 
 integer, parameter, public :: max_string=800
 
+
 !Type for general config
-type aero_rad_conf
+type crtm_conf
  integer :: n_Sensors
  integer :: n_Absorbers
  integer :: n_Clouds
@@ -49,16 +54,18 @@ type aero_rad_conf
  character(len=255), allocatable :: SENSOR_ID(:)
  character(len=255) :: ENDIAN_TYPE
  character(len=255) :: COEFFICIENT_PATH
-end type aero_rad_conf
+end type crtm_conf
+
+
 
 contains
 
 ! ------------------------------------------------------------------------------
 
-SUBROUTINE aero_rad_conf_setup(rc, c_conf)
+subroutine crtm_conf_setup(rc, c_conf)
 
 implicit none
-type(aero_rad_conf), intent(inout) :: rc
+type(crtm_conf), intent(inout) :: rc
 type(c_ptr),    intent(in)    :: c_conf
 
 character(len=1023) :: SkipChannels
@@ -103,30 +110,29 @@ character(len=100), allocatable :: skiplist_str(:)
    read(skiplist_str(i),*)  rc%skiplist(i)
  enddo
 
-END SUBROUTINE aero_rad_conf_setup
+end subroutine crtm_conf_setup
 
 ! -----------------------------------------------------------------------------
 
-subroutine aero_rad_conf_delete(rc)
+subroutine crtm_conf_delete(rc)
 
 implicit none
-type(rad_conf), intent(inout) :: rc
+type(crtm_conf), intent(inout) :: rc
 
  deallocate(rc%SENSOR_ID)
  deallocate(rc%skiplist)
 
-end subroutine aero_rad_conf_delete
+end subroutine crtm_conf_delete
 
 ! ------------------------------------------------------------------------------
 
-SUBROUTINE Load_Atm_Data(n_profiles,n_layers,geovals,rc,atm)
+SUBROUTINE Load_Atm_Data(N_PROFILES,N_LAYERS,geovals,atm,rc)
 
 implicit none
-integer, intent(in) :: n_profiles, n_layers
+integer, intent(in) :: N_PROFILES, N_LAYERS
 type(ufo_geovals), intent(in) :: geovals
-type(rad_conf), intent(in) :: rc
 type(CRTM_Atmosphere_type), intent(inout) :: atm(:)
-
+type(crtm_conf) :: rc
 
 ! Local variables
 integer :: k1
@@ -141,77 +147,67 @@ character(max_string) :: err_msg
     print *, k1, varname
  end do
 
-!@mzp
-!var_aerosols - where to set up - declare - from ufo_vars_mod.F90
-!possibly from config
-!@mzp
- error result when not available for ufo_geovals_get_var call
- e.g.
- CALL ufo_geovals_get_var(geovals, var_oz, geoval)
-
  ! Populate the atmosphere structures for CRTM (atm(k1), for the k1-th profile)
  ! ----------------------------------------------------------------------------
- do k1 = 1,n_profiles
-    call ufo_geovals_get_var(geovals, var_tv, geoval)
+ do k1 = 1,N_PROFILES
+    call ufo_geovals_get_var(geovals, var_ts, geoval)
 
     ! Check model levels is consistent in geovals & crtm
     if (k1 == 1) then
-      if (geoval%nval /= n_layers) then
+      if (geoval%nval /= n_Layers) then
         write(err_msg,*) 'Load_Atm_Data error: layers inconsistent!'
         call abor1_ftn(err_msg)
       endif
     endif
 
-    atm(k1)%Temperature(1:n_layers) = geoval%vals(:,k1)
+    atm(k1)%Temperature(1:N_LAYERS) = geoval%vals(:,k1)
 
     call ufo_geovals_get_var(geovals, var_prs, geoval)
-    atm(k1)%Pressure(1:n_layers) = geoval%vals(:,k1)
+    atm(k1)%Pressure(1:N_LAYERS) = geoval%vals(:,k1)
     call ufo_geovals_get_var(geovals, var_prsi, geoval)
     atm(k1)%Level_Pressure(:) = geoval%vals(:,k1)
     atm(k1)%Climatology         = US_STANDARD_ATMOSPHERE
     atm(k1)%Absorber_Id(1:1)    = (/ H2O_ID /)
     atm(k1)%Absorber_Units(1:1) = (/ MASS_MIXING_RATIO_UNITS /)
     call ufo_geovals_get_var(geovals, var_mixr, geoval)
-    atm(k1)%Absorber(1:n_layers,1)       = geoval%vals(:,k1)
+    atm(k1)%Absorber(1:N_LAYERS,1)       = geoval%vals(:,k1)
     atm(k1)%Absorber_Id(2:2)    = (/ O3_ID /)
     atm(k1)%Absorber_Units(2:2) = (/ VOLUME_MIXING_RATIO_UNITS /)
     call ufo_geovals_get_var(geovals, var_oz, geoval)
+    atm(k1)%Absorber(1:N_LAYERS,2)       = geoval%vals(:,k1)
 
-!@mzp
- !if not available  
-    IF (error) THEN
-       atm(k1)%absorber(1:n_layers,2)=ozone_fill
-    ELSE
-       atm(k1)%Absorber(1:n_layers,2)       = geoval%vals(:,k1)
-    ENDIF
+    IF (rc%n_Absorbers > min_crtm_n_absorbers) THEN
 
-!@mzp
-    IF (rc%n_Absorbers >= 3) THEN 
        atm(k1)%Absorber_Id(3:3)    = (/ CO2_ID /)
        atm(k1)%Absorber_Units(3:3) = (/ VOLUME_MIXING_RATIO_UNITS /)
        CALL ufo_geovals_get_var(geovals, var_co2, geoval)
-       atm(k1)%Absorber(1:n_layers,3)       = geoval%vals(:,k1)
+       atm(k1)%Absorber(1:N_LAYERS,3)       = geoval%vals(:,k1)
+       
     ENDIF
 
-!@mzp
-    IF (rc%n_Clouds >= 1) THEN
+    IF ( rc%n_Clouds > 1 ) THEN
+
        atm(k1)%Cloud(1)%Type = WATER_CLOUD
        CALL ufo_geovals_get_var(geovals, var_clw, geoval)
        atm(k1)%Cloud(1)%Water_Content = geoval%vals(:,k1)
        CALL ufo_geovals_get_var(geovals, var_clwefr, geoval)
        atm(k1)%Cloud(1)%Effective_Radius = geoval%vals(:,k1)
+
+!** BTJ added 11/20/2018 for compatibility with CRTM REL 2.3.0+
+!** need to map to cloud fraction geoval, if it exists.  For now assume
+!** fully filled pixel. 
+       atm(k1)%Cloud_Fraction = 1.0_fp  
+       
     ENDIF
 
-    IF (rc%n_Clouds >= 2) THEN
+    IF ( rc%n_Clouds > 2 ) THEN
+
        atm(k1)%Cloud(2)%Type = ICE_CLOUD
        CALL ufo_geovals_get_var(geovals, var_cli, geoval)
        atm(k1)%Cloud(2)%Water_Content = geoval%vals(:,k1)
        CALL ufo_geovals_get_var(geovals, var_cliefr, geoval)
        atm(k1)%Cloud(2)%Effective_Radius = geoval%vals(:,k1)
-    ENDIF
 
-    IF (rc%n_Aerosols > 0) THEN
-       CALL load_aerosol_data(n_profiles,n_layers,geovals,var_aerosols,atm)       
     ENDIF
 
  end do
@@ -255,11 +251,11 @@ real(kind_real), allocatable :: ObsTb(:,:)
  do n1 = 1,n_Channels
    !Get the variable name for this channel
    call get_var_name(varname_tmplate,n1,varname)
-   call obsspace_get_db(obss, "", varname, ObsTb(:,n1))
+   call obsspace_get_db(obss, "ObsValue", varname, ObsTb(:,n1))
  enddo
 
  !Loop over all n_Profiles, i.e. number of locations
- do k1 = 1,n_profiles
+ do k1 = 1,N_PROFILES
 
    !Pass sensor information
    sfc(k1)%sensordata%sensor_id        = chinfo(1)%sensor_id
@@ -366,22 +362,22 @@ integer :: nlocs
  nlocs = obsspace_get_nlocs(obss)
  allocate(TmpVar(nlocs))
 
- call obsspace_get_db(obss, "", "Sat_Zenith_Angle", TmpVar)
+ call obsspace_get_db(obss, "MetaData", "Sat_Zenith_Angle", TmpVar)
  geo(:)%Sensor_Zenith_Angle = TmpVar(:)
 
- call obsspace_get_db(obss, "", "Sol_Zenith_Angle", TmpVar)
+ call obsspace_get_db(obss, "MetaData", "Sol_Zenith_Angle", TmpVar)
  geo(:)%Source_Zenith_Angle = TmpVar(:)
 
- call obsspace_get_db(obss, "", "Sat_Azimuth_Angle", TmpVar)
+ call obsspace_get_db(obss, "MetaData", "Sat_Azimuth_Angle", TmpVar)
  geo(:)%Sensor_Azimuth_Angle = TmpVar(:)
 
- call obsspace_get_db(obss, "", "Sol_Azimuth_Angle", TmpVar)
+ call obsspace_get_db(obss, "MetaData", "Sol_Azimuth_Angle", TmpVar)
  geo(:)%Source_Azimuth_Angle = TmpVar(:)
 
- call obsspace_get_db(obss, "", "Scan_Position", TmpVar)
+ call obsspace_get_db(obss, "MetaData", "Scan_Position", TmpVar)
  geo(:)%Ifov = TmpVar(:)
 
- call obsspace_get_db(obss, "", "Scan_Angle", TmpVar) !The Sensor_Scan_Angle is optional
+ call obsspace_get_db(obss, "MetaData", "Scan_Angle", TmpVar) !The Sensor_Scan_Angle is optional
  geo(:)%Sensor_Scan_Angle = TmpVar(:)
 
  deallocate(TmpVar)
@@ -406,288 +402,303 @@ end subroutine get_var_name
 
 ! -----------------------------------------------------------------------------
 
-SUBROUTINE load_aerosol_data_gocart_default(n_profiles,n_layers,geovals,&
-     &var_aerosols_gocart_default,atm)
+SUBROUTINE load_aerosol_data(n_profiles,n_layers,geovals,&
+     &var_aerosols,atm)
 
     USE CRTM_aerosolcoeff, ONLY: aeroc
 
     INTEGER, INTENT(in) :: n_profiles,n_layers
     TYPE(ufo_geovals), INTENT(in) :: geovals
-    CHARACTER(len=MAXVARLEN), DIMENSION(n_aerosols_gocart_default), &
-         &INTENT(in) :: var_aerosols_gocart_default
+    CHARACTER(len=MAXVARLEN), DIMENSION(:), INTENT(in) :: var_aerosols
     TYPE(CRTM_atmosphere_type), INTENT(inout) :: atm(:)
 
     INTEGER, PARAMETER :: ndust_bins=5, nseas_bins=4
     REAL(kind_real), DIMENSION(ndust_bins), PARAMETER  :: dust_radii=[&
          &0.55_kind_real,1.4_kind_real,2.4_kind_real,4.5_kind_real,8.0_kind_real]
+
+    REAL(kind_real),PARAMETER  :: p25_radius=0.9_kind_real
+!p25_radius <- (0.78*(dust_radii_esrl[1])^3+
+!               0.22*(dust_radii_esrl[2])^3)^(1./3.)
+
     INTEGER, DIMENSION(nseas_bins), PARAMETER  :: seas_types=[&
          SEASALT_SSAM_AEROSOL,SEASALT_SSCM1_AEROSOL,SEASALT_SSCM2_AEROSOL,    SEASALT_SSCM3_AEROSOL]
 
     REAL(kind_real), DIMENSION(n_layers) :: ugkg_kgm2,rh
 
     TYPE(ufo_geoval), POINTER :: geoval
-    INTEGER :: nc, nl
-    INTEGER :: k1, k2
 
     INTEGER :: i,k,m
 
-    DO m=1,n_profiles
+    CHARACTER(max_string) :: aerosol_option
+    CHARACTER(max_string) :: message = &
+         &'this aerosol not implemented - check next week'
 
-       CALL calculate_rh_and_depthfactor(atm(m),n_layers,ugkg_kgm2,rh)
+    CHARACTER(len=MAXVARLEN) :: varname
 
-       DO i=1,n_aerosols_gocart_default
-          varname=var_aerosols_gocart_default(i)
-          CALL ufo_geovals_get_var(geovals,varname, geoval)
+    IF (ALL(var_aerosols == var_aerosols_gocart_default)) THEN
 
-          atm(m)%aerosol(i)%Concentration(1:n_layers)=&
-               &MAX(geoval%vals(:,m)*ugkg_kgm2,aerosol_concentration_minvalue)
+       DO m=1,n_profiles
 
-          SELECT CASE ( TRIM(varname))
-          CASE ('sulf')
-             atm(m)%aerosol(i)%type  = SULFATE_AEROSOL
-             DO k=1,n_layers
-                atm(m)%aerosol(i)%effective_radius(k)=&
-                     &gocart_aerosol_size(atm(m)%aerosol(i)%type, &
-                     &rh(k))
-             ENDDO
+          CALL calculate_aero_layer_factor(atm(m),n_layers,ugkg_kgm2)
 
-          CASE ('bc1')
-             atm(m)%aerosol(i)%type  = BLACK_CARBON_AEROSOL
-             atm(m)%aerosol(i)%effective_radius(:)=&
-                  &AeroC%Reff(1,atm(m)%aerosol(i)%type)
-          CASE ('bc2')
-             atm(m)%aerosol(i)%type  = BLACK_CARBON_AEROSOL
-             DO k=1,n_layers
-                atm(m)%aerosol(i)%effective_radius(k)=&
-                     &gocart_aerosol_size(atm(m)%aerosol(i)%type, &
-                     &rh(k))
-             ENDDO
+          DO i=1,n_aerosols_gocart_default
+             varname=var_aerosols_gocart_default(i)
+             CALL ufo_geovals_get_var(geovals,varname, geoval)
 
-          CASE ('oc1')
-             atm(m)%aerosol(i)%type  = ORGANIC_CARBON_AEROSOL
-             atm(m)%aerosol(i)%effective_radius(:)=&
-                  &AeroC%Reff(1,atm(m)%aerosol(i)%type)
-          CASE ('oc2')
-             atm(m)%aerosol(i)%type  = ORGANIC_CARBON_AEROSOL
-             DO k=1,n_layers
-                atm(m)%aerosol(i)%effective_radius(k)=&
-                     &gocart_aerosol_size(atm(m)%aerosol(i)%type, &
-                     &rh(k))
-             ENDDO
+             atm(m)%aerosol(i)%Concentration(1:n_layers)=&
+                  &MAX(geoval%vals(:,m)*ugkg_kgm2,aerosol_concentration_minvalue)
 
-          CASE ('dust1')
-             atm(m)%aerosol(i)%type  = DUST_AEROSOL
-             atm(m)%aerosol(i)%effective_radius(:)=dust_radii(1)
-          CASE ('dust2')
-             atm(m)%aerosol(i)%type  = DUST_AEROSOL
-             atm(m)%aerosol(i)%effective_radius(:)=dust_radii(2)
-          CASE ('dust3')
-             atm(m)%aerosol(i)%type  = DUST_AEROSOL
-             atm(m)%aerosol(i)%effective_radius(:)=dust_radii(3)
-          CASE ('dust4')
-             atm(m)%aerosol(i)%type  = DUST_AEROSOL
-             atm(m)%aerosol(i)%effective_radius(:)=dust_radii(4)
-          CASE ('dust5')
-             atm(m)%aerosol(i)%type  = DUST_AEROSOL
-             atm(m)%aerosol(i)%effective_radius(:)=dust_radii(5)
+             SELECT CASE ( TRIM(varname))
+             CASE ('sulf')
+                atm(m)%aerosol(i)%type  = SULFATE_AEROSOL
+                DO k=1,n_layers
+                   atm(m)%aerosol(i)%effective_radius(k)=&
+                        &gocart_aerosol_size(atm(m)%aerosol(i)%type, &
+                        &rh(k))
+                ENDDO
 
-          CASE ('seas1')
-             atm(m)%aerosol(i)%type  = seas_types(1)
-             DO k=1,n_layers
-                atm(m)%aerosol(i)%effective_radius(k)=&
-                     &gocart_aerosol_size(atm(m)%aerosol(i)%type, &
-                     &rh(k))
-             ENDDO
-          CASE ('seas2')
-             atm(m)%aerosol(i)%type  = seas_types(2)
-             DO k=1,n_layers
-                atm(m)%aerosol(i)%effective_radius(k)=&
-                     &gocart_aerosol_size(atm(m)%aerosol(i)%type, &
-                     &rh(k))
-             ENDDO
-          CASE ('seas3')
-             atm(m)%aerosol(i)%type  = seas_types(3)
-             DO k=1,n_layers
-                atm(m)%aerosol(i)%effective_radius(k)=&
-                     &gocart_aerosol_size(atm(m)%aerosol(i)%type, &
-                     &rh(k))
-             ENDDO
-          CASE ('seas4')
-             atm(m)%aerosol(i)%type  = seas_types(4)
-             DO k=1,n_layers
-                atm(m)%aerosol(i)%effective_radius(k)=&
-                     &gocart_aerosol_size(atm(m)%aerosol(i)%type, &
-                     &rh(k))
-             ENDDO
-          END SELECT
+             CASE ('bc1')
+                atm(m)%aerosol(i)%type  = BLACK_CARBON_AEROSOL
+                atm(m)%aerosol(i)%effective_radius(:)=&
+                     &AeroC%Reff(1,atm(m)%aerosol(i)%type)
+             CASE ('bc2')
+                atm(m)%aerosol(i)%type  = BLACK_CARBON_AEROSOL
+                DO k=1,n_layers
+                   atm(m)%aerosol(i)%effective_radius(k)=&
+                        &gocart_aerosol_size(atm(m)%aerosol(i)%type, &
+                        &rh(k))
+                ENDDO
 
-       ENDDO
+             CASE ('oc1')
+                atm(m)%aerosol(i)%type  = ORGANIC_CARBON_AEROSOL
+                atm(m)%aerosol(i)%effective_radius(:)=&
+                     &AeroC%Reff(1,atm(m)%aerosol(i)%type)
+             CASE ('oc2')
+                atm(m)%aerosol(i)%type  = ORGANIC_CARBON_AEROSOL
+                DO k=1,n_layers
+                   atm(m)%aerosol(i)%effective_radius(k)=&
+                        &gocart_aerosol_size(atm(m)%aerosol(i)%type, &
+                        &rh(k))
+                ENDDO
 
-    ENDDO
+             CASE ('dust1')
+                atm(m)%aerosol(i)%type  = DUST_AEROSOL
+                atm(m)%aerosol(i)%effective_radius(:)=dust_radii(1)
+             CASE ('dust2')
+                atm(m)%aerosol(i)%type  = DUST_AEROSOL
+                atm(m)%aerosol(i)%effective_radius(:)=dust_radii(2)
+             CASE ('dust3')
+                atm(m)%aerosol(i)%type  = DUST_AEROSOL
+                atm(m)%aerosol(i)%effective_radius(:)=dust_radii(3)
+             CASE ('dust4')
+                atm(m)%aerosol(i)%type  = DUST_AEROSOL
+                atm(m)%aerosol(i)%effective_radius(:)=dust_radii(4)
+             CASE ('dust5')
+                atm(m)%aerosol(i)%type  = DUST_AEROSOL
+                atm(m)%aerosol(i)%effective_radius(:)=dust_radii(5)
 
-    NULLIFY(geoval)
+             CASE ('seas1')
+                atm(m)%aerosol(i)%type  = seas_types(1)
+                DO k=1,n_layers
+                   atm(m)%aerosol(i)%effective_radius(k)=&
+                        &gocart_aerosol_size(atm(m)%aerosol(i)%type, &
+                        &rh(k))
+                ENDDO
+             CASE ('seas2')
+                atm(m)%aerosol(i)%type  = seas_types(2)
+                DO k=1,n_layers
+                   atm(m)%aerosol(i)%effective_radius(k)=&
+                        &gocart_aerosol_size(atm(m)%aerosol(i)%type, &
+                        &rh(k))
+                ENDDO
+             CASE ('seas3')
+                atm(m)%aerosol(i)%type  = seas_types(3)
+                DO k=1,n_layers
+                   atm(m)%aerosol(i)%effective_radius(k)=&
+                        &gocart_aerosol_size(atm(m)%aerosol(i)%type, &
+                        &rh(k))
+                ENDDO
+             CASE ('seas4')
+                atm(m)%aerosol(i)%type  = seas_types(4)
+                DO k=1,n_layers
+                   atm(m)%aerosol(i)%effective_radius(k)=&
+                        &gocart_aerosol_size(atm(m)%aerosol(i)%type, &
+                        &rh(k))
+                ENDDO
+             END SELECT
 
-  END SUBROUTINE load_aerosol_data_gocart_default
-
-  SUBROUTINE load_aerosol_data_gocart_esrl(n_profiles,n_layers,geovals,&
-       &var_aerosols_gocart_esrl,atm)
-    
-    USE CRTM_aerosolcoeff, ONLY: aeroc
-    
-    INTEGER, INTENT(in) :: n_profiles,n_layers
-    TYPE(ufo_geovals), INTENT(in) :: geovals
-    CHARACTER(len=MAXVARLEN), DIMENSION(n_aerosols_gocart_esrl), &
-         &INTENT(in) :: var_aerosols_gocart_esrl
-    TYPE(CRTM_atmosphere_type), INTENT(inout) :: atm(:)
-
-    INTEGER, PARAMETER :: ndust_bins=5, nseas_bins=4
-    REAL(kind_real), DIMENSION(ndust_bins), PARAMETER  :: dust_radii=[&
-         &0.55_kind_real,1.4_kind_real,2.4_kind_real,4.5_kind_real,8.0_kind_real]
-    INTEGER, DIMENSION(nseas_bins), PARAMETER  :: seas_types=[&
-         SEASALT_SSAM_AEROSOL,SEASALT_SSCM1_AEROSOL,SEASALT_SSCM2_AEROSOL,    SEASALT_SSCM3_AEROSOL]
-
-    REAL(kind_real), DIMENSION(n_layers) :: ugkg_kgm2,rh
-
-    TYPE(ufo_geoval), POINTER :: geoval
-    INTEGER :: nc, nl
-    INTEGER :: k1, k2
-
-    INTEGER :: i,k,m
-
-    CHARACTER(*), PARAMETER :: PROGRAM_NAME = 'gocart esrl'
-
-    message = 'gocart esrl not implemented'
-    CALL Display_Message( PROGRAM_NAME, message, FAILURE )
-    STOP
-
-    DO m=1,n_profiles
-
-       CALL calculate_rh_and_depthfactor(atm(m),n_layers,ugkg_kgm2,rh)
-
-       DO i=1,n_aerosols_gocart_esrl
-          varname=var_aerosols_gocart_default(i)
-          CALL ufo_geovals_get_var(geovals,varname, geoval)
-
-          atm(m)%aerosol(i)%Concentration(1:n_layers)=&
-               &MAX(geoval%vals(:,m)*ugkg_kgm2,aerosol_concentration_minvalue)
-
-          SELECT CASE ( TRIM(varname))
-          CASE ('sulf')
-             atm(m)%aerosol(i)%type  = SULFATE_AEROSOL
-!rh needs to be from top to bottom
-             DO k=1,n_layers
-                atm(m)%aerosol(i)%effective_radius(k)=&
-                     &gocart_aerosol_size(atm(m)%aerosol(i)%type, &
-                     &rh(k))
-             ENDDO
-
-          CASE ('bc1')
-             atm(m)%aerosol(i)%type  = BLACK_CARBON_AEROSOL
-             atm(m)%aerosol(i)%effective_radius(:)=&
-                  &AeroC%Reff(1,atm(m)%aerosol(i)%type)
-          CASE ('bc2')
-             atm(m)%aerosol(i)%type  = BLACK_CARBON_AEROSOL
-             DO k=1,n_layers
-                atm(m)%aerosol(i)%effective_radius(k)=&
-                     &gocart_aerosol_size(atm(m)%aerosol(i)%type, &
-                     &rh(k))
-             ENDDO
-
-          CASE ('oc1')
-             atm(m)%aerosol(i)%type  = ORGANIC_CARBON_AEROSOL
-             atm(m)%aerosol(i)%effective_radius(:)=&
-                  &AeroC%Reff(1,atm(m)%aerosol(i)%type)
-          CASE ('oc2')
-             atm(m)%aerosol(i)%type  = ORGANIC_CARBON_AEROSOL
-             DO k=1,n_layers
-                atm(m)%aerosol(i)%effective_radius(k)=&
-                     &gocart_aerosol_size(atm(m)%aerosol(i)%type, &
-                     &rh(k))
-             ENDDO
-
-          CASE ('dust1')
-             atm(m)%aerosol(i)%type  = DUST_AEROSOL
-             atm(m)%aerosol(i)%effective_radius(:)=dust_radii(1)
-          CASE ('dust2')
-             atm(m)%aerosol(i)%type  = DUST_AEROSOL
-             atm(m)%aerosol(i)%effective_radius(:)=dust_radii(2)
-          CASE ('dust3')
-             atm(m)%aerosol(i)%type  = DUST_AEROSOL
-             atm(m)%aerosol(i)%effective_radius(:)=dust_radii(3)
-          CASE ('dust4')
-             atm(m)%aerosol(i)%type  = DUST_AEROSOL
-             atm(m)%aerosol(i)%effective_radius(:)=dust_radii(4)
-          CASE ('dust5')
-             atm(m)%aerosol(i)%type  = DUST_AEROSOL
-             atm(m)%aerosol(i)%effective_radius(:)=dust_radii(5)
-
-!@mzp needs to be calculated between dust1 and dust2
-          CASE ('p25')
-             atm(m)%aerosol(i)%type  = DUST_AEROSOL
-             atm(m)%aerosol(i)%effective_radius(:)=dust_radii(1)
-
-          CASE ('seas1')
-             atm(m)%aerosol(i)%type  = seas_types(1)
-             DO k=1,n_layers
-                atm(m)%aerosol(i)%effective_radius(k)=&
-                     &gocart_aerosol_size(atm(m)%aerosol(i)%type, &
-                     &rh(k))
-             ENDDO
-          CASE ('seas2')
-             atm(m)%aerosol(i)%type  = seas_types(2)
-             DO k=1,n_layers
-                atm(m)%aerosol(i)%effective_radius(k)=&
-                     &gocart_aerosol_size(atm(m)%aerosol(i)%type, &
-                     &rh(k))
-             ENDDO
-          CASE ('seas3')
-             atm(m)%aerosol(i)%type  = seas_types(3)
-             DO k=1,n_layers
-                atm(m)%aerosol(i)%effective_radius(k)=&
-                     &gocart_aerosol_size(atm(m)%aerosol(i)%type, &
-                     &rh(k))
-             ENDDO
-          CASE ('seas4')
-             atm(m)%aerosol(i)%type  = seas_types(4)
-             DO k=1,n_layers
-                atm(m)%aerosol(i)%effective_radius(k)=&
-                     &gocart_aerosol_size(atm(m)%aerosol(i)%type, &
-                     &rh(k))
-             ENDDO
-          END SELECT
+          ENDDO
 
        ENDDO
 
+    ELSEIF (ALL(var_aerosols == var_aerosols_gocart_esrl)) THEN
+
+       aerosol_option = 'gocart esrl'
+       CALL Display_Message( aerosol_option, message, FAILURE )
+       STOP
+
+       DO m=1,n_profiles
+
+          CALL calculate_aero_layer_factor(atm(m),n_layers,ugkg_kgm2)
+
+          DO i=1,n_aerosols_gocart_esrl
+             varname=var_aerosols_gocart_default(i)
+             CALL ufo_geovals_get_var(geovals,varname, geoval)
+
+             atm(m)%aerosol(i)%Concentration(1:n_layers)=&
+                  &MAX(geoval%vals(:,m)*ugkg_kgm2,aerosol_concentration_minvalue)
+
+             SELECT CASE ( TRIM(varname))
+             CASE ('sulf')
+                atm(m)%aerosol(i)%type  = SULFATE_AEROSOL
+
+                DO k=1,n_layers
+                   atm(m)%aerosol(i)%effective_radius(k)=&
+                        &gocart_aerosol_size(atm(m)%aerosol(i)%type, &
+                        &rh(k))
+                ENDDO
+
+             CASE ('bc1')
+                atm(m)%aerosol(i)%type  = BLACK_CARBON_AEROSOL
+                atm(m)%aerosol(i)%effective_radius(:)=&
+                     &AeroC%Reff(1,atm(m)%aerosol(i)%type)
+             CASE ('bc2')
+                atm(m)%aerosol(i)%type  = BLACK_CARBON_AEROSOL
+                DO k=1,n_layers
+                   atm(m)%aerosol(i)%effective_radius(k)=&
+                        &gocart_aerosol_size(atm(m)%aerosol(i)%type, &
+                        &rh(k))
+                ENDDO
+
+             CASE ('oc1')
+                atm(m)%aerosol(i)%type  = ORGANIC_CARBON_AEROSOL
+                atm(m)%aerosol(i)%effective_radius(:)=&
+                     &AeroC%Reff(1,atm(m)%aerosol(i)%type)
+             CASE ('oc2')
+                atm(m)%aerosol(i)%type  = ORGANIC_CARBON_AEROSOL
+                DO k=1,n_layers
+                   atm(m)%aerosol(i)%effective_radius(k)=&
+                        &gocart_aerosol_size(atm(m)%aerosol(i)%type, &
+                        &rh(k))
+                ENDDO
+
+             CASE ('dust1')
+                atm(m)%aerosol(i)%type  = DUST_AEROSOL
+                atm(m)%aerosol(i)%effective_radius(:)=dust_radii(1)
+             CASE ('dust2')
+                atm(m)%aerosol(i)%type  = DUST_AEROSOL
+                atm(m)%aerosol(i)%effective_radius(:)=dust_radii(2)
+             CASE ('dust3')
+                atm(m)%aerosol(i)%type  = DUST_AEROSOL
+                atm(m)%aerosol(i)%effective_radius(:)=dust_radii(3)
+             CASE ('dust4')
+                atm(m)%aerosol(i)%type  = DUST_AEROSOL
+                atm(m)%aerosol(i)%effective_radius(:)=dust_radii(4)
+             CASE ('dust5')
+                atm(m)%aerosol(i)%type  = DUST_AEROSOL
+                atm(m)%aerosol(i)%effective_radius(:)=dust_radii(5)
+
+             CASE ('p25')
+                atm(m)%aerosol(i)%type  = DUST_AEROSOL
+                atm(m)%aerosol(i)%effective_radius(:)=p25_radius
+
+             CASE ('seas1')
+                atm(m)%aerosol(i)%type  = seas_types(1)
+                DO k=1,n_layers
+                   atm(m)%aerosol(i)%effective_radius(k)=&
+                        &gocart_aerosol_size(atm(m)%aerosol(i)%type, &
+                        &rh(k))
+                ENDDO
+             CASE ('seas2')
+                atm(m)%aerosol(i)%type  = seas_types(2)
+                DO k=1,n_layers
+                   atm(m)%aerosol(i)%effective_radius(k)=&
+                        &gocart_aerosol_size(atm(m)%aerosol(i)%type, &
+                        &rh(k))
+                ENDDO
+             CASE ('seas3')
+                atm(m)%aerosol(i)%type  = seas_types(3)
+                DO k=1,n_layers
+                   atm(m)%aerosol(i)%effective_radius(k)=&
+                        &gocart_aerosol_size(atm(m)%aerosol(i)%type, &
+                        &rh(k))
+                ENDDO
+             CASE ('seas4')
+                atm(m)%aerosol(i)%type  = seas_types(4)
+                DO k=1,n_layers
+                   atm(m)%aerosol(i)%effective_radius(k)=&
+                        &gocart_aerosol_size(atm(m)%aerosol(i)%type, &
+                        &rh(k))
+                ENDDO
+             END SELECT
+
+          ENDDO
+
+       ENDDO
+
+    ELSEIF (ALL(var_aerosols == var_aerosols_other)) THEN
+
+       aerosol_option = 'other'
+       CALL Display_Message( aerosol_option, message, FAILURE )
+       STOP
+
+    ELSE
+
+       aerosol_option = 'unknown aerosol'
+       CALL Display_Message( aerosol_option, message, FAILURE )
+       STOP
+
+    ENDIF
+
+  END SUBROUTINE load_aerosol_data
+
+  SUBROUTINE check_fwd(obss,n_profiles,n_channels,varname_tmplate,fwd)
+
+    TYPE(c_ptr), value,       INTENT(in)    :: obss
+    INTEGER, INTENT(in) :: n_profiles,n_channels
+    CHARACTER(MAXVARLEN), INTENT(in) :: varname_tmplate
+    REAL(kind_real), DIMENSION(n_profiles, n_channels), INTENT(in) :: fwd
+    REAL(kind_real), DIMENSION(n_profiles, n_channels) :: &
+         &obs, innovation, diff
+    REAL(kind_real), DIMENSION(n_channels) :: rmse
+    
+    CHARACTER(MAXVARLEN) :: varname
+    CHARACTER(MAXVARLEN) :: cinnovation="obs_minus_forecast_unadjusted_"
+
+    INTEGER :: l,m
+
+    DO l = 1,n_Channels
+!Get the variable name for this channel
+       CALL get_var_name(varname_tmplate,l,varname)
+       CALL obsspace_get_db(obss, "", varname, obs(:,l))
+       CALL get_var_name(varname_tmplate,l,cinnovation)
+       CALL obsspace_get_db(obss, "", varname, innovation(:,l))
     ENDDO
 
-    NULLIFY(geoval)
+    rmse = 0_kind_real
 
-  END SUBROUTINE load_aerosol_data_gocart_esrl
+    DO m = 1, n_profiles
+       DO l = 1, n_channels
+          diff(l,m) = fwd(m,l) - (obs(m,l) - innovation(m,l))
+          rmse(l) = rmse(l) + diff(l,m)**2
+       END DO
+    ENDDO
 
-  SUBROUTINE load_aerosol_data_none(n_profiles,n_layers,geovals,&
-       &var_aerosols_none,n_aerosols_none,atm)
-    
-    USE CRTM_aerosolcoeff, ONLY: aeroc
-    
-    INTEGER, INTENT(in) :: n_profiles,n_layers
-    TYPE(ufo_geovals), INTENT(in) :: geovals
-    INTEGER :: n_aerosols_none !=size(var_aerosols_none)
-    CHARACTER(len=MAXVARLEN), DIMENSION(n_aerosols_none), &
-         &INTENT(in) :: var_aerosols_none
-    TYPE(CRTM_atmosphere_type), INTENT(inout) :: atm(:)
+    rmse=SQRT(rmse/n_profiles)
 
-    CHARACTER(*), PARAMETER :: PROGRAM_NAME = 'other aerosol'
+    PRINT *,'N_profiles', N_PROFILES
+    DO l = 1, n_Channels
+       PRINT *, 'Channel: ',l
+       PRINT *, 'Max difference: ', MAXVAL(ABS(diff(l,:)))
+       PRINT *, 'RMSE: ', rmse(l)
+    ENDDO
 
-    CONTINUE
-
-    message = 'this aerosol not implemented - check next week'
-    CALL Display_Message( PROGRAM_NAME, message, FAILURE )
-    STOP
-    
-  END SUBROUTINE load_aerosol_data_none
+  END SUBROUTINE check_fwd
   
-  FUNCTION gocart_aerosol_size( itype, eh ) & ! eh input in 0-1
+  FUNCTION gocart_aerosol_size( itype, rh ) & ! rh input in 0-1
        &RESULT(r_eff)   ! in micrometer
+
+!@mzp: will be modified as in NASA's
 
     USE CRTM_aerosolcoeff, ONLY: aeroc
     IMPLICIT NONE
@@ -696,23 +707,23 @@ SUBROUTINE load_aerosol_data_gocart_default(n_profiles,n_layers,geovals,&
 !   modified from a function provided by quanhua liu
 !
     INTEGER ,INTENT(in) :: itype
-    REAL(kind_real)    ,INTENT(in) :: eh
+    REAL(kind_real)    ,INTENT(in) :: rh
 
     INTEGER :: j1,j2,k
     REAL(kind_real)    :: h1
     REAL(kind_real)    :: r_eff
 
     j2 = 0
-    IF ( eh <= aeroc%rh(1) ) THEN
+    IF ( rh <= aeroc%rh(1) ) THEN
        j1 = 1
-    ELSE IF ( eh >= aeroc%rh(aeroc%n_rh) ) THEN
+    ELSE IF ( rh >= aeroc%rh(aeroc%n_rh) ) THEN
        j1 = aeroc%n_rh
     ELSE
        DO k = 1, aeroc%n_rh-1
-          IF ( eh < aeroc%rh(k+1) .AND. eh > aeroc%rh(k) ) THEN
+          IF ( rh < aeroc%rh(k+1) .AND. rh > aeroc%rh(k) ) THEN
              j1 = k
              j2 = k+1
-             h1 = (eh-aeroc%rh(k))/(aeroc%rh(k+1)-aeroc%rh(k))
+             h1 = (rh-aeroc%rh(k))/(aeroc%rh(k+1)-aeroc%rh(k))
              EXIT
           ENDIF
        ENDDO
@@ -728,13 +739,12 @@ SUBROUTINE load_aerosol_data_gocart_default(n_profiles,n_layers,geovals,&
 
   END FUNCTION gocart_aerosol_size
 
-  SUBROUTINE calculate_rh_and_depthfactor(atm,n_layers,ugkg_kgm2,rh)
+  SUBROUTINE calculate_aero_layer_factor(atm,n_layers,ugkg_kgm2)
 
     TYPE(CRTM_atmosphere_type), INTENT(in) :: atm
     INTEGER, INTENT(in) :: n_layers
-    REAL(kind_real), DIMENSION(n_layers), INTENT(out) :: ugkg_kgm2,rh
+    REAL(kind_real), DIMENSION(n_layers), INTENT(out) :: ugkg_kgm2
 
-    REAL(kind_real), DIMENSION(n_layers) :: tsen,prsl
     INTEGER :: k
 
 !rh, ug2kg need to be from top to bottom    
@@ -743,150 +753,13 @@ SUBROUTINE load_aerosol_data_gocart_default(n_profiles,n_layers,geovals,&
 !correct for mixing ratio factor ugkg_kgm2 
 !being calculated from dry pressure, cotton eq. (2.4)
 !p_dry=p_total/(1+1.61*mixing_ratio)
-       ugkg_kgm2(k)=1.0e-9_kind_real*(atm(m)%level_pressure(k)-&
-            &atm(m)%level_pressure(k-1))*100_kind_real/grav/&
-            &(one+eps_p1*atm(m)%absorber(k,1)*1.e-3_kind_real)
-       prsl(k)=atm(m)%pressure(n_layers-k+1)*0.1_kind_real ! must be in cb for genqsat
-       tsen(k)=atm(m)%temperature(n_layers-k+1)
+       ugkg_kgm2(k)=1.0e-9_kind_real*(atm%Level_Pressure(k)-&
+            &atm%Level_Pressure(k-1))*100_kind_real/grav/&
+            &(one+eps_p1*atm%Absorber(k,1)*1.e-3_kind_real)
     ENDDO
     
-    CALL genqsat(qsat,tsen,prsl,n_layers,ice4qsat)
-    
-!relative humidity is ratio of specific humidities not mixing ratios
-    DO k=1,n_layers
-       rh(k)=(atm(m)%Absorber(k,1)*1.e-3_fp/(1._fp+atm(m)%Absorber(k,1)*1.e-3_fp))/&
-            &qsat(N_LAYERS-k+1)
-
-    ENDDO
-
     RETURN  
   
-  CONTAINS
+  END SUBROUTINE calculate_aero_layer_factor
 
-    SUBROUTINE params()
-      
-      LOGICAL, PARAMETER :: ice4qsat=.TRUE.
-
-      REAL(kind_real), PARAMETER :: &
-           &ttp = 2.7316e+2_kind_real, &
-           &psat = 6.1078e+2_kind_real,&
-           &rd = 2.8705e+2_kind_real,&
-           &rv = 4.6150e+2_kind_real,&
-           &cv = 7.1760e+2_kind_real,&
-           &cliq = 4.1855e+3_kind_real,&
-           &csol = 2.1060e+3_kind_real,&
-           &cvap = 1.8460e+3_kind_real,&
-           &hvap = 2.5000e+6_kind_real,&
-           &hfus = 3.3358e+5_kind_real,&
-           &grav = 9.81_kind_real
-      
-      REAL(kind_real), PARAMETER ::  &
-           &tmix = ttp-20_kind_real,&
-           &hsub = hvap+hfus,&
-           &eps = rd/rv,&
-           &eps_p1= one+eps,&
-           &omeps=one-eps,&
-           &dldt =cvap-cliq,&
-           &dldti = cvap-csol,&
-           &xa = -(dldt/rv),&
-           &xai = -(dldti/rv),&
-           &xb = xa+hvap/(rv*ttp),&
-           &xbi = xai+hsub/(rv*ttp)
-      
-    END SUBROUTINE params
-       
-    SUBROUTINE genqsat(qsat,tsen,prsl,nsig,ice)
-      
-!   input argument list:
-!     tsen      - input sensibile temperature field (nlat,nlon,nsig)
-!     prsl      - input layer mean pressure field (nlat,nlon,nsig)
-!     nsig      - number of levels                              
-!     ice       - logical flag:  t=include ice and ice-water effects,
-!                 depending on t, in qsat calcuations.
-!                 otherwise, compute qsat with respect to water surface
-!
-!   output argument list:
-!     qsat      - saturation specific humidity (output)
-!
-! remarks: see modules used
-!
-! attributes:
-!   language: f90
-!   machine:  ibm rs/6000 sp
-!
-      
-      IMPLICIT NONE
-      
-      LOGICAL                               ,INTENT(in   ) :: ice
-      REAL(kind_real),DIMENSION(nsig), INTENT(  out) :: qsat
-      REAL(kind_real),DIMENSION(nsig),INTENT(in   ) :: tsen,prsl
-      INTEGER                       ,INTENT(in   ) :: nsig
-      
-      INTEGER k
-      REAL(kind_real) pw,tdry,tr,es,es2
-      REAL(kind_real) w,onep3,esmax
-      REAL(kind_real) desidt,deswdt,dwdt,desdt,esi,esw
-      REAL(kind_real) :: mint,estmax
-      INTEGER :: lmint
-      
-      onep3 = 1.e3_kind_real
-      
-      mint=340_kind_real
-      lmint=1
-      
-      DO k=1,nsig
-         IF((prsl(k) < 30_kind_real .AND.  &
-              prsl(k) > 2_kind_real) .AND.  &
-              tsen(k) < mint)THEN
-            lmint=k
-            mint=tsen(k)
-         END IF
-      END DO
-      
-      tdry = mint
-      tr = ttp/tdry
-      
-      IF (tdry >= ttp .OR. .NOT. ice) THEN
-         estmax = psat * (tr**xa) * EXP(xb*(one-tr))
-      ELSEIF (tdry < tmix) THEN
-         estmax = psat * (tr**xai) * EXP(xbi*(one-tr))
-      ELSE
-         w  = (tdry - tmix) / (ttp - tmix)
-         estmax =  w * psat * (tr**xa) * EXP(xb*(one-tr)) &
-              + (one-w) * psat * (tr**xai) * EXP(xbi*(one-tr))
-      ENDIF
-      
-      DO k = 1,nsig
-         
-         tdry = tsen(k)
-         tr = ttp/tdry
-         IF (tdry >= ttp .OR. .NOT. ice) THEN
-            es = psat * (tr**xa) * EXP(xb*(one-tr))
-         ELSEIF (tdry < tmix) THEN
-            es = psat * (tr**xai) * EXP(xbi*(one-tr))
-         ELSE
-            esw = psat * (tr**xa) * EXP(xb*(one-tr)) 
-            esi = psat * (tr**xai) * EXP(xbi*(one-tr)) 
-            w  = (tdry - tmix) / (ttp - tmix)
-            es =  w * psat * (tr**xa) * EXP(xb*(one-tr)) &
-                 + (one-w) * psat * (tr**xai) * EXP(xbi*(one-tr))
-         ENDIF
-
-         pw = onep3*prsl(k)
-         esmax = es
-         IF(lmint < k)THEN
-            esmax=0.1_kind_real*pw
-            esmax=MIN(esmax,estmax)
-         END IF
-         es2=MIN(es,esmax)
-         qsat(k) = eps * es2 / (pw - omeps * es2)
-
-      END DO
-
-      RETURN
-
-    END SUBROUTINE genqsat
-
-  END SUBROUTINE calculate_rh_and_depthfactor
-
-END MODULE ufo_radiance_utils_mod
+end module ufo_crtm_utils_mod
