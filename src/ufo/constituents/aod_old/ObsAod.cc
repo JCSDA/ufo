@@ -46,10 +46,6 @@ ObsAod::ObsAod(const ioda::ObsSpace & odb, const eckit::Configuration & config)
   }
   varout_.reset(new oops::Variables(vout));
 
-  // call Fortran setup routine
-  const eckit::LocalConfiguration obsOptions(config, "ObsOptions");
-  const eckit::Configuration * configc = &obsOptions;
-  ufo_aod_setup_f90(keyOperRadiance_, &configc);
   oops::Log::info() << "ObsAod channels: " << channels << std::endl;
   oops::Log::trace() << "ObsAod created." << std::endl;
 }

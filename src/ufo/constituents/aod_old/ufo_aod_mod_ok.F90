@@ -1,0 +1,693 @@
+! (C) Copyright 2017-2018 UCAR
+! 
+! This software is licensed under the terms of the Apache Licence Version 2.0
+! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
+
+!> Fortran module to handle aod observations
+
+MODULE ufo_aod_mod
+  
+  use iso_c_binding
+  use ufo_vars_mod
+  use ufo_locs_mod
+  use ufo_geovals_mod
+  use kinds
+!  USE ufo_aod_misc
+  use crtm_module
+  USE ufo_basis_mod, only: ufo_basis
+  use obsspace_mod
+  USE ufo_aod_utils_mod, only: aerosol_concentration_minvalue
+
+  implicit none
+
+  public :: ufo_aod
+
+  private
+  integer, parameter :: max_string=800  
+  LOGICAL, PARAMETER :: ice4qsat=.TRUE.
+
+  REAL(fp),PARAMETER:: &
+       &ttp = 2.7316e+2_fp, &
+       &psat = 6.1078e+2_fp,&
+       &rd = 2.8705e+2_fp,&
+       &rv = 4.6150e+2_fp,&
+       &cv = 7.1760e+2_fp,&
+       &cliq = 4.1855e+3_fp,&
+       &csol = 2.1060e+3_fp,&
+       &cvap = 1.8460e+3_fp,&
+       &hvap = 2.5000e+6_fp,&
+       &hfus = 3.3358e+5_fp,&
+       &grav = 9.81_fp
+  
+  REAL(fp),PARAMETER ::  &
+       &tmix = ttp-20._fp,&
+       &hsub = hvap+hfus,&
+       &eps = rd/rv,&
+       &eps_p1= 1._fp+eps,&
+       &omeps=one-eps,&
+       &dldt =cvap-cliq,&
+       &dldti = cvap-csol,&
+       &xa = -(dldt/rv),&
+       &xai = -(dldti/rv),&
+       &xb = xa+hvap/(rv*ttp),&
+       &xbi = xai+hsub/(rv*ttp)
+  
+  LOGICAL :: flip_vertical
+
+  
+  !> Fortran derived type for aod trajectory
+  type, extends(ufo_basis) :: ufo_aod
+  contains
+    procedure :: simobs => ufo_aod_simobs
+  end type ufo_aod
+
+contains
+  
+! ------------------------------------------------------------------------------
+
+  SUBROUTINE ufo_aod_simobs(self, geovals, hofx, obss) 
+    implicit none
+    class(ufo_aod),    intent(in)    :: self
+    type(ufo_geovals), intent(in)    :: geovals
+    real(kind_real),  intent(inout) :: hofx(:)
+    type(c_ptr), value, intent(in)    :: obss
+
+    real(kind_real), allocatable :: Aod_Obs(:,:)
+    real(kind_real), allocatable :: Omg_Aod(:,:)
+
+    !*************************************************************************************
+    !******* Begin CRTM block ************************************************************
+    !*************************************************************************************
+
+    ! --------------------------
+    ! Some non-CRTM-y Parameters
+    ! --------------------------
+    CHARACTER(*), PARAMETER :: PROGRAM_NAME   = 'ufo_aod_mod.F90'
+    
+    
+    ! ============================================================================
+    ! STEP 2. **** SET UP SOME PARAMETERS FOR THE CRTM RUN ****
+    !
+
+    ! Directory location of coefficients
+    !** temporary local path for storing coefficient files (2 files per sensor), also several non-sensor specific binary files needed for other things
+    !** NOTE: for some strange reason, this compiled as little endian, even though BIG_ENDIAN was specified on the compiler flags --BTJ
+    CHARACTER(*), PARAMETER :: ENDIAN_TYPE='little_endian'
+    CHARACTER(*), PARAMETER :: COEFFICIENT_PATH='Data/'
+
+    ! Profile dimensions
+    !** UFO to provide N_LAYERS, N_ABSORBERS, N_CLOUDS, N_AEROSOLS
+
+
+    INTEGER, PARAMETER :: N_ABSORBERS = 2  !** UFO
+    INTEGER, PARAMETER :: N_CLOUDS    = 0  !** UFO
+    INTEGER, PARAMETER :: n_aerosols_gocart_crtm = 14,N_AEROSOLS=n_aerosols_gocart_crtm
+
+
+    INTEGER :: N_PROFILES 
+    INTEGER :: N_LAYERS   
+
+    
+    ! Sensor information
+    INTEGER     , PARAMETER :: N_SENSORS = 1  
+    CHARACTER(*), PARAMETER :: SENSOR_ID(N_SENSORS) = (/'v.viirs-m_npp'/)  !** UFO to provide sensor name
+
+    CHARACTER(max_string) :: err_msg
+
+  
+    ! ---------
+    ! Local Variables
+    ! ---------
+    CHARACTER(256) :: message, version
+    INTEGER        :: err_stat, alloc_stat
+    INTEGER        :: n_channels
+    INTEGER        :: l, m, n, nc, i,k
+    real(fp)       :: cf
+
+   
+    
+    ! ============================================================================
+    ! STEP 3. **** DEFINE THE CRTM INTERFACE STRUCTURES ****
+    !
+    ! 3a. Define the "non-demoninational" arguments
+    ! ---------------------------------------------
+    TYPE(CRTM_ChannelInfo_type)             :: chinfo(N_SENSORS)
+    
+    
+    ! 3b. Define the FORWARD variables
+    ! --------------------------------
+    TYPE(CRTM_Atmosphere_type), ALLOCATABLE :: atm(:)
+    TYPE(CRTM_RTSolution_type), ALLOCATABLE :: rts(:,:)
+    
+    
+    ! 3c. Define the K-MATRIX variables
+    ! ---------------------------------
+    TYPE(CRTM_Atmosphere_type), ALLOCATABLE :: atm_K(:,:)
+    TYPE(CRTM_RTSolution_type), ALLOCATABLE :: rts_K(:,:)
+    ! ============================================================================
+
+    TYPE(CRTM_Aerosol_type), ALLOCATABLE :: aerosols(:)
+
+    TYPE(ufo_geoval), pointer :: geoval
+    character(MAXVARLEN) :: varname
+    integer              :: ivar
+
+    integer              :: nobs
+    integer              :: nlocs
+    character(len=3)     :: chan_num
+    character(len=100)   :: var_name
+    REAL(fp), allocatable :: rmse(:)
+    real(fp), allocatable :: diff(:,:)
+    real(kind_real), allocatable :: ztmp(:)
+
+    ! Program header
+    ! --------------
+
+    nobs  = obsspace_get_nobs(obss)
+    nlocs = obsspace_get_nlocs(obss)
+
+    n_profiles=geovals%nobs
+
+    varname=var_aerosols_gocart_default(1)
+
+    call ufo_geovals_get_var(geovals,varname, geoval)
+    n_layers=SIZE(geoval%vals,1)
+    
+
+    ALLOCATE(atm(n_profiles),aerosols(n_aerosols))
+
+    
+    CALL CRTM_Version( Version )
+    CALL Program_Message( PROGRAM_NAME, &
+         'Check/example program for the CRTM Forward and K-Matrix functions using '//&
+         ENDIAN_TYPE//' coefficient datafiles', &
+         'CRTM Version: '//TRIM(Version) )
+    
+    ! ============================================================================
+    ! STEP 4. **** INITIALIZE THE CRTM ****
+    !
+    ! 4a. Initialise all the sensors at once
+    ! --------------------------------------
+    !** NOTE: CRTM_Init points to the various binary files needed for CRTM.  See the
+    !**       CRTM_Lifecycle.f90 for more details. 
+    WRITE( *,'(/5x,"Initializing the CRTM...")' )
+    err_stat = CRTM_Init( SENSOR_ID, &
+         chinfo, &
+         File_Path=COEFFICIENT_PATH, &
+         Quiet=.TRUE.)
+    IF ( err_stat /= SUCCESS ) THEN
+       message = 'Error initializing CRTM'
+       CALL Display_Message( PROGRAM_NAME, message, FAILURE )
+       STOP
+    END IF
+    
+    ! 4b. Output some channel information
+    ! -----------------------------------
+    n_channels = SUM(CRTM_ChannelInfo_n_Channels(chinfo))
+    !WRITE( *,'(/5x,"Processing a total of ",i0," channels...", i0, " layers..")' ) n_channels, N_LAYERS
+    DO n = 1, N_SENSORS
+       !WRITE( *,'(7x,i0," from ",a)' ) &
+       !     CRTM_ChannelInfo_n_Channels(chinfo(n)), TRIM(SENSOR_ID(n))
+    END DO
+    ! ============================================================================
+    ! Begin loop over sensors
+    !** UFO: this loop isn't necessary if we're calling CRTM for each sensor -- it's
+    !        not clear to me whether it's more efficient to call all sensors at once
+    !        or do each one individually.  I'm leaving this capability intact.  
+    ! 
+    ! ----------------------------------------------------------------------------
+    Sensor_Loop: DO n = 1, N_SENSORS
+       
+       ! ==========================================================================
+       ! STEP 5. **** ALLOCATE STRUCTURE ARRAYS ****
+       !
+       ! 5a. Determine the number of channels
+       !     for the current sensor
+       ! ------------------------------------
+       n_channels = CRTM_ChannelInfo_n_Channels(chinfo(n))
+       
+       ! 5b. Allocate the ARRAYS
+       ! -----------------------
+       ALLOCATE( rts( n_channels, N_PROFILES ), &
+            atm_K( n_channels, N_PROFILES ), &
+            rts_K( n_channels, N_PROFILES ), &
+            STAT = alloc_stat )
+       IF ( alloc_stat /= 0 ) THEN
+          message = 'Error allocating structure arrays'
+          CALL Display_Message( PROGRAM_NAME, message, FAILURE )
+          STOP
+       END IF
+       
+       ! 5c. Allocate the STRUCTURE INTERNALS
+       !     NOTE: Only the Atmosphere structures
+       !           are allocated in this example
+       ! ----------------------------------------
+       ! The input FORWARD structure
+       CALL CRTM_Atmosphere_Create( atm, N_LAYERS, N_ABSORBERS, N_CLOUDS, N_AEROSOLS )
+       IF ( ANY(.NOT. CRTM_Atmosphere_Associated(atm)) ) THEN
+          message = 'Error allocating CRTM Forward Atmosphere structure'
+          CALL Display_Message( PROGRAM_NAME, message, FAILURE )
+          STOP
+       END IF
+       
+       ! The output K-MATRIX structure
+       CALL CRTM_Atmosphere_Create( atm_K, N_LAYERS, N_ABSORBERS, N_CLOUDS, N_AEROSOLS )
+       IF ( ANY(.NOT. CRTM_Atmosphere_Associated(atm_K)) ) THEN
+          message = 'Error allocating CRTM K-matrix Atmosphere structure'
+          CALL Display_Message( PROGRAM_NAME, message, FAILURE )
+          STOP
+       END IF
+
+       CALL CRTM_RTSolution_Create(rts, n_Layers )
+       CALL CRTM_RTSolution_Create(rts_k, n_Layers )
+
+       ! ==========================================================================
+       
+       ! ==========================================================================
+       ! STEP 6. **** ASSIGN INPUT DATA ****
+       !
+       ! 6a. Atmosphere and Surface input
+       !     NOTE: that this is the hard part (in my opinion :o). The mechanism by
+       !     by which the atmosphere and surface data are loaded in to their
+       !     respective structures below was done purely to keep the step-by-step
+       !     instructions in this program relatively "clean".
+       ! ------------------------------------------------------------------------
+       !** UFO NOTE: this is where input data from UFO/OOPS will be loaded
+       !**           subroutines not necessary, but helps cleanly separate atmos
+       !**           and surface data. 
+
+       CALL Load_Atm_Data()   !** NOTE: could be moved out of sensor loop
+       
+       IF (n_Aerosols > 0)  CALL Load_Aerosol_Data()
+
+       CALL CRTM_Atmosphere_Zero( atm_K )
+       
+       ! 7b. Inintialize the K-matrix INPUT so
+       !     that the results are dTb/dx
+       ! -------------------------------------
+       rts_K%Radiance               = ZERO
+       rts_K%Brightness_Temperature = ZERO
+
+       DO m = 1, N_PROFILES
+          DO l = 1, n_Channels
+             rts_K(l,m)%layer_optical_depth = ONE
+          ENDDO
+       ENDDO
+
+       ! ==========================================================================
+
+       ! ==========================================================================
+       ! STEP 8. **** CALL THE CRTM FUNCTIONS FOR THE CURRENT SENSOR ****
+       !
+       call CRTM_Atmosphere_Inspect(atm)
+       call CRTM_ChannelInfo_Inspect(chinfo(1))
+
+! 8b.1 The K-matrix model for AOD
+! ----------------------
+       err_stat = CRTM_AOD_K( atm,    &  ! FORWARD  Input
+            rts_K                   , &  ! K-MATRIX Input
+            chinfo(n:n)             , &  ! Input
+            rts                     , &  ! FORWARD  Output
+            atm_k        )               ! K-MATRIX Output
+       IF ( err_stat /= SUCCESS ) THEN
+          message = 'Error calling CRTM K-Matrix Model for '//TRIM(SENSOR_ID(n))
+          CALL Display_Message( PROGRAM_NAME, message, FAILURE )
+          STOP
+       END IF
+
+       ! ============================================================================
+       ! 8c. **** OUTPUT THE RESULTS TO SCREEN (optional) ****
+       !
+       ! User should read the user guide or the source code of the routine
+       ! CRTM_RTSolution_Inspect in the file CRTM_RTSolution_Define.f90 to
+       ! select the needed variables for outputs.  These variables are contained
+       ! in the structure RTSolution.
+
+       ALLOCATE(diff(n_channels,n_profiles),rmse(n_channels))
+
+       allocate(Aod_Obs(n_profiles, n_channels))
+       allocate(Omg_Aod(n_profiles, n_channels))
+       do l = 1, n_channels
+         write(chan_num, '(I0)') l
+
+         var_name = 'aerosol_optical_depth_' // trim(chan_num) // '_'
+         call obsspace_get_db(obss, "", var_name, Aod_Obs(:,l))
+
+         var_name = 'obs_minus_forecast_unadjusted_' // trim(chan_num) // '_'
+         call obsspace_get_db(obss, "", var_name, Omg_Aod(:,l))
+       enddo
+
+       rmse = 0
+       DO m = 1, N_PROFILES
+          DO l = 1, n_Channels
+             diff(l,m) = SUM(rts(l,m)%layer_optical_depth(:)) - (Aod_Obs(m,l) - Omg_Aod(m,l))
+             rmse(l) = rmse(l) + diff(l,m)**2
+          END DO
+       ENDDO
+
+       rmse=SQRT(rmse/n_profiles)
+
+       PRINT *,'N_profiles', N_PROFILES
+       DO l = 1, n_Channels
+          PRINT *, 'Channel: ',l
+          PRINT *, 'Max difference: ', MAXVAL(ABS(diff(l,:)))
+          PRINT *, 'RMSE: ', rmse(l)
+       ENDDO
+
+       DEALLOCATE(diff,rmse)
+
+       deallocate(Aod_Obs)
+       deallocate(Omg_Aod)
+
+       ! output to hofx structure   
+       hofx(:) = 0.0
+       i = 1
+       do m = 1, N_PROFILES
+         do l = 1, n_Channels
+            hofx(i) = SUM(rts(l,m)%layer_optical_depth)
+           i = i + 1
+         enddo
+       enddo
+       ! ==========================================================================
+       ! STEP 9. **** CLEAN UP FOR NEXT SENSOR ****
+       !
+       ! 9a. Deallocate the structures
+       ! -----------------------------
+       CALL CRTM_Atmosphere_Destroy(atm_K)
+       CALL CRTM_Atmosphere_Destroy(atm)
+       CALL CRTM_RTSolution_Destroy(rts_K)
+       CALL CRTM_RTSolution_Destroy(rts)
+       
+       !** NOTE: Not 100% clear if any of the RTS structures need to be destroyed. 
+       
+       ! 9b. Deallocate the arrays !** NOTE: this is required
+       ! -------------------------
+       DEALLOCATE(rts, rts_K, atm_K, STAT = alloc_stat)
+       IF ( alloc_stat /= 0 ) THEN
+          message = 'Error allocating structure arrays'
+          CALL Display_Message( PROGRAM_NAME, message, FAILURE )
+          STOP
+       END IF
+       ! ==========================================================================
+       
+    END DO Sensor_Loop
+    
+    ! ==========================================================================
+    ! 10. **** DESTROY THE CRTM ****
+    !
+    WRITE( *, '( /5x, "Destroying the CRTM..." )' )
+    err_stat = CRTM_Destroy( chinfo )
+    IF ( err_stat /= SUCCESS ) THEN
+       message = 'Error destroying CRTM'
+       CALL Display_Message( PROGRAM_NAME, message, FAILURE )
+       STOP
+    END IF
+    ! ==========================================================================
+    
+  CONTAINS
+    
+    ! ==========================================================================
+    !                Below are some internal procedures that load the
+    !                necessary input structures with some pretend data
+    ! ==========================================================================
+    
+    !
+    ! Internal subprogam to load some test profile data
+    !
+    SUBROUTINE Load_Atm_Data()
+      implicit none
+      ! Local variables
+      INTEGER :: nc, NL
+      INTEGER :: k1, k2
+      
+      ! 4a.1 Profile #1
+      ! ---------------
+      ! ...Profile and absorber definitions (fake/placeholder()
+
+
+!!$ 1   Temperature
+!!$ 2   Water vapor
+!!$ 3   Pressure
+!!$ 4   Level pressure
+
+      !** populate the atmosphere structures for CRTM (atm(k1), for the k1-th profile)
+
+
+      k1=1
+
+      varname=var_prs
+      call ufo_geovals_get_var(geovals, varname, geoval)
+
+      IF (geoval%vals(1,k1) > geoval%vals(N_LAYERS,k1)) THEN 
+         flip_vertical=.TRUE.
+      ELSE
+         flip_vertical=.FALSE.
+      ENDIF
+
+      DO k1 = 1,N_PROFILES
+
+         varname=var_ts
+         call ufo_geovals_get_var(geovals, varname, geoval)
+         IF (flip_vertical) THEN
+            atm(k1)%Temperature(1:N_LAYERS) = geoval%vals(N_LAYERS:1:-1,k1)
+         ELSE             
+            atm(k1)%Temperature(1:N_LAYERS) = geoval%vals(:,k1) 
+         ENDIF
+!         print *, 'Temperature:', atm(k1)%Temperature(1:2), geoval%vals(1:2,k1)
+
+         varname=var_prs
+         call ufo_geovals_get_var(geovals, varname, geoval)
+         IF (flip_vertical) THEN
+            atm(k1)%Pressure(1:N_LAYERS) = geoval%vals(N_LAYERS:1:-1,k1)
+         ELSE
+            atm(k1)%Pressure(1:N_LAYERS) = geoval%vals(:,k1) 
+         ENDIF
+!         print *, 'Pressure:', atm(k1)%Pressure(1:2), geoval%vals(1:2,k1)
+
+
+         varname=var_prsi
+         call ufo_geovals_get_var(geovals, varname, geoval)
+         IF (flip_vertical) THEN
+            atm(k1)%Level_Pressure(0:N_LAYERS) = geoval%vals(N_LAYERS+1:1:-1,k1)
+         ELSE
+            atm(k1)%Level_Pressure(0:N_LAYERS) = geoval%vals(:,k1)
+         ENDIF
+!         print *, 'level_pressure:', atm(k1)%Level_Pressure(0:1), geoval%vals(1:2,k1)
+
+         atm(k1)%Climatology         = US_STANDARD_ATMOSPHERE
+
+         atm(k1)%Absorber_Id(1:1)    = (/ H2O_ID /)
+         atm(k1)%Absorber_Units(1:1) = (/ MASS_MIXING_RATIO_UNITS /)
+         varname=var_mixr
+         call ufo_geovals_get_var(geovals, varname, geoval)
+         IF (flip_vertical) THEN
+            atm(k1)%Absorber(1:N_LAYERS,1)       = geoval%vals(N_LAYERS:1:-1,k1)
+         ELSE
+            atm(k1)%Absorber(1:N_LAYERS,1)       = geoval%vals(:,k1) 
+         ENDIF
+!         print *, 'water vapor:', atm(k1)%Absorber(1:2,1), geoval%vals(1:2,k1)
+
+         atm(k1)%Absorber_Id(2:2)    = (/ O3_ID /)
+         atm(k1)%Absorber_Units(2:2) = (/ VOLUME_MIXING_RATIO_UNITS /)
+         atm(k1)%Absorber(1:N_LAYERS,2)=1.e-10
+
+      ENDDO
+
+      
+    END SUBROUTINE Load_Atm_Data
+    
+    SUBROUTINE Load_Aerosol_Data()
+
+      USE crtm_aerosolcoeff, ONLY: AeroC
+
+      REAL(fp), DIMENSION(N_LAYERS) :: ugkg_kgm2,qsat,rh,prsl,tsen
+
+! Local variables
+      INTEGER :: nc, NL
+      INTEGER :: k1, k2
+
+! 4a.1 Profile #1
+! ---------------
+! ...Profile and absorber definitions (fake/placeholder()
+
+      CHARACTER(len=MAXVARLEN) :: varname
+
+      INTEGER :: n_aerosols_all
+
+      INTEGER :: i,k,m
+
+      DO m=1,N_PROFILES
+
+!ug2kg && hPa2Pa
+         DO k=1,N_LAYERS
+!calculate factor for converting mixing ratio to concentration 
+!and to calculate total aerosol mass in a layer
+!correct for mixing ratio factor ugkg_kgm2 
+!being calculated from dry pressure, cotton eq. (2.4)
+!p_dry=p_total/(1+1.61*mixing_ratio)
+            ugkg_kgm2(k)=1.0e-9*(atm(m)%Level_Pressure(k)-&
+                 &atm(m)%Level_Pressure(k-1))*100./grav/&
+                 &(1.+eps_p1*atm(m)%Absorber(k,1)*1.e-3)
+         ENDDO
+
+         varname=var_rh
+
+         CALL ufo_geovals_get_var(geovals, varname, geoval)
+
+         rh(1:N_LAYERS)=MIN(geoval%vals(1:N_LAYERS,m),1.0)
+
+         n_aerosols_all=SIZE(var_aerosols_gocart_default)
+         
+         IF (n_aerosols_all /= n_aerosols_gocart_crtm) THEN
+            message = 'Only default GOCART with 14 species allowed for now'
+            CALL Display_Message( PROGRAM_NAME, message, FAILURE )
+            STOP
+         ENDIF
+         
+         DO i=1,n_aerosols_all
+            varname=var_aerosols_gocart_default(i)
+            call ufo_geovals_get_var(geovals,varname, geoval)
+
+            IF (flip_vertical) THEN
+               atm(m)%aerosol(i)%Concentration(1:N_LAYERS)=geoval%vals(N_LAYERS:1:-1,m)
+            ELSE
+               atm(m)%aerosol(i)%Concentration(1:N_LAYERS)=geoval%vals(1:N_LAYERS,m)
+            ENDIF
+
+            atm(m)%aerosol(i)%Concentration=MAX(atm(m)%aerosol(i)%Concentration*ugkg_kgm2,&
+                 &aerosol_concentration_minvalue)
+
+            SELECT CASE ( TRIM(varname))
+            CASE ('sulf')
+               atm(m)%aerosol(i)%type  = SULFATE_AEROSOL
+!rh needs to be from top to bottom
+               DO k=1,N_LAYERS
+                  atm(m)%Aerosol(i)%Effective_Radius(k)=&
+                       &GOCART_Aerosol_size(atm(m)%aerosol(i)%type, &
+                       &rh(k))
+               ENDDO
+
+            CASE ('bc1')
+               atm(m)%aerosol(i)%type  = BLACK_CARBON_AEROSOL
+               atm(m)%Aerosol(i)%Effective_Radius(:)=&
+                    &AeroC%Reff(1,atm(m)%aerosol(i)%type)
+            CASE ('bc2')
+               atm(m)%aerosol(i)%type  = BLACK_CARBON_AEROSOL
+               DO k=1,N_LAYERS
+                  atm(m)%Aerosol(i)%Effective_Radius(k)=&
+                       &GOCART_Aerosol_size(atm(m)%aerosol(i)%type, &
+                       &rh(k))
+               ENDDO
+
+            CASE ('oc1')
+               atm(m)%aerosol(i)%type  = ORGANIC_CARBON_AEROSOL
+               atm(m)%Aerosol(i)%Effective_Radius(:)=&
+                    &AeroC%Reff(1,atm(m)%aerosol(i)%type)
+            CASE ('oc2')
+               atm(m)%aerosol(i)%type  = ORGANIC_CARBON_AEROSOL
+               DO k=1,N_LAYERS
+                  atm(m)%Aerosol(i)%Effective_Radius(k)=&
+                       &GOCART_Aerosol_size(atm(m)%aerosol(i)%type, &
+                       &rh(k))
+               ENDDO
+
+            CASE ('dust1')
+               atm(m)%aerosol(i)%type  = DUST_AEROSOL
+               atm(m)%Aerosol(i)%Effective_Radius(:)=0.55_fp
+            CASE ('dust2')
+               atm(m)%aerosol(i)%type  = DUST_AEROSOL
+               atm(m)%Aerosol(i)%Effective_Radius(:)=1.4_fp
+            CASE ('dust3')
+               atm(m)%aerosol(i)%type  = DUST_AEROSOL
+               atm(m)%Aerosol(i)%Effective_Radius(:)=2.4_fp
+            CASE ('dust4')
+               atm(m)%aerosol(i)%type  = DUST_AEROSOL
+               atm(m)%Aerosol(i)%Effective_Radius(:)=4.5_fp
+            CASE ('dust5')
+               atm(m)%aerosol(i)%type  = DUST_AEROSOL
+               atm(m)%Aerosol(i)%Effective_Radius(:)=8.0_fp
+
+            CASE ('seas1')
+               atm(m)%aerosol(i)%type  = SEASALT_SSAM_AEROSOL
+               DO k=1,N_LAYERS
+                  atm(m)%Aerosol(i)%Effective_Radius(k)=&
+                       &GOCART_Aerosol_size(atm(m)%aerosol(i)%type, &
+                       &rh(k))
+               ENDDO
+            CASE ('seas2')
+               atm(m)%aerosol(i)%type  = SEASALT_SSCM1_AEROSOL
+               DO k=1,N_LAYERS
+                  atm(m)%Aerosol(i)%Effective_Radius(k)=&
+                       &GOCART_Aerosol_size(atm(m)%aerosol(i)%type, &
+                       &rh(k))
+               ENDDO
+            CASE ('seas3')
+               atm(m)%aerosol(i)%type  = SEASALT_SSCM2_AEROSOL
+               DO k=1,N_LAYERS
+                  atm(m)%Aerosol(i)%Effective_Radius(k)=&
+                       &GOCART_Aerosol_size(atm(m)%aerosol(i)%type, &
+                       &rh(k))
+               ENDDO
+            CASE ('seas4')
+               atm(m)%aerosol(i)%type  = SEASALT_SSCM3_AEROSOL
+               DO k=1,N_LAYERS
+                  atm(m)%Aerosol(i)%Effective_Radius(k)=&
+                       &GOCART_Aerosol_size(atm(m)%aerosol(i)%type, &
+                       &rh(k))
+               ENDDO
+            END SELECT
+
+         ENDDO
+
+      ENDDO
+      
+    END SUBROUTINE Load_Aerosol_Data
+    
+    FUNCTION GOCART_Aerosol_size( itype,  & ! Input
+         eh ) & ! Input in 0-1
+                           result( R_eff  )   ! in micrometer
+      USE crtm_aerosolcoeff, ONLY: AeroC
+      IMPLICIT NONE
+      
+!
+!   modified from a function provided by Quanhua Liu
+!
+      INTEGER ,INTENT(in) :: itype
+      REAL(fp)    ,INTENT(in) :: eh
+      
+      INTEGER :: j1,j2,k
+      REAL(fp)    :: h1
+      REAL(fp)    :: R_eff
+
+      j2 = 0
+      IF ( eh <= AeroC%RH(1) ) THEN
+         j1 = 1
+      ELSE IF ( eh >= AeroC%RH(AeroC%n_RH) ) THEN
+         j1 = AeroC%n_RH
+      ELSE
+         DO k = 1, AeroC%n_RH-1
+            IF ( eh < AeroC%RH(k+1) .AND. eh > AeroC%RH(k) ) THEN
+               j1 = k
+               j2 = k+1
+               h1 = (eh-AeroC%RH(k))/(AeroC%RH(k+1)-AeroC%RH(k))
+               EXIT
+            ENDIF
+         ENDDO
+      ENDIF
+      
+      IF ( j2 == 0 ) THEN
+         R_eff = AeroC%Reff(j1,itype )
+      ELSE
+         R_eff = (1.0_fp-h1)*AeroC%Reff(j1,itype ) + h1*AeroC%Reff(j2,itype )
+      ENDIF
+      
+      RETURN
+      
+    END FUNCTION GOCART_Aerosol_size
+
+  END SUBROUTINE ufo_aod_simobs
+
+! ------------------------------------------------------------------------------
+
+
+END MODULE ufo_aod_mod

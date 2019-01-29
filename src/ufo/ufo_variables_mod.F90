@@ -12,7 +12,7 @@ private
 public :: ufo_vars, ufo_vars_setup, ufo_vars_clone, ufo_vars_delete
 public :: ufo_vars_getindex, ufo_vars_nvars, ufo_vars_vnames
 
-INTEGER, PARAMETER, PUBLIC :: n_aerosols_gocart_default=14,&
+INTEGER, PARAMETER, PUBLIC :: n_aerosols_gocart_nasa=14,&
      &n_aerosols_gocart_esrl=15,n_aerosols_other=1
 
 integer, parameter, public :: MAXVARLEN=56
@@ -54,7 +54,7 @@ character(len=MAXVARLEN), public :: var_sfc_soiltyp = "Soil_Type"
 
 !@mzp strings have to be same MAXVARLEN length for array constructor
 CHARACTER(len=MAXVARLEN), public :: var_rh          = "relative_humidity"
-CHARACTER(len=MAXVARLEN), DIMENSION(n_aerosols_gocart_default), PUBLIC :: var_aerosols_gocart_default = [&
+CHARACTER(len=MAXVARLEN), DIMENSION(n_aerosols_gocart_nasa), PUBLIC :: var_aerosols_gocart_nasa = [&
      &"sulf                                                    ",&
      &"bc1                                                     ",&
      &"bc2                                                     ",&
@@ -70,7 +70,7 @@ CHARACTER(len=MAXVARLEN), DIMENSION(n_aerosols_gocart_default), PUBLIC :: var_ae
      &"seas3                                                   ",&
      &"seas4                                                   "]
 !@mzp var_aerosols_gocart_esrl =[&
-!    &var_aerosols_gocart_default,&
+!    &var_aerosols_gocart_nasa,&
 !    &"p25                                                     "]
 ! won't compile
 CHARACTER(len=MAXVARLEN), DIMENSION(n_aerosols_gocart_esrl), PUBLIC :: var_aerosols_gocart_esrl = [&

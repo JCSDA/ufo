@@ -13,7 +13,6 @@ module ufo_aod_mod_c
   implicit none
   private
   
-  ! ------------------------------------------------------------------------------
 #define LISTED_TYPE ufo_aod
 
   !> Linked list interface - defines registry_t type
@@ -40,8 +39,6 @@ type(c_ptr), intent(in)    :: c_conf
 type(ufo_aod), pointer :: self
 
 call ufo_aod_registry%setup(c_key_self, self)
-
-call self%setup(c_conf)
     
 end subroutine ufo_aod_setup_c
   
@@ -53,12 +50,8 @@ integer(c_int), intent(inout) :: c_key_self
     
 type(ufo_aod), pointer :: self
 
-CALL ufo_aod_registry%get(c_key_self, self)
-
-call self%delete()
-
-call ufo_aod_registry%remove(c_key_self)
-
+call ufo_aod_registry%delete(c_key_self, self)
+    
 end subroutine ufo_aod_delete_c
   
 ! ------------------------------------------------------------------------------
