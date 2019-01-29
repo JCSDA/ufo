@@ -82,7 +82,7 @@ CONTAINS
 
     CONTINUE
 
-    IF (self%rc%n_aerosols /= n_aerosols_gocart_default) THEN
+    IF (self%rc%n_aerosols /= n_aerosols_gocart_nasa) THEN
        message = 'Only default GOCART with 14 species allowed for now'
        CALL display_message( program_name, message, failure )
        STOP

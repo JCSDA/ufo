@@ -171,8 +171,11 @@ character(max_string) :: err_msg
     atm(k1)%Absorber(1:N_LAYERS,1)       = geoval%vals(:,k1)
     atm(k1)%Absorber_Id(2:2)    = (/ O3_ID /)
     atm(k1)%Absorber_Units(2:2) = (/ VOLUME_MIXING_RATIO_UNITS /)
-    call ufo_geovals_get_var(geovals, var_oz, geoval)
-    atm(k1)%Absorber(1:N_LAYERS,2)       = geoval%vals(:,k1)
+!    call ufo_geovals_get_var(geovals, var_oz, geoval)
+!    atm(k1)%Absorber(1:N_LAYERS,2)       = geoval%vals(:,k1)
+
+!@mzp - figure way out of it
+    atm(k1)%Absorber(1:N_LAYERS,2)=1.e-10
 
     IF (rc%n_Absorbers > min_crtm_n_absorbers) THEN
 
@@ -412,6 +415,19 @@ SUBROUTINE load_aerosol_data(n_profiles,n_layers,geovals,&
 
     CHARACTER(max_string) :: aerosol_option
     CHARACTER(max_string) :: message
+    CHARACTER(len=MAXVARLEN) :: varname
+
+    TYPE(ufo_geoval), POINTER :: geoval
+
+    REAL(kind_real), DIMENSION(n_layers,n_profiles) :: rh
+
+    varname=var_rh
+    
+    CALL ufo_geovals_get_var(geovals, varname, geoval)
+    
+    rh(1:n_layers,1:n_profiles)=geoval%vals(1:n_layers,1:n_profiles)
+
+    WHERE (rh > 1_kind_real) rh=1_kind_real
 
     IF (ALL(var_aerosols == var_aerosols_gocart_nasa)) THEN
        CALL assign_gocart_nasa
@@ -436,17 +452,13 @@ SUBROUTINE load_aerosol_data(n_profiles,n_layers,geovals,&
       
       INTEGER, DIMENSION(nseas_bins), PARAMETER  :: seas_types=[&
            SEASALT_SSAM_AEROSOL,SEASALT_SSCM1_AEROSOL,SEASALT_SSCM2_AEROSOL,SEASALT_SSCM3_AEROSOL]
+
+      REAL(kind_real), DIMENSION(n_layers) :: ugkg_kgm2
       
-      REAL(kind_real), DIMENSION(n_layers) :: ugkg_kgm2,rh
-      
-      TYPE(ufo_geoval), POINTER :: geoval
-    
       INTEGER :: i,k,m
-      
-      CHARACTER(len=MAXVARLEN) :: varname
-      
+
       DO m=1,n_profiles
-         
+
          CALL calculate_aero_layer_factor(atm(m),n_layers,ugkg_kgm2)
          
          DO i=1,n_aerosols_gocart_nasa
@@ -463,7 +475,7 @@ SUBROUTINE load_aerosol_data(n_profiles,n_layers,geovals,&
                DO k=1,n_layers
                   atm(m)%aerosol(i)%effective_radius(k)=&
                        &gocart_aerosol_size(atm(m)%aerosol(i)%type, &
-                       &rh(k))
+                       &rh(k,m))
                ENDDO
 
             CASE ('bc1')
@@ -475,7 +487,7 @@ SUBROUTINE load_aerosol_data(n_profiles,n_layers,geovals,&
                DO k=1,n_layers
                   atm(m)%aerosol(i)%effective_radius(k)=&
                        &gocart_aerosol_size(atm(m)%aerosol(i)%type, &
-                       &rh(k))
+                       &rh(k,m))
                ENDDO
 
             CASE ('oc1')
@@ -487,7 +499,7 @@ SUBROUTINE load_aerosol_data(n_profiles,n_layers,geovals,&
                DO k=1,n_layers
                   atm(m)%aerosol(i)%effective_radius(k)=&
                        &gocart_aerosol_size(atm(m)%aerosol(i)%type, &
-                       &rh(k))
+                       &rh(k,m))
                ENDDO
 
             CASE ('dust1')
@@ -511,28 +523,28 @@ SUBROUTINE load_aerosol_data(n_profiles,n_layers,geovals,&
                DO k=1,n_layers
                   atm(m)%aerosol(i)%effective_radius(k)=&
                        &gocart_aerosol_size(atm(m)%aerosol(i)%type, &
-                       &rh(k))
+                       &rh(k,m))
                ENDDO
             CASE ('seas2')
                atm(m)%aerosol(i)%type  = seas_types(2)
                DO k=1,n_layers
                   atm(m)%aerosol(i)%effective_radius(k)=&
                        &gocart_aerosol_size(atm(m)%aerosol(i)%type, &
-                       &rh(k))
+                       &rh(k,m))
                ENDDO
             CASE ('seas3')
                atm(m)%aerosol(i)%type  = seas_types(3)
                DO k=1,n_layers
                   atm(m)%aerosol(i)%effective_radius(k)=&
                        &gocart_aerosol_size(atm(m)%aerosol(i)%type, &
-                       &rh(k))
+                       &rh(k,m))
                ENDDO
             CASE ('seas4')
                atm(m)%aerosol(i)%type  = seas_types(4)
                DO k=1,n_layers
                   atm(m)%aerosol(i)%effective_radius(k)=&
                        &gocart_aerosol_size(atm(m)%aerosol(i)%type, &
-                       &rh(k))
+                       &rh(k,m))
                ENDDO
             END SELECT
 
@@ -547,18 +559,19 @@ SUBROUTINE load_aerosol_data(n_profiles,n_layers,geovals,&
       INTEGER, PARAMETER :: ndust_bins=5, nseas_bins=4
       REAL(kind_real), DIMENSION(ndust_bins), PARAMETER  :: dust_radii=[&
            &0.55_kind_real,1.4_kind_real,2.4_kind_real,4.5_kind_real,8.0_kind_real]
+
+      REAL(kind_real),PARAMETER  :: p25_radius=0.9_kind_real
+!p25_radius <- (0.78*(dust_radii_esrl[1])^3+
+!               0.22*(dust_radii_esrl[2])^3)^(1./3.)
+
       
       INTEGER, DIMENSION(nseas_bins), PARAMETER  :: seas_types=[&
            SEASALT_SSAM_AEROSOL,SEASALT_SSCM1_AEROSOL,SEASALT_SSCM2_AEROSOL,SEASALT_SSCM3_AEROSOL]
       
-      REAL(kind_real), DIMENSION(n_layers) :: ugkg_kgm2,rh
+      REAL(kind_real), DIMENSION(n_layers) :: ugkg_kgm2
       
-      TYPE(ufo_geoval), POINTER :: geoval
-    
       INTEGER :: i,k,m
       
-      CHARACTER(len=MAXVARLEN) :: varname
-
       aerosol_option = 'gocart esrl'
       message = 'this aerosol not implemented - check next week'
       CALL Display_Message( aerosol_option, message, FAILURE )
@@ -582,7 +595,7 @@ SUBROUTINE load_aerosol_data(n_profiles,n_layers,geovals,&
                DO k=1,n_layers
                   atm(m)%aerosol(i)%effective_radius(k)=&
                        &gocart_aerosol_size(atm(m)%aerosol(i)%type, &
-                       &rh(k))
+                       &rh(k,m))
                ENDDO
 
             CASE ('bc1')
@@ -594,7 +607,7 @@ SUBROUTINE load_aerosol_data(n_profiles,n_layers,geovals,&
                DO k=1,n_layers
                   atm(m)%aerosol(i)%effective_radius(k)=&
                        &gocart_aerosol_size(atm(m)%aerosol(i)%type, &
-                       &rh(k))
+                       &rh(k,m))
                ENDDO
 
             CASE ('oc1')
@@ -606,7 +619,7 @@ SUBROUTINE load_aerosol_data(n_profiles,n_layers,geovals,&
                DO k=1,n_layers
                   atm(m)%aerosol(i)%effective_radius(k)=&
                        &gocart_aerosol_size(atm(m)%aerosol(i)%type, &
-                       &rh(k))
+                       &rh(k,m))
                ENDDO
 
             CASE ('dust1')
@@ -634,28 +647,28 @@ SUBROUTINE load_aerosol_data(n_profiles,n_layers,geovals,&
                DO k=1,n_layers
                   atm(m)%aerosol(i)%effective_radius(k)=&
                        &gocart_aerosol_size(atm(m)%aerosol(i)%type, &
-                       &rh(k))
+                       &rh(k,m))
                ENDDO
             CASE ('seas2')
                atm(m)%aerosol(i)%type  = seas_types(2)
                DO k=1,n_layers
                   atm(m)%aerosol(i)%effective_radius(k)=&
                        &gocart_aerosol_size(atm(m)%aerosol(i)%type, &
-                       &rh(k))
+                       &rh(k,m))
                ENDDO
             CASE ('seas3')
                atm(m)%aerosol(i)%type  = seas_types(3)
                DO k=1,n_layers
                   atm(m)%aerosol(i)%effective_radius(k)=&
                        &gocart_aerosol_size(atm(m)%aerosol(i)%type, &
-                       &rh(k))
+                       &rh(k,m))
                ENDDO
             CASE ('seas4')
                atm(m)%aerosol(i)%type  = seas_types(4)
                DO k=1,n_layers
                   atm(m)%aerosol(i)%effective_radius(k)=&
                        &gocart_aerosol_size(atm(m)%aerosol(i)%type, &
-                       &rh(k))
+                       &rh(k,m))
                ENDDO
             END SELECT
 
@@ -667,14 +680,10 @@ SUBROUTINE load_aerosol_data(n_profiles,n_layers,geovals,&
 
     SUBROUTINE assign_other
 
-      REAL(kind_real), DIMENSION(n_layers) :: ugkg_kgm2,rh
-      
-      TYPE(ufo_geoval), POINTER :: geoval
+      REAL(kind_real), DIMENSION(n_layers) :: ugkg_kgm2
       
       INTEGER :: i,k,m
       
-      CHARACTER(len=MAXVARLEN) :: varname
-
       aerosol_option = 'other'
       message = 'this aerosol not implemented - check next week'
       CALL Display_Message( aerosol_option, message, FAILURE )
@@ -689,21 +698,21 @@ SUBROUTINE load_aerosol_data(n_profiles,n_layers,geovals,&
     TYPE(c_ptr), value,       INTENT(in)    :: obss
     INTEGER, INTENT(in) :: n_profiles,n_channels
     CHARACTER(MAXVARLEN), INTENT(in) :: varname_tmplate
-    REAL(kind_real), DIMENSION(n_profiles, n_channels), INTENT(in) :: fwd
+    REAL(kind_real), DIMENSION(n_channels,n_profiles), INTENT(in) :: fwd
+
     REAL(kind_real), DIMENSION(n_profiles, n_channels) :: &
          &obs, innovation, diff
     REAL(kind_real), DIMENSION(n_channels) :: rmse
     
     CHARACTER(MAXVARLEN) :: varname
-    CHARACTER(MAXVARLEN) :: cinnovation="obs_minus_forecast_unadjusted_"
+    CHARACTER(MAXVARLEN) :: cinnovation="obs_minus_forecast_unadjusted"
 
     INTEGER :: l,m
 
     DO l = 1,n_Channels
-!Get the variable name for this channel
        CALL get_var_name(varname_tmplate,l,varname)
        CALL obsspace_get_db(obss, "", varname, obs(:,l))
-       CALL get_var_name(varname_tmplate,l,cinnovation)
+       CALL get_var_name(cinnovation,l,varname)
        CALL obsspace_get_db(obss, "", varname, innovation(:,l))
     ENDDO
 
@@ -711,8 +720,8 @@ SUBROUTINE load_aerosol_data(n_profiles,n_layers,geovals,&
 
     DO m = 1, n_profiles
        DO l = 1, n_channels
-          diff(l,m) = fwd(m,l) - (obs(m,l) - innovation(m,l))
-          rmse(l) = rmse(l) + diff(l,m)**2
+          diff(m,l) = fwd(m,l) - (obs(m,l) - innovation(m,l))
+          rmse(l) = rmse(l) + diff(m,l)**2
        END DO
     ENDDO
 
@@ -721,7 +730,7 @@ SUBROUTINE load_aerosol_data(n_profiles,n_layers,geovals,&
     PRINT *,'N_profiles', N_PROFILES
     DO l = 1, n_Channels
        PRINT *, 'Channel: ',l
-       PRINT *, 'Max difference: ', MAXVAL(ABS(diff(l,:)))
+       PRINT *, 'Max difference: ', MAXVAL(ABS(diff(:,l)))
        PRINT *, 'RMSE: ', rmse(l)
     ENDDO
 
@@ -741,7 +750,7 @@ SUBROUTINE load_aerosol_data(n_profiles,n_layers,geovals,&
     INTEGER ,INTENT(in) :: itype
     REAL(kind_real)    ,INTENT(in) :: rh
 
-    INTEGER :: j1,j2,k
+    INTEGER :: j1,j2,m
     REAL(kind_real)    :: h1
     REAL(kind_real)    :: r_eff
 
@@ -751,11 +760,11 @@ SUBROUTINE load_aerosol_data(n_profiles,n_layers,geovals,&
     ELSE IF ( rh >= aeroc%rh(aeroc%n_rh) ) THEN
        j1 = aeroc%n_rh
     ELSE
-       DO k = 1, aeroc%n_rh-1
-          IF ( rh < aeroc%rh(k+1) .AND. rh > aeroc%rh(k) ) THEN
-             j1 = k
-             j2 = k+1
-             h1 = (rh-aeroc%rh(k))/(aeroc%rh(k+1)-aeroc%rh(k))
+       DO m = 1, aeroc%n_rh-1
+          IF ( rh < aeroc%rh(m+1) .AND. rh > aeroc%rh(m) ) THEN
+             j1 = m
+             j2 = m+1
+             h1 = (rh-aeroc%rh(m))/(aeroc%rh(m+1)-aeroc%rh(m))
              EXIT
           ENDIF
        ENDDO

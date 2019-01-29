@@ -171,8 +171,11 @@ character(max_string) :: err_msg
     atm(k1)%Absorber(1:N_LAYERS,1)       = geoval%vals(:,k1)
     atm(k1)%Absorber_Id(2:2)    = (/ O3_ID /)
     atm(k1)%Absorber_Units(2:2) = (/ VOLUME_MIXING_RATIO_UNITS /)
-    call ufo_geovals_get_var(geovals, var_oz, geoval)
-    atm(k1)%Absorber(1:N_LAYERS,2)       = geoval%vals(:,k1)
+!    call ufo_geovals_get_var(geovals, var_oz, geoval)
+!    atm(k1)%Absorber(1:N_LAYERS,2)       = geoval%vals(:,k1)
+
+!@mzp - figure way out of it
+    atm(k1)%Absorber(1:N_LAYERS,2)=1.e-10
 
     IF (rc%n_Absorbers > min_crtm_n_absorbers) THEN
 
@@ -547,6 +550,11 @@ SUBROUTINE load_aerosol_data(n_profiles,n_layers,geovals,&
       INTEGER, PARAMETER :: ndust_bins=5, nseas_bins=4
       REAL(kind_real), DIMENSION(ndust_bins), PARAMETER  :: dust_radii=[&
            &0.55_kind_real,1.4_kind_real,2.4_kind_real,4.5_kind_real,8.0_kind_real]
+
+      REAL(kind_real),PARAMETER  :: p25_radius=0.9_kind_real
+!p25_radius <- (0.78*(dust_radii_esrl[1])^3+
+!               0.22*(dust_radii_esrl[2])^3)^(1./3.)
+
       
       INTEGER, DIMENSION(nseas_bins), PARAMETER  :: seas_types=[&
            SEASALT_SSAM_AEROSOL,SEASALT_SSCM1_AEROSOL,SEASALT_SSCM2_AEROSOL,SEASALT_SSCM3_AEROSOL]
@@ -690,20 +698,20 @@ SUBROUTINE load_aerosol_data(n_profiles,n_layers,geovals,&
     INTEGER, INTENT(in) :: n_profiles,n_channels
     CHARACTER(MAXVARLEN), INTENT(in) :: varname_tmplate
     REAL(kind_real), DIMENSION(n_profiles, n_channels), INTENT(in) :: fwd
+
     REAL(kind_real), DIMENSION(n_profiles, n_channels) :: &
          &obs, innovation, diff
     REAL(kind_real), DIMENSION(n_channels) :: rmse
     
     CHARACTER(MAXVARLEN) :: varname
-    CHARACTER(MAXVARLEN) :: cinnovation="obs_minus_forecast_unadjusted_"
+    CHARACTER(MAXVARLEN) :: cinnovation="obs_minus_forecast_unadjusted"
 
     INTEGER :: l,m
 
     DO l = 1,n_Channels
-!Get the variable name for this channel
        CALL get_var_name(varname_tmplate,l,varname)
        CALL obsspace_get_db(obss, "", varname, obs(:,l))
-       CALL get_var_name(varname_tmplate,l,cinnovation)
+       CALL get_var_name(cinnovation,l,varname)
        CALL obsspace_get_db(obss, "", varname, innovation(:,l))
     ENDDO
 
@@ -717,6 +725,8 @@ SUBROUTINE load_aerosol_data(n_profiles,n_layers,geovals,&
     ENDDO
 
     rmse=SQRT(rmse/n_profiles)
+
+    PRINT *,'@@1'
 
     PRINT *,'N_profiles', N_PROFILES
     DO l = 1, n_Channels

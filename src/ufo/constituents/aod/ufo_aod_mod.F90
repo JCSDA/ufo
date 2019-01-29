@@ -182,7 +182,7 @@ REAL(kind_real), ALLOCATABLE, DIMENSION(:,:) :: fwd
 !this needs to be corrected !!!@mzp
    IF (self%rc%n_Aerosols > 0) &
         &CALL load_aerosol_data(n_profiles,n_layers,geovals,&
-        &var_aerosols_gocart_default,atm)
+        &var_aerosols_gocart_nasa,atm)
 
    ! Call THE CRTM inspection
    ! ------------------------
@@ -212,12 +212,23 @@ REAL(kind_real), ALLOCATABLE, DIMENSION(:,:) :: fwd
       STOP
    END IF
 
-   DO m = 1, N_PROFILES
-      DO l = 1, n_Channels
-         rts_k(l,m)%layer_optical_depth = ONE
+! The output K-MATRIX structure
+   CALL CRTM_Atmosphere_Create( atm_K, n_layers, self%rc%n_Absorbers, self%rc%n_Clouds, self%rc%n_Aerosols)
+   IF ( ANY(.NOT. CRTM_Atmosphere_Associated(atm_K)) ) THEN
+      message = 'Error allocating CRTM K-matrix Atmosphere structure'
+      CALL Display_Message( PROGRAM_NAME, message, FAILURE )
+      STOP
+   END IF
+   
+   CALL CRTM_RTSolution_Create(rts, n_Layers )
+   CALL CRTM_RTSolution_Create(rts_k, n_Layers )
+   
+   DO m = 1, n_profiles
+      DO l = 1, n_channels
+         rts_k(l,m)%layer_optical_depth = one
       ENDDO
    ENDDO
-
+   
 
 ! 8b.1 The K-matrix model for AOD
 ! ----------------------
@@ -237,11 +248,11 @@ REAL(kind_real), ALLOCATABLE, DIMENSION(:,:) :: fwd
    ! Put simulated brightness temperature into hofx
    ! ----------------------------------------------
 
+   ALLOCATE(fwd(n_profiles,n_channels))
+
    !Set to zero and initializ counter
    hofx(:) = 0.0_kind_real
    i = 1
-
-   ALLOCATE(fwd(n_profiles, n_channels))
 
    do m = 1, n_Profiles
      do l = 1, N_Channels
@@ -249,13 +260,16 @@ REAL(kind_real), ALLOCATABLE, DIMENSION(:,:) :: fwd
        hofx(i) = SUM(rts(l,m)%layer_optical_depth)
        i = i + 1
 
-       fwd(l,m)= hofx(i)
+       fwd(m,l)= hofx(i)
+
+       PRINT *,'@@@0',fwd(m,l)
 
      end do
    end do
 
    CALL check_fwd(obss,n_profiles, n_channels,varname_template,fwd)
-   
+
+
    DEALLOCATE(fwd)
 
    ! Deallocate the structures
@@ -263,9 +277,12 @@ REAL(kind_real), ALLOCATABLE, DIMENSION(:,:) :: fwd
    call CRTM_Atmosphere_Destroy(atm)
    call CRTM_RTSolution_Destroy(rts)
 
+   call CRTM_Atmosphere_Destroy(atm_k)
+   call CRTM_RTSolution_Destroy(rts_k)
+
    ! Deallocate all arrays
    ! ---------------------
-   deallocate(geo, atm, sfc, rts, STAT = alloc_stat)
+   DEALLOCATE(geo, atm, sfc, rts, atm_k, rts_k, STAT = alloc_stat)
    if ( alloc_stat /= 0 ) THEN
       message = 'Error deallocating structure arrays'
       call Display_Message( PROGRAM_NAME, message, FAILURE )
@@ -273,7 +290,6 @@ REAL(kind_real), ALLOCATABLE, DIMENSION(:,:) :: fwd
    end if
 
 end do Sensor_Loop
-
 
  ! Destroy CRTM instance
  ! ---------------------
