@@ -30,6 +30,7 @@ list( APPEND ufo_test_input
   testinput/radiosonde.yaml
   testinput/radiosonde_qc.yaml
   testinput/aircraft.yaml
+  testinput/aircraft_qc.yaml
   testinput/aod.yaml
   testinput/gnssroref.yaml
   testinput/channelsparser.yaml
@@ -181,6 +182,12 @@ ecbuild_add_test( TARGET  test_ufo_aircraft_opr
                   MPI     4
                   SOURCES mains/TestObsOperator.cc
                   ARGS    "testinput/aircraft.yaml"
+                  LIBS    ufo )
+
+ecbuild_add_test( TARGET  test_ufo_aircraft_qc
+                  BOOST
+                  SOURCES mains/TestObsFilters.cc
+                  ARGS    "testinput/aircraft_qc.yaml"
                   LIBS    ufo )
 
 ecbuild_add_test( TARGET  test_ufo_aircraft_tlad

@@ -155,7 +155,6 @@ subroutine ufo_locs_init(self, obss, t1, t2)
 
   character(len=*),parameter:: &
      myname = "ufo_locs_init"
-  character(len=255) :: record
   integer :: i
   integer :: tw_nlocs
   integer, dimension(:), allocatable :: tw_indx
@@ -206,9 +205,6 @@ subroutine ufo_locs_init(self, obss, t1, t2)
     call datetime_delete(date_time(i))
   enddo
   deallocate(date_time, lon, lat, tw_indx)
-
-  write(record,*) myname,': allocated/assigned obs locations'
-  call fckit_log%info(record)
 
 end subroutine ufo_locs_init
 
