@@ -173,6 +173,29 @@ REAL(kind_real), ALLOCATABLE, DIMENSION(:,:) :: fwd
 !   END IF
 
 
+!do not initialize: Radiance, Brightness_Temperature
+!initialize: layer_optical_depth
+
+   ALLOCATE( atm_K( n_channels, N_PROFILES ), &
+        rts_K( n_channels, N_PROFILES ), &
+        STAT = alloc_stat )
+   IF ( alloc_stat /= 0 ) THEN
+      message = 'Error allocating structure arrays'
+      CALL Display_Message( PROGRAM_NAME, message, FAILURE )
+      STOP
+   END IF
+
+! The output K-MATRIX structure
+   CALL CRTM_Atmosphere_Create( atm_K, n_layers, self%rc%n_Absorbers, self%rc%n_Clouds, self%rc%n_Aerosols)
+   IF ( ANY(.NOT. CRTM_Atmosphere_Associated(atm_K)) ) THEN
+      message = 'Error allocating CRTM K-matrix Atmosphere structure'
+      CALL Display_Message( PROGRAM_NAME, message, FAILURE )
+      STOP
+   END IF
+   
+   CALL CRTM_RTSolution_Create(rts, n_Layers )
+   CALL CRTM_RTSolution_Create(rts_k, n_Layers )
+
    !Assign the data from the GeoVaLs
    !--------------------------------
    CALL Load_Atm_Data(n_Profiles,n_Layers,geovals,atm,self%rc)
@@ -200,28 +223,10 @@ REAL(kind_real), ALLOCATABLE, DIMENSION(:,:) :: fwd
 !                            chinfo(n:n), &  ! Input
 !                            rts          )  ! Output
 
-!do not initialize: Radiance, Brightness_Temperature
-!initialize: layer_optical_depth
 
-   ALLOCATE( atm_K( n_channels, N_PROFILES ), &
-        rts_K( n_channels, N_PROFILES ), &
-        STAT = alloc_stat )
-   IF ( alloc_stat /= 0 ) THEN
-      message = 'Error allocating structure arrays'
-      CALL Display_Message( PROGRAM_NAME, message, FAILURE )
-      STOP
-   END IF
-
-! The output K-MATRIX structure
-   CALL CRTM_Atmosphere_Create( atm_K, n_layers, self%rc%n_Absorbers, self%rc%n_Clouds, self%rc%n_Aerosols)
-   IF ( ANY(.NOT. CRTM_Atmosphere_Associated(atm_K)) ) THEN
-      message = 'Error allocating CRTM K-matrix Atmosphere structure'
-      CALL Display_Message( PROGRAM_NAME, message, FAILURE )
-      STOP
-   END IF
-   
-   CALL CRTM_RTSolution_Create(rts, n_Layers )
-   CALL CRTM_RTSolution_Create(rts_k, n_Layers )
+!@mzp - is this necessary
+   rts_K%Radiance               = ZERO
+   rts_K%Brightness_Temperature = ZERO
    
    DO m = 1, n_profiles
       DO l = 1, n_channels
@@ -258,9 +263,10 @@ REAL(kind_real), ALLOCATABLE, DIMENSION(:,:) :: fwd
      do l = 1, N_Channels
 
        hofx(i) = SUM(rts(l,m)%layer_optical_depth)
-       i = i + 1
 
        fwd(m,l)= hofx(i)
+
+       i = i + 1
 
        PRINT *,'@@@0',fwd(m,l)
 
