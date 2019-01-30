@@ -40,6 +40,7 @@ type rad_conf
  character(len=255), allocatable :: SENSOR_ID(:)
  character(len=255) :: ENDIAN_TYPE
  character(len=255) :: COEFFICIENT_PATH
+ logical :: inspect
 end type rad_conf
 
 contains
@@ -93,6 +94,11 @@ character(len=100), allocatable :: skiplist_str(:)
  do i = 1,nskip
    read(skiplist_str(i),*)  rc%skiplist(i)
  enddo
+
+ rc%inspect = 0
+ if (config_element_exists(c_conf,"InspectProfileNumber")) then
+   rc%inspect = config_get_int(c_conf,"InspectProfileNumber")
+ endif
 
 end subroutine rad_conf_setup
 

@@ -174,11 +174,12 @@ type(CRTM_RTSolution_type), allocatable :: rts(:,:)
 
    ! Call THE CRTM inspection
    ! ------------------------
-   call CRTM_Atmosphere_Inspect(atm(n))
-   call CRTM_Surface_Inspect(sfc(n))
-   call CRTM_Geometry_Inspect(geo(n))
-   call CRTM_ChannelInfo_Inspect(chinfo(n))
-
+   if (self%rc%inspect > 0) then
+     call CRTM_Atmosphere_Inspect(atm(self%rc%inspect))
+     call CRTM_Surface_Inspect(sfc(self%rc%inspect))
+     call CRTM_Geometry_Inspect(geo(self%rc%inspect))
+     call CRTM_ChannelInfo_Inspect(chinfo(self%rc%inspect))
+   endif
 
    ! Call the forward model call for each sensor
    ! -------------------------------------------
