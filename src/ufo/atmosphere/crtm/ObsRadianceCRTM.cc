@@ -5,7 +5,7 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
  */
 
-#include "ufo/atmosphere/radiance/ObsRadiance.h"
+#include "ufo/atmosphere/crtm/ObsRadianceCRTM.h"
 
 #include <ostream>
 #include <set>
@@ -23,13 +23,13 @@
 namespace ufo {
 
 // -----------------------------------------------------------------------------
-static ObsOperatorMaker<ObsRadiance> makerAmsua_("AMSU-A");
-static ObsOperatorMaker<ObsRadiance> makerAvhrr_("AVHRR");
+static ObsOperatorMaker<ObsRadianceCRTM> makerAmsua_("AMSU-A");
+static ObsOperatorMaker<ObsRadianceCRTM> makerAvhrr_("AVHRR");
 
 // -----------------------------------------------------------------------------
 
-ObsRadiance::ObsRadiance(const ioda::ObsSpace & odb, const eckit::Configuration & config)
-  : keyOperRadiance_(0), odb_(odb), varin_(), varout_()
+ObsRadianceCRTM::ObsRadianceCRTM(const ioda::ObsSpace & odb, const eckit::Configuration & config)
+  : keyOperRadianceCRTM_(0), odb_(odb), varin_(), varout_()
 {
   const std::vector<std::string> vv{"air_temperature", "humidity_mixing_ratio", "air_pressure",
                                     "air_pressure_levels", "mass_concentration_of_ozone_in_air",
@@ -58,30 +58,30 @@ ObsRadiance::ObsRadiance(const ioda::ObsSpace & odb, const eckit::Configuration 
   // call Fortran setup routine
   const eckit::LocalConfiguration obsOptions(config, "ObsOptions");
   const eckit::Configuration * configc = &obsOptions;
-  ufo_radiance_setup_f90(keyOperRadiance_, &configc);
-  oops::Log::info() << "ObsRadiance channels: " << channels << std::endl;
-  oops::Log::trace() << "ObsRadiance created." << std::endl;
+  ufo_radiance_crtm_setup_f90(keyOperRadianceCRTM_, &configc);
+  oops::Log::info() << "ObsRadianceCRTM channels: " << channels << std::endl;
+  oops::Log::trace() << "ObsRadianceCRTM created." << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
-ObsRadiance::~ObsRadiance() {
-  ufo_radiance_delete_f90(keyOperRadiance_);
-  oops::Log::trace() << "ObsRadiance destructed" << std::endl;
+ObsRadianceCRTM::~ObsRadianceCRTM() {
+  ufo_radiance_crtm_delete_f90(keyOperRadianceCRTM_);
+  oops::Log::trace() << "ObsRadianceCRTM destructed" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
-void ObsRadiance::simulateObs(const GeoVaLs & gom, ioda::ObsVector & ovec,
+void ObsRadianceCRTM::simulateObs(const GeoVaLs & gom, ioda::ObsVector & ovec,
                               const ObsBias & bias) const {
-  ufo_radiance_simobs_f90(keyOperRadiance_, gom.toFortran(), odb_,
+  ufo_radiance_crtm_simobs_f90(keyOperRadianceCRTM_, gom.toFortran(), odb_,
                           ovec.size(), ovec.toFortran(), bias.toFortran());
 }
 
 // -----------------------------------------------------------------------------
 
-void ObsRadiance::print(std::ostream & os) const {
-  os << "ObsRadiance::print not implemented";
+void ObsRadianceCRTM::print(std::ostream & os) const {
+  os << "ObsRadianceCRTM::print not implemented";
 }
 
 // -----------------------------------------------------------------------------

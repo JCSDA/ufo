@@ -5,7 +5,7 @@
 
 !> Fortran module to provide code shared between nonlinear and tlm/adm radiance calculations
 
-MODULE ufo_radiance_utils_mod
+MODULE ufo_radiance_crtm_utils_mod
 
 use iso_c_binding
 use config_mod
@@ -673,4 +673,4 @@ END SUBROUTINE get_var_name
 
 ! -----------------------------------------------------------------------------
 
-END MODULE ufo_radiance_utils_mod
+END MODULE ufo_radiance_crtm_utils_mod
