@@ -16,7 +16,6 @@ MODULE ufo_aod_mod
   use crtm_module
   USE ufo_basis_mod, only: ufo_basis
   use obsspace_mod
-  USE ufo_aod_utils_mod, only: aerosol_concentration_minvalue
 
   implicit none
 
@@ -54,6 +53,7 @@ MODULE ufo_aod_mod
   
   LOGICAL :: flip_vertical
 
+  REAL, PARAMETER :: aerosol_concentration_minvalue=1.e-16
   
   !> Fortran derived type for aod trajectory
   type, extends(ufo_basis) :: ufo_aod

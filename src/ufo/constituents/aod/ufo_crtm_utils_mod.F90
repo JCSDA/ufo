@@ -693,12 +693,12 @@ SUBROUTINE load_aerosol_data(n_profiles,n_layers,geovals,&
     
   END SUBROUTINE load_aerosol_data
 
-  SUBROUTINE check_fwd(obss,n_profiles,n_channels,varname_tmplate,fwd)
+  SUBROUTINE check_fwd(fwd,obss,n_profiles,n_channels,varname_tmplate)
 
     TYPE(c_ptr), value,       INTENT(in)    :: obss
     INTEGER, INTENT(in) :: n_profiles,n_channels
-    CHARACTER(MAXVARLEN), INTENT(in) :: varname_tmplate
-    REAL(kind_real), DIMENSION(n_channels,n_profiles), INTENT(in) :: fwd
+    CHARACTER(*), INTENT(in) :: varname_tmplate
+    REAL(kind_real), DIMENSION(n_profiles,n_channels), INTENT(in) :: fwd
 
     REAL(kind_real), DIMENSION(n_profiles, n_channels) :: &
          &obs, innovation, diff

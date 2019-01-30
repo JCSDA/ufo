@@ -31,7 +31,7 @@ module ufo_aod_mod
    procedure :: simobs => ufo_aod_simobs
  end type ufo_aod
 
- CHARACTER(MAXVARLEN), PARAMETER :: varname_template="aerosol_optical_depth"
+ CHARACTER(MAXVARLEN), PARAMETER :: varname_tmplate="aerosol_optical_depth"
 
 contains
 
@@ -268,12 +268,10 @@ REAL(kind_real), ALLOCATABLE, DIMENSION(:,:) :: fwd
 
        i = i + 1
 
-       PRINT *,'@@@0',fwd(m,l)
-
      end do
    end do
 
-   CALL check_fwd(obss,n_profiles, n_channels,varname_template,fwd)
+   CALL check_fwd(fwd,obss,n_profiles, n_channels,varname_tmplate)
 
 
    DEALLOCATE(fwd)
