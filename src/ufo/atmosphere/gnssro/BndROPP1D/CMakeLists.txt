@@ -9,6 +9,12 @@ set (  bndropp1d_src_files
        ObsGnssroBndROPP1D.interface.h
        ObsGnssroBndROPP1D.interface.F90
        ufo_gnssro_bndropp1d_mod.F90
+       ObsGnssroBndROPP1DTLAD.h
+       ObsGnssroBndROPP1DTLAD.cc
+       ObsGnssroBndROPP1DTLAD.interface.h
+       ObsGnssroBndROPP1DTLAD.interface.F90
+       ufo_gnssro_bndropp1d_tlad_mod.F90
+       ufo_gnssro_ropp_utils_mod.F90
 PARENT_SCOPE
 )
 else( ${ROPP-UFO_FOUND} )
@@ -18,6 +24,11 @@ set (  bndropp1d_src_files
        ObsGnssroBndROPP1D.interface.h
        ObsGnssroBndROPP1D.interface.F90
        ufo_gnssro_bndropp1d_mod_stub.F90
+       ObsGnssroBndROPP1DTLAD.h
+       ObsGnssroBndROPP1DTLAD.cc
+       ObsGnssroBndROPP1DTLAD.interface.h
+       ObsGnssroBndROPP1DTLAD.interface.F90
+       ufo_gnssro_bndropp1d_tlad_mod_stub.F90
 PARENT_SCOPE
 )
 endif( ${ROPP-UFO_FOUND} )

@@ -33,6 +33,7 @@ list( APPEND ufo_test_input
   testinput/aircraft_qc.yaml
   testinput/aod.yaml
   testinput/gnssroref.yaml
+  testinput/gnssrobndropp1d.yaml
   testinput/channelsparser.yaml
 )
 
@@ -53,8 +54,7 @@ list( APPEND ufo_test_data
   atmosphere/amsua_geoval_n19_2018041500_s.nc4
   atmosphere/sondes_geoval_2018041500_m.nc4
   atmosphere/sondes_geoval_2018041500_s.nc4
-  atmosphere/gnssro_ref_geovals.nc4
-
+  atmosphere/gnssro_geoval_2018041500_s.nc4
   constituents/vars_ges.2015081000_dbl_subset.nc4
   constituents/aod_geoval_2018041500_m.nc4
 )
@@ -102,7 +102,7 @@ list (APPEND ioda_obs_test_data
   atmosphere/amsua_obs_n19_2018041500_s.nc4
   atmosphere/sondes_obs_2018041500_m.nc4
   atmosphere/sondes_obs_2018041500_s.nc4
-  atmosphere/gnssro_ref_obs.nc4
+  atmosphere/gnssro_obs_2018041500_s.nc4
   atmosphere/diag_t_obs_01_wprofiles.odb
   atmosphere/diag_t_obs_01_wprofiles_odb
 
@@ -209,6 +209,18 @@ ecbuild_add_test( TARGET  test_ufo_gnssroRef_tlad
                   SOURCES mains/TestObsOperatorTLAD.cc
                   ARGS    "testinput/gnssroref.yaml"
                   LIBS    ufo )
+if( ${ROPP-UFO_FOUND} )
+ecbuild_add_test( TARGET  test_ufo_gnssroBndROPP1D_opr
+                  BOOST
+                  SOURCES mains/TestObsOperator.cc
+                  ARGS    "testinput/gnssrobndropp1d.yaml"
+                  LIBS    ufo )
+ecbuild_add_test( TARGET  test_ufo_gnssroBndROPP1D_tlad
+                  BOOST 
+                  SOURCES mains/TestObsOperatorTLAD.cc
+                  ARGS    "testinput/gnssrobndropp1d.yaml"
+                  LIBS    ufo )
+endif( ${ROPP-UFO_FOUND} )
 
 # Marine UFO tests
 if( ${GSW_FOUND} )
