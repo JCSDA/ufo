@@ -29,8 +29,6 @@ Observations:
     random: 0
     window_begin: "2018-04-14T21:00:00Z"
     window_end: "2018-04-15T03:00:00Z"
-   rmsequiv: "228.32019688865083"
-   tolerance: "1.0e-8"
    ObsBias: {}
  - ObsType: "Radiosonde"
    ObsData: 
@@ -39,11 +37,9 @@ Observations:
    variables: 
    - air_temperature
    GeoVaLs: 
-    norm: "64102.13571856729"
+    norm: "22355.0135965"
     random: 0
     filename: "Data/sondes_geoval_2018041500_m.nc4"
     window_begin: "2018-04-14T21:00:00Z"
     window_end: "2018-04-15T03:00:00Z"
-   rmsequiv: "254.46418485798108"
-   tolerance: "1.0e-8"
    ObsBias: {}

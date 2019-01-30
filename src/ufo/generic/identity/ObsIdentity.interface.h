@@ -5,8 +5,8 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#ifndef UFO_MARINE_SEASURFACETEMP_OBSSEASURFACETEMP_INTERFACE_H_
-#define UFO_MARINE_SEASURFACETEMP_OBSSEASURFACETEMP_INTERFACE_H_
+#ifndef UFO_GENERIC_IDENTITY_OBSIDENTITY_INTERFACE_H_
+#define UFO_GENERIC_IDENTITY_OBSIDENTITY_INTERFACE_H_
 
 #include "ioda/ObsSpace.h"
 
@@ -14,15 +14,14 @@
 
 namespace ufo {
 
-/// Interface to Fortran UFO marine/seasurfacetemp routines
-
 extern "C" {
 
 // -----------------------------------------------------------------------------
 
-  void ufo_seasurfacetemp_setup_f90(F90hop &, const eckit::Configuration * const *);
-  void ufo_seasurfacetemp_delete_f90(F90hop &);
-  void ufo_seasurfacetemp_simobs_f90(const F90hop &, const F90goms &, const ioda::ObsSpace &,
+  void ufo_identity_setup_f90(F90hop &, const eckit::Configuration * const *,
+                              char *, char *, const int &);
+  void ufo_identity_delete_f90(F90hop &);
+  void ufo_identity_simobs_f90(const F90hop &, const F90goms &, const ioda::ObsSpace &,
                                const int &, double &, const F90obias &);
 
 // -----------------------------------------------------------------------------
@@ -30,4 +29,4 @@ extern "C" {
 }  // extern C
 
 }  // namespace ufo
-#endif  // UFO_MARINE_SEASURFACETEMP_OBSSEASURFACETEMP_INTERFACE_H_
+#endif  // UFO_GENERIC_IDENTITY_OBSIDENTITY_INTERFACE_H_

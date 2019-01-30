@@ -12,10 +12,13 @@
 
 namespace eckit {class Configuration;}
 namespace ioda {class ObsSpace;}
+namespace oops {class Variables;}
 
 namespace ufo {
+  class GeoVaLs;
 
-std::vector<bool> processWhere(ioda::ObsSpace &, const eckit::Configuration &);
+oops::Variables preProcessWhere(const eckit::Configuration &);
+std::vector<bool> processWhere(ioda::ObsSpace &, const GeoVaLs &, const eckit::Configuration &);
 
 }  // namespace ufo
 

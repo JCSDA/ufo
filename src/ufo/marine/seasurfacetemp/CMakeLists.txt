@@ -4,15 +4,7 @@
 # which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 
 set ( seasurfacetemp_files
-    ObsSeaSurfaceTemp.h
     ObsSeaSurfaceTemp.cc
-    ObsSeaSurfaceTempTLAD.h
     ObsSeaSurfaceTempTLAD.cc
-    ObsSeaSurfaceTemp.interface.F90
-    ObsSeaSurfaceTemp.interface.h
-    ObsSeaSurfaceTempTLAD.interface.F90
-    ObsSeaSurfaceTempTLAD.interface.h
-    ufo_seasurfacetemp_mod.F90
-    ufo_seasurfacetemp_tlad_mod.F90
     PARENT_SCOPE
 )

@@ -31,7 +31,7 @@ static oops::FilterMaker<UfoTrait, oops::ObsFilter<UfoTrait, ObsPreQC>> mkPreQC_
 // -----------------------------------------------------------------------------
 
 ObsPreQC::ObsPreQC(ioda::ObsSpace & obsdb, const eckit::Configuration & config)
-  : obsdb_(obsdb), config_(config)
+  : obsdb_(obsdb), config_(config), nogeovals_()
 {
   const float rmiss = util::missingValue(rmiss);
   const int imiss = util::missingValue(imiss);

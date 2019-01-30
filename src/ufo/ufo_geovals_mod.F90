@@ -130,7 +130,7 @@ type(ufo_geoval), pointer, intent(inout)    :: geoval
 character(len=*), parameter :: myname_="ufo_geovals_get_var"
 
 character(max_string) :: err_msg
-integer :: ivar
+integer :: ivar, jv
 
 geoval => NULL()
 if (.not. self%lalloc .or. .not. self%linit) then
@@ -140,6 +140,10 @@ endif
 ivar = ufo_vars_getindex(self%variables, varname)
 
 if (ivar < 0) then
+  write(0,*)'ufo_geovals_get_var looking for ',trim(varname),' in:'
+  do jv=1,self%variables%nv
+    write(0,*)'ufo_geovals_get_var ',jv,trim(self%variables%fldnames(jv))
+  enddo
   write(err_msg,*) myname_, trim(varname), ' doesnt exist'
   call abor1_ftn(err_msg)
 else
@@ -236,10 +240,11 @@ end subroutine ufo_geovals_rms
 ! ------------------------------------------------------------------------------
 
 subroutine ufo_geovals_random(self) 
-use random_vectors_mod
+use random_mod
 implicit none
 type(ufo_geovals), intent(inout) :: self
 integer :: ivar
+integer :: rseed = 7
 
 if (.not. self%lalloc) then
   call abor1_ftn("ufo_geovals_random: geovals not allocated")
@@ -248,7 +253,7 @@ if (.not. self%linit) then
   call abor1_ftn("ufo_geovals_random: geovals not initialized")
 endif
 do ivar = 1, self%nvar
-  call random_vector(self%geovals(ivar)%vals)
+  call normal_distribution(self%geovals(ivar)%vals, 0.0_kind_real, 1.0_kind_real, rseed)
 enddo
 
 end subroutine ufo_geovals_random
@@ -649,16 +654,31 @@ end subroutine ufo_geovals_dotprod
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_geovals_minmaxavg(self, kobs, pmin, pmax, prms) 
+subroutine ufo_geovals_minmaxavg(self, kobs, kvar, pmin, pmax, prms) 
 implicit none
 integer, intent(inout) :: kobs
+integer, intent(in) :: kvar
 real(kind_real), intent(inout) :: pmin, pmax, prms
 type(ufo_geovals), intent(in) :: self
+real(kind_real) :: zobs
+integer :: jo, jz, jv
 
-kobs = self%nobs
-pmin=minval(self%geovals(1)%vals)
-pmax=maxval(self%geovals(1)%vals)
-prms=0. !sqrt(sum(self%values(:,:)**2)/real(self%nobs*self%nvar,kind_real))
+jv = kvar+1
+kobs = 0
+pmin = huge(pmin)
+pmax = -huge(pmax)
+prms = 0.0_kind_real
+do jo = 1, self%nobs
+  do jz = 1, self%geovals(jv)%nval
+    if (self%geovals(jv)%vals(jz,jo) .ne. self%missing_value) then
+      kobs = kobs + 1
+      if (self%geovals(jv)%vals(jz,jo) < pmin) pmin = self%geovals(jv)%vals(jz,jo)
+      if (self%geovals(jv)%vals(jz,jo) > pmax) pmax = self%geovals(jv)%vals(jz,jo)
+      prms = prms + self%geovals(jv)%vals(jz,jo) * self%geovals(jv)%vals(jz,jo)
+    endif
+  enddo
+enddo
+if (kobs > 0) prms = sqrt(prms/real(kobs,kind_real))
 
 end subroutine ufo_geovals_minmaxavg
 
