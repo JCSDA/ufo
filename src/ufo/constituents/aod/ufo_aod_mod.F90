@@ -203,9 +203,10 @@ REAL(kind_real), ALLOCATABLE, DIMENSION(:,:) :: fwd
 !   CALL Load_Geom_Data(obss,geo)
 
 !this needs to be corrected !!!@mzp
+   
    IF (self%rc%n_Aerosols > 0) &
         &CALL load_aerosol_data(n_profiles,n_layers,geovals,&
-        &var_aerosols_gocart_nasa,atm)
+        &self%rc%aerosol_option,atm)
 
    ! Call THE CRTM inspection
    ! ------------------------
@@ -225,8 +226,8 @@ REAL(kind_real), ALLOCATABLE, DIMENSION(:,:) :: fwd
 
 
 !@mzp - is this necessary
-   rts_K%Radiance               = ZERO
-   rts_K%Brightness_Temperature = ZERO
+!   rts_K%Radiance               = ZERO
+!   rts_K%Brightness_Temperature = ZERO
    
    DO m = 1, n_profiles
       DO l = 1, n_channels
@@ -272,7 +273,6 @@ REAL(kind_real), ALLOCATABLE, DIMENSION(:,:) :: fwd
    end do
 
    CALL check_fwd(fwd,obss,n_profiles, n_channels,varname_tmplate)
-
 
    DEALLOCATE(fwd)
 

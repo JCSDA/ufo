@@ -37,7 +37,8 @@ REAL(kind_real), PARAMETER :: &
      &rv = 4.6150e+2_kind_real,&
      &eps_p1 = one+rd/rv,&
      &grav = 9.81_kind_real,&
-     &aerosol_concentration_minvalue=1.e-16
+     &aerosol_concentration_minvalue=1.e-16,&
+     &ozone_default_value=1.e-10
 
 INTEGER, PARAMETER, public :: min_crtm_n_absorbers = 2
 
@@ -54,6 +55,7 @@ type crtm_conf
  character(len=255), allocatable :: SENSOR_ID(:)
  character(len=255) :: ENDIAN_TYPE
  character(len=255) :: COEFFICIENT_PATH
+ character(len=255) :: aerosol_option
 end type crtm_conf
 
 contains
@@ -80,7 +82,28 @@ character(len=100), allocatable :: skiplist_str(:)
  !Number of absorbers, clouds and aerosols (should match what model will provide)
  rc%n_Absorbers = config_get_int(c_conf,"n_Absorbers")
  rc%n_Clouds    = config_get_int(c_conf,"n_Clouds"   )
- rc%n_Aerosols  = config_get_int(c_conf,"n_Aerosols" )
+
+ IF (config_element_exists(c_conf,"n_Aerosols")) THEN 
+    rc%n_Aerosols  = config_get_int(c_conf,"n_Aerosols" )
+ ELSE
+    rc%n_Aerosols  = 0
+ ENDIF
+
+ IF (config_element_exists(c_conf,"AerosolOption")) THEN
+    rc%aerosol_option = config_get_string(c_conf,LEN(rc%aerosol_option),"AerosolOption")
+    rc%aerosol_option = upper2lower(rc%aerosol_option)
+    IF (TRIM(rc%aerosol_option) == "aerosols_gocart_nasa") THEN
+       rc%n_Aerosols=14
+    ELSEIF (TRIM(rc%aerosol_option) == "aerosols_gocart_esrl") THEN
+       rc%n_Aerosols=15
+    ELSEIF (TRIM(rc%aerosol_option) == "aerosols_other") THEN
+       rc%n_Aerosols=1
+    ELSE
+       rc%n_Aerosols=0
+    ENDIF
+ ELSE
+    rc%aerosol_option = ""
+ ENDIF
 
  !Allocate SENSOR_ID
  allocate(rc%SENSOR_ID(rc%n_Sensors))
@@ -93,6 +116,7 @@ character(len=100), allocatable :: skiplist_str(:)
 
  !Path to coefficient files
  rc%COEFFICIENT_PATH = config_get_string(c_conf,len(rc%COEFFICIENT_PATH),"CoefficientPath")
+
 
  !Channels to skip
  if (config_element_exists(c_conf,"SkipChannels")) then
@@ -171,11 +195,13 @@ character(max_string) :: err_msg
     atm(k1)%Absorber(1:N_LAYERS,1)       = geoval%vals(:,k1)
     atm(k1)%Absorber_Id(2:2)    = (/ O3_ID /)
     atm(k1)%Absorber_Units(2:2) = (/ VOLUME_MIXING_RATIO_UNITS /)
-!    call ufo_geovals_get_var(geovals, var_oz, geoval)
-!    atm(k1)%Absorber(1:N_LAYERS,2)       = geoval%vals(:,k1)
 
-!@mzp - figure way out of it
-    atm(k1)%Absorber(1:N_LAYERS,2)=1.e-10
+    IF (rc%aerosol_option /= "") THEN
+       atm(k1)%Absorber(1:N_LAYERS,2)=ozone_default_value
+    ELSE
+       CALL ufo_geovals_get_var(geovals, var_oz, geoval)
+       atm(k1)%Absorber(1:N_LAYERS,2)       = geoval%vals(:,k1)
+    ENDIF
 
     IF (rc%n_Absorbers > min_crtm_n_absorbers) THEN
 
@@ -404,22 +430,34 @@ end subroutine get_var_name
 ! -----------------------------------------------------------------------------
 
 SUBROUTINE load_aerosol_data(n_profiles,n_layers,geovals,&
-     &var_aerosols,atm)
+     &aerosol_option,atm)
 
     USE CRTM_aerosolcoeff, ONLY: aeroc
 
     INTEGER, INTENT(in) :: n_profiles,n_layers
     TYPE(ufo_geovals), INTENT(in) :: geovals
-    CHARACTER(len=MAXVARLEN), DIMENSION(:), INTENT(in) :: var_aerosols
     TYPE(CRTM_atmosphere_type), INTENT(inout) :: atm(:)
 
-    CHARACTER(max_string) :: aerosol_option
+    CHARACTER(*) :: aerosol_option
     CHARACTER(max_string) :: message
     CHARACTER(len=MAXVARLEN) :: varname
 
     TYPE(ufo_geoval), POINTER :: geoval
 
     REAL(kind_real), DIMENSION(n_layers,n_profiles) :: rh
+
+    IF (TRIM(aerosol_option) == "aerosols_gocart_nasa") THEN
+       CALL assign_gocart_nasa
+    ELSEIF (TRIM(aerosol_option) == "aerosols_gocart_esrl") THEN
+       CALL assign_gocart_esrl
+    ELSEIF (TRIM(aerosol_option) == "aerosols_other") THEN
+       CALL assign_other
+    ELSE
+       aerosol_option = 'unknown aerosol'
+       message = 'this aerosol not implemented - check next week'
+       CALL Display_Message( aerosol_option, message, FAILURE )
+       STOP
+    ENDIF
 
     varname=var_rh
     
@@ -429,18 +467,6 @@ SUBROUTINE load_aerosol_data(n_profiles,n_layers,geovals,&
 
     WHERE (rh > 1_kind_real) rh=1_kind_real
 
-    IF (ALL(var_aerosols == var_aerosols_gocart_nasa)) THEN
-       CALL assign_gocart_nasa
-    ELSEIF (ALL(var_aerosols == var_aerosols_gocart_esrl)) THEN
-       CALL assign_gocart_esrl
-    ELSEIF (ALL(var_aerosols == var_aerosols_other)) THEN
-       CALL assign_other
-    ELSE
-       aerosol_option = 'unknown aerosol'
-       message = 'this aerosol not implemented - check next week'
-       CALL Display_Message( aerosol_option, message, FAILURE )
-       STOP
-    ENDIF
 
   CONTAINS 
 
@@ -802,5 +828,74 @@ SUBROUTINE load_aerosol_data(n_profiles,n_layers,geovals,&
     RETURN  
   
   END SUBROUTINE calculate_aero_layer_factor
+
+  FUNCTION upper2lower(str) RESULT(string)
+
+    IMPLICIT NONE
+
+    CHARACTER(*), INTENT(in) :: str
+    CHARACTER(LEN(str))      :: string
+
+    INTEGER :: ic, i
+
+    CHARACTER(26), PARAMETER :: upper = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+    CHARACTER(26), PARAMETER :: lower = 'abcdefghijklmnopqrstuvwxyz'
+
+!   lowcase each letter if it is lowecase
+    string = str
+    DO i = 1, LEN_TRIM(str)
+       ic = INDEX(upper, str(i:i))
+       IF (ic > 0) string(i:i) = lower(ic:ic)
+    END DO
+
+  END FUNCTION upper2lower
+
+  FUNCTION lower2upper(str) RESULT (string)
+
+    IMPLICIT NONE
+
+    CHARACTER(*), INTENT(in) :: str
+    CHARACTER(LEN(str))      :: string
+
+    INTEGER :: ic, i
+
+    CHARACTER(26), PARAMETER :: upper = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+    CHARACTER(26), PARAMETER :: lower = 'abcdefghijklmnopqrstuvwxyz'
+
+!   lowcase each letter if it is lowecase
+    string = str
+    DO i = 1, LEN_TRIM(str)
+       ic = INDEX(lower, str(i:i))
+       IF (ic > 0) string(i:i) = upper(ic:ic)
+    END DO
+
+  END FUNCTION lower2upper
+
+  FUNCTION replace_text(s,text,rep) RESULT(outs) 
+    CHARACTER(*)        :: s,text,rep
+    CHARACTER(LEN(s)+100) :: outs  ! provide outs with extra 100 char len
+    INTEGER             :: i, nt, nr
+
+    outs = s ; nt = LEN_TRIM(text) ; nr = LEN_TRIM(rep)
+    DO
+       i = INDEX(outs,text(:nt)) ; IF (i == 0) EXIT
+       outs = outs(:i-1) // rep(:nr) // outs(i+nt:)
+    END DO
+
+  END FUNCTION replace_text
+
+  INTEGER FUNCTION getindex(names,usrname)
+    IMPLICIT NONE
+    CHARACTER(len=*),INTENT(in) :: names(:)
+    CHARACTER(len=*),INTENT(in) :: usrname
+    INTEGER i
+    getindex=-1
+    DO i=1,SIZE(names)
+       IF(TRIM(usrname)==TRIM(names(i))) THEN
+          getindex=i
+          EXIT
+       ENDIF
+    ENDDO
+  END FUNCTION getindex
 
 end module ufo_crtm_utils_mod
