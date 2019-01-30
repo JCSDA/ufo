@@ -8,6 +8,7 @@
 #include "ufo/atmosphere/rttov/ObsRadianceRTTOV.h"
 
 #include <ostream>
+#include <set>
 #include <string>
 #include <vector>
 
@@ -17,26 +18,47 @@
 
 #include "ufo/GeoVaLs.h"
 #include "ufo/ObsBias.h"
-
+#include "ufo/utils/IntSetParser.h"
 
 namespace ufo {
 
 // -----------------------------------------------------------------------------
-static ObsOperatorMaker<ObsRadianceRTTOV> makerRadianceRTTOV_("RadianceRTTOV");
+static ObsOperatorMaker<ObsRadianceRTTOV> makerRadianceRTTOV_("RTTOV");
 // -----------------------------------------------------------------------------
 
 ObsRadianceRTTOV::ObsRadianceRTTOV(const ioda::ObsSpace & odb,
                        const eckit::Configuration & config)
   : keyOper_(0), odb_(odb), varin_(), varout_()
 {
-  // TODO(anyone): list the variables for GeoVaLs that are needed for the observation
-  //       operator below in vv (e.g., vv{"temperature", "humidity"})
-  const std::vector<std::string> vvin{""};
-  varin_.reset(new oops::Variables(vvin));
-  const std::vector<std::string> vvout{""};
-  varout_.reset(new oops::Variables(vvout));
-  const eckit::Configuration * configc = &config;
+  const std::vector<std::string> vv{"air_temperature", "humidity_mixing_ratio", "air_pressure",
+                                    "air_pressure_levels", "mass_concentration_of_ozone_in_air",
+                                    "mass_concentration_of_carbon_dioxide_in_air",
+                                    "atmosphere_mass_content_of_cloud_liquid_water",
+                                    "atmosphere_mass_content_of_cloud_ice",
+                                    "effective_radius_of_cloud_liquid_water_particle",
+                                    "effective_radius_of_cloud_ice_particle",
+                                    "Water_Fraction", "Land_Fraction", "Ice_Fraction",
+                                    "Snow_Fraction", "Water_Temperature", "Land_Temperature",
+                                    "Ice_Temperature", "Snow_Temperature", "Vegetation_Fraction",
+                                    "Sfc_Wind_Speed", "Sfc_Wind_Direction", "Lai", "Soil_Moisture",
+                                    "Soil_Temperature", "Land_Type_Index", "Vegetation_Type",
+                                    "Soil_Type", "Snow_Depth"};
+  varin_.reset(new oops::Variables(vv));
+ 
+  // parse channels from the config and create variable names
+  std::string chlist = config.getString("channels");
+  std::set<int> channels = parseIntSet(chlist);
+  std::vector<std::string> vout;
+  for (const int jj : channels) {
+    vout.push_back("brightness_temperature_"+std::to_string(jj)+"_");
+  }
+  varout_.reset(new oops::Variables(vout));
+
+  // call Fortran setup routine
+  const eckit::LocalConfiguration obsOptions(config, "ObsOptions");
+  const eckit::Configuration * configc = &obsOptions;
   ufo_radiancerttov_setup_f90(keyOper_, &configc);
+  oops::Log::info() << "ObsRadianceRTTOV channels: " << channels << std::endl;
   oops::Log::trace() << "ObsRadianceRTTOV created." << std::endl;
 }
 

@@ -24,8 +24,7 @@
 namespace ufo {
 
 // -----------------------------------------------------------------------------
-static LinearObsOperatorMaker<ObsRadianceCRTMTLAD> makerAmsuaTL_("AMSU-A");
-static LinearObsOperatorMaker<ObsRadianceCRTMTLAD> makerAvhrrTL_("AVHRR");
+static LinearObsOperatorMaker<ObsRadianceCRTMTLAD> makerAmsuaTL_("CRTM");
 // -----------------------------------------------------------------------------
 
 ObsRadianceCRTMTLAD::ObsRadianceCRTMTLAD(const ioda::ObsSpace & odb,

@@ -23,8 +23,7 @@
 namespace ufo {
 
 // -----------------------------------------------------------------------------
-static ObsOperatorMaker<ObsRadianceCRTM> makerAmsua_("AMSU-A");
-static ObsOperatorMaker<ObsRadianceCRTM> makerAvhrr_("AVHRR");
+static ObsOperatorMaker<ObsRadianceCRTM> makerCRTM_("CRTM");
 
 // -----------------------------------------------------------------------------
 

@@ -22,18 +22,17 @@
 namespace ufo {
 
 // -----------------------------------------------------------------------------
-static LinearObsOperatorMaker<ObsRadianceRTTOVTLAD> makerRadianceRTTOVTL_("RadianceRTTOV");
+static LinearObsOperatorMaker<ObsRadianceRTTOVTLAD> makerRadianceRTTOVTL_("RTTOV");
 // -----------------------------------------------------------------------------
 
 ObsRadianceRTTOVTLAD::ObsRadianceRTTOVTLAD(const ioda::ObsSpace & odb,
                                const eckit::Configuration & config)
   : keyOper_(0), varin_(), odb_(odb)
 {
-  // TODO(anyone): list the variables for GeoVaLs that are needed for the observation
-  //       operator TL and AD below in vv (e.g., vv{"temperature", "humidity"})
-  const std::vector<std::string> vv{""};
+  const std::vector<std::string> vv{"air_temperature"};
   varin_.reset(new oops::Variables(vv));
-  const eckit::Configuration * configc = &config;
+  const eckit::LocalConfiguration obsOptions(config, "ObsOptions");
+  const eckit::Configuration * configc = &obsOptions;
   ufo_radiancerttov_tlad_setup_f90(keyOper_, &configc);
   oops::Log::trace() << "ObsRadianceRTTOVTLAD created" << std::endl;
 }

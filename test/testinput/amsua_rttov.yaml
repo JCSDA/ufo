@@ -8,7 +8,7 @@ LinearObsOpTest:
  toleranceAD: "1.0e-12"
 Observations: 
  ObsTypes: 
- - ObsType: "AMSU-A"
+ - ObsType: "RTTOV"
    channels: "1-15"
    ObsOptions: 
     RTModel: "RTTOV"
