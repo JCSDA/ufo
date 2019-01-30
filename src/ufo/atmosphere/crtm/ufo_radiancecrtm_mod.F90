@@ -119,7 +119,7 @@ SUBROUTINE ufo_radiance_rttov_simobs(self, geovals, hofx, obss)
  ! Get number of profile and layers from geovals
  ! ---------------------------------------------
  n_Profiles = geovals%nobs
- call ufo_geovals_get_var(geovals, var_tv, temp)
+ call ufo_geovals_get_var(geovals, var_ts, temp)
  n_Layers = temp%nval
  N_LEVELS = N_LAYERS + 1
  nullify(temp)

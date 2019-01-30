@@ -443,7 +443,7 @@ SUBROUTINE RTTOV_Load_Atm_Data(N_PROFILES,N_LAYERS,geovals,obss,profiles)
     !   ENDIF
 
 
-    CALL ufo_geovals_get_var(geovals, var_tv, geoval)
+    CALL ufo_geovals_get_var(geovals, var_ts, geoval)
     profiles(k1)%t(2:n_levels) = geoval%vals(:,k1)
     profiles(k1)%t(1) = profiles(k1)%t(2)
 
@@ -535,13 +535,13 @@ SUBROUTINE RTTOV_Load_Atm_Data(N_PROFILES,N_LAYERS,geovals,obss,profiles)
     !DAR: Could/should get emissivity here?
     ! call rttov_get_emissivity()
 
-    CALL obsspace_get_db(obss, "", "height", TmpVar)
+    CALL obsspace_get_db(obss, "MetaData", "height", TmpVar)
     profiles(:)%elevation = TmpVar(:) / 1000.0 !m -> km for RTTOV
 
-    CALL obsspace_get_db(obss, "", "latitude", TmpVar)
+    CALL obsspace_get_db(obss, "MetaData", "latitude", TmpVar)
     profiles(:)%latitude = TmpVar(:)
 
-    CALL obsspace_get_db(obss, "", "longitude", TmpVar)
+    CALL obsspace_get_db(obss, "MetaData", "longitude", TmpVar)
     profiles(:)%longitude = TmpVar(:)
   ENDDO
 

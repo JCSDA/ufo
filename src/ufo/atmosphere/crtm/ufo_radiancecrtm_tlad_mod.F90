@@ -340,7 +340,7 @@ INCLUDE 'rttov_alloc_k.interface'
  ! Get number of profile and layers from geovals
  ! ---------------------------------------------
  self%n_Profiles = geovals%nobs
- call ufo_geovals_get_var(geovals, var_tv, temp)
+ call ufo_geovals_get_var(geovals, var_ts, temp)
  self%n_Layers = temp%nval
 
  n_levels = self%n_layers + 1
