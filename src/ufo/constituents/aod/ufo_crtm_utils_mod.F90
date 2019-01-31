@@ -30,7 +30,7 @@ public Load_Geom_Data
 
 PUBLIC Load_Aerosol_Data
 
-public check_fwd
+PUBLIC check_fwd
 
 REAL(kind_real), PARAMETER :: &
      &rd = 2.8705e+2_kind_real,&
@@ -210,7 +210,7 @@ character(max_string) :: err_msg
        
     ENDIF
 
-    IF ( rc%n_Clouds > 1 ) THEN
+    IF ( rc%n_Clouds >= 1 ) THEN
 
        atm(k1)%Cloud(1)%Type = WATER_CLOUD
        CALL ufo_geovals_get_var(geovals, var_clw, geoval)
@@ -225,7 +225,7 @@ character(max_string) :: err_msg
        
     ENDIF
 
-    IF ( rc%n_Clouds > 2 ) THEN
+    IF ( rc%n_Clouds >= 2 ) THEN
 
        atm(k1)%Cloud(2)%Type = ICE_CLOUD
        CALL ufo_geovals_get_var(geovals, var_cli, geoval)
@@ -892,4 +892,4 @@ SUBROUTINE load_aerosol_data(n_profiles,n_layers,geovals,&
     ENDDO
   END FUNCTION getindex
 
-end module ufo_crtm_utils_mod
+END MODULE ufo_crtm_utils_mod
