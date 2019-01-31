@@ -202,8 +202,6 @@ REAL(kind_real), ALLOCATABLE, DIMENSION(:,:) :: fwd
 !   CALL Load_Sfc_Data(n_Profiles,n_Layers,n_Channels,geovals,sfc,chinfo,obss)
 !   CALL Load_Geom_Data(obss,geo)
 
-!this needs to be corrected !!!@mzp
-   
    IF (self%rc%n_Aerosols > 0) &
         &CALL load_aerosol_data(n_profiles,n_layers,geovals,&
         &self%rc%aerosol_option,atm)
@@ -225,10 +223,6 @@ REAL(kind_real), ALLOCATABLE, DIMENSION(:,:) :: fwd
 !                            rts          )  ! Output
 
 
-!@mzp - is this necessary
-!   rts_K%Radiance               = ZERO
-!   rts_K%Brightness_Temperature = ZERO
-   
    DO m = 1, n_profiles
       DO l = 1, n_channels
          rts_k(l,m)%layer_optical_depth = one

@@ -83,11 +83,8 @@ character(len=100), allocatable :: skiplist_str(:)
  rc%n_Absorbers = config_get_int(c_conf,"n_Absorbers")
  rc%n_Clouds    = config_get_int(c_conf,"n_Clouds"   )
 
- IF (config_element_exists(c_conf,"n_Aerosols")) THEN 
-    rc%n_Aerosols  = config_get_int(c_conf,"n_Aerosols" )
- ELSE
-    rc%n_Aerosols  = 0
- ENDIF
+ IF (config_element_exists(c_conf,"n_Aerosols")) &
+      &rc%n_Aerosols  = config_get_int(c_conf,"n_Aerosols" )
 
  IF (config_element_exists(c_conf,"AerosolOption")) THEN
     rc%aerosol_option = config_get_string(c_conf,LEN(rc%aerosol_option),"AerosolOption")
@@ -99,9 +96,10 @@ character(len=100), allocatable :: skiplist_str(:)
     ELSEIF (TRIM(rc%aerosol_option) == "aerosols_other") THEN
        rc%n_Aerosols=1
     ELSE
-       rc%n_Aerosols=0
+       rc%n_Aerosols=1
     ENDIF
  ELSE
+    rc%n_Aerosols  = 0
     rc%aerosol_option = ""
  ENDIF
 
@@ -196,7 +194,7 @@ character(max_string) :: err_msg
     atm(k1)%Absorber_Id(2:2)    = (/ O3_ID /)
     atm(k1)%Absorber_Units(2:2) = (/ VOLUME_MIXING_RATIO_UNITS /)
 
-    IF (rc%aerosol_option /= "") THEN
+    IF (TRIM(rc%aerosol_option) /= "") THEN
        atm(k1)%Absorber(1:N_LAYERS,2)=ozone_default_value
     ELSE
        CALL ufo_geovals_get_var(geovals, var_oz, geoval)
@@ -447,26 +445,24 @@ SUBROUTINE load_aerosol_data(n_profiles,n_layers,geovals,&
     REAL(kind_real), DIMENSION(n_layers,n_profiles) :: rh
 
     IF (TRIM(aerosol_option) == "aerosols_gocart_nasa") THEN
+       varname=var_rh
+       CALL ufo_geovals_get_var(geovals, varname, geoval)
+       rh(1:n_layers,1:n_profiles)=geoval%vals(1:n_layers,1:n_profiles)
+       WHERE (rh > 1_kind_real) rh=1_kind_real
        CALL assign_gocart_nasa
     ELSEIF (TRIM(aerosol_option) == "aerosols_gocart_esrl") THEN
+       varname=var_rh
+       CALL ufo_geovals_get_var(geovals, varname, geoval)
+       rh(1:n_layers,1:n_profiles)=geoval%vals(1:n_layers,1:n_profiles)
+       WHERE (rh > 1_kind_real) rh=1_kind_real
        CALL assign_gocart_esrl
     ELSEIF (TRIM(aerosol_option) == "aerosols_other") THEN
        CALL assign_other
     ELSE
-       aerosol_option = 'unknown aerosol'
-       message = 'this aerosol not implemented - check next week'
+       message = 'this aerosol not implemented - check later'
        CALL Display_Message( aerosol_option, message, FAILURE )
        STOP
     ENDIF
-
-    varname=var_rh
-    
-    CALL ufo_geovals_get_var(geovals, varname, geoval)
-    
-    rh(1:n_layers,1:n_profiles)=geoval%vals(1:n_layers,1:n_profiles)
-
-    WHERE (rh > 1_kind_real) rh=1_kind_real
-
 
   CONTAINS 
 
@@ -598,8 +594,7 @@ SUBROUTINE load_aerosol_data(n_profiles,n_layers,geovals,&
       
       INTEGER :: i,k,m
       
-      aerosol_option = 'gocart esrl'
-      message = 'this aerosol not implemented - check next week'
+      message = 'this aerosol not implemented - check later'
       CALL Display_Message( aerosol_option, message, FAILURE )
       STOP
 
@@ -710,8 +705,7 @@ SUBROUTINE load_aerosol_data(n_profiles,n_layers,geovals,&
       
       INTEGER :: i,k,m
       
-      aerosol_option = 'other'
-      message = 'this aerosol not implemented - check next week'
+      message = 'this aerosol not implemented - check later'
       CALL Display_Message( aerosol_option, message, FAILURE )
       STOP
 

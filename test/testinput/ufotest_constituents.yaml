@@ -16,10 +16,10 @@ Observations:
    ObsOptions:
     n_Absorbers: 2
     n_Clouds: 0
-    n_Aerosols: 14
     Sensor_ID: "v.viirs-m_npp"
     EndianType: little_endian
     CoefficientPath: "Data/"
+    AerosolOption: "aerosols_gocart_nasa"
    ObsData: 
     ObsDataIn: 
      obsfile: "Data/aod_obs_2018041500_m.nc4"
