@@ -15,6 +15,18 @@ set ( radiance_files
   ufo_radiance_mod.F90
   ufo_radiance_tlad_mod.F90
   ufo_radiance_utils_mod.F90
-  ../../constituents/aod/ufo_crtm_utils_mod.F90
+  ufo_crtm_utils_mod.F90
+  ObsAod.h
+  ObsAod.cc
+  ObsAodTLAD.h
+  ObsAodTLAD.cc
+  ObsAod.interface.F90
+  ObsAod.interface.h
+  ObsAodTLAD.interface.F90
+  ObsAodTLAD.interface.h
+  ufo_crtm_utils_mod.F90
+  ufo_aod_utils_mod.F90
+  ufo_aod_mod.F90
+  ufo_aod_tlad_mod.F90
   PARENT_SCOPE
 )
