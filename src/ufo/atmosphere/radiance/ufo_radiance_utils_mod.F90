@@ -40,7 +40,7 @@ type rad_conf
  character(len=255), allocatable :: SENSOR_ID(:)
  character(len=255) :: ENDIAN_TYPE
  character(len=255) :: COEFFICIENT_PATH
- logical :: inspect
+ integer :: inspect
 end type rad_conf
 
 contains
