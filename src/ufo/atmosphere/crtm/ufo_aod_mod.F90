@@ -202,7 +202,7 @@ REAL(kind_real), ALLOCATABLE, DIMENSION(:,:) :: fwd
 !   CALL Load_Sfc_Data(n_Profiles,n_Layers,n_Channels,geovals,sfc,chinfo,obss)
 !   CALL Load_Geom_Data(obss,geo)
 
-   IF (self%rc%n_Aerosols > 0) &
+   IF (TRIM(self%rc%aerosol_option) /= "") &
         &CALL load_aerosol_data(n_profiles,n_layers,geovals,&
         &self%rc%aerosol_option,atm)
 

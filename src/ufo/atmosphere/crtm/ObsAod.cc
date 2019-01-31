@@ -5,7 +5,7 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
  */
 
-#include "ufo/constituents/aod/ObsAod.h"
+#include "ufo/atmosphere/crtm/ObsAod.h"
 
 #include <ostream>
 #include <set>

@@ -14,7 +14,7 @@ use kinds
 use crtm_module
 
 use ufo_vars_mod
-use ufo_geovals_mod, only: ufo_geovals, ufo_geoval, ufo_geovals_get_var
+USE ufo_geovals_mod, ONLY: ufo_geovals, ufo_geoval, ufo_geovals_get_var
 use ufo_basis_mod, only: ufo_basis
 use obsspace_mod
 
@@ -155,7 +155,7 @@ type(CRTM_Atmosphere_type), intent(inout) :: atm(:)
 type(crtm_conf) :: rc
 
 ! Local variables
-integer :: k1
+integer :: k1,ivar
 type(ufo_geoval), pointer :: geoval
 character(MAXVARLEN) :: varname
 character(max_string) :: err_msg
@@ -194,7 +194,8 @@ character(max_string) :: err_msg
     atm(k1)%Absorber_Id(2:2)    = (/ O3_ID /)
     atm(k1)%Absorber_Units(2:2) = (/ VOLUME_MIXING_RATIO_UNITS /)
 
-    IF (TRIM(rc%aerosol_option) /= "") THEN
+    ivar = ufo_vars_getindex(geovals%variables, var_oz)
+    IF (ivar < 0 .AND. TRIM(rc%aerosol_option) /= "") THEN 
        atm(k1)%Absorber(1:N_LAYERS,2)=ozone_default_value
     ELSE
        CALL ufo_geovals_get_var(geovals, var_oz, geoval)
