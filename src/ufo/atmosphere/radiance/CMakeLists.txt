@@ -15,5 +15,6 @@ set ( radiance_files
   ufo_radiance_mod.F90
   ufo_radiance_tlad_mod.F90
   ufo_radiance_utils_mod.F90
+  ../../constituents/aod/ufo_crtm_utils_mod.F90
   PARENT_SCOPE
 )

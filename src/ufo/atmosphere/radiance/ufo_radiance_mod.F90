@@ -14,7 +14,8 @@ module ufo_radiance_mod
  use ufo_geovals_mod, only: ufo_geovals, ufo_geoval, ufo_geovals_get_var
  use ufo_basis_mod, only: ufo_basis
  use ufo_vars_mod
- use ufo_radiance_utils_mod
+! use ufo_radiance_utils_mod
+ use ufo_crtm_utils_mod
  use crtm_module
  use obsspace_mod
 
@@ -24,12 +25,14 @@ module ufo_radiance_mod
  !> Fortran derived type for radiance trajectory
  type, extends(ufo_basis), public :: ufo_radiance
  private
-  type(rad_conf) :: rc
+  type(crtm_conf) :: rc
  contains
    procedure :: setup  => ufo_radiance_setup
    procedure :: delete => ufo_radiance_delete
    procedure :: simobs => ufo_radiance_simobs
  end type ufo_radiance
+
+ CHARACTER(MAXVARLEN), PARAMETER :: varname_tmplate="brightness_temperature"
 
 contains
 
@@ -41,7 +44,7 @@ implicit none
 class(ufo_radiance), intent(inout) :: self
 type(c_ptr),         intent(in)    :: c_conf
 
- call rad_conf_setup(self%rc,c_conf)
+ call crtm_conf_setup(self%rc,c_conf)
 
 end subroutine ufo_radiance_setup
 
@@ -52,7 +55,7 @@ subroutine ufo_radiance_delete(self)
 implicit none
 class(ufo_radiance), intent(inout) :: self
 
- call rad_conf_delete(self%rc)
+ call crtm_conf_delete(self%rc)
 
 end subroutine ufo_radiance_delete
 
@@ -167,7 +170,7 @@ type(CRTM_RTSolution_type), allocatable :: rts(:,:)
 
    !Assign the data from the GeoVaLs
    !--------------------------------
-   call Load_Atm_Data(n_Profiles,n_Layers,geovals,atm)
+   CALL Load_Atm_Data(n_Profiles,n_Layers,geovals,atm,self%rc)
    call Load_Sfc_Data(n_Profiles,n_Layers,n_Channels,geovals,sfc,chinfo,obss)
    call Load_Geom_Data(obss,geo)
 
