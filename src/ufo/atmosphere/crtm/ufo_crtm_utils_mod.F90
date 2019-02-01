@@ -90,13 +90,13 @@ character(len=100), allocatable :: skiplist_str(:)
     rc%aerosol_option = config_get_string(c_conf,LEN(rc%aerosol_option),"AerosolOption")
     rc%aerosol_option = upper2lower(rc%aerosol_option)
     IF (TRIM(rc%aerosol_option) == "aerosols_gocart_nasa") THEN
-       rc%n_Aerosols=14
+       rc%n_Aerosols=n_aerosols_gocart_nasa
     ELSEIF (TRIM(rc%aerosol_option) == "aerosols_gocart_esrl") THEN
-       rc%n_Aerosols=15
+       rc%n_Aerosols=n_aerosols_gocart_esrl
     ELSEIF (TRIM(rc%aerosol_option) == "aerosols_other") THEN
        rc%n_Aerosols=1
     ELSE
-       rc%n_Aerosols=1
+       rc%n_Aerosols=0
     ENDIF
  ELSE
     rc%n_Aerosols  = 0
