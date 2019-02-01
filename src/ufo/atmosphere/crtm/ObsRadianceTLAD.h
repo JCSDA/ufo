@@ -5,8 +5,8 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#ifndef UFO_ATMOSPHERE_RADIANCE_OBSRADIANCETLAD_H_
-#define UFO_ATMOSPHERE_RADIANCE_OBSRADIANCETLAD_H_
+#ifndef UFO_ATMOSPHERE_CRTM_OBSRADIANCETLAD_H_
+#define UFO_ATMOSPHERE_CRTM_OBSRADIANCETLAD_H_
 
 #include <ostream>
 #include <string>
@@ -64,4 +64,4 @@ class ObsRadianceTLAD : public LinearObsOperatorBase,
 // -----------------------------------------------------------------------------
 
 }  // namespace ufo
-#endif  // UFO_ATMOSPHERE_RADIANCE_OBSRADIANCETLAD_H_
+#endif  // UFO_ATMOSPHERE_CRTM_OBSRADIANCETLAD_H_
