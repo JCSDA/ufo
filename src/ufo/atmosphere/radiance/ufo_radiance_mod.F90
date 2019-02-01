@@ -22,7 +22,7 @@ module ufo_radiance_mod
  private
 
  !> Fortran derived type for radiance trajectory
- type, extends(ufo_basis), public :: ufo_radiance
+ type, public :: ufo_radiance
  private
   type(rad_conf) :: rc
  contains
@@ -58,13 +58,14 @@ end subroutine ufo_radiance_delete
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_radiance_simobs(self, geovals, hofx, obss)
+subroutine ufo_radiance_simobs(self, geovals, hofx, obss, assimchan)
 
 implicit none
 class(ufo_radiance),      intent(in) :: self
 type(ufo_geovals),        intent(in) :: geovals
 real(c_double),        intent(inout) :: hofx(:)
 type(c_ptr), value,       intent(in) :: obss
+integer(c_int),           intent(in) :: assimchan(:)
 
 ! Local Variables
 character(*), parameter :: PROGRAM_NAME = 'ufo_radiance_mod.F90'
@@ -198,14 +199,14 @@ type(CRTM_RTSolution_type), allocatable :: rts(:,:)
    ! Put simulated brightness temperature into hofx
    ! ----------------------------------------------
 
-   !Set to zero and initializ counter
+   !Set to zero and initialize counter
    hofx(:) = 0.0_kind_real
    i = 1
 
    do m = 1, n_Profiles
-     do l = 1, N_Channels
+     do l = 1, size(assimchan)
 
-       hofx(i) = rts(l,m)%Brightness_Temperature
+       hofx(i) = rts(assimchan(l),m)%Brightness_Temperature
        i = i + 1
 
      end do

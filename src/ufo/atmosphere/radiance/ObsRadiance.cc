@@ -24,6 +24,7 @@ namespace ufo {
 
 // -----------------------------------------------------------------------------
 static ObsOperatorMaker<ObsRadiance> makerAmsua_("AMSU-A");
+static ObsOperatorMaker<ObsRadiance> makerGoes16_("GOES-16");
 static ObsOperatorMaker<ObsRadiance> makerAvhrr_("AVHRR");
 
 // -----------------------------------------------------------------------------
@@ -50,8 +51,10 @@ ObsRadiance::ObsRadiance(const ioda::ObsSpace & odb, const eckit::Configuration 
   std::string chlist = config.getString("channels");
   std::set<int> channels = parseIntSet(chlist);
   std::vector<std::string> vout;
+  fortranchannels_.reserve(channels.size());
   for (const int jj : channels) {
     vout.push_back("brightness_temperature_"+std::to_string(jj)+"_");
+    fortranchannels_.push_back(jj);
   }
   varout_.reset(new oops::Variables(vout));
 
@@ -75,7 +78,8 @@ ObsRadiance::~ObsRadiance() {
 void ObsRadiance::simulateObs(const GeoVaLs & gom, ioda::ObsVector & ovec,
                               const ObsBias & bias) const {
   ufo_radiance_simobs_f90(keyOperRadiance_, gom.toFortran(), odb_,
-                          ovec.size(), ovec.toFortran(), bias.toFortran());
+                          ovec.size(), ovec.toFortran(), bias.toFortran(),
+                          fortranchannels_.size(), fortranchannels_[0]);
 }
 
 // -----------------------------------------------------------------------------
