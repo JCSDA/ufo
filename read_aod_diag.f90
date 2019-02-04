@@ -105,7 +105,6 @@ MODULE read_aod_diag
   TYPE diag_data_fix_list_aod
      REAL(r_single) :: lat               ! latitude (deg)
      REAL(r_single) :: lon               ! longitude (deg)
-     REAL(r_single) :: psfc              ! psfc (hPa)
      REAL(r_single) :: obstime           ! observation time relative to analysis
      REAL(r_single) :: solzen_ang        ! solar zenith angle (deg)
      REAL(r_single) :: solazm_ang        ! solar azimumth angle (deg)
@@ -384,10 +383,9 @@ CONTAINS
 
     data_name%fix(1) ='lat       '
     data_name%fix(2) ='lon       '
-    data_name%fix(3) ='psfc      '
-    data_name%fix(4) ='obstim    '
-    data_name%fix(5) ='solzen    '
-    data_name%fix(6) ='solazm    '
+    data_name%fix(3) ='obstim    '
+    data_name%fix(4) ='solzen    '
+    data_name%fix(5) ='solazm    '
     data_name%chn(1)='obs       '
     data_name%chn(2)='omg       '
     data_name%chn(3)='errinv    '
@@ -508,7 +506,7 @@ CONTAINS
 !locals
 
     REAL(r_single), ALLOCATABLE, DIMENSION(:)  :: Latitude, Longitude, &
-         &Obs_Time,  Psfc, Sol_Zenith_Angle, Sol_Azimuth_Angle,&
+         &Obs_Time,  Sol_Zenith_Angle, Sol_Azimuth_Angle,&
          &Observation, Obs_Minus_Forecast_unadjusted,  &
          &Inverse_Observation_Error, QC_Flag
 
@@ -523,7 +521,7 @@ CONTAINS
        
        ALLOCATE( &
             &Channel_Index(ndatum), Latitude(ndatum), Longitude(ndatum), &
-            &Obs_Time(ndatum), Psfc(ndatum),&
+            &Obs_Time(ndatum), &
             &Sol_Zenith_Angle(ndatum), Sol_Azimuth_Angle(ndatum),&
             &Observation(ndatum), Obs_Minus_Forecast_unadjusted(ndatum),&
             &Inverse_Observation_Error(ndatum),QC_Flag(ndatum))
@@ -533,7 +531,6 @@ CONTAINS
        CALL nc_diag_read_get_var('Channel_Index', Channel_Index)
        CALL nc_diag_read_get_var('Latitude', Latitude)
        CALL nc_diag_read_get_var('Longitude', Longitude)
-       CALL nc_diag_read_get_var('Psfc', Psfc)
        CALL nc_diag_read_get_var('Obs_Time', Obs_Time)
        CALL nc_diag_read_get_var('Sol_Zenith_Angle', Sol_Zenith_Angle)
        CALL nc_diag_read_get_var('Sol_Azimuth_Angle', Sol_Azimuth_Angle)
@@ -547,7 +544,6 @@ CONTAINS
        DO i=1,nlocs
           all_data_fix(i)%lat               = Latitude(ii)
           all_data_fix(i)%lon               = Longitude(ii)
-          all_data_fix(i)%psfc              = psfc(ii)
           all_data_fix(i)%obstime           = Obs_Time(ii)
           all_data_fix(i)%solzen_ang        = Sol_Zenith_Angle(ii)
           all_data_fix(i)%solazm_ang        = Sol_Azimuth_Angle(ii)
@@ -604,7 +600,7 @@ CONTAINS
     INTEGER(i_kind)                          :: nrecord, ndatum, nangord
     INTEGER(i_kind)                          :: cch, ic, ir, cdatum
     REAL(r_single), ALLOCATABLE, DIMENSION(:)  :: Latitude, Longitude, &
-         &Obs_Time,  Psfc, Sol_Zenith_Angle, Sol_Azimuth_Angle,&
+         &Obs_Time,  Sol_Zenith_Angle, Sol_Azimuth_Angle,&
          &Observation, Obs_Minus_Forecast_unadjusted,  &
          &Inverse_Observation_Error, QC_Flag
 
@@ -620,7 +616,7 @@ CONTAINS
 
     ALLOCATE( &
          &Channel_Index(ndatum), Latitude(ndatum), Longitude(ndatum), &
-         &Obs_Time(ndatum), Psfc(ndatum),&
+         &Obs_Time(ndatum), &
          &Sol_Zenith_Angle(ndatum), Sol_Azimuth_Angle(ndatum),&
          &Observation(ndatum), Obs_Minus_Forecast_unadjusted(ndatum),&
          &Inverse_Observation_Error(ndatum),QC_Flag(ndatum))
@@ -631,7 +627,6 @@ CONTAINS
     CALL nc_diag_read_get_var('Channel_Index', Channel_Index)
     CALL nc_diag_read_get_var('Latitude', Latitude)
     CALL nc_diag_read_get_var('Longitude', Longitude)
-    CALL nc_diag_read_get_var('Psfc', Psfc)
     CALL nc_diag_read_get_var('Obs_Time', Obs_Time)
     CALL nc_diag_read_get_var('Sol_Zenith_Angle', Sol_Zenith_Angle)
     CALL nc_diag_read_get_var('Sol_Azimuth_Angle', Sol_Azimuth_Angle)
@@ -646,7 +641,6 @@ CONTAINS
        clon = Longitude(cdatum)
        all_data_fix(ir)%lat               = Latitude(cdatum)
        all_data_fix(ir)%lon               = Longitude(cdatum)
-       all_data_fix(ir)%psfc              = psfc(cdatum)
        all_data_fix(ir)%obstime           = Obs_Time(cdatum)
        all_data_fix(ir)%solzen_ang        = Sol_Zenith_Angle(cdatum)
        all_data_fix(ir)%solazm_ang        = Sol_Azimuth_Angle(cdatum)
@@ -772,10 +766,9 @@ CONTAINS
 ! Transfer fix_tmp record to output structure
     data_fix%lat = fix_tmp(1)
     data_fix%lon = fix_tmp(2)
-    data_fix%psfc = fix_tmp(3)
-    data_fix%obstime = fix_tmp(4) 
-    data_fix%solzen_ang = fix_tmp(5)
-    data_fix%solazm_ang = fix_tmp(6)
+    data_fix%obstime = fix_tmp(3) 
+    data_fix%solzen_ang = fix_tmp(4)
+    data_fix%solazm_ang = fix_tmp(5)
 
 ! Transfer data record to output structure
     DO ich=1,header_fix%nchan

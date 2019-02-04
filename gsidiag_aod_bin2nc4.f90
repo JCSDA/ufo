@@ -170,8 +170,6 @@ PROGRAM convert_aod_diag
         CALL nc_diag_metadata("Latitude",              data_fix%lat                              ) ! observation latitude (degrees)
         CALL nc_diag_metadata("Longitude",             data_fix%lon                        ) ! observation longitude (degrees)
 
-        CALL nc_diag_metadata("Psfc",             data_fix%psfc                        ) ! observation surface pressure (hPa)
-
         CALL nc_diag_metadata("Obs_Time",              data_fix%obstime                   ) ! observation time (hours relative to analysis time)
 
         CALL nc_diag_metadata("Sol_Zenith_Angle",      data_fix%solzen_ang                              ) ! solar zenith angle (degrees)
