@@ -12,7 +12,6 @@ module ufo_radiance_tlad_mod
  use kinds
 
  use ufo_geovals_mod, only: ufo_geovals, ufo_geoval, ufo_geovals_get_var
- use ufo_basis_tlad_mod, only: ufo_basis_tlad
  use ufo_vars_mod
  use ufo_radiance_utils_mod
  use crtm_module
@@ -22,7 +21,7 @@ module ufo_radiance_tlad_mod
  private
 
  !> Fortran derived type for radiance trajectory
- type, extends(ufo_basis_tlad), public :: ufo_radiance_tlad
+ type, public :: ufo_radiance_tlad
  private
   type(rad_conf) :: rc
   integer :: n_Profiles
@@ -30,6 +29,7 @@ module ufo_radiance_tlad_mod
   integer :: n_Channels
   type(CRTM_Atmosphere_type), allocatable :: atm_K(:,:)
   type(CRTM_Surface_type), allocatable :: sfc_K(:,:)
+  logical :: ltraj
  contains
   procedure :: setup  => ufo_radiance_tlad_setup
   procedure :: delete  => ufo_radiance_tlad_delete
@@ -76,13 +76,14 @@ end subroutine ufo_radiance_tlad_delete
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_radiance_tlad_settraj(self, geovals, obss)
+subroutine ufo_radiance_tlad_settraj(self, geovals, obss, channels)
 
 implicit none
 
 class(ufo_radiance_tlad), intent(inout) :: self
 type(ufo_geovals),        intent(in)    :: geovals
 type(c_ptr), value,       intent(in)    :: obss
+integer(c_int),           intent(in)    :: channels(:)  !List of channels to use
 
 ! Local Variables
 character(*), parameter :: PROGRAM_NAME = 'ufo_radiance_mod.F90'
@@ -139,6 +140,16 @@ type(CRTM_RTSolution_type), allocatable :: rts_K(:,:)
  ! Loop over all sensors. Not necessary if we're calling CRTM for each sensor
  ! ----------------------------------------------------------------------------
  Sensor_Loop:do n = 1, self%rc%n_Sensors
+
+
+   ! Pass channel list to CRTM
+   ! -------------------------
+   !err_stat = CRTM_ChannelInfo_Subset(chinfo(n), channels, reset=.false.)
+   !if ( err_stat /= SUCCESS ) THEN
+   !   message = 'Error subsetting channels'
+   !   call Display_Message( PROGRAM_NAME, message, FAILURE )
+   !   stop
+   !end if
 
 
    ! Determine the number of channels for the current sensor
@@ -206,7 +217,7 @@ type(CRTM_RTSolution_type), allocatable :: rts_K(:,:)
    !Assign the data from the GeoVaLs
    !--------------------------------
    call Load_Atm_Data(self%N_PROFILES,self%N_LAYERS,geovals,atm)
-   call Load_Sfc_Data(self%N_PROFILES,self%N_LAYERS,self%N_Channels,geovals,sfc,chinfo,obss)
+   call Load_Sfc_Data(self%N_PROFILES,self%N_LAYERS,self%N_Channels,channels,geovals,sfc,chinfo,obss)
    call Load_Geom_Data(obss,geo)
 
 
@@ -237,6 +248,8 @@ type(CRTM_RTSolution_type), allocatable :: rts_K(:,:)
       call Display_Message( PROGRAM_NAME, message, FAILURE )
       stop
    end if
+
+   call CRTM_RTSolution_Inspect(rts)
 
 
    ! Deallocate the structures
@@ -279,13 +292,14 @@ end subroutine ufo_radiance_tlad_settraj
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_radiance_simobs_tl(self, geovals, hofx, obss)
+subroutine ufo_radiance_simobs_tl(self, geovals, obss, hofx, channels)
 
 implicit none
-class(ufo_radiance_tlad), intent(in) :: self
-type(ufo_geovals),        intent(in) :: geovals
-real(c_double),        intent(inout) :: hofx(:)
-type(c_ptr), value,    intent(in)    :: obss
+class(ufo_radiance_tlad), intent(in)    :: self
+type(ufo_geovals),        intent(in)    :: geovals
+type(c_ptr), value,       intent(in)    :: obss
+real(c_double),           intent(inout) :: hofx(:)
+integer(c_int),           intent(in)    :: channels(:)  !List of channels to use
 
 character(len=*), parameter :: myname_="ufo_radiance_simobs_tl"
 character(max_string) :: err_msg
@@ -328,11 +342,11 @@ type(ufo_geoval), pointer :: tv_d
  ! Multiply by Jacobian and add to hofx
  job = 0
  do jprofile = 1, self%n_Profiles
-   do jchannel = 1, self%n_Channels
+   do jchannel = 1, size(channels)
      job = job + 1
      do jlevel = 1, tv_d%nval
        hofx(job) = hofx(job) + &
-                    self%atm_K(jchannel,jprofile)%Temperature(jlevel) * tv_d%vals(jlevel,jprofile)
+                    self%atm_K(channels(jchannel),jprofile)%Temperature(jlevel) * tv_d%vals(jlevel,jprofile)
      enddo
    enddo
  enddo
@@ -340,15 +354,17 @@ type(ufo_geoval), pointer :: tv_d
 
 end subroutine ufo_radiance_simobs_tl
 
+
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_radiance_simobs_ad(self, geovals, hofx, obss)
+subroutine ufo_radiance_simobs_ad(self, geovals, obss, hofx, channels)
 
 implicit none
-class(ufo_radiance_tlad), intent(in) :: self
-type(ufo_geovals),     intent(inout) :: geovals
-real(c_double),           intent(in) :: hofx(:)
-type(c_ptr), value,    intent(in)    :: obss
+class(ufo_radiance_tlad), intent(in)    :: self
+type(ufo_geovals),        intent(inout) :: geovals
+type(c_ptr), value,       intent(in)    :: obss
+real(c_double),           intent(in)    :: hofx(:)
+integer(c_int),           intent(in)    :: channels(:)  !List of channels to use
 
 character(len=*), parameter :: myname_="ufo_radiance_simobs_ad"
 character(max_string) :: err_msg
@@ -390,11 +406,11 @@ type(ufo_geoval), pointer :: tv_d
  ! Multiply by Jacobian and add to hofx (adjoint)
  job = 0
  do jprofile = 1, self%n_Profiles
-   do jchannel = 1, self%n_Channels
+   do jchannel = 1, size(channels)
      job = job + 1
      do jlevel = 1, tv_d%nval
        tv_d%vals(jlevel,jprofile) = tv_d%vals(jlevel,jprofile) + &
-                                    self%atm_K(jchannel,jprofile)%Temperature(jlevel) * hofx(job)
+                                    self%atm_K(channels(jchannel),jprofile)%Temperature(jlevel) * hofx(job)
      enddo
    enddo
  enddo

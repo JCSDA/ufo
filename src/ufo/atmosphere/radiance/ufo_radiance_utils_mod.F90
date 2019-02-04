@@ -15,7 +15,6 @@ use crtm_module
 
 use ufo_vars_mod
 use ufo_geovals_mod, only: ufo_geovals, ufo_geoval, ufo_geovals_get_var
-use ufo_basis_mod, only: ufo_basis
 use obsspace_mod
 
 implicit none
@@ -126,15 +125,8 @@ type(CRTM_Atmosphere_type), intent(inout) :: atm(:)
 ! Local variables
 integer :: k1
 type(ufo_geoval), pointer :: geoval
-character(MAXVARLEN) :: varname
 character(max_string) :: err_msg
 
- ! Print profile and absorber definitions
- ! --------------------------------------
- do k1 = 1,geovals%nvar
-    varname = geovals%variables%fldnames(k1)
-    print *, k1, varname
- end do
 
  ! Populate the atmosphere structures for CRTM (atm(k1), for the k1-th profile)
  ! ----------------------------------------------------------------------------
@@ -192,7 +184,7 @@ character(max_string) :: err_msg
 
 ! ------------------------------------------------------------------------------
 
-subroutine Load_Sfc_Data(n_Profiles,n_Layers,N_Channels,geovals,sfc,chinfo,obss)
+subroutine Load_Sfc_Data(n_Profiles,n_Layers,N_Channels,channels,geovals,sfc,chinfo,obss)
 
 implicit none
 integer,                     intent(in)    :: n_Profiles, n_Layers, N_Channels
@@ -200,6 +192,7 @@ type(ufo_geovals),           intent(in)    :: geovals
 type(CRTM_Surface_type),     intent(inout) :: sfc(:)
 type(CRTM_ChannelInfo_type), intent(in)    :: chinfo(:)
 type(c_ptr), value,          intent(in)    :: obss
+integer(c_int),              intent(in)    :: channels(:)
 
 type(ufo_geoval), pointer :: geoval
 integer  :: k1, n1
@@ -223,11 +216,14 @@ real(kind_real), allocatable :: ObsTb(:,:)
  varname_tmplate = "brightness_temperature"
 
  allocate(ObsTb(n_profiles, n_channels))
+ ObsTb = 0.0_kind_real
  
  do n1 = 1,n_Channels
-   !Get the variable name for this channel
-   call get_var_name(varname_tmplate,n1,varname)
-   call obsspace_get_db(obss, "ObsValue", varname, ObsTb(:,n1))
+   if (any(n1==channels)) then
+     !Get the variable name for this channel
+     call get_var_name(varname_tmplate,n1,varname)
+     call obsspace_get_db(obss, "ObsValue", varname, ObsTb(:,n1))
+   endif
  enddo
 
  !Loop over all n_Profiles, i.e. number of locations

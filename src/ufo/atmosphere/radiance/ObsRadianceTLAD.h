@@ -10,6 +10,7 @@
 
 #include <ostream>
 #include <string>
+#include <vector>
 
 #include <boost/scoped_ptr.hpp>
 
@@ -59,6 +60,7 @@ class ObsRadianceTLAD : public LinearObsOperatorBase,
   F90hop keyOperRadiance_;
   const ioda::ObsSpace& odb_;
   boost::scoped_ptr<const oops::Variables> varin_;
+  std::vector<int> channels_;
 };
 
 // -----------------------------------------------------------------------------

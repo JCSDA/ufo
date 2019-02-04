@@ -12,7 +12,6 @@ module ufo_radiance_mod
  use kinds
 
  use ufo_geovals_mod, only: ufo_geovals, ufo_geoval, ufo_geovals_get_var
- use ufo_basis_mod, only: ufo_basis
  use ufo_vars_mod
  use ufo_radiance_utils_mod
  use crtm_module
@@ -58,14 +57,14 @@ end subroutine ufo_radiance_delete
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_radiance_simobs(self, geovals, hofx, obss, assimchan)
+subroutine ufo_radiance_simobs(self, geovals, hofx, obss, channels)
 
 implicit none
-class(ufo_radiance),      intent(in) :: self
-type(ufo_geovals),        intent(in) :: geovals
-real(c_double),        intent(inout) :: hofx(:)
-type(c_ptr), value,       intent(in) :: obss
-integer(c_int),           intent(in) :: assimchan(:)
+class(ufo_radiance),      intent(in) :: self         !Radiance object
+type(ufo_geovals),        intent(in) :: geovals      !Inputs from the model
+real(c_double),        intent(inout) :: hofx(:)      !h(x) to return
+type(c_ptr), value,       intent(in) :: obss         !ObsSpace
+integer(c_int),           intent(in) :: channels(:)  !List of channels to use
 
 ! Local Variables
 character(*), parameter :: PROGRAM_NAME = 'ufo_radiance_mod.F90'
@@ -111,10 +110,9 @@ type(CRTM_RTSolution_type), allocatable :: rts(:,:)
  !**       CRTM_Lifecycle.f90 for more details.
 
  write( *,'(/5x,"Initializing the CRTM...")' )
- err_stat = CRTM_Init( self%rc%SENSOR_ID, &
-            chinfo, &
-            File_Path=trim(self%rc%COEFFICIENT_PATH), &
-            Quiet=.TRUE.)
+ err_stat = CRTM_Init( self%rc%SENSOR_ID, chinfo, &
+                       File_Path=trim(self%rc%COEFFICIENT_PATH), &
+                       Quiet=.TRUE.)
  if ( err_stat /= SUCCESS ) THEN
    message = 'Error initializing CRTM'
    call Display_Message( PROGRAM_NAME, message, FAILURE )
@@ -125,6 +123,16 @@ type(CRTM_RTSolution_type), allocatable :: rts(:,:)
  ! Loop over all sensors. Not necessary if we're calling CRTM for each sensor
  ! ----------------------------------------------------------------------------
  Sensor_Loop:do n = 1, self%rc%n_Sensors
+
+
+   ! Pass channel list to CRTM
+   ! -------------------------
+   !err_stat = CRTM_ChannelInfo_Subset(chinfo(n), channels, reset=.false.)
+   !if ( err_stat /= SUCCESS ) THEN
+   !   message = 'Error subsetting channels'
+   !   call Display_Message( PROGRAM_NAME, message, FAILURE )
+   !   stop
+   !end if
 
 
    ! Determine the number of channels for the current sensor
@@ -169,7 +177,7 @@ type(CRTM_RTSolution_type), allocatable :: rts(:,:)
    !Assign the data from the GeoVaLs
    !--------------------------------
    call Load_Atm_Data(n_Profiles,n_Layers,geovals,atm)
-   call Load_Sfc_Data(n_Profiles,n_Layers,n_Channels,geovals,sfc,chinfo,obss)
+   call Load_Sfc_Data(n_Profiles,n_Layers,n_Channels,channels,geovals,sfc,chinfo,obss)
    call Load_Geom_Data(obss,geo)
 
 
@@ -195,6 +203,7 @@ type(CRTM_RTSolution_type), allocatable :: rts(:,:)
       stop
    end if
 
+   call CRTM_RTSolution_Inspect(rts)
 
    ! Put simulated brightness temperature into hofx
    ! ----------------------------------------------
@@ -204,9 +213,9 @@ type(CRTM_RTSolution_type), allocatable :: rts(:,:)
    i = 1
 
    do m = 1, n_Profiles
-     do l = 1, size(assimchan)
+     do l = 1, size(channels)
 
-       hofx(i) = rts(assimchan(l),m)%Brightness_Temperature
+       hofx(i) = rts(channels(l),m)%Brightness_Temperature
        i = i + 1
 
      end do
