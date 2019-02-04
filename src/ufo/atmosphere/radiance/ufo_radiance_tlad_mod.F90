@@ -249,7 +249,7 @@ type(CRTM_RTSolution_type), allocatable :: rts_K(:,:)
       stop
    end if
 
-   call CRTM_RTSolution_Inspect(rts)
+   !call CRTM_RTSolution_Inspect(rts)
 
 
    ! Deallocate the structures

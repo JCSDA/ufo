@@ -203,7 +203,7 @@ type(CRTM_RTSolution_type), allocatable :: rts(:,:)
       stop
    end if
 
-   call CRTM_RTSolution_Inspect(rts)
+   !call CRTM_RTSolution_Inspect(rts)
 
    ! Put simulated brightness temperature into hofx
    ! ----------------------------------------------
