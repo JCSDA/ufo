@@ -9,7 +9,7 @@ LinearObsOpTest:
 Observations: 
  ObsTypes: 
  - ObsType: "AMSU-A"
-   channels: "1-15"
+   channels: "1-6,9-13,15"
    ObsOptions: 
     n_Absorbers: 3
     n_Clouds: 2
@@ -26,6 +26,6 @@ Observations:
     random: 0
     window_begin: "2018-04-14T21:00:00Z"
     window_end: "2018-04-15T03:00:00Z"
-   rmsequiv: "232.23113652417769"
+   rmsequiv: "232.54571375224393"
    tolerance: "1.e-8"
    ObsBias: {} 
