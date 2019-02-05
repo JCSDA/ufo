@@ -295,6 +295,12 @@ ecbuild_add_test( TARGET  test_ufo_aod_opr
                   ARGS    "testinput/aod.yaml"
                   LIBS    ufo )
 
+ecbuild_add_test( TARGET  test_ufo_aod_tlad
+                  BOOST
+                  SOURCES mains/TestObsOperatorTLAD.cc
+                  ARGS    "testinput/aod.yaml"
+                  LIBS    ufo )
+
 ecbuild_add_test( TARGET  test_ufo_intset_parser
                   BOOST
                   SOURCES mains/TestIntSetParser.cc
