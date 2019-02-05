@@ -6,6 +6,7 @@
 set ( utils_files
       IntSetParser.cc
       IntSetParser.h
+      twindow_utils_mod.F90
       vert_interp.F90
 )
 
