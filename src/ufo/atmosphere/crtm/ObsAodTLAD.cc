@@ -5,7 +5,7 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#include "ufo/constituents/aod/ObsAodTLAD.h"
+#include "ufo/atmosphere/crtm/ObsAodTLAD.h"
 
 #include <ostream>
 #include <string>
@@ -30,10 +30,10 @@ ObsAodTLAD::ObsAodTLAD(const ioda::ObsSpace & odb, const eckit::Configuration & 
 {
   const eckit::Configuration * configc = &config;
   ufo_aod_tlad_setup_f90(keyOperAod_, &configc);
-  const std::vector<std::string> vv{"temperature", "humidity_mixing_ratio",
+  const std::vector<std::string> vv{"air_temperature", "humidity_mixing_ratio", "relative_humidity",
       "air_pressure", "air_pressure_levels",
       "sulf", "bc1", "bc2", "oc1", "oc2", "dust1", "dust2", "dust3", "dust4", "dust5",
-      "seas1", "seas2", "seas3", "seas4", "p25"};
+      "seas1", "seas2", "seas3", "seas4"};
   varin_.reset(new oops::Variables(vv));
   oops::Log::trace() << "ObsAodTLAD created" << std::endl;
 }
