@@ -12,11 +12,7 @@ Observations:
    channels: "1-15"
    ObsOptions: 
     RTModel: "RTTOV"
-    n_Absorbers: 3
-    n_Clouds: 2
-    n_Aerosols: 0
     Sensor_ID: noaa_19_amsua
-    EndianType: little_endian
     CoefficientPath: "Data/"
    ObsData: 
     ObsDataIn: 

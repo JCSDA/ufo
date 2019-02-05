@@ -14,5 +14,6 @@ set ( radiancerttov_files
     ObsRadianceRTTOVTLAD.interface.h
     ufo_radiancerttov_mod.F90
     ufo_radiancerttov_tlad_mod.F90
+    ufo_radiancerttov_utils_mod.F90
     PARENT_SCOPE
 )
