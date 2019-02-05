@@ -14,7 +14,6 @@ set ( crtm_files
   ObsRadianceTLAD.interface.h
   ufo_radiance_mod.F90
   ufo_radiance_tlad_mod.F90
-  ufo_radiance_utils_mod.F90
   ufo_crtm_utils_mod.F90
   ObsAod.h
   ObsAod.cc
@@ -24,7 +23,6 @@ set ( crtm_files
   ObsAod.interface.h
   ObsAodTLAD.interface.F90
   ObsAodTLAD.interface.h
-  ufo_aod_utils_mod.F90
   ufo_aod_mod.F90
   ufo_aod_tlad_mod.F90
   PARENT_SCOPE

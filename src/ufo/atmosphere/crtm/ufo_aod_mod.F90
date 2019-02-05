@@ -222,14 +222,6 @@ REAL(kind_real), ALLOCATABLE, DIMENSION(:,:) :: fwd
 !                            chinfo(n:n), &  ! Input
 !                            rts          )  ! Output
 
-
-   DO m = 1, n_profiles
-      DO l = 1, n_channels
-         rts_k(l,m)%layer_optical_depth = one
-      ENDDO
-   ENDDO
-   
-
 ! 8b.1 The K-matrix model for AOD
 ! ----------------------
    err_stat = CRTM_AOD_K( atm,    &  ! FORWARD  Input

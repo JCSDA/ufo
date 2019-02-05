@@ -14,7 +14,6 @@ module ufo_radiance_mod
  use ufo_geovals_mod, only: ufo_geovals, ufo_geoval, ufo_geovals_get_var
  use ufo_basis_mod, only: ufo_basis
  use ufo_vars_mod
-! use ufo_radiance_utils_mod
  use ufo_crtm_utils_mod
  use crtm_module
  use obsspace_mod

@@ -14,7 +14,7 @@ module ufo_radiance_tlad_mod
  use ufo_geovals_mod, only: ufo_geovals, ufo_geoval, ufo_geovals_get_var
  use ufo_basis_tlad_mod, only: ufo_basis_tlad
  use ufo_vars_mod
- use ufo_radiance_utils_mod
+ use ufo_crtm_utils_mod
  use crtm_module
  use obsspace_mod
 
@@ -24,7 +24,7 @@ module ufo_radiance_tlad_mod
  !> Fortran derived type for radiance trajectory
  type, extends(ufo_basis_tlad), public :: ufo_radiance_tlad
  private
-  type(rad_conf) :: rc
+  type(crtm_conf) :: rc
   integer :: n_Profiles
   integer :: n_Layers
   integer :: n_Channels
@@ -48,7 +48,7 @@ implicit none
 class(ufo_radiance_tlad), intent(inout) :: self
 type(c_ptr),              intent(in)    :: c_conf
 
- call rad_conf_setup(self%rc,c_conf)
+ call crtm_conf_setup(self%rc,c_conf)
 
 end subroutine ufo_radiance_tlad_setup
 
@@ -60,7 +60,7 @@ implicit none
 class(ufo_radiance_tlad), intent(inout) :: self
 
  self%ltraj = .false.
- call rad_conf_delete(self%rc)
+ call crtm_conf_delete(self%rc)
 
  if (allocated(self%atm_k)) then
    call CRTM_Atmosphere_Destroy(self%atm_K)
@@ -205,7 +205,7 @@ type(CRTM_RTSolution_type), allocatable :: rts_K(:,:)
 
    !Assign the data from the GeoVaLs
    !--------------------------------
-   call Load_Atm_Data(self%N_PROFILES,self%N_LAYERS,geovals,atm)
+   CALL Load_Atm_Data(self%N_PROFILES,self%N_LAYERS,geovals,atm,self%rc)
    call Load_Sfc_Data(self%N_PROFILES,self%N_LAYERS,self%N_Channels,geovals,sfc,chinfo,obss)
    call Load_Geom_Data(obss,geo)
 
