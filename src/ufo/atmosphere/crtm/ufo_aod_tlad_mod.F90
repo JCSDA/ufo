@@ -85,7 +85,7 @@ type(ufo_geovals),        intent(in)    :: geovals
 type(c_ptr), value,       intent(in)    :: obss
 
 ! Local Variables
-character(*), parameter :: PROGRAM_NAME = 'ufo_aod_mod.F90'
+character(*), parameter :: PROGRAM_NAME = 'ufo_aod_tlad_mod.F90'
 character(255) :: message, version
 integer        :: err_stat, alloc_stat
 INTEGER        :: n, k1,l,m
@@ -309,7 +309,9 @@ type(ufo_geoval), pointer :: tv_d
  hofx(:) = 0.0_kind_real
 
 
-
+ PRINT *,'@@@1',SIZE(hofx),self%n_Profiles,self%n_Channels
+ WRITE(err_msg,*) myname_, ' hofx size'
+ CALL abor1_ftn(err_msg)
 
 
  ! Temperature
