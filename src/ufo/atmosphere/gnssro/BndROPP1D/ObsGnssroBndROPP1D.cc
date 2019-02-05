@@ -33,7 +33,7 @@ ObsGnssroBndROPP1D::ObsGnssroBndROPP1D(const ioda::ObsSpace & odb,
                                     "geopotential_height", "sfc_geopotential_height"};
   varin_.reset(new oops::Variables(vv));
 
-  const std::vector<std::string> vout{"zz"};
+  const std::vector<std::string> vout{"bending_angle"};
   varout_.reset(new oops::Variables(vout));
 
   const eckit::Configuration * configc = &config;
