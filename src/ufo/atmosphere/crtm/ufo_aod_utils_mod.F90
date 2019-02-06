@@ -20,7 +20,6 @@ MODULE ufo_aod_utils_mod
      INTEGER :: n_absorbers
      INTEGER :: n_clouds
      INTEGER :: n_aerosols
-     INTEGER, ALLOCATABLE :: skiplist(:)
      CHARACTER(len=255), ALLOCATABLE :: sensor_id(:)
      CHARACTER(len=255) :: endian_type
      CHARACTER(len=255) :: coefficient_path
@@ -73,10 +72,6 @@ CONTAINS
     TYPE(aod_conf), INTENT(inout) :: rc
     TYPE(c_ptr),    INTENT(in)    :: c_conf
     
-    CHARACTER(len=1023) :: skipchannels
-    INTEGER :: nskip, i
-    CHARACTER(len=100), ALLOCATABLE :: skiplist_str(:)
-    
 !some config needs to come from user
 !-----------------------------------
     
@@ -110,20 +105,6 @@ CONTAINS
 !@mzp begin
 !    rc%coefficient_path = config_get_string(c_conf,LEN(rc%coefficient_path),"coefficientpath")
 !@mzp end 
-   
-!channels to skip
-    IF (config_element_exists(c_conf,"skipchannels")) THEN
-       skipchannels = config_get_string(c_conf,LEN(skipchannels),"skipchannels")
-       nskip = 1 + COUNT(TRANSFER(skipchannels, 'a', LEN(skipchannels)) == ",")
-       ALLOCATE(skiplist_str(nskip))
-       READ(skipchannels,*) skiplist_str
-    ELSE
-       nskip = 0
-    ENDIF
-    ALLOCATE(rc%skiplist(nskip))
-    DO i = 1,nskip
-       READ(skiplist_str(i),*)  rc%skiplist(i)
-    ENDDO
     
   END SUBROUTINE aod_conf_setup
   
@@ -134,7 +115,6 @@ CONTAINS
     TYPE(aod_conf), INTENT(inout) :: rc
     
     DEALLOCATE(rc%sensor_id)
-    DEALLOCATE(rc%skiplist)
     
   END SUBROUTINE aod_conf_delete
 

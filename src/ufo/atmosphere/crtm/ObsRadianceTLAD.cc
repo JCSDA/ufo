@@ -8,6 +8,7 @@
 #include "ufo/atmosphere/crtm/ObsRadianceTLAD.h"
 
 #include <ostream>
+#include <set>
 #include <string>
 #include <vector>
 
@@ -20,6 +21,7 @@
 #include "ufo/GeoVaLs.h"
 #include "ufo/ObsBias.h"
 #include "ufo/ObsBiasIncrement.h"
+#include "ufo/utils/IntSetParser.h"
 
 namespace ufo {
 
@@ -33,6 +35,15 @@ ObsRadianceTLAD::ObsRadianceTLAD(const ioda::ObsSpace & odb, const eckit::Config
 {
   const std::vector<std::string> vv{"air_temperature"};
   varin_.reset(new oops::Variables(vv));
+
+  // parse channels from the config and create variable names
+  std::string chlist = config.getString("channels");
+  std::set<int> channels = parseIntSet(chlist);
+  channels_.reserve(channels.size());
+  for (const int jj : channels) {
+    channels_.push_back(jj);
+  }
+
   const eckit::LocalConfiguration obsOptions(config, "ObsOptions");
   const eckit::Configuration * configc = &obsOptions;
   ufo_radiance_tlad_setup_f90(keyOperRadiance_, &configc);
@@ -49,7 +60,8 @@ ObsRadianceTLAD::~ObsRadianceTLAD() {
 // -----------------------------------------------------------------------------
 
 void ObsRadianceTLAD::setTrajectory(const GeoVaLs & geovals, const ObsBias & bias) {
-  ufo_radiance_tlad_settraj_f90(keyOperRadiance_, geovals.toFortran(), odb_);
+  ufo_radiance_tlad_settraj_f90(keyOperRadiance_, geovals.toFortran(), odb_,
+                                channels_.size(), channels_[0]);
 }
 
 // -----------------------------------------------------------------------------
@@ -57,7 +69,8 @@ void ObsRadianceTLAD::setTrajectory(const GeoVaLs & geovals, const ObsBias & bia
 void ObsRadianceTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec,
                                     const ObsBiasIncrement & bias) const {
   ufo_radiance_simobs_tl_f90(keyOperRadiance_, geovals.toFortran(), odb_,
-                             ovec.size(), ovec.toFortran());
+                             ovec.size(), ovec.toFortran(),
+                             channels_.size(), channels_[0]);
 }
 
 // -----------------------------------------------------------------------------
@@ -65,7 +78,8 @@ void ObsRadianceTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & o
 void ObsRadianceTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec,
                                     ObsBiasIncrement & bias) const {
   ufo_radiance_simobs_ad_f90(keyOperRadiance_, geovals.toFortran(), odb_,
-                             ovec.size(), ovec.toFortran());
+                             ovec.size(), ovec.toFortran(),
+                             channels_.size(), channels_[0]);
 }
 
 // -----------------------------------------------------------------------------
