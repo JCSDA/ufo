@@ -3,71 +3,73 @@
 ! This software is licensed under the terms of the Apache Licence Version 2.0
 ! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 
-!> Fortran module to handle radiance observations
+!> Fortran module to handle aod observations
 
-module ufo_radiance_mod
+module ufo_aod_mod
 
  use iso_c_binding
  use config_mod
  use kinds
 
  use ufo_geovals_mod, only: ufo_geovals, ufo_geoval, ufo_geovals_get_var
+ use ufo_basis_mod, only: ufo_basis
  use ufo_vars_mod
- use ufo_radiance_utils_mod
+ use ufo_crtm_utils_mod
  use crtm_module
  use obsspace_mod
 
  implicit none
  private
 
- !> Fortran derived type for radiance trajectory
- type, public :: ufo_radiance
+ !> Fortran derived type for aod trajectory
+ type, extends(ufo_basis), public :: ufo_aod
  private
-  type(rad_conf) :: rc
+  type(crtm_conf) :: rc
  contains
-   procedure :: setup  => ufo_radiance_setup
-   procedure :: delete => ufo_radiance_delete
-   procedure :: simobs => ufo_radiance_simobs
- end type ufo_radiance
+   procedure :: setup  => ufo_aod_setup
+   procedure :: delete => ufo_aod_delete
+   procedure :: simobs => ufo_aod_simobs
+ end type ufo_aod
+
+ CHARACTER(MAXVARLEN), PARAMETER :: varname_tmplate="aerosol_optical_depth"
 
 contains
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_radiance_setup(self, c_conf)
+subroutine ufo_aod_setup(self, c_conf)
 
 implicit none
-class(ufo_radiance), intent(inout) :: self
+class(ufo_aod), intent(inout) :: self
 type(c_ptr),         intent(in)    :: c_conf
 
- call rad_conf_setup(self%rc,c_conf)
+ call crtm_conf_setup(self%rc,c_conf)
 
-end subroutine ufo_radiance_setup
-
-! ------------------------------------------------------------------------------
-
-subroutine ufo_radiance_delete(self)
-
-implicit none
-class(ufo_radiance), intent(inout) :: self
-
- call rad_conf_delete(self%rc)
-
-end subroutine ufo_radiance_delete
+end subroutine ufo_aod_setup
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_radiance_simobs(self, geovals, hofx, obss, channels)
+subroutine ufo_aod_delete(self)
 
 implicit none
-class(ufo_radiance),      intent(in) :: self         !Radiance object
-type(ufo_geovals),        intent(in) :: geovals      !Inputs from the model
-real(c_double),        intent(inout) :: hofx(:)      !h(x) to return
-type(c_ptr), value,       intent(in) :: obss         !ObsSpace
-integer(c_int),           intent(in) :: channels(:)  !List of channels to use
+class(ufo_aod), intent(inout) :: self
+
+ call crtm_conf_delete(self%rc)
+
+end subroutine ufo_aod_delete
+
+! ------------------------------------------------------------------------------
+
+subroutine ufo_aod_simobs(self, geovals, hofx, obss)
+
+implicit none
+class(ufo_aod),      intent(in) :: self
+type(ufo_geovals),        intent(in) :: geovals
+real(c_double),        intent(inout) :: hofx(:)
+type(c_ptr), value,       intent(in) :: obss
 
 ! Local Variables
-character(*), parameter :: PROGRAM_NAME = 'ufo_radiance_mod.F90'
+character(*), parameter :: PROGRAM_NAME = 'ufo_aod_mod.F90'
 character(255) :: message, version
 integer        :: err_stat, alloc_stat
 integer        :: l, m, n, i, s
@@ -86,6 +88,12 @@ type(CRTM_Atmosphere_type), allocatable :: atm(:)
 type(CRTM_Surface_type),    allocatable :: sfc(:)
 type(CRTM_RTSolution_type), allocatable :: rts(:,:)
 
+! Define the K-MATRIX variables - necessary for AOD call
+! ---------------------------------
+TYPE(CRTM_Atmosphere_type), ALLOCATABLE :: atm_K(:,:)
+TYPE(CRTM_RTSolution_type), ALLOCATABLE :: rts_K(:,:)
+
+REAL(kind_real), ALLOCATABLE, DIMENSION(:,:) :: fwd
 
  ! Get number of profile and layers from geovals
  ! ---------------------------------------------
@@ -110,9 +118,10 @@ type(CRTM_RTSolution_type), allocatable :: rts(:,:)
  !**       CRTM_Lifecycle.f90 for more details.
 
  write( *,'(/5x,"Initializing the CRTM...")' )
- err_stat = CRTM_Init( self%rc%SENSOR_ID, chinfo, &
-                       File_Path=trim(self%rc%COEFFICIENT_PATH), &
-                       Quiet=.TRUE.)
+ err_stat = CRTM_Init( self%rc%SENSOR_ID, &
+            chinfo, &
+            File_Path=trim(self%rc%COEFFICIENT_PATH), &
+            Quiet=.TRUE.)
  if ( err_stat /= SUCCESS ) THEN
    message = 'Error initializing CRTM'
    call Display_Message( PROGRAM_NAME, message, FAILURE )
@@ -122,17 +131,7 @@ type(CRTM_RTSolution_type), allocatable :: rts(:,:)
 
  ! Loop over all sensors. Not necessary if we're calling CRTM for each sensor
  ! ----------------------------------------------------------------------------
- Sensor_Loop:do n = 1, self%rc%n_Sensors
-
-
-   ! Pass channel list to CRTM
-   ! -------------------------
-   !err_stat = CRTM_ChannelInfo_Subset(chinfo(n), channels, reset=.false.)
-   !if ( err_stat /= SUCCESS ) THEN
-   !   message = 'Error subsetting channels'
-   !   call Display_Message( PROGRAM_NAME, message, FAILURE )
-   !   stop
-   !end if
+ Sensor_Loop:DO n = 1, self%rc%n_Sensors
 
 
    ! Determine the number of channels for the current sensor
@@ -166,81 +165,129 @@ type(CRTM_RTSolution_type), allocatable :: rts(:,:)
 
    ! Create the input FORWARD structure (sfc)
    ! ----------------------------------------
-   call CRTM_Surface_Create(sfc, N_Channels)
-   IF ( ANY(.NOT. CRTM_Surface_Associated(sfc)) ) THEN
-      message = 'Error allocating CRTM Surface structure'
+!   call CRTM_Surface_Create(sfc, N_Channels)
+!   IF ( ANY(.NOT. CRTM_Surface_Associated(sfc)) ) THEN
+!      message = 'Error allocating CRTM Surface structure'
+!      CALL Display_Message( PROGRAM_NAME, message, FAILURE )
+!      STOP
+!   END IF
+
+
+!do not initialize: Radiance, Brightness_Temperature
+!initialize: layer_optical_depth
+
+   ALLOCATE( atm_K( n_channels, N_PROFILES ), &
+        rts_K( n_channels, N_PROFILES ), &
+        STAT = alloc_stat )
+   IF ( alloc_stat /= 0 ) THEN
+      message = 'Error allocating structure arrays'
       CALL Display_Message( PROGRAM_NAME, message, FAILURE )
       STOP
    END IF
 
+! The output K-MATRIX structure
+   CALL CRTM_Atmosphere_Create( atm_K, n_layers, self%rc%n_Absorbers, self%rc%n_Clouds, self%rc%n_Aerosols)
+   IF ( ANY(.NOT. CRTM_Atmosphere_Associated(atm_K)) ) THEN
+      message = 'Error allocating CRTM K-matrix Atmosphere structure'
+      CALL Display_Message( PROGRAM_NAME, message, FAILURE )
+      STOP
+   END IF
+   
+   CALL CRTM_RTSolution_Create(rts, n_Layers )
+   CALL CRTM_RTSolution_Create(rts_k, n_Layers )
 
    !Assign the data from the GeoVaLs
    !--------------------------------
-   call Load_Atm_Data(n_Profiles,n_Layers,geovals,atm)
-   call Load_Sfc_Data(n_Profiles,n_Layers,n_Channels,channels,geovals,sfc,chinfo,obss)
-   call Load_Geom_Data(obss,geo)
+   CALL Load_Atm_Data(n_Profiles,n_Layers,geovals,atm,self%rc)
+!   CALL Load_Sfc_Data(n_Profiles,n_Layers,n_Channels,geovals,sfc,chinfo,obss)
+!   CALL Load_Geom_Data(obss,geo)
 
+   IF (TRIM(self%rc%aerosol_option) /= "") &
+        &CALL load_aerosol_data(n_profiles,n_layers,geovals,&
+        &self%rc%aerosol_option,atm)
 
    ! Call THE CRTM inspection
    ! ------------------------
-   if (self%rc%inspect > 0) then
-     call CRTM_Atmosphere_Inspect(atm(self%rc%inspect))
-     call CRTM_Surface_Inspect(sfc(self%rc%inspect))
-     call CRTM_Geometry_Inspect(geo(self%rc%inspect))
-     call CRTM_ChannelInfo_Inspect(chinfo(n))
-   endif
+   call CRTM_Atmosphere_Inspect(atm(12))
+!   call CRTM_Surface_Inspect(sfc(12))
+!   call CRTM_Geometry_Inspect(geo(12))
+   call CRTM_ChannelInfo_Inspect(chinfo(1))
+
 
    ! Call the forward model call for each sensor
    ! -------------------------------------------
-   err_stat = CRTM_Forward( atm        , &  ! Input
-                            sfc        , &  ! Input
-                            geo        , &  ! Input
-                            chinfo(n:n), &  ! Input
-                            rts          )  ! Output
+!   err_stat = CRTM_Forward( atm        , &  ! Input
+!                            sfc        , &  ! Input
+!                            geo        , &  ! Input
+!                            chinfo(n:n), &  ! Input
+!                            rts          )  ! Output
+
+
+   DO m = 1, n_profiles
+      DO l = 1, n_channels
+         rts_k(l,m)%layer_optical_depth = one
+      ENDDO
+   ENDDO
+   
+
+! 8b.1 The K-matrix model for AOD
+! ----------------------
+   err_stat = CRTM_AOD_K( atm,    &  ! FORWARD  Input
+        rts_K                   , &  ! K-MATRIX Input
+        chinfo(n:n)             , &  ! Input
+        rts                     , &  ! FORWARD  Output
+        atm_k        )               ! K-MATRIX Output
+
    if ( err_stat /= SUCCESS ) THEN
       message = 'Error calling CRTM Forward Model for '//TRIM(self%rc%SENSOR_ID(n))
       call Display_Message( PROGRAM_NAME, message, FAILURE )
       stop
    end if
 
-   !call CRTM_RTSolution_Inspect(rts)
 
    ! Put simulated brightness temperature into hofx
    ! ----------------------------------------------
 
-   !Set to zero and initialize counter
+   ALLOCATE(fwd(n_profiles,n_channels))
+
+   !Set to zero and initializ counter
    hofx(:) = 0.0_kind_real
    i = 1
 
    do m = 1, n_Profiles
-     do l = 1, size(channels)
+     do l = 1, N_Channels
 
-       hofx(i) = rts(channels(l),m)%Brightness_Temperature
+       hofx(i) = SUM(rts(l,m)%layer_optical_depth)
+
+       fwd(m,l)= hofx(i)
+
        i = i + 1
 
      end do
    end do
 
+   CALL check_fwd(fwd,obss,n_profiles, n_channels,varname_tmplate)
+
+   DEALLOCATE(fwd)
 
    ! Deallocate the structures
    ! -------------------------
-   call CRTM_Geometry_Destroy(geo)
    call CRTM_Atmosphere_Destroy(atm)
    call CRTM_RTSolution_Destroy(rts)
-   call CRTM_Surface_Destroy(sfc)
 
+   call CRTM_Atmosphere_Destroy(atm_k)
+   call CRTM_RTSolution_Destroy(rts_k)
 
    ! Deallocate all arrays
    ! ---------------------
-   deallocate(geo, atm, sfc, rts, STAT = alloc_stat)
+   DEALLOCATE(geo, atm, sfc, rts, atm_k, rts_k, STAT = alloc_stat)
    if ( alloc_stat /= 0 ) THEN
       message = 'Error deallocating structure arrays'
       call Display_Message( PROGRAM_NAME, message, FAILURE )
       stop
    end if
 
- end do Sensor_Loop
-
+end do Sensor_Loop
 
  ! Destroy CRTM instance
  ! ---------------------
@@ -252,8 +299,8 @@ type(CRTM_RTSolution_type), allocatable :: rts(:,:)
     stop
  end if
 
-end subroutine ufo_radiance_simobs
+end subroutine ufo_aod_simobs
 
 ! ------------------------------------------------------------------------------
 
-end module ufo_radiance_mod
+end module ufo_aod_mod

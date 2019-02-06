@@ -5,7 +5,7 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#include "ufo/atmosphere/radiance/ObsRadianceTLAD.h"
+#include "ufo/atmosphere/crtm/ObsRadianceTLAD.h"
 
 #include <ostream>
 #include <set>

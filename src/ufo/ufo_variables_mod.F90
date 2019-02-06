@@ -12,11 +12,13 @@ private
 public :: ufo_vars, ufo_vars_setup, ufo_vars_clone, ufo_vars_delete
 public :: ufo_vars_getindex, ufo_vars_nvars, ufo_vars_vnames
 
-integer, parameter, public :: naerosols_gocart_esrl=15
+INTEGER, PARAMETER, PUBLIC :: n_aerosols_gocart_nasa=14,&
+     &n_aerosols_gocart_esrl=15,n_aerosols_other=1
 
 integer, parameter, public :: MAXVARLEN=56
 character(len=MAXVARLEN), public :: var_tv   = "virtual_temperature"
 character(len=MAXVARLEN), public :: var_ts   = "air_temperature"
+character(len=MAXVARLEN), public :: var_t    = "temperature"
 character(len=MAXVARLEN), public :: var_prsl = "atmosphere_ln_pressure_coordinate"
 character(len=MAXVARLEN), public :: var_mixr = "humidity_mixing_ratio"
 character(len=MAXVARLEN), public :: var_q    = "specific_humidity"
@@ -51,7 +53,27 @@ character(len=MAXVARLEN), public :: var_sfc_vegtyp  = "Vegetation_Type"
 character(len=MAXVARLEN), public :: var_sfc_soiltyp = "Soil_Type"
 
 !@mzp strings have to be same MAXVARLEN length for array constructor
-CHARACTER(len=MAXVARLEN), DIMENSION(naerosols_gocart_esrl), PUBLIC :: var_aerosols =[&
+CHARACTER(len=MAXVARLEN), public :: var_rh          = "relative_humidity"
+CHARACTER(len=MAXVARLEN), DIMENSION(n_aerosols_gocart_nasa), PUBLIC :: var_aerosols_gocart_nasa = [&
+     &"sulf                                                    ",&
+     &"bc1                                                     ",&
+     &"bc2                                                     ",&
+     &"oc1                                                     ",&
+     &"oc2                                                     ",&
+     &"dust1                                                   ",&
+     &"dust2                                                   ",&
+     &"dust3                                                   ",&
+     &"dust4                                                   ",&
+     &"dust5                                                   ",&
+     &"seas1                                                   ",&
+     &"seas2                                                   ",&
+     &"seas3                                                   ",&
+     &"seas4                                                   "]
+!@mzp var_aerosols_gocart_esrl =[&
+!    &var_aerosols_gocart_nasa,&
+!    &"p25                                                     "]
+! won't compile
+CHARACTER(len=MAXVARLEN), DIMENSION(n_aerosols_gocart_esrl), PUBLIC :: var_aerosols_gocart_esrl = [&
      &"sulf                                                    ",&
      &"bc1                                                     ",&
      &"bc2                                                     ",&
@@ -68,7 +90,8 @@ CHARACTER(len=MAXVARLEN), DIMENSION(naerosols_gocart_esrl), PUBLIC :: var_aeroso
      &"seas4                                                   ",&
      &"p25                                                     "]
 
-CHARACTER(len=MAXVARLEN), PUBLIC :: var_t="temperature"
+CHARACTER(len=MAXVARLEN), DIMENSION(n_aerosols_other), PUBLIC :: var_aerosols_other = [&
+     &"other                                                   "]
 
 character(len=MAXVARLEN), public :: var_seaicefrac    = "ice_concentration"
 character(len=MAXVARLEN), public :: var_stericheight  = "steric_height"
