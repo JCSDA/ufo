@@ -11,7 +11,7 @@ Locations:
  - -100
 Observations: 
  ObsTypes: 
- - ObsType: "AMSU-A"
+ - ObsType: "CRTM"
    channels: "1-15"
    ObsOptions: 
     n_Absorbers: 3

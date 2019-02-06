@@ -26,10 +26,11 @@ extern "C" {
 //  Radiance observation operator
 // -----------------------------------------------------------------------------
 
-  void ufo_radiance_crtm_setup_f90(F90hop &, const eckit::Configuration * const *);
-  void ufo_radiance_crtm_delete_f90(F90hop &);
-  void ufo_radiance_crtm_simobs_f90(const F90hop &, const F90goms &, const ioda::ObsSpace &,
-                               const int &, double &, const F90obias &);
+  void ufo_radiancecrtm_setup_f90(F90hop &, const eckit::Configuration * const *);
+  void ufo_radiancecrtm_delete_f90(F90hop &);
+  void ufo_radiancecrtm_simobs_f90(const F90hop &, const F90goms &, const ioda::ObsSpace &,
+                               const int &, double &, const F90obias &, const int &,
+                               const int &);
 // -----------------------------------------------------------------------------
 
 }  // extern C

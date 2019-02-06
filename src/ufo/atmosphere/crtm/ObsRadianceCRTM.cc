@@ -49,15 +49,17 @@ ObsRadianceCRTM::ObsRadianceCRTM(const ioda::ObsSpace & odb, const eckit::Config
   std::string chlist = config.getString("channels");
   std::set<int> channels = parseIntSet(chlist);
   std::vector<std::string> vout;
+  channels_.reserve(channels.size());
   for (const int jj : channels) {
     vout.push_back("brightness_temperature_"+std::to_string(jj)+"_");
+    channels_.push_back(jj);
   }
   varout_.reset(new oops::Variables(vout));
 
   // call Fortran setup routine
   const eckit::LocalConfiguration obsOptions(config, "ObsOptions");
   const eckit::Configuration * configc = &obsOptions;
-  ufo_radiance_crtm_setup_f90(keyOperRadianceCRTM_, &configc);
+  ufo_radiancecrtm_setup_f90(keyOperRadianceCRTM_, &configc);
   oops::Log::info() << "ObsRadianceCRTM channels: " << channels << std::endl;
   oops::Log::trace() << "ObsRadianceCRTM created." << std::endl;
 }
@@ -65,7 +67,7 @@ ObsRadianceCRTM::ObsRadianceCRTM(const ioda::ObsSpace & odb, const eckit::Config
 // -----------------------------------------------------------------------------
 
 ObsRadianceCRTM::~ObsRadianceCRTM() {
-  ufo_radiance_crtm_delete_f90(keyOperRadianceCRTM_);
+  ufo_radiancecrtm_delete_f90(keyOperRadianceCRTM_);
   oops::Log::trace() << "ObsRadianceCRTM destructed" << std::endl;
 }
 
@@ -73,8 +75,9 @@ ObsRadianceCRTM::~ObsRadianceCRTM() {
 
 void ObsRadianceCRTM::simulateObs(const GeoVaLs & gom, ioda::ObsVector & ovec,
                               const ObsBias & bias) const {
-  ufo_radiance_crtm_simobs_f90(keyOperRadianceCRTM_, gom.toFortran(), odb_,
-                          ovec.size(), ovec.toFortran(), bias.toFortran());
+  ufo_radiancecrtm_simobs_f90(keyOperRadianceCRTM_, gom.toFortran(), odb_,
+                          ovec.size(), ovec.toFortran(), bias.toFortran(),
+                          channels_.size(), channels_[0]);
 }
 
 // -----------------------------------------------------------------------------

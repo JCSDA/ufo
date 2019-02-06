@@ -25,7 +25,6 @@ module ufo_radiancerttov_mod
  private
 
 !> Fortran derived type for the observation type
-! TODO: fill in if needed
  TYPE, EXTENDS(ufo_basis), PUBLIC :: ufo_radiancerttov
    PRIVATE
    TYPE(rad_conf) :: rc
@@ -38,7 +37,6 @@ module ufo_radiancerttov_mod
 contains
 
 ! ------------------------------------------------------------------------------
-! TODO: add setup of your observation operator (optional)
 subroutine ufo_radiancerttov_setup(self, c_conf)
 implicit none
 class(ufo_radiancerttov), intent(inout) :: self
@@ -49,7 +47,6 @@ CALL rad_conf_setup(self % rc,c_conf)
 end subroutine ufo_radiancerttov_setup
 
 ! ------------------------------------------------------------------------------
-! TODO: add cleanup of your observation operator (optional)
 subroutine ufo_radiancerttov_delete(self)
 implicit none
 class(ufo_radiancerttov), intent(inout) :: self
@@ -59,8 +56,6 @@ CALL rad_conf_delete(self % rc)
 end subroutine ufo_radiancerttov_delete
 
 ! ------------------------------------------------------------------------------
-! TODO: put code for your nonlinear observation operator in this routine
-! Code in this routine is for radiancerttov only, please remove and replace
 SUBROUTINE ufo_radiancerttov_simobs(self, geovals, hofx, obss)
 
 USE ufo_radiancerttov_utils_mod , ONLY : config_rttov

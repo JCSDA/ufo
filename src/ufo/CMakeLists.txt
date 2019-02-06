@@ -60,7 +60,6 @@ add_subdirectory( utils )
 add_subdirectory( basis )
 add_subdirectory( generic )
 add_subdirectory( atmosphere )
-add_subdirectory( constituents )
 if( ${GSW_FOUND} )
     add_subdirectory( marine )
 endif( ${GSW_FOUND} )
@@ -69,7 +68,6 @@ list( APPEND ufo_src_files
     ${basis_src_files}
     ${generic_src_files}
     ${atmosphere_src_files}
-    ${constituents_src_files}
 )
 if( ${GSW_FOUND} )
     list( APPEND ufo_src_files ${marine_src_files} )

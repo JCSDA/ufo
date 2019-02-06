@@ -8,6 +8,7 @@
 #include "ufo/atmosphere/crtm/ObsRadianceCRTMTLAD.h"
 
 #include <ostream>
+#include <set>
 #include <string>
 #include <vector>
 
@@ -20,11 +21,12 @@
 #include "ufo/GeoVaLs.h"
 #include "ufo/ObsBias.h"
 #include "ufo/ObsBiasIncrement.h"
+#include "ufo/utils/IntSetParser.h"
 
 namespace ufo {
 
 // -----------------------------------------------------------------------------
-static LinearObsOperatorMaker<ObsRadianceCRTMTLAD> makerAmsuaTL_("CRTM");
+static LinearObsOperatorMaker<ObsRadianceCRTMTLAD> makerCRTMTL_("CRTM");
 // -----------------------------------------------------------------------------
 
 ObsRadianceCRTMTLAD::ObsRadianceCRTMTLAD(const ioda::ObsSpace & odb,
@@ -33,39 +35,51 @@ ObsRadianceCRTMTLAD::ObsRadianceCRTMTLAD(const ioda::ObsSpace & odb,
 {
   const std::vector<std::string> vv{"air_temperature"};
   varin_.reset(new oops::Variables(vv));
+
+  // parse channels from the config and create variable names
+  std::string chlist = config.getString("channels");
+  std::set<int> channels = parseIntSet(chlist);
+  channels_.reserve(channels.size());
+  for (const int jj : channels) {
+    channels_.push_back(jj);
+  }
+
   const eckit::LocalConfiguration obsOptions(config, "ObsOptions");
   const eckit::Configuration * configc = &obsOptions;
-  ufo_radiance_crtm_tlad_setup_f90(keyOperRadianceCRTM_, &configc);
+  ufo_radiancecrtm_tlad_setup_f90(keyOperRadianceCRTM_, &configc);
   oops::Log::trace() << "ObsRadianceCRTMTLAD created" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
 ObsRadianceCRTMTLAD::~ObsRadianceCRTMTLAD() {
-  ufo_radiance_crtm_tlad_delete_f90(keyOperRadianceCRTM_);
+  ufo_radiancecrtm_tlad_delete_f90(keyOperRadianceCRTM_);
   oops::Log::trace() << "ObsRadianceCRTMTLAD destructed" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
 void ObsRadianceCRTMTLAD::setTrajectory(const GeoVaLs & geovals, const ObsBias & bias) {
-  ufo_radiance_crtm_tlad_settraj_f90(keyOperRadianceCRTM_, geovals.toFortran(), odb_);
+  ufo_radiancecrtm_tlad_settraj_f90(keyOperRadianceCRTM_, geovals.toFortran(), odb_,
+                                channels_.size(), channels_[0]);
 }
 
 // -----------------------------------------------------------------------------
 
 void ObsRadianceCRTMTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec,
                                     const ObsBiasIncrement & bias) const {
-  ufo_radiance_crtm_simobs_tl_f90(keyOperRadianceCRTM_, geovals.toFortran(), odb_,
-                             ovec.size(), ovec.toFortran());
+  ufo_radiancecrtm_simobs_tl_f90(keyOperRadianceCRTM_, geovals.toFortran(), odb_,
+                             ovec.size(), ovec.toFortran(),
+                             channels_.size(), channels_[0]);
 }
 
 // -----------------------------------------------------------------------------
 
 void ObsRadianceCRTMTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec,
                                     ObsBiasIncrement & bias) const {
-  ufo_radiance_crtm_simobs_ad_f90(keyOperRadianceCRTM_, geovals.toFortran(), odb_,
-                             ovec.size(), ovec.toFortran());
+  ufo_radiancecrtm_simobs_ad_f90(keyOperRadianceCRTM_, geovals.toFortran(), odb_,
+                             ovec.size(), ovec.toFortran(),
+                             channels_.size(), channels_[0]);
 }
 
 // -----------------------------------------------------------------------------

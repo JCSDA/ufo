@@ -5,7 +5,7 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
  */
 
-#include "ufo/constituents/aod/ObsAod.h"
+#include "ufo/atmosphere/crtm/ObsAod.h"
 
 #include <ostream>
 #include <set>
@@ -29,12 +29,10 @@ static ObsOperatorMaker<ObsAod> makerAOD_("Aod");
 ObsAod::ObsAod(const ioda::ObsSpace & odb, const eckit::Configuration & config)
   : keyOperAod_(0), odb_(odb), varin_(), varout_()
 {
-  const eckit::Configuration * configc = &config;
-  ufo_aod_setup_f90(keyOperAod_, &configc);
-  const std::vector<std::string> vv{"temperature", "humidity_mixing_ratio",
+  const std::vector<std::string> vv{"air_temperature", "humidity_mixing_ratio", "relative_humidity",
       "air_pressure", "air_pressure_levels",
       "sulf", "bc1", "bc2", "oc1", "oc2", "dust1", "dust2", "dust3", "dust4", "dust5",
-      "seas1", "seas2", "seas3", "seas4", "p25"};
+      "seas1", "seas2", "seas3", "seas4"};
   varin_.reset(new oops::Variables(vv));
 
   // parse channels from the config and create variable names
@@ -46,6 +44,10 @@ ObsAod::ObsAod(const ioda::ObsSpace & odb, const eckit::Configuration & config)
   }
   varout_.reset(new oops::Variables(vout));
 
+  // call Fortran setup routine
+  const eckit::LocalConfiguration obsOptions(config, "ObsOptions");
+  const eckit::Configuration * configc = &obsOptions;
+  ufo_aod_setup_f90(keyOperAod_, &configc);
   oops::Log::info() << "ObsAod channels: " << channels << std::endl;
   oops::Log::trace() << "ObsAod created." << std::endl;
 }

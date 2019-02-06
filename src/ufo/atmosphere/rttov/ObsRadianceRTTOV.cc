@@ -44,7 +44,7 @@ ObsRadianceRTTOV::ObsRadianceRTTOV(const ioda::ObsSpace & odb,
                                     "Soil_Temperature", "Land_Type_Index", "Vegetation_Type",
                                     "Soil_Type", "Snow_Depth"};
   varin_.reset(new oops::Variables(vv));
- 
+
   // parse channels from the config and create variable names
   std::string chlist = config.getString("channels");
   std::set<int> channels = parseIntSet(chlist);
