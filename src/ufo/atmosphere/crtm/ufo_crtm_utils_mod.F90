@@ -51,7 +51,6 @@ type crtm_conf
  integer :: n_Absorbers
  integer :: n_Clouds
  integer :: n_Aerosols
- integer, allocatable :: skiplist(:)
  character(len=255), allocatable :: SENSOR_ID(:)
  character(len=255) :: ENDIAN_TYPE
  character(len=255) :: COEFFICIENT_PATH
@@ -68,10 +67,6 @@ subroutine crtm_conf_setup(conf, c_conf)
 implicit none
 type(crtm_conf), intent(inout) :: conf
 type(c_ptr),    intent(in)    :: c_conf
-
-character(len=1023) :: SkipChannels
-integer :: nskip, i
-character(len=100), allocatable :: skiplist_str(:)
 
  !Some config needs to come from user
  !-----------------------------------
@@ -116,20 +111,6 @@ character(len=100), allocatable :: skiplist_str(:)
  !Path to coefficient files
  conf%COEFFICIENT_PATH = config_get_string(c_conf,len(conf%COEFFICIENT_PATH),"CoefficientPath")
 
- !Channels to skip
- if (config_element_exists(c_conf,"SkipChannels")) then
-   SkipChannels = config_get_string(c_conf,len(SkipChannels),"SkipChannels")
-   nskip = 1 + count(transfer(SkipChannels, 'a', len(SkipChannels)) == ",")
-   allocate(skiplist_str(nskip))
-   read(SkipChannels,*) skiplist_str
- else
-   nskip = 0
- endif
- allocate(conf%skiplist(nskip))
- do i = 1,nskip
-   read(skiplist_str(i),*)  conf%skiplist(i)
- enddo
-
  conf%inspect = 0
  if (config_element_exists(c_conf,"InspectProfileNumber")) then
    conf%inspect = config_get_int(c_conf,"InspectProfileNumber")
@@ -145,7 +126,6 @@ implicit none
 type(crtm_conf), intent(inout) :: conf
 
  deallocate(conf%SENSOR_ID)
- deallocate(conf%skiplist)
 
 end subroutine crtm_conf_delete
 
