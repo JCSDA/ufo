@@ -23,7 +23,7 @@ module ufo_radiance_mod
  !> Fortran derived type for radiance trajectory
  type, public :: ufo_radiance
  private
-  type(crtm_conf) :: rc
+  type(crtm_conf) :: conf
  contains
    procedure :: setup  => ufo_radiance_setup
    procedure :: delete => ufo_radiance_delete
@@ -42,7 +42,7 @@ implicit none
 class(ufo_radiance), intent(inout) :: self
 type(c_ptr),         intent(in)    :: c_conf
 
- call crtm_conf_setup(self%rc,c_conf)
+ call crtm_conf_setup(self%conf,c_conf)
 
 end subroutine ufo_radiance_setup
 
@@ -53,7 +53,7 @@ subroutine ufo_radiance_delete(self)
 implicit none
 class(ufo_radiance), intent(inout) :: self
 
- call crtm_conf_delete(self%rc)
+ call crtm_conf_delete(self%conf)
 
 end subroutine ufo_radiance_delete
 
@@ -80,7 +80,7 @@ integer :: n_Layers
 integer :: n_Channels
 
 ! Define the "non-demoninational" arguments
-type(CRTM_ChannelInfo_type)             :: chinfo(self%rc%n_Sensors)
+type(CRTM_ChannelInfo_type)             :: chinfo(self%conf%n_Sensors)
 type(CRTM_Geometry_type),   allocatable :: geo(:)
 
 ! Define the FORWARD variables
@@ -102,7 +102,7 @@ type(CRTM_RTSolution_type), allocatable :: rts(:,:)
  call CRTM_Version( Version )
  call Program_Message( PROGRAM_NAME, &
                        'Check/example program for the CRTM Forward and K-Matrix functions using '//&
-                       trim(self%rc%ENDIAN_type)//' coefficient datafiles', &
+                       trim(self%conf%ENDIAN_type)//' coefficient datafiles', &
                        'CRTM Version: '//TRIM(Version) )
 
 
@@ -112,8 +112,8 @@ type(CRTM_RTSolution_type), allocatable :: rts(:,:)
  !**       CRTM_Lifecycle.f90 for more details.
 
  write( *,'(/5x,"Initializing the CRTM...")' )
- err_stat = CRTM_Init( self%rc%SENSOR_ID, chinfo, &
-                       File_Path=trim(self%rc%COEFFICIENT_PATH), &
+ err_stat = CRTM_Init( self%conf%SENSOR_ID, chinfo, &
+                       File_Path=trim(self%conf%COEFFICIENT_PATH), &
                        Quiet=.TRUE.)
  if ( err_stat /= SUCCESS ) THEN
    message = 'Error initializing CRTM'
@@ -124,7 +124,7 @@ type(CRTM_RTSolution_type), allocatable :: rts(:,:)
 
  ! Loop over all sensors. Not necessary if we're calling CRTM for each sensor
  ! ----------------------------------------------------------------------------
- Sensor_Loop:do n = 1, self%rc%n_Sensors
+ Sensor_Loop:do n = 1, self%conf%n_Sensors
 
 
    ! Pass channel list to CRTM
@@ -158,7 +158,7 @@ type(CRTM_RTSolution_type), allocatable :: rts(:,:)
 
    ! Create the input FORWARD structure (atm)
    ! ----------------------------------------
-   call CRTM_Atmosphere_Create( atm, n_Layers, self%rc%n_Absorbers, self%rc%n_Clouds, self%rc%n_Aerosols )
+   call CRTM_Atmosphere_Create( atm, n_Layers, self%conf%n_Absorbers, self%conf%n_Clouds, self%conf%n_Aerosols )
    if ( ANY(.NOT. CRTM_Atmosphere_Associated(atm)) ) THEN
       message = 'Error allocating CRTM Forward Atmosphere structure'
       CALL Display_Message( PROGRAM_NAME, message, FAILURE )
@@ -178,17 +178,17 @@ type(CRTM_RTSolution_type), allocatable :: rts(:,:)
 
    !Assign the data from the GeoVaLs
    !--------------------------------
-   call Load_Atm_Data(n_Profiles,n_Layers,geovals,atm,self%rc)
+   call Load_Atm_Data(n_Profiles,n_Layers,geovals,atm,self%conf)
    call Load_Sfc_Data(n_Profiles,n_Layers,n_Channels,channels,geovals,sfc,chinfo,obss)
    call Load_Geom_Data(obss,geo)
 
 
    ! Call THE CRTM inspection
    ! ------------------------
-   if (self%rc%inspect > 0) then
-     call CRTM_Atmosphere_Inspect(atm(self%rc%inspect))
-     call CRTM_Surface_Inspect(sfc(self%rc%inspect))
-     call CRTM_Geometry_Inspect(geo(self%rc%inspect))
+   if (self%conf%inspect > 0) then
+     call CRTM_Atmosphere_Inspect(atm(self%conf%inspect))
+     call CRTM_Surface_Inspect(sfc(self%conf%inspect))
+     call CRTM_Geometry_Inspect(geo(self%conf%inspect))
      call CRTM_ChannelInfo_Inspect(chinfo(n))
    endif
 
@@ -200,7 +200,7 @@ type(CRTM_RTSolution_type), allocatable :: rts(:,:)
                             chinfo(n:n), &  ! Input
                             rts          )  ! Output
    if ( err_stat /= SUCCESS ) THEN
-      message = 'Error calling CRTM Forward Model for '//TRIM(self%rc%SENSOR_ID(n))
+      message = 'Error calling CRTM Forward Model for '//TRIM(self%conf%SENSOR_ID(n))
       call Display_Message( PROGRAM_NAME, message, FAILURE )
       stop
    end if

@@ -63,10 +63,10 @@ contains
 
 ! ------------------------------------------------------------------------------
 
-subroutine crtm_conf_setup(rc, c_conf)
+subroutine crtm_conf_setup(conf, c_conf)
 
 implicit none
-type(crtm_conf), intent(inout) :: rc
+type(crtm_conf), intent(inout) :: conf
 type(c_ptr),    intent(in)    :: c_conf
 
 character(len=1023) :: SkipChannels
@@ -78,43 +78,43 @@ character(len=100), allocatable :: skiplist_str(:)
 
  !Number of sensors, each call to CRTM will be for a single sensor
  !type (zenith/scan angle will be different)
- rc%n_Sensors = 1
+ conf%n_Sensors = 1
 
  !Number of absorbers, clouds and aerosols (should match what model will provide)
- rc%n_Absorbers = config_get_int(c_conf,"n_Absorbers")
- rc%n_Clouds    = config_get_int(c_conf,"n_Clouds"   )
+ conf%n_Absorbers = config_get_int(c_conf,"n_Absorbers")
+ conf%n_Clouds    = config_get_int(c_conf,"n_Clouds"   )
 
  IF (config_element_exists(c_conf,"n_Aerosols")) &
-      &rc%n_Aerosols  = config_get_int(c_conf,"n_Aerosols" )
+      &conf%n_Aerosols  = config_get_int(c_conf,"n_Aerosols" )
 
  IF (config_element_exists(c_conf,"AerosolOption")) THEN
-    rc%aerosol_option = config_get_string(c_conf,LEN(rc%aerosol_option),"AerosolOption")
-    rc%aerosol_option = upper2lower(rc%aerosol_option)
-    IF (TRIM(rc%aerosol_option) == "aerosols_gocart_nasa") THEN
-       rc%n_Aerosols=n_aerosols_gocart_nasa
-    ELSEIF (TRIM(rc%aerosol_option) == "aerosols_gocart_esrl") THEN
-       rc%n_Aerosols=n_aerosols_gocart_esrl
-    ELSEIF (TRIM(rc%aerosol_option) == "aerosols_other") THEN
-       rc%n_Aerosols=1
+    conf%aerosol_option = config_get_string(c_conf,LEN(conf%aerosol_option),"AerosolOption")
+    conf%aerosol_option = upper2lower(conf%aerosol_option)
+    IF (TRIM(conf%aerosol_option) == "aerosols_gocart_nasa") THEN
+       conf%n_Aerosols=n_aerosols_gocart_nasa
+    ELSEIF (TRIM(conf%aerosol_option) == "aerosols_gocart_esrl") THEN
+       conf%n_Aerosols=n_aerosols_gocart_esrl
+    ELSEIF (TRIM(conf%aerosol_option) == "aerosols_other") THEN
+       conf%n_Aerosols=1
     ELSE
-       rc%n_Aerosols=0
+       conf%n_Aerosols=0
     ENDIF
  ELSE
-    rc%n_Aerosols  = 0
-    rc%aerosol_option = ""
+    conf%n_Aerosols  = 0
+    conf%aerosol_option = ""
  ENDIF
 
  !Allocate SENSOR_ID
- allocate(rc%SENSOR_ID(rc%n_Sensors))
+ allocate(conf%SENSOR_ID(conf%n_Sensors))
 
  !Get sensor ID from config
- rc%SENSOR_ID(rc%n_Sensors) = config_get_string(c_conf,len(rc%SENSOR_ID(rc%n_Sensors)),"Sensor_ID")
+ conf%SENSOR_ID(conf%n_Sensors) = config_get_string(c_conf,len(conf%SENSOR_ID(conf%n_Sensors)),"Sensor_ID")
 
  !ENDIAN type
- rc%ENDIAN_TYPE = config_get_string(c_conf,len(rc%ENDIAN_TYPE),"EndianType")
+ conf%ENDIAN_TYPE = config_get_string(c_conf,len(conf%ENDIAN_TYPE),"EndianType")
 
  !Path to coefficient files
- rc%COEFFICIENT_PATH = config_get_string(c_conf,len(rc%COEFFICIENT_PATH),"CoefficientPath")
+ conf%COEFFICIENT_PATH = config_get_string(c_conf,len(conf%COEFFICIENT_PATH),"CoefficientPath")
 
  !Channels to skip
  if (config_element_exists(c_conf,"SkipChannels")) then
@@ -125,39 +125,39 @@ character(len=100), allocatable :: skiplist_str(:)
  else
    nskip = 0
  endif
- allocate(rc%skiplist(nskip))
+ allocate(conf%skiplist(nskip))
  do i = 1,nskip
-   read(skiplist_str(i),*)  rc%skiplist(i)
+   read(skiplist_str(i),*)  conf%skiplist(i)
  enddo
 
- rc%inspect = 0
+ conf%inspect = 0
  if (config_element_exists(c_conf,"InspectProfileNumber")) then
-   rc%inspect = config_get_int(c_conf,"InspectProfileNumber")
+   conf%inspect = config_get_int(c_conf,"InspectProfileNumber")
  endif
 
 end subroutine crtm_conf_setup
 
 ! -----------------------------------------------------------------------------
 
-subroutine crtm_conf_delete(rc)
+subroutine crtm_conf_delete(conf)
 
 implicit none
-type(crtm_conf), intent(inout) :: rc
+type(crtm_conf), intent(inout) :: conf
 
- deallocate(rc%SENSOR_ID)
- deallocate(rc%skiplist)
+ deallocate(conf%SENSOR_ID)
+ deallocate(conf%skiplist)
 
 end subroutine crtm_conf_delete
 
 ! ------------------------------------------------------------------------------
 
-SUBROUTINE Load_Atm_Data(N_PROFILES,N_LAYERS,geovals,atm,rc)
+SUBROUTINE Load_Atm_Data(N_PROFILES,N_LAYERS,geovals,atm,conf)
 
 implicit none
 integer, intent(in) :: N_PROFILES, N_LAYERS
 type(ufo_geovals), intent(in) :: geovals
 type(CRTM_Atmosphere_type), intent(inout) :: atm(:)
-type(crtm_conf) :: rc
+type(crtm_conf) :: conf
 
 ! Local variables
 integer :: k1,ivar
@@ -193,14 +193,14 @@ character(max_string) :: err_msg
     atm(k1)%Absorber_Units(2:2) = (/ VOLUME_MIXING_RATIO_UNITS /)
 
     ivar = ufo_vars_getindex(geovals%variables, var_oz)
-    IF (ivar < 0 .AND. TRIM(rc%aerosol_option) /= "") THEN 
+    IF (ivar < 0 .AND. TRIM(conf%aerosol_option) /= "") THEN 
        atm(k1)%Absorber(1:N_LAYERS,2)=ozone_default_value
     ELSE
        CALL ufo_geovals_get_var(geovals, var_oz, geoval)
        atm(k1)%Absorber(1:N_LAYERS,2)       = geoval%vals(:,k1)
     ENDIF
 
-    IF (rc%n_Absorbers > min_crtm_n_absorbers) THEN
+    IF (conf%n_Absorbers > min_crtm_n_absorbers) THEN
 
        atm(k1)%Absorber_Id(3:3)    = (/ CO2_ID /)
        atm(k1)%Absorber_Units(3:3) = (/ VOLUME_MIXING_RATIO_UNITS /)
@@ -209,7 +209,7 @@ character(max_string) :: err_msg
        
     ENDIF
 
-    IF ( rc%n_Clouds >= 1 ) THEN
+    IF ( conf%n_Clouds >= 1 ) THEN
 
        atm(k1)%Cloud(1)%Type = WATER_CLOUD
        CALL ufo_geovals_get_var(geovals, var_clw, geoval)
@@ -224,7 +224,7 @@ character(max_string) :: err_msg
        
     ENDIF
 
-    IF ( rc%n_Clouds >= 2 ) THEN
+    IF ( conf%n_Clouds >= 2 ) THEN
 
        atm(k1)%Cloud(2)%Type = ICE_CLOUD
        CALL ufo_geovals_get_var(geovals, var_cli, geoval)
