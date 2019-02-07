@@ -7,7 +7,9 @@ list( APPEND atmosphere_src_files
 )
 add_subdirectory( atmvertinterp )
 add_subdirectory( crtm )
-add_subdirectory( rttov )
+if( ${RTTOV_FOUND} )
+    add_subdirectory( rttov )
+endif( ${RTTOV_FOUND} )
 add_subdirectory( gnssro )
 add_subdirectory( surface )
 

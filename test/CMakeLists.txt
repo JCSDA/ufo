@@ -153,23 +153,25 @@ ecbuild_add_test( TARGET  test_ufo_amsua_opr_crtm
                   ARGS    "testinput/amsua_crtm.yaml"
                   LIBS    ufo )
 
-ecbuild_add_test( TARGET  test_ufo_amsua_opr_rttov
-                  BOOST
-                  SOURCES mains/TestObsOperator.cc
-                  ARGS    "testinput/amsua_rttov.yaml"
-                  LIBS    ufo )
-
 ecbuild_add_test( TARGET  test_ufo_amsua_tlad_crtm
                   BOOST
                   SOURCES mains/TestObsOperatorTLAD.cc
                   ARGS    "testinput/amsua_crtm.yaml"
                   LIBS    ufo )
 
-ecbuild_add_test( TARGET  test_ufo_amsua_tlad_rttov
-                  BOOST
-                  SOURCES mains/TestObsOperatorTLAD.cc
-                  ARGS    "testinput/amsua_rttov.yaml"
-                  LIBS    ufo )
+if( ${RTTOV_FOUND} )
+  ecbuild_add_test( TARGET  test_ufo_amsua_opr_rttov
+                    BOOST
+                    SOURCES mains/TestObsOperator.cc
+                    ARGS    "testinput/amsua_rttov.yaml"
+                    LIBS    ufo )
+
+  ecbuild_add_test( TARGET  test_ufo_amsua_tlad_rttov
+                    BOOST
+                    SOURCES mains/TestObsOperatorTLAD.cc
+                    ARGS    "testinput/amsua_rttov.yaml"
+                    LIBS    ufo )
+endif( ${RTTOV_FOUND} )
 
 ecbuild_add_test( TARGET  test_ufo_radiosonde_opr
                   BOOST
@@ -346,7 +348,7 @@ CREATE_SYMLINK_FILENAME( ${crtm_SOURCE_DIR}/fix
 #####################################################################
 # Files for RTTOV tests
 #####################################################################
-
+if( ${RTTOV_FOUND} )
 list( APPEND rttov_test_input
 rttov7pred54L/rtcoef_noaa_19_amsua.dat
 )
@@ -355,3 +357,4 @@ rttov7pred54L/rtcoef_noaa_19_amsua.dat
 CREATE_SYMLINK_FILENAME( ${rttov_SOURCE_DIR}/rtcoef_rttov12
                          ${CMAKE_CURRENT_BINARY_DIR}/Data
                          ${rttov_test_input} )
+endif( ${RTTOV_FOUND} )
