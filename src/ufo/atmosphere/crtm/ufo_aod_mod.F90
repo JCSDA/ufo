@@ -93,8 +93,6 @@ type(CRTM_RTSolution_type), allocatable :: rts(:,:)
 TYPE(CRTM_Atmosphere_type), ALLOCATABLE :: atm_K(:,:)
 TYPE(CRTM_RTSolution_type), ALLOCATABLE :: rts_K(:,:)
 
-REAL(kind_real), ALLOCATABLE, DIMENSION(:,:) :: fwd
-
  ! Get number of profile and layers from geovals
  ! ---------------------------------------------
  n_Profiles = geovals%nobs
@@ -213,7 +211,6 @@ REAL(kind_real), ALLOCATABLE, DIMENSION(:,:) :: fwd
 !   call CRTM_Geometry_Inspect(geo(12))
    call CRTM_ChannelInfo_Inspect(chinfo(1))
 
-
    ! Call the forward model call for each sensor
    ! -------------------------------------------
 !   err_stat = CRTM_Forward( atm        , &  ! Input
@@ -240,8 +237,6 @@ REAL(kind_real), ALLOCATABLE, DIMENSION(:,:) :: fwd
    ! Put simulated brightness temperature into hofx
    ! ----------------------------------------------
 
-   ALLOCATE(fwd(n_profiles,n_channels))
-
    !Set to zero and initializ counter
    hofx(:) = 0.0_kind_real
    i = 1
@@ -251,16 +246,12 @@ REAL(kind_real), ALLOCATABLE, DIMENSION(:,:) :: fwd
 
        hofx(i) = SUM(rts(l,m)%layer_optical_depth)
 
-       fwd(m,l)= hofx(i)
-
        i = i + 1
 
      end do
    end do
 
-   CALL check_fwd(fwd,obss,n_profiles, n_channels,varname_tmplate)
-
-   DEALLOCATE(fwd)
+   CALL check_fwd(hofx,obss,n_profiles, n_channels,varname_tmplate)
 
    ! Deallocate the structures
    ! -------------------------

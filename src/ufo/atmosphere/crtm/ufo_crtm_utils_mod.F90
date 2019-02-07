@@ -38,7 +38,7 @@ REAL(kind_real), PARAMETER :: &
      &eps_p1 = one+rd/rv,&
      &grav = 9.81_kind_real,&
      &aerosol_concentration_minvalue=1.e-16,&
-     &ozone_default_value=1.e-10
+     &ozone_default_value=1.e-3
 
 INTEGER, PARAMETER, public :: min_crtm_n_absorbers = 2
 
@@ -714,12 +714,12 @@ SUBROUTINE load_aerosol_data(n_profiles,n_layers,geovals,&
     
   END SUBROUTINE load_aerosol_data
 
-  SUBROUTINE check_fwd(fwd,obss,n_profiles,n_channels,varname_tmplate)
+  SUBROUTINE check_fwd(hofx,obss,n_profiles,n_channels,varname_tmplate)
 
     TYPE(c_ptr), value,       INTENT(in)    :: obss
     INTEGER, INTENT(in) :: n_profiles,n_channels
     CHARACTER(*), INTENT(in) :: varname_tmplate
-    REAL(kind_real), DIMENSION(n_profiles,n_channels), INTENT(in) :: fwd
+    REAL(kind_real), DIMENSION(*), INTENT(in) :: hofx
 
     REAL(kind_real), DIMENSION(n_profiles, n_channels) :: &
          &obs, innovation, diff
@@ -728,7 +728,7 @@ SUBROUTINE load_aerosol_data(n_profiles,n_layers,geovals,&
     CHARACTER(MAXVARLEN) :: varname
     CHARACTER(MAXVARLEN) :: cinnovation="obs_minus_forecast_unadjusted"
 
-    INTEGER :: l,m
+    INTEGER :: i,l,m
 
     DO l = 1,n_Channels
        CALL get_var_name(varname_tmplate,l,varname)
@@ -739,10 +739,13 @@ SUBROUTINE load_aerosol_data(n_profiles,n_layers,geovals,&
 
     rmse = 0_kind_real
 
+    i = 1
+
     DO m = 1, n_profiles
        DO l = 1, n_channels
-          diff(m,l) = fwd(m,l) - (obs(m,l) - innovation(m,l))
+          diff(m,l) = hofx(i) - (obs(m,l) - innovation(m,l))
           rmse(l) = rmse(l) + diff(m,l)**2
+          i = i + 1
        END DO
     ENDDO
 

@@ -172,15 +172,14 @@ type(CRTM_RTSolution_type), allocatable :: rts_K(:,:)
       STOP
    END IF
 
-
    ! Create the input FORWARD structure (sfc)
    ! ----------------------------------------
-   call CRTM_Surface_Create(sfc, self%N_Channels)
-   IF ( ANY(.NOT. CRTM_Surface_Associated(sfc)) ) THEN
-      message = 'Error allocating CRTM Surface structure (setTraj)'
-      CALL Display_Message( PROGRAM_NAME, message, FAILURE )
-      STOP
-   END IF
+!   call CRTM_Surface_Create(sfc, self%N_Channels)
+!   IF ( ANY(.NOT. CRTM_Surface_Associated(sfc)) ) THEN
+!      message = 'Error allocating CRTM Surface structure (setTraj)'
+!      CALL Display_Message( PROGRAM_NAME, message, FAILURE )
+!      STOP
+!   END IF
 
 
    ! Create output K-MATRIX structure (atm)
@@ -192,15 +191,14 @@ type(CRTM_RTSolution_type), allocatable :: rts_K(:,:)
       STOP
    END IF
 
-
    ! Create output K-MATRIX structure (sfc)
    ! --------------------------------------
-   call CRTM_Surface_Create(self%sfc_K, self%N_Channels)
-   IF ( ANY(.NOT. CRTM_Surface_Associated(self%sfc_K)) ) THEN
-      message = 'Error allocating CRTM K-matrix Surface structure (setTraj)'
-      CALL Display_Message( PROGRAM_NAME, message, FAILURE )
-      STOP
-   END IF
+!   call CRTM_Surface_Create(self%sfc_K, self%N_Channels)
+!   IF ( ANY(.NOT. CRTM_Surface_Associated(self%sfc_K)) ) THEN
+!      message = 'Error allocating CRTM K-matrix Surface structure (setTraj)'
+!      CALL Display_Message( PROGRAM_NAME, message, FAILURE )
+!      STOP
+!   END IF
 
 
    !Assign the data from the GeoVaLs
@@ -209,6 +207,20 @@ type(CRTM_RTSolution_type), allocatable :: rts_K(:,:)
 !   call Load_Sfc_Data(self%N_PROFILES,self%N_LAYERS,self%N_Channels,geovals,sfc,chinfo,obss)
 !   call Load_Geom_Data(obss,geo)
 
+   IF (TRIM(self%rc%aerosol_option) /= "") &
+        &CALL load_aerosol_data(self%n_profiles,self%n_layers,geovals,&
+        &self%rc%aerosol_option,atm)
+
+   call CRTM_Atmosphere_Inspect(atm(12))
+
+   CALL CRTM_RTSolution_Create(rts, self%n_Layers )
+   CALL CRTM_RTSolution_Create(rts_k, self%n_Layers )
+
+   DO m = 1, self%n_Profiles
+      DO l = 1, self%N_Channels
+         rts_k(l,m)%layer_optical_depth = one
+      ENDDO
+   ENDDO
 
    ! Zero the K-matrix OUTPUT structures
    ! -----------------------------------
@@ -218,6 +230,7 @@ type(CRTM_RTSolution_type), allocatable :: rts_K(:,:)
 
    ! Inintialize the K-matrix INPUT so that the results are daero/dx
    ! -------------------------------------------------------------
+
 
    FORALL (m=1:self%N_PROFILES,l=1:self%N_Channels) rts_k(l,m)%layer_optical_depth = one
 
@@ -234,7 +247,6 @@ type(CRTM_RTSolution_type), allocatable :: rts_K(:,:)
       stop
    end if
 
-
    ! Deallocate the structures
    ! -------------------------
 !   call CRTM_Geometry_Destroy(geo)
@@ -242,6 +254,7 @@ type(CRTM_RTSolution_type), allocatable :: rts_K(:,:)
    call CRTM_RTSolution_Destroy(rts_K)
    call CRTM_RTSolution_Destroy(rts)
 !   call CRTM_Surface_Destroy(sfc)
+
 
 
    ! Deallocate all arrays
@@ -308,8 +321,7 @@ type(ufo_geoval), pointer :: tv_d
  ! ---------------
  hofx(:) = 0.0_kind_real
 
-
- PRINT *,'@@@1',SIZE(hofx),self%n_Profiles,self%n_Channels
+ PRINT *,'@@@2',SIZE(hofx),self%n_Profiles,self%n_Channels
  WRITE(err_msg,*) myname_, ' hofx size'
  CALL abor1_ftn(err_msg)
 
