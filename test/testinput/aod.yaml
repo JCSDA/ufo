@@ -21,11 +21,11 @@ Observations:
     ObsDataIn: 
      obsfile: "Data/aod_obs_2018041500_m.nc4"
    GeoVaLs: 
-    window_begin: "2018-04-14T21:00:00Z"
-    window_end: "2018-04-15T03:00:00Z"
     norm: "2673.32605458027"
     filename: "Data/aod_geoval_2018041500_m.nc4"
     random: 0
+    window_begin: "2018-04-14T21:00:00Z"
+    window_end: "2018-04-15T03:00:00Z"
    rmsequiv: "0.025691325227768444"
    tolerance: "999.999"
    ObsBias: {}
