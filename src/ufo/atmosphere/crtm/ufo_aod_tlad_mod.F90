@@ -231,7 +231,6 @@ type(CRTM_RTSolution_type), allocatable :: rts_K(:,:)
    ! Inintialize the K-matrix INPUT so that the results are daero/dx
    ! -------------------------------------------------------------
 
-
    FORALL (m=1:self%N_PROFILES,l=1:self%N_Channels) rts_k(l,m)%layer_optical_depth = one
 
    ! Call the K-matrix model
@@ -318,10 +317,14 @@ CHARACTER(MAXVARLEN), DIMENSION(self%rc%n_aerosols) :: var_aerosols
    call abor1_ftn(err_msg)
  endif
 
- CALL assign_aerosol_names(self%rc%aerosol_option,self%rc%n_aerosols,var_aerosols)
+ CALL assign_aerosol_names(self%rc%aerosol_option,var_aerosols)
+
+ PRINT *,'@@@1',var_aerosols
 
  ! Get aerosol_1 from geovals
  call ufo_geovals_get_var(geovals, var_aerosols(1), tv_d)
+
+
 
  ! Check model levels is consistent in geovals & crtm
  if (tv_d%nval /= self%n_Layers) then

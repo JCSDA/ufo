@@ -719,11 +719,10 @@ SUBROUTINE load_aerosol_data(n_profiles,n_layers,geovals,&
     
   END SUBROUTINE load_aerosol_data
 
-  SUBROUTINE assign_aerosol_names(aerosol_option,n_aerosols,var_aerosols)
+  SUBROUTINE assign_aerosol_names(aerosol_option,var_aerosols)
 
     CHARACTER(*), INTENT(in) :: aerosol_option
-    INTEGER, INTENT(in) :: n_aerosols
-    CHARACTER(MAXVARLEN), DIMENSION(n_aerosols), INTENT(out) :: var_aerosols
+    CHARACTER(*), INTENT(out) :: var_aerosols(:)
 
     CHARACTER(max_string) :: err_msg
 
