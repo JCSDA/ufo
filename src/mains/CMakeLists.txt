@@ -7,10 +7,3 @@ ecbuild_add_executable( TARGET  ufo_crtm.x
                         SOURCES ufoRunCRTM.cc
                         LIBS    ufo
                        )
-
-if ( ${RTTOV_FOUND} )
-  ecbuild_add_executable( TARGET  ufo_rttov.x
-                          SOURCES ufoRunRTTOV.cc
-                          LIBS    ufo
-                         )
-endif( ${RTTOV_FOUND} )
