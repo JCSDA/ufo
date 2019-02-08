@@ -88,7 +88,7 @@ type(c_ptr), value,       intent(in)    :: obss
 character(*), parameter :: PROGRAM_NAME = 'ufo_aod_tlad_mod.F90'
 character(255) :: message, version
 integer        :: err_stat, alloc_stat
-INTEGER        :: n, k1,l,m
+INTEGER        :: n,l,m
 type(ufo_geoval), pointer :: temp
 
 ! Define the "non-demoninational" arguments
@@ -211,16 +211,10 @@ type(CRTM_RTSolution_type), allocatable :: rts_K(:,:)
         &CALL load_aerosol_data(self%n_profiles,self%n_layers,geovals,&
         &self%rc%aerosol_option,atm)
 
-   call CRTM_Atmosphere_Inspect(atm(12))
+!   call CRTM_Atmosphere_Inspect(atm(1))
 
-   CALL CRTM_RTSolution_Create(rts, self%n_Layers )
-   CALL CRTM_RTSolution_Create(rts_k, self%n_Layers )
-
-   DO m = 1, self%n_Profiles
-      DO l = 1, self%N_Channels
-         rts_k(l,m)%layer_optical_depth = one
-      ENDDO
-   ENDDO
+   CALL CRTM_RTSolution_Create(rts, self%n_layers )
+   CALL CRTM_RTSolution_Create(rts_k, self%n_layers )
 
    ! Zero the K-matrix OUTPUT structures
    ! -----------------------------------
@@ -231,7 +225,7 @@ type(CRTM_RTSolution_type), allocatable :: rts_K(:,:)
    ! Inintialize the K-matrix INPUT so that the results are daero/dx
    ! -------------------------------------------------------------
 
-   FORALL (m=1:self%N_PROFILES,l=1:self%N_Channels) rts_k(l,m)%layer_optical_depth = one
+   FORALL (m=1:self%n_profiles,l=1:self%n_channels) rts_k(l,m)%layer_optical_depth = one
 
    ! Call the K-matrix model
    ! -----------------------
@@ -298,9 +292,79 @@ type(c_ptr), value,    intent(in)    :: obss
 character(len=*), parameter :: myname_="ufo_aod_simobs_tl"
 character(max_string) :: err_msg
 integer :: job, jprofile, jchannel, jlevel, jaero
-type(ufo_geoval), pointer :: tv_d
+type(ufo_geoval), pointer :: var_p
 
 CHARACTER(MAXVARLEN), DIMENSION(self%rc%n_aerosols) :: var_aerosols
+REAL(kind_real), DIMENSION(self%n_layers) :: ugkg_kgm2
+
+
+ ! Initial checks
+ ! --------------
+
+ ! Check if trajectory was set
+ if (.not. self%ltraj) then
+   write(err_msg,*) myname_, ' trajectory wasnt set!'
+   call abor1_ftn(err_msg)
+ endif
+
+ ! Check if nobs is consistent in geovals & hofx
+ if (geovals%nobs /= self%n_Profiles) then
+   write(err_msg,*) myname_, ' error: nobs inconsistent!'
+   call abor1_ftn(err_msg)
+ endif
+
+ call ufo_geovals_get_var(geovals, var_prs, var_p)
+
+ ! Check model levels is consistent in geovals & crtm
+ if (var_p%nval /= self%n_Layers) then
+   write(err_msg,*) myname_, ' error: layers inconsistent!'
+   call abor1_ftn(err_msg)
+ endif
+
+ CALL assign_aerosol_names(self%rc%aerosol_option,var_aerosols)
+
+ ! Initialize hofx
+ ! ---------------
+ hofx(:) = 0.0_kind_real
+
+ ! Multiply by Jacobian and add to hofx
+ job = 0
+ do jprofile = 1, self%n_profiles
+
+    CALL calculate_aero_layer_factor(geovals,jprofile,ugkg_kgm2)
+
+   do jchannel = 1, self%n_channels
+     job = job + 1
+     DO jaero = 1, self%rc%n_aerosols
+        CALL ufo_geovals_get_var(geovals, var_aerosols(jaero), var_p)
+        DO jlevel = 1, var_p%nval
+           hofx(job) = hofx(job) + &
+                self%atm_k(jchannel,jprofile)%aerosol(jaero)%concentration(jlevel) * var_p%vals(jlevel,jprofile)*ugkg_kgm2(jlevel)
+        ENDDO
+     ENDDO
+   enddo
+ enddo
+
+end subroutine ufo_aod_simobs_tl
+
+! ------------------------------------------------------------------------------
+
+subroutine ufo_aod_simobs_ad(self, geovals, hofx, obss)
+
+implicit none
+class(ufo_aod_tlad), intent(in) :: self
+type(ufo_geovals),     intent(inout) :: geovals
+real(c_double),           intent(in) :: hofx(:)
+type(c_ptr), value,    intent(in)    :: obss
+
+character(len=*), parameter :: myname_="ufo_aod_simobs_ad"
+character(max_string) :: err_msg
+integer :: job, jprofile, jchannel, jlevel
+type(ufo_geoval), pointer :: var_p
+
+CHARACTER(MAXVARLEN), DIMENSION(self%rc%n_aerosols) :: var_aerosols
+REAL(kind_real), DIMENSION(self%n_layers) :: ugkg_kgm2
+INTEGER :: jaero
 
  ! Initial checks
  ! --------------
@@ -319,85 +383,18 @@ CHARACTER(MAXVARLEN), DIMENSION(self%rc%n_aerosols) :: var_aerosols
 
  CALL assign_aerosol_names(self%rc%aerosol_option,var_aerosols)
 
- PRINT *,'@@@1',var_aerosols
+! var_p needs to be for each aerosol
 
- ! Get aerosol_1 from geovals
- call ufo_geovals_get_var(geovals, var_aerosols(1), tv_d)
-
-
-
- ! Check model levels is consistent in geovals & crtm
- if (tv_d%nval /= self%n_Layers) then
-   write(err_msg,*) myname_, ' error: layers inconsistent!'
-   call abor1_ftn(err_msg)
- endif
-
- ! Initialize hofx
- ! ---------------
- hofx(:) = 0.0_kind_real
-
- ! Multiply by Jacobian and add to hofx
- job = 0
- do jprofile = 1, self%n_profiles
-   do jchannel = 1, self%n_channels
-     job = job + 1
-     do jlevel = 1, tv_d%nval
-        DO jaero = 1, self%rc%n_aerosols
-           hofx(job) = hofx(job) + &
-                self%atm_k(jchannel,jprofile)%aerosol(jaero)%concentration(jlevel) * tv_d%vals(jlevel,jprofile)
-        ENDDO
-     enddo
-   enddo
- enddo
-
-
-end subroutine ufo_aod_simobs_tl
-
-! ------------------------------------------------------------------------------
-
-subroutine ufo_aod_simobs_ad(self, geovals, hofx, obss)
-
-implicit none
-class(ufo_aod_tlad), intent(in) :: self
-type(ufo_geovals),     intent(inout) :: geovals
-real(c_double),           intent(in) :: hofx(:)
-type(c_ptr), value,    intent(in)    :: obss
-
-character(len=*), parameter :: myname_="ufo_aod_simobs_ad"
-character(max_string) :: err_msg
-integer :: job, jprofile, jchannel, jlevel
-type(ufo_geoval), pointer :: tv_d
-
-
- ! Initial checks
- ! --------------
-
- ! Check if trajectory was set
- if (.not. self%ltraj) then
-   write(err_msg,*) myname_, ' trajectory wasnt set!'
-   call abor1_ftn(err_msg)
- endif
-
- ! Check if nobs is consistent in geovals & hofx
- if (geovals%nobs /= self%n_Profiles) then
-   write(err_msg,*) myname_, ' error: nobs inconsistent!'
-   call abor1_ftn(err_msg)
- endif
-
-
- ! Temperature
- ! -----------
-
- ! Get t from geovals
- call ufo_geovals_get_var(geovals, var_ts, tv_d)
-
- ! allocate if not yet allocated
- if (.not. allocated(tv_d%vals)) then
-    tv_d%nobs = self%n_Profiles
-    tv_d%nval = self%n_Layers
-    allocate(tv_d%vals(tv_d%nval,tv_d%nobs))
-    tv_d%vals = 0.0_kind_real
- endif
+ DO jaero=1,self%rc%n_aerosols
+    CALL ufo_geovals_get_var(geovals, var_aerosols(jaero), var_p)
+! allocate if not yet allocated
+    IF (.NOT. ALLOCATED(var_p%vals)) THEN
+       var_p%nobs = self%n_Profiles
+       var_p%nval = self%n_Layers
+       ALLOCATE(var_p%vals(var_p%nval,var_p%nobs))
+       var_p%vals = 0.0_kind_real
+    ENDIF
+ ENDDO
 
 
  ! Multiply by Jacobian and add to hofx (adjoint)
@@ -405,8 +402,8 @@ type(ufo_geoval), pointer :: tv_d
  do jprofile = 1, self%n_Profiles
    do jchannel = 1, self%n_Channels
      job = job + 1
-     do jlevel = 1, tv_d%nval
-       tv_d%vals(jlevel,jprofile) = tv_d%vals(jlevel,jprofile) + &
+     do jlevel = 1, var_p%nval
+       var_p%vals(jlevel,jprofile) = var_p%vals(jlevel,jprofile) + &
                                     self%atm_K(jchannel,jprofile)%Temperature(jlevel) * hofx(job)
      enddo
    enddo

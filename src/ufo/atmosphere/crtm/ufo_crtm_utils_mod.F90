@@ -31,6 +31,7 @@ public Load_Geom_Data
 PUBLIC Load_Aerosol_Data
 PUBLIC check_fwd
 public assign_aerosol_names
+public calculate_aero_layer_factor
 
 REAL(kind_real), PARAMETER :: &
      &rd = 2.8705e+2_kind_real,&
@@ -38,6 +39,7 @@ REAL(kind_real), PARAMETER :: &
      &eps_p1 = one+rd/rv,&
      &grav = 9.81_kind_real,&
      &aerosol_concentration_minvalue=1.e-16,&
+     &aerosol_concentration_minvalue_layer=1.e-23,& !ugkg_kgm2 of the order ~ 1.e-7
      &ozone_default_value=1.e-3 ! in ppmv in crtm
 
 INTEGER, PARAMETER, public :: min_crtm_n_absorbers = 2
@@ -57,6 +59,12 @@ type crtm_conf
  character(len=255) :: COEFFICIENT_PATH
  character(len=255) :: aerosol_option
 end type crtm_conf
+
+INTERFACE calculate_aero_layer_factor
+
+   MODULE PROCEDURE calculate_aero_layer_factor_atm, calculate_aero_layer_factor_geovals
+
+END INTERFACE
 
 contains
 
@@ -444,7 +452,6 @@ SUBROUTINE load_aerosol_data(n_profiles,n_layers,geovals,&
     TYPE(ufo_geoval), POINTER :: geoval
 
     REAL(kind_real), DIMENSION(n_layers,n_profiles) :: rh
-    REAL(kind_real) :: aerosol_concentration_minvalue_layer
 
     IF (TRIM(aerosol_option) == "aerosols_gocart_nasa") THEN
        varname=var_rh
@@ -483,10 +490,8 @@ SUBROUTINE load_aerosol_data(n_profiles,n_layers,geovals,&
 
       DO m=1,n_profiles
 
-         CALL calculate_aero_layer_factor(atm(m),n_layers,ugkg_kgm2)
+         CALL calculate_aero_layer_factor(atm(m),ugkg_kgm2)
  
-         aerosol_concentration_minvalue_layer=aerosol_concentration_minvalue*MINVAL(ugkg_kgm2)
-
          DO i=1,n_aerosols_gocart_nasa
 
             varname=var_aerosols_gocart_nasa(i)
@@ -604,9 +609,7 @@ SUBROUTINE load_aerosol_data(n_profiles,n_layers,geovals,&
 
       DO m=1,n_profiles
 
-         CALL calculate_aero_layer_factor(atm(m),n_layers,ugkg_kgm2)
-
-         aerosol_concentration_minvalue_layer=aerosol_concentration_minvalue*MINVAL(ugkg_kgm2)
+         CALL calculate_aero_layer_factor(atm(m),ugkg_kgm2)
 
          DO i=1,n_aerosols_gocart_esrl
             varname=var_aerosols_gocart_esrl(i)
@@ -720,7 +723,7 @@ SUBROUTINE load_aerosol_data(n_profiles,n_layers,geovals,&
   END SUBROUTINE load_aerosol_data
 
   SUBROUTINE assign_aerosol_names(aerosol_option,var_aerosols)
-
+    
     CHARACTER(*), INTENT(in) :: aerosol_option
     CHARACTER(*), INTENT(out) :: var_aerosols(:)
 
@@ -738,187 +741,217 @@ SUBROUTINE load_aerosol_data(n_profiles,n_layers,geovals,&
      END IF
 
    END SUBROUTINE assign_aerosol_names
+   
+   SUBROUTINE calculate_aero_layer_factor_atm(atm,ugkg_kgm2)
 
-  SUBROUTINE check_fwd(hofx,obss,n_profiles,n_channels,varname_tmplate)
+     TYPE(CRTM_atmosphere_type), INTENT(in) :: atm
+     REAL(kind_real), INTENT(out) :: ugkg_kgm2(:)
 
-    TYPE(c_ptr), value,       INTENT(in)    :: obss
-    INTEGER, INTENT(in) :: n_profiles,n_channels
-    CHARACTER(*), INTENT(in) :: varname_tmplate
-    REAL(kind_real), DIMENSION(*), INTENT(in) :: hofx
+     INTEGER :: k
 
-    REAL(kind_real), DIMENSION(n_profiles, n_channels) :: &
-         &obs, innovation, diff
-    REAL(kind_real), DIMENSION(n_channels) :: rmse
-    
-    CHARACTER(MAXVARLEN) :: varname
-    CHARACTER(MAXVARLEN) :: cinnovation="obs_minus_forecast_unadjusted"
+!rh, ug2kg need to be from top to bottom    
+!ug2kg && hPa2Pa
+     DO k=1,SIZE(ugkg_kgm2)
+!correct for mixing ratio factor ugkg_kgm2 
+!being calculated from dry pressure, cotton eq. (2.4)
+!p_dry=p_total/(1+1.61*mixing_ratio)
+        ugkg_kgm2(k)=1.0e-9_kind_real*(atm%Level_Pressure(k)-&
+             &atm%Level_Pressure(k-1))*100_kind_real/grav/&
+             &(one+eps_p1*atm%Absorber(k,1)*1.e-3_kind_real)
+     ENDDO
 
-    INTEGER :: i,l,m
+   END SUBROUTINE calculate_aero_layer_factor_atm
 
-    DO l = 1,n_Channels
-       CALL get_var_name(varname_tmplate,l,varname)
-       CALL obsspace_get_db(obss, "", varname, obs(:,l))
-       CALL get_var_name(cinnovation,l,varname)
-       CALL obsspace_get_db(obss, "", varname, innovation(:,l))
-    ENDDO
+   SUBROUTINE calculate_aero_layer_factor_geovals(geovals,jprofile,ugkg_kgm2)
 
-    rmse = 0_kind_real
+     TYPE(ufo_geovals), INTENT(in) :: geovals
+     INTEGER, INTENT(in) :: jprofile
+     REAL(kind_real), INTENT(out) :: ugkg_kgm2(:)
 
-    i = 1
+     TYPE(ufo_geoval), POINTER :: geoval
+     INTEGER :: k, n_layers
+     REAL(kind_real), ALLOCATABLE, DIMENSION(:) :: p,pl,mixr
 
-    DO m = 1, n_profiles
-       DO l = 1, n_channels
-          diff(m,l) = hofx(i) - (obs(m,l) - innovation(m,l))
-          rmse(l) = rmse(l) + diff(m,l)**2
-          i = i + 1
-       END DO
-    ENDDO
+     n_layers=SIZE(ugkg_kgm2)
 
-    rmse=SQRT(rmse/n_profiles)
+     ALLOCATE(p(n_layers),pl(n_layers+1),mixr(n_layers))
 
-    PRINT *,'N_profiles', N_PROFILES
-    DO l = 1, n_Channels
-       PRINT *, 'Channel: ',l
-       PRINT *, 'Max difference: ', MAXVAL(ABS(diff(:,l)))
-       PRINT *, 'RMSE: ', rmse(l)
-    ENDDO
+     CALL ufo_geovals_get_var(geovals, var_prs, geoval)
+     p=geoval%vals(:,jprofile)
+     CALL ufo_geovals_get_var(geovals, var_prsi, geoval)
+     pl=geoval%vals(:,jprofile)
+     CALL ufo_geovals_get_var(geovals, var_mixr, geoval)
+     mixr=geoval%vals(:,jprofile)
 
-  END SUBROUTINE check_fwd
-  
-  FUNCTION gocart_aerosol_size( itype, rh ) & ! rh input in 0-1
-       &RESULT(r_eff)   ! in micrometer
+!ug2kg && hPa2Pa
+     DO k=1,n_layers
+!correct for mixing ratio factor ugkg_kgm2 
+!being calculated from dry pressure, cotton eq. (2.4)
+!p_dry=p_total/(1+1.61*mixing_ratio)
+        ugkg_kgm2(k)=1.0e-9_kind_real*(pl(k)-pl(k-1))*100_kind_real/grav/&
+             &(one+eps_p1*mixr(k)*1.e-3_kind_real)
+     ENDDO
+
+     DEALLOCATE(p,pl,mixr)
+
+   END SUBROUTINE calculate_aero_layer_factor_geovals
+   
+   SUBROUTINE check_fwd(hofx,obss,n_profiles,n_channels,varname_tmplate)
+     
+     TYPE(c_ptr), value,       INTENT(in)    :: obss
+     INTEGER, INTENT(in) :: n_profiles,n_channels
+     CHARACTER(*), INTENT(in) :: varname_tmplate
+     REAL(kind_real), DIMENSION(*), INTENT(in) :: hofx
+
+     REAL(kind_real), DIMENSION(n_profiles, n_channels) :: &
+          &obs, innovation, diff
+     REAL(kind_real), DIMENSION(n_channels) :: rmse
+
+     CHARACTER(MAXVARLEN) :: varname
+     CHARACTER(MAXVARLEN) :: cinnovation="obs_minus_forecast_unadjusted"
+
+     INTEGER :: i,l,m
+
+     DO l = 1,n_Channels
+        CALL get_var_name(varname_tmplate,l,varname)
+        CALL obsspace_get_db(obss, "", varname, obs(:,l))
+        CALL get_var_name(cinnovation,l,varname)
+        CALL obsspace_get_db(obss, "", varname, innovation(:,l))
+     ENDDO
+
+     rmse = 0_kind_real
+
+     i = 1
+
+     DO m = 1, n_profiles
+        DO l = 1, n_channels
+           diff(m,l) = hofx(i) - (obs(m,l) - innovation(m,l))
+           rmse(l) = rmse(l) + diff(m,l)**2
+           i = i + 1
+        END DO
+     ENDDO
+
+     rmse=SQRT(rmse/n_profiles)
+
+     PRINT *,'N_profiles', N_PROFILES
+     DO l = 1, n_Channels
+        PRINT *, 'Channel: ',l
+        PRINT *, 'Max difference: ', MAXVAL(ABS(diff(:,l)))
+        PRINT *, 'RMSE: ', rmse(l)
+     ENDDO
+
+   END SUBROUTINE check_fwd
+
+   FUNCTION gocart_aerosol_size( itype, rh ) & ! rh input in 0-1
+        &RESULT(r_eff)   ! in micrometer
 
 !@mzp: will be modified as in NASA's
 
-    USE CRTM_aerosolcoeff, ONLY: aeroc
-    IMPLICIT NONE
+     USE CRTM_aerosolcoeff, ONLY: aeroc
+     IMPLICIT NONE
 
 !
 !   modified from a function provided by quanhua liu
 !
-    INTEGER ,INTENT(in) :: itype
-    REAL(kind_real)    ,INTENT(in) :: rh
+     INTEGER ,INTENT(in) :: itype
+     REAL(kind_real)    ,INTENT(in) :: rh
 
-    INTEGER :: j1,j2,m
-    REAL(kind_real)    :: h1
-    REAL(kind_real)    :: r_eff
+     INTEGER :: j1,j2,m
+     REAL(kind_real)    :: h1
+     REAL(kind_real)    :: r_eff
 
-    j2 = 0
-    IF ( rh <= aeroc%rh(1) ) THEN
-       j1 = 1
-    ELSE IF ( rh >= aeroc%rh(aeroc%n_rh) ) THEN
-       j1 = aeroc%n_rh
-    ELSE
-       DO m = 1, aeroc%n_rh-1
-          IF ( rh < aeroc%rh(m+1) .AND. rh > aeroc%rh(m) ) THEN
-             j1 = m
-             j2 = m+1
-             h1 = (rh-aeroc%rh(m))/(aeroc%rh(m+1)-aeroc%rh(m))
-             EXIT
-          ENDIF
-       ENDDO
-    ENDIF
+     j2 = 0
+     IF ( rh <= aeroc%rh(1) ) THEN
+        j1 = 1
+     ELSE IF ( rh >= aeroc%rh(aeroc%n_rh) ) THEN
+        j1 = aeroc%n_rh
+     ELSE
+        DO m = 1, aeroc%n_rh-1
+           IF ( rh < aeroc%rh(m+1) .AND. rh > aeroc%rh(m) ) THEN
+              j1 = m
+              j2 = m+1
+              h1 = (rh-aeroc%rh(m))/(aeroc%rh(m+1)-aeroc%rh(m))
+              EXIT
+           ENDIF
+        ENDDO
+     ENDIF
 
-    IF ( j2 == 0 ) THEN
-       r_eff = aeroc%reff(j1,itype )
-    ELSE
-       r_eff = (one-h1)*aeroc%reff(j1,itype ) + h1*aeroc%reff(j2,itype )
-    ENDIF
+     IF ( j2 == 0 ) THEN
+        r_eff = aeroc%reff(j1,itype )
+     ELSE
+        r_eff = (one-h1)*aeroc%reff(j1,itype ) + h1*aeroc%reff(j2,itype )
+     ENDIF
 
-    RETURN
+   END FUNCTION gocart_aerosol_size
 
-  END FUNCTION gocart_aerosol_size
 
-  SUBROUTINE calculate_aero_layer_factor(atm,n_layers,ugkg_kgm2)
+   FUNCTION upper2lower(str) RESULT(string)
 
-    TYPE(CRTM_atmosphere_type), INTENT(in) :: atm
-    INTEGER, INTENT(in) :: n_layers
-    REAL(kind_real), DIMENSION(n_layers), INTENT(out) :: ugkg_kgm2
+     IMPLICIT NONE
 
-    INTEGER :: k
+     CHARACTER(*), INTENT(in) :: str
+     CHARACTER(LEN(str))      :: string
 
-!rh, ug2kg need to be from top to bottom    
-!ug2kg && hPa2Pa
-    DO k=1,n_layers
-!correct for mixing ratio factor ugkg_kgm2 
-!being calculated from dry pressure, cotton eq. (2.4)
-!p_dry=p_total/(1+1.61*mixing_ratio)
-       ugkg_kgm2(k)=1.0e-9_kind_real*(atm%Level_Pressure(k)-&
-            &atm%Level_Pressure(k-1))*100_kind_real/grav/&
-            &(one+eps_p1*atm%Absorber(k,1)*1.e-3_kind_real)
-    ENDDO
-    
-    RETURN  
-  
-  END SUBROUTINE calculate_aero_layer_factor
+     INTEGER :: ic, i
 
-  FUNCTION upper2lower(str) RESULT(string)
-
-    IMPLICIT NONE
-
-    CHARACTER(*), INTENT(in) :: str
-    CHARACTER(LEN(str))      :: string
-
-    INTEGER :: ic, i
-
-    CHARACTER(26), PARAMETER :: upper = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
-    CHARACTER(26), PARAMETER :: lower = 'abcdefghijklmnopqrstuvwxyz'
+     CHARACTER(26), PARAMETER :: upper = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+     CHARACTER(26), PARAMETER :: lower = 'abcdefghijklmnopqrstuvwxyz'
 
 !   lowcase each letter if it is lowecase
-    string = str
-    DO i = 1, LEN_TRIM(str)
-       ic = INDEX(upper, str(i:i))
-       IF (ic > 0) string(i:i) = lower(ic:ic)
-    END DO
+     string = str
+     DO i = 1, LEN_TRIM(str)
+        ic = INDEX(upper, str(i:i))
+        IF (ic > 0) string(i:i) = lower(ic:ic)
+     END DO
 
-  END FUNCTION upper2lower
+   END FUNCTION upper2lower
 
-  FUNCTION lower2upper(str) RESULT (string)
+   FUNCTION lower2upper(str) RESULT (string)
 
-    IMPLICIT NONE
+     IMPLICIT NONE
 
-    CHARACTER(*), INTENT(in) :: str
-    CHARACTER(LEN(str))      :: string
+     CHARACTER(*), INTENT(in) :: str
+     CHARACTER(LEN(str))      :: string
 
-    INTEGER :: ic, i
+     INTEGER :: ic, i
 
-    CHARACTER(26), PARAMETER :: upper = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
-    CHARACTER(26), PARAMETER :: lower = 'abcdefghijklmnopqrstuvwxyz'
+     CHARACTER(26), PARAMETER :: upper = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+     CHARACTER(26), PARAMETER :: lower = 'abcdefghijklmnopqrstuvwxyz'
 
 !   lowcase each letter if it is lowecase
-    string = str
-    DO i = 1, LEN_TRIM(str)
-       ic = INDEX(lower, str(i:i))
-       IF (ic > 0) string(i:i) = upper(ic:ic)
-    END DO
+     string = str
+     DO i = 1, LEN_TRIM(str)
+        ic = INDEX(lower, str(i:i))
+        IF (ic > 0) string(i:i) = upper(ic:ic)
+     END DO
 
-  END FUNCTION lower2upper
+   END FUNCTION lower2upper
 
-  FUNCTION replace_text(s,text,rep) RESULT(outs) 
-    CHARACTER(*)        :: s,text,rep
-    CHARACTER(LEN(s)+100) :: outs  ! provide outs with extra 100 char len
-    INTEGER             :: i, nt, nr
+   FUNCTION replace_text(s,text,rep) RESULT(outs) 
+     CHARACTER(*)        :: s,text,rep
+     CHARACTER(LEN(s)+100) :: outs  ! provide outs with extra 100 char len
+     INTEGER             :: i, nt, nr
 
-    outs = s ; nt = LEN_TRIM(text) ; nr = LEN_TRIM(rep)
-    DO
-       i = INDEX(outs,text(:nt)) ; IF (i == 0) EXIT
-       outs = outs(:i-1) // rep(:nr) // outs(i+nt:)
-    END DO
+     outs = s ; nt = LEN_TRIM(text) ; nr = LEN_TRIM(rep)
+     DO
+        i = INDEX(outs,text(:nt)) ; IF (i == 0) EXIT
+        outs = outs(:i-1) // rep(:nr) // outs(i+nt:)
+     END DO
 
-  END FUNCTION replace_text
+   END FUNCTION replace_text
 
-  INTEGER FUNCTION getindex(names,usrname)
-    IMPLICIT NONE
-    CHARACTER(len=*),INTENT(in) :: names(:)
-    CHARACTER(len=*),INTENT(in) :: usrname
-    INTEGER i
-    getindex=-1
-    DO i=1,SIZE(names)
-       IF(TRIM(usrname)==TRIM(names(i))) THEN
-          getindex=i
-          EXIT
-       ENDIF
-    ENDDO
-  END FUNCTION getindex
+   INTEGER FUNCTION getindex(names,usrname)
+     IMPLICIT NONE
+     CHARACTER(len=*),INTENT(in) :: names(:)
+     CHARACTER(len=*),INTENT(in) :: usrname
+     INTEGER i
+     getindex=-1
+     DO i=1,SIZE(names)
+        IF(TRIM(usrname)==TRIM(names(i))) THEN
+           getindex=i
+           EXIT
+        ENDIF
+     ENDDO
+   END FUNCTION getindex
 
-END MODULE ufo_crtm_utils_mod
+ END MODULE ufo_crtm_utils_mod
