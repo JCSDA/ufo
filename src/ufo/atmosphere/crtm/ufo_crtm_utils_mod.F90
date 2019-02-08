@@ -29,8 +29,8 @@ public Load_Sfc_Data
 public Load_Geom_Data
 
 PUBLIC Load_Aerosol_Data
-
 PUBLIC check_fwd
+public assign_aerosol_names
 
 REAL(kind_real), PARAMETER :: &
      &rd = 2.8705e+2_kind_real,&
@@ -38,7 +38,7 @@ REAL(kind_real), PARAMETER :: &
      &eps_p1 = one+rd/rv,&
      &grav = 9.81_kind_real,&
      &aerosol_concentration_minvalue=1.e-16,&
-     &ozone_default_value=1.e-3
+     &ozone_default_value=1.e-3 ! in ppmv in crtm
 
 INTEGER, PARAMETER, public :: min_crtm_n_absorbers = 2
 
@@ -444,6 +444,7 @@ SUBROUTINE load_aerosol_data(n_profiles,n_layers,geovals,&
     TYPE(ufo_geoval), POINTER :: geoval
 
     REAL(kind_real), DIMENSION(n_layers,n_profiles) :: rh
+    REAL(kind_real) :: aerosol_concentration_minvalue_layer
 
     IF (TRIM(aerosol_option) == "aerosols_gocart_nasa") THEN
        varname=var_rh
@@ -483,14 +484,16 @@ SUBROUTINE load_aerosol_data(n_profiles,n_layers,geovals,&
       DO m=1,n_profiles
 
          CALL calculate_aero_layer_factor(atm(m),n_layers,ugkg_kgm2)
-         
+ 
+         aerosol_concentration_minvalue_layer=aerosol_concentration_minvalue*MINVAL(ugkg_kgm2)
+
          DO i=1,n_aerosols_gocart_nasa
 
             varname=var_aerosols_gocart_nasa(i)
             CALL ufo_geovals_get_var(geovals,varname, geoval)
 
             atm(m)%aerosol(i)%Concentration(1:n_layers)=&
-                 &MAX(geoval%vals(:,m)*ugkg_kgm2,aerosol_concentration_minvalue)
+                 &MAX(geoval%vals(:,m)*ugkg_kgm2,aerosol_concentration_minvalue_layer)
 
             SELECT CASE ( TRIM(varname))
             CASE ('sulf')
@@ -603,12 +606,14 @@ SUBROUTINE load_aerosol_data(n_profiles,n_layers,geovals,&
 
          CALL calculate_aero_layer_factor(atm(m),n_layers,ugkg_kgm2)
 
+         aerosol_concentration_minvalue_layer=aerosol_concentration_minvalue*MINVAL(ugkg_kgm2)
+
          DO i=1,n_aerosols_gocart_esrl
             varname=var_aerosols_gocart_esrl(i)
             CALL ufo_geovals_get_var(geovals,varname, geoval)
 
             atm(m)%aerosol(i)%Concentration(1:n_layers)=&
-                 &MAX(geoval%vals(:,m)*ugkg_kgm2,aerosol_concentration_minvalue)
+                 &MAX(geoval%vals(:,m)*ugkg_kgm2,aerosol_concentration_minvalue_layer)
 
             SELECT CASE ( TRIM(varname))
             CASE ('sulf')
@@ -713,6 +718,27 @@ SUBROUTINE load_aerosol_data(n_profiles,n_layers,geovals,&
     END SUBROUTINE assign_other
     
   END SUBROUTINE load_aerosol_data
+
+  SUBROUTINE assign_aerosol_names(aerosol_option,n_aerosols,var_aerosols)
+
+    CHARACTER(*), INTENT(in) :: aerosol_option
+    INTEGER, INTENT(in) :: n_aerosols
+    CHARACTER(MAXVARLEN), DIMENSION(n_aerosols), INTENT(out) :: var_aerosols
+
+    CHARACTER(max_string) :: err_msg
+
+    IF (aerosol_option == "aerosols_gocart_nasa") THEN
+       var_aerosols=var_aerosols_gocart_nasa
+    ELSEIF (aerosol_option == "aerosols_gocart_esrl") THEN
+       var_aerosols=var_aerosols_gocart_esrl
+    ELSEIF (aerosol_option == "var_aerosols_other") THEN
+       var_aerosols=var_aerosols_other
+    ELSE
+       WRITE(err_msg,*) 'assign_aerosol_names: aerosol_option not implemented '//TRIM(aerosol_option)
+        call abor1_ftn(err_msg)
+     END IF
+
+   END SUBROUTINE assign_aerosol_names
 
   SUBROUTINE check_fwd(hofx,obss,n_profiles,n_channels,varname_tmplate)
 

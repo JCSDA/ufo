@@ -298,9 +298,10 @@ type(c_ptr), value,    intent(in)    :: obss
 
 character(len=*), parameter :: myname_="ufo_aod_simobs_tl"
 character(max_string) :: err_msg
-integer :: job, jprofile, jchannel, jlevel
+integer :: job, jprofile, jchannel, jlevel, jaero
 type(ufo_geoval), pointer :: tv_d
 
+CHARACTER(MAXVARLEN), DIMENSION(self%rc%n_aerosols) :: var_aerosols
 
  ! Initial checks
  ! --------------
@@ -317,20 +318,10 @@ type(ufo_geoval), pointer :: tv_d
    call abor1_ftn(err_msg)
  endif
 
- ! Initialize hofx
- ! ---------------
- hofx(:) = 0.0_kind_real
+ CALL assign_aerosol_names(self%rc%aerosol_option,self%rc%n_aerosols,var_aerosols)
 
- PRINT *,'@@@2',SIZE(hofx),self%n_Profiles,self%n_Channels
- WRITE(err_msg,*) myname_, ' hofx size'
- CALL abor1_ftn(err_msg)
-
-
- ! Temperature
- ! -----------
-
- ! Get t from geovals
- call ufo_geovals_get_var(geovals, var_ts, tv_d)
+ ! Get aerosol_1 from geovals
+ call ufo_geovals_get_var(geovals, var_aerosols(1), tv_d)
 
  ! Check model levels is consistent in geovals & crtm
  if (tv_d%nval /= self%n_Layers) then
@@ -338,14 +329,20 @@ type(ufo_geoval), pointer :: tv_d
    call abor1_ftn(err_msg)
  endif
 
+ ! Initialize hofx
+ ! ---------------
+ hofx(:) = 0.0_kind_real
+
  ! Multiply by Jacobian and add to hofx
  job = 0
- do jprofile = 1, self%n_Profiles
-   do jchannel = 1, self%n_Channels
+ do jprofile = 1, self%n_profiles
+   do jchannel = 1, self%n_channels
      job = job + 1
      do jlevel = 1, tv_d%nval
-       hofx(job) = hofx(job) + &
-                    self%atm_K(jchannel,jprofile)%Temperature(jlevel) * tv_d%vals(jlevel,jprofile)
+        DO jaero = 1, self%rc%n_aerosols
+           hofx(job) = hofx(job) + &
+                self%atm_k(jchannel,jprofile)%aerosol(jaero)%concentration(jlevel) * tv_d%vals(jlevel,jprofile)
+        ENDDO
      enddo
    enddo
  enddo

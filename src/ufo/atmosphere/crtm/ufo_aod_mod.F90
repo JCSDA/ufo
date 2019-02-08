@@ -206,7 +206,7 @@ TYPE(CRTM_RTSolution_type), ALLOCATABLE :: rts_K(:,:)
 
    ! Call THE CRTM inspection
    ! ------------------------
-   call CRTM_Atmosphere_Inspect(atm(12))
+   call CRTM_Atmosphere_Inspect(atm(1))
 !   call CRTM_Surface_Inspect(sfc(12))
 !   call CRTM_Geometry_Inspect(geo(12))
    call CRTM_ChannelInfo_Inspect(chinfo(1))
@@ -241,15 +241,12 @@ TYPE(CRTM_RTSolution_type), ALLOCATABLE :: rts_K(:,:)
    hofx(:) = 0.0_kind_real
    i = 1
 
-   do m = 1, n_Profiles
-     do l = 1, N_Channels
-
-       hofx(i) = SUM(rts(l,m)%layer_optical_depth)
-
-       i = i + 1
-
-     end do
-   end do
+   DO m = 1, n_profiles
+      DO l = 1, n_channels
+         hofx(i) = SUM(rts(l,m)%layer_optical_depth)
+         i = i + 1
+      END DO
+   END DO
 
    CALL check_fwd(hofx,obss,n_profiles, n_channels,varname_tmplate)
 
