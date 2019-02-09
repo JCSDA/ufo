@@ -30,7 +30,7 @@ static LinearObsOperatorMaker<ObsAodTLAD> makerAodTL_("Aod");
 ObsAodTLAD::ObsAodTLAD(const ioda::ObsSpace & odb, const eckit::Configuration & config)
   : keyOperAod_(0), varin_(), odb_(odb)
 {
-  const std::vector<std::string> vv{"air_temperature", "humidity_mixing_ratio", "relative_humidity",
+  const std::vector<std::string> vv{"humidity_mixing_ratio",
       "air_pressure", "air_pressure_levels",
       "sulf", "bc1", "bc2", "oc1", "oc2", "dust1", "dust2", "dust3", "dust4", "dust5",
       "seas1", "seas2", "seas3", "seas4"};

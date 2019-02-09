@@ -383,8 +383,6 @@ INTEGER :: jaero
 
  CALL assign_aerosol_names(self%rc%aerosol_option,var_aerosols)
 
-! var_p needs to be for each aerosol
-
  DO jaero=1,self%rc%n_aerosols
     CALL ufo_geovals_get_var(geovals, var_aerosols(jaero), var_p)
 ! allocate if not yet allocated
@@ -394,21 +392,21 @@ INTEGER :: jaero
        ALLOCATE(var_p%vals(var_p%nval,var_p%nobs))
        var_p%vals = 0.0_kind_real
     ENDIF
+
+! Multiply by Jacobian and add to hofx (adjoint)
+    job = 0
+    DO jprofile = 1, self%n_Profiles
+       CALL calculate_aero_layer_factor(geovals,jprofile,ugkg_kgm2)
+       DO jchannel = 1, self%n_Channels
+          job = job + 1
+          DO jlevel = 1, var_p%nval
+             var_p%vals(jlevel,jprofile) = var_p%vals(jlevel,jprofile) + &
+                  self%atm_K(jchannel,jprofile)%aerosol(jaero)%concentration(jlevel) * hofx(job) !? /ugkg_kgm2(jlevel)
+          ENDDO
+       ENDDO
+    ENDDO
+
  ENDDO
-
-
- ! Multiply by Jacobian and add to hofx (adjoint)
- job = 0
- do jprofile = 1, self%n_Profiles
-   do jchannel = 1, self%n_Channels
-     job = job + 1
-     do jlevel = 1, var_p%nval
-       var_p%vals(jlevel,jprofile) = var_p%vals(jlevel,jprofile) + &
-                                    self%atm_K(jchannel,jprofile)%Temperature(jlevel) * hofx(job)
-     enddo
-   enddo
- enddo
-
 
  ! Once all geovals set replace flag
  ! ---------------------------------
