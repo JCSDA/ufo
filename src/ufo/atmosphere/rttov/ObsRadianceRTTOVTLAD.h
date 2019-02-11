@@ -5,18 +5,18 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#ifndef UFO_ATMOSPHERE_CRTM_OBSRADIANCETLAD_H_
-#define UFO_ATMOSPHERE_CRTM_OBSRADIANCETLAD_H_
+#ifndef UFO_ATMOSPHERE_RTTOV_OBSRADIANCERTTOVTLAD_H_
+#define UFO_ATMOSPHERE_RTTOV_OBSRADIANCERTTOVTLAD_H_
 
 #include <ostream>
 #include <string>
-#include <vector>
 
 #include <boost/scoped_ptr.hpp>
 
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
-#include "ufo/atmosphere/crtm/ObsRadianceTLAD.interface.h"
+
+#include "ufo/atmosphere/rttov/ObsRadianceRTTOVTLAD.interface.h"
 #include "ufo/LinearObsOperatorBase.h"
 
 // Forward declarations
@@ -35,14 +35,14 @@ namespace ufo {
   class ObsBiasIncrement;
 
 // -----------------------------------------------------------------------------
-/// Radiance (currently only temperature) observation for UFO.
-class ObsRadianceTLAD : public LinearObsOperatorBase,
-                        private util::ObjectCounter<ObsRadianceTLAD> {
+/// RadianceRTTOV TL/AD observation operator class
+class ObsRadianceRTTOVTLAD : public LinearObsOperatorBase,
+                       private util::ObjectCounter<ObsRadianceRTTOVTLAD> {
  public:
-  static const std::string classname() {return "ufo::ObsRadianceTLAD";}
+  static const std::string classname() {return "ufo::ObsRadianceRTTOVTLAD";}
 
-  ObsRadianceTLAD(const ioda::ObsSpace &, const eckit::Configuration &);
-  virtual ~ObsRadianceTLAD();
+  ObsRadianceRTTOVTLAD(const ioda::ObsSpace &, const eckit::Configuration &);
+  virtual ~ObsRadianceRTTOVTLAD();
 
   // Obs Operators
   void setTrajectory(const GeoVaLs &, const ObsBias &);
@@ -52,18 +52,17 @@ class ObsRadianceTLAD : public LinearObsOperatorBase,
   // Other
   const oops::Variables & variables() const {return *varin_;}
 
-  int & toFortran() {return keyOperRadiance_;}
-  const int & toFortran() const {return keyOperRadiance_;}
+  int & toFortran() {return keyOper_;}
+  const int & toFortran() const {return keyOper_;}
 
  private:
   void print(std::ostream &) const;
-  F90hop keyOperRadiance_;
+  F90hop keyOper_;
   const ioda::ObsSpace& odb_;
   boost::scoped_ptr<const oops::Variables> varin_;
-  std::vector<int> channels_;
 };
 
 // -----------------------------------------------------------------------------
 
 }  // namespace ufo
-#endif  // UFO_ATMOSPHERE_CRTM_OBSRADIANCETLAD_H_
+#endif  // UFO_ATMOSPHERE_RTTOV_OBSRADIANCERTTOVTLAD_H_

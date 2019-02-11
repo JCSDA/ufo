@@ -3,9 +3,9 @@
 ! This software is licensed under the terms of the Apache Licence Version 2.0
 ! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 
-!> Fortran module to handle tl/ad for radiance observations
+!> Fortran module to handle tl/ad for radiancecrtm observations
 
-module ufo_radiance_tlad_mod
+module ufo_radiancecrtm_tlad_mod
 
  use iso_c_binding
  use config_mod
@@ -20,8 +20,8 @@ module ufo_radiance_tlad_mod
  implicit none
  private
 
- !> Fortran derived type for radiance trajectory
- type, public :: ufo_radiance_tlad
+ !> Fortran derived type for radiancecrtm trajectory
+ type, public :: ufo_radiancecrtm_tlad
  private
   type(crtm_conf) :: conf
   integer :: n_Profiles
@@ -31,33 +31,33 @@ module ufo_radiance_tlad_mod
   type(CRTM_Surface_type), allocatable :: sfc_K(:,:)
   logical :: ltraj
  contains
-  procedure :: setup  => ufo_radiance_tlad_setup
-  procedure :: delete  => ufo_radiance_tlad_delete
-  procedure :: settraj => ufo_radiance_tlad_settraj
-  procedure :: simobs_tl  => ufo_radiance_simobs_tl
-  procedure :: simobs_ad  => ufo_radiance_simobs_ad
- end type ufo_radiance_tlad
+  procedure :: setup  => ufo_radiancecrtm_tlad_setup
+  procedure :: delete  => ufo_radiancecrtm_tlad_delete
+  procedure :: settraj => ufo_radiancecrtm_tlad_settraj
+  procedure :: simobs_tl  => ufo_radiancecrtm_simobs_tl
+  procedure :: simobs_ad  => ufo_radiancecrtm_simobs_ad
+ end type ufo_radiancecrtm_tlad
 
 contains
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_radiance_tlad_setup(self, c_conf)
+subroutine ufo_radiancecrtm_tlad_setup(self, c_conf)
 
 implicit none
-class(ufo_radiance_tlad), intent(inout) :: self
+class(ufo_radiancecrtm_tlad), intent(inout) :: self
 type(c_ptr),              intent(in)    :: c_conf
 
  call crtm_conf_setup(self%conf,c_conf)
 
-end subroutine ufo_radiance_tlad_setup
+end subroutine ufo_radiancecrtm_tlad_setup
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_radiance_tlad_delete(self)
+subroutine ufo_radiancecrtm_tlad_delete(self)
 
 implicit none
-class(ufo_radiance_tlad), intent(inout) :: self
+class(ufo_radiancecrtm_tlad), intent(inout) :: self
 
  self%ltraj = .false.
  call crtm_conf_delete(self%conf)
@@ -72,21 +72,21 @@ class(ufo_radiance_tlad), intent(inout) :: self
    deallocate(self%sfc_k)
  endif
 
-end subroutine ufo_radiance_tlad_delete
+end subroutine ufo_radiancecrtm_tlad_delete
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_radiance_tlad_settraj(self, geovals, obss, channels)
+subroutine ufo_radiancecrtm_tlad_settraj(self, geovals, obss, channels)
 
 implicit none
 
-class(ufo_radiance_tlad), intent(inout) :: self
+class(ufo_radiancecrtm_tlad), intent(inout) :: self
 type(ufo_geovals),        intent(in)    :: geovals
 type(c_ptr), value,       intent(in)    :: obss
 integer(c_int),           intent(in)    :: channels(:)  !List of channels to use
 
 ! Local Variables
-character(*), parameter :: PROGRAM_NAME = 'ufo_radiance_mod.F90'
+character(*), parameter :: PROGRAM_NAME = 'ufo_radiancecrtm_mod.F90'
 character(255) :: message, version
 integer        :: err_stat, alloc_stat
 integer        :: n, k1
@@ -288,20 +288,20 @@ type(CRTM_RTSolution_type), allocatable :: rts_K(:,:)
  ! ------------------------------------
  self%ltraj = .true.
 
-end subroutine ufo_radiance_tlad_settraj
+end subroutine ufo_radiancecrtm_tlad_settraj
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_radiance_simobs_tl(self, geovals, obss, hofx, channels)
+subroutine ufo_radiancecrtm_simobs_tl(self, geovals, obss, hofx, channels)
 
 implicit none
-class(ufo_radiance_tlad), intent(in)    :: self
+class(ufo_radiancecrtm_tlad), intent(in)    :: self
 type(ufo_geovals),        intent(in)    :: geovals
 type(c_ptr), value,       intent(in)    :: obss
 real(c_double),           intent(inout) :: hofx(:)
 integer(c_int),           intent(in)    :: channels(:)  !List of channels to use
 
-character(len=*), parameter :: myname_="ufo_radiance_simobs_tl"
+character(len=*), parameter :: myname_="ufo_radiancecrtm_simobs_tl"
 character(max_string) :: err_msg
 integer :: job, jprofile, jchannel, jlevel
 type(ufo_geoval), pointer :: tv_d
@@ -352,21 +352,21 @@ type(ufo_geoval), pointer :: tv_d
  enddo
 
 
-end subroutine ufo_radiance_simobs_tl
+end subroutine ufo_radiancecrtm_simobs_tl
 
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_radiance_simobs_ad(self, geovals, obss, hofx, channels)
+subroutine ufo_radiancecrtm_simobs_ad(self, geovals, obss, hofx, channels)
 
 implicit none
-class(ufo_radiance_tlad), intent(in)    :: self
+class(ufo_radiancecrtm_tlad), intent(in)    :: self
 type(ufo_geovals),        intent(inout) :: geovals
 type(c_ptr), value,       intent(in)    :: obss
 real(c_double),           intent(in)    :: hofx(:)
 integer(c_int),           intent(in)    :: channels(:)  !List of channels to use
 
-character(len=*), parameter :: myname_="ufo_radiance_simobs_ad"
+character(len=*), parameter :: myname_="ufo_radiancecrtm_simobs_ad"
 character(max_string) :: err_msg
 integer :: job, jprofile, jchannel, jlevel
 type(ufo_geoval), pointer :: tv_d
@@ -421,8 +421,8 @@ type(ufo_geoval), pointer :: tv_d
  if (.not. geovals%linit ) geovals%linit=.true.
 
 
-end subroutine ufo_radiance_simobs_ad
+end subroutine ufo_radiancecrtm_simobs_ad
 
 ! ------------------------------------------------------------------------------
 
-end module ufo_radiance_tlad_mod
+end module ufo_radiancecrtm_tlad_mod

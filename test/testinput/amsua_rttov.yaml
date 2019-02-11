@@ -5,17 +5,13 @@ window_end: "2018-04-15T03:00:00Z"
 LinearObsOpTest: 
  testiterTL: 10
  toleranceTL: "1.0e-10"
- toleranceAD: "1.0e-11"
+ toleranceAD: "1.0e-12"
 Observations: 
  ObsTypes: 
- - ObsType: "AMSU-A"
-   channels: "1-6,9-13,15"
+ - ObsType: "RTTOV"
+   channels: "1-15"
    ObsOptions: 
-    n_Absorbers: 3
-    n_Clouds: 2
-    n_Aerosols: 0
-    Sensor_ID: amsua_n19
-    EndianType: little_endian
+    Sensor_ID: noaa_19_amsua
     CoefficientPath: "Data/"
    ObsData: 
     ObsDataIn: 
@@ -26,6 +22,6 @@ Observations:
     random: 0
     window_begin: "2018-04-14T21:00:00Z"
     window_end: "2018-04-15T03:00:00Z"
-   rmsequiv: "232.54571375224393"
+   rmsequiv: "227.00372268124545"
    tolerance: "1.e-8"
    ObsBias: {} 

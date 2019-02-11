@@ -3,9 +3,9 @@
 ! This software is licensed under the terms of the Apache Licence Version 2.0
 ! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 
-!> Fortran module to handle radiance observations
+!> Fortran module to handle radiancecrtm observations
 
-module ufo_radiance_mod
+module ufo_radiancecrtm_mod
 
  use iso_c_binding
  use config_mod
@@ -20,15 +20,15 @@ module ufo_radiance_mod
  implicit none
  private
 
- !> Fortran derived type for radiance trajectory
- type, public :: ufo_radiance
+ !> Fortran derived type for radiancecrtm trajectory
+ type, public :: ufo_radiancecrtm
  private
   type(crtm_conf) :: conf
  contains
-   procedure :: setup  => ufo_radiance_setup
-   procedure :: delete => ufo_radiance_delete
-   procedure :: simobs => ufo_radiance_simobs
- end type ufo_radiance
+   procedure :: setup  => ufo_radiancecrtm_setup
+   procedure :: delete => ufo_radiancecrtm_delete
+   procedure :: simobs => ufo_radiancecrtm_simobs
+ end type ufo_radiancecrtm
 
  CHARACTER(MAXVARLEN), PARAMETER :: varname_tmplate="brightness_temperature"
 
@@ -36,40 +36,40 @@ contains
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_radiance_setup(self, c_conf)
+subroutine ufo_radiancecrtm_setup(self, c_conf)
 
 implicit none
-class(ufo_radiance), intent(inout) :: self
+class(ufo_radiancecrtm), intent(inout) :: self
 type(c_ptr),         intent(in)    :: c_conf
 
  call crtm_conf_setup(self%conf,c_conf)
 
-end subroutine ufo_radiance_setup
+end subroutine ufo_radiancecrtm_setup
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_radiance_delete(self)
+subroutine ufo_radiancecrtm_delete(self)
 
 implicit none
-class(ufo_radiance), intent(inout) :: self
+class(ufo_radiancecrtm), intent(inout) :: self
 
  call crtm_conf_delete(self%conf)
 
-end subroutine ufo_radiance_delete
+end subroutine ufo_radiancecrtm_delete
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_radiance_simobs(self, geovals, hofx, obss, channels)
+subroutine ufo_radiancecrtm_simobs(self, geovals, hofx, obss, channels)
 
 implicit none
-class(ufo_radiance),      intent(in) :: self         !Radiance object
+class(ufo_radiancecrtm),      intent(in) :: self         !Radiance object
 type(ufo_geovals),        intent(in) :: geovals      !Inputs from the model
 real(c_double),        intent(inout) :: hofx(:)      !h(x) to return
 type(c_ptr), value,       intent(in) :: obss         !ObsSpace
 integer(c_int),           intent(in) :: channels(:)  !List of channels to use
 
 ! Local Variables
-character(*), parameter :: PROGRAM_NAME = 'ufo_radiance_mod.F90'
+character(*), parameter :: PROGRAM_NAME = 'ufo_radiancecrtm_mod.F90'
 character(255) :: message, version
 integer        :: err_stat, alloc_stat
 integer        :: l, m, n, i, s
@@ -254,8 +254,8 @@ type(CRTM_RTSolution_type), allocatable :: rts(:,:)
     stop
  end if
 
-end subroutine ufo_radiance_simobs
+end subroutine ufo_radiancecrtm_simobs
 
 ! ------------------------------------------------------------------------------
 
-end module ufo_radiance_mod
+end module ufo_radiancecrtm_mod

@@ -4,16 +4,16 @@
 # which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 
 set ( crtm_files
-  ObsRadiance.h
-  ObsRadiance.cc
-  ObsRadianceTLAD.h
-  ObsRadianceTLAD.cc
-  ObsRadiance.interface.F90
-  ObsRadiance.interface.h
-  ObsRadianceTLAD.interface.F90
-  ObsRadianceTLAD.interface.h
-  ufo_radiance_mod.F90
-  ufo_radiance_tlad_mod.F90
+  ObsRadianceCRTM.h
+  ObsRadianceCRTM.cc
+  ObsRadianceCRTMTLAD.h
+  ObsRadianceCRTMTLAD.cc
+  ObsRadianceCRTM.interface.F90
+  ObsRadianceCRTM.interface.h
+  ObsRadianceCRTMTLAD.interface.F90
+  ObsRadianceCRTMTLAD.interface.h
+  ufo_radiancecrtm_mod.F90
+  ufo_radiancecrtm_tlad_mod.F90
   ufo_crtm_utils_mod.F90
   ObsAod.h
   ObsAod.cc
