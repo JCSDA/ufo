@@ -62,8 +62,7 @@ end type crtm_conf
 
 INTERFACE calculate_aero_layer_factor
 
-   MODULE PROCEDURE calculate_aero_layer_factor_atm_profile, calculate_aero_layer_factor_geovals,&
-        &calculate_aero_layer_factor_atm
+   MODULE PROCEDURE calculate_aero_layer_factor_atm, calculate_aero_layer_factor_geovals
 
 END INTERFACE
 
@@ -743,7 +742,7 @@ SUBROUTINE load_aerosol_data(n_profiles,n_layers,geovals,&
 
    END SUBROUTINE assign_aerosol_names
    
-   SUBROUTINE calculate_aero_layer_factor_atm_profile(atm,ugkg_kgm2)
+   SUBROUTINE calculate_aero_layer_factor_atm(atm,ugkg_kgm2)
 
      TYPE(CRTM_atmosphere_type), INTENT(in) :: atm
      REAL(kind_real), INTENT(out) :: ugkg_kgm2(:)
@@ -761,28 +760,6 @@ SUBROUTINE load_aerosol_data(n_profiles,n_layers,geovals,&
              &(one+eps_p1*atm%Absorber(k,1)*1.e-3_kind_real)
      ENDDO
 
-   END SUBROUTINE calculate_aero_layer_factor_atm_profile
-
-   SUBROUTINE calculate_aero_layer_factor_atm(atm,ugkg_kgm2)
-
-     TYPE(CRTM_atmosphere_type), INTENT(in) :: atm(:)
-     REAL(kind_real), INTENT(out) :: ugkg_kgm2(:,:)
-
-     INTEGER :: k,m
-
-!rh, ug2kg need to be from top to bottom    
-!ug2kg && hPa2Pa
-     DO k=1,SIZE(ugkg_kgm2,1)
-        DO m=1,SIZE(ugkg_kgm2,2)
-!correct for mixing ratio factor ugkg_kgm2 
-!being calculated from dry pressure, cotton eq. (2.4)
-!p_dry=p_total/(1+1.61*mixing_ratio)
-           ugkg_kgm2(k,m)=1.0e-9_kind_real*(atm(m)%Level_Pressure(k)-&
-                &atm(m)%Level_Pressure(k-1))*100_kind_real/grav/&
-                &(one+eps_p1*atm(m)%Absorber(k,1)*1.e-3_kind_real)
-        ENDDO
-     ENDDO
-     
    END SUBROUTINE calculate_aero_layer_factor_atm
 
    SUBROUTINE calculate_aero_layer_factor_geovals(geovals,jprofile,ugkg_kgm2)

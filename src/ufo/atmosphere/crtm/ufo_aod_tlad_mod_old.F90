@@ -30,7 +30,6 @@ module ufo_aod_tlad_mod
   integer :: n_Channels
   type(CRTM_Atmosphere_type), allocatable :: atm_K(:,:)
   type(CRTM_Surface_type), allocatable :: sfc_K(:,:)
-  REAL(kind_real), allocatable  :: ugkg_kgm2(:,:)  
  contains
   procedure :: setup  => ufo_aod_tlad_setup
   procedure :: delete  => ufo_aod_tlad_delete
@@ -72,11 +71,6 @@ class(ufo_aod_tlad), intent(inout) :: self
    call CRTM_Surface_Destroy(self%sfc_K)
    deallocate(self%sfc_k)
  endif
-
- IF (ALLOCATED(self%ugkg_kgm2)) THEN
-   deallocate(self%ugkg_kgm2)
- endif
-
 
 end subroutine ufo_aod_tlad_delete
 
@@ -160,7 +154,6 @@ type(CRTM_RTSolution_type), allocatable :: rts_K(:,:)
              rts( self%N_Channels, self%n_Profiles )        , &
              self%atm_K( self%N_Channels, self%n_Profiles ) , &
              self%sfc_K( self%N_Channels, self%n_Profiles ) , &
-             self%ugkg_kgm2(self%n_Layers,self%n_Profiles ) , &
              rts_K( self%N_Channels, self%n_Profiles )      , &
              STAT = alloc_stat                                )
    if ( alloc_stat /= 0 ) THEN
@@ -228,12 +221,11 @@ type(CRTM_RTSolution_type), allocatable :: rts_K(:,:)
    call CRTM_Atmosphere_Zero( self%atm_K )
 !   call CRTM_Surface_Zero( self%sfc_K )
 
-   CALL calculate_aero_layer_factor(atm,self%ugkg_kgm2)
 
    ! Inintialize the K-matrix INPUT so that the results are daero/dx
    ! -------------------------------------------------------------
 
-   FORALL (l=1:self%n_channels,m=1:self%n_profiles) rts_k(l,m)%layer_optical_depth = one
+   FORALL (m=1:self%n_profiles,l=1:self%n_channels) rts_k(l,m)%layer_optical_depth = one
 
    ! Call the K-matrix model
    ! -----------------------
@@ -303,6 +295,8 @@ integer :: job, jprofile, jchannel, jlevel, jaero
 type(ufo_geoval), pointer :: var_p
 
 CHARACTER(MAXVARLEN), DIMENSION(self%rc%n_aerosols) :: var_aerosols
+REAL(kind_real), DIMENSION(self%n_layers) :: ugkg_kgm2
+
 
  ! Initial checks
  ! --------------
@@ -337,13 +331,15 @@ CHARACTER(MAXVARLEN), DIMENSION(self%rc%n_aerosols) :: var_aerosols
  job = 0
  do jprofile = 1, self%n_profiles
 
+    CALL calculate_aero_layer_factor(geovals,jprofile,ugkg_kgm2)
+
    do jchannel = 1, self%n_channels
      job = job + 1
      DO jaero = 1, self%rc%n_aerosols
         CALL ufo_geovals_get_var(geovals, var_aerosols(jaero), var_p)
         DO jlevel = 1, var_p%nval
            hofx(job) = hofx(job) + &
-                self%atm_k(jchannel,jprofile)%aerosol(jaero)%concentration(jlevel) * var_p%vals(jlevel,jprofile) * self%ugkg_kgm2(jlevel,jprofile)
+                self%atm_k(jchannel,jprofile)%aerosol(jaero)%concentration(jlevel) * var_p%vals(jlevel,jprofile)*ugkg_kgm2(jlevel)
         ENDDO
      ENDDO
    enddo
@@ -367,6 +363,7 @@ integer :: job, jprofile, jchannel, jlevel
 type(ufo_geoval), pointer :: var_p
 
 CHARACTER(MAXVARLEN), DIMENSION(self%rc%n_aerosols) :: var_aerosols
+REAL(kind_real), DIMENSION(self%n_layers) :: ugkg_kgm2
 INTEGER :: jaero
 
  ! Initial checks
@@ -399,16 +396,15 @@ INTEGER :: jaero
 ! Multiply by Jacobian and add to hofx (adjoint)
     job = 0
     DO jprofile = 1, self%n_Profiles
+       CALL calculate_aero_layer_factor(geovals,jprofile,ugkg_kgm2)
        DO jchannel = 1, self%n_Channels
           job = job + 1
           DO jlevel = 1, var_p%nval
              var_p%vals(jlevel,jprofile) = var_p%vals(jlevel,jprofile) + &
-                  self%atm_K(jchannel,jprofile)%aerosol(jaero)%concentration(jlevel) * hofx(job) !/ self%ugkg_kgm2(jlevel,jprofile)
+                  self%atm_K(jchannel,jprofile)%aerosol(jaero)%concentration(jlevel) * hofx(job) !? /ugkg_kgm2(jlevel)
           ENDDO
        ENDDO
     ENDDO
-
-    FORALL (jlevel=1:var_p%nval,jprofile=1:self%n_profiles) var_p%vals(jlevel,jprofile)=var_p%vals(jlevel,jprofile)/self%ugkg_kgm2(jlevel,jprofile)
 
  ENDDO
 
