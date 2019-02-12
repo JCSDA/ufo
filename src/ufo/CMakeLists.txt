@@ -76,6 +76,9 @@ list( APPEND UFO_LIBS_DEP oops ioda crtm ${LAPACK_LIBRARIES} ${NETCDF_LIBRARIES}
 if( ${GSW_FOUND} )
     list( APPEND UFO_LIBS_DEP gsw )
 endif( ${GSW_FOUND} )
+if( ${RTTOV_FOUND} )
+    list( APPEND UFO_LIBS_DEP rttov )
+endif( ${RTTOV_FOUND} )
 
 if( ${ROPP-UFO_FOUND} )
     list( APPEND UFO_LIBS_DEP ropp-ufo )

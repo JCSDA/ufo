@@ -26,12 +26,13 @@ endfunction(CREATE_SYMLINK_FILENAME)
 list( APPEND ufo_test_input
   testinput/ufotest_atmosphere.yaml
   testinput/ufotest_constituents.yaml
-  testinput/amsua.yaml
+  testinput/amsua_crtm.yaml
+  testinput/amsua_rttov.yaml
   testinput/radiosonde.yaml
   testinput/radiosonde_qc.yaml
   testinput/aircraft.yaml
   testinput/aircraft_qc.yaml
-  testinput/aod.yaml
+  testinput/aod_crtm.yaml
   testinput/gnssroref.yaml
   testinput/gnssrobndropp1d.yaml
   testinput/channelsparser.yaml
@@ -146,17 +147,31 @@ ecbuild_add_test( TARGET  test_ufo_locations_constituents
                   ARGS    "testinput/ufotest_constituents.yaml"
                   LIBS    ufo )
 
-ecbuild_add_test( TARGET  test_ufo_amsua_opr
+ecbuild_add_test( TARGET  test_ufo_amsua_opr_crtm
                   BOOST
                   SOURCES mains/TestObsOperator.cc
-                  ARGS    "testinput/amsua.yaml"
+                  ARGS    "testinput/amsua_crtm.yaml"
                   LIBS    ufo )
 
-ecbuild_add_test( TARGET  test_ufo_amsua_tlad
+ecbuild_add_test( TARGET  test_ufo_amsua_tlad_crtm
                   BOOST
                   SOURCES mains/TestObsOperatorTLAD.cc
-                  ARGS    "testinput/amsua.yaml"
+                  ARGS    "testinput/amsua_crtm.yaml"
                   LIBS    ufo )
+
+if( ${RTTOV_FOUND} )
+  ecbuild_add_test( TARGET  test_ufo_amsua_opr_rttov
+                    BOOST
+                    SOURCES mains/TestObsOperator.cc
+                    ARGS    "testinput/amsua_rttov.yaml"
+                    LIBS    ufo )
+
+  ecbuild_add_test( TARGET  test_ufo_amsua_tlad_rttov
+                    BOOST
+                    SOURCES mains/TestObsOperatorTLAD.cc
+                    ARGS    "testinput/amsua_rttov.yaml"
+                    LIBS    ufo )
+endif( ${RTTOV_FOUND} )
 
 ecbuild_add_test( TARGET  test_ufo_radiosonde_opr
                   BOOST
@@ -292,13 +307,13 @@ endif( ${GSW_FOUND} )
 ecbuild_add_test( TARGET  test_ufo_aod_opr
                   BOOST
                   SOURCES mains/TestObsOperator.cc
-                  ARGS    "testinput/aod.yaml"
+                  ARGS    "testinput/aod_crtm.yaml"
                   LIBS    ufo )
 
 ecbuild_add_test( TARGET  test_ufo_aod_tlad
                   BOOST
                   SOURCES mains/TestObsOperatorTLAD.cc
-                  ARGS    "testinput/aod.yaml"
+                  ARGS    "testinput/aod_crtm.yaml"
                   LIBS    ufo )
 
 ecbuild_add_test( TARGET  test_ufo_intset_parser
@@ -335,3 +350,17 @@ TauCoeff/ODAS/Little_Endian/v.viirs-m_npp.TauCoeff.bin
 CREATE_SYMLINK_FILENAME( ${crtm_SOURCE_DIR}/fix
                          ${CMAKE_CURRENT_BINARY_DIR}/Data
                          ${crtm_test_input} )
+
+#####################################################################
+# Files for RTTOV tests
+#####################################################################
+if( ${RTTOV_FOUND} )
+list( APPEND rttov_test_input
+rttov7pred54L/rtcoef_noaa_19_amsua.dat
+)
+
+# Symlink all CRTM files
+CREATE_SYMLINK_FILENAME( ${rttov_SOURCE_DIR}/rtcoef_rttov12
+                         ${CMAKE_CURRENT_BINARY_DIR}/Data
+                         ${rttov_test_input} )
+endif( ${RTTOV_FOUND} )

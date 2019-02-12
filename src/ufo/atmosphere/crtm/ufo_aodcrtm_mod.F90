@@ -24,7 +24,7 @@ module ufo_aod_mod
  !> Fortran derived type for aod trajectory
  type, extends(ufo_basis), public :: ufo_aod
  private
-  type(crtm_conf) :: rc
+  type(crtm_conf) :: conf
  contains
    procedure :: setup  => ufo_aod_setup
    procedure :: delete => ufo_aod_delete
@@ -43,7 +43,7 @@ implicit none
 class(ufo_aod), intent(inout) :: self
 type(c_ptr),         intent(in)    :: c_conf
 
- call crtm_conf_setup(self%rc,c_conf)
+ call crtm_conf_setup(self%conf,c_conf)
 
 end subroutine ufo_aod_setup
 
@@ -54,7 +54,7 @@ subroutine ufo_aod_delete(self)
 implicit none
 class(ufo_aod), intent(inout) :: self
 
- call crtm_conf_delete(self%rc)
+ call crtm_conf_delete(self%conf)
 
 end subroutine ufo_aod_delete
 
@@ -80,7 +80,7 @@ integer :: n_Layers
 integer :: n_Channels
 
 ! Define the "non-demoninational" arguments
-type(CRTM_ChannelInfo_type)             :: chinfo(self%rc%n_Sensors)
+type(CRTM_ChannelInfo_type)             :: chinfo(self%conf%n_Sensors)
 type(CRTM_Geometry_type),   allocatable :: geo(:)
 
 ! Define the FORWARD variables
@@ -106,7 +106,7 @@ TYPE(CRTM_RTSolution_type), ALLOCATABLE :: rts_K(:,:)
  call CRTM_Version( Version )
  call Program_Message( PROGRAM_NAME, &
                        'Check/example program for the CRTM Forward and K-Matrix functions using '//&
-                       trim(self%rc%ENDIAN_type)//' coefficient datafiles', &
+                       trim(self%conf%ENDIAN_type)//' coefficient datafiles', &
                        'CRTM Version: '//TRIM(Version) )
 
 
@@ -116,9 +116,9 @@ TYPE(CRTM_RTSolution_type), ALLOCATABLE :: rts_K(:,:)
  !**       CRTM_Lifecycle.f90 for more details.
 
  write( *,'(/5x,"Initializing the CRTM...")' )
- err_stat = CRTM_Init( self%rc%SENSOR_ID, &
+ err_stat = CRTM_Init( self%conf%SENSOR_ID, &
             chinfo, &
-            File_Path=trim(self%rc%COEFFICIENT_PATH), &
+            File_Path=trim(self%conf%COEFFICIENT_PATH), &
             Quiet=.TRUE.)
  if ( err_stat /= SUCCESS ) THEN
    message = 'Error initializing CRTM'
@@ -129,7 +129,7 @@ TYPE(CRTM_RTSolution_type), ALLOCATABLE :: rts_K(:,:)
 
  ! Loop over all sensors. Not necessary if we're calling CRTM for each sensor
  ! ----------------------------------------------------------------------------
- Sensor_Loop:DO n = 1, self%rc%n_Sensors
+ Sensor_Loop:DO n = 1, self%conf%n_Sensors
 
 
    ! Determine the number of channels for the current sensor
@@ -153,7 +153,7 @@ TYPE(CRTM_RTSolution_type), ALLOCATABLE :: rts_K(:,:)
 
    ! Create the input FORWARD structure (atm)
    ! ----------------------------------------
-   call CRTM_Atmosphere_Create( atm, n_Layers, self%rc%n_Absorbers, self%rc%n_Clouds, self%rc%n_Aerosols )
+   call CRTM_Atmosphere_Create( atm, n_Layers, self%conf%n_Absorbers, self%conf%n_Clouds, self%conf%n_Aerosols )
    if ( ANY(.NOT. CRTM_Atmosphere_Associated(atm)) ) THEN
       message = 'Error allocating CRTM Forward Atmosphere structure'
       CALL Display_Message( PROGRAM_NAME, message, FAILURE )
@@ -184,7 +184,7 @@ TYPE(CRTM_RTSolution_type), ALLOCATABLE :: rts_K(:,:)
    END IF
 
 ! The output K-MATRIX structure
-   CALL CRTM_Atmosphere_Create( atm_K, n_layers, self%rc%n_Absorbers, self%rc%n_Clouds, self%rc%n_Aerosols)
+   CALL CRTM_Atmosphere_Create( atm_K, n_layers, self%conf%n_Absorbers, self%conf%n_Clouds, self%conf%n_Aerosols)
    IF ( ANY(.NOT. CRTM_Atmosphere_Associated(atm_K)) ) THEN
       message = 'Error allocating CRTM K-matrix Atmosphere structure'
       CALL Display_Message( PROGRAM_NAME, message, FAILURE )
@@ -196,13 +196,13 @@ TYPE(CRTM_RTSolution_type), ALLOCATABLE :: rts_K(:,:)
 
    !Assign the data from the GeoVaLs
    !--------------------------------
-   CALL Load_Atm_Data(n_Profiles,n_Layers,geovals,atm,self%rc)
+   CALL Load_Atm_Data(n_Profiles,n_Layers,geovals,atm,self%conf)
 !   CALL Load_Sfc_Data(n_Profiles,n_Layers,n_Channels,geovals,sfc,chinfo,obss)
 !   CALL Load_Geom_Data(obss,geo)
 
-   IF (TRIM(self%rc%aerosol_option) /= "") &
+   IF (TRIM(self%conf%aerosol_option) /= "") &
         &CALL load_aerosol_data(n_profiles,n_layers,geovals,&
-        &self%rc%aerosol_option,atm)
+        &self%conf%aerosol_option,atm)
 
    ! Call THE CRTM inspection
    ! ------------------------
@@ -228,7 +228,7 @@ TYPE(CRTM_RTSolution_type), ALLOCATABLE :: rts_K(:,:)
         atm_k        )               ! K-MATRIX Output
 
    if ( err_stat /= SUCCESS ) THEN
-      message = 'Error calling CRTM Forward Model for '//TRIM(self%rc%SENSOR_ID(n))
+      message = 'Error calling CRTM Forward Model for '//TRIM(self%conf%SENSOR_ID(n))
       call Display_Message( PROGRAM_NAME, message, FAILURE )
       stop
    end if
