@@ -2,17 +2,14 @@
 test_framework_runtime_config: "--log_level=test_suite"
 window_begin: "2018-04-14T21:00:00Z"
 window_end: "2018-04-15T03:00:00Z"
-Locations: 
- lats: 
- - 45
- - 40
- lons: 
- - 0
- - -100
+LinearObsOpTest: 
+ testiterTL: 10
+ toleranceTL: "1.0e-10"
+ toleranceAD: "1.0e-11"
 Observations: 
  ObsTypes: 
  - ObsType: "CRTM"
-   channels: "1-15"
+   channels: "1-6,9-13,15"
    ObsOptions: 
     n_Absorbers: 3
     n_Clouds: 2
@@ -24,22 +21,11 @@ Observations:
     ObsDataIn: 
      obsfile: "Data/amsua_obs_n19_2018041500_m.nc4"
    GeoVaLs: 
-    norm: "62902.291784229797"
+    norm: "7071.1296549464405"
     filename: "Data/amsua_geoval_n19_2018041500_m.nc4"
     random: 0
     window_begin: "2018-04-14T21:00:00Z"
     window_end: "2018-04-15T03:00:00Z"
-   ObsBias: {}
- - ObsType: "Radiosonde"
-   ObsData: 
-    ObsDataIn: 
-     obsfile: "Data/sondes_obs_2018041500_m.nc4"
-   variables: 
-   - air_temperature
-   GeoVaLs: 
-    norm: "22355.0135965"
-    random: 0
-    filename: "Data/sondes_geoval_2018041500_m.nc4"
-    window_begin: "2018-04-14T21:00:00Z"
-    window_end: "2018-04-15T03:00:00Z"
-   ObsBias: {}
+   rmsequiv: "232.54571375224393"
+   tolerance: "1.e-8"
+   ObsBias: {} 

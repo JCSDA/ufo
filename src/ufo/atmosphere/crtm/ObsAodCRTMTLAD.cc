@@ -11,13 +11,15 @@
 #include <string>
 #include <vector>
 
-#include "ioda/ObsVector.h"
+#include <boost/scoped_ptr.hpp>
 
+#include "ioda/ObsSpace.h"
+#include "ioda/ObsVector.h"
 #include "oops/base/Variables.h"
 #include "oops/util/Logger.h"
-
 #include "ufo/GeoVaLs.h"
 #include "ufo/ObsBias.h"
+#include "ufo/ObsBiasIncrement.h"
 
 namespace ufo {
 
@@ -28,19 +30,20 @@ static LinearObsOperatorMaker<ObsAodTLAD> makerAodTL_("Aod");
 ObsAodTLAD::ObsAodTLAD(const ioda::ObsSpace & odb, const eckit::Configuration & config)
   : keyOperAod_(0), varin_(), odb_(odb)
 {
-  const eckit::Configuration * configc = &config;
-  ufo_aod_tlad_setup_f90(keyOperAod_, &configc);
-  const std::vector<std::string> vv{"air_temperature", "humidity_mixing_ratio", "relative_humidity",
-      "air_pressure", "air_pressure_levels",
+  const std::vector<std::string> vv{
       "sulf", "bc1", "bc2", "oc1", "oc2", "dust1", "dust2", "dust3", "dust4", "dust5",
       "seas1", "seas2", "seas3", "seas4"};
   varin_.reset(new oops::Variables(vv));
+  const eckit::LocalConfiguration obsOptions(config, "ObsOptions");
+  const eckit::Configuration * configc = &obsOptions;
+  ufo_aod_tlad_setup_f90(keyOperAod_, &configc);
   oops::Log::trace() << "ObsAodTLAD created" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
 ObsAodTLAD::~ObsAodTLAD() {
+  ufo_aod_tlad_delete_f90(keyOperAod_);
   oops::Log::trace() << "ObsAodTLAD destructed" << std::endl;
 }
 
@@ -53,17 +56,17 @@ void ObsAodTLAD::setTrajectory(const GeoVaLs & geovals, const ObsBias & bias) {
 // -----------------------------------------------------------------------------
 
 void ObsAodTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec,
-                               const ObsBiasIncrement & bias) const {
+                                    const ObsBiasIncrement & bias) const {
   ufo_aod_simobs_tl_f90(keyOperAod_, geovals.toFortran(), odb_,
-                        ovec.size(), ovec.toFortran());
+                             ovec.size(), ovec.toFortran());
 }
 
 // -----------------------------------------------------------------------------
 
 void ObsAodTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec,
-                               ObsBiasIncrement & bias) const {
+                                    ObsBiasIncrement & bias) const {
   ufo_aod_simobs_ad_f90(keyOperAod_, geovals.toFortran(), odb_,
-                        ovec.size(), ovec.toFortran());
+                             ovec.size(), ovec.toFortran());
 }
 
 // -----------------------------------------------------------------------------
