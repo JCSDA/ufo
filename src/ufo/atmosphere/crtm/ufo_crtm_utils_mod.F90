@@ -62,7 +62,7 @@ end type crtm_conf
 
 INTERFACE calculate_aero_layer_factor
 
-   MODULE PROCEDURE calculate_aero_layer_factor_atm_profile, calculate_aero_layer_factor_geovals,&
+   MODULE PROCEDURE calculate_aero_layer_factor_atm_profile,&
         &calculate_aero_layer_factor_atm
 
 END INTERFACE
@@ -785,40 +785,6 @@ SUBROUTINE load_aerosol_data(n_profiles,n_layers,geovals,&
      
    END SUBROUTINE calculate_aero_layer_factor_atm
 
-   SUBROUTINE calculate_aero_layer_factor_geovals(geovals,jprofile,ugkg_kgm2)
-
-     TYPE(ufo_geovals), INTENT(in) :: geovals
-     INTEGER, INTENT(in) :: jprofile
-     REAL(kind_real), INTENT(out) :: ugkg_kgm2(:)
-
-     TYPE(ufo_geoval), POINTER :: geoval
-     INTEGER :: k, n_layers
-     REAL(kind_real), ALLOCATABLE, DIMENSION(:) :: p,pl,mixr
-
-     n_layers=SIZE(ugkg_kgm2)
-
-     ALLOCATE(p(n_layers),pl(n_layers+1),mixr(n_layers))
-
-     CALL ufo_geovals_get_var(geovals, var_prs, geoval)
-     p=geoval%vals(:,jprofile)
-     CALL ufo_geovals_get_var(geovals, var_prsi, geoval)
-     pl=geoval%vals(:,jprofile)
-     CALL ufo_geovals_get_var(geovals, var_mixr, geoval)
-     mixr=geoval%vals(:,jprofile)
-
-!ug2kg && hPa2Pa
-     DO k=1,n_layers
-!correct for mixing ratio factor ugkg_kgm2 
-!being calculated from dry pressure, cotton eq. (2.4)
-!p_dry=p_total/(1+1.61*mixing_ratio)
-        ugkg_kgm2(k)=1.0e-9_kind_real*(pl(k)-pl(k-1))*100_kind_real/grav/&
-             &(one+eps_p1*mixr(k)*1.e-3_kind_real)
-     ENDDO
-
-     DEALLOCATE(p,pl,mixr)
-
-   END SUBROUTINE calculate_aero_layer_factor_geovals
-   
    SUBROUTINE check_fwd(hofx,obss,n_profiles,n_channels,varname_tmplate)
      
      TYPE(c_ptr), value,       INTENT(in)    :: obss
