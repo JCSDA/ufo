@@ -103,7 +103,7 @@ character(len=100), allocatable :: skiplist_str(:)
     ELSEIF (TRIM(rc%aerosol_option) == "aerosols_gocart_esrl") THEN
        rc%n_Aerosols=n_aerosols_gocart_esrl
     ELSEIF (TRIM(rc%aerosol_option) == "aerosols_other") THEN
-       rc%n_Aerosols=1
+       rc%n_Aerosols=n_aerosols_other
     ELSE
        rc%n_Aerosols=0
     ENDIF
