@@ -219,8 +219,6 @@ type(CRTM_RTSolution_type), allocatable :: rts_K(:,:)
         &CALL load_aerosol_data(self%n_profiles,self%n_layers,geovals,&
         &self%conf%aerosol_option,atm)
 
-!   call CRTM_Atmosphere_Inspect(atm(1))
-
    CALL CRTM_RTSolution_Create(rts, self%n_layers )
    CALL CRTM_RTSolution_Create(rts_k, self%n_layers )
 
@@ -340,13 +338,13 @@ CHARACTER(MAXVARLEN), DIMENSION(self%conf%n_aerosols) :: var_aerosols
  job = 0
  do jprofile = 1, self%n_profiles
 
-   do jchannel = 1, self%n_channels
+   do jchannel = 1, size(channels)
      job = job + 1
      DO jaero = 1, self%conf%n_aerosols
         CALL ufo_geovals_get_var(geovals, var_aerosols(jaero), var_p)
         DO jlevel = 1, var_p%nval
            hofx(job) = hofx(job) + &
-                self%atm_k(jchannel,jprofile)%aerosol(jaero)%concentration(jlevel) * var_p%vals(jlevel,jprofile) * self%scaling_factor(jlevel,jprofile)
+                self%atm_k(channels(jchannel),jprofile)%aerosol(jaero)%concentration(jlevel) * var_p%vals(jlevel,jprofile) * self%scaling_factor(jlevel,jprofile)
         ENDDO
      ENDDO
    enddo
@@ -404,11 +402,11 @@ INTEGER :: jaero
 ! Multiply by Jacobian and add to hofx (adjoint)
     job = 0
     DO jprofile = 1, self%n_Profiles
-       DO jchannel = 1, self%n_Channels
+       DO jchannel = 1, size(channels)
           job = job + 1
           DO jlevel = 1, var_p%nval
              var_p%vals(jlevel,jprofile) = var_p%vals(jlevel,jprofile) + &
-                  self%atm_k(jchannel,jprofile)%aerosol(jaero)%concentration(jlevel) * hofx(job) 
+                  self%atm_k(channels(jchannel),jprofile)%aerosol(jaero)%concentration(jlevel) * hofx(job) 
           ENDDO
        ENDDO
     ENDDO
