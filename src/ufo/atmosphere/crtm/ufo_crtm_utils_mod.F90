@@ -38,9 +38,9 @@ REAL(kind_real), PARAMETER :: &
      &rv = 4.6150e+2_kind_real,&
      &eps_p1 = one+rd/rv,&
      &grav = 9.81_kind_real,&
-     &aerosol_concentration_minvalue=1.e-16,&
-     &aerosol_concentration_minvalue_layer=1.e-23,& !ugkg_kgm2 of the order ~ 1.e-7
-     &ozone_default_value=1.e-3 ! in ppmv in crtm
+     &aerosol_concentration_minvalue=1.e-16_kind_real,&
+     &aerosol_concentration_minvalue_layer=tiny(rd),& 
+     &ozone_default_value=1.e-3_kind_real ! in ppmv in crtm
 
 INTEGER, PARAMETER, public :: min_crtm_n_absorbers = 2
 

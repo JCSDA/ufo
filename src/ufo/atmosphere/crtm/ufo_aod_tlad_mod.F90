@@ -319,7 +319,9 @@ CHARACTER(MAXVARLEN), DIMENSION(self%rc%n_aerosols) :: var_aerosols
    call abor1_ftn(err_msg)
  endif
 
- call ufo_geovals_get_var(geovals, var_prs, var_p)
+ CALL assign_aerosol_names(self%rc%aerosol_option,var_aerosols)
+
+ call ufo_geovals_get_var(geovals, var_aerosols(1), var_p)
 
  ! Check model levels is consistent in geovals & crtm
  if (var_p%nval /= self%n_Layers) then
@@ -327,7 +329,6 @@ CHARACTER(MAXVARLEN), DIMENSION(self%rc%n_aerosols) :: var_aerosols
    call abor1_ftn(err_msg)
  endif
 
- CALL assign_aerosol_names(self%rc%aerosol_option,var_aerosols)
 
  ! Initialize hofx
  ! ---------------
