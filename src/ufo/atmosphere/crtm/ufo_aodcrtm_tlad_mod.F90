@@ -5,14 +5,13 @@
 
 !> Fortran module to handle tl/ad for aod observations
 
-module ufo_aod_tlad_mod
+module ufo_aodcrtm_tlad_mod
 
  use iso_c_binding
  use config_mod
  use kinds
 
  use ufo_geovals_mod, only: ufo_geovals, ufo_geoval, ufo_geovals_get_var
- use ufo_basis_tlad_mod, only: ufo_basis_tlad
  use ufo_vars_mod
  use ufo_crtm_utils_mod
  use crtm_module
@@ -22,7 +21,7 @@ module ufo_aod_tlad_mod
  private
 
  !> Fortran derived type for aod trajectory
- type, extends(ufo_basis_tlad), public :: ufo_aod_tlad
+ type, public :: ufo_aodcrtm_tlad
  private
   type(crtm_conf) :: conf
   integer :: n_Profiles
@@ -31,34 +30,35 @@ module ufo_aod_tlad_mod
   type(CRTM_Atmosphere_type), allocatable :: atm_K(:,:)
   type(CRTM_Surface_type), allocatable :: sfc_K(:,:)
   REAL(kind_real), allocatable  :: scaling_factor(:,:)  
+  logical :: ltraj
  contains
-  procedure :: setup  => ufo_aod_tlad_setup
-  procedure :: delete  => ufo_aod_tlad_delete
-  procedure :: settraj => ufo_aod_tlad_settraj
-  procedure :: simobs_tl  => ufo_aod_simobs_tl
-  procedure :: simobs_ad  => ufo_aod_simobs_ad
- end type ufo_aod_tlad
+  procedure :: setup  => ufo_aodcrtm_tlad_setup
+  procedure :: delete  => ufo_aodcrtm_tlad_delete
+  procedure :: settraj => ufo_aodcrtm_tlad_settraj
+  procedure :: simobs_tl  => ufo_aodcrtm_simobs_tl
+  procedure :: simobs_ad  => ufo_aodcrtm_simobs_ad
+ end type ufo_aodcrtm_tlad
 
 contains
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_aod_tlad_setup(self, c_conf)
+subroutine ufo_aodcrtm_tlad_setup(self, c_conf)
 
 implicit none
-class(ufo_aod_tlad), intent(inout) :: self
+class(ufo_aodcrtm_tlad), intent(inout) :: self
 type(c_ptr),              intent(in)    :: c_conf
 
  call crtm_conf_setup(self%conf,c_conf)
 
-end subroutine ufo_aod_tlad_setup
+end subroutine ufo_aodcrtm_tlad_setup
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_aod_tlad_delete(self)
+subroutine ufo_aodcrtm_tlad_delete(self)
 
 implicit none
-class(ufo_aod_tlad), intent(inout) :: self
+class(ufo_aodcrtm_tlad), intent(inout) :: self
 
  self%ltraj = .false.
  call crtm_conf_delete(self%conf)
@@ -78,20 +78,21 @@ class(ufo_aod_tlad), intent(inout) :: self
  endif
 
 
-end subroutine ufo_aod_tlad_delete
+end subroutine ufo_aodcrtm_tlad_delete
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_aod_tlad_settraj(self, geovals, obss)
+SUBROUTINE ufo_aodcrtm_tlad_settraj(self, geovals, obss, channels)
 
 implicit none
 
-class(ufo_aod_tlad), intent(inout) :: self
+class(ufo_aodcrtm_tlad), intent(inout) :: self
 type(ufo_geovals),        intent(in)    :: geovals
 type(c_ptr), value,       intent(in)    :: obss
+INTEGER(c_int),           intent(in)    :: channels(:)  !List of channels to use
 
 ! Local Variables
-character(*), parameter :: PROGRAM_NAME = 'ufo_aod_tlad_mod.F90'
+character(*), parameter :: PROGRAM_NAME = 'ufo_aodcrtm_tlad_mod.F90'
 character(255) :: message, version
 integer        :: err_stat, alloc_stat
 INTEGER        :: n,l,m
@@ -285,19 +286,20 @@ type(CRTM_RTSolution_type), allocatable :: rts_K(:,:)
  ! ------------------------------------
  self%ltraj = .true.
 
-end subroutine ufo_aod_tlad_settraj
+end subroutine ufo_aodcrtm_tlad_settraj
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_aod_simobs_tl(self, geovals, hofx, obss)
+SUBROUTINE ufo_aodcrtm_simobs_tl(self, geovals, obss, hofx, channels)
 
 implicit none
-class(ufo_aod_tlad), intent(in) :: self
+class(ufo_aodcrtm_tlad), intent(in) :: self
 type(ufo_geovals),        intent(in) :: geovals
-real(c_double),        intent(inout) :: hofx(:)
 type(c_ptr), value,    intent(in)    :: obss
+real(c_double),        intent(inout) :: hofx(:)
+INTEGER(c_int),           intent(in)    :: channels(:)  !List of channels to use
 
-character(len=*), parameter :: myname_="ufo_aod_simobs_tl"
+character(len=*), parameter :: myname_="ufo_aodcrtm_simobs_tl"
 character(max_string) :: err_msg
 integer :: job, jprofile, jchannel, jlevel, jaero
 type(ufo_geoval), pointer :: var_p
@@ -350,19 +352,20 @@ CHARACTER(MAXVARLEN), DIMENSION(self%conf%n_aerosols) :: var_aerosols
    enddo
  enddo
 
-end subroutine ufo_aod_simobs_tl
+end subroutine ufo_aodcrtm_simobs_tl
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_aod_simobs_ad(self, geovals, hofx, obss)
+SUBROUTINE ufo_aodcrtm_simobs_ad(self, geovals, obss, hofx, channels)
 
 implicit none
-class(ufo_aod_tlad), intent(in) :: self
+class(ufo_aodcrtm_tlad), intent(in) :: self
 type(ufo_geovals),     intent(inout) :: geovals
-real(c_double),           intent(in) :: hofx(:)
 type(c_ptr), value,    intent(in)    :: obss
+real(c_double),           intent(in) :: hofx(:)
+INTEGER(c_int),           intent(in)    :: channels(:)  !List of channels to use
 
-character(len=*), parameter :: myname_="ufo_aod_simobs_ad"
+character(len=*), parameter :: myname_="ufo_aodcrtm_simobs_ad"
 character(max_string) :: err_msg
 integer :: job, jprofile, jchannel, jlevel
 type(ufo_geoval), pointer :: var_p
@@ -419,8 +422,8 @@ INTEGER :: jaero
  if (.not. geovals%linit ) geovals%linit=.true.
 
 
-end subroutine ufo_aod_simobs_ad
+end subroutine ufo_aodcrtm_simobs_ad
 
 ! ------------------------------------------------------------------------------
 
-end module ufo_aod_tlad_mod
+END MODULE ufo_aodcrtm_tlad_mod

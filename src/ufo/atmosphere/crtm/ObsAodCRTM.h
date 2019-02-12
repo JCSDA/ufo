@@ -5,42 +5,43 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
  */
 
-#ifndef UFO_ATMOSPHERE_CRTM_OBSAOD_H_
-#define UFO_ATMOSPHERE_CRTM_OBSAOD_H_
+#ifndef UFO_ATMOSPHERE_CRTM_OBSAODCRTM_H_
+#define UFO_ATMOSPHERE_CRTM_OBSAODCRTM_H_
 
 #include <ostream>
 #include <string>
+#include <vector>
 
 #include <boost/scoped_ptr.hpp>
 
 #include "oops/base/Variables.h"
 #include "oops/util/Logger.h"
 #include "oops/util/ObjectCounter.h"
-#include "ufo/atmosphere/crtm/ObsAod.interface.h"
+#include "ufo/atmosphere/crtm/ObsAodCRTM.interface.h"
 #include "ufo/ObsOperatorBase.h"
 
 namespace eckit {
-class Configuration;
+  class Configuration;
 }
 
 namespace ioda {
-class ObsSpace;
-class ObsVector;
+  class ObsSpace;
+  class ObsVector;
 }
 
 namespace ufo {
-class GeoVaLs;
-class ObsBias;
+  class GeoVaLs;
+  class ObsBias;
 
 // -----------------------------------------------------------------------------
-/// Aod observation for UFO.
-class ObsAod : public ObsOperatorBase,
-               private util::ObjectCounter<ObsAod> {
+/// AodCRTM observation for UFO.
+class ObsAodCRTM : public ObsOperatorBase,
+                    private util::ObjectCounter<ObsAodCRTM> {
  public:
-  static const std::string classname() {return "ufo::ObsAod";}
+  static const std::string classname() {return "ufo::ObsAodCRTM";}
 
-  ObsAod(const ioda::ObsSpace &, const eckit::Configuration &);
-  virtual ~ObsAod();
+  ObsAodCRTM(const ioda::ObsSpace &, const eckit::Configuration &);
+  virtual ~ObsAodCRTM();
 
 // Obs Operator
   void simulateObs(const GeoVaLs &, ioda::ObsVector &, const ObsBias &) const;
@@ -49,18 +50,19 @@ class ObsAod : public ObsOperatorBase,
   const oops::Variables & variables() const {return *varin_;}
   const oops::Variables & observed() const {return *varout_;}
 
-  int & toFortran() {return keyOperAod_;}
-  const int & toFortran() const {return keyOperAod_;}
+  int & toFortran() {return keyOperAodCRTM_;}
+  const int & toFortran() const {return keyOperAodCRTM_;}
 
  private:
   void print(std::ostream &) const;
-  F90hop keyOperAod_;
+  F90hop keyOperAodCRTM_;
   const ioda::ObsSpace& odb_;
   boost::scoped_ptr<const oops::Variables> varin_;
   boost::scoped_ptr<const oops::Variables> varout_;
+  std::vector<int> channels_;
 };
 
 // -----------------------------------------------------------------------------
 
 }  // namespace ufo
-#endif  // UFO_ATMOSPHERE_CRTM_OBSAOD_H_
+#endif  // UFO_ATMOSPHERE_CRTM_OBSAODCRTM_H_

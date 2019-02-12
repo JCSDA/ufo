@@ -5,14 +5,13 @@
 
 !> Fortran module to handle aod observations
 
-module ufo_aod_mod
+module ufo_aodcrtm_mod
 
  use iso_c_binding
  use config_mod
  use kinds
 
  use ufo_geovals_mod, only: ufo_geovals, ufo_geoval, ufo_geovals_get_var
- use ufo_basis_mod, only: ufo_basis
  use ufo_vars_mod
  use ufo_crtm_utils_mod
  use crtm_module
@@ -22,14 +21,14 @@ module ufo_aod_mod
  private
 
  !> Fortran derived type for aod trajectory
- type, extends(ufo_basis), public :: ufo_aod
+ type, public :: ufo_aodcrtm
  private
   type(crtm_conf) :: conf
  contains
-   procedure :: setup  => ufo_aod_setup
-   procedure :: delete => ufo_aod_delete
-   procedure :: simobs => ufo_aod_simobs
- end type ufo_aod
+   procedure :: setup  => ufo_aodcrtm_setup
+   procedure :: delete => ufo_aodcrtm_delete
+   procedure :: simobs => ufo_aodcrtm_simobs
+ end type ufo_aodcrtm
 
  CHARACTER(MAXVARLEN), PARAMETER :: varname_tmplate="aerosol_optical_depth"
 
@@ -37,39 +36,40 @@ contains
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_aod_setup(self, c_conf)
+subroutine ufo_aodcrtm_setup(self, c_conf)
 
 implicit none
-class(ufo_aod), intent(inout) :: self
+class(ufo_aodcrtm), intent(inout) :: self
 type(c_ptr),         intent(in)    :: c_conf
 
  call crtm_conf_setup(self%conf,c_conf)
 
-end subroutine ufo_aod_setup
+end subroutine ufo_aodcrtm_setup
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_aod_delete(self)
+subroutine ufo_aodcrtm_delete(self)
 
 implicit none
-class(ufo_aod), intent(inout) :: self
+class(ufo_aodcrtm), intent(inout) :: self
 
  call crtm_conf_delete(self%conf)
 
-end subroutine ufo_aod_delete
+end subroutine ufo_aodcrtm_delete
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_aod_simobs(self, geovals, hofx, obss)
+SUBROUTINE ufo_aodcrtm_simobs(self, geovals, hofx, obss, channels)
 
 implicit none
-class(ufo_aod),      intent(in) :: self
+class(ufo_aodcrtm),      intent(in) :: self
 type(ufo_geovals),        intent(in) :: geovals
 real(c_double),        intent(inout) :: hofx(:)
 type(c_ptr), value,       intent(in) :: obss
+INTEGER(c_int),           intent(in) :: channels(:)  !List of channels to use
 
 ! Local Variables
-character(*), parameter :: PROGRAM_NAME = 'ufo_aod_mod.F90'
+character(*), parameter :: PROGRAM_NAME = 'ufo_aodcrtm_mod.F90'
 character(255) :: message, version
 integer        :: err_stat, alloc_stat
 integer        :: l, m, n, i, s
@@ -170,9 +170,6 @@ TYPE(CRTM_RTSolution_type), ALLOCATABLE :: rts_K(:,:)
 !      STOP
 !   END IF
 
-
-!do not initialize: Radiance, Brightness_Temperature
-!initialize: layer_optical_depth
 
    ALLOCATE( atm_K( n_channels, N_PROFILES ), &
         rts_K( n_channels, N_PROFILES ), &
@@ -279,8 +276,8 @@ end do Sensor_Loop
     stop
  end if
 
-end subroutine ufo_aod_simobs
+end subroutine ufo_aodcrtm_simobs
 
 ! ------------------------------------------------------------------------------
 
-end module ufo_aod_mod
+end module ufo_aodcrtm_mod

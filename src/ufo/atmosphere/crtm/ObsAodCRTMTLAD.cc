@@ -5,9 +5,10 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#include "ufo/atmosphere/crtm/ObsAodTLAD.h"
+#include "ufo/atmosphere/crtm/ObsAodCRTMTLAD.h"
 
 #include <ostream>
+#include <set>
 #include <string>
 #include <vector>
 
@@ -20,59 +21,73 @@
 #include "ufo/GeoVaLs.h"
 #include "ufo/ObsBias.h"
 #include "ufo/ObsBiasIncrement.h"
+#include "ufo/utils/IntSetParser.h"
 
 namespace ufo {
 
 // -----------------------------------------------------------------------------
-static LinearObsOperatorMaker<ObsAodTLAD> makerAodTL_("Aod");
+static LinearObsOperatorMaker<ObsAodCRTMTLAD> makerAodTL_("Aod");
 // -----------------------------------------------------------------------------
 
-ObsAodTLAD::ObsAodTLAD(const ioda::ObsSpace & odb, const eckit::Configuration & config)
-  : keyOperAod_(0), varin_(), odb_(odb)
+ObsAodCRTMTLAD::ObsAodCRTMTLAD(const ioda::ObsSpace & odb,
+                                         const eckit::Configuration & config)
+  : keyOperAodCRTM_(0), varin_(), odb_(odb)
 {
   const std::vector<std::string> vv{
-      "sulf", "bc1", "bc2", "oc1", "oc2", "dust1", "dust2", "dust3", "dust4", "dust5",
-      "seas1", "seas2", "seas3", "seas4"};
+    "sulf", "bc1", "bc2", "oc1", "oc2", "dust1", "dust2", "dust3", "dust4", "dust5",
+    "seas1", "seas2", "seas3", "seas4"};
   varin_.reset(new oops::Variables(vv));
+
+  // parse channels from the config and create variable names
+  std::string chlist = config.getString("channels");
+  std::set<int> channels = parseIntSet(chlist);
+  channels_.reserve(channels.size());
+  for (const int jj : channels) {
+    channels_.push_back(jj);
+  }
+
   const eckit::LocalConfiguration obsOptions(config, "ObsOptions");
   const eckit::Configuration * configc = &obsOptions;
-  ufo_aod_tlad_setup_f90(keyOperAod_, &configc);
-  oops::Log::trace() << "ObsAodTLAD created" << std::endl;
+  ufo_aodcrtm_tlad_setup_f90(keyOperAodCRTM_, &configc);
+  oops::Log::trace() << "ObsAodCRTMTLAD created" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
-ObsAodTLAD::~ObsAodTLAD() {
-  ufo_aod_tlad_delete_f90(keyOperAod_);
-  oops::Log::trace() << "ObsAodTLAD destructed" << std::endl;
+ObsAodCRTMTLAD::~ObsAodCRTMTLAD() {
+  ufo_aodcrtm_tlad_delete_f90(keyOperAodCRTM_);
+  oops::Log::trace() << "ObsAodCRTMTLAD destructed" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
-void ObsAodTLAD::setTrajectory(const GeoVaLs & geovals, const ObsBias & bias) {
-  ufo_aod_tlad_settraj_f90(keyOperAod_, geovals.toFortran(), odb_);
+void ObsAodCRTMTLAD::setTrajectory(const GeoVaLs & geovals, const ObsBias & bias) {
+  ufo_aodcrtm_tlad_settraj_f90(keyOperAodCRTM_, geovals.toFortran(), odb_,
+                                channels_.size(), channels_[0]);
 }
 
 // -----------------------------------------------------------------------------
 
-void ObsAodTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec,
+void ObsAodCRTMTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec,
                                     const ObsBiasIncrement & bias) const {
-  ufo_aod_simobs_tl_f90(keyOperAod_, geovals.toFortran(), odb_,
-                             ovec.size(), ovec.toFortran());
+  ufo_aodcrtm_simobs_tl_f90(keyOperAodCRTM_, geovals.toFortran(), odb_,
+                             ovec.size(), ovec.toFortran(),
+                             channels_.size(), channels_[0]);
 }
 
 // -----------------------------------------------------------------------------
 
-void ObsAodTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec,
+void ObsAodCRTMTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec,
                                     ObsBiasIncrement & bias) const {
-  ufo_aod_simobs_ad_f90(keyOperAod_, geovals.toFortran(), odb_,
-                             ovec.size(), ovec.toFortran());
+  ufo_aodcrtm_simobs_ad_f90(keyOperAodCRTM_, geovals.toFortran(), odb_,
+                             ovec.size(), ovec.toFortran(),
+                             channels_.size(), channels_[0]);
 }
 
 // -----------------------------------------------------------------------------
 
-void ObsAodTLAD::print(std::ostream & os) const {
-  os << "ObsAodTLAD::print not implemented" << std::endl;
+void ObsAodCRTMTLAD::print(std::ostream & os) const {
+  os << "ObsAodCRTMTLAD::print not implemented" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

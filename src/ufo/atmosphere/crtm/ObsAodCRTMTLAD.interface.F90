@@ -5,21 +5,24 @@
 
 !> Fortran module for Fortran-C++ interface functions for CRTM tl/ad obs operator
 
-module ufo_aod_tlad_mod_c
+module ufo_aodcrtm_tlad_mod_c
 
   use iso_c_binding
   use config_mod
-  use ufo_aod_tlad_mod
+  use ufo_aodcrtm_tlad_mod
+  use ufo_geovals_mod
+  use ufo_geovals_mod_c,   only: ufo_geovals_registry
+
   implicit none
   private
 
-#define LISTED_TYPE ufo_aod_tlad
+#define LISTED_TYPE ufo_aodcrtm_tlad
 
   !> Linked list interface - defines registry_t type
 #include "../../linkedList_i.f"
 
   !> Global registry
-  type(registry_t) :: ufo_aod_tlad_registry
+  type(registry_t) :: ufo_aodcrtm_tlad_registry
 
 contains
 
@@ -29,91 +32,109 @@ contains
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_aod_tlad_setup_c(c_key_self, c_conf) bind(c,name='ufo_aod_tlad_setup_f90')
+subroutine ufo_aodcrtm_tlad_setup_c(c_key_self, c_conf) bind(c,name='ufo_aodcrtm_tlad_setup_f90')
 implicit none
 integer(c_int), intent(inout) :: c_key_self
 type(c_ptr), intent(in)    :: c_conf
 
-type(ufo_aod_tlad), pointer :: self
+type(ufo_aodcrtm_tlad), pointer :: self
 
-call ufo_aod_tlad_registry%setup(c_key_self, self)
+call ufo_aodcrtm_tlad_registry%setup(c_key_self, self)
 
 call self%setup(c_conf)
 
-end subroutine ufo_aod_tlad_setup_c
+end subroutine ufo_aodcrtm_tlad_setup_c
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_aod_tlad_delete_c(c_key_self) bind(c,name='ufo_aod_tlad_delete_f90')
+subroutine ufo_aodcrtm_tlad_delete_c(c_key_self) bind(c,name='ufo_aodcrtm_tlad_delete_f90')
 implicit none
 integer(c_int), intent(inout) :: c_key_self
 
-type(ufo_aod_tlad), pointer :: self
+type(ufo_aodcrtm_tlad), pointer :: self
 
-call ufo_aod_tlad_registry%get(c_key_self, self)
-call self%opr_delete()
-call ufo_aod_tlad_registry%remove(c_key_self)
+call ufo_aodcrtm_tlad_registry%get(c_key_self, self)
+call self%delete()
+call ufo_aodcrtm_tlad_registry%remove(c_key_self)
 
-end subroutine ufo_aod_tlad_delete_c
+end subroutine ufo_aodcrtm_tlad_delete_c
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_aod_tlad_settraj_c(c_key_self, c_key_geovals, c_obsspace) bind(c,name='ufo_aod_tlad_settraj_f90')
+subroutine ufo_aodcrtm_tlad_settraj_c(c_key_self, c_key_geovals, c_obsspace, c_nchan, c_channels) &
+                                       bind(c,name='ufo_aodcrtm_tlad_settraj_f90')
 
 implicit none
 integer(c_int),     intent(in) :: c_key_self
 integer(c_int),     intent(in) :: c_key_geovals
 type(c_ptr), value, intent(in) :: c_obsspace
+integer(c_int),     intent(in) :: c_nchan
+integer(c_int),     intent(in) :: c_channels(c_nchan)
 
-type(ufo_aod_tlad), pointer :: self
+type(ufo_aodcrtm_tlad), pointer :: self
+type(ufo_geovals),       pointer :: geovals
 
-character(len=*), parameter :: myname_="ufo_aod_tlad_settraj_c"
+character(len=*), parameter :: myname_="ufo_aodcrtm_tlad_settraj_c"
 
-call ufo_aod_tlad_registry%get(c_key_self, self)
-call self%opr_settraj(c_key_geovals, c_obsspace)
+call ufo_aodcrtm_tlad_registry%get(c_key_self, self)
+call ufo_geovals_registry%get(c_key_geovals,geovals)
 
-end subroutine ufo_aod_tlad_settraj_c
+call self%settraj(geovals, c_obsspace, c_channels)
+
+end subroutine ufo_aodcrtm_tlad_settraj_c
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_aod_simobs_tl_c(c_key_self, c_key_geovals, c_obsspace, c_nobs, c_hofx) bind(c,name='ufo_aod_simobs_tl_f90')
+subroutine ufo_aodcrtm_simobs_tl_c(c_key_self, c_key_geovals, c_obsspace, c_nobs, c_hofx, c_nchan, c_channels) &
+                                    bind(c,name='ufo_aodcrtm_simobs_tl_f90')
 
 implicit none
-integer(c_int), intent(in) :: c_key_self
-integer(c_int), intent(in) :: c_key_geovals
-type(c_ptr), value, intent(in) :: c_obsspace
-integer(c_int), intent(in) :: c_nobs
-real(c_double), intent(inout) :: c_hofx(c_nobs)
+integer(c_int),     intent(in)    :: c_key_self
+integer(c_int),     intent(in)    :: c_key_geovals
+type(c_ptr), value, intent(in)    :: c_obsspace
+integer(c_int),     intent(in)    :: c_nobs
+real(c_double),     intent(inout) :: c_hofx(c_nobs)
+integer(c_int),     intent(in)    :: c_nchan
+integer(c_int),     intent(in)    :: c_channels(c_nchan)
 
-type(ufo_aod_tlad), pointer :: self
+type(ufo_aodcrtm_tlad), pointer :: self
+type(ufo_geovals),       pointer :: geovals
 
-character(len=*), parameter :: myname_="ufo_aod_simobs_tl_c"
+character(len=*), parameter :: myname_="ufo_aodcrtm_simobs_tl_c"
 
-call ufo_aod_tlad_registry%get(c_key_self, self)
-call self%opr_simobs_tl(c_key_geovals, c_obsspace, c_hofx)
+call ufo_aodcrtm_tlad_registry%get(c_key_self, self)
+call ufo_geovals_registry%get(c_key_geovals,geovals)
 
-end subroutine ufo_aod_simobs_tl_c
+call self%simobs_tl(geovals, c_obsspace, c_hofx, c_channels)
+
+end subroutine ufo_aodcrtm_simobs_tl_c
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_aod_simobs_ad_c(c_key_self, c_key_geovals, c_obsspace, c_nobs, c_hofx) bind(c,name='ufo_aod_simobs_ad_f90')
+subroutine ufo_aodcrtm_simobs_ad_c(c_key_self, c_key_geovals, c_obsspace, c_nobs, c_hofx, c_nchan, c_channels) &
+                                    bind(c,name='ufo_aodcrtm_simobs_ad_f90')
 
 implicit none
-integer(c_int), intent(in) :: c_key_self
-integer(c_int), intent(in) :: c_key_geovals
+integer(c_int),     intent(in) :: c_key_self
+integer(c_int),     intent(in) :: c_key_geovals
 type(c_ptr), value, intent(in) :: c_obsspace
-integer(c_int), intent(in) :: c_nobs
-real(c_double), intent(in) :: c_hofx(c_nobs)
+integer(c_int),     intent(in) :: c_nobs
+real(c_double),     intent(in) :: c_hofx(c_nobs)
+integer(c_int),     intent(in) :: c_nchan
+integer(c_int),     intent(in) :: c_channels(c_nchan)
 
-type(ufo_aod_tlad), pointer :: self
+type(ufo_aodcrtm_tlad), pointer :: self
+type(ufo_geovals),       pointer :: geovals
 
-character(len=*), parameter :: myname_="ufo_aod_simobs_ad_c"
+character(len=*), parameter :: myname_="ufo_aodcrtm_simobs_ad_c"
 
-call ufo_aod_tlad_registry%get(c_key_self, self)
-call self%opr_simobs_ad(c_key_geovals, c_obsspace, c_hofx)
+call ufo_aodcrtm_tlad_registry%get(c_key_self, self)
+call ufo_geovals_registry%get(c_key_geovals,geovals)
 
-end subroutine ufo_aod_simobs_ad_c
+call self%simobs_ad(geovals, c_obsspace, c_hofx, c_channels)
+
+end subroutine ufo_aodcrtm_simobs_ad_c
 
 ! ------------------------------------------------------------------------------
 
-end module ufo_aod_tlad_mod_c
+end module ufo_aodcrtm_tlad_mod_c

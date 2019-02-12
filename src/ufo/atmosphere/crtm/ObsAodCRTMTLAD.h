@@ -5,17 +5,18 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#ifndef UFO_ATMOSPHERE_CRTM_OBSAODTLAD_H_
-#define UFO_ATMOSPHERE_CRTM_OBSAODTLAD_H_
+#ifndef UFO_ATMOSPHERE_CRTM_OBSAODCRTMTLAD_H_
+#define UFO_ATMOSPHERE_CRTM_OBSAODCRTMTLAD_H_
 
 #include <ostream>
 #include <string>
+#include <vector>
 
 #include <boost/scoped_ptr.hpp>
 
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
-#include "ufo/atmosphere/crtm/ObsAodTLAD.interface.h"
+#include "ufo/atmosphere/crtm/ObsAodCRTMTLAD.interface.h"
 #include "ufo/LinearObsOperatorBase.h"
 
 // Forward declarations
@@ -34,14 +35,14 @@ namespace ufo {
   class ObsBiasIncrement;
 
 // -----------------------------------------------------------------------------
-/// Aod (currently only temperature) observation for UFO.
-class ObsAodTLAD : public LinearObsOperatorBase,
-                   private util::ObjectCounter<ObsAodTLAD> {
+/// AodCRTM (currently only temperature) observation for UFO.
+class ObsAodCRTMTLAD : public LinearObsOperatorBase,
+                        private util::ObjectCounter<ObsAodCRTMTLAD> {
  public:
-  static const std::string classname() {return "ufo::ObsAodTLAD";}
+  static const std::string classname() {return "ufo::ObsAodCRTMTLAD";}
 
-  ObsAodTLAD(const ioda::ObsSpace &, const eckit::Configuration &);
-  virtual ~ObsAodTLAD();
+  ObsAodCRTMTLAD(const ioda::ObsSpace &, const eckit::Configuration &);
+  virtual ~ObsAodCRTMTLAD();
 
   // Obs Operators
   void setTrajectory(const GeoVaLs &, const ObsBias &);
@@ -51,17 +52,18 @@ class ObsAodTLAD : public LinearObsOperatorBase,
   // Other
   const oops::Variables & variables() const {return *varin_;}
 
-  int & toFortran() {return keyOperAod_;}
-  const int & toFortran() const {return keyOperAod_;}
+  int & toFortran() {return keyOperAodCRTM_;}
+  const int & toFortran() const {return keyOperAodCRTM_;}
 
  private:
   void print(std::ostream &) const;
-  F90hop keyOperAod_;
+  F90hop keyOperAodCRTM_;
   const ioda::ObsSpace& odb_;
   boost::scoped_ptr<const oops::Variables> varin_;
+  std::vector<int> channels_;
 };
 
 // -----------------------------------------------------------------------------
 
 }  // namespace ufo
-#endif  // UFO_ATMOSPHERE_CRTM_OBSAODTLAD_H_
+#endif  // UFO_ATMOSPHERE_CRTM_OBSAODCRTMTLAD_H_
