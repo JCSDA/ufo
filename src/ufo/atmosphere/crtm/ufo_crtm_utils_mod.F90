@@ -99,7 +99,7 @@ type(c_ptr),    intent(in)    :: c_conf
     ELSEIF (TRIM(conf%aerosol_option) == "aerosols_gocart_esrl") THEN
        conf%n_Aerosols=n_aerosols_gocart_esrl
     ELSEIF (TRIM(conf%aerosol_option) == "aerosols_other") THEN
-       conf%n_Aerosols=1
+       conf%n_Aerosols=n_aerosols_other
     ELSE
        conf%n_Aerosols=0
     ENDIF
