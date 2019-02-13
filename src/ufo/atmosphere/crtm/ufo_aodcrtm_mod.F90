@@ -241,13 +241,13 @@ TYPE(CRTM_RTSolution_type), ALLOCATABLE :: rts_K(:,:)
    i = 1
 
    DO m = 1, n_profiles
-      DO l = 1, n_channels
-         hofx(i) = SUM(rts(l,m)%layer_optical_depth)
+      DO l = 1, SIZE(channels)
+         hofx(i) = SUM(rts(channels(l),m)%layer_optical_depth)
          i = i + 1
       END DO
    END DO
 
-   CALL check_fwd(hofx,obss,n_profiles, n_channels,varname_tmplate)
+   CALL check_fwd(hofx,obss,n_profiles, n_channels,varname_tmplate,channels)
 
    ! Deallocate the structures
    ! -------------------------

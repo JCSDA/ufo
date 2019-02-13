@@ -767,12 +767,13 @@ SUBROUTINE load_aerosol_data(n_profiles,n_layers,geovals,&
      
    END SUBROUTINE calculate_aero_layer_factor_atm
 
-   SUBROUTINE check_fwd(hofx,obss,n_profiles,n_channels,varname_tmplate)
+   SUBROUTINE check_fwd(hofx,obss,n_profiles,n_channels,varname_tmplate,channels)
      
      TYPE(c_ptr), value,       INTENT(in)    :: obss
      INTEGER, INTENT(in) :: n_profiles,n_channels
      CHARACTER(*), INTENT(in) :: varname_tmplate
      REAL(kind_real), DIMENSION(*), INTENT(in) :: hofx
+     INTEGER(c_int),           INTENT(in) :: channels(:)  !List of channels to use
 
      REAL(kind_real), DIMENSION(n_profiles, n_channels) :: &
           &obs, innovation, diff
@@ -783,11 +784,11 @@ SUBROUTINE load_aerosol_data(n_profiles,n_layers,geovals,&
 
      INTEGER :: i,l,m
 
-     DO l = 1,n_Channels
-        CALL get_var_name(varname_tmplate,l,varname)
-        CALL obsspace_get_db(obss, "", varname, obs(:,l))
-        CALL get_var_name(cinnovation,l,varname)
-        CALL obsspace_get_db(obss, "", varname, innovation(:,l))
+     DO l = 1,SIZE(channels)
+        CALL get_var_name(varname_tmplate,channels(l),varname)
+        CALL obsspace_get_db(obss, "", varname, obs(:,channels(l)))
+        CALL get_var_name(cinnovation,channels(l),varname)
+        CALL obsspace_get_db(obss, "", varname, innovation(:,channels(l)))
      ENDDO
 
      rmse = 0_kind_real
@@ -795,9 +796,9 @@ SUBROUTINE load_aerosol_data(n_profiles,n_layers,geovals,&
      i = 1
 
      DO m = 1, n_profiles
-        DO l = 1, n_channels
-           diff(m,l) = hofx(i) - (obs(m,l) - innovation(m,l))
-           rmse(l) = rmse(l) + diff(m,l)**2
+        DO l = 1, SIZE(channels)
+           diff(m,channels(l)) = hofx(i) - (obs(m,channels(l)) - innovation(m,channels(l)))
+           rmse(channels(l)) = rmse(channels(l)) + diff(m,channels(l))**2
            i = i + 1
         END DO
      ENDDO
@@ -805,10 +806,10 @@ SUBROUTINE load_aerosol_data(n_profiles,n_layers,geovals,&
      rmse=SQRT(rmse/n_profiles)
 
      PRINT *,'N_profiles', N_PROFILES
-     DO l = 1, n_Channels
-        PRINT *, 'Channel: ',l
-        PRINT *, 'Max difference: ', MAXVAL(ABS(diff(:,l)))
-        PRINT *, 'RMSE: ', rmse(l)
+     DO l = 1, SIZE(channels)
+        PRINT *, 'Channel: ',channels(l)
+        PRINT *, 'Max difference: ', MAXVAL(ABS(diff(:,channels(l))))
+        PRINT *, 'RMSE: ', rmse(channels(l))
      ENDDO
 
    END SUBROUTINE check_fwd
