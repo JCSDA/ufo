@@ -26,7 +26,8 @@ endfunction(CREATE_SYMLINK_FILENAME)
 list( APPEND ufo_test_input
   testinput/ufotest_atmosphere.yaml
   testinput/ufotest_constituents.yaml
-  testinput/amsua.yaml
+  testinput/amsua_crtm.yaml
+  testinput/amsua_rttov.yaml
   testinput/radiosonde.yaml
   testinput/radiosonde_qc.yaml
   testinput/aircraft.yaml
@@ -55,8 +56,8 @@ list( APPEND ufo_test_data
   atmosphere/sondes_geoval_2018041500_m.nc4
   atmosphere/sondes_geoval_2018041500_s.nc4
   atmosphere/gnssro_geoval_2018041500_s.nc4
-  constituents/vars_ges.2015081000_dbl_subset.nc4
-  constituents/aod_geoval_2018041500_m.nc4
+  atmosphere/aod_geoval_2018041500_m.nc4
+  atmosphere/aod_geoval_2018041500_s.nc4
 )
 
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Data)
@@ -106,9 +107,8 @@ list (APPEND ioda_obs_test_data
   atmosphere/diag_t_obs_01_wprofiles.odb
   atmosphere/diag_t_obs_01_wprofiles_odb
 
-  constituents/diag_viirs_ges.2015081000_dbl_subset.nc4
-  constituents/aod_obs_2015081000_m.nc4
-  constituents/aod_obs_2018041500_m.nc4
+  atmosphere/aod_obs_2018041500_m.nc4
+  atmosphere/aod_obs_2018041500_s.nc4
 
   marine/Jason-2-2018-04-15.nc
   marine/profile_2018-04-15.nc
@@ -147,17 +147,31 @@ ecbuild_add_test( TARGET  test_ufo_locations_constituents
                   ARGS    "testinput/ufotest_constituents.yaml"
                   LIBS    ufo )
 
-ecbuild_add_test( TARGET  test_ufo_amsua_opr
+ecbuild_add_test( TARGET  test_ufo_amsua_opr_crtm
                   BOOST
                   SOURCES mains/TestObsOperator.cc
-                  ARGS    "testinput/amsua.yaml"
+                  ARGS    "testinput/amsua_crtm.yaml"
                   LIBS    ufo )
 
-ecbuild_add_test( TARGET  test_ufo_amsua_tlad
+ecbuild_add_test( TARGET  test_ufo_amsua_tlad_crtm
                   BOOST
                   SOURCES mains/TestObsOperatorTLAD.cc
-                  ARGS    "testinput/amsua.yaml"
+                  ARGS    "testinput/amsua_crtm.yaml"
                   LIBS    ufo )
+
+if( ${RTTOV_FOUND} )
+  ecbuild_add_test( TARGET  test_ufo_amsua_opr_rttov
+                    BOOST
+                    SOURCES mains/TestObsOperator.cc
+                    ARGS    "testinput/amsua_rttov.yaml"
+                    LIBS    ufo )
+
+  ecbuild_add_test( TARGET  test_ufo_amsua_tlad_rttov
+                    BOOST
+                    SOURCES mains/TestObsOperatorTLAD.cc
+                    ARGS    "testinput/amsua_rttov.yaml"
+                    LIBS    ufo )
+endif( ${RTTOV_FOUND} )
 
 ecbuild_add_test( TARGET  test_ufo_radiosonde_opr
                   BOOST
@@ -290,7 +304,7 @@ if( ${GSW_FOUND} )
 
 endif( ${GSW_FOUND} )
 
-ecbuild_add_test( TARGET  test_ufo_aod
+ecbuild_add_test( TARGET  test_ufo_aod_opr
                   BOOST
                   SOURCES mains/TestObsOperator.cc
                   ARGS    "testinput/aod.yaml"
@@ -330,3 +344,17 @@ TauCoeff/ODAS/Little_Endian/v.viirs-m_npp.TauCoeff.bin
 CREATE_SYMLINK_FILENAME( ${crtm_SOURCE_DIR}/fix
                          ${CMAKE_CURRENT_BINARY_DIR}/Data
                          ${crtm_test_input} )
+
+#####################################################################
+# Files for RTTOV tests
+#####################################################################
+if( ${RTTOV_FOUND} )
+list( APPEND rttov_test_input
+rttov7pred54L/rtcoef_noaa_19_amsua.dat
+)
+
+# Symlink all CRTM files
+CREATE_SYMLINK_FILENAME( ${rttov_SOURCE_DIR}/rtcoef_rttov12
+                         ${CMAKE_CURRENT_BINARY_DIR}/Data
+                         ${rttov_test_input} )
+endif( ${RTTOV_FOUND} )

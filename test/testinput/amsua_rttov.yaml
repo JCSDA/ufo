@@ -1,0 +1,27 @@
+---
+test_framework_runtime_config: "--log_level=test_suite"
+window_begin: "2018-04-14T21:00:00Z"
+window_end: "2018-04-15T03:00:00Z"
+LinearObsOpTest: 
+ testiterTL: 10
+ toleranceTL: "1.0e-10"
+ toleranceAD: "1.0e-12"
+Observations: 
+ ObsTypes: 
+ - ObsType: "RTTOV"
+   channels: "1-15"
+   ObsOptions: 
+    Sensor_ID: noaa_19_amsua
+    CoefficientPath: "Data/"
+   ObsData: 
+    ObsDataIn: 
+     obsfile: "Data/amsua_obs_n19_2018041500_m.nc4"
+   GeoVaLs: 
+    norm: "7071.1296549464405"
+    filename: "Data/amsua_geoval_n19_2018041500_m.nc4"
+    random: 0
+    window_begin: "2018-04-14T21:00:00Z"
+    window_end: "2018-04-15T03:00:00Z"
+   rmsequiv: "227.00372268124545"
+   tolerance: "1.e-8"
+   ObsBias: {} 
