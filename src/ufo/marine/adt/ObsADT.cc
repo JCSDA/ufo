@@ -26,7 +26,7 @@ static ObsOperatorMaker<ObsADT> makerADT_("ADT");
 // -----------------------------------------------------------------------------
 
 ObsADT::ObsADT(const ioda::ObsSpace & odb, const eckit::Configuration & config)
-  : keyOper_(0), odb_(odb), varin_(), varout_()
+  : ObsOperatorBase(odb, config), keyOper_(0), odb_(odb), varin_(), varout_()
 {
   const std::vector<std::string> vvin{"sea_surface_height_above_geoid"};
   varin_.reset(new oops::Variables(vvin));

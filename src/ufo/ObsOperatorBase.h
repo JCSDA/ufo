@@ -35,7 +35,8 @@ class Locations;
 class ObsOperatorBase : public util::Printable,
                         private boost::noncopyable {
  public:
-  ObsOperatorBase() {}
+  ObsOperatorBase(const ioda::ObsSpace & odb, const eckit::Configuration &)
+     : odb_(odb) {}
   virtual ~ObsOperatorBase() {}
 
 /// Obs Operator
@@ -47,8 +48,12 @@ class ObsOperatorBase : public util::Printable,
 /// Operator output variables
   virtual const oops::Variables & observed() const = 0;
 
+/// Locations for GeoVaLs
+  virtual Locations * locations(const util::DateTime &, const util::DateTime &) const;
+
  private:
   virtual void print(std::ostream &) const = 0;
+  const ioda::ObsSpace & odb_;
 };
 
 // -----------------------------------------------------------------------------
