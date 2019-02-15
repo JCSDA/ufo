@@ -28,7 +28,7 @@ static ObsOperatorMaker<ObsRadianceRTTOV> makerRadianceRTTOV_("RTTOV");
 
 ObsRadianceRTTOV::ObsRadianceRTTOV(const ioda::ObsSpace & odb,
                        const eckit::Configuration & config)
-  : keyOper_(0), odb_(odb), varin_(), varout_()
+  : ObsOperatorBase(odb, config), keyOper_(0), odb_(odb), varin_(), varout_()
 {
   const std::vector<std::string> vv{"air_temperature", "humidity_mixing_ratio", "air_pressure",
                                     "air_pressure_levels", "mass_concentration_of_ozone_in_air",

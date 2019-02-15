@@ -59,7 +59,6 @@ class ObsOperator : public util::Printable,
 
  private:
   void print(std::ostream &) const;
-  const ioda::ObsSpace & os_;
   boost::scoped_ptr<ObsOperatorBase> oper_;
 };
 

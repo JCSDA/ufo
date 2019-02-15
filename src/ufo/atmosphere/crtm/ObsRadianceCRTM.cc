@@ -28,7 +28,7 @@ static ObsOperatorMaker<ObsRadianceCRTM> makerCRTM_("CRTM");
 // -----------------------------------------------------------------------------
 
 ObsRadianceCRTM::ObsRadianceCRTM(const ioda::ObsSpace & odb, const eckit::Configuration & config)
-  : keyOperRadianceCRTM_(0), odb_(odb), varin_(), varout_()
+  : ObsOperatorBase(odb, config), keyOperRadianceCRTM_(0), odb_(odb), varin_(), varout_()
 {
   const std::vector<std::string> vv{"air_temperature", "humidity_mixing_ratio", "air_pressure",
                                     "air_pressure_levels", "mass_concentration_of_ozone_in_air",

@@ -28,7 +28,8 @@ static ObsOperatorMaker<ObsAtmVertInterp> makerSatwnd_("Satwind");
 // -----------------------------------------------------------------------------
 
 ObsAtmVertInterp::ObsAtmVertInterp(const ioda::ObsSpace & odb, const eckit::Configuration & config)
-  : keyOperAtmVertInterp_(0), odb_(odb), varin_(), varout_()
+  : ObsOperatorBase(odb, config), keyOperAtmVertInterp_(0),
+    odb_(odb), varin_(), varout_()
 {
   int c_name_size = 200;
   char *buffin = new char[c_name_size];

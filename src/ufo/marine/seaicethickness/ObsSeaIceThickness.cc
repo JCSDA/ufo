@@ -27,7 +27,7 @@ static ObsOperatorMaker<ObsSeaIceThickness> makerSeaIceThickness_("SeaIceThickne
 
 ObsSeaIceThickness::ObsSeaIceThickness(const ioda::ObsSpace & odb,
                                        const eckit::Configuration & config)
-  : keyOper_(0), odb_(odb), varin_(), varout_()
+  : ObsOperatorBase(odb, config), keyOper_(0), odb_(odb), varin_(), varout_()
 {
   const std::vector<std::string> vvin{"ice_concentration", "ice_thickness"};
   varin_.reset(new oops::Variables(vvin));
