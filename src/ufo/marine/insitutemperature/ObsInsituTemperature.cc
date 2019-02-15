@@ -27,7 +27,7 @@ static ObsOperatorMaker<ObsInsituTemperature> makerInsituTemperature_("InsituTem
 
 ObsInsituTemperature::ObsInsituTemperature(const ioda::ObsSpace & odb,
                                            const eckit::Configuration & config)
-  : keyOper_(0), odb_(odb), varin_(), varout_()
+  : ObsOperatorBase(odb, config), keyOper_(0), odb_(odb), varin_(), varout_()
 {
   const std::vector<std::string> vvin{"ocean_potential_temperature",
                                       "ocean_salinity", "ocean_layer_thickness"};

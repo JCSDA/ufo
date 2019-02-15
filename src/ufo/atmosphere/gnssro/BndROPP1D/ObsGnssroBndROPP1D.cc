@@ -27,7 +27,7 @@ static ObsOperatorMaker<ObsGnssroBndROPP1D> makerGnssroBndROPP1D_("GnssroBndROPP
 
 ObsGnssroBndROPP1D::ObsGnssroBndROPP1D(const ioda::ObsSpace & odb,
                                        const eckit::Configuration & config)
-  : keyOperGnssroBndROPP1D_(0), odb_(odb), varin_(), varout_()
+  : ObsOperatorBase(odb, config), keyOperGnssroBndROPP1D_(0), odb_(odb), varin_(), varout_()
 {
   const std::vector<std::string> vv{"temperature", "specific_humidity", "air_pressure",
                                     "geopotential_height", "sfc_geopotential_height"};

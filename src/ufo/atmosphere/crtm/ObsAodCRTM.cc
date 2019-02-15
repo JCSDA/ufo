@@ -28,7 +28,7 @@ static ObsOperatorMaker<ObsAodCRTM> makerAOD_("Aod");
 // -----------------------------------------------------------------------------
 
 ObsAodCRTM::ObsAodCRTM(const ioda::ObsSpace & odb, const eckit::Configuration & config)
-  : keyOperAodCRTM_(0), odb_(odb), varin_(), varout_()
+  : ObsOperatorBase(odb, config), keyOperAodCRTM_(0), odb_(odb), varin_(), varout_()
 {
   const std::vector<std::string> vv{
     "air_temperature", "humidity_mixing_ratio", "relative_humidity",

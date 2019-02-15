@@ -29,7 +29,7 @@ namespace ufo {
 
 ObsIdentity::ObsIdentity(const ioda::ObsSpace & odb,
                          const eckit::Configuration & config)
-  : keyOperObsIdentity_(0), odb_(odb), varin_(), varout_()
+  : ObsOperatorBase(odb, config), keyOperObsIdentity_(0), odb_(odb), varin_(), varout_()
 {
   int c_name_size = 200;
   char *buffin = new char[c_name_size];

@@ -22,7 +22,7 @@ namespace ufo {
 // -----------------------------------------------------------------------------
 
 ObsOperator::ObsOperator(const ioda::ObsSpace & os, const eckit::Configuration & conf)
-  : os_(os), oper_(ObsOperatorFactory::create(os, conf))
+  : oper_(ObsOperatorFactory::create(os, conf))
 {}
 
 // -----------------------------------------------------------------------------
@@ -52,7 +52,7 @@ const oops::Variables & ObsOperator::observed() const {
 
 Locations * ObsOperator::locations(const util::DateTime & t1,
                                    const util::DateTime & t2) const {
-  return new Locations(os_, t1, t2);
+  return oper_->locations(t1, t2);
 }
 
 // -----------------------------------------------------------------------------
