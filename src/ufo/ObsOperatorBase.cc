@@ -11,8 +11,16 @@
 #include "ioda/ObsSpace.h"
 #include "oops/util/abor1_cpp.h"
 #include "oops/util/Logger.h"
+#include "ufo/Locations.h"
 
 namespace ufo {
+
+// -----------------------------------------------------------------------------
+
+Locations * ObsOperatorBase::locations(const util::DateTime & t1,
+                                       const util::DateTime & t2) const {
+  return new Locations(odb_, t1, t2);
+}
 
 // -----------------------------------------------------------------------------
 
