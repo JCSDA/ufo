@@ -9,7 +9,7 @@ LinearObsOpTest:
 Observations: 
  ObsTypes: 
  - ObsType: Aod
-   channels: "4,7-8,10"
+   channels: "4"
    ObsOptions:
     n_Absorbers: 2
     n_Clouds: 0

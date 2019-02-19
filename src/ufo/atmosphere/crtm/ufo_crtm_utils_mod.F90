@@ -776,19 +776,22 @@ SUBROUTINE load_aerosol_data(n_profiles,n_layers,geovals,&
      INTEGER(c_int),           INTENT(in) :: channels(:)  !List of channels to use
 
      REAL(kind_real), DIMENSION(n_profiles, n_channels) :: &
-          &obs, innovation, diff
+          &obs, hofxgsi, diff
      REAL(kind_real), DIMENSION(n_channels) :: rmse
 
-     CHARACTER(MAXVARLEN) :: varname
-     CHARACTER(MAXVARLEN) :: cinnovation="obs_minus_forecast_unadjusted"
-
+     CHARACTER(MAXVARLEN) :: varname,varnamecombo
+     CHARACTER(*), PARAMETER :: chofx="@GsiHofXBc"
+     CHARACTER(*), PARAMETER :: cobsvalue="@ObsValue"
+     
      INTEGER :: i,l,m
 
      DO l = 1,SIZE(channels)
         CALL get_var_name(varname_tmplate,channels(l),varname)
-        CALL obsspace_get_db(obss, "", varname, obs(:,channels(l)))
-        CALL get_var_name(cinnovation,channels(l),varname)
-        CALL obsspace_get_db(obss, "", varname, innovation(:,channels(l)))
+        varnamecombo=trim(varname)//chofx
+        CALL obsspace_get_db(obss, "", varnamecombo, obs(:,channels(l)))
+        CALL get_var_name(chofx,channels(l),varname)
+        varnamecombo=TRIM(varname)//cobsvalue
+        CALL obsspace_get_db(obss, "", varnamecombo, hofxgsi(:,channels(l)))
      ENDDO
 
      rmse = 0_kind_real
@@ -797,7 +800,7 @@ SUBROUTINE load_aerosol_data(n_profiles,n_layers,geovals,&
 
      DO m = 1, n_profiles
         DO l = 1, SIZE(channels)
-           diff(m,channels(l)) = hofx(i) - (obs(m,channels(l)) - innovation(m,channels(l)))
+           diff(m,channels(l)) = hofx(i) - hofxgsi(m,channels(l))
            rmse(channels(l)) = rmse(channels(l)) + diff(m,channels(l))**2
            i = i + 1
         END DO
