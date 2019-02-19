@@ -419,6 +419,23 @@ end subroutine get_var_name
 
 ! -----------------------------------------------------------------------------
 
+subroutine get_var_name_new(varname_tmplate,n,varname)
+
+character(len=*), intent(in) :: varname_tmplate
+integer, intent(in) :: n
+character(len=*), intent(out) :: varname
+
+character(len=3) :: chan
+
+ ! pass in varname_tmplate = "brigtness_temperature"
+ write(chan, '(I0)') n
+ varname = trim(varname_tmplate) // '_' // trim(chan)
+
+end subroutine get_var_name_new
+
+! -----------------------------------------------------------------------------
+
+
 SUBROUTINE load_aerosol_data(n_profiles,n_layers,geovals,&
      &aerosol_option,atm)
 
@@ -786,10 +803,10 @@ SUBROUTINE load_aerosol_data(n_profiles,n_layers,geovals,&
      INTEGER :: i,l,m
 
      DO l = 1,SIZE(channels)
-        CALL get_var_name(varname_tmplate,channels(l),varname)
+        CALL get_var_name_new(varname_tmplate,channels(l),varname)
         varnamecombo=trim(varname)//chofx
         CALL obsspace_get_db(obss, "", varnamecombo, obs(:,channels(l)))
-        CALL get_var_name(chofx,channels(l),varname)
+        CALL get_var_name_new(chofx,channels(l),varname)
         varnamecombo=TRIM(varname)//cobsvalue
         CALL obsspace_get_db(obss, "", varnamecombo, hofxgsi(:,channels(l)))
      ENDDO
