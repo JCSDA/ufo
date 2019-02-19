@@ -804,10 +804,10 @@ SUBROUTINE load_aerosol_data(n_profiles,n_layers,geovals,&
 
      DO l = 1,SIZE(channels)
         CALL get_var_name_new(varname_tmplate,channels(l),varname)
-        varnamecombo=trim(varname)//chofx
+        varnamecombo=trim(varname)//cobsvalue
         CALL obsspace_get_db(obss, "", varnamecombo, obs(:,channels(l)))
         CALL get_var_name_new(chofx,channels(l),varname)
-        varnamecombo=TRIM(varname)//cobsvalue
+        varnamecombo=TRIM(varname)//chofx
         CALL obsspace_get_db(obss, "", varnamecombo, hofxgsi(:,channels(l)))
      ENDDO
 
