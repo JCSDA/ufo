@@ -43,7 +43,7 @@ ObsAodCRTM::ObsAodCRTM(const ioda::ObsSpace & odb, const eckit::Configuration & 
   std::vector<std::string> vout;
   channels_.reserve(channels.size());
   for (const int jj : channels) {
-    vout.push_back("brightness_temperature_"+std::to_string(jj));
+    vout.push_back("aerosol_optical_depth_"+std::to_string(jj));
     channels_.push_back(jj);
   }
   varout_.reset(new oops::Variables(vout));
