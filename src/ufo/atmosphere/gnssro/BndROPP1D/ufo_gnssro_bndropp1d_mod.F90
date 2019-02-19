@@ -136,6 +136,7 @@ subroutine ufo_gnssro_bndropp1d_simobs(self, geovals, hofx, obss)
        hofx(iobs) = y%bangle(nvprof)  ! nvprof is just one point
     end if
 !  hack -- handling ropp missing value 
+   call ropp_tidy_up_1d(x,y)
 
   end do obs_loop
       
