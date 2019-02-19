@@ -796,19 +796,14 @@ SUBROUTINE load_aerosol_data(n_profiles,n_layers,geovals,&
           &obs, hofxgsi, diff
      REAL(kind_real), DIMENSION(n_channels) :: rmse
 
-     CHARACTER(MAXVARLEN) :: varname,varnamecombo
-     CHARACTER(*), PARAMETER :: chofx="@GsiHofXBc"
-     CHARACTER(*), PARAMETER :: cobsvalue="@ObsValue"
+     CHARACTER(MAXVARLEN) :: varname
+     CHARACTER(*), PARAMETER :: chofx="GsiHofXBc"
      
      INTEGER :: i,l,m
 
      DO l = 1,SIZE(channels)
         CALL get_var_name_new(varname_tmplate,channels(l),varname)
-        varnamecombo=trim(varname)//cobsvalue
-        CALL obsspace_get_db(obss, "", varnamecombo, obs(:,channels(l)))
-        CALL get_var_name_new(chofx,channels(l),varname)
-        varnamecombo=TRIM(varname)//chofx
-        CALL obsspace_get_db(obss, "", varnamecombo, hofxgsi(:,channels(l)))
+        CALL obsspace_get_db(obss,chofx,varname,hofxgsi(:,channels(l)))
      ENDDO
 
      rmse = 0_kind_real
