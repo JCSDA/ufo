@@ -792,8 +792,7 @@ SUBROUTINE load_aerosol_data(n_profiles,n_layers,geovals,&
      REAL(kind_real), DIMENSION(*), INTENT(in) :: hofx
      INTEGER(c_int),           INTENT(in) :: channels(:)  !List of channels to use
 
-     REAL(kind_real), DIMENSION(n_profiles, n_channels) :: &
-          &obs, hofxgsi, diff
+     REAL(kind_real), DIMENSION(n_profiles, n_channels) :: hofxgsi, diff
      REAL(kind_real), DIMENSION(n_channels) :: rmse
 
      CHARACTER(MAXVARLEN) :: varname
