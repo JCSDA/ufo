@@ -30,7 +30,7 @@ ObsGnssroBndROPP2D::ObsGnssroBndROPP2D(const ioda::ObsSpace & odb,
   : keyOperGnssroBndROPP2D_(0), odb_(odb), varin_(), varout_()
 {
   const std::vector<std::string> vv{"temperature", "specific_humidity", "air_pressure",
-                                    "geopotential_height"} ;//, "sfc_geopotential_height"};
+                                    "geopotential_height"};
   varin_.reset(new oops::Variables(vv));
 
   const std::vector<std::string> vout{"bending_angle"};
