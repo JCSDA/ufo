@@ -44,13 +44,10 @@ subroutine ufo_gnssro_bndropp1d_simobs(self, geovals, hofx, obss)
   real(c_double)                             :: missing
 
   character(len=*), parameter  :: myname_="ufo_gnssro_bndropp1d_simobs"
-  real                         :: ob_time
   integer, parameter           :: max_string = 800
 
   character(max_string)              :: err_msg
-  character(len=250)                 :: record
   integer                            :: nlev, nobs, iobs,nvprof, obss_nobs
-  integer, allocatable, dimension(:) :: ichk
   type(ufo_geoval), pointer          :: t, q, prs, gph, gph_sfc
   real(kind_real), allocatable       :: obsLat(:), obsLon(:), obsImpP(:), obsLocR(:), obsGeoid(:)
 
@@ -87,10 +84,6 @@ subroutine ufo_gnssro_bndropp1d_simobs(self, geovals, hofx, obss)
   call obsspace_get_db(obss, " ", "impact_parameter", obsImpP)
   call obsspace_get_db(obss, " ", "earth_radius_of_curvature", obsLocR) 
   call obsspace_get_db(obss, " ", "geoid_height_above_reference_ellipsoid", obsGeoid) 
-
-  nvprof = 1 ! number of vertical profiles (occultation points)
-  allocate(ichk(nvprof))
-  ichk(:) = 0   ! this will hold QC values for observation from QC flags
 
   deallocate(obsLat) 
   deallocate(obsLon)

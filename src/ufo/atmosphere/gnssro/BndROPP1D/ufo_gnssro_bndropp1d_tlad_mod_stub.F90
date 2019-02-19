@@ -3,7 +3,7 @@
 ! This software is licensed under the terms of the Apache Licence Version 2.0
 ! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 
-!> Fortran module for gnssro bending angle ropp1d tangent linear and adjoint
+!> Stubbed Fortran module for gnssro bending angle ropp1d tangent linear and adjoint
 !> following the ROPP (2018 Aug) implementation
 
 module ufo_gnssro_bndropp1d_tlad_mod
@@ -48,7 +48,7 @@ subroutine ufo_gnssro_bndropp1d_tlad_settraj(self, geovals, obss)
   character(len=*), parameter :: myname_="ufo_gnssro_bndropp1d_tlad_settraj"
   character(max_string)       :: err_msg
   type(ufo_geoval), pointer   :: t, q, prs, gph, gph_sfc
-  integer                     :: iobs, ierr
+  integer                     :: iobs
 
   write(err_msg,*) "TRACE: ufo_gnssro_bndropp1d_tlad_settraj: begin"
   call fckit_log%info(err_msg) 
@@ -93,7 +93,6 @@ subroutine ufo_gnssro_bndropp1d_simobs_tl(self, geovals, hofx, obss)
   type(c_ptr),   value,             intent(in)    :: obss
  
   integer                         :: iobs,nlev, nobs
-  integer                         :: ierr,nvprof
     
   character(len=*), parameter  :: myname_="ufo_gnssro_bndropp1d_simobs_tl"
   character(max_string)        :: err_msg
@@ -144,8 +143,6 @@ subroutine ufo_gnssro_bndropp1d_simobs_tl(self, geovals, hofx, obss)
   call obsspace_get_db(obss, " ", "earth_radius_of_curvature", obsLocR)
   call obsspace_get_db(obss, " ", "geoid_height_above_reference_ellipsoid", obsGeoid) 
 
-  nvprof = 1  ! no. of bending angles in profile 
-
 ! tidy up - deallocate obsspace structures
   deallocate(obsLat) 
   deallocate(obsLon)
@@ -177,7 +174,6 @@ subroutine ufo_gnssro_bndropp1d_simobs_ad(self, geovals, hofx, obss)
 
   real(kind_real),    allocatable :: obsLat(:), obsLon(:), obsImpP(:), obsLocR(:), obsGeoid(:)
   integer                         :: iobs,nlev, nobs
-  integer                         :: ierr,nvprof
   character(len=*), parameter     :: myname_="ufo_gnssro_bndropp1d_simobs_ad"
   character(max_string)           :: err_msg
 
@@ -244,9 +240,6 @@ subroutine ufo_gnssro_bndropp1d_simobs_ad(self, geovals, hofx, obss)
   call obsspace_get_db(obss, " ", "geoid_height_above_reference_ellipsoid", obsGeoid)
   
   missing = missing_value(missing)
-
-! loop through the obs
-  nvprof=1  ! no. of bending angles in profile 
 
 ! tidy up - deallocate obsspace structures
   deallocate(obsLat) 
