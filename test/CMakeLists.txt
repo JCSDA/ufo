@@ -35,6 +35,7 @@ list( APPEND ufo_test_input
   testinput/aod.yaml
   testinput/gnssroref.yaml
   testinput/gnssrobndropp1d.yaml
+  testinput/gnssrobndropp2d.yaml
   testinput/channelsparser.yaml
 )
 
@@ -233,6 +234,16 @@ ecbuild_add_test( TARGET  test_ufo_gnssroBndROPP1D_tlad
                   BOOST 
                   SOURCES mains/TestObsOperatorTLAD.cc
                   ARGS    "testinput/gnssrobndropp1d.yaml"
+                  LIBS    ufo )
+ecbuild_add_test( TARGET  test_ufo_gnssroBndROPP2D_opr
+                  BOOST
+                  SOURCES mains/TestObsOperator.cc
+                  ARGS    "testinput/gnssrobndropp2d.yaml"
+                  LIBS    ufo )
+ecbuild_add_test( TARGET  test_ufo_gnssroBndROPP2D_tlad
+                  BOOST 
+                  SOURCES mains/TestObsOperatorTLAD.cc
+                  ARGS    "testinput/gnssrobndropp2d.yaml"
                   LIBS    ufo )
 endif( ${ROPP-UFO_FOUND} )
 
