@@ -194,11 +194,12 @@ subroutine ufo_gnssro_bndropp2d_simobs_tl(self, geovals, hofx, obss)
 !   now call TL of forward model
     call ropp_fm_bangle_2d_tl(x,x_tl,y, y_tl)
     hofx(iobs) = y_tl%bangle(nvprof) ! this will need to change if profile is passed
- 
+
+!   tidy up -deallocate ropp structures 
+    call ropp_tidy_up_tlad_2d(x,x_tl,y,y_tl)
+
   end do obs_loop
 
-! tidy up -deallocate ropp structures  
-  call ropp_tidy_up_tlad_2d(x,x_tl,y,y_tl)   
 ! tidy up - deallocate obsspace structures
   deallocate(obsLat) 
   deallocate(obsLon)
@@ -365,12 +366,13 @@ subroutine ufo_gnssro_bndropp2d_simobs_ad(self, geovals, hofx, obss)
                         gph_d_zero(:),           &
                            nlev,x_ad) 
 
+!     tidy up - deallocate ropp structures  
+      call ropp_tidy_up_tlad_2d(x,x_ad,y,y_ad)
+
     end if  ! end missing value check
 
   end do obs_loop
 
-! tidy up - deallocate ropp structures  
-  call ropp_tidy_up_tlad_2d(x,x_ad,y,y_ad)   
 ! tidy up - deallocate obsspace structures
   deallocate(obsLat) 
   deallocate(obsLon)

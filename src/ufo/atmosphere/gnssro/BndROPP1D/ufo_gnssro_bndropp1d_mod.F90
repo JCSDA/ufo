@@ -140,6 +140,7 @@ subroutine ufo_gnssro_bndropp1d_simobs(self, geovals, hofx, obss)
 
   end do obs_loop
       
+  deallocate(ichk)
   deallocate(obsLat) 
   deallocate(obsLon)
   deallocate(obsImpP)
