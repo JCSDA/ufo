@@ -84,6 +84,11 @@ subroutine init_ropp_1d_statevec(step_time,rlon,rlat, temp,shum,pres,phi,lm,phi_
 ! allocate arrays for temperature, specific humidity, pressure
 ! and geopotential height data
 !--------------------------------------------------------------
+if (associated(x%temp)) deallocate(x%temp) 
+if (associated(x%shum)) deallocate(x%shum)
+if (associated(x%pres)) deallocate(x%pres)
+if (associated(x%geop)) deallocate(x%geop)
+
   allocate(x%temp(x%n_lev))
   allocate(x%shum(x%n_lev))
   allocate(x%pres(x%n_lev))

@@ -200,7 +200,6 @@ subroutine ufo_gnssro_bndropp1d_simobs_tl(self, geovals, hofx, obss)
 
 !   tidy up -deallocate ropp structures 
     call ropp_tidy_up_tlad_1d(x,x_tl,y,y_tl)
-
   end do obs_loop
 
 ! tidy up - deallocate obsspace structures
