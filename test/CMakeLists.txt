@@ -32,7 +32,7 @@ list( APPEND ufo_test_input
   testinput/radiosonde_qc.yaml
   testinput/aircraft.yaml
   testinput/aircraft_qc.yaml
-  testinput/aod.yaml
+  testinput/aod_crtm.yaml
   testinput/gnssroref.yaml
   testinput/gnssrobndropp1d.yaml
   testinput/channelsparser.yaml
@@ -307,7 +307,13 @@ endif( ${GSW_FOUND} )
 ecbuild_add_test( TARGET  test_ufo_aod_opr
                   BOOST
                   SOURCES mains/TestObsOperator.cc
-                  ARGS    "testinput/aod.yaml"
+                  ARGS    "testinput/aod_crtm.yaml"
+                  LIBS    ufo )
+
+ecbuild_add_test( TARGET  test_ufo_aod_tlad
+                  BOOST
+                  SOURCES mains/TestObsOperatorTLAD.cc
+                  ARGS    "testinput/aod_crtm.yaml"
                   LIBS    ufo )
 
 ecbuild_add_test( TARGET  test_ufo_intset_parser

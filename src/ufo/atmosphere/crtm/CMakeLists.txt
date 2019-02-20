@@ -15,16 +15,15 @@ set ( crtm_files
   ufo_radiancecrtm_mod.F90
   ufo_radiancecrtm_tlad_mod.F90
   ufo_crtm_utils_mod.F90
-  ObsAod.h
-  ObsAod.cc
-  ObsAodTLAD.h
-  ObsAodTLAD.cc
-  ObsAod.interface.F90
-  ObsAod.interface.h
-  ObsAodTLAD.interface.F90
-  ObsAodTLAD.interface.h
-  ufo_aod_utils_mod.F90
-  ufo_aod_mod.F90
-  ufo_aod_tlad_mod.F90
+  ObsAodCRTM.h
+  ObsAodCRTM.cc
+  ObsAodCRTMTLAD.h
+  ObsAodCRTMTLAD.cc
+  ObsAodCRTM.interface.F90
+  ObsAodCRTM.interface.h
+  ObsAodCRTMTLAD.interface.F90
+  ObsAodCRTMTLAD.interface.h
+  ufo_aodcrtm_mod.F90
+  ufo_aodcrtm_tlad_mod.F90
   PARENT_SCOPE
 )
