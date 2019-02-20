@@ -14,7 +14,7 @@ set (  bndropp1d_src_files
        ObsGnssroBndROPP1DTLAD.interface.h
        ObsGnssroBndROPP1DTLAD.interface.F90
        ufo_gnssro_bndropp1d_tlad_mod.F90
-       ufo_gnssro_ropp_utils_mod.F90
+       ufo_gnssro_ropp1d_utils_mod.F90
 PARENT_SCOPE
 )
 else( ${ROPP-UFO_FOUND} )
