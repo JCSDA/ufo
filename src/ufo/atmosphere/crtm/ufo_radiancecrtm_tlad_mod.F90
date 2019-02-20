@@ -60,6 +60,7 @@ implicit none
 class(ufo_radiancecrtm_tlad), intent(inout) :: self
 
  self%ltraj = .false.
+
  call crtm_conf_delete(self%conf)
 
  if (allocated(self%atm_k)) then

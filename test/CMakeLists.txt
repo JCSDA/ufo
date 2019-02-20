@@ -32,9 +32,10 @@ list( APPEND ufo_test_input
   testinput/radiosonde_qc.yaml
   testinput/aircraft.yaml
   testinput/aircraft_qc.yaml
-  testinput/aod.yaml
+  testinput/aod_crtm.yaml
   testinput/gnssroref.yaml
   testinput/gnssrobndropp1d.yaml
+  testinput/gnssrobndropp2d.yaml
   testinput/channelsparser.yaml
   testinput/satwind.yaml
 )
@@ -248,6 +249,16 @@ ecbuild_add_test( TARGET  test_ufo_gnssroBndROPP1D_tlad
                   SOURCES mains/TestObsOperatorTLAD.cc
                   ARGS    "testinput/gnssrobndropp1d.yaml"
                   LIBS    ufo )
+ecbuild_add_test( TARGET  test_ufo_gnssroBndROPP2D_opr
+                  BOOST
+                  SOURCES mains/TestObsOperator.cc
+                  ARGS    "testinput/gnssrobndropp2d.yaml"
+                  LIBS    ufo )
+ecbuild_add_test( TARGET  test_ufo_gnssroBndROPP2D_tlad
+                  BOOST 
+                  SOURCES mains/TestObsOperatorTLAD.cc
+                  ARGS    "testinput/gnssrobndropp2d.yaml"
+                  LIBS    ufo )
 endif( ${ROPP-UFO_FOUND} )
 
 # Marine UFO tests
@@ -321,7 +332,13 @@ endif( ${GSW_FOUND} )
 ecbuild_add_test( TARGET  test_ufo_aod_opr
                   BOOST
                   SOURCES mains/TestObsOperator.cc
-                  ARGS    "testinput/aod.yaml"
+                  ARGS    "testinput/aod_crtm.yaml"
+                  LIBS    ufo )
+
+ecbuild_add_test( TARGET  test_ufo_aod_tlad
+                  BOOST
+                  SOURCES mains/TestObsOperatorTLAD.cc
+                  ARGS    "testinput/aod_crtm.yaml"
                   LIBS    ufo )
 
 ecbuild_add_test( TARGET  test_ufo_intset_parser

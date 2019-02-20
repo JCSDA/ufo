@@ -18,7 +18,7 @@ use vert_interp_mod
 use lag_interp_mod,    only: lag_interp_const, lag_interp_smthWeights
 use obsspace_mod  
 use missing_values_mod
-use ufo_gnssro_ropp_utils_mod
+use ufo_gnssro_ropp1d_utils_mod
 use fckit_log_module,  only : fckit_log
 
 implicit none
@@ -136,9 +136,11 @@ subroutine ufo_gnssro_bndropp1d_simobs(self, geovals, hofx, obss)
        hofx(iobs) = y%bangle(nvprof)  ! nvprof is just one point
     end if
 !  hack -- handling ropp missing value 
+   call ropp_tidy_up_1d(x,y)
 
   end do obs_loop
       
+  deallocate(ichk)
   deallocate(obsLat) 
   deallocate(obsLon)
   deallocate(obsImpP)

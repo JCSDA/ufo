@@ -60,6 +60,7 @@ add_subdirectory( utils )
 add_subdirectory( basis )
 add_subdirectory( generic )
 add_subdirectory( atmosphere )
+add_subdirectory( ncdiag )
 if( ${GSW_FOUND} )
     add_subdirectory( marine )
 endif( ${GSW_FOUND} )
@@ -68,6 +69,7 @@ list( APPEND ufo_src_files
     ${basis_src_files}
     ${generic_src_files}
     ${atmosphere_src_files}
+    ${ncdiag_src_files}
 )
 if( ${GSW_FOUND} )
     list( APPEND ufo_src_files ${marine_src_files} )
@@ -85,6 +87,16 @@ if( ${ROPP-UFO_FOUND} )
 endif( ${ROPP-UFO_FOUND} )
 
 message(STATUS ${ufo_src_files})
+
+ecbuild_add_executable( TARGET  gsidiag_aod_bin2nc4.x
+                        SOURCES ncdiag/gsidiag_aod_bin2nc4.f90
+                        LIBS    ufo
+                      )
+
+ecbuild_add_executable( TARGET  gsiprofiles_bin2nc4.x
+                        SOURCES ncdiag/gsiprofiles_bin2nc4.f90
+                        LIBS    ufo
+                      )
 
 ecbuild_add_library( TARGET   ufo
                      SOURCES  ${ufo_src_files}

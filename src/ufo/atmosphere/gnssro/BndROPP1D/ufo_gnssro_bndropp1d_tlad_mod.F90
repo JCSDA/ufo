@@ -19,7 +19,7 @@ use obsspace_mod
 use config_mod
 use gnssro_mod_conf
 use missing_values_mod
-use ufo_gnssro_ropp_utils_mod
+use ufo_gnssro_ropp1d_utils_mod
 use fckit_log_module, only : fckit_log
 
 integer, parameter         :: max_string=800
@@ -197,11 +197,11 @@ subroutine ufo_gnssro_bndropp1d_simobs_tl(self, geovals, hofx, obss)
 !   now call TL of forward model
     call ropp_fm_bangle_1d_tl(x,x_tl,y, y_tl%bangle(nvprof))
     hofx(iobs) = y_tl%bangle(nvprof) ! this will need to change if profile is passed
- 
+
+!   tidy up -deallocate ropp structures 
+    call ropp_tidy_up_tlad_1d(x,x_tl,y,y_tl)
   end do obs_loop
 
-! tidy up -deallocate ropp structures  
-  call ropp_tidy_up_tlad_1d(x,x_tl,y,y_tl)   
 ! tidy up - deallocate obsspace structures
   deallocate(obsLat) 
   deallocate(obsLon)
@@ -370,12 +370,13 @@ subroutine ufo_gnssro_bndropp1d_simobs_ad(self, geovals, hofx, obss)
                         gph_d_zero(:),           &
                            nlev,x_ad) 
 
+!     tidy up - deallocate ropp structures  
+      call ropp_tidy_up_tlad_1d(x,x_ad,y,y_ad)
+
     end if  ! end missing value check
 
   end do obs_loop
 
-! tidy up - deallocate ropp structures  
-  call ropp_tidy_up_tlad_1d(x,x_ad,y,y_ad)   
 ! tidy up - deallocate obsspace structures
   deallocate(obsLat) 
   deallocate(obsLon)
