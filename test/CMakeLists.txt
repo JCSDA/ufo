@@ -36,6 +36,7 @@ list( APPEND ufo_test_input
   testinput/gnssroref.yaml
   testinput/gnssrobndropp1d.yaml
   testinput/channelsparser.yaml
+  testinput/satwind.yaml
 )
 
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/testinput)
@@ -58,6 +59,8 @@ list( APPEND ufo_test_data
   atmosphere/gnssro_geoval_2018041500_s.nc4
   atmosphere/aod_geoval_2018041500_m.nc4
   atmosphere/aod_geoval_2018041500_s.nc4
+  atmosphere/satwind_geoval_2018041500_m.nc4
+  atmosphere/satwind_geoval_2018041500_s.nc4
 )
 
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Data)
@@ -109,6 +112,9 @@ list (APPEND ioda_obs_test_data
 
   atmosphere/aod_obs_2018041500_m.nc4
   atmosphere/aod_obs_2018041500_s.nc4
+
+  atmosphere/satwind_obs_2018041500_m.nc4
+  atmosphere/satwind_obs_2018041500_s.nc4
 
   marine/Jason-2-2018-04-15.nc
   marine/profile_2018-04-15.nc
@@ -223,6 +229,14 @@ ecbuild_add_test( TARGET  test_ufo_gnssroRef_tlad
                   SOURCES mains/TestObsOperatorTLAD.cc
                   ARGS    "testinput/gnssroref.yaml"
                   LIBS    ufo )
+
+ecbuild_add_test( TARGET  test_ufo_satwind_opr
+                  BOOST
+                  MPI     4
+                  SOURCES mains/TestObsOperator.cc
+                  ARGS    "testinput/satwind.yaml"
+                  LIBS    ufo )
+
 if( ${ROPP-UFO_FOUND} )
 ecbuild_add_test( TARGET  test_ufo_gnssroBndROPP1D_opr
                   BOOST
