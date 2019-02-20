@@ -8,7 +8,7 @@ LinearObsOpTest:
   toleranceAD: 1.0e-11
 Observations:
   ObsTypes:
-  - ObsType: AMV
+  - ObsType: Satwind
     ObsData:
       ObsDataIn:
         obsfile: Data/satwind_obs_2018041500_m.nc4
