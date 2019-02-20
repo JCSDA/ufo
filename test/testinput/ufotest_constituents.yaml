@@ -12,7 +12,7 @@ Locations:
 Observations: 
  ObsTypes: 
  - ObsType: Aod
-   channels: "1-11"
+   channels: "4"
    ObsOptions:
     n_Absorbers: 2
     n_Clouds: 0
