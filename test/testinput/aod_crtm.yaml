@@ -26,6 +26,6 @@ Observations:
     random: 0
     window_begin: "2018-04-14T21:00:00Z"
     window_end: "2018-04-15T03:00:00Z"
-   rmsequiv: "0.025691325227768444"
-   tolerance: "999.999"
+   vecequiv: "GsiHofX"
+   tolerance: "1.0e-04"  # in % so that corresponds to 10^-3
    ObsBias: {}
