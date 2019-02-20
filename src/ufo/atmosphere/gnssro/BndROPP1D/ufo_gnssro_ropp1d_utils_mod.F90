@@ -6,16 +6,16 @@
 !> Fortran module to handle gnssro bending angle observations following 
 !> the ROPP (2018 Aug) implementation
 
-module ufo_gnssro_ropp_utils_mod
+module ufo_gnssro_ropp1d_utils_mod
 
 use iso_c_binding
-use fckit_log_module, only : fckit_log
+use fckit_log_module, only: fckit_log
 use kinds,            only: kind_real
 
 ! ROPP data type and library subroutines
 use typesizes,     only: wp => EightByteReal
 use datetimetypes, only: dp
-use ropp_fm_types, only: State1dFM, State2dFM, obs1dBangle
+use ropp_fm_types, only: State1dFM, obs1dBangle
 use geodesy,       only: gravity, R_eff, geometric2geopotential
 use arrays,        only: callocate
 
@@ -24,13 +24,8 @@ public             :: init_ropp_1d_statevec
 public             :: init_ropp_1d_statevec_ad
 public             :: init_ropp_1d_obvec
 public             :: init_ropp_1d_obvec_tlad
-public             :: init_ropp_2d_statevec
-public             :: init_ropp_2d_obvec
-public             :: init_ropp_2d_obvec_tlad
 public             :: ropp_tidy_up_1d
-public             :: ropp_tidy_up_2d
 public             :: ropp_tidy_up_tlad_1d
-public             :: ropp_tidy_up_tlad_2d
 private
 
 contains
@@ -89,6 +84,11 @@ subroutine init_ropp_1d_statevec(step_time,rlon,rlat, temp,shum,pres,phi,lm,phi_
 ! allocate arrays for temperature, specific humidity, pressure
 ! and geopotential height data
 !--------------------------------------------------------------
+if (associated(x%temp)) deallocate(x%temp) 
+if (associated(x%shum)) deallocate(x%shum)
+if (associated(x%pres)) deallocate(x%pres)
+if (associated(x%geop)) deallocate(x%geop)
+
   allocate(x%temp(x%n_lev))
   allocate(x%shum(x%n_lev))
   allocate(x%pres(x%n_lev))
@@ -357,235 +357,6 @@ subroutine init_ropp_1d_obvec_tlad(iloop,nvprof,obs_impact,  &
 
 end subroutine init_ropp_1d_obvec_tlad
 
-!------------------------------------------------------------------------------------
-!------------------------------------------------------------------------------------
-subroutine init_ropp_2d_statevec(rlon,rlat,temp,shum,pres,phi,lm,x)
-
-!  Description:
-!     subroutine to fill a ROPP state vector structure with
-!     model background fields: Temperature, pressure, specific
-!     humidity at full-levels, and surface geopotential height.
-!
-!  Inputs:
-!     temp   background temperature
-!     shum   background specific humidity
-!     pres   background pressure
-!     phi    geopotential height
-!
-!     phi_sfc  terrain geopotential of background field
-!     lm       number of vertical levels in  the background
-!
-!  Outputs:
-!     x      Forward model state vector
-!
-! ###############################################################
-  implicit none
-! Output state vector
-  type(State2dFM),     intent(out)   :: x
-  real(kind=kind_real),intent(in)    :: rlat
-  real(kind=kind_real),intent(in)    :: rlon
-  integer,             intent(in)    :: lm
-  real(kind=kind_real), dimension(lm), intent(in)    :: temp,shum,pres,phi
-! Local variables
-  integer :: n,i,j,k
-  real    :: rlon_local
-!-------------------------------------------------------------------------
-! number of profiles in plane
-  x%n_horiz=31
-! Number of levels in background profile.  What about (lm+1) field ?
-  x%n_lev=lm
-
-!-------------------------------------------------------------
-! allocate arrays for temperature, specific humidity, pressure
-! and geopotential height data and additional 2d fields
-!-------------------------------------------------------------
-  allocate(x%temp(x%n_lev,x%n_horiz))
-  allocate(x%shum(x%n_lev,x%n_horiz))
-  allocate(x%pres(x%n_lev,x%n_horiz))
-  allocate(x%geop(x%n_lev,x%n_horiz))
-
-! needed in 2D
-  allocate(x%refrac(x%n_lev,x%n_horiz))
-  allocate(x%nr(x%n_lev,x%n_horiz))
-  allocate(x%lat(x%n_horiz))
-  allocate(x%lon(x%n_horiz))
-
-  x%lat(:) = real(rlat,kind=wp)
-  rlon_local = rlon
-  if (rlon_local .gt. 180) rlon_local = rlon_local - 360.
-  x%lon(:) = real(rlon_local,kind=wp)
-
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! number of profiles and angular separation between them
-  x%dtheta = 40.0_wp/6371.0_wp
-
-! TEMPORARY!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!----------------------------------------------------
-! ROPP FM requires vertical height profile to be of the ascending order.
-! (see ropp_io_ascend ( ROdata )). So we need to flip the data.
-!----------------------------------------------------
-
-  n = lm
-
-! BCR  write(*,'(4a9,a11)') 'lvl','temp','shum','pres','geop'
-  do k = 1, lm
-
-     x%temp(n,:) = real(temp(k),kind=wp)
-     x%shum(n,:) = real(shum(k),kind=wp)
-     x%pres(n,:) = real(pres(k)*100.,kind=wp)
-     x%geop(n,:) = real(phi(k),kind=wp)
-
-     n = n - 1
-
-  end do
-
-  return
-end subroutine init_ropp_2d_statevec
-
-!---------------------------------------------------------------------------------------------
-subroutine init_ropp_2d_obvec(nvprof,obs_impact,rlat,rlon,roc,undulat,y)
-
-!  Description:
-!     subroutine to fill a ROPP observation vector structure
-!     observation provides the inputs of:
-!     impact parameter, lat, lon, time, radius of curvature
-!
-!     forward model will provide the simulation of bending angle
-!
-!  Inputs:
-!     obs_impact    impact parameter
-!     rlat          latitude
-!     rlon          longitude
-!     roc           radius of curvature
-!     undulat       undulation correction for radius of curvature
-!
-!  Outputs:
-!     y:     Partially filled Forward model observation vector
-!
-! ###############################################################
-  implicit none
-! Output state vector
-  type(Obs1dBangle),                       intent(out)   :: y
-
-  integer,                                 intent(in)    :: nvprof
-  real(kind=kind_real), dimension(nvprof), intent(in)    :: obs_impact
-  real(kind=kind_real),                    intent(in)    :: rlat,rlon
-  real(kind=kind_real),                    intent(in)    :: roc, undulat
-
-  real(kind=wp)              :: r8lat
-  integer                    :: i
-  real(kind=kind_real)       :: rlon_local
-
-!-------------------------------------------------------------------------
-  r8lat = real(rlat,kind=wp)
-  y%lat = r8lat
-  rlon_local = rlon
-  if (rlon_local .gt. 180.) rlon_local = rlon_local - 360.0 ! ROPP Longitude value -180 to 180
-  y%lon        = real(rlon_local,kind=wp)
-  y%g_sfc      = gravity(r8lat, 0.0_wp)          ! 2nd argument is height(m) above the sfc
-  y%r_curve    = real(roc,kind=wp)             ! ROPP rad of curve (m)
-  y%undulation = real(undulat,kind=wp)      ! ROPP undulation corr for rad of curve (m)
-  y%r_earth    = r_eff(r8lat)
-
-!---------------------------------------------------
-! allocate bending angle, impact parameter & weights
-!----------------------------------------------------
-  allocate(y%bangle(1:nvprof))                     ! value computed in fwd model
-  allocate(y%impact(1:nvprof))
-! needed for 2D
-  allocate(y%a_path(1:nvprof,2))
-  allocate(y%rtan(1:nvprof))
-
-! number of points in profile
-  y%nobs = nvprof
-
-  do i=1,nvprof
-     y%impact(i) = real(obs_impact(i),kind=wp)  ! ROPP expects impact parameter in meters
-  end do
-
-  return
-
-end subroutine init_ropp_2d_obvec
-
-!-------------------------------------------------------------------------
-!-------------------------------------------------------------------------
-subroutine init_ropp_2d_obvec_tlad(iloop,nvprof,obs_impact,  &
-                                rlat,rlon,roc,undulat,y,y_p)
-
-!  Description:
-!     subroutine to fill a ROPP observation vector structure
-!     observation provides the inputs of:
-!     impact parameter, lat, lon, time, radius of curvature
-!
-!     forward model will provide the simulation of bending angle
-!
-!  Inputs:
-!     obs_impact    impact parameter
-!     rlat          latitude
-!     rlon          longitude
-!     roc           radius of curvature
-!     undulat       undulation correction for radius of curvature
-!
-!  Outputs:
-!     y:     Partially filled Forward model observation vector
-!-------------------------------------------------------------------------
-  implicit none
-! Output state vector
-  type(Obs1dBangle),          intent(out)   :: y,y_p
-
-  integer,                    intent(in)    :: iloop
-  integer,                    intent(in)    :: nvprof
-  real(kind=kind_real),    dimension(nvprof), intent(in)    :: obs_impact
-  real(kind=kind_real),    intent(in)    :: rlat,rlon
-  real(kind=kind_real),    intent(in)    :: roc, undulat
-
-  real(kind=wp)              :: r8lat
-  integer                    :: i
-  real(kind=kind_real)       :: rlon_local
-
-!-------------------------------------------------------------------------
-  r8lat = real(rlat,kind=wp)
-  y%lat = r8lat
-  rlon_local = rlon
-  if (rlon_local .gt. 180.) rlon_local = rlon_local - 360.0 ! ROPP Longitude value -180 to 180
-  y%lon = real(rlon_local,kind=wp)
-  y%g_sfc = gravity(r8lat, 0.0_wp)          ! 2nd argument is height(m) above the sfc
-  y%r_curve = real(roc,kind=wp)             ! ROPP rad of curve (m)
-  y%undulation = real(undulat,kind=wp)      ! ROPP undulation corr for rad of curve (m)
-  y%r_earth = r_eff(r8lat)
-
-!--------------------------------------------------------
-! allocate bending angle, impact parameter & weights
-!---------------------------------------------------------
-  if (iloop ==1) then
-
-     allocate(y%bangle(1:nvprof))                     ! value computed in fwd model
-     allocate(y%impact(1:nvprof))
-!    needed for 2D
-     allocate(y%a_path(1:nvprof,2))
-     allocate(y%rtan(1:nvprof))
-!    TL code
-     allocate(y_p%bangle(1:nvprof))                     ! value computed in fwd model
-     allocate(y_p%impact(1:nvprof))
-!    needed for 2D
-     allocate(y_p%a_path(1:nvprof,2))
-     allocate(y_p%rtan(1:nvprof))
-
-  endif
-
-! number of points in profile
-  y%nobs    = nvprof
-  y_p%nobs = nvprof
-
-  do i = 1 ,nvprof
-     y%impact(i)    = real(obs_impact(i),kind=wp)  ! ROPP expects impact parameter in meters
-     y_p%impact(i)  = real(obs_impact(i),kind=wp)  ! ROPP expects impact parameter in meters
-  end do
-
-  return
-
-end subroutine init_ropp_2d_obvec_tlad
-
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 subroutine ropp_tidy_up_1d(x,y)
@@ -602,29 +373,6 @@ subroutine ropp_tidy_up_1d(x,y)
   if (associated(y%bangle)) deallocate(y%bangle)
 
 end subroutine ropp_tidy_up_1d
-
-!-------------------------------------------------------------------------
-!-------------------------------------------------------------------------
-subroutine ropp_tidy_up_2d(x,y)
-  implicit none
-  type(state2dfm),   intent(inout) :: x
-  type(obs1dbangle), intent(inout) :: y
-! x
-  if (associated(x%temp))   deallocate(x%temp)
-  if (associated(x%shum))   deallocate(x%shum)
-  if (associated(x%pres))   deallocate(x%pres)
-  if (associated(x%geop))   deallocate(x%geop)
-  if (associated(x%nr))     deallocate(x%nr)
-  if (associated(x%refrac)) deallocate(x%refrac)
-  if (associated(x%lat))    deallocate(x%lat)
-  if (associated(x%lon))    deallocate(x%lon)
-! y
-  if (associated(y%impact)) deallocate(y%impact)
-  if (associated(y%bangle)) deallocate(y%bangle)
-  if (associated(y%a_path)) deallocate(y%a_path)
-  if (associated(y%rtan))   deallocate(y%rtan)
- 
-end subroutine ropp_tidy_up_2d
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -656,40 +404,5 @@ subroutine ropp_tidy_up_tlad_1d(x,x_p,y,y_p)
 end subroutine ropp_tidy_up_tlad_1d
 
 !-------------------------------------------------------------------------
-!-------------------------------------------------------------------------
-subroutine ropp_tidy_up_tlad_2d(x,x_p,y,y_p)
-  implicit none
-  type(state2dfm),   intent(inout) :: x,x_p  ! x_p can be either x_tl or x_ad
-  type(obs1dbangle), intent(inout) :: y,y_p  ! y_p can be either y_tl or y_ad
-! x
-  deallocate(x%temp)
-  deallocate(x%shum)
-  deallocate(x%pres)
-  deallocate(x%geop)
-  deallocate(x%nr)
-  deallocate(x%refrac)
-  deallocate(x%lat)
-  deallocate(x%lon)
-  deallocate(x_p%temp)
-  deallocate(x_p%shum)
-  deallocate(x_p%pres)
-  deallocate(x_p%geop)
-  deallocate(x_p%nr)
-  deallocate(x_p%refrac)
-  deallocate(x_p%lat)
-  deallocate(x_p%lon)
-! y
-  deallocate(y%impact)
-  deallocate(y%bangle)
-  deallocate(y%a_path)
-  deallocate(y%rtan)
-  deallocate(y_p%impact)
-  deallocate(y_p%bangle)
-  deallocate(y_p%a_path)
-  deallocate(y_p%rtan)
-
-  return
-
-end subroutine ropp_tidy_up_tlad_2d
      
-end module ufo_gnssro_ropp_utils_mod
+end module ufo_gnssro_ropp1d_utils_mod
