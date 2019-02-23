@@ -61,7 +61,7 @@ implicit none
     character(max_string) :: err_msg
     type(ufo_geoval), pointer :: geoval_adt
     real(kind_real), allocatable :: obs_adt(:)
-    integer :: nobs, obss_nobs
+    integer :: nobs
     integer :: iobs, cnt, cnt_glb    
     real(kind_real) :: offset_hofx, pe_offset_hofx
     real(kind_real) :: offset_obs, pe_offset_obs
@@ -86,8 +86,7 @@ implicit none
     call ufo_geovals_get_var(geovals, var_abs_topo, geoval_adt)
 
     ! Read in obs data
-    obss_nobs = obsspace_get_nobs(obss)
-    allocate(obs_adt(obss_nobs))
+    allocate(obs_adt(nobs))
     
     call obsspace_get_db(obss, "ObsValue", "obs_absolute_dynamic_topography", obs_adt)
 
