@@ -61,7 +61,7 @@ implicit none
     character(max_string) :: err_msg
     type(ufo_geoval), pointer :: geoval_adt
     real(kind_real), allocatable :: obs_adt(:)
-    integer :: nobs, obss_nobs
+    integer :: obss_nlocs
     integer :: iobs, cnt, cnt_glb    
     real(kind_real) :: offset_hofx, pe_offset_hofx
     real(kind_real) :: offset_obs, pe_offset_obs
@@ -74,7 +74,7 @@ implicit none
     missing = missing_value(missing)
     
     ! check if nobs is consistent in geovals & hofx
-    nobs = obsspace_get_nlocs(obss)
+    obss_nlocs = obsspace_get_nlocs(obss)
 
     !nobs = size(hofx,1)
     if (geovals%nobs /= size(hofx,1)) then
@@ -86,8 +86,7 @@ implicit none
     call ufo_geovals_get_var(geovals, var_abs_topo, geoval_adt)
 
     ! Read in obs data
-    obss_nobs = obsspace_get_nobs(obss)
-    allocate(obs_adt(obss_nobs))
+    allocate(obs_adt(obss_nlocs))
     
     call obsspace_get_db(obss, "ObsValue", "obs_absolute_dynamic_topography", obs_adt)
 
@@ -95,7 +94,7 @@ implicit none
     pe_offset_hofx = 0.0
     pe_offset_obs = 0.0    
     cnt = 0
-    do iobs = 1, nobs
+    do iobs = 1, obss_nlocs
        if (hofx(iobs)/=missing) then      
           pe_offset_hofx = pe_offset_hofx + geoval_adt%vals(1,iobs)
           pe_offset_obs = pe_offset_obs + obs_adt(iobs)          
@@ -111,7 +110,7 @@ implicit none
     offset_obs = offset_obs/cnt_glb    
     
     ! Adjust simulated obs to obs offset
-    do iobs = 1, nobs
+    do iobs = 1, obss_nlocs
        hofx(iobs) = geoval_adt%vals(1,iobs) + (offset_obs-offset_hofx)
     enddo
 

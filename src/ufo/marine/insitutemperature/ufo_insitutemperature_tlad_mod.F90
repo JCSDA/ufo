@@ -96,7 +96,7 @@ subroutine ufo_insitutemperature_tlad_settraj(self, geovals, obss)
     real(kind_real), allocatable :: obs_lat(:)
     real(kind_real), allocatable :: obs_lon(:)
     real(kind_real), allocatable :: obs_depth(:)
-    integer :: obss_nobs
+    integer :: obss_nlocs
 
     ! check if sea temperature profile variable is in geovals and get it
     call ufo_geovals_get_var(geovals, var_ocn_pot_temp, temp)
@@ -123,10 +123,10 @@ subroutine ufo_insitutemperature_tlad_settraj(self, geovals, obss)
     allocate(self%lato(nobs))
     allocate(self%deptho(nobs))
 
-    obss_nobs = obsspace_get_nobs(obss)
-    allocate(obs_lat(obss_nobs))
-    allocate(obs_lon(obss_nobs))
-    allocate(obs_depth(obss_nobs))
+    obss_nlocs = obsspace_get_nlocs(obss)
+    allocate(obs_lat(obss_nlocs))
+    allocate(obs_lon(obss_nlocs))
+    allocate(obs_depth(obss_nlocs))
 
     call obsspace_get_db(obss, "", "longitude", obs_lon)
     call obsspace_get_db(obss, "", "latitude", obs_lat)
