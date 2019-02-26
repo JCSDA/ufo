@@ -70,7 +70,7 @@ type(c_ptr), value, intent(in)    :: obss
     real(kind_real), allocatable :: obs_lat(:)
     real(kind_real), allocatable :: obs_depth(:)
     real(kind_real), allocatable :: obs_val(:)
-    integer :: obss_nobs
+    integer :: obss_nlocs
     
     ! Vertical interpolation
     real(kind_real) :: wf, tp, sp, prs
@@ -96,11 +96,11 @@ type(c_ptr), value, intent(in)    :: obss
     call ufo_geovals_get_var(geovals, var_ocn_lay_thick, h)
 
     ! Read in obs data
-    obss_nobs = obsspace_get_nobs(obss)
-    allocate(obs_lon(obss_nobs))
-    allocate(obs_lat(obss_nobs))
-    allocate(obs_depth(obss_nobs))
-    allocate(obs_val(obss_nobs))
+    obss_nlocs = obsspace_get_nlocs(obss)
+    allocate(obs_lon(obss_nlocs))
+    allocate(obs_lat(obss_nlocs))
+    allocate(obs_depth(obss_nlocs))
+    allocate(obs_val(obss_nlocs))
 
     call obsspace_get_db(obss, "", "longitude", obs_lon)
     call obsspace_get_db(obss, "", "latitude", obs_lat)
