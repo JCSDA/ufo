@@ -88,16 +88,6 @@ endif( ${ROPP-UFO_FOUND} )
 
 message(STATUS ${ufo_src_files})
 
-ecbuild_add_executable( TARGET  gsidiag_aod_bin2nc4.x
-                        SOURCES ncdiag/gsidiag_aod_bin2nc4.f90
-                        LIBS    ufo
-                      )
-
-ecbuild_add_executable( TARGET  gsiprofiles_bin2nc4.x
-                        SOURCES ncdiag/gsiprofiles_bin2nc4.f90
-                        LIBS    ufo
-                      )
-
 ecbuild_add_library( TARGET   ufo
                      SOURCES  ${ufo_src_files}
                      LIBS     ${UFO_LIBS_DEP}

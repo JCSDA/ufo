@@ -29,7 +29,6 @@ public Load_Sfc_Data
 public Load_Geom_Data
 
 PUBLIC Load_Aerosol_Data
-PUBLIC check_fwd
 public assign_aerosol_names
 public calculate_aero_layer_factor
 
@@ -419,6 +418,23 @@ end subroutine get_var_name
 
 ! -----------------------------------------------------------------------------
 
+subroutine get_var_name_new(varname_tmplate,n,varname)
+
+character(len=*), intent(in) :: varname_tmplate
+integer, intent(in) :: n
+character(len=*), intent(out) :: varname
+
+character(len=3) :: chan
+
+ ! pass in varname_tmplate = "brigtness_temperature"
+ write(chan, '(I0)') n
+ varname = trim(varname_tmplate) // '_' // trim(chan)
+
+end subroutine get_var_name_new
+
+! -----------------------------------------------------------------------------
+
+
 SUBROUTINE load_aerosol_data(n_profiles,n_layers,geovals,&
      &aerosol_option,atm)
 
@@ -766,53 +782,6 @@ SUBROUTINE load_aerosol_data(n_profiles,n_layers,geovals,&
      ENDDO
      
    END SUBROUTINE calculate_aero_layer_factor_atm
-
-   SUBROUTINE check_fwd(hofx,obss,n_profiles,n_channels,varname_tmplate,channels)
-     
-     TYPE(c_ptr), value,       INTENT(in)    :: obss
-     INTEGER, INTENT(in) :: n_profiles,n_channels
-     CHARACTER(*), INTENT(in) :: varname_tmplate
-     REAL(kind_real), DIMENSION(*), INTENT(in) :: hofx
-     INTEGER(c_int),           INTENT(in) :: channels(:)  !List of channels to use
-
-     REAL(kind_real), DIMENSION(n_profiles, n_channels) :: &
-          &obs, innovation, diff
-     REAL(kind_real), DIMENSION(n_channels) :: rmse
-
-     CHARACTER(MAXVARLEN) :: varname
-     CHARACTER(MAXVARLEN) :: cinnovation="obs_minus_forecast_unadjusted"
-
-     INTEGER :: i,l,m
-
-     DO l = 1,SIZE(channels)
-        CALL get_var_name(varname_tmplate,channels(l),varname)
-        CALL obsspace_get_db(obss, "", varname, obs(:,channels(l)))
-        CALL get_var_name(cinnovation,channels(l),varname)
-        CALL obsspace_get_db(obss, "", varname, innovation(:,channels(l)))
-     ENDDO
-
-     rmse = 0_kind_real
-
-     i = 1
-
-     DO m = 1, n_profiles
-        DO l = 1, SIZE(channels)
-           diff(m,channels(l)) = hofx(i) - (obs(m,channels(l)) - innovation(m,channels(l)))
-           rmse(channels(l)) = rmse(channels(l)) + diff(m,channels(l))**2
-           i = i + 1
-        END DO
-     ENDDO
-
-     rmse=SQRT(rmse/n_profiles)
-
-     PRINT *,'N_profiles', N_PROFILES
-     DO l = 1, SIZE(channels)
-        PRINT *, 'Channel: ',channels(l)
-        PRINT *, 'Max difference: ', MAXVAL(ABS(diff(:,channels(l))))
-        PRINT *, 'RMSE: ', rmse(channels(l))
-     ENDDO
-
-   END SUBROUTINE check_fwd
 
    FUNCTION gocart_aerosol_size( itype, rh ) & ! rh input in 0-1
         &RESULT(r_eff)   ! in micrometer

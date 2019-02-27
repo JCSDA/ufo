@@ -43,3 +43,22 @@ Observations:
     window_begin: "2018-04-14T21:00:00Z"
     window_end: "2018-04-15T03:00:00Z"
    ObsBias: {}
+ - ObsType: Aod
+   channels: "4"
+   ObsOptions:
+    n_Absorbers: 2
+    n_Clouds: 0
+    Sensor_ID: "v.viirs-m_npp"
+    EndianType: little_endian
+    CoefficientPath: "Data/"
+    AerosolOption: "aerosols_gocart_nasa"
+   ObsData: 
+    ObsDataIn: 
+     obsfile: "Data/aod_obs_2018041500_m.nc4"
+   GeoVaLs: 
+    norm: "64817.436359937565"
+    filename: "Data/aod_geoval_2018041500_m.nc4"
+    random: 0
+    window_begin: "2018-04-14T21:00:00Z"
+    window_end: "2018-04-15T03:00:00Z"
+   ObsBias: {}

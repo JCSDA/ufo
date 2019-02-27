@@ -25,7 +25,6 @@ endfunction(CREATE_SYMLINK_FILENAME)
 # Create Data directory for test input config and symlink all files
 list( APPEND ufo_test_input
   testinput/ufotest_atmosphere.yaml
-  testinput/ufotest_constituents.yaml
   testinput/amsua_crtm.yaml
   testinput/amsua_rttov.yaml
   testinput/radiosonde.yaml
@@ -136,22 +135,10 @@ ecbuild_add_test( TARGET  test_ufo_geovals_atmosphere
                   ARGS    "testinput/ufotest_atmosphere.yaml"
                   LIBS    ufo )
 
-ecbuild_add_test( TARGET  test_ufo_geovals_constituents
-                  BOOST
-                  SOURCES mains/TestGeoVaLs.cc
-                  ARGS    "testinput/ufotest_constituents.yaml"
-                  LIBS    ufo )
-
 ecbuild_add_test( TARGET  test_ufo_locations_atmosphere
                   BOOST
                   SOURCES mains/TestLocations.cc
                   ARGS    "testinput/ufotest_atmosphere.yaml"
-                  LIBS    ufo )
-
-ecbuild_add_test( TARGET  test_ufo_locations_constituents
-                  BOOST
-                  SOURCES mains/TestLocations.cc
-                  ARGS    "testinput/ufotest_constituents.yaml"
                   LIBS    ufo )
 
 ecbuild_add_test( TARGET  test_ufo_amsua_opr_crtm
@@ -329,13 +316,13 @@ if( ${GSW_FOUND} )
 
 endif( ${GSW_FOUND} )
 
-ecbuild_add_test( TARGET  test_ufo_aod_opr
+ecbuild_add_test( TARGET  test_ufo_aod_opr_crtm
                   BOOST
                   SOURCES mains/TestObsOperator.cc
                   ARGS    "testinput/aod_crtm.yaml"
                   LIBS    ufo )
 
-ecbuild_add_test( TARGET  test_ufo_aod_tlad
+ecbuild_add_test( TARGET  test_ufo_aod_tlad_crtm
                   BOOST
                   SOURCES mains/TestObsOperatorTLAD.cc
                   ARGS    "testinput/aod_crtm.yaml"
