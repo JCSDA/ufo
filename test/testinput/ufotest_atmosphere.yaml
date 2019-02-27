@@ -56,7 +56,7 @@ Observations:
     ObsDataIn: 
      obsfile: "Data/aod_obs_2018041500_m.nc4"
    GeoVaLs: 
-    norm: "64834.281449019174"
+    norm: "64817.436359937565"
     filename: "Data/aod_geoval_2018041500_m.nc4"
     random: 0
     window_begin: "2018-04-14T21:00:00Z"
