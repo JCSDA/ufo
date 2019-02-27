@@ -247,8 +247,6 @@ TYPE(CRTM_RTSolution_type), ALLOCATABLE :: rts_K(:,:)
       END DO
    END DO
 
-!   CALL check_fwd(hofx,obss,n_profiles, n_channels,varname_tmplate,channels)
-
    ! Deallocate the structures
    ! -------------------------
    call CRTM_Atmosphere_Destroy(atm)
