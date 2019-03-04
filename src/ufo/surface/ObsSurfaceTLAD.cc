@@ -10,7 +10,7 @@
 namespace ufo {
 
 // -----------------------------------------------------------------------------
-static LinearObsOperatorMaker<ObsIdentityTLAD> makerSSTTL_("SeaSurfaceTemp");
+static LinearObsOperatorMaker<ObsIdentityTLAD> makerSurfaceTL_("Surface");
 
 // -----------------------------------------------------------------------------
 
