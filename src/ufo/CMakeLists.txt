@@ -58,8 +58,14 @@ endfunction(PREPEND)
 
 add_subdirectory( utils )
 add_subdirectory( basis )
-add_subdirectory( generic )
-add_subdirectory( atmosphere )
+add_subdirectory( identity )
+add_subdirectory( atmvertinterp )
+add_subdirectory( crtm )
+if( ${RTTOV_FOUND} )
+    add_subdirectory( rttov )
+endif( ${RTTOV_FOUND} )
+add_subdirectory( gnssro )
+add_subdirectory( surface )
 add_subdirectory( ncdiag )
 if( ${GSW_FOUND} )
     add_subdirectory( marine )
@@ -67,8 +73,12 @@ endif( ${GSW_FOUND} )
 list( APPEND ufo_src_files
     ${utils_src_files}
     ${basis_src_files}
-    ${generic_src_files}
-    ${atmosphere_src_files}
+    ${identity_src_files}
+    ${atmvertinterp_src_files}
+    ${crtm_src_files}
+    ${rttov_src_files}
+    ${gnssro_src_files}
+    ${surface_src_files}
     ${ncdiag_src_files}
 )
 if( ${GSW_FOUND} )
