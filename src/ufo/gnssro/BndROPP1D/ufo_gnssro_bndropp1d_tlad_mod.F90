@@ -66,11 +66,14 @@ subroutine ufo_gnssro_bndropp1d_tlad_settraj(self, geovals, obss)
 ! Keep copy of dimensions
   self%nval = prs%nval
   self%nobs = obsspace_get_nlocs(obss)
-
+  
+  iflip = 0
   if (prs%vals(1,1) .lt. prs%vals(prs%nval,1) ) then
     self%iflip = 1
-    write(err_msg,*) "TRACE: ufo_gnssro_bndropp1d_tlad_settraj: The model vertical height profile is in descending order, &
-                             but ROPP requires it to be the ascending order, need flipping"
+    write(err_msg,*) "TRACE: ufo_gnssro_bndropp1d_tlad_settraj:
+                      Model vertical height profile is in descending order, &
+                      but ROPP requires it to be ascending order, &
+                      need flip"
     call fckit_log%info(err_msg)
   end if
 

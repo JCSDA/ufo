@@ -82,6 +82,15 @@ subroutine ufo_gnssro_bndropp2d_simobs(self, geovals, hofx, obss)
   nlev  = t%nval ! number of model levels
   nobs  = obsspace_get_nlocs(obss)
 
+  iflip = 0
+  if (prs%vals(1,1) .lt. prs%vals(prs%nval,1) ) then
+    iflip = 1
+    write(err_msg,*) "TRACE: ufo_gnssro_bndropp2d_simobs:
+                      Model vertical height profile is in descending order, &
+                      but ROPP requires it to be ascending order, &
+                      need flip"
+    call fckit_log%info(err_msg)
+  end if
 ! set obs space struture
   allocate(obsLon(nobs))
   allocate(obsLat(nobs))
