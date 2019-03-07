@@ -59,7 +59,7 @@ subroutine ufo_gnssro_bndropp2d_simobs(self, geovals, hofx, obss)
   real(kind=dp)                   :: ob_time
   type(ufo_geoval), pointer          :: t, q, prs, gph !, gph_sfc
   real(kind_real), allocatable       :: obsLat(:), obsLon(:), obsImpP(:), obsLocR(:), obsGeoid(:)
-
+  integer                            :: iflip
 
   write(err_msg,*) "TRACE: ufo_gnssro_bndropp2d_simobs: begin"
   call fckit_log%info(err_msg)
@@ -110,7 +110,7 @@ subroutine ufo_gnssro_bndropp2d_simobs(self, geovals, hofx, obss)
                            q%vals(:,iobs),      &
                          prs%vals(:,iobs),      &
                            gph%vals(:,iobs),      &
-                                  nlev,x)
+                                  nlev,x, iflip)
      
     call init_ropp_2d_obvec(nvprof,        &
                   obsImpP(iobs),         &

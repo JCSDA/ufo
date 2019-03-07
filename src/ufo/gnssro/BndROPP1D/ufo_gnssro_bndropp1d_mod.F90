@@ -61,7 +61,7 @@ subroutine ufo_gnssro_bndropp1d_simobs(self, geovals, hofx, obss)
   integer, allocatable, dimension(:) :: ichk
   type(ufo_geoval), pointer          :: t, q, prs, gph, gph_sfc
   real(kind_real), allocatable       :: obsLat(:), obsLon(:), obsImpP(:), obsLocR(:), obsGeoid(:)
-
+  integer                            :: iflip 
   write(err_msg,*) "TRACE: ufo_gnssro_bndropp1d_simobs: begin"
   call fckit_log%info(err_msg)
 
@@ -82,6 +82,13 @@ subroutine ufo_gnssro_bndropp1d_simobs(self, geovals, hofx, obss)
 
   nlev  = t%nval ! number of model levels
   nobs  = obsspace_get_nlocs(obss)
+
+  if (prs%vals(1,1) .lt. prs%vals(prs%nval,1) ) then
+    iflip = 1 
+    write(err_msg,*) "TRACE: ufo_gnssro_bndropp1d_simobs: The model vertical height profile is in descending order, &
+                             but ROPP requires it to be the ascending order, need reverse"
+    call fckit_log%info(err_msg)
+  end if
 
 ! set obs space struture
   allocate(obsLon(nobs))
@@ -115,7 +122,7 @@ subroutine ufo_gnssro_bndropp1d_simobs(self, geovals, hofx, obss)
                                gph%vals(:,iobs),     &
                                nlev,                 &
                                gph_sfc%vals(1,iobs), &
-                               x)
+                               x, iflip)
 
     call init_ropp_1d_obvec(nvprof,          &
                             obsImpP(iobs),   &
