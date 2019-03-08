@@ -27,7 +27,7 @@ integer, parameter         :: max_string=800
 !> Fortran derived type for gnssro trajectory
 type, extends(ufo_basis_tlad)   ::  ufo_gnssro_BndROPP2D_tlad
   private
-  integer                       :: nval, nobs
+  integer                       :: nval, nobs, iflip
   real(kind_real), allocatable  :: prs(:,:), t(:,:), q(:,:), gph(:,:), gph_sfc(:,:)
   contains
     procedure :: delete     => ufo_gnssro_bndropp2d_tlad_delete
@@ -66,6 +66,16 @@ subroutine ufo_gnssro_bndropp2d_tlad_settraj(self, geovals, obss)
 ! Keep copy of dimensions
   self%nval = prs%nval
   self%nobs = obsspace_get_nlocs(obss)
+
+  iflip = 0
+  if (prs%vals(1,1) .lt. prs%vals(prs%nval,1) ) then
+    self%iflip = 1
+    write(err_msg,*) "TRACE: ufo_gnssro_bndropp2d_tlad_settraj:
+                      Model vertical height profile is in descending order, &
+                      but ROPP requires it to be ascending order, &
+                      need flip"
+    call fckit_log%info(err_msg)
+  end if
 
   allocate(self%t(self%nval,self%nobs))
   allocate(self%q(self%nval,self%nobs))
@@ -181,7 +191,7 @@ subroutine ufo_gnssro_bndropp2d_simobs_tl(self, geovals, hofx, obss)
                         prs_d%vals(:,iobs),     &
                         gph_d_zero(:),          &
                                    nlev,        &
-                                   x_tl)
+                                   x_tl, self%iflip)
 !   set both y and y_tl structures    
     call init_ropp_2d_obvec_tlad(iobs, nvprof, &
                       obsImpP(iobs),           &
@@ -364,7 +374,7 @@ subroutine ufo_gnssro_bndropp2d_simobs_ad(self, geovals, hofx, obss)
                           q_d%vals(:,iobs),      &
                         prs_d%vals(:,iobs),      &
                         gph_d_zero(:),           &
-                           nlev,x_ad) 
+                           nlev,x_ad, self%iflip) 
 
 !     tidy up - deallocate ropp structures  
       call ropp_tidy_up_tlad_2d(x,x_ad,y,y_ad)
