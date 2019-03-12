@@ -29,7 +29,7 @@ ObsSeaIceFractionTLAD::ObsSeaIceFractionTLAD(const ioda::ObsSpace & odb,
                                              const eckit::Configuration & config)
   : keyOper_(0), varin_(), odb_(odb)
 {
-  const std::vector<std::string> vv{"sea_ice_area_fraction"};
+  const std::vector<std::string> vv{"sea_ice_category_area_fraction"};
   varin_.reset(new oops::Variables(vv));
   const eckit::Configuration * configc = &config;
   ufo_seaicefraction_tlad_setup_f90(keyOper_, &configc);

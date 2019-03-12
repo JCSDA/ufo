@@ -29,7 +29,7 @@ ObsSeaIceFraction::ObsSeaIceFraction(const ioda::ObsSpace & odb,
                                      const eckit::Configuration & config)
   : ObsOperatorBase(odb, config), keyOper_(0), odb_(odb), varin_(), varout_()
 {
-  const std::vector<std::string> vvin{"sea_ice_area_fraction"};
+  const std::vector<std::string> vvin{"sea_ice_category_area_fraction"};
   varin_.reset(new oops::Variables(vvin));
   const std::vector<std::string> vvout{"sea_ice_area_fraction"};
   varout_.reset(new oops::Variables(vvout));

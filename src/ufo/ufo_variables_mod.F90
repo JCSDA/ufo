@@ -93,8 +93,8 @@ CHARACTER(len=MAXVARLEN), DIMENSION(n_aerosols_gocart_esrl), PUBLIC :: var_aeros
 CHARACTER(len=MAXVARLEN), DIMENSION(n_aerosols_other), PUBLIC :: var_aerosols_other = [&
      &"other                                                   "]
 
-character(len=MAXVARLEN), public :: var_seaicefrac    = "sea_ice_area_fraction"
-character(len=MAXVARLEN), public :: var_seaicethick   = "sea_ice_thickness"
+character(len=MAXVARLEN), public :: var_seaicefrac    = "sea_ice_category_area_fraction"
+character(len=MAXVARLEN), public :: var_seaicethick   = "sea_ice_category_thickness"
 character(len=MAXVARLEN), public :: var_abs_topo      = "sea_surface_height_above_geoid"
 character(len=MAXVARLEN), public :: var_ocn_pot_temp  = "sea_water_potential_temperature"
 character(len=MAXVARLEN), public :: var_ocn_con_temp  = "sea_water_conservative_temperature"
