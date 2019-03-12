@@ -378,23 +378,23 @@ integer :: nlocs
  nlocs = obsspace_get_nlocs(obss)
  allocate(TmpVar(nlocs))
 
- call obsspace_get_db(obss, "MetaData", "sat_zenith_angle", TmpVar)
- geo(:)%Sensor_zenith_angle = TmpVar(:)
+ call obsspace_get_db(obss, "MetaData", "Sat_Zenith_Angle", TmpVar)
+ geo(:)%Sensor_Zenith_Angle = TmpVar(:)
 
- call obsspace_get_db(obss, "MetaData", "sol_zenith_angle", TmpVar)
- geo(:)%Source_zenith_angle = TmpVar(:)
+ call obsspace_get_db(obss, "MetaData", "Sol_Zenith_Angle", TmpVar)
+ geo(:)%Source_Zenith_Angle = TmpVar(:)
 
- call obsspace_get_db(obss, "MetaData", "sat_azimuth_angle", TmpVar)
- geo(:)%Sensor_azimuth_angle = TmpVar(:)
+ call obsspace_get_db(obss, "MetaData", "Sat_Azimuth_Angle", TmpVar)
+ geo(:)%Sensor_Azimuth_Angle = TmpVar(:)
 
- call obsspace_get_db(obss, "MetaData", "sol_azimuth_angle", TmpVar)
- geo(:)%Source_azimuth_angle = TmpVar(:)
+ call obsspace_get_db(obss, "MetaData", "Sol_Azimuth_Angle", TmpVar)
+ geo(:)%Source_Azimuth_Angle = TmpVar(:)
 
- call obsspace_get_db(obss, "MetaData", "scan_position", TmpVar)
+ call obsspace_get_db(obss, "MetaData", "Scan_Position", TmpVar)
  geo(:)%Ifov = TmpVar(:)
 
- call obsspace_get_db(obss, "MetaData", "scan_angle", TmpVar) !The Sensor_scan_angle is optional
- geo(:)%Sensor_scan_angle = TmpVar(:)
+ call obsspace_get_db(obss, "MetaData", "Scan_Angle", TmpVar) !The Sensor_Scan_Angle is optional
+ geo(:)%Sensor_Scan_Angle = TmpVar(:)
 
  deallocate(TmpVar)
 
