@@ -102,10 +102,11 @@ type(c_ptr), value, intent(in)    :: obss
     allocate(obs_depth(obss_nlocs))
     allocate(obs_val(obss_nlocs))
 
-    call obsspace_get_db(obss, "", "longitude", obs_lon)
-    call obsspace_get_db(obss, "", "latitude", obs_lat)
-    call obsspace_get_db(obss, "", "ocean_depth", obs_depth)
-    call obsspace_get_db(obss, "ObsValue", "insitu_temperature", obs_val)
+    call obsspace_get_db(obss, "MetaData", "longitude", obs_lon)
+    call obsspace_get_db(obss, "MetaData", "latitude", obs_lat)
+    call obsspace_get_db(obss, "MetaData", "depth", obs_depth)
+    call obsspace_get_db(obss, "ObsValue", "sea_water_temperature", obs_val)
+
 
     nlev = temp%nval
     nobs = temp%nobs        

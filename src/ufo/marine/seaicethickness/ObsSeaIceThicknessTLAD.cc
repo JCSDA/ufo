@@ -29,7 +29,7 @@ ObsSeaIceThicknessTLAD::ObsSeaIceThicknessTLAD(const ioda::ObsSpace & odb,
                                                const eckit::Configuration & config)
   : keyOper_(0), varin_(), odb_(odb)
 {
-  const std::vector<std::string> vv{"ice_concentration", "ice_thickness"};
+  const std::vector<std::string> vv{"sea_ice_area_fraction", "sea_ice_thickness"};
   varin_.reset(new oops::Variables(vv));
   const eckit::Configuration * configc = &config;
   ufo_seaicethickness_tlad_setup_f90(keyOper_, &configc);

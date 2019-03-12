@@ -93,16 +93,15 @@ CHARACTER(len=MAXVARLEN), DIMENSION(n_aerosols_gocart_esrl), PUBLIC :: var_aeros
 CHARACTER(len=MAXVARLEN), DIMENSION(n_aerosols_other), PUBLIC :: var_aerosols_other = [&
      &"other                                                   "]
 
-character(len=MAXVARLEN), public :: var_seaicefrac    = "ice_concentration"
-character(len=MAXVARLEN), public :: var_stericheight  = "steric_height"
-character(len=MAXVARLEN), public :: var_seaicethick   = "ice_thickness"
+character(len=MAXVARLEN), public :: var_seaicefrac    = "sea_ice_area_fraction"
+character(len=MAXVARLEN), public :: var_seaicethick   = "sea_ice_thickness"
 character(len=MAXVARLEN), public :: var_abs_topo      = "sea_surface_height_above_geoid"
-character(len=MAXVARLEN), public :: var_ocn_pot_temp  = "ocean_potential_temperature"
-character(len=MAXVARLEN), public :: var_ocn_con_temp  = "ocean_conservative_temperature"
-character(len=MAXVARLEN), public :: var_ocn_abs_salt  = "ocean_absolute_salinity"
-character(len=MAXVARLEN), public :: var_ocn_salt      = "ocean_salinity"
-character(len=MAXVARLEN), public :: var_ocn_lay_thick = "ocean_layer_thickness"
-character(len=MAXVARLEN), public :: var_ocn_sst       = "ocean_upper_level_temperature"
+character(len=MAXVARLEN), public :: var_ocn_pot_temp  = "sea_water_potential_temperature"
+character(len=MAXVARLEN), public :: var_ocn_con_temp  = "sea_water_conservative_temperature"
+character(len=MAXVARLEN), public :: var_ocn_abs_salt  = "sea_water_absolute_salinity"
+character(len=MAXVARLEN), public :: var_ocn_salt      = "sea_water_practical_salinity"
+character(len=MAXVARLEN), public :: var_ocn_lay_thick = "sea_water_cell_thickness"
+character(len=MAXVARLEN), public :: var_ocn_sst       = "sea_surface_temperature"
 
 ! ------------------------------------------------------------------------------
 
