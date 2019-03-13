@@ -52,8 +52,8 @@ ecbuild_add_resources( TARGET ufo_test_scripts
 list( APPEND ufo_test_data
   atmosphere/aircraft_geoval_2018041500_m.nc4
   atmosphere/aircraft_geoval_2018041500_s.nc4
-  atmosphere/amsua_geoval_n19_2018041500_m.nc4
-  atmosphere/amsua_geoval_n19_2018041500_s.nc4
+  atmosphere/amsua_n19_geoval_2018041500_m.nc4
+  atmosphere/amsua_n19_geoval_2018041500_s.nc4
   atmosphere/sondes_geoval_2018041500_m.nc4
   atmosphere/sondes_geoval_2018041500_s.nc4
   atmosphere/gnssro_geoval_2018041500_s.nc4
@@ -102,8 +102,8 @@ endif( ${GSW_FOUND} )
 list (APPEND ioda_obs_test_data
   atmosphere/aircraft_obs_2018041500_m.nc4
   atmosphere/aircraft_obs_2018041500_s.nc4
-  atmosphere/amsua_obs_n19_2018041500_m.nc4
-  atmosphere/amsua_obs_n19_2018041500_s.nc4
+  atmosphere/amsua_n19_obs_2018041500_m.nc4
+  atmosphere/amsua_n19_obs_2018041500_s.nc4
   atmosphere/sondes_obs_2018041500_m.nc4
   atmosphere/sondes_obs_2018041500_s.nc4
   atmosphere/gnssro_obs_2018041500_s.nc4

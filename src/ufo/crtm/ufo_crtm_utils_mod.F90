@@ -208,7 +208,7 @@ character(max_string) :: err_msg
 !** BTJ added 11/20/2018 for compatibility with CRTM REL 2.3.0+
 !** need to map to cloud fraction geoval, if it exists.  For now assume
 !** fully filled pixel. 
-       atm(k1)%Cloud_Fraction = 1.0_fp  
+       atm(k1)%Cloud_Fraction = 1.0_fp
        
     ENDIF
 
@@ -378,22 +378,22 @@ integer :: nlocs
  nlocs = obsspace_get_nlocs(obss)
  allocate(TmpVar(nlocs))
 
- call obsspace_get_db(obss, "MetaData", "Sat_Zenith_Angle", TmpVar)
+ call obsspace_get_db(obss, "MetaData", "sat_zenith_angle", TmpVar)
  geo(:)%Sensor_Zenith_Angle = TmpVar(:)
 
- call obsspace_get_db(obss, "MetaData", "Sol_Zenith_Angle", TmpVar)
+ call obsspace_get_db(obss, "MetaData", "sol_zenith_angle", TmpVar)
  geo(:)%Source_Zenith_Angle = TmpVar(:)
 
- call obsspace_get_db(obss, "MetaData", "Sat_Azimuth_Angle", TmpVar)
+ call obsspace_get_db(obss, "MetaData", "sat_azimuth_angle", TmpVar)
  geo(:)%Sensor_Azimuth_Angle = TmpVar(:)
 
- call obsspace_get_db(obss, "MetaData", "Sol_Azimuth_Angle", TmpVar)
+ call obsspace_get_db(obss, "MetaData", "sol_azimuth_angle", TmpVar)
  geo(:)%Source_Azimuth_Angle = TmpVar(:)
 
- call obsspace_get_db(obss, "MetaData", "Scan_Position", TmpVar)
+ call obsspace_get_db(obss, "MetaData", "scan_position", TmpVar)
  geo(:)%Ifov = TmpVar(:)
 
- call obsspace_get_db(obss, "MetaData", "Scan_Angle", TmpVar) !The Sensor_Scan_Angle is optional
+ call obsspace_get_db(obss, "MetaData", "scan_angle", TmpVar) !The Sensor_Scan_Angle is optional
  geo(:)%Sensor_Scan_Angle = TmpVar(:)
 
  deallocate(TmpVar)
@@ -412,25 +412,9 @@ character(len=3) :: chan
 
  ! pass in varname_tmplate = "brigtness_temperature"
  write(chan, '(I0)') n
- varname = trim(varname_tmplate) // '_' // trim(chan) // '_'
-
-end subroutine get_var_name
-
-! -----------------------------------------------------------------------------
-
-subroutine get_var_name_new(varname_tmplate,n,varname)
-
-character(len=*), intent(in) :: varname_tmplate
-integer, intent(in) :: n
-character(len=*), intent(out) :: varname
-
-character(len=3) :: chan
-
- ! pass in varname_tmplate = "brigtness_temperature"
- write(chan, '(I0)') n
  varname = trim(varname_tmplate) // '_' // trim(chan)
 
-end subroutine get_var_name_new
+end subroutine get_var_name
 
 ! -----------------------------------------------------------------------------
 

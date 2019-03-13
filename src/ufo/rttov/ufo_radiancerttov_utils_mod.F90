@@ -287,16 +287,16 @@ SUBROUTINE load_geom_data_rttov(obss,profiles)
   nlocs = obsspace_get_nlocs(obss)
   ALLOCATE(TmpVar(nlocs))
 
-  CALL obsspace_get_db(obss, "MetaData", "Sat_Zenith_Angle", TmpVar)
+  CALL obsspace_get_db(obss, "MetaData", "sat_zenith_angle", TmpVar)
   profiles(:)%zenangle = TmpVar(:)
 
-  CALL obsspace_get_db(obss, "MetaData", "Sat_Azimuth_Angle", TmpVar)
+  CALL obsspace_get_db(obss, "MetaData", "sat_azimuth_angle", TmpVar)
   profiles(:)%azangle = TmpVar(:)
 
-  CALL obsspace_get_db(obss, "MetaData", "Sol_Zenith_Angle", TmpVar)
+  CALL obsspace_get_db(obss, "MetaData", "sol_zenith_angle", TmpVar)
   profiles(:)%sunzenangle = TmpVar(:)
 
-  CALL obsspace_get_db(obss, "MetaData", "Sol_Azimuth_Angle", TmpVar)
+  CALL obsspace_get_db(obss, "MetaData", "sol_azimuth_angle", TmpVar)
   profiles(:)%sunazangle = TmpVar(:)
 
 
