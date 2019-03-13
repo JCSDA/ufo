@@ -128,9 +128,9 @@ subroutine ufo_insitutemperature_tlad_settraj(self, geovals, obss)
     allocate(obs_lon(obss_nlocs))
     allocate(obs_depth(obss_nlocs))
 
-    call obsspace_get_db(obss, "", "longitude", obs_lon)
-    call obsspace_get_db(obss, "", "latitude", obs_lat)
-    call obsspace_get_db(obss, "", "ocean_depth", obs_depth)
+    call obsspace_get_db(obss, "MetaData", "longitude", obs_lon)
+    call obsspace_get_db(obss, "MetaData", "latitude", obs_lat)
+    call obsspace_get_db(obss, "MetaData", "depth", obs_depth)
 
     self%lono = obs_lon
     self%lato = obs_lat

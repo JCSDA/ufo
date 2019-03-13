@@ -29,10 +29,11 @@ ObsInsituTemperature::ObsInsituTemperature(const ioda::ObsSpace & odb,
                                            const eckit::Configuration & config)
   : ObsOperatorBase(odb, config), keyOper_(0), odb_(odb), varin_(), varout_()
 {
-  const std::vector<std::string> vvin{"ocean_potential_temperature",
-                                      "ocean_salinity", "ocean_layer_thickness"};
+  const std::vector<std::string> vvin{"sea_water_potential_temperature",
+                                      "sea_water_practical_salinity",
+                                      "sea_water_cell_thickness"};
   varin_.reset(new oops::Variables(vvin));
-  const std::vector<std::string> vvout{"insitu_temperature"};
+  const std::vector<std::string> vvout{"sea_water_temperature"};  // Insitu temperature
   varout_.reset(new oops::Variables(vvout));
   const eckit::Configuration * configc = &config;
   ufo_insitutemperature_setup_f90(keyOper_, &configc);
