@@ -41,6 +41,8 @@ module read_diag
   use nc_diag_read_mod, only: nc_diag_read_init, nc_diag_read_close
   implicit none
 
+  integer, parameter :: max_string = 800
+
 ! Declare public and private
   private
 
@@ -247,14 +249,15 @@ end subroutine set_netcdf_read
 subroutine open_radiag(filename, ftin)
    character*500,   intent(in) :: filename
    integer(i_kind), intent(inout) :: ftin
+   character(max_string) :: err_msg
 
    integer(i_kind) :: i
 
    if (netcdf) then
       if (nopen_ncdiag >= MAX_OPEN_NCDIAG) then
-         write(6,*) 'OPEN_RADIAG:  ***ERROR*** Cannot open more than ', &
+         write(err_msg,*) 'OPEN_RADIAG:  ***ERROR*** Cannot open more than ', &
                     MAX_OPEN_NCDIAG, ' netcdf diag files.'
-         call abort
+         call abor1_ftn(err_msg)
       endif
       call nc_diag_read_init(filename,ftin)
       do i = 1, MAX_OPEN_NCDIAG
@@ -286,15 +289,16 @@ end subroutine open_radiag
 subroutine close_radiag(filename, ftin)
    character*500,   intent(in) :: filename
    integer(i_kind), intent(inout) :: ftin
+   character(max_string) :: err_msg
 
    integer(i_kind) :: id
 
    if (netcdf) then
       id = find_ncdiag_id(ftin)
       if (id < 0) then
-         write(6,*) 'CLOSE_RADIAG:  ***ERROR*** ncdiag file ', filename,   &
+         write(err_msg,*) 'CLOSE_RADIAG:  ***ERROR*** ncdiag file ', filename,   &
                     ' was not opened'
-         call abort
+         call abor1_ftn(err_msg)
       endif
       call nc_diag_read_close(filename)
       ncdiag_open_id(id) = -1
@@ -415,6 +419,7 @@ subroutine read_radiag_header_nc(ftin,npred_radiag,retrieval,header_fix,header_c
                                             ireal, ipchan, iextra, jextra,   &
                                             idiag, angord, iversion, inewpc, &
                                             isens
+  character(max_string)                  :: err_msg
 
   iflag = 0
 !  allocate(nchan_diag(1) )
@@ -425,8 +430,8 @@ subroutine read_radiag_header_nc(ftin,npred_radiag,retrieval,header_fix,header_c
   call nc_diag_read_get_global_attr(ftin, "Number_of_channels", nchan_diag)
 
   if (nchan_dim .ne. nchan_diag) then
-     write(*,*)'ERROR: Number of channels from dimension do not match those from header, aborting.'
-     call abort
+     write(err_msg,*)'ERROR: Number of channels from dimension do not match those from header, aborting.'
+     call abor1_ftn(err_msg)
   endif  
 
   call nc_diag_read_get_global_attr(ftin, "Satellite_Sensor", isis)      ; header_fix%isis = isis
@@ -762,7 +767,8 @@ subroutine read_radiag_data(ftin,header_fix,retrieval,data_fix,data_chan,data_ex
   type(diag_data_fix_list)   ,intent(out):: data_fix
   type(diag_data_chan_list)  ,allocatable :: data_chan(:)
   type(diag_data_extra_list) ,allocatable :: data_extra(:,:)
-  integer(i_kind),intent(out)            :: iflag
+  integer(i_kind),intent(out)             :: iflag
+  character(max_string)                   :: err_msg
 
   integer(i_kind) :: id
 
@@ -770,8 +776,8 @@ subroutine read_radiag_data(ftin,header_fix,retrieval,data_fix,data_chan,data_ex
 
      id = find_ncdiag_id(ftin)
      if (id < 0) then
-        write(6,*) 'READ_RADIAG_DATA:  ***ERROR*** netcdf diag file ', ftin, ' has not been opened yet.'
-        call abort
+        write(err_msg,*) 'READ_RADIAG_DATA:  ***ERROR*** netcdf diag file ', ftin, ' has not been opened yet.'
+        call abor1_ftn(err_msg)
      endif
 
      if (.not. ncdiag_open_status(id)%nc_read) then
@@ -807,15 +813,16 @@ subroutine read_all_radiag(ftin, header_fix, retrieval, all_data_fix, &
   type(diag_data_fix_list),  allocatable  :: all_data_fix(:)
   type(diag_data_chan_list), allocatable  :: all_data_chan(:,:)
   type(diag_data_extra_list), allocatable :: all_data_extra(:,:,:)
-  integer(i_kind), intent(out) :: nobs
+  integer(i_kind), intent(out)            :: nobs
+  character(max_string)                   :: err_msg
 
   integer(i_kind) :: id
 
   if (netcdf) then
      id = find_ncdiag_id(ftin)
      if (id < 0) then
-        write(6,*) 'READ_RADIAG_DATA:  ***ERROR*** netcdf diag file ', ftin, ' has not been opened yet.'
-        call abort
+        write(err_msg,*) 'READ_RADIAG_DATA:  ***ERROR*** netcdf diag file ', ftin, ' has not been opened yet.'
+        call abor1_ftn(err_msg)
      endif
 
      if (.not. ncdiag_open_status(id)%nc_read) then
@@ -889,6 +896,7 @@ subroutine read_radiag_data_nc_init(ftin, diag_status, header_fix, retrieval)
   real(r_kind), allocatable, dimension(:,:)   :: BC_angord ! (nobs, BC_angord_arr_dim) ;
 
   real(r_kind)                                :: clat, clon
+  character(max_string)                       :: err_msg
 
   ndatum = nc_diag_read_get_dim(ftin,'nobs')
   if (header_fix%angord > 0) then
@@ -1050,11 +1058,11 @@ subroutine read_radiag_data_nc_init(ftin, diag_status, header_fix, retrieval)
 
     do ic=1,header_fix%nchan
       if (clat .ne. Latitude(cdatum) .or. clon .ne. Longitude(cdatum)) then
-        write(*,*) 'ERROR: Lats & Lons are mismatched.  This is bad'
-        print *,'irecord=',ir
-        print *,'clat,clon=',clat,clon
-        print *,'lat/lon(datum)=',Latitude(cdatum), Longitude(cdatum)
-        call abort
+        write(err_msg,*) 'ERROR: Lats & Lons are mismatched.  This is bad', &
+                         "\n irecord=",ir, &
+                         "\n clat,clon=",clat,clon, &
+                         "\n lat/lon(datum)=",Latitude(cdatum), Longitude(cdatum)
+        call abor1_ftn(err_msg)
       endif
       cch = Channel_Index(cdatum)
       if (allocated(diag_status%all_data_chan(ir,cch)%bifix)) deallocate(diag_status%all_data_chan(ir,cch)%bifix )
