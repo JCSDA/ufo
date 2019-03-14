@@ -29,6 +29,7 @@ namespace ioda {
 
 namespace ufo {
   class GeoVaLs;
+  class Locations;
   class ObsBias;
 
 // -----------------------------------------------------------------------------
@@ -48,6 +49,8 @@ class ObsGnssroBndROPP2D : public ObsOperatorBase,
 // Other
   const oops::Variables & variables() const {return *varin_;}
   const oops::Variables & observed() const {return *varout_;}
+
+  Locations * locations(const util::DateTime &, const util::DateTime &) const;
 
   int & toFortran() {return keyOperGnssroBndROPP2D_;}
   const int & toFortran() const {return keyOperGnssroBndROPP2D_;}
