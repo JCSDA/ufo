@@ -32,6 +32,7 @@ class Locations : public util::Printable,
  public:
   static const std::string classname() {return "ufo::Locations";}
 
+  Locations();
   Locations(const ioda::ObsSpace &, const util::DateTime &, const util::DateTime &);
   explicit Locations(const eckit::Configuration &);
   ~Locations();
