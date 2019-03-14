@@ -86,7 +86,7 @@ subroutine ufo_gnssro_bndropp1d_simobs(self, geovals, hofx, obss)
   iflip = 0
   if (prs%vals(1,1) .lt. prs%vals(prs%nval,1) ) then
     iflip = 1 
-    write(err_msg,*) "TRACE: ufo_gnssro_bndropp1d_simobs:
+    write(err_msg,*) "TRACE: ufo_gnssro_bndropp1d_simobs:                   &
                       Model vertical height profile is in descending order, &
                       but ROPP requires it to be ascending order, &
                       need flip"
