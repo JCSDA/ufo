@@ -208,7 +208,7 @@ character(max_string) :: err_msg
 !** BTJ added 11/20/2018 for compatibility with CRTM REL 2.3.0+
 !** need to map to cloud fraction geoval, if it exists.  For now assume
 !** fully filled pixel. 
-       atm(k1)%Cloud_Fraction = 1.0_fp
+!       atm(k1)%Cloud_Fraction = 1.0_fp
        
     ENDIF
 
