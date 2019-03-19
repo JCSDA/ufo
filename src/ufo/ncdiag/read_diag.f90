@@ -1059,9 +1059,9 @@ subroutine read_radiag_data_nc_init(ftin, diag_status, header_fix, retrieval)
     do ic=1,header_fix%nchan
       if (clat .ne. Latitude(cdatum) .or. clon .ne. Longitude(cdatum)) then
         write(err_msg,*) 'ERROR: Lats & Lons are mismatched.  This is bad', &
-                         "\n irecord=",ir, &
-                         "\n clat,clon=",clat,clon, &
-                         "\n lat/lon(datum)=",Latitude(cdatum), Longitude(cdatum)
+                         new_line('a')//"irecord = ", ir, &
+                         new_line('a')//"clat,clon = ", clat, clon, &
+                         new_line('a')//"lat/lon(datum) = ", latitude(cdatum), longitude(cdatum)
         call abor1_ftn(err_msg)
       endif
       cch = Channel_Index(cdatum)
