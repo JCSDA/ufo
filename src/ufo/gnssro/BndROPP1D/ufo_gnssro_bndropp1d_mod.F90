@@ -85,8 +85,8 @@ subroutine ufo_gnssro_bndropp1d_simobs(self, geovals, hofx, obss)
   iflip = 0
   if (prs%vals(1,1) .lt. prs%vals(prs%nval,1) ) then
     iflip = 1 
-    write(err_msg,'(a)') '  ufo_gnssro_bndropp1d_simobs:'//NEW_LINE('a')//                         &
-                         '  Model vertical height profile is in descending order,'//NEW_LINE('a')// &
+    write(err_msg,'(a)') '  ufo_gnssro_bndropp1d_simobs:'//new_line('a')//                         &
+                         '  Model vertical height profile is in descending order,'//new_line('a')// &
                          '  but ROPP requires it to be ascending order, need flip'
     call fckit_log%info(err_msg)
   end if
