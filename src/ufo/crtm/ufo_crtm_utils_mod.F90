@@ -379,7 +379,7 @@ integer :: nlocs
  geo(:)%Sensor_Zenith_Angle = TmpVar(:)
 
  call obsspace_get_db(obss, "MetaData", "sol_zenith_angle", TmpVar)
- geo(:)%Source_Zenith_Angle = TmpVar(:)
+ geo(:)%Source_Zenith_Angle = abs(TmpVar(:)) ! needs to be absolute value
 
  call obsspace_get_db(obss, "MetaData", "sat_azimuth_angle", TmpVar)
  geo(:)%Sensor_Azimuth_Angle = TmpVar(:)
@@ -397,6 +397,10 @@ integer :: nlocs
     geo(:)%Sensor_Azimuth_Angle = 0.0_kind_real
  where (geo(:)%Sensor_Azimuth_Angle < 0.0_kind_real) &
     geo(:)%Sensor_Azimuth_Angle = 0.0_kind_real
+ where (geo(:)%Sensor_Scan_Angle > 360.0_kind_real) &
+    geo(:)%Sensor_Scan_Angle = 0.0_kind_real
+ where (geo(:)%Sensor_Scan_Angle < 0.0_kind_real) &
+    geo(:)%Sensor_Scan_Angle = 0.0_kind_real
 
  call obsspace_get_db(obss, "MetaData", "scan_position", TmpVar)
  geo(:)%Ifov = TmpVar(:)
