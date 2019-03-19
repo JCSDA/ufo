@@ -376,10 +376,10 @@ integer :: nlocs
  allocate(TmpVar(nlocs))
 
  call obsspace_get_db(obss, "MetaData", "sat_zenith_angle", TmpVar)
- geo(:)%Sensor_Zenith_Angle = TmpVar(:)
+ geo(:)%Sensor_Zenith_Angle = abs(TmpVar(:)) ! needs to be absolute value
 
  call obsspace_get_db(obss, "MetaData", "sol_zenith_angle", TmpVar)
- geo(:)%Source_Zenith_Angle = abs(TmpVar(:)) ! needs to be absolute value
+ geo(:)%Source_Zenith_Angle = TmpVar(:)
 
  call obsspace_get_db(obss, "MetaData", "sat_azimuth_angle", TmpVar)
  geo(:)%Sensor_Azimuth_Angle = TmpVar(:)
