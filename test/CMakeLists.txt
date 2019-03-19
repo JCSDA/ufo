@@ -28,7 +28,6 @@ list( APPEND ufo_test_input
   testinput/amsua_crtm.yaml
   testinput/amsua_rttov.yaml
   testinput/mhs_crtm.yaml
-  testinput/mhs_rttov.yaml
   testinput/radiosonde.yaml
   testinput/radiosonde_qc.yaml
   testinput/aircraft.yaml
@@ -179,17 +178,6 @@ if( ${RTTOV_FOUND} )
                     BOOST
                     SOURCES mains/TestObsOperatorTLAD.cc
                     ARGS    "testinput/amsua_rttov.yaml"
-                    LIBS    ufo )
-  ecbuild_add_test( TARGET  test_ufo_mhs_opr_rttov
-                    BOOST
-                    SOURCES mains/TestObsOperator.cc
-                    ARGS    "testinput/mhs_rttov.yaml"
-                    LIBS    ufo )
-
-  ecbuild_add_test( TARGET  test_ufo_mhs_tlad_rttov
-                    BOOST
-                    SOURCES mains/TestObsOperatorTLAD.cc
-                    ARGS    "testinput/mhs_rttov.yaml"
                     LIBS    ufo )
 endif( ${RTTOV_FOUND} )
 
@@ -397,7 +385,6 @@ CREATE_SYMLINK_FILENAME( ${crtm_SOURCE_DIR}/fix
 if( ${RTTOV_FOUND} )
 list( APPEND rttov_test_input
 rttov7pred54L/rtcoef_noaa_19_amsua.dat
-rttov7pred54L/rtcoef_noaa_19_mhs.dat
 )
 
 # Symlink all CRTM files
