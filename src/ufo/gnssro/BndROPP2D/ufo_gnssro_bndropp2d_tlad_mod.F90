@@ -59,7 +59,6 @@ subroutine ufo_gnssro_bndropp2d_tlad_settraj(self, geovals, obss)
   call ufo_geovals_get_var(geovals, var_q,     q)         ! specific humidity
   call ufo_geovals_get_var(geovals, var_prs,   prs)       ! pressure
   call ufo_geovals_get_var(geovals, var_z,     gph)       ! geopotential height
-!  call ufo_geovals_get_var(geovals, var_sfc_z, gph_sfc)   ! surface geopotential height
       
   call self%delete()   
 
@@ -70,10 +69,10 @@ subroutine ufo_gnssro_bndropp2d_tlad_settraj(self, geovals, obss)
   self%iflip = 0
   if (prs%vals(1,1) .lt. prs%vals(prs%nval,1) ) then
     self%iflip = 1 
-    write(err_msg,'(a)') 'TRACE: ufo_gnssro_bndropp2d_tlad_settraj:',           &
-                         'Model vertical height profile is in descending order',&
-                         'but ROPP requires it to be ascending order',          &
-                         'need flip'
+    write(err_msg,'(a)') 'TRACE: ufo_gnssro_bndropp2d_tlad_settraj:'//NEW_LINE('A')//                   &
+                         '       Model vertical height profile is in descending order'//NEW_LINE('A')// &
+                         '       but ROPP requires it to be ascending order'//NEW_LINE('A')//           &
+                         '       need flip'
     call fckit_log%info(err_msg)
   end if
 
@@ -81,14 +80,12 @@ subroutine ufo_gnssro_bndropp2d_tlad_settraj(self, geovals, obss)
   allocate(self%q(self%nval,self%nobs))
   allocate(self%prs(self%nval,self%nobs))
   allocate(self%gph(self%nval,self%nobs))
-!  allocate(self%gph_sfc(1,self%nobs))
 
 ! allocate  
   self%gph     = gph%vals
   self%t       = t%vals
   self%q       = q%vals
   self%prs     = prs%vals
-!  self%gph_sfc = gph_sfc%vals
 
   self%ltraj   = .true.
        
@@ -169,7 +166,7 @@ subroutine ufo_gnssro_bndropp2d_simobs_tl(self, geovals, hofx, obss)
   obs_loop: do iobs = 1, nobs   ! order of loop doesn't matter
 
 !   map the trajectory to ROPP structure x
-    call init_ropp_2d_statevec(        &
+    call init_ropp_2d_statevec(                &
                         obsLon(iobs),          &
                         obsLat(iobs),          &
                         self%t(:,iobs),        &
@@ -177,21 +174,21 @@ subroutine ufo_gnssro_bndropp2d_simobs_tl(self, geovals, hofx, obss)
                         self%prs(:,iobs),      &
                         self%gph(:,iobs),      &
                                    nlev,       &
-                                     x)
+                          x, self%iflip)
 !  hack -- make non zero humidity to avoid zero denominator in tangent linear
 !          see  ropp_fm/bangle_1d/ropp_fm_bangle_1d_tl.f90
     where(x%shum .le. 1e-8)        x%shum = 1e-8
 !  hack -- make non zero humidity to avoid zero denominator in tangent linear
 
-    call init_ropp_2d_statevec(            &
+    call init_ropp_2d_statevec(                 &
                         obsLon(iobs),           &
                         obsLat(iobs),           &
                         t_d%vals(:,iobs),       &
                         q_d%vals(:,iobs),       &
                         prs_d%vals(:,iobs),     &
                         gph_d_zero(:),          &
-                                   nlev,        &
-                                   x_tl, self%iflip)
+                                 nlev,          &
+                          x_tl, self%iflip)
 !   set both y and y_tl structures    
     call init_ropp_2d_obvec_tlad(iobs, nvprof, &
                       obsImpP(iobs),           &
@@ -334,7 +331,7 @@ subroutine ufo_gnssro_bndropp2d_simobs_ad(self, geovals, hofx, obss)
                           self%prs(:,iobs),    &
                           self%gph(:,iobs),    &
                                      nlev,     &
-                                    x)
+                            x, self%iflip)
 
         call init_ropp_2d_statevec(   &
                             obsLon(iobs),     &
@@ -344,7 +341,7 @@ subroutine ufo_gnssro_bndropp2d_simobs_ad(self, geovals, hofx, obss)
                        prs_d%vals(:,iobs),    &
                             gph_d_zero(:),    &
                                      nlev,    &
-                                     x_ad)
+                         x_ad, self%iflip)
 
 
  !      x_ad is local so initialise to 0.0
@@ -374,7 +371,7 @@ subroutine ufo_gnssro_bndropp2d_simobs_ad(self, geovals, hofx, obss)
                           q_d%vals(:,iobs),      &
                         prs_d%vals(:,iobs),      &
                         gph_d_zero(:),           &
-                           nlev,x_ad, self%iflip) 
+                     nlev, x_ad, self%iflip) 
 
 !     tidy up - deallocate ropp structures  
       call ropp_tidy_up_tlad_2d(x,x_ad,y,y_ad)
