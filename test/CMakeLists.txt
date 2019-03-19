@@ -27,6 +27,8 @@ list( APPEND ufo_test_input
   testinput/ufotest_atmosphere.yaml
   testinput/amsua_crtm.yaml
   testinput/amsua_rttov.yaml
+  testinput/mhs_crtm.yaml
+  testinput/mhs_rttov.yaml
   testinput/radiosonde.yaml
   testinput/radiosonde_qc.yaml
   testinput/aircraft.yaml
@@ -54,6 +56,7 @@ list( APPEND ufo_test_data
   atmosphere/aircraft_geoval_2018041500_s.nc4
   atmosphere/amsua_n19_geoval_2018041500_m.nc4
   atmosphere/amsua_n19_geoval_2018041500_s.nc4
+  atmosphere/mhs_n19_geoval_2018041500_m.nc4
   atmosphere/sondes_geoval_2018041500_m.nc4
   atmosphere/sondes_geoval_2018041500_s.nc4
   atmosphere/gnssro_geoval_2018041500_s.nc4
@@ -104,6 +107,7 @@ list (APPEND ioda_obs_test_data
   atmosphere/aircraft_obs_2018041500_s.nc4
   atmosphere/amsua_n19_obs_2018041500_m.nc4
   atmosphere/amsua_n19_obs_2018041500_s.nc4
+  atmosphere/mhs_n19_obs_2018041500_m.nc4
   atmosphere/sondes_obs_2018041500_m.nc4
   atmosphere/sondes_obs_2018041500_s.nc4
   atmosphere/gnssro_obs_2018041500_s.nc4
@@ -152,6 +156,17 @@ ecbuild_add_test( TARGET  test_ufo_amsua_tlad_crtm
                   SOURCES mains/TestObsOperatorTLAD.cc
                   ARGS    "testinput/amsua_crtm.yaml"
                   LIBS    ufo )
+ecbuild_add_test( TARGET  test_ufo_mhs_opr_crtm
+                  BOOST
+                  SOURCES mains/TestObsOperator.cc
+                  ARGS    "testinput/mhs_crtm.yaml"
+                  LIBS    ufo )
+
+ecbuild_add_test( TARGET  test_ufo_mhs_tlad_crtm
+                  BOOST
+                  SOURCES mains/TestObsOperatorTLAD.cc
+                  ARGS    "testinput/mhs_crtm.yaml"
+                  LIBS    ufo )
 
 if( ${RTTOV_FOUND} )
   ecbuild_add_test( TARGET  test_ufo_amsua_opr_rttov
@@ -164,6 +179,17 @@ if( ${RTTOV_FOUND} )
                     BOOST
                     SOURCES mains/TestObsOperatorTLAD.cc
                     ARGS    "testinput/amsua_rttov.yaml"
+                    LIBS    ufo )
+  ecbuild_add_test( TARGET  test_ufo_mhs_opr_rttov
+                    BOOST
+                    SOURCES mains/TestObsOperator.cc
+                    ARGS    "testinput/mhs_rttov.yaml"
+                    LIBS    ufo )
+
+  ecbuild_add_test( TARGET  test_ufo_mhs_tlad_rttov
+                    BOOST
+                    SOURCES mains/TestObsOperatorTLAD.cc
+                    ARGS    "testinput/mhs_rttov.yaml"
                     LIBS    ufo )
 endif( ${RTTOV_FOUND} )
 
@@ -354,6 +380,8 @@ EmisCoeff/IR_Land/SEcategory/Little_Endian/USGS.IRland.EmisCoeff.bin
 EmisCoeff/VIS_Land/SEcategory/Little_Endian/USGS.VISland.EmisCoeff.bin
 SpcCoeff/Little_Endian/amsua_n19.SpcCoeff.bin
 TauCoeff/ODPS/Little_Endian/amsua_n19.TauCoeff.bin
+SpcCoeff/Little_Endian/mhs_n19.SpcCoeff.bin
+TauCoeff/ODPS/Little_Endian/mhs_n19.TauCoeff.bin
 SpcCoeff/Little_Endian/v.viirs-m_npp.SpcCoeff.bin
 TauCoeff/ODAS/Little_Endian/v.viirs-m_npp.TauCoeff.bin
 )
@@ -369,6 +397,7 @@ CREATE_SYMLINK_FILENAME( ${crtm_SOURCE_DIR}/fix
 if( ${RTTOV_FOUND} )
 list( APPEND rttov_test_input
 rttov7pred54L/rtcoef_noaa_19_amsua.dat
+rttov7pred54L/rtcoef_noaa_19_mhs.dat
 )
 
 # Symlink all CRTM files
