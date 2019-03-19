@@ -26,6 +26,7 @@ endfunction(CREATE_SYMLINK_FILENAME)
 list( APPEND ufo_test_input
   testinput/ufotest_atmosphere.yaml
   testinput/amsua_crtm.yaml
+  testinput/hirs4_crtm.yaml
   testinput/amsua_rttov.yaml
   testinput/radiosonde.yaml
   testinput/radiosonde_qc.yaml
@@ -61,6 +62,7 @@ list( APPEND ufo_test_data
   atmosphere/aod_geoval_2018041500_s.nc4
   atmosphere/satwind_geoval_2018041500_m.nc4
   atmosphere/satwind_geoval_2018041500_s.nc4
+  atmosphere/hirs4_metop-a_geoval_2018041500_m.nc4
 )
 
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Data)
@@ -147,10 +149,22 @@ ecbuild_add_test( TARGET  test_ufo_amsua_opr_crtm
                   ARGS    "testinput/amsua_crtm.yaml"
                   LIBS    ufo )
 
+ecbuild_add_test( TARGET  test_ufo_hirs4_opr_crtm
+                  BOOST
+                  SOURCES mains/TestObsOperator.cc
+                  ARGS    "testinput/hirs4_crtm.yaml"
+                  LIBS    ufo )
+
 ecbuild_add_test( TARGET  test_ufo_amsua_tlad_crtm
                   BOOST
                   SOURCES mains/TestObsOperatorTLAD.cc
                   ARGS    "testinput/amsua_crtm.yaml"
+                  LIBS    ufo )
+
+ecbuild_add_test( TARGET  test_ufo_hirs4_tlad_crtm
+                  BOOST
+                  SOURCES mains/TestObsOperatorTLAD.cc
+                  ARGS    "testinput/hirs4_crtm.yaml"
                   LIBS    ufo )
 
 if( ${RTTOV_FOUND} )
@@ -352,8 +366,8 @@ EmisCoeff/VIS_Water/SEcategory/Little_Endian/NPOESS.VISwater.EmisCoeff.bin
 EmisCoeff/IR_Water/Little_Endian/Nalli.IRwater.EmisCoeff.bin
 EmisCoeff/IR_Land/SEcategory/Little_Endian/USGS.IRland.EmisCoeff.bin
 EmisCoeff/VIS_Land/SEcategory/Little_Endian/USGS.VISland.EmisCoeff.bin
-SpcCoeff/Little_Endian/amsua_n19.SpcCoeff.bin
-TauCoeff/ODPS/Little_Endian/amsua_n19.TauCoeff.bin
+SpcCoeff/Little_Endian/hirs4_metop-a.SpcCoeff.bin
+TauCoeff/ODPS/Little_Endian/hirs4_metop-a.TauCoeff.bin
 SpcCoeff/Little_Endian/v.viirs-m_npp.SpcCoeff.bin
 TauCoeff/ODAS/Little_Endian/v.viirs-m_npp.TauCoeff.bin
 )
