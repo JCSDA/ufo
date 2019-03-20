@@ -379,7 +379,7 @@ integer :: nlocs
  allocate(TmpVar(nlocs))
 
  call obsspace_get_db(obss, "MetaData", "sat_zenith_angle", TmpVar)
- geo(:)%Sensor_Zenith_Angle = TmpVar(:)
+ geo(:)%Sensor_Zenith_Angle = abs(TmpVar(:)) ! needs to be absolute value
 
  call obsspace_get_db(obss, "MetaData", "sol_zenith_angle", TmpVar)
  geo(:)%Source_Zenith_Angle = TmpVar(:)
@@ -389,6 +389,18 @@ integer :: nlocs
 
  call obsspace_get_db(obss, "MetaData", "sol_azimuth_angle", TmpVar)
  geo(:)%Source_Azimuth_Angle = TmpVar(:)
+
+!  For some microwave instruments the solar and sensor azimuth angles can be
+!  missing  (given a value of 10^11).  Set these to zero to get past CRTM QC.
+ where (geo(:)%Source_Azimuth_Angle < 0.0_kind_real .or. &
+        geo(:)%Source_Azimuth_Angle > 360.0_kind_real) &
+    geo(:)%Source_Azimuth_Angle = 0.0_kind_real
+ where (geo(:)%Sensor_Azimuth_Angle < 0.0_kind_real .or. &
+        geo(:)%Sensor_Azimuth_Angle > 360.0_kind_real) &
+    geo(:)%Sensor_Azimuth_Angle = 0.0_kind_real
+ where (geo(:)%Sensor_Scan_Angle < 0.0_kind_real .or. &
+        geo(:)%Sensor_Scan_Angle > 360.0_kind_real) &
+    geo(:)%Sensor_Scan_Angle = 0.0_kind_real
 
  call obsspace_get_db(obss, "MetaData", "scan_position", TmpVar)
  geo(:)%Ifov = TmpVar(:)
