@@ -64,7 +64,7 @@ Observations:
       ObsDataIn:
         obsfile: Data/sst_obs-2018-04-15.nc4
     variables:
-    - ocean_upper_level_temperature
+    - sea_surface_temperature
     GeoVaLs:
       norm: 7098.7569334355994
       random: 0

@@ -54,12 +54,12 @@ subroutine ufo_gnssro_bndropp2d_simobs(self, geovals, hofx, obss)
   character(len=*), parameter     :: myname_="ufo_gnssro_bndropp2d_simobs"
   integer, parameter              :: max_string = 800
   character(max_string)           :: err_msg
-  integer                         :: nlev, nobs, iobs, nvprof, obss_nobs
+  integer                         :: nlev, nobs, iobs, nvprof
   integer                         :: ierr
   real(kind=dp)                   :: ob_time
   type(ufo_geoval), pointer          :: t, q, prs, gph !, gph_sfc
   real(kind_real), allocatable       :: obsLat(:), obsLon(:), obsImpP(:), obsLocR(:), obsGeoid(:)
-
+  integer                            :: iflip
 
   write(err_msg,*) "TRACE: ufo_gnssro_bndropp2d_simobs: begin"
   call fckit_log%info(err_msg)
@@ -82,6 +82,14 @@ subroutine ufo_gnssro_bndropp2d_simobs(self, geovals, hofx, obss)
   nlev  = t%nval ! number of model levels
   nobs  = obsspace_get_nlocs(obss)
 
+  iflip = 0
+  if (prs%vals(1,1) .lt. prs%vals(prs%nval,1) ) then
+    iflip = 1
+    write(err_msg,'(a)') '  ufo_gnssro_bndropp2d_simobs:'//new_line('a')//                         &
+                         '  Model vertical height profile is in descending order,'//new_line('a')// &
+                         '  but ROPP requires it to be ascending order, need flip'
+    call fckit_log%info(err_msg)
+  end if
 ! set obs space struture
   allocate(obsLon(nobs))
   allocate(obsLat(nobs))
@@ -103,22 +111,22 @@ subroutine ufo_gnssro_bndropp2d_simobs(self, geovals, hofx, obss)
 ! loop through the obs
   obs_loop: do iobs = 1, nobs  
 
-    call init_ropp_2d_statevec(            &
+    call init_ropp_2d_statevec(          &
                       obsLon(iobs),      &
                       obsLat(iobs),      &
-                           t%vals(:,iobs),      &
-                           q%vals(:,iobs),      &
-                         prs%vals(:,iobs),      &
-                           gph%vals(:,iobs),      &
-                                  nlev,x)
+                    t%vals(:,iobs),      &
+                    q%vals(:,iobs),      &
+                  prs%vals(:,iobs),      &
+                  gph%vals(:,iobs),      &
+                     nlev,x, iflip)
      
-    call init_ropp_2d_obvec(nvprof,        &
+    call init_ropp_2d_obvec(nvprof,      &
                   obsImpP(iobs),         &
                    obsLat(iobs),         &
                    obsLon(iobs),         &
                   obsLocR(iobs),         &
                  obsGeoid(iobs),         &
-                                     y)
+                             y)
 
     call ropp_fm_bangle_2d(x,y)
 

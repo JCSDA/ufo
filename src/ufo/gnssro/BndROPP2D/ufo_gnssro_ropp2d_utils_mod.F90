@@ -32,7 +32,7 @@ contains
 
 ! ------------------------------------------------------------------------------------
 ! ------------------------------------------------------------------------------------
-subroutine init_ropp_2d_statevec(rlon,rlat,temp,shum,pres,phi,lm,x)
+subroutine init_ropp_2d_statevec(rlon,rlat,temp,shum,pres,phi,lm,x, iflip)
 
 !  Description:
 !     subroutine to fill a ROPP state vector structure with
@@ -61,6 +61,7 @@ subroutine init_ropp_2d_statevec(rlon,rlat,temp,shum,pres,phi,lm,x)
 ! Local variables
   integer :: n,i,j,k
   real    :: rlon_local
+  integer, optional, intent(in)  :: iflip
 !-------------------------------------------------------------------------
 ! number of profiles in plane
   x%n_horiz=31
@@ -98,25 +99,31 @@ subroutine init_ropp_2d_statevec(rlon,rlat,temp,shum,pres,phi,lm,x)
 !----------------------------------------------------
 
   n = lm
+  if ( present(iflip) .and. iflip .eq. 1) then
 
-! BCR  write(*,'(4a9,a11)') 'lvl','temp','shum','pres','geop'
-  do k = 1, lm
+    do k = 1, lm
+       x%temp(n,:) = real(temp(k),kind=wp)
+       x%shum(n,:) = real(shum(k),kind=wp)
+       x%pres(n,:) = real(pres(k)*100.,kind=wp)
+       x%geop(n,:) = real(phi(k),kind=wp)
+       n = n - 1
+    end do
 
-     x%temp(n,:) = real(temp(k),kind=wp)
-     x%shum(n,:) = real(shum(k),kind=wp)
-     x%pres(n,:) = real(pres(k)*100.,kind=wp)
-     x%geop(n,:) = real(phi(k),kind=wp)
+  else
+    do k = 1, lm
+       x%temp(k,:) = real(temp(k),kind=wp)
+       x%shum(k,:) = real(shum(k),kind=wp)
+       x%pres(k,:) = real(pres(k)*100.,kind=wp)
+       x%geop(k,:) = real(phi(k),kind=wp)
+    end do
 
-     n = n - 1
-
-  end do
-
+  end if
   return
 end subroutine init_ropp_2d_statevec
 
 ! ------------------------------------------------------------------------------
 
-subroutine init_ropp_2d_statevec_ad(temp_d,shum_d,pres_d,phi_d,lm,x_ad)
+subroutine init_ropp_2d_statevec_ad(temp_d,shum_d,pres_d,phi_d,lm,x_ad, iflip)
 
 !  Description:
 !     subroutine to fill a ROPP state vector structure with
@@ -147,37 +154,49 @@ subroutine init_ropp_2d_statevec_ad(temp_d,shum_d,pres_d,phi_d,lm,x_ad)
   real(kind=kind_real), dimension(lm), intent(inout)    :: temp_d,shum_d,pres_d,phi_d
 
 ! Local variables
-  integer n,j,k
-  real rlon_local
-
+  integer ::  n,j,k
+  real    :: rlon_local
+  integer, optional, intent(in)  :: iflip
 !-------------------------------------------------------------------------
   n = lm
-  do k = 1, lm
+  if ( present(iflip) .and. iflip .eq. 1) then
 
-     do j =  1, x_ad%n_horiz
-!!!      x_tl%temp(n,:) = real(temp_d(k),kind=wp)
-         temp_d(k) = temp_d(k) + real(x_ad%temp(n,j),kind=kind_real)
-         x_ad%temp(n,j) = 0.0_wp
+    do k = 1, lm
+       do j =  1, x_ad%n_horiz
+!!!        x_tl%temp(n,:) = real(temp_d(k),kind=wp)
+           temp_d(k) = temp_d(k) + real(x_ad%temp(n,j),kind=kind_real)
+           x_ad%temp(n,j) = 0.0_wp
         
-!!!      x_tl%shum(n,:) = real(shum_d(k),kind=wp)
-         shum_d(k) = shum_d(k) + real(x_ad%shum(n,j),kind=kind_real)
-         x_ad%shum(n,j) = 0.0_wp
+!!!        x_tl%shum(n,:) = real(shum_d(k),kind=wp)
+           shum_d(k) = shum_d(k) + real(x_ad%shum(n,j),kind=kind_real)
+           x_ad%shum(n,j) = 0.0_wp
         
-!!!      x_tl%pres(n,:) = real(pres_d(k)*100.,kind=wp)
-         pres_d(k) = pres_d(k) + 100.0*real(x_ad%pres(n,j),kind=kind_real)
-         x_ad%pres(n,j) = 0.0_wp
+!!!        x_tl%pres(n,:) = real(pres_d(k)*100.,kind=wp)
+           pres_d(k) = pres_d(k) + 100.0*real(x_ad%pres(n,j),kind=kind_real)
+           x_ad%pres(n,j) = 0.0_wp
         
-!!!      x_tl%geop(n,:) = real(phi_d(k),kind=wp)
-        
-         phi_d(k) = phi_d(k) + real(x_ad%geop(n,j),kind=kind_real)
-         x_ad%geop(n,j) = 0.0_wp
-        
+!!!        x_tl%geop(n,:) = real(phi_d(k),kind=wp)
+           phi_d(k) = phi_d(k) + real(x_ad%geop(n,j),kind=kind_real)
+           x_ad%geop(n,j) = 0.0_wp
       enddo
 
       n = n - 1
-   end do
-
-   return
+    end do
+  else
+    do k = 1, lm
+       do j =  1, x_ad%n_horiz
+           temp_d(k) = temp_d(k) + real(x_ad%temp(k,j),kind=kind_real)
+           x_ad%temp(k,j) = 0.0_wp
+           shum_d(k) = shum_d(k) + real(x_ad%shum(k,j),kind=kind_real)
+           x_ad%shum(k,j) = 0.0_wp
+           pres_d(k) = pres_d(k) + 100.0*real(x_ad%pres(k,j),kind=kind_real)
+           x_ad%pres(k,j) = 0.0_wp
+           phi_d(k) = phi_d(k) + real(x_ad%geop(k,j),kind=kind_real)
+           x_ad%geop(k,j) = 0.0_wp
+      enddo
+    end do
+  end if
+  return
  end subroutine init_ropp_2d_statevec_ad
 !-------------------------------------------------------------------------
 !---------------------------------------------------------------------------------------------

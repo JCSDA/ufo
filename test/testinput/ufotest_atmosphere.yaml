@@ -22,10 +22,10 @@ Observations:
     CoefficientPath: "Data/"
    ObsData: 
     ObsDataIn: 
-     obsfile: "Data/amsua_obs_n19_2018041500_m.nc4"
+     obsfile: "Data/amsua_n19_obs_2018041500_m.nc4"
    GeoVaLs: 
-    norm: "62902.291784229797"
-    filename: "Data/amsua_geoval_n19_2018041500_m.nc4"
+    norm: "71915.58953025"
+    filename: "Data/amsua_n19_geoval_2018041500_m.nc4"
     random: 0
     window_begin: "2018-04-14T21:00:00Z"
     window_end: "2018-04-15T03:00:00Z"

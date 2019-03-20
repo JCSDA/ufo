@@ -30,8 +30,9 @@ ObsInsituTemperatureTLAD::ObsInsituTemperatureTLAD(const ioda::ObsSpace & odb,
                                                    const eckit::Configuration & config)
   : keyOper_(0), varin_(), odb_(odb)
 {
-  const std::vector<std::string> vv{"ocean_potential_temperature",
-                                    "ocean_salinity", "ocean_layer_thickness"};
+  const std::vector<std::string> vv{"sea_water_potential_temperature",
+                                    "sea_water_practical_salinity",
+                                    "sea_water_cell_thickness"};
   varin_.reset(new oops::Variables(vv));
   const eckit::Configuration * configc = &config;
   ufo_insitutemperature_tlad_setup_f90(keyOper_, &configc);

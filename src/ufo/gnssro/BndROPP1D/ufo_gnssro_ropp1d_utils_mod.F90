@@ -33,7 +33,7 @@ contains
 ! ------------------------------------------------------------------------------------
 ! ------------------------------------------------------------------------------------
 
-subroutine init_ropp_1d_statevec(step_time,rlon,rlat, temp,shum,pres,phi,lm,phi_sfc,x)
+subroutine init_ropp_1d_statevec(step_time,rlon,rlat, temp,shum,pres,phi,lm,phi_sfc,x, iflip)
 !  Description:
 !     subroutine to fill a ROPP state vector structure with
 !     model background fields: Temperature, pressure, specific
@@ -63,7 +63,7 @@ subroutine init_ropp_1d_statevec(step_time,rlon,rlat, temp,shum,pres,phi,lm,phi_
   character(len=250)                 :: record
   real(kind=kind_real)               :: rlon_local
   integer ::  n,i,j,k
-
+  integer, optional, intent(in)  :: iflip
   x%non_ideal     = .FALSE.
   x%direct_ion    = .FALSE.
   x%state_ok      = .TRUE.
@@ -84,10 +84,10 @@ subroutine init_ropp_1d_statevec(step_time,rlon,rlat, temp,shum,pres,phi,lm,phi_
 ! allocate arrays for temperature, specific humidity, pressure
 ! and geopotential height data
 !--------------------------------------------------------------
-if (associated(x%temp)) deallocate(x%temp) 
-if (associated(x%shum)) deallocate(x%shum)
-if (associated(x%pres)) deallocate(x%pres)
-if (associated(x%geop)) deallocate(x%geop)
+  if (associated(x%temp)) deallocate(x%temp) 
+  if (associated(x%shum)) deallocate(x%shum)
+  if (associated(x%pres)) deallocate(x%pres)
+  if (associated(x%geop)) deallocate(x%geop)
 
   allocate(x%temp(x%n_lev))
   allocate(x%shum(x%n_lev))
@@ -97,18 +97,25 @@ if (associated(x%geop)) deallocate(x%geop)
 ! ROPP FM requires vertical height profile to be of the ascending order.
 ! (see ropp_io_ascend ( ROdata )). So we need to flip the data.
 !----------------------------------------------------
-  n = lm
   write(record,'(4a9,a11)') 'lvl','temp','shum','pres','geop'
 
-  do k = 1, lm
-     x%temp(n) = real(temp(k),kind=wp)
-     x%shum(n) = real(shum(k),kind=wp)
-     x%pres(n) = real(pres(k)*100.,kind=wp)
-     x%geop(n) = real(phi(k),kind=wp)
-     write(record,'(5x,i4,f9.2,f9.4,f9.1,f15.1)') &
-                  n, x%temp(n), x%shum(n), x%pres(n), x%geop(n)
-     n = n - 1
-  end do
+ n = lm
+ if ( present(iflip) .and. iflip .eq. 1) then
+   do k = 1, lm
+      x%temp(n) = real(temp(k),kind=wp)
+      x%shum(n) = real(shum(k),kind=wp)
+      x%pres(n) = real(pres(k)*100.,kind=wp)
+      x%geop(n) = real(phi(k),kind=wp)
+      n = n - 1
+   end do
+else
+   do k = 1, lm
+      x%temp(k) = real(temp(k),kind=wp)
+      x%shum(k) = real(shum(k),kind=wp)
+      x%pres(k) = real(pres(k)*100.,kind=wp)
+      x%geop(k) = real(phi(k),kind=wp)
+   end do
+end if
 
 ! sufrace geopotential height value
   x%geop_sfc = real(phi_sfc,kind=wp)
@@ -155,7 +162,7 @@ end subroutine init_ropp_1d_statevec
 !------------------------------------------------------------------------------------
 !------------------------------------------------------------------------------------
 
-subroutine init_ropp_1d_statevec_ad(temp_d,shum_d,pres_d,phi_d,lm,x_ad)
+subroutine init_ropp_1d_statevec_ad(temp_d,shum_d,pres_d,phi_d,lm,x_ad, iflip)
 
 !  Description:
 !     subroutine to fill a ROPP state vector structure with
@@ -179,33 +186,47 @@ subroutine init_ropp_1d_statevec_ad(temp_d,shum_d,pres_d,phi_d,lm,x_ad)
   real(kind=kind_real), dimension(lm), intent(inout)    :: temp_d,shum_d,pres_d,phi_d
 
 ! Local variables
-  integer n,j,k
-  real   rlon_local
+  integer   ::   n,j,k
+  real      ::   rlon_local
+  integer, optional, intent(in) :: iflip
 !-------------------------------------------------------------------------
 
   n = lm
 
-  do k = 1, lm
+  if ( present(iflip) .and. iflip .eq. 1) then
+    do k = 1, lm
 
-!!   x_tl%temp(n,:) = real(temp_d(k),kind=wp)
-     temp_d(k) = temp_d(k) + real(x_ad%temp(n),kind=kind_real)
-     x_ad%temp(n) = 0.0_wp
+!!     x_tl%temp(n,:) = real(temp_d(k),kind=wp)
+       temp_d(k) = temp_d(k) + real(x_ad%temp(n),kind=kind_real)
+       x_ad%temp(n) = 0.0_wp
 
-!!   x_tl%shum(n,:) = real(shum_d(k),kind=wp)
-     shum_d(k) = shum_d(k) + real(x_ad%shum(n),kind=kind_real)
-     x_ad%shum(n) = 0.0_wp
+!!     x_tl%shum(n,:) = real(shum_d(k),kind=wp)
+       shum_d(k) = shum_d(k) + real(x_ad%shum(n),kind=kind_real)
+       x_ad%shum(n) = 0.0_wp
 
-!!   x_tl%pres(n,:) = real(pres_d(k)*100.,kind=wp)
-     pres_d(k) = pres_d(k) + 100.0*real(x_ad%pres(n),kind=kind_real)
-     x_ad%pres(n) = 0.0_wp 
+!!     x_tl%pres(n,:) = real(pres_d(k)*100.,kind=wp)
+       pres_d(k) = pres_d(k) + 100.0*real(x_ad%pres(n),kind=kind_real)
+       x_ad%pres(n) = 0.0_wp 
 
-!!   x_tl%geop(n,:) = real(phi_d(k),kind=wp)
-     phi_d(k) = phi_d(k) + real(x_ad%geop(n),kind=kind_real)
-     x_ad%geop(n) = 0.0_wp
+!!     x_tl%geop(n,:) = real(phi_d(k),kind=wp)
+       phi_d(k) = phi_d(k) + real(x_ad%geop(n),kind=kind_real)
+       x_ad%geop(n) = 0.0_wp
 
-     n = n -1
-  end do
+       n = n -1
+    end do
+  else
+    do k = 1, lm
+       temp_d(k) = temp_d(k) + real(x_ad%temp(k),kind=kind_real)
+       x_ad%temp(k) = 0.0_wp
+       shum_d(k) = shum_d(k) + real(x_ad%shum(k),kind=kind_real)
+       x_ad%shum(k) = 0.0_wp
+       pres_d(k) = pres_d(k) + 100.0*real(x_ad%pres(k),kind=kind_real)
+       x_ad%pres(k) = 0.0_wp
+       phi_d(k) = phi_d(k) + real(x_ad%geop(k),kind=kind_real)
+       x_ad%geop(k) = 0.0_wp
+     end do
 
+  end if
   return
 
 end subroutine init_ropp_1d_statevec_ad
