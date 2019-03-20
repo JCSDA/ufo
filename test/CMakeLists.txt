@@ -26,6 +26,7 @@ endfunction(CREATE_SYMLINK_FILENAME)
 list( APPEND ufo_test_input
   testinput/ufotest_atmosphere.yaml
   testinput/amsua_crtm.yaml
+  testinput/amsua_rttov.yaml
   testinput/airs_crtm.yaml
   testinput/radiosonde.yaml
   testinput/radiosonde_qc.yaml
@@ -55,7 +56,6 @@ list( APPEND ufo_test_data
   atmosphere/amsua_n19_geoval_2018041500_m.nc4
   atmosphere/amsua_n19_geoval_2018041500_s.nc4
   atmosphere/airs_aqua_geoval_2018041500_m.nc4
-  atmosphere/airs_aqua_geoval_2018041500_s.nc4
   atmosphere/sondes_geoval_2018041500_m.nc4
   atmosphere/sondes_geoval_2018041500_s.nc4
   atmosphere/gnssro_geoval_2018041500_s.nc4
