@@ -149,22 +149,10 @@ ecbuild_add_test( TARGET  test_ufo_amsua_opr_crtm
                   ARGS    "testinput/amsua_crtm.yaml"
                   LIBS    ufo )
 
-ecbuild_add_test( TARGET  test_ufo_hirs4_opr_crtm
-                  BOOST
-                  SOURCES mains/TestObsOperator.cc
-                  ARGS    "testinput/hirs4_crtm.yaml"
-                  LIBS    ufo )
-
 ecbuild_add_test( TARGET  test_ufo_amsua_tlad_crtm
                   BOOST
                   SOURCES mains/TestObsOperatorTLAD.cc
                   ARGS    "testinput/amsua_crtm.yaml"
-                  LIBS    ufo )
-
-ecbuild_add_test( TARGET  test_ufo_hirs4_tlad_crtm
-                  BOOST
-                  SOURCES mains/TestObsOperatorTLAD.cc
-                  ARGS    "testinput/hirs4_crtm.yaml"
                   LIBS    ufo )
 
 if( ${RTTOV_FOUND} )
@@ -180,6 +168,18 @@ if( ${RTTOV_FOUND} )
                     ARGS    "testinput/amsua_rttov.yaml"
                     LIBS    ufo )
 endif( ${RTTOV_FOUND} )
+
+ecbuild_add_test( TARGET  test_ufo_hirs4_opr_crtm
+                  BOOST
+                  SOURCES mains/TestObsOperator.cc
+                  ARGS    "testinput/hirs4_crtm.yaml"
+                  LIBS    ufo )
+
+ecbuild_add_test( TARGET  test_ufo_hirs4_tlad_crtm
+                  BOOST
+                  SOURCES mains/TestObsOperatorTLAD.cc
+                  ARGS    "testinput/hirs4_crtm.yaml"
+                  LIBS    ufo )
 
 ecbuild_add_test( TARGET  test_ufo_radiosonde_opr
                   BOOST
