@@ -92,7 +92,7 @@ program gsidiag_bin2txt
 
   logical linfile
   character*80                         ::  nlfn = './gsidiag_bin2txt.nl'
-
+  character(800) :: err_msg
 
   nargs = iargc()
   if( nargs.eq.0 ) then
@@ -129,8 +129,8 @@ program gsidiag_bin2txt
   write(*,*)'Input diag file:     ',trim(infn)
   inquire(file=trim(infn), exist=linfile)
   if (.not. linfile) then
-    write(*,*)trim(infn) // ' does not exist - exiting'
-    call abort
+    write(err_msg,*)trim(infn) // ' does not exist - exiting'
+    call abor1_ftn(err_msg)
   endif
   
   if (.not. append_txt_suffix) then
