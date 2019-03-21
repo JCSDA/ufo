@@ -30,5 +30,5 @@ Observations:
    vecequiv: GsiHofX  # this only works with CRTM tag/v2.2.3 at this point; use rmsequiv for comparing with develop CRTM
    #rmsequiv: GsiHofX  # this only works with CRTM tag/v2.2.3 at this point; use rmsequiv for comparing with develop CRTM
 #   rmsequiv: 230.0482
-   tolerance: 2.65e-2
+   tolerance: 2.7e-2
    ObsBias: {}
