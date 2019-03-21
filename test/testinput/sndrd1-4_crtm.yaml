@@ -1,0 +1,94 @@
+---
+test_framework_runtime_config: "--log_level=test_suite"
+window_begin: "2018-04-14T21:00:00Z"
+window_end: "2018-04-15T03:00:00Z"
+LinearObsOpTest: 
+ testiterTL: 10
+ toleranceTL: 1.0e-10
+ toleranceAD: 1.0e-11
+Observations: 
+ ObsTypes: 
+ - ObsType: "CRTM"
+   channels: "1-15"
+   ObsOptions: 
+    n_Absorbers: 3
+    n_Clouds: 0
+    n_Aerosols: 0
+    Sensor_ID: sndrD1_g15
+    EndianType: little_endian
+    CoefficientPath: "Data/"
+   ObsData: 
+    ObsDataIn: 
+     obsfile: "Data/sndrd1_g15_obs_2018041500_m.nc4"
+   GeoVaLs: 
+    filename: "Data/sndrd1_g15_geoval_2018041500_m.nc4"
+    random: 0
+    window_begin: "2018-04-14T21:00:00Z"
+    window_end: "2018-04-15T03:00:00Z"
+   vecequiv: GsiHofX  # this only works with CRTM tag/v2.2.3 at this point; use rmsequiv for comparing with develop CRTM
+#   rmsequiv: 230.0482
+   tolerance: 1.1e-5
+   ObsBias: {} 
+ - ObsType: "CRTM"
+   channels: "1-15"
+   ObsOptions: 
+    n_Absorbers: 3
+    n_Clouds: 0
+    n_Aerosols: 0
+    Sensor_ID: sndrD2_g15
+    EndianType: little_endian
+    CoefficientPath: "Data/"
+   ObsData: 
+    ObsDataIn: 
+     obsfile: "Data/sndrd2_g15_obs_2018041500_m.nc4"
+   GeoVaLs: 
+    filename: "Data/sndrd2_g15_geoval_2018041500_m.nc4"
+    random: 0
+    window_begin: "2018-04-14T21:00:00Z"
+    window_end: "2018-04-15T03:00:00Z"
+   vecequiv: GsiHofX  # this only works with CRTM tag/v2.2.3 at this point; use rmsequiv for comparing with develop CRTM
+#   rmsequiv: 230.0482
+   tolerance: 1.1e-5
+   ObsBias: {} 
+ - ObsType: "CRTM"
+   channels: "1-15"
+   ObsOptions: 
+    n_Absorbers: 3
+    n_Clouds: 0
+    n_Aerosols: 0
+    Sensor_ID: sndrD3_g15
+    EndianType: little_endian
+    CoefficientPath: "Data/"
+   ObsData: 
+    ObsDataIn: 
+     obsfile: "Data/sndrd3_g15_obs_2018041500_m.nc4"
+   GeoVaLs: 
+    filename: "Data/sndrd3_g15_geoval_2018041500_m.nc4"
+    random: 0
+    window_begin: "2018-04-14T21:00:00Z"
+    window_end: "2018-04-15T03:00:00Z"
+   vecequiv: GsiHofX  # this only works with CRTM tag/v2.2.3 at this point; use rmsequiv for comparing with develop CRTM
+#   rmsequiv: 230.0482
+   tolerance: 1.1e-5
+   ObsBias: {} 
+ - ObsType: "CRTM"
+   channels: "1-15"
+   ObsOptions: 
+    n_Absorbers: 3
+    n_Clouds: 0
+    n_Aerosols: 0
+    Sensor_ID: sndrD4_g15
+    EndianType: little_endian
+    CoefficientPath: "Data/"
+   ObsData: 
+    ObsDataIn: 
+     obsfile: "Data/sndrd4_g15_obs_2018041500_m.nc4"
+   GeoVaLs: 
+    filename: "Data/sndrd4_g15_geoval_2018041500_m.nc4"
+    random: 0
+    window_begin: "2018-04-14T21:00:00Z"
+    window_end: "2018-04-15T03:00:00Z"
+   vecequiv: GsiHofX  # this only works with CRTM tag/v2.2.3 at this point; use rmsequiv for comparing with develop CRTM
+#   rmsequiv: 230.0482
+   tolerance: 1.1e-5
+   ObsBias: {} 
