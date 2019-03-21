@@ -9,8 +9,9 @@ LinearObsOpTest:
 Observations: 
  ObsTypes: 
  - ObsType: "CRTM"
-   channels: "1-6,9-13,15"
+   channels: "1-6,9-12,13,15"
    ObsOptions: 
+    InspectProfileNumber: 12
     n_Absorbers: 3
     n_Clouds: 2
     n_Aerosols: 0
@@ -20,6 +21,8 @@ Observations:
    ObsData: 
     ObsDataIn: 
      obsfile: "Data/amsua_n19_obs_2018041500_m.nc4"
+    ObsDataOut: 
+     obsfile: "Data/amsua_n19_obs_2018041500_m_out.nc4"
    GeoVaLs: 
     filename: "Data/amsua_n19_geoval_2018041500_m.nc4"
     random: 0
