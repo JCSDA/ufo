@@ -9,22 +9,19 @@ LinearObsOpTest:
 Observations: 
  ObsTypes: 
  - ObsType: "CRTM"
-   channels: "1-6,9-12,13,15"
+   channels: "1,6-7"
    ObsOptions: 
-    InspectProfileNumber: 12
     n_Absorbers: 3
-    n_Clouds: 2
+    n_Clouds: 0
     n_Aerosols: 0
-    Sensor_ID: amsua_n19
+    Sensor_ID: airs2378_aqua
     EndianType: little_endian
     CoefficientPath: "Data/"
    ObsData: 
     ObsDataIn: 
-     obsfile: "Data/amsua_n19_obs_2018041500_m.nc4"
-    ObsDataOut: 
-     obsfile: "Data/amsua_n19_obs_2018041500_m_out.nc4"
+     obsfile: "Data/airs_aqua_obs_2018041500_m.nc4"
    GeoVaLs: 
-    filename: "Data/amsua_n19_geoval_2018041500_m.nc4"
+    filename: "Data/airs_aqua_geoval_2018041500_m.nc4"
     random: 0
     window_begin: "2018-04-14T21:00:00Z"
     window_end: "2018-04-15T03:00:00Z"

@@ -15,6 +15,82 @@ Observations:
    channels: "1-15"
    ObsOptions: 
     n_Absorbers: 3
+    n_Clouds: 0
+    n_Aerosols: 0
+    Sensor_ID: sndrD1_g15
+    EndianType: little_endian
+    CoefficientPath: "Data/"
+   ObsData: 
+    ObsDataIn: 
+     obsfile: "Data/sndrd1_g15_obs_2018041500_m.nc4"
+   GeoVaLs: 
+    norm: "74212.737121051658"
+    filename: "Data/sndrd1_g15_geoval_2018041500_m.nc4"
+    random: 0
+    window_begin: "2018-04-14T21:00:00Z"
+    window_end: "2018-04-15T03:00:00Z"
+   ObsBias: {}
+ - ObsType: "CRTM"
+   channels: "1-15"
+   ObsOptions: 
+    n_Absorbers: 3
+    n_Clouds: 0
+    n_Aerosols: 0
+    Sensor_ID: sndrD2_g15
+    EndianType: little_endian
+    CoefficientPath: "Data/"
+   ObsData: 
+    ObsDataIn: 
+     obsfile: "Data/sndrd2_g15_obs_2018041500_m.nc4"
+   GeoVaLs: 
+    norm: "74288.051612403084"
+    filename: "Data/sndrd2_g15_geoval_2018041500_m.nc4"
+    random: 0
+    window_begin: "2018-04-14T21:00:00Z"
+    window_end: "2018-04-15T03:00:00Z"
+   ObsBias: {}
+ - ObsType: "CRTM"
+   channels: "1-15"
+   ObsOptions: 
+    n_Absorbers: 3
+    n_Clouds: 0
+    n_Aerosols: 0
+    Sensor_ID: sndrD3_g15
+    EndianType: little_endian
+    CoefficientPath: "Data/"
+   ObsData: 
+    ObsDataIn: 
+     obsfile: "Data/sndrd3_g15_obs_2018041500_m.nc4"
+   GeoVaLs: 
+    norm: "74304.964259013519"
+    filename: "Data/sndrd3_g15_geoval_2018041500_m.nc4"
+    random: 0
+    window_begin: "2018-04-14T21:00:00Z"
+    window_end: "2018-04-15T03:00:00Z"
+   ObsBias: {}
+ - ObsType: "CRTM"
+   channels: "1-15"
+   ObsOptions: 
+    n_Absorbers: 3
+    n_Clouds: 0
+    n_Aerosols: 0
+    Sensor_ID: sndrD4_g15
+    EndianType: little_endian
+    CoefficientPath: "Data/"
+   ObsData: 
+    ObsDataIn: 
+     obsfile: "Data/sndrd4_g15_obs_2018041500_m.nc4"
+   GeoVaLs: 
+    norm: "74258.667545948425"
+    filename: "Data/sndrd4_g15_geoval_2018041500_m.nc4"
+    random: 0
+    window_begin: "2018-04-14T21:00:00Z"
+    window_end: "2018-04-15T03:00:00Z"
+   ObsBias: {}
+ - ObsType: "CRTM"
+   channels: "1-15"
+   ObsOptions: 
+    n_Absorbers: 3
     n_Clouds: 2
     n_Aerosols: 0
     Sensor_ID: amsua_n19
@@ -24,7 +100,7 @@ Observations:
     ObsDataIn: 
      obsfile: "Data/amsua_n19_obs_2018041500_m.nc4"
    GeoVaLs: 
-    norm: "71915.58953025"
+    norm: "72037.644147104103"
     filename: "Data/amsua_n19_geoval_2018041500_m.nc4"
     random: 0
     window_begin: "2018-04-14T21:00:00Z"
@@ -45,6 +121,25 @@ Observations:
    GeoVaLs:
     norm: "72133.564628909691"
     filename: "Data/mhs_n19_geoval_2018041500_m.nc4"
+    random: 0
+    window_begin: "2018-04-14T21:00:00Z"
+    window_end: "2018-04-15T03:00:00Z"
+   ObsBias: {}
+ - ObsType: "CRTM"
+   channels: "1,6-7"
+   ObsOptions:
+    n_Absorbers: 3
+    n_Clouds: 0
+    n_Aerosols: 0
+    Sensor_ID: airs2378_aqua
+    EndianType: little_endian
+    CoefficientPath: "Data/"
+   ObsData:
+    ObsDataIn:
+     obsfile: "Data/airs_aqua_obs_2018041500_m.nc4"
+   GeoVaLs:
+    norm: "72466.767872899669"
+    filename: "Data/airs_aqua_geoval_2018041500_m.nc4"
     random: 0
     window_begin: "2018-04-14T21:00:00Z"
     window_end: "2018-04-15T03:00:00Z"
