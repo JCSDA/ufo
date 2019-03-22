@@ -179,15 +179,16 @@ ecbuild_add_test( TARGET  test_ufo_sndrd1-4_tlad_crtm
                   
 ecbuild_add_test( TARGET  test_ufo_airs_opr_crtm
                   BOOST
+                  MPI     4
                   SOURCES mains/TestObsOperator.cc
                   ARGS    "testinput/airs_crtm.yaml"
                   LIBS    ufo )
 
-ecbuild_add_test( TARGET  test_ufo_airs_tlad_crtm
-                  BOOST
-                  SOURCES mains/TestObsOperatorTLAD.cc
-                  ARGS    "testinput/airs_crtm.yaml"
-                  LIBS    ufo )
+#ecbuild_add_test( TARGET  test_ufo_airs_tlad_crtm
+#                  BOOST
+#                  SOURCES mains/TestObsOperatorTLAD.cc
+#                  ARGS    "testinput/airs_crtm.yaml"
+#                  LIBS    ufo )
 
 if( ${RTTOV_FOUND} )
   ecbuild_add_test( TARGET  test_ufo_amsua_opr_rttov
