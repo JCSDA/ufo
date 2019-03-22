@@ -68,7 +68,7 @@ Locations::Locations(const eckit::Configuration & conf) {
     // random longitudes 
     std::vector<double> lonrange;
     if (conf.has("lonrange")) {
-      std::vector<double> config_lonrange = conf.getDoubleVector("lats");
+      std::vector<double> config_lonrange = conf.getDoubleVector("lonrange");
       ASSERT(config_lonrange.size() == 2);
       lonrange.assign(begin(config_lonrange), end(config_lonrange));
     } else {
@@ -82,7 +82,7 @@ Locations::Locations(const eckit::Configuration & conf) {
     // random latitudes 
     std::vector<double> latrange;
     if (conf.has("latrange")) {
-      std::vector<double> config_latrange = conf.getDoubleVector("lats");
+      std::vector<double> config_latrange = conf.getDoubleVector("latrange");
       ASSERT(config_latrange.size() == 2);
       latrange.assign(begin(config_latrange), end(config_latrange));
     } else {
