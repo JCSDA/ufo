@@ -65,7 +65,7 @@ Locations::Locations(const eckit::Configuration & conf) {
       rseed = std::time(0);
     }
 
-    // random longitudes 
+    // random longitudes
     std::vector<double> lonrange;
     if (conf.has("lonrange")) {
       std::vector<double> config_lonrange = conf.getDoubleVector("lonrange");
@@ -74,12 +74,11 @@ Locations::Locations(const eckit::Configuration & conf) {
     } else {
       lonrange.push_back(0.0);
       lonrange.push_back(360.0);
-    }    
-    std::cout << "MSM lonrange " << lonrange << std::endl;
+    }
     util::UniformDistribution<double> xx(Nrandom, lonrange[0], lonrange[1], rseed);
     for (size_t jj=0; jj < Nrandom; ++jj) lons.push_back(xx[jj]);
 
-    // random latitudes 
+    // random latitudes
     std::vector<double> latrange;
     if (conf.has("latrange")) {
       std::vector<double> config_latrange = conf.getDoubleVector("latrange");
@@ -87,9 +86,8 @@ Locations::Locations(const eckit::Configuration & conf) {
       latrange.assign(begin(config_latrange), end(config_latrange));
     } else {
       latrange.push_back(-90.0);
-      latrange.push_back( 90.0);
+      latrange.push_back(90.0);
     }
-    std::cout << "MSM latrange " << latrange << std::endl;
     util::UniformDistribution<double> yy(Nrandom, latrange[0], latrange[1], rseed);
     for (size_t jj=0; jj < Nrandom; ++jj) lats.push_back(yy[jj]);
 
