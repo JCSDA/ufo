@@ -24,6 +24,7 @@ module ufo_identity_tlad_mod
 
  use ufo_vars_mod
  use obsspace_mod
+ use missing_values_mod
 
  implicit none
 
@@ -122,6 +123,10 @@ subroutine identity_simobs_ad_(self, geovals, hofx, obss)
   integer :: iobs, ivar, nlocs
   type(ufo_geoval), pointer :: point
   character(len=MAXVARLEN)  :: geovar
+  real(c_double) :: missing
+
+  !> Set missing value
+  missing = missing_value(missing)
 
   if (.not. geovals%linit ) geovals%linit=.true.
 
@@ -142,7 +147,9 @@ subroutine identity_simobs_ad_(self, geovals, hofx, obss)
 
     ! backward obs operator
     do iobs = 1, nlocs
-      point%vals(1,iobs) = hofx(ivar + (iobs-1)*self%nvars)
+      if (hofx(ivar + (iobs-1)*self%nvars) /= missing) then
+        point%vals(1,iobs) = hofx(ivar + (iobs-1)*self%nvars)
+      endif
     enddo
   enddo
 
