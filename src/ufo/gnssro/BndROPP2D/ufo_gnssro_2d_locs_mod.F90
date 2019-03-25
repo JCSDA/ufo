@@ -35,7 +35,7 @@ subroutine ufo_gnssro_2d_locs_init(self, obss, t1, t2)
   type(datetime), dimension(:), allocatable :: date_time
 
 ! gnss ro data 2d location  
-  integer, parameter          :: n_horiz = 31           ! from ropp2d lib
+  integer, parameter          :: n_horiz = 3           ! from ropp2d lib
   real*8,  parameter          :: dtheta = 40.0/6371.0   ! from ropp2d lib
   real*8,  dimension(n_horiz) :: plat_2d, plon_2d
   integer                     ::  kerror

@@ -64,7 +64,7 @@ subroutine init_ropp_2d_statevec(rlon,rlat,temp,shum,pres,phi,lm,x, iflip)
   integer, optional, intent(in)  :: iflip
 !-------------------------------------------------------------------------
 ! number of profiles in plane
-  x%n_horiz=31
+  x%n_horiz=3
 ! Number of levels in background profile.  What about (lm+1) field ?
   x%n_lev=lm
 
