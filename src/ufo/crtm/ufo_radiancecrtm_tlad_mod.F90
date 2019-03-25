@@ -16,6 +16,7 @@ module ufo_radiancecrtm_tlad_mod
  use ufo_crtm_utils_mod
  use crtm_module
  use obsspace_mod
+ use missing_values_mod
 
  implicit none
  private
@@ -371,6 +372,7 @@ character(len=*), parameter :: myname_="ufo_radiancecrtm_simobs_ad"
 character(max_string) :: err_msg
 integer :: job, jprofile, jchannel, jlevel
 type(ufo_geoval), pointer :: tv_d
+real(c_double) :: missing
 
 
  ! Initial checks
@@ -388,6 +390,8 @@ type(ufo_geoval), pointer :: tv_d
    call abor1_ftn(err_msg)
  endif
 
+ ! Set missing value
+ missing = missing_value(missing)
 
  ! Temperature
  ! -----------
@@ -410,8 +414,10 @@ type(ufo_geoval), pointer :: tv_d
    do jchannel = 1, size(channels)
      job = job + 1
      do jlevel = 1, tv_d%nval
-       tv_d%vals(jlevel,jprofile) = tv_d%vals(jlevel,jprofile) + &
-                                    self%atm_K(channels(jchannel),jprofile)%Temperature(jlevel) * hofx(job)
+       if (hofx(job) /= missing) then
+         tv_d%vals(jlevel,jprofile) = tv_d%vals(jlevel,jprofile) + &
+                                      self%atm_K(channels(jchannel),jprofile)%Temperature(jlevel) * hofx(job)
+       endif
      enddo
    enddo
  enddo
