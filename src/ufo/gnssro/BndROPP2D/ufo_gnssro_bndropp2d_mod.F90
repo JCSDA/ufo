@@ -60,9 +60,12 @@ subroutine ufo_gnssro_bndropp2d_simobs(self, geovals, hofx, obss)
   type(ufo_geoval), pointer          :: t, q, prs, gph !, gph_sfc
   real(kind_real), allocatable       :: obsLat(:), obsLon(:), obsImpP(:), obsLocR(:), obsGeoid(:)
   integer                            :: iflip
+  integer,                 parameter :: n_horiz=31
 
   write(err_msg,*) "TRACE: ufo_gnssro_bndropp2d_simobs: begin"
   call fckit_log%info(err_msg)
+
+  print*,  "geovals%nobs & size(hofx)*n_horiz)", geovals%nobs, size(hofx)
 
 ! check if nobs is consistent in geovals & hofx
   if (geovals%nobs /= size(hofx)) then
