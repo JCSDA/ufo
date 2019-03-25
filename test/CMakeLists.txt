@@ -28,6 +28,8 @@ list( APPEND ufo_test_input
   testinput/amsua_crtm.yaml
   testinput/hirs4_crtm.yaml
   testinput/amsua_rttov.yaml
+  testinput/mhs_crtm.yaml
+  testinput/sndrd1-4_crtm.yaml
   testinput/airs_crtm.yaml
   testinput/radiosonde.yaml
   testinput/radiosonde_qc.yaml
@@ -56,6 +58,7 @@ list( APPEND ufo_test_data
   atmosphere/aircraft_geoval_2018041500_s.nc4
   atmosphere/amsua_n19_geoval_2018041500_m.nc4
   atmosphere/amsua_n19_geoval_2018041500_s.nc4
+  atmosphere/mhs_n19_geoval_2018041500_m.nc4
   atmosphere/airs_aqua_geoval_2018041500_m.nc4
   atmosphere/sondes_geoval_2018041500_m.nc4
   atmosphere/sondes_geoval_2018041500_s.nc4
@@ -65,6 +68,10 @@ list( APPEND ufo_test_data
   atmosphere/satwind_geoval_2018041500_m.nc4
   atmosphere/satwind_geoval_2018041500_s.nc4
   atmosphere/hirs4_metop-a_geoval_2018041500_m.nc4
+  atmosphere/sndrd1_g15_geoval_2018041500_m.nc4
+  atmosphere/sndrd2_g15_geoval_2018041500_m.nc4
+  atmosphere/sndrd3_g15_geoval_2018041500_m.nc4
+  atmosphere/sndrd4_g15_geoval_2018041500_m.nc4
 )
 
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Data)
@@ -108,6 +115,7 @@ list (APPEND ioda_obs_test_data
   atmosphere/aircraft_obs_2018041500_s.nc4
   atmosphere/amsua_n19_obs_2018041500_m.nc4
   atmosphere/amsua_n19_obs_2018041500_s.nc4
+  atmosphere/mhs_n19_obs_2018041500_m.nc4
   atmosphere/airs_aqua_obs_2018041500_m.nc4
   atmosphere/sondes_obs_2018041500_m.nc4
   atmosphere/sondes_obs_2018041500_s.nc4
@@ -117,6 +125,10 @@ list (APPEND ioda_obs_test_data
 
   atmosphere/aod_obs_2018041500_m.nc4
   atmosphere/aod_obs_2018041500_s.nc4
+  atmosphere/sndrd1_g15_obs_2018041500_m.nc4
+  atmosphere/sndrd2_g15_obs_2018041500_m.nc4
+  atmosphere/sndrd3_g15_obs_2018041500_m.nc4
+  atmosphere/sndrd4_g15_obs_2018041500_m.nc4
 
   atmosphere/satwind_obs_2018041500_m.nc4
   atmosphere/satwind_obs_2018041500_s.nc4
@@ -157,18 +169,42 @@ ecbuild_add_test( TARGET  test_ufo_amsua_tlad_crtm
                   SOURCES mains/TestObsOperatorTLAD.cc
                   ARGS    "testinput/amsua_crtm.yaml"
                   LIBS    ufo )
+ecbuild_add_test( TARGET  test_ufo_mhs_opr_crtm
+                  BOOST
+                  SOURCES mains/TestObsOperator.cc
+                  ARGS    "testinput/mhs_crtm.yaml"
+                  LIBS    ufo )
 
+ecbuild_add_test( TARGET  test_ufo_mhs_tlad_crtm
+                  BOOST
+                  SOURCES mains/TestObsOperatorTLAD.cc
+                  ARGS    "testinput/mhs_crtm.yaml"
+                  LIBS    ufo )
+
+ecbuild_add_test( TARGET  test_ufo_sndrd1-4_opr_crtm
+                  BOOST
+                  SOURCES mains/TestObsOperator.cc
+                  ARGS    "testinput/sndrd1-4_crtm.yaml"
+                  LIBS    ufo )
+
+ecbuild_add_test( TARGET  test_ufo_sndrd1-4_tlad_crtm
+                  BOOST
+                  SOURCES mains/TestObsOperatorTLAD.cc
+                  ARGS    "testinput/sndrd1-4_crtm.yaml"
+                  LIBS    ufo )
+                  
 ecbuild_add_test( TARGET  test_ufo_airs_opr_crtm
                   BOOST
+                  MPI     4
                   SOURCES mains/TestObsOperator.cc
                   ARGS    "testinput/airs_crtm.yaml"
                   LIBS    ufo )
 
-ecbuild_add_test( TARGET  test_ufo_airs_tlad_crtm
-                  BOOST
-                  SOURCES mains/TestObsOperatorTLAD.cc
-                  ARGS    "testinput/airs_crtm.yaml"
-                  LIBS    ufo )
+#ecbuild_add_test( TARGET  test_ufo_airs_tlad_crtm
+#                  BOOST
+#                  SOURCES mains/TestObsOperatorTLAD.cc
+#                  ARGS    "testinput/airs_crtm.yaml"
+#                  LIBS    ufo )
 
 if( ${RTTOV_FOUND} )
   ecbuild_add_test( TARGET  test_ufo_amsua_opr_rttov
@@ -383,6 +419,19 @@ EmisCoeff/IR_Land/SEcategory/Little_Endian/USGS.IRland.EmisCoeff.bin
 EmisCoeff/VIS_Land/SEcategory/Little_Endian/USGS.VISland.EmisCoeff.bin
 SpcCoeff/Little_Endian/hirs4_metop-a.SpcCoeff.bin
 TauCoeff/ODPS/Little_Endian/hirs4_metop-a.TauCoeff.bin
+SpcCoeff/Little_Endian/amsua_n19.SpcCoeff.bin
+TauCoeff/ODPS/Little_Endian/amsua_n19.TauCoeff.bin
+SpcCoeff/Little_Endian/mhs_n19.SpcCoeff.bin
+TauCoeff/ODPS/Little_Endian/mhs_n19.TauCoeff.bin
+SpcCoeff/Little_Endian/sndrD1_g15.SpcCoeff.bin
+TauCoeff/ODPS/Little_Endian/sndrD1_g15.TauCoeff.bin
+SpcCoeff/Little_Endian/sndrD2_g15.SpcCoeff.bin
+TauCoeff/ODPS/Little_Endian/sndrD2_g15.TauCoeff.bin
+SpcCoeff/Little_Endian/sndrD3_g15.SpcCoeff.bin
+TauCoeff/ODPS/Little_Endian/sndrD3_g15.TauCoeff.bin
+SpcCoeff/Little_Endian/sndrD4_g15.SpcCoeff.bin
+TauCoeff/ODPS/Little_Endian/sndrD4_g15.TauCoeff.bin
+>>>>>>> origin/develop-emc-codesprint
 SpcCoeff/Little_Endian/airs2378_aqua.SpcCoeff.bin
 TauCoeff/ODPS/Little_Endian/airs2378_aqua.TauCoeff.bin
 SpcCoeff/Little_Endian/v.viirs-m_npp.SpcCoeff.bin
