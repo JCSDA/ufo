@@ -107,8 +107,8 @@ Observations:
     window_end: "2018-04-15T03:00:00Z"
    ObsBias: {}
  - ObsType: "CRTM"
-   channels: "1-5"
-   ObsOptions:
+   channels: "1-15"
+   ObsOptions: 
     n_Absorbers: 3
     n_Clouds: 0
     n_Aerosols: 0
@@ -131,15 +131,15 @@ Observations:
     n_Absorbers: 3
     n_Clouds: 0
     n_Aerosols: 0
-    Sensor_ID: airs2378_aqua
+    Sensor_ID: hirs4
     EndianType: little_endian
     CoefficientPath: "Data/"
-   ObsData:
-    ObsDataIn:
-     obsfile: "Data/airs_aqua_obs_2018041500_m.nc4"
-   GeoVaLs:
-    norm: "72466.767872899669"
-    filename: "Data/airs_aqua_geoval_2018041500_m.nc4"
+   ObsData: 
+    ObsDataIn: 
+     obsfile: "Data/hirs4_metop-a_obs_2018041500_m.nc4"
+   GeoVaLs: 
+    norm: "72023.219124404903"
+    filename: "Data/hirs4_metop-a_geoval_2018041500_m.nc4"
     random: 0
     window_begin: "2018-04-14T21:00:00Z"
     window_end: "2018-04-15T03:00:00Z"
