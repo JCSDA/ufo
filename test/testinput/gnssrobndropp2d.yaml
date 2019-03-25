@@ -5,7 +5,7 @@ window_end: '2018-04-15T03:00:00Z'
 LinearObsOpTest: 
  testiterTL:  10
  toleranceTL: "1.0e-11"
- toleranceAD: "1.0e-7"
+ toleranceAD: "1.0e-9"
 Observations: 
  ObsTypes: 
  - ObsType: GnssroBndROPP2D
@@ -23,4 +23,4 @@ Observations:
     window_end: '2018-04-15T03:00:00Z'
    ObsBias: {}
    rmsequiv: "0.0090541147788147647"
-   tolerance: "1.0e-10"
+   tolerance: "1.0e-12"
