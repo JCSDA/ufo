@@ -88,8 +88,6 @@ type(ufo_locs), pointer :: self
 
 type(datetime) :: t1, t2
 
-call ufo_locs_registry%setup(c_key_self, self)
-
 call c_f_datetime(c_t1, t1)
 call c_f_datetime(c_t2, t2)
 
