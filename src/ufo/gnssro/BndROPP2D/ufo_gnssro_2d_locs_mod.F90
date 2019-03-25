@@ -89,7 +89,7 @@ subroutine ufo_gnssro_2d_locs_init(self, obss, t1, t2)
  do i = 1, nlocs
     call datetime_delete(date_time(i))
   enddo
-  deallocate(date_time, lon, lat, tw_indx)
+  deallocate(date_time, lon, lat, tw_indx, obsAzim)
 
 end subroutine ufo_gnssro_2d_locs_init
 
