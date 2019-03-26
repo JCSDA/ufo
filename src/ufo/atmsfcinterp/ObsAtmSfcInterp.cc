@@ -22,7 +22,7 @@
 namespace ufo {
 
 // -----------------------------------------------------------------------------
-static ObsOperatorMaker<ObsAtmSfcInterp> makerAtmSfcInterp_("AtmSfcInterp");
+static ObsOperatorMaker<ObsAtmSfcInterp> makerAtmSfcInterp_("2mTemp");
 // -----------------------------------------------------------------------------
 
 ObsAtmSfcInterp::ObsAtmSfcInterp(const ioda::ObsSpace & odb,

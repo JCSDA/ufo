@@ -16,3 +16,11 @@ set ( atmsfcinterp_files
     ufo_atmsfcinterp_tlad_mod.F90
     PARENT_SCOPE
 )
+
+PREPEND( _p_atmsfcinterp_files       "atmsfcinterp"       ${atmsfcinterp_files} )
+
+set ( atmsfcinterp_src_files
+      ${_p_atmsfcinterp_files}
+      PARENT_SCOPE
+)
+

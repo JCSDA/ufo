@@ -8,7 +8,7 @@ LinearObsOpTest:
   toleranceAD: 1.0e-11
 Observations:
   ObsTypes:
-  - ObsType: atmsfcinterp
+  - ObsType: 2mTemp 
     ObsData:
       ObsDataIn:
         obsfile: Data/sfc_obs_2018041500_m.nc4

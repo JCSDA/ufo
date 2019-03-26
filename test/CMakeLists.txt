@@ -145,7 +145,7 @@ ecbuild_add_test( TARGET  test_ufo_locations_atmosphere
                   ARGS    "testinput/ufotest_atmosphere.yaml"
                   LIBS    ufo )
 
-ecbuild_add_test( TARGET  test_ufo_temp2m_opr_crtm
+ecbuild_add_test( TARGET  test_ufo_temp2m_opr
                   BOOST
                   SOURCES mains/TestObsOperator.cc
                   ARGS    "testinput/t2m.yaml"
