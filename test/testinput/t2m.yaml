@@ -1,0 +1,26 @@
+---
+test_framework_runtime_config: "--log_level=test_suite"
+window_begin: '2018-04-14T21:00:00Z'
+window_end: '2018-04-15T03:00:00Z'
+LinearObsOpTest:
+  testiterTL: 12
+  toleranceTL: 1.0e-9
+  toleranceAD: 1.0e-11
+Observations:
+  ObsTypes:
+  - ObsType: atmsfcinterp
+    ObsData:
+      ObsDataIn:
+        obsfile: Data/sfc_obs_2018041500_m.nc4
+      ObsDataOut:
+        obsfile: Data/sfc_obs_2018041500_m_out.nc4
+    variables:
+    - air_temperature
+    GeoVaLs:
+      random: 0
+      filename: Data/sfc_geoval_2018041500_m.nc4
+      window_begin: '2018-04-14T21:00:00Z'
+      window_end: '2018-04-15T03:00:00Z'
+    vecequiv: GsiHofX
+    tolerance: 1.0e-04  # in % so that corresponds to 10^-3
+    ObsBias: {}

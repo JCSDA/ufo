@@ -27,6 +27,7 @@ list( APPEND ufo_test_input
   testinput/ufotest_atmosphere.yaml
   testinput/amsua_crtm.yaml
   testinput/amsua_rttov.yaml
+  testinput/t2m.yaml
   testinput/radiosonde.yaml
   testinput/radiosonde_qc.yaml
   testinput/aircraft.yaml
@@ -61,6 +62,7 @@ list( APPEND ufo_test_data
   atmosphere/aod_geoval_2018041500_s.nc4
   atmosphere/satwind_geoval_2018041500_m.nc4
   atmosphere/satwind_geoval_2018041500_s.nc4
+  atmosphere/sfc_geoval_2018041500_m.nc4
 )
 
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Data)
@@ -116,6 +118,8 @@ list (APPEND ioda_obs_test_data
   atmosphere/satwind_obs_2018041500_m.nc4
   atmosphere/satwind_obs_2018041500_s.nc4
 
+  atmosphere/sfc_obs_2018041500_m.nc4
+
   marine/Jason-2-2018-04-15.nc
   marine/profile_2018-04-15.nc
   marine/cryosat2-2018-04-15.nc
@@ -139,6 +143,12 @@ ecbuild_add_test( TARGET  test_ufo_locations_atmosphere
                   BOOST
                   SOURCES mains/TestLocations.cc
                   ARGS    "testinput/ufotest_atmosphere.yaml"
+                  LIBS    ufo )
+
+ecbuild_add_test( TARGET  test_ufo_temp2m_opr_crtm
+                  BOOST
+                  SOURCES mains/TestObsOperator.cc
+                  ARGS    "testinput/t2m.yaml"
                   LIBS    ufo )
 
 ecbuild_add_test( TARGET  test_ufo_amsua_opr_crtm
