@@ -93,6 +93,7 @@ program convert_rad_diag
                      'bc_sst    ' /
 
   real(r_quad) :: cvar, rch
+  character(800) :: err_msg
 
 
   nargs = iargc()
@@ -129,8 +130,8 @@ program convert_rad_diag
   write(*,*)'Input bin diag:  ',trim(infn)
   inquire(file=trim(infn), exist=linfile)
   if (.not. linfile) then
-    write(*,*)trim(infn) // ' does not exist - exiting'
-    call abort
+    write(err_msg,*)trim(infn) // ' does not exist - exiting'
+    call abor1_ftn(err_msg)
   endif
   
   if (.not. append_suffix) then
