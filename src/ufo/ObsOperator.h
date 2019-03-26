@@ -8,6 +8,8 @@
 #ifndef UFO_OBSOPERATOR_H_
 #define UFO_OBSOPERATOR_H_
 
+#include <string>
+
 #include <boost/noncopyable.hpp>
 #include <boost/scoped_ptr.hpp>
 
