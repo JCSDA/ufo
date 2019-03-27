@@ -26,10 +26,8 @@ module ufo_atmsfcinterp_mod
   private
     integer :: nvars
     real(kind_real) :: magl
-    character(len=max_string), allocatable :: varin(:)
-    character(len=max_string), allocatable :: varout(:)
-  end type
-
+    character(len=max_string), public, allocatable :: varin(:)
+    character(len=max_string), public, allocatable :: varout(:)
   contains
     procedure :: setup  => ufo_atmsfcinterp_setup
     procedure :: delete => ufo_atmsfcinterp_delete
@@ -43,6 +41,7 @@ subroutine ufo_atmsfcinterp_setup(self, c_conf)
   implicit none
   class(ufo_atmsfcinterp), intent(inout) :: self
   type(c_ptr),        intent(in)    :: c_conf
+  integer :: ii, ivar
 
   !> Size of variables
   self%nvars = size(config_get_string_vector(c_conf, max_string, "variables"))
@@ -51,11 +50,17 @@ subroutine ufo_atmsfcinterp_setup(self, c_conf)
   !> Read variable list and store in varout
   self%varout = config_get_string_vector(c_conf, max_string, "variables")
   !> Allocate varin: variables we need from the model
-  allocate(self%varin(self%nvars))
+  allocate(self%varin(self%nvars+1))
   !> Set vars_in based on vars_out
   do ii = 1, self%nvars
     self%varin(ii) = self%varout(ii)
   enddo
+  !> add geopotential height
+  self%varin(self%nvars+1) = "geopotential_height"
+  !> need skin temperature for near-surface interpolations
+  !self%varin(self%nvars+2) = "sfc_skin_temperature"
+  !> need surface geopotential height to get difference from phi
+  !self%varin(self%nvars+3) = "sfc_geopotential_height"
 
 end subroutine ufo_atmsfcinterp_setup
 
@@ -74,18 +79,20 @@ subroutine ufo_atmsfcinterp_simobs(self, geovals, hofx, obss)
   type(ufo_geovals),  intent(in)    :: geovals
   real(c_double),     intent(inout) :: hofx(:)
   type(c_ptr), value, intent(in)    :: obss
-  type(ufo_geoval), pointer :: phi, hgt
-  integer :: nlocs,i
+  type(ufo_geoval), pointer :: phi, hgt, profile
+  integer :: nlocs, ivar, iobs
   real(kind_real), allocatable :: obselev(:), obshgt(:)
+  character(len=MAXVARLEN) :: geovar
+
 
   ! for low altitudes, we can assume: phi = z
   ! get geopotential height profile
   call ufo_geovals_get_var(geovals, var_z, phi)
   ! get surface geopotential height
-  call ufo_geovals_get_var(geovals, var_sfc_z, hgt)
+  !call ufo_geovals_get_var(geovals, var_sfc_z, hgt)
 
   ! get number of obs
-  nlocs = obsspace_get_nobs(obss)
+  nlocs = obsspace_get_nlocs(obss)
 
   ! get station elevation from obs
   allocate(obselev(nlocs))
@@ -95,10 +102,25 @@ subroutine ufo_atmsfcinterp_simobs(self, geovals, hofx, obss)
   allocate(obshgt(nlocs))
   call obsspace_get_db(obss, "MetaData", "height",obshgt)
 
-  print *, shape(phi), shape(hgt)
-  do i=1,nlocs
-   print *, obselev(i),obshgt(i)
-  end do
+  do ivar = 1, self%nvars
+    ! Get the name of input variable in geovals
+    geovar = self%varin(ivar)
+
+    ! Get profile for this variable from geovals
+    call ufo_geovals_get_var(geovals, geovar, profile)
+
+    ! Interpolate from geovals to observational location into hofx
+    ! Note: hofx holds all variables (varin) for location 1
+    ! then all variables for location 2, and so on
+    do iobs = 1, nlocs
+      ! test by just grabbing the lowest model layer value
+      hofx(ivar + (iobs-1)*self%nvars) = profile%vals(1,iobs) 
+      if (trim(geovar) == 'surface_pressure') then
+        hofx(ivar + (iobs-1)*self%nvars) = hofx(ivar +(iobs-1)*self%nvars)*10_kind_real
+      end if
+    enddo
+  enddo
+
 
 
 

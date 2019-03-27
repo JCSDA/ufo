@@ -10,6 +10,9 @@
 #include <ostream>
 #include <string>
 #include <vector>
+#include <boost/algorithm/string.hpp>
+
+#include "oops/util/Logger.h"
 
 #include "ioda/ObsVector.h"
 
@@ -22,28 +25,35 @@
 namespace ufo {
 
 // -----------------------------------------------------------------------------
-static ObsOperatorMaker<ObsAtmSfcInterp> makerAtmSfcInterp_("2mTemp");
+static ObsOperatorMaker<ObsAtmSfcInterp> maker2mTemp_("2mTemp");
 // -----------------------------------------------------------------------------
 
-ObsAtmSfcInterp::ObsAtmSfcInterp(const ioda::ObsSpace & odb,
-                       const eckit::Configuration & config)
-  : keyOper_(0), odb_(odb), varin_(), varout_()
+ObsAtmSfcInterp::ObsAtmSfcInterp(const ioda::ObsSpace & odb, const eckit::Configuration & config)
+  : ObsOperatorBase(odb, config), keyOperAtmSfcInterp_(0),
+    odb_(odb), varin_(), varout_()
 {
-  // TODO(anyone): list the variables for GeoVaLs that are needed for the observation
-  //       operator below in vv (e.g., vv{"temperature", "humidity"})
-  const std::vector<std::string> vvin{""};
-  varin_.reset(new oops::Variables(vvin));
-  const std::vector<std::string> vvout{""};
-  varout_.reset(new oops::Variables(vvout));
+  int c_name_size = 200;
+  char *buffin = new char[c_name_size];
+  char *buffout = new char[c_name_size];
   const eckit::Configuration * configc = &config;
-  ufo_atmsfcinterp_setup_f90(keyOper_, &configc);
+
+  ufo_atmsfcinterp_setup_f90(keyOperAtmSfcInterp_, &configc, buffin, buffout, c_name_size);
+
+  std::string vstr_in(buffin), vstr_out(buffout);
+  std::vector<std::string> vvin;
+  std::vector<std::string> vvout;
+  boost::split(vvin, vstr_in, boost::is_any_of("\t"));
+  boost::split(vvout, vstr_out, boost::is_any_of("\t"));
+  varin_.reset(new oops::Variables(vvin));
+  varout_.reset(new oops::Variables(vvout));
+
   oops::Log::trace() << "ObsAtmSfcInterp created." << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
 ObsAtmSfcInterp::~ObsAtmSfcInterp() {
-  ufo_atmsfcinterp_delete_f90(keyOper_);
+  ufo_atmsfcinterp_delete_f90(keyOperAtmSfcInterp_);
   oops::Log::trace() << "ObsAtmSfcInterp destructed" << std::endl;
 }
 
@@ -51,7 +61,7 @@ ObsAtmSfcInterp::~ObsAtmSfcInterp() {
 
 void ObsAtmSfcInterp::simulateObs(const GeoVaLs & gv, ioda::ObsVector & ovec,
                               const ObsBias & bias) const {
-  ufo_atmsfcinterp_simobs_f90(keyOper_, gv.toFortran(), odb_, ovec.size(), ovec.toFortran(),
+  ufo_atmsfcinterp_simobs_f90(keyOperAtmSfcInterp_, gv.toFortran(), odb_, ovec.size(), ovec.toFortran(),
                       bias.toFortran());
   oops::Log::trace() << "ObsAtmSfcInterp: observation operator run" << std::endl;
 }

@@ -27,6 +27,7 @@ character(len=MAXVARLEN), public :: var_prsi = "air_pressure_levels"
 character(len=MAXVARLEN), public :: var_z    = "geopotential_height"
 character(len=MAXVARLEN), public :: var_zi   = "geopotential_height_levels"
 character(len=MAXVARLEN), public :: var_sfc_z= "sfc_geopotential_height"
+character(len=MAXVARLEN), public :: var_sfc_tskin= "sfc_skin_temperature"
 character(len=MAXVARLEN), public :: var_oz   = "mass_concentration_of_ozone_in_air"
 character(len=MAXVARLEN), public :: var_co2  = "mass_concentration_of_carbon_dioxide_in_air"
 character(len=MAXVARLEN), public :: var_clw  = "atmosphere_mass_content_of_cloud_liquid_water"
@@ -127,6 +128,7 @@ self%nv = config_get_int(c_vars, "nvars")
 
 allocate(self%fldnames(self%nv))
 svars = config_get_string(c_vars,len(svars),"variables")
+
 read(svars,*) self%fldnames
 
 ! TODO: a check on whether this var is in the list of defined vars

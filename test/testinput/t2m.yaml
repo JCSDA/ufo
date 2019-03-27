@@ -15,7 +15,7 @@ Observations:
       ObsDataOut:
         obsfile: Data/sfc_obs_2018041500_m_out.nc4
     variables:
-    - air_temperature
+    - air_temperature 
     GeoVaLs:
       random: 0
       filename: Data/sfc_geoval_2018041500_m.nc4

@@ -50,12 +50,12 @@ class ObsAtmSfcInterp : public ObsOperatorBase,
   const oops::Variables & variables() const {return *varin_;}
   const oops::Variables & observed() const {return *varout_;}
 
-  int & toFortran() {return keyOper_;}
-  const int & toFortran() const {return keyOper_;}
+  int & toFortran() {return keyOperAtmSfcInterp_;}
+  const int & toFortran() const {return keyOperAtmSfcInterp_;}
 
  private:
   void print(std::ostream &) const;
-  F90hop keyOper_;
+  F90hop keyOperAtmSfcInterp_;
   const ioda::ObsSpace& odb_;
   boost::scoped_ptr<const oops::Variables> varin_;
   boost::scoped_ptr<const oops::Variables> varout_;

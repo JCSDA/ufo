@@ -17,7 +17,7 @@ module ufo_atmsfcinterp_tlad_mod_c
 #define LISTED_TYPE ufo_atmsfcinterp_tlad
 
   !> Linked list interface - defines registry_t type
-#include "../../linkedList_i.f"
+#include "../linkedList_i.f"
 
   !> Global registry
   type(registry_t) :: ufo_atmsfcinterp_tlad_registry
@@ -26,7 +26,7 @@ contains
 
   ! ------------------------------------------------------------------------------
   !> Linked list implementation
-#include "../../linkedList_c.f"
+#include "../linkedList_c.f"
 
 ! ------------------------------------------------------------------------------
 

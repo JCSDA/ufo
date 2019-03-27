@@ -14,7 +14,6 @@ set ( atmsfcinterp_files
     ObsAtmSfcInterpTLAD.interface.h
     ufo_atmsfcinterp_mod.F90
     ufo_atmsfcinterp_tlad_mod.F90
-    PARENT_SCOPE
 )
 
 PREPEND( _p_atmsfcinterp_files       "atmsfcinterp"       ${atmsfcinterp_files} )
