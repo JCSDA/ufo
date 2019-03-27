@@ -13,6 +13,7 @@ set ( atmsfcinterp_files
     ObsAtmSfcInterpTLAD.interface.F90
     ObsAtmSfcInterpTLAD.interface.h
     ufo_atmsfcinterp_mod.F90
+    ufo_atmsfc_mod.F90
     ufo_atmsfcinterp_tlad_mod.F90
 )
 

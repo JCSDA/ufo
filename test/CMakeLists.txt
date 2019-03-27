@@ -27,7 +27,7 @@ list( APPEND ufo_test_input
   testinput/ufotest_atmosphere.yaml
   testinput/amsua_crtm.yaml
   testinput/amsua_rttov.yaml
-  testinput/t2m.yaml
+  testinput/2mtemp.yaml
   testinput/radiosonde.yaml
   testinput/radiosonde_qc.yaml
   testinput/aircraft.yaml
@@ -145,10 +145,10 @@ ecbuild_add_test( TARGET  test_ufo_locations_atmosphere
                   ARGS    "testinput/ufotest_atmosphere.yaml"
                   LIBS    ufo )
 
-ecbuild_add_test( TARGET  test_ufo_temp2m_opr
+ecbuild_add_test( TARGET  test_ufo_2mtemp_opr
                   BOOST
                   SOURCES mains/TestObsOperator.cc
-                  ARGS    "testinput/t2m.yaml"
+                  ARGS    "testinput/2mtemp.yaml"
                   LIBS    ufo )
 
 ecbuild_add_test( TARGET  test_ufo_amsua_opr_crtm

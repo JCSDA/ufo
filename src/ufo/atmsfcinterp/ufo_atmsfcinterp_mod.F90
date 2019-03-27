@@ -74,6 +74,7 @@ end subroutine ufo_atmsfcinterp_delete
 
 ! ------------------------------------------------------------------------------
 subroutine ufo_atmsfcinterp_simobs(self, geovals, hofx, obss)
+  use atmsfc_mod, only : calc_t2
   implicit none
   class(ufo_atmsfcinterp), intent(in)    :: self
   type(ufo_geovals),  intent(in)    :: geovals
@@ -112,13 +113,19 @@ subroutine ufo_atmsfcinterp_simobs(self, geovals, hofx, obss)
     ! Interpolate from geovals to observational location into hofx
     ! Note: hofx holds all variables (varin) for location 1
     ! then all variables for location 2, and so on
-    do iobs = 1, nlocs
-      ! test by just grabbing the lowest model layer value
-      hofx(ivar + (iobs-1)*self%nvars) = profile%vals(1,iobs) 
-      if (trim(geovar) == 'surface_pressure') then
-        hofx(ivar + (iobs-1)*self%nvars) = hofx(ivar +(iobs-1)*self%nvars)*10_kind_real
-      end if
-    enddo
+    select case (trim(geovar))
+      case ("air_temperature")
+        ! this subroutine call will mimic that of what is performed in GSI to
+        ! compute 2m temperature from other model variables
+        call calc_t2
+    end select
+    !do iobs = 1, nlocs
+    !  ! test by just grabbing the lowest model layer value
+    !  hofx(ivar + (iobs-1)*self%nvars) = profile%vals(1,iobs) 
+    !  if (trim(geovar) == 'surface_pressure') then
+    !    hofx(ivar + (iobs-1)*self%nvars) = hofx(ivar +(iobs-1)*self%nvars)*10_kind_real
+    !  end if
+    !enddo
   enddo
 
 
