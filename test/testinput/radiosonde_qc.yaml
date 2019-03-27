@@ -39,5 +39,5 @@ Observations:
       - variable: gsi_wind_red_factor
         minvalue: 1.001
     vecequiv: GsiHofX
-    tolerance: 1.0e-03  # in % so that corresponds to 10^-5
+    tolerance: 1.0e-05
     ObsBias: {}
