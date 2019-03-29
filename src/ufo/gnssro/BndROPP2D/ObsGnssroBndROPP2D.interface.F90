@@ -72,6 +72,7 @@ integer(c_int),      intent(in)   :: c_bias
 type(ufo_gnssro_BndROPP2D),  pointer :: self
 
 character(len=*), parameter :: myname_="ufo_gnssro_bndropp2d_simobs_c"
+
 call ufo_gnssro_BndROPP2D_registry%get(c_key_self, self)
 call self%opr_simobs(c_key_geovals, c_obsspace, c_hofx)
 
