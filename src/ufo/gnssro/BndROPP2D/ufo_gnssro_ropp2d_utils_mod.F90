@@ -57,7 +57,8 @@ subroutine init_ropp_2d_statevec(rlon,rlat,temp,shum,pres,phi,lm,x, iflip)
   type(State2dFM),     intent(out)   :: x
   real(kind=kind_real),intent(in)    :: rlat, rlon
   integer,             intent(in)    :: lm
-  real(kind=kind_real), dimension(lm), intent(in)    :: temp,shum,pres,phi
+integer,parameter :: n_horiz = 3
+  real(kind=kind_real), dimension(lm,n_horiz), intent(in)    :: temp,shum,pres,phi
 ! Local variables
   integer :: n,i,j,k
   real    :: rlon_local
@@ -102,19 +103,19 @@ subroutine init_ropp_2d_statevec(rlon,rlat,temp,shum,pres,phi,lm,x, iflip)
   if ( present(iflip) .and. iflip .eq. 1) then
 
     do k = 1, lm
-       x%temp(n,:) = real(temp(k),kind=wp)
-       x%shum(n,:) = real(shum(k),kind=wp)
-       x%pres(n,:) = real(pres(k)*100.,kind=wp)
-       x%geop(n,:) = real(phi(k),kind=wp)
+       x%temp(n,:) = real(temp(k,:),kind=wp)
+       x%shum(n,:) = real(shum(k,:),kind=wp)
+       x%pres(n,:) = real(pres(k,:)*100.,kind=wp)
+       x%geop(n,:) = real(phi(k,:),kind=wp)
        n = n - 1
     end do
 
   else
     do k = 1, lm
-       x%temp(k,:) = real(temp(k),kind=wp)
-       x%shum(k,:) = real(shum(k),kind=wp)
-       x%pres(k,:) = real(pres(k)*100.,kind=wp)
-       x%geop(k,:) = real(phi(k),kind=wp)
+       x%temp(k,:) = real(temp(k,:),kind=wp)
+       x%shum(k,:) = real(shum(k,:),kind=wp)
+       x%pres(k,:) = real(pres(k,:)*100.,kind=wp)
+       x%geop(k,:) = real(phi(k,:),kind=wp)
     end do
 
   end if
