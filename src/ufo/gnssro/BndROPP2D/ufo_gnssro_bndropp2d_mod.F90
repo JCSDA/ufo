@@ -19,21 +19,31 @@ use lag_interp_mod,    only: lag_interp_const, lag_interp_smthWeights
 use obsspace_mod
 use missing_values_mod
 use ufo_gnssro_ropp2d_utils_mod
+use gnssro_mod_conf
 use fckit_log_module,  only : fckit_log
 
 implicit none
 public             :: ufo_gnssro_bndropp2d
 private
-
   !> Fortran derived type for gnssro trajectory
 type, extends(ufo_basis) :: ufo_gnssro_BndROPP2D
+  type(gnssro_conf)  :: loc2dconf
   contains
+    procedure :: setup     => ufo_gnssro_bndropp2d_setup
     procedure :: simobs    => ufo_gnssro_bndropp2d_simobs
 end type ufo_gnssro_BndROPP2D
 
 contains
 
 ! ------------------------------------------------------------------------------
+subroutine ufo_gnssro_bndropp2d_setup(self, c_conf)
+  implicit none
+  class(ufo_gnssro_BndROPP2D), intent(inout) :: self
+  type(c_ptr),                 intent(in)    :: c_conf
+
+  call gnssro_conf_setup(self%loc2dconf,c_conf)
+end subroutine ufo_gnssro_bndropp2d_setup
+
 ! ------------------------------------------------------------------------------
 subroutine ufo_gnssro_bndropp2d_simobs(self, geovals, hofx, obss)
   use ropp_fm_types, only: State2dFM
@@ -59,16 +69,15 @@ subroutine ufo_gnssro_bndropp2d_simobs(self, geovals, hofx, obss)
   real(kind=dp)                   :: ob_time
   type(ufo_geoval), pointer          :: t, q, prs, gph !, gph_sfc
   real(kind_real), allocatable       :: obsLat(:), obsLon(:), obsImpP(:), obsLocR(:), obsGeoid(:)
-  integer                            :: iflip
-  integer,                 parameter :: n_horiz=3
+  integer     :: iflip, n_horiz
+
+  n_horiz = self%loc2dconf%n_horiz
 
   write(err_msg,*) "TRACE: ufo_gnssro_bndropp2d_simobs: begin"
   call fckit_log%info(err_msg)
 
-  print*,  "geovals%nobs & size(hofx)*n_horiz)", geovals%nobs, size(hofx)
-
 ! check if nobs is consistent in geovals & hofx
-  if (geovals%nobs /= size(hofx)) then
+  if (geovals%nobs /= size(hofx)*n_horiz) then
       write(err_msg,*) myname_, ' error: nobs inconsistent!'
       call abor1_ftn(err_msg)
   endif
@@ -78,7 +87,6 @@ subroutine ufo_gnssro_bndropp2d_simobs(self, geovals, hofx, obss)
   call ufo_geovals_get_var(geovals, var_q,     q)         ! specific humidity
   call ufo_geovals_get_var(geovals, var_prs,   prs)       ! pressure
   call ufo_geovals_get_var(geovals, var_z,     gph)       ! geopotential height
-!  call ufo_geovals_get_var(geovals, var_sfc_z, gph_sfc)   ! surface geopotential height
 
   missing = missing_value(missing)
 
@@ -107,20 +115,18 @@ subroutine ufo_gnssro_bndropp2d_simobs(self, geovals, hofx, obss)
   call obsspace_get_db(obss, " ", "geoid_height_above_reference_ellipsoid", obsGeoid)
 
   nvprof=1  ! no. of bending angles in profile 
-
   write(err_msg,*) "TRACE: ufo_gnssro_bndropp2d_simobs: begin observation loop, nobs =  ", nobs
   call fckit_log%info(err_msg)
 
 ! loop through the obs
   obs_loop: do iobs = 1, nobs  
-
     call init_ropp_2d_statevec(          &
                       obsLon(iobs),      &
                       obsLat(iobs),      &
-                    t%vals(:,iobs),      &
-                    q%vals(:,iobs),      &
-                  prs%vals(:,iobs),      &
-                  gph%vals(:,iobs),      &
+                    t%vals(:,iobs:nobs*n_horiz:nobs),      &
+                    q%vals(:,iobs:nobs*n_horiz:nobs),      &
+                  prs%vals(:,iobs:nobs*n_horiz:nobs),      &
+                  gph%vals(:,iobs:nobs*n_horiz:nobs),      &
                      nlev,x, iflip)
      
     call init_ropp_2d_obvec(nvprof,      &
