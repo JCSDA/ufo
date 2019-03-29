@@ -10,12 +10,24 @@ implicit none
 private
 public   :: gnssro_conf
 public   :: gnssro_conf_setup
+public   :: conf2d
 
 type gnssro_conf
   integer(c_int) :: ro_top_meter
   integer(c_int) :: use_compress
   character(len=255) :: obserr_method
+  integer(c_int) :: n_horiz
 end type gnssro_conf
+
+!--------- ropp2d location default parameters-----------------
+integer(c_int),  parameter, public :: n_horiz_2d = 31   !should be odd number
+real(kind_real), parameter, public :: res_2d     = 40.0 !km
+
+type conf2d
+  integer(c_int)  :: n_horiz
+  real(kind_real) :: res             !km
+end type conf2d
+
 contains
 !-------------------------------
 
@@ -40,6 +52,11 @@ if (config_element_exists(c_conf,"obserr_method")) then
   roconf%obserr_method = config_get_string(c_conf,len(roconf%obserr_method),"obserr_method")
 else
   roconf%obserr_method = "FILE"
+endif
+if (config_element_exists(c_conf,"n_horiz")) then
+  roconf%n_horiz = config_get_int(c_conf,"n_horiz")
+else 
+  roconf%n_horiz = 31
 endif
 
 end subroutine gnssro_conf_setup
