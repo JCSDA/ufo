@@ -11,29 +11,28 @@ module ufo_atmvertinterp_mod
   use ufo_geovals_mod
   use ufo_geovals_mod_c,   only: ufo_geovals_registry
   use vert_interp_mod
-  use ufo_basis_mod, only: ufo_basis
   use obsspace_mod
 
   integer, parameter :: max_string=800
 
 ! ------------------------------------------------------------------------------
 
-  type, extends(ufo_basis) :: ufo_atmvertinterp
+  type, public :: ufo_atmvertinterp
    private
      integer :: nvars  ! number of variables to be interpolated
      character(len=max_string), public, allocatable :: varin(:)    ! size nvars+1 (+1 for log pressure)
      character(len=max_string), public, allocatable :: varout(:)   ! size nvars
-  contains
-    procedure :: setup  => atmvertinterp_setup_
-    procedure :: simobs => atmvertinterp_simobs_
-    final :: destructor
+   contains
+     procedure :: setup  => ufo_atmvertinterp_setup
+     procedure :: delete => ufo_atmvertinterp_delete
+     procedure :: simobs => ufo_atmvertinterp_simobs
   end type ufo_atmvertinterp
 
 ! ------------------------------------------------------------------------------
 contains
 ! ------------------------------------------------------------------------------
 
-subroutine atmvertinterp_setup_(self, c_conf)
+subroutine ufo_atmvertinterp_setup(self, c_conf)
   use config_mod
   implicit none
   class(ufo_atmvertinterp), intent(inout) :: self
@@ -57,19 +56,20 @@ subroutine atmvertinterp_setup_(self, c_conf)
   !> Put log pressure to the varin (vars from the model) list
   self%varin(self%nvars+1) = "atmosphere_ln_pressure_coordinate"
 
-end subroutine atmvertinterp_setup_
+end subroutine ufo_atmvertinterp_setup
 
 ! ------------------------------------------------------------------------------
 
-subroutine atmvertinterp_simobs_(self, geovals, hofx, obss)
+subroutine ufo_atmvertinterp_simobs(self, geovals, obss, nvars, nlocs, hofx)
 
   implicit none
-  class(ufo_atmvertinterp), intent(in) :: self
+  class(ufo_atmvertinterp), intent(in)        :: self
+  integer, intent(in)                         :: nvars, nlocs
   type(ufo_geovals), intent(in)               :: geovals
-  real(c_double),  intent(inout)              :: hofx(:)
+  real(c_double),  intent(inout)              :: hofx(nvars, nlocs)
   type(c_ptr), value, intent(in)              :: obss
 
-  integer :: iobs, ivar, nlocs
+  integer :: iobs, ivar
   real(kind_real), dimension(:), allocatable :: obspressure
   type(ufo_geoval), pointer :: presprofile, profile
   real(kind_real), allocatable :: wf(:)
@@ -80,7 +80,6 @@ subroutine atmvertinterp_simobs_(self, geovals, hofx, obss)
   call ufo_geovals_get_var(geovals, var_prsl, presprofile)
 
   ! Get the observation vertical coordinates
-  nlocs = obsspace_get_nlocs(obss)
   allocate(obspressure(nlocs))
   call obsspace_get_db(obss, "MetaData", "air_pressure", obspressure)
 
@@ -102,11 +101,9 @@ subroutine atmvertinterp_simobs_(self, geovals, hofx, obss)
     call ufo_geovals_get_var(geovals, geovar, profile)
 
     ! Interpolate from geovals to observational location into hofx
-    ! Note: hofx holds all variables (varin) for location 1
-    ! then all variables for location 2, and so on
     do iobs = 1, nlocs
       call vert_interp_apply(profile%nval, profile%vals(:,iobs), &
-                             & hofx(ivar + (iobs-1)*self%nvars), wi(iobs), wf(iobs))
+                             & hofx(ivar,iobs), wi(iobs), wf(iobs))
     enddo
   enddo
   ! Cleanup memory
@@ -114,15 +111,15 @@ subroutine atmvertinterp_simobs_(self, geovals, hofx, obss)
   deallocate(wi)
   deallocate(wf)
 
-end subroutine atmvertinterp_simobs_
+end subroutine ufo_atmvertinterp_simobs
 
 ! ------------------------------------------------------------------------------
 
-subroutine  destructor(self)
-  type(ufo_atmvertinterp), intent(inout) :: self
+subroutine  ufo_atmvertinterp_delete(self)
+  class(ufo_atmvertinterp), intent(inout) :: self
   if (allocated(self%varout)) deallocate(self%varout)
   if (allocated(self%varin)) deallocate(self%varin)
-end subroutine destructor
+end subroutine ufo_atmvertinterp_delete
 
 ! ------------------------------------------------------------------------------
 
