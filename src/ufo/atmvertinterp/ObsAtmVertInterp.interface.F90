@@ -62,11 +62,7 @@ integer(c_int), intent(inout) :: c_key_self
 
 type(ufo_atmvertinterp), pointer :: self
 
-call ufo_atmvertinterp_registry%get(c_key_self, self)
-
-call self%delete()
-
-call ufo_atmvertinterp_registry%remove(c_key_self)
+call ufo_atmvertinterp_registry%delete(c_key_self, self)
 
 end subroutine ufo_atmvertinterp_delete_c
 

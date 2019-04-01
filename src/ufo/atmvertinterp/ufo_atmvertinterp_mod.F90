@@ -23,16 +23,16 @@ module ufo_atmvertinterp_mod
      character(len=max_string), public, allocatable :: varin(:)    ! size nvars+1 (+1 for log pressure)
      character(len=max_string), public, allocatable :: varout(:)   ! size nvars
    contains
-     procedure :: setup  => ufo_atmvertinterp_setup
-     procedure :: delete => ufo_atmvertinterp_delete
-     procedure :: simobs => ufo_atmvertinterp_simobs
+     procedure :: setup  => atmvertinterp_setup_
+     procedure :: simobs => atmvertinterp_simobs_
+     final :: destructor
   end type ufo_atmvertinterp
 
 ! ------------------------------------------------------------------------------
 contains
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_atmvertinterp_setup(self, c_conf)
+subroutine atmvertinterp_setup_(self, c_conf)
   use config_mod
   implicit none
   class(ufo_atmvertinterp), intent(inout) :: self
@@ -56,11 +56,11 @@ subroutine ufo_atmvertinterp_setup(self, c_conf)
   !> Put log pressure to the varin (vars from the model) list
   self%varin(self%nvars+1) = "atmosphere_ln_pressure_coordinate"
 
-end subroutine ufo_atmvertinterp_setup
+end subroutine atmvertinterp_setup_
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_atmvertinterp_simobs(self, geovals, obss, nvars, nlocs, hofx)
+subroutine atmvertinterp_simobs_(self, geovals, obss, nvars, nlocs, hofx)
 
   implicit none
   class(ufo_atmvertinterp), intent(in)        :: self
@@ -111,15 +111,15 @@ subroutine ufo_atmvertinterp_simobs(self, geovals, obss, nvars, nlocs, hofx)
   deallocate(wi)
   deallocate(wf)
 
-end subroutine ufo_atmvertinterp_simobs
+end subroutine atmvertinterp_simobs_
 
 ! ------------------------------------------------------------------------------
 
-subroutine  ufo_atmvertinterp_delete(self)
-  class(ufo_atmvertinterp), intent(inout) :: self
+subroutine destructor(self)
+  type(ufo_atmvertinterp), intent(inout) :: self
   if (allocated(self%varout)) deallocate(self%varout)
   if (allocated(self%varin)) deallocate(self%varin)
-end subroutine ufo_atmvertinterp_delete
+end subroutine destructor
 
 ! ------------------------------------------------------------------------------
 
