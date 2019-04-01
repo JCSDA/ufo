@@ -20,9 +20,9 @@ module ufo_atmvertinterp_mod
 
   type, extends(ufo_basis) :: ufo_atmvertinterp
    private
-     integer, public :: nvars
-     character(len=max_string), public, allocatable :: varin(:)
-     character(len=max_string), public, allocatable :: varout(:)
+     integer :: nvars  ! number of variables to be interpolated
+     character(len=max_string), public, allocatable :: varin(:)    ! size nvars+1 (+1 for log pressure)
+     character(len=max_string), public, allocatable :: varout(:)   ! size nvars
   contains
     procedure :: setup  => atmvertinterp_setup_
     procedure :: simobs => atmvertinterp_simobs_

@@ -10,6 +10,7 @@
 #include <ostream>
 #include <string>
 #include <vector>
+#include <boost/algorithm/string.hpp>
 
 #include "ioda/ObsVector.h"
 
@@ -27,16 +28,23 @@ static ObsOperatorMaker<ObsExample> makerExample_("Example");
 
 ObsExample::ObsExample(const ioda::ObsSpace & odb,
                        const eckit::Configuration & config)
-  : keyOper_(0), odb_(odb), varin_(), varout_()
+  : ObsOperatorBase(odb, config), keyOper_(0), odb_(odb), varin_(), varout_()
 {
-  // TODO(anyone): list the variables for GeoVaLs that are needed for the observation
-  //       operator below in vv (e.g., vv{"temperature", "humidity"})
-  const std::vector<std::string> vvin{""};
-  varin_.reset(new oops::Variables(vvin));
-  const std::vector<std::string> vvout{""};
-  varout_.reset(new oops::Variables(vvout));
+  int c_name_size = 800;
+  char *buffin = new char[c_name_size];
+  char *buffout = new char[c_name_size];
   const eckit::Configuration * configc = &config;
-  ufo_example_setup_f90(keyOper_, &configc);
+
+  ufo_example_setup_f90(keyOper_, &configc, buffin, buffout, c_name_size);
+
+  std::string vstr_in(buffin), vstr_out(buffout);
+  std::vector<std::string> vvin;
+  std::vector<std::string> vvout;
+  boost::split(vvin, vstr_in, boost::is_any_of("\t"));
+  boost::split(vvout, vstr_out, boost::is_any_of("\t"));
+  varin_.reset(new oops::Variables(vvin));
+  varout_.reset(new oops::Variables(vvout));
+
   oops::Log::trace() << "ObsExample created." << std::endl;
 }
 
