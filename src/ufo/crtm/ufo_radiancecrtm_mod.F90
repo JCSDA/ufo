@@ -23,26 +23,65 @@ module ufo_radiancecrtm_mod
  !> Fortran derived type for radiancecrtm trajectory
  type, public :: ufo_radiancecrtm
  private
-  type(crtm_conf) :: conf
+   character(len=max_string), public, allocatable :: varin(:)  ! variables requested from the model
+   integer :: nvars_out
+   character(len=max_string), public, allocatable :: varout(:) ! variables simulated by CRTM
+   integer, allocatable                           :: channels(:)
+   type(crtm_conf) :: conf
  contains
    procedure :: setup  => ufo_radiancecrtm_setup
    procedure :: delete => ufo_radiancecrtm_delete
    procedure :: simobs => ufo_radiancecrtm_simobs
  end type ufo_radiancecrtm
 
- CHARACTER(MAXVARLEN), PARAMETER :: varname_tmplate="brightness_temperature"
-
+ character(len=maxvarlen), dimension(24), parameter :: varin_default = &
+                            (/var_ts, var_mixr, var_prs, var_prsi, var_oz, var_co2,       &
+                              var_sfc_wfrac, var_sfc_lfrac, var_sfc_ifrac, var_sfc_sfrac, &
+                              var_sfc_wtmp,  var_sfc_ltmp,  var_sfc_itmp,  var_sfc_stmp,  &
+                              var_sfc_vegfrac, var_sfc_wspeed, var_sfc_wdir, var_sfc_lai, &
+                              var_sfc_soilm, var_sfc_soilt, var_sfc_landtyp,              &
+                              var_sfc_vegtyp, var_sfc_soiltyp, var_sfc_sdepth/)
 contains
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_radiancecrtm_setup(self, c_conf)
+subroutine ufo_radiancecrtm_setup(self, c_conf, channels)
 
 implicit none
 class(ufo_radiancecrtm), intent(inout) :: self
-type(c_ptr),         intent(in)    :: c_conf
+type(c_ptr),             intent(in)    :: c_conf
+integer(c_int),          intent(in)    :: channels(:)  !List of channels to use
+
+integer :: nvars_in, nvars_out
+integer :: ind, ich
 
  call crtm_conf_setup(self%conf,c_conf)
+
+ ! request from the model all the hardcoded atmospheric & surface variables + 
+ ! 2 * n_clouds (for mass content and effective radius)
+ nvars_in = size(varin_default) + self%conf%n_clouds * 2
+ allocate(self%varin(nvars_in))
+ self%varin(1:size(varin_default)) = varin_default
+ ind = size(varin_default) + 1
+ if (self%conf%n_clouds > 0) then
+   self%varin(ind)   = var_clw
+   self%varin(ind+1) = var_clwefr
+   ind = ind + 2
+ endif
+ if (self%conf%n_clouds > 1) then
+   self%varin(ind)   = var_cli
+   self%varin(ind+1) = var_cliefr
+   ind = ind + 2
+ endif
+
+ ! output variables: all requested channels
+ nvars_out = size(channels)
+ allocate(self%varout(nvars_out))
+ allocate(self%channels(nvars_out))
+ self%channels(:) = channels(:)
+ do ich = 1, size(channels)
+   call get_var_name(ich, self%varout(ich))
+ enddo
 
 end subroutine ufo_radiancecrtm_setup
 
@@ -59,20 +98,20 @@ end subroutine ufo_radiancecrtm_delete
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_radiancecrtm_simobs(self, geovals, hofx, obss, channels)
+subroutine ufo_radiancecrtm_simobs(self, geovals, obss, nvars, nlocs, hofx)
 
 implicit none
-class(ufo_radiancecrtm),      intent(in) :: self         !Radiance object
+class(ufo_radiancecrtm),  intent(in) :: self         !Radiance object
 type(ufo_geovals),        intent(in) :: geovals      !Inputs from the model
-real(c_double),        intent(inout) :: hofx(:)      !h(x) to return
+integer,                  intent(in) :: nvars, nlocs
+real(c_double),        intent(inout) :: hofx(nvars, nlocs) !h(x) to return
 type(c_ptr), value,       intent(in) :: obss         !ObsSpace
-integer(c_int),           intent(in) :: channels(:)  !List of channels to use
 
 ! Local Variables
 character(*), parameter :: PROGRAM_NAME = 'ufo_radiancecrtm_mod.F90'
 character(255) :: message, version
 integer        :: err_stat, alloc_stat
-integer        :: l, m, n, i, s
+integer        :: l, m, n, s
 type(ufo_geoval), pointer :: temp
 
 integer :: n_Profiles
@@ -179,7 +218,7 @@ type(CRTM_RTSolution_type), allocatable :: rts(:,:)
    !Assign the data from the GeoVaLs
    !--------------------------------
    call Load_Atm_Data(n_Profiles,n_Layers,geovals,atm,self%conf)
-   call Load_Sfc_Data(n_Profiles,n_Layers,n_Channels,channels,geovals,sfc,chinfo,obss)
+   call Load_Sfc_Data(n_Profiles,n_Layers,n_Channels,self%channels,geovals,sfc,chinfo,obss)
    call Load_Geom_Data(obss,geo)
 
 
@@ -211,14 +250,12 @@ type(CRTM_RTSolution_type), allocatable :: rts(:,:)
    ! ----------------------------------------------
 
    !Set to zero and initialize counter
-   hofx(:) = 0.0_kind_real
-   i = 1
+   hofx(:,:) = 0.0_kind_real
 
    do m = 1, n_Profiles
-     do l = 1, size(channels)
+     do l = 1, size(self%channels)
 
-       hofx(i) = rts(channels(l),m)%Brightness_Temperature
-       i = i + 1
+       hofx(l, m) = rts(self%channels(l),m)%Brightness_Temperature
 
      end do
    end do

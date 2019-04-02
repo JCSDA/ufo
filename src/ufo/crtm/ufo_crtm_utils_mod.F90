@@ -26,6 +26,7 @@ public crtm_conf_delete
 public Load_Atm_Data
 public Load_Sfc_Data
 public Load_Geom_Data
+public get_var_name
 
 PUBLIC Load_Aerosol_Data
 public assign_aerosol_names
@@ -251,12 +252,9 @@ integer, parameter :: SEA_WATER_TYPE              =  1  ! Water type            
 integer, parameter :: FRESH_SNOW_TYPE             =  2  ! NPOESS Snow type         for IR/VIS SfcOptics
 integer, parameter :: FRESH_ICE_TYPE              =  1  ! NPOESS Ice type          for IR/VIS SfcOptics
 
-character(len=100) :: varname_tmplate
 character(len=200) :: varname
 
 real(kind_real), allocatable :: ObsTb(:,:)
-
- varname_tmplate = "brightness_temperature"
 
  allocate(ObsTb(n_profiles, n_channels))
  ObsTb = 0.0_kind_real
@@ -264,7 +262,7 @@ real(kind_real), allocatable :: ObsTb(:,:)
  do n1 = 1,n_Channels
    if (any(n1==channels)) then
      !Get the variable name for this channel
-     call get_var_name(varname_tmplate,n1,varname)
+     call get_var_name(n1,varname)
      call obsspace_get_db(obss, "ObsValue", varname, ObsTb(:,n1))
    endif
  enddo
@@ -401,17 +399,15 @@ end subroutine Load_Geom_Data
 
 ! ------------------------------------------------------------------------------
 
-subroutine get_var_name(varname_tmplate,n,varname)
+subroutine get_var_name(n,varname)
 
-character(len=*), intent(in) :: varname_tmplate
 integer, intent(in) :: n
 character(len=*), intent(out) :: varname
 
 character(len=3) :: chan
 
- ! pass in varname_tmplate = "brigtness_temperature"
  write(chan, '(I0)') n
- varname = trim(varname_tmplate) // '_' // trim(chan)
+ varname = 'brightness_temperature_' // trim(chan)
 
 end subroutine get_var_name
 
