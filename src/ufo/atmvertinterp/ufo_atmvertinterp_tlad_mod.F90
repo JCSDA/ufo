@@ -20,13 +20,12 @@ module ufo_atmvertinterp_tlad_mod
 ! ------------------------------------------------------------------------------
 
   type, extends(ufo_basis_tlad) :: ufo_atmvertinterp_tlad
-   private
+  private
+     integer :: nvars
+     character(len=max_string), public, allocatable :: varin(:)
      integer :: nval, nlocs
      real(kind_real), allocatable :: wf(:)
      integer, allocatable :: wi(:)
-     integer, public :: nvars
-     character(len=max_string), public, allocatable :: varin(:)
-     character(len=max_string), public, allocatable :: varout(:)
   contains
     procedure :: setup => atmvertinterp_tlad_setup_
     procedure :: delete => atmvertinterp_tlad_delete_
@@ -50,16 +49,10 @@ subroutine atmvertinterp_tlad_setup_(self, c_conf)
 
   !> Size of variables
   self%nvars = size(config_get_string_vector(c_conf, max_string, "variables"))
-  !> Allocate varout
-  allocate(self%varout(self%nvars))
-  !> Read variable list and store in varout
-  self%varout = config_get_string_vector(c_conf, max_string, "variables")
-  !> Allocate varin, need additional slot to hold vertical coord.
+  !> Allocate varin
   allocate(self%varin(self%nvars))
-  !> Set vars_in based on vars_out
-  do ii = 1, self%nvars
-    self%varin(ii) = self%varout(ii)
-  enddo
+  !> Read variable list and store in varin
+  self%varin = config_get_string_vector(c_conf, max_string, "variables")
 
 end subroutine atmvertinterp_tlad_setup_
 
@@ -202,7 +195,6 @@ subroutine  destructor(self)
   self%nvars = 0
   self%ltraj = .false.
   if (allocated(self%varin)) deallocate(self%varin)
-  if (allocated(self%varout)) deallocate(self%varout)
   if (allocated(self%wi)) deallocate(self%wi)
   if (allocated(self%wf)) deallocate(self%wf)
 end subroutine destructor
