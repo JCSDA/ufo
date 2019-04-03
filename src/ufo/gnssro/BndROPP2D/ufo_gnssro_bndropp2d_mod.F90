@@ -20,6 +20,7 @@ use obsspace_mod
 use missing_values_mod
 use ufo_gnssro_ropp2d_utils_mod
 use gnssro_mod_conf
+use ufo_locs_mod
 use fckit_log_module,  only : fckit_log
 
 implicit none
@@ -27,7 +28,7 @@ public             :: ufo_gnssro_bndropp2d
 private
   !> Fortran derived type for gnssro trajectory
 type, extends(ufo_basis) :: ufo_gnssro_BndROPP2D
-  type(gnssro_conf)  :: loc2dconf
+  type(gnssro_conf)  :: roconf
   contains
     procedure :: setup     => ufo_gnssro_bndropp2d_setup
     procedure :: simobs    => ufo_gnssro_bndropp2d_simobs
@@ -41,7 +42,7 @@ subroutine ufo_gnssro_bndropp2d_setup(self, c_conf)
   class(ufo_gnssro_BndROPP2D), intent(inout) :: self
   type(c_ptr),                 intent(in)    :: c_conf
 
-  call gnssro_conf_setup(self%loc2dconf,c_conf)
+  call gnssro_conf_setup(self%roconf,c_conf)
 end subroutine ufo_gnssro_bndropp2d_setup
 
 ! ------------------------------------------------------------------------------
@@ -61,24 +62,28 @@ subroutine ufo_gnssro_bndropp2d_simobs(self, geovals, hofx, obss)
   type(State2dFM)                    :: x
   type(Obs1dBangle)                  :: y
 
-  character(len=*), parameter     :: myname_="ufo_gnssro_bndropp2d_simobs"
-  integer, parameter              :: max_string = 800
-  character(max_string)           :: err_msg
-  integer                         :: nlev, nobs, iobs, nvprof
-  integer                         :: ierr
-  real(kind=dp)                   :: ob_time
-  type(ufo_geoval), pointer          :: t, q, prs, gph !, gph_sfc
-  real(kind_real), allocatable       :: obsLat(:), obsLon(:), obsImpP(:), obsLocR(:), obsGeoid(:)
-  integer     :: iflip, n_horiz
+  character(len=*), parameter   :: myname_="ufo_gnssro_bndropp2d_simobs"
+  integer, parameter            :: max_string = 800
+  character(max_string)         :: err_msg
+  integer                       :: nlev, nobs, iobs, nvprof
+  integer                       :: ierr, iflip, kerror
+  type(ufo_geoval), pointer     :: t, q, prs, gph
+  real(kind_real), allocatable  :: obsImpP(:),obsLocR(:),obsGeoid(:),obsAzim(:) !nobs
+  real(kind_real), allocatable  :: obsLat(:),obsLon(:)                          !nobs
+  real(kind_real), allocatable  :: obsLon2d(:),obsLat2d(:)       ! nobs * n_horiz
+  real(kind_real), allocatable  :: obsLonnh(:),obsLatnh(:)       ! n_horiz
+  integer                         :: n_horiz
+  real(kind_real)                 :: dtheta
 
-  n_horiz = self%loc2dconf%n_horiz
+  n_horiz = self%roconf%n_horiz
+  dtheta  = self%roconf%dtheta
 
   write(err_msg,*) "TRACE: ufo_gnssro_bndropp2d_simobs: begin"
   call fckit_log%info(err_msg)
 
 ! check if nobs is consistent in geovals & hofx
   if (geovals%nobs /= size(hofx)*n_horiz) then
-      write(err_msg,*) myname_, ' error: nobs inconsistent!'
+      write(err_msg,*) myname_, ' error: 2d nobs inconsistent!'
       call abor1_ftn(err_msg)
   endif
 
@@ -101,12 +106,15 @@ subroutine ufo_gnssro_bndropp2d_simobs(self, geovals, hofx, obss)
                          '  but ROPP requires it to be ascending order, need flip'
     call fckit_log%info(err_msg)
   end if
+
 ! set obs space struture
   allocate(obsLon(nobs))
   allocate(obsLat(nobs))
   allocate(obsImpP(nobs))
   allocate(obsLocR(nobs))
   allocate(obsGeoid(nobs))
+  allocate(obsLatnh(n_horiz))
+  allocate(obsLonnh(n_horiz))
 
   call obsspace_get_db(obss, " ", "longitude",        obsLon)
   call obsspace_get_db(obss, " ", "latitude",         obsLat)
@@ -114,20 +122,36 @@ subroutine ufo_gnssro_bndropp2d_simobs(self, geovals, hofx, obss)
   call obsspace_get_db(obss, " ", "earth_radius_of_curvature", obsLocR)
   call obsspace_get_db(obss, " ", "geoid_height_above_reference_ellipsoid", obsGeoid)
 
+  if (obsspace_has(obss,"MetaData", "lon2d")) then
+    allocate(obsLat2d(nobs*n_horiz))
+    allocate(obsLon2d(nobs*n_horiz))
+    call obsspace_get_db(obss, "MetaData", "lon2d",obsLon2d)
+    call obsspace_get_db(obss, "MetaData", "lat2d",obsLat2d)
+  else
+    allocate(obsAzim(nobs)) ! only needed for 2d location calculation
+    call obsspace_get_db(obss, " ", "sensor_azimuth_angle", obsAzim)
+  endif
+
   nvprof=1  ! no. of bending angles in profile 
   write(err_msg,*) "TRACE: ufo_gnssro_bndropp2d_simobs: begin observation loop, nobs =  ", nobs
   call fckit_log%info(err_msg)
 
 ! loop through the obs
   obs_loop: do iobs = 1, nobs  
-    call init_ropp_2d_statevec(          &
-                      obsLon(iobs),      &
-                      obsLat(iobs),      &
-                    t%vals(:,iobs:nobs*n_horiz:nobs),      &
-                    q%vals(:,iobs:nobs*n_horiz:nobs),      &
-                  prs%vals(:,iobs:nobs*n_horiz:nobs),      &
-                  gph%vals(:,iobs:nobs*n_horiz:nobs),      &
-                     nlev,x, iflip)
+
+    if( obsspace_has(obss,"MetaData", "lon2d") ) then
+      obsLatnh = obsLat2d( (iobs-1)*n_horiz+1:iobs*n_horiz )
+      obsLonnh = obsLon2d( (iobs-1)*n_horiz+1:iobs*n_horiz )
+    else
+      call ropp_fm_2d_plane(obsLat(iobs),obsLon(iobs),obsAzim(iobs),dtheta,n_horiz,obsLatnh,obsLonnh,kerror)
+    endif
+
+    call init_ropp_2d_statevec(obsLonnh, obsLatnh,                  &
+                    t%vals(:,(iobs-1)*n_horiz+1:iobs*n_horiz),      &
+                    q%vals(:,(iobs-1)*n_horiz+1:iobs*n_horiz),      &
+                  prs%vals(:,(iobs-1)*n_horiz+1:iobs*n_horiz),      &
+                  gph%vals(:,(iobs-1)*n_horiz+1:iobs*n_horiz),      &
+                     nlev,x,n_horiz,dtheta,iflip)
      
     call init_ropp_2d_obvec(nvprof,      &
                   obsImpP(iobs),         &
@@ -158,6 +182,11 @@ subroutine ufo_gnssro_bndropp2d_simobs(self, geovals, hofx, obss)
   deallocate(obsImpP)
   deallocate(obsLocR)
   deallocate(obsGeoid)
+  deallocate(obsLatnh)
+  deallocate(obsLonnh)
+  if(allocated(obsLat2d)) deallocate(obsLat2d)
+  if(allocated(obsLon2d)) deallocate(obsLon2d)
+  if(allocated(obsAzim))  deallocate(obsAzim)
 
   write(err_msg,*) "TRACE: ufo_gnssro_bndropp2d_simobs: completed"
   call fckit_log%info(err_msg)
