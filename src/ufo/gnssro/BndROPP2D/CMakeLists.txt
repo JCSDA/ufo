@@ -30,6 +30,7 @@ set (  bndropp2d_src_files
        ObsGnssroBndROPP2DTLAD.interface.h
        ObsGnssroBndROPP2DTLAD.interface.F90
        ufo_gnssro_bndropp2d_tlad_mod_stub.F90
+       ufo_gnssro_2d_locs_mod_stub.F90
 PARENT_SCOPE
 )
 endif( ${ROPP-UFO_FOUND} )
