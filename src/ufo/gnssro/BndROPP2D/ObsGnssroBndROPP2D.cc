@@ -67,7 +67,7 @@ Locations * ObsGnssroBndROPP2D::locations(const util::DateTime & t1,
   int keylocs = locs->toFortran();
   const util::DateTime * p1 = &t1;
   const util::DateTime * p2 = &t2;
- 
+
   const eckit::LocalConfiguration obsOptions(config_, "ObsOptions");
   const eckit::Configuration * configc = &obsOptions;
 
