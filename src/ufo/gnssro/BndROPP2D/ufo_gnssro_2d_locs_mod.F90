@@ -41,7 +41,7 @@ subroutine ufo_gnssro_2d_locs_init(self, obss, t1, t2, roconf)
   integer         :: kerror, n_horiz
   real(kind_real) :: dtheta
 
-  dtheta  = roconf%res/6371.0
+  dtheta  = roconf%dtheta
   n_horiz = roconf%n_horiz
 
  ! Local copies pre binning
@@ -98,7 +98,7 @@ subroutine ufo_gnssro_2d_locs_init(self, obss, t1, t2, roconf)
   end do
 
 ! it would better to store the 2d location to obsspace
-!       and then operators can use is later 
+!       and can be used later in operators
 ! call obsspace_put_db(obss, "MetaData","lon2d", self%lon)
 ! call obsspace_put_db(obss, "MetaData","lat2d", self%lat)
 

@@ -17,6 +17,7 @@ type gnssro_conf
   character(len=255) :: obserr_method
   integer(c_int)     :: n_horiz
   real(kind_real)    :: res
+  real(kind_real)    :: dtheta
 end type gnssro_conf
 
 !--------- ropp2d location default parameters-----------------
@@ -58,6 +59,8 @@ if (config_element_exists(c_conf,"res")) then
 else
   roconf%res = res_2d
 endif
+
+roconf%dtheta = roconf%res /6371.0
 
 end subroutine gnssro_conf_setup
 
