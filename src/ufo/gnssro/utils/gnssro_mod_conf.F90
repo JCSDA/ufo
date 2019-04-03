@@ -10,7 +10,6 @@ implicit none
 private
 public   :: gnssro_conf
 public   :: gnssro_conf_setup
-public   :: conf2d
 
 type gnssro_conf
   integer(c_int)     :: ro_top_meter
