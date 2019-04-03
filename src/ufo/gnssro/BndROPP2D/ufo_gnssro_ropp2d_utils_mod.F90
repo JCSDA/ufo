@@ -32,7 +32,7 @@ contains
 
 ! ------------------------------------------------------------------------------------
 ! ------------------------------------------------------------------------------------
-subroutine init_ropp_2d_statevec(rlon,rlat,temp,shum,pres,phi,lm,x, iflip)
+subroutine init_ropp_2d_statevec(rlon,rlat,temp,shum,pres,phi,lm, x, n_horiz, dtheta, iflip)
 
 !  Description:
 !     subroutine to fill a ROPP state vector structure with
@@ -54,18 +54,19 @@ subroutine init_ropp_2d_statevec(rlon,rlat,temp,shum,pres,phi,lm,x, iflip)
 ! ###############################################################
   implicit none
 ! Output state vector
-  type(State2dFM),     intent(out)   :: x
-  real(kind=kind_real),intent(in)    :: rlat, rlon
-  integer,             intent(in)    :: lm
-integer,parameter :: n_horiz = 3
-  real(kind=kind_real), dimension(lm,n_horiz), intent(in)    :: temp,shum,pres,phi
+  type(State2dFM),      intent(out)   :: x
+  integer,              intent(in)    :: lm, n_horiz
+  real(kind=kind_real), intent(in)    :: dtheta
+  real(kind=kind_real), dimension(n_horiz), intent(in)     ::   rlon, rlat
+  real(kind=kind_real), dimension(lm,n_horiz), intent(in)  :: temp,shum,pres,phi
 ! Local variables
   integer :: n,i,j,k
-  real    :: rlon_local
   integer, optional, intent(in)  :: iflip
 !-------------------------------------------------------------------------
 ! number of profiles in plane
-  x%n_horiz=3
+  x%n_horiz = n_horiz
+  x%dtheta  = dtheta
+
 ! Number of levels in background profile.  What about (lm+1) field ?
   x%n_lev=lm
 
@@ -84,14 +85,10 @@ integer,parameter :: n_horiz = 3
   allocate(x%lat(x%n_horiz))
   allocate(x%lon(x%n_horiz))
 
-  x%lat(:) = real(rlat,kind=wp)
-  rlon_local = rlon
-  if (rlon_local .gt. 180) rlon_local = rlon_local - 360.
-  x%lon(:) = real(rlon_local,kind=wp)
+  x%lat(:) = real(rlat(:),kind=wp)
+  x%lon(:) = real(rlon(:),kind=wp)
+  where (x%lon .gt. 180.0) x%lon = x%lon -360.0
 
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! number of profiles and angular separation between them
-  x%dtheta = 40.0_wp/6371.0_wp
 
 ! TEMPORARY!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !----------------------------------------------------
@@ -124,7 +121,7 @@ end subroutine init_ropp_2d_statevec
 
 ! ------------------------------------------------------------------------------
 
-subroutine init_ropp_2d_statevec_ad(temp_d,shum_d,pres_d,phi_d,lm,x_ad, iflip)
+subroutine init_ropp_2d_statevec_ad(temp_d,shum_d,pres_d,phi_d,lm,x_ad,n_horiz,iflip)
 
 !  Description:
 !     subroutine to fill a ROPP state vector structure with
@@ -150,9 +147,10 @@ subroutine init_ropp_2d_statevec_ad(temp_d,shum_d,pres_d,phi_d,lm,x_ad, iflip)
 
 ! Output state vector
 
-  type(State2dFM),     intent(inout) :: x_ad
-  integer,             intent(in)    :: lm
-  real(kind=kind_real), dimension(lm), intent(inout)    :: temp_d,shum_d,pres_d,phi_d
+  type(State2dFM),           intent(inout) :: x_ad
+  integer,                   intent(in)    :: lm, n_horiz
+  real(kind=kind_real), &
+       dimension(lm,n_horiz), intent(inout) :: temp_d,shum_d,pres_d,phi_d
 
 ! Local variables
   integer ::  n,j,k
@@ -160,24 +158,26 @@ subroutine init_ropp_2d_statevec_ad(temp_d,shum_d,pres_d,phi_d,lm,x_ad, iflip)
   integer, optional, intent(in)  :: iflip
 !-------------------------------------------------------------------------
   n = lm
+  x_ad%n_horiz = n_horiz
+
   if ( present(iflip) .and. iflip .eq. 1) then
 
     do k = 1, lm
        do j =  1, x_ad%n_horiz
 !!!        x_tl%temp(n,:) = real(temp_d(k),kind=wp)
-           temp_d(k) = temp_d(k) + real(x_ad%temp(n,j),kind=kind_real)
+           temp_d(k,j) = temp_d(k,j) + real(x_ad%temp(n,j),kind=kind_real)
            x_ad%temp(n,j) = 0.0_wp
         
 !!!        x_tl%shum(n,:) = real(shum_d(k),kind=wp)
-           shum_d(k) = shum_d(k) + real(x_ad%shum(n,j),kind=kind_real)
+           shum_d(k,j) = shum_d(k,j) + real(x_ad%shum(n,j),kind=kind_real)
            x_ad%shum(n,j) = 0.0_wp
         
 !!!        x_tl%pres(n,:) = real(pres_d(k)*100.,kind=wp)
-           pres_d(k) = pres_d(k) + 100.0*real(x_ad%pres(n,j),kind=kind_real)
+           pres_d(k,j) = pres_d(k,j) + 100.0*real(x_ad%pres(n,j),kind=kind_real)
            x_ad%pres(n,j) = 0.0_wp
         
 !!!        x_tl%geop(n,:) = real(phi_d(k),kind=wp)
-           phi_d(k) = phi_d(k) + real(x_ad%geop(n,j),kind=kind_real)
+           phi_d(k,j) = phi_d(k,j) + real(x_ad%geop(n,j),kind=kind_real)
            x_ad%geop(n,j) = 0.0_wp
       enddo
 
@@ -186,13 +186,13 @@ subroutine init_ropp_2d_statevec_ad(temp_d,shum_d,pres_d,phi_d,lm,x_ad, iflip)
   else
     do k = 1, lm
        do j =  1, x_ad%n_horiz
-           temp_d(k) = temp_d(k) + real(x_ad%temp(k,j),kind=kind_real)
+           temp_d(k,j) = temp_d(k,j) + real(x_ad%temp(k,j),kind=kind_real)
            x_ad%temp(k,j) = 0.0_wp
-           shum_d(k) = shum_d(k) + real(x_ad%shum(k,j),kind=kind_real)
+           shum_d(k,j) = shum_d(k,j) + real(x_ad%shum(k,j),kind=kind_real)
            x_ad%shum(k,j) = 0.0_wp
-           pres_d(k) = pres_d(k) + 100.0*real(x_ad%pres(k,j),kind=kind_real)
+           pres_d(k,j) = pres_d(k,j) + 100.0*real(x_ad%pres(k,j),kind=kind_real)
            x_ad%pres(k,j) = 0.0_wp
-           phi_d(k) = phi_d(k) + real(x_ad%geop(k,j),kind=kind_real)
+           phi_d(k,j) = phi_d(k,j) + real(x_ad%geop(k,j),kind=kind_real)
            x_ad%geop(k,j) = 0.0_wp
       enddo
     end do
