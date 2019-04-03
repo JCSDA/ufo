@@ -763,6 +763,7 @@ real(kind_real), allocatable :: time_offset(:,:)
 
 integer :: i
 integer :: j
+integer :: nfactor, nlocs, fvlen_nloc
 
 ! open netcdf file and read dimensions
 call nc_diag_read_init(filename, iunit)
@@ -774,13 +775,24 @@ else
   fvlen = vardims(2)
 endif
 
+if (allocated(vardims)) deallocate(vardims)
+call nc_diag_read_get_var_dims(iunit, "time", nvardim, vardims)
+fvlen_nloc  = vardims(1)
+if ( fvlen_nloc == fvlen .or. (fvlen_nloc /= fvlen .and. mod(fvlen,fvlen_nloc) == 0) ) then
+  nfactor = fvlen/fvlen_nloc
+else
+  write(err_msg,*) 'ufo_geovals_read_netcdf: variable dimension is not consistent'
+  call abor1_ftn(trim(err_msg))
+end if
+
+
 !> round-robin distribute the observations to PEs
 !> Calculate how many obs. on each PE
-distribution=random_distribution(fvlen)
-nobs=distribution%nobs_pe()
-allocate(dist_indx(nobs))
+distribution=random_distribution(fvlen_nloc)
+nlocs=distribution%nobs_pe()
+allocate(dist_indx(nlocs))
 dist_indx = distribution%indx
-
+nobs      = nlocs*nfactor
 ! Strip out obs that fall outside the timing window.
 
 ! Read in the date_time attribute and for a datetime object
@@ -792,25 +804,24 @@ call datetime_create("1000-01-01T00:00:00Z", refdate)
 call datetime_from_ifs(refdate, date_time_attr/100, 0)
 
 ! Read in the time variable
-allocate(time_offset(1,nobs))
-if (allocated(vardims)) deallocate(vardims)
-call nc_diag_read_get_var_dims(iunit, "time", nvardim, vardims)
+allocate(time_offset(1,nlocs))
 vartype = nc_diag_read_get_var_type(iunit, "time")
 call ufo_geovals_read_nc_var(iunit, nvardim, vardims, vartype, dist_indx, "time", time_offset)
-
 ! Generate the timing window indices
-allocate(tw_indx(nobs))
-call gen_twindow_index(refdate, t1, t2, nobs, time_offset(1,:), tw_indx, tw_nobs)
+allocate(tw_indx(nlocs))
+call gen_twindow_index(refdate, t1, t2, nlocs, time_offset(1,:), tw_indx, tw_nobs)
 
 ! Adjust dist_indx if tw_nobs is different than original nobs
-if (tw_nobs .ne. nobs) then
-  nobs = tw_nobs
+! also Adjust dist_indx if nfactor is larger than 1
+if (tw_nobs .ne. nlocs .or. nfactor .gt. 1) then
+  nlocs = tw_nobs
+  nobs = nlocs * nfactor
   if (allocated(dist_indx)) deallocate(dist_indx)
   allocate(dist_indx(nobs))
-  do i = 1, nobs
-    dist_indx(i) = distribution%indx(tw_indx(i))
+  do i = 1, nlocs
+    dist_indx((i-1)*nfactor+1:i*nfactor) = distribution%indx(tw_indx(i))
   enddo
-endif
+end if
 
 deallocate(time_offset)
 deallocate(tw_indx)
@@ -857,7 +868,6 @@ do ivar = 1, vars%nv
     ! read the variable out of the file
     call ufo_geovals_read_nc_var(iunit, nvardim, vardims, vartype, dist_indx, &
                                  vars%fldnames(ivar), self%geovals(ivar)%vals)
-
     ! set the missing value equal to IODA missing_value
     where (self%geovals(ivar)%vals > 1.0e08) self%geovals(ivar)%vals = self%missing_value
     
