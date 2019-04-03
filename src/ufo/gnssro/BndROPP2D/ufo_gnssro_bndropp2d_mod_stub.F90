@@ -17,6 +17,7 @@ use ufo_basis_mod,     only: ufo_basis
 use vert_interp_mod
 use lag_interp_mod,    only: lag_interp_const, lag_interp_smthWeights
 use obsspace_mod
+use gnssro_mod_conf
 use missing_values_mod
 use fckit_log_module,  only : fckit_log
 
@@ -26,13 +27,23 @@ private
 
   !> Fortran derived type for gnssro trajectory
 type, extends(ufo_basis) :: ufo_gnssro_BndROPP2D
+  type(gnssro_conf)  :: roconf
   contains
+    procedure :: setup     => ufo_gnssro_bndropp2d_setup
     procedure :: simobs    => ufo_gnssro_bndropp2d_simobs
 end type ufo_gnssro_BndROPP2D
 
 contains
 
 ! ------------------------------------------------------------------------------
+subroutine ufo_gnssro_bndropp2d_setup(self, c_conf)
+  implicit none
+  class(ufo_gnssro_BndROPP2D), intent(inout) :: self
+  type(c_ptr),                 intent(in)    :: c_conf
+
+  call gnssro_conf_setup(self%roconf,c_conf)
+end subroutine ufo_gnssro_bndropp2d_setup
+
 ! ------------------------------------------------------------------------------
 subroutine ufo_gnssro_bndropp2d_simobs(self, geovals, hofx, obss)
 
