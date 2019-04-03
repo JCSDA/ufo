@@ -2,16 +2,17 @@ module ufo_gnssro_2d_locs_mod
 
 use iso_c_binding
 use fckit_log_module, only : fckit_log
-use kinds,            only: kind_real
+use kinds,            only : kind_real
 use ufo_locs_mod
-  use gnssro_mod_conf
+use gnssro_mod_conf
+
 public:: ufo_gnssro_2d_locs_init
 
 contains
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
-subroutine ufo_gnssro_2d_locs_init(self, obss, t1, t2, loc2dconf)
+subroutine ufo_gnssro_2d_locs_init(self, obss, t1, t2, roconf)
   use kinds
   use datetime_mod
   use twindow_utils_mod
@@ -34,13 +35,14 @@ subroutine ufo_gnssro_2d_locs_init(self, obss, t1, t2, loc2dconf)
   type(datetime),  dimension(:), allocatable :: date_time
 
 ! gnss ro data 2d location  
-  real(kind_real), dimension(:), allocatable     :: obsAzim
-  type(conf2d),                  intent(in)      :: loc2dconf
-  real(kind_real), dimension(loc2dconf%n_horiz)  :: plat_2d, plon_2d
-  integer         :: kerror
+  real(kind_real), dimension(:), allocatable :: obsAzim
+  type(gnssro_conf),          intent(in)     :: roconf
+  real(kind_real), dimension(roconf%n_horiz) :: plat_2d, plon_2d
+  integer         :: kerror, n_horiz
   real(kind_real) :: dtheta
 
-  dtheta=loc2dconf%res/6371.0
+  dtheta  = roconf%res/6371.0
+  n_horiz = roconf%n_horiz
 
  ! Local copies pre binning
   nlocs = obsspace_get_nlocs(obss)
@@ -84,18 +86,23 @@ subroutine ufo_gnssro_2d_locs_init(self, obss, t1, t2, loc2dconf)
   endif
 
   !Setup ufo 2d locations 
-  call ufo_locs_setup(self, tw_nlocs*loc2dconf%n_horiz)
+  call ufo_locs_setup(self, tw_nlocs*n_horiz)
   do i = 1, tw_nlocs
-    call ropp_fm_2d_plane(lon(tw_indx(i)),lat(tw_indx(i)),obsAzim(tw_indx(i)),dtheta, loc2dconf%n_horiz,plat_2d,plon_2d,kerror)
-    do j = 1, loc2dconf%n_horiz
-      self%lon( (j-1)*tw_nlocs+i ) = plon_2d(j)
-      self%lat( (j-1)*tw_nlocs+i ) = plat_2d(j)
-      self%time((j-1)*tw_nlocs+i ) = date_time(tw_indx(i))
-      self%indx((j-1)*tw_nlocs+i ) = tw_indx(i)+(j-1)*tw_nlocs
-    enddo
+    call ropp_fm_2d_plane(lat(tw_indx(i)),lon(tw_indx(i)),obsAzim(tw_indx(i)),dtheta,n_horiz,plat_2d,plon_2d,kerror)
+    self%lon( (i-1)*n_horiz+1 : i*n_horiz) =  plon_2d
+    self%lat( (i-1)*n_horiz+1 : i*n_horiz) =  plat_2d
+    self%time((i-1)*n_horiz+1 : i*n_horiz) =  date_time(tw_indx(i))
+    do j = 1, n_horiz
+      self%indx((i-1)*n_horiz+j) =  (tw_indx(i)-1)*n_horiz+j
+    end do
   end do
 
- do i = 1, nlocs
+! it would better to store the 2d location to obsspace
+!       and then operators can use is later 
+! call obsspace_put_db(obss, "MetaData","lon2d", self%lon)
+! call obsspace_put_db(obss, "MetaData","lat2d", self%lat)
+
+  do i = 1, nlocs
     call datetime_delete(date_time(i))
   enddo
   deallocate(date_time, lon, lat, tw_indx, obsAzim)
