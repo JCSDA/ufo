@@ -99,7 +99,8 @@ character(len=MAXVARLEN), public :: var_abs_topo      = "sea_surface_height_abov
 character(len=MAXVARLEN), public :: var_ocn_pot_temp  = "sea_water_potential_temperature"
 character(len=MAXVARLEN), public :: var_ocn_con_temp  = "sea_water_conservative_temperature"
 character(len=MAXVARLEN), public :: var_ocn_abs_salt  = "sea_water_absolute_salinity"
-character(len=MAXVARLEN), public :: var_ocn_salt      = "sea_water_practical_salinity"
+character(len=MAXVARLEN), public :: var_ocn_pra_salt      = "sea_water_practical_salinity"
+character(len=MAXVARLEN), public :: var_ocn_salt      = "sea_water_salinity"
 character(len=MAXVARLEN), public :: var_ocn_lay_thick = "sea_water_cell_thickness"
 character(len=MAXVARLEN), public :: var_ocn_sst       = "sea_surface_temperature"
 

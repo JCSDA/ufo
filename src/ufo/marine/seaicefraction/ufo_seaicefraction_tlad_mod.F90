@@ -15,6 +15,7 @@ module ufo_seaicefraction_tlad_mod
  use ufo_basis_tlad_mod, only: ufo_basis_tlad
  use ufo_vars_mod
  use obsspace_mod
+ use missing_values_mod
 
  implicit none
  private
@@ -114,6 +115,10 @@ character(max_string) :: err_msg
 
 integer :: iobs
 type(ufo_geoval), pointer :: geoval
+real(c_double) :: missing
+
+!> Set missing value
+missing = missing_value(missing)
 
 ! check if nobs is consistent in geovals & hofx
 if (geovals%nobs /= size(hofx,1)) then
@@ -137,7 +142,9 @@ end if
 ! backward sea ice fraction obs operator
 geoval%vals=0.0
 do iobs = 1, size(hofx,1)
+ if (hofx(iobs) /= missing) then
    geoval%vals(:,iobs) = geoval%vals(:,iobs) + hofx(iobs)
+ end if
 enddo
 
 end subroutine ufo_seaicefraction_simobs_ad

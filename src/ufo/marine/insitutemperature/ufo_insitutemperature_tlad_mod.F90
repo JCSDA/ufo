@@ -15,6 +15,7 @@ module ufo_insitutemperature_tlad_mod
  use ufo_basis_tlad_mod, only: ufo_basis_tlad
  use ufo_vars_mod
  use obsspace_mod
+ use missing_values_mod
 
  implicit none
  private
@@ -259,6 +260,10 @@ subroutine ufo_insitutemperature_simobs_ad(self, geovals, hofx, obss)
     integer :: iobs, nobs, ilev, nlev
     type(ufo_geoval), pointer :: dtemp, dsalt, dlayerthick
     real (kind_real) :: dtp, dsp
+    real(c_double) :: missing
+
+    !> Set missing value
+    missing = missing_value(missing)
     
     ! check if trajectory was set
     if (.not. self%ltraj) then
@@ -295,22 +300,23 @@ subroutine ufo_insitutemperature_simobs_ad(self, geovals, hofx, obss)
     dsalt%vals = 0.0
     do iobs = 1, size(hofx,1)
 
-       lono = self%lono(iobs)
-       lato = self%lato(iobs)
-       deptho = self%deptho(iobs)
+       if (hofx(iobs) /= missing) then
+          lono = self%lono(iobs)
+          lato = self%lato(iobs)
+          deptho = self%deptho(iobs)
       
-       ! Adjoint obs operator
-       dtp = 0.0
-       dsp = 0.0
-       call insitu_t_tlad(hofx(iobs),dtp,dsp,self%tempo(iobs),self%salto(iobs),lono,lato,deptho,self%jac(:,iobs))
+          ! Adjoint obs operator
+          dtp = 0.0
+          dsp = 0.0
+          call insitu_t_tlad(hofx(iobs),dtp,dsp,self%tempo(iobs),self%salto(iobs),lono,lato,deptho,self%jac(:,iobs))
 
-       ! Backward interpolate
-       call vert_interp_apply_ad(nlev, dtemp%vals(:,iobs), dtp, self%wi(iobs), self%wf(iobs))
-       call vert_interp_apply_ad(nlev, dsalt%vals(:,iobs), dsp, self%wi(iobs), self%wf(iobs))
+          ! Backward interpolate
+          call vert_interp_apply_ad(nlev, dtemp%vals(:,iobs), dtp, self%wi(iobs), self%wf(iobs))
+          call vert_interp_apply_ad(nlev, dsalt%vals(:,iobs), dsp, self%wi(iobs), self%wf(iobs))
 
-       ! Layer thickness is not a control variable: zero it out!
-       dlayerthick%vals=0.0
-       
+          ! Layer thickness is not a control variable: zero it out!
+          dlayerthick%vals=0.0
+       end if
     enddo
 
 end subroutine ufo_insitutemperature_simobs_ad

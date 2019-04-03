@@ -1,11 +1,11 @@
-! (C) Copyright 2017-2018 UCAR
+! (C) Copyright 2017-2019 UCAR
 !
 ! This software is licensed under the terms of the Apache Licence Version 2.0
 ! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 
-!> Fortran insitutemperature module for observation operator
+!> Fortran marinevertinterp module for observation operator
 
-module ufo_insitutemperature_mod
+module ufo_marinevertinterp_mod
 
  use iso_c_binding
  use config_mod
@@ -22,55 +22,65 @@ module ufo_insitutemperature_mod
  integer, parameter :: max_string=800
 
 !> Fortran derived type for the observation type
- type, extends(ufo_basis), public :: ufo_insitutemperature
- private
+ type, extends(ufo_basis), public :: ufo_marinevertinterp
+    private
+    character(len=max_string), public, allocatable :: varin(:)
+    character(len=max_string), public, allocatable :: varout(:)    
  contains
-   procedure :: setup  => ufo_insitutemperature_setup
-   procedure :: delete => ufo_insitutemperature_delete
-   procedure :: simobs => ufo_insitutemperature_simobs
- end type ufo_insitutemperature
+   procedure :: setup  => ufo_marinevertinterp_setup
+   procedure :: delete => ufo_marinevertinterp_delete
+   procedure :: simobs => ufo_marinevertinterp_simobs
+ end type ufo_marinevertinterp
 
 contains
 
 ! ------------------------------------------------------------------------------
-subroutine ufo_insitutemperature_setup(self, c_conf)
+subroutine ufo_marinevertinterp_setup(self, c_conf)
 implicit none
-class(ufo_insitutemperature), intent(inout) :: self
+class(ufo_marinevertinterp), intent(inout) :: self
 type(c_ptr),        intent(in)    :: c_conf
 
-end subroutine ufo_insitutemperature_setup
+! Get output variable name (hard-coded to 1)
+allocate(self%varout(1))
+self%varout = config_get_string_vector(c_conf, max_string, "variable")
+
+! Set input variable names (hard-coded to 2)
+allocate(self%varin(2))
+self%varin(1) = self%varout(1)
+self%varin(2) = "sea_water_cell_thickness"
+
+
+end subroutine ufo_marinevertinterp_setup
 
 ! ------------------------------------------------------------------------------
-subroutine ufo_insitutemperature_delete(self)
+subroutine ufo_marinevertinterp_delete(self)
 implicit none
-class(ufo_insitutemperature), intent(inout) :: self
+class(ufo_marinevertinterp), intent(inout) :: self
 
-end subroutine ufo_insitutemperature_delete
+end subroutine ufo_marinevertinterp_delete
 
 ! ------------------------------------------------------------------------------
-subroutine ufo_insitutemperature_simobs(self, geovals, hofx, obss)
+subroutine ufo_marinevertinterp_simobs(self, geovals, hofx, obss)
 use gsw_pot_to_insitu
 use vert_interp_mod
 use ufo_tpsp2ti_mod
 use ufo_marine_ncutils
 implicit none
-class(ufo_insitutemperature), intent(in)    :: self
+class(ufo_marinevertinterp), intent(in)    :: self
 type(ufo_geovals),  intent(in)    :: geovals
 real(c_double),     intent(inout) :: hofx(:)
 type(c_ptr), value, intent(in)    :: obss
 
-    character(len=*), parameter :: myname_="ufo_insitutemperature_simobs"
+    character(len=*), parameter :: myname_="ufo_marinevertinterp_simobs"
     character(max_string)  :: err_msg
 
     integer :: iobs, ilev, nlev, nobs
-    type(ufo_geoval), pointer :: temp, salt, h
+    type(ufo_geoval), pointer :: var, h
     real (kind_real), allocatable :: depth(:,:)
-    real(kind_real) :: lono, lato, deptho
-    real(kind_real), allocatable :: obs_lon(:)
-    real(kind_real), allocatable :: obs_lat(:)
+    real(kind_real) :: deptho
     real(kind_real), allocatable :: obs_depth(:)
     integer :: obss_nlocs
-    real(kind_real) :: wf, tp, sp, prs
+    real(kind_real) :: wf, sp, prs
     integer :: wi
     
     ! check if nobs is consistent in geovals & hofx
@@ -80,21 +90,16 @@ type(c_ptr), value, intent(in)    :: obss
     endif
 
     ! Associate geoval pointers
-    call ufo_geovals_get_var(geovals, var_ocn_pot_temp, temp)
-    call ufo_geovals_get_var(geovals, var_ocn_salt, salt)
+    call ufo_geovals_get_var(geovals, self%varin(1), var)
     call ufo_geovals_get_var(geovals, var_ocn_lay_thick, h)
 
     ! Read in obs data
     obss_nlocs = obsspace_get_nlocs(obss)
-    allocate(obs_lon(obss_nlocs))
-    allocate(obs_lat(obss_nlocs))
     allocate(obs_depth(obss_nlocs))
-    call obsspace_get_db(obss, "MetaData", "longitude", obs_lon)
-    call obsspace_get_db(obss, "MetaData", "latitude", obs_lat)
     call obsspace_get_db(obss, "MetaData", "depth", obs_depth)
 
-    nlev = temp%nval
-    nobs = temp%nobs        
+    nlev = var%nval
+    nobs = var%nobs        
     allocate(depth(nlev,nobs))
     do iobs = 1,size(hofx,1)
        !< Depth from layer thickness
@@ -104,14 +109,10 @@ type(c_ptr), value, intent(in)    :: obss
        end do          
     end do
 
-    ! Information for temporary output file
-    
     hofx = 0.0
-    ! insitu temperature profile obs operator
+    ! Vertical interpolation
     do iobs = 1,size(hofx,1)
 
-       lono = obs_lon(iobs)
-       lato = obs_lat(iobs)
        deptho = obs_depth(iobs)
     
        !< Interpolation weight
@@ -121,20 +122,14 @@ type(c_ptr), value, intent(in)    :: obss
           wf=0.0
        end if
 
-       ! Interpolate temp_p, salt_p to deptho
-       call vert_interp_apply(nlev, temp%vals(:,iobs), tp, wi, wf)
-       call vert_interp_apply(nlev, salt%vals(:,iobs), sp, wi, wf)
-
-       ! Get insitu temp at model levels and obs location (lono, lato, zo)
-       call insitu_t_nl(hofx(iobs), tp, sp, lono, lato, deptho)
+       !Apply vertical interpolation
+       call vert_interp_apply(nlev, var%vals(:,iobs), hofx(iobs), wi, wf)
 
     enddo
 
     deallocate(depth)
-    deallocate(obs_lon)
-    deallocate(obs_lat)
     deallocate(obs_depth)
     
-  end subroutine ufo_insitutemperature_simobs
+  end subroutine ufo_marinevertinterp_simobs
 
-end module ufo_insitutemperature_mod
+end module ufo_marinevertinterp_mod
