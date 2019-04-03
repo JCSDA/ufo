@@ -24,7 +24,6 @@ module ufo_radiancecrtm_mod
  type, public :: ufo_radiancecrtm
  private
    character(len=max_string), public, allocatable :: varin(:)  ! variables requested from the model
-   integer :: nvars_out
    character(len=max_string), public, allocatable :: varout(:) ! variables simulated by CRTM
    integer, allocatable                           :: channels(:)
    type(crtm_conf) :: conf
