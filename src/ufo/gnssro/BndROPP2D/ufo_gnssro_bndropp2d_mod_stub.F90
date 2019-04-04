@@ -28,6 +28,7 @@ private
   !> Fortran derived type for gnssro trajectory
 type, extends(ufo_basis) :: ufo_gnssro_BndROPP2D
   type(gnssro_conf)  :: roconf
+  real(kind_real), allocatable  :: obsLon2d(:), obsLat2d(:)  !2d location
   contains
     procedure :: setup     => ufo_gnssro_bndropp2d_setup
     procedure :: simobs    => ufo_gnssro_bndropp2d_simobs
@@ -36,12 +37,16 @@ end type ufo_gnssro_BndROPP2D
 contains
 
 ! ------------------------------------------------------------------------------
-subroutine ufo_gnssro_bndropp2d_setup(self, c_conf)
+subroutine ufo_gnssro_bndropp2d_setup(self, c_conf, c_size)
   implicit none
   class(ufo_gnssro_BndROPP2D), intent(inout) :: self
   type(c_ptr),                 intent(in)    :: c_conf
+  integer,                     intent(in)    :: c_size ! 1d obsspace vector length
 
   call gnssro_conf_setup(self%roconf,c_conf)
+  allocate(self%obsLon2d(c_size*self%roconf%n_horiz))
+  allocate(self%obsLat2d(c_size*self%roconf%n_horiz))
+
 end subroutine ufo_gnssro_bndropp2d_setup
 
 ! ------------------------------------------------------------------------------
