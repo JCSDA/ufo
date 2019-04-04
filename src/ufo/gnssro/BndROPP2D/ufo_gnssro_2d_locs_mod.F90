@@ -4,24 +4,24 @@ use iso_c_binding
 use fckit_log_module, only : fckit_log
 use kinds,            only : kind_real
 use ufo_locs_mod
-use gnssro_mod_conf
-
 public:: ufo_gnssro_2d_locs_init
 
 contains
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
-subroutine ufo_gnssro_2d_locs_init(self, obss, t1, t2, roconf)
+subroutine ufo_gnssro_2d_locs_init(self, locs, obss, t1, t2)
   use kinds
   use datetime_mod
   use twindow_utils_mod
   use fckit_log_module, only : fckit_log
   use obsspace_mod
+  use ufo_gnssro_bndropp2d_mod
 
   implicit none
 
-  type(ufo_locs),      intent(inout) :: self
+  type(ufo_locs),              intent(inout) :: locs
+  class(ufo_gnssro_BndROPP2D), intent(inout) :: self
   type(c_ptr),  value, intent(in)    :: obss
   type(datetime),      intent(in)    :: t1, t2
 
@@ -35,26 +35,21 @@ subroutine ufo_gnssro_2d_locs_init(self, obss, t1, t2, roconf)
   type(datetime),  dimension(:), allocatable :: date_time
 
 ! gnss ro data 2d location  
-  real(kind_real), dimension(:), allocatable :: obsAzim
-  type(gnssro_conf),          intent(in)     :: roconf
-  real(kind_real), dimension(roconf%n_horiz) :: plat_2d, plon_2d
+  real(kind_real), dimension(:), allocatable      :: obsAzim
+  real(kind_real), dimension(self%roconf%n_horiz) :: plat_2d, plon_2d
   integer         :: kerror, n_horiz
   real(kind_real) :: dtheta
 
-  dtheta  = roconf%dtheta
-  n_horiz = roconf%n_horiz
-
+  dtheta  = self%roconf%dtheta
+  n_horiz = self%roconf%n_horiz
  ! Local copies pre binning
   nlocs = obsspace_get_nlocs(obss)
 
   allocate(date_time(nlocs), lon(nlocs), lat(nlocs))
 
-!TODO(JG): Add "MetaData" or similar group attribute to all ioda ObsSpace objects
-  if (obsspace_has(obss,"MetaData", "time")) then
-    call obsspace_get_db(obss, "MetaData", "datetime", date_time)
-  else
-    call obsspace_get_db(obss, "", "datetime", date_time)
-  endif
+  call obsspace_get_db(obss, "", "datetime", date_time)
+  call obsspace_get_db(obss, "", "longitude", lon)
+  call obsspace_get_db(obss, "", "latitude", lat)
 
   ! Generate the timing window indices
   allocate(tw_indx(nlocs))
@@ -65,15 +60,6 @@ subroutine ufo_gnssro_2d_locs_init(self, obss, t1, t2, roconf)
       tw_indx(tw_nlocs) = i
     endif
   enddo
-
-!TODO(JG): Add "MetaData" or similar group attribute to all ioda ObsSpace objects
-  if (obsspace_has(obss,"MetaData", "longitude")) then
-    call obsspace_get_db(obss, "MetaData", "longitude", lon)
-    call obsspace_get_db(obss, "MetaData", "latitude", lat)
-  else
-    call obsspace_get_db(obss, "", "longitude", lon)
-    call obsspace_get_db(obss, "", "latitude", lat)
-  endif
 
   allocate(obsAzim(nlocs))
   if (obsspace_has(obss,"ObsValue","bending_angle")) then
@@ -86,21 +72,20 @@ subroutine ufo_gnssro_2d_locs_init(self, obss, t1, t2, roconf)
   endif
 
   !Setup ufo 2d locations 
-  call ufo_locs_setup(self, tw_nlocs*n_horiz)
+  call ufo_locs_setup(locs, tw_nlocs*n_horiz)
   do i = 1, tw_nlocs
     call ropp_fm_2d_plane(lat(tw_indx(i)),lon(tw_indx(i)),obsAzim(tw_indx(i)),dtheta,n_horiz,plat_2d,plon_2d,kerror)
-    self%lon( (i-1)*n_horiz+1 : i*n_horiz) =  plon_2d
-    self%lat( (i-1)*n_horiz+1 : i*n_horiz) =  plat_2d
-    self%time((i-1)*n_horiz+1 : i*n_horiz) =  date_time(tw_indx(i))
+    locs%lon( (i-1)*n_horiz+1 : i*n_horiz) =  plon_2d
+    locs%lat( (i-1)*n_horiz+1 : i*n_horiz) =  plat_2d
+    locs%time((i-1)*n_horiz+1 : i*n_horiz) =  date_time(tw_indx(i))
     do j = 1, n_horiz
-      self%indx((i-1)*n_horiz+j) =  (tw_indx(i)-1)*n_horiz+j
+      locs%indx((i-1)*n_horiz+j) =  (tw_indx(i)-1)*n_horiz+j
     end do
   end do
 
-! it would better to store the 2d location to obsspace
-!       and can be used later in operators
-! call obsspace_put_db(obss, "MetaData","lon2d", self%lon)
-! call obsspace_put_db(obss, "MetaData","lat2d", self%lat)
+  ! save ufo_locs to self
+  self%obsLat2d = locs%lat
+  self%obsLon2d = locs%lon
 
   do i = 1, nlocs
     call datetime_delete(date_time(i))
