@@ -8,6 +8,8 @@
 #ifndef UFO_OBSOPERATOR_H_
 #define UFO_OBSOPERATOR_H_
 
+#include <string>
+
 #include <boost/noncopyable.hpp>
 #include <boost/scoped_ptr.hpp>
 
@@ -56,6 +58,9 @@ class ObsOperator : public util::Printable,
 
 /// Operator locations
   Locations * locations(const util::DateTime &, const util::DateTime &) const;
+
+/// Operator type
+  const std::string & obstype() const;
 
  private:
   void print(std::ostream &) const;

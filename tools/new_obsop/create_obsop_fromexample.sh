@@ -3,7 +3,7 @@ example="Example"
 example_dir="example"
 
 echo "Usage: create_obsop_fromexample.sh <ObsOperatorName> <path/to/obsoperator>"
-echo "Example: create_obsop_fromexample.sh Radiance atmosphere/radiance2"
+echo "Example: create_obsop_fromexample.sh CRTM crtm2"
 echo "Please use CamelCase for the ObsOperatorName and path relative to src/ufo/"
  
 if [ "$#" -lt 2 ]; then

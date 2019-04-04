@@ -16,6 +16,7 @@ module ufo_radiancecrtm_tlad_mod
  use ufo_crtm_utils_mod
  use crtm_module
  use obsspace_mod
+ use missing_values_mod
 
  implicit none
  private
@@ -23,6 +24,8 @@ module ufo_radiancecrtm_tlad_mod
  !> Fortran derived type for radiancecrtm trajectory
  type, public :: ufo_radiancecrtm_tlad
  private
+  character(len=max_string), public, allocatable :: varin(:)  ! variables requested from the model
+  integer, allocatable                           :: channels(:)
   type(crtm_conf) :: conf
   integer :: n_Profiles
   integer :: n_Layers
@@ -42,13 +45,25 @@ contains
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_radiancecrtm_tlad_setup(self, c_conf)
+subroutine ufo_radiancecrtm_tlad_setup(self, c_conf, channels)
 
 implicit none
 class(ufo_radiancecrtm_tlad), intent(inout) :: self
-type(c_ptr),              intent(in)    :: c_conf
+type(c_ptr),                  intent(in)    :: c_conf
+integer(c_int),               intent(in)    :: channels(:)  !List of channels to use
+
+integer :: nvars_in
 
  call crtm_conf_setup(self%conf,c_conf)
+
+ ! only air_temperature adjusted for now
+ nvars_in = 1
+ allocate(self%varin(nvars_in))
+ self%varin(1) = var_ts
+
+ ! save channels
+ allocate(self%channels(size(channels)))
+ self%channels(:) = channels(:)
 
 end subroutine ufo_radiancecrtm_tlad_setup
 
@@ -77,14 +92,13 @@ end subroutine ufo_radiancecrtm_tlad_delete
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_radiancecrtm_tlad_settraj(self, geovals, obss, channels)
+subroutine ufo_radiancecrtm_tlad_settraj(self, geovals, obss)
 
 implicit none
 
 class(ufo_radiancecrtm_tlad), intent(inout) :: self
 type(ufo_geovals),        intent(in)    :: geovals
 type(c_ptr), value,       intent(in)    :: obss
-integer(c_int),           intent(in)    :: channels(:)  !List of channels to use
 
 ! Local Variables
 character(*), parameter :: PROGRAM_NAME = 'ufo_radiancecrtm_mod.F90'
@@ -218,7 +232,7 @@ type(CRTM_RTSolution_type), allocatable :: rts_K(:,:)
    !Assign the data from the GeoVaLs
    !--------------------------------
    call Load_Atm_Data(self%N_PROFILES,self%N_LAYERS,geovals,atm,self%conf)
-   call Load_Sfc_Data(self%N_PROFILES,self%N_LAYERS,self%N_Channels,channels,geovals,sfc,chinfo,obss)
+   call Load_Sfc_Data(self%N_PROFILES,self%N_LAYERS,self%N_Channels,self%channels,geovals,sfc,chinfo,obss)
    call Load_Geom_Data(obss,geo)
 
 
@@ -293,18 +307,18 @@ end subroutine ufo_radiancecrtm_tlad_settraj
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_radiancecrtm_simobs_tl(self, geovals, obss, hofx, channels)
+subroutine ufo_radiancecrtm_simobs_tl(self, geovals, obss, nvars, nlocs, hofx)
 
 implicit none
 class(ufo_radiancecrtm_tlad), intent(in)    :: self
 type(ufo_geovals),        intent(in)    :: geovals
 type(c_ptr), value,       intent(in)    :: obss
-real(c_double),           intent(inout) :: hofx(:)
-integer(c_int),           intent(in)    :: channels(:)  !List of channels to use
+integer,                  intent(in)    :: nvars, nlocs
+real(c_double),           intent(inout) :: hofx(nvars, nlocs)
 
 character(len=*), parameter :: myname_="ufo_radiancecrtm_simobs_tl"
 character(max_string) :: err_msg
-integer :: job, jprofile, jchannel, jlevel
+integer :: jprofile, jchannel, jlevel
 type(ufo_geoval), pointer :: tv_d
 
 
@@ -325,8 +339,7 @@ type(ufo_geoval), pointer :: tv_d
 
  ! Initialize hofx
  ! ---------------
- hofx(:) = 0.0_kind_real
-
+ hofx(:,:) = 0.0_kind_real
 
  ! Temperature
  ! -----------
@@ -341,13 +354,12 @@ type(ufo_geoval), pointer :: tv_d
  endif
 
  ! Multiply by Jacobian and add to hofx
- job = 0
  do jprofile = 1, self%n_Profiles
-   do jchannel = 1, size(channels)
-     job = job + 1
+   do jchannel = 1, size(self%channels)
      do jlevel = 1, tv_d%nval
-       hofx(job) = hofx(job) + &
-                    self%atm_K(channels(jchannel),jprofile)%Temperature(jlevel) * tv_d%vals(jlevel,jprofile)
+       hofx(jchannel, jprofile) = hofx(jchannel, jprofile) + &
+                    self%atm_K(self%channels(jchannel),jprofile)%Temperature(jlevel) * &
+                    tv_d%vals(jlevel,jprofile)
      enddo
    enddo
  enddo
@@ -358,19 +370,20 @@ end subroutine ufo_radiancecrtm_simobs_tl
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_radiancecrtm_simobs_ad(self, geovals, obss, hofx, channels)
+subroutine ufo_radiancecrtm_simobs_ad(self, geovals, obss, nvars, nlocs, hofx)
 
 implicit none
 class(ufo_radiancecrtm_tlad), intent(in)    :: self
 type(ufo_geovals),        intent(inout) :: geovals
 type(c_ptr), value,       intent(in)    :: obss
-real(c_double),           intent(in)    :: hofx(:)
-integer(c_int),           intent(in)    :: channels(:)  !List of channels to use
+integer,                  intent(in)    :: nvars, nlocs
+real(c_double),           intent(in)    :: hofx(nvars, nlocs)
 
 character(len=*), parameter :: myname_="ufo_radiancecrtm_simobs_ad"
 character(max_string) :: err_msg
-integer :: job, jprofile, jchannel, jlevel
+integer :: jprofile, jchannel, jlevel
 type(ufo_geoval), pointer :: tv_d
+real(c_double) :: missing
 
 
  ! Initial checks
@@ -388,6 +401,8 @@ type(ufo_geoval), pointer :: tv_d
    call abor1_ftn(err_msg)
  endif
 
+ ! Set missing value
+ missing = missing_value(missing)
 
  ! Temperature
  ! -----------
@@ -405,13 +420,14 @@ type(ufo_geoval), pointer :: tv_d
 
 
  ! Multiply by Jacobian and add to hofx (adjoint)
- job = 0
  do jprofile = 1, self%n_Profiles
-   do jchannel = 1, size(channels)
-     job = job + 1
+   do jchannel = 1, size(self%channels)
      do jlevel = 1, tv_d%nval
-       tv_d%vals(jlevel,jprofile) = tv_d%vals(jlevel,jprofile) + &
-                                    self%atm_K(channels(jchannel),jprofile)%Temperature(jlevel) * hofx(job)
+       if (hofx(jchannel, jprofile) /= missing) then
+         tv_d%vals(jlevel,jprofile) = tv_d%vals(jlevel,jprofile) + &
+                                      self%atm_K(self%channels(jchannel),jprofile)%Temperature(jlevel) * &
+                                      hofx(jchannel, jprofile)
+       endif
      enddo
    enddo
  enddo
