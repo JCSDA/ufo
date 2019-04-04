@@ -99,36 +99,27 @@ subroutine ufo_gnssro_bndropp2d_tlad_settraj(self, geovals, obss)
   allocate(self%obsLat2d(self%nobs*n_horiz))
   allocate(self%obsLon2d(self%nobs*n_horiz))
 
-  if (obsspace_has(obss,"MetaData", "lon2d")) then
+  allocate(obsLon(self%nobs))
+  allocate(obsLat(self%nobs))
+  allocate(obsAzim(self%nobs))
+  call obsspace_get_db(obss, " ", "longitude",        obsLon)
+  call obsspace_get_db(obss, " ", "latitude",         obsLat)
+  call obsspace_get_db(obss, " ", "sensor_azimuth_angle", obsAzim)
 
-    call obsspace_get_db(obss, "MetaData", "lon2d",self%obsLon2d)
-    call obsspace_get_db(obss, "MetaData", "lat2d",self%obsLat2d)
+  allocate(obsLatnh(n_horiz))
+  allocate(obsLonnh(n_horiz))
 
-  else
+  do i = 1, self%nobs
+     call ropp_fm_2d_plane(obsLat(i),obsLon(i),obsAzim(i),dtheta,n_horiz,obsLatnh,obsLonnh,kerror)
+     self%obsLon2d((i-1)*n_horiz+1:i*n_horiz) =  obsLonnh
+     self%obsLat2d((i-1)*n_horiz+1:i*n_horiz) =  obsLatnh
+  end do
 
-    allocate(obsLon(self%nobs))
-    allocate(obsLat(self%nobs))
-    allocate(obsAzim(self%nobs))
-    call obsspace_get_db(obss, " ", "longitude",        obsLon)
-    call obsspace_get_db(obss, " ", "latitude",         obsLat)
-    call obsspace_get_db(obss, " ", "sensor_azimuth_angle", obsAzim)
-
-    allocate(obsLatnh(n_horiz))
-    allocate(obsLonnh(n_horiz))
-
-    do i = 1, self%nobs
-       call ropp_fm_2d_plane(obsLat(i),obsLon(i),obsAzim(i),dtheta,n_horiz,obsLatnh,obsLonnh,kerror)
-       self%obsLon2d((i-1)*n_horiz+1:i*n_horiz) =  obsLonnh
-       self%obsLat2d((i-1)*n_horiz+1:i*n_horiz) =  obsLatnh
-    end do
-
-    deallocate(obsLat)
-    deallocate(obsLon)
-    deallocate(obsLonnh)
-    deallocate(obsLatnh)
-    deallocate(obsAzim)
-
-  endif
+  deallocate(obsLat)
+  deallocate(obsLon)
+  deallocate(obsLonnh)
+  deallocate(obsLatnh)
+  deallocate(obsAzim)
 
   allocate(self%t(self%nval,self%nobs*n_horiz))
   allocate(self%q(self%nval,self%nobs*n_horiz))
