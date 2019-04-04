@@ -27,8 +27,7 @@ static ObsOperatorMaker<ObsGnssroBndROPP2D> makerGnssroBndROPP2D_("GnssroBndROPP
 
 ObsGnssroBndROPP2D::ObsGnssroBndROPP2D(const ioda::ObsSpace & odb,
                                        const eckit::Configuration & config)
-  : ObsOperatorBase(odb, config), keyOperGnssroBndROPP2D_(0), odb_(odb), varin_(), varout_(),
-    config_(config)
+  : ObsOperatorBase(odb, config), keyOperGnssroBndROPP2D_(0), odb_(odb), varin_(), varout_()
 {
   const std::vector<std::string> vv{"temperature", "specific_humidity", "air_pressure",
                                     "geopotential_height"};
@@ -40,7 +39,7 @@ ObsGnssroBndROPP2D::ObsGnssroBndROPP2D(const ioda::ObsSpace & odb,
   const eckit::LocalConfiguration obsOptions(config, "ObsOptions");
   const eckit::Configuration * configc = &obsOptions;
 
-  ufo_gnssro_bndropp2d_setup_f90(keyOperGnssroBndROPP2D_, &configc);
+  ufo_gnssro_bndropp2d_setup_f90(keyOperGnssroBndROPP2D_, &configc, odb_.nlocs());
   oops::Log::trace() << "ObsGnssroBndROPP2D created." << std::endl;
 }
 
@@ -68,10 +67,7 @@ Locations * ObsGnssroBndROPP2D::locations(const util::DateTime & t1,
   const util::DateTime * p1 = &t1;
   const util::DateTime * p2 = &t2;
 
-  const eckit::LocalConfiguration obsOptions(config_, "ObsOptions");
-  const eckit::Configuration * configc = &obsOptions;
-
-  ufo_gnssro_2d_locs_init_f90(keylocs, odb_, &p1, &p2, &configc);
+  ufo_gnssro_2d_locs_init_f90(keyOperGnssroBndROPP2D_, keylocs, odb_, &p1, &p2);
 
   return locs;
 }

@@ -33,15 +33,16 @@ contains
   
 ! ------------------------------------------------------------------------------
   
-subroutine ufo_gnssro_bndropp2d_setup_c(c_key_self, c_conf) bind(c,name='ufo_gnssro_bndropp2d_setup_f90')
+subroutine ufo_gnssro_bndropp2d_setup_c(c_key_self, c_conf,c_size) bind(c,name='ufo_gnssro_bndropp2d_setup_f90')
 implicit none
 integer(c_int), intent(inout) :: c_key_self
 type(c_ptr),    intent(in)    :: c_conf
-    
+integer(c_int), intent(in)    :: c_size  ! obsspace vector length
+
 type(ufo_gnssro_BndROPP2D), pointer :: self
 
 call ufo_gnssro_BndROPP2D_registry%setup(c_key_self, self)
-call self%setup(c_conf)
+call self%setup(c_conf, c_size)
    
 end subroutine ufo_gnssro_BndROPP2D_setup_c
   
@@ -78,41 +79,27 @@ call self%opr_simobs(c_key_geovals, c_obsspace, c_hofx)
 end subroutine ufo_gnssro_bndropp2d_simobs_c
 
 ! ------------------------------------------------------------------------------
-subroutine ufo_gnssro_2d_locs_init_c(c_key_self, c_obsspace, c_t1, c_t2, c_conf) bind(c,name='ufo_gnssro_2d_locs_init_f90')
+subroutine ufo_gnssro_2d_locs_init_c(c_key_self, c_key_locs, c_obsspace, c_t1, c_t2) bind(c,name='ufo_gnssro_2d_locs_init_f90')
 use datetime_mod
-use gnssro_mod_conf, only : n_horiz_2d, res_2d, gnssro_conf
 implicit none
-integer(c_int),     intent(inout)  :: c_key_self
+integer(c_int),     intent(in)     :: c_key_self  ! operator key
+integer(c_int),     intent(inout)  :: c_key_locs  ! location key
 type(c_ptr), value, intent(in)     :: c_obsspace
 type(c_ptr),        intent(in)     :: c_t1, c_t2
-type(c_ptr),        intent(in)     :: c_conf
-type(ufo_locs),     pointer        :: self
+
+type(ufo_locs),              pointer :: locs
+type(ufo_gnssro_BndROPP2D),  pointer :: self
+
 integer, parameter            :: max_string = 800
 character(max_string)         :: err_msg
-type(datetime)   :: t1, t2
-type(gnssro_conf)     :: roconf
+type(datetime)                :: t1, t2
 
 call c_f_datetime(c_t1, t1)
 call c_f_datetime(c_t2, t2)
 
-if (config_element_exists(c_conf,"n_horiz")) then
-  roconf%n_horiz = config_get_int(c_conf,"n_horiz")
-  if ( mod(roconf%n_horiz,2) .eq. 0 ) then
-    write(err_msg,*) 'ufo_gnssro_2d_locs_init_c error: n_horiz must be a odd number'
-    call abor1_ftn(err_msg)
-  end if
-else
-  roconf%n_horiz = n_horiz_2d
-endif
-
-if (config_element_exists(c_conf,"res")) then
-  roconf%res = config_get_real(c_conf,"res")
-else
-  roconf%res = res_2d
-endif 
-roconf%dtheta = roconf%res /6371.0
-call ufo_locs_registry%get(c_key_self, self)
-call ufo_gnssro_2d_locs_init(self, c_obsspace, t1, t2, roconf )
+call ufo_locs_registry%get(c_key_locs, locs)
+call ufo_gnssro_BndROPP2D_registry%get(c_key_self, self)
+call ufo_gnssro_2d_locs_init(self,locs, c_obsspace, t1, t2)
 
 end subroutine ufo_gnssro_2d_locs_init_c
 
