@@ -61,7 +61,7 @@ ObsAtmVertInterp::~ObsAtmVertInterp() {
 void ObsAtmVertInterp::simulateObs(const GeoVaLs & gom, ioda::ObsVector & ovec,
                                 const ObsBias & bias) const {
   ufo_atmvertinterp_simobs_f90(keyOperAtmVertInterp_, gom.toFortran(), odb_,
-                            ovec.size(), ovec.toFortran(), bias.toFortran());
+                            ovec.nvars(), ovec.nlocs(), ovec.toFortran(), bias.toFortran());
 }
 
 // -----------------------------------------------------------------------------
