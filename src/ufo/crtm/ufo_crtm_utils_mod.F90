@@ -5,7 +5,7 @@
 
 !> Fortran module to provide code shared between nonlinear and tlm/adm radiance calculations
 
-module ufo_crtm_utils_mod
+MODULE ufo_crtm_utils_mod
 
 use iso_c_binding
 use config_mod
@@ -874,4 +874,98 @@ SUBROUTINE load_aerosol_data(n_profiles,n_layers,geovals,&
      ENDDO
    END FUNCTION getindex
 
- END MODULE ufo_crtm_utils_mod
+END MODULE ufo_crtm_utils_mod   
+
+SUBMODULE (ufo_crtm_utils_mod) fv3_utils_mod
+
+PRIVATE
+
+REAL, PARAMETER :: rdgas  = 287.04   !< gas constant for dry air [j/kg/deg]
+REAL, PARAMETER :: rvgas  = 461.50   !< gas constant for water vapor [J/kg/deg]
+
+REAL, PARAMETER :: esl = 0.621971831
+REAL, PARAMETER :: zvir =  rvgas/rdgas - 1. 
+REAL, PARAMETER :: tice = 273.16
+
+CONTAINS
+
+  MODULE PROCEDURE qsmith(km, t, p, q, rh)
+
+! input T in deg K; p (Pa)
+    INTEGER, INTENT(in):: km
+    REAL, INTENT(in),DIMENSION(km):: t, p, q
+    REAL, INTENT(out),DIMENSION(km):: rh
+! Local:
+    REAL es(km), qs(km)
+    REAL ap1, eps10
+    REAL Tmin
+    INTEGER i, k, it
+
+    Tmin = tice-160.
+    eps10  = 10.*esl
+
+    IF( .NOT. ALLOCATED(table) ) CALL  qsmith_init
+
+    DO k=1,km
+       ap1 = 10.*DIM(t(i,k), Tmin) + 1.
+       ap1 = MIN(2621., ap1)
+       it = ap1
+       es = table(it) + (ap1-it)*des(it)
+       qs = esl*es*(1.+zvir*q)/p
+       rh = q/qs
+    ENDDO
+
+  CONTAINS
+
+    SUBROUTINE qsmith_init
+      
+      INTEGER, PARAMETER:: length=2621 
+      INTEGER i
+    
+      IF( .NOT. ALLOCATED(table) ) THEN
+!                            Generate es table (dT = 0.1 deg. C)
+
+         ALLOCATE ( table(length) )
+         ALLOCATE (  des (length) )
+
+         CALL qs_table(length, table)
+
+         DO i=1,length-1
+            des(i) = table(i+1) - table(i)
+         ENDDO
+         des(length) = des(length-1)
+      ENDIF
+
+    END SUBROUTINE qsmith_init
+
+    SUBROUTINE qs_table(n,table)
+      INTEGER, INTENT(in):: n
+      REAL table (n)
+      REAL:: dt=0.1
+      REAL esbasw, tbasw, esbasi, tbasi, Tmin, tem, aa, b, c, d, e, esh20 
+      REAL wice, wh2o
+      INTEGER i
+! Constants
+      esbasw = 1013246.0
+      tbasw =   373.16
+      tbasi =   273.16
+      Tmin = tbasi - 160.
+!  Compute es over water
+!  see smithsonian meteorological tables page 350.
+      DO  i=1,n
+         tem = Tmin+dt*REAL(i-1)
+         aa  = -7.90298*(tbasw/tem-1)
+         b   =  5.02808*alog10(tbasw/tem)
+         c   = -1.3816e-07*(10**((1-tem/tbasw)*11.344)-1)
+         d   =  8.1328e-03*(10**((tbasw/tem-1)*(-3.49149))-1)
+         e   = alog10(esbasw)
+         table(i)  = 0.1*10**(aa+b+c+d+e)
+      ENDDO
+
+    END SUBROUTINE qs_table
+
+  END PROCEDURE qsmith
+
+END SUBMODULE fv3_utils_mod
+
+
