@@ -5,7 +5,7 @@ use iso_c_binding
 use config_mod
 use kinds
 use obsspace_mod
-
+use gnssro_mod_constants
 implicit none
 private
 public   :: gnssro_conf
@@ -60,7 +60,7 @@ else
   roconf%res = res_2d
 endif
 
-roconf%dtheta = roconf%res /6371.0
+roconf%dtheta = roconf%res /mean_earth_rad
 
 end subroutine gnssro_conf_setup
 
