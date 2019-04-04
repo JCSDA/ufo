@@ -79,7 +79,7 @@ integer :: ind, ich
  allocate(self%channels(nvars_out))
  self%channels(:) = channels(:)
  do ich = 1, size(channels)
-   call get_var_name(ich, self%varout(ich))
+   call get_var_name(self%channels(ich), self%varout(ich))
  enddo
 
 end subroutine ufo_radiancecrtm_setup
