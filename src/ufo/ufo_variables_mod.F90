@@ -12,7 +12,7 @@ private
 public :: ufo_vars, ufo_vars_setup, ufo_vars_clone, ufo_vars_delete
 public :: ufo_vars_getindex, ufo_vars_nvars, ufo_vars_vnames
 
-INTEGER, PARAMETER, PUBLIC :: n_aerosols_gocart_nasa=14,&
+INTEGER, PARAMETER, PUBLIC :: n_aerosols_gocart_default=14,&
      &n_aerosols_gocart_esrl=15,n_aerosols_other=1
 
 integer, parameter, public :: MAXVARLEN=56
@@ -54,7 +54,8 @@ character(len=MAXVARLEN), public, parameter :: var_sfc_soiltyp = "Soil_Type"
 
 !@mzp strings have to be same MAXVARLEN length for array constructor
 CHARACTER(len=MAXVARLEN), public, parameter :: var_rh          = "relative_humidity"
-CHARACTER(len=MAXVARLEN), DIMENSION(n_aerosols_gocart_nasa), PUBLIC :: var_aerosols_gocart_nasa = [&
+CHARACTER(len=MAXVARLEN), DIMENSION(n_aerosols_gocart_default), PUBLIC, PARAMETER  :: &
+     &var_aerosols_gocart_default = [&
      &"sulf                                                    ",&
      &"bc1                                                     ",&
      &"bc2                                                     ",&
@@ -70,10 +71,11 @@ CHARACTER(len=MAXVARLEN), DIMENSION(n_aerosols_gocart_nasa), PUBLIC :: var_aeros
      &"seas3                                                   ",&
      &"seas4                                                   "]
 !@mzp var_aerosols_gocart_esrl =[&
-!    &var_aerosols_gocart_nasa,&
+!    &var_aerosols_gocart_default,&
 !    &"p25                                                     "]
 ! won't compile
-CHARACTER(len=MAXVARLEN), DIMENSION(n_aerosols_gocart_esrl), PUBLIC :: var_aerosols_gocart_esrl = [&
+CHARACTER(len=MAXVARLEN), DIMENSION(n_aerosols_gocart_esrl), PUBLIC, PARAMETER :: &
+     &var_aerosols_gocart_esrl = [&
      &"sulf                                                    ",&
      &"bc1                                                     ",&
      &"bc2                                                     ",&
@@ -90,7 +92,8 @@ CHARACTER(len=MAXVARLEN), DIMENSION(n_aerosols_gocart_esrl), PUBLIC :: var_aeros
      &"seas4                                                   ",&
      &"p25                                                     "]
 
-CHARACTER(len=MAXVARLEN), DIMENSION(n_aerosols_other), PUBLIC :: var_aerosols_other = [&
+CHARACTER(len=MAXVARLEN), DIMENSION(n_aerosols_other), PUBLIC, PARAMETER :: &
+     &var_aerosols_other = [&
      &"other                                                   "]
 
 character(len=MAXVARLEN), public, parameter :: var_seaicefrac    = "sea_ice_category_area_fraction"

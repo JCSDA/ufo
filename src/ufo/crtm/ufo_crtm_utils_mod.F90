@@ -33,7 +33,7 @@ public assign_aerosol_names
 public calculate_aero_layer_factor
 
 REAL(kind_real), PARAMETER :: &
-     &rd = 2.8705e+2_kind_real,&
+     &rd = 2.8704e+2_kind_real,&
      &rv = 4.6150e+2_kind_real,&
      &eps_p1 = one+rd/rv,&
      &grav = 9.81_kind_real,&
@@ -93,8 +93,8 @@ type(c_ptr),    intent(in)    :: c_conf
  IF (config_element_exists(c_conf,"AerosolOption")) THEN
     conf%aerosol_option = config_get_string(c_conf,LEN(conf%aerosol_option),"AerosolOption")
     conf%aerosol_option = upper2lower(conf%aerosol_option)
-    IF (TRIM(conf%aerosol_option) == "aerosols_gocart_nasa") THEN
-       conf%n_Aerosols=n_aerosols_gocart_nasa
+    IF (TRIM(conf%aerosol_option) == "aerosols_gocart_default") THEN
+       conf%n_Aerosols=n_aerosols_gocart_default
     ELSEIF (TRIM(conf%aerosol_option) == "aerosols_gocart_esrl") THEN
        conf%n_Aerosols=n_aerosols_gocart_esrl
     ELSEIF (TRIM(conf%aerosol_option) == "aerosols_other") THEN
@@ -429,18 +429,35 @@ SUBROUTINE load_aerosol_data(n_profiles,n_layers,geovals,&
 
     TYPE(ufo_geoval), POINTER :: geoval
 
-    REAL(kind_real), DIMENSION(n_layers,n_profiles) :: rh
+    CHARACTER(*), PARAMETER :: routine_name = 'Load_Aerosol_Data'
 
-    IF (TRIM(aerosol_option) == "aerosols_gocart_nasa") THEN
+    REAL(kind_real), DIMENSION(n_layers,n_profiles) :: rh
+    INTEGER :: ivar
+
+    IF (TRIM(aerosol_option) == "aerosols_gocart_default") THEN
        varname=var_rh
-       CALL ufo_geovals_get_var(geovals, varname, geoval)
-       rh(1:n_layers,1:n_profiles)=geoval%vals(1:n_layers,1:n_profiles)
+       ivar = ufo_vars_getindex(geovals%variables, var_rh)
+       IF (ivar < 0) THEN
+          message='relative humidity missing as input - will be calculated from tables'
+          CALL Display_Message(ROUTINE_NAME, TRIM(message), WARNING )
+          CALL qsmith(atm,rh)
+       ELSE
+          CALL ufo_geovals_get_var(geovals, varname, geoval)
+          rh(1:n_layers,1:n_profiles)=geoval%vals(1:n_layers,1:n_profiles)
+       ENDIF
        WHERE (rh > 1_kind_real) rh=1_kind_real
        CALL assign_gocart_nasa
     ELSEIF (TRIM(aerosol_option) == "aerosols_gocart_esrl") THEN
        varname=var_rh
-       CALL ufo_geovals_get_var(geovals, varname, geoval)
-       rh(1:n_layers,1:n_profiles)=geoval%vals(1:n_layers,1:n_profiles)
+       ivar = ufo_vars_getindex(geovals%variables, var_rh)
+       IF (ivar < 0) THEN
+          message='relative humidity missing as input - will be calculated from tables'
+          CALL Display_Message(ROUTINE_NAME, TRIM(message), WARNING )
+          CALL qsmith(atm,rh)
+       ELSE
+          CALL ufo_geovals_get_var(geovals, varname, geoval)
+          rh(1:n_layers,1:n_profiles)=geoval%vals(1:n_layers,1:n_profiles)
+       ENDIF
        WHERE (rh > 1_kind_real) rh=1_kind_real
        CALL assign_gocart_esrl
     ELSEIF (TRIM(aerosol_option) == "aerosols_other") THEN
@@ -470,9 +487,9 @@ SUBROUTINE load_aerosol_data(n_profiles,n_layers,geovals,&
 
          CALL calculate_aero_layer_factor(atm(m),ugkg_kgm2)
  
-         DO i=1,n_aerosols_gocart_nasa
+         DO i=1,n_aerosols_gocart_default
 
-            varname=var_aerosols_gocart_nasa(i)
+            varname=var_aerosols_gocart_default(i)
             CALL ufo_geovals_get_var(geovals,varname, geoval)
 
             atm(m)%aerosol(i)%Concentration(1:n_layers)=&
@@ -707,8 +724,8 @@ SUBROUTINE load_aerosol_data(n_profiles,n_layers,geovals,&
 
     CHARACTER(max_string) :: err_msg
 
-    IF (aerosol_option == "aerosols_gocart_nasa") THEN
-       var_aerosols=var_aerosols_gocart_nasa
+    IF (aerosol_option == "aerosols_gocart_default") THEN
+       var_aerosols=var_aerosols_gocart_default
     ELSEIF (aerosol_option == "aerosols_gocart_esrl") THEN
        var_aerosols=var_aerosols_gocart_esrl
     ELSEIF (aerosol_option == "var_aerosols_other") THEN
@@ -874,98 +891,98 @@ SUBROUTINE load_aerosol_data(n_profiles,n_layers,geovals,&
      ENDDO
    END FUNCTION getindex
 
-END MODULE ufo_crtm_utils_mod   
+!from fv3
 
-SUBMODULE (ufo_crtm_utils_mod) fv3_utils_mod
+   SUBROUTINE qsmith(atm,rh)
 
-PRIVATE
+     TYPE(CRTM_atmosphere_type), INTENT(in) :: atm(:)
+     REAL(kind_real), INTENT(out),DIMENSION(:,:):: rh
 
-REAL, PARAMETER :: rdgas  = 287.04   !< gas constant for dry air [j/kg/deg]
-REAL, PARAMETER :: rvgas  = 461.50   !< gas constant for water vapor [J/kg/deg]
-
-REAL, PARAMETER :: esl = 0.621971831
-REAL, PARAMETER :: zvir =  rvgas/rdgas - 1. 
-REAL, PARAMETER :: tice = 273.16
-
-CONTAINS
-
-  MODULE PROCEDURE qsmith(km, t, p, q, rh)
-
-! input T in deg K; p (Pa)
-    INTEGER, INTENT(in):: km
-    REAL, INTENT(in),DIMENSION(km):: t, p, q
-    REAL, INTENT(out),DIMENSION(km):: rh
 ! Local:
-    REAL es(km), qs(km)
-    REAL ap1, eps10
-    REAL Tmin
-    INTEGER i, k, it
+! input T in deg K; p (Pa)
+     REAL, PARAMETER :: rdgas  = rd   !< gas constant for dry air [j/kg/deg]
+     REAL, PARAMETER :: rvgas  = rv   !< gas constant for water vapor [J/kg/deg]
+     
+     REAL, PARAMETER :: esl = 0.621971831
+     REAL, PARAMETER :: zvir =  rvgas/rdgas - 1. 
+     REAL, PARAMETER :: tice = 273.16
+     
+     REAL, ALLOCATABLE :: table(:),des(:)
 
-    Tmin = tice-160.
-    eps10  = 10.*esl
+     REAL es, qs
+     REAL ap1, eps10
+     REAL Tmin
+     INTEGER i, k, it, n_layers, n_profiles
 
-    IF( .NOT. ALLOCATED(table) ) CALL  qsmith_init
+     n_layers=SIZE(rh,1)
+     n_profiles=SIZE(rh,2)
 
-    DO k=1,km
-       ap1 = 10.*DIM(t(i,k), Tmin) + 1.
-       ap1 = MIN(2621., ap1)
-       it = ap1
-       es = table(it) + (ap1-it)*des(it)
-       qs = esl*es*(1.+zvir*q)/p
-       rh = q/qs
-    ENDDO
+     Tmin = tice-160.
+     eps10  = 10.*esl
 
-  CONTAINS
+     IF( .NOT. ALLOCATED(table) ) CALL  qsmith_init
 
-    SUBROUTINE qsmith_init
-      
-      INTEGER, PARAMETER:: length=2621 
-      INTEGER i
-    
-      IF( .NOT. ALLOCATED(table) ) THEN
+     DO i=1,n_profiles
+        DO k=1,n_layers
+           ap1 = 10.*DIM(atm(i)%Temperature(k), Tmin) + 1.
+           ap1 = MIN(2621., ap1)
+           it = ap1
+           es = table(it) + (ap1-it)*des(it)
+           qs = esl*es*(1.+zvir*atm(i)%Absorber(k,1)*1.e-3)/(atm(i)%Pressure(k)*100.)
+           rh(k,i) = (atm(i)%Absorber(k,1)*1.e-3)/qs
+        ENDDO
+     ENDDO
+
+   CONTAINS
+
+     SUBROUTINE qsmith_init
+
+       INTEGER, PARAMETER:: length=2621 
+       INTEGER i
+
+       IF( .NOT. ALLOCATED(table) ) THEN
 !                            Generate es table (dT = 0.1 deg. C)
 
-         ALLOCATE ( table(length) )
-         ALLOCATE (  des (length) )
+          ALLOCATE ( table(length) )
+          ALLOCATE (  des (length) )
 
-         CALL qs_table(length, table)
+          CALL qs_table(length, table)
 
-         DO i=1,length-1
-            des(i) = table(i+1) - table(i)
-         ENDDO
-         des(length) = des(length-1)
-      ENDIF
+          DO i=1,length-1
+             des(i) = table(i+1) - table(i)
+          ENDDO
+          des(length) = des(length-1)
+       ENDIF
 
-    END SUBROUTINE qsmith_init
+     END SUBROUTINE qsmith_init
 
-    SUBROUTINE qs_table(n,table)
-      INTEGER, INTENT(in):: n
-      REAL table (n)
-      REAL:: dt=0.1
-      REAL esbasw, tbasw, esbasi, tbasi, Tmin, tem, aa, b, c, d, e, esh20 
-      REAL wice, wh2o
-      INTEGER i
+     SUBROUTINE qs_table(n,table)
+       INTEGER, INTENT(in):: n
+       REAL table (n)
+       REAL:: dt=0.1
+       REAL esbasw, tbasw, esbasi, tbasi, Tmin, tem, aa, b, c, d, e, esh20 
+       REAL wice, wh2o
+       INTEGER i
 ! Constants
-      esbasw = 1013246.0
-      tbasw =   373.16
-      tbasi =   273.16
-      Tmin = tbasi - 160.
+       esbasw = 1013246.0
+       tbasw =   373.16
+       tbasi =   273.16
+       Tmin = tbasi - 160.
 !  Compute es over water
 !  see smithsonian meteorological tables page 350.
-      DO  i=1,n
-         tem = Tmin+dt*REAL(i-1)
-         aa  = -7.90298*(tbasw/tem-1)
-         b   =  5.02808*alog10(tbasw/tem)
-         c   = -1.3816e-07*(10**((1-tem/tbasw)*11.344)-1)
-         d   =  8.1328e-03*(10**((tbasw/tem-1)*(-3.49149))-1)
-         e   = alog10(esbasw)
-         table(i)  = 0.1*10**(aa+b+c+d+e)
-      ENDDO
+       DO  i=1,n
+          tem = Tmin+dt*REAL(i-1)
+          aa  = -7.90298*(tbasw/tem-1)
+          b   =  5.02808*alog10(tbasw/tem)
+          c   = -1.3816e-07*(10**((1-tem/tbasw)*11.344)-1)
+          d   =  8.1328e-03*(10**((tbasw/tem-1)*(-3.49149))-1)
+          e   =  alog10(esbasw)
+          table(i)  = 0.1*10**(aa+b+c+d+e)
+       ENDDO
 
-    END SUBROUTINE qs_table
+     END SUBROUTINE qs_table
 
-  END PROCEDURE qsmith
-
-END SUBMODULE fv3_utils_mod
-
+   END SUBROUTINE qsmith
+   
+END MODULE ufo_crtm_utils_mod   
 
