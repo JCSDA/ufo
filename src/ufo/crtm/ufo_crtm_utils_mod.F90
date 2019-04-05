@@ -446,7 +446,7 @@ SUBROUTINE load_aerosol_data(n_profiles,n_layers,geovals,&
           rh(1:n_layers,1:n_profiles)=geoval%vals(1:n_layers,1:n_profiles)
        ENDIF
        WHERE (rh > 1_kind_real) rh=1_kind_real
-       CALL assign_gocart_nasa
+       CALL assign_gocart_default
     ELSEIF (TRIM(aerosol_option) == "aerosols_gocart_esrl") THEN
        varname=var_rh
        ivar = ufo_vars_getindex(geovals%variables, var_rh)
@@ -470,7 +470,7 @@ SUBROUTINE load_aerosol_data(n_profiles,n_layers,geovals,&
 
   CONTAINS 
 
-    SUBROUTINE assign_gocart_nasa
+    SUBROUTINE assign_gocart_default
 
       INTEGER, PARAMETER :: ndust_bins=5, nseas_bins=4
       REAL(kind_real), DIMENSION(ndust_bins), PARAMETER  :: dust_radii=[&
@@ -578,7 +578,7 @@ SUBROUTINE load_aerosol_data(n_profiles,n_layers,geovals,&
 
       ENDDO
 
-    END SUBROUTINE assign_gocart_nasa
+    END SUBROUTINE assign_gocart_default
 
     SUBROUTINE assign_gocart_esrl
 
