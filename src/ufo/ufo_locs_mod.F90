@@ -167,7 +167,7 @@ subroutine ufo_locs_init(self, obss, t1, t2)
   allocate(date_time(nlocs), lon(nlocs), lat(nlocs))
 
 !TODO(JG): Add "MetaData" or similar group attribute to all ioda ObsSpace objects
-  if (obsspace_has(obss,"MetaData", "time")) then
+  if (obsspace_has(obss,"MetaData", "datetime")) then
     call obsspace_get_db(obss, "MetaData", "datetime", date_time)
   else
     call obsspace_get_db(obss, "", "datetime", date_time)
