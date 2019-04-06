@@ -57,6 +57,12 @@ Locations * ObsOperator::locations(const util::DateTime & t1,
 
 // -----------------------------------------------------------------------------
 
+const std::string & ObsOperator::obstype() const {
+  return oper_->obstype();
+}
+
+// -----------------------------------------------------------------------------
+
 void ObsOperator::print(std::ostream & os) const {
   os << *oper_;
 }

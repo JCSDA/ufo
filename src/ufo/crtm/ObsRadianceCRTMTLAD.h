@@ -60,7 +60,6 @@ class ObsRadianceCRTMTLAD : public LinearObsOperatorBase,
   F90hop keyOperRadianceCRTM_;
   const ioda::ObsSpace& odb_;
   boost::scoped_ptr<const oops::Variables> varin_;
-  std::vector<int> channels_;
 };
 
 // -----------------------------------------------------------------------------

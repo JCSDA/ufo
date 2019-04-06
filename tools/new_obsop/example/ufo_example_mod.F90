@@ -18,11 +18,15 @@ module ufo_example_mod
 
  implicit none
  private
+ integer, parameter :: max_string=800
 
 !> Fortran derived type for the observation type
 ! TODO: fill in if needed
  type, extends(ufo_basis), public :: ufo_example
  private
+   integer, public :: nvars_in, nvars_out
+   character(len=max_string), public, allocatable :: varin(:)
+   character(len=max_string), public, allocatable :: varout(:)
  contains
    procedure :: setup  => ufo_example_setup
    procedure :: delete => ufo_example_delete
@@ -37,6 +41,10 @@ subroutine ufo_example_setup(self, c_conf)
 implicit none
 class(ufo_example), intent(inout) :: self
 type(c_ptr),        intent(in)    :: c_conf
+! TODO: add input variables (requested from the model) and
+!           output variables (simulated by the obs operator)
+  self%nvars_in  = 0
+  self%nvars_out = 0
 
 end subroutine ufo_example_setup
 
@@ -45,6 +53,9 @@ end subroutine ufo_example_setup
 subroutine ufo_example_delete(self)
 implicit none
 class(ufo_example), intent(inout) :: self
+
+  if (allocated(self%varout)) deallocate(self%varout)
+  if (allocated(self%varin))  deallocate(self%varin)
 
 end subroutine ufo_example_delete
 
@@ -60,21 +71,22 @@ type(c_ptr), value, intent(in)    :: obss
 
 ! Local variables
 type(ufo_geoval), pointer :: geoval
-integer :: ierr, nobs
-real(kind_real), allocatable :: obss_metadata
+integer :: nlocs
+real(kind_real), dimension(:), allocatable :: obss_metadata
 
 ! check if some variable is in geovals and get it (var_tv is defined in ufo_vars_mod)
-call ufo_geovals_get_var(geovals, var_tv, geoval, status=ierr)
+call ufo_geovals_get_var(geovals, var_tv, geoval)
 
 ! get some metadata from obsspace
-nobs = obsspace_get_nobs(obss)
-allocate(obss_metadata(nobs))
-call obsspace_get_db(obss, "ObsValue", "some_variable", obss_metadata)
+nlocs = obsspace_get_nlocs(obss)
+allocate(obss_metadata(nlocs))
+call obsspace_get_db(obss, "MetaData", "some_metadata", obss_metadata)
 
 ! put observation operator code here
 
 
 end subroutine ufo_example_simobs
+
 
 ! ------------------------------------------------------------------------------
 

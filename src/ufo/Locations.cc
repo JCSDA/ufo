@@ -65,12 +65,30 @@ Locations::Locations(const eckit::Configuration & conf) {
       rseed = std::time(0);
     }
 
-    // random longitudes range from 0 to 360 degrees
-    util::UniformDistribution<double> xx(Nrandom, 0.0, 360.0, rseed);
+    // random longitudes
+    std::vector<double> lonrange;
+    if (conf.has("lonrange")) {
+      std::vector<double> config_lonrange = conf.getDoubleVector("lonrange");
+      ASSERT(config_lonrange.size() == 2);
+      lonrange.assign(begin(config_lonrange), end(config_lonrange));
+    } else {
+      lonrange.push_back(0.0);
+      lonrange.push_back(360.0);
+    }
+    util::UniformDistribution<double> xx(Nrandom, lonrange[0], lonrange[1], rseed);
     for (size_t jj=0; jj < Nrandom; ++jj) lons.push_back(xx[jj]);
 
-    // random latitudes range from -90 to 90 degrees
-    util::UniformDistribution<double> yy(Nrandom, -90.0, 90.0, rseed);
+    // random latitudes
+    std::vector<double> latrange;
+    if (conf.has("latrange")) {
+      std::vector<double> config_latrange = conf.getDoubleVector("latrange");
+      ASSERT(config_latrange.size() == 2);
+      latrange.assign(begin(config_latrange), end(config_latrange));
+    } else {
+      latrange.push_back(-90.0);
+      latrange.push_back(90.0);
+    }
+    util::UniformDistribution<double> yy(Nrandom, latrange[0], latrange[1], rseed);
     for (size_t jj=0; jj < Nrandom; ++jj) lats.push_back(yy[jj]);
 
     nloc += Nrandom;

@@ -5,7 +5,7 @@ window_end: 2018-04-15T03:00:00Z
 LinearObsOpTest:
   testiterTL: 1
   toleranceTL: 1.0e-10
-  toleranceAD: 1.0e-10
+  toleranceAD: 1.0e-12
 Observations:
   ObsTypes:
   - ObsType: ADT
@@ -21,4 +21,4 @@ Observations:
     ObsBias: {}
     #rmsequiv: 0.80114003705029235
     rmsequiv: 0.20601693262068568  # for testing with bogus geoval data
-    tolerance: 1.0e-8
+    tolerance: 1.0e-10
