@@ -11,16 +11,14 @@ module ufo_identity_mod
  use kinds
  use ufo_vars_mod
  use ufo_geovals_mod
- use ufo_geovals_mod_c, only: ufo_geovals_registry
 
- use ufo_basis_mod, only : ufo_basis
  use obsspace_mod
 
  integer, parameter :: max_string=800
 
 ! Fortran derived type for the observation type
 !---------------------------------------------------------------------------------------------------
- type, extends(ufo_basis) :: ufo_identity
+ type, public :: ufo_identity
  private
     integer, public :: nvars
     character(len=max_string), public, allocatable :: varin(:)
@@ -66,19 +64,17 @@ end subroutine identity_setup_
 
 
 ! ------------------------------------------------------------------------------
-subroutine identity_simobs_(self, geovals, hofx, obss)
+subroutine identity_simobs_(self, geovals, obss, nvars, nlocs, hofx)
   implicit none
   class(ufo_identity), intent(in)    :: self
   type(ufo_geovals),  intent(in)     :: geovals
-  real(c_double),     intent(inout)  :: hofx(:)
+  integer,            intent(in)     :: nvars, nlocs
+  real(c_double),     intent(inout)  :: hofx(nvars, nlocs)
   type(c_ptr), value, intent(in)     :: obss
 
-  integer :: iobs, ivar, nlocs
+  integer :: iobs, ivar
   type(ufo_geoval), pointer :: point
   character(len=MAXVARLEN) :: geovar
-
-  !> Get the observation vertical coordinates
-  nlocs = obsspace_get_nlocs(obss)
 
   do ivar = 1, self%nvars
     !> Get the name of input variable in geovals
@@ -89,7 +85,7 @@ subroutine identity_simobs_(self, geovals, hofx, obss)
 
     !> Here we just apply a identity hofx
     do iobs = 1, nlocs
-      hofx(ivar + (iobs-1)*self%nvars) = point%vals(1,iobs)
+      hofx(ivar,iobs) = point%vals(1,iobs)
     enddo
   enddo
 
@@ -97,7 +93,7 @@ end subroutine identity_simobs_
 
 
 ! ------------------------------------------------------------------------------
-subroutine  destructor(self)
+subroutine destructor(self)
   type(ufo_identity), intent(inout) :: self
   if (allocated(self%varout)) deallocate(self%varout)
   if (allocated(self%varin)) deallocate(self%varin)

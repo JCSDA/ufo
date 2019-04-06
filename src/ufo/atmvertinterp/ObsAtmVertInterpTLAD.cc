@@ -66,17 +66,17 @@ void ObsAtmVertInterpTLAD::setTrajectory(const GeoVaLs & geovals, const ObsBias 
 // -----------------------------------------------------------------------------
 
 void ObsAtmVertInterpTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec,
-                                      const ObsBiasIncrement & bias) const {
+                                         const ObsBiasIncrement & bias) const {
   ufo_atmvertinterp_simobs_tl_f90(keyOperAtmVertInterp_, geovals.toFortran(), odb_,
-                               ovec.size(), ovec.toFortran());
+                                  ovec.nvars(), ovec.nlocs(), ovec.toFortran());
 }
 
 // -----------------------------------------------------------------------------
 
 void ObsAtmVertInterpTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec,
-                                      ObsBiasIncrement & bias) const {
+                                         ObsBiasIncrement & bias) const {
   ufo_atmvertinterp_simobs_ad_f90(keyOperAtmVertInterp_, geovals.toFortran(), odb_,
-                               ovec.size(), ovec.toFortran());
+                                  ovec.nvars(), ovec.nlocs(), ovec.toFortran());
 }
 
 // -----------------------------------------------------------------------------
