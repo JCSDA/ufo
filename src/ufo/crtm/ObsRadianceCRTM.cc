@@ -7,10 +7,13 @@
 
 #include "ufo/crtm/ObsRadianceCRTM.h"
 
+#include <algorithm>
 #include <ostream>
 #include <set>
 #include <string>
 #include <vector>
+
+#include <boost/algorithm/string.hpp>
 
 #include "ioda/ObsVector.h"
 
@@ -31,42 +34,29 @@ ObsRadianceCRTM::ObsRadianceCRTM(const ioda::ObsSpace & odb, const eckit::Config
   : ObsOperatorBase(odb, config), keyOperRadianceCRTM_(0), odb_(odb), varin_(), varout_()
 {
   const eckit::LocalConfiguration obsOptions(config, "ObsOptions");
-  const int n_clouds = obsOptions.getInt("n_Clouds");
-  std::vector<std::string> vv{"air_temperature", "humidity_mixing_ratio", "air_pressure",
-                              "air_pressure_levels", "mass_concentration_of_ozone_in_air",
-                              "mass_concentration_of_carbon_dioxide_in_air",
-                              "Water_Fraction", "Land_Fraction", "Ice_Fraction",
-                              "Snow_Fraction", "Water_Temperature", "Land_Temperature",
-                              "Ice_Temperature", "Snow_Temperature", "Vegetation_Fraction",
-                              "Sfc_Wind_Speed", "Sfc_Wind_Direction", "Lai", "Soil_Moisture",
-                              "Soil_Temperature", "Land_Type_Index", "Vegetation_Type",
-                              "Soil_Type", "Snow_Depth"};
-  // Note: how should we control the clouds used in CRTM?
-  // currently uses n_clouds; if n_clouds = 1, use water; n_clouds = 2, water and ice
-  if (n_clouds > 0) {
-    vv.push_back("atmosphere_mass_content_of_cloud_liquid_water");
-    vv.push_back("effective_radius_of_cloud_liquid_water_particle");
-  }
-  if (n_clouds > 1) {
-    vv.push_back("atmosphere_mass_content_of_cloud_ice");
-    vv.push_back("effective_radius_of_cloud_ice_particle");
-  }
-  varin_.reset(new oops::Variables(vv));
+  int c_name_size = 2000;
+  char *buffin = new char[c_name_size];
+  char *buffout = new char[c_name_size];
 
   // parse channels from the config and create variable names
   std::string chlist = config.getString("channels");
   std::set<int> channels = parseIntSet(chlist);
-  std::vector<std::string> vout;
-  channels_.reserve(channels.size());
-  for (const int jj : channels) {
-    vout.push_back("brightness_temperature_"+std::to_string(jj));
-    channels_.push_back(jj);
-  }
-  varout_.reset(new oops::Variables(vout));
+  std::vector<int> channels_list;
+  std::copy(channels.begin(), channels.end(), std::back_inserter(channels_list));
 
   // call Fortran setup routine
   const eckit::Configuration * configc = &obsOptions;
-  ufo_radiancecrtm_setup_f90(keyOperRadianceCRTM_, &configc);
+  ufo_radiancecrtm_setup_f90(keyOperRadianceCRTM_, &configc, channels_list.size(),
+                             channels_list[0], buffin, buffout, c_name_size);
+
+  std::string vstr_in(buffin), vstr_out(buffout);
+  std::vector<std::string> vvin;
+  std::vector<std::string> vvout;
+  boost::split(vvin, vstr_in, boost::is_any_of("\t"));
+  boost::split(vvout, vstr_out, boost::is_any_of("\t"));
+  varin_.reset(new oops::Variables(vvin));
+  varout_.reset(new oops::Variables(vvout));
+
   oops::Log::info() << "ObsRadianceCRTM channels: " << channels << std::endl;
   oops::Log::trace() << "ObsRadianceCRTM created." << std::endl;
 }
@@ -83,8 +73,9 @@ ObsRadianceCRTM::~ObsRadianceCRTM() {
 void ObsRadianceCRTM::simulateObs(const GeoVaLs & gom, ioda::ObsVector & ovec,
                               const ObsBias & bias) const {
   ufo_radiancecrtm_simobs_f90(keyOperRadianceCRTM_, gom.toFortran(), odb_,
-                          ovec.size(), ovec.toFortran(), bias.toFortran(),
-                          channels_.size(), channels_[0]);
+                          ovec.nvars(), ovec.nlocs(), ovec.toFortran(),
+                          bias.toFortran());
+  oops::Log::trace() << "ObsRadianceCRTM simulateObs done." << std::endl;
 }
 
 // -----------------------------------------------------------------------------

@@ -14,5 +14,11 @@ set ( example_files
     ObsExampleTLAD.interface.h
     ufo_example_mod.F90
     ufo_example_tlad_mod.F90
-    PARENT_SCOPE
+)
+
+PREPEND( _p_example_files     "example"     ${example_files} )
+
+set ( example_src_files
+      ${_p_example_files}
+      PARENT_SCOPE
 )

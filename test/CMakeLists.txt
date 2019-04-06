@@ -131,96 +131,81 @@ CREATE_SYMLINK_FILENAME( ${ioda_SOURCE_DIR}/test/testinput
 #####################################################################
 
 ecbuild_add_test( TARGET  test_ufo_geovals_atmosphere
-                  BOOST
                   SOURCES mains/TestGeoVaLs.cc
                   ARGS    "testinput/ufotest_atmosphere.yaml"
                   LIBS    ufo )
 
 ecbuild_add_test( TARGET  test_ufo_locations_atmosphere
-                  BOOST
                   SOURCES mains/TestLocations.cc
                   ARGS    "testinput/ufotest_atmosphere.yaml"
                   LIBS    ufo )
 
 ecbuild_add_test( TARGET  test_ufo_amsua_opr_crtm
-                  BOOST
                   SOURCES mains/TestObsOperator.cc
                   ARGS    "testinput/amsua_crtm.yaml"
                   LIBS    ufo )
 
 ecbuild_add_test( TARGET  test_ufo_amsua_tlad_crtm
-                  BOOST
                   SOURCES mains/TestObsOperatorTLAD.cc
                   ARGS    "testinput/amsua_crtm.yaml"
                   LIBS    ufo )
 
 if( ${RTTOV_FOUND} )
   ecbuild_add_test( TARGET  test_ufo_amsua_opr_rttov
-                    BOOST
                     SOURCES mains/TestObsOperator.cc
                     ARGS    "testinput/amsua_rttov.yaml"
                     LIBS    ufo )
 
   ecbuild_add_test( TARGET  test_ufo_amsua_tlad_rttov
-                    BOOST
                     SOURCES mains/TestObsOperatorTLAD.cc
                     ARGS    "testinput/amsua_rttov.yaml"
                     LIBS    ufo )
 endif( ${RTTOV_FOUND} )
 
 ecbuild_add_test( TARGET  test_ufo_radiosonde_opr
-                  BOOST
                   MPI     4
                   SOURCES mains/TestObsOperator.cc
                   ARGS    "testinput/radiosonde.yaml"
                   LIBS    ufo )
 
 ecbuild_add_test( TARGET  test_ufo_radiosonde_qc
-                  BOOST
                   MPI     4
                   SOURCES mains/TestObsFilters.cc
                   ARGS    "testinput/radiosonde_qc.yaml"
                   LIBS    ufo )
 
 ecbuild_add_test( TARGET  test_ufo_radiosonde_tlad
-                  BOOST
                   SOURCES mains/TestObsOperatorTLAD.cc
                   ARGS    "testinput/radiosonde.yaml"
                   LIBS    ufo )
 
 ecbuild_add_test( TARGET  test_ufo_aircraft_opr
-                  BOOST
                   MPI     4
                   SOURCES mains/TestObsOperator.cc
                   ARGS    "testinput/aircraft.yaml"
                   LIBS    ufo )
 
 ecbuild_add_test( TARGET  test_ufo_aircraft_qc
-                  BOOST
                   SOURCES mains/TestObsFilters.cc
                   ARGS    "testinput/aircraft_qc.yaml"
                   LIBS    ufo )
 
 ecbuild_add_test( TARGET  test_ufo_aircraft_tlad
-                  BOOST
                   SOURCES mains/TestObsOperatorTLAD.cc
                   ARGS    "testinput/aircraft.yaml"
                   LIBS    ufo )
 
 ecbuild_add_test( TARGET  test_ufo_gnssroRef_opr
-                  BOOST
                   SOURCES mains/TestObsOperator.cc
                   ARGS    "testinput/gnssroref.yaml"
                   LIBS    ufo )
 
 ecbuild_add_test( TARGET  test_ufo_gnssroRef_tlad
-                  BOOST
                   SOURCES mains/TestObsOperatorTLAD.cc
                   ARGS    "testinput/gnssroref.yaml"
                   LIBS    ufo )
 
 ecbuild_add_test( TARGET  test_ufo_satwind_opr
-                  BOOST
                   MPI     4
                   SOURCES mains/TestObsOperator.cc
                   ARGS    "testinput/satwind.yaml"
@@ -228,22 +213,18 @@ ecbuild_add_test( TARGET  test_ufo_satwind_opr
 
 if( ${ROPP-UFO_FOUND} )
 ecbuild_add_test( TARGET  test_ufo_gnssroBndROPP1D_opr
-                  BOOST
                   SOURCES mains/TestObsOperator.cc
                   ARGS    "testinput/gnssrobndropp1d.yaml"
                   LIBS    ufo )
 ecbuild_add_test( TARGET  test_ufo_gnssroBndROPP1D_tlad
-                  BOOST 
                   SOURCES mains/TestObsOperatorTLAD.cc
                   ARGS    "testinput/gnssrobndropp1d.yaml"
                   LIBS    ufo )
 ecbuild_add_test( TARGET  test_ufo_gnssroBndROPP2D_opr
-                  BOOST
                   SOURCES mains/TestObsOperator.cc
                   ARGS    "testinput/gnssrobndropp2d.yaml"
                   LIBS    ufo )
 ecbuild_add_test( TARGET  test_ufo_gnssroBndROPP2D_tlad
-                  BOOST 
                   SOURCES mains/TestObsOperatorTLAD.cc
                   ARGS    "testinput/gnssrobndropp2d.yaml"
                   LIBS    ufo )
@@ -253,61 +234,51 @@ endif( ${ROPP-UFO_FOUND} )
 if( ${GSW_FOUND} )
 
     ecbuild_add_test( TARGET  test_ufo_geovals_marine
-                      BOOST
                       SOURCES mains/TestGeoVaLs.cc
                       ARGS    "testinput/ufotest_marine.yaml"
                       LIBS    ufo )
 
     ecbuild_add_test( TARGET  test_ufo_locations_marine
-                      BOOST
                       SOURCES mains/TestLocations.cc
                       ARGS    "testinput/ufotest_marine.yaml"
                       LIBS    ufo )
 
     ecbuild_add_test( TARGET  test_ufo_insitutemperature_opr
-                      BOOST
                       SOURCES mains/TestObsOperator.cc
                       ARGS    "testinput/tprof.yaml"
                       LIBS    ufo )
 
     ecbuild_add_test( TARGET  test_ufo_insitutemperature_tlad
-                      BOOST
                       SOURCES mains/TestObsOperatorTLAD.cc
                       ARGS    "testinput/tprof.yaml"
                       LIBS    ufo )
 
     ecbuild_add_test( TARGET  test_ufo_seaice_opr
-                      BOOST
                       SOURCES mains/TestObsOperator.cc
                       ARGS    "testinput/seaice.yaml"
                       LIBS    ufo )
 
     ecbuild_add_test( TARGET  test_ufo_seaice_tlad
-                      BOOST
                       SOURCES mains/TestObsOperatorTLAD.cc
                       ARGS    "testinput/seaice.yaml"
                       LIBS    ufo )
 
     ecbuild_add_test( TARGET  test_ufo_sst_opr
-                      BOOST
                       SOURCES mains/TestObsOperator.cc
                       ARGS    "testinput/sea_surface_temp.yaml"
                       LIBS    ufo )
 
     ecbuild_add_test( TARGET  test_ufo_sst_tlad
-                      BOOST
                       SOURCES mains/TestObsOperatorTLAD.cc
                       ARGS    "testinput/sea_surface_temp.yaml"
                       LIBS    ufo )
 
     ecbuild_add_test( TARGET  test_ufo_adt_opr
-                      BOOST
                       SOURCES mains/TestObsOperator.cc
                       ARGS    "testinput/adt.yaml"
                       LIBS    ufo )
 
     ecbuild_add_test( TARGET  test_ufo_adt_tlad
-                      BOOST
                       SOURCES mains/TestObsOperatorTLAD.cc
                       ARGS    "testinput/adt.yaml"
                       LIBS    ufo )		      
@@ -327,19 +298,16 @@ if( ${GSW_FOUND} )
 endif( ${GSW_FOUND} )
 
 ecbuild_add_test( TARGET  test_ufo_aod_opr_crtm
-                  BOOST
                   SOURCES mains/TestObsOperator.cc
                   ARGS    "testinput/aod_crtm.yaml"
                   LIBS    ufo )
 
 ecbuild_add_test( TARGET  test_ufo_aod_tlad_crtm
-                  BOOST
                   SOURCES mains/TestObsOperatorTLAD.cc
                   ARGS    "testinput/aod_crtm.yaml"
                   LIBS    ufo )
 
 ecbuild_add_test( TARGET  test_ufo_intset_parser
-                  BOOST
                   SOURCES mains/TestIntSetParser.cc
                   ARGS    "testinput/channelsparser.yaml"
                   LIBS    ufo )

@@ -38,18 +38,14 @@ ObsAtmVertInterpTLAD::ObsAtmVertInterpTLAD(const ioda::ObsSpace & odb,
 {
   int c_name_size = 200;
   char *buffin = new char[c_name_size];
-  char *buffout = new char[c_name_size];
   const eckit::Configuration * configc = &config;
 
-  ufo_atmvertinterp_tlad_setup_f90(keyOperAtmVertInterp_, &configc, buffin, buffout, c_name_size);
+  ufo_atmvertinterp_tlad_setup_f90(keyOperAtmVertInterp_, &configc, buffin, c_name_size);
 
-  std::string vstr_in(buffin), vstr_out(buffout);
+  std::string vstr_in(buffin);
   std::vector<std::string> vvin;
-  std::vector<std::string> vvout;
   boost::split(vvin, vstr_in, boost::is_any_of("\t"));
-  boost::split(vvout, vstr_out, boost::is_any_of("\t"));
   varin_.reset(new oops::Variables(vvin));
-  varout_.reset(new oops::Variables(vvout));
 
   oops::Log::trace() << "ObsAtmVertInterpTLAD created" << std::endl;
 }
@@ -70,17 +66,17 @@ void ObsAtmVertInterpTLAD::setTrajectory(const GeoVaLs & geovals, const ObsBias 
 // -----------------------------------------------------------------------------
 
 void ObsAtmVertInterpTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec,
-                                      const ObsBiasIncrement & bias) const {
+                                         const ObsBiasIncrement & bias) const {
   ufo_atmvertinterp_simobs_tl_f90(keyOperAtmVertInterp_, geovals.toFortran(), odb_,
-                               ovec.size(), ovec.toFortran());
+                                  ovec.nvars(), ovec.nlocs(), ovec.toFortran());
 }
 
 // -----------------------------------------------------------------------------
 
 void ObsAtmVertInterpTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec,
-                                      ObsBiasIncrement & bias) const {
+                                         ObsBiasIncrement & bias) const {
   ufo_atmvertinterp_simobs_ad_f90(keyOperAtmVertInterp_, geovals.toFortran(), odb_,
-                               ovec.size(), ovec.toFortran());
+                                  ovec.nvars(), ovec.nlocs(), ovec.toFortran());
 }
 
 // -----------------------------------------------------------------------------
