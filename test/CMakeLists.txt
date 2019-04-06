@@ -399,7 +399,6 @@ SpcCoeff/Little_Endian/sndrD3_g15.SpcCoeff.bin
 TauCoeff/ODPS/Little_Endian/sndrD3_g15.TauCoeff.bin
 SpcCoeff/Little_Endian/sndrD4_g15.SpcCoeff.bin
 TauCoeff/ODPS/Little_Endian/sndrD4_g15.TauCoeff.bin
->>>>>>> origin/develop-emc-codesprint
 SpcCoeff/Little_Endian/airs2378_aqua.SpcCoeff.bin
 TauCoeff/ODPS/Little_Endian/airs2378_aqua.TauCoeff.bin
 SpcCoeff/Little_Endian/v.viirs-m_npp.SpcCoeff.bin
