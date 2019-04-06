@@ -49,6 +49,8 @@ subroutine ufo_gnssro_bndropp2d_setup(self, c_conf, c_size)
 
   allocate(self%obsLon2d(c_size*self%roconf%n_horiz))
   allocate(self%obsLat2d(c_size*self%roconf%n_horiz))
+  self%obsLon2d = 0.0
+  self%obsLat2d = 0.0
 
 end subroutine ufo_gnssro_bndropp2d_setup
 
