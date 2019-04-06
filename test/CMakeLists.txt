@@ -116,6 +116,7 @@ list (APPEND ioda_obs_test_data
   atmosphere/amsua_n19_obs_2018041500_m.nc4
   atmosphere/amsua_n19_obs_2018041500_s.nc4
   atmosphere/mhs_n19_obs_2018041500_m.nc4
+  atmosphere/hirs4_metop-a_obs_2018041500_m.nc4
   atmosphere/airs_aqua_obs_2018041500_m.nc4
   atmosphere/sondes_obs_2018041500_m.nc4
   atmosphere/sondes_obs_2018041500_s.nc4
