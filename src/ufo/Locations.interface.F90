@@ -59,6 +59,21 @@ end subroutine ufo_locs_create_c
 
 ! ------------------------------------------------------------------------------
 
+subroutine ufo_locs_setup_c(key, nlocs) bind(c,name='ufo_locs_setup_f90')
+
+implicit none
+integer(c_int), intent(inout) :: key
+integer(c_int), intent(in) :: nlocs
+type(ufo_locs), pointer :: self
+
+call ufo_locs_registry%setup(key, self)
+
+call ufo_locs_setup(self, nlocs)
+
+end subroutine ufo_locs_setup_c
+
+! ------------------------------------------------------------------------------
+
 subroutine ufo_locs_delete_c(key) bind(c,name='ufo_locs_delete_f90')
 
 implicit none

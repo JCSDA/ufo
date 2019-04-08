@@ -10,6 +10,7 @@
 
 #include "ioda/ObsSpace.h"
 #include "ufo/Fortran.h"
+#include "ufo/Locations.h"
 
 namespace ufo {
 
@@ -23,7 +24,10 @@ extern "C" {
 // -----------------------------------------------------------------------------
 // Gnssro bending angle observation operators - (ROPP2D)
 // -----------------------------------------------------------------------------
-  void ufo_gnssro_bndropp2d_setup_f90(F90hop &, const eckit::Configuration * const *);
+  void ufo_gnssro_2d_locs_init_f90(const F90hop &, F90locs &, const ioda::ObsSpace &,
+                                    const util::DateTime * const *,
+                                    const util::DateTime * const *);
+  void ufo_gnssro_bndropp2d_setup_f90(F90hop &, const eckit::Configuration * const *, const int &);
   void ufo_gnssro_bndropp2d_delete_f90(F90hop &);
   void ufo_gnssro_bndropp2d_simobs_f90(const F90hop &, const F90goms &, const ioda::ObsSpace &,
                                        const int &, double &, const F90obias &);

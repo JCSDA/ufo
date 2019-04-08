@@ -28,7 +28,12 @@ type, extends(ufo_basis_tlad)   ::  ufo_gnssro_BndROPP2D_tlad
   private
   integer                       :: nval, nobs
   real(kind_real), allocatable  :: prs(:,:), t(:,:), q(:,:), gph(:,:), gph_sfc(:,:)
+  integer                       :: n_horiz      ! 2d points along ray path
+  integer                       :: iflip        ! geoval ascending order flag
+  type(gnssro_conf)             :: roconf       ! ro configuration
+  real(kind_real), allocatable  :: obsLon2d(:), obsLat2d(:)  !2d locations - nobs*n_horiz
   contains
+    procedure :: setup      => ufo_gnssro_bndropp2d_tlad_setup
     procedure :: delete     => ufo_gnssro_bndropp2d_tlad_delete
     procedure :: settraj    => ufo_gnssro_bndropp2d_tlad_settraj
     procedure :: simobs_tl  => ufo_gnssro_bndropp2d_simobs_tl
@@ -38,6 +43,15 @@ end type ufo_gnssro_bndropp2d_tlad
 contains
 
 ! ------------------------------------------------------------------------------
+subroutine ufo_gnssro_bndropp2d_tlad_setup(self, c_conf)
+  implicit none
+  class(ufo_gnssro_BndROPP2D_tlad), intent(inout) :: self
+  type(c_ptr),                      intent(in)    :: c_conf
+
+  call gnssro_conf_setup(self%roconf,c_conf)
+
+end subroutine ufo_gnssro_bndropp2d_tlad_setup
+
 ! ------------------------------------------------------------------------------    
 subroutine ufo_gnssro_bndropp2d_tlad_settraj(self, geovals, obss)
        

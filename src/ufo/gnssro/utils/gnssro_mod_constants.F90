@@ -21,7 +21,7 @@ real(kind_real), parameter, public :: rd_over_rv = rd/rv
 real(kind_real), parameter, public :: rv_over_rd = rv/rd
 real(kind_real), parameter, public :: rd_over_g  = rd/grav
 real(kind_real),            public :: n_a, n_b,n_c
-
+real(kind_real), parameter, public :: mean_earth_rad = 6371.0
 contains
 subroutine gnssro_ref_constants(use_compress)
 implicit none

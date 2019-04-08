@@ -57,6 +57,7 @@ list( APPEND ufo_test_data
   atmosphere/sondes_geoval_2018041500_m.nc4
   atmosphere/sondes_geoval_2018041500_s.nc4
   atmosphere/gnssro_geoval_2018041500_s.nc4
+  atmosphere/gnssro_geoval_2018041500_s_2d.nc4
   atmosphere/aod_geoval_2018041500_m.nc4
   atmosphere/aod_geoval_2018041500_s.nc4
   atmosphere/satwind_geoval_2018041500_m.nc4
