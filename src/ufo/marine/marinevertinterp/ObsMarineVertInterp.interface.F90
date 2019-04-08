@@ -11,7 +11,10 @@ module ufo_marinevertinterp_mod_c
   use iso_c_binding
   use config_mod
   use ufo_marinevertinterp_mod
-  use string_f_c_mod  
+  use string_f_c_mod
+  use ufo_geovals_mod
+  use ufo_geovals_mod_c,   only: ufo_geovals_registry
+  
   implicit none
   private
 
@@ -81,9 +84,12 @@ real(c_double), intent(inout) :: c_hofx(c_nobs)
 integer(c_int), intent(in) :: c_bias
 
 type(ufo_marinevertinterp), pointer :: self
+type(ufo_geovals), pointer :: geovals
 
 call ufo_marinevertinterp_registry%get(c_key_self, self)
-call self%opr_simobs(c_key_geovals, c_obsspace, c_hofx)
+call ufo_geovals_registry%get(c_key_geovals,geovals)
+
+call self%simobs(geovals, c_hofx, c_obsspace)
 
 end subroutine ufo_marinevertinterp_simobs_c
 

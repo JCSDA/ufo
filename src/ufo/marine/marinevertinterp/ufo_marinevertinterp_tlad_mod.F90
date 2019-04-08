@@ -12,7 +12,6 @@ module ufo_marinevertinterp_tlad_mod
  use kinds
 
  use ufo_geovals_mod, only: ufo_geovals, ufo_geoval, ufo_geovals_get_var
- use ufo_basis_tlad_mod, only: ufo_basis_tlad
  use ufo_vars_mod
  use obsspace_mod
  use missing_values_mod
@@ -23,8 +22,9 @@ module ufo_marinevertinterp_tlad_mod
  integer, parameter :: max_string=800
 
  !> Fortran derived type for the tl/ad observation operator
- type, extends(ufo_basis_tlad), public :: ufo_marinevertinterp_tlad
+ type, public :: ufo_marinevertinterp_tlad    
     private
+    logical,                    public :: ltraj = .false. !< trajectory set?    
     character(len=max_string), public, allocatable :: varin(:)
     character(len=max_string), public, allocatable :: varout(:)    
 
@@ -196,7 +196,7 @@ end subroutine ufo_marinevertinterp_simobs_tl
 subroutine ufo_marinevertinterp_simobs_ad(self, geovals, hofx, obss)
     use ufo_tpsp2ti_mod
     use gsw_pot_to_insitu
-    use vert_interp_mod      
+    use vert_interp_mod
     implicit none
     class(ufo_marinevertinterp_tlad), intent(in)    :: self
     type(ufo_geovals),       intent(inout) :: geovals

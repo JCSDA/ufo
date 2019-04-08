@@ -10,9 +10,7 @@ module ufo_marinevertinterp_mod
  use iso_c_binding
  use config_mod
  use kinds
-
  use ufo_geovals_mod, only: ufo_geovals, ufo_geoval, ufo_geovals_get_var
- use ufo_basis_mod, only: ufo_basis
  use ufo_vars_mod
  use obsspace_mod
 
@@ -22,7 +20,7 @@ module ufo_marinevertinterp_mod
  integer, parameter :: max_string=800
 
 !> Fortran derived type for the observation type
- type, extends(ufo_basis), public :: ufo_marinevertinterp
+ type, public :: ufo_marinevertinterp    
     private
     character(len=max_string), public, allocatable :: varin(:)
     character(len=max_string), public, allocatable :: varout(:)    

@@ -10,6 +10,8 @@ module ufo_marinevertinterp_tlad_mod_c
 
   use iso_c_binding
   use config_mod
+  use ufo_geovals_mod
+  use ufo_geovals_mod_c,   only: ufo_geovals_registry    
   use ufo_marinevertinterp_tlad_mod
   use string_f_c_mod    
   implicit none
@@ -59,7 +61,7 @@ integer(c_int), intent(inout) :: c_key_self
 type(ufo_marinevertinterp_tlad), pointer :: self
 
 call ufo_marinevertinterp_tlad_registry%get(c_key_self, self)
-call self%opr_delete()
+call self%delete()
 call ufo_marinevertinterp_tlad_registry%remove(c_key_self)
 
 end subroutine ufo_marinevertinterp_tlad_delete_c
@@ -74,9 +76,11 @@ integer(c_int),     intent(in) :: c_key_geovals
 type(c_ptr), value, intent(in) :: c_obsspace
 
 type(ufo_marinevertinterp_tlad), pointer :: self
+type(ufo_geovals), pointer :: geovals
 
 call ufo_marinevertinterp_tlad_registry%get(c_key_self, self)
-call self%opr_settraj(c_key_geovals, c_obsspace)
+call ufo_geovals_registry%get(c_key_geovals,geovals)
+call self%settraj(geovals, c_obsspace)
 
 end subroutine ufo_marinevertinterp_tlad_settraj_c
 
@@ -92,9 +96,11 @@ integer(c_int), intent(in) :: c_nobs
 real(c_double), intent(inout) :: c_hofx(c_nobs)
 
 type(ufo_marinevertinterp_tlad), pointer :: self
+type(ufo_geovals), pointer :: geovals
 
 call ufo_marinevertinterp_tlad_registry%get(c_key_self, self)
-call self%opr_simobs_tl(c_key_geovals, c_obsspace, c_hofx)
+call ufo_geovals_registry%get(c_key_geovals,geovals)
+call self%simobs_tl(geovals, c_hofx, c_obsspace)
 
 end subroutine ufo_marinevertinterp_simobs_tl_c
 
@@ -110,9 +116,11 @@ integer(c_int), intent(in) :: c_nobs
 real(c_double), intent(in) :: c_hofx(c_nobs)
 
 type(ufo_marinevertinterp_tlad), pointer :: self
+type(ufo_geovals), pointer :: geovals
 
 call ufo_marinevertinterp_tlad_registry%get(c_key_self, self)
-call self%opr_simobs_ad(c_key_geovals, c_obsspace, c_hofx)
+call ufo_geovals_registry%get(c_key_geovals,geovals)
+call self%simobs_ad(geovals, c_hofx, c_obsspace)
 
 end subroutine ufo_marinevertinterp_simobs_ad_c
 
