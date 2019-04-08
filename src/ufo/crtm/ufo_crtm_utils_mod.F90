@@ -395,9 +395,6 @@ integer :: nlocs
  where (geo(:)%Sensor_Azimuth_Angle < 0.0_kind_real .or. &
         geo(:)%Sensor_Azimuth_Angle > 360.0_kind_real) &
     geo(:)%Sensor_Azimuth_Angle = 0.0_kind_real
- where (geo(:)%Sensor_Scan_Angle < 0.0_kind_real .or. &
-        geo(:)%Sensor_Scan_Angle > 360.0_kind_real) &
-    geo(:)%Sensor_Scan_Angle = 0.0_kind_real
 
  call obsspace_get_db(obss, "MetaData", "scan_position", TmpVar)
  geo(:)%Ifov = TmpVar(:)
