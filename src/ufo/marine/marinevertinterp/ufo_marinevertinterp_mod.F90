@@ -115,10 +115,6 @@ type(c_ptr), value, intent(in)    :: obss
     
        !< Interpolation weight
        call vert_interp_weights(nlev, deptho, depth(:,iobs), wi, wf)
-       if (deptho.ge.maxval(depth)) then
-          wi=nlev-1
-          wf=0.0
-       end if
 
        !Apply vertical interpolation
        call vert_interp_apply(nlev, var%vals(:,iobs), hofx(iobs), wi, wf)

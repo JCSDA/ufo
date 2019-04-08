@@ -133,10 +133,7 @@ subroutine ufo_marinevertinterp_tlad_settraj(self, geovals, obss)
     allocate(self%wi(nobs),self%wf(nobs))
     do iobs = 1, nobs    
        call vert_interp_weights(nlev,self%deptho(iobs),self%depth(:,iobs),self%wi(iobs),self%wf(iobs))
-       if (self%deptho(iobs).ge.maxval(self%depth(:,iobs))) then
-          self%wi(iobs)=nlev-1
-          self%wf(iobs)=0.0
-       end if
+
     end do
     self%ltraj    = .true.
 
