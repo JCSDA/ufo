@@ -3,9 +3,9 @@ test_framework_runtime_config: "--log_level=test_suite"
 window_begin: '2018-04-14T21:00:00Z'
 window_end: '2018-04-15T03:00:00Z'
 LinearObsOpTest: 
- testiterTL:  11
- toleranceTL: "1.0e-9"
- toleranceAD: "1.0e-10"
+ testiterTL:  12
+ toleranceTL: "1.0e-11"
+ toleranceAD: "1.0e-13"
 Observations: 
  ObsTypes: 
  - ObsType: GnssroRef
@@ -16,10 +16,10 @@ Observations:
    GeoVaLs: 
     norm: "8000000.0"
     random: 0
-    nobs: 1200
+    nobs: 20
     filename: "Data/gnssro_geoval_2018041500_s.nc4"
     window_begin: '2018-04-14T21:00:00Z'
     window_end: '2018-04-15T03:00:00Z'
    ObsBias: {}
-   rmsequiv: "109.90229534640328"
+   rmsequiv: "128.446442160338"
    tolerance: "1.0e-13"
