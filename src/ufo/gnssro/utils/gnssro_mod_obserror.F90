@@ -70,13 +70,13 @@ if (QCflags(i) .eq. 0) then
 
    else !!!! CDAAC processing
      if( abs(obsLat(i))>= 40.00 ) then
-       if (H_km > 12.00) then
+       if ( H_km>12.00 ) then
           obsErr(i)=-0.685627 +0.377174 *H_km-0.00421934 *H_km**2
        else
           obsErr(i)=-3.27737 +1.20003 *H_km-0.0558024 *H_km**2
        endif
      else
-       if( H_km >18.00) then
+       if( H_km>18.00 ) then
           obsErr(i)=-2.73867 +0.447663 *H_km-0.00475603 *H_km**2
        else
           obsErr(i)=-3.45303 +0.908216 *H_km-0.0293331 *H_km**2
@@ -104,19 +104,19 @@ obsErr = missing
 
 do i = 1, nobs
 
-if (QCflags(i) .eq. 0) then
-   H_km  = obsZ(nobs)/1000.0_kind_real
-   if( obsLat(i)>= 20.0 .or.obsLat(i)<= -20.0 ) then
-       obsErr(i)=-1.321_kind_real+0.341_kind_real*H_km-0.005_kind_real*H_km**2
-   else
-     if(H_km > 10.0) then
-        obsErr(i)=2.013_kind_real-0.060_kind_real*H_km+0.0045_kind_real*H_km**2
+  if (QCflags(i) .eq. 0) then
+     H_km  = obsZ(i)/1000.0_kind_real
+     if( abs(obsLat(i))>= 20.0 ) then
+         obsErr(i)=-1.321+0.341*H_km-0.005*H_km**2
      else
-        obsErr(i)=-1.18_kind_real+0.058_kind_real*H_km+0.025_kind_real*H_km**2
+       if(H_km > 10.0) then
+          obsErr(i)=2.013-0.060*H_km+0.0045*H_km**2
+       else
+          obsErr(i)=-1.18+0.058*H_km+0.025*H_km**2
+       endif
      endif
-   endif
-   obsErr(i) = 1.0_kind_real/abs(exp(obsErr(i)))
-end if
+     obsErr(i) = 1.0_kind_real/abs(exp(obsErr(i)))
+  end if
 end do
 
 end subroutine refractivity_obserr_GSI
