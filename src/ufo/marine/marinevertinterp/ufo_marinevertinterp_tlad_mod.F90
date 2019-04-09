@@ -25,7 +25,7 @@ module ufo_marinevertinterp_tlad_mod
  type, public :: ufo_marinevertinterp_tlad    
     private
     logical,                    public :: ltraj = .false. !< trajectory set?    
-    character(len=max_string), public, allocatable :: varin(:)
+    character(len=max_string),  public :: varin(1)
 
     integer                            :: nobs       !< Number of observations
     integer                            :: nval       !< Number of level in model's profiles 
@@ -53,11 +53,9 @@ type(c_ptr),              intent(in)    :: c_conf
 
 character(len=max_string) :: varprof(1)
 
-! Set input variable names (hard-coded to 2)
+! Set input variable names
 varprof = config_get_string_vector(c_conf, max_string, "variable")
-allocate(self%varin(2))
 self%varin(1) = varprof(1)
-self%varin(2) = "sea_water_cell_thickness"
 
 end subroutine ufo_marinevertinterp_tlad_setup
 
@@ -131,7 +129,6 @@ subroutine ufo_marinevertinterp_tlad_settraj(self, geovals, obss)
     allocate(self%wi(nobs),self%wf(nobs))
     do iobs = 1, nobs    
        call vert_interp_weights(nlev,self%deptho(iobs),self%depth(:,iobs),self%wi(iobs),self%wf(iobs))
-
     end do
     self%ltraj    = .true.
 
@@ -152,10 +149,8 @@ subroutine ufo_marinevertinterp_simobs_tl(self, geovals, hofx, obss)
 
     character(len=*), parameter :: myname_="ufo_marinevertinterp_simobs_tl"
     character(max_string) :: err_msg
-
     integer :: iobs, ilev, nlev, nobs
-
-    type(ufo_geoval), pointer :: var_d, dlayerthick !< Increments from geovals
+    type(ufo_geoval), pointer :: var_d !< Increments from geoval
 
     ! check if trajectory was set
     if (.not. self%ltraj) then
@@ -171,11 +166,7 @@ subroutine ufo_marinevertinterp_simobs_tl(self, geovals, hofx, obss)
 
     ! Associate geovals
     call ufo_geovals_get_var(geovals, self%varin(1), var_d)
-    call ufo_geovals_get_var(geovals, var_ocn_lay_thick, dlayerthick)
 
-    ! Make sure thickness is not perturbed
-    dlayerthick%vals=0.0
-    
     nlev = var_d%nval
     nobs = var_d%nobs        
 
@@ -204,7 +195,7 @@ subroutine ufo_marinevertinterp_simobs_ad(self, geovals, hofx, obss)
     real (kind=kind_real) :: deptho !< Observation location
         
     integer :: iobs, nobs, ilev, nlev
-    type(ufo_geoval), pointer :: dvar, dlayerthick
+    type(ufo_geoval), pointer :: dvar
     real(c_double) :: missing
 
     !> Set missing value
@@ -226,27 +217,20 @@ subroutine ufo_marinevertinterp_simobs_ad(self, geovals, hofx, obss)
     
     ! Associate geovals
     call ufo_geovals_get_var(geovals, var_ocn_salt, dvar)
-    call ufo_geovals_get_var(geovals, var_ocn_lay_thick, dlayerthick)
     
     nlev = self%nval
     nobs = self%nobs
     
     if (.not. allocated(dvar%vals)) allocate(dvar%vals(nlev, size(hofx,1)))
-    if (.not. allocated(dlayerthick%vals)) allocate(dlayerthick%vals(nlev, size(hofx,1)))    
 
     ! backward vertical interp
     dvar%vals = 0.0
     do iobs = 1, size(hofx,1)
-
        if (hofx(iobs) /= missing) then
-
           deptho = self%deptho(iobs)
       
           ! Adjoint obs operator
           call vert_interp_apply_ad(nlev, dvar%vals(:,iobs), hofx(iobs), self%wi(iobs), self%wf(iobs))
-
-          ! Layer thickness is not a control variable: zero it out!
-          dlayerthick%vals=0.0
        end if
     enddo
 

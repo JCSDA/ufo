@@ -37,7 +37,6 @@ ObsMarineVertInterpTLAD::ObsMarineVertInterpTLAD(const ioda::ObsSpace & odb,
 
   std::string vstr_in(buffin);
   std::vector<std::string> vvin;
-  std::vector<std::string> vvout;
   boost::split(vvin, vstr_in, boost::is_any_of("\t"));
   varin_.reset(new oops::Variables(vvin));
 
