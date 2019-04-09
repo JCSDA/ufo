@@ -21,6 +21,13 @@ Observations:
     filename: "Data/gnssro_geoval_2018041500_s.nc4"
     window_begin: '2018-04-14T21:00:00Z'
     window_end: '2018-04-15T03:00:00Z'
+    ObsFilters:
+    - Filter: Background Check
+      variables:
+      - bending_angle
+      threshold: 3.0
+    - Filter: ROobserror
+      errmodel: "ROPP"
    ObsBias: {}
    rmsequiv: "0.00919697505361058"
    tolerance: "1.0e-13"
