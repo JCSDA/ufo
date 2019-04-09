@@ -40,7 +40,7 @@ type(c_ptr),  value,       intent(in)    :: obspace
 type(c_ptr),               intent(in)    :: conf
 
 self%variable   = config_get_string(conf, max_string, "variable", "bending_angle")
-self%errmodel   = config_get_string(conf, max_string, "errmodel", "ROPP")
+self%errmodel   = config_get_string(conf, max_string, "errmodel", "GSI")
 self%obsdb      = obspace
 self%qcname     = config_get_string(conf, max_string, "QCname")
 end subroutine ufo_roobserror_create
