@@ -26,7 +26,6 @@ module ufo_marinevertinterp_tlad_mod
     private
     logical,                    public :: ltraj = .false. !< trajectory set?    
     character(len=max_string), public, allocatable :: varin(:)
-    character(len=max_string), public, allocatable :: varout(:)    
 
     integer                            :: nobs       !< Number of observations
     integer                            :: nval       !< Number of level in model's profiles 
@@ -52,13 +51,12 @@ implicit none
 class(ufo_marinevertinterp_tlad), intent(inout) :: self
 type(c_ptr),              intent(in)    :: c_conf
 
-! Get output variable name (hard-coded to 1)
-allocate(self%varout(1))
-self%varout = config_get_string_vector(c_conf, max_string, "variable")
+character(len=max_string) :: varprof(1)
 
 ! Set input variable names (hard-coded to 2)
+varprof = config_get_string_vector(c_conf, max_string, "variable")
 allocate(self%varin(2))
-self%varin(1) = self%varout(1)
+self%varin(1) = varprof(1)
 self%varin(2) = "sea_water_cell_thickness"
 
 end subroutine ufo_marinevertinterp_tlad_setup
