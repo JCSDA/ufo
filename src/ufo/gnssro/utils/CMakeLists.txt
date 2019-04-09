@@ -9,6 +9,7 @@ set (  utils_src_files
        gnssro_mod_conf.F90	  
        gnssro_mod_constants.F90
        gnssro_mod_transform.F90
+       gnssro_mod_obserror.F90
 PARENT_SCOPE
 )
 

@@ -6,64 +6,120 @@ use kinds
 use gnssro_mod_constants
 
 contains
-
-subroutine obserr_method(obsLat, obsZ, nobs, GlobalModel, ERR_TYPE, obsErr)
-integer,                         intent(in)  :: nobs, GlobalModel
-real(kind_real), dimension(nobs),intent(in)  :: obsLat,  obsZ
+subroutine bending_angle_obserr_ROPP(obsImpH, obsValue, nobs,  obsErr, QCflags, missing)
+integer,                         intent(in)  :: nobs
+real(kind_real), dimension(nobs),intent(in)  :: obsImpH, obsValue
+integer(c_int),  dimension(nobs),intent(in)  :: QCflags(:)
 real(kind_real), dimension(nobs),intent(out) :: obsErr
-character(len=255),intent(in)  :: ERR_TYPE
-real(kind_real)                :: obsZ_km
+real(kind_real)                  :: H_km, missing
 
-select case (trim(ERR_TYPE))
-
-case ("RefGSI")
-call refractivity_err_gsi(obsLat, obsZ, nobs, GlobalModel, obsErr)
-
-case ("BndGSI")
-
-end select
-
-end subroutine obserr_method
-
-subroutine  refractivity_err_gsi(obsLat, obsZ, nobs,GlobalModel, obsErr)
-integer,                         intent(in)  :: nobs, GlobalModel
-real(kind_real), dimension(nobs),intent(in)  :: obsLat,obsZ
-real(kind_real), dimension(nobs),intent(out) :: obsErr
-real(kind_real)                :: obsZ_km
+obsErr = missing
 
 do i = 1, nobs
-obsZ_km  = obsZ(nobs)/1000.0_kind_real
+   
+if (QCflags(i) .eq. 0) then
 
-if( GlobalModel .eq. 1 ) then ! for global
+    H_km  = obsImpH(i)/1000.0_kind_real
 
-     if( obsLat(i)>= 20.0 .or.obsLat(i)<= -20.0 ) then
-         obsErr(i)=-1.321_kind_real+0.341_kind_real*obsZ_km-0.005_kind_real*obsZ_km**2
-     else
-       if(obsZ_km > 10.0) then
-          obsErr(i)=2.013_kind_real-0.060_kind_real*obsZ_km+0.0045_kind_real*obsZ_km**2
+    if ( H_km <= 10.0 ) then
+       obsErr(i) = (H_km*1.25 + (10-H_km)*20)/10.0
+       obsErr(i) = obsErr(i)/100.0*obsValue(i)
+    else if ( H_km > 10.0 .and. H_km <= 32.0 ) then
+      obsErr(i) = 1.25/100.0*obsValue(i) 
+    else
+      obsErr(i) = 3.0*1e-6
+    end if
+end if
+
+end do
+
+end subroutine bending_angle_obserr_ROPP
+!-----------------------------------
+
+subroutine  bending_angle_obserr_GSI(obsLat, obsImpH, obsSaid, nobs, obsErr, QCflags, missing)
+integer,                         intent(in)  :: nobs
+real(kind_real), dimension(nobs),intent(in)  :: obsImpH, obsLat
+integer(c_int),  dimension(nobs),intent(in)  :: obsSaid, QCflags(:)
+real(kind_real), dimension(nobs),intent(out) ::  obsErr
+real(kind_real)                 :: H_km, missing
+
+obsErr = missing
+
+do i = 1, nobs
+
+if (QCflags(i) .eq. 0) then
+
+   H_km  = obsImpH(i)/1000.0_kind_real
+   if( (ObsSaid(i)==41).or.(ObsSaid(i)==722).or.(ObsSaid(i)==723).or.   &
+       (ObsSaid(i)==4).or.(ObsSaid(i)==42).or.(ObsSaid(i)==3).or.       &
+       (ObsSaid(i)==5).or.(ObsSaid(i)==821.or.(ObsSaid(i)==421)).or.    &
+       (ObsSaid(i)==440).or.(ObsSaid(i)==43)) then
+       if( abs(obsLat(i))>= 40.00 ) then
+         if(H_km>12.0) then
+           obsErr(i)=0.19032 +0.287535 *H_km-0.00260813*H_km**2
+         else
+           obsErr(i)=-3.20978 +1.26964 *H_km-0.0622538 *H_km**2
+         endif
        else
-          obsErr(i)=-1.18_kind_real+0.058_kind_real*obsZ_km+0.025_kind_real*obsZ_km**2
+         if(H_km>18.) then
+           obsErr(i)=-1.87788 +0.354718 *H_km-0.00313189 *H_km**2
+         else
+           obsErr(i)=-2.41024 +0.806594 *H_km-0.027257 *H_km**2
+         endif
+       endif
+
+   else !!!! CDAAC processing
+     if( abs(obsLat(i))>= 40.00 ) then
+       if (H_km > 12.00) then
+          obsErr(i)=-0.685627 +0.377174 *H_km-0.00421934 *H_km**2
+       else
+          obsErr(i)=-3.27737 +1.20003 *H_km-0.0558024 *H_km**2
+       endif
+     else
+       if( H_km >18.00) then
+          obsErr(i)=-2.73867 +0.447663 *H_km-0.00475603 *H_km**2
+       else
+          obsErr(i)=-3.45303 +0.908216 *H_km-0.0293331 *H_km**2
        endif
      endif
-     obsErr(i) = 1.0_kind_real/abs(exp(obsErr(i)))
+     obsErr(i) = 0.001 /abs(exp(obsErr(i)))
 
-else ! for regional 
-     if( obsLat(i) >= 20.0 .or.obsLat(i) <= -20.0 ) then
-         if (obsZ_km > 10.00) then
-             obsErr(i) =-1.321_kind_real+0.341_kind_real*obsZ_km-0.005_kind_real*obsZ_km**2
-         else
-             obsErr(i) =-1.2_kind_real+0.065_kind_real*obsZ_km+0.021_kind_real*obsZ_km**2
-         endif
-     else
-         if(obsZ_km > 10.00) then
-            obsErr(i) =2.013_kind_real-0.120_kind_real*obsZ_km+0.0065_kind_real*obsZ_km**2
-         else
-            obsErr(i) =-1.19_kind_real+0.03_kind_real*obsZ_km+0.023_kind_real*obsZ_km**2
-         endif
-     endif
-     obsErr(i) = 1.0_kind_real/abs(exp(obsErr(i)))
-endif
+  endif
+
+end if
+
 end do
-end subroutine refractivity_err_gsi
+
+end subroutine bending_angle_obserr_GSI
+!--------------------------------------
+
+subroutine refractivity_obserr_GSI(obsLat, obsZ, nobs, obsErr, QCflags,missing)
+integer,                         intent(in)  :: nobs
+real(kind_real), dimension(nobs),intent(in)  :: obsLat, obsZ
+real(kind_real), dimension(nobs),intent(out) :: obsErr
+integer(c_int),  dimension(nobs),intent(in)  :: QCflags(:)
+real(kind_real)                   :: H_km, missing
+
+obsErr = missing
+
+do i = 1, nobs
+
+if (QCflags(i) .eq. 0) then
+   H_km  = obsZ(nobs)/1000.0_kind_real
+   if( obsLat(i)>= 20.0 .or.obsLat(i)<= -20.0 ) then
+       obsErr(i)=-1.321_kind_real+0.341_kind_real*H_km-0.005_kind_real*H_km**2
+   else
+     if(H_km > 10.0) then
+        obsErr(i)=2.013_kind_real-0.060_kind_real*H_km+0.0045_kind_real*H_km**2
+     else
+        obsErr(i)=-1.18_kind_real+0.058_kind_real*H_km+0.025_kind_real*H_km**2
+     endif
+   endif
+   obsErr(i) = 1.0_kind_real/abs(exp(obsErr(i)))
+end if
+end do
+
+end subroutine refractivity_obserr_GSI
 
 end module gnssro_mod_obserror
+
