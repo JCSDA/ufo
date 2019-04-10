@@ -32,7 +32,7 @@ namespace ioda {
 namespace ufo {
   class GeoVaLs;
 
-/// ROobserror: check observation closeness to background
+/// ROobserror: calculate observational errors
 
 class ROobserror : public util::Printable,
                         private util::ObjectCounter<ROobserror> {
