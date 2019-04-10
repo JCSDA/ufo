@@ -24,23 +24,23 @@ static oops::FilterMaker<UfoTrait, oops::ObsFilter<UfoTrait, ROobserror> >
 
 ROobserror::ROobserror(const ioda::ObsSpace & os,
                                  const eckit::Configuration & config) {
-  oops::Log::debug() << "ROobserror contructor starting" << std::endl;
+  oops::Log::trace() << "ROobserror contructor starting" << std::endl;
   const eckit::Configuration * conf = &config;
   ufo_roobserror_create_f90(key_, os, conf);
-  oops::Log::debug() << "ROobserror contructor key = " << key_ << std::endl;
+  oops::Log::trace() << "ROobserror contructor key = " << key_ << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
 ROobserror::~ROobserror() {
-  oops::Log::debug() << "ROobserror destructor key = " << key_ << std::endl;
+  oops::Log::trace() << "ROobserror destructor key = " << key_ << std::endl;
   ufo_roobserror_delete_f90(key_);
 }
 
 // -----------------------------------------------------------------------------
 
 void ROobserror::priorFilter(const GeoVaLs & gv) const {
-  oops::Log::debug() << "ROobserror priorFilter" << std::endl;
+  oops::Log::trace() << "ROobserror using priorFilter" << std::endl;
   ufo_roobserror_prior_f90(key_);
 }
 
