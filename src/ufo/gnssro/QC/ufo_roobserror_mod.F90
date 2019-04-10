@@ -102,6 +102,8 @@ case ("bending_angle")
     write(err_msg,*) "ufo_roobserror_mod: setting up bending_angle obs error with GSI method"
     deallocate(obsSaid)
     deallocate(obsLat)
+    ! up date obs error
+    call obsspace_put_db(self%obsdb, "EffectiveError", trim(self%variable), obsErr)
 
   case ("ROPP")
     allocate(obsValue(nobs))
@@ -109,6 +111,8 @@ case ("bending_angle")
     call bending_angle_obserr_ROPP(obsImpH, obsValue, nobs, obsErr, QCflags, missing)
     write(err_msg,*) "ufo_roobserror_mod: setting up bending_angle obs error with ROPP method"
     deallocate(obsValue)
+    ! up date obs error
+    call obsspace_put_db(self%obsdb, "EffectiveError", trim(self%variable), obsErr)
 
   case default
     write(err_msg,*) "ufo_roobserror_mod: bending_angle error model must be GSI or ROPP"
@@ -135,6 +139,8 @@ case ("refractivity")
     call fckit_log%info(err_msg)
     deallocate(obsZ)
     deallocate(obsLat)  
+    ! up date obs error
+    call obsspace_put_db(self%obsdb, "EffectiveError", trim(self%variable), obsErr)
 
   case ("ROPP")
      write(err_msg,*) "ufo_roobserror_mod: ROPP refractivity error model is not avaiable now"
@@ -148,9 +154,6 @@ case ("refractivity")
 case default
   call abor1_ftn("ufo_roobserror_prior: variable has to be bending_angle or refractivity")
 end select
-
-! up date obs error
-call obsspace_put_db(self%obsdb, "EffectiveError", trim(self%variable), obsErr)
 
 deallocate(QCflags)
 deallocate(obsErr)
