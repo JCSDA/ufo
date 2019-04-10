@@ -7,10 +7,6 @@ use iso_c_binding
 use ufo_constants_mod
 implicit none
 public   :: gnssro_ref_constants
-real(kind_real), parameter, public :: zero    = 0.0_kind_real
-real(kind_real), parameter, public :: one     = 1.0_kind_real
-real(kind_real), parameter, public :: two     = 2.0_kind_real
-real(kind_real), parameter, public :: half    = 0.5_kind_real
 real(kind_real),            public :: n_a, n_b,n_c
 contains
 subroutine gnssro_ref_constants(use_compress)
