@@ -12,7 +12,7 @@
 #include <vector>
 
 #include "eckit/config/LocalConfiguration.h"
-#include "ioda/ObsDataVector.h"
+#include "ioda/ObsDataRows.h"
 #include "ioda/ObsSpace.h"
 #include "oops/base/Variables.h"
 #include "oops/util/missingValues.h"
@@ -73,7 +73,7 @@ std::vector<bool> processWhere(ioda::ObsSpace & obsdb, const GeoVaLs & gvals,
     if (vmin != missing || vmax != missing ||
         masks[jm].has("is_defined") || masks[jm].has("is_not_defined")) {
 //    Get float values
-      ioda::ObsDataVector<float> values(obsdb, var, obgrp);
+      ioda::ObsDataRows<float> values(obsdb, var, obgrp);
       if (grp == "GeoVaLs") gvals.get(values.values(), var);
       if (grp == "GeoVaLs") oops::Log::debug() << "processWhere gv = " << gvals << std::endl;
       if (grp == "GeoVaLs") oops::Log::debug() << "processWhere values = " << values << std::endl;
@@ -110,7 +110,7 @@ std::vector<bool> processWhere(ioda::ObsSpace & obsdb, const GeoVaLs & gvals,
 //  Process masks on integer values
     if (masks[jm].has("is_in") || masks[jm].has("is_not_in")) {
 //    Get int values
-      ioda::ObsDataVector<int> valint(obsdb, var, obgrp);
+      ioda::ObsDataRows<int> valint(obsdb, var, obgrp);
 
 //    Apply mask is_in
       if (masks[jm].has("is_in")) {
