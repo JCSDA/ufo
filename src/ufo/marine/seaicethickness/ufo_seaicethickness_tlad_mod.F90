@@ -15,6 +15,7 @@ module ufo_seaicethickness_tlad_mod
  use ufo_basis_tlad_mod, only: ufo_basis_tlad
  use ufo_vars_mod
  use obsspace_mod
+ use missing_values_mod
 
  implicit none
  private
@@ -91,8 +92,6 @@ character(max_string) :: err_msg
 integer :: iobs, icat, ncat
 type(ufo_geoval), pointer :: icethick_d, icefrac_d
 
-print *, myname_, ' nobs: ', geovals%nobs, size(hofx,1)
-
 ! check if trajectory was set
 if (.not. self%ltraj) then
   write(err_msg,*) myname_, ' trajectory wasnt set!'
@@ -117,8 +116,8 @@ hofx = 0.0
 do iobs = 1, size(hofx,1)
    do icat = 1, ncat
      hofx(iobs) = hofx(iobs) +                                         &
-                  self%icefrac%vals(icat,iobs) * icethick_d%vals(icat,iobs) / 905.0 + &
-                  icefrac_d%vals(icat,iobs) * self%icethick%vals(icat,iobs) /905.0
+                  self%icefrac%vals(icat,iobs) * icethick_d%vals(icat,iobs) + &
+                  icefrac_d%vals(icat,iobs) * self%icethick%vals(icat,iobs)
    enddo
 enddo
 
@@ -139,6 +138,7 @@ character(max_string) :: err_msg
 
 integer :: iobs, icat, ncat
 type(ufo_geoval), pointer :: icefrac_d, icethick_d
+real(c_double) :: missing
 
 ! check if trajectory was set
 if (.not. self%ltraj) then
@@ -154,10 +154,9 @@ endif
 
 if (.not. geovals%linit ) geovals%linit=.true.
 
-! check if sea ice fraction variable is in geovals and get it
-call ufo_geovals_get_var(geovals, var_seaicefrac, icefrac_d)
 
-! check if sea ice thickness variable is in geovals and get it
+! Get sea-ice fraction & thickness geovals
+call ufo_geovals_get_var(geovals, var_seaicefrac, icefrac_d)
 call ufo_geovals_get_var(geovals, var_seaicethick, icethick_d)
 
 ncat = self%icethick%nval
@@ -170,23 +169,21 @@ if (.not.(allocated(icefrac_d%vals) .or. .not. allocated(icethick_d%vals))) then
    if (.not. allocated(icethick_d%vals)) allocate(icethick_d%vals(ncat, size(hofx,1)))
 end if
 
-!print *, 'in ad: hofx=', hofx
-
 ! backward sea ice thickness obs operator
 
-print *,'ncat=',ncat
 if (.not. allocated(icefrac_d%vals))  allocate(icefrac_d%vals(ncat,size(hofx,1)))
 if (.not. allocated(icethick_d%vals)) allocate(icethick_d%vals(ncat, size(hofx,1)))
 
 icethick_d%vals = 0.0
 icefrac_d%vals = 0.0
+
 do iobs = 1, size(hofx,1)
+   if (hofx(iobs) /= missing) then   
    do icat = 1, ncat
-      icefrac_d%vals(icat,iobs)  = icefrac_d%vals(icat,iobs) + self%icethick%vals(icat,iobs) * hofx(iobs) / 905.0
-      icethick_d%vals(icat,iobs) = icethick_d%vals(icat,iobs) + self%icefrac%vals(icat,iobs) * hofx(iobs) / 905.0
-      !print *, 'in ad: thick=', icethick_d%vals(:,iobs)
-      !print *, 'in ad: frac=', icefrac_d%vals(:,iobs)
-   enddo
+      icefrac_d%vals(icat,iobs)  = icefrac_d%vals(icat,iobs) + self%icethick%vals(icat,iobs) * hofx(iobs)
+      icethick_d%vals(icat,iobs) = icethick_d%vals(icat,iobs) + self%icefrac%vals(icat,iobs) * hofx(iobs)
+   end do
+end if
 enddo
 
 end subroutine ufo_seaicethickness_simobs_ad

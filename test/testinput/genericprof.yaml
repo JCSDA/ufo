@@ -1,0 +1,24 @@
+---
+test_framework_runtime_config: "--log_level=test_suite"
+window_begin: 2018-04-14T21:00:00Z
+window_end: 2018-04-15T03:00:00Z
+LinearObsOpTest:
+  testiterTL: 10
+  toleranceTL: 1.0e-7
+  toleranceAD: 1.0e-7
+Observations:
+  ObsTypes:
+  - ObsType: InsituSalinity
+    ObsData:
+      ObsDataIn:
+        obsfile: Data/profile_2018-04-15.nc
+    variable:
+    - sea_water_salinity
+    GeoVaLs:
+      random: 0
+      filename: Data/profile_2018-04-15_geovals.nc
+      window_begin: 2018-04-14T21:00:00Z
+      window_end: 2018-04-15T03:00:00Z
+    ObsBias: {}
+    rmsequiv: 35.0
+    tolerance: 1.0e-8

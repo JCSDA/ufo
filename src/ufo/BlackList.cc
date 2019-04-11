@@ -12,7 +12,7 @@
 
 #include "eckit/config/Configuration.h"
 
-#include "ioda/ObsDataVector.h"
+#include "ioda/ObsDataRows.h"
 #include "ioda/ObsSpace.h"
 #include "oops/base/Variables.h"
 #include "oops/interface/ObsFilter.h"
@@ -50,7 +50,7 @@ void BlackList::priorFilter(const GeoVaLs & gv) const {
   std::vector<bool> blacklisted = processWhere(obsdb_, gv, config_);
 
   for (size_t jv = 0; jv < vars.size(); ++jv) {
-    ioda::ObsDataVector<int> flags(obsdb_, vars[jv], qcgrp);
+    ioda::ObsDataRows<int> flags(obsdb_, vars[jv], qcgrp);
     int ii = 0;
     for (size_t jobs = 0; jobs < nobs; ++jobs) {
       if (blacklisted[jobs] && flags[jobs] == 0) flags[jobs] = QCflags::black;

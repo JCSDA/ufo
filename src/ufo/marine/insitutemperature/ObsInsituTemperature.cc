@@ -30,7 +30,7 @@ ObsInsituTemperature::ObsInsituTemperature(const ioda::ObsSpace & odb,
   : ObsOperatorBase(odb, config), keyOper_(0), odb_(odb), varin_(), varout_()
 {
   const std::vector<std::string> vvin{"sea_water_potential_temperature",
-                                      "sea_water_practical_salinity",
+                                      "sea_water_salinity",
                                       "sea_water_cell_thickness"};
   varin_.reset(new oops::Variables(vvin));
   const std::vector<std::string> vvout{"sea_water_temperature"};  // Insitu temperature

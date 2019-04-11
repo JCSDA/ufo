@@ -11,7 +11,7 @@
 
 #include "eckit/config/Configuration.h"
 
-#include "ioda/ObsDataVector.h"
+#include "ioda/ObsDataRows.h"
 #include "ioda/ObsSpace.h"
 #include "oops/interface/ObsFilter.h"
 #include "oops/util/Logger.h"
@@ -53,8 +53,8 @@ void ObsBoundsCheck::priorFilter(const GeoVaLs & gv) const {
     const float vmin = bounds[jj].getFloat("minvalue", missing);
     const float vmax = bounds[jj].getFloat("maxvalue", missing);
 
-    ioda::ObsDataVector<float> obs(obsdb_, var, obgrp);
-    ioda::ObsDataVector<int> flags(obsdb_, var, qcgrp);
+    ioda::ObsDataRows<float> obs(obsdb_, var, obgrp);
+    ioda::ObsDataRows<int> flags(obsdb_, var, qcgrp);
 
 //  Select where the bounds check will apply
     std::vector<bool> apply = processWhere(obsdb_, gv, bounds[jj]);

@@ -12,7 +12,7 @@
 
 #include "eckit/config/Configuration.h"
 
-#include "ioda/ObsDataVector.h"
+#include "ioda/ObsDataRows.h"
 #include "ioda/ObsSpace.h"
 #include "oops/interface/ObsFilter.h"
 #include "oops/util/Logger.h"
@@ -38,10 +38,10 @@ ObsPreQC::ObsPreQC(ioda::ObsSpace & obsdb, const eckit::Configuration & config)
   const std::vector<std::string> vars = config.getStringVector("observed");
 
   for (size_t jj = 0; jj < vars.size(); ++jj) {
-    ioda::ObsDataVector<float> obs(obsdb, vars[jj], "ObsValue");
-    ioda::ObsDataVector<float> err(obsdb, vars[jj], "ObsError");
-    ioda::ObsDataVector<int> flags(obsdb, vars[jj]);
-    ioda::ObsDataVector<int> preqc(obsdb, vars[jj]);
+    ioda::ObsDataRows<float> obs(obsdb, vars[jj], "ObsValue");
+    ioda::ObsDataRows<float> err(obsdb, vars[jj], "ObsError");
+    ioda::ObsDataRows<int> flags(obsdb, vars[jj]);
+    ioda::ObsDataRows<int> preqc(obsdb, vars[jj]);
     if (obsdb.has(vars[jj], "PreQC")) flags.read("PreQC");
 
     for (size_t jobs = 0; jobs < obs.size(); ++jobs) {
@@ -62,7 +62,7 @@ ObsPreQC::~ObsPreQC() {
   const std::vector<std::string> vars = config_.getStringVector("observed");
 
   for (size_t jj = 0; jj < vars.size(); ++jj) {
-    ioda::ObsDataVector<int> flags(obsdb_, vars[jj], qcgrp);
+    ioda::ObsDataRows<int> flags(obsdb_, vars[jj], qcgrp);
 
     size_t iobs = flags.size();
     size_t ipass = 0;

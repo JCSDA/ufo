@@ -10,6 +10,7 @@
 
 #include <string>
 
+#include "ioda/ObsDataVector.h"
 #include "ioda/ObsSpace.h"
 #include "ioda/ObsVector.h"
 #include "Locations.h"
@@ -29,6 +30,7 @@ struct UfoTrait {
   typedef ufo::Locations           Locations;
   typedef ioda::ObsSpace           ObsSpace;
   typedef ioda::ObsVector          ObsVector;
+  template <typename DATATYPE> using ObsDataVector = ioda::ObsDataVector<DATATYPE>;
 
   typedef ufo::ObsOperator         ObsOperator;
   typedef ufo::LinearObsOperator   LinearObsOperator;
