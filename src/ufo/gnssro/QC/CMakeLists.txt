@@ -9,6 +9,11 @@ set (  qc_src_files
        ROgeorealityCheck.interface.F90  
        ROgeorealityCheck.interface.h
        ufo_rogeorealitycheck_mod.F90
+       ROobserror.h
+       ROobserror.cc
+       ROobserror.interface.F90  
+       ROobserror.interface.h
+       ufo_roobserror_mod.F90
 PARENT_SCOPE
 )
 

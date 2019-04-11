@@ -221,6 +221,10 @@ ecbuild_add_test( TARGET  test_ufo_gnssroBndROPP1D_tlad
                   SOURCES mains/TestObsOperatorTLAD.cc
                   ARGS    "testinput/gnssrobndropp1d.yaml"
                   LIBS    ufo )
+ecbuild_add_test( TARGET  test_ufo_gnssroBndROPP1D_qc
+                  SOURCES mains/TestObsFilters.cc
+                  ARGS    "testinput/gnssrobndropp1d.yaml"
+                  LIBS    ufo )
 ecbuild_add_test( TARGET  test_ufo_gnssroBndROPP2D_opr
                   SOURCES mains/TestObsOperator.cc
                   ARGS    "testinput/gnssrobndropp2d.yaml"

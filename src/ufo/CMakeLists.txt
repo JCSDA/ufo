@@ -44,6 +44,7 @@ list( APPEND ufo_src_files
     ufo_geovals_mod.F90
     ufo_locs_mod.F90
     ufo_variables_mod.F90
+    ufo_constants_mod.F90
 )
 
 # macro to prepend a prefix with relative path
