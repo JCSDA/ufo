@@ -87,7 +87,7 @@ type(c_ptr), value, intent(in)    :: obss
     ! total sea ice fraction obs operator
     do iobs = 1, size(hofx,1)
        do icat = 1, ncat
-          hofx(iobs) = hofx(iobs) + icefrac%vals(icat,iobs) * icethick%vals(icat,iobs) / 905.0
+          hofx(iobs) = hofx(iobs) + icefrac%vals(icat,iobs) * icethick%vals(icat,iobs)
        enddo
     enddo
 

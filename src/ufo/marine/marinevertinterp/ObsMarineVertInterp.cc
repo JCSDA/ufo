@@ -5,15 +5,12 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
  */
 
-#include "ufo/identity/ObsIdentity.h"
+#include "ufo/marine/marinevertinterp/ObsMarineVertInterp.h"
 
 #include <ostream>
 #include <string>
 #include <vector>
-
 #include <boost/algorithm/string.hpp>
-
-#include "oops/util/Logger.h"
 
 #include "ioda/ObsVector.h"
 
@@ -26,21 +23,19 @@
 namespace ufo {
 
 // -----------------------------------------------------------------------------
-static ObsOperatorMaker<ObsIdentity> makerSST_("SeaSurfaceTemp");
-static ObsOperatorMaker<ObsIdentity> makerSSS_("SeaSurfaceSalinity");
+static ObsOperatorMaker<ObsMarineVertInterp> makerMarineVertInterp_("InsituSalinity");
 // -----------------------------------------------------------------------------
 
-ObsIdentity::ObsIdentity(const ioda::ObsSpace & odb,
-                         const eckit::Configuration & config)
-  : ObsOperatorBase(odb, config), keyOperObsIdentity_(0), odb_(odb), varin_(), varout_()
+ObsMarineVertInterp::ObsMarineVertInterp(const ioda::ObsSpace & odb,
+                                           const eckit::Configuration & config)
+  : ObsOperatorBase(odb, config), keyOper_(0), odb_(odb), varin_(), varout_()
 {
   int c_name_size = 200;
   char *buffin = new char[c_name_size];
   char *buffout = new char[c_name_size];
   const eckit::Configuration * configc = &config;
 
-  ufo_identity_setup_f90(keyOperObsIdentity_, &configc, buffin, buffout,
-                         c_name_size);
+  ufo_marinevertinterp_setup_f90(keyOper_, &configc, buffin, buffout, c_name_size);
 
   std::string vstr_in(buffin), vstr_out(buffout);
   std::vector<std::string> vvin;
@@ -50,30 +45,29 @@ ObsIdentity::ObsIdentity(const ioda::ObsSpace & odb,
   varin_.reset(new oops::Variables(vvin));
   varout_.reset(new oops::Variables(vvout));
 
-  oops::Log::trace() << "ObsIdentity created." << std::endl;
+  oops::Log::trace() << "ObsMarineVertInterp created." << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
-ObsIdentity::~ObsIdentity() {
-  ufo_identity_delete_f90(keyOperObsIdentity_);
-  oops::Log::trace() << "ObsIdentity destructed" << std::endl;
+ObsMarineVertInterp::~ObsMarineVertInterp() {
+  ufo_marinevertinterp_delete_f90(keyOper_);
+  oops::Log::trace() << "ObsMarineVertInterp destructed" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
-void ObsIdentity::simulateObs(const GeoVaLs & gom, ioda::ObsVector & ovec,
+void ObsMarineVertInterp::simulateObs(const GeoVaLs & gv, ioda::ObsVector & ovec,
                               const ObsBias & bias) const {
-  ufo_identity_simobs_f90(keyOperObsIdentity_, gom.toFortran(), odb_,
-                          ovec.nvars(), ovec.nlocs(), ovec.toFortran(),
-                          bias.toFortran());
-  oops::Log::trace() << "ObsIdentity: observation operator run" << std::endl;
+  ufo_marinevertinterp_simobs_f90(keyOper_, gv.toFortran(), odb_, ovec.size(), ovec.toFortran(),
+                      bias.toFortran());
+  oops::Log::trace() << "ObsMarineVertInterp: observation operator run" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
-void ObsIdentity::print(std::ostream & os) const {
-  os << "ObsIdentity::print not implemented";
+void ObsMarineVertInterp::print(std::ostream & os) const {
+  os << "ObsMarineVertInterp::print not implemented";
 }
 
 // -----------------------------------------------------------------------------

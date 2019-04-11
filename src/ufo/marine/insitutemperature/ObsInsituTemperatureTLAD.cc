@@ -31,7 +31,7 @@ ObsInsituTemperatureTLAD::ObsInsituTemperatureTLAD(const ioda::ObsSpace & odb,
   : keyOper_(0), varin_(), odb_(odb)
 {
   const std::vector<std::string> vv{"sea_water_potential_temperature",
-                                    "sea_water_practical_salinity",
+                                    "sea_water_salinity",
                                     "sea_water_cell_thickness"};
   varin_.reset(new oops::Variables(vv));
   const eckit::Configuration * configc = &config;

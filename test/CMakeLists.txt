@@ -73,6 +73,7 @@ if( ${GSW_FOUND} )
     list( APPEND ufo_marine_test_input
       testinput/ufotest_marine.yaml
       testinput/tprof.yaml
+      testinput/genericprof.yaml
       testinput/adt.yaml
       testinput/seaice.yaml
       testinput/sea_surface_temp.yaml
@@ -248,9 +249,6 @@ if( ${GSW_FOUND} )
                       ARGS    "testinput/tprof.yaml"
                       LIBS    ufo )
 
-# SRH: This test works, but it take 5 minutes to run. Thought it would be good
-# to comment this test out until the performance issue can be addressed.
-#
     ecbuild_add_test( TARGET  test_ufo_insitutemperature_tlad
                       SOURCES mains/TestObsOperatorTLAD.cc
                       ARGS    "testinput/tprof.yaml"
@@ -285,6 +283,18 @@ if( ${GSW_FOUND} )
                       SOURCES mains/TestObsOperatorTLAD.cc
                       ARGS    "testinput/adt.yaml"
                       LIBS    ufo )		      
+
+    ecbuild_add_test( TARGET  test_ufo_marinevertinterp_opr
+                      BOOST
+                      SOURCES mains/TestObsOperator.cc
+                      ARGS    "testinput/genericprof.yaml"
+                      LIBS    ufo )
+
+    ecbuild_add_test( TARGET  test_ufo_marinevertinterp_tlad
+                      BOOST
+                      SOURCES mains/TestObsOperatorTLAD.cc
+                      ARGS    "testinput/genericprof.yaml"
+                      LIBS    ufo )
 
 endif( ${GSW_FOUND} )
 

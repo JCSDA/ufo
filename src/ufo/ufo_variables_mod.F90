@@ -96,15 +96,16 @@ CHARACTER(len=MAXVARLEN), DIMENSION(n_aerosols_other), PUBLIC, PARAMETER :: &
      &var_aerosols_other = [&
      &"other                                                   "]
 
-character(len=MAXVARLEN), public, parameter :: var_seaicefrac    = "sea_ice_category_area_fraction"
-character(len=MAXVARLEN), public, parameter :: var_seaicethick   = "sea_ice_category_thickness"
-character(len=MAXVARLEN), public, parameter :: var_abs_topo      = "sea_surface_height_above_geoid"
-character(len=MAXVARLEN), public, parameter :: var_ocn_pot_temp  = "sea_water_potential_temperature"
-character(len=MAXVARLEN), public, parameter :: var_ocn_con_temp  = "sea_water_conservative_temperature"
-character(len=MAXVARLEN), public, parameter :: var_ocn_abs_salt  = "sea_water_absolute_salinity"
-character(len=MAXVARLEN), public, parameter :: var_ocn_salt      = "sea_water_practical_salinity"
-character(len=MAXVARLEN), public, parameter :: var_ocn_lay_thick = "sea_water_cell_thickness"
-character(len=MAXVARLEN), public, parameter :: var_ocn_sst       = "sea_surface_temperature"
+character(len=MAXVARLEN), public :: var_seaicefrac    = "sea_ice_category_area_fraction"
+character(len=MAXVARLEN), public :: var_seaicethick   = "sea_ice_category_thickness"
+character(len=MAXVARLEN), public :: var_abs_topo      = "sea_surface_height_above_geoid"
+character(len=MAXVARLEN), public :: var_ocn_pot_temp  = "sea_water_potential_temperature"
+character(len=MAXVARLEN), public :: var_ocn_con_temp  = "sea_water_conservative_temperature"
+character(len=MAXVARLEN), public :: var_ocn_abs_salt  = "sea_water_absolute_salinity"
+character(len=MAXVARLEN), public :: var_ocn_pra_salt      = "sea_water_practical_salinity"
+character(len=MAXVARLEN), public :: var_ocn_salt      = "sea_water_salinity"
+character(len=MAXVARLEN), public :: var_ocn_lay_thick = "sea_water_cell_thickness"
+character(len=MAXVARLEN), public :: var_ocn_sst       = "sea_surface_temperature"
 
 ! ------------------------------------------------------------------------------
 
