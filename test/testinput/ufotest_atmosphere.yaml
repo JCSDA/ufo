@@ -24,7 +24,7 @@ Observations:
     ObsDataIn: 
      obsfile: "Data/amsua_n19_obs_2018041500_m.nc4"
    GeoVaLs: 
-    norm: "72037.644147104103"
+    norm: "72000.7229763"
     filename: "Data/amsua_n19_geoval_2018041500_m.nc4"
     random: 0
     window_begin: "2018-04-14T21:00:00Z"
