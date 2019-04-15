@@ -195,12 +195,12 @@ ecbuild_add_test( TARGET  test_ufo_mhs_tlad_crtm
 #                  ARGS    "testinput/sndrd1-4_crtm.yaml"
 #                  LIBS    ufo )
                   
-ecbuild_add_test( TARGET  test_ufo_airs_opr_crtm
-                  BOOST
-                  MPI     4
-                  SOURCES mains/TestObsOperator.cc
-                  ARGS    "testinput/airs_crtm.yaml"
-                  LIBS    ufo )
+#ecbuild_add_test( TARGET  test_ufo_airs_opr_crtm
+#                  BOOST
+#                  MPI     4
+#                  SOURCES mains/TestObsOperator.cc
+#                  ARGS    "testinput/airs_crtm.yaml"
+#                  LIBS    ufo )
 
 #ecbuild_add_test( TARGET  test_ufo_airs_tlad_crtm
 #                  BOOST
