@@ -12,7 +12,7 @@
 
 #include "eckit/config/Configuration.h"
 
-#include "ioda/ObsDataRows.h"
+#include "ioda/ObsDataVector.h"
 #include "ioda/ObsSpace.h"
 #include "oops/interface/ObsFilter.h"
 #include "oops/util/Logger.h"
@@ -42,24 +42,18 @@ ObsDomainCheck::~ObsDomainCheck() {}
 // -----------------------------------------------------------------------------
 
 void ObsDomainCheck::priorFilter(const GeoVaLs & gv) const {
-  const size_t nobs = obsdb_.nlocs();
   const std::string qcgrp = config_.getString("QCname");
-  const std::vector<std::string> vars = config_.getStringVector("observed");
+  const oops::Variables vars(config_.getStringVector("observed"));
 
   std::vector<bool> inside = processWhere(obsdb_, gv, config_);
 
+  ioda::ObsDataVector<int> flags(obsdb_, vars, qcgrp);
   for (size_t jv = 0; jv < vars.size(); ++jv) {
-    ioda::ObsDataRows<int> flags(obsdb_, vars[jv], qcgrp);
-    int ii = 0;
-    for (size_t jobs = 0; jobs < nobs; ++jobs) {
-      if (!inside[jobs] && flags[jobs] == 0) flags[jobs] = QCflags::domain;
-      if (!inside[jobs]) ++ii;
+    for (size_t jobs = 0; jobs < obsdb_.nlocs(); ++jobs) {
+      if (!inside[jobs] && flags[jv][jobs] == 0) flags[jv][jobs] = QCflags::domain;
     }
-    flags.save();
-
-    oops::Log::debug() << "ObsDomainCheck: " << obsdb_.obsname() << " " << vars[jv]
-                       << " rejected " << ii << " obs." << std::endl;
   }
+  flags.save(qcgrp);
 }
 
 // -----------------------------------------------------------------------------

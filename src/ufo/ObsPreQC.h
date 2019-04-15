@@ -28,7 +28,7 @@ class ObsPreQC : public util::Printable {
   ~ObsPreQC();
 
   void priorFilter(const GeoVaLs &) const {}
-  void postFilter(const ioda::ObsVector &) const {}
+  void postFilter(const ioda::ObsVector &) const;
 
   const oops::Variables & requiredGeoVaLs() const {return nogeovals_;}
 
