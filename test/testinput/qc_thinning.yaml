@@ -21,10 +21,6 @@ Observations:
       window_end: '2018-04-15T03:00:00Z'
     ObsFilters:
     - Filter: Thinning
-      observed:
-      - eastward_wind
-      - northward_wind
       amount: 0.75
       random_seed: 0
-    rmsequiv: 124.16300559
-    tolerance: 1.0e-10
+    passedBenchmark: 79

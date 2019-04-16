@@ -271,7 +271,6 @@ ecbuild_add_test( TARGET  test_ufo_satwind_opr
                   LIBS    ufo )
 
 ecbuild_add_test( TARGET  test_ufo_qc_thinning
-                  MPI     4
                   SOURCES mains/TestObsFilters.cc
                   ARGS    "testinput/qc_thinning.yaml"
                   LIBS    ufo )
