@@ -34,7 +34,6 @@ list( APPEND ufo_test_input
   testinput/radiosonde.yaml
   testinput/radiosonde_qc.yaml
   testinput/aircraft.yaml
-  testinput/aircraft_qc.yaml
   testinput/aod_crtm.yaml
   testinput/gnssroref.yaml
   testinput/gnssrobndropp1d.yaml
@@ -235,7 +234,6 @@ ecbuild_add_test( TARGET  test_ufo_radiosonde_opr
                   LIBS    ufo )
 
 ecbuild_add_test( TARGET  test_ufo_radiosonde_qc
-                  MPI     4
                   SOURCES mains/TestObsFilters.cc
                   ARGS    "testinput/radiosonde_qc.yaml"
                   LIBS    ufo )
@@ -249,11 +247,6 @@ ecbuild_add_test( TARGET  test_ufo_aircraft_opr
                   MPI     4
                   SOURCES mains/TestObsOperator.cc
                   ARGS    "testinput/aircraft.yaml"
-                  LIBS    ufo )
-
-ecbuild_add_test( TARGET  test_ufo_aircraft_qc
-                  SOURCES mains/TestObsFilters.cc
-                  ARGS    "testinput/aircraft_qc.yaml"
                   LIBS    ufo )
 
 ecbuild_add_test( TARGET  test_ufo_aircraft_tlad
