@@ -95,6 +95,7 @@ ObsPreQC::~ObsPreQC() {
     size_t iherr = 0;
     size_t ifgss = 0;
     size_t ignss = 0;
+    size_t ithin = 0;
 
     for (size_t jobs = 0; jobs < iobs; ++jobs) {
       if (flags[jj][jobs] == QCflags::pass)    ++ipass;
@@ -105,6 +106,7 @@ ObsPreQC::~ObsPreQC() {
       if (flags[jj][jobs] == QCflags::black)   ++iblck;
       if (flags[jj][jobs] == QCflags::Hfailed) ++iherr;
       if (flags[jj][jobs] == QCflags::fguess)  ++ifgss;
+      if (flags[jj][jobs] == QCflags::thinned) ++ithin;
       if (flags[jj][jobs] == 76 || flags[jj][jobs] == 77)  ++ignss;
     }
 
@@ -118,6 +120,7 @@ ObsPreQC::~ObsPreQC() {
     obsdb_.comm().allReduceInPlace(iherr, eckit::mpi::sum());
     obsdb_.comm().allReduceInPlace(ifgss, eckit::mpi::sum());
     obsdb_.comm().allReduceInPlace(ignss, eckit::mpi::sum());
+    obsdb_.comm().allReduceInPlace(ithin, eckit::mpi::sum());
 
     if (obsdb_.comm().rank() == 0) {
       const std::string info = "QC " + flags.obstype() + " " + vars[jj] + ": ";
@@ -131,10 +134,11 @@ ObsPreQC::~ObsPreQC() {
                                        << std::endl;
       if (ignss > 0) oops::Log::info() << info << ignss << " rejected by GNSSRO reality check."
                                        << std::endl;
+      if (ithin > 0) oops::Log::info() << info << ithin << " removed by thinning." << std::endl;
       oops::Log::info() << info << ipass << " passed." << std::endl;
     }
 
-    ASSERT(ipass + imiss + ipreq + ibnds + iwhit + iblck + ifgss + ignss == iobs);
+    ASSERT(ipass + imiss + ipreq + ibnds + iwhit + iblck + ifgss + ignss + ithin == iobs);
   }
 }
 

@@ -37,6 +37,8 @@ list( APPEND ufo_src_files
     processWhere.cc
     processWhere.h
     QCflags.h
+    Thinning.cc
+    Thinning.h
     UfoTrait.h
     ufo_geovals_mod.F90
     ufo_locs_mod.F90
