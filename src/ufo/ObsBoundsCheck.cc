@@ -11,7 +11,7 @@
 
 #include "eckit/config/Configuration.h"
 
-#include "ioda/ObsDataRows.h"
+#include "ioda/ObsDataVector.h"
 #include "ioda/ObsSpace.h"
 #include "oops/interface/ObsFilter.h"
 #include "oops/util/Logger.h"
@@ -48,32 +48,32 @@ void ObsBoundsCheck::priorFilter(const GeoVaLs & gv) const {
   std::vector<eckit::LocalConfiguration> bounds;
   config_.get("bounds", bounds);
 
-  for (size_t jj = 0; jj < bounds.size(); ++jj) {
-    const std::string var(bounds[jj].getString("variable"));
-    const float vmin = bounds[jj].getFloat("minvalue", missing);
-    const float vmax = bounds[jj].getFloat("maxvalue", missing);
+  std::vector<std::string> svar;
+  for (size_t jv = 0; jv < bounds.size(); ++jv) {
+    svar.push_back(bounds[jv].getString("variable"));
+  }
+  oops::Variables vars(svar);
 
-    ioda::ObsDataRows<float> obs(obsdb_, var, obgrp);
-    ioda::ObsDataRows<int> flags(obsdb_, var, qcgrp);
+  ioda::ObsDataVector<float> obs(obsdb_, vars, obgrp);
+  ioda::ObsDataVector<int> flags(obsdb_, vars, qcgrp);
+
+  for (size_t jv = 0; jv < bounds.size(); ++jv) {
+    const std::string var = bounds[jv].getString("variable");
+    const float vmin = bounds[jv].getFloat("minvalue", missing);
+    const float vmax = bounds[jv].getFloat("maxvalue", missing);
 
 //  Select where the bounds check will apply
-    std::vector<bool> apply = processWhere(obsdb_, gv, bounds[jj]);
+    std::vector<bool> apply = processWhere(obsdb_, gv, bounds[jv]);
 
-    int ii = 0;
-    for (size_t jobs = 0; jobs < obs.size(); ++jobs) {
-      if (apply[jobs] && flags[jobs] == 0) {
-        ASSERT(obs[jobs] != missing);
-        if (vmin != missing && obs[jobs] < vmin) flags[jobs] = QCflags::bounds;
-        if (vmax != missing && obs[jobs] > vmax) flags[jobs] = QCflags::bounds;
-        if (flags[jobs] == QCflags::bounds) ++ii;
+    for (size_t jobs = 0; jobs < obs.nlocs(); ++jobs) {
+      if (apply[jobs] && flags[jv][jobs] == 0) {
+        ASSERT(obs[jv][jobs] != missing);
+        if (vmin != missing && obs[jv][jobs] < vmin) flags[jv][jobs] = QCflags::bounds;
+        if (vmax != missing && obs[jv][jobs] > vmax) flags[jv][jobs] = QCflags::bounds;
       }
     }
-
-    flags.save();
-
-    oops::Log::debug() << "ObsBoundsCheck: " << obsdb_.obsname() << " " << var
-                       << " rejected " << ii << " obs." << std::endl;
   }
+  flags.save(qcgrp);
 }
 
 // -----------------------------------------------------------------------------

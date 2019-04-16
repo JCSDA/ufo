@@ -14,14 +14,9 @@
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
 #include "oops/util/Printable.h"
-#include "ufo/BackgroundCheck.interface.h"
 
 namespace eckit {
   class Configuration;
-}
-
-namespace oops {
-  class Variables;
 }
 
 namespace ioda {
@@ -39,7 +34,7 @@ class BackgroundCheck : public util::Printable,
  public:
   static const std::string classname() {return "ufo::BackgroundCheck";}
 
-  BackgroundCheck(const ioda::ObsSpace &, const eckit::Configuration &);
+  BackgroundCheck(ioda::ObsSpace &, const eckit::Configuration &);
   ~BackgroundCheck();
 
   void priorFilter(const GeoVaLs &) const;
@@ -49,7 +44,10 @@ class BackgroundCheck : public util::Printable,
 
  private:
   void print(std::ostream &) const;
-  F90bgcheck key_;
+
+  ioda::ObsSpace & obsdb_;
+  const eckit::LocalConfiguration config_;
+  double threshold_;
   const oops::Variables geovars_;
 };
 

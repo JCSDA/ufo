@@ -12,7 +12,7 @@
 #include <vector>
 
 #include "eckit/config/LocalConfiguration.h"
-#include "ioda/ObsDataRows.h"
+#include "ioda/ObsDataVector.h"
 #include "ioda/ObsSpace.h"
 #include "oops/base/Variables.h"
 #include "oops/util/missingValues.h"
@@ -73,10 +73,15 @@ std::vector<bool> processWhere(ioda::ObsSpace & obsdb, const GeoVaLs & gvals,
     if (vmin != missing || vmax != missing ||
         masks[jm].has("is_defined") || masks[jm].has("is_not_defined")) {
 //    Get float values
-      ioda::ObsDataRows<float> values(obsdb, var, obgrp);
-      if (grp == "GeoVaLs") gvals.get(values.values(), var);
-      if (grp == "GeoVaLs") oops::Log::debug() << "processWhere gv = " << gvals << std::endl;
-      if (grp == "GeoVaLs") oops::Log::debug() << "processWhere values = " << values << std::endl;
+      std::vector<float> values(nlocs);
+      if (grp == "GeoVaLs") {
+        gvals.get(values, var);
+      } else {
+        ioda::ObsDataVector<float> vals(obsdb, var, obgrp);
+        for (size_t jj = 0; jj < nlocs; ++jj) {
+          values[jj] = vals[var][jj];
+        }
+      }
 
 //    Apply mask min/max
       if (vmin != missing || vmax != missing) {
@@ -110,13 +115,13 @@ std::vector<bool> processWhere(ioda::ObsSpace & obsdb, const GeoVaLs & gvals,
 //  Process masks on integer values
     if (masks[jm].has("is_in") || masks[jm].has("is_not_in")) {
 //    Get int values
-      ioda::ObsDataRows<int> valint(obsdb, var, obgrp);
+      ioda::ObsDataVector<int> valint(obsdb, var, obgrp);
 
 //    Apply mask is_in
       if (masks[jm].has("is_in")) {
         std::set<int> whitelist = parseIntSet(masks[jm].getString("is_in"));
         for (size_t jj = 0; jj < nlocs; ++jj) {
-          if (!contains(whitelist, valint[jj])) where[jj] = false;
+          if (!contains(whitelist, valint[var][jj])) where[jj] = false;
         }
       }
 
@@ -124,7 +129,7 @@ std::vector<bool> processWhere(ioda::ObsSpace & obsdb, const GeoVaLs & gvals,
       if (masks[jm].has("is_not_in")) {
         std::set<int> blacklist = parseIntSet(masks[jm].getString("is_not_in"));
         for (size_t jj = 0; jj < nlocs; ++jj) {
-          if (contains(blacklist, valint[jj])) where[jj] = false;
+          if (contains(blacklist, valint[var][jj])) where[jj] = false;
         }
       }
     }
