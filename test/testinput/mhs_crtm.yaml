@@ -5,22 +5,28 @@ window_end: "2018-04-15T03:00:00Z"
 LinearObsOpTest: 
  testiterTL: 10
  toleranceTL: 1.0e-10
- toleranceAD: 1.0e-12
+ toleranceAD: 1.0e-11
 Observations: 
  ObsTypes: 
- - ObsType: "RTTOV"
-   channels: "1-15"
+ - ObsType: "CRTM"
+   channels: "1-5"
    ObsOptions: 
-    Sensor_ID: noaa_19_amsua
+    n_Absorbers: 3
+    n_Clouds: 0
+    n_Aerosols: 0
+    Sensor_ID: mhs_n19
+    EndianType: little_endian
     CoefficientPath: "Data/"
    ObsData: 
     ObsDataIn: 
-     obsfile: "Data/amsua_n19_obs_2018041500_m.nc4"
+     obsfile: "Data/mhs_n19_obs_2018041500_m.nc4"
+    ObsDataOut:
+     obsfile: "Data/mhs_n19_obs_2018041500_m_out.nc4"
    GeoVaLs: 
-    filename: "Data/amsua_n19_geoval_2018041500_m.nc4"
+    filename: "Data/mhs_n19_geoval_2018041500_m.nc4"
     random: 0
     window_begin: "2018-04-14T21:00:00Z"
     window_end: "2018-04-15T03:00:00Z"
-   rmsequiv: 226.72514274
-   tolerance: 1.e-10
+   vecequiv: GsiHofX
+   tolerance: 1.5e-5
    ObsBias: {} 

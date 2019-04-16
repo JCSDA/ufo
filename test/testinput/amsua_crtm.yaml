@@ -9,8 +9,9 @@ LinearObsOpTest:
 Observations: 
  ObsTypes: 
  - ObsType: "CRTM"
-   channels: "1-6,9-13,15"
+   channels: "1-6,9-12,13,15"
    ObsOptions: 
+    InspectProfileNumber: 12
     n_Absorbers: 3
     n_Clouds: 2
     n_Aerosols: 0
@@ -20,12 +21,13 @@ Observations:
    ObsData: 
     ObsDataIn: 
      obsfile: "Data/amsua_n19_obs_2018041500_m.nc4"
+    ObsDataOut: 
+     obsfile: "Data/amsua_n19_obs_2018041500_m_out.nc4"
    GeoVaLs: 
     filename: "Data/amsua_n19_geoval_2018041500_m.nc4"
     random: 0
     window_begin: "2018-04-14T21:00:00Z"
     window_end: "2018-04-15T03:00:00Z"
-#   vecequiv: GsiHofX  # this only works with CRTM tag/v2.2.3 at this point; use rmsequiv for comparing with develop CRTM
-   rmsequiv: 230.0482
+   vecequiv: GsiHofX
    tolerance: 1.e-6
    ObsBias: {} 
