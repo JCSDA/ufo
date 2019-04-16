@@ -30,4 +30,5 @@ Observations:
       errmodel: "ROPP"
    ObsBias: {}
    rmsequiv: "0.00919697505361058"
+   passedBenchmark: 20
    tolerance: "1.0e-13"
