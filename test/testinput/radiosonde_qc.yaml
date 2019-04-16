@@ -19,25 +19,15 @@ Observations:
     - eastward_wind
     - northward_wind
     GeoVaLs:
+      norm: 8471.883687854357
       random: 0
       filename: Data/sondes_geoval_2018041500_m.nc4
       window_begin: '2018-04-14T21:00:00Z'
       window_end: '2018-04-15T03:00:00Z'
     ObsFilters:
-    - Filter: BlackList
-      observed:
-      - eastward_wind
-      - northward_wind
-      where:
-      - variable: gsi_wind_red_factor
-        maxvalue: 0.999
-    - Filter: BlackList
-      observed:
-      - eastward_wind
-      - northward_wind
-      where:
-      - variable: gsi_wind_red_factor
-        minvalue: 1.001
-    vecequiv: GsiHofX
-    tolerance: 1.0e-05
+    - Filter: Background Check
+      variables:
+      - air_temperature
+      threshold: 2.0
+    passedBenchmark: 288
     ObsBias: {}
