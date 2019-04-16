@@ -23,15 +23,13 @@ function(CREATE_SYMLINK_FILENAME src dst)
 endfunction(CREATE_SYMLINK_FILENAME)
 
 # Create Data directory for test input config and symlink all files
-# (two tests are commented out as CRTM files need to be added to the 
-#  official repository)
 list( APPEND ufo_test_input
   testinput/ufotest_atmosphere.yaml
   testinput/amsua_crtm.yaml
-#  testinput/hirs4_crtm.yaml
+  testinput/hirs4_crtm.yaml
   testinput/amsua_rttov.yaml
   testinput/mhs_crtm.yaml
-#  testinput/sndrd1-4_crtm.yaml
+  testinput/sndrd1-4_crtm.yaml
   testinput/airs_crtm.yaml
   testinput/radiosonde.yaml
   testinput/radiosonde_qc.yaml
@@ -170,40 +168,38 @@ ecbuild_add_test( TARGET  test_ufo_amsua_tlad_crtm
                   SOURCES mains/TestObsOperatorTLAD.cc
                   ARGS    "testinput/amsua_crtm.yaml"
                   LIBS    ufo )
+
 ecbuild_add_test( TARGET  test_ufo_mhs_opr_crtm
-                  BOOST
                   SOURCES mains/TestObsOperator.cc
                   ARGS    "testinput/mhs_crtm.yaml"
                   LIBS    ufo )
 
 ecbuild_add_test( TARGET  test_ufo_mhs_tlad_crtm
-                  BOOST
                   SOURCES mains/TestObsOperatorTLAD.cc
                   ARGS    "testinput/mhs_crtm.yaml"
                   LIBS    ufo )
 
-# Tests commented out until CRTM coefficients are added 
+# Tests commented out until CRTM coefficients are added
 #ecbuild_add_test( TARGET  test_ufo_sndrd1-4_opr_crtm
-#                  BOOST
 #                  SOURCES mains/TestObsOperator.cc
 #                  ARGS    "testinput/sndrd1-4_crtm.yaml"
 #                  LIBS    ufo )
 
 #ecbuild_add_test( TARGET  test_ufo_sndrd1-4_tlad_crtm
-#                  BOOST
 #                  SOURCES mains/TestObsOperatorTLAD.cc
 #                  ARGS    "testinput/sndrd1-4_crtm.yaml"
 #                  LIBS    ufo )
-                  
+
+# Tests commented out until CRTM coefficients are added
 #ecbuild_add_test( TARGET  test_ufo_airs_opr_crtm
-#                  BOOST
 #                  MPI     4
 #                  SOURCES mains/TestObsOperator.cc
 #                  ARGS    "testinput/airs_crtm.yaml"
 #                  LIBS    ufo )
 
+# Commented for now until CRTM channel subsetting is fully
+# implemented (test takes too long to run now)
 #ecbuild_add_test( TARGET  test_ufo_airs_tlad_crtm
-#                  BOOST
 #                  SOURCES mains/TestObsOperatorTLAD.cc
 #                  ARGS    "testinput/airs_crtm.yaml"
 #                  LIBS    ufo )
@@ -222,13 +218,11 @@ endif( ${RTTOV_FOUND} )
 
 # Tests commented out until CRTM coefficients are added 
 #ecbuild_add_test( TARGET  test_ufo_hirs4_opr_crtm
-#                  BOOST
 #                  SOURCES mains/TestObsOperator.cc
 #                  ARGS    "testinput/hirs4_crtm.yaml"
 #                  LIBS    ufo )
 
 #ecbuild_add_test( TARGET  test_ufo_hirs4_tlad_crtm
-#                  BOOST
 #                  SOURCES mains/TestObsOperatorTLAD.cc
 #                  ARGS    "testinput/hirs4_crtm.yaml"
 #                  LIBS    ufo )
