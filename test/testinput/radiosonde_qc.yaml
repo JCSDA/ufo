@@ -19,7 +19,6 @@ Observations:
     - eastward_wind
     - northward_wind
     GeoVaLs:
-      norm: 8471.883687854357
       random: 0
       filename: Data/sondes_geoval_2018041500_m.nc4
       window_begin: '2018-04-14T21:00:00Z'
