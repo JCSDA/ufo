@@ -25,7 +25,6 @@ Observations:
     random: 0
     window_begin: "2018-04-14T21:00:00Z"
     window_end: "2018-04-15T03:00:00Z"
-   vecequiv: GsiHofX  # this only works with CRTM tag/v2.2.3 at this point; use rmsequiv for comparing with develop CRTM
-#   rmsequiv: 230.0482
+   vecequiv: GsiHofX
    tolerance: 1.e-5
    ObsBias: {} 
