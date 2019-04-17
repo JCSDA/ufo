@@ -56,7 +56,8 @@ void BackgroundCheck::priorFilter(const GeoVaLs & gv) const {}
 void BackgroundCheck::postFilter(const ioda::ObsVector & hofx) const {
   oops::Log::trace() << "BackgroundCheck postFilter" << std::endl;
 
-  const oops::Variables vars(config_.getStringVector("observed"));
+  const oops::Variables vars(config_.getStringVector("variables"));
+  const oops::Variables observed(config_.getStringVector("observed"));
   const std::string qcgrp = config_.getString("QCname");
   const std::string obgrp = "ObsValue";
   const std::string ergrp = "ObsError";
@@ -70,11 +71,13 @@ void BackgroundCheck::postFilter(const ioda::ObsVector & hofx) const {
 //  Select where the bounds check will apply
 //    std::vector<bool> apply = processWhere(obsdb_, gv, bounds[jv]);
     std::vector<bool> apply(obsdb_.nlocs(), true);
+    const std::string var = vars[jv];
 
     for (size_t jobs = 0; jobs < obsdb_.nlocs(); ++jobs) {
       if (apply[jobs] && flags[jv][jobs] == 0) {
         ASSERT(obs[jv][jobs] != missing);
-        size_t iobs = vars.size() * jobs + jv;
+        size_t iv = observed.find(var);
+        size_t iobs = observed.size() * jobs + iv;
         if (std::abs(obs[jv][jobs] - hofx[iobs]) > threshold_ * err[jv][jobs]) {
           flags[jv][jobs] = QCflags::fguess;
         }
