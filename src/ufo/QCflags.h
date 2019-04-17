@@ -18,8 +18,9 @@ namespace QCflags {
   constexpr int domain  = 4;   // observation not within domain of use
   constexpr int black   = 5;   // observation black listed
   constexpr int Hfailed = 6;   // H(x) computation failed
+  constexpr int thinned = 7;   // observation removed due to thinning
   constexpr int fguess  = 10;  // observation too far from guess
-};
+};  // namespace QCflags
 
 }  // namespace ufo
 
