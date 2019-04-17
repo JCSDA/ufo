@@ -42,6 +42,7 @@ list( APPEND ufo_test_input
   testinput/gnssrobndropp2d.yaml
   testinput/channelsparser.yaml
   testinput/satwind.yaml
+  testinput/qc_thinning.yaml
 )
 
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/testinput)
@@ -242,7 +243,6 @@ ecbuild_add_test( TARGET  test_ufo_radiosonde_opr
                   LIBS    ufo )
 
 ecbuild_add_test( TARGET  test_ufo_radiosonde_qc
-                  MPI     4
                   SOURCES mains/TestObsFilters.cc
                   ARGS    "testinput/radiosonde_qc.yaml"
                   LIBS    ufo )
@@ -256,11 +256,6 @@ ecbuild_add_test( TARGET  test_ufo_aircraft_opr
                   MPI     4
                   SOURCES mains/TestObsOperator.cc
                   ARGS    "testinput/aircraft.yaml"
-                  LIBS    ufo )
-
-ecbuild_add_test( TARGET  test_ufo_aircraft_qc
-                  SOURCES mains/TestObsFilters.cc
-                  ARGS    "testinput/aircraft_qc.yaml"
                   LIBS    ufo )
 
 ecbuild_add_test( TARGET  test_ufo_aircraft_tlad
@@ -282,6 +277,11 @@ ecbuild_add_test( TARGET  test_ufo_satwind_opr
                   MPI     4
                   SOURCES mains/TestObsOperator.cc
                   ARGS    "testinput/satwind.yaml"
+                  LIBS    ufo )
+
+ecbuild_add_test( TARGET  test_ufo_qc_thinning
+                  SOURCES mains/TestObsFilters.cc
+                  ARGS    "testinput/qc_thinning.yaml"
                   LIBS    ufo )
 
 if( ${ROPP-UFO_FOUND} )

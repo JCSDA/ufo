@@ -2,10 +2,6 @@
 test_framework_runtime_config: "--log_level=test_suite"
 window_begin: '2018-04-14T21:00:00Z'
 window_end: '2018-04-15T03:00:00Z'
-LinearObsOpTest:
-  testiterTL: 12
-  toleranceTL: 1.0e-9
-  toleranceAD: 1.0e-11
 Observations:
   ObsTypes:
   - ObsType: Radiosonde
@@ -24,8 +20,7 @@ Observations:
       window_begin: '2018-04-14T21:00:00Z'
       window_end: '2018-04-15T03:00:00Z'
     ObsFilters:
-    - Filter: Background Check
-      threshold: 2.0
-    passedBenchmark: 277      # number of passed obs
-#    qcBenchmark: GsiQC       # benchmark QC from the file
-    ObsBias: {}
+    - Filter: Thinning
+      amount: 0.75
+      random_seed: 0
+    passedBenchmark: 79
