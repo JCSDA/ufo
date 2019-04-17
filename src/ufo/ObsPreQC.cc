@@ -130,15 +130,16 @@ ObsPreQC::~ObsPreQC() {
       if (iwhit > 0) oops::Log::info() << info << iwhit << " out of domain of use." << std::endl;
       if (iblck > 0) oops::Log::info() << info << iblck << " black-listed." << std::endl;
       if (iherr > 0) oops::Log::info() << info << iherr << " H(x) failed." << std::endl;
+      if (ithin > 0) oops::Log::info() << info << ithin << " removed by thinning." << std::endl;
       if (ifgss > 0) oops::Log::info() << info << ifgss << " rejected by first-guess check."
                                        << std::endl;
       if (ignss > 0) oops::Log::info() << info << ignss << " rejected by GNSSRO reality check."
                                        << std::endl;
-      if (ithin > 0) oops::Log::info() << info << ithin << " removed by thinning." << std::endl;
-      oops::Log::info() << info << ipass << " passed." << std::endl;
+      oops::Log::info() << info << ipass << " passed out of "
+                        << iobs << " observations." << std::endl;
     }
 
-    ASSERT(ipass + imiss + ipreq + ibnds + iwhit + iblck + ifgss + ignss + ithin == iobs);
+    ASSERT(ipass + imiss + ipreq + ibnds + iwhit + iblck + iherr + ithin + ifgss + ignss == iobs);
   }
 }
 
