@@ -180,22 +180,21 @@ ecbuild_add_test( TARGET  test_ufo_mhs_tlad_crtm
                   LIBS    ufo )
 
 # Tests commented out until CRTM coefficients are added
-#ecbuild_add_test( TARGET  test_ufo_sndrd1-4_opr_crtm
-#                  SOURCES mains/TestObsOperator.cc
-#                  ARGS    "testinput/sndrd1-4_crtm.yaml"
-#                  LIBS    ufo )
+ecbuild_add_test( TARGET  test_ufo_sndrd1-4_opr_crtm
+                  SOURCES mains/TestObsOperator.cc
+                  ARGS    "testinput/sndrd1-4_crtm.yaml"
+                  LIBS    ufo )
 
-#ecbuild_add_test( TARGET  test_ufo_sndrd1-4_tlad_crtm
-#                  SOURCES mains/TestObsOperatorTLAD.cc
-#                  ARGS    "testinput/sndrd1-4_crtm.yaml"
-#                  LIBS    ufo )
+ecbuild_add_test( TARGET  test_ufo_sndrd1-4_tlad_crtm
+                  SOURCES mains/TestObsOperatorTLAD.cc
+                  ARGS    "testinput/sndrd1-4_crtm.yaml"
+                  LIBS    ufo )
 
 # Tests commented out until CRTM coefficients are added
-#ecbuild_add_test( TARGET  test_ufo_airs_opr_crtm
-#                  MPI     4
-#                  SOURCES mains/TestObsOperator.cc
-#                  ARGS    "testinput/airs_crtm.yaml"
-#                  LIBS    ufo )
+ecbuild_add_test( TARGET  test_ufo_airs_opr_crtm
+                  SOURCES mains/TestObsOperator.cc
+                  ARGS    "testinput/airs_crtm.yaml"
+                  LIBS    ufo )
 
 # Commented for now until CRTM channel subsetting is fully
 # implemented (test takes too long to run now)
@@ -412,8 +411,8 @@ SpcCoeff/Little_Endian/sndrD3_g15.SpcCoeff.bin
 TauCoeff/ODPS/Little_Endian/sndrD3_g15.TauCoeff.bin
 SpcCoeff/Little_Endian/sndrD4_g15.SpcCoeff.bin
 TauCoeff/ODPS/Little_Endian/sndrD4_g15.TauCoeff.bin
-SpcCoeff/Little_Endian/airs2378_aqua.SpcCoeff.bin
-TauCoeff/ODPS/Little_Endian/airs2378_aqua.TauCoeff.bin
+SpcCoeff/Little_Endian/airs_aqua.SpcCoeff.bin
+TauCoeff/ODPS/Little_Endian/airs_aqua.TauCoeff.bin
 SpcCoeff/Little_Endian/v.viirs-m_npp.SpcCoeff.bin
 TauCoeff/ODAS/Little_Endian/v.viirs-m_npp.TauCoeff.bin
 )

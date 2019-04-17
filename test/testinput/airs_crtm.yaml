@@ -14,7 +14,7 @@ Observations:
     n_Absorbers: 3
     n_Clouds: 0
     n_Aerosols: 0
-    Sensor_ID: airs2378_aqua
+    Sensor_ID: airs_aqua
     EndianType: little_endian
     CoefficientPath: "Data/"
    ObsData: 
