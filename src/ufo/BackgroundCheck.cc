@@ -75,7 +75,7 @@ void BackgroundCheck::postFilter(const ioda::ObsVector & hofx) const {
       if (apply[jobs] && flags[jv][jobs] == 0) {
         ASSERT(obs[jv][jobs] != missing);
         size_t iobs = vars.size() * jobs + jv;
-        if (abs(obs[jv][jobs] - hofx[iobs]) > threshold_ * err[jv][jobs]) {
+        if (std::abs(obs[jv][jobs] - hofx[iobs]) > threshold_ * err[jv][jobs]) {
           flags[jv][jobs] = QCflags::fguess;
         }
       }
