@@ -27,6 +27,7 @@ list( APPEND ufo_test_input
   testinput/ufotest_atmosphere.yaml
   testinput/amsua_crtm.yaml
   testinput/hirs4_crtm.yaml
+  testinput/iasi_crtm.yaml
   testinput/amsua_rttov.yaml
   testinput/mhs_crtm.yaml
   testinput/sndrd1-4_crtm.yaml
@@ -58,6 +59,7 @@ list( APPEND ufo_test_data
   atmosphere/aircraft_geoval_2018041500_s.nc4
   atmosphere/amsua_n19_geoval_2018041500_m.nc4
   atmosphere/amsua_n19_geoval_2018041500_s.nc4
+  atmosphere/iasi_metop-a_geoval_2018041500_m.nc4
   atmosphere/mhs_n19_geoval_2018041500_m.nc4
   atmosphere/airs_aqua_geoval_2018041500_m.nc4
   atmosphere/sondes_geoval_2018041500_m.nc4
@@ -117,6 +119,7 @@ list (APPEND ioda_obs_test_data
   atmosphere/aircraft_obs_2018041500_s.nc4
   atmosphere/amsua_n19_obs_2018041500_m.nc4
   atmosphere/amsua_n19_obs_2018041500_s.nc4
+  atmosphere/iasi_metop-a_obs_2018041500_m.nc4
   atmosphere/mhs_n19_obs_2018041500_m.nc4
   atmosphere/hirs4_metop-a_obs_2018041500_m.nc4
   atmosphere/airs_aqua_obs_2018041500_m.nc4
@@ -177,6 +180,12 @@ ecbuild_add_test( TARGET  test_ufo_mhs_opr_crtm
 ecbuild_add_test( TARGET  test_ufo_mhs_tlad_crtm
                   SOURCES mains/TestObsOperatorTLAD.cc
                   ARGS    "testinput/mhs_crtm.yaml"
+                  LIBS    ufo )
+
+ecbuild_add_test( TARGET  test_ufo_iasi_opr_crtm
+                  BOOST
+                  SOURCES mains/TestObsOperator.cc
+                  ARGS    "testinput/iasi_crtm.yaml"
                   LIBS    ufo )
 
 # Tests commented out until CRTM coefficients are added
@@ -402,6 +411,8 @@ SpcCoeff/Little_Endian/hirs4_metop-a.SpcCoeff.bin
 TauCoeff/ODPS/Little_Endian/hirs4_metop-a.TauCoeff.bin
 SpcCoeff/Little_Endian/amsua_n19.SpcCoeff.bin
 TauCoeff/ODPS/Little_Endian/amsua_n19.TauCoeff.bin
+SpcCoeff/Little_Endian/iasi616_metop-a.SpcCoeff.bin
+TauCoeff/ODPS/Little_Endian/iasi616_metop-a.TauCoeff.bin
 SpcCoeff/Little_Endian/mhs_n19.SpcCoeff.bin
 TauCoeff/ODPS/Little_Endian/mhs_n19.TauCoeff.bin
 SpcCoeff/Little_Endian/sndrD1_g15.SpcCoeff.bin
