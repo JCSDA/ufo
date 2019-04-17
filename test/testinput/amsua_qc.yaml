@@ -29,6 +29,11 @@ Observations:
     window_begin: "2018-04-14T21:00:00Z"
     window_end: "2018-04-15T03:00:00Z"
    ObsFilters:
+   - Filter: Bounds Check
+     bounds:
+     - variable: brightness_temperature_1
+       minvalue: 100.0
+       maxvalue: 500.0
    - Filter: Background Check
      variables:
      - brightness_temperature_1
