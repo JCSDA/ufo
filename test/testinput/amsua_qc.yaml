@@ -1,0 +1,39 @@
+---
+test_framework_runtime_config: "--log_level=test_suite"
+window_begin: "2018-04-14T21:00:00Z"
+window_end: "2018-04-15T03:00:00Z"
+LinearObsOpTest: 
+ testiterTL: 10
+ toleranceTL: 1.0e-10
+ toleranceAD: 1.0e-11
+Observations: 
+ ObsTypes: 
+ - ObsType: "CRTM"
+   channels: "1-6,9-12,13,15"
+   ObsOptions: 
+    InspectProfileNumber: 12
+    n_Absorbers: 3
+    n_Clouds: 2
+    n_Aerosols: 0
+    Sensor_ID: amsua_n19
+    EndianType: little_endian
+    CoefficientPath: "Data/"
+   ObsData: 
+    ObsDataIn: 
+     obsfile: "Data/amsua_n19_obs_2018041500_m.nc4"
+    ObsDataOut: 
+     obsfile: "Data/amsua_n19_obs_2018041500_m_out.nc4"
+   GeoVaLs: 
+    filename: "Data/amsua_n19_geoval_2018041500_m.nc4"
+    random: 0
+    window_begin: "2018-04-14T21:00:00Z"
+    window_end: "2018-04-15T03:00:00Z"
+   ObsFilters:
+   - Filter: Background Check
+     variables:
+     - brightness_temperature_1
+     threshold: 2.0
+   passedBenchmark: 1175      # number of passed obs
+   vecequiv: GsiHofX
+   tolerance: 1.e-6
+   ObsBias: {} 
