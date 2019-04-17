@@ -47,6 +47,7 @@ class BackgroundCheck : public util::Printable,
 
   ioda::ObsSpace & obsdb_;
   const eckit::LocalConfiguration config_;
+  double abs_threshold_;
   double threshold_;
   const oops::Variables geovars_;
 };
