@@ -165,6 +165,11 @@ ecbuild_add_test( TARGET  test_ufo_amsua_opr_crtm
                   ARGS    "testinput/amsua_crtm.yaml"
                   LIBS    ufo )
 
+ecbuild_add_test( TARGET  test_ufo_amsua_qc
+                  SOURCES mains/TestObsFilters.cc
+                  ARGS    "testinput/amsua_qc.yaml"
+                  LIBS    ufo )
+
 ecbuild_add_test( TARGET  test_ufo_amsua_tlad_crtm
                   SOURCES mains/TestObsOperatorTLAD.cc
                   ARGS    "testinput/amsua_crtm.yaml"
@@ -206,11 +211,6 @@ if( ${RTTOV_FOUND} )
   ecbuild_add_test( TARGET  test_ufo_amsua_opr_rttov
                     SOURCES mains/TestObsOperator.cc
                     ARGS    "testinput/amsua_rttov.yaml"
-                    LIBS    ufo )
-
-  ecbuild_add_test( TARGET  test_ufo_amsua_qc
-                    SOURCES mains/TestObsFilters.cc
-                    ARGS    "testinput/amsua_qc.yaml"
                     LIBS    ufo )
 
   ecbuild_add_test( TARGET  test_ufo_amsua_tlad_rttov
