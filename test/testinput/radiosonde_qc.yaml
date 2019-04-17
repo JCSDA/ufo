@@ -27,4 +27,5 @@ Observations:
     - Filter: Background Check
       threshold: 2.0
     passedBenchmark: 277
+#    qcBenchmark: GsiQC
     ObsBias: {}
