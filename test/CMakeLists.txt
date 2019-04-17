@@ -183,7 +183,6 @@ ecbuild_add_test( TARGET  test_ufo_mhs_tlad_crtm
                   LIBS    ufo )
 
 ecbuild_add_test( TARGET  test_ufo_iasi_opr_crtm
-                  BOOST
                   SOURCES mains/TestObsOperator.cc
                   ARGS    "testinput/iasi_crtm.yaml"
                   LIBS    ufo )
