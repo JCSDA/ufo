@@ -26,5 +26,6 @@ Observations:
     ObsFilters:
     - Filter: Background Check
       threshold: 2.0
-    passedBenchmark: 277
+    passedBenchmark: 277      # number of passed obs
+#    qcBenchmark: GsiQC       # benchmark QC from the file
     ObsBias: {}
