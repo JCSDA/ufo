@@ -407,8 +407,8 @@ SpcCoeff/Little_Endian/hirs4_metop-a.SpcCoeff.bin
 TauCoeff/ODPS/Little_Endian/hirs4_metop-a.TauCoeff.bin
 SpcCoeff/Little_Endian/amsua_n19.SpcCoeff.bin
 TauCoeff/ODPS/Little_Endian/amsua_n19.TauCoeff.bin
-SpcCoeff/Little_Endian/iasi616_metop-a.SpcCoeff.bin
-TauCoeff/ODPS/Little_Endian/iasi616_metop-a.TauCoeff.bin
+SpcCoeff/Little_Endian/iasi_metop-a.SpcCoeff.bin
+TauCoeff/ODPS/Little_Endian/iasi_metop-a.TauCoeff.bin
 SpcCoeff/Little_Endian/mhs_n19.SpcCoeff.bin
 TauCoeff/ODPS/Little_Endian/mhs_n19.TauCoeff.bin
 SpcCoeff/Little_Endian/sndrD1_g15.SpcCoeff.bin
