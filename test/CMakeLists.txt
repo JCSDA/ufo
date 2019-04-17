@@ -179,7 +179,6 @@ ecbuild_add_test( TARGET  test_ufo_mhs_tlad_crtm
                   ARGS    "testinput/mhs_crtm.yaml"
                   LIBS    ufo )
 
-# Tests commented out until CRTM coefficients are added
 ecbuild_add_test( TARGET  test_ufo_sndrd1-4_opr_crtm
                   SOURCES mains/TestObsOperator.cc
                   ARGS    "testinput/sndrd1-4_crtm.yaml"
@@ -190,7 +189,6 @@ ecbuild_add_test( TARGET  test_ufo_sndrd1-4_tlad_crtm
                   ARGS    "testinput/sndrd1-4_crtm.yaml"
                   LIBS    ufo )
 
-# Tests commented out until CRTM coefficients are added
 ecbuild_add_test( TARGET  test_ufo_airs_opr_crtm
                   SOURCES mains/TestObsOperator.cc
                   ARGS    "testinput/airs_crtm.yaml"
@@ -215,16 +213,15 @@ if( ${RTTOV_FOUND} )
                     LIBS    ufo )
 endif( ${RTTOV_FOUND} )
 
-# Tests commented out until CRTM coefficients are added 
-#ecbuild_add_test( TARGET  test_ufo_hirs4_opr_crtm
-#                  SOURCES mains/TestObsOperator.cc
-#                  ARGS    "testinput/hirs4_crtm.yaml"
-#                  LIBS    ufo )
+ecbuild_add_test( TARGET  test_ufo_hirs4_opr_crtm
+                  SOURCES mains/TestObsOperator.cc
+                  ARGS    "testinput/hirs4_crtm.yaml"
+                  LIBS    ufo )
 
-#ecbuild_add_test( TARGET  test_ufo_hirs4_tlad_crtm
-#                  SOURCES mains/TestObsOperatorTLAD.cc
-#                  ARGS    "testinput/hirs4_crtm.yaml"
-#                  LIBS    ufo )
+ecbuild_add_test( TARGET  test_ufo_hirs4_tlad_crtm
+                  SOURCES mains/TestObsOperatorTLAD.cc
+                  ARGS    "testinput/hirs4_crtm.yaml"
+                  LIBS    ufo )
 
 ecbuild_add_test( TARGET  test_ufo_radiosonde_opr
                   MPI     4
