@@ -413,7 +413,7 @@ subroutine get_var_name(n,varname)
 integer, intent(in) :: n
 character(len=*), intent(out) :: varname
 
-character(len=3) :: chan
+character(len=6) :: chan
 
  write(chan, '(I0)') n
  varname = 'brightness_temperature_' // trim(chan)

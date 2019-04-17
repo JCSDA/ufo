@@ -34,7 +34,7 @@ ObsRadianceCRTM::ObsRadianceCRTM(const ioda::ObsSpace & odb, const eckit::Config
   : ObsOperatorBase(odb, config), keyOperRadianceCRTM_(0), odb_(odb), varin_(), varout_()
 {
   const eckit::LocalConfiguration obsOptions(config, "ObsOptions");
-  int c_name_size = 2000;
+  int c_name_size = 3000;
   char *buffin = new char[c_name_size];
   char *buffout = new char[c_name_size];
 
