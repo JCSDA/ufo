@@ -34,7 +34,6 @@ list( APPEND ufo_test_input
   testinput/radiosonde.yaml
   testinput/radiosonde_qc.yaml
   testinput/aircraft.yaml
-  testinput/aircraft_qc.yaml
   testinput/cris_crtm.yaml
   testinput/aod_crtm.yaml
   testinput/gnssroref.yaml
