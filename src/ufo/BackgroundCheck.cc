@@ -36,8 +36,13 @@ BackgroundCheck::BackgroundCheck(ioda::ObsSpace & os, const eckit::Configuration
 {
   oops::Log::trace() << "BackgroundCheck contructor starting" << std::endl;
   oops::Log::debug() << "BackgroundCheck: config = " << config << std::endl;
-  threshold_ = config.getDouble("threshold");
-  ASSERT(threshold_ > 0.0);
+  const double missing = util::missingValue(missing);
+
+  threshold_ = config.getDouble("threshold", missing);
+  abs_threshold_ = config.getDouble("absolute threshold", missing);
+  ASSERT(abs_threshold_ != missing || threshold_ != missing);
+  ASSERT(abs_threshold_ > 0.0 || abs_threshold_ == missing);
+  ASSERT(threshold_ > 0.0 || threshold_ == missing);
   ASSERT(geovars_.size() == 0);
 }
 
@@ -61,6 +66,7 @@ void BackgroundCheck::postFilter(const ioda::ObsVector & hofx) const {
   const std::string qcgrp = config_.getString("QCname");
   const std::string obgrp = "ObsValue";
   const std::string ergrp = "ObsError";
+  const double dmissing = util::missingValue(dmissing);
   const float missing = util::missingValue(missing);
 
   ioda::ObsDataVector<double> obs(obsdb_, vars, obgrp);
@@ -78,8 +84,11 @@ void BackgroundCheck::postFilter(const ioda::ObsVector & hofx) const {
         ASSERT(obs[jv][jobs] != missing);
         size_t iv = observed.find(var);
         size_t iobs = observed.size() * jobs + iv;
-        if (std::abs(obs[jv][jobs] - hofx[iobs]) > threshold_ * err[jv][jobs]) {
+        if (abs_threshold_ != dmissing && std::abs(obs[jv][jobs] - hofx[iobs]) > abs_threshold_)  {
           flags[jv][jobs] = QCflags::fguess;
+        }
+        if (threshold_ != dmissing && std::abs(obs[jv][jobs] - hofx[iobs]) >
+          threshold_ * err[jv][jobs]) { flags[jv][jobs] = QCflags::fguess;
         }
       }
     }
