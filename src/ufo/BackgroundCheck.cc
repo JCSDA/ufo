@@ -32,7 +32,7 @@ static oops::FilterMaker<UfoTrait, oops::ObsFilter<UfoTrait, BackgroundCheck> >
 // -----------------------------------------------------------------------------
 
 BackgroundCheck::BackgroundCheck(ioda::ObsSpace & os, const eckit::Configuration & config)
-  : obsdb_(os), config_(config), threshold_(-1.0), gv_(NULL), geovars_()
+  : obsdb_(os), config_(config), threshold_(-1.0), gv_(NULL), geovars_(preProcessWhere(config_))
 {
   oops::Log::trace() << "BackgroundCheck contructor starting" << std::endl;
   oops::Log::debug() << "BackgroundCheck: config = " << config << std::endl;
@@ -43,7 +43,6 @@ BackgroundCheck::BackgroundCheck(ioda::ObsSpace & os, const eckit::Configuration
   ASSERT(abs_threshold_ != missing || threshold_ != missing);
   ASSERT(abs_threshold_ > 0.0 || abs_threshold_ == missing);
   ASSERT(threshold_ > 0.0 || threshold_ == missing);
-  ASSERT(geovars_.size() == 0);
 }
 
 // -----------------------------------------------------------------------------
