@@ -19,7 +19,6 @@
 #include "oops/util/Logger.h"
 #include "oops/util/missingValues.h"
 #include "oops/util/Random.h"
-#include "ufo/processWhere.h"
 #include "ufo/QCflags.h"
 #include "ufo/UfoTrait.h"
 #include "ufo/utils/IntSetParser.h"
@@ -31,10 +30,9 @@ static oops::FilterMaker<UfoTrait, oops::ObsFilter<UfoTrait, Thinning>> mkThinni
 // -----------------------------------------------------------------------------
 
 Thinning::Thinning(ioda::ObsSpace & obsdb, const eckit::Configuration & config)
-  : obsdb_(obsdb), config_(config), geovars_(preProcessWhere(config_))
+  : obsdb_(obsdb), config_(config), geovars_()
 {
   oops::Log::debug() << "Thinning: config = " << config_ << std::endl;
-  oops::Log::debug() << "Thinning: geovars = " << geovars_ << std::endl;
 }
 
 // -----------------------------------------------------------------------------
@@ -65,7 +63,7 @@ void Thinning::priorFilter(const GeoVaLs & gv) const {
 // -----------------------------------------------------------------------------
 
 void Thinning::print(std::ostream & os) const {
-  os << "Thinning: config = " << config_ << " , geovars = " << geovars_ << std::endl;
+  os << "Thinning: config = " << config_ << std::endl;
 }
 
 // -----------------------------------------------------------------------------
