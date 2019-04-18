@@ -26,6 +26,7 @@ endfunction(CREATE_SYMLINK_FILENAME)
 list( APPEND ufo_test_input
   testinput/ufotest_atmosphere.yaml
   testinput/amsua_crtm.yaml
+  testinput/amsua_qc.yaml
   testinput/hirs4_crtm.yaml
   testinput/iasi_crtm.yaml
   testinput/amsua_rttov.yaml
@@ -165,6 +166,11 @@ ecbuild_add_test( TARGET  test_ufo_locations_atmosphere
 ecbuild_add_test( TARGET  test_ufo_amsua_opr_crtm
                   SOURCES mains/TestObsOperator.cc
                   ARGS    "testinput/amsua_crtm.yaml"
+                  LIBS    ufo )
+
+ecbuild_add_test( TARGET  test_ufo_amsua_qc
+                  SOURCES mains/TestObsFilters.cc
+                  ARGS    "testinput/amsua_qc.yaml"
                   LIBS    ufo )
 
 ecbuild_add_test( TARGET  test_ufo_amsua_tlad_crtm
