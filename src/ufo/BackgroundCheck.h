@@ -49,6 +49,7 @@ class BackgroundCheck : public util::Printable,
   const eckit::LocalConfiguration config_;
   double abs_threshold_;
   double threshold_;
+  const GeoVaLs mutable * gv_;
   const oops::Variables geovars_;
 };
 

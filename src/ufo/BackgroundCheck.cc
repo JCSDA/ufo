@@ -32,7 +32,7 @@ static oops::FilterMaker<UfoTrait, oops::ObsFilter<UfoTrait, BackgroundCheck> >
 // -----------------------------------------------------------------------------
 
 BackgroundCheck::BackgroundCheck(ioda::ObsSpace & os, const eckit::Configuration & config)
-  : obsdb_(os), config_(config), threshold_(-1.0), geovars_()
+  : obsdb_(os), config_(config), threshold_(-1.0), gv_(NULL), geovars_()
 {
   oops::Log::trace() << "BackgroundCheck contructor starting" << std::endl;
   oops::Log::debug() << "BackgroundCheck: config = " << config << std::endl;
@@ -54,7 +54,9 @@ BackgroundCheck::~BackgroundCheck() {
 
 // -----------------------------------------------------------------------------
 
-void BackgroundCheck::priorFilter(const GeoVaLs & gv) const {}
+void BackgroundCheck::priorFilter(const GeoVaLs & gv) const {
+  gv_ = &gv;
+}
 
 // -----------------------------------------------------------------------------
 
@@ -73,10 +75,11 @@ void BackgroundCheck::postFilter(const ioda::ObsVector & hofx) const {
   ioda::ObsDataVector<double> err(obsdb_, vars, ergrp);
   ioda::ObsDataVector<int> flags(obsdb_, vars, qcgrp);
 
+// Select where the background check will apply
+  std::vector<bool> apply = processWhere(obsdb_, *gv_, config_);
+//    std::vector<bool> apply(obsdb_.nlocs(), true);
+
   for (size_t jv = 0; jv < vars.size(); ++jv) {
-//  Select where the bounds check will apply
-//    std::vector<bool> apply = processWhere(obsdb_, gv, bounds[jv]);
-    std::vector<bool> apply(obsdb_.nlocs(), true);
     const std::string var = vars[jv];
 
     for (size_t jobs = 0; jobs < obsdb_.nlocs(); ++jobs) {
