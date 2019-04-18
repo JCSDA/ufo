@@ -253,8 +253,10 @@ type(CRTM_RTSolution_type), allocatable :: rts(:,:)
 
    do m = 1, n_Profiles
      do l = 1, size(self%channels)
-       chind = minloc(abs(chinfo(n)%Sensor_Channel-self%channels(l)),1)
+
+       chind  = minloc(abs(chinfo(n)%Sensor_Channel-self%channels(l)),1)
        hofx(l, m) = rts(chind,m)%Brightness_Temperature
+
      end do
    end do
 

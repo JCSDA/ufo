@@ -26,6 +26,7 @@ endfunction(CREATE_SYMLINK_FILENAME)
 list( APPEND ufo_test_input
   testinput/ufotest_atmosphere.yaml
   testinput/amsua_crtm.yaml
+  testinput/seviri_crtm.yaml
   testinput/amsua_qc.yaml
   testinput/hirs4_crtm.yaml
   testinput/iasi_crtm.yaml
@@ -61,6 +62,7 @@ list( APPEND ufo_test_data
   atmosphere/aircraft_geoval_2018041500_s.nc4
   atmosphere/cris-fsr_npp_geoval_2018041500_m.nc4
   atmosphere/amsua_n19_geoval_2018041500_m.nc4
+  atmosphere/seviri_m08_geoval_2018041500_m.nc4
   atmosphere/amsua_n19_geoval_2018041500_s.nc4
   atmosphere/iasi_metop-a_geoval_2018041500_m.nc4
   atmosphere/mhs_n19_geoval_2018041500_m.nc4
@@ -122,6 +124,7 @@ list (APPEND ioda_obs_test_data
   atmosphere/aircraft_obs_2018041500_s.nc4
   atmosphere/cris-fsr_npp_obs_2018041500_m.nc4
   atmosphere/amsua_n19_obs_2018041500_m.nc4
+  atmosphere/seviri_m08_obs_2018041500_m.nc4
   atmosphere/amsua_n19_obs_2018041500_s.nc4
   atmosphere/iasi_metop-a_obs_2018041500_m.nc4
   atmosphere/mhs_n19_obs_2018041500_m.nc4
@@ -181,6 +184,15 @@ ecbuild_add_test( TARGET  test_ufo_amsua_tlad_crtm
                   ARGS    "testinput/amsua_crtm.yaml"
                   LIBS    ufo )
 
+ecbuild_add_test( TARGET  test_ufo_seviri_opr_crtm
+                  SOURCES mains/TestObsOperator.cc
+                  ARGS    "testinput/seviri_crtm.yaml"
+                  LIBS    ufo )
+
+ecbuild_add_test( TARGET  test_ufo_seviri_tlad_crtm
+                  SOURCES mains/TestObsOperatorTLAD.cc
+                  ARGS    "testinput/seviri_crtm.yaml"
+                  LIBS    ufo )
 ecbuild_add_test( TARGET  test_ufo_cris_opr_crtm
                   SOURCES mains/TestObsOperator.cc
                   ARGS    "testinput/cris_crtm.yaml"
@@ -425,6 +437,8 @@ SpcCoeff/Little_Endian/hirs4_metop-a.SpcCoeff.bin
 TauCoeff/ODPS/Little_Endian/hirs4_metop-a.TauCoeff.bin
 SpcCoeff/Little_Endian/amsua_n19.SpcCoeff.bin
 TauCoeff/ODPS/Little_Endian/amsua_n19.TauCoeff.bin
+SpcCoeff/Little_Endian/seviri_m08.SpcCoeff.bin
+TauCoeff/ODAS/Little_Endian/seviri_m08.TauCoeff.bin
 SpcCoeff/Little_Endian/cris-fsr_npp.SpcCoeff.bin
 TauCoeff/ODPS/Little_Endian/cris-fsr_npp.TauCoeff.bin
 SpcCoeff/Little_Endian/iasi_metop-a.SpcCoeff.bin

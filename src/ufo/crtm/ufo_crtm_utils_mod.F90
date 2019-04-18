@@ -396,11 +396,17 @@ integer :: nlocs
         geo(:)%Sensor_Azimuth_Angle > 360.0_kind_real) &
     geo(:)%Sensor_Azimuth_Angle = 0.0_kind_real
 
+ where (abs(geo(:)%Source_Zenith_Angle) > 180.0_kind_real) &
+    geo(:)%Source_Zenith_Angle = 100.0_kind_real
+
  call obsspace_get_db(obss, "MetaData", "scan_position", TmpVar)
  geo(:)%Ifov = TmpVar(:)
 
  call obsspace_get_db(obss, "MetaData", "scan_angle", TmpVar) !The Sensor_Scan_Angle is optional
  geo(:)%Sensor_Scan_Angle = TmpVar(:)
+
+ where (abs(geo(:)%Sensor_Scan_Angle) > 80.0_kind_real) &
+    geo(:)%Sensor_Scan_Angle = 0.0_kind_real
 
  deallocate(TmpVar)
 
