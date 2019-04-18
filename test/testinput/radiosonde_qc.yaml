@@ -30,6 +30,10 @@ Observations:
       - eastward_wind
       - northward_wind
       threshold: 2.0
-    passedBenchmark: 277      # number of passed obs
+      where:
+      - variable: latitude
+        minvalue: -40.0
+        maxvalue: 40.0
+    passedBenchmark: 297      # number of passed obs
 #    qcBenchmark: GsiQC       # benchmark QC from the file
     ObsBias: {}
