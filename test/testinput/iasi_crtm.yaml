@@ -9,22 +9,26 @@ LinearObsOpTest:
 Observations: 
  ObsTypes: 
  - ObsType: "CRTM"
-   channels: "1,6-7"
+   channels: "16,29,32,35,38,41 44"
    ObsOptions: 
     n_Absorbers: 3
     n_Clouds: 0
     n_Aerosols: 0
-    Sensor_ID: airs_aqua
+    Sensor_ID: iasi_metop-a
     EndianType: little_endian
     CoefficientPath: "Data/"
+    InspectProfileNumber: 12
    ObsData: 
     ObsDataIn: 
-     obsfile: "Data/airs_aqua_obs_2018041500_m.nc4"
+     obsfile: "Data/iasi_metop-a_obs_2018041500_m.nc4"
+    ObsDataOut:
+     obsfile: "Data/iasi_metop-a_obs_2018041500_m.out.nc4"
    GeoVaLs: 
-    filename: "Data/airs_aqua_geoval_2018041500_m.nc4"
+    filename: "Data/iasi_metop-a_geoval_2018041500_m.nc4"
     random: 0
     window_begin: "2018-04-14T21:00:00Z"
     window_end: "2018-04-15T03:00:00Z"
-   vecequiv: GsiHofX
+   vecequiv: GsiHofX  # this only works with CRTM tag/v2.2.3 at this point; use rmsequiv for comparing with develop CRTM
+#   rmsequiv: 230.0482
    tolerance: 1.e-5
    ObsBias: {} 

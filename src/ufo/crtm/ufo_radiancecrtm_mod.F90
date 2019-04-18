@@ -110,7 +110,7 @@ type(c_ptr), value,       intent(in) :: obss         !ObsSpace
 character(*), parameter :: PROGRAM_NAME = 'ufo_radiancecrtm_mod.F90'
 character(255) :: message, version
 integer        :: err_stat, alloc_stat
-integer        :: l, m, n, s
+integer        :: l, m, n, s, chind
 type(ufo_geoval), pointer :: temp
 
 integer :: n_Profiles
@@ -253,9 +253,8 @@ type(CRTM_RTSolution_type), allocatable :: rts(:,:)
 
    do m = 1, n_Profiles
      do l = 1, size(self%channels)
-
-       hofx(l, m) = rts(self%channels(l),m)%Brightness_Temperature
-
+       chind = minloc(abs(chinfo(n)%Sensor_Channel-self%channels(l)),1)
+       hofx(l, m) = rts(chind,m)%Brightness_Temperature
      end do
    end do
 

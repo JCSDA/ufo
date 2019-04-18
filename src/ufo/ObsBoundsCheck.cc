@@ -58,7 +58,7 @@ void ObsBoundsCheck::priorFilter(const GeoVaLs & gv) const {
   ioda::ObsDataVector<int> flags(obsdb_, vars, qcgrp);
 
   for (size_t jv = 0; jv < bounds.size(); ++jv) {
-    const std::string var = bounds[jv].getString("variable");
+    const std::string var = vars[jv];
     const float vmin = bounds[jv].getFloat("minvalue", missing);
     const float vmax = bounds[jv].getFloat("maxvalue", missing);
 
