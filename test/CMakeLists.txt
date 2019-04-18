@@ -180,10 +180,10 @@ ecbuild_add_test( TARGET  test_ufo_cris_opr_crtm
                   ARGS    "testinput/cris_crtm.yaml"
                   LIBS    ufo )
 
-ecbuild_add_test( TARGET  test_ufo_cris_tlad_crtm
-                  SOURCES mains/TestObsOperatorTLAD.cc
-                  ARGS    "testinput/cris_crtm.yaml"
-                  LIBS    ufo )
+#ecbuild_add_test( TARGET  test_ufo_cris_tlad_crtm
+#                  SOURCES mains/TestObsOperatorTLAD.cc
+#                  ARGS    "testinput/cris_crtm.yaml"
+#                  LIBS    ufo )
 
 ecbuild_add_test( TARGET  test_ufo_mhs_opr_crtm
                   SOURCES mains/TestObsOperator.cc
