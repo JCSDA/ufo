@@ -18,10 +18,10 @@
 #include "ioda/ObsVector.h"
 
 #include "oops/base/Variables.h"
+#include "oops/util/IntSetParser.h"
 
 #include "ufo/GeoVaLs.h"
 #include "ufo/ObsBias.h"
-#include "ufo/utils/IntSetParser.h"
 
 namespace ufo {
 
@@ -40,7 +40,7 @@ ObsRadianceCRTM::ObsRadianceCRTM(const ioda::ObsSpace & odb, const eckit::Config
 
   // parse channels from the config and create variable names
   std::string chlist = config.getString("channels");
-  std::set<int> channels = parseIntSet(chlist);
+  std::set<int> channels = oops::parseIntSet(chlist);
   std::vector<int> channels_list;
   std::copy(channels.begin(), channels.end(), std::back_inserter(channels_list));
 

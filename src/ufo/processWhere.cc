@@ -15,9 +15,10 @@
 #include "ioda/ObsDataVector.h"
 #include "ioda/ObsSpace.h"
 #include "oops/base/Variables.h"
+#include "oops/util/IntSetParser.h"
 #include "oops/util/missingValues.h"
 #include "ufo/GeoVaLs.h"
-#include "ufo/utils/IntSetParser.h"
+#include "ufo/utils/SplitVarGroup.h"
 
 namespace ufo {
 
@@ -119,17 +120,17 @@ std::vector<bool> processWhere(ioda::ObsSpace & obsdb, const GeoVaLs & gvals,
 
 //    Apply mask is_in
       if (masks[jm].has("is_in")) {
-        std::set<int> whitelist = parseIntSet(masks[jm].getString("is_in"));
+        std::set<int> whitelist = oops::parseIntSet(masks[jm].getString("is_in"));
         for (size_t jj = 0; jj < nlocs; ++jj) {
-          if (!contains(whitelist, valint[var][jj])) where[jj] = false;
+          if (!oops::contains(whitelist, valint[var][jj])) where[jj] = false;
         }
       }
 
 //    Apply mask is_not_in
       if (masks[jm].has("is_not_in")) {
-        std::set<int> blacklist = parseIntSet(masks[jm].getString("is_not_in"));
+        std::set<int> blacklist = oops::parseIntSet(masks[jm].getString("is_not_in"));
         for (size_t jj = 0; jj < nlocs; ++jj) {
-          if (contains(blacklist, valint[var][jj])) where[jj] = false;
+          if (oops::contains(blacklist, valint[var][jj])) where[jj] = false;
         }
       }
     }

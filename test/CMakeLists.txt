@@ -410,11 +410,6 @@ ecbuild_add_test( TARGET  test_ufo_aod_tlad_crtm
                   ARGS    "testinput/aod_crtm.yaml"
                   LIBS    ufo )
 
-ecbuild_add_test( TARGET  test_ufo_intset_parser
-                  SOURCES mains/TestIntSetParser.cc
-                  ARGS    "testinput/channelsparser.yaml"
-                  LIBS    ufo )
-
 #####################################################################
 # Files for CRTM tests
 #####################################################################

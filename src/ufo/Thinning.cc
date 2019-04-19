@@ -21,7 +21,6 @@
 #include "oops/util/Random.h"
 #include "ufo/QCflags.h"
 #include "ufo/UfoTrait.h"
-#include "ufo/utils/IntSetParser.h"
 
 namespace ufo {
 

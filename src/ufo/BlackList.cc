@@ -21,7 +21,6 @@
 #include "ufo/processWhere.h"
 #include "ufo/QCflags.h"
 #include "ufo/UfoTrait.h"
-#include "ufo/utils/IntSetParser.h"
 
 namespace ufo {
 
