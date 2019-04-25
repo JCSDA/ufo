@@ -6,8 +6,6 @@
 list( APPEND ufo_src_files
     BackgroundCheck.cc
     BackgroundCheck.h
-    BackgroundCheck.interface.F90
-    BackgroundCheck.interface.h
     BlackList.cc
     BlackList.h
     Fortran.h
@@ -39,11 +37,13 @@ list( APPEND ufo_src_files
     processWhere.cc
     processWhere.h
     QCflags.h
+    Thinning.cc
+    Thinning.h
     UfoTrait.h
-    ufo_bgcheck_mod.F90
     ufo_geovals_mod.F90
     ufo_locs_mod.F90
     ufo_variables_mod.F90
+    ufo_constants_mod.F90
 )
 
 # macro to prepend a prefix with relative path

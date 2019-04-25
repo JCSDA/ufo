@@ -19,4 +19,4 @@ Observations:
       window_end: 2018-04-15T03:00:00Z
     ObsBias: {}
     rmsequiv: 15.020734025831988              
-    tolerance: 1.0e-8
+    tolerance: 1.0e-10

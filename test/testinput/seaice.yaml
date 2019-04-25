@@ -5,7 +5,7 @@ window_end: 2018-04-15T03:00:00Z
 LinearObsOpTest:
   testiterTL: 10
   toleranceTL: 1.0e-10
-  toleranceAD: 1.0e-10
+  toleranceAD: 1.0e-12
 Observations:
   ObsTypes:
   - ObsType: SeaIceFraction
@@ -30,5 +30,5 @@ Observations:
       window_begin: 2018-04-14T21:00:00Z
       window_end: 2018-04-15T03:00:00Z
     ObsBias: {}
-    rmsequiv: 0.0013812154696133147
+    rmsequiv: 1.25
     tolerance: 1.0e-8

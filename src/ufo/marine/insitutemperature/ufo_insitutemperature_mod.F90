@@ -69,30 +69,19 @@ type(c_ptr), value, intent(in)    :: obss
     real(kind_real), allocatable :: obs_lon(:)
     real(kind_real), allocatable :: obs_lat(:)
     real(kind_real), allocatable :: obs_depth(:)
-    real(kind_real), allocatable :: obs_val(:)
     integer :: obss_nlocs
-    
-    ! Vertical interpolation
     real(kind_real) :: wf, tp, sp, prs
     integer :: wi
     
-    ! netcdf stuff
-    character(len=120) :: filename !< name of outpu file for omf, lon, lat, ...
-    type(diag_marine_obs) :: insitu_out    
-
     ! check if nobs is consistent in geovals & hofx
     if (geovals%nobs /= size(hofx,1)) then
        write(err_msg,*) myname_, ' error: nobs inconsistent!'
        call abor1_ftn(err_msg)
     endif
 
-    ! check if sea temperature profile variable is in geovals and get it
+    ! Associate geoval pointers
     call ufo_geovals_get_var(geovals, var_ocn_pot_temp, temp)
-    
-    ! check if sea salinity profile variable is in geovals and get it
     call ufo_geovals_get_var(geovals, var_ocn_salt, salt)
-
-    ! check if ocean layer thickness variable is in geovals and get it
     call ufo_geovals_get_var(geovals, var_ocn_lay_thick, h)
 
     ! Read in obs data
@@ -100,13 +89,9 @@ type(c_ptr), value, intent(in)    :: obss
     allocate(obs_lon(obss_nlocs))
     allocate(obs_lat(obss_nlocs))
     allocate(obs_depth(obss_nlocs))
-    allocate(obs_val(obss_nlocs))
-
     call obsspace_get_db(obss, "MetaData", "longitude", obs_lon)
     call obsspace_get_db(obss, "MetaData", "latitude", obs_lat)
     call obsspace_get_db(obss, "MetaData", "depth", obs_depth)
-    call obsspace_get_db(obss, "ObsValue", "sea_water_temperature", obs_val)
-
 
     nlev = temp%nval
     nobs = temp%nobs        
@@ -149,7 +134,6 @@ type(c_ptr), value, intent(in)    :: obss
     deallocate(obs_lon)
     deallocate(obs_lat)
     deallocate(obs_depth)
-    deallocate(obs_val)
     
   end subroutine ufo_insitutemperature_simobs
 

@@ -27,6 +27,7 @@ extern "C" {
                                     const util::DateTime * const *);
   void ufo_locs_create_f90(F90locs &, const int  &, const double *,
                             const double *, const int  &);
+  void ufo_locs_setup_f90(F90locs &, const int  &);
   void ufo_locs_delete_f90(F90locs &);
   void ufo_locs_nobs_f90(const F90locs &, int &);
   void ufo_locs_coords_f90(const F90locs &, int &, double &, double &);

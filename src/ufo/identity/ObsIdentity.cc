@@ -26,6 +26,9 @@
 namespace ufo {
 
 // -----------------------------------------------------------------------------
+static ObsOperatorMaker<ObsIdentity> makerSST_("SeaSurfaceTemp");
+static ObsOperatorMaker<ObsIdentity> makerSSS_("SeaSurfaceSalinity");
+// -----------------------------------------------------------------------------
 
 ObsIdentity::ObsIdentity(const ioda::ObsSpace & odb,
                          const eckit::Configuration & config)
@@ -62,7 +65,7 @@ ObsIdentity::~ObsIdentity() {
 void ObsIdentity::simulateObs(const GeoVaLs & gom, ioda::ObsVector & ovec,
                               const ObsBias & bias) const {
   ufo_identity_simobs_f90(keyOperObsIdentity_, gom.toFortran(), odb_,
-                          ovec.size(), ovec.toFortran(),
+                          ovec.nvars(), ovec.nlocs(), ovec.toFortran(),
                           bias.toFortran());
   oops::Log::trace() << "ObsIdentity: observation operator run" << std::endl;
 }

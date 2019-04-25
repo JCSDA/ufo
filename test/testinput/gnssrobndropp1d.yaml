@@ -4,8 +4,8 @@ window_begin: '2018-04-14T21:00:00Z'
 window_end: '2018-04-15T03:00:00Z'
 LinearObsOpTest: 
  testiterTL:  10
- toleranceTL: "1.0e-11"
- toleranceAD: "1.0e-7"
+ toleranceTL: "1.0e-13"
+ toleranceAD: "1.0e-14"
 Observations: 
  ObsTypes: 
  - ObsType: GnssroBndROPP1D
@@ -21,6 +21,14 @@ Observations:
     filename: "Data/gnssro_geoval_2018041500_s.nc4"
     window_begin: '2018-04-14T21:00:00Z'
     window_end: '2018-04-15T03:00:00Z'
+    ObsFilters:
+    - Filter: Background Check
+      variables:
+      - bending_angle
+      threshold: 3.0
+    - Filter: ROobserror
+      errmodel: "ROPP"
    ObsBias: {}
-   rmsequiv: "0.0090542248281786329"
-   tolerance: "1.0e-10"
+   rmsequiv: "0.00919697505361058"
+   passedBenchmark: 20
+   tolerance: "1.0e-13"

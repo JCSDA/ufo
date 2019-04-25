@@ -15,9 +15,10 @@
 #include "ioda/ObsDataVector.h"
 #include "ioda/ObsSpace.h"
 #include "oops/base/Variables.h"
+#include "oops/util/IntSetParser.h"
 #include "oops/util/missingValues.h"
 #include "ufo/GeoVaLs.h"
-#include "ufo/utils/IntSetParser.h"
+#include "ufo/utils/SplitVarGroup.h"
 
 namespace ufo {
 
@@ -73,10 +74,15 @@ std::vector<bool> processWhere(ioda::ObsSpace & obsdb, const GeoVaLs & gvals,
     if (vmin != missing || vmax != missing ||
         masks[jm].has("is_defined") || masks[jm].has("is_not_defined")) {
 //    Get float values
-      ioda::ObsDataVector<float> values(obsdb, var, obgrp);
-      if (grp == "GeoVaLs") gvals.get(values.values(), var);
-      if (grp == "GeoVaLs") oops::Log::debug() << "processWhere gv = " << gvals << std::endl;
-      if (grp == "GeoVaLs") oops::Log::debug() << "processWhere values = " << values << std::endl;
+      std::vector<float> values(nlocs);
+      if (grp == "GeoVaLs") {
+        gvals.get(values, var);
+      } else {
+        ioda::ObsDataVector<float> vals(obsdb, var, obgrp);
+        for (size_t jj = 0; jj < nlocs; ++jj) {
+          values[jj] = vals[var][jj];
+        }
+      }
 
 //    Apply mask min/max
       if (vmin != missing || vmax != missing) {
@@ -114,17 +120,17 @@ std::vector<bool> processWhere(ioda::ObsSpace & obsdb, const GeoVaLs & gvals,
 
 //    Apply mask is_in
       if (masks[jm].has("is_in")) {
-        std::set<int> whitelist = parseIntSet(masks[jm].getString("is_in"));
+        std::set<int> whitelist = oops::parseIntSet(masks[jm].getString("is_in"));
         for (size_t jj = 0; jj < nlocs; ++jj) {
-          if (!contains(whitelist, valint[jj])) where[jj] = false;
+          if (!oops::contains(whitelist, valint[var][jj])) where[jj] = false;
         }
       }
 
 //    Apply mask is_not_in
       if (masks[jm].has("is_not_in")) {
-        std::set<int> blacklist = parseIntSet(masks[jm].getString("is_not_in"));
+        std::set<int> blacklist = oops::parseIntSet(masks[jm].getString("is_not_in"));
         for (size_t jj = 0; jj < nlocs; ++jj) {
-          if (contains(blacklist, valint[jj])) where[jj] = false;
+          if (oops::contains(blacklist, valint[var][jj])) where[jj] = false;
         }
       }
     }

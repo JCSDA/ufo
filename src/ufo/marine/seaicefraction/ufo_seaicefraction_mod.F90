@@ -69,11 +69,6 @@ type(c_ptr), value, intent(in)    :: obss
     integer(kind=4) :: iVarLev_ID, iVarGOM_ID
     integer :: ncat,nobs
 
-    ! netcdf stuff
-    character(len=120) :: filename !< name of outpu file for omf, lon, lat, ...
-    character(len=MAXVARLEN) :: dim_name    
-    type(diag_marine_obs) :: sic_out    
-
     ! check if nobs is consistent in geovals & hofx
     if (geovals%nobs /= size(hofx,1)) then
        write(err_msg,*) myname_, ' error: nobs inconsistent!'
@@ -83,18 +78,10 @@ type(c_ptr), value, intent(in)    :: obss
     ! check if sea ice fraction variables is in geovals and get it
     call ufo_geovals_get_var(geovals, var_seaicefrac, geoval)
 
-    ! Information for temporary output file
-    filename='sic-test.nc'    
-    call sic_out%init(size(hofx,1),filename)
-    
     ! total sea ice fraction obs operator
     do iobs = 1, size(hofx,1)
        hofx(iobs) = sum(geoval%vals(:,iobs))
     enddo
-
-    dim_name="ncat"
-    call sic_out%write_geoval(var_seaicefrac,geoval,arg_dim_name=dim_name)
-    call sic_out%finalize()
 
 end subroutine ufo_seaicefraction_simobs
 

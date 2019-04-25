@@ -24,20 +24,20 @@ Observations:
       window_begin: '2018-04-14T21:00:00Z'
       window_end: '2018-04-15T03:00:00Z'
     ObsFilters:
-    - Filter: BlackList
-      observed:
+    - Filter: Background Check
+      variables: 
+      - air_temperature
+      threshold: 2.0
+      absolute threshold: 1.0
+    - Filter: Background Check
+      variables:
       - eastward_wind
       - northward_wind
+      threshold: 2.0
       where:
-      - variable: gsi_wind_red_factor
-        maxvalue: 0.999
-    - Filter: BlackList
-      observed:
-      - eastward_wind
-      - northward_wind
-      where:
-      - variable: gsi_wind_red_factor
-        minvalue: 1.001
-    vecequiv: GsiHofX
-    tolerance: 1.0e-03  # in % so that corresponds to 10^-5
+      - variable: latitude
+        minvalue: -60.0
+        maxvalue: 60.0
+    passedBenchmark: 246      # number of passed obs
+#    qcBenchmark: GsiQC       # benchmark QC from the file
     ObsBias: {}

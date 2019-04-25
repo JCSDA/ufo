@@ -17,11 +17,11 @@
 #include "ioda/ObsSpace.h"
 #include "ioda/ObsVector.h"
 #include "oops/base/Variables.h"
+#include "oops/util/IntSetParser.h"
 #include "oops/util/Logger.h"
 #include "ufo/GeoVaLs.h"
 #include "ufo/ObsBias.h"
 #include "ufo/ObsBiasIncrement.h"
-#include "ufo/utils/IntSetParser.h"
 
 namespace ufo {
 
@@ -40,7 +40,7 @@ ObsAodCRTMTLAD::ObsAodCRTMTLAD(const ioda::ObsSpace & odb,
 
   // parse channels from the config and create variable names
   std::string chlist = config.getString("channels");
-  std::set<int> channels = parseIntSet(chlist);
+  std::set<int> channels = oops::parseIntSet(chlist);
   channels_.reserve(channels.size());
   for (const int jj : channels) {
     channels_.push_back(jj);

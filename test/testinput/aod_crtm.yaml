@@ -5,7 +5,7 @@ window_end: "2018-04-15T03:00:00Z"
 LinearObsOpTest:
  testiterTL: 10
  toleranceTL: "1.0e-10"
- toleranceAD: "1.0e-11"
+ toleranceAD: "1.0e-13"
 Observations: 
  ObsTypes: 
  - ObsType: Aod
@@ -16,7 +16,7 @@ Observations:
     Sensor_ID: "v.viirs-m_npp"
     EndianType: little_endian
     CoefficientPath: "Data/"
-    AerosolOption: "aerosols_gocart_nasa"
+    AerosolOption: "aerosols_gocart_default"
    ObsData: 
     ObsDataIn: 
      obsfile: "Data/aod_obs_2018041500_m.nc4"
@@ -27,5 +27,5 @@ Observations:
     window_begin: "2018-04-14T21:00:00Z"
     window_end: "2018-04-15T03:00:00Z"
    vecequiv: "GsiHofX"
-   tolerance: "1.0e-04"  # in % so that corresponds to 10^-3
+   tolerance: "1.0e-06"
    ObsBias: {}

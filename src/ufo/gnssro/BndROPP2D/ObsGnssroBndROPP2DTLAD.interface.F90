@@ -37,7 +37,7 @@ type(c_ptr), intent(in)    :: c_conf
 type(ufo_gnssro_BndROPP2D_tlad), pointer :: self
 
 call ufo_gnssro_BndROPP2D_tlad_registry%setup(c_key_self, self)
-!call self%setup(c_conf)
+call self%setup(c_conf)
    
 end subroutine ufo_gnssro_bndropp2d_tlad_setup_c
   

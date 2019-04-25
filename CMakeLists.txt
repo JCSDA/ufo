@@ -16,7 +16,6 @@ set( CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake;${CMAKE_MODULE_PATH})
 set( ECBUILD_DEFAULT_BUILD_TYPE Release )
 set( ENABLE_OS_TESTS           OFF CACHE BOOL "Disable OS tests" FORCE )
 set( ENABLE_LARGE_FILE_SUPPORT OFF CACHE BOOL "Disable testing of large file support" FORCE )
-set( ENABLE_MPI ON CACHE BOOL "Compile with MPI" )
 
 include( ecbuild_system NO_POLICY_SCOPE )
 
@@ -38,9 +37,6 @@ set( UFO_LINKER_LANGUAGE CXX )
 ################################################################################
 
 # Boost
-set( Boost_MINIMUM_VERSION "1.47" )
-find_package( Boost ${Boost_MINIMUM_VERSION} REQUIRED
-              COMPONENTS unit_test_framework )
 include_directories( ${Boost_INCLUDE_DIR} )
 
 # NetCDF

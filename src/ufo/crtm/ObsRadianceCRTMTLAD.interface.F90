@@ -10,6 +10,7 @@ module ufo_radiancecrtm_tlad_mod_c
   use iso_c_binding
   use config_mod
   use ufo_radiancecrtm_tlad_mod
+  use string_f_c_mod
   use ufo_geovals_mod
   use ufo_geovals_mod_c,   only: ufo_geovals_registry
 
@@ -32,16 +33,23 @@ contains
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_radiancecrtm_tlad_setup_c(c_key_self, c_conf) bind(c,name='ufo_radiancecrtm_tlad_setup_f90')
+subroutine ufo_radiancecrtm_tlad_setup_c(c_key_self, c_conf, c_nchan, c_channels, csin, &
+                                    c_str_size) bind(c,name='ufo_radiancecrtm_tlad_setup_f90')
 implicit none
 integer(c_int), intent(inout) :: c_key_self
-type(c_ptr), intent(in)    :: c_conf
+type(c_ptr),    intent(in)    :: c_conf
+integer(c_int), intent(in) :: c_nchan
+integer(c_int), intent(in) :: c_channels(c_nchan)
+integer(c_int), intent(in) :: c_str_size
+character(kind=c_char,len=1),intent(inout) :: csin(c_str_size+1)
 
 type(ufo_radiancecrtm_tlad), pointer :: self
 
 call ufo_radiancecrtm_tlad_registry%setup(c_key_self, self)
 
-call self%setup(c_conf)
+call self%setup(c_conf, c_channels)
+
+call f_c_string_vector(self%varin, csin)
 
 end subroutine ufo_radiancecrtm_tlad_setup_c
 
@@ -61,15 +69,13 @@ end subroutine ufo_radiancecrtm_tlad_delete_c
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_radiancecrtm_tlad_settraj_c(c_key_self, c_key_geovals, c_obsspace, c_nchan, c_channels) &
+subroutine ufo_radiancecrtm_tlad_settraj_c(c_key_self, c_key_geovals, c_obsspace) &
                                        bind(c,name='ufo_radiancecrtm_tlad_settraj_f90')
 
 implicit none
 integer(c_int),     intent(in) :: c_key_self
 integer(c_int),     intent(in) :: c_key_geovals
 type(c_ptr), value, intent(in) :: c_obsspace
-integer(c_int),     intent(in) :: c_nchan
-integer(c_int),     intent(in) :: c_channels(c_nchan)
 
 type(ufo_radiancecrtm_tlad), pointer :: self
 type(ufo_geovals),       pointer :: geovals
@@ -79,23 +85,21 @@ character(len=*), parameter :: myname_="ufo_radiancecrtm_tlad_settraj_c"
 call ufo_radiancecrtm_tlad_registry%get(c_key_self, self)
 call ufo_geovals_registry%get(c_key_geovals,geovals)
 
-call self%settraj(geovals, c_obsspace, c_channels)
+call self%settraj(geovals, c_obsspace)
 
 end subroutine ufo_radiancecrtm_tlad_settraj_c
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_radiancecrtm_simobs_tl_c(c_key_self, c_key_geovals, c_obsspace, c_nobs, c_hofx, c_nchan, c_channels) &
+subroutine ufo_radiancecrtm_simobs_tl_c(c_key_self, c_key_geovals, c_obsspace, c_nvars, c_nlocs, c_hofx) &
                                     bind(c,name='ufo_radiancecrtm_simobs_tl_f90')
 
 implicit none
 integer(c_int),     intent(in)    :: c_key_self
 integer(c_int),     intent(in)    :: c_key_geovals
 type(c_ptr), value, intent(in)    :: c_obsspace
-integer(c_int),     intent(in)    :: c_nobs
-real(c_double),     intent(inout) :: c_hofx(c_nobs)
-integer(c_int),     intent(in)    :: c_nchan
-integer(c_int),     intent(in)    :: c_channels(c_nchan)
+integer(c_int),     intent(in)    :: c_nvars, c_nlocs
+real(c_double),     intent(inout) :: c_hofx(c_nvars, c_nlocs)
 
 type(ufo_radiancecrtm_tlad), pointer :: self
 type(ufo_geovals),       pointer :: geovals
@@ -105,23 +109,21 @@ character(len=*), parameter :: myname_="ufo_radiancecrtm_simobs_tl_c"
 call ufo_radiancecrtm_tlad_registry%get(c_key_self, self)
 call ufo_geovals_registry%get(c_key_geovals,geovals)
 
-call self%simobs_tl(geovals, c_obsspace, c_hofx, c_channels)
+call self%simobs_tl(geovals, c_obsspace, c_nvars, c_nlocs, c_hofx)
 
 end subroutine ufo_radiancecrtm_simobs_tl_c
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_radiancecrtm_simobs_ad_c(c_key_self, c_key_geovals, c_obsspace, c_nobs, c_hofx, c_nchan, c_channels) &
+subroutine ufo_radiancecrtm_simobs_ad_c(c_key_self, c_key_geovals, c_obsspace, c_nvars, c_nlocs, c_hofx) &
                                     bind(c,name='ufo_radiancecrtm_simobs_ad_f90')
 
 implicit none
 integer(c_int),     intent(in) :: c_key_self
 integer(c_int),     intent(in) :: c_key_geovals
 type(c_ptr), value, intent(in) :: c_obsspace
-integer(c_int),     intent(in) :: c_nobs
-real(c_double),     intent(in) :: c_hofx(c_nobs)
-integer(c_int),     intent(in) :: c_nchan
-integer(c_int),     intent(in) :: c_channels(c_nchan)
+integer(c_int),     intent(in) :: c_nvars, c_nlocs
+real(c_double),     intent(in) :: c_hofx(c_nvars, c_nlocs)
 
 type(ufo_radiancecrtm_tlad), pointer :: self
 type(ufo_geovals),       pointer :: geovals
@@ -131,7 +133,7 @@ character(len=*), parameter :: myname_="ufo_radiancecrtm_simobs_ad_c"
 call ufo_radiancecrtm_tlad_registry%get(c_key_self, self)
 call ufo_geovals_registry%get(c_key_geovals,geovals)
 
-call self%simobs_ad(geovals, c_obsspace, c_hofx, c_channels)
+call self%simobs_ad(geovals, c_obsspace, c_nvars, c_nlocs, c_hofx)
 
 end subroutine ufo_radiancecrtm_simobs_ad_c
 

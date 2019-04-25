@@ -26,6 +26,9 @@
 namespace ufo {
 
 // -----------------------------------------------------------------------------
+static LinearObsOperatorMaker<ObsIdentityTLAD> makerSST_("SeaSurfaceTemp");
+static LinearObsOperatorMaker<ObsIdentityTLAD> makerSSS_("SeaSurfaceSalinity");
+// -----------------------------------------------------------------------------
 
 ObsIdentityTLAD::ObsIdentityTLAD(const ioda::ObsSpace & odb,
                                  const eckit::Configuration & config)

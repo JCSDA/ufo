@@ -18,12 +18,15 @@ module ufo_example_tlad_mod
 
  implicit none
  private
+ integer, parameter :: max_string=800
 
  !> Fortran derived type for the tl/ad observation operator
  ! TODO: add to the below type what you need for your tl/ad observation operator
  !       this type can hold information on trajectory, for example
  type, extends(ufo_basis_tlad), public :: ufo_example_tlad
  private
+  integer :: nvars_in
+  character(len=max_string), public, allocatable :: varin(:)
  contains
   procedure :: setup  => ufo_example_tlad_setup
   procedure :: delete  => ufo_example_tlad_delete
@@ -41,6 +44,9 @@ implicit none
 class(ufo_example_tlad), intent(inout) :: self
 type(c_ptr),              intent(in)    :: c_conf
 
+! TODO: setup input variables varin (updated model variables)
+  self%nvars_in = 0
+
 end subroutine ufo_example_tlad_setup
 
 ! ------------------------------------------------------------------------------
@@ -48,6 +54,8 @@ end subroutine ufo_example_tlad_setup
 subroutine ufo_example_tlad_delete(self)
 implicit none
 class(ufo_example_tlad), intent(inout) :: self
+
+  if (allocated(self%varin))   deallocate(self%varin)
 
 end subroutine ufo_example_tlad_delete
 

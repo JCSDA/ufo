@@ -21,6 +21,6 @@ Observations:
     random: 0
     window_begin: "2018-04-14T21:00:00Z"
     window_end: "2018-04-15T03:00:00Z"
-   rmsequiv: 225.68246647
-   tolerance: 1.e-8
+   rmsequiv: 226.72514274
+   tolerance: 1.e-10
    ObsBias: {} 
