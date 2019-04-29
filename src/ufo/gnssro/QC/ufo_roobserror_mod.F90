@@ -25,7 +25,6 @@ integer, parameter :: max_string=99
 type :: ufo_roobserror
   character(len=max_string) :: variable
   character(len=max_string) :: errmodel
-  character(len=max_string) :: qcname
   type(c_ptr)               :: obsdb
 end type ufo_roobserror
 
@@ -42,7 +41,6 @@ type(c_ptr),               intent(in)    :: conf
 self%variable   = config_get_string(conf, max_string, "variable", "bending_angle")
 self%errmodel   = config_get_string(conf, max_string, "errmodel", "GSI")
 self%obsdb      = obspace
-self%qcname     = config_get_string(conf, max_string, "QCname")
 end subroutine ufo_roobserror_create
 
 ! ------------------------------------------------------------------------------
@@ -75,7 +73,7 @@ allocate(obsErr(nobs))
 QCflags(:)  = 0
 
 ! read QC flags
-call obsspace_get_db(self%obsdb, self%qcname, trim(self%variable),QCflags )
+call obsspace_get_db(self%obsdb, "FortranQC", trim(self%variable),QCflags )
 
 !-------------------------------
 select case (trim(self%variable))
@@ -103,7 +101,7 @@ case ("bending_angle")
     deallocate(obsSaid)
     deallocate(obsLat)
     ! up date obs error
-    call obsspace_put_db(self%obsdb, "EffectiveError", trim(self%variable), obsErr)
+    call obsspace_put_db(self%obsdb, "FortranERR", trim(self%variable), obsErr)
 
   case ("ROPP")
     allocate(obsValue(nobs))
@@ -112,7 +110,7 @@ case ("bending_angle")
     write(err_msg,*) "ufo_roobserror_mod: setting up bending_angle obs error with ROPP method"
     deallocate(obsValue)
     ! up date obs error
-    call obsspace_put_db(self%obsdb, "EffectiveError", trim(self%variable), obsErr)
+    call obsspace_put_db(self%obsdb, "FortranERR", trim(self%variable), obsErr)
 
   case default
     write(err_msg,*) "ufo_roobserror_mod: bending_angle error model must be GSI or ROPP"
@@ -140,7 +138,7 @@ case ("refractivity")
     deallocate(obsZ)
     deallocate(obsLat)  
     ! up date obs error
-    call obsspace_put_db(self%obsdb, "EffectiveError", trim(self%variable), obsErr)
+    call obsspace_put_db(self%obsdb, "FortranERR", trim(self%variable), obsErr)
 
   case ("ROPP")
      write(err_msg,*) "ufo_roobserror_mod: ROPP refractivity error model is not avaiable now"

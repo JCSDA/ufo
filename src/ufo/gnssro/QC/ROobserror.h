@@ -11,6 +11,7 @@
 #include <ostream>
 #include <string>
 
+#include "ioda/ObsDataVector.h"
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
 #include "oops/util/Printable.h"
@@ -39,7 +40,9 @@ class ROobserror : public util::Printable,
  public:
   static const std::string classname() {return "ufo::ROobserror";}
 
-  ROobserror(const ioda::ObsSpace &, const eckit::Configuration &);
+  ROobserror(const ioda::ObsSpace &, const eckit::Configuration &,
+             boost::shared_ptr<ioda::ObsDataVector<int> >,
+             boost::shared_ptr<ioda::ObsDataVector<float> >);
   ~ROobserror();
 
   void priorFilter(const GeoVaLs &) const;
@@ -51,6 +54,8 @@ class ROobserror : public util::Printable,
   void print(std::ostream &) const;
   F90roerr key_;
   const oops::Variables geovars_;
+  boost::shared_ptr<ioda::ObsDataVector<int> > flags_;
+  boost::shared_ptr<ioda::ObsDataVector<float> > obserr_;
 };
 
 }  // namespace ufo

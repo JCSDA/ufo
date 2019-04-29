@@ -11,7 +11,10 @@
 #include <ostream>
 #include <string>
 
+#include "boost/shared_ptr.hpp"
+
 #include "eckit/config/LocalConfiguration.h"
+#include "ioda/ObsDataVector.h"
 #include "ioda/ObsSpace.h"
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
@@ -35,7 +38,9 @@ class BlackList : public util::Printable,
  public:
   static const std::string classname() {return "ufo::BlackList";}
 
-  BlackList(ioda::ObsSpace &, const eckit::Configuration &);
+  BlackList(ioda::ObsSpace &, const eckit::Configuration &,
+            boost::shared_ptr<ioda::ObsDataVector<int> >,
+            boost::shared_ptr<ioda::ObsDataVector<float> >);
   ~BlackList();
 
   void priorFilter(const GeoVaLs &) const;
@@ -49,6 +54,7 @@ class BlackList : public util::Printable,
   ioda::ObsSpace & obsdb_;
   const eckit::LocalConfiguration config_;
   oops::Variables geovars_;
+  ioda::ObsDataVector<int> & flags_;
 };
 
 }  // namespace ufo

@@ -4,10 +4,12 @@
  * This software is licensed under the terms of the Apache Licence Version 2.0
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
  */
+
 #include "ufo/gnssro/QC/ROgeorealityCheck.h"
 
 #include "eckit/config/Configuration.h"
 
+#include "ioda/ObsDataVector.h"
 #include "ioda/ObsSpace.h"
 #include "ioda/ObsVector.h"
 #include "oops/base/ObsFilterBase.h"
@@ -24,7 +26,9 @@ static oops::FilterMaker<UfoTrait, oops::ObsFilter<UfoTrait, ROgeorealityCheck> 
 // -----------------------------------------------------------------------------
 
 ROgeorealityCheck::ROgeorealityCheck(const ioda::ObsSpace & os,
-                                 const eckit::Configuration & config) {
+                                     const eckit::Configuration & config,
+                                     boost::shared_ptr<ioda::ObsDataVector<int> > qc,
+                                     boost::shared_ptr<ioda::ObsDataVector<float> >): flags_(qc) {
   oops::Log::debug() << "ROgeorealityCheck contructor starting" << std::endl;
   const eckit::Configuration * conf = &config;
   ufo_rogeorealitycheck_create_f90(key_, os, conf);
@@ -42,7 +46,9 @@ ROgeorealityCheck::~ROgeorealityCheck() {
 
 void ROgeorealityCheck::priorFilter(const GeoVaLs & gv) const {
   oops::Log::debug() << "ROgeorealityCheck priorFilter" << std::endl;
+  flags_->save("FortranQC");    // should pass values to fortran properly
   ufo_rogeorealitycheck_prior_f90(key_, gv.toFortran());
+  flags_->read("FortranQC");    // should get values from fortran properly
 }
 
 // -----------------------------------------------------------------------------

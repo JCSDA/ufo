@@ -28,8 +28,10 @@ namespace ufo {
 static oops::FilterMaker<UfoTrait, oops::ObsFilter<UfoTrait, Thinning>> mkThinning_("Thinning");
 // -----------------------------------------------------------------------------
 
-Thinning::Thinning(ioda::ObsSpace & obsdb, const eckit::Configuration & config)
-  : obsdb_(obsdb), config_(config), geovars_()
+Thinning::Thinning(ioda::ObsSpace & obsdb, const eckit::Configuration & config,
+                   boost::shared_ptr<ioda::ObsDataVector<int> > flags,
+                   boost::shared_ptr<ioda::ObsDataVector<float> >)
+  : obsdb_(obsdb), config_(config), geovars_(), flags_(*flags)
 {
   oops::Log::debug() << "Thinning: config = " << config_ << std::endl;
 }
@@ -42,7 +44,6 @@ Thinning::~Thinning() {}
 
 void Thinning::priorFilter(const GeoVaLs & gv) const {
   const size_t nobs = obsdb_.nlocs();
-  const std::string qcgrp = config_.getString("QCname");
   const oops::Variables vars(config_.getStringVector("observed"));
   const float thinning = config_.getFloat("amount");
 
@@ -50,13 +51,11 @@ void Thinning::priorFilter(const GeoVaLs & gv) const {
   unsigned int random_seed = config_.getInt("random_seed", std::time(0));
   util::UniformDistribution<float> rand(nobs, 0.0, 1.0, random_seed);
 
-  ioda::ObsDataVector<int> flags(obsdb_, vars, qcgrp);
   for (size_t jv = 0; jv < vars.size(); ++jv) {
     for (size_t jobs = 0; jobs < nobs; ++jobs) {
-      if ( rand[jobs] < thinning && flags[jv][jobs] == 0) flags[jv][jobs] = QCflags::thinned;
+      if ( rand[jobs] < thinning && flags_[jv][jobs] == 0) flags_[jv][jobs] = QCflags::thinned;
     }
   }
-  flags.save(qcgrp);
 }
 
 // -----------------------------------------------------------------------------

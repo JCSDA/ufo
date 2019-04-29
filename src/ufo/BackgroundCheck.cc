@@ -7,7 +7,9 @@
 
 #include "ufo/BackgroundCheck.h"
 
+#include <algorithm>
 #include <cmath>
+#include <limits>
 #include <vector>
 
 #include "eckit/config/Configuration.h"
@@ -31,18 +33,23 @@ static oops::FilterMaker<UfoTrait, oops::ObsFilter<UfoTrait, BackgroundCheck> >
   makerBgChk_("Background Check");
 // -----------------------------------------------------------------------------
 
-BackgroundCheck::BackgroundCheck(ioda::ObsSpace & os, const eckit::Configuration & config)
-  : obsdb_(os), config_(config), threshold_(-1.0), gv_(NULL), geovars_(preProcessWhere(config_))
+BackgroundCheck::BackgroundCheck(ioda::ObsSpace & os, const eckit::Configuration & config,
+                                 boost::shared_ptr<ioda::ObsDataVector<int> > flags,
+                                 boost::shared_ptr<ioda::ObsDataVector<float> > obserr)
+  : obsdb_(os), config_(config), abs_threshold_(-1.0), threshold_(-1.0), gv_(NULL),
+    geovars_(preProcessWhere(config_)), flags_(flags), obserr_(obserr)
 {
   oops::Log::trace() << "BackgroundCheck contructor starting" << std::endl;
   oops::Log::debug() << "BackgroundCheck: config = " << config << std::endl;
-  const double missing = util::missingValue(missing);
+  ASSERT(flags_);
+  ASSERT(obserr_);
 
+  const double missing = util::missingValue(missing);
   threshold_ = config.getDouble("threshold", missing);
   abs_threshold_ = config.getDouble("absolute threshold", missing);
   ASSERT(abs_threshold_ != missing || threshold_ != missing);
-  ASSERT(abs_threshold_ > 0.0 || abs_threshold_ == missing);
-  ASSERT(threshold_ > 0.0 || threshold_ == missing);
+  ASSERT(abs_threshold_ == missing || abs_threshold_ > 0.0);
+  ASSERT(threshold_ == missing || threshold_ > 0.0);
 }
 
 // -----------------------------------------------------------------------------
@@ -64,38 +71,40 @@ void BackgroundCheck::postFilter(const ioda::ObsVector & hofx) const {
 
   const oops::Variables vars(config_.getStringVector("variables"));
   const oops::Variables observed(config_.getStringVector("observed"));
-  const std::string qcgrp = config_.getString("QCname");
-  const std::string obgrp = "ObsValue";
-  const std::string ergrp = "ObsError";
-  const double dmissing = util::missingValue(dmissing);
-  const float missing = util::missingValue(missing);
+  const double missing = util::missingValue(missing);
 
-  ioda::ObsDataVector<double> obs(obsdb_, vars, obgrp);
-  ioda::ObsDataVector<double> err(obsdb_, vars, ergrp);
-  ioda::ObsDataVector<int> flags(obsdb_, vars, qcgrp);
+  ioda::ObsDataVector<double> obs(obsdb_, vars, "ObsValue");
+  ioda::ObsDataVector<int> & flags(*flags_);      // simplifies syntax below
+  ioda::ObsDataVector<float> & obserr(*obserr_);  // simplifies syntax below
+  oops::Log::debug() << "BackgroundCheck flags: " << flags;
+  oops::Log::debug() << "BackgroundCheck obserr: " << obserr;
 
 // Select where the background check will apply
   std::vector<bool> apply = processWhere(obsdb_, *gv_, config_);
-//    std::vector<bool> apply(obsdb_.nlocs(), true);
 
   for (size_t jv = 0; jv < vars.size(); ++jv) {
-    const std::string var = vars[jv];
+    size_t iv = observed.find(vars[jv]);
 
     for (size_t jobs = 0; jobs < obsdb_.nlocs(); ++jobs) {
-      if (apply[jobs] && flags[jv][jobs] == 0) {
-        ASSERT(obs[jv][jobs] != missing);
-        size_t iv = observed.find(var);
+      if (apply[jobs] && flags[iv][jobs] == 0) {
         size_t iobs = observed.size() * jobs + iv;
-        if (abs_threshold_ != dmissing && std::abs(obs[jv][jobs] - hofx[iobs]) > abs_threshold_)  {
-          flags[jv][jobs] = QCflags::fguess;
+        ASSERT(obserr[iv][jobs] != util::missingValue(obserr[iv][jobs]));
+        ASSERT(obs[jv][jobs] != util::missingValue(obs[jv][jobs]));
+        ASSERT(hofx[iobs] != util::missingValue(hofx[iobs]));
+
+//      Threshold for current observation
+        double zz = std::numeric_limits<double>::max();
+        if (abs_threshold_ != missing) zz = abs_threshold_;
+        if (threshold_ != missing)  {
+          zz = std::min(zz, threshold_ * static_cast<double>(obserr[iv][jobs]));
         }
-        if (threshold_ != dmissing && std::abs(obs[jv][jobs] - hofx[iobs]) >
-          threshold_ * err[jv][jobs]) { flags[jv][jobs] = QCflags::fguess;
-        }
+        ASSERT(zz < std::numeric_limits<double>::max() && zz > 0.0);
+
+//      Check distance from background
+        if (std::abs(obs[jv][jobs] - hofx[iobs]) > zz) flags[iv][jobs] = QCflags::fguess;
       }
     }
   }
-  flags.save(qcgrp);
 }
 
 // -----------------------------------------------------------------------------

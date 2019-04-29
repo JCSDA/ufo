@@ -89,7 +89,7 @@ call obsspace_get_db(self%obsdb, "", "impact_parameter", yimpar)
 call obsspace_get_db(self%obsdb, "", "geoid_height_above_reference_ellipsoid",ygeoid)
 call obsspace_get_db(self%obsdb, "", "altitude",  yalt)
 call obsspace_get_db(self%obsdb, "", "earth_radius_of_curvature", yearthr)
-call obsspace_get_db(self%obsdb, "EffectiveQC", trim(self%variable),flags )
+call obsspace_get_db(self%obsdb, "FortranQC", trim(self%variable),flags )
 
 do jobs = 1, iobs
 
@@ -113,7 +113,7 @@ enddo
 write(err_msg,*)'ufo_ufo_rogeorealitycheck_prior: ',ireject, " out of ", iobs," are rejected"
 call fckit_log%info(err_msg)
 
-call obsspace_put_db(self%obsdb, "EffectiveQC", trim(self%variable), flags)
+call obsspace_put_db(self%obsdb, "FortranQC", trim(self%variable), flags)
 
 deallocate(yalt)
 deallocate(ygeoid)

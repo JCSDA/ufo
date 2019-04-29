@@ -10,7 +10,10 @@
 
 #include <ostream>
 
+#include "boost/shared_ptr.hpp"
+
 #include "eckit/config/LocalConfiguration.h"
+#include "ioda/ObsDataVector.h"
 #include "ioda/ObsSpace.h"
 #include "oops/base/Variables.h"
 #include "oops/util/Printable.h"
@@ -24,7 +27,9 @@ class GeoVaLs;
 
 class ObsPreQC : public util::Printable {
  public:
-  ObsPreQC(ioda::ObsSpace &, const eckit::Configuration &);
+  ObsPreQC(ioda::ObsSpace &, const eckit::Configuration &,
+           boost::shared_ptr<ioda::ObsDataVector<int> >,
+           boost::shared_ptr<ioda::ObsDataVector<float> >);
   ~ObsPreQC();
 
   void priorFilter(const GeoVaLs &) const {}
@@ -38,6 +43,7 @@ class ObsPreQC : public util::Printable {
   ioda::ObsSpace & obsdb_;
   const eckit::LocalConfiguration config_;
   const oops::Variables nogeovals_;
+  ioda::ObsDataVector<int> & flags_;
 };
 
 }  // namespace ufo
