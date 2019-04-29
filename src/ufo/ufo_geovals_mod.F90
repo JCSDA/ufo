@@ -427,6 +427,7 @@ do jv = 1, other%nvar
   other%geovals(jv)%vals(:,:) = self%geovals(jv)%vals(:,:)
 enddo
 
+other%missing_value = self%missing_value
 other%lalloc = .true.
 other%linit = .true.
 
