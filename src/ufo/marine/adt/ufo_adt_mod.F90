@@ -73,12 +73,12 @@ implicit none
     ! Set missing flag
     missing = missing_value(missing)
     
-    ! check if nobs is consistent in geovals & hofx
+    ! check if nlocs is consistent in geovals & hofx
     obss_nlocs = obsspace_get_nlocs(obss)
 
-    !nobs = size(hofx,1)
-    if (geovals%nobs /= size(hofx,1)) then
-       write(err_msg,*) myname_, ' error: nobs inconsistent!'
+    !nlocs = size(hofx,1)
+    if (geovals%nlocs /= size(hofx,1)) then
+       write(err_msg,*) myname_, ' error: nlocs inconsistent!'
        call abor1_ftn(err_msg)
     endif
 

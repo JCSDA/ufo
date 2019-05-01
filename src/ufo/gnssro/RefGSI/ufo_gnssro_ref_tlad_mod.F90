@@ -24,7 +24,7 @@ module ufo_gnssro_ref_tlad_mod
   type, extends(ufo_basis_tlad) :: ufo_gnssro_Ref_tlad
    private
   type(gnssro_conf) :: roconf
-     integer                       :: nval, nobs
+     integer                       :: nval, nlocs
      real(kind_real), allocatable  :: wf(:)
      integer,         allocatable  :: wi(:)
      real(kind_real), allocatable  :: prs(:), t(:), q(:)
@@ -75,23 +75,23 @@ contains
 
       !Keep copy of dimensions
       self%nval = prs%nval
-      self%nobs = obsspace_get_nlocs(obss)
+      self%nlocs = obsspace_get_nlocs(obss)
  
-      allocate(self%wi(self%nobs))
-      allocate(self%wf(self%nobs))
-      allocate(self%t(self%nobs))
-      allocate(self%q(self%nobs))
-      allocate(self%prs(self%nobs))
-      allocate(self%obsH(self%nobs))
+      allocate(self%wi(self%nlocs))
+      allocate(self%wf(self%nlocs))
+      allocate(self%t(self%nlocs))
+      allocate(self%q(self%nlocs))
+      allocate(self%prs(self%nlocs))
+      allocate(self%obsH(self%nlocs))
 
-      allocate(obsZ(self%nobs))
-      allocate(obsLat(self%nobs))
+      allocate(obsZ(self%nlocs))
+      allocate(obsLat(self%nlocs))
 
       ! get observation vectors
       call obsspace_get_db(obss, "", "altitude", obsZ)
       call obsspace_get_db(obss, "", "latitude", obsLat)
 
-      do iobs = 1, self%nobs
+      do iobs = 1, self%nlocs
 
         !  calculate observation geopotential height using  MJ Mahoney's (2001)
         call geometric2geop(obsLat(iobs), obsZ(iobs), self%obsH(iobs))
@@ -137,9 +137,9 @@ contains
         call abor1_ftn(err_msg)
       endif
       
-      ! check if nobs is consistent in geovals & hofx
-      if (geovals%nobs /= size(hofx)) then
-        write(err_msg,*) myname_, ' error: nobs inconsistent!'
+      ! check if nlocs is consistent in geovals & hofx
+      if (geovals%nlocs /= size(hofx)) then
+        write(err_msg,*) myname_, ' error: nlocs inconsistent!'
         call abor1_ftn(err_msg)
       endif
      
@@ -151,7 +151,7 @@ contains
       call gnssro_ref_constants(self%roconf%use_compress)
 
       ! tangent linear obs operator (linear)
-      do iobs = 1, geovals%nobs
+      do iobs = 1, geovals%nlocs
         wi0 = self%wi(iobs)
         call vert_interp_apply_tl(  t_d%nval,  t_d%vals(:,iobs), gesT_d, self%wi(iobs),self%wf(iobs)) 
         call vert_interp_apply_tl(  q_d%nval,  q_d%vals(:,iobs), gesQ_d, self%wi(iobs),self%wf(iobs))
@@ -201,9 +201,9 @@ contains
         call abor1_ftn(err_msg)
       endif
       
-      ! check if nobs is consistent in geovals & hofx
-      if (geovals%nobs /= size(hofx)) then
-        write(err_msg,*) myname_, ' error: nobs inconsistent!'
+      ! check if nlocs is consistent in geovals & hofx
+      if (geovals%nlocs /= size(hofx)) then
+        write(err_msg,*) myname_, ' error: nlocs inconsistent!'
         call abor1_ftn(err_msg)
       endif
       
@@ -214,23 +214,23 @@ contains
 
       ! allocate if not yet allocated	
       if (.not. allocated(t_d%vals)) then
-         t_d%nobs = self%nobs
+         t_d%nlocs = self%nlocs
          t_d%nval = self%nval
-         allocate(t_d%vals(t_d%nval,t_d%nobs))
+         allocate(t_d%vals(t_d%nval,t_d%nlocs))
          t_d%vals = 0.0_kind_real
       endif
 
       if (.not. allocated(prs_d%vals)) then
-         prs_d%nobs = self%nobs
+         prs_d%nlocs = self%nlocs
          prs_d%nval = self%nval
-         allocate(prs_d%vals(prs_d%nval,prs_d%nobs))
+         allocate(prs_d%vals(prs_d%nval,prs_d%nlocs))
          prs_d%vals = 0.0_kind_real
       endif
 
       if (.not. allocated(q_d%vals)) then
-         q_d%nobs = self%nobs
+         q_d%nlocs = self%nlocs
          q_d%nval = self%nval
-         allocate(q_d%vals(q_d%nval,q_d%nobs))
+         allocate(q_d%vals(q_d%nval,q_d%nlocs))
          q_d%vals = 0.0_kind_real
       endif
 
@@ -239,7 +239,7 @@ contains
       call gnssro_ref_constants(self%roconf%use_compress)
       missing = missing_value(missing)
 
-      do iobs = 1, geovals%nobs
+      do iobs = 1, geovals%nlocs
     
          if (hofx(iobs) .ne. missing) then
            t_coeff = - n_a*self%prs(iobs)/self%t(iobs)**2           &

@@ -41,7 +41,7 @@ class GeoVaLs : public util::Printable,
   ~GeoVaLs();
 
   GeoVaLs & operator = (const GeoVaLs &);
-  GeoVaLs & operator*=(const double);
+  GeoVaLs & operator *= (const double);
   GeoVaLs & operator += (const GeoVaLs &);
   GeoVaLs & operator -= (const GeoVaLs &);
   GeoVaLs & operator /= (const GeoVaLs &);

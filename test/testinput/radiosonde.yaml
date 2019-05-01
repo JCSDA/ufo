@@ -17,10 +17,7 @@ Observations:
     variables:
     - air_temperature
     GeoVaLs:
-      random: 0
       filename: Data/sondes_geoval_2018041500_m.nc4
-      window_begin: '2018-04-14T21:00:00Z'
-      window_end: '2018-04-15T03:00:00Z'
     vecequiv: GsiHofX
     tolerance: 1.0e-06
     ObsBias: {}

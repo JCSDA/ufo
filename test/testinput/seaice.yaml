@@ -13,10 +13,7 @@ Observations:
       ObsDataIn:
         obsfile: Data/icec-2018-04-15.nc
     GeoVaLs:
-      random: 0
       filename: Data/icec-2018-04-15_geovals.nc
-      window_begin: 2018-04-14T21:00:00Z
-      window_end: 2018-04-15T03:00:00Z
     ObsBias: {}
     rmsequiv: 2.5
     tolerance: 1.0e-8
@@ -25,10 +22,7 @@ Observations:
       ObsDataIn:
         obsfile: Data/cryosat2-2018-04-15.nc
     GeoVaLs:
-      random: 0
       filename: Data/cryosat2-2018-04-15_geovals.nc
-      window_begin: 2018-04-14T21:00:00Z
-      window_end: 2018-04-15T03:00:00Z
     ObsBias: {}
     rmsequiv: 1.25
     tolerance: 1.0e-8

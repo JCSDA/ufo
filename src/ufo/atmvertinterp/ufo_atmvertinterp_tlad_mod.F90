@@ -148,9 +148,9 @@ subroutine atmvertinterp_simobs_ad_(self, geovals, obss, nvars, nlocs, hofx)
       
     ! Allocate geovals profile if not yet allocated
     if (.not. allocated(profile%vals)) then
-       profile%nobs = self%nlocs
-       profile%nval = self%nval
-       allocate(profile%vals(profile%nval, profile%nobs))
+       profile%nlocs = self%nlocs
+       profile%nval  = self%nval
+       allocate(profile%vals(profile%nval, profile%nlocs))
        profile%vals(:,:) = 0.0_kind_real
     endif
     if (.not. geovals%linit ) geovals%linit=.true.

@@ -74,11 +74,11 @@ subroutine ufo_gnssro_bndropp2d_simobs(self, geovals, hofx, obss)
   character(len=*), parameter   :: myname_="ufo_gnssro_bndropp2d_simobs"
   integer, parameter            :: max_string = 800
   character(max_string)         :: err_msg
-  integer                       :: nlev, nobs, iobs, nvprof
+  integer                       :: nlev, nlocs, iobs, nvprof
   integer                       :: ierr, iflip, kerror
   type(ufo_geoval), pointer     :: t, q, prs, gph
-  real(kind_real), allocatable  :: obsImpP(:),obsLocR(:),obsGeoid(:)  !nobs
-  real(kind_real), allocatable  :: obsLat(:),obsLon(:)                !nobs
+  real(kind_real), allocatable  :: obsImpP(:),obsLocR(:),obsGeoid(:)  !nlocs
+  real(kind_real), allocatable  :: obsLat(:),obsLon(:)                !nlocs
   real(kind_real), allocatable  :: obsLonnh(:),obsLatnh(:)            ! n_horiz
   integer                       :: n_horiz
   real(kind_real)               :: dtheta
@@ -89,9 +89,9 @@ subroutine ufo_gnssro_bndropp2d_simobs(self, geovals, hofx, obss)
   write(err_msg,*) "TRACE: ufo_gnssro_bndropp2d_simobs: begin"
   call fckit_log%info(err_msg)
 
-! check if nobs is consistent in geovals & hofx
-  if (geovals%nobs /= size(hofx)*n_horiz) then
-      write(err_msg,*) myname_, ' error: 2d nobs inconsistent!'
+! check if nlocs is consistent in geovals & hofx
+  if (geovals%nlocs /= size(hofx)*n_horiz) then
+      write(err_msg,*) myname_, ' error: 2d nlocs inconsistent!'
       call abor1_ftn(err_msg)
   endif
 
@@ -104,7 +104,7 @@ subroutine ufo_gnssro_bndropp2d_simobs(self, geovals, hofx, obss)
   missing = missing_value(missing)
 
   nlev  = t%nval ! number of model levels
-  nobs  = obsspace_get_nlocs(obss)
+  nlocs  = obsspace_get_nlocs(obss)
 
   iflip = 0
   if (prs%vals(1,1) .lt. prs%vals(prs%nval,1) ) then
@@ -116,11 +116,11 @@ subroutine ufo_gnssro_bndropp2d_simobs(self, geovals, hofx, obss)
   end if
 
 ! set obs space struture
-  allocate(obsLon(nobs))
-  allocate(obsLat(nobs))
-  allocate(obsImpP(nobs))
-  allocate(obsLocR(nobs))
-  allocate(obsGeoid(nobs))
+  allocate(obsLon(nlocs))
+  allocate(obsLat(nlocs))
+  allocate(obsImpP(nlocs))
+  allocate(obsLocR(nlocs))
+  allocate(obsGeoid(nlocs))
   allocate(obsLatnh(n_horiz))
   allocate(obsLonnh(n_horiz))
 
@@ -131,11 +131,11 @@ subroutine ufo_gnssro_bndropp2d_simobs(self, geovals, hofx, obss)
   call obsspace_get_db(obss, " ", "geoid_height_above_reference_ellipsoid", obsGeoid)
 
   nvprof=1  ! no. of bending angles in profile 
-  write(err_msg,*) "TRACE: ufo_gnssro_bndropp2d_simobs: begin observation loop, nobs =  ", nobs
+  write(err_msg,*) "TRACE: ufo_gnssro_bndropp2d_simobs: begin observation loop, nlocs =  ", nlocs
   call fckit_log%info(err_msg)
 
 ! loop through the obs
-  obs_loop: do iobs = 1, nobs  
+  obs_loop: do iobs = 1, nlocs  
 
     obsLatnh = self%obsLat2d( (iobs-1)*n_horiz+1:iobs*n_horiz )
     obsLonnh = self%obsLon2d( (iobs-1)*n_horiz+1:iobs*n_horiz )

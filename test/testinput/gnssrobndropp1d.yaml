@@ -15,12 +15,7 @@ Observations:
      obsfile: "Data/gnssro_obs_2018041500_s.nc4"
     obsvalue: bending_angle
    GeoVaLs: 
-    norm: "8000000.0"
-    random: 0
-    nobs: 1200
     filename: "Data/gnssro_geoval_2018041500_s.nc4"
-    window_begin: '2018-04-14T21:00:00Z'
-    window_end: '2018-04-15T03:00:00Z'
     ObsFilters:
     - Filter: Background Check
       variables:

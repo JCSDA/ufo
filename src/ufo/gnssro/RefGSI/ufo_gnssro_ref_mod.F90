@@ -53,7 +53,7 @@ contains
       character(len=*), parameter :: myname_="ufo_gnssro_ref_simobs"
       character(max_string) :: err_msg
       integer           :: GlobalModel = 1
-      integer           :: iobs,k,nobs
+      integer           :: iobs,k,nlocs
       real(kind_real)   :: wf 
       integer           :: wi
       type(ufo_geoval), pointer    :: t,q,prs,gph
@@ -61,9 +61,9 @@ contains
       real(kind_real), allocatable :: obsZ(:), obsLat(:)
       real(kind_real)  :: obsH, gesT,gesQ, gesTv, gesTv0,gesP
 
-      ! check if nobs is consistent in geovals & hofx
-      if (geovals%nobs /= size(hofx)) then
-        write(err_msg,*) myname_, ' error: nobs inconsistent!'
+      ! check if nlocs is consistent in geovals & hofx
+      if (geovals%nlocs /= size(hofx)) then
+        write(err_msg,*) myname_, ' error: nlocs inconsistent!'
         call abor1_ftn(err_msg)
       endif
       ! get variables from geovals
@@ -72,10 +72,10 @@ contains
       call ufo_geovals_get_var(geovals, var_q, q)
       call ufo_geovals_get_var(geovals, var_z, gph)
 
-      nobs = obsspace_get_nlocs(obss)
+      nlocs = obsspace_get_nlocs(obss)
 
-      allocate(obsZ(nobs))
-      allocate(obsLat(nobs))
+      allocate(obsZ(nlocs))
+      allocate(obsLat(nlocs))
 
       call obsspace_get_db(obss, "", "altitude", obsZ)
       call obsspace_get_db(obss, "", "latitude", obsLat)
@@ -84,7 +84,7 @@ contains
 
 
       ! obs operator
-      do iobs = 1, geovals%nobs
+      do iobs = 1, geovals%nlocs
 
       !  Convert geometric height at observation to geopotential height 
            call geometric2geop(obsLat(iobs), obsZ(iobs), obsH)

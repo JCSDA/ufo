@@ -62,7 +62,7 @@ type(c_ptr), value, intent(in)    :: obss
     character(len=*), parameter :: myname_="ufo_insitutemperature_simobs"
     character(max_string)  :: err_msg
 
-    integer :: iobs, ilev, nlev, nobs
+    integer :: iobs, ilev, nlev, nlocs
     type(ufo_geoval), pointer :: temp, salt, h
     real (kind_real), allocatable :: depth(:,:)
     real(kind_real) :: lono, lato, deptho
@@ -73,9 +73,9 @@ type(c_ptr), value, intent(in)    :: obss
     real(kind_real) :: wf, tp, sp, prs
     integer :: wi
     
-    ! check if nobs is consistent in geovals & hofx
-    if (geovals%nobs /= size(hofx,1)) then
-       write(err_msg,*) myname_, ' error: nobs inconsistent!'
+    ! check if nlocs is consistent in geovals & hofx
+    if (geovals%nlocs /= size(hofx,1)) then
+       write(err_msg,*) myname_, ' error: nlocs inconsistent!'
        call abor1_ftn(err_msg)
     endif
 
@@ -94,8 +94,8 @@ type(c_ptr), value, intent(in)    :: obss
     call obsspace_get_db(obss, "MetaData", "depth", obs_depth)
 
     nlev = temp%nval
-    nobs = temp%nobs        
-    allocate(depth(nlev,nobs))
+    nlocs = temp%nlocs        
+    allocate(depth(nlev,nlocs))
     do iobs = 1,size(hofx,1)
        !< Depth from layer thickness
        depth(1,iobs)=0.5*h%vals(1,iobs)

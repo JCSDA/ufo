@@ -25,9 +25,6 @@ Observations:
      obsfile: "Data/amsua_n19_obs_2018041500_m_out.nc4"
    GeoVaLs: 
     filename: "Data/amsua_n19_geoval_2018041500_m.nc4"
-    random: 0
-    window_begin: "2018-04-14T21:00:00Z"
-    window_end: "2018-04-15T03:00:00Z"
    ObsFilters:
    - Filter: Bounds Check
      bounds:

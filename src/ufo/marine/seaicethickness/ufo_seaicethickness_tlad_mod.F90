@@ -98,9 +98,9 @@ if (.not. self%ltraj) then
   call abor1_ftn(err_msg)
 endif
 
-! check if nobs is consistent in geovals & hofx
-if (geovals%nobs /= size(hofx,1)) then
-  write(err_msg,*) myname_, ' error: nobs inconsistent!'
+! check if nlocs is consistent in geovals & hofx
+if (geovals%nlocs /= size(hofx,1)) then
+  write(err_msg,*) myname_, ' error: nlocs inconsistent!'
   call abor1_ftn(err_msg)
 endif
 
@@ -146,9 +146,9 @@ if (.not. self%ltraj) then
   call abor1_ftn(err_msg)
 endif
 
-! check if nobs is consistent in geovals & hofx
-if (geovals%nobs /= size(hofx,1)) then
-  write(err_msg,*) myname_, ' error: nobs inconsistent!'
+! check if nlocs is consistent in geovals & hofx
+if (geovals%nlocs /= size(hofx,1)) then
+  write(err_msg,*) myname_, ' error: nlocs inconsistent!'
   call abor1_ftn(err_msg)
 endif
 

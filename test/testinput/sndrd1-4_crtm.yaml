@@ -22,9 +22,6 @@ Observations:
      obsfile: "Data/sndrd1_g15_obs_2018041500_m.nc4"
    GeoVaLs: 
     filename: "Data/sndrd1_g15_geoval_2018041500_m.nc4"
-    random: 0
-    window_begin: "2018-04-14T21:00:00Z"
-    window_end: "2018-04-15T03:00:00Z"
    vecequiv: GsiHofX
    tolerance: 1.1e-5
    ObsBias: {} 
@@ -42,9 +39,6 @@ Observations:
      obsfile: "Data/sndrd2_g15_obs_2018041500_m.nc4"
    GeoVaLs: 
     filename: "Data/sndrd2_g15_geoval_2018041500_m.nc4"
-    random: 0
-    window_begin: "2018-04-14T21:00:00Z"
-    window_end: "2018-04-15T03:00:00Z"
    vecequiv: GsiHofX
    tolerance: 1.1e-5
    ObsBias: {} 
@@ -62,9 +56,6 @@ Observations:
      obsfile: "Data/sndrd3_g15_obs_2018041500_m.nc4"
    GeoVaLs: 
     filename: "Data/sndrd3_g15_geoval_2018041500_m.nc4"
-    random: 0
-    window_begin: "2018-04-14T21:00:00Z"
-    window_end: "2018-04-15T03:00:00Z"
    vecequiv: GsiHofX
    tolerance: 1.1e-5
    ObsBias: {} 
@@ -82,9 +73,6 @@ Observations:
      obsfile: "Data/sndrd4_g15_obs_2018041500_m.nc4"
    GeoVaLs: 
     filename: "Data/sndrd4_g15_geoval_2018041500_m.nc4"
-    random: 0
-    window_begin: "2018-04-14T21:00:00Z"
-    window_end: "2018-04-15T03:00:00Z"
    vecequiv: GsiHofX
    tolerance: 1.1e-5
    ObsBias: {} 

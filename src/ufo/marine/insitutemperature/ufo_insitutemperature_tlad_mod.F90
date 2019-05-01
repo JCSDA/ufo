@@ -25,12 +25,12 @@ module ufo_insitutemperature_tlad_mod
  !> Fortran derived type for the tl/ad observation operator
  type, extends(ufo_basis_tlad), public :: ufo_insitutemperature_tlad
  private
-     integer                            :: nobs       !< Number of observations
+     integer                            :: nlocs       !< Number of observations
      integer                            :: nval       !< Number of level in model's profiles 
      type(ufo_geoval)                   :: temp       !< Temperature (traj)     ] Model vertical 
      type(ufo_geoval)                   :: salt       !< Salinity (traj)        ] profile at 
      type(ufo_geoval)                   :: h          !< Layer thickness (traj) ] obs locations
-     real (kind=kind_real), allocatable :: depth(:,:) !< Depth                     [nval x nobs]     
+     real (kind=kind_real), allocatable :: depth(:,:) !< Depth                     [nval x nlocs]     
      real (kind=kind_real), allocatable :: lono(:)    !< Observation location
      real (kind=kind_real), allocatable :: lato(:)    !< Observation location
      real (kind=kind_real), allocatable :: deptho(:)  !< Observation location
@@ -38,7 +38,7 @@ module ufo_insitutemperature_tlad_mod
      real (kind=kind_real), allocatable :: salto(:)   !< salt interpolated at observation location     
      real(kind_real), allocatable       :: wf(:)      !< Vertical interpolation weights
      integer, allocatable               :: wi(:)      !< Vertical interpolation indices
-     real (kind=kind_real), allocatable :: jac(:,:)   !< Jacobian     [2 x nobs]
+     real (kind=kind_real), allocatable :: jac(:,:)   !< Jacobian     [2 x nlocs]
  contains
   procedure :: setup  => ufo_insitutemperature_tlad_setup
   procedure :: delete  => ufo_insitutemperature_tlad_delete
@@ -92,7 +92,7 @@ subroutine ufo_insitutemperature_tlad_settraj(self, geovals, obss)
     character(max_string) :: err_msg
 
     type(ufo_geoval), pointer :: temp, salt, h
-    integer :: nobs, nlev, iobs, ilev
+    integer :: nlocs, nlev, iobs, ilev
 
     real(kind_real), allocatable :: obs_lat(:)
     real(kind_real), allocatable :: obs_lon(:)
@@ -110,19 +110,19 @@ subroutine ufo_insitutemperature_tlad_settraj(self, geovals, obss)
 
     call ufo_insitutemperature_tlad_delete(self)
 
-    nobs = h%nobs
+    nlocs = h%nlocs
     nlev = h%nval
     
-    self%nobs = nobs
+    self%nlocs = nlocs
     self%nval = nlev
     
     self%temp = temp
     self%salt = salt
     self%h    = h
 
-    allocate(self%lono(nobs))
-    allocate(self%lato(nobs))
-    allocate(self%deptho(nobs))
+    allocate(self%lono(nlocs))
+    allocate(self%lato(nlocs))
+    allocate(self%deptho(nlocs))
 
     obss_nlocs = obsspace_get_nlocs(obss)
     allocate(obs_lat(obss_nlocs))
@@ -138,8 +138,8 @@ subroutine ufo_insitutemperature_tlad_settraj(self, geovals, obss)
     self%deptho = obs_depth
 
     !< Depth from layer thickness
-    allocate(self%depth(nlev,nobs))
-    do iobs = 1, nobs
+    allocate(self%depth(nlev,nlocs))
+    do iobs = 1, nlocs
        self%depth(1,iobs)=0.5*self%h%vals(1,iobs)       
        do ilev = 2, nlev
           self%depth(ilev,iobs)=sum(self%h%vals(1:ilev-1,iobs))+0.5*self%h%vals(ilev,iobs)
@@ -147,8 +147,8 @@ subroutine ufo_insitutemperature_tlad_settraj(self, geovals, obss)
     end do
 
     !< Interpolation weight
-    allocate(self%wi(nobs),self%wf(nobs))
-    do iobs = 1, nobs    
+    allocate(self%wi(nlocs),self%wf(nlocs))
+    do iobs = 1, nlocs    
        call vert_interp_weights(nlev,self%deptho(iobs),self%depth(:,iobs),self%wi(iobs),self%wf(iobs))
        if (self%deptho(iobs).ge.maxval(self%depth(:,iobs))) then
           self%wi(iobs)=nlev-1
@@ -158,8 +158,8 @@ subroutine ufo_insitutemperature_tlad_settraj(self, geovals, obss)
     self%ltraj    = .true.
 
     !< Jacobian
-    allocate(self%jac(2,nobs),self%tempo(nobs),self%salto(nobs))
-    do iobs = 1, nobs
+    allocate(self%jac(2,nlocs),self%tempo(nlocs),self%salto(nlocs))
+    do iobs = 1, nlocs
        ! Interpolate background do obs depth and save in traj
        call vert_interp_apply(nlev, self%temp%vals(:,iobs), self%tempo(iobs), self%wi(iobs), self%wf(iobs))
        call vert_interp_apply(nlev, self%salt%vals(:,iobs), self%salto(iobs), self%wi(iobs), self%wf(iobs))
@@ -188,7 +188,7 @@ subroutine ufo_insitutemperature_simobs_tl(self, geovals, hofx, obss)
     character(len=*), parameter :: myname_="ufo_insitutemperature_simobs_tl"
     character(max_string) :: err_msg
 
-    integer :: iobs, ilev, nlev, nobs
+    integer :: iobs, ilev, nlev, nlocs
 
     type(ufo_geoval), pointer :: temp_d, salt_d, dlayerthick !< Increments from geovals
     real (kind=kind_real) :: lono, lato, deptho !< Observation location
@@ -202,9 +202,9 @@ subroutine ufo_insitutemperature_simobs_tl(self, geovals, hofx, obss)
        call abor1_ftn(err_msg)
     endif
 
-    ! check if nobs is consistent in geovals & hofx
-    if (geovals%nobs /= size(hofx,1)) then
-       write(err_msg,*) myname_, ' error: nobs inconsistent!'
+    ! check if nlocs is consistent in geovals & hofx
+    if (geovals%nlocs /= size(hofx,1)) then
+       write(err_msg,*) myname_, ' error: nlocs inconsistent!'
        call abor1_ftn(err_msg)
     endif
 
@@ -220,11 +220,11 @@ subroutine ufo_insitutemperature_simobs_tl(self, geovals, hofx, obss)
     dlayerthick%vals=0.0
     
     nlev = temp_d%nval
-    nobs = temp_d%nobs        
+    nlocs = temp_d%nlocs        
 
     ! linear sea temperature profile obs operator
     hofx = 0.0
-    do iobs = 1,nobs
+    do iobs = 1,nlocs
 
        lono = self%lono(iobs)
        lato = self%lato(iobs)
@@ -257,7 +257,7 @@ subroutine ufo_insitutemperature_simobs_ad(self, geovals, hofx, obss)
 
     real (kind=kind_real) :: lono, lato, deptho !< Observation location
         
-    integer :: iobs, nobs, ilev, nlev
+    integer :: iobs, nlocs, ilev, nlev
     type(ufo_geoval), pointer :: dtemp, dsalt, dlayerthick
     real (kind_real) :: dtp, dsp
     real(c_double) :: missing
@@ -271,9 +271,9 @@ subroutine ufo_insitutemperature_simobs_ad(self, geovals, hofx, obss)
        call abor1_ftn(err_msg)
     endif
 
-    ! check if nobs is consistent in geovals & hofx
-    if (geovals%nobs /= size(hofx,1)) then
-       write(err_msg,*) myname_, ' error: nobs inconsistent!'
+    ! check if nlocs is consistent in geovals & hofx
+    if (geovals%nlocs /= size(hofx,1)) then
+       write(err_msg,*) myname_, ' error: nlocs inconsistent!'
        call abor1_ftn(err_msg)
     endif
 
@@ -289,7 +289,7 @@ subroutine ufo_insitutemperature_simobs_ad(self, geovals, hofx, obss)
     call ufo_geovals_get_var(geovals, var_ocn_lay_thick, dlayerthick)
     
     nlev = self%nval
-    nobs = self%nobs
+    nlocs = self%nlocs
     
     if (.not. allocated(dtemp%vals)) allocate(dtemp%vals(nlev, size(hofx,1)))
     if (.not. allocated(dsalt%vals)) allocate(dsalt%vals(nlev, size(hofx,1)))

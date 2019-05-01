@@ -84,11 +84,11 @@ character(max_string) :: err_msg
 integer :: iobs
 type(ufo_geoval), pointer :: geoval
 
-print *, myname_, ' nobs: ', geovals%nobs, size(hofx,1)
+print *, myname_, ' nlocs: ', geovals%nlocs, size(hofx,1)
 
-! check if nobs is consistent in geovals & hofx
-if (geovals%nobs /= size(hofx,1)) then
-  write(err_msg,*) myname_, ' error: nobs inconsistent!'
+! check if nlocs is consistent in geovals & hofx
+if (geovals%nlocs /= size(hofx,1)) then
+  write(err_msg,*) myname_, ' error: nlocs inconsistent!'
   call abor1_ftn(err_msg)
 endif
 
@@ -120,9 +120,9 @@ real(c_double) :: missing
 !> Set missing value
 missing = missing_value(missing)
 
-! check if nobs is consistent in geovals & hofx
-if (geovals%nobs /= size(hofx,1)) then
-  write(err_msg,*) myname_, ' error: nobs inconsistent!'
+! check if nlocs is consistent in geovals & hofx
+if (geovals%nlocs /= size(hofx,1)) then
+  write(err_msg,*) myname_, ' error: nlocs inconsistent!'
   call abor1_ftn(err_msg)
 endif
 

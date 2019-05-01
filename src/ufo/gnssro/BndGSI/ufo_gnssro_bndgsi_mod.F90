@@ -91,9 +91,9 @@ end subroutine ufo_gnssro_bndgsi_setup
       sIndxExt = one
       hofx(:) = miss_values
 
-      ! check if nobs is consistent in geovals & hofx
-      if (geovals%nobs /= size(hofx)) then
-        write(err_msg,*) myname_, ' error: nobs inconsistent!'
+      ! check if nlocs is consistent in geovals & hofx
+      if (geovals%nlocs /= size(hofx)) then
+        write(err_msg,*) myname_, ' error: nlocs inconsistent!'
         call abor1_ftn(err_msg)
       endif
       ! check if prsi (pressure at model interface levels) variable is in geovals and get it
@@ -114,7 +114,7 @@ end subroutine ufo_gnssro_bndgsi_setup
       endif
       nlevExt = nlev + nlevAdd
       nlevCheck = min(23, nlev) !number of levels to check super refraction
-      nobs  = geovals%nobs ! number of observations
+      nobs  = geovals%nlocs ! number of observations
 
       allocate(gesPi(nlev1,nobs)) 
       allocate(gesZi(nlev1,nobs)) 

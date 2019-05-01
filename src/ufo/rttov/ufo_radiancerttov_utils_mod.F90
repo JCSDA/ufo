@@ -139,7 +139,7 @@ SUBROUTINE load_atm_data_rttov(nprofiles,nlayers,geovals,obss,profiles)
   nlevels = nlayers + 1
   
   DO k1 = 1, geovals%nvar
-    varname = geovals%variables%fldnames(k1)
+    varname = geovals%variables(k1)
     PRINT *, k1, varname
   END DO
   

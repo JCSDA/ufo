@@ -15,10 +15,7 @@ Observations:
     variable:
     - sea_water_salinity
     GeoVaLs:
-      random: 0
       filename: Data/profile_2018-04-15_geovals.nc
-      window_begin: 2018-04-14T21:00:00Z
-      window_end: 2018-04-15T03:00:00Z
     ObsBias: {}
     rmsequiv: 35.0
     tolerance: 1.0e-8

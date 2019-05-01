@@ -17,12 +17,7 @@ Observations:
      obsfile: "Data/gnssro_obs_2018041500_s.nc4"
     obsvalue: bending_angle
    GeoVaLs: 
-    norm: "8000000.0"
-    random: 0
-    nobs: 20
     filename: "Data/gnssro_geoval_2018041500_s_2d.nc4"
-    window_begin: '2018-04-14T21:00:00Z'
-    window_end: '2018-04-15T03:00:00Z'
    ObsBias: {}
    rmsequiv: "0.00921866919884274"
    tolerance: "1.0e-13"
