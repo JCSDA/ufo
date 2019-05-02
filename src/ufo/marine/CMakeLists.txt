@@ -13,6 +13,7 @@ add_subdirectory( seaicefraction )
 add_subdirectory( insitutemperature )
 add_subdirectory( adt )
 add_subdirectory( marinevertinterp )
+add_subdirectory( coolskin )
 
 PREPEND( _p_obsop_files               "marine/obsop"               ${obsop_files} )
 PREPEND( _p_seaicethickness_files     "marine/seaicethickness"     ${seaicethickness_files} )
@@ -21,7 +22,7 @@ PREPEND( _p_insitutemperature_files   "marine/insitutemperature"   ${insitutempe
 PREPEND( _p_adt_files                 "marine/adt"                 ${adt_files} )
 PREPEND( _p_marinevertinterp_files    "marine/marinevertinterp"    ${marinevertinterp_files} )
 PREPEND( _p_marine_utils_files        "marine/utils"               ${marine_utils_files} )
-
+PREPEND( _p_coolskin_files            "marine/coolskin"            ${coolskin_files} )
 set ( marine_src_files
     ${_p_marine_utils_files}
     ${_p_obsop_files}
@@ -30,6 +31,7 @@ set ( marine_src_files
     ${_p_insitutemperature_files}
     ${_p_adt_files}
     ${_p_marinevertinterp_files}
+    ${_p_coolskin_files}
     PARENT_SCOPE
 )
 
