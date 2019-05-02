@@ -32,11 +32,13 @@ list( APPEND ufo_src_files
     ObsOperator.h
     ObsOperatorBase.cc
     ObsOperatorBase.h
-    ObsPreQC.cc
-    ObsPreQC.h
+    PreQC.cc
+    PreQC.h
     processWhere.cc
     processWhere.h
     QCflags.h
+    QCmanager.cc
+    QCmanager.h
     Thinning.cc
     Thinning.h
     UfoTrait.h

@@ -5,7 +5,7 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
  */
 
-#include "ufo/ObsPreQC.h"
+#include "ufo/QCmanager.h"
 
 #include <string>
 #include <vector>
@@ -28,15 +28,15 @@ namespace ufo {
 // the factory for models not in UFO/IODA.
 
 // -----------------------------------------------------------------------------
-static oops::FilterMaker<UfoTrait, oops::ObsFilter<UfoTrait, ObsPreQC>> mkPreQC_("PreQC");
+static oops::FilterMaker<UfoTrait, oops::ObsFilter<UfoTrait, QCmanager>> mkqcman_("QCmanager");
 // -----------------------------------------------------------------------------
 
-ObsPreQC::ObsPreQC(ioda::ObsSpace & obsdb, const eckit::Configuration & config,
-                   boost::shared_ptr<ioda::ObsDataVector<int> > qcflags,
-                   boost::shared_ptr<ioda::ObsDataVector<float> > obserr)
+QCmanager::QCmanager(ioda::ObsSpace & obsdb, const eckit::Configuration & config,
+                     boost::shared_ptr<ioda::ObsDataVector<int> > qcflags,
+                     boost::shared_ptr<ioda::ObsDataVector<float> > obserr)
   : obsdb_(obsdb), config_(config), nogeovals_(), flags_(*qcflags)
 {
-  oops::Log::trace() << "ObsPreQC::ObsPreQC starting " << config_ << std::endl;
+  oops::Log::trace() << "QCmanager::QCmanager starting " << config_ << std::endl;
 
   ASSERT(qcflags);
   ASSERT(obserr);
@@ -57,22 +57,17 @@ ObsPreQC::ObsPreQC(ioda::ObsSpace & obsdb, const eckit::Configuration & config,
     for (size_t jobs = 0; jobs < obsdb_.nlocs(); ++jobs) {
       if (flags_[jv][jobs] == imiss || obs[jv][jobs] == rmiss || (*obserr)[jv][jobs] == rmiss) {
         flags_[jv][jobs] = QCflags::missing;
-      } else {
-        if (flags_[jv][jobs] > 3) {
-          flags_[jv][jobs] = QCflags::preQC;
-        } else {
-          flags_[jv][jobs] = 0;
-        }
       }
     }
   }
-  oops::Log::trace() << "ObsPreQC::ObsPreQC done" << std::endl;
+
+  oops::Log::trace() << "QCmanager::QCmanager done" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
-void ObsPreQC::postFilter(const ioda::ObsVector & hofx) const {
-  oops::Log::trace() << "ObsPreQC postFilter" << std::endl;
+void QCmanager::postFilter(const ioda::ObsVector & hofx) const {
+  oops::Log::trace() << "QCmanager postFilter" << std::endl;
 
   const oops::Variables observed(config_.getStringVector("observed"));
   const double missing = util::missingValue(missing);
@@ -85,11 +80,20 @@ void ObsPreQC::postFilter(const ioda::ObsVector & hofx) const {
       }
     }
   }
+  oops::Log::trace() << "QCmanager postFilter done" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
-ObsPreQC::~ObsPreQC() {
+QCmanager::~QCmanager() {
+  oops::Log::trace() << "QCmanager::~QCmanager starting" << std::endl;
+  oops::Log::info() << *this;
+  oops::Log::trace() << "QCmanager::~QCmanager done" << std::endl;
+}
+
+// -----------------------------------------------------------------------------
+
+void QCmanager::print(std::ostream & os) const {
   const oops::Variables observed(config_.getStringVector("observed"));
 
   for (size_t jj = 0; jj < observed.size(); ++jj) {
@@ -132,29 +136,20 @@ ObsPreQC::~ObsPreQC() {
 
     if (obsdb_.comm().rank() == 0) {
       const std::string info = "QC " + flags_.obstype() + " " + observed[jj] + ": ";
-      if (imiss > 0) oops::Log::info() << info << imiss << " missing values." << std::endl;
-      if (ipreq > 0) oops::Log::info() << info << ipreq << " rejected by pre QC." << std::endl;
-      if (ibnds > 0) oops::Log::info() << info << ibnds << " out of bounds." << std::endl;
-      if (iwhit > 0) oops::Log::info() << info << iwhit << " out of domain of use." << std::endl;
-      if (iblck > 0) oops::Log::info() << info << iblck << " black-listed." << std::endl;
-      if (iherr > 0) oops::Log::info() << info << iherr << " H(x) failed." << std::endl;
-      if (ithin > 0) oops::Log::info() << info << ithin << " removed by thinning." << std::endl;
-      if (ifgss > 0) oops::Log::info() << info << ifgss << " rejected by first-guess check."
-                                       << std::endl;
-      if (ignss > 0) oops::Log::info() << info << ignss << " rejected by GNSSRO reality check."
-                                       << std::endl;
-      oops::Log::info() << info << ipass << " passed out of "
-                        << iobs << " observations." << std::endl;
+      if (imiss > 0) os << info << imiss << " missing values." << std::endl;
+      if (ipreq > 0) os << info << ipreq << " rejected by pre QC." << std::endl;
+      if (ibnds > 0) os << info << ibnds << " out of bounds." << std::endl;
+      if (iwhit > 0) os << info << iwhit << " out of domain of use." << std::endl;
+      if (iblck > 0) os << info << iblck << " black-listed." << std::endl;
+      if (iherr > 0) os << info << iherr << " H(x) failed." << std::endl;
+      if (ithin > 0) os << info << ithin << " removed by thinning." << std::endl;
+      if (ifgss > 0) os << info << ifgss << " rejected by first-guess check." << std::endl;
+      if (ignss > 0) os << info << ignss << " rejected by GNSSRO reality check." << std::endl;
+      os << info << ipass << " passed out of " << iobs << " observations." << std::endl;
     }
 
     ASSERT(ipass + imiss + ipreq + ibnds + iwhit + iblck + iherr + ithin + ifgss + ignss == iobs);
   }
-}
-
-// -----------------------------------------------------------------------------
-
-void ObsPreQC::print(std::ostream & os) const {
-  os << "ObsPreQC";
 }
 
 // -----------------------------------------------------------------------------

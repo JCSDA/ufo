@@ -52,7 +52,7 @@ class ObsOperatorBase : public util::Printable,
   virtual Locations * locations(const util::DateTime &, const util::DateTime &) const;
 
 /// Operator type
-  const std::string & obstype() const {return odb_.obsname();}
+  virtual const std::string & obstype() const {return odb_.obsname();}
 
  private:
   virtual void print(std::ostream &) const = 0;
