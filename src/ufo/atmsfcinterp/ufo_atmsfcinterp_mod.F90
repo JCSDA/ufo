@@ -64,15 +64,15 @@ subroutine ufo_atmsfcinterp_setup(self, c_conf)
   !> need surface geopotential height to get difference from phi
   self%varin(3) = "sfc_geopotential_height"
   !> need surface roughness
-  self%varid(4) = "surface_roughness"
+  self%varin(4) = "surface_roughness"
   !> need surface and atmospheric pressure for potential temperature
-  self%varid(5) = "surface_pressure"
-  self%varid(6) = "air_pressure"
-  self%varid(7) = "air_temperature"
-  self%varid(8) = "specific_humidity_mixing_ratio"
-  self%varid(9) = "eastward_wind"
-  self%varid(10) = "northward_wind"
-  self%varid(11) = "landsea_mask"
+  self%varin(5) = "surface_pressure"
+  self%varin(6) = "air_pressure"
+  self%varin(7) = "air_temperature"
+  self%varin(8) = "specific_humidity_mixing_ratio"
+  self%varin(9) = "eastward_wind"
+  self%varin(10) = "northward_wind"
+  self%varin(11) = "landsea_mask"
   print *, 'varin'
   print *, self%varin
   print *, 'varout'
