@@ -122,7 +122,7 @@ type(CRTM_RTSolution_type), allocatable :: rts_K(:,:)
 
  ! Get number of profile and layers from geovals
  ! ---------------------------------------------
- self%n_Profiles = geovals%nobs
+ self%n_Profiles = geovals%nlocs
  call ufo_geovals_get_var(geovals, var_ts, temp)
  self%n_Layers = temp%nval
  nullify(temp)
@@ -331,9 +331,9 @@ type(ufo_geoval), pointer :: tv_d
    call abor1_ftn(err_msg)
  endif
 
- ! Check if nobs is consistent in geovals & hofx
- if (geovals%nobs /= self%n_Profiles) then
-   write(err_msg,*) myname_, ' error: nobs inconsistent!'
+ ! Check if nlocs is consistent in geovals & hofx
+ if (geovals%nlocs /= self%n_Profiles) then
+   write(err_msg,*) myname_, ' error: nlocs inconsistent!'
    call abor1_ftn(err_msg)
  endif
 
@@ -395,9 +395,9 @@ real(c_double) :: missing
    call abor1_ftn(err_msg)
  endif
 
- ! Check if nobs is consistent in geovals & hofx
- if (geovals%nobs /= self%n_Profiles) then
-   write(err_msg,*) myname_, ' error: nobs inconsistent!'
+ ! Check if nlocs is consistent in geovals & hofx
+ if (geovals%nlocs /= self%n_Profiles) then
+   write(err_msg,*) myname_, ' error: nlocs inconsistent!'
    call abor1_ftn(err_msg)
  endif
 
@@ -412,9 +412,9 @@ real(c_double) :: missing
 
  ! allocate if not yet allocated
  if (.not. allocated(tv_d%vals)) then
-    tv_d%nobs = self%n_Profiles
+    tv_d%nlocs = self%n_Profiles
     tv_d%nval = self%n_Layers
-    allocate(tv_d%vals(tv_d%nval,tv_d%nobs))
+    allocate(tv_d%vals(tv_d%nval,tv_d%nlocs))
     tv_d%vals = 0.0_kind_real
  endif
 

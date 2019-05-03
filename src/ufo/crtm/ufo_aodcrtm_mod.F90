@@ -95,7 +95,7 @@ TYPE(CRTM_RTSolution_type), ALLOCATABLE :: rts_K(:,:)
 
  ! Get number of profile and layers from geovals
  ! ---------------------------------------------
- n_Profiles = geovals%nobs
+ n_Profiles = geovals%nlocs
  call ufo_geovals_get_var(geovals, var_ts, temp)
  n_Layers = temp%nval
  nullify(temp)

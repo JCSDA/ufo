@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2017-2018 UCAR
+ * (C) Copyright 2017-2019 UCAR
  * 
  * This software is licensed under the terms of the Apache Licence Version 2.0
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
@@ -20,47 +20,59 @@
 namespace ufo {
 
 // -----------------------------------------------------------------------------
+/*! \brief Constructor given Locations and Variables
+ *
+ * \details This ufo::GeoVaLs constructor is typically used to initialize
+ * GeoVaLs for the full time window (ufo::Locations hold all locations within
+ * data assimilation window) and all variables (oops::Variables hold all 
+ * variables specified by the ObsOperator as input varialbes. Note that
+ * nothing is allocated in the constructor currently, and getValues is
+ * responsible for allocation
+ *
+ */
 GeoVaLs::GeoVaLs(const Locations & locs, const oops::Variables & vars)
   : keyGVL_(-1), vars_(vars)
 {
   oops::Log::trace() << "GeoVaLs contructor starting" << std::endl;
   const eckit::Configuration * cvar = &vars_.toFortran();
-  ufo_geovals_setup_f90(keyGVL_, locs.toFortran(), &cvar);
+  ufo_geovals_setup_f90(keyGVL_, locs.nobs(), &cvar);
   oops::Log::trace() << "GeoVaLs contructor key = " << keyGVL_ << std::endl;
 }
+
 // -----------------------------------------------------------------------------
+/*! \brief Constructor for tests
+ *
+ * \details This ufo::GeoVaLs constructor is typically used in tests, GeoVaLs
+ * are read from the file.
+ */
 GeoVaLs::GeoVaLs(const eckit::Configuration & config, const oops::Variables & vars)
-: keyGVL_(-1), vars_(vars)
+  : keyGVL_(-1), vars_(vars)
 {
   oops::Log::trace() << "GeoVaLs constructor config starting" << std::endl;
-  ufo_geovals_create_f90(keyGVL_);
-  int irandom = 0;
-  config.get("random", irandom);
   const eckit::Configuration * conf = &config;
   const eckit::Configuration * cvar = &vars_.toFortran();
-  if (irandom == 0) {
-    ufo_geovals_read_file_f90(keyGVL_, &conf, &cvar);
-  } else {
-    ufo_geovals_setup_random_f90(keyGVL_, &conf, &cvar);
-  }
+  ufo_geovals_setup_f90(keyGVL_, 0, &cvar);
+  ufo_geovals_read_file_f90(keyGVL_, &conf, &cvar);
   oops::Log::trace() << "GeoVaLs contructor config key = " << keyGVL_ << std::endl;
 }
 // -----------------------------------------------------------------------------
 /*! \brief Copy constructor */
 
-  GeoVaLs::GeoVaLs(const GeoVaLs & other)
-    : keyGVL_(-1), vars_(other.vars_)
+GeoVaLs::GeoVaLs(const GeoVaLs & other)
+  : keyGVL_(-1), vars_(other.vars_)
 {
   oops::Log::trace() << "GeoVaLs copy constructor starting" << std::endl;
-
-  ufo_geovals_create_f90(keyGVL_);
+  const eckit::Configuration * cvar = &vars_.toFortran();
+  ufo_geovals_setup_f90(keyGVL_, 0, &cvar);
   ufo_geovals_copy_f90(other.keyGVL_, keyGVL_);
-
   oops::Log::trace() << "GeoVaLs copy constructor key = " << keyGVL_ << std::endl;
 }
 // -----------------------------------------------------------------------------
+/*? \brief Destructor */
 GeoVaLs::~GeoVaLs() {
+  oops::Log::trace() << "GeoVaLs destructor starting" << std::endl;
   ufo_geovals_delete_f90(keyGVL_);
+  oops::Log::trace() << "GeoVaLs destructor done" << std::endl;
 }
 // -----------------------------------------------------------------------------
 /*! \brief Analytic initialization for GeoVaLs
@@ -77,69 +89,100 @@ GeoVaLs::~GeoVaLs() {
  */
 void GeoVaLs::analytic_init(const Locations & locs,
                             const eckit::Configuration & config)
-  {
+{
+  oops::Log::trace() << "GeoVaLs::analytic_init starting" << std::endl;
   const eckit::Configuration * conf = &config;
   if (config.has("analytic_init")) {
       ufo_geovals_analytic_init_f90(keyGVL_, locs.toFortran(), &conf);
-    }
   }
+  oops::Log::trace() << "GeoVaLs::analytic_init done" << std::endl;
+}
 // -----------------------------------------------------------------------------
+/*! \brief Zero out the GeoVaLs */
 void GeoVaLs::zero() {
+  oops::Log::trace() << "GeoVaLs::zero starting" << std::endl;
   ufo_geovals_zero_f90(keyGVL_);
+  oops::Log::trace() << "GeoVaLs::zero done" << std::endl;
 }
 // -----------------------------------------------------------------------------
-/*! Absolute value */
+/*! \brief Absolute value */
 void GeoVaLs::abs() {
+  oops::Log::trace() << "GeoVaLs::abs starting" << std::endl;
   ufo_geovals_abs_f90(keyGVL_);
+  oops::Log::trace() << "GeoVaLs::abs done" << std::endl;
 }
 // -----------------------------------------------------------------------------
+/*! \brief Calculate norm */
 double GeoVaLs::norm() const {
+  oops::Log::trace() << "GeoVaLs::norm starting" << std::endl;
   double zz;
   ufo_geovals_rms_f90(keyGVL_, zz);
+  oops::Log::trace() << "GeoVaLs::norm done" << std::endl;
   return zz;
 }
 // -----------------------------------------------------------------------------
+/*! \brief Randomize GeoVaLs */
 void GeoVaLs::random() {
+  oops::Log::trace() << "GeoVaLs::random starting" << std::endl;
   ufo_geovals_random_f90(keyGVL_);
+  oops::Log::trace() << "GeoVaLs::random done" << std::endl;
 }
 // -----------------------------------------------------------------------------
+/*! \brief Multiply by a constant scalar */
 GeoVaLs & GeoVaLs::operator*=(const double zz) {
+  oops::Log::trace() << "GeoVaLs::operator*= starting" << std::endl;
   ufo_geovals_scalmult_f90(keyGVL_, zz);
+  oops::Log::trace() << "GeoVaLs::operator*= done" << std::endl;
   return *this;
 }
 // -----------------------------------------------------------------------------
+/*! \brief Copy operator */
 GeoVaLs & GeoVaLs::operator=(const GeoVaLs & rhs) {
+  oops::Log::trace() << "GeoVaLs::operator= starting" << std::endl;
   ufo_geovals_assign_f90(keyGVL_, rhs.keyGVL_);
+  oops::Log::trace() << "GeoVaLs::operator= done" << std::endl;
   return *this;
 }
 // -----------------------------------------------------------------------------
+/*! \brief Add another GeoVaLs */
 GeoVaLs & GeoVaLs::operator+=(const GeoVaLs & other) {
+  oops::Log::trace() << "GeoVaLs::operator+= starting" << std::endl;
   ufo_geovals_add_f90(keyGVL_, other.keyGVL_);
+  oops::Log::trace() << "GeoVaLs::operator+= done" << std::endl;
   return *this;
 }
 // -----------------------------------------------------------------------------
+/*! \brief Subtract another GeoVaLs */
 GeoVaLs & GeoVaLs::operator-=(const GeoVaLs & other) {
+  oops::Log::trace() << "GeoVaLs::operator-= starting" << std::endl;
   ufo_geovals_diff_f90(keyGVL_, other.keyGVL_);
+  oops::Log::trace() << "GeoVaLs::operator-= done" << std::endl;
   return *this;
 }
 // -----------------------------------------------------------------------------
-/*! GeoVaLs normalization
+/*! \brief GeoVaLs normalization
  *
  * \details This operator is used to normalize each element of the input GeoVaLs
  * object (LHS) with the rms values of each variable on the RHS, across all
  * locations
  */
 GeoVaLs & GeoVaLs::operator/=(const GeoVaLs & other) {
+  oops::Log::trace() << "GeoVaLs::operator/= starting" << std::endl;
   ufo_geovals_normalize_f90(keyGVL_, other.keyGVL_);
+  oops::Log::trace() << "GeoVaLs::operator/= done" << std::endl;
   return *this;
 }
 // -----------------------------------------------------------------------------
+/*! \brief Scalar product of two GeoVaLs */
 double GeoVaLs::dot_product_with(const GeoVaLs & other) const {
+  oops::Log::trace() << "GeoVaLs::dot_product_with starting" << std::endl;
   double zz;
   ufo_geovals_dotprod_f90(keyGVL_, other.keyGVL_, zz);
+  oops::Log::trace() << "GeoVaLs::dot_product_with done" << std::endl;
   return zz;
 }
 // -----------------------------------------------------------------------------
+/*! \brief Output GeoVaLs to a stream */
 void GeoVaLs::print(std::ostream & os) const {
   int nn;
   double zmin, zmax, zrms;
@@ -174,23 +217,31 @@ void GeoVaLs::print(std::ostream & os) const {
   }
 }
 // -----------------------------------------------------------------------------
+/*! \brief Return all values for a specific variable and level */
 void GeoVaLs::get(std::vector<float> & vals, const std::string & var, const int lev) const {
+  oops::Log::trace() << "GeoVaLs::get starting" << std::endl;
   int nlocs;
   ufo_geovals_nlocs_f90(keyGVL_, nlocs);
   ASSERT(vals.size() == nlocs);
   ufo_geovals_get_f90(keyGVL_, var.size(), var.c_str(), lev, nlocs, vals[0]);
-  oops::Log::debug() << "GeoVaLs:get values = " << vals << std::endl;
+  oops::Log::trace() << "GeoVaLs::get done" << std::endl;
 }
 // -----------------------------------------------------------------------------
+/*! \brief Read GeoVaLs from the file */
 void GeoVaLs::read(const eckit::Configuration & config) {
+  oops::Log::trace() << "GeoVaLs::read starting" << std::endl;
   const eckit::Configuration * conf = &config;
   const eckit::Configuration * cvar = &vars_.toFortran();
   ufo_geovals_read_file_f90(keyGVL_, &conf, &cvar);
+  oops::Log::trace() << "GeoVaLs::read done" << std::endl;
 }
 // -----------------------------------------------------------------------------
+/*! \brief Write GeoVaLs to the file */
 void GeoVaLs::write(const eckit::Configuration & config) const {
+  oops::Log::trace() << "GeoVaLs::write starting" << std::endl;
   const eckit::Configuration * conf = &config;
   ufo_geovals_write_file_f90(keyGVL_, &conf);
+  oops::Log::trace() << "GeoVaLs::write done" << std::endl;
 }
 // -----------------------------------------------------------------------------
 }  // namespace ufo

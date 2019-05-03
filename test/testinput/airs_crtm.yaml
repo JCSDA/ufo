@@ -22,9 +22,6 @@ Observations:
      obsfile: "Data/airs_aqua_obs_2018041500_m.nc4"
    GeoVaLs: 
     filename: "Data/airs_aqua_geoval_2018041500_m.nc4"
-    random: 0
-    window_begin: "2018-04-14T21:00:00Z"
-    window_end: "2018-04-15T03:00:00Z"
    vecequiv: GsiHofX
    tolerance: 1.e-5
    ObsBias: {} 

@@ -27,12 +27,12 @@ integer, parameter         :: max_string=800
 !> Fortran derived type for gnssro trajectory
 type, extends(ufo_basis_tlad)   ::  ufo_gnssro_BndROPP2D_tlad
   private
-  integer                       :: nval, nobs
+  integer                       :: nval, nlocs
   real(kind_real), allocatable  :: prs(:,:), t(:,:), q(:,:), gph(:,:), gph_sfc(:,:)
   integer                       :: n_horiz      ! 2d points along ray path
   integer                       :: iflip        ! geoval ascending order flag
   type(gnssro_conf)             :: roconf       ! ro configuration
-  real(kind_real), allocatable  :: obsLon2d(:), obsLat2d(:)  !2d locations - nobs*n_horiz
+  real(kind_real), allocatable  :: obsLon2d(:), obsLat2d(:)  !2d locations - nlocs*n_horiz
   contains
     procedure :: setup      => ufo_gnssro_bndropp2d_tlad_setup
     procedure :: delete     => ufo_gnssro_bndropp2d_tlad_delete
@@ -64,9 +64,9 @@ subroutine ufo_gnssro_bndropp2d_tlad_settraj(self, geovals, obss)
   character(max_string)       :: err_msg
   type(ufo_geoval), pointer   :: t, q, prs, gph, gph_sfc
   integer                     :: i, iobs, ierr, kerror
-  real(kind_real), allocatable  :: obsAzim(:)                    ! nobs
-  real(kind_real), allocatable  :: obsLat(:), obsLon(:)          ! nobs
-  real(kind_real), allocatable  :: obsLon2d(:),obsLat2d(:)       ! nobs * n_horiz
+  real(kind_real), allocatable  :: obsAzim(:)                    ! nlocs
+  real(kind_real), allocatable  :: obsLat(:), obsLon(:)          ! nlocs
+  real(kind_real), allocatable  :: obsLon2d(:),obsLat2d(:)       ! nlocs * n_horiz
   real(kind_real), allocatable  :: obsLonnh(:),obsLatnh(:)       ! n_horiz
   integer                       :: n_horiz
   real(kind_real)               :: dtheta
@@ -82,7 +82,7 @@ subroutine ufo_gnssro_bndropp2d_tlad_settraj(self, geovals, obss)
   call self%delete()   
 
   self%nval    = prs%nval
-  self%nobs    = obsspace_get_nlocs(obss)
+  self%nlocs    = obsspace_get_nlocs(obss)
   self%iflip   = 0
 
   n_horiz = self%roconf%n_horiz
@@ -96,12 +96,12 @@ subroutine ufo_gnssro_bndropp2d_tlad_settraj(self, geovals, obss)
     call fckit_log%info(err_msg)
   end if
 
-  allocate(self%obsLat2d(self%nobs*n_horiz))
-  allocate(self%obsLon2d(self%nobs*n_horiz))
+  allocate(self%obsLat2d(self%nlocs*n_horiz))
+  allocate(self%obsLon2d(self%nlocs*n_horiz))
 
-  allocate(obsLon(self%nobs))
-  allocate(obsLat(self%nobs))
-  allocate(obsAzim(self%nobs))
+  allocate(obsLon(self%nlocs))
+  allocate(obsLat(self%nlocs))
+  allocate(obsAzim(self%nlocs))
   call obsspace_get_db(obss, " ", "longitude",        obsLon)
   call obsspace_get_db(obss, " ", "latitude",         obsLat)
   call obsspace_get_db(obss, " ", "sensor_azimuth_angle", obsAzim)
@@ -109,7 +109,7 @@ subroutine ufo_gnssro_bndropp2d_tlad_settraj(self, geovals, obss)
   allocate(obsLatnh(n_horiz))
   allocate(obsLonnh(n_horiz))
 
-  do i = 1, self%nobs
+  do i = 1, self%nlocs
      call ropp_fm_2d_plane(obsLat(i),obsLon(i),obsAzim(i),dtheta,n_horiz,obsLatnh,obsLonnh,kerror)
      self%obsLon2d((i-1)*n_horiz+1:i*n_horiz) =  obsLonnh
      self%obsLat2d((i-1)*n_horiz+1:i*n_horiz) =  obsLatnh
@@ -121,10 +121,10 @@ subroutine ufo_gnssro_bndropp2d_tlad_settraj(self, geovals, obss)
   deallocate(obsLatnh)
   deallocate(obsAzim)
 
-  allocate(self%t(self%nval,self%nobs*n_horiz))
-  allocate(self%q(self%nval,self%nobs*n_horiz))
-  allocate(self%prs(self%nval,self%nobs*n_horiz))
-  allocate(self%gph(self%nval,self%nobs*n_horiz))
+  allocate(self%t(self%nval,self%nlocs*n_horiz))
+  allocate(self%q(self%nval,self%nlocs*n_horiz))
+  allocate(self%prs(self%nval,self%nlocs*n_horiz))
+  allocate(self%gph(self%nval,self%nlocs*n_horiz))
 
 ! allocate  
   self%gph     = gph%vals
@@ -151,7 +151,8 @@ subroutine ufo_gnssro_bndropp2d_simobs_tl(self, geovals, hofx, obss)
 
   type(State2dFM)                 :: x,x_tl
   type(Obs1dBangle)               :: y,y_tl
-  integer                         :: iobs,nlev, nobs,ierr,nvprof
+
+  integer                         :: iobs,nlev, nlocs,ierr,nvprof
     
   character(len=*), parameter  :: myname_="ufo_gnssro_bndropp2d_simobs_tl"
   character(max_string)        :: err_msg
@@ -160,9 +161,9 @@ subroutine ufo_gnssro_bndropp2d_simobs_tl(self, geovals, hofx, obss)
 ! hack - set local geopotential height to zero for ropp routines
   real(kind_real), allocatable  :: gph_d_zero(:,:)
 ! hack - set local geopotential height to zero for ropp routines
-  real(kind_real), allocatable  :: obsImpP(:),obsLocR(:),obsGeoid(:),obsAzim(:) !nobs
-  real(kind_real), allocatable  :: obsLat(:),obsLon(:)                          !nobs
-  real(kind_real), allocatable  :: obsLon2d(:),obsLat2d(:)       ! nobs * n_horiz
+  real(kind_real), allocatable  :: obsImpP(:),obsLocR(:),obsGeoid(:),obsAzim(:) !nlocs
+  real(kind_real), allocatable  :: obsLat(:),obsLon(:)                          !nlocs
+  real(kind_real), allocatable  :: obsLon2d(:),obsLat2d(:)       ! nlocs * n_horiz
   real(kind_real), allocatable  :: obsLonnh(:),obsLatnh(:)       ! n_horiz
   integer                         :: n_horiz
   real(kind_real)                 :: dtheta
@@ -179,9 +180,9 @@ subroutine ufo_gnssro_bndropp2d_simobs_tl(self, geovals, hofx, obss)
      call abor1_ftn(err_msg)
   endif
       
-! check if nobs is consistent in geovals & hofx
-  if (geovals%nobs /= size(hofx)*n_horiz ) then
-     write(err_msg,*) myname_, ' error: 2d nobs inconsistent!'
+! check if nlocs is consistent in geovals & hofx
+  if (geovals%nlocs /= size(hofx)*n_horiz ) then
+     write(err_msg,*) myname_, ' error: 2d nlocs inconsistent!'
      call abor1_ftn(err_msg)
   endif
 
@@ -191,17 +192,17 @@ subroutine ufo_gnssro_bndropp2d_simobs_tl(self, geovals, hofx, obss)
   call ufo_geovals_get_var(geovals, var_prs,   prs_d)       ! pressure
 
   nlev    = self%nval
-  nobs    = self%nobs
+  nlocs   = self%nlocs
 
-  allocate(gph_d_zero(nlev,nobs*n_horiz))
+  allocate(gph_d_zero(nlev,nlocs*n_horiz))
   gph_d_zero     = 0.0
 
 ! set obs space struture
-  allocate(obsLon(nobs))
-  allocate(obsLat(nobs))
-  allocate(obsImpP(nobs))
-  allocate(obsLocR(nobs))
-  allocate(obsGeoid(nobs))
+  allocate(obsLon(nlocs))
+  allocate(obsLat(nlocs))
+  allocate(obsImpP(nlocs))
+  allocate(obsLocR(nlocs))
+  allocate(obsGeoid(nlocs))
   call obsspace_get_db(obss, " ", "longitude",        obsLon)
   call obsspace_get_db(obss, " ", "latitude",         obsLat)
   call obsspace_get_db(obss, " ", "impact_parameter", obsImpP)
@@ -211,7 +212,7 @@ subroutine ufo_gnssro_bndropp2d_simobs_tl(self, geovals, hofx, obss)
   nvprof = 1  ! no. of bending angles in profile 
 
 ! loop through the obs
-  obs_loop: do iobs = 1, nobs   ! order of loop doesn't matter
+  obs_loop: do iobs = 1, nlocs   ! order of loop doesn't matter
 
 !   map the trajectory to ROPP structure x
     call init_ropp_2d_statevec(self%obsLon2d( (iobs-1)*n_horiz+1:iobs*n_horiz ), &
@@ -291,7 +292,7 @@ subroutine ufo_gnssro_bndropp2d_simobs_ad(self, geovals, hofx, obss)
   real(kind_real),    allocatable :: obsLat(:), obsLon(:), obsImpP(:), obsLocR(:), obsGeoid(:)
   type(State2dFM)                 :: x,x_ad
   type(Obs1dBangle)               :: y,y_ad
-  integer                         :: iobs,nlev,nobs,ierr,nvprof
+  integer                         :: iobs,nlev,nlocs,ierr,nvprof
   character(len=*), parameter     :: myname_="ufo_gnssro_bndropp2d_simobs_ad"
   character(max_string)           :: err_msg
   integer                         :: n_horiz
@@ -308,9 +309,9 @@ subroutine ufo_gnssro_bndropp2d_simobs_ad(self, geovals, hofx, obss)
      write(err_msg,*) myname_, ' trajectory wasnt set!'
      call abor1_ftn(err_msg)
   endif
-! check if nobs is consistent in geovals & hofx
-  if (geovals%nobs /= size(hofx)*n_horiz) then
-     write(err_msg,*) myname_, ' error: 2d nobs inconsistent!'
+! check if nlocs is consistent in geovals & hofx
+  if (geovals%nlocs /= size(hofx)*n_horiz) then
+     write(err_msg,*) myname_, ' error: 2d nlocs inconsistent!'
      call abor1_ftn(err_msg)
   endif
      
@@ -321,40 +322,40 @@ subroutine ufo_gnssro_bndropp2d_simobs_ad(self, geovals, hofx, obss)
 
 ! allocate if not yet allocated   
   if (.not. allocated(t_d%vals)) then
-      t_d%nobs = self%nobs*n_horiz
+      t_d%nlocs = self%nlocs*n_horiz
       t_d%nval = self%nval
-      allocate(t_d%vals(t_d%nval,t_d%nobs))
+      allocate(t_d%vals(t_d%nval,t_d%nlocs))
       t_d%vals = 0.0_kind_real
   endif
 
   if (.not. allocated(prs_d%vals)) then
-      prs_d%nobs = self%nobs*n_horiz
+      prs_d%nlocs = self%nlocs*n_horiz
       prs_d%nval = self%nval
-      allocate(prs_d%vals(prs_d%nval,prs_d%nobs))
+      allocate(prs_d%vals(prs_d%nval,prs_d%nlocs))
       prs_d%vals = 0.0_kind_real
   endif
 
   if (.not. allocated(q_d%vals)) then
-      q_d%nobs = self%nobs*n_horiz
+      q_d%nlocs = self%nlocs*n_horiz
       q_d%nval = self%nval
-      allocate(q_d%vals(q_d%nval,q_d%nobs))
+      allocate(q_d%vals(q_d%nval,q_d%nlocs))
       q_d%vals = 0.0_kind_real
   endif
 
   if (.not. geovals%linit ) geovals%linit=.true.
 
   nlev    = self%nval
-  nobs    = self%nobs
+  nlocs   = self%nlocs
 
-  allocate(gph_d_zero(nlev,nobs*n_horiz))
+  allocate(gph_d_zero(nlev,nlocs*n_horiz))
   gph_d_zero = 0.0
 
 ! set obs space struture
-  allocate(obsLon(nobs))
-  allocate(obsLat(nobs))
-  allocate(obsImpP(nobs))
-  allocate(obsLocR(nobs))
-  allocate(obsGeoid(nobs))
+  allocate(obsLon(nlocs))
+  allocate(obsLat(nlocs))
+  allocate(obsImpP(nlocs))
+  allocate(obsLocR(nlocs))
+  allocate(obsGeoid(nlocs))
 
   call obsspace_get_db(obss, " ", "longitude", obsLon)
   call obsspace_get_db(obss, " ", "latitude", obsLat) 
@@ -366,7 +367,7 @@ subroutine ufo_gnssro_bndropp2d_simobs_ad(self, geovals, hofx, obss)
 
 ! loop through the obs
   nvprof=1  ! no. of bending angles in profile 
-  obs_loop: do iobs = 1, nobs 
+  obs_loop: do iobs = 1, nlocs 
 
     if (hofx(iobs) .gt. missing) then
 

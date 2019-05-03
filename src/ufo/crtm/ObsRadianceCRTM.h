@@ -44,21 +44,23 @@ class ObsRadianceCRTM : public ObsOperatorBase,
   virtual ~ObsRadianceCRTM();
 
 // Obs Operator
-  void simulateObs(const GeoVaLs &, ioda::ObsVector &, const ObsBias &) const;
+  void simulateObs(const GeoVaLs &, ioda::ObsVector &, const ObsBias &) const override;
 
 // Other
-  const oops::Variables & variables() const {return *varin_;}
-  const oops::Variables & observed() const {return *varout_;}
+  const oops::Variables & variables() const override {return *varin_;}
+  const oops::Variables & observed() const override {return *varout_;}
+  const std::string & obstype() const override {return obsname_;}
 
   int & toFortran() {return keyOperRadianceCRTM_;}
   const int & toFortran() const {return keyOperRadianceCRTM_;}
 
  private:
-  void print(std::ostream &) const;
+  void print(std::ostream &) const override;
   F90hop keyOperRadianceCRTM_;
   const ioda::ObsSpace& odb_;
   boost::scoped_ptr<const oops::Variables> varin_;
   boost::scoped_ptr<const oops::Variables> varout_;
+  std::string obsname_;
 };
 
 // -----------------------------------------------------------------------------

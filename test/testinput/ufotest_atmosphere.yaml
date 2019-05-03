@@ -26,9 +26,6 @@ Observations:
    GeoVaLs: 
     norm: "72000.7229763"
     filename: "Data/amsua_n19_geoval_2018041500_m.nc4"
-    random: 0
-    window_begin: "2018-04-14T21:00:00Z"
-    window_end: "2018-04-15T03:00:00Z"
    ObsBias: {}
  - ObsType: "Radiosonde"
    ObsData: 
@@ -38,10 +35,7 @@ Observations:
    - air_temperature
    GeoVaLs: 
     norm: "22355.0135965"
-    random: 0
     filename: "Data/sondes_geoval_2018041500_m.nc4"
-    window_begin: "2018-04-14T21:00:00Z"
-    window_end: "2018-04-15T03:00:00Z"
    ObsBias: {}
  - ObsType: Aod
    channels: "4"
@@ -58,7 +52,4 @@ Observations:
    GeoVaLs: 
     norm: "64817.436359937565"
     filename: "Data/aod_geoval_2018041500_m.nc4"
-    random: 0
-    window_begin: "2018-04-14T21:00:00Z"
-    window_end: "2018-04-15T03:00:00Z"
    ObsBias: {}

@@ -92,7 +92,7 @@ type(c_ptr), value, intent(in)       :: obss
 
  ! Get number of profile and layers from geovals
  ! ---------------------------------------------
- nprofiles = geovals % nobs
+ nprofiles = geovals % nlocs
  call ufo_geovals_get_var(geovals, var_ts, temp)
  nlayers = temp % nval
  nlevels = nlayers + 1

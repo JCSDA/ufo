@@ -11,6 +11,7 @@
 #include <ostream>
 #include <string>
 
+#include "ioda/ObsDataVector.h"
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
 #include "oops/util/Printable.h"
@@ -39,7 +40,9 @@ class ROgeorealityCheck : public util::Printable,
  public:
   static const std::string classname() {return "ufo::ROgeorealityCheck";}
 
-  ROgeorealityCheck(const ioda::ObsSpace &, const eckit::Configuration &);
+  ROgeorealityCheck(const ioda::ObsSpace &, const eckit::Configuration &,
+                    boost::shared_ptr<ioda::ObsDataVector<int> >,
+                    boost::shared_ptr<ioda::ObsDataVector<float> >);
   ~ROgeorealityCheck();
 
   void priorFilter(const GeoVaLs &) const;
@@ -51,6 +54,7 @@ class ROgeorealityCheck : public util::Printable,
   void print(std::ostream &) const;
   F90rogeorealitycheck key_;
   const oops::Variables nogeovals_;
+  boost::shared_ptr<ioda::ObsDataVector<int> > flags_;
 };
 
 }  // namespace ufo

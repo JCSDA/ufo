@@ -1,0 +1,21 @@
+
+---
+test_framework_runtime_config: "--log_level=test_suite"
+window_begin: 2018-04-14T21:00:00Z
+window_end: 2018-04-15T03:00:00Z
+LinearObsOpTest:
+  testiterTL: 7
+  toleranceTL: 1.0e-5
+  toleranceAD: 1.0e-12
+Observations:
+  ObsTypes:
+  - ObsType: CoolSkin
+    ObsData:
+      ObsDataIn:
+        obsfile: Data/coolskin_fake_obs_2018041500.nc
+    GeoVaLs:
+      filename: Data/coolskin_fake_geovals_2018041500.nc
+    ObsBias: {}
+    rmsequiv: 300
+    tolerance: 1.0e-10
+

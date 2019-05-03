@@ -19,41 +19,38 @@ implicit none
 private
 integer, parameter :: max_string=800
 
-public :: ufo_geovals, ufo_geoval, ufo_geovals_get_var
-public :: ufo_geovals_init, ufo_geovals_setup, ufo_geovals_delete, ufo_geovals_print
+public :: ufo_geovals, ufo_geoval
+public :: ufo_geovals_get_var
+public :: ufo_geovals_setup, ufo_geovals_delete, ufo_geovals_print
 public :: ufo_geovals_zero, ufo_geovals_random, ufo_geovals_dotprod, ufo_geovals_scalmult
 public :: ufo_geovals_assign, ufo_geovals_add, ufo_geovals_diff, ufo_geovals_abs
 public :: ufo_geovals_minmaxavg, ufo_geovals_normalize, ufo_geovals_maxloc
 public :: ufo_geovals_read_netcdf, ufo_geovals_write_netcdf
 public :: ufo_geovals_rms, ufo_geovals_copy
 public :: ufo_geovals_analytic_init
-public :: ufo_geovals_allocone
 
 ! ------------------------------------------------------------------------------
 
 !> type to hold interpolated field for one variable, one observation
 type :: ufo_geoval
-  real(kind_real), allocatable :: vals(:,:) !< values (nval, nobs)
+  real(kind_real), allocatable :: vals(:,:) !< values (nval, nlocs)
   integer :: nval                !< number of values in profile
-  integer :: nobs                !< number of observations
+  integer :: nlocs                !< number of observations
 end type ufo_geoval
 
 !> type to hold interpolated fields required by the obs operators
 type :: ufo_geovals
-  integer :: nobs                !< number of observations
+  integer :: nlocs                !< number of observations
   integer :: nvar                !< number of variables (supposed to be the
                                  !  same for same obs operator
 
   type(ufo_geoval), allocatable :: geovals(:)  !< array of interpolated
                                                !  vertical profiles for all obs (nvar)
 
-  type(ufo_vars) :: variables    !< variables list
+  character(len=MAXVARLEN), allocatable :: variables(:)  !< variable list
 
   real(c_double) :: missing_value !< obsspace missing value mark
 
-  logical :: lalloc              !< .true. if type was initialized and allocated
-                                 !  (only geovals are allocated, not the arrays
-                                 !   inside of the ufo_geoval type)
   logical :: linit               !< .true. if all the ufo_geoval arrays inside geovals
                                  !  were allocated and have data
 end type ufo_geovals
@@ -62,38 +59,26 @@ end type ufo_geovals
 contains
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_geovals_init(self)
+subroutine ufo_geovals_setup(self, c_vars, nlocs)
 implicit none
 type(ufo_geovals), intent(inout) :: self
-
-self%lalloc = .false.
-self%linit  = .false.
-self%nvar = 0
-self%nobs = 0
-
-end subroutine ufo_geovals_init
-
-! ------------------------------------------------------------------------------
-
-subroutine ufo_geovals_setup(self, vars, nobs)
-implicit none
-type(ufo_geovals), intent(inout) :: self
-type(ufo_vars), intent(in) :: vars
-integer, intent(in) :: nobs
+type(c_ptr), intent(in)    :: c_vars
+integer, intent(in) :: nlocs
 
 integer :: ivar
 
 call ufo_geovals_delete(self)
-self%nobs = nobs
-self%nvar = vars%nv
+self%nlocs = nlocs
 self%missing_value = missing_value(self%missing_value)
-call ufo_vars_clone(vars, self%variables) 
+
+call ufo_vars_read(c_vars, self%variables)
+self%nvar = size(self%variables)
 allocate(self%geovals(self%nvar))
 do ivar = 1, self%nvar
-  self%geovals(ivar)%nobs = nobs
+  self%geovals(ivar)%nlocs = nlocs
   self%geovals(ivar)%nval = 0
 enddo
-self%lalloc = .true.
+
 end subroutine ufo_geovals_setup
 
 ! ------------------------------------------------------------------------------
@@ -104,18 +89,16 @@ type(ufo_geovals), intent(inout) :: self
 
 integer :: ivar
 
-if (self%linit) then
+if (allocated(self%geovals)) then
   do ivar = 1, self%nvar
-    deallocate(self%geovals(ivar)%vals)
+    if (allocated(self%geovals(ivar)%vals)) deallocate(self%geovals(ivar)%vals)
   enddo
   self%linit = .false.
-endif
-if (self%lalloc) then
   deallocate(self%geovals)
-  self%lalloc = .false.
   self%nvar = 0
-  self%nobs = 0
+  self%nlocs = 0
 endif
+if (allocated(self%variables)) deallocate(self%variables)
 
 end subroutine ufo_geovals_delete
 
@@ -133,7 +116,7 @@ character(max_string) :: err_msg
 integer :: ivar, jv
 
 geoval => NULL()
-if (.not. self%lalloc .or. .not. self%linit) then
+if (.not. self%linit) then
    !return
 endif
 
@@ -141,8 +124,8 @@ ivar = ufo_vars_getindex(self%variables, varname)
 
 if (ivar < 0) then
   write(0,*)'ufo_geovals_get_var looking for ',trim(varname),' in:'
-  do jv=1,self%variables%nv
-    write(0,*)'ufo_geovals_get_var ',jv,trim(self%variables%fldnames(jv))
+  do jv=1,self%nvar
+    write(0,*)'ufo_geovals_get_var ',jv,trim(self%variables(jv))
   enddo
   write(err_msg,*) myname_, trim(varname), ' doesnt exist'
   call abor1_ftn(err_msg)
@@ -154,33 +137,11 @@ end subroutine ufo_geovals_get_var
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_geovals_allocone(self) 
-implicit none
-type(ufo_geovals), intent(inout) :: self
-integer :: ivar
-
-if (.not. self%lalloc) then
-  call abor1_ftn("ufo_geovals_zero: geovals not allocated")
-endif
-
-do ivar = 1,self%nvar
-  self%geovals(ivar)%nval = 1
-  allocate(self%geovals(ivar)%vals(1,self%nobs))
-enddo
-self%linit = .true.
-
-end subroutine ufo_geovals_allocone
-
-! ------------------------------------------------------------------------------
-
 subroutine ufo_geovals_zero(self) 
 implicit none
 type(ufo_geovals), intent(inout) :: self
 integer :: ivar
 
-if (.not. self%lalloc) then
-  call abor1_ftn("ufo_geovals_zero: geovals not allocated")
-endif
 if (.not. self%linit) then
   call abor1_ftn("ufo_geovals_zero: geovals not initialized")
 endif
@@ -197,9 +158,6 @@ implicit none
 type(ufo_geovals), intent(inout) :: self
 integer :: ivar
 
-if (.not. self%lalloc) then
-  call abor1_ftn("ufo_geovals_abs: geovals not allocated")
-endif
 if (.not. self%linit) then
   call abor1_ftn("ufo_geovals_abs: geovals not initialized")
 endif
@@ -218,16 +176,13 @@ real(kind_real), intent(inout) :: vrms
 integer :: jv, jo
 real(kind_real) :: N
 
-if (.not. self%lalloc) then
-  call abor1_ftn("ufo_geovals_rms: geovals not allocated")
-endif
 if (.not. self%linit) then
   call abor1_ftn("ufo_geovals_rms: geovals not initialized")
 endif
 vrms=0.0_kind_real
 N=0.0_kind_real
 do jv = 1, self%nvar
-   do jo = 1, self%nobs
+   do jo = 1, self%nlocs
       vrms = vrms + Sum(self%geovals(jv)%vals(:,jo)**2)
       N=N+self%geovals(jv)%nval
    enddo   
@@ -246,9 +201,6 @@ type(ufo_geovals), intent(inout) :: self
 integer :: ivar
 integer :: rseed = 7
 
-if (.not. self%lalloc) then
-  call abor1_ftn("ufo_geovals_random: geovals not allocated")
-endif
 if (.not. self%linit) then
   call abor1_ftn("ufo_geovals_random: geovals not initialized")
 endif
@@ -266,12 +218,12 @@ type(ufo_geovals), intent(inout) :: self
 real(kind_real), intent(in) :: zz
 integer :: jv, jo, jz
 
-if (.not. self%lalloc .or. .not. self%linit) then
+if (.not. self%linit) then
   call abor1_ftn("ufo_geovals_scalmult: geovals not allocated")
 endif
 
 do jv=1,self%nvar
-  do jo=1,self%nobs
+  do jo=1,self%nlocs
     do jz = 1, self%geovals(jv)%nval
       self%geovals(jv)%vals(jz,jo) = zz * self%geovals(jv)%vals(jz,jo)
     enddo
@@ -290,28 +242,28 @@ integer :: jv, jo, jz
 integer :: iv
 character(max_string) :: err_msg
 
-if (.not. self%lalloc .or. .not. self%linit) then
+if (.not. self%linit) then
   call abor1_ftn("ufo_geovals_scalmult: geovals not allocated")
 endif
-if (.not. rhs%lalloc .or. .not. rhs%linit) then
+if (.not. rhs%linit) then
   call abor1_ftn("ufo_geovals_scalmult: geovals not allocated")
 endif
 
-if (self%nobs /= rhs%nobs) then
-  call abor1_ftn("ufo_geovals_assign: nobs different between lhs and rhs")
+if (self%nlocs /= rhs%nlocs) then
+  call abor1_ftn("ufo_geovals_assign: nlocs different between lhs and rhs")
 endif
 
 do jv=1,self%nvar
-  iv = ufo_vars_getindex(rhs%variables, self%variables%fldnames(jv))
+  iv = ufo_vars_getindex(rhs%variables, self%variables(jv))
   if (iv < 0) then
-    write(err_msg,*) 'ufo_geovals_assign: var ', trim(self%variables%fldnames(jv)), ' doesnt exist in rhs'
+    write(err_msg,*) 'ufo_geovals_assign: var ', trim(self%variables(jv)), ' doesnt exist in rhs'
     call abor1_ftn(trim(err_msg))
   endif
   if (self%geovals(jv)%nval /= rhs%geovals(iv)%nval) then
-    write(err_msg,*) 'ufo_geovals_assign: nvals for var ', trim(self%variables%fldnames(jv)), ' are different in lhs and rhs'
+    write(err_msg,*) 'ufo_geovals_assign: nvals for var ', trim(self%variables(jv)), ' are different in lhs and rhs'
     call abor1_ftn(trim(err_msg))
   endif
-  do jo=1,self%nobs
+  do jo=1,self%nlocs
     do jz = 1, self%geovals(jv)%nval
       self%geovals(jv)%vals(jz,jo) = rhs%geovals(iv)%vals(jz,jo)
     enddo
@@ -331,25 +283,25 @@ integer :: jv, jo, jz
 integer :: iv
 character(max_string) :: err_msg
 
-if (.not. self%lalloc .or. .not. self%linit) then
+if (.not. self%linit) then
   call abor1_ftn("ufo_geovals_add: geovals not allocated")
 endif
-if (.not. other%lalloc .or. .not. other%linit) then
+if (.not. other%linit) then
   call abor1_ftn("ufo_geovals_add: geovals not allocated")
 endif
 
-if (self%nobs /= other%nobs) then
-  call abor1_ftn("ufo_geovals_assign: nobs different between lhs and rhs")
+if (self%nlocs /= other%nlocs) then
+  call abor1_ftn("ufo_geovals_assign: nlocs different between lhs and rhs")
 endif
 
 do jv=1,self%nvar
-  iv = ufo_vars_getindex(other%variables, self%variables%fldnames(jv))
+  iv = ufo_vars_getindex(other%variables, self%variables(jv))
   if (iv .ne. -1) then !Only add if exists in RHS
     if (self%geovals(jv)%nval /= other%geovals(iv)%nval) then
-      write(err_msg,*) 'ufo_geovals_assign: nvals for var ', trim(self%variables%fldnames(jv)), ' are different in lhs and rhs'
+      write(err_msg,*) 'ufo_geovals_assign: nvals for var ', trim(self%variables(jv)), ' are different in lhs and rhs'
       call abor1_ftn(trim(err_msg))
     endif
-    do jo=1,self%nobs
+    do jo=1,self%nlocs
       do jz = 1, self%geovals(jv)%nval
         self%geovals(jv)%vals(jz,jo) = self%geovals(jv)%vals(jz,jo) + other%geovals(iv)%vals(jz,jo)
       enddo
@@ -370,25 +322,25 @@ integer :: jv, jo, jz
 integer :: iv
 character(max_string) :: err_msg
 
-if (.not. self%lalloc .or. .not. self%linit) then
+if (.not. self%linit) then
   call abor1_ftn("ufo_geovals_diff: geovals not allocated")
 endif
-if (.not. other%lalloc .or. .not. other%linit) then
+if (.not. other%linit) then
   call abor1_ftn("ufo_geovals_diff: geovals not allocated")
 endif
 
-if (self%nobs /= other%nobs) then
-  call abor1_ftn("ufo_geovals_assign: nobs different between lhs and rhs")
+if (self%nlocs /= other%nlocs) then
+  call abor1_ftn("ufo_geovals_assign: nlocs different between lhs and rhs")
 endif
 
 do jv=1,self%nvar
-  iv = ufo_vars_getindex(other%variables, self%variables%fldnames(jv))
+  iv = ufo_vars_getindex(other%variables, self%variables(jv))
   if (iv .ne. -1) then !Only subtract if exists in RHS
     if (self%geovals(jv)%nval /= other%geovals(iv)%nval) then
-      write(err_msg,*) 'ufo_geovals_assign: nvals for var ', trim(self%variables%fldnames(jv)), ' are different in lhs and rhs'
+      write(err_msg,*) 'ufo_geovals_assign: nvals for var ', trim(self%variables(jv)), ' are different in lhs and rhs'
       call abor1_ftn(trim(err_msg))
     endif
-    do jo=1,self%nobs
+    do jo=1,self%nlocs
       do jz = 1, self%geovals(jv)%nval
         self%geovals(jv)%vals(jz,jo) = self%geovals(jv)%vals(jz,jo) - other%geovals(iv)%vals(jz,jo)
       enddo
@@ -408,26 +360,26 @@ type(ufo_geovals), intent(in) :: self
 type(ufo_geovals), intent(inout) :: other
 integer :: jv
 
-if (.not. self%lalloc .or. .not. self%linit) then
+if (.not. self%linit) then
   call abor1_ftn("ufo_geovals_copy: geovals not defined")
 endif
 
 call ufo_geovals_delete(other)
 
-call ufo_vars_clone(self%variables,other%variables)
-
-other%nobs = self%nobs
+other%nlocs = self%nlocs
 other%nvar = self%nvar
+allocate(other%variables(other%nvar))
+other%variables(:) = self%variables(:)
 
 allocate(other%geovals(other%nvar))
 do jv = 1, other%nvar
   other%geovals(jv)%nval = self%geovals(jv)%nval
-  other%geovals(jv)%nobs = self%geovals(jv)%nobs
-  allocate(other%geovals(jv)%vals(other%geovals(jv)%nval, other%geovals(jv)%nobs))
+  other%geovals(jv)%nlocs = self%geovals(jv)%nlocs
+  allocate(other%geovals(jv)%vals(other%geovals(jv)%nval, other%geovals(jv)%nlocs))
   other%geovals(jv)%vals(:,:) = self%geovals(jv)%vals(:,:)
 enddo
 
-other%lalloc = .true.
+other%missing_value = self%missing_value
 other%linit = .true.
 
 end subroutine ufo_geovals_copy
@@ -477,13 +429,13 @@ real(kind_real) :: p0, kz, u0, v0, w0, t0, phis0, ps0, rho0, hum0
 real(kind_real) :: q1, q2, q3, q4
 integer :: ivar, iloc, ival
 
-if (.not. self%lalloc .or. .not. self%linit) then
+if (.not. self%linit) then
   call abor1_ftn("ufo_geovals_analytic_init: geovals not defined")
 endif
 
 ! The last variable should be the ln pressure coordinate.  That's
 ! where we get the height information for the analytic init
-if (trim(self%variables%fldnames(self%nvar)) /= trim(var_prsl)) then
+if (trim(self%variables(self%nvar)) /= trim(var_prsl)) then
   call abor1_ftn("ufo_geovals_analytic_init: pressure coordinate not defined")
 endif
 
@@ -491,7 +443,7 @@ deg_to_rad = pi/180.0_kind_real
 
 do ivar = 1, self%nvar-1
 
-   do iloc = 1, self%geovals(ivar)%nobs
+   do iloc = 1, self%geovals(ivar)%nlocs
 
       ! convert lat and lon to radians
       rlat = deg_to_rad * locs%lat(iloc)
@@ -533,7 +485,7 @@ do ivar = 1, self%nvar-1
          end select init_option
 
          ! currently only temperture is implemented         
-         if (trim(self%variables%fldnames(ivar)) == trim(var_tv)) then
+         if (trim(self%variables(ivar)) == trim(var_tv)) then
             ! Warning: we may need a conversion from temperature to
             ! virtual temperture here
             self%geovals(ivar)%vals(ival,iloc) = t0
@@ -568,10 +520,10 @@ type(ufo_geovals), intent(in) :: other   !> Reference GeoVaLs object (RHS)
 integer :: jv, jo, jz
 real(kind_real) :: over_nloc, vrms, norm
 
-if (.not. self%lalloc .or. .not. self%linit) then
+if (.not. self%linit) then
   call abor1_ftn("ufo_geovals_normalize: geovals not allocated")
 endif
-if (.not. other%lalloc .or. .not. other%linit) then
+if (.not. other%linit) then
   call abor1_ftn("ufo_geovals_normalize: geovals not allocated")
 endif
 if (self%nvar /= other%nvar) then
@@ -586,10 +538,10 @@ do jv=1,self%nvar
    !! object as a reference, since this may be the exact analytic answer
 
    over_nloc = 1.0_kind_real / &
-        (real(other%nobs,kind_real)*real(other%geovals(jv)%nval,kind_real))
+        (real(other%nlocs,kind_real)*real(other%geovals(jv)%nval,kind_real))
 
    vrms = 0.0_kind_real
-   do jo = 1, other%nobs
+   do jo = 1, other%nlocs
       do jz = 1, other%geovals(jv)%nval
          vrms = vrms + other%geovals(jv)%vals(jz,jo)**2
       enddo
@@ -602,7 +554,7 @@ do jv=1,self%nvar
    endif
 
    ! Now loop through the LHS locations to compute the normalized value
-   do jo=1,self%nobs
+   do jo=1,self%nlocs
       do jz = 1, self%geovals(jv)%nval
          self%geovals(jv)%vals(jz,jo) = norm*self%geovals(jv)%vals(jz,jo)
       enddo
@@ -624,11 +576,11 @@ type(fckit_mpi_comm) :: f_comm
 
 f_comm = fckit_mpi_comm()
 
-if (.not. self%lalloc .or. .not. self%linit) then
+if (.not. self%linit) then
   call abor1_ftn("ufo_geovals_dotprod: geovals not allocated")
 endif
 
-if (.not. other%lalloc .or. .not. other%linit) then
+if (.not. other%linit) then
   call abor1_ftn("ufo_geovals_dotprod: geovals not allocated")
 endif
 
@@ -637,7 +589,7 @@ prod=0.0
 do ivar = 1, self%nvar
   nval = self%geovals(ivar)%nval
   do ival = 1, nval
-     do iobs = 1, self%nobs
+     do iobs = 1, self%nlocs
       if ((self%geovals(ivar)%vals(ival,iobs) .ne. self%missing_value) .and. &
           (other%geovals(ivar)%vals(ival,iobs) .ne. self%missing_value)) then
         prod = prod + self%geovals(ivar)%vals(ival,iobs) * &
@@ -668,7 +620,7 @@ kobs = 0
 pmin = huge(pmin)
 pmax = -huge(pmax)
 prms = 0.0_kind_real
-do jo = 1, self%nobs
+do jo = 1, self%nlocs
   do jz = 1, self%geovals(jv)%nval
     if (self%geovals(jv)%vals(jz,jo) .ne. self%missing_value) then
       kobs = kobs + 1
@@ -700,7 +652,7 @@ type(ufo_geovals), intent(in) :: self
 real(kind_real) :: vrms
 integer :: jv, jo, jz
 
-if (.not. self%lalloc .or. .not. self%linit) then
+if (.not. self%linit) then
   call abor1_ftn("ufo_geovals_maxloc: geovals not allocated")
 endif
 
@@ -709,7 +661,7 @@ iobs = 1
 ivar = 1
 
 do jv = 1,self%nvar
-   do jo = 1, self%nobs
+   do jo = 1, self%nlocs
 
       vrms = 0.0_kind_real
       do jz = 1, self%geovals(jv)%nval
@@ -729,147 +681,93 @@ end subroutine ufo_geovals_maxloc
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_geovals_read_netcdf(self, filename, vars, t1, t2)
-use datetime_mod
-use twindow_utils_mod
-
-use nc_diag_read_mod, only: nc_diag_read_get_global_attr
-use nc_diag_read_mod, only: nc_diag_read_get_dim
-use nc_diag_read_mod, only: nc_diag_read_get_var_dims, nc_diag_read_check_var
-use nc_diag_read_mod, only: nc_diag_read_get_var_type
-use nc_diag_read_mod, only: nc_diag_read_init, nc_diag_read_close
+subroutine ufo_geovals_read_netcdf(self, filename, c_vars)
+use netcdf
 
 implicit none
 type(ufo_geovals), intent(inout)  :: self
 character(max_string), intent(in) :: filename
-type(ufo_vars), intent(in)        :: vars
-type(datetime), intent(in)        :: t1
-type(datetime), intent(in)        :: t2
+type(c_ptr), intent(in)           :: c_vars
 
-integer :: iunit, ivar, nobs, nval, fvlen
-integer :: nvardim, vartype
-integer, allocatable, dimension(:) :: vardims
+integer :: nlocs, nlocs_all, nlocs_var
+integer :: nval
+
+integer :: ncid, dimid, varid, vartype, ndims
+integer, dimension(3) :: dimids
+integer :: ivar
 
 character(max_string) :: err_msg
 
 type(random_distribution) :: distribution
 integer, allocatable, dimension(:) :: dist_indx
 
-integer :: date_time_attr
-type(datetime) :: refdate
-integer :: tw_nobs
-integer, allocatable :: tw_indx(:)
-real(kind_real), allocatable :: time_offset(:,:)
+real, allocatable :: field2d(:,:), field1d(:)
 
-integer :: i
-integer :: j
+! open netcdf file
+call check('nf90_open', nf90_open(trim(filename),nf90_nowrite,ncid))
 
-! open netcdf file and read dimensions
-call nc_diag_read_init(filename, iunit)
-if (allocated(vardims)) deallocate(vardims)
-call nc_diag_read_get_var_dims(iunit, vars%fldnames(1), nvardim, vardims)
-if (nvardim .eq. 1) then
-  fvlen = vardims(1)
-else
-  fvlen = vardims(2)
-endif
+! find how many locs are in the file
+call check('nf90_inq_dimid', nf90_inq_dimid(ncid, "nlocs", dimid))
+call check('nf90_inquire_dimension', nf90_inquire_dimension(ncid, dimid, len = nlocs_all))
 
 !> round-robin distribute the observations to PEs
 !> Calculate how many obs. on each PE
-distribution=random_distribution(fvlen)
-nobs=distribution%nobs_pe()
-allocate(dist_indx(nobs))
+distribution=random_distribution(nlocs_all)
+nlocs=distribution%nobs_pe()
+allocate(dist_indx(nlocs))
 dist_indx = distribution%indx
 
-! Strip out obs that fall outside the timing window.
-
-! Read in the date_time attribute and for a datetime object
-call nc_diag_read_get_global_attr(iunit, "date_time", date_time_attr)
-
-! Create the datetime object with a dummy date, then set it from the
-! date_time attribute.
-call datetime_create("1000-01-01T00:00:00Z", refdate)
-call datetime_from_ifs(refdate, date_time_attr/100, 0)
-
-! Read in the time variable
-allocate(time_offset(1,nobs))
-if (allocated(vardims)) deallocate(vardims)
-call nc_diag_read_get_var_dims(iunit, "time", nvardim, vardims)
-vartype = nc_diag_read_get_var_type(iunit, "time")
-call ufo_geovals_read_nc_var(iunit, nvardim, vardims, vartype, dist_indx, "time", time_offset)
-
-! Generate the timing window indices
-allocate(tw_indx(nobs))
-call gen_twindow_index(refdate, t1, t2, nobs, time_offset(1,:), tw_indx, tw_nobs)
-
-! Adjust dist_indx if tw_nobs is different than original nobs
-if (tw_nobs .ne. nobs) then
-  nobs = tw_nobs
-  if (allocated(dist_indx)) deallocate(dist_indx)
-  allocate(dist_indx(nobs))
-  do i = 1, nobs
-    dist_indx(i) = distribution%indx(tw_indx(i))
-  enddo
-endif
-
-deallocate(time_offset)
-deallocate(tw_indx)
-
 ! allocate geovals structure
-call ufo_geovals_init(self)
-call ufo_geovals_setup(self, vars, nobs)
+call ufo_geovals_setup(self, c_vars, nlocs)
 
-do ivar = 1, vars%nv
-  if (.not. nc_diag_read_check_var(iunit, vars%fldnames(ivar))) then
-     write(err_msg,*) 'ufo_geovals_read_netcdf: var ', trim(vars%fldnames(ivar)), ' doesnt exist'
-     call abor1_ftn(trim(err_msg))
-  endif
-  !> get dimensions of variable
-  if (allocated(vardims)) deallocate(vardims)
-  call nc_diag_read_get_var_dims(iunit, vars%fldnames(ivar), nvardim, vardims)
-  !> get variable type
-  vartype = nc_diag_read_get_var_type(iunit, vars%fldnames(ivar))
-  !> read 1d vars (only double precision and integer for now)
-  if (nvardim == 1) then
-    if (vardims(1) /= fvlen) call abor1_ftn('ufo_geovals_read_netcdf: var dim /= fvlen')
+do ivar = 1, self%nvar
+  call check('nf90_inq_varid', nf90_inq_varid(ncid, self%variables(ivar), varid))
+  call check('nf90_inquire_variable', nf90_inquire_variable(ncid, varid, xtype = vartype, &
+                                         ndims = ndims, dimids = dimids))
+  !> read 1d variable
+  if (ndims == 1) then
+    call check('nf90_inquire_dimension', nf90_inquire_dimension(ncid, dimids(1), len = nlocs_var))
+    if (nlocs_var /= nlocs_all) then
+      call abor1_ftn('ufo_geovals_read_netcdf: var dim /= nlocs_all')
+    endif
     nval = 1
-
     !> allocate geoval for this variable
     self%geovals(ivar)%nval = nval
-    allocate(self%geovals(ivar)%vals(nval,nobs))
+    allocate(self%geovals(ivar)%vals(nval,nlocs))
 
-    ! read the variable out of the file
-    call ufo_geovals_read_nc_var(iunit, nvardim, vardims, vartype, dist_indx, &
-                                 vars%fldnames(ivar), self%geovals(ivar)%vals)
-
-    ! set the missing value equal to IODA missing_value
-    where (self%geovals(ivar)%vals(1,:) > 1.0e08) self%geovals(ivar)%vals(1,:) = self%missing_value
-
-  !> read 2d vars (only double precision and integer for now)
-  elseif (nvardim == 2) then
-    if (vardims(2) /= fvlen) call abor1_ftn('ufo_geovals_read_netcdf: var dim /= fvlen')
-    nval = vardims(1)
-
+    allocate(field1d(nlocs_var))
+    call check('nf90_get_var', nf90_get_var(ncid, varid, field1d))
+    self%geovals(ivar)%vals(1,:) = field1d(dist_indx)
+    deallocate(field1d)
+  !> read 2d variable
+  elseif (ndims == 2) then
+    call check('nf90_inquire_dimension', nf90_inquire_dimension(ncid, dimids(1), len = nval))
+    call check('nf90_inquire_dimension', nf90_inquire_dimension(ncid, dimids(2), len = nlocs_var))
+    if (nlocs_var /= nlocs_all) then
+      call abor1_ftn('ufo_geovals_read_netcdf: var dim /= nlocs_all')
+    endif
     !> allocate geoval for this variable
     self%geovals(ivar)%nval = nval
-    allocate(self%geovals(ivar)%vals(nval,nobs))
-
-    ! read the variable out of the file
-    call ufo_geovals_read_nc_var(iunit, nvardim, vardims, vartype, dist_indx, &
-                                 vars%fldnames(ivar), self%geovals(ivar)%vals)
-
-    ! set the missing value equal to IODA missing_value
-    where (self%geovals(ivar)%vals > 1.0e08) self%geovals(ivar)%vals = self%missing_value
-    
+    allocate(self%geovals(ivar)%vals(nval,nlocs))
+    allocate(field2d(nval, nlocs_var))
+    call check('nf90_get_var', nf90_get_var(ncid, varid, field2d))
+    self%geovals(ivar)%vals(:,:) = field2d(:,dist_indx)
+    deallocate(field2d)
   !> only 1d & 2d vars
   else
     call abor1_ftn('ufo_geovals_read_netcdf: can only read 1d and 2d fields')
   endif
+
+  ! set the missing value equal to IODA missing_value
+  where (self%geovals(ivar)%vals > 1.0e08) self%geovals(ivar)%vals = self%missing_value
+    
 enddo
+
+deallocate(dist_indx)
 
 self%linit = .true.
 
-call nc_diag_read_close(filename)
+call check('nf90_close', nf90_close(ncid))
 
 end subroutine ufo_geovals_read_netcdf
 
@@ -881,21 +779,21 @@ type(ufo_geovals), intent(inout)  :: self
 character(max_string), intent(in) :: filename
 
 integer :: i
-integer :: ncid, dimid_nobs, dimid_nval, dims(2)
+integer :: ncid, dimid_nlocs, dimid_nval, dims(2)
 integer, allocatable :: ncid_var(:)
 
 allocate(ncid_var(self%nvar))
 
 call check('nf90_create', nf90_create(trim(filename),nf90_hdf5,ncid))
-call check('nf90_def_dim', nf90_def_dim(ncid,'nobs',self%nobs, dimid_nobs))
-dims(2) = dimid_nobs
+call check('nf90_def_dim', nf90_def_dim(ncid,'nlocs',self%nlocs, dimid_nlocs))
+dims(2) = dimid_nlocs
 
 do i = 1, self%nvar
   call check('nf90_def_dim', &
-       nf90_def_dim(ncid,trim(self%variables%fldnames(i))//"_nval",self%geovals(i)%nval, dimid_nval))
+       nf90_def_dim(ncid,trim(self%variables(i))//"_nval",self%geovals(i)%nval, dimid_nval))
   dims(1) = dimid_nval
   call check('nf90_def_var',  &
-       nf90_def_var(ncid,trim(self%variables%fldnames(i)),nf90_double,dims,ncid_var(i)))
+       nf90_def_var(ncid,trim(self%variables(i)),nf90_double,dims,ncid_var(i)))
 enddo
 
 call check('nf90_enddef', nf90_enddef(ncid))
@@ -911,83 +809,19 @@ end subroutine ufo_geovals_write_netcdf
 
 ! ------------------------------------------------------------------------------
 subroutine check(action, status)
-
 use netcdf, only: nf90_noerr, nf90_strerror
-
 implicit none
 
 integer, intent (in) :: status
 character (len=*), intent (in) :: action
+character(max_string) :: err_msg
 
 if(status /= nf90_noerr) then
-   print *, "During action: ", trim(action), ", received error: ", trim(nf90_strerror(status))
-   stop 2
+  write(err_msg,*) "During action: ", trim(action), ", received error: ", trim(nf90_strerror(status))
+  call abor1_ftn(err_msg)
 end if
 
 end subroutine check
-
-! ------------------------------------------------------------------------------
-subroutine ufo_geovals_read_nc_var(iunit, nvardim, vardims, vartype, &
-                                   dist_indx, varname, varvalues)
-  use netcdf, only: NF90_FLOAT, NF90_DOUBLE, NF90_INT
-  use nc_diag_read_mod, only: nc_diag_read_get_var
-
-  implicit none
-
-  integer, intent(in) :: iunit
-  integer, intent(in) :: nvardim
-  integer, intent(in) :: vardims(:)
-  integer, intent(in) :: vartype
-  integer, intent(in) :: dist_indx(:)
-  character(len=*)    :: varname
-  real(kind_real)     :: varvalues(:,:)
-
-  real(kind_real), allocatable :: fieldr2d(:,:), fieldr1d(:)
-  real, allocatable :: fieldf2d(:,:), fieldf1d(:)
-  integer, allocatable :: fieldi2d(:,:), fieldi1d(:)
-
-  ! The caller is responsible for making sure that only 1D or 2D vars are being read.
-  if (nvardim == 1) then
-    if (vartype == NF90_DOUBLE) then
-       allocate(fieldr1d(vardims(1)))
-       call nc_diag_read_get_var(iunit, varname, fieldr1d)
-       varvalues(1,:) = fieldr1d(dist_indx)
-       deallocate(fieldr1d)
-    elseif (vartype == NF90_FLOAT) then
-       allocate(fieldf1d(vardims(1)))
-       call nc_diag_read_get_var(iunit, varname, fieldf1d)  
-       varvalues(1,:) = dble(fieldf1d(dist_indx))
-       deallocate(fieldf1d)
-    elseif (vartype == NF90_INT) then
-       allocate(fieldi1d(vardims(1)))
-       call nc_diag_read_get_var(iunit, varname, fieldi1d)
-       varvalues(1,:) = fieldi1d(dist_indx)
-       deallocate(fieldi1d)
-    else
-       call abor1_ftn('ufo_geovals_read_netcdf: can only read double, float and int')
-    endif
-  else
-    if (vartype == NF90_DOUBLE) then
-       allocate(fieldr2d(vardims(1), vardims(2)))
-       call nc_diag_read_get_var(iunit, varname, fieldr2d)
-       varvalues = fieldr2d(:,dist_indx)
-       deallocate(fieldr2d)
-    elseif (vartype == NF90_FLOAT) then
-       allocate(fieldf2d(vardims(1), vardims(2)))
-       call nc_diag_read_get_var(iunit, varname, fieldf2d)
-       varvalues = fieldf2d(:,dist_indx)
-       deallocate(fieldf2d)
-    elseif (vartype == NF90_INT) then
-       allocate(fieldi2d(vardims(1), vardims(2)))
-       call nc_diag_read_get_var(iunit, varname, fieldi2d)
-       varvalues = fieldi2d(:,dist_indx)
-       deallocate(fieldi2d)
-    else
-       call abor1_ftn('ufo_geovals_read_netcdf: can only read double, float and int')
-    endif
-  endif
-
-end subroutine ufo_geovals_read_nc_var
 
 ! ------------------------------------------------------------------------------
 
@@ -1001,7 +835,7 @@ character(MAXVARLEN) :: varname
 integer :: ivar
 
 do ivar = 1, self%nvar
-  varname = self%variables%fldnames(ivar)
+  varname = self%variables(ivar)
   call ufo_geovals_get_var(self, varname, geoval)
   if (associated(geoval)) then
     print *, 'geoval test: ', trim(varname), geoval%nval, geoval%vals(:,iobs)

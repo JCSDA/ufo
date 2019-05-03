@@ -27,11 +27,11 @@ module ufo_marinevertinterp_tlad_mod
     logical,                    public :: ltraj = .false. !< trajectory set?    
     character(len=max_string),  public :: varin(1)
 
-    integer                            :: nobs       !< Number of observations
+    integer                            :: nlocs       !< Number of observations
     integer                            :: nval       !< Number of level in model's profiles 
     type(ufo_geoval)                   :: var        !< traj
     type(ufo_geoval)                   :: h          !< Layer thickness (traj) ] obs locations
-    real (kind=kind_real), allocatable :: depth(:,:) !< Depth                     [nval x nobs]     
+    real (kind=kind_real), allocatable :: depth(:,:) !< Depth                     [nval x nlocs]     
     real (kind=kind_real), allocatable :: deptho(:)  !< Observation location
     real(kind_real), allocatable       :: wf(:)      !< Vertical interpolation weights
     integer, allocatable               :: wi(:)      !< Vertical interpolation indices
@@ -88,7 +88,7 @@ subroutine ufo_marinevertinterp_tlad_settraj(self, geovals, obss)
     character(max_string) :: err_msg
 
     type(ufo_geoval), pointer :: var, h
-    integer :: nobs, nlev, iobs, ilev
+    integer :: nlocs, nlev, iobs, ilev
 
     real(kind_real), allocatable :: obs_depth(:)
     integer :: obss_nlocs
@@ -99,16 +99,16 @@ subroutine ufo_marinevertinterp_tlad_settraj(self, geovals, obss)
 
     call ufo_marinevertinterp_tlad_delete(self)
 
-    nobs = h%nobs
+    nlocs = h%nlocs
     nlev = h%nval
     
-    self%nobs = nobs
+    self%nlocs = nlocs
     self%nval = nlev
     
     self%var = var
     self%h    = h
 
-    allocate(self%deptho(nobs))
+    allocate(self%deptho(nlocs))
 
     obss_nlocs = obsspace_get_nlocs(obss)
     allocate(obs_depth(obss_nlocs))
@@ -117,8 +117,8 @@ subroutine ufo_marinevertinterp_tlad_settraj(self, geovals, obss)
     self%deptho = obs_depth
 
     !< Depth from layer thickness
-    allocate(self%depth(nlev,nobs))
-    do iobs = 1, nobs
+    allocate(self%depth(nlev,nlocs))
+    do iobs = 1, nlocs
        self%depth(1,iobs)=0.5*self%h%vals(1,iobs)       
        do ilev = 2, nlev
           self%depth(ilev,iobs)=sum(self%h%vals(1:ilev-1,iobs))+0.5*self%h%vals(ilev,iobs)
@@ -126,8 +126,8 @@ subroutine ufo_marinevertinterp_tlad_settraj(self, geovals, obss)
     end do
 
     !< Interpolation weight
-    allocate(self%wi(nobs),self%wf(nobs))
-    do iobs = 1, nobs    
+    allocate(self%wi(nlocs),self%wf(nlocs))
+    do iobs = 1, nlocs    
        call vert_interp_weights(nlev,self%deptho(iobs),self%depth(:,iobs),self%wi(iobs),self%wf(iobs))
     end do
     self%ltraj    = .true.
@@ -149,7 +149,7 @@ subroutine ufo_marinevertinterp_simobs_tl(self, geovals, hofx, obss)
 
     character(len=*), parameter :: myname_="ufo_marinevertinterp_simobs_tl"
     character(max_string) :: err_msg
-    integer :: iobs, ilev, nlev, nobs
+    integer :: iobs, ilev, nlev, nlocs
     type(ufo_geoval), pointer :: var_d !< Increments from geoval
 
     ! check if trajectory was set
@@ -158,9 +158,9 @@ subroutine ufo_marinevertinterp_simobs_tl(self, geovals, hofx, obss)
        call abor1_ftn(err_msg)
     endif
 
-    ! check if nobs is consistent in geovals & hofx
-    if (geovals%nobs /= size(hofx,1)) then
-       write(err_msg,*) myname_, ' error: nobs inconsistent!'
+    ! check if nlocs is consistent in geovals & hofx
+    if (geovals%nlocs /= size(hofx,1)) then
+       write(err_msg,*) myname_, ' error: nlocs inconsistent!'
        call abor1_ftn(err_msg)
     endif
 
@@ -168,11 +168,11 @@ subroutine ufo_marinevertinterp_simobs_tl(self, geovals, hofx, obss)
     call ufo_geovals_get_var(geovals, self%varin(1), var_d)
 
     nlev = var_d%nval
-    nobs = var_d%nobs        
+    nlocs = var_d%nlocs        
 
     ! linear vertical interp
     hofx = 0.0
-    do iobs = 1,nobs
+    do iobs = 1,nlocs
        call vert_interp_apply(nlev, var_d%vals(:,iobs), hofx(iobs), self%wi(iobs), self%wf(iobs))
     enddo
 
@@ -194,7 +194,7 @@ subroutine ufo_marinevertinterp_simobs_ad(self, geovals, hofx, obss)
 
     real (kind=kind_real) :: deptho !< Observation location
         
-    integer :: iobs, nobs, ilev, nlev
+    integer :: iobs, nlocs, ilev, nlev
     type(ufo_geoval), pointer :: dvar
     real(c_double) :: missing
 
@@ -207,9 +207,9 @@ subroutine ufo_marinevertinterp_simobs_ad(self, geovals, hofx, obss)
        call abor1_ftn(err_msg)
     endif
 
-    ! check if nobs is consistent in geovals & hofx
-    if (geovals%nobs /= size(hofx,1)) then
-       write(err_msg,*) myname_, ' error: nobs inconsistent!'
+    ! check if nlocs is consistent in geovals & hofx
+    if (geovals%nlocs /= size(hofx,1)) then
+       write(err_msg,*) myname_, ' error: nlocs inconsistent!'
        call abor1_ftn(err_msg)
     endif
 
@@ -219,7 +219,7 @@ subroutine ufo_marinevertinterp_simobs_ad(self, geovals, hofx, obss)
     call ufo_geovals_get_var(geovals, var_ocn_salt, dvar)
     
     nlev = self%nval
-    nobs = self%nobs
+    nlocs = self%nlocs
     
     if (.not. allocated(dvar%vals)) allocate(dvar%vals(nlev, size(hofx,1)))
 

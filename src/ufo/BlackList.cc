@@ -28,8 +28,10 @@ namespace ufo {
 static oops::FilterMaker<UfoTrait, oops::ObsFilter<UfoTrait, BlackList>> mkBlkLst_("BlackList");
 // -----------------------------------------------------------------------------
 
-BlackList::BlackList(ioda::ObsSpace & obsdb, const eckit::Configuration & config)
-  : obsdb_(obsdb), config_(config), geovars_(preProcessWhere(config_))
+BlackList::BlackList(ioda::ObsSpace & obsdb, const eckit::Configuration & config,
+                     boost::shared_ptr<ioda::ObsDataVector<int> > flags,
+                     boost::shared_ptr<ioda::ObsDataVector<float> >)
+  : obsdb_(obsdb), config_(config), geovars_(preProcessWhere(config_)), flags_(*flags)
 {
   oops::Log::debug() << "BlackList: config = " << config_ << std::endl;
   oops::Log::debug() << "BlackList: geovars = " << geovars_ << std::endl;
@@ -43,18 +45,15 @@ BlackList::~BlackList() {}
 
 void BlackList::priorFilter(const GeoVaLs & gv) const {
   const size_t nobs = obsdb_.nlocs();
-  const std::string qcgrp = config_.getString("QCname");
   const oops::Variables vars(config_.getStringVector("observed"));
 
   std::vector<bool> blacklisted = processWhere(obsdb_, gv, config_);
 
-  ioda::ObsDataVector<int> flags(obsdb_, vars, qcgrp);
   for (size_t jv = 0; jv < vars.size(); ++jv) {
     for (size_t jobs = 0; jobs < nobs; ++jobs) {
-      if (blacklisted[jobs] && flags[jv][jobs] == 0) flags[jv][jobs] = QCflags::black;
+      if (blacklisted[jobs] && flags_[jv][jobs] == 0) flags_[jv][jobs] = QCflags::black;
     }
   }
-  flags.save(qcgrp);
 }
 
 // -----------------------------------------------------------------------------

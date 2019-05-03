@@ -35,28 +35,21 @@ contains
 !> Linked list implementation
 #include "linkedList_c.f"
 ! ------------------------------------------------------------------------------
-
-subroutine ufo_geovals_setup_c(c_key_self, c_key_locs, c_vars) bind(c,name='ufo_geovals_setup_f90')
+!> Setup GeoVaLs (store nlocs, variables; don't do allocation yet)
+subroutine ufo_geovals_setup_c(c_key_self, c_nlocs, c_vars) bind(c,name='ufo_geovals_setup_f90')
 use config_mod
 implicit none
 integer(c_int), intent(inout) :: c_key_self
-integer(c_int), intent(in) :: c_key_locs
+integer(c_int), intent(in) :: c_nlocs
 type(c_ptr), intent(in)    :: c_vars
 
 type(ufo_geovals), pointer :: self
-type(ufo_locs), pointer :: locs
-type(ufo_vars) :: vars
 
 call ufo_geovals_registry%init()
 call ufo_geovals_registry%add(c_key_self)
 call ufo_geovals_registry%get(c_key_self, self)
 
-call ufo_locs_registry%get(c_key_locs,locs)
-
-call ufo_vars_setup(vars, c_vars)
-
-call ufo_geovals_init(self)
-call ufo_geovals_setup(self, vars, locs%nlocs)
+call ufo_geovals_setup(self, c_vars, c_nlocs)
 
 end subroutine ufo_geovals_setup_c
 
@@ -78,6 +71,7 @@ call ufo_geovals_copy(self, other)
 end subroutine ufo_geovals_copy_c
 
 ! ------------------------------------------------------------------------------
+!> Analytic init
 
 subroutine ufo_geovals_analytic_init_c(c_key_self, c_key_locs, c_conf) bind(c,name='ufo_geovals_analytic_init_f90')
 use config_mod
@@ -101,23 +95,6 @@ end subroutine ufo_geovals_analytic_init_c
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_geovals_create_c(c_key_self) bind(c,name='ufo_geovals_create_f90')
-
-implicit none
-integer(c_int), intent(inout) :: c_key_self
-
-type(ufo_geovals), pointer :: self
-
-call ufo_geovals_registry%init()
-call ufo_geovals_registry%add(c_key_self)
-call ufo_geovals_registry%get(c_key_self, self)
-
-call ufo_geovals_init(self)
-
-end subroutine ufo_geovals_create_c
-
-! ------------------------------------------------------------------------------
-
 subroutine ufo_geovals_delete_c(c_key_self) bind(c,name='ufo_geovals_delete_f90')
 
 implicit none
@@ -132,34 +109,6 @@ call ufo_geovals_delete(self)
 call ufo_geovals_registry%remove(c_key_self)
 
 end subroutine ufo_geovals_delete_c
-
-! ------------------------------------------------------------------------------
-
-subroutine ufo_geovals_setup_allocone_c(c_key_self, c_conf, c_vars) bind(c,name='ufo_geovals_setup_allocone_f90')
-use config_mod
-implicit none
-integer(c_int), intent(inout) :: c_key_self
-type(c_ptr), intent(in)    :: c_conf
-type(c_ptr), intent(in)    :: c_vars
-
-type(ufo_geovals), pointer :: self
-type(ufo_vars) :: vars
-integer :: nobs
-
-call ufo_geovals_registry%init()
-call ufo_geovals_registry%add(c_key_self)
-call ufo_geovals_registry%get(c_key_self, self)
-
-!> read variables
-call ufo_vars_setup(vars, c_vars)
-
-! allocate one
-nobs = config_get_int(c_conf, "nobs")
-call ufo_geovals_init(self)
-call ufo_geovals_setup(self, vars, nobs)
-call ufo_geovals_allocone(self)
-
-end subroutine ufo_geovals_setup_allocone_c
 
 ! ------------------------------------------------------------------------------
 
@@ -200,34 +149,6 @@ call ufo_geovals_registry%get(c_key_self, self)
 call ufo_geovals_rms(self,vrms)
 
 end subroutine ufo_geovals_rms_c
-
-! ------------------------------------------------------------------------------
-
-subroutine ufo_geovals_setup_random_c(c_key_self, c_conf, c_vars) bind(c,name='ufo_geovals_setup_random_f90')
-use config_mod
-implicit none
-integer(c_int), intent(inout) :: c_key_self
-type(c_ptr), intent(in)    :: c_conf
-type(c_ptr), intent(in)    :: c_vars
-
-type(ufo_geovals), pointer :: self
-type(ufo_vars) :: vars
-integer :: nobs
-
-call ufo_geovals_registry%init()
-call ufo_geovals_registry%add(c_key_self)
-call ufo_geovals_registry%get(c_key_self, self)
-
-!> read variables
-call ufo_vars_setup(vars, c_vars)
-
-! randomize
-nobs = config_get_int(c_conf, "nobs")
-call ufo_geovals_init(self)
-call ufo_geovals_setup(self, vars, nobs)
-call ufo_geovals_random(self)
-
-end subroutine ufo_geovals_setup_random_c
 
 ! ------------------------------------------------------------------------------
 
@@ -358,20 +279,22 @@ implicit none
 integer(c_int), intent(in) :: c_key_self
 integer(c_int), intent(inout) :: kobs
 type(ufo_geovals), pointer :: self
+
 call ufo_geovals_registry%get(c_key_self, self)
-kobs = self%nobs
+kobs = self%nlocs
+
 end subroutine ufo_geovals_nlocs_c
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_geovals_get_c(c_key_self, lvar, c_var, lev, nobs, values) bind(c, name='ufo_geovals_get_f90')
+subroutine ufo_geovals_get_c(c_key_self, lvar, c_var, lev, nlocs, values) bind(c, name='ufo_geovals_get_f90')
 implicit none
 integer(c_int), intent(in) :: c_key_self
 integer(c_int), intent(in) :: lvar
 character(kind=c_char, len=1), intent(in) :: c_var(lvar+1)
 integer(c_int), intent(in) :: lev
-integer(c_int), intent(in) :: nobs
-real(c_float), intent(inout) :: values(nobs)
+integer(c_int), intent(in) :: nlocs
+real(c_float), intent(inout) :: values(nlocs)
 
 character(max_string) :: err_msg
 type(ufo_geoval), pointer :: geoval
@@ -388,28 +311,27 @@ if (lev<1 .or. lev>size(geoval%vals,1)) then
   write(err_msg,*)'ufo_geovals_get_f90',trim(varname),'level out of range:',lev,size(geoval%vals,1)
   call abor1_ftn(err_msg)
 endif
-if (nobs /= size(geoval%vals,2)) then
-  write(err_msg,*)'ufo_geovals_get_f90',trim(varname),'error obs number:',nobs,size(geoval%vals,2)
+if (nlocs /= size(geoval%vals,2)) then
+  write(err_msg,*)'ufo_geovals_get_f90',trim(varname),'error locs number:',nlocs,size(geoval%vals,2)
   call abor1_ftn(err_msg)
 endif
 
 values(:) = geoval%vals(lev,:)
-write(0,*)'ufo_geovals_get values ',values(:)
 
 end subroutine ufo_geovals_get_c
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_geovals_maxloc_c(c_key_self, mxval, iobs, ivar) bind(c,name='ufo_geovals_maxloc_f90')
+subroutine ufo_geovals_maxloc_c(c_key_self, mxval, iloc, ivar) bind(c,name='ufo_geovals_maxloc_f90')
 implicit none
 integer(c_int), intent(in) :: c_key_self 
 real(c_double), intent(inout) :: mxval
-integer(c_int), intent(inout) :: iobs, ivar
+integer(c_int), intent(inout) :: iloc, ivar
 type(ufo_geovals), pointer :: self
 
 call ufo_geovals_registry%get(c_key_self, self)
 
-call ufo_geovals_maxloc(self, mxval, iobs, ivar)
+call ufo_geovals_maxloc(self, mxval, iloc, ivar)
 
 end subroutine ufo_geovals_maxloc_c
 
@@ -425,33 +347,17 @@ type(c_ptr), intent(in)    :: c_conf
 type(c_ptr), intent(in)    :: c_vars
 
 type(ufo_geovals), pointer :: self
-type(ufo_vars) :: vars
 character(max_string) :: filename
-
-character(max_string) :: t1str
-character(max_string) :: t2str
-type(datetime)        :: t1
-type(datetime)        :: t2
-
 
 call ufo_geovals_registry%init()
 call ufo_geovals_registry%add(c_key_self)
 call ufo_geovals_registry%get(c_key_self, self)
 
-!> read variables
-call ufo_vars_setup(vars, c_vars)
-
 ! read filename for config
 filename = config_get_string(c_conf,len(filename),"filename")
 
-! read timing window edges
-t1str = config_get_string(c_conf, len(t1str), "window_begin")
-t2str = config_get_string(c_conf, len(t1str), "window_end")
-call datetime_create(trim(t1str), t1)
-call datetime_create(trim(t2str), t2)
-
 ! read geovals
-call ufo_geovals_read_netcdf(self, filename, vars, t1, t2)
+call ufo_geovals_read_netcdf(self, filename, c_vars)
 
 end subroutine ufo_geovals_read_file_c
 

@@ -11,6 +11,9 @@
 #include <ostream>
 #include <string>
 
+#include "boost/shared_ptr.hpp"
+
+#include "ioda/ObsDataVector.h"
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
 #include "oops/util/Printable.h"
@@ -34,7 +37,9 @@ class BackgroundCheck : public util::Printable,
  public:
   static const std::string classname() {return "ufo::BackgroundCheck";}
 
-  BackgroundCheck(ioda::ObsSpace &, const eckit::Configuration &);
+  BackgroundCheck(ioda::ObsSpace &, const eckit::Configuration &,
+                  boost::shared_ptr<ioda::ObsDataVector<int> >,
+                  boost::shared_ptr<ioda::ObsDataVector<float> >);
   ~BackgroundCheck();
 
   void priorFilter(const GeoVaLs &) const;
@@ -51,6 +56,8 @@ class BackgroundCheck : public util::Printable,
   double threshold_;
   const GeoVaLs mutable * gv_;
   const oops::Variables geovars_;
+  boost::shared_ptr<ioda::ObsDataVector<int> > flags_;
+  boost::shared_ptr<ioda::ObsDataVector<float> > obserr_;
 };
 
 }  // namespace ufo

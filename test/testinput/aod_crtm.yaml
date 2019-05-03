@@ -23,9 +23,6 @@ Observations:
    GeoVaLs: 
     norm: "2673.32605458027"
     filename: "Data/aod_geoval_2018041500_m.nc4"
-    random: 0
-    window_begin: "2018-04-14T21:00:00Z"
-    window_end: "2018-04-15T03:00:00Z"
    vecequiv: "GsiHofX"
    tolerance: "1.0e-06"
    ObsBias: {}

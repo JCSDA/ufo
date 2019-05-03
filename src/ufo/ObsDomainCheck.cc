@@ -28,8 +28,10 @@ static oops::FilterMaker<UfoTrait, oops::ObsFilter<UfoTrait, ObsDomainCheck>>
   mkDomLst_("Domain Check");
 // -----------------------------------------------------------------------------
 
-ObsDomainCheck::ObsDomainCheck(ioda::ObsSpace & obsdb, const eckit::Configuration & config)
-  : obsdb_(obsdb), config_(config), geovars_(preProcessWhere(config_))
+ObsDomainCheck::ObsDomainCheck(ioda::ObsSpace & obsdb, const eckit::Configuration & config,
+                               boost::shared_ptr<ioda::ObsDataVector<int> > flags,
+                               boost::shared_ptr<ioda::ObsDataVector<float> >)
+  : obsdb_(obsdb), config_(config), geovars_(preProcessWhere(config_)), flags_(*flags)
 {
   oops::Log::debug() << "ObsDomainCheck: config = " << config_ << std::endl;
   oops::Log::debug() << "ObsDomainCheck: geovars = " << geovars_ << std::endl;
@@ -42,18 +44,15 @@ ObsDomainCheck::~ObsDomainCheck() {}
 // -----------------------------------------------------------------------------
 
 void ObsDomainCheck::priorFilter(const GeoVaLs & gv) const {
-  const std::string qcgrp = config_.getString("QCname");
   const oops::Variables vars(config_.getStringVector("observed"));
 
   std::vector<bool> inside = processWhere(obsdb_, gv, config_);
 
-  ioda::ObsDataVector<int> flags(obsdb_, vars, qcgrp);
   for (size_t jv = 0; jv < vars.size(); ++jv) {
     for (size_t jobs = 0; jobs < obsdb_.nlocs(); ++jobs) {
-      if (!inside[jobs] && flags[jv][jobs] == 0) flags[jv][jobs] = QCflags::domain;
+      if (!inside[jobs] && flags_[jv][jobs] == 0) flags_[jv][jobs] = QCflags::domain;
     }
   }
-  flags.save(qcgrp);
 }
 
 // -----------------------------------------------------------------------------

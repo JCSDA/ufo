@@ -67,11 +67,11 @@ type(c_ptr), value, intent(in)    :: obss
     integer(kind=4) :: iNcid
     integer(kind=4) :: iDimStation_ID, iDimLev_ID
     integer(kind=4) :: iVarLev_ID, iVarGOM_ID
-    integer :: ncat,nobs
+    integer :: ncat,nlocs
 
-    ! check if nobs is consistent in geovals & hofx
-    if (geovals%nobs /= size(hofx,1)) then
-       write(err_msg,*) myname_, ' error: nobs inconsistent!'
+    ! check if nlocs is consistent in geovals & hofx
+    if (geovals%nlocs /= size(hofx,1)) then
+       write(err_msg,*) myname_, ' error: nlocs inconsistent!'
        call abor1_ftn(err_msg)
     endif
 

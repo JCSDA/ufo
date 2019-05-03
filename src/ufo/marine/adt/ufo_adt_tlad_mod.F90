@@ -89,7 +89,7 @@ type(c_ptr), value,      intent(in)    :: obss
 
 character(len=*), parameter :: myname_="ufo_adt_simobs_tl"
 character(max_string) :: err_msg
-integer :: iobs, nobs, cnt, cnt_glb
+integer :: iobs, nlocs, cnt, cnt_glb
 type(ufo_geoval), pointer :: geoval_adt
 real(kind_real) :: offset_hofx, pe_offset_hofx
 type(fckit_mpi_comm) :: f_comm
@@ -102,11 +102,11 @@ if (.not. self%ltraj) then
   call abor1_ftn(err_msg)
 endif
 
-! check if nobs is consistent in geovals & hofx
-nobs = self%nlocs
+! check if nlocs is consistent in geovals & hofx
+nlocs = self%nlocs
 
-if (geovals%nobs /= nobs) then
-  write(err_msg,*) myname_, ' error: nobs inconsistent!'
+if (geovals%nlocs /= nlocs) then
+  write(err_msg,*) myname_, ' error: nlocs inconsistent!'
   call abor1_ftn(err_msg)
 endif
 
@@ -148,7 +148,7 @@ type(c_ptr), value,      intent(in)    :: obss
 character(len=*), parameter :: myname_="ufo_adt_simobs_ad"
 character(max_string) :: err_msg
 
-integer :: iobs, nobs, cnt, cnt_glb
+integer :: iobs, nlocs, cnt, cnt_glb
 type(ufo_geoval), pointer :: geoval_adt
 real(kind_real) :: offset_hofx, pe_offset_hofx
 type(fckit_mpi_comm) :: f_comm
@@ -161,10 +161,10 @@ endif
 
 f_comm = fckit_mpi_comm()
 
-! check if nobs is consistent in geovals & hofx
-nobs = self%nlocs
-if (geovals%nobs /= nobs) then
-  write(err_msg,*) myname_, ' error: nobs inconsistent!'
+! check if nlocs is consistent in geovals & hofx
+nlocs = self%nlocs
+if (geovals%nlocs /= nlocs) then
+  write(err_msg,*) myname_, ' error: nlocs inconsistent!'
   call abor1_ftn(err_msg)
 endif
 
@@ -188,9 +188,9 @@ call f_comm%allreduce(pe_offset_hofx, offset_hofx, fckit_mpi_sum())
 call f_comm%allreduce(cnt, cnt_glb, fckit_mpi_sum()) 
 offset_hofx = offset_hofx/cnt_glb
 
-if (.not. allocated(geoval_adt%vals))  allocate(geoval_adt%vals(1,nobs))
+if (.not. allocated(geoval_adt%vals))  allocate(geoval_adt%vals(1,nlocs))
 geoval_adt%vals = 0.0
-do iobs = 1, nobs
+do iobs = 1, nlocs
    if (hofx(iobs)/=self%r_miss_val) then
       geoval_adt%vals(1,iobs) = geoval_adt%vals(1,iobs) + hofx(iobs) - offset_hofx
    end if

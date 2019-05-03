@@ -11,7 +11,10 @@
 #include <ostream>
 #include <string>
 
+#include "boost/shared_ptr.hpp"
+
 #include "eckit/config/LocalConfiguration.h"
+#include "ioda/ObsDataVector.h"
 #include "ioda/ObsSpace.h"
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
@@ -31,7 +34,9 @@ class Thinning : public util::Printable,
  public:
   static const std::string classname() {return "ufo::Thinning";}
 
-  Thinning(ioda::ObsSpace &, const eckit::Configuration &);
+  Thinning(ioda::ObsSpace &, const eckit::Configuration &,
+           boost::shared_ptr<ioda::ObsDataVector<int> >,
+           boost::shared_ptr<ioda::ObsDataVector<float> >);
   ~Thinning();
 
   void priorFilter(const GeoVaLs &) const;
@@ -45,6 +50,7 @@ class Thinning : public util::Printable,
   ioda::ObsSpace & obsdb_;
   const eckit::LocalConfiguration config_;
   oops::Variables geovars_;
+  ioda::ObsDataVector<int> & flags_;
 };
 
 }  // namespace ufo

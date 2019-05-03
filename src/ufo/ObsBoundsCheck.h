@@ -11,7 +11,10 @@
 #include <ostream>
 #include <string>
 
+#include "boost/shared_ptr.hpp"
+
 #include "eckit/config/LocalConfiguration.h"
+#include "ioda/ObsDataVector.h"
 #include "ioda/ObsSpace.h"
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
@@ -33,7 +36,9 @@ class ObsBoundsCheck : public util::Printable,
  public:
   static const std::string classname() {return "ufo::ObsBoundsCheck";}
 
-  ObsBoundsCheck(ioda::ObsSpace &, const eckit::Configuration &);
+  ObsBoundsCheck(ioda::ObsSpace &, const eckit::Configuration &,
+                 boost::shared_ptr<ioda::ObsDataVector<int> >,
+                 boost::shared_ptr<ioda::ObsDataVector<float> >);
   ~ObsBoundsCheck();
 
   void priorFilter(const GeoVaLs &) const;
@@ -47,6 +52,7 @@ class ObsBoundsCheck : public util::Printable,
   ioda::ObsSpace & obsdb_;
   const eckit::LocalConfiguration config_;
   const oops::Variables geovars_;
+  ioda::ObsDataVector<int> & flags_;
 };
 
 }  // namespace ufo

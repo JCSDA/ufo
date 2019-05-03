@@ -55,8 +55,8 @@ subroutine ufo_gnssro_bndropp1d_simobs(self, geovals, hofx, obss)
   call fckit_log%info(err_msg)
 
 ! check if nobs is consistent in geovals & hofx
-  if (geovals%nobs /= size(hofx)) then
-      write(err_msg,*) myname_, ' error: nobs inconsistent!'
+  if (geovals%nlocs /= size(hofx)) then
+      write(err_msg,*) myname_, ' error: nlocs inconsistent!'
       call abor1_ftn(err_msg)
   endif
 

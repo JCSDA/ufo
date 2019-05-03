@@ -9,8 +9,7 @@ module ufo_vars_mod
 
 implicit none
 private
-public :: ufo_vars, ufo_vars_setup, ufo_vars_clone, ufo_vars_delete
-public :: ufo_vars_getindex, ufo_vars_nvars, ufo_vars_vnames
+public :: ufo_vars_read, ufo_vars_getindex
 
 INTEGER, PARAMETER, PUBLIC :: n_aerosols_gocart_default=14,&
      &n_aerosols_gocart_esrl=15,n_aerosols_other=1
@@ -106,104 +105,55 @@ character(len=MAXVARLEN), public :: var_ocn_pra_salt      = "sea_water_practical
 character(len=MAXVARLEN), public :: var_ocn_salt      = "sea_water_salinity"
 character(len=MAXVARLEN), public :: var_ocn_lay_thick = "sea_water_cell_thickness"
 character(len=MAXVARLEN), public :: var_ocn_sst       = "sea_surface_temperature"
-
-! ------------------------------------------------------------------------------
-
-!> Fortran derived type to represent model variables
-type :: ufo_vars
-  integer :: nv
-  character(len=MAXVARLEN), allocatable :: fldnames(:) !< Variable identifiers
-end type ufo_vars
+character(len=MAXVARLEN), public :: var_sea_td        = "sea_surface_foundation_temperature"
+character(len=MAXVARLEN), public :: var_latent_vap    = "latent_heat_vaporization"
+character(len=MAXVARLEN), public :: var_sw_rad        = "net_downwelling_shortwave_radiation"
+character(len=MAXVARLEN), public :: var_latent_heat   = "upward_latent_heat_flux_in_air"
+character(len=MAXVARLEN), public :: var_sens_heat     = "upward_sensible_heat_flux_in_air"
+character(len=MAXVARLEN), public :: var_lw_rad        = "net_downwelling_longwave_radiation"
+character(len=MAXVARLEN), public :: var_sea_fric_vel  = "friction_velocity_over_water"
 
 ! ------------------------------------------------------------------------------
 contains
-! ------------------------------------------------------------------------------
 
-subroutine ufo_vars_setup(self, c_vars)
+subroutine ufo_vars_read(c_vars, vars)
 use iso_c_binding
 use config_mod
 implicit none
-type(ufo_vars), intent(inout) :: self
 type(c_ptr), intent(in)       :: c_vars
+character(len=MAXVARLEN), dimension(:), allocatable, intent(inout) :: vars
 character(len=30*MAXVARLEN) :: svars
 
-self%nv = config_get_int(c_vars, "nvars")
+integer :: nvars
 
-allocate(self%fldnames(self%nv))
+nvars = config_get_int(c_vars, "nvars")
+
+if (allocated(vars)) deallocate(vars)
+allocate(vars(nvars))
 svars = config_get_string(c_vars,len(svars),"variables")
+read(svars,*) vars
 
-read(svars,*) self%fldnames
-
-! TODO: a check on whether this var is in the list of defined vars
-
-end subroutine ufo_vars_setup
+end subroutine ufo_vars_read
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_vars_clone(self, other)
+integer function ufo_vars_getindex(vars, varname)
 implicit none
-type(ufo_vars), intent(in)    :: self
-type(ufo_vars), intent(inout) :: other
-
-call ufo_vars_delete(other)
-other%nv = self%nv
-allocate(other%fldnames(other%nv))
-other%fldnames(:) = self%fldnames(:)
-
-end subroutine ufo_vars_clone
-
-! ------------------------------------------------------------------------------
-
-subroutine ufo_vars_delete(self)
-implicit none
-type(ufo_vars), intent(inout) :: self
-
-if (allocated(self%fldnames)) deallocate(self%fldnames)
-self%nv = 0
-
-end subroutine ufo_vars_delete
-
-! ------------------------------------------------------------------------------
-
-integer function ufo_vars_getindex(self, varname)
-implicit none
-type(ufo_vars), intent(in)       :: self
-character(MAXVARLEN), intent(in) :: varname
+character(len=MAXVARLEN), intent(in) :: vars(:)
+character(MAXVARLEN), intent(in)     :: varname
 
 integer :: ivar
 
 ufo_vars_getindex = -1
 
-do ivar = 1, self%nv
-  if (self%fldnames(ivar) == varname) then
+do ivar = 1, size(vars)
+  if (vars(ivar) == varname) then
     ufo_vars_getindex = ivar
     exit
   endif
 enddo
 
 end function ufo_vars_getindex
-
-! ------------------------------------------------------------------------------
-
-integer function ufo_vars_nvars(self) 
-implicit none
-type(ufo_vars), intent(in) :: self
-
-ufo_vars_nvars = self%nv
-
-end function ufo_vars_nvars
-
-! ------------------------------------------------------------------------------
-
-function ufo_vars_vnames(self) 
-implicit none
-type(ufo_vars), intent(in) :: self
-
-character(len=MAXVARLEN), dimension(self%nv) :: ufo_vars_vnames
-
-ufo_vars_vnames(1:self%nv) = self%fldnames
-
-end function ufo_vars_vnames
 
 ! ------------------------------------------------------------------------------
 

@@ -113,7 +113,7 @@ type(CRTM_RTSolution_type), allocatable :: rts_K(:,:)
 
  ! Get number of profile and layers from geovals
  ! ---------------------------------------------
- self%n_Profiles = geovals%nobs
+ self%n_Profiles = geovals%nlocs
  call ufo_geovals_get_var(geovals, var_ts, temp)
  self%n_Layers = temp%nval
  nullify(temp)
@@ -313,9 +313,9 @@ CHARACTER(MAXVARLEN), DIMENSION(self%conf%n_aerosols) :: var_aerosols
    call abor1_ftn(err_msg)
  endif
 
- ! Check if nobs is consistent in geovals & hofx
- if (geovals%nobs /= self%n_Profiles) then
-   write(err_msg,*) myname_, ' error: nobs inconsistent!'
+ ! Check if nlocs is consistent in geovals & hofx
+ if (geovals%nlocs /= self%n_Profiles) then
+   write(err_msg,*) myname_, ' error: nlocs inconsistent!'
    call abor1_ftn(err_msg)
  endif
 
@@ -380,9 +380,9 @@ INTEGER :: jaero
    call abor1_ftn(err_msg)
  endif
 
- ! Check if nobs is consistent in geovals & hofx
- if (geovals%nobs /= self%n_Profiles) then
-   write(err_msg,*) myname_, ' error: nobs inconsistent!'
+ ! Check if nlocs is consistent in geovals & hofx
+ if (geovals%nlocs /= self%n_Profiles) then
+   write(err_msg,*) myname_, ' error: nlocs inconsistent!'
    call abor1_ftn(err_msg)
  endif
 
@@ -393,9 +393,9 @@ INTEGER :: jaero
     CALL ufo_geovals_get_var(geovals, var_aerosols(jaero), var_p)
 ! allocate if not yet allocated
     IF (.NOT. ALLOCATED(var_p%vals)) THEN
-       var_p%nobs = self%n_Profiles
+       var_p%nlocs = self%n_Profiles
        var_p%nval = self%n_Layers
-       ALLOCATE(var_p%vals(var_p%nval,var_p%nobs))
+       ALLOCATE(var_p%vals(var_p%nval,var_p%nlocs))
        var_p%vals = 0.0_kind_real
     ENDIF
 

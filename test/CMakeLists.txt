@@ -95,6 +95,7 @@ if( ${GSW_FOUND} )
       testinput/tprof.yaml
       testinput/genericprof.yaml
       testinput/adt.yaml
+      testinput/coolskin.yaml
       testinput/seaice.yaml
       testinput/sea_surface_temp.yaml
     )
@@ -108,6 +109,7 @@ if( ${GSW_FOUND} )
 
     list( APPEND ufo_marine_test_data
       marine/Jason-2-2018-04-15_geovals.nc
+      marine/coolskin_fake_geovals_2018041500.nc
       marine/profile_2018-04-15_geovals.nc
       marine/cryosat2-2018-04-15_geovals.nc
       marine/icec-2018-04-15_geovals.nc
@@ -151,6 +153,7 @@ list (APPEND ioda_obs_test_data
   atmosphere/sfc_obs_2018041500_m.nc4
 
   marine/Jason-2-2018-04-15.nc
+  marine/coolskin_fake_obs_2018041500.nc 
   marine/profile_2018-04-15.nc
   marine/cryosat2-2018-04-15.nc
   marine/icec-2018-04-15.nc
@@ -395,6 +398,16 @@ if( ${GSW_FOUND} )
                       SOURCES mains/TestObsOperatorTLAD.cc
                       ARGS    "testinput/adt.yaml"
                       LIBS    ufo )		      
+
+    ecbuild_add_test( TARGET  test_ufo_CoolSkin_opr
+                      SOURCES mains/TestObsOperator.cc
+                      ARGS    "testinput/coolskin.yaml"
+                      LIBS    ufo )
+
+    ecbuild_add_test( TARGET  test_ufo_CoolSkin_tlad
+                      SOURCES mains/TestObsOperatorTLAD.cc
+                      ARGS    "testinput/coolskin.yaml"
+                      LIBS    ufo )
 
     ecbuild_add_test( TARGET  test_ufo_marinevertinterp_opr
                       BOOST
