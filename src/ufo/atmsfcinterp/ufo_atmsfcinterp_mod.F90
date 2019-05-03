@@ -50,17 +50,33 @@ subroutine ufo_atmsfcinterp_setup(self, c_conf)
   !> Read variable list and store in varout
   self%varout = config_get_string_vector(c_conf, max_string, "variables")
   !> Allocate varin: variables we need from the model
-  allocate(self%varin(self%nvars+1))
+  allocate(self%varin(11))
   !> Set vars_in based on vars_out
-  do ii = 1, self%nvars
-    self%varin(ii) = self%varout(ii)
-  enddo
+  !do ii = 1, self%nvars
+  ! self%varin(ii) = self%varout(ii)
+  !enddo
+  ! TODO: additional variables will need to be added but all of the 'standard'
+  ! vars need the same input from the GeoVaLs (T,P,U,V,Q need all for each other)
   !> add geopotential height
-  self%varin(self%nvars+1) = "geopotential_height"
+  self%varin(1) = "geopotential_height"
   !> need skin temperature for near-surface interpolations
-  !self%varin(self%nvars+2) = "sfc_skin_temperature"
+  self%varin(2) = "sfc_skin_temperature"
   !> need surface geopotential height to get difference from phi
-  !self%varin(self%nvars+3) = "sfc_geopotential_height"
+  self%varin(3) = "sfc_geopotential_height"
+  !> need surface roughness
+  self%varid(4) = "surface_roughness"
+  !> need surface and atmospheric pressure for potential temperature
+  self%varid(5) = "surface_pressure"
+  self%varid(6) = "air_pressure"
+  self%varid(7) = "air_temperature"
+  self%varid(8) = "specific_humidity_mixing_ratio"
+  self%varid(9) = "eastward_wind"
+  self%varid(10) = "northward_wind"
+  self%varid(11) = "landsea_mask"
+  print *, 'varin'
+  print *, self%varin
+  print *, 'varout'
+  print *, self%varout
 
 end subroutine ufo_atmsfcinterp_setup
 
