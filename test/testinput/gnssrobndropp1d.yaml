@@ -1,29 +1,33 @@
 ---
+logging:
+  categories: Warning, Error, Debug
 test_framework_runtime_config: "--log_level=test_suite"
-window_begin: '2018-04-14T21:00:00Z'
-window_end: '2018-04-15T03:00:00Z'
+
+window_begin: 2018-04-14T21:00:00Z
+window_end: 2018-04-15T03:00:00Z
+
 LinearObsOpTest: 
  testiterTL:  10
- toleranceTL: "1.0e-13"
- toleranceAD: "1.0e-14"
+ toleranceTL: 1.0e-13
+ toleranceAD: 1.0e-14
+
 Observations: 
  ObsTypes: 
  - ObsType: GnssroBndROPP1D
    ObsOptions: 
    ObsData: 
     ObsDataIn: 
-     obsfile: "Data/gnssro_obs_2018041500_s.nc4"
+     obsfile: Data/gnssro_obs_2018041500_s.nc4
     obsvalue: bending_angle
    GeoVaLs: 
-    filename: "Data/gnssro_geoval_2018041500_s.nc4"
+    filename: Data/gnssro_geoval_2018041500_s.nc4
     ObsFilters:
     - Filter: Background Check
       variables:
       - bending_angle
       threshold: 3.0
     - Filter: ROobserror
-      errmodel: "ROPP"
-   ObsBias: {}
-   rmsequiv: "0.00919697505361058"
+      errmodel: ROPP
+   rmsequiv: 0.00919697505361058
    passedBenchmark: 20
-   tolerance: "1.0e-13"
+   tolerance: 1.0e-13

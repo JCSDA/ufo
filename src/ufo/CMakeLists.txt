@@ -69,9 +69,7 @@ endif( ${RTTOV_FOUND} )
 add_subdirectory( gnssro )
 add_subdirectory( surface )
 add_subdirectory( ncdiag )
-if( ${GSW_FOUND} )
-    add_subdirectory( marine )
-endif( ${GSW_FOUND} )
+add_subdirectory( marine )
 list( APPEND ufo_src_files
     ${utils_src_files}
     ${basis_src_files}
@@ -83,9 +81,7 @@ list( APPEND ufo_src_files
     ${surface_src_files}
     ${ncdiag_src_files}
 )
-if( ${GSW_FOUND} )
-    list( APPEND ufo_src_files ${marine_src_files} )
-endif( ${GSW_FOUND} )
+list( APPEND ufo_src_files ${marine_src_files} )
 list( APPEND UFO_LIBS_DEP oops ioda crtm ${LAPACK_LIBRARIES} ${NETCDF_LIBRARIES} )
 if( ${GSW_FOUND} )
     list( APPEND UFO_LIBS_DEP gsw )

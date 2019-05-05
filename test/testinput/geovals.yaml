@@ -9,9 +9,8 @@ window_end: 2018-04-15T03:00:00Z
 Observations: 
  ObsTypes: 
  - ObsType: CRTM
-   channels: 1-6,9-12,13,15
+   channels: 1-15
    ObsOptions: 
-    InspectProfileNumber: 12
     n_Absorbers: 3
     n_Clouds: 2
     n_Aerosols: 0
@@ -22,15 +21,14 @@ Observations:
     ObsDataIn: 
      obsfile: Data/amsua_n19_obs_2018041500_m.nc4
    GeoVaLs: 
+    norm: 72000.7229763
     filename: Data/amsua_n19_geoval_2018041500_m.nc4
-   ObsFilters:
-   - Filter: Bounds Check
-     bounds:
-     - variable: brightness_temperature_1
-       minvalue: 100.0
-       maxvalue: 500.0
-   - Filter: Background Check
-     variables:
-     - brightness_temperature_1
-     threshold: 2.0
-   passedBenchmark: 1175      # number of passed obs
+ - ObsType: Radiosonde
+   ObsData: 
+    ObsDataIn: 
+     obsfile: Data/sondes_obs_2018041500_m.nc4
+   variables: 
+   - air_temperature
+   GeoVaLs: 
+    norm: 22355.0135965
+    filename: Data/sondes_geoval_2018041500_m.nc4

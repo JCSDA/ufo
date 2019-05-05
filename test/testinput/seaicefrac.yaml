@@ -8,18 +8,16 @@ window_end: 2018-04-15T03:00:00Z
 
 LinearObsOpTest:
   testiterTL: 10
-  toleranceTL: 1.0e-8
-  toleranceAD: 1.0e-10
+  toleranceTL: 1.0e-10
+  toleranceAD: 1.0e-12
 
 Observations:
   ObsTypes:
-  - ObsType: SeaSurfaceTemp
+  - ObsType: SeaIceFraction
     ObsData:
       ObsDataIn:
-        obsfile: Data/sst_obs-2018-04-15.nc4
-    variables:
-    - sea_surface_temperature
+        obsfile: Data/icec-2018-04-15.nc
     GeoVaLs:
-      filename: Data/sst_obs-2018-04-15_geovals.nc
-    rmsequiv: 15.0
-    tolerance: 1.0e-10
+      filename: Data/icec-2018-04-15_geovals.nc
+    rmsequiv: 2.5
+    tolerance: 1.0e-8

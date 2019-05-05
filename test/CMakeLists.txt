@@ -24,27 +24,34 @@ endfunction(CREATE_SYMLINK_FILENAME)
 
 # Create Data directory for test input config and symlink all files
 list( APPEND ufo_test_input
-  testinput/ufotest_atmosphere.yaml
-  testinput/amsua_crtm.yaml
-  testinput/seviri_crtm.yaml
-  testinput/amsua_qc.yaml
-  testinput/hirs4_crtm.yaml
-  testinput/iasi_crtm.yaml
-  testinput/amsua_rttov.yaml
-  testinput/mhs_crtm.yaml
-  testinput/sndrd1-4_crtm.yaml
-  testinput/airs_crtm.yaml
-  testinput/radiosonde.yaml
-  testinput/radiosonde_qc.yaml
+  testinput/adt.yaml
   testinput/aircraft.yaml
-  testinput/cris_crtm.yaml
+  testinput/airs_crtm.yaml
+  testinput/amsua_crtm.yaml
+  testinput/amsua_rttov.yaml
+  testinput/amsua_qc.yaml
   testinput/aod_crtm.yaml
-  testinput/gnssroref.yaml
+  testinput/coolskin.yaml
+  testinput/cris_crtm.yaml
+  testinput/genericprof.yaml
+  testinput/geovals.yaml
   testinput/gnssrobndropp1d.yaml
   testinput/gnssrobndropp2d.yaml
-  testinput/channelsparser.yaml
-  testinput/satwind.yaml
+  testinput/gnssroref.yaml
+  testinput/hirs4_crtm.yaml
+  testinput/iasi_crtm.yaml
+  testinput/locations.yaml
+  testinput/mhs_crtm.yaml
   testinput/qc_thinning.yaml
+  testinput/radiosonde.yaml
+  testinput/radiosonde_qc.yaml
+  testinput/satwind.yaml
+  testinput/seaicefrac.yaml
+  testinput/seaicethick.yaml
+  testinput/sea_surface_temp.yaml
+  testinput/seviri_crtm.yaml
+  testinput/sndrd1-4_crtm.yaml
+  testinput/tprof.yaml
 )
 
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/testinput)
@@ -60,99 +67,65 @@ ecbuild_add_resources( TARGET ufo_test_scripts
 list( APPEND ufo_test_data
   atmosphere/aircraft_geoval_2018041500_m.nc4
   atmosphere/aircraft_geoval_2018041500_s.nc4
-  atmosphere/cris-fsr_npp_geoval_2018041500_m.nc4
-  atmosphere/amsua_n19_geoval_2018041500_m.nc4
-  atmosphere/seviri_m08_geoval_2018041500_m.nc4
-  atmosphere/amsua_n19_geoval_2018041500_s.nc4
-  atmosphere/iasi_metop-a_geoval_2018041500_m.nc4
-  atmosphere/mhs_n19_geoval_2018041500_m.nc4
   atmosphere/airs_aqua_geoval_2018041500_m.nc4
-  atmosphere/sondes_geoval_2018041500_m.nc4
-  atmosphere/sondes_geoval_2018041500_s.nc4
-  atmosphere/gnssro_geoval_2018041500_s.nc4
-  atmosphere/gnssro_geoval_2018041500_s_2d.nc4
+  atmosphere/amsua_n19_geoval_2018041500_m.nc4
+  atmosphere/amsua_n19_geoval_2018041500_s.nc4
   atmosphere/aod_geoval_2018041500_m.nc4
   atmosphere/aod_geoval_2018041500_s.nc4
+  atmosphere/cris-fsr_npp_geoval_2018041500_m.nc4
+  atmosphere/gnssro_geoval_2018041500_s.nc4
+  atmosphere/gnssro_geoval_2018041500_s_2d.nc4
+  atmosphere/hirs4_metop-a_geoval_2018041500_m.nc4
+  atmosphere/iasi_metop-a_geoval_2018041500_m.nc4
+  atmosphere/mhs_n19_geoval_2018041500_m.nc4
   atmosphere/satwind_geoval_2018041500_m.nc4
   atmosphere/satwind_geoval_2018041500_s.nc4
-  atmosphere/hirs4_metop-a_geoval_2018041500_m.nc4
+  atmosphere/seviri_m08_geoval_2018041500_m.nc4
   atmosphere/sndrd1_g15_geoval_2018041500_m.nc4
   atmosphere/sndrd2_g15_geoval_2018041500_m.nc4
   atmosphere/sndrd3_g15_geoval_2018041500_m.nc4
   atmosphere/sndrd4_g15_geoval_2018041500_m.nc4
+  atmosphere/sondes_geoval_2018041500_m.nc4
+  atmosphere/sondes_geoval_2018041500_s.nc4
+  marine/coolskin_fake_geovals_2018041500.nc
+  marine/cryosat2-2018-04-15_geovals.nc
+  marine/icec-2018-04-15_geovals.nc
+  marine/Jason-2-2018-04-15_geovals.nc
+  marine/profile_2018-04-15_geovals.nc
+  marine/sst_obs-2018-04-15_geovals.nc
 )
 
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Data)
 CREATE_SYMLINK_FILENAME( ${CMAKE_CURRENT_SOURCE_DIR}/testinput ${CMAKE_CURRENT_BINARY_DIR}/Data ${ufo_test_data} )
 
-# Add marine test data
-if( ${GSW_FOUND} )
-
-    list( APPEND ufo_marine_test_input
-      testinput/ufotest_marine.yaml
-      testinput/tprof.yaml
-      testinput/genericprof.yaml
-      testinput/adt.yaml
-      testinput/coolskin.yaml
-      testinput/seaice.yaml
-      testinput/sea_surface_temp.yaml
-    )
-
-	CREATE_SYMLINK( ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR} ${ufo_marine_test_input} )
-
-    ecbuild_add_resources( TARGET ufo_marine_test_scripts
-                           SOURCES_PACK
-                           ${ufo_marine_test_input}
-                         )
-
-    list( APPEND ufo_marine_test_data
-      marine/Jason-2-2018-04-15_geovals.nc
-      marine/coolskin_fake_geovals_2018041500.nc
-      marine/profile_2018-04-15_geovals.nc
-      marine/cryosat2-2018-04-15_geovals.nc
-      marine/icec-2018-04-15_geovals.nc
-      marine/sst_obs-2018-04-15_geovals.nc
-    )
-
-	CREATE_SYMLINK_FILENAME( ${CMAKE_CURRENT_SOURCE_DIR}/testinput
-                             ${CMAKE_CURRENT_BINARY_DIR}/Data
-                             ${ufo_marine_test_data} )
-
-endif( ${GSW_FOUND} )
-
 # Add ioda obs test data
 list (APPEND ioda_obs_test_data
   atmosphere/aircraft_obs_2018041500_m.nc4
   atmosphere/aircraft_obs_2018041500_s.nc4
-  atmosphere/cris-fsr_npp_obs_2018041500_m.nc4
-  atmosphere/amsua_n19_obs_2018041500_m.nc4
-  atmosphere/seviri_m08_obs_2018041500_m.nc4
-  atmosphere/amsua_n19_obs_2018041500_s.nc4
-  atmosphere/iasi_metop-a_obs_2018041500_m.nc4
-  atmosphere/mhs_n19_obs_2018041500_m.nc4
-  atmosphere/hirs4_metop-a_obs_2018041500_m.nc4
   atmosphere/airs_aqua_obs_2018041500_m.nc4
-  atmosphere/sondes_obs_2018041500_m.nc4
-  atmosphere/sondes_obs_2018041500_s.nc4
-  atmosphere/gnssro_obs_2018041500_s.nc4
-  atmosphere/diag_t_obs_01_wprofiles.odb
-  atmosphere/diag_t_obs_01_wprofiles_odb
-
+  atmosphere/amsua_n19_obs_2018041500_m.nc4
+  atmosphere/amsua_n19_obs_2018041500_s.nc4
   atmosphere/aod_obs_2018041500_m.nc4
   atmosphere/aod_obs_2018041500_s.nc4
+  atmosphere/cris-fsr_npp_obs_2018041500_m.nc4
+  atmosphere/gnssro_obs_2018041500_s.nc4
+  atmosphere/hirs4_metop-a_obs_2018041500_m.nc4
+  atmosphere/iasi_metop-a_obs_2018041500_m.nc4
+  atmosphere/mhs_n19_obs_2018041500_m.nc4
+  atmosphere/satwind_obs_2018041500_m.nc4
+  atmosphere/satwind_obs_2018041500_s.nc4
+  atmosphere/seviri_m08_obs_2018041500_m.nc4
   atmosphere/sndrd1_g15_obs_2018041500_m.nc4
   atmosphere/sndrd2_g15_obs_2018041500_m.nc4
   atmosphere/sndrd3_g15_obs_2018041500_m.nc4
   atmosphere/sndrd4_g15_obs_2018041500_m.nc4
-
-  atmosphere/satwind_obs_2018041500_m.nc4
-  atmosphere/satwind_obs_2018041500_s.nc4
-
-  marine/Jason-2-2018-04-15.nc
-  marine/coolskin_fake_obs_2018041500.nc 
-  marine/profile_2018-04-15.nc
+  atmosphere/sondes_obs_2018041500_m.nc4
+  atmosphere/sondes_obs_2018041500_s.nc4
+  marine/coolskin_fake_obs_2018041500.nc
   marine/cryosat2-2018-04-15.nc
   marine/icec-2018-04-15.nc
+  marine/Jason-2-2018-04-15.nc
+  marine/profile_2018-04-15.nc
   marine/sst_obs-2018-04-15.nc4
   )
 
@@ -162,14 +135,14 @@ CREATE_SYMLINK_FILENAME( ${ioda_SOURCE_DIR}/test/testinput
 
 #####################################################################
 
-ecbuild_add_test( TARGET  test_ufo_geovals_atmosphere
+ecbuild_add_test( TARGET  test_ufo_geovals
                   SOURCES mains/TestGeoVaLs.cc
-                  ARGS    "testinput/ufotest_atmosphere.yaml"
+                  ARGS    "testinput/geovals.yaml"
                   LIBS    ufo )
 
-ecbuild_add_test( TARGET  test_ufo_locations_atmosphere
+ecbuild_add_test( TARGET  test_ufo_locations
                   SOURCES mains/TestLocations.cc
-                  ARGS    "testinput/ufotest_atmosphere.yaml"
+                  ARGS    "testinput/locations.yaml"
                   LIBS    ufo )
 
 ecbuild_add_test( TARGET  test_ufo_amsua_opr_crtm
@@ -196,6 +169,7 @@ ecbuild_add_test( TARGET  test_ufo_seviri_tlad_crtm
                   SOURCES mains/TestObsOperatorTLAD.cc
                   ARGS    "testinput/seviri_crtm.yaml"
                   LIBS    ufo )
+
 ecbuild_add_test( TARGET  test_ufo_cris_opr_crtm
                   SOURCES mains/TestObsOperator.cc
                   ARGS    "testinput/cris_crtm.yaml"
@@ -217,6 +191,7 @@ ecbuild_add_test( TARGET  test_ufo_mhs_tlad_crtm
                   LIBS    ufo )
 
 ecbuild_add_test( TARGET  test_ufo_iasi_opr_crtm
+                  MPI     2
                   SOURCES mains/TestObsOperator.cc
                   ARGS    "testinput/iasi_crtm.yaml"
                   LIBS    ufo )
@@ -232,6 +207,7 @@ ecbuild_add_test( TARGET  test_ufo_sndrd1-4_tlad_crtm
                   LIBS    ufo )
 
 ecbuild_add_test( TARGET  test_ufo_airs_opr_crtm
+                  MPI     4
                   SOURCES mains/TestObsOperator.cc
                   ARGS    "testinput/airs_crtm.yaml"
                   LIBS    ufo )
@@ -242,6 +218,16 @@ ecbuild_add_test( TARGET  test_ufo_airs_opr_crtm
 #                  SOURCES mains/TestObsOperatorTLAD.cc
 #                  ARGS    "testinput/airs_crtm.yaml"
 #                  LIBS    ufo )
+
+ecbuild_add_test( TARGET  test_ufo_hirs4_opr_crtm
+                  SOURCES mains/TestObsOperator.cc
+                  ARGS    "testinput/hirs4_crtm.yaml"
+                  LIBS    ufo )
+
+ecbuild_add_test( TARGET  test_ufo_hirs4_tlad_crtm
+                  SOURCES mains/TestObsOperatorTLAD.cc
+                  ARGS    "testinput/hirs4_crtm.yaml"
+                  LIBS    ufo )
 
 if( ${RTTOV_FOUND} )
   ecbuild_add_test( TARGET  test_ufo_amsua_opr_rttov
@@ -254,16 +240,6 @@ if( ${RTTOV_FOUND} )
                     ARGS    "testinput/amsua_rttov.yaml"
                     LIBS    ufo )
 endif( ${RTTOV_FOUND} )
-
-ecbuild_add_test( TARGET  test_ufo_hirs4_opr_crtm
-                  SOURCES mains/TestObsOperator.cc
-                  ARGS    "testinput/hirs4_crtm.yaml"
-                  LIBS    ufo )
-
-ecbuild_add_test( TARGET  test_ufo_hirs4_tlad_crtm
-                  SOURCES mains/TestObsOperatorTLAD.cc
-                  ARGS    "testinput/hirs4_crtm.yaml"
-                  LIBS    ufo )
 
 ecbuild_add_test( TARGET  test_ufo_radiosonde_opr
                   MPI     4
@@ -318,18 +294,22 @@ ecbuild_add_test( TARGET  test_ufo_gnssroBndROPP1D_opr
                   SOURCES mains/TestObsOperator.cc
                   ARGS    "testinput/gnssrobndropp1d.yaml"
                   LIBS    ufo )
+
 ecbuild_add_test( TARGET  test_ufo_gnssroBndROPP1D_tlad
                   SOURCES mains/TestObsOperatorTLAD.cc
                   ARGS    "testinput/gnssrobndropp1d.yaml"
                   LIBS    ufo )
+
 ecbuild_add_test( TARGET  test_ufo_gnssroBndROPP1D_qc
                   SOURCES mains/TestObsFilters.cc
                   ARGS    "testinput/gnssrobndropp1d.yaml"
                   LIBS    ufo )
+
 ecbuild_add_test( TARGET  test_ufo_gnssroBndROPP2D_opr
                   SOURCES mains/TestObsOperator.cc
                   ARGS    "testinput/gnssrobndropp2d.yaml"
                   LIBS    ufo )
+
 ecbuild_add_test( TARGET  test_ufo_gnssroBndROPP2D_tlad
                   SOURCES mains/TestObsOperatorTLAD.cc
                   ARGS    "testinput/gnssrobndropp2d.yaml"
@@ -337,18 +317,59 @@ ecbuild_add_test( TARGET  test_ufo_gnssroBndROPP2D_tlad
 endif( ${ROPP-UFO_FOUND} )
 
 # Marine UFO tests
+ecbuild_add_test( TARGET  test_ufo_seaicefrac_opr
+                  SOURCES mains/TestObsOperator.cc
+                  ARGS    "testinput/seaicefrac.yaml"
+                  LIBS    ufo )
+
+ecbuild_add_test( TARGET  test_ufo_seaicefrac_tlad
+                  SOURCES mains/TestObsOperatorTLAD.cc
+                  ARGS    "testinput/seaicefrac.yaml"
+                  LIBS    ufo )
+
+ecbuild_add_test( TARGET  test_ufo_seaicethick_opr
+                  SOURCES mains/TestObsOperator.cc
+                  ARGS    "testinput/seaicethick.yaml"
+                  LIBS    ufo )
+
+ecbuild_add_test( TARGET  test_ufo_seaicethick_tlad
+                  SOURCES mains/TestObsOperatorTLAD.cc
+                  ARGS    "testinput/seaicethick.yaml"
+                  LIBS    ufo )
+
+ecbuild_add_test( TARGET  test_ufo_sst_opr
+                  SOURCES mains/TestObsOperator.cc
+                  ARGS    "testinput/sea_surface_temp.yaml"
+                  LIBS    ufo )
+
+ecbuild_add_test( TARGET  test_ufo_sst_tlad
+                  SOURCES mains/TestObsOperatorTLAD.cc
+                  ARGS    "testinput/sea_surface_temp.yaml"
+                  LIBS    ufo )
+
+ecbuild_add_test( TARGET  test_ufo_adt_opr
+                  SOURCES mains/TestObsOperator.cc
+                  ARGS    "testinput/adt.yaml"
+                  LIBS    ufo )
+
+ecbuild_add_test( TARGET  test_ufo_adt_tlad
+                  SOURCES mains/TestObsOperatorTLAD.cc
+                  ARGS    "testinput/adt.yaml"
+                  LIBS    ufo )    
+
+ecbuild_add_test( TARGET  test_ufo_CoolSkin_opr
+                  SOURCES mains/TestObsOperator.cc
+                  ARGS    "testinput/coolskin.yaml"
+                  LIBS    ufo )
+
+ecbuild_add_test( TARGET  test_ufo_CoolSkin_tlad
+                  SOURCES mains/TestObsOperatorTLAD.cc
+                  ARGS    "testinput/coolskin.yaml"
+                  LIBS    ufo )
+
+
+# Marine UFO tests
 if( ${GSW_FOUND} )
-
-    ecbuild_add_test( TARGET  test_ufo_geovals_marine
-                      SOURCES mains/TestGeoVaLs.cc
-                      ARGS    "testinput/ufotest_marine.yaml"
-                      LIBS    ufo )
-
-    ecbuild_add_test( TARGET  test_ufo_locations_marine
-                      SOURCES mains/TestLocations.cc
-                      ARGS    "testinput/ufotest_marine.yaml"
-                      LIBS    ufo )
-
     ecbuild_add_test( TARGET  test_ufo_insitutemperature_opr
                       SOURCES mains/TestObsOperator.cc
                       ARGS    "testinput/tprof.yaml"
@@ -359,54 +380,12 @@ if( ${GSW_FOUND} )
                       ARGS    "testinput/tprof.yaml"
                       LIBS    ufo )
 
-    ecbuild_add_test( TARGET  test_ufo_seaice_opr
-                      SOURCES mains/TestObsOperator.cc
-                      ARGS    "testinput/seaice.yaml"
-                      LIBS    ufo )
-
-    ecbuild_add_test( TARGET  test_ufo_seaice_tlad
-                      SOURCES mains/TestObsOperatorTLAD.cc
-                      ARGS    "testinput/seaice.yaml"
-                      LIBS    ufo )
-
-    ecbuild_add_test( TARGET  test_ufo_sst_opr
-                      SOURCES mains/TestObsOperator.cc
-                      ARGS    "testinput/sea_surface_temp.yaml"
-                      LIBS    ufo )
-
-    ecbuild_add_test( TARGET  test_ufo_sst_tlad
-                      SOURCES mains/TestObsOperatorTLAD.cc
-                      ARGS    "testinput/sea_surface_temp.yaml"
-                      LIBS    ufo )
-
-    ecbuild_add_test( TARGET  test_ufo_adt_opr
-                      SOURCES mains/TestObsOperator.cc
-                      ARGS    "testinput/adt.yaml"
-                      LIBS    ufo )
-
-    ecbuild_add_test( TARGET  test_ufo_adt_tlad
-                      SOURCES mains/TestObsOperatorTLAD.cc
-                      ARGS    "testinput/adt.yaml"
-                      LIBS    ufo )		      
-
-    ecbuild_add_test( TARGET  test_ufo_CoolSkin_opr
-                      SOURCES mains/TestObsOperator.cc
-                      ARGS    "testinput/coolskin.yaml"
-                      LIBS    ufo )
-
-    ecbuild_add_test( TARGET  test_ufo_CoolSkin_tlad
-                      SOURCES mains/TestObsOperatorTLAD.cc
-                      ARGS    "testinput/coolskin.yaml"
-                      LIBS    ufo )
-
     ecbuild_add_test( TARGET  test_ufo_marinevertinterp_opr
-                      BOOST
                       SOURCES mains/TestObsOperator.cc
                       ARGS    "testinput/genericprof.yaml"
                       LIBS    ufo )
 
     ecbuild_add_test( TARGET  test_ufo_marinevertinterp_tlad
-                      BOOST
                       SOURCES mains/TestObsOperatorTLAD.cc
                       ARGS    "testinput/genericprof.yaml"
                       LIBS    ufo )

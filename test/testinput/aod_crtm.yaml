@@ -1,28 +1,31 @@
 ---
+logging:
+  categories: Warning, Error, Debug
 test_framework_runtime_config: "--log_level=test_suite"
-window_begin: "2018-04-14T21:00:00Z"
-window_end: "2018-04-15T03:00:00Z"
+
+window_begin: 2018-04-14T21:00:00Z
+window_end: 2018-04-15T03:00:00Z
+
 LinearObsOpTest:
  testiterTL: 10
- toleranceTL: "1.0e-10"
- toleranceAD: "1.0e-13"
+ toleranceTL: 1.0e-10
+ toleranceAD: 1.0e-13
+
 Observations: 
  ObsTypes: 
  - ObsType: Aod
-   channels: "4"
+   channels: 4
    ObsOptions:
     n_Absorbers: 2
     n_Clouds: 0
-    Sensor_ID: "v.viirs-m_npp"
+    Sensor_ID: v.viirs-m_npp
     EndianType: little_endian
-    CoefficientPath: "Data/"
-    AerosolOption: "aerosols_gocart_default"
+    CoefficientPath: Data/
+    AerosolOption: aerosols_gocart_default
    ObsData: 
     ObsDataIn: 
-     obsfile: "Data/aod_obs_2018041500_m.nc4"
+     obsfile: Data/aod_obs_2018041500_m.nc4
    GeoVaLs: 
-    norm: "2673.32605458027"
-    filename: "Data/aod_geoval_2018041500_m.nc4"
-   vecequiv: "GsiHofX"
-   tolerance: "1.0e-06"
-   ObsBias: {}
+    filename: Data/aod_geoval_2018041500_m.nc4
+   vecequiv: GsiHofX
+   tolerance: 1.0e-06

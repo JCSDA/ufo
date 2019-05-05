@@ -1,30 +1,31 @@
 ---
+logging:
+  categories: Warning, Error, Debug
 test_framework_runtime_config: "--log_level=test_suite"
-window_begin: "2018-04-14T21:00:00Z"
-window_end: "2018-04-15T03:00:00Z"
+
+window_begin: 2018-04-14T21:00:00Z
+window_end: 2018-04-15T03:00:00Z
+
 LinearObsOpTest: 
- testiterTL: 10
- toleranceTL: 1.0e-10
+ testiterTL: 5
+ toleranceTL: 1.0e-7
  toleranceAD: 1.0e-11
+
 Observations: 
  ObsTypes: 
- - ObsType: "CRTM"
-   channels: "1-6,9-12,13,15"
+ - ObsType: CRTM
+   channels: 1-6,9-12,13,15
    ObsOptions: 
-    InspectProfileNumber: 12
     n_Absorbers: 3
     n_Clouds: 2
     n_Aerosols: 0
     Sensor_ID: amsua_n19
     EndianType: little_endian
-    CoefficientPath: "Data/"
+    CoefficientPath: Data/
    ObsData: 
     ObsDataIn: 
-     obsfile: "Data/amsua_n19_obs_2018041500_m.nc4"
-    ObsDataOut: 
-     obsfile: "Data/amsua_n19_obs_2018041500_m_out.nc4"
+     obsfile: Data/amsua_n19_obs_2018041500_m.nc4
    GeoVaLs: 
-    filename: "Data/amsua_n19_geoval_2018041500_m.nc4"
+    filename: Data/amsua_n19_geoval_2018041500_m.nc4
    vecequiv: GsiHofX
    tolerance: 1.e-6
-   ObsBias: {} 
