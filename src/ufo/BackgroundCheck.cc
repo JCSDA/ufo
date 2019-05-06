@@ -37,16 +37,16 @@ BackgroundCheck::BackgroundCheck(ioda::ObsSpace & os, const eckit::Configuration
                                  boost::shared_ptr<ioda::ObsDataVector<int> > flags,
                                  boost::shared_ptr<ioda::ObsDataVector<float> > obserr)
   : obsdb_(os), config_(config), abs_threshold_(-1.0), threshold_(-1.0), gv_(NULL),
-    geovars_(preProcessWhere(config_)), flags_(flags), obserr_(obserr)
+    geovars_(preProcessWhere(config_)), flags_(*flags), obserr_(*obserr)
 {
   oops::Log::trace() << "BackgroundCheck contructor starting" << std::endl;
   oops::Log::debug() << "BackgroundCheck: config = " << config << std::endl;
-  ASSERT(flags_);
-  ASSERT(obserr_);
+  ASSERT(flags);
+  ASSERT(obserr);
 
-  const double missing = util::missingValue(missing);
-  threshold_ = config.getDouble("threshold", missing);
-  abs_threshold_ = config.getDouble("absolute threshold", missing);
+  const float missing = util::missingValue(missing);
+  threshold_ = config.getFloat("threshold", missing);
+  abs_threshold_ = config.getFloat("absolute threshold", missing);
   ASSERT(abs_threshold_ != missing || threshold_ != missing);
   ASSERT(abs_threshold_ == missing || abs_threshold_ > 0.0);
   ASSERT(threshold_ == missing || threshold_ > 0.0);
@@ -71,13 +71,13 @@ void BackgroundCheck::postFilter(const ioda::ObsVector & hofx) const {
 
   const oops::Variables vars(config_.getStringVector("variables"));
   const oops::Variables observed(config_.getStringVector("observed"));
-  const double missing = util::missingValue(missing);
+  const float missing = util::missingValue(missing);
 
-  ioda::ObsDataVector<double> obs(obsdb_, vars, "ObsValue");
-  ioda::ObsDataVector<int> & flags(*flags_);      // simplifies syntax below
-  ioda::ObsDataVector<float> & obserr(*obserr_);  // simplifies syntax below
-  oops::Log::debug() << "BackgroundCheck flags: " << flags;
-  oops::Log::debug() << "BackgroundCheck obserr: " << obserr;
+  oops::Log::debug() << "BackgroundCheck flags: " << flags_;
+  oops::Log::debug() << "BackgroundCheck obserr: " << obserr_;
+
+  ioda::ObsDataVector<float> obs(obsdb_, vars, "ObsValue");
+  ioda::ObsDataVector<float> bias(obsdb_, vars, "ObsBias", true);
 
 // Select where the background check will apply
   std::vector<bool> apply = processWhere(obsdb_, *gv_, config_);
@@ -86,22 +86,23 @@ void BackgroundCheck::postFilter(const ioda::ObsVector & hofx) const {
     size_t iv = observed.find(vars[jv]);
 
     for (size_t jobs = 0; jobs < obsdb_.nlocs(); ++jobs) {
-      if (apply[jobs] && flags[iv][jobs] == 0) {
+      if (apply[jobs] && flags_[iv][jobs] == 0) {
         size_t iobs = observed.size() * jobs + iv;
-        ASSERT(obserr[iv][jobs] != util::missingValue(obserr[iv][jobs]));
+        ASSERT(obserr_[iv][jobs] != util::missingValue(obserr_[iv][jobs]));
         ASSERT(obs[jv][jobs] != util::missingValue(obs[jv][jobs]));
         ASSERT(hofx[iobs] != util::missingValue(hofx[iobs]));
 
 //      Threshold for current observation
-        double zz = std::numeric_limits<double>::max();
+        float zz = std::numeric_limits<float>::max();
         if (abs_threshold_ != missing) zz = abs_threshold_;
-        if (threshold_ != missing)  {
-          zz = std::min(zz, threshold_ * static_cast<double>(obserr[iv][jobs]));
-        }
-        ASSERT(zz < std::numeric_limits<double>::max() && zz > 0.0);
+        if (threshold_ != missing) zz = std::min(zz, threshold_ * obserr_[iv][jobs]);
+        ASSERT(zz < std::numeric_limits<float>::max() && zz > 0.0);
+
+//      Apply bias correction
+        float yy = obs[jv][jobs] + bias[jv][jobs];
 
 //      Check distance from background
-        if (std::abs(obs[jv][jobs] - hofx[iobs]) > zz) flags[iv][jobs] = QCflags::fguess;
+        if (std::abs(static_cast<float>(hofx[iobs]) - yy) > zz) flags_[iv][jobs] = QCflags::fguess;
       }
     }
   }
