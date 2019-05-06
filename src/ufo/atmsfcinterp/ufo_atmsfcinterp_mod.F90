@@ -82,7 +82,7 @@ end subroutine ufo_atmsfcinterp_delete
 
 ! ------------------------------------------------------------------------------
 subroutine ufo_atmsfcinterp_simobs(self, geovals, hofx, obss)
-  use atmsfc_mod, only : calc_t2
+  use atmsfc_mod, only : sfc_wtq_fwd_gsi
   implicit none
   class(ufo_atmsfcinterp), intent(in)    :: self
   type(ufo_geovals),  intent(in)    :: geovals
@@ -93,6 +93,7 @@ subroutine ufo_atmsfcinterp_simobs(self, geovals, hofx, obss)
                                profile
   integer :: nlocs, ivar, iobs
   real(kind_real), allocatable :: obselev(:), obshgt(:)
+  real(kind_real) :: outvalue
   character(len=MAXVARLEN) :: geovar
 
 
@@ -101,7 +102,7 @@ subroutine ufo_atmsfcinterp_simobs(self, geovals, hofx, obss)
   ! that need to be grabbed from GeoVaLs regardless of the observation type
 
   ! for low altitudes, we can assume: phi = z
-  ! grabbing geopotential height profile and surface value,
+  ! grabbing geopotential height profile and surface elevation,
   ! surface temperature, surface roughness length
   ! surface and profile air pressure
   ! profiles of tsen, q, u, v, and surface land fraction
@@ -116,17 +117,16 @@ subroutine ufo_atmsfcinterp_simobs(self, geovals, hofx, obss)
   call ufo_geovals_get_var(geovals, var_u, u)
   call ufo_geovals_get_var(geovals, var_v, v)
   call ufo_geovals_get_var(geovals, var_sfc_lfrac, landmask)
-
   ! get number of obs
   nlocs = obsspace_get_nlocs(obss)
 
   ! get station elevation from obs
   allocate(obselev(nlocs))
-  call obsspace_get_db(obss, "MetaData", "station_elevation",obselev)
+  call obsspace_get_db(obss, "MetaData", "station_elevation", obselev)
 
   ! get observation height (above sea level)
   allocate(obshgt(nlocs))
-  call obsspace_get_db(obss, "MetaData", "height",obshgt)
+  call obsspace_get_db(obss, "MetaData", "height", obshgt)
 
   do ivar = 1, self%nvars
     ! Get the name of input variable in geovals
@@ -135,22 +135,16 @@ subroutine ufo_atmsfcinterp_simobs(self, geovals, hofx, obss)
     ! Get profile for this variable from geovals
     call ufo_geovals_get_var(geovals, geovar, profile)
 
-    ! Interpolate from geovals to observational location into hofx
-    ! Note: hofx holds all variables (varin) for location 1
-    ! then all variables for location 2, and so on
-    select case (trim(geovar))
-      case ("air_temperature")
-        ! this subroutine call will mimic that of what is performed in GSI to
-        ! compute 2m temperature from other model variables
-        call calc_t2
-    end select
-    !do iobs = 1, nlocs
-    !  ! test by just grabbing the lowest model layer value
-    !  hofx(ivar + (iobs-1)*self%nvars) = profile%vals(1,iobs) 
-    !  if (trim(geovar) == 'surface_pressure') then
-    !    hofx(ivar + (iobs-1)*self%nvars) = hofx(ivar +(iobs-1)*self%nvars)*10_kind_real
-    !  end if
-    !enddo
+    ! calling a modified version of the sfc_model routine from GSI
+    do iobs = 1, nlocs
+      call sfc_wtq_fwd_gsi(psfc%vals(1,iobs),tsfc%vals(1,iobs),prs%vals(1,iobs),&
+                           tsen%vals(1,iobs),q%vals(1,iobs),u%vals(1,iobs),&
+                           v%vals(1,iobs),prs%vals(2,iobs),tsen%vals(2,iobs),&
+                           q%vals(2,iobs),phi%vals(1,iobs),roughlen%vals(1,iobs),&
+                           landmask%vals(1,iobs),2.0_kind_real,& ! force 2m agl for testing...
+                           !landmask%vals(1,iobs),obshgt(iobs)-hgt%vals(1,iobs),&
+                           profile%vals(1,iobs),profile%vals(2,iobs),outvalue)
+    enddo
   enddo
 
 
