@@ -13,13 +13,15 @@ LinearObsOpTest:
 
 Observations:
   ObsTypes:
-  - ObsType: Satwind
-    ObsData:
+  - ObsOperator:
+      name: Satwind
+      variables:
+      - eastward_wind
+      - northward_wind
+    ObsSpace:
+      name: Satwind
       ObsDataIn:
         obsfile: Data/satwind_obs_2018041500_m.nc4
-    variables:
-    - eastward_wind
-    - northward_wind
     GeoVaLs:
       filename: Data/satwind_geoval_2018041500_m.nc4
     vecequiv: GsiHofX

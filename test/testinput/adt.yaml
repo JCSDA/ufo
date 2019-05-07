@@ -13,12 +13,13 @@ LinearObsOpTest:
 
 Observations:
   ObsTypes:
-  - ObsType: ADT
-    ObsData:
+  - ObsSpace:
+      name: ADT
       ObsDataIn:
         obsfile: Data/Jason-2-2018-04-15.nc
+    ObsOperator:
+      name: ADT
     GeoVaLs:
       filename: Data/Jason-2-2018-04-15_geovals.nc
-    ObsBias: {}
     rmsequiv: 0.20601693262068568  # for testing with bogus geoval data
     tolerance: 1.0e-10

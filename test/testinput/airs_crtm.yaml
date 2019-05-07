@@ -13,19 +13,20 @@ LinearObsOpTest:
 
 Observations: 
  ObsTypes: 
- - ObsType: CRTM
-   channels: 1,6-7
-   ObsOptions: 
-    n_Absorbers: 3
-    n_Clouds: 0
-    n_Aerosols: 0
-    Sensor_ID: airs_aqua
-    EndianType: little_endian
-    CoefficientPath: Data/
-   ObsData: 
-    ObsDataIn: 
-     obsfile: Data/airs_aqua_obs_2018041500_m.nc4
+ - ObsOperator:
+     name: CRTM
+     channels: 1,6-7
+     n_Absorbers: 3
+     n_Clouds: 0
+     n_Aerosols: 0
+     Sensor_ID: airs_aqua
+     EndianType: little_endian
+     CoefficientPath: Data/
+   ObsSpace: 
+     name: Radiance
+     ObsDataIn: 
+       obsfile: Data/airs_aqua_obs_2018041500_m.nc4
    GeoVaLs: 
-    filename: Data/airs_aqua_geoval_2018041500_m.nc4
+     filename: Data/airs_aqua_geoval_2018041500_m.nc4
    vecequiv: GsiHofX
    tolerance: 1.e-5

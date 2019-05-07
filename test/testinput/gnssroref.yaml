@@ -13,9 +13,11 @@ LinearObsOpTest:
 
 Observations: 
  ObsTypes: 
- - ObsType: GnssroRef
-   ObsOptions: 
-   ObsData: 
+ - ObsOperator:
+    name: GnssroRef
+    ObsOptions:
+   ObsSpace: 
+    name: GnssroRef
     ObsDataIn: 
      obsfile: Data/gnssro_obs_2018041500_s.nc4
    GeoVaLs: 

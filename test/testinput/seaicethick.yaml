@@ -13,8 +13,10 @@ LinearObsOpTest:
 
 Observations:
   ObsTypes:
-  - ObsType: SeaIceThickness
-    ObsData:
+  - ObsOperator:
+      name: SeaIceThickness
+    ObsSpace:
+      name: SeaIceThickness
       ObsDataIn:
         obsfile: Data/cryosat2-2018-04-15.nc
     GeoVaLs:

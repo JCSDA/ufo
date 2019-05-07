@@ -13,21 +13,22 @@ LinearObsOpTest:
 
 Observations: 
  ObsTypes: 
- - ObsType: GnssroBndROPP1D
-   ObsOptions: 
-   ObsData: 
-    ObsDataIn: 
-     obsfile: Data/gnssro_obs_2018041500_s.nc4
-    obsvalue: bending_angle
+ - ObsOperator: 
+     name: GnssroBndROPP1D
+     obsvalue: bending_angle
+   ObsSpace: 
+     name: GnssroBnd
+     ObsDataIn: 
+       obsfile: Data/gnssro_obs_2018041500_s.nc4
    GeoVaLs: 
-    filename: Data/gnssro_geoval_2018041500_s.nc4
-    ObsFilters:
-    - Filter: Background Check
-      variables:
-      - bending_angle
-      threshold: 3.0
-    - Filter: ROobserror
-      errmodel: ROPP
+     filename: Data/gnssro_geoval_2018041500_s.nc4
+   ObsFilters:
+   - Filter: Background Check
+     variables:
+     - bending_angle
+     threshold: 3.0
+   - Filter: ROobserror
+     errmodel: ROPP
    rmsequiv: 0.00919697505361058
    passedBenchmark: 20
    tolerance: 1.0e-13

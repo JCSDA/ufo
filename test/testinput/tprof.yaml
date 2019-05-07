@@ -13,8 +13,10 @@ LinearObsOpTest:
 
 Observations:
   ObsTypes:
-  - ObsType: InsituTemperature
-    ObsData:
+  - ObsOperator:
+      name: InsituTemperature
+    ObsSpace:
+      name: InsituTemperature
       ObsDataIn:
         obsfile: Data/profile_2018-04-15.nc
     GeoVaLs:

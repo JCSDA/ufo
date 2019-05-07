@@ -8,27 +8,31 @@ window_end: 2018-04-15T03:00:00Z
 
 Observations: 
  ObsTypes: 
- - ObsType: CRTM
-   channels: 1-15
-   ObsOptions: 
-    n_Absorbers: 3
-    n_Clouds: 2
-    n_Aerosols: 0
-    Sensor_ID: amsua_n19
-    EndianType: little_endian
-    CoefficientPath: Data/
-   ObsData: 
+ - ObsOperator:
+     name: CRTM
+     channels: 1-15
+     n_Absorbers: 3
+     n_Clouds: 2
+     n_Aerosols: 0
+     Sensor_ID: amsua_n19
+     EndianType: little_endian
+     CoefficientPath: Data/
+   ObsSpace: 
+    name: Radiance
     ObsDataIn: 
      obsfile: Data/amsua_n19_obs_2018041500_m.nc4
    GeoVaLs: 
     norm: 72000.7229763
     filename: Data/amsua_n19_geoval_2018041500_m.nc4
- - ObsType: Radiosonde
-   ObsData: 
+ - ObsType:
+   ObsSpace: 
+    name: Radiosonde
     ObsDataIn: 
      obsfile: Data/sondes_obs_2018041500_m.nc4
-   variables: 
-   - air_temperature
+   ObsOperator:
+     name: Radiosonde
+     variables: 
+     - air_temperature
    GeoVaLs: 
     norm: 22355.0135965
     filename: Data/sondes_geoval_2018041500_m.nc4

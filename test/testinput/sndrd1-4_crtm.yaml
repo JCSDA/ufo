@@ -13,55 +13,53 @@ LinearObsOpTest:
 
 Observations: 
  ObsTypes: 
- - ObsType: CRTM
-   channels: 1-15
-   ObsOptions: &crtm_options
-    n_Absorbers: 3
-    n_Clouds: 0
-    n_Aerosols: 0
-    EndianType: little_endian
-    CoefficientPath: Data/
-    Sensor_ID: sndrD1_g15
-   ObsData: 
-    ObsDataIn: 
-     obsfile: "Data/sndrd1_g15_obs_2018041500_m.nc4"
+ - ObsOperator: &obsop
+     name: CRTM
+     channels: 1-15
+     n_Absorbers: 3
+     n_Clouds: 0
+     n_Aerosols: 0
+     EndianType: little_endian
+     CoefficientPath: Data/
+     Sensor_ID: sndrD1_g15
+   ObsSpace: 
+     name: Radiance
+     ObsDataIn: 
+       obsfile: "Data/sndrd1_g15_obs_2018041500_m.nc4"
    GeoVaLs: 
-    filename: "Data/sndrd1_g15_geoval_2018041500_m.nc4"
+     filename: "Data/sndrd1_g15_geoval_2018041500_m.nc4"
    vecequiv: GsiHofX
    tolerance: 1.1e-5
- - ObsType: CRTM
-   channels: 1-15
-   ObsOptions:
-    <<: *crtm_options
-    Sensor_ID: sndrD2_g15
-   ObsData: 
-    ObsDataIn: 
-     obsfile: Data/sndrd2_g15_obs_2018041500_m.nc4
+ - ObsOperator:
+     <<: *obsop
+     Sensor_ID: sndrD2_g15
+   ObsSpace: 
+     name: Radiance
+     ObsDataIn: 
+       obsfile: Data/sndrd2_g15_obs_2018041500_m.nc4
    GeoVaLs: 
-    filename: Data/sndrd2_g15_geoval_2018041500_m.nc4
+     filename: Data/sndrd2_g15_geoval_2018041500_m.nc4
    vecequiv: GsiHofX
    tolerance: 1.1e-5
- - ObsType: CRTM
-   channels: 1-15
-   ObsOptions:
-    <<: *crtm_options 
-    Sensor_ID: sndrD3_g15
-   ObsData: 
-    ObsDataIn: 
-     obsfile: Data/sndrd3_g15_obs_2018041500_m.nc4
+ - ObsOperator:
+     <<: *obsop
+     Sensor_ID: sndrD3_g15
+   ObsSpace: 
+     name: Radiance
+     ObsDataIn: 
+       obsfile: Data/sndrd3_g15_obs_2018041500_m.nc4
    GeoVaLs: 
-    filename: Data/sndrd3_g15_geoval_2018041500_m.nc4
+     filename: Data/sndrd3_g15_geoval_2018041500_m.nc4
    vecequiv: GsiHofX
    tolerance: 1.1e-5
- - ObsType: CRTM
-   channels: 1-15
-   ObsOptions:
-    <<: *crtm_options
-    Sensor_ID: sndrD4_g15
-   ObsData: 
-    ObsDataIn: 
-     obsfile: Data/sndrd4_g15_obs_2018041500_m.nc4
+ - ObsOperator:
+     <<: *obsop
+     Sensor_ID: sndrD4_g15
+   ObsSpace: 
+     name: Radiance
+     ObsDataIn: 
+       obsfile: Data/sndrd4_g15_obs_2018041500_m.nc4
    GeoVaLs: 
-    filename: Data/sndrd4_g15_geoval_2018041500_m.nc4
+     filename: Data/sndrd4_g15_geoval_2018041500_m.nc4
    vecequiv: GsiHofX
    tolerance: 1.1e-5

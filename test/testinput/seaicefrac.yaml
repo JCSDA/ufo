@@ -13,8 +13,10 @@ LinearObsOpTest:
 
 Observations:
   ObsTypes:
-  - ObsType: SeaIceFraction
-    ObsData:
+  - ObsOperator:
+      name: SeaIceFraction
+    ObsSpace:
+      name: SeaIceFraction
       ObsDataIn:
         obsfile: Data/icec-2018-04-15.nc
     GeoVaLs:

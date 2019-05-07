@@ -34,8 +34,7 @@ ObsRadianceCRTM::ObsRadianceCRTM(const ioda::ObsSpace & odb, const eckit::Config
   : ObsOperatorBase(odb, config), keyOperRadianceCRTM_(0),
     odb_(odb), varin_(), varout_(), obsname_("CRTM:")
 {
-  const eckit::LocalConfiguration obsOptions(config, "ObsOptions");
-  obsname_ += obsOptions.getString("Sensor_ID");
+  obsname_ += config.getString("Sensor_ID");
   int c_name_size = 3000;
   char *buffin = new char[c_name_size];
   char *buffout = new char[c_name_size];
@@ -47,7 +46,7 @@ ObsRadianceCRTM::ObsRadianceCRTM(const ioda::ObsSpace & odb, const eckit::Config
   std::copy(channels.begin(), channels.end(), std::back_inserter(channels_list));
 
   // call Fortran setup routine
-  const eckit::Configuration * configc = &obsOptions;
+  const eckit::Configuration * configc = &config;
   ufo_radiancecrtm_setup_f90(keyOperRadianceCRTM_, &configc, channels_list.size(),
                              channels_list[0], buffin, buffout, c_name_size);
 

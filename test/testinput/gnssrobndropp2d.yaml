@@ -13,11 +13,13 @@ LinearObsOpTest:
 
 Observations: 
  ObsTypes: 
- - ObsType: GnssroBndROPP2D
-   ObsOptions: 
-    n_horiz: 3
-    res: 40.0
-   ObsData: 
+ - ObsOperator:
+    name: GnssroBndROPP2D
+    ObsOptions: 
+     n_horiz: 3
+     res: 40.0
+   ObsSpace: 
+    name: GnssroBnd
     ObsDataIn: 
      obsfile: Data/gnssro_obs_2018041500_s.nc4
     obsvalue: bending_angle

@@ -8,14 +8,16 @@ window_end: 2018-04-15T03:00:00Z
 
 Observations:
   ObsTypes:
-  - ObsType: Radiosonde
-    ObsData:
+  - ObsOperator:
+      name: Radiosonde
+      variables:
+      - air_temperature
+      - eastward_wind
+      - northward_wind
+    ObsSpace:
+      name: Radiosonde
       ObsDataIn:
         obsfile: Data/sondes_obs_2018041500_m.nc4
-    variables:
-    - air_temperature
-    - eastward_wind
-    - northward_wind
     GeoVaLs:
       filename: Data/sondes_geoval_2018041500_m.nc4
     ObsFilters:

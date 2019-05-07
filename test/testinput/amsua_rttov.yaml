@@ -13,12 +13,14 @@ LinearObsOpTest:
 
 Observations: 
  ObsTypes: 
- - ObsType: RTTOV
-   channels: 1-15
-   ObsOptions: 
-    Sensor_ID: noaa_19_amsua
-    CoefficientPath: Data/
-   ObsData: 
+ - ObsOperator:
+     name: RTTOV
+     channels: 1-15
+     ObsOptions: 
+      Sensor_ID: noaa_19_amsua
+      CoefficientPath: Data/
+   ObsSpace: 
+    name: Radiance
     ObsDataIn: 
      obsfile: Data/amsua_n19_obs_2018041500_m.nc4
    GeoVaLs: 

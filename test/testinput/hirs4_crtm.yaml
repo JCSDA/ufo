@@ -13,19 +13,20 @@ LinearObsOpTest:
 
 Observations: 
  ObsTypes: 
- - ObsType: CRTM
-   channels: 1-15
-   ObsOptions: 
-    n_Absorbers: 3
-    n_Clouds: 0
-    n_Aerosols: 0
-    Sensor_ID: hirs4_metop-a
-    EndianType: little_endian
-    CoefficientPath: Data/
-   ObsData: 
-    ObsDataIn: 
-     obsfile: Data/hirs4_metop-a_obs_2018041500_m.nc4
+ - ObsOperator:
+     name: CRTM
+     channels: 1-15
+     n_Absorbers: 3
+     n_Clouds: 0
+     n_Aerosols: 0
+     Sensor_ID: hirs4_metop-a
+     EndianType: little_endian
+     CoefficientPath: Data/
+   ObsSpace:
+     name: Radiance 
+     ObsDataIn: 
+       obsfile: Data/hirs4_metop-a_obs_2018041500_m.nc4
    GeoVaLs: 
-    filename: Data/hirs4_metop-a_geoval_2018041500_m.nc4
+     filename: Data/hirs4_metop-a_geoval_2018041500_m.nc4
    vecequiv: GsiHofX
    tolerance: 1.e-5

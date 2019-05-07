@@ -13,12 +13,14 @@ LinearObsOpTest:
 
 Observations:
   ObsTypes:
-  - ObsType: InsituSalinity
-    ObsData:
+  - ObsOperator:
+      name: InsituSalinity
+      variable:
+      - sea_water_salinity
+    ObsSpace:
+      name: InsituSalinity
       ObsDataIn:
         obsfile: Data/profile_2018-04-15.nc
-    variable:
-    - sea_water_salinity
     GeoVaLs:
       filename: Data/profile_2018-04-15_geovals.nc
     rmsequiv: 35.0

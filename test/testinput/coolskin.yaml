@@ -13,8 +13,10 @@ LinearObsOpTest:
 
 Observations:
   ObsTypes:
-  - ObsType: CoolSkin
-    ObsData:
+  - ObsOperator:
+      name: CoolSkin
+    ObsSpace:
+      name: CoolSkin
       ObsDataIn:
         obsfile: Data/coolskin_fake_obs_2018041500.nc
     GeoVaLs:

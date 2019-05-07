@@ -13,14 +13,15 @@ LinearObsOpTest:
 
 Observations:
   ObsTypes:
-  - ObsType: Aircraft
-    ObsData:
+  - ObsSpace:
+      name: Aircraft
       ObsDataIn:
         obsfile: Data/aircraft_obs_2018041500_m.nc4
-    variables:
-    - air_temperature
+    ObsOperator:
+      name: Aircraft
+      variables:
+      - air_temperature
     GeoVaLs:
       filename: Data/aircraft_geoval_2018041500_m.nc4
     vecequiv: GsiHofX
     tolerance: 1.0e-6
-    ObsBias: {}
