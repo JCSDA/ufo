@@ -143,7 +143,7 @@ subroutine ufo_atmsfcinterp_simobs(self, geovals, hofx, obss)
                            q%vals(2,iobs),phi%vals(1,iobs),roughlen%vals(1,iobs),&
                            landmask%vals(1,iobs),2.0_kind_real,& ! force 2m agl for testing...
                            !landmask%vals(1,iobs),obshgt(iobs)-hgt%vals(1,iobs),&
-                           profile%vals(1,iobs),profile%vals(2,iobs),outvalue)
+                           outvalue,geovar)
     enddo
   enddo
 

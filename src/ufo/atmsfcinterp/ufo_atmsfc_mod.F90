@@ -4,14 +4,15 @@ contains
 
 subroutine sfc_wtq_fwd_gsi(psfc_in,tsfc,prsl1_in,tsen1,q1,u1,v1,&
                            prsl2_in,tsen2,q2,phi1,roughlen,landmask,&
-                           obshgt,var1,var2,outvar)
+                           obshgt,outvar,varname)
   ! sfc_wtq_fwd_gsi
   ! based off of subroutines from GSI sfc_model.f90 file
   use kinds
   implicit none
   real(kind_real), intent(in) :: psfc_in, tsfc, prsl1_in, tsen1, q1, u1, v1,&
                                  prsl2_in, tsen2, q2, phi1, roughlen, landmask, &
-                                 obshgt, var1, var2
+                                 obshgt
+  character(len=MAXVARLEN), intent(in) :: varname
   real(kind_real), intent(out) :: outvar
 
   real(kind_real), parameter :: zint0 = 0.01_kind_real ! default roughness over land
@@ -27,6 +28,8 @@ subroutine sfc_wtq_fwd_gsi(psfc_in,tsfc,prsl1_in,tsen1,q1,u1,v1,&
   real(kind_real), parameter :: r0_9 = 0.9_kind_real
   real(kind_real), parameter :: r0_2 = 0.2_kind_real
   real(kind_real), parameter :: zero = 0.0_kind_real
+  real(kind_real), parameter :: one = 1.0_kind_real
+  real(kind_real), parameter :: two = 2.0_kind_real
   real(kind_real), parameter :: five = 5.0_kind_real
 
   real(kind_real) :: psfc, prsl1, prsl2
@@ -37,6 +40,8 @@ subroutine sfc_wtq_fwd_gsi(psfc_in,tsfc,prsl1_in,tsen1,q1,u1,v1,&
   real(kind_real) :: wspd2, Vc2, V2
   real(kind_real) :: rib
   real(kind_real) :: psim, psimz, psih, psihz
+  real(kind_real) :: cc, ust, mol, hol, holz
+  real(kind_real) :: xx, yy
  
   ! convert pressures to hPa from Pa
   psfc = psfc_in / r100
@@ -58,12 +63,12 @@ subroutine sfc_wtq_fwd_gsi(psfc_in,tsfc,prsl1_in,tsen1,q1,u1,v1,&
   gzzoz0 = log(obshgt/z0)
 
   ! virtual temperature from sensible temperature
-  tv1 = tsen1 * (1.0_kind_real + fv * q1)
-  tv2 = tsen2 * (1.0_kind_real + fv * q2)
+  tv1 = tsen1 * (one + fv * q1)
+  tv2 = tsen2 * (one + fv * q2)
 
   ! convert temperature of the ground to virtual temp assuming saturation
   call da_tp_to_qs( tsfc, psfc, eg, qg)
-  tvg = tsfc * (1.0_kind_real + fv * qg)
+  tvg = tsfc * (one + fv * qg)
 
   ! potential temperature calculations
   thg = tsfc * (r1000 / psfc) ** rd_over_cp ! surface theta
@@ -117,10 +122,67 @@ subroutine sfc_wtq_fwd_gsi(psfc_in,tsfc,prsl1_in,tsen1,q1,u1,v1,&
 
   ! free convection
   else
-    ! calculate psim and psih using iteration method
+    psim = zero
+    psih = zero
+    cc = two * atan(one)
+    
+    ! friction speed
+    ust = k_kar * sqrt(V2) / (gzsoz0 - psim)
+    ! heat flux factor
+    mol = k_kar * (th1 - thg)/(gzsoz0 - psih)
+    ! ratio of PBL height to Monin-Obukhov length
+    if (ust < r0_01) then
+      hol = rib * gzsoz0
+    else
+      hol = k_kar * 9.80665_kind_real * phi1 * mol / (th1 * ust * ust)
+    end if
+    hol = min(hol,zero)
+    hol = max(hol,-r10)
+    holz = (obshgt / phi1) * hol 
+    holz = min(holz,zero)
+    holz = max(holz,-r10)
+
+    xx = (one - r16 * hol) ** quarter
+    yy = log((one+xx*xx)/two) 
+    psim = two * log((one+xx)/two) + yy - two * atan(xx) + cc
+    psih = two * yy
+
+    xx = (one - r16 * holz) ** quarter
+    yy = log((one+xx*xx)/two) 
+    psimz = two * log((one+xx)/two) + yy - two * atan(xx) + cc
+    psihz = two * yy
+
+    psim = min(psim,r0_9*gzsoz0)
+    psimz = min(psimz, r0_9*gzzoz0)
+    psih = min(psih,r0_9*gzsoz0)
+    psihz = min(psihz,r0_9*gzzoz0)
 
   end if
   
+  psiw = gzsoz0 - psim
+  psit = gzsoz0 - psih 
+  psiwz = gzzoz0 - psimz
+  psitz = gzzoz0 - psihz
+
+  ust = k_kar * sqrt(V2) / (gzsoz0 - psim)
+
+  psiq = log(k_kar*ust*phi1/ka + phi1 / zq0) - psih
+  psiqz = log(k_kar*ust*obshgt/ka + obshgt / zq0) - psihz
+
+  select case(trim(varname))
+    case("air_temperature")
+      outvar = (thg + (th1 - thg)*psitz/psit)*(psfc/r1000)**rd_over_cp
+    case("virtual_temperature")
+      outvar = (thg + (th1 - thg)*psitz/psit)*(psfc/r1000)**rd_over_cp
+      outvar = outvar * (one + fv * q1)  
+    case("specific_humidity")
+      outvar = qg + (q1 - qg)*psiqz/psiq
+    case("eastward_wind")
+      outvar = u1 * psiwz / psiw 
+    case("northward_wind")
+      outvar = v1 * psiwz / psiw
+  end select
+  return
 
 end subroutine
 
