@@ -51,8 +51,7 @@ PreQC::PreQC(ioda::ObsSpace & obsdb, const eckit::Configuration & config,
 
 // Read QC flags from pre-processing
   const std::string qcin = config.getString("inputQC", "PreQC");
-  ioda::ObsDataVector<int> preqc(obsdb, observed);
-  preqc.read(qcin);
+  ioda::ObsDataVector<int> preqc(obsdb, observed, qcin);
   oops::Log::debug() << "PreQC::PreQC preqc: " << preqc;
 
 // Get threshold and reject above threshold

@@ -77,7 +77,7 @@ void BackgroundCheck::postFilter(const ioda::ObsVector & hofx) const {
   oops::Log::debug() << "BackgroundCheck obserr: " << obserr_;
 
   ioda::ObsDataVector<float> obs(obsdb_, vars, "ObsValue");
-  ioda::ObsDataVector<float> bias(obsdb_, vars, "ObsBias", true);
+  ioda::ObsDataVector<float> bias(obsdb_, vars, "ObsBias", false);
 
 // Select where the background check will apply
   std::vector<bool> apply = processWhere(obsdb_, *gv_, config_);
