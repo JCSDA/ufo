@@ -5,8 +5,8 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
  */
 
-#ifndef UFO_BACKGROUNDCHECK_H_
-#define UFO_BACKGROUNDCHECK_H_
+#ifndef UFO_FILTERS_BACKGROUNDCHECK_H_
+#define UFO_FILTERS_BACKGROUNDCHECK_H_
 
 #include <ostream>
 #include <string>
@@ -62,4 +62,4 @@ class BackgroundCheck : public util::Printable,
 
 }  // namespace ufo
 
-#endif  // UFO_BACKGROUNDCHECK_H_
+#endif  // UFO_FILTERS_BACKGROUNDCHECK_H_

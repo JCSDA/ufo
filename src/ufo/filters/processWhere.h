@@ -5,8 +5,8 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
  */
 
-#ifndef UFO_PROCESSWHERE_H_
-#define UFO_PROCESSWHERE_H_
+#ifndef UFO_FILTERS_PROCESSWHERE_H_
+#define UFO_FILTERS_PROCESSWHERE_H_
 
 #include <vector>
 
@@ -22,4 +22,4 @@ std::vector<bool> processWhere(ioda::ObsSpace &, const GeoVaLs &, const eckit::C
 
 }  // namespace ufo
 
-#endif  // UFO_PROCESSWHERE_H_
+#endif  // UFO_FILTERS_PROCESSWHERE_H_

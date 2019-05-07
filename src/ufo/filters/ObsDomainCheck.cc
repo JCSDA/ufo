@@ -5,7 +5,7 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
  */
 
-#include "ufo/BlackList.h"
+#include "ufo/filters/ObsDomainCheck.h"
 
 #include <string>
 #include <vector>
@@ -14,52 +14,51 @@
 
 #include "ioda/ObsDataVector.h"
 #include "ioda/ObsSpace.h"
-#include "oops/base/Variables.h"
 #include "oops/interface/ObsFilter.h"
 #include "oops/util/Logger.h"
 #include "oops/util/missingValues.h"
-#include "ufo/processWhere.h"
-#include "ufo/QCflags.h"
+#include "ufo/filters/processWhere.h"
+#include "ufo/filters/QCflags.h"
 #include "ufo/UfoTrait.h"
 
 namespace ufo {
 
 // -----------------------------------------------------------------------------
-static oops::FilterMaker<UfoTrait, oops::ObsFilter<UfoTrait, BlackList>> mkBlkLst_("BlackList");
+static oops::FilterMaker<UfoTrait, oops::ObsFilter<UfoTrait, ObsDomainCheck>>
+  mkDomLst_("Domain Check");
 // -----------------------------------------------------------------------------
 
-BlackList::BlackList(ioda::ObsSpace & obsdb, const eckit::Configuration & config,
-                     boost::shared_ptr<ioda::ObsDataVector<int> > flags,
-                     boost::shared_ptr<ioda::ObsDataVector<float> >)
+ObsDomainCheck::ObsDomainCheck(ioda::ObsSpace & obsdb, const eckit::Configuration & config,
+                               boost::shared_ptr<ioda::ObsDataVector<int> > flags,
+                               boost::shared_ptr<ioda::ObsDataVector<float> >)
   : obsdb_(obsdb), config_(config), geovars_(preProcessWhere(config_)), flags_(*flags)
 {
-  oops::Log::debug() << "BlackList: config = " << config_ << std::endl;
-  oops::Log::debug() << "BlackList: geovars = " << geovars_ << std::endl;
+  oops::Log::debug() << "ObsDomainCheck: config = " << config_ << std::endl;
+  oops::Log::debug() << "ObsDomainCheck: geovars = " << geovars_ << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
-BlackList::~BlackList() {}
+ObsDomainCheck::~ObsDomainCheck() {}
 
 // -----------------------------------------------------------------------------
 
-void BlackList::priorFilter(const GeoVaLs & gv) const {
-  const size_t nobs = obsdb_.nlocs();
+void ObsDomainCheck::priorFilter(const GeoVaLs & gv) const {
   const oops::Variables vars(config_.getStringVector("observed"));
 
-  std::vector<bool> blacklisted = processWhere(obsdb_, gv, config_);
+  std::vector<bool> inside = processWhere(obsdb_, gv, config_);
 
   for (size_t jv = 0; jv < vars.size(); ++jv) {
-    for (size_t jobs = 0; jobs < nobs; ++jobs) {
-      if (blacklisted[jobs] && flags_[jv][jobs] == 0) flags_[jv][jobs] = QCflags::black;
+    for (size_t jobs = 0; jobs < obsdb_.nlocs(); ++jobs) {
+      if (!inside[jobs] && flags_[jv][jobs] == 0) flags_[jv][jobs] = QCflags::domain;
     }
   }
 }
 
 // -----------------------------------------------------------------------------
 
-void BlackList::print(std::ostream & os) const {
-  os << "BlackList: config = " << config_ << " , geovars = " << geovars_ << std::endl;
+void ObsDomainCheck::print(std::ostream & os) const {
+  os << "ObsDomainCheck: config = " << config_ << std::endl;
 }
 
 // -----------------------------------------------------------------------------

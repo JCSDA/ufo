@@ -5,8 +5,8 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
  */
 
-#ifndef UFO_QCFLAGS_H_
-#define UFO_QCFLAGS_H_
+#ifndef UFO_FILTERS_QCFLAGS_H_
+#define UFO_FILTERS_QCFLAGS_H_
 
 namespace ufo {
 
@@ -24,4 +24,4 @@ namespace QCflags {
 
 }  // namespace ufo
 
-#endif  // UFO_QCFLAGS_H_
+#endif  // UFO_FILTERS_QCFLAGS_H_

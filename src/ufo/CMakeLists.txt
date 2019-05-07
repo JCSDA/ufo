@@ -4,10 +4,6 @@
 # which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 
 list( APPEND ufo_src_files
-    BackgroundCheck.cc
-    BackgroundCheck.h
-    BlackList.cc
-    BlackList.h
     Fortran.h
     GeoVaLs.cc
     GeoVaLs.h
@@ -24,23 +20,10 @@ list( APPEND ufo_src_files
     ObsBias.h
     ObsBiasCovariance.h
     ObsBiasIncrement.h
-    ObsBoundsCheck.cc
-    ObsBoundsCheck.h
-    ObsDomainCheck.cc
-    ObsDomainCheck.h
     ObsOperator.cc
     ObsOperator.h
     ObsOperatorBase.cc
     ObsOperatorBase.h
-    PreQC.cc
-    PreQC.h
-    processWhere.cc
-    processWhere.h
-    QCflags.h
-    QCmanager.cc
-    QCmanager.h
-    Thinning.cc
-    Thinning.h
     UfoTrait.h
     ufo_geovals_mod.F90
     ufo_locs_mod.F90
@@ -60,6 +43,7 @@ endfunction(PREPEND)
 
 add_subdirectory( utils )
 add_subdirectory( basis )
+add_subdirectory( filters )
 add_subdirectory( identity )
 add_subdirectory( atmvertinterp )
 add_subdirectory( crtm )
@@ -73,6 +57,7 @@ add_subdirectory( marine )
 list( APPEND ufo_src_files
     ${utils_src_files}
     ${basis_src_files}
+    ${filters_src_files}
     ${identity_src_files}
     ${atmvertinterp_src_files}
     ${crtm_src_files}

@@ -5,7 +5,7 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#include "ufo/BackgroundCheck.h"
+#include "ufo/filters/BackgroundCheck.h"
 
 #include <algorithm>
 #include <cmath>
@@ -21,9 +21,9 @@
 #include "oops/interface/ObsFilter.h"
 #include "oops/util/Logger.h"
 
+#include "ufo/filters/processWhere.h"
+#include "ufo/filters/QCflags.h"
 #include "ufo/GeoVaLs.h"
-#include "ufo/processWhere.h"
-#include "ufo/QCflags.h"
 #include "ufo/UfoTrait.h"
 
 namespace ufo {
