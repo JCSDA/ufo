@@ -5,8 +5,8 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
  */
 
-#ifndef UFO_OBSDOMAINCHECK_H_
-#define UFO_OBSDOMAINCHECK_H_
+#ifndef UFO_FILTERS_OBSBOUNDSCHECK_H_
+#define UFO_FILTERS_OBSBOUNDSCHECK_H_
 
 #include <ostream>
 #include <string>
@@ -27,23 +27,19 @@ namespace ioda {
 namespace ufo {
   class GeoVaLs;
 
-/// Domain check: generic check that obs are within domain
+/// ObsBoundsCheck: generic quality control based on observation data only
 
-// Domain is defined by metadata criteria regardless of obs value.
-// If obs value is required, use ObsBoundsCheck.
+// Check that observations are within some bounds over some domain
 
-// The same effect can be achieved with opposite criteria through BlackList,
-// the choice is a matter of convenience or which seems more natural.
-
-class ObsDomainCheck : public util::Printable,
-                       private util::ObjectCounter<ObsDomainCheck> {
+class ObsBoundsCheck : public util::Printable,
+                       private util::ObjectCounter<ObsBoundsCheck> {
  public:
-  static const std::string classname() {return "ufo::ObsDomainCheck";}
+  static const std::string classname() {return "ufo::ObsBoundsCheck";}
 
-  ObsDomainCheck(ioda::ObsSpace &, const eckit::Configuration &,
+  ObsBoundsCheck(ioda::ObsSpace &, const eckit::Configuration &,
                  boost::shared_ptr<ioda::ObsDataVector<int> >,
                  boost::shared_ptr<ioda::ObsDataVector<float> >);
-  ~ObsDomainCheck();
+  ~ObsBoundsCheck();
 
   void priorFilter(const GeoVaLs &) const;
   void postFilter(const ioda::ObsVector &) const {}
@@ -61,4 +57,4 @@ class ObsDomainCheck : public util::Printable,
 
 }  // namespace ufo
 
-#endif  // UFO_OBSDOMAINCHECK_H_
+#endif  // UFO_FILTERS_OBSBOUNDSCHECK_H_

@@ -1,27 +1,32 @@
 ---
+logging:
+  categories: Warning, Error, Debug
 test_framework_runtime_config: "--log_level=test_suite"
-window_begin: "2018-04-14T21:00:00Z"
-window_end: "2018-04-15T03:00:00Z"
+
+window_begin: 2018-04-14T21:00:00Z
+window_end: 2018-04-15T03:00:00Z
+
 LinearObsOpTest: 
  testiterTL: 10
  toleranceTL: 1.0e-10
  toleranceAD: 1.0e-11
+
 Observations: 
  ObsTypes: 
- - ObsType: "CRTM"
-   channels: "1,6-7"
-   ObsOptions: 
-    n_Absorbers: 3
-    n_Clouds: 0
-    n_Aerosols: 0
-    Sensor_ID: airs_aqua
-    EndianType: little_endian
-    CoefficientPath: "Data/"
-   ObsData: 
-    ObsDataIn: 
-     obsfile: "Data/airs_aqua_obs_2018041500_m.nc4"
+ - ObsOperator:
+     name: CRTM
+     channels: 1,6-7
+     n_Absorbers: 3
+     n_Clouds: 0
+     n_Aerosols: 0
+     Sensor_ID: airs_aqua
+     EndianType: little_endian
+     CoefficientPath: Data/
+   ObsSpace: 
+     name: Radiance
+     ObsDataIn: 
+       obsfile: Data/airs_aqua_obs_2018041500_m.nc4
    GeoVaLs: 
-    filename: "Data/airs_aqua_geoval_2018041500_m.nc4"
+     filename: Data/airs_aqua_geoval_2018041500_m.nc4
    vecequiv: GsiHofX
    tolerance: 1.e-5
-   ObsBias: {} 

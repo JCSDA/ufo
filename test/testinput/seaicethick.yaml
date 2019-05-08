@@ -7,19 +7,19 @@ window_begin: 2018-04-14T21:00:00Z
 window_end: 2018-04-15T03:00:00Z
 
 LinearObsOpTest:
-  testiterTL: 7
-  toleranceTL: 1.0e-5
+  testiterTL: 10
+  toleranceTL: 1.0e-10
   toleranceAD: 1.0e-12
 
 Observations:
   ObsTypes:
   - ObsOperator:
-      name: CoolSkin
+      name: SeaIceThickness
     ObsSpace:
-      name: CoolSkin
+      name: SeaIceThickness
       ObsDataIn:
-        obsfile: Data/coolskin_fake_obs_2018041500.nc
+        obsfile: Data/cryosat2-2018-04-15.nc
     GeoVaLs:
-      filename: Data/coolskin_fake_geovals_2018041500.nc
-    rmsequiv: 300
-    tolerance: 1.0e-10
+      filename: Data/cryosat2-2018-04-15_geovals.nc
+    rmsequiv: 1.25
+    tolerance: 1.0e-8

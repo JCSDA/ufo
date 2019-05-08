@@ -1,23 +1,27 @@
 ---
+logging:
+  categories: Warning, Error, Debug
 test_framework_runtime_config: "--log_level=test_suite"
-window_begin: '2018-04-14T21:00:00Z'
-window_end: '2018-04-15T03:00:00Z'
+
+window_begin: 2018-04-14T21:00:00Z
+window_end: 2018-04-15T03:00:00Z
+
 LinearObsOpTest:
   testiterTL: 12
   toleranceTL: 1.0e-9
   toleranceAD: 1.0e-11
+
 Observations:
   ObsTypes:
-  - ObsType: Radiosonde
-    ObsData:
+  - ObsOperator:
+      name: Radiosonde
+      variables:
+      - air_temperature
+    ObsSpace:
+      name: Radiosonde
       ObsDataIn:
         obsfile: Data/sondes_obs_2018041500_m.nc4
-      ObsDataOut:
-        obsfile: Data/sondes_obs_2018041500_m_out.nc4
-    variables:
-    - air_temperature
     GeoVaLs:
       filename: Data/sondes_geoval_2018041500_m.nc4
     vecequiv: GsiHofX
     tolerance: 1.0e-06
-    ObsBias: {}

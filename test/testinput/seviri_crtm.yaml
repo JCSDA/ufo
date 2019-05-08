@@ -1,30 +1,32 @@
 ---
+logging:
+  categories: Warning, Error, Debug
 test_framework_runtime_config: "--log_level=test_suite"
-window_begin: "2018-04-14T21:00:00Z"
-window_end: "2018-04-15T03:00:00Z"
+
+window_begin: 2018-04-14T21:00:00Z
+window_end: 2018-04-15T03:00:00Z
+
 LinearObsOpTest: 
- testiterTL: 10
- toleranceTL: 1.0e-10
+ testiterTL: 6
+ toleranceTL: 1.0e-6
  toleranceAD: 1.0e-11
+
 Observations: 
  ObsTypes: 
- - ObsType: "CRTM"
-   channels: "5"
-   ObsOptions: 
-    InspectProfileNumber: 1
-    n_Absorbers: 3
-    n_Clouds: 0
-    n_Aerosols: 0
-    Sensor_ID: seviri_m08
-    EndianType: little_endian
-    CoefficientPath: "Data/"
-   ObsData: 
-    ObsDataIn: 
-     obsfile: "Data/seviri_m08_obs_2018041500_m.nc4"
-    ObsDataOut: 
-     obsfile: "Data/seviri_m08_obs_2018041500_m_out.nc4"
+ - ObsOperator:
+     name: CRTM
+     channels: 5
+     n_Absorbers: 3
+     n_Clouds: 0
+     n_Aerosols: 0
+     Sensor_ID: seviri_m08
+     EndianType: little_endian
+     CoefficientPath: Data/
+   ObsSpace: 
+     name: Radiance
+     ObsDataIn: 
+       obsfile: Data/seviri_m08_obs_2018041500_m.nc4
    GeoVaLs: 
-    filename: "Data/seviri_m08_geoval_2018041500_m.nc4"
+     filename: Data/seviri_m08_geoval_2018041500_m.nc4
    vecequiv: GsiHofX
    tolerance: 1.e-5
-   ObsBias: {}

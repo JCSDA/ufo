@@ -34,7 +34,6 @@ ObsRadianceCRTMTLAD::ObsRadianceCRTMTLAD(const ioda::ObsSpace & odb,
                                          const eckit::Configuration & config)
   : keyOperRadianceCRTM_(0), varin_(), odb_(odb)
 {
-  const eckit::LocalConfiguration obsOptions(config, "ObsOptions");
   int c_name_size = 2000;
   char *buffin = new char[c_name_size];
 
@@ -45,7 +44,7 @@ ObsRadianceCRTMTLAD::ObsRadianceCRTMTLAD(const ioda::ObsSpace & odb,
   std::copy(channels.begin(), channels.end(), std::back_inserter(channels_list));
 
   // call Fortran setup routine
-  const eckit::Configuration * configc = &obsOptions;
+  const eckit::Configuration * configc = &config;
   ufo_radiancecrtm_tlad_setup_f90(keyOperRadianceCRTM_, &configc, channels_list.size(),
                                   channels_list[0], buffin, c_name_size);
 

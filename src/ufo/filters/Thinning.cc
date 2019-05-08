@@ -5,7 +5,7 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#include "ufo/Thinning.h"
+#include "ufo/filters/Thinning.h"
 
 #include <string>
 #include <vector>
@@ -19,7 +19,7 @@
 #include "oops/util/Logger.h"
 #include "oops/util/missingValues.h"
 #include "oops/util/Random.h"
-#include "ufo/QCflags.h"
+#include "ufo/filters/QCflags.h"
 #include "ufo/UfoTrait.h"
 
 namespace ufo {

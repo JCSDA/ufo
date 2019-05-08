@@ -5,8 +5,8 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
  */
 
-#ifndef UFO_BACKGROUNDCHECK_H_
-#define UFO_BACKGROUNDCHECK_H_
+#ifndef UFO_FILTERS_BACKGROUNDCHECK_H_
+#define UFO_FILTERS_BACKGROUNDCHECK_H_
 
 #include <ostream>
 #include <string>
@@ -52,14 +52,14 @@ class BackgroundCheck : public util::Printable,
 
   ioda::ObsSpace & obsdb_;
   const eckit::LocalConfiguration config_;
-  double abs_threshold_;
-  double threshold_;
+  float abs_threshold_;
+  float threshold_;
   const GeoVaLs mutable * gv_;
   const oops::Variables geovars_;
-  boost::shared_ptr<ioda::ObsDataVector<int> > flags_;
-  boost::shared_ptr<ioda::ObsDataVector<float> > obserr_;
+  ioda::ObsDataVector<int> & flags_;
+  ioda::ObsDataVector<float> & obserr_;
 };
 
 }  // namespace ufo
 
-#endif  // UFO_BACKGROUNDCHECK_H_
+#endif  // UFO_FILTERS_BACKGROUNDCHECK_H_

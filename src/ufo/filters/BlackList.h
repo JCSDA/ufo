@@ -1,12 +1,12 @@
 /*
- * (C) Copyright 2019 UCAR
+ * (C) Copyright 2018-2019 UCAR
  * 
  * This software is licensed under the terms of the Apache Licence Version 2.0
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
  */
 
-#ifndef UFO_THINNING_H_
-#define UFO_THINNING_H_
+#ifndef UFO_FILTERS_BLACKLIST_H_
+#define UFO_FILTERS_BLACKLIST_H_
 
 #include <ostream>
 #include <string>
@@ -27,17 +27,21 @@ namespace ioda {
 namespace ufo {
   class GeoVaLs;
 
-/// Thinning: randonly thin a given percentage of observations
+/// BlackList: generic black listing of observations
 
-class Thinning : public util::Printable,
-                  private util::ObjectCounter<Thinning> {
+// Filters observations out regardless of obs value
+// The same effect can be achieved with opposite criteria through the "Domain Check",
+// the choice is a matter of convenience or which seems more natural.
+
+class BlackList : public util::Printable,
+                  private util::ObjectCounter<BlackList> {
  public:
-  static const std::string classname() {return "ufo::Thinning";}
+  static const std::string classname() {return "ufo::BlackList";}
 
-  Thinning(ioda::ObsSpace &, const eckit::Configuration &,
-           boost::shared_ptr<ioda::ObsDataVector<int> >,
-           boost::shared_ptr<ioda::ObsDataVector<float> >);
-  ~Thinning();
+  BlackList(ioda::ObsSpace &, const eckit::Configuration &,
+            boost::shared_ptr<ioda::ObsDataVector<int> >,
+            boost::shared_ptr<ioda::ObsDataVector<float> >);
+  ~BlackList();
 
   void priorFilter(const GeoVaLs &) const;
   void postFilter(const ioda::ObsVector &) const {}
@@ -55,4 +59,4 @@ class Thinning : public util::Printable,
 
 }  // namespace ufo
 
-#endif  // UFO_THINNING_H_
+#endif  // UFO_FILTERS_BLACKLIST_H_

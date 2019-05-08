@@ -5,8 +5,8 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
  */
 
-#ifndef UFO_BLACKLIST_H_
-#define UFO_BLACKLIST_H_
+#ifndef UFO_FILTERS_OBSDOMAINCHECK_H_
+#define UFO_FILTERS_OBSDOMAINCHECK_H_
 
 #include <ostream>
 #include <string>
@@ -27,21 +27,23 @@ namespace ioda {
 namespace ufo {
   class GeoVaLs;
 
-/// BlackList: generic black listing of observations
+/// Domain check: generic check that obs are within domain
 
-// Filters observations out regardless of obs value
-// The same effect can be achieved with opposite criteria through the "Domain Check",
+// Domain is defined by metadata criteria regardless of obs value.
+// If obs value is required, use ObsBoundsCheck.
+
+// The same effect can be achieved with opposite criteria through BlackList,
 // the choice is a matter of convenience or which seems more natural.
 
-class BlackList : public util::Printable,
-                  private util::ObjectCounter<BlackList> {
+class ObsDomainCheck : public util::Printable,
+                       private util::ObjectCounter<ObsDomainCheck> {
  public:
-  static const std::string classname() {return "ufo::BlackList";}
+  static const std::string classname() {return "ufo::ObsDomainCheck";}
 
-  BlackList(ioda::ObsSpace &, const eckit::Configuration &,
-            boost::shared_ptr<ioda::ObsDataVector<int> >,
-            boost::shared_ptr<ioda::ObsDataVector<float> >);
-  ~BlackList();
+  ObsDomainCheck(ioda::ObsSpace &, const eckit::Configuration &,
+                 boost::shared_ptr<ioda::ObsDataVector<int> >,
+                 boost::shared_ptr<ioda::ObsDataVector<float> >);
+  ~ObsDomainCheck();
 
   void priorFilter(const GeoVaLs &) const;
   void postFilter(const ioda::ObsVector &) const {}
@@ -53,10 +55,10 @@ class BlackList : public util::Printable,
 
   ioda::ObsSpace & obsdb_;
   const eckit::LocalConfiguration config_;
-  oops::Variables geovars_;
+  const oops::Variables geovars_;
   ioda::ObsDataVector<int> & flags_;
 };
 
 }  // namespace ufo
 
-#endif  // UFO_BLACKLIST_H_
+#endif  // UFO_FILTERS_OBSDOMAINCHECK_H_

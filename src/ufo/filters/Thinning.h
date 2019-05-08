@@ -1,12 +1,12 @@
 /*
- * (C) Copyright 2018-2019 UCAR
+ * (C) Copyright 2019 UCAR
  * 
  * This software is licensed under the terms of the Apache Licence Version 2.0
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
  */
 
-#ifndef UFO_OBSBOUNDSCHECK_H_
-#define UFO_OBSBOUNDSCHECK_H_
+#ifndef UFO_FILTERS_THINNING_H_
+#define UFO_FILTERS_THINNING_H_
 
 #include <ostream>
 #include <string>
@@ -27,19 +27,17 @@ namespace ioda {
 namespace ufo {
   class GeoVaLs;
 
-/// ObsBoundsCheck: generic quality control based on observation data only
+/// Thinning: randonly thin a given percentage of observations
 
-// Check that observations are within some bounds over some domain
-
-class ObsBoundsCheck : public util::Printable,
-                       private util::ObjectCounter<ObsBoundsCheck> {
+class Thinning : public util::Printable,
+                  private util::ObjectCounter<Thinning> {
  public:
-  static const std::string classname() {return "ufo::ObsBoundsCheck";}
+  static const std::string classname() {return "ufo::Thinning";}
 
-  ObsBoundsCheck(ioda::ObsSpace &, const eckit::Configuration &,
-                 boost::shared_ptr<ioda::ObsDataVector<int> >,
-                 boost::shared_ptr<ioda::ObsDataVector<float> >);
-  ~ObsBoundsCheck();
+  Thinning(ioda::ObsSpace &, const eckit::Configuration &,
+           boost::shared_ptr<ioda::ObsDataVector<int> >,
+           boost::shared_ptr<ioda::ObsDataVector<float> >);
+  ~Thinning();
 
   void priorFilter(const GeoVaLs &) const;
   void postFilter(const ioda::ObsVector &) const {}
@@ -51,10 +49,10 @@ class ObsBoundsCheck : public util::Printable,
 
   ioda::ObsSpace & obsdb_;
   const eckit::LocalConfiguration config_;
-  const oops::Variables geovars_;
+  oops::Variables geovars_;
   ioda::ObsDataVector<int> & flags_;
 };
 
 }  // namespace ufo
 
-#endif  // UFO_OBSBOUNDSCHECK_H_
+#endif  // UFO_FILTERS_THINNING_H_

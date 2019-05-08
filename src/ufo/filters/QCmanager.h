@@ -5,8 +5,8 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
  */
 
-#ifndef UFO_PREQC_H_
-#define UFO_PREQC_H_
+#ifndef UFO_FILTERS_QCMANAGER_H_
+#define UFO_FILTERS_QCMANAGER_H_
 
 #include <ostream>
 
@@ -14,35 +14,39 @@
 
 #include "eckit/config/LocalConfiguration.h"
 #include "ioda/ObsDataVector.h"
+#include "ioda/ObsSpace.h"
 #include "oops/base/Variables.h"
 #include "oops/util/Printable.h"
 
 namespace ioda {
-  class ObsSpace;
   class ObsVector;
 }
 
 namespace ufo {
 class GeoVaLs;
 
-class PreQC : public util::Printable {
+class QCmanager : public util::Printable {
  public:
-  PreQC(ioda::ObsSpace &, const eckit::Configuration &,
-        boost::shared_ptr<ioda::ObsDataVector<int> >,
-        boost::shared_ptr<ioda::ObsDataVector<float> >);
-  ~PreQC() {}
+  QCmanager(ioda::ObsSpace &, const eckit::Configuration &,
+            boost::shared_ptr<ioda::ObsDataVector<int> >,
+            boost::shared_ptr<ioda::ObsDataVector<float> >);
+  ~QCmanager();
 
   void priorFilter(const GeoVaLs &) const {}
-  void postFilter(const ioda::ObsVector &) const {}
+  void postFilter(const ioda::ObsVector &) const;
 
   const oops::Variables & requiredGeoVaLs() const {return nogeovals_;}
 
  private:
   void print(std::ostream &) const;
 
+  ioda::ObsSpace & obsdb_;
+  const eckit::LocalConfiguration config_;
   const oops::Variables nogeovals_;
+  ioda::ObsDataVector<int> & flags_;
+  boost::shared_ptr<ioda::ObsDataVector<float> > obserr_;
 };
 
 }  // namespace ufo
 
-#endif  // UFO_PREQC_H_
+#endif  // UFO_FILTERS_QCMANAGER_H_

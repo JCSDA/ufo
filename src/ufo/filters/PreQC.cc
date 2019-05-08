@@ -5,7 +5,7 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
  */
 
-#include "ufo/PreQC.h"
+#include "ufo/filters/PreQC.h"
 
 #include <string>
 
@@ -17,7 +17,7 @@
 #include "oops/interface/ObsFilter.h"
 #include "oops/util/Logger.h"
 #include "oops/util/missingValues.h"
-#include "ufo/QCflags.h"
+#include "ufo/filters/QCflags.h"
 #include "ufo/UfoTrait.h"
 
 namespace ufo {
@@ -51,8 +51,7 @@ PreQC::PreQC(ioda::ObsSpace & obsdb, const eckit::Configuration & config,
 
 // Read QC flags from pre-processing
   const std::string qcin = config.getString("inputQC", "PreQC");
-  ioda::ObsDataVector<int> preqc(obsdb, observed);
-  preqc.read(qcin);
+  ioda::ObsDataVector<int> preqc(obsdb, observed, qcin);
   oops::Log::debug() << "PreQC::PreQC preqc: " << preqc;
 
 // Get threshold and reject above threshold

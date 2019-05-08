@@ -5,7 +5,7 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
  */
 
-#include "ufo/QCmanager.h"
+#include "ufo/filters/QCmanager.h"
 
 #include <string>
 #include <vector>
@@ -18,7 +18,7 @@
 #include "oops/interface/ObsFilter.h"
 #include "oops/util/Logger.h"
 #include "oops/util/missingValues.h"
-#include "ufo/QCflags.h"
+#include "ufo/filters/QCflags.h"
 #include "ufo/UfoTrait.h"
 
 namespace ufo {
