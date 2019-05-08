@@ -15,7 +15,7 @@ Observations:
  ObsTypes: 
  - ObsOperator:
      name: CRTM
-     channels: 1-6,9-12,13,15
+     channels: 1-15
      n_Absorbers: 3
      n_Clouds: 2
      n_Aerosols: 0

@@ -196,15 +196,20 @@ ecbuild_add_test( TARGET  test_ufo_iasi_opr_crtm
                   ARGS    "testinput/iasi_crtm.yaml"
                   LIBS    ufo )
 
+#ecbuild_add_test( TARGET  test_ufo_iasi_tlad_crtm
+#                  SOURCES mains/TestObsOperatorTLAD.cc
+#                  ARGS    "testinput/iasi_crtm.yaml"
+#                  LIBS    ufo )
+
 ecbuild_add_test( TARGET  test_ufo_sndrd1-4_opr_crtm
                   SOURCES mains/TestObsOperator.cc
                   ARGS    "testinput/sndrd1-4_crtm.yaml"
                   LIBS    ufo )
 
-ecbuild_add_test( TARGET  test_ufo_sndrd1-4_tlad_crtm
-                  SOURCES mains/TestObsOperatorTLAD.cc
-                  ARGS    "testinput/sndrd1-4_crtm.yaml"
-                  LIBS    ufo )
+#ecbuild_add_test( TARGET  test_ufo_sndrd1-4_tlad_crtm
+#                  SOURCES mains/TestObsOperatorTLAD.cc
+#                  ARGS    "testinput/sndrd1-4_crtm.yaml"
+#                  LIBS    ufo )
 
 ecbuild_add_test( TARGET  test_ufo_airs_opr_crtm
                   MPI     4
@@ -212,8 +217,6 @@ ecbuild_add_test( TARGET  test_ufo_airs_opr_crtm
                   ARGS    "testinput/airs_crtm.yaml"
                   LIBS    ufo )
 
-# Commented for now until CRTM channel subsetting is fully
-# implemented (test takes too long to run now)
 #ecbuild_add_test( TARGET  test_ufo_airs_tlad_crtm
 #                  SOURCES mains/TestObsOperatorTLAD.cc
 #                  ARGS    "testinput/airs_crtm.yaml"

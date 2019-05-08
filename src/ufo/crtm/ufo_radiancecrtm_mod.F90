@@ -110,7 +110,7 @@ type(c_ptr), value,       intent(in) :: obss         !ObsSpace
 character(*), parameter :: PROGRAM_NAME = 'ufo_radiancecrtm_mod.F90'
 character(255) :: message, version
 integer        :: err_stat, alloc_stat
-integer        :: l, m, n, s, chind
+integer        :: l, m, n, s
 type(ufo_geoval), pointer :: temp
 
 integer :: n_Profiles
@@ -167,12 +167,12 @@ type(CRTM_RTSolution_type), allocatable :: rts(:,:)
 
    ! Pass channel list to CRTM
    ! -------------------------
-   !err_stat = CRTM_ChannelInfo_Subset(chinfo(n), channels, reset=.false.)
-   !if ( err_stat /= SUCCESS ) THEN
-   !   message = 'Error subsetting channels'
-   !   call Display_Message( PROGRAM_NAME, message, FAILURE )
-   !   stop
-   !end if
+   err_stat = CRTM_ChannelInfo_Subset(chinfo(n), self%channels, reset=.false.)
+   if ( err_stat /= SUCCESS ) THEN
+      message = 'Error subsetting channels!'
+      call Display_Message( PROGRAM_NAME, message, FAILURE )
+      stop
+   end if
 
 
    ! Determine the number of channels for the current sensor
@@ -253,10 +253,7 @@ type(CRTM_RTSolution_type), allocatable :: rts(:,:)
 
    do m = 1, n_Profiles
      do l = 1, size(self%channels)
-
-       chind  = minloc(abs(chinfo(n)%Sensor_Channel-self%channels(l)),1)
-       hofx(l, m) = rts(chind,m)%Brightness_Temperature
-
+       hofx(l,m) = rts(l,m)%Brightness_Temperature
      end do
    end do
 
