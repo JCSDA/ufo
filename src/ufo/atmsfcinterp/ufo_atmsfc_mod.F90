@@ -8,6 +8,7 @@ subroutine sfc_wtq_fwd_gsi(psfc_in,tsfc,prsl1_in,tsen1,q1,u1,v1,&
   ! sfc_wtq_fwd_gsi
   ! based off of subroutines from GSI sfc_model.f90 file
   use kinds
+  use ufo_vars_mod, only: MAXVARLEN
   implicit none
   real(kind_real), intent(in) :: psfc_in, tsfc, prsl1_in, tsen1, q1, u1, v1,&
                                  prsl2_in, tsen2, q2, phi1, roughlen, landmask, &
@@ -42,6 +43,7 @@ subroutine sfc_wtq_fwd_gsi(psfc_in,tsfc,prsl1_in,tsen1,q1,u1,v1,&
   real(kind_real) :: psim, psimz, psih, psihz
   real(kind_real) :: cc, ust, mol, hol, holz
   real(kind_real) :: xx, yy
+  real(kind_real) :: psiw, psit, psiwz, psitz, psiq, psiqz
  
   ! convert pressures to hPa from Pa
   psfc = psfc_in / r100
@@ -131,7 +133,7 @@ subroutine sfc_wtq_fwd_gsi(psfc_in,tsfc,prsl1_in,tsen1,q1,u1,v1,&
     ! heat flux factor
     mol = k_kar * (th1 - thg)/(gzsoz0 - psih)
     ! ratio of PBL height to Monin-Obukhov length
-    if (ust < r0_01) then
+    if (ust < 0.01_kind_real) then
       hol = rib * gzsoz0
     else
       hol = k_kar * 9.80665_kind_real * phi1 * mol / (th1 * ust * ust)
@@ -142,12 +144,12 @@ subroutine sfc_wtq_fwd_gsi(psfc_in,tsfc,prsl1_in,tsen1,q1,u1,v1,&
     holz = min(holz,zero)
     holz = max(holz,-r10)
 
-    xx = (one - r16 * hol) ** quarter
+    xx = (one - r16 * hol) ** 0.25_kind_real 
     yy = log((one+xx*xx)/two) 
     psim = two * log((one+xx)/two) + yy - two * atan(xx) + cc
     psih = two * yy
 
-    xx = (one - r16 * holz) ** quarter
+    xx = (one - r16 * holz) ** 0.25_kind_real
     yy = log((one+xx*xx)/two) 
     psimz = two * log((one+xx)/two) + yy - two * atan(xx) + cc
     psihz = two * yy

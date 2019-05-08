@@ -82,6 +82,7 @@ list( APPEND ufo_test_data
   atmosphere/sndrd2_g15_geoval_2018041500_m.nc4
   atmosphere/sndrd3_g15_geoval_2018041500_m.nc4
   atmosphere/sndrd4_g15_geoval_2018041500_m.nc4
+  atmosphere/sfc_tsen_geoval_2018041500.nc4
 )
 
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Data)
@@ -158,6 +159,8 @@ list (APPEND ioda_obs_test_data
   marine/cryosat2-2018-04-15.nc
   marine/icec-2018-04-15.nc
   marine/sst_obs-2018-04-15.nc4
+
+  atmosphere/sfc_tsen_obs_2018041500.nc4
   )
 
 CREATE_SYMLINK_FILENAME( ${ioda_SOURCE_DIR}/test/testinput

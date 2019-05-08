@@ -11,14 +11,14 @@ Observations:
   - ObsType: 2mTemp 
     ObsData:
       ObsDataIn:
-        obsfile: Data/sfc_obs_2018041500_m.nc4
+        obsfile: Data/sfc_tsen_obs_2018041500.nc4
       ObsDataOut:
         obsfile: Data/sfc_obs_2018041500_m_out.nc4
     variables:
     - air_temperature 
     GeoVaLs:
       random: 0
-      filename: Data/sfc_geoval_2018041500_m.nc4
+      filename: Data/sfc_tsen_geoval_2018041500.nc4
       window_begin: '2018-04-14T21:00:00Z'
       window_end: '2018-04-15T03:00:00Z'
     vecequiv: GsiHofX
