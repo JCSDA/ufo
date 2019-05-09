@@ -5,7 +5,7 @@
 
 !> Fortran module to implement example check
 
-module ufo_examplecheck_mod
+module ufo_example_mod
 
 use iso_c_binding
 use kinds
@@ -14,52 +14,53 @@ use obsspace_mod
 use config_mod
 
 implicit none
-public :: ufo_examplecheck, ufo_examplecheck_create, ufo_examplecheck_delete, ufo_examplecheck_prior, ufo_examplecheck_post
+public :: ufo_example, ufo_example_create, ufo_example_delete, ufo_example_prior, ufo_example_post
 private
 
 ! ------------------------------------------------------------------------------
 !> TODO: fill in this type
-type :: ufo_examplecheck
-end type ufo_examplecheck
+type :: ufo_example
+end type ufo_example
 
 ! ------------------------------------------------------------------------------
 contains
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_examplecheck_create(self, obspace, conf)
+subroutine ufo_example_create(self, conf)
 implicit none
-type(ufo_examplecheck), intent(inout) :: self
-type(c_ptr), value, intent(in)   :: obspace
+type(ufo_example), intent(inout) :: self
 type(c_ptr), intent(in)          :: conf
 
-end subroutine ufo_examplecheck_create
+end subroutine ufo_example_create
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_examplecheck_delete(self)
+subroutine ufo_example_delete(self)
 implicit none
-type(ufo_examplecheck), intent(inout) :: self
+type(ufo_example), intent(inout) :: self
 
-end subroutine ufo_examplecheck_delete
+end subroutine ufo_example_delete
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_examplecheck_prior(self, geovals)
+subroutine ufo_example_prior(self, obspace, geovals)
 implicit none
-type(ufo_examplecheck), intent(in) :: self
-type(ufo_geovals), intent(in) :: geovals
+type(ufo_example),  intent(in) :: self
+type(c_ptr), value, intent(in) :: obspace
+type(ufo_geovals),  intent(in) :: geovals
 
-end subroutine ufo_examplecheck_prior
+end subroutine ufo_example_prior
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_examplecheck_post(self, hofx)
+subroutine ufo_example_post(self, obspace, hofx)
 implicit none
-type(ufo_examplecheck), intent(in) :: self
-real(c_double),  intent(in)        :: hofx(:)
+type(ufo_example),  intent(in) :: self
+type(c_ptr), value, intent(in) :: obspace
+real(c_double),     intent(in) :: hofx(:)
 
-end subroutine ufo_examplecheck_post
+end subroutine ufo_example_post
 
 ! ------------------------------------------------------------------------------
 
-end module ufo_examplecheck_mod
+end module ufo_example_mod
