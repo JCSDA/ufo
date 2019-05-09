@@ -55,6 +55,12 @@ type crtm_conf
  character(len=255), allocatable :: SENSOR_ID(:)
  character(len=255) :: ENDIAN_TYPE
  character(len=255) :: COEFFICIENT_PATH
+ character(len=255) :: &
+    IRwaterCoeff_File, IRlandCoeff_File, IRsnowCoeff_File, IRiceCoeff_File, &
+    VISwaterCoeff_File, VISlandCoeff_File, VISsnowCoeff_File, VISiceCoeff_File, &
+    MWwaterCoeff_File
+ integer, allocatable :: Land_WSI(:)
+
  integer :: inspect
  character(len=255) :: aerosol_option
 end type crtm_conf
@@ -75,6 +81,8 @@ subroutine crtm_conf_setup(conf, c_conf)
 implicit none
 type(crtm_conf), intent(inout) :: conf
 type(c_ptr),    intent(in)    :: c_conf
+
+character(len=255) :: IRVISwaterCoeff, IRVISlandCoeff, IRVISsnowCoeff, IRVISiceCoeff, MWwaterCoeff
 
  !Some config needs to come from user
  !-----------------------------------
@@ -119,6 +127,41 @@ type(c_ptr),    intent(in)    :: c_conf
  !Path to coefficient files
  conf%COEFFICIENT_PATH = config_get_string(c_conf,len(conf%COEFFICIENT_PATH),"CoefficientPath")
 
+ ! Coefficient file prefixes
+ IRVISwaterCoeff = config_get_string(c_conf, len(IRVISwaterCoeff), "IRVISwaterCoeff", "Nalli")
+ IRVISlandCoeff  = config_get_string(c_conf, len(IRVISlandCoeff),  "IRVISlandCoeff",  "NPOESS")
+ IRVISsnowCoeff  = config_get_string(c_conf, len(IRVISsnowCoeff),  "IRVISsnowCoeff",  "NPOESS")
+ IRVISiceCoeff   = config_get_string(c_conf, len(IRVISiceCoeff),   "IRVISiceCoeff",   "NPOESS")
+ MWwaterCoeff    = config_get_string(c_conf, len(MWwaterCoeff),    "MWwaterCoeff",    "FASTEM6")
+
+ ! Define water, snow, ice (WSI) categories
+ select case (trim(IRVISlandCoeff))
+    case ("USGS")
+       allocate(conf%Land_WSI(2))
+       conf%Land_WSI(1:2) = (/16,24/)
+    case ("IGBP")
+       allocate(conf%Land_WSI(2))
+       conf%Land_WSI(1:2) = (/15,17/)
+    case default
+       allocate(conf%Land_WSI(1))
+       conf%Land_WSI(1) = -1
+ end select
+
+ ! IR emissivity coeff files
+ conf%IRwaterCoeff_File = trim(IRVISwaterCoeff)//".IRwater.EmisCoeff.bin"
+ conf%IRlandCoeff_File  = trim(IRVISlandCoeff)//".IRland.EmisCoeff.bin"
+ conf%IRsnowCoeff_File  = trim(IRVISsnowCoeff)//".IRsnow.EmisCoeff.bin"
+ conf%IRiceCoeff_File   = trim(IRVISiceCoeff)//".IRice.EmisCoeff.bin"
+
+ !VIS emissivity coeff files
+ conf%VISwaterCoeff_File = trim(IRVISwaterCoeff)//".VISwater.EmisCoeff.bin"
+ conf%VISlandCoeff_File  = trim(IRVISlandCoeff)//".VISland.EmisCoeff.bin"
+ conf%VISsnowCoeff_File  = trim(IRVISsnowCoeff)//".VISsnow.EmisCoeff.bin"
+ conf%VISiceCoeff_File   = trim(IRVISiceCoeff)//".VISice.EmisCoeff.bin"
+
+ ! MW water emissivity coeff file
+ conf%MWwaterCoeff_File = trim(MWwaterCoeff)//".MWwater.EmisCoeff.bin"
+
  conf%inspect = 0
  if (config_element_exists(c_conf,"InspectProfileNumber")) then
    conf%inspect = config_get_int(c_conf,"InspectProfileNumber")
@@ -134,6 +177,7 @@ implicit none
 type(crtm_conf), intent(inout) :: conf
 
  deallocate(conf%SENSOR_ID)
+ deallocate(conf%Land_WSI)
 
 end subroutine crtm_conf_delete
 
@@ -228,7 +272,7 @@ character(max_string) :: err_msg
 
 ! ------------------------------------------------------------------------------
 
-subroutine Load_Sfc_Data(n_Profiles,n_Layers,N_Channels,channels,geovals,sfc,chinfo,obss)
+subroutine Load_Sfc_Data(n_Profiles,n_Layers,N_Channels,channels,geovals,sfc,chinfo,obss,conf)
 
 implicit none
 integer,                     intent(in)    :: n_Profiles, n_Layers, N_Channels
@@ -237,6 +281,7 @@ type(CRTM_Surface_type),     intent(inout) :: sfc(:)
 type(CRTM_ChannelInfo_type), intent(in)    :: chinfo(:)
 type(c_ptr), value,          intent(in)    :: obss
 integer(c_int),              intent(in)    :: channels(:)
+type(crtm_conf),             intent(in)    :: conf
 
 type(ufo_geoval), pointer :: geoval
 integer  :: k1, n1
@@ -320,13 +365,17 @@ real(kind_real), allocatable :: ObsTb(:,:)
    call ufo_geovals_get_var(geovals, var_sfc_sdepth, geoval)
    sfc(k1)%Snow_Depth = geoval%vals(1,k1)
 
-   !Land_Type
-   call ufo_geovals_get_var(geovals, var_sfc_landtyp, geoval)
-   sfc(k1)%Land_Type = int(geoval%vals(1,k1))
-
    !Land_Coverage
    call ufo_geovals_get_var(geovals, var_sfc_lfrac, geoval)
    sfc(k1)%Land_Coverage = geoval%vals(1,k1)
+
+   !Land_Type
+   ! + used to lookup land sfc emiss. for IR and VIS
+   ! + land sfc emiss. undefined over water/snow/ice
+   call ufo_geovals_get_var(geovals, var_sfc_landtyp, geoval)
+   if (.not.any(int(geoval%vals(1,k1)) == conf%Land_WSI)) then
+      sfc(k1)%Land_Type = int(geoval%vals(1,k1))
+   end if
 
    !Land_Temperature
    call ufo_geovals_get_var(geovals, var_sfc_ltmp, geoval)

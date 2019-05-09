@@ -152,6 +152,15 @@ type(CRTM_RTSolution_type), allocatable :: rts(:,:)
  write( *,'(/5x,"Initializing the CRTM...")' )
  err_stat = CRTM_Init( self%conf%SENSOR_ID, chinfo, &
                        File_Path=trim(self%conf%COEFFICIENT_PATH), &
+                       IRwaterCoeff_File=trim(self%conf%IRwaterCoeff_File), &
+                       IRlandCoeff_File=trim(self%conf%IRlandCoeff_File), &
+                       IRsnowCoeff_File=trim(self%conf%IRsnowCoeff_File), &
+                       IRiceCoeff_File=trim(self%conf%IRiceCoeff_File), &
+                       VISwaterCoeff_File=trim(self%conf%VISwaterCoeff_File), &
+                       VISlandCoeff_File=trim(self%conf%VISlandCoeff_File), &
+                       VISsnowCoeff_File=trim(self%conf%VISsnowCoeff_File), &
+                       VISiceCoeff_File=trim(self%conf%VISiceCoeff_File), &
+                       MWwaterCoeff_File=trim(self%conf%MWwaterCoeff_File), &
                        Quiet=.TRUE.)
  if ( err_stat /= SUCCESS ) THEN
    message = 'Error initializing CRTM'
@@ -217,7 +226,7 @@ type(CRTM_RTSolution_type), allocatable :: rts(:,:)
    !Assign the data from the GeoVaLs
    !--------------------------------
    call Load_Atm_Data(n_Profiles,n_Layers,geovals,atm,self%conf)
-   call Load_Sfc_Data(n_Profiles,n_Layers,n_Channels,self%channels,geovals,sfc,chinfo,obss)
+   call Load_Sfc_Data(n_Profiles,n_Layers,n_Channels,self%channels,geovals,sfc,chinfo,obss,self%conf)
    call Load_Geom_Data(obss,geo)
 
 
