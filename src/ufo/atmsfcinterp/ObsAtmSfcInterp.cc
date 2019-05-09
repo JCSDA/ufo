@@ -25,7 +25,7 @@
 namespace ufo {
 
 // -----------------------------------------------------------------------------
-static ObsOperatorMaker<ObsAtmSfcInterp> maker2mTemp_("2mTemp");
+static ObsOperatorMaker<ObsAtmSfcInterp> makerPBLinterp_("PBLinterp");
 // -----------------------------------------------------------------------------
 
 ObsAtmSfcInterp::ObsAtmSfcInterp(const ioda::ObsSpace & odb, const eckit::Configuration & config)
@@ -61,8 +61,8 @@ ObsAtmSfcInterp::~ObsAtmSfcInterp() {
 
 void ObsAtmSfcInterp::simulateObs(const GeoVaLs & gv, ioda::ObsVector & ovec,
                               const ObsBias & bias) const {
-  ufo_atmsfcinterp_simobs_f90(keyOperAtmSfcInterp_, gv.toFortran(), odb_, ovec.size(), ovec.toFortran(),
-                      bias.toFortran());
+  ufo_atmsfcinterp_simobs_f90(keyOperAtmSfcInterp_, gv.toFortran(),
+                      odb_, ovec.size(), ovec.toFortran(), bias.toFortran());
   oops::Log::trace() << "ObsAtmSfcInterp: observation operator run" << std::endl;
 }
 

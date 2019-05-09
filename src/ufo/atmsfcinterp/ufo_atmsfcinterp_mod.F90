@@ -86,7 +86,7 @@ subroutine ufo_atmsfcinterp_simobs(self, geovals, hofx, obss)
   implicit none
   class(ufo_atmsfcinterp), intent(in)    :: self
   type(ufo_geovals),  intent(in)    :: geovals
-  real(c_double),     intent(inout) :: hofx(:)
+  real(c_double),     intent(inout) :: hofx(nvars,nlocs)
   type(c_ptr), value, intent(in)    :: obss
   type(ufo_geoval), pointer :: phi, hgt, tsfc, roughlen, psfc, prs, &
                                tsen, q, u, v, landmask, &
@@ -143,7 +143,7 @@ subroutine ufo_atmsfcinterp_simobs(self, geovals, hofx, obss)
                            q%vals(2,iobs),phi%vals(1,iobs),roughlen%vals(1,iobs),&
                            landmask%vals(1,iobs),2.0_kind_real,& ! force 2m agl for testing...
                            !landmask%vals(1,iobs),obshgt(iobs)-hgt%vals(1,iobs),&
-                           outvalue,geovar)
+                           hofx(ivar,iobs),geovar)
     enddo
   enddo
 
