@@ -16,6 +16,9 @@ Observations:
  - ObsOperator: 
      name: GnssroBndROPP1D
      obsvalue: bending_angle
+     ObsOptions: 
+       n_horiz: 3
+       res: 40.0
    ObsSpace: 
      name: GnssroBnd
      ObsDataIn: 
@@ -30,5 +33,5 @@ Observations:
    - Filter: ROobserror
      errmodel: ROPP
    rmsequiv: 0.00919697505361058
-   passedBenchmark: 20
+   passedBenchmark: 18
    tolerance: 1.0e-13
