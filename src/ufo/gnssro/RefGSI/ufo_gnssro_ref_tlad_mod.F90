@@ -18,7 +18,6 @@ module ufo_gnssro_ref_tlad_mod
   use gnssro_mod_constants
   use gnssro_mod_conf
   use missing_values_mod
-  integer, parameter :: max_string=800
 
   !> Fortran derived type for gnssro trajectory
   type, extends(ufo_basis_tlad) :: ufo_gnssro_Ref_tlad
@@ -66,7 +65,7 @@ contains
 
       !Get variables from geovals
       call ufo_geovals_get_var(geovals, var_prs, prs)
-      call ufo_geovals_get_var(geovals, var_t, t)
+      call ufo_geovals_get_var(geovals, var_ts,t)
       call ufo_geovals_get_var(geovals, var_q, q)
       call ufo_geovals_get_var(geovals, var_z, gph)
 
@@ -88,8 +87,8 @@ contains
       allocate(obsLat(self%nlocs))
 
       ! get observation vectors
-      call obsspace_get_db(obss, "", "altitude", obsZ)
-      call obsspace_get_db(obss, "", "latitude", obsLat)
+      call obsspace_get_db(obss, "MetaData", "altitude", obsZ)
+      call obsspace_get_db(obss, "MetaData", "latitude", obsLat)
 
       do iobs = 1, self%nlocs
 
@@ -144,7 +143,7 @@ contains
       endif
      
       ! get variables from geovals
-      call ufo_geovals_get_var(geovals, var_t, t_d)
+      call ufo_geovals_get_var(geovals, var_ts,t_d)
       call ufo_geovals_get_var(geovals, var_q, q_d)
       call ufo_geovals_get_var(geovals, var_prs, prs_d)
  
@@ -209,7 +208,7 @@ contains
       
       ! get variables from geovals
       call ufo_geovals_get_var(geovals, var_prs, prs_d)
-      call ufo_geovals_get_var(geovals, var_t, t_d)
+      call ufo_geovals_get_var(geovals, var_ts,t_d)
       call ufo_geovals_get_var(geovals, var_q, q_d)
 
       ! allocate if not yet allocated	

@@ -16,9 +16,9 @@ module ufo_gnssro_ref_mod
   use obsspace_mod
   use config_mod
   use gnssro_mod_conf
+  use gnssro_mod_constants
 
   implicit none
-  integer, parameter :: max_string=800
   public             :: ufo_gnssro_Ref
   private
 
@@ -42,7 +42,6 @@ contains
    end subroutine ufo_gnssro_ref_setup
 
    subroutine ufo_gnssro_ref_simobs(self, geovals, hofx, obss)
-    use gnssro_mod_constants
     use gnssro_mod_transform, only: geometric2geop
       implicit none
       class(ufo_gnssro_Ref), intent(in)          :: self
@@ -68,7 +67,7 @@ contains
       endif
       ! get variables from geovals
       call ufo_geovals_get_var(geovals, var_prs, prs)
-      call ufo_geovals_get_var(geovals, var_t, t)
+      call ufo_geovals_get_var(geovals, var_ts,t)
       call ufo_geovals_get_var(geovals, var_q, q)
       call ufo_geovals_get_var(geovals, var_z, gph)
 
@@ -77,8 +76,8 @@ contains
       allocate(obsZ(nlocs))
       allocate(obsLat(nlocs))
 
-      call obsspace_get_db(obss, "", "altitude", obsZ)
-      call obsspace_get_db(obss, "", "latitude", obsLat)
+      call obsspace_get_db(obss, "MetaData", "altitude", obsZ)
+      call obsspace_get_db(obss, "MetaData", "latitude", obsLat)
 
       call gnssro_ref_constants(self%roconf%use_compress)
 

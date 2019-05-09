@@ -8,6 +8,8 @@ use ufo_constants_mod
 implicit none
 public   :: gnssro_ref_constants
 real(kind_real),            public :: n_a, n_b,n_c
+integer, parameter,         public :: max_string    = 800
+
 contains
 subroutine gnssro_ref_constants(use_compress)
 implicit none

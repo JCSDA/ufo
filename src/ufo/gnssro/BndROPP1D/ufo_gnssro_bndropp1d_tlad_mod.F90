@@ -55,7 +55,7 @@ subroutine ufo_gnssro_bndropp1d_tlad_settraj(self, geovals, obss)
   call fckit_log%info(err_msg) 
 
 ! get model state variables from geovals
-  call ufo_geovals_get_var(geovals, var_t,     t)         ! temperature
+  call ufo_geovals_get_var(geovals, var_ts,    t)         ! temperature
   call ufo_geovals_get_var(geovals, var_q,     q)         ! specific humidity
   call ufo_geovals_get_var(geovals, var_prs,   prs)       ! pressure
   call ufo_geovals_get_var(geovals, var_z,     gph)       ! geopotential height
@@ -139,7 +139,7 @@ subroutine ufo_gnssro_bndropp1d_simobs_tl(self, geovals, hofx, obss)
   endif
 
 ! get variables from geovals
-  call ufo_geovals_get_var(geovals, var_t,     t_d)         ! temperature
+  call ufo_geovals_get_var(geovals, var_ts,    t_d)         ! temperature
   call ufo_geovals_get_var(geovals, var_q,     q_d)         ! specific humidity
   call ufo_geovals_get_var(geovals, var_prs,   prs_d)       ! pressure
 
@@ -156,11 +156,11 @@ subroutine ufo_gnssro_bndropp1d_simobs_tl(self, geovals, hofx, obss)
   allocate(obsImpP(nlocs))
   allocate(obsLocR(nlocs))
   allocate(obsGeoid(nlocs))
-  call obsspace_get_db(obss, " ", "longitude",        obsLon)
-  call obsspace_get_db(obss, " ", "latitude",         obsLat)
-  call obsspace_get_db(obss, " ", "impact_parameter", obsImpP)
-  call obsspace_get_db(obss, " ", "earth_radius_of_curvature", obsLocR)
-  call obsspace_get_db(obss, " ", "geoid_height_above_reference_ellipsoid", obsGeoid) 
+  call obsspace_get_db(obss, "MetaData", "longitude",        obsLon)
+  call obsspace_get_db(obss, "MetaData", "latitude",         obsLat)
+  call obsspace_get_db(obss, "MetaData", "impact_parameter", obsImpP)
+  call obsspace_get_db(obss, "MetaData", "earth_radius_of_curvature", obsLocR)
+  call obsspace_get_db(obss, "MetaData", "geoid_height_above_reference_ellipsoid", obsGeoid) 
 
   nvprof = 1  ! no. of bending angles in profile 
 
@@ -270,7 +270,7 @@ subroutine ufo_gnssro_bndropp1d_simobs_ad(self, geovals, hofx, obss)
   endif
      
 ! get variables from geovals
-  call ufo_geovals_get_var(geovals, var_t,     t_d)         ! temperature
+  call ufo_geovals_get_var(geovals, var_ts,    t_d)         ! temperature
   call ufo_geovals_get_var(geovals, var_q,     q_d)         ! specific humidity
   call ufo_geovals_get_var(geovals, var_prs,   prs_d)       ! pressure
 
@@ -311,11 +311,11 @@ subroutine ufo_gnssro_bndropp1d_simobs_ad(self, geovals, hofx, obss)
   allocate(obsLocR(nlocs))
   allocate(obsGeoid(nlocs))
 
-  call obsspace_get_db(obss, " ", "longitude", obsLon)
-  call obsspace_get_db(obss, " ", "latitude", obsLat) 
-  call obsspace_get_db(obss, " ", "impact_parameter", obsImpP)
-  call obsspace_get_db(obss, " ", "earth_radius_of_curvature", obsLocR)
-  call obsspace_get_db(obss, " ", "geoid_height_above_reference_ellipsoid", obsGeoid)
+  call obsspace_get_db(obss, "MetaData", "longitude", obsLon)
+  call obsspace_get_db(obss, "MetaData", "latitude", obsLat) 
+  call obsspace_get_db(obss, "MetaData", "impact_parameter", obsImpP)
+  call obsspace_get_db(obss, "MetaData", "earth_radius_of_curvature", obsLocR)
+  call obsspace_get_db(obss, "MetaData", "geoid_height_above_reference_ellipsoid", obsGeoid)
   
   missing = missing_value(missing)
 
