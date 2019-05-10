@@ -32,7 +32,7 @@ ObsAtmSfcInterp::ObsAtmSfcInterp(const ioda::ObsSpace & odb, const eckit::Config
   : ObsOperatorBase(odb, config), keyOperAtmSfcInterp_(0),
     odb_(odb), varin_(), varout_()
 {
-  int c_name_size = 200;
+  int c_name_size = 500;
   char *buffin = new char[c_name_size];
   char *buffout = new char[c_name_size];
   const eckit::Configuration * configc = &config;
@@ -59,10 +59,10 @@ ObsAtmSfcInterp::~ObsAtmSfcInterp() {
 
 // -----------------------------------------------------------------------------
 
-void ObsAtmSfcInterp::simulateObs(const GeoVaLs & gv, ioda::ObsVector & ovec,
-                              const ObsBias & bias) const {
-  ufo_atmsfcinterp_simobs_f90(keyOperAtmSfcInterp_, gv.toFortran(),
-                      odb_, ovec.size(), ovec.toFortran(), bias.toFortran());
+void ObsAtmSfcInterp::simulateObs(const GeoVaLs & gom, ioda::ObsVector & ovec,
+                                const ObsBias & bias) const {
+  ufo_atmsfcinterp_simobs_f90(keyOperAtmSfcInterp_, gom.toFortran(), odb_,
+                            ovec.nvars(), ovec.nlocs(), ovec.toFortran(), bias.toFortran());
   oops::Log::trace() << "ObsAtmSfcInterp: observation operator run" << std::endl;
 }
 
