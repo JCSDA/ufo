@@ -7,9 +7,9 @@ window_begin: 2018-04-14T21:00:00Z
 window_end: 2018-04-15T03:00:00Z
 
 LinearObsOpTest:
-  testiterTL: 10
-  toleranceTL: 1.0e-7
-  toleranceAD: 1.0e-7
+  coefTL: 1.0e-4
+  toleranceTL: 1.0e-8
+  toleranceAD: 1.0e-12
 
 Observations:
   ObsTypes:

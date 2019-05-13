@@ -178,10 +178,10 @@ ecbuild_add_test( TARGET  test_ufo_cris_opr_crtm
                   ARGS    "testinput/cris_crtm.yaml"
                   LIBS    ufo )
 
-#ecbuild_add_test( TARGET  test_ufo_cris_tlad_crtm
-#                  SOURCES mains/TestObsOperatorTLAD.cc
-#                  ARGS    "testinput/cris_crtm.yaml"
-#                  LIBS    ufo )
+ecbuild_add_test( TARGET  test_ufo_cris_tlad_crtm
+                  SOURCES mains/TestObsOperatorTLAD.cc
+                  ARGS    "testinput/cris_crtm.yaml"
+                  LIBS    ufo )
 
 ecbuild_add_test( TARGET  test_ufo_mhs_opr_crtm
                   SOURCES mains/TestObsOperator.cc
@@ -199,20 +199,20 @@ ecbuild_add_test( TARGET  test_ufo_iasi_opr_crtm
                   ARGS    "testinput/iasi_crtm.yaml"
                   LIBS    ufo )
 
-#ecbuild_add_test( TARGET  test_ufo_iasi_tlad_crtm
-#                  SOURCES mains/TestObsOperatorTLAD.cc
-#                  ARGS    "testinput/iasi_crtm.yaml"
-#                  LIBS    ufo )
+ecbuild_add_test( TARGET  test_ufo_iasi_tlad_crtm
+                  SOURCES mains/TestObsOperatorTLAD.cc
+                  ARGS    "testinput/iasi_crtm.yaml"
+                  LIBS    ufo )
 
 ecbuild_add_test( TARGET  test_ufo_sndrd1-4_opr_crtm
                   SOURCES mains/TestObsOperator.cc
                   ARGS    "testinput/sndrd1-4_crtm.yaml"
                   LIBS    ufo )
 
-#ecbuild_add_test( TARGET  test_ufo_sndrd1-4_tlad_crtm
-#                  SOURCES mains/TestObsOperatorTLAD.cc
-#                  ARGS    "testinput/sndrd1-4_crtm.yaml"
-#                  LIBS    ufo )
+ecbuild_add_test( TARGET  test_ufo_sndrd1-4_tlad_crtm
+                  SOURCES mains/TestObsOperatorTLAD.cc
+                  ARGS    "testinput/sndrd1-4_crtm.yaml"
+                  LIBS    ufo )
 
 ecbuild_add_test( TARGET  test_ufo_airs_opr_crtm
                   MPI     4
@@ -220,10 +220,10 @@ ecbuild_add_test( TARGET  test_ufo_airs_opr_crtm
                   ARGS    "testinput/airs_crtm.yaml"
                   LIBS    ufo )
 
-#ecbuild_add_test( TARGET  test_ufo_airs_tlad_crtm
-#                  SOURCES mains/TestObsOperatorTLAD.cc
-#                  ARGS    "testinput/airs_crtm.yaml"
-#                  LIBS    ufo )
+ecbuild_add_test( TARGET  test_ufo_airs_tlad_crtm
+                  SOURCES mains/TestObsOperatorTLAD.cc
+                  ARGS    "testinput/airs_crtm.yaml"
+                  LIBS    ufo )
 
 ecbuild_add_test( TARGET  test_ufo_hirs4_opr_crtm
                   SOURCES mains/TestObsOperator.cc
