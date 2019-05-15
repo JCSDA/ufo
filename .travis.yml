@@ -1,0 +1,71 @@
+#======================================================================
+# Project settings
+#======================================================================
+# Only build master.
+branches:
+  only:
+    - develop
+
+language: cpp
+#======================================================================
+# Environment
+#======================================================================
+
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+    packages:
+      - gcc-8
+      - gfortran-8
+      - g++-8
+      - lcov
+
+#======================================================================
+# Build Matrix
+#======================================================================
+matrix:
+   include:
+     - os: linux
+       compiler: gcc
+       sudo: false
+       dist: trusty
+
+#======================================================================
+# Docker does not work on Mac
+#======================================================================
+services:
+  - docker
+
+before_install:
+  - REPO_SOURCE_DIR=${TRAVIS_BUILD_DIR}
+#======================================================================
+# Clone all repos
+#======================================================================
+  - git clone https://github.com/jcsda/ufo-bundle.git ufo-bundle
+  - git clone https://github.com/jcsda/oops.git ufo-bundle/oops
+  - git clone https://github.com/jcsda/GSW-Fortran.git ufo-bundle/gsw
+  - git clone https://github.com/jcsda/crtm.git ufo-bundle/crtm
+  - git clone https://github.com/jcsda/ioda.git ufo-bundle/ioda
+  - git clone https://github.com/jcsda/ufo.git ufo-bundle/ufo
+  - ls ${REPO_SOURCE_DIR}
+  - ls ${REPO_SOURCE_DIR}/ufo-bundle
+#======================================================================
+# get docker image
+# FROM  jcsda/docker:latest
+#======================================================================
+  - docker build -t jcsda/docker --build-arg=Dockerfile .  #Dockerfile handles ssh for mpi
+  - docker images
+  - docker run -d -t --name jcsda_container -v ${REPO_SOURCE_DIR}/ufo-bundle:/jcsda/src_repo jcsda/docker
+  - docker ps -a
+
+#======================================================================
+# Here are the run steps
+#======================================================================
+script:
+  - docker exec jcsda_container ls
+  - docker exec jcsda_container ls /jcsda/src_repo
+  - docker exec jcsda_container bash -c 'cp -r /jcsda/.openmpi/ ~/' 
+  - docker exec jcsda_container bash -c 'cd /build_repo && ecbuild /jcsda/src_repo' 
+  - docker exec jcsda_container bash -c 'cd /build_repo/ufo && make -j4'
+  - docker exec jcsda_container bash -c 'cd /build_repo/ufo && ctest'
