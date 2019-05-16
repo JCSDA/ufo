@@ -4,7 +4,7 @@ contains
 
 subroutine sfc_wtq_fwd_gsi(psfc_in,tsfc,prsl1_in,tsen1,q1,u1,v1,&
                            prsl2_in,tsen2,q2,phi1,roughlen,landmask,&
-                           obshgt,outvar,varname)
+                           obshgt_in,outvar,varname)
   ! sfc_wtq_fwd_gsi
   ! based off of subroutines from GSI sfc_model.f90 file
   use kinds
@@ -12,7 +12,7 @@ subroutine sfc_wtq_fwd_gsi(psfc_in,tsfc,prsl1_in,tsen1,q1,u1,v1,&
   implicit none
   real(kind_real), intent(in) :: psfc_in, tsfc, prsl1_in, tsen1, q1, u1, v1,&
                                  prsl2_in, tsen2, q2, phi1, roughlen, landmask, &
-                                 obshgt
+                                 obshgt_in
   character(len=MAXVARLEN), intent(in) :: varname
   real(kind_real), intent(out) :: outvar
 
@@ -33,7 +33,7 @@ subroutine sfc_wtq_fwd_gsi(psfc_in,tsfc,prsl1_in,tsen1,q1,u1,v1,&
   real(kind_real), parameter :: two = 2.0_kind_real
   real(kind_real), parameter :: five = 5.0_kind_real
 
-  real(kind_real) :: psfc, prsl1, prsl2
+  real(kind_real) :: psfc, prsl1, prsl2, obshgt
   real(kind_real) :: tvg, tv1, tv2 
   real(kind_real) :: z0,zq0
   real(kind_real) :: gzzoz0, gzsoz0
@@ -49,6 +49,11 @@ subroutine sfc_wtq_fwd_gsi(psfc_in,tsfc,prsl1_in,tsen1,q1,u1,v1,&
   psfc = psfc_in / r100
   prsl1 = prsl1_in / r100
   prsl2 = prsl2_in / r100 
+
+  ! 2mTemp etc. is not at 2m in GSI output (it's 0m apparently),
+  ! but 10m winds are at 10m... make height agl at least 2m
+  obshgt = max(obshgt_in,two)
+  print *, obshgt_in,obshgt
 
   ! minimum roughness length (should be in meters)
   z0 = roughlen

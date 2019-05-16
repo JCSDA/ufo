@@ -147,8 +147,8 @@ subroutine atmsfcinterp_simobs_(self, geovals, obss, nvars, nlocs, hofx)
                            tsen%vals(1,iobs),q%vals(1,iobs),u%vals(1,iobs),&
                            v%vals(1,iobs),prs%vals(2,iobs),tsen%vals(2,iobs),&
                            q%vals(2,iobs),phi%vals(1,iobs),roughlen%vals(1,iobs),&
-                           landmask%vals(1,iobs),2._kind_real,&
-                           !landmask%vals(1,iobs),obshgt(iobs)-hgt%vals(1,iobs),&
+                           !landmask%vals(1,iobs),2._kind_real,&
+                           landmask%vals(1,iobs),obshgt(iobs)-hgt%vals(1,iobs),&
                            hofx(ivar,iobs),geovar)
     enddo
   enddo
