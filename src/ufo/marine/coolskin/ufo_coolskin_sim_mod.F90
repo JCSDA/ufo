@@ -6,21 +6,22 @@ module ufo_coolskin_sim_mod
   private
 
 contains
-  subroutine ufo_coolskin_sim(Ts,dTc,S_ns,H_I,H_s,R_nl,Td,u0)
+  subroutine ufo_coolskin_sim(Ts,dTc,S_ns,H_I,H_s,R_nl,Tdc,u0)
   use kinds 
   implicit none
  
-  real(kind=kind_real),        intent(inout) :: Ts,dTc,u0      !dTc to return
-  real(kind=kind_real),        intent(in)    :: S_ns,H_I,H_s,R_nl,Td
+  real(kind=kind_real),        intent(inout) :: Ts,dTc      !dTc to return
+  real(kind=kind_real),        intent(in)    :: S_ns,H_I,H_s,R_nl,u0,Tdc
   
   ! local variables
   integer:: N_i,i
-  real(kind=kind_real) :: delta,fc, u, lamda,Q0,Qb
+  real(kind=kind_real) :: delta,fc, u, lamda,Q0,Qb,Td
   
 
   u     = max(0.0002, u0) !friction velocity over water
   dTc   = 0.0
   N_i   = 3
+  Td = Tdc + 273.15 ! convert from C to K
 
   do i = 1,N_i
       Q0     = H_I + H_s + (eps * sig * (Td - dTc)**4 - R_nl)
@@ -34,26 +35,29 @@ contains
   enddo
 
   Ts = Td - dTc
+  Ts = Ts - 273.15 ! convert from K to C
   
   end subroutine ufo_coolskin_sim
   
   !-----------------------------------------------------------------------
   
-  subroutine ufo_coolskin_jac(jac,S_ns,H_I,H_s,R_nl,Td,u0)
+  subroutine ufo_coolskin_jac(jac,S_ns,H_I,H_s,R_nl,Tdc,u0)
   use kinds
   implicit none
   
-  real(kind=kind_real),        intent(in)    :: S_ns,H_I,H_s,R_nl,Td,u0
+  real(kind=kind_real),        intent(in)    :: S_ns,H_I,H_s,R_nl,u0,Tdc
   real(kind=kind_real),        intent(out)   :: jac(6) ! jac calculated for all inputs
 
-  real(kind=kind_real) :: delta ,fc ,u
+  real(kind=kind_real) :: delta ,fc ,u, Td
   real(kind=kind_real) :: lamda ,Q0 ,Qb ,Ts ,dTc ,c0 ,y ,Q
   real(kind=kind_real) :: const ,d_lamda_dQb ,dQb_dTs ,d_lamda_dTs,d_delta_dTs,dfc_d_delta,dQ_dTs
 
   u     = max(0.0002, u0) !friction velocity over water
+
+  call ufo_coolskin_sim(Ts,dTc,S_ns,H_I,H_s,R_nl,Tdc,u)
   
-  call ufo_coolskin_sim(Ts,dTc,S_ns,H_I,H_s,R_nl,Td,u)
-  
+  Td = Tdc + 273.15  ! convert from C to K
+  Ts = Ts + 273.15
   Q0      = H_I + H_s + (eps * sig * Ts**4 - R_nl)
    
   !constant apears in net heat equation
