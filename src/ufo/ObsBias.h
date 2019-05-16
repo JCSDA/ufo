@@ -33,8 +33,8 @@ class ObsBias : public util::Printable,
  public:
   static const std::string classname() {return "ufo::ObsBias";}
 
-  explicit ObsBias(const eckit::Configuration &) {}
-  ObsBias(const ObsBias &, const bool) {}
+  explicit ObsBias(const eckit::Configuration &) : inputs_() {}
+  ObsBias(const ObsBias & other, const bool) : inputs_(other.inputs_) {}
   ~ObsBias() {}
 
   ObsBias & operator+=(const ObsBiasIncrement &) {return *this;}
@@ -44,12 +44,16 @@ class ObsBias : public util::Printable,
   void write(const eckit::Configuration &) const {}
   double norm() const {return 0.0;}
 
+/// Other
+  const oops::Variables & variables() const {return inputs_;}
+
   int & toFortran() {return keyBias_;}
   const int & toFortran() const {return keyBias_;}
 
  private:
   void print(std::ostream &) const {}
   int keyBias_;
+  const oops::Variables inputs_;
 };
 
 // -----------------------------------------------------------------------------
