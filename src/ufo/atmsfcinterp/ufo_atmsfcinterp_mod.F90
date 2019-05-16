@@ -57,24 +57,13 @@ subroutine atmsfcinterp_setup_(self, c_conf)
 
   !> add geopotential height
   self%varin(1) = var_z
-  !self%varin(self%nvars+1) = var_z
   !> need skin temperature for near-surface interpolations
-  !self%varin(self%nvars+2) = var_sfc_t
   self%varin(2) = var_sfc_t
   !> need surface geopotential height to get difference from phi
-  !self%varin(self%nvars+3) = var_sfc_z 
   self%varin(3) = var_sfc_z 
   !> need surface roughness
   self%varin(4) = var_sfc_rough 
-  !self%varin(self%nvars+4) = var_sfc_rough 
   !> need surface and atmospheric pressure for potential temperature
-  !self%varin(self%nvars+5) = var_ps
-  !self%varin(self%nvars+6) = var_prs
-  !self%varin(self%nvars+7) = var_ts
-  !self%varin(self%nvars+8) = var_q
-  !self%varin(self%nvars+9) = var_u 
-  !self%varin(self%nvars+10) = var_v 
-  !self%varin(self%nvars+11) = var_sfc_lfrac
   self%varin(5) = var_ps
   self%varin(6) = var_prs
   self%varin(7) = var_ts
