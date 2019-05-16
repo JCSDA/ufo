@@ -30,6 +30,7 @@ list( APPEND ufo_test_input
   testinput/amsua_crtm.yaml
   testinput/amsua_rttov.yaml
   testinput/amsua_qc.yaml
+  testinput/gmi_crtm.yaml
   testinput/aod_crtm.yaml
   testinput/coolskin.yaml
   testinput/cris_crtm.yaml
@@ -71,6 +72,7 @@ list( APPEND ufo_test_data
   atmosphere/airs_aqua_geoval_2018041500_m.nc4
   atmosphere/amsua_n19_geoval_2018041500_m.nc4
   atmosphere/amsua_n19_geoval_2018041500_s.nc4
+  atmosphere/gmi_gpm_geoval_2018041500_m.nc4
   atmosphere/aod_geoval_2018041500_m.nc4
   atmosphere/aod_geoval_2018041500_s.nc4
   atmosphere/cris-fsr_npp_geoval_2018041500_m.nc4
@@ -106,6 +108,7 @@ list (APPEND ioda_obs_test_data
   atmosphere/aircraft_obs_2018041500_s.nc4
   atmosphere/airs_aqua_obs_2018041500_m.nc4
   atmosphere/amsua_n19_obs_2018041500_m.nc4
+  atmosphere/gmi_gpm_obs_2018041500_m.nc4
   atmosphere/amsua_n19_obs_2018041500_s.nc4
   atmosphere/aod_obs_2018041500_m.nc4
   atmosphere/aod_obs_2018041500_s.nc4
@@ -161,6 +164,16 @@ ecbuild_add_test( TARGET  test_ufo_amsua_qc
 ecbuild_add_test( TARGET  test_ufo_amsua_tlad_crtm
                   SOURCES mains/TestObsOperatorTLAD.cc
                   ARGS    "testinput/amsua_crtm.yaml"
+                  LIBS    ufo )
+
+ecbuild_add_test( TARGET  test_ufo_gmi_opr_crtm
+                  SOURCES mains/TestObsOperator.cc
+                  ARGS    "testinput/gmi_crtm.yaml"
+                  LIBS    ufo )
+
+ecbuild_add_test( TARGET  test_ufo_gmi_tlad_crtm
+                  SOURCES mains/TestObsOperatorTLAD.cc
+                  ARGS    "testinput/gmi_crtm.yaml"
                   LIBS    ufo )
 
 ecbuild_add_test( TARGET  test_ufo_seviri_opr_crtm
@@ -435,6 +448,8 @@ SpcCoeff/Little_Endian/hirs4_metop-a.SpcCoeff.bin
 TauCoeff/ODPS/Little_Endian/hirs4_metop-a.TauCoeff.bin
 SpcCoeff/Little_Endian/amsua_n19.SpcCoeff.bin
 TauCoeff/ODPS/Little_Endian/amsua_n19.TauCoeff.bin
+SpcCoeff/Little_Endian/gmi_gpm.SpcCoeff.bin
+TauCoeff/ODPS/Little_Endian/gmi_gpm.TauCoeff.bin
 SpcCoeff/Little_Endian/seviri_m08.SpcCoeff.bin
 TauCoeff/ODAS/Little_Endian/seviri_m08.TauCoeff.bin
 SpcCoeff/Little_Endian/cris-fsr_npp.SpcCoeff.bin
