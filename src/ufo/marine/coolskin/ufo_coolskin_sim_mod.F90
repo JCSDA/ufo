@@ -19,9 +19,9 @@ contains
   
 
   u     = max(0.0002, u0) !friction velocity over water
-
   dTc   = 0.0
-  
+  N_i   = 3
+
   do i = 1,N_i
       Q0     = H_I + H_s + (eps * sig * (Td - dTc)**4 - R_nl)
       Qb     = Q0 + (S_B*cw/(alpha*L_e))*H_I
@@ -62,7 +62,7 @@ contains
 
   !Saunder’s constant
   lamda   = 6.0*(1.0+((alpha*gr*Qb/(Rou*cw))*(16.0*Rou**2.0 * cw**2.0 * v_w**3.0 /\
-  k_t**2.0)* (1/u**4.0))**(3.0/4.0))**(-1.0/3.0)
+  k_t**2.0)* (1/u**4.0))**(0.75))**(-1.0/3.0)
   
   ! cool layer thickness
   delta   = lamda * v_w / u
@@ -72,15 +72,15 @@ contains
   
   ! net heat in cool layer
   Q       = H_I + H_s + (eps * sig * (Td - dTc)**4 - R_nl) - S_ns * fc
-  const   = ((alpha*gr/(Rou*cw))*(16.0*Rou**2.0 * cw**2.0 * v_w**3.0 / k_t**2.0))**(3.0/4.0)
+  const   = ((alpha*gr/(Rou*cw))*(16.0*Rou**2.0 * cw**2.0 * v_w**3.0 / k_t**2.0))**(0.75)
   
   ! calculate d(fc)/d(delta)
   dfc_d_delta  = 11 + 3.3E-5 / delta**2 *(1.0-exp(-delta/(8.0E-4))) - 3.3E-5\
   / delta * (1.0/(8.0E-4) * exp(-delta/(8.0E-4)))
   
   ! calculate d(lamda)/d(Qb)
-  d_lamda_dQb  = -6.0/3.0 *(1.0+const *(Qb/u**4) **(3.0/4.0))**(-4.0/3.0) *\
-  (3.0/4.0) * const * (Qb/u**4) ** (-1.0/4.0)
+  d_lamda_dQb  = -2.0 *(1.0+const *(Qb/u**4) **(0.75))**(-4.0/3.0) *\
+  (0.75) * const * (Qb/u**4) ** (-0.25)
   
   ! this apears in several of jacobians, I decided to calculate it once (4 eps * sig * Ts**3)
   y            = 4 * eps * sig * Ts**3

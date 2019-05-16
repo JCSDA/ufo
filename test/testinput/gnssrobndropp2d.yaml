@@ -9,21 +9,21 @@ window_end: 2018-04-15T03:00:00Z
 LinearObsOpTest: 
  testiterTL:  10
  toleranceTL: 1.0e-11
- toleranceAD: 1.0e-13
+ toleranceAD: 1.0e-12
 
 Observations: 
  ObsTypes: 
  - ObsOperator:
     name: GnssroBndROPP2D
+    obsvalue: bending_angle
     ObsOptions: 
      n_horiz: 3
      res: 40.0
    ObsSpace: 
-    name: GnssroBnd
-    ObsDataIn: 
-     obsfile: Data/gnssro_obs_2018041500_s.nc4
-    obsvalue: bending_angle
+     name: GnssroBnd
+     ObsDataIn: 
+       obsfile: Data/gnssro_obs_2018041500_s.nc4
    GeoVaLs: 
     filename: Data/gnssro_geoval_2018041500_s_2d.nc4
-   rmsequiv: 0.00921866919884274
-   tolerance: 1.0e-13
+   rmsequiv: 0.0092189705331515992
+   tolerance: 1.0e-14

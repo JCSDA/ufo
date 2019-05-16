@@ -40,7 +40,7 @@ type(ufo_gnssro_BndGSI), pointer :: self
 call ufo_gnssro_BndGSI_registry%setup(c_key_self, self)
 call self%setup(c_conf)
     
-end subroutine ufo_gnssro_BndGSI_setup_c
+end subroutine ufo_gnssro_bndgsi_setup_c
   
 ! ------------------------------------------------------------------------------
   
@@ -69,6 +69,7 @@ integer(c_int), intent(in) :: c_bias
 type(ufo_gnssro_BndGSI),     pointer :: self
 
 character(len=*), parameter :: myname_="ufo_gnssro_bndgsi_simobs_c"
+
 call ufo_gnssro_BndGSI_registry%get(c_key_self, self)
 call self%opr_simobs(c_key_geovals, c_obsspace, c_hofx)
 

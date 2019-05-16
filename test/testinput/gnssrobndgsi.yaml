@@ -14,20 +14,18 @@ LinearObsOpTest:
 Observations: 
  ObsTypes: 
  - ObsOperator: 
-     name: GnssroBndROPP1D
+     name: GnssroBndGSI
      obsvalue: bending_angle
      ObsOptions:
+       use_compress: 1
+       vertlayer: full
    ObsSpace: 
      name: GnssroBnd
      ObsDataIn: 
        obsfile: Data/gnssro_obs_2018041500_m.nc4
+     ObsDataOut:
+       obsfile: Data/gnssro_bndgsi_2018041500_m_output.nc4
    GeoVaLs: 
      filename: Data/gnssro_geoval_2018041500_m.nc4
-   ObsFilters:
-   - Filter: Background Check
-     variables:
-     - bending_angle
-     threshold: 3.0
-   rmsequiv: 0.0080965941619387614
-   passedBenchmark: 149
-   tolerance: 1.0e-13
+   vecequiv: GsiHofX
+   tolerance: 1.0e-8

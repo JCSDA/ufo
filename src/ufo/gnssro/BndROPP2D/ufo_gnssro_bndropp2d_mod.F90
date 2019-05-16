@@ -88,7 +88,6 @@ subroutine ufo_gnssro_bndropp2d_simobs(self, geovals, hofx, obss)
 
   write(err_msg,*) "TRACE: ufo_gnssro_bndropp2d_simobs: begin"
   call fckit_log%info(err_msg)
-
 ! check if nlocs is consistent in geovals & hofx
   if (geovals%nlocs /= size(hofx)*n_horiz) then
       write(err_msg,*) myname_, ' error: 2d nlocs inconsistent!'
@@ -96,7 +95,7 @@ subroutine ufo_gnssro_bndropp2d_simobs(self, geovals, hofx, obss)
   endif
 
 ! get variables from geovals
-  call ufo_geovals_get_var(geovals, var_t,     t)         ! temperature
+  call ufo_geovals_get_var(geovals, var_ts,    t)         ! temperature
   call ufo_geovals_get_var(geovals, var_q,     q)         ! specific humidity
   call ufo_geovals_get_var(geovals, var_prs,   prs)       ! pressure
   call ufo_geovals_get_var(geovals, var_z,     gph)       ! geopotential height
@@ -124,11 +123,11 @@ subroutine ufo_gnssro_bndropp2d_simobs(self, geovals, hofx, obss)
   allocate(obsLatnh(n_horiz))
   allocate(obsLonnh(n_horiz))
 
-  call obsspace_get_db(obss, " ", "longitude",        obsLon)
-  call obsspace_get_db(obss, " ", "latitude",         obsLat)
-  call obsspace_get_db(obss, " ", "impact_parameter", obsImpP)
-  call obsspace_get_db(obss, " ", "earth_radius_of_curvature", obsLocR)
-  call obsspace_get_db(obss, " ", "geoid_height_above_reference_ellipsoid", obsGeoid)
+  call obsspace_get_db(obss, "MetaData", "longitude",        obsLon)
+  call obsspace_get_db(obss, "MetaData", "latitude",         obsLat)
+  call obsspace_get_db(obss, "MetaData", "impact_parameter", obsImpP)
+  call obsspace_get_db(obss, "MetaData", "earth_radius_of_curvature", obsLocR)
+  call obsspace_get_db(obss, "MetaData", "geoid_height_above_reference_ellipsoid", obsGeoid)
 
   nvprof=1  ! no. of bending angles in profile 
   write(err_msg,*) "TRACE: ufo_gnssro_bndropp2d_simobs: begin observation loop, nlocs =  ", nlocs

@@ -10,7 +10,7 @@ Observations:
  ObsTypes: 
  - ObsOperator:
      name: CRTM
-     channels: 1-6,9-12,13,15
+     channels: 1-15
      n_Absorbers: 3
      n_Clouds: 2
      n_Aerosols: 0
@@ -33,4 +33,4 @@ Observations:
      variables:
      - brightness_temperature_1
      threshold: 2.0
-   passedBenchmark: 1175      # number of passed obs
+   passedBenchmark: 1475      # number of passed obs

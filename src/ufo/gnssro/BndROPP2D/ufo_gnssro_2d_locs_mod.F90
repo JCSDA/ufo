@@ -47,9 +47,9 @@ subroutine ufo_gnssro_2d_locs_init(self, locs, obss, t1, t2)
 
   allocate(date_time(nlocs), lon(nlocs), lat(nlocs))
 
-  call obsspace_get_db(obss, "", "datetime", date_time)
-  call obsspace_get_db(obss, "", "longitude", lon)
-  call obsspace_get_db(obss, "", "latitude", lat)
+  call obsspace_get_db(obss, "MetaData", "datetime", date_time)
+  call obsspace_get_db(obss, "MetaData", "longitude", lon)
+  call obsspace_get_db(obss, "MetaData", "latitude", lat)
 
   ! Generate the timing window indices
   allocate(tw_indx(nlocs))
@@ -63,8 +63,8 @@ subroutine ufo_gnssro_2d_locs_init(self, locs, obss, t1, t2)
 
   allocate(obsAzim(nlocs))
   if (obsspace_has(obss,"ObsValue","bending_angle")) then
-     if (obsspace_has(obss, "GroupUndefined", "sensor_azimuth_angle")) then
-       call obsspace_get_db(obss, " ", "sensor_azimuth_angle", obsAzim)
+     if (obsspace_has(obss, "MetaData", "sensor_azimuth_angle")) then
+       call obsspace_get_db(obss, "MetaData", "sensor_azimuth_angle", obsAzim)
      else
        write(err_msg,*) myname, ' error: sensor_azimuth_angle not found'
        call abor1_ftn(err_msg)

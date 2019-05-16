@@ -110,7 +110,7 @@ type(c_ptr), value,       intent(in) :: obss         !ObsSpace
 character(*), parameter :: PROGRAM_NAME = 'ufo_radiancecrtm_mod.F90'
 character(255) :: message, version
 integer        :: err_stat, alloc_stat
-integer        :: l, m, n, s, chind
+integer        :: l, m, n, s
 type(ufo_geoval), pointer :: temp
 
 integer :: n_Profiles
@@ -152,6 +152,15 @@ type(CRTM_RTSolution_type), allocatable :: rts(:,:)
  write( *,'(/5x,"Initializing the CRTM...")' )
  err_stat = CRTM_Init( self%conf%SENSOR_ID, chinfo, &
                        File_Path=trim(self%conf%COEFFICIENT_PATH), &
+                       IRwaterCoeff_File=trim(self%conf%IRwaterCoeff_File), &
+                       IRlandCoeff_File=trim(self%conf%IRlandCoeff_File), &
+                       IRsnowCoeff_File=trim(self%conf%IRsnowCoeff_File), &
+                       IRiceCoeff_File=trim(self%conf%IRiceCoeff_File), &
+                       VISwaterCoeff_File=trim(self%conf%VISwaterCoeff_File), &
+                       VISlandCoeff_File=trim(self%conf%VISlandCoeff_File), &
+                       VISsnowCoeff_File=trim(self%conf%VISsnowCoeff_File), &
+                       VISiceCoeff_File=trim(self%conf%VISiceCoeff_File), &
+                       MWwaterCoeff_File=trim(self%conf%MWwaterCoeff_File), &
                        Quiet=.TRUE.)
  if ( err_stat /= SUCCESS ) THEN
    message = 'Error initializing CRTM'
@@ -167,12 +176,12 @@ type(CRTM_RTSolution_type), allocatable :: rts(:,:)
 
    ! Pass channel list to CRTM
    ! -------------------------
-   !err_stat = CRTM_ChannelInfo_Subset(chinfo(n), channels, reset=.false.)
-   !if ( err_stat /= SUCCESS ) THEN
-   !   message = 'Error subsetting channels'
-   !   call Display_Message( PROGRAM_NAME, message, FAILURE )
-   !   stop
-   !end if
+   err_stat = CRTM_ChannelInfo_Subset(chinfo(n), self%channels, reset=.false.)
+   if ( err_stat /= SUCCESS ) THEN
+      message = 'Error subsetting channels!'
+      call Display_Message( PROGRAM_NAME, message, FAILURE )
+      stop
+   end if
 
 
    ! Determine the number of channels for the current sensor
@@ -217,7 +226,7 @@ type(CRTM_RTSolution_type), allocatable :: rts(:,:)
    !Assign the data from the GeoVaLs
    !--------------------------------
    call Load_Atm_Data(n_Profiles,n_Layers,geovals,atm,self%conf)
-   call Load_Sfc_Data(n_Profiles,n_Layers,n_Channels,self%channels,geovals,sfc,chinfo,obss)
+   call Load_Sfc_Data(n_Profiles,n_Layers,n_Channels,self%channels,geovals,sfc,chinfo,obss,self%conf)
    call Load_Geom_Data(obss,geo)
 
 
@@ -253,10 +262,7 @@ type(CRTM_RTSolution_type), allocatable :: rts(:,:)
 
    do m = 1, n_Profiles
      do l = 1, size(self%channels)
-
-       chind  = minloc(abs(chinfo(n)%Sensor_Channel-self%channels(l)),1)
-       hofx(l, m) = rts(chind,m)%Brightness_Temperature
-
+       hofx(l,m) = rts(l,m)%Brightness_Temperature
      end do
    end do
 

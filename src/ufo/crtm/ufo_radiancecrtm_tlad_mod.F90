@@ -159,12 +159,12 @@ type(CRTM_RTSolution_type), allocatable :: rts_K(:,:)
 
    ! Pass channel list to CRTM
    ! -------------------------
-   !err_stat = CRTM_ChannelInfo_Subset(chinfo(n), channels, reset=.false.)
-   !if ( err_stat /= SUCCESS ) THEN
-   !   message = 'Error subsetting channels'
-   !   call Display_Message( PROGRAM_NAME, message, FAILURE )
-   !   stop
-   !end if
+   err_stat = CRTM_ChannelInfo_Subset(chinfo(n), self%channels, reset=.false.)
+   if ( err_stat /= SUCCESS ) THEN
+      message = 'Error subsetting channels'
+      call Display_Message( PROGRAM_NAME, message, FAILURE )
+      stop
+   end if
 
 
    ! Determine the number of channels for the current sensor
@@ -232,7 +232,7 @@ type(CRTM_RTSolution_type), allocatable :: rts_K(:,:)
    !Assign the data from the GeoVaLs
    !--------------------------------
    call Load_Atm_Data(self%N_PROFILES,self%N_LAYERS,geovals,atm,self%conf)
-   call Load_Sfc_Data(self%N_PROFILES,self%N_LAYERS,self%N_Channels,self%channels,geovals,sfc,chinfo,obss)
+   call Load_Sfc_Data(self%N_PROFILES,self%N_LAYERS,self%N_Channels,self%channels,geovals,sfc,chinfo,obss,self%conf)
    call Load_Geom_Data(obss,geo)
 
 
@@ -358,7 +358,7 @@ type(ufo_geoval), pointer :: tv_d
    do jchannel = 1, size(self%channels)
      do jlevel = 1, tv_d%nval
        hofx(jchannel, jprofile) = hofx(jchannel, jprofile) + &
-                    self%atm_K(self%channels(jchannel),jprofile)%Temperature(jlevel) * &
+                    self%atm_K(jchannel,jprofile)%Temperature(jlevel) * &
                     tv_d%vals(jlevel,jprofile)
      enddo
    enddo
@@ -425,7 +425,7 @@ real(c_double) :: missing
      do jlevel = 1, tv_d%nval
        if (hofx(jchannel, jprofile) /= missing) then
          tv_d%vals(jlevel,jprofile) = tv_d%vals(jlevel,jprofile) + &
-                                      self%atm_K(self%channels(jchannel),jprofile)%Temperature(jlevel) * &
+                                      self%atm_K(jchannel,jprofile)%Temperature(jlevel) * &
                                       hofx(jchannel, jprofile)
        endif
      enddo

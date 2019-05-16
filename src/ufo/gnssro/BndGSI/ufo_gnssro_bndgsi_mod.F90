@@ -16,10 +16,14 @@ module ufo_gnssro_bndgsi_mod
   use ufo_basis_mod,      only: ufo_basis
   use lag_interp_mod,     only: lag_interp_const, lag_interp_smthWeights
   use obsspace_mod
+  use missing_values_mod
   use gnssro_mod_conf
   use gnssro_mod_constants
+  use fckit_log_module,  only : fckit_log
 
   implicit none
+!  integer, parameter              :: max_string    = 800
+
   public             :: ufo_gnssro_BndGSI
   private
 
@@ -41,292 +45,303 @@ type(c_ptr),              intent(in)    :: c_conf
 call gnssro_conf_setup(self%roconf,c_conf)
 end subroutine ufo_gnssro_bndgsi_setup
 
-  subroutine ufo_gnssro_bndgsi_simobs(self, geovals, hofx, obss)
-      use gnssro_mod_transform
-      use gnssro_mod_grids, only: get_coordinate_value
-      implicit none
-      class(ufo_gnssro_bndGSI), intent(in)    :: self
-      type(ufo_geovals),        intent(in)    :: geovals
-      real(kind_real),          intent(inout) :: hofx(:)
-      type(c_ptr), value,       intent(in)    :: obss
-    
-      character(len=*), parameter     :: myname_ ="ufo_gnssro_bndgsi_simobs"
-      real(kind_real), parameter      :: r1em6 = 1.0e-6_kind_real
-      real(kind_real), parameter      :: r1em3 = 1.0e-3_kind_real
-      real(kind_real), parameter      :: six   = 6.0_kind_real
-      real(kind_real), parameter      :: ds    = 10000.0_kind_real
-      integer, parameter              :: nlevAdd = 13 !num of additional levels on top of exsiting model levels
-      integer, parameter              :: newAdd  = 20 !num of additional levels on top of extended levels
-      integer, parameter              :: ngrd    = 80 !num of new veritcal grids for bending angle computation
-      integer, parameter              :: max_string    = 800
-      real(kind_real), parameter      :: miss_values   = -99999.00
-      real(kind_real), parameter      :: crit_gradRefr = 157.0_kind_real !criteria for the refractivity gradient
+subroutine ufo_gnssro_bndgsi_simobs(self, geovals, hofx, obss)
+  use gnssro_mod_transform
+  use gnssro_mod_grids, only: get_coordinate_value
+  implicit none
+  class(ufo_gnssro_bndGSI), intent(in)    :: self
+  type(ufo_geovals),        intent(in)    :: geovals
+  real(kind_real),          intent(inout) :: hofx(:)
+  type(c_ptr), value,       intent(in)    :: obss
+  integer                                 ::  nlocs
 
-      character(max_string)           :: err_msg
-      integer                         :: iobs, ilev, igrd, klev
-      integer                         :: nlev, nlev1, nobs, nlevExt, nlevCheck
-      real(kind_real)                 :: rnlevExt
-      real(kind_real)                 :: w4(4), dw4(4)
-      type(ufo_geoval), pointer       :: t, gphi, prsi, q
-      real(kind_real), allocatable    :: gesT(:,:), gesZi(:,:), gesPi(:,:), gesQ(:,:)
-      real(kind_real), allocatable    :: refr(:,:), radius(:,:)
-      real(kind_real), allocatable    :: refrIndex(:), refrXrad(:), geomzi(:), refrXrad_new(:)
-      real(kind_real), allocatable    :: lagConst(:,:)
-      real(kind_real), allocatable    :: obsLat(:), obsImpP(:), obsLocR(:), obsGeoid(:)
-      real(kind_real)                 :: specHmean, tmean
-      real(kind_real)                 :: d_refrXrad
-      real(kind_real)                 :: derivRefr_s(ngrd),grids(ngrd),refrXrad_s(ngrd)
-      real(kind_real)                 :: sIndx, sIndxExt
-      integer                         :: indx
-      real(kind_real)                 :: bndIntgd, bendingAngle, obsImpH, gradRefr
-      logical                         :: obs_check, qc_layer_SR
-      integer                         :: nobs_outIntgl
-      integer                         :: count_SR, top_layer_SP, top_layer_SR, bot_layer_SR !for super refraction
-      integer                         :: count_rejection
-       real(kind_real)                 :: jacob    
-      nobs = 0
-      nlev = 0
-      nlev1 = 0
-      nlevExt = 0
-      sIndxExt = one
-      hofx(:) = miss_values
+  character(len=*), parameter     :: myname ="ufo_gnssro_bndgsi_simobs"
+  real(kind_real), parameter      :: r1em6 = 1.0e-6_kind_real
+  real(kind_real), parameter      :: r1em3 = 1.0e-3_kind_real
+  real(kind_real), parameter      :: six   = 6.0_kind_real
+  real(kind_real), parameter      :: ds    = 10000.0_kind_real
+  integer, parameter              :: nlevAdd = 13 !num of additional levels on top of exsiting model levels
+  integer, parameter              :: newAdd  = 20 !num of additional levels on top of extended levels
+  integer, parameter              :: ngrd    = 80 !num of new veritcal grids for bending angle computation
+  real(kind_real), parameter      :: crit_gradRef = 157.0_kind_real !criteria for the refractivity gradient
 
-      ! check if nlocs is consistent in geovals & hofx
-      if (geovals%nlocs /= size(hofx)) then
-        write(err_msg,*) myname_, ' error: nlocs inconsistent!'
-        call abor1_ftn(err_msg)
-      endif
-      ! check if prsi (pressure at model interface levels) variable is in geovals and get it
-      call ufo_geovals_get_var(geovals, var_prsi, prsi)
-      ! check if t (temperature) variable is in geovals and get it
-      call ufo_geovals_get_var(geovals, var_t, t)
-      ! check if q(specific humidity) variable is in geovals and get it
-      call ufo_geovals_get_var(geovals, var_q, q)
-      ! check if gphi (geopotential height at model interface levels) variable is in geovals and get it
-      call ufo_geovals_get_var(geovals, var_zi, gphi)
+  character(max_string)           :: err_msg
+  integer                         :: iobs, ilev, igrd, klev
+  integer                         :: nlev, nlev1, nlevExt, nlevCheck
+  real(kind_real)                 :: rnlevExt
+  real(kind_real)                 :: w4(4), dw4(4)
+  type(ufo_geoval), pointer       :: t, q, gph, prs
+  real(kind_real), allocatable    :: gesT(:,:), gesZ(:,:), gesP(:,:), gesQ(:,:), gesTv(:,:)
+  real(kind_real), allocatable    :: ref(:), radius(:)
+  real(kind_real), allocatable    :: refIndex(:), refXrad(:), geomz(:), refXrad_new(:)
+  real(kind_real), allocatable    :: lagConst(:,:)
+  real(kind_real), allocatable    :: obsLat(:), obsImpP(:), obsLocR(:), obsGeoid(:), obsValue(:)
+  real(kind_real)                 :: d_refXrad
+  real(kind_real)                 :: derivRef_s(ngrd),grids(ngrd),refXrad_s(ngrd)
+  real(kind_real)                 :: sIndx, sIndxExt
+  integer                         :: indx
+  real(kind_real)                 :: bndIntgd, bendingAngle, obsImpH, gradRef
+  logical                         :: obs_check, qc_layer_SR
+  integer                         :: nobs_outIntgl
+  integer                         :: count_SR, top_layer_SP, top_layer_SR, bot_layer_SR !for super refaction
+  integer                         :: count_rejection
+  integer                         :: iflip
+  real(c_double)                  :: missing
 
- 
-      nlev  = t%nval ! number of model levels
-      nlev1 = prsi%nval ! number of model interface levels 
-      if (nlev1 /= nlev+1) then
-         write(err_msg,*) myname_, ' Numbers of vertical profiles, nlev1 and nlev, dont match'
-         call abor1_ftn(err_msg)
-      endif
-      nlevExt = nlev + nlevAdd
-      nlevCheck = min(23, nlev) !number of levels to check super refraction
-      nobs  = geovals%nlocs ! number of observations
 
-      allocate(gesPi(nlev1,nobs)) 
-      allocate(gesZi(nlev1,nobs)) 
-      allocate(gesT(nlev,nobs)) 
-      allocate(gesQ(nlev,nobs)) 
+! check if nobs is consistent in geovals & hofx
+  if (geovals%nlocs /= size(hofx)) then
+    write(err_msg,*) myname, ': nlocs inconsistent!'
+    call abor1_ftn(err_msg)
+  endif
 
-      !FV3 background is from top to bottom. Reserse the vertical order 
-      do ilev=1, nlev
-         gesT(ilev,:) = t%vals(nlev-ilev+1,:)
-         gesQ(ilev,:) = q%vals(nlev-ilev+1,:)
-      enddo
+  missing = missing_value(missing)
+  nlocs   = obsspace_get_nlocs(obss) ! number of observations
 
-      do ilev=1, nlev1
-         gesPi(ilev,:) = prsi%vals(nlev1-ilev+1,:)
-         gesZi(ilev,:) = gphi%vals(nlev1-ilev+1,:)
-      enddo
+! get variables from geovals
+  call ufo_geovals_get_var(geovals, var_ts,  t)         ! air temperature
+  call ufo_geovals_get_var(geovals, var_q,   q)         ! specific humidity
+  if (self%roconf%vertlayer .eq. "mass") then
+    call ufo_geovals_get_var(geovals, var_prs,   prs)       ! pressure
+    call ufo_geovals_get_var(geovals, var_z,     gph)       ! geopotential height
+  else if (self%roconf%vertlayer .eq. "full") then
+    call ufo_geovals_get_var(geovals, var_prsi,  prs)       ! pressure
+    call ufo_geovals_get_var(geovals, var_zi,    gph)       ! geopotential height
+  else
+    call ufo_geovals_get_var(geovals, var_prsi,  prs)       ! pressure
+    call ufo_geovals_get_var(geovals, var_zi,    gph)      
+    write(err_msg,*) myname,': vertlayer has to be mass of full, '//new_line('a')// &
+                                 'will use full layer anyway'
+    call fckit_log%info(err_msg)
+  end if
 
-      do igrd = 0, ngrd-1
-          grids(igrd+1) = igrd * ds
-      end do 
+  nlev  = t%nval   ! number of model mass levels
+  nlev1 = prs%nval ! number of model pressure/height levels 
 
-      allocate(geomzi(nlev))      !geometric height at interface model levels
-      allocate(radius(nlev,nobs)) !distance between earth center to model interface level
+  allocate(gesP(nlev1,nlocs)) 
+  allocate(gesZ(nlev1,nlocs)) 
+  allocate(gesT(nlev,nlocs)) 
+  allocate(gesTv(nlev,nlocs))
+  allocate(gesQ(nlev,nlocs)) 
 
-      allocate(refr(nlevExt,nobs))    !refractivity N 
-      allocate(refrIndex(nlev))       !refractivity index n
-      allocate(refrXrad(0:nlevExt+1)) !x=nr, r: radius
-      allocate(lagConst(3,nlevExt))   !x=nr, r: radius
-      allocate(refrXrad_new(nlevExt+newAdd))
+! copy geovals to local background arrays
+  iflip = 0
+  if (prs%vals(1,1) .lt. prs%vals(prs%nval,1) ) then
+     iflip = 1
+     write(err_msg,'(a)')'  ufo_gnssro_bndgsi_simobs:'//new_line('a')//                         &
+                         '  Model vertical height profile is in descending order,'//new_line('a')// &
+                         '  but bndGSI requires it to be ascending order, need flip'
+    call fckit_log%info(err_msg)
+    do ilev=1, nlev
+       gesT(ilev,:) = t%vals(nlev-ilev+1,:)
+       gesQ(ilev,:) = q%vals(nlev-ilev+1,:)
+       gesTv(ilev,:)= gesT(ilev,:)*(1+gesQ(ilev,:)*(rv_over_rd-1))
+    enddo
+    do ilev=1, nlev1
+       gesP(ilev,:) = prs%vals(nlev1-ilev+1,:)
+       gesZ(ilev,:) = gph%vals(nlev1-ilev+1,:)
+    enddo
+  else  ! not flipping
+    do ilev=1, nlev
+       gesT(ilev,:)  = t%vals(ilev,:)
+       gesQ(ilev,:)  = q%vals(ilev,:)
+       gesTv(ilev,:) = gesT(ilev,:)*(1+gesQ(ilev,:)*(rv_over_rd-1))
+    enddo
 
-      allocate(obsLat(nobs))
-      allocate(obsImpP(nobs))
-      allocate(obsLocR(nobs))
-      allocate(obsGeoid(nobs))
+    do ilev=1, nlev1
+       gesP(ilev,:) = prs%vals(ilev,:)
+       gesZ(ilev,:) = gph%vals(ilev,:)
+    enddo
+  end if
 
-      call obsspace_get_db(obss, "Metadata", "Latitude", obsLat)
-      call obsspace_get_db(obss, "Metadata", "IMPP", obsImpP)   !observed impact parameter; meter
-      call obsspace_get_db(obss, "Metadata", "ELRC", obsLocR)   !local radius of earth; meter
-      call obsspace_get_db(obss, "Metadata", "GEODU", obsGeoid) !Geoid; meter
+! if background t and q are on mass layers, 
+!    while p and z are on interface layers, take the mean of t and q
+!       -- gsi manner
+  if ( nlev1 /= nlev ) then  
+     do ilev = nlev, 2, -1
+        gesQ(ilev,:) = half* (gesQ(ilev,:) + gesQ(ilev-1,:))
+        gesTv(ilev,:) = half* (gesTv(ilev,:) + gesTv(ilev-1,:))
+!       PLEASE KEEP this COMMENT:
+!       to exactly reproduce gsi, t is converted to tv, tv mean is calcualted,
+!       then tv mean is converted to t mean
+        gesT(ilev,:) = gesTv(ilev,:)/(1+ gesQ(ilev,:)*(rv_over_rd-1))
+!       gesT(ilev,:) = half* (gesT(ilev,:) + gesT(ilev-1,:))
+     enddo
+  end if
 
-      nobs_outIntgl = 0 !initialize count of observations out of integral grids  
-      count_rejection = 0
+! set obs space struture
+  allocate(obsLat(nlocs))
+  allocate(obsImpP(nlocs))
+  allocate(obsLocR(nlocs))
+  allocate(obsGeoid(nlocs))
+  allocate(ObsValue(nlocs))
 
-      obs_loop: do iobs = 1, nobs 
-         do ilev = 1,nlev 
+  call obsspace_get_db(obss, "MetaData", "latitude",         obsLat)
+  call obsspace_get_db(obss, "MetaData", "impact_parameter", obsImpP)
+  call obsspace_get_db(obss, "MetaData", "earth_radius_of_curvature", obsLocR)
+  call obsspace_get_db(obss, "MetaData", "geoid_height_above_reference_ellipsoid", obsGeoid)
+  call obsspace_get_db(obss, "ObsValue", "bending_angle", obsValue)
 
-         ! compute guess geometric height from geopotential height at model interface levels
-            call geop2geometric( obsLat(iobs), gesZi(ilev,iobs), geomzi(ilev), jacob)
+  sIndxExt  = one
+  nlevExt   = nlev + nlevAdd
+  nlevCheck = min(23, nlev)   !number of levels to check super refaction
 
-         ! compute guess radius 
-            radius(ilev,iobs) = geomzi(ilev) + obsGeoid(iobs) + obsLocR(iobs)   ! radius r
+! define new integration grids
+  do igrd = 0, ngrd-1
+     grids(igrd+1) = igrd * ds
+  end do 
 
-         ! compute guess refractivity and refractivity index at model interface levels
-            if(ilev > 1) then
-               specHmean = (gesQ(ilev,iobs) + gesQ(ilev-1,iobs))/two
-               tmean = (gesT(ilev,iobs) + gesT(ilev-1,iobs) )/two
-            else
-               specHmean = gesQ(1,iobs)
-               tmean = gesT(1,iobs)
-            endif
-            call compute_refractivity(tmean, specHmean, gesPi(ilev,iobs), refr(ilev,iobs),self%roconf%use_compress) !refr N
-            refrIndex(ilev) = one + (r1em6*refr(ilev,iobs))         ! refr index n
-            refrXrad(ilev)  = refrIndex(ilev) * radius(ilev,iobs)   ! x=nr
+! bending angle forward model starts
+  allocate(geomz(nlev))    ! geometric height
+  allocate(radius(nlev))   ! tangent point radisu to earth center
+  allocate(ref(nlevExt))   ! refractivity
 
-         end do 
+  allocate(refIndex(nlev))              !refactivity index n
+  allocate(refXrad(0:nlevExt+1))        !x=nr, model conuterpart impact parameter
+  allocate(lagConst(3,nlevExt))         !
+  allocate(refXrad_new(nlevExt+newAdd)) !
 
-         ! data rejection based on model background !
-         ! (1) skip data below the model levels
-         call get_coordinate_value(obsImpP(iobs), sIndx,refrXrad(1),nlev,"increasing")
-         if (sIndx < one .or. sIndx > float(nlev)) then 
-             count_rejection = count_rejection + 1
-             cycle
-         end if
 
-         ! (2) super-refraction
-         qc_layer_SR=.false.
-         count_SR=0
-         top_layer_SR=0
-         bot_layer_SR=0
-         obsImpH = (obsImpP(iobs) - obsLocR(iobs)) * r1em3 !impact heigt: a-r_earth
-         if (obsImpH <= six) then
-            do klev=nlevCheck,1,-1
+  nobs_outIntgl = 0 !initialize count of observations out of integral grids  
+  count_rejection = 0
 
-               ! check for model SR layer 
-               gradRefr = 1000.0_kind_real * (refr(klev+1,iobs)-refr(klev,iobs)) / (radius(klev+1,iobs)-radius(klev,iobs))
+  obs_loop: do iobs = 1, nlocs
 
-               if (abs(gradRefr)>= half*crit_gradRefr) then  !Super refractivity - likely, to be used in obs SR qc
-                  qc_layer_SR=.true.   !SR-likely layer detected
-               endif
+    hofx(iobs) =  missing
+    do ilev = 1,nlev 
+!     compute guess geometric height from geopotential height
+      call geop2geometric(obsLat(iobs), gesZ(ilev,iobs), geomz(ilev))
+      radius(ilev) = geomz(ilev) + obsGeoid(iobs) + obsLocR(iobs)   ! radius r
+!     guess refactivity, refactivity index,  and impact parameter
+      call compute_refractivity(gesT(ilev,iobs), gesQ(ilev,iobs), gesP(ilev,iobs),   &
+                                ref(ilev), self%roconf%use_compress) 
+      refIndex(ilev) = one + (r1em6*ref(ilev))        
+      refXrad(ilev)  = refIndex(ilev) * radius(ilev)  
+    end do 
 
-               !if (((ref_rad(klev+1)-ref_rad(klev))/(radius(klev+1,iobs)-radius(klev,iobs))) < zero) then
-               if (abs(gradRefr) >= 0.75_kind_real*crit_gradRefr) then  !relax to close-to-SR conditions
-                  count_SR=count_SR+1 ! layers of SR
+!   data rejection based on model background !
+!   (1) skip data beyond model levels
+    call get_coordinate_value(obsImpP(iobs),sIndx,refXrad(1),nlev,"increasing")
+    if (sIndx < one .or. sIndx > float(nlev)) then 
+       cycle obs_loop
+    end if
 
-                  if (count_SR > 1 ) then
-                     !if(abs(bot_layer_SR-klev) > 1) write(6,*) 'WARNING GPSRO: non-consecutive SR layers'
-                     bot_layer_SR=klev
-                  else
-                     top_layer_SR=klev
-                     bot_layer_SR=top_layer_SR
-                  endif
+!   (2) super-refaction
+    qc_layer_SR  = .false.
+    count_SR     = 0
+    top_layer_SR = 0
+    bot_layer_SR = 0
 
-               endif
-            end do
-            if (top_layer_SR >= 1 .and. obsImpP(iobs) <= refrXrad(top_layer_SR+2)) then !obs inside model SR layer
-               count_rejection = count_rejection + 1
-               cycle
-            end if
+    obsImpH = (obsImpP(iobs) - obsLocR(iobs)) * r1em3 !impact heigt: a-r_earth
+    if (obsImpH <= six) then
+       do klev = nlevCheck, 1, -1
+
+!         check for model SR layer 
+          gradRef = 1000.0_kind_real * (ref(klev+1)-ref(klev)) /       &
+                                    (radius(klev+1)-radius(klev))
+
+!         PLEASE KEEP this COMMENT:
+!         this check needs RO profile, which was done with MPI reduce in GSI
+!         not applied here yet
+
+!         only check once - SR-likely layer detected
+          if (.not.qc_layer_SR .and. abs(gradRef)>= half*crit_gradRef) then 
+             qc_layer_SR=.true. 
           endif
 
+!         relax to close-to-SR conditions
+          if (abs(gradRef) >= 0.75_kind_real*crit_gradRef) then
+             count_SR=count_SR+1        ! layers of SR
+             if (count_SR > 1 ) then
+                bot_layer_SR=klev
+             else
+                top_layer_SR=klev
+                bot_layer_SR=top_layer_SR
+             endif
+          endif
+       end do
+     
+!      obs inside model SR layer
+       if (top_layer_SR >= 1 .and. obsImpP(iobs) <= refXrad(top_layer_SR+2)) then
+          cycle obs_loop
+       end if
 
-         ! Extend atmosphere above interface level nlev
-         d_refrXrad = refrXrad(nlev) - refrXrad(nlev-1)
-         do ilev=1,nlevAdd
-            refrXrad(nlev+ilev)=refrXrad(nlev)+ ilev*d_refrXrad ! extended x_i
-            refr(nlev+ilev,iobs)=refr(nlev+ilev-1,iobs)**2/refr(nlev+ilev-2,iobs) ! exended N_i
-         end do
+    end if ! obsImpH <= six
 
-         refrXrad(0)=refrXrad(3)
-         refrXrad(nlevExt+1)=refrXrad(nlevExt-2)
+!  Extend atmosphere above interface level nlev
+    d_refXrad = refXrad(nlev) - refXrad(nlev-1)
+    do ilev = 1, nlevAdd
+      refXrad(nlev+ilev)=refXrad(nlev)+ ilev*d_refXrad    ! extended x_i
+      ref(nlev+ilev)=ref(nlev+ilev-1)**2/ref(nlev+ilev-2) ! exended N_i
+    end do
 
-         do ilev = 1,nlevExt
-            call lag_interp_const(lagConst(:,ilev),refrXrad(ilev-1:ilev+1),3)
-         enddo
+    refXrad(0)=refXrad(3)
+    refXrad(nlevExt+1)=refXrad(nlevExt-2)
+    do ilev = 1,nlevExt
+       call lag_interp_const(lagConst(:,ilev),refXrad(ilev-1:ilev+1),3)
+    enddo
 
-         ! Set up a new equally-spaced vertical grid for integral 
+!   integrate on a new set of equally-spaced vertical grid 
+    derivRef_s = zero
+    grids_loop: do igrd =1,ngrd
+      refXrad_s(igrd)=sqrt(grids(igrd)**2 + obsImpP(iobs)**2) !x_s^2=s^2+a^2
+      call get_coordinate_value(refXrad_s(igrd), sIndx,refXrad(1:nlevExt),nlevExt,"increasing")
+      rnlevExt = float(nlevExt)
 
-         derivRefr_s = zero
-         grids_loop: do igrd =1,ngrd
-         !use the new grids (s) for bending angle computation
-           refrXrad_s(igrd)=sqrt(grids(igrd)**2 + obsImpP(iobs)**2) !x_s^2=s^2+a^2
+      if (sIndx > zero .and. sIndx < rnlevExt) then  !obs inside the new grid
+        indx=sIndx
+!       Compute derivative at new grids (dN/ds) using Lagrange interpolators
+        call lag_interp_smthWeights(refXrad(indx-1:indx+2),refXrad_s(igrd),&
+                        lagConst(:,indx),lagConst(:,indx+1),&
+                        w4,dw4,4)
+        if (indx==1) then
+          w4(4)=w4(4)+w4(1); w4(1:3)=w4(2:4);w4(4)=zero
+          dw4(4)=dw4(4)+dw4(1);dw4(1:3)=dw4(2:4);dw4(4)=zero
+          indx=indx+1
+        endif
+        if (indx==nlevExt-1) then
+          w4(1)=w4(1)+w4(4); w4(2:4)=w4(1:3);w4(1)=zero
+          dw4(1)=dw4(1)+dw4(4); dw4(2:4)=dw4(1:3);dw4(1)=zero
+          indx=indx-1
+        endif
 
-           call get_coordinate_value(refrXrad_s(igrd), sIndx,refrXrad(1:nlevExt),nlevExt,"increasing")
+        derivRef_s(igrd)=dot_product(dw4,ref(indx-1:indx+2)) !derivative dN/dx_s
+        derivRef_s(igrd)=max(zero,abs(derivRef_s(igrd)))
 
-           rnlevExt = float(nlevExt)
+      else
+        cycle  obs_loop
+      endif !obs in new grid
+    end do grids_loop
 
-           if (sIndx < rnlevExt) then  !obs inside the new grid
-           !HS if (sIndx > zero .and. sIndx < rnlevExt) then  !obs inside the new grid
-              indx=sIndx
+!   bending angle (radians)
+    bendingAngle = ds*derivRef_s(1)/refXrad_s(1)
+    do igrd = 2,ngrd
+       bndIntgd     = ds*derivRef_s(igrd)/refXrad_s(igrd)
+       bendingAngle = bendingAngle + two*bndIntgd
+    end do
+    bendingAngle=r1em6 * obsImpP(iobs) * bendingAngle
+    hofx(iobs) = bendingAngle
 
-!             Compute derivative at new grids (dN/ds) using Lagrange interpolators
-              call lag_interp_smthWeights(refrXrad(indx-1:indx+2),refrXrad_s(igrd),&
-                   lagConst(:,indx),lagConst(:,indx+1),&
-                   w4,dw4,4)
-              if(indx==1) then
-                 w4(4)=w4(4)+w4(1); w4(1:3)=w4(2:4);w4(4)=zero
-                 dw4(4)=dw4(4)+dw4(1);dw4(1:3)=dw4(2:4);dw4(4)=zero
-                 indx=indx+1
-              endif
-              if(indx==nlevExt-1) then
-                 w4(1)=w4(1)+w4(4); w4(2:4)=w4(1:3);w4(1)=zero
-                 dw4(1)=dw4(1)+dw4(4); dw4(2:4)=dw4(1:3);dw4(1)=zero
-                 indx=indx-1
-              endif
-              !need make sure dot_product is available or add the code
-              derivRefr_s(igrd)=dot_product(dw4,refr(indx-1:indx+2,iobs)) !derivative dN/dx_s
-              derivRefr_s(igrd)=max(zero,abs(derivRefr_s(igrd)))
+  end do obs_loop
 
-           else
-              obs_check=.true.
-              nobs_outIntgl=nobs_outIntgl+1
-              d_refrXrad=refrXrad(nlev)-refrXrad(nlev-1)
-              do klev=1,newAdd
-                 refrXrad_new(nlevExt+klev)=refrXrad(nlevExt)+ klev*d_refrXrad ! extended x_i
-              end do
-              do klev=1,nlevExt
-                 refrXrad_new(klev)=refrXrad(klev)
-              enddo
-              call get_coordinate_value(refrXrad_s(igrd), sIndx,refrXrad_new(1:nlevExt+newAdd),nlevExt+newAdd,"increasing")
-              sIndxExt=max(sIndx,sIndxExt)
-           endif !obs in new grid
-         end do grids_loop
+  deallocate(obsLat)
+  deallocate(obsImpP)
+  deallocate(obsLocR)
+  deallocate(obsGeoid)
 
-!        bending angle (radians)
-         bendingAngle = ds*derivRefr_s(1)/refrXrad_s(1)
-         do igrd = 2,ngrd
-            bndIntgd     = ds*derivRefr_s(igrd)/refrXrad_s(igrd)
-            bendingAngle = bendingAngle + two*bndIntgd
-         end do
-         bendingAngle=r1em6 * obsImpP(iobs) * bendingAngle
-         hofx(iobs) = bendingAngle
+  deallocate(gesP) 
+  deallocate(gesZ) 
+  deallocate(gesT) 
+  deallocate(gesTv) 
+  deallocate(gesQ) 
+  deallocate(ref) 
+  deallocate(refIndex) 
+  deallocate(refXrad) 
+  deallocate(geomz) 
+  deallocate(radius) 
+  deallocate(lagConst) 
+  deallocate(refXrad_new) 
 
-      end do obs_loop
-
-      write(6,*) 'bndGSI: hofx ', &
-                 'min = ', minval(hofx, mask=hofx > miss_values), 'min index = ', minloc(hofx), &
-                 'max = ', maxval(hofx, mask=hofx > miss_values), 'max index = ', maxloc(hofx)
-      write(6,*) 'bndGSI: ', count_rejection, ' out of ', nobs, ' rejected due to model vertical range and super refraction'
-
-      !for tuning the nlevExt. New grids (s) should be in range  with nlevExt. If not, adjust the hardwired 
-      if (nobs_outIntgl>=1) then
-         write(6,*)'bndGSI: Warning',nobs_outIntgl,'obs outside integration grid. Increase nlevExt to',&
-         int(sIndxExt)
-      endif
-
-      deallocate(obsLat)
-      deallocate(obsImpP)
-      deallocate(obsLocR)
-      deallocate(obsGeoid)
-
-      deallocate(gesPi) 
-      deallocate(gesZi) 
-      deallocate(gesT) 
-      deallocate(gesQ) 
-      deallocate(refr) 
-      deallocate(refrIndex) 
-      deallocate(refrXrad) 
-      deallocate(geomzi) 
-      deallocate(radius) 
-      deallocate(lagConst) 
-      deallocate(refrXrad_new) 
-
-   end subroutine ufo_gnssro_bndgsi_simobs
+end subroutine ufo_gnssro_bndgsi_simobs
 ! ------------------------------------------------------------------------------
 end module ufo_gnssro_bndgsi_mod

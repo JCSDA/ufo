@@ -7,7 +7,7 @@ window_begin: 2018-04-14T21:00:00Z
 window_end: 2018-04-15T03:00:00Z
 
 LinearObsOpTest:
-  testiterTL: 7
+  coefTL: 1.0e-7
   toleranceTL: 1.0e-5
   toleranceAD: 1.0e-12
 
@@ -21,5 +21,5 @@ Observations:
         obsfile: Data/coolskin_fake_obs_2018041500.nc
     GeoVaLs:
       filename: Data/coolskin_fake_geovals_2018041500.nc
-    rmsequiv: 300
+    rmsequiv: 299.56465393601127
     tolerance: 1.0e-10

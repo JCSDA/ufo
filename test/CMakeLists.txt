@@ -37,6 +37,7 @@ list( APPEND ufo_test_input
   testinput/geovals.yaml
   testinput/gnssrobndropp1d.yaml
   testinput/gnssrobndropp2d.yaml
+  testinput/gnssrobndgsi.yaml
   testinput/gnssroref.yaml
   testinput/hirs4_crtm.yaml
   testinput/iasi_crtm.yaml
@@ -76,6 +77,7 @@ list( APPEND ufo_test_data
   atmosphere/cris-fsr_npp_geoval_2018041500_m.nc4
   atmosphere/gnssro_geoval_2018041500_s.nc4
   atmosphere/gnssro_geoval_2018041500_s_2d.nc4
+  atmosphere/gnssro_geoval_2018041500_m.nc4
   atmosphere/hirs4_metop-a_geoval_2018041500_m.nc4
   atmosphere/iasi_metop-a_geoval_2018041500_m.nc4
   atmosphere/mhs_n19_geoval_2018041500_m.nc4
@@ -112,6 +114,7 @@ list (APPEND ioda_obs_test_data
   atmosphere/aod_obs_2018041500_s.nc4
   atmosphere/cris-fsr_npp_obs_2018041500_m.nc4
   atmosphere/gnssro_obs_2018041500_s.nc4
+  atmosphere/gnssro_obs_2018041500_m.nc4
   atmosphere/hirs4_metop-a_obs_2018041500_m.nc4
   atmosphere/iasi_metop-a_obs_2018041500_m.nc4
   atmosphere/mhs_n19_obs_2018041500_m.nc4
@@ -188,10 +191,10 @@ ecbuild_add_test( TARGET  test_ufo_cris_opr_crtm
                   ARGS    "testinput/cris_crtm.yaml"
                   LIBS    ufo )
 
-#ecbuild_add_test( TARGET  test_ufo_cris_tlad_crtm
-#                  SOURCES mains/TestObsOperatorTLAD.cc
-#                  ARGS    "testinput/cris_crtm.yaml"
-#                  LIBS    ufo )
+ecbuild_add_test( TARGET  test_ufo_cris_tlad_crtm
+                  SOURCES mains/TestObsOperatorTLAD.cc
+                  ARGS    "testinput/cris_crtm.yaml"
+                  LIBS    ufo )
 
 ecbuild_add_test( TARGET  test_ufo_mhs_opr_crtm
                   SOURCES mains/TestObsOperator.cc
@@ -206,6 +209,11 @@ ecbuild_add_test( TARGET  test_ufo_mhs_tlad_crtm
 ecbuild_add_test( TARGET  test_ufo_iasi_opr_crtm
                   MPI     2
                   SOURCES mains/TestObsOperator.cc
+                  ARGS    "testinput/iasi_crtm.yaml"
+                  LIBS    ufo )
+
+ecbuild_add_test( TARGET  test_ufo_iasi_tlad_crtm
+                  SOURCES mains/TestObsOperatorTLAD.cc
                   ARGS    "testinput/iasi_crtm.yaml"
                   LIBS    ufo )
 
@@ -225,12 +233,10 @@ ecbuild_add_test( TARGET  test_ufo_airs_opr_crtm
                   ARGS    "testinput/airs_crtm.yaml"
                   LIBS    ufo )
 
-# Commented for now until CRTM channel subsetting is fully
-# implemented (test takes too long to run now)
-#ecbuild_add_test( TARGET  test_ufo_airs_tlad_crtm
-#                  SOURCES mains/TestObsOperatorTLAD.cc
-#                  ARGS    "testinput/airs_crtm.yaml"
-#                  LIBS    ufo )
+ecbuild_add_test( TARGET  test_ufo_airs_tlad_crtm
+                  SOURCES mains/TestObsOperatorTLAD.cc
+                  ARGS    "testinput/airs_crtm.yaml"
+                  LIBS    ufo )
 
 ecbuild_add_test( TARGET  test_ufo_hirs4_opr_crtm
                   SOURCES mains/TestObsOperator.cc
@@ -289,6 +295,11 @@ ecbuild_add_test( TARGET  test_ufo_gnssroRef_opr
 ecbuild_add_test( TARGET  test_ufo_gnssroRef_tlad
                   SOURCES mains/TestObsOperatorTLAD.cc
                   ARGS    "testinput/gnssroref.yaml"
+                  LIBS    ufo )
+
+ecbuild_add_test( TARGET  test_ufo_gnssroBndGSI_opr
+                  SOURCES mains/TestObsOperator.cc
+                  ARGS    "testinput/gnssrobndgsi.yaml"
                   LIBS    ufo )
 
 ecbuild_add_test( TARGET  test_ufo_satwind_opr

@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.com/JCSDA/ufo.svg?token=zswWHqwVimHTBAygfenZ&branch=develop)](https://travis-ci.com/JCSDA/ufo)
+
 UFO interfaces for OOPS
 
 (C) Copyright 2017 UCAR.

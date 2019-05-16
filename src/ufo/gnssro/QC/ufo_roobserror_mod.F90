@@ -19,7 +19,6 @@ public :: ufo_roobserror, ufo_roobserror_create, ufo_roobserror_delete
 public :: ufo_roobserror_prior, ufo_roobserror_post
 public :: max_string
 private
-integer, parameter :: max_string=99 
 
 ! ------------------------------------------------------------------------------
 type :: ufo_roobserror
@@ -85,17 +84,17 @@ case ("bending_angle")
   allocate(obsGeoid(nobs))
   allocate(obsLocR(nobs))
   allocate(obsImpH(nobs))
-  call obsspace_get_db(self%obsdb, "", "impact_parameter", obsImpP)
-  call obsspace_get_db(self%obsdb, "", "geoid_height_above_reference_ellipsoid",obsGeoid)
-  call obsspace_get_db(self%obsdb, "", "earth_radius_of_curvature", obsLocR)
+  call obsspace_get_db(self%obsdb, "MetaData", "impact_parameter", obsImpP)
+  call obsspace_get_db(self%obsdb, "MetaData", "geoid_height_above_reference_ellipsoid",obsGeoid)
+  call obsspace_get_db(self%obsdb, "MetaData", "earth_radius_of_curvature", obsLocR)
   obsImpH(:) = obsImpP(:) - obsGeoid(:) - obsLocR(:)
 
   select case (trim(self%errmodel))
   case ("GSI")
     allocate(obsSaid(nobs))
     allocate(obsLat(nobs))
-    call obsspace_get_db(self%obsdb, " ", "occulting_sat_id", obsSaid)
-    call obsspace_get_db(self%obsdb, " ", "latitude", obsLat)
+    call obsspace_get_db(self%obsdb, "MetaData", "occulting_sat_id", obsSaid)
+    call obsspace_get_db(self%obsdb, "MetaData", "latitude", obsLat)
     call bending_angle_obserr_GSI(obsLat, obsImpH, obsSaid, nobs, obsErr, QCflags, missing)
     write(err_msg,*) "ufo_roobserror_mod: setting up bending_angle obs error with GSI method"
     deallocate(obsSaid)
@@ -130,8 +129,8 @@ case ("refractivity")
   case ("GSI")
     allocate(obsZ(nobs))
     allocate(obsLat(nobs))
-    call obsspace_get_db(self%obsdb, "", "altitude",  obsZ) 
-    call obsspace_get_db(self%obsdb, "", "latitude", obsLat)
+    call obsspace_get_db(self%obsdb, "MetaData", "altitude",  obsZ) 
+    call obsspace_get_db(self%obsdb, "MetaData", "latitude", obsLat)
     call refractivity_obserr_GSI(obsLat, obsZ, nobs, obsErr, QCflags, missing)
     write(err_msg,*) "ufo_roobserror_mod: setting up refractivity obs error with GSI method" 
     call fckit_log%info(err_msg)

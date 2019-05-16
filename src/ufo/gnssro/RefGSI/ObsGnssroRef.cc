@@ -28,7 +28,7 @@ static ObsOperatorMaker<ObsGnssroRef> makerGnssroRef_("GnssroRef");
 ObsGnssroRef::ObsGnssroRef(const ioda::ObsSpace & odb, const eckit::Configuration & config)
   : ObsOperatorBase(odb, config), keyOperGnssroRef_(0), odb_(odb), varin_(), varout_()
 {
-  const std::vector<std::string> vv{"temperature", "specific_humidity", "air_pressure",
+  const std::vector<std::string> vv{"air_temperature", "specific_humidity", "air_pressure",
                                     "geopotential_height"};
   varin_.reset(new oops::Variables(vv));
 
