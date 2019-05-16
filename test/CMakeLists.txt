@@ -41,7 +41,7 @@ list( APPEND ufo_test_input
   testinput/gnssroref.yaml
   testinput/hirs4_crtm.yaml
   testinput/iasi_crtm.yaml
-  testinput/2mtemp.yaml
+  testinput/gsisfcmodel.yaml
   testinput/locations.yaml
   testinput/mhs_crtm.yaml
   testinput/qc_thinning.yaml
@@ -90,6 +90,8 @@ list( APPEND ufo_test_data
   atmosphere/sndrd3_g15_geoval_2018041500_m.nc4
   atmosphere/sndrd4_g15_geoval_2018041500_m.nc4
   atmosphere/sfc_tsen_geoval_2018041500_m.nc4
+  atmosphere/sfc_uv_geoval_2018041500_m.nc4
+  atmosphere/sfc_q_geoval_2018041500_m.nc4
   atmosphere/sondes_geoval_2018041500_m.nc4
   atmosphere/sondes_geoval_2018041500_s.nc4
   marine/coolskin_fake_geovals_2018041500.nc
@@ -127,6 +129,8 @@ list (APPEND ioda_obs_test_data
   atmosphere/sndrd4_g15_obs_2018041500_m.nc4
 
   atmosphere/sfc_tsen_2018041500_m.nc4
+  atmosphere/sfc_q_2018041500_m.nc4
+  atmosphere/sfc_uv_2018041500_m.nc4
 
   atmosphere/sondes_obs_2018041500_m.nc4
   atmosphere/sondes_obs_2018041500_s.nc4
@@ -155,10 +159,10 @@ ecbuild_add_test( TARGET  test_ufo_locations
                   ARGS    "testinput/locations.yaml"
                   LIBS    ufo )
 
-ecbuild_add_test( TARGET  test_ufo_2mtemp_opr
+ecbuild_add_test( TARGET  test_ufo_gsi_sfc_model_opr
                   BOOST
                   SOURCES mains/TestObsOperator.cc
-                  ARGS    "testinput/2mtemp.yaml"
+                  ARGS    "testinput/gsisfcmodel.yaml"
                   LIBS    ufo )
 
 ecbuild_add_test( TARGET  test_ufo_amsua_opr_crtm
