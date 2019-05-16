@@ -128,9 +128,9 @@ list (APPEND ioda_obs_test_data
   atmosphere/sndrd3_g15_obs_2018041500_m.nc4
   atmosphere/sndrd4_g15_obs_2018041500_m.nc4
 
-  atmosphere/sfc_tsen_2018041500_m.nc4
-  atmosphere/sfc_q_2018041500_m.nc4
-  atmosphere/sfc_uv_2018041500_m.nc4
+  atmosphere/sfc_tsen_obs_2018041500_m.nc4
+  atmosphere/sfc_q_obs_2018041500_m.nc4
+  atmosphere/sfc_uv_obs_2018041500_m.nc4
 
   atmosphere/sondes_obs_2018041500_m.nc4
   atmosphere/sondes_obs_2018041500_s.nc4
