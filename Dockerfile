@@ -4,6 +4,19 @@ FROM  jcsda/docker:latest
 #ENV COVERAGE=ON
 RUN touch /env.txt
 RUN printenv > /env.txt
+
+#build fckit
+RUN git clone https://github.com/JCSDA/fckit.git \
+    && cd fckit \
+    && git checkout develop \
+    && mkdir build \
+    && cd  build \
+    && ecbuild -build=Debug .. \
+    && make -j`nproc` \
+    && make install \
+    && cd ../../ \
+    && rm -fr ecbuild \
+    && rm -fr fckit
   
 RUN mkdir -p /var/run/sshd \
     && ssh-keygen -A \
