@@ -91,7 +91,6 @@ list( APPEND ufo_test_data
   atmosphere/sndrd4_g15_geoval_2018041500_m.nc4
   atmosphere/sfc_tsen_geoval_2018041500_m.nc4
   atmosphere/sfc_uv_geoval_2018041500_m.nc4
-  atmosphere/sfc_q_geoval_2018041500_m.nc4
   atmosphere/sondes_geoval_2018041500_m.nc4
   atmosphere/sondes_geoval_2018041500_s.nc4
   marine/coolskin_fake_geovals_2018041500.nc
@@ -129,7 +128,6 @@ list (APPEND ioda_obs_test_data
   atmosphere/sndrd4_g15_obs_2018041500_m.nc4
 
   atmosphere/sfc_tsen_obs_2018041500_m.nc4
-  atmosphere/sfc_q_obs_2018041500_m.nc4
   atmosphere/sfc_uv_obs_2018041500_m.nc4
 
   atmosphere/sondes_obs_2018041500_m.nc4

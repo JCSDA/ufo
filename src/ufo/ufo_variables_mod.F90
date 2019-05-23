@@ -55,6 +55,7 @@ character(len=MAXVARLEN), public, parameter :: var_sfc_vegtyp  = "Vegetation_Typ
 character(len=MAXVARLEN), public, parameter :: var_sfc_soiltyp = "Soil_Type"
 character(len=MAXVARLEN), public, parameter :: var_sfc_rough   = "surface_roughness_length"
 character(len=MAXVARLEN), public, parameter :: var_sfc_t   = "surface_temperature"
+character(len=MAXVARLEN), public, parameter :: var_sfc_fact10  = "GSI_wind_reduction_factor_10m"
 
 !@mzp strings have to be same MAXVARLEN length for array constructor
 CHARACTER(len=MAXVARLEN), public, parameter :: var_rh          = "relative_humidity"

@@ -25,6 +25,7 @@ module ufo_atmsfcinterp_mod
   type, public :: ufo_atmsfcinterp
   private
     integer :: nvars
+    logical :: use_fact10
     real(kind_real) :: magl
     character(len=MAXVARLEN), public, allocatable :: varin(:)
     character(len=MAXVARLEN), public, allocatable :: varout(:)
@@ -41,7 +42,7 @@ subroutine atmsfcinterp_setup_(self, c_conf)
   implicit none
   class(ufo_atmsfcinterp), intent(inout) :: self
   type(c_ptr),        intent(in)    :: c_conf
-  integer :: ii, ivar
+  integer :: ii, ivar, nallvars, istart
 
   !> Size of variables
   self%nvars = size(config_get_string_vector(c_conf, max_string, "variables"))
@@ -49,10 +50,28 @@ subroutine atmsfcinterp_setup_(self, c_conf)
   allocate(self%varout(self%nvars))
   !> Read variable list and store in varout
   self%varout = config_get_string_vector(c_conf, max_string, "variables")
-  !> Allocate varin: variables we need from the model
-  allocate(self%varin(11+self%nvars))
+  ! check for if we need to look for wind reduction factor
+  self%use_fact10 = .false. 
   do ii = 1, self%nvars
-    self%varin(ii+11) = self%varout(ii)
+    select case(trim(self%varout(ii)))
+      case("eastward_wind")
+        self%use_fact10 = .true.
+      case("northward_wind")
+        self%use_fact10 = .true.
+      case default
+        cycle 
+    end select
+  end do
+  !> Allocate varin: variables we need from the model
+  if (self%use_fact10) then
+    istart = 12
+  else
+    istart = 11
+  end if
+  nallvars = self%nvars + istart
+  allocate(self%varin(nallvars))
+  do ii = 1, self%nvars
+    self%varin(ii+istart) = self%varout(ii)
   enddo
 
   !> add geopotential height
@@ -71,7 +90,7 @@ subroutine atmsfcinterp_setup_(self, c_conf)
   self%varin(9) = var_u 
   self%varin(10) = var_v 
   self%varin(11) = var_sfc_lfrac
-  print *, self%varin
+  if (self%use_fact10)  self%varin(12) = var_sfc_fact10
 
 end subroutine atmsfcinterp_setup_
 
@@ -87,7 +106,7 @@ subroutine atmsfcinterp_simobs_(self, geovals, obss, nvars, nlocs, hofx)
   type(c_ptr), value, intent(in)              :: obss
   type(ufo_geoval), pointer :: phi, hgt, tsfc, roughlen, psfc, prs, &
                                tsen, q, u, v, landmask, &
-                               profile
+                               profile, rad10
   integer :: ivar, iobs
   real(kind_real), allocatable :: obselev(:), obshgt(:)
   real(kind_real) :: outvalue
@@ -114,6 +133,7 @@ subroutine atmsfcinterp_simobs_(self, geovals, obss, nvars, nlocs, hofx)
   call ufo_geovals_get_var(geovals, var_u, u)
   call ufo_geovals_get_var(geovals, var_v, v)
   call ufo_geovals_get_var(geovals, var_sfc_lfrac, landmask)
+  if (self%use_fact10) call ufo_geovals_get_var(geovals, var_sfc_fact10, rad10)
 
   ! get station elevation from obs
   allocate(obselev(nlocs))
@@ -127,18 +147,35 @@ subroutine atmsfcinterp_simobs_(self, geovals, obss, nvars, nlocs, hofx)
     ! Get the name of input variable in geovals
     geovar = self%varout(ivar)
 
-    ! Get profile for this variable from geovals
-    !call ufo_geovals_get_var(geovals, geovar, profile)
-
-    ! calling a modified version of the sfc_model routine from GSI
-    do iobs = 1, nlocs
-      call sfc_wtq_fwd_gsi(psfc%vals(1,iobs),tsfc%vals(1,iobs),prs%vals(1,iobs),&
-                           tsen%vals(1,iobs),q%vals(1,iobs),u%vals(1,iobs),&
-                           v%vals(1,iobs),prs%vals(2,iobs),tsen%vals(2,iobs),&
-                           q%vals(2,iobs),phi%vals(1,iobs),roughlen%vals(1,iobs),&
-                           landmask%vals(1,iobs),obshgt(iobs)-obselev(iobs),&
-                           hofx(ivar,iobs),geovar)
-    enddo
+    select case(trim(geovar))
+      case("air_temperature")
+        ! calling a modified version of the sfc_model routine from GSI
+        do iobs = 1, nlocs
+          call sfc_wtq_fwd_gsi(psfc%vals(1,iobs),tsfc%vals(1,iobs),prs%vals(1,iobs),&
+                               tsen%vals(1,iobs),q%vals(1,iobs),u%vals(1,iobs),&
+                               v%vals(1,iobs),prs%vals(2,iobs),tsen%vals(2,iobs),&
+                               q%vals(2,iobs),phi%vals(1,iobs),roughlen%vals(1,iobs),&
+                               landmask%vals(1,iobs),obshgt(iobs)-obselev(iobs),&
+                               hofx(ivar,iobs),geovar)
+        end do
+      case("virtual_temperature")
+        do iobs = 1, nlocs
+          call sfc_wtq_fwd_gsi(psfc%vals(1,iobs),tsfc%vals(1,iobs),prs%vals(1,iobs),&
+                               tsen%vals(1,iobs),q%vals(1,iobs),u%vals(1,iobs),&
+                               v%vals(1,iobs),prs%vals(2,iobs),tsen%vals(2,iobs),&
+                               q%vals(2,iobs),phi%vals(1,iobs),roughlen%vals(1,iobs),&
+                               landmask%vals(1,iobs),obshgt(iobs)-obselev(iobs),&
+                               hofx(ivar,iobs),geovar)
+        end do
+      case("eastward_wind")
+        do iobs = 1, nlocs
+          hofx(ivar,iobs) = u%vals(1,iobs) * rad10%vals(1,iobs)
+        end do
+      case("northward_wind")
+        do iobs = 1, nlocs
+          hofx(ivar,iobs) = v%vals(1,iobs) * rad10%vals(1,iobs)
+        end do
+    end select
   enddo
 
 

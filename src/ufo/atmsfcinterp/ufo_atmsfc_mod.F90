@@ -2,17 +2,17 @@ module atmsfc_mod
 
 contains
 
-subroutine sfc_wtq_fwd_gsi(psfc_in,tsfc,prsl1_in,tsen1,q1,u1,v1,&
+subroutine sfc_wtq_fwd_gsi(psfc_in,tsfc_in,prsl1_in,tsen1,q1,u1,v1,&
                            prsl2_in,tsen2,q2,phi1,roughlen,landmask,&
-                           obshgt_in,outvar,varname)
+                           obshgt,outvar,varname)
   ! sfc_wtq_fwd_gsi
   ! based off of subroutines from GSI sfc_model.f90 file
   use kinds
   use ufo_vars_mod, only: MAXVARLEN
   implicit none
-  real(kind_real), intent(in) :: psfc_in, tsfc, prsl1_in, tsen1, q1, u1, v1,&
+  real(kind_real), intent(in) :: psfc_in, tsfc_in, prsl1_in, tsen1, q1, u1, v1,&
                                  prsl2_in, tsen2, q2, phi1, roughlen, landmask, &
-                                 obshgt_in
+                                 obshgt
   character(len=MAXVARLEN), intent(in) :: varname
   real(kind_real), intent(out) :: outvar
 
@@ -33,7 +33,7 @@ subroutine sfc_wtq_fwd_gsi(psfc_in,tsfc,prsl1_in,tsen1,q1,u1,v1,&
   real(kind_real), parameter :: two = 2.0_kind_real
   real(kind_real), parameter :: five = 5.0_kind_real
 
-  real(kind_real) :: psfc, prsl1, prsl2, obshgt
+  real(kind_real) :: psfc, prsl1, prsl2
   real(kind_real) :: tvg, tv1, tv2 
   real(kind_real) :: z0,zq0
   real(kind_real) :: gzzoz0, gzsoz0
@@ -44,16 +44,12 @@ subroutine sfc_wtq_fwd_gsi(psfc_in,tsfc,prsl1_in,tsen1,q1,u1,v1,&
   real(kind_real) :: cc, ust, mol, hol, holz
   real(kind_real) :: xx, yy
   real(kind_real) :: psiw, psit, psiwz, psitz, psiq, psiqz
+  real(kind_real) :: tsfc 
  
   ! convert pressures to hPa from Pa
   psfc = psfc_in / r100
   prsl1 = prsl1_in / r100
   prsl2 = prsl2_in / r100 
-
-  ! 2mTemp etc. is not at 2m in GSI output (it's 0m apparently),
-  ! but 10m winds are at 10m... make height agl at least 2m
-  obshgt = max(obshgt_in,two)
-  print *, obshgt_in,obshgt
 
   ! minimum roughness length (should be in meters)
   z0 = roughlen
@@ -72,6 +68,10 @@ subroutine sfc_wtq_fwd_gsi(psfc_in,tsfc,prsl1_in,tsen1,q1,u1,v1,&
   ! virtual temperature from sensible temperature
   tv1 = tsen1 * (one + fv * q1)
   tv2 = tsen2 * (one + fv * q2)
+
+  ! test
+  tsfc = tsfc_in
+  !if ( tsfc < 200 ) tsfc = tsen1
 
   ! convert temperature of the ground to virtual temp assuming saturation
   call da_tp_to_qs( tsfc, psfc, eg, qg)
@@ -186,8 +186,11 @@ subroutine sfc_wtq_fwd_gsi(psfc_in,tsfc,prsl1_in,tsen1,q1,u1,v1,&
       outvar = qg + (q1 - qg)*psiqz/psiq
     case("eastward_wind")
       outvar = u1 * psiwz / psiw 
+      !print *, 'computed', psiwz / psiw
+      !print *, outvar, u1, psiwz, psiw
     case("northward_wind")
       outvar = v1 * psiwz / psiw
+      !print *, outvar, v1, psiwz, psiw
   end select
   return
 
