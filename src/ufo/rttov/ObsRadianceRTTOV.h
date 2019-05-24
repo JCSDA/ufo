@@ -10,6 +10,7 @@
 
 #include <ostream>
 #include <string>
+#include <vector>
 
 #include <boost/scoped_ptr.hpp>
 
@@ -43,21 +44,24 @@ class ObsRadianceRTTOV : public ObsOperatorBase,
   virtual ~ObsRadianceRTTOV();
 
 // Obs Operator
-  void simulateObs(const GeoVaLs &, ioda::ObsVector &) const;
+  void simulateObs(const GeoVaLs &, ioda::ObsVector &) const override;
 
 // Other
-  const oops::Variables & variables() const {return *varin_;}
-  const oops::Variables & observed() const {return *varout_;}
+  const oops::Variables & variables() const override {return *varin_;}
+  const oops::Variables & observed() const override {return *varout_;}
+  const std::string & obstype() const override {return obsname_;}
 
-  int & toFortran() {return keyOper_;}
-  const int & toFortran() const {return keyOper_;}
+  int & toFortran() {return keyOperRadianceRTTOV_;}
+  const int & toFortran() const {return keyOperRadianceRTTOV_;}
 
  private:
-  void print(std::ostream &) const;
-  F90hop keyOper_;
+  void print(std::ostream &) const override;
+  F90hop keyOperRadianceRTTOV_;
   const ioda::ObsSpace& odb_;
   boost::scoped_ptr<const oops::Variables> varin_;
   boost::scoped_ptr<const oops::Variables> varout_;
+  std::vector<int> channels_;
+  std::string obsname_;
 };
 
 // -----------------------------------------------------------------------------

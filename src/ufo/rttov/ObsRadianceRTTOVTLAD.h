@@ -10,6 +10,7 @@
 
 #include <ostream>
 #include <string>
+#include <vector>
 
 #include <boost/scoped_ptr.hpp>
 
@@ -52,14 +53,15 @@ class ObsRadianceRTTOVTLAD : public LinearObsOperatorBase,
   // Other
   const oops::Variables & variables() const {return *varin_;}
 
-  int & toFortran() {return keyOper_;}
-  const int & toFortran() const {return keyOper_;}
+  int & toFortran() {return keyOperRadianceRTTOV_;}
+  const int & toFortran() const {return keyOperRadianceRTTOV_;}
 
  private:
   void print(std::ostream &) const;
-  F90hop keyOper_;
+  F90hop keyOperRadianceRTTOV_;
   const ioda::ObsSpace& odb_;
   boost::scoped_ptr<const oops::Variables> varin_;
+  std::vector<int> channels_;
 };
 
 // -----------------------------------------------------------------------------

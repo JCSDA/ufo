@@ -721,7 +721,9 @@ dist_indx = distribution%indx
 call ufo_geovals_setup(self, c_vars, nlocs)
 
 do ivar = 1, self%nvar
+
   call check('nf90_inq_varid', nf90_inq_varid(ncid, self%variables(ivar), varid))
+
   call check('nf90_inquire_variable', nf90_inquire_variable(ncid, varid, xtype = vartype, &
                                          ndims = ndims, dimids = dimids))
   !> read 1d variable
