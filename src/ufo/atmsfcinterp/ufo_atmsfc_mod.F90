@@ -186,11 +186,8 @@ subroutine sfc_wtq_fwd_gsi(psfc_in,tsfc_in,prsl1_in,tsen1,q1,u1,v1,&
       outvar = qg + (q1 - qg)*psiqz/psiq
     case("eastward_wind")
       outvar = u1 * psiwz / psiw 
-      !print *, 'computed', psiwz / psiw
-      !print *, outvar, u1, psiwz, psiw
     case("northward_wind")
       outvar = v1 * psiwz / psiw
-      !print *, outvar, v1, psiwz, psiw
   end select
   return
 

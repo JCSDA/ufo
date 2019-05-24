@@ -54,9 +54,7 @@ subroutine atmsfcinterp_setup_(self, c_conf)
   self%use_fact10 = .false. 
   do ii = 1, self%nvars
     select case(trim(self%varout(ii)))
-      case("eastward_wind")
-        self%use_fact10 = .true.
-      case("northward_wind")
+      case("eastward_wind", "northward_wind")
         self%use_fact10 = .true.
       case default
         cycle 
@@ -146,9 +144,11 @@ subroutine atmsfcinterp_simobs_(self, geovals, obss, nvars, nlocs, hofx)
   do ivar = 1, self%nvars
     ! Get the name of input variable in geovals
     geovar = self%varout(ivar)
+    ! Get profile for this variable from geovals
+    call ufo_geovals_get_var(geovals, geovar, profile)
 
     select case(trim(geovar))
-      case("air_temperature")
+      case("air_temperature", "virtual_temperature")
         ! calling a modified version of the sfc_model routine from GSI
         do iobs = 1, nlocs
           call sfc_wtq_fwd_gsi(psfc%vals(1,iobs),tsfc%vals(1,iobs),prs%vals(1,iobs),&
@@ -158,22 +158,9 @@ subroutine atmsfcinterp_simobs_(self, geovals, obss, nvars, nlocs, hofx)
                                landmask%vals(1,iobs),obshgt(iobs)-obselev(iobs),&
                                hofx(ivar,iobs),geovar)
         end do
-      case("virtual_temperature")
+      case("eastward_wind", "northward_wind")
         do iobs = 1, nlocs
-          call sfc_wtq_fwd_gsi(psfc%vals(1,iobs),tsfc%vals(1,iobs),prs%vals(1,iobs),&
-                               tsen%vals(1,iobs),q%vals(1,iobs),u%vals(1,iobs),&
-                               v%vals(1,iobs),prs%vals(2,iobs),tsen%vals(2,iobs),&
-                               q%vals(2,iobs),phi%vals(1,iobs),roughlen%vals(1,iobs),&
-                               landmask%vals(1,iobs),obshgt(iobs)-obselev(iobs),&
-                               hofx(ivar,iobs),geovar)
-        end do
-      case("eastward_wind")
-        do iobs = 1, nlocs
-          hofx(ivar,iobs) = u%vals(1,iobs) * rad10%vals(1,iobs)
-        end do
-      case("northward_wind")
-        do iobs = 1, nlocs
-          hofx(ivar,iobs) = v%vals(1,iobs) * rad10%vals(1,iobs)
+          hofx(ivar,iobs) = profile%vals(1,iobs) * rad10%vals(1,iobs)
         end do
     end select
   enddo
