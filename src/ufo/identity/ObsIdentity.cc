@@ -20,7 +20,6 @@
 #include "oops/base/Variables.h"
 
 #include "ufo/GeoVaLs.h"
-#include "ufo/ObsBias.h"
 
 
 namespace ufo {
@@ -62,11 +61,9 @@ ObsIdentity::~ObsIdentity() {
 
 // -----------------------------------------------------------------------------
 
-void ObsIdentity::simulateObs(const GeoVaLs & gom, ioda::ObsVector & ovec,
-                              const ObsBias & bias) const {
+void ObsIdentity::simulateObs(const GeoVaLs & gom, ioda::ObsVector & ovec) const {
   ufo_identity_simobs_f90(keyOperObsIdentity_, gom.toFortran(), odb_,
-                          ovec.nvars(), ovec.nlocs(), ovec.toFortran(),
-                          bias.toFortran());
+                          ovec.nvars(), ovec.nlocs(), ovec.toFortran());
   oops::Log::trace() << "ObsIdentity: observation operator run" << std::endl;
 }
 

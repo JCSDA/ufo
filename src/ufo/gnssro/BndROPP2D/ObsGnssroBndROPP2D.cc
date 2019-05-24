@@ -52,10 +52,9 @@ ObsGnssroBndROPP2D::~ObsGnssroBndROPP2D() {
 
 // -----------------------------------------------------------------------------
 
-void ObsGnssroBndROPP2D::simulateObs(const GeoVaLs & gom, ioda::ObsVector & ovec,
-                                const ObsBias & bias) const {
+void ObsGnssroBndROPP2D::simulateObs(const GeoVaLs & gom, ioda::ObsVector & ovec) const {
   ufo_gnssro_bndropp2d_simobs_f90(keyOperGnssroBndROPP2D_, gom.toFortran(), odb_,
-                                  ovec.size(), ovec.toFortran(), bias.toFortran());
+                                  ovec.size(), ovec.toFortran());
 }
 
 // -----------------------------------------------------------------------------

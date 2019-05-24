@@ -18,7 +18,6 @@
 #include "oops/util/IntSetParser.h"
 
 #include "ufo/GeoVaLs.h"
-#include "ufo/ObsBias.h"
 
 namespace ufo {
 
@@ -71,10 +70,8 @@ ObsRadianceRTTOV::~ObsRadianceRTTOV() {
 
 // -----------------------------------------------------------------------------
 
-void ObsRadianceRTTOV::simulateObs(const GeoVaLs & gv, ioda::ObsVector & ovec,
-                              const ObsBias & bias) const {
-  ufo_radiancerttov_simobs_f90(keyOper_, gv.toFortran(), odb_, ovec.size(), ovec.toFortran(),
-                      bias.toFortran());
+void ObsRadianceRTTOV::simulateObs(const GeoVaLs & gv, ioda::ObsVector & ovec) const {
+  ufo_radiancerttov_simobs_f90(keyOper_, gv.toFortran(), odb_, ovec.size(), ovec.toFortran());
   oops::Log::trace() << "ObsRadianceRTTOV: observation operator run" << std::endl;
 }
 

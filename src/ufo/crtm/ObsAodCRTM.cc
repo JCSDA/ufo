@@ -65,10 +65,9 @@ ObsAodCRTM::~ObsAodCRTM() {
 
 // -----------------------------------------------------------------------------
 
-void ObsAodCRTM::simulateObs(const GeoVaLs & gom, ioda::ObsVector & ovec,
-                              const ObsBias & bias) const {
+void ObsAodCRTM::simulateObs(const GeoVaLs & gom, ioda::ObsVector & ovec) const {
   ufo_aodcrtm_simobs_f90(keyOperAodCRTM_, gom.toFortran(), odb_,
-                          ovec.size(), ovec.toFortran(), bias.toFortran(),
+                          ovec.size(), ovec.toFortran(),
                           channels_.size(), channels_[0]);
 }
 

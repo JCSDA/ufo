@@ -31,7 +31,6 @@ namespace ioda {
 
 namespace ufo {
   class GeoVaLs;
-  class ObsBias;
 
 // -----------------------------------------------------------------------------
 /// coolskin observation operator class
@@ -44,7 +43,7 @@ class ObsCoolSkin : public ObsOperatorBase,
   virtual ~ObsCoolSkin();
 
 // Obs Operator
-  void simulateObs(const GeoVaLs &, ioda::ObsVector &, const ObsBias &) const;
+  void simulateObs(const GeoVaLs &, ioda::ObsVector &) const;
 
 // Other
   const oops::Variables & variables() const {return *varin_;}

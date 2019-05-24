@@ -29,7 +29,7 @@ extern "C" {
                                   const int &, const int &, char *, char *, const int &);
   void ufo_radiancecrtm_delete_f90(F90hop &);
   void ufo_radiancecrtm_simobs_f90(const F90hop &, const F90goms &, const ioda::ObsSpace &,
-                               const int &, const int &, double &, const F90obias &);
+                               const int &, const int &, double &);
 // -----------------------------------------------------------------------------
 
 }  // extern C

@@ -31,7 +31,6 @@ namespace ioda {
 
 namespace ufo {
   class GeoVaLs;
-  class ObsBias;
 
 // -----------------------------------------------------------------------------
 /// RadianceCRTM observation for UFO.
@@ -44,7 +43,7 @@ class ObsRadianceCRTM : public ObsOperatorBase,
   virtual ~ObsRadianceCRTM();
 
 // Obs Operator
-  void simulateObs(const GeoVaLs &, ioda::ObsVector &, const ObsBias &) const override;
+  void simulateObs(const GeoVaLs &, ioda::ObsVector &) const override;
 
 // Other
   const oops::Variables & variables() const override {return *varin_;}

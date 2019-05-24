@@ -75,7 +75,7 @@ end subroutine ufo_radiancecrtm_delete_c
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_radiancecrtm_simobs_c(c_key_self, c_key_geovals, c_obsspace, c_nvars, c_nlocs, c_hofx, c_bias) &
+subroutine ufo_radiancecrtm_simobs_c(c_key_self, c_key_geovals, c_obsspace, c_nvars, c_nlocs, c_hofx) &
            bind(c,name='ufo_radiancecrtm_simobs_f90')
 
 implicit none
@@ -84,7 +84,6 @@ integer(c_int), intent(in) :: c_key_geovals
 type(c_ptr), value, intent(in) :: c_obsspace
 integer(c_int), intent(in) :: c_nvars, c_nlocs
 real(c_double), intent(inout) :: c_hofx(c_nvars, c_nlocs)
-integer(c_int), intent(in) :: c_bias
 
 type(ufo_radiancecrtm), pointer :: self
 type(ufo_geovals),  pointer :: geovals

@@ -27,7 +27,7 @@ static ObsOperatorMaker<ObsMarineVertInterp> makerMarineVertInterp_("InsituSalin
 // -----------------------------------------------------------------------------
 
 ObsMarineVertInterp::ObsMarineVertInterp(const ioda::ObsSpace & odb,
-                                           const eckit::Configuration & config)
+                                         const eckit::Configuration & config)
   : ObsOperatorBase(odb, config), keyOper_(0), odb_(odb), varin_(), varout_()
 {
   int c_name_size = 200;
@@ -57,10 +57,8 @@ ObsMarineVertInterp::~ObsMarineVertInterp() {
 
 // -----------------------------------------------------------------------------
 
-void ObsMarineVertInterp::simulateObs(const GeoVaLs & gv, ioda::ObsVector & ovec,
-                              const ObsBias & bias) const {
-  ufo_marinevertinterp_simobs_f90(keyOper_, gv.toFortran(), odb_, ovec.size(), ovec.toFortran(),
-                      bias.toFortran());
+void ObsMarineVertInterp::simulateObs(const GeoVaLs & gv, ioda::ObsVector & ovec) const {
+  ufo_marinevertinterp_simobs_f90(keyOper_, gv.toFortran(), odb_, ovec.size(), ovec.toFortran());
   oops::Log::trace() << "ObsMarineVertInterp: observation operator run" << std::endl;
 }
 

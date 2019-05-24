@@ -16,7 +16,6 @@
 #include "oops/base/Variables.h"
 
 #include "ufo/GeoVaLs.h"
-#include "ufo/ObsBias.h"
 
 
 namespace ufo {
@@ -53,10 +52,8 @@ ObsCoolSkin::~ObsCoolSkin() {
 
 // -----------------------------------------------------------------------------
 
-void ObsCoolSkin::simulateObs(const GeoVaLs & gv, ioda::ObsVector & ovec,
-                         const ObsBias & bias) const {
-  ufo_CoolSkin_simobs_f90(keyOper_, gv.toFortran(), odb_, ovec.size(), ovec.toFortran(),
-                     bias.toFortran());
+void ObsCoolSkin::simulateObs(const GeoVaLs & gv, ioda::ObsVector & ovec) const {
+  ufo_CoolSkin_simobs_f90(keyOper_, gv.toFortran(), odb_, ovec.size(), ovec.toFortran());
   oops::Log::trace() << "ObsCoolSkin: observation operator run" << std::endl;
 }
 

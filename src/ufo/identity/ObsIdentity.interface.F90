@@ -72,7 +72,7 @@ end subroutine ufo_identity_delete_c
 ! ------------------------------------------------------------------------------
 
 subroutine ufo_identity_simobs_c(c_key_self, c_key_geovals, c_obsspace, c_nvars, c_nlocs, &
-                                 c_hofx, c_bias) bind(c,name='ufo_identity_simobs_f90')
+                                 c_hofx) bind(c,name='ufo_identity_simobs_f90')
 
 implicit none
 integer(c_int), intent(in) :: c_key_self
@@ -80,7 +80,6 @@ integer(c_int), intent(in) :: c_key_geovals
 type(c_ptr), value, intent(in) :: c_obsspace
 integer(c_int), intent(in) :: c_nvars, c_nlocs
 real(c_double), intent(inout) :: c_hofx(c_nvars, c_nlocs)
-integer(c_int), intent(in) :: c_bias
 
 type(ufo_identity), pointer :: self
 type(ufo_geovals),  pointer :: geovals

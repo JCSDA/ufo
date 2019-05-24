@@ -30,7 +30,6 @@ namespace ioda {
 namespace ufo {
   class GeoVaLs;
   class Locations;
-  class ObsBias;
 
 // -----------------------------------------------------------------------------
 
@@ -44,7 +43,7 @@ class ObsGnssroBndROPP2D : public ObsOperatorBase,
   virtual ~ObsGnssroBndROPP2D();
 
 // Obs Operator
-  void simulateObs(const GeoVaLs &, ioda::ObsVector &, const ObsBias &) const;
+  void simulateObs(const GeoVaLs &, ioda::ObsVector &) const;
 
 // Other
   const oops::Variables & variables() const {return *varin_;}

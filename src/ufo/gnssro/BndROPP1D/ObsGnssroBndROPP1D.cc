@@ -17,7 +17,6 @@
 #include "oops/util/Logger.h"
 
 #include "ufo/GeoVaLs.h"
-#include "ufo/ObsBias.h"
 
 namespace ufo {
 
@@ -50,10 +49,9 @@ ObsGnssroBndROPP1D::~ObsGnssroBndROPP1D() {
 
 // -----------------------------------------------------------------------------
 
-void ObsGnssroBndROPP1D::simulateObs(const GeoVaLs & gom, ioda::ObsVector & ovec,
-                                const ObsBias & bias) const {
+void ObsGnssroBndROPP1D::simulateObs(const GeoVaLs & gom, ioda::ObsVector & ovec) const {
   ufo_gnssro_bndropp1d_simobs_f90(keyOperGnssroBndROPP1D_, gom.toFortran(), odb_,
-                                  ovec.size(), ovec.toFortran(), bias.toFortran());
+                                  ovec.size(), ovec.toFortran());
 }
 
 // -----------------------------------------------------------------------------

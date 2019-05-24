@@ -31,7 +31,6 @@ namespace ioda {
 
 namespace ufo {
   class GeoVaLs;
-  class ObsBias;
 
 // -----------------------------------------------------------------------------
 /// Total ice concentration observation operator class
@@ -44,7 +43,7 @@ class ObsSeaIceFraction : public ObsOperatorBase,
   virtual ~ObsSeaIceFraction();
 
 // Obs Operator
-  void simulateObs(const GeoVaLs &, ioda::ObsVector &, const ObsBias &) const;
+  void simulateObs(const GeoVaLs &, ioda::ObsVector &) const;
 
 // Other
   const oops::Variables & variables() const {return *varin_;}
