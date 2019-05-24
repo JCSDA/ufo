@@ -4,8 +4,10 @@ RUN touch /env.txt
 RUN printenv > /env.txt
 
 #build lcov
-RUN git clone https://github.com/linux-test-project/lcov.git \
-    && cd lcov \
+RUN cd /usr/local/src \
+    && curl -L -O http://downloads.sourceforge.net/ltp/lcov-1.14.tar.gz \
+    && tar -xvf lcov-1.14.tar.gz \
+    && cd lcov-1.14 \
     && make install
 
 RUN mkdir -p /var/run/sshd \

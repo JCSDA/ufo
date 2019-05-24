@@ -49,7 +49,7 @@ before_install:
   - git clone https://github.com/jcsda/fckit.git ufo-bundle/fckit
   - ls ${REPO_SOURCE_DIR}
   - ls ${REPO_SOURCE_DIR}/ufo-bundle
-  - find . -name \* -exec chmod 777 {} \; -print
+  - find . -name \* -exec chmod 777 {} \;
 
 #======================================================================
 # get docker image
@@ -82,5 +82,5 @@ script:
 #======================================================================
 after_success:
   - cd ${REPO_SOURCE_DIR}/ufo-bundle
-  - bash <(curl -s https://codecov.io/bash) -t 80e931a0-8cb3-49f6-be20-462b338c57be  -X gcov -f coverage.info  #  Token is not needed for publuc repo
+    #  - bash <(curl -s https://codecov.io/bash) -t 80e931a0-8cb3-49f6-be20-462b338c57be  -X gcov -f coverage.info  #  Token is not needed for publuc repo
 
