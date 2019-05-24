@@ -71,7 +71,7 @@ subroutine atmvertinterp_tlad_settraj_(self, geovals, obss)
   call self%cleanup()
 
   ! Get pressure profiles from geovals
-  call ufo_geovals_get_var(geovals, var_prsl, presprofile)
+  call ufo_geovals_get_var(geovals, var_prs, presprofile)
   self%nval = presprofile%nval
 
   ! Get the observation vertical coordinates
@@ -85,8 +85,8 @@ subroutine atmvertinterp_tlad_settraj_(self, geovals, obss)
 
   ! Calculate the interpolation weights
   do iobs = 1, self%nlocs
-    call vert_interp_weights(presprofile%nval, log(obspressure(iobs)/10.), &
-                             presprofile%vals(:,iobs), self%wi(iobs), self%wf(iobs))
+    call vert_interp_weights(presprofile%nval, log(obspressure(iobs)), &
+                             log(presprofile%vals(:,iobs)), self%wi(iobs), self%wf(iobs))
   enddo
 
   ! Cleanup memory

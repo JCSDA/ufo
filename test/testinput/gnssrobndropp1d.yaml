@@ -28,6 +28,6 @@ Observations:
      variables:
      - bending_angle
      threshold: 3.0
-   rmsequiv: 0.0080965941619387614
+   rmsequiv: 0.008096593619323458 
    passedBenchmark: 149
    tolerance: 1.0e-13

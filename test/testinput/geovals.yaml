@@ -22,7 +22,7 @@ Observations:
     ObsDataIn: 
      obsfile: Data/amsua_n19_obs_2018041500_m.nc4
    GeoVaLs: 
-    norm: 72000.7229763
+    norm: 5965462.8825656148
     filename: Data/amsua_n19_geoval_2018041500_m.nc4
  - ObsType:
    ObsSpace: 
@@ -34,5 +34,5 @@ Observations:
      variables: 
      - air_temperature
    GeoVaLs: 
-    norm: 22355.0135965
+    norm: 4961372.34819
     filename: Data/sondes_geoval_2018041500_m.nc4

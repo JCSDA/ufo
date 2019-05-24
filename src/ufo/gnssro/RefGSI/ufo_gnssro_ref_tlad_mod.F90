@@ -155,6 +155,7 @@ contains
         call vert_interp_apply_tl(  t_d%nval,  t_d%vals(:,iobs), gesT_d, self%wi(iobs),self%wf(iobs)) 
         call vert_interp_apply_tl(  q_d%nval,  q_d%vals(:,iobs), gesQ_d, self%wi(iobs),self%wf(iobs))
         call vert_interp_apply_tl(prs_d%nval,prs_d%vals(:,iobs), gesP_d, self%wi(iobs),self%wf(iobs))
+
 !       pressure does not change during minimization
 
         t_coeff = - n_a*self%prs(iobs)/self%t(iobs)**2           &
@@ -193,6 +194,7 @@ contains
       type(ufo_geoval), pointer :: t_d, q_d, prs_d
       real(kind_real)           :: t_coeff, q_coeff, p_coeff
       real(kind_real)           :: gesT_d, gesQ_d, gesP_d
+
 
       ! check if trajectory was set
       if (.not. self%ltraj) then

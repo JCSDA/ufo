@@ -54,7 +54,7 @@ subroutine atmvertinterp_setup_(self, c_conf)
     self%varin(ii) = self%varout(ii)
   enddo
   !> Put log pressure to the varin (vars from the model) list
-  self%varin(self%nvars+1) = "atmosphere_ln_pressure_coordinate"
+  self%varin(self%nvars+1) = var_prs
 
 end subroutine atmvertinterp_setup_
 
@@ -77,7 +77,7 @@ subroutine atmvertinterp_simobs_(self, geovals, obss, nvars, nlocs, hofx)
   character(len=MAXVARLEN) :: geovar
 
   ! Get pressure profiles from geovals
-  call ufo_geovals_get_var(geovals, var_prsl, presprofile)
+  call ufo_geovals_get_var(geovals, var_prs, presprofile)
 
   ! Get the observation vertical coordinates
   allocate(obspressure(nlocs))
@@ -89,8 +89,8 @@ subroutine atmvertinterp_simobs_(self, geovals, obss, nvars, nlocs, hofx)
 
   ! Calculate the interpolation weights
   do iobs = 1, nlocs
-    call vert_interp_weights(presprofile%nval, log(obspressure(iobs)/10.), &
-                             presprofile%vals(:,iobs), wi(iobs), wf(iobs))
+    call vert_interp_weights(presprofile%nval, log(obspressure(iobs)), &
+                             log(presprofile%vals(:,iobs)), wi(iobs), wf(iobs))
   enddo
 
   do ivar = 1, self%nvars

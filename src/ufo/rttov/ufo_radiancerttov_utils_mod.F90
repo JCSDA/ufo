@@ -154,7 +154,7 @@ SUBROUTINE load_atm_data_rttov(nprofiles,nlayers,geovals,obss,profiles)
     profiles(k1)%gas_units = 2
 
     CALL ufo_geovals_get_var(geovals, var_prsi, geoval)
-    profiles(k1)%p(1:nlevels) = geoval%vals(:,k1) ! hPa    
+    profiles(k1)%p(1:nlevels) = geoval%vals(:,k1)*0.01 ! hPa
 
 
     ! ! Check model levels is consistent in geovals & RTTOV
@@ -287,16 +287,16 @@ SUBROUTINE load_geom_data_rttov(obss,profiles)
   nlocs = obsspace_get_nlocs(obss)
   ALLOCATE(TmpVar(nlocs))
 
-  CALL obsspace_get_db(obss, "MetaData", "sat_zenith_angle", TmpVar)
+  CALL obsspace_get_db(obss, "MetaData", "sensor_zenith_angle", TmpVar)
   profiles(:)%zenangle = TmpVar(:)
 
-  CALL obsspace_get_db(obss, "MetaData", "sat_azimuth_angle", TmpVar)
+  CALL obsspace_get_db(obss, "MetaData", "sensor_azimuth_angle", TmpVar)
   profiles(:)%azangle = TmpVar(:)
 
-  CALL obsspace_get_db(obss, "MetaData", "sol_zenith_angle", TmpVar)
+  CALL obsspace_get_db(obss, "MetaData", "solar_zenith_angle", TmpVar)
   profiles(:)%sunzenangle = TmpVar(:)
 
-  CALL obsspace_get_db(obss, "MetaData", "sol_azimuth_angle", TmpVar)
+  CALL obsspace_get_db(obss, "MetaData", "solar_azimuth_angle", TmpVar)
   profiles(:)%sunazangle = TmpVar(:)
 
 

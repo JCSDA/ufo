@@ -22,5 +22,5 @@ Observations:
      obsfile: Data/gnssro_obs_2018041500_s.nc4
    GeoVaLs: 
     filename: Data/gnssro_geoval_2018041500_s.nc4
-   rmsequiv: 128.44644884511627
+   rmsequiv: 128.44644216033788
    tolerance: 1.0e-13
