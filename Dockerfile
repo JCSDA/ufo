@@ -1,10 +1,13 @@
 FROM  jcsda/docker:latest
 
-#ENV OOPS_CMAKE_OPTIONS="-DCMAKE_BUILD_TYPE=DEBUG -DENABLE_GPROF=ON"
-#ENV COVERAGE=ON
 RUN touch /env.txt
 RUN printenv > /env.txt
-  
+
+#build lcov
+RUN git clone https://github.com/linux-test-project/lcov.git \
+    && cd lcov \
+    && make install
+
 RUN mkdir -p /var/run/sshd \
     && ssh-keygen -A \
     && sed -i 's/#PermitRootLogin yes/PermitRootLogin yes/g' /etc/ssh/sshd_config \
@@ -14,15 +17,15 @@ RUN mkdir -p /var/run/sshd \
 RUN groupadd jcsda -g 9999
 RUN adduser jcsdauser
 
-RUN mkdir -p  /jcsda /build_repo \
- &&  chown -R jcsdauser:jcsda /jcsda /usr/local /build_repo \
- &&  chmod 6755 /jcsda /build_repo /usr/local
+RUN mkdir -p /jcsda /build_container \
+ &&  chown -R jcsdauser:jcsda /jcsda /build_container  /usr/local \
+ &&  chmod 6755 /jcsda /build_container /usr/local
+
 
 RUN mkdir /jcsda/.ssh ; echo "StrictHostKeyChecking no" > /jcsda/.ssh/config
 COPY default-mca-params.conf /jcsda/.openmpi/mca-params.conf
 RUN mkdir -p /jcsda/.openmpi
 RUN chown -R jcsdauser:jcsda /jcsda/
-RUN chown -R jcsdauser:jcsda /build_repo/
 
 USER jcsdauser
 WORKDIR /jcsda
@@ -33,6 +36,5 @@ RUN ssh-keygen -f /jcsda/.ssh/id_rsa -t rsa -N '' \
     && cp /jcsda/.ssh/id_rsa.pub /jcsda/.ssh/authorized_keys
 
 VOLUME /jcsda
-VOLUME /build_repo
 
 CMD ["/bin/bash"]
