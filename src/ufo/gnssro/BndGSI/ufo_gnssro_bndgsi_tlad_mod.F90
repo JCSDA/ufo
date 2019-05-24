@@ -1,0 +1,688 @@
+! (C) Copyright 2017-2018 UCAR
+!  
+! This software is licensed under the terms of the Apache Licence Version 2.0
+! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
+
+!> Fortran module to handle gnssro bending angle observations following 
+!> the NCEP/GSI (2018 Aug) implementation
+
+module ufo_gnssro_bndgsi_tlad_mod
+use kinds
+use iso_c_binding
+use ufo_vars_mod
+use ufo_geovals_mod
+use ufo_geovals_mod_c, only: ufo_geovals_registry
+use obsspace_mod
+use missing_values_mod
+use lag_interp_mod
+use ufo_basis_tlad_mod,only: ufo_basis_tlad
+use gnssro_mod_conf
+use gnssro_mod_constants
+use fckit_log_module,  only : fckit_log
+
+implicit none
+real(c_double)                             :: missing
+
+!>  Fortran derived type for gnssro trajectory
+type, extends(ufo_basis_tlad) :: ufo_gnssro_BndGSI_tlad
+  private
+  integer                       :: nlev, nlev1, nlocs, iflip
+  real(kind_real), allocatable  :: jac_t(:,:), jac_prs(:,:), jac_q(:,:)
+  type(gnssro_conf)             :: roconf
+
+  contains
+    procedure :: setup      => ufo_gnssro_bndgsi_tlad_setup
+    procedure :: delete     => ufo_gnssro_bndgsi_tlad_delete
+    procedure :: settraj    => ufo_gnssro_bndgsi_tlad_settraj
+    procedure :: simobs_tl  => ufo_gnssro_bndgsi_simobs_tl
+    procedure :: simobs_ad  => ufo_gnssro_bndgsi_simobs_ad
+end type ufo_gnssro_bndgsi_tlad
+
+contains
+! ------------------------------------------------------------------------------
+subroutine ufo_gnssro_bndgsi_tlad_setup(self, c_conf)
+  implicit none
+  class(ufo_gnssro_BndGSI_tlad), intent(inout) :: self
+  type(c_ptr),                   intent(in)    :: c_conf
+  call gnssro_conf_setup(self%roconf,c_conf)
+end subroutine ufo_gnssro_bndgsi_tlad_setup
+
+! ------------------------------------------------------------------------------
+subroutine ufo_gnssro_bndgsi_tlad_settraj(self, geovals, obss)
+  use gnssro_mod_transform
+  use gnssro_mod_grids, only: get_coordinate_value
+  implicit none
+  class(ufo_gnssro_bndgsi_tlad), intent(inout) :: self
+  type(ufo_geovals),             intent(in)    :: geovals
+  type(c_ptr), value,            intent(in)    :: obss
+  character(len=*), parameter     :: myname  = "ufo_gnssro_bndgsi_tlad_settraj"
+  character(max_string)           :: err_msg
+  integer, parameter              :: nlevAdd = 13 !num of additional levels on top of exsiting model levels
+  integer, parameter              :: newAdd  = 20 !num of additional levels on top of extended levels
+  integer, parameter              :: ngrd    = 80 !num of new veritcal grids for bending angle computation
+  type(ufo_geoval), pointer       :: t, q, gph, prs
+  integer                         :: iobs,k,j, ilev, klev
+  integer                         :: nlev, nlev1, nlocs, nlevExt, nlevCheck
+  real(kind_real)                 :: w4(4), dw4(4), w4_tl(4), dw4_tl(4)
+  real(kind_real)                 :: geomzi
+  real(kind_real), allocatable    :: obsLat(:), obsImpP(:), obsLocR(:), obsGeoid(:), obsValue(:)
+  real(kind_real)                 :: d_refXrad, gradRef,obsImpH
+  real(kind_real)                 :: d_refXrad_tl
+  real(kind_real)                 :: derivRefr_s(ngrd),grids(ngrd)
+  real(kind_real)                 :: sIndx
+  integer                         :: indx
+  logical                         :: obs_check, qc_layer_SR
+  integer                         :: nlocs_outIntgl
+  integer                         :: count_SR, top_layer_SP, top_layer_SR, bot_layer_SR !for super refraction
+  integer                         :: count_rejection
+  real(kind_real)                 :: p_coef, t_coef, q_coef
+  real(kind_real)                 :: fv, pw
+  real(kind_real)                 :: dbetaxi, dbetan
+  real(kind_real)                 :: sumIntgl
+  real(kind_real), allocatable    :: lagConst(:,:), lagConst_tl(:,:)
+  real(kind_real), allocatable    :: gesT(:,:), gesQ(:,:), gesP(:,:), gesH(:,:)
+  real(kind_real),allocatable     :: radius(:), dzdh(:), refIndex(:)
+  real(kind_real), allocatable    :: dhdp(:), dhdt(:)
+  real(kind_real), allocatable    :: ref(:)
+  real(kind_real), allocatable    :: refXrad(:)
+  real(kind_real), allocatable    :: refXrad_s(:)
+  real(kind_real), allocatable    :: refXrad_tl(:), ref_tl(:)
+  real(kind_real), allocatable    :: dndp(:,:), dndt(:,:), dndq(:,:)
+  real(kind_real), allocatable    :: dxidp(:,:), dxidt(:,:), dxidq(:,:)
+  real(kind_real), allocatable    :: dbenddxi(:), dbenddn(:)
+ 
+  write(err_msg,*) myname, ": begin"
+  call fckit_log%info(err_msg)
+
+! Make sure nothing already allocated   
+  call self%delete()
+
+  missing = missing_value(missing)
+  nlocs   = obsspace_get_nlocs(obss) ! number of observations
+
+! get variables from geovals
+  call ufo_geovals_get_var(geovals, var_ts,  t)         ! air temperature
+  call ufo_geovals_get_var(geovals, var_q,   q)         ! specific humidity
+
+  if (self%roconf%vertlayer .eq. "mass") then
+    call ufo_geovals_get_var(geovals, var_prs,   prs)       ! pressure
+    call ufo_geovals_get_var(geovals, var_z,     gph)       ! geopotential height
+  else if (self%roconf%vertlayer .eq. "full") then
+    call ufo_geovals_get_var(geovals, var_prsi,  prs)       ! pressure
+    call ufo_geovals_get_var(geovals, var_zi,    gph)       ! geopotential height
+  else
+    call ufo_geovals_get_var(geovals, var_prsi,  prs)       ! pressure
+    call ufo_geovals_get_var(geovals, var_zi,    gph)
+  end if
+
+  nlev  = t%nval   ! number of model mass levels
+  nlev1 = prs%nval
+  self%nlev  = t%nval   ! number of model mass levels
+  self%nlev1 = prs%nval ! number of model pressure/height levels 
+  self%nlocs = nlocs
+
+  nlevExt = nlev + nlevAdd
+
+!  PLEASE KEEP this for future profile QC check
+!  nlevCheck = min(23, nlev) !number of levels to check super refraction
+
+  allocate(gesT(nlev,nlocs))
+  allocate(gesQ(nlev,nlocs))
+  allocate(gesP(nlev1,nlocs))
+  allocate(gesH(nlev1,nlocs))
+
+! copy geovals to local background arrays
+  self%iflip = 0
+  if (prs%vals(1,1) .lt. prs%vals(prs%nval,1) ) then
+     self%iflip = 1
+     write(err_msg,'(a)')'  ufo_gnssro_bndgsi_tlad_settraj:'//new_line('a')//                         &
+                         '  Model vertical height profile is in descending order,'//new_line('a')// &
+                         '  but bndGSI requires it to be ascending order, need flip'
+    call fckit_log%info(err_msg)
+    do k = 1, nlev
+       gesT(k,:) = t%vals(nlev-k+1,:)
+       gesQ(k,:) = q%vals(nlev-k+1,:)
+    enddo
+    do k = 1, nlev1
+       gesP(k,:) = prs%vals(nlev1-k+1,:)
+       gesH(k,:) = gph%vals(nlev1-k+1,:)
+    enddo
+  else  ! not flipping
+    call fckit_log%info(err_msg)
+
+    do k = 1, nlev
+       gesT(k,:) = t%vals(k,:)
+       gesQ(k,:) = q%vals(k,:)
+    enddo
+    do k = 1, nlev1
+       gesP(k,:) = prs%vals(k,:)
+       gesH(k,:) = gph%vals(k,:)
+    enddo
+  end if
+
+! if all fields t and q are on mass layers,
+! while p and z are on interface layers -- gsi manner
+  if ( nlev1 /= nlev ) then
+     do k = nlev, 2, -1
+        gesT(k,:) = half* (gesT(k,:) + gesT(k-1,:))
+        gesQ(k,:) = half* (gesQ(k,:) + gesQ(k-1,:))
+     enddo
+  end if
+! set obs space struture
+  allocate(obsLat(nlocs))
+  allocate(obsImpP(nlocs))
+  allocate(obsLocR(nlocs))
+  allocate(obsGeoid(nlocs))
+
+  call obsspace_get_db(obss, "MetaData", "latitude",         obsLat)
+  call obsspace_get_db(obss, "MetaData", "impact_parameter", obsImpP)
+  call obsspace_get_db(obss, "MetaData", "earth_radius_of_curvature", obsLocR)
+  call obsspace_get_db(obss, "MetaData", "geoid_height_above_reference_ellipsoid", obsGeoid)
+
+  allocate(dhdp(nlev))
+  allocate(dhdt(nlev))
+  allocate(dzdh(nlev))
+  allocate(radius(nlev))
+  allocate(refIndex(nlev))
+  allocate(ref(nlevExt)) 
+  allocate(ref_tl(nlevExt))
+  allocate(refXrad(0:nlevExt+1)) 
+  allocate(refXrad_tl(0:nlevExt+1))
+  allocate(refXrad_s(ngrd))
+  allocate(dndp(nlev,nlev))
+  allocate(dndq(nlev,nlev))
+  allocate(dndt(nlev,nlev))
+  allocate(dxidp(nlev,nlev))
+  allocate(dxidt(nlev,nlev))
+  allocate(dxidq(nlev,nlev))
+  allocate(dbenddxi(nlev))
+  allocate(dbenddn(nlev))
+  allocate(lagConst_tl(3,nlevExt))
+  allocate(lagConst(3,nlevExt))
+  allocate(self%jac_t(nlev,nlocs))
+  allocate(self%jac_q(nlev,nlocs))
+  allocate(self%jac_prs(nlev1,nlocs))
+
+! Inizialize some variables
+  dxidt=zero; dxidp=zero; dxidq=zero
+  dndt=zero;  dndq=zero;  dndp=zero
+
+! tempprary manner to handle the missing hofx 
+  self%jac_t = missing
+
+  do j = 1, ngrd
+     grids(j) = (j-1) * ds
+  end do
+
+  count_rejection = 0
+! calculate jacobian
+  call gnssro_ref_constants(self%roconf%use_compress)
+
+  obs_loop: do iobs = 1, nlocs
+
+    dxidt=zero; dxidp=zero; dxidq=zero
+    dndt=zero;  dndq=zero;  dndp=zero
+
+    do k = 1, nlev
+!      geometric height nad dzdh jacobian
+       call geop2geometric( obsLat(iobs), gesH(k,iobs), geomzi, dzdh(k))
+!      guess radius 
+       radius(k) = geomzi + obsGeoid(iobs) + obsLocR(iobs)   ! radius r
+!      guess refactivity, refactivity index,  and impact parameter
+       call compute_refractivity(gesT(k,iobs), gesQ(k,iobs), gesP(k,iobs), &
+                                 ref(k),self%roconf%use_compress) 
+       refIndex(k)= one + (r1em6*ref(k)) 
+       refXrad(k) = refIndex(k) * radius(k) 
+    end do
+
+!   data rejection based on model background !
+!   (1) skip data beyond model levels
+    call get_coordinate_value(obsImpP(iobs),sIndx,refXrad(1),nlev,"increasing")
+    if (sIndx < one .or. sIndx > float(nlev)) then
+       cycle obs_loop
+    end if
+
+!   (2) super-refaction
+    qc_layer_SR  = .false.
+    count_SR     = 0
+    top_layer_SR = 0
+    bot_layer_SR = 0
+
+    obsImpH = (obsImpP(iobs) - obsLocR(iobs)) * r1em3 !impact heigt: a-r_earth
+    if (obsImpH <= six) then
+       do k = nlevCheck, 1, -1
+!         check for model SR layer
+          gradRef = 1000.0_kind_real * (ref(k+1)-ref(k)) /       &
+                                    (radius(k+1)-radius(k))
+
+!         PLEASE KEEP this COMMENT:
+!         this check needs RO profile, which was done with MPI reduce in GSI
+!         not applied here yet
+
+!         only check once - SR-likely layer detected
+          if (.not.qc_layer_SR .and. abs(gradRef)>= half*crit_gradRefr) then
+             qc_layer_SR=.true.
+          endif
+
+!         relax to close-to-SR conditions
+          if (abs(gradRef) >= 0.75_kind_real*crit_gradRefr) then
+             count_SR=count_SR+1        ! layers of SR
+             if (count_SR > 1 ) then
+                bot_layer_SR=k
+             else
+                top_layer_SR=k
+                bot_layer_SR=top_layer_SR
+             endif
+          endif
+       end do
+
+!      obs inside model SR layer
+       if (top_layer_SR >= 1 .and. obsImpP(iobs) <= refXrad(top_layer_SR+2)) then
+          cycle obs_loop
+       end if
+
+    end if ! obsImpH <= six
+    do k = 1, nlev
+
+!     jacobian for refractivity(N)
+      fv    = rv_over_rd-one
+      pw    = rd_over_rv+gesQ(k,iobs)*(one-rd_over_rv)
+      q_coef =  n_b *gesP(k,iobs)/(gesT(k,iobs)**2*pw**2)*rd_over_rv + &
+                n_c *gesP(k,iobs)/(gesT(k,iobs)*  pw**2)*rd_over_rv
+      p_coef =  n_a/gesT(k,iobs)   + &
+                n_b*gesQ(k,iobs)/(gesT(k,iobs)**2*pw) + &
+                n_c*gesQ(k,iobs)/(gesT(k,iobs)*pw)
+      t_coef = -n_a*gesP(k,iobs)/gesT(k,iobs)**2 -  &
+                n_b*two*gesQ(k,iobs)*gesP(k,iobs)/(gesT(k,iobs)**3*pw) - &
+                n_c*gesQ(k,iobs)*gesP(k,iobs)/(gesT(k,iobs)**2*pw)
+
+
+      dhdp=zero; dhdt=zero 
+      if(k > 1) then
+         do j = 2, k
+            dhdt(j-1)= rd_over_g*(log(gesP(j-1,iobs))-log(gesP(j,iobs)))
+            dhdp(j)  = dhdp(j)-rd_over_g*(gesT(j-1,iobs)/gesP(j,iobs))
+            dhdp(j-1)= dhdp(j-1)+rd_over_g*(gesT(j-1,iobs)/gesP(j-1,iobs))
+         end do
+      end if
+      if(k == 1)then
+         dndt(k,k)=dndt(k,k)+t_coef
+         dndq(k,k)=dndq(k,k)+q_coef
+         dndp(k,k)=dndp(k,k)+p_coef
+      else
+         dndt(k,k)=dndt(k,k)+half*t_coef
+         dndt(k,k-1)=dndt(k,k-1)+half*t_coef
+         dndq(k,k)=dndq(k,k)+half*q_coef
+         dndq(k,k-1)=dndq(k,k-1)+half*q_coef
+         dndp(k,k)=p_coef
+      end if
+      do j = 1, nlev
+         dxidt(k,j)=r1em6*radius(k)*dndt(k,j) + refIndex(k)*dzdh(k)*dhdt(j)
+         dxidq(k,j)=r1em6*radius(k)*dndq(k,j)
+         dxidp(k,j)=r1em6*radius(k)*dndp(k,j) + refIndex(k)*dzdh(k)*dhdp(j)
+      end do
+    end do !nlev loop
+
+    d_refXrad=refXrad(nlev)-refXrad(nlev-1)
+    
+    do k = 1, nlevAdd
+       refXrad(nlev+k) = refXrad(nlev) + k*d_refXrad
+       ref(nlev+k)     = ref(nlev+k-1)**2/ref(nlev+k-2) 
+    end do
+
+    refXrad(0)=refXrad(3)
+    refXrad(nlevExt+1)=refXrad(nlevExt-2)
+
+    do klev = 1, nlev
+       refXrad_tl      = zero
+       refXrad_tl(klev)= one
+       ref_tl          = zero
+       ref_tl(klev)    = one
+       lagConst        = zero
+       lagConst_tl     = zero
+       d_refXrad_tl    = refXrad_tl(nlev)-refXrad_tl(nlev-1)
+
+       do k = 1, nlevAdd
+          refXrad_tl(nlev+k) = refXrad_tl(nlev)+ k*d_refXrad_tl
+          ref_tl(nlev+k)     = (two*ref(nlev+k-1)*ref_tl(nlev+k-1)/ref(nlev+k-2))-&
+                               (ref(nlev+k-1)**2/ref(nlev+k-2)**2)*ref_tl(nlev+k-2)
+       end do
+       refXrad_tl(0)=refXrad_tl(3)
+       refXrad_tl(nlevExt+1)=refXrad_tl(nlevExt-2)
+
+       do k=1,nlevExt
+          call lag_interp_const_tl(lagConst(:,k),lagConst_tl(:,k),refXrad(k-1:k+1),refXrad_tl(k-1:k+1),3)
+       end do
+       
+       intloop2: do j = 1, ngrd
+          refXrad_s(j) = sqrt(grids(j)**2 + obsImpP(iobs)**2) !x_s^2=s^2+a^2
+          call get_coordinate_value(refXrad_s(j),sIndx,refXrad(1:nlevExt),nlevExt,"increasing")
+          indx=sIndx
+          call lag_interp_smthWeights_tl(refXrad(indx-1:indx+2),refXrad_tl(indx-1:indx+2), &
+                                         refXrad_s(j), lagConst(:,indx),lagConst_tl(:,indx),&
+                                        lagConst(:,indx+1),lagConst_tl(:,indx+1),dw4,dw4_tl,4)
+          if ( indx < nlevExt) then
+            if(indx==1) then
+              dw4(4)=dw4(4)+dw4(1);dw4(1:3)=dw4(2:4);dw4(4)=zero
+              dw4_tl(4)=dw4_tl(4)+dw4_tl(1);dw4_tl(1:3)=dw4_tl(2:4);dw4_tl(4)=zero
+              indx=indx+1
+            endif
+            if(indx==nlevExt-1) then
+              dw4(1)=dw4(1)+dw4(4); dw4(2:4)=dw4(1:3);dw4(1)=zero
+              dw4_tl(1)=dw4_tl(1)+dw4_tl(4); dw4_tl(2:4)=dw4_tl(1:3);dw4_tl(1)=zero
+              indx=indx-1
+            endif
+           
+            dbetaxi=(r1em6/refXrad_s(j))*dot_product(dw4_tl,ref(indx-1:indx+2))
+            dbetan =(r1em6/refXrad_s(j))*dot_product(dw4,ref_tl(indx-1:indx+2))
+
+            if(j == 1)then
+              dbenddxi(klev)=dbetaxi
+              dbenddn(klev)=dbetan
+            else
+              dbenddxi(klev)=dbenddxi(klev)+two*dbetaxi
+              dbenddn(klev)=dbenddn(klev)+two*dbetan
+            end if
+         else
+            cycle  obs_loop
+         end if ! obs inside the new "s" grids
+       end do intloop2
+       dbenddxi(klev)=-dbenddxi(klev)*ds*obsImpP(iobs)
+       dbenddn(klev)=-dbenddn(klev)*ds*obsImpP(iobs)
+
+
+     end do
+     
+     do k = 1, nlev
+        self%jac_t(k,iobs)=zero
+        self%jac_q(k,iobs)=zero
+        self%jac_prs(k,iobs)=zero
+        do j = 1, nlev
+           self%jac_t(k,iobs)  = self%jac_t(k,iobs)+dbenddxi(j)*dxidt(j,k)+ &
+                                                 dbenddn(j) * dndt(j,k)
+           self%jac_q(k,iobs)  = self%jac_q(k,iobs)+dbenddxi(j)*dxidq(j,k)+ &
+                                                   dbenddn(j) * dndq(j,k)
+           self%jac_prs(k,iobs)= self%jac_prs(k,iobs)+dbenddxi(j)*dxidp(j,k)+ &
+                                                  dbenddn(j) * dndp(j,k)
+        end do
+      end do
+      if ( nlev /= nlev1)   self%jac_prs(nlev1,iobs)=  0.
+  end do obs_loop
+
+  self%ltraj = .true.
+
+  deallocate(obsLat)
+  deallocate(obsImpP)
+  deallocate(obsLocR)
+  deallocate(obsGeoid)
+  deallocate(gesT)
+  deallocate(gesQ)
+  deallocate(gesP)
+  deallocate(gesH)
+  deallocate(dhdp)
+  deallocate(dhdt)
+  deallocate(radius)
+  deallocate(dzdh)
+  deallocate(refIndex)
+  deallocate(ref) 
+  deallocate(ref_tl)
+  deallocate(refXrad)
+  deallocate(refXrad_tl) 
+  deallocate(refXrad_s)
+  deallocate(dndp)
+  deallocate(dndq)
+  deallocate(dndt)
+  deallocate(dxidp)
+  deallocate(dxidt)
+  deallocate(dxidq)
+  deallocate(dbenddxi)
+  deallocate(dbenddn)
+  deallocate(lagConst)
+  deallocate(lagConst_tl)
+
+  write(err_msg,*) myname, ": complete"
+  call fckit_log%info(err_msg)
+
+end subroutine ufo_gnssro_bndgsi_tlad_settraj
+!----------------------------------------------------------------
+subroutine ufo_gnssro_bndgsi_simobs_tl(self, geovals, hofx, obss)
+  use gnssro_mod_transform
+  implicit none
+  class(ufo_gnssro_bndgsi_tlad), intent(in)    :: self
+  type(ufo_geovals),             intent(in)    :: geovals
+  real(kind_real),               intent(inout) :: hofx(:)
+  type(c_ptr), value,            intent(in)    :: obss
+  character(len=*), parameter     :: myname = "ufo_gnssro_bndgsi_simobs_tl"
+  character(max_string)           :: err_msg 
+  integer                         :: nlev, nlev1, nlocs, nlevExt, nlevAdd
+  integer                         :: iobs, k, j, ilev
+  type(ufo_geoval), pointer       :: t_tl, prs_tl, q_tl
+  real(kind_real), allocatable    :: gesT_tl(:,:), gesP_tl(:,:), gesQ_tl(:,:)
+  real(kind_real)                 :: sumIntgl
+
+  write(err_msg,*) myname, ": begin"
+  call fckit_log%info(err_msg)
+
+! missing = missing_value(missing)
+  hofx = missing_value(missing)
+
+! check if trajectory was set
+  if (.not. self%ltraj) then
+      write(err_msg,*) myname, ' trajectory was not set!'
+      call abor1_ftn(err_msg)
+  endif
+
+! check if nlocs is consistent in geovals & hofx
+  if (geovals%nlocs /= size(hofx)) then
+      write(err_msg,*) myname, ' error: nlocs inconsistent!'
+      call abor1_ftn(err_msg)
+  endif
+  
+  call ufo_geovals_get_var(geovals, var_ts,  t_tl)         ! air temperature
+  call ufo_geovals_get_var(geovals, var_q,   q_tl)         ! specific humidity
+  if (self%roconf%vertlayer .eq. "mass") then
+    call ufo_geovals_get_var(geovals, var_prs,   prs_tl)       ! pressure
+  else if (self%roconf%vertlayer .eq. "full") then
+    call ufo_geovals_get_var(geovals, var_prsi,  prs_tl)       ! pressure
+  else
+    call ufo_geovals_get_var(geovals, var_prsi,  prs_tl)       ! pressure
+  end if
+
+  nlocs = self%nlocs
+  nlev  = self%nlev
+  nlev1 = self%nlev1
+
+  allocate(gesT_tl(nlev, nlocs)) 
+  allocate(gesQ_tl(nlev, nlocs))
+  allocate(gesP_tl(nlev1,nlocs)) 
+
+  if( self%iflip == 1 ) then
+    do k = 1, nlev
+       gesT_tl(k,:) = t_tl%vals(nlev-k+1,:)
+       gesQ_tl(k,:) = q_tl%vals(nlev-k+1,:)
+    enddo
+    do k = 1, nlev1
+       gesP_tl(k,:) = prs_tl%vals(nlev1-k+1,:)
+    enddo
+  else  ! not flipping
+    do k =1, nlev
+       gesT_tl(k,:) = t_tl%vals(k,:)
+       gesQ_tl(k,:) = q_tl%vals(k,:)
+    enddo
+    do k =1, nlev1
+       gesP_tl(k,:) = prs_tl%vals(k,:)
+    enddo
+  end if
+
+! if all fields t and q are on mass layers,
+! while p and z are on interface layers -- gsi manner
+  if ( nlev1 /= nlev ) then
+     do k = nlev, 2, -1
+        gesT_tl(k,:) = half* (gesT_tl(k,:) + gesT_tl(k-1,:))
+        gesQ_tl(k,:) = half* (gesQ_tl(k,:) + gesQ_tl(k-1,:))
+     enddo
+  end if
+
+  do iobs = 1, nlocs
+    if (self%jac_t(1,iobs) /= missing ) then ! .and. hofx(iobs) /= missing) then
+      sumIntgl = 0.0
+      do k = 1, nlev
+         sumIntgl = sumIntgl + self%jac_t(k,iobs)*gesT_tl(k,iobs) &
+                  + self%jac_q(k,iobs)*gesQ_tl(k,iobs) &
+                  + self%jac_prs(k,iobs)*gesP_tl(k,iobs)
+
+      end do
+      hofx(iobs)=sumIntgl
+    end if
+  end do !nlocs loop 
+  deallocate(gesT_tl)
+  deallocate(gesP_tl)
+  deallocate(gesQ_tl)
+
+  write(err_msg,*) "TRACE: ufo_gnssro_bndgsi_simobs_tl: begin"
+  call fckit_log%info(err_msg)
+
+end subroutine ufo_gnssro_bndgsi_simobs_tl
+
+!----------------------------------------------------------------
+subroutine ufo_gnssro_bndgsi_simobs_ad(self, geovals, hofx, obss)
+  implicit none
+  class(ufo_gnssro_bndgsi_tlad), intent(in)    :: self
+  type(ufo_geovals),             intent(inout) :: geovals
+  real(kind_real),               intent(in)    :: hofx(:)
+  type(c_ptr), value,            intent(in)    :: obss
+  type(ufo_geoval), pointer       :: t_ad, q_ad, prs_ad
+  real(kind_real), allocatable    :: gesT_ad(:,:), gesP_ad(:,:), gesQ_ad(:,:)
+  character(len=*), parameter   :: myname = "ufo_gnssro_bndgsi_simobs_ad"
+  character(max_string)         :: err_msg
+  integer                       :: nlocs, iobs, k, nlev,nlev1
+
+  write(err_msg,*) myname,": begin"
+  call fckit_log%info(err_msg)
+   
+! check if trajectory was set
+  if (.not. self%ltraj) then
+     write(err_msg,*) myname, ' trajectory wasnt set!'
+     call abor1_ftn(err_msg)
+  endif
+  
+! check if nlocs is consistent in geovals & hofx
+  if (geovals%nlocs /= size(hofx)) then
+      write(err_msg,*) myname, ' error: nlocs inconsistent!'
+      call abor1_ftn(err_msg)
+  endif
+
+  call ufo_geovals_get_var(geovals, var_ts,  t_ad)         ! air temperature
+  call ufo_geovals_get_var(geovals, var_q,   q_ad)         ! specific humidity
+
+  if (self%roconf%vertlayer .eq. "mass") then
+    call ufo_geovals_get_var(geovals, var_prs,   prs_ad)       ! pressure
+  else if (self%roconf%vertlayer .eq. "full") then
+    call ufo_geovals_get_var(geovals, var_prsi,  prs_ad)       ! pressure
+  else
+    call ufo_geovals_get_var(geovals, var_prsi,  prs_ad)       ! pressure
+  end if
+
+! allocate if not yet allocated	
+  if (.not. allocated(t_ad%vals)) then
+      t_ad%nlocs = self%nlocs
+      t_ad%nval = self%nlev
+      allocate(t_ad%vals(t_ad%nval,t_ad%nlocs))
+      t_ad%vals = 0.0_kind_real
+  endif
+  if (.not. allocated(prs_ad%vals)) then
+      prs_ad%nlocs = self%nlocs
+      prs_ad%nval = self%nlev1
+      allocate(prs_ad%vals(prs_ad%nval,prs_ad%nlocs))
+      prs_ad%vals = 0.0_kind_real
+  endif
+  if (.not. allocated(q_ad%vals)) then
+      q_ad%nlocs = self%nlocs
+      q_ad%nval = self%nlev
+      allocate(q_ad%vals(q_ad%nval,q_ad%nlocs))
+      q_ad%vals = 0.0_kind_real
+  endif
+  if (.not. geovals%linit ) geovals%linit=.true.
+
+  nlocs = self%nlocs
+  nlev  = self%nlev
+  nlev1 = self%nlev1
+  allocate(gesT_ad(nlev,nlocs))
+  allocate(gesQ_ad(nlev,nlocs))
+  allocate(gesP_ad(nlev1,nlocs))
+
+  gesT_ad = 0.0_kind_real
+  gesQ_ad = 0.0_kind_real
+  gesP_ad = 0.0_kind_real
+
+  do iobs = 1,nlocs
+     if (self%jac_t(1,iobs) /= missing .and. hofx(iobs) /= missing) then
+
+         do k = 1,nlev1
+            if (k == nlev + 1) then
+               gesP_ad(k,iobs) = gesP_ad(k,iobs) + hofx(iobs)*self%jac_prs(k,iobs)
+            else
+               gesT_ad(k,iobs) = gesT_ad(k,iobs) + hofx(iobs)*self%jac_t(k,iobs)
+               gesQ_ad(k,iobs) = gesQ_ad(k,iobs) + hofx(iobs)*self%jac_q(k,iobs)
+               gesP_ad(k,iobs) = gesP_ad(k,iobs) + hofx(iobs)*self%jac_prs(k,iobs)
+            end if
+         end do 
+
+         if ( nlev1 /= nlev ) then
+           do k = 2, nlev
+              gesT_ad(k-1,iobs) = half*gesT_ad(k,iobs) +  gesT_ad(k-1,iobs)
+              gesT_ad(k,iobs)   = half*gesT_ad(k,iobs)
+              gesQ_ad(k-1,iobs) = half*gesQ_ad(k,iobs) +  gesQ_ad(k-1,iobs)
+              gesQ_ad(k,iobs)   = half*gesQ_ad(k,iobs)
+           enddo
+         end if
+
+    end if
+  end do  ! iobs loop
+
+  if( self%iflip == 1 ) then
+    do k = 1, nlev
+       t_ad%vals(nlev-k+1,:) = gesT_ad(k,:)
+       q_ad%vals(nlev-k+1,:) = gesQ_ad(k,:)
+    enddo
+    do k = 1, nlev1
+       prs_ad%vals(nlev1-k+1,:) = gesP_ad(k,:)
+    enddo
+  else  ! not flipping
+    do k =1, nlev
+       t_ad%vals(k,:) = gesT_ad(k,:)
+       q_ad%vals(k,:) = gesQ_ad(k,:)
+    enddo
+    do k =1, nlev1
+       prs_ad%vals(k,:) = gesP_ad(k,:) 
+    enddo
+  end if
+
+  deallocate(gesT_ad)
+  deallocate(gesP_ad)
+  deallocate(gesQ_ad)
+
+  write(err_msg,*) "TRACE: ufo_gnssro_bndgsi_simobs_ad: begin"
+  call fckit_log%info(err_msg)
+
+end subroutine ufo_gnssro_bndgsi_simobs_ad
+! ------------------------------------------------------------------------------
+
+subroutine ufo_gnssro_bndgsi_tlad_delete(self)
+  implicit none
+  class(ufo_gnssro_bndgsi_tlad), intent(inout) :: self
+  character(len=*), parameter :: myname="ufo_gnssro_bndgsi_tlad_delete"
+      
+  self%nlocs = 0
+  self%nlev  = 0
+  self%nlev1 = 0
+  if (allocated(self%jac_t)) deallocate(self%jac_t)
+  if (allocated(self%jac_prs)) deallocate(self%jac_prs)
+  if (allocated(self%jac_q)) deallocate(self%jac_q)
+
+  self%ltraj = .false.
+
+end subroutine ufo_gnssro_bndgsi_tlad_delete
+
+! ------------------------------------------------------------------------------
+end module ufo_gnssro_bndgsi_tlad_mod

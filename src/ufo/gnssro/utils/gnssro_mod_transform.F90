@@ -24,7 +24,7 @@ contains
 ! Parameters from WGS-84 model software inside GPS receivers.
 ! copy from GSI
 subroutine  geometric2geop(Latitude,geometricZ, geopotentialH ) 
-
+implicit none
 real(kind_real), intent(in)  :: Latitude,   geometricZ
 real(kind_real), intent(out) :: geopotentialH
 real(kind_real)              :: sino, termg, termr ! local variables
@@ -38,6 +38,7 @@ end subroutine  geometric2geop
 
 
 subroutine geop2geometric(latitude, geopotentialH, geometricZ, dzdh_jac)
+implicit none
 ! calculate observation geometric height using  MJ Mahoney's (2001), eq(23)
 real(kind_real),intent(in)   :: latitude,   geopotentialH
 real(kind_real),intent(out)  :: geometricZ
@@ -60,18 +61,16 @@ end subroutine geop2geometric
 ! ------------------------------
 
 subroutine compute_refractivity(temperature, specH, pressure,refr, use_compress)
-
-real(kind_real), intent(in) :: temperature, specH, pressure
+implicit none
+real(kind_real), intent(in)  :: temperature, specH, pressure
 real(kind_real), intent(out) :: refr
-real(kind_real) :: fact,pw,refr1,refr2,refr3, tfact
-integer(c_int),intent(in)   :: use_compress
+integer(c_int),  intent(in)  :: use_compress
+real(kind_real) :: refr1,refr2,refr3, tfact
 
 ! constants needed to compute refractivity
   call gnssro_ref_constants(use_compress)
 
-  fact  = one+fv*specH
   tfact = (1-rd_over_rv)*specH+rd_over_rv
-  pw    = rd_over_rv+specH*(one-rd_over_rv)
   refr1 = n_a*pressure/temperature
   refr2 = n_b*specH*pressure/(temperature**2*tfact)
   refr3 = n_c*specH*pressure/(temperature*tfact)
