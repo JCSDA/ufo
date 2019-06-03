@@ -12,8 +12,6 @@
 #include <vector>
 #include <boost/algorithm/string.hpp>
 
-#include <boost/scoped_ptr.hpp>
-
 #include "ioda/ObsSpace.h"
 #include "ioda/ObsVector.h"
 

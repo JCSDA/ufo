@@ -8,11 +8,10 @@
 #ifndef UFO_CRTM_OBSAODCRTM_H_
 #define UFO_CRTM_OBSAODCRTM_H_
 
+#include <memory>
 #include <ostream>
 #include <string>
 #include <vector>
-
-#include <boost/scoped_ptr.hpp>
 
 #include "oops/base/Variables.h"
 #include "oops/util/Logger.h"
@@ -56,8 +55,8 @@ class ObsAodCRTM : public ObsOperatorBase,
   void print(std::ostream &) const;
   F90hop keyOperAodCRTM_;
   const ioda::ObsSpace& odb_;
-  boost::scoped_ptr<const oops::Variables> varin_;
-  boost::scoped_ptr<const oops::Variables> varout_;
+  std::unique_ptr<const oops::Variables> varin_;
+  std::unique_ptr<const oops::Variables> varout_;
   std::vector<int> channels_;
 };
 

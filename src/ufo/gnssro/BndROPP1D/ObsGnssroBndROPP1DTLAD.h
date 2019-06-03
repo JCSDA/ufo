@@ -8,10 +8,9 @@
 #ifndef UFO_GNSSRO_BNDROPP1D_OBSGNSSROBNDROPP1DTLAD_H_
 #define UFO_GNSSRO_BNDROPP1D_OBSGNSSROBNDROPP1DTLAD_H_
 
+#include <memory>
 #include <ostream>
 #include <string>
-
-#include <boost/scoped_ptr.hpp>
 
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
@@ -58,7 +57,7 @@ class ObsGnssroBndROPP1DTLAD : public LinearObsOperatorBase,
   void print(std::ostream &) const;
   F90hop keyOperGnssroBndROPP1D_;
   const ioda::ObsSpace& odb_;
-  boost::scoped_ptr<const oops::Variables> varin_;
+  std::unique_ptr<const oops::Variables> varin_;
 };
 
 // -----------------------------------------------------------------------------
