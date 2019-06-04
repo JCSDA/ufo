@@ -122,9 +122,7 @@ subroutine ufo_gnssro_bndgsi_tlad_settraj(self, geovals, obss)
   self%nlocs = nlocs
 
   nlevExt = nlev + nlevAdd
-
-!  PLEASE KEEP this for future profile QC check
-!  nlevCheck = min(23, nlev) !number of levels to check super refraction
+  nlevCheck = min(23, nlev) !number of levels to check super refraction
 
   allocate(gesT(nlev,nlocs))
   allocate(gesQ(nlev,nlocs))

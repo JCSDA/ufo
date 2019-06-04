@@ -304,10 +304,10 @@ ecbuild_add_test( TARGET  test_ufo_gnssroBndGSI_opr
                   ARGS    "testinput/gnssrobndgsi.yaml"
                   LIBS    ufo )
 
-#ecbuild_add_test( TARGET  test_ufo_gnssroBndGSI_tlad
-#                  SOURCES mains/TestObsOperatorTLAD.cc
-#                  ARGS    "testinput/gnssrobndgsi.yaml"
-#                  LIBS    ufo )
+ecbuild_add_test( TARGET  test_ufo_gnssroBndGSI_tlad
+                  SOURCES mains/TestObsOperatorTLAD.cc
+                  ARGS    "testinput/gnssrobndgsi.yaml"
+                  LIBS    ufo )
 
 ecbuild_add_test( TARGET  test_ufo_satwind_opr
                   MPI     4
