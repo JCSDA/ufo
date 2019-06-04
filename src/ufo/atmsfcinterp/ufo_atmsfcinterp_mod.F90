@@ -20,7 +20,6 @@ module ufo_atmsfcinterp_mod
   private
 
   integer, parameter :: max_string = 50
-  real(kind_real), parameter :: grav = 9.80665e+0_kind_real
   !> Fortran derived type for the observation type
   type, public :: ufo_atmsfcinterp
   private
@@ -51,20 +50,16 @@ subroutine atmsfcinterp_setup_(self, c_conf)
   !> Read variable list and store in varout
   self%varout = config_get_string_vector(c_conf, max_string, "variables")
   ! check for if we need to look for wind reduction factor
-  self%use_fact10 = .false. 
-  do ii = 1, self%nvars
-    select case(trim(self%varout(ii)))
-      case("eastward_wind", "northward_wind")
-        self%use_fact10 = .true.
-      case default
-        cycle 
-    end select
-  end do
+  self%use_fact10 = .false.
+  if (config_element_exists(c_conf,"use_fact10")) then 
+    ii = config_get_int(c_conf,"use_fact10")
+    if (ii /= 0) self%use_fact10 = .true.
+  end if
   !> Allocate varin: variables we need from the model
   if (self%use_fact10) then
-    istart = 12
+    istart = 13
   else
-    istart = 11
+    istart = 12
   end if
   nallvars = self%nvars + istart
   allocate(self%varin(nallvars))
@@ -84,11 +79,12 @@ subroutine atmsfcinterp_setup_(self, c_conf)
   self%varin(5) = var_ps
   self%varin(6) = var_prs
   self%varin(7) = var_ts
-  self%varin(8) = var_q
-  self%varin(9) = var_u 
-  self%varin(10) = var_v 
-  self%varin(11) = var_sfc_lfrac
-  if (self%use_fact10)  self%varin(12) = var_sfc_fact10
+  self%varin(8) = var_tv
+  self%varin(9) = var_q
+  self%varin(10) = var_u 
+  self%varin(11) = var_v 
+  self%varin(12) = var_sfc_lfrac
+  if (self%use_fact10)  self%varin(13) = var_sfc_fact10
 
 end subroutine atmsfcinterp_setup_
 
@@ -103,11 +99,12 @@ subroutine atmsfcinterp_simobs_(self, geovals, obss, nvars, nlocs, hofx)
   real(c_double),  intent(inout)              :: hofx(nvars, nlocs)
   type(c_ptr), value, intent(in)              :: obss
   type(ufo_geoval), pointer :: phi, hgt, tsfc, roughlen, psfc, prs, &
-                               tsen, q, u, v, landmask, &
+                               tsen, tv, q, u, v, landmask, &
                                profile, rad10
   integer :: ivar, iobs
   real(kind_real), allocatable :: obselev(:), obshgt(:)
   real(kind_real) :: outvalue
+  real(kind_real), parameter :: minroughlen = 0.0001_kind_real
   character(len=MAXVARLEN) :: geovar
 
 
@@ -127,6 +124,7 @@ subroutine atmsfcinterp_simobs_(self, geovals, obss, nvars, nlocs, hofx)
   call ufo_geovals_get_var(geovals, var_ps, psfc)
   call ufo_geovals_get_var(geovals, var_prs, prs)
   call ufo_geovals_get_var(geovals, var_ts, tsen)
+  call ufo_geovals_get_var(geovals, var_tv, tv)
   call ufo_geovals_get_var(geovals, var_q, q)
   call ufo_geovals_get_var(geovals, var_u, u)
   call ufo_geovals_get_var(geovals, var_v, v)
@@ -140,30 +138,37 @@ subroutine atmsfcinterp_simobs_(self, geovals, obss, nvars, nlocs, hofx)
   ! get observation height (above sea level)
   allocate(obshgt(nlocs))
   call obsspace_get_db(obss, "MetaData", "height", obshgt)
+  
+  do iobs = 1, nlocs
+    ! minimum roughness length
+    z0 = roughlen%vals(1,iobs)
+    if (z0 < minroughlen) z0 = minroughlen
 
-  do ivar = 1, self%nvars
-    ! Get the name of input variable in geovals
-    geovar = self%varout(ivar)
-    ! Get profile for this variable from geovals
-    call ufo_geovals_get_var(geovals, geovar, profile)
+    do ivar = 1, self%nvars
+      ! Get the name of input variable in geovals
+      geovar = self%varout(ivar)
+      ! Get profile for this variable from geovals
+      call ufo_geovals_get_var(geovals, geovar, profile)
 
-    select case(trim(geovar))
-      case("air_temperature", "virtual_temperature")
-        ! calling a modified version of the sfc_model routine from GSI
-        do iobs = 1, nlocs
-          call sfc_wtq_fwd_gsi(psfc%vals(1,iobs),tsfc%vals(1,iobs),prs%vals(1,iobs),&
-                               tsen%vals(1,iobs),q%vals(1,iobs),u%vals(1,iobs),&
-                               v%vals(1,iobs),prs%vals(2,iobs),tsen%vals(2,iobs),&
-                               q%vals(2,iobs),phi%vals(1,iobs),roughlen%vals(1,iobs),&
-                               landmask%vals(1,iobs),obshgt(iobs)-obselev(iobs),&
-                               hofx(ivar,iobs),geovar)
-        end do
-      case("eastward_wind", "northward_wind")
-        do iobs = 1, nlocs
-          hofx(ivar,iobs) = profile%vals(1,iobs) * rad10%vals(1,iobs)
-        end do
-    end select
-  enddo
+      select case(trim(geovar))
+        case("air_temperature", "virtual_temperature")
+          ! calling a modified version of the sfc_model routine from GSI
+            call sfc_wtq_fwd_gsi(psfc%vals(1,iobs),tsfc%vals(1,iobs),prs%vals(1,iobs),&
+                                 tsen%vals(1,iobs),q%vals(1,iobs),u%vals(1,iobs),&
+                                 v%vals(1,iobs),prs%vals(2,iobs),tsen%vals(2,iobs),&
+                                 q%vals(2,iobs),phi%vals(1,iobs),roughlen%vals(1,iobs),&
+                                 landmask%vals(1,iobs),obshgt(iobs)-obselev(iobs),&
+                                 hofx(ivar,iobs),geovar)
+        case("eastward_wind", "northward_wind")
+          if (self%use_fact10) then ! use provided fact10 from model
+            hofx(ivar,iobs) = profile%vals(1,iobs) * rad10%vals(1,iobs)
+          else ! compute wind reduction factor
+            call sfc_wind_fact_gsi(z0, phi%vals(1,iobs), obshgt(iobs)-obselev(iobs), psim, psimz, redfac)
+            hofx(ivar,iobs) = profile%vals(1,iobs) * redfac
+          end if
+      end select
+    end do
+  end do
 
 
 

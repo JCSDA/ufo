@@ -2,23 +2,54 @@ module atmsfc_mod
 
 contains
 
-subroutine sfc_wtq_fwd_gsi(psfc_in,tsfc_in,prsl1_in,tsen1,q1,u1,v1,&
-                           prsl2_in,tsen2,q2,phi1,roughlen,landmask,&
-                           obshgt,outvar,varname)
+subroutine sfc_wind_fact_gsi(z0, phi1, obshgt, psim, psimz, redfac)
+  use kinds
+  use ufo_constants_mod, only: rd_over_cp, grav
+  implicit none
+  real(kind_real), intent(in) :: z0, phi1, obshgt, psim, psimz
+  real(kind_real), intent(out) :: redfac
+
+  ! constant variable for psi
+  gzsoz0 = log(phi1/z0)
+  gzzoz0 = log(obshgt/z0)
+
+  psiw = gzsoz0 - psim
+  psiwz = gzzoz0 - psimz
+  redfac = psiwz / psiw 
+
+  return
+
+end subroutine sfc_wind_fact_gsi
+
+subroutine calc_psi_vars_gsi(rib, gzsoz0, gzzoz0, thv1, thv2,&
+                             V2, th1, thg, phi1, obshgt, & 
+                             psim, psih, psimz, psihz)
+  use kinds
+  implicit none
+  real(kind_real), intent(in) :: rib, gzsoz0, gzzoz0, thv1, thv2, &
+                                 V2, th1, thg, ph1, obshgt
+  real(kind_real), intent(out) :: psim, psih, psimz, psihz 
+
+
+end subroutine calc_psi_vars_gsi
+
+subroutine sfc_wtq_fwd_gsi(psfc_in,tsfc,prsl1_in,tsen1,tv1,q1,u1,v1,&
+                           prsl2_in,tsen2,tv2,q2,phi1,roughlen,landmask,&
+                           obshgt,tout,tvout,qout,radfac)
   ! sfc_wtq_fwd_gsi
   ! based off of subroutines from GSI sfc_model.f90 file
   use kinds
   use ufo_vars_mod, only: MAXVARLEN
+  use ufo_constants_mod, only: rd_over_cp, grav
   implicit none
-  real(kind_real), intent(in) :: psfc_in, tsfc_in, prsl1_in, tsen1, q1, u1, v1,&
+  real(kind_real), intent(in) :: psfc_in, tsfc, prsl1_in, tsen1, q1, u1, v1,&
                                  prsl2_in, tsen2, q2, phi1, roughlen, landmask, &
                                  obshgt
   character(len=MAXVARLEN), intent(in) :: varname
-  real(kind_real), intent(out) :: outvar
+  real(kind_real), intent(out) :: tout, tvout, qout, radfac
 
   real(kind_real), parameter :: zint0 = 0.01_kind_real ! default roughness over land
   real(kind_real), parameter :: k_kar = 0.4_kind_real ! Von Karman constant
-  real(kind_real), parameter :: rd_over_cp = 0.28573561616_kind_real ! rd/cp
   real(kind_real), parameter :: fv = 0.60773384427_kind_real ! cv/cp - 1
   real(kind_real), parameter :: ka = 2.4e-5_kind_real
   real(kind_real), parameter :: r16 = 16.0_kind_real
@@ -44,7 +75,6 @@ subroutine sfc_wtq_fwd_gsi(psfc_in,tsfc_in,prsl1_in,tsen1,q1,u1,v1,&
   real(kind_real) :: cc, ust, mol, hol, holz
   real(kind_real) :: xx, yy
   real(kind_real) :: psiw, psit, psiwz, psitz, psiq, psiqz
-  real(kind_real) :: tsfc 
  
   ! convert pressures to hPa from Pa
   psfc = psfc_in / r100
@@ -68,10 +98,6 @@ subroutine sfc_wtq_fwd_gsi(psfc_in,tsfc_in,prsl1_in,tsen1,q1,u1,v1,&
   ! virtual temperature from sensible temperature
   tv1 = tsen1 * (one + fv * q1)
   tv2 = tsen2 * (one + fv * q2)
-
-  ! test
-  tsfc = tsfc_in
-  !if ( tsfc < 200 ) tsfc = tsen1
 
   ! convert temperature of the ground to virtual temp assuming saturation
   call da_tp_to_qs( tsfc, psfc, eg, qg)
@@ -99,7 +125,7 @@ subroutine sfc_wtq_fwd_gsi(psfc_in,tsfc_in,prsl1_in,tsen1,q1,u1,v1,&
   V2 = 0.000001_kind_real + wspd2 + Vc2
 
   ! bulk richardson number
-  rib = (9.80665_kind_real * phi1 / th1) * (thv1 - thvg) / V2
+  rib = (grav * phi1 / th1) * (thv1 - thvg) / V2
 
   ! calculate psi based off of regime
   ! stable conditions
@@ -176,19 +202,12 @@ subroutine sfc_wtq_fwd_gsi(psfc_in,tsfc_in,prsl1_in,tsen1,q1,u1,v1,&
   psiq = log(k_kar*ust*phi1/ka + phi1 / zq0) - psih
   psiqz = log(k_kar*ust*obshgt/ka + obshgt / zq0) - psihz
 
-  select case(trim(varname))
-    case("air_temperature")
-      outvar = (thg + (th1 - thg)*psitz/psit)*(psfc/r1000)**rd_over_cp
-    case("virtual_temperature")
-      outvar = (thg + (th1 - thg)*psitz/psit)*(psfc/r1000)**rd_over_cp
-      outvar = outvar * (one + fv * q1)  
-    case("specific_humidity")
-      outvar = qg + (q1 - qg)*psiqz/psiq
-    case("eastward_wind")
-      outvar = u1 * psiwz / psiw 
-    case("northward_wind")
-      outvar = v1 * psiwz / psiw
-  end select
+  tout = (thg + (th1 - thg)*psitz/psit)*(psfc/r1000)**rd_over_cp
+  tvout = (thg + (th1 - thg)*psitz/psit)*(psfc/r1000)**rd_over_cp
+  tvout = tvout * (one + fv * q1)  
+  qout = qg + (q1 - qg)*psiqz/psiq
+  radfac = psiwz / psiw 
+
   return
 
 end subroutine
