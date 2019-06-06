@@ -17,6 +17,8 @@ Observations:
       name: ADT
       ObsDataIn:
         obsfile: Data/Jason-2-2018-04-15.nc
+      simulate:
+        variables: [obs_absolute_dynamic_topography]
     ObsOperator:
       name: ADT
     GeoVaLs:

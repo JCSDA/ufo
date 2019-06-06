@@ -15,15 +15,15 @@ Observations:
   ObsTypes:
   - ObsOperator:
       name: RTTOV
-      channels: 5
       Sensor_ID: noaa_19_amsua
       CoefficientPath: Data/
-      variables:
-      - brightness_temperature
     ObsSpace: 
       name: Radiance
       ObsDataIn:
         obsfile: Data/ioda_metop_2_amsua.nc4
+      simulate:
+        variables: [brightness_temperature]
+        channels: 5
     GeoVaLs:
       filename: Data/geovals_rttov.nc4
     rmsequiv: 239.48475677393529

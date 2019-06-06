@@ -26,14 +26,11 @@ static ObsOperatorMaker<ObsGnssroBndROPP1D> makerGnssroBndROPP1D_("GnssroBndROPP
 
 ObsGnssroBndROPP1D::ObsGnssroBndROPP1D(const ioda::ObsSpace & odb,
                                        const eckit::Configuration & config)
-  : ObsOperatorBase(odb, config), keyOperGnssroBndROPP1D_(0), odb_(odb), varin_(), varout_()
+  : ObsOperatorBase(odb, config), keyOperGnssroBndROPP1D_(0), odb_(odb), varin_()
 {
   const std::vector<std::string> vv{"air_temperature", "specific_humidity", "air_pressure",
                                     "geopotential_height", "sfc_geopotential_height"};
   varin_.reset(new oops::Variables(vv));
-
-  const std::vector<std::string> vout{"bending_angle"};
-  varout_.reset(new oops::Variables(vout));
 
   const eckit::Configuration * configc = &config;
   ufo_gnssro_bndropp1d_setup_f90(keyOperGnssroBndROPP1D_, &configc);

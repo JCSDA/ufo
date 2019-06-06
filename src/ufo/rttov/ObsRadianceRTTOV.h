@@ -47,7 +47,6 @@ class ObsRadianceRTTOV : public ObsOperatorBase,
 
 // Other
   const oops::Variables & variables() const override {return *varin_;}
-  const oops::Variables & observed() const override {return *varout_;}
   const std::string & obstype() const override {return obsname_;}
 
   int & toFortran() {return keyOperRadianceRTTOV_;}
@@ -58,7 +57,6 @@ class ObsRadianceRTTOV : public ObsOperatorBase,
   F90hop keyOperRadianceRTTOV_;
   const ioda::ObsSpace& odb_;
   std::unique_ptr<const oops::Variables> varin_;
-  std::unique_ptr<const oops::Variables> varout_;
   std::vector<int> channels_;
   std::string obsname_;
 };

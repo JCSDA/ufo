@@ -15,7 +15,6 @@ Observations:
  ObsTypes: 
  - ObsOperator: &obsop
      name: CRTM
-     channels: 1-15
      n_Absorbers: 3
      n_Clouds: 0
      n_Aerosols: 0
@@ -23,9 +22,12 @@ Observations:
      CoefficientPath: Data/
      Sensor_ID: sndrD1_g15
    ObsSpace: 
-     name: Radiance
+     name: sndrD1_g15
      ObsDataIn: 
        obsfile: "Data/sndrd1_g15_obs_2018041500_m.nc4"
+     simulate: &simobs
+       variables: [brightness_temperature]
+       channels: 1-15
    GeoVaLs: 
      filename: "Data/sndrd1_g15_geoval_2018041500_m.nc4"
    vecequiv: GsiHofX
@@ -34,9 +36,10 @@ Observations:
      <<: *obsop
      Sensor_ID: sndrD2_g15
    ObsSpace: 
-     name: Radiance
+     name: sndrD2_g15
      ObsDataIn: 
        obsfile: Data/sndrd2_g15_obs_2018041500_m.nc4
+     simulate: *simobs
    GeoVaLs: 
      filename: Data/sndrd2_g15_geoval_2018041500_m.nc4
    vecequiv: GsiHofX
@@ -45,9 +48,10 @@ Observations:
      <<: *obsop
      Sensor_ID: sndrD3_g15
    ObsSpace: 
-     name: Radiance
+     name: sndrD3_g15
      ObsDataIn: 
        obsfile: Data/sndrd3_g15_obs_2018041500_m.nc4
+     simulate: *simobs
    GeoVaLs: 
      filename: Data/sndrd3_g15_geoval_2018041500_m.nc4
    vecequiv: GsiHofX
@@ -56,9 +60,10 @@ Observations:
      <<: *obsop
      Sensor_ID: sndrD4_g15
    ObsSpace: 
-     name: Radiance
+     name: sndrD4_g15
      ObsDataIn: 
        obsfile: Data/sndrd4_g15_obs_2018041500_m.nc4
+     simulate: *simobs
    GeoVaLs: 
      filename: Data/sndrd4_g15_geoval_2018041500_m.nc4
    vecequiv: GsiHofX

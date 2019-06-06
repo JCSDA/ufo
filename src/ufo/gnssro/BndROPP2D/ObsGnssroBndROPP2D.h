@@ -46,7 +46,6 @@ class ObsGnssroBndROPP2D : public ObsOperatorBase,
 
 // Other
   const oops::Variables & variables() const {return *varin_;}
-  const oops::Variables & observed() const {return *varout_;}
 
   Locations * locations(const util::DateTime &, const util::DateTime &) const;
 
@@ -58,7 +57,6 @@ class ObsGnssroBndROPP2D : public ObsOperatorBase,
   F90hop keyOperGnssroBndROPP2D_;
   const ioda::ObsSpace& odb_;
   std::unique_ptr<const oops::Variables> varin_;
-  std::unique_ptr<const oops::Variables> varout_;
 };
 
 // -----------------------------------------------------------------------------

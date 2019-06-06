@@ -25,12 +25,10 @@ static ObsOperatorMaker<ObsSeaIceFraction> makerSeaIceFraction_("SeaIceFraction"
 
 ObsSeaIceFraction::ObsSeaIceFraction(const ioda::ObsSpace & odb,
                                      const eckit::Configuration & config)
-  : ObsOperatorBase(odb, config), keyOper_(0), odb_(odb), varin_(), varout_()
+  : ObsOperatorBase(odb, config), keyOper_(0), odb_(odb), varin_()
 {
   const std::vector<std::string> vvin{"sea_ice_category_area_fraction"};
   varin_.reset(new oops::Variables(vvin));
-  const std::vector<std::string> vvout{"sea_ice_area_fraction"};
-  varout_.reset(new oops::Variables(vvout));
   const eckit::Configuration * configc = &config;
   ufo_seaicefraction_setup_f90(keyOper_, &configc);
   oops::Log::trace() << "ObsSeaIceFraction created." << std::endl;

@@ -44,12 +44,6 @@ const oops::Variables & ObsOperator::variables() const {
 
 // -----------------------------------------------------------------------------
 
-const oops::Variables & ObsOperator::observed() const {
-  return oper_->observed();
-}
-
-// -----------------------------------------------------------------------------
-
 Locations * ObsOperator::locations(const util::DateTime & t1,
                                    const util::DateTime & t2) const {
   return oper_->locations(t1, t2);

@@ -15,7 +15,6 @@ Observations:
  ObsTypes: 
  - ObsOperator:
     name: GnssroBndROPP2D
-    obsvalue: bending_angle
     ObsOptions: 
      n_horiz: 3
      res: 40.0
@@ -23,6 +22,8 @@ Observations:
      name: GnssroBnd
      ObsDataIn: 
        obsfile: Data/gnssro_obs_2018041500_s.nc4
+     simulate: 
+       variables: [bending_angle]
    GeoVaLs: 
     filename: Data/gnssro_geoval_2018041500_s_2d.nc4
    rmsequiv: 0.0092189692269075245

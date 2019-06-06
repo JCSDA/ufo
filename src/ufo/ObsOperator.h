@@ -53,9 +53,6 @@ class ObsOperator : public util::Printable,
 /// Operator input required from Model
   const oops::Variables & variables() const;
 
-/// Operator output variables
-  const oops::Variables & observed() const;
-
 /// Operator locations
   Locations * locations(const util::DateTime &, const util::DateTime &) const;
 

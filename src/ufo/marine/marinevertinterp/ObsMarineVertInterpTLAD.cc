@@ -33,7 +33,11 @@ ObsMarineVertInterpTLAD::ObsMarineVertInterpTLAD(const ioda::ObsSpace & odb,
   int c_name_size = 200;
   char *buffin = new char[c_name_size];
   const eckit::Configuration * configc = &config;
-  ufo_marinevertinterp_tlad_setup_f90(keyOper_, &configc, buffin, c_name_size);
+
+  const oops::Variables & observed = odb.obsvariables();
+  const eckit::Configuration * varconfig = &observed.toFortran();
+
+  ufo_marinevertinterp_tlad_setup_f90(keyOper_, &configc, &varconfig, buffin, c_name_size);
 
   std::string vstr_in(buffin);
   std::vector<std::string> vvin;

@@ -28,22 +28,20 @@ static ObsOperatorMaker<ObsMarineVertInterp> makerMarineVertInterp_("InsituSalin
 
 ObsMarineVertInterp::ObsMarineVertInterp(const ioda::ObsSpace & odb,
                                          const eckit::Configuration & config)
-  : ObsOperatorBase(odb, config), keyOper_(0), odb_(odb), varin_(), varout_()
+  : ObsOperatorBase(odb, config), keyOper_(0), odb_(odb), varin_()
 {
   int c_name_size = 200;
   char *buffin = new char[c_name_size];
-  char *buffout = new char[c_name_size];
   const eckit::Configuration * configc = &config;
 
-  ufo_marinevertinterp_setup_f90(keyOper_, &configc, buffin, buffout, c_name_size);
+  const oops::Variables & observed = odb.obsvariables();
+  const eckit::Configuration * varconfig = &observed.toFortran();
+  ufo_marinevertinterp_setup_f90(keyOper_, &configc, &varconfig, buffin, c_name_size);
 
-  std::string vstr_in(buffin), vstr_out(buffout);
+  std::string vstr_in(buffin);
   std::vector<std::string> vvin;
-  std::vector<std::string> vvout;
   boost::split(vvin, vstr_in, boost::is_any_of("\t"));
-  boost::split(vvout, vstr_out, boost::is_any_of("\t"));
   varin_.reset(new oops::Variables(vvin));
-  varout_.reset(new oops::Variables(vvout));
 
   oops::Log::trace() << "ObsMarineVertInterp created." << std::endl;
 }

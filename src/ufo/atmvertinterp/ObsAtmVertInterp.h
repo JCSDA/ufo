@@ -46,7 +46,6 @@ class ObsAtmVertInterp : public ObsOperatorBase,
 
 // Other
   const oops::Variables & variables() const {return *varin_;}
-  const oops::Variables & observed() const {return *varout_;}
 
   int & toFortran() {return keyOperAtmVertInterp_;}
   const int & toFortran() const {return keyOperAtmVertInterp_;}
@@ -56,7 +55,6 @@ class ObsAtmVertInterp : public ObsOperatorBase,
   F90hop keyOperAtmVertInterp_;
   const ioda::ObsSpace& odb_;
   std::unique_ptr<const oops::Variables> varin_;
-  std::unique_ptr<const oops::Variables> varout_;
 };
 
 // -----------------------------------------------------------------------------

@@ -27,8 +27,10 @@ static ObsOperatorMaker<ObsAodCRTM> makerAOD_("Aod");
 
 // -----------------------------------------------------------------------------
 
-ObsAodCRTM::ObsAodCRTM(const ioda::ObsSpace & odb, const eckit::Configuration & config)
-  : ObsOperatorBase(odb, config), keyOperAodCRTM_(0), odb_(odb), varin_(), varout_()
+ObsAodCRTM::ObsAodCRTM(const ioda::ObsSpace & odb,
+                       const eckit::Configuration & config)
+  : ObsOperatorBase(odb, config), keyOperAodCRTM_(0), odb_(odb), varin_(),
+    channels_(odb.obsvariables().channels())
 {
   const std::vector<std::string> vv{
     "air_temperature", "humidity_mixing_ratio", "relative_humidity",
@@ -37,22 +39,11 @@ ObsAodCRTM::ObsAodCRTM(const ioda::ObsSpace & odb, const eckit::Configuration & 
       "seas1", "seas2", "seas3", "seas4"};
   varin_.reset(new oops::Variables(vv));
 
-  // parse channels from the config and create variable names
-  std::string chlist = config.getString("channels");
-  std::set<int> channels = oops::parseIntSet(chlist);
-  std::vector<std::string> vout;
-  channels_.reserve(channels.size());
-  for (const int jj : channels) {
-    vout.push_back("aerosol_optical_depth_"+std::to_string(jj));
-    channels_.push_back(jj);
-  }
-  varout_.reset(new oops::Variables(vout));
-
   // call Fortran setup routine
   const eckit::LocalConfiguration obsOptions(config, "ObsOptions");
   const eckit::Configuration * configc = &obsOptions;
   ufo_aodcrtm_setup_f90(keyOperAodCRTM_, &configc);
-  oops::Log::info() << "ObsAodCRTM channels: " << channels << std::endl;
+  oops::Log::info() << "ObsAodCRTM channels: " << channels_ << std::endl;
   oops::Log::trace() << "ObsAodCRTM created." << std::endl;
 }
 

@@ -45,6 +45,7 @@ class QCmanager : public util::Printable {
   const oops::Variables nogeovals_;
   ioda::ObsDataVector<int> & flags_;
   boost::shared_ptr<ioda::ObsDataVector<float> > obserr_;
+  const oops::Variables & observed_;
 };
 
 }  // namespace ufo

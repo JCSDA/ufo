@@ -26,7 +26,7 @@ static ObsOperatorMaker<ObsRadianceRTTOV> makerRTTOV_("RTTOV");
 // -----------------------------------------------------------------------------
 
 ObsRadianceRTTOV::ObsRadianceRTTOV(const ioda::ObsSpace & odb, const eckit::Configuration & config)
-  : ObsOperatorBase(odb, config), keyOperRadianceRTTOV_(0), odb_(odb), varin_(), varout_(),
+  : ObsOperatorBase(odb, config), keyOperRadianceRTTOV_(0), odb_(odb), varin_(),
     obsname_("RTTOV:")
 {
   obsname_ += config.getString("Sensor_ID");
@@ -41,23 +41,16 @@ ObsRadianceRTTOV::ObsRadianceRTTOV(const ioda::ObsSpace & odb, const eckit::Conf
 
   varin_.reset(new oops::Variables(vv));
 
-  // parse channels from the config and create variable names
-  std::string chlist = config.getString("channels");
-  std::set<int> channels = oops::parseIntSet(chlist);
-  std::vector<std::string> vout;
-  channels_.reserve(channels.size());
-  for (const int jj : channels) {
-    vout.push_back("brightness_temperature_"+std::to_string(jj)+"_");
-    channels_.push_back(jj);
-  }
-  varout_.reset(new oops::Variables(vout));
+  // get channels
+  const oops::Variables & observed = odb.obsvariables();
+  channels_ = observed.channels();
 
   // call Fortran setup routine
 //  const eckit::LocalConfiguration obsOptions(config, "ObsOptions");
 //  const eckit::Configuration * configc = &obsOptions;
   const eckit::Configuration * configc = &config;
   ufo_radiancerttov_setup_f90(keyOperRadianceRTTOV_, &configc);
-  oops::Log::info() << "ObsRadianceRTTOV channels: " << channels << std::endl;
+  oops::Log::info() << "ObsRadianceRTTOV channels: " << channels_ << std::endl;
 
   oops::Log::trace() << "ObsRadianceRTTOV created." << std::endl;
 }

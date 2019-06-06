@@ -25,7 +25,7 @@ static ObsOperatorMaker<ObsGnssroBndGSI> makerGnssroBndGSI_("GnssroBndGSI");
 // -----------------------------------------------------------------------------
 
 ObsGnssroBndGSI::ObsGnssroBndGSI(const ioda::ObsSpace & odb, const eckit::Configuration & config)
-  : ObsOperatorBase(odb, config), keyOperGnssroBndGSI_(0), odb_(odb), varin_(), varout_()
+  : ObsOperatorBase(odb, config), keyOperGnssroBndGSI_(0), odb_(odb), varin_()
 {
   std::vector<std::string> vv{"air_temperature", "specific_humidity"};
 
@@ -50,9 +50,6 @@ ObsGnssroBndGSI::ObsGnssroBndGSI(const ioda::ObsSpace & odb, const eckit::Config
   }
 
   varin_.reset(new oops::Variables(vv));
-
-  const std::vector<std::string> vout{"bending_angle"};
-  varout_.reset(new oops::Variables(vout));
 
   ufo_gnssro_bndgsi_setup_f90(keyOperGnssroBndGSI_, &configc);
   oops::Log::trace() << "ObsGnssroBndGSI created." << std::endl;

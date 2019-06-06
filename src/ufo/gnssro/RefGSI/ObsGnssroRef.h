@@ -45,7 +45,6 @@ class ObsGnssroRef : public ObsOperatorBase,
 
 // Other
   const oops::Variables & variables() const {return *varin_;}
-  const oops::Variables & observed() const {return *varout_;}
 
   int & toFortran() {return keyOperGnssroRef_;}
   const int & toFortran() const {return keyOperGnssroRef_;}
@@ -55,7 +54,6 @@ class ObsGnssroRef : public ObsOperatorBase,
   F90hop keyOperGnssroRef_;
   const ioda::ObsSpace& odb_;
   std::unique_ptr<const oops::Variables> varin_;
-  std::unique_ptr<const oops::Variables> varout_;
 };
 
 // -----------------------------------------------------------------------------

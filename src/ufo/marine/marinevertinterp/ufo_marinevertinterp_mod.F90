@@ -33,20 +33,25 @@ module ufo_marinevertinterp_mod
 contains
 
 ! ------------------------------------------------------------------------------
-subroutine ufo_marinevertinterp_setup(self, c_conf)
+subroutine ufo_marinevertinterp_setup(self, vars)
 implicit none
 class(ufo_marinevertinterp), intent(inout) :: self
-type(c_ptr),        intent(in)    :: c_conf
+character(len=MAXVARLEN), dimension(:), intent(inout) :: vars
+character(max_string)  :: err_msg
 
 ! Get output variable name (hard-coded to 1)
-allocate(self%varout(1))
-self%varout = config_get_string_vector(c_conf, max_string, "variable")
+if (size(vars) /= 1) then
+  write(err_msg,*) 'ufo_marinevertinterp_setup error: only variables size 1 supported!'
+  call abor1_ftn(err_msg)
+endif
+
+allocate(self%varout(size(vars)))
+self%varout = vars
 
 ! Set input variable names (hard-coded to 2)
-allocate(self%varin(2))
-self%varin(1) = self%varout(1)
-self%varin(2) = "sea_water_cell_thickness"
-
+allocate(self%varin(size(vars)+1))
+self%varin(1:size(vars)) = self%varout
+self%varin(size(vars)+1) = "sea_water_cell_thickness"
 
 end subroutine ufo_marinevertinterp_setup
 
@@ -54,6 +59,9 @@ end subroutine ufo_marinevertinterp_setup
 subroutine ufo_marinevertinterp_delete(self)
 implicit none
 class(ufo_marinevertinterp), intent(inout) :: self
+
+if (allocated(self%varin))  deallocate(self%varin)
+if (allocated(self%varout)) deallocate(self%varout)
 
 end subroutine ufo_marinevertinterp_delete
 

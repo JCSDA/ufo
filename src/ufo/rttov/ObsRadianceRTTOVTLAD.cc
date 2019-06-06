@@ -34,13 +34,9 @@ ObsRadianceRTTOVTLAD::ObsRadianceRTTOVTLAD(const ioda::ObsSpace & odb,
   const std::vector<std::string> vv{"air_temperature"};
   varin_.reset(new oops::Variables(vv));
 
-  // parse channels from the config and create variable names
-  std::string chlist = config.getString("channels");
-  std::set<int> channels = oops::parseIntSet(chlist);
-  channels_.reserve(channels.size());
-  for (const int jj : channels) {
-    channels_.push_back(jj);
-  }
+  // get channels
+  const oops::Variables & observed = odb.obsvariables();
+  channels_ = observed.channels();
 
 //  const eckit::LocalConfiguration obsOptions(config, "ObsOptions");
 //  const eckit::Configuration * configc = &obsOptions;

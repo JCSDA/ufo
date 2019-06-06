@@ -21,8 +21,7 @@ module ufo_identity_mod
  type, public :: ufo_identity
  private
     integer, public :: nvars
-    character(len=max_string), public, allocatable :: varin(:)
-    character(len=max_string), public, allocatable :: varout(:)
+    character(len=max_string), public, allocatable :: vars(:)
  contains
    procedure :: setup  => identity_setup_
    procedure :: simobs => identity_simobs_
@@ -32,33 +31,14 @@ module ufo_identity_mod
 contains
 
 ! ------------------------------------------------------------------------------
-subroutine identity_setup_(self, c_conf)
-   use config_mod
+subroutine identity_setup_(self, vars)
    implicit none
    class(ufo_identity), intent(inout) :: self
-   type(c_ptr),        intent(in)     :: c_conf
+   character(len=MAXVARLEN), dimension(:), intent(inout) :: vars
 
-   integer :: ii
-
-  !> Size of variables
-  self%nvars = size(config_get_string_vector(c_conf, max_string, "variables"))
-
-  !> Allocate varout: variables in the observation vector
-  allocate(self%varin(self%nvars))
-
-  !> Read variable list and store in varout
-  self%varin = config_get_string_vector(c_conf, max_string, "variables")
-
-  !> -----------------------------------------------------------------------------
-  !> Allocate varin: variables we need from the model
-  !> need additional slot to hold vertical coord.
-
-  allocate(self%varout(self%nvars))
-
-  !> Set vars_in based on vars_out
-  do ii = 1, self%nvars
-    self%varout(ii) = self%varin(ii)
-  enddo
+  self%nvars = size(vars)
+  allocate(self%vars(self%nvars))
+  self%vars = vars
 
 end subroutine identity_setup_
 
@@ -78,7 +58,7 @@ subroutine identity_simobs_(self, geovals, obss, nvars, nlocs, hofx)
 
   do ivar = 1, self%nvars
     !> Get the name of input variable in geovals
-    geovar = self%varin(ivar)
+    geovar = self%vars(ivar)
 
     !> Get profile for this variable from geovals
     call ufo_geovals_get_var(geovals, geovar, point)
@@ -95,8 +75,7 @@ end subroutine identity_simobs_
 ! ------------------------------------------------------------------------------
 subroutine destructor(self)
   type(ufo_identity), intent(inout) :: self
-  if (allocated(self%varout)) deallocate(self%varout)
-  if (allocated(self%varin)) deallocate(self%varin)
+  if (allocated(self%vars)) deallocate(self%vars)
 end subroutine destructor
 
 

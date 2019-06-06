@@ -31,14 +31,18 @@ static LinearObsOperatorMaker<ObsAtmVertInterpTLAD> makerSatwindTL_("Satwind");
 // -----------------------------------------------------------------------------
 
 ObsAtmVertInterpTLAD::ObsAtmVertInterpTLAD(const ioda::ObsSpace & odb,
-                                     const eckit::Configuration & config)
+                                           const eckit::Configuration & config)
   : keyOperAtmVertInterp_(0), varin_(), odb_(odb)
 {
   int c_name_size = 200;
   char *buffin = new char[c_name_size];
   const eckit::Configuration * configc = &config;
 
-  ufo_atmvertinterp_tlad_setup_f90(keyOperAtmVertInterp_, &configc, buffin, c_name_size);
+  const oops::Variables & observed = odb.obsvariables();
+  const eckit::Configuration * varconfig = &observed.toFortran();
+
+  ufo_atmvertinterp_tlad_setup_f90(keyOperAtmVertInterp_, &configc, &varconfig, buffin,
+                                   c_name_size);
 
   std::string vstr_in(buffin);
   std::vector<std::string> vvin;

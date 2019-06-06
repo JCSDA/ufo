@@ -32,27 +32,22 @@ module ufo_atmvertinterp_mod
 contains
 ! ------------------------------------------------------------------------------
 
-subroutine atmvertinterp_setup_(self, c_conf)
-  use config_mod
+subroutine atmvertinterp_setup_(self, vars)
   implicit none
   class(ufo_atmvertinterp), intent(inout) :: self
-  type(c_ptr), intent(in)    :: c_conf
-
-  integer :: ii
+  character(len=MAXVARLEN), dimension(:), intent(inout) :: vars
 
   !> Size of variables
-  self%nvars = size(config_get_string_vector(c_conf, max_string, "variables"))
+  self%nvars = size(vars)
   !> Allocate varout: variables in the observation vector
   allocate(self%varout(self%nvars))
   !> Read variable list and store in varout
-  self%varout = config_get_string_vector(c_conf, max_string, "variables")
+  self%varout = vars
   !> Allocate varin: variables we need from the model
   !  need additional slot to hold vertical coord.
   allocate(self%varin(self%nvars+1))
   !> Set vars_in based on vars_out
-  do ii = 1, self%nvars
-    self%varin(ii) = self%varout(ii)
-  enddo
+  self%varin(1:self%nvars) = self%varout(1:self%nvars)
   !> Put log pressure to the varin (vars from the model) list
   self%varin(self%nvars+1) = var_prs
 
@@ -80,6 +75,7 @@ subroutine atmvertinterp_simobs_(self, geovals, obss, nvars, nlocs, hofx)
   call ufo_geovals_get_var(geovals, var_prs, presprofile)
 
   ! Get the observation vertical coordinates
+  print *, 'nvars, nlocs: ', nvars, nlocs
   allocate(obspressure(nlocs))
   call obsspace_get_db(obss, "MetaData", "air_pressure", obspressure)
 
