@@ -140,6 +140,9 @@ integer :: iobs, icat, ncat
 type(ufo_geoval), pointer :: icefrac_d, icethick_d
 real(c_double) :: missing
 
+!> Set missing value
+missing = missing_value(missing)
+
 ! check if trajectory was set
 if (.not. self%ltraj) then
   write(err_msg,*) myname_, ' trajectory wasnt set!'
