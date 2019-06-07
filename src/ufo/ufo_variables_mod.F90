@@ -112,6 +112,27 @@ character(len=MAXVARLEN), public :: var_sens_heat     = "upward_sensible_heat_fl
 character(len=MAXVARLEN), public :: var_lw_rad        = "net_downwelling_longwave_radiation"
 character(len=MAXVARLEN), public :: var_sea_fric_vel  = "friction_velocity_over_water"
 
+
+character(len=MAXVARLEN), public, parameter :: var_du001 = "dust_mixing_ratio_bin1"
+character(len=MAXVARLEN), public, parameter :: var_du002 = "dust_mixing_ratio_bin2"
+character(len=MAXVARLEN), public, parameter :: var_du003 = "dust_mixing_ratio_bin3"
+character(len=MAXVARLEN), public, parameter :: var_du004 = "dust_mixing_ratio_bin4"
+character(len=MAXVARLEN), public, parameter :: var_du005 = "dust_mixing_ratio_bin5"
+character(len=MAXVARLEN), public, parameter :: var_ss001 = "sea_salt_mixing_ratio_bin1"
+character(len=MAXVARLEN), public, parameter :: var_ss002 = "sea_salt_mixing_ratio_bin2"
+character(len=MAXVARLEN), public, parameter :: var_ss003 = "sea_salt_mixing_ratio_bin3"
+character(len=MAXVARLEN), public, parameter :: var_ss004 = "sea_salt_mixing_ratio_bin4"
+character(len=MAXVARLEN), public, parameter :: var_ss005 = "sea_salt_mixing_ratio_bin5"
+character(len=MAXVARLEN), public, parameter :: var_bcphobic = "hydrophobic_black_carbon"
+character(len=MAXVARLEN), public, parameter :: var_bcphilic = "hydrophilic_black_carbon"
+character(len=MAXVARLEN), public, parameter :: var_ocphobic = "hydrophobic_organic_carbon"
+character(len=MAXVARLEN), public, parameter :: var_ocphilic = "hydrophilic_organic_carbon"
+character(len=MAXVARLEN), public, parameter :: var_sulfate = "sulfate_aerosols"
+character(len=MAXVARLEN), public, parameter :: var_no3an1 = "nitrate_size_bin1"
+character(len=MAXVARLEN), public, parameter :: var_no3an2 = "nitrate_size_bin2"
+character(len=MAXVARLEN), public, parameter :: var_no3an3 = "nitrate_size_bin3"
+
+
 ! ------------------------------------------------------------------------------
 contains
 
