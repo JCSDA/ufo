@@ -15,7 +15,6 @@ Observations:
  ObsTypes: 
  - ObsOperator:
      name: CRTM
-     channels: 1,6-7
      n_Absorbers: 3
      n_Clouds: 0
      n_Aerosols: 0
@@ -23,9 +22,12 @@ Observations:
      EndianType: little_endian
      CoefficientPath: Data/
    ObsSpace: 
-     name: Radiance
+     name: airs_aqua
      ObsDataIn: 
        obsfile: Data/airs_aqua_obs_2018041500_m.nc4
+     simulate:
+       variables: [brightness_temperature]
+       channels: 1,6-7
    GeoVaLs: 
      filename: Data/airs_aqua_geoval_2018041500_m.nc4
    vecequiv: GsiHofX

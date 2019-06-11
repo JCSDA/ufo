@@ -25,14 +25,14 @@ module ufo_radiancerttov_mod
  private
 
 !> Fortran derived type for the observation type
- TYPE, EXTENDS(ufo_basis), PUBLIC :: ufo_radiancerttov
-   PRIVATE
-   TYPE(rad_conf) :: rc
+ type, public :: ufo_radiancerttov
+   private
+   type(rttov_conf) :: conf
  CONTAINS
-   PROCEDURE :: setup  => ufo_radiancerttov_setup
-   PROCEDURE :: delete => ufo_radiancerttov_delete
-   PROCEDURE :: simobs => ufo_radiancerttov_simobs
- END TYPE ufo_radiancerttov
+   procedure :: setup  => ufo_radiancerttov_setup
+   procedure :: delete => ufo_radiancerttov_delete
+   procedure :: simobs => ufo_radiancerttov_simobs
+ end type ufo_radiancerttov
 
 contains
 
@@ -42,7 +42,7 @@ implicit none
 class(ufo_radiancerttov), intent(inout) :: self
 type(c_ptr),        intent(in)    :: c_conf
 
-CALL rad_conf_setup(self % rc,c_conf)
+call rttov_conf_setup(self % conf,c_conf)
 
 end subroutine ufo_radiancerttov_setup
 
@@ -51,74 +51,87 @@ subroutine ufo_radiancerttov_delete(self)
 implicit none
 class(ufo_radiancerttov), intent(inout) :: self
 
-CALL rad_conf_delete(self % rc)
+ call rttov_conf_delete(self%conf)
 
 end subroutine ufo_radiancerttov_delete
 
 ! ------------------------------------------------------------------------------
-SUBROUTINE ufo_radiancerttov_simobs(self, geovals, hofx, obss)
+SUBROUTINE ufo_radiancerttov_simobs(self, geovals, hofx, obss, channels)
 
-USE ufo_radiancerttov_utils_mod , ONLY : config_rttov
+use fckit_log_module, only : fckit_log
 
 implicit none
 class(ufo_radiancerttov), intent(in) :: self
-type(ufo_geovals),  intent(in)       :: geovals
-real(c_double),     intent(inout)    :: hofx(:)
-type(c_ptr), value, intent(in)       :: obss
+type(ufo_geovals),        intent(in) :: geovals
+real(c_double),        intent(inout) :: hofx(:)
+type(c_ptr), value,       intent(in) :: obss
+integer(c_int),           intent(in) :: channels(:)  !List of channels to use
 
-  ! Local Variables
-  CHARACTER(*), PARAMETER          :: PROGRAM_NAME = 'ufo_radiancerttov_mod.F90'
-  CHARACTER(255)                   :: message, version
-  INTEGER                          :: err_stat, alloc_stat
-  INTEGER                          :: l, m, n, i, s, ierr
-  TYPE(ufo_geoval), POINTER        :: temp
+! Local Variables
+character(*), parameter          :: PROGRAM_NAME = 'ufo_radiancerttov_mod.F90'
+character(255)                   :: message, version
+integer                          :: err_stat, alloc_stat
+integer                          :: l, m, n, i, s, ierr
+type(ufo_geoval), pointer        :: temp
 
-  INTEGER                          :: nprofiles
-  INTEGER                          :: nlayers
+integer                          :: nprofiles
 
-  TYPE(rttov_chanprof),    POINTER :: chanprof(:)    => NULL() ! Input channel/profile list
-  LOGICAL(KIND=jplm),      POINTER :: calcemis(:)    => NULL() ! Flag to indicate calculation of emissivity within RTTOV
-  TYPE(rttov_emissivity),  POINTER :: emissivity(:)  => NULL() ! Input/output surface emissivity
-  TYPE(rttov_profile),     POINTER :: profiles(:)    => NULL() ! Input profiles
-  TYPE(rttov_transmission)         :: transmission             ! Output transmittances
-  TYPE(rttov_radiance)             :: radiance                 ! Output radiances
+type(rttov_chanprof),    pointer :: chanprof(:)    => NULL() ! Input channel/profile list
+logical(kind=jplm),      pointer :: calcemis(:)    => NULL() ! Flag to indicate calculation of emissivity within RTTOV
+type(rttov_emissivity),  pointer :: emissivity(:)  => NULL() ! Input/output surface emissivity
+type(rttov_profile),     pointer :: profiles(:)    => NULL() ! Input profiles
+type(rttov_transmission)         :: transmission             ! Output transmittances
+type(rttov_radiance)             :: radiance                 ! Output radiances
 
-  INTEGER(KIND=jpim)               :: errorstatus              ! Return error status of RTTOV subroutine calls
+integer(kind=jpim)               :: errorstatus              ! Return error status of RTTOV subroutine calls
 
-  INTEGER                          :: i_inst,j , jch, nlevels, nch, nchannels, nchans_total, nchans_inst, asw
+integer                          :: i_inst,j , jch, nlevels, nch, nchans_total, nchans_inst, asw
 
-  INCLUDE 'rttov_direct.interface'
-  INCLUDE 'rttov_alloc_direct.interface'
+integer                          :: nprof_sim, nchan_sim, nchan_max_sim, nprof_max_sim
+integer                          :: prof_start, prof_end
 
- ! Get number of profile and layers from geovals
- ! ---------------------------------------------
- nprofiles = geovals % nlocs
- call ufo_geovals_get_var(geovals, var_ts, temp)
- nlayers = temp % nval
- nlevels = nlayers + 1
- nullify(temp)
+character(MAXVARLEN) :: varname
 
- hofx(:) = 0.0_kind_real
- errorstatus = 0_jpim
- nchans_total = 0
- 
- asw = 1
+INCLUDE 'rttov_direct.interface'
+INCLUDE 'rttov_print_profile.interface'
+INCLUDE 'rttov_alloc_direct.interface'
+INCLUDE 'rttov_user_profile_checkinput.interface'
 
- IF( .NOT. config_rttov % rttov_is_setup) THEN
-   CALL config_rttov % setup(self % rc, asw)
- ENDIF
+! Get number of profile and layers from geovals
+! ---------------------------------------------
 
- Sensor_Loop:DO i_inst = 1, self % rc % nSensors
+nprofiles = geovals % nlocs
+varname = 'air_pressure' !var_prsi
+call ufo_geovals_get_var(geovals, varname, temp)
+nlevels = temp % nval ! lfric passing nlevels
+nullify(temp)
 
-  nchans_inst = config_rttov % rttov_coef_array(i_inst) % coef % fmv_chn
-    
+hofx(:) = 0.0_kind_real
+errorstatus = 0_jpim
+nchans_total = 0
+
+nchan_max_sim = 300 ! Maximum number of channels to pass to RTTOV to simulate
+
+if( .NOT. config_rttov % rttov_is_setup) then
+  asw = 1
+  call config_rttov % setup(self % conf, asw)
+end if
+
+Sensor_Loop:do i_inst = 1, self % conf % nSensors
+
+!  nchans_inst = config_rttov % rttov_coef_array(i_inst) % coef % fmv_chn
+  nchans_inst = SIZE(channels)
+
   ! Ensure the options and coefficients are consistent
-  CALL rttov_user_options_checkinput(errorstatus, config_rttov % opts, config_rttov % rttov_coef_array(i_inst))
-  IF (errorstatus /= errorstatus_success) THEN
-    WRITE(*,*) 'error in rttov options'
-    CALL rttov_exit(errorstatus)
-  ENDIF
+  call rttov_user_options_checkinput(errorstatus, config_rttov % opts, &
+                                     config_rttov % rttov_coef_array(i_inst))
 
+  if (errorstatus /= errorstatus_success) then
+    write(message,'(A, I6)') 'after rttov_user_options_checkinput: error = ',&
+      errorstatus
+    call fckit_log%info(message)
+    call rttov_exit(errorstatus)
+  end if
   ! --------------------------------------------------------------------------
   ! 3. Allocate RTTOV input and output structures
   ! --------------------------------------------------------------------------
@@ -126,18 +139,21 @@ type(c_ptr), value, intent(in)       :: obss
   ! Determine the total number of radiances to simulate (nchanprof).
   ! In this example we simulate all specified channels for each profile, but
   ! in general one can simulate a different number of channels for each profile.
-  nchannels = nchans_inst * nprofiles
+
+  nprof_max_sim = nchan_max_sim / nchans_inst
+  nprof_sim = MIN(nprof_max_sim, nprofiles)
+  nchan_sim = nprof_sim * nchans_inst
 
   ! Allocate structures for rttov_direct
-  CALL rttov_alloc_direct( &
-        errorstatus,             &
-        1_jpim,                  &  ! 1 => allocate
-        nprofiles,              &
-        nchannels,               &
+  call rttov_alloc_direct( &
+        errorstatus,            &
+        1_jpim,                 &  ! 1 => allocate
+        nprof_sim,              &
+        nchan_sim,              &
         nlevels,                &
-        chanprof,                &
-        config_rttov % opts,              &
-        profiles,                &
+        chanprof,               &
+        config_rttov % opts,    &
+        profiles,               &
         config_rttov % rttov_coef_array(i_inst),&
         transmission,            &
         radiance,                &
@@ -145,75 +161,88 @@ type(c_ptr), value, intent(in)       :: obss
         emissivity=emissivity,   &
         init=.TRUE._jplm)
 
-  IF (errorstatus /= errorstatus_success) THEN
-    WRITE(*,*) 'allocation error for rttov_direct structures'
-    CALL rttov_exit(errorstatus)
-  ENDIF
-
+  if (errorstatus /= errorstatus_success) then
+    write(message,'(A, I6)') 'after rttov_alloc_direct error = ', errorstatus
+    call fckit_log%info(message)
+    call rttov_exit(errorstatus)
+  end if 
   ! --------------------------------------------------------------------------
   ! 4. Build the list of profile/channel indices in chanprof
   ! --------------------------------------------------------------------------
+  prof_start = 1
+  prof_end = nprofiles
 
-  nch = 0_jpim
-  DO j = 1, nprofiles
-    DO jch = 1, nchans_inst
-      nch = nch + 1_jpim
-      chanprof(nch) % prof = j
-      chanprof(nch) % chan = jch ! only all channels for now. Look at OPS for better implementation.
-    ENDDO
-  ENDDO
+  do while ( prof_start <= prof_end)
+    
+    nch = 0_jpim
+    do j = 1, MIN(nprof_sim, prof_end - prof_start + 1)
+      do jch = 1, nchans_inst
+        
+        nch = nch + 1_jpim
+        chanprof(nch) % prof = j
+        chanprof(nch) % chan = channels(jch)
+      end do
+    end do
 
-   !Assign the data from the GeoVaLs
-   !--------------------------------
+    !Assign the data from the GeoVaLs
+    !--------------------------------
+    call load_atm_data_rttov(geovals,obss,profiles,prof_start)
 
-   CALL load_atm_data_rttov(nprofiles,nlayers,geovals,obss,profiles)
+    call load_geom_data_rttov(obss,profiles,prof_start)
 
-   call load_geom_data_rttov(obss,profiles)
+    call rttov_user_profile_checkinput(rttov_errorstatus, &
+      config_rttov % opts, &
+      config_rttov % rttov_coef_array(i_inst), &
+      profiles(1))
 
-  ! --------------------------------------------------------------------------
-  ! 6. Specify surface emissivity and reflectance
-  ! --------------------------------------------------------------------------
+    ! --------------------------------------------------------------------------
+    ! 6. Specify surface emissivity and reflectance
+    ! --------------------------------------------------------------------------
 
-  ! In this example we have no values for input emissivities
-  emissivity(:) % emis_in = 0._jprb
+    ! In this example we have no values for input emissivities
+    emissivity(:) % emis_in = 0._jprb
 
-  ! Calculate emissivity within RTTOV where the input emissivity value is
-  ! zero or less (all channels in this case)
-  calcemis(:) = (emissivity(:) % emis_in <= 0._jprb)
+    ! Calculate emissivity within RTTOV where the input emissivity value is
+    ! zero or less (all channels in this case)
+    calcemis(:) = (emissivity(:) % emis_in <= 0._jprb)
 
-   ! --------------------------------------------------------------------------
-   ! 7. Call RTTOV forward model
-   ! --------------------------------------------------------------------------
-   CALL rttov_direct(                         &
-     errorstatus,                             &! out   error flag
-     chanprof,                                &! in    channel and profile index structure
-     config_rttov % opts,                     &! in    options structure
-     profiles,                                &! in    profile array
-     config_rttov % rttov_coef_array(i_inst), &! in    coefficients structure
-     transmission,                            &! inout computed transmittances
-     radiance,                                &! inout computed radiances
-     calcemis    = calcemis,                  &! in    flag for internal emissivity calcs
-     emissivity  = emissivity)!,              &! inout input/output emissivities per channel
-       
-   IF ( errorstatus /= errorstatus_success ) THEN
-     message = 'Error calling RTTOV Forward Model for amsua'!//TRIM(SENSOR_ID(n))
-     WRITE(*,*) message
-     STOP
-   END IF
+    call rttov_print_profile(profiles(1))
 
-   ! Put simulated brightness temperature into hofx
-   ! ----------------------------------------------
-   
-   hofx(nchans_total+1:nchans_total+nchannels) = radiance % bt(1:nchannels)
+    ! --------------------------------------------------------------------------
+    ! 7. Call RTTOV forward model
+    ! --------------------------------------------------------------------------
+    call rttov_direct(                         &
+      errorstatus,                             &! out   error flag
+      chanprof,                                &! in    channel and profile index structure
+      config_rttov % opts,                     &! in    options structure
+      profiles,                                &! in    profile array
+      config_rttov % rttov_coef_array(i_inst), &! in    coefficients structure
+      transmission,                            &! inout computed transmittances
+      radiance,                                &! inout computed radiances
+      calcemis    = calcemis,                  &! in    flag for internal emissivity calcs
+      emissivity  = emissivity)!,              &! inout input/output emissivities per channel
 
-   nchans_total = nchans_total + nchannels
+    if ( errorstatus /= errorstatus_success ) then
+      write(message,'(A, 2I6)') 'after rttov_direct: error ', errorstatus, i_inst
+      call fckit_log%info(message)
+    end if
+
+    ! Put simulated brightness temperature into hofx
+    ! ----------------------------------------------
+
+    hofx(nchans_total+1:nchans_total+nchan_sim) = radiance % bt(1:nchan_sim)
+
+    nchans_total = nchans_total + nchan_sim
+
+    prof_start = prof_start + nprof_sim
+  end do
 
   ! Allocate structures for rttov_direct
-  CALL rttov_alloc_direct(                       &
+  call rttov_alloc_direct(                       &
         errorstatus,                             &
         0_jpim,                                  &  ! 0 => deallocate
-        nprofiles,                              &
-        nchannels,                               &
+        nprof_sim,                              &
+        nchan_sim,                               &
         nlevels,                                &
         chanprof,                                &
         config_rttov % opts,                     &
@@ -224,14 +253,17 @@ type(c_ptr), value, intent(in)       :: obss
         calcemis = calcemis,                     &
         emissivity = emissivity)
 
-  IF (errorstatus /= errorstatus_success) THEN
-    WRITE(*,*) 'deallocation error for rttov_direct structures'
-    CALL rttov_exit(errorstatus)
-  ENDIF
+  if (errorstatus /= errorstatus_success) then
+    write(message,'(A, 2I6)') &
+      'after rttov_alloc_direct (deallocation): errorstatus, i_inst =', &
+      errorstatus, i_inst
+    call fckit_log%info(message)
+    call rttov_exit(errorstatus)
+  end if
 
-END DO Sensor_Loop
+end do Sensor_Loop
 
-END SUBROUTINE ufo_radiancerttov_simobs
+end subroutine ufo_radiancerttov_simobs
 
 ! ------------------------------------------------------------------------------
 

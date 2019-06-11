@@ -15,19 +15,21 @@ Observations:
  ObsTypes: 
  - ObsOperator:
      name: Aod
-     channels: 4
      ObsOptions:
-      n_Absorbers: 2
-      n_Clouds: 0
-      Sensor_ID: v.viirs-m_npp
-      EndianType: little_endian
-      CoefficientPath: Data/
-      AerosolOption: aerosols_gocart_default
+       n_Absorbers: 2
+       n_Clouds: 0
+       Sensor_ID: v.viirs-m_npp
+       EndianType: little_endian
+       CoefficientPath: Data/
+       AerosolOption: aerosols_gocart_default
    ObsSpace: 
-    name: Aod
-    ObsDataIn: 
-     obsfile: Data/aod_obs_2018041500_m.nc4
+     name: Aod
+     ObsDataIn: 
+       obsfile: Data/aod_obs_2018041500_m.nc4
+     simulate:
+       variables: [aerosol_optical_depth]
+       channels: 4
    GeoVaLs: 
-    filename: Data/aod_geoval_2018041500_m.nc4
+     filename: Data/aod_geoval_2018041500_m.nc4
    vecequiv: GsiHofX
    tolerance: 1.0e-06

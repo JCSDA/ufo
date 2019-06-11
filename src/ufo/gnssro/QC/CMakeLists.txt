@@ -4,11 +4,6 @@
 # which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 
 set (  qc_src_files
-       ROgeorealityCheck.h
-       ROgeorealityCheck.cc 
-       ROgeorealityCheck.interface.F90  
-       ROgeorealityCheck.interface.h
-       ufo_rogeorealitycheck_mod.F90
        ROobserror.h
        ROobserror.cc
        ROobserror.interface.F90  

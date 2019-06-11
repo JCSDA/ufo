@@ -19,6 +19,8 @@ Observations:
       name: SeaIceFraction
       ObsDataIn:
         obsfile: Data/icec-2018-04-15.nc
+      simulate:
+        variables: [sea_ice_area_fraction]
     GeoVaLs:
       filename: Data/icec-2018-04-15_geovals.nc
     rmsequiv: 2.5

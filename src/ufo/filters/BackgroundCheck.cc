@@ -69,8 +69,8 @@ void BackgroundCheck::priorFilter(const GeoVaLs & gv) const {
 void BackgroundCheck::postFilter(const ioda::ObsVector & hofx) const {
   oops::Log::trace() << "BackgroundCheck postFilter" << std::endl;
 
-  const oops::Variables vars(config_.getStringVector("variables"));
-  const oops::Variables observed(config_.getStringVector("observed"));
+  const oops::Variables vars(config_);
+  const oops::Variables observed = obsdb_.obsvariables();
   const float missing = util::missingValue(missing);
 
   oops::Log::debug() << "BackgroundCheck flags: " << flags_;

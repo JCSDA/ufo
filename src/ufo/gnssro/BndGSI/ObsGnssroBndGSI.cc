@@ -17,7 +17,6 @@
 #include "oops/util/Logger.h"
 
 #include "ufo/GeoVaLs.h"
-#include "ufo/ObsBias.h"
 
 namespace ufo {
 
@@ -26,7 +25,7 @@ static ObsOperatorMaker<ObsGnssroBndGSI> makerGnssroBndGSI_("GnssroBndGSI");
 // -----------------------------------------------------------------------------
 
 ObsGnssroBndGSI::ObsGnssroBndGSI(const ioda::ObsSpace & odb, const eckit::Configuration & config)
-  : ObsOperatorBase(odb, config), keyOperGnssroBndGSI_(0), odb_(odb), varin_(), varout_()
+  : ObsOperatorBase(odb, config), keyOperGnssroBndGSI_(0), odb_(odb), varin_()
 {
   std::vector<std::string> vv{"air_temperature", "specific_humidity"};
 
@@ -52,9 +51,6 @@ ObsGnssroBndGSI::ObsGnssroBndGSI(const ioda::ObsSpace & odb, const eckit::Config
 
   varin_.reset(new oops::Variables(vv));
 
-  const std::vector<std::string> vout{"bending_angle"};
-  varout_.reset(new oops::Variables(vout));
-
   ufo_gnssro_bndgsi_setup_f90(keyOperGnssroBndGSI_, &configc);
   oops::Log::trace() << "ObsGnssroBndGSI created." << std::endl;
 }
@@ -68,10 +64,9 @@ ObsGnssroBndGSI::~ObsGnssroBndGSI() {
 
 // -----------------------------------------------------------------------------
 
-void ObsGnssroBndGSI::simulateObs(const GeoVaLs & gom, ioda::ObsVector & ovec,
-                                const ObsBias & bias) const {
+void ObsGnssroBndGSI::simulateObs(const GeoVaLs & gom, ioda::ObsVector & ovec) const {
   ufo_gnssro_bndgsi_simobs_f90(keyOperGnssroBndGSI_, gom.toFortran(), odb_,
-                               ovec.size(), ovec.toFortran(), bias.toFortran());
+                               ovec.size(), ovec.toFortran());
 }
 
 // -----------------------------------------------------------------------------

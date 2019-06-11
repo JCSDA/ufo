@@ -104,7 +104,7 @@ subroutine init_ropp_1d_statevec(step_time,rlon,rlat, temp,shum,pres,phi,lm,phi_
    do k = 1, lm
       x%temp(n) = real(temp(k),kind=wp)
       x%shum(n) = real(shum(k),kind=wp)
-      x%pres(n) = real(pres(k)*100.,kind=wp)
+      x%pres(n) = real(pres(k),kind=wp)
       x%geop(n) = real(phi(k),kind=wp)
       n = n - 1
    end do
@@ -112,7 +112,7 @@ else
    do k = 1, lm
       x%temp(k) = real(temp(k),kind=wp)
       x%shum(k) = real(shum(k),kind=wp)
-      x%pres(k) = real(pres(k)*100.,kind=wp)
+      x%pres(k) = real(pres(k),kind=wp)
       x%geop(k) = real(phi(k),kind=wp)
    end do
 end if
@@ -204,8 +204,8 @@ subroutine init_ropp_1d_statevec_ad(temp_d,shum_d,pres_d,phi_d,lm,x_ad, iflip)
        shum_d(k) = shum_d(k) + real(x_ad%shum(n),kind=kind_real)
        x_ad%shum(n) = 0.0_wp
 
-!!     x_tl%pres(n,:) = real(pres_d(k)*100.,kind=wp)
-       pres_d(k) = pres_d(k) + 100.0*real(x_ad%pres(n),kind=kind_real)
+!!     x_tl%pres(n,:) = real(pres_d(k),kind=wp)
+       pres_d(k) = pres_d(k) + real(x_ad%pres(n),kind=kind_real)
        x_ad%pres(n) = 0.0_wp 
 
 !!     x_tl%geop(n,:) = real(phi_d(k),kind=wp)
@@ -220,7 +220,7 @@ subroutine init_ropp_1d_statevec_ad(temp_d,shum_d,pres_d,phi_d,lm,x_ad, iflip)
        x_ad%temp(k) = 0.0_wp
        shum_d(k) = shum_d(k) + real(x_ad%shum(k),kind=kind_real)
        x_ad%shum(k) = 0.0_wp
-       pres_d(k) = pres_d(k) + 100.0*real(x_ad%pres(k),kind=kind_real)
+       pres_d(k) = pres_d(k) + real(x_ad%pres(k),kind=kind_real)
        x_ad%pres(k) = 0.0_wp
        phi_d(k) = phi_d(k) + real(x_ad%geop(k),kind=kind_real)
        x_ad%geop(k) = 0.0_wp

@@ -27,10 +27,10 @@ extern "C" {
 // -----------------------------------------------------------------------------
 
   void ufo_atmvertinterp_setup_f90(F90hop &, const eckit::Configuration * const *,
-                                char *, char *, const int &);
+                                const eckit::Configuration * const *, char *, const int &);
   void ufo_atmvertinterp_delete_f90(F90hop &);
   void ufo_atmvertinterp_simobs_f90(const F90hop &, const F90goms &, const ioda::ObsSpace &,
-                                 const int &, const int &, double &, const F90obias &);
+                                 const int &, const int &, double &);
 // -----------------------------------------------------------------------------
 
 }  // extern C

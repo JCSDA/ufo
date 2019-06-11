@@ -16,7 +16,6 @@
 #include "oops/base/Variables.h"
 
 #include "ufo/GeoVaLs.h"
-#include "ufo/ObsBias.h"
 
 
 namespace ufo {
@@ -26,7 +25,7 @@ static ObsOperatorMaker<ObsCoolSkin> makerCoolSkin_("CoolSkin");
 // -----------------------------------------------------------------------------
 
 ObsCoolSkin::ObsCoolSkin(const ioda::ObsSpace & odb, const eckit::Configuration & config)
-  : ObsOperatorBase(odb, config), keyOper_(0), odb_(odb), varin_(), varout_()
+  : ObsOperatorBase(odb, config), keyOper_(0), odb_(odb), varin_()
 {
   const std::vector<std::string> vvin{"sea_surface_temperature",
                                       "net_downwelling_shortwave_radiation",
@@ -36,9 +35,6 @@ ObsCoolSkin::ObsCoolSkin(const ioda::ObsSpace & odb, const eckit::Configuration 
                                       "friction_velocity_over_water"};
   varin_.reset(new oops::Variables(vvin));
 
-  const std::vector<std::string> vvout{"sea_surface_temperature"};
-
-  varout_.reset(new oops::Variables(vvout));
   const eckit::Configuration * configc = &config;
   ufo_CoolSkin_setup_f90(keyOper_, &configc);
   oops::Log::trace() << "ObsCoolSkin created." << std::endl;
@@ -53,10 +49,8 @@ ObsCoolSkin::~ObsCoolSkin() {
 
 // -----------------------------------------------------------------------------
 
-void ObsCoolSkin::simulateObs(const GeoVaLs & gv, ioda::ObsVector & ovec,
-                         const ObsBias & bias) const {
-  ufo_CoolSkin_simobs_f90(keyOper_, gv.toFortran(), odb_, ovec.size(), ovec.toFortran(),
-                     bias.toFortran());
+void ObsCoolSkin::simulateObs(const GeoVaLs & gv, ioda::ObsVector & ovec) const {
+  ufo_CoolSkin_simobs_f90(keyOper_, gv.toFortran(), odb_, ovec.size(), ovec.toFortran());
   oops::Log::trace() << "ObsCoolSkin: observation operator run" << std::endl;
 }
 

@@ -5,395 +5,482 @@
 
 !> Fortran module to provide code shared between nonlinear and tlm/adm radiance calculations
 
-MODULE ufo_radiancerttov_utils_mod
+module ufo_radiancerttov_utils_mod
 
 use iso_c_binding
 use config_mod
 use kinds
 
-USE rttov_types, ONLY : rttov_options, rttov_profile, rttov_coefs, &
+use rttov_types, only : rttov_options, rttov_profile, rttov_coefs, &
                         rttov_radiance, rttov_transmission, rttov_emissivity, &
                         rttov_chanprof
-USE rttov_const, ONLY : errorstatus_success, deg2rad
+use rttov_const, only : errorstatus_success, deg2rad
 
 use ufo_vars_mod
 use ufo_geovals_mod, only: ufo_geovals, ufo_geoval, ufo_geovals_get_var
 use ufo_basis_mod, only: ufo_basis
-use obsspace_mod
 
 implicit none
 private
 
-public rad_conf
-public rad_conf_setup
-public rad_conf_delete
+public rttov_conf
+public rttov_conf_setup
+public rttov_conf_delete
 public load_atm_data_rttov
 public load_geom_data_rttov
 
 integer, parameter, public :: max_string=800
 
-INTEGER, public  :: rttov_errorstatus
+integer, public  :: rttov_errorstatus
 
 !Type for general config
-type rad_conf
+type rttov_conf
  integer              :: nsensors
- integer, allocatable :: skiplist(:)
  character(len=255), allocatable :: SENSOR_ID(:)
  character(len=255) :: COEFFICIENT_PATH
-end type rad_conf
+end type rttov_conf
 
-TYPE conf_type_rttov
-  TYPE(rttov_coefs), ALLOCATABLE :: rttov_coef_array(:)
-  TYPE(rttov_options) :: opts
-  LOGICAL :: rttov_is_setup = .FALSE.
-  CONTAINS 
+type conf_type_rttov
+  type(rttov_coefs), allocatable :: rttov_coef_array(:)
+  type(rttov_options) :: opts
+  logical :: rttov_is_setup = .FALSE.
+  contains
     PROCEDURE :: set_opts => set_options_rttov
     PROCEDURE :: setup =>    setup_rttov
-  END TYPE conf_type_rttov
+end type conf_type_rttov
 
-TYPE(conf_type_rttov), PUBLIC :: config_rttov
+type(conf_type_rttov), PUBLIC :: config_rttov
 
 contains
 
 ! ------------------------------------------------------------------------------
 
-SUBROUTINE rad_conf_setup(rc, c_conf)
+subroutine rttov_conf_setup(conf, c_conf)
 
 implicit none
-type(rad_conf), intent(inout) :: rc
+type(rttov_conf), intent(inout) :: conf
 type(c_ptr),    intent(in)    :: c_conf
-
-character(len=1023) :: SkipChannels
-integer :: nskip, i
-character(len=100), allocatable :: skiplist_str(:)
 
 !Number of sensors, each call to RTTOV will be for a single sensor
 !type (zenith/scan angle will be different)
-rc%nSensors = 1
+conf%nSensors = 1
 
 !Allocate SENSOR_ID
-ALLOCATE(rc%SENSOR_ID(rc%nSensors))
+allocate(conf%SENSOR_ID(conf%nSensors))
 
 !Get sensor ID from config
-rc%SENSOR_ID(rc%nSensors) = config_get_string(c_conf,LEN(rc%SENSOR_ID(rc%nSensors)),"Sensor_ID")
+conf%SENSOR_ID(conf%nSensors) = &
+  config_get_string(c_conf,LEN(conf%SENSOR_ID(conf%nSensors)),"Sensor_ID")
 
 !Path to coefficient files
-rc%COEFFICIENT_PATH = config_get_string(c_conf,LEN(rc%COEFFICIENT_PATH),"CoefficientPath")
+conf%COEFFICIENT_PATH = &
+  config_get_string(c_conf,LEN(conf%COEFFICIENT_PATH),"CoefficientPath")
 
-!Channels to skip
-IF (config_element_exists(c_conf,"SkipChannels")) THEN
-  SkipChannels = config_get_string(c_conf,LEN(SkipChannels),"SkipChannels")
-  nskip = 1 + COUNT(TRANSFER(SkipChannels, 'a', LEN(SkipChannels)) == ",")
-  ALLOCATE(skiplist_str(nskip))
-  READ(SkipChannels,*) skiplist_str
-ELSE
-  nskip = 0
-ENDIF
-ALLOCATE(rc%skiplist(nskip))
-DO i = 1,nskip
-  READ(skiplist_str(i),*)  rc%skiplist(i)
-ENDDO
-
-END SUBROUTINE rad_conf_setup
+end subroutine rttov_conf_setup
 
 ! -----------------------------------------------------------------------------
 
-SUBROUTINE rad_conf_delete(rc)
-  
-  IMPLICIT NONE
-  TYPE(rad_conf), INTENT(inout) :: rc
+subroutine rttov_conf_delete(conf)
 
-  DEALLOCATE(rc%SENSOR_ID)
-  DEALLOCATE(rc%skiplist)
+implicit none
+type(rttov_conf), intent(inout) :: conf
 
-END SUBROUTINE rad_conf_delete
+deallocate(conf%SENSOR_ID)
+
+end subroutine rttov_conf_delete
 
 ! -----------------------------------------------------------------------------
 
-SUBROUTINE load_atm_data_rttov(nprofiles,nlayers,geovals,obss,profiles)
-  
-  IMPLICIT NONE
-  
-  INTEGER, INTENT(in) :: nprofiles, nlayers
-  TYPE(ufo_geovals), INTENT(in) :: geovals
-  TYPE(c_ptr), VALUE,       INTENT(in)    :: obss
-  TYPE(rttov_profile), INTENT(inout) :: profiles(:)
-  
-  ! Local variables
-  INTEGER :: k1, nlocs
-  INTEGER :: nlevels
-  TYPE(ufo_geoval), POINTER :: geoval
-  CHARACTER(MAXVARLEN) :: varname
-  CHARACTER(max_string) :: err_msg
-  
-  REAL :: ifrac, sfrac, lfrac
-  REAL :: itmp, stmp, ltmp
-  REAL :: windsp
-  
-  REAL(kind_real), ALLOCATABLE :: TmpVar(:)
-  REAL, PARAMETER :: q_mixratio_to_ppmv  = 1.60771704e+3 ! g/kg -> ppmv
-  
-  nlocs = obsspace_get_nlocs(obss)
-  ALLOCATE(TmpVar(nlocs))
-  
-  nlevels = nlayers + 1
-  
-  DO k1 = 1, geovals%nvar
-    varname = geovals%variables(k1)
-    PRINT *, k1, varname
-  END DO
-  
-  !gas_units are ppmv (moist?)
-  ! assuming wind direction 0 is N but it could be E?
-  
-  DO k1 = 1, nprofiles
+subroutine load_atm_data_rttov(geovals,obss,profiles,prof_start1)
+
+use fckit_log_module, only : fckit_log
+use obsspace_mod, only : obsspace_get_db, obsspace_get_nlocs, obsspace_has
+
+implicit none
+
+type(ufo_geovals), intent(in) :: geovals
+type(c_ptr), VALUE, intent(in) :: obss
+type(rttov_profile), intent(inout) :: profiles(:)
+integer, OPTIONAL, intent(IN) :: prof_start1
+
+! Local variables
+integer :: k1, nlocs_total, iprof
+integer :: nlevels
+integer :: nprofiles
+integer :: prof_start
+
+type(ufo_geoval), pointer :: geoval
+character(MAXVARLEN) :: varname
+character(max_string) :: err_msg
+
+real :: ifrac, sfrac, lfrac
+real :: itmp, stmp, ltmp
+real :: windsp
+
+real(kind_real), allocatable :: TmpVar(:)
+real, parameter :: q_mixratio_to_ppmv  = 1.60771704e+3 ! g/kg -> ppmv
+character(255) :: message
+logical :: variable_present
+
+nlocs_total = obsspace_get_nlocs(obss)
+
+if(PRESENT(prof_start1)) then
+  prof_start = prof_start1
+else
+  prof_start = 1
+end if
+
+nprofiles = SIZE(profiles)
+ 
+nlevels = SIZE(profiles(1)%p)
+
+write(message,'(A, 2I6)') ' load_atm_data_rttov  nprofiles nlevels, ', nprofiles, nlevels
+call fckit_log%info(message)
+
+!  prof_end = MIN(prof_start + nprofiles, nlocs_total)
+
+do k1 = 1, geovals%nvar
+  varname = geovals%variables(k1)
+  write(message,'(I6, A)') k1, varname
+  call fckit_log%info(message)
+end do
+
+!gas_units are ppmv (moist?)
+
 ! gas_units = 1 is mixing_ratio (moist)
 ! gas_units = 2 is ppmv (moist)
 ! gas_units is per-profile and cannot be set for individual instruments.
+profiles(1:nprofiles)%gas_units = 1
 
-    profiles(k1)%gas_units = 2
+varname = "air_pressure" !var_prsi
+call ufo_geovals_get_var(geovals, varname, geoval) ! lfric
 
-    CALL ufo_geovals_get_var(geovals, var_prsi, geoval)
-    profiles(k1)%p(1:nlevels) = geoval%vals(:,k1) ! hPa    
+do iprof = 1, nprofiles
+  profiles(iprof)%p(nlevels:1:-1) = geoval%vals(:,prof_start + iprof - 1) / 100! hPa
+!  profiles(iprof)%p(1) = 0.5 * profiles(iprof)%p(2)
+end do
 
+varname = "air_temperature" !var_ts
+call ufo_geovals_get_var(geovals, varname, geoval) !lfric
 
-    ! ! Check model levels is consistent in geovals & RTTOV
-    !   IF (k1 == 1) THEN
-    !     IF (geoval%nval /= nLayers) THEN
-    !       WRITE(err_msg,*) 'Load_Atm_Data error: layers inconsistent!'
-    !       STOP
-    !     ENDIF
-    !   ENDIF
+do iprof = 1, nprofiles
+  profiles(iprof)%t(nlevels:1:-1) = geoval%vals(:,prof_start + iprof - 1) ! K
+!    profiles(iprof)%t(1) = profiles(iprof)%t(2)
+end do
 
+varname = "specific_humidity" !var_mixr
+call ufo_geovals_get_var(geovals, varname, geoval)
 
-    CALL ufo_geovals_get_var(geovals, var_ts, geoval)
-    profiles(k1)%t(2:nlevels) = geoval%vals(:,k1)
-    profiles(k1)%t(1) = profiles(k1)%t(2)
+do iprof = 1, nprofiles
+  profiles(iprof)%q(nlevels:1:-1) = geoval%vals(:,prof_start + iprof - 1) ! kg/kg
+!    profiles(iprof)%q(1) = profiles(iprof)%q(2)
+end do
 
-    CALL ufo_geovals_get_var(geovals, var_mixr, geoval)
-    profiles(k1)%q(2:nlevels)       = geoval%vals(:,k1)! * q_mixratio_to_ppmv 
-    profiles(k1)%q(1) = profiles(k1)%q(2) 
+if (ASSOCIATED(profiles(1)%o3)) then
+  varname = var_oz
+  call ufo_geovals_get_var(geovals, varname, geoval)
+  do iprof = 1, nprofiles
+    profiles(iprof)%o3(nlevels:1:-1) = geoval%vals(:,prof_start + iprof - 1) ! kg/kg
+!      profiles(iprof)%o3(1) = profiles(iprof)%o3(2)
+  end do
+end if
 
+if(ASSOCIATED(profiles(1)%co2)) then
+  varname = var_co2
+  call ufo_geovals_get_var(geovals, varname, geoval)
+  do iprof = 1, nprofiles
+    profiles(iprof)%co2(nlevels:1:-1) = geoval%vals(:,prof_start + iprof - 1) ! kg/kg
+!      profiles(iprof)%co2(1) = profiles(iprof)%co2(2)
+  end do
+end if
 
-    IF (ASSOCIATED(profiles(k1)%o3)) THEN
-      CALL ufo_geovals_get_var(geovals, var_oz, geoval)
-      profiles(k1)%o3(2:nlevels)       = geoval%vals(:,k1) 
-      profiles(k1)%o3(1) = profiles(k1)%o3(2) 
-    ENDIF
+if (ASSOCIATED(profiles(1)%clw)) then
+  call ufo_geovals_get_var(geovals, var_clw, geoval)
+  do iprof = 1, nprofiles
+    profiles(iprof)%clw(nlevels:1:-1) = geoval%vals(:,prof_start + iprof - 1) ! kg/kg
+!      profiles(iprof)%clw(1) = profiles(iprof)%clw(2)
+  end do
+end if
 
+! Near surface
 
-    IF (ASSOCIATED(profiles(k1)%co2)) THEN
-      CALL ufo_geovals_get_var(geovals, var_co2, geoval)
-      profiles(k1)%co2(2:nlevels)      = geoval%vals(:,k1)
-      profiles(k1)%co2(1) = profiles(k1)%co2(2) 
-    ENDIF
+varname = "air_pressure_at_two_meters_above_surface"
+call ufo_geovals_get_var(geovals, varname, geoval) ! lfric
+profiles(1:nprofiles)%s2m%p = geoval%vals(1,prof_start:prof_start + nprofiles - 1)/ 100
 
-    IF (ASSOCIATED(profiles(k1)%co2)) THEN
-      CALL ufo_geovals_get_var(geovals, var_clw, geoval)
-      profiles(k1)%clw(2:nlevels) = geoval%vals(:,k1)
-      profiles(k1)%clw(1) = profiles(k1)%clw(2) 
-    ENDIF
+varname = "air_temperature_at_two_meters_above_surface"
+call ufo_geovals_get_var(geovals, varname, geoval) ! lfric
+profiles(1:nprofiles)%s2m%t = geoval%vals(1,prof_start:prof_start + nprofiles - 1)
 
-    ! Near surface
-    profiles(k1)%s2m%p = profiles(k1)%p(nlevels)
+varname = "specific_humidity_at_two_meters_above_surface"
+call ufo_geovals_get_var(geovals, varname, geoval) ! lfric
+profiles(1:nprofiles)%s2m%q = geoval%vals(1,prof_start:prof_start + nprofiles - 1)
 
-    !DAR: T2m, q2m is currently defined as temperature at bottom of profile. May not be appropriate.
-    profiles(k1)%s2m%t = profiles(k1)%t(nlevels)
-    profiles(k1)%s2m%q = profiles(k1)%q(nlevels)! * q_mixratio_to_ppmv 
+!DAR: O3_2m unused
+!        profiles(k1)%s2m%o = profiles(k1)%o3(nlevels)
 
-    !DAR: O3_2m unused
-    !        profiles(k1)%s2m%o = profiles(k1)%o3(nlevels)
+! ! 10m windspeed - I wonder if this will ultimately be U10 and V10 so won't need to be converted - should expect either.
+! call ufo_geovals_get_var(geovals, var_sfc_wspeed, geoval)
+! windsp = geoval%vals(1,k1)
 
-    ! 10m windspeed - I wonder if this will ultimately be U10 and V10 so won't need to be converted - should expect either.
-    CALL ufo_geovals_get_var(geovals, var_sfc_wspeed, geoval)
-    windsp = geoval%vals(1,k1)
+! call ufo_geovals_get_var(geovals, var_sfc_wdir, geoval)       
+! profiles(k1)%s2m%u             = windsp * COS(geoval%vals(1,k1) * deg2rad)
+! profiles(k1)%s2m%v             = windsp * SIN(geoval%vals(1,k1) * deg2rad)
 
-    CALL ufo_geovals_get_var(geovals, var_sfc_wdir, geoval)       
-    profiles(k1)%s2m%u             = windsp * COS(geoval%vals(1,k1) * deg2rad)
-    profiles(k1)%s2m%v             = windsp * SIN(geoval%vals(1,k1) * deg2rad)
+varname = "eastward_wind"
+call ufo_geovals_get_var(geovals, varname, geoval)
+profiles(1:nprofiles)%s2m%u = geoval%vals(1,prof_start:prof_start + nprofiles - 1)
 
-    !Skin
+varname = "northward_wind"
+call ufo_geovals_get_var(geovals, varname, geoval)
+profiles(1:nprofiles)%s2m%v = geoval%vals(1,prof_start:prof_start + nprofiles - 1)
 
-    !DAR: Assume ocean for now
-    profiles(k1)%skin%watertype         = 1 !** NOTE: need to check how to determine fresh vs sea water types (salinity???)
+!Skin
+varname = "skin_temperature"
+call ufo_geovals_get_var(geovals, varname, geoval)
+profiles(1:nprofiles)%skin%t = geoval%vals(1,prof_start:prof_start + nprofiles - 1)
 
-    !DAR: Salinity fixed for now too
-    profiles(k1)%skin%salinity          = 35.0
+varname = "water_type"
+call ufo_geovals_get_var(geovals, varname, geoval)
+profiles(1:nprofiles)%skin%watertype = geoval%vals(1,prof_start:prof_start + nprofiles - 1)
 
-    !DAR: Default fastem parameters. We are not using FASTEM over land so these are unused
-    profiles(k1)%skin%fastem            = [3.0, 5.0, 15.0, 0.1, 0.3]
+varname = "surface_type"
+call ufo_geovals_get_var(geovals, varname, geoval)
+profiles(1:nprofiles)%skin%surftype = geoval%vals(1,prof_start:prof_start + nprofiles - 1)
 
-    !Land point or sea point      
-    CALL ufo_geovals_get_var(geovals, var_sfc_wfrac, geoval)
-    IF (geoval%vals(1,k1) > 0.5) THEN
-      profiles(k1)%skin%surftype   = 1 ! sea         
+!DAR: Salinity fixed for now too
+profiles(1:nprofiles)%skin%salinity = 35.0
 
-      CALL ufo_geovals_get_var(geovals, var_sfc_wtmp, geoval)
-      profiles(k1)%skin%t   = geoval%vals(1,k1)
+!DAR: Default fastem parameters. We are not using FASTEM over land so these are unused
+do k1 = 1,nprofiles
+  profiles(k1)%skin%fastem            = [3.0, 5.0, 15.0, 0.1, 0.3]
+end do
 
-    ELSE ! land
-      profiles(k1)%skin%surftype   = 0 ! land
+! !Land point or sea point
+! call ufo_geovals_get_var(geovals, var_sfc_wfrac, geoval)
+! if (geoval%vals(1,k1) > 0.5) then
+!   profiles(k1)%skin%surftype   = 1 ! sea         
 
-      !determine land, snow and ice fractions and temperatures to determine average temperature
+!   call ufo_geovals_get_var(geovals, var_sfc_wtmp, geoval)
+!   profiles(k1)%skin%t   = geoval%vals(1,k1)
 
-      CALL ufo_geovals_get_var(geovals, var_sfc_lfrac, geoval)
-      lfrac   = geoval%vals(1,k1)
-      CALL ufo_geovals_get_var(geovals, var_sfc_sfrac, geoval)
-      sfrac   = geoval%vals(1,k1)
-      CALL ufo_geovals_get_var(geovals, var_sfc_ifrac, geoval)
-      ifrac   = geoval%vals(1,k1)
+! else ! land
+!   profiles(k1)%skin%surftype   = 0 ! land
 
-      CALL ufo_geovals_get_var(geovals, var_sfc_ltmp, geoval)
-      ltmp   = geoval%vals(1,k1)
-      CALL ufo_geovals_get_var(geovals, var_sfc_stmp, geoval)
-      stmp   = geoval%vals(1,k1)
-      CALL ufo_geovals_get_var(geovals, var_sfc_itmp, geoval)
-      itmp   = geoval%vals(1,k1)
+!   !determine land, snow and ice fractions and temperatures to determine average temperature
 
-      !Skin temperature is a combination of (i)ce temp, (l)and temp and (s)now temp       
-      profiles(k1)%skin%t   = (lfrac * ltmp + sfrac * stmp + ifrac * itmp) / (lfrac + sfrac + ifrac)
+!   call ufo_geovals_get_var(geovals, var_sfc_lfrac, geoval)
+!   lfrac   = geoval%vals(1,k1)
+!   call ufo_geovals_get_var(geovals, var_sfc_sfrac, geoval)
+!   sfrac   = geoval%vals(1,k1)
+!   call ufo_geovals_get_var(geovals, var_sfc_ifrac, geoval)
+!   ifrac   = geoval%vals(1,k1)
 
-    ENDIF
+!   call ufo_geovals_get_var(geovals, var_sfc_ltmp, geoval)
+!   ltmp   = geoval%vals(1,k1)
+!   call ufo_geovals_get_var(geovals, var_sfc_stmp, geoval)
+!   stmp   = geoval%vals(1,k1)
+!   call ufo_geovals_get_var(geovals, var_sfc_itmp, geoval)
+!   itmp   = geoval%vals(1,k1)
 
-    !DAR: Could/should get emissivity here?
-    ! call rttov_get_emissivity()
+!   !Skin temperature is a combination of (i)ce temp, (l)and temp and (s)now temp
+!   profiles(k1)%skin%t   = (lfrac * ltmp + sfrac * stmp + ifrac * itmp) / (lfrac + sfrac + ifrac)
 
-    CALL obsspace_get_db(obss, "MetaData", "height", TmpVar)
-    profiles(:)%elevation = TmpVar(:) / 1000.0 !m -> km for RTTOV
+! end if
 
-    CALL obsspace_get_db(obss, "MetaData", "latitude", TmpVar)
-    profiles(:)%latitude = TmpVar(:)
+!DAR: Could/should get emissivity here?
+! call rttov_get_emissivity()
 
-    CALL obsspace_get_db(obss, "MetaData", "longitude", TmpVar)
-    profiles(:)%longitude = TmpVar(:)
-  ENDDO
+allocate(TmpVar(nprofiles))
 
-END SUBROUTINE load_atm_data_rttov
+variable_present = obsspace_has(obss, "MetaData", "elevation")
+if (variable_present) then
+  call obsspace_get_db(obss, "MetaData", "elevation", TmpVar(prof_start:prof_start + nprofiles - 1) )
+  profiles(1:nprofiles)%elevation = TmpVar(prof_start:prof_start + nprofiles - 1) / 1000.0 !m -> km for RTTOV
+else
+  write(message,'(A)') &
+    'MetaData elevation not in database: check implicit filtering'
+  call fckit_log%info(message)
+end if
+
+variable_present = obsspace_has(obss, "MetaData", "latitude")
+if (variable_present) then
+  call obsspace_get_db(obss, "MetaData", "latitude", TmpVar(prof_start:prof_start + nprofiles - 1) )
+  profiles(1:nprofiles)%latitude = TmpVar(prof_start:prof_start + nprofiles - 1)
+else
+  write(message,'(A)') &
+    'MetaData latitude not in database: check implicit filtering'
+  call fckit_log%info(message)
+end if
+
+variable_present = obsspace_has(obss, "MetaData", "longitude")
+if (variable_present) then
+  call obsspace_get_db(obss, "MetaData", "longitude", TmpVar(prof_start:prof_start + nprofiles - 1) )
+  profiles(1:nprofiles)%longitude = TmpVar(prof_start:prof_start + nprofiles - 1)
+else
+  write(message,'(A)') &
+  'MetaData longitude not in database: check implicit filtering'
+  call fckit_log%info(message)
+end if
+
+end subroutine load_atm_data_rttov
+
 
 !
 ! Internal subprogam to load some test geometry data
 !
-SUBROUTINE load_geom_data_rttov(obss,profiles)
-  ! Satellite viewing geometry
-  ! DAR: check it's all within limits
+subroutine load_geom_data_rttov(obss,profiles,prof_start1)
 
-  IMPLICIT NONE
+! Satellite viewing geometry
+! DAR: check it's all within limits
+use obsspace_mod, only :  obsspace_get_nlocs, obsspace_get_db
 
-  TYPE(c_ptr), VALUE,       INTENT(in)    :: obss
-  TYPE(rttov_profile), INTENT(inout) :: profiles(:)
-  REAL(kind_real), ALLOCATABLE :: TmpVar(:)
-  INTEGER :: nlocs
+implicit none
 
-  nlocs = obsspace_get_nlocs(obss)
-  ALLOCATE(TmpVar(nlocs))
+type(c_ptr), VALUE,       intent(in)    :: obss
+type(rttov_profile), intent(inout) :: profiles(:)
+integer, OPTIONAL, intent(IN) :: prof_start1
 
-  CALL obsspace_get_db(obss, "MetaData", "sat_zenith_angle", TmpVar)
-  profiles(:)%zenangle = TmpVar(:)
+real(kind_real), allocatable :: TmpVar(:)
 
-  CALL obsspace_get_db(obss, "MetaData", "sat_azimuth_angle", TmpVar)
-  profiles(:)%azangle = TmpVar(:)
+integer :: prof_start
+integer :: nlocs_total, nprofiles
+integer :: nlevels
 
-  CALL obsspace_get_db(obss, "MetaData", "sol_zenith_angle", TmpVar)
-  profiles(:)%sunzenangle = TmpVar(:)
+if(PRESENT(prof_start1)) then
+  prof_start = prof_start1
+else
+  prof_start = 1
+end if
 
-  CALL obsspace_get_db(obss, "MetaData", "sol_azimuth_angle", TmpVar)
-  profiles(:)%sunazangle = TmpVar(:)
+nlocs_total = obsspace_get_nlocs(obss)
+nprofiles = SIZE(profiles)
+
+allocate(TmpVar(nprofiles))
+
+nlevels = SIZE(profiles(1)%p)
+
+call obsspace_get_db(obss, "MetaData", "sensor_zenith_angle", TmpVar(prof_start:prof_start + nprofiles - 1))
+profiles(1:nprofiles)%zenangle = TmpVar(prof_start:prof_start + nprofiles - 1)
+
+call obsspace_get_db(obss, "MetaData", "sensor_azimuth_angle", TmpVar(prof_start:prof_start + nprofiles - 1))
+profiles(1:nprofiles)%azangle = TmpVar(prof_start:prof_start + nprofiles - 1)
+
+call obsspace_get_db(obss, "MetaData", "solar_zenith_angle", TmpVar(prof_start:prof_start + nprofiles - 1))
+profiles(1:nprofiles)%sunzenangle = TmpVar(prof_start:prof_start + nprofiles - 1)
+
+call obsspace_get_db(obss, "MetaData", "solar_azimuth_angle", TmpVar(prof_start:prof_start + nprofiles - 1))
+profiles(1:nprofiles)%sunazangle = TmpVar(prof_start:prof_start + nprofiles - 1)
+
+deallocate(TmpVar)
+
+end subroutine load_geom_data_rttov
 
 
-  ! DAR-RTTOV doesn't have any code to modify the viewing angle so this will need to be done elsewhere in UFO and passed to RTTOV
-  ! call ioda_obsdb_var_to_ovec(UFO_Radiance, TmpOvec, "ScanPosition")
-  ! profiles(:)%Ifov = TmpOvec%values(::nchannels)
-  ! call ioda_obsdb_var_to_ovec(UFO_Radiance, TmpOvec, "ScanAngle")
-  ! profiles(:)%Sensor_ScanAngle = TmpOvec%values(::nchannels)
+subroutine set_options_rttov(self)
+implicit none
+class(conf_type_rttov), intent(INOUT) :: self
 
-  DEALLOCATE(TmpVar)
-END SUBROUTINE load_geom_data_rttov
+self % opts % rt_ir % addsolar            = .FALSE. ! Do not include solar radiation
+self % opts % interpolation % addinterp   = .TRUE.  ! Allow interpolation of input profile
+self % opts % interpolation % interp_mode = 1       ! Set interpolation method
+self % opts % interpolation % reg_limit_extrap = .TRUE. ! Set interpolation methodreg_limit_extrap
+self % opts % rt_all % addrefrac          = .TRUE.  ! Include refraction in path calc
+self % opts % rt_all % switchrad          = .TRUE.  ! Include refraction in path calc
+self % opts % rt_ir % addclouds           = .FALSE. ! Don't include cloud effects
+self % opts % rt_ir % addaerosl           = .FALSE. ! Don't include aerosol effects
 
-SUBROUTINE set_options_rttov(self)
-  IMPLICIT NONE
-  CLASS(conf_type_rttov), INTENT(INOUT) :: self
-  
-  self % opts % rt_ir % addsolar            = .FALSE. ! Do not include solar radiation
-  self % opts % interpolation % addinterp   = .TRUE.  ! Allow interpolation of input profile
-  self % opts % interpolation % interp_mode = 1       ! Set interpolation method
-  self % opts % rt_all % addrefrac          = .TRUE.  ! Include refraction in path calc
-  self % opts % rt_ir % addclouds           = .FALSE. ! Don't include cloud effects
-  self % opts % rt_ir % addaerosl           = .FALSE. ! Don't include aerosol effects
-  
-  self % opts % rt_ir % ozone_data          = .FALSE. ! Set the relevant flag to .TRUE.
-  self % opts % rt_ir % co2_data            = .FALSE. !   when supplying a profile of the
-  self % opts % rt_ir % n2o_data            = .FALSE. !   given trace gas (ensure the
-  self % opts % rt_ir % ch4_data            = .FALSE. !   coef file supports the gas)
-  self % opts % rt_ir % co_data             = .FALSE. !
-  self % opts % rt_ir % so2_data            = .FALSE. !
-  self % opts % rt_mw % clw_data            = .TRUE.  !
-  
-  self % opts % config % verbose            = .TRUE.  ! Enable printing of warnings
-  self % opts % config % apply_reg_limits   = .TRUE.
-  self % opts % config % do_checkinput      = .FALSE.
-END SUBROUTINE set_options_rttov
+self % opts % rt_ir % ozone_data          = .FALSE. ! Set the relevant flag to .TRUE.
+self % opts % rt_ir % co2_data            = .FALSE. !   when supplying a profile of the
+self % opts % rt_ir % n2o_data            = .FALSE. !   given trace gas (ensure the
+self % opts % rt_ir % ch4_data            = .FALSE. !   coef file supports the gas)
+self % opts % rt_ir % co_data             = .FALSE. !
+self % opts % rt_ir % so2_data            = .FALSE. !
+self % opts % rt_mw % clw_data            = .FALSE. !
+
+self % opts % config % verbose            = .TRUE.  ! Enable printing of warnings
+self % opts % config % apply_reg_limits   = .TRUE.
+self % opts % config % do_checkinput      = .TRUE.
+
+end subroutine set_options_rttov
 ! ------------------------------------------------------------------------------
 
-SUBROUTINE setup_rttov(self, rc, asw)
-  CLASS(conf_type_rttov)     :: self
-  TYPE(rad_conf), INTENT(in) :: rc
-  INTEGER, INTENT(IN) :: asw !allocate switch
-  
-  CHARACTER(len=255) :: coef_filename
-  INTEGER :: i_inst
-  
-  INCLUDE 'rttov_read_coefs.interface'
-  
-  rttov_errorstatus = 0
 
-  IF(asw == 1) THEN
+subroutine setup_rttov(self, conf, asw)
+class(conf_type_rttov) :: self
+type(rttov_conf), intent(in) :: conf
+integer, intent(IN) :: asw !allocate switch
 
-    CALL self % set_opts()
-    ! --------------------------------------------------------------------------
-    ! 2. Read coefficients
-    ! --------------------------------------------------------------------------    
-    ALLOCATE(self%rttov_coef_array(rc%nSensors))
-    
-    DO i_inst = 1, rc%nSensors
-      coef_filename = TRIM(rc%COEFFICIENT_PATH) // 'rtcoef_' // TRIM(rc%SENSOR_ID(i_inst)) // '.dat'
-      CALL rttov_read_coefs(rttov_errorstatus, &                        !out
-                              self%rttov_coef_array(i_inst), & !inout
-                              self%opts, &                     !in
-                              file_coef=coef_filename)                    !in
-        
-      IF (rttov_errorstatus /= errorstatus_success) THEN
-        WRITE(*,*) 'fatal error reading coefficients'
-        !          CALL rttov_exit(errorstatus)
-      ELSE
-        WRITE(*,*) 'successfully read' // coef_filename
-      ENDIF
-      
-    ENDDO
-    
-    self%rttov_is_setup =.TRUE.
-    
-  ELSE !asw == 0
-    !Quick and dirty for now
-    DEALLOCATE(self%rttov_coef_array)
-    self%rttov_is_setup =.FALSE.
-  ENDIF
-  
-END SUBROUTINE setup_rttov
+character(len=255) :: coef_filename
+integer :: i_inst
 
-SUBROUTINE get_var_name(varname_tmplate,n,varname)
-  
-  CHARACTER(len=*), INTENT(in) :: varname_tmplate
-  INTEGER, INTENT(in) :: n
-  CHARACTER(len=*), INTENT(out) :: varname
-  
-  CHARACTER(len=3) :: chan
-  
-  ! pass in varname_tmplate = "brightness_temperature"
-  WRITE(chan, '(I0)') n
-  varname = TRIM(varname_tmplate) // '_' // TRIM(chan) // '_'
-  
-END SUBROUTINE get_var_name
+INCLUDE 'rttov_read_coefs.interface'
+
+rttov_errorstatus = 0
+
+if(asw == 1) then
+
+  call self % set_opts()
+  ! --------------------------------------------------------------------------
+  ! 2. Read coefficients
+  ! --------------------------------------------------------------------------
+  allocate(self%rttov_coef_array(conf%nSensors))
+
+  do i_inst = 1, conf%nSensors
+    coef_filename = &
+      TRIM(conf%COEFFICIENT_PATH)//'rtcoef_'//TRIM(conf%SENSOR_ID(i_inst))//'.dat'
+    call rttov_read_coefs(rttov_errorstatus, &             !out
+                          self%rttov_coef_array(i_inst), & !inout
+                          self%opts, &                     !in
+                          file_coef=coef_filename)         !in
+
+    if (rttov_errorstatus /= errorstatus_success) then
+      WRITE(*,*) 'fatal error reading coefficients'
+      !          call rttov_exit(errorstatus)
+    else
+      WRITE(*,*) 'successfully read' // coef_filename
+    end if
+
+  end do
+
+  self%rttov_is_setup =.TRUE.
+
+else !asw == 0
+  !Quick and dirty for now
+  deallocate(self%rttov_coef_array)
+  self%rttov_is_setup =.FALSE.
+end if
+
+end subroutine setup_rttov
+
+subroutine get_var_name(varname_tmplate,n,varname)
+
+character(len=*), intent(in) :: varname_tmplate
+integer, intent(in) :: n
+character(len=*), intent(out) :: varname
+
+character(len=3) :: chan
+
+! pass in varname_tmplate = "brightness_temperature"
+WRITE(chan, '(I0)') n
+varname = TRIM(varname_tmplate) // '_' // TRIM(chan) // '_'
+
+end subroutine get_var_name
 
 ! -----------------------------------------------------------------------------
 
-END MODULE ufo_radiancerttov_utils_mod
+subroutine get_var_name_new(varname_tmplate,n,varname)
+
+character(len=*), intent(in) :: varname_tmplate
+integer, intent(in) :: n
+character(len=*), intent(out) :: varname
+
+character(len=3) :: chan
+
+ ! pass in varname_tmplate = "brigtness_temperature"
+ write(chan, '(I0)') n
+ varname = trim(varname_tmplate) // '_' // trim(chan)
+
+end subroutine get_var_name_new
+
+end module ufo_radiancerttov_utils_mod

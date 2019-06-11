@@ -102,7 +102,7 @@ subroutine init_ropp_2d_statevec(rlon,rlat,temp,shum,pres,phi,lm, x, n_horiz, dt
     do k = 1, lm
        x%temp(n,:) = real(temp(k,:),kind=wp)
        x%shum(n,:) = real(shum(k,:),kind=wp)
-       x%pres(n,:) = real(pres(k,:)*100.,kind=wp)
+       x%pres(n,:) = real(pres(k,:),kind=wp)
        x%geop(n,:) = real(phi(k,:),kind=wp)
        n = n - 1
     end do
@@ -111,7 +111,7 @@ subroutine init_ropp_2d_statevec(rlon,rlat,temp,shum,pres,phi,lm, x, n_horiz, dt
     do k = 1, lm
        x%temp(k,:) = real(temp(k,:),kind=wp)
        x%shum(k,:) = real(shum(k,:),kind=wp)
-       x%pres(k,:) = real(pres(k,:)*100.,kind=wp)
+       x%pres(k,:) = real(pres(k,:),kind=wp)
        x%geop(k,:) = real(phi(k,:),kind=wp)
     end do
 
@@ -172,8 +172,8 @@ subroutine init_ropp_2d_statevec_ad(temp_d,shum_d,pres_d,phi_d,lm,x_ad,n_horiz,i
            shum_d(k,j) = shum_d(k,j) + real(x_ad%shum(n,j),kind=kind_real)
            x_ad%shum(n,j) = 0.0_wp
         
-!!!        x_tl%pres(n,:) = real(pres_d(k)*100.,kind=wp)
-           pres_d(k,j) = pres_d(k,j) + 100.0*real(x_ad%pres(n,j),kind=kind_real)
+!!!        x_tl%pres(n,:) = real(pres_d(k),kind=wp)
+           pres_d(k,j) = pres_d(k,j) + real(x_ad%pres(n,j),kind=kind_real)
            x_ad%pres(n,j) = 0.0_wp
         
 !!!        x_tl%geop(n,:) = real(phi_d(k),kind=wp)
@@ -190,7 +190,7 @@ subroutine init_ropp_2d_statevec_ad(temp_d,shum_d,pres_d,phi_d,lm,x_ad,n_horiz,i
            x_ad%temp(k,j) = 0.0_wp
            shum_d(k,j) = shum_d(k,j) + real(x_ad%shum(k,j),kind=kind_real)
            x_ad%shum(k,j) = 0.0_wp
-           pres_d(k,j) = pres_d(k,j) + 100.0*real(x_ad%pres(k,j),kind=kind_real)
+           pres_d(k,j) = pres_d(k,j) + real(x_ad%pres(k,j),kind=kind_real)
            x_ad%pres(k,j) = 0.0_wp
            phi_d(k,j) = phi_d(k,j) + real(x_ad%geop(k,j),kind=kind_real)
            x_ad%geop(k,j) = 0.0_wp

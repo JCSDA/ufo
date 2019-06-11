@@ -81,8 +81,6 @@ if( ${ROPP-UFO_FOUND} )
     list( APPEND UFO_LIBS_DEP ropp-ufo )
 endif( ${ROPP-UFO_FOUND} )
 
-message(STATUS ${ufo_src_files})
-
 ecbuild_add_library( TARGET   ufo
                      SOURCES  ${ufo_src_files}
                      LIBS     ${UFO_LIBS_DEP}

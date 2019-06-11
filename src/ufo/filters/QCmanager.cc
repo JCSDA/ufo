@@ -34,26 +34,25 @@ static oops::FilterMaker<UfoTrait, oops::ObsFilter<UfoTrait, QCmanager>> mkqcman
 QCmanager::QCmanager(ioda::ObsSpace & obsdb, const eckit::Configuration & config,
                      boost::shared_ptr<ioda::ObsDataVector<int> > qcflags,
                      boost::shared_ptr<ioda::ObsDataVector<float> > obserr)
-  : obsdb_(obsdb), config_(config), nogeovals_(), flags_(*qcflags)
+  : obsdb_(obsdb), config_(config), nogeovals_(), flags_(*qcflags),
+    observed_(obsdb.obsvariables())
 {
   oops::Log::trace() << "QCmanager::QCmanager starting " << config_ << std::endl;
 
   ASSERT(qcflags);
   ASSERT(obserr);
 
-  const oops::Variables observed(config.getStringVector("observed"));
-
-  ASSERT(flags_.nvars() == observed.size());
+  ASSERT(flags_.nvars() == observed_.size());
   ASSERT(flags_.nlocs() == obsdb_.nlocs());
-  ASSERT(obserr->nvars() == observed.size());
+  ASSERT(obserr->nvars() == observed_.size());
   ASSERT(obserr->nlocs() == obsdb_.nlocs());
 
   const float rmiss = util::missingValue(rmiss);
   const int imiss = util::missingValue(imiss);
 
-  const ioda::ObsDataVector<float> obs(obsdb, observed, "ObsValue");
+  const ioda::ObsDataVector<float> obs(obsdb, observed_, "ObsValue");
 
-  for (size_t jv = 0; jv < observed.size(); ++jv) {
+  for (size_t jv = 0; jv < observed_.size(); ++jv) {
     for (size_t jobs = 0; jobs < obsdb_.nlocs(); ++jobs) {
       if (flags_[jv][jobs] == imiss || obs[jv][jobs] == rmiss || (*obserr)[jv][jobs] == rmiss) {
         flags_[jv][jobs] = QCflags::missing;
@@ -69,12 +68,11 @@ QCmanager::QCmanager(ioda::ObsSpace & obsdb, const eckit::Configuration & config
 void QCmanager::postFilter(const ioda::ObsVector & hofx) const {
   oops::Log::trace() << "QCmanager postFilter" << std::endl;
 
-  const oops::Variables observed(config_.getStringVector("observed"));
   const double missing = util::missingValue(missing);
 
-  for (size_t jv = 0; jv < observed.size(); ++jv) {
+  for (size_t jv = 0; jv < observed_.size(); ++jv) {
     for (size_t jobs = 0; jobs < obsdb_.nlocs(); ++jobs) {
-      size_t iobs = observed.size() * jobs + jv;
+      size_t iobs = observed_.size() * jobs + jv;
       if (flags_[jv][jobs] == 0 && hofx[iobs] == missing) {
         flags_[jv][jobs] = QCflags::Hfailed;
       }
@@ -94,9 +92,7 @@ QCmanager::~QCmanager() {
 // -----------------------------------------------------------------------------
 
 void QCmanager::print(std::ostream & os) const {
-  const oops::Variables observed(config_.getStringVector("observed"));
-
-  for (size_t jj = 0; jj < observed.size(); ++jj) {
+  for (size_t jj = 0; jj < observed_.size(); ++jj) {
     size_t iobs = obsdb_.nlocs();
     size_t ipass = 0;
     size_t imiss = 0;
@@ -135,7 +131,7 @@ void QCmanager::print(std::ostream & os) const {
     obsdb_.comm().allReduceInPlace(ithin, eckit::mpi::sum());
 
     if (obsdb_.comm().rank() == 0) {
-      const std::string info = "QC " + flags_.obstype() + " " + observed[jj] + ": ";
+      const std::string info = "QC " + flags_.obstype() + " " + observed_[jj] + ": ";
       if (imiss > 0) os << info << imiss << " missing values." << std::endl;
       if (ipreq > 0) os << info << ipreq << " rejected by pre QC." << std::endl;
       if (ibnds > 0) os << info << ibnds << " out of bounds." << std::endl;

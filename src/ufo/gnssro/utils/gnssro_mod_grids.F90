@@ -18,7 +18,7 @@ subroutine get_coordinate_value(fin, fout, x, nx, flag)
   real(kind_real), intent(in)   :: x(nx) !grid values
   real(kind_real), intent(in)   :: fin   !input point
   character(10),   intent(in)   :: flag  !"increasing" or "decreasing"
-  real(kind_real), intent(out)  :: fout  !input point
+  real(kind_real), intent(out)  :: fout  !output point
   integer                       :: ix, isrchf
 
 ! Treat "normal" case in which nx>1

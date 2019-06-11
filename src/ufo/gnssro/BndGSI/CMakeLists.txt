@@ -9,5 +9,10 @@ set (  bndgsi_src_files
        ObsGnssroBndGSI.interface.h
        ObsGnssroBndGSI.interface.F90
        ufo_gnssro_bndgsi_mod.F90
+       ObsGnssroBndGSITLAD.h
+       ObsGnssroBndGSITLAD.cc
+       ObsGnssroBndGSITLAD.interface.h
+       ObsGnssroBndGSITLAD.interface.F90
+       ufo_gnssro_bndgsi_tlad_mod.F90
 PARENT_SCOPE
 )

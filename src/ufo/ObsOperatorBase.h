@@ -26,7 +26,6 @@ class ObsVector;
 
 namespace ufo {
 class GeoVaLs;
-class ObsBias;
 class Locations;
 
 // -----------------------------------------------------------------------------
@@ -40,13 +39,10 @@ class ObsOperatorBase : public util::Printable,
   virtual ~ObsOperatorBase() {}
 
 /// Obs Operator
-  virtual void simulateObs(const GeoVaLs &, ioda::ObsVector &, const ObsBias &) const = 0;
+  virtual void simulateObs(const GeoVaLs &, ioda::ObsVector &) const = 0;
 
 /// Operator input required from Model
   virtual const oops::Variables & variables() const = 0;
-
-/// Operator output variables
-  virtual const oops::Variables & observed() const = 0;
 
 /// Locations for GeoVaLs
   virtual Locations * locations(const util::DateTime &, const util::DateTime &) const;

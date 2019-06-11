@@ -38,20 +38,16 @@ module ufo_atmvertinterp_tlad_mod
 contains
 ! ------------------------------------------------------------------------------
 
-subroutine atmvertinterp_tlad_setup_(self, c_conf)
-  use config_mod
+subroutine atmvertinterp_tlad_setup_(self, vars)
   implicit none
   class(ufo_atmvertinterp_tlad), intent(inout) :: self
-  type(c_ptr), intent(in)    :: c_conf
-
-  integer :: ii
+  character(len=MAXVARLEN), dimension(:), intent(inout) :: vars
 
   !> Size of variables
-  self%nvars = size(config_get_string_vector(c_conf, max_string, "variables"))
+  self%nvars = size(vars)
   !> Allocate varin
   allocate(self%varin(self%nvars))
-  !> Read variable list and store in varin
-  self%varin = config_get_string_vector(c_conf, max_string, "variables")
+  self%varin = vars
 
 end subroutine atmvertinterp_tlad_setup_
 
@@ -71,7 +67,7 @@ subroutine atmvertinterp_tlad_settraj_(self, geovals, obss)
   call self%cleanup()
 
   ! Get pressure profiles from geovals
-  call ufo_geovals_get_var(geovals, var_prsl, presprofile)
+  call ufo_geovals_get_var(geovals, var_prs, presprofile)
   self%nval = presprofile%nval
 
   ! Get the observation vertical coordinates
@@ -85,8 +81,8 @@ subroutine atmvertinterp_tlad_settraj_(self, geovals, obss)
 
   ! Calculate the interpolation weights
   do iobs = 1, self%nlocs
-    call vert_interp_weights(presprofile%nval, log(obspressure(iobs)/10.), &
-                             presprofile%vals(:,iobs), self%wi(iobs), self%wf(iobs))
+    call vert_interp_weights(presprofile%nval, log(obspressure(iobs)), &
+                             log(presprofile%vals(:,iobs)), self%wi(iobs), self%wf(iobs))
   enddo
 
   ! Cleanup memory

@@ -3,14 +3,16 @@
 ! This software is licensed under the terms of the Apache Licence Version 2.0
 ! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 
-!> Fortran radiancerttov module for functions on the interface between C++ and Fortran
-!  to handle observation operators
+!> Fortran module to handle radiancerttov observations
 
 module ufo_radiancerttov_mod_c
 
   use iso_c_binding
   use config_mod
   use ufo_radiancerttov_mod 
+  use ufo_geovals_mod
+  use ufo_geovals_mod_c,   only: ufo_geovals_registry
+
   implicit none
   private
 
@@ -64,7 +66,8 @@ end subroutine ufo_radiancerttov_delete_c
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_radiancerttov_simobs_c(c_key_self, c_key_geovals, c_obsspace, c_nobs, c_hofx, c_bias) bind(c,name='ufo_radiancerttov_simobs_f90')
+subroutine ufo_radiancerttov_simobs_c(c_key_self, c_key_geovals, c_obsspace, c_nobs, c_hofx, &
+                                 c_nchan, c_channels) bind(c,name='ufo_radiancerttov_simobs_f90')
 
 implicit none
 integer(c_int), intent(in) :: c_key_self
@@ -72,12 +75,19 @@ integer(c_int), intent(in) :: c_key_geovals
 type(c_ptr), value, intent(in) :: c_obsspace
 integer(c_int), intent(in) :: c_nobs
 real(c_double), intent(inout) :: c_hofx(c_nobs)
-integer(c_int), intent(in) :: c_bias
+integer(c_int), intent(in) :: c_nchan
+integer(c_int), intent(in) :: c_channels(c_nchan)
 
 type(ufo_radiancerttov), pointer :: self
+type(ufo_geovals),  pointer :: geovals
+
+character(len=*), parameter :: myname_="ufo_radiancerttov_simobs_c"
 
 call ufo_radiancerttov_registry%get(c_key_self, self)
-call self%opr_simobs(c_key_geovals, c_obsspace, c_hofx)
+
+call ufo_geovals_registry%get(c_key_geovals,geovals)
+
+call self%simobs(geovals, c_hofx, c_obsspace, c_channels)
 
 end subroutine ufo_radiancerttov_simobs_c
 

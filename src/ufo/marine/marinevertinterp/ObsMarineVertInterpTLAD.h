@@ -8,10 +8,9 @@
 #ifndef UFO_MARINE_MARINEVERTINTERP_OBSMARINEVERTINTERPTLAD_H_
 #define UFO_MARINE_MARINEVERTINTERP_OBSMARINEVERTINTERPTLAD_H_
 
+#include <memory>
 #include <ostream>
 #include <string>
-
-#include <boost/scoped_ptr.hpp>
 
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
@@ -59,7 +58,7 @@ class ObsMarineVertInterpTLAD : public LinearObsOperatorBase,
   void print(std::ostream &) const;
   F90hop keyOper_;
   const ioda::ObsSpace& odb_;
-  boost::scoped_ptr<const oops::Variables> varin_;
+  std::unique_ptr<const oops::Variables> varin_;
 };
 
 // -----------------------------------------------------------------------------

@@ -8,10 +8,10 @@
 #ifndef UFO_OBSOPERATOR_H_
 #define UFO_OBSOPERATOR_H_
 
+#include <memory>
 #include <string>
 
 #include <boost/noncopyable.hpp>
-#include <boost/scoped_ptr.hpp>
 
 #include "oops/util/Printable.h"
 
@@ -53,9 +53,6 @@ class ObsOperator : public util::Printable,
 /// Operator input required from Model
   const oops::Variables & variables() const;
 
-/// Operator output variables
-  const oops::Variables & observed() const;
-
 /// Operator locations
   Locations * locations(const util::DateTime &, const util::DateTime &) const;
 
@@ -64,7 +61,7 @@ class ObsOperator : public util::Printable,
 
  private:
   void print(std::ostream &) const;
-  boost::scoped_ptr<ObsOperatorBase> oper_;
+  std::unique_ptr<ObsOperatorBase> oper_;
 };
 
 // -----------------------------------------------------------------------------

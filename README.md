@@ -1,3 +1,4 @@
+[![travis_develop](https://travis-ci.com/JCSDA/ufo.svg?token=zswWHqwVimHTBAygfenZ&branch=develop)](https://travis-ci.com/JCSDA/ufo)
 [![codecov](https://codecov.io/gh/JCSDA/ufo/branch/develop/graph/badge.svg?token=kTqYXNeF6h)](https://codecov.io/gh/JCSDA/ufo)
 
 UFO interfaces for OOPS

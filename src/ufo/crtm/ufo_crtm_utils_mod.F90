@@ -213,9 +213,9 @@ character(max_string) :: err_msg
     atm(k1)%Temperature(1:N_LAYERS) = geoval%vals(:,k1)
 
     call ufo_geovals_get_var(geovals, var_prs, geoval)
-    atm(k1)%Pressure(1:N_LAYERS) = geoval%vals(:,k1)
+    atm(k1)%Pressure(1:N_LAYERS) = geoval%vals(:,k1) * 0.01  ! to hPa
     call ufo_geovals_get_var(geovals, var_prsi, geoval)
-    atm(k1)%Level_Pressure(:) = geoval%vals(:,k1)
+    atm(k1)%Level_Pressure(:) = geoval%vals(:,k1) * 0.01     ! to hPa
     atm(k1)%Climatology         = US_STANDARD_ATMOSPHERE
     atm(k1)%Absorber_Id(1:1)    = (/ H2O_ID /)
     atm(k1)%Absorber_Units(1:1) = (/ MASS_MIXING_RATIO_UNITS /)
@@ -424,16 +424,16 @@ integer :: nlocs
  nlocs = obsspace_get_nlocs(obss)
  allocate(TmpVar(nlocs))
 
- call obsspace_get_db(obss, "MetaData", "sat_zenith_angle", TmpVar)
+ call obsspace_get_db(obss, "MetaData", "sensor_zenith_angle", TmpVar)
  geo(:)%Sensor_Zenith_Angle = abs(TmpVar(:)) ! needs to be absolute value
 
- call obsspace_get_db(obss, "MetaData", "sol_zenith_angle", TmpVar)
+ call obsspace_get_db(obss, "MetaData", "solar_zenith_angle", TmpVar)
  geo(:)%Source_Zenith_Angle = TmpVar(:)
 
- call obsspace_get_db(obss, "MetaData", "sat_azimuth_angle", TmpVar)
+ call obsspace_get_db(obss, "MetaData", "sensor_azimuth_angle", TmpVar)
  geo(:)%Sensor_Azimuth_Angle = TmpVar(:)
 
- call obsspace_get_db(obss, "MetaData", "sol_azimuth_angle", TmpVar)
+ call obsspace_get_db(obss, "MetaData", "solar_azimuth_angle", TmpVar)
  geo(:)%Source_Azimuth_Angle = TmpVar(:)
 
 !  For some microwave instruments the solar and sensor azimuth angles can be
@@ -451,7 +451,7 @@ integer :: nlocs
  call obsspace_get_db(obss, "MetaData", "scan_position", TmpVar)
  geo(:)%Ifov = TmpVar(:)
 
- call obsspace_get_db(obss, "MetaData", "scan_angle", TmpVar) !The Sensor_Scan_Angle is optional
+ call obsspace_get_db(obss, "MetaData", "sensor_view_angle", TmpVar) !The Sensor_Scan_Angle is optional
  geo(:)%Sensor_Scan_Angle = TmpVar(:)
 
  where (abs(geo(:)%Sensor_Scan_Angle) > 80.0_kind_real) &

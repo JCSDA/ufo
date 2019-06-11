@@ -18,7 +18,6 @@ integer, parameter, public :: MAXVARLEN=56
 character(len=MAXVARLEN), public, parameter :: var_tv   = "virtual_temperature"
 character(len=MAXVARLEN), public, parameter :: var_ts   = "air_temperature"
 character(len=MAXVARLEN), public, parameter :: var_t    = "temperature"
-character(len=MAXVARLEN), public, parameter :: var_prsl = "atmosphere_ln_pressure_coordinate"
 character(len=MAXVARLEN), public, parameter :: var_mixr = "humidity_mixing_ratio"
 character(len=MAXVARLEN), public, parameter :: var_q    = "specific_humidity"
 character(len=MAXVARLEN), public, parameter :: var_u    = "eastward_wind"

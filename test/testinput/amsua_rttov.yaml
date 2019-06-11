@@ -3,27 +3,28 @@ logging:
   categories: Warning, Error, Debug
 test_framework_runtime_config: "--log_level=test_suite"
 
-window_begin: 2018-04-14T21:00:00Z
-window_end: 2018-04-15T03:00:00Z
+window_begin: 2018-09-01T09:00:00Z
+window_end: 2018-09-01T15:00:00Z
 
 LinearObsOpTest: 
  coefTL: 1.e-5
  toleranceTL: 1.0e-5
  toleranceAD: 1.0e-11
 
-Observations: 
- ObsTypes: 
- - ObsOperator:
-     name: RTTOV
-     channels: 1-15
-     ObsOptions: 
+Observations:
+  ObsTypes:
+  - ObsOperator:
+      name: RTTOV
       Sensor_ID: noaa_19_amsua
       CoefficientPath: Data/
-   ObsSpace: 
-    name: Radiance
-    ObsDataIn: 
-     obsfile: Data/amsua_n19_obs_2018041500_m.nc4
-   GeoVaLs: 
-    filename: Data/amsua_n19_geoval_2018041500_m.nc4
-   rmsequiv: 226.72514274
-   tolerance: 1.e-10
+    ObsSpace: 
+      name: Radiance
+      ObsDataIn:
+        obsfile: Data/ioda_metop_2_amsua.nc4
+      simulate:
+        variables: [brightness_temperature]
+        channels: 5
+    GeoVaLs:
+      filename: Data/geovals_rttov.nc4
+    rmsequiv: 239.48475677393529
+    tolerance: 1.e-10

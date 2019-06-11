@@ -18,64 +18,60 @@
 #include "oops/util/IntSetParser.h"
 
 #include "ufo/GeoVaLs.h"
-#include "ufo/ObsBias.h"
 
 namespace ufo {
 
 // -----------------------------------------------------------------------------
-static ObsOperatorMaker<ObsRadianceRTTOV> makerRadianceRTTOV_("RTTOV");
+static ObsOperatorMaker<ObsRadianceRTTOV> makerRTTOV_("RTTOV");
 // -----------------------------------------------------------------------------
 
-ObsRadianceRTTOV::ObsRadianceRTTOV(const ioda::ObsSpace & odb,
-                       const eckit::Configuration & config)
-  : ObsOperatorBase(odb, config), keyOper_(0), odb_(odb), varin_(), varout_()
+ObsRadianceRTTOV::ObsRadianceRTTOV(const ioda::ObsSpace & odb, const eckit::Configuration & config)
+  : ObsOperatorBase(odb, config), keyOperRadianceRTTOV_(0), odb_(odb), varin_(),
+    obsname_("RTTOV:")
 {
-  const std::vector<std::string> vv{"air_temperature", "humidity_mixing_ratio", "air_pressure",
-                                    "air_pressure_levels", "mass_concentration_of_ozone_in_air",
-                                    "mass_concentration_of_carbon_dioxide_in_air",
-                                    "atmosphere_mass_content_of_cloud_liquid_water",
-                                    "atmosphere_mass_content_of_cloud_ice",
-                                    "effective_radius_of_cloud_liquid_water_particle",
-                                    "effective_radius_of_cloud_ice_particle",
-                                    "Water_Fraction", "Land_Fraction", "Ice_Fraction",
-                                    "Snow_Fraction", "Water_Temperature", "Land_Temperature",
-                                    "Ice_Temperature", "Snow_Temperature", "Vegetation_Fraction",
-                                    "Sfc_Wind_Speed", "Sfc_Wind_Direction", "Lai", "Soil_Moisture",
-                                    "Soil_Temperature", "Land_Type_Index", "Vegetation_Type",
-                                    "Soil_Type", "Snow_Depth"};
+  obsname_ += config.getString("Sensor_ID");
+  const std::vector<std::string> vv{
+    "air_pressure", "air_pressure_at_two_meters_above_surface",
+    "air_temperature", "air_temperature_at_two_meters_above_surface",
+    "eastward_wind", "northward_wind",
+    "skin_temperature",
+    "specific_humidity", "specific_humidity_at_two_meters_above_surface",
+    "surface_air_pressure", "surface_temperature",
+    "surface_type", "water_type"};
+
   varin_.reset(new oops::Variables(vv));
 
-  // parse channels from the config and create variable names
-  std::string chlist = config.getString("channels");
-  std::set<int> channels = oops::parseIntSet(chlist);
-  std::vector<std::string> vout;
-  for (const int jj : channels) {
-    vout.push_back("brightness_temperature_"+std::to_string(jj)+"_");
-  }
-  varout_.reset(new oops::Variables(vout));
+  // get channels
+  const oops::Variables & observed = odb.obsvariables();
+  channels_ = observed.channels();
 
   // call Fortran setup routine
-  const eckit::LocalConfiguration obsOptions(config, "ObsOptions");
-  const eckit::Configuration * configc = &obsOptions;
-  ufo_radiancerttov_setup_f90(keyOper_, &configc);
-  oops::Log::info() << "ObsRadianceRTTOV channels: " << channels << std::endl;
+//  const eckit::LocalConfiguration obsOptions(config, "ObsOptions");
+//  const eckit::Configuration * configc = &obsOptions;
+  const eckit::Configuration * configc = &config;
+  ufo_radiancerttov_setup_f90(keyOperRadianceRTTOV_, &configc);
+  oops::Log::info() << "ObsRadianceRTTOV channels: " << channels_ << std::endl;
+
   oops::Log::trace() << "ObsRadianceRTTOV created." << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
 ObsRadianceRTTOV::~ObsRadianceRTTOV() {
-  ufo_radiancerttov_delete_f90(keyOper_);
+  ufo_radiancerttov_delete_f90(keyOperRadianceRTTOV_);
   oops::Log::trace() << "ObsRadianceRTTOV destructed" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
-void ObsRadianceRTTOV::simulateObs(const GeoVaLs & gv, ioda::ObsVector & ovec,
-                              const ObsBias & bias) const {
-  ufo_radiancerttov_simobs_f90(keyOper_, gv.toFortran(), odb_, ovec.size(), ovec.toFortran(),
-                      bias.toFortran());
-  oops::Log::trace() << "ObsRadianceRTTOV: observation operator run" << std::endl;
+void ObsRadianceRTTOV::simulateObs(const GeoVaLs & gom, ioda::ObsVector & ovec) const {
+  oops::Log::trace() << "ObsRadianceRTTOV:: simulateObs started" << std::endl;
+
+  ufo_radiancerttov_simobs_f90(keyOperRadianceRTTOV_, gom.toFortran(), odb_,
+                          ovec.size(), ovec.toFortran(),
+                          channels_.size(), channels_[0]);
+
+  oops::Log::trace() << "ObsRadianceRTTOV:: simulateObs completed" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

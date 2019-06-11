@@ -44,7 +44,7 @@ Thinning::~Thinning() {}
 
 void Thinning::priorFilter(const GeoVaLs & gv) const {
   const size_t nobs = obsdb_.nlocs();
-  const oops::Variables vars(config_.getStringVector("observed"));
+  const oops::Variables vars = obsdb_.obsvariables();
   const float thinning = config_.getFloat("amount");
 
   // create random numbers for each observation based on some seed

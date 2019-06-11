@@ -37,19 +37,26 @@ services:
 
 before_install:
   - REPO_SOURCE_DIR=${TRAVIS_BUILD_DIR}
+  - export BRANCH=$(if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then echo $TRAVIS_BRANCH; else echo $TRAVIS_PULL_REQUEST_BRANCH; fi)
+  - echo "TRAVIS_BRANCH=$TRAVIS_BRANCH, PR=$PR, BRANCH=$BRANCH"
 #======================================================================
 # Clone all repos
 #======================================================================
   - git clone https://github.com/jcsda/ufo-bundle.git ufo-bundle
-  - git clone https://github.com/jcsda/oops.git ufo-bundle/oops
   - git clone https://github.com/jcsda/GSW-Fortran.git ufo-bundle/gsw
   - git clone https://github.com/jcsda/crtm.git ufo-bundle/crtm
-  - git clone https://github.com/jcsda/ioda.git ufo-bundle/ioda
-  - git clone https://github.com/jcsda/ufo.git ufo-bundle/ufo
   - git clone https://github.com/jcsda/fckit.git ufo-bundle/fckit
+
+  - git clone https://github.com/jcsda/oops.git ufo-bundle/oops
+  - git clone https://github.com/jcsda/ioda.git ufo-bundle/ioda
+  - git clone -b $BRANCH https://github.com/jcsda/ufo.git ufo-bundle/ufo 
+
+  - cd ufo-bundle
+  - sed -i 's/BRANCH develop  UPDATE//' CMakeLists.txt
+  - cd ${REPO_SOURCE_DIR}
   - ls ${REPO_SOURCE_DIR}
   - ls ${REPO_SOURCE_DIR}/ufo-bundle
-  - find . -name \* -exec chmod 777 {} \; -print
+  - find . -name \* -exec chmod 777 {} \;
 
 #======================================================================
 # get docker image
@@ -82,5 +89,5 @@ script:
 #======================================================================
 after_success:
   - cd ${REPO_SOURCE_DIR}/ufo-bundle
-  - bash <(curl -s https://codecov.io/bash) -t 80e931a0-8cb3-49f6-be20-462b338c57be  -X gcov -f coverage.info  #  Token is not needed for publuc repo
+    #  - bash <(curl -s https://codecov.io/bash) -t 80e931a0-8cb3-49f6-be20-462b338c57be  -X gcov -f coverage.info  #  Token is not needed for publuc repo
 

@@ -8,10 +8,9 @@
 #ifndef UFO_GNSSRO_BNDROPP1D_OBSGNSSROBNDROPP1D_H_
 #define UFO_GNSSRO_BNDROPP1D_OBSGNSSROBNDROPP1D_H_
 
+#include <memory>
 #include <ostream>
 #include <string>
-
-#include <boost/scoped_ptr.hpp>
 
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
@@ -29,7 +28,6 @@ namespace ioda {
 
 namespace ufo {
   class GeoVaLs;
-  class ObsBias;
 
 // -----------------------------------------------------------------------------
 
@@ -43,11 +41,10 @@ class ObsGnssroBndROPP1D : public ObsOperatorBase,
   virtual ~ObsGnssroBndROPP1D();
 
 // Obs Operator
-  void simulateObs(const GeoVaLs &, ioda::ObsVector &, const ObsBias &) const;
+  void simulateObs(const GeoVaLs &, ioda::ObsVector &) const;
 
 // Other
   const oops::Variables & variables() const {return *varin_;}
-  const oops::Variables & observed() const {return *varout_;}
 
   int & toFortran() {return keyOperGnssroBndROPP1D_;}
   const int & toFortran() const {return keyOperGnssroBndROPP1D_;}
@@ -56,8 +53,7 @@ class ObsGnssroBndROPP1D : public ObsOperatorBase,
   void print(std::ostream &) const;
   F90hop keyOperGnssroBndROPP1D_;
   const ioda::ObsSpace& odb_;
-  boost::scoped_ptr<const oops::Variables> varin_;
-  boost::scoped_ptr<const oops::Variables> varout_;
+  std::unique_ptr<const oops::Variables> varin_;
 };
 
 // -----------------------------------------------------------------------------

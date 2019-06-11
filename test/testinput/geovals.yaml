@@ -10,7 +10,6 @@ Observations:
  ObsTypes: 
  - ObsOperator:
      name: CRTM
-     channels: 1-15
      n_Absorbers: 3
      n_Clouds: 2
      n_Aerosols: 0
@@ -21,18 +20,21 @@ Observations:
     name: Radiance
     ObsDataIn: 
      obsfile: Data/amsua_n19_obs_2018041500_m.nc4
+    simulate:
+     variables: [brightness_temperature]
+     channels: 1-15
    GeoVaLs: 
-    norm: 72000.7229763
+    norm: 5965462.8825656148
     filename: Data/amsua_n19_geoval_2018041500_m.nc4
  - ObsType:
    ObsSpace: 
     name: Radiosonde
     ObsDataIn: 
      obsfile: Data/sondes_obs_2018041500_m.nc4
+    simulate:
+     variables: [air_temperature]
    ObsOperator:
      name: Radiosonde
-     variables: 
-     - air_temperature
    GeoVaLs: 
-    norm: 22355.0135965
+    norm: 4961372.34819
     filename: Data/sondes_geoval_2018041500_m.nc4

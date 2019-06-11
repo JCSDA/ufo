@@ -22,8 +22,6 @@ module ufo_gnssro_bndgsi_mod
   use fckit_log_module,  only : fckit_log
 
   implicit none
-!  integer, parameter              :: max_string    = 800
-
   public             :: ufo_gnssro_BndGSI
   private
 
@@ -54,19 +52,12 @@ subroutine ufo_gnssro_bndgsi_simobs(self, geovals, hofx, obss)
   real(kind_real),          intent(inout) :: hofx(:)
   type(c_ptr), value,       intent(in)    :: obss
   integer                                 ::  nlocs
-
-  character(len=*), parameter     :: myname ="ufo_gnssro_bndgsi_simobs"
-  real(kind_real), parameter      :: r1em6 = 1.0e-6_kind_real
-  real(kind_real), parameter      :: r1em3 = 1.0e-3_kind_real
-  real(kind_real), parameter      :: six   = 6.0_kind_real
-  real(kind_real), parameter      :: ds    = 10000.0_kind_real
+  character(len=*), parameter     :: myname  = "ufo_gnssro_bndgsi_simobs"
+  character(max_string)           :: err_msg
   integer, parameter              :: nlevAdd = 13 !num of additional levels on top of exsiting model levels
   integer, parameter              :: newAdd  = 20 !num of additional levels on top of extended levels
   integer, parameter              :: ngrd    = 80 !num of new veritcal grids for bending angle computation
-  real(kind_real), parameter      :: crit_gradRef = 157.0_kind_real !criteria for the refractivity gradient
-
-  character(max_string)           :: err_msg
-  integer                         :: iobs, ilev, igrd, klev
+  integer                         :: iobs, k, igrd
   integer                         :: nlev, nlev1, nlevExt, nlevCheck
   real(kind_real)                 :: rnlevExt
   real(kind_real)                 :: w4(4), dw4(4)
@@ -88,6 +79,8 @@ subroutine ufo_gnssro_bndgsi_simobs(self, geovals, hofx, obss)
   integer                         :: iflip
   real(c_double)                  :: missing
 
+  write(err_msg,*) myname, ": begin"
+  call fckit_log%info(err_msg)
 
 ! check if nobs is consistent in geovals & hofx
   if (geovals%nlocs /= size(hofx)) then
@@ -111,7 +104,7 @@ subroutine ufo_gnssro_bndgsi_simobs(self, geovals, hofx, obss)
     call ufo_geovals_get_var(geovals, var_prsi,  prs)       ! pressure
     call ufo_geovals_get_var(geovals, var_zi,    gph)      
     write(err_msg,*) myname,': vertlayer has to be mass of full, '//new_line('a')// &
-                                 'will use full layer anyway'
+                            '  will use full layer anyway'
     call fckit_log%info(err_msg)
   end if
 
@@ -132,25 +125,25 @@ subroutine ufo_gnssro_bndgsi_simobs(self, geovals, hofx, obss)
                          '  Model vertical height profile is in descending order,'//new_line('a')// &
                          '  but bndGSI requires it to be ascending order, need flip'
     call fckit_log%info(err_msg)
-    do ilev=1, nlev
-       gesT(ilev,:) = t%vals(nlev-ilev+1,:)
-       gesQ(ilev,:) = q%vals(nlev-ilev+1,:)
-       gesTv(ilev,:)= gesT(ilev,:)*(1+gesQ(ilev,:)*(rv_over_rd-1))
+    do k=1, nlev
+       gesT(k,:) = t%vals(nlev-k+1,:)
+       gesQ(k,:) = q%vals(nlev-k+1,:)
+       gesTv(k,:)= gesT(k,:)*(1+gesQ(k,:)*(rv_over_rd-1))
     enddo
-    do ilev=1, nlev1
-       gesP(ilev,:) = prs%vals(nlev1-ilev+1,:)
-       gesZ(ilev,:) = gph%vals(nlev1-ilev+1,:)
+    do k=1, nlev1
+       gesP(k,:) = prs%vals(nlev1-k+1,:)
+       gesZ(k,:) = gph%vals(nlev1-k+1,:)
     enddo
   else  ! not flipping
-    do ilev=1, nlev
-       gesT(ilev,:)  = t%vals(ilev,:)
-       gesQ(ilev,:)  = q%vals(ilev,:)
-       gesTv(ilev,:) = gesT(ilev,:)*(1+gesQ(ilev,:)*(rv_over_rd-1))
+    do k=1, nlev
+       gesT(k,:)  = t%vals(k,:)
+       gesQ(k,:)  = q%vals(k,:)
+       gesTv(k,:) = gesT(k,:)*(1+gesQ(k,:)*(rv_over_rd-1))
     enddo
 
-    do ilev=1, nlev1
-       gesP(ilev,:) = prs%vals(ilev,:)
-       gesZ(ilev,:) = gph%vals(ilev,:)
+    do k=1, nlev1
+       gesP(k,:) = prs%vals(k,:)
+       gesZ(k,:) = gph%vals(k,:)
     enddo
   end if
 
@@ -158,14 +151,14 @@ subroutine ufo_gnssro_bndgsi_simobs(self, geovals, hofx, obss)
 !    while p and z are on interface layers, take the mean of t and q
 !       -- gsi manner
   if ( nlev1 /= nlev ) then  
-     do ilev = nlev, 2, -1
-        gesQ(ilev,:) = half* (gesQ(ilev,:) + gesQ(ilev-1,:))
-        gesTv(ilev,:) = half* (gesTv(ilev,:) + gesTv(ilev-1,:))
+     do k = nlev, 2, -1
+        gesQ(k,:) = half* (gesQ(k,:) + gesQ(k-1,:))
+        gesTv(k,:) = half* (gesTv(k,:) + gesTv(k-1,:))
 !       PLEASE KEEP this COMMENT:
 !       to exactly reproduce gsi, t is converted to tv, tv mean is calcualted,
 !       then tv mean is converted to t mean
-        gesT(ilev,:) = gesTv(ilev,:)/(1+ gesQ(ilev,:)*(rv_over_rd-1))
-!       gesT(ilev,:) = half* (gesT(ilev,:) + gesT(ilev-1,:))
+        gesT(k,:) = gesTv(k,:)/(1+ gesQ(k,:)*(rv_over_rd-1))
+!       gesT(k,:) = half* (gesT(k,:) + gesT(k-1,:))
      enddo
   end if
 
@@ -208,15 +201,15 @@ subroutine ufo_gnssro_bndgsi_simobs(self, geovals, hofx, obss)
   obs_loop: do iobs = 1, nlocs
 
     hofx(iobs) =  missing
-    do ilev = 1,nlev 
+    do k = 1, nlev
 !     compute guess geometric height from geopotential height
-      call geop2geometric(obsLat(iobs), gesZ(ilev,iobs), geomz(ilev))
-      radius(ilev) = geomz(ilev) + obsGeoid(iobs) + obsLocR(iobs)   ! radius r
+      call geop2geometric(obsLat(iobs), gesZ(k,iobs), geomz(k))
+      radius(k) = geomz(k) + obsGeoid(iobs) + obsLocR(iobs)   ! radius r
 !     guess refactivity, refactivity index,  and impact parameter
-      call compute_refractivity(gesT(ilev,iobs), gesQ(ilev,iobs), gesP(ilev,iobs),   &
-                                ref(ilev), self%roconf%use_compress) 
-      refIndex(ilev) = one + (r1em6*ref(ilev))        
-      refXrad(ilev)  = refIndex(ilev) * radius(ilev)  
+      call compute_refractivity(gesT(k,iobs), gesQ(k,iobs), gesP(k,iobs),   &
+                                ref(k), self%roconf%use_compress)
+      refIndex(k) = one + (r1em6*ref(k))
+      refXrad(k)  = refIndex(k) * radius(k)
     end do 
 
 !   data rejection based on model background !
@@ -234,28 +227,26 @@ subroutine ufo_gnssro_bndgsi_simobs(self, geovals, hofx, obss)
 
     obsImpH = (obsImpP(iobs) - obsLocR(iobs)) * r1em3 !impact heigt: a-r_earth
     if (obsImpH <= six) then
-       do klev = nlevCheck, 1, -1
+       do k = nlevCheck, 1, -1
 
-!         check for model SR layer 
-          gradRef = 1000.0_kind_real * (ref(klev+1)-ref(klev)) /       &
-                                    (radius(klev+1)-radius(klev))
-
+!         check for model SR layer
+          gradRef = 1000.0_kind_real * (ref(k+1)-ref(k)) /       &
+                                    (radius(k+1)-radius(k))
 !         PLEASE KEEP this COMMENT:
 !         this check needs RO profile, which was done with MPI reduce in GSI
 !         not applied here yet
-
 !         only check once - SR-likely layer detected
-          if (.not.qc_layer_SR .and. abs(gradRef)>= half*crit_gradRef) then 
+          if (.not.qc_layer_SR .and. abs(gradRef)>= half*crit_gradRefr) then
              qc_layer_SR=.true. 
           endif
 
 !         relax to close-to-SR conditions
-          if (abs(gradRef) >= 0.75_kind_real*crit_gradRef) then
+          if (abs(gradRef) >= 0.75_kind_real*crit_gradRefr) then
              count_SR=count_SR+1        ! layers of SR
              if (count_SR > 1 ) then
-                bot_layer_SR=klev
+                bot_layer_SR=k
              else
-                top_layer_SR=klev
+                top_layer_SR=k
                 bot_layer_SR=top_layer_SR
              endif
           endif
@@ -270,15 +261,15 @@ subroutine ufo_gnssro_bndgsi_simobs(self, geovals, hofx, obss)
 
 !  Extend atmosphere above interface level nlev
     d_refXrad = refXrad(nlev) - refXrad(nlev-1)
-    do ilev = 1, nlevAdd
-      refXrad(nlev+ilev)=refXrad(nlev)+ ilev*d_refXrad    ! extended x_i
-      ref(nlev+ilev)=ref(nlev+ilev-1)**2/ref(nlev+ilev-2) ! exended N_i
+    do k = 1, nlevAdd
+      refXrad(nlev+k)=refXrad(nlev)+ k*d_refXrad    ! extended x_i
+      ref(nlev+k)=ref(nlev+k-1)**2/ref(nlev+k-2) ! exended N_i
     end do
 
     refXrad(0)=refXrad(3)
     refXrad(nlevExt+1)=refXrad(nlevExt-2)
-    do ilev = 1,nlevExt
-       call lag_interp_const(lagConst(:,ilev),refXrad(ilev-1:ilev+1),3)
+    do k = 1,nlevExt
+       call lag_interp_const(lagConst(:,k),refXrad(k-1:k+1),3)
     enddo
 
 !   integrate on a new set of equally-spaced vertical grid 
@@ -328,7 +319,6 @@ subroutine ufo_gnssro_bndgsi_simobs(self, geovals, hofx, obss)
   deallocate(obsImpP)
   deallocate(obsLocR)
   deallocate(obsGeoid)
-
   deallocate(gesP) 
   deallocate(gesZ) 
   deallocate(gesT) 
@@ -342,6 +332,8 @@ subroutine ufo_gnssro_bndgsi_simobs(self, geovals, hofx, obss)
   deallocate(lagConst) 
   deallocate(refXrad_new) 
 
+  write(err_msg,*) myname, ": complete"
+  call fckit_log%info(err_msg)
 end subroutine ufo_gnssro_bndgsi_simobs
 ! ------------------------------------------------------------------------------
 end module ufo_gnssro_bndgsi_mod

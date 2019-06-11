@@ -45,7 +45,7 @@ BlackList::~BlackList() {}
 
 void BlackList::priorFilter(const GeoVaLs & gv) const {
   const size_t nobs = obsdb_.nlocs();
-  const oops::Variables vars(config_.getStringVector("observed"));
+  const oops::Variables vars = obsdb_.obsvariables();
 
   std::vector<bool> blacklisted = processWhere(obsdb_, gv, config_);
 
