@@ -152,7 +152,7 @@ character(len=MAXVARLEN) :: geovar
   ! -----------------------------   
   hofx(:,:) = 0.0_kind_real
   call get_GEOS_AOD(nlayers, nlocs, self%n_wavelengths, self%n_tracers, rcfile, mieTables, &
-                    self%wavelength, self%varin(1:self%n_tracers), qm, rh,  hofx, rc = rc)  !self%varin includes rh and delp!!!!
+                    self%wavelength, self%varin(1:self%n_tracers), qm, rh,  aod_tot = hofx, rc = rc)  !self%varin includes rh and delp!!!!
         
   ! delete the Mie tables
   ! --------------------
