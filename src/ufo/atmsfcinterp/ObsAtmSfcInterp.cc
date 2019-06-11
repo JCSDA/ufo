@@ -16,36 +16,32 @@
 
 #include "ioda/ObsVector.h"
 
-#include "oops/base/Variables.h"
-
 #include "ufo/GeoVaLs.h"
-#include "ufo/ObsBias.h"
 
 
 namespace ufo {
 
 // -----------------------------------------------------------------------------
-static ObsOperatorMaker<ObsAtmSfcInterp> makerPBLinterp_("PBLinterp");
+static ObsOperatorMaker<ObsAtmSfcInterp> makerGSISfcModel_("GSISfcModel");
 // -----------------------------------------------------------------------------
 
 ObsAtmSfcInterp::ObsAtmSfcInterp(const ioda::ObsSpace & odb, const eckit::Configuration & config)
   : ObsOperatorBase(odb, config), keyOperAtmSfcInterp_(0),
-    odb_(odb), varin_(), varout_()
+    odb_(odb), varin_()
 {
   int c_name_size = 500;
   char *buffin = new char[c_name_size];
-  char *buffout = new char[c_name_size];
   const eckit::Configuration * configc = &config;
 
-  ufo_atmsfcinterp_setup_f90(keyOperAtmSfcInterp_, &configc, buffin, buffout, c_name_size);
+  const oops::Variables & observed = odb.obsvariables();
+  const eckit::Configuration * varconfig = &observed.toFortran();
 
-  std::string vstr_in(buffin), vstr_out(buffout);
+  ufo_atmsfcinterp_setup_f90(keyOperAtmSfcInterp_, &configc, &varconfig, buffin, c_name_size);
+
+  std::string vstr_in(buffin);
   std::vector<std::string> vvin;
-  std::vector<std::string> vvout;
   boost::split(vvin, vstr_in, boost::is_any_of("\t"));
-  boost::split(vvout, vstr_out, boost::is_any_of("\t"));
   varin_.reset(new oops::Variables(vvin));
-  varout_.reset(new oops::Variables(vvout));
 
   oops::Log::trace() << "ObsAtmSfcInterp created." << std::endl;
 }
@@ -59,11 +55,10 @@ ObsAtmSfcInterp::~ObsAtmSfcInterp() {
 
 // -----------------------------------------------------------------------------
 
-void ObsAtmSfcInterp::simulateObs(const GeoVaLs & gom, ioda::ObsVector & ovec,
-                                const ObsBias & bias) const {
+void ObsAtmSfcInterp::simulateObs(const GeoVaLs & gom, ioda::ObsVector & ovec) const {
   ufo_atmsfcinterp_simobs_f90(keyOperAtmSfcInterp_, gom.toFortran(), odb_,
-                            ovec.nvars(), ovec.nlocs(), ovec.toFortran(), bias.toFortran());
-  oops::Log::trace() << "ObsAtmSfcInterp: observation operator run" << std::endl;
+                            ovec.nvars(), ovec.nlocs(), ovec.toFortran());
+  oops::Log::trace() << "ObsAtmSfcInterp: observation operator executed" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

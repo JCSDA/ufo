@@ -12,11 +12,8 @@
 #include <string>
 #include <vector>
 
-#include <boost/scoped_ptr.hpp>
-
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
-
 #include "ufo/atmsfcinterp/ObsAtmSfcInterp.interface.h"
 #include "ufo/ObsOperatorBase.h"
 
@@ -45,11 +42,10 @@ class ObsAtmSfcInterp : public ObsOperatorBase,
   virtual ~ObsAtmSfcInterp();
 
 // Obs Operator
-  void simulateObs(const GeoVaLs &, ioda::ObsVector &, const ObsBias &) const;
+  void simulateObs(const GeoVaLs &, ioda::ObsVector &) const;
 
 // Other
   const oops::Variables & variables() const {return *varin_;}
-  const oops::Variables & observed() const {return *varout_;}
 
   int & toFortran() {return keyOperAtmSfcInterp_;}
   const int & toFortran() const {return keyOperAtmSfcInterp_;}
@@ -59,7 +55,6 @@ class ObsAtmSfcInterp : public ObsOperatorBase,
   F90hop keyOperAtmSfcInterp_;
   const ioda::ObsSpace& odb_;
   boost::scoped_ptr<const oops::Variables> varin_;
-  boost::scoped_ptr<const oops::Variables> varout_;
 };
 
 // -----------------------------------------------------------------------------
