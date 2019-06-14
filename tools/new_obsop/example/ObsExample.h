@@ -30,7 +30,6 @@ namespace ioda {
 
 namespace ufo {
   class GeoVaLs;
-  class ObsBias;
 
 // -----------------------------------------------------------------------------
 /// Example observation operator class
@@ -43,11 +42,10 @@ class ObsExample : public ObsOperatorBase,
   virtual ~ObsExample();
 
 // Obs Operator
-  void simulateObs(const GeoVaLs &, ioda::ObsVector &, const ObsBias &) const;
+  void simulateObs(const GeoVaLs &, ioda::ObsVector &) const;
 
 // Other
   const oops::Variables & variables() const {return *varin_;}
-  const oops::Variables & observed() const {return *varout_;}
 
   int & toFortran() {return keyOper_;}
   const int & toFortran() const {return keyOper_;}
@@ -57,7 +55,6 @@ class ObsExample : public ObsOperatorBase,
   F90hop keyOper_;
   const ioda::ObsSpace& odb_;
   std::unique_ptr<const oops::Variables> varin_;
-  std::unique_ptr<const oops::Variables> varout_;
 };
 
 // -----------------------------------------------------------------------------
