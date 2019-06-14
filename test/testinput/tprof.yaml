@@ -19,6 +19,8 @@ Observations:
       name: InsituTemperature
       ObsDataIn:
         obsfile: Data/profile_2018-04-15.nc
+      simulate:
+        variables: [sea_water_temperature]
     GeoVaLs:
       filename: Data/profile_2018-04-15_geovals.nc
     rmsequiv: 15.020734025831988              

@@ -44,7 +44,7 @@ ObsDomainCheck::~ObsDomainCheck() {}
 // -----------------------------------------------------------------------------
 
 void ObsDomainCheck::priorFilter(const GeoVaLs & gv) const {
-  const oops::Variables vars(config_.getStringVector("observed"));
+  const oops::Variables vars = obsdb_.obsvariables();
 
   std::vector<bool> inside = processWhere(obsdb_, gv, config_);
 

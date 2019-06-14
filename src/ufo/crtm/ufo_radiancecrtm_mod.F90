@@ -24,7 +24,6 @@ module ufo_radiancecrtm_mod
  type, public :: ufo_radiancecrtm
  private
    character(len=max_string), public, allocatable :: varin(:)  ! variables requested from the model
-   character(len=max_string), public, allocatable :: varout(:) ! variables simulated by CRTM
    integer, allocatable                           :: channels(:)
    type(crtm_conf) :: conf
  contains
@@ -72,15 +71,8 @@ integer :: ind, ich
    self%varin(ind+1) = var_cliefr
    ind = ind + 2
  endif
-
- ! output variables: all requested channels
- nvars_out = size(channels)
- allocate(self%varout(nvars_out))
- allocate(self%channels(nvars_out))
+ allocate(self%channels(size(channels)))
  self%channels(:) = channels(:)
- do ich = 1, size(channels)
-   call get_var_name(self%channels(ich), self%varout(ich))
- enddo
 
 end subroutine ufo_radiancecrtm_setup
 
@@ -228,7 +220,6 @@ type(CRTM_RTSolution_type), allocatable :: rts(:,:)
    call Load_Atm_Data(n_Profiles,n_Layers,geovals,atm,self%conf)
    call Load_Sfc_Data(n_Profiles,n_Layers,n_Channels,self%channels,geovals,sfc,chinfo,obss,self%conf)
    call Load_Geom_Data(obss,geo)
-
 
    ! Call THE CRTM inspection
    ! ------------------------

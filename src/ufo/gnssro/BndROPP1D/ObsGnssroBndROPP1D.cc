@@ -17,7 +17,6 @@
 #include "oops/util/Logger.h"
 
 #include "ufo/GeoVaLs.h"
-#include "ufo/ObsBias.h"
 
 namespace ufo {
 
@@ -27,14 +26,11 @@ static ObsOperatorMaker<ObsGnssroBndROPP1D> makerGnssroBndROPP1D_("GnssroBndROPP
 
 ObsGnssroBndROPP1D::ObsGnssroBndROPP1D(const ioda::ObsSpace & odb,
                                        const eckit::Configuration & config)
-  : ObsOperatorBase(odb, config), keyOperGnssroBndROPP1D_(0), odb_(odb), varin_(), varout_()
+  : ObsOperatorBase(odb, config), keyOperGnssroBndROPP1D_(0), odb_(odb), varin_()
 {
   const std::vector<std::string> vv{"air_temperature", "specific_humidity", "air_pressure",
                                     "geopotential_height", "sfc_geopotential_height"};
   varin_.reset(new oops::Variables(vv));
-
-  const std::vector<std::string> vout{"bending_angle"};
-  varout_.reset(new oops::Variables(vout));
 
   const eckit::Configuration * configc = &config;
   ufo_gnssro_bndropp1d_setup_f90(keyOperGnssroBndROPP1D_, &configc);
@@ -50,10 +46,9 @@ ObsGnssroBndROPP1D::~ObsGnssroBndROPP1D() {
 
 // -----------------------------------------------------------------------------
 
-void ObsGnssroBndROPP1D::simulateObs(const GeoVaLs & gom, ioda::ObsVector & ovec,
-                                const ObsBias & bias) const {
+void ObsGnssroBndROPP1D::simulateObs(const GeoVaLs & gom, ioda::ObsVector & ovec) const {
   ufo_gnssro_bndropp1d_simobs_f90(keyOperGnssroBndROPP1D_, gom.toFortran(), odb_,
-                                  ovec.size(), ovec.toFortran(), bias.toFortran());
+                                  ovec.size(), ovec.toFortran());
 }
 
 // -----------------------------------------------------------------------------

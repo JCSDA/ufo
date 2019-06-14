@@ -38,10 +38,8 @@ ObsRadianceCRTMTLAD::ObsRadianceCRTMTLAD(const ioda::ObsSpace & odb,
   char *buffin = new char[c_name_size];
 
   // parse channels from the config and create variable names
-  std::string chlist = config.getString("channels");
-  std::set<int> channels = oops::parseIntSet(chlist);
-  std::vector<int> channels_list;
-  std::copy(channels.begin(), channels.end(), std::back_inserter(channels_list));
+  const oops::Variables & observed = odb.obsvariables();
+  std::vector<int> channels_list = observed.channels();
 
   // call Fortran setup routine
   const eckit::Configuration * configc = &config;

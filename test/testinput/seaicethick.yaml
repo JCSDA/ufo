@@ -19,6 +19,8 @@ Observations:
       name: SeaIceThickness
       ObsDataIn:
         obsfile: Data/cryosat2-2018-04-15.nc
+      simulate:
+        variables: [sea_ice_thickness]
     GeoVaLs:
       filename: Data/cryosat2-2018-04-15_geovals.nc
     rmsequiv: 1.25

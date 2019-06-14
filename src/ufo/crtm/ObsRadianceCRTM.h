@@ -8,11 +8,10 @@
 #ifndef UFO_CRTM_OBSRADIANCECRTM_H_
 #define UFO_CRTM_OBSRADIANCECRTM_H_
 
+#include <memory>
 #include <ostream>
 #include <string>
 #include <vector>
-
-#include <boost/scoped_ptr.hpp>
 
 #include "oops/base/Variables.h"
 #include "oops/util/Logger.h"
@@ -31,7 +30,6 @@ namespace ioda {
 
 namespace ufo {
   class GeoVaLs;
-  class ObsBias;
 
 // -----------------------------------------------------------------------------
 /// RadianceCRTM observation for UFO.
@@ -44,11 +42,10 @@ class ObsRadianceCRTM : public ObsOperatorBase,
   virtual ~ObsRadianceCRTM();
 
 // Obs Operator
-  void simulateObs(const GeoVaLs &, ioda::ObsVector &, const ObsBias &) const override;
+  void simulateObs(const GeoVaLs &, ioda::ObsVector &) const override;
 
 // Other
   const oops::Variables & variables() const override {return *varin_;}
-  const oops::Variables & observed() const override {return *varout_;}
   const std::string & obstype() const override {return obsname_;}
 
   int & toFortran() {return keyOperRadianceCRTM_;}
@@ -58,8 +55,7 @@ class ObsRadianceCRTM : public ObsOperatorBase,
   void print(std::ostream &) const override;
   F90hop keyOperRadianceCRTM_;
   const ioda::ObsSpace& odb_;
-  boost::scoped_ptr<const oops::Variables> varin_;
-  boost::scoped_ptr<const oops::Variables> varout_;
+  std::unique_ptr<const oops::Variables> varin_;
   std::string obsname_;
 };
 

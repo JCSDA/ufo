@@ -12,8 +12,6 @@
 #include <string>
 #include <vector>
 
-#include <boost/scoped_ptr.hpp>
-
 #include "ioda/ObsSpace.h"
 #include "ioda/ObsVector.h"
 #include "oops/base/Variables.h"
@@ -30,21 +28,13 @@ static LinearObsOperatorMaker<ObsAodCRTMTLAD> makerAodTL_("Aod");
 // -----------------------------------------------------------------------------
 
 ObsAodCRTMTLAD::ObsAodCRTMTLAD(const ioda::ObsSpace & odb,
-                                         const eckit::Configuration & config)
-  : keyOperAodCRTM_(0), varin_(), odb_(odb)
+                               const eckit::Configuration & config)
+  : keyOperAodCRTM_(0), varin_(), odb_(odb), channels_(odb.obsvariables().channels())
 {
   const std::vector<std::string> vv{
     "sulf", "bc1", "bc2", "oc1", "oc2", "dust1", "dust2", "dust3", "dust4", "dust5",
     "seas1", "seas2", "seas3", "seas4"};
   varin_.reset(new oops::Variables(vv));
-
-  // parse channels from the config and create variable names
-  std::string chlist = config.getString("channels");
-  std::set<int> channels = oops::parseIntSet(chlist);
-  channels_.reserve(channels.size());
-  for (const int jj : channels) {
-    channels_.push_back(jj);
-  }
 
   const eckit::LocalConfiguration obsOptions(config, "ObsOptions");
   const eckit::Configuration * configc = &obsOptions;

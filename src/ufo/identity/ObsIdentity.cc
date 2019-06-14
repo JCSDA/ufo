@@ -20,7 +20,6 @@
 #include "oops/base/Variables.h"
 
 #include "ufo/GeoVaLs.h"
-#include "ufo/ObsBias.h"
 
 
 namespace ufo {
@@ -32,23 +31,21 @@ static ObsOperatorMaker<ObsIdentity> makerSSS_("SeaSurfaceSalinity");
 
 ObsIdentity::ObsIdentity(const ioda::ObsSpace & odb,
                          const eckit::Configuration & config)
-  : ObsOperatorBase(odb, config), keyOperObsIdentity_(0), odb_(odb), varin_(), varout_()
+  : ObsOperatorBase(odb, config), keyOperObsIdentity_(0), odb_(odb), varin_()
 {
   int c_name_size = 200;
   char *buffin = new char[c_name_size];
-  char *buffout = new char[c_name_size];
   const eckit::Configuration * configc = &config;
 
-  ufo_identity_setup_f90(keyOperObsIdentity_, &configc, buffin, buffout,
-                         c_name_size);
+  const oops::Variables & vars = odb.obsvariables();
+  const eckit::Configuration * varconfig = &vars.toFortran();
 
-  std::string vstr_in(buffin), vstr_out(buffout);
+  ufo_identity_setup_f90(keyOperObsIdentity_, &configc, &varconfig, buffin, c_name_size);
+
+  std::string vstr_in(buffin);
   std::vector<std::string> vvin;
-  std::vector<std::string> vvout;
   boost::split(vvin, vstr_in, boost::is_any_of("\t"));
-  boost::split(vvout, vstr_out, boost::is_any_of("\t"));
   varin_.reset(new oops::Variables(vvin));
-  varout_.reset(new oops::Variables(vvout));
 
   oops::Log::trace() << "ObsIdentity created." << std::endl;
 }
@@ -62,11 +59,9 @@ ObsIdentity::~ObsIdentity() {
 
 // -----------------------------------------------------------------------------
 
-void ObsIdentity::simulateObs(const GeoVaLs & gom, ioda::ObsVector & ovec,
-                              const ObsBias & bias) const {
+void ObsIdentity::simulateObs(const GeoVaLs & gom, ioda::ObsVector & ovec) const {
   ufo_identity_simobs_f90(keyOperObsIdentity_, gom.toFortran(), odb_,
-                          ovec.nvars(), ovec.nlocs(), ovec.toFortran(),
-                          bias.toFortran());
+                          ovec.nvars(), ovec.nlocs(), ovec.toFortran());
   oops::Log::trace() << "ObsIdentity: observation operator run" << std::endl;
 }
 

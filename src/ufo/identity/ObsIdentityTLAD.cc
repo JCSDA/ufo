@@ -11,7 +11,6 @@
 #include <string>
 #include <vector>
 #include <boost/algorithm/string.hpp>
-#include <boost/scoped_ptr.hpp>
 
 #include "ioda/ObsSpace.h"
 #include "ioda/ObsVector.h"
@@ -36,11 +35,11 @@ ObsIdentityTLAD::ObsIdentityTLAD(const ioda::ObsSpace & odb,
 {
   int c_name_size = 200;
   char *buffin = new char[c_name_size];
-  char *buffout = new char[c_name_size];
   const eckit::Configuration * configc = &config;
 
-  ufo_identity_tlad_setup_f90(keyOperObsIdentity_, &configc, buffin,
-                              c_name_size);
+  const eckit::Configuration * varconfig = &odb.obsvariables().toFortran();
+
+  ufo_identity_tlad_setup_f90(keyOperObsIdentity_, &configc, &varconfig, buffin, c_name_size);
 
   std::string vstr_in(buffin);
   std::vector<std::string> vvin;

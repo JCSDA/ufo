@@ -8,11 +8,10 @@
 #ifndef UFO_CRTM_OBSAODCRTM_H_
 #define UFO_CRTM_OBSAODCRTM_H_
 
+#include <memory>
 #include <ostream>
 #include <string>
 #include <vector>
-
-#include <boost/scoped_ptr.hpp>
 
 #include "oops/base/Variables.h"
 #include "oops/util/Logger.h"
@@ -31,7 +30,6 @@ namespace ioda {
 
 namespace ufo {
   class GeoVaLs;
-  class ObsBias;
 
 // -----------------------------------------------------------------------------
 /// AodCRTM observation for UFO.
@@ -44,11 +42,10 @@ class ObsAodCRTM : public ObsOperatorBase,
   virtual ~ObsAodCRTM();
 
 // Obs Operator
-  void simulateObs(const GeoVaLs &, ioda::ObsVector &, const ObsBias &) const;
+  void simulateObs(const GeoVaLs &, ioda::ObsVector &) const;
 
 // Other
   const oops::Variables & variables() const {return *varin_;}
-  const oops::Variables & observed() const {return *varout_;}
 
   int & toFortran() {return keyOperAodCRTM_;}
   const int & toFortran() const {return keyOperAodCRTM_;}
@@ -57,8 +54,7 @@ class ObsAodCRTM : public ObsOperatorBase,
   void print(std::ostream &) const;
   F90hop keyOperAodCRTM_;
   const ioda::ObsSpace& odb_;
-  boost::scoped_ptr<const oops::Variables> varin_;
-  boost::scoped_ptr<const oops::Variables> varout_;
+  std::unique_ptr<const oops::Variables> varin_;
   std::vector<int> channels_;
 };
 

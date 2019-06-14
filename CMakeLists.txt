@@ -57,29 +57,29 @@ ecbuild_use_package( PROJECT crtm VERSION 2.2.3 REQUIRED )
 include_directories( ${CRTM_INCLUDE_DIRS} )
 
 # RTTOV
-ecbuild_use_package( PROJECT rttov VERSION 12.1.0 )
+ecbuild_use_package( PROJECT rttov VERSION 12.1.0 QUIET )
 if( ${RTTOV_FOUND} )
-    message("RTTOV FOUND; Including RTTOV Radiance Observation Operator")
+    message(STATUS "RTTOV FOUND; Including RTTOV Radiance Observation Operator")
     include_directories( ${RTTOV_INCLUDE_DIRS} )
 else( ${RTTOV_FOUND} )
-    message("RTTOV NOT FOUND; Excluding RTTOV Radiance Observation Operator")
+    message(STATUS "RTTOV NOT FOUND; Excluding RTTOV Radiance Observation Operator")
 endif( ${RTTOV_FOUND} )
 
 # GSW
-ecbuild_use_package( PROJECT gsw )
+ecbuild_use_package( PROJECT gsw QUIET )
 if( ${GSW_FOUND} )
-    message("GSW FOUND; Including Marine Observation Operators")
+    message(STATUS "GSW FOUND; Including Marine Observation Operators")
     include_directories( ${GSW_INCLUDE_DIRS} )
 else( ${GSW_FOUND} )
-    message("GSW NOT FOUND: Excluding Marine Observation Operators")
+    message(STATUS "GSW NOT FOUND: Excluding Marine Observation Operators")
 endif( ${GSW_FOUND} )
 
 # ROPP-UFO
-ecbuild_use_package( PROJECT ropp-ufo )
+ecbuild_use_package( PROJECT ropp-ufo QUIET )
 if( ${ROPP-UFO_FOUND} )
-    message("ROPP FOUND; Including GNSSRO Bending angle ROPP Operators")
+    message(STATUS "ROPP FOUND; Including GNSSRO Bending angle ROPP Operators")
 else( ${ROPP-UFO_FOUND} )
-    message("ROPP NOT FOUND: Excluding  GNSSRO Bending angle ROPP Operators")
+    message(STATUS "ROPP NOT FOUND: Excluding  GNSSRO Bending angle ROPP Operators")
 endif( ${ROPP-UFO_FOUND} )
 
 ################################################################################

@@ -42,7 +42,7 @@ PreQC::PreQC(ioda::ObsSpace & obsdb, const eckit::Configuration & config,
   ASSERT(qcflags);
   ASSERT(obserr);
 
-  const oops::Variables observed(config.getStringVector("observed"));
+  const oops::Variables observed = obsdb.obsvariables();
 
   ASSERT(qcflags->nvars() == observed.size());
   ASSERT(qcflags->nlocs() == obsdb.nlocs());

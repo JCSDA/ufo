@@ -7,15 +7,14 @@ window_begin: 2018-04-14T21:00:00Z
 window_end: 2018-04-15T03:00:00Z
 
 LinearObsOpTest: 
- testiterTL:  10
- toleranceTL: 1.0e-13
- toleranceAD: 1.0e-14
+ testiterTL:  11
+ toleranceTL: 1.0e-11
+ toleranceAD: 1.0e-13
 
 Observations: 
  ObsTypes: 
  - ObsOperator: 
      name: GnssroBndGSI
-     obsvalue: bending_angle
      ObsOptions:
        use_compress: 1
        vertlayer: full
@@ -25,6 +24,8 @@ Observations:
        obsfile: Data/gnssro_obs_2018041500_m.nc4
      ObsDataOut:
        obsfile: Data/gnssro_bndgsi_2018041500_m_output.nc4
+     simulate:
+       variables: [bending_angle]
    GeoVaLs: 
      filename: Data/gnssro_geoval_2018041500_m.nc4
    vecequiv: GsiHofX

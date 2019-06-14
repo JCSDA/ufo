@@ -12,6 +12,7 @@ module ufo_atmsfcinterp_mod
   use kinds
 
   use ufo_geovals_mod, only: ufo_geovals, ufo_geoval, ufo_geovals_get_var
+  use ufo_geovals_mod_c, only: ufo_geovals_registry
   use ufo_basis_mod, only: ufo_basis
   use ufo_vars_mod
   use obsspace_mod
@@ -31,30 +32,33 @@ module ufo_atmsfcinterp_mod
   contains
     procedure :: setup  => atmsfcinterp_setup_
     procedure :: simobs => atmsfcinterp_simobs_
-    !final :: destructor
+    final :: destructor
   end type ufo_atmsfcinterp
 
 contains
 
 ! ------------------------------------------------------------------------------
-subroutine atmsfcinterp_setup_(self, c_conf)
+subroutine atmsfcinterp_setup_(self, c_conf, vars)
   implicit none
   class(ufo_atmsfcinterp), intent(inout) :: self
   type(c_ptr),        intent(in)    :: c_conf
-  integer :: ii, ivar, nallvars, istart
+  character(len=MAXVARLEN), dimension(:), intent(inout) :: vars
+  integer :: ii, ivar, nallvars, istart, fact10tmp
+  logical :: fact10nml
 
   !> Size of variables
-  self%nvars = size(config_get_string_vector(c_conf, max_string, "variables"))
+  self%nvars = size(vars)
   !> Allocate varout: variables in the observation vector
   allocate(self%varout(self%nvars))
   !> Read variable list and store in varout
-  self%varout = config_get_string_vector(c_conf, max_string, "variables")
+  self%varout = vars
   ! check for if we need to look for wind reduction factor
-  self%use_fact10 = .false.
-  if (config_element_exists(c_conf,"use_fact10")) then 
-    ii = config_get_int(c_conf,"use_fact10")
-    if (ii /= 0) self%use_fact10 = .true.
+  self%use_fact10 = .false. 
+  fact10tmp = config_get_int(c_conf, "use_fact10", 0)
+  if (fact10tmp /= 0) then
+    self%use_fact10 = .true.
   end if
+
   !> Allocate varin: variables we need from the model
   if (self%use_fact10) then
     istart = 13

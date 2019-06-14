@@ -37,21 +37,24 @@ contains
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_marinevertinterp_setup_c(c_key_self, c_conf, csin, csout, c_str_size) bind(c,name='ufo_marinevertinterp_setup_f90')
+subroutine ufo_marinevertinterp_setup_c(c_key_self, c_conf, c_varconf, csin, c_str_size) bind(c,name='ufo_marinevertinterp_setup_f90')
+use ufo_vars_mod
 implicit none
 integer(c_int), intent(inout) :: c_key_self
 type(c_ptr),    intent(in)    :: c_conf
+type(c_ptr), intent(in) :: c_varconf ! config with variables to be simulated
 integer(c_int), intent(in) :: c_str_size
-character(kind=c_char,len=1),intent(inout) :: csin(c_str_size+1),csout(c_str_size+1)
+character(kind=c_char,len=1),intent(inout) :: csin(c_str_size+1)
+character(len=MAXVARLEN), dimension(:), allocatable :: vars
 
 type(ufo_marinevertinterp), pointer :: self
 
 call ufo_marinevertinterp_registry%setup(c_key_self, self)
+call ufo_vars_read(c_varconf, vars)
+call self%setup(vars)
 
-call self%setup(c_conf)
-
-call f_c_string_vector(self%varout, csout)
 call f_c_string_vector(self%varin, csin) 
+deallocate(vars)
 
 end subroutine ufo_marinevertinterp_setup_c
 
@@ -73,7 +76,7 @@ end subroutine ufo_marinevertinterp_delete_c
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_marinevertinterp_simobs_c(c_key_self, c_key_geovals, c_obsspace, c_nobs, c_hofx, c_bias) bind(c,name='ufo_marinevertinterp_simobs_f90')
+subroutine ufo_marinevertinterp_simobs_c(c_key_self, c_key_geovals, c_obsspace, c_nobs, c_hofx) bind(c,name='ufo_marinevertinterp_simobs_f90')
 
 implicit none
 integer(c_int), intent(in) :: c_key_self
@@ -81,7 +84,6 @@ integer(c_int), intent(in) :: c_key_geovals
 type(c_ptr), value, intent(in) :: c_obsspace
 integer(c_int), intent(in) :: c_nobs
 real(c_double), intent(inout) :: c_hofx(c_nobs)
-integer(c_int), intent(in) :: c_bias
 
 type(ufo_marinevertinterp), pointer :: self
 type(ufo_geovals), pointer :: geovals

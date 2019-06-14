@@ -8,8 +8,9 @@
 #ifndef UFO_LINEAROBSOPERATOR_H_
 #define UFO_LINEAROBSOPERATOR_H_
 
+#include <memory>
+
 #include <boost/noncopyable.hpp>
-#include <boost/scoped_ptr.hpp>
 
 #include "oops/util/Printable.h"
 
@@ -51,7 +52,7 @@ class LinearObsOperator : public util::Printable,
 
  private:
   void print(std::ostream &) const;
-  boost::scoped_ptr<LinearObsOperatorBase> oper_;
+  std::unique_ptr<LinearObsOperatorBase> oper_;
 };
 
 // -----------------------------------------------------------------------------

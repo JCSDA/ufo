@@ -435,7 +435,7 @@ endif
 
 ! The last variable should be the ln pressure coordinate.  That's
 ! where we get the height information for the analytic init
-if (trim(self%variables(self%nvar)) /= trim(var_prsl)) then
+if (trim(self%variables(self%nvar)) /= trim(var_prs)) then
   call abor1_ftn("ufo_geovals_analytic_init: pressure coordinate not defined")
 endif
 
@@ -453,8 +453,8 @@ do ivar = 1, self%nvar-1
 
          ! obtain height from the existing GeoVaLs object, which should be an
          ! output of the State::getValues() method
-         ! convert from KPa (ufo standard) to Pa (dcmip standard)
-         p0 = exp(self%geovals(self%nvar)%vals(ival,iloc))*1.0e3_kind_real
+         ! should be delivered in units of Pa
+         p0 = self%geovals(self%nvar)%vals(ival,iloc)
 
          init_option: select case (trim(ic))
 
@@ -721,7 +721,9 @@ dist_indx = distribution%indx
 call ufo_geovals_setup(self, c_vars, nlocs)
 
 do ivar = 1, self%nvar
+
   call check('nf90_inq_varid', nf90_inq_varid(ncid, self%variables(ivar), varid))
+
   call check('nf90_inquire_variable', nf90_inquire_variable(ncid, varid, xtype = vartype, &
                                          ndims = ndims, dimids = dimids))
   !> read 1d variable

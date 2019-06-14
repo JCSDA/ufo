@@ -8,7 +8,6 @@
 module ufo_identity_tlad_mod
 
  use iso_c_binding
- use config_mod
  use kinds
 
  use ufo_geovals_mod, only: &
@@ -37,7 +36,7 @@ module ufo_identity_tlad_mod
  private
    integer          :: nval, nlocs
    integer, public  :: nvars
-   character(len=max_string), public, allocatable :: varin(:)
+   character(len=max_string), public, allocatable :: vars(:)
  contains
    procedure :: setup  => identity_tlad_setup_
    procedure :: delete  => identity_tlad_delete_
@@ -50,23 +49,14 @@ module ufo_identity_tlad_mod
 contains
 
 ! ------------------------------------------------------------------------------
-subroutine identity_tlad_setup_(self, c_conf)
+subroutine identity_tlad_setup_(self, vars)
+   implicit none
+   class(ufo_identity_tlad), intent(inout) :: self
+   character(len=MAXVARLEN), dimension(:), intent(inout) :: vars
 
-  use config_mod
-  implicit none
-  class(ufo_identity_tlad), intent(inout) :: self
-  type(c_ptr), intent(in)    :: c_conf
-
-  integer :: ii
-
-  !> Size of variables
-  self%nvars = size(config_get_string_vector(c_conf, max_string, "variables"))
-
-  !> Allocate varin
-  allocate(self%varin(self%nvars))
-
-  !> Read variable list and store in varin
-  self%varin = config_get_string_vector(c_conf, max_string, "variables")
+  self%nvars = size(vars)
+  allocate(self%vars(self%nvars))
+  self%vars = vars
 
 end subroutine identity_tlad_setup_
 
@@ -99,7 +89,7 @@ subroutine identity_simobs_tl_(self, geovals, hofx, obss)
 
   do ivar = 1, self%nvars
     !> Get the name of input variable in geovals
-    geovar = self%varin(ivar)
+    geovar = self%vars(ivar)
 
     !> Get profile for this variable from geovals
     call ufo_geovals_get_var(geovals, geovar, point)
@@ -134,7 +124,7 @@ subroutine identity_simobs_ad_(self, geovals, hofx, obss)
 
   do ivar = 1, self%nvars
     !> Get the name of input variable in geovals
-    geovar = self%varin(ivar)
+    geovar = self%vars(ivar)
 
     !> Get profile for this variable from geovals
     call ufo_geovals_get_var(geovals, geovar, point)
@@ -170,7 +160,7 @@ subroutine  destructor(self)
   self%nlocs = 0
   self%nvars = 0
   self%ltraj = .false.
-  if (allocated(self%varin)) deallocate(self%varin)
+  if (allocated(self%vars)) deallocate(self%vars)
 end subroutine destructor
 
 

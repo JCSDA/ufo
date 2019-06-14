@@ -20,7 +20,7 @@ extern "C" {
 
 // -----------------------------------------------------------------------------
 
-  void ufo_marinevertinterp_tlad_setup_f90(F90hop &,
+  void ufo_marinevertinterp_tlad_setup_f90(F90hop &, const eckit::Configuration * const *,
                                            const eckit::Configuration * const *,
                                            char *, const int &);
   void ufo_marinevertinterp_tlad_delete_f90(F90hop &);

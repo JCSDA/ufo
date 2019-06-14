@@ -46,16 +46,13 @@ module ufo_marinevertinterp_tlad_mod
 contains
 
 ! ------------------------------------------------------------------------------
-subroutine ufo_marinevertinterp_tlad_setup(self, c_conf)
+subroutine ufo_marinevertinterp_tlad_setup(self, vars)
 implicit none
 class(ufo_marinevertinterp_tlad), intent(inout) :: self
-type(c_ptr),              intent(in)    :: c_conf
-
-character(len=max_string) :: varprof(1)
+character(len=MAXVARLEN), dimension(:), intent(inout) :: vars
 
 ! Set input variable names
-varprof = config_get_string_vector(c_conf, max_string, "variable")
-self%varin(1) = varprof(1)
+self%varin(1) = vars(1)
 
 end subroutine ufo_marinevertinterp_tlad_setup
 

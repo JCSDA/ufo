@@ -15,12 +15,12 @@ Observations:
   ObsTypes:
   - ObsOperator:
       name: SeaSurfaceTemp
-      variables:
-      - sea_surface_temperature
     ObsSpace:
       name: SeaSurfaceTemp
       ObsDataIn:
         obsfile: Data/sst_obs-2018-04-15.nc4
+      simulate:
+        variables: [sea_surface_temperature]
     GeoVaLs:
       filename: Data/sst_obs-2018-04-15_geovals.nc
     rmsequiv: 15.0

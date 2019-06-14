@@ -30,35 +30,30 @@ static ObsOperatorMaker<ObsRadianceCRTM> makerCRTM_("CRTM");
 
 // -----------------------------------------------------------------------------
 
-ObsRadianceCRTM::ObsRadianceCRTM(const ioda::ObsSpace & odb, const eckit::Configuration & config)
+ObsRadianceCRTM::ObsRadianceCRTM(const ioda::ObsSpace & odb,
+                                 const eckit::Configuration & config)
   : ObsOperatorBase(odb, config), keyOperRadianceCRTM_(0),
-    odb_(odb), varin_(), varout_(), obsname_("CRTM:")
+    odb_(odb), varin_(), obsname_("CRTM:")
 {
   obsname_ += config.getString("Sensor_ID");
   int c_name_size = 3000;
   char *buffin = new char[c_name_size];
-  char *buffout = new char[c_name_size];
 
   // parse channels from the config and create variable names
-  std::string chlist = config.getString("channels");
-  std::set<int> channels = oops::parseIntSet(chlist);
-  std::vector<int> channels_list;
-  std::copy(channels.begin(), channels.end(), std::back_inserter(channels_list));
+  const oops::Variables & observed = odb.obsvariables();
+  std::vector<int> channels_list = observed.channels();
 
   // call Fortran setup routine
   const eckit::Configuration * configc = &config;
   ufo_radiancecrtm_setup_f90(keyOperRadianceCRTM_, &configc, channels_list.size(),
-                             channels_list[0], buffin, buffout, c_name_size);
+                             channels_list[0], buffin, c_name_size);
 
-  std::string vstr_in(buffin), vstr_out(buffout);
+  std::string vstr_in(buffin);
   std::vector<std::string> vvin;
-  std::vector<std::string> vvout;
   boost::split(vvin, vstr_in, boost::is_any_of("\t"));
-  boost::split(vvout, vstr_out, boost::is_any_of("\t"));
   varin_.reset(new oops::Variables(vvin));
-  varout_.reset(new oops::Variables(vvout));
 
-  oops::Log::info() << "ObsRadianceCRTM channels: " << channels << std::endl;
+  oops::Log::info() << "ObsRadianceCRTM channels: " << channels_list << std::endl;
   oops::Log::trace() << "ObsRadianceCRTM created." << std::endl;
 }
 
@@ -71,11 +66,9 @@ ObsRadianceCRTM::~ObsRadianceCRTM() {
 
 // -----------------------------------------------------------------------------
 
-void ObsRadianceCRTM::simulateObs(const GeoVaLs & gom, ioda::ObsVector & ovec,
-                              const ObsBias & bias) const {
+void ObsRadianceCRTM::simulateObs(const GeoVaLs & gom, ioda::ObsVector & ovec) const {
   ufo_radiancecrtm_simobs_f90(keyOperRadianceCRTM_, gom.toFortran(), odb_,
-                          ovec.nvars(), ovec.nlocs(), ovec.toFortran(),
-                          bias.toFortran());
+                          ovec.nvars(), ovec.nlocs(), ovec.toFortran());
   oops::Log::trace() << "ObsRadianceCRTM simulateObs done." << std::endl;
 }
 

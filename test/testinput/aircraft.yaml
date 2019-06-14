@@ -17,10 +17,10 @@ Observations:
       name: Aircraft
       ObsDataIn:
         obsfile: Data/aircraft_obs_2018041500_m.nc4
+      simulate:
+        variables: [air_temperature]
     ObsOperator:
       name: Aircraft
-      variables:
-      - air_temperature
     GeoVaLs:
       filename: Data/aircraft_geoval_2018041500_m.nc4
     vecequiv: GsiHofX
