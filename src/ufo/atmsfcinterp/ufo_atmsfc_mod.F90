@@ -3,13 +3,15 @@ module atmsfc_mod
 contains
 
 subroutine sfc_wind_fact_gsi(z0, phi1, obshgt, psim, psimz, redfac)
+  ! compute wind reduction factor
+  ! aka the coefficient to multiply u,v in lowest model level
+  ! to get u,v at 'obshgt'
   use kinds
   use ufo_constants_mod, only: rd_over_cp, grav
   implicit none
   real(kind_real), intent(in) :: z0, phi1, obshgt, psim, psimz
   real(kind_real), intent(out) :: redfac
 
-  ! constant variable for psi
   gzsoz0 = log(phi1/z0)
   gzzoz0 = log(obshgt/z0)
 
@@ -21,17 +23,121 @@ subroutine sfc_wind_fact_gsi(z0, phi1, obshgt, psim, psimz, redfac)
 
 end subroutine sfc_wind_fact_gsi
 
+!--------------------------------------------------------------------------
+
 subroutine calc_psi_vars_gsi(rib, gzsoz0, gzzoz0, thv1, thv2,&
                              V2, th1, thg, phi1, obshgt, & 
                              psim, psih, psimz, psihz)
+  ! calculate psi based off of near-surface atmospheric regime
   use kinds
+  use ufo_constants_mod, only: grav
   implicit none
   real(kind_real), intent(in) :: rib, gzsoz0, gzzoz0, thv1, thv2, &
                                  V2, th1, thg, ph1, obshgt
   real(kind_real), intent(out) :: psim, psih, psimz, psihz 
 
+  real(kind_real), parameter :: r0_2 = 0.2_kind_real
+  real(kind_real), parameter :: zero = 0.0_kind_real
+
+  ! stable conditions
+  if (rib >= r0_2) then
+    psim = -r10*gzsoz0 
+    psimz = -r10*gzzoz0
+    psim = max(psim,-r10)
+    psimz = max(psimz,-r10)
+    psih = psim
+    psihz = psimz
+  ! mechanically driven turbulence
+  else if ((rib < r0_2) .and. (rib > zero)) then
+    psim = ( -five * rib) * gzsoz0 / (r1_1 - five*rib)  
+    psimz = ( -five * rib) * gzzoz0 / (r1_1 - five*rib)  
+    psim = max(psim,-r10)
+    psimz = max(psimz,-r10)
+    psih = psim
+    psihz = psimz
+  ! unstable forced convection
+  else if ((rib == zero) .or. (rib < zero .and. thv2>thv1)) then
+    psim = zero
+    psimz = zero
+    psih = psim
+    psihz = psimz
+  ! free convection
+  else
+    psim = zero
+    psih = zero
+    cc = two * atan(one)
+    ! friction speed
+    ust = k_kar * sqrt(V2) / (gzsoz0 - psim)
+    ! heat flux factor
+    mol = k_kar * (th1 - thg)/(gzsoz0 - psih)
+    ! ratio of PBL height to Monin-Obukhov length
+    if (ust < 0.01_kind_real) then
+      hol = rib * gzsoz0
+    else
+      hol = k_kar * grav * phi1 * mol / (th1 * ust * ust)
+    end if
+    hol = min(hol,zero)
+    hol = max(hol,-r10)
+    holz = (obshgt / phi1) * hol 
+    holz = min(holz,zero)
+    holz = max(holz,-r10)
+
+    xx = (one - r16 * hol) ** 0.25_kind_real 
+    yy = log((one+xx*xx)/two) 
+    psim = two * log((one+xx)/two) + yy - two * atan(xx) + cc
+    psih = two * yy
+
+    xx = (one - r16 * holz) ** 0.25_kind_real
+    yy = log((one+xx*xx)/two) 
+    psimz = two * log((one+xx)/two) + yy - two * atan(xx) + cc
+    psihz = two * yy
+
+    psim = min(psim,r0_9*gzsoz0)
+    psimz = min(psimz, r0_9*gzzoz0)
+    psih = min(psih,r0_9*gzsoz0)
+    psihz = min(psihz,r0_9*gzzoz0)
+
+  end if
+
 
 end subroutine calc_psi_vars_gsi
+
+!--------------------------------------------------------------------------
+
+subroutine calc_pot_temp_gsi(t_in, p_in, t_out)
+  ! compute potential (virtual) temperature from a given (virtual) temperature
+  ! and pressure value
+  ! units must be in K and Pa!
+  implicit none
+  real(kind_real), intent(in) :: t_in, p_in
+  real(kind_real), intent(out) :: t_out
+  use ufo_constants_mod, only: rd_over_cp
+
+  t_out = t_in * (1.0e5_kind_real / p_in) ** rd_over_cp
+
+end subroutine calc_pot_temp_gsi
+
+!--------------------------------------------------------------------------
+
+subroutine calc_conv_vel_gsi(u1, v1, thvg, thv1, V2)
+  ! compute convective velocity for use in computing psi vars
+  implicit none
+  real(kind_real), intent(in) :: u1, v1, thvg, thv1
+  real(kind_real), intent(out) :: V2
+  real(kind_real) :: wspd2, Vc2
+
+  wspd2 = u1*u1 + v1*v1
+  if (thvg >= thv1) then
+    Vc2 = 4.0_kind_real * (thvg - thv1)
+  else
+    Vc2 = 0.0_kind_real
+  end if
+
+  V2 = 1e-6_kind_real + wspd2 + Vc2
+
+end subroutine
+
+!--------------------------------------------------------------------------
 
 subroutine sfc_wtq_fwd_gsi(psfc_in,tsfc,prsl1_in,tsen1,tv1,q1,u1,v1,&
                            prsl2_in,tsen2,tv2,q2,phi1,roughlen,landmask,&

@@ -95,7 +95,9 @@ end subroutine atmsfcinterp_setup_
 ! ------------------------------------------------------------------------------
 
 subroutine atmsfcinterp_simobs_(self, geovals, obss, nvars, nlocs, hofx)
-  use atmsfc_mod, only : sfc_wtq_fwd_gsi
+  use atmsfc_mod, only : calc_pot_temp_gsi, calc_conv_vel_gsi, sfc_wind_fact_gsi, &
+                         calc_psi_vars_gsi
+  use ufo_constants_mod, only: grav
   implicit none
   class(ufo_atmsfcinterp), intent(in)        :: self
   integer, intent(in)                         :: nvars, nlocs
@@ -110,6 +112,8 @@ subroutine atmsfcinterp_simobs_(self, geovals, obss, nvars, nlocs, hofx)
   real(kind_real) :: outvalue
   real(kind_real), parameter :: minroughlen = 0.0001_kind_real
   character(len=MAXVARLEN) :: geovar
+  real(kind_real) :: thv1, thv2, th1, thg, thvg, rib, V2
+  real(kind_real) :: redfac, psim, psimz, psih, psihz 
 
 
   ! to compute the value near the surface we are going to use
@@ -148,6 +152,23 @@ subroutine atmsfcinterp_simobs_(self, geovals, obss, nvars, nlocs, hofx)
     z0 = roughlen%vals(1,iobs)
     if (z0 < minroughlen) z0 = minroughlen
 
+    ! get potential temperatures for calculating psi
+    call calc_pot_temp_gsi(tv%vals(1,iobs), prs%vals(1,iobs), thv1)
+    call calc_pot_temp_gsi(tv%vals(2,iobs), prs%vals(2,iobs), thv2)
+    call calc_pot_temp_gsi(tsen%vals(1,iobs), prs%vals(1,iobs), th1)
+    call calc_pot_temp_gsi(tsfc%vals(1,iobs), psfc%vals(1,iobs), thg)
+    call calc_pot_temp_gsi(tvsfc, psfc%vals(1,iobs), thvg)
+
+    ! calculate convective velocity
+    call calc_conv_vel_gsi(u%vals(1,iobs), v%vals(1,iobs), thvg, thv1, V2)
+
+    ! calculate bulk richardson number
+    rib = (grav * phi%vals(1,iobs) / th1) * (thv1 - thvg) / V2
+
+    ! calculate parameters regardless of variable
+    call calc_psi_vars_gsi(rib, gzsoz0, gzzoz0, thv1, thv2, V2, th1,&
+                           thg, phi%vals(1,iobs), obshgt(iobs)-obselev(iobs),&
+                           psim, psih, psimz, psihz)
     do ivar = 1, self%nvars
       ! Get the name of input variable in geovals
       geovar = self%varout(ivar)
@@ -155,14 +176,14 @@ subroutine atmsfcinterp_simobs_(self, geovals, obss, nvars, nlocs, hofx)
       call ufo_geovals_get_var(geovals, geovar, profile)
 
       select case(trim(geovar))
-        case("air_temperature", "virtual_temperature")
-          ! calling a modified version of the sfc_model routine from GSI
-            call sfc_wtq_fwd_gsi(psfc%vals(1,iobs),tsfc%vals(1,iobs),prs%vals(1,iobs),&
-                                 tsen%vals(1,iobs),q%vals(1,iobs),u%vals(1,iobs),&
-                                 v%vals(1,iobs),prs%vals(2,iobs),tsen%vals(2,iobs),&
-                                 q%vals(2,iobs),phi%vals(1,iobs),roughlen%vals(1,iobs),&
-                                 landmask%vals(1,iobs),obshgt(iobs)-obselev(iobs),&
-                                 hofx(ivar,iobs),geovar)
+        !case("air_temperature", "virtual_temperature")
+        !  ! calling a modified version of the sfc_model routine from GSI
+        !    call sfc_wtq_fwd_gsi(psfc%vals(1,iobs),tsfc%vals(1,iobs),prs%vals(1,iobs),&
+        !                         tsen%vals(1,iobs),q%vals(1,iobs),u%vals(1,iobs),&
+        !                         v%vals(1,iobs),prs%vals(2,iobs),tsen%vals(2,iobs),&
+        !                         q%vals(2,iobs),phi%vals(1,iobs),roughlen%vals(1,iobs),&
+        !                         landmask%vals(1,iobs),obshgt(iobs)-obselev(iobs),&
+        !                         hofx(ivar,iobs),geovar)
         case("eastward_wind", "northward_wind")
           if (self%use_fact10) then ! use provided fact10 from model
             hofx(ivar,iobs) = profile%vals(1,iobs) * rad10%vals(1,iobs)
