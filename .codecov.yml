@@ -7,5 +7,3 @@ coverage:
   round: down
   range: "70...100"
 
-ignore:
-  - "src/test"
