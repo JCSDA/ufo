@@ -17,8 +17,6 @@
 #include "oops/base/Variables.h"
 
 #include "ufo/GeoVaLs.h"
-#include "ufo/ObsBias.h"
-
 
 namespace ufo {
 
@@ -28,22 +26,20 @@ static ObsOperatorMaker<ObsExample> makerExample_("Example");
 
 ObsExample::ObsExample(const ioda::ObsSpace & odb,
                        const eckit::Configuration & config)
-  : ObsOperatorBase(odb, config), keyOper_(0), odb_(odb), varin_(), varout_()
+  : ObsOperatorBase(odb, config), keyOper_(0), odb_(odb), varin_()
 {
   int c_name_size = 800;
   char *buffin = new char[c_name_size];
-  char *buffout = new char[c_name_size];
   const eckit::Configuration * configc = &config;
 
-  ufo_example_setup_f90(keyOper_, &configc, buffin, buffout, c_name_size);
+  const oops::Variables & observed = odb.obsvariables();
+  const eckit::Configuration * varconfig = &observed.toFortran();
+  ufo_example_setup_f90(keyOper_, &configc, &varconfig, buffin, c_name_size);
 
-  std::string vstr_in(buffin), vstr_out(buffout);
+  std::string vstr_in(buffin);
   std::vector<std::string> vvin;
-  std::vector<std::string> vvout;
   boost::split(vvin, vstr_in, boost::is_any_of("\t"));
-  boost::split(vvout, vstr_out, boost::is_any_of("\t"));
   varin_.reset(new oops::Variables(vvin));
-  varout_.reset(new oops::Variables(vvout));
 
   oops::Log::trace() << "ObsExample created." << std::endl;
 }
@@ -57,10 +53,9 @@ ObsExample::~ObsExample() {
 
 // -----------------------------------------------------------------------------
 
-void ObsExample::simulateObs(const GeoVaLs & gv, ioda::ObsVector & ovec,
-                              const ObsBias & bias) const {
-  ufo_example_simobs_f90(keyOper_, gv.toFortran(), odb_, ovec.size(), ovec.toFortran(),
-                      bias.toFortran());
+void ObsExample::simulateObs(const GeoVaLs & gv, ioda::ObsVector & ovec) const {
+  ufo_example_simobs_f90(keyOper_, gv.toFortran(), odb_, ovec.nvars(), ovec.nlocs(),
+                         ovec.toFortran());
   oops::Log::trace() << "ObsExample: observation operator run" << std::endl;
 }
 

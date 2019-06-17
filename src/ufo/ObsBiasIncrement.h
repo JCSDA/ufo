@@ -1,14 +1,15 @@
 /*
  * (C) Copyright 2017-2018 UCAR
- * 
+ *
  * This software is licensed under the terms of the Apache Licence Version 2.0
- * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
 #ifndef UFO_OBSBIASINCREMENT_H_
 #define UFO_OBSBIASINCREMENT_H_
 
 #include <iostream>
+#include <vector>
 
 #include "oops/util/Logger.h"
 #include "oops/util/Printable.h"
@@ -48,6 +49,11 @@ class ObsBiasIncrement : public util::Printable {
   void read(const eckit::Configuration &) {}
   void write(const eckit::Configuration &) const {}
   double norm() const {return 0.0;}
+
+/// Serialize and deserialize
+  size_t serialSize() const {return 0;}
+  void serialize(std::vector<double> &) const {}
+  void deserialize(const std::vector<double> &, size_t &) {}
 
  private:
   void print(std::ostream &) const {}
