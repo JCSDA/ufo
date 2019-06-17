@@ -22,4 +22,4 @@ Observations:
     - Filter: Thinning
       amount: 0.75
       random_seed: 0
-    passedBenchmark: 285 
+    passedBenchmark: 271 
