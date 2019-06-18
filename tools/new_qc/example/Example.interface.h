@@ -5,10 +5,10 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#ifndef UFO_FILTERS_EXAMPLE_INTERFACE_H_
-#define UFO_FILTERS_EXAMPLE_INTERFACE_H_
+#ifndef TOOLS_NEW_QC_EXAMPLE_EXAMPLE_INTERFACE_H_
+#define TOOLS_NEW_QC_EXAMPLE_EXAMPLE_INTERFACE_H_
 
-#include "Fortran.h"
+#include "ufo/Fortran.h"
 
 // Forward declarations
 namespace eckit {
@@ -34,4 +34,4 @@ extern "C" {
 
 }  // namespace ufo
 
-#endif  // UFO_FILTERS_EXAMPLE_INTERFACE_H_
+#endif  // TOOLS_NEW_QC_EXAMPLE_EXAMPLE_INTERFACE_H_

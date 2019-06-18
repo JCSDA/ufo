@@ -5,8 +5,8 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#ifndef UFO_EXAMPLE_OBSEXAMPLE_INTERFACE_H_
-#define UFO_EXAMPLE_OBSEXAMPLE_INTERFACE_H_
+#ifndef TOOLS_NEW_OBSOP_EXAMPLE_OBSEXAMPLE_INTERFACE_H_
+#define TOOLS_NEW_OBSOP_EXAMPLE_OBSEXAMPLE_INTERFACE_H_
 
 #include "ioda/ObsSpace.h"
 
@@ -31,4 +31,4 @@ extern "C" {
 }  // extern C
 
 }  // namespace ufo
-#endif  // UFO_EXAMPLE_OBSEXAMPLE_INTERFACE_H_
+#endif  // TOOLS_NEW_OBSOP_EXAMPLE_OBSEXAMPLE_INTERFACE_H_

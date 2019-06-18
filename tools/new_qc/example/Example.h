@@ -5,23 +5,26 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
  */
 
-#ifndef UFO_FILTERS_EXAMPLE_H_
-#define UFO_FILTERS_EXAMPLE_H_
+#ifndef TOOLS_NEW_QC_EXAMPLE_EXAMPLE_H_
+#define TOOLS_NEW_QC_EXAMPLE_EXAMPLE_H_
 
 #include <ostream>
 #include <string>
 
 #include "boost/shared_ptr.hpp"
 
-#include "eckit/config/LocalConfiguration.h"
 #include "ioda/ObsDataVector.h"
-#include "ioda/ObsSpace.h"
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
 #include "oops/util/Printable.h"
-#include "ufo/Example.interface.h"
+#include "tools/new_qc/example/Example.interface.h"
+
+namespace eckit {
+  class Configuration;
+}
 
 namespace ioda {
+  class ObsSpace;
   class ObsVector;
 }
 
@@ -56,4 +59,4 @@ class Example : public util::Printable,
 
 }  // namespace ufo
 
-#endif  // UFO_FILTERS_EXAMPLE_H_
+#endif  // TOOLS_NEW_QC_EXAMPLE_EXAMPLE_H_
