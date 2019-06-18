@@ -43,33 +43,28 @@ ObsBoundsCheck::~ObsBoundsCheck() {}
 // -----------------------------------------------------------------------------
 
 void ObsBoundsCheck::priorFilter(const GeoVaLs & gv) const {
-  const std::string obgrp = "ObsValue";
   const float missing = util::missingValue(missing);
 
-  std::vector<eckit::LocalConfiguration> bounds;
-  config_.get("bounds", bounds);
 
-  std::vector<std::string> svar;
-  for (size_t jv = 0; jv < bounds.size(); ++jv) {
-    svar.push_back(bounds[jv].getString("variable"));
-  }
-  oops::Variables vars(svar);
+  oops::Variables vars(config_);
+  oops::Variables observed = obsdb_.obsvariables();
 
-  ioda::ObsDataVector<float> obs(obsdb_, vars, obgrp);
 
-  for (size_t jv = 0; jv < bounds.size(); ++jv) {
-    const std::string var = vars[jv];
-    const float vmin = bounds[jv].getFloat("minvalue", missing);
-    const float vmax = bounds[jv].getFloat("maxvalue", missing);
+  ioda::ObsDataVector<float> obs(obsdb_, vars, "ObsValue");
 
-//  Select where the bounds check will apply
-    std::vector<bool> apply = processWhere(obsdb_, gv, bounds[jv]);
+  const float vmin = config_.getFloat("minvalue", missing);
+  const float vmax = config_.getFloat("maxvalue", missing);
 
+// Select where the bounds check will apply
+  std::vector<bool> apply = processWhere(obsdb_, gv, config_);
+
+  for (size_t jv = 0; jv < vars.size(); ++jv) {
+    size_t iv = observed.find(vars[jv]);
     for (size_t jobs = 0; jobs < obs.nlocs(); ++jobs) {
-      if (apply[jobs] && flags_[jv][jobs] == 0) {
+      if (apply[jobs] && flags_[iv][jobs] == 0) {
         ASSERT(obs[jv][jobs] != missing);
-        if (vmin != missing && obs[jv][jobs] < vmin) flags_[jv][jobs] = QCflags::bounds;
-        if (vmax != missing && obs[jv][jobs] > vmax) flags_[jv][jobs] = QCflags::bounds;
+        if (vmin != missing && obs[jv][jobs] < vmin) flags_[iv][jobs] = QCflags::bounds;
+        if (vmax != missing && obs[jv][jobs] > vmax) flags_[iv][jobs] = QCflags::bounds;
       }
     }
   }

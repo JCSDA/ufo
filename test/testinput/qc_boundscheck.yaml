@@ -1,0 +1,34 @@
+---
+logging:
+  categories: Warning, Error, Debug
+test_framework_runtime_config: "--log_level=test_suite"
+
+window_begin: 2018-04-14T21:00:00Z
+window_end: 2018-04-15T03:00:00Z
+
+Observations:
+ ObsTypes: 
+ - ObsOperator:
+     name: CRTM
+     n_Absorbers: 3
+     n_Clouds: 2
+     n_Aerosols: 0
+     Sensor_ID: amsua_n19
+     EndianType: little_endian
+     CoefficientPath: Data/
+   ObsSpace:
+     name: amsua_n19
+     ObsDataIn: 
+       obsfile: Data/amsua_n19_obs_2018041500_m.nc4
+     simulate:
+       variables: [brightness_temperature]
+       channels: 1-15
+   GeoVaLs: 
+     filename: Data/amsua_n19_geoval_2018041500_m.nc4
+   ObsFilters:
+   - Filter: Bounds Check
+     variables: [brightness_temperature]
+     channels: 4-6
+     minvalue: 240.0
+     maxvalue: 300.0
+   passedBenchmark: 1388      # number of passed obs
