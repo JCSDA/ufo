@@ -94,6 +94,7 @@ list( APPEND ufo_test_data
   atmosphere/sndrd3_g15_geoval_2018041500_m.nc4
   atmosphere/sndrd4_g15_geoval_2018041500_m.nc4
   atmosphere/sfc_tsen_geoval_2018041500_m.nc4
+  atmosphere/sfc_q_geoval_2018041500_m.nc4
   atmosphere/sfc_uv_geoval_2018041500_m.nc4
   atmosphere/sondes_geoval_2018041500_m.nc4
   atmosphere/sondes_geoval_2018041500_s.nc4
@@ -135,6 +136,7 @@ list (APPEND ioda_obs_test_data
 
   atmosphere/sfc_tsen_obs_2018041500_m.nc4
   atmosphere/sfc_uv_obs_2018041500_m.nc4
+  atmosphere/sfc_obs_2018041500_m.nc4
 
   atmosphere/sondes_obs_2018041500_m.nc4
   atmosphere/sondes_obs_2018041500_s.nc4
@@ -164,7 +166,6 @@ ecbuild_add_test( TARGET  test_ufo_locations
                   LIBS    ufo )
 
 ecbuild_add_test( TARGET  test_ufo_gsi_sfc_model_opr
-                  BOOST
                   SOURCES mains/TestObsOperator.cc
                   ARGS    "testinput/gsisfcmodel.yaml"
                   LIBS    ufo )

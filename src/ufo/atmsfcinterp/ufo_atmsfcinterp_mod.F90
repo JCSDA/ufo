@@ -219,6 +219,7 @@ subroutine atmsfcinterp_simobs_(self, geovals, obss, nvars, nlocs, hofx)
     end do
   end do
 
+  deallocate(obshgt,obselev)
 
 
 
