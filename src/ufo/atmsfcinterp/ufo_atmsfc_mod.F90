@@ -318,78 +318,39 @@ subroutine sfc_wtq_fwd_gsi(psfc_in,tsfc,prsl1_in,tsen1,tv1,q1,u1,v1,&
 
 end subroutine
 
-subroutine DA_TP_To_Qs( t, p, es, qs )
-
-!$$$ subprogram documentation block
-!               .      .    .                                       .
-! subprogram:   DA_TP_To_Qs
-!
-!   prgrmmr:
-!
-! abstract:  Convert T/p to saturation specific humidity.
-!
-!  METHOD: qs = es_alpha * es / ( p - ( 1 - rd_over_rv ) * es ).
-!          Use Rogers & Yau (1989) formula: es = a exp( bTc / (T_c + c) ).
-!
-! program history log: 
-!   2000-10-03  Barker  - Creation of F90 version.
-!   2008-04-14  safford - added standard documentation block
-!
-!   input argument list:
-!     t          - Temperature.
-!     p          - Pressure.
-!
-!   output argument list:
-!     es         - Sat. vapour pressure.
-!     qs         - Sat. specific humidity.
-!
-! attributes:
-!   language:  f90
-!   machine:   ibm RS/6000 SP
-!
-!$$$ end documentation block
+subroutine gsi_tp_to_qs( t, p_in, es_out, qs)
+  ! calculate saturation specific humidity for a given
+  ! temperature and pressure
+  ! based on subroutin DA_TP_To_Qs in GSI
    use kinds
+   use ufo_constants_mod, only: t0c
 
    implicit none
-
-   real(kind_real), intent(in   ) :: t                ! Temperature.
-   real(kind_real), intent(in   ) :: p                ! Pressure.
-   real(kind_real), intent(  out) :: es               ! Sat. vapour pressure.
-   real(kind_real), intent(  out) :: qs               ! Sat. specific humidity.
+   real(kind_real), intent(in) :: t                ! Temperature.
+   real(kind_real), intent(in) :: p_in             ! Pressure.
+   real(kind_real), intent(out) :: es_out          ! Sat. vapour pressure.
+   real(kind_real), intent(out) :: qs              ! Sat. specific humidity.
 
 !  Saturation Vapour Pressure Constants(Rogers & Yau, 1989)
    real(kind_real), parameter    :: es_alpha = 611.2_kind_real
    real(kind_real), parameter    :: es_beta = 17.67_kind_real
    real(kind_real), parameter    :: es_gamma = 243.5_kind_real
   
-   real(kind_real), parameter    :: eps = 0.62199349945_kind_real ! rd/rv 
-   real(kind_real), parameter    :: t0c = 2.7315e+2_kind_real ! 0 deg C in K
-   real(kind_real) :: omeps
-
+   real(kind_real) :: omeps, p, es
    real(kind_real)                          :: t_c              ! T in degreesC.
 
+   p = p_in /100.0_kind_real ! Pa to hPa
 
-!------------------------------------------------------------------------------
-!  [1.0] Initialise:
-!------------------------------------------------------------------------------
    omeps = 1.0_kind_real - eps
    t_c = t - t0c
 
-!------------------------------------------------------------------------------
-!  [2.0] Calculate saturation vapour pressure:
-!------------------------------------------------------------------------------
-
    es = 0.01_kind_real * es_alpha * exp( es_beta * t_c / ( t_c + es_gamma ) ) 
 
-!------------------------------------------------------------------------------
-!  [3.0] Calculate saturation specific humidity:
-!------------------------------------------------------------------------------
-
    qs = eps * es / ( p - omeps * es )
+   es_out = es * 100.0_kind_real ! hPa to Pa
 
-
-return
-end subroutine DA_TP_To_Qs
+   return
+end subroutine gsi_tp_to_qs
 
 
 end module atmsfc_mod

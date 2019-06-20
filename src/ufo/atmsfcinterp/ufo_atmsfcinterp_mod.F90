@@ -97,7 +97,7 @@ end subroutine atmsfcinterp_setup_
 subroutine atmsfcinterp_simobs_(self, geovals, obss, nvars, nlocs, hofx)
   use atmsfc_mod, only : calc_pot_temp_gsi, calc_conv_vel_gsi, sfc_wind_fact_gsi, &
                          calc_psi_vars_gsi
-  use ufo_constants_mod, only: grav
+  use ufo_constants_mod, only: grav, cv_over_cp, rd_over_cp
   implicit none
   class(ufo_atmsfcinterp), intent(in)        :: self
   integer, intent(in)                         :: nvars, nlocs
@@ -110,11 +110,14 @@ subroutine atmsfcinterp_simobs_(self, geovals, obss, nvars, nlocs, hofx)
   integer :: ivar, iobs
   real(kind_real), allocatable :: obselev(:), obshgt(:)
   real(kind_real) :: outvalue
-  real(kind_real), parameter :: minroughlen = 0.0001_kind_real
+  real(kind_real), parameter :: minroughlen = 1.0e-4_kind_real
   character(len=MAXVARLEN) :: geovar
   real(kind_real) :: thv1, thv2, th1, thg, thvg, rib, V2
   real(kind_real) :: redfac, psim, psimz, psih, psihz 
-
+  real(kind_real) :: ttmp1, ttmpg, eg, qg
+  real(kind_real), parameter :: fv = cv_over_cp - 1.0_kind_real
+  real(kind_real), parameter :: zint0 = 0.01_kind_real ! default roughness over land
+  real(kind_real), parameter :: k_kar = 0.4_kind_real ! Von Karman constant
 
   ! to compute the value near the surface we are going to use
   ! similarity theory which requires a number of near surface parameters
@@ -151,6 +154,13 @@ subroutine atmsfcinterp_simobs_(self, geovals, obss, nvars, nlocs, hofx)
     ! minimum roughness length
     z0 = roughlen%vals(1,iobs)
     if (z0 < minroughlen) z0 = minroughlen
+    ! roughness length for over water
+    zq0 = zint0
+    if (landmask < 0.01) zq0 = z0
+
+    ! get virtual temperature of the ground assuming saturation
+    call gsi_tp_to_qs(tsfc%vals(1,iobs), psfc%vals(1,iobs), eg, qg)
+    tvg = tsfc%vals(1,iobs) * (1.0_kind_real + fv * qg)
 
     ! get potential temperatures for calculating psi
     call calc_pot_temp_gsi(tv%vals(1,iobs), prs%vals(1,iobs), thv1)
@@ -165,6 +175,9 @@ subroutine atmsfcinterp_simobs_(self, geovals, obss, nvars, nlocs, hofx)
     ! calculate bulk richardson number
     rib = (grav * phi%vals(1,iobs) / th1) * (thv1 - thvg) / V2
 
+    gzsoz0 = log(phi%vals(1,iobs)/z0)
+    gzzoz0 = log(obshgt(iobs)-obselev(iobs)/z0)
+
     ! calculate parameters regardless of variable
     call calc_psi_vars_gsi(rib, gzsoz0, gzzoz0, thv1, thv2, V2, th1,&
                            thg, phi%vals(1,iobs), obshgt(iobs)-obselev(iobs),&
@@ -176,14 +189,17 @@ subroutine atmsfcinterp_simobs_(self, geovals, obss, nvars, nlocs, hofx)
       call ufo_geovals_get_var(geovals, geovar, profile)
 
       select case(trim(geovar))
-        !case("air_temperature", "virtual_temperature")
-        !  ! calling a modified version of the sfc_model routine from GSI
-        !    call sfc_wtq_fwd_gsi(psfc%vals(1,iobs),tsfc%vals(1,iobs),prs%vals(1,iobs),&
-        !                         tsen%vals(1,iobs),q%vals(1,iobs),u%vals(1,iobs),&
-        !                         v%vals(1,iobs),prs%vals(2,iobs),tsen%vals(2,iobs),&
-        !                         q%vals(2,iobs),phi%vals(1,iobs),roughlen%vals(1,iobs),&
-        !                         landmask%vals(1,iobs),obshgt(iobs)-obselev(iobs),&
-        !                         hofx(ivar,iobs),geovar)
+        case("air_temperature", "virtual_temperature")
+          psit = gzsoz0 - psih
+          psitz = gzzoz0 - psihz
+          if (trim(geovar) == "air_temperature") then
+            ttmp1 = th1
+            ttmpg = thg
+          else
+            ttmp1 = thv1
+            ttmpg = thvg
+          end if
+          hofx(ivar,iobs) = (ttmpg + (ttmp1 - ttmpg)*psitz/psit)*(psfc%vals(1,iobs)/1.0e5_kind_real)**rd_over_cp
         case("eastward_wind", "northward_wind")
           if (self%use_fact10) then ! use provided fact10 from model
             hofx(ivar,iobs) = profile%vals(1,iobs) * rad10%vals(1,iobs)
@@ -191,6 +207,11 @@ subroutine atmsfcinterp_simobs_(self, geovals, obss, nvars, nlocs, hofx)
             call sfc_wind_fact_gsi(z0, phi%vals(1,iobs), obshgt(iobs)-obselev(iobs), psim, psimz, redfac)
             hofx(ivar,iobs) = profile%vals(1,iobs) * redfac
           end if
+        case("specific_humidity")
+          ust = k_kar * sqrt(V2) / (gzsoz0 - psim)
+          psiq = log(k_kar*ust*phi%vals(1,iobs)/ka + phi%vals(1,iobs) / zq0) - psih
+          psiqz = log(k_kar*ust*(obshgt(iobs)-obselev(iobs))/ka + (obshgt(iobs)-obselev(iobs)) / zq0) - psihz
+          hofx(ivar,iobs) = qg + (q%vals(1,iobs) - qg)*psiqz/psiq
       end select
     end do
   end do
