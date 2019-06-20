@@ -54,7 +54,7 @@ class ObsAtmSfcInterp : public ObsOperatorBase,
   void print(std::ostream &) const;
   F90hop keyOperAtmSfcInterp_;
   const ioda::ObsSpace& odb_;
-  boost::scoped_ptr<const oops::Variables> varin_;
+  std::unique_ptr<const oops::Variables> varin_;
 };
 
 // -----------------------------------------------------------------------------

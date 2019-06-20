@@ -11,12 +11,10 @@ subroutine sfc_wind_fact_gsi(z0, phi1, obshgt, psim, psimz, redfac)
   implicit none
   real(kind_real), intent(in) :: z0, phi1, obshgt, psim, psimz
   real(kind_real), intent(out) :: redfac
+  real(kind_real) :: psiw, psiwz
 
-  gzsoz0 = log(phi1/z0)
-  gzzoz0 = log(obshgt/z0)
-
-  psiw = gzsoz0 - psim
-  psiwz = gzzoz0 - psimz
+  psiw = log(phi1/z0) - psim
+  psiwz = log(obshgt/z0) - psimz
   redfac = psiwz / psiw 
 
   return
@@ -33,11 +31,20 @@ subroutine calc_psi_vars_gsi(rib, gzsoz0, gzzoz0, thv1, thv2,&
   use ufo_constants_mod, only: grav
   implicit none
   real(kind_real), intent(in) :: rib, gzsoz0, gzzoz0, thv1, thv2, &
-                                 V2, th1, thg, ph1, obshgt
+                                 V2, th1, thg, phi1, obshgt
   real(kind_real), intent(out) :: psim, psih, psimz, psihz 
 
   real(kind_real), parameter :: r0_2 = 0.2_kind_real
   real(kind_real), parameter :: zero = 0.0_kind_real
+  real(kind_real), parameter :: one = 1.0_kind_real
+  real(kind_real), parameter :: two = 2.0_kind_real
+  real(kind_real), parameter :: r10 = 10.0_kind_real
+  real(kind_real), parameter :: five = 5.0_kind_real
+  real(kind_real), parameter :: r1_1 = 1.1_kind_real
+  real(kind_real), parameter :: r0_9 = 0.9_kind_real
+  real(kind_real), parameter :: r16 = 16.0_kind_real
+  real(kind_real), parameter :: k_kar = 0.4_kind_real ! Von Karman constant
+  real(kind_real) :: cc, mol, ust, hol, holz, xx, yy 
 
   ! stable conditions
   if (rib >= r0_2) then
@@ -108,10 +115,11 @@ subroutine calc_pot_temp_gsi(t_in, p_in, t_out)
   ! compute potential (virtual) temperature from a given (virtual) temperature
   ! and pressure value
   ! units must be in K and Pa!
+  use ufo_constants_mod, only: rd_over_cp
+  use kinds
   implicit none
   real(kind_real), intent(in) :: t_in, p_in
   real(kind_real), intent(out) :: t_out
-  use ufo_constants_mod, only: rd_over_cp
 
   t_out = t_in * (1.0e5_kind_real / p_in) ** rd_over_cp
 
@@ -121,6 +129,7 @@ end subroutine calc_pot_temp_gsi
 
 subroutine calc_conv_vel_gsi(u1, v1, thvg, thv1, V2)
   ! compute convective velocity for use in computing psi vars
+  use kinds
   implicit none
   real(kind_real), intent(in) :: u1, v1, thvg, thv1
   real(kind_real), intent(out) :: V2
@@ -139,191 +148,191 @@ end subroutine
 
 !--------------------------------------------------------------------------
 
-subroutine sfc_wtq_fwd_gsi(psfc_in,tsfc,prsl1_in,tsen1,tv1,q1,u1,v1,&
-                           prsl2_in,tsen2,tv2,q2,phi1,roughlen,landmask,&
-                           obshgt,tout,tvout,qout,radfac)
-  ! sfc_wtq_fwd_gsi
-  ! based off of subroutines from GSI sfc_model.f90 file
-  use kinds
-  use ufo_vars_mod, only: MAXVARLEN
-  use ufo_constants_mod, only: rd_over_cp, grav
-  implicit none
-  real(kind_real), intent(in) :: psfc_in, tsfc, prsl1_in, tsen1, q1, u1, v1,&
-                                 prsl2_in, tsen2, q2, phi1, roughlen, landmask, &
-                                 obshgt
-  character(len=MAXVARLEN), intent(in) :: varname
-  real(kind_real), intent(out) :: tout, tvout, qout, radfac
-
-  real(kind_real), parameter :: zint0 = 0.01_kind_real ! default roughness over land
-  real(kind_real), parameter :: k_kar = 0.4_kind_real ! Von Karman constant
-  real(kind_real), parameter :: fv = 0.60773384427_kind_real ! cv/cp - 1
-  real(kind_real), parameter :: ka = 2.4e-5_kind_real
-  real(kind_real), parameter :: r16 = 16.0_kind_real
-  real(kind_real), parameter :: r1_1 = 1.1_kind_real
-  real(kind_real), parameter :: r10 = 10.0_kind_real
-  real(kind_real), parameter :: r100 = 100.0_kind_real
-  real(kind_real), parameter :: r1000 = 1000.0_kind_real
-  real(kind_real), parameter :: r0_9 = 0.9_kind_real
-  real(kind_real), parameter :: r0_2 = 0.2_kind_real
-  real(kind_real), parameter :: zero = 0.0_kind_real
-  real(kind_real), parameter :: one = 1.0_kind_real
-  real(kind_real), parameter :: two = 2.0_kind_real
-  real(kind_real), parameter :: five = 5.0_kind_real
-
-  real(kind_real) :: psfc, prsl1, prsl2
-  real(kind_real) :: tvg, tv1, tv2 
-  real(kind_real) :: z0,zq0
-  real(kind_real) :: gzzoz0, gzsoz0
-  real(kind_real) :: th1, thg, thv1, thv2, thvg, eg, qg
-  real(kind_real) :: wspd2, Vc2, V2
-  real(kind_real) :: rib
-  real(kind_real) :: psim, psimz, psih, psihz
-  real(kind_real) :: cc, ust, mol, hol, holz
-  real(kind_real) :: xx, yy
-  real(kind_real) :: psiw, psit, psiwz, psitz, psiq, psiqz
- 
-  ! convert pressures to hPa from Pa
-  psfc = psfc_in / r100
-  prsl1 = prsl1_in / r100
-  prsl2 = prsl2_in / r100 
-
-  ! minimum roughness length (should be in meters)
-  z0 = roughlen
-  if (z0 < 0.0001_kind_real) z0 = 0.0001_kind_real
-  ! roughness length for over water
-  if ( landmask < 0.01 ) then
-     zq0 = z0
-  else
-     zq0 = zint0
-  end if
-
-  ! constant variable for psi
-  gzsoz0 = log(phi1/z0)
-  gzzoz0 = log(obshgt/z0)
-
-  ! virtual temperature from sensible temperature
-  tv1 = tsen1 * (one + fv * q1)
-  tv2 = tsen2 * (one + fv * q2)
-
-  ! convert temperature of the ground to virtual temp assuming saturation
-  call da_tp_to_qs( tsfc, psfc, eg, qg)
-  tvg = tsfc * (one + fv * qg)
-
-  ! potential temperature calculations
-  thg = tsfc * (r1000 / psfc) ** rd_over_cp ! surface theta
-  th1 = tsen1 * (r1000 / prsl1) ** rd_over_cp ! theta for lowest model layer
-
-  ! virtual potential temperature
-  thv1 = tv1 * (r1000 / prsl1) ** rd_over_cp ! surface theta
-  thv2 = tv2 * (r1000 / prsl2) ** rd_over_cp ! surface theta
-  thvg = tvg * (r1000 / psfc) ** rd_over_cp ! surface theta
-
-  ! wind speed
-  wspd2 = u1*u1 + v1*v1  
-
-  ! convective velocity
-  if (thvg >= thv1) then
-    Vc2 = 4.0_kind_real * (thvg - thv1)
-  else
-    Vc2 = zero
-  end if
-
-  V2 = 0.000001_kind_real + wspd2 + Vc2
-
-  ! bulk richardson number
-  rib = (grav * phi1 / th1) * (thv1 - thvg) / V2
-
-  ! calculate psi based off of regime
-  ! stable conditions
-  if (rib >= r0_2) then
-    psim = -r10*gzsoz0 
-    psimz = -r10*gzzoz0
-    psim = max(psim,-r10)
-    psimz = max(psimz,-r10)
-    psih = psim
-    psihz = psimz
-
-  ! mechanically driven turbulence
-  else if ((rib < r0_2) .and. (rib > zero)) then
-    psim = ( -five * rib) * gzsoz0 / (r1_1 - five*rib)  
-    psimz = ( -five * rib) * gzzoz0 / (r1_1 - five*rib)  
-    psim = max(psim,-r10)
-    psimz = max(psimz,-r10)
-    psih = psim
-    psihz = psimz
-
-  ! unstable forced convection
-  else if ((rib == zero) .or. (rib < zero .and. thv2>thv1)) then
-    psim = zero
-    psimz = zero
-    psih = psim
-    psihz = psimz
-
-  ! free convection
-  else
-    psim = zero
-    psih = zero
-    cc = two * atan(one)
-    
-    ! friction speed
-    ust = k_kar * sqrt(V2) / (gzsoz0 - psim)
-    ! heat flux factor
-    mol = k_kar * (th1 - thg)/(gzsoz0 - psih)
-    ! ratio of PBL height to Monin-Obukhov length
-    if (ust < 0.01_kind_real) then
-      hol = rib * gzsoz0
-    else
-      hol = k_kar * 9.80665_kind_real * phi1 * mol / (th1 * ust * ust)
-    end if
-    hol = min(hol,zero)
-    hol = max(hol,-r10)
-    holz = (obshgt / phi1) * hol 
-    holz = min(holz,zero)
-    holz = max(holz,-r10)
-
-    xx = (one - r16 * hol) ** 0.25_kind_real 
-    yy = log((one+xx*xx)/two) 
-    psim = two * log((one+xx)/two) + yy - two * atan(xx) + cc
-    psih = two * yy
-
-    xx = (one - r16 * holz) ** 0.25_kind_real
-    yy = log((one+xx*xx)/two) 
-    psimz = two * log((one+xx)/two) + yy - two * atan(xx) + cc
-    psihz = two * yy
-
-    psim = min(psim,r0_9*gzsoz0)
-    psimz = min(psimz, r0_9*gzzoz0)
-    psih = min(psih,r0_9*gzsoz0)
-    psihz = min(psihz,r0_9*gzzoz0)
-
-  end if
-  
-  psiw = gzsoz0 - psim
-  psit = gzsoz0 - psih 
-  psiwz = gzzoz0 - psimz
-  psitz = gzzoz0 - psihz
-
-  ust = k_kar * sqrt(V2) / (gzsoz0 - psim)
-
-  psiq = log(k_kar*ust*phi1/ka + phi1 / zq0) - psih
-  psiqz = log(k_kar*ust*obshgt/ka + obshgt / zq0) - psihz
-
-  tout = (thg + (th1 - thg)*psitz/psit)*(psfc/r1000)**rd_over_cp
-  tvout = (thg + (th1 - thg)*psitz/psit)*(psfc/r1000)**rd_over_cp
-  tvout = tvout * (one + fv * q1)  
-  qout = qg + (q1 - qg)*psiqz/psiq
-  radfac = psiwz / psiw 
-
-  return
-
-end subroutine
+!subroutine sfc_wtq_fwd_gsi(psfc_in,tsfc,prsl1_in,tsen1,tv1,q1,u1,v1,&
+!                           prsl2_in,tsen2,tv2,q2,phi1,roughlen,landmask,&
+!                           obshgt,tout,tvout,qout,radfac)
+!  ! sfc_wtq_fwd_gsi
+!  ! based off of subroutines from GSI sfc_model.f90 file
+!  use kinds
+!  use ufo_vars_mod, only: MAXVARLEN
+!  use ufo_constants_mod, only: rd_over_cp, grav
+!  implicit none
+!  real(kind_real), intent(in) :: psfc_in, tsfc, prsl1_in, tsen1, q1, u1, v1,&
+!                                 prsl2_in, tsen2, q2, phi1, roughlen, landmask, &
+!                                 obshgt
+!  character(len=MAXVARLEN), intent(in) :: varname
+!  real(kind_real), intent(out) :: tout, tvout, qout, radfac
+!
+!  real(kind_real), parameter :: zint0 = 0.01_kind_real ! default roughness over land
+!  real(kind_real), parameter :: k_kar = 0.4_kind_real ! Von Karman constant
+!  real(kind_real), parameter :: fv = 0.60773384427_kind_real ! cv/cp - 1
+!  real(kind_real), parameter :: ka = 2.4e-5_kind_real
+!  real(kind_real), parameter :: r16 = 16.0_kind_real
+!  real(kind_real), parameter :: r1_1 = 1.1_kind_real
+!  real(kind_real), parameter :: r10 = 10.0_kind_real
+!  real(kind_real), parameter :: r100 = 100.0_kind_real
+!  real(kind_real), parameter :: r1000 = 1000.0_kind_real
+!  real(kind_real), parameter :: r0_9 = 0.9_kind_real
+!  real(kind_real), parameter :: r0_2 = 0.2_kind_real
+!  real(kind_real), parameter :: zero = 0.0_kind_real
+!  real(kind_real), parameter :: one = 1.0_kind_real
+!  real(kind_real), parameter :: two = 2.0_kind_real
+!  real(kind_real), parameter :: five = 5.0_kind_real
+!
+!  real(kind_real) :: psfc, prsl1, prsl2
+!  real(kind_real) :: tvg, tv1, tv2 
+!  real(kind_real) :: z0,zq0
+!  real(kind_real) :: gzzoz0, gzsoz0
+!  real(kind_real) :: th1, thg, thv1, thv2, thvg, eg, qg
+!  real(kind_real) :: wspd2, Vc2, V2
+!  real(kind_real) :: rib
+!  real(kind_real) :: psim, psimz, psih, psihz
+!  real(kind_real) :: cc, ust, mol, hol, holz
+!  real(kind_real) :: xx, yy
+!  real(kind_real) :: psiw, psit, psiwz, psitz, psiq, psiqz
+! 
+!  ! convert pressures to hPa from Pa
+!  psfc = psfc_in / r100
+!  prsl1 = prsl1_in / r100
+!  prsl2 = prsl2_in / r100 
+!
+!  ! minimum roughness length (should be in meters)
+!  z0 = roughlen
+!  if (z0 < 0.0001_kind_real) z0 = 0.0001_kind_real
+!  ! roughness length for over water
+!  if ( landmask < 0.01 ) then
+!     zq0 = z0
+!  else
+!     zq0 = zint0
+!  end if
+!
+!  ! constant variable for psi
+!  gzsoz0 = log(phi1/z0)
+!  gzzoz0 = log(obshgt/z0)
+!
+!  ! virtual temperature from sensible temperature
+!  tv1 = tsen1 * (one + fv * q1)
+!  tv2 = tsen2 * (one + fv * q2)
+!
+!  ! convert temperature of the ground to virtual temp assuming saturation
+!  call da_tp_to_qs( tsfc, psfc, eg, qg)
+!  tvg = tsfc * (one + fv * qg)
+!
+!  ! potential temperature calculations
+!  thg = tsfc * (r1000 / psfc) ** rd_over_cp ! surface theta
+!  th1 = tsen1 * (r1000 / prsl1) ** rd_over_cp ! theta for lowest model layer
+!
+!  ! virtual potential temperature
+!  thv1 = tv1 * (r1000 / prsl1) ** rd_over_cp ! surface theta
+!  thv2 = tv2 * (r1000 / prsl2) ** rd_over_cp ! surface theta
+!  thvg = tvg * (r1000 / psfc) ** rd_over_cp ! surface theta
+!
+!  ! wind speed
+!  wspd2 = u1*u1 + v1*v1  
+!
+!  ! convective velocity
+!  if (thvg >= thv1) then
+!    Vc2 = 4.0_kind_real * (thvg - thv1)
+!  else
+!    Vc2 = zero
+!  end if
+!
+!  V2 = 0.000001_kind_real + wspd2 + Vc2
+!
+!  ! bulk richardson number
+!  rib = (grav * phi1 / th1) * (thv1 - thvg) / V2
+!
+!  ! calculate psi based off of regime
+!  ! stable conditions
+!  if (rib >= r0_2) then
+!    psim = -r10*gzsoz0 
+!    psimz = -r10*gzzoz0
+!    psim = max(psim,-r10)
+!    psimz = max(psimz,-r10)
+!    psih = psim
+!    psihz = psimz
+!
+!  ! mechanically driven turbulence
+!  else if ((rib < r0_2) .and. (rib > zero)) then
+!    psim = ( -five * rib) * gzsoz0 / (r1_1 - five*rib)  
+!    psimz = ( -five * rib) * gzzoz0 / (r1_1 - five*rib)  
+!    psim = max(psim,-r10)
+!    psimz = max(psimz,-r10)
+!    psih = psim
+!    psihz = psimz
+!
+!  ! unstable forced convection
+!  else if ((rib == zero) .or. (rib < zero .and. thv2>thv1)) then
+!    psim = zero
+!    psimz = zero
+!    psih = psim
+!    psihz = psimz
+!
+!  ! free convection
+!  else
+!    psim = zero
+!    psih = zero
+!    cc = two * atan(one)
+!    
+!    ! friction speed
+!    ust = k_kar * sqrt(V2) / (gzsoz0 - psim)
+!    ! heat flux factor
+!    mol = k_kar * (th1 - thg)/(gzsoz0 - psih)
+!    ! ratio of PBL height to Monin-Obukhov length
+!    if (ust < 0.01_kind_real) then
+!      hol = rib * gzsoz0
+!    else
+!      hol = k_kar * 9.80665_kind_real * phi1 * mol / (th1 * ust * ust)
+!    end if
+!    hol = min(hol,zero)
+!    hol = max(hol,-r10)
+!    holz = (obshgt / phi1) * hol 
+!    holz = min(holz,zero)
+!    holz = max(holz,-r10)
+!
+!    xx = (one - r16 * hol) ** 0.25_kind_real 
+!    yy = log((one+xx*xx)/two) 
+!    psim = two * log((one+xx)/two) + yy - two * atan(xx) + cc
+!    psih = two * yy
+!
+!    xx = (one - r16 * holz) ** 0.25_kind_real
+!    yy = log((one+xx*xx)/two) 
+!    psimz = two * log((one+xx)/two) + yy - two * atan(xx) + cc
+!    psihz = two * yy
+!
+!    psim = min(psim,r0_9*gzsoz0)
+!    psimz = min(psimz, r0_9*gzzoz0)
+!    psih = min(psih,r0_9*gzsoz0)
+!    psihz = min(psihz,r0_9*gzzoz0)
+!
+!  end if
+!  
+!  psiw = gzsoz0 - psim
+!  psit = gzsoz0 - psih 
+!  psiwz = gzzoz0 - psimz
+!  psitz = gzzoz0 - psihz
+!
+!  ust = k_kar * sqrt(V2) / (gzsoz0 - psim)
+!
+!  psiq = log(k_kar*ust*phi1/ka + phi1 / zq0) - psih
+!  psiqz = log(k_kar*ust*obshgt/ka + obshgt / zq0) - psihz
+!
+!  tout = (thg + (th1 - thg)*psitz/psit)*(psfc/r1000)**rd_over_cp
+!  tvout = (thg + (th1 - thg)*psitz/psit)*(psfc/r1000)**rd_over_cp
+!  tvout = tvout * (one + fv * q1)  
+!  qout = qg + (q1 - qg)*psiqz/psiq
+!  radfac = psiwz / psiw 
+!
+!  return
+!
+!end subroutine
 
 subroutine gsi_tp_to_qs( t, p_in, es_out, qs)
   ! calculate saturation specific humidity for a given
   ! temperature and pressure
   ! based on subroutin DA_TP_To_Qs in GSI
    use kinds
-   use ufo_constants_mod, only: t0c
+   use ufo_constants_mod, only: t0c, rd_over_rv 
 
    implicit none
    real(kind_real), intent(in) :: t                ! Temperature.
@@ -341,12 +350,12 @@ subroutine gsi_tp_to_qs( t, p_in, es_out, qs)
 
    p = p_in /100.0_kind_real ! Pa to hPa
 
-   omeps = 1.0_kind_real - eps
+   omeps = 1.0_kind_real - rd_over_rv
    t_c = t - t0c
 
    es = 0.01_kind_real * es_alpha * exp( es_beta * t_c / ( t_c + es_gamma ) ) 
 
-   qs = eps * es / ( p - omeps * es )
+   qs = rd_over_rv * es / ( p - omeps * es )
    es_out = es * 100.0_kind_real ! hPa to Pa
 
    return

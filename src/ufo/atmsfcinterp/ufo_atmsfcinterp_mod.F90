@@ -32,7 +32,6 @@ module ufo_atmsfcinterp_mod
   contains
     procedure :: setup  => atmsfcinterp_setup_
     procedure :: simobs => atmsfcinterp_simobs_
-    final :: destructor
   end type ufo_atmsfcinterp
 
 contains
@@ -96,7 +95,7 @@ end subroutine atmsfcinterp_setup_
 
 subroutine atmsfcinterp_simobs_(self, geovals, obss, nvars, nlocs, hofx)
   use atmsfc_mod, only : calc_pot_temp_gsi, calc_conv_vel_gsi, sfc_wind_fact_gsi, &
-                         calc_psi_vars_gsi
+                         calc_psi_vars_gsi, gsi_tp_to_qs
   use ufo_constants_mod, only: grav, cv_over_cp, rd_over_cp
   implicit none
   class(ufo_atmsfcinterp), intent(in)        :: self
@@ -113,11 +112,15 @@ subroutine atmsfcinterp_simobs_(self, geovals, obss, nvars, nlocs, hofx)
   real(kind_real), parameter :: minroughlen = 1.0e-4_kind_real
   character(len=MAXVARLEN) :: geovar
   real(kind_real) :: thv1, thv2, th1, thg, thvg, rib, V2
+  real(kind_real) :: gzsoz0, gzzoz0, psiw, psiwz
   real(kind_real) :: redfac, psim, psimz, psih, psihz 
   real(kind_real) :: ttmp1, ttmpg, eg, qg
+  real(kind_real) :: z0, zq0, tvsfc 
   real(kind_real), parameter :: fv = cv_over_cp - 1.0_kind_real
+  real(kind_real) :: psit, psitz, ust, psiq, psiqz
   real(kind_real), parameter :: zint0 = 0.01_kind_real ! default roughness over land
   real(kind_real), parameter :: k_kar = 0.4_kind_real ! Von Karman constant
+  real(kind_real), parameter :: ka = 2.4e-5_kind_real
 
   ! to compute the value near the surface we are going to use
   ! similarity theory which requires a number of near surface parameters
@@ -156,11 +159,11 @@ subroutine atmsfcinterp_simobs_(self, geovals, obss, nvars, nlocs, hofx)
     if (z0 < minroughlen) z0 = minroughlen
     ! roughness length for over water
     zq0 = zint0
-    if (landmask < 0.01) zq0 = z0
+    if (landmask%vals(1,iobs) < 0.01) zq0 = z0
 
     ! get virtual temperature of the ground assuming saturation
     call gsi_tp_to_qs(tsfc%vals(1,iobs), psfc%vals(1,iobs), eg, qg)
-    tvg = tsfc%vals(1,iobs) * (1.0_kind_real + fv * qg)
+    tvsfc = tsfc%vals(1,iobs) * (1.0_kind_real + fv * qg)
 
     ! get potential temperatures for calculating psi
     call calc_pot_temp_gsi(tv%vals(1,iobs), prs%vals(1,iobs), thv1)

@@ -39,6 +39,7 @@ contains
 ! ------------------------------------------------------------------------------
 
 subroutine ufo_atmsfcinterp_setup_c(c_key_self, c_conf, c_varconf, csin, c_str_size) bind(c,name='ufo_atmsfcinterp_setup_f90')
+use ufo_vars_mod, only: MAXVARLEN, ufo_vars_read
 implicit none
 integer(c_int), intent(inout) :: c_key_self
 type(c_ptr), intent(in) :: c_conf 
