@@ -8,9 +8,9 @@
 #ifndef UFO_ATMSFCINTERP_OBSATMSFCINTERPTLAD_H_
 #define UFO_ATMSFCINTERP_OBSATMSFCINTERPTLAD_H_
 
+#include <memory>
 #include <ostream>
 #include <string>
-
 
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"

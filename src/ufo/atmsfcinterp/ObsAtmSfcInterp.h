@@ -8,6 +8,7 @@
 #ifndef UFO_ATMSFCINTERP_OBSATMSFCINTERP_H_
 #define UFO_ATMSFCINTERP_OBSATMSFCINTERP_H_
 
+#include <memory>
 #include <ostream>
 #include <string>
 #include <vector>
