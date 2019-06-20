@@ -31,4 +31,4 @@ Observations:
      channels: 4-6
      minvalue: 240.0
      maxvalue: 300.0
-   passedBenchmark: 1388      # number of passed obs
+   passedBenchmark: 1394      # number of passed obs
