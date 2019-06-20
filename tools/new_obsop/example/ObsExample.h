@@ -5,8 +5,8 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
  */
 
-#ifndef UFO_EXAMPLE_OBSEXAMPLE_H_
-#define UFO_EXAMPLE_OBSEXAMPLE_H_
+#ifndef TOOLS_NEW_OBSOP_EXAMPLE_OBSEXAMPLE_H_
+#define TOOLS_NEW_OBSOP_EXAMPLE_OBSEXAMPLE_H_
 
 #include <memory>
 #include <ostream>
@@ -30,7 +30,6 @@ namespace ioda {
 
 namespace ufo {
   class GeoVaLs;
-  class ObsBias;
 
 // -----------------------------------------------------------------------------
 /// Example observation operator class
@@ -43,11 +42,10 @@ class ObsExample : public ObsOperatorBase,
   virtual ~ObsExample();
 
 // Obs Operator
-  void simulateObs(const GeoVaLs &, ioda::ObsVector &, const ObsBias &) const;
+  void simulateObs(const GeoVaLs &, ioda::ObsVector &) const;
 
 // Other
   const oops::Variables & variables() const {return *varin_;}
-  const oops::Variables & observed() const {return *varout_;}
 
   int & toFortran() {return keyOper_;}
   const int & toFortran() const {return keyOper_;}
@@ -57,10 +55,9 @@ class ObsExample : public ObsOperatorBase,
   F90hop keyOper_;
   const ioda::ObsSpace& odb_;
   std::unique_ptr<const oops::Variables> varin_;
-  std::unique_ptr<const oops::Variables> varout_;
 };
 
 // -----------------------------------------------------------------------------
 
 }  // namespace ufo
-#endif  // UFO_EXAMPLE_OBSEXAMPLE_H_
+#endif  // TOOLS_NEW_OBSOP_EXAMPLE_OBSEXAMPLE_H_

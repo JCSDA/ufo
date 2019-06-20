@@ -17,7 +17,7 @@ private
 #define LISTED_TYPE ufo_example
 
 !> Linked list interface - defines registry_t type
-#include "linkedList_i.f"
+#include "../linkedList_i.f"
 
 !> Global registry
 type(registry_t) :: ufo_example_registry
@@ -26,7 +26,7 @@ type(registry_t) :: ufo_example_registry
 contains
 ! ------------------------------------------------------------------------------
 !> Linked list implementation
-#include "linkedList_c.f"
+#include "../linkedList_c.f"
 ! ------------------------------------------------------------------------------
 
 subroutine ufo_example_create_c(c_self, c_conf) bind(c,name='ufo_example_create_f90')

@@ -24,7 +24,7 @@ Observations:
      variables: [brightness_temperature]
      channels: 1-15
    GeoVaLs: 
-    norm: 5965462.8825656148
+    norm: 5948559.5380894365 
     filename: Data/amsua_n19_geoval_2018041500_m.nc4
  - ObsType:
    ObsSpace: 
@@ -36,5 +36,5 @@ Observations:
    ObsOperator:
      name: Radiosonde
    GeoVaLs: 
-    norm: 4961372.34819
+    norm: 13183568.923112851 
     filename: Data/sondes_geoval_2018041500_m.nc4

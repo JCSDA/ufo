@@ -56,9 +56,6 @@ class ObsOperator : public util::Printable,
 /// Operator locations
   Locations * locations(const util::DateTime &, const util::DateTime &) const;
 
-/// Operator type
-  const std::string & obstype() const;
-
  private:
   void print(std::ostream &) const;
   std::unique_ptr<ObsOperatorBase> oper_;

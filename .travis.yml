@@ -89,5 +89,5 @@ script:
 #======================================================================
 after_success:
   - cd ${REPO_SOURCE_DIR}/ufo-bundle
-    #  - bash <(curl -s https://codecov.io/bash) -t 80e931a0-8cb3-49f6-be20-462b338c57be  -X gcov -f coverage.info  #  Token is not needed for publuc repo
+  - bash <(curl -s https://codecov.io/bash) -t e23dfd1d-85be-4e0f-aaf3-81911fec7178  -X gcov -f coverage.info  #  Token is not needed for publuc repo
 

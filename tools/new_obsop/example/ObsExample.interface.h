@@ -5,8 +5,8 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#ifndef UFO_EXAMPLE_OBSEXAMPLE_INTERFACE_H_
-#define UFO_EXAMPLE_OBSEXAMPLE_INTERFACE_H_
+#ifndef TOOLS_NEW_OBSOP_EXAMPLE_OBSEXAMPLE_INTERFACE_H_
+#define TOOLS_NEW_OBSOP_EXAMPLE_OBSEXAMPLE_INTERFACE_H_
 
 #include "ioda/ObsSpace.h"
 
@@ -21,14 +21,14 @@ extern "C" {
 // -----------------------------------------------------------------------------
 
   void ufo_example_setup_f90(F90hop &, const eckit::Configuration * const *,
-                             char *, char *, const int &);
+                             const eckit::Configuration * const *, char *, const int &);
   void ufo_example_delete_f90(F90hop &);
   void ufo_example_simobs_f90(const F90hop &, const F90goms &, const ioda::ObsSpace &,
-                               const int &, double &, const F90obias &);
+                               const int &, const int &, double &);
 
 // -----------------------------------------------------------------------------
 
 }  // extern C
 
 }  // namespace ufo
-#endif  // UFO_EXAMPLE_OBSEXAMPLE_INTERFACE_H_
+#endif  // TOOLS_NEW_OBSOP_EXAMPLE_OBSEXAMPLE_INTERFACE_H_

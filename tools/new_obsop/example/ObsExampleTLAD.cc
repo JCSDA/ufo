@@ -5,7 +5,7 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#include "ufo/example/ObsExampleTLAD.h"
+#include "tools/new_obsop/example/ObsExampleTLAD.h"
 
 #include <ostream>
 #include <string>
