@@ -1,4 +1,4 @@
-# (C) Copyright 2017-2018 UCAR.
+# (C) Copyright 2019 UCAR.
 #
 # This software is licensed under the terms of the Apache Licence Version 2.0
 # which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
@@ -16,7 +16,7 @@ set ( geosaod_files
     ufo_geosaod_tlad_mod.F90
 )
 
-PREPEND( _p_geosaod_files     "geosaod"     ${geosaod_files} )
+PREPEND( _p_geosaod_files     "geos-aero"     ${geosaod_files} )
 
 set ( geosaod_src_files
       ${_p_geosaod_files}

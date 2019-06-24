@@ -55,7 +55,7 @@ add_subdirectory( surface )
 add_subdirectory( ncdiag )
 add_subdirectory( marine )
 if( ${GEOS-AERO_FOUND} )
-    add_subdirectory( GEOS-AERO )
+    add_subdirectory( geos-aero )
 endif( ${GEOS-AERO_FOUND} )
 
 list( APPEND ufo_src_files
@@ -69,7 +69,7 @@ list( APPEND ufo_src_files
     ${gnssro_src_files}
     ${surface_src_files}
     ${ncdiag_src_files}
-    ${geos-aero-src_files}
+    ${geosaod_src_files}
 )
 list( APPEND ufo_src_files ${marine_src_files} )
 list( APPEND UFO_LIBS_DEP oops ioda crtm ${LAPACK_LIBRARIES} ${NETCDF_LIBRARIES} )
@@ -85,7 +85,7 @@ if( ${ROPP-UFO_FOUND} )
 endif( ${ROPP-UFO_FOUND} )
 
 if( ${GEOS-AERO_FOUND} )
-    add_subdirectory( GEOS-AERO )
+    list( APPEND UFO_LIBS_DEP geos-aero )
 endif( ${GEOS-AERO_FOUND} )
 
 

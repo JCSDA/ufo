@@ -17,7 +17,7 @@ module ufo_geosaod_mod
  use obsspace_mod
 
  use GEOS_MieObs_mod
- 
+
 
  implicit none
  private
@@ -36,7 +36,7 @@ module ufo_geosaod_mod
  end type ufo_geosaod
 
  character(len=maxvarlen), dimension(2), parameter :: varindefault = &
-                                                 (/var_delp, var_rh/) 
+                                                 (/var_delp, var_rh/)
 
 contains
 
@@ -48,17 +48,17 @@ type(c_ptr),        intent(in)    :: c_conf
 
 character(len=*) :: var_name
 character(len=3) :: wav
- 
+
   !  varin: aer tracer variables we need from the model (list in .yaml file)
   !  need also relative humidity and delp (in varindefault).
   !---------
   tracer_variables = config_get_string_vector(c_conf, max_string, "tracer_geovals")
   self%n_tracers = size(tracer_variables)
-  self%nvars_in =  size(varin_default) + self%n_tracers 
+  self%nvars_in =  size(varin_default) + self%n_tracers
 
   allocate(self%varin(self%nvars_in))
 
-  do ii = 1, self%nvars_in 
+  do ii = 1, self%nvars_in
      self%varin(ii) = tracers_variables(ii)                      ! aer MR
   enddo
   self%varin(self%n_tracers + 1 : self%nvars_in) = varindefault  ! delp and rh
@@ -67,17 +67,17 @@ character(len=3) :: wav
 
   !varout: variables in the observation vector
   !------
-  self%n_wavelengths = size(config_get_float_vector(c_conf, "wavelengths")) 
-                        ! number of wavelengths at which AOD will be computed  
+  self%n_wavelengths = size(config_get_float_vector(c_conf, "wavelengths"))
+                        ! number of wavelengths at which AOD will be computed
 
   self%wavelength = allocate(self%n_wavelengths)                 ! wavelength numb
   self%wavelength = config_get_float_vector(c_conf, "wavelengths")
- 
+
   allocate(self%varout(self%n_wavelengths))
-  ! Read variable list and store in varout                       ! AOD for now 
-  !------- 
-  var_name = config_get_string_vector(c_conf, max_string, "variables") 
-  do jj = 1, self%n_wavelengths     
+  ! Read variable list and store in varout                       ! AOD for now
+  !-------
+  var_name = config_get_string_vector(c_conf, max_string, "variables")
+  do jj = 1, self%n_wavelengths
      write(wav, 'IO)') int(self%wavelength(jj))
      self%varout = var_name //'_'// trim(wav)   !name: aerosol_optical_depth_in_log_space_550 (for ex)
   enddo
@@ -123,37 +123,37 @@ real(c_double), dimension(:,:), allocatable   :: delp
 
 character(len=MAXVARLEN) :: geovar
 
-    
+
   ! Get delp and rh from model interp at obs loc (from geovals)
   call ufo_geovals_get_var(geovals, var_delp, delp_profile)
-  nlayers = profile%nval                                          ! number of model layers
+  nlayers = delp_profile%nval                                          ! number of model layers
   allocate(delp(nlayers,nlocs))
-  delp = profile%vals
+  delp = delp_profile%vals
 
   ! Get RH from geovals
   allocate(rh(nlayers,nlocs))
   call ufo_geovals_get_var(geovals, var_RH, rh_profile)
   rh = profile%vals
 
-  ! Get Aer profiles interpolated at obs loc 
-  allocate(qm(self%n_tracers, nlayers, nlocs))   
+  ! Get Aer profiles interpolated at obs loc
+  allocate(qm(self%n_tracers, nlayers, nlocs))
   do n = 1, self%n_tracers
      geovar = self%varin(n)                   !self%varin in setup contains tracers first then delp and rh
-     call ufo_geovals_get_var(geovals, geovar, aer_profile)  
+     call ufo_geovals_get_var(geovals, geovar, aer_profile)
      qm(n,:,:) = aer_profile(n)%vals
      qm(n,:,:) = qm(n,:,:) * delp / grav
   enddo
-   
+
   ! create Mie tables
   ! -----------------
   call get_Mie_Tables(mieTables, rcfile, rc)
 
   ! call observation operator code
-  ! -----------------------------   
+  ! -----------------------------
   hofx(:,:) = 0.0_kind_real
   call get_GEOS_AOD(nlayers, nlocs, self%n_wavelengths, self%n_tracers, rcfile, mieTables, &
                     self%wavelength, self%varin(1:self%n_tracers), qm, rh,  aod_tot = hofx, rc = rc)  !self%varin includes rh and delp!!!!
-        
+
   ! delete the Mie tables
   ! --------------------
   call detete_Mie_Tables(mieTables, rc)

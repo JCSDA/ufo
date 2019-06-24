@@ -1,8 +1,8 @@
 !
 !  (C) Copyright 2017-2019 UCAR
-!  
+!
 !  This software is licensed under the terms of the Apache Licence Version 2.0
-!  which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
+!  which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 !
 
 module ufo_vars_mod
@@ -22,6 +22,7 @@ character(len=MAXVARLEN), public, parameter :: var_mixr = "humidity_mixing_ratio
 character(len=MAXVARLEN), public, parameter :: var_q    = "specific_humidity"
 character(len=MAXVARLEN), public, parameter :: var_prs  = "air_pressure"
 character(len=MAXVARLEN), public, parameter :: var_prsi = "air_pressure_levels"
+character(len=MAXVARLEN), public, parameter :: var_delp = "air_pressure_thickness"
 character(len=MAXVARLEN), public, parameter :: var_z    = "geopotential_height"
 character(len=MAXVARLEN), public, parameter :: var_zi   = "geopotential_height_levels"
 character(len=MAXVARLEN), public, parameter :: var_sfc_z= "sfc_geopotential_height"
