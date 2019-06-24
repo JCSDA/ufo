@@ -54,6 +54,10 @@ add_subdirectory( gnssro )
 add_subdirectory( surface )
 add_subdirectory( ncdiag )
 add_subdirectory( marine )
+if( ${GEOS-AERO_FOUND} )
+    add_subdirectory( GEOS-AERO )
+endif( ${GEOS-AERO_FOUND} )
+
 list( APPEND ufo_src_files
     ${utils_src_files}
     ${basis_src_files}
@@ -65,6 +69,7 @@ list( APPEND ufo_src_files
     ${gnssro_src_files}
     ${surface_src_files}
     ${ncdiag_src_files}
+    ${geos-aero-src_files}
 )
 list( APPEND ufo_src_files ${marine_src_files} )
 list( APPEND UFO_LIBS_DEP oops ioda crtm ${LAPACK_LIBRARIES} ${NETCDF_LIBRARIES} )
@@ -78,6 +83,11 @@ endif( ${RTTOV_FOUND} )
 if( ${ROPP-UFO_FOUND} )
     list( APPEND UFO_LIBS_DEP ropp-ufo )
 endif( ${ROPP-UFO_FOUND} )
+
+if( ${GEOS-AERO_FOUND} )
+    add_subdirectory( GEOS-AERO )
+endif( ${GEOS-AERO_FOUND} )
+
 
 ecbuild_add_library( TARGET   ufo
                      SOURCES  ${ufo_src_files}
