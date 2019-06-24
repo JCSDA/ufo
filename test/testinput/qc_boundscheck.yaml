@@ -6,7 +6,7 @@ test_framework_runtime_config: "--log_level=test_suite"
 window_begin: 2018-04-14T21:00:00Z
 window_end: 2018-04-15T03:00:00Z
 
-Observations: 
+Observations:
  ObsTypes: 
  - ObsOperator:
      name: CRTM
@@ -27,12 +27,8 @@ Observations:
      filename: Data/amsua_n19_geoval_2018041500_m.nc4
    ObsFilters:
    - Filter: Bounds Check
-     bounds:
-     - variable: brightness_temperature_1
-       minvalue: 100.0
-       maxvalue: 500.0
-   - Filter: Background Check
      variables: [brightness_temperature]
-     channels: 1
-     threshold: 2.0
-   passedBenchmark: 1463      # number of passed obs
+     channels: 4-6
+     minvalue: 240.0
+     maxvalue: 300.0
+   passedBenchmark: 1394      # number of passed obs

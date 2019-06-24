@@ -30,5 +30,5 @@ Observations:
       - variable: latitude
         minvalue: -60.0
         maxvalue: 60.0
-    passedBenchmark: 246      # number of passed obs
+    passedBenchmark: 958      # number of passed obs
 #    qcBenchmark: GsiQC       # benchmark QC from the file

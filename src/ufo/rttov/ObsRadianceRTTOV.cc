@@ -26,10 +26,8 @@ static ObsOperatorMaker<ObsRadianceRTTOV> makerRTTOV_("RTTOV");
 // -----------------------------------------------------------------------------
 
 ObsRadianceRTTOV::ObsRadianceRTTOV(const ioda::ObsSpace & odb, const eckit::Configuration & config)
-  : ObsOperatorBase(odb, config), keyOperRadianceRTTOV_(0), odb_(odb), varin_(),
-    obsname_("RTTOV:")
+  : ObsOperatorBase(odb, config), keyOperRadianceRTTOV_(0), odb_(odb), varin_()
 {
-  obsname_ += config.getString("Sensor_ID");
   const std::vector<std::string> vv{
     "air_pressure", "air_pressure_at_two_meters_above_surface",
     "air_temperature", "air_temperature_at_two_meters_above_surface",
