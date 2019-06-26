@@ -24,7 +24,7 @@ extern "C" {
                              char *, char *, const int &);
   void ufo_geosaod_delete_f90(F90hop &);
   void ufo_geosaod_simobs_f90(const F90hop &, const F90goms &, const ioda::ObsSpace &,
-                               const int &, double &, const F90obias &);
+                                 const int &, const int &, double &);
 
 // -----------------------------------------------------------------------------
 

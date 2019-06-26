@@ -1,4 +1,4 @@
-! (C) Copyright 2017-2018 UCAR
+! (C) Copyright 2019 UCAR
 !
 ! This software is licensed under the terms of the Apache Licence Version 2.0
 ! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
@@ -71,20 +71,22 @@ end subroutine ufo_geosaod_delete_c
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_geosaod_simobs_c(c_key_self, c_key_geovals, c_obsspace, c_nobs, c_hofx, c_bias) bind(c,name='ufo_geosaod_simobs_f90')
+subroutine ufo_geosaod_simobs_c(c_key_self, c_key_geovals, c_obsspace, c_nvars, c_nlocs, c_hofx) bind(c,name='ufo_geosaod_simobs_f90')
 
 implicit none
 integer(c_int), intent(in) :: c_key_self
 integer(c_int), intent(in) :: c_key_geovals
 type(c_ptr), value, intent(in) :: c_obsspace
-integer(c_int), intent(in) :: c_nobs
-real(c_double), intent(inout) :: c_hofx(c_nobs)
-integer(c_int), intent(in) :: c_bias
+integer(c_int), intent(in) :: c_nvars, c_nlocs
+real(c_double), intent(inout) :: c_hofx(c_nvars, c_nlocs)
+
 
 type(ufo_geosaod), pointer :: self
 
 call ufo_geosaod_registry%get(c_key_self, self)
-call self%opr_simobs(c_key_geovals, c_obsspace, c_hofx)
+call ufo_geovals_registry%get(c_key_geovals,geovals)
+
+call self%simobs(geovals, c_obsspace, c_nvars, c_nlocs, c_hofx)
 
 end subroutine ufo_geosaod_simobs_c
 
