@@ -5,17 +5,18 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#ifndef UFO_GEOS_AERO_OBSGEOSAODTLAD_H_
-#define UFO_GEOS_AERO_OBSGEOSAODTLAD_H_
+#ifndef UFO_GEOS-AERO_OBSGEOSAODTLAD_H_
+#define UFO_GEOS-AERO_OBSGEOSAODTLAD_H_
 
-#include <memory>
 #include <ostream>
 #include <string>
+
+#include <boost/scoped_ptr.hpp>
 
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
 
-#include "ufo/geosaod/ObsGeosAodTLAD.interface.h"
+#include "ufo/geos-aero/ObsGeosAodTLAD.interface.h"
 #include "ufo/LinearObsOperatorBase.h"
 
 // Forward declarations
@@ -58,10 +59,10 @@ class ObsGeosAodTLAD : public LinearObsOperatorBase,
   void print(std::ostream &) const;
   F90hop keyOper_;
   const ioda::ObsSpace& odb_;
-  std::unique_ptr<const oops::Variables> varin_;
+  boost::scoped_ptr<const oops::Variables> varin_;
 };
 
 // -----------------------------------------------------------------------------
 
 }  // namespace ufo
-#endif  // UFO_GEOS_AERO_OBSGEOSAODTLAD_H_
+#endif  // UFO_GEOS-AERO_OBSGEOSAODTLAD_H_

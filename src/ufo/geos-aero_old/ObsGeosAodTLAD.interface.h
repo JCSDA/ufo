@@ -5,8 +5,8 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#ifndef UFO_GEOS_AERO_OBSGEOSAODTLAD_INTERFACE_H_
-#define UFO_GEOS_AERO_OBSGEOSAODTLAD_INTERFACE_H_
+#ifndef UFO_GEOS-AERO_OBSGEOSAODTLAD_INTERFACE_H_
+#define UFO_GEOS-AERO_OBSGEOSAODTLAD_INTERFACE_H_
 
 #include "ioda/ObsSpace.h"
 
@@ -14,7 +14,7 @@
 
 namespace ufo {
 
-/// Interface to Fortran UFO geosaod routines
+/// Interface to Fortran UFO geos-aero routines
 
 extern "C" {
 
@@ -33,4 +33,4 @@ extern "C" {
 }  // extern C
 
 }  // namespace ufo
-#endif  // UFO_GEOS_AERO_OBSGEOSAODTLAD_INTERFACE_H_
+#endif  // UFO_GEOS-AERO_OBSGEOSAODTLAD_INTERFACE_H_

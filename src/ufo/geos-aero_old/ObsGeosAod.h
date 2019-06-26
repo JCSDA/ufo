@@ -5,17 +5,18 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
  */
 
-#ifndef UFO_GEOS_AERO_OBSGEOSAOD_H_
-#define UFO_GEOS_AERO_OBSGEOSAOD_H_
+#ifndef UFO_GEOS-AERO_OBSGEOSAOD_H_
+#define UFO_GEOS-AERO_OBSGEOSAOD_H_
 
-#include <memory>
 #include <ostream>
 #include <string>
+
+#include <boost/scoped_ptr.hpp>
 
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
 
-#include "ufo/geosaod/ObsGeosAod.interface.h"
+#include "ufo/geos-aero/ObsGeosAod.interface.h"
 #include "ufo/ObsOperatorBase.h"
 
 /// Forward declarations
@@ -30,6 +31,7 @@ namespace ioda {
 
 namespace ufo {
   class GeoVaLs;
+  class ObsBias;
 
 // -----------------------------------------------------------------------------
 /// GeosAod observation operator class
@@ -42,10 +44,11 @@ class ObsGeosAod : public ObsOperatorBase,
   virtual ~ObsGeosAod();
 
 // Obs Operator
-  void simulateObs(const GeoVaLs &, ioda::ObsVector &) const;
+  void simulateObs(const GeoVaLs &, ioda::ObsVector &, const ObsBias &) const;
 
 // Other
   const oops::Variables & variables() const {return *varin_;}
+  const oops::Variables & observed() const {return *varout_;}
 
   int & toFortran() {return keyOper_;}
   const int & toFortran() const {return keyOper_;}
@@ -54,10 +57,11 @@ class ObsGeosAod : public ObsOperatorBase,
   void print(std::ostream &) const;
   F90hop keyOper_;
   const ioda::ObsSpace& odb_;
-  std::unique_ptr<const oops::Variables> varin_;
+  boost::scoped_ptr<const oops::Variables> varin_;
+  boost::scoped_ptr<const oops::Variables> varout_;
 };
 
 // -----------------------------------------------------------------------------
 
 }  // namespace ufo
-#endif  // UFO_GEOS_AERO_OBSGEOSAOD_H_
+#endif  // UFO_GEOS-AERO_OBSGEOSAOD_H_

@@ -17,6 +17,8 @@
 #include "oops/base/Variables.h"
 
 #include "ufo/GeoVaLs.h"
+#include "ufo/ObsBias.h"
+
 
 namespace ufo {
 
@@ -26,20 +28,22 @@ static ObsOperatorMaker<ObsGeosAod> makerGeosAod_("GeosAod");
 
 ObsGeosAod::ObsGeosAod(const ioda::ObsSpace & odb,
                        const eckit::Configuration & config)
-  : ObsOperatorBase(odb, config), keyOper_(0), odb_(odb), varin_()
+  : ObsOperatorBase(odb, config), keyOper_(0), odb_(odb), varin_(), varout_()
 {
   int c_name_size = 800;
   char *buffin = new char[c_name_size];
+  char *buffout = new char[c_name_size];
   const eckit::Configuration * configc = &config;
 
-  const oops::Variables & observed = odb.obsvariables();
-  const eckit::Configuration * varconfig = &observed.toFortran();
-  ufo_geosaod_setup_f90(keyOper_, &configc, &varconfig, buffin, c_name_size);
+  ufo_geosaod_setup_f90(keyOper_, &configc, buffin, buffout, c_name_size);
 
-  std::string vstr_in(buffin);
+  std::string vstr_in(buffin), vstr_out(buffout);
   std::vector<std::string> vvin;
+  std::vector<std::string> vvout;
   boost::split(vvin, vstr_in, boost::is_any_of("\t"));
+  boost::split(vvout, vstr_out, boost::is_any_of("\t"));
   varin_.reset(new oops::Variables(vvin));
+  varout_.reset(new oops::Variables(vvout));
 
   oops::Log::trace() << "ObsGeosAod created." << std::endl;
 }
@@ -53,9 +57,10 @@ ObsGeosAod::~ObsGeosAod() {
 
 // -----------------------------------------------------------------------------
 
-void ObsGeosAod::simulateObs(const GeoVaLs & gv, ioda::ObsVector & ovec) const {
-  ufo_geosaod_simobs_f90(keyOper_, gv.toFortran(), odb_, ovec.nvars(), ovec.nlocs(),
-                         ovec.toFortran());
+void ObsGeosAod::simulateObs(const GeoVaLs & gv, ioda::ObsVector & ovec,
+                              const ObsBias & bias) const {
+  ufo_geosaod_simobs_f90(keyOper_, gv.toFortran(), odb_, ovec.size(), ovec.toFortran(),
+                      bias.toFortran());
   oops::Log::trace() << "ObsGeosAod: observation operator run" << std::endl;
 }
 

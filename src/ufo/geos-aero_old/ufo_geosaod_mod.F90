@@ -12,11 +12,8 @@ module ufo_geosaod_mod
  use kinds
 
  use ufo_geovals_mod, only: ufo_geovals, ufo_geoval, ufo_geovals_get_var
- use ufo_basis_mod, only: ufo_basis
  use ufo_vars_mod
  use obsspace_mod
-
- use ufo_constants_mod, only: grav
 
  use GEOS_MieObs_mod
 
@@ -24,98 +21,107 @@ module ufo_geosaod_mod
  private
  integer, parameter :: max_string=800
 
-!> Fortran derived type for the observation type
  type, public :: ufo_geosaod
  private
-   integer, public :: nvars_in, nvars_out, ntracers
+   integer, public :: nvars_in, nwavelengths, ntracers
    character(len=max_string), public, allocatable :: varin(:)
    character(len=max_string), public, allocatable :: varout(:)
    real(c_float), public, allocatable :: wavelength(:)
-   character(len=10) :: rcfile
  contains
    procedure :: setup  => ufo_geosaod_setup
+   procedure :: delete => ufo_geosaod_delete
    procedure :: simobs => ufo_geosaod_simobs
-   final :: destructor
  end type ufo_geosaod
 
-!> Default variables required from model
- character(len=maxvarlen), dimension(2), parameter :: varindefault = (/var_delp, var_rh/)
+ character(len=maxvarlen), dimension(2), parameter :: varindefault = &
+                                                 (/var_delp, var_rh/)
 
 contains
 
 ! ------------------------------------------------------------------------------
+subroutine ufo_geosaod_setup(self, c_conf)
+  implicit none
+  class(ufo_geosaod), intent(inout) :: self
+  type(c_ptr),        intent(in)    :: c_conf
 
-subroutine ufo_geosaod_setup(self, c_conf, vars)
-implicit none
-class(ufo_geosaod), intent(inout) :: self
-type(c_ptr),        intent(in)    :: c_conf
-character(len=maxvarlen), dimension(:), intent(inout) :: vars
+  integer nvar_name
+  character(len=*), allocatable :: var_name(:)
+  character(len=3) :: wav
+  character(len=*), allocatable :: tracer_variables(:)
 
-!Locals
-integer :: iq
-character(len=maxvarlen), allocatable :: tracer_variables(:)
+  integer iq, n
 
-  self%nvars_out = size(vars)
-  allocate(self%varout(self%nvars_out))
-  self%varout = vars
-
-  ! Let user choose specific aerosols needed.
+  !  varin: aer tracer variables we need from the model (list in .yaml file)
+  !  need also relative humidity and delp (in varindefault).
+  !---------
   self%ntracers = size(config_get_string_vector(c_conf, max_string, "tracer_geovals"))
   allocate(tracer_variables(self%ntracers))
   tracer_variables = config_get_string_vector(c_conf, max_string, "tracer_geovals")
-
   self%nvars_in =  size(varindefault) + self%ntracers
+
   allocate(self%varin(self%nvars_in))
+
   do iq = 1, self%nvars_in
      self%varin(iq) = tracer_variables(iq)                       ! aer MR
   enddo
   self%varin(self%ntracers + 1 : self%nvars_in) = varindefault   ! delp and rh
 
-  deallocate(tracer_variables)
-
-  ! List of wavelenths
-  allocate(self%wavelength(self%nvars_out))
+  !varout: variables in the observation vector
+  !------
+  self%nwavelengths = config_get_int(c_conf, "n_wavelengths")
+  allocate(self%wavelength(self%nwavelengths))
   call config_get_float_vector(c_conf, "wavelengths", self%wavelength)
 
-  ! RC File for ChemBase
-  self%rcfile = config_get_string(c_conf,len(self%rcfile),"RCFile")
+  ! Read variable list and store in varout
+  allocate(self%varout(self%nwavelengths))
+  nvar_name = size( config_get_string_vector(c_conf, max_string, "variables"))  ! AOD for now
+  allocate(var_name(nvar_name))
+  var_name = config_get_string_vector(c_conf, max_string, "variables")
+  do n = 1, self%nwavelengths
+     write(wav, 'IO') int(self%wavelength(n))
+     self%varout = var_name //'_'// trim(wav)   !name: aerosol_optical_depth_in_log_space_550 (for ex)
+  enddo
 
+  deallocate(var_name, tracer_variables)
 end subroutine ufo_geosaod_setup
 
 ! ------------------------------------------------------------------------------
-
-subroutine destructor(self)
+subroutine ufo_geosaod_delete(self)
 implicit none
-type(ufo_geosaod), intent(inout) :: self
+class(ufo_geosaod), intent(inout) :: self
 
-  if (allocated(self%varout))     deallocate(self%varout)
-  if (allocated(self%varin))      deallocate(self%varin)
+  if (allocated(self%varout)) deallocate(self%varout)
+  if (allocated(self%varin))  deallocate(self%varin)
   if (allocated(self%wavelength)) deallocate(self%wavelength)
 
-end subroutine destructor
+end subroutine ufo_geosaod_delete
 
 ! ------------------------------------------------------------------------------
-
 subroutine ufo_geosaod_simobs(self, geovals, obss, nvars, nlocs, hofx)
+
 implicit none
 class(ufo_geosaod), intent(in)    :: self
-integer, intent(in)               :: nvars, nlocs
 type(ufo_geovals),  intent(in)    :: geovals
-real(c_double),     intent(inout) :: hofx(nvars, nlocs)
+integer,            intent(in)    :: nvars, nlocs
+real(c_double),     intent(inout) :: hofx(nvars,nlocs)   ! nwavelength, nlocs
 type(c_ptr), value, intent(in)    :: obss
 
 ! Local variables
+character(*), parameter :: PROGRAM_NAME = ' ufo_geosaod_mod.F90'
 type(ufo_geoval), pointer :: aer_profile
 type(ufo_geoval), pointer :: delp_profile
 type(ufo_geoval), pointer :: rh_profile
 integer :: nlayers, rc, n
 
-real(4) :: hofx4(nvars, nlocs)
-real(4), dimension(:,:,:), allocatable :: qm    ! aer mass mix ratio (kg/kg *delp/g) prof at obs loc
-real(4), dimension(:,:),   allocatable :: rh    ! relativ humidity prof interp at obs loc
-real(4), dimension(:,:),   allocatable :: delp
+character(len=10), parameter :: rcfile = 'Aod_EOS.rc'   ! perhaps move it into geos-aero/
+real(kind_real)  , parameter :: grav = 9.80616
+
+real(c_double), dimension(:,:,:), allocatable :: qm  ! aer mass mix ratio (kg/kg *delp/g) prof at obs loc
+real(c_double), dimension(:,:), allocatable   :: rh  ! relativ humidity prof interp at obs loc
+real(c_double), dimension(:,:), allocatable   :: delp
 
 character(len=MAXVARLEN) :: geovar
+
 
   ! Get delp and rh from model interp at obs loc (from geovals)
   call ufo_geovals_get_var(geovals, var_delp, delp_profile)
@@ -133,26 +139,25 @@ character(len=MAXVARLEN) :: geovar
   do n = 1, self%ntracers
      geovar = self%varin(n)                   !self%varin in setup contains tracers first then delp and rh
      call ufo_geovals_get_var(geovals, geovar, aer_profile)
-     qm(n,:,:) = aer_profile%vals
+     qm(n,:,:) = aer_profile(n)%vals
      qm(n,:,:) = qm(n,:,:) * delp / grav
   enddo
 
   ! call observation operator code
   ! -----------------------------
-  hofx4(:,:) = 0.0_4
-  call get_GEOS_AOD(nlayers, nlocs, self%nvars_out, self%ntracers, self%rcfile,  &
-                    real(self%wavelength,4), self%varin(1:self%ntracers), qm, rh,       &
-                    aod_tot = hofx4, rc = rc)  !self%varin includes rh and delp!!!!
+  hofx(:,:) = 0.0_kind_real
+  call get_GEOS_AOD(nlayers, nlocs, real(self%nwavelengths,4), self%ntracers, rcfile,  &
+                    self%wavelength, self%varin(1:self%n_tracers), qm, rh,       &
+                    aod_tot = hofx, rc = rc)  !self%varin includes rh and delp!!!!
 
-  ! Convert back to ufo precision
-  ! -----------------------------
-  hofx = real(hofx4,c_double)
 
   ! cleanup memory
   ! --------
   deallocate(qm, rh, delp)
 
+
 end subroutine ufo_geosaod_simobs
+
 
 ! ------------------------------------------------------------------------------
 
