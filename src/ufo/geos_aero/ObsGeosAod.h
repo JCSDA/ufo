@@ -15,7 +15,7 @@
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
 
-#include "ufo/geosaod/ObsGeosAod.interface.h"
+#include "ufo/geos_aero/ObsGeosAod.interface.h"
 #include "ufo/ObsOperatorBase.h"
 
 /// Forward declarations

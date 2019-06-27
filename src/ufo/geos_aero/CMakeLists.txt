@@ -16,7 +16,7 @@ set ( geosaod_files
     ufo_geosaod_tlad_mod.F90
 )
 
-PREPEND( _p_geosaod_files     "geos-aero"     ${geosaod_files} )
+PREPEND( _p_geosaod_files     "geos_aero"     ${geosaod_files} )
 
 set ( geosaod_src_files
       ${_p_geosaod_files}

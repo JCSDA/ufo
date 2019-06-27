@@ -55,7 +55,7 @@ add_subdirectory( surface )
 add_subdirectory( ncdiag )
 add_subdirectory( marine )
 if( ${GEOS-AERO_FOUND} )
-    add_subdirectory( geos-aero )
+    add_subdirectory( geos_aero )
 endif( ${GEOS-AERO_FOUND} )
 
 list( APPEND ufo_src_files
@@ -85,7 +85,7 @@ if( ${ROPP-UFO_FOUND} )
 endif( ${ROPP-UFO_FOUND} )
 
 if( ${GEOS-AERO_FOUND} )
-    list( APPEND UFO_LIBS_DEP geos-aero )
+    list( APPEND UFO_LIBS_DEP geosaero )
 endif( ${GEOS-AERO_FOUND} )
 
 

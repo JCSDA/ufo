@@ -139,7 +139,7 @@ character(len=MAXVARLEN) :: geovar
 
   ! call observation operator code
   ! -----------------------------
-  hofx4(:,:) = 0.0_4
+  hofx4(:,:) = 0.0
   call get_GEOS_AOD(nlayers, nlocs, self%nvars_out, self%ntracers, self%rcfile,  &
                     real(self%wavelength,4), self%varin(1:self%ntracers), qm, rh,       &
                     aod_tot = hofx4, rc = rc)  !self%varin includes rh and delp!!!!
