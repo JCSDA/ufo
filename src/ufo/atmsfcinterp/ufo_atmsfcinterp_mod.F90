@@ -212,7 +212,6 @@ subroutine atmsfcinterp_simobs_(self, geovals, obss, nvars, nlocs, hofx)
             call sfc_wind_fact_gsi(u%vals(1,iobs), v%vals(1,iobs), tsen%vals(1,iobs), q%vals(1,iobs),&
                                    psfc%vals(1,iobs), prsi%vals(1,iobs), prsi%vals(2,iobs),&
                                    tsfc%vals(1,iobs), z0, landmask%vals(1,iobs), redfac)
-            print *, redfac
             hofx(ivar,iobs) = profile%vals(1,iobs) * redfac
           end if
         case("specific_humidity")
