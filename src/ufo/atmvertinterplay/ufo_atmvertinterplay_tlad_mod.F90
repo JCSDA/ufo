@@ -25,7 +25,7 @@ module ufo_atmvertinterplay_tlad_mod
  !       this type can hold information on trajectory, for atmvertinterplay
  type, extends(ufo_basis_tlad), public :: ufo_atmvertinterplay_tlad
  private
-  integer :: nvars_in
+  integer :: nvars
   character(len=max_string), public, allocatable :: varin(:)
  contains
   procedure :: setup  => ufo_atmvertinterplay_tlad_setup
@@ -45,7 +45,7 @@ class(ufo_atmvertinterplay_tlad), intent(inout) :: self
 type(c_ptr),              intent(in)    :: c_conf
 
 ! TODO: setup input variables varin (updated model variables)
-  self%nvars_in = 0
+  self%nvars = size(config_get_string_vector(c_conf, max_string, "variables"))
 
 end subroutine ufo_atmvertinterplay_tlad_setup
 
