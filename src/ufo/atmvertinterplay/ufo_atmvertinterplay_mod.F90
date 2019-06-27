@@ -46,7 +46,6 @@ character(len=MAXVARLEN), dimension(:), intent(inout) :: vars
 integer :: i
 
   self%nvars = size(vars)
-  print *,"nvars=",self%nvars
   allocate(self%varout(self%nvars))
   self%varout = vars
 
