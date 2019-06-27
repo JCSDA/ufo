@@ -180,7 +180,6 @@ type(CRTM_RTSolution_type), allocatable :: rts(:,:)
    ! -------------------------------------------------------
    N_Channels = CRTM_ChannelInfo_n_Channels(chinfo(n))
 
-
    ! Allocate the ARRAYS
    ! -------------------
    allocate( geo( n_Profiles ),               &

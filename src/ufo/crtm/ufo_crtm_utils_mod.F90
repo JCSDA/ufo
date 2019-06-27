@@ -305,11 +305,8 @@ real(kind_real), allocatable :: ObsTb(:,:)
  ObsTb = 0.0_kind_real
  
  do n1 = 1,n_Channels
-   if (any(n1==channels)) then
-     !Get the variable name for this channel
-     call get_var_name(n1,varname)
-     call obsspace_get_db(obss, "ObsValue", varname, ObsTb(:,n1))
-   endif
+   call get_var_name(channels(n1),varname)
+   call obsspace_get_db(obss, "ObsValue", varname, ObsTb(:,n1))
  enddo
 
  !Loop over all n_Profiles, i.e. number of locations
@@ -319,7 +316,7 @@ real(kind_real), allocatable :: ObsTb(:,:)
    sfc(k1)%sensordata%sensor_id        = chinfo(1)%sensor_id
    sfc(k1)%sensordata%wmo_sensor_id    = chinfo(1)%wmo_sensor_id
    sfc(k1)%sensordata%wmo_satellite_id = chinfo(1)%wmo_satellite_id
-   sfc(k1)%sensordata%sensor_channel   = chinfo(1)%sensor_channel
+   sfc(k1)%sensordata%sensor_channel   = channels
 
    !Pass observation value
    do n1 = 1, n_channels
