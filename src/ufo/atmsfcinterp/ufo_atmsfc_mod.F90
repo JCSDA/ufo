@@ -2,20 +2,161 @@ module atmsfc_mod
 
 contains
 
-subroutine sfc_wind_fact_gsi(z0, phi1, obshgt, psim, psimz, redfac)
+subroutine sfc_wind_fact_gsi(u, v, tsen, q, psfc, prsi1, prsi2,&
+                             skint, z0, lsmask, f10m) 
   ! compute wind reduction factor
   ! aka the coefficient to multiply u,v in lowest model level
-  ! to get u,v at 'obshgt'
+  ! to get u,v at 'obshgt' aka 10m agl
+  ! based off of compute_fact10 from GSI
   use kinds
-  use ufo_constants_mod, only: rd_over_cp, grav
+  use ufo_constants_mod, only: rd_over_cp, rv_over_rd, rd, grav
   implicit none
-  real(kind_real), intent(in) :: z0, phi1, obshgt, psim, psimz
-  real(kind_real), intent(out) :: redfac
+  real(kind_real), intent(in) :: u, v, tsen, q, psfc, prsi1, prsi2,&
+                                 skint, z0, lsmask 
+  real(kind_real), intent(out) :: f10m
   real(kind_real) :: psiw, psiwz
+  real(kind_real), parameter :: zero = 0.0_kind_real
+  real(kind_real), parameter :: quarter = 0.25_kind_real
+  real(kind_real), parameter :: half = 0.5_kind_real
+  real(kind_real), parameter :: one = 1.0_kind_real
+  real(kind_real), parameter :: two = 2.0_kind_real
+  real(kind_real), parameter :: four = 4.0_kind_real
+  real(kind_real), parameter :: ten = 10.0_kind_real
+  real(kind_real), parameter :: alpha = 5.0_kind_real
+  real(kind_real), parameter :: a0 = -3.975_kind_real
+  real(kind_real), parameter :: a1 = 12.32_kind_real
+  real(kind_real), parameter :: b1 = -7.755_kind_real
+  real(kind_real), parameter :: b2 = 6.041_kind_real
+  real(kind_real), parameter :: a0p = -7.941_kind_real
+  real(kind_real), parameter :: a1p = 24.75_kind_real
+  real(kind_real), parameter :: b1p = -8.705_kind_real
+  real(kind_real), parameter :: b2p = 7.899_kind_real
+  real(kind_real), parameter :: vis = 1.4e-5_kind_real
+  real(kind_real), parameter :: fv = rv_over_rd - one
+  real(kind_real),parameter::  charnok = 0.014_kind_real
 
-  psiw = log(phi1/z0) - psim
-  psiwz = log(obshgt/z0) - psimz
-  redfac = psiwz / psiw 
+  real(kind_real) :: rat, restar, ustar, del, tem, prki1, prki2, prkl, prsl
+  real(kind_real) :: wspd, wind, q0, theta1, tv1, thv1, tvs, z1
+  real(kind_real) :: z0max, ztmax, dtv, adtv, rb, fm, fh, hlinf, fm10
+  real(kind_real) :: hl1, hl0inf, hltinf, aa, aa0, bb, bb0, pm, ph, fms, fhs
+  real(kind_real) :: hl0, hlt, hl110, pm10, hl12, ph2, olinf 
+   
+
+  rat=zero
+  restar=zero
+  ustar=zero
+  del = prsi1-prsi2
+  tem = (one + rd_over_cp) * del
+  prki1 = (prsi1*1.0e-5_kind_real)**rd_over_cp
+  prki2 = (prsi2*1.0e-5_kind_real)**rd_over_cp
+  prkl = (prki1*prsi1-prki2*prsi2)/tem
+  prsl = 1.0e5_kind_real*prkl**(one/rd_over_cp)
+  wspd = sqrt( u*u + v*v )
+  wind = max(wind,one)
+  q0 = max(q,1.e-8_kind_real)
+  theta1 = tsen * (prki1/prkl)
+  tv1 = tsen * (one+fv*q0)
+  thv1 = theta1 * (one+fv*q0)
+  tvs = max(skint,tsen) * (one+fv*q0) ! fix this
+  z1 = -rd*tv1*log(prsl/psfc)/grav
+
+
+  ! compute stability dependent exchange coefficients
+  if (lsmask < 0.01_kind_real) then
+    ustar = sqrt(grav * z0 / charnok)
+  end if 
+  ! compute stability indices (rb and hlinf)
+  z0max = min(z0,one*z1)
+  ztmax = z0max
+  if (lsmask < 0.01_kind_real) then
+    restar = ustar * z0max / vis
+    restar = max(restar, 1.e-6_kind_real)
+    ! rat taken from Zeng, Zhao and Dickinson 1997
+    rat = 2.67_kind_real * restar**quarter - 2.57_kind_real
+    rat = min(rat, 7.0_kind_real)
+    ztmax = z0max * exp(-rat)
+  end if
+
+  dtv = thv1 - tvs
+  adtv = abs(dtv)
+  adtv = max(adtv,1.e-3_kind_real)
+  dtv = sign(one,dtv)*adtv
+  rb = grav * dtv * z1 / (half * (thv1 + tvs) * wind * wind)
+  rb = max(rb,-5.e3_kind_real)
+  fm = log((z0max + z1) / z0max)
+  fh = log((ztmax + z1) / ztmax)
+  hlinf = rb * fm * fm / fh
+  fm10 = log((z0max + 10.0_kind_real) / z0max)
+    
+  ! stable case
+  if (dtv >= zero) then
+    hl1 = hlinf
+  end if
+  if ((dtv >= zero) .and. (hlinf > quarter)) then
+    hl0inf = z0max * hlinf / z1
+    hltinf = ztmax * hlinf / z1
+    aa = sqrt(one + four*alpha*hlinf)
+    aa0 = sqrt(one + four*alpha*hl0inf)
+    bb = aa
+    bb0 = sqrt(one + four*alpha*hltinf)
+    pm = aa0 - aa + log((aa+one)/(aa0+one))
+    ph = bb0 - bb + log((bb+one)/(bb0+one))
+    fms = fm - pm
+    fhs = fh - ph
+    hl1 = fms * fms * rb / fhs
+  end if
+  ! second iteration
+  if (dtv >= zero) then
+    hl0 = z0max * hl1 / z1
+    hlt = ztmax * hl1 / z1
+    aa = sqrt(one + four*alpha*hl1)
+    aa0 = sqrt(one + four*alpha*hl0)
+    bb = aa
+    bb0 = sqrt(one + four*alpha*hlt)
+    pm = aa0 - aa + log((aa+one)/(aa0+one))
+    ph = bb0 - bb + log((bb+one)/(bb0+one))
+    hl110 = hl1 * ten / z1
+    aa = sqrt(one + four*alpha*hl110)
+    pm10 = aa0 - aa + log((aa+one)/(aa0+one))
+    hl12 = hl1 * two / z1
+    bb = sqrt(one + four * alpha * hl12)
+    ph2 = bb0 - bb + log((bb+one)/(bb0+one))
+  end if
+
+  ! unstable case
+  ! check for unphysical obukhov length
+  if (dtv < zero) then
+    olinf = z1 / hlinf
+    if ( abs(olinf) <= z0max * 50.0_kind_real ) then
+      hlinf = -z1 / (50.0_kind_real * z0max)
+    end if
+  end if
+
+  ! get pm and ph
+  if (dtv < zero .and. hlinf >= (-half)) then
+    hl1 = hlinf
+    pm = (a0 + a1*hl1) * hl1 / (one + b1*hl1 + b2*hl1*hl1)
+    ph = (a0p + a1p*hl1)*hl1/(one + b1p*hl1 + b2*hl1*hl1)
+    hl110 = hl1 * ten / z1
+    pm10 = (a0 + a1*hl110)*hl110/(one + b1*hl110 + b2*hl110*hl110)
+    hl12 = hl1 * two / z1
+    ph2 = (a0p + a1p*hl12)*hl12/(one + b1p*hl12 + b2p*hl12*hl12)
+  end if
+  if (dtv < zero .and. hlinf < (-half)) then
+    hl1 = -hlinf
+    pm = log(hl1) + two*hl1**(-quarter) - 0.8776_kind_real
+    ph = log(hl1) + half*hl1**(-half) + 1.386_kind_real
+    hl110 = hl1 * ten / z1
+    pm10 = log(hl110) + two*hl110**(-quarter) - 0.8776_kind_real
+    hl12 = hl1 * two / z1
+    ph2 = log(hl12) + half*hl12**(-half) + 1.386_kind_real
+  end if
+
+  ! finish the exchange coefficient computation to provide fm and fh
+  fm = fm - pm
+  fh = fh - ph
+  fm10 = fm10 - pm10
+  f10m = fm10 / fm
 
   return
 
@@ -148,185 +289,6 @@ end subroutine
 
 !--------------------------------------------------------------------------
 
-!subroutine sfc_wtq_fwd_gsi(psfc_in,tsfc,prsl1_in,tsen1,tv1,q1,u1,v1,&
-!                           prsl2_in,tsen2,tv2,q2,phi1,roughlen,landmask,&
-!                           obshgt,tout,tvout,qout,radfac)
-!  ! sfc_wtq_fwd_gsi
-!  ! based off of subroutines from GSI sfc_model.f90 file
-!  use kinds
-!  use ufo_vars_mod, only: MAXVARLEN
-!  use ufo_constants_mod, only: rd_over_cp, grav
-!  implicit none
-!  real(kind_real), intent(in) :: psfc_in, tsfc, prsl1_in, tsen1, q1, u1, v1,&
-!                                 prsl2_in, tsen2, q2, phi1, roughlen, landmask, &
-!                                 obshgt
-!  character(len=MAXVARLEN), intent(in) :: varname
-!  real(kind_real), intent(out) :: tout, tvout, qout, radfac
-!
-!  real(kind_real), parameter :: zint0 = 0.01_kind_real ! default roughness over land
-!  real(kind_real), parameter :: k_kar = 0.4_kind_real ! Von Karman constant
-!  real(kind_real), parameter :: fv = 0.60773384427_kind_real ! cv/cp - 1
-!  real(kind_real), parameter :: ka = 2.4e-5_kind_real
-!  real(kind_real), parameter :: r16 = 16.0_kind_real
-!  real(kind_real), parameter :: r1_1 = 1.1_kind_real
-!  real(kind_real), parameter :: r10 = 10.0_kind_real
-!  real(kind_real), parameter :: r100 = 100.0_kind_real
-!  real(kind_real), parameter :: r1000 = 1000.0_kind_real
-!  real(kind_real), parameter :: r0_9 = 0.9_kind_real
-!  real(kind_real), parameter :: r0_2 = 0.2_kind_real
-!  real(kind_real), parameter :: zero = 0.0_kind_real
-!  real(kind_real), parameter :: one = 1.0_kind_real
-!  real(kind_real), parameter :: two = 2.0_kind_real
-!  real(kind_real), parameter :: five = 5.0_kind_real
-!
-!  real(kind_real) :: psfc, prsl1, prsl2
-!  real(kind_real) :: tvg, tv1, tv2 
-!  real(kind_real) :: z0,zq0
-!  real(kind_real) :: gzzoz0, gzsoz0
-!  real(kind_real) :: th1, thg, thv1, thv2, thvg, eg, qg
-!  real(kind_real) :: wspd2, Vc2, V2
-!  real(kind_real) :: rib
-!  real(kind_real) :: psim, psimz, psih, psihz
-!  real(kind_real) :: cc, ust, mol, hol, holz
-!  real(kind_real) :: xx, yy
-!  real(kind_real) :: psiw, psit, psiwz, psitz, psiq, psiqz
-! 
-!  ! convert pressures to hPa from Pa
-!  psfc = psfc_in / r100
-!  prsl1 = prsl1_in / r100
-!  prsl2 = prsl2_in / r100 
-!
-!  ! minimum roughness length (should be in meters)
-!  z0 = roughlen
-!  if (z0 < 0.0001_kind_real) z0 = 0.0001_kind_real
-!  ! roughness length for over water
-!  if ( landmask < 0.01 ) then
-!     zq0 = z0
-!  else
-!     zq0 = zint0
-!  end if
-!
-!  ! constant variable for psi
-!  gzsoz0 = log(phi1/z0)
-!  gzzoz0 = log(obshgt/z0)
-!
-!  ! virtual temperature from sensible temperature
-!  tv1 = tsen1 * (one + fv * q1)
-!  tv2 = tsen2 * (one + fv * q2)
-!
-!  ! convert temperature of the ground to virtual temp assuming saturation
-!  call da_tp_to_qs( tsfc, psfc, eg, qg)
-!  tvg = tsfc * (one + fv * qg)
-!
-!  ! potential temperature calculations
-!  thg = tsfc * (r1000 / psfc) ** rd_over_cp ! surface theta
-!  th1 = tsen1 * (r1000 / prsl1) ** rd_over_cp ! theta for lowest model layer
-!
-!  ! virtual potential temperature
-!  thv1 = tv1 * (r1000 / prsl1) ** rd_over_cp ! surface theta
-!  thv2 = tv2 * (r1000 / prsl2) ** rd_over_cp ! surface theta
-!  thvg = tvg * (r1000 / psfc) ** rd_over_cp ! surface theta
-!
-!  ! wind speed
-!  wspd2 = u1*u1 + v1*v1  
-!
-!  ! convective velocity
-!  if (thvg >= thv1) then
-!    Vc2 = 4.0_kind_real * (thvg - thv1)
-!  else
-!    Vc2 = zero
-!  end if
-!
-!  V2 = 0.000001_kind_real + wspd2 + Vc2
-!
-!  ! bulk richardson number
-!  rib = (grav * phi1 / th1) * (thv1 - thvg) / V2
-!
-!  ! calculate psi based off of regime
-!  ! stable conditions
-!  if (rib >= r0_2) then
-!    psim = -r10*gzsoz0 
-!    psimz = -r10*gzzoz0
-!    psim = max(psim,-r10)
-!    psimz = max(psimz,-r10)
-!    psih = psim
-!    psihz = psimz
-!
-!  ! mechanically driven turbulence
-!  else if ((rib < r0_2) .and. (rib > zero)) then
-!    psim = ( -five * rib) * gzsoz0 / (r1_1 - five*rib)  
-!    psimz = ( -five * rib) * gzzoz0 / (r1_1 - five*rib)  
-!    psim = max(psim,-r10)
-!    psimz = max(psimz,-r10)
-!    psih = psim
-!    psihz = psimz
-!
-!  ! unstable forced convection
-!  else if ((rib == zero) .or. (rib < zero .and. thv2>thv1)) then
-!    psim = zero
-!    psimz = zero
-!    psih = psim
-!    psihz = psimz
-!
-!  ! free convection
-!  else
-!    psim = zero
-!    psih = zero
-!    cc = two * atan(one)
-!    
-!    ! friction speed
-!    ust = k_kar * sqrt(V2) / (gzsoz0 - psim)
-!    ! heat flux factor
-!    mol = k_kar * (th1 - thg)/(gzsoz0 - psih)
-!    ! ratio of PBL height to Monin-Obukhov length
-!    if (ust < 0.01_kind_real) then
-!      hol = rib * gzsoz0
-!    else
-!      hol = k_kar * 9.80665_kind_real * phi1 * mol / (th1 * ust * ust)
-!    end if
-!    hol = min(hol,zero)
-!    hol = max(hol,-r10)
-!    holz = (obshgt / phi1) * hol 
-!    holz = min(holz,zero)
-!    holz = max(holz,-r10)
-!
-!    xx = (one - r16 * hol) ** 0.25_kind_real 
-!    yy = log((one+xx*xx)/two) 
-!    psim = two * log((one+xx)/two) + yy - two * atan(xx) + cc
-!    psih = two * yy
-!
-!    xx = (one - r16 * holz) ** 0.25_kind_real
-!    yy = log((one+xx*xx)/two) 
-!    psimz = two * log((one+xx)/two) + yy - two * atan(xx) + cc
-!    psihz = two * yy
-!
-!    psim = min(psim,r0_9*gzsoz0)
-!    psimz = min(psimz, r0_9*gzzoz0)
-!    psih = min(psih,r0_9*gzsoz0)
-!    psihz = min(psihz,r0_9*gzzoz0)
-!
-!  end if
-!  
-!  psiw = gzsoz0 - psim
-!  psit = gzsoz0 - psih 
-!  psiwz = gzzoz0 - psimz
-!  psitz = gzzoz0 - psihz
-!
-!  ust = k_kar * sqrt(V2) / (gzsoz0 - psim)
-!
-!  psiq = log(k_kar*ust*phi1/ka + phi1 / zq0) - psih
-!  psiqz = log(k_kar*ust*obshgt/ka + obshgt / zq0) - psihz
-!
-!  tout = (thg + (th1 - thg)*psitz/psit)*(psfc/r1000)**rd_over_cp
-!  tvout = (thg + (th1 - thg)*psitz/psit)*(psfc/r1000)**rd_over_cp
-!  tvout = tvout * (one + fv * q1)  
-!  qout = qg + (q1 - qg)*psiqz/psiq
-!  radfac = psiwz / psiw 
-!
-!  return
-!
-!end subroutine
-
 subroutine gsi_tp_to_qs( t, p_in, es_out, qs)
   ! calculate saturation specific humidity for a given
   ! temperature and pressure
@@ -360,6 +322,5 @@ subroutine gsi_tp_to_qs( t, p_in, es_out, qs)
 
    return
 end subroutine gsi_tp_to_qs
-
 
 end module atmsfc_mod

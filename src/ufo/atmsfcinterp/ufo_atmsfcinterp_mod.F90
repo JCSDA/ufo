@@ -81,6 +81,7 @@ subroutine atmsfcinterp_setup_(self, c_conf, vars)
   !> need surface and atmospheric pressure for potential temperature
   self%varin(5) = var_ps
   self%varin(6) = var_prs
+  !self%varin(7) = var_prsi
   self%varin(7) = var_ts
   self%varin(8) = var_tv
   self%varin(9) = var_q
@@ -96,7 +97,7 @@ end subroutine atmsfcinterp_setup_
 subroutine atmsfcinterp_simobs_(self, geovals, obss, nvars, nlocs, hofx)
   use atmsfc_mod, only : calc_pot_temp_gsi, calc_conv_vel_gsi, sfc_wind_fact_gsi, &
                          calc_psi_vars_gsi, gsi_tp_to_qs
-  use ufo_constants_mod, only: grav, cv_over_cp, rd_over_cp
+  use ufo_constants_mod, only: grav, rv, rd, rd_over_cp
   implicit none
   class(ufo_atmsfcinterp), intent(in)        :: self
   integer, intent(in)                         :: nvars, nlocs
@@ -116,7 +117,7 @@ subroutine atmsfcinterp_simobs_(self, geovals, obss, nvars, nlocs, hofx)
   real(kind_real) :: redfac, psim, psimz, psih, psihz 
   real(kind_real) :: ttmp1, ttmpg, eg, qg
   real(kind_real) :: z0, zq0, tvsfc 
-  real(kind_real), parameter :: fv = cv_over_cp - 1.0_kind_real
+  real(kind_real), parameter :: fv = rv/rd - 1.0_kind_real
   real(kind_real) :: psit, psitz, ust, psiq, psiqz
   real(kind_real), parameter :: zint0 = 0.01_kind_real ! default roughness over land
   real(kind_real), parameter :: k_kar = 0.4_kind_real ! Von Karman constant
@@ -137,6 +138,7 @@ subroutine atmsfcinterp_simobs_(self, geovals, obss, nvars, nlocs, hofx)
   call ufo_geovals_get_var(geovals, var_sfc_rough, roughlen)
   call ufo_geovals_get_var(geovals, var_ps, psfc)
   call ufo_geovals_get_var(geovals, var_prs, prs)
+  !call ufo_geovals_get_var(geovals, var_prsi, prsi)
   call ufo_geovals_get_var(geovals, var_ts, tsen)
   call ufo_geovals_get_var(geovals, var_tv, tv)
   call ufo_geovals_get_var(geovals, var_q, q)
@@ -179,7 +181,7 @@ subroutine atmsfcinterp_simobs_(self, geovals, obss, nvars, nlocs, hofx)
     rib = (grav * phi%vals(1,iobs) / th1) * (thv1 - thvg) / V2
 
     gzsoz0 = log(phi%vals(1,iobs)/z0)
-    gzzoz0 = log(obshgt(iobs)-obselev(iobs)/z0)
+    gzzoz0 = log((obshgt(iobs)-obselev(iobs))/z0)
 
     ! calculate parameters regardless of variable
     call calc_psi_vars_gsi(rib, gzsoz0, gzzoz0, thv1, thv2, V2, th1,&
@@ -207,7 +209,10 @@ subroutine atmsfcinterp_simobs_(self, geovals, obss, nvars, nlocs, hofx)
           if (self%use_fact10) then ! use provided fact10 from model
             hofx(ivar,iobs) = profile%vals(1,iobs) * rad10%vals(1,iobs)
           else ! compute wind reduction factor
-            call sfc_wind_fact_gsi(z0, phi%vals(1,iobs), obshgt(iobs)-obselev(iobs), psim, psimz, redfac)
+            call sfc_wind_fact_gsi(u%vals(1,iobs), v%vals(1,iobs), tsen%vals(1,iobs), q%vals(1,iobs),&
+                                   psfc%vals(1,iobs), prs%vals(1,iobs), prs%vals(2,iobs),&
+                                   tsfc%vals(1,iobs), zq0, landmask%vals(1,iobs), redfac)
+            print *, redfac
             hofx(ivar,iobs) = profile%vals(1,iobs) * redfac
           end if
         case("specific_humidity")
