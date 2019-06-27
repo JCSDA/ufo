@@ -19,12 +19,27 @@ Observations:
     ObsSpace:
       name: GSISfcModel
       ObsDataIn:
-        obsfile: Data/sfc_uv_obs_2018041500_m.nc4
+        obsfile: Data/sfc_obs_2018041500_m.nc4
       ObsDataOut:
-        obsfile: Data/sfc_uv_obs_2018041500_m_out.nc4
+        obsfile: Data/sfc_obs_2018041500_m_out.nc4
+      simulate:
+        variables: [air_temperature, eastward_wind, northward_wind]
+    GeoVaLs:
+      filename: Data/sfc_geoval_2018041500_m.nc4
+    vecequiv: GsiHofX
+    tolerance: 1.0e-04
+  - ObsOperator:
+      name: GSISfcModel 
+      use_fact10: 1
+    ObsSpace:
+      name: GSISfcModel
+      ObsDataIn:
+        obsfile: Data/sfc_obs_2018041500_m.nc4
+      ObsDataOut:
+        obsfile: Data/sfc_obs_2018041500_m_out.nc4
       simulate:
         variables: [eastward_wind, northward_wind]
     GeoVaLs:
-      filename: Data/sfc_uv_geoval_2018041500_m.nc4
+      filename: Data/sfc_geoval_2018041500_m.nc4
     vecequiv: GsiHofX
-    tolerance: 1.0e-04
+    tolerance: 1.0e-05

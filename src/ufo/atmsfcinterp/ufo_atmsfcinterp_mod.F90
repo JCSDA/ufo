@@ -60,9 +60,9 @@ subroutine atmsfcinterp_setup_(self, c_conf, vars)
 
   !> Allocate varin: variables we need from the model
   if (self%use_fact10) then
-    istart = 13
+    istart = 14
   else
-    istart = 12
+    istart = 13
   end if
   nallvars = self%nvars + istart
   allocate(self%varin(nallvars))
@@ -81,14 +81,14 @@ subroutine atmsfcinterp_setup_(self, c_conf, vars)
   !> need surface and atmospheric pressure for potential temperature
   self%varin(5) = var_ps
   self%varin(6) = var_prs
-  !self%varin(7) = var_prsi
-  self%varin(7) = var_ts
-  self%varin(8) = var_tv
-  self%varin(9) = var_q
-  self%varin(10) = var_u 
-  self%varin(11) = var_v 
-  self%varin(12) = var_sfc_lfrac
-  if (self%use_fact10)  self%varin(13) = var_sfc_fact10
+  self%varin(7) = var_prsi
+  self%varin(8) = var_ts
+  self%varin(9) = var_tv
+  self%varin(10) = var_q
+  self%varin(11) = var_u 
+  self%varin(12) = var_v 
+  self%varin(13) = var_sfc_lfrac
+  if (self%use_fact10)  self%varin(14) = var_sfc_fact10
 
 end subroutine atmsfcinterp_setup_
 
@@ -104,7 +104,7 @@ subroutine atmsfcinterp_simobs_(self, geovals, obss, nvars, nlocs, hofx)
   type(ufo_geovals), intent(in)               :: geovals
   real(c_double),  intent(inout)              :: hofx(nvars, nlocs)
   type(c_ptr), value, intent(in)              :: obss
-  type(ufo_geoval), pointer :: phi, hgt, tsfc, roughlen, psfc, prs, &
+  type(ufo_geoval), pointer :: phi, hgt, tsfc, roughlen, psfc, prs, prsi, &
                                tsen, tv, q, u, v, landmask, &
                                profile, rad10
   integer :: ivar, iobs
@@ -138,7 +138,7 @@ subroutine atmsfcinterp_simobs_(self, geovals, obss, nvars, nlocs, hofx)
   call ufo_geovals_get_var(geovals, var_sfc_rough, roughlen)
   call ufo_geovals_get_var(geovals, var_ps, psfc)
   call ufo_geovals_get_var(geovals, var_prs, prs)
-  !call ufo_geovals_get_var(geovals, var_prsi, prsi)
+  call ufo_geovals_get_var(geovals, var_prsi, prsi)
   call ufo_geovals_get_var(geovals, var_ts, tsen)
   call ufo_geovals_get_var(geovals, var_tv, tv)
   call ufo_geovals_get_var(geovals, var_q, q)
@@ -210,8 +210,8 @@ subroutine atmsfcinterp_simobs_(self, geovals, obss, nvars, nlocs, hofx)
             hofx(ivar,iobs) = profile%vals(1,iobs) * rad10%vals(1,iobs)
           else ! compute wind reduction factor
             call sfc_wind_fact_gsi(u%vals(1,iobs), v%vals(1,iobs), tsen%vals(1,iobs), q%vals(1,iobs),&
-                                   psfc%vals(1,iobs), prs%vals(1,iobs), prs%vals(2,iobs),&
-                                   tsfc%vals(1,iobs), zq0, landmask%vals(1,iobs), redfac)
+                                   psfc%vals(1,iobs), prsi%vals(1,iobs), prsi%vals(2,iobs),&
+                                   tsfc%vals(1,iobs), z0, landmask%vals(1,iobs), redfac)
             print *, redfac
             hofx(ivar,iobs) = profile%vals(1,iobs) * redfac
           end if

@@ -40,26 +40,25 @@ subroutine sfc_wind_fact_gsi(u, v, tsen, q, psfc, prsi1, prsi2,&
   real(kind_real) :: z0max, ztmax, dtv, adtv, rb, fm, fh, hlinf, fm10
   real(kind_real) :: hl1, hl0inf, hltinf, aa, aa0, bb, bb0, pm, ph, fms, fhs
   real(kind_real) :: hl0, hlt, hl110, pm10, hl12, ph2, olinf 
-   
 
+   
   rat=zero
   restar=zero
   ustar=zero
-  del = prsi1-prsi2
+  del = (prsi1-prsi2)*1.0e-3_kind_real
   tem = (one + rd_over_cp) * del
   prki1 = (prsi1*1.0e-5_kind_real)**rd_over_cp
   prki2 = (prsi2*1.0e-5_kind_real)**rd_over_cp
-  prkl = (prki1*prsi1-prki2*prsi2)/tem
+  prkl = (prki1*(prsi1*1.0e-3_kind_real)-prki2*(prsi2*1.0e-3_kind_real))/tem
   prsl = 1.0e5_kind_real*prkl**(one/rd_over_cp)
   wspd = sqrt( u*u + v*v )
-  wind = max(wind,one)
+  wind = max(wspd,one)
   q0 = max(q,1.e-8_kind_real)
   theta1 = tsen * (prki1/prkl)
   tv1 = tsen * (one+fv*q0)
   thv1 = theta1 * (one+fv*q0)
-  tvs = max(skint,tsen) * (one+fv*q0) ! fix this
+  tvs = skint * (one+fv*q0) ! fix this
   z1 = -rd*tv1*log(prsl/psfc)/grav
-
 
   ! compute stability dependent exchange coefficients
   if (lsmask < 0.01_kind_real) then
@@ -177,6 +176,7 @@ subroutine calc_psi_vars_gsi(rib, gzsoz0, gzzoz0, thv1, thv2,&
 
   real(kind_real), parameter :: r0_2 = 0.2_kind_real
   real(kind_real), parameter :: zero = 0.0_kind_real
+  real(kind_real), parameter :: quarter = 0.25_kind_real
   real(kind_real), parameter :: one = 1.0_kind_real
   real(kind_real), parameter :: two = 2.0_kind_real
   real(kind_real), parameter :: r10 = 10.0_kind_real
@@ -230,12 +230,12 @@ subroutine calc_psi_vars_gsi(rib, gzsoz0, gzzoz0, thv1, thv2,&
     holz = min(holz,zero)
     holz = max(holz,-r10)
 
-    xx = (one - r16 * hol) ** 0.25_kind_real 
+    xx = (one - r16 * hol) ** quarter 
     yy = log((one+xx*xx)/two) 
     psim = two * log((one+xx)/two) + yy - two * atan(xx) + cc
     psih = two * yy
 
-    xx = (one - r16 * holz) ** 0.25_kind_real
+    xx = (one - r16 * holz) ** quarter
     yy = log((one+xx*xx)/two) 
     psimz = two * log((one+xx)/two) + yy - two * atan(xx) + cc
     psihz = two * yy
@@ -289,7 +289,7 @@ end subroutine
 
 !--------------------------------------------------------------------------
 
-subroutine gsi_tp_to_qs( t, p_in, es_out, qs)
+subroutine gsi_tp_to_qs( t, p, es, qs)
   ! calculate saturation specific humidity for a given
   ! temperature and pressure
   ! based on subroutin DA_TP_To_Qs in GSI
@@ -298,8 +298,8 @@ subroutine gsi_tp_to_qs( t, p_in, es_out, qs)
 
    implicit none
    real(kind_real), intent(in) :: t                ! Temperature.
-   real(kind_real), intent(in) :: p_in             ! Pressure.
-   real(kind_real), intent(out) :: es_out          ! Sat. vapour pressure.
+   real(kind_real), intent(in) :: p             ! Pressure.
+   real(kind_real), intent(out) :: es          ! Sat. vapour pressure.
    real(kind_real), intent(out) :: qs              ! Sat. specific humidity.
 
 !  Saturation Vapour Pressure Constants(Rogers & Yau, 1989)
@@ -307,18 +307,15 @@ subroutine gsi_tp_to_qs( t, p_in, es_out, qs)
    real(kind_real), parameter    :: es_beta = 17.67_kind_real
    real(kind_real), parameter    :: es_gamma = 243.5_kind_real
   
-   real(kind_real) :: omeps, p, es
+   real(kind_real) :: omeps
    real(kind_real)                          :: t_c              ! T in degreesC.
-
-   p = p_in /100.0_kind_real ! Pa to hPa
 
    omeps = 1.0_kind_real - rd_over_rv
    t_c = t - t0c
 
-   es = 0.01_kind_real * es_alpha * exp( es_beta * t_c / ( t_c + es_gamma ) ) 
+   es = es_alpha * exp( es_beta * t_c / ( t_c + es_gamma ) ) 
 
    qs = rd_over_rv * es / ( p - omeps * es )
-   es_out = es * 100.0_kind_real ! hPa to Pa
 
    return
 end subroutine gsi_tp_to_qs
