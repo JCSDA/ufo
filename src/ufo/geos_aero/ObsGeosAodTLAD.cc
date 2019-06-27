@@ -34,7 +34,10 @@ ObsGeosAodTLAD::ObsGeosAodTLAD(const ioda::ObsSpace & odb,
   char *buffin = new char[c_name_size];
   const eckit::Configuration * configc = &config;
 
-  ufo_geosaod_tlad_setup_f90(keyOper_, &configc, buffin, c_name_size);
+  const oops::Variables & observed = odb.obsvariables();
+  const int nvars_out = observed.size();
+
+  ufo_geosaod_tlad_setup_f90(keyOper_, &configc, buffin, c_name_size, nvars_out);
 
   std::string vstr_in(buffin);
   std::vector<std::string> vvin;
@@ -63,7 +66,7 @@ void ObsGeosAodTLAD::setTrajectory(const GeoVaLs & geovals, const ObsBias & bias
 void ObsGeosAodTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec,
                              const ObsBiasIncrement & bias) const {
   ufo_geosaod_simobs_tl_f90(keyOper_, geovals.toFortran(), odb_,
-                            ovec.size(), ovec.toFortran());
+                            ovec.nvars(), ovec.nlocs(), ovec.toFortran());
   oops::Log::trace() << "ObsGeosAodTLAD: TL observation operator run" << std::endl;
 }
 
@@ -72,7 +75,7 @@ void ObsGeosAodTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ov
 void ObsGeosAodTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec,
                              ObsBiasIncrement & bias) const {
   ufo_geosaod_simobs_ad_f90(keyOper_, geovals.toFortran(), odb_,
-                            ovec.size(), ovec.toFortran());
+                            ovec.nvars(), ovec.nlocs(), ovec.toFortran());
   oops::Log::trace() << "ObsGeosAodTLAD: adjoint observation operator run" << std::endl;
 }
 

@@ -37,6 +37,7 @@ list( APPEND ufo_test_input
   testinput/cris_crtm.yaml
   testinput/genericprof.yaml
   testinput/geovals.yaml
+  testinput/geos_aod.yaml
   testinput/gnssrobndropp1d.yaml
   testinput/gnssrobndropp2d.yaml
   testinput/gnssrobndgsi.yaml
@@ -81,6 +82,7 @@ list( APPEND ufo_test_data
   atmosphere/aod_geoval_2018041500_s.nc4
   atmosphere/cris-fsr_npp_geoval_2018041500_m.nc4
   atmosphere/geovals_rttov.nc4
+  atmosphere/geos_aer_geoval_2018041500_m.nc4
   atmosphere/gnssro_geoval_2018041500_s.nc4
   atmosphere/gnssro_geoval_2018041500_s_2d.nc4
   atmosphere/gnssro_geoval_2018041500_m.nc4
@@ -120,6 +122,7 @@ list (APPEND ioda_obs_test_data
   atmosphere/aod_obs_2018041500_m.nc4
   atmosphere/aod_obs_2018041500_s.nc4
   atmosphere/cris-fsr_npp_obs_2018041500_m.nc4
+  atmosphere/geos_aod_obs_2018041500_m.nc4
   atmosphere/gnssro_obs_2018041500_s.nc4
   atmosphere/gnssro_obs_2018041500_m.nc4
   atmosphere/hirs4_metop-a_obs_2018041500_m.nc4
@@ -442,6 +445,21 @@ if( ${GSW_FOUND} )
                       LIBS    ufo )
 
 endif( ${GSW_FOUND} )
+
+if( ${GEOS-AERO_FOUND} )
+
+ecbuild_add_test( TARGET  test_ufo_geos_aero_opr
+                  MPI     4
+                  SOURCES mains/TestObsOperator.cc
+                  ARGS    "testinput/geos_aod.yaml"
+                  LIBS    ufo )
+
+ecbuild_add_test( TARGET  test_ufo_geos_aero_tlad
+                  SOURCES mains/TestObsOperatorTLAD.cc
+                  ARGS    "testinput/geos_aod.yaml"
+                  LIBS    ufo )
+
+endif( ${GEOS-AERO_FOUND} )
 
 ecbuild_add_test( TARGET  test_ufo_aod_opr_crtm
                   SOURCES mains/TestObsOperator.cc
