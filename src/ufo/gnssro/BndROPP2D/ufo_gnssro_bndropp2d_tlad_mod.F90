@@ -19,6 +19,7 @@ use obsspace_mod
 use config_mod
 use gnssro_mod_conf
 use missing_values_mod
+use ufo_gnssro_ropp1d_utils_mod
 use ufo_gnssro_ropp2d_utils_mod
 use fckit_log_module, only : fckit_log
 
@@ -29,7 +30,6 @@ type, extends(ufo_basis_tlad)   ::  ufo_gnssro_BndROPP2D_tlad
   private
   integer                       :: nval, nlocs
   real(kind_real), allocatable  :: prs(:,:), t(:,:), q(:,:), gph(:,:), gph_sfc(:,:)
-  integer                       :: n_horiz      ! 2d points along ray path
   integer                       :: iflip        ! geoval ascending order flag
   type(gnssro_conf)             :: roconf       ! ro configuration
   real(kind_real), allocatable  :: obsLon2d(:), obsLat2d(:)  !2d locations - nlocs*n_horiz
@@ -79,10 +79,11 @@ subroutine ufo_gnssro_bndropp2d_tlad_settraj(self, geovals, obss)
   call ufo_geovals_get_var(geovals, var_q,     q)         ! specific humidity
   call ufo_geovals_get_var(geovals, var_prs,   prs)       ! pressure
   call ufo_geovals_get_var(geovals, var_z,     gph)       ! geopotential height
+  call ufo_geovals_get_var(geovals, var_sfc_z, gph_sfc)   ! surface geopotential height
   call self%delete()   
 
   self%nval    = prs%nval
-  self%nlocs    = obsspace_get_nlocs(obss)
+  self%nlocs   = obsspace_get_nlocs(obss)
   self%iflip   = 0
 
   n_horiz = self%roconf%n_horiz
@@ -126,12 +127,14 @@ subroutine ufo_gnssro_bndropp2d_tlad_settraj(self, geovals, obss)
   allocate(self%q(self%nval,self%nlocs*n_horiz))
   allocate(self%prs(self%nval,self%nlocs*n_horiz))
   allocate(self%gph(self%nval,self%nlocs*n_horiz))
+  allocate(self%gph_sfc(1,self%nlocs*n_horiz))
 
-! allocate  
+! allocate   
   self%gph     = gph%vals
   self%t       = t%vals
   self%q       = q%vals
   self%prs     = prs%vals
+  self%gph_sfc = gph_sfc%vals
 
   self%ltraj   = .true.
        
@@ -141,7 +144,7 @@ end subroutine ufo_gnssro_bndropp2d_tlad_settraj
 ! ------------------------------------------------------------------------------    
 subroutine ufo_gnssro_bndropp2d_simobs_tl(self, geovals, hofx, obss)
 
-  use ropp_fm_types, only: State2dFM
+  use ropp_fm_types, only: State2dFM, State1dFM
   use ropp_fm_types, only: Obs1dBangle
   use datetimetypes, only: dp
   implicit none
@@ -151,8 +154,9 @@ subroutine ufo_gnssro_bndropp2d_simobs_tl(self, geovals, hofx, obss)
   type(c_ptr),   value,             intent(in)    :: obss
 
   type(State2dFM)                 :: x,x_tl
+  type(State1dFM)                 :: x1d,x1d_tl
   type(Obs1dBangle)               :: y,y_tl
-
+ 
   integer                         :: iobs,nlev, nlocs,ierr,nvprof
     
   character(len=*), parameter  :: myname_="ufo_gnssro_bndropp2d_simobs_tl"
@@ -161,13 +165,15 @@ subroutine ufo_gnssro_bndropp2d_simobs_tl(self, geovals, hofx, obss)
 
 ! hack - set local geopotential height to zero for ropp routines
   real(kind_real), allocatable  :: gph_d_zero(:,:)
+  real(kind_real)               :: gph_sfc_d_zero
 ! hack - set local geopotential height to zero for ropp routines
   real(kind_real), allocatable  :: obsImpP(:),obsLocR(:),obsGeoid(:),obsAzim(:) !nlocs
   real(kind_real), allocatable  :: obsLat(:),obsLon(:)                          !nlocs
   real(kind_real), allocatable  :: obsLon2d(:),obsLat2d(:)       ! nlocs * n_horiz
   real(kind_real), allocatable  :: obsLonnh(:),obsLatnh(:)       ! n_horiz
-  integer                         :: n_horiz
-  real(kind_real)                 :: dtheta
+  integer                       :: n_horiz
+  real(kind_real)               :: dtheta
+  real(kind_real)               :: ob_time
 
   n_horiz = self%roconf%n_horiz
   dtheta  = self%roconf%dtheta
@@ -188,7 +194,7 @@ subroutine ufo_gnssro_bndropp2d_simobs_tl(self, geovals, hofx, obss)
   endif
 
 ! get variables from geovals
-  call ufo_geovals_get_var(geovals, var_ts,     t_d)         ! temperature
+  call ufo_geovals_get_var(geovals, var_ts,    t_d)         ! temperature
   call ufo_geovals_get_var(geovals, var_q,     q_d)         ! specific humidity
   call ufo_geovals_get_var(geovals, var_prs,   prs_d)       ! pressure
 
@@ -197,6 +203,7 @@ subroutine ufo_gnssro_bndropp2d_simobs_tl(self, geovals, hofx, obss)
 
   allocate(gph_d_zero(nlev,nlocs*n_horiz))
   gph_d_zero     = 0.0
+  gph_sfc_d_zero = 0.0
 
 ! set obs space struture
   allocate(obsLon(nlocs))
@@ -211,49 +218,95 @@ subroutine ufo_gnssro_bndropp2d_simobs_tl(self, geovals, hofx, obss)
   call obsspace_get_db(obss, "MetaData", "earth_radius_of_curvature", obsLocR)
   call obsspace_get_db(obss, "MetaData", "geoid_height_above_reference_ellipsoid", obsGeoid)
 
-  nvprof = 1  ! no. of bending angles in profile 
+  nvprof  = 1  ! no. of bending angles in profile 
+  ob_time = 0.0
 
 ! loop through the obs
   obs_loop: do iobs = 1, nlocs   ! order of loop doesn't matter
 
-!   map the trajectory to ROPP structure x
-    call init_ropp_2d_statevec(self%obsLon2d( (iobs-1)*n_horiz+1:iobs*n_horiz ), &
-                               self%obsLat2d( (iobs-1)*n_horiz+1:iobs*n_horiz ), &
-                               self%t(:,(iobs-1)*n_horiz+1:iobs*n_horiz),    &
-                               self%q(:,(iobs-1)*n_horiz+1:iobs*n_horiz),    &
-                               self%prs(:,(iobs-1)*n_horiz+1:iobs*n_horiz),  &
-                               self%gph(:,(iobs-1)*n_horiz+1:iobs*n_horiz),  &
-                               nlev, x, n_horiz, dtheta, self%iflip)
+    if ( ( obsImpP(iobs)-obsLocR(iobs)-obsGeoid(iobs) ) <= self%roconf%top_2d ) then
 
-!  hack -- make non zero humidity to avoid zero denominator in tangent linear
-!          see  ropp_fm/bangle_1d/ropp_fm_bangle_1d_tl.f90
-    where(x%shum .le. 1e-8)        x%shum = 1e-8
-!  hack -- make non zero humidity to avoid zero denominator in tangent linear
+!      map the trajectory to ROPP 2D structure x
+       call init_ropp_2d_statevec(self%obsLon2d( (iobs-1)*n_horiz+1:iobs*n_horiz ), &
+                                  self%obsLat2d( (iobs-1)*n_horiz+1:iobs*n_horiz ), &
+                                  self%t(:,(iobs-1)*n_horiz+1:iobs*n_horiz),    &
+                                  self%q(:,(iobs-1)*n_horiz+1:iobs*n_horiz),    &
+                                  self%prs(:,(iobs-1)*n_horiz+1:iobs*n_horiz),  &
+                                  self%gph(:,(iobs-1)*n_horiz+1:iobs*n_horiz),  &
+                                  nlev, x, n_horiz, dtheta, self%iflip)
 
-    call init_ropp_2d_statevec(self%obsLon2d( (iobs-1)*n_horiz+1:iobs*n_horiz ), &
-                               self%obsLat2d( (iobs-1)*n_horiz+1:iobs*n_horiz ), &
-                               t_d%vals(:,(iobs-1)*n_horiz+1:iobs*n_horiz),    &
-                               q_d%vals(:,(iobs-1)*n_horiz+1:iobs*n_horiz),    &
-                               prs_d%vals(:,(iobs-1)*n_horiz+1:iobs*n_horiz),  &
-                               gph_d_zero(:,(iobs-1)*n_horiz+1:iobs*n_horiz),  &
-                               nlev, x_tl, n_horiz, dtheta, self%iflip)
+!      hack -- make non zero humidity to avoid zero denominator in tangent linear
+!              see  ropp_fm/bangle_1d/ropp_fm_bangle_1d_tl.f90
+       where(x%shum .le. 1e-8)        x%shum = 1e-8
+!      hack -- make non zero humidity to avoid zero denominator in tangent linear
 
-!   set both y and y_tl structures    
-    call init_ropp_2d_obvec_tlad(iobs, nvprof, &
-                      obsImpP(iobs),           &
-                      obsLat(iobs),            &
-                      obsLon(iobs),            &
-                      obsLocR(iobs),           &
-                      obsGeoid(iobs),          &
+       call init_ropp_2d_statevec(self%obsLon2d( (iobs-1)*n_horiz+1:iobs*n_horiz ), &
+                                  self%obsLat2d( (iobs-1)*n_horiz+1:iobs*n_horiz ), &
+                                  t_d%vals(:,(iobs-1)*n_horiz+1:iobs*n_horiz),    &
+                                  q_d%vals(:,(iobs-1)*n_horiz+1:iobs*n_horiz),    &
+                                  prs_d%vals(:,(iobs-1)*n_horiz+1:iobs*n_horiz),  &
+                                  gph_d_zero(:,(iobs-1)*n_horiz+1:iobs*n_horiz),  &
+                                  nlev, x_tl, n_horiz, dtheta, self%iflip)
+
+!      set both y and y_tl structures    
+       call init_ropp_2d_obvec_tlad(iobs, nvprof, &
+                         obsImpP(iobs),           &
+                         obsLat(iobs),            &
+                         obsLon(iobs),            &
+                         obsLocR(iobs),           &
+                         obsGeoid(iobs),          &
                              y,y_tl)
 
-!   now call TL of forward model
-    call ropp_fm_bangle_2d_tl(x,x_tl,y, y_tl)
-    hofx(iobs) = y_tl%bangle(nvprof) ! this will need to change if profile is passed
+!      now call TL of forward model
+       call ropp_fm_bangle_2d_tl(x,x_tl,y, y_tl)
+       hofx(iobs) = y_tl%bangle(nvprof) ! this will need to change if profile is passed
 
-!   tidy up -deallocate ropp structures 
-    call ropp_tidy_up_tlad_2d(x,x_tl,y,y_tl)
+!      tidy up -deallocate ropp structures 
+       call ropp_tidy_up_tlad_2d(x,x_tl,y,y_tl)
 
+    else ! apply ropp1d above top_2d
+
+!      map the trajectory to ROPP 1D structure x1d
+       call init_ropp_1d_statevec(ob_time,             &
+                                obsLon(iobs),         &
+                                obsLat(iobs),         &
+                                self%t(:,(iobs-1)*n_horiz+1+(n_horiz-1)/2),       &
+                                self%q(:,(iobs-1)*n_horiz+1+(n_horiz-1)/2),       &
+                                self%prs(:,(iobs-1)*n_horiz+1+(n_horiz-1)/2),     &
+                                self%gph(:,(iobs-1)*n_horiz+1+(n_horiz-1)/2),     &
+                                nlev,                                             &
+                                self%gph_sfc(1,(iobs-1)*n_horiz+1+(n_horiz-1)/2), &
+                                x1d, self%iflip)
+
+       where(x1d%shum .le. 1e-8)        x1d%shum = 1e-8
+
+       call init_ropp_1d_statevec( ob_time,      &
+                         obsLon(iobs),           &
+                         obsLat(iobs),           &
+                         t_d%vals(:,(iobs-1)*n_horiz+1+(n_horiz-1)/2),       &
+                         q_d%vals(:,(iobs-1)*n_horiz+1+(n_horiz-1)/2),       &
+                         prs_d%vals(:,(iobs-1)*n_horiz+1+(n_horiz-1)/2),     &
+                         gph_d_zero(:,(iobs-1)*n_horiz+1+(n_horiz-1)/2),     &
+                                   nlev,         &
+                         gph_sfc_d_zero,         &
+                         x1d_tl, self%iflip)
+
+!      y and y_tl structures    
+       call init_ropp_1d_obvec_tlad(iobs, nvprof, &
+                         obsImpP(iobs),           &
+                         obsLat(iobs),            &
+                         obsLon(iobs),            &
+                         obsLocR(iobs),           &
+                         obsGeoid(iobs),          &
+                             y,y_tl)
+
+!     TL 
+      call ropp_fm_bangle_1d_tl(x1d,x1d_tl,y,y_tl%bangle(nvprof))
+      hofx(iobs) = y_tl%bangle(nvprof)
+
+!     tidy up 
+      call ropp_tidy_up_tlad_1d(x1d,x1d_tl,y,y_tl)
+    end if
   end do obs_loop
 
 ! tidy up - deallocate obsspace structures
@@ -262,6 +315,7 @@ subroutine ufo_gnssro_bndropp2d_simobs_tl(self, geovals, hofx, obss)
   deallocate(obsImpP)
   deallocate(obsLocR)
   deallocate(obsGeoid)
+  deallocate(gph_d_zero)
 
   write(err_msg,*) "TRACE: ufo_gnssro_bndropp2d_simobs_tl: complete"
   call fckit_log%info(err_msg)
@@ -274,7 +328,7 @@ end subroutine ufo_gnssro_bndropp2d_simobs_tl
 ! ------------------------------------------------------------------------------
 subroutine ufo_gnssro_bndropp2d_simobs_ad(self, geovals, hofx, obss)
 
-  use ropp_fm_types, only: State2dFM
+  use ropp_fm_types, only: State2dFM, State1dFM
   use ropp_fm_types, only: Obs1dBangle
   use typesizes,     only: wp => EightByteReal
   use datetimetypes, only: dp
@@ -290,15 +344,18 @@ subroutine ufo_gnssro_bndropp2d_simobs_ad(self, geovals, hofx, obss)
 
 ! set local geopotential height to zero for ropp routines
   real(kind_real),    allocatable :: gph_d_zero(:,:)
+  real(kind_real)                 :: gph_sfc_d_zero
 
   real(kind_real),    allocatable :: obsLat(:), obsLon(:), obsImpP(:), obsLocR(:), obsGeoid(:)
   type(State2dFM)                 :: x,x_ad
+  type(State1dFM)                 :: x1d,x1d_ad
   type(Obs1dBangle)               :: y,y_ad
   integer                         :: iobs,nlev,nlocs,ierr,nvprof
   character(len=*), parameter     :: myname_="ufo_gnssro_bndropp2d_simobs_ad"
   character(max_string)           :: err_msg
-  integer                         :: n_horiz
+  integer                         :: n_horiz 
   real(kind_real)                 :: dtheta
+  real(kind_real)                 :: ob_time
 
   n_horiz = self%roconf%n_horiz
   dtheta  = self%roconf%dtheta
@@ -350,7 +407,8 @@ subroutine ufo_gnssro_bndropp2d_simobs_ad(self, geovals, hofx, obss)
   nlocs   = self%nlocs
 
   allocate(gph_d_zero(nlev,nlocs*n_horiz))
-  gph_d_zero = 0.0
+  gph_d_zero     = 0.0
+  gph_sfc_d_zero = 0.0
 
 ! set obs space struture
   allocate(obsLon(nlocs))
@@ -368,18 +426,21 @@ subroutine ufo_gnssro_bndropp2d_simobs_ad(self, geovals, hofx, obss)
   missing = missing_value(missing)
 
 ! loop through the obs
-  nvprof=1  ! no. of bending angles in profile 
+  nvprof  = 1  ! no. of bending angles in profile 
+  ob_time = 0.0
+
   obs_loop: do iobs = 1, nlocs 
 
     if (hofx(iobs) .gt. missing) then
+       if ( ( obsImpP(iobs)-obsLocR(iobs)-obsGeoid(iobs) ) <= self%roconf%top_2d ) then
 
 !       map the trajectory to ROPP structure x
         call init_ropp_2d_statevec(self%obsLon2d((iobs-1)*n_horiz+1:iobs*n_horiz), &
                                    self%obsLat2d((iobs-1)*n_horiz+1:iobs*n_horiz), &
-                                   self%t(:,(iobs-1)*n_horiz+1:iobs*n_horiz),    &
-                                   self%q(:,(iobs-1)*n_horiz+1:iobs*n_horiz),    &
-                                   self%prs(:,(iobs-1)*n_horiz+1:iobs*n_horiz),  &
-                                   self%gph(:,(iobs-1)*n_horiz+1:iobs*n_horiz),  &
+                                   self%t(:,(iobs-1)*n_horiz+1:iobs*n_horiz),      &
+                                   self%q(:,(iobs-1)*n_horiz+1:iobs*n_horiz),      &
+                                   self%prs(:,(iobs-1)*n_horiz+1:iobs*n_horiz),    &
+                                   self%gph(:,(iobs-1)*n_horiz+1:iobs*n_horiz),    &
                                    nlev, x, n_horiz, dtheta, self%iflip)
 
         call init_ropp_2d_statevec(self%obsLon2d( (iobs-1)*n_horiz+1:iobs*n_horiz ), &
@@ -418,10 +479,71 @@ subroutine ufo_gnssro_bndropp2d_simobs_ad(self, geovals, hofx, obss)
                           q_d%vals(:,(iobs-1)*n_horiz+1:iobs*n_horiz),      &
                         prs_d%vals(:,(iobs-1)*n_horiz+1:iobs*n_horiz),      &
                         gph_d_zero(:,(iobs-1)*n_horiz+1:iobs*n_horiz),      &
+
                         nlev, x_ad, n_horiz,self%iflip)
 
 !     tidy up - deallocate ropp structures  
       call ropp_tidy_up_tlad_2d(x,x_ad,y,y_ad)
+
+      else ! apply ropp1d above top_2d
+
+!       map the trajectory to ROPP 1D structure x1d
+        call init_ropp_1d_statevec( ob_time,   &
+                          obsLon(iobs),        &
+                          obsLat(iobs),        &
+                          self%t(:,(iobs-1)*n_horiz+1+(n_horiz-1)/2),       &
+                          self%q(:,(iobs-1)*n_horiz+1+(n_horiz-1)/2),       &
+                          self%prs(:,(iobs-1)*n_horiz+1+(n_horiz-1)/2),     &
+                          self%gph(:,(iobs-1)*n_horiz+1+(n_horiz-1)/2),     &
+                          nlev,                                             &
+                          self%gph_sfc(1,(iobs-1)*n_horiz+1+(n_horiz-1)/2), &
+                          x1d, self%iflip)
+
+        call init_ropp_1d_statevec( ob_time,  &
+                          obsLon(iobs),     &
+                          obsLat(iobs),     &
+                          t_d%vals(:,(iobs-1)*n_horiz+1+(n_horiz-1)/2),       &
+                          q_d%vals(:,(iobs-1)*n_horiz+1+(n_horiz-1)/2),       &
+                          prs_d%vals(:,(iobs-1)*n_horiz+1+(n_horiz-1)/2),       &
+                          gph_d_zero(:,(iobs-1)*n_horiz+1+(n_horiz-1)/2),       &
+                          nlev,    &
+                          gph_sfc_d_zero,    &
+                          x1d_ad, self%iflip)
+
+
+ !      x_ad is local so initialise to 0.0
+        x1d_ad%temp(:) = 0.0_wp
+        x1d_ad%pres(:) = 0.0_wp
+        x1d_ad%shum(:) = 0.0_wp
+        x1d_ad%geop(:) = 0.0_wp
+
+ !      set both y and y_ad structures    
+        call init_ropp_1d_obvec_tlad(iobs,  nvprof,  &
+                         obsImpP(iobs),              &
+                         obsLat(iobs),               &
+                         obsLon(iobs),               &
+                         obsLocR(iobs),              &
+                         obsGeoid(iobs),             &
+                                y,y_ad)
+
+
+!       local variable initialise
+        y_ad%bangle(:) = 0.0_wp
+
+!       now call AD of forward model
+        y_ad%bangle(nvprof)  = y_ad%bangle(nvprof) + hofx(iobs)
+        call ropp_fm_bangle_1d_ad(x1d,x1d_ad,y,y_ad)
+        call init_ropp_1d_statevec_ad(           &
+                          t_d%vals(:,(iobs-1)*n_horiz+1+(n_horiz-1)/2),       &
+                          q_d%vals(:,(iobs-1)*n_horiz+1+(n_horiz-1)/2),       &
+                        prs_d%vals(:,(iobs-1)*n_horiz+1+(n_horiz-1)/2),       &
+                        gph_d_zero(:,(iobs-1)*n_horiz+1+(n_horiz-1)/2),       &
+                        nlev, x1d_ad, self%iflip)
+
+!       tidy up
+        call ropp_tidy_up_tlad_1d(x1d,x1d_ad,y,y_ad)
+
+      end if ! end top_2d check
 
     end if  ! end missing value check
 
@@ -455,6 +577,9 @@ subroutine ufo_gnssro_bndropp2d_tlad_delete(self)
   if (allocated(self%t))   deallocate(self%t)
   if (allocated(self%q))   deallocate(self%q)
   if (allocated(self%gph)) deallocate(self%gph)
+  if (allocated(self%gph_sfc))  deallocate(self%gph_sfc)
+  if (allocated(self%obsLat2d)) deallocate(self%obsLat2d)
+  if (allocated(self%obsLon2d)) deallocate(self%obsLon2d)
 
   self%ltraj = .false. 
 

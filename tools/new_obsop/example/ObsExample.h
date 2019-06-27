@@ -5,8 +5,8 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
  */
 
-#ifndef UFO_EXAMPLE_OBSEXAMPLE_H_
-#define UFO_EXAMPLE_OBSEXAMPLE_H_
+#ifndef TOOLS_NEW_OBSOP_EXAMPLE_OBSEXAMPLE_H_
+#define TOOLS_NEW_OBSOP_EXAMPLE_OBSEXAMPLE_H_
 
 #include <memory>
 #include <ostream>
@@ -60,4 +60,4 @@ class ObsExample : public ObsOperatorBase,
 // -----------------------------------------------------------------------------
 
 }  // namespace ufo
-#endif  // UFO_EXAMPLE_OBSEXAMPLE_H_
+#endif  // TOOLS_NEW_OBSOP_EXAMPLE_OBSEXAMPLE_H_

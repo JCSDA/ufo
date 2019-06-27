@@ -63,9 +63,6 @@ std::vector<bool> processWhere(ioda::ObsSpace & obsdb, const GeoVaLs & gvals,
 //  Set obs group if group is not GeoVaLs
     std::string obgrp = grp;
     if (grp == "GeoVaLs") obgrp = "";
-    if (obgrp == "MetaData") {                               // TEMPORARY HACK TO BE REMOVED
-      if (!obsdb.has(obgrp, var)) obgrp = "GroupUndefined";  // TEMPORARY HACK TO BE REMOVED
-    }                                                        // TEMPORARY HACK TO BE REMOVED
 
 //  Process masks on float values
     const float vmin = masks[jm].getFloat("minvalue", missing);

@@ -33,9 +33,8 @@ static ObsOperatorMaker<ObsRadianceCRTM> makerCRTM_("CRTM");
 ObsRadianceCRTM::ObsRadianceCRTM(const ioda::ObsSpace & odb,
                                  const eckit::Configuration & config)
   : ObsOperatorBase(odb, config), keyOperRadianceCRTM_(0),
-    odb_(odb), varin_(), obsname_("CRTM:")
+    odb_(odb), varin_()
 {
-  obsname_ += config.getString("Sensor_ID");
   int c_name_size = 3000;
   char *buffin = new char[c_name_size];
 

@@ -18,6 +18,7 @@ Observations:
     ObsOptions: 
      n_horiz: 3
      res: 40.0
+     top_2d: 50.0
    ObsSpace: 
      name: GnssroBnd
      ObsDataIn: 

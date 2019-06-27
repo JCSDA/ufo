@@ -5,13 +5,14 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
  */
 
-#include "ufo/filters/Example.h"
+#include "tools/new_qc/example/Example.h"
 
 #include "eckit/config/Configuration.h"
 
 #include "ioda/ObsDataVector.h"
 #include "ioda/ObsSpace.h"
 #include "oops/base/Variables.h"
+#include "oops/interface/ObsFilter.h"
 #include "oops/util/Logger.h"
 
 #include "ufo/UfoTrait.h"
@@ -23,10 +24,10 @@ static oops::FilterMaker<UfoTrait, oops::ObsFilter<UfoTrait, Example> >
   makerExample_("Example");
 // -----------------------------------------------------------------------------
 
-Example::Example(ioda::ObsSpace & os, const eckit::Configuration & config,
+Example::Example(ioda::ObsSpace & obsdb, const eckit::Configuration & config,
                      boost::shared_ptr<ioda::ObsDataVector<int> > flags,
                      boost::shared_ptr<ioda::ObsDataVector<float> >)
-  : obsdb_(obsdb), geovars_(), flags_(*flags)
+  : obsdb_(obsdb), geovars_(), flags_(*flags) {
   oops::Log::trace() << "Example contructor starting" << std::endl;
   const eckit::Configuration * conf = &config;
   ufo_example_create_f90(key_, conf);
@@ -59,7 +60,4 @@ void Example::postFilter(const ioda::ObsVector & hofxb) const {
 void Example::print(std::ostream & os) const {
   os << "Example::print not yet implemented " << key_;
 }
-
-// -----------------------------------------------------------------------------
-
 }  // namespace ufo
