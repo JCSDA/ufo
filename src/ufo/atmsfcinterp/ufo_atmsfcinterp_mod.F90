@@ -95,9 +95,10 @@ end subroutine atmsfcinterp_setup_
 ! ------------------------------------------------------------------------------
 
 subroutine atmsfcinterp_simobs_(self, geovals, obss, nvars, nlocs, hofx)
-  use atmsfc_mod, only : calc_pot_temp_gsi, calc_conv_vel_gsi, sfc_wind_fact_gsi, &
-                         calc_psi_vars_gsi, gsi_tp_to_qs
-  use ufo_constants_mod, only: grav, rv, rd, rd_over_cp
+  use atmsfc_mod, only : calc_conv_vel_gsi, sfc_wind_fact_gsi, &
+                         calc_psi_vars_gsi
+  use thermo_utils_mod, only: calc_theta, gsi_tp_to_qs 
+  use ufo_constants_mod, only: grav, rv, rd, rd_over_cp, von_karman
   implicit none
   class(ufo_atmsfcinterp), intent(in)        :: self
   integer, intent(in)                         :: nvars, nlocs
@@ -120,7 +121,6 @@ subroutine atmsfcinterp_simobs_(self, geovals, obss, nvars, nlocs, hofx)
   real(kind_real), parameter :: fv = rv/rd - 1.0_kind_real
   real(kind_real) :: psit, psitz, ust, psiq, psiqz
   real(kind_real), parameter :: zint0 = 0.01_kind_real ! default roughness over land
-  real(kind_real), parameter :: k_kar = 0.4_kind_real ! Von Karman constant
   real(kind_real), parameter :: ka = 2.4e-5_kind_real
 
   ! to compute the value near the surface we are going to use
@@ -168,11 +168,11 @@ subroutine atmsfcinterp_simobs_(self, geovals, obss, nvars, nlocs, hofx)
     tvsfc = tsfc%vals(1,iobs) * (1.0_kind_real + fv * qg)
 
     ! get potential temperatures for calculating psi
-    call calc_pot_temp_gsi(tv%vals(1,iobs), prs%vals(1,iobs), thv1)
-    call calc_pot_temp_gsi(tv%vals(2,iobs), prs%vals(2,iobs), thv2)
-    call calc_pot_temp_gsi(tsen%vals(1,iobs), prs%vals(1,iobs), th1)
-    call calc_pot_temp_gsi(tsfc%vals(1,iobs), psfc%vals(1,iobs), thg)
-    call calc_pot_temp_gsi(tvsfc, psfc%vals(1,iobs), thvg)
+    call calc_theta(tv%vals(1,iobs), prs%vals(1,iobs), thv1)
+    call calc_theta(tv%vals(2,iobs), prs%vals(2,iobs), thv2)
+    call calc_theta(tsen%vals(1,iobs), prs%vals(1,iobs), th1)
+    call calc_theta(tsfc%vals(1,iobs), psfc%vals(1,iobs), thg)
+    call calc_theta(tvsfc, psfc%vals(1,iobs), thvg)
 
     ! calculate convective velocity
     call calc_conv_vel_gsi(u%vals(1,iobs), v%vals(1,iobs), thvg, thv1, V2)
@@ -215,9 +215,9 @@ subroutine atmsfcinterp_simobs_(self, geovals, obss, nvars, nlocs, hofx)
             hofx(ivar,iobs) = profile%vals(1,iobs) * redfac
           end if
         case("specific_humidity")
-          ust = k_kar * sqrt(V2) / (gzsoz0 - psim)
-          psiq = log(k_kar*ust*phi%vals(1,iobs)/ka + phi%vals(1,iobs) / zq0) - psih
-          psiqz = log(k_kar*ust*(obshgt(iobs)-obselev(iobs))/ka + (obshgt(iobs)-obselev(iobs)) / zq0) - psihz
+          ust = von_karman * sqrt(V2) / (gzsoz0 - psim)
+          psiq = log(von_karman*ust*phi%vals(1,iobs)/ka + phi%vals(1,iobs) / zq0) - psih
+          psiqz = log(von_karman*ust*(obshgt(iobs)-obselev(iobs))/ka + (obshgt(iobs)-obselev(iobs)) / zq0) - psihz
           hofx(ivar,iobs) = qg + (q%vals(1,iobs) - qg)*psiqz/psiq
       end select
     end do

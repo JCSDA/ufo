@@ -9,19 +9,13 @@ subroutine sfc_wind_fact_gsi(u, v, tsen, q, psfc, prsi1, prsi2,&
   ! to get u,v at 'obshgt' aka 10m agl
   ! based off of compute_fact10 from GSI
   use kinds
-  use ufo_constants_mod, only: rd_over_cp, rv_over_rd, rd, grav
+  use ufo_constants_mod, only: rd_over_cp, rv_over_rd, rd, grav, &
+                               zero, quarter, half, one, two, four, ten
   implicit none
   real(kind_real), intent(in) :: u, v, tsen, q, psfc, prsi1, prsi2,&
                                  skint, z0, lsmask 
   real(kind_real), intent(out) :: f10m
   real(kind_real) :: psiw, psiwz
-  real(kind_real), parameter :: zero = 0.0_kind_real
-  real(kind_real), parameter :: quarter = 0.25_kind_real
-  real(kind_real), parameter :: half = 0.5_kind_real
-  real(kind_real), parameter :: one = 1.0_kind_real
-  real(kind_real), parameter :: two = 2.0_kind_real
-  real(kind_real), parameter :: four = 4.0_kind_real
-  real(kind_real), parameter :: ten = 10.0_kind_real
   real(kind_real), parameter :: alpha = 5.0_kind_real
   real(kind_real), parameter :: a0 = -3.975_kind_real
   real(kind_real), parameter :: a1 = 12.32_kind_real
@@ -168,39 +162,33 @@ subroutine calc_psi_vars_gsi(rib, gzsoz0, gzzoz0, thv1, thv2,&
                              psim, psih, psimz, psihz)
   ! calculate psi based off of near-surface atmospheric regime
   use kinds
-  use ufo_constants_mod, only: grav
+  use ufo_constants_mod, only: grav, von_karman, zero, quarter, &
+                               one, two, five, ten
   implicit none
   real(kind_real), intent(in) :: rib, gzsoz0, gzzoz0, thv1, thv2, &
                                  V2, th1, thg, phi1, obshgt
   real(kind_real), intent(out) :: psim, psih, psimz, psihz 
 
   real(kind_real), parameter :: r0_2 = 0.2_kind_real
-  real(kind_real), parameter :: zero = 0.0_kind_real
-  real(kind_real), parameter :: quarter = 0.25_kind_real
-  real(kind_real), parameter :: one = 1.0_kind_real
-  real(kind_real), parameter :: two = 2.0_kind_real
-  real(kind_real), parameter :: r10 = 10.0_kind_real
-  real(kind_real), parameter :: five = 5.0_kind_real
   real(kind_real), parameter :: r1_1 = 1.1_kind_real
   real(kind_real), parameter :: r0_9 = 0.9_kind_real
   real(kind_real), parameter :: r16 = 16.0_kind_real
-  real(kind_real), parameter :: k_kar = 0.4_kind_real ! Von Karman constant
   real(kind_real) :: cc, mol, ust, hol, holz, xx, yy 
 
   ! stable conditions
   if (rib >= r0_2) then
-    psim = -r10*gzsoz0 
-    psimz = -r10*gzzoz0
-    psim = max(psim,-r10)
-    psimz = max(psimz,-r10)
+    psim = -ten*gzsoz0 
+    psimz = -ten*gzzoz0
+    psim = max(psim,-ten)
+    psimz = max(psimz,-ten)
     psih = psim
     psihz = psimz
   ! mechanically driven turbulence
   else if ((rib < r0_2) .and. (rib > zero)) then
     psim = ( -five * rib) * gzsoz0 / (r1_1 - five*rib)  
     psimz = ( -five * rib) * gzzoz0 / (r1_1 - five*rib)  
-    psim = max(psim,-r10)
-    psimz = max(psimz,-r10)
+    psim = max(psim,-ten)
+    psimz = max(psimz,-ten)
     psih = psim
     psihz = psimz
   ! unstable forced convection
@@ -215,20 +203,20 @@ subroutine calc_psi_vars_gsi(rib, gzsoz0, gzzoz0, thv1, thv2,&
     psih = zero
     cc = two * atan(one)
     ! friction speed
-    ust = k_kar * sqrt(V2) / (gzsoz0 - psim)
+    ust = von_karman * sqrt(V2) / (gzsoz0 - psim)
     ! heat flux factor
-    mol = k_kar * (th1 - thg)/(gzsoz0 - psih)
+    mol = von_karman * (th1 - thg)/(gzsoz0 - psih)
     ! ratio of PBL height to Monin-Obukhov length
     if (ust < 0.01_kind_real) then
       hol = rib * gzsoz0
     else
-      hol = k_kar * grav * phi1 * mol / (th1 * ust * ust)
+      hol = von_karman * grav * phi1 * mol / (th1 * ust * ust)
     end if
     hol = min(hol,zero)
-    hol = max(hol,-r10)
+    hol = max(hol,-ten)
     holz = (obshgt / phi1) * hol 
     holz = min(holz,zero)
-    holz = max(holz,-r10)
+    holz = max(holz,-ten)
 
     xx = (one - r16 * hol) ** quarter 
     yy = log((one+xx*xx)/two) 
@@ -252,22 +240,6 @@ end subroutine calc_psi_vars_gsi
 
 !--------------------------------------------------------------------------
 
-subroutine calc_pot_temp_gsi(t_in, p_in, t_out)
-  ! compute potential (virtual) temperature from a given (virtual) temperature
-  ! and pressure value
-  ! units must be in K and Pa!
-  use ufo_constants_mod, only: rd_over_cp
-  use kinds
-  implicit none
-  real(kind_real), intent(in) :: t_in, p_in
-  real(kind_real), intent(out) :: t_out
-
-  t_out = t_in * (1.0e5_kind_real / p_in) ** rd_over_cp
-
-end subroutine calc_pot_temp_gsi
-
-!--------------------------------------------------------------------------
-
 subroutine calc_conv_vel_gsi(u1, v1, thvg, thv1, V2)
   ! compute convective velocity for use in computing psi vars
   use kinds
@@ -285,39 +257,8 @@ subroutine calc_conv_vel_gsi(u1, v1, thvg, thv1, V2)
 
   V2 = 1e-6_kind_real + wspd2 + Vc2
 
-end subroutine
+end subroutine calc_conv_vel_gsi
 
 !--------------------------------------------------------------------------
-
-subroutine gsi_tp_to_qs( t, p, es, qs)
-  ! calculate saturation specific humidity for a given
-  ! temperature and pressure
-  ! based on subroutin DA_TP_To_Qs in GSI
-   use kinds
-   use ufo_constants_mod, only: t0c, rd_over_rv 
-
-   implicit none
-   real(kind_real), intent(in) :: t                ! Temperature.
-   real(kind_real), intent(in) :: p             ! Pressure.
-   real(kind_real), intent(out) :: es          ! Sat. vapour pressure.
-   real(kind_real), intent(out) :: qs              ! Sat. specific humidity.
-
-!  Saturation Vapour Pressure Constants(Rogers & Yau, 1989)
-   real(kind_real), parameter    :: es_alpha = 611.2_kind_real
-   real(kind_real), parameter    :: es_beta = 17.67_kind_real
-   real(kind_real), parameter    :: es_gamma = 243.5_kind_real
-  
-   real(kind_real) :: omeps
-   real(kind_real)                          :: t_c              ! T in degreesC.
-
-   omeps = 1.0_kind_real - rd_over_rv
-   t_c = t - t0c
-
-   es = es_alpha * exp( es_beta * t_c / ( t_c + es_gamma ) ) 
-
-   qs = rd_over_rv * es / ( p - omeps * es )
-
-   return
-end subroutine gsi_tp_to_qs
 
 end module atmsfc_mod
