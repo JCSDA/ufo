@@ -294,7 +294,6 @@ ecbuild_add_test( TARGET  test_ufo_radiosonde_tlad
                   LIBS    ufo )
 
 ecbuild_add_test( TARGET  test_ufo_aircraft_opr
-                  MPI     4
                   SOURCES mains/TestObsOperator.cc
                   ARGS    "testinput/aircraft.yaml"
                   LIBS    ufo )

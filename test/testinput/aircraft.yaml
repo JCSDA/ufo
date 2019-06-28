@@ -17,6 +17,8 @@ Observations:
       name: Aircraft
       ObsDataIn:
         obsfile: Data/aircraft_obs_2018041500_m.nc4
+      ObsDataOut:
+        obsfile: Data/aircraft_obs_2018041500_m_out.nc4
       simulate:
         variables: [air_temperature]
     ObsOperator:
