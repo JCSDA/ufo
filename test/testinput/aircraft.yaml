@@ -3,8 +3,8 @@ logging:
   categories: Warning, Error, Debug
 test_framework_runtime_config: "--log_level=test_suite"
 
-window_begin: '2018-04-14T21:00:00Z'
-window_end: '2018-04-15T03:00:00Z'
+window_begin: '2018-04-14T20:30:00Z'
+window_end: '2018-04-15T03:30:00Z'
 
 LinearObsOpTest:
   coefTL: 0.1
@@ -17,8 +17,6 @@ Observations:
       name: Aircraft
       ObsDataIn:
         obsfile: Data/aircraft_obs_2018041500_m.nc4
-      ObsDataOut:
-        obsfile: Data/aircraft_obs_2018041500_m_out.nc4
       simulate:
         variables: [air_temperature]
     ObsOperator:
