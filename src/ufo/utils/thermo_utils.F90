@@ -21,7 +21,6 @@ subroutine calc_theta(t_in, p_in, t_out)
   ! and pressure value, assumes the standard definition of theta at 1000 hPa
   ! units must be in K and Pa!
   use ufo_constants_mod, only: rd_over_cp
-  use kinds
   implicit none
   real(kind_real), intent(in) :: t_in, p_in
   real(kind_real), intent(out) :: t_out
@@ -36,7 +35,6 @@ subroutine gsi_tp_to_qs( t, p, es, qs)
   ! calculate saturation specific humidity for a given
   ! temperature and pressure
   ! based on subroutin DA_TP_To_Qs in GSI
-   use kinds
    use ufo_constants_mod, only: t0c, rd_over_rv, es_w_0
 
    implicit none
