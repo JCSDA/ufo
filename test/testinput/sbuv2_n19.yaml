@@ -14,9 +14,9 @@ LinearObsOpTest:
 Observations:
   ObsTypes:
   - ObsOperator:
-      name: AtmVertInterpLay
+      name: OzoneLayer
     ObsSpace:
-      name: AtmVertInterpLay
+      name: OzoneLayer
       ObsDataIn:
         obsfile: Data/sbuv2_n19_obs_2018041500_m.nc4
       simulate:

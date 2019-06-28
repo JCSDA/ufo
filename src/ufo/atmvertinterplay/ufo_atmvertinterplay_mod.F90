@@ -15,6 +15,7 @@ module ufo_atmvertinterplay_mod
  use ufo_geovals_mod_c, only: ufo_geovals_registry
  use ufo_basis_mod, only: ufo_basis
  use ufo_vars_mod
+ use ufo_constants_mod
  use obsspace_mod
 
  implicit none
@@ -96,7 +97,7 @@ real(kind_real) :: rozcon,g
 real(kind_real) :: topozp,botozp
 real :: pindex
 
-  rozcon = 1./(21.4e-9*9.80665) ! = 1./((9.8 m/s**2) * (.001*DU)) =
+  rozcon = 1./(21.4e-9*grav) ! = 1./((9.8 m/s**2) * (.001*DU)) =
                     !(DU)*(s**2)/m
 
   ! Get pressure profiles from geovals log(cb)
@@ -111,8 +112,8 @@ real :: pindex
   !obs pressures read in as Pa
   call obsspace_get_db(obss, "MetaData", "top_level_pressure", toppressure)
   call obsspace_get_db(obss, "MetaData", "bottom_level_pressure", botpressure)
-  toppressure = toppressure !*.001
-  botpressure = botpressure !*.001
+  toppressure = toppressure 
+  botpressure = botpressure 
 
   do ivar = 1, self%nvars
     !get the name of input variable in geovals

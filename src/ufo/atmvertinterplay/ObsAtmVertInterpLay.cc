@@ -22,7 +22,7 @@ namespace ufo {
 
 // -----------------------------------------------------------------------------
 static ObsOperatorMaker<ObsAtmVertInterpLay> makerAtmVertInterpLay_("AtmVertInterpLay");
-static ObsOperatorMaker<ObsAtmVertInterpLay> makerOzoneLay_("OzoneLay");
+static ObsOperatorMaker<ObsAtmVertInterpLay> makerOzoneLayer_("OzoneLayer");
 // -----------------------------------------------------------------------------
 
 ObsAtmVertInterpLay::ObsAtmVertInterpLay(const ioda::ObsSpace & odb,

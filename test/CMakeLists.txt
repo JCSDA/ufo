@@ -281,7 +281,6 @@ if( ${RTTOV_FOUND} )
 endif( ${RTTOV_FOUND} )
 
 ecbuild_add_test( TARGET  test_ufo_sbuv2_n19_opr
-                  MPI     4
                   SOURCES mains/TestObsOperator.cc
                   ARGS    "testinput/sbuv2_n19.yaml"
                   LIBS    ufo )
