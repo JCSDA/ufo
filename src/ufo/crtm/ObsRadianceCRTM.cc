@@ -13,8 +13,6 @@
 #include <string>
 #include <vector>
 
-#include <boost/algorithm/string.hpp>
-
 #include "ioda/ObsVector.h"
 
 #include "oops/base/Variables.h"
@@ -35,9 +33,6 @@ ObsRadianceCRTM::ObsRadianceCRTM(const ioda::ObsSpace & odb,
   : ObsOperatorBase(odb, config), keyOperRadianceCRTM_(0),
     odb_(odb), varin_()
 {
-  int c_name_size = 3000;
-  char *buffin = new char[c_name_size];
-
   // parse channels from the config and create variable names
   const oops::Variables & observed = odb.obsvariables();
   std::vector<int> channels_list = observed.channels();
@@ -45,12 +40,7 @@ ObsRadianceCRTM::ObsRadianceCRTM(const ioda::ObsSpace & odb,
   // call Fortran setup routine
   const eckit::Configuration * configc = &config;
   ufo_radiancecrtm_setup_f90(keyOperRadianceCRTM_, &configc, channels_list.size(),
-                             channels_list[0], buffin, c_name_size);
-
-  std::string vstr_in(buffin);
-  std::vector<std::string> vvin;
-  boost::split(vvin, vstr_in, boost::is_any_of("\t"));
-  varin_.reset(new oops::Variables(vvin));
+                             channels_list[0], varin_);
 
   oops::Log::info() << "ObsRadianceCRTM channels: " << channels_list << std::endl;
   oops::Log::trace() << "ObsRadianceCRTM created." << std::endl;

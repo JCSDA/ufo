@@ -8,7 +8,6 @@
 #ifndef UFO_ATMVERTINTERP_OBSATMVERTINTERPTLAD_H_
 #define UFO_ATMVERTINTERP_OBSATMVERTINTERPTLAD_H_
 
-#include <memory>
 #include <ostream>
 #include <string>
 
@@ -48,7 +47,7 @@ class ObsAtmVertInterpTLAD : public LinearObsOperatorBase,
   void simulateObsAD(GeoVaLs &, const ioda::ObsVector &, ObsBiasIncrement &) const;
 
   // Other
-  const oops::Variables & variables() const {return *varin_;}
+  const oops::Variables & variables() const {return varin_;}
 
   int & toFortran() {return keyOperAtmVertInterp_;}
   const int & toFortran() const {return keyOperAtmVertInterp_;}
@@ -57,7 +56,7 @@ class ObsAtmVertInterpTLAD : public LinearObsOperatorBase,
   void print(std::ostream &) const;
   F90hop keyOperAtmVertInterp_;
   const ioda::ObsSpace& odb_;
-  std::unique_ptr<const oops::Variables> varin_;
+  oops::Variables varin_;
 };
 
 // -----------------------------------------------------------------------------
