@@ -104,7 +104,6 @@ real :: pindex
   call ufo_geovals_get_var(geovals, var_prsi, modelpressures)
   nsig = modelpressures%nval - 1
   !geoval pressures read in as Pa
-  modelpressures%vals = modelpressures%vals !*1000.
 
   allocate(toppressure(nlocs))
   allocate(botpressure(nlocs))
@@ -130,10 +129,10 @@ real :: pindex
       if (iz1>nsig) iz1=nsig
       iz2 = pob
       g = 0.
-      dz1 = nsig + 1
+      dz1 = topozp
       do kk=iz1,iz2,-1
         delz = 1.
-        !if(kk==iz1)delz=dz1-iz1
+        if(kk==iz1)delz=dz1-iz1
         if (kk==iz2) delz=delz-pob+iz2
         !Interpolate in cbars
         delp4=(modelpressures%vals(kk,iobs)-modelpressures%vals(kk+1,iobs))*.001
