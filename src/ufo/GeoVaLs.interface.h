@@ -37,6 +37,7 @@ extern "C" {
   void ufo_geovals_assign_f90(const F90goms &, const F90goms &);
   void ufo_geovals_add_f90(const F90goms &, const F90goms &);
   void ufo_geovals_diff_f90(const F90goms &, const F90goms &);
+  void ufo_geovals_schurmult_f90(const F90goms &, const F90goms &);
   void ufo_geovals_normalize_f90(const F90goms &, const F90goms &);
   void ufo_geovals_dotprod_f90(const F90goms &, const F90goms &, double &);
   void ufo_geovals_minmaxavg_f90(const F90goms &, int &, int &, double &, double &, double &);

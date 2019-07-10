@@ -227,6 +227,22 @@ end subroutine ufo_geovals_diff_c
 
 ! ------------------------------------------------------------------------------
 
+subroutine ufo_geovals_schurmult_c(c_key_self, c_key_other) bind(c,name='ufo_geovals_schurmult_f90')
+implicit none
+integer(c_int), intent(in) :: c_key_self
+integer(c_int), intent(in) :: c_key_other
+type(ufo_geovals), pointer :: self
+type(ufo_geovals), pointer :: other
+
+call ufo_geovals_registry%get(c_key_self, self)
+call ufo_geovals_registry%get(c_key_other, other)
+
+call ufo_geovals_schurmult(self, other)
+
+end subroutine ufo_geovals_schurmult_c
+
+! ------------------------------------------------------------------------------
+
 subroutine ufo_geovals_normalize_c(c_key_self, c_key_other) bind(c,name='ufo_geovals_normalize_f90')
 implicit none
 integer(c_int), intent(in) :: c_key_self
