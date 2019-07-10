@@ -111,8 +111,6 @@ real :: pindex
   !obs pressures read in as Pa
   call obsspace_get_db(obss, "MetaData", "top_level_pressure", toppressure)
   call obsspace_get_db(obss, "MetaData", "bottom_level_pressure", botpressure)
-  toppressure = toppressure 
-  botpressure = botpressure 
 
   do ivar = 1, self%nvars
     !get the name of input variable in geovals
@@ -128,12 +126,16 @@ real :: pindex
       iz1 = topozp
       if (iz1>nsig) iz1=nsig
       iz2 = pob
+      !For total column ozone
+      if(iz1 .eq. nsig .and. iz2 .lt.7)iz2 = 1
       g = 0.
       dz1 = topozp
       do kk=iz1,iz2,-1
         delz = 1.
         if(kk==iz1)delz=dz1-iz1
         if (kk==iz2) delz=delz-pob+iz2
+        !For total column ozone
+        if(iz1 .eq. nsig .and. iz2 .eq. 1)delz = 1
         !Interpolate in cbars
         delp4=(modelpressures%vals(kk,iobs)-modelpressures%vals(kk+1,iobs))*.001
         g=g + &

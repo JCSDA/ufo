@@ -26,4 +26,4 @@ Observations:
     GeoVaLs:
       filename: Data/sbuv2_n19_geoval_2018041500_m.nc4
     vecequiv: GsiHofX
-    tolerance: 5.0e-04  # in % so that corresponds to 10^-3
+    tolerance: 1.0e-05  # in % so that corresponds to 10^-3
