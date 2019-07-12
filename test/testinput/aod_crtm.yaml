@@ -16,8 +16,6 @@ Observations:
  - ObsOperator:
      name: Aod
      ObsOptions:
-       n_Absorbers: 2
-       n_Clouds: 0
        Sensor_ID: v.viirs-m_npp
        EndianType: little_endian
        CoefficientPath: Data/

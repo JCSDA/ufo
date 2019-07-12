@@ -41,6 +41,9 @@ module ufo_radiancecrtm_tlad_mod
   procedure :: simobs_ad  => ufo_radiancecrtm_simobs_ad
  end type ufo_radiancecrtm_tlad
 
+ character(len=maxvarlen), dimension(1), parameter :: varin_default = &
+                            (/var_ts/)
+
 contains
 
 ! ------------------------------------------------------------------------------
@@ -53,13 +56,27 @@ type(c_ptr),                  intent(in)    :: c_conf
 integer(c_int),               intent(in)    :: channels(:)  !List of channels to use
 
 integer :: nvars_in
+integer :: ind, jspec
 
  call crtm_conf_setup(self%conf,c_conf)
 
- ! only air_temperature adjusted for now
- nvars_in = 1
+ ! request from the model var_ts +
+ ! 1 * n_Absorbers
+ ! 1 * n_Clouds (mass content only)
+ nvars_in = size(varin_default) + self%conf%n_Absorbers + self%conf%n_Clouds
  allocate(self%varin(nvars_in))
- self%varin(1) = var_ts
+ self%varin(1:size(varin_default)) = varin_default
+ ind = size(varin_default) + 1
+
+ !Use list of Absorbers and Clouds from conf
+ do jspec = 1, self%conf%n_Absorbers
+   self%varin(ind) = self%conf%Absorbers(jspec)
+   ind = ind + 1
+ end do
+ do jspec = 1, self%conf%n_Clouds
+   self%varin(ind) = self%conf%Clouds(jspec,1)
+   ind = ind + 1
+ end do
 
  ! save channels
  allocate(self%channels(size(channels)))
@@ -318,8 +335,8 @@ real(c_double),           intent(inout) :: hofx(nvars, nlocs)
 
 character(len=*), parameter :: myname_="ufo_radiancecrtm_simobs_tl"
 character(max_string) :: err_msg
-integer :: jprofile, jchannel, jlevel
-type(ufo_geoval), pointer :: tv_d
+integer :: jprofile, jchannel, jlevel, jspec
+type(ufo_geoval), pointer :: geoval_d
 
 
  ! Initial checks
@@ -345,10 +362,10 @@ type(ufo_geoval), pointer :: tv_d
  ! -----------
 
  ! Get t from geovals
- call ufo_geovals_get_var(geovals, var_ts, tv_d)
+ call ufo_geovals_get_var(geovals, var_ts, geoval_d)
 
  ! Check model levels is consistent in geovals & crtm
- if (tv_d%nval /= self%n_Layers) then
+ if (geoval_d%nval /= self%n_Layers) then
    write(err_msg,*) myname_, ' error: layers inconsistent!'
    call abor1_ftn(err_msg)
  endif
@@ -356,14 +373,51 @@ type(ufo_geoval), pointer :: tv_d
  ! Multiply by Jacobian and add to hofx
  do jprofile = 1, self%n_Profiles
    do jchannel = 1, size(self%channels)
-     do jlevel = 1, tv_d%nval
+     do jlevel = 1, geoval_d%nval
        hofx(jchannel, jprofile) = hofx(jchannel, jprofile) + &
                     self%atm_K(jchannel,jprofile)%Temperature(jlevel) * &
-                    tv_d%vals(jlevel,jprofile)
+                    geoval_d%vals(jlevel,jprofile)
      enddo
    enddo
  enddo
 
+ ! Absorbers
+ ! ---------
+
+ do jspec = 1, self%conf%n_Absorbers
+   ! Get Absorber from geovals
+   call ufo_geovals_get_var(geovals, self%conf%Absorbers(jspec), geoval_d)
+
+   ! Multiply by Jacobian and add to hofx
+   do jprofile = 1, self%n_Profiles
+     do jchannel = 1, size(self%channels)
+       do jlevel = 1, geoval_d%nval
+         hofx(jchannel, jprofile) = hofx(jchannel, jprofile) + &
+                      self%atm_K(jchannel,jprofile)%Absorber(jlevel,jspec) * &
+                      geoval_d%vals(jlevel,jprofile)
+       enddo
+     enddo
+   enddo
+ end do
+
+ ! Clouds (mass content only)
+ ! --------------------------
+
+ do jspec = 1, self%conf%n_Clouds
+   ! Get Cloud from geovals
+   call ufo_geovals_get_var(geovals, self%conf%Clouds(jspec,1), geoval_d)
+
+   ! Multiply by Jacobian and add to hofx
+   do jprofile = 1, self%n_Profiles
+     do jchannel = 1, size(self%channels)
+       do jlevel = 1, geoval_d%nval
+         hofx(jchannel, jprofile) = hofx(jchannel, jprofile) + &
+                      self%atm_K(jchannel,jprofile)%Cloud(jspec)%Water_Content(jlevel) * &
+                      geoval_d%vals(jlevel,jprofile)
+       enddo
+     enddo
+   enddo
+ end do
 
 end subroutine ufo_radiancecrtm_simobs_tl
 
@@ -381,8 +435,8 @@ real(c_double),           intent(in)    :: hofx(nvars, nlocs)
 
 character(len=*), parameter :: myname_="ufo_radiancecrtm_simobs_ad"
 character(max_string) :: err_msg
-integer :: jprofile, jchannel, jlevel
-type(ufo_geoval), pointer :: tv_d
+integer :: jprofile, jchannel, jlevel, jspec
+type(ufo_geoval), pointer :: geoval_d
 real(c_double) :: missing
 
 
@@ -408,23 +462,22 @@ real(c_double) :: missing
  ! -----------
 
  ! Get t from geovals
- call ufo_geovals_get_var(geovals, var_ts, tv_d)
+ call ufo_geovals_get_var(geovals, var_ts, geoval_d)
 
  ! allocate if not yet allocated
- if (.not. allocated(tv_d%vals)) then
-    tv_d%nlocs = self%n_Profiles
-    tv_d%nval = self%n_Layers
-    allocate(tv_d%vals(tv_d%nval,tv_d%nlocs))
-    tv_d%vals = 0.0_kind_real
+ if (.not. allocated(geoval_d%vals)) then
+    geoval_d%nlocs = self%n_Profiles
+    geoval_d%nval = self%n_Layers
+    allocate(geoval_d%vals(geoval_d%nval,geoval_d%nlocs))
+    geoval_d%vals = 0.0_kind_real
  endif
-
 
  ! Multiply by Jacobian and add to hofx (adjoint)
  do jprofile = 1, self%n_Profiles
    do jchannel = 1, size(self%channels)
-     do jlevel = 1, tv_d%nval
+     do jlevel = 1, geoval_d%nval
        if (hofx(jchannel, jprofile) /= missing) then
-         tv_d%vals(jlevel,jprofile) = tv_d%vals(jlevel,jprofile) + &
+         geoval_d%vals(jlevel,jprofile) = geoval_d%vals(jlevel,jprofile) + &
                                       self%atm_K(jchannel,jprofile)%Temperature(jlevel) * &
                                       hofx(jchannel, jprofile)
        endif
@@ -432,6 +485,63 @@ real(c_double) :: missing
    enddo
  enddo
 
+ ! Absorbers
+ ! ---------
+
+ do jspec = 1, self%conf%n_Absorbers
+   ! Get Absorber from geovals
+   call ufo_geovals_get_var(geovals, self%conf%Absorbers(jspec), geoval_d)
+
+   ! allocate if not yet allocated
+   if (.not. allocated(geoval_d%vals)) then
+      geoval_d%nlocs = self%n_Profiles
+      geoval_d%nval = self%n_Layers
+      allocate(geoval_d%vals(geoval_d%nval,geoval_d%nlocs))
+      geoval_d%vals = 0.0_kind_real
+   endif
+
+   ! Multiply by Jacobian and add to hofx (adjoint)
+   do jprofile = 1, self%n_Profiles
+     do jchannel = 1, size(self%channels)
+       do jlevel = 1, geoval_d%nval
+         if (hofx(jchannel, jprofile) /= missing) then
+           geoval_d%vals(jlevel,jprofile) = geoval_d%vals(jlevel,jprofile) + &
+                                        self%atm_K(jchannel,jprofile)%Absorber(jlevel,jspec) * &
+                                        hofx(jchannel, jprofile)
+         endif
+       enddo
+     enddo
+   enddo
+ end do
+
+ ! Clouds (mass content only)
+ ! --------------------------
+
+ do jspec = 1, self%conf%n_Clouds
+   ! Get Cloud from geovals
+   call ufo_geovals_get_var(geovals, self%conf%Clouds(jspec,1), geoval_d)
+
+   ! allocate if not yet allocated
+   if (.not. allocated(geoval_d%vals)) then
+      geoval_d%nlocs = self%n_Profiles
+      geoval_d%nval = self%n_Layers
+      allocate(geoval_d%vals(geoval_d%nval,geoval_d%nlocs))
+      geoval_d%vals = 0.0_kind_real
+   endif
+
+   ! Multiply by Jacobian and add to hofx (adjoint)
+   do jprofile = 1, self%n_Profiles
+     do jchannel = 1, size(self%channels)
+       do jlevel = 1, geoval_d%nval
+         if (hofx(jchannel, jprofile) /= missing) then
+           geoval_d%vals(jlevel,jprofile) = geoval_d%vals(jlevel,jprofile) + &
+                                        self%atm_K(jchannel,jprofile)%Cloud(jspec)%Water_Content(jlevel) * &
+                                        hofx(jchannel, jprofile)
+         endif
+       enddo
+     enddo
+   enddo
+ end do
 
  ! Once all geovals set replace flag
  ! ---------------------------------

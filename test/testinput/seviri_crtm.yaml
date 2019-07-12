@@ -15,8 +15,7 @@ Observations:
  ObsTypes: 
  - ObsOperator:
      name: CRTM
-     n_Absorbers: 3
-     n_Clouds: 0
+     Extra_Absorbers: [carbon_dioxide]
      n_Aerosols: 0
      Sensor_ID: seviri_m08
      EndianType: little_endian

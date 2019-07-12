@@ -8,15 +8,15 @@ window_end: 2018-04-15T03:00:00Z
 
 LinearObsOpTest:
  testiterTL: 5
- toleranceTL: 1.0e-5
+ toleranceTL: 2.0e-5
  toleranceAD: 1.0e-11
 
 Observations:
  ObsTypes:
  - ObsOperator:
      name: CRTM
-     n_Absorbers: 3
-     n_Clouds: 2
+     Extra_Absorbers: [carbon_dioxide]
+     Clouds: [cloud_liquid_water, cloud_ice]
      n_Aerosols: 0
      Sensor_ID: atms_npp
      EndianType: little_endian

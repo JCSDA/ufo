@@ -32,13 +32,14 @@ module ufo_radiancecrtm_mod
    procedure :: simobs => ufo_radiancecrtm_simobs
  end type ufo_radiancecrtm
 
- character(len=maxvarlen), dimension(24), parameter :: varin_default = &
-                            (/var_ts, var_mixr, var_prs, var_prsi, var_oz, var_co2,       &
+ character(len=maxvarlen), dimension(21), parameter :: varin_default = &
+                            (/var_ts, var_prs, var_prsi,                                  &
                               var_sfc_wfrac, var_sfc_lfrac, var_sfc_ifrac, var_sfc_sfrac, &
                               var_sfc_wtmp,  var_sfc_ltmp,  var_sfc_itmp,  var_sfc_stmp,  &
                               var_sfc_vegfrac, var_sfc_wspeed, var_sfc_wdir, var_sfc_lai, &
                               var_sfc_soilm, var_sfc_soilt, var_sfc_landtyp,              &
                               var_sfc_vegtyp, var_sfc_soiltyp, var_sfc_sdepth/)
+
 contains
 
 ! ------------------------------------------------------------------------------
@@ -51,26 +52,30 @@ type(c_ptr),             intent(in)    :: c_conf
 integer(c_int),          intent(in)    :: channels(:)  !List of channels to use
 
 integer :: nvars_in, nvars_out
-integer :: ind, ich
+integer :: ind, jspec, ich
 
  call crtm_conf_setup(self%conf,c_conf)
 
  ! request from the model all the hardcoded atmospheric & surface variables + 
- ! 2 * n_clouds (for mass content and effective radius)
- nvars_in = size(varin_default) + self%conf%n_clouds * 2
+ ! 1 * n_Absorbers
+ ! 2 * n_Clouds (mass content and effective radius)
+ nvars_in = size(varin_default) + self%conf%n_Absorbers + 2 * self%conf%n_Clouds
  allocate(self%varin(nvars_in))
  self%varin(1:size(varin_default)) = varin_default
  ind = size(varin_default) + 1
- if (self%conf%n_clouds > 0) then
-   self%varin(ind)   = var_clw
-   self%varin(ind+1) = var_clwefr
-   ind = ind + 2
- endif
- if (self%conf%n_clouds > 1) then
-   self%varin(ind)   = var_cli
-   self%varin(ind+1) = var_cliefr
-   ind = ind + 2
- endif
+ !Use list of Absorbers and Clouds from conf
+ do jspec = 1, self%conf%n_Absorbers
+   self%varin(ind) = self%conf%Absorbers(jspec)
+   ind = ind + 1
+ end do
+ do jspec = 1, self%conf%n_Clouds
+   self%varin(ind) = self%conf%Clouds(jspec,1)
+   ind = ind + 1
+   self%varin(ind) = self%conf%Clouds(jspec,2)
+   ind = ind + 1
+ end do
+
+ ! save channels
  allocate(self%channels(size(channels)))
  self%channels(:) = channels(:)
 

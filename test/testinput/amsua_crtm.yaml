@@ -15,8 +15,8 @@ Observations:
  ObsTypes: 
  - ObsOperator:
      name: CRTM
-     n_Absorbers: 3
-     n_Clouds: 2
+     Extra_Absorbers: [carbon_dioxide]
+     Clouds: [cloud_liquid_water, cloud_ice]
      n_Aerosols: 0
      inspectProfile: 1
      Sensor_ID: amsua_n19
