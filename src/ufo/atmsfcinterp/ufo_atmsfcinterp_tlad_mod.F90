@@ -24,6 +24,8 @@ module ufo_atmsfcinterp_tlad_mod
  !       this type can hold information on trajectory, for atmsfcinterp
  type, extends(ufo_basis_tlad), public :: ufo_atmsfcinterp_tlad
  private
+   integer :: nvars_in
+   character(len=MAXVARLEN), public, allocatable :: varin(:)
  contains
   procedure :: setup  => ufo_atmsfcinterp_tlad_setup
   procedure :: delete  => ufo_atmsfcinterp_tlad_delete

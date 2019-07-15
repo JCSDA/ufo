@@ -11,6 +11,7 @@ module ufo_atmsfcinterp_tlad_mod_c
   use iso_c_binding
   use config_mod
   use ufo_atmsfcinterp_tlad_mod 
+  use string_f_c_mod
   implicit none
   private
 
@@ -30,16 +31,20 @@ contains
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_atmsfcinterp_tlad_setup_c(c_key_self, c_conf) bind(c,name='ufo_atmsfcinterp_tlad_setup_f90')
+subroutine ufo_atmsfcinterp_tlad_setup_c(c_key_self, c_conf, c_varlist) bind(c,name='ufo_atmsfcinterp_tlad_setup_f90')
 implicit none
 integer(c_int), intent(inout) :: c_key_self
 type(c_ptr), intent(in)    :: c_conf
+type(c_ptr), intent(in), value :: c_varlist
     
 type(ufo_atmsfcinterp_tlad), pointer :: self
 
 call ufo_atmsfcinterp_tlad_registry%setup(c_key_self, self)
 
 call self%setup(c_conf)
+
+!> Update C++ ObsOperator with input variable list
+call f_c_push_string_vector(c_varlist, self%varin)
 
 end subroutine ufo_atmsfcinterp_tlad_setup_c
 

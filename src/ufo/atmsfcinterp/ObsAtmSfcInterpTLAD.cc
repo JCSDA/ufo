@@ -29,12 +29,11 @@ ObsAtmSfcInterpTLAD::ObsAtmSfcInterpTLAD(const ioda::ObsSpace & odb,
                                const eckit::Configuration & config)
   : keyOperAtmSfcInterp_(0), varin_(), odb_(odb)
 {
-  // TODO(anyone): list the variables for GeoVaLs that are needed for the observation
-  //       operator TL and AD below in vv (e.g., vv{"temperature", "humidity"})
-  const std::vector<std::string> vv{""};
-  varin_.reset(new oops::Variables(vv));
   const eckit::Configuration * configc = &config;
-  ufo_atmsfcinterp_tlad_setup_f90(keyOperAtmSfcInterp_, &configc);
+  std::vector<std::string> vvin;
+  ufo_atmsfcinterp_tlad_setup_f90(keyOperAtmSfcInterp_, &configc, vvin);
+  varin_.reset(new oops::Variables(vvin));
+
   oops::Log::trace() << "ObsAtmSfcInterpTLAD created" << std::endl;
 }
 

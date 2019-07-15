@@ -38,14 +38,13 @@ contains
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_atmsfcinterp_setup_c(c_key_self, c_conf, c_varconf, csin, c_str_size) bind(c,name='ufo_atmsfcinterp_setup_f90')
+subroutine ufo_atmsfcinterp_setup_c(c_key_self, c_conf, c_varconf, c_varlist) bind(c,name='ufo_atmsfcinterp_setup_f90')
 use ufo_vars_mod, only: MAXVARLEN, ufo_vars_read
 implicit none
 integer(c_int), intent(inout) :: c_key_self
 type(c_ptr), intent(in) :: c_conf 
 type(c_ptr), intent(in) :: c_varconf ! config with variables to be simulated
-integer(c_int), intent(in) :: c_str_size
-character(kind=c_char,len=1),intent(inout) :: csin(c_str_size+1) 
+type(c_ptr), intent(in), value :: c_varlist
 character(len=MAXVARLEN), dimension(:), allocatable :: vars
 
 type(ufo_atmsfcinterp), pointer :: self
@@ -53,10 +52,10 @@ type(ufo_atmsfcinterp), pointer :: self
 call ufo_atmsfcinterp_registry%setup(c_key_self, self)
 call ufo_vars_read(c_varconf, vars)
 call self%setup(c_conf, vars)
-
-!> Set vars_out
-call f_c_string_vector(self%varin, csin) 
 deallocate(vars)
+
+!> Update C++ ObsOperator with input variable list
+call f_c_push_string_varlist(c_varlist, self%varin)
 
 end subroutine ufo_atmsfcinterp_setup_c
 

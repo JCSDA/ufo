@@ -8,6 +8,9 @@
 #ifndef UFO_ATMSFCINTERP_OBSATMSFCINTERPTLAD_INTERFACE_H_
 #define UFO_ATMSFCINTERP_OBSATMSFCINTERPTLAD_INTERFACE_H_
 
+#include <string>
+#include <vector>
+
 #include "ioda/ObsSpace.h"
 
 #include "ufo/Fortran.h"
@@ -20,7 +23,8 @@ extern "C" {
 
 // -----------------------------------------------------------------------------
 
-  void ufo_atmsfcinterp_tlad_setup_f90(F90hop &, const eckit::Configuration * const *);
+  void ufo_atmsfcinterp_tlad_setup_f90(F90hop &, const eckit::Configuration * const *,
+                                       std::vector<std::string> &);
   void ufo_atmsfcinterp_tlad_delete_f90(F90hop &);
   void ufo_atmsfcinterp_tlad_settraj_f90(const F90hop &, const F90goms &, const ioda::ObsSpace &);
   void ufo_atmsfcinterp_simobs_tl_f90(const F90hop &, const F90goms &, const ioda::ObsSpace &,

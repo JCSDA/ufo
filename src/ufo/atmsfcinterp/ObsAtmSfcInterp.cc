@@ -29,19 +29,10 @@ ObsAtmSfcInterp::ObsAtmSfcInterp(const ioda::ObsSpace & odb, const eckit::Config
   : ObsOperatorBase(odb, config), keyOperAtmSfcInterp_(0),
     odb_(odb), varin_()
 {
-  int c_name_size = 500;
-  char *buffin = new char[c_name_size];
   const eckit::Configuration * configc = &config;
-
   const oops::Variables & observed = odb.obsvariables();
   const eckit::Configuration * varconfig = &observed.toFortran();
-
-  ufo_atmsfcinterp_setup_f90(keyOperAtmSfcInterp_, &configc, &varconfig, buffin, c_name_size);
-
-  std::string vstr_in(buffin);
-  std::vector<std::string> vvin;
-  boost::split(vvin, vstr_in, boost::is_any_of("\t"));
-  varin_.reset(new oops::Variables(vvin));
+  ufo_atmsfcinterp_setup_f90(keyOperAtmSfcInterp_, &configc, &varconfig, varin_);
 
   oops::Log::trace() << "ObsAtmSfcInterp created." << std::endl;
 }
