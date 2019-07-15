@@ -160,6 +160,14 @@ GeoVaLs & GeoVaLs::operator-=(const GeoVaLs & other) {
   return *this;
 }
 // -----------------------------------------------------------------------------
+/*! \brief Multiply another GeoVaLs */
+GeoVaLs & GeoVaLs::operator*=(const GeoVaLs & other) {
+  oops::Log::trace() << "GeoVaLs::operator*= starting" << std::endl;
+  ufo_geovals_schurmult_f90(keyGVL_, other.keyGVL_);
+  oops::Log::trace() << "GeoVaLs::operator*= done" << std::endl;
+  return *this;
+}
+// -----------------------------------------------------------------------------
 /*! \brief GeoVaLs normalization
  *
  * \details This operator is used to normalize each element of the input GeoVaLs

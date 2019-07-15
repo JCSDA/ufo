@@ -9,7 +9,7 @@
 #define UFO_CRTM_OBSRADIANCECRTMTLAD_INTERFACE_H_
 
 #include "ioda/ObsSpace.h"
-
+#include "oops/base/Variables.h"
 #include "ufo/Fortran.h"
 
 namespace ufo {
@@ -27,7 +27,8 @@ extern "C" {
 // -----------------------------------------------------------------------------
 
   void ufo_radiancecrtm_tlad_setup_f90(F90hop &, const eckit::Configuration * const *,
-                                       const int &, const int &, char *, const int &);
+                                       const int &, const int &,
+                                       oops::Variables &);
   void ufo_radiancecrtm_tlad_delete_f90(F90hop &);
   void ufo_radiancecrtm_tlad_settraj_f90(const F90hop &, const F90goms &, const ioda::ObsSpace &);
   void ufo_radiancecrtm_simobs_tl_f90(const F90hop &, const F90goms &, const ioda::ObsSpace &,

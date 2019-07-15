@@ -8,10 +8,8 @@
 #ifndef UFO_CRTM_OBSRADIANCECRTM_H_
 #define UFO_CRTM_OBSRADIANCECRTM_H_
 
-#include <memory>
 #include <ostream>
 #include <string>
-#include <vector>
 
 #include "oops/base/Variables.h"
 #include "oops/util/Logger.h"
@@ -45,7 +43,7 @@ class ObsRadianceCRTM : public ObsOperatorBase,
   void simulateObs(const GeoVaLs &, ioda::ObsVector &) const override;
 
 // Other
-  const oops::Variables & variables() const override {return *varin_;}
+  const oops::Variables & variables() const override {return varin_;}
 
   int & toFortran() {return keyOperRadianceCRTM_;}
   const int & toFortran() const {return keyOperRadianceCRTM_;}
@@ -54,7 +52,7 @@ class ObsRadianceCRTM : public ObsOperatorBase,
   void print(std::ostream &) const override;
   F90hop keyOperRadianceCRTM_;
   const ioda::ObsSpace& odb_;
-  std::unique_ptr<const oops::Variables> varin_;
+  oops::Variables varin_;
 };
 
 // -----------------------------------------------------------------------------

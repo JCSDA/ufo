@@ -9,7 +9,7 @@
 #define UFO_ATMVERTINTERP_OBSATMVERTINTERP_INTERFACE_H_
 
 #include "ioda/ObsSpace.h"
-
+#include "oops/base/Variables.h"
 #include "ufo/Fortran.h"
 
 namespace ufo {
@@ -27,7 +27,8 @@ extern "C" {
 // -----------------------------------------------------------------------------
 
   void ufo_atmvertinterp_setup_f90(F90hop &, const eckit::Configuration * const *,
-                                const eckit::Configuration * const *, char *, const int &);
+                                   const eckit::Configuration * const *,
+                                   oops::Variables &);
   void ufo_atmvertinterp_delete_f90(F90hop &);
   void ufo_atmvertinterp_simobs_f90(const F90hop &, const F90goms &, const ioda::ObsSpace &,
                                  const int &, const int &, double &);

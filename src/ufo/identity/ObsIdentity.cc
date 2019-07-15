@@ -8,10 +8,6 @@
 #include "ufo/identity/ObsIdentity.h"
 
 #include <ostream>
-#include <string>
-#include <vector>
-
-#include <boost/algorithm/string.hpp>
 
 #include "oops/util/Logger.h"
 
@@ -33,19 +29,10 @@ ObsIdentity::ObsIdentity(const ioda::ObsSpace & odb,
                          const eckit::Configuration & config)
   : ObsOperatorBase(odb, config), keyOperObsIdentity_(0), odb_(odb), varin_()
 {
-  int c_name_size = 200;
-  char *buffin = new char[c_name_size];
   const eckit::Configuration * configc = &config;
-
   const oops::Variables & vars = odb.obsvariables();
   const eckit::Configuration * varconfig = &vars.toFortran();
-
-  ufo_identity_setup_f90(keyOperObsIdentity_, &configc, &varconfig, buffin, c_name_size);
-
-  std::string vstr_in(buffin);
-  std::vector<std::string> vvin;
-  boost::split(vvin, vstr_in, boost::is_any_of("\t"));
-  varin_.reset(new oops::Variables(vvin));
+  ufo_identity_setup_f90(keyOperObsIdentity_, &configc, &varconfig, varin_);
 
   oops::Log::trace() << "ObsIdentity created." << std::endl;
 }

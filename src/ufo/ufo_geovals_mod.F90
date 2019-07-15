@@ -24,7 +24,7 @@ public :: ufo_geovals_get_var
 public :: ufo_geovals_setup, ufo_geovals_delete, ufo_geovals_print
 public :: ufo_geovals_zero, ufo_geovals_random, ufo_geovals_dotprod, ufo_geovals_scalmult
 public :: ufo_geovals_assign, ufo_geovals_add, ufo_geovals_diff, ufo_geovals_abs
-public :: ufo_geovals_minmaxavg, ufo_geovals_normalize, ufo_geovals_maxloc
+public :: ufo_geovals_minmaxavg, ufo_geovals_normalize, ufo_geovals_maxloc, ufo_geovals_schurmult
 public :: ufo_geovals_read_netcdf, ufo_geovals_write_netcdf
 public :: ufo_geovals_rms, ufo_geovals_copy
 public :: ufo_geovals_analytic_init
@@ -291,14 +291,14 @@ if (.not. other%linit) then
 endif
 
 if (self%nlocs /= other%nlocs) then
-  call abor1_ftn("ufo_geovals_assign: nlocs different between lhs and rhs")
+  call abor1_ftn("ufo_geovals_add: nlocs different between lhs and rhs")
 endif
 
 do jv=1,self%nvar
   iv = ufo_vars_getindex(other%variables, self%variables(jv))
   if (iv .ne. -1) then !Only add if exists in RHS
     if (self%geovals(jv)%nval /= other%geovals(iv)%nval) then
-      write(err_msg,*) 'ufo_geovals_assign: nvals for var ', trim(self%variables(jv)), ' are different in lhs and rhs'
+      write(err_msg,*) 'ufo_geovals_add: nvals for var ', trim(self%variables(jv)), ' are different in lhs and rhs'
       call abor1_ftn(trim(err_msg))
     endif
     do jo=1,self%nlocs
@@ -330,14 +330,14 @@ if (.not. other%linit) then
 endif
 
 if (self%nlocs /= other%nlocs) then
-  call abor1_ftn("ufo_geovals_assign: nlocs different between lhs and rhs")
+  call abor1_ftn("ufo_geovals_diff: nlocs different between lhs and rhs")
 endif
 
 do jv=1,self%nvar
   iv = ufo_vars_getindex(other%variables, self%variables(jv))
   if (iv .ne. -1) then !Only subtract if exists in RHS
     if (self%geovals(jv)%nval /= other%geovals(iv)%nval) then
-      write(err_msg,*) 'ufo_geovals_assign: nvals for var ', trim(self%variables(jv)), ' are different in lhs and rhs'
+      write(err_msg,*) 'ufo_geovals_diff: nvals for var ', trim(self%variables(jv)), ' are different in lhs and rhs'
       call abor1_ftn(trim(err_msg))
     endif
     do jo=1,self%nlocs
@@ -349,6 +349,45 @@ do jv=1,self%nvar
 enddo
 
 end subroutine ufo_geovals_diff
+
+! ------------------------------------------------------------------------------
+!> Schur product of two GeoVaLs objects
+
+subroutine ufo_geovals_schurmult(self, other) 
+implicit none
+type(ufo_geovals), intent(inout) :: self
+type(ufo_geovals), intent(in) :: other
+integer :: jv, jo, jz
+integer :: iv
+character(max_string) :: err_msg
+
+if (.not. self%linit) then
+  call abor1_ftn("ufo_geovals_schurmult: geovals not allocated")
+endif
+if (.not. other%linit) then
+  call abor1_ftn("ufo_geovals_schurmult: geovals not allocated")
+endif
+
+if (self%nlocs /= other%nlocs) then
+  call abor1_ftn("ufo_geovals_schurmult: nlocs different between lhs and rhs")
+endif
+
+do jv=1,self%nvar
+  iv = ufo_vars_getindex(other%variables, self%variables(jv))
+  if (iv .ne. -1) then !Only mult if exists in RHS
+    if (self%geovals(jv)%nval /= other%geovals(iv)%nval) then
+      write(err_msg,*) 'ufo_geovals_schurmult: nvals for var ', trim(self%variables(jv)), ' are different in lhs and rhs'
+      call abor1_ftn(trim(err_msg))
+    endif
+    do jo=1,self%nlocs
+      do jz = 1, self%geovals(jv)%nval
+        self%geovals(jv)%vals(jz,jo) = self%geovals(jv)%vals(jz,jo) * other%geovals(iv)%vals(jz,jo)
+      enddo
+    enddo
+  endif
+enddo
+
+end subroutine ufo_geovals_schurmult
 
 ! ------------------------------------------------------------------------------
 !> Copy one GeoVaLs object into another
