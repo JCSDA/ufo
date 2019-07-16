@@ -70,7 +70,7 @@ type(c_ptr), value, intent(in)    :: obss
     real(kind_real), allocatable :: obs_lat(:)
     real(kind_real), allocatable :: obs_depth(:)
     integer :: obss_nlocs
-    real(kind_real) :: wf, tp, sp, prs
+    real(kind_real) :: wf, tp, sp, prs, max_depth
     integer :: wi
     
     ! check if nlocs is consistent in geovals & hofx
@@ -103,6 +103,7 @@ type(c_ptr), value, intent(in)    :: obss
           depth(ilev,iobs)=sum(h%vals(1:ilev-1,iobs))+0.5*h%vals(ilev,iobs)
        end do          
     end do
+    max_depth=maxval(depth)
 
     ! Information for temporary output file
     
@@ -116,7 +117,7 @@ type(c_ptr), value, intent(in)    :: obss
     
        !< Interpolation weight
        call vert_interp_weights(nlev, deptho, depth(:,iobs), wi, wf)
-       if (deptho.ge.maxval(depth)) then
+       if (deptho >= max_depth) then
           wi=nlev-1
           wf=0.0
        end if

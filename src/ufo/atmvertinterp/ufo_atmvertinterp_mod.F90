@@ -70,6 +70,8 @@ subroutine atmvertinterp_simobs_(self, geovals, obss, nvars, nlocs, hofx)
   real(kind_real), allocatable :: wf(:)
   integer, allocatable :: wi(:)
   character(len=MAXVARLEN) :: geovar
+  
+  real(kind_real), allocatable :: tmp(:)
 
   ! Get pressure profiles from geovals
   call ufo_geovals_get_var(geovals, var_prs, presprofile)
@@ -84,9 +86,11 @@ subroutine atmvertinterp_simobs_(self, geovals, obss, nvars, nlocs, hofx)
   allocate(wf(nlocs))
 
   ! Calculate the interpolation weights
+  allocate(tmp(presprofile%nval))
   do iobs = 1, nlocs
+    tmp = log(presprofile%vals(:,iobs))
     call vert_interp_weights(presprofile%nval, log(obspressure(iobs)), &
-                             log(presprofile%vals(:,iobs)), wi(iobs), wf(iobs))
+                             tmp, wi(iobs), wf(iobs))
   enddo
 
   do ivar = 1, self%nvars
@@ -106,6 +110,8 @@ subroutine atmvertinterp_simobs_(self, geovals, obss, nvars, nlocs, hofx)
   deallocate(obspressure)
   deallocate(wi)
   deallocate(wf)
+
+  deallocate(tmp)
 
 end subroutine atmvertinterp_simobs_
 

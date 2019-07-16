@@ -8,9 +8,6 @@
 #include "ufo/marine/marinevertinterp/ObsMarineVertInterpTLAD.h"
 
 #include <ostream>
-#include <string>
-#include <vector>
-#include <boost/algorithm/string.hpp>
 
 #include "ioda/ObsSpace.h"
 #include "ioda/ObsVector.h"
@@ -27,22 +24,13 @@ static LinearObsOperatorMaker<ObsMarineVertInterpTLAD> makerMarinevertinterpTL_(
 // -----------------------------------------------------------------------------
 
 ObsMarineVertInterpTLAD::ObsMarineVertInterpTLAD(const ioda::ObsSpace & odb,
-                                                   const eckit::Configuration & config)
+                                                 const eckit::Configuration & config)
   : keyOper_(0), odb_(odb), varin_()
 {
-  int c_name_size = 200;
-  char *buffin = new char[c_name_size];
   const eckit::Configuration * configc = &config;
-
   const oops::Variables & observed = odb.obsvariables();
   const eckit::Configuration * varconfig = &observed.toFortran();
-
-  ufo_marinevertinterp_tlad_setup_f90(keyOper_, &configc, &varconfig, buffin, c_name_size);
-
-  std::string vstr_in(buffin);
-  std::vector<std::string> vvin;
-  boost::split(vvin, vstr_in, boost::is_any_of("\t"));
-  varin_.reset(new oops::Variables(vvin));
+  ufo_marinevertinterp_tlad_setup_f90(keyOper_, &configc, &varconfig, varin_);
 
   oops::Log::trace() << "ObsMarineVertInterpTLAD created" << std::endl;
 }

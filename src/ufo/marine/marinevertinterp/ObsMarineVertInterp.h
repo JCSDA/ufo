@@ -8,7 +8,6 @@
 #ifndef UFO_MARINE_MARINEVERTINTERP_OBSMARINEVERTINTERP_H_
 #define UFO_MARINE_MARINEVERTINTERP_OBSMARINEVERTINTERP_H_
 
-#include <memory>
 #include <ostream>
 #include <string>
 
@@ -46,7 +45,7 @@ class ObsMarineVertInterp : public ObsOperatorBase,
   void simulateObs(const GeoVaLs &, ioda::ObsVector &) const;
 
 // Other
-  const oops::Variables & variables() const {return *varin_;}
+  const oops::Variables & variables() const {return varin_;}
 
   int & toFortran() {return keyOper_;}
   const int & toFortran() const {return keyOper_;}
@@ -55,7 +54,7 @@ class ObsMarineVertInterp : public ObsOperatorBase,
   void print(std::ostream &) const;
   F90hop keyOper_;
   const ioda::ObsSpace& odb_;
-  std::unique_ptr<const oops::Variables> varin_;
+  oops::Variables varin_;
 };
 
 // -----------------------------------------------------------------------------

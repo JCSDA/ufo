@@ -8,7 +8,7 @@ window_end: 2018-04-15T03:00:00Z
 
 LinearObsOpTest:
   coefTL: 0.1
-  toleranceTL: 1.0e-7
+  toleranceTL: 1.0e-14
   toleranceAD: 1.0e-7
 
 Observations:

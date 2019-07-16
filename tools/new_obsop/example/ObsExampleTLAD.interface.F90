@@ -31,12 +31,11 @@ contains
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_example_tlad_setup_c(c_key_self, c_conf, csin, c_str_size) bind(c,name='ufo_example_tlad_setup_f90')
+subroutine ufo_example_tlad_setup_c(c_key_self, c_conf, c_varlist) bind(c,name='ufo_example_tlad_setup_f90')
 implicit none
 integer(c_int), intent(inout) :: c_key_self
 type(c_ptr), intent(in)    :: c_conf
-integer(c_int), intent(in) :: c_str_size
-character(kind=c_char,len=1),intent(inout) :: csin(c_str_size+1)
+type(c_ptr), intent(in), value :: c_varlist
 
 type(ufo_example_tlad), pointer :: self
 
@@ -44,8 +43,8 @@ call ufo_example_tlad_registry%setup(c_key_self, self)
 
 call self%setup(c_conf)
 
-!> Set vars
-call f_c_string_vector(self%varin, csin)
+!> Update C++ ObsOperator with input variable list
+call f_c_push_string_vector(c_varlist, self%varin)
 
 end subroutine ufo_example_tlad_setup_c
 

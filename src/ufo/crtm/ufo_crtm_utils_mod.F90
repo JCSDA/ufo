@@ -43,6 +43,10 @@ REAL(kind_real), PARAMETER :: &
 
 INTEGER, PARAMETER, public :: min_crtm_n_absorbers = 2
 
+! h2o must come first for AOD, because o3 geoval is undefined
+INTEGER, PARAMETER, public :: crtm_h2o_absorber_ind = 1
+INTEGER, PARAMETER, public :: crtm_o3_absorber_ind = 2
+
 integer, parameter, public :: max_string=800
 
 
@@ -52,6 +56,12 @@ type crtm_conf
  integer :: n_Absorbers
  integer :: n_Clouds
  integer :: n_Aerosols
+ character(len=MAXVARLEN), allocatable :: Absorbers(:)
+ integer, allocatable :: Absorber_Id(:)
+ integer, allocatable :: Absorber_Units(:)
+ character(len=MAXVARLEN), allocatable :: Clouds(:,:)
+ integer, allocatable :: Cloud_Id(:)
+
  character(len=255), allocatable :: SENSOR_ID(:)
  character(len=255) :: ENDIAN_TYPE
  character(len=255) :: COEFFICIENT_PATH
@@ -72,6 +82,44 @@ INTERFACE calculate_aero_layer_factor
 
 END INTERFACE
 
+ ! Add more UFO_Absorbers as needed
+ character(len=MAXVARLEN), parameter :: &
+      UFO_Absorbers(3) = &
+         [ var_mixr, var_co2, var_oz ]
+ integer, parameter :: &
+      CRTM_Absorber_Id(N_VALID_ABSORBER_IDS) = &
+         [ H2O_ID,  CO2_ID,   O3_ID,  N2O_ID, &
+            CO_ID,  CH4_ID,   O2_ID,   NO_ID, &
+           SO2_ID,  NO2_ID,  NH3_ID, HNO3_ID, &
+            OH_ID,   HF_ID,  HCl_ID,  HBr_ID, &
+            HI_ID,  ClO_ID,  OCS_ID, H2CO_ID, &
+          HOCl_ID,   N2_ID,  HCN_ID, CH3l_ID, &
+          H2O2_ID, C2H2_ID, C2H6_ID,  PH3_ID, &
+          COF2_ID,  SF6_ID,  H2S_ID,HCOOH_ID ]
+ integer, parameter :: &
+      CRTM_Absorber_Units(3) = [ &
+         MASS_MIXING_RATIO_UNITS   & !H2O
+       , VOLUME_MIXING_RATIO_UNITS & !CO2
+       , VOLUME_MIXING_RATIO_UNITS & !O3
+        ]
+
+ character(len=MAXVARLEN), parameter :: &
+      UFO_Clouds(N_VALID_CLOUD_CATEGORIES) = &
+         [ var_clw, &
+           var_cli, &
+           var_clr, &
+           var_cls, &
+           var_clg, &
+           var_clh  ]
+ integer, parameter :: &
+      CRTM_Cloud_Id(N_VALID_CLOUD_CATEGORIES) = &
+         [   WATER_CLOUD, &
+               ICE_CLOUD, &
+              RAIN_CLOUD, &
+              SNOW_CLOUD, &
+           GRAUPEL_CLOUD, &
+              HAIL_CLOUD  ]
+
 contains
 
 ! ------------------------------------------------------------------------------
@@ -83,6 +131,9 @@ type(crtm_conf), intent(inout) :: conf
 type(c_ptr),    intent(in)    :: c_conf
 
 character(len=255) :: IRVISwaterCoeff, IRVISlandCoeff, IRVISsnowCoeff, IRVISiceCoeff, MWwaterCoeff
+integer :: jspec, ivar
+character(len=MAXVARLEN) :: BASENAME
+character(max_string) :: err_msg
 
  !Some config needs to come from user
  !-----------------------------------
@@ -91,10 +142,70 @@ character(len=255) :: IRVISwaterCoeff, IRVISlandCoeff, IRVISsnowCoeff, IRVISiceC
  !type (zenith/scan angle will be different)
  conf%n_Sensors = 1
 
- !Number of absorbers, clouds and aerosols (should match what model will provide)
- conf%n_Absorbers = config_get_int(c_conf,"n_Absorbers")
- conf%n_Clouds    = config_get_int(c_conf,"n_Clouds"   )
+ ! absorbers, clouds and aerosols (should match what model will provide)
 
+ ! Absorbers
+ !----------
+ conf%n_Absorbers = min_crtm_n_absorbers
+ if (config_element_exists(c_conf,"Extra_Absorbers")) &
+   conf%n_Absorbers = conf%n_Absorbers + config_get_data_dimension(c_conf,"Extra_Absorbers")
+
+ allocate( conf%Absorbers     ( conf%n_Absorbers ), &
+           conf%Absorber_Id   ( conf%n_Absorbers ), &
+           conf%Absorber_Units( conf%n_Absorbers ) )
+
+ conf%Absorbers(crtm_h2o_absorber_ind) = var_mixr
+ conf%Absorbers(crtm_o3_absorber_ind)  = var_oz
+
+ if (conf%n_Absorbers > min_crtm_n_absorbers) then
+   conf%Absorbers(min_crtm_n_absorbers+1:conf%n_Absorbers) = &
+      config_get_string_vector(c_conf,MAXVARLEN,"Extra_Absorbers")
+ end if
+
+ do jspec = min_crtm_n_absorbers+1, conf%n_Absorbers
+   ! TODO: units treatment needs to be more generic here (mass, volume, partial pressure, etc.)
+   BASENAME = conf%Absorbers(jspec)
+   conf%Absorbers(jspec) = "mass_concentration_of_"//trim(BASENAME)//"_in_air"
+   ivar = ufo_vars_getindex(UFO_Absorbers, conf%Absorbers(jspec))
+   if (ivar < 1) then
+     write(err_msg,*) 'crtm_conf_setup error: ',trim(BASENAME),' not supported by UFO_Absorbers'
+     call abor1_ftn(err_msg)
+   end if
+ end do
+
+ do jspec = 1, conf%n_Absorbers
+   ivar = ufo_vars_getindex(UFO_Absorbers, conf%Absorbers(jspec))
+   conf%Absorber_Id(jspec) = CRTM_Absorber_Id(ivar)
+   conf%Absorber_Units(jspec) = CRTM_Absorber_Units(ivar)
+ end do
+
+
+ ! Clouds
+ !-------
+ conf%n_Clouds = 0
+ if (config_element_exists(c_conf,"Clouds")) &
+   conf%n_Clouds = config_get_data_dimension(c_conf,"Clouds")
+ allocate( conf%Clouds  ( conf%n_Clouds,2), &
+           conf%Cloud_Id( conf%n_Clouds ) )
+ if (conf%n_Clouds > 0) then
+   conf%Clouds(1:conf%n_Clouds,1) = config_get_string_vector(c_conf,MAXVARLEN,"Clouds")
+   do jspec = 1, conf%n_Clouds
+     BASENAME = conf%Clouds(jspec,1)
+     conf%Clouds(jspec,1) = "atmosphere_mass_content_of_"//trim(BASENAME)
+     !TODO(JJGuerrette) :: fix hydrometeor variable names for CF convention
+     !conf%Clouds(jspec,1) = "mass_content_of_"//trim(BASENAME)//"_in_atmosphere_layer"
+     ivar = ufo_vars_getindex(UFO_Clouds, conf%Clouds(jspec,1))
+     if (ivar < 1) then
+       write(err_msg,*) 'crtm_conf_setup error: ',trim(BASENAME),' not supported by UFO_Clouds'
+       call abor1_ftn(err_msg)
+     end if
+     conf%Clouds(jspec,2) = "effective_radius_of_"//trim(BASENAME)//"_particle"
+     conf%Cloud_Id(jspec) = CRTM_Cloud_Id(ivar)
+   end do
+ end if
+
+ ! Aerosols
+ !---------
  IF (config_element_exists(c_conf,"n_Aerosols")) &
       &conf%n_Aerosols  = config_get_int(c_conf,"n_Aerosols" )
 
@@ -178,6 +289,11 @@ type(crtm_conf), intent(inout) :: conf
 
  deallocate(conf%SENSOR_ID)
  deallocate(conf%Land_WSI)
+ deallocate(conf%Absorbers)
+ deallocate(conf%Absorber_Id)
+ deallocate(conf%Absorber_Units)
+ deallocate(conf%Clouds)
+ deallocate(conf%Cloud_Id)
 
 end subroutine crtm_conf_delete
 
@@ -192,7 +308,7 @@ type(CRTM_Atmosphere_type), intent(inout) :: atm(:)
 type(crtm_conf) :: conf
 
 ! Local variables
-integer :: k1,ivar
+integer :: k1,ivar,jspec
 type(ufo_geoval), pointer :: geoval
 character(max_string) :: err_msg
 
@@ -217,54 +333,33 @@ character(max_string) :: err_msg
     call ufo_geovals_get_var(geovals, var_prsi, geoval)
     atm(k1)%Level_Pressure(:) = geoval%vals(:,k1) * 0.01     ! to hPa
     atm(k1)%Climatology         = US_STANDARD_ATMOSPHERE
-    atm(k1)%Absorber_Id(1:1)    = (/ H2O_ID /)
-    atm(k1)%Absorber_Units(1:1) = (/ MASS_MIXING_RATIO_UNITS /)
-    call ufo_geovals_get_var(geovals, var_mixr, geoval)
-    atm(k1)%Absorber(1:N_LAYERS,1)       = geoval%vals(:,k1)
-    atm(k1)%Absorber_Id(2:2)    = (/ O3_ID /)
-    atm(k1)%Absorber_Units(2:2) = (/ VOLUME_MIXING_RATIO_UNITS /)
 
-    ivar = ufo_vars_getindex(geovals%variables, var_oz)
-    IF (ivar < 0 .AND. TRIM(conf%aerosol_option) /= "") THEN 
-       atm(k1)%Absorber(1:N_LAYERS,2)=ozone_default_value
-    ELSE
-       CALL ufo_geovals_get_var(geovals, var_oz, geoval)
-       atm(k1)%Absorber(1:N_LAYERS,2)       = geoval%vals(:,k1)
-    ENDIF
+    do jspec = 1, conf%n_Absorbers
+       ! O3 Absorber has special treatment for Aerosols
+       if ( trim(conf%Absorbers(jspec)) == trim(var_oz) .AND. &
+            ufo_vars_getindex(geovals%variables, var_oz) < 0 .AND. &
+            TRIM(conf%aerosol_option) /= "" ) then
+          atm(k1)%Absorber(1:N_LAYERS,jspec) = ozone_default_value
+       else
+          CALL ufo_geovals_get_var(geovals, conf%Absorbers(jspec), geoval)
+          atm(k1)%Absorber(1:N_LAYERS,jspec) = geoval%vals(:,k1)
+       end if
+       atm(k1)%Absorber_Id(jspec)    = conf%Absorber_Id(jspec)
+       atm(k1)%Absorber_Units(jspec) = conf%Absorber_Units(jspec)
+    end do
 
-    IF (conf%n_Absorbers > min_crtm_n_absorbers) THEN
-
-       atm(k1)%Absorber_Id(3:3)    = (/ CO2_ID /)
-       atm(k1)%Absorber_Units(3:3) = (/ VOLUME_MIXING_RATIO_UNITS /)
-       CALL ufo_geovals_get_var(geovals, var_co2, geoval)
-       atm(k1)%Absorber(1:N_LAYERS,3)       = geoval%vals(:,k1)
-       
-    ENDIF
-
-    IF ( conf%n_Clouds >= 1 ) THEN
-
-       atm(k1)%Cloud(1)%Type = WATER_CLOUD
-       CALL ufo_geovals_get_var(geovals, var_clw, geoval)
-       atm(k1)%Cloud(1)%Water_Content = geoval%vals(:,k1)
-       CALL ufo_geovals_get_var(geovals, var_clwefr, geoval)
-       atm(k1)%Cloud(1)%Effective_Radius = geoval%vals(:,k1)
+    do jspec = 1, conf%n_Clouds
+       CALL ufo_geovals_get_var(geovals, conf%Clouds(jspec,1), geoval)
+       atm(k1)%Cloud(jspec)%Water_Content = geoval%vals(:,k1)
+       CALL ufo_geovals_get_var(geovals, conf%Clouds(jspec,2), geoval)
+       atm(k1)%Cloud(jspec)%Effective_Radius = geoval%vals(:,k1)
+       atm(k1)%Cloud(jspec)%Type = conf%Cloud_Id(jspec)
+    end do
 
 !** BTJ added 11/20/2018 for compatibility with CRTM REL 2.3.0+
 !** need to map to cloud fraction geoval, if it exists.  For now assume
-!** fully filled pixel. 
-       atm(k1)%Cloud_Fraction = 1.0_fp
-       
-    ENDIF
-
-    IF ( conf%n_Clouds >= 2 ) THEN
-
-       atm(k1)%Cloud(2)%Type = ICE_CLOUD
-       CALL ufo_geovals_get_var(geovals, var_cli, geoval)
-       atm(k1)%Cloud(2)%Water_Content = geoval%vals(:,k1)
-       CALL ufo_geovals_get_var(geovals, var_cliefr, geoval)
-       atm(k1)%Cloud(2)%Effective_Radius = geoval%vals(:,k1)
-
-    ENDIF
+!** fully filled pixel.
+    if (conf%n_Clouds > 0) atm(k1)%Cloud_Fraction = 1.0_fp
 
  end do
 
@@ -303,7 +398,7 @@ real(kind_real), allocatable :: ObsTb(:,:)
 
  allocate(ObsTb(n_profiles, n_channels))
  ObsTb = 0.0_kind_real
- 
+
  do n1 = 1,n_Channels
    call get_var_name(channels(n1),varname)
    call obsspace_get_db(obss, "ObsValue", varname, ObsTb(:,n1))
