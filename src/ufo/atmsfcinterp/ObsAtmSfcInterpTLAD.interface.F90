@@ -11,7 +11,10 @@ module ufo_atmsfcinterp_tlad_mod_c
   use iso_c_binding
   use config_mod
   use ufo_atmsfcinterp_tlad_mod 
+  use ufo_geovals_mod_c, only: ufo_geovals_registry
+  use ufo_geovals_mod,   only: ufo_geovals
   use string_f_c_mod
+  use ufo_vars_mod
   implicit none
   private
 
@@ -31,17 +34,20 @@ contains
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_atmsfcinterp_tlad_setup_c(c_key_self, c_conf, c_varlist) bind(c,name='ufo_atmsfcinterp_tlad_setup_f90')
+subroutine ufo_atmsfcinterp_tlad_setup_c(c_key_self, c_conf, c_varconf, c_varlist) bind(c,name='ufo_atmsfcinterp_tlad_setup_f90')
 implicit none
 integer(c_int), intent(inout) :: c_key_self
 type(c_ptr), intent(in)    :: c_conf
+type(c_ptr), intent(in)    :: c_varconf
 type(c_ptr), intent(in), value :: c_varlist
+character(len=MAXVARLEN), dimension(:), allocatable :: vars
     
 type(ufo_atmsfcinterp_tlad), pointer :: self
 
 call ufo_atmsfcinterp_tlad_registry%setup(c_key_self, self)
-
-call self%setup(c_conf)
+call ufo_vars_read(c_varconf, vars)
+call self%setup(vars)
+deallocate(vars)
 
 !> Update C++ ObsOperator with input variable list
 call f_c_push_string_vector(c_varlist, self%varin)
@@ -56,9 +62,7 @@ integer(c_int), intent(inout) :: c_key_self
     
 type(ufo_atmsfcinterp_tlad), pointer :: self
 
-call ufo_atmsfcinterp_tlad_registry%get(c_key_self, self)
-call self%opr_delete()
-call ufo_atmsfcinterp_tlad_registry%remove(c_key_self)
+call ufo_atmsfcinterp_tlad_registry%delete(c_key_self, self)
 
 end subroutine ufo_atmsfcinterp_tlad_delete_c
 
@@ -72,45 +76,58 @@ integer(c_int),     intent(in) :: c_key_geovals
 type(c_ptr), value, intent(in) :: c_obsspace
 
 type(ufo_atmsfcinterp_tlad), pointer :: self
+type(ufo_geovals),           pointer :: geovals
+
+character(len=*), parameter :: myname_="ufo_atmsfcinterp_tlad_settraj_c"
 
 call ufo_atmsfcinterp_tlad_registry%get(c_key_self, self)
-call self%opr_settraj(c_key_geovals, c_obsspace)
+call ufo_geovals_registry%get(c_key_geovals, geovals)
+
+call self%settraj(geovals, c_obsspace)
 
 end subroutine ufo_atmsfcinterp_tlad_settraj_c
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_atmsfcinterp_simobs_tl_c(c_key_self, c_key_geovals, c_obsspace, c_nobs, c_hofx) bind(c,name='ufo_atmsfcinterp_simobs_tl_f90')
+subroutine ufo_atmsfcinterp_simobs_tl_c(c_key_self, c_key_geovals, c_obsspace, c_nvars, c_nlocs, c_hofx) bind(c,name='ufo_atmsfcinterp_simobs_tl_f90')
 
 implicit none
 integer(c_int), intent(in) :: c_key_self
 integer(c_int), intent(in) :: c_key_geovals
 type(c_ptr), value, intent(in) :: c_obsspace
-integer(c_int), intent(in) :: c_nobs
-real(c_double), intent(inout) :: c_hofx(c_nobs)
+integer(c_int), intent(in) :: c_nvars, c_nlocs
+real(c_double), intent(inout) :: c_hofx(c_nvars, c_nlocs)
 
 type(ufo_atmsfcinterp_tlad), pointer :: self
+type(ufo_geovals),           pointer :: geovals
 
 call ufo_atmsfcinterp_tlad_registry%get(c_key_self, self)
-call self%opr_simobs_tl(c_key_geovals, c_obsspace, c_hofx)
+call ufo_geovals_registry%get(c_key_geovals, geovals)
+
+call self%simobs_tl(geovals, c_obsspace, c_nvars, c_nlocs, c_hofx)
 
 end subroutine ufo_atmsfcinterp_simobs_tl_c
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_atmsfcinterp_simobs_ad_c(c_key_self, c_key_geovals, c_obsspace, c_nobs, c_hofx) bind(c,name='ufo_atmsfcinterp_simobs_ad_f90')
+subroutine ufo_atmsfcinterp_simobs_ad_c(c_key_self, c_key_geovals, c_obsspace, c_nvars, c_nlocs, c_hofx) bind(c,name='ufo_atmsfcinterp_simobs_ad_f90')
 
 implicit none
 integer(c_int), intent(in) :: c_key_self
 integer(c_int), intent(in) :: c_key_geovals
 type(c_ptr), value, intent(in) :: c_obsspace
-integer(c_int), intent(in) :: c_nobs
-real(c_double), intent(in) :: c_hofx(c_nobs)
+integer(c_int), intent(in) :: c_nvars, c_nlocs
+real(c_double), intent(in) :: c_hofx(c_nvars, c_nlocs)
 
 type(ufo_atmsfcinterp_tlad), pointer :: self
+type(ufo_geovals),           pointer :: geovals
+
+character(len=*), parameter :: myname_="ufo_atmsfcinterp_simobs_ad_c"
 
 call ufo_atmsfcinterp_tlad_registry%get(c_key_self, self)
-call self%opr_simobs_ad(c_key_geovals, c_obsspace, c_hofx)
+call ufo_geovals_registry%get(c_key_geovals, geovals)
+
+call self%simobs_ad(geovals, c_obsspace, c_nvars, c_nlocs, c_hofx)
 
 end subroutine ufo_atmsfcinterp_simobs_ad_c
 

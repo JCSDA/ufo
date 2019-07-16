@@ -56,7 +56,7 @@ void ObsAtmSfcInterpTLAD::setTrajectory(const GeoVaLs & geovals, const ObsBias &
 void ObsAtmSfcInterpTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec,
                              const ObsBiasIncrement & bias) const {
   ufo_atmsfcinterp_simobs_tl_f90(keyOperAtmSfcInterp_, geovals.toFortran(), odb_,
-                            ovec.size(), ovec.toFortran());
+                            ovec.nvars(), ovec.nlocs(), ovec.toFortran());
   oops::Log::trace() << "ObsAtmSfcInterpTLAD: TL observation operator run" << std::endl;
 }
 
@@ -65,7 +65,7 @@ void ObsAtmSfcInterpTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector
 void ObsAtmSfcInterpTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec,
                              ObsBiasIncrement & bias) const {
   ufo_atmsfcinterp_simobs_ad_f90(keyOperAtmSfcInterp_, geovals.toFortran(), odb_,
-                            ovec.size(), ovec.toFortran());
+                            ovec.nvars(), ovec.nlocs(), ovec.toFortran());
 }
 
 // -----------------------------------------------------------------------------
