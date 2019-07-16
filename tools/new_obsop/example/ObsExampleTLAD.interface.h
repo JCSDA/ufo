@@ -21,6 +21,7 @@ extern "C" {
 // -----------------------------------------------------------------------------
 
   void ufo_example_tlad_setup_f90(F90hop &, const eckit::Configuration * const *,
+                                  const eckit::Configuration * const *,
                                   oops::Variables &);
   void ufo_example_tlad_delete_f90(F90hop &);
   void ufo_example_tlad_settraj_f90(const F90hop &, const F90goms &, const ioda::ObsSpace &);

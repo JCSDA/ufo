@@ -28,7 +28,9 @@ ObsExampleTLAD::ObsExampleTLAD(const ioda::ObsSpace & odb,
   : keyOper_(0), varin_(), odb_(odb)
 {
   const eckit::Configuration * configc = &config;
-  ufo_example_tlad_setup_f90(keyOper_, &configc, varin_);
+  const oops::Variables & observed = odb.obsvariables();
+  const eckit::Configuration * varconfig = &observed.toFortran();
+  ufo_example_tlad_setup_f90(keyOper_, &configc, &varconfig, varin_);
 
   oops::Log::trace() << "ObsExampleTLAD created" << std::endl;
 }

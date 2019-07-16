@@ -12,7 +12,6 @@ module ufo_example_mod
  use kinds
 
  use ufo_geovals_mod, only: ufo_geovals, ufo_geoval, ufo_geovals_get_var
- use ufo_basis_mod, only: ufo_basis
  use ufo_vars_mod
  use obsspace_mod
 

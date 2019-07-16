@@ -48,7 +48,7 @@ class ObsExampleTLAD : public LinearObsOperatorBase,
   void simulateObsAD(GeoVaLs &, const ioda::ObsVector &, ObsBiasIncrement &) const;
 
   // Other
-  const oops::Variables & variables() const {return *varin_;}
+  const oops::Variables & variables() const {return varin_;}
 
   int & toFortran() {return keyOper_;}
   const int & toFortran() const {return keyOper_;}
