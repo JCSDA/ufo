@@ -8,9 +8,6 @@
 #include "ufo/atmsfcinterp/ObsAtmSfcInterp.h"
 
 #include <ostream>
-#include <string>
-#include <vector>
-#include <boost/algorithm/string.hpp>
 
 #include "oops/util/Logger.h"
 
