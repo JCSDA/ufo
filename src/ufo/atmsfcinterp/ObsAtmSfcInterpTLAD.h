@@ -5,16 +5,15 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#ifndef TOOLS_NEW_OBSOP_EXAMPLE_OBSEXAMPLETLAD_H_
-#define TOOLS_NEW_OBSOP_EXAMPLE_OBSEXAMPLETLAD_H_
+#ifndef UFO_ATMSFCINTERP_OBSATMSFCINTERPTLAD_H_
+#define UFO_ATMSFCINTERP_OBSATMSFCINTERPTLAD_H_
 
 #include <ostream>
 #include <string>
 
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
-
-#include "ufo/example/ObsExampleTLAD.interface.h"
+#include "ufo/atmsfcinterp/ObsAtmSfcInterpTLAD.interface.h"
 #include "ufo/LinearObsOperatorBase.h"
 
 // Forward declarations
@@ -33,14 +32,14 @@ namespace ufo {
   class ObsBiasIncrement;
 
 // -----------------------------------------------------------------------------
-/// Example TL/AD observation operator class
-class ObsExampleTLAD : public LinearObsOperatorBase,
-                       private util::ObjectCounter<ObsExampleTLAD> {
+/// AtmSfcInterp TL/AD observation operator class
+class ObsAtmSfcInterpTLAD : public LinearObsOperatorBase,
+                       private util::ObjectCounter<ObsAtmSfcInterpTLAD> {
  public:
-  static const std::string classname() {return "ufo::ObsExampleTLAD";}
+  static const std::string classname() {return "ufo::ObsAtmSfcInterpTLAD";}
 
-  ObsExampleTLAD(const ioda::ObsSpace &, const eckit::Configuration &);
-  virtual ~ObsExampleTLAD();
+  ObsAtmSfcInterpTLAD(const ioda::ObsSpace &, const eckit::Configuration &);
+  virtual ~ObsAtmSfcInterpTLAD();
 
   // Obs Operators
   void setTrajectory(const GeoVaLs &, const ObsBias &);
@@ -48,14 +47,14 @@ class ObsExampleTLAD : public LinearObsOperatorBase,
   void simulateObsAD(GeoVaLs &, const ioda::ObsVector &, ObsBiasIncrement &) const;
 
   // Other
-  const oops::Variables & variables() const {return *varin_;}
+  const oops::Variables & variables() const {return varin_;}
 
-  int & toFortran() {return keyOper_;}
-  const int & toFortran() const {return keyOper_;}
+  int & toFortran() {return keyOperAtmSfcInterp_;}
+  const int & toFortran() const {return keyOperAtmSfcInterp_;}
 
  private:
   void print(std::ostream &) const;
-  F90hop keyOper_;
+  F90hop keyOperAtmSfcInterp_;
   const ioda::ObsSpace& odb_;
   oops::Variables varin_;
 };
@@ -63,4 +62,4 @@ class ObsExampleTLAD : public LinearObsOperatorBase,
 // -----------------------------------------------------------------------------
 
 }  // namespace ufo
-#endif  // TOOLS_NEW_OBSOP_EXAMPLE_OBSEXAMPLETLAD_H_
+#endif  // UFO_ATMSFCINTERP_OBSATMSFCINTERPTLAD_H_

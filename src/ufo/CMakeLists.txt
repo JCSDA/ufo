@@ -46,6 +46,7 @@ add_subdirectory( basis )
 add_subdirectory( filters )
 add_subdirectory( identity )
 add_subdirectory( atmvertinterp )
+add_subdirectory( atmsfcinterp )
 add_subdirectory( crtm )
 if( ${RTTOV_FOUND} )
     add_subdirectory( rttov )
@@ -60,6 +61,7 @@ list( APPEND ufo_src_files
     ${filters_src_files}
     ${identity_src_files}
     ${atmvertinterp_src_files}
+    ${atmsfcinterp_src_files}
     ${crtm_src_files}
     ${rttov_src_files}
     ${gnssro_src_files}
