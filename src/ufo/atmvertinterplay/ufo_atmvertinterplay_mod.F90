@@ -97,8 +97,7 @@ real(kind_real) :: rozcon,g
 real(kind_real) :: topozp,botozp
 real :: pindex
 
-  rozcon = 1./(21.4e-9*grav) ! = 1./((9.8 m/s**2) * (.001*DU)) =
-                    !(DU)*(s**2)/m
+  rozcon = 1./(1.e-3*DU*grav)
 
   ! Get pressure profiles from geovals log(cb)
   call ufo_geovals_get_var(geovals, var_prsi, modelpressures)

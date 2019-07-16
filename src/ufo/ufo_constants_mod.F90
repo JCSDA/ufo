@@ -30,5 +30,6 @@ real(kind_real), parameter, public :: v_w   = 0.8e-6     !> Water kinematic visc
 real(kind_real), parameter, public :: S_B   = 0.026
 real(kind_real), parameter, public :: gr    = 9.81
 real(kind_real), parameter, public :: Rou    = 1000.0
+real(kind_real), parameter, public :: DU    = 21.415e-6 !Dobson unit, kg O3/m**2
 end module ufo_constants_mod
 
