@@ -3,8 +3,8 @@ logging:
   categories: Warning, Error, Debug
 test_framework_runtime_config: "--log_level=test_suite"
 
-window_begin: 2018-04-14T21:00:00Z
-window_end: 2018-04-15T03:00:00Z
+window_begin: 2018-04-14T20:30:00Z
+window_end: 2018-04-15T03:30:00Z
 
 LinearObsOpTest:
   coefTL: 0.1
@@ -26,4 +26,4 @@ Observations:
     GeoVaLs:
       filename: Data/sbuv2_n19_geoval_2018041500_m.nc4
     vecequiv: GsiHofX
-    tolerance: 1.0e-05  # in % so that corresponds to 10^-3
+    tolerance: 1.0e-04  # in % so that corresponds to 10^-3
