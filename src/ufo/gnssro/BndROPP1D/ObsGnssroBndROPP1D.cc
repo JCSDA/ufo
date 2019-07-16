@@ -29,7 +29,7 @@ ObsGnssroBndROPP1D::ObsGnssroBndROPP1D(const ioda::ObsSpace & odb,
   : ObsOperatorBase(odb, config), keyOperGnssroBndROPP1D_(0), odb_(odb), varin_()
 {
   const std::vector<std::string> vv{"air_temperature", "specific_humidity", "air_pressure",
-                                    "geopotential_height", "sfc_geopotential_height"};
+                                    "geopotential_height", "surface_geopotential_height"};
   varin_.reset(new oops::Variables(vv));
 
   const eckit::Configuration * configc = &config;
