@@ -14,7 +14,7 @@ LinearObsOpTest:
 Observations:
   ObsTypes:
   - ObsOperator:
-      name: SeaSurfaceTemp
+      name: Identity
     ObsSpace:
       name: SeaSurfaceTemp
       ObsDataIn:

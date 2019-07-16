@@ -9,7 +9,7 @@ window_end: 2018-04-15T03:00:00Z
 Observations:
   ObsTypes:
   - ObsOperator:
-      name: Radiosonde
+      name: VertInterp
     ObsSpace:
       name: Radiosonde
       ObsDataIn:

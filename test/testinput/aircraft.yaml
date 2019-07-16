@@ -20,7 +20,7 @@ Observations:
       simulate:
         variables: [air_temperature]
     ObsOperator:
-      name: Aircraft
+      name: VertInterp
     GeoVaLs:
       filename: Data/aircraft_geoval_2018041500_m.nc4
     vecequiv: GsiHofX

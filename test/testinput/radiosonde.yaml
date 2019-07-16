@@ -14,7 +14,7 @@ LinearObsOpTest:
 Observations:
   ObsTypes:
   - ObsOperator:
-      name: Radiosonde
+      name: VertInterp
     ObsSpace:
       name: Radiosonde
       ObsDataIn:
