@@ -8,13 +8,11 @@
 #ifndef UFO_ATMSFCINTERP_OBSATMSFCINTERPTLAD_H_
 #define UFO_ATMSFCINTERP_OBSATMSFCINTERPTLAD_H_
 
-#include <memory>
 #include <ostream>
 #include <string>
 
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
-
 #include "ufo/atmsfcinterp/ObsAtmSfcInterpTLAD.interface.h"
 #include "ufo/LinearObsOperatorBase.h"
 
@@ -49,7 +47,7 @@ class ObsAtmSfcInterpTLAD : public LinearObsOperatorBase,
   void simulateObsAD(GeoVaLs &, const ioda::ObsVector &, ObsBiasIncrement &) const;
 
   // Other
-  const oops::Variables & variables() const {return *varin_;}
+  const oops::Variables & variables() const {return varin_;}
 
   int & toFortran() {return keyOperAtmSfcInterp_;}
   const int & toFortran() const {return keyOperAtmSfcInterp_;}
@@ -58,7 +56,7 @@ class ObsAtmSfcInterpTLAD : public LinearObsOperatorBase,
   void print(std::ostream &) const;
   F90hop keyOperAtmSfcInterp_;
   const ioda::ObsSpace& odb_;
-  std::unique_ptr<const oops::Variables> varin_;
+  oops::Variables varin_;
 };
 
 // -----------------------------------------------------------------------------

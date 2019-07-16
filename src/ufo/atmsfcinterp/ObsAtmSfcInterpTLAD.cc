@@ -8,13 +8,13 @@
 #include "ufo/atmsfcinterp/ObsAtmSfcInterpTLAD.h"
 
 #include <ostream>
-#include <string>
-#include <vector>
 
 #include "ioda/ObsSpace.h"
 #include "ioda/ObsVector.h"
+
 #include "oops/base/Variables.h"
 #include "oops/util/Logger.h"
+
 #include "ufo/GeoVaLs.h"
 #include "ufo/ObsBias.h"
 #include "ufo/ObsBiasIncrement.h"
@@ -22,7 +22,7 @@
 namespace ufo {
 
 // -----------------------------------------------------------------------------
-static LinearObsOperatorMaker<ObsAtmSfcInterpTLAD> maker2mTempTL_("2mTemp");
+static LinearObsOperatorMaker<ObsAtmSfcInterpTLAD> makerGSISfcModelTL_("GSISfcModel");;
 // -----------------------------------------------------------------------------
 
 ObsAtmSfcInterpTLAD::ObsAtmSfcInterpTLAD(const ioda::ObsSpace & odb,
@@ -30,9 +30,9 @@ ObsAtmSfcInterpTLAD::ObsAtmSfcInterpTLAD(const ioda::ObsSpace & odb,
   : keyOperAtmSfcInterp_(0), varin_(), odb_(odb)
 {
   const eckit::Configuration * configc = &config;
-  std::vector<std::string> vvin;
-  ufo_atmsfcinterp_tlad_setup_f90(keyOperAtmSfcInterp_, &configc, vvin);
-  varin_.reset(new oops::Variables(vvin));
+  const oops::Variables & observed = odb.obsvariables();
+  const eckit::Configuration * varconfig = &observed.toFortran();
+  ufo_atmsfcinterp_tlad_setup_f90(keyOperAtmSfcInterp_, &configc, &varconfig, varin_);
 
   oops::Log::trace() << "ObsAtmSfcInterpTLAD created" << std::endl;
 }
@@ -66,7 +66,6 @@ void ObsAtmSfcInterpTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector
                              ObsBiasIncrement & bias) const {
   ufo_atmsfcinterp_simobs_ad_f90(keyOperAtmSfcInterp_, geovals.toFortran(), odb_,
                             ovec.size(), ovec.toFortran());
-  oops::Log::trace() << "ObsAtmSfcInterpTLAD: adjoint observation operator run" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
