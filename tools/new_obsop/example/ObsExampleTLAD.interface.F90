@@ -44,7 +44,7 @@ call ufo_example_tlad_registry%setup(c_key_self, self)
 call self%setup(c_conf)
 
 !> Update C++ ObsOperator with input variable list
-call f_c_push_string_vector(c_varlist, self%varin)
+call f_c_push_string_varlist(c_varlist, self%varin)
 
 end subroutine ufo_example_tlad_setup_c
 
