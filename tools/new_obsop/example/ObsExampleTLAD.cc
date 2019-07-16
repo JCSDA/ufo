@@ -8,8 +8,6 @@
 #include "tools/new_obsop/example/ObsExampleTLAD.h"
 
 #include <ostream>
-#include <string>
-#include <vector>
 
 #include "ioda/ObsSpace.h"
 #include "ioda/ObsVector.h"
@@ -30,9 +28,7 @@ ObsExampleTLAD::ObsExampleTLAD(const ioda::ObsSpace & odb,
   : keyOper_(0), varin_(), odb_(odb)
 {
   const eckit::Configuration * configc = &config;
-  std::vector<std::string> vvin;
-  ufo_example_tlad_setup_f90(keyOper_, &configc, vvin);
-  varin_.reset(new oops::Variables(vvin));
+  ufo_example_tlad_setup_f90(keyOper_, &configc, varin_);
 
   oops::Log::trace() << "ObsExampleTLAD created" << std::endl;
 }
