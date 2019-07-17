@@ -8,9 +8,6 @@
 #include "ufo/atmvertinterplay/ObsAtmVertInterpLayTLAD.h"
 
 #include <ostream>
-#include <string>
-#include <vector>
-#include <boost/algorithm/string.hpp>
 
 #include "ioda/ObsSpace.h"
 #include "ioda/ObsVector.h"
@@ -28,18 +25,14 @@ static LinearObsOperatorMaker<ObsAtmVertInterpLayTLAD> makerAtmVertInterpLayTL_(
 
 ObsAtmVertInterpLayTLAD::ObsAtmVertInterpLayTLAD(const ioda::ObsSpace & odb,
                                const eckit::Configuration & config)
-  : keyOper_(0), varin_(), odb_(odb)
+  : keyOperAtmVertInterpLay_(0), varin_(), odb_(odb)
 {
-  int c_name_size = 800;
-  char *buffin = new char[c_name_size];
   const eckit::Configuration * configc = &config;
+  const oops::Variables & observed = odb.obsvariables();
+  const eckit::Configuration * varconfig = &observed.toFortran();
 
-  ufo_atmvertinterplay_tlad_setup_f90(keyOper_, &configc, buffin, c_name_size);
+  ufo_atmvertinterplay_tlad_setup_f90(keyOperAtmVertInterpLay_, &configc, &varconfig, varin_);
 
-  std::string vstr_in(buffin);
-  std::vector<std::string> vvin;
-  boost::split(vvin, vstr_in, boost::is_any_of("\t"));
-  varin_.reset(new oops::Variables(vvin));
 
   oops::Log::trace() << "ObsAtmVertInterpLayTLAD created" << std::endl;
 }
@@ -47,33 +40,30 @@ ObsAtmVertInterpLayTLAD::ObsAtmVertInterpLayTLAD(const ioda::ObsSpace & odb,
 // -----------------------------------------------------------------------------
 
 ObsAtmVertInterpLayTLAD::~ObsAtmVertInterpLayTLAD() {
-  ufo_atmvertinterplay_tlad_delete_f90(keyOper_);
+  ufo_atmvertinterplay_tlad_delete_f90(keyOperAtmVertInterpLay_);
   oops::Log::trace() << "ObsAtmVertInterpLayTLAD destructed" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
 void ObsAtmVertInterpLayTLAD::setTrajectory(const GeoVaLs & geovals, const ObsBias & bias) {
-  ufo_atmvertinterplay_tlad_settraj_f90(keyOper_, geovals.toFortran(), odb_);
-  oops::Log::trace() << "ObsAtmVertInterpLayTLAD: trajectory set" << std::endl;
+  ufo_atmvertinterplay_tlad_settraj_f90(keyOperAtmVertInterpLay_, geovals.toFortran(), odb_);
 }
 
 // -----------------------------------------------------------------------------
 
 void ObsAtmVertInterpLayTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec,
                              const ObsBiasIncrement & bias) const {
-  ufo_atmvertinterplay_simobs_tl_f90(keyOper_, geovals.toFortran(), odb_,
-                            ovec.size(), ovec.toFortran());
-  oops::Log::trace() << "ObsAtmVertInterpLayTLAD: TL observation operator run" << std::endl;
+  ufo_atmvertinterplay_simobs_tl_f90(keyOperAtmVertInterpLay_, geovals.toFortran(), odb_,
+                            ovec.nvars(), ovec.nlocs(), ovec.toFortran());
 }
 
 // -----------------------------------------------------------------------------
 
 void ObsAtmVertInterpLayTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec,
                              ObsBiasIncrement & bias) const {
-  ufo_atmvertinterplay_simobs_ad_f90(keyOper_, geovals.toFortran(), odb_,
-                            ovec.size(), ovec.toFortran());
-  oops::Log::trace() << "ObsAtmVertInterpLayTLAD: adjoint observation operator run" << std::endl;
+  ufo_atmvertinterplay_simobs_ad_f90(keyOperAtmVertInterpLay_, geovals.toFortran(), odb_,
+                            ovec.nvars(), ovec.nlocs(), ovec.toFortran());
 }
 
 // -----------------------------------------------------------------------------

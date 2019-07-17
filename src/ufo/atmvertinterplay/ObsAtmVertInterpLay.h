@@ -8,13 +8,11 @@
 #ifndef UFO_ATMVERTINTERPLAY_OBSATMVERTINTERPLAY_H_
 #define UFO_ATMVERTINTERPLAY_OBSATMVERTINTERPLAY_H_
 
-#include <memory>
 #include <ostream>
 #include <string>
 
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
-
 #include "ufo/atmvertinterplay/ObsAtmVertInterpLay.interface.h"
 #include "ufo/ObsOperatorBase.h"
 
@@ -45,16 +43,16 @@ class ObsAtmVertInterpLay : public ObsOperatorBase,
   void simulateObs(const GeoVaLs &, ioda::ObsVector &) const;
 
 // Other
-  const oops::Variables & variables() const {return *varin_;}
+  const oops::Variables & variables() const {return varin_;}
 
-  int & toFortran() {return keyOper_;}
-  const int & toFortran() const {return keyOper_;}
+  int & toFortran() {return keyOperAtmInterpLay_;}
+  const int & toFortran() const {return keyOperAtmInterpLay_;}
 
  private:
   void print(std::ostream &) const;
-  F90hop keyOper_;
+  F90hop keyOperAtmInterpLay_;
   const ioda::ObsSpace& odb_;
-  std::unique_ptr<const oops::Variables> varin_;
+  oops::Variables varin_;
 };
 
 // -----------------------------------------------------------------------------

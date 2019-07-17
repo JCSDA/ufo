@@ -8,11 +8,10 @@
 module ufo_atmvertinterplay_tlad_mod
 
  use iso_c_binding
- use config_mod
  use kinds
 
- use ufo_geovals_mod, only: ufo_geovals, ufo_geoval, ufo_geovals_get_var
- use ufo_basis_tlad_mod, only: ufo_basis_tlad
+ use ufo_geovals_mod
+ use ufo_geovals_mod_c, only: ufo_geovals_registry
  use ufo_vars_mod
  use obsspace_mod
 
@@ -23,77 +22,77 @@ module ufo_atmvertinterplay_tlad_mod
  !> Fortran derived type for the tl/ad observation operator
  ! TODO: add to the below type what you need for your tl/ad observation operator
  !       this type can hold information on trajectory, for atmvertinterplay
- type, extends(ufo_basis_tlad), public :: ufo_atmvertinterplay_tlad
+ type, public :: ufo_atmvertinterplay_tlad
  private
   integer :: nvars
+  integer :: nval, nlocs
   character(len=max_string), public, allocatable :: varin(:)
  contains
-  procedure :: setup  => ufo_atmvertinterplay_tlad_setup
-  procedure :: delete  => ufo_atmvertinterplay_tlad_delete
-  procedure :: settraj => ufo_atmvertinterplay_tlad_settraj
-  procedure :: simobs_tl  => ufo_atmvertinterplay_simobs_tl
-  procedure :: simobs_ad  => ufo_atmvertinterplay_simobs_ad
+  procedure :: setup  => atmvertinterplay_tlad_setup_
+  procedure :: delete  => atmvertinterplay_tlad_delete_
+  procedure :: settraj => atmvertinterplay_tlad_settraj_
+  procedure :: simobs_tl  => atmvertinterplay_simobs_tl_
+  procedure :: simobs_ad  => atmvertinterplay_simobs_ad_
  end type ufo_atmvertinterplay_tlad
 
 contains
 
 ! ------------------------------------------------------------------------------
-! TODO: add setup of your TL/AD observation operator (optional)
-subroutine ufo_atmvertinterplay_tlad_setup(self, c_conf)
+subroutine atmvertinterplay_tlad_setup_(self, vars)
 implicit none
 class(ufo_atmvertinterplay_tlad), intent(inout) :: self
-type(c_ptr),              intent(in)    :: c_conf
+character(len=MAXVARLEN), dimension(:), intent(inout) :: vars
 
-! TODO: setup input variables varin (updated model variables)
-  self%nvars = size(config_get_string_vector(c_conf, max_string, "variables"))
+  self%nvars = size(vars)
+  !> Allocate varin
+  allocate(self%varin(self%nvars))
+  self%varin = vars
 
-end subroutine ufo_atmvertinterplay_tlad_setup
+end subroutine atmvertinterplay_tlad_setup_
 
 ! ------------------------------------------------------------------------------
-! TODO: add cleanup of your TL/AD observation operator (optional)
-subroutine ufo_atmvertinterplay_tlad_delete(self)
+subroutine atmvertinterplay_tlad_delete_(self)
 implicit none
 class(ufo_atmvertinterplay_tlad), intent(inout) :: self
 
   if (allocated(self%varin))   deallocate(self%varin)
 
-end subroutine ufo_atmvertinterplay_tlad_delete
+end subroutine atmvertinterplay_tlad_delete_
 
 ! ------------------------------------------------------------------------------
-! TODO: replace below function with your set trajectory for tl/ad code
-subroutine ufo_atmvertinterplay_tlad_settraj(self, geovals, obss)
+subroutine atmvertinterplay_tlad_settraj_(self, geovals, obss)
 implicit none
 class(ufo_atmvertinterplay_tlad), intent(inout) :: self
 type(ufo_geovals),       intent(in)    :: geovals
 type(c_ptr), value,      intent(in)    :: obss
 
-end subroutine ufo_atmvertinterplay_tlad_settraj
+end subroutine atmvertinterplay_tlad_settraj_
 
 ! ------------------------------------------------------------------------------
-! TODO: replace below function with your tl observation operator.
 ! Note: this can use information saved from trajectory in your ufo_atmvertinterplay_tlad type
 ! Input geovals parameter represents dx for tangent linear model
-subroutine ufo_atmvertinterplay_simobs_tl(self, geovals, hofx, obss)
+subroutine atmvertinterplay_simobs_tl_(self, geovals, obss, nvars, nlocs, hofx)
 implicit none
 class(ufo_atmvertinterplay_tlad), intent(in)    :: self
-type(ufo_geovals),       intent(in)    :: geovals
-real(c_double),          intent(inout) :: hofx(:)
+type(ufo_geovals),       intent(inout)    :: geovals
+integer, intent(in) :: nvars, nlocs
+real(c_double),          intent(in) :: hofx(nvars, nlocs)
 type(c_ptr), value,      intent(in)    :: obss
 
-end subroutine ufo_atmvertinterplay_simobs_tl
+end subroutine atmvertinterplay_simobs_tl_
 
 ! ------------------------------------------------------------------------------
-! TODO: replace below function with your ad observation operator.
 ! Note: this can use information saved from trajectory in your ufo_atmvertinterplay_tlad type
-subroutine ufo_atmvertinterplay_simobs_ad(self, geovals, hofx, obss)
+subroutine atmvertinterplay_simobs_ad_(self, geovals, obss, nvars, nlocs, hofx)
 implicit none
 class(ufo_atmvertinterplay_tlad), intent(in)    :: self
 type(ufo_geovals),       intent(inout) :: geovals
-real(c_double),          intent(in)    :: hofx(:)
+integer, intent(in) :: nvars, nlocs
+real(c_double),          intent(in)    :: hofx(nvars, nlocs)
 type(c_ptr), value,      intent(in)    :: obss
 
 
-end subroutine ufo_atmvertinterplay_simobs_ad
+end subroutine atmvertinterplay_simobs_ad_
 
 ! ------------------------------------------------------------------------------
 

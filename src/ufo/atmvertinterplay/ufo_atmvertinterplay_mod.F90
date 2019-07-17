@@ -37,10 +37,9 @@ module ufo_atmvertinterplay_mod
 contains
 
 ! ------------------------------------------------------------------------------
-subroutine ufo_atmvertinterplay_setup(self, c_conf, vars)
+subroutine ufo_atmvertinterplay_setup(self, vars)
 implicit none
 class(ufo_atmvertinterplay), intent(inout) :: self
-type(c_ptr),        intent(in)    :: c_conf
 character(len=MAXVARLEN), dimension(:), intent(inout) :: vars
   
 !Local Variables
