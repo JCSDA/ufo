@@ -12,14 +12,18 @@ use kinds
 use ufo_geovals_mod
 use obsspace_mod
 use config_mod
+use ufo_vars_mod
 
 implicit none
-public :: ufo_example, ufo_example_create, ufo_example_delete, ufo_example_prior, ufo_example_post
+public :: ufo_example_create, ufo_example_delete, ufo_example_prior, ufo_example_post
 private
+integer, parameter :: max_string=800
 
 ! ------------------------------------------------------------------------------
 !> TODO: fill in this type
-type :: ufo_example
+type, public :: ufo_example
+private
+  character(len=max_string), public, allocatable :: geovars(:)
 end type ufo_example
 
 ! ------------------------------------------------------------------------------
@@ -31,6 +35,8 @@ implicit none
 type(ufo_example), intent(inout) :: self
 type(c_ptr), intent(in)          :: conf
 
+! TODO: set self%geovars (list of variables to use from GeoVaLs) if needed
+
 end subroutine ufo_example_create
 
 ! ------------------------------------------------------------------------------
@@ -38,6 +44,8 @@ end subroutine ufo_example_create
 subroutine ufo_example_delete(self)
 implicit none
 type(ufo_example), intent(inout) :: self
+
+if (allocated(self%geovars))   deallocate(self%geovars)
 
 end subroutine ufo_example_delete
 
@@ -53,11 +61,12 @@ end subroutine ufo_example_prior
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_example_post(self, obspace, hofx)
+subroutine ufo_example_post(self, obspace, nvars, nlocs, hofx)
 implicit none
 type(ufo_example),  intent(in) :: self
 type(c_ptr), value, intent(in) :: obspace
-real(c_double),     intent(in) :: hofx(:)
+integer,            intent(in) :: nvars, nlocs
+real(c_double),     intent(in) :: hofx(nvars, nlocs)
 
 end subroutine ufo_example_post
 
