@@ -5,15 +5,15 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
  */
 
-#ifndef UFO_ATMVERTINTERPLAY_OBSATMVERTINTERPLAY_H_
-#define UFO_ATMVERTINTERPLAY_OBSATMVERTINTERPLAY_H_
+#ifndef UFO_ATMSFCINTERP_OBSATMSFCINTERP_H_
+#define UFO_ATMSFCINTERP_OBSATMSFCINTERP_H_
 
 #include <ostream>
 #include <string>
 
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
-#include "ufo/atmvertinterplay/ObsAtmVertInterpLay.interface.h"
+#include "ufo/atmsfcinterp/ObsAtmSfcInterp.interface.h"
 #include "ufo/ObsOperatorBase.h"
 
 /// Forward declarations
@@ -28,16 +28,17 @@ namespace ioda {
 
 namespace ufo {
   class GeoVaLs;
+  class ObsBias;
 
 // -----------------------------------------------------------------------------
-/// AtmVertInterpLay observation operator class
-class ObsAtmVertInterpLay : public ObsOperatorBase,
-                   private util::ObjectCounter<ObsAtmVertInterpLay> {
+/// AtmSfcInterp observation operator class
+class ObsAtmSfcInterp : public ObsOperatorBase,
+                   private util::ObjectCounter<ObsAtmSfcInterp> {
  public:
-  static const std::string classname() {return "ufo::ObsAtmVertInterpLay";}
+  static const std::string classname() {return "ufo::ObsAtmSfcInterp";}
 
-  ObsAtmVertInterpLay(const ioda::ObsSpace &, const eckit::Configuration &);
-  virtual ~ObsAtmVertInterpLay();
+  ObsAtmSfcInterp(const ioda::ObsSpace &, const eckit::Configuration &);
+  virtual ~ObsAtmSfcInterp();
 
 // Obs Operator
   void simulateObs(const GeoVaLs &, ioda::ObsVector &) const;
@@ -45,12 +46,12 @@ class ObsAtmVertInterpLay : public ObsOperatorBase,
 // Other
   const oops::Variables & variables() const {return varin_;}
 
-  int & toFortran() {return keyOperAtmVertInterpLay_;}
-  const int & toFortran() const {return keyOperAtmVertInterpLay_;}
+  int & toFortran() {return keyOperAtmSfcInterp_;}
+  const int & toFortran() const {return keyOperAtmSfcInterp_;}
 
  private:
   void print(std::ostream &) const;
-  F90hop keyOperAtmVertInterpLay_;
+  F90hop keyOperAtmSfcInterp_;
   const ioda::ObsSpace& odb_;
   oops::Variables varin_;
 };
@@ -58,4 +59,4 @@ class ObsAtmVertInterpLay : public ObsOperatorBase,
 // -----------------------------------------------------------------------------
 
 }  // namespace ufo
-#endif  // UFO_ATMVERTINTERPLAY_OBSATMVERTINTERPLAY_H_
+#endif  // UFO_ATMSFCINTERP_OBSATMSFCINTERP_H_

@@ -22,6 +22,7 @@
 namespace ufo {
 
 // -----------------------------------------------------------------------------
+static LinearObsOperatorMaker<ObsIdentityTLAD> makerIdentityTL_("Identity");
 static LinearObsOperatorMaker<ObsIdentityTLAD> makerSST_("SeaSurfaceTemp");
 static LinearObsOperatorMaker<ObsIdentityTLAD> makerSSS_("SeaSurfaceSalinity");
 // -----------------------------------------------------------------------------

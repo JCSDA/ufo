@@ -1,0 +1,55 @@
+window_begin: 2018-04-14T20:30:00Z
+window_end: 2018-04-15T03:30:00Z
+
+LinearObsOpTest:
+  coefTL: 0.1
+  toleranceTL: 1.0e-9
+  toleranceAD: 1.0e-11
+
+Observations:
+  ObsTypes:
+  - ObsOperator:
+      name: GSISfcModel 
+      use_fact10: 0
+    ObsSpace:
+      name: GSISfcModel
+      ObsDataIn:
+        obsfile: Data/sfc_obs_2018041500_m.nc4
+      ObsDataOut:
+        obsfile: Data/sfc_obs_2018041500_m_out.nc4
+      simulate:
+        variables: [air_temperature]
+    GeoVaLs:
+      filename: Data/sfc_geoval_2018041500_m.nc4
+    vecequiv: GsiHofX
+    tolerance: 1.0e-04
+  - ObsOperator:
+      name: GSISfcModel 
+      use_fact10: 0
+    ObsSpace:
+      name: GSISfcModel
+      ObsDataIn:
+        obsfile: Data/sfc_obs_2018041500_m.nc4
+      ObsDataOut:
+        obsfile: Data/sfc_obs_2018041500_m_out.nc4
+      simulate:
+        variables: [eastward_wind, northward_wind]
+    GeoVaLs:
+      filename: Data/sfc_geoval_2018041500_m.nc4
+    vecequiv: GsiHofX
+    tolerance: 1.0e-03
+  - ObsOperator:
+      name: GSISfcModel 
+      use_fact10: 1
+    ObsSpace:
+      name: GSISfcModel
+      ObsDataIn:
+        obsfile: Data/sfc_obs_2018041500_m.nc4
+      ObsDataOut:
+        obsfile: Data/sfc_obs_2018041500_m_out.nc4
+      simulate:
+        variables: [eastward_wind, northward_wind]
+    GeoVaLs:
+      filename: Data/sfc_geoval_2018041500_m.nc4
+    vecequiv: GsiHofX
+    tolerance: 1.0e-05

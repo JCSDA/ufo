@@ -5,12 +5,13 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
  */
 
+#include "ufo/Locations.h"
+
 #include <memory>
 #include <vector>
 
-#include "ufo/Locations.h"
-
 #include "eckit/config/Configuration.h"
+#include "eckit/exception/Exceptions.h"
 
 #include "oops/util/Logger.h"
 #include "oops/util/Random.h"

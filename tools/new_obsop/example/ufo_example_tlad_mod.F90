@@ -12,7 +12,6 @@ module ufo_example_tlad_mod
  use kinds
 
  use ufo_geovals_mod, only: ufo_geovals, ufo_geoval, ufo_geovals_get_var
- use ufo_basis_tlad_mod, only: ufo_basis_tlad
  use ufo_vars_mod
  use obsspace_mod
 
@@ -23,26 +22,27 @@ module ufo_example_tlad_mod
  !> Fortran derived type for the tl/ad observation operator
  ! TODO: add to the below type what you need for your tl/ad observation operator
  !       this type can hold information on trajectory, for example
- type, extends(ufo_basis_tlad), public :: ufo_example_tlad
+ type, public :: ufo_example_tlad
  private
   integer :: nvars_in
   character(len=max_string), public, allocatable :: varin(:)
  contains
   procedure :: setup  => ufo_example_tlad_setup
-  procedure :: delete  => ufo_example_tlad_delete
   procedure :: settraj => ufo_example_tlad_settraj
   procedure :: simobs_tl  => ufo_example_simobs_tl
   procedure :: simobs_ad  => ufo_example_simobs_ad
+  final :: destructor
  end type ufo_example_tlad
 
 contains
 
 ! ------------------------------------------------------------------------------
 ! TODO: add setup of your TL/AD observation operator (optional)
-subroutine ufo_example_tlad_setup(self, c_conf)
+subroutine ufo_example_tlad_setup(self, c_conf, vars)
 implicit none
 class(ufo_example_tlad), intent(inout) :: self
-type(c_ptr),              intent(in)    :: c_conf
+type(c_ptr),             intent(in)    :: c_conf
+character(len=MAXVARLEN), dimension(:), intent(inout) :: vars ! variables to be simulated
 
 ! TODO: setup input variables varin (updated model variables)
   self%nvars_in = 0
@@ -51,13 +51,13 @@ end subroutine ufo_example_tlad_setup
 
 ! ------------------------------------------------------------------------------
 ! TODO: add cleanup of your TL/AD observation operator (optional)
-subroutine ufo_example_tlad_delete(self)
+subroutine destructor(self)
 implicit none
-class(ufo_example_tlad), intent(inout) :: self
+type(ufo_example_tlad), intent(inout) :: self
 
   if (allocated(self%varin))   deallocate(self%varin)
 
-end subroutine ufo_example_tlad_delete
+end subroutine destructor
 
 ! ------------------------------------------------------------------------------
 ! TODO: replace below function with your set trajectory for tl/ad code
@@ -73,11 +73,12 @@ end subroutine ufo_example_tlad_settraj
 ! TODO: replace below function with your tl observation operator.
 ! Note: this can use information saved from trajectory in your ufo_example_tlad type
 ! Input geovals parameter represents dx for tangent linear model
-subroutine ufo_example_simobs_tl(self, geovals, hofx, obss)
+subroutine ufo_example_simobs_tl(self, geovals, obss, nvars, nlocs, hofx)
 implicit none
 class(ufo_example_tlad), intent(in)    :: self
 type(ufo_geovals),       intent(in)    :: geovals
-real(c_double),          intent(inout) :: hofx(:)
+integer,                 intent(in)    :: nvars, nlocs
+real(c_double),          intent(inout) :: hofx(nvars, nlocs)
 type(c_ptr), value,      intent(in)    :: obss
 
 end subroutine ufo_example_simobs_tl
@@ -85,11 +86,12 @@ end subroutine ufo_example_simobs_tl
 ! ------------------------------------------------------------------------------
 ! TODO: replace below function with your ad observation operator.
 ! Note: this can use information saved from trajectory in your ufo_example_tlad type
-subroutine ufo_example_simobs_ad(self, geovals, hofx, obss)
+subroutine ufo_example_simobs_ad(self, geovals, obss, nvars, nlocs, hofx)
 implicit none
 class(ufo_example_tlad), intent(in)    :: self
 type(ufo_geovals),       intent(inout) :: geovals
-real(c_double),          intent(in)    :: hofx(:)
+integer,                 intent(in)    :: nvars, nlocs
+real(c_double),          intent(in)    :: hofx(nvars, nlocs)
 type(c_ptr), value,      intent(in)    :: obss
 
 
