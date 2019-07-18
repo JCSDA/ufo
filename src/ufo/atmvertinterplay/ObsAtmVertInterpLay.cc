@@ -42,10 +42,9 @@ ObsAtmVertInterpLay::~ObsAtmVertInterpLay() {
 
 // -----------------------------------------------------------------------------
 
-void ObsAtmVertInterpLay::simulateObs(const GeoVaLs & gv, ioda::ObsVector & ovec) const {
+void ObsAtmVertInterpLay::simulateObs(const GeoVaLs & gom, ioda::ObsVector & ovec) const {
   ufo_atmvertinterplay_simobs_f90(keyOperAtmVertInterpLay_, gom.toFortran(), odb_, ovec.nvars(), ovec.nlocs(),
                          ovec.toFortran());
-  oops::Log::trace() << "ObsAtmVertInterpLay: observation operator run" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

@@ -74,9 +74,9 @@ end subroutine atmvertinterplay_tlad_settraj_
 subroutine atmvertinterplay_simobs_tl_(self, geovals, obss, nvars, nlocs, hofx)
 implicit none
 class(ufo_atmvertinterplay_tlad), intent(in)    :: self
-type(ufo_geovals),       intent(inout)    :: geovals
+type(ufo_geovals),       intent(in)    :: geovals
 integer, intent(in) :: nvars, nlocs
-real(c_double),          intent(in) :: hofx(nvars, nlocs)
+real(c_double),          intent(inout) :: hofx(nvars, nlocs)
 type(c_ptr), value,      intent(in)    :: obss
 
 end subroutine atmvertinterplay_simobs_tl_

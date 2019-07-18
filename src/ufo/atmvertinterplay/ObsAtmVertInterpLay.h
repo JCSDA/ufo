@@ -28,6 +28,8 @@ namespace ioda {
 
 namespace ufo {
   class GeoVaLs;
+  class ObsBias;
+  class ObsBiasIncrement;
 
 // -----------------------------------------------------------------------------
 /// AtmVertInterpLay observation operator class
@@ -40,17 +42,19 @@ class ObsAtmVertInterpLay : public ObsOperatorBase,
   virtual ~ObsAtmVertInterpLay();
 
 // Obs Operator
-  void simulateObs(const GeoVaLs &, ioda::ObsVector &) const;
+  void setTrajectory(const GeoVaLs &, const ObsBias &);
+  void simulateObsTL(const GeoVaLs &, ioda::ObsVector &, const ObsBiasIncrement &) const;
+  void simulateObsAD(GeoVaLs &, const ioda::ObsVector &, ObsBiasIncrement &) const;
 
 // Other
   const oops::Variables & variables() const {return varin_;}
 
-  int & toFortran() {return keyOperAtmInterpLay_;}
-  const int & toFortran() const {return keyOperAtmInterpLay_;}
+  int & toFortran() {return keyOperAtmVertInterpLay_;}
+  const int & toFortran() const {return keyOperAtmVertInterpLay_;}
 
  private:
   void print(std::ostream &) const;
-  F90hop keyOperAtmInterpLay_;
+  F90hop keyOperAtmVertInterpLay_;
   const ioda::ObsSpace& odb_;
   oops::Variables varin_;
 };
