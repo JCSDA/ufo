@@ -734,6 +734,7 @@ integer :: nval
 integer :: ncid, dimid, varid, vartype, ndims
 integer, dimension(3) :: dimids
 integer :: ivar
+integer :: ierr
 
 character(max_string) :: err_msg
 
@@ -746,6 +747,11 @@ real, allocatable :: field2d(:,:), field1d(:)
 call check('nf90_open', nf90_open(trim(filename),nf90_nowrite,ncid))
 
 ! find how many locs are in the file
+ierr = nf90_inq_dimid(ncid, "nlocs", dimid)
+if(ierr /= nf90_noerr) then
+  write(err_msg,*) "Error: Dimension nlocs not found in ", trim(filename)
+  call abor1_ftn(err_msg)
+endif
 call check('nf90_inq_dimid', nf90_inq_dimid(ncid, "nlocs", dimid))
 call check('nf90_inquire_dimension', nf90_inquire_dimension(ncid, dimid, len = nlocs_all))
 
@@ -761,7 +767,11 @@ call ufo_geovals_setup(self, c_vars, nlocs)
 
 do ivar = 1, self%nvar
 
-  call check('nf90_inq_varid', nf90_inq_varid(ncid, self%variables(ivar), varid))
+  ierr = nf90_inq_varid(ncid, self%variables(ivar), varid)
+  if(ierr /= nf90_noerr) then
+    write(err_msg,*) "Error: Variable ", trim(self%variables(ivar)), " not found in ", trim(filename)
+    call abor1_ftn(err_msg)
+  endif
 
   call check('nf90_inquire_variable', nf90_inquire_variable(ncid, varid, xtype = vartype, &
                                          ndims = ndims, dimids = dimids))
