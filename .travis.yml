@@ -25,16 +25,22 @@ before_install:
 # Clone all repos
 #======================================================================
   - pwd
+#  checkout for the same branch name in ufo-bundle
   - git clone https://github.com/jcsda/ufo-bundle.git ${REPO_SOURCE_DIR}/ufo-bundle
+  - cd ${REPO_SOURCE_DIR}/ufo-bundle
+  - git checkout $BRANCH || echo "No branch named $BRANCH in oops repo"
+  - cd $REPO_SOURCE_DIR  
+
   - git clone https://github.com/jcsda/GSW-Fortran.git ${REPO_SOURCE_DIR}/ufo-bundle/gsw
   - git clone https://github.com/jcsda/fckit.git ${REPO_SOURCE_DIR}/ufo-bundle/fckit
-  - date
 
 #  checkout for the same branch name in crtm
+  - date
   - git clone https://github.com/jcsda/crtm.git ${REPO_SOURCE_DIR}/ufo-bundle/crtm
   - cd ${REPO_SOURCE_DIR}/ufo-bundle/crtm
   - git checkout $BRANCH || echo "No branch named $BRANCH in crtm repo"
-  - cd $REPO_SOURCE_DIR  
+  - cd $REPO_SOURCE_DIR
+  - date  
 
 #  checkout for the same branch name in oops
   - git clone https://github.com/jcsda/oops.git ${REPO_SOURCE_DIR}/ufo-bundle/oops
@@ -42,6 +48,11 @@ before_install:
   - git checkout $BRANCH || echo "No branch named $BRANCH in oops repo"
   - cd $REPO_SOURCE_DIR  
 
+#  checkout for the same branch name in saber
+  - git clone https://github.com/jcsda/saber.git ${REPO_SOURCE_DIR}/ufo-bundle/saber
+  - cd ${REPO_SOURCE_DIR}/ufo-bundle/saber
+  - git checkout $BRANCH || echo "No branch named $BRANCH in saber repo"
+  - cd $REPO_SOURCE_DIR  
 
 #  checkout for the same branch name in ioda
   - git clone https://github.com/jcsda/ioda.git ${REPO_SOURCE_DIR}/ufo-bundle/ioda
