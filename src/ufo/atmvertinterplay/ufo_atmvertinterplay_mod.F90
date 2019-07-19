@@ -89,6 +89,7 @@ integer :: iz1,iz2,k,kk
 integer :: nsig
 real(kind_real), dimension(:), allocatable :: obss_metadata
 real(kind_real), dimension(:), allocatable :: toppressure,botpressure
+real(kind_real), dimension(:), allocatable :: lat, lon
 type(ufo_geoval), pointer :: modelpressures, modelozone
 character(len=MAXVARLEN) :: geovar
 real :: pob,delp4,delz,dz1
@@ -105,10 +106,14 @@ real :: pindex
 
   allocate(toppressure(nlocs))
   allocate(botpressure(nlocs))
+  allocate(lat(nlocs))
+  allocate(lon(nlocs))
 
   !obs pressures read in as Pa
   call obsspace_get_db(obss, "MetaData", "top_level_pressure", toppressure)
   call obsspace_get_db(obss, "MetaData", "bottom_level_pressure", botpressure)
+  call obsspace_get_db(obss, "MetaData", "latitude", lat)
+  call obsspace_get_db(obss, "MetaData", "longitude", lon)
 
   do ivar = 1, self%nvars
     !get the name of input variable in geovals
@@ -138,6 +143,8 @@ real :: pindex
         delp4=(modelpressures%vals(kk,iobs)-modelpressures%vals(kk+1,iobs))*.001
         g=g + &
              modelozone%vals(kk,iobs)*rozcon*delz*delp4
+   print *,iobs,k,g,modelpressures%vals(kk,iobs),modelpressures%vals(kk+1,iobs)
+   print *,lat(iobs),lon(iobs)
       enddo
       hofx(ivar,iobs) = g
       dz1 = pob
