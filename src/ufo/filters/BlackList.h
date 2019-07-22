@@ -43,6 +43,7 @@ class BlackList : public util::Printable,
             boost::shared_ptr<ioda::ObsDataVector<float> >);
   ~BlackList();
 
+  void preProcess() const {}
   void priorFilter(const GeoVaLs &) const;
   void postFilter(const ioda::ObsVector &) const {}
 

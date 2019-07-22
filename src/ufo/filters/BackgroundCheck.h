@@ -42,6 +42,7 @@ class BackgroundCheck : public util::Printable,
                   boost::shared_ptr<ioda::ObsDataVector<float> >);
   ~BackgroundCheck();
 
+  void preProcess() const {}
   void priorFilter(const GeoVaLs &) const;
   void postFilter(const ioda::ObsVector &) const;
 

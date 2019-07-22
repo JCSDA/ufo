@@ -41,6 +41,7 @@ class ObsBoundsCheck : public util::Printable,
                  boost::shared_ptr<ioda::ObsDataVector<float> >);
   ~ObsBoundsCheck();
 
+  void preProcess() const {}
   void priorFilter(const GeoVaLs &) const;
   void postFilter(const ioda::ObsVector &) const {}
 
