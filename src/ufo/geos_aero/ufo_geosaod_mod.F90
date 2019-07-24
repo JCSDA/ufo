@@ -66,7 +66,7 @@ character(len=maxvarlen), allocatable :: tracer_variables(:)
 
   self%nvars_in =  size(varindefault) + self%ntracers
   allocate(self%varin(self%nvars_in))
-  do iq = 1, self%nvars_in
+  do iq = 1, self%ntracers
      self%varin(iq) = tracer_variables(iq)                       ! aer MR
   enddo
   self%varin(self%ntracers + 1 : self%nvars_in) = varindefault   ! delp and rh
