@@ -8,9 +8,6 @@
 #include "tools/new_obsop/example/ObsExampleTLAD.h"
 
 #include <ostream>
-#include <string>
-#include <vector>
-#include <boost/algorithm/string.hpp>
 
 #include "ioda/ObsSpace.h"
 #include "ioda/ObsVector.h"
@@ -30,16 +27,10 @@ ObsExampleTLAD::ObsExampleTLAD(const ioda::ObsSpace & odb,
                                const eckit::Configuration & config)
   : keyOper_(0), varin_(), odb_(odb)
 {
-  int c_name_size = 800;
-  char *buffin = new char[c_name_size];
   const eckit::Configuration * configc = &config;
-
-  ufo_example_tlad_setup_f90(keyOper_, &configc, buffin, c_name_size);
-
-  std::string vstr_in(buffin);
-  std::vector<std::string> vvin;
-  boost::split(vvin, vstr_in, boost::is_any_of("\t"));
-  varin_.reset(new oops::Variables(vvin));
+  const oops::Variables & observed = odb.obsvariables();
+  const eckit::Configuration * varconfig = &observed.toFortran();
+  ufo_example_tlad_setup_f90(keyOper_, &configc, &varconfig, varin_);
 
   oops::Log::trace() << "ObsExampleTLAD created" << std::endl;
 }

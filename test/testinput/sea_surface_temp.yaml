@@ -1,20 +1,15 @@
----
-logging:
-  categories: Warning, Error, Debug
-test_framework_runtime_config: "--log_level=test_suite"
-
 window_begin: 2018-04-14T21:00:00Z
 window_end: 2018-04-15T03:00:00Z
 
 LinearObsOpTest:
   coefTL: 0.1
-  toleranceTL: 1.0e-8
+  toleranceTL: 1.0e-14
   toleranceAD: 1.0e-10
 
 Observations:
   ObsTypes:
   - ObsOperator:
-      name: SeaSurfaceTemp
+      name: Identity
     ObsSpace:
       name: SeaSurfaceTemp
       ObsDataIn:

@@ -8,9 +8,6 @@
 #include "ufo/atmvertinterp/ObsAtmVertInterp.h"
 
 #include <ostream>
-#include <string>
-#include <vector>
-#include <boost/algorithm/string.hpp>
 
 #include "oops/util/Logger.h"
 
@@ -21,6 +18,7 @@
 namespace ufo {
 
 // -----------------------------------------------------------------------------
+static ObsOperatorMaker<ObsAtmVertInterp> makerVertInterp_("VertInterp");
 static ObsOperatorMaker<ObsAtmVertInterp> makerRadiosonde_("Radiosonde");
 static ObsOperatorMaker<ObsAtmVertInterp> makerAircraft_("Aircraft");
 static ObsOperatorMaker<ObsAtmVertInterp> makerSatwnd_("Satwind");
@@ -31,18 +29,10 @@ ObsAtmVertInterp::ObsAtmVertInterp(const ioda::ObsSpace & odb,
   : ObsOperatorBase(odb, config), keyOperAtmVertInterp_(0),
     odb_(odb), varin_()
 {
-  int c_name_size = 200;
-  char *buffin = new char[c_name_size];
   const eckit::Configuration * configc = &config;
-
   const oops::Variables & observed = odb.obsvariables();
   const eckit::Configuration * varconfig = &observed.toFortran();
-  ufo_atmvertinterp_setup_f90(keyOperAtmVertInterp_, &configc, &varconfig, buffin, c_name_size);
-
-  std::string vstr_in(buffin);
-  std::vector<std::string> vvin;
-  boost::split(vvin, vstr_in, boost::is_any_of("\t"));
-  varin_.reset(new oops::Variables(vvin));
+  ufo_atmvertinterp_setup_f90(keyOperAtmVertInterp_, &configc, &varconfig, varin_);
 
   oops::Log::trace() << "ObsAtmVertInterp created." << std::endl;
 }

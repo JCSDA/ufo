@@ -8,7 +8,6 @@
 #ifndef TOOLS_NEW_OBSOP_EXAMPLE_OBSEXAMPLE_H_
 #define TOOLS_NEW_OBSOP_EXAMPLE_OBSEXAMPLE_H_
 
-#include <memory>
 #include <ostream>
 #include <string>
 
@@ -45,7 +44,7 @@ class ObsExample : public ObsOperatorBase,
   void simulateObs(const GeoVaLs &, ioda::ObsVector &) const;
 
 // Other
-  const oops::Variables & variables() const {return *varin_;}
+  const oops::Variables & variables() const {return varin_;}
 
   int & toFortran() {return keyOper_;}
   const int & toFortran() const {return keyOper_;}
@@ -54,7 +53,7 @@ class ObsExample : public ObsOperatorBase,
   void print(std::ostream &) const;
   F90hop keyOper_;
   const ioda::ObsSpace& odb_;
-  std::unique_ptr<const oops::Variables> varin_;
+  oops::Variables varin_;
 };
 
 // -----------------------------------------------------------------------------

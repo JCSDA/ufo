@@ -1,20 +1,15 @@
----
-logging:
-  categories: Warning, Error, Debug
-test_framework_runtime_config: "--log_level=test_suite"
-
 window_begin: 2018-04-14T21:00:00Z
 window_end: 2018-04-15T03:00:00Z
 
 LinearObsOpTest:
   coefTL: 0.1
-  toleranceTL: 1.0e-9
+  toleranceTL: 1.0e-13
   toleranceAD: 1.0e-11
 
 Observations:
   ObsTypes:
   - ObsOperator:
-      name: Radiosonde
+      name: VertInterp
     ObsSpace:
       name: Radiosonde
       ObsDataIn:

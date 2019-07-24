@@ -8,6 +8,7 @@ set ( utils_files
       SplitVarGroup.h
       twindow_utils_mod.F90
       vert_interp.F90
+      thermo_utils.F90
 )
 
 PREPEND( _p_utils_files       "utils"       ${utils_files} )

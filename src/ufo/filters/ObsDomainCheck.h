@@ -45,6 +45,7 @@ class ObsDomainCheck : public util::Printable,
                  boost::shared_ptr<ioda::ObsDataVector<float> >);
   ~ObsDomainCheck();
 
+  void preProcess() const {}
   void priorFilter(const GeoVaLs &) const;
   void postFilter(const ioda::ObsVector &) const {}
 

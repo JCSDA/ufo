@@ -1,13 +1,8 @@
----
-logging:
-  categories: Warning, Error, Debug
-test_framework_runtime_config: "--log_level=test_suite"
-
 window_begin: 2018-04-14T21:00:00Z
 window_end: 2018-04-15T03:00:00Z
 
 LinearObsOpTest:
- coefTL: 1.0e-4
+ coefTL: 1.0e-3
  toleranceTL: 1.0e-5
  toleranceAD: 1.0e-13
 
@@ -16,8 +11,6 @@ Observations:
  - ObsOperator:
      name: Aod
      ObsOptions:
-       n_Absorbers: 2
-       n_Clouds: 0
        Sensor_ID: v.viirs-m_npp
        EndianType: little_endian
        CoefficientPath: Data/

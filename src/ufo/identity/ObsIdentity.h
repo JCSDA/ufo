@@ -8,10 +8,8 @@
 #ifndef UFO_IDENTITY_OBSIDENTITY_H_
 #define UFO_IDENTITY_OBSIDENTITY_H_
 
-#include <memory>
 #include <ostream>
 #include <string>
-#include <vector>
 
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
@@ -45,7 +43,7 @@ class ObsIdentity : public ObsOperatorBase,
   void simulateObs(const GeoVaLs &, ioda::ObsVector &) const;
 
 // Other
-  const oops::Variables & variables() const {return *varin_;}
+  const oops::Variables & variables() const {return varin_;}
 
   int & toFortran() {return keyOperObsIdentity_;}
   const int & toFortran() const {return keyOperObsIdentity_;}
@@ -54,7 +52,7 @@ class ObsIdentity : public ObsOperatorBase,
   void print(std::ostream &) const;
   F90hop keyOperObsIdentity_;
   const ioda::ObsSpace& odb_;
-  std::unique_ptr<const oops::Variables> varin_;
+  oops::Variables varin_;
 };
 
 // -----------------------------------------------------------------------------

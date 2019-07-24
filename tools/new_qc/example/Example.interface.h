@@ -8,6 +8,8 @@
 #ifndef TOOLS_NEW_QC_EXAMPLE_EXAMPLE_INTERFACE_H_
 #define TOOLS_NEW_QC_EXAMPLE_EXAMPLE_INTERFACE_H_
 
+#include "ioda/ObsSpace.h"
+#include "oops/base/Variables.h"
 #include "ufo/Fortran.h"
 
 // Forward declarations
@@ -26,10 +28,13 @@ typedef int F90check;
 /// Interface to Fortran routines
 
 extern "C" {
-  void ufo_example_create_f90(F90check &, const eckit::Configuration *);
+  void ufo_example_create_f90(F90check &, const eckit::Configuration *,
+                              oops::Variables &);
   void ufo_example_delete_f90(F90check &);
-  void ufo_example_prior_f90(const F90check &, const ioda::ObsSpace &, const F90goms &);
-  void ufo_example_post_f90(const F90check &, const ioda::ObsSpace &, const int &, const double &);
+  void ufo_example_prior_f90(const F90check &, const ioda::ObsSpace &,
+                             const F90goms &);
+  void ufo_example_post_f90(const F90check &, const ioda::ObsSpace &, const int &,
+                            const int &, const double &);
 }  // extern C
 
 }  // namespace ufo

@@ -44,6 +44,7 @@ list( APPEND ufo_test_input
   testinput/gnssroref.yaml
   testinput/hirs4_crtm.yaml
   testinput/iasi_crtm.yaml
+  testinput/gsisfcmodel.yaml
   testinput/locations.yaml
   testinput/mhs_crtm.yaml
   testinput/qc_boundscheck.yaml
@@ -93,6 +94,7 @@ list( APPEND ufo_test_data
   atmosphere/mhs_n19_geoval_2018041500_m.nc4
   atmosphere/satwind_geoval_2018041500_m.nc4
   atmosphere/satwind_geoval_2018041500_s.nc4
+  atmosphere/sfc_geoval_2018041500_m.nc4
   atmosphere/seviri_m08_geoval_2018041500_m.nc4
   atmosphere/sndrd1_g15_geoval_2018041500_m.nc4
   atmosphere/sndrd2_g15_geoval_2018041500_m.nc4
@@ -137,6 +139,9 @@ list (APPEND ioda_obs_test_data
   atmosphere/sndrd2_g15_obs_2018041500_m.nc4
   atmosphere/sndrd3_g15_obs_2018041500_m.nc4
   atmosphere/sndrd4_g15_obs_2018041500_m.nc4
+
+  atmosphere/sfc_obs_2018041500_m.nc4
+
   atmosphere/sondes_obs_2018041500_m.nc4
   atmosphere/sondes_obs_2018041500_s.nc4
   marine/coolskin_fake_obs_2018041500.nc
@@ -145,6 +150,7 @@ list (APPEND ioda_obs_test_data
   marine/Jason-2-2018-04-15.nc
   marine/profile_2018-04-15.nc
   marine/sst_obs-2018-04-15.nc4
+
   )
 
 CREATE_SYMLINK_FILENAME( ${ioda_SOURCE_DIR}/test/testinput
@@ -161,6 +167,11 @@ ecbuild_add_test( TARGET  test_ufo_geovals
 ecbuild_add_test( TARGET  test_ufo_locations
                   SOURCES mains/TestLocations.cc
                   ARGS    "testinput/locations.yaml"
+                  LIBS    ufo )
+
+ecbuild_add_test( TARGET  test_ufo_gsi_sfc_model_opr
+                  SOURCES mains/TestObsOperator.cc
+                  ARGS    "testinput/gsisfcmodel.yaml"
                   LIBS    ufo )
 
 ecbuild_add_test( TARGET  test_ufo_amsua_opr_crtm

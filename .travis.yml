@@ -6,38 +6,16 @@ branches:
     - develop
 
 language: cpp
-#======================================================================
-# Environment
-#======================================================================
 
-addons:
-  apt:
-    sources:
-      - ubuntu-toolchain-r-test
-    packages:
-      - gcc-7
-      - gfortran-7
-      - g++-7
-
-#======================================================================
-# Build Matrix
-#======================================================================
-matrix:
-   include:
-     - os: linux
-       compiler: gcc
-       sudo: false
-       dist: trusty
-
-#======================================================================
-# Docker does not work on Mac
-#======================================================================
 services:
   - docker
 
 before_install:
-  - REPO_SOURCE_DIR=${TRAVIS_BUILD_DIR}
-  - echo $REPO_SOURCE_DIR
+  - date
+  - REPO_SOURCE_DIR=${TRAVIS_BUILD_DIR}/jcsda/src_repo
+#  create the same file structure on Travis VM and Docker container
+  - mkdir -p ${TRAVIS_BUILD_DIR}/jcsda/src_repo
+# echo branch info
   - echo $TRAVIS_PULL_REQUEST
   - echo $TRAVIS_PULL_REQUEST_BRANCH
   - echo $TRAVIS_BRANCH
@@ -47,32 +25,43 @@ before_install:
 # Clone all repos
 #======================================================================
   - pwd
-  - git clone https://github.com/jcsda/ufo-bundle.git ufo-bundle
-  - git clone https://github.com/jcsda/GSW-Fortran.git ufo-bundle/gsw
-  - git clone https://github.com/jcsda/fckit.git ufo-bundle/fckit
-
-
-#  checkout for the same branch name in crtm
-  - git clone https://github.com/jcsda/crtm.git ufo-bundle/crtm
-  - cd ufo-bundle/crtm
-  - git checkout $BRANCH || echo "No branch named $BRANCH in crtm repo"
-  - cd $REPO_SOURCE_DIR  
-
-#  checkout for the same branch name in oops
-  - git clone https://github.com/jcsda/oops.git ufo-bundle/oops
-  - cd ufo-bundle/oops
+#  checkout for the same branch name in ufo-bundle
+  - git clone https://github.com/jcsda/ufo-bundle.git ${REPO_SOURCE_DIR}/ufo-bundle
+  - cd ${REPO_SOURCE_DIR}/ufo-bundle
   - git checkout $BRANCH || echo "No branch named $BRANCH in oops repo"
   - cd $REPO_SOURCE_DIR  
 
+  - git clone https://github.com/jcsda/GSW-Fortran.git ${REPO_SOURCE_DIR}/ufo-bundle/gsw
+  - git clone https://github.com/jcsda/fckit.git ${REPO_SOURCE_DIR}/ufo-bundle/fckit
+
+#  checkout for the same branch name in crtm
+  - date
+  - git clone https://github.com/jcsda/crtm.git ${REPO_SOURCE_DIR}/ufo-bundle/crtm
+  - cd ${REPO_SOURCE_DIR}/ufo-bundle/crtm
+  - git checkout $BRANCH || echo "No branch named $BRANCH in crtm repo"
+  - cd $REPO_SOURCE_DIR
+  - date  
+
+#  checkout for the same branch name in oops
+  - git clone https://github.com/jcsda/oops.git ${REPO_SOURCE_DIR}/ufo-bundle/oops
+  - cd ${REPO_SOURCE_DIR}/ufo-bundle/oops
+  - git checkout $BRANCH || echo "No branch named $BRANCH in oops repo"
+  - cd $REPO_SOURCE_DIR  
+
+#  checkout for the same branch name in saber
+  - git clone https://github.com/jcsda/saber.git ${REPO_SOURCE_DIR}/ufo-bundle/saber
+  - cd ${REPO_SOURCE_DIR}/ufo-bundle/saber
+  - git checkout $BRANCH || echo "No branch named $BRANCH in saber repo"
+  - cd $REPO_SOURCE_DIR  
 
 #  checkout for the same branch name in ioda
-  - git clone https://github.com/jcsda/ioda.git ufo-bundle/ioda
-  - cd ufo-bundle/ioda
+  - git clone https://github.com/jcsda/ioda.git ${REPO_SOURCE_DIR}/ufo-bundle/ioda
+  - cd ${REPO_SOURCE_DIR}/ufo-bundle/ioda
   - git checkout $BRANCH || echo "No branch named $BRANCH in ioda repo"
   - cd $REPO_SOURCE_DIR  
 
 #  clone the testing branch of ufo
-  - git clone -b $BRANCH https://github.com/jcsda/ufo.git ufo-bundle/ufo 
+  - git clone -b $BRANCH https://github.com/jcsda/ufo.git ${REPO_SOURCE_DIR}/ufo-bundle/ufo 
 
 # do no switch to develop branch by removing 
 # develop UPDATE in CMakeLists.txt in ufo-bundle
@@ -88,11 +77,16 @@ before_install:
 # get docker image
 # FROM  jcsda/docker:latest
 #======================================================================
+  - cd ${REPO_SOURCE_DIR}/ufo-bundle/ufo
+  - date
   - docker build -t jcsda/docker --build-arg=Dockerfile .  #Dockerfile handles ssh for mpi
+  - date
   - docker images
-  - docker run -d -t --name jcsda_container -v ${REPO_SOURCE_DIR}/ufo-bundle:/jcsda/src_repo jcsda/docker
+  # request codecov to detect CI environment to pass through to docker
+  - ci_env=`bash <(curl -s https://codecov.io/env)`
+  - docker run -d -t $ci_env --name jcsda_container -v ${REPO_SOURCE_DIR}/ufo-bundle:/jcsda/src_repo jcsda/docker
   - docker ps -a
-
+  - date
 #======================================================================
 # Here are the run steps
 #======================================================================
@@ -103,17 +97,14 @@ script:
 ##  use cmake with flags to generate test coverage reports
   - docker exec jcsda_container bash -c 'cd /build_container && cmake -DCMAKE_MODULE_PATH=/usr/local/share/ecbuild/cmake/ -DCMAKE_BUILD_TYPE=Debug -DENABLE_GPROF=ON  /jcsda/src_repo' 
   - docker exec jcsda_container bash -c 'cd /build_container/ufo && make -j4'
+  - date
   - docker exec jcsda_container bash -c 'cd /build_container/ufo && ctest'
+  - date
 ##  run lcov inside container
   - docker exec jcsda_container bash -c 'cd /build_container/ufo && lcov --capture --directory . --output-file coverage.info'
   - docker exec jcsda_container bash -c 'cd /build_container/ufo && lcov --remove coverage.info "/usr/*" --output-file coverage.info'  #  filter system-files 
   - docker exec jcsda_container bash -c 'cd /build_container/ufo && lcov --list coverage.info'  #  debug info
-##  copy coverage report to shared volume btw container and Travis
-  - docker exec jcsda_container cp /build_container/ufo/coverage.info  /jcsda/src_repo/
-#======================================================================
-# CodeCov report
-#======================================================================
-after_success:
-  - cd ${REPO_SOURCE_DIR}/ufo-bundle
-  - bash <(curl -s https://codecov.io/bash) -t e23dfd1d-85be-4e0f-aaf3-81911fec7178  -X gcov -f coverage.info  #  Token is not needed for publuc repo
+  - docker exec jcsda_container bash -c 'cp /jcsda/src_repo/ufo/codecov.yml /build_container/ufo/'  #  debug info
+
+  - docker exec jcsda_container bash -c 'cd /build_container/ufo && bash <(curl -s https://codecov.io/bash) -t e23dfd1d-85be-4e0f-aaf3-81911fec7178  -X gcov -f coverage.info -R /jcsda/src_repo/ufo/'
 

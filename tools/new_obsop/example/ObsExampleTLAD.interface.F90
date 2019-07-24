@@ -11,6 +11,8 @@ module ufo_example_tlad_mod_c
   use iso_c_binding
   use config_mod
   use ufo_example_tlad_mod
+  use ufo_geovals_mod_c, only: ufo_geovals_registry
+  use ufo_geovals_mod,   only: ufo_geovals
   use string_f_c_mod
   implicit none
   private
@@ -31,21 +33,24 @@ contains
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_example_tlad_setup_c(c_key_self, c_conf, csin, c_str_size) bind(c,name='ufo_example_tlad_setup_f90')
+subroutine ufo_example_tlad_setup_c(c_key_self, c_conf, c_varconf, c_varlist) bind(c,name='ufo_example_tlad_setup_f90')
+use ufo_vars_mod
 implicit none
 integer(c_int), intent(inout) :: c_key_self
-type(c_ptr), intent(in)    :: c_conf
-integer(c_int), intent(in) :: c_str_size
-character(kind=c_char,len=1),intent(inout) :: csin(c_str_size+1)
+type(c_ptr), intent(in) :: c_conf
+type(c_ptr), intent(in) :: c_varconf ! config with variables to be simulated
+type(c_ptr), intent(in), value :: c_varlist
+character(len=MAXVARLEN), dimension(:), allocatable :: vars
 
 type(ufo_example_tlad), pointer :: self
 
 call ufo_example_tlad_registry%setup(c_key_self, self)
+call ufo_vars_read(c_varconf, vars)
+call self%setup(c_conf, vars)
+deallocate(vars)
 
-call self%setup(c_conf)
-
-!> Set vars
-call f_c_string_vector(self%varin, csin)
+!> Update C++ ObsOperator with input variable list
+call f_c_push_string_varlist(c_varlist, self%varin)
 
 end subroutine ufo_example_tlad_setup_c
 
@@ -57,9 +62,7 @@ integer(c_int), intent(inout) :: c_key_self
     
 type(ufo_example_tlad), pointer :: self
 
-call ufo_example_tlad_registry%get(c_key_self, self)
-call self%opr_delete()
-call ufo_example_tlad_registry%remove(c_key_self)
+call ufo_example_tlad_registry%delete(c_key_self, self)
 
 end subroutine ufo_example_tlad_delete_c
 
@@ -73,45 +76,51 @@ integer(c_int),     intent(in) :: c_key_geovals
 type(c_ptr), value, intent(in) :: c_obsspace
 
 type(ufo_example_tlad), pointer :: self
+type(ufo_geovals),      pointer :: geovals
 
 call ufo_example_tlad_registry%get(c_key_self, self)
-call self%opr_settraj(c_key_geovals, c_obsspace)
+call ufo_geovals_registry%get(c_key_geovals, geovals)
+call self%settraj(geovals, c_obsspace)
 
 end subroutine ufo_example_tlad_settraj_c
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_example_simobs_tl_c(c_key_self, c_key_geovals, c_obsspace, c_nobs, c_hofx) bind(c,name='ufo_example_simobs_tl_f90')
+subroutine ufo_example_simobs_tl_c(c_key_self, c_key_geovals, c_obsspace, c_nvars, c_nlocs, c_hofx) bind(c,name='ufo_example_simobs_tl_f90')
 
 implicit none
 integer(c_int), intent(in) :: c_key_self
 integer(c_int), intent(in) :: c_key_geovals
 type(c_ptr), value, intent(in) :: c_obsspace
-integer(c_int), intent(in) :: c_nobs
-real(c_double), intent(inout) :: c_hofx(c_nobs)
+integer(c_int), intent(in) :: c_nvars, c_nlocs
+real(c_double), intent(inout) :: c_hofx(c_nvars, c_nlocs)
 
 type(ufo_example_tlad), pointer :: self
+type(ufo_geovals),      pointer :: geovals
 
 call ufo_example_tlad_registry%get(c_key_self, self)
-call self%opr_simobs_tl(c_key_geovals, c_obsspace, c_hofx)
+call ufo_geovals_registry%get(c_key_geovals, geovals)
+call self%simobs_tl(geovals, c_obsspace, c_nvars, c_nlocs, c_hofx)
 
 end subroutine ufo_example_simobs_tl_c
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_example_simobs_ad_c(c_key_self, c_key_geovals, c_obsspace, c_nobs, c_hofx) bind(c,name='ufo_example_simobs_ad_f90')
+subroutine ufo_example_simobs_ad_c(c_key_self, c_key_geovals, c_obsspace, c_nvars, c_nlocs, c_hofx) bind(c,name='ufo_example_simobs_ad_f90')
 
 implicit none
 integer(c_int), intent(in) :: c_key_self
 integer(c_int), intent(in) :: c_key_geovals
 type(c_ptr), value, intent(in) :: c_obsspace
-integer(c_int), intent(in) :: c_nobs
-real(c_double), intent(in) :: c_hofx(c_nobs)
+integer(c_int), intent(in) :: c_nvars, c_nlocs
+real(c_double), intent(in) :: c_hofx(c_nvars, c_nlocs)
 
 type(ufo_example_tlad), pointer :: self
+type(ufo_geovals),      pointer :: geovals
 
 call ufo_example_tlad_registry%get(c_key_self, self)
-call self%opr_simobs_ad(c_key_geovals, c_obsspace, c_hofx)
+call ufo_geovals_registry%get(c_key_geovals, geovals)
+call self%simobs_ad(geovals, c_obsspace, c_nvars, c_nlocs, c_hofx)
 
 end subroutine ufo_example_simobs_ad_c
 

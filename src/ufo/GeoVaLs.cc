@@ -7,9 +7,11 @@
 
 #include "ufo/GeoVaLs.h"
 
+#include <iomanip>
 #include <vector>
 
 #include "eckit/config/Configuration.h"
+#include "eckit/exception/Exceptions.h"
 
 #include "oops/base/Variables.h"
 #include "oops/util/Logger.h"
@@ -157,6 +159,14 @@ GeoVaLs & GeoVaLs::operator-=(const GeoVaLs & other) {
   oops::Log::trace() << "GeoVaLs::operator-= starting" << std::endl;
   ufo_geovals_diff_f90(keyGVL_, other.keyGVL_);
   oops::Log::trace() << "GeoVaLs::operator-= done" << std::endl;
+  return *this;
+}
+// -----------------------------------------------------------------------------
+/*! \brief Multiply another GeoVaLs */
+GeoVaLs & GeoVaLs::operator*=(const GeoVaLs & other) {
+  oops::Log::trace() << "GeoVaLs::operator*= starting" << std::endl;
+  ufo_geovals_schurmult_f90(keyGVL_, other.keyGVL_);
+  oops::Log::trace() << "GeoVaLs::operator*= done" << std::endl;
   return *this;
 }
 // -----------------------------------------------------------------------------

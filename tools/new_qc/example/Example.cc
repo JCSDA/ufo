@@ -30,7 +30,7 @@ Example::Example(ioda::ObsSpace & obsdb, const eckit::Configuration & config,
   : obsdb_(obsdb), geovars_(), flags_(*flags) {
   oops::Log::trace() << "Example contructor starting" << std::endl;
   const eckit::Configuration * conf = &config;
-  ufo_example_create_f90(key_, conf);
+  ufo_example_create_f90(key_, conf, geovars_);
   oops::Log::debug() << "Example contructor key = " << key_ << std::endl;
 }
 
@@ -52,7 +52,7 @@ void Example::priorFilter(const GeoVaLs & gv) const {
 
 void Example::postFilter(const ioda::ObsVector & hofxb) const {
   oops::Log::trace() << "Example postFilter" << std::endl;
-  ufo_example_post_f90(key_, obsdb_, hofxb.size(), hofxb.toFortran());
+  ufo_example_post_f90(key_, obsdb_, hofxb.nvars(), hofxb.nlocs(), hofxb.toFortran());
 }
 
 // -----------------------------------------------------------------------------
