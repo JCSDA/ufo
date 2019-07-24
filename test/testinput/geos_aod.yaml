@@ -14,21 +14,17 @@ LinearObsOpTest:
 Observations:
   ObsTypes:
   - ObsOperator:
-      name: LAOD
-      wavelengths:
-      - 550.
-      variables:
-      - aerosol_optical_depth_in_log_space
+      name: GeosAod
+      tracer_geovals: [ "DU001", "DU002", "DU003", "DU004" ]
+      RCFile: ["geosaod.rc"]
+      wavelengths: [550.0]
     ObsSpace:
-      name: LAOD
+      name: GeosAod
       ObsDataIn:
         obsfile: Data/geos_aod_obs_2018041500_m.nc4
+      simulate:
+        variables: [aerosol_optical_depth]        
     GeoVaLs:
       filename: Data/geos_aod_geoval_2018041500_m.nc4
-      tracer_geovals:
-      - du001, du002, du003, du004, du005, 
-        ss001, ss002, ss003, ss004, ss005,
-        no3an1, no3an2, no3an3, so4, 
-        bcphobic, bcphilic, ocphobic, ocphilic
     vecequiv: HofX
     tolerance: 1.0e-06

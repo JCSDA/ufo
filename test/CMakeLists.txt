@@ -57,6 +57,8 @@ list( APPEND ufo_test_input
   testinput/seviri_crtm.yaml
   testinput/sndrd1-4_crtm.yaml
   testinput/tprof.yaml
+  testinput/geosaod.rc
+  testinput/Chem_MieRegistry.rc
 )
 
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/testinput)
