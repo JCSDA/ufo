@@ -43,13 +43,13 @@ contains
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_aodcrtm_tlad_setup(self, c_conf)
+subroutine ufo_aodcrtm_tlad_setup(self, c_confOpts, c_confOper)
 
 implicit none
 class(ufo_aodcrtm_tlad), intent(inout) :: self
-type(c_ptr),              intent(in)    :: c_conf
+type(c_ptr),              intent(in)    :: c_confOpts, c_confOper
 
- call crtm_conf_setup(self%conf,c_conf)
+ call crtm_conf_setup(self%conf, c_confOpts, c_confOper)
 
 end subroutine ufo_aodcrtm_tlad_setup
 

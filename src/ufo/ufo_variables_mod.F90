@@ -159,15 +159,15 @@ end subroutine ufo_vars_read
 
 integer function ufo_vars_getindex(vars, varname)
 implicit none
-character(len=MAXVARLEN), intent(in) :: vars(:)
-character(MAXVARLEN), intent(in)     :: varname
+character(len=*), intent(in) :: vars(:)
+character(len=*), intent(in) :: varname
 
 integer :: ivar
 
 ufo_vars_getindex = -1
 
 do ivar = 1, size(vars)
-  if (vars(ivar) == varname) then
+  if (trim(vars(ivar)) == trim(varname)) then
     ufo_vars_getindex = ivar
     exit
   endif

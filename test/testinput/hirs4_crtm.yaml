@@ -10,11 +10,13 @@ Observations:
  ObsTypes: 
  - ObsOperator:
      name: CRTM
-     Extra_Absorbers: [carbon_dioxide]
-     n_Aerosols: 0
-     Sensor_ID: hirs4_metop-a
-     EndianType: little_endian
-     CoefficientPath: Data/
+     Absorbers: [H2O,O3,CO2]
+     LinearObsOperator:
+       Absorbers: [H2O,O3,CO2]
+     ObsOptions:
+       Sensor_ID: hirs4_metop-a
+       EndianType: little_endian
+       CoefficientPath: Data/
    ObsSpace:
      name: hirs4_metop-a
      ObsDataIn: 
