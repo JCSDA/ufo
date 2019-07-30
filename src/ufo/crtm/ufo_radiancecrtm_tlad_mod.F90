@@ -7,8 +7,8 @@
 
 module ufo_radiancecrtm_tlad_mod
 
+ use fckit_configuration_module, only: fckit_configuration
  use iso_c_binding
- use config_mod
  use kinds
 
  use ufo_geovals_mod, only: ufo_geovals, ufo_geoval, ufo_geovals_get_var
@@ -49,20 +49,20 @@ contains
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_radiancecrtm_tlad_setup(self, c_confOpts, c_confOper, c_confLinOper, channels)
+subroutine ufo_radiancecrtm_tlad_setup(self, f_confOpts, f_confOper, f_confLinOper, channels)
 
 implicit none
 class(ufo_radiancecrtm_tlad), intent(inout) :: self
-type(c_ptr),                  intent(in)    :: c_confOpts
-type(c_ptr),                  intent(in)    :: c_confOper
-type(c_ptr),                  intent(in)    :: c_confLinOper
+type(fckit_configuration),    intent(in)    :: f_confOpts
+type(fckit_configuration),    intent(in)    :: f_confOper
+type(fckit_configuration),    intent(in)    :: f_confLinOper
 integer(c_int),               intent(in)    :: channels(:)  !List of channels to use
 
 integer :: nvars_in
 integer :: ind, jspec
 
- call crtm_conf_setup(self%conf_traj, c_confOpts, c_confOper)
- call crtm_conf_setup(self%conf,      c_confOpts, c_confLinOper)
+ call crtm_conf_setup(self%conf_traj, f_confOpts, f_confOper)
+ call crtm_conf_setup(self%conf,      f_confOpts, f_confLinOper)
 
  ! request from the model var_ts +
  ! 1 * n_Absorbers

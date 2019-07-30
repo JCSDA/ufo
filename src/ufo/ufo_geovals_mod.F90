@@ -6,6 +6,7 @@
 !
 module ufo_geovals_mod
 
+use fckit_configuration_module, only: fckit_configuration
 use iso_c_binding
 use ufo_vars_mod
 use kinds
@@ -66,12 +67,14 @@ type(c_ptr), intent(in)    :: c_vars
 integer, intent(in) :: nlocs
 
 integer :: ivar
+type(fckit_configuration) :: f_vars
 
 call ufo_geovals_delete(self)
 self%nlocs = nlocs
 self%missing_value = missing_value(self%missing_value)
 
-call ufo_vars_read(c_vars, self%variables)
+f_vars = fckit_configuration(c_vars)
+call ufo_vars_read(f_vars, self%variables)
 self%nvar = size(self%variables)
 allocate(self%geovals(self%nvar))
 do ivar = 1, self%nvar

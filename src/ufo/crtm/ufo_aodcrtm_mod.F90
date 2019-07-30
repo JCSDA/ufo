@@ -7,8 +7,8 @@
 
 module ufo_aodcrtm_mod
 
+ use fckit_configuration_module, only: fckit_configuration
  use iso_c_binding
- use config_mod
  use kinds
 
  use ufo_geovals_mod, only: ufo_geovals, ufo_geoval, ufo_geovals_get_var
@@ -36,15 +36,15 @@ contains
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_aodcrtm_setup(self, c_confOpts, c_confOper)
+subroutine ufo_aodcrtm_setup(self, f_confOpts, f_confOper)
 
 implicit none
-class(ufo_aodcrtm), intent(inout) :: self
-type(c_ptr),        intent(in)    :: c_confOpts, c_confOper
+class(ufo_aodcrtm),        intent(inout) :: self
+type(fckit_configuration), intent(in)    :: f_confOpts, f_confOper
 
 character(len=max_string) :: err_msg
 
- call crtm_conf_setup(self%conf, c_confOpts, c_confOper)
+ call crtm_conf_setup(self%conf, f_confOpts, f_confOper)
  if ( ufo_vars_getindex(self%conf%Absorbers, var_mixr) /= 1 ) then
    write(err_msg,*) 'ufo_aodcrtm_setup error: H2O must be first in CRTM Absorbers for AOD'
    call abor1_ftn(err_msg)

@@ -1,8 +1,8 @@
 !==========================================================================
 module gnssro_mod_conf
 !==========================================================================
+use fckit_configuration_module, only: fckit_configuration 
 use iso_c_binding
-use config_mod
 use kinds
 use obsspace_mod
 use gnssro_mod_constants
@@ -28,19 +28,30 @@ real(kind_real), parameter, public :: top_2d     = 20.0 !km; maximum height the 
 contains
 !-------------------------------
 
-subroutine gnssro_conf_setup(roconf, c_conf)
+subroutine gnssro_conf_setup(roconf, f_conf)
 implicit none
-type(gnssro_conf), intent(inout)  :: roconf
-type(c_ptr),       intent(in)     :: c_conf
+type(gnssro_conf), intent(inout)      :: roconf
+type(fckit_configuration), intent(in) :: f_conf
 
-roconf%ro_top_meter  = config_get_int(c_conf,  "ro_top_meter",  30000 )
-roconf%use_compress  = config_get_int(c_conf,  "use_compress",  1 )
-roconf%n_horiz       = config_get_int(c_conf,  "n_horiz",       n_horiz_2d)
-roconf%res           = config_get_real(c_conf, "res",           res_2d)
-roconf%top_2d        = config_get_real(c_conf, "top_2d",        top_2d)
+character(len=:), allocatable :: str
+
+roconf%ro_top_meter = 30000
+if (f_conf%has("ro_top_meter")) call f_conf%get_or_die("ro_top_meter",roconf%ro_top_meter)
+roconf%use_compress = 1
+if (f_conf%has("use_compress")) call f_conf%get_or_die("use_compress",roconf%use_compress)
+roconf%n_horiz = n_horiz_2d
+if (f_conf%has("n_horiz")) call f_conf%get_or_die("n_horiz",roconf%n_horiz)
+roconf%res = res_2d
+if (f_conf%has("res")) call f_conf%get_or_die("res",roconf%res)
+roconf%top_2d = top_2d
+if (f_conf%has("top_2d")) call f_conf%get_or_die("top_2d",roconf%top_2d)
 roconf%top_2d        = roconf%top_2d*1000.0     ! km to m
 roconf%dtheta        = roconf%res/mean_earth_rad
-roconf%vertlayer     = config_get_string(c_conf,len(roconf%vertlayer), "vertlayer", "full")
+roconf%vertlayer = "full"
+if (f_conf%has("vertlayer")) then
+   call f_conf%get_or_die("vertlayer",str)
+   roconf%vertlayer = str
+end if
 
 end subroutine gnssro_conf_setup
 

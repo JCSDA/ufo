@@ -7,8 +7,8 @@
 
 module ufo_radiancecrtm_mod
 
+ use fckit_configuration_module, only: fckit_configuration
  use iso_c_binding
- use config_mod
  use kinds
 
  use ufo_geovals_mod, only: ufo_geovals, ufo_geoval, ufo_geovals_get_var
@@ -44,19 +44,19 @@ contains
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_radiancecrtm_setup(self, c_confOpts, c_confOper, channels)
+subroutine ufo_radiancecrtm_setup(self, f_confOpts, f_confOper, channels)
 
 implicit none
 class(ufo_radiancecrtm), intent(inout) :: self
-type(c_ptr),             intent(in)    :: c_confOpts
-type(c_ptr),             intent(in)    :: c_confOper
+type(fckit_configuration),  intent(in)    :: f_confOpts
+type(fckit_configuration),  intent(in)    :: f_confOper
 integer(c_int),          intent(in)    :: channels(:)  !List of channels to use
 
 integer :: nvars_in, nvars_out
 integer :: ind, jspec, ich
 character(len=max_string) :: err_msg
 
- call crtm_conf_setup(self%conf,c_confOpts,c_confOper)
+ call crtm_conf_setup(self%conf,f_confOpts,f_confOper)
  if ( ufo_vars_getindex(self%conf%Absorbers, var_mixr) < 1 ) then
    write(err_msg,*) 'ufo_radiancecrtm_setup error: H2O must be included in CRTM Absorbers'
    call abor1_ftn(err_msg)

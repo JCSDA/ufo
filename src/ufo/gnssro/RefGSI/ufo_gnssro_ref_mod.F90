@@ -6,7 +6,7 @@
 !> Fortran module to handle gnssro refractivity observations
 
 module ufo_gnssro_ref_mod
-  use iso_c_binding
+  use fckit_configuration_module, only: fckit_configuration 
   use kinds
   use ufo_vars_mod
   use ufo_geovals_mod
@@ -14,7 +14,6 @@ module ufo_gnssro_ref_mod
   use vert_interp_mod
   use ufo_basis_mod,     only: ufo_basis
   use obsspace_mod
-  use config_mod
   use gnssro_mod_conf
   use gnssro_mod_constants
 
@@ -33,12 +32,13 @@ module ufo_gnssro_ref_mod
 
 contains
 ! ------------------------------------------------------------------------------
-   subroutine ufo_gnssro_ref_setup(self, c_conf)
+   subroutine ufo_gnssro_ref_setup(self, f_conf)
     implicit none
-    class(ufo_gnssro_Ref), intent(inout) :: self
-    type(c_ptr),         intent(in)    :: c_conf
+    class(ufo_gnssro_Ref), intent(inout)  :: self
+    type(fckit_configuration), intent(in) :: f_conf
 
-    call gnssro_conf_setup(self%roconf,c_conf)
+    call gnssro_conf_setup(self%roconf,f_conf)
+
    end subroutine ufo_gnssro_ref_setup
 
    subroutine ufo_gnssro_ref_simobs(self, geovals, hofx, obss)

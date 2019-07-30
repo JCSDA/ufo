@@ -8,7 +8,7 @@
 
 module ufo_gnssro_bndropp2d_mod
 
-use iso_c_binding
+use fckit_configuration_module, only: fckit_configuration 
 use kinds
 use ufo_vars_mod
 use ufo_geovals_mod
@@ -37,13 +37,14 @@ end type ufo_gnssro_BndROPP2D
 contains
 
 ! ------------------------------------------------------------------------------
-subroutine ufo_gnssro_bndropp2d_setup(self, c_conf, c_size)
+subroutine ufo_gnssro_bndropp2d_setup(self, f_conf, c_size)
   implicit none
   class(ufo_gnssro_BndROPP2D), intent(inout) :: self
-  type(c_ptr),                 intent(in)    :: c_conf
+  type(fckit_configuration), intent(in)      :: f_conf
   integer,                     intent(in)    :: c_size ! 1d obsspace vector length
 
-  call gnssro_conf_setup(self%roconf,c_conf)
+  call gnssro_conf_setup(self%roconf,f_conf)
+
   allocate(self%obsLon2d(c_size*self%roconf%n_horiz))
   allocate(self%obsLat2d(c_size*self%roconf%n_horiz))
 

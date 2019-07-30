@@ -136,21 +136,22 @@ character(len=MAXVARLEN), public :: var_sea_fric_vel  = "friction_velocity_over_
 ! ------------------------------------------------------------------------------
 contains
 
-subroutine ufo_vars_read(c_vars, vars)
-use iso_c_binding
-use config_mod
+subroutine ufo_vars_read(f_vars, vars)
+use fckit_configuration_module, only: fckit_configuration
 implicit none
-type(c_ptr), intent(in)       :: c_vars
+type(fckit_configuration), intent(in)                              :: f_vars
 character(len=MAXVARLEN), dimension(:), allocatable, intent(inout) :: vars
-character(len=30*MAXVARLEN) :: svars
 
 integer :: nvars
+character(len=30*MAXVARLEN) :: svars
+character(len=:), allocatable :: str
 
-nvars = config_get_int(c_vars, "nvars")
+call f_vars%get_or_die("nvars",nvars)
 
 if (allocated(vars)) deallocate(vars)
 allocate(vars(nvars))
-svars = config_get_string(c_vars,len(svars),"variables")
+call f_vars%get_or_die("variables",str)
+svars = str
 read(svars,*) vars
 
 end subroutine ufo_vars_read

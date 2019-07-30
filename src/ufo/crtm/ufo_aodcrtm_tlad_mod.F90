@@ -7,8 +7,8 @@
 
 module ufo_aodcrtm_tlad_mod
 
+ use fckit_configuration_module, only: fckit_configuration
  use iso_c_binding
- use config_mod
  use kinds
 
  use ufo_geovals_mod, only: ufo_geovals, ufo_geoval, ufo_geovals_get_var
@@ -43,13 +43,13 @@ contains
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_aodcrtm_tlad_setup(self, c_confOpts, c_confOper)
+subroutine ufo_aodcrtm_tlad_setup(self, f_confOpts, f_confOper)
 
 implicit none
-class(ufo_aodcrtm_tlad), intent(inout) :: self
-type(c_ptr),              intent(in)    :: c_confOpts, c_confOper
+class(ufo_aodcrtm_tlad),   intent(inout) :: self
+type(fckit_configuration), intent(in)    :: f_confOpts, f_confOper
 
- call crtm_conf_setup(self%conf, c_confOpts, c_confOper)
+ call crtm_conf_setup(self%conf, f_confOpts, f_confOper)
 
 end subroutine ufo_aodcrtm_tlad_setup
 
