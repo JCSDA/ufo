@@ -67,6 +67,9 @@ subroutine ufo_gnssro_bndgsi_simobs(self, geovals, hofx, obss)
   real(kind_real), allocatable    :: refIndex(:), refXrad(:), geomz(:), refXrad_new(:)
   real(kind_real), allocatable    :: lagConst(:,:)
   real(kind_real), allocatable    :: obsLat(:), obsImpP(:), obsLocR(:), obsGeoid(:), obsValue(:)
+  real(kind_real), allocatable    :: temperature(:)
+  real(kind_real)                 :: wf
+  integer                         :: wi, wi2
   real(kind_real)                 :: d_refXrad
   real(kind_real)                 :: derivRef_s(ngrd),grids(ngrd),refXrad_s(ngrd)
   real(kind_real)                 :: sIndx, sIndxExt
@@ -194,13 +197,17 @@ subroutine ufo_gnssro_bndgsi_simobs(self, geovals, hofx, obss)
   allocate(lagConst(3,nlevExt))         !
   allocate(refXrad_new(nlevExt+newAdd)) !
 
+  allocate(temperature(nlocs))
 
   nobs_outIntgl = 0 !initialize count of observations out of integral grids  
   count_rejection = 0
 
+
   obs_loop: do iobs = 1, nlocs
 
     hofx(iobs) =  missing
+    temperature(iobs) =  missing
+
     do k = 1, nlev
 !     compute guess geometric height from geopotential height
       call geop2geometric(obsLat(iobs), gesZ(k,iobs), geomz(k))
@@ -215,9 +222,15 @@ subroutine ufo_gnssro_bndgsi_simobs(self, geovals, hofx, obss)
 !   data rejection based on model background !
 !   (1) skip data beyond model levels
     call get_coordinate_value(obsImpP(iobs),sIndx,refXrad(1),nlev,"increasing")
-    if (sIndx < one .or. sIndx > float(nlev)) then 
-       cycle obs_loop
-    end if
+    if (sIndx < one .or. sIndx > float(nlev))    cycle obs_loop
+
+!   calculating temeprature at obs location to obs space for BackgroundCheck ROGSI
+    indx=sIndx
+    wi=min(max(1,indx),nlev)
+    wi2=max(1,min(indx+1,nlev))
+    wf=indx-float(wi)
+    wf=max(zero,min(wf,one))
+    temperature(iobs)=gesT(wi,iobs)*(one-wf)+gesT(wi2,iobs)*wf
 
 !   (2) super-refaction
     qc_layer_SR  = .false.
@@ -315,6 +328,9 @@ subroutine ufo_gnssro_bndgsi_simobs(self, geovals, hofx, obss)
 
   end do obs_loop
 
+! putting temeprature at obs location to obs space tor BackgroundCheck ROGSI
+  call obsspace_put_db(obss, "MetaData", "temperature", temperature)
+
   deallocate(obsLat)
   deallocate(obsImpP)
   deallocate(obsLocR)
@@ -331,6 +347,7 @@ subroutine ufo_gnssro_bndgsi_simobs(self, geovals, hofx, obss)
   deallocate(radius) 
   deallocate(lagConst) 
   deallocate(refXrad_new) 
+  deallocate(temperature)
 
   write(err_msg,*) myname, ": complete"
   call fckit_log%info(err_msg)
