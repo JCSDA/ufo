@@ -19,6 +19,7 @@
 // Forward declarations
 namespace eckit {
   class Configuration;
+  class LocalConfiguration;
 }
 
 namespace ioda {

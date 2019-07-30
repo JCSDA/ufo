@@ -10,11 +10,13 @@ Observations:
  ObsTypes: 
  - ObsOperator:
      name: CRTM
-     Extra_Absorbers: [carbon_dioxide]
-     n_Aerosols: 0
-     Sensor_ID: mhs_n19
-     EndianType: little_endian
-     CoefficientPath: Data/
+     Absorbers: [H2O,O3,CO2]
+     LinearObsOperator:
+       Absorbers: [H2O,O3,CO2]
+     ObsOptions:
+       Sensor_ID: mhs_n19
+       EndianType: little_endian
+       CoefficientPath: Data/
    ObsSpace:
      name: mhs_n19
      ObsDataIn: 

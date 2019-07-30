@@ -5,12 +5,12 @@ Observations:
  ObsTypes: 
  - ObsOperator:
      name: CRTM
-     Extra_Absorbers: [carbon_dioxide]
-     Clouds: [cloud_liquid_water, cloud_ice]
-     n_Aerosols: 0
-     Sensor_ID: amsua_n19
-     EndianType: little_endian
-     CoefficientPath: Data/
+     Absorbers: [H2O,O3,CO2]
+     Clouds: [Water, Ice]
+     ObsOptions:
+       Sensor_ID: amsua_n19
+       EndianType: little_endian
+       CoefficientPath: Data/
    ObsSpace: 
     name: Radiance
     ObsDataIn: 

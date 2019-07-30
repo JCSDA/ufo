@@ -27,6 +27,8 @@ extern "C" {
 // -----------------------------------------------------------------------------
 
   void ufo_radiancecrtm_tlad_setup_f90(F90hop &, const eckit::Configuration * const *,
+                                       const eckit::Configuration * const *,
+                                       const eckit::Configuration * const *,
                                        const int &, const int &,
                                        oops::Variables &);
   void ufo_radiancecrtm_tlad_delete_f90(F90hop &);

@@ -27,6 +27,7 @@ module ufo_radiancecrtm_tlad_mod
   character(len=max_string), public, allocatable :: varin(:)  ! variables requested from the model
   integer, allocatable                           :: channels(:)
   type(crtm_conf) :: conf
+  type(crtm_conf) :: conf_traj
   integer :: n_Profiles
   integer :: n_Layers
   integer :: n_Channels
@@ -48,17 +49,20 @@ contains
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_radiancecrtm_tlad_setup(self, c_conf, channels)
+subroutine ufo_radiancecrtm_tlad_setup(self, c_confOpts, c_confOper, c_confLinOper, channels)
 
 implicit none
 class(ufo_radiancecrtm_tlad), intent(inout) :: self
-type(c_ptr),                  intent(in)    :: c_conf
+type(c_ptr),                  intent(in)    :: c_confOpts
+type(c_ptr),                  intent(in)    :: c_confOper
+type(c_ptr),                  intent(in)    :: c_confLinOper
 integer(c_int),               intent(in)    :: channels(:)  !List of channels to use
 
 integer :: nvars_in
 integer :: ind, jspec
 
- call crtm_conf_setup(self%conf,c_conf)
+ call crtm_conf_setup(self%conf_traj, c_confOpts, c_confOper)
+ call crtm_conf_setup(self%conf,      c_confOpts, c_confLinOper)
 
  ! request from the model var_ts +
  ! 1 * n_Absorbers
@@ -94,6 +98,7 @@ class(ufo_radiancecrtm_tlad), intent(inout) :: self
  self%ltraj = .false.
 
  call crtm_conf_delete(self%conf)
+ call crtm_conf_delete(self%conf_traj)
 
  if (allocated(self%atm_k)) then
    call CRTM_Atmosphere_Destroy(self%atm_K)
@@ -125,7 +130,7 @@ integer        :: n, k1
 type(ufo_geoval), pointer :: temp
 
 ! Define the "non-demoninational" arguments
-type(CRTM_ChannelInfo_type)             :: chinfo(self%conf%n_Sensors)
+type(CRTM_ChannelInfo_type)             :: chinfo(self%conf_traj%n_Sensors)
 type(CRTM_Geometry_type),   allocatable :: geo(:)
 
 ! Define the FORWARD variables
@@ -149,7 +154,7 @@ type(CRTM_RTSolution_type), allocatable :: rts_K(:,:)
  call CRTM_Version( Version )
  call Program_Message( PROGRAM_NAME, &
                        'Check/example program for the CRTM Forward and K-Matrix (setTraj) functions using '//&
-                       trim(self%conf%ENDIAN_type)//' coefficient datafiles', &
+                       trim(self%conf_traj%ENDIAN_type)//' coefficient datafiles', &
                        'CRTM Version: '//TRIM(Version) )
 
 
@@ -159,9 +164,9 @@ type(CRTM_RTSolution_type), allocatable :: rts_K(:,:)
  !**       CRTM_Lifecycle.f90 for more details.
 
  write( *,'(/5x,"Initializing the CRTM (setTraj) ...")' )
- err_stat = CRTM_Init( self%conf%SENSOR_ID, &
+ err_stat = CRTM_Init( self%conf_traj%SENSOR_ID, &
             chinfo, &
-            File_Path=trim(self%conf%COEFFICIENT_PATH), &
+            File_Path=trim(self%conf_traj%COEFFICIENT_PATH), &
             Quiet=.TRUE.)
  if ( err_stat /= SUCCESS ) THEN
    message = 'Error initializing CRTM (setTraj)'
@@ -171,7 +176,7 @@ type(CRTM_RTSolution_type), allocatable :: rts_K(:,:)
 
  ! Loop over all sensors. Not necessary if we're calling CRTM for each sensor
  ! ----------------------------------------------------------------------------
- Sensor_Loop:do n = 1, self%conf%n_Sensors
+ Sensor_Loop:do n = 1, self%conf_traj%n_Sensors
 
 
    ! Pass channel list to CRTM
@@ -208,7 +213,7 @@ type(CRTM_RTSolution_type), allocatable :: rts_K(:,:)
 
    ! Create the input FORWARD structure (atm)
    ! ----------------------------------------
-   call CRTM_Atmosphere_Create( atm, self%n_Layers, self%conf%n_Absorbers, self%conf%n_Clouds, self%conf%n_Aerosols )
+   call CRTM_Atmosphere_Create( atm, self%n_Layers, self%conf_traj%n_Absorbers, self%conf_traj%n_Clouds, self%conf_traj%n_Aerosols )
    if ( ANY(.NOT. CRTM_Atmosphere_Associated(atm)) ) THEN
       message = 'Error allocating CRTM Forward Atmosphere structure (setTraj)'
       CALL Display_Message( PROGRAM_NAME, message, FAILURE )
@@ -228,7 +233,7 @@ type(CRTM_RTSolution_type), allocatable :: rts_K(:,:)
 
    ! Create output K-MATRIX structure (atm)
    ! --------------------------------------
-   call CRTM_Atmosphere_Create( self%atm_K, self%n_Layers, self%conf%n_Absorbers, self%conf%n_Clouds, self%conf%n_Aerosols )
+   call CRTM_Atmosphere_Create( self%atm_K, self%n_Layers, self%conf_traj%n_Absorbers, self%conf_traj%n_Clouds, self%conf_traj%n_Aerosols )
    if ( ANY(.NOT. CRTM_Atmosphere_Associated(self%atm_K)) ) THEN
       message = 'Error allocating CRTM K-matrix Atmosphere structure (setTraj)'
       CALL Display_Message( PROGRAM_NAME, message, FAILURE )
@@ -248,8 +253,8 @@ type(CRTM_RTSolution_type), allocatable :: rts_K(:,:)
 
    !Assign the data from the GeoVaLs
    !--------------------------------
-   call Load_Atm_Data(self%N_PROFILES,self%N_LAYERS,geovals,atm,self%conf)
-   call Load_Sfc_Data(self%N_PROFILES,self%N_LAYERS,self%N_Channels,self%channels,geovals,sfc,chinfo,obss,self%conf)
+   call Load_Atm_Data(self%N_PROFILES,self%N_LAYERS,geovals,atm,self%conf_traj)
+   call Load_Sfc_Data(self%N_PROFILES,self%N_LAYERS,self%N_Channels,self%channels,geovals,sfc,chinfo,obss,self%conf_traj)
    call Load_Geom_Data(obss,geo)
 
 
@@ -276,7 +281,7 @@ type(CRTM_RTSolution_type), allocatable :: rts_K(:,:)
                              self%sfc_K  , &  ! K-MATRIX Output
                              rts           )  ! FORWARD  Output
    if ( err_stat /= SUCCESS ) THEN
-      message = 'Error calling CRTM (setTraj) K-Matrix Model for '//TRIM(self%conf%SENSOR_ID(n))
+      message = 'Error calling CRTM (setTraj) K-Matrix Model for '//TRIM(self%conf_traj%SENSOR_ID(n))
       call Display_Message( PROGRAM_NAME, message, FAILURE )
       stop
    end if
@@ -335,7 +340,7 @@ real(c_double),           intent(inout) :: hofx(nvars, nlocs)
 
 character(len=*), parameter :: myname_="ufo_radiancecrtm_simobs_tl"
 character(max_string) :: err_msg
-integer :: jprofile, jchannel, jlevel, jspec
+integer :: jprofile, jchannel, jlevel, jspec, ispec
 type(ufo_geoval), pointer :: geoval_d
 
 
@@ -388,12 +393,14 @@ type(ufo_geoval), pointer :: geoval_d
    ! Get Absorber from geovals
    call ufo_geovals_get_var(geovals, self%conf%Absorbers(jspec), geoval_d)
 
+   ispec = ufo_vars_getindex(self%conf_traj%Absorbers, self%conf%Absorbers(jspec))
+
    ! Multiply by Jacobian and add to hofx
    do jprofile = 1, self%n_Profiles
      do jchannel = 1, size(self%channels)
        do jlevel = 1, geoval_d%nval
          hofx(jchannel, jprofile) = hofx(jchannel, jprofile) + &
-                      self%atm_K(jchannel,jprofile)%Absorber(jlevel,jspec) * &
+                      self%atm_K(jchannel,jprofile)%Absorber(jlevel,ispec) * &
                       geoval_d%vals(jlevel,jprofile)
        enddo
      enddo
@@ -407,12 +414,14 @@ type(ufo_geoval), pointer :: geoval_d
    ! Get Cloud from geovals
    call ufo_geovals_get_var(geovals, self%conf%Clouds(jspec,1), geoval_d)
 
+   ispec = ufo_vars_getindex(self%conf_traj%Clouds(:,1), self%conf%Clouds(jspec,1))
+
    ! Multiply by Jacobian and add to hofx
    do jprofile = 1, self%n_Profiles
      do jchannel = 1, size(self%channels)
        do jlevel = 1, geoval_d%nval
          hofx(jchannel, jprofile) = hofx(jchannel, jprofile) + &
-                      self%atm_K(jchannel,jprofile)%Cloud(jspec)%Water_Content(jlevel) * &
+                      self%atm_K(jchannel,jprofile)%Cloud(ispec)%Water_Content(jlevel) * &
                       geoval_d%vals(jlevel,jprofile)
        enddo
      enddo
@@ -435,7 +444,7 @@ real(c_double),           intent(in)    :: hofx(nvars, nlocs)
 
 character(len=*), parameter :: myname_="ufo_radiancecrtm_simobs_ad"
 character(max_string) :: err_msg
-integer :: jprofile, jchannel, jlevel, jspec
+integer :: jprofile, jchannel, jlevel, jspec, ispec
 type(ufo_geoval), pointer :: geoval_d
 real(c_double) :: missing
 
@@ -500,13 +509,15 @@ real(c_double) :: missing
       geoval_d%vals = 0.0_kind_real
    endif
 
+   ispec = ufo_vars_getindex(self%conf_traj%Absorbers, self%conf%Absorbers(jspec))
+
    ! Multiply by Jacobian and add to hofx (adjoint)
    do jprofile = 1, self%n_Profiles
      do jchannel = 1, size(self%channels)
        do jlevel = 1, geoval_d%nval
          if (hofx(jchannel, jprofile) /= missing) then
            geoval_d%vals(jlevel,jprofile) = geoval_d%vals(jlevel,jprofile) + &
-                                        self%atm_K(jchannel,jprofile)%Absorber(jlevel,jspec) * &
+                                        self%atm_K(jchannel,jprofile)%Absorber(jlevel,ispec) * &
                                         hofx(jchannel, jprofile)
          endif
        enddo
@@ -529,13 +540,15 @@ real(c_double) :: missing
       geoval_d%vals = 0.0_kind_real
    endif
 
+   ispec = ufo_vars_getindex(self%conf_traj%Clouds(:,1), self%conf%Clouds(jspec,1))
+
    ! Multiply by Jacobian and add to hofx (adjoint)
    do jprofile = 1, self%n_Profiles
      do jchannel = 1, size(self%channels)
        do jlevel = 1, geoval_d%nval
          if (hofx(jchannel, jprofile) /= missing) then
            geoval_d%vals(jlevel,jprofile) = geoval_d%vals(jlevel,jprofile) + &
-                                        self%atm_K(jchannel,jprofile)%Cloud(jspec)%Water_Content(jlevel) * &
+                                        self%atm_K(jchannel,jprofile)%Cloud(ispec)%Water_Content(jlevel) * &
                                         hofx(jchannel, jprofile)
          endif
        enddo

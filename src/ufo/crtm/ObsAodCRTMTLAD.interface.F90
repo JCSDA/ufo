@@ -32,16 +32,16 @@ contains
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_aodcrtm_tlad_setup_c(c_key_self, c_conf) bind(c,name='ufo_aodcrtm_tlad_setup_f90')
+subroutine ufo_aodcrtm_tlad_setup_c(c_key_self, c_confOpts, c_confOper) bind(c,name='ufo_aodcrtm_tlad_setup_f90')
 implicit none
 integer(c_int), intent(inout) :: c_key_self
-type(c_ptr), intent(in)    :: c_conf
+type(c_ptr), intent(in)    :: c_confOpts, c_confOper
 
 type(ufo_aodcrtm_tlad), pointer :: self
 
 call ufo_aodcrtm_tlad_registry%setup(c_key_self, self)
 
-call self%setup(c_conf)
+call self%setup(c_confOpts, c_confOper)
 
 end subroutine ufo_aodcrtm_tlad_setup_c
 

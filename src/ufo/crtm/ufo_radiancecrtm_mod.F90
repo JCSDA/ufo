@@ -44,17 +44,27 @@ contains
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_radiancecrtm_setup(self, c_conf, channels)
+subroutine ufo_radiancecrtm_setup(self, c_confOpts, c_confOper, channels)
 
 implicit none
 class(ufo_radiancecrtm), intent(inout) :: self
-type(c_ptr),             intent(in)    :: c_conf
+type(c_ptr),             intent(in)    :: c_confOpts
+type(c_ptr),             intent(in)    :: c_confOper
 integer(c_int),          intent(in)    :: channels(:)  !List of channels to use
 
 integer :: nvars_in, nvars_out
 integer :: ind, jspec, ich
+character(len=max_string) :: err_msg
 
- call crtm_conf_setup(self%conf,c_conf)
+ call crtm_conf_setup(self%conf,c_confOpts,c_confOper)
+ if ( ufo_vars_getindex(self%conf%Absorbers, var_mixr) < 1 ) then
+   write(err_msg,*) 'ufo_radiancecrtm_setup error: H2O must be included in CRTM Absorbers'
+   call abor1_ftn(err_msg)
+ end if
+ if ( ufo_vars_getindex(self%conf%Absorbers, var_oz) < 1 ) then
+   write(err_msg,*) 'ufo_radiancecrtm_setup error: O3 must be included in CRTM Absorbers'
+   call abor1_ftn(err_msg)
+ end if
 
  ! request from the model all the hardcoded atmospheric & surface variables + 
  ! 1 * n_Absorbers
