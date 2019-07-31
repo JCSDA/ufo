@@ -67,6 +67,8 @@ character(len=MAXVARLEN), public, parameter :: var_sfc_soilt   = "Soil_Temperatu
 character(len=MAXVARLEN), public, parameter :: var_sfc_landtyp = "Land_Type_Index"
 character(len=MAXVARLEN), public, parameter :: var_sfc_vegtyp  = "Vegetation_Type"
 character(len=MAXVARLEN), public, parameter :: var_sfc_soiltyp = "Soil_Type"
+character(len=MAXVARLEN), public, parameter :: var_geomz       = "height"
+character(len=MAXVARLEN), public, parameter :: var_sfc_geomz   = "surface_altitude"
 character(len=MAXVARLEN), public, parameter :: var_sfc_rough   = "surface_roughness_length"
 character(len=MAXVARLEN), public, parameter :: var_sfc_t   = "surface_temperature"
 character(len=MAXVARLEN), public, parameter :: var_sfc_fact10  = "GSI_wind_reduction_factor_10m"

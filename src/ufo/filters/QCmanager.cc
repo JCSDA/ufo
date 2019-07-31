@@ -104,6 +104,7 @@ void QCmanager::print(std::ostream & os) const {
     size_t ifgss = 0;
     size_t ignss = 0;
     size_t ithin = 0;
+    size_t ihcor = 0;
 
     for (size_t jobs = 0; jobs < iobs; ++jobs) {
       if (flags_[jj][jobs] == QCflags::pass)    ++ipass;
@@ -116,6 +117,7 @@ void QCmanager::print(std::ostream & os) const {
       if (flags_[jj][jobs] == QCflags::fguess)  ++ifgss;
       if (flags_[jj][jobs] == QCflags::thinned) ++ithin;
       if (flags_[jj][jobs] == 76 || flags_[jj][jobs] == 77)  ++ignss;
+      if (flags_[jj][jobs] == 80) ++ihcor;
     }
 
     obsdb_.comm().allReduceInPlace(iobs, eckit::mpi::sum());
@@ -129,6 +131,7 @@ void QCmanager::print(std::ostream & os) const {
     obsdb_.comm().allReduceInPlace(ifgss, eckit::mpi::sum());
     obsdb_.comm().allReduceInPlace(ignss, eckit::mpi::sum());
     obsdb_.comm().allReduceInPlace(ithin, eckit::mpi::sum());
+    obsdb_.comm().allReduceInPlace(ihcor, eckit::mpi::sum());
 
     if (obsdb_.comm().rank() == 0) {
       const std::string info = "QC " + flags_.obstype() + " " + observed_[jj] + ": ";
@@ -141,10 +144,12 @@ void QCmanager::print(std::ostream & os) const {
       if (ithin > 0) os << info << ithin << " removed by thinning." << std::endl;
       if (ifgss > 0) os << info << ifgss << " rejected by first-guess check." << std::endl;
       if (ignss > 0) os << info << ignss << " rejected by GNSSRO reality check." << std::endl;
+      if (ihcor > 0) os << info << ihcor << " rejected by HeightCorrection check." << std::endl;
       os << info << ipass << " passed out of " << iobs << " observations." << std::endl;
     }
 
-    ASSERT(ipass + imiss + ipreq + ibnds + iwhit + iblck + iherr + ithin + ifgss + ignss == iobs);
+    ASSERT(ipass + imiss + ipreq + ibnds + iwhit + iblck + iherr + ithin + ifgss + ignss \
+           + ihcor == iobs);
   }
 }
 
