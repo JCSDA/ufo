@@ -30,4 +30,4 @@ Observations:
      variables: [brightness_temperature]
      channels: 1
      threshold: 2.0
-   passedBenchmark: 1463      # number of passed obs
+   passedBenchmark: 1462      # number of passed obs

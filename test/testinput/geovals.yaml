@@ -31,5 +31,5 @@ Observations:
    ObsOperator:
      name: VertInterp
    GeoVaLs: 
-    norm: 13183568.923112851 
+    norm: 13190691.119867075 
     filename: Data/sondes_geoval_2018041500_m.nc4
