@@ -59,6 +59,8 @@ character(len=maxvarlen), allocatable :: tracer_variables(:)
   allocate(self%varout(self%nvars_out))
   self%varout = vars
 
+  print*, 'aod setup test'
+
   ! Let user choose specific aerosols needed.
   self%ntracers = size(config_get_string_vector(c_conf, max_string, "tracer_geovals"))
   allocate(tracer_variables(self%ntracers))

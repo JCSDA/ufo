@@ -8,13 +8,13 @@
 #include "ufo/geos_aero/ObsGeosAodTLAD.h"
 
 #include <ostream>
-#include <string>
-#include <vector>
-#include <boost/algorithm/string.hpp>
+#include <set>
 
 #include "ioda/ObsSpace.h"
 #include "ioda/ObsVector.h"
 #include "oops/base/Variables.h"
+#include "oops/util/IntSetParser.h"
+
 #include "oops/util/Logger.h"
 #include "ufo/GeoVaLs.h"
 #include "ufo/ObsBias.h"
@@ -30,19 +30,20 @@ ObsGeosAodTLAD::ObsGeosAodTLAD(const ioda::ObsSpace & odb,
                                const eckit::Configuration & config)
   : keyOper_(0), varin_(), odb_(odb)
 {
-  int c_name_size = 800;
-  char *buffin = new char[c_name_size];
   const eckit::Configuration * configc = &config;
 
   const oops::Variables & observed = odb.obsvariables();
   const int nvars_out = observed.size();
 
-  ufo_geosaod_tlad_setup_f90(keyOper_, &configc, buffin, c_name_size, nvars_out);
+//  ufo_geosaod_tlad_setup_f90(keyOper_, &configc, buffin, c_name_size, nvars_out);
 
-  std::string vstr_in(buffin);
-  std::vector<std::string> vvin;
-  boost::split(vvin, vstr_in, boost::is_any_of("\t"));
-  varin_.reset(new oops::Variables(vvin));
+//  std::string vstr_in(buffin);
+//  std::vector<std::string> vvin;
+//  boost::split(vvin, vstr_in, boost::is_any_of("\t"));
+//  varin_.reset(new oops::Variables(vvin));
+
+  ufo_geosaod_tlad_setup_f90(keyOper_, &configc, varin_, nvars_out);
+
 
   oops::Log::trace() << "ObsGeosAodTLAD created" << std::endl;
 }

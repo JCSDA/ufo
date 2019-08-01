@@ -10,7 +10,9 @@
 
 #include "ioda/ObsSpace.h"
 
-#include "ufo/Fortran.h"
+#include "oops/base/Variables.h"
+#include "ufo/Fortran.h"'
+
 
 namespace ufo {
 
@@ -21,7 +23,7 @@ extern "C" {
 // -----------------------------------------------------------------------------
 
   void ufo_geosaod_tlad_setup_f90(F90hop &, const eckit::Configuration * const *,
-                                  char *, const int &, const int &);
+                                  oops::Variables &, const int &);
   void ufo_geosaod_tlad_delete_f90(F90hop &);
   void ufo_geosaod_tlad_settraj_f90(const F90hop &, const F90goms &, const ioda::ObsSpace &);
   void ufo_geosaod_simobs_tl_f90(const F90hop &, const F90goms &, const ioda::ObsSpace &,
