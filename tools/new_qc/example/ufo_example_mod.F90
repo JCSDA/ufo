@@ -7,11 +7,11 @@
 
 module ufo_example_mod
 
+use fckit_configuration_module, only: fckit_configuration
 use iso_c_binding
 use kinds
 use ufo_geovals_mod
 use obsspace_mod
-use config_mod
 use ufo_vars_mod
 
 implicit none
@@ -30,10 +30,10 @@ end type ufo_example
 contains
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_example_create(self, conf)
+subroutine ufo_example_create(self, f_conf)
 implicit none
-type(ufo_example), intent(inout) :: self
-type(c_ptr), intent(in)          :: conf
+type(ufo_example), intent(inout)      :: self
+type(fckit_configuration), intent(in) :: f_conf
 
 ! TODO: set self%geovars (list of variables to use from GeoVaLs) if needed
 

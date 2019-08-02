@@ -7,8 +7,8 @@
 
 MODULE ufo_crtm_utils_mod
 
+use fckit_configuration_module, only: fckit_configuration
 use iso_c_binding
-use config_mod
 use kinds
 
 use crtm_module
@@ -128,17 +128,20 @@ contains
 
 ! ------------------------------------------------------------------------------
 
-subroutine crtm_conf_setup(conf, c_confOpts, c_confOper)
+subroutine crtm_conf_setup(conf, f_confOpts, f_confOper)
 
 implicit none
-type(crtm_conf), intent(inout) :: conf
-type(c_ptr),     intent(in)    :: c_confOpts
-type(c_ptr),     intent(in)    :: c_confOper
+type(crtm_conf),            intent(inout) :: conf
+type(fckit_configuration),  intent(in)    :: f_confOpts
+type(fckit_configuration),  intent(in)    :: f_confOper
 
 character(len=255) :: IRVISwaterCoeff, IRVISlandCoeff, IRVISsnowCoeff, IRVISiceCoeff, MWwaterCoeff
 integer :: jspec, ivar
 character(len=MAXVARLEN)  :: BASENAME
 character(len=max_string) :: err_msg
+character(len=:), allocatable :: str
+character(kind=c_char,len=MAXVARLEN), allocatable :: char_array(:)
+integer(c_size_t),parameter :: csize = MAXVARLEN
 
  !Some config needs to come from user
  !-----------------------------------
@@ -152,14 +155,16 @@ character(len=max_string) :: err_msg
  ! Absorbers
  !----------
  conf%n_Absorbers = 0
- if (config_element_exists(c_confOper,"Absorbers")) &
-   conf%n_Absorbers = config_get_data_dimension(c_confOper,"Absorbers")
+ if (f_confOper%has("Absorbers")) &
+   conf%n_Absorbers = conf%n_Absorbers + f_confOper%get_size("Absorbers")
+
  allocate( conf%Absorbers     ( conf%n_Absorbers ), &
            conf%Absorber_Id   ( conf%n_Absorbers ), &
            conf%Absorber_Units( conf%n_Absorbers ) )
+
  if (conf%n_Absorbers > 0) then
-   conf%Absorbers(1:conf%n_Absorbers) = &
-     config_get_string_vector(c_confOper,MAXVARLEN,"Absorbers")
+   call f_confOper%get_or_die("Absorbers",csize,char_array)
+   conf%Absorbers(1:conf%n_Absorbers) = char_array
  end if
 
  ! check for duplications
@@ -186,13 +191,13 @@ character(len=max_string) :: err_msg
  ! Clouds
  !-------
  conf%n_Clouds = 0
- if (config_element_exists(c_confOper,"Clouds")) &
-   conf%n_Clouds = config_get_data_dimension(c_confOper,"Clouds")
+ if (f_confOper%has("Clouds")) &
+   conf%n_Clouds = f_confOper%get_size("Clouds")
  allocate( conf%Clouds  ( conf%n_Clouds,2), &
            conf%Cloud_Id( conf%n_Clouds ) )
  if (conf%n_Clouds > 0) then
-   conf%Clouds(1:conf%n_Clouds,1) = &
-     config_get_string_vector(c_confOper,MAXVARLEN,"Clouds")
+   call f_confOper%get_or_die("Clouds",csize,char_array) 
+   conf%Clouds(1:conf%n_Clouds,1) = char_array
  end if
 
  ! check for duplications
@@ -216,8 +221,9 @@ character(len=max_string) :: err_msg
 
  ! Aerosols
  !---------
- IF (config_element_exists(c_confOpts,"AerosolOption")) THEN
-    conf%aerosol_option = config_get_string(c_confOpts,LEN(conf%aerosol_option),"AerosolOption")
+ IF (f_confOpts%has("AerosolOption")) THEN
+    call f_confOpts%get_or_die("AerosolOption",str)
+    conf%aerosol_option = str
     conf%aerosol_option = upper2lower(conf%aerosol_option)
     IF (TRIM(conf%aerosol_option) == "aerosols_gocart_default") THEN
        conf%n_Aerosols=n_aerosols_gocart_default
@@ -237,20 +243,43 @@ character(len=max_string) :: err_msg
  allocate(conf%SENSOR_ID(conf%n_Sensors))
 
  !Get sensor ID from config
- conf%SENSOR_ID(conf%n_Sensors) = config_get_string(c_confOpts,len(conf%SENSOR_ID(conf%n_Sensors)),"Sensor_ID")
+ call f_confOpts%get_or_die("Sensor_ID",str)
+ conf%SENSOR_ID(conf%n_Sensors) = str
 
  !ENDIAN type
- conf%ENDIAN_TYPE = config_get_string(c_confOpts,len(conf%ENDIAN_TYPE),"EndianType")
+ call f_confOpts%get_or_die("EndianType",str)
+ conf%ENDIAN_TYPE = str
 
  !Path to coefficient files
- conf%COEFFICIENT_PATH = config_get_string(c_confOpts,len(conf%COEFFICIENT_PATH),"CoefficientPath")
+ call f_confOpts%get_or_die("CoefficientPath",str)
+ conf%COEFFICIENT_PATH = str
 
  ! Coefficient file prefixes
- IRVISwaterCoeff = config_get_string(c_confOpts, len(IRVISwaterCoeff), "IRVISwaterCoeff", "Nalli")
- IRVISlandCoeff  = config_get_string(c_confOpts, len(IRVISlandCoeff),  "IRVISlandCoeff",  "NPOESS")
- IRVISsnowCoeff  = config_get_string(c_confOpts, len(IRVISsnowCoeff),  "IRVISsnowCoeff",  "NPOESS")
- IRVISiceCoeff   = config_get_string(c_confOpts, len(IRVISiceCoeff),   "IRVISiceCoeff",   "NPOESS")
- MWwaterCoeff    = config_get_string(c_confOpts, len(MWwaterCoeff),    "MWwaterCoeff",    "FASTEM6")
+ IRVISwaterCoeff = "Nalli"
+ if (f_confOpts%has("IRVISwaterCoeff")) then
+    call f_confOpts%get_or_die("IRVISwaterCoeff",str)
+    IRVISwaterCoeff = str
+ end if
+ IRVISlandCoeff = "NPOESS"
+ if (f_confOpts%has("IRVISlandCoeff")) then
+    call f_confOpts%get_or_die("IRVISlandCoeff",str)
+    IRVISlandCoeff = str
+ end if
+ IRVISsnowCoeff = "NPOESS"
+ if (f_confOpts%has("IRVISsnowCoeff")) then
+    call f_confOpts%get_or_die("IRVISsnowCoeff",str)
+    IRVISsnowCoeff = str
+ end if
+ IRVISiceCoeff = "NPOESS"
+ if (f_confOpts%has("IRVISiceCoeff")) then
+    call f_confOpts%get_or_die("IRVISiceCoeff",str)
+    IRVISiceCoeff = str
+ end if
+ MWwaterCoeff = "FASTEM6"
+ if (f_confOpts%has("MWwaterCoeff")) then
+    call f_confOpts%get_or_die("MWwaterCoeff",str)
+    MWwaterCoeff = str
+ end if
 
  ! Define water, snow, ice (WSI) categories
  select case (trim(IRVISlandCoeff))
@@ -281,8 +310,8 @@ character(len=max_string) :: err_msg
  conf%MWwaterCoeff_File = trim(MWwaterCoeff)//".MWwater.EmisCoeff.bin"
 
  conf%inspect = 0
- if (config_element_exists(c_confOpts,"InspectProfileNumber")) then
-   conf%inspect = config_get_int(c_confOpts,"InspectProfileNumber")
+ if (f_confOpts%has("InspectProfileNumber")) then
+   call f_confOpts%get_or_die("InspectProfileNumber",conf%inspect)
  endif
 
 end subroutine crtm_conf_setup

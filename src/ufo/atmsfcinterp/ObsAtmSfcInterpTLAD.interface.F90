@@ -8,8 +8,8 @@
 
 module ufo_atmsfcinterp_tlad_mod_c
 
+  use fckit_configuration_module, only: fckit_configuration
   use iso_c_binding
-  use config_mod
   use ufo_atmsfcinterp_tlad_mod 
   use ufo_geovals_mod_c, only: ufo_geovals_registry
   use ufo_geovals_mod,   only: ufo_geovals
@@ -43,9 +43,13 @@ type(c_ptr), intent(in), value :: c_varlist
 character(len=MAXVARLEN), dimension(:), allocatable :: vars
     
 type(ufo_atmsfcinterp_tlad), pointer :: self
+type(fckit_configuration) :: f_conf, f_varconf
 
 call ufo_atmsfcinterp_tlad_registry%setup(c_key_self, self)
-call ufo_vars_read(c_varconf, vars)
+f_conf = fckit_configuration(c_conf)
+f_varconf = fckit_configuration(c_varconf)
+
+call ufo_vars_read(f_varconf, vars)
 call self%setup(vars)
 deallocate(vars)
 

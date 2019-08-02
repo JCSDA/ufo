@@ -6,6 +6,7 @@
 !
 module ufo_roobserror_mod_c
 
+use fckit_configuration_module, only: fckit_configuration
 use iso_c_binding
 use ufo_roobserror_mod
 
@@ -37,9 +38,12 @@ type(c_ptr), value, intent(in) :: c_obspace
 type(c_ptr), value, intent(in) :: c_conf
 
 type(ufo_roobserror), pointer :: self
- 
+ type(fckit_configuration) :: f_conf
+
 call ufo_roobserror_registry%setup(c_self, self)
-call ufo_roobserror_create(self, c_obspace, c_conf)
+f_conf = fckit_configuration(c_conf)
+
+call ufo_roobserror_create(self, c_obspace, f_conf)
 
 end subroutine ufo_roobserror_create_c
 

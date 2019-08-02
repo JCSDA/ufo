@@ -6,11 +6,10 @@
 !> Fortran module to implement RO observational error
 
 module ufo_roobserror_mod
-use iso_c_binding
+use fckit_configuration_module, only: fckit_configuration 
 use kinds
 use ufo_geovals_mod
 use obsspace_mod
-use config_mod
 use missing_values_mod
 use gnssro_mod_obserror
 
@@ -31,15 +30,27 @@ end type ufo_roobserror
 contains
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_roobserror_create(self, obspace, conf)
+subroutine ufo_roobserror_create(self, obspace, f_conf)
+use iso_c_binding
 implicit none
-type(ufo_roobserror), intent(inout) :: self
-type(c_ptr),  value,       intent(in)    :: obspace
-type(c_ptr),               intent(in)    :: conf
+type(ufo_roobserror), intent(inout)   :: self
+type(c_ptr),  value,       intent(in) :: obspace
+type(fckit_configuration), intent(in) :: f_conf
 
-self%variable   = config_get_string(conf, max_string, "variable", "bending_angle")
-self%errmodel   = config_get_string(conf, max_string, "errmodel", "GSI")
+character(len=:), allocatable :: str
+
+self%variable = "bending_angle"
+if (f_conf%has("variable")) then
+   call f_conf%get_or_die("variable",str)
+   self%variable = str
+end if
+self%errmodel = "GSI"
+if (f_conf%has("errmodel")) then
+   call f_conf%get_or_die("errmodel",str)
+   self%errmodel = str
+end if
 self%obsdb      = obspace
+
 end subroutine ufo_roobserror_create
 
 ! ------------------------------------------------------------------------------

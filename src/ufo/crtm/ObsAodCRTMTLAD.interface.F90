@@ -7,8 +7,8 @@
 
 module ufo_aodcrtm_tlad_mod_c
 
+  use fckit_configuration_module, only: fckit_configuration
   use iso_c_binding
-  use config_mod
   use ufo_aodcrtm_tlad_mod
   use ufo_geovals_mod
   use ufo_geovals_mod_c,   only: ufo_geovals_registry
@@ -38,10 +38,13 @@ integer(c_int), intent(inout) :: c_key_self
 type(c_ptr), intent(in)    :: c_confOpts, c_confOper
 
 type(ufo_aodcrtm_tlad), pointer :: self
+type(fckit_configuration) :: f_confOpts, f_confOper
 
 call ufo_aodcrtm_tlad_registry%setup(c_key_self, self)
+f_confOpts = fckit_configuration(c_confOpts)
+f_confOper = fckit_configuration(c_confOper)
 
-call self%setup(c_confOpts, c_confOper)
+call self%setup(f_confOpts, f_confOper)
 
 end subroutine ufo_aodcrtm_tlad_setup_c
 

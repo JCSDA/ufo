@@ -6,6 +6,7 @@
 !
 module ufo_geovals_mod_c
 
+use fckit_configuration_module, only: fckit_configuration
 use iso_c_binding
 use ufo_geovals_mod
 use ufo_locs_mod
@@ -37,7 +38,7 @@ contains
 ! ------------------------------------------------------------------------------
 !> Setup GeoVaLs (store nlocs, variables; don't do allocation yet)
 subroutine ufo_geovals_setup_c(c_key_self, c_nlocs, c_vars) bind(c,name='ufo_geovals_setup_f90')
-use config_mod
+
 implicit none
 integer(c_int), intent(inout) :: c_key_self
 integer(c_int), intent(in) :: c_nlocs
@@ -74,7 +75,7 @@ end subroutine ufo_geovals_copy_c
 !> Analytic init
 
 subroutine ufo_geovals_analytic_init_c(c_key_self, c_key_locs, c_conf) bind(c,name='ufo_geovals_analytic_init_f90')
-use config_mod
+
 implicit none
 integer(c_int), intent(in) :: c_key_self
 integer(c_int), intent(in) :: c_key_locs
@@ -83,12 +84,15 @@ type(c_ptr), intent(in)    :: c_conf
 type(ufo_geovals), pointer :: self
 type(ufo_locs), pointer :: locs
 character(len=30) :: ic
+character(len=:), allocatable :: str
+type(fckit_configuration) :: f_conf
 
 call ufo_geovals_registry%get(c_key_self, self)
 call ufo_locs_registry%get(c_key_locs,locs)
 
-ic = config_get_string(c_conf,len(ic),"analytic_init")
-
+f_conf = fckit_configuration(c_conf)
+call f_conf%get_or_die("analytic_init",str)
+ic = str
 call ufo_geovals_analytic_init(self,locs,ic)
 
 end subroutine ufo_geovals_analytic_init_c
@@ -354,7 +358,7 @@ end subroutine ufo_geovals_maxloc_c
 ! ------------------------------------------------------------------------------
 
 subroutine ufo_geovals_read_file_c(c_key_self, c_conf, c_vars) bind(c,name='ufo_geovals_read_file_f90')
-use config_mod
+
 use datetime_mod
 
 implicit none
@@ -364,13 +368,17 @@ type(c_ptr), intent(in)    :: c_vars
 
 type(ufo_geovals), pointer :: self
 character(max_string) :: filename
+character(len=:), allocatable :: str
+type(fckit_configuration) :: f_conf
 
 call ufo_geovals_registry%init()
 call ufo_geovals_registry%add(c_key_self)
 call ufo_geovals_registry%get(c_key_self, self)
 
 ! read filename for config
-filename = config_get_string(c_conf,len(filename),"filename")
+f_conf = fckit_configuration(c_conf)
+call f_conf%get_or_die("filename",str)
+filename = str
 
 ! read geovals
 call ufo_geovals_read_netcdf(self, filename, c_vars)
@@ -380,7 +388,6 @@ end subroutine ufo_geovals_read_file_c
 ! ------------------------------------------------------------------------------
 
 subroutine ufo_geovals_write_file_c(c_key_self, c_conf) bind(c,name='ufo_geovals_write_file_f90')
-use config_mod
 use fckit_mpi_module
 implicit none
 integer(c_int), intent(in) :: c_key_self
@@ -392,9 +399,13 @@ character(max_string) :: fout, filename
 type(fckit_mpi_comm)      :: comm
 character(len=10)         :: cproc
 integer                   :: ppos
+character(len=:), allocatable :: str
+type(fckit_configuration) :: f_conf
 
 ! read filename for config
-filename = config_get_string(c_conf,len(filename),"filename")
+f_conf = fckit_configuration(c_conf)
+call f_conf%get_or_die("filename",str)
+filename = str
 
 ! get the process rank number
 comm = fckit_mpi_comm()
