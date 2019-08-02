@@ -44,6 +44,7 @@ list( APPEND ufo_test_input
   testinput/hirs4_crtm.yaml
   testinput/iasi_crtm.yaml
   testinput/gsisfcmodel.yaml
+#  testinput/surface_ps_qc.yaml
   testinput/locations.yaml
   testinput/mhs_crtm.yaml
   testinput/qc_boundscheck.yaml
@@ -171,6 +172,11 @@ ecbuild_add_test( TARGET  test_ufo_gsi_sfc_model_opr
                   SOURCES mains/TestObsOperator.cc
                   ARGS    "testinput/gsisfcmodel.yaml"
                   LIBS    ufo )
+
+#ecbuild_add_test( TARGET  test_ufo_surface_ps_qc
+#                  SOURCES mains/TestObsFilters.cc
+#                  ARGS    "testinput/surface_ps_qc.yaml"
+#                  LIBS    ufo )
 
 ecbuild_add_test( TARGET  test_ufo_amsua_opr_crtm
                   SOURCES mains/TestObsOperator.cc

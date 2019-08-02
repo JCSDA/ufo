@@ -8,7 +8,7 @@
 
 module ufo_gnssro_ropp2d_utils_mod
 
-use iso_c_binding
+!use iso_c_binding
 use fckit_log_module, only: fckit_log
 use kinds,            only: kind_real
 

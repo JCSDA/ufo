@@ -10,12 +10,15 @@ Observations:
  ObsTypes: 
  - ObsOperator:
      name: CRTM
-     Extra_Absorbers: [carbon_dioxide]
-     Clouds: [cloud_liquid_water, cloud_ice]
-     n_Aerosols: 0
-     Sensor_ID: gmi_gpm
-     EndianType: little_endian
-     CoefficientPath: Data/
+     Absorbers: [H2O,O3,CO2]
+     Clouds: [Water, Ice]
+     LinearObsOperator:
+       Absorbers: [H2O,O3,CO2]
+       Clouds: [Water]
+     ObsOptions:
+       Sensor_ID: gmi_gpm
+       EndianType: little_endian
+       CoefficientPath: Data/
    ObsSpace:
      name: gmi_gpm
      ObsDataIn: 

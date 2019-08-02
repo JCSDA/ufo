@@ -8,13 +8,15 @@ LinearObsOpTest:
 
 Observations: 
  ObsTypes: 
- - ObsOperator: &obsop
+ - ObsOperator: &obsoper
      name: CRTM
-     Extra_Absorbers: [carbon_dioxide]
-     n_Aerosols: 0
-     EndianType: little_endian
-     CoefficientPath: Data/
-     Sensor_ID: sndrD1_g15
+     Absorbers: [H2O,O3,CO2]
+     LinearObsOperator:
+       Absorbers: [H2O,O3,CO2]
+     ObsOptions: &obsopts
+       EndianType: little_endian
+       CoefficientPath: Data/
+       Sensor_ID: sndrD1_g15
    ObsSpace: 
      name: sndrD1_g15
      ObsDataIn: 
@@ -27,8 +29,10 @@ Observations:
    vecequiv: GsiHofX
    tolerance: 1.1e-5
  - ObsOperator:
-     <<: *obsop
-     Sensor_ID: sndrD2_g15
+     <<: *obsoper
+     ObsOptions:
+       <<: *obsopts
+       Sensor_ID: sndrD2_g15
    ObsSpace: 
      name: sndrD2_g15
      ObsDataIn: 
@@ -39,8 +43,10 @@ Observations:
    vecequiv: GsiHofX
    tolerance: 1.1e-5
  - ObsOperator:
-     <<: *obsop
-     Sensor_ID: sndrD3_g15
+     <<: *obsoper
+     ObsOptions:
+       <<: *obsopts
+       Sensor_ID: sndrD3_g15
    ObsSpace: 
      name: sndrD3_g15
      ObsDataIn: 
@@ -51,8 +57,10 @@ Observations:
    vecequiv: GsiHofX
    tolerance: 1.1e-5
  - ObsOperator:
-     <<: *obsop
-     Sensor_ID: sndrD4_g15
+     <<: *obsoper
+     ObsOptions:
+       <<: *obsopts
+       Sensor_ID: sndrD4_g15
    ObsSpace: 
      name: sndrD4_g15
      ObsDataIn: 

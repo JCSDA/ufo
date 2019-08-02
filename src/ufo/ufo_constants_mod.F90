@@ -38,6 +38,8 @@ real(kind_real), parameter, public :: v_w   = 0.8e-6     !> Water kinematic visc
 real(kind_real), parameter, public :: S_B   = 0.026
 real(kind_real), parameter, public :: gr    = 9.81
 real(kind_real), parameter, public :: Rou    = 1000.0
+real(kind_real), parameter, public :: Lclr   = 0.0065 ! constant lapse rate
+real(kind_real), parameter, public :: t2tv   = 0.608 ! constant lapse rate
 real(kind_real), parameter, public :: von_karman = 0.41_kind_real ! Von Karman Constant
 real(kind_real), parameter, public :: es_w_0 = 611.2_kind_real ! saturation vapor pressure of water at 0C
 end module ufo_constants_mod

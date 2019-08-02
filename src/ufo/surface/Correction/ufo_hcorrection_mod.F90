@@ -1,0 +1,342 @@
+! (C) Copyright 2017-2018 UCAR
+!
+! This software is licensed under the terms of the Apache Licence Version 2.0
+! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+
+!> Fortran module to implement hcorrection check
+
+module ufo_hcorrection_mod
+
+use iso_c_binding
+use kinds
+use ufo_geovals_mod
+use obsspace_mod
+use config_mod
+use ufo_vars_mod
+use missing_values_mod
+use vert_interp_mod
+use fckit_log_module,  only : fckit_log
+use ufo_constants_mod, only : grav, rd, Lclr, t2tv
+
+implicit none
+public :: ufo_hcorrection_create, ufo_hcorrection_delete, ufo_hcorrection_prior, ufo_hcorrection_post
+private
+integer, parameter :: max_string=800
+
+! ------------------------------------------------------------------------------
+!> TODO: fill in this type
+type, public :: ufo_hcorrection
+private
+  character(len=max_string), public, allocatable :: geovars(:)
+  character(len=max_string) :: da_psfc_scheme
+  integer                   :: max_hdiff
+end type ufo_hcorrection
+
+! ------------------------------------------------------------------------------
+contains
+! ------------------------------------------------------------------------------
+
+subroutine ufo_hcorrection_create(self, conf)
+implicit none
+type(ufo_hcorrection), intent(inout) :: self
+type(c_ptr), intent(in)          :: conf
+
+! TODO: set self%geovars (list of variables to use from GeoVaLs) if needed
+allocate(self%geovars(5))
+self%geovars = (/var_tv,var_ps,var_prs,var_geomz,var_sfc_geomz/)
+self%da_psfc_scheme = config_get_string(conf, max_string, "da_psfc_scheme", "UKMO")
+self%max_hdiff = config_get_int(conf, "max_hdiff", 100)
+
+end subroutine ufo_hcorrection_create
+
+! ------------------------------------------------------------------------------
+
+subroutine ufo_hcorrection_delete(self)
+implicit none
+type(ufo_hcorrection), intent(inout) :: self
+
+if (allocated(self%geovars))   deallocate(self%geovars)
+
+end subroutine ufo_hcorrection_delete
+
+! ------------------------------------------------------------------------------
+
+subroutine ufo_hcorrection_prior(self, obspace, geovals)
+use gnssro_mod_transform
+implicit none
+type(ufo_hcorrection),  intent(in) :: self
+type(c_ptr), value, intent(in) :: obspace
+type(ufo_geovals),  intent(in) :: geovals
+
+! Local variables
+type(ufo_geoval), pointer :: geoval
+integer                           :: ivar
+real(kind_real)                   :: missing, H2000 = 2000.0
+integer                           :: nobs, iobs, nlev
+real(kind_real),    allocatable   :: cor_psfc(:)
+type(ufo_geoval),   pointer       :: model_ps, model_p, model_sfc_geomz, model_tv, model_geomz
+character(len=*), parameter       :: myname_="ufo_surface_psfc_simobs"
+character(max_string)             :: err_msg
+character(len=250)                :: buf
+real(kind_real)                   :: wf
+integer                           :: wi
+integer(c_int32_t), allocatable   :: flags(:)
+logical                           :: variable_present
+real(kind_real), dimension(:), allocatable :: obs_height, obs_t, obs_q, obs_psfc, obs_bias
+real(kind_real), dimension(:), allocatable :: model_tvs, model_zs, model_level1, model_p_2000, model_tv_2000, model_psfc
+
+missing = missing_value(missing)
+nobs    = obsspace_get_nlocs(obspace)
+
+! check if nobs is consistent in geovals & nlocs
+if (geovals%nlocs /= nobs) then
+   write(err_msg,*) myname_, ' error: nlocs of model and obs is inconsistent!'
+   call abor1_ftn(err_msg)
+endif
+
+! cor_psfc: observed surface pressure at model surface height, corresponding to P_o2m in da_intpsfc_prs* subroutines
+allocate(cor_psfc(nobs))
+allocate(flags(nobs))
+flags(:)  = 0
+
+! get obs variables
+allocate(obs_height(nobs))
+allocate(obs_psfc(nobs))
+allocate(obs_bias(nobs))
+call obsspace_get_db(obspace, "MetaData",  "station_elevation",obs_height)
+call obsspace_get_db(obspace, "ObsValue",  "surface_pressure", obs_psfc)
+call obsspace_get_db(obspace, "FortranQC", "surface_pressure", flags )
+
+! get model variables
+call ufo_geovals_get_var(geovals, var_ps, model_ps)
+call ufo_geovals_get_var(geovals, var_geomz, model_geomz)
+call ufo_geovals_get_var(geovals, var_sfc_geomz, model_sfc_geomz)
+call ufo_geovals_get_var(geovals, var_tv, model_tv)
+call ufo_geovals_get_var(geovals, var_prs, model_p)
+
+if (model_geomz%vals(1,1) .gt. model_geomz%vals(model_geomz%nval,1) ) then
+   write(err_msg,'(a)') '  ufo_surface_psfc:'//new_line('a')//                   &
+                        '  Model vertical height profile is from top to bottom,'//new_line('a')
+   call fckit_log%info(err_msg)
+end if
+
+allocate(model_zs(nobs))
+allocate(model_level1(nobs))
+allocate(model_psfc(nobs))
+
+model_zs = model_sfc_geomz%vals(1,:)
+model_level1 = model_geomz%vals(model_geomz%nval,:)   !reverse
+model_psfc = model_ps%vals(1,:)
+
+!QC
+do iobs = 1, nobs
+
+!TODO
+   if (abs (obs_height(iobs) - model_zs(iobs)) > self%max_hdiff ) then
+      obs_height(iobs) = missing
+      obs_bias(iobs) = missing
+      flags(iobs) = 80
+   end if
+
+end do
+
+! do terrain height correction, two optional schemes
+select case (trim(self%da_psfc_scheme))
+
+case ("WRFDA")
+   ! get extra obs values
+   variable_present = obsspace_has(obspace, "ObsValue", "air_temperature")
+   if (variable_present) then
+      allocate(obs_t(nobs))
+      call obsspace_get_db(obspace, "ObsValue", "air_temperature", obs_t)
+   end if
+   variable_present = obsspace_has(obspace, "ObsValue", "specific_humidity")
+   if (variable_present) then
+      allocate(obs_q(nobs))
+      call obsspace_get_db(obspace, "ObsValue", "specific_humidity", obs_q)
+   end if
+
+   ! get extra model values
+   allocate(model_tvs(nobs))
+   model_tvs = model_tv%vals(model_tv%nval,:) + Lclr * ( model_level1 - model_zs )  !Lclr = 0.0065 K/m
+
+   ! correction
+   call da_intpsfc_prs(nobs, missing, cor_psfc, obs_height, obs_psfc, model_zs, model_tvs, obs_t, obs_q)
+
+   ! update the obs surface pressure
+   obs_bias = cor_psfc - obs_psfc
+
+   deallocate(obs_t)
+   deallocate(obs_q)
+   deallocate(model_tvs)
+
+case ("UKMO")
+
+   allocate(model_p_2000(nobs))
+   allocate(model_tv_2000(nobs))
+   do iobs = 1, nobs
+      ! vertical interpolation for getting model P and tv at 2000 m
+      call vert_interp_weights(model_geomz%nval, H2000, model_geomz%vals(:,iobs), wi, wf)
+      call vert_interp_apply(model_p%nval, model_p%vals(:,iobs), model_p_2000(iobs), wi, wf)
+      call vert_interp_apply(model_tv%nval, model_tv%vals(:,iobs), model_tv_2000(iobs), wi, wf)
+   end do
+
+   ! correction
+   call da_intpsfc_prs_ukmo(nobs, missing, cor_psfc, obs_height, obs_psfc, model_zs, model_psfc, model_tv_2000, model_p_2000)
+
+   ! update the obs surface pressure
+   obs_bias = cor_psfc - obs_psfc
+
+   deallocate(model_p_2000)
+   deallocate(model_tv_2000)
+
+case default
+   write(err_msg,*) "ufo_surface_mod.F90: da_psfc_scheme must be WRFDA or UKMO"
+   call fckit_log%info(err_msg)
+end select
+
+! output
+call obsspace_put_db(obspace, "ObsBias", "surface_pressure", obs_bias)
+call obsspace_put_db(obspace, "FortranQC", "surface_pressure", flags)
+
+call fckit_log%info(buf)
+deallocate(obs_height)
+deallocate(obs_psfc)
+deallocate(flags)
+
+deallocate(model_zs)
+deallocate(model_level1)
+deallocate(model_psfc)
+end subroutine ufo_hcorrection_prior
+
+! ------------------------------------------------------------------------------
+
+subroutine ufo_hcorrection_post(self, obspace, nvars, nlocs, hofx)
+implicit none
+type(ufo_hcorrection),  intent(in) :: self
+type(c_ptr), value, intent(in) :: obspace
+integer,            intent(in) :: nvars, nlocs
+real(c_double),     intent(in) :: hofx(nvars, nlocs)
+
+end subroutine ufo_hcorrection_post
+
+! ------------------------------------------------------------------------------
+!> \Conduct terrain height correction for surface pressure
+!!
+!! \This subroutine is based on a subroutine from WRFDA da_intpsfc_prs.inc file
+!!  corresponding to sfc_assi_options = 1 in WRFDA's namelist
+!!
+!! \Date: June 2019: Created
+!! \Method: hydrosatic equation
+!!
+!!  P_o2m = P_o * exp [-grav/rd * (H_m-H_o) / (TV_m + TV_o)/2)
+!!
+!!  Where:
+!!  H_m    = model surface height
+!!  H_o    = station height
+!!  TV_m   = virtual temperature at model surface height
+!!  TV_o   = virtual temperature at station height
+!!  P_o2m  = pressure interpolated from station height to model surface height
+!!  P_o    = pressure at station height
+!!  grav   = gravitational acceleration
+!!  rd     = gas constant per mole
+!!
+
+subroutine da_intpsfc_prs (nobs, missing, P_o2m, H_o, P_o, H_m, TV_m, T_o, Q_o)
+implicit none
+integer,                          intent (in)           :: nobs !<total observation number
+real(kind_real),                  intent (in)           :: missing
+real(kind_real), dimension(nobs), intent (out)          :: P_o2m !<observed PS at model sfc height
+real(kind_real), dimension(nobs), intent (in)           :: H_o, P_o !<observed Height and PS
+real(kind_real), dimension(nobs), intent (in)           :: H_m, TV_m !<model sfc height and TV
+real(kind_real), dimension(nobs), intent (in), optional :: T_o, Q_o !<obserbed T and Q
+real(kind_real), dimension(nobs)                        :: TV_o, TV
+
+! 1.  model and observation virtual temperature
+! ---------------------------------------------
+
+if (present(T_o) .and. present(Q_o)) then
+   TV_o = T_o  * (1.0 + t2tv * Q_o)
+else if (present(T_o) .and. .not.(present(Q_o))) then
+      TV_o = T_o
+else
+      TV_o = TV_m
+end if
+
+TV  = 0.5 * (TV_m + TV_o)
+
+! 2.  extrapolate pressure from station height to model surface height
+! --------------------------------------------------------------------
+
+where ( H_o /= missing ) 
+   P_o2m = P_o * exp ( - (H_m - H_o) * grav / (rd * TV) )
+elsewhere
+   P_o2m = P_o
+end where
+
+end subroutine da_intpsfc_prs
+
+! ------------------------------------------------------------------------------
+!> \Conduct terrain height correction for surface pressure
+!!
+!! \Reference: Ingleby,2013. UKMO Technical Report No: 582. Appendix 1.
+!!
+!! \Method: integrate the hydrosatic equation dp/dz=-rho*g/RT to get P_m2o first, equation:
+!!
+!!  (P_m2o/P_m)=(T_m2o/T_m)** (grav/rd*L)
+!!
+!!  Where:
+!!  P_m2o = model surface pressure at station height
+!!  P_m   = model surface pressure
+!!  T_m   = temperature at model surface height; derived from TV_2000
+!!  T_m2o = model surface temperature at station height
+!!  grav  = gravitational acceleration
+!!  rd    = gas constant per mole
+!!  Lclr  = constant lapse rate (0.0065 K/m)
+!!
+!!  To avoid dirunal/local variations, use TV_2000 (2000 m above the model surface height) instead of direct T_m
+!!
+!!  T_m = TV_2000 * (P_o / P_2000) ** (rd*L/grav)
+!!
+!! Where:
+!!  P_2000  = background pressure at 2000 m
+!!  TV_2000 = background virtual temperature at 2000 m
+!!  P_o     = pressure at station height
+!!
+!!  Finally, in practice, adjust P_o to the model surface height using
+!!
+!!  P_o2m = P_o * (P_m / P_m2o)
+!!
+
+subroutine da_intpsfc_prs_ukmo (nobs, missing, P_o2m, H_o, P_o, H_m, P_m, TV_2000, P_2000)
+implicit none
+integer,                          intent (in)           :: nobs !<total observation number
+real(kind_real),                  intent (in)           :: missing
+real(kind_real), dimension(nobs), intent (out)          :: P_o2m !<observed PS at model sfc height
+real(kind_real), dimension(nobs), intent (in)           :: H_o, P_o !<observed Height and PS
+real(kind_real), dimension(nobs), intent (in)           :: H_m, P_m, TV_2000, P_2000 !<model Height, PS, TV at 2000 m, and P at 2000 m
+real(kind_real)                                         :: ind !<local variable
+real(kind_real), dimension(nobs)                        :: P_m2o, T_m, T_m2o !<local variables: model PS at observed height, model sfc T,
+                                                                             !!             and model T  at observed height
+
+! define the constant power exponent
+ind = rd * Lclr / grav
+
+where ( H_o /= missing ) 
+   ! calculate T_m   -- background temperature at model surface height
+   !           T_m2o -- background temperature at station height
+   T_m = TV_2000 * (P_m / P_2000) ** ind
+   T_m2o = T_m + Lclr * ( H_m - H_o)
+   P_m2o = P_m * (T_m2o / T_m) ** (1.0 / ind)
+
+   ! In practice, P_o is adjusted to the model surface height
+   P_o2m = P_o * P_m / P_m2o
+elsewhere
+   P_o2m = P_o
+end where
+
+end subroutine da_intpsfc_prs_ukmo
+
+! ------------------------------------------------------------------------------
+
+end module ufo_hcorrection_mod

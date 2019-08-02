@@ -7,8 +7,8 @@
 !> the NCEP/GSI (2018 Aug) implementation
 
 module ufo_gnssro_bndgsi_tlad_mod
+use fckit_configuration_module, only: fckit_configuration 
 use kinds
-use iso_c_binding
 use ufo_vars_mod
 use ufo_geovals_mod
 use ufo_geovals_mod_c, only: ufo_geovals_registry
@@ -40,11 +40,13 @@ end type ufo_gnssro_bndgsi_tlad
 
 contains
 ! ------------------------------------------------------------------------------
-subroutine ufo_gnssro_bndgsi_tlad_setup(self, c_conf)
+subroutine ufo_gnssro_bndgsi_tlad_setup(self, f_conf)
   implicit none
   class(ufo_gnssro_BndGSI_tlad), intent(inout) :: self
-  type(c_ptr),                   intent(in)    :: c_conf
-  call gnssro_conf_setup(self%roconf,c_conf)
+  type(fckit_configuration), intent(in)        :: f_conf
+
+  call gnssro_conf_setup(self%roconf,f_conf)
+
 end subroutine ufo_gnssro_bndgsi_tlad_setup
 
 ! ------------------------------------------------------------------------------

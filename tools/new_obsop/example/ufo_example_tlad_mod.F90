@@ -7,8 +7,8 @@
 
 module ufo_example_tlad_mod
 
+ use fckit_configuration_module, only: fckit_configuration
  use iso_c_binding
- use config_mod
  use kinds
 
  use ufo_geovals_mod, only: ufo_geovals, ufo_geoval, ufo_geovals_get_var
@@ -38,10 +38,10 @@ contains
 
 ! ------------------------------------------------------------------------------
 ! TODO: add setup of your TL/AD observation operator (optional)
-subroutine ufo_example_tlad_setup(self, c_conf, vars)
+subroutine ufo_example_tlad_setup(self, f_conf, vars)
 implicit none
 class(ufo_example_tlad), intent(inout) :: self
-type(c_ptr),             intent(in)    :: c_conf
+type(fckit_configuration), intent(in)  :: f_conf
 character(len=MAXVARLEN), dimension(:), intent(inout) :: vars ! variables to be simulated
 
 ! TODO: setup input variables varin (updated model variables)

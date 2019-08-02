@@ -16,7 +16,6 @@ use ufo_geovals_mod_c,   only: ufo_geovals_registry
 use vert_interp_mod
 use ufo_basis_tlad_mod,  only: ufo_basis_tlad
 use obsspace_mod
-use config_mod
 use gnssro_mod_conf
 use missing_values_mod
 use fckit_log_module, only : fckit_log

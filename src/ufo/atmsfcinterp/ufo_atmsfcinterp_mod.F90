@@ -7,8 +7,8 @@
 
 module ufo_atmsfcinterp_mod
 
+  use fckit_configuration_module, only: fckit_configuration
   use iso_c_binding
-  use config_mod
   use kinds
 
   use ufo_geovals_mod, only: ufo_geovals, ufo_geoval, ufo_geovals_get_var
@@ -37,10 +37,10 @@ module ufo_atmsfcinterp_mod
 contains
 
 ! ------------------------------------------------------------------------------
-subroutine atmsfcinterp_setup_(self, c_conf, vars)
+subroutine atmsfcinterp_setup_(self, f_conf, vars)
   implicit none
   class(ufo_atmsfcinterp), intent(inout) :: self
-  type(c_ptr),        intent(in)    :: c_conf
+  type(fckit_configuration), intent(in)  :: f_conf
   character(len=MAXVARLEN), dimension(:), intent(inout) :: vars
   integer :: ii, ivar, nallvars, istart, fact10tmp
   logical :: fact10nml
@@ -52,8 +52,9 @@ subroutine atmsfcinterp_setup_(self, c_conf, vars)
   !> Read variable list and store in varout
   self%varout = vars
   ! check for if we need to look for wind reduction factor
-  self%use_fact10 = .false. 
-  fact10tmp = config_get_int(c_conf, "use_fact10", 0)
+  self%use_fact10 = .false.
+  fact10tmp = 0
+  if (f_conf%has("use_fact10")) call f_conf%get_or_die("use_fact10",fact10tmp)
   if (fact10tmp /= 0) then
     self%use_fact10 = .true.
   end if
