@@ -6,6 +6,7 @@
 !
 module ufo_hcorrection_mod_c
 
+use fckit_configuration_module, only: fckit_configuration
 use iso_c_binding
 use ufo_hcorrection_mod
 use ufo_geovals_mod
@@ -36,9 +37,11 @@ type(c_ptr), value, intent(in) :: c_conf
 type(c_ptr), intent(in), value :: c_varlist ! list of geovals variables to be requested
 
 type(ufo_hcorrection), pointer :: self
+type(fckit_configuration)      :: f_conf
 
+f_conf = fckit_configuration(c_conf)
 call ufo_hcorrection_registry%setup(c_self, self)
-call ufo_hcorrection_create(self, c_conf)
+call ufo_hcorrection_create(self, f_conf)
 
 !> Update C++ ObsFilter with geovals variables list
 if (allocated(self%geovars)) then
