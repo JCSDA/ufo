@@ -8,7 +8,7 @@
 module ufo_geosaod_mod
 
  use iso_c_binding
- use config_mod
+ use fckit_configuration_module, only: fckit_configuration
  use kinds
 
  use ufo_geovals_mod, only: ufo_geovals, ufo_geoval, ufo_geovals_get_var
@@ -45,15 +45,19 @@ contains
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_geosaod_setup(self, c_conf, vars)
+subroutine ufo_geosaod_setup(self, f_conf, vars)
 implicit none
 class(ufo_geosaod), intent(inout) :: self
-type(c_ptr),        intent(in)    :: c_conf
+type(fckit_configuration), intent(in) :: f_conf
 character(len=maxvarlen), dimension(:), intent(inout) :: vars
+
+
 
 !Locals
 integer :: iq
-character(len=maxvarlen), allocatable :: tracer_variables(:)
+character(kind=c_char,len=MAXVARLEN), allocatable :: tracer_variables(:)
+integer(c_size_t),parameter :: csize = MAXVARLEN
+character(len=MAXVARLEN), allocatable :: str
 
   self%nvars_out = size(vars)
   allocate(self%varout(self%nvars_out))
@@ -62,10 +66,9 @@ character(len=maxvarlen), allocatable :: tracer_variables(:)
   print*, 'aod setup test'
 
   ! Let user choose specific aerosols needed.
-  self%ntracers = size(config_get_string_vector(c_conf, max_string, "tracer_geovals"))
-  allocate(tracer_variables(self%ntracers))
-  tracer_variables = config_get_string_vector(c_conf, max_string, "tracer_geovals")
-
+  call f_conf%get_or_die("tracer_geovals",csize,tracer_variables)
+  self%ntracers = f_conf%get_size("tracer_geovals")
+  
   self%nvars_in =  size(varindefault) + self%ntracers
   allocate(self%varin(self%nvars_in))
   do iq = 1, self%ntracers
@@ -77,11 +80,12 @@ character(len=maxvarlen), allocatable :: tracer_variables(:)
 
   ! List of wavelenths
   allocate(self%wavelength(self%nvars_out))
-  call config_get_float_vector(c_conf, "wavelengths", self%wavelength)
 
+  call f_conf%get_or_die("wavelengths", self%wavelength)
+ 
   ! RC File for ChemBase
-  self%rcfile = config_get_string(c_conf,len(self%rcfile),"RCFile")
-
+  call f_conf%get_or_die("RCFile", self%rcfile)
+ 
 end subroutine ufo_geosaod_setup
 
 ! ------------------------------------------------------------------------------

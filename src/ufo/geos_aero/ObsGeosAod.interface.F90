@@ -9,7 +9,7 @@
 module ufo_geosaod_mod_c
 
   use iso_c_binding
-  use config_mod
+  use fckit_configuration_module, only: fckit_configuration
   use ufo_geosaod_mod 
   use string_f_c_mod
   use ufo_geovals_mod,   only: ufo_geovals
@@ -49,11 +49,14 @@ type(c_ptr), intent(in), value :: c_varlist
 character(len=MAXVARLEN), dimension(:), allocatable :: vars
 
 type(ufo_geosaod), pointer :: self
+type(fckit_configuration)  :: f_conf
+
+f_conf = fckit_configuration(c_conf)
 
 call ufo_geosaod_registry%setup(c_key_self, self)
 call ufo_vars_read(c_varconf, vars)
 
-call self%setup(c_conf, vars)
+call self%setup(f_conf, vars)
 
 !call f_c_string_vector(self%varin, csin)
 ! Update C++ Obsoperator with input variable list
