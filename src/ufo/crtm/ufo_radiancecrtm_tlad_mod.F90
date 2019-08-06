@@ -49,20 +49,26 @@ contains
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_radiancecrtm_tlad_setup(self, f_confOpts, f_confOper, f_confLinOper, channels)
+subroutine ufo_radiancecrtm_tlad_setup(self, f_confOper, channels)
 
 implicit none
 class(ufo_radiancecrtm_tlad), intent(inout) :: self
-type(fckit_configuration),    intent(in)    :: f_confOpts
 type(fckit_configuration),    intent(in)    :: f_confOper
-type(fckit_configuration),    intent(in)    :: f_confLinOper
 integer(c_int),               intent(in)    :: channels(:)  !List of channels to use
 
 integer :: nvars_in
 integer :: ind, jspec
+type(fckit_configuration) :: f_confOpts,f_confLinOper
 
+ call f_confOper%get_or_die("ObsOptions",f_confOpts)
  call crtm_conf_setup(self%conf_traj, f_confOpts, f_confOper)
- call crtm_conf_setup(self%conf,      f_confOpts, f_confLinOper)
+
+ if ( f_confOper%has("LinearObsOperator") ) then
+    call f_confOper%get_or_die("LinearObsOperator",f_confLinOper)
+    call crtm_conf_setup(self%conf, f_confOpts, f_confLinOper)
+ else
+    call crtm_conf_setup(self%conf, f_confOpts, f_confOper)
+ end if
 
  ! request from the model var_ts +
  ! 1 * n_Absorbers
