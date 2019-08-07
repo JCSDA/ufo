@@ -9,8 +9,8 @@
 
 #include <ostream>
 
-#include "oops/util/Logger.h"
 #include "ioda/ObsVector.h"
+#include "oops/util/Logger.h"
 
 #include "ufo/GeoVaLs.h"
 
@@ -43,8 +43,8 @@ ObsAtmVertInterpLay::~ObsAtmVertInterpLay() {
 // -----------------------------------------------------------------------------
 
 void ObsAtmVertInterpLay::simulateObs(const GeoVaLs & gom, ioda::ObsVector & ovec) const {
-  ufo_atmvertinterplay_simobs_f90(keyOperAtmVertInterpLay_, gom.toFortran(), odb_, ovec.nvars(), ovec.nlocs(),
-                         ovec.toFortran());
+  ufo_atmvertinterplay_simobs_f90(keyOperAtmVertInterpLay_, gom.toFortran(), odb_, ovec.nvars(),
+                         ovec.nlocs(), ovec.toFortran());
 }
 
 // -----------------------------------------------------------------------------

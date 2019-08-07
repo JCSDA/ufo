@@ -29,7 +29,7 @@ extern "C" {
   void ufo_atmvertinterplay_simobs_tl_f90(const F90hop &, const F90goms &, const ioda::ObsSpace &,
                                   const int &, const int &, double &);
   void ufo_atmvertinterplay_simobs_ad_f90(const F90hop &, const F90goms &, const ioda::ObsSpace &,
-                                  const int &,const int &,  const double &);
+                                  const int &, const int &,  const double &);
 // -----------------------------------------------------------------------------
 
 }  // extern C
