@@ -7,8 +7,7 @@
 
 module ufo_atmvertinterp_tlad_mod_c
 
-  use iso_c_binding
-  use config_mod
+  use fckit_configuration_module, only: fckit_configuration
   use ufo_atmvertinterp_tlad_mod
   use ufo_geovals_mod_c, only: ufo_geovals_registry
   use ufo_geovals_mod,   only: ufo_geovals
@@ -43,9 +42,13 @@ type(c_ptr), intent(in), value :: c_varlist
 character(len=MAXVARLEN), dimension(:), allocatable :: vars
 
 type(ufo_atmvertinterp_tlad), pointer :: self
+type(fckit_configuration) :: f_conf, f_varconf
 
 call ufo_atmvertinterp_tlad_registry%setup(c_key_self, self)
-call ufo_vars_read(c_varconf, vars)
+f_conf = fckit_configuration(c_conf)
+f_varconf = fckit_configuration(c_varconf)
+
+call ufo_vars_read(f_varconf, vars)
 call self%setup(vars)
 deallocate(vars)
 
@@ -69,7 +72,6 @@ end subroutine ufo_atmvertinterp_tlad_delete_c
 ! ------------------------------------------------------------------------------
 
 subroutine ufo_atmvertinterp_tlad_settraj_c(c_key_self, c_key_geovals, c_obsspace) bind(c,name='ufo_atmvertinterp_tlad_settraj_f90')
-
 implicit none
 integer(c_int), intent(in) :: c_key_self
 integer(c_int), intent(in) :: c_key_geovals
@@ -91,7 +93,6 @@ end subroutine ufo_atmvertinterp_tlad_settraj_c
 
 subroutine ufo_atmvertinterp_simobs_tl_c(c_key_self, c_key_geovals, c_obsspace, c_nvars, c_nlocs, c_hofx) &
            bind(c,name='ufo_atmvertinterp_simobs_tl_f90')
-
 implicit none
 integer(c_int), intent(in) :: c_key_self
 integer(c_int), intent(in) :: c_key_geovals
@@ -115,7 +116,6 @@ end subroutine ufo_atmvertinterp_simobs_tl_c
 
 subroutine ufo_atmvertinterp_simobs_ad_c(c_key_self, c_key_geovals, c_obsspace, c_nvars, c_nlocs, c_hofx) &
            bind(c,name='ufo_atmvertinterp_simobs_ad_f90')
-
 implicit none
 integer(c_int), intent(in) :: c_key_self
 integer(c_int), intent(in) :: c_key_geovals

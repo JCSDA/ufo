@@ -7,8 +7,7 @@
 
 module ufo_gnssro_bndropp2d_mod_c
   
-  use iso_c_binding
-  use config_mod
+  use fckit_configuration_module, only: fckit_configuration 
   use ufo_gnssro_bndropp2d_mod
   use ufo_locs_mod
   use ufo_locs_mod_c
@@ -40,9 +39,12 @@ type(c_ptr),    intent(in)    :: c_conf
 integer(c_int), intent(in)    :: c_size  ! obsspace vector length
 
 type(ufo_gnssro_BndROPP2D), pointer :: self
+type(fckit_configuration) :: f_conf
 
 call ufo_gnssro_BndROPP2D_registry%setup(c_key_self, self)
-call self%setup(c_conf, c_size)
+f_conf = fckit_configuration(c_conf)
+
+call self%setup(f_conf, c_size)
    
 end subroutine ufo_gnssro_BndROPP2D_setup_c
   

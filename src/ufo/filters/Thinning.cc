@@ -42,7 +42,7 @@ Thinning::~Thinning() {}
 
 // -----------------------------------------------------------------------------
 
-void Thinning::priorFilter(const GeoVaLs & gv) const {
+void Thinning::preProcess() const {
   const size_t nobs = obsdb_.nlocs();
   const oops::Variables vars = obsdb_.obsvariables();
   const float thinning = config_.getFloat("amount");

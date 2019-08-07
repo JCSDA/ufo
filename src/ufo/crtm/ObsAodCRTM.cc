@@ -40,9 +40,10 @@ ObsAodCRTM::ObsAodCRTM(const ioda::ObsSpace & odb,
   varin_.reset(new oops::Variables(vv));
 
   // call Fortran setup routine
-  const eckit::LocalConfiguration obsOptions(config, "ObsOptions");
-  const eckit::Configuration * configc = &obsOptions;
-  ufo_aodcrtm_setup_f90(keyOperAodCRTM_, &configc);
+  const eckit::LocalConfiguration obsOpts(config, "ObsOptions");
+  const eckit::Configuration * configOpts = &obsOpts;
+  const eckit::Configuration * configOper = &config;
+  ufo_aodcrtm_setup_f90(keyOperAodCRTM_, &configOpts, &configOper);
   oops::Log::info() << "ObsAodCRTM channels: " << channels_ << std::endl;
   oops::Log::trace() << "ObsAodCRTM created." << std::endl;
 }

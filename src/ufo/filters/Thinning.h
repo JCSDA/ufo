@@ -39,7 +39,8 @@ class Thinning : public util::Printable,
            boost::shared_ptr<ioda::ObsDataVector<float> >);
   ~Thinning();
 
-  void priorFilter(const GeoVaLs &) const;
+  void preProcess() const;
+  void priorFilter(const GeoVaLs &) const {}
   void postFilter(const ioda::ObsVector &) const {}
 
   const oops::Variables & requiredGeoVaLs() const {return geovars_;}

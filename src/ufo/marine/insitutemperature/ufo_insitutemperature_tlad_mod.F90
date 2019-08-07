@@ -7,8 +7,8 @@
 
 module ufo_insitutemperature_tlad_mod
 
+ use fckit_configuration_module, only: fckit_configuration
  use iso_c_binding
- use config_mod
  use kinds
 
  use ufo_geovals_mod, only: ufo_geovals, ufo_geoval, ufo_geovals_get_var
@@ -50,10 +50,10 @@ module ufo_insitutemperature_tlad_mod
 contains
 
 ! ------------------------------------------------------------------------------
-subroutine ufo_insitutemperature_tlad_setup(self, c_conf)
+subroutine ufo_insitutemperature_tlad_setup(self, f_conf)
 implicit none
 class(ufo_insitutemperature_tlad), intent(inout) :: self
-type(c_ptr),              intent(in)    :: c_conf
+type(fckit_configuration), intent(in)            :: f_conf
 
 end subroutine ufo_insitutemperature_tlad_setup
 
@@ -295,6 +295,9 @@ subroutine ufo_insitutemperature_simobs_ad(self, geovals, hofx, obss)
     if (.not. allocated(dsalt%vals)) allocate(dsalt%vals(nlev, size(hofx,1)))
     if (.not. allocated(dlayerthick%vals)) allocate(dlayerthick%vals(nlev, size(hofx,1)))    
 
+    ! Layer thickness is not a control variable: zero it out!
+    dlayerthick%vals=0.0
+
     ! backward sea temperature profile obs operator
     dtemp%vals = 0.0
     dsalt%vals = 0.0
@@ -314,8 +317,6 @@ subroutine ufo_insitutemperature_simobs_ad(self, geovals, hofx, obss)
           call vert_interp_apply_ad(nlev, dtemp%vals(:,iobs), dtp, self%wi(iobs), self%wf(iobs))
           call vert_interp_apply_ad(nlev, dsalt%vals(:,iobs), dsp, self%wi(iobs), self%wf(iobs))
 
-          ! Layer thickness is not a control variable: zero it out!
-          dlayerthick%vals=0.0
        end if
     enddo
 

@@ -6,7 +6,7 @@
 !> Fortran module for gnssro refractivity tangent linear and adjoint
 
 module ufo_gnssro_ref_tlad_mod
-  use iso_c_binding
+  use fckit_configuration_module, only: fckit_configuration 
   use kinds
   use ufo_vars_mod
   use ufo_geovals_mod
@@ -14,7 +14,6 @@ module ufo_gnssro_ref_tlad_mod
   use vert_interp_mod
   use ufo_basis_tlad_mod,  only: ufo_basis_tlad
   use obsspace_mod
-  use config_mod
   use gnssro_mod_constants
   use gnssro_mod_conf
   use missing_values_mod
@@ -38,12 +37,13 @@ module ufo_gnssro_ref_tlad_mod
 
 contains
 ! ------------------------------------------------------------------------------
-subroutine ufo_gnssro_ref_tlad_setup(self, c_conf)
+subroutine ufo_gnssro_ref_tlad_setup(self, f_conf)
   implicit none
   class(ufo_gnssro_Ref_tlad), intent(inout) :: self
-  type(c_ptr),         intent(in)    :: c_conf
+  type(fckit_configuration), intent(in)     :: f_conf
 
-  call gnssro_conf_setup(self%roconf,c_conf)
+  call gnssro_conf_setup(self%roconf,f_conf)
+
 end subroutine ufo_gnssro_ref_tlad_setup
 
 ! ------------------------------------------------------------------------------

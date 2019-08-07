@@ -7,8 +7,8 @@
 
 module ufo_gnssro_bndropp1d_mod_c
   
+  use fckit_configuration_module, only: fckit_configuration 
   use iso_c_binding
-  use config_mod
   use ufo_gnssro_bndropp1d_mod
 
   implicit none
@@ -36,9 +36,11 @@ integer(c_int), intent(inout) :: c_key_self
 type(c_ptr),    intent(in)    :: c_conf
     
 type(ufo_gnssro_BndROPP1D), pointer :: self
+type(fckit_configuration) :: f_conf
 
 call ufo_gnssro_BndROPP1D_registry%setup(c_key_self, self)
-    
+f_conf = fckit_configuration(c_conf)
+
 end subroutine ufo_gnssro_BndROPP1D_setup_c
   
 ! ------------------------------------------------------------------------------

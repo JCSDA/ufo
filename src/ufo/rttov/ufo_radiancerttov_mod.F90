@@ -7,8 +7,8 @@
 
 module ufo_radiancerttov_mod
 
+ use fckit_configuration_module, only: fckit_configuration
  use iso_c_binding
- use config_mod
  use kinds
 
  use ufo_geovals_mod, only: ufo_geovals, ufo_geoval, ufo_geovals_get_var
@@ -37,12 +37,12 @@ module ufo_radiancerttov_mod
 contains
 
 ! ------------------------------------------------------------------------------
-subroutine ufo_radiancerttov_setup(self, c_conf)
+subroutine ufo_radiancerttov_setup(self, f_conf)
 implicit none
 class(ufo_radiancerttov), intent(inout) :: self
-type(c_ptr),        intent(in)    :: c_conf
+type(fckit_configuration), intent(in)   :: f_conf
 
-call rttov_conf_setup(self % conf,c_conf)
+call rttov_conf_setup(self % conf,f_conf)
 
 end subroutine ufo_radiancerttov_setup
 

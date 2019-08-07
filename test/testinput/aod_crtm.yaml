@@ -10,6 +10,7 @@ Observations:
  ObsTypes: 
  - ObsOperator:
      name: Aod
+     Absorbers: [H2O,O3]
      ObsOptions:
        Sensor_ID: v.viirs-m_npp
        EndianType: little_endian

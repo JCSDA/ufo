@@ -7,8 +7,8 @@
 
 MODULE ufo_crtm_utils_mod
 
+use fckit_configuration_module, only: fckit_configuration
 use iso_c_binding
-use config_mod
 use kinds
 
 use crtm_module
@@ -40,12 +40,6 @@ REAL(kind_real), PARAMETER :: &
      &aerosol_concentration_minvalue=1.e-16_kind_real,&
      &aerosol_concentration_minvalue_layer=tiny(rd),& 
      &ozone_default_value=1.e-3_kind_real ! in ppmv in crtm
-
-INTEGER, PARAMETER, public :: min_crtm_n_absorbers = 2
-
-! h2o must come first for AOD, because o3 geoval is undefined
-INTEGER, PARAMETER, public :: crtm_h2o_absorber_ind = 1
-INTEGER, PARAMETER, public :: crtm_o3_absorber_ind = 2
 
 integer, parameter, public :: max_string=800
 
@@ -83,9 +77,16 @@ INTERFACE calculate_aero_layer_factor
 END INTERFACE
 
  ! Add more UFO_Absorbers as needed
+ ! Note: must have same ordering as CRTM_Absorbers, 
+ !       CRTM_Absorber_Id, and CRTM_Absorber_Units
  character(len=MAXVARLEN), parameter :: &
       UFO_Absorbers(3) = &
          [ var_mixr, var_co2, var_oz ]
+
+ ! copy of ABSORBER_ID_NAME defined in CRTM_Atmosphere_Define
+ character(len=*), parameter :: &
+      CRTM_Absorbers(N_VALID_ABSORBER_IDS) = &
+         ABSORBER_ID_NAME(1:N_VALID_ABSORBER_IDS)
  integer, parameter :: &
       CRTM_Absorber_Id(N_VALID_ABSORBER_IDS) = &
          [ H2O_ID,  CO2_ID,   O3_ID,  N2O_ID, &
@@ -104,13 +105,16 @@ END INTERFACE
         ]
 
  character(len=MAXVARLEN), parameter :: &
-      UFO_Clouds(N_VALID_CLOUD_CATEGORIES) = &
-         [ var_clw, &
-           var_cli, &
-           var_clr, &
-           var_cls, &
-           var_clg, &
-           var_clh  ]
+      UFO_Clouds(N_VALID_CLOUD_CATEGORIES,2) = &
+         reshape( &
+            [ var_clw,    var_cli,    var_clr,    var_cls,    var_clg,    var_clh, &
+              var_clwefr, var_cliefr, var_clrefr, var_clsefr, var_clgefr, var_clhefr ] &
+            , [N_VALID_CLOUD_CATEGORIES,2] )
+
+ ! copy of CLOUD_CATEGORY_NAME defined in CRTM_Cloud_Define
+ character(len=*), parameter :: &
+      CRTM_Clouds(N_VALID_CLOUD_CATEGORIES) = &
+         CLOUD_CATEGORY_NAME(1:N_VALID_CLOUD_CATEGORIES)
  integer, parameter :: &
       CRTM_Cloud_Id(N_VALID_CLOUD_CATEGORIES) = &
          [   WATER_CLOUD, &
@@ -124,16 +128,20 @@ contains
 
 ! ------------------------------------------------------------------------------
 
-subroutine crtm_conf_setup(conf, c_conf)
+subroutine crtm_conf_setup(conf, f_confOpts, f_confOper)
 
 implicit none
-type(crtm_conf), intent(inout) :: conf
-type(c_ptr),    intent(in)    :: c_conf
+type(crtm_conf),            intent(inout) :: conf
+type(fckit_configuration),  intent(in)    :: f_confOpts
+type(fckit_configuration),  intent(in)    :: f_confOper
 
 character(len=255) :: IRVISwaterCoeff, IRVISlandCoeff, IRVISsnowCoeff, IRVISiceCoeff, MWwaterCoeff
 integer :: jspec, ivar
-character(len=MAXVARLEN) :: BASENAME
-character(max_string) :: err_msg
+character(len=MAXVARLEN)  :: BASENAME
+character(len=max_string) :: err_msg
+character(len=:), allocatable :: str
+character(kind=c_char,len=MAXVARLEN), allocatable :: char_array(:)
+integer(c_size_t),parameter :: csize = MAXVARLEN
 
  !Some config needs to come from user
  !-----------------------------------
@@ -146,35 +154,35 @@ character(max_string) :: err_msg
 
  ! Absorbers
  !----------
- conf%n_Absorbers = min_crtm_n_absorbers
- if (config_element_exists(c_conf,"Extra_Absorbers")) &
-   conf%n_Absorbers = conf%n_Absorbers + config_get_data_dimension(c_conf,"Extra_Absorbers")
+ conf%n_Absorbers = 0
+ if (f_confOper%has("Absorbers")) &
+   conf%n_Absorbers = conf%n_Absorbers + f_confOper%get_size("Absorbers")
 
  allocate( conf%Absorbers     ( conf%n_Absorbers ), &
            conf%Absorber_Id   ( conf%n_Absorbers ), &
            conf%Absorber_Units( conf%n_Absorbers ) )
 
- conf%Absorbers(crtm_h2o_absorber_ind) = var_mixr
- conf%Absorbers(crtm_o3_absorber_ind)  = var_oz
-
- if (conf%n_Absorbers > min_crtm_n_absorbers) then
-   conf%Absorbers(min_crtm_n_absorbers+1:conf%n_Absorbers) = &
-      config_get_string_vector(c_conf,MAXVARLEN,"Extra_Absorbers")
+ if (conf%n_Absorbers > 0) then
+   call f_confOper%get_or_die("Absorbers",csize,char_array)
+   conf%Absorbers(1:conf%n_Absorbers) = char_array
  end if
 
- do jspec = min_crtm_n_absorbers+1, conf%n_Absorbers
-   ! TODO: units treatment needs to be more generic here (mass, volume, partial pressure, etc.)
-   BASENAME = conf%Absorbers(jspec)
-   conf%Absorbers(jspec) = "mass_concentration_of_"//trim(BASENAME)//"_in_air"
-   ivar = ufo_vars_getindex(UFO_Absorbers, conf%Absorbers(jspec))
-   if (ivar < 1) then
-     write(err_msg,*) 'crtm_conf_setup error: ',trim(BASENAME),' not supported by UFO_Absorbers'
+ ! check for duplications
+ do jspec = 2, conf%n_Absorbers
+   if ( any(conf%Absorbers(jspec-1) == conf%Absorbers(jspec:conf%n_Absorbers)) ) then
+     write(err_msg,*) 'crtm_conf_setup error: ',trim(conf%Absorbers(jspec)),' is duplicated in Absorbers'
      call abor1_ftn(err_msg)
    end if
  end do
 
+ ! convert from CRTM names to UFO CF names and define Id and Units
  do jspec = 1, conf%n_Absorbers
-   ivar = ufo_vars_getindex(UFO_Absorbers, conf%Absorbers(jspec))
+   ivar = ufo_vars_getindex(CRTM_Absorbers, conf%Absorbers(jspec))
+   if (ivar < 1 .or. ivar > size(UFO_Absorbers)) then
+     write(err_msg,*) 'crtm_conf_setup error: ',trim(conf%Absorbers(jspec)),' not supported by UFO_Absorbers'
+     call abor1_ftn(err_msg)
+   end if
+   conf%Absorbers(jspec) = UFO_Absorbers(ivar)
    conf%Absorber_Id(jspec) = CRTM_Absorber_Id(ivar)
    conf%Absorber_Units(jspec) = CRTM_Absorber_Units(ivar)
  end do
@@ -183,34 +191,39 @@ character(max_string) :: err_msg
  ! Clouds
  !-------
  conf%n_Clouds = 0
- if (config_element_exists(c_conf,"Clouds")) &
-   conf%n_Clouds = config_get_data_dimension(c_conf,"Clouds")
+ if (f_confOper%has("Clouds")) &
+   conf%n_Clouds = f_confOper%get_size("Clouds")
  allocate( conf%Clouds  ( conf%n_Clouds,2), &
            conf%Cloud_Id( conf%n_Clouds ) )
  if (conf%n_Clouds > 0) then
-   conf%Clouds(1:conf%n_Clouds,1) = config_get_string_vector(c_conf,MAXVARLEN,"Clouds")
-   do jspec = 1, conf%n_Clouds
-     BASENAME = conf%Clouds(jspec,1)
-     conf%Clouds(jspec,1) = "atmosphere_mass_content_of_"//trim(BASENAME)
-     !TODO(JJGuerrette) :: fix hydrometeor variable names for CF convention
-     !conf%Clouds(jspec,1) = "mass_content_of_"//trim(BASENAME)//"_in_atmosphere_layer"
-     ivar = ufo_vars_getindex(UFO_Clouds, conf%Clouds(jspec,1))
-     if (ivar < 1) then
-       write(err_msg,*) 'crtm_conf_setup error: ',trim(BASENAME),' not supported by UFO_Clouds'
-       call abor1_ftn(err_msg)
-     end if
-     conf%Clouds(jspec,2) = "effective_radius_of_"//trim(BASENAME)//"_particle"
-     conf%Cloud_Id(jspec) = CRTM_Cloud_Id(ivar)
-   end do
+   call f_confOper%get_or_die("Clouds",csize,char_array) 
+   conf%Clouds(1:conf%n_Clouds,1) = char_array
  end if
+
+ ! check for duplications
+ do jspec = 2, conf%n_Clouds
+   if ( any(conf%Clouds(jspec-1,1) == conf%Clouds(jspec:conf%n_Clouds,1)) ) then
+     write(err_msg,*) 'crtm_conf_setup error: ',trim(conf%Clouds(jspec,1)),' is duplicated in Clouds'
+     call abor1_ftn(err_msg)
+   end if
+ end do
+
+ ! convert from CRTM names to UFO CF names and define Id
+ do jspec = 1, conf%n_Clouds
+   ivar = ufo_vars_getindex(CRTM_Clouds, conf%Clouds(jspec,1))
+   if (ivar < 1 .or. ivar > size(UFO_Clouds)) then
+     write(err_msg,*) 'crtm_conf_setup error: ',trim(conf%Clouds(jspec,1)),' not supported by UFO_Clouds'
+     call abor1_ftn(err_msg)
+   end if
+   conf%Clouds(jspec,1:2) = UFO_Clouds(ivar,1:2)
+   conf%Cloud_Id(jspec)   = CRTM_Cloud_Id(ivar)
+ end do
 
  ! Aerosols
  !---------
- IF (config_element_exists(c_conf,"n_Aerosols")) &
-      &conf%n_Aerosols  = config_get_int(c_conf,"n_Aerosols" )
-
- IF (config_element_exists(c_conf,"AerosolOption")) THEN
-    conf%aerosol_option = config_get_string(c_conf,LEN(conf%aerosol_option),"AerosolOption")
+ IF (f_confOpts%has("AerosolOption")) THEN
+    call f_confOpts%get_or_die("AerosolOption",str)
+    conf%aerosol_option = str
     conf%aerosol_option = upper2lower(conf%aerosol_option)
     IF (TRIM(conf%aerosol_option) == "aerosols_gocart_default") THEN
        conf%n_Aerosols=n_aerosols_gocart_default
@@ -230,20 +243,43 @@ character(max_string) :: err_msg
  allocate(conf%SENSOR_ID(conf%n_Sensors))
 
  !Get sensor ID from config
- conf%SENSOR_ID(conf%n_Sensors) = config_get_string(c_conf,len(conf%SENSOR_ID(conf%n_Sensors)),"Sensor_ID")
+ call f_confOpts%get_or_die("Sensor_ID",str)
+ conf%SENSOR_ID(conf%n_Sensors) = str
 
  !ENDIAN type
- conf%ENDIAN_TYPE = config_get_string(c_conf,len(conf%ENDIAN_TYPE),"EndianType")
+ call f_confOpts%get_or_die("EndianType",str)
+ conf%ENDIAN_TYPE = str
 
  !Path to coefficient files
- conf%COEFFICIENT_PATH = config_get_string(c_conf,len(conf%COEFFICIENT_PATH),"CoefficientPath")
+ call f_confOpts%get_or_die("CoefficientPath",str)
+ conf%COEFFICIENT_PATH = str
 
  ! Coefficient file prefixes
- IRVISwaterCoeff = config_get_string(c_conf, len(IRVISwaterCoeff), "IRVISwaterCoeff", "Nalli")
- IRVISlandCoeff  = config_get_string(c_conf, len(IRVISlandCoeff),  "IRVISlandCoeff",  "NPOESS")
- IRVISsnowCoeff  = config_get_string(c_conf, len(IRVISsnowCoeff),  "IRVISsnowCoeff",  "NPOESS")
- IRVISiceCoeff   = config_get_string(c_conf, len(IRVISiceCoeff),   "IRVISiceCoeff",   "NPOESS")
- MWwaterCoeff    = config_get_string(c_conf, len(MWwaterCoeff),    "MWwaterCoeff",    "FASTEM6")
+ IRVISwaterCoeff = "Nalli"
+ if (f_confOpts%has("IRVISwaterCoeff")) then
+    call f_confOpts%get_or_die("IRVISwaterCoeff",str)
+    IRVISwaterCoeff = str
+ end if
+ IRVISlandCoeff = "NPOESS"
+ if (f_confOpts%has("IRVISlandCoeff")) then
+    call f_confOpts%get_or_die("IRVISlandCoeff",str)
+    IRVISlandCoeff = str
+ end if
+ IRVISsnowCoeff = "NPOESS"
+ if (f_confOpts%has("IRVISsnowCoeff")) then
+    call f_confOpts%get_or_die("IRVISsnowCoeff",str)
+    IRVISsnowCoeff = str
+ end if
+ IRVISiceCoeff = "NPOESS"
+ if (f_confOpts%has("IRVISiceCoeff")) then
+    call f_confOpts%get_or_die("IRVISiceCoeff",str)
+    IRVISiceCoeff = str
+ end if
+ MWwaterCoeff = "FASTEM6"
+ if (f_confOpts%has("MWwaterCoeff")) then
+    call f_confOpts%get_or_die("MWwaterCoeff",str)
+    MWwaterCoeff = str
+ end if
 
  ! Define water, snow, ice (WSI) categories
  select case (trim(IRVISlandCoeff))
@@ -274,8 +310,8 @@ character(max_string) :: err_msg
  conf%MWwaterCoeff_File = trim(MWwaterCoeff)//".MWwater.EmisCoeff.bin"
 
  conf%inspect = 0
- if (config_element_exists(c_conf,"InspectProfileNumber")) then
-   conf%inspect = config_get_int(c_conf,"InspectProfileNumber")
+ if (f_confOpts%has("InspectProfileNumber")) then
+   call f_confOpts%get_or_die("InspectProfileNumber",conf%inspect)
  endif
 
 end subroutine crtm_conf_setup

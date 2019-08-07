@@ -8,8 +8,8 @@
 
 module ufo_adt_tlad_mod_c
 
+  use fckit_configuration_module, only: fckit_configuration 
   use iso_c_binding
-  use config_mod
   use ufo_adt_tlad_mod 
   implicit none
   private
@@ -36,10 +36,12 @@ integer(c_int), intent(inout) :: c_key_self
 type(c_ptr), intent(in)    :: c_conf
     
 type(ufo_adt_tlad), pointer :: self
+type(fckit_configuration) :: f_conf
 
 call ufo_adt_tlad_registry%setup(c_key_self, self)
+f_conf = fckit_configuration(c_conf)
 
-call self%setup(c_conf)
+call self%setup(f_conf)
 
 end subroutine ufo_adt_tlad_setup_c
 

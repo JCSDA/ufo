@@ -22,7 +22,7 @@ Observations:
     GeoVaLs:
       filename: Data/sfc_geoval_2018041500_m.nc4
     vecequiv: GsiHofX
-    tolerance: 1.0e-04
+    tolerance: 1.0e-05
   - ObsOperator:
       name: GSISfcModel 
       use_fact10: 0
@@ -52,4 +52,4 @@ Observations:
     GeoVaLs:
       filename: Data/sfc_geoval_2018041500_m.nc4
     vecequiv: GsiHofX
-    tolerance: 1.0e-05
+    tolerance: 1.0e-07

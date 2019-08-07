@@ -1,0 +1,23 @@
+window_begin: 2018-04-14T20:30:00Z
+window_end: 2018-04-15T03:30:00Z
+
+Observations: 
+ ObsTypes: 
+ - ObsOperator:
+     name: Identity
+   ObsSpace:
+     name: Identity
+     ObsDataIn: 
+       obsfile: Data/sfc_obs_2018041500_m.nc4
+     simulate:
+       variables: [surface_pressure]
+   GeoVaLs: 
+     filename: Data/sfc_geoval_2018041500_m.nc4
+   ObsFilters:
+   - Filter: Background Check
+     variables: [surface_pressure]
+     threshold: 3.0
+   - Filter: HCorrection
+     da_psfc_scheme: UKMO   # or WRFDA
+     max_hdiff: 500
+   passedBenchmark: 9      # number of passed obs

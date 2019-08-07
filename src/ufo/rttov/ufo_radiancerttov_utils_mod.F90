@@ -7,8 +7,8 @@
 
 module ufo_radiancerttov_utils_mod
 
+use fckit_configuration_module, only: fckit_configuration
 use iso_c_binding
-use config_mod
 use kinds
 
 use rttov_types, only : rttov_options, rttov_profile, rttov_coefs, &
@@ -55,11 +55,13 @@ contains
 
 ! ------------------------------------------------------------------------------
 
-subroutine rttov_conf_setup(conf, c_conf)
+subroutine rttov_conf_setup(conf, f_conf)
 
 implicit none
-type(rttov_conf), intent(inout) :: conf
-type(c_ptr),    intent(in)    :: c_conf
+type(rttov_conf), intent(inout)       :: conf
+type(fckit_configuration), intent(in) :: f_conf
+
+character(len=:),allocatable :: str
 
 !Number of sensors, each call to RTTOV will be for a single sensor
 !type (zenith/scan angle will be different)
@@ -69,12 +71,12 @@ conf%nSensors = 1
 allocate(conf%SENSOR_ID(conf%nSensors))
 
 !Get sensor ID from config
-conf%SENSOR_ID(conf%nSensors) = &
-  config_get_string(c_conf,LEN(conf%SENSOR_ID(conf%nSensors)),"Sensor_ID")
+call f_conf%get_or_die("Sensor_ID",str)
+conf%SENSOR_ID(conf%nSensors) = str
 
 !Path to coefficient files
-conf%COEFFICIENT_PATH = &
-  config_get_string(c_conf,LEN(conf%COEFFICIENT_PATH),"CoefficientPath")
+call f_conf%get_or_die("CoefficientPath",str)
+conf%COEFFICIENT_PATH = str
 
 end subroutine rttov_conf_setup
 

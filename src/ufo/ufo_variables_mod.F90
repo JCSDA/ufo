@@ -28,48 +28,43 @@ character(len=MAXVARLEN), public, parameter :: var_ps   = "surface_pressure"
 character(len=MAXVARLEN), public, parameter :: var_z    = "geopotential_height"
 character(len=MAXVARLEN), public, parameter :: var_zi   = "geopotential_height_levels"
 character(len=MAXVARLEN), public, parameter :: var_sfc_z= "surface_geopotential_height"
-character(len=MAXVARLEN), public, parameter :: var_oz   = "mass_concentration_of_ozone_in_air"
-character(len=MAXVARLEN), public, parameter :: var_co2  = "mass_concentration_of_carbon_dioxide_in_air"
-character(len=MAXVARLEN), public, parameter :: var_clw  = "atmosphere_mass_content_of_cloud_liquid_water"
-character(len=MAXVARLEN), public, parameter :: var_cli  = "atmosphere_mass_content_of_cloud_ice"
-character(len=MAXVARLEN), public, parameter :: var_clr  = "atmosphere_mass_content_of_rain"
-character(len=MAXVARLEN), public, parameter :: var_cls  = "atmosphere_mass_content_of_snow"
-character(len=MAXVARLEN), public, parameter :: var_clg  = "atmosphere_mass_content_of_graupel"
-character(len=MAXVARLEN), public, parameter :: var_clh  = "atmosphere_mass_content_of_hail"
-!TODO(JJGuerrette) :: fix hydrometeor variable names for CF convention
-!character(len=MAXVARLEN), public, parameter :: var_clw  = "mass_content_of_cloud_liquid_water_in_atmosphere_layer"
-!character(len=MAXVARLEN), public, parameter :: var_cli  = "mass_content_of_cloud_ice_in_atmosphere_layer"
-!character(len=MAXVARLEN), public, parameter :: var_clr  = "mass_content_of_rain_in_atmosphere_layer"
-!character(len=MAXVARLEN), public, parameter :: var_cls  = "mass_content_of_snow_in_atmosphere_layer"
-!character(len=MAXVARLEN), public, parameter :: var_clg  = "mass_content_of_graupel_in_atmosphere_layer"
-!character(len=MAXVARLEN), public, parameter :: var_clh  = "mass_content_of_hail_in_atmosphere_layer"
+character(len=MAXVARLEN), public, parameter :: var_oz   = "mole_fraction_of_ozone_in_air"
+character(len=MAXVARLEN), public, parameter :: var_co2  = "mole_fraction_of_carbon_dioxide_in_air"
+character(len=MAXVARLEN), public, parameter :: var_clw  = "mass_content_of_cloud_liquid_water_in_atmosphere_layer"
+character(len=MAXVARLEN), public, parameter :: var_cli  = "mass_content_of_cloud_ice_in_atmosphere_layer"
+character(len=MAXVARLEN), public, parameter :: var_clr  = "mass_content_of_rain_in_atmosphere_layer"
+character(len=MAXVARLEN), public, parameter :: var_cls  = "mass_content_of_snow_in_atmosphere_layer"
+character(len=MAXVARLEN), public, parameter :: var_clg  = "mass_content_of_graupel_in_atmosphere_layer"
+character(len=MAXVARLEN), public, parameter :: var_clh  = "mass_content_of_hail_in_atmosphere_layer"
 character(len=MAXVARLEN), public, parameter :: var_clwefr = "effective_radius_of_cloud_liquid_water_particle"
 character(len=MAXVARLEN), public, parameter :: var_cliefr = "effective_radius_of_cloud_ice_particle"
 character(len=MAXVARLEN), public, parameter :: var_clrefr = "effective_radius_of_rain_particle"
 character(len=MAXVARLEN), public, parameter :: var_clsefr = "effective_radius_of_snow_particle"
 character(len=MAXVARLEN), public, parameter :: var_clgefr = "effective_radius_of_graupel_particle"
 character(len=MAXVARLEN), public, parameter :: var_clhefr = "effective_radius_of_hail_particle"
-character(len=MAXVARLEN), public, parameter :: var_sfc_wfrac = "Water_Fraction"
-character(len=MAXVARLEN), public, parameter :: var_sfc_lfrac = "Land_Fraction"
-character(len=MAXVARLEN), public, parameter :: var_sfc_ifrac = "Ice_Fraction"
-character(len=MAXVARLEN), public, parameter :: var_sfc_sfrac = "Snow_Fraction"
-character(len=MAXVARLEN), public, parameter :: var_sfc_wtmp  = "Water_Temperature"
-character(len=MAXVARLEN), public, parameter :: var_sfc_ltmp  = "Land_Temperature"
-character(len=MAXVARLEN), public, parameter :: var_sfc_itmp  = "Ice_Temperature"
-character(len=MAXVARLEN), public, parameter :: var_sfc_stmp  = "Snow_Temperature"
-character(len=MAXVARLEN), public, parameter :: var_sfc_sdepth  = "Snow_Depth"
-character(len=MAXVARLEN), public, parameter :: var_sfc_vegfrac = "Vegetation_Fraction"
-character(len=MAXVARLEN), public, parameter :: var_sfc_wspeed  = "Sfc_Wind_Speed"
-character(len=MAXVARLEN), public, parameter :: var_sfc_wdir    = "Sfc_Wind_Direction"
-character(len=MAXVARLEN), public, parameter :: var_sfc_lai     = "Lai"
-character(len=MAXVARLEN), public, parameter :: var_sfc_soilm   = "Soil_Moisture"
-character(len=MAXVARLEN), public, parameter :: var_sfc_soilt   = "Soil_Temperature"
-character(len=MAXVARLEN), public, parameter :: var_sfc_landtyp = "Land_Type_Index"
-character(len=MAXVARLEN), public, parameter :: var_sfc_vegtyp  = "Vegetation_Type"
-character(len=MAXVARLEN), public, parameter :: var_sfc_soiltyp = "Soil_Type"
+character(len=MAXVARLEN), public, parameter :: var_sfc_wfrac = "water_area_fraction"
+character(len=MAXVARLEN), public, parameter :: var_sfc_lfrac = "land_area_fraction"
+character(len=MAXVARLEN), public, parameter :: var_sfc_ifrac = "ice_area_fraction"
+character(len=MAXVARLEN), public, parameter :: var_sfc_sfrac = "surface_snow_area_fraction"
+character(len=MAXVARLEN), public, parameter :: var_sfc_wtmp  = "surface_temperature_where_sea"
+character(len=MAXVARLEN), public, parameter :: var_sfc_ltmp  = "surface_temperature_where_land"
+character(len=MAXVARLEN), public, parameter :: var_sfc_itmp  = "surface_temperature_where_ice"
+character(len=MAXVARLEN), public, parameter :: var_sfc_stmp  = "surface_temperature_where_snow"
+character(len=MAXVARLEN), public, parameter :: var_sfc_sdepth  = "surface_snow_thickness"
+character(len=MAXVARLEN), public, parameter :: var_sfc_vegfrac = "vegetation_area_fraction"
+character(len=MAXVARLEN), public, parameter :: var_sfc_wspeed  = "surface_wind_speed"
+character(len=MAXVARLEN), public, parameter :: var_sfc_wdir    = "surface_wind_from_direction"
+character(len=MAXVARLEN), public, parameter :: var_sfc_lai     = "leaf_area_index"
+character(len=MAXVARLEN), public, parameter :: var_sfc_soilm   = "volume_fraction_of_condensed_water_in_soil"
+character(len=MAXVARLEN), public, parameter :: var_sfc_soilt   = "soil_temperature"
+character(len=MAXVARLEN), public, parameter :: var_sfc_landtyp = "land_type_index"
+character(len=MAXVARLEN), public, parameter :: var_sfc_vegtyp  = "vegetation_type_index"
+character(len=MAXVARLEN), public, parameter :: var_sfc_soiltyp = "soil_type"
+character(len=MAXVARLEN), public, parameter :: var_geomz       = "height"
+character(len=MAXVARLEN), public, parameter :: var_sfc_geomz   = "surface_altitude"
 character(len=MAXVARLEN), public, parameter :: var_sfc_rough   = "surface_roughness_length"
 character(len=MAXVARLEN), public, parameter :: var_sfc_t   = "surface_temperature"
-character(len=MAXVARLEN), public, parameter :: var_sfc_fact10  = "GSI_wind_reduction_factor_10m"
+character(len=MAXVARLEN), public, parameter :: var_sfc_fact10  = "wind_reduction_factor_at_10m"
 
 !@mzp strings have to be same MAXVARLEN length for array constructor
 CHARACTER(len=MAXVARLEN), public, parameter :: var_rh          = "relative_humidity"
@@ -136,21 +131,22 @@ character(len=MAXVARLEN), public :: var_sea_fric_vel  = "friction_velocity_over_
 ! ------------------------------------------------------------------------------
 contains
 
-subroutine ufo_vars_read(c_vars, vars)
-use iso_c_binding
-use config_mod
+subroutine ufo_vars_read(f_vars, vars)
+use fckit_configuration_module, only: fckit_configuration
 implicit none
-type(c_ptr), intent(in)       :: c_vars
+type(fckit_configuration), intent(in)                              :: f_vars
 character(len=MAXVARLEN), dimension(:), allocatable, intent(inout) :: vars
-character(len=30*MAXVARLEN) :: svars
 
 integer :: nvars
+character(len=30*MAXVARLEN) :: svars
+character(len=:), allocatable :: str
 
-nvars = config_get_int(c_vars, "nvars")
+call f_vars%get_or_die("nvars",nvars)
 
 if (allocated(vars)) deallocate(vars)
 allocate(vars(nvars))
-svars = config_get_string(c_vars,len(svars),"variables")
+call f_vars%get_or_die("variables",str)
+svars = str
 read(svars,*) vars
 
 end subroutine ufo_vars_read
@@ -159,15 +155,15 @@ end subroutine ufo_vars_read
 
 integer function ufo_vars_getindex(vars, varname)
 implicit none
-character(len=MAXVARLEN), intent(in) :: vars(:)
-character(MAXVARLEN), intent(in)     :: varname
+character(len=*), intent(in) :: vars(:)
+character(len=*), intent(in) :: varname
 
 integer :: ivar
 
 ufo_vars_getindex = -1
 
 do ivar = 1, size(vars)
-  if (vars(ivar) == varname) then
+  if (trim(vars(ivar)) == trim(varname)) then
     ufo_vars_getindex = ivar
     exit
   endif
