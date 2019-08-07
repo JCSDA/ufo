@@ -53,11 +53,8 @@ list( APPEND ufo_test_input
   testinput/radiosonde.yaml
   testinput/radiosonde_qc.yaml
   testinput/satwind.yaml
-<<<<<<< HEAD
   testinput/sbuv2_n19.yaml
-=======
   testinput/scatwind.yaml
->>>>>>> develop
   testinput/seaicefrac.yaml
   testinput/seaicethick.yaml
   testinput/sea_surface_temp.yaml
