@@ -44,17 +44,19 @@ contains
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_radiancecrtm_setup(self, f_confOpts, f_confOper, channels)
+subroutine ufo_radiancecrtm_setup(self, f_confOper, channels)
 
 implicit none
-class(ufo_radiancecrtm), intent(inout) :: self
-type(fckit_configuration),  intent(in)    :: f_confOpts
-type(fckit_configuration),  intent(in)    :: f_confOper
-integer(c_int),          intent(in)    :: channels(:)  !List of channels to use
+class(ufo_radiancecrtm),   intent(inout) :: self
+type(fckit_configuration), intent(in)    :: f_confOper
+integer(c_int),            intent(in)    :: channels(:)  !List of channels to use
 
 integer :: nvars_in, nvars_out
 integer :: ind, jspec, ich
 character(len=max_string) :: err_msg
+type(fckit_configuration) :: f_confOpts
+
+ call f_confOper%get_or_die("ObsOptions",f_confOpts)
 
  call crtm_conf_setup(self%conf,f_confOpts,f_confOper)
  if ( ufo_vars_getindex(self%conf%Absorbers, var_mixr) < 1 ) then
