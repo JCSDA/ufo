@@ -22,7 +22,7 @@ Observations:
       ObsDataOut:
         obsfile: Data/sbuv2_n19_obs_2018041500_m_out.nc4
       simulate:
-        variables: [mass_concentration_of_ozone_in_air]
+        variables: [mole_fraction_of_ozone_in_air]
     GeoVaLs:
       filename: Data/sbuv2_n19_geoval_2018041500_m.nc4
     vecequiv: GsiHofX

@@ -137,11 +137,8 @@ list (APPEND ioda_obs_test_data
   atmosphere/mhs_n19_obs_2018041500_m.nc4
   atmosphere/satwind_obs_2018041500_m.nc4
   atmosphere/satwind_obs_2018041500_s.nc4
-<<<<<<< HEAD
   atmosphere/sbuv2_n19_obs_2018041500_m.nc4
-=======
   atmosphere/scatwind_obs_2018041500_m.nc4
->>>>>>> develop
   atmosphere/seviri_m08_obs_2018041500_m.nc4
   atmosphere/sndrd1_g15_obs_2018041500_m.nc4
   atmosphere/sndrd2_g15_obs_2018041500_m.nc4

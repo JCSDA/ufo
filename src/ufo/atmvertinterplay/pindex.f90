@@ -7,7 +7,7 @@ integer :: ix, k, nsig
 real(kind_real) :: ozp, obspressure, psi
 real(kind_real), dimension(nsig) :: press
 
-psi = 1./press(1)
+psi = 1.0_kind_real/press(1)
 if(obspressure*psi < 1.) then
   ozp = obspressure
 else

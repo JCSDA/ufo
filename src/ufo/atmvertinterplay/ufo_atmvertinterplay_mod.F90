@@ -59,7 +59,7 @@ integer :: i
   enddo
 
   ! Put pressure to the varin (vars from the model) list
-  self%varin(self%nvars+1) = "air_pressure_levels"
+  self%varin(self%nvars+1) = var_prsi
 
 end subroutine ufo_atmvertinterplay_setup
 
@@ -135,9 +135,8 @@ real :: pindex
         !For total column ozone
         if(iz1 .eq. nsig .and. iz2 .eq. 1)delz = 1
         !Interpolate in cbars
-        delp4=(modelpressures%vals(kk,iobs)-modelpressures%vals(kk+1,iobs))*.001
-        g=g + &
-             modelozone%vals(kk,iobs)*rozcon*delz*delp4
+        delp4=(modelpressures%vals(kk,iobs)-modelpressures%vals(kk+1,iobs))*1.0e-3_kind_real
+        g = g + modelozone%vals(kk,iobs)*rozcon*delz*delp4
       enddo
       hofx(ivar,iobs) = g
       dz1 = pob
