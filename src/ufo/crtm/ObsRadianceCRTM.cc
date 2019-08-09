@@ -37,14 +37,9 @@ ObsRadianceCRTM::ObsRadianceCRTM(const ioda::ObsSpace & odb,
   const oops::Variables & observed = odb.obsvariables();
   std::vector<int> channels_list = observed.channels();
 
-  // establish options and operator configs
-  const eckit::LocalConfiguration obsOpts(config, "ObsOptions");
-  const eckit::Configuration * configOpts = &obsOpts;
-
-  const eckit::Configuration * configOper = &config;
-
   // call Fortran setup routine
-  ufo_radiancecrtm_setup_f90(keyOperRadianceCRTM_, &configOpts, &configOper,
+  const eckit::Configuration * configc = &config;
+  ufo_radiancecrtm_setup_f90(keyOperRadianceCRTM_, &configc,
                              channels_list.size(), channels_list[0], varin_);
 
   oops::Log::info() << "ObsRadianceCRTM channels: " << channels_list << std::endl;

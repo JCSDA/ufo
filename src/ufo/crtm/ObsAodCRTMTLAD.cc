@@ -36,10 +36,8 @@ ObsAodCRTMTLAD::ObsAodCRTMTLAD(const ioda::ObsSpace & odb,
     "seas1", "seas2", "seas3", "seas4"};
   varin_.reset(new oops::Variables(vv));
 
-  const eckit::LocalConfiguration obsOpts(config, "ObsOptions");
-  const eckit::Configuration * configOpts = &obsOpts;
-  const eckit::Configuration * configOper = &config;
-  ufo_aodcrtm_tlad_setup_f90(keyOperAodCRTM_, &configOpts, &configOper);
+  const eckit::Configuration * configc = &config;
+  ufo_aodcrtm_tlad_setup_f90(keyOperAodCRTM_, &configc);
   oops::Log::trace() << "ObsAodCRTMTLAD created" << std::endl;
 }
 
