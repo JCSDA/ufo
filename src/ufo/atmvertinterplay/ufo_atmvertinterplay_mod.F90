@@ -118,8 +118,8 @@ real :: pindex
     call ufo_geovals_get_var(geovals, geovar, modelozone)
 
      do iobs = 1, nlocs
-      topozp = pindex(nsig, modelpressures%vals(1, iobs), toppressure(iobs))
-      botozp = pindex(nsig, modelpressures%vals(1, iobs), botpressure(iobs))
+      topozp = pindex(nsig+1, modelpressures%vals(1, iobs), toppressure(iobs))
+      botozp = pindex(nsig+1, modelpressures%vals(1, iobs), botpressure(iobs))
       pob = botozp
       iz1 = topozp
       if (iz1>nsig) iz1=nsig

@@ -1,11 +1,11 @@
-real function pindex(nsig, press, obspressure)
+real function pindex(nx, press, obspressure)
 
 use kinds
 implicit none
 
-integer :: ix, k, nsig
+integer :: ix, k, nx
 real(kind_real) :: ozp, obspressure, psi
-real(kind_real), dimension(nsig) :: press
+real(kind_real), dimension(nx) :: press
 
 psi = 1.0_kind_real/press(1)
 if(obspressure*psi < 1.) then
@@ -17,13 +17,13 @@ if( ozp >= press(1)) then
   ix = 1
 else
   ix = 0
-  do k = 1, nsig
+  do k = 1, nx-1
     if(ozp >= press(k)) then
       ix = k
       exit
     endif
   enddo
-  if(ix == 0) ix = nsig + 1
+  if(ix == 0) ix = nx
   if(ix > 1)ix = ix -1
 endif
 ozp = float(ix) + &
