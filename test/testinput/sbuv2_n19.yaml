@@ -1,0 +1,29 @@
+---
+logging:
+  categories: Warning, Error, Debug
+test_framework_runtime_config: "--log_level=test_suite"
+
+window_begin: 2018-04-14T20:30:00Z
+window_end: 2018-04-15T03:30:00Z
+
+LinearObsOpTest:
+  coefTL: 0.1
+  toleranceTL: 1.0e-9
+  toleranceAD: 1.0e-11
+
+Observations:
+  ObsTypes:
+  - ObsOperator:
+      name: OzoneLayer
+    ObsSpace:
+      name: OzoneLayer
+      ObsDataIn:
+        obsfile: Data/sbuv2_n19_obs_2018041500_m.nc4
+      ObsDataOut:
+        obsfile: Data/sbuv2_n19_obs_2018041500_m_out.nc4
+      simulate:
+        variables: [mole_fraction_of_ozone_in_air]
+    GeoVaLs:
+      filename: Data/sbuv2_n19_geoval_2018041500_m.nc4
+    vecequiv: GsiHofX
+    tolerance: 1.0e-04  # in % so that corresponds to 10^-3
