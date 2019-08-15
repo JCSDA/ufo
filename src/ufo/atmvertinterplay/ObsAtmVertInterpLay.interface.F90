@@ -9,10 +9,9 @@
 module ufo_atmvertinterplay_mod_c
 
   use iso_c_binding
-  use config_mod
 
   use fckit_configuration_module, only: fckit_configuration
-  use ufo_atmvertinterplay_mod 
+  use ufo_atmvertinterplay_mod
   use string_f_c_mod
   use ufo_geovals_mod,   only: ufo_geovals
   use ufo_geovals_mod_c, only: ufo_geovals_registry
@@ -68,7 +67,7 @@ end subroutine ufo_atmvertinterplay_setup_c
 subroutine ufo_atmvertinterplay_delete_c(c_key_self) bind(c,name='ufo_atmvertinterplay_delete_f90')
 implicit none
 integer(c_int), intent(inout) :: c_key_self
-    
+
 type(ufo_atmvertinterplay), pointer :: self
 
 call ufo_atmvertinterplay_registry%delete(c_key_self, self)

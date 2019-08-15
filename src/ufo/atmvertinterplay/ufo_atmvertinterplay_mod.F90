@@ -8,7 +8,6 @@
 module ufo_atmvertinterplay_mod
 
  use iso_c_binding
- use config_mod
  use kinds
 
  use ufo_geovals_mod, only: ufo_geovals, ufo_geoval, ufo_geovals_get_var
@@ -41,7 +40,7 @@ subroutine ufo_atmvertinterplay_setup(self, vars)
 implicit none
 class(ufo_atmvertinterplay), intent(inout) :: self
 character(len=MAXVARLEN), dimension(:), intent(inout) :: vars
-  
+
 !Local Variables
 integer :: i
 
