@@ -9,7 +9,6 @@
 module ufo_atmvertinterplay_tlad_mod_c
 
   use iso_c_binding
-  use config_mod
 
   use fckit_configuration_module, only: fckit_configuration
   use ufo_atmvertinterplay_tlad_mod
@@ -65,7 +64,7 @@ end subroutine ufo_atmvertinterplay_tlad_setup_c
 subroutine ufo_atmvertinterplay_tlad_delete_c(c_key_self) bind(c,name='ufo_atmvertinterplay_tlad_delete_f90')
 implicit none
 integer(c_int), intent(inout) :: c_key_self
-    
+
 type(ufo_atmvertinterplay_tlad), pointer :: self
 
 call ufo_atmvertinterplay_tlad_registry%delete(c_key_self, self)
