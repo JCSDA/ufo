@@ -7,7 +7,7 @@
 
 module ufo_seaicefraction_tlad_mod
 
- use fckit_configuration_module, only: fckit_configuration 
+ use fckit_configuration_module, only: fckit_configuration
  use iso_c_binding
  use kinds
 
@@ -83,8 +83,6 @@ character(max_string) :: err_msg
 
 integer :: iobs
 type(ufo_geoval), pointer :: geoval
-
-print *, myname_, ' nlocs: ', geovals%nlocs, size(hofx,1)
 
 ! check if nlocs is consistent in geovals & hofx
 if (geovals%nlocs /= size(hofx,1)) then
