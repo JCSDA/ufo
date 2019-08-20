@@ -62,6 +62,7 @@ list( APPEND ufo_test_input
   testinput/sndrd1-4_crtm.yaml
   testinput/tprof.yaml
   testinput/qc_domain_latitude.yaml
+  testinput/qc_domain_minpress.yaml
 )
 
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/testinput)
@@ -181,6 +182,11 @@ ecbuild_add_test( TARGET  test_ufo_locations
                   SOURCES mains/TestLocations.cc
                   ARGS    "testinput/locations.yaml"
                   LIBS    ufo )
+
+ecbuild_add_test( TARGET  test_ufo_qc_domain_minpress
+	          SOURCES mains/TestObsFilters.cc
+	          ARGS    "testinput/qc_domain_minpress.yaml"
+	          LIBS    ufo)
 
 ecbuild_add_test( TARGET  test_ufo_gsi_sfc_model_opr
                   SOURCES mains/TestObsOperator.cc
