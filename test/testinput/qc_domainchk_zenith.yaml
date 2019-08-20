@@ -23,9 +23,7 @@ Observations:
     - Filter: Domain Check
       where:
       - variable: sensor_zenith_angle 
-#       minvalue: 
         maxvalue: 60. 
-#   passedBenchmark: 1200      # number of passed obs
     passedBenchmark:  890      # number of passed obs
   - ObsOperator:
       name: CRTM
@@ -47,9 +45,7 @@ Observations:
     - Filter: Domain Check
       where:
       - variable: sensor_zenith_angle
-#       minvalue: 60.
         maxvalue: 60.
-#   passedBenchmark: 1200      # number of passed obs
     passedBenchmark:  890      # number of passed obs
 
 
