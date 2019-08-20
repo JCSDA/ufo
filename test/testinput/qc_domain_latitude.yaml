@@ -26,4 +26,40 @@ Observations:
      - variable: latitude
        minvalue: -60.
        maxvalue: 60. 
-   passedBenchmark: 1394      # number of passed obs
+   passedBenchmark: 1200      # number of passed obs
+ - ObsOperator:
+      name: VertInterp
+   ObsSpace:
+      name: Radiosonde
+      ObsDataIn:
+        obsfile: Data/sondes_obs_2018041500_m.nc4
+      simulate:
+        variables: [air_temperature, eastward_wind, northward_wind]
+   GeoVaLs:
+      filename: Data/sondes_geoval_2018041500_m.nc4
+   ObsFilters:
+   - Filter: Domain Check
+     where:
+     - variable: latitude
+       minvalue: -60.
+       maxvalue: 60. 
+   passedBenchmark: 943      # number of passed obs
+ - ObsOperator:
+      name: VertInterp
+   ObsSpace:
+      name: Satwind
+      ObsDataIn:
+        obsfile: Data/satwind_obs_2018041500_m.nc4
+      ObsDataOut:
+        obsfile: Data/satwind_obs_2018041500_m_out.nc4
+      simulate:
+        variables: [eastward_wind, northward_wind]
+   GeoVaLs:
+      filename: Data/satwind_geoval_2018041500_m.nc4
+   ObsFilters:
+   - Filter: Domain Check
+     where:
+     - variable: latitude
+       minvalue: -60.
+       maxvalue: 60. 
+   passedBenchmark: 146      # number of passed obs
