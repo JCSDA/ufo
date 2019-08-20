@@ -1,0 +1,30 @@
+window_begin: 2018-04-14T21:00:00Z
+window_end: 2018-04-15T03:00:00Z
+
+Observations:
+ ObsTypes: 
+ - ObsOperator:
+     name: CRTM
+     Absorbers: [H2O,O3,CO2]
+     Clouds: [Water, Ice]
+     ObsOptions:
+       Sensor_ID: amsua_n19
+       EndianType: little_endian
+       CoefficientPath: Data/
+   ObsSpace:
+     name: amsua_n19
+     ObsDataIn: 
+       obsfile: Data/amsua_n19_obs_2018041500_m.nc4
+     simulate:
+       variables: [brightness_temperature]
+       channels: 1-15
+   GeoVaLs: 
+     filename: Data/amsua_n19_geoval_2018041500_m.nc4
+   ObsFilters:
+   - Filter: Difference Check
+     variables: [brightness_temperature]
+     channels: 4
+     reference: brightness_temperature
+     value: brightness_temperature
+     threshold: 10
+   passedBenchmark: 1394      # number of passed obs
