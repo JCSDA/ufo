@@ -10,7 +10,7 @@ Observations:
       ObsDataIn:
         obsfile: Data/sondes_obs_2018041500_m.nc4
       simulate:
-        variables: [air_temperature, eastward_wind, northward_wind]
+        variables: [eastward_wind, northward_wind]
    GeoVaLs:
       filename: Data/sondes_geoval_2018041500_m.nc4
    ObsFilters:
@@ -18,7 +18,7 @@ Observations:
      where:
      - variable: air_pressure 
        minvalue: 30000.
-   passedBenchmark: 943      # number of passed obs
+   passedBenchmark: 458      # number of passed obs
  - ObsOperator:
       name: VertInterp
    ObsSpace:
@@ -34,7 +34,7 @@ Observations:
      where:
      - variable: air_pressure 
        minvalue: 30000.
-   passedBenchmark: 146      # number of passed obs
+   passedBenchmark: 78      # number of passed obs
  - ObsOperator:
       name: VertInterp
    ObsSpace:
@@ -50,4 +50,4 @@ Observations:
      where:
      - variable: air_pressure 
        minvalue: 30000.
-   passedBenchmark: 146      # number of passed obs
+   passedBenchmark: 232      # number of passed obs

@@ -177,7 +177,7 @@ ecbuild_add_test( TARGET  test_ufo_locations
                   ARGS    "testinput/locations.yaml"
                   LIBS    ufo )
 
-ecbuild_add_test( TARGET  test_ufo_qc_domain_latitude
+ecbuild_add_test( TARGET  test_ufo_qc_domain_minpress
 	          SOURCES mains/TestObsFilters.cc
 	          ARGS    "testinput/qc_domain_minpress.yaml"
 	          LIBS    ufo)
