@@ -24,4 +24,4 @@ Observations:
    - Filter: Thinning
      amount: 0.75
      random_seed: 0
-   passedBenchmark: 1462      # number of passed obs
+   passedBenchmark: 390      # number of passed obs
