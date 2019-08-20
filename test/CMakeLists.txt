@@ -61,6 +61,7 @@ list( APPEND ufo_test_input
   testinput/seviri_crtm.yaml
   testinput/sndrd1-4_crtm.yaml
   testinput/tprof.yaml
+  testinput/tprof.yaml
 )
 
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/testinput)
@@ -387,6 +388,11 @@ ecbuild_add_test( TARGET  test_ufo_qc_boundscheck
 ecbuild_add_test( TARGET  test_ufo_qc_thinning
                   SOURCES mains/TestObsFilters.cc
                   ARGS    "testinput/qc_thinning.yaml"
+                  LIBS    ufo )
+
+ecbuild_add_test( TARGET  test_ufo_qc_thinning
+                  SOURCES mains/TestObsFilters.cc
+                  ARGS    "testinput/qc_thinning_rad.yaml"
                   LIBS    ufo )
 
 if( ${ROPP-UFO_FOUND} )
