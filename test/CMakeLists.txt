@@ -49,7 +49,7 @@ list( APPEND ufo_test_input
   testinput/locations.yaml
   testinput/mhs_crtm.yaml
   testinput/qc_boundscheck.yaml
-  testinput/qc_domainchk.yaml
+  testinput/qc_domainchk_zenith.yaml
   testinput/qc_thinning.yaml
   testinput/radiosonde.yaml
   testinput/radiosonde_qc.yaml
@@ -385,9 +385,9 @@ ecbuild_add_test( TARGET  test_ufo_qc_boundscheck
                   ARGS    "testinput/qc_boundscheck.yaml"
                   LIBS    ufo )
 
-ecbuild_add_test( TARGET  test_ufo_qc_domainchk
+ecbuild_add_test( TARGET  test_ufo_qc_domainchk_zenith
                   SOURCES mains/TestObsFilters.cc
-                  ARGS    "testinput/qc_domainchk.yaml"
+                  ARGS    "testinput/qc_domainchk_zenith.yaml"
                   LIBS    ufo )
 
 ecbuild_add_test( TARGET  test_ufo_qc_thinning
