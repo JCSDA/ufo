@@ -27,3 +27,49 @@ Observations:
      minvalue: 240.0
      maxvalue: 300.0
    passedBenchmark: 1394      # number of passed obs
+ - ObsOperator:
+     name: CRTM
+     Absorbers: [H2O,O3,CO2]
+     ObsOptions:
+       Sensor_ID: iasi_metop-a
+       EndianType: little_endian
+       CoefficientPath: Data/
+   ObsSpace: 
+     name: iasi_metop-a
+     ObsDataIn: 
+       obsfile: Data/iasi_metop-a_obs_2018041500_m.nc4
+     simulate:
+       variables: [brightness_temperature]
+       channels: 16,29,32,35,38,41,44
+   GeoVaLs: 
+     filename: Data/iasi_metop-a_geoval_2018041500_m.nc4
+   ObsFilters:
+   - Filter: Bounds Check
+     variables: [brightness_temperature]
+     channels: 16,29,32,35,38,41,44
+     minvalue: 210.0
+     maxvalue: 250.0
+   passedBenchmark: 664      # number of passed obs
+ - ObsOperator:
+     name: CRTM
+     Absorbers: [H2O,O3,CO2]
+     ObsOptions:
+       Sensor_ID: seviri_m08
+       EndianType: little_endian
+       CoefficientPath: Data/
+   ObsSpace: 
+     name: seviri_m08
+     ObsDataIn: 
+       obsfile: Data/seviri_m08_obs_2018041500_m.nc4
+     simulate:
+       variables: [brightness_temperature]
+       channels: 5-11
+   GeoVaLs: 
+     filename: Data/seviri_m08_geoval_2018041500_m.nc4
+   ObsFilters:
+   - Filter: Bounds Check
+     variables: [brightness_temperature]
+     channels: 5-11
+     minvalue: 185.0
+     maxvalue: 255.0
+   passedBenchmark: 139       # number of passed obs
