@@ -390,7 +390,7 @@ ecbuild_add_test( TARGET  test_ufo_qc_thinning
                   ARGS    "testinput/qc_thinning.yaml"
                   LIBS    ufo )
 
-ecbuild_add_test( TARGET  test_ufo_qc_thinning
+ecbuild_add_test( TARGET  test_ufo_qc_thinning_rad
                   SOURCES mains/TestObsFilters.cc
                   ARGS    "testinput/qc_thinning_rad.yaml"
                   LIBS    ufo )
