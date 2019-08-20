@@ -50,6 +50,7 @@ list( APPEND ufo_test_input
   testinput/mhs_crtm.yaml
   testinput/qc_boundscheck.yaml
   testinput/qc_thinning.yaml
+  testinput/qc_thinning_rad.yaml
   testinput/radiosonde.yaml
   testinput/radiosonde_qc.yaml
   testinput/satwind.yaml
@@ -60,7 +61,6 @@ list( APPEND ufo_test_input
   testinput/sea_surface_temp.yaml
   testinput/seviri_crtm.yaml
   testinput/sndrd1-4_crtm.yaml
-  testinput/tprof.yaml
   testinput/tprof.yaml
 )
 
