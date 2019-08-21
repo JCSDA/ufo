@@ -8,7 +8,8 @@ set ( filters_files
       BackgroundCheck.h
       BlackList.cc
       BlackList.h
-      CMakeLists.txt
+      DifferenceCheck.cc
+      DifferenceCheck.h
       ObsBoundsCheck.cc
       ObsBoundsCheck.h
       ObsDomainCheck.cc
