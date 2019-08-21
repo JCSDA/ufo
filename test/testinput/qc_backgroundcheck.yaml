@@ -1,0 +1,78 @@
+window_begin: 2018-04-14T21:00:00Z
+window_end: 2018-04-15T03:00:00Z
+
+Observations:
+ ObsTypes: 
+ - ObsOperator:
+     name: CRTM
+     Absorbers: [H2O,O3,CO2]
+     Clouds: [Water, Ice]
+     ObsOptions:
+       Sensor_ID: amsua_n19
+       EndianType: little_endian
+       CoefficientPath: Data/
+   ObsSpace:
+     name: amsua_n19
+     ObsDataIn: 
+       obsfile: Data/amsua_n19_obs_2018041500_m.nc4
+     ObsDataOut:
+       obsfile: Data/amsua_n19_hofx_2018041500_m_out.nc4
+     simulate:
+       variables: [brightness_temperature]
+       channels: 1-15
+   GeoVaLs: 
+     filename: Data/amsua_n19_geoval_2018041500_m.nc4
+   ObsFilters:
+   - Filter: Background Check
+     variables: [brightness_temperature]
+     channels: 1
+     threshold: 2.0
+   passedBenchmark: 1462      # number of passed obs
+ - ObsOperator:
+     name: VertInterp
+   ObsSpace:
+     name: Radiosonde
+     ObsDataIn:
+       obsfile: Data/sondes_obs_2018041500_s.nc4
+     ObsDataOut:
+       obsfile: Data/sondes_hofx_2018041500_s_out.nc4
+     simulate:
+       variables: [air_temperature, eastward_wind, northward_wind]
+   GeoVaLs:
+     filename: Data/sondes_geoval_2018041500_s.nc4
+   ObsFilters:
+   - Filter: Background Check
+     variables: [air_temperature]
+     threshold: 2.0
+     absolute threshold: 1.0
+   - Filter: Background Check
+     variables: [eastward_wind, northward_wind]
+     threshold: 2.0
+     where:
+     - variable: latitude
+       minvalue: -60.0
+       maxvalue: 60.0
+   passedBenchmark: 133      # number of passed obs
+#    qcBenchmark: GsiQC       # benchmark QC from the file
+ - ObsOperator:
+     name: GnssroBndGSI
+     ObsOptions:
+       use_compress: 1
+       vertlayer: full
+   ObsSpace:
+     name: GnssroBndGSI
+     ObsDataIn:
+       obsfile: Data/gnssro_obs_2018041500_m.nc4
+     simulate:
+       variables: [bending_angle]
+   GeoVaLs:
+     filename: Data/gnssro_geoval_2018041500_m.nc4
+   ObsFilters:
+   - Filter: Background Check
+     variables: [bending_angle]
+     threshold: 2.0
+     where:
+     - variable: impact_height
+       minvalue: 0
+       maxvalue: 50000
+   passedBenchmark: 148      # number of passed obs
