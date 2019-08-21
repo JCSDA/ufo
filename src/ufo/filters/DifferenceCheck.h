@@ -50,7 +50,7 @@ class DifferenceCheck : public util::Printable,
 
   ioda::ObsSpace & obsdb_;
   ioda::ObsDataVector<int> & flags_;
-  const eckit::Configuration & config_;
+  eckit::LocalConfiguration config_;
   oops::Variables geovars_;
   float threshold_;
   std::string rvar_;
