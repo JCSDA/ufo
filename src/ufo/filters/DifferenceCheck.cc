@@ -100,7 +100,7 @@ void DifferenceCheck::priorFilter(const GeoVaLs & gvals) const {
           if (flags_[jv][jobs] == 0) flags_[jv][jobs] = QCflags::missing;
         }
       } else {
-        if (std::abs(val[jobs] - ref[jobs]) > threshold_) {
+        if (std::abs(static_cast<float>(val[jobs] - ref[jobs])) > threshold_) {
           for (size_t jv = 0; jv < flags_.nvars(); ++jv) {
             if (flags_[jv][jobs] == 0) flags_[jv][jobs] = QCflags::diffref;
           }
