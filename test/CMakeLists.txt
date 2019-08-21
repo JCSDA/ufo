@@ -49,6 +49,7 @@ list( APPEND ufo_test_input
   testinput/locations.yaml
   testinput/mhs_crtm.yaml
   testinput/qc_boundscheck.yaml
+  testinput/qc_domainchk_zenith.yaml
   testinput/qc_thinning.yaml
   testinput/qc_backgroundcheck.yaml
   testinput/qc_thinning_rad.yaml
@@ -109,6 +110,7 @@ list( APPEND ufo_test_data
   atmosphere/abi_g16_geoval_2019042306_m.nc4
   atmosphere/sondes_geoval_2018041500_m.nc4
   atmosphere/sondes_geoval_2018041500_s.nc4
+  atmosphere/ssmis_f18_geoval_2018041500_m.nc4
   marine/coolskin_fake_geovals_2018041500.nc
   marine/cryosat2-2018-04-15_geovals.nc
   marine/icec-2018-04-15_geovals.nc
@@ -149,6 +151,7 @@ list (APPEND ioda_obs_test_data
   atmosphere/sndrd4_g15_obs_2018041500_m.nc4
   atmosphere/ahi_himawari8_obs_2019042306_m.nc4
   atmosphere/abi_g16_obs_2019042306_m.nc4
+  atmosphere/ssmis_f18_obs_2018041500_m.nc4
 
   atmosphere/sfc_obs_2018041500_m.nc4
 
@@ -395,6 +398,11 @@ ecbuild_add_test( TARGET  test_ufo_qc_boundscheck
 ecbuild_add_test( TARGET  test_ufo_qc_backgroundcheck
                   SOURCES mains/TestObsFilters.cc
                   ARGS    "testinput/qc_backgroundcheck.yaml"
+                  LIBS    ufo )
+
+ecbuild_add_test( TARGET  test_ufo_qc_domainchk_zenith
+                  SOURCES mains/TestObsFilters.cc
+                  ARGS    "testinput/qc_domainchk_zenith.yaml"
                   LIBS    ufo )
 
 ecbuild_add_test( TARGET  test_ufo_qc_thinning
