@@ -62,7 +62,7 @@ DifferenceCheck::~DifferenceCheck() {
 // -----------------------------------------------------------------------------
 
 void DifferenceCheck::priorFilter(const GeoVaLs & gvals) const {
-  oops::Log::trace() << "DifferenceCheck postFilter" << std::endl;
+  oops::Log::trace() << "DifferenceCheck priorFilter" << std::endl;
 
   const float missing = util::missingValue(missing);
   const size_t nlocs = obsdb_.nlocs();
