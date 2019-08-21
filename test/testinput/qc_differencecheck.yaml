@@ -1,38 +1,37 @@
-window_begin: 2018-04-14T21:00:00Z
-window_end: 2018-04-15T03:00:00Z
+window_begin: 2019-04-23T03:00:00Z
+window_end: 2019-04-23T09:00:00Z
 
 Observations:
- ObsTypes:
- - ObsOperator:
-      name: VertInterp
-   ObsSpace:
-      name: Radiosonde
+  ObsTypes:
+  - ObsOperator:
+      name: CRTM
+      Absorbers: [H2O,O3,CO2]
+      ObsOptions:
+        Sensor_ID: abi_g16 
+        EndianType: little_endian
+        CoefficientPath: Data/
+    ObsSpace:
+      name: abi_g16 
       ObsDataIn:
-        obsfile: Data/sondes_obs_2018041500_m.nc4
+        obsfile: Data/abi_g16_obs_2019042306_m.nc4
       simulate:
-        variables: [eastward_wind, northward_wind]
-   GeoVaLs:
-      filename: Data/sondes_geoval_2018041500_m.nc4
-   ObsFilters:
-   - Filter: Domain Check
-     where:
-     - variable: air_pressure 
-       minvalue: 30000.
-   passedBenchmark: 458      # number of passed obs
- - ObsOperator:
-      name: VertInterp
-   ObsSpace:
-      name: Satwind
-      ObsDataIn:
-        obsfile: Data/satwind_obs_2018041500_m.nc4
-      simulate:
-        variables: [eastward_wind, northward_wind]
-   GeoVaLs:
-      filename: Data/satwind_geoval_2018041500_m.nc4
-   ObsFilters:
-   - Filter: Difference Check
-     threshold: 10000
-     reference: eastward_wind
-     value: northward_wind
-   passedBenchmark: 78      # number of passed obs
+        variables: [brightness_temperature]
+        channels: 7-16
+    GeoVaLs:
+      filename: Data/abi_g16_geoval_2019042306_m.nc4
+    ObsFilters:
+    - Filter: Difference Check
+      reference: sensor_zenith_angle
+      value: sensor_zenith_angle
+      threshold: 1
+      where:
+      - variable: sensor_zenith_angle 
+        maxvalue: 60. 
+    passedBenchmark:  890      # number of passed obs
+#    ObsFilters:
+#    - Filter: Domain Check
+#      where:
+#      - variable: sensor_zenith_angle 
+#        maxvalue: 60. 
+#    passedBenchmark:  890      # number of passed obs
 
