@@ -50,7 +50,9 @@ list( APPEND ufo_test_input
   testinput/mhs_crtm.yaml
   testinput/qc_boundscheck.yaml
   testinput/qc_differencecheck.yaml
+  testinput/qc_domainchk_zenith.yaml
   testinput/qc_thinning.yaml
+  testinput/qc_thinning_rad.yaml
   testinput/radiosonde.yaml
   testinput/radiosonde_qc.yaml
   testinput/satwind.yaml
@@ -394,11 +396,21 @@ ecbuild_add_test( TARGET  test_ufo_qc_boundscheck
 ecbuild_add_test( TARGET  test_ufo_qc_differencecheck
                   SOURCES mains/TestObsFilters.cc
                   ARGS    "testinput/qc_differencecheck.yaml"
+		  LIBS    ufo )
+
+ecbuild_add_test( TARGET  test_ufo_qc_domainchk_zenith
+                  SOURCES mains/TestObsFilters.cc
+                  ARGS    "testinput/qc_domainchk_zenith.yaml"
                   LIBS    ufo )
 
 ecbuild_add_test( TARGET  test_ufo_qc_thinning
                   SOURCES mains/TestObsFilters.cc
                   ARGS    "testinput/qc_thinning.yaml"
+                  LIBS    ufo )
+
+ecbuild_add_test( TARGET  test_ufo_qc_thinning_rad
+                  SOURCES mains/TestObsFilters.cc
+                  ARGS    "testinput/qc_thinning_rad.yaml"
                   LIBS    ufo )
 
 if( ${ROPP-UFO_FOUND} )

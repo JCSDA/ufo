@@ -21,18 +21,7 @@ Observations:
    GeoVaLs: 
      filename: Data/amsua_n19_geoval_2018041500_m.nc4
    ObsFilters:
-   - Filter: Bounds Check
-     variables: [brightness_temperature]
-     channels: 1
-     minvalue: 50.0
-     maxvalue: 400.0
-   - Filter: Bounds Check
-     variables: [brightness_temperature]
-     channels: 2-15
-     minvalue: 100.0
-     maxvalue: 500.0
-   - Filter: Background Check
-     variables: [brightness_temperature]
-     channels: 1
-     threshold: 2.0
-   passedBenchmark: 1462      # number of passed obs
+   - Filter: Thinning
+     amount: 0.75
+     random_seed: 0
+   passedBenchmark: 390      # number of passed obs
