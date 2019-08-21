@@ -64,6 +64,7 @@ list( APPEND ufo_test_input
   testinput/seviri_crtm.yaml
   testinput/sndrd1-4_crtm.yaml
   testinput/tprof.yaml
+  testinput/qc_domain_latitude.yaml
   testinput/qc_domain_minpress.yaml
 )
 
@@ -171,6 +172,11 @@ CREATE_SYMLINK_FILENAME( ${ioda_SOURCE_DIR}/test/testinput
                          ${ioda_obs_test_data} )
 
 #####################################################################
+
+ecbuild_add_test( TARGET  test_ufo_qc_domain_latitude
+                  SOURCES mains/TestObsFilters.cc
+                  ARGS    "testinput/qc_domain_latitude.yaml"
+                  LIBS    ufo)
 
 ecbuild_add_test( TARGET  test_ufo_geovals
                   SOURCES mains/TestGeoVaLs.cc
