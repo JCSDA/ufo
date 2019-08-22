@@ -45,7 +45,7 @@ list( APPEND ufo_test_input
   testinput/hirs4_crtm.yaml
   testinput/iasi_crtm.yaml
   testinput/gsisfcmodel.yaml
-#  testinput/surface_ps_qc.yaml
+  testinput/surface_ps_qc.yaml
   testinput/locations.yaml
   testinput/mhs_crtm.yaml
   testinput/qc_boundscheck.yaml
@@ -103,6 +103,7 @@ list( APPEND ufo_test_data
   atmosphere/satwind_geoval_2018041500_s.nc4
   atmosphere/scatwind_geoval_2018041500_m.nc4
   atmosphere/sfc_geoval_2018041500_m.nc4
+  atmosphere/ps_geovals_2018041500_0000.nc4
   atmosphere/seviri_m08_geoval_2018041500_m.nc4
   atmosphere/sndrd1_g15_geoval_2018041500_m.nc4
   atmosphere/sndrd2_g15_geoval_2018041500_m.nc4
@@ -199,10 +200,10 @@ ecbuild_add_test( TARGET  test_ufo_gsi_sfc_model_opr
                   ARGS    "testinput/gsisfcmodel.yaml"
                   LIBS    ufo )
 
-#ecbuild_add_test( TARGET  test_ufo_surface_ps_qc
-#                  SOURCES mains/TestObsFilters.cc
-#                  ARGS    "testinput/surface_ps_qc.yaml"
-#                  LIBS    ufo )
+ecbuild_add_test( TARGET  test_ufo_surface_ps_qc
+                  SOURCES mains/TestObsFilters.cc
+                  ARGS    "testinput/surface_ps_qc.yaml"
+                  LIBS    ufo )
 
 ecbuild_add_test( TARGET  test_ufo_amsua_opr_crtm
                   SOURCES mains/TestObsOperator.cc

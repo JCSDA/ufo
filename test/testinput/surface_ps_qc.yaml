@@ -6,18 +6,36 @@ Observations:
  - ObsOperator:
      name: Identity
    ObsSpace:
-     name: Identity
-     ObsDataIn: 
+     name: Surface
+     ObsDataIn:
        obsfile: Data/sfc_obs_2018041500_m.nc4
      simulate:
        variables: [surface_pressure]
-   GeoVaLs: 
-     filename: Data/sfc_geoval_2018041500_m.nc4
+   GeoVaLs:
+     filename: Data/ps_geovals_2018041500_0000.nc4
    ObsFilters:
    - Filter: Background Check
      variables: [surface_pressure]
      threshold: 3.0
    - Filter: HCorrection
-     da_psfc_scheme: UKMO   # or WRFDA
+     da_psfc_scheme: WRFDA
      max_hdiff: 500
-   passedBenchmark: 9      # number of passed obs
+   passedBenchmark: 30
+ - ObsOperator:
+     name: Identity
+   ObsSpace:
+     name: Surface
+     ObsDataIn:
+       obsfile: Data/sfc_obs_2018041500_m.nc4
+     simulate:
+       variables: [surface_pressure]
+   GeoVaLs:
+     filename: Data/ps_geovals_2018041500_0000.nc4
+   ObsFilters:
+   - Filter: Background Check
+     variables: [surface_pressure]
+     threshold: 3.0
+   - Filter: HCorrection
+     da_psfc_scheme: UKMO
+     max_hdiff: 500
+   passedBenchmark: 12
