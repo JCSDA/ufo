@@ -59,6 +59,7 @@ class ObsOperator : public util::Printable,
  private:
   void print(std::ostream &) const;
   std::unique_ptr<ObsOperatorBase> oper_;
+  const ioda::ObsSpace & odb_;
 };
 
 // -----------------------------------------------------------------------------

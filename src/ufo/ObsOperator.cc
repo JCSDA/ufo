@@ -22,7 +22,7 @@ namespace ufo {
 // -----------------------------------------------------------------------------
 
 ObsOperator::ObsOperator(const ioda::ObsSpace & os, const eckit::Configuration & conf)
-  : oper_(ObsOperatorFactory::create(os, conf))
+  : oper_(ObsOperatorFactory::create(os, conf)), odb_(os)
 {}
 
 // -----------------------------------------------------------------------------
@@ -34,6 +34,10 @@ ObsOperator::~ObsOperator() {}
 void ObsOperator::simulateObs(const GeoVaLs & gvals, ioda::ObsVector & yy,
                               const ObsBias & bias) const {
   oper_->simulateObs(gvals, yy);
+  ioda::ObsVector ybias(yy);
+  ybias.zero();
+  bias.computeObsBias(gvals, ybias, odb_);
+  yy += ybias;
 }
 
 // -----------------------------------------------------------------------------

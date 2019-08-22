@@ -17,8 +17,11 @@ list( APPEND ufo_src_files
     Locations.h
     Locations.interface.F90
     Locations.interface.h
+    ObsBias.cc
     ObsBias.h
+    ObsBiasCovariance.cc
     ObsBiasCovariance.h
+    ObsBiasIncrement.cc
     ObsBiasIncrement.h
     ObsOperator.cc
     ObsOperator.h
@@ -43,6 +46,7 @@ endfunction(PREPEND)
 
 add_subdirectory( utils )
 add_subdirectory( basis )
+add_subdirectory( obsbias )
 add_subdirectory( filters )
 add_subdirectory( identity )
 add_subdirectory( atmvertinterp )
@@ -59,6 +63,7 @@ add_subdirectory( marine )
 list( APPEND ufo_src_files
     ${utils_src_files}
     ${basis_src_files}
+    ${obsbias_src_files}
     ${filters_src_files}
     ${identity_src_files}
     ${atmvertinterp_src_files}

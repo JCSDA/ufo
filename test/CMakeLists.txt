@@ -29,6 +29,7 @@ list( APPEND ufo_test_input
   testinput/aircraft.yaml
   testinput/airs_crtm.yaml
   testinput/amsua_crtm.yaml
+  testinput/amsua_crtm_bc.yaml
   testinput/amsua_rttov.yaml
   testinput/amsua_qc.yaml
   testinput/atms_crtm.yaml
@@ -98,6 +99,7 @@ list( APPEND ufo_test_data
   atmosphere/hirs4_metop-a_geoval_2018041500_m.nc4
   atmosphere/iasi_metop-a_geoval_2018041500_m.nc4
   atmosphere/mhs_n19_geoval_2018041500_m.nc4
+  atmosphere/satbias_crtm_in
   atmosphere/satwind_geoval_2018041500_m.nc4
   atmosphere/sbuv2_n19_geoval_2018041500_m.nc4
   atmosphere/satwind_geoval_2018041500_s.nc4
@@ -131,6 +133,7 @@ list (APPEND ioda_obs_test_data
   atmosphere/aircraft_obs_2018041500_s.nc4
   atmosphere/airs_aqua_obs_2018041500_m.nc4
   atmosphere/amsua_n19_obs_2018041500_m.nc4
+  atmosphere/amsua_n19_obs_2018041500_m_bc.nc4
   atmosphere/gmi_gpm_obs_2018041500_m.nc4
   atmosphere/amsua_n19_obs_2018041500_s.nc4
   atmosphere/atms_npp_obs_2018041500_m.nc4
@@ -190,6 +193,21 @@ ecbuild_add_test( TARGET  test_ufo_locations
                   ARGS    "testinput/locations.yaml"
                   LIBS    ufo )
 
+ecbuild_add_test( TARGET  test_ufo_amsua_obs_bias
+                  SOURCES mains/TestObsBias.cc
+                  ARGS    "testinput/amsua_crtm_bc.yaml"
+                  LIBS    ufo )
+
+ecbuild_add_test( TARGET  test_ufo_amsua_obs_bias_increment
+                  SOURCES mains/TestObsBiasIncrement.cc
+                  ARGS    "testinput/amsua_crtm_bc.yaml"
+                  LIBS    ufo )
+
+ecbuild_add_test( TARGET  test_ufo_amsua_obs_bias_covariance
+                  SOURCES mains/TestObsBiasCovariance.cc
+                  ARGS    "testinput/amsua_crtm_bc.yaml"
+                  LIBS    ufo )
+
 ecbuild_add_test( TARGET  test_ufo_qc_domain_minpress
 	          SOURCES mains/TestObsFilters.cc
 	          ARGS    "testinput/qc_domain_minpress.yaml"
@@ -208,6 +226,11 @@ ecbuild_add_test( TARGET  test_ufo_surface_ps_qc
 ecbuild_add_test( TARGET  test_ufo_amsua_opr_crtm
                   SOURCES mains/TestObsOperator.cc
                   ARGS    "testinput/amsua_crtm.yaml"
+                  LIBS    ufo )
+
+ecbuild_add_test( TARGET  test_ufo_amsua_opr_crtm_bc
+                  SOURCES mains/TestObsOperator.cc
+                  ARGS    "testinput/amsua_crtm_bc.yaml"
                   LIBS    ufo )
 
 ecbuild_add_test( TARGET  test_ufo_amsua_qc

@@ -8,10 +8,11 @@
 #ifndef UFO_OBSBIASCOVARIANCE_H_
 #define UFO_OBSBIASCOVARIANCE_H_
 
-#include <ostream>
 #include <string>
+#include <vector>
 #include <boost/noncopyable.hpp>
 
+#include "eckit/config/LocalConfiguration.h"
 #include "oops/util/ObjectCounter.h"
 #include "oops/util/Printable.h"
 
@@ -32,20 +33,21 @@ class ObsBiasCovariance : public util::Printable,
   static const std::string classname() {return "ufo::ObsBiasCovariance";}
 
 /// Constructor, destructor
-  explicit ObsBiasCovariance(const eckit::Configuration &) {}
+  explicit ObsBiasCovariance(const eckit::Configuration &);
   ~ObsBiasCovariance() {}
 
 /// Linear algebra operators
   void linearize(const ObsBias &) {}
   void multiply(const ObsBiasIncrement &, ObsBiasIncrement &) const {}
   void inverseMultiply(const ObsBiasIncrement &, ObsBiasIncrement &) const {}
-  void randomize(ObsBiasIncrement &) const {}
+  void randomize(ObsBiasIncrement &) const;
 
   const eckit::Configuration & config() const {return conf_;}
 
  private:
   void print(std::ostream &) const {}
   const eckit::LocalConfiguration conf_;
+  std::vector<double> variance_;
 };
 
 // -----------------------------------------------------------------------------
