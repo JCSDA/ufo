@@ -21,6 +21,7 @@
 #include "oops/interface/ObsFilter.h"
 #include "oops/util/Logger.h"
 
+#include "ufo/filters/copyVars2ODV.h"
 #include "ufo/filters/processWhere.h"
 #include "ufo/filters/QCflags.h"
 #include "ufo/GeoVaLs.h"
@@ -79,8 +80,16 @@ void BackgroundCheck::postFilter(const ioda::ObsVector & hofx) const {
   ioda::ObsDataVector<float> obs(obsdb_, vars, "ObsValue");
   ioda::ObsDataVector<float> bias(obsdb_, vars, "ObsBias", false);
 
+// Allocate ObsDataVector for input variables
+  ioda::ObsDataVector<float> filterInputs(obsdb_, collectFilterVars(config_));
+
+// Collect data into filterInputs for where check
+  filterInputs = copyVars2ODV(*gv_, filterInputs);
+  filterInputs = copyVars2ODV(hofx, filterInputs, "HofX");
+  filterInputs = copyVars2ODV(obsdb_, filterInputs);
+
 // Select where the background check will apply
-  std::vector<bool> apply = processWhere(obsdb_, *gv_, config_);
+  std::vector<bool> apply = processWhere(obsdb_, filterInputs, config_);
 
   for (size_t jv = 0; jv < vars.size(); ++jv) {
     size_t iv = observed.find(vars[jv]);

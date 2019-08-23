@@ -21,6 +21,8 @@ set ( filters_files
       QCmanager.h
       Thinning.cc
       Thinning.h
+      copyVars2ODV.cc
+      copyVars2ODV.h
       processWhere.cc
       processWhere.h
 )
