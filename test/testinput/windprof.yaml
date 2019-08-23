@@ -1,0 +1,25 @@
+window_begin: 2018-04-14T20:30:00Z
+window_end: 2018-04-15T03:30:00Z
+
+LinearObsOpTest:
+  coefTL: 0.1
+  toleranceTL: 1.0e-13
+  toleranceAD: 1.0e-11
+
+Observations:
+  ObsTypes:
+  - ObsOperator:
+      name: VertInterp
+      VertCoord: geopotential_height 
+    ObsSpace:
+      name: Radiosonde
+      ObsDataIn:
+        obsfile: Data/windprof_obs_2018041500_m.nc4
+      ObsDataOut:
+        obsfile: Data/windprof_obs_2018041500_m_out.nc4
+      simulate:
+        variables: [eastward_wind, northward_wind]
+    GeoVaLs:
+      filename: Data/windprof_geoval_2018041500_m.nc4
+    vecequiv: GsiHofX
+    tolerance: 1.0e-05

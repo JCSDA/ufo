@@ -63,8 +63,11 @@ character(len=MAXVARLEN), public, parameter :: var_sfc_soiltyp = "soil_type"
 character(len=MAXVARLEN), public, parameter :: var_geomz       = "height"
 character(len=MAXVARLEN), public, parameter :: var_sfc_geomz   = "surface_altitude"
 character(len=MAXVARLEN), public, parameter :: var_sfc_rough   = "surface_roughness_length"
-character(len=MAXVARLEN), public, parameter :: var_sfc_t   = "surface_temperature"
+character(len=MAXVARLEN), public, parameter :: var_sfc_t       = "surface_temperature"
 character(len=MAXVARLEN), public, parameter :: var_sfc_fact10  = "wind_reduction_factor_at_10m"
+
+character(len=MAXVARLEN), public, parameter :: var_refl        = "equivalent_reflectivity_factor"
+character(len=MAXVARLEN), public, parameter :: var_w           = "upward_air_velocity"
 
 !@mzp strings have to be same MAXVARLEN length for array constructor
 CHARACTER(len=MAXVARLEN), public, parameter :: var_rh          = "relative_humidity"

@@ -53,6 +53,8 @@ add_subdirectory( atmvertinterp )
 add_subdirectory( atmvertinterplay )
 add_subdirectory( atmsfcinterp )
 add_subdirectory( crtm )
+add_subdirectory( radarreflectivity )
+add_subdirectory( radarradialvelocity )
 if( ${RTTOV_FOUND} )
     add_subdirectory( rttov )
 endif( ${RTTOV_FOUND} )
@@ -74,6 +76,8 @@ list( APPEND ufo_src_files
     ${gnssro_src_files}
     ${surface_src_files}
     ${ncdiag_src_files}
+    ${radarreflectivity_src_files}
+    ${radarradialvelocity_src_files}
 )
 list( APPEND ufo_src_files ${marine_src_files} )
 list( APPEND UFO_LIBS_DEP oops ioda crtm ${LAPACK_LIBRARIES} ${NETCDF_LIBRARIES} )
