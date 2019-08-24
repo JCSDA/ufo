@@ -10,7 +10,6 @@ use fckit_configuration_module, only: fckit_configuration
 use iso_c_binding
 use ufo_vars_mod
 use kinds
-use type_distribution, only: random_distribution
 use obsspace_mod
 use missing_values_mod
 
@@ -723,12 +722,13 @@ end subroutine ufo_geovals_maxloc
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_geovals_read_netcdf(self, filename, c_vars)
+subroutine ufo_geovals_read_netcdf(self, filename, c_obspace, c_vars)
 use netcdf
 
 implicit none
 type(ufo_geovals), intent(inout)  :: self
 character(max_string), intent(in) :: filename
+type(c_ptr), intent(in)           :: c_obspace
 type(c_ptr), intent(in)           :: c_vars
 
 integer :: nlocs, nlocs_all, nlocs_var
@@ -741,8 +741,7 @@ integer :: ierr
 
 character(max_string) :: err_msg
 
-type(random_distribution) :: distribution
-integer, allocatable, dimension(:) :: dist_indx
+integer(c_size_t), allocatable, dimension(:) :: dist_indx
 
 real, allocatable :: field2d(:,:), field1d(:)
 
@@ -760,10 +759,9 @@ call check('nf90_inquire_dimension', nf90_inquire_dimension(ncid, dimid, len = n
 
 !> round-robin distribute the observations to PEs
 !> Calculate how many obs. on each PE
-distribution=random_distribution(nlocs_all)
-nlocs=distribution%nobs_pe()
+nlocs = obsspace_get_nlocs(c_obspace)
 allocate(dist_indx(nlocs))
-dist_indx = distribution%indx
+call obsspace_get_index(c_obspace, dist_indx)
 
 ! allocate geovals structure
 call ufo_geovals_setup(self, c_vars, nlocs)

@@ -47,14 +47,16 @@ GeoVaLs::GeoVaLs(const Locations & locs, const oops::Variables & vars)
  * \details This ufo::GeoVaLs constructor is typically used in tests, GeoVaLs
  * are read from the file.
  */
-GeoVaLs::GeoVaLs(const eckit::Configuration & config, const oops::Variables & vars)
+GeoVaLs::GeoVaLs(const eckit::Configuration & config,
+                 const ioda::ObsSpace & obspace,
+                 const oops::Variables & vars)
   : keyGVL_(-1), vars_(vars)
 {
   oops::Log::trace() << "GeoVaLs constructor config starting" << std::endl;
   const eckit::Configuration * conf = &config;
   const eckit::Configuration * cvar = &vars_.toFortran();
   ufo_geovals_setup_f90(keyGVL_, 0, &cvar);
-  ufo_geovals_read_file_f90(keyGVL_, &conf, &cvar);
+  ufo_geovals_read_file_f90(keyGVL_, &conf, obspace, &cvar);
   oops::Log::trace() << "GeoVaLs contructor config key = " << keyGVL_ << std::endl;
 }
 // -----------------------------------------------------------------------------
@@ -238,11 +240,12 @@ void GeoVaLs::get(std::vector<float> & vals, const std::string & var, const int 
 }
 // -----------------------------------------------------------------------------
 /*! \brief Read GeoVaLs from the file */
-void GeoVaLs::read(const eckit::Configuration & config) {
+void GeoVaLs::read(const eckit::Configuration & config,
+                   const ioda::ObsSpace & obspace) {
   oops::Log::trace() << "GeoVaLs::read starting" << std::endl;
   const eckit::Configuration * conf = &config;
   const eckit::Configuration * cvar = &vars_.toFortran();
-  ufo_geovals_read_file_f90(keyGVL_, &conf, &cvar);
+  ufo_geovals_read_file_f90(keyGVL_, &conf, obspace, &cvar);
   oops::Log::trace() << "GeoVaLs::read done" << std::endl;
 }
 // -----------------------------------------------------------------------------
