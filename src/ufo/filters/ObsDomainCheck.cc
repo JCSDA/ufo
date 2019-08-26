@@ -44,13 +44,15 @@ ObsDomainCheck::~ObsDomainCheck() {}
 // -----------------------------------------------------------------------------
 
 void ObsDomainCheck::priorFilter(const GeoVaLs & gv) const {
-  const oops::Variables vars = obsdb_.obsvariables();
+  const oops::Variables vars(config_);
+  const oops::Variables observed = obsdb_.obsvariables();
 
   std::vector<bool> inside = processWhere(obsdb_, gv, config_);
 
   for (size_t jv = 0; jv < vars.size(); ++jv) {
+    size_t iv = observed.find(vars[jv]);
     for (size_t jobs = 0; jobs < obsdb_.nlocs(); ++jobs) {
-      if (!inside[jobs] && flags_[jv][jobs] == 0) flags_[jv][jobs] = QCflags::domain;
+      if (!inside[jobs] && flags_[iv][jobs] == 0) flags_[iv][jobs] = QCflags::domain;
     }
   }
 }

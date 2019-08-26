@@ -45,13 +45,15 @@ BlackList::~BlackList() {}
 
 void BlackList::priorFilter(const GeoVaLs & gv) const {
   const size_t nobs = obsdb_.nlocs();
-  const oops::Variables vars = obsdb_.obsvariables();
+  const oops::Variables vars(config_);
+  const oops::Variables observed = obsdb_.obsvariables();
 
   std::vector<bool> blacklisted = processWhere(obsdb_, gv, config_);
 
   for (size_t jv = 0; jv < vars.size(); ++jv) {
+    size_t iv = observed.find(vars[jv]);
     for (size_t jobs = 0; jobs < nobs; ++jobs) {
-      if (blacklisted[jobs] && flags_[jv][jobs] == 0) flags_[jv][jobs] = QCflags::black;
+      if (blacklisted[jobs] && flags_[iv][jobs] == 0) flags_[iv][jobs] = QCflags::black;
     }
   }
 }

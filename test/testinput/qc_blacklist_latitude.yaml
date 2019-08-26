@@ -21,14 +21,14 @@ Observations:
    GeoVaLs:
      filename: Data/amsua_n19_geoval_2018041500_m.nc4
    ObsFilters:
-   - Filter: Domain Check
+   - Filter: BlackList
      variables: [brightness_temperature]
-     channels: 1-8
+     channels: 1-15
      where:
      - variable: latitude
        minvalue: -60.
        maxvalue: 60. 
-   passedBenchmark: 1340      # number of passed obs
+   passedBenchmark: 300      # number of passed obs
  - ObsOperator:
       name: VertInterp
    ObsSpace:
@@ -40,13 +40,13 @@ Observations:
    GeoVaLs:
       filename: Data/sondes_geoval_2018041500_m.nc4
    ObsFilters:
-   - Filter: Domain Check
+   - Filter: BlackList
      variables: [air_temperature, eastward_wind, northward_wind]
      where:
      - variable: latitude
        minvalue: -60.
        maxvalue: 60. 
-   passedBenchmark: 943      # number of passed obs
+   passedBenchmark: 206      # number of passed obs
  - ObsOperator:
       name: VertInterp
    ObsSpace:
@@ -60,10 +60,10 @@ Observations:
    GeoVaLs:
       filename: Data/satwind_geoval_2018041500_m.nc4
    ObsFilters:
-   - Filter: Domain Check
-     variables: [eastward_wind]
+   - Filter: BlackList
+     variables: [eastward_wind, northward_wind]
      where:
      - variable: latitude
        minvalue: -60.
        maxvalue: 60. 
-   passedBenchmark: 147      # number of passed obs
+   passedBenchmark: 2      # number of passed obs

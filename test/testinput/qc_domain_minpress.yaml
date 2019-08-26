@@ -15,6 +15,7 @@ Observations:
       filename: Data/sondes_geoval_2018041500_m.nc4
    ObsFilters:
    - Filter: Domain Check
+     variables: [eastward_wind, northward_wind]
      where:
      - variable: air_pressure 
        minvalue: 30000.
@@ -31,6 +32,7 @@ Observations:
       filename: Data/satwind_geoval_2018041500_m.nc4
    ObsFilters:
    - Filter: Domain Check
+     variables: [eastward_wind, northward_wind]
      where:
      - variable: air_pressure 
        minvalue: 30000.
@@ -47,6 +49,7 @@ Observations:
       filename: Data/aircraft_geoval_2018041500_m.nc4
    ObsFilters:
    - Filter: Domain Check
+     variables: [air_temperature]
      where:
      - variable: air_pressure 
        minvalue: 30000.

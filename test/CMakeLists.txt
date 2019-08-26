@@ -66,6 +66,7 @@ list( APPEND ufo_test_input
   testinput/seviri_crtm.yaml
   testinput/sndrd1-4_crtm.yaml
   testinput/tprof.yaml
+  testinput/qc_blacklist_latitude.yaml
   testinput/windprof.yaml
   testinput/qc_domain_latitude.yaml
   testinput/qc_domain_minpress.yaml
@@ -453,6 +454,11 @@ ecbuild_add_test( TARGET  test_ufo_qc_thinning_rad
                   SOURCES mains/TestObsFilters.cc
                   ARGS    "testinput/qc_thinning_rad.yaml"
                   LIBS    ufo )
+
+ecbuild_add_test( TARGET  test_ufo_qc_blacklist_latitude
+                  SOURCES mains/TestObsFilters.cc
+                  ARGS    "testinput/qc_blacklist_latitude.yaml"
+                  LIBS    ufo)
 
 if( ${ROPP-UFO_FOUND} )
 ecbuild_add_test( TARGET  test_ufo_gnssroBndROPP1D_opr
