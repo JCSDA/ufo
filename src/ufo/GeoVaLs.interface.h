@@ -15,6 +15,10 @@ namespace eckit {
   class Configuration;
 }
 
+namespace ioda {
+  class ObsSpace;
+}
+
 namespace ufo {
 
 /// Interface to Fortran UFO GeoVals routines
@@ -45,7 +49,9 @@ extern "C" {
   void ufo_geovals_nlocs_f90(const F90goms &, int &);
   void ufo_geovals_get_f90(const F90goms &, const int &, const char *, const int &,
                            const int &, float &);
-  void ufo_geovals_read_file_f90(const F90goms &, const eckit::Configuration * const *,
+  void ufo_geovals_read_file_f90(const F90goms &,
+                                 const eckit::Configuration * const *,
+                                 const ioda::ObsSpace &,
                                  const eckit::Configuration * const *);
   void ufo_geovals_write_file_f90(const F90goms &, const eckit::Configuration * const *);
 }  // extern C

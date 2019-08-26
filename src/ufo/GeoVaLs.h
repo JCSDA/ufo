@@ -22,6 +22,10 @@ namespace eckit {
   class Configuration;
 }
 
+namespace ioda {
+  class ObsSpace;
+}
+
 namespace ufo {
   class Locations;
 
@@ -35,7 +39,8 @@ class GeoVaLs : public util::Printable,
   static const std::string classname() {return "ufo::GeoVaLs";}
 
   GeoVaLs(const Locations &, const oops::Variables &);
-  GeoVaLs(const eckit::Configuration &, const oops::Variables &);
+  GeoVaLs(const eckit::Configuration &, const ioda::ObsSpace &,
+          const oops::Variables &);
   GeoVaLs(const GeoVaLs &);
 
   ~GeoVaLs();
@@ -56,7 +61,7 @@ class GeoVaLs : public util::Printable,
   bool has(const std::string & var) const {return vars_.has(var);}
   void get(std::vector<float> &, const std::string &, const int lev = 1) const;
 
-  void read(const eckit::Configuration &);
+  void read(const eckit::Configuration &, const ioda::ObsSpace &);
   void analytic_init(const Locations &, const eckit::Configuration &);
   void write(const eckit::Configuration &) const;
 

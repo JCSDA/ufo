@@ -104,4 +104,4 @@ Observations:
      where:
      - variable: air_temperature@HofX
        minvalue: 275.
-   passedBenchmark: 1539      # number of passed obs
+   passedBenchmark: 1548      # number of passed obs
