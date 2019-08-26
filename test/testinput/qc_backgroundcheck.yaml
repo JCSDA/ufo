@@ -27,7 +27,15 @@ Observations:
      variables: [brightness_temperature]
      channels: 1
      threshold: 2.0
-   passedBenchmark: 1462      # number of passed obs
+   - Filter: Background Check
+     variables: [brightness_temperature]
+     channels: 15
+     threshold: 2.0
+     where:
+     - variable: water_area_fraction@GeoVaLs
+       minvalue: 0.5
+   passedBenchmark: 1446      # number of passed obs
+
  - ObsOperator:
      name: VertInterp
    ObsSpace:
@@ -76,3 +84,24 @@ Observations:
        minvalue: 0
        maxvalue: 50000
    passedBenchmark: 148      # number of passed obs
+ - ObsOperator:
+      name: VertInterp
+   ObsSpace:
+      name: Aircraft 
+      ObsDataIn:
+        obsfile: Data/aircraft_obs_2018041500_m.nc4
+      simulate:
+        variables: [air_temperature, eastward_wind, northward_wind]
+   GeoVaLs:
+      filename: Data/aircraft_geoval_2018041500_m.nc4
+   ObsFilters:
+   - Filter: Background Check
+     variables: [eastward_wind, northward_wind]
+     threshold: 1.5
+     where:
+     - variable: air_pressure@MetaData
+       minvalue: 10000.
+     where:
+     - variable: air_temperature@HofX
+       minvalue: 275.
+   passedBenchmark: 1539      # number of passed obs

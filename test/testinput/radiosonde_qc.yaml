@@ -22,7 +22,7 @@ Observations:
       variables: [eastward_wind, northward_wind]
       threshold: 2.0
       where:
-      - variable: latitude
+      - variable: latitude@MetaData
         minvalue: -60.0
         maxvalue: 60.0
     passedBenchmark: 958      # number of passed obs

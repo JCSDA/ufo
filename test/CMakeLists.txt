@@ -66,6 +66,7 @@ list( APPEND ufo_test_input
   testinput/seviri_crtm.yaml
   testinput/sndrd1-4_crtm.yaml
   testinput/tprof.yaml
+  testinput/windprof.yaml
   testinput/qc_domain_latitude.yaml
   testinput/qc_domain_minpress.yaml
 )
@@ -115,6 +116,7 @@ list( APPEND ufo_test_data
   atmosphere/abi_g16_geoval_2019042306_m.nc4
   atmosphere/sondes_geoval_2018041500_m.nc4
   atmosphere/sondes_geoval_2018041500_s.nc4
+  atmosphere/windprof_geoval_2018041500_m.nc4
   atmosphere/ssmis_f18_geoval_2018041500_m.nc4
   marine/coolskin_fake_geovals_2018041500.nc
   marine/cryosat2-2018-04-15_geovals.nc
@@ -163,6 +165,7 @@ list (APPEND ioda_obs_test_data
 
   atmosphere/sondes_obs_2018041500_m.nc4
   atmosphere/sondes_obs_2018041500_s.nc4
+  atmosphere/windprof_obs_2018041500_m.nc4
   marine/coolskin_fake_obs_2018041500.nc
   marine/cryosat2-2018-04-15.nc
   marine/icec-2018-04-15.nc
@@ -416,10 +419,10 @@ ecbuild_add_test( TARGET  test_ufo_satwind_opr
                   ARGS    "testinput/satwind.yaml"
                   LIBS    ufo )
 
-ecbuild_add_test( TARGET  test_ufo_scatwind_opr
-                  SOURCES mains/TestObsOperator.cc
-                  ARGS    "testinput/scatwind.yaml"
-                  LIBS    ufo )
+#ecbuild_add_test( TARGET  test_ufo_windprof_opr
+#                  SOURCES mains/TestObsOperator.cc
+#                  ARGS    "testinput/windprof.yaml"
+#                  LIBS    ufo )
 
 ecbuild_add_test( TARGET  test_ufo_qc_boundscheck
                   SOURCES mains/TestObsFilters.cc

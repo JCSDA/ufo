@@ -145,4 +145,99 @@ std::vector<bool> processWhere(ioda::ObsSpace & obsdb, const GeoVaLs & gvals,
 
 // -----------------------------------------------------------------------------
 
+std::vector<bool> processWhere(ioda::ObsSpace & obsdb,
+                               const ioda::ObsDataVector<float> & allvars,
+                               const eckit::Configuration & config) {
+  const float missing = util::missingValue(missing);
+  const size_t nlocs = allvars.nlocs();
+
+// Everywhere by default if no mask
+  std::vector<bool> where(nlocs, true);
+
+  std::vector<eckit::LocalConfiguration> masks;
+  config.get("where", masks);
+
+  for (size_t jm = 0; jm < masks.size(); ++jm) {
+//  Get variable@group
+    const std::string vargrp(masks[jm].getString("variable"));
+
+//  Process masks on float values
+    const float vmin = masks[jm].getFloat("minvalue", missing);
+    const float vmax = masks[jm].getFloat("maxvalue", missing);
+
+    if (vmin != missing || vmax != missing ||
+        masks[jm].has("is_defined") || masks[jm].has("is_not_defined")) {
+//    Apply mask min/max
+      if (vmin != missing || vmax != missing) {
+        for (size_t jj = 0; jj < nlocs; ++jj) {
+          if (vmin != missing && allvars[vargrp].at(jj) < vmin) where[jj] = false;
+          if (vmax != missing && allvars[vargrp].at(jj) > vmax) where[jj] = false;
+        }
+      }
+
+//    Apply mask is_defined
+      if (masks[jm].has("is_defined")) {
+        if (allvars.has(vargrp)) {
+          for (size_t jj = 0; jj < nlocs; ++jj) {
+            if (allvars[vargrp].at(jj) == missing) where[jj] = false;
+          }
+        } else {
+          for (size_t jj = 0; jj < nlocs; ++jj) where[jj] = false;
+        }
+      }
+
+//    Apply mask is_not_defined
+      if (masks[jm].has("is_not_defined")) {
+        if (allvars.has(vargrp)) {
+          for (size_t jj = 0; jj < nlocs; ++jj) {
+            if (allvars[vargrp].at(jj) != missing) where[jj] = false;
+          }
+        }
+      }
+    }
+
+//  Get variable and group
+    std::string var;
+    std::string grp;
+    splitVarGroup(vargrp, var, grp);
+
+//  Set obs group if group is not GeoVaLs
+    std::string obgrp = grp;
+    if (grp == "GeoVaLs") obgrp = "";
+
+//  Process masks on integer values
+    if (masks[jm].has("is_in") || masks[jm].has("is_not_in")) {
+//    Get int values
+      ioda::ObsDataVector<int> valint(obsdb, var, obgrp);
+
+//    Apply mask is_in
+      if (masks[jm].has("is_in")) {
+        std::set<int> whitelist = oops::parseIntSet(masks[jm].getString("is_in"));
+        for (size_t jj = 0; jj < nlocs; ++jj) {
+          if (!oops::contains(whitelist, valint[var][jj])) where[jj] = false;
+        }
+      }
+
+//    Apply mask is_not_in
+      if (masks[jm].has("is_not_in")) {
+        std::set<int> blacklist = oops::parseIntSet(masks[jm].getString("is_not_in"));
+        for (size_t jj = 0; jj < nlocs; ++jj) {
+          if (oops::contains(blacklist, valint[var][jj])) where[jj] = false;
+        }
+      }
+    }
+  }
+
+// Print diagnostics for debug
+  int ii = 0;
+  for (size_t jj = 0; jj < nlocs; ++jj) {
+    if (where[jj] == false) ++ii;
+  }
+  oops::Log::debug() << "processWhere: " << obsdb.obsname()
+                     << " selected " << ii << " obs." << std::endl;
+  return where;
+}
+
+// -----------------------------------------------------------------------------
+
 }  // namespace ufo
