@@ -14,6 +14,7 @@
 #include "ioda/ObsDataVector.h"
 #include "ioda/ObsSpace.h"
 #include "oops/interface/ObsFilter.h"
+#include "oops/util/abor1_cpp.h"
 #include "oops/util/Logger.h"
 #include "oops/util/missingValues.h"
 #include "ufo/filters/processWhere.h"
@@ -30,7 +31,8 @@ static oops::FilterMaker<UfoTrait, oops::ObsFilter<UfoTrait, ObsBoundsCheck> >
 ObsBoundsCheck::ObsBoundsCheck(ioda::ObsSpace & obsdb, const eckit::Configuration & config,
                                boost::shared_ptr<ioda::ObsDataVector<int> > flags,
                                boost::shared_ptr<ioda::ObsDataVector<float> >)
-  : obsdb_(obsdb), config_(config), geovars_(preProcessWhere(config_)), flags_(*flags)
+  : obsdb_(obsdb), config_(config), geovars_(preProcessWhere(config_, "GeoVaLs")),
+    flags_(*flags)
 {
   oops::Log::debug() << "ObsBoundsCheck: config = " << config_ << std::endl;
   oops::Log::debug() << "ObsBoundsCheck: geovars = " << geovars_ << std::endl;
@@ -45,10 +47,13 @@ ObsBoundsCheck::~ObsBoundsCheck() {}
 void ObsBoundsCheck::priorFilter(const GeoVaLs & gv) const {
   const float missing = util::missingValue(missing);
 
-
   oops::Variables vars(config_);
+  if (vars.size() == 0) {
+    oops::Log::error() << "No variables will be filtered out in filter "
+                       << config_ << std::endl;
+    ABORT("No variables specified to be filtered out in filter");
+  }
   oops::Variables observed = obsdb_.obsvariables();
-
 
   ioda::ObsDataVector<float> obs(obsdb_, vars, "ObsValue");
 

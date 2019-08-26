@@ -48,6 +48,7 @@ add_subdirectory( utils )
 add_subdirectory( basis )
 add_subdirectory( obsbias )
 add_subdirectory( filters )
+add_subdirectory( obsfunctions )
 add_subdirectory( identity )
 add_subdirectory( atmvertinterp )
 add_subdirectory( atmvertinterplay )
@@ -67,6 +68,7 @@ list( APPEND ufo_src_files
     ${basis_src_files}
     ${obsbias_src_files}
     ${filters_src_files}
+    ${obsfunctions_src_files}
     ${identity_src_files}
     ${atmvertinterp_src_files}
     ${atmvertinterplay_src_files}

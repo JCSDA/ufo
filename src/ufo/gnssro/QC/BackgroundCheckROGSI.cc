@@ -37,7 +37,7 @@ BackgroundCheckROGSI::BackgroundCheckROGSI(ioda::ObsSpace & os, const eckit::Con
                                  boost::shared_ptr<ioda::ObsDataVector<int> > flags,
                                  boost::shared_ptr<ioda::ObsDataVector<float> > obserr)
   : obsdb_(os), config_(config),  gv_(NULL),
-    geovars_(preProcessWhere(config_)), flags_(*flags)
+    geovars_(preProcessWhere(config_, "GeoVaLs")), flags_(*flags)
 {
   oops::Log::trace() << "BackgroundCheckROGSI contructor starting: "
                      << "using GSI style BackgroundCheck for GnssroBndGSI" << std::endl;

@@ -18,13 +18,15 @@
 #include "oops/util/IntSetParser.h"
 #include "oops/util/missingValues.h"
 #include "ufo/GeoVaLs.h"
+#include "ufo/obsfunctions/ObsFunction.h"
 #include "ufo/utils/SplitVarGroup.h"
 
 namespace ufo {
 
 // -----------------------------------------------------------------------------
 
-oops::Variables preProcessWhere(const eckit::Configuration & config) {
+oops::Variables preProcessWhere(const eckit::Configuration & config,
+                                const std::string & group) {
   std::vector<eckit::LocalConfiguration> masks;
   config.get("where", masks);
 
@@ -34,7 +36,7 @@ oops::Variables preProcessWhere(const eckit::Configuration & config) {
     std::string var;
     std::string grp;
     splitVarGroup(vargrp, var, grp);
-    if (grp == "GeoVaLs") vv.push_back(var);
+    if (grp == group) vv.push_back(var);
   }
 
   return oops::Variables(vv);
@@ -56,13 +58,9 @@ std::vector<bool> processWhere(ioda::ObsSpace & obsdb, const GeoVaLs & gvals,
   for (size_t jm = 0; jm < masks.size(); ++jm) {
 //  Get variable and group
     const std::string vargrp(masks[jm].getString("variable"));
-    std::string var = vargrp;
-    std::string grp = "MetaData";
+    std::string var, grp;
+    std::string obgrp = "MetaData";
     splitVarGroup(vargrp, var, grp);
-
-//  Set obs group if group is not GeoVaLs
-    std::string obgrp = grp;
-    if (grp == "GeoVaLs") obgrp = "";
 
 //  Process masks on float values
     const float vmin = masks[jm].getFloat("minvalue", missing);
@@ -74,6 +72,16 @@ std::vector<bool> processWhere(ioda::ObsSpace & obsdb, const GeoVaLs & gvals,
       std::vector<float> values(nlocs);
       if (grp == "GeoVaLs") {
         gvals.get(values, var);
+      } else if (grp == "ObsFunction") {
+        ioda::ObsDataVector<float> vals(obsdb, var);
+        ObsFunction obsdiag(var);
+        ioda::ObsDataVector<float> metadata(obsdb, obsdiag.requiredMetaData(),
+              "MetaData");
+        ioda::ObsDataVector<float> obs(obsdb, obsdiag.requiredObsData(), "ObsValue");
+        obsdiag.compute(metadata, obs, vals);
+        for (size_t jj = 0; jj < nlocs; ++jj) {
+          values[jj] = vals[var][jj];
+        }
       } else {
         ioda::ObsDataVector<float> vals(obsdb, var, obgrp);
         for (size_t jj = 0; jj < nlocs; ++jj) {

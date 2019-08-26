@@ -19,6 +19,7 @@
 #include "ioda/ObsVector.h"
 
 #include "oops/interface/ObsFilter.h"
+#include "oops/util/abor1_cpp.h"
 #include "oops/util/Logger.h"
 
 #include "ufo/filters/copyVars2ODV.h"
@@ -38,7 +39,7 @@ BackgroundCheck::BackgroundCheck(ioda::ObsSpace & os, const eckit::Configuration
                                  boost::shared_ptr<ioda::ObsDataVector<int> > flags,
                                  boost::shared_ptr<ioda::ObsDataVector<float> > obserr)
   : obsdb_(os), config_(config), abs_threshold_(-1.0), threshold_(-1.0), gv_(NULL),
-    geovars_(preProcessWhere(config_)), flags_(*flags), obserr_(*obserr)
+    geovars_(preProcessWhere(config_, "GeoVaLs")), flags_(*flags), obserr_(*obserr)
 {
   oops::Log::trace() << "BackgroundCheck contructor starting" << std::endl;
   oops::Log::debug() << "BackgroundCheck: config = " << config << std::endl;
@@ -71,6 +72,11 @@ void BackgroundCheck::postFilter(const ioda::ObsVector & hofx) const {
   oops::Log::trace() << "BackgroundCheck postFilter" << std::endl;
 
   const oops::Variables vars(config_);
+  if (vars.size() == 0) {
+    oops::Log::error() << "No variables will be filtered out in filter "
+                       << config_ << std::endl;
+    ABORT("No variables specified to be filtered out in filter");
+  }
   const oops::Variables observed = obsdb_.obsvariables();
   const float missing = util::missingValue(missing);
 
