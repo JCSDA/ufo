@@ -22,6 +22,7 @@
 #include "oops/util/abor1_cpp.h"
 #include "oops/util/Logger.h"
 
+#include "ufo/filters/actions/FilterAction.h"
 #include "ufo/filters/copyVars2ODV.h"
 #include "ufo/filters/processWhere.h"
 #include "ufo/filters/QCflags.h"
@@ -94,6 +95,10 @@ void BackgroundCheck::postFilter(const ioda::ObsVector & hofx) const {
   filterInputs = copyVars2ODV(hofx, filterInputs, "HofX");
   filterInputs = copyVars2ODV(obsdb_, filterInputs);
 
+// Allocate flagged obs (false by default)
+  std::vector<std::vector<bool>> flagged(flags_.nvars());
+  for (size_t jv = 0; jv < flagged.size(); ++jv) flagged[jv].resize(obsdb_.nlocs());
+
 // Select where the background check will apply
   std::vector<bool> apply = processWhere(obsdb_, filterInputs, config_);
 
@@ -117,10 +122,17 @@ void BackgroundCheck::postFilter(const ioda::ObsVector & hofx) const {
         float yy = obs[jv][jobs] + bias[jv][jobs];
 
 //      Check distance from background
-        if (std::abs(static_cast<float>(hofx[iobs]) - yy) > zz) flags_[iv][jobs] = QCflags::fguess;
+        if (std::abs(static_cast<float>(hofx[iobs]) - yy) > zz) flagged[iv][jobs] = true;
       }
     }
   }
+
+// Apply action
+  eckit::LocalConfiguration aconf;
+  config_.get("action", aconf);
+  aconf.set("flag", QCflags::fguess);
+  FilterAction action(aconf);
+  action.apply(vars, flagged, flags_, obserr_);
 }
 
 // -----------------------------------------------------------------------------

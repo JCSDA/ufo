@@ -25,6 +25,14 @@ set ( filters_files
       copyVars2ODV.h
       processWhere.cc
       processWhere.h
+      actions/FilterAction.cc
+      actions/FilterAction.h
+      actions/FilterActionBase.cc
+      actions/FilterActionBase.h
+      actions/InflateError.cc
+      actions/InflateError.h
+      actions/RejectObs.cc
+      actions/RejectObs.h
 )
 
 PREPEND( _p_filters_files       "filters"       ${filters_files} )

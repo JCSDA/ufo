@@ -53,6 +53,8 @@ Observations:
      variables: [air_temperature]
      threshold: 2.0
      absolute threshold: 1.0
+     action:
+       name: reject
    - Filter: Background Check
      variables: [eastward_wind, northward_wind]
      threshold: 2.0
@@ -60,7 +62,10 @@ Observations:
      - variable: latitude
        minvalue: -60.0
        maxvalue: 60.0
-   passedBenchmark: 133      # number of passed obs
+     action:
+       name: inflate error
+       inflation: 2.0
+   passedBenchmark: 142      # number of passed obs
 #    qcBenchmark: GsiQC       # benchmark QC from the file
  - ObsOperator:
      name: GnssroBndGSI
