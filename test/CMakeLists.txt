@@ -43,6 +43,7 @@ list( APPEND ufo_test_input
   testinput/gnssrobndropp2d.yaml
   testinput/gnssrobndgsi.yaml
   testinput/gnssroref.yaml
+  testinput/gnssro_domain_check.yaml
   testinput/hirs4_crtm.yaml
   testinput/iasi_crtm.yaml
   testinput/gsisfcmodel.yaml
@@ -413,6 +414,11 @@ ecbuild_add_test( TARGET  test_ufo_gnssroBndGSI_opr
 ecbuild_add_test( TARGET  test_ufo_gnssroBndGSI_tlad
                   SOURCES mains/TestObsOperatorTLAD.cc
                   ARGS    "testinput/gnssrobndgsi.yaml"
+                  LIBS    ufo )
+
+ecbuild_add_test( TARGET  test_ufo_gnssro_domain_check
+                  SOURCES mains/TestObsFilters.cc
+                  ARGS    "testinput/gnssro_domain_check.yaml"
                   LIBS    ufo )
 
 ecbuild_add_test( TARGET  test_ufo_satwind_opr
