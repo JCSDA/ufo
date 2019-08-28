@@ -14,6 +14,7 @@
 #include "oops/base/Variables.h"
 
 #include "ufo/GeoVaLs.h"
+#include "ufo/ObsDiagnostics.h"
 
 namespace ufo {
 
@@ -42,7 +43,8 @@ ObsRadarRadialVelocity::~ObsRadarRadialVelocity() {
 
 // -----------------------------------------------------------------------------
 
-void ObsRadarRadialVelocity::simulateObs(const GeoVaLs & gv, ioda::ObsVector & ovec) const {
+void ObsRadarRadialVelocity::simulateObs(const GeoVaLs & gv, ioda::ObsVector & ovec,
+                                         ObsDiagnostics &) const {
   ufo_radarradialvelocity_simobs_f90(keyOper_, gv.toFortran(), odb_, ovec.nvars(), ovec.nlocs(),
                          ovec.toFortran());
   oops::Log::trace() << "ObsRadarRadialVelocity: observation operator run" << std::endl;

@@ -15,6 +15,7 @@
 #include "oops/interface/ObsFilter.h"
 #include "oops/util/Logger.h"
 
+#include "ufo/ObsDiagnostics.h"
 #include "ufo/UfoTrait.h"
 
 namespace ufo {
@@ -24,9 +25,9 @@ static oops::FilterMaker<UfoTrait, oops::ObsFilter<UfoTrait, HCorrection> >
   makerHCorrection_("HCorrection");
 // -----------------------------------------------------------------------------
 
-HCorrection::HCorrection(ioda::ObsSpace & obsdb, const eckit::Configuration & config,
-                     boost::shared_ptr<ioda::ObsDataVector<int> > flags,
-                     boost::shared_ptr<ioda::ObsDataVector<float> >)
+HCorrection::HCorrection(const ioda::ObsSpace & obsdb, const eckit::Configuration & config,
+                         boost::shared_ptr<ioda::ObsDataVector<int> > flags,
+                         boost::shared_ptr<ioda::ObsDataVector<float> >)
   : obsdb_(obsdb), geovars_(), flags_(*flags) {
   oops::Log::trace() << "HCorrection contructor starting" << std::endl;
   const eckit::Configuration * conf = &config;
@@ -52,7 +53,7 @@ void HCorrection::priorFilter(const GeoVaLs & gv) const {
 
 // -----------------------------------------------------------------------------
 
-void HCorrection::postFilter(const ioda::ObsVector & hofxb) const {
+void HCorrection::postFilter(const ioda::ObsVector & hofxb, const ObsDiagnostics &) const {
   oops::Log::trace() << "HCorrection postFilter" << std::endl;
   ufo_hcorrection_post_f90(key_, obsdb_, hofxb.nvars(), hofxb.nlocs(), hofxb.toFortran());
 }

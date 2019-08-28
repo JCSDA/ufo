@@ -17,6 +17,7 @@
 #include "oops/util/Logger.h"
 
 #include "ufo/GeoVaLs.h"
+#include "ufo/ObsDiagnostics.h"
 
 namespace ufo {
 
@@ -47,7 +48,8 @@ ObsGnssroRef::~ObsGnssroRef() {
 
 // -----------------------------------------------------------------------------
 
-void ObsGnssroRef::simulateObs(const GeoVaLs & gom, ioda::ObsVector & ovec) const {
+void ObsGnssroRef::simulateObs(const GeoVaLs & gom, ioda::ObsVector & ovec,
+                               ObsDiagnostics &) const {
   ufo_gnssro_ref_simobs_f90(keyOperGnssroRef_, gom.toFortran(), odb_,
                             ovec.size(), ovec.toFortran());
 }

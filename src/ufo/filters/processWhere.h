@@ -22,7 +22,8 @@ namespace ufo {
   class GeoVaLs;
 
 oops::Variables preProcessWhere(const eckit::Configuration &, const std::string &);
-std::vector<bool> processWhere(ioda::ObsSpace &, const GeoVaLs &, const eckit::Configuration &);
+std::vector<bool> processWhere(ioda::ObsSpace &, const GeoVaLs &,
+                               const eckit::Configuration &);
 std::vector<bool> processWhere(ioda::ObsSpace &, const ioda::ObsDataVector<float> &,
                                const eckit::Configuration &);
 }  // namespace ufo

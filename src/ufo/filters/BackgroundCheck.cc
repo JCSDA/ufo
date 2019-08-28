@@ -27,6 +27,7 @@
 #include "ufo/filters/processWhere.h"
 #include "ufo/filters/QCflags.h"
 #include "ufo/GeoVaLs.h"
+#include "ufo/ObsDiagnostics.h"
 #include "ufo/UfoTrait.h"
 
 namespace ufo {
@@ -40,7 +41,8 @@ BackgroundCheck::BackgroundCheck(ioda::ObsSpace & os, const eckit::Configuration
                                  boost::shared_ptr<ioda::ObsDataVector<int> > flags,
                                  boost::shared_ptr<ioda::ObsDataVector<float> > obserr)
   : obsdb_(os), config_(config), abs_threshold_(-1.0), threshold_(-1.0), gv_(NULL),
-    geovars_(preProcessWhere(config_, "GeoVaLs")), flags_(*flags), obserr_(*obserr)
+    geovars_(preProcessWhere(config_, "GeoVaLs")), diagvars_(),
+    flags_(*flags), obserr_(*obserr)
 {
   oops::Log::trace() << "BackgroundCheck contructor starting" << std::endl;
   oops::Log::debug() << "BackgroundCheck: config = " << config << std::endl;
@@ -69,7 +71,7 @@ void BackgroundCheck::priorFilter(const GeoVaLs & gv) const {
 
 // -----------------------------------------------------------------------------
 
-void BackgroundCheck::postFilter(const ioda::ObsVector & hofx) const {
+void BackgroundCheck::postFilter(const ioda::ObsVector & hofx, const ObsDiagnostics &) const {
   oops::Log::trace() << "BackgroundCheck postFilter" << std::endl;
 
   const oops::Variables vars(config_);

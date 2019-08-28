@@ -15,6 +15,7 @@
 #include "ufo/GeoVaLs.h"
 #include "ufo/Locations.h"
 #include "ufo/ObsBias.h"
+#include "ufo/ObsDiagnostics.h"
 #include "ufo/ObsOperatorBase.h"
 
 namespace ufo {
@@ -32,8 +33,8 @@ ObsOperator::~ObsOperator() {}
 // -----------------------------------------------------------------------------
 
 void ObsOperator::simulateObs(const GeoVaLs & gvals, ioda::ObsVector & yy,
-                              const ObsBias & bias) const {
-  oper_->simulateObs(gvals, yy);
+                              const ObsBias & bias, ObsDiagnostics & ydiags) const {
+  oper_->simulateObs(gvals, yy, ydiags);
   ioda::ObsVector ybias(yy);
   ybias.zero();
   bias.computeObsBias(gvals, ybias, odb_);

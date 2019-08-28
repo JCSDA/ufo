@@ -32,10 +32,11 @@ ObsBoundsCheck::ObsBoundsCheck(ioda::ObsSpace & obsdb, const eckit::Configuratio
                                boost::shared_ptr<ioda::ObsDataVector<int> > flags,
                                boost::shared_ptr<ioda::ObsDataVector<float> >)
   : obsdb_(obsdb), config_(config), geovars_(preProcessWhere(config_, "GeoVaLs")),
-    flags_(*flags)
+    diagvars_(preProcessWhere(config_, "ObsDiag")), flags_(*flags)
 {
   oops::Log::debug() << "ObsBoundsCheck: config = " << config_ << std::endl;
   oops::Log::debug() << "ObsBoundsCheck: geovars = " << geovars_ << std::endl;
+  oops::Log::debug() << "ObsBoundsCheck: diagvars = " << diagvars_ << std::endl;
 }
 
 // -----------------------------------------------------------------------------

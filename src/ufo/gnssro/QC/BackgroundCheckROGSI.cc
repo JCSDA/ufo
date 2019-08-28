@@ -33,9 +33,10 @@ static oops::FilterMaker<UfoTrait, oops::ObsFilter<UfoTrait, BackgroundCheckROGS
   makerBgChk_("Background Check ROGSI");
 // -----------------------------------------------------------------------------
 
-BackgroundCheckROGSI::BackgroundCheckROGSI(ioda::ObsSpace & os, const eckit::Configuration & config,
-                                 boost::shared_ptr<ioda::ObsDataVector<int> > flags,
-                                 boost::shared_ptr<ioda::ObsDataVector<float> > obserr)
+BackgroundCheckROGSI::BackgroundCheckROGSI(ioda::ObsSpace & os,
+                                           const eckit::Configuration & config,
+                                           boost::shared_ptr<ioda::ObsDataVector<int> > flags,
+                                           boost::shared_ptr<ioda::ObsDataVector<float> > obserr)
   : obsdb_(os), config_(config),  gv_(NULL),
     geovars_(preProcessWhere(config_, "GeoVaLs")), flags_(*flags)
 {
@@ -61,7 +62,7 @@ void BackgroundCheckROGSI::priorFilter(const GeoVaLs & gv) const {
 
 // -----------------------------------------------------------------------------
 
-void BackgroundCheckROGSI::postFilter(const ioda::ObsVector & hofx) const {
+void BackgroundCheckROGSI::postFilter(const ioda::ObsVector & hofx, const ObsDiagnostics &) const {
   oops::Log::trace() << "BackgroundCheckROGSI postFilter" << std::endl;
 
   const oops::Variables vars(config_);

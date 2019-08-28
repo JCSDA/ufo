@@ -18,6 +18,7 @@
 #include "ObsBias.h"
 #include "ObsBiasCovariance.h"
 #include "ObsBiasIncrement.h"
+#include "ObsDiagnostics.h"
 #include "ObsOperator.h"
 #include "LinearObsOperator.h"
 
@@ -27,6 +28,7 @@ struct UfoTrait {
   static std::string name() {return "UFO";}
 
   typedef ufo::GeoVaLs             GeoVaLs;
+  typedef ufo::ObsDiagnostics      ObsDiagnostics;
   typedef ufo::Locations           Locations;
   typedef ioda::ObsSpace           ObsSpace;
   typedef ioda::ObsVector          ObsVector;

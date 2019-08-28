@@ -25,8 +25,7 @@ namespace ufo {
 
 // -----------------------------------------------------------------------------
 
-oops::Variables preProcessWhere(const eckit::Configuration & config,
-                                const std::string & group) {
+oops::Variables preProcessWhere(const eckit::Configuration & config, const std::string & group) {
   std::vector<eckit::LocalConfiguration> masks;
   config.get("where", masks);
 

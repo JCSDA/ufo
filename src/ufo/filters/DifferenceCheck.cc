@@ -35,8 +35,8 @@ static oops::FilterMaker<UfoTrait, oops::ObsFilter<UfoTrait, DifferenceCheck> >
 DifferenceCheck::DifferenceCheck(ioda::ObsSpace & os, const eckit::Configuration & config,
                                  boost::shared_ptr<ioda::ObsDataVector<int> > flags,
                                  boost::shared_ptr<ioda::ObsDataVector<float> >)
-  : obsdb_(os), flags_(*flags), config_(config), geovars_(), threshold_(-1.0),
-    rvar_(), rgrp_(), vvar_(), vgrp_()
+  : obsdb_(os), flags_(*flags), config_(config), geovars_(), diagvars_(),
+    threshold_(-1.0), rvar_(), rgrp_(), vvar_(), vgrp_()
 {
   oops::Log::trace() << "DifferenceCheck contructor starting" << std::endl;
   threshold_ = config.getFloat("threshold");

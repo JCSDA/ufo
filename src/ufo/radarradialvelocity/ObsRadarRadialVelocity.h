@@ -29,6 +29,7 @@ namespace ioda {
 
 namespace ufo {
   class GeoVaLs;
+  class ObsDiagnostics;
 
 // -----------------------------------------------------------------------------
 /// RadarRadialVelocity observation operator class
@@ -41,7 +42,7 @@ class ObsRadarRadialVelocity : public ObsOperatorBase,
   virtual ~ObsRadarRadialVelocity();
 
 // Obs Operator
-  void simulateObs(const GeoVaLs &, ioda::ObsVector &) const;
+  void simulateObs(const GeoVaLs &, ioda::ObsVector &, ObsDiagnostics &) const override;
 
 // Other
   const oops::Variables & variables() const {return varin_;}

@@ -16,6 +16,7 @@
 #include "oops/base/Variables.h"
 
 #include "ufo/GeoVaLs.h"
+#include "ufo/ObsDiagnostics.h"
 
 namespace ufo {
 
@@ -42,7 +43,8 @@ ObsADT::~ObsADT() {
 
 // -----------------------------------------------------------------------------
 
-void ObsADT::simulateObs(const GeoVaLs & gv, ioda::ObsVector & ovec) const {
+void ObsADT::simulateObs(const GeoVaLs & gv, ioda::ObsVector & ovec,
+                         ObsDiagnostics &) const {
   ufo_adt_simobs_f90(keyOper_, gv.toFortran(), odb_, ovec.size(), ovec.toFortran());
   oops::Log::trace() << "ObsADT: observation operator run" << std::endl;
 }
