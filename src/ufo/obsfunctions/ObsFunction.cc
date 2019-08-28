@@ -9,6 +9,7 @@
 
 #include "ioda/ObsDataVector.h"
 #include "oops/base/Variables.h"
+#include "ufo/GeoVaLs.h"
 
 namespace ufo {
 
@@ -25,9 +26,10 @@ ObsFunction::~ObsFunction() {}
 // -----------------------------------------------------------------------------
 
 void ObsFunction::compute(const ioda::ObsDataVector<float> & metadata,
-                      const ioda::ObsDataVector<float> & obs,
-                      ioda::ObsDataVector<float> & out) const {
-  obsfct_->compute(metadata, obs, out);
+                          const ioda::ObsDataVector<float> & obs,
+                          const GeoVaLs & geovals,
+                          ioda::ObsDataVector<float> & out) const {
+  obsfct_->compute(metadata, obs, geovals, out);
 }
 
 // -----------------------------------------------------------------------------
@@ -40,6 +42,12 @@ const oops::Variables & ObsFunction::requiredObsData() const {
 
 const oops::Variables & ObsFunction::requiredMetaData() const {
   return obsfct_->requiredMetaData();
+}
+
+// -----------------------------------------------------------------------------
+
+const oops::Variables & ObsFunction::requiredGeoVaLs() const {
+  return obsfct_->requiredGeoVaLs();
 }
 
 // -----------------------------------------------------------------------------

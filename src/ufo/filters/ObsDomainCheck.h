@@ -56,7 +56,7 @@ class ObsDomainCheck : public util::Printable,
 
   ioda::ObsSpace & obsdb_;
   const eckit::LocalConfiguration config_;
-  const oops::Variables geovars_;
+  oops::Variables geovars_;
   ioda::ObsDataVector<int> & flags_;
 };
 

@@ -18,6 +18,8 @@
 
 namespace ufo {
 
+class GeoVaLs;
+
 // -----------------------------------------------------------------------------
 /// Base class for computing functions on observation data
 
@@ -29,12 +31,15 @@ class ObsFunctionBase : private boost::noncopyable {
 /// compute the result of the function
   virtual void compute(const ioda::ObsDataVector<float> &,
                        const ioda::ObsDataVector<float> &,
+                       const GeoVaLs &,
                        ioda::ObsDataVector<float> &) const = 0;
 
 /// observed variables required to compute the function
   virtual const oops::Variables & requiredObsData() const = 0;
-/// metadata requited to compute the function
+/// metadata required to compute the function
   virtual const oops::Variables & requiredMetaData() const = 0;
+/// geovals required to compute the function
+  virtual const oops::Variables & requiredGeoVaLs() const = 0;
 };
 
 // -----------------------------------------------------------------------------

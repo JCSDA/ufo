@@ -20,7 +20,9 @@
 #include "oops/util/missingValues.h"
 #include "ufo/filters/processWhere.h"
 #include "ufo/filters/QCflags.h"
+#include "ufo/obsfunctions/ObsFunction.h"
 #include "ufo/UfoTrait.h"
+#include "ufo/utils/SplitVarGroup.h"
 
 namespace ufo {
 
@@ -35,6 +37,13 @@ ObsDomainCheck::ObsDomainCheck(ioda::ObsSpace & obsdb, const eckit::Configuratio
   : obsdb_(obsdb), config_(config), geovars_(preProcessWhere(config_, "GeoVaLs")),
     flags_(*flags)
 {
+  oops::Variables obsfcts(preProcessWhere(config_, "ObsFunction"));
+  for (std::size_t ivar = 0; ivar < obsfcts.size(); ++ivar) {
+    std::string var, grp;
+    splitVarGroup(obsfcts[ivar], var, grp);
+    ObsFunction function(var);
+    geovars_ += function.requiredGeoVaLs();
+  }
   oops::Log::debug() << "ObsDomainCheck: config = " << config_ << std::endl;
   oops::Log::debug() << "ObsDomainCheck: geovars = " << geovars_ << std::endl;
 }

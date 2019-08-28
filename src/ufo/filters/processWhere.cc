@@ -74,11 +74,11 @@ std::vector<bool> processWhere(ioda::ObsSpace & obsdb, const GeoVaLs & gvals,
         gvals.get(values, var);
       } else if (grp == "ObsFunction") {
         ioda::ObsDataVector<float> vals(obsdb, var);
-        ObsFunction obsdiag(var);
-        ioda::ObsDataVector<float> metadata(obsdb, obsdiag.requiredMetaData(),
+        ObsFunction obsfct(var);
+        ioda::ObsDataVector<float> metadata(obsdb, obsfct.requiredMetaData(),
               "MetaData");
-        ioda::ObsDataVector<float> obs(obsdb, obsdiag.requiredObsData(), "ObsValue");
-        obsdiag.compute(metadata, obs, vals);
+        ioda::ObsDataVector<float> obs(obsdb, obsfct.requiredObsData(), "ObsValue");
+        obsfct.compute(metadata, obs, gvals, vals);
         for (size_t jj = 0; jj < nlocs; ++jj) {
           values[jj] = vals[var][jj];
         }

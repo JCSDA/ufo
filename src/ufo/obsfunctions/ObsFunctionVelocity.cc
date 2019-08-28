@@ -11,6 +11,7 @@
 
 #include "ioda/ObsDataVector.h"
 #include "oops/base/Variables.h"
+#include "ufo/GeoVaLs.h"
 
 namespace ufo {
 
@@ -18,7 +19,8 @@ static ObsFunctionMaker<ObsFunctionVelocity> makerObsFuncVelocity_("Velocity");
 
 // -----------------------------------------------------------------------------
 
-ObsFunctionVelocity::ObsFunctionVelocity() : obsvars_(), metadatavars_() {
+ObsFunctionVelocity::ObsFunctionVelocity()
+  : obsvars_(), metadatavars_(), geovars_() {
   // needs two wind components to calculate speed
   obsvars_.push_back("eastward_wind");
   obsvars_.push_back("northward_wind");
@@ -31,8 +33,9 @@ ObsFunctionVelocity::~ObsFunctionVelocity() {}
 // -----------------------------------------------------------------------------
 
 void ObsFunctionVelocity::compute(const ioda::ObsDataVector<float> & metadata,
-                              const ioda::ObsDataVector<float> & obs,
-                              ioda::ObsDataVector<float> & out) const {
+                                  const ioda::ObsDataVector<float> & obs,
+                                  const GeoVaLs & geovals,
+                                  ioda::ObsDataVector<float> & out) const {
   // TODO(AS): should use constants for variable names
   const size_t nlocs = obs.nlocs();
   for (size_t jj = 0; jj < nlocs; ++jj) {
@@ -52,6 +55,12 @@ const oops::Variables & ObsFunctionVelocity::requiredObsData() const {
 
 const oops::Variables & ObsFunctionVelocity::requiredMetaData() const {
   return metadatavars_;
+}
+
+// -----------------------------------------------------------------------------
+
+const oops::Variables & ObsFunctionVelocity::requiredGeoVaLs() const {
+  return geovars_;
 }
 
 // -----------------------------------------------------------------------------
