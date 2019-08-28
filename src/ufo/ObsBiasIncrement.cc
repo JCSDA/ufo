@@ -11,6 +11,7 @@
 #include "ufo/ObsBiasIncrement.h"
 
 #include "oops/util/Logger.h"
+#include "oops/util/Random.h"
 #include "ufo/ObsBias.h"
 
 namespace ufo {
@@ -57,6 +58,13 @@ void ObsBiasIncrement::diff(const ObsBias & b1, const ObsBias & b2) {
 
 void ObsBiasIncrement::zero() {
   for (std::size_t ii = 0; ii < this->size(); ++ii) biasinc_[ii] = 0.0;
+}
+
+// -----------------------------------------------------------------------------
+
+void ObsBiasIncrement::random() {
+  util::NormalDistribution<double> x(this->size(), 0.0, 1.0, 5);
+  for (std::size_t jj = 0; jj < this->size(); ++jj) biasinc_[jj] = x[jj];
 }
 
 // -----------------------------------------------------------------------------
