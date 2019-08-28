@@ -189,7 +189,8 @@ subroutine ufo_gnssro_bndropp2d_simobs_tl(self, geovals, hofx, obss)
       
 ! check if nlocs is consistent in geovals & hofx
   if (geovals%nlocs /= size(hofx)*n_horiz ) then
-     write(err_msg,*) myname_, ' error: 2d nlocs inconsistent!'
+     write(err_msg,*) myname_, ' error: 2d nlocs inconsistent! geovals%nlocs, size(hofx), &
+                                 and n_horiz are', geovals%nlocs, size(hofx), n_horiz
      call abor1_ftn(err_msg)
   endif
 
