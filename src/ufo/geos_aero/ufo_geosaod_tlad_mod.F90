@@ -29,7 +29,7 @@ module ufo_geosaod_tlad_mod
   character(len=max_string), public, allocatable :: varin(:)
   real(4), allocatable :: bext(:,:,:,:)
   real(c_float), public, allocatable :: wavelength(:)
-  character(len=10) :: rcfile
+  character(len=maxvarlen),public:: rcfile
   real(4), dimension(:,:), allocatable :: delp(:,:)
  contains
   procedure :: setup  => ufo_geosaod_tlad_setup
@@ -54,6 +54,7 @@ integer(c_int),           intent(in)    :: c_nvars_out
 integer :: iq
 character(len=maxvarlen), allocatable :: tracer_variables(:)
 integer(c_size_t),parameter :: csize = MAXVARLEN
+character(len=:), allocatable :: str
 
  ! Let user choose specific aerosols needed.
 
@@ -75,7 +76,8 @@ integer(c_size_t),parameter :: csize = MAXVARLEN
  call f_conf%get_or_die("wavelengths", self%wavelength)
 
  ! RC File for ChemBase
- call f_conf%get_or_die("RCFile", self%rcfile)
+ call f_conf%get_or_die("RCFile",str)
+ self%rcfile = str
 
 end subroutine ufo_geosaod_tlad_setup
 
@@ -119,10 +121,14 @@ real(4), dimension(:,:,:), allocatable :: qm    ! aer mass mix ratio (kg/kg *del
  allocate(self%delp(self%nlayers,self%nlocs))
  self%delp = delp_profile%vals
 
+ print*, 'in trajectory delp', self%delp(:,1)
+
  ! Get RH from geovals
  allocate(rh(self%nlayers,self%nlocs))
  call ufo_geovals_get_var(geovals, var_RH, rh_profile)
  rh = rh_profile%vals
+
+ print*, 'in trajectory RH', rh(:,1)
 
  ! Get Aer profiles interpolated at obs loc
  allocate(qm(self%ntracers, self%nlayers, self%nlocs))
@@ -132,11 +138,13 @@ real(4), dimension(:,:,:), allocatable :: qm    ! aer mass mix ratio (kg/kg *del
     qm(n,:,:) = aer_profile%vals
     qm(n,:,:) = qm(n,:,:) * self%delp / grav
  enddo
+ print*, 'in trajectory qm', qm(1,:,1) 
 
  allocate(self%bext(self%nlayers, self%nvars_out, self%ntracers, self%nlocs))
 
  call get_GEOS_AOD(self%nlayers, self%nlocs, self%nvars_out, self%ntracers, self%rcfile,  &
-                   real(self%wavelength,4), self%varin, qm, rh, bext=self%bext, rc = rc) 
+                   real(self%wavelength,4), self%varin, qm, rh, ext=self%bext, rc = rc) 
+ print*, 'in trajectory ect', self%bext(:,1,1,1)
 
  deallocate(rh)
  deallocate(qm)
@@ -161,20 +169,30 @@ type(ufo_geoval), pointer :: aer_profile
 
 character(len=MAXVARLEN) :: geovar
 
+
  ! Get Aer profiles interpolated at obs loc
  allocate(qm_tl(self%ntracers, self%nlayers, nlocs))
  do n = 1, self%ntracers
     geovar = self%varin(n)
+    print*, 'in ufo tlad geovar', geovar
     call ufo_geovals_get_var(geovals, geovar, aer_profile)
+    if (n==1) then
+    print*, 'aer_profile', aer_profile%vals(:,1)
+    endif
     qm_tl(n,:,:) = aer_profile%vals
     qm_tl(n,:,:) = qm_tl(n,:,:) * self%delp / grav
  enddo
+
+ print*, 'in ufo tlad mod qm_tl', qm_tl(1,:,1) 
 
  call get_geos_aod_tl(self%nlayers, nlocs, self%nvars_out, self%ntracers, self%bext, qm_tl, aod_tot_tl=hofx4)
 
  ! Convert back to ufo precision
  ! -----------------------------
  hofx = real(hofx4,c_double)
+
+ print*, 'in ufo tlad mod end hofx', hofx(1,:) 
+
 
  deallocate(qm_tl)
 
@@ -193,12 +211,14 @@ real(c_double),          intent(in)    :: hofx(nvars, nlocs)
 
 real(4) :: hofx4(nvars, nlocs)
 real(4), dimension(:,:,:), allocatable :: qm_ad
+ hofx4 = real(hofx)
 
-
+ print*, 'in ufo ad', hofx(1, 1)
  allocate(qm_ad(self%ntracers, self%nlayers, nlocs))
- 
+ print*, 'in ufo ad', shape(qm_ad), qm_ad(1,1,1)
  call get_geos_aod_ad(self%nlayers, nlocs, self%nvars_out, self%ntracers, self%bext, qm_ad, aod_tot_ad=hofx4)
-
+  
+ print*, 'qm_ad', shape(qm_ad)
  deallocate(qm_ad)
 
 end subroutine ufo_geosaod_simobs_ad

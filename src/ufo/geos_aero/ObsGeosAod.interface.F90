@@ -49,12 +49,13 @@ type(c_ptr), intent(in), value :: c_varlist
 character(len=MAXVARLEN), dimension(:), allocatable :: vars
 
 type(ufo_geosaod), pointer :: self
-type(fckit_configuration)  :: f_conf
+type(fckit_configuration)  :: f_conf, f_varconf
 
 f_conf = fckit_configuration(c_conf)
+f_varconf = fckit_configuration(c_varconf)
 
 call ufo_geosaod_registry%setup(c_key_self, self)
-call ufo_vars_read(c_varconf, vars)
+call ufo_vars_read(f_varconf, vars)
 
 call self%setup(f_conf, vars)
 

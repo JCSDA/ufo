@@ -31,7 +31,7 @@ module ufo_geosaod_mod
    character(len=max_string), public, allocatable :: varin(:)
    character(len=max_string), public, allocatable :: varout(:)
    real(c_float), public, allocatable :: wavelength(:)
-   character(len=10) :: rcfile
+   character(len=maxvarlen),public :: rcfile
  contains
    procedure :: setup  => ufo_geosaod_setup
    procedure :: simobs => ufo_geosaod_simobs
@@ -57,7 +57,7 @@ character(len=maxvarlen), dimension(:), intent(inout) :: vars
 integer :: iq
 character(kind=c_char,len=MAXVARLEN), allocatable :: tracer_variables(:)
 integer(c_size_t),parameter :: csize = MAXVARLEN
-character(len=MAXVARLEN), allocatable :: str
+character(len=:), allocatable :: str
 
   self%nvars_out = size(vars)
   allocate(self%varout(self%nvars_out))
@@ -68,6 +68,8 @@ character(len=MAXVARLEN), allocatable :: str
   ! Let user choose specific aerosols needed.
   call f_conf%get_or_die("tracer_geovals",csize,tracer_variables)
   self%ntracers = f_conf%get_size("tracer_geovals")
+
+  print*, 'ntracers', self%ntracers
   
   self%nvars_in =  size(varindefault) + self%ntracers
   allocate(self%varin(self%nvars_in))
@@ -76,15 +78,21 @@ character(len=MAXVARLEN), allocatable :: str
   enddo
   self%varin(self%ntracers + 1 : self%nvars_in) = varindefault   ! delp and rh
 
+
+  print*, 'tracer_var', tracer_variables
   deallocate(tracer_variables)
 
   ! List of wavelenths
   allocate(self%wavelength(self%nvars_out))
 
   call f_conf%get_or_die("wavelengths", self%wavelength)
+  print*, 'wavel', self%wavelength
  
   ! RC File for ChemBase
-  call f_conf%get_or_die("RCFile", self%rcfile)
+  call f_conf%get_or_die("RCFile",str)
+  self%rcfile = str
+
+  print*, 'rc', self%rcfile
  
 end subroutine ufo_geosaod_setup
 
@@ -126,6 +134,8 @@ character(len=MAXVARLEN) :: geovar
   ! Get delp and rh from model interp at obs loc (from geovals)
   call ufo_geovals_get_var(geovals, var_delp, delp_profile)
   nlayers = delp_profile%nval                                          ! number of model layers
+
+  print*, 'nlayers', nlayers
   allocate(delp(nlayers,nlocs))
   delp = delp_profile%vals
 
@@ -143,6 +153,7 @@ character(len=MAXVARLEN) :: geovar
      qm(n,:,:) = qm(n,:,:) * delp / grav
   enddo
 
+
   ! call observation operator code
   ! -----------------------------
   hofx4(:,:) = 0.0
@@ -153,6 +164,7 @@ character(len=MAXVARLEN) :: geovar
   ! Convert back to ufo precision
   ! -----------------------------
   hofx = real(hofx4,c_double)
+
 
   ! cleanup memory
   ! --------

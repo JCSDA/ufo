@@ -9,7 +9,7 @@
 module ufo_geosaod_tlad_mod_c
 
   use iso_c_binding
-  use config_mod
+  use fckit_configuration_module, only: fckit_configuration
   use ufo_geosaod_tlad_mod
   use string_f_c_mod
   use ufo_geovals_mod_c, only: ufo_geovals_registry
@@ -47,9 +47,14 @@ type(c_ptr), intent(in), value :: c_varlist
 
 type(ufo_geosaod_tlad), pointer :: self
 
+type(fckit_configuration)  :: f_conf
+
+f_conf = fckit_configuration(c_conf)
+
+
 call ufo_geosaod_tlad_registry%setup(c_key_self, self)
 
-call self%setup(c_conf, c_nvars_out)
+call self%setup(f_conf, c_nvars_out)
 
 !> Set vars
 !call f_c_string_vector(self%varin, csin)
