@@ -21,6 +21,8 @@ set ( filters_files
       QCmanager.h
       Thinning.cc
       Thinning.h
+      Gaussian_Thinning.cc
+      Gaussian_Thinning.h
       processWhere.cc
       processWhere.h
       actions/FilterAction.cc

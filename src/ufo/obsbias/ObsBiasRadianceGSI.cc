@@ -149,26 +149,26 @@ void ObsBiasRadianceGSI::computeObsBias(const GeoVaLs & geovals,
   odb.get_db("MetaData", "sensor_view_angle", nlocs, viewing_angle.data());
   for (std::size_t jc = 0; jc < nchanl; ++jc) {
     for (std::size_t jl = 0; jl < nlocs; ++jl) {
-      pred[jl] = pow(viewing_angle[jl]*Constants::deg2rad(), 4);
+      pred[jl] = pow(viewing_angle[jl]*Constants::deg2rad, 4);
     }
     preds.push_back(pred);
   }
   for (std::size_t jc = 0; jc < nchanl; ++jc) {
     for (std::size_t jl = 0; jl < nlocs; ++jl) {
-      pred[jl] = pow(viewing_angle[jl]*Constants::deg2rad(), 3);
+      pred[jl] = pow(viewing_angle[jl]*Constants::deg2rad, 3);
     }
     preds.push_back(pred);
   }
   for (std::size_t jc = 0; jc < nchanl; ++jc) {
     for (std::size_t jl = 0; jl < nlocs; ++jl) {
-      pred[jl] = pow(viewing_angle[jl]*Constants::deg2rad(), 2);
+      pred[jl] = pow(viewing_angle[jl]*Constants::deg2rad, 2);
     }
     preds.push_back(pred);
   }
 
   for (std::size_t jc = 0; jc < nchanl; ++jc) {
     for (std::size_t jl = 0; jl < nlocs; ++jl) {
-      pred[jl] = viewing_angle[jl]*Constants::deg2rad();
+      pred[jl] = viewing_angle[jl]*Constants::deg2rad;
     }
     preds.push_back(pred);
   }
