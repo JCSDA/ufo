@@ -39,7 +39,7 @@ static oops::FilterMaker<UfoTrait, oops::ObsFilter<UfoTrait, BackgroundCheck> >
 BackgroundCheck::BackgroundCheck(ioda::ObsSpace & os, const eckit::Configuration & config,
                                  boost::shared_ptr<ioda::ObsDataVector<int> > flags,
                                  boost::shared_ptr<ioda::ObsDataVector<float> > obserr)
-  : obsdb_(os), config_(config), abs_threshold_(-1.0), threshold_(-1.0), gv_(NULL),
+  : obsdb_(os), data_(obsdb_), config_(config), abs_threshold_(-1.0), threshold_(-1.0),
     geovars_(preProcessWhere(config_, "GeoVaLs")), diagvars_(),
     flags_(*flags), obserr_(*obserr)
 {
@@ -65,13 +65,14 @@ BackgroundCheck::~BackgroundCheck() {
 // -----------------------------------------------------------------------------
 
 void BackgroundCheck::priorFilter(const GeoVaLs & gv) const {
-  gv_ = &gv;
+  data_.associate(gv);
 }
 
 // -----------------------------------------------------------------------------
 
 void BackgroundCheck::postFilter(const ioda::ObsVector & hofx, const ObsDiagnostics &) const {
   oops::Log::trace() << "BackgroundCheck postFilter" << std::endl;
+  data_.associate(hofx);
   const oops::Variables vars(config_);
   if (vars.size() == 0) {
     oops::Log::error() << "No variables will be filtered out in filter "
@@ -92,7 +93,7 @@ void BackgroundCheck::postFilter(const ioda::ObsVector & hofx, const ObsDiagnost
   for (size_t jv = 0; jv < flagged.size(); ++jv) flagged[jv].resize(obsdb_.nlocs());
 
 // Select where the background check will apply
-  std::vector<bool> apply = processWhere(config_, obsdb_, gv_, &hofx);
+  std::vector<bool> apply = processWhere(config_, data_);
 
   for (size_t jv = 0; jv < vars.size(); ++jv) {
     size_t iv = observed.find(vars[jv]);

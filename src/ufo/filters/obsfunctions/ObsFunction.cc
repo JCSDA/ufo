@@ -5,11 +5,10 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#include "ufo/obsfunctions/ObsFunction.h"
+#include "ufo/filters/obsfunctions/ObsFunction.h"
 
 #include "ioda/ObsDataVector.h"
 #include "oops/base/Variables.h"
-#include "ufo/GeoVaLs.h"
 
 namespace ufo {
 
@@ -25,23 +24,9 @@ ObsFunction::~ObsFunction() {}
 
 // -----------------------------------------------------------------------------
 
-void ObsFunction::compute(const ioda::ObsDataVector<float> & metadata,
-                          const ioda::ObsDataVector<float> & obs,
-                          const GeoVaLs & geovals,
+void ObsFunction::compute(const ObsFilterData & in,
                           ioda::ObsDataVector<float> & out) const {
-  obsfct_->compute(metadata, obs, geovals, out);
-}
-
-// -----------------------------------------------------------------------------
-
-const oops::Variables & ObsFunction::requiredObsData() const {
-  return obsfct_->requiredObsData();
-}
-
-// -----------------------------------------------------------------------------
-
-const oops::Variables & ObsFunction::requiredMetaData() const {
-  return obsfct_->requiredMetaData();
+  obsfct_->compute(in, out);
 }
 
 // -----------------------------------------------------------------------------

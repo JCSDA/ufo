@@ -5,18 +5,17 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#ifndef UFO_OBSFUNCTIONS_OBSFUNCTIONVELOCITY_H_
-#define UFO_OBSFUNCTIONS_OBSFUNCTIONVELOCITY_H_
+#ifndef UFO_FILTERS_OBSFUNCTIONS_OBSFUNCTIONVELOCITY_H_
+#define UFO_FILTERS_OBSFUNCTIONS_OBSFUNCTIONVELOCITY_H_
 
-#include "ufo/obsfunctions/ObsFunctionBase.h"
+#include "ufo/filters/ObsFilterData.h"
+#include "ufo/filters/obsfunctions/ObsFunctionBase.h"
 
 namespace oops {
   class Variables;
 }
 
 namespace ufo {
-
-class GeoVaLs;
 
 // -----------------------------------------------------------------------------
 
@@ -25,16 +24,10 @@ class ObsFunctionVelocity : public ObsFunctionBase {
   ObsFunctionVelocity();
   ~ObsFunctionVelocity();
 
-  void compute(const ioda::ObsDataVector<float> &,
-               const ioda::ObsDataVector<float> &,
-               const GeoVaLs &,
+  void compute(const ObsFilterData &,
                ioda::ObsDataVector<float> &) const;
-  const oops::Variables & requiredObsData() const;
-  const oops::Variables & requiredMetaData() const;
   const oops::Variables & requiredGeoVaLs() const;
  private:
-  oops::Variables obsvars_;
-  oops::Variables metadatavars_;
   oops::Variables geovars_;
 };
 
@@ -42,4 +35,4 @@ class ObsFunctionVelocity : public ObsFunctionBase {
 
 }  // namespace ufo
 
-#endif  // UFO_OBSFUNCTIONS_OBSFUNCTIONVELOCITY_H_
+#endif  // UFO_FILTERS_OBSFUNCTIONS_OBSFUNCTIONVELOCITY_H_

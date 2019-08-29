@@ -5,8 +5,8 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#ifndef UFO_OBSFUNCTIONS_OBSFUNCTION_H_
-#define UFO_OBSFUNCTIONS_OBSFUNCTION_H_
+#ifndef UFO_FILTERS_OBSFUNCTIONS_OBSFUNCTION_H_
+#define UFO_FILTERS_OBSFUNCTIONS_OBSFUNCTION_H_
 
 #include <memory>
 #include <string>
@@ -14,15 +14,14 @@
 #include <boost/noncopyable.hpp>
 
 #include "ioda/ObsDataVector.h"
-#include "ufo/obsfunctions/ObsFunctionBase.h"
+#include "ufo/filters/ObsFilterData.h"
+#include "ufo/filters/obsfunctions/ObsFunctionBase.h"
 
 namespace oops {
   class Variables;
 }
 
 namespace ufo {
-
-class GeoVaLs;
 
 // -----------------------------------------------------------------------------
 
@@ -33,14 +32,8 @@ class ObsFunction : private boost::noncopyable {
   ~ObsFunction();
 
 /// compute(metadata, obs values, output)
-  void compute(const ioda::ObsDataVector<float> &,
-               const ioda::ObsDataVector<float> &,
-               const GeoVaLs &,
+  void compute(const ObsFilterData &,
                ioda::ObsDataVector<float> &) const;
-/// required variables (@ObsValue/@HofX)
-  const oops::Variables & requiredObsData() const;
-/// required metadata
-  const oops::Variables & requiredMetaData() const;
 /// required geovals
   const oops::Variables & requiredGeoVaLs() const;
  private:
@@ -51,4 +44,4 @@ class ObsFunction : private boost::noncopyable {
 
 }  // namespace ufo
 
-#endif  // UFO_OBSFUNCTIONS_OBSFUNCTION_H_
+#endif  // UFO_FILTERS_OBSFUNCTIONS_OBSFUNCTION_H_
