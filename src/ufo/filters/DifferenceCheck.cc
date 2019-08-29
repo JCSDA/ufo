@@ -36,11 +36,10 @@ DifferenceCheck::DifferenceCheck(ioda::ObsSpace & os, const eckit::Configuration
                                  boost::shared_ptr<ioda::ObsDataVector<int> > flags,
                                  boost::shared_ptr<ioda::ObsDataVector<float> >)
   : obsdb_(os), flags_(*flags), config_(config), geovars_(), diagvars_(),
-    threshold_(-1.0), rvar_(), rgrp_(), vvar_(), vgrp_()
+    rvar_(), rgrp_(), vvar_(), vgrp_()
 {
   oops::Log::trace() << "DifferenceCheck contructor starting" << std::endl;
-  threshold_ = config.getFloat("threshold");
-  ASSERT(threshold_ > 0.0);
+
 
 // Reference setup
   const std::string sref = config_.getString("reference");
@@ -67,6 +66,17 @@ void DifferenceCheck::priorFilter(const GeoVaLs & gvals) const {
   const float missing = util::missingValue(missing);
   const size_t nlocs = obsdb_.nlocs();
 
+// min/max value setup
+  float vmin = config_.getFloat("minvalue", missing);
+  float vmax = config_.getFloat("maxvalue", missing);
+
+// check for threshold and if exists, set vmin and vmax appropriately
+  const float thresh = config_.getFloat("threshold", missing);
+  if (thresh != missing) {
+    vmin = -thresh;
+    vmax = thresh;
+  }
+
 // Process "where" mask
   std::vector<bool> apply = processWhere(config_, obsdb_, &gvals);
 
@@ -92,18 +102,20 @@ void DifferenceCheck::priorFilter(const GeoVaLs & gvals) const {
     }
   }
 
-// Check difference between value and reference and set flag
+// Loop over all obs
   for (size_t jobs = 0; jobs < nlocs; ++jobs) {
     if (apply[jobs]) {
+      // check to see if one of the reference or value is missing
       if (val[jobs] == missing || ref[jobs] == missing) {
         for (size_t jv = 0; jv < flags_.nvars(); ++jv) {
-          if (flags_[jv][jobs] == 0) flags_[jv][jobs] = QCflags::missing;
+          if (flags_[jv][jobs] == 0) flags_[jv][jobs] = QCflags::diffref;
         }
       } else {
-        if (std::abs(static_cast<float>(val[jobs] - ref[jobs])) > threshold_) {
-          for (size_t jv = 0; jv < flags_.nvars(); ++jv) {
-            if (flags_[jv][jobs] == 0) flags_[jv][jobs] = QCflags::diffref;
-          }
+// Check if difference is within min/max value range and set flag
+        float diff = val[jobs] - ref[jobs];
+        for (size_t jv = 0; jv < flags_.nvars(); ++jv) {
+          if (vmin != missing && diff < vmin) flags_[jv][jobs] = QCflags::diffref;
+          if (vmax != missing && diff > vmax) flags_[jv][jobs] = QCflags::diffref;
         }
       }
     }

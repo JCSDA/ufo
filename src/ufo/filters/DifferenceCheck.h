@@ -55,7 +55,6 @@ class DifferenceCheck : public util::Printable,
   eckit::LocalConfiguration config_;
   oops::Variables geovars_;
   oops::Variables diagvars_;
-  float threshold_;
   std::string rvar_;
   std::string rgrp_;
   std::string vvar_;
