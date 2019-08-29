@@ -21,11 +21,13 @@
 #include "oops/util/Printable.h"
 
 namespace ioda {
+  template <typename DATATYPE> class ObsDataVector;
   class ObsVector;
 }
 
 namespace ufo {
   class GeoVaLs;
+  class ObsDiagnostics;
 
 /// Thinning: randonly thin a given percentage of observations
 
@@ -34,23 +36,25 @@ class Thinning : public util::Printable,
  public:
   static const std::string classname() {return "ufo::Thinning";}
 
-  Thinning(ioda::ObsSpace &, const eckit::Configuration &,
+  Thinning(const ioda::ObsSpace &, const eckit::Configuration &,
            boost::shared_ptr<ioda::ObsDataVector<int> >,
            boost::shared_ptr<ioda::ObsDataVector<float> >);
   ~Thinning();
 
   void preProcess() const;
   void priorFilter(const GeoVaLs &) const {}
-  void postFilter(const ioda::ObsVector &) const {}
+  void postFilter(const ioda::ObsVector &, const ObsDiagnostics &) const {}
 
   const oops::Variables & requiredGeoVaLs() const {return geovars_;}
+  const oops::Variables & requiredHdiagnostics() const {return diagvars_;}
 
  private:
   void print(std::ostream &) const;
 
-  ioda::ObsSpace & obsdb_;
+  const ioda::ObsSpace & obsdb_;
   const eckit::LocalConfiguration config_;
-  oops::Variables geovars_;
+  const oops::Variables geovars_;
+  const oops::Variables diagvars_;
   ioda::ObsDataVector<int> & flags_;
 };
 

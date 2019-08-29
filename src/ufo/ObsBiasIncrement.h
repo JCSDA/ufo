@@ -34,6 +34,7 @@ class ObsBiasIncrement : public util::Printable {
 /// Linear algebra operators
   void diff(const ObsBias &, const ObsBias &);
   void zero();
+  void random();
   ObsBiasIncrement & operator=(const ObsBiasIncrement &);
   ObsBiasIncrement & operator+=(const ObsBiasIncrement &);
   ObsBiasIncrement & operator-=(const ObsBiasIncrement &);

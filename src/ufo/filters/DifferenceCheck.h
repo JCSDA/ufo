@@ -26,6 +26,7 @@ namespace ioda {
 
 namespace ufo {
   class GeoVaLs;
+  class ObsDiagnostics;
 
 /// DifferenceCheck filter
 
@@ -41,9 +42,10 @@ class DifferenceCheck : public util::Printable,
 
   void preProcess() const {}
   void priorFilter(const GeoVaLs &) const;
-  void postFilter(const ioda::ObsVector &) const {}
+  void postFilter(const ioda::ObsVector &, const ObsDiagnostics &) const {}
 
   const oops::Variables & requiredGeoVaLs() const {return geovars_;}
+  const oops::Variables & requiredHdiagnostics() const {return diagvars_;}
 
  private:
   void print(std::ostream &) const;
@@ -52,6 +54,7 @@ class DifferenceCheck : public util::Printable,
   ioda::ObsDataVector<int> & flags_;
   eckit::LocalConfiguration config_;
   oops::Variables geovars_;
+  oops::Variables diagvars_;
   float threshold_;
   std::string rvar_;
   std::string rgrp_;

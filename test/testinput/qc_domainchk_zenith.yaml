@@ -24,7 +24,7 @@ Observations:
       variables: [brightness_temperature]
       channels: 7-16
       where:
-      - variable: sensor_zenith_angle 
+      - variable: sensor_zenith_angle@MetaData
         maxvalue: 60. 
     passedBenchmark:  890      # number of passed obs
   - ObsOperator:
@@ -48,7 +48,7 @@ Observations:
       variables: [brightness_temperature]
       channels: 7-16
       where:
-      - variable: sensor_zenith_angle
+      - variable: sensor_zenith_angle@MetaData
         maxvalue: 60.
     passedBenchmark:  890      # number of passed obs
 

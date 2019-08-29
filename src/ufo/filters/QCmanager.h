@@ -19,11 +19,13 @@
 #include "oops/util/Printable.h"
 
 namespace ioda {
+  template <typename DATATYPE> class ObsDataVector;
   class ObsVector;
 }
 
 namespace ufo {
 class GeoVaLs;
+class ObsDiagnostics;
 
 class QCmanager : public util::Printable {
  public:
@@ -34,9 +36,10 @@ class QCmanager : public util::Printable {
 
   void preProcess() const {}
   void priorFilter(const GeoVaLs &) const {}
-  void postFilter(const ioda::ObsVector &) const;
+  void postFilter(const ioda::ObsVector &, const ObsDiagnostics &) const;
 
   const oops::Variables & requiredGeoVaLs() const {return nogeovals_;}
+  const oops::Variables & requiredHdiagnostics() const {return nodiags_;}
 
  private:
   void print(std::ostream &) const;
@@ -44,6 +47,7 @@ class QCmanager : public util::Printable {
   ioda::ObsSpace & obsdb_;
   const eckit::LocalConfiguration config_;
   const oops::Variables nogeovals_;
+  const oops::Variables nodiags_;
   ioda::ObsDataVector<int> & flags_;
   boost::shared_ptr<ioda::ObsDataVector<float> > obserr_;
   const oops::Variables & observed_;

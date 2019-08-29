@@ -10,6 +10,7 @@ Observations:
   ObsTypes:
   - ObsOperator:
       name: VertInterp
+      VertCoord: air_pressure
     ObsSpace:
       name: Radiosonde
       ObsDataIn:

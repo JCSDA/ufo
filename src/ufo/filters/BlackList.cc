@@ -33,7 +33,7 @@ BlackList::BlackList(ioda::ObsSpace & obsdb, const eckit::Configuration & config
                      boost::shared_ptr<ioda::ObsDataVector<int> > flags,
                      boost::shared_ptr<ioda::ObsDataVector<float> >)
   : obsdb_(obsdb), config_(config), geovars_(preProcessWhere(config_, "GeoVaLs")),
-    flags_(*flags)
+    diagvars_(), flags_(*flags)
 {
   oops::Log::debug() << "BlackList: config = " << config_ << std::endl;
   oops::Log::debug() << "BlackList: geovars = " << geovars_ << std::endl;
@@ -55,7 +55,7 @@ void BlackList::priorFilter(const GeoVaLs & gv) const {
   }
   const oops::Variables observed = obsdb_.obsvariables();
 
-  std::vector<bool> blacklisted = processWhere(obsdb_, gv, config_);
+  std::vector<bool> blacklisted = processWhere(config_, obsdb_, &gv);
 
   for (size_t jv = 0; jv < vars.size(); ++jv) {
     size_t iv = observed.find(vars[jv]);

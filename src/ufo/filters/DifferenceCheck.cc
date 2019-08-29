@@ -35,8 +35,8 @@ static oops::FilterMaker<UfoTrait, oops::ObsFilter<UfoTrait, DifferenceCheck> >
 DifferenceCheck::DifferenceCheck(ioda::ObsSpace & os, const eckit::Configuration & config,
                                  boost::shared_ptr<ioda::ObsDataVector<int> > flags,
                                  boost::shared_ptr<ioda::ObsDataVector<float> >)
-  : obsdb_(os), flags_(*flags), config_(config), geovars_(), threshold_(-1.0),
-    rvar_(), rgrp_(), vvar_(), vgrp_()
+  : obsdb_(os), flags_(*flags), config_(config), geovars_(), diagvars_(),
+    threshold_(-1.0), rvar_(), rgrp_(), vvar_(), vgrp_()
 {
   oops::Log::trace() << "DifferenceCheck contructor starting" << std::endl;
   threshold_ = config.getFloat("threshold");
@@ -68,7 +68,7 @@ void DifferenceCheck::priorFilter(const GeoVaLs & gvals) const {
   const size_t nlocs = obsdb_.nlocs();
 
 // Process "where" mask
-  std::vector<bool> apply = processWhere(obsdb_, gvals, config_);
+  std::vector<bool> apply = processWhere(config_, obsdb_, &gvals);
 
 // Get reference values (as floats)
   std::vector<float> ref(nlocs);

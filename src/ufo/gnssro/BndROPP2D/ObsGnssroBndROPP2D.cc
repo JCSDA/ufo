@@ -19,6 +19,8 @@
 #include "ufo/GeoVaLs.h"
 #include "ufo/Locations.h"
 #include "ufo/ObsBias.h"
+#include "ufo/ObsDiagnostics.h"
+
 namespace ufo {
 
 // -----------------------------------------------------------------------------
@@ -49,7 +51,8 @@ ObsGnssroBndROPP2D::~ObsGnssroBndROPP2D() {
 
 // -----------------------------------------------------------------------------
 
-void ObsGnssroBndROPP2D::simulateObs(const GeoVaLs & gom, ioda::ObsVector & ovec) const {
+void ObsGnssroBndROPP2D::simulateObs(const GeoVaLs & gom, ioda::ObsVector & ovec,
+                                     ObsDiagnostics &) const {
   ufo_gnssro_bndropp2d_simobs_f90(keyOperGnssroBndROPP2D_, gom.toFortran(), odb_,
                                   ovec.size(), ovec.toFortran());
 }

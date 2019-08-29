@@ -1,0 +1,39 @@
+window_begin: 2018-04-14T21:00:00Z
+window_end: 2018-04-15T03:00:00Z
+
+Observations: 
+ ObsTypes: 
+ - ObsOperator: 
+     name: GnssroBndGSI
+     ObsOptions:
+       use_compress: 1
+       vertlayer: full
+   ObsSpace: 
+     name: GnssroBnd
+     ObsDataIn: 
+       obsfile: Data/gnssro_obs_2018041500_m.nc4
+     ObsDataOut:
+       obsfile: Data/gnssro_bndgsi_2018041500_m_output.nc4
+     simulate:
+       variables: [bending_angle]
+   GeoVaLs: 
+     filename: Data/gnssro_geoval_2018041500_m.nc4
+   ObsFilters:
+    - Filter: Domain Check
+      variables: [bending_angle]
+      where:
+      # Earth radius of curvature limits in meters
+      # note values in the raw BUFR data files is in km
+      - variable: earth_radius_of_curvature@MetaData
+        minvalue: 6250000.
+        maxvalue: 6450000. 
+      - variable: geoid_height_above_reference_ellipsoid@MetaData
+        minvalue: -200.
+        maxvalue: 200. 
+      - variable: latitude@MetaData
+        minvalue: -90.
+        maxvalue: 90. 
+      - variable: longitude@MetaData
+        minvalue: -180.
+        maxvalue: 360. 
+   passedBenchmark: 150

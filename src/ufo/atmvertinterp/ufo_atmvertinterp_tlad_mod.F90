@@ -13,6 +13,7 @@ module ufo_atmvertinterp_tlad_mod
   use vert_interp_mod
   use obsspace_mod
   use missing_values_mod
+  use fckit_configuration_module, only: fckit_configuration
 
   integer, parameter :: max_string=800
 
@@ -25,6 +26,8 @@ module ufo_atmvertinterp_tlad_mod
      integer :: nval, nlocs
      real(kind_real), allocatable :: wf(:)
      integer, allocatable :: wi(:)
+     character(len=MAXVARLEN), public :: v_coord ! GeoVaL to use to interpolate in vertical
+     logical, public :: use_ln ! if T, use ln(v_coord) not v_coord
   contains
     procedure :: setup => atmvertinterp_tlad_setup_
     procedure :: cleanup => atmvertinterp_tlad_cleanup_
@@ -38,16 +41,30 @@ module ufo_atmvertinterp_tlad_mod
 contains
 ! ------------------------------------------------------------------------------
 
-subroutine atmvertinterp_tlad_setup_(self, vars)
+subroutine atmvertinterp_tlad_setup_(self, grid_conf, vars)
   implicit none
   class(ufo_atmvertinterp_tlad), intent(inout) :: self
   character(len=MAXVARLEN), dimension(:), intent(inout) :: vars
+  character(kind=c_char,len=:), allocatable :: coord_name
+  type(fckit_configuration) :: grid_conf
 
   !> Size of variables
   self%nvars = size(vars)
   !> Allocate varin
   allocate(self%varin(self%nvars))
   self%varin = vars
+
+  !> grab what vertical coordinate/variable to use from the config
+  self%use_ln = .false.
+
+  if( grid_conf%has("VertCoord") ) then
+      call grid_conf%get_or_die("VertCoord",coord_name)
+      self%v_coord = coord_name
+      if( trim(self%v_coord) .eq. var_prs ) self%use_ln = .true.
+  else  ! default
+      self%v_coord = var_prs
+      self%use_ln  = .true.
+  endif
 
 end subroutine atmvertinterp_tlad_setup_
 
@@ -59,34 +76,45 @@ subroutine atmvertinterp_tlad_settraj_(self, geovals, obss)
   type(ufo_geovals),         intent(in)    :: geovals
   type(c_ptr), value,        intent(in)    :: obss
 
-  real(kind_real), allocatable :: obspressure(:)
-  type(ufo_geoval), pointer :: presprofile
+  real(kind_real), allocatable :: obsvcoord(:)
+  type(ufo_geoval), pointer :: vcoordprofile
   integer :: iobs
+  real(kind_real), allocatable :: tmp(:)
+  real(kind_real) :: tmp2
 
   ! Make sure nothing already allocated
   call self%cleanup()
 
   ! Get pressure profiles from geovals
-  call ufo_geovals_get_var(geovals, var_prs, presprofile)
-  self%nval = presprofile%nval
+  call ufo_geovals_get_var(geovals, self%v_coord, vcoordprofile)
+  self%nval = vcoordprofile%nval
 
   ! Get the observation vertical coordinates
   self%nlocs = obsspace_get_nlocs(obss)
-  allocate(obspressure(self%nlocs))
-  call obsspace_get_db(obss, "MetaData", "air_pressure", obspressure)
+  allocate(obsvcoord(self%nlocs))
+  call obsspace_get_db(obss, "MetaData", self%v_coord, obsvcoord)
 
   ! Allocate arrays for interpolation weights
   allocate(self%wi(self%nlocs))
   allocate(self%wf(self%nlocs))
 
   ! Calculate the interpolation weights
+  allocate(tmp(vcoordprofile%nval))
   do iobs = 1, self%nlocs
-    call vert_interp_weights(presprofile%nval, log(obspressure(iobs)), &
-                             log(presprofile%vals(:,iobs)), self%wi(iobs), self%wf(iobs))
+    if (self%use_ln) then
+      tmp = log(vcoordprofile%vals(:,iobs))
+      tmp2 = log(obsvcoord(iobs))
+    else
+      tmp = vcoordprofile%vals(:,iobs)
+      tmp2 = obsvcoord(iobs)
+    end if
+    call vert_interp_weights(vcoordprofile%nval, tmp2, tmp, self%wi(iobs), self%wf(iobs))
   enddo
 
   ! Cleanup memory
-  deallocate(obspressure)
+  deallocate(obsvcoord)
+  deallocate(tmp)
+
 end subroutine atmvertinterp_tlad_settraj_
 
 ! ------------------------------------------------------------------------------
@@ -98,7 +126,7 @@ subroutine atmvertinterp_simobs_tl_(self, geovals, obss, nvars, nlocs, hofx)
   integer,                   intent(in) :: nvars, nlocs
   real(c_double),         intent(inout) :: hofx(nvars, nlocs)
   type(c_ptr), value,        intent(in) :: obss
-  
+
   integer :: iobs, ivar
   type(ufo_geoval), pointer :: profile
   character(len=MAXVARLEN) :: geovar
@@ -111,7 +139,7 @@ subroutine atmvertinterp_simobs_tl_(self, geovals, obss, nvars, nlocs, hofx)
     call ufo_geovals_get_var(geovals, geovar, profile)
 
     ! Interpolate from geovals to observational location into hofx
-    do iobs = 1, self%nlocs
+    do iobs = 1, nlocs
       call vert_interp_apply_tl(profile%nval, profile%vals(:,iobs), &
                                 & hofx(ivar,iobs), self%wi(iobs), self%wf(iobs))
     enddo
@@ -127,7 +155,7 @@ subroutine atmvertinterp_simobs_ad_(self, geovals, obss, nvars, nlocs, hofx)
   integer,                   intent(in)    :: nvars, nlocs
   real(c_double),            intent(in)    :: hofx(nvars, nlocs)
   type(c_ptr), value,        intent(in)    :: obss
-  
+
   integer :: iobs, ivar
   type(ufo_geoval), pointer :: profile
   character(len=MAXVARLEN) :: geovar
@@ -141,7 +169,7 @@ subroutine atmvertinterp_simobs_ad_(self, geovals, obss, nvars, nlocs, hofx)
 
     ! Get pointer to profile for this variable in geovals
     call ufo_geovals_get_var(geovals, geovar, profile)
-      
+
     ! Allocate geovals profile if not yet allocated
     if (.not. allocated(profile%vals)) then
        profile%nlocs = self%nlocs

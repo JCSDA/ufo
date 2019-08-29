@@ -16,6 +16,8 @@ namespace oops {
 
 namespace ufo {
 
+class GeoVaLs;
+
 // -----------------------------------------------------------------------------
 
 class ObsFunctionVelocity : public ObsFunctionBase {
@@ -25,12 +27,15 @@ class ObsFunctionVelocity : public ObsFunctionBase {
 
   void compute(const ioda::ObsDataVector<float> &,
                const ioda::ObsDataVector<float> &,
+               const GeoVaLs &,
                ioda::ObsDataVector<float> &) const;
   const oops::Variables & requiredObsData() const;
   const oops::Variables & requiredMetaData() const;
+  const oops::Variables & requiredGeoVaLs() const;
  private:
   oops::Variables obsvars_;
   oops::Variables metadatavars_;
+  oops::Variables geovars_;
 };
 
 // -----------------------------------------------------------------------------

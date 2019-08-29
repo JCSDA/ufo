@@ -14,7 +14,7 @@
 #include "ioda/ObsVector.h"
 
 #include "ufo/GeoVaLs.h"
-
+#include "ufo/ObsDiagnostics.h"
 
 namespace ufo {
 
@@ -43,7 +43,8 @@ ObsAtmSfcInterp::~ObsAtmSfcInterp() {
 
 // -----------------------------------------------------------------------------
 
-void ObsAtmSfcInterp::simulateObs(const GeoVaLs & gom, ioda::ObsVector & ovec) const {
+void ObsAtmSfcInterp::simulateObs(const GeoVaLs & gom, ioda::ObsVector & ovec,
+                                  ObsDiagnostics &) const {
   ufo_atmsfcinterp_simobs_f90(keyOperAtmSfcInterp_, gom.toFortran(), odb_,
                             ovec.nvars(), ovec.nlocs(), ovec.toFortran());
   oops::Log::trace() << "ObsAtmSfcInterp: observation operator executed" << std::endl;

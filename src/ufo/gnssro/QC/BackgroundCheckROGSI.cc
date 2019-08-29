@@ -33,9 +33,10 @@ static oops::FilterMaker<UfoTrait, oops::ObsFilter<UfoTrait, BackgroundCheckROGS
   makerBgChk_("Background Check ROGSI");
 // -----------------------------------------------------------------------------
 
-BackgroundCheckROGSI::BackgroundCheckROGSI(ioda::ObsSpace & os, const eckit::Configuration & config,
-                                 boost::shared_ptr<ioda::ObsDataVector<int> > flags,
-                                 boost::shared_ptr<ioda::ObsDataVector<float> > obserr)
+BackgroundCheckROGSI::BackgroundCheckROGSI(ioda::ObsSpace & os,
+                                           const eckit::Configuration & config,
+                                           boost::shared_ptr<ioda::ObsDataVector<int> > flags,
+                                           boost::shared_ptr<ioda::ObsDataVector<float> > obserr)
   : obsdb_(os), config_(config),  gv_(NULL),
     geovars_(preProcessWhere(config_, "GeoVaLs")), flags_(*flags)
 {
@@ -61,7 +62,7 @@ void BackgroundCheckROGSI::priorFilter(const GeoVaLs & gv) const {
 
 // -----------------------------------------------------------------------------
 
-void BackgroundCheckROGSI::postFilter(const ioda::ObsVector & hofx) const {
+void BackgroundCheckROGSI::postFilter(const ioda::ObsVector & hofx, const ObsDiagnostics &) const {
   oops::Log::trace() << "BackgroundCheckROGSI postFilter" << std::endl;
 
   const oops::Variables vars(config_);
@@ -80,7 +81,7 @@ void BackgroundCheckROGSI::postFilter(const ioda::ObsVector & hofx) const {
                                          "MetaData");  // background temperature at obs location
 
 // Select where the background check will apply
-  std::vector<bool> apply = processWhere(obsdb_, *gv_, config_);
+  std::vector<bool> apply = processWhere(config_, obsdb_, gv_, &hofx);
 
   for (size_t jv = 0; jv < vars.size(); ++jv) {
     size_t iv = observed.find(vars[jv]);

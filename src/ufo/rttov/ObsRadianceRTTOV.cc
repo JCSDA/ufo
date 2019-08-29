@@ -18,6 +18,7 @@
 #include "oops/util/IntSetParser.h"
 
 #include "ufo/GeoVaLs.h"
+#include "ufo/ObsDiagnostics.h"
 
 namespace ufo {
 
@@ -62,7 +63,8 @@ ObsRadianceRTTOV::~ObsRadianceRTTOV() {
 
 // -----------------------------------------------------------------------------
 
-void ObsRadianceRTTOV::simulateObs(const GeoVaLs & gom, ioda::ObsVector & ovec) const {
+void ObsRadianceRTTOV::simulateObs(const GeoVaLs & gom, ioda::ObsVector & ovec,
+                                   ObsDiagnostics &) const {
   oops::Log::trace() << "ObsRadianceRTTOV:: simulateObs started" << std::endl;
 
   ufo_radiancerttov_simobs_f90(keyOperRadianceRTTOV_, gom.toFortran(), odb_,

@@ -59,7 +59,7 @@ Observations:
      variables: [eastward_wind, northward_wind]
      threshold: 2.0
      where:
-     - variable: latitude
+     - variable: latitude@MetaData
        minvalue: -60.0
        maxvalue: 60.0
      action:
@@ -85,7 +85,7 @@ Observations:
      variables: [bending_angle]
      threshold: 2.0
      where:
-     - variable: impact_height
+     - variable: impact_height@MetaData
        minvalue: 0
        maxvalue: 50000
    passedBenchmark: 148      # number of passed obs

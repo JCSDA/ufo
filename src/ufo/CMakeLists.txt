@@ -23,6 +23,8 @@ list( APPEND ufo_src_files
     ObsBiasCovariance.h
     ObsBiasIncrement.cc
     ObsBiasIncrement.h
+    ObsDiagnostics.cc
+    ObsDiagnostics.h
     ObsOperator.cc
     ObsOperator.h
     ObsOperatorBase.cc

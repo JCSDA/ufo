@@ -15,7 +15,7 @@
 
 #include "ufo/GeoVaLs.h"
 #include "ufo/ObsBias.h"
-
+#include "ufo/ObsDiagnostics.h"
 
 namespace ufo {
 
@@ -44,7 +44,8 @@ ObsMarineVertInterp::~ObsMarineVertInterp() {
 
 // -----------------------------------------------------------------------------
 
-void ObsMarineVertInterp::simulateObs(const GeoVaLs & gv, ioda::ObsVector & ovec) const {
+void ObsMarineVertInterp::simulateObs(const GeoVaLs & gv, ioda::ObsVector & ovec,
+                                      ObsDiagnostics &) const {
   ufo_marinevertinterp_simobs_f90(keyOper_, gv.toFortran(), odb_, ovec.size(), ovec.toFortran());
   oops::Log::trace() << "ObsMarineVertInterp: observation operator run" << std::endl;
 }

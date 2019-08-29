@@ -18,12 +18,14 @@
 #include "oops/util/Printable.h"
 
 namespace ioda {
+  template <typename DATATYPE> class ObsDataVector;
   class ObsSpace;
   class ObsVector;
 }
 
 namespace ufo {
 class GeoVaLs;
+class ObsDiagnostics;
 
 class PreQC : public util::Printable {
  public:
@@ -34,14 +36,16 @@ class PreQC : public util::Printable {
 
   void preProcess() const {}
   void priorFilter(const GeoVaLs &) const {}
-  void postFilter(const ioda::ObsVector &) const {}
+  void postFilter(const ioda::ObsVector &, const ObsDiagnostics &) const {}
 
   const oops::Variables & requiredGeoVaLs() const {return nogeovals_;}
+  const oops::Variables & requiredHdiagnostics() const {return nodiagvars_;}
 
  private:
   void print(std::ostream &) const;
 
   const oops::Variables nogeovals_;
+  const oops::Variables nodiagvars_;
 };
 
 }  // namespace ufo

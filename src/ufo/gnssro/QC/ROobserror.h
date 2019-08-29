@@ -32,11 +32,12 @@ namespace ioda {
 
 namespace ufo {
   class GeoVaLs;
+  class ObsDiagnostics;
 
 /// ROobserror: calculate observational errors
 
 class ROobserror : public util::Printable,
-                        private util::ObjectCounter<ROobserror> {
+                   private util::ObjectCounter<ROobserror> {
  public:
   static const std::string classname() {return "ufo::ROobserror";}
 
@@ -47,14 +48,16 @@ class ROobserror : public util::Printable,
 
   void preProcess() const {}
   void priorFilter(const GeoVaLs &) const;
-  void postFilter(const ioda::ObsVector &) const;
+  void postFilter(const ioda::ObsVector &, const ObsDiagnostics &) const {}
 
   const oops::Variables & requiredGeoVaLs() const {return geovars_;}
+  const oops::Variables & requiredHdiagnostics() const {return diagvars_;}
 
  private:
   void print(std::ostream &) const;
   F90roerr key_;
   const oops::Variables geovars_;
+  const oops::Variables diagvars_;
   boost::shared_ptr<ioda::ObsDataVector<int> > flags_;
   boost::shared_ptr<ioda::ObsDataVector<float> > obserr_;
 };

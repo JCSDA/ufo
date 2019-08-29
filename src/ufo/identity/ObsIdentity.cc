@@ -9,14 +9,13 @@
 
 #include <ostream>
 
-#include "oops/util/Logger.h"
-
 #include "ioda/ObsVector.h"
 
 #include "oops/base/Variables.h"
+#include "oops/util/Logger.h"
 
 #include "ufo/GeoVaLs.h"
-
+#include "ufo/ObsDiagnostics.h"
 
 namespace ufo {
 
@@ -47,7 +46,8 @@ ObsIdentity::~ObsIdentity() {
 
 // -----------------------------------------------------------------------------
 
-void ObsIdentity::simulateObs(const GeoVaLs & gom, ioda::ObsVector & ovec) const {
+void ObsIdentity::simulateObs(const GeoVaLs & gom, ioda::ObsVector & ovec,
+                              ObsDiagnostics &) const {
   ufo_identity_simobs_f90(keyOperObsIdentity_, gom.toFortran(), odb_,
                           ovec.nvars(), ovec.nlocs(), ovec.toFortran());
   oops::Log::trace() << "ObsIdentity: observation operator run" << std::endl;

@@ -34,7 +34,7 @@ static oops::FilterMaker<UfoTrait, oops::ObsFilter<UfoTrait, QCmanager>> mkqcman
 QCmanager::QCmanager(ioda::ObsSpace & obsdb, const eckit::Configuration & config,
                      boost::shared_ptr<ioda::ObsDataVector<int> > qcflags,
                      boost::shared_ptr<ioda::ObsDataVector<float> > obserr)
-  : obsdb_(obsdb), config_(config), nogeovals_(), flags_(*qcflags),
+  : obsdb_(obsdb), config_(config), nogeovals_(), nodiags_(), flags_(*qcflags),
     observed_(obsdb.obsvariables())
 {
   oops::Log::trace() << "QCmanager::QCmanager starting " << config_ << std::endl;
@@ -65,7 +65,7 @@ QCmanager::QCmanager(ioda::ObsSpace & obsdb, const eckit::Configuration & config
 
 // -----------------------------------------------------------------------------
 
-void QCmanager::postFilter(const ioda::ObsVector & hofx) const {
+void QCmanager::postFilter(const ioda::ObsVector & hofx, const ObsDiagnostics &) const {
   oops::Log::trace() << "QCmanager postFilter" << std::endl;
 
   const double missing = util::missingValue(missing);

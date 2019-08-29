@@ -19,6 +19,7 @@
 
 #include "ufo/GeoVaLs.h"
 #include "ufo/ObsBias.h"
+#include "ufo/ObsDiagnostics.h"
 
 namespace ufo {
 
@@ -55,7 +56,8 @@ ObsAodCRTM::~ObsAodCRTM() {
 
 // -----------------------------------------------------------------------------
 
-void ObsAodCRTM::simulateObs(const GeoVaLs & gom, ioda::ObsVector & ovec) const {
+void ObsAodCRTM::simulateObs(const GeoVaLs & gom, ioda::ObsVector & ovec,
+                             ObsDiagnostics &) const {
   ufo_aodcrtm_simobs_f90(keyOperAodCRTM_, gom.toFortran(), odb_,
                           ovec.size(), ovec.toFortran(),
                           channels_.size(), channels_[0]);

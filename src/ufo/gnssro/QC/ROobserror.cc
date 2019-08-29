@@ -57,10 +57,6 @@ void ROobserror::priorFilter(const GeoVaLs & gv) const {
 
 // -----------------------------------------------------------------------------
 
-void ROobserror::postFilter(const ioda::ObsVector & hofxb) const {}
-
-// -----------------------------------------------------------------------------
-
 void ROobserror::print(std::ostream & os) const {
   os << "ROobserror::print not yet implemented " << key_;
 }

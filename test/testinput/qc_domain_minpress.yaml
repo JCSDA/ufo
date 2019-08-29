@@ -17,7 +17,7 @@ Observations:
    - Filter: Domain Check
      variables: [eastward_wind, northward_wind]
      where:
-     - variable: air_pressure 
+     - variable: air_pressure@MetaData
        minvalue: 30000.
    passedBenchmark: 458      # number of passed obs
  - ObsOperator:
@@ -34,7 +34,7 @@ Observations:
    - Filter: Domain Check
      variables: [eastward_wind, northward_wind]
      where:
-     - variable: air_pressure 
+     - variable: air_pressure@MetaData
        minvalue: 30000.
    passedBenchmark: 78      # number of passed obs
  - ObsOperator:
@@ -51,6 +51,6 @@ Observations:
    - Filter: Domain Check
      variables: [air_temperature]
      where:
-     - variable: air_pressure 
+     - variable: air_pressure@MetaData
        minvalue: 30000.
    passedBenchmark: 232      # number of passed obs

@@ -41,7 +41,6 @@ subroutine atmvertinterp_setup_(self, grid_conf, vars)
   character(len=MAXVARLEN), dimension(:), intent(inout) :: vars
   type(fckit_configuration) :: grid_conf
   character(kind=c_char,len=:), allocatable :: coord_name
-  character(len=MAXVARLEN) :: v_coord
 
   !> Size of variables
   self%nvars = size(vars)
@@ -89,7 +88,7 @@ subroutine atmvertinterp_simobs_(self, geovals, obss, nvars, nlocs, hofx)
   real(kind_real), allocatable :: wf(:)
   integer, allocatable :: wi(:)
   character(len=MAXVARLEN) :: geovar
-  
+
   real(kind_real), allocatable :: tmp(:)
   real(kind_real) :: tmp2
 
@@ -109,7 +108,7 @@ subroutine atmvertinterp_simobs_(self, geovals, obss, nvars, nlocs, hofx)
   do iobs = 1, nlocs
     if (self%use_ln) then
       tmp = log(vcoordprofile%vals(:,iobs))
-      tmp2 = log(obsvcoord(iobs)) 
+      tmp2 = log(obsvcoord(iobs))
     else
       tmp = vcoordprofile%vals(:,iobs)
       tmp2 = obsvcoord(iobs)

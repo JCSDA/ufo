@@ -22,6 +22,8 @@ namespace oops {
 
 namespace ufo {
 
+class GeoVaLs;
+
 // -----------------------------------------------------------------------------
 
 class ObsFunction : private boost::noncopyable {
@@ -33,12 +35,14 @@ class ObsFunction : private boost::noncopyable {
 /// compute(metadata, obs values, output)
   void compute(const ioda::ObsDataVector<float> &,
                const ioda::ObsDataVector<float> &,
+               const GeoVaLs &,
                ioda::ObsDataVector<float> &) const;
 /// required variables (@ObsValue/@HofX)
   const oops::Variables & requiredObsData() const;
 /// required metadata
   const oops::Variables & requiredMetaData() const;
-
+/// required geovals
+  const oops::Variables & requiredGeoVaLs() const;
  private:
   std::unique_ptr<ObsFunctionBase> obsfct_;
 };

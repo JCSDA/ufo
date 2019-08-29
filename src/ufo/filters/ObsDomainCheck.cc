@@ -17,10 +17,11 @@
 #include "oops/interface/ObsFilter.h"
 #include "oops/util/abor1_cpp.h"
 #include "oops/util/Logger.h"
-#include "oops/util/missingValues.h"
 #include "ufo/filters/processWhere.h"
 #include "ufo/filters/QCflags.h"
+#include "ufo/obsfunctions/ObsFunction.h"
 #include "ufo/UfoTrait.h"
+#include "ufo/utils/SplitVarGroup.h"
 
 namespace ufo {
 
@@ -33,8 +34,15 @@ ObsDomainCheck::ObsDomainCheck(ioda::ObsSpace & obsdb, const eckit::Configuratio
                                boost::shared_ptr<ioda::ObsDataVector<int> > flags,
                                boost::shared_ptr<ioda::ObsDataVector<float> >)
   : obsdb_(obsdb), config_(config), geovars_(preProcessWhere(config_, "GeoVaLs")),
-    flags_(*flags)
+    diagvars_(), flags_(*flags)
 {
+  oops::Variables obsfcts(preProcessWhere(config_, "ObsFunction"));
+  for (std::size_t ivar = 0; ivar < obsfcts.size(); ++ivar) {
+    std::string var, grp;
+    splitVarGroup(obsfcts[ivar], var, grp);
+    ObsFunction function(var);
+    geovars_ += function.requiredGeoVaLs();
+  }
   oops::Log::debug() << "ObsDomainCheck: config = " << config_ << std::endl;
   oops::Log::debug() << "ObsDomainCheck: geovars = " << geovars_ << std::endl;
 }
@@ -54,7 +62,7 @@ void ObsDomainCheck::priorFilter(const GeoVaLs & gv) const {
   }
   const oops::Variables observed = obsdb_.obsvariables();
 
-  std::vector<bool> inside = processWhere(obsdb_, gv, config_);
+  std::vector<bool> inside = processWhere(config_, obsdb_, &gv);
 
   for (size_t jv = 0; jv < vars.size(); ++jv) {
     size_t iv = observed.find(vars[jv]);
