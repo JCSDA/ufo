@@ -25,7 +25,7 @@ Observations:
      variables: [brightness_temperature]
      channels: 1-15
      where:
-     - variable: latitude
+     - variable: latitude@MetaData
        minvalue: -60.
        maxvalue: 60. 
    passedBenchmark: 300      # number of passed obs
@@ -43,7 +43,7 @@ Observations:
    - Filter: BlackList
      variables: [air_temperature, eastward_wind, northward_wind]
      where:
-     - variable: latitude
+     - variable: latitude@MetaData
        minvalue: -60.
        maxvalue: 60. 
    passedBenchmark: 206      # number of passed obs
@@ -63,7 +63,7 @@ Observations:
    - Filter: BlackList
      variables: [eastward_wind, northward_wind]
      where:
-     - variable: latitude
+     - variable: latitude@MetaData
        minvalue: -60.
        maxvalue: 60. 
    passedBenchmark: 2      # number of passed obs

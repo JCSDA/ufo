@@ -62,7 +62,7 @@ void ObsBoundsCheck::priorFilter(const GeoVaLs & gv) const {
   const float vmax = config_.getFloat("maxvalue", missing);
 
 // Select where the bounds check will apply
-  std::vector<bool> apply = processWhere(obsdb_, gv, config_);
+  std::vector<bool> apply = processWhere(config_, obsdb_, &gv);
 
   for (size_t jv = 0; jv < vars.size(); ++jv) {
     size_t iv = observed.find(vars[jv]);

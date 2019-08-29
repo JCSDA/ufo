@@ -81,7 +81,7 @@ void BackgroundCheckROGSI::postFilter(const ioda::ObsVector & hofx, const ObsDia
                                          "MetaData");  // background temperature at obs location
 
 // Select where the background check will apply
-  std::vector<bool> apply = processWhere(obsdb_, *gv_, config_);
+  std::vector<bool> apply = processWhere(config_, obsdb_, gv_, &hofx);
 
   for (size_t jv = 0; jv < vars.size(); ++jv) {
     size_t iv = observed.find(vars[jv]);

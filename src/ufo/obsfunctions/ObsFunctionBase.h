@@ -49,6 +49,7 @@ class ObsFunctionFactory {
  public:
   static ObsFunctionBase * create(const std::string &);
   virtual ~ObsFunctionFactory() { getMakers().clear(); }
+  static bool functionExists(const std::string &);
  protected:
   explicit ObsFunctionFactory(const std::string &);
  private:

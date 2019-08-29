@@ -41,4 +41,10 @@ ObsFunctionBase * ObsFunctionFactory::create(const std::string & id) {
 
 // -----------------------------------------------------------------------------
 
+bool ObsFunctionFactory::functionExists(const std::string & name) {
+  return (getMakers().find(name) != getMakers().end());
+}
+
+// -----------------------------------------------------------------------------
+
 }  // namespace ufo

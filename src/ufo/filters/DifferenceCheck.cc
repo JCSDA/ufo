@@ -68,7 +68,7 @@ void DifferenceCheck::priorFilter(const GeoVaLs & gvals) const {
   const size_t nlocs = obsdb_.nlocs();
 
 // Process "where" mask
-  std::vector<bool> apply = processWhere(obsdb_, gvals, config_);
+  std::vector<bool> apply = processWhere(config_, obsdb_, &gvals);
 
 // Get reference values (as floats)
   std::vector<float> ref(nlocs);

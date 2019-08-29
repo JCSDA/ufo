@@ -23,7 +23,6 @@
 #include "oops/util/Logger.h"
 
 #include "ufo/filters/actions/FilterAction.h"
-#include "ufo/filters/copyVars2ODV.h"
 #include "ufo/filters/processWhere.h"
 #include "ufo/filters/QCflags.h"
 #include "ufo/GeoVaLs.h"
@@ -73,7 +72,6 @@ void BackgroundCheck::priorFilter(const GeoVaLs & gv) const {
 
 void BackgroundCheck::postFilter(const ioda::ObsVector & hofx, const ObsDiagnostics &) const {
   oops::Log::trace() << "BackgroundCheck postFilter" << std::endl;
-
   const oops::Variables vars(config_);
   if (vars.size() == 0) {
     oops::Log::error() << "No variables will be filtered out in filter "
@@ -89,20 +87,12 @@ void BackgroundCheck::postFilter(const ioda::ObsVector & hofx, const ObsDiagnost
   ioda::ObsDataVector<float> obs(obsdb_, vars, "ObsValue");
   ioda::ObsDataVector<float> bias(obsdb_, vars, "ObsBias", false);
 
-// Allocate ObsDataVector for input variables
-  ioda::ObsDataVector<float> filterInputs(obsdb_, collectFilterVars(config_));
-
-// Collect data into filterInputs for where check
-  filterInputs = copyVars2ODV(*gv_, filterInputs);
-  filterInputs = copyVars2ODV(hofx, filterInputs, "HofX");
-  filterInputs = copyVars2ODV(obsdb_, filterInputs);
-
 // Allocate flagged obs (false by default)
   std::vector<std::vector<bool>> flagged(flags_.nvars());
   for (size_t jv = 0; jv < flagged.size(); ++jv) flagged[jv].resize(obsdb_.nlocs());
 
 // Select where the background check will apply
-  std::vector<bool> apply = processWhere(obsdb_, filterInputs, config_);
+  std::vector<bool> apply = processWhere(config_, obsdb_, gv_, &hofx);
 
   for (size_t jv = 0; jv < vars.size(); ++jv) {
     size_t iv = observed.find(vars[jv]);

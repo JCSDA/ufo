@@ -17,7 +17,6 @@
 #include "oops/interface/ObsFilter.h"
 #include "oops/util/abor1_cpp.h"
 #include "oops/util/Logger.h"
-#include "oops/util/missingValues.h"
 #include "ufo/filters/processWhere.h"
 #include "ufo/filters/QCflags.h"
 #include "ufo/obsfunctions/ObsFunction.h"
@@ -63,7 +62,7 @@ void ObsDomainCheck::priorFilter(const GeoVaLs & gv) const {
   }
   const oops::Variables observed = obsdb_.obsvariables();
 
-  std::vector<bool> inside = processWhere(obsdb_, gv, config_);
+  std::vector<bool> inside = processWhere(config_, obsdb_, &gv);
 
   for (size_t jv = 0; jv < vars.size(); ++jv) {
     size_t iv = observed.find(vars[jv]);
