@@ -31,7 +31,7 @@ static oops::FilterMaker<UfoTrait, oops::ObsFilter<UfoTrait, ObsBoundsCheck> >
 ObsBoundsCheck::ObsBoundsCheck(ioda::ObsSpace & obsdb, const eckit::Configuration & config,
                                boost::shared_ptr<ioda::ObsDataVector<int> > flags,
                                boost::shared_ptr<ioda::ObsDataVector<float> >)
-  : obsdb_(obsdb), config_(config), geovars_(preProcessWhere(config_, "GeoVaLs")),
+  : obsdb_(obsdb), data_(obsdb_), config_(config), geovars_(preProcessWhere(config_, "GeoVaLs")),
     diagvars_(preProcessWhere(config_, "ObsDiag")), flags_(*flags)
 {
   oops::Log::debug() << "ObsBoundsCheck: config = " << config_ << std::endl;
@@ -62,7 +62,8 @@ void ObsBoundsCheck::priorFilter(const GeoVaLs & gv) const {
   const float vmax = config_.getFloat("maxvalue", missing);
 
 // Select where the bounds check will apply
-  std::vector<bool> apply = processWhere(config_, obsdb_, &gv);
+  data_.associate(gv);
+  std::vector<bool> apply = processWhere(config_, data_);
 
   for (size_t jv = 0; jv < vars.size(); ++jv) {
     size_t iv = observed.find(vars[jv]);

@@ -13,19 +13,15 @@
 #include <vector>
 
 namespace eckit {class Configuration;}
-namespace ioda {
-  template <typename DATATYPE> class ObsDataVector;
-  class ObsSpace;
-  class ObsVector;
-}
+
 namespace oops {class Variables;}
 
 namespace ufo {
-  class GeoVaLs;
+  class ObsFilterData;
 
 oops::Variables preProcessWhere(const eckit::Configuration &, const std::string &);
-std::vector<bool> processWhere(const eckit::Configuration &, ioda::ObsSpace &,
-                               const GeoVaLs * geovals = NULL, const ioda::ObsVector * hofx = NULL);
+std::vector<bool> processWhere(const eckit::Configuration &, ObsFilterData &);
+
 }  // namespace ufo
 
 #endif  // UFO_FILTERS_PROCESSWHERE_H_

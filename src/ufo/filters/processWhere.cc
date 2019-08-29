@@ -12,14 +12,12 @@
 #include <vector>
 
 #include "eckit/config/LocalConfiguration.h"
-#include "ioda/ObsDataVector.h"
-#include "ioda/ObsSpace.h"
-#include "ioda/ObsVector.h"
 #include "oops/base/Variables.h"
 #include "oops/util/IntSetParser.h"
+#include "oops/util/Logger.h"
 #include "oops/util/missingValues.h"
-#include "ufo/GeoVaLs.h"
-#include "ufo/obsfunctions/ObsFunction.h"
+#include "ufo/filters/ObsFilterData.h"
+#include "ufo/filters/obsfunctions/ObsFunction.h"
 #include "ufo/utils/SplitVarGroup.h"
 
 namespace ufo {
@@ -30,89 +28,19 @@ oops::Variables preProcessWhere(const eckit::Configuration & config, const std::
   std::vector<eckit::LocalConfiguration> masks;
   config.get("where", masks);
 
-  std::vector<std::string> vv;
+  oops::Variables vars;
   for (size_t jm = 0; jm < masks.size(); ++jm) {
     const std::string vargrp(masks[jm].getString("variable"));
     std::string var;
     std::string grp;
     splitVarGroup(vargrp, var, grp);
-    if (grp == group) vv.push_back(var);
+    if (grp == group) vars.push_back(var);
+    if (group == "GeoVaLs" && grp.find("Function") != std::string::npos) {
+      ObsFunction obsdiag(var);
+      vars += obsdiag.requiredGeoVaLs();
+    }
   }
-
-  return oops::Variables(vv);
-}
-
-// -----------------------------------------------------------------------------
-
-bool dataExists(const std::string & varname, ioda::ObsSpace & obsdb,
-                const GeoVaLs * gvals = NULL, const ioda::ObsVector * hofx = NULL) {
-  std::string var, grp;
-  splitVarGroup(varname, var, grp);
-  if (grp == "GeoVaLs") {
-    ASSERT(gvals);
-    return gvals->has(var);
-  } else if (grp == "ObsFunction" || grp == "HofXFunction") {
-    return ObsFunctionFactory::functionExists(var);
-  } else {
-    return obsdb.has(grp, var);
-  }
-  return false;
-}
-
-// -----------------------------------------------------------------------------
-
-std::vector<float> getData(const std::string & varname, ioda::ObsSpace & obsdb,
-                           const GeoVaLs * gvals = NULL, const ioda::ObsVector * hofx = NULL) {
-  std::string var, grp;
-  splitVarGroup(varname, var, grp);
-
-  std::size_t nvals = obsdb.nlocs();
-  if (grp == "VarMetaData")  nvals = obsdb.nvars();
-
-  std::vector<float> values(nvals);
-  if (grp == "GeoVaLs") {
-    ASSERT(gvals);
-    gvals->get(values, var);
-  } else if (grp == "ObsFunction") {
-    ioda::ObsDataVector<float> vals(obsdb, var, grp, false);
-    ObsFunction obsdiag(var);
-    ioda::ObsDataVector<float> metadata(obsdb, obsdiag.requiredMetaData(), "MetaData");
-    ioda::ObsDataVector<float> obs(obsdb, obsdiag.requiredObsData(), "ObsValue");
-    obsdiag.compute(metadata, obs, *gvals, vals);
-    for (size_t jj = 0; jj < nvals; ++jj) {
-      values[jj] = vals[var][jj];
-    }
-  } else if (grp == "HofXFunction") {
-    ASSERT(hofx);
-    ioda::ObsDataVector<float> vals(obsdb, var, grp, false);
-    ObsFunction obsdiag(var);
-    ioda::ObsDataVector<float> metadata(obsdb, obsdiag.requiredMetaData(), "MetaData");
-    const oops::Variables requiredObs = obsdiag.requiredObsData();
-    ioda::ObsDataVector<float> obs(obsdb, obsdiag.requiredObsData(), "HofX", false);
-    const size_t hofxnvars = hofx->nvars();
-    for (size_t jv = 0; jv < requiredObs.size(); ++jv) {
-      ASSERT(hofx->has(requiredObs[jv]));
-      size_t iv = hofx->varnames().find(requiredObs[jv]);
-      for (size_t jj = 0; jj < obs.nlocs(); ++jj) {
-        obs[jv].at(jj) = (*hofx)[iv + (jj * hofxnvars)];
-      }
-    }
-    obsdiag.compute(metadata, obs, *gvals, vals);
-    for (size_t jj = 0; jj < nvals; ++jj) {
-      values[jj] = vals[var][jj];
-    }
-  } else if (grp == "HofX") {
-    ASSERT(hofx);
-    ASSERT(hofx->has(var));
-    size_t hofxnvars = hofx->nvars();
-    size_t iv = hofx->varnames().find(var);
-    for (size_t jj = 0; jj < nvals; ++jj) {
-      values[jj] = (*hofx)[iv + (jj * hofxnvars)];
-    }
-  } else {
-    obsdb.get_db(grp, var, nvals, values.data());
-  }
-  return values;
+  return vars;
 }
 
 // -----------------------------------------------------------------------------
@@ -177,10 +105,9 @@ void processWhereIsNotIn(const std::vector<int> & data,
 // -----------------------------------------------------------------------------
 
 std::vector<bool> processWhere(const eckit::Configuration & config,
-        ioda::ObsSpace & obsdb, const GeoVaLs * gvals,
-        const ioda::ObsVector * hofx) {
+                               ObsFilterData & filterdata) {
   const float missing = util::missingValue(missing);
-  const size_t nlocs = obsdb.nlocs();
+  const size_t nlocs = filterdata.nlocs();
 
 // Everywhere by default if no mask
   std::vector<bool> where(nlocs, true);
@@ -195,7 +122,7 @@ std::vector<bool> processWhere(const eckit::Configuration & config,
     splitVarGroup(varname, var, grp);
     if (grp != "VarMetaData") {
 //    Get data
-      std::vector<float> data = getData(varname, obsdb, gvals, hofx);
+      std::vector<float> data = filterdata.get(varname);
 //    Process masks on float values
       const float vmin = masks[jm].getFloat("minvalue", missing);
       const float vmax = masks[jm].getFloat("maxvalue", missing);
@@ -207,7 +134,7 @@ std::vector<bool> processWhere(const eckit::Configuration & config,
 
 //    Apply mask is_defined
       if (masks[jm].has("is_defined")) {
-        if (dataExists(varname, obsdb, gvals, hofx)) {
+        if (filterdata.has(varname)) {
           processWhereIsDefined(data, where);
         } else {
           std::fill(where.begin(), where.end(), false);

@@ -14,6 +14,8 @@ set ( filters_files
       ObsBoundsCheck.h
       ObsDomainCheck.cc
       ObsDomainCheck.h
+      ObsFilterData.cc
+      ObsFilterData.h
       PreQC.cc
       PreQC.h
       QCflags.h
@@ -33,6 +35,12 @@ set ( filters_files
       actions/InflateError.h
       actions/RejectObs.cc
       actions/RejectObs.h
+      obsfunctions/ObsFunction.cc
+      obsfunctions/ObsFunction.h
+      obsfunctions/ObsFunctionBase.cc
+      obsfunctions/ObsFunctionBase.h
+      obsfunctions/ObsFunctionVelocity.cc
+      obsfunctions/ObsFunctionVelocity.h
 )
 
 PREPEND( _p_filters_files       "filters"       ${filters_files} )

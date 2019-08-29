@@ -35,21 +35,20 @@ static oops::FilterMaker<UfoTrait, oops::ObsFilter<UfoTrait, DifferenceCheck> >
 DifferenceCheck::DifferenceCheck(ioda::ObsSpace & os, const eckit::Configuration & config,
                                  boost::shared_ptr<ioda::ObsDataVector<int> > flags,
                                  boost::shared_ptr<ioda::ObsDataVector<float> >)
-  : obsdb_(os), flags_(*flags), config_(config), geovars_(), diagvars_(),
-    rvar_(), rgrp_(), vvar_(), vgrp_()
+  : obsdb_(os), data_(obsdb_), flags_(*flags), config_(config), geovars_(), diagvars_(),
+    ref_(config_.getString("reference")), val_(config_.getString("value"))
 {
   oops::Log::trace() << "DifferenceCheck contructor starting" << std::endl;
 
 
+  std::string var, grp;
 // Reference setup
-  const std::string sref = config_.getString("reference");
-  splitVarGroup(sref, rvar_, rgrp_);
-  if (rgrp_ == "GeoVaLs") geovars_.push_back(rvar_);
+  splitVarGroup(ref_, var, grp);
+  if (grp == "GeoVaLs") geovars_.push_back(var);
 
 // Value to compare setup
-  const std::string sval = config_.getString("value");
-  splitVarGroup(sval, vvar_, vgrp_);
-  if (vgrp_ == "GeoVaLs") geovars_.push_back(vvar_);
+  splitVarGroup(val_, var, grp);
+  if (grp == "GeoVaLs") geovars_.push_back(var);
 }
 
 // -----------------------------------------------------------------------------
@@ -60,7 +59,7 @@ DifferenceCheck::~DifferenceCheck() {
 
 // -----------------------------------------------------------------------------
 
-void DifferenceCheck::priorFilter(const GeoVaLs & gvals) const {
+void DifferenceCheck::priorFilter(const GeoVaLs & gv) const {
   oops::Log::trace() << "DifferenceCheck priorFilter" << std::endl;
 
   const float missing = util::missingValue(missing);
@@ -78,29 +77,13 @@ void DifferenceCheck::priorFilter(const GeoVaLs & gvals) const {
   }
 
 // Process "where" mask
-  std::vector<bool> apply = processWhere(config_, obsdb_, &gvals);
+  data_.associate(gv);
+  std::vector<bool> apply = processWhere(config_, data_);
 
-// Get reference values (as floats)
-  std::vector<float> ref(nlocs);
-  if (rgrp_ == "GeoVaLs") {
-    gvals.get(ref, rvar_);
-  } else {
-    ioda::ObsDataVector<float> tmp(obsdb_, rvar_, rgrp_);
-    for (size_t jj = 0; jj < nlocs; ++jj) {
-      ref[jj] = tmp[rvar_][jj];
-    }
-  }
-
-// Get values to compare (as floats)
-  std::vector<float> val(nlocs);
-  if (vgrp_ == "GeoVaLs") {
-    gvals.get(val, vvar_);
-  } else {
-    ioda::ObsDataVector<float> tmp(obsdb_, vvar_, vgrp_);
-    for (size_t jj = 0; jj < nlocs; ++jj) {
-      val[jj] = tmp[vvar_][jj];
-    }
-  }
+// Get reference values and values to compare (as floats)
+  std::vector<float> ref = data_.get(ref_);
+  std::vector<float> val = data_.get(val_);
+  ASSERT(ref.size() == val.size());
 
 // Loop over all obs
   for (size_t jobs = 0; jobs < nlocs; ++jobs) {

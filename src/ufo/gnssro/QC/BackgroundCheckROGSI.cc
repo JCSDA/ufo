@@ -37,7 +37,7 @@ BackgroundCheckROGSI::BackgroundCheckROGSI(ioda::ObsSpace & os,
                                            const eckit::Configuration & config,
                                            boost::shared_ptr<ioda::ObsDataVector<int> > flags,
                                            boost::shared_ptr<ioda::ObsDataVector<float> > obserr)
-  : obsdb_(os), config_(config),  gv_(NULL),
+  : obsdb_(os), data_(obsdb_), config_(config),
     geovars_(preProcessWhere(config_, "GeoVaLs")), flags_(*flags)
 {
   oops::Log::trace() << "BackgroundCheckROGSI contructor starting: "
@@ -57,7 +57,7 @@ BackgroundCheckROGSI::~BackgroundCheckROGSI() {
 // -----------------------------------------------------------------------------
 
 void BackgroundCheckROGSI::priorFilter(const GeoVaLs & gv) const {
-  gv_ = &gv;
+  data_.associate(gv);
 }
 
 // -----------------------------------------------------------------------------
@@ -81,7 +81,8 @@ void BackgroundCheckROGSI::postFilter(const ioda::ObsVector & hofx, const ObsDia
                                          "MetaData");  // background temperature at obs location
 
 // Select where the background check will apply
-  std::vector<bool> apply = processWhere(config_, obsdb_, gv_, &hofx);
+  data_.associate(hofx);
+  std::vector<bool> apply = processWhere(config_, data_);
 
   for (size_t jv = 0; jv < vars.size(); ++jv) {
     size_t iv = observed.find(vars[jv]);

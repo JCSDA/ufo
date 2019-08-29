@@ -17,6 +17,7 @@
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
 #include "oops/util/Printable.h"
+#include "ufo/filters/ObsFilterData.h"
 
 namespace eckit {
   class Configuration;
@@ -54,8 +55,8 @@ class BackgroundCheckROGSI : public util::Printable,
   void print(std::ostream &) const;
 
   ioda::ObsSpace & obsdb_;
+  mutable ObsFilterData data_;
   const eckit::LocalConfiguration config_;
-  const GeoVaLs mutable * gv_;
   const oops::Variables geovars_;
   const oops::Variables diagvars_;
   ioda::ObsDataVector<int> & flags_;

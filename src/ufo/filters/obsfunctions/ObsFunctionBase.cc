@@ -5,7 +5,7 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#include "ufo/obsfunctions/ObsFunctionBase.h"
+#include "ufo/filters/obsfunctions/ObsFunctionBase.h"
 
 #include <map>
 #include <string>

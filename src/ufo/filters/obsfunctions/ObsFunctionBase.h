@@ -5,8 +5,8 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#ifndef UFO_OBSFUNCTIONS_OBSFUNCTIONBASE_H_
-#define UFO_OBSFUNCTIONS_OBSFUNCTIONBASE_H_
+#ifndef UFO_FILTERS_OBSFUNCTIONS_OBSFUNCTIONBASE_H_
+#define UFO_FILTERS_OBSFUNCTIONS_OBSFUNCTIONBASE_H_
 
 #include <map>
 #include <string>
@@ -15,10 +15,9 @@
 
 #include "ioda/ObsDataVector.h"
 #include "oops/base/Variables.h"
+#include "ufo/filters/ObsFilterData.h"
 
 namespace ufo {
-
-class GeoVaLs;
 
 // -----------------------------------------------------------------------------
 /// Base class for computing functions on observation data
@@ -29,15 +28,9 @@ class ObsFunctionBase : private boost::noncopyable {
   virtual ~ObsFunctionBase() {}
 
 /// compute the result of the function
-  virtual void compute(const ioda::ObsDataVector<float> &,
-                       const ioda::ObsDataVector<float> &,
-                       const GeoVaLs &,
+  virtual void compute(const ObsFilterData &,
                        ioda::ObsDataVector<float> &) const = 0;
 
-/// observed variables required to compute the function
-  virtual const oops::Variables & requiredObsData() const = 0;
-/// metadata required to compute the function
-  virtual const oops::Variables & requiredMetaData() const = 0;
 /// geovals required to compute the function
   virtual const oops::Variables & requiredGeoVaLs() const = 0;
 };
@@ -74,4 +67,4 @@ class ObsFunctionMaker : public ObsFunctionFactory {
 
 }  // namespace ufo
 
-#endif  // UFO_OBSFUNCTIONS_OBSFUNCTIONBASE_H_
+#endif  // UFO_FILTERS_OBSFUNCTIONS_OBSFUNCTIONBASE_H_

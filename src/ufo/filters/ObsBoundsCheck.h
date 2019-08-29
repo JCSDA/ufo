@@ -19,6 +19,7 @@
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
 #include "oops/util/Printable.h"
+#include "ufo/filters/ObsFilterData.h"
 
 namespace ioda {
   template <typename DATATYPE> class ObsDataVector;
@@ -54,6 +55,7 @@ class ObsBoundsCheck : public util::Printable,
   void print(std::ostream &) const;
 
   ioda::ObsSpace & obsdb_;
+  mutable ObsFilterData data_;
   const eckit::LocalConfiguration config_;
   const oops::Variables geovars_;
   oops::Variables diagvars_;
