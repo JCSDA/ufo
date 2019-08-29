@@ -746,6 +746,8 @@ integer :: ivar
 integer :: ierr
 
 character(max_string) :: err_msg
+character(len=30) :: obs_nlocs_str
+character(len=30) :: geo_nlocs_str
 
 integer(c_size_t), allocatable, dimension(:) :: dist_indx
 integer(c_size_t), allocatable, dimension(:) :: obs_dist_indx
@@ -770,9 +772,6 @@ obs_all_nlocs = obsspace_get_gnlocs(c_obspace)
 obs_nlocs = obsspace_get_nlocs(c_obspace)
 allocate(obs_dist_indx(obs_nlocs))
 call obsspace_get_index(c_obspace, obs_dist_indx)
-do iloc = 1, obs_nlocs
-  print*, "DEBUG: obs_dist_indx intially: iloc, obs_dist_indx: ", iloc, obs_dist_indx(iloc)
-enddo
 
 if (nlocs_all .lt. obs_all_nlocs) then
   write(err_msg,*) "Error: geovals file must have at least as many locations as the obs file"
@@ -810,18 +809,17 @@ else
       enddo
     enddo
   else
-    write(err_msg,*) "Error: number of locations (", nlocs_all, ") in the geovals file must be an integer multiple of the number of locations (", obs_all_nlocs, ") in the obs file"
-    call abor1_ftn(err_msg)
+    write(obs_nlocs_str, *) obs_all_nlocs
+    write(geo_nlocs_str, *) nlocs_all
+    print*, "WARNING: The number of locations (", trim(adjustl(geo_nlocs_str)), &
+            ") in the geovals file is greater than the number of locations (", &
+            trim(adjustl(obs_nlocs_str)), ") in the obs file"
+    print*, "         Will use the first ", trim(adjustl(obs_nlocs_str)), &
+            " locations from the geovals file."
+    nlocs = obs_nlocs
+    dist_indx = obs_dist_indx
   endif
 endif
-
-print*, "DEBUG: obs_nlocs, obs_all_nlocs, nlocs, nlocs_all: ", obs_nlocs, obs_all_nlocs, nlocs, nlocs_all
-do iloc = 1, obs_nlocs
-  print*, "DEBUG: obs_dist_indx: iloc, indx: ", iloc, obs_dist_indx(iloc)
-enddo
-do iloc = 1, nlocs
-  print*, "DEBUG: dist_indx: iloc, indx: ", iloc, dist_indx(iloc)
-enddo
 
 ! allocate geovals structure
 call ufo_geovals_setup(self, c_vars, nlocs)
