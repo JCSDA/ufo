@@ -23,6 +23,9 @@ filename_optical_properties_OC: /gpfsm/dnb52/projects/p10/gmao_ops/fvInput/AeroC
 filename_optical_properties_BC: /gpfsm/dnb52/projects/p10/gmao_ops/fvInput/AeroCom/x/PIESA/x/optics_BC.v1_3.nc
 filename_optical_properties_SU: /gpfsm/dnb52/projects/p10/gmao_ops/fvInput/AeroCom/x/PIESA/x/optics_SU.v1_3.nc
 filename_optical_properties_NI: /gpfsm/dnb52/projects/p10/gmao_ops/fvInput/AeroCom/x/PIESA/x/optics_NI.v2_5.nc
+filename__optical_properties_BRC: /gpfsm/dnb52/projects/p10/gmao_ops/fvInput/AeroCom/x/PIESA/x/optics_BRC.v1_5.nc
+
+
 
 # Second block is a copy of a chem registry type, used here only
 # to specify what to write out to the bundle file!!!
