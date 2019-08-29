@@ -69,6 +69,7 @@ character(len=MAXVARLEN), public, parameter :: var_sfc_fact10  = "wind_reduction
 
 !@mzp strings have to be same MAXVARLEN length for array constructor
 CHARACTER(len=MAXVARLEN), public, parameter :: var_rh          = "relative_humidity"
+
 CHARACTER(len=MAXVARLEN), DIMENSION(n_aerosols_gocart_default), PUBLIC, PARAMETER  :: &
      &var_aerosols_gocart_default = [&
      &"sulf                                                    ",&
