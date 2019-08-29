@@ -57,6 +57,7 @@ list( APPEND ufo_test_input
   testinput/qc_thinning.yaml
   testinput/qc_backgroundcheck.yaml
   testinput/qc_thinning_rad.yaml
+  testinput/qc_gauss_thinning.yaml
   testinput/radiosonde.yaml
   testinput/radiosonde_qc.yaml
   testinput/satwind.yaml
@@ -465,6 +466,11 @@ ecbuild_add_test( TARGET  test_ufo_qc_thinning
 ecbuild_add_test( TARGET  test_ufo_qc_thinning_rad
                   SOURCES mains/TestObsFilters.cc
                   ARGS    "testinput/qc_thinning_rad.yaml"
+                  LIBS    ufo )
+
+ecbuild_add_test( TARGET  test_ufo_qc_gauss_thinning
+                  SOURCES mains/TestObsFilters.cc
+                  ARGS    "testinput/qc_gauss_thinning.yaml"
                   LIBS    ufo )
 
 ecbuild_add_test( TARGET  test_ufo_qc_blacklist_latitude

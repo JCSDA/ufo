@@ -14,6 +14,7 @@
 #include <boost/noncopyable.hpp>
 
 #include "oops/util/Printable.h"
+#include "ufo/GeoVaLs.h"
 
 // Forward declarations
 namespace oops {
@@ -25,13 +26,14 @@ namespace ioda {
 }
 
 namespace ufo {
+  class Locations;
 
 // -----------------------------------------------------------------------------
 
 class ObsDiagnostics : public util::Printable,
                        private boost::noncopyable {
  public:
-  ObsDiagnostics(const ioda::ObsSpace &, const oops::Variables &);
+  ObsDiagnostics(const ioda::ObsSpace &, const Locations &, const oops::Variables &);
   ~ObsDiagnostics() {}
 
 // I/O
@@ -40,6 +42,8 @@ class ObsDiagnostics : public util::Printable,
  private:
   void print(std::ostream &) const;
   const ioda::ObsSpace & obsdb_;
+
+  GeoVaLs gdiags_;
 };
 
 // -----------------------------------------------------------------------------

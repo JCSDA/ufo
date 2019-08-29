@@ -1,0 +1,35 @@
+window_begin: 2018-04-14T20:30:00Z
+window_end: 2018-04-15T03:30:00Z
+
+Observations:
+  ObsTypes:
+  - ObsSpace:
+      name: Aircraft
+      ObsDataIn:
+        obsfile: Data/aircraft_obs_2018041500_m.nc4
+      simulate:
+        variables: [air_temperature]
+    ObsOperator:
+      name: VertInterp
+    GeoVaLs:
+      filename: Data/aircraft_geoval_2018041500_m.nc4
+    ObsFilters:
+    - Filter: Gaussian_Thinning
+      horizontal_mesh:   1111.949266 #km = 10 deg at equator
+    passedBenchmark: 10
+  - ObsSpace:
+      name: Aircraft
+      ObsDataIn:
+        obsfile: Data/aircraft_obs_2018041500_m.nc4
+      simulate:
+        variables: [air_temperature]
+    ObsOperator:
+      name: VertInterp
+    GeoVaLs:
+      filename: Data/aircraft_geoval_2018041500_m.nc4
+    ObsFilters:
+    - Filter: Gaussian_Thinning
+      horizontal_mesh:   1111.949266 #km = 10 deg at equator
+      vertical_mesh:     10000 #Pa
+    passedBenchmark: 33
+

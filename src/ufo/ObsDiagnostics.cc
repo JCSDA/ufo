@@ -11,6 +11,7 @@
 #include <string>
 
 #include "oops/base/Variables.h"
+#include "ufo/Locations.h"
 
 #include "ioda/ObsSpace.h"
 
@@ -18,8 +19,10 @@ namespace ufo {
 
 // -----------------------------------------------------------------------------
 
-ObsDiagnostics::ObsDiagnostics(const ioda::ObsSpace & os, const oops::Variables &)
-  : obsdb_(os) {}
+ObsDiagnostics::ObsDiagnostics(const ioda::ObsSpace & os, const Locations & locs,
+                               const oops::Variables & vars)
+  : obsdb_(os), gdiags_(locs, vars)
+{}
 
 // -----------------------------------------------------------------------------
 

@@ -7,11 +7,11 @@ Observations:
       name: CRTM
       Absorbers: [H2O,O3,CO2]
       ObsOptions:
-        Sensor_ID: abi_g16 
+        Sensor_ID: abi_g16
         EndianType: little_endian
         CoefficientPath: Data/
     ObsSpace:
-      name: abi_g16 
+      name: abi_g16
       ObsDataIn:
         obsfile: Data/abi_g16_obs_2019042306_m.nc4
       simulate:
@@ -23,6 +23,6 @@ Observations:
     - Filter: Difference Check
       reference: brightness_temperature_8@ObsValue
       value: brightness_temperature_9@ObsValue
-      threshold: 10
+      minvalue: -10
+      maxvalue: 10
     passedBenchmark:  540      # number of passed obs
-
