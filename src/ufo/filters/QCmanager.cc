@@ -105,7 +105,9 @@ void QCmanager::print(std::ostream & os) const {
     size_t ignss = 0;
     size_t ithin = 0;
     size_t ihcor = 0;
+    size_t iclw  = 0;
     size_t idiffref = 0;
+    size_t iseaice  = 0;
 
     for (size_t jobs = 0; jobs < iobs; ++jobs) {
       if (flags_[jj][jobs] == QCflags::pass)    ++ipass;
@@ -117,7 +119,9 @@ void QCmanager::print(std::ostream & os) const {
       if (flags_[jj][jobs] == QCflags::Hfailed) ++iherr;
       if (flags_[jj][jobs] == QCflags::fguess)  ++ifgss;
       if (flags_[jj][jobs] == QCflags::thinned) ++ithin;
+      if (flags_[jj][jobs] == QCflags::clw)     ++iclw;
       if (flags_[jj][jobs] == QCflags::diffref) ++idiffref;
+      if (flags_[jj][jobs] == QCflags::seaice)  ++iseaice;
       if (flags_[jj][jobs] == 76 || flags_[jj][jobs] == 77)  ++ignss;
       if (flags_[jj][jobs] == 80) ++ihcor;
     }
@@ -131,10 +135,12 @@ void QCmanager::print(std::ostream & os) const {
     obsdb_.comm().allReduceInPlace(iblck, eckit::mpi::sum());
     obsdb_.comm().allReduceInPlace(iherr, eckit::mpi::sum());
     obsdb_.comm().allReduceInPlace(ifgss, eckit::mpi::sum());
+    obsdb_.comm().allReduceInPlace(iclw,  eckit::mpi::sum());
     obsdb_.comm().allReduceInPlace(ignss, eckit::mpi::sum());
     obsdb_.comm().allReduceInPlace(ithin, eckit::mpi::sum());
     obsdb_.comm().allReduceInPlace(ihcor, eckit::mpi::sum());
     obsdb_.comm().allReduceInPlace(idiffref, eckit::mpi::sum());
+    obsdb_.comm().allReduceInPlace(iseaice,  eckit::mpi::sum());
 
 
     if (obsdb_.comm().rank() == 0) {
@@ -146,16 +152,18 @@ void QCmanager::print(std::ostream & os) const {
       if (iblck > 0) os << info << iblck << " black-listed." << std::endl;
       if (iherr > 0) os << info << iherr << " H(x) failed." << std::endl;
       if (ithin > 0) os << info << ithin << " removed by thinning." << std::endl;
+      if (iclw  > 0) os << info << iclw  << " removed by cloud liquid water check." << std::endl;
       if (ifgss > 0) os << info << ifgss << " rejected by first-guess check." << std::endl;
       if (ignss > 0) os << info << ignss << " rejected by GNSSRO reality check." << std::endl;
       if (ihcor > 0) os << info << ihcor << " rejected by HeightCorrection check." << std::endl;
       if (idiffref > 0) os << info << idiffref << " rejected by difference check." << std::endl;
+      if (iseaice  > 0) os << info << iseaice  << " removed by sea ice check." << std::endl;
 
       os << info << ipass << " passed out of " << iobs << " observations." << std::endl;
     }
 
-    ASSERT(ipass + imiss + ipreq + ibnds + iwhit + iblck + iherr + ithin + ifgss + ignss \
-           + ihcor + idiffref == iobs);
+    ASSERT(ipass + imiss + ipreq + ibnds + iwhit + iblck + iherr + ithin + iclw + ifgss + ignss \
+           + ihcor + idiffref + iseaice == iobs);
   }
 }
 
