@@ -39,10 +39,6 @@ class ObsDiagnostics : public util::Printable,
 // I/O
   void save(const std::string &) const;
 
-// Interfaces
-  int & toFortran() {return gdiags_.toFortran();}
-  const int & toFortran() const {return gdiags_.toFortran();}
-
  private:
   void print(std::ostream &) const;
   const ioda::ObsSpace & obsdb_;

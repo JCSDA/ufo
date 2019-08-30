@@ -57,10 +57,9 @@ ObsRadianceCRTM::~ObsRadianceCRTM() {
 // -----------------------------------------------------------------------------
 
 void ObsRadianceCRTM::simulateObs(const GeoVaLs & gom, ioda::ObsVector & ovec,
-                                  ObsDiagnostics & dvec) const {
+                                  ObsDiagnostics &) const {
   ufo_radiancecrtm_simobs_f90(keyOperRadianceCRTM_, gom.toFortran(), odb_,
-                          ovec.nvars(), ovec.nlocs(), ovec.toFortran(),
-                          dvec.toFortran());
+                          ovec.nvars(), ovec.nlocs(), ovec.toFortran());
   oops::Log::trace() << "ObsRadianceCRTM simulateObs done." << std::endl;
 }
 
