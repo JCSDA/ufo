@@ -18,6 +18,8 @@ set ( filters_files
       MWSeaIceCheck.h
       ObsDomainCheck.cc
       ObsDomainCheck.h
+      ObsDomainErrCheck.cc
+      ObsDomainErrCheck.h
       ObsFilterData.cc
       ObsFilterData.h
       PreQC.cc
@@ -43,6 +45,8 @@ set ( filters_files
       obsfunctions/ObsFunction.h
       obsfunctions/ObsFunctionBase.cc
       obsfunctions/ObsFunctionBase.h
+      obsfunctions/ObsFunctionScattering.cc
+      obsfunctions/ObsFunctionScattering.h
       obsfunctions/ObsFunctionVelocity.cc
       obsfunctions/ObsFunctionVelocity.h
 )

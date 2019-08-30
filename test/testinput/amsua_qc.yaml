@@ -31,8 +31,15 @@ Observations:
      channels: 2-15
      minvalue: 100.0
      maxvalue: 500.0
+   - Filter: DomainErr Check
+     variables: [brightness_temperature]
+     channels: 1
+     infltparameter: 1.5
+     where:
+     - variable: Scattering@ObsFunction
+       maxvalue: 100.0
    - Filter: Background Check
      variables: [brightness_temperature]
      channels: 1
      threshold: 2.0
-   passedBenchmark: 1462      # number of passed obs
+   passedBenchmark: 1496      # number of passed obs

@@ -476,6 +476,11 @@ ecbuild_add_test( TARGET  test_ufo_qc_function_windspeed
                   ARGS    "testinput/qc_function_windspeed.yaml"
                   LIBS    ufo )
 
+ecbuild_add_test( TARGET  test_ufo_qc_function_scattering
+                  SOURCES mains/TestObsFilters.cc
+                  ARGS    "testinput/amsua_qc.yaml"
+                  LIBS    ufo )
+
 ecbuild_add_test( TARGET  test_ufo_qc_thinning
                   SOURCES mains/TestObsFilters.cc
                   ARGS    "testinput/qc_thinning.yaml"
