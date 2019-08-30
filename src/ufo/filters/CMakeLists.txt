@@ -12,6 +12,10 @@ set ( filters_files
       DifferenceCheck.h
       ObsBoundsCheck.cc
       ObsBoundsCheck.h
+      MWCLWCheck.cc
+      MWCLWCheck.h
+      MWSeaIceCheck.cc
+      MWSeaIceCheck.h
       ObsDomainCheck.cc
       ObsDomainCheck.h
       ObsFilterData.cc
