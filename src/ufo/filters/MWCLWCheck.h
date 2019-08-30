@@ -34,7 +34,7 @@ namespace ufo {
 // Check that observations are within some bounds over some domain
 
 class MWCLWCheck : public util::Printable,
-                       private util::ObjectCounter<MWCLWCheck> {
+                   private util::ObjectCounter<MWCLWCheck> {
  public:
   static const std::string classname() {return "ufo::MWCLWCheck";}
 
@@ -45,7 +45,7 @@ class MWCLWCheck : public util::Printable,
 
   void preProcess() const {}
   void priorFilter(const GeoVaLs &) const;
-  void postFilter(const ioda::ObsVector &, const ObsDiagnostics &) const {}
+  void postFilter(const ioda::ObsVector &, const ObsDiagnostics &) const;
 
   const oops::Variables & requiredGeoVaLs() const {return geovars_;}
   const oops::Variables & requiredHdiagnostics() const {return diagvars_;}

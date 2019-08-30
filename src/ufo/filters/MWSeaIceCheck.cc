@@ -30,7 +30,7 @@ static oops::FilterMaker<UfoTrait, oops::ObsFilter<UfoTrait, MWSeaIceCheck> >
 MWSeaIceCheck::MWSeaIceCheck(ioda::ObsSpace & obsdb, const eckit::Configuration & config,
                                boost::shared_ptr<ioda::ObsDataVector<int> > flags,
                                boost::shared_ptr<ioda::ObsDataVector<float> >)
-  : obsdb_(obsdb), data_(obsdb), config_(config), geovars_(preProcessWhere(config_, "GeoVaLs")),
+  : obsdb_(obsdb), data_(obsdb_), config_(config), geovars_(preProcessWhere(config_, "GeoVaLs")),
     diagvars_(), flags_(*flags)
 {
   oops::Log::debug() << "MWSeaIceCheck: config = " << config_ << std::endl;

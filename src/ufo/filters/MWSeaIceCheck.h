@@ -34,7 +34,7 @@ namespace ufo {
 // Check that observations are within some bounds over some domain
 
 class MWSeaIceCheck : public util::Printable,
-                       private util::ObjectCounter<MWSeaIceCheck> {
+                      private util::ObjectCounter<MWSeaIceCheck> {
  public:
   static const std::string classname() {return "ufo::MWSeaIceCheck";}
 
