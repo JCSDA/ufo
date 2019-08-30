@@ -18,6 +18,8 @@ set ( filters_files
       MWSeaIceCheck.h
       ObsDomainCheck.cc
       ObsDomainCheck.h
+      ObsErrInflationCheck.cc
+      ObsErrInflationCheck.h
       ObsDomainErrCheck.cc
       ObsDomainErrCheck.h
       ObsFilterData.cc
@@ -45,6 +47,8 @@ set ( filters_files
       obsfunctions/ObsFunction.h
       obsfunctions/ObsFunctionBase.cc
       obsfunctions/ObsFunctionBase.h
+      obsfunctions/ObsFunctionErrInflationFactor.cc
+      obsfunctions/ObsFunctionErrInflationFactor.h
       obsfunctions/ObsFunctionScattering.cc
       obsfunctions/ObsFunctionScattering.h
       obsfunctions/ObsFunctionVelocity.cc

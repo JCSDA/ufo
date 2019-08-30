@@ -32,6 +32,8 @@ list( APPEND ufo_test_input
   testinput/amsua_crtm_bc.yaml
   testinput/amsua_rttov.yaml
   testinput/amsua_qc.yaml
+  testinput/iasi_qc.yaml
+  testinput/iasi_obsfunc_qc.yaml
   testinput/amsua_allsky_gsi_qc.yaml
   testinput/amsua_seaice_qc.yaml
   testinput/atms_crtm.yaml
@@ -251,6 +253,16 @@ ecbuild_add_test( TARGET  test_ufo_amsua_opr_crtm_bc
 ecbuild_add_test( TARGET  test_ufo_amsua_qc
                   SOURCES mains/TestObsFilters.cc
                   ARGS    "testinput/amsua_qc.yaml"
+                  LIBS    ufo )
+
+ecbuild_add_test( TARGET  test_ufo_iasi_qc
+                  SOURCES mains/TestObsFilters.cc
+                  ARGS    "testinput/iasi_qc.yaml"
+                  LIBS    ufo )
+
+ecbuild_add_test( TARGET  test_ufo_iasi_obsfunc_qc
+                  SOURCES mains/TestObsFilters.cc
+                  ARGS    "testinput/iasi_obsfunc_qc.yaml"
                   LIBS    ufo )
 
 ecbuild_add_test( TARGET  test_ufo_amsua_allsky_gsi_qc
