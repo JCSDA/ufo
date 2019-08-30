@@ -151,6 +151,8 @@ if (f_vars%has("nvars")) then
   call f_vars%get_or_die("variables",str)
   svars = str
   read(svars,*) vars
+else
+  allocate(vars(0))
 endif
 
 end subroutine ufo_vars_read

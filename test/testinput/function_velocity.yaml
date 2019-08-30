@@ -1,0 +1,18 @@
+window_begin: 2018-04-14T20:00:00Z
+window_end: 2018-04-15T03:00:00Z
+
+ObsSpace:
+  name: Satwind
+  ObsDataIn:
+    obsfile: Data/satwind_obs_2018041500_m.nc4
+  ObsDataOut:
+    obsfile: Data/satwind_obs_2018041500_function_output.nc4
+  simulate:
+    variables: [eastward_wind, northward_wind]
+GeoVaLs:
+  filename: Data/satwind_geoval_2018041500_m.nc4
+ObsFunction:
+  name: Velocity
+  inputGroupName: ObsValue
+  reference: wind_speed
+  tolerance: 1.e-7

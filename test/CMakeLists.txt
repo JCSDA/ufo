@@ -75,6 +75,7 @@ list( APPEND ufo_test_input
   testinput/windprof.yaml
   testinput/qc_domain_latitude.yaml
   testinput/qc_domain_minpress.yaml
+  testinput/function_velocity.yaml
 )
 
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/testinput)
@@ -186,6 +187,11 @@ CREATE_SYMLINK_FILENAME( ${ioda_SOURCE_DIR}/test/testinput
                          ${ioda_obs_test_data} )
 
 #####################################################################
+
+ecbuild_add_test( TARGET  test_ufo_function_velocity
+                  SOURCES mains/TestObsFunction.cc
+                  ARGS    "testinput/function_velocity.yaml"
+                  LIBS    ufo)
 
 ecbuild_add_test( TARGET  test_ufo_qc_domain_latitude
                   SOURCES mains/TestObsFilters.cc
