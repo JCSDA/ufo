@@ -733,6 +733,12 @@ type(c_ptr), intent(in)           :: c_vars
 
 integer :: nlocs, nlocs_all, nlocs_var
 integer :: nval
+integer :: obs_nlocs
+integer :: obs_all_nlocs
+integer :: indx_mult
+integer :: iloc
+integer :: jloc, jloc_start, jloc_end
+integer :: iloc_new
 
 integer :: ncid, dimid, varid, vartype, ndims
 integer, dimension(3) :: dimids
@@ -740,8 +746,11 @@ integer :: ivar
 integer :: ierr
 
 character(max_string) :: err_msg
+character(len=30) :: obs_nlocs_str
+character(len=30) :: geo_nlocs_str
 
 integer(c_size_t), allocatable, dimension(:) :: dist_indx
+integer(c_size_t), allocatable, dimension(:) :: obs_dist_indx
 
 real, allocatable :: field2d(:,:), field1d(:)
 
@@ -759,9 +768,58 @@ call check('nf90_inquire_dimension', nf90_inquire_dimension(ncid, dimid, len = n
 
 !> round-robin distribute the observations to PEs
 !> Calculate how many obs. on each PE
-nlocs = obsspace_get_nlocs(c_obspace)
-allocate(dist_indx(nlocs))
-call obsspace_get_index(c_obspace, dist_indx)
+obs_all_nlocs = obsspace_get_gnlocs(c_obspace)
+obs_nlocs = obsspace_get_nlocs(c_obspace)
+allocate(obs_dist_indx(obs_nlocs))
+call obsspace_get_index(c_obspace, obs_dist_indx)
+
+if (nlocs_all .lt. obs_all_nlocs) then
+  write(err_msg,*) "Error: geovals file must have at least as many locations as the obs file"
+  call abor1_ftn(err_msg)
+elseif (nlocs_all .eq. obs_all_nlocs) then
+  ! Have one-for-one relationship between obs and geovals locations. dist_indx
+  ! is already set as needed.
+  nlocs = obs_nlocs
+  allocate(dist_indx(nlocs))
+  dist_indx = obs_dist_indx
+else
+  ! Have multiple geovals locations for each obs location. Requirement is for
+  ! geovals number of locations be an integer multiple of obs number of locations.
+  !
+  ! If requirement is met, then the dist_indx needs to be expanded to include
+  ! the multiple locations from the geovals file. If the multiple mentioned above
+  ! is n, then the assumption is that in the geovals file, the corresponding list
+  ! of indexes for location i in the obs file is related by the following:
+  !
+  !    start: (i-1)*n + 1
+  !    end:   i*n
+  !
+  indx_mult = nlocs_all / obs_all_nlocs
+  if (mod(nlocs_all, indx_mult) .eq. 0) then
+    ! Add extra indices to dist_indx
+    nlocs = indx_mult * obs_nlocs
+    allocate(dist_indx(nlocs))
+    iloc_new = 1
+    do iloc = 1,obs_nlocs
+      jloc_start = ((obs_dist_indx(iloc) - 1) * indx_mult) + 1
+      jloc_end = obs_dist_indx(iloc) * indx_mult
+      do jloc = jloc_start, jloc_end
+        dist_indx(iloc_new) = jloc
+        iloc_new = iloc_new + 1
+      enddo
+    enddo
+  else
+    write(obs_nlocs_str, *) obs_all_nlocs
+    write(geo_nlocs_str, *) nlocs_all
+    print*, "WARNING: The number of locations (", trim(adjustl(geo_nlocs_str)), &
+            ") in the geovals file is greater than the number of locations (", &
+            trim(adjustl(obs_nlocs_str)), ") in the obs file"
+    print*, "         Will use the first ", trim(adjustl(obs_nlocs_str)), &
+            " locations from the geovals file."
+    nlocs = obs_nlocs
+    dist_indx = obs_dist_indx
+  endif
+endif
 
 ! allocate geovals structure
 call ufo_geovals_setup(self, c_vars, nlocs)
@@ -815,7 +873,8 @@ do ivar = 1, self%nvar
     
 enddo
 
-deallocate(dist_indx)
+if (allocated(dist_indx)) deallocate(dist_indx)
+if (allocated(obs_dist_indx)) deallocate(obs_dist_indx)
 
 self%linit = .true.
 
