@@ -26,8 +26,6 @@
 namespace ufo {
 
 // -----------------------------------------------------------------------------
-static oops::FilterMaker<UfoTrait, oops::ObsFilter<UfoTrait, BlackList>> mkBlkLst_("BlackList");
-// -----------------------------------------------------------------------------
 
 BlackList::BlackList(ioda::ObsSpace & obsdb, const eckit::Configuration & config,
                      boost::shared_ptr<ioda::ObsDataVector<int> > flags,

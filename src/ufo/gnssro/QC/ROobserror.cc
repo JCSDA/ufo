@@ -21,9 +21,6 @@
 namespace ufo {
 
 // -----------------------------------------------------------------------------
-static oops::FilterMaker<UfoTrait, oops::ObsFilter<UfoTrait, ROobserror> >
-     makerROobserror_("ROobserror");
-// -----------------------------------------------------------------------------
 
 ROobserror::ROobserror(const ioda::ObsSpace & os,
                        const eckit::Configuration & config,

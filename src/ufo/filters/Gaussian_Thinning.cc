@@ -27,9 +27,6 @@
 namespace ufo {
 
 // -----------------------------------------------------------------------------
-static oops::FilterMaker<UfoTrait,
-       oops::ObsFilter<UfoTrait, Gaussian_Thinning>> mkGaussian_Thinning_("Gaussian_Thinning");
-// -----------------------------------------------------------------------------
 
 Gaussian_Thinning::Gaussian_Thinning(ioda::ObsSpace & obsdb, const eckit::Configuration & config,
                                      boost::shared_ptr<ioda::ObsDataVector<int> > flags,

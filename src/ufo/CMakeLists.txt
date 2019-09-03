@@ -9,6 +9,7 @@ list( APPEND ufo_src_files
     GeoVaLs.h
     GeoVaLs.interface.F90
     GeoVaLs.interface.h
+    instantiateObsFilterFactory.h
     LinearObsOperator.cc
     LinearObsOperator.h
     LinearObsOperatorBase.cc

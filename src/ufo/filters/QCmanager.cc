@@ -28,8 +28,6 @@ namespace ufo {
 // the factory for models not in UFO/IODA.
 
 // -----------------------------------------------------------------------------
-static oops::FilterMaker<UfoTrait, oops::ObsFilter<UfoTrait, QCmanager>> mkqcman_("QCmanager");
-// -----------------------------------------------------------------------------
 
 QCmanager::QCmanager(ioda::ObsSpace & obsdb, const eckit::Configuration & config,
                      boost::shared_ptr<ioda::ObsDataVector<int> > qcflags,

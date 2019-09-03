@@ -25,8 +25,6 @@
 namespace ufo {
 
 // -----------------------------------------------------------------------------
-static oops::FilterMaker<UfoTrait, oops::ObsFilter<UfoTrait, Thinning>> mkThinning_("Thinning");
-// -----------------------------------------------------------------------------
 
 Thinning::Thinning(const ioda::ObsSpace & obsdb, const eckit::Configuration & config,
                    boost::shared_ptr<ioda::ObsDataVector<int> > flags,

@@ -29,9 +29,6 @@
 namespace ufo {
 
 // -----------------------------------------------------------------------------
-static oops::FilterMaker<UfoTrait, oops::ObsFilter<UfoTrait, ObsErrInflationCheck>>
-  mkDomErLst_("ObsErrInflation Check");
-// -----------------------------------------------------------------------------
 
 ObsErrInflationCheck::ObsErrInflationCheck(
                                ioda::ObsSpace & obsdb, const eckit::Configuration & config,
