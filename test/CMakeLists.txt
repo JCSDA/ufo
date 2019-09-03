@@ -55,6 +55,7 @@ list( APPEND ufo_test_input
   testinput/locations.yaml
   testinput/mhs_crtm.yaml
   testinput/qc_boundscheck.yaml
+  testinput/qc_cris.yaml
   testinput/qc_differencecheck.yaml
   testinput/qc_domainchk_zenith.yaml
   testinput/qc_function_windspeed.yaml
@@ -473,6 +474,11 @@ ecbuild_add_test( TARGET  test_ufo_satwind_opr
 ecbuild_add_test( TARGET  test_ufo_qc_boundscheck
                   SOURCES mains/TestObsFilters.cc
                   ARGS    "testinput/qc_boundscheck.yaml"
+                  LIBS    ufo )
+
+ecbuild_add_test( TARGET  test_ufo_qc_cris
+                  SOURCES mains/TestObsFilters.cc
+                  ARGS    "testinput/qc_cris.yaml"
                   LIBS    ufo )
 
 ecbuild_add_test( TARGET  test_ufo_qc_differencecheck

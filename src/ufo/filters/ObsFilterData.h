@@ -23,6 +23,7 @@ namespace ioda {
 
 namespace ufo {
   class GeoVaLs;
+  class ObsDiagnostics;
 
 /// ObsFilterData: check observation closeness to background
 
@@ -36,6 +37,7 @@ class ObsFilterData : public util::Printable,
 
   void associate(const GeoVaLs &);
   void associate(const ioda::ObsVector &);
+  void associate(const ObsDiagnostics &);
 
   std::vector<float> get(const std::string &) const;
   bool has(const std::string &) const;
@@ -48,6 +50,7 @@ class ObsFilterData : public util::Printable,
   ioda::ObsSpace & obsdb_;
   const GeoVaLs mutable * gvals_;
   const ioda::ObsVector mutable * hofx_;
+  const ObsDiagnostics mutable * diags_;
 };
 
 }  // namespace ufo

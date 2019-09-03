@@ -197,7 +197,7 @@ type(CRTM_RTSolution_type), allocatable :: rts_K(:,:)
 
    ! Determine the number of channels for the current sensor
    ! -------------------------------------------------------
-   self%N_Channels = CRTM_ChannelInfo_n_Channels(chinfo(n))
+   self%n_Channels = CRTM_ChannelInfo_n_Channels(chinfo(n))
 
 
    ! Allocate the ARRAYS
@@ -205,10 +205,10 @@ type(CRTM_RTSolution_type), allocatable :: rts_K(:,:)
    allocate( geo( self%n_Profiles )                         , &
              atm( self%n_Profiles )                         , &
              sfc( self%n_Profiles )                         , &
-             rts( self%N_Channels, self%n_Profiles )        , &
-             self%atm_K( self%N_Channels, self%n_Profiles ) , &
-             self%sfc_K( self%N_Channels, self%n_Profiles ) , &
-             rts_K( self%N_Channels, self%n_Profiles )      , &
+             rts( self%n_Channels, self%n_Profiles )        , &
+             self%atm_K( self%n_Channels, self%n_Profiles ) , &
+             self%sfc_K( self%n_Channels, self%n_Profiles ) , &
+             rts_K( self%n_Channels, self%n_Profiles )      , &
              STAT = alloc_stat                                )
    if ( alloc_stat /= 0 ) THEN
       message = 'Error allocating structure arrays (setTraj)'
@@ -229,7 +229,7 @@ type(CRTM_RTSolution_type), allocatable :: rts_K(:,:)
 
    ! Create the input FORWARD structure (sfc)
    ! ----------------------------------------
-   call CRTM_Surface_Create(sfc, self%N_Channels)
+   call CRTM_Surface_Create(sfc, self%n_Channels)
    IF ( ANY(.NOT. CRTM_Surface_Associated(sfc)) ) THEN
       message = 'Error allocating CRTM Surface structure (setTraj)'
       CALL Display_Message( PROGRAM_NAME, message, FAILURE )
@@ -249,7 +249,7 @@ type(CRTM_RTSolution_type), allocatable :: rts_K(:,:)
 
    ! Create output K-MATRIX structure (sfc)
    ! --------------------------------------
-   call CRTM_Surface_Create(self%sfc_K, self%N_Channels)
+   call CRTM_Surface_Create(self%sfc_K, self%n_Channels)
    IF ( ANY(.NOT. CRTM_Surface_Associated(self%sfc_K)) ) THEN
       message = 'Error allocating CRTM K-matrix Surface structure (setTraj)'
       CALL Display_Message( PROGRAM_NAME, message, FAILURE )
@@ -260,7 +260,7 @@ type(CRTM_RTSolution_type), allocatable :: rts_K(:,:)
    !Assign the data from the GeoVaLs
    !--------------------------------
    call Load_Atm_Data(self%N_PROFILES,self%N_LAYERS,geovals,atm,self%conf_traj)
-   call Load_Sfc_Data(self%N_PROFILES,self%N_LAYERS,self%N_Channels,self%channels,geovals,sfc,chinfo,obss,self%conf_traj)
+   call Load_Sfc_Data(self%N_PROFILES,self%N_LAYERS,self%n_Channels,self%channels,geovals,sfc,chinfo,obss,self%conf_traj)
    call Load_Geom_Data(obss,geo)
 
 

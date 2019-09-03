@@ -9,6 +9,7 @@
 
 #include <ostream>
 #include <string>
+#include <vector>
 
 #include "oops/base/Variables.h"
 #include "ufo/Locations.h"
@@ -27,6 +28,13 @@ ObsDiagnostics::ObsDiagnostics(const ioda::ObsSpace & os, const Locations & locs
 // -----------------------------------------------------------------------------
 
 void ObsDiagnostics::save(const std::string &) const {}
+
+// -----------------------------------------------------------------------------
+
+void ObsDiagnostics::get(std::vector<float> & vals, const std::string & var,
+                         const int lev) const {
+  gdiags_.get(vals, var, lev);
+}
 
 // -----------------------------------------------------------------------------
 

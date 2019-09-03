@@ -17,6 +17,7 @@
 #include "oops/util/missingValues.h"
 #include "ufo/filters/obsfunctions/ObsFunction.h"
 #include "ufo/GeoVaLs.h"
+#include "ufo/ObsDiagnostics.h"
 #include "ufo/utils/SplitVarGroup.h"
 
 namespace ufo {
@@ -24,7 +25,7 @@ namespace ufo {
 // -----------------------------------------------------------------------------
 
 ObsFilterData::ObsFilterData(ioda::ObsSpace & obsdb)
-  : obsdb_(obsdb), gvals_(), hofx_() {
+  : obsdb_(obsdb), gvals_(), hofx_(), diags_() {
   oops::Log::trace() << "ObsFilterData created" << std::endl;
 }
 
@@ -48,6 +49,12 @@ void ObsFilterData::associate(const ioda::ObsVector & hofx) {
 
 // -----------------------------------------------------------------------------
 
+void ObsFilterData::associate(const ObsDiagnostics & diags) {
+  diags_ = &diags;
+}
+
+// -----------------------------------------------------------------------------
+
 size_t ObsFilterData::nlocs() const {
   return obsdb_.nlocs();
 }
@@ -62,6 +69,9 @@ bool ObsFilterData::has(const std::string & varname) const {
     return gvals_->has(var);
   } else if (grp == "ObsFunction" || grp == "HofXFunction") {
     return ObsFunctionFactory::functionExists(var);
+  } else if (grp == "ObsDiag") {
+    ASSERT(diags_);
+    return diags_->has(var);
   } else {
     return obsdb_.has(grp, var);
   }
@@ -96,6 +106,9 @@ std::vector<float> ObsFilterData::get(const std::string & varname) const {
     for (size_t jj = 0; jj < nvals; ++jj) {
       values[jj] = (*hofx_)[iv + (jj * hofxnvars)];
     }
+  } else if (grp == "ObsDiag") {
+    ASSERT(diags_);
+    diags_->get(values, var);
   } else {
     obsdb_.get_db(grp, var, nvals, values.data());
   }

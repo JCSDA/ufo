@@ -8,6 +8,8 @@ set ( filters_files
       BackgroundCheck.h
       BlackList.cc
       BlackList.h
+      DiagBoundsCheck.cc
+      DiagBoundsCheck.h
       DifferenceCheck.cc
       DifferenceCheck.h
       ObsBoundsCheck.cc

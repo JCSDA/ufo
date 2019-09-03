@@ -14,7 +14,7 @@ public :: ufo_vars_read, ufo_vars_getindex
 INTEGER, PARAMETER, PUBLIC :: n_aerosols_gocart_default=14,&
      &n_aerosols_gocart_esrl=15,n_aerosols_other=1
 
-integer, parameter, public :: MAXVARLEN=56
+integer, parameter, public :: MAXVARLEN=60
 character(len=MAXVARLEN), public, parameter :: var_tv   = "virtual_temperature"
 character(len=MAXVARLEN), public, parameter :: var_ts   = "air_temperature"
 character(len=MAXVARLEN), public, parameter :: var_t    = "temperature"
@@ -65,6 +65,12 @@ character(len=MAXVARLEN), public, parameter :: var_sfc_geomz   = "surface_altitu
 character(len=MAXVARLEN), public, parameter :: var_sfc_rough   = "surface_roughness_length"
 character(len=MAXVARLEN), public, parameter :: var_sfc_t       = "surface_temperature"
 character(len=MAXVARLEN), public, parameter :: var_sfc_fact10  = "wind_reduction_factor_at_10m"
+character(len=MAXVARLEN), public, parameter :: var_sfc_emiss   = "surface_emissivity"
+character(len=MAXVARLEN), public, parameter :: var_opt_depth   = "optical_thickness_of_atmosphere_layer"
+character(len=MAXVARLEN), public, parameter :: var_radiance    = "toa_outgoing_radiance_per_unit_wavenumber"
+character(len=MAXVARLEN), public, parameter :: var_tb     = "brightness_temperature"
+character(len=MAXVARLEN), public, parameter :: var_tb_clr = "brightness_temperature_assuming_clear_sky"
+
 
 character(len=MAXVARLEN), public, parameter :: var_refl        = "equivalent_reflectivity_factor"
 character(len=MAXVARLEN), public, parameter :: var_w           = "upward_air_velocity"
@@ -141,7 +147,6 @@ type(fckit_configuration), intent(in)                              :: f_vars
 character(len=MAXVARLEN), dimension(:), allocatable, intent(inout) :: vars
 
 integer :: nvars
-character(len=30*MAXVARLEN) :: svars
 character(len=:), allocatable :: str
 
 if (f_vars%has("nvars")) then
@@ -149,8 +154,7 @@ if (f_vars%has("nvars")) then
   if (allocated(vars)) deallocate(vars)
   allocate(vars(nvars))
   call f_vars%get_or_die("variables",str)
-  svars = str
-  read(svars,*) vars
+  read(str,*) vars
 else
   allocate(vars(0))
 endif

@@ -10,6 +10,7 @@
 
 #include <ostream>
 #include <string>
+#include <vector>
 
 #include <boost/noncopyable.hpp>
 
@@ -38,6 +39,13 @@ class ObsDiagnostics : public util::Printable,
 
 // I/O
   void save(const std::string &) const;
+
+// Interfaces
+  int & toFortran() {return gdiags_.toFortran();}
+  const int & toFortran() const {return gdiags_.toFortran();}
+
+  bool has(const std::string & var) const {return gdiags_.has(var);}
+  void get(std::vector<float> &, const std::string &, const int lev = 1) const;
 
  private:
   void print(std::ostream &) const;
