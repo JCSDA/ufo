@@ -722,20 +722,20 @@ end subroutine ufo_geovals_maxloc
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_geovals_read_netcdf(self, filename, c_obspace, c_vars)
+subroutine ufo_geovals_read_netcdf(self, filename, loc_multiplier, c_obspace, c_vars)
 use netcdf
 
 implicit none
 type(ufo_geovals), intent(inout)  :: self
 character(max_string), intent(in) :: filename
+integer, intent(in)               :: loc_multiplier
 type(c_ptr), intent(in)           :: c_obspace
 type(c_ptr), intent(in)           :: c_vars
 
-integer :: nlocs, nlocs_all, nlocs_var
+integer :: nlocs, gv_all_nlocs, nlocs_var
 integer :: nval
 integer :: obs_nlocs
 integer :: obs_all_nlocs
-integer :: indx_mult
 integer :: iloc
 integer :: jloc, jloc_start, jloc_end
 integer :: iloc_new
@@ -764,7 +764,7 @@ if(ierr /= nf90_noerr) then
   call abor1_ftn(err_msg)
 endif
 call check('nf90_inq_dimid', nf90_inq_dimid(ncid, "nlocs", dimid))
-call check('nf90_inquire_dimension', nf90_inquire_dimension(ncid, dimid, len = nlocs_all))
+call check('nf90_inquire_dimension', nf90_inquire_dimension(ncid, dimid, len = gv_all_nlocs))
 
 !> round-robin distribute the observations to PEs
 !> Calculate how many obs. on each PE
@@ -773,53 +773,35 @@ obs_nlocs = obsspace_get_nlocs(c_obspace)
 allocate(obs_dist_indx(obs_nlocs))
 call obsspace_get_index(c_obspace, obs_dist_indx)
 
-if (nlocs_all .lt. obs_all_nlocs) then
-  write(err_msg,*) "Error: geovals file must have at least as many locations as the obs file"
+! loc_multiplier specifies how many locations in the geovals file per
+! single location in the obs file. There needs to be at least
+! loc_multiplier * obs_all_nlocs locations in the geovals file.
+
+if (gv_all_nlocs .lt. (loc_multiplier * obs_all_nlocs)) then
+  write(obs_nlocs_str, *) loc_multiplier * obs_all_nlocs
+  write(geo_nlocs_str, *) gv_all_nlocs
+  write(err_msg,'(7a)') &
+     "Error: Number of locations in the geovals file (", &
+     trim(adjustl(geo_nlocs_str)), ") must be greater than or equal to ", &
+     "the product of loc_multiplier and number of locations in the ", &
+     "obs file (", trim(adjustl(obs_nlocs_str)), ")"
   call abor1_ftn(err_msg)
-elseif (nlocs_all .eq. obs_all_nlocs) then
-  ! Have one-for-one relationship between obs and geovals locations. dist_indx
-  ! is already set as needed.
-  nlocs = obs_nlocs
-  allocate(dist_indx(nlocs))
-  dist_indx = obs_dist_indx
-else
-  ! Have multiple geovals locations for each obs location. Requirement is for
-  ! geovals number of locations be an integer multiple of obs number of locations.
-  !
-  ! If requirement is met, then the dist_indx needs to be expanded to include
-  ! the multiple locations from the geovals file. If the multiple mentioned above
-  ! is n, then the assumption is that in the geovals file, the corresponding list
-  ! of indexes for location i in the obs file is related by the following:
-  !
-  !    start: (i-1)*n + 1
-  !    end:   i*n
-  !
-  indx_mult = nlocs_all / obs_all_nlocs
-  if (mod(nlocs_all, indx_mult) .eq. 0) then
-    ! Add extra indices to dist_indx
-    nlocs = indx_mult * obs_nlocs
-    allocate(dist_indx(nlocs))
-    iloc_new = 1
-    do iloc = 1,obs_nlocs
-      jloc_start = ((obs_dist_indx(iloc) - 1) * indx_mult) + 1
-      jloc_end = obs_dist_indx(iloc) * indx_mult
-      do jloc = jloc_start, jloc_end
-        dist_indx(iloc_new) = jloc
-        iloc_new = iloc_new + 1
-      enddo
-    enddo
-  else
-    write(obs_nlocs_str, *) obs_all_nlocs
-    write(geo_nlocs_str, *) nlocs_all
-    print*, "WARNING: The number of locations (", trim(adjustl(geo_nlocs_str)), &
-            ") in the geovals file is greater than the number of locations (", &
-            trim(adjustl(obs_nlocs_str)), ") in the obs file"
-    print*, "         Will use the first ", trim(adjustl(obs_nlocs_str)), &
-            " locations from the geovals file."
-    nlocs = obs_nlocs
-    dist_indx = obs_dist_indx
-  endif
 endif
+
+! We have enough locations in the geovals file to cover the span of the
+! number of locations in the obs file. Generate the dist_indx according
+! to the loc_multiplier and obs_nlocs values.
+nlocs = loc_multiplier * obs_nlocs
+allocate(dist_indx(nlocs))
+iloc_new = 1
+do iloc = 1,obs_nlocs
+  jloc_start = ((obs_dist_indx(iloc) - 1) * loc_multiplier) + 1
+  jloc_end = obs_dist_indx(iloc) * loc_multiplier
+  do jloc = jloc_start, jloc_end
+    dist_indx(iloc_new) = jloc
+    iloc_new = iloc_new + 1
+  enddo
+enddo
 
 ! allocate geovals structure
 call ufo_geovals_setup(self, c_vars, nlocs)
@@ -837,8 +819,8 @@ do ivar = 1, self%nvar
   !> read 1d variable
   if (ndims == 1) then
     call check('nf90_inquire_dimension', nf90_inquire_dimension(ncid, dimids(1), len = nlocs_var))
-    if (nlocs_var /= nlocs_all) then
-      call abor1_ftn('ufo_geovals_read_netcdf: var dim /= nlocs_all')
+    if (nlocs_var /= gv_all_nlocs) then
+      call abor1_ftn('ufo_geovals_read_netcdf: var dim /= gv_all_nlocs')
     endif
     nval = 1
     !> allocate geoval for this variable
@@ -853,8 +835,8 @@ do ivar = 1, self%nvar
   elseif (ndims == 2) then
     call check('nf90_inquire_dimension', nf90_inquire_dimension(ncid, dimids(1), len = nval))
     call check('nf90_inquire_dimension', nf90_inquire_dimension(ncid, dimids(2), len = nlocs_var))
-    if (nlocs_var /= nlocs_all) then
-      call abor1_ftn('ufo_geovals_read_netcdf: var dim /= nlocs_all')
+    if (nlocs_var /= gv_all_nlocs) then
+      call abor1_ftn('ufo_geovals_read_netcdf: var dim /= gv_all_nlocs')
     endif
     !> allocate geoval for this variable
     self%geovals(ivar)%nval = nval
