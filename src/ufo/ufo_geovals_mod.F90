@@ -129,7 +129,7 @@ if (ivar < 0) then
   do jv=1,self%nvar
     write(0,*)'ufo_geovals_get_var ',jv,trim(self%variables(jv))
   enddo
-  write(err_msg,*) myname_, trim(varname), ' doesnt exist'
+  write(err_msg,*) myname_, " ", trim(varname), ' doesnt exist'
   call abor1_ftn(err_msg)
 else
   geoval => self%geovals(ivar)

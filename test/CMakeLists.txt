@@ -78,6 +78,8 @@ list( APPEND ufo_test_input
   testinput/qc_domain_latitude.yaml
   testinput/qc_domain_minpress.yaml
   testinput/function_velocity.yaml
+  testinput/reflectivity.yaml
+  testinput/radialvelocity.yaml
 )
 
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/testinput)
@@ -133,6 +135,8 @@ list( APPEND ufo_test_data
   marine/Jason-2-2018-04-15_geovals.nc
   marine/profile_2018-04-15_geovals.nc
   marine/sst_obs-2018-04-15_geovals.nc
+  atmosphere/radar_dbz_geoval_2019052222.nc4
+  atmosphere/radar_rw_geoval_2019052222.nc4
 )
 
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Data)
@@ -181,6 +185,9 @@ list (APPEND ioda_obs_test_data
   marine/Jason-2-2018-04-15.nc
   marine/profile_2018-04-15.nc
   marine/sst_obs-2018-04-15.nc4
+
+  atmosphere/radar_dbz_obs_2019052222.nc4
+  atmosphere/radar_rw_obs_2019052222.nc4
 
   )
 
@@ -624,6 +631,16 @@ ecbuild_add_test( TARGET  test_ufo_aod_opr_crtm
 ecbuild_add_test( TARGET  test_ufo_aod_tlad_crtm
                   SOURCES mains/TestObsOperatorTLAD.cc
                   ARGS    "testinput/aod_crtm.yaml"
+                  LIBS    ufo )
+
+ecbuild_add_test( TARGET  test_ufo_radarreflectivity_opr
+                  SOURCES mains/TestObsOperator.cc
+                  ARGS    "testinput/reflectivity.yaml"
+                  LIBS    ufo )
+
+ecbuild_add_test( TARGET  test_ufo_radarradialvelocity_opr
+                  SOURCES mains/TestObsOperator.cc
+                  ARGS    "testinput/radialvelocity.yaml"
                   LIBS    ufo )
 
 #####################################################################

@@ -1,0 +1,22 @@
+window_begin: 2019-05-22T21:55:00Z
+window_end: 2019-05-22T22:05:00Z
+
+LinearObsOpTest:
+  coefTL: 0.1
+  toleranceTL: 1.0e-13
+  toleranceAD: 1.0e-11
+
+Observations:
+  ObsTypes:
+  - ObsOperator:
+      name: RadarRadialVelocity
+    ObsSpace:
+      name: Radar
+      ObsDataIn:
+        obsfile: Data/radar_rw_obs_2019052222.nc4
+      simulate:
+        variables: [radial_velocity]
+    GeoVaLs:
+      filename: Data/radar_rw_geoval_2019052222.nc4
+    vecequiv: GsiHofX
+    tolerance: 1.0e-05

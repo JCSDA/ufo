@@ -1,0 +1,23 @@
+window_begin: 2019-05-22T21:55:00Z
+window_end: 2019-05-22T22:05:00Z
+
+LinearObsOpTest:
+  coefTL: 0.1
+  toleranceTL: 1.0e-13
+  toleranceAD: 1.0e-11
+
+Observations:
+  ObsTypes:
+  - ObsOperator:
+      name: RadarReflectivity
+      VertCoord: geopotential_height
+    ObsSpace:
+      name: Radar
+      ObsDataIn:
+        obsfile: Data/radar_dbz_obs_2019052222.nc4
+      simulate:
+        variables: [equivalent_reflectivity_factor]
+    GeoVaLs:
+      filename: Data/radar_dbz_geoval_2019052222.nc4
+    vecequiv: GsiHofX
+    tolerance: 1.0e-05
