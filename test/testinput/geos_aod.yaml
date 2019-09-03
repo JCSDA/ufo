@@ -2,19 +2,19 @@ window_begin: 2018-04-14T21:00:00Z
 window_end: 2018-04-15T03:00:00Z
 
 LinearObsOpTest:
-  coefTL: 1.0e-9
-  toleranceTL: 1.0e-3
-  toleranceAD: 1.0e-11
+  coefTL: 1.0e-8
+  toleranceTL: 1.0e-08
+  toleranceAD: 1.0e-09
 
 Observations:
   ObsTypes:
   - ObsOperator:
       name: GeosAod
-      tracer_geovals: [ "dust_mixing_ratio_bin1", "dust_mixing_ratio_bin2",
-                        "dust_mixing_ratio_bin3", "dust_mixing_ratio_bin4",
-                        "dust_mixing_ratio_bin5", "sea_salt_mixing_ratio_bin1",
-                        "sea_salt_mixing_ratio_bin2", "sea_salt_mixing_ratio_bin3",
-                        "sea_salt_mixing_ratio_bin4", "sea_salt_mixing_ratio_bin5",
+      tracer_geovals: [ "dust_mixing_ratio_size_bin1", "dust_mixing_ratio_size_bin2",
+                        "dust_mixing_ratio_size_bin3", "dust_mixing_ratio_size_bin4",
+                        "dust_mixing_ratio_size_bin5", "sea_salt_mixing_ratio_size_bin1",
+                        "sea_salt_mixing_ratio_size_bin2", "sea_salt_mixing_ratio_size_bin3",
+                        "sea_salt_mixing_ratio_size_bin4", "sea_salt_mixing_ratio_size_bin5",
                         "hydrophobic_black_carbon", "hydrophilic_black_carbon",
                         "hydrophobic_organic_carbon", "hydrophilic_organic_carbon",
                         "sulfate_aerosols", "nitrate_size_bin1", "nitrate_size_bin2",
@@ -25,7 +25,7 @@ Observations:
     ObsSpace:
       name: GeosAod
       ObsDataIn:
-        obsfile: Data/geos_c360_aod_obs_2018041500_m.nc4
+        obsfile: Data/geos_aod_obs_2018041500_m.nc4
       simulate:
         variables: [Total_Aerosol_Optical_Depth_550]        
     GeoVaLs:
