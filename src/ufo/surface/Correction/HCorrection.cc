@@ -21,9 +21,6 @@
 namespace ufo {
 
 // -----------------------------------------------------------------------------
-static oops::FilterMaker<UfoTrait, oops::ObsFilter<UfoTrait, HCorrection> >
-  makerHCorrection_("HCorrection");
-// -----------------------------------------------------------------------------
 
 HCorrection::HCorrection(const ioda::ObsSpace & obsdb, const eckit::Configuration & config,
                          boost::shared_ptr<ioda::ObsDataVector<int> > flags,

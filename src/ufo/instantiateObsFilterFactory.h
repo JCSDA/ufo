@@ -25,6 +25,7 @@
 #include "ufo/filters/QCmanager.h"
 #include "ufo/filters/Thinning.h"
 #include "ufo/gnssro/QC/ROobserror.h"
+#include "ufo/surface/Correction/HCorrection.h"
 
 namespace ufo {
 template<typename MODEL> void instantiateObsFilterFactory() {
@@ -59,6 +60,8 @@ template<typename MODEL> void instantiateObsFilterFactory() {
            makerChk13_("ObsErrInflation Check");
   static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::DiagBoundsCheck> >
            makerChk14_("Diag Bounds Check");
+  static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::HCorrection> >
+           makerChk15_("HCorrection");
 }
 
 }  // namespace ufo
