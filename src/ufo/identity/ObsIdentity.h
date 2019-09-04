@@ -28,6 +28,7 @@ namespace ioda {
 
 namespace ufo {
   class GeoVaLs;
+  class ObsDiagnostics;
 
 // -----------------------------------------------------------------------------
 /// Generic identity observation operator class
@@ -40,7 +41,7 @@ class ObsIdentity : public ObsOperatorBase,
   virtual ~ObsIdentity();
 
 // Obs Operator
-  void simulateObs(const GeoVaLs &, ioda::ObsVector &) const;
+  void simulateObs(const GeoVaLs &, ioda::ObsVector &, ObsDiagnostics &) const override;
 
 // Other
   const oops::Variables & variables() const {return varin_;}

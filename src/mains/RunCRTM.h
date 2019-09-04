@@ -28,6 +28,7 @@ namespace ufo {
 template <typename MODEL> class RunCRTM : public oops::Application {
   typedef oops::GeoVaLs<MODEL>           GeoVaLs_;
   typedef oops::ObsAuxControl<MODEL>     ObsAuxCtrl_;
+  typedef oops::ObsDiagnostics<MODEL>    ObsDiags_;
   typedef oops::Observations<MODEL>      Observations_;
   typedef oops::ObsOperator<MODEL>       ObsOperator_;
   typedef oops::ObsSpaces<MODEL>         ObsSpaces_;
@@ -52,6 +53,8 @@ template <typename MODEL> class RunCRTM : public oops::Application {
     oops::Log::debug() << "Observations configuration is:" << obsconf << std::endl;
     ObsSpaces_ obsdb(obsconf, winbgn, winend);
 
+    oops::Variables diagvars;
+
     std::vector<eckit::LocalConfiguration> conf;
     obsconf.get("ObsTypes", conf);
 
@@ -61,15 +64,18 @@ template <typename MODEL> class RunCRTM : public oops::Application {
       ObsOperator_ hop(obsdb[jj], obsopconf);
 
       const eckit::LocalConfiguration gconf(conf[jj], "GeoVaLs");
-      const GeoVaLs_ gval(gconf, hop.variables());
+      const GeoVaLs_ gval(gconf, obsdb[jj], hop.variables());
 
       const ObsAuxCtrl_ ybias(conf[jj]);
 
-      ObsVector_ ovec(obsdb[jj]);
+      ObsVector_ hofx(obsdb[jj]);
+      ObsDiags_ diag(obsdb[jj],
+                     hop.locations(obsdb[jj].windowStart(), obsdb[jj].windowEnd()),
+                     diagvars);
 
-      hop.simulateObs(gval, ovec, ybias);
+      hop.simulateObs(gval, hofx, ybias, diag);
 
-      const double zz = ovec.rms();
+      const double zz = hofx.rms();
       const double xx = conf[jj].getDouble("rmsequiv");
       const double tol = conf[jj].getDouble("tolerance");
 //      BOOST_CHECK_CLOSE(xx, zz, tol);

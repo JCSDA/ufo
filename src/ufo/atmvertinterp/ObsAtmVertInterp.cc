@@ -14,6 +14,7 @@
 #include "ioda/ObsVector.h"
 
 #include "ufo/GeoVaLs.h"
+#include "ufo/ObsDiagnostics.h"
 
 namespace ufo {
 
@@ -46,7 +47,8 @@ ObsAtmVertInterp::~ObsAtmVertInterp() {
 
 // -----------------------------------------------------------------------------
 
-void ObsAtmVertInterp::simulateObs(const GeoVaLs & gom, ioda::ObsVector & ovec) const {
+void ObsAtmVertInterp::simulateObs(const GeoVaLs & gom, ioda::ObsVector & ovec,
+                                   ObsDiagnostics &) const {
   ufo_atmvertinterp_simobs_f90(keyOperAtmVertInterp_, gom.toFortran(), odb_,
                                ovec.nvars(), ovec.nlocs(), ovec.toFortran());
 }

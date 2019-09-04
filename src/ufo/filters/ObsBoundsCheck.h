@@ -19,13 +19,16 @@
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
 #include "oops/util/Printable.h"
+#include "ufo/filters/ObsFilterData.h"
 
 namespace ioda {
+  template <typename DATATYPE> class ObsDataVector;
   class ObsVector;
 }
 
 namespace ufo {
   class GeoVaLs;
+  class ObsDiagnostics;
 
 /// ObsBoundsCheck: generic quality control based on observation data only
 
@@ -43,16 +46,19 @@ class ObsBoundsCheck : public util::Printable,
 
   void preProcess() const {}
   void priorFilter(const GeoVaLs &) const;
-  void postFilter(const ioda::ObsVector &) const {}
+  void postFilter(const ioda::ObsVector &, const ObsDiagnostics &) const {}
 
   const oops::Variables & requiredGeoVaLs() const {return geovars_;}
+  const oops::Variables & requiredHdiagnostics() const {return diagvars_;}
 
  private:
   void print(std::ostream &) const;
 
   ioda::ObsSpace & obsdb_;
+  mutable ObsFilterData data_;
   const eckit::LocalConfiguration config_;
   const oops::Variables geovars_;
+  oops::Variables diagvars_;
   ioda::ObsDataVector<int> & flags_;
 };
 

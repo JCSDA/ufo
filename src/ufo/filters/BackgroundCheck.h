@@ -17,18 +17,21 @@
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
 #include "oops/util/Printable.h"
+#include "ufo/filters/ObsFilterData.h"
 
 namespace eckit {
   class Configuration;
 }
 
 namespace ioda {
+  template <typename DATATYPE> class ObsDataVector;
   class ObsSpace;
   class ObsVector;
 }
 
 namespace ufo {
   class GeoVaLs;
+  class ObsDiagnostics;
 
 /// BackgroundCheck: check observation closeness to background
 
@@ -44,19 +47,21 @@ class BackgroundCheck : public util::Printable,
 
   void preProcess() const {}
   void priorFilter(const GeoVaLs &) const;
-  void postFilter(const ioda::ObsVector &) const;
+  void postFilter(const ioda::ObsVector &, const ObsDiagnostics &) const;
 
   const oops::Variables & requiredGeoVaLs() const {return geovars_;}
+  const oops::Variables & requiredHdiagnostics() const {return diagvars_;}
 
  private:
   void print(std::ostream &) const;
 
   ioda::ObsSpace & obsdb_;
+  mutable ObsFilterData data_;
   const eckit::LocalConfiguration config_;
   float abs_threshold_;
   float threshold_;
-  const GeoVaLs mutable * gv_;
   const oops::Variables geovars_;
+  const oops::Variables diagvars_;
   ioda::ObsDataVector<int> & flags_;
   ioda::ObsDataVector<float> & obserr_;
 };

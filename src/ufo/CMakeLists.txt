@@ -9,6 +9,7 @@ list( APPEND ufo_src_files
     GeoVaLs.h
     GeoVaLs.interface.F90
     GeoVaLs.interface.h
+    instantiateObsFilterFactory.h
     LinearObsOperator.cc
     LinearObsOperator.h
     LinearObsOperatorBase.cc
@@ -17,9 +18,14 @@ list( APPEND ufo_src_files
     Locations.h
     Locations.interface.F90
     Locations.interface.h
+    ObsBias.cc
     ObsBias.h
+    ObsBiasCovariance.cc
     ObsBiasCovariance.h
+    ObsBiasIncrement.cc
     ObsBiasIncrement.h
+    ObsDiagnostics.cc
+    ObsDiagnostics.h
     ObsOperator.cc
     ObsOperator.h
     ObsOperatorBase.cc
@@ -43,11 +49,15 @@ endfunction(PREPEND)
 
 add_subdirectory( utils )
 add_subdirectory( basis )
+add_subdirectory( obsbias )
 add_subdirectory( filters )
 add_subdirectory( identity )
 add_subdirectory( atmvertinterp )
+add_subdirectory( atmvertinterplay )
 add_subdirectory( atmsfcinterp )
 add_subdirectory( crtm )
+add_subdirectory( radarreflectivity )
+add_subdirectory( radarradialvelocity )
 if( ${RTTOV_FOUND} )
     add_subdirectory( rttov )
 endif( ${RTTOV_FOUND} )
@@ -62,9 +72,11 @@ endif( ${GEOS-AERO_FOUND} )
 list( APPEND ufo_src_files
     ${utils_src_files}
     ${basis_src_files}
+    ${obsbias_src_files}
     ${filters_src_files}
     ${identity_src_files}
     ${atmvertinterp_src_files}
+    ${atmvertinterplay_src_files}
     ${atmsfcinterp_src_files}
     ${crtm_src_files}
     ${rttov_src_files}
@@ -72,6 +84,8 @@ list( APPEND ufo_src_files
     ${surface_src_files}
     ${ncdiag_src_files}
     ${geosaod_src_files}
+    ${radarreflectivity_src_files}
+    ${radarradialvelocity_src_files}
 )
 list( APPEND ufo_src_files ${marine_src_files} )
 list( APPEND UFO_LIBS_DEP oops ioda crtm ${LAPACK_LIBRARIES} ${NETCDF_LIBRARIES} )

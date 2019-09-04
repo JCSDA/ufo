@@ -52,6 +52,7 @@ subroutine ufo_gnssro_bndropp2d_setup(self, f_conf, c_size)
 
   allocate(self%obsLon2d(c_size*self%roconf%n_horiz))
   allocate(self%obsLat2d(c_size*self%roconf%n_horiz))
+
   self%obsLon2d = 0.0
   self%obsLat2d = 0.0
 
@@ -96,7 +97,8 @@ subroutine ufo_gnssro_bndropp2d_simobs(self, geovals, hofx, obss)
   call fckit_log%info(err_msg)
 ! check if nlocs is consistent in geovals & hofx
   if (geovals%nlocs /= size(hofx)*n_horiz) then
-      write(err_msg,*) myname_, ' error: 2d nlocs inconsistent!'
+      write(err_msg,*) myname_, ' error: 2d nlocs inconsistent! geovals%nlocs, size(hofx), &
+                                  and n_horiz are', geovals%nlocs, size(hofx), n_horiz
       call abor1_ftn(err_msg)
   endif
 

@@ -8,17 +8,19 @@
 #ifndef UFO_FILTERS_PROCESSWHERE_H_
 #define UFO_FILTERS_PROCESSWHERE_H_
 
+#include <set>
+#include <string>
 #include <vector>
 
 namespace eckit {class Configuration;}
-namespace ioda {class ObsSpace;}
+
 namespace oops {class Variables;}
 
 namespace ufo {
-  class GeoVaLs;
+  class ObsFilterData;
 
-oops::Variables preProcessWhere(const eckit::Configuration &);
-std::vector<bool> processWhere(ioda::ObsSpace &, const GeoVaLs &, const eckit::Configuration &);
+oops::Variables preProcessWhere(const eckit::Configuration &, const std::string &);
+std::vector<bool> processWhere(const eckit::Configuration &, ObsFilterData &);
 
 }  // namespace ufo
 

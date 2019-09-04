@@ -357,17 +357,19 @@ end subroutine ufo_geovals_maxloc_c
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_geovals_read_file_c(c_key_self, c_conf, c_vars) bind(c,name='ufo_geovals_read_file_f90')
+subroutine ufo_geovals_read_file_c(c_key_self, c_conf, c_obspace, c_vars) bind(c,name='ufo_geovals_read_file_f90')
 
 use datetime_mod
 
 implicit none
 integer(c_int), intent(inout) :: c_key_self
 type(c_ptr), intent(in)    :: c_conf
+type(c_ptr), value, intent(in)    :: c_obspace
 type(c_ptr), intent(in)    :: c_vars
 
 type(ufo_geovals), pointer :: self
 character(max_string) :: filename
+integer :: loc_multiplier
 character(len=:), allocatable :: str
 type(fckit_configuration) :: f_conf
 
@@ -380,8 +382,14 @@ f_conf = fckit_configuration(c_conf)
 call f_conf%get_or_die("filename",str)
 filename = str
 
+if (f_conf%has("loc_multiplier")) then
+  call f_conf%get_or_die("loc_multiplier", loc_multiplier)
+else
+  loc_multiplier = 1
+endif
+
 ! read geovals
-call ufo_geovals_read_netcdf(self, filename, c_vars)
+call ufo_geovals_read_netcdf(self, filename, loc_multiplier, c_obspace, c_vars)
 
 end subroutine ufo_geovals_read_file_c
 

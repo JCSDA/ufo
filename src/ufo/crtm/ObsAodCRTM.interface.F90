@@ -35,19 +35,18 @@ contains
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_aodcrtm_setup_c(c_key_self, c_confOpts, c_confOper) bind(c,name='ufo_aodcrtm_setup_f90')
+subroutine ufo_aodcrtm_setup_c(c_key_self, c_conf) bind(c,name='ufo_aodcrtm_setup_f90')
 implicit none
 integer(c_int), intent(inout) :: c_key_self
-type(c_ptr),    intent(in)    :: c_confOpts, c_confOper
+type(c_ptr),    intent(in)    :: c_conf
 
 type(ufo_aodcrtm), pointer :: self
-type(fckit_configuration) :: f_confOpts, f_confOper
+type(fckit_configuration) :: f_conf
 
 call ufo_aodcrtm_registry%setup(c_key_self, self)
-f_confOpts = fckit_configuration(c_confOpts)
-f_confOper = fckit_configuration(c_confOper)
+f_conf = fckit_configuration(c_conf)
 
-call self%setup(f_confOpts,f_confOper)
+call self%setup(f_conf)
 
 end subroutine ufo_aodcrtm_setup_c
 

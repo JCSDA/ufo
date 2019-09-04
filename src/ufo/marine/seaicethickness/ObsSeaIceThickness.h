@@ -30,6 +30,7 @@ namespace ioda {
 
 namespace ufo {
   class GeoVaLs;
+  class ObsDiagnostics;
 
 // -----------------------------------------------------------------------------
 /// Sea ice thickness observation operator class
@@ -42,7 +43,7 @@ class ObsSeaIceThickness : public ObsOperatorBase,
   virtual ~ObsSeaIceThickness();
 
 // Obs Operator
-  void simulateObs(const GeoVaLs &, ioda::ObsVector &) const;
+  void simulateObs(const GeoVaLs &, ioda::ObsVector &, ObsDiagnostics &) const override;
 
 // Other
   const oops::Variables & variables() const {return *varin_;}

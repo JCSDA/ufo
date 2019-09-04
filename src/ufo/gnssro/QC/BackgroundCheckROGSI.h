@@ -17,6 +17,7 @@
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
 #include "oops/util/Printable.h"
+#include "ufo/filters/ObsFilterData.h"
 
 namespace eckit {
   class Configuration;
@@ -29,6 +30,7 @@ namespace ioda {
 
 namespace ufo {
   class GeoVaLs;
+  class ObsDiagnostics;
 
 /// BackgroundCheckROGSI: check observation closeness to background
 
@@ -38,23 +40,25 @@ class BackgroundCheckROGSI : public util::Printable,
   static const std::string classname() {return "ufo::BackgroundCheckROGSI";}
 
   BackgroundCheckROGSI(ioda::ObsSpace &, const eckit::Configuration &,
-                  boost::shared_ptr<ioda::ObsDataVector<int> >,
-                  boost::shared_ptr<ioda::ObsDataVector<float> >);
+                       boost::shared_ptr<ioda::ObsDataVector<int> >,
+                       boost::shared_ptr<ioda::ObsDataVector<float> >);
   ~BackgroundCheckROGSI();
 
   void preProcess() const {}
   void priorFilter(const GeoVaLs &) const;
-  void postFilter(const ioda::ObsVector &) const;
+  void postFilter(const ioda::ObsVector &, const ObsDiagnostics &) const;
 
   const oops::Variables & requiredGeoVaLs() const {return geovars_;}
+  const oops::Variables & requiredHdiagnostics() const {return diagvars_;}
 
  private:
   void print(std::ostream &) const;
 
   ioda::ObsSpace & obsdb_;
+  mutable ObsFilterData data_;
   const eckit::LocalConfiguration config_;
-  const GeoVaLs mutable * gv_;
   const oops::Variables geovars_;
+  const oops::Variables diagvars_;
   ioda::ObsDataVector<int> & flags_;
 };
 

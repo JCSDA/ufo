@@ -21,12 +21,13 @@
 #include "oops/util/Printable.h"
 
 namespace ioda {
-class ObsVector;
+  class ObsVector;
 }
 
 namespace ufo {
-class GeoVaLs;
-class Locations;
+  class GeoVaLs;
+  class Locations;
+  class ObsDiagnostics;
 
 // -----------------------------------------------------------------------------
 /// Base class for observation operators
@@ -39,7 +40,7 @@ class ObsOperatorBase : public util::Printable,
   virtual ~ObsOperatorBase() {}
 
 /// Obs Operator
-  virtual void simulateObs(const GeoVaLs &, ioda::ObsVector &) const = 0;
+  virtual void simulateObs(const GeoVaLs &, ioda::ObsVector &, ObsDiagnostics &) const = 0;
 
 /// Operator input required from Model
   virtual const oops::Variables & variables() const = 0;

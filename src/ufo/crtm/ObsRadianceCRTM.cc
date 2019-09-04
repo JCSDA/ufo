@@ -20,6 +20,7 @@
 
 #include "ufo/GeoVaLs.h"
 #include "ufo/ObsBias.h"
+#include "ufo/ObsDiagnostics.h"
 
 namespace ufo {
 
@@ -37,14 +38,9 @@ ObsRadianceCRTM::ObsRadianceCRTM(const ioda::ObsSpace & odb,
   const oops::Variables & observed = odb.obsvariables();
   std::vector<int> channels_list = observed.channels();
 
-  // establish options and operator configs
-  const eckit::LocalConfiguration obsOpts(config, "ObsOptions");
-  const eckit::Configuration * configOpts = &obsOpts;
-
-  const eckit::Configuration * configOper = &config;
-
   // call Fortran setup routine
-  ufo_radiancecrtm_setup_f90(keyOperRadianceCRTM_, &configOpts, &configOper,
+  const eckit::Configuration * configc = &config;
+  ufo_radiancecrtm_setup_f90(keyOperRadianceCRTM_, &configc,
                              channels_list.size(), channels_list[0], varin_);
 
   oops::Log::info() << "ObsRadianceCRTM channels: " << channels_list << std::endl;
@@ -60,9 +56,11 @@ ObsRadianceCRTM::~ObsRadianceCRTM() {
 
 // -----------------------------------------------------------------------------
 
-void ObsRadianceCRTM::simulateObs(const GeoVaLs & gom, ioda::ObsVector & ovec) const {
+void ObsRadianceCRTM::simulateObs(const GeoVaLs & gom, ioda::ObsVector & ovec,
+                                  ObsDiagnostics & dvec) const {
   ufo_radiancecrtm_simobs_f90(keyOperRadianceCRTM_, gom.toFortran(), odb_,
-                          ovec.nvars(), ovec.nlocs(), ovec.toFortran());
+                          ovec.nvars(), ovec.nlocs(), ovec.toFortran(),
+                          dvec.toFortran());
   oops::Log::trace() << "ObsRadianceCRTM simulateObs done." << std::endl;
 }
 

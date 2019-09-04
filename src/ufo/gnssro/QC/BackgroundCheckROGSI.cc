@@ -33,11 +33,12 @@ static oops::FilterMaker<UfoTrait, oops::ObsFilter<UfoTrait, BackgroundCheckROGS
   makerBgChk_("Background Check ROGSI");
 // -----------------------------------------------------------------------------
 
-BackgroundCheckROGSI::BackgroundCheckROGSI(ioda::ObsSpace & os, const eckit::Configuration & config,
-                                 boost::shared_ptr<ioda::ObsDataVector<int> > flags,
-                                 boost::shared_ptr<ioda::ObsDataVector<float> > obserr)
-  : obsdb_(os), config_(config),  gv_(NULL),
-    geovars_(preProcessWhere(config_)), flags_(*flags)
+BackgroundCheckROGSI::BackgroundCheckROGSI(ioda::ObsSpace & os,
+                                           const eckit::Configuration & config,
+                                           boost::shared_ptr<ioda::ObsDataVector<int> > flags,
+                                           boost::shared_ptr<ioda::ObsDataVector<float> > obserr)
+  : obsdb_(os), data_(obsdb_), config_(config),
+    geovars_(preProcessWhere(config_, "GeoVaLs")), flags_(*flags)
 {
   oops::Log::trace() << "BackgroundCheckROGSI contructor starting: "
                      << "using GSI style BackgroundCheck for GnssroBndGSI" << std::endl;
@@ -56,12 +57,12 @@ BackgroundCheckROGSI::~BackgroundCheckROGSI() {
 // -----------------------------------------------------------------------------
 
 void BackgroundCheckROGSI::priorFilter(const GeoVaLs & gv) const {
-  gv_ = &gv;
+  data_.associate(gv);
 }
 
 // -----------------------------------------------------------------------------
 
-void BackgroundCheckROGSI::postFilter(const ioda::ObsVector & hofx) const {
+void BackgroundCheckROGSI::postFilter(const ioda::ObsVector & hofx, const ObsDiagnostics &) const {
   oops::Log::trace() << "BackgroundCheckROGSI postFilter" << std::endl;
 
   const oops::Variables vars(config_);
@@ -80,7 +81,8 @@ void BackgroundCheckROGSI::postFilter(const ioda::ObsVector & hofx) const {
                                          "MetaData");  // background temperature at obs location
 
 // Select where the background check will apply
-  std::vector<bool> apply = processWhere(obsdb_, *gv_, config_);
+  data_.associate(hofx);
+  std::vector<bool> apply = processWhere(config_, data_);
 
   for (size_t jv = 0; jv < vars.size(); ++jv) {
     size_t iv = observed.find(vars[jv]);

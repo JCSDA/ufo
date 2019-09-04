@@ -30,6 +30,7 @@ namespace ioda {
 namespace ufo {
   class GeoVaLs;
   class ObsBias;
+  class ObsDiagnostics;
 
 // -----------------------------------------------------------------------------
 /// Marinevertinterp observation operator class
@@ -42,7 +43,7 @@ class ObsMarineVertInterp : public ObsOperatorBase,
   virtual ~ObsMarineVertInterp();
 
 // Obs Operator
-  void simulateObs(const GeoVaLs &, ioda::ObsVector &) const;
+  void simulateObs(const GeoVaLs &, ioda::ObsVector &, ObsDiagnostics &) const override;
 
 // Other
   const oops::Variables & variables() const {return varin_;}

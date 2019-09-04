@@ -11,7 +11,6 @@
 #include <iostream>
 #include <vector>
 
-#include "oops/util/Logger.h"
 #include "oops/util/Printable.h"
 
 namespace eckit {
@@ -27,28 +26,30 @@ class ObsBiasIncrement : public util::Printable {
  public:
 /// Constructor, destructor
   ObsBiasIncrement() {}
-  explicit ObsBiasIncrement(const eckit::Configuration &) {}
-  ObsBiasIncrement(const ObsBiasIncrement &, const bool copy = true) {}
-  ObsBiasIncrement(const ObsBiasIncrement &, const eckit::Configuration &) {}
+  explicit ObsBiasIncrement(const eckit::Configuration &);
+  ObsBiasIncrement(const ObsBiasIncrement &, const bool = true);
+  ObsBiasIncrement(const ObsBiasIncrement &, const eckit::Configuration &);
   ~ObsBiasIncrement() {}
 
 /// Linear algebra operators
-  void diff(const ObsBias &, const ObsBias &) {}
-  void zero() {}
-  ObsBiasIncrement & operator=(const ObsBiasIncrement &) {return *this;}
-  ObsBiasIncrement & operator+=(const ObsBiasIncrement &) {return *this;}
-  ObsBiasIncrement & operator-=(const ObsBiasIncrement &) {return *this;}
-  ObsBiasIncrement & operator*=(const double) {return *this;}
-  void axpy(const double, const ObsBiasIncrement &) {}
-  double dot_product_with(const ObsBiasIncrement &) const {
-    oops::Log::trace() << "ufo::ObsBiasIncrement dot product" << std::endl;
-    return 0.0;
-  }
+  void diff(const ObsBias &, const ObsBias &);
+  void zero();
+  void random();
+  ObsBiasIncrement & operator=(const ObsBiasIncrement &);
+  ObsBiasIncrement & operator+=(const ObsBiasIncrement &);
+  ObsBiasIncrement & operator-=(const ObsBiasIncrement &);
+  ObsBiasIncrement & operator*=(const double);
+  void axpy(const double, const ObsBiasIncrement &);
+  double dot_product_with(const ObsBiasIncrement &) const;
 
 /// I/O and diagnostics
   void read(const eckit::Configuration &) {}
   void write(const eckit::Configuration &) const {}
-  double norm() const {return 0.0;}
+  double norm() const;
+  std::size_t size() const {return biasinc_.size();}
+
+  double & operator[](const unsigned int ii) {return biasinc_[ii];}
+  const double & operator[](const unsigned int ii) const {return biasinc_[ii];}
 
 /// Serialize and deserialize
   size_t serialSize() const {return 0;}
@@ -57,6 +58,7 @@ class ObsBiasIncrement : public util::Printable {
 
  private:
   void print(std::ostream &) const {}
+  std::vector<double> biasinc_;
 };
 
 // -----------------------------------------------------------------------------

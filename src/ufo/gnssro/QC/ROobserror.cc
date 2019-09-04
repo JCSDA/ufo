@@ -21,9 +21,6 @@
 namespace ufo {
 
 // -----------------------------------------------------------------------------
-static oops::FilterMaker<UfoTrait, oops::ObsFilter<UfoTrait, ROobserror> >
-     makerROobserror_("ROobserror");
-// -----------------------------------------------------------------------------
 
 ROobserror::ROobserror(const ioda::ObsSpace & os,
                        const eckit::Configuration & config,
@@ -54,10 +51,6 @@ void ROobserror::priorFilter(const GeoVaLs & gv) const {
   flags_->read("FortranQC");    // should get values from fortran properly
   obserr_->read("FortranERR");  // should get values from fortran properly
 }
-
-// -----------------------------------------------------------------------------
-
-void ROobserror::postFilter(const ioda::ObsVector & hofxb) const {}
 
 // -----------------------------------------------------------------------------
 

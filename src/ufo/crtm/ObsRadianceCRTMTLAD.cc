@@ -35,23 +35,9 @@ ObsRadianceCRTMTLAD::ObsRadianceCRTMTLAD(const ioda::ObsSpace & odb,
   const oops::Variables & observed = odb.obsvariables();
   std::vector<int> channels_list = observed.channels();
 
-  // establish options, operator, and linear operator configs
-  const eckit::LocalConfiguration obsOpts(config, "ObsOptions");
-  const eckit::Configuration * configOpts = &obsOpts;
-
-  const eckit::Configuration * configOper = &config;
-
-  const eckit::Configuration * configLinOper;
-  eckit::LocalConfiguration obsLinOper;
-  if ( config.get("LinearObsOperator", obsLinOper) ) {
-     configLinOper = &obsLinOper;
-  } else {
-     configLinOper = &config;
-  }
-
   // call Fortran setup routine
-  ufo_radiancecrtm_tlad_setup_f90(keyOperRadianceCRTM_, &configOpts, &configOper,
-                                  &configLinOper,
+  const eckit::Configuration * configc = &config;
+  ufo_radiancecrtm_tlad_setup_f90(keyOperRadianceCRTM_, &configc,
                                   channels_list.size(), channels_list[0], varin_);
 
   oops::Log::trace() << "ObsRadianceCRTMTLAD created" << std::endl;

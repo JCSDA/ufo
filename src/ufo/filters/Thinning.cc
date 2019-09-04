@@ -25,13 +25,11 @@
 namespace ufo {
 
 // -----------------------------------------------------------------------------
-static oops::FilterMaker<UfoTrait, oops::ObsFilter<UfoTrait, Thinning>> mkThinning_("Thinning");
-// -----------------------------------------------------------------------------
 
-Thinning::Thinning(ioda::ObsSpace & obsdb, const eckit::Configuration & config,
+Thinning::Thinning(const ioda::ObsSpace & obsdb, const eckit::Configuration & config,
                    boost::shared_ptr<ioda::ObsDataVector<int> > flags,
                    boost::shared_ptr<ioda::ObsDataVector<float> >)
-  : obsdb_(obsdb), config_(config), geovars_(), flags_(*flags)
+  : obsdb_(obsdb), config_(config), geovars_(), diagvars_(), flags_(*flags)
 {
   oops::Log::debug() << "Thinning: config = " << config_ << std::endl;
 }

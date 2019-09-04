@@ -51,7 +51,7 @@ f_conf = fckit_configuration(c_conf)
 f_varconf = fckit_configuration(c_varconf)
 
 call ufo_vars_read(f_varconf, vars)
-call self%setup(vars)
+call self%setup(f_conf, vars)
 deallocate(vars)
 
 !> Update C++ ObsOperator with input variable list

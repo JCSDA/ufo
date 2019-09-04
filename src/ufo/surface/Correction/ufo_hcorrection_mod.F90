@@ -7,11 +7,10 @@
 
 module ufo_hcorrection_mod
 
-use iso_c_binding
+use fckit_configuration_module, only: fckit_configuration
 use kinds
 use ufo_geovals_mod
 use obsspace_mod
-use config_mod
 use ufo_vars_mod
 use missing_values_mod
 use vert_interp_mod
@@ -36,16 +35,22 @@ end type ufo_hcorrection
 contains
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_hcorrection_create(self, conf)
+subroutine ufo_hcorrection_create(self, f_conf)
 implicit none
 type(ufo_hcorrection), intent(inout) :: self
-type(c_ptr), intent(in)          :: conf
+type(fckit_configuration), intent(in):: f_conf
+character(len=:), allocatable        :: str
 
-! TODO: set self%geovars (list of variables to use from GeoVaLs) if needed
 allocate(self%geovars(5))
 self%geovars = (/var_tv,var_ps,var_prs,var_geomz,var_sfc_geomz/)
-self%da_psfc_scheme = config_get_string(conf, max_string, "da_psfc_scheme", "UKMO")
-self%max_hdiff = config_get_int(conf, "max_hdiff", 100)
+
+self%da_psfc_scheme = "UKMO"
+if (f_conf%has("da_psfc_scheme")) then
+   call f_conf%get_or_die("da_psfc_scheme",str)
+   self%da_psfc_scheme = str
+end if
+self%max_hdiff = 100
+if (f_conf%has("max_hdiff")) call f_conf%get_or_die("max_hdiff",self%max_hdiff)
 
 end subroutine ufo_hcorrection_create
 
@@ -62,7 +67,7 @@ end subroutine ufo_hcorrection_delete
 ! ------------------------------------------------------------------------------
 
 subroutine ufo_hcorrection_prior(self, obspace, geovals)
-use gnssro_mod_transform
+use iso_c_binding
 implicit none
 type(ufo_hcorrection),  intent(in) :: self
 type(c_ptr), value, intent(in) :: obspace
@@ -212,6 +217,7 @@ end subroutine ufo_hcorrection_prior
 ! ------------------------------------------------------------------------------
 
 subroutine ufo_hcorrection_post(self, obspace, nvars, nlocs, hofx)
+use iso_c_binding
 implicit none
 type(ufo_hcorrection),  intent(in) :: self
 type(c_ptr), value, intent(in) :: obspace

@@ -19,7 +19,10 @@ namespace QCflags {
   constexpr int black   = 5;   // observation black listed
   constexpr int Hfailed = 6;   // H(x) computation failed
   constexpr int thinned = 7;   // observation removed due to thinning
+  constexpr int diffref = 8;   // metadata too far from reference
+  constexpr int clw     = 9;   // observation removed due to cloud field
   constexpr int fguess  = 10;  // observation too far from guess
+  constexpr int seaice  = 11;  // observation based sea ice detection, also flags land points
 };  // namespace QCflags
 
 }  // namespace ufo

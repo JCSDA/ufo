@@ -44,3 +44,5 @@ perl -p -i -e "s/ufo_${example_lc}/ufo_${generate_lc}/g" ${generate_dir}/*
 perl -p -i -e "s#${example_path}#${generate_path}#g" ${generate_dir}/Obs*
 # replace example in the rest of the files
 perl -p -i -e "s/${example_lc}/${generate_lc}/g" ${generate_dir}/*
+
+echo "Directory created"

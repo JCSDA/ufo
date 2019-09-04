@@ -10,7 +10,6 @@ use fckit_configuration_module, only: fckit_configuration
 use iso_c_binding
 use ufo_vars_mod
 use kinds
-use type_distribution, only: random_distribution
 use obsspace_mod
 use missing_values_mod
 
@@ -130,7 +129,7 @@ if (ivar < 0) then
   do jv=1,self%nvar
     write(0,*)'ufo_geovals_get_var ',jv,trim(self%variables(jv))
   enddo
-  write(err_msg,*) myname_, trim(varname), ' doesnt exist'
+  write(err_msg,*) myname_, " ", trim(varname), ' doesnt exist'
   call abor1_ftn(err_msg)
 else
   geoval => self%geovals(ivar)
@@ -723,16 +722,23 @@ end subroutine ufo_geovals_maxloc
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_geovals_read_netcdf(self, filename, c_vars)
+subroutine ufo_geovals_read_netcdf(self, filename, loc_multiplier, c_obspace, c_vars)
 use netcdf
 
 implicit none
 type(ufo_geovals), intent(inout)  :: self
 character(max_string), intent(in) :: filename
+integer, intent(in)               :: loc_multiplier
+type(c_ptr), intent(in)           :: c_obspace
 type(c_ptr), intent(in)           :: c_vars
 
-integer :: nlocs, nlocs_all, nlocs_var
+integer :: nlocs, gv_all_nlocs, nlocs_var
 integer :: nval
+integer :: obs_nlocs
+integer :: obs_all_nlocs
+integer :: iloc
+integer :: jloc, jloc_start, jloc_end
+integer :: iloc_new
 
 integer :: ncid, dimid, varid, vartype, ndims
 integer, dimension(3) :: dimids
@@ -740,9 +746,11 @@ integer :: ivar
 integer :: ierr
 
 character(max_string) :: err_msg
+character(len=30) :: obs_nlocs_str
+character(len=30) :: geo_nlocs_str
 
-type(random_distribution) :: distribution
-integer, allocatable, dimension(:) :: dist_indx
+integer(c_size_t), allocatable, dimension(:) :: dist_indx
+integer(c_size_t), allocatable, dimension(:) :: obs_dist_indx
 
 real, allocatable :: field2d(:,:), field1d(:)
 
@@ -756,14 +764,44 @@ if(ierr /= nf90_noerr) then
   call abor1_ftn(err_msg)
 endif
 call check('nf90_inq_dimid', nf90_inq_dimid(ncid, "nlocs", dimid))
-call check('nf90_inquire_dimension', nf90_inquire_dimension(ncid, dimid, len = nlocs_all))
+call check('nf90_inquire_dimension', nf90_inquire_dimension(ncid, dimid, len = gv_all_nlocs))
 
 !> round-robin distribute the observations to PEs
 !> Calculate how many obs. on each PE
-distribution=random_distribution(nlocs_all)
-nlocs=distribution%nobs_pe()
+obs_all_nlocs = obsspace_get_gnlocs(c_obspace)
+obs_nlocs = obsspace_get_nlocs(c_obspace)
+allocate(obs_dist_indx(obs_nlocs))
+call obsspace_get_index(c_obspace, obs_dist_indx)
+
+! loc_multiplier specifies how many locations in the geovals file per
+! single location in the obs file. There needs to be at least
+! loc_multiplier * obs_all_nlocs locations in the geovals file.
+
+if (gv_all_nlocs .lt. (loc_multiplier * obs_all_nlocs)) then
+  write(obs_nlocs_str, *) loc_multiplier * obs_all_nlocs
+  write(geo_nlocs_str, *) gv_all_nlocs
+  write(err_msg,'(7a)') &
+     "Error: Number of locations in the geovals file (", &
+     trim(adjustl(geo_nlocs_str)), ") must be greater than or equal to ", &
+     "the product of loc_multiplier and number of locations in the ", &
+     "obs file (", trim(adjustl(obs_nlocs_str)), ")"
+  call abor1_ftn(err_msg)
+endif
+
+! We have enough locations in the geovals file to cover the span of the
+! number of locations in the obs file. Generate the dist_indx according
+! to the loc_multiplier and obs_nlocs values.
+nlocs = loc_multiplier * obs_nlocs
 allocate(dist_indx(nlocs))
-dist_indx = distribution%indx
+iloc_new = 1
+do iloc = 1,obs_nlocs
+  jloc_start = ((obs_dist_indx(iloc) - 1) * loc_multiplier) + 1
+  jloc_end = obs_dist_indx(iloc) * loc_multiplier
+  do jloc = jloc_start, jloc_end
+    dist_indx(iloc_new) = jloc
+    iloc_new = iloc_new + 1
+  enddo
+enddo
 
 ! allocate geovals structure
 call ufo_geovals_setup(self, c_vars, nlocs)
@@ -781,8 +819,8 @@ do ivar = 1, self%nvar
   !> read 1d variable
   if (ndims == 1) then
     call check('nf90_inquire_dimension', nf90_inquire_dimension(ncid, dimids(1), len = nlocs_var))
-    if (nlocs_var /= nlocs_all) then
-      call abor1_ftn('ufo_geovals_read_netcdf: var dim /= nlocs_all')
+    if (nlocs_var /= gv_all_nlocs) then
+      call abor1_ftn('ufo_geovals_read_netcdf: var dim /= gv_all_nlocs')
     endif
     nval = 1
     !> allocate geoval for this variable
@@ -797,8 +835,8 @@ do ivar = 1, self%nvar
   elseif (ndims == 2) then
     call check('nf90_inquire_dimension', nf90_inquire_dimension(ncid, dimids(1), len = nval))
     call check('nf90_inquire_dimension', nf90_inquire_dimension(ncid, dimids(2), len = nlocs_var))
-    if (nlocs_var /= nlocs_all) then
-      call abor1_ftn('ufo_geovals_read_netcdf: var dim /= nlocs_all')
+    if (nlocs_var /= gv_all_nlocs) then
+      call abor1_ftn('ufo_geovals_read_netcdf: var dim /= gv_all_nlocs')
     endif
     !> allocate geoval for this variable
     self%geovals(ivar)%nval = nval
@@ -817,7 +855,8 @@ do ivar = 1, self%nvar
     
 enddo
 
-deallocate(dist_indx)
+if (allocated(dist_indx)) deallocate(dist_indx)
+if (allocated(obs_dist_indx)) deallocate(obs_dist_indx)
 
 self%linit = .true.
 

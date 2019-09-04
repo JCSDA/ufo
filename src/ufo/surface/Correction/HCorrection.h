@@ -31,31 +31,34 @@ namespace ioda {
 
 namespace ufo {
   class GeoVaLs;
+  class ObsDiagnostics;
 
 /// HCorrection filter
 
 class HCorrection : public util::Printable,
-                private util::ObjectCounter<HCorrection> {
+                    private util::ObjectCounter<HCorrection> {
  public:
   static const std::string classname() {return "ufo::HCorrection";}
 
-  HCorrection(ioda::ObsSpace &, const eckit::Configuration &,
+  HCorrection(const ioda::ObsSpace &, const eckit::Configuration &,
             boost::shared_ptr<ioda::ObsDataVector<int> >,
             boost::shared_ptr<ioda::ObsDataVector<float> >);
   ~HCorrection();
 
   void preProcess() const {}
   void priorFilter(const GeoVaLs &) const;
-  void postFilter(const ioda::ObsVector &) const;
+  void postFilter(const ioda::ObsVector &, const ObsDiagnostics &) const;
 
   const oops::Variables & requiredGeoVaLs() const {return geovars_;}
+  const oops::Variables & requiredHdiagnostics() const {return diagvars_;}
 
  private:
   void print(std::ostream &) const;
   F90check key_;
 
-  ioda::ObsSpace & obsdb_;
+  const ioda::ObsSpace & obsdb_;
   oops::Variables geovars_;
+  oops::Variables diagvars_;
   ioda::ObsDataVector<int> & flags_;
 };
 

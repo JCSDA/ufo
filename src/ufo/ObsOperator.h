@@ -37,6 +37,7 @@ namespace ufo {
   class GeoVaLs;
   class Locations;
   class ObsBias;
+  class ObsDiagnostics;
   class ObsOperatorBase;
 
 // -----------------------------------------------------------------------------
@@ -48,7 +49,7 @@ class ObsOperator : public util::Printable,
   ~ObsOperator();
 
 /// Obs Operator
-  void simulateObs(const GeoVaLs &, ioda::ObsVector &, const ObsBias &) const;
+  void simulateObs(const GeoVaLs &, ioda::ObsVector &, const ObsBias &, ObsDiagnostics &) const;
 
 /// Operator input required from Model
   const oops::Variables & variables() const;
@@ -59,6 +60,7 @@ class ObsOperator : public util::Printable,
  private:
   void print(std::ostream &) const;
   std::unique_ptr<ObsOperatorBase> oper_;
+  const ioda::ObsSpace & odb_;
 };
 
 // -----------------------------------------------------------------------------
