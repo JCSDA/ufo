@@ -18,6 +18,7 @@
 #include "oops/util/IntSetParser.h"
 
 #include "ufo/GeoVaLs.h"
+#include "ufo/ObsDiagnostics.h"
 
 namespace ufo {
 
@@ -54,7 +55,7 @@ ObsGeosAod::~ObsGeosAod() {
 
 // -----------------------------------------------------------------------------
 
-void ObsGeosAod::simulateObs(const GeoVaLs & gv, ioda::ObsVector & ovec) const {
+void ObsGeosAod::simulateObs(const GeoVaLs & gv, ioda::ObsVector & ovec, ObsDiagnostics &) const {
   ufo_geosaod_simobs_f90(keyOper_, gv.toFortran(), odb_, ovec.nvars(), ovec.nlocs(),
                          ovec.toFortran());
   oops::Log::trace() << "ObsGeosAod: observation operator run" << std::endl;

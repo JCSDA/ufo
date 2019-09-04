@@ -32,6 +32,7 @@ namespace ioda {
 
 namespace ufo {
   class GeoVaLs;
+  class ObsDiagnostics;
 
 // -----------------------------------------------------------------------------
 /// GeosAod observation operator class
@@ -44,7 +45,7 @@ class ObsGeosAod : public ObsOperatorBase,
   virtual ~ObsGeosAod();
 
 // Obs Operator
-  void simulateObs(const GeoVaLs &, ioda::ObsVector &) const;
+  void simulateObs(const GeoVaLs &, ioda::ObsVector &, ObsDiagnostics &) const override;
 
 // Other
 // const oops::Variables & variables() const {return *varin_;}
