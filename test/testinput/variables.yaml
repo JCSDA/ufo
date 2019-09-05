@@ -1,0 +1,9 @@
+---
+Variables:
+  - variables: [brightness_temperature@ObsValue]
+    channels: 1, 4-5
+    reference: [brightness_temperature_1@ObsValue, brightness_temperature_4@ObsValue, brightness_temperature_5@ObsValue]
+  - variables: [latitude@MetaData, height@MetaData]
+    reference: [latitude@MetaData, height@MetaData]
+  - variable: something@MetaData
+    reference: [something@MetaData]
