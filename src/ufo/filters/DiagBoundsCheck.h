@@ -5,8 +5,8 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
  */
 
-#ifndef UFO_FILTERS_OBSBOUNDSCHECK_H_
-#define UFO_FILTERS_OBSBOUNDSCHECK_H_
+#ifndef UFO_FILTERS_DIAGBOUNDSCHECK_H_
+#define UFO_FILTERS_DIAGBOUNDSCHECK_H_
 
 #include <ostream>
 #include <string>
@@ -30,23 +30,23 @@ namespace ufo {
   class GeoVaLs;
   class ObsDiagnostics;
 
-/// ObsBoundsCheck: generic quality control based on observation data only
+/// DiagBoundsCheck: generic quality control based on diagnostic data only
 
 // Check that observations are within some bounds over some domain
 
-class ObsBoundsCheck : public util::Printable,
-                       private util::ObjectCounter<ObsBoundsCheck> {
+class DiagBoundsCheck : public util::Printable,
+                        private util::ObjectCounter<DiagBoundsCheck> {
  public:
-  static const std::string classname() {return "ufo::ObsBoundsCheck";}
+  static const std::string classname() {return "ufo::DiagBoundsCheck";}
 
-  ObsBoundsCheck(ioda::ObsSpace &, const eckit::Configuration &,
-                 boost::shared_ptr<ioda::ObsDataVector<int> >,
-                 boost::shared_ptr<ioda::ObsDataVector<float> >);
-  ~ObsBoundsCheck();
+  DiagBoundsCheck(ioda::ObsSpace &, const eckit::Configuration &,
+                  boost::shared_ptr<ioda::ObsDataVector<int> >,
+                  boost::shared_ptr<ioda::ObsDataVector<float> >);
+  ~DiagBoundsCheck();
 
   void preProcess() const {}
   void priorFilter(const GeoVaLs &) const;
-  void postFilter(const ioda::ObsVector &, const ObsDiagnostics &) const {}
+  void postFilter(const ioda::ObsVector &, const ObsDiagnostics &) const;
 
   const oops::Variables & requiredGeoVaLs() const {return geovars_;}
   const oops::Variables & requiredHdiagnostics() const {return diagvars_;}
@@ -64,4 +64,4 @@ class ObsBoundsCheck : public util::Printable,
 
 }  // namespace ufo
 
-#endif  // UFO_FILTERS_OBSBOUNDSCHECK_H_
+#endif  // UFO_FILTERS_DIAGBOUNDSCHECK_H_

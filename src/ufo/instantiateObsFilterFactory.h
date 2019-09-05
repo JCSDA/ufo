@@ -12,6 +12,7 @@
 #include "oops/interface/ObsFilter.h"
 #include "ufo/filters/BackgroundCheck.h"
 #include "ufo/filters/BlackList.h"
+#include "ufo/filters/DiagBoundsCheck.h"
 #include "ufo/filters/DifferenceCheck.h"
 #include "ufo/filters/Gaussian_Thinning.h"
 #include "ufo/filters/MWCLWCheck.h"
@@ -57,8 +58,10 @@ template<typename MODEL> void instantiateObsFilterFactory() {
            makerChk12_("DomainErr Check");
   static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::ObsErrInflationCheck> >
            makerChk13_("ObsErrInflation Check");
+  static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::DiagBoundsCheck> >
+           makerChk14_("Diag Bounds Check");
   static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::HCorrection> >
-           makerChk14_("HCorrection");
+           makerChk15_("HCorrection");
 }
 
 }  // namespace ufo

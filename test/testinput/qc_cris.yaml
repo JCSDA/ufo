@@ -25,12 +25,10 @@ Observations:
                  197,200,211,224,275,279,291,311,332,342,389,410,427,
                  464,501,529,710,713,742,882,890,937,995,1008,1022,1058
    ObsFilters:
-   - Filter: Bounds Check
+   - Filter: Diag Bounds Check
      variables: [brightness_temperature]
+     ObsDiags: [brightness_temperature_jacobian_surface_temperature]
      channels: *all_channels
-     test variables:
-       variables: [brightness_temperature_jacobian_surface_temperature@ObsDiag]
-       channels: *all_channels
      maxvalue: 0.2
    passedBenchmark: 7123      # number of passed obs
    GeoVaLs: 
