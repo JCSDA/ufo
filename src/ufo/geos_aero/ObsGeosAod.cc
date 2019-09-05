@@ -11,11 +11,11 @@
 #include <set>
 
 #include "ioda/ObsVector.h"
+#include "oops/util/IntSetParser.h"
+#include "oops/util/Logger.h"
 
 #include "oops/base/Variables.h"
 
-#include "oops/util/Logger.h"
-#include "oops/util/IntSetParser.h"
 
 #include "ufo/GeoVaLs.h"
 #include "ufo/ObsDiagnostics.h"
@@ -34,13 +34,6 @@ ObsGeosAod::ObsGeosAod(const ioda::ObsSpace & odb,
 
   const oops::Variables & observed = odb.obsvariables();
   const eckit::Configuration * varconfig = &observed.toFortran();
-//  ufo_geosaod_setup_f90(keyOper_, &configc, &varconfig, buffin, c_name_size);
-
-//  std::string vstr_in(buffin);
-//  std::vector<std::string> vvin;
-//  boost::split(vvin, vstr_in, boost::is_any_of("\t"));
-//  varin_.reset(new oops::Variables(vvin));
-
   ufo_geosaod_setup_f90(keyOper_, &configc, &varconfig, varin_);
 
   oops::Log::trace() << "ObsGeosAod created." << std::endl;
