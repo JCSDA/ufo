@@ -40,7 +40,7 @@ MWSeaIceCheck::~MWSeaIceCheck() {}
 
 // -----------------------------------------------------------------------------
 
-void MWSeaIceCheck::priorFilter(const GeoVaLs & gv) const {
+void MWSeaIceCheck::priorFilter(const GeoVaLs & gv) {
   data_.associate(gv);
   const float missing = util::missingValue(missing);
 

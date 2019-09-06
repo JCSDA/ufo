@@ -56,7 +56,7 @@ DifferenceCheck::~DifferenceCheck() {
 
 // -----------------------------------------------------------------------------
 
-void DifferenceCheck::priorFilter(const GeoVaLs & gv) const {
+void DifferenceCheck::priorFilter(const GeoVaLs & gv) {
   oops::Log::trace() << "DifferenceCheck priorFilter" << std::endl;
 
   const float missing = util::missingValue(missing);

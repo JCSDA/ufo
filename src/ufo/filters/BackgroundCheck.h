@@ -46,8 +46,8 @@ class BackgroundCheck : public util::Printable,
   ~BackgroundCheck();
 
   void preProcess() const {}
-  void priorFilter(const GeoVaLs &) const;
-  void postFilter(const ioda::ObsVector &, const ObsDiagnostics &) const;
+  void priorFilter(const GeoVaLs &);
+  void postFilter(const ioda::ObsVector &, const ObsDiagnostics &);
 
   const oops::Variables & requiredGeoVaLs() const {return geovars_;}
   const oops::Variables & requiredHdiagnostics() const {return diagvars_;}
@@ -56,7 +56,7 @@ class BackgroundCheck : public util::Printable,
   void print(std::ostream &) const;
 
   ioda::ObsSpace & obsdb_;
-  mutable ObsFilterData data_;
+  ObsFilterData data_;
   const eckit::LocalConfiguration config_;
   float abs_threshold_;
   float threshold_;

@@ -52,7 +52,7 @@ class ObsDomainErrCheck : public util::Printable,
   ~ObsDomainErrCheck();
 
   void preProcess() const {}
-  void priorFilter(const GeoVaLs &) const;
+  void priorFilter(const GeoVaLs &);
   void postFilter(const ioda::ObsVector &, const ObsDiagnostics &) const {}
 
   const oops::Variables & requiredGeoVaLs() const {return geovars_;}
@@ -62,7 +62,7 @@ class ObsDomainErrCheck : public util::Printable,
   void print(std::ostream &) const;
 
   ioda::ObsSpace & obsdb_;
-  mutable ObsFilterData data_;
+  ObsFilterData data_;
   const eckit::LocalConfiguration config_;
   const oops::Variables geovars_;
   const oops::Variables diagvars_;

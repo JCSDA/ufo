@@ -43,7 +43,7 @@ ObsDomainCheck::~ObsDomainCheck() {}
 
 // -----------------------------------------------------------------------------
 
-void ObsDomainCheck::priorFilter(const GeoVaLs & gv) const {
+void ObsDomainCheck::priorFilter(const GeoVaLs & gv) {
   const oops::Variables vars(config_);
   if (vars.size() == 0) {
     oops::Log::error() << "No variables will be filtered out in filter "

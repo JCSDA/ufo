@@ -42,7 +42,7 @@ class DifferenceCheck : public util::Printable,
   ~DifferenceCheck();
 
   void preProcess() const {}
-  void priorFilter(const GeoVaLs &) const;
+  void priorFilter(const GeoVaLs &);
   void postFilter(const ioda::ObsVector &, const ObsDiagnostics &) const {}
 
   const oops::Variables & requiredGeoVaLs() const {return geovars_;}
@@ -52,7 +52,7 @@ class DifferenceCheck : public util::Printable,
   void print(std::ostream &) const;
 
   ioda::ObsSpace & obsdb_;
-  mutable ObsFilterData data_;
+  ObsFilterData data_;
   ioda::ObsDataVector<int> & flags_;
   eckit::LocalConfiguration config_;
   oops::Variables geovars_;

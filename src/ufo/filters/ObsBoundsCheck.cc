@@ -49,13 +49,13 @@ ObsBoundsCheck::~ObsBoundsCheck() {}
 
 // -----------------------------------------------------------------------------
 
-void ObsBoundsCheck::priorFilter(const GeoVaLs & gv) const {
+void ObsBoundsCheck::priorFilter(const GeoVaLs & gv) {
   data_.associate(gv);
 }
 
 // -----------------------------------------------------------------------------
 
-void ObsBoundsCheck::postFilter(const ioda::ObsVector & hofx, const ObsDiagnostics & diags) const {
+void ObsBoundsCheck::postFilter(const ioda::ObsVector & hofx, const ObsDiagnostics & diags) {
   const float missing = util::missingValue(missing);
   data_.associate(hofx);
   data_.associate(diags);

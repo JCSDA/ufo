@@ -51,7 +51,7 @@ ObsDomainErrCheck::~ObsDomainErrCheck() {}
 
 // -----------------------------------------------------------------------------
 
-void ObsDomainErrCheck::priorFilter(const GeoVaLs & gv) const {
+void ObsDomainErrCheck::priorFilter(const GeoVaLs & gv) {
   data_.associate(gv);
   const oops::Variables vars(config_);
   if (vars.size() == 0) {

@@ -61,13 +61,13 @@ BackgroundCheck::~BackgroundCheck() {
 
 // -----------------------------------------------------------------------------
 
-void BackgroundCheck::priorFilter(const GeoVaLs & gv) const {
+void BackgroundCheck::priorFilter(const GeoVaLs & gv) {
   data_.associate(gv);
 }
 
 // -----------------------------------------------------------------------------
 
-void BackgroundCheck::postFilter(const ioda::ObsVector & hofx, const ObsDiagnostics &) const {
+void BackgroundCheck::postFilter(const ioda::ObsVector & hofx, const ObsDiagnostics &) {
   oops::Log::trace() << "BackgroundCheck postFilter" << std::endl;
   data_.associate(hofx);
   const oops::Variables vars(config_);

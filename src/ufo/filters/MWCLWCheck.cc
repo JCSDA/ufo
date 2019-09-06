@@ -44,13 +44,13 @@ MWCLWCheck::~MWCLWCheck() {}
 
 // -----------------------------------------------------------------------------
 
-void MWCLWCheck::priorFilter(const GeoVaLs & gv) const {
+void MWCLWCheck::priorFilter(const GeoVaLs & gv) {
   data_.associate(gv);
 }
 
 // -----------------------------------------------------------------------------
 
-void MWCLWCheck:: postFilter(const ioda::ObsVector & hofx, const ObsDiagnostics &) const {
+void MWCLWCheck:: postFilter(const ioda::ObsVector & hofx, const ObsDiagnostics &) {
   oops::Log::trace() << "MWCLWCheck postFilter" << std::endl;
   data_.associate(hofx);
 

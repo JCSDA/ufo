@@ -45,8 +45,8 @@ class ObsBoundsCheck : public util::Printable,
   ~ObsBoundsCheck();
 
   void preProcess() const {}
-  void priorFilter(const GeoVaLs &) const;
-  void postFilter(const ioda::ObsVector &, const ObsDiagnostics &) const;
+  void priorFilter(const GeoVaLs &);
+  void postFilter(const ioda::ObsVector &, const ObsDiagnostics &);
 
   const oops::Variables & requiredGeoVaLs() const {return geovars_;}
   const oops::Variables & requiredHdiagnostics() const {return diagvars_;}
@@ -55,7 +55,7 @@ class ObsBoundsCheck : public util::Printable,
   void print(std::ostream &) const;
 
   ioda::ObsSpace & obsdb_;
-  mutable ObsFilterData data_;
+  ObsFilterData data_;
   const eckit::LocalConfiguration config_;
   oops::Variables geovars_;
   oops::Variables diagvars_;

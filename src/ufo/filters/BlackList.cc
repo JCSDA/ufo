@@ -43,7 +43,7 @@ BlackList::~BlackList() {}
 
 // -----------------------------------------------------------------------------
 
-void BlackList::priorFilter(const GeoVaLs & gv) const {
+void BlackList::priorFilter(const GeoVaLs & gv) {
   const size_t nobs = obsdb_.nlocs();
   const oops::Variables vars(config_);
   if (vars.size() == 0) {

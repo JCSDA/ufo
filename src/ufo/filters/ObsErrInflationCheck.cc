@@ -49,7 +49,7 @@ ObsErrInflationCheck::~ObsErrInflationCheck() {}
 
 // -----------------------------------------------------------------------------
 
-void ObsErrInflationCheck::priorFilter(const GeoVaLs & gv) const {
+void ObsErrInflationCheck::priorFilter(const GeoVaLs & gv) {
   data_.associate(gv);
   const oops::Variables vars(config_);
   if (vars.size() == 0) {
