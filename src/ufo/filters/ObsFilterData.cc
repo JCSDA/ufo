@@ -125,6 +125,9 @@ void ObsFilterData::print(std::ostream & os) const {
   if (hofx_) {
     os << ", hofx";
   }
+  if (diags_) {
+    os << ", diags";
+  }
   os << std::endl;
 }
 

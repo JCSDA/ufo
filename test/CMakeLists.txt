@@ -81,6 +81,7 @@ list( APPEND ufo_test_input
   testinput/function_velocity.yaml
   testinput/reflectivity.yaml
   testinput/radialvelocity.yaml
+  testinput/variables.yaml
 )
 
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/testinput)
@@ -216,6 +217,11 @@ ecbuild_add_test( TARGET  test_ufo_geovals
 ecbuild_add_test( TARGET  test_ufo_locations
                   SOURCES mains/TestLocations.cc
                   ARGS    "testinput/locations.yaml"
+                  LIBS    ufo )
+
+ecbuild_add_test( TARGET  test_ufo_variables
+                  SOURCES mains/TestVariables.cc
+                  ARGS    "testinput/variables.yaml"
                   LIBS    ufo )
 
 ecbuild_add_test( TARGET  test_ufo_amsua_obs_bias

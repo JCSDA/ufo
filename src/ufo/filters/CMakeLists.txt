@@ -8,8 +8,6 @@ set ( filters_files
       BackgroundCheck.h
       BlackList.cc
       BlackList.h
-      DiagBoundsCheck.cc
-      DiagBoundsCheck.h
       DifferenceCheck.cc
       DifferenceCheck.h
       ObsBoundsCheck.cc
@@ -33,6 +31,8 @@ set ( filters_files
       QCmanager.h
       Thinning.cc
       Thinning.h
+      Variables.cc
+      Variables.h
       Gaussian_Thinning.cc
       Gaussian_Thinning.h
       processWhere.cc
