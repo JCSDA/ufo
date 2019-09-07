@@ -8,9 +8,3 @@ foreach(FILENAME ${test_files})
      ${PROJECT_SOURCE_DIR}/tools/${FILENAME}
      ${CMAKE_BINARY_DIR}/bin/${FILENAME} )
 endforeach(FILENAME)
-
-ecbuild_add_test( TARGET ufo_tools_coding_norms
-                  TYPE SCRIPT
-                  COMMAND ${CMAKE_BINARY_DIR}/bin/cpplint.py
-                  ARGS --quiet --recursive ${CMAKE_CURRENT_SOURCE_DIR}
-                  WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/bin )

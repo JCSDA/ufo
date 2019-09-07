@@ -8,15 +8,17 @@
 #ifndef TEST_UFO_VARIABLES_H_
 #define TEST_UFO_VARIABLES_H_
 
+#include <algorithm>
 #include <string>
+#include <vector>
 
 #define ECKIT_TESTING_SELF_REGISTER_CASES 0
 
 #include "eckit/config/LocalConfiguration.h"
 #include "eckit/testing/Test.h"
-#include "ufo/filters/Variables.h"
-#include "oops/runs/Test.h"
 #include "oops/../test/TestEnvironment.h"
+#include "oops/runs/Test.h"
+#include "ufo/filters/Variables.h"
 
 namespace ufo {
 namespace test {

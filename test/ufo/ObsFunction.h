@@ -5,27 +5,23 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
  */
 
-#ifndef TEST_INTERFACE_OBSFUNCTION_H_
-#define TEST_INTERFACE_OBSFUNCTION_H_
+#ifndef TEST_UFO_OBSFUNCTION_H_
+#define TEST_UFO_OBSFUNCTION_H_
 
 #include <string>
-#include <cmath>
+#include <vector>
 
 #define ECKIT_TESTING_SELF_REGISTER_CASES 0
-
-#include <boost/noncopyable.hpp>
-#include <boost/shared_ptr.hpp>
 
 #include "eckit/config/LocalConfiguration.h"
 #include "eckit/testing/Test.h"
 #include "ioda/ObsSpace.h"
 #include "ioda/ObsVector.h"
-#include "oops/runs/Test.h"
 #include "oops/../test/TestEnvironment.h"
-#include "ufo/filters/obsfunctions/ObsFunction.h"
+#include "oops/runs/Test.h"
 #include "ufo/filters/ObsFilterData.h"
+#include "ufo/filters/obsfunctions/ObsFunction.h"
 #include "ufo/GeoVaLs.h"
-#include "ufo/UfoTrait.h"
 
 namespace ufo {
 namespace test {
@@ -88,7 +84,7 @@ class ObsFunction : public oops::Test {
   ObsFunction() {}
   virtual ~ObsFunction() {}
  private:
-  std::string testid() const {return "test::ObsFunction<UfoTrait>";}
+  std::string testid() const {return "ufo::test::ObsFunction";}
 
   void register_tests() const {
     std::vector<eckit::testing::Test>& ts = eckit::testing::specification();
@@ -103,4 +99,4 @@ class ObsFunction : public oops::Test {
 }  // namespace test
 }  // namespace ufo
 
-#endif  // TEST_INTERFACE_OBSFUNCTION_H_
+#endif  // TEST_UFO_OBSFUNCTION_H_

@@ -5,12 +5,12 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
  */
 
+#include "../ufo/ObsFunction.h"
 #include "oops/runs/Run.h"
-#include "../obsfunction/ObsFunction.h"
 
 int main(int argc,  char ** argv) {
   oops::Run run(argc, argv);
   ufo::test::ObsFunction tests;
   run.execute(tests);
   return 0;
-};
+}

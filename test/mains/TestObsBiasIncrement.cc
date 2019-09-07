@@ -5,10 +5,9 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
  */
 
-#include "ufo/UfoTrait.h"
 #include "oops/runs/Run.h"
-
 #include "test/interface/ObsAuxIncrement.h"
+#include "ufo/UfoTrait.h"
 
 int main(int argc,  char ** argv) {
   oops::Run run(argc, argv);
@@ -16,4 +15,3 @@ int main(int argc,  char ** argv) {
   run.execute(tests);
   return 0;
 }
-

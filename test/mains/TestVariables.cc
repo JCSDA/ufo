@@ -5,13 +5,12 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
  */
 
+#include "../ufo/Variables.h"
 #include "oops/runs/Run.h"
-#include "../variables/Variables.h"
 
 int main(int argc,  char ** argv) {
   oops::Run run(argc, argv);
   ufo::test::Variables tests;
   run.execute(tests);
   return 0;
-};
-
+}
