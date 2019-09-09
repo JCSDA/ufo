@@ -31,7 +31,6 @@ namespace ioda {
 namespace ufo {
   class GeoVaLs;
   class ObsBias;
-  class ObsBiasIncrement;
 
 // -----------------------------------------------------------------------------
 /// Sea-ice fraction TL/AD observation operator class
@@ -45,8 +44,8 @@ class ObsSeaIceFractionTLAD : public LinearObsOperatorBase,
 
   // Obs Operators
   void setTrajectory(const GeoVaLs &, const ObsBias &);
-  void simulateObsTL(const GeoVaLs &, ioda::ObsVector &, const ObsBiasIncrement &) const;
-  void simulateObsAD(GeoVaLs &, const ioda::ObsVector &, ObsBiasIncrement &) const;
+  void simulateObsTL(const GeoVaLs &, ioda::ObsVector &) const;
+  void simulateObsAD(GeoVaLs &, const ioda::ObsVector &) const;
 
   // Other
   const oops::Variables & variables() const {return *varin_;}

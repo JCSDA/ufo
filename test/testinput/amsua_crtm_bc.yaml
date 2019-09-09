@@ -34,5 +34,5 @@ Observations:
    ObsBias:
      name: GSI
      abias_in: Data/satbias_crtm_in
-   rmsequiv: 230.94075430936681
+   rmsequiv: 230.55760103118919
    tolerance: 1.e-6

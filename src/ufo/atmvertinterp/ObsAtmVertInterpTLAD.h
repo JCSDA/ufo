@@ -29,7 +29,6 @@ namespace ioda {
 namespace ufo {
   class GeoVaLs;
   class ObsBias;
-  class ObsBiasIncrement;
 
 // -----------------------------------------------------------------------------
 /// AtmVertInterp observation operator
@@ -43,8 +42,8 @@ class ObsAtmVertInterpTLAD : public LinearObsOperatorBase,
 
   // Obs Operators
   void setTrajectory(const GeoVaLs &, const ObsBias &);
-  void simulateObsTL(const GeoVaLs &, ioda::ObsVector &, const ObsBiasIncrement &) const;
-  void simulateObsAD(GeoVaLs &, const ioda::ObsVector &, ObsBiasIncrement &) const;
+  void simulateObsTL(const GeoVaLs &, ioda::ObsVector &) const;
+  void simulateObsAD(GeoVaLs &, const ioda::ObsVector &) const;
 
   // Other
   const oops::Variables & variables() const {return varin_;}

@@ -55,16 +55,14 @@ void ObsGnssroRefTLAD::setTrajectory(const GeoVaLs & geovals, const ObsBias & bi
 
 // -----------------------------------------------------------------------------
 
-void ObsGnssroRefTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec,
-                                      const ObsBiasIncrement & bias) const {
+void ObsGnssroRefTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec) const {
   ufo_gnssro_ref_simobs_tl_f90(keyOperGnssroRef_, geovals.toFortran(), odb_,
                                ovec.size(), ovec.toFortran());
 }
 
 // -----------------------------------------------------------------------------
 
-void ObsGnssroRefTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec,
-                                      ObsBiasIncrement & bias) const {
+void ObsGnssroRefTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec) const {
   ufo_gnssro_ref_simobs_ad_f90(keyOperGnssroRef_, geovals.toFortran(), odb_,
                                ovec.size(), ovec.toFortran());
 }

@@ -5,16 +5,18 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#include "ufo/LinearObsOperator.h"
+#include "ioda/ObsVector.h"
 
+#include "ufo/LinearObsOperator.h"
 #include "ufo/LinearObsOperatorBase.h"
+#include "ufo/ObsBiasIncrement.h"
 
 namespace ufo {
 
 // -----------------------------------------------------------------------------
 
-LinearObsOperator::LinearObsOperator(const ioda::ObsSpace & os, const eckit::Configuration & conf)
-  : oper_(LinearObsOperatorFactory::create(os, conf))
+LinearObsOperator::LinearObsOperator(ioda::ObsSpace & os, const eckit::Configuration & conf)
+  : oper_(LinearObsOperatorFactory::create(os, conf)), odb_(os)
 {}
 
 // -----------------------------------------------------------------------------
@@ -31,14 +33,19 @@ void LinearObsOperator::setTrajectory(const GeoVaLs & gvals, const ObsBias & bia
 
 void LinearObsOperator::simulateObsTL(const GeoVaLs & gvals, ioda::ObsVector & yy,
                                       const ObsBiasIncrement & bias) const {
-  oper_->simulateObsTL(gvals, yy, bias);
+  oper_->simulateObsTL(gvals, yy);
+  ioda::ObsVector ybiasinc(odb_);
+  bias.computeObsBiasTL(gvals, ybiasinc, odb_);
+  yy += ybiasinc;
 }
 
 // -----------------------------------------------------------------------------
 
 void LinearObsOperator::simulateObsAD(GeoVaLs & gvals, const ioda::ObsVector & yy,
                                       ObsBiasIncrement & bias) const {
-  oper_->simulateObsAD(gvals, yy, bias);
+  ioda::ObsVector ybiasinc(odb_);
+  bias.computeObsBiasAD(gvals, ybiasinc, odb_);
+  oper_->simulateObsAD(gvals, yy);
 }
 
 // -----------------------------------------------------------------------------

@@ -300,6 +300,11 @@ ecbuild_add_test( TARGET  test_ufo_amsua_tlad_crtm
                   ARGS    "testinput/amsua_crtm.yaml"
                   LIBS    ufo )
 
+ecbuild_add_test( TARGET  test_ufo_amsua_tlad_crtm_bc
+                  SOURCES mains/TestObsOperatorTLAD.cc
+                  ARGS    "testinput/amsua_crtm_bc.yaml"
+                  LIBS    ufo )
+
 #ecbuild_add_test( TARGET  test_ufo_atms_opr_crtm
 #                  SOURCES mains/TestObsOperator.cc
 #                  ARGS    "testinput/atms_crtm.yaml"

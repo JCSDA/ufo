@@ -39,7 +39,7 @@ namespace ufo {
 class LinearObsOperator : public util::Printable,
                           private boost::noncopyable {
  public:
-  LinearObsOperator(const ioda::ObsSpace &, const eckit::Configuration &);
+  LinearObsOperator(ioda::ObsSpace &, const eckit::Configuration &);
   ~LinearObsOperator();
 
 /// Obs Operator
@@ -53,6 +53,7 @@ class LinearObsOperator : public util::Printable,
  private:
   void print(std::ostream &) const;
   std::unique_ptr<LinearObsOperatorBase> oper_;
+  ioda::ObsSpace & odb_;
 };
 
 // -----------------------------------------------------------------------------

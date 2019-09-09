@@ -52,8 +52,8 @@ void ObsRadarReflectivityTLAD::setTrajectory(const GeoVaLs & geovals, const ObsB
 
 // -----------------------------------------------------------------------------
 
-void ObsRadarReflectivityTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec,
-                             const ObsBiasIncrement & bias) const {
+void ObsRadarReflectivityTLAD::simulateObsTL(const GeoVaLs & geovals,
+                                             ioda::ObsVector & ovec) const {
   ufo_radarreflectivity_simobs_tl_f90(keyOper_, geovals.toFortran(), odb_,
                             ovec.size(), ovec.toFortran());
   oops::Log::trace() << "ObsRadarReflectivityTLAD: TL observation operator run" << std::endl;
@@ -61,8 +61,8 @@ void ObsRadarReflectivityTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsV
 
 // -----------------------------------------------------------------------------
 
-void ObsRadarReflectivityTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec,
-                             ObsBiasIncrement & bias) const {
+void ObsRadarReflectivityTLAD::simulateObsAD(GeoVaLs & geovals,
+                                             const ioda::ObsVector & ovec) const {
   ufo_radarreflectivity_simobs_ad_f90(keyOper_, geovals.toFortran(), odb_,
                             ovec.size(), ovec.toFortran());
   oops::Log::trace() << "ObsRadarReflectivityTLAD: adjoint observation operator run" << std::endl;

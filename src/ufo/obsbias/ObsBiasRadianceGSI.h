@@ -45,7 +45,7 @@ class ObsBiasRadianceGSI : public ObsBiasBase,
   void read(const eckit::Configuration &) override;
   void write(const eckit::Configuration &) const override;
   double norm() const override;
-  std::size_t size() const override { return bias_.size();};
+  std::size_t size() const override { return biascoeffs_.size();};
 
 /// Add increments
   ObsBiasRadianceGSI & operator+=(const ObsBiasIncrement &) override;
@@ -59,8 +59,8 @@ class ObsBiasRadianceGSI : public ObsBiasBase,
   const oops::Variables & variables() const override {return *varin_;}
 
 /// Bias parameters interface
-  double & operator[](const unsigned int ii) override {return bias_[ii];}
-  const double & operator[](const unsigned int ii) const override {return bias_[ii];}
+  double & operator[](const unsigned int ii) override {return biascoeffs_[ii];}
+  const double & operator[](const unsigned int ii) const override {return biascoeffs_[ii];}
 
  private:
   void print(std::ostream &) const override;
@@ -68,7 +68,7 @@ class ObsBiasRadianceGSI : public ObsBiasBase,
   std::string sensor_id_;  // sensor_id
   std::vector<int> channels_;  // channel
 
-  std::vector<double> bias_;
+  std::vector<double> biascoeffs_;
 
   static const std::vector<std::string> predictors_;  // predictor names
 };

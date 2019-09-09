@@ -17,7 +17,6 @@
 #include "oops/util/Logger.h"
 #include "ufo/GeoVaLs.h"
 #include "ufo/ObsBias.h"
-#include "ufo/ObsBiasIncrement.h"
 
 namespace ufo {
 
@@ -53,8 +52,7 @@ void ObsSeaIceThicknessTLAD::setTrajectory(const GeoVaLs & geovals, const ObsBia
 
 // -----------------------------------------------------------------------------
 
-void ObsSeaIceThicknessTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec,
-                             const ObsBiasIncrement & bias) const {
+void ObsSeaIceThicknessTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec) const {
   ufo_seaicethickness_simobs_tl_f90(keyOper_, geovals.toFortran(), odb_,
                                     ovec.size(), ovec.toFortran());
   oops::Log::trace() << "ObsSeaIceThicknessTLAD: TL observation operator run" << std::endl;
@@ -62,8 +60,7 @@ void ObsSeaIceThicknessTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVec
 
 // -----------------------------------------------------------------------------
 
-void ObsSeaIceThicknessTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec,
-                             ObsBiasIncrement & bias) const {
+void ObsSeaIceThicknessTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec) const {
   ufo_seaicethickness_simobs_ad_f90(keyOper_, geovals.toFortran(), odb_,
                                     ovec.size(), ovec.toFortran());
   oops::Log::trace() << "ObsSeaIceThicknessTLAD: adjoint observation operator run" << std::endl;

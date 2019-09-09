@@ -19,7 +19,6 @@
 #include "oops/util/Logger.h"
 #include "ufo/GeoVaLs.h"
 #include "ufo/ObsBias.h"
-#include "ufo/ObsBiasIncrement.h"
 
 namespace ufo {
 
@@ -62,8 +61,7 @@ void ObsRadianceRTTOVTLAD::setTrajectory(const GeoVaLs & geovals, const ObsBias 
 
 // -----------------------------------------------------------------------------
 
-void ObsRadianceRTTOVTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec,
-                             const ObsBiasIncrement & bias) const {
+void ObsRadianceRTTOVTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec) const {
   ufo_radiancerttov_simobs_tl_f90(keyOperRadianceRTTOV_, geovals.toFortran(), odb_,
                                   ovec.size(), ovec.toFortran(),
                                   channels_.size(), channels_[0]);
@@ -72,8 +70,7 @@ void ObsRadianceRTTOVTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVecto
 
 // -----------------------------------------------------------------------------
 
-void ObsRadianceRTTOVTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec,
-                             ObsBiasIncrement & bias) const {
+void ObsRadianceRTTOVTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec) const {
   ufo_radiancerttov_simobs_ad_f90(keyOperRadianceRTTOV_, geovals.toFortran(), odb_,
                                   ovec.size(), ovec.toFortran(),
                                   channels_.size(), channels_[0]);

@@ -17,7 +17,6 @@
 
 #include "ufo/GeoVaLs.h"
 #include "ufo/ObsBias.h"
-#include "ufo/ObsBiasIncrement.h"
 
 namespace ufo {
 
@@ -55,16 +54,14 @@ void ObsAtmVertInterpTLAD::setTrajectory(const GeoVaLs & geovals, const ObsBias 
 
 // -----------------------------------------------------------------------------
 
-void ObsAtmVertInterpTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec,
-                                         const ObsBiasIncrement & bias) const {
+void ObsAtmVertInterpTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec) const {
   ufo_atmvertinterp_simobs_tl_f90(keyOperAtmVertInterp_, geovals.toFortran(), odb_,
                                   ovec.nvars(), ovec.nlocs(), ovec.toFortran());
 }
 
 // -----------------------------------------------------------------------------
 
-void ObsAtmVertInterpTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec,
-                                         ObsBiasIncrement & bias) const {
+void ObsAtmVertInterpTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec) const {
   ufo_atmvertinterp_simobs_ad_f90(keyOperAtmVertInterp_, geovals.toFortran(), odb_,
                                   ovec.nvars(), ovec.nlocs(), ovec.toFortran());
 }

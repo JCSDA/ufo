@@ -17,7 +17,6 @@
 #include "oops/util/Logger.h"
 #include "ufo/GeoVaLs.h"
 #include "ufo/ObsBias.h"
-#include "ufo/ObsBiasIncrement.h"
 
 namespace ufo {
 
@@ -56,16 +55,14 @@ void ObsCoolSkinTLAD::setTrajectory(const GeoVaLs & geovals, const ObsBias & bia
 
 // -----------------------------------------------------------------------------
 
-void ObsCoolSkinTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec,
-                               const ObsBiasIncrement & bias) const {
+void ObsCoolSkinTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec) const {
   ufo_CoolSkin_simobs_tl_f90(keyOper_, geovals.toFortran(), odb_, ovec.size(), ovec.toFortran());
   oops::Log::trace() << "ObsCoolSkinTLAD: tangent linear observation operator run" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
-void ObsCoolSkinTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec,
-                             ObsBiasIncrement & bias) const {
+void ObsCoolSkinTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec) const {
   ufo_CoolSkin_simobs_ad_f90(keyOper_, geovals.toFortran(), odb_, ovec.size(), ovec.toFortran());
   oops::Log::trace() << "ObsCoolSkinTLAD: adjoint observation operator run" << std::endl;
 }

@@ -45,7 +45,7 @@ namespace ufo {
 class ObsOperator : public util::Printable,
                     private boost::noncopyable {
  public:
-  ObsOperator(const ioda::ObsSpace &, const eckit::Configuration &);
+  ObsOperator(ioda::ObsSpace &, const eckit::Configuration &);
   ~ObsOperator();
 
 /// Obs Operator
@@ -60,7 +60,7 @@ class ObsOperator : public util::Printable,
  private:
   void print(std::ostream &) const;
   std::unique_ptr<ObsOperatorBase> oper_;
-  const ioda::ObsSpace & odb_;
+  ioda::ObsSpace & odb_;
 };
 
 // -----------------------------------------------------------------------------

@@ -17,7 +17,6 @@
 #include "oops/util/Logger.h"
 #include "ufo/GeoVaLs.h"
 #include "ufo/ObsBias.h"
-#include "ufo/ObsBiasIncrement.h"
 
 namespace ufo {
 
@@ -52,8 +51,7 @@ void ObsSeaIceFractionTLAD::setTrajectory(const GeoVaLs & geovals, const ObsBias
 
 // -----------------------------------------------------------------------------
 
-void ObsSeaIceFractionTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec,
-                             const ObsBiasIncrement & bias) const {
+void ObsSeaIceFractionTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec) const {
   ufo_seaicefraction_simobs_tl_f90(keyOper_, geovals.toFortran(), odb_,
                                    ovec.size(), ovec.toFortran());
   oops::Log::trace() << "ObsSeaIceFractionTLAD: TL observation operator run" << std::endl;
@@ -61,8 +59,7 @@ void ObsSeaIceFractionTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVect
 
 // -----------------------------------------------------------------------------
 
-void ObsSeaIceFractionTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec,
-                             ObsBiasIncrement & bias) const {
+void ObsSeaIceFractionTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec) const {
   ufo_seaicefraction_simobs_ad_f90(keyOper_, geovals.toFortran(), odb_,
                                    ovec.size(), ovec.toFortran());
   oops::Log::trace() << "ObsSeaIceFractionTLAD: adjoint observation operator run" << std::endl;

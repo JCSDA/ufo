@@ -54,13 +54,13 @@ ObsBiasRadianceGSI::ObsBiasRadianceGSI(const eckit::Configuration & conf)
   if (biasConf.has("abias_in")) {
     read(biasConf);
   } else {
-    bias_.clear();
+    biascoeffs_.clear();
     for (std::size_t jc = 0; jc < channels_.size(); ++jc)
       for (std::size_t n = 0; n < predictors_.size() + 4; ++n)
-        bias_.push_back(0.0);
+        biascoeffs_.push_back(0.0);
   }
 
-  oops::Log::info() << "ObsBiasRadianceGSI created." << std::endl;
+  oops::Log::trace() << "ObsBiasRadianceGSI created." << std::endl;
 }
 
 // -----------------------------------------------------------------------------
@@ -92,11 +92,11 @@ void ObsBiasRadianceGSI::read(const eckit::Configuration & biasconf) {
         infile >> par;
         if ( nusis == sensor_id_ &&
             std::find(channels_.begin(), channels_.end(), nuchan) != channels_.end() )
-          bias_.push_back(static_cast<double>(par));
+          biascoeffs_.push_back(static_cast<double>(par));
       }
     }
     infile.close();
-    oops::Log::info() << "ObsBiasRadianceGSI::read from file: "
+    oops::Log::trace() << "ObsBiasRadianceGSI::read from file: "
                       << biasconf.getString("abias_in") << " Done " << std::endl;
   } else {
     oops::Log::error() << "Unable to open file : " << filename << std::endl;
@@ -114,8 +114,8 @@ void ObsBiasRadianceGSI::write(const eckit::Configuration & conf) const {
 // -----------------------------------------------------------------------------
 
 void ObsBiasRadianceGSI::computeObsBias(const GeoVaLs & geovals,
-                                     ioda::ObsVector & ybias,
-                                     const ioda::ObsSpace & odb) const {
+                                        ioda::ObsVector & ybias,
+                                        const ioda::ObsSpace & odb) const {
   std::size_t npred = predictors_.size();
   std::size_t nchanl = channels_.size();
   std::size_t nlocs = ybias.nlocs();
@@ -174,42 +174,55 @@ void ObsBiasRadianceGSI::computeObsBias(const GeoVaLs & geovals,
   }
 
   std::size_t index = 0;
-  // Loop through each locations
+  // Loop through each location
   for (std::size_t jl = 0; jl < nlocs; ++jl) {
     // Loop through each channel
+    std::size_t idx_coeffs = 0;
     for (std::size_t jc = 0; jc < nchanl; ++jc) {
       // Linear combination
-      index = jl * nchanl + jc;
+      ybias[index] = 0.0;
       for (std::size_t n = 0; n < npred + 4; ++n) {
-        ybias[index] = bias_[jc*(npred+4)+n] * preds[n*nchanl+jc][jl];
+        ybias[index] += biascoeffs_[idx_coeffs] * preds[n*nchanl+jc][jl];
+        ++idx_coeffs;
       }
+      ++index;
     }
   }
+  ybias.save("ObsBias");
+  oops::Log::trace() << "ObsBiasRadianceGSI::computeObsBias done." << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
 double ObsBiasRadianceGSI::norm() const {
   double zz = 0.0;
-  for (unsigned int jj = 0; jj < bias_.size(); ++jj) {
-    zz += bias_[jj] * bias_[jj];
+  for (unsigned int jj = 0; jj < biascoeffs_.size(); ++jj) {
+    zz += biascoeffs_[jj] * biascoeffs_[jj];
   }
-  if (bias_.size() > 0) zz = std::sqrt(zz/this->size());
+  if (biascoeffs_.size() > 0) zz = std::sqrt(zz/this->size());
   return zz;
 }
 
 // -----------------------------------------------------------------------------
 
 ObsBiasRadianceGSI & ObsBiasRadianceGSI::operator+=(const ObsBiasIncrement & dx) {
-  for (unsigned int jj = 0; jj < bias_.size(); ++jj)
-    bias_[jj] += dx[jj];
+  for (unsigned int jj = 0; jj < biascoeffs_.size(); ++jj)
+    biascoeffs_[jj] += dx[jj];
   return *this;
 }
 
 // -----------------------------------------------------------------------------
 
 void ObsBiasRadianceGSI::print(std::ostream & os) const {
-  os << "ObsBiasRadianceGSI::print not implemented";
+  os << "ObsBiasRadianceGSI::print " << sensor_id_ << std::endl;
+  std::size_t pred_size = predictors_.size() + 4;
+  std::size_t jc;
+  for (jc = 0; jc < channels_.size(); ++jc) {
+    os << "Channel : " << channels_[jc] << std::endl;
+    for (std::size_t n = 0; n < pred_size; ++n)
+      os << biascoeffs_[jc*pred_size+n] << " ";
+    os << std::endl;
+  }
 }
 
 // -----------------------------------------------------------------------------

@@ -17,7 +17,13 @@ namespace eckit {
   class Configuration;
 }
 
+namespace ioda {
+  class ObsSpace;
+  class ObsVector;
+}
+
 namespace ufo {
+  class GeoVaLs;
   class ObsBias;
 
 // -----------------------------------------------------------------------------
@@ -50,6 +56,15 @@ class ObsBiasIncrement : public util::Printable {
 
   double & operator[](const unsigned int ii) {return biasinc_[ii];}
   const double & operator[](const unsigned int ii) const {return biasinc_[ii];}
+
+/// Linear obs bias model
+  void computeObsBiasTL(const GeoVaLs &,
+                        ioda::ObsVector &,
+                        const ioda::ObsSpace &) const {}
+
+  void computeObsBiasAD(GeoVaLs &,
+                        ioda::ObsVector &,
+                        const ioda::ObsSpace &) {}
 
 /// Serialize and deserialize
   size_t serialSize() const {return 0;}

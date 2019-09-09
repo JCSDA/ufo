@@ -52,8 +52,8 @@ void ObsRadarRadialVelocityTLAD::setTrajectory(const GeoVaLs & geovals, const Ob
 
 // -----------------------------------------------------------------------------
 
-void ObsRadarRadialVelocityTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec,
-                             const ObsBiasIncrement & bias) const {
+void ObsRadarRadialVelocityTLAD::simulateObsTL(const GeoVaLs & geovals,
+                                               ioda::ObsVector & ovec) const {
   ufo_radarradialvelocity_simobs_tl_f90(keyOper_, geovals.toFortran(), odb_,
                             ovec.size(), ovec.toFortran());
   oops::Log::trace() << "ObsRadarRadialVelocityTLAD: TL observation operator run" << std::endl;
@@ -61,8 +61,8 @@ void ObsRadarRadialVelocityTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::Ob
 
 // -----------------------------------------------------------------------------
 
-void ObsRadarRadialVelocityTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec,
-                             ObsBiasIncrement & bias) const {
+void ObsRadarRadialVelocityTLAD::simulateObsAD(GeoVaLs & geovals,
+                                               const ioda::ObsVector & ovec) const {
   ufo_radarradialvelocity_simobs_ad_f90(keyOper_, geovals.toFortran(), odb_,
                             ovec.size(), ovec.toFortran());
   oops::Log::trace() << "ObsRadarRadialVelocityTLAD: adjoint observation operator run" << std::endl;
