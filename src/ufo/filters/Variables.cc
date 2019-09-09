@@ -71,7 +71,9 @@ Variables::Variables(const eckit::Configuration & conf, const std::string & allg
         }
       }
     } else {
-      fullnames_ = fullnames;
+      for (size_t jvar = 0; jvar < varnames.size(); ++jvar) {
+        fullnames_.push_back(varnames[jvar]+"@"+grpnames[jvar]);
+      }
     }
   } else if (conf.has("variable")) {
     std::string fullname(conf.getString("variable"));

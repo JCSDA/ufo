@@ -54,6 +54,7 @@ list( APPEND ufo_test_input
   testinput/surface_ps_qc.yaml
   testinput/locations.yaml
   testinput/mhs_crtm.yaml
+  testinput/obsfilterdata.yaml
   testinput/qc_boundscheck.yaml
   testinput/qc_cris.yaml
   testinput/qc_differencecheck.yaml
@@ -217,6 +218,11 @@ ecbuild_add_test( TARGET  test_ufo_geovals
 ecbuild_add_test( TARGET  test_ufo_locations
                   SOURCES mains/TestLocations.cc
                   ARGS    "testinput/locations.yaml"
+                  LIBS    ufo )
+
+ecbuild_add_test( TARGET  test_ufo_obsfilterdata
+                  SOURCES mains/TestObsFilterData.cc
+                  ARGS    "testinput/obsfilterdata.yaml"
                   LIBS    ufo )
 
 ecbuild_add_test( TARGET  test_ufo_variables
