@@ -13,8 +13,8 @@
 #include <vector>
 
 #include "oops/base/Variables.h"
-#include "oops/util/ObjectCounter.h"
 #include "oops/util/Logger.h"
+#include "oops/util/ObjectCounter.h"
 
 
 #include "ufo/geos_aero/ObsGeosAod.interface.h"
@@ -48,9 +48,7 @@ class ObsGeosAod : public ObsOperatorBase,
   void simulateObs(const GeoVaLs &, ioda::ObsVector &, ObsDiagnostics &) const override;
 
 // Other
-// const oops::Variables & variables() const {return *varin_;}
   const oops::Variables & variables() const {return varin_;}
- 
   int & toFortran() {return keyOper_;}
   const int & toFortran() const {return keyOper_;}
 
@@ -58,7 +56,6 @@ class ObsGeosAod : public ObsOperatorBase,
   void print(std::ostream &) const;
   F90hop keyOper_;
   const ioda::ObsSpace& odb_;
-//  std::unique_ptr<const oops::Variables> varin_;
   oops::Variables varin_;
 };
 
