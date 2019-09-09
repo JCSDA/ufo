@@ -35,13 +35,6 @@ ObsGeosAodTLAD::ObsGeosAodTLAD(const ioda::ObsSpace & odb,
   const oops::Variables & observed = odb.obsvariables();
   const int nvars_out = observed.size();
 
-//  ufo_geosaod_tlad_setup_f90(keyOper_, &configc, buffin, c_name_size, nvars_out);
-
-//  std::string vstr_in(buffin);
-//  std::vector<std::string> vvin;
-//  boost::split(vvin, vstr_in, boost::is_any_of("\t"));
-//  varin_.reset(new oops::Variables(vvin));
-
   ufo_geosaod_tlad_setup_f90(keyOper_, &configc, varin_, nvars_out);
 
 
