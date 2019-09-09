@@ -23,6 +23,7 @@
 #include "oops/util/Logger.h"
 
 #include "ufo/filters/actions/FilterAction.h"
+#include "ufo/filters/getScalarOrFilterData.h"
 #include "ufo/filters/processWhere.h"
 #include "ufo/filters/QCflags.h"
 #include "ufo/GeoVaLs.h"
@@ -36,7 +37,9 @@ namespace ufo {
 BackgroundCheck::BackgroundCheck(ioda::ObsSpace & os, const eckit::Configuration & config,
                                  boost::shared_ptr<ioda::ObsDataVector<int> > flags,
                                  boost::shared_ptr<ioda::ObsDataVector<float> > obserr)
-  : obsdb_(os), data_(obsdb_), config_(config), abs_threshold_(-1.0), threshold_(-1.0),
+  : obsdb_(os), data_(obsdb_), config_(config),
+    abs_threshold_(config_.getString("absolute threshold", "")),
+    threshold_(config_.getString("threshold", "")),
     geovars_(preProcessWhere(config_, "GeoVaLs")), diagvars_(),
     flags_(*flags), obserr_(*obserr)
 {
@@ -45,12 +48,7 @@ BackgroundCheck::BackgroundCheck(ioda::ObsSpace & os, const eckit::Configuration
   ASSERT(flags);
   ASSERT(obserr);
 
-  const float missing = util::missingValue(missing);
-  threshold_ = config.getFloat("threshold", missing);
-  abs_threshold_ = config.getFloat("absolute threshold", missing);
-  ASSERT(abs_threshold_ != missing || threshold_ != missing);
-  ASSERT(abs_threshold_ == missing || abs_threshold_ > 0.0);
-  ASSERT(threshold_ == missing || threshold_ > 0.0);
+  ASSERT(abs_threshold_ != "" || threshold_ != "");
 }
 
 // -----------------------------------------------------------------------------
@@ -95,6 +93,12 @@ void BackgroundCheck::postFilter(const ioda::ObsVector & hofx, const ObsDiagnost
   for (size_t jv = 0; jv < vars.size(); ++jv) {
     size_t iv = observed.find(vars[jv]);
 
+//  Threshold for current variable
+    std::vector<float> abs_thr(obsdb_.nlocs(), std::numeric_limits<float>::max());
+    std::vector<float> thr(obsdb_.nlocs(), std::numeric_limits<float>::max());
+    if (abs_threshold_ != "") abs_thr = getScalarOrFilterData(abs_threshold_, data_);
+    if (threshold_ != "")     thr     = getScalarOrFilterData(threshold_, data_);
+
     for (size_t jobs = 0; jobs < obsdb_.nlocs(); ++jobs) {
       if (apply[jobs] && flags_[iv][jobs] == 0) {
         size_t iobs = observed.size() * jobs + iv;
@@ -103,9 +107,7 @@ void BackgroundCheck::postFilter(const ioda::ObsVector & hofx, const ObsDiagnost
         ASSERT(hofx[iobs] != util::missingValue(hofx[iobs]));
 
 //      Threshold for current observation
-        float zz = std::numeric_limits<float>::max();
-        if (abs_threshold_ != missing) zz = abs_threshold_;
-        if (threshold_ != missing) zz = std::min(zz, threshold_ * obserr_[iv][jobs]);
+        float zz = std::min(abs_thr[jobs], thr[jobs] * obserr_[iv][jobs]);
         ASSERT(zz < std::numeric_limits<float>::max() && zz > 0.0);
 
 //      Apply bias correction
@@ -122,7 +124,7 @@ void BackgroundCheck::postFilter(const ioda::ObsVector & hofx, const ObsDiagnost
   config_.get("action", aconf);
   aconf.set("flag", QCflags::fguess);
   FilterAction action(aconf);
-  action.apply(vars, flagged, flags_, obserr_);
+  action.apply(vars, flagged, data_, flags_, obserr_);
 }
 
 // -----------------------------------------------------------------------------

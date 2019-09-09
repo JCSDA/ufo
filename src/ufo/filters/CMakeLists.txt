@@ -10,6 +10,8 @@ set ( filters_files
       BlackList.h
       DifferenceCheck.cc
       DifferenceCheck.h
+      getScalarOrFilterData.cc
+      getScalarOrFilterData.h
       ObsBoundsCheck.cc
       ObsBoundsCheck.h
       MWCLWCheck.cc
@@ -18,8 +20,6 @@ set ( filters_files
       MWSeaIceCheck.h
       ObsDomainCheck.cc
       ObsDomainCheck.h
-      ObsErrInflationCheck.cc
-      ObsErrInflationCheck.h
       ObsDomainErrCheck.cc
       ObsDomainErrCheck.h
       ObsFilterData.cc

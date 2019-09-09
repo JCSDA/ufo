@@ -19,7 +19,6 @@
 #include "ufo/filters/ObsBoundsCheck.h"
 #include "ufo/filters/ObsDomainCheck.h"
 #include "ufo/filters/ObsDomainErrCheck.h"
-#include "ufo/filters/ObsErrInflationCheck.h"
 #include "ufo/filters/PreQC.h"
 #include "ufo/filters/QCmanager.h"
 #include "ufo/filters/Thinning.h"
@@ -55,10 +54,8 @@ template<typename MODEL> void instantiateObsFilterFactory() {
            makerChk11_("MW SeaIce Check");
   static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::ObsDomainErrCheck> >
            makerChk12_("DomainErr Check");
-  static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::ObsErrInflationCheck> >
-           makerChk13_("ObsErrInflation Check");
   static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::HCorrection> >
-           makerChk14_("HCorrection");
+           makerChk13_("HCorrection");
 }
 
 }  // namespace ufo

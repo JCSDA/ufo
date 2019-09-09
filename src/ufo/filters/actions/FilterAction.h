@@ -16,12 +16,13 @@
 
 #include "ioda/ObsDataVector.h"
 #include "ufo/filters/actions/FilterActionBase.h"
-
 namespace eckit {
   class Configuration;
 }
 
 namespace ufo {
+
+class ObsFilterData;
 
 // -----------------------------------------------------------------------------
 
@@ -31,6 +32,7 @@ class FilterAction : private boost::noncopyable {
   ~FilterAction();
 
   void apply(const oops::Variables &, const std::vector<std::vector<bool>> &,
+             const ObsFilterData &,
              ioda::ObsDataVector<int> &, ioda::ObsDataVector<float> &) const;
  private:
   std::unique_ptr<FilterActionBase> action_;

@@ -13,6 +13,7 @@
 
 #include "ioda/ObsDataVector.h"
 #include "oops/base/Variables.h"
+#include "ufo/filters/ObsFilterData.h"
 
 namespace ufo {
 
@@ -29,8 +30,9 @@ FilterAction::~FilterAction() {}
 // -----------------------------------------------------------------------------
 
 void FilterAction::apply(const oops::Variables & vars, const std::vector<std::vector<bool>> & mask,
+                         const ObsFilterData & data,
                          ioda::ObsDataVector<int> & flag, ioda::ObsDataVector<float> & err) const {
-  action_->apply(vars, mask, flag, err);
+  action_->apply(vars, mask, data, flag, err);
 }
 
 // -----------------------------------------------------------------------------

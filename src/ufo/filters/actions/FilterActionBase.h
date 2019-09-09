@@ -20,6 +20,8 @@
 
 namespace ufo {
 
+class ObsFilterData;
+
 // -----------------------------------------------------------------------------
 /// Base class for computing obs diagnostics
 
@@ -30,6 +32,7 @@ class FilterActionBase : private boost::noncopyable {
 
 /// compute the diagnostic
   virtual void apply(const oops::Variables &, const std::vector<std::vector<bool>> &,
+                     const ObsFilterData &,
                      ioda::ObsDataVector<int> &, ioda::ObsDataVector<float> &) const = 0;
 };
 

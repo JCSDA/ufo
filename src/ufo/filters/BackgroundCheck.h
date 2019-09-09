@@ -58,8 +58,8 @@ class BackgroundCheck : public util::Printable,
   ioda::ObsSpace & obsdb_;
   ObsFilterData data_;
   const eckit::LocalConfiguration config_;
-  float abs_threshold_;
-  float threshold_;
+  const std::string abs_threshold_;
+  const std::string threshold_;
   const oops::Variables geovars_;
   const oops::Variables diagvars_;
   ioda::ObsDataVector<int> & flags_;
