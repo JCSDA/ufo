@@ -40,7 +40,8 @@ BackgroundCheck::BackgroundCheck(ioda::ObsSpace & os, const eckit::Configuration
   : obsdb_(os), data_(obsdb_), config_(config),
     abs_threshold_(config_.getString("absolute threshold", "")),
     threshold_(config_.getString("threshold", "")),
-    geovars_(preProcessWhere(config_, "GeoVaLs")), diagvars_(),
+    allvars_(getAllWhereVariables(config_)), geovars_(allvars_.allFromGroup("GeoVaLs")),
+    diagvars_(allvars_.allFromGroup("ObsDiag")),
     flags_(*flags), obserr_(*obserr)
 {
   oops::Log::trace() << "BackgroundCheck contructor starting" << std::endl;

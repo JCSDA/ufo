@@ -30,8 +30,9 @@ namespace ufo {
 BlackList::BlackList(ioda::ObsSpace & obsdb, const eckit::Configuration & config,
                      boost::shared_ptr<ioda::ObsDataVector<int> > flags,
                      boost::shared_ptr<ioda::ObsDataVector<float> >)
-  : obsdb_(obsdb), data_(obsdb_), config_(config), geovars_(preProcessWhere(config_, "GeoVaLs")),
-    diagvars_(), flags_(*flags)
+  : obsdb_(obsdb), data_(obsdb_), config_(config),
+    allvars_(getAllWhereVariables(config_)), geovars_(allvars_.allFromGroup("GeoVaLs")),
+    diagvars_(allvars_.allFromGroup("ObsDiag")), flags_(*flags)
 {
   oops::Log::debug() << "BlackList: config = " << config_ << std::endl;
   oops::Log::debug() << "BlackList: geovars = " << geovars_ << std::endl;

@@ -20,6 +20,7 @@
 #include "oops/util/ObjectCounter.h"
 #include "oops/util/Printable.h"
 #include "ufo/filters/ObsFilterData.h"
+#include "ufo/filters/Variables.h"
 
 namespace ioda {
   class ObsVector;
@@ -55,6 +56,7 @@ class DifferenceCheck : public util::Printable,
   ObsFilterData data_;
   ioda::ObsDataVector<int> & flags_;
   eckit::LocalConfiguration config_;
+  ufo::Variables allvars_;
   oops::Variables geovars_;
   oops::Variables diagvars_;
   const std::string ref_;

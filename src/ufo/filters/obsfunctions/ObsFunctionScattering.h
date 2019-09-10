@@ -10,10 +10,7 @@
 
 #include "ufo/filters/ObsFilterData.h"
 #include "ufo/filters/obsfunctions/ObsFunctionBase.h"
-
-namespace oops {
-  class Variables;
-}
+#include "ufo/filters/Variables.h"
 
 namespace ufo {
 
@@ -26,9 +23,9 @@ class ObsFunctionScattering : public ObsFunctionBase {
 
   void compute(const ObsFilterData &,
                ioda::ObsDataVector<float> &) const;
-  const oops::Variables & requiredGeoVaLs() const;
+  const ufo::Variables & requiredVariables() const;
  private:
-  oops::Variables geovars_;
+  ufo::Variables invars_;
 };
 
 // -----------------------------------------------------------------------------

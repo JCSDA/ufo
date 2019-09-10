@@ -8,12 +8,9 @@
 #include "ufo/filters/obsfunctions/ObsFunctionErrInflationFactor.h"
 
 #include <math.h>
-#include <algorithm>
 #include <vector>
 
 #include "ioda/ObsDataVector.h"
-#include "oops/base/Variables.h"
-#include "ufo/GeoVaLs.h"
 
 namespace ufo {
 
@@ -23,7 +20,8 @@ static ObsFunctionMaker<ObsFunctionErrInflationFactor>
 // -----------------------------------------------------------------------------
 
 ObsFunctionErrInflationFactor::ObsFunctionErrInflationFactor()
-  : geovars_() {
+  : invars_() {
+  invars_ += "latitude@MetaData";
 }
 
 // -----------------------------------------------------------------------------
@@ -51,8 +49,8 @@ void ObsFunctionErrInflationFactor::compute(const ObsFilterData & input,
 
 // -----------------------------------------------------------------------------
 
-const oops::Variables & ObsFunctionErrInflationFactor::requiredGeoVaLs() const {
-  return geovars_;
+const ufo::Variables & ObsFunctionErrInflationFactor::requiredVariables() const {
+  return invars_;
 }
 
 // -----------------------------------------------------------------------------

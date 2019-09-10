@@ -21,6 +21,7 @@
 #include "oops/runs/Test.h"
 #include "ufo/filters/ObsFilterData.h"
 #include "ufo/filters/obsfunctions/ObsFunction.h"
+#include "ufo/filters/Variables.h"
 #include "ufo/GeoVaLs.h"
 
 namespace ufo {
@@ -45,7 +46,8 @@ void testFunction() {
   ObsFunction obsfunc(funcname);
 
 ///  Setup GeoVaLs
-  oops::Variables geovars = obsfunc.requiredGeoVaLs();
+  ufo::Variables allfuncvars = obsfunc.requiredVariables();
+  oops::Variables geovars = allfuncvars.allFromGroup("GeoVaLs");
   const eckit::LocalConfiguration gconf(conf, "GeoVaLs");
   const GeoVaLs gval(gconf, ospace, geovars);
 

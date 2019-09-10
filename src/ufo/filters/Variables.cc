@@ -20,6 +20,7 @@
 #include "oops/util/IntSetParser.h"
 #include "oops/util/Logger.h"
 
+#include "ufo/filters/obsfunctions/ObsFunction.h"
 #include "ufo/utils/SplitVarGroup.h"
 
 // -----------------------------------------------------------------------------
@@ -113,6 +114,12 @@ Variables & Variables::operator+=(const Variables & rhs) {
 // -----------------------------------------------------------------------------
 
 Variables & Variables::operator+=(const std::string & rhs) {
+  std::string var, grp;
+  splitVarGroup(rhs, var, grp);
+  if (var == "" || grp == "") {
+    oops::Log::error() << "Both name and group should be specified for variable" << std::endl;
+    ABORT("Both name and group should be specified for variable");
+  }
   fullnames_.push_back(rhs);
   return *this;
 }
@@ -143,6 +150,11 @@ oops::Variables Variables::allFromGroup(const std::string & group) const {
     std::string var, grp;
     splitVarGroup(fullnames_[jj], var, grp);
     if (grp == group) vars.push_back(var);
+    if (grp == "ObsFunction") {
+      ObsFunction obsfunc(var);
+      ufo::Variables funcvars = obsfunc.requiredVariables();
+      vars += funcvars.allFromGroup(group);
+    }
   }
   return vars;
 }

@@ -19,7 +19,6 @@
 #include "oops/util/missingValues.h"
 #include "ufo/filters/processWhere.h"
 #include "ufo/filters/QCflags.h"
-#include "ufo/filters/Variables.h"
 #include "ufo/UfoTrait.h"
 
 namespace ufo {
@@ -29,15 +28,15 @@ namespace ufo {
 ObsBoundsCheck::ObsBoundsCheck(ioda::ObsSpace & obsdb, const eckit::Configuration & config,
                                boost::shared_ptr<ioda::ObsDataVector<int> > flags,
                                boost::shared_ptr<ioda::ObsDataVector<float> >)
-  : obsdb_(obsdb), data_(obsdb_), config_(config), geovars_(preProcessWhere(config_, "GeoVaLs")),
-    diagvars_(preProcessWhere(config_, "ObsDiag")), flags_(*flags)
+  : obsdb_(obsdb), data_(obsdb_), config_(config),
+    allvars_(getAllWhereVariables(config_)), geovars_(), diagvars_(), flags_(*flags)
 {
   if (config_.has("test variables")) {
     eckit::LocalConfiguration testvarconf(config_, "test variables");
-    ufo::Variables testvars(testvarconf);
-    diagvars_ += testvars.allFromGroup("ObsDiag");
-    geovars_  += testvars.allFromGroup("GeoVaLs");
+    allvars_ += ufo::Variables(testvarconf);
   }
+  diagvars_ += allvars_.allFromGroup("ObsDiag");
+  geovars_  += allvars_.allFromGroup("GeoVaLs");
   oops::Log::debug() << "ObsBoundsCheck: config = " << config_ << std::endl;
   oops::Log::debug() << "ObsBoundsCheck: geovars = " << geovars_ << std::endl;
   oops::Log::debug() << "ObsBoundsCheck: diagvars = " << diagvars_ << std::endl;

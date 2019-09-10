@@ -14,12 +14,11 @@
 
 namespace eckit {class Configuration;}
 
-namespace oops {class Variables;}
-
 namespace ufo {
   class ObsFilterData;
+  class Variables;
 
-oops::Variables preProcessWhere(const eckit::Configuration &, const std::string &);
+ufo::Variables getAllWhereVariables(const eckit::Configuration &);
 std::vector<bool> processWhere(const eckit::Configuration &, ObsFilterData &);
 
 }  // namespace ufo

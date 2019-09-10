@@ -18,6 +18,7 @@
 #include "oops/util/ObjectCounter.h"
 #include "oops/util/Printable.h"
 #include "ufo/filters/ObsFilterData.h"
+#include "ufo/filters/Variables.h"
 
 namespace eckit {
   class Configuration;
@@ -60,6 +61,7 @@ class BackgroundCheck : public util::Printable,
   const eckit::LocalConfiguration config_;
   const std::string abs_threshold_;
   const std::string threshold_;
+  const ufo::Variables allvars_;
   const oops::Variables geovars_;
   const oops::Variables diagvars_;
   ioda::ObsDataVector<int> & flags_;

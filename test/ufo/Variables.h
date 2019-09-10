@@ -17,6 +17,7 @@
 #include "eckit/config/LocalConfiguration.h"
 #include "eckit/testing/Test.h"
 #include "oops/../test/TestEnvironment.h"
+#include "oops/base/Variables.h"
 #include "oops/runs/Test.h"
 #include "ufo/filters/Variables.h"
 
@@ -24,7 +25,6 @@ namespace ufo {
 namespace test {
 
 // -----------------------------------------------------------------------------
-
 
 void testConfigConstructor() {
   std::vector<eckit::LocalConfiguration> conf;
@@ -47,6 +47,25 @@ void testConfigConstructor() {
 }
 
 // -----------------------------------------------------------------------------
+// Test that ufo::Variables::allFromGroup() gets variables from the functions
+void testAllFromGroup() {
+  ufo::Variables vars;
+  vars += ("height@GeoVaLs");
+  vars += ("Velocity@ObsFunction");
+  vars += ("latitude@MetaData");
+  vars += ("temperature@ObsValue");
+  vars += ("longitude@MetaData");
+
+  oops::Variables res = vars.allFromGroup("ObsValue");
+  oops::Log::info() << res << std::endl;
+
+  EXPECT(res.size() == 3);
+  EXPECT(res.has("eastward_wind"));
+  EXPECT(res.has("northward_wind"));
+  EXPECT(res.has("temperature"));
+}
+
+// -----------------------------------------------------------------------------
 
 class Variables : public oops::Test {
  public:
@@ -60,6 +79,9 @@ class Variables : public oops::Test {
 
     ts.emplace_back(CASE("ufo/Variables/testConfigConstructor")
       { testConfigConstructor(); });
+
+    ts.emplace_back(CASE("ufo/Variables/testAllFromGroup")
+      { testAllFromGroup(); });
   }
 };
 

@@ -20,6 +20,7 @@
 #include "oops/util/ObjectCounter.h"
 #include "oops/util/Printable.h"
 #include "ufo/filters/ObsFilterData.h"
+#include "ufo/filters/Variables.h"
 
 namespace ioda {
   template <typename DATATYPE> class ObsDataVector;
@@ -57,6 +58,7 @@ class ObsBoundsCheck : public util::Printable,
   ioda::ObsSpace & obsdb_;
   ObsFilterData data_;
   const eckit::LocalConfiguration config_;
+  ufo::Variables allvars_;
   oops::Variables geovars_;
   oops::Variables diagvars_;
   ioda::ObsDataVector<int> & flags_;

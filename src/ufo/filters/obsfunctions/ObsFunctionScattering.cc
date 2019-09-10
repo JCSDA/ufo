@@ -11,7 +11,6 @@
 #include <vector>
 
 #include "ioda/ObsDataVector.h"
-#include "oops/base/Variables.h"
 
 namespace ufo {
 
@@ -19,8 +18,11 @@ static ObsFunctionMaker<ObsFunctionScattering> makerObsFuncScattering_("Scatteri
 
 // -----------------------------------------------------------------------------
 
-ObsFunctionScattering::ObsFunctionScattering() : geovars_() {
+ObsFunctionScattering::ObsFunctionScattering() : invars_() {
   // empiracal formula is used to calculate AMSU-A scattering over ocean
+  invars_ += "brightness_temperature_1@ObsValue";
+  invars_ += "brightness_temperature_2@ObsValue";
+  invars_ += "brightness_temperature_15@ObsValue";
 }
 
 // -----------------------------------------------------------------------------
@@ -45,8 +47,8 @@ void ObsFunctionScattering::compute(const ObsFilterData & input,
 
 // -----------------------------------------------------------------------------
 
-const oops::Variables & ObsFunctionScattering::requiredGeoVaLs() const {
-  return geovars_;
+const ufo::Variables & ObsFunctionScattering::requiredVariables() const {
+  return invars_;
 }
 
 // -----------------------------------------------------------------------------

@@ -32,20 +32,15 @@ namespace ufo {
 DifferenceCheck::DifferenceCheck(ioda::ObsSpace & os, const eckit::Configuration & config,
                                  boost::shared_ptr<ioda::ObsDataVector<int> > flags,
                                  boost::shared_ptr<ioda::ObsDataVector<float> >)
-  : obsdb_(os), data_(obsdb_), flags_(*flags), config_(config), geovars_(), diagvars_(),
+  : obsdb_(os), data_(obsdb_), flags_(*flags), config_(config),
+    allvars_(getAllWhereVariables(config_)), geovars_(), diagvars_(),
     ref_(config_.getString("reference")), val_(config_.getString("value"))
 {
   oops::Log::trace() << "DifferenceCheck contructor starting" << std::endl;
-
-
-  std::string var, grp;
-// Reference setup
-  splitVarGroup(ref_, var, grp);
-  if (grp == "GeoVaLs") geovars_.push_back(var);
-
-// Value to compare setup
-  splitVarGroup(val_, var, grp);
-  if (grp == "GeoVaLs") geovars_.push_back(var);
+  allvars_ += ref_;
+  allvars_ += val_;
+  geovars_ = allvars_.allFromGroup("GeoVaLs");
+  diagvars_ = allvars_.allFromGroup("ObsDiag");
 }
 
 // -----------------------------------------------------------------------------

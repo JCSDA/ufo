@@ -11,7 +11,6 @@
 #include <vector>
 
 #include "ioda/ObsDataVector.h"
-#include "oops/base/Variables.h"
 
 namespace ufo {
 
@@ -20,7 +19,9 @@ static ObsFunctionMaker<ObsFunctionVelocity> makerObsFuncVelocity_("Velocity");
 // -----------------------------------------------------------------------------
 
 ObsFunctionVelocity::ObsFunctionVelocity()
-  : geovars_() {
+  : invars_() {
+  invars_ += "eastward_wind@ObsValue";
+  invars_ += "northward_wind@ObsValue";
 }
 
 // -----------------------------------------------------------------------------
@@ -44,8 +45,8 @@ void ObsFunctionVelocity::compute(const ObsFilterData & in,
 
 // -----------------------------------------------------------------------------
 
-const oops::Variables & ObsFunctionVelocity::requiredGeoVaLs() const {
-  return geovars_;
+const ufo::Variables & ObsFunctionVelocity::requiredVariables() const {
+  return invars_;
 }
 
 // -----------------------------------------------------------------------------

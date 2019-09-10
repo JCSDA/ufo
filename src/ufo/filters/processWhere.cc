@@ -12,33 +12,24 @@
 #include <vector>
 
 #include "eckit/config/LocalConfiguration.h"
-#include "oops/base/Variables.h"
 #include "oops/util/IntSetParser.h"
 #include "oops/util/Logger.h"
 #include "oops/util/missingValues.h"
 #include "ufo/filters/ObsFilterData.h"
-#include "ufo/filters/obsfunctions/ObsFunction.h"
+#include "ufo/filters/Variables.h"
 #include "ufo/utils/SplitVarGroup.h"
 
 namespace ufo {
 
 // -----------------------------------------------------------------------------
 
-oops::Variables preProcessWhere(const eckit::Configuration & config, const std::string & group) {
+ufo::Variables getAllWhereVariables(const eckit::Configuration & config) {
   std::vector<eckit::LocalConfiguration> masks;
   config.get("where", masks);
 
-  oops::Variables vars;
+  ufo::Variables vars;
   for (size_t jm = 0; jm < masks.size(); ++jm) {
-    const std::string vargrp(masks[jm].getString("variable"));
-    std::string var;
-    std::string grp;
-    splitVarGroup(vargrp, var, grp);
-    if (grp == group) vars.push_back(var);
-    if (group == "GeoVaLs" && grp.find("Function") != std::string::npos) {
-      ObsFunction obsdiag(var);
-      vars += obsdiag.requiredGeoVaLs();
-    }
+    vars += ufo::Variables(masks[jm]);
   }
   return vars;
 }
@@ -115,14 +106,11 @@ std::vector<bool> processWhere(const eckit::Configuration & config,
   std::vector<eckit::LocalConfiguration> masks;
   config.get("where", masks);
 
-  for (size_t jm = 0; jm < masks.size(); ++jm) {
-//  Get variable@group
-    const std::string varname(masks[jm].getString("variable"));
-    std::string var, grp;
-    splitVarGroup(varname, var, grp);
-    if (grp != "VarMetaData") {
+  const ufo::Variables vars = getAllWhereVariables(config);
+  for (size_t jm = 0; jm < vars.size(); ++jm) {
+    if (vars.group(jm) != "VarMetaData") {
 //    Get data
-      std::vector<float> data = filterdata.get(varname);
+      std::vector<float> data = filterdata.get(vars[jm]);
 //    Process masks on float values
       const float vmin = masks[jm].getFloat("minvalue", missing);
       const float vmax = masks[jm].getFloat("maxvalue", missing);
@@ -134,7 +122,7 @@ std::vector<bool> processWhere(const eckit::Configuration & config,
 
 //    Apply mask is_defined
       if (masks[jm].has("is_defined")) {
-        if (filterdata.has(varname)) {
+        if (filterdata.has(vars[jm])) {
           processWhereIsDefined(data, where);
         } else {
           std::fill(where.begin(), where.end(), false);

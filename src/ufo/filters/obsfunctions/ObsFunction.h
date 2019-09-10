@@ -17,9 +17,6 @@
 #include "ufo/filters/ObsFilterData.h"
 #include "ufo/filters/obsfunctions/ObsFunctionBase.h"
 
-namespace oops {
-  class Variables;
-}
 
 namespace ufo {
 
@@ -34,8 +31,8 @@ class ObsFunction : private boost::noncopyable {
 /// compute(metadata, obs values, output)
   void compute(const ObsFilterData &,
                ioda::ObsDataVector<float> &) const;
-/// required geovals
-  const oops::Variables & requiredGeoVaLs() const;
+/// required variables
+  const ufo::Variables & requiredVariables() const;
  private:
   std::unique_ptr<ObsFunctionBase> obsfct_;
 };

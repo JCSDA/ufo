@@ -21,6 +21,7 @@
 #include "oops/util/ObjectCounter.h"
 #include "oops/util/Printable.h"
 #include "ufo/filters/ObsFilterData.h"
+#include "ufo/filters/Variables.h"
 
 namespace eckit {class Configuration;}
 
@@ -64,6 +65,7 @@ class ObsDomainErrCheck : public util::Printable,
   ioda::ObsSpace & obsdb_;
   ObsFilterData data_;
   const eckit::LocalConfiguration config_;
+  const ufo::Variables allvars_;
   const oops::Variables geovars_;
   const oops::Variables diagvars_;
   ioda::ObsDataVector<int> & flags_;

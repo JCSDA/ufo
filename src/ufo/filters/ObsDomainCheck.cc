@@ -31,7 +31,8 @@ ObsDomainCheck::ObsDomainCheck(ioda::ObsSpace & obsdb, const eckit::Configuratio
                                boost::shared_ptr<ioda::ObsDataVector<int> > flags,
                                boost::shared_ptr<ioda::ObsDataVector<float> >)
   : obsdb_(obsdb), data_(obsdb_), config_(config),
-    geovars_(preProcessWhere(config_, "GeoVaLs")), diagvars_(), flags_(*flags)
+    allvars_(getAllWhereVariables(config_)), geovars_(allvars_.allFromGroup("GeoVaLs")),
+    diagvars_(allvars_.allFromGroup("ObsDiag")), flags_(*flags)
 {
   oops::Log::debug() << "ObsDomainCheck: config = " << config_ << std::endl;
   oops::Log::debug() << "ObsDomainCheck: geovars = " << geovars_ << std::endl;
