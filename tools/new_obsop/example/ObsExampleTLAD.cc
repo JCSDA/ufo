@@ -15,7 +15,6 @@
 #include "oops/util/Logger.h"
 #include "ufo/GeoVaLs.h"
 #include "ufo/ObsBias.h"
-#include "ufo/ObsBiasIncrement.h"
 
 namespace ufo {
 
@@ -51,8 +50,7 @@ void ObsExampleTLAD::setTrajectory(const GeoVaLs & geovals, const ObsBias & bias
 
 // -----------------------------------------------------------------------------
 
-void ObsExampleTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec,
-                             const ObsBiasIncrement & bias) const {
+void ObsExampleTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec) const {
   ufo_example_simobs_tl_f90(keyOper_, geovals.toFortran(), odb_,
                             ovec.size(), ovec.toFortran());
   oops::Log::trace() << "ObsExampleTLAD: TL observation operator run" << std::endl;
@@ -60,8 +58,7 @@ void ObsExampleTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ov
 
 // -----------------------------------------------------------------------------
 
-void ObsExampleTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec,
-                             ObsBiasIncrement & bias) const {
+void ObsExampleTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec) const {
   ufo_example_simobs_ad_f90(keyOper_, geovals.toFortran(), odb_,
                             ovec.size(), ovec.toFortran());
   oops::Log::trace() << "ObsExampleTLAD: adjoint observation operator run" << std::endl;
