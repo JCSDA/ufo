@@ -16,8 +16,6 @@ set ( filters_files
       ObsBoundsCheck.h
       MWCLWCheck.cc
       MWCLWCheck.h
-      MWSeaIceCheck.cc
-      MWSeaIceCheck.h
       ObsDomainCheck.cc
       ObsDomainCheck.h
       ObsDomainErrCheck.cc
