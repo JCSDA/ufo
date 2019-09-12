@@ -45,13 +45,13 @@ class ObsGnssroRef : public ObsOperatorBase,
   void simulateObs(const GeoVaLs &, ioda::ObsVector &, ObsDiagnostics &) const override;
 
 // Other
-  const oops::Variables & variables() const {return *varin_;}
+  const oops::Variables & variables() const override {return *varin_;}
 
   int & toFortran() {return keyOperGnssroRef_;}
   const int & toFortran() const {return keyOperGnssroRef_;}
 
  private:
-  void print(std::ostream &) const;
+  void print(std::ostream &) const override;
   F90hop keyOperGnssroRef_;
   const ioda::ObsSpace& odb_;
   std::unique_ptr<const oops::Variables> varin_;
