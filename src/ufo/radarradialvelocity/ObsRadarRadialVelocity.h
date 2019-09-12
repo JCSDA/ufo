@@ -45,13 +45,13 @@ class ObsRadarRadialVelocity : public ObsOperatorBase,
   void simulateObs(const GeoVaLs &, ioda::ObsVector &, ObsDiagnostics &) const override;
 
 // Other
-  const oops::Variables & variables() const {return varin_;}
+  const oops::Variables & variables() const override {return varin_;}
 
   int & toFortran() {return keyOper_;}
   const int & toFortran() const {return keyOper_;}
 
  private:
-  void print(std::ostream &) const;
+  void print(std::ostream &) const override;
   F90hop keyOper_;
   const ioda::ObsSpace& odb_;
   oops::Variables varin_;
