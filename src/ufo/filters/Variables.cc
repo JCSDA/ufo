@@ -171,6 +171,18 @@ bool Variables::has(const std::string & var) const {
 
 // -----------------------------------------------------------------------------
 
+bool Variables::hasGroup(const std::string & group) const {
+  bool found = false;
+  for (size_t jj = 0; jj < fullnames_.size(); ++jj) {
+    std::string var, grp;
+    splitVarGroup(fullnames_[jj], var, grp);
+    if (grp == group) found = true;
+  }
+  return found;
+}
+
+// -----------------------------------------------------------------------------
+
 size_t Variables::find(const std::string & var) const {
   size_t ii = fullnames_.size();
   for (size_t jj = 0; jj < fullnames_.size(); ++jj) {

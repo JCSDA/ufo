@@ -10,26 +10,23 @@
 
 #include <ostream>
 #include <string>
+#include <vector>
 
 #include "boost/shared_ptr.hpp"
 
-#include "eckit/config/LocalConfiguration.h"
-#include "ioda/ObsDataVector.h"
-#include "ioda/ObsSpace.h"
-#include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
-#include "oops/util/Printable.h"
-#include "ufo/filters/ObsFilterData.h"
-#include "ufo/filters/Variables.h"
+#include "ufo/filters/FilterBase.h"
+
+namespace eckit {
+  class Configuration;
+}
 
 namespace ioda {
   template <typename DATATYPE> class ObsDataVector;
-  class ObsVector;
+  class ObsSpace;
 }
 
 namespace ufo {
-  class GeoVaLs;
-  class ObsDiagnostics;
 
 /// BlackList: generic black listing of observations
 
@@ -37,7 +34,7 @@ namespace ufo {
 // The same effect can be achieved with opposite criteria through the "Domain Check",
 // the choice is a matter of convenience or which seems more natural.
 
-class BlackList : public util::Printable,
+class BlackList : public FilterBase,
                   private util::ObjectCounter<BlackList> {
  public:
   static const std::string classname() {return "ufo::BlackList";}
@@ -47,23 +44,9 @@ class BlackList : public util::Printable,
             boost::shared_ptr<ioda::ObsDataVector<float> >);
   ~BlackList();
 
-  void preProcess() const {}
-  void priorFilter(const GeoVaLs &);
-  void postFilter(const ioda::ObsVector &, const ObsDiagnostics &) const {}
-
-  const oops::Variables & requiredGeoVaLs() const {return geovars_;}
-  const oops::Variables & requiredHdiagnostics() const {return diagvars_;}
-
  private:
-  void print(std::ostream &) const;
-
-  ioda::ObsSpace & obsdb_;
-  ObsFilterData data_;
-  const eckit::LocalConfiguration config_;
-  const ufo::Variables allvars_;
-  const oops::Variables geovars_;
-  const oops::Variables diagvars_;
-  ioda::ObsDataVector<int> & flags_;
+  void print(std::ostream &) const override;
+  void applyFilter(const std::vector<bool> &, std::vector<std::vector<bool>> &) const override;
 };
 
 }  // namespace ufo

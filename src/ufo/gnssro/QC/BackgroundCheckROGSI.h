@@ -10,33 +10,28 @@
 
 #include <ostream>
 #include <string>
+#include <vector>
 
 #include "boost/shared_ptr.hpp"
 
-#include "ioda/ObsDataVector.h"
-#include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
-#include "oops/util/Printable.h"
-#include "ufo/filters/ObsFilterData.h"
-#include "ufo/filters/Variables.h"
+#include "ufo/filters/FilterBase.h"
 
 namespace eckit {
   class Configuration;
 }
 
 namespace ioda {
+  template <typename DATATYPE> class ObsDataVector;
   class ObsSpace;
-  class ObsVector;
 }
 
 namespace ufo {
-  class GeoVaLs;
-  class ObsDiagnostics;
 
 /// BackgroundCheckROGSI: check observation closeness to background
 
-class BackgroundCheckROGSI : public util::Printable,
-                        private util::ObjectCounter<BackgroundCheckROGSI> {
+class BackgroundCheckROGSI : public FilterBase,
+                             private util::ObjectCounter<BackgroundCheckROGSI> {
  public:
   static const std::string classname() {return "ufo::BackgroundCheckROGSI";}
 
@@ -45,23 +40,9 @@ class BackgroundCheckROGSI : public util::Printable,
                        boost::shared_ptr<ioda::ObsDataVector<float> >);
   ~BackgroundCheckROGSI();
 
-  void preProcess() const {}
-  void priorFilter(const GeoVaLs &) const;
-  void postFilter(const ioda::ObsVector &, const ObsDiagnostics &) const;
-
-  const oops::Variables & requiredGeoVaLs() const {return geovars_;}
-  const oops::Variables & requiredHdiagnostics() const {return diagvars_;}
-
  private:
-  void print(std::ostream &) const;
-
-  ioda::ObsSpace & obsdb_;
-  mutable ObsFilterData data_;
-  const eckit::LocalConfiguration config_;
-  const ufo::Variables allvars_;
-  const oops::Variables geovars_;
-  const oops::Variables diagvars_;
-  ioda::ObsDataVector<int> & flags_;
+  void print(std::ostream &) const override;
+  void applyFilter(const std::vector<bool> &, std::vector<std::vector<bool>> &) const override;
 };
 
 }  // namespace ufo

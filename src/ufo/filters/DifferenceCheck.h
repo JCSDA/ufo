@@ -10,29 +10,27 @@
 
 #include <ostream>
 #include <string>
+#include <vector>
 
 #include "boost/shared_ptr.hpp"
 
-#include "eckit/config/LocalConfiguration.h"
-#include "ioda/ObsDataVector.h"
-#include "ioda/ObsSpace.h"
-#include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
-#include "oops/util/Printable.h"
-#include "ufo/filters/ObsFilterData.h"
-#include "ufo/filters/Variables.h"
+#include "ufo/filters/FilterBase.h"
+
+namespace eckit {
+  class Configuration;
+}
 
 namespace ioda {
-  class ObsVector;
+  template <typename DATATYPE> class ObsDataVector;
+  class ObsSpace;
 }
 
 namespace ufo {
-  class GeoVaLs;
-  class ObsDiagnostics;
 
 /// DifferenceCheck filter
 
-class DifferenceCheck : public util::Printable,
+class DifferenceCheck : public FilterBase,
                         private util::ObjectCounter<DifferenceCheck> {
  public:
   static const std::string classname() {return "ufo::DifferenceCheck";}
@@ -42,23 +40,10 @@ class DifferenceCheck : public util::Printable,
                   boost::shared_ptr<ioda::ObsDataVector<float> >);
   ~DifferenceCheck();
 
-  void preProcess() const {}
-  void priorFilter(const GeoVaLs &);
-  void postFilter(const ioda::ObsVector &, const ObsDiagnostics &) const {}
-
-  const oops::Variables & requiredGeoVaLs() const {return geovars_;}
-  const oops::Variables & requiredHdiagnostics() const {return diagvars_;}
-
  private:
-  void print(std::ostream &) const;
+  void print(std::ostream &) const override;
+  void applyFilter(const std::vector<bool> &, std::vector<std::vector<bool>> &) const override;
 
-  ioda::ObsSpace & obsdb_;
-  ObsFilterData data_;
-  ioda::ObsDataVector<int> & flags_;
-  eckit::LocalConfiguration config_;
-  ufo::Variables allvars_;
-  oops::Variables geovars_;
-  oops::Variables diagvars_;
   const std::string ref_;
   const std::string val_;
 };

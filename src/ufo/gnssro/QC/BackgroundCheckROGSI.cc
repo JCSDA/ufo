@@ -33,20 +33,15 @@ static oops::FilterMaker<UfoTrait, oops::ObsFilter<UfoTrait, BackgroundCheckROGS
   makerBgChk_("Background Check ROGSI");
 // -----------------------------------------------------------------------------
 
-BackgroundCheckROGSI::BackgroundCheckROGSI(ioda::ObsSpace & os,
+BackgroundCheckROGSI::BackgroundCheckROGSI(ioda::ObsSpace & obsdb,
                                            const eckit::Configuration & config,
                                            boost::shared_ptr<ioda::ObsDataVector<int> > flags,
                                            boost::shared_ptr<ioda::ObsDataVector<float> > obserr)
-  : obsdb_(os), data_(obsdb_), config_(config),
-    allvars_(getAllWhereVariables(config_)), geovars_(allvars_.allFromGroup("GeoVaLs")),
-    diagvars_(allvars_.allFromGroup("ObsDiag")), flags_(*flags)
+  : FilterBase(obsdb, config, flags, obserr)
 {
   oops::Log::trace() << "BackgroundCheckROGSI contructor starting: "
                      << "using GSI style BackgroundCheck for GnssroBndGSI" << std::endl;
   oops::Log::debug() << "BackgroundCheckROGSI: config = " << config << std::endl;
-  ASSERT(flags);
-
-  const float missing = util::missingValue(missing);
 }
 
 // -----------------------------------------------------------------------------
@@ -57,13 +52,8 @@ BackgroundCheckROGSI::~BackgroundCheckROGSI() {
 
 // -----------------------------------------------------------------------------
 
-void BackgroundCheckROGSI::priorFilter(const GeoVaLs & gv) const {
-  data_.associate(gv);
-}
-
-// -----------------------------------------------------------------------------
-
-void BackgroundCheckROGSI::postFilter(const ioda::ObsVector & hofx, const ObsDiagnostics &) const {
+void BackgroundCheckROGSI::applyFilter(const std::vector<bool> & apply,
+                                       std::vector<std::vector<bool>> & flagged) const {
   oops::Log::trace() << "BackgroundCheckROGSI postFilter" << std::endl;
 
   const oops::Variables vars(config_);
@@ -81,18 +71,18 @@ void BackgroundCheckROGSI::postFilter(const ioda::ObsVector & hofx, const ObsDia
   ioda::ObsDataVector<float> temperature(obsdb_, "temperature",
                                          "MetaData");  // background temperature at obs location
 
-// Select where the background check will apply
-  data_.associate(hofx);
-  std::vector<bool> apply = processWhere(config_, data_);
-
   for (size_t jv = 0; jv < vars.size(); ++jv) {
     size_t iv = observed.find(vars[jv]);
+
+//  H(x)
+    const std::string varhofx = vars[jv] + "@HofX";
+    std::vector<float> hofx = data_.get(varhofx);
 
     for (size_t jobs = 0; jobs < obsdb_.nlocs(); ++jobs) {
       if (apply[jobs] && flags_[iv][jobs] == 0) {
         size_t iobs = observed.size() * jobs + iv;
         ASSERT(obs[jv][jobs] != util::missingValue(obs[jv][jobs]));
-        ASSERT(hofx[iobs] != util::missingValue(hofx[iobs]));
+        ASSERT(hofx[jobs] != util::missingValue(hofx[jobs]));
         ASSERT(impactheight[0][iobs] != util::missingValue(impactheight[0][iobs]));
 
         float imp = impactheight[0][jobs]/1000.0 + geoidheight[0][jobs]/1000.0;
@@ -133,7 +123,7 @@ void BackgroundCheckROGSI::postFilter(const ioda::ObsVector & hofx, const ObsDia
         float yy = obs[jv][jobs] + bias[jv][jobs];
 
 //      GSI style background check: if omb/o is greater than a cutoff
-        if (std::abs(static_cast<float>(hofx[iobs])-yy) > yy*cutoff) {
+        if (std::abs(static_cast<float>(hofx[jobs])-yy) > yy*cutoff) {
            flags_[iv][jobs] = QCflags::fguess; }
       }
     }

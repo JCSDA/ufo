@@ -19,7 +19,7 @@ namespace ufo {
   class Variables;
 
 ufo::Variables getAllWhereVariables(const eckit::Configuration &);
-std::vector<bool> processWhere(const eckit::Configuration &, ObsFilterData &);
+std::vector<bool> processWhere(const eckit::Configuration &, const ObsFilterData &);
 
 }  // namespace ufo
 

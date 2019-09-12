@@ -96,7 +96,7 @@ void processWhereIsNotIn(const std::vector<int> & data,
 // -----------------------------------------------------------------------------
 
 std::vector<bool> processWhere(const eckit::Configuration & config,
-                               ObsFilterData & filterdata) {
+                               const ObsFilterData & filterdata) {
   const float missing = util::missingValue(missing);
   const size_t nlocs = filterdata.nlocs();
 

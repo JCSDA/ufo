@@ -10,31 +10,30 @@
 
 #include <ostream>
 #include <string>
+#include <vector>
 
 #include "boost/shared_ptr.hpp"
 
-#include "eckit/config/LocalConfiguration.h"
-#include "ioda/ObsDataVector.h"
-#include "ioda/ObsSpace.h"
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
-#include "oops/util/Printable.h"
-#include "ufo/filters/ObsFilterData.h"
-#include "ufo/filters/Variables.h"
+#include "ufo/filters/FilterBase.h"
+
+namespace eckit {
+  class Configuration;
+}
 
 namespace ioda {
-  class ObsVector;
+  template <typename DATATYPE> class ObsDataVector;
+  class ObsSpace;
 }
 
 namespace ufo {
-  class GeoVaLs;
-  class ObsDiagnostics;
 
 /// MWCLWCheck: generic quality control based on observation data only
 
 // Check that observations are within some bounds over some domain
 
-class MWCLWCheck : public util::Printable,
+class MWCLWCheck : public FilterBase,
                    private util::ObjectCounter<MWCLWCheck> {
  public:
   static const std::string classname() {return "ufo::MWCLWCheck";}
@@ -44,23 +43,11 @@ class MWCLWCheck : public util::Printable,
              boost::shared_ptr<ioda::ObsDataVector<float> >);
   ~MWCLWCheck();
 
-  void preProcess() const {}
-  void priorFilter(const GeoVaLs &);
-  void postFilter(const ioda::ObsVector &, const ObsDiagnostics &);
-
-  const oops::Variables & requiredGeoVaLs() const {return geovars_;}
-  const oops::Variables & requiredHdiagnostics() const {return diagvars_;}
-
  private:
-  void print(std::ostream &) const;
+  void print(std::ostream &) const override;
+  void applyFilter(const std::vector<bool> &, std::vector<std::vector<bool>> &) const override;
 
-  ioda::ObsSpace & obsdb_;
-  ObsFilterData data_;
-  const eckit::LocalConfiguration config_;
-  const ufo::Variables allvars_;
-  const oops::Variables geovars_;
-  const oops::Variables diagvars_;
-  ioda::ObsDataVector<int> & flags_;
+  oops::Variables invars_;
 };
 
 }  // namespace ufo

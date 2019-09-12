@@ -26,10 +26,10 @@ namespace ufo {
 
 // -----------------------------------------------------------------------------
 
-Thinning::Thinning(const ioda::ObsSpace & obsdb, const eckit::Configuration & config,
+Thinning::Thinning(ioda::ObsSpace & obsdb, const eckit::Configuration & config,
                    boost::shared_ptr<ioda::ObsDataVector<int> > flags,
-                   boost::shared_ptr<ioda::ObsDataVector<float> >)
-  : obsdb_(obsdb), config_(config), geovars_(), diagvars_(), flags_(*flags)
+                   boost::shared_ptr<ioda::ObsDataVector<float> > obserr)
+  : FilterBase(obsdb, config, flags, obserr)
 {
   oops::Log::debug() << "Thinning: config = " << config_ << std::endl;
 }
@@ -40,7 +40,8 @@ Thinning::~Thinning() {}
 
 // -----------------------------------------------------------------------------
 
-void Thinning::preProcess() const {
+void Thinning::applyFilter(const std::vector<bool> & apply,
+                           std::vector<std::vector<bool>> & flagged) const {
   const size_t nobs = obsdb_.nlocs();
   const oops::Variables vars = obsdb_.obsvariables();
   const float thinning = config_.getFloat("amount");

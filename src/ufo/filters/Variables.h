@@ -40,7 +40,9 @@ class Variables: public util::Printable {
   oops::Variables allFromGroup(const std::string &) const;
 
   bool has(const std::string &) const;
+  bool hasGroup(const std::string &) const;
   size_t find(const std::string &) const;
+  operator bool() const {return !fullnames_.empty();}
 
   void removeDuplicates();
 

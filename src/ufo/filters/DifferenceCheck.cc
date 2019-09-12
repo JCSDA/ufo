@@ -19,7 +19,6 @@
 #include "oops/interface/ObsFilter.h"
 #include "oops/util/Logger.h"
 
-#include "ufo/filters/processWhere.h"
 #include "ufo/filters/QCflags.h"
 #include "ufo/GeoVaLs.h"
 #include "ufo/UfoTrait.h"
@@ -29,18 +28,15 @@ namespace ufo {
 
 // -----------------------------------------------------------------------------
 
-DifferenceCheck::DifferenceCheck(ioda::ObsSpace & os, const eckit::Configuration & config,
+DifferenceCheck::DifferenceCheck(ioda::ObsSpace & obsdb, const eckit::Configuration & config,
                                  boost::shared_ptr<ioda::ObsDataVector<int> > flags,
-                                 boost::shared_ptr<ioda::ObsDataVector<float> >)
-  : obsdb_(os), data_(obsdb_), flags_(*flags), config_(config),
-    allvars_(getAllWhereVariables(config_)), geovars_(), diagvars_(),
+                                 boost::shared_ptr<ioda::ObsDataVector<float> > obserr)
+  : FilterBase(obsdb, config, flags, obserr),
     ref_(config_.getString("reference")), val_(config_.getString("value"))
 {
   oops::Log::trace() << "DifferenceCheck contructor starting" << std::endl;
   allvars_ += ref_;
   allvars_ += val_;
-  geovars_ = allvars_.allFromGroup("GeoVaLs");
-  diagvars_ = allvars_.allFromGroup("ObsDiag");
 }
 
 // -----------------------------------------------------------------------------
@@ -51,7 +47,8 @@ DifferenceCheck::~DifferenceCheck() {
 
 // -----------------------------------------------------------------------------
 
-void DifferenceCheck::priorFilter(const GeoVaLs & gv) {
+void DifferenceCheck::applyFilter(const std::vector<bool> & apply,
+                                  std::vector<std::vector<bool>> & flagged) const {
   oops::Log::trace() << "DifferenceCheck priorFilter" << std::endl;
 
   const float missing = util::missingValue(missing);
@@ -67,10 +64,6 @@ void DifferenceCheck::priorFilter(const GeoVaLs & gv) {
     vmin = -thresh;
     vmax = thresh;
   }
-
-// Process "where" mask
-  data_.associate(gv);
-  std::vector<bool> apply = processWhere(config_, data_);
 
 // Get reference values and values to compare (as floats)
   std::vector<float> ref = data_.get(ref_);

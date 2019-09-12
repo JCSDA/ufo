@@ -17,7 +17,6 @@
 #include "oops/util/abor1_cpp.h"
 #include "oops/util/Logger.h"
 #include "oops/util/missingValues.h"
-#include "ufo/filters/processWhere.h"
 #include "ufo/filters/QCflags.h"
 #include "ufo/UfoTrait.h"
 
@@ -27,19 +26,14 @@ namespace ufo {
 
 ObsBoundsCheck::ObsBoundsCheck(ioda::ObsSpace & obsdb, const eckit::Configuration & config,
                                boost::shared_ptr<ioda::ObsDataVector<int> > flags,
-                               boost::shared_ptr<ioda::ObsDataVector<float> >)
-  : obsdb_(obsdb), data_(obsdb_), config_(config),
-    allvars_(getAllWhereVariables(config_)), geovars_(), diagvars_(), flags_(*flags)
+                               boost::shared_ptr<ioda::ObsDataVector<float> > obserr)
+  : FilterBase(obsdb, config, flags, obserr)
 {
   if (config_.has("test variables")) {
     eckit::LocalConfiguration testvarconf(config_, "test variables");
     allvars_ += ufo::Variables(testvarconf);
   }
-  diagvars_ += allvars_.allFromGroup("ObsDiag");
-  geovars_  += allvars_.allFromGroup("GeoVaLs");
   oops::Log::debug() << "ObsBoundsCheck: config = " << config_ << std::endl;
-  oops::Log::debug() << "ObsBoundsCheck: geovars = " << geovars_ << std::endl;
-  oops::Log::debug() << "ObsBoundsCheck: diagvars = " << diagvars_ << std::endl;
 }
 
 // -----------------------------------------------------------------------------
@@ -48,16 +42,9 @@ ObsBoundsCheck::~ObsBoundsCheck() {}
 
 // -----------------------------------------------------------------------------
 
-void ObsBoundsCheck::priorFilter(const GeoVaLs & gv) {
-  data_.associate(gv);
-}
-
-// -----------------------------------------------------------------------------
-
-void ObsBoundsCheck::postFilter(const ioda::ObsVector & hofx, const ObsDiagnostics & diags) {
+void ObsBoundsCheck::applyFilter(const std::vector<bool> & apply,
+                                 std::vector<std::vector<bool>> & flagged) const {
   const float missing = util::missingValue(missing);
-  data_.associate(hofx);
-  data_.associate(diags);
 
 // Find which variables to apply filter on
   oops::Variables filtervars(config_);
@@ -91,9 +78,6 @@ void ObsBoundsCheck::postFilter(const ioda::ObsVector & hofx, const ObsDiagnosti
 
 // Find which variables are in flags/obserror
   oops::Variables observed = obsdb_.obsvariables();
-
-// Select where the bounds check will apply
-  std::vector<bool> apply = processWhere(config_, data_);
 
 // Loop over all variables to filter
   for (size_t jv = 0; jv < filtervars.size(); ++jv) {

@@ -22,15 +22,15 @@ namespace ufo {
 
 // -----------------------------------------------------------------------------
 
-ROobserror::ROobserror(const ioda::ObsSpace & os,
+ROobserror::ROobserror(ioda::ObsSpace & obsdb,
                        const eckit::Configuration & config,
                        boost::shared_ptr<ioda::ObsDataVector<int> > qc,
                        boost::shared_ptr<ioda::ObsDataVector<float> > oberr)
-  : flags_(qc), obserr_(oberr)
+  : FilterBase(obsdb, config, qc, oberr)
 {
   oops::Log::trace() << "ROobserror contructor starting" << std::endl;
   const eckit::Configuration * conf = &config;
-  ufo_roobserror_create_f90(key_, os, conf);
+  ufo_roobserror_create_f90(key_, obsdb, conf);
   oops::Log::trace() << "ROobserror contructor key = " << key_ << std::endl;
 }
 
@@ -43,13 +43,14 @@ ROobserror::~ROobserror() {
 
 // -----------------------------------------------------------------------------
 
-void ROobserror::priorFilter(const GeoVaLs & gv) const {
+void ROobserror::applyFilter(const std::vector<bool> & apply,
+                             std::vector<std::vector<bool>> & flagged) const {
   oops::Log::trace() << "ROobserror using priorFilter" << std::endl;
-  flags_->save("FortranQC");    // should pass values to fortran properly
-  obserr_->save("FortranERR");  // should pass values to fortran properly
+  flags_.save("FortranQC");    // should pass values to fortran properly
+  obserr_.save("FortranERR");  // should pass values to fortran properly
   ufo_roobserror_prior_f90(key_);
-  flags_->read("FortranQC");    // should get values from fortran properly
-  obserr_->read("FortranERR");  // should get values from fortran properly
+  flags_.read("FortranQC");    // should get values from fortran properly
+  obserr_.read("FortranERR");  // should get values from fortran properly
 }
 
 // -----------------------------------------------------------------------------

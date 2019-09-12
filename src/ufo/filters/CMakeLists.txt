@@ -10,6 +10,8 @@ set ( filters_files
       BlackList.h
       DifferenceCheck.cc
       DifferenceCheck.h
+      FilterBase.cc
+      FilterBase.h
       getScalarOrFilterData.cc
       getScalarOrFilterData.h
       ObsBoundsCheck.cc
