@@ -263,16 +263,16 @@ character(max_string) :: err_msg
    !! Parse hofxdiags%variables into independent/dependent variables and channel
    !! assumed formats:
    !!   jacobian var -->     <ystr>_jacobian_<xstr>_<chstr>
-   !!   non-jacobian var --> <xstr>_<chstr>
+   !!   non-jacobian var --> <ystr>_<chstr>
 
    jacobian_needed = .false.
    do jvar = 1, hofxdiags%nvar
       varstr = hofxdiags%variables(jvar)
-      str_pos(4) = len(varstr)
+      str_pos(4) = len_trim(varstr)
       if (str_pos(4) < 1) cycle
       str_pos(3) = index(varstr,"_",back=.true.)        !final "_" before channel
       read(varstr(str_pos(3)+1:str_pos(4)),*) ch_diags(jvar)
-      str_pos(1) = index(varstr,jacobianstr) - 1
+      str_pos(1) = index(varstr,jacobianstr) - 1        !position before jacobianstr
       if (str_pos(1) == 0) then
          write(err_msg,*) 'ufo_radiancecrtm_simobs: _jacobian_ must be // &
                            & preceded by dependent variable in config: ', &
@@ -283,11 +283,14 @@ character(max_string) :: err_msg
          ystr_diags(jvar) = varstr(1:str_pos(1))
          str_pos(2) = str_pos(1) + len(jacobianstr) + 1 !begin xstr_diags
          jacobian_needed = .true.
-         xstr_diags(jvar) = varstr(str_pos(2):str_pos(3)-1)
+         str_pos(4) = str_pos(3) - str_pos(2)
+         xstr_diags(jvar)(1:str_pos(4)) = varstr(str_pos(2):str_pos(3)-1)
+         xstr_diags(jvar)(str_pos(4)+1:) = ""
       else !null
          !Diagnostic is a dependent variable (y)
-         xstr_diags(jvar)=""
-         ystr_diags(jvar) = varstr(1:str_pos(3)-1)
+         xstr_diags(jvar) = ""
+         ystr_diags(jvar)(1:str_pos(3)-1) = varstr(1:str_pos(3)-1)
+         ystr_diags(jvar)(str_pos(3):) = ""
       end if 
    end do
 
