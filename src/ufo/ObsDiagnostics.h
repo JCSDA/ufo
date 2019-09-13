@@ -35,6 +35,8 @@ class ObsDiagnostics : public util::Printable,
                        private boost::noncopyable {
  public:
   ObsDiagnostics(const ioda::ObsSpace &, const Locations &, const oops::Variables &);
+  ObsDiagnostics(const eckit::Configuration &, const ioda::ObsSpace &,
+                 const oops::Variables &);
   ~ObsDiagnostics() {}
 
 // I/O

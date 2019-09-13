@@ -10,6 +10,9 @@ ObsFilterData:
   GeoVaLs:
     filename: Data/satwind_geoval_2018041500_m.nc4
     variables: [eastward_wind, northward_wind, air_pressure]
+  ObsDiag:
+    filename: Data/satwind_geoval_2018041500_m.nc4
+    variables: [surface_roughness_length]
   HofX: GsiHofX
 - ObsSpace:
     name: amsua_n19
@@ -31,4 +34,7 @@ ObsFilterData:
     - air_pressure
     - air_pressure_levels
     - humidity_mixing_ratio
+  ObsDiag:
+    filename: Data/amsua_n19_geoval_2018041500_m.nc4
+    variables: [surface_snow_thickness, vegetation_type_index]
   HofX: GsiHofX

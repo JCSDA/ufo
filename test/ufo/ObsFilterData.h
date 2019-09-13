@@ -22,6 +22,7 @@
 #include "ufo/filters/ObsFilterData.h"
 #include "ufo/filters/Variables.h"
 #include "ufo/GeoVaLs.h"
+#include "ufo/ObsDiagnostics.h"
 
 namespace ufo {
 namespace test {
@@ -45,6 +46,11 @@ void testObsFilterData() {
     const eckit::LocalConfiguration gconf(confs[jconf], "GeoVaLs");
     const oops::Variables ingeovars(gconf);
     const GeoVaLs gval(gconf, ospace, ingeovars);
+
+///  Setup ObsDiags
+    const eckit::LocalConfiguration obsdiagconf(confs[jconf], "ObsDiag");
+    const oops::Variables inobsdiagvars(obsdiagconf);
+    const ObsDiagnostics obsdiags(obsdiagconf, ospace, inobsdiagvars);
 
 ///  Setup H(x)
     const std::string hofxgroup = confs[jconf].getString("HofX");
@@ -95,6 +101,22 @@ void testObsFilterData() {
       std::vector<float> vec = data.get(geovars[jvar]);
       std::vector<float> ref(ospace.nlocs());
       gval.get(ref, geovars.variable(jvar));
+      EXPECT(vec == ref);
+    }
+
+///  Check that associate(), has() and get() work on ObsDiags:
+    ufo::Variables diagvars(obsdiagconf, "ObsDiag");
+///  ObsDiags not associated yet
+    for (size_t jvar = 0; jvar < diagvars.size(); ++jvar) {
+      EXPECT(!data.has(diagvars[jvar]));
+    }
+    data.associate(obsdiags);
+///  ObsDiags associated now
+    for (size_t jvar = 0; jvar < diagvars.size(); ++jvar) {
+      EXPECT(data.has(diagvars[jvar]));
+      std::vector<float> vec = data.get(diagvars[jvar]);
+      std::vector<float> ref(ospace.nlocs());
+      obsdiags.get(ref, diagvars.variable(jvar));
       EXPECT(vec == ref);
     }
   }

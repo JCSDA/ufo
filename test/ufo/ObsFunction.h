@@ -8,6 +8,7 @@
 #ifndef TEST_UFO_OBSFUNCTION_H_
 #define TEST_UFO_OBSFUNCTION_H_
 
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -23,6 +24,7 @@
 #include "ufo/filters/obsfunctions/ObsFunction.h"
 #include "ufo/filters/Variables.h"
 #include "ufo/GeoVaLs.h"
+#include "ufo/ObsDiagnostics.h"
 
 namespace ufo {
 namespace test {
@@ -37,6 +39,9 @@ void testFunction() {
   const eckit::LocalConfiguration obsconf(conf, "ObsSpace");
   ioda::ObsSpace ospace(obsconf, bgn, end);
 
+///  Setup ObsFilterData
+  ObsFilterData inputs(ospace);
+
 ///  Get function name and which group to use for H(x)
   const eckit::LocalConfiguration obsfuncconf(conf, "ObsFunction");
   std::string funcname = obsfuncconf.getString("name");
@@ -44,17 +49,28 @@ void testFunction() {
 
 ///  Setup function
   ObsFunction obsfunc(funcname);
+  ufo::Variables allfuncvars = obsfunc.requiredVariables();
 
 ///  Setup GeoVaLs
-  ufo::Variables allfuncvars = obsfunc.requiredVariables();
-  oops::Variables geovars = allfuncvars.allFromGroup("GeoVaLs");
-  const eckit::LocalConfiguration gconf(conf, "GeoVaLs");
-  const GeoVaLs gval(gconf, ospace, geovars);
+  const oops::Variables geovars = allfuncvars.allFromGroup("GeoVaLs");
+  std::unique_ptr<GeoVaLs> gval;
+  if (geovars.size() > 0) {
+    const eckit::LocalConfiguration gconf(conf, "GeoVaLs");
+    gval.reset(new GeoVaLs(gconf, ospace, geovars));
+    inputs.associate(*gval);
+  }
+
+///  Setup ObsDiags
+  const oops::Variables diagvars = allfuncvars.allFromGroup("ObsDiag");
+  std::unique_ptr<ObsDiagnostics> diags;
+  if (diagvars.size() > 0) {
+    const eckit::LocalConfiguration diagconf(conf, "ObsDiag");
+    diags.reset(new ObsDiagnostics(diagconf, ospace, diagvars));
+    inputs.associate(*diags);
+  }
 
 ///  Compute function result
   ioda::ObsDataVector<float> vals(ospace, funcname, "ObsFunction", false);
-  ObsFilterData inputs(ospace);
-  inputs.associate(gval);
   obsfunc.compute(inputs, vals);
   vals.save("TestResult");
 

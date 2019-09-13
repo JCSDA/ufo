@@ -9,8 +9,13 @@ ObsSpace:
     obsfile: Data/satwind_obs_2018041500_function_output.nc4
   simulate:
     variables: [eastward_wind, northward_wind]
-GeoVaLs:
-  filename: Data/satwind_geoval_2018041500_m.nc4
+# can have GeoVaLs section like below
+#GeoVaLs:
+#  filename: Data/satwind_geoval_2018041500_m.nc4
+#
+# can have ObsDiag section like below
+#ObsDiag:
+#  filename: Data/satwind_obsdiag_2018041500_m.nc4
 ObsFunction:
   name: Velocity
   inputGroupName: ObsValue
