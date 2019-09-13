@@ -9,12 +9,18 @@
 #define UFO_OBSBIASINCREMENT_H_
 
 #include <iostream>
+#include <memory>
 #include <vector>
+
+#include "eckit/config/LocalConfiguration.h"
 
 #include "oops/util/Printable.h"
 
-namespace eckit {
-  class Configuration;
+#include "ufo/obsbias/LinearObsBiasBase.h"
+
+namespace ioda {
+  class ObsSpace;
+  class ObsVector;
 }
 
 namespace ioda {
@@ -52,28 +58,32 @@ class ObsBiasIncrement : public util::Printable {
   void read(const eckit::Configuration &) {}
   void write(const eckit::Configuration &) const {}
   double norm() const;
-  std::size_t size() const {return biasinc_.size();}
+  std::size_t size() const;
 
-  double & operator[](const unsigned int ii) {return biasinc_[ii];}
-  const double & operator[](const unsigned int ii) const {return biasinc_[ii];}
+  double & operator[](const unsigned int ii) {return (*biasbase_)[ii];}
+  const double & operator[](const unsigned int ii) const {return (*biasbase_)[ii];}
 
 /// Linear obs bias model
   void computeObsBiasTL(const GeoVaLs &,
                         ioda::ObsVector &,
-                        const ioda::ObsSpace &) const {}
+                        const ioda::ObsSpace &) const;
 
   void computeObsBiasAD(GeoVaLs &,
-                        ioda::ObsVector &,
-                        const ioda::ObsSpace &) {}
+                        const ioda::ObsVector &,
+                        const ioda::ObsSpace &);
 
 /// Serialize and deserialize
-  size_t serialSize() const {return 0;}
+  std::size_t serialSize() const {return 0;}
   void serialize(std::vector<double> &) const {}
-  void deserialize(const std::vector<double> &, size_t &) {}
+  void deserialize(const std::vector<double> &, std::size_t &) {}
+
+/// Other
+  const eckit::Configuration & config() const {return conf_;}
 
  private:
-  void print(std::ostream &) const {}
-  std::vector<double> biasinc_;
+  void print(std::ostream &) const;
+  std::unique_ptr<LinearObsBiasBase> biasbase_;
+  const eckit::LocalConfiguration conf_;
 };
 
 // -----------------------------------------------------------------------------

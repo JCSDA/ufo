@@ -4,10 +4,14 @@
 # which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 
 set ( obsbias_files
+  LinearObsBiasBase.h
+  LinearObsBiasBase.cc
   ObsBiasBase.h
   ObsBiasBase.cc
   ObsBiasRadianceGSI.h
   ObsBiasRadianceGSI.cc
+  ObsBiasRadianceGSITLAD.h
+  ObsBiasRadianceGSITLAD.cc
 )
 
 PREPEND( _p_obsbias_files       "obsbias"       ${obsbias_files} )

@@ -6,7 +6,6 @@
  */
 
 #include "ioda/ObsVector.h"
-
 #include "ufo/LinearObsOperator.h"
 #include "ufo/LinearObsOperatorBase.h"
 #include "ufo/ObsBiasIncrement.h"
@@ -43,9 +42,9 @@ void LinearObsOperator::simulateObsTL(const GeoVaLs & gvals, ioda::ObsVector & y
 
 void LinearObsOperator::simulateObsAD(GeoVaLs & gvals, const ioda::ObsVector & yy,
                                       ObsBiasIncrement & bias) const {
-  ioda::ObsVector ybiasinc(odb_);
-  bias.computeObsBiasAD(gvals, ybiasinc, odb_);
+  ioda::ObsVector ybiasinc(yy);
   oper_->simulateObsAD(gvals, yy);
+  bias.computeObsBiasAD(gvals, ybiasinc, odb_);
 }
 
 // -----------------------------------------------------------------------------
