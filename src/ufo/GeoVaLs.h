@@ -59,7 +59,9 @@ class GeoVaLs : public util::Printable,
   double norm() const;
 
   bool has(const std::string & var) const {return vars_.has(var);}
-  void get(std::vector<float> &, const std::string &, const int lev = 1) const;
+  size_t nlevs(const std::string & var) const;
+  void get(std::vector<float> &, const std::string &) const;
+  void get(std::vector<float> &, const std::string &, const int) const;
 
   void read(const eckit::Configuration &, const ioda::ObsSpace &);
   void analytic_init(const Locations &, const eckit::Configuration &);

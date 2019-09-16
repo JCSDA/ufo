@@ -98,10 +98,23 @@ void testObsFilterData() {
 ///  GeoVaLs associated now
     for (size_t jvar = 0; jvar < geovars.size(); ++jvar) {
       EXPECT(data.has(geovars[jvar]));
-      std::vector<float> vec = data.get(geovars[jvar]);
-      std::vector<float> ref(ospace.nlocs());
-      gval.get(ref, geovars.variable(jvar));
-      EXPECT(vec == ref);
+      int nlevs = data.nlevs(geovars[jvar]);
+      int nlevs_ref = gval.nlevs(geovars.variable(jvar));
+      EXPECT(nlevs == nlevs_ref);
+///  nlevs == 1: 2D geovals, could be retrieved with get(var)
+      if (nlevs == 1) {
+        std::vector<float> vec = data.get(geovars[jvar]);
+        std::vector<float> ref(ospace.nlocs());
+        gval.get(ref, geovars.variable(jvar));
+        EXPECT(vec == ref);
+///  otherwise need get(var, level) to retrieve
+      } else {
+        std::vector<float> vec;
+        vec = data.get(geovars[jvar], nlevs);
+        std::vector<float> ref(ospace.nlocs());
+        gval.get(ref, geovars.variable(jvar), nlevs);
+        EXPECT(vec == ref);
+      }
     }
 
 ///  Check that associate(), has() and get() work on ObsDiags:
@@ -114,10 +127,23 @@ void testObsFilterData() {
 ///  ObsDiags associated now
     for (size_t jvar = 0; jvar < diagvars.size(); ++jvar) {
       EXPECT(data.has(diagvars[jvar]));
-      std::vector<float> vec = data.get(diagvars[jvar]);
-      std::vector<float> ref(ospace.nlocs());
-      obsdiags.get(ref, diagvars.variable(jvar));
-      EXPECT(vec == ref);
+      int nlevs = data.nlevs(diagvars[jvar]);
+      int nlevs_ref = obsdiags.nlevs(diagvars.variable(jvar));
+      EXPECT(nlevs == nlevs_ref);
+///  nlevs == 1: 2D obsdiags, could be retrieved with get(var)
+      if (nlevs == 1) {
+        std::vector<float> vec = data.get(diagvars[jvar]);
+        std::vector<float> ref(ospace.nlocs());
+        obsdiags.get(ref, diagvars.variable(jvar));
+        EXPECT(vec == ref);
+///  otherwise need get(var, level) to retrieve
+      } else {
+        std::vector<float> vec;
+        vec = data.get(diagvars[jvar], nlevs);
+        std::vector<float> ref(ospace.nlocs());
+        obsdiags.get(ref, diagvars.variable(jvar), nlevs);
+        EXPECT(vec == ref);
+      }
     }
   }
 }

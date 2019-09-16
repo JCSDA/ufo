@@ -131,6 +131,51 @@ std::vector<float> ObsFilterData::get(const std::string & varname) const {
 }
 
 // -----------------------------------------------------------------------------
+/*! Returns requested data at requested level from ObsFilterData
+ *  \param varname is a name of a variable requested (has to be formatted as
+ *         name@group, group must be either GeoVaLs or ObsDiag
+ *  \param level is a level variable is requested at
+ *  \return data associated with varname, in std::vector<float>
+ *  \warning if data are unavailable, assertions would fail and method abort
+ */
+std::vector<float> ObsFilterData::get(const std::string & varname, const int level) const {
+  std::string var, grp;
+  splitVarGroup(varname, var, grp);
+
+  ASSERT(grp == "GeoVaLs" || grp == "ObsDiag");
+  std::size_t nvals = obsdb_.nlocs();
+  std::vector<float> values(nvals);
+///  For GeoVaLs read from GeoVaLs (should be available)
+  if (grp == "GeoVaLs") {
+    ASSERT(gvals_);
+    gvals_->get(values, var, level);
+///  For ObsDiag get from ObsDiagnostics
+  } else if (grp == "ObsDiag") {
+    ASSERT(diags_);
+    diags_->get(values, var, level);
+  }
+  return values;
+}
+
+// -----------------------------------------------------------------------------
+/*! Returns number of levels in 3D geovals and obsdiags or
+ *  one if not 3D geovals or obsdiag
+ *
+ */
+size_t ObsFilterData::nlevs(const std::string & varname) const {
+  std::string var, grp;
+  splitVarGroup(varname, var, grp);
+  if (grp == "GeoVaLs") {
+    ASSERT(gvals_);
+    return gvals_->nlevs(var);
+  } else if (grp == "ObsDiag") {
+    ASSERT(diags_);
+    return diags_->nlevs(var);
+  }
+  return 1;
+}
+
+// -----------------------------------------------------------------------------
 /*! Prints basic info on ObsFilterData (which data contains) */
 void ObsFilterData::print(std::ostream & os) const {
   os << "Filter data: contains obs";

@@ -307,6 +307,61 @@ end subroutine ufo_geovals_nlocs_c
 
 ! ------------------------------------------------------------------------------
 
+subroutine ufo_geovals_nlevs_c(c_key_self, lvar, c_var, nlevs) bind(c, name='ufo_geovals_nlevs_f90')
+implicit none
+integer(c_int), intent(in) :: c_key_self
+integer(c_int), intent(in) :: lvar
+character(kind=c_char, len=1), intent(in) :: c_var(lvar+1)
+integer(c_int), intent(out) :: nlevs
+
+type(ufo_geoval), pointer :: geoval
+character(len=MAXVARLEN) :: varname
+type(ufo_geovals), pointer :: self
+
+call c_f_string(c_var, varname)
+call ufo_geovals_registry%get(c_key_self, self)
+
+call ufo_geovals_get_var(self, varname, geoval)
+
+nlevs = size(geoval%vals,1)
+
+end subroutine ufo_geovals_nlevs_c
+
+! ------------------------------------------------------------------------------
+
+subroutine ufo_geovals_get2d_c(c_key_self, lvar, c_var, nlocs, values) bind(c, name='ufo_geovals_get2d_f90')
+implicit none
+integer(c_int), intent(in) :: c_key_self
+integer(c_int), intent(in) :: lvar
+character(kind=c_char, len=1), intent(in) :: c_var(lvar+1)
+integer(c_int), intent(in) :: nlocs
+real(c_float), intent(inout) :: values(nlocs)
+
+character(max_string) :: err_msg
+type(ufo_geoval), pointer :: geoval
+character(len=MAXVARLEN) :: varname
+type(ufo_geovals), pointer :: self
+
+call c_f_string(c_var, varname)
+call ufo_geovals_registry%get(c_key_self, self)
+
+call ufo_geovals_get_var(self, varname, geoval)
+
+if (size(geoval%vals,1) /= 1) then
+  write(err_msg,*)'ufo_geovals_get2d_f90',trim(varname),'is not a 2D var:',size(geoval%vals,1), ' levels'
+  call abor1_ftn(err_msg)
+endif
+if (nlocs /= size(geoval%vals,2)) then
+  write(err_msg,*)'ufo_geovals_get2d_f90',trim(varname),'error locs number:',nlocs,size(geoval%vals,2)
+  call abor1_ftn(err_msg)
+endif
+
+values(:) = geoval%vals(1,:)
+
+end subroutine ufo_geovals_get2d_c
+
+! ------------------------------------------------------------------------------
+
 subroutine ufo_geovals_get_c(c_key_self, lvar, c_var, lev, nlocs, values) bind(c, name='ufo_geovals_get_f90')
 implicit none
 integer(c_int), intent(in) :: c_key_self
@@ -320,7 +375,6 @@ character(max_string) :: err_msg
 type(ufo_geoval), pointer :: geoval
 character(len=MAXVARLEN) :: varname
 type(ufo_geovals), pointer :: self
-integer :: jj
 
 call c_f_string(c_var, varname)
 call ufo_geovals_registry%get(c_key_self, self)

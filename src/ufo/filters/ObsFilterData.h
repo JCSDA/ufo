@@ -51,12 +51,15 @@ class ObsFilterData : public util::Printable,
 
   //! Returns requested data from ObsFilterData
   std::vector<float> get(const std::string &) const;
+  //! Returns requested data at requested level from ObsFilterData
+  std::vector<float> get(const std::string &, const int) const;
   //! Checks if requested data exists in ObsFilterData
   bool has(const std::string &) const;
 
   //! Returns number of locations
   size_t nlocs() const;
-
+  //! Returns number of levels for specified variable if 3D GeoVaLs or ObsDiags
+  size_t nlevs(const std::string &) const;
  private:
   void print(std::ostream &) const;
 

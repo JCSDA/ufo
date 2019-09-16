@@ -38,6 +38,18 @@ void ObsDiagnostics::save(const std::string &) const {}
 
 // -----------------------------------------------------------------------------
 
+size_t ObsDiagnostics::nlevs(const std::string & var) const {
+  return gdiags_.nlevs(var);
+}
+
+// -----------------------------------------------------------------------------
+
+void ObsDiagnostics::get(std::vector<float> & vals, const std::string & var) const {
+  gdiags_.get(vals, var);
+}
+
+// -----------------------------------------------------------------------------
+
 void ObsDiagnostics::get(std::vector<float> & vals, const std::string & var,
                          const int lev) const {
   gdiags_.get(vals, var, lev);
