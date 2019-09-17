@@ -11,10 +11,11 @@
 #include <set>
 
 #include "ioda/ObsVector.h"
+#include "oops/base/Variables.h"
+
 #include "oops/util/IntSetParser.h"
 #include "oops/util/Logger.h"
 
-#include "oops/base/Variables.h"
 
 
 #include "ufo/GeoVaLs.h"
