@@ -9,6 +9,7 @@ set (  bndgsi_src_files
        ObsGnssroBndGSI.interface.h
        ObsGnssroBndGSI.interface.F90
        ufo_gnssro_bndgsi_mod.F90
+       ufo_gnssro_bndgsi_util_mod.F90
        ObsGnssroBndGSITLAD.h
        ObsGnssroBndGSITLAD.cc
        ObsGnssroBndGSITLAD.interface.h

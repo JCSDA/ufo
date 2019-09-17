@@ -111,6 +111,7 @@ list( APPEND ufo_test_data
   atmosphere/gnssro_geoval_2018041500_s.nc4
   atmosphere/gnssro_geoval_2018041500_s_2d.nc4
   atmosphere/gnssro_geoval_2018041500_m.nc4
+  atmosphere/gnssro_geoval_2018041500_l.nc4
   atmosphere/hirs4_metop-a_geoval_2018041500_m.nc4
   atmosphere/iasi_metop-a_geoval_2018041500_m.nc4
   atmosphere/mhs_n19_geoval_2018041500_m.nc4
@@ -161,6 +162,7 @@ list (APPEND ioda_obs_test_data
   atmosphere/cris-fsr_npp_obs_2018041500_m.nc4
   atmosphere/gnssro_obs_2018041500_s.nc4
   atmosphere/gnssro_obs_2018041500_m.nc4
+  atmosphere/gnssro_obs_2018041500_l.nc4
   atmosphere/hirs4_metop-a_obs_2018041500_m.nc4
   atmosphere/iasi_metop-a_obs_2018041500_m.nc4
   atmosphere/mhs_n19_obs_2018041500_m.nc4
@@ -480,11 +482,13 @@ ecbuild_add_test( TARGET  test_ufo_gnssroRef_tlad
                   DEPENDS test_ObsOperatorTLAD.x )
 
 ecbuild_add_test( TARGET  test_ufo_gnssroBndGSI_opr
+                  MPI     2
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
                   ARGS    "testinput/gnssrobndgsi.yaml"
                   DEPENDS test_ObsOperator.x )
 
 ecbuild_add_test( TARGET  test_ufo_gnssroBndGSI_tlad
+                  MPI     2
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
                   ARGS    "testinput/gnssrobndgsi.yaml"
                   DEPENDS test_ObsOperatorTLAD.x )
