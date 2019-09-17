@@ -62,7 +62,7 @@ void MWCLWCheck::applyFilter(const std::vector<bool> & apply,
 //     1) Use observed BTs
 //     2) Use calculated BTs
 //     3) Symmetric calculation
-  const int clw_option = config_.getInt("clw_option", missing);
+  const int clw_option = config_.getInt("clw_option");
   oops::Log::debug() << "MWCLWCheck: config = " << config_ << std::endl;
 
 // Number of channels to be tested and number of thresholds needs to be the same
