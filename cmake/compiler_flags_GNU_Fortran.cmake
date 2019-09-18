@@ -22,7 +22,7 @@ set( CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -D_REAL8_ -ffree-line-length-no
 # RELEASE FLAGS
 ####################################################################
 
-set( CMAKE_Fortran_FLAGS_RELEASE "-O3 -funroll-all-loops -finline-functions ")
+set( CMAKE_Fortran_FLAGS_RELEASE "-O3 -g -funroll-all-loops -finline-functions ")
 
 ####################################################################
 # DEBUG FLAGS

@@ -22,7 +22,7 @@ set( CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -D_REAL8_")
 # RELEASE FLAGS
 ####################################################################
 
-set( CMAKE_Fortran_FLAGS_RELEASE "-O3 -ip -unroll -inline -no-heap-arrays" )
+set( CMAKE_Fortran_FLAGS_RELEASE "-O3 -g -ip -unroll -inline -no-heap-arrays" )
 
 ####################################################################
 # DEBUG FLAGS
