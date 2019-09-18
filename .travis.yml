@@ -76,6 +76,9 @@ before_install:
 
   - cd ufo-bundle
   - sed -i 's/BRANCH develop  UPDATE//' CMakeLists.txt
+  - sed -i -e '/ecbuild_bundle( PROJECT ufo/i\
+    ecbuild_bundle( PROJECT ropp-ufo  GIT "https://github.com/JCSDA/ropp-test.git" )' CMakeLists.txt
+  - cat CMakeLists.txt
   - cd ${REPO_SOURCE_DIR}
   - ls ${REPO_SOURCE_DIR}
   - ls ${REPO_SOURCE_DIR}/ufo-bundle
