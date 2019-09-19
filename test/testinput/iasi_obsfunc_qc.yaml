@@ -96,5 +96,4 @@ Observations:
      action:
        name: inflate error
        inflation: ErrInflationFactor@ObsFunction
-   passedBenchmark: 22792
-#  passedBenchmark: 31416
+   passedBenchmark: 24024 

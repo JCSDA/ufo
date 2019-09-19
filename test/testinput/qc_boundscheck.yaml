@@ -49,7 +49,7 @@ Observations:
      channels: 16,29,32,35,38,41,44
      minvalue: 210.0
      maxvalue: 250.0
-   passedBenchmark: 664      # number of passed obs
+   passedBenchmark: 645      # number of passed obs
  - ObsOperator:
      name: CRTM
      Absorbers: [H2O,O3,CO2]
