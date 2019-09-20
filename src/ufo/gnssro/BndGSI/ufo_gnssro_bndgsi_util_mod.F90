@@ -83,7 +83,6 @@ subroutine ufo_gnssro_bndgsi_simobs_single( &
    real(kind_real)                 :: refXrad_s(ngrd)
 
 !------------------------------------------------------------
-   temperature =  missing
 
    do klev = 1, nlev
 !    compute guess geometric height from geopotential height

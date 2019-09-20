@@ -203,6 +203,7 @@ subroutine ufo_gnssro_bndgsi_simobs(self, geovals, hofx, obss)
 ! bending angle forward model starts
 
   allocate(temperature(nlocs))
+  temperature = missing
 
   iobs = 0
   rec_loop: do irec = 1, nrecs
@@ -229,7 +230,7 @@ subroutine ufo_gnssro_bndgsi_simobs(self, geovals, hofx, obss)
   write(err_msg,*) myname, ": complete"
   call fckit_log%info(err_msg)
 
-! putting temeprature at obs location to obs space tor BackgroundCheck ROGSI
+! putting temeprature at obs location to obs space for BackgroundCheck ROGSI
   call obsspace_put_db(obss, "MetaData", "temperature", temperature)
 
   deallocate(obsLat)
