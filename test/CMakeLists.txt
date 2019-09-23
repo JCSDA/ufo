@@ -200,6 +200,15 @@ CREATE_SYMLINK_FILENAME( ${ioda_SOURCE_DIR}/test/testinput
                          ${CMAKE_CURRENT_BINARY_DIR}/Data
                          ${ioda_obs_test_data} )
 
+# Add ufo obsdiag test data
+list (APPEND ufo_obsdiag_test_data
+  atmosphere/iasi_metop-a_obsdiag_2018041500_m.nc4
+  )
+
+CREATE_SYMLINK_FILENAME( ${CMAKE_CURRENT_SOURCE_DIR}/testinput
+                         ${CMAKE_CURRENT_BINARY_DIR}/Data
+                         ${ufo_obsdiag_test_data} )
+
 #####################################################################
 
 ecbuild_add_executable( TARGET  test_ObsOperator.x
