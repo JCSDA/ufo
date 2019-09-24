@@ -106,6 +106,22 @@ Variables::Variables(const eckit::Configuration & conf, const std::string & allg
 
 // -----------------------------------------------------------------------------
 
+Variables::Variables(const std::string & vargrp, const std::vector<int> & channels) {
+  oops::Log::trace() << "ufo::Variables(string, channels) starting" << std::endl;
+  std::string var, grp;
+  splitVarGroup(vargrp, var, grp);
+  if (var == "" || grp == "") {
+    oops::Log::error() << "Both name and group should be specified for variable" << std::endl;
+    ABORT("Both name and group should be specified for variable");
+  }
+  for (size_t jch = 0; jch < channels.size(); ++jch) {
+    fullnames_.push_back(var+"_"+std::to_string(channels[jch])+"@"+grp);
+  }
+  oops::Log::trace() << "ufo::Variables(string, channels) done" << std::endl;
+}
+
+// -----------------------------------------------------------------------------
+
 Variables & Variables::operator+=(const Variables & rhs) {
   fullnames_.insert(fullnames_.end(), rhs.fullnames_.begin(), rhs.fullnames_.end());
   return *this;

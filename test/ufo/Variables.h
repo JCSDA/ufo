@@ -9,6 +9,7 @@
 #define TEST_UFO_VARIABLES_H_
 
 #include <algorithm>
+#include <set>
 #include <string>
 #include <vector>
 
@@ -19,6 +20,7 @@
 #include "oops/../test/TestEnvironment.h"
 #include "oops/base/Variables.h"
 #include "oops/runs/Test.h"
+#include "oops/util/IntSetParser.h"
 #include "ufo/filters/Variables.h"
 
 namespace ufo {
@@ -35,7 +37,31 @@ void testConfigConstructor() {
     ufo::Variables vars(conf[jj]);
     vars.removeDuplicates();
     // read reference vector of strings
-    eckit::LocalConfiguration ref(conf[jj], "reference");
+    std::vector<std::string> refvars(conf[jj].getStringVector("reference"));
+    std::sort(refvars.begin(), refvars.end());
+    // compare the two
+    EXPECT(vars.size() == refvars.size());
+    for (std::size_t jvar = 0; jvar < vars.size(); ++jvar) {
+      EXPECT(vars[jvar] == refvars[jvar]);
+    }
+  }
+}
+
+// -----------------------------------------------------------------------------
+
+void testChannelsConstructor() {
+  std::vector<eckit::LocalConfiguration> conf;
+  ::test::TestEnvironment::config().get("Variables with channels", conf);
+
+  for (std::size_t jj = 0; jj < conf.size(); ++jj) {
+    // read varname and channels from the config
+    const std::string varname = conf[jj].getString("variable name");
+    std::string chlist = conf[jj].getString("channels");
+    std::set<int> channelset = oops::parseIntSet(chlist);
+    std::vector<int> channels;
+    std::copy(channelset.begin(), channelset.end(), std::back_inserter(channels));
+    ufo::Variables vars(varname, channels);
+    // read reference vector of strings
     std::vector<std::string> refvars(conf[jj].getStringVector("reference"));
     std::sort(refvars.begin(), refvars.end());
     // compare the two
@@ -79,6 +105,9 @@ class Variables : public oops::Test {
 
     ts.emplace_back(CASE("ufo/Variables/testConfigConstructor")
       { testConfigConstructor(); });
+
+    ts.emplace_back(CASE("ufo/Variables/testChannelsConstructor")
+      { testChannelsConstructor(); });
 
     ts.emplace_back(CASE("ufo/Variables/testAllFromGroup")
       { testAllFromGroup(); });
