@@ -28,4 +28,4 @@ Observations:
    GeoVaLs: 
      filename: Data/gnssro_geoval_2018041500_l.nc4
    vecequiv: GsiHofX
-   tolerance: 1.0e-6
+   tolerance: 1.0e-7
