@@ -26,7 +26,7 @@ static LinearObsOperatorMaker<ObsAtmSfcInterpTLAD> makerGSISfcModelTL_("GSISfcMo
 
 ObsAtmSfcInterpTLAD::ObsAtmSfcInterpTLAD(const ioda::ObsSpace & odb,
                                const eckit::Configuration & config)
-  : keyOperAtmSfcInterp_(0), varin_(), odb_(odb)
+  : keyOperAtmSfcInterp_(0), odb_(odb), varin_()
 {
   const eckit::Configuration * configc = &config;
   const oops::Variables & observed = odb.obsvariables();

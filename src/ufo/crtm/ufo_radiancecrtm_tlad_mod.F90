@@ -24,8 +24,8 @@ module ufo_radiancecrtm_tlad_mod
  !> Fortran derived type for radiancecrtm trajectory
  type, public :: ufo_radiancecrtm_tlad
  private
-  character(len=max_string), public, allocatable :: varin(:)  ! variables requested from the model
-  integer, allocatable                           :: channels(:)
+  character(len=MAXVARLEN), public, allocatable :: varin(:)  ! variables requested from the model
+  integer, allocatable                          :: channels(:)
   type(crtm_conf) :: conf
   type(crtm_conf) :: conf_traj
   integer :: n_Profiles
@@ -132,7 +132,7 @@ type(c_ptr), value,       intent(in)    :: obss
 character(*), parameter :: PROGRAM_NAME = 'ufo_radiancecrtm_mod.F90'
 character(255) :: message, version
 integer        :: err_stat, alloc_stat
-integer        :: n, k1
+integer        :: n
 type(ufo_geoval), pointer :: temp
 
 ! Define the "non-demoninational" arguments

@@ -23,8 +23,8 @@ module ufo_radiancecrtm_mod
  !> Fortran derived type for radiancecrtm trajectory
  type, public :: ufo_radiancecrtm
  private
-   character(len=max_string), public, allocatable :: varin(:)  ! variables requested from the model
-   integer, allocatable                           :: channels(:)
+   character(len=MAXVARLEN), public, allocatable :: varin(:)  ! variables requested from the model
+   integer, allocatable                          :: channels(:)
    type(crtm_conf) :: conf
  contains
    procedure :: setup  => ufo_radiancecrtm_setup
@@ -51,8 +51,8 @@ class(ufo_radiancecrtm),   intent(inout) :: self
 type(fckit_configuration), intent(in)    :: f_confOper
 integer(c_int),            intent(in)    :: channels(:)  !List of channels to use
 
-integer :: nvars_in, nvars_out
-integer :: ind, jspec, ich
+integer :: nvars_in
+integer :: ind, jspec
 character(len=max_string) :: err_msg
 type(fckit_configuration) :: f_confOpts
 
@@ -120,7 +120,7 @@ type(c_ptr), value,       intent(in) :: obss         !ObsSpace
 character(*), parameter :: PROGRAM_NAME = 'ufo_radiancecrtm_mod.F90'
 character(255) :: message, version
 integer        :: err_stat, alloc_stat
-integer        :: l, m, n, s
+integer        :: l, m, n
 type(ufo_geoval), pointer :: temp
 
 integer :: n_Profiles
@@ -395,6 +395,7 @@ character(max_string) :: err_msg
          call abor1_ftn(err_msg)
       end if
 
+      jchannel = -1
       do ichannel = 1, size(self%channels)
          if (ch_diags(jvar) == self%channels(ichannel)) then
             jchannel = ichannel

@@ -17,7 +17,6 @@ module ufo_atmvertinterplay_tlad_mod
 
  implicit none
  private
- integer, parameter :: max_string=800
 
  !> Fortran derived type for the tl/ad observation operator
  ! TODO: add to the below type what you need for your tl/ad observation operator
@@ -26,7 +25,7 @@ module ufo_atmvertinterplay_tlad_mod
  private
   integer :: nvars
   integer :: nval, nlocs
-  character(len=max_string), public, allocatable :: varin(:)
+  character(len=MAXVARLEN), public, allocatable :: varin(:)
  contains
   procedure :: setup  => atmvertinterplay_tlad_setup_
   procedure :: delete  => atmvertinterplay_tlad_delete_

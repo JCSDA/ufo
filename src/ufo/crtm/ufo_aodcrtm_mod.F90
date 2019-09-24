@@ -85,7 +85,7 @@ INTEGER(c_int),           intent(in) :: channels(:)  !List of channels to use
 character(*), parameter :: PROGRAM_NAME = 'ufo_aodcrtm_mod.F90'
 character(255) :: message, version
 integer        :: err_stat, alloc_stat
-integer        :: l, m, n, i, s
+integer        :: l, m, n, i
 type(ufo_geoval), pointer :: temp
 
 integer :: n_Profiles

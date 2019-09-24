@@ -25,7 +25,7 @@ static LinearObsOperatorMaker<ObsADTTLAD> makerADTTL_("ADT");
 // -----------------------------------------------------------------------------
 
 ObsADTTLAD::ObsADTTLAD(const ioda::ObsSpace & odb, const eckit::Configuration & config)
-  : keyOper_(0), varin_(), odb_(odb)
+  : keyOper_(0), odb_(odb), varin_()
 {
   const std::vector<std::string> vv{"sea_surface_height_above_geoid"};
   varin_.reset(new oops::Variables(vv));

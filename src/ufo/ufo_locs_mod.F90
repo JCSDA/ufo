@@ -126,8 +126,6 @@ subroutine ufo_locs_delete(self)
 implicit none
 type(ufo_locs), intent(inout) :: self
 
-integer :: n
-
 if (allocated(self%lat)) deallocate(self%lat)
 if (allocated(self%lon)) deallocate(self%lon)
 if (allocated(self%time)) deallocate(self%time)
@@ -142,7 +140,6 @@ subroutine ufo_locs_init(self, obss, t1, t2)
   use kinds
   use datetime_mod
   use twindow_utils_mod
-  use fckit_log_module, only : fckit_log
   use obsspace_mod
 
   implicit none

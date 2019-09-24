@@ -14,14 +14,12 @@ module ufo_identity_mod
 
  use obsspace_mod
 
- integer, parameter :: max_string=800
-
 ! Fortran derived type for the observation type
 !---------------------------------------------------------------------------------------------------
  type, public :: ufo_identity
  private
     integer, public :: nvars
-    character(len=max_string), public, allocatable :: vars(:)
+    character(len=MAXVARLEN), public, allocatable :: vars(:)
  contains
    procedure :: setup  => identity_setup_
    procedure :: simobs => identity_simobs_

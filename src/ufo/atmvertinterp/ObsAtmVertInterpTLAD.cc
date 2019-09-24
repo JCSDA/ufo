@@ -29,7 +29,7 @@ static LinearObsOperatorMaker<ObsAtmVertInterpTLAD> makerSatwindTL_("Satwind");
 
 ObsAtmVertInterpTLAD::ObsAtmVertInterpTLAD(const ioda::ObsSpace & odb,
                                            const eckit::Configuration & config)
-  : keyOperAtmVertInterp_(0), varin_(), odb_(odb)
+  : keyOperAtmVertInterp_(0), odb_(odb), varin_()
 {
   const eckit::Configuration * configc = &config;
   const oops::Variables & observed = odb.obsvariables();

@@ -28,7 +28,7 @@ static LinearObsOperatorMaker<ObsGnssroBndGSITLAD> makerGnssroBndGSITL_("GnssroB
 
 ObsGnssroBndGSITLAD::ObsGnssroBndGSITLAD(const ioda::ObsSpace & odb,
                                                const eckit::Configuration & config)
-  : keyOperGnssroBndGSI_(0), varin_(), odb_(odb)
+  : keyOperGnssroBndGSI_(0), odb_(odb), varin_()
 {
   std::vector<std::string> vv{"air_temperature", "specific_humidity"};
 

@@ -17,7 +17,6 @@ module ufo_radarreflectivity_tlad_mod
 
  implicit none
  private
- integer, parameter :: max_string=800
 
  !> Fortran derived type for the tl/ad observation operator
  ! TODO: add to the below type what you need for your tl/ad observation operator
@@ -25,7 +24,7 @@ module ufo_radarreflectivity_tlad_mod
  type, public :: ufo_radarreflectivity_tlad
  private
   integer :: nvars_in
-  character(len=max_string), public, allocatable :: varin(:)
+  character(len=MAXVARLEN), public, allocatable :: varin(:)
  contains
   procedure :: setup  => ufo_radarreflectivity_tlad_setup
   procedure :: settraj => ufo_radarreflectivity_tlad_settraj

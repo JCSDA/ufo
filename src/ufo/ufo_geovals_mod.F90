@@ -653,7 +653,6 @@ integer, intent(inout) :: kobs
 integer, intent(in) :: kvar
 real(kind_real), intent(inout) :: pmin, pmax, prms
 type(ufo_geovals), intent(in) :: self
-real(kind_real) :: zobs
 integer :: jo, jz, jv
 
 jv = kvar+1

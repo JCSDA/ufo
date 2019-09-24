@@ -24,7 +24,7 @@ static LinearObsOperatorMaker<ObsExampleTLAD> makerExampleTL_("Example");
 
 ObsExampleTLAD::ObsExampleTLAD(const ioda::ObsSpace & odb,
                                const eckit::Configuration & config)
-  : keyOper_(0), varin_(), odb_(odb)
+  : keyOper_(0), odb_(odb), varin_()
 {
   const eckit::Configuration * configc = &config;
   const oops::Variables & observed = odb.obsvariables();

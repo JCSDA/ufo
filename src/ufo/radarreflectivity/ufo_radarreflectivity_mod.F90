@@ -17,15 +17,14 @@ module ufo_radarreflectivity_mod
 
  implicit none
  private
- integer, parameter :: max_string=800
 
 !> Fortran derived type for the observation type
 
  type, public :: ufo_radarreflectivity
  private
    integer, public :: nvars_in, nvars_out
-   character(len=max_string), public, allocatable :: varin(:)
-   character(len=max_string), public, allocatable :: varout(:)
+   character(len=MAXVARLEN), public, allocatable :: varin(:)
+   character(len=MAXVARLEN), public, allocatable :: varout(:)
    character(len=MAXVARLEN), public :: v_coord ! GeoVaL to use to interpolate in vertical
  contains
    procedure :: setup  => ufo_radarreflectivity_setup

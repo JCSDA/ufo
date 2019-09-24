@@ -27,7 +27,7 @@ static LinearObsOperatorMaker<ObsGnssroRefTLAD> makerGnssroRefTL_("GnssroRef");
 // -----------------------------------------------------------------------------
 
 ObsGnssroRefTLAD::ObsGnssroRefTLAD(const ioda::ObsSpace & odb, const eckit::Configuration & config)
-  : keyOperGnssroRef_(0), varin_(), odb_(odb)
+  : keyOperGnssroRef_(0), odb_(odb), varin_()
 {
   const eckit::LocalConfiguration obsOptions(config, "ObsOptions");
   const eckit::Configuration * configc = &obsOptions;

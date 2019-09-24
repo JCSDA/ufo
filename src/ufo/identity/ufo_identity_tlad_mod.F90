@@ -27,8 +27,6 @@ module ufo_identity_tlad_mod
 
  implicit none
 
- integer, parameter :: max_string=800
-
  ! ------------------------------------------------------------------------------
 
  !> Fortran derived type for the tl/ad observation operator
@@ -36,7 +34,7 @@ module ufo_identity_tlad_mod
  private
    integer          :: nval, nlocs
    integer, public  :: nvars
-   character(len=max_string), public, allocatable :: vars(:)
+   character(len=MAXVARLEN), public, allocatable :: vars(:)
  contains
    procedure :: setup  => identity_tlad_setup_
    procedure :: delete  => identity_tlad_delete_

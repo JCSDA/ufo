@@ -28,7 +28,7 @@ static LinearObsOperatorMaker<ObsRadianceCRTMTLAD> makerCRTMTL_("CRTM");
 
 ObsRadianceCRTMTLAD::ObsRadianceCRTMTLAD(const ioda::ObsSpace & odb,
                                          const eckit::Configuration & config)
-  : keyOperRadianceCRTM_(0), varin_(), odb_(odb)
+  : keyOperRadianceCRTM_(0), odb_(odb), varin_()
 {
   // parse channels from the config and create variable names
   const oops::Variables & observed = odb.obsvariables();

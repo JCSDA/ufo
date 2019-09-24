@@ -24,7 +24,7 @@ static LinearObsOperatorMaker<ObsAtmVertInterpLayTLAD> makerAtmVertInterpLayTL_(
 
 ObsAtmVertInterpLayTLAD::ObsAtmVertInterpLayTLAD(const ioda::ObsSpace & odb,
                                const eckit::Configuration & config)
-  : keyOperAtmVertInterpLay_(0), varin_(), odb_(odb)
+  : keyOperAtmVertInterpLay_(0), odb_(odb), varin_()
 {
   const eckit::Configuration * configc = &config;
   const oops::Variables & observed = odb.obsvariables();

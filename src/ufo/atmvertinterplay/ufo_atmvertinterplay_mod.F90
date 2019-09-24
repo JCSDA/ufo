@@ -19,14 +19,13 @@ module ufo_atmvertinterplay_mod
 
  implicit none
  private
- integer, parameter :: max_string=800
 
 !> Fortran derived type for the observation type
  type, public :: ufo_atmvertinterplay
  private
    integer :: nvars  ! number of variables to be interpolated
-   character(len=max_string), public, allocatable :: varin(:)
-   character(len=max_string), public, allocatable :: varout(:)
+   character(len=MAXVARLEN), public, allocatable :: varin(:)
+   character(len=MAXVARLEN), public, allocatable :: varout(:)
  contains
    procedure :: setup  => ufo_atmvertinterplay_setup
    procedure :: simobs => ufo_atmvertinterplay_simobs
@@ -83,10 +82,9 @@ type(c_ptr), value, intent(in)    :: obss
 
 ! Local variables
 type(ufo_geoval), pointer :: geoval
-integer :: i,iobs, ivar
-integer :: iz1,iz2,k,kk
+integer :: iobs, ivar
+integer :: iz1,iz2,kk
 integer :: nsig
-real(kind_real), dimension(:), allocatable :: obss_metadata
 real(kind_real), dimension(:), allocatable :: toppressure,botpressure
 type(ufo_geoval), pointer :: modelpressures, modelozone
 character(len=MAXVARLEN) :: geovar

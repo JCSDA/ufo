@@ -17,15 +17,14 @@ module ufo_radarradialvelocity_mod
 
  implicit none
  private
- integer, parameter :: max_string=800
 
 !> Fortran derived type for the observation type
 ! DONE
  type, public :: ufo_radarradialvelocity
  private
    integer, public :: nvars_in, nvars_out
-   character(len=max_string), public, allocatable :: varin(:)
-   character(len=max_string), public, allocatable :: varout(:)
+   character(len=MAXVARLEN), public, allocatable :: varin(:)
+   character(len=MAXVARLEN), public, allocatable :: varout(:)
    character(len=MAXVARLEN), public :: v_coord ! GeoVaL to use to interpolate in vertical
  contains
    procedure :: setup  => ufo_radarradialvelocity_setup
