@@ -74,6 +74,7 @@ list( APPEND ufo_test_input
   testinput/sea_surface_temp.yaml
   testinput/seviri_crtm.yaml
   testinput/sndrd1-4_crtm.yaml
+  testinput/timeoper.yaml
   testinput/tprof.yaml
   testinput/qc_blacklist_latitude.yaml
   testinput/windprof.yaml
@@ -131,6 +132,7 @@ list( APPEND ufo_test_data
   atmosphere/abi_g16_geoval_2019042306_m.nc4
   atmosphere/sondes_geoval_2018041500_m.nc4
   atmosphere/sondes_geoval_2018041500_s.nc4
+  atmosphere/sondes_geoval_2018041500_vs.nc4
   atmosphere/windprof_geoval_2018041500_m.nc4
   atmosphere/ssmis_f18_geoval_2018041500_m.nc4
   marine/coolskin_fake_geovals_2018041500.nc
@@ -183,6 +185,7 @@ list (APPEND ioda_obs_test_data
 
   atmosphere/sondes_obs_2018041500_m.nc4
   atmosphere/sondes_obs_2018041500_s.nc4
+  atmosphere/sondes_obs_2018041500_vs.nc4
   atmosphere/windprof_obs_2018041500_m.nc4
   marine/coolskin_fake_obs_2018041500.nc
   marine/cryosat2-2018-04-15.nc
@@ -236,7 +239,7 @@ ecbuild_add_test( TARGET  test_ufo_function_velocity
 ecbuild_add_test( TARGET  test_ufo_qc_domain_latitude
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
                   ARGS    "testinput/qc_domain_latitude.yaml"
-		  DEPENDS test_ObsFilters.x )
+                  DEPENDS test_ObsFilters.x )
 
 ecbuild_add_test( TARGET  test_ufo_geovals
                   SOURCES mains/TestGeoVaLs.cc
@@ -468,6 +471,12 @@ ecbuild_add_test( TARGET  test_ufo_radiosonde_tlad
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
                   ARGS    "testinput/radiosonde.yaml"
                   DEPENDS test_ObsOperatorTLAD.x )
+
+ecbuild_add_test( TARGET  test_ufo_timeoper_opr
+                  MPI     4
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
+                  ARGS    "testinput/timeoper.yaml"
+                  DEPENDS test_ObsOperator.x )
 
 ecbuild_add_test( TARGET  test_ufo_aircraft_opr
                   MPI     4

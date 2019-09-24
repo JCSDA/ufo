@@ -65,6 +65,7 @@ add_subdirectory( gnssro )
 add_subdirectory( surface )
 add_subdirectory( ncdiag )
 add_subdirectory( marine )
+add_subdirectory( timeoper )
 list( APPEND ufo_src_files
     ${utils_src_files}
     ${basis_src_files}
@@ -81,6 +82,7 @@ list( APPEND ufo_src_files
     ${ncdiag_src_files}
     ${radarreflectivity_src_files}
     ${radarradialvelocity_src_files}
+    ${timeoper_src_files}
 )
 list( APPEND ufo_src_files ${marine_src_files} )
 list( APPEND UFO_LIBS_DEP oops ioda crtm ${LAPACK_LIBRARIES} ${NETCDF_LIBRARIES} )

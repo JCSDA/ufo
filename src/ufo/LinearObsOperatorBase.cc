@@ -30,7 +30,15 @@ LinearObsOperatorFactory::LinearObsOperatorFactory(const std::string & name) {
 LinearObsOperatorBase * LinearObsOperatorFactory::create(const ioda::ObsSpace & odb,
                                              const eckit::Configuration & conf) {
   oops::Log::trace() << "LinearObsOperatorBase::create starting" << std::endl;
-  const std::string id = conf.getString("name");
+
+  std::string id;
+
+  if (conf.has("lin_name")) {
+    id = conf.getString("lin_name");
+  } else {
+    id = conf.getString("name");
+  }
+
   typename std::map<std::string, LinearObsOperatorFactory*>::iterator jloc = getMakers().find(id);
   if (jloc == getMakers().end()) {
     oops::Log::error() << id << " does not exist in ufo::LinearObsOperatorFactory." << std::endl;

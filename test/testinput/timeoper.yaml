@@ -1,0 +1,27 @@
+window_begin: 2018-04-14T21:00:00Z
+window_end: 2018-04-15T03:00:00Z
+
+LinearObsOpTest:
+  coefTL: 0.1
+  toleranceTL: 1.0e-13
+  toleranceAD: 1.0e-11
+
+Observations:
+  ObsTypes:
+  - ObsOperator:
+      name: TimeOpInterp
+      windowSub: PT3H
+      ObsOperator:
+        name: VertInterp
+    ObsSpace:
+      name: Radiosonde
+      ObsDataIn:
+        obsfile: Data/sondes_obs_2018041500_vs.nc4
+      simulate:
+        variables: [air_temperature]
+    GeoVaLs:
+      filename: Data/sondes_geoval_2018041500_vs.nc4
+      loc_multiplier: 2
+    vecequiv: GsiHofX
+    tolerance: 1.0e-06
+
