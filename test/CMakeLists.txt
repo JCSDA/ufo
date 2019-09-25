@@ -80,6 +80,7 @@ list( APPEND ufo_test_input
   testinput/windprof.yaml
   testinput/qc_domain_latitude.yaml
   testinput/qc_domain_minpress.yaml
+  testinput/obsdiag_crtm_jacobian.yaml
   testinput/function_velocity.yaml
   testinput/reflectivity.yaml
   testinput/radialvelocity.yaml
@@ -234,6 +235,11 @@ ecbuild_add_executable( TARGET  test_ObsFilters.x
 ecbuild_add_test( TARGET  test_ufo_function_velocity
                   SOURCES mains/TestObsFunction.cc
                   ARGS    "testinput/function_velocity.yaml"
+                  LIBS    ufo)
+
+ecbuild_add_test( TARGET  test_ufo_obsdiag_crtm_jacobian
+                  SOURCES mains/TestObsDiagnostics.cc
+                  ARGS    "testinput/obsdiag_crtm_jacobian.yaml"
                   LIBS    ufo)
 
 ecbuild_add_test( TARGET  test_ufo_qc_domain_latitude
