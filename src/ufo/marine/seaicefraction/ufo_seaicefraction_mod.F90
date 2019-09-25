@@ -50,7 +50,6 @@ end subroutine ufo_seaicefraction_delete
 ! ------------------------------------------------------------------------------
 ! Code in this routine is for seaicefraction only, please remove and replace
 subroutine ufo_seaicefraction_simobs(self, geovals, hofx, obss)
-use ufo_marine_ncutils
 implicit none
 class(ufo_seaicefraction), intent(in)    :: self
 type(ufo_geovals),  intent(in)    :: geovals
