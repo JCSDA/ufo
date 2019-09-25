@@ -84,6 +84,7 @@ list( APPEND ufo_test_input
   testinput/function_velocity.yaml
   testinput/reflectivity.yaml
   testinput/radialvelocity.yaml
+  testinput/processwhere.yaml
   testinput/variables.yaml
 )
 
@@ -144,6 +145,7 @@ list( APPEND ufo_test_data
   marine/sst_obs-2018-04-15_geovals.nc
   atmosphere/radar_dbz_geoval_2019052222.nc4
   atmosphere/radar_rw_geoval_2019052222.nc4
+  filters/where_testdata.nc4
 )
 
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Data)
@@ -265,6 +267,11 @@ ecbuild_add_test( TARGET  test_ufo_obsfilterdata
 ecbuild_add_test( TARGET  test_ufo_variables
                   SOURCES mains/TestVariables.cc
                   ARGS    "testinput/variables.yaml"
+                  LIBS    ufo )
+
+ecbuild_add_test( TARGET  test_ufo_processwhere
+                  SOURCES mains/TestProcessWhere.cc
+                  ARGS    "testinput/processwhere.yaml"
                   LIBS    ufo )
 
 ecbuild_add_test( TARGET  test_ufo_amsua_obs_bias
