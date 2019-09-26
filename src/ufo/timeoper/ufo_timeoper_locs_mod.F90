@@ -19,7 +19,6 @@ use kinds
 use datetime_mod
 use duration_mod
 use twindow_utils_mod
-use fckit_log_module, only : fckit_log
 use obsspace_mod
 
 implicit none

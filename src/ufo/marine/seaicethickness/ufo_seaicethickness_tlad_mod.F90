@@ -62,7 +62,6 @@ type(ufo_geovals),       intent(in)    :: geovals
 type(c_ptr), value,      intent(in)    :: obss
 
 character(len=*), parameter :: myname_="ufo_seaicethick_tlad_settraj"
-character(max_string) :: err_msg
 
 type(ufo_geoval), pointer :: icethick, icefrac
 

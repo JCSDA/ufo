@@ -62,12 +62,6 @@ type(c_ptr), value, intent(in)    :: obss
     integer :: iobs
     type(ufo_geoval), pointer :: geoval
 
-    ! Netcdf stuff to write out geovals
-    integer(kind=4) :: iNcid
-    integer(kind=4) :: iDimStation_ID, iDimLev_ID
-    integer(kind=4) :: iVarLev_ID, iVarGOM_ID
-    integer :: ncat,nlocs
-
     ! check if nlocs is consistent in geovals & hofx
     if (geovals%nlocs /= size(hofx,1)) then
        write(err_msg,*) myname_, ' error: nlocs inconsistent!'

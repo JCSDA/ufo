@@ -402,10 +402,10 @@ character(max_string) :: err_msg
 
 ! ------------------------------------------------------------------------------
 
-subroutine Load_Sfc_Data(n_Profiles,n_Layers,n_Channels,channels,geovals,sfc,chinfo,obss,conf)
+subroutine Load_Sfc_Data(n_Profiles,n_Channels,channels,geovals,sfc,chinfo,obss,conf)
 
 implicit none
-integer,                     intent(in)    :: n_Profiles, n_Layers, n_Channels
+integer,                     intent(in)    :: n_Profiles, n_Channels
 type(ufo_geovals),           intent(in)    :: geovals
 type(CRTM_Surface_type),     intent(inout) :: sfc(:)
 type(CRTM_ChannelInfo_type), intent(in)    :: chinfo(:)

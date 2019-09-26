@@ -95,9 +95,6 @@ subroutine ufo_radarradialvelocity_simobs(self, geovals, obss, nvars, nlocs, hof
   type(c_ptr), value, intent(in)    :: obss
 
   ! Local variables
-  type(ufo_geoval), pointer :: geoval
-  real(kind_real), dimension(:), allocatable :: obss_metadata
-
   integer :: iobs, ivar
   real(kind_real),  dimension(:), allocatable :: obsvcoord
   real(kind_real),  dimension(:), allocatable :: radarazim, radartilt, radardir, vterminal

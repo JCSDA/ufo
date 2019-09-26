@@ -63,9 +63,9 @@ implicit none
     character(max_string) :: err_msg
     type(ufo_geoval), pointer :: S_ns,H_I,H_s,R_nl,Td,u
     integer :: obss_nlocs
-    integer :: iobs, cnt, cnt_glb    
+    integer :: iobs
     real(c_double) :: missing
-    real(kind_real) :: dTc,Ts
+    real(kind_real) :: dTc
 
     ! Set missing flag
     missing = missing_value(missing)

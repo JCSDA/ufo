@@ -94,9 +94,6 @@ subroutine ufo_radarreflectivity_simobs(self, geovals, obss, nvars, nlocs, hofx)
   type(c_ptr), value, intent(in)    :: obss
 
   ! Local variables
-  type(ufo_geoval), pointer :: geoval
-  real(kind_real), dimension(:), allocatable :: obss_metadata
-
   integer :: iobs, ivar
   real(kind_real),  dimension(:), allocatable :: obsvcoord
   type(ufo_geoval), pointer :: vcoordprofile, profile

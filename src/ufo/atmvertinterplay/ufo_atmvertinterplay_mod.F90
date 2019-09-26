@@ -81,7 +81,6 @@ real(c_double),     intent(inout) :: hofx(nvars, nlocs)
 type(c_ptr), value, intent(in)    :: obss
 
 ! Local variables
-type(ufo_geoval), pointer :: geoval
 integer :: iobs, ivar
 integer :: iz1,iz2,kk
 integer :: nsig

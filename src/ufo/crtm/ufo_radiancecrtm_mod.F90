@@ -248,7 +248,7 @@ character(max_string) :: err_msg
    !Assign the data from the GeoVaLs
    !--------------------------------
    call Load_Atm_Data(n_Profiles,n_Layers,geovals,atm,self%conf)
-   call Load_Sfc_Data(n_Profiles,n_Layers,n_Channels,self%channels,geovals,sfc,chinfo,obss,self%conf)
+   call Load_Sfc_Data(n_Profiles,n_Channels,self%channels,geovals,sfc,chinfo,obss,self%conf)
    call Load_Geom_Data(obss,geo)
 
    ! Call THE CRTM inspection
