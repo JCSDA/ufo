@@ -49,10 +49,12 @@ class ObsFilterData : public util::Printable,
   //! Associates ObsDiagnostics from ObsOperator with this ObsFilterData
   void associate(const ObsDiagnostics &);
 
-  //! Returns requested data from ObsFilterData
-  std::vector<float> get(const std::string &) const;
-  //! Returns requested data at requested level from ObsFilterData
-  std::vector<float> get(const std::string &, const int) const;
+  //! Gets requested data from ObsFilterData
+  void get(const std::string &, std::vector<float> &) const;
+  //! Gets requested data at requested level from ObsFilterData
+  void get(const std::string &, const int, std::vector<float> &) const;
+  //! Gets requested data from ObsFilterData
+  void get(const std::string &, std::vector<int> &) const;
   //! Checks if requested data exists in ObsFilterData
   bool has(const std::string &) const;
 

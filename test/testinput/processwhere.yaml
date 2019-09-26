@@ -90,3 +90,43 @@ ProcessWhere:
     - variable: var5@MetaData
       is_not_defined:
     size where true: 4
+  - where:                       # test is_in
+    - variable: intvar3@MetaData
+      is_in: 1
+    size where true: 5
+  - where:                       # test is_in
+    - variable: intvar4@MetaData
+      is_in: 0-3
+    size where true: 8
+  - where:                       # test is_in when nothing is in
+    - variable: intvar3@MetaData
+      is_in: 5-22
+    size where true: 0
+  - where:                       # test is_in when all is in
+    - variable: intvar3@MetaData
+      is_in: 0, 1
+    size where true: 10
+  - where:                       # test is_in when some values are missing
+    - variable: intvar5@MetaData
+      is_in: 0-3
+    size where true: 4
+  - where:                       # test is_not_in
+    - variable: intvar3@MetaData
+      is_not_in: 1
+    size where true: 5
+  - where:                       # test is_not_in
+    - variable: intvar4@MetaData
+      is_not_in: 0-3
+    size where true: 2
+  - where:                       # test is_not_in when nothing is in
+    - variable: intvar3@MetaData
+      is_not_in: 5-22
+    size where true: 10
+  - where:                       # test is_not_in when all is in
+    - variable: intvar3@MetaData
+      is_not_in: 0, 1
+    size where true: 0
+  - where:                       # test is_not_in when some values are missing
+    - variable: intvar5@MetaData
+      is_not_in: 0-3
+    size where true: 6

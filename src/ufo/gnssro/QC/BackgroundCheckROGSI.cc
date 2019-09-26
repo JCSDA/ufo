@@ -76,7 +76,8 @@ void BackgroundCheckROGSI::applyFilter(const std::vector<bool> & apply,
 
 //  H(x)
     const std::string varhofx = vars[jv] + "@HofX";
-    std::vector<float> hofx = data_.get(varhofx);
+    std::vector<float> hofx;
+    data_.get(varhofx, hofx);
 
     for (size_t jobs = 0; jobs < obsdb_.nlocs(); ++jobs) {
       if (apply[jobs] && flags_[iv][jobs] == 0) {

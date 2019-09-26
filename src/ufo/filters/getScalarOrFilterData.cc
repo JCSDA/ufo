@@ -37,7 +37,7 @@ std::vector<float> getScalarOrFilterData(const std::string & strfactor,
                          << strfactor << std::endl;
       ABORT("getScalarOrFilterData: either a value or a valid variable should be specified");
     }
-    factors = data.get(strfactor);
+    data.get(strfactor, factors);
   }
   return factors;
 }

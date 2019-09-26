@@ -82,13 +82,14 @@ bool ObsFilterData::has(const std::string & varname) const {
 }
 
 // -----------------------------------------------------------------------------
-/*! Returns requested data from ObsFilterData
+/*! Gets requested data from ObsFilterData
  *  \param varname is a name of a variable requested (has to be formatted as
  *         name@group
+ *  \param values on output is data from varname (undefined on input)
  *  \return data associated with varname, in std::vector<float>
  *  \warning if data are unavailable, assertions would fail and method abort
  */
-std::vector<float> ObsFilterData::get(const std::string & varname) const {
+void ObsFilterData::get(const std::string & varname, std::vector<float> & values) const {
   std::string var, grp;
   splitVarGroup(varname, var, grp);
 
@@ -96,7 +97,7 @@ std::vector<float> ObsFilterData::get(const std::string & varname) const {
 ///  VarMetaData is a special case: size(nvars) instead of (nlocs)
   if (grp == "VarMetaData")  nvals = obsdb_.nvars();
 
-  std::vector<float> values(nvals);
+  values.resize(nvals);
 ///  For GeoVaLs read from GeoVaLs (should be available)
   if (grp == "GeoVaLs") {
     ASSERT(gvals_);
@@ -127,24 +128,52 @@ std::vector<float> ObsFilterData::get(const std::string & varname) const {
   } else {
     obsdb_.get_db(grp, var, nvals, values.data());
   }
-  return values;
 }
 
 // -----------------------------------------------------------------------------
-/*! Returns requested data at requested level from ObsFilterData
+/*! Gets requested integer data from ObsFilterData
+ *  \param varname is a name of a variable requested (has to be formatted as
+ *         name@group
+ *  \param values on output is data from varname (undefined on input)
+ *  \return data associated with varname, in std::vector<int>
+ *  \warning if data are unavailable, assertions would fail and method abort
+ *           only ObsSpace int data are supported currently
+ */
+void ObsFilterData::get(const std::string & varname, std::vector<int> & values) const {
+  std::string var, grp;
+  splitVarGroup(varname, var, grp);
+
+  std::size_t nvals = obsdb_.nlocs();
+///  VarMetaData is a special case: size(nvars) instead of (nlocs)
+  if (grp == "VarMetaData")  nvals = obsdb_.nvars();
+
+  values.resize(nvals);
+///  GeoVaLs, HofX, ObsDiag are not supportd for int data
+  if (grp == "GeoVaLs" || grp == "HofX" || grp == "ObsDiag" || grp == "ObsFunction") {
+    oops::Log::error() << "ObsFilterData::get int values only supported for ObsSpace" << std::endl;
+    ABORT("ObsFilterData::get int values only supported for ObsSpace");
+  } else {
+    obsdb_.get_db(grp, var, nvals, values.data());
+  }
+}
+
+
+// -----------------------------------------------------------------------------
+/*! Gets requested data at requested level from ObsFilterData
  *  \param varname is a name of a variable requested (has to be formatted as
  *         name@group, group must be either GeoVaLs or ObsDiag
  *  \param level is a level variable is requested at
+ *  \param values on output is data from varname (undefined on input)
  *  \return data associated with varname, in std::vector<float>
  *  \warning if data are unavailable, assertions would fail and method abort
  */
-std::vector<float> ObsFilterData::get(const std::string & varname, const int level) const {
+void ObsFilterData::get(const std::string & varname, const int level,
+                        std::vector<float> & values) const {
   std::string var, grp;
   splitVarGroup(varname, var, grp);
 
   ASSERT(grp == "GeoVaLs" || grp == "ObsDiag");
-  std::size_t nvals = obsdb_.nlocs();
-  std::vector<float> values(nvals);
+  values.resize(obsdb_.nlocs());
 ///  For GeoVaLs read from GeoVaLs (should be available)
   if (grp == "GeoVaLs") {
     ASSERT(gvals_);
@@ -154,7 +183,6 @@ std::vector<float> ObsFilterData::get(const std::string & varname, const int lev
     ASSERT(diags_);
     diags_->get(values, var, level);
   }
-  return values;
 }
 
 // -----------------------------------------------------------------------------

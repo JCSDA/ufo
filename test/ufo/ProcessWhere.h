@@ -29,9 +29,7 @@ namespace test {
 // -----------------------------------------------------------------------------
 
 void testProcessWhere() {
-  oops::Log::info() << "weeeell" << std::endl;
   const eckit::LocalConfiguration conf = ::test::TestEnvironment::config();
-  oops::Log::info() << conf;
 
   util::DateTime bgn(conf.getString("window_begin"));
   util::DateTime end(conf.getString("window_end"));
@@ -41,14 +39,11 @@ void testProcessWhere() {
   ioda::ObsSpace ospace(obsconf, bgn, end);
   ObsFilterData data(ospace);
 
-  oops::Log::info() << "created ObsFilterData" << std::endl;
-
   const int nlocs = obsconf.getInt("nlocs");
   EXPECT(data.nlocs() == nlocs);
 
   std::vector<eckit::LocalConfiguration> confs;
   conf.get("ProcessWhere", confs);
-  oops::Log::info() << confs.size() << " confs" << std::endl;
   for (size_t jconf = 0; jconf < confs.size(); ++jconf) {
     std::vector<bool> result = processWhere(confs[jconf], data);
     const int size_ref = confs[jconf].getInt("size where true");

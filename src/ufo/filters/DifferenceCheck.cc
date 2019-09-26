@@ -66,8 +66,9 @@ void DifferenceCheck::applyFilter(const std::vector<bool> & apply,
   }
 
 // Get reference values and values to compare (as floats)
-  std::vector<float> ref = data_.get(ref_);
-  std::vector<float> val = data_.get(val_);
+  std::vector<float> ref, val;
+  data_.get(ref_, ref);
+  data_.get(val_, val);
   ASSERT(ref.size() == val.size());
 
 // Loop over all obs

@@ -84,7 +84,8 @@ void ObsBoundsCheck::applyFilter(const std::vector<bool> & apply,
 //  find index of the filtered variable in flags/obserror
     size_t iv = observed.find(filtervars[jv]);
 //  get test data for this variable
-    std::vector<float> testdata = data_.get(testvars[jv]);
+    std::vector<float> testdata;
+    data_.get(testvars[jv], testdata);
 //  apply the filter
     for (size_t jobs = 0; jobs < obsdb_.nlocs(); ++jobs) {
       if (apply[jobs] && flags_[iv][jobs] == 0) {

@@ -7,6 +7,8 @@ ObsFilterData:
       obsfile: Data/satwind_obs_2018041500_m.nc4
     simulate:
       variables: [eastward_wind, northward_wind]
+    integer data:
+      variables: [eastward_wind@ObsType, northward_wind@ObsType]
   GeoVaLs:
     filename: Data/satwind_geoval_2018041500_m.nc4
     variables: [eastward_wind, northward_wind, air_pressure]
@@ -21,6 +23,8 @@ ObsFilterData:
     simulate:
       variables: [brightness_temperature]
       channels: 1-10,15
+    integer data:
+      variables: [brightness_temperature_12@PreQC]
   GeoVaLs:
     filename: Data/amsua_n19_geoval_2018041500_m.nc4
     variables:
