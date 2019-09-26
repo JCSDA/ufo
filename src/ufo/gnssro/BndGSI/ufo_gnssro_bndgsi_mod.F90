@@ -58,7 +58,6 @@ subroutine ufo_gnssro_bndgsi_simobs(self, geovals, hofx, obss)
   integer, parameter                      :: ngrd    = 80 !num of new veritcal grids for bending angle computation
   integer                                 :: iobs, k, igrd, irec, icount
   integer                                 :: nlev, nlev1, nlevExt, nlevCheck
-  real(kind_real)                         :: rnlevExt
   type(ufo_geoval), pointer               :: t, q, gph, prs
   real(kind_real), allocatable            :: gesT(:,:), gesZ(:,:), gesP(:,:), gesQ(:,:), gesTv(:,:)
   real(kind_real), allocatable            :: obsLat(:)

@@ -92,7 +92,6 @@ type(ufo_locs),              pointer :: locs
 type(ufo_gnssro_BndROPP2D),  pointer :: self
 
 integer, parameter            :: max_string = 800
-character(max_string)         :: err_msg
 type(datetime)                :: t1, t2
 
 call c_f_datetime(c_t1, t1)

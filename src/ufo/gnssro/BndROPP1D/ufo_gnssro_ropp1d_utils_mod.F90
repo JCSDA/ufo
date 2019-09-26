@@ -186,8 +186,7 @@ subroutine init_ropp_1d_statevec_ad(temp_d,shum_d,pres_d,phi_d,lm,x_ad, iflip)
   real(kind=kind_real), dimension(lm), intent(inout)    :: temp_d,shum_d,pres_d,phi_d
 
 ! Local variables
-  integer   ::   n,j,k
-  real      ::   rlon_local
+  integer   ::   n,k
   integer, optional, intent(in) :: iflip
 !-------------------------------------------------------------------------
 
@@ -336,7 +335,6 @@ subroutine init_ropp_1d_obvec_tlad(iloop,nvprof,obs_impact,  &
   real(kind=wp)              :: r8lat
   integer                    :: i
   real(kind=kind_real)       :: rlon_local
-  real(kind=dp)              :: ob_time
 
 !-------------------------------------------------------------------------
   y%time     = real(0.0, kind=wp)!)real(ob_time,kind=wp)

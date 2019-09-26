@@ -65,26 +65,24 @@ subroutine ufo_gnssro_bndgsi_tlad_settraj(self, geovals, obss)
   integer, parameter              :: newAdd  = 20 !num of additional levels on top of extended levels
   integer, parameter              :: ngrd    = 80 !num of new veritcal grids for bending angle computation
   type(ufo_geoval), pointer       :: t, q, gph, prs
-  integer                         :: iobs,k,j, ilev, klev, irec, icount
+  integer                         :: iobs,k,j, klev, irec, icount
   integer                         :: nrecs
   integer                         :: nlev, nlev1, nlocs, nlevExt, nlevCheck
-  real(kind_real)                 :: w4(4), dw4(4), w4_tl(4), dw4_tl(4)
+  real(kind_real)                 :: dw4(4), dw4_tl(4)
   real(kind_real)                 :: geomzi
-  real(kind_real), allocatable    :: obsLat(:), obsImpP(:), obsLocR(:), obsGeoid(:), obsValue(:)
+  real(kind_real), allocatable    :: obsLat(:), obsImpP(:), obsLocR(:), obsGeoid(:)
   integer(c_size_t), allocatable  :: obsRecnum(:)
   real(kind_real)                 :: d_refXrad, gradRef,obsImpH
   real(kind_real)                 :: d_refXrad_tl
-  real(kind_real)                 :: derivRefr_s(ngrd),grids(ngrd)
+  real(kind_real)                 :: grids(ngrd)
   real(kind_real)                 :: sIndx
   integer                         :: indx
-  logical                         :: obs_check, qc_layer_SR
-  integer                         :: nlocs_outIntgl
-  integer                         :: count_SR, top_layer_SP, top_layer_SR, bot_layer_SR !for super refraction
+  logical                         :: qc_layer_SR
+  integer                         :: count_SR, top_layer_SR, bot_layer_SR !for super refraction
   integer                         :: count_rejection
   real(kind_real)                 :: p_coef, t_coef, q_coef
   real(kind_real)                 :: fv, pw
   real(kind_real)                 :: dbetaxi, dbetan
-  real(kind_real)                 :: sumIntgl
   real(kind_real), allocatable    :: lagConst(:,:), lagConst_tl(:,:)
   real(kind_real), allocatable    :: gesT(:,:), gesQ(:,:), gesP(:,:), gesH(:,:)
   real(kind_real),allocatable     :: radius(:), dzdh(:), refIndex(:)
@@ -492,8 +490,8 @@ subroutine ufo_gnssro_bndgsi_simobs_tl(self, geovals, hofx, obss)
   type(c_ptr), value,            intent(in)    :: obss
   character(len=*), parameter     :: myname = "ufo_gnssro_bndgsi_simobs_tl"
   character(max_string)           :: err_msg 
-  integer                         :: nlev, nlev1, nlocs, nlevExt, nlevAdd
-  integer                         :: iobs, k, j, ilev, irec, icount
+  integer                         :: nlev, nlev1, nlocs
+  integer                         :: iobs, k, irec, icount
   type(ufo_geoval), pointer       :: t_tl, prs_tl, q_tl
   real(kind_real), allocatable    :: gesT_tl(:,:), gesP_tl(:,:), gesQ_tl(:,:)
   real(kind_real)                 :: sumIntgl

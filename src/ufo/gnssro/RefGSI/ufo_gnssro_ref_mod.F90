@@ -51,8 +51,7 @@ contains
       
       character(len=*), parameter :: myname_="ufo_gnssro_ref_simobs"
       character(max_string) :: err_msg
-      integer           :: GlobalModel = 1
-      integer           :: iobs,k,nlocs
+      integer           :: iobs,nlocs
       real(kind_real)   :: wf 
       integer           :: wi
       type(ufo_geoval), pointer    :: t,q,prs,gph

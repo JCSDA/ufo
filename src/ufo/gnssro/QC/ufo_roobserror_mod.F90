@@ -15,7 +15,7 @@ use gnssro_mod_obserror
 
 implicit none
 public :: ufo_roobserror, ufo_roobserror_create, ufo_roobserror_delete
-public :: ufo_roobserror_prior, ufo_roobserror_post
+public :: ufo_roobserror_prior
 public :: max_string
 private
 
@@ -167,11 +167,5 @@ deallocate(QCflags)
 deallocate(obsErr)
 
 end subroutine ufo_roobserror_prior
-
-! ------------------------------------------------------------------------------
-subroutine ufo_roobserror_post(self)
-implicit none
-type(ufo_roobserror), intent(in) :: self
-end subroutine ufo_roobserror_post
 
 end module ufo_roobserror_mod

@@ -80,7 +80,7 @@ subroutine ufo_gnssro_bndropp2d_simobs(self, geovals, hofx, obss)
   integer, parameter            :: max_string = 800
   character(max_string)         :: err_msg
   integer                       :: nlev, nlocs, iobs, nvprof
-  integer                       :: ierr, iflip, kerror
+  integer                       :: iflip
   type(ufo_geoval), pointer     :: t, q, prs, gph, gph_sfc
   real(kind_real), allocatable  :: obsImpP(:),obsLocR(:),obsGeoid(:)  !nlocs
   real(kind_real), allocatable  :: obsLat(:),obsLon(:)                !nlocs

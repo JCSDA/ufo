@@ -56,7 +56,6 @@ subroutine ufo_gnssro_ref_tlad_settraj(self, geovals, obss)
   type(c_ptr), value,        intent(in)    :: obss
       
   character(len=*), parameter :: myname_="ufo_gnssro_ref_tlad_settraj"
-  character(max_string)       :: err_msg
       
   type(ufo_geoval),    pointer :: t,q,prs,gph
   real(kind_real), allocatable :: obsZ(:), obsLat(:)  ! observation vector

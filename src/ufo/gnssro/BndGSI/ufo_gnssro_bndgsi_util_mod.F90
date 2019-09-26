@@ -29,8 +29,6 @@ subroutine ufo_gnssro_bndgsi_simobs_single( &
            temperature, bendingAngle)
 ! -------------------------------------------------------------------------------
    character(len=*), parameter   :: myname  = "ufo_gnssro_bndgsi_simobs_single"
-   character(max_string)         :: err_msg
-   real(c_double)                :: missing
  
    real(kind_real), intent(out)   :: bendingAngle
  

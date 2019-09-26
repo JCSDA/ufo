@@ -84,21 +84,4 @@ end subroutine ufo_hcorrection_prior_c
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_hcorrection_post_c(c_self, c_obspace, c_nvars, c_nlocs, c_hofx) bind(c,name='ufo_hcorrection_post_f90')
-implicit none
-integer(c_int), intent(in) :: c_self
-type(c_ptr), value, intent(in) :: c_obspace
-integer(c_int), intent(in) :: c_nvars, c_nlocs
-real(c_double), intent(in) :: c_hofx(c_nvars, c_nlocs)
-
-type(ufo_hcorrection), pointer :: self
-
-call ufo_hcorrection_registry%get(c_self, self)
-
-call ufo_hcorrection_post(self, c_obspace, c_nvars, c_nlocs, c_hofx)
-
-end subroutine ufo_hcorrection_post_c
-
-! ------------------------------------------------------------------------------
-
 end module ufo_hcorrection_mod_c
