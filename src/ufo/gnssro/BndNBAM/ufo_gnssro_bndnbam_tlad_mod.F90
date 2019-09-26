@@ -2,11 +2,10 @@
 !  
 ! This software is licensed under the terms of the Apache Licence Version 2.0
 ! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
+!> Fortran module of Gnssro NBAM (NCEP's Bending Angle Method)
+!> tlad operator
 
-!> Fortran module to handle gnssro bending angle observations following 
-!> the NCEP/GSI (2018 Aug) implementation
-
-module ufo_gnssro_bndgsi_tlad_mod
+module ufo_gnssro_bndnbam_tlad_mod
 use fckit_configuration_module, only: fckit_configuration 
 use kinds
 use ufo_vars_mod
@@ -24,7 +23,7 @@ implicit none
 real(c_double)                             :: missing
 
 !>  Fortran derived type for gnssro trajectory
-type, extends(ufo_basis_tlad) :: ufo_gnssro_BndGSI_tlad
+type, extends(ufo_basis_tlad) :: ufo_gnssro_BndNBAM_tlad
   private
   integer                       :: nlev, nlev1, nlocs, iflip, nrecs
   real(kind_real), allocatable  :: jac_t(:,:), jac_prs(:,:), jac_q(:,:)
@@ -32,34 +31,34 @@ type, extends(ufo_basis_tlad) :: ufo_gnssro_BndGSI_tlad
   type(gnssro_conf)             :: roconf
 
   contains
-    procedure :: setup      => ufo_gnssro_bndgsi_tlad_setup
-    procedure :: delete     => ufo_gnssro_bndgsi_tlad_delete
-    procedure :: settraj    => ufo_gnssro_bndgsi_tlad_settraj
-    procedure :: simobs_tl  => ufo_gnssro_bndgsi_simobs_tl
-    procedure :: simobs_ad  => ufo_gnssro_bndgsi_simobs_ad
-end type ufo_gnssro_bndgsi_tlad
+    procedure :: setup      => ufo_gnssro_bndnbam_tlad_setup
+    procedure :: delete     => ufo_gnssro_bndnbam_tlad_delete
+    procedure :: settraj    => ufo_gnssro_bndnbam_tlad_settraj
+    procedure :: simobs_tl  => ufo_gnssro_bndnbam_simobs_tl
+    procedure :: simobs_ad  => ufo_gnssro_bndnbam_simobs_ad
+end type ufo_gnssro_bndnbam_tlad
 
 contains
 ! ------------------------------------------------------------------------------
-subroutine ufo_gnssro_bndgsi_tlad_setup(self, f_conf)
+subroutine ufo_gnssro_bndnbam_tlad_setup(self, f_conf)
   implicit none
-  class(ufo_gnssro_BndGSI_tlad), intent(inout) :: self
+  class(ufo_gnssro_BndNBAM_tlad), intent(inout) :: self
   type(fckit_configuration), intent(in)        :: f_conf
 
   call gnssro_conf_setup(self%roconf,f_conf)
 
-end subroutine ufo_gnssro_bndgsi_tlad_setup
+end subroutine ufo_gnssro_bndnbam_tlad_setup
 
 ! ------------------------------------------------------------------------------
-subroutine ufo_gnssro_bndgsi_tlad_settraj(self, geovals, obss)
+subroutine ufo_gnssro_bndnbam_tlad_settraj(self, geovals, obss)
   use gnssro_mod_transform
   use gnssro_mod_grids, only: get_coordinate_value
   use, intrinsic::  iso_c_binding
   implicit none
-  class(ufo_gnssro_bndgsi_tlad), intent(inout) :: self
+  class(ufo_gnssro_bndnbam_tlad), intent(inout) :: self
   type(ufo_geovals),             intent(in)    :: geovals
   type(c_ptr), value,            intent(in)    :: obss
-  character(len=*), parameter     :: myname  = "ufo_gnssro_bndgsi_tlad_settraj"
+  character(len=*), parameter     :: myname  = "ufo_gnssro_bndnbam_tlad_settraj"
   character(max_string)           :: err_msg
   integer, parameter              :: nlevAdd = 13 !num of additional levels on top of exsiting model levels
   integer, parameter              :: newAdd  = 20 !num of additional levels on top of extended levels
@@ -75,7 +74,7 @@ subroutine ufo_gnssro_bndgsi_tlad_settraj(self, geovals, obss)
   real(kind_real)                 :: d_refXrad, gradRef,obsImpH
   real(kind_real)                 :: d_refXrad_tl
   real(kind_real)                 :: grids(ngrd)
-  real(kind_real)                 :: sIndx
+  real(kind_real)                 :: sIndx 
   integer                         :: indx
   logical                         :: qc_layer_SR
   integer                         :: count_SR, top_layer_SR, bot_layer_SR !for super refraction
@@ -141,9 +140,9 @@ subroutine ufo_gnssro_bndgsi_tlad_settraj(self, geovals, obss)
   self%iflip = 0
   if (prs%vals(1,1) .lt. prs%vals(prs%nval,1) ) then
      self%iflip = 1
-     write(err_msg,'(a)')'  ufo_gnssro_bndgsi_tlad_settraj:'//new_line('a')//                         &
+     write(err_msg,'(a)')'  ufo_gnssro_bndnbam_tlad_settraj:'//new_line('a')//                         &
                          '  Model vertical height profile is in descending order,'//new_line('a')// &
-                         '  but bndGSI requires it to be ascending order, need flip'
+                         '  but NBAM requires it to be ascending order, need flip'
     call fckit_log%info(err_msg)
     do k = 1, nlev
        gesT(k,:) = t%vals(nlev-k+1,:)
@@ -167,7 +166,7 @@ subroutine ufo_gnssro_bndgsi_tlad_settraj(self, geovals, obss)
   end if
 
 ! if all fields t and q are on mass layers,
-! while p and z are on interface layers -- gsi manner
+! while p and z are on interface layers -- NBAM manner
   if ( nlev1 /= nlev ) then
      do k = nlev, 2, -1
         gesT(k,:) = half* (gesT(k,:) + gesT(k-1,:))
@@ -292,7 +291,7 @@ subroutine ufo_gnssro_bndgsi_tlad_settraj(self, geovals, obss)
                                     (radius(k+1)-radius(k))
 
 !         PLEASE KEEP this COMMENT:
-!         this check needs RO profile, which was done with MPI reduce in GSI
+!         this check needs RO profile, which was done with MPI reduce in NBAM
 !         not applied here yet
 
 !         only check once - SR-likely layer detected
@@ -479,16 +478,16 @@ subroutine ufo_gnssro_bndgsi_tlad_settraj(self, geovals, obss)
   write(err_msg,*) myname, ": complete"
   call fckit_log%info(err_msg)
 
-end subroutine ufo_gnssro_bndgsi_tlad_settraj
+end subroutine ufo_gnssro_bndnbam_tlad_settraj
 !----------------------------------------------------------------
-subroutine ufo_gnssro_bndgsi_simobs_tl(self, geovals, hofx, obss)
+subroutine ufo_gnssro_bndnbam_simobs_tl(self, geovals, hofx, obss)
   use gnssro_mod_transform
   implicit none
-  class(ufo_gnssro_bndgsi_tlad), intent(in)    :: self
+  class(ufo_gnssro_bndnbam_tlad), intent(in)    :: self
   type(ufo_geovals),             intent(in)    :: geovals
   real(kind_real),               intent(inout) :: hofx(:)
   type(c_ptr), value,            intent(in)    :: obss
-  character(len=*), parameter     :: myname = "ufo_gnssro_bndgsi_simobs_tl"
+  character(len=*), parameter     :: myname = "ufo_gnssro_bndnbam_simobs_tl"
   character(max_string)           :: err_msg 
   integer                         :: nlev, nlev1, nlocs
   integer                         :: iobs, k, irec, icount
@@ -551,7 +550,7 @@ subroutine ufo_gnssro_bndgsi_simobs_tl(self, geovals, hofx, obss)
   end if
 
 ! if all fields t and q are on mass layers,
-! while p and z are on interface layers -- gsi manner
+! while p and z are on interface layers -- NBAM manner
   if ( nlev1 /= nlev ) then
      do k = nlev, 2, -1
         gesT_tl(k,:) = half* (gesT_tl(k,:) + gesT_tl(k-1,:))
@@ -580,21 +579,21 @@ subroutine ufo_gnssro_bndgsi_simobs_tl(self, geovals, hofx, obss)
   deallocate(gesP_tl)
   deallocate(gesQ_tl)
 
-  write(err_msg,*) "TRACE: ufo_gnssro_bndgsi_simobs_tl: begin"
+  write(err_msg,*) "TRACE: ufo_gnssro_bndnbam_simobs_tl: begin"
   call fckit_log%info(err_msg)
 
-end subroutine ufo_gnssro_bndgsi_simobs_tl
+end subroutine ufo_gnssro_bndnbam_simobs_tl
 
 !----------------------------------------------------------------
-subroutine ufo_gnssro_bndgsi_simobs_ad(self, geovals, hofx, obss)
+subroutine ufo_gnssro_bndnbam_simobs_ad(self, geovals, hofx, obss)
   implicit none
-  class(ufo_gnssro_bndgsi_tlad), intent(in)    :: self
+  class(ufo_gnssro_bndnbam_tlad), intent(in)    :: self
   type(ufo_geovals),             intent(inout) :: geovals
   real(kind_real),               intent(in)    :: hofx(:)
   type(c_ptr), value,            intent(in)    :: obss
   type(ufo_geoval), pointer       :: t_ad, q_ad, prs_ad
   real(kind_real), allocatable    :: gesT_ad(:,:), gesP_ad(:,:), gesQ_ad(:,:)
-  character(len=*), parameter   :: myname = "ufo_gnssro_bndgsi_simobs_ad"
+  character(len=*), parameter   :: myname = "ufo_gnssro_bndnbam_simobs_ad"
   character(max_string)         :: err_msg
   integer                       :: nlocs, iobs, k, nlev,nlev1, icount, irec
 
@@ -707,16 +706,16 @@ subroutine ufo_gnssro_bndgsi_simobs_ad(self, geovals, hofx, obss)
   deallocate(gesP_ad)
   deallocate(gesQ_ad)
 
-  write(err_msg,*) "TRACE: ufo_gnssro_bndgsi_simobs_ad: begin"
+  write(err_msg,*) "TRACE: ufo_gnssro_bndnbam_simobs_ad: begin"
   call fckit_log%info(err_msg)
 
-end subroutine ufo_gnssro_bndgsi_simobs_ad
+end subroutine ufo_gnssro_bndnbam_simobs_ad
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_gnssro_bndgsi_tlad_delete(self)
+subroutine ufo_gnssro_bndnbam_tlad_delete(self)
   implicit none
-  class(ufo_gnssro_bndgsi_tlad), intent(inout) :: self
-  character(len=*), parameter :: myname="ufo_gnssro_bndgsi_tlad_delete"
+  class(ufo_gnssro_bndnbam_tlad), intent(inout) :: self
+  character(len=*), parameter :: myname="ufo_gnssro_bndnbam_tlad_delete"
       
   self%nlocs = 0
   self%nrecs = 0
@@ -730,7 +729,7 @@ subroutine ufo_gnssro_bndgsi_tlad_delete(self)
 
   self%ltraj = .false.
 
-end subroutine ufo_gnssro_bndgsi_tlad_delete
+end subroutine ufo_gnssro_bndnbam_tlad_delete
 
 ! ------------------------------------------------------------------------------
-end module ufo_gnssro_bndgsi_tlad_mod
+end module ufo_gnssro_bndnbam_tlad_mod

@@ -5,8 +5,8 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
  */
 
-#ifndef UFO_GNSSRO_QC_BACKGROUNDCHECKROGSI_H_
-#define UFO_GNSSRO_QC_BACKGROUNDCHECKROGSI_H_
+#ifndef UFO_GNSSRO_QC_BACKGROUNDCHECKRONBAM_H_
+#define UFO_GNSSRO_QC_BACKGROUNDCHECKRONBAM_H_
 
 #include <ostream>
 #include <string>
@@ -28,17 +28,17 @@ namespace ioda {
 
 namespace ufo {
 
-/// BackgroundCheckROGSI: check observation closeness to background
+/// BackgroundCheckRONBAM: check observation closeness to background
 
-class BackgroundCheckROGSI : public FilterBase,
-                             private util::ObjectCounter<BackgroundCheckROGSI> {
+class BackgroundCheckRONBAM : public FilterBase,
+                             private util::ObjectCounter<BackgroundCheckRONBAM> {
  public:
-  static const std::string classname() {return "ufo::BackgroundCheckROGSI";}
+  static const std::string classname() {return "ufo::BackgroundCheckRONBAM";}
 
-  BackgroundCheckROGSI(ioda::ObsSpace &, const eckit::Configuration &,
+  BackgroundCheckRONBAM(ioda::ObsSpace &, const eckit::Configuration &,
                        boost::shared_ptr<ioda::ObsDataVector<int> >,
                        boost::shared_ptr<ioda::ObsDataVector<float> >);
-  ~BackgroundCheckROGSI();
+  ~BackgroundCheckRONBAM();
 
  private:
   void print(std::ostream &) const override;
@@ -47,4 +47,4 @@ class BackgroundCheckROGSI : public FilterBase,
 
 }  // namespace ufo
 
-#endif  // UFO_GNSSRO_QC_BACKGROUNDCHECKROGSI_H_
+#endif  // UFO_GNSSRO_QC_BACKGROUNDCHECKRONBAM_H_

@@ -5,7 +5,7 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
  */
 
-#include "ufo/gnssro/BndGSI/ObsGnssroBndGSI.h"
+#include "ufo/gnssro/BndNBAM/ObsGnssroBndNBAM.h"
 
 #include <ostream>
 #include <string>
@@ -22,11 +22,11 @@
 namespace ufo {
 
 // -----------------------------------------------------------------------------
-static ObsOperatorMaker<ObsGnssroBndGSI> makerGnssroBndGSI_("GnssroBndGSI");
+static ObsOperatorMaker<ObsGnssroBndNBAM> makerGnssroBndNBAM_("GnssroBndNBAM");
 // -----------------------------------------------------------------------------
 
-ObsGnssroBndGSI::ObsGnssroBndGSI(const ioda::ObsSpace & odb, const eckit::Configuration & config)
-  : ObsOperatorBase(odb, config), keyOperGnssroBndGSI_(0), odb_(odb), varin_()
+ObsGnssroBndNBAM::ObsGnssroBndNBAM(const ioda::ObsSpace & odb, const eckit::Configuration & config)
+  : ObsOperatorBase(odb, config), keyOperGnssroBndNBAM_(0), odb_(odb), varin_()
 {
   std::vector<std::string> vv{"air_temperature", "specific_humidity"};
 
@@ -35,12 +35,7 @@ ObsGnssroBndGSI::ObsGnssroBndGSI(const ioda::ObsSpace & odb, const eckit::Config
 
   std::string vertlayer;
 
-//---- get vertical coordinate from config ------------------------
-  if ( obsOptions.has("vertlayer") ) {
-     vertlayer = obsOptions.getString("vertlayer");
-  } else {
-     vertlayer = "full";
-  }
+  vertlayer = obsOptions.getString("vertlayer", "full");
 
   if ( vertlayer == "mass" ) {
     vv.push_back("air_pressure");
@@ -52,29 +47,29 @@ ObsGnssroBndGSI::ObsGnssroBndGSI(const ioda::ObsSpace & odb, const eckit::Config
 
   varin_.reset(new oops::Variables(vv));
 
-  ufo_gnssro_bndgsi_setup_f90(keyOperGnssroBndGSI_, &configc);
-  oops::Log::trace() << "ObsGnssroBndGSI created." << std::endl;
+  ufo_gnssro_bndnbam_setup_f90(keyOperGnssroBndNBAM_, &configc);
+  oops::Log::trace() << "ObsGnssroBndNBAM created." << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
-ObsGnssroBndGSI::~ObsGnssroBndGSI() {
-  ufo_gnssro_bndgsi_delete_f90(keyOperGnssroBndGSI_);
-  oops::Log::trace() << "ObsGnssroBndGSI destructed" << std::endl;
+ObsGnssroBndNBAM::~ObsGnssroBndNBAM() {
+  ufo_gnssro_bndnbam_delete_f90(keyOperGnssroBndNBAM_);
+  oops::Log::trace() << "ObsGnssroBndNBAM destructed" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
-void ObsGnssroBndGSI::simulateObs(const GeoVaLs & gom, ioda::ObsVector & ovec,
+void ObsGnssroBndNBAM::simulateObs(const GeoVaLs & gom, ioda::ObsVector & ovec,
                                   ObsDiagnostics &) const {
-  ufo_gnssro_bndgsi_simobs_f90(keyOperGnssroBndGSI_, gom.toFortran(), odb_,
+  ufo_gnssro_bndnbam_simobs_f90(keyOperGnssroBndNBAM_, gom.toFortran(), odb_,
                                ovec.size(), ovec.toFortran());
 }
 
 // -----------------------------------------------------------------------------
 
-void ObsGnssroBndGSI::print(std::ostream & os) const {
-  os << "ObsGnssroBndGSI::print not implemented";
+void ObsGnssroBndNBAM::print(std::ostream & os) const {
+  os << "ObsGnssroBndNBAM::print not implemented";
 }
 
 // -----------------------------------------------------------------------------

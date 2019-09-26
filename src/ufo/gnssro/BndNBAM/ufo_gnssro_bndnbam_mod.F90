@@ -1,11 +1,10 @@
 !  
 ! This software is licensed under the terms of the Apache Licence Version 2.0
 ! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
+!> Fortran module of Gnssro NBAM (NCEP's Bending Angle Method)
+!> nonlinear operator
 
-!> Fortran module to handle gnssro bending angle observations following 
-!> the NCEP/GSI (2018 Aug) implementation
-
-module ufo_gnssro_bndgsi_mod
+module ufo_gnssro_bndnbam_mod
   use, intrinsic::  iso_c_binding
   use kinds
   use ufo_vars_mod
@@ -17,40 +16,40 @@ module ufo_gnssro_bndgsi_mod
   use gnssro_mod_conf
   use gnssro_mod_constants
   use fckit_log_module,  only : fckit_log
-  use ufo_gnssro_bndgsi_util_mod
+  use ufo_gnssro_bndnbam_util_mod
 
   implicit none
-  public             :: ufo_gnssro_BndGSI
+  public             :: ufo_gnssro_BndNBAM
   private
 
   !> Fortran derived type for gnssro trajectory
-  type, extends(ufo_basis) :: ufo_gnssro_BndGSI
+  type, extends(ufo_basis) :: ufo_gnssro_BndNBAM
    type(gnssro_conf) :: roconf
   contains
-   procedure :: setup     => ufo_gnssro_bndgsi_setup
-   procedure :: simobs    => ufo_gnssro_bndgsi_simobs
-  end type ufo_gnssro_BndGSI
+   procedure :: setup     => ufo_gnssro_bndnbam_setup
+   procedure :: simobs    => ufo_gnssro_bndnbam_simobs
+  end type ufo_gnssro_BndNBAM
 
   contains
 ! ------------------------------------------------------------------------------
-subroutine ufo_gnssro_bndgsi_setup(self, f_conf)
+subroutine ufo_gnssro_bndnbam_setup(self, f_conf)
 
 use fckit_configuration_module, only: fckit_configuration 
 implicit none
-class(ufo_gnssro_BndGSI), intent(inout) :: self
+class(ufo_gnssro_BndNBAM), intent(inout) :: self
 type(fckit_configuration), intent(in)   :: f_conf
 
 call gnssro_conf_setup(self%roconf,f_conf)
 
-end subroutine ufo_gnssro_bndgsi_setup
+end subroutine ufo_gnssro_bndnbam_setup
 
-subroutine ufo_gnssro_bndgsi_simobs(self, geovals, hofx, obss)
+subroutine ufo_gnssro_bndnbam_simobs(self, geovals, hofx, obss)
   implicit none
-  class(ufo_gnssro_bndGSI), intent(in)    :: self
+  class(ufo_gnssro_BndNBAM), intent(in)    :: self
   type(ufo_geovals),        intent(in)    :: geovals
   real(kind_real),          intent(inout) :: hofx(:)
   type(c_ptr), value,       intent(in)    :: obss
-  character(len=*), parameter             :: myname  = "ufo_gnssro_bndgsi_simobs"
+  character(len=*), parameter             :: myname  = "ufo_gnssro_bndnbam_simobs"
   character(max_string)                   :: err_msg
   integer                                 :: nrecs
   integer                                 :: nlocs
@@ -119,9 +118,9 @@ subroutine ufo_gnssro_bndgsi_simobs(self, geovals, hofx, obss)
   iflip = 0
   if (prs%vals(1,1) .lt. prs%vals(prs%nval,1) ) then
      iflip = 1
-     write(err_msg,'(a)')'  ufo_gnssro_bndgsi_simobs:'//new_line('a')//                         &
+     write(err_msg,'(a)')'  ufo_gnssro_bndnbam_simobs:'//new_line('a')//                         &
                          '  Model vertical height profile is in descending order,'//new_line('a')// &
-                         '  but bndGSI requires it to be ascending order, need flip'
+                         '  but bndNBAM requires it to be ascending order, need flip'
     call fckit_log%info(err_msg)
     do k=1, nlev
        gesT(k,:) = t%vals(nlev-k+1,:)
@@ -147,13 +146,13 @@ subroutine ufo_gnssro_bndgsi_simobs(self, geovals, hofx, obss)
 
 ! if background t and q are on mass layers, 
 !    while p and z are on interface layers, take the mean of t and q
-!       -- gsi manner
+!       -- NBAM manner
   if ( nlev1 /= nlev ) then  
      do k = nlev, 2, -1
         gesQ(k,:) = half* (gesQ(k,:) + gesQ(k-1,:))
         gesTv(k,:) = half* (gesTv(k,:) + gesTv(k-1,:))
 !       PLEASE KEEP this COMMENT:
-!       to exactly reproduce gsi, t is converted to tv, tv mean is calcualted,
+!       to exactly reproduce nbam, t is converted to tv, tv mean is calcualted,
 !       then tv mean is converted to t mean
         gesT(k,:) = gesTv(k,:)/(1+ gesQ(k,:)*(rv_over_rd-1))
 !       gesT(k,:) = half* (gesT(k,:) + gesT(k-1,:))
@@ -209,7 +208,7 @@ subroutine ufo_gnssro_bndgsi_simobs(self, geovals, hofx, obss)
     obs_loop: do icount = nlocs_begin(irec), nlocs_end(irec)
 
       iobs = iobs + 1
-      call ufo_gnssro_bndgsi_simobs_single(   &
+      call ufo_gnssro_bndnbam_simobs_single(   &
            obsLat(iobs), obsGeoid(iobs), obsLocR(iobs), obsImpP(iobs), &
            gesZ(:,iobs), gesT(:,iobs), gesQ(:,iobs), gesP(:,iobs), &
            grids, self%roconf%use_compress, &
@@ -229,7 +228,7 @@ subroutine ufo_gnssro_bndgsi_simobs(self, geovals, hofx, obss)
   write(err_msg,*) myname, ": complete"
   call fckit_log%info(err_msg)
 
-! putting temeprature at obs location to obs space for BackgroundCheck ROGSI
+! putting temeprature at obs location to obs space for BackgroundCheck RONBAM
   call obsspace_put_db(obss, "MetaData", "temperature", temperature)
 
   deallocate(obsLat)
@@ -248,6 +247,6 @@ subroutine ufo_gnssro_bndgsi_simobs(self, geovals, hofx, obss)
 
   write(err_msg,*) myname, ": complete"
   call fckit_log%info(err_msg)
-end subroutine ufo_gnssro_bndgsi_simobs
+end subroutine ufo_gnssro_bndnbam_simobs
 ! ------------------------------------------------------------------------------
-end module ufo_gnssro_bndgsi_mod
+end module ufo_gnssro_bndnbam_mod

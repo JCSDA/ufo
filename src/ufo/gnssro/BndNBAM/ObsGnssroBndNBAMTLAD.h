@@ -5,8 +5,8 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#ifndef UFO_GNSSRO_BNDGSI_OBSGNSSROBNDGSITLAD_H_
-#define UFO_GNSSRO_BNDGSI_OBSGNSSROBNDGSITLAD_H_
+#ifndef UFO_GNSSRO_BNDNBAM_OBSGNSSROBNDNBAMTLAD_H_
+#define UFO_GNSSRO_BNDNBAM_OBSGNSSROBNDNBAMTLAD_H_
 
 #include <memory>
 #include <ostream>
@@ -14,7 +14,7 @@
 
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
-#include "ufo/gnssro/BndGSI/ObsGnssroBndGSITLAD.interface.h"
+#include "ufo/gnssro/BndNBAM/ObsGnssroBndNBAMTLAD.interface.h"
 #include "ufo/LinearObsOperatorBase.h"
 
 // Forward declarations
@@ -32,14 +32,15 @@ namespace ufo {
   class ObsBias;
 
 // -----------------------------------------------------------------------------
-/// GnssroBndGSI observation operator
-class ObsGnssroBndGSITLAD : public LinearObsOperatorBase,
-                          private util::ObjectCounter<ObsGnssroBndGSITLAD> {
+// Gnssro BndNBAM observation operator tl/ad
+//   -- to reproduce exactly the operational (2019) NBAM
+class ObsGnssroBndNBAMTLAD : public LinearObsOperatorBase,
+                          private util::ObjectCounter<ObsGnssroBndNBAMTLAD> {
  public:
-  static const std::string classname() {return "ufo::ObsGnssroBndGSITLAD";}
+  static const std::string classname() {return "ufo::ObsGnssroBndNBAMTLAD";}
 
-  ObsGnssroBndGSITLAD(const ioda::ObsSpace &, const eckit::Configuration &);
-  virtual ~ObsGnssroBndGSITLAD();
+  ObsGnssroBndNBAMTLAD(const ioda::ObsSpace &, const eckit::Configuration &);
+  virtual ~ObsGnssroBndNBAMTLAD();
 
   // Obs Operators
   void setTrajectory(const GeoVaLs &, const ObsBias &) override;
@@ -49,12 +50,12 @@ class ObsGnssroBndGSITLAD : public LinearObsOperatorBase,
   // Other
   const oops::Variables & variables() const override {return *varin_;}
 
-  int & toFortran() {return keyOperGnssroBndGSI_;}
-  const int & toFortran() const {return keyOperGnssroBndGSI_;}
+  int & toFortran() {return keyOperGnssroBndNBAM_;}
+  const int & toFortran() const {return keyOperGnssroBndNBAM_;}
 
  private:
   void print(std::ostream &) const override;
-  F90hop keyOperGnssroBndGSI_;
+  F90hop keyOperGnssroBndNBAM_;
   const ioda::ObsSpace& odb_;
   std::unique_ptr<const oops::Variables> varin_;
 };
@@ -62,4 +63,4 @@ class ObsGnssroBndGSITLAD : public LinearObsOperatorBase,
 // -----------------------------------------------------------------------------
 
 }  // namespace ufo
-#endif  // UFO_GNSSRO_BNDGSI_OBSGNSSROBNDGSITLAD_H_
+#endif  // UFO_GNSSRO_BNDNBAM_OBSGNSSROBNDNBAMTLAD_H_

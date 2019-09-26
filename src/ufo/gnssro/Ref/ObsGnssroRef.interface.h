@@ -5,8 +5,8 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#ifndef UFO_GNSSRO_REFGSI_OBSGNSSROREF_INTERFACE_H_
-#define UFO_GNSSRO_REFGSI_OBSGNSSROREF_INTERFACE_H_
+#ifndef UFO_GNSSRO_REF_OBSGNSSROREF_INTERFACE_H_
+#define UFO_GNSSRO_REF_OBSGNSSROREF_INTERFACE_H_
 
 #include "ioda/ObsSpace.h"
 #include "ufo/Fortran.h"
@@ -21,7 +21,7 @@ namespace ufo {
 
 extern "C" {
 // -----------------------------------------------------------------------------
-//  Gnssro observation operators-refractivity (GSI) and their tl/ad
+// Gnssro refractivity observation operator
 // -----------------------------------------------------------------------------
   void ufo_gnssro_ref_setup_f90(F90hop &, const eckit::Configuration * const *);
   void ufo_gnssro_ref_delete_f90(F90hop &);
@@ -32,4 +32,4 @@ extern "C" {
 }  // extern C
 
 }  // namespace ufo
-#endif  // UFO_GNSSRO_REFGSI_OBSGNSSROREF_INTERFACE_H_
+#endif  // UFO_GNSSRO_REF_OBSGNSSROREF_INTERFACE_H_

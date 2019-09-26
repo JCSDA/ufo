@@ -2,10 +2,9 @@
 ! This software is licensed under the terms of the Apache Licence Version 2.0
 ! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 
-!> Fortran module to handle gnssro bending angle observations following 
-!> the NCEP/GSI (2018 Aug) implementation
+!> Fortran module of Gnssro NBAM (NCEP's Bending Angle Method) operator
 
-module ufo_gnssro_bndgsi_util_mod
+module ufo_gnssro_bndnbam_util_mod
   use fckit_log_module, only: fckit_log
   use kinds
   use missing_values_mod
@@ -16,20 +15,20 @@ module ufo_gnssro_bndgsi_util_mod
   use gnssro_mod_grids, only: get_coordinate_value
 
   implicit none
-  public             :: ufo_gnssro_bndgsi_simobs_single
+  public             :: ufo_gnssro_bndnbam_simobs_single
   private
 
   contains
 ! ------------------------------------------------------------------------------
-subroutine ufo_gnssro_bndgsi_simobs_single( &
+subroutine ufo_gnssro_bndnbam_simobs_single( &
            obsLat, obsGeoid, obsLocR, obsImpP, &
            gesZ, gesT, gesQ, gesP, &
            grids, use_compress, &
            nlev, nlev1, nlevExt, nlevAdd, nlevCheck, ngrd, &
            temperature, bendingAngle)
 ! -------------------------------------------------------------------------------
-   character(len=*), parameter   :: myname  = "ufo_gnssro_bndgsi_simobs_single"
- 
+   character(len=*), parameter    :: myname  = "ufo_gnssro_bndnbam_simobs_single"
+
    real(kind_real), intent(out)   :: bendingAngle
  
    integer, intent(in)            :: nlev
@@ -101,7 +100,7 @@ subroutine ufo_gnssro_bndgsi_simobs_single( &
       return
    endif
 
-!   calculating temeprature at obs location to obs space for BackgroundCheck ROGSI
+!   calculating temeprature at obs location to obs space for BackgroundCheck RONBAM
    indx=sIndx
    wi=min(max(1,indx),nlev)
    wi2=max(1,min(indx+1,nlev))
@@ -198,6 +197,6 @@ subroutine ufo_gnssro_bndgsi_simobs_single( &
     end do
     bendingAngle=r1em6 * obsImpP * bendingAngle
 
-end subroutine ufo_gnssro_bndgsi_simobs_single
+end subroutine ufo_gnssro_bndnbam_simobs_single
 ! ------------------------------------------------------------------------------
-end module ufo_gnssro_bndgsi_util_mod
+end module ufo_gnssro_bndnbam_util_mod

@@ -9,8 +9,8 @@ set (  qc_src_files
        ROobserror.interface.F90  
        ROobserror.interface.h
        ufo_roobserror_mod.F90
-       BackgroundCheckROGSI.h
-       BackgroundCheckROGSI.cc
+       BackgroundCheckRONBAM.h
+       BackgroundCheckRONBAM.cc
 PARENT_SCOPE
 )
 

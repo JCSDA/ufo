@@ -5,8 +5,8 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#ifndef UFO_GNSSRO_BNDGSI_OBSGNSSROBNDGSI_INTERFACE_H_
-#define UFO_GNSSRO_BNDGSI_OBSGNSSROBNDGSI_INTERFACE_H_
+#ifndef UFO_GNSSRO_REF_OBSGNSSROREFTLAD_INTERFACE_H_
+#define UFO_GNSSRO_REF_OBSGNSSROREFTLAD_INTERFACE_H_
 
 #include "ioda/ObsSpace.h"
 #include "ufo/Fortran.h"
@@ -21,15 +21,18 @@ namespace ufo {
 
 extern "C" {
 // -----------------------------------------------------------------------------
-//  Gnssro observation operators-bending angle (GSI) and their tl/ad
+//  Gnssro refractivity observation operator – tl/ad
 // -----------------------------------------------------------------------------
-  void ufo_gnssro_bndgsi_setup_f90(F90hop &, const eckit::Configuration * const *);
-  void ufo_gnssro_bndgsi_delete_f90(F90hop &);
-  void ufo_gnssro_bndgsi_simobs_f90(const F90hop &, const F90goms &, const ioda::ObsSpace &,
+  void ufo_gnssro_ref_tlad_setup_f90(F90hop &, const eckit::Configuration * const *);
+  void ufo_gnssro_ref_tlad_delete_f90(F90hop &);
+  void ufo_gnssro_ref_tlad_settraj_f90(const F90hop &, const F90goms &, const ioda::ObsSpace &);
+  void ufo_gnssro_ref_simobs_tl_f90(const F90hop &, const F90goms &, const ioda::ObsSpace &,
                                     const int &, double &);
+  void ufo_gnssro_ref_simobs_ad_f90(const F90hop &, const F90goms &, const ioda::ObsSpace &,
+                                    const int &, const double &);
 // -----------------------------------------------------------------------------
 
 }  // extern C
 
 }  // namespace ufo
-#endif  // UFO_GNSSRO_BNDGSI_OBSGNSSROBNDGSI_INTERFACE_H_
+#endif  // UFO_GNSSRO_REF_OBSGNSSROREFTLAD_INTERFACE_H_

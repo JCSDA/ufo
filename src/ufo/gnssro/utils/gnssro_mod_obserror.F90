@@ -36,9 +36,9 @@ end if
 end do
 
 end subroutine bending_angle_obserr_ROPP
-!-----------------------------------
+!---------------------------------------
 
-subroutine  bending_angle_obserr_GSI(obsLat, obsImpH, obsSaid, nobs, obsErr, QCflags, missing)
+subroutine  bending_angle_obserr_NBAM(obsLat, obsImpH, obsSaid, nobs, obsErr, QCflags, missing)
 implicit none
 integer,                         intent(in)  :: nobs
 real(kind_real), dimension(nobs),intent(in)  :: obsImpH, obsLat
@@ -95,10 +95,10 @@ end if
 
 end do
 
-end subroutine bending_angle_obserr_GSI
-!--------------------------------------
+end subroutine bending_angle_obserr_NBAM
+!---------------------------------------
 
-subroutine refractivity_obserr_GSI(obsLat, obsZ, nobs, obsErr, QCflags,missing)
+subroutine refractivity_obserr_NBAM(obsLat, obsZ, nobs, obsErr, QCflags,missing)
 implicit none
 integer,                         intent(in)  :: nobs
 real(kind_real), dimension(nobs),intent(in)  :: obsLat, obsZ
@@ -127,7 +127,7 @@ do i = 1, nobs
   end if
 end do
 
-end subroutine refractivity_obserr_GSI
+end subroutine refractivity_obserr_NBAM
 
 end module gnssro_mod_obserror
 

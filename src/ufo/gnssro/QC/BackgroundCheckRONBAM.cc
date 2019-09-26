@@ -5,7 +5,7 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#include "ufo/gnssro/QC/BackgroundCheckROGSI.h"
+#include "ufo/gnssro/QC/BackgroundCheckRONBAM.h"
 
 #include <algorithm>
 #include <cmath>
@@ -29,38 +29,38 @@
 namespace ufo {
 
 // -----------------------------------------------------------------------------
-static oops::FilterMaker<UfoTrait, oops::ObsFilter<UfoTrait, BackgroundCheckROGSI> >
-  makerBgChk_("Background Check ROGSI");
+static oops::FilterMaker<UfoTrait, oops::ObsFilter<UfoTrait, BackgroundCheckRONBAM> >
+  makerBgChk_("Background Check RONBAM");
 // -----------------------------------------------------------------------------
 
-BackgroundCheckROGSI::BackgroundCheckROGSI(ioda::ObsSpace & obsdb,
+BackgroundCheckRONBAM::BackgroundCheckRONBAM(ioda::ObsSpace & obsdb,
                                            const eckit::Configuration & config,
                                            boost::shared_ptr<ioda::ObsDataVector<int> > flags,
                                            boost::shared_ptr<ioda::ObsDataVector<float> > obserr)
   : FilterBase(obsdb, config, flags, obserr)
 {
-  oops::Log::trace() << "BackgroundCheckROGSI contructor starting: "
-                     << "using GSI style BackgroundCheck for GnssroBndGSI" << std::endl;
-  oops::Log::debug() << "BackgroundCheckROGSI: config = " << config << std::endl;
+  oops::Log::trace() << "BackgroundCheckRONBAM contructor starting: "
+                     << "using NBAM style BackgroundCheck for GnssroBndNBAM" << std::endl;
+  oops::Log::debug() << "BackgroundCheckRONBAM: config = " << config << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
-BackgroundCheckROGSI::~BackgroundCheckROGSI() {
-  oops::Log::trace() << "BackgroundCheckROGSI destructed" << std::endl;
+BackgroundCheckRONBAM::~BackgroundCheckRONBAM() {
+  oops::Log::trace() << "BackgroundCheckRONBAM destructed" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
-void BackgroundCheckROGSI::applyFilter(const std::vector<bool> & apply,
+void BackgroundCheckRONBAM::applyFilter(const std::vector<bool> & apply,
                                        std::vector<std::vector<bool>> & flagged) const {
-  oops::Log::trace() << "BackgroundCheckROGSI postFilter" << std::endl;
+  oops::Log::trace() << "BackgroundCheckRONBAM postFilter" << std::endl;
 
   const oops::Variables vars(config_);
   const oops::Variables observed = obsdb_.obsvariables();
   const float missing = util::missingValue(missing);
 
-  oops::Log::debug() << "BackgroundCheckROGSI flags: " << flags_;
+  oops::Log::debug() << "BackgroundCheckRONBAM flags: " << flags_;
 
   ioda::ObsDataVector<float> obs(obsdb_, vars, "ObsValue");
   ioda::ObsDataVector<float> bias(obsdb_, vars, "ObsBias", false);
@@ -123,7 +123,7 @@ void BackgroundCheckROGSI::applyFilter(const std::vector<bool> & apply,
 //      Apply bias correction
         float yy = obs[jv][jobs] + bias[jv][jobs];
 
-//      GSI style background check: if omb/o is greater than a cutoff
+//      NBAM style background check: if omb/o is greater than a cutoff
         if (std::abs(static_cast<float>(hofx[jobs])-yy) > yy*cutoff) {
            flags_[iv][jobs] = QCflags::fguess; }
       }
@@ -133,8 +133,8 @@ void BackgroundCheckROGSI::applyFilter(const std::vector<bool> & apply,
 
 // -----------------------------------------------------------------------------
 
-void BackgroundCheckROGSI::print(std::ostream & os) const {
-  os << "BackgroundCheckROGSI::print not yet implemented ";
+void BackgroundCheckRONBAM::print(std::ostream & os) const {
+  os << "BackgroundCheckRONBAM::print not yet implemented ";
 }
 
 // -----------------------------------------------------------------------------

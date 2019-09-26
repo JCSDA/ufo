@@ -68,12 +68,12 @@ Observations:
    passedBenchmark: 142      # number of passed obs
 #    qcBenchmark: GsiQC       # benchmark QC from the file
  - ObsOperator:
-     name: GnssroBndGSI
+     name: GnssroBndNBAM
      ObsOptions:
        use_compress: 1
        vertlayer: full
    ObsSpace:
-     name: GnssroBndGSI
+     name: GnssroBndNBAM
      ObsDataIn:
        obsfile: Data/gnssro_obs_2018041500_m.nc4
      simulate:

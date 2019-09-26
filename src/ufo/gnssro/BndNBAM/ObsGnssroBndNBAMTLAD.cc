@@ -5,7 +5,7 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#include "ufo/gnssro/BndGSI/ObsGnssroBndGSITLAD.h"
+#include "ufo/gnssro/BndNBAM/ObsGnssroBndNBAMTLAD.h"
 
 #include <ostream>
 #include <string>
@@ -23,12 +23,12 @@
 namespace ufo {
 
 // -----------------------------------------------------------------------------
-static LinearObsOperatorMaker<ObsGnssroBndGSITLAD> makerGnssroBndGSITL_("GnssroBndGSI");
+static LinearObsOperatorMaker<ObsGnssroBndNBAMTLAD> makerGnssroBndNBAMTL_("GnssroBndNBAM");
 // -----------------------------------------------------------------------------
 
-ObsGnssroBndGSITLAD::ObsGnssroBndGSITLAD(const ioda::ObsSpace & odb,
+ObsGnssroBndNBAMTLAD::ObsGnssroBndNBAMTLAD(const ioda::ObsSpace & odb,
                                                const eckit::Configuration & config)
-  : keyOperGnssroBndGSI_(0), odb_(odb), varin_()
+  : keyOperGnssroBndNBAM_(0), odb_(odb), varin_()
 {
   std::vector<std::string> vv{"air_temperature", "specific_humidity"};
 
@@ -38,11 +38,7 @@ ObsGnssroBndGSITLAD::ObsGnssroBndGSITLAD(const ioda::ObsSpace & odb,
   std::string vertlayer;
 
 //---- get vertical coordinate from config ------------------------
-  if ( obsOptions.has("vertlayer") ) {
-     vertlayer = obsOptions.getString("vertlayer");
-  } else {
-     vertlayer = "full";
-  }
+  vertlayer = obsOptions.getString("vertlayer", "full");
 
   if ( vertlayer == "mass" ) {
     vv.push_back("air_pressure");
@@ -52,43 +48,43 @@ ObsGnssroBndGSITLAD::ObsGnssroBndGSITLAD(const ioda::ObsSpace & odb,
 
   varin_.reset(new oops::Variables(vv));
 
-  ufo_gnssro_bndgsi_tlad_setup_f90(keyOperGnssroBndGSI_, &configc);
+  ufo_gnssro_bndnbam_tlad_setup_f90(keyOperGnssroBndNBAM_, &configc);
 
-  oops::Log::info() << "ObsGnssroBndGSITLAD vars: " << *varin_ << std::endl;
-  oops::Log::trace() << "ObsGnssroBndGSITLAD created" << std::endl;
+  oops::Log::info() << "ObsGnssroBndNBAMTLAD vars: " << *varin_ << std::endl;
+  oops::Log::trace() << "ObsGnssroBndNBAMTLAD created" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
-ObsGnssroBndGSITLAD::~ObsGnssroBndGSITLAD() {
-  ufo_gnssro_bndgsi_tlad_delete_f90(keyOperGnssroBndGSI_);
-  oops::Log::trace() << "ObsGnssroBndGSITLAD destructed" << std::endl;
+ObsGnssroBndNBAMTLAD::~ObsGnssroBndNBAMTLAD() {
+  ufo_gnssro_bndnbam_tlad_delete_f90(keyOperGnssroBndNBAM_);
+  oops::Log::trace() << "ObsGnssroBndNBAMTLAD destructed" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
-void ObsGnssroBndGSITLAD::setTrajectory(const GeoVaLs & geovals, const ObsBias & bias) {
-  ufo_gnssro_bndgsi_tlad_settraj_f90(keyOperGnssroBndGSI_, geovals.toFortran(), odb_);
+void ObsGnssroBndNBAMTLAD::setTrajectory(const GeoVaLs & geovals, const ObsBias & bias) {
+  ufo_gnssro_bndnbam_tlad_settraj_f90(keyOperGnssroBndNBAM_, geovals.toFortran(), odb_);
 }
 
 // -----------------------------------------------------------------------------
 
-void ObsGnssroBndGSITLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec) const {
-  ufo_gnssro_bndgsi_simobs_tl_f90(keyOperGnssroBndGSI_, geovals.toFortran(), odb_,
+void ObsGnssroBndNBAMTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec) const {
+  ufo_gnssro_bndnbam_simobs_tl_f90(keyOperGnssroBndNBAM_, geovals.toFortran(), odb_,
                                ovec.size(), ovec.toFortran());
 }
 
 // -----------------------------------------------------------------------------
 
-void ObsGnssroBndGSITLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec) const {
-  ufo_gnssro_bndgsi_simobs_ad_f90(keyOperGnssroBndGSI_, geovals.toFortran(), odb_,
+void ObsGnssroBndNBAMTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec) const {
+  ufo_gnssro_bndnbam_simobs_ad_f90(keyOperGnssroBndNBAM_, geovals.toFortran(), odb_,
                                ovec.size(), ovec.toFortran());
 }
 
 // -----------------------------------------------------------------------------
 
-void ObsGnssroBndGSITLAD::print(std::ostream & os) const {
-  os << "ObsGnssroBndGSITLAD::print not implemented" << std::endl;
+void ObsGnssroBndNBAMTLAD::print(std::ostream & os) const {
+  os << "ObsGnssroBndNBAMTLAD::print not implemented" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
