@@ -129,4 +129,4 @@ ProcessWhere:
   - where:                       # test is_not_in when some values are missing
     - variable: intvar5@MetaData
       is_not_in: 0-3
-    size where true: 6
+    size where true: 2

@@ -87,9 +87,10 @@ void processWhereIsIn(const std::vector<int> & data,
 void processWhereIsNotIn(const std::vector<int> & data,
                          const std::set<int> & blacklist,
                          std::vector<bool> & mask) {
+  const int missing = util::missingValue(missing);
   const size_t n = data.size();
   for (size_t jj = 0; jj < n; ++jj) {
-    if (oops::contains(blacklist, data[jj])) mask[jj] = false;
+    if (data[jj] == missing || oops::contains(blacklist, data[jj])) mask[jj] = false;
   }
 }
 
