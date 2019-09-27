@@ -6,14 +6,9 @@
 set ( atmvertinterplay_files
     ObsAtmVertInterpLay.h
     ObsAtmVertInterpLay.cc
-    ObsAtmVertInterpLayTLAD.h
-    ObsAtmVertInterpLayTLAD.cc
     ObsAtmVertInterpLay.interface.F90
     ObsAtmVertInterpLay.interface.h
-    ObsAtmVertInterpLayTLAD.interface.F90
-    ObsAtmVertInterpLayTLAD.interface.h
     ufo_atmvertinterplay_mod.F90
-    ufo_atmvertinterplay_tlad_mod.F90
     pindex.f90
 )
 

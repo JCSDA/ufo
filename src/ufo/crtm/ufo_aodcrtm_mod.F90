@@ -85,7 +85,7 @@ INTEGER(c_int),           intent(in) :: channels(:)  !List of channels to use
 character(*), parameter :: PROGRAM_NAME = 'ufo_aodcrtm_mod.F90'
 character(255) :: message, version
 integer        :: err_stat, alloc_stat
-integer        :: l, m, n, i, s
+integer        :: l, m, n, i
 type(ufo_geoval), pointer :: temp
 
 integer :: n_Profiles
@@ -207,7 +207,7 @@ TYPE(CRTM_RTSolution_type), ALLOCATABLE :: rts_K(:,:)
    !Assign the data from the GeoVaLs
    !--------------------------------
    CALL Load_Atm_Data(n_Profiles,n_Layers,geovals,atm,self%conf)
-!   CALL Load_Sfc_Data(n_Profiles,n_Layers,n_Channels,geovals,sfc,chinfo,obss,self%conf)
+!   CALL Load_Sfc_Data(n_Profiles,n_Channels,geovals,sfc,chinfo,obss,self%conf)
 !   CALL Load_Geom_Data(obss,geo)
 
    IF (TRIM(self%conf%aerosol_option) /= "") &

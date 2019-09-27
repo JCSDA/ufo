@@ -45,7 +45,7 @@ list( APPEND ufo_test_input
   testinput/geovals.yaml
   testinput/gnssrobndropp1d.yaml
   testinput/gnssrobndropp2d.yaml
-  testinput/gnssrobndgsi.yaml
+  testinput/gnssrobndnbam.yaml
   testinput/gnssroref.yaml
   testinput/gnssro_domain_check.yaml
   testinput/hirs4_crtm.yaml
@@ -74,14 +74,17 @@ list( APPEND ufo_test_input
   testinput/sea_surface_temp.yaml
   testinput/seviri_crtm.yaml
   testinput/sndrd1-4_crtm.yaml
+  testinput/timeoper.yaml
   testinput/tprof.yaml
   testinput/qc_blacklist_latitude.yaml
   testinput/windprof.yaml
   testinput/qc_domain_latitude.yaml
   testinput/qc_domain_minpress.yaml
+  testinput/obsdiag_crtm_jacobian.yaml
   testinput/function_velocity.yaml
   testinput/reflectivity.yaml
   testinput/radialvelocity.yaml
+  testinput/processwhere.yaml
   testinput/variables.yaml
 )
 
@@ -131,6 +134,7 @@ list( APPEND ufo_test_data
   atmosphere/abi_g16_geoval_2019042306_m.nc4
   atmosphere/sondes_geoval_2018041500_m.nc4
   atmosphere/sondes_geoval_2018041500_s.nc4
+  atmosphere/sondes_geoval_2018041500_vs.nc4
   atmosphere/windprof_geoval_2018041500_m.nc4
   atmosphere/ssmis_f18_geoval_2018041500_m.nc4
   marine/coolskin_fake_geovals_2018041500.nc
@@ -141,6 +145,7 @@ list( APPEND ufo_test_data
   marine/sst_obs-2018-04-15_geovals.nc
   atmosphere/radar_dbz_geoval_2019052222.nc4
   atmosphere/radar_rw_geoval_2019052222.nc4
+  filters/where_testdata.nc4
 )
 
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Data)
@@ -183,6 +188,7 @@ list (APPEND ioda_obs_test_data
 
   atmosphere/sondes_obs_2018041500_m.nc4
   atmosphere/sondes_obs_2018041500_s.nc4
+  atmosphere/sondes_obs_2018041500_vs.nc4
   atmosphere/windprof_obs_2018041500_m.nc4
   marine/coolskin_fake_obs_2018041500.nc
   marine/cryosat2-2018-04-15.nc
@@ -199,6 +205,15 @@ list (APPEND ioda_obs_test_data
 CREATE_SYMLINK_FILENAME( ${ioda_SOURCE_DIR}/test/testinput
                          ${CMAKE_CURRENT_BINARY_DIR}/Data
                          ${ioda_obs_test_data} )
+
+# Add ufo obsdiag test data
+list (APPEND ufo_obsdiag_test_data
+  atmosphere/iasi_metop-a_obsdiag_2018041500_m.nc4
+  )
+
+CREATE_SYMLINK_FILENAME( ${CMAKE_CURRENT_SOURCE_DIR}/testinput
+                         ${CMAKE_CURRENT_BINARY_DIR}/Data
+                         ${ufo_obsdiag_test_data} )
 
 #####################################################################
 
@@ -224,10 +239,15 @@ ecbuild_add_test( TARGET  test_ufo_function_velocity
                   ARGS    "testinput/function_velocity.yaml"
                   LIBS    ufo)
 
+ecbuild_add_test( TARGET  test_ufo_obsdiag_crtm_jacobian
+                  SOURCES mains/TestObsDiagnostics.cc
+                  ARGS    "testinput/obsdiag_crtm_jacobian.yaml"
+                  LIBS    ufo)
+
 ecbuild_add_test( TARGET  test_ufo_qc_domain_latitude
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
                   ARGS    "testinput/qc_domain_latitude.yaml"
-		  DEPENDS test_ObsFilters.x )
+                  DEPENDS test_ObsFilters.x )
 
 ecbuild_add_test( TARGET  test_ufo_geovals
                   SOURCES mains/TestGeoVaLs.cc
@@ -247,6 +267,11 @@ ecbuild_add_test( TARGET  test_ufo_obsfilterdata
 ecbuild_add_test( TARGET  test_ufo_variables
                   SOURCES mains/TestVariables.cc
                   ARGS    "testinput/variables.yaml"
+                  LIBS    ufo )
+
+ecbuild_add_test( TARGET  test_ufo_processwhere
+                  SOURCES mains/TestProcessWhere.cc
+                  ARGS    "testinput/processwhere.yaml"
                   LIBS    ufo )
 
 ecbuild_add_test( TARGET  test_ufo_amsua_obs_bias
@@ -460,6 +485,12 @@ ecbuild_add_test( TARGET  test_ufo_radiosonde_tlad
                   ARGS    "testinput/radiosonde.yaml"
                   DEPENDS test_ObsOperatorTLAD.x )
 
+ecbuild_add_test( TARGET  test_ufo_timeoper_opr
+                  MPI     4
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
+                  ARGS    "testinput/timeoper.yaml"
+                  DEPENDS test_ObsOperator.x )
+
 ecbuild_add_test( TARGET  test_ufo_aircraft_opr
                   MPI     4
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
@@ -481,16 +512,17 @@ ecbuild_add_test( TARGET  test_ufo_gnssroRef_tlad
                   ARGS    "testinput/gnssroref.yaml"
                   DEPENDS test_ObsOperatorTLAD.x )
 
-ecbuild_add_test( TARGET  test_ufo_gnssroBndGSI_opr
+
+ecbuild_add_test( TARGET  test_ufo_gnssroBndNBAM_opr
                   MPI     2
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
-                  ARGS    "testinput/gnssrobndgsi.yaml"
+                  ARGS    "testinput/gnssrobndnbam.yaml"
                   DEPENDS test_ObsOperator.x )
 
-ecbuild_add_test( TARGET  test_ufo_gnssroBndGSI_tlad
+ecbuild_add_test( TARGET  test_ufo_gnssroBndNBAM_tlad
                   MPI     2
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
-                  ARGS    "testinput/gnssrobndgsi.yaml"
+                  ARGS    "testinput/gnssrobndnbam.yaml"
                   DEPENDS test_ObsOperatorTLAD.x )
 
 ecbuild_add_test( TARGET  test_ufo_gnssro_domain_check

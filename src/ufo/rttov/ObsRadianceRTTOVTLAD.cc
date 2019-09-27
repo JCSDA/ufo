@@ -28,7 +28,7 @@ static LinearObsOperatorMaker<ObsRadianceRTTOVTLAD> makerRTTOVTL_("RTTOV");
 
 ObsRadianceRTTOVTLAD::ObsRadianceRTTOVTLAD(const ioda::ObsSpace & odb,
                                            const eckit::Configuration & config)
-  : keyOperRadianceRTTOV_(0), varin_(), odb_(odb)
+  : keyOperRadianceRTTOV_(0), odb_(odb), varin_()
 {
   const std::vector<std::string> vv{"air_temperature"};
   varin_.reset(new oops::Variables(vv));

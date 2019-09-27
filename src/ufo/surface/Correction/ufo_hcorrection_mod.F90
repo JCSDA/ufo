@@ -18,7 +18,7 @@ use fckit_log_module,  only : fckit_log
 use ufo_constants_mod, only : grav, rd, Lclr, t2tv
 
 implicit none
-public :: ufo_hcorrection_create, ufo_hcorrection_delete, ufo_hcorrection_prior, ufo_hcorrection_post
+public :: ufo_hcorrection_create, ufo_hcorrection_delete, ufo_hcorrection_prior
 private
 integer, parameter :: max_string=800
 
@@ -74,10 +74,8 @@ type(c_ptr), value, intent(in) :: obspace
 type(ufo_geovals),  intent(in) :: geovals
 
 ! Local variables
-type(ufo_geoval), pointer :: geoval
-integer                           :: ivar
 real(kind_real)                   :: missing, H2000 = 2000.0
-integer                           :: nobs, iobs, nlev
+integer                           :: nobs, iobs
 real(kind_real),    allocatable   :: cor_psfc(:)
 type(ufo_geoval),   pointer       :: model_ps, model_p, model_sfc_geomz, model_tv, model_geomz
 character(len=*), parameter       :: myname_="ufo_surface_psfc_simobs"
@@ -213,18 +211,6 @@ deallocate(model_zs)
 deallocate(model_level1)
 deallocate(model_psfc)
 end subroutine ufo_hcorrection_prior
-
-! ------------------------------------------------------------------------------
-
-subroutine ufo_hcorrection_post(self, obspace, nvars, nlocs, hofx)
-use iso_c_binding
-implicit none
-type(ufo_hcorrection),  intent(in) :: self
-type(c_ptr), value, intent(in) :: obspace
-integer,            intent(in) :: nvars, nlocs
-real(c_double),     intent(in) :: hofx(nvars, nlocs)
-
-end subroutine ufo_hcorrection_post
 
 ! ------------------------------------------------------------------------------
 !> \Conduct terrain height correction for surface pressure

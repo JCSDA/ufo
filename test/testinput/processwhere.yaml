@@ -1,0 +1,132 @@
+window_begin: 2018-04-14T20:00:00Z
+window_end: 2018-04-15T03:00:00Z
+ObsSpace:
+  name: ProcessWhere Test Data
+  ObsDataIn:
+    obsfile: Data/where_testdata.nc4
+  simulate:
+    variables: []
+  nlocs: 10
+ProcessWhere:
+  - where:                      # test minvalue when all are >= min
+    - variable: var1@MetaData
+      minvalue: 1
+    size where true: 10
+  - where:                      # test minvalue when it's in the middle of the range
+    - variable: var1@MetaData
+      minvalue: 4
+    size where true: 7
+  - where:                      # test minvalue when all are < min
+    - variable: var1@MetaData
+      minvalue: 11
+    size where true: 0
+  - where:                      # test maxvalue when all are <= max
+    - variable: var1@MetaData
+      maxvalue: 10
+    size where true: 10
+  - where:                      # test maxvalue when all but one are > max, one == max
+    - variable: var1@MetaData
+      maxvalue: 1
+    size where true: 1
+  - where:                      # test min & max at the same time when all should pass
+    - variable: var2@MetaData
+      minvalue: 1
+      maxvalue: 10
+    size where true: 10
+  - where:                      # test min & max at the same time when some should pass
+    - variable: var2@MetaData
+      minvalue: 2
+      maxvalue: 5
+    size where true: 4
+  - where:                      # test min & max at the same time when max < min
+    - variable: var2@MetaData
+      minvalue: 6
+      maxvalue: 4
+    size where true: 0
+  - where:                      # test min & max at the same time when max == min
+    - variable: var2@MetaData
+      minvalue: 7
+      maxvalue: 7
+    size where true: 1
+  - where:                      # test min & max  for variable with missing values
+    - variable: var5@MetaData
+      minvalue: 2
+      maxvalue: 5
+    size where true: 4
+  - where:                      # test min & max  for variable with missing values
+    - variable: var5@MetaData
+      minvalue: 0
+      maxvalue: 100
+    size where true: 6
+  - where:                      # test min & max  for variable with missing values
+    - variable: var5@MetaData
+      minvalue: 100
+    size where true: 0
+  - where:                      # test that AND for 2 conditions works as expected
+    - variable: var1@MetaData
+      maxvalue: 5
+    - variable: var2@MetaData
+      maxvalue: 6
+    size where true: 1
+  - where:                      # test that AND for 2 conditions works as expected
+    - variable: var1@MetaData
+      maxvalue: 5
+    - variable: var2@MetaData
+      minvalue: 6
+    size where true: 5
+  - where:                      # test that is_defined works when all is defined
+    - variable: var1@MetaData
+      is_defined:
+    size where true: 10
+  - where:                      # test that is_not_defined works when all is defined
+    - variable: var1@MetaData
+      is_not_defined:
+    size where true: 0
+  - where:                      # test that is_defined works when some are defined
+    - variable: var5@MetaData
+      is_defined:
+    size where true: 6
+  - where:                      # test that is_not_defined works when some are defined
+    - variable: var5@MetaData
+      is_not_defined:
+    size where true: 4
+  - where:                       # test is_in
+    - variable: intvar3@MetaData
+      is_in: 1
+    size where true: 5
+  - where:                       # test is_in
+    - variable: intvar4@MetaData
+      is_in: 0-3
+    size where true: 8
+  - where:                       # test is_in when nothing is in
+    - variable: intvar3@MetaData
+      is_in: 5-22
+    size where true: 0
+  - where:                       # test is_in when all is in
+    - variable: intvar3@MetaData
+      is_in: 0, 1
+    size where true: 10
+  - where:                       # test is_in when some values are missing
+    - variable: intvar5@MetaData
+      is_in: 0-3
+    size where true: 4
+  - where:                       # test is_not_in
+    - variable: intvar3@MetaData
+      is_not_in: 1
+    size where true: 5
+  - where:                       # test is_not_in
+    - variable: intvar4@MetaData
+      is_not_in: 0-3
+    size where true: 2
+  - where:                       # test is_not_in when nothing is in
+    - variable: intvar3@MetaData
+      is_not_in: 5-22
+    size where true: 10
+  - where:                       # test is_not_in when all is in
+    - variable: intvar3@MetaData
+      is_not_in: 0, 1
+    size where true: 0
+  - where:                       # test is_not_in when some values are missing
+    - variable: intvar5@MetaData
+      is_not_in: 0-3
+    size where true: 2

@@ -15,14 +15,13 @@ module ufo_atmvertinterp_tlad_mod
   use missing_values_mod
   use fckit_configuration_module, only: fckit_configuration
 
-  integer, parameter :: max_string=800
 
 ! ------------------------------------------------------------------------------
 
   type, public :: ufo_atmvertinterp_tlad
   private
      integer :: nvars
-     character(len=max_string), public, allocatable :: varin(:)
+     character(len=MAXVARLEN), public, allocatable :: varin(:)
      integer :: nval, nlocs
      real(kind_real), allocatable :: wf(:)
      integer, allocatable :: wi(:)

@@ -26,7 +26,7 @@ class Variables: public util::Printable {
 
   Variables();
   explicit Variables(const eckit::Configuration &, const std::string & allgroup = "");
-
+  Variables(const std::string &, const std::vector<int> &);
   ~Variables();
 
   Variables & operator+=(const Variables &);

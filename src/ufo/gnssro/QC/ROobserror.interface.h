@@ -30,7 +30,6 @@ extern "C" {
                                         const eckit::Configuration *);
   void ufo_roobserror_delete_f90(F90roerr &);
   void ufo_roobserror_prior_f90(const F90roerr &);
-  void ufo_roobserror_post_f90(const F90roerr &);
 }  // extern C
 
 }  // namespace ufo

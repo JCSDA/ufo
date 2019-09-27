@@ -28,7 +28,7 @@ static LinearObsOperatorMaker<ObsGnssroBndROPP2DTLAD> makerGnssroBndROPP2DTL_("G
 
 ObsGnssroBndROPP2DTLAD::ObsGnssroBndROPP2DTLAD(const ioda::ObsSpace & odb,
                                                const eckit::Configuration & config)
-  : keyOperGnssroBndROPP2D_(0), varin_(), odb_(odb)
+  : keyOperGnssroBndROPP2D_(0), odb_(odb), varin_()
 {
   const eckit::LocalConfiguration obsOptions(config, "ObsOptions");
   const eckit::Configuration * configc = &obsOptions;

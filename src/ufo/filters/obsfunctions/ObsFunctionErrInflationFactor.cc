@@ -33,7 +33,8 @@ ObsFunctionErrInflationFactor::~ObsFunctionErrInflationFactor() {}
 void ObsFunctionErrInflationFactor::compute(const ObsFilterData & input,
                                             ioda::ObsDataVector<float> & out) const {
   const size_t nlocs = input.nlocs();
-  std::vector<float> lats = input.get("latitude@MetaData");
+  std::vector<float> lats;
+  input.get("latitude@MetaData", lats);
   for (size_t jj = 0; jj < nlocs; ++jj) {
       out[0][jj] = 1.0;
      if ( std::abs(lats[jj]) > 25.0 ) {

@@ -1,0 +1,31 @@
+window_begin: 2018-04-14T21:00:00Z
+window_end: 2018-04-15T03:00:00Z
+
+LinearObsOpTest: 
+ testiterTL:  11
+ toleranceTL: 1.0e-12
+ toleranceAD: 1.0e-13
+
+Observations: 
+ ObsTypes: 
+ - ObsOperator: 
+     name: GnssroBndNBAM
+     ObsOptions:
+       use_compress: 1
+       vertlayer: full
+   ObsSpace: 
+     name: GnssroBnd
+     ObsDataIn: 
+       obsfile: Data/gnssro_obs_2018041500_l.nc4
+       obsgrouping: 
+         group_varable: "record_number"
+         sort_variable: "impact_height"
+         sort_order: "ascending"
+     ObsDataOut:
+       obsfile: Data/gnssro_bndnbam_2018041500_l_output.nc4
+     simulate:
+       variables: [bending_angle]
+   GeoVaLs: 
+     filename: Data/gnssro_geoval_2018041500_l.nc4
+   vecequiv: GsiHofX
+   tolerance: 1.0e-7

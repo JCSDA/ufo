@@ -50,7 +50,6 @@ end subroutine ufo_seaicefraction_delete
 ! ------------------------------------------------------------------------------
 ! Code in this routine is for seaicefraction only, please remove and replace
 subroutine ufo_seaicefraction_simobs(self, geovals, hofx, obss)
-use ufo_marine_ncutils
 implicit none
 class(ufo_seaicefraction), intent(in)    :: self
 type(ufo_geovals),  intent(in)    :: geovals
@@ -62,12 +61,6 @@ type(c_ptr), value, intent(in)    :: obss
 
     integer :: iobs
     type(ufo_geoval), pointer :: geoval
-
-    ! Netcdf stuff to write out geovals
-    integer(kind=4) :: iNcid
-    integer(kind=4) :: iDimStation_ID, iDimLev_ID
-    integer(kind=4) :: iVarLev_ID, iVarGOM_ID
-    integer :: ncat,nlocs
 
     ! check if nlocs is consistent in geovals & hofx
     if (geovals%nlocs /= size(hofx,1)) then

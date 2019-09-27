@@ -52,7 +52,6 @@ subroutine ufo_insitutemperature_simobs(self, geovals, hofx, obss)
 use gsw_pot_to_insitu
 use vert_interp_mod
 use ufo_tpsp2ti_mod
-use ufo_marine_ncutils
 implicit none
 class(ufo_insitutemperature), intent(in)    :: self
 type(ufo_geovals),  intent(in)    :: geovals

@@ -63,10 +63,9 @@ subroutine ufo_gnssro_bndropp2d_tlad_settraj(self, geovals, obss)
   character(len=*), parameter :: myname_="ufo_gnssro_bndropp2d_tlad_settraj"
   character(max_string)       :: err_msg
   type(ufo_geoval), pointer   :: t, q, prs, gph, gph_sfc
-  integer                     :: i, iobs, ierr, kerror
+  integer                     :: i, kerror
   real(kind_real), allocatable  :: obsAzim(:)                    ! nlocs
   real(kind_real), allocatable  :: obsLat(:), obsLon(:)          ! nlocs
-  real(kind_real), allocatable  :: obsLon2d(:),obsLat2d(:)       ! nlocs * n_horiz
   real(kind_real), allocatable  :: obsLonnh(:),obsLatnh(:)       ! n_horiz
   integer                       :: n_horiz
   real(kind_real)               :: dtheta
@@ -157,7 +156,7 @@ subroutine ufo_gnssro_bndropp2d_simobs_tl(self, geovals, hofx, obss)
   type(State1dFM)                 :: x1d,x1d_tl
   type(Obs1dBangle)               :: y,y_tl
  
-  integer                         :: iobs,nlev, nlocs,ierr,nvprof
+  integer                         :: iobs,nlev, nlocs,nvprof
     
   character(len=*), parameter  :: myname_="ufo_gnssro_bndropp2d_simobs_tl"
   character(max_string)        :: err_msg
@@ -167,10 +166,8 @@ subroutine ufo_gnssro_bndropp2d_simobs_tl(self, geovals, hofx, obss)
   real(kind_real), allocatable  :: gph_d_zero(:,:)
   real(kind_real)               :: gph_sfc_d_zero
 ! hack - set local geopotential height to zero for ropp routines
-  real(kind_real), allocatable  :: obsImpP(:),obsLocR(:),obsGeoid(:),obsAzim(:) !nlocs
-  real(kind_real), allocatable  :: obsLat(:),obsLon(:)                          !nlocs
-  real(kind_real), allocatable  :: obsLon2d(:),obsLat2d(:)       ! nlocs * n_horiz
-  real(kind_real), allocatable  :: obsLonnh(:),obsLatnh(:)       ! n_horiz
+  real(kind_real), allocatable  :: obsImpP(:),obsLocR(:),obsGeoid(:) !nlocs
+  real(kind_real), allocatable  :: obsLat(:),obsLon(:)               !nlocs
   integer                       :: n_horiz
   real(kind_real)               :: dtheta
   real(kind_real)               :: ob_time
@@ -351,7 +348,7 @@ subroutine ufo_gnssro_bndropp2d_simobs_ad(self, geovals, hofx, obss)
   type(State2dFM)                 :: x,x_ad
   type(State1dFM)                 :: x1d,x1d_ad
   type(Obs1dBangle)               :: y,y_ad
-  integer                         :: iobs,nlev,nlocs,ierr,nvprof
+  integer                         :: iobs,nlev,nlocs,nvprof
   character(len=*), parameter     :: myname_="ufo_gnssro_bndropp2d_simobs_ad"
   character(max_string)           :: err_msg
   integer                         :: n_horiz 

@@ -15,7 +15,6 @@ subroutine sfc_wind_fact_gsi(u, v, tsen, q, psfc, prsi1, prsi2,&
   real(kind_real), intent(in) :: u, v, tsen, q, psfc, prsi1, prsi2,&
                                  skint, z0, lsmask 
   real(kind_real), intent(out) :: f10m
-  real(kind_real) :: psiw, psiwz
   real(kind_real), parameter :: alpha = 5.0_kind_real
   real(kind_real), parameter :: a0 = -3.975_kind_real
   real(kind_real), parameter :: a1 = 12.32_kind_real

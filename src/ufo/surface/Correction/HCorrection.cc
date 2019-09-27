@@ -52,7 +52,6 @@ void HCorrection::priorFilter(const GeoVaLs & gv) const {
 
 void HCorrection::postFilter(const ioda::ObsVector & hofxb, const ObsDiagnostics &) const {
   oops::Log::trace() << "HCorrection postFilter" << std::endl;
-  ufo_hcorrection_post_f90(key_, obsdb_, hofxb.nvars(), hofxb.nlocs(), hofxb.toFortran());
 }
 
 // -----------------------------------------------------------------------------

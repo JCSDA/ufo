@@ -28,7 +28,7 @@ static LinearObsOperatorMaker<ObsAodCRTMTLAD> makerAodTL_("Aod");
 
 ObsAodCRTMTLAD::ObsAodCRTMTLAD(const ioda::ObsSpace & odb,
                                const eckit::Configuration & config)
-  : keyOperAodCRTM_(0), varin_(), odb_(odb), channels_(odb.obsvariables().channels())
+  : keyOperAodCRTM_(0), odb_(odb), varin_(), channels_(odb.obsvariables().channels())
 {
   const std::vector<std::string> vv{
     "sulf", "bc1", "bc2", "oc1", "oc2", "dust1", "dust2", "dust3", "dust4", "dust5",

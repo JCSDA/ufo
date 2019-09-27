@@ -137,7 +137,6 @@ type(fckit_configuration),  intent(in)    :: f_confOper
 
 character(len=255) :: IRVISwaterCoeff, IRVISlandCoeff, IRVISsnowCoeff, IRVISiceCoeff, MWwaterCoeff
 integer :: jspec, ivar
-character(len=MAXVARLEN)  :: BASENAME
 character(len=max_string) :: err_msg
 character(len=:), allocatable :: str
 character(kind=c_char,len=MAXVARLEN), allocatable :: char_array(:)
@@ -344,7 +343,7 @@ type(CRTM_Atmosphere_type), intent(inout) :: atm(:)
 type(crtm_conf) :: conf
 
 ! Local variables
-integer :: k1,ivar,jspec
+integer :: k1,jspec
 type(ufo_geoval), pointer :: geoval
 character(max_string) :: err_msg
 
@@ -403,10 +402,10 @@ character(max_string) :: err_msg
 
 ! ------------------------------------------------------------------------------
 
-subroutine Load_Sfc_Data(n_Profiles,n_Layers,n_Channels,channels,geovals,sfc,chinfo,obss,conf)
+subroutine Load_Sfc_Data(n_Profiles,n_Channels,channels,geovals,sfc,chinfo,obss,conf)
 
 implicit none
-integer,                     intent(in)    :: n_Profiles, n_Layers, n_Channels
+integer,                     intent(in)    :: n_Profiles, n_Channels
 type(ufo_geovals),           intent(in)    :: geovals
 type(CRTM_Surface_type),     intent(inout) :: sfc(:)
 type(CRTM_ChannelInfo_type), intent(in)    :: chinfo(:)
@@ -897,10 +896,6 @@ SUBROUTINE load_aerosol_data(n_profiles,n_layers,geovals,&
 
     SUBROUTINE assign_other
 
-      REAL(kind_real), DIMENSION(n_layers) :: ugkg_kgm2
-      
-      INTEGER :: i,k,m
-      
       message = 'this aerosol not implemented - check later'
       CALL Display_Message( aerosol_option, message, FAILURE )
       STOP
@@ -990,6 +985,7 @@ SUBROUTINE load_aerosol_data(n_profiles,n_layers,geovals,&
      REAL(kind_real)    :: r_eff
 
      j2 = 0
+     j1 = 1
      IF ( rh <= aeroc%rh(1) ) THEN
         j1 = 1
      ELSE IF ( rh >= aeroc%rh(aeroc%n_rh) ) THEN
@@ -1034,40 +1030,6 @@ SUBROUTINE load_aerosol_data(n_profiles,n_layers,geovals,&
      END DO
 
    END FUNCTION upper2lower
-
-   FUNCTION lower2upper(str) RESULT (string)
-
-     IMPLICIT NONE
-
-     CHARACTER(*), INTENT(in) :: str
-     CHARACTER(LEN(str))      :: string
-
-     INTEGER :: ic, i
-
-     CHARACTER(26), PARAMETER :: upper = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
-     CHARACTER(26), PARAMETER :: lower = 'abcdefghijklmnopqrstuvwxyz'
-
-!   lowcase each letter if it is lowecase
-     string = str
-     DO i = 1, LEN_TRIM(str)
-        ic = INDEX(lower, str(i:i))
-        IF (ic > 0) string(i:i) = upper(ic:ic)
-     END DO
-
-   END FUNCTION lower2upper
-
-   FUNCTION replace_text(s,text,rep) RESULT(outs) 
-     CHARACTER(*)        :: s,text,rep
-     CHARACTER(LEN(s)+100) :: outs  ! provide outs with extra 100 char len
-     INTEGER             :: i, nt, nr
-
-     outs = s ; nt = LEN_TRIM(text) ; nr = LEN_TRIM(rep)
-     DO
-        i = INDEX(outs,text(:nt)) ; IF (i == 0) EXIT
-        outs = outs(:i-1) // rep(:nr) // outs(i+nt:)
-     END DO
-
-   END FUNCTION replace_text
 
    INTEGER FUNCTION getindex(names,usrname)
      IMPLICIT NONE
@@ -1152,8 +1114,7 @@ SUBROUTINE load_aerosol_data(n_profiles,n_layers,geovals,&
        INTEGER, INTENT(in):: n
        REAL table (n)
        REAL:: dt=0.1
-       REAL esbasw, tbasw, esbasi, tbasi, Tmin, tem, aa, b, c, d, e, esh20 
-       REAL wice, wh2o
+       REAL esbasw, tbasw, tbasi, Tmin, tem, aa, b, c, d, e
        INTEGER i
 ! Constants
        esbasw = 1013246.0

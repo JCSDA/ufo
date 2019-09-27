@@ -7,11 +7,13 @@ use gnssro_mod_constants
 
 contains
 subroutine bending_angle_obserr_ROPP(obsImpH, obsValue, nobs,  obsErr, QCflags, missing)
+implicit none
 integer,                         intent(in)  :: nobs
 real(kind_real), dimension(nobs),intent(in)  :: obsImpH, obsValue
 integer(c_int),  dimension(nobs),intent(in)  :: QCflags(:)
 real(kind_real), dimension(nobs),intent(out) :: obsErr
 real(kind_real)                  :: H_km, missing
+integer :: i
 
 obsErr = missing
 
@@ -34,14 +36,17 @@ end if
 end do
 
 end subroutine bending_angle_obserr_ROPP
-!-----------------------------------
+!---------------------------------------
 
-subroutine  bending_angle_obserr_GSI(obsLat, obsImpH, obsSaid, nobs, obsErr, QCflags, missing)
+subroutine  bending_angle_obserr_NBAM(obsLat, obsImpH, obsSaid, nobs, obsErr, QCflags, missing)
+implicit none
 integer,                         intent(in)  :: nobs
 real(kind_real), dimension(nobs),intent(in)  :: obsImpH, obsLat
 integer(c_int),  dimension(nobs),intent(in)  :: obsSaid, QCflags(:)
 real(kind_real), dimension(nobs),intent(out) ::  obsErr
 real(kind_real)                 :: H_km, missing
+
+integer :: i
 
 obsErr = missing
 
@@ -90,15 +95,18 @@ end if
 
 end do
 
-end subroutine bending_angle_obserr_GSI
-!--------------------------------------
+end subroutine bending_angle_obserr_NBAM
+!---------------------------------------
 
-subroutine refractivity_obserr_GSI(obsLat, obsZ, nobs, obsErr, QCflags,missing)
+subroutine refractivity_obserr_NBAM(obsLat, obsZ, nobs, obsErr, QCflags,missing)
+implicit none
 integer,                         intent(in)  :: nobs
 real(kind_real), dimension(nobs),intent(in)  :: obsLat, obsZ
 real(kind_real), dimension(nobs),intent(out) :: obsErr
 integer(c_int),  dimension(nobs),intent(in)  :: QCflags(:)
 real(kind_real)                   :: H_km, missing
+
+integer :: i
 
 obsErr = missing
 
@@ -119,7 +127,7 @@ do i = 1, nobs
   end if
 end do
 
-end subroutine refractivity_obserr_GSI
+end subroutine refractivity_obserr_NBAM
 
 end module gnssro_mod_obserror
 

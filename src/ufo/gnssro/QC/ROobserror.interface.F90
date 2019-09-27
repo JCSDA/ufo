@@ -75,12 +75,4 @@ end subroutine ufo_roobserror_prior_c
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_roobserror_post_c(c_self) bind(c,name='ufo_roobserror_post_f90')
-implicit none
-integer(c_int), intent(in) :: c_self
-
-end subroutine ufo_roobserror_post_c
-
-! ------------------------------------------------------------------------------
-
 end module ufo_roobserror_mod_c

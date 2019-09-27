@@ -48,7 +48,6 @@ subroutine ufo_gnssro_bndropp1d_tlad_settraj(self, geovals, obss)
   character(len=*), parameter :: myname_="ufo_gnssro_bndropp1d_tlad_settraj"
   character(max_string)       :: err_msg
   type(ufo_geoval), pointer   :: t, q, prs, gph, gph_sfc
-  integer                     :: iobs, ierr
 
   write(err_msg,*) "TRACE: ufo_gnssro_bndropp1d_tlad_settraj: begin"
   call fckit_log%info(err_msg) 
@@ -109,7 +108,7 @@ subroutine ufo_gnssro_bndropp1d_simobs_tl(self, geovals, hofx, obss)
   type(Obs1dBangle)               :: y,y_tl
  
   integer                         :: iobs,nlev, nlocs
-  integer                         :: ierr,nvprof
+  integer                         :: nvprof
     
   character(len=*), parameter  :: myname_="ufo_gnssro_bndropp1d_simobs_tl"
   character(max_string)        :: err_msg
@@ -249,7 +248,7 @@ subroutine ufo_gnssro_bndropp1d_simobs_ad(self, geovals, hofx, obss)
   type(State1dFM)                 :: x,x_ad
   type(Obs1dBangle)               :: y,y_ad
   integer                         :: iobs,nlev, nlocs
-  integer                         :: ierr,nvprof
+  integer                         :: nvprof
   real(kind=dp)                   :: ob_time
   character(len=*), parameter     :: myname_="ufo_gnssro_bndropp1d_simobs_ad"
   character(max_string)           :: err_msg

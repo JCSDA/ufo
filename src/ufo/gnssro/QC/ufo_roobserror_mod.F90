@@ -15,7 +15,7 @@ use gnssro_mod_obserror
 
 implicit none
 public :: ufo_roobserror, ufo_roobserror_create, ufo_roobserror_delete
-public :: ufo_roobserror_prior, ufo_roobserror_post
+public :: ufo_roobserror_prior
 public :: max_string
 private
 
@@ -44,7 +44,7 @@ if (f_conf%has("variable")) then
    call f_conf%get_or_die("variable",str)
    self%variable = str
 end if
-self%errmodel = "GSI"
+self%errmodel = "NBAM"
 if (f_conf%has("errmodel")) then
    call f_conf%get_or_die("errmodel",str)
    self%errmodel = str
@@ -101,13 +101,13 @@ case ("bending_angle")
   obsImpH(:) = obsImpP(:) - obsGeoid(:) - obsLocR(:)
 
   select case (trim(self%errmodel))
-  case ("GSI")
+  case ("NBAM")
     allocate(obsSaid(nobs))
     allocate(obsLat(nobs))
     call obsspace_get_db(self%obsdb, "MetaData", "occulting_sat_id", obsSaid)
     call obsspace_get_db(self%obsdb, "MetaData", "latitude", obsLat)
-    call bending_angle_obserr_GSI(obsLat, obsImpH, obsSaid, nobs, obsErr, QCflags, missing)
-    write(err_msg,*) "ufo_roobserror_mod: setting up bending_angle obs error with GSI method"
+    call bending_angle_obserr_NBAM(obsLat, obsImpH, obsSaid, nobs, obsErr, QCflags, missing)
+    write(err_msg,*) "ufo_roobserror_mod: setting up bending_angle obs error with NBAM method"
     deallocate(obsSaid)
     deallocate(obsLat)
     ! up date obs error
@@ -123,7 +123,7 @@ case ("bending_angle")
     call obsspace_put_db(self%obsdb, "FortranERR", trim(self%variable), obsErr)
 
   case default
-    write(err_msg,*) "ufo_roobserror_mod: bending_angle error model must be GSI or ROPP"
+    write(err_msg,*) "ufo_roobserror_mod: bending_angle error model must be NBAM or ROPP"
     call fckit_log%info(err_msg) 
 
   end select
@@ -137,13 +137,13 @@ case ("refractivity")
 
   select case (trim(self%errmodel))
 
-  case ("GSI")
+  case ("NBAM")
     allocate(obsZ(nobs))
     allocate(obsLat(nobs))
     call obsspace_get_db(self%obsdb, "MetaData", "altitude",  obsZ) 
     call obsspace_get_db(self%obsdb, "MetaData", "latitude", obsLat)
-    call refractivity_obserr_GSI(obsLat, obsZ, nobs, obsErr, QCflags, missing)
-    write(err_msg,*) "ufo_roobserror_mod: setting up refractivity obs error with GSI method" 
+    call refractivity_obserr_NBAM(obsLat, obsZ, nobs, obsErr, QCflags, missing)
+    write(err_msg,*) "ufo_roobserror_mod: setting up refractivity obs error with NBAM method" 
     call fckit_log%info(err_msg)
     deallocate(obsZ)
     deallocate(obsLat)  
@@ -155,7 +155,7 @@ case ("refractivity")
      call fckit_log%info(err_msg)
 
   case default
-    write(err_msg,*) "ufo_roobserror_mod: only GSI refractivity model is avaiable now"
+    write(err_msg,*) "ufo_roobserror_mod: only NBAM refractivity model is avaiable now"
     call fckit_log%info(err_msg)
   end select
 
@@ -167,11 +167,5 @@ deallocate(QCflags)
 deallocate(obsErr)
 
 end subroutine ufo_roobserror_prior
-
-! ------------------------------------------------------------------------------
-subroutine ufo_roobserror_post(self)
-implicit none
-type(ufo_roobserror), intent(in) :: self
-end subroutine ufo_roobserror_post
 
 end module ufo_roobserror_mod

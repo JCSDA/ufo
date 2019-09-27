@@ -64,9 +64,21 @@ void testObsFilterData() {
     ufo::Variables obsvars(obsvarconf, "ObsValue");
     for (size_t jvar = 0; jvar < obsvars.size(); ++jvar) {
       EXPECT(data.has(obsvars[jvar]));
-      std::vector<float> vec = data.get(obsvars[jvar]);
+      std::vector<float> vec;
+      data.get(obsvars[jvar], vec);
       std::vector<float> ref(ospace.nlocs());
       ospace.get_db(obsvars.group(jvar), obsvars.variable(jvar), ref.size(), ref.data());
+      EXPECT(vec == ref);
+    }
+///  Check that has() and get() work on integer variables in ObsSpace:
+    const eckit::LocalConfiguration intvarconf(obsconf, "integer data");
+    ufo::Variables intvars(intvarconf);
+    for (size_t jvar = 0; jvar < intvars.size(); ++jvar) {
+      EXPECT(data.has(intvars[jvar]));
+      std::vector<int> vec;
+      data.get(intvars[jvar], vec);
+      std::vector<int> ref(ospace.nlocs());
+      ospace.get_db(intvars.group(jvar), intvars.variable(jvar), ref.size(), ref.data());
       EXPECT(vec == ref);
     }
 
@@ -80,7 +92,8 @@ void testObsFilterData() {
 ///  H(x) associated now
     for (size_t jvar = 0; jvar < hofxvars.size(); ++jvar) {
       EXPECT(data.has(hofxvars[jvar]));
-      std::vector<float> vec = data.get(hofxvars[jvar]);
+      std::vector<float> vec;
+      data.get(hofxvars[jvar], vec);
       std::vector<float> ref(hofx.nlocs());
       for (size_t jloc = 0; jloc < hofx.nlocs(); jloc++) {
         ref[jloc] = hofx[hofxvars.size() * jloc + jvar];
@@ -103,14 +116,15 @@ void testObsFilterData() {
       EXPECT(nlevs == nlevs_ref);
 ///  nlevs == 1: 2D geovals, could be retrieved with get(var)
       if (nlevs == 1) {
-        std::vector<float> vec = data.get(geovars[jvar]);
+        std::vector<float> vec;
+        data.get(geovars[jvar], vec);
         std::vector<float> ref(ospace.nlocs());
         gval.get(ref, geovars.variable(jvar));
         EXPECT(vec == ref);
 ///  otherwise need get(var, level) to retrieve
       } else {
         std::vector<float> vec;
-        vec = data.get(geovars[jvar], nlevs);
+        data.get(geovars[jvar], nlevs, vec);
         std::vector<float> ref(ospace.nlocs());
         gval.get(ref, geovars.variable(jvar), nlevs);
         EXPECT(vec == ref);
@@ -132,14 +146,15 @@ void testObsFilterData() {
       EXPECT(nlevs == nlevs_ref);
 ///  nlevs == 1: 2D obsdiags, could be retrieved with get(var)
       if (nlevs == 1) {
-        std::vector<float> vec = data.get(diagvars[jvar]);
+        std::vector<float> vec;
+        data.get(diagvars[jvar], vec);
         std::vector<float> ref(ospace.nlocs());
         obsdiags.get(ref, diagvars.variable(jvar));
         EXPECT(vec == ref);
 ///  otherwise need get(var, level) to retrieve
       } else {
         std::vector<float> vec;
-        vec = data.get(diagvars[jvar], nlevs);
+        data.get(diagvars[jvar], nlevs, vec);
         std::vector<float> ref(ospace.nlocs());
         obsdiags.get(ref, diagvars.variable(jvar), nlevs);
         EXPECT(vec == ref);

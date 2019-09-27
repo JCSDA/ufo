@@ -1,0 +1,24 @@
+window_begin: 2018-04-14T20:00:00Z
+window_end: 2018-04-15T03:00:00Z
+ObsSpace:
+  name: iasi_metop-a
+  ObsDataIn:
+    obsfile: Data/iasi_metop-a_obs_2018041500_m.nc4
+  simulate:
+    variables: [brightness_temperature]
+    channels: 16, 29
+ObsOperator:
+  name: CRTM
+  Absorbers: [H2O,O3,CO2]
+  ObsOptions:
+    Sensor_ID: iasi_metop-a
+    EndianType: little_endian
+    CoefficientPath: Data/
+GeoVaLs:
+  filename: Data/iasi_metop-a_geoval_2018041500_m.nc4
+ObsDiag:
+   variables: [brightness_temperature_jacobian_surface_temperature, brightness_temperature_jacobian_air_temperature]
+   channels: 16, 29
+Reference ObsDiag:
+  filename: Data/iasi_metop-a_obsdiag_2018041500_m.nc4
+tolerance: 1.e-7

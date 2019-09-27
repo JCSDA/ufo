@@ -28,7 +28,7 @@ static LinearObsOperatorMaker<ObsIdentityTLAD> makerSSS_("SeaSurfaceSalinity");
 
 ObsIdentityTLAD::ObsIdentityTLAD(const ioda::ObsSpace & odb,
                                  const eckit::Configuration & config)
-  : keyOperObsIdentity_(0), varin_(), odb_(odb)
+  : keyOperObsIdentity_(0), odb_(odb), varin_()
 {
   const eckit::Configuration * configc = &config;
   const eckit::Configuration * varconfig = &odb.obsvariables().toFortran();

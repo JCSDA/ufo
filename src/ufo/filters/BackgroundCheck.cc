@@ -79,7 +79,8 @@ void BackgroundCheck::applyFilter(const std::vector<bool> & apply,
 
 //  H(x)
     const std::string varhofx = vars[jv] + "@HofX";
-    std::vector<float> hofx = data_.get(varhofx);
+    std::vector<float> hofx;
+    data_.get(varhofx, hofx);
 
 //  Threshold for current variable
     std::vector<float> abs_thr(obsdb_.nlocs(), std::numeric_limits<float>::max());

@@ -82,8 +82,10 @@ void MWCLWCheck::applyFilter(const std::vector<bool> & apply,
 //  H(x)
     const std::string var0 = invars_[0] + "@HofX";
     const std::string var1 = invars_[1] + "@HofX";
-    std::vector<float> hofx0 = data_.get(var0);
-    std::vector<float> hofx1 = data_.get(var1);
+    std::vector<float> hofx0;
+    data_.get(var0, hofx0);
+    std::vector<float> hofx1;
+    data_.get(var1, hofx1);
 
 // Loop over obs locations calculating CLW from observations
   float clw_obs = missing, clw_guess = missing;

@@ -29,7 +29,7 @@ static LinearObsOperatorMaker<ObsAtmVertInterpTLAD> makerSatwindTL_("Satwind");
 
 ObsAtmVertInterpTLAD::ObsAtmVertInterpTLAD(const ioda::ObsSpace & odb,
                                            const eckit::Configuration & config)
-  : keyOperAtmVertInterp_(0), varin_(), odb_(odb)
+  : keyOperAtmVertInterp_(0), odb_(odb), varin_()
 {
   const eckit::Configuration * configc = &config;
   const oops::Variables & observed = odb.obsvariables();
@@ -49,7 +49,11 @@ ObsAtmVertInterpTLAD::~ObsAtmVertInterpTLAD() {
 // -----------------------------------------------------------------------------
 
 void ObsAtmVertInterpTLAD::setTrajectory(const GeoVaLs & geovals, const ObsBias & bias) {
+  oops::Log::trace() << "ObsAtmVertInterpTLAD::setTrajectory entering" << std::endl;
+
   ufo_atmvertinterp_tlad_settraj_f90(keyOperAtmVertInterp_, geovals.toFortran(), odb_);
+
+  oops::Log::trace() << "ObsAtmVertInterpTLAD::setTrajectory exiting" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
@@ -57,6 +61,8 @@ void ObsAtmVertInterpTLAD::setTrajectory(const GeoVaLs & geovals, const ObsBias 
 void ObsAtmVertInterpTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec) const {
   ufo_atmvertinterp_simobs_tl_f90(keyOperAtmVertInterp_, geovals.toFortran(), odb_,
                                   ovec.nvars(), ovec.nlocs(), ovec.toFortran());
+
+  oops::Log::trace() << "ObsAtmVertInterpTLAD::simulateObsTL exiting" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
@@ -64,6 +70,8 @@ void ObsAtmVertInterpTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVecto
 void ObsAtmVertInterpTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec) const {
   ufo_atmvertinterp_simobs_ad_f90(keyOperAtmVertInterp_, geovals.toFortran(), odb_,
                                   ovec.nvars(), ovec.nlocs(), ovec.toFortran());
+
+  oops::Log::trace() << "ObsAtmVertInterpTLAD::simulateObsAD exiting" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

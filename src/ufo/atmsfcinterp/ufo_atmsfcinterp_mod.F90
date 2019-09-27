@@ -42,8 +42,7 @@ subroutine atmsfcinterp_setup_(self, f_conf, vars)
   class(ufo_atmsfcinterp), intent(inout) :: self
   type(fckit_configuration), intent(in)  :: f_conf
   character(len=MAXVARLEN), dimension(:), intent(inout) :: vars
-  integer :: ii, ivar, nallvars, istart, fact10tmp
-  logical :: fact10nml
+  integer :: ii, nallvars, istart, fact10tmp
 
   !> Size of variables
   self%nvars = size(vars)
@@ -111,11 +110,10 @@ subroutine atmsfcinterp_simobs_(self, geovals, obss, nvars, nlocs, hofx)
                                profile, rad10
   integer :: ivar, iobs
   real(kind_real), allocatable :: obselev(:), obshgt(:)
-  real(kind_real) :: outvalue
   real(kind_real), parameter :: minroughlen = 1.0e-4_kind_real
   character(len=MAXVARLEN) :: geovar
   real(kind_real) :: thv1, thv2, th1, thg, thvg, rib, V2
-  real(kind_real) :: gzsoz0, gzzoz0, psiw, psiwz
+  real(kind_real) :: gzsoz0, gzzoz0
   real(kind_real) :: redfac, psim, psimz, psih, psihz 
   real(kind_real) :: ttmp1, ttmpg, eg, qg
   real(kind_real) :: z0, zq0, tvsfc 

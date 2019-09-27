@@ -44,6 +44,14 @@ set( NETCDF_F90 ON CACHE BOOL "Compile with Fortran NetCDF" )
 find_package( NetCDF REQUIRED )
 include_directories( ${NETCDF_INCLUDE_DIR} )
 
+# eckit
+ecbuild_use_package( PROJECT eckit VERSION 0.18.0 REQUIRED )
+include_directories( ${ECKIT_INCLUDE_DIRS} )
+
+# fckit
+ecbuild_use_package( PROJECT fckit VERSION 0.4.1 REQUIRED )
+include_directories( ${FCKIT_INCLUDE_DIRS} )
+
 # ioda
 ecbuild_use_package( PROJECT ioda VERSION 0.1.0 REQUIRED )
 include_directories( ${IODA_INCLUDE_DIRS} )

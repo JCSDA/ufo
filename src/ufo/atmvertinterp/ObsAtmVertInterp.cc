@@ -49,8 +49,12 @@ ObsAtmVertInterp::~ObsAtmVertInterp() {
 
 void ObsAtmVertInterp::simulateObs(const GeoVaLs & gom, ioda::ObsVector & ovec,
                                    ObsDiagnostics &) const {
+  oops::Log::trace() << "ObsAtmVertInterp::simulateObs entered" << std::endl;
+
   ufo_atmvertinterp_simobs_f90(keyOperAtmVertInterp_, gom.toFortran(), odb_,
                                ovec.nvars(), ovec.nlocs(), ovec.toFortran());
+
+  oops::Log::trace() << "ObsAtmVertInterp::simulateObs exit" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
