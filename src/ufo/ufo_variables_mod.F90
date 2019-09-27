@@ -66,6 +66,7 @@ character(len=MAXVARLEN), public, parameter :: var_sfc_rough   = "surface_roughn
 character(len=MAXVARLEN), public, parameter :: var_sfc_t       = "surface_temperature"
 character(len=MAXVARLEN), public, parameter :: var_sfc_fact10  = "wind_reduction_factor_at_10m"
 character(len=MAXVARLEN), public, parameter :: var_sfc_emiss   = "surface_emissivity"
+character(len=MAXVARLEN), public, parameter :: var_sfc_sss     = "sea_surface_salinity"
 character(len=MAXVARLEN), public, parameter :: var_opt_depth   = "optical_thickness_of_atmosphere_layer"
 character(len=MAXVARLEN), public, parameter :: var_radiance    = "toa_outgoing_radiance_per_unit_wavenumber"
 character(len=MAXVARLEN), public, parameter :: var_tb     = "brightness_temperature"
