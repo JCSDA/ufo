@@ -6000,8 +6000,8 @@ def FlagCxx11Features(filename, clean_lines, linenum, error):
           ('C++ TR1 headers such as <%s> are unapproved.') % include.group(1))
 
   # Flag unapproved C++11 headers.
-  if include and include.group(1) in ('cfenv',
-                                      'condition_variable',
+  if include and include.group(1) in ('condition_variable',
+                                      'fenv',
                                       'future',
                                       'mutex',
                                       'thread',
