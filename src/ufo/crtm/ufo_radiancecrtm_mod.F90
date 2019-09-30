@@ -135,6 +135,7 @@ type(CRTM_Geometry_type),   allocatable :: geo(:)
 type(CRTM_Atmosphere_type), allocatable :: atm(:)
 type(CRTM_Surface_type),    allocatable :: sfc(:)
 type(CRTM_RTSolution_type), allocatable :: rts(:,:)
+type(CRTM_Options_type),   allocatable  :: Options(:) 
 
 ! Define the K-MATRIX variables for hofxdiags
 type(CRTM_Atmosphere_type), allocatable :: atm_K(:,:)
@@ -151,6 +152,7 @@ integer :: jvar, jprofile, jlevel, jchannel, ichannel, jspec
 
 logical :: jacobian_needed
 character(max_string) :: err_msg
+character(20)         :: radiometer_smap
 
  ! Get number of profile and layers from geovals
  ! ---------------------------------------------
@@ -356,11 +358,20 @@ character(max_string) :: err_msg
    else
       ! Call the forward model call for each sensor
       ! -------------------------------------------
-      err_stat = CRTM_Forward( atm        , &  ! Input
-                               sfc        , &  ! Input
-                               geo        , &  ! Input
-                               chinfo(n:n), &  ! Input
-                               rts          )  ! Output
+      if (chinfo(n)%Sensor_Id /= radiometer_smap) THEN
+      	 err_stat = CRTM_Forward( atm        , &  ! Input
+                              	  sfc        , &  ! Input
+                                  geo        , &  ! Input
+                                  chinfo(n:n), &  ! Input
+                                  rts          )  ! Output
+      else
+         err_stat = CRTM_Forward( atm        , &  ! Input
+                                  sfc        , &  ! Input
+                                  geo        , &  ! Input
+                                  chinfo(n:n), &  ! Input
+                                  rts        , &  ! Output
+			          Options%Use_Old_MWSSEM = .TRUE.  )   ! Optional input
+      end if
       if ( err_stat /= SUCCESS ) THEN
          message = 'Error calling CRTM Forward Model for '//TRIM(self%conf%SENSOR_ID(n))
          call Display_Message( PROGRAM_NAME, message, FAILURE )
