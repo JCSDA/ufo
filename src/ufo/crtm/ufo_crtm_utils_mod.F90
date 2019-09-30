@@ -428,6 +428,7 @@ integer, parameter :: FRESH_SNOW_TYPE             =  2  ! NPOESS Snow type      
 integer, parameter :: FRESH_ICE_TYPE              =  1  ! NPOESS Ice type          for IR/VIS SfcOptics
 
 character(len=200) :: varname
+character(20)      :: radiometer_smap
 
 real(kind_real), allocatable :: ObsTb(:,:)
 
@@ -532,9 +533,11 @@ real(kind_real), allocatable :: ObsTb(:,:)
    call ufo_geovals_get_var(geovals, var_sfc_soilt, geoval)
    sfc(k1)%Soil_Temperature = geoval%vals(1,k1)
    
-   !Sea_Surface_Salinity
-   call ufo_geovals_get_var(geovals, var_sfc_sss, geoval)
-   sfc(k1)%Salinity = geoval%vals(1,k1)
+   if (chinfo(1)%sensor_id == radiometer_smap) THEN
+      !Sea_Surface_Salinity
+      call ufo_geovals_get_var(geovals, var_sfc_sss, geoval)
+       sfc(k1)%Salinity = geoval%vals(1,k1)
+   end if
 
  end do
 

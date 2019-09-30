@@ -365,12 +365,13 @@ character(20)         :: radiometer_smap
                                   chinfo(n:n), &  ! Input
                                   rts          )  ! Output
       else
+         Options%Use_Old_MWSSEM = .TRUE.
          err_stat = CRTM_Forward( atm        , &  ! Input
                                   sfc        , &  ! Input
                                   geo        , &  ! Input
                                   chinfo(n:n), &  ! Input
                                   rts        , &  ! Output
-			          Options%Use_Old_MWSSEM = .TRUE.  )   ! Optional input
+			          Options     )   ! Optional input
       end if
       if ( err_stat /= SUCCESS ) THEN
          message = 'Error calling CRTM Forward Model for '//TRIM(self%conf%SENSOR_ID(n))
