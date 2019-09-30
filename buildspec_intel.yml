@@ -1,0 +1,170 @@
+version: 0.2
+
+env:
+  parameter-store:
+    GIT_USER: "/CodeBuild/Git_USER"
+    GIT_PASS: "/CodeBuild/Git_PASS"
+
+phases:
+  install:
+    commands:
+      - echo Executing install phase
+      - echo $CODEBUILD_WEBHOOK_TRIGGER
+      - echo $CODEBUILD_WEBHOOK_BASE_REF
+      - echo $CODEBUILD_WEBHOOK_ACTOR_ACCOUNT_ID
+      - echo $CODEBUILD_WEBHOOK_EVENT
+
+
+      - echo MPI setup for Docker
+      - mkdir -p /var/run/sshd
+      - ssh-keygen -A
+      - sed -i 's/#PermitRootLogin yes/PermitRootLogin yes/g' /etc/ssh/sshd_config
+      - sed -i 's/#RSAAuthentication yes/RSAAuthentication yes/g' /etc/ssh/sshd_config
+      - sed -i 's/#PubkeyAuthentication yes/PubkeyAuthentication yes/g' /etc/ssh/sshd_config
+
+      - groupadd jcsda -g 9999
+      - useradd jcsdauser
+      - mkdir -p /jcsda /build_container
+      - chown -R jcsdauser:jcsda /build_container  /usr/local
+      - chmod 6755 /jcsda /build_container /usr/local
+
+      - mkdir /jcsda/.ssh ; echo "StrictHostKeyChecking no" > /jcsda/.ssh/config
+      - mkdir -p /jcsda/.openmpi
+      - mkdir -p /home/jcsdauser/.openmpi
+
+      - cp default-mca-params.conf /home/jcsdauser/.openmpi/mca-params.conf
+      - cat /home/jcsdauser/.openmpi/mca-params.conf
+      - chown -R jcsdauser:jcsda /jcsda/
+
+      - su - jcsdauser -c "ssh-keygen -f /jcsda/.ssh/id_rsa -t rsa -N ''
+        && chmod 600 /jcsda/.ssh/config
+        && chmod 700 /jcsda/.ssh
+        && cp /jcsda/.ssh/id_rsa.pub /jcsda/.ssh/authorized_keys
+        && echo MPI setup for Docker done"
+      - su - jcsdauser -c "echo $CC
+        && echo $CXX
+        && echo $FC
+        && whereis mpicc"
+
+      ## cannot source /etc/bash.bashrc so copy what's there for root 
+      - sed '12s/INTEL_TARGET_ARCH=/INTEL_TARGET_ARCH=intel64/' /opt/intel/compilers_and_libraries/linux/bin/compilervars.sh
+      - export COMPILERVARS_ARCHITECTURE=intel64
+      - export COMPILERVARS_PLATFORM=linux
+      - . /opt/intel/compilers_and_libraries/linux/bin/compilervars.sh
+      - export FC=mpiifort
+      - export CC=mpiicc
+      - export CXX=mpiicpc
+      - export PATH=/usr/local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+      - export LD_LIBRARY_PATH=/usr/local/lib
+      - export LIBRARY_PATH=/usr/local/lib
+      - . /opt/intel/compilers_and_libraries/linux/bin/compilervars.sh
+
+  pre_build:
+    commands:
+      - echo Executing pre_build phase
+      - git lfs install # creates .gitconfig
+      - cp ~/.gitconfig /home/jcsdauser/
+
+      - if ["$CODEBUILD_WEBHOOK_EVENT" = "PULL_REQUEST_MERGED"];
+        then export CODEBUILD_GIT_BRANCH="develop";
+        echo "Merging to develop";
+        else CODEBUILD_GIT_BRANCH="$(git branch -a --contains $CODEBUILD_SOURCE_VERSION | sed -n 2p | awk '{ printf $1 }')";
+        export CODEBUILD_GIT_BRANCH=${CODEBUILD_GIT_BRANCH#remotes/origin/};
+        fi
+
+      - echo "CODEBUILD_GIT_BRANCH=${CODEBUILD_GIT_BRANCH}"
+      - echo "CODEBUILD_SOURCE_VERSION=${CODEBUILD_SOURCE_VERSION}"
+
+      # ufo-bunde 
+      - git clone https://$GIT_USER:$GIT_PASS@github.com/jcsda/ufo-bundle ufo-bundle
+      - cd ufo-bundle
+      - git checkout $CODEBUILD_GIT_BRANCH || echo "No branch named $CODEBUILD_GIT_BRANCH in ufo-bundle repo"
+      - cd $CODEBUILD_SRC_DIR
+      # ufo
+      - git clone -b $CODEBUILD_GIT_BRANCH https://$GIT_USER:$GIT_PASS@github.com/jcsda/ufo ufo-bundle/ufo
+      # crtm
+      - git clone https://$GIT_USER:$GIT_PASS@github.com/jcsda/crtm ufo-bundle/crtm
+      - cd ufo-bundle/crtm
+      - git checkout $CODEBUILD_GIT_BRANCH || echo "No branch named $CODEBUILD_GIT_BRANCH in crtm repo"
+      - cd $CODEBUILD_SRC_DIR
+      # saber
+      - git clone https://$GIT_USER:$GIT_PASS@github.com/jcsda/saber ufo-bundle/saber
+      - cd ufo-bundle/saber
+      - git checkout $CODEBUILD_GIT_BRANCH || echo "No branch named $CODEBUILD_GIT_BRANCH in saber repo"
+      - cd $CODEBUILD_SRC_DIR
+      # oops
+      - git clone https://$GIT_USER:$GIT_PASS@github.com/jcsda/oops ufo-bundle/oops
+      - cd ufo-bundle/oops
+      - git checkout $CODEBUILD_GIT_BRANCH || echo "No branch named $CODEBUILD_GIT_BRANCH in oops repo"
+      - cd $CODEBUILD_SRC_DIR
+      # ioda
+      - git clone https://$GIT_USER:$GIT_PASS@github.com/jcsda/ioda ufo-bundle/ioda
+      - cd ufo-bundle/ioda
+      - git checkout $CODEBUILD_GIT_BRANCH || echo "No branch named $CODEBUILD_GIT_BRANCH in ioda repo"
+      - cd $CODEBUILD_SRC_DIR
+      # ropp
+      - git clone https://$GIT_USER:$GIT_PASS@github.com/jcsda/ropp-test ufo-bundle/ropp-ufo
+      - cd ufo-bundle/ropp-ufo
+      - git checkout $CODEBUILD_GIT_BRANCH || echo "No branch named $CODEBUILD_GIT_BRANCH in ropp repo"
+      - cd $CODEBUILD_SRC_DIR
+      #fckit
+      - git clone https://$GIT_USER:$GIT_PASS@github.com/jcsda/fckit ufo-bundle/fckit
+      - cd ufo-bundle/fckit
+      - git checkout $CODEBUILD_GIT_BRANCH || echo "No branch named $CODEBUILD_GIT_BRANCH in fckit repo"
+      - cd $CODEBUILD_SRC_DIR
+      #gsw
+      - git clone https://$GIT_USER:$GIT_PASS@github.com/jcsda/GSW-Fortran.git ufo-bundle/gsw
+      - cd ufo-bundle/gsw
+      - git checkout $CODEBUILD_GIT_BRANCH || echo "No branch named $CODEBUILD_GIT_BRANCH in gsw repo"
+      - cd $CODEBUILD_SRC_DIR
+
+      - ls
+      - pwd
+      - mv ufo-bundle /jcsda/
+      - cd /jcsda/ufo-bundle
+      - pwd
+      - ls
+      - sed -i 's/BRANCH develop  UPDATE//' CMakeLists.txt
+      - sed -i -e '/ecbuild_bundle( PROJECT ufo/i\
+        ecbuild_bundle( PROJECT ropp-ufo  GIT "https://github.com/JCSDA/ropp-test.git" )' CMakeLists.txt
+  build:
+    commands:
+      - echo Executing build phase
+      ## cannot source /etc/bash.bashrc so copy what's there for jscdauser
+      - su - jcsdauser -c "export COMPILERVARS_ARCHITECTURE=intel64
+        && export COMPILERVARS_PLATFORM=linux
+        && . /opt/intel/compilers_and_libraries/linux/bin/compilervars.sh
+        && export FC=mpiifort
+        && export CC=mpiicc
+        && export CXX=mpiicpc
+        && export PATH=/usr/local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+        && export LD_LIBRARY_PATH=/usr/local/lib
+        && export LIBRARY_PATH=/usr/local/lib
+        && . /opt/intel/compilers_and_libraries/linux/bin/compilervars.sh
+        && cd /build_container 
+        && ls
+        && ecbuild /jcsda/ufo-bundle/
+        && cd ufo
+        && make -j4
+        && ctest"
+  post_build:
+    commands:
+      - echo Executing post_build phase
+      - echo $CODEBUILD_BUILD_SUCCEEDING
+
+      - if [ "$CODEBUILD_BUILD_SUCCEEDING" = "0" ];
+        then echo "Build Failing";
+        su - jcsdauser -c "export COMPILERVARS_ARCHITECTURE=intel64
+        && export COMPILERVARS_PLATFORM=linux
+        && . /opt/intel/compilers_and_libraries/linux/bin/compilervars.sh
+        && export FC=mpiifort
+        && export CC=mpiicc
+        && export CXX=mpiicpc
+        && export PATH=/usr/local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+        && export LD_LIBRARY_PATH=/usr/local/lib
+        && export LIBRARY_PATH=/usr/local/lib
+        && . /opt/intel/compilers_and_libraries/linux/bin/compilervars.sh
+        && cd /build_container/ufo/
+        && ctest -VV --rerun-failed";
+        else echo "CODEBUILD_BUILD_SUCCEEDING=$CODEBUILD_BUILD_SUCCEEDING";
+        fi
