@@ -35,14 +35,13 @@ contains
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_locs_create_c(key, klocs, klats, klons, rdist) bind(c,name='ufo_locs_create_f90')
+subroutine ufo_locs_create_c(key, klocs, klats, klons) bind(c,name='ufo_locs_create_f90')
 
 implicit none
 integer(c_int), intent(inout) :: key
 integer(c_int), intent(in) :: klocs
 real(c_double), intent(in) :: klats(klocs)
 real(c_double), intent(in) :: klons(klocs)
-integer(c_int), intent(in) :: rdist
 
 type(ufo_locs), pointer :: self
 real(kind_real) :: lats(klocs)
@@ -53,7 +52,7 @@ call ufo_locs_registry%setup(key, self)
 lats(:) = klats(:)
 lons(:) = klons(:)
 
-call ufo_locs_create(self, klocs, lats, lons, rdist)
+call ufo_locs_create(self, klocs, lats, lons)
 
 end subroutine ufo_locs_create_c
 
