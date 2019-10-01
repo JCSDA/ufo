@@ -113,17 +113,29 @@ case ("bending_angle")
     ! up date obs error
     call obsspace_put_db(self%obsdb, "FortranERR", trim(self%variable), obsErr)
 
-  case ("ROPP")
+  case ("ECMWF")
     allocate(obsValue(nobs))
     call obsspace_get_db(self%obsdb, "ObsValue", "bending_angle", obsValue)
-    call bending_angle_obserr_ROPP(obsImpH, obsValue, nobs, obsErr, QCflags, missing)
-    write(err_msg,*) "ufo_roobserror_mod: setting up bending_angle obs error with ROPP method"
+    call bending_angle_obserr_ECMWF(obsImpH, obsValue, nobs, obsErr, QCflags, missing)
+    write(err_msg,*) "ufo_roobserror_mod: setting up bending_angle obs error with ECMWF method"
     deallocate(obsValue)
     ! up date obs error
     call obsspace_put_db(self%obsdb, "FortranERR", trim(self%variable), obsErr)
 
+  case ("NRL")
+    allocate(obsValue(nobs))
+    allocate(obsLat(nobs))
+    call obsspace_get_db(self%obsdb, "ObsValue", "bending_angle", obsValue)
+    call obsspace_get_db(self%obsdb, "MetaData", "latitude", obsLat)
+    call bending_angle_obserr_NRL(obsLat, obsImpH, obsValue, nobs, obsErr, QCflags, missing)
+    write(err_msg,*) "ufo_roobserror_mod: setting up bending_angle obs error with NRL method"
+    deallocate(obsValue)
+    deallocate(obsLat)
+    ! up date obs error
+    call obsspace_put_db(self%obsdb, "FortranERR", trim(self%variable), obsErr)
+
   case default
-    write(err_msg,*) "ufo_roobserror_mod: bending_angle error model must be NBAM or ROPP"
+    write(err_msg,*) "ufo_roobserror_mod: bending_angle error model must be NBAM, ECMWF, or NRL"
     call fckit_log%info(err_msg) 
 
   end select
@@ -150,12 +162,12 @@ case ("refractivity")
     ! up date obs error
     call obsspace_put_db(self%obsdb, "FortranERR", trim(self%variable), obsErr)
 
-  case ("ROPP")
-     write(err_msg,*) "ufo_roobserror_mod: ROPP refractivity error model is not avaiable now"
+  case ("ECMWF")
+     write(err_msg,*) "ufo_roobserror_mod: ECMWF refractivity error model is not available now"
      call fckit_log%info(err_msg)
 
   case default
-    write(err_msg,*) "ufo_roobserror_mod: only NBAM refractivity model is avaiable now"
+    write(err_msg,*) "ufo_roobserror_mod: only NBAM refractivity model is available now"
     call fckit_log%info(err_msg)
   end select
 

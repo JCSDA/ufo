@@ -46,6 +46,7 @@ list( APPEND ufo_test_input
   testinput/gnssrobndropp1d.yaml
   testinput/gnssrobndropp2d.yaml
   testinput/gnssrobndnbam.yaml
+  testinput/gnssrobndnbam_obs_error.yaml
   testinput/gnssroref.yaml
   testinput/gnssro_domain_check.yaml
   testinput/hirs4_crtm.yaml
@@ -524,6 +525,11 @@ ecbuild_add_test( TARGET  test_ufo_gnssroBndNBAM_tlad
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
                   ARGS    "testinput/gnssrobndnbam.yaml"
                   DEPENDS test_ObsOperatorTLAD.x )
+
+ecbuild_add_test( TARGET  test_ufo_gnssroBndNBAM_obs_error
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                  ARGS    "testinput/gnssrobndnbam_obs_error.yaml"
+                  DEPENDS test_ObsFilters.x )
 
 ecbuild_add_test( TARGET  test_ufo_gnssro_domain_check
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
