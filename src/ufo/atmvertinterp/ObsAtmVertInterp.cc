@@ -20,9 +20,6 @@ namespace ufo {
 
 // -----------------------------------------------------------------------------
 static ObsOperatorMaker<ObsAtmVertInterp> makerVertInterp_("VertInterp");
-static ObsOperatorMaker<ObsAtmVertInterp> makerRadiosonde_("Radiosonde");
-static ObsOperatorMaker<ObsAtmVertInterp> makerAircraft_("Aircraft");
-static ObsOperatorMaker<ObsAtmVertInterp> makerSatwnd_("Satwind");
 // -----------------------------------------------------------------------------
 
 ObsAtmVertInterp::ObsAtmVertInterp(const ioda::ObsSpace & odb,

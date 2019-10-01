@@ -22,9 +22,6 @@ namespace ufo {
 
 // -----------------------------------------------------------------------------
 static LinearObsOperatorMaker<ObsAtmVertInterpTLAD> makerVertInterpTL_("VertInterp");
-static LinearObsOperatorMaker<ObsAtmVertInterpTLAD> makerRadiosondeTL_("Radiosonde");
-static LinearObsOperatorMaker<ObsAtmVertInterpTLAD> makerAircraftTL_("Aircraft");
-static LinearObsOperatorMaker<ObsAtmVertInterpTLAD> makerSatwindTL_("Satwind");
 // -----------------------------------------------------------------------------
 
 ObsAtmVertInterpTLAD::ObsAtmVertInterpTLAD(const ioda::ObsSpace & odb,

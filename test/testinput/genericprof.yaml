@@ -9,7 +9,7 @@ LinearObsOpTest:
 Observations:
   ObsTypes:
   - ObsOperator:
-      name: InsituSalinity
+      name: MarineVertInterp
     ObsSpace:
       name: InsituSalinity
       ObsDataIn:

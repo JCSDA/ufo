@@ -11,7 +11,6 @@ module ufo_locs_mod
 use datetime_mod
 use iso_c_binding
 use kinds
-use type_distribution, only: random_distribution
 
 implicit none
 private
@@ -33,18 +32,13 @@ end type ufo_locs
 contains
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_locs_create(self, nlocs, lats, lons, rdist)
+subroutine ufo_locs_create(self, nlocs, lats, lons)
 implicit none
 type(ufo_locs), intent(inout) :: self
 integer, intent(in)           :: nlocs
 real(kind_real), intent(in) :: lats(nlocs)
 real(kind_real), intent(in) :: lons(nlocs)
-integer, intent(in)         :: rdist
 
-type(random_distribution) :: ran_dist
-integer, allocatable :: dist_indx(:)
-real(kind_real), allocatable, dimension(:) :: latsr, lonsr
-type(datetime), allocatable, dimension(:) :: timer
 integer :: n
 character(len=20) :: fstring
 
@@ -60,39 +54,6 @@ enddo
 do n = 1, self%nlocs
   self%indx(n) = n
 enddo
-
-ran_dist = random_distribution(self%nlocs)
-dist_indx = ran_dist%indx
-
-if (rdist == 1) then
-
-  !Redistribute randomly
-  self%nlocs = ran_dist%nobs_pe()
-  allocate(latsr(self%nlocs), lonsr(self%nlocs), timer(self%nlocs))
-  do n = 1,self%nlocs
-    latsr(n) =  self%lat(dist_indx(n))
-    lonsr(n) =  self%lon(dist_indx(n))
-    timer(n) = self%time(dist_indx(n))
-  enddo
-  do n = 1,self%nlocs
-    call datetime_delete(self%time(n))
-  enddo
-  deallocate(self%lat, self%lon, self%time, self%indx)
-  
-  allocate(self%lat(self%nlocs), self%lon(self%nlocs), self%time(self%nlocs), self%indx(self%nlocs))
-  self%lat(:) = latsr(:)
-  self%lon(:) = lonsr(:)
-  self%time(:) = timer(:)
-  do n = 1, self%nlocs
-    self%indx(n) = n
-  enddo
-
-  do n = 1,self%nlocs
-    call datetime_delete(timer(n))
-  enddo
-  deallocate(latsr, lonsr, timer)
-
-endif
 
 end subroutine ufo_locs_create
 

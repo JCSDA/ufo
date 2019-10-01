@@ -19,7 +19,7 @@
 namespace ufo {
 
 // -----------------------------------------------------------------------------
-static LinearObsOperatorMaker<ObsMarineVertInterpTLAD> makerMarinevertinterpTL_("InsituSalinity");
+static LinearObsOperatorMaker<ObsMarineVertInterpTLAD> makerMarinevertinterpTL_("MarineVertInterp");
 // -----------------------------------------------------------------------------
 
 ObsMarineVertInterpTLAD::ObsMarineVertInterpTLAD(const ioda::ObsSpace & odb,
