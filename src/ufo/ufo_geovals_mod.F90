@@ -190,7 +190,7 @@ do jv = 1, self%nvar
    enddo   
 enddo
 
-vrms = sqrt(vrms/N)
+if ( N > 0) vrms = sqrt(vrms/N)
 
 end subroutine ufo_geovals_rms
 
@@ -707,7 +707,11 @@ do jv = 1,self%nvar
       do jz = 1, self%geovals(jv)%nval
          vrms = vrms + self%geovals(jv)%vals(jz,jo)**2
       enddo
-      vrms = sqrt(vrms/real(self%geovals(jv)%nval,kind_real))
+
+      if ( self%geovals(jv)%nval > 0 ) then
+        vrms = sqrt(vrms/real(self%geovals(jv)%nval,kind_real))
+      end if
+
       if (vrms > mxval) then
          mxval = vrms
          iobs = jo
