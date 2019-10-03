@@ -12,6 +12,7 @@
 #include <string>
 #include <vector>
 
+#include "ioda/ObsDataVector.h"
 #include "oops/util/ObjectCounter.h"
 #include "oops/util/Printable.h"
 
@@ -55,6 +56,8 @@ class ObsFilterData : public util::Printable,
   void get(const std::string &, const int, std::vector<float> &) const;
   //! Gets requested data from ObsFilterData
   void get(const std::string &, std::vector<int> &) const;
+  //! Gets requested data from ObsFilterData (ObsDataVector has to be allocated)
+  void get(const std::string &, ioda::ObsDataVector<float> &) const;
   //! Checks if requested data exists in ObsFilterData
   bool has(const std::string &) const;
 

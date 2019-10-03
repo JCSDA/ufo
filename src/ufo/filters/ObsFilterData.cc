@@ -69,7 +69,7 @@ bool ObsFilterData::has(const std::string & varname) const {
   splitVarGroup(varname, var, grp);
   if (grp == "GeoVaLs") {
     return (gvals_ && gvals_->has(var));
-  } else if (grp == "ObsFunction" || grp == "HofXFunction") {
+  } else if (grp == "ObsFunction") {
     return ObsFunctionFactory::functionExists(var);
   } else if (grp == "HofX") {
     return (hofx_ && hofx_->has(var));
@@ -104,7 +104,7 @@ void ObsFilterData::get(const std::string & varname, std::vector<float> & values
     gvals_->get(values, var);
 ///  For ObsFunction instantiate ObsFunction and calculate the result
 ///  TODO(AS?): cache results of function computations
-  } else if (grp == "ObsFunction" || grp == "HofXFunction") {
+  } else if (grp == "ObsFunction") {
     ioda::ObsDataVector<float> vals(obsdb_, var, grp, false);
     ObsFunction obsfunc(var);
     obsfunc.compute(*this, vals);
@@ -184,6 +184,26 @@ void ObsFilterData::get(const std::string & varname, const int level,
     diags_->get(values, var, level);
   }
 }
+
+// -----------------------------------------------------------------------------
+/*! Gets requested data from ObsFilterData into ObsDataVector
+ *  \param varname is a name of a variable requested (has to be formatted as
+ *         name@group
+ *  \param values on output is data from varname (should be allocated on input)
+ *  \return data associated with varname, in ioda::ObsDataVector<float>
+ *  \warning only works for ObsFunction;
+ *           if data are unavailable, assertions would fail and method abort
+ */
+void ObsFilterData::get(const std::string & varname, ioda::ObsDataVector<float> & values) const {
+  std::string var, grp;
+  splitVarGroup(varname, var, grp);
+
+  ASSERT(grp == "ObsFunction");
+
+  ObsFunction obsfunc(var);
+  obsfunc.compute(*this, values);
+}
+
 
 // -----------------------------------------------------------------------------
 /*! Returns number of levels in 3D geovals and obsdiags or
