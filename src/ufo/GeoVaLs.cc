@@ -56,7 +56,8 @@ GeoVaLs::GeoVaLs(const eckit::Configuration & config,
   const eckit::Configuration * conf = &config;
   const eckit::Configuration * cvar = &vars_.toFortran();
   ufo_geovals_setup_f90(keyGVL_, 0, &cvar);
-  ufo_geovals_read_file_f90(keyGVL_, &conf, obspace, &cvar);
+  // only read if there are variables specified
+  if (vars.size() > 0)  ufo_geovals_read_file_f90(keyGVL_, &conf, obspace, &cvar);
   oops::Log::trace() << "GeoVaLs contructor config key = " << keyGVL_ << std::endl;
 }
 // -----------------------------------------------------------------------------

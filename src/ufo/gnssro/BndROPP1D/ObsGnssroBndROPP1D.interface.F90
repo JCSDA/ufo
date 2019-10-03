@@ -17,7 +17,7 @@ module ufo_gnssro_bndropp1d_mod_c
 #define LISTED_TYPE ufo_gnssro_BndROPP1D
   
   !> Linked list interface - defines registry_t type
-#include "../../linkedList_i.f"
+#include "oops/util/linkedList_i.f"
   
   !> Global registry
   type(registry_t) :: ufo_gnssro_BndROPP1D_registry
@@ -26,7 +26,7 @@ module ufo_gnssro_bndropp1d_mod_c
 contains
   ! ------------------------------------------------------------------------------
   !> Linked list implementation
-#include "../../linkedList_c.f"
+#include "oops/util/linkedList_c.f"
   
 ! ------------------------------------------------------------------------------
   

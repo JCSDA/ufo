@@ -8,9 +8,7 @@ LinearObsOpTest:
 
 Observations:
   ObsTypes:
-  - ObsOperator:
-      name: VertInterp
-    ObsSpace:
+  - ObsSpace:
       name: Satwind
       ObsDataIn:
         obsfile: Data/satwind_obs_2018041500_m.nc4
@@ -18,8 +16,6 @@ Observations:
         obsfile: Data/satwind_obs_2018041500_m_out.nc4
       simulate:
         variables: [eastward_wind, northward_wind]
-    GeoVaLs:
-      filename: Data/satwind_geoval_2018041500_m.nc4
     ObsFilters:
     - Filter: Domain Check
       variables: [eastward_wind, northward_wind]

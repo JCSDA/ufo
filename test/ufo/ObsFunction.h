@@ -31,6 +31,23 @@ namespace test {
 
 // -----------------------------------------------------------------------------
 
+float dataVectorDiff(const ioda::ObsSpace & ospace, ioda::ObsDataVector<float> & vals,
+                    const ioda::ObsDataVector<float> & ref) {
+  float rms = 0.0;
+  int nobs = 0;
+  for (size_t jj = 0; jj < ref.nlocs() ; ++jj) {
+    vals[0][jj] -= ref[0][jj];
+    rms += vals[0][jj] * vals[0][jj];
+    nobs++;
+  }
+  ospace.comm().allReduceInPlace(rms, eckit::mpi::sum());
+  ospace.comm().allReduceInPlace(nobs, eckit::mpi::sum());
+  if (nobs > 0) rms = sqrt(rms / static_cast<float>(nobs));
+  return rms;
+}
+
+// -----------------------------------------------------------------------------
+
 void testFunction() {
   const eckit::LocalConfiguration conf = ::test::TestEnvironment::config();
 ///  Setup ObsSpace
@@ -45,7 +62,6 @@ void testFunction() {
 ///  Get function name and which group to use for H(x)
   const eckit::LocalConfiguration obsfuncconf(conf, "ObsFunction");
   std::string funcname = obsfuncconf.getString("name");
-  std::string grpname = obsfuncconf.getString("inputGroupName");
 
 ///  Setup function
   ObsFunction obsfunc(funcname);
@@ -69,30 +85,31 @@ void testFunction() {
     inputs.associate(*diags);
   }
 
+///  Get output variable names
+  const oops::Variables outputvars(obsfuncconf);
 ///  Compute function result
-  ioda::ObsDataVector<float> vals(ospace, funcname, "ObsFunction", false);
+  ioda::ObsDataVector<float> vals(ospace, outputvars, "ObsFunction", false);
   obsfunc.compute(inputs, vals);
   vals.save("TestResult");
 
+///  Compute function result through ObsFilterData
+  ioda::ObsDataVector<float> vals_ofd(ospace, outputvars, "ObsFunction", false);
+  inputs.get(funcname+"@ObsFunction", vals_ofd);
+
 ///  Read reference values from ObsSpace
-  std::string varref = obsfuncconf.getString("reference");
-  ioda::ObsDataVector<float> ref(ospace, varref, "TestReference");
+  ioda::ObsDataVector<float> ref(ospace, outputvars, "TestReference");
 
   const double tol = obsfuncconf.getDouble("tolerance");
 
 ///  Calculate rms(f(x) - ref) and compare to tolerance
-  double zrms = 0.0;
-  int nobs = 0;
-  for (size_t jj = 0; jj < ref.nlocs() ; ++jj) {
-    vals[0][jj] -= ref[0][jj];
-    zrms += vals[0][jj] * vals[0][jj];
-    nobs++;
-  }
-  ospace.comm().allReduceInPlace(zrms, eckit::mpi::sum());
-  ospace.comm().allReduceInPlace(nobs, eckit::mpi::sum());
-  if (nobs > 0) zrms = sqrt(zrms / static_cast<double>(nobs));
+  float rms = dataVectorDiff(ospace, vals, ref);
   oops::Log::info() << "Vector difference between reference and computed: " << vals << std::endl;
-  EXPECT(zrms < 100*tol);  //  change tol from percent to actual value.
+  EXPECT(rms < 100*tol);  //  change tol from percent to actual value.
+
+  rms = dataVectorDiff(ospace, vals_ofd, ref);
+  oops::Log::info() << "Vector difference between reference and computed via ObsFilterData: "
+                    << vals_ofd << std::endl;
+  EXPECT(rms < 100*tol);  //  change tol from percent to actual value.
 }
 
 // -----------------------------------------------------------------------------
