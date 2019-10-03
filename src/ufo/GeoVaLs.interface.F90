@@ -25,7 +25,7 @@ integer, parameter :: max_string=800
 #define LISTED_TYPE ufo_geovals
 
 !> Linked list interface - defines registry_t type
-#include "linkedList_i.f"
+#include "oops/util/linkedList_i.f"
 
 !> Global registry
 type(registry_t) :: ufo_geovals_registry
@@ -34,7 +34,7 @@ type(registry_t) :: ufo_geovals_registry
 contains
 ! ------------------------------------------------------------------------------
 !> Linked list implementation
-#include "linkedList_c.f"
+#include "oops/util/linkedList_c.f"
 ! ------------------------------------------------------------------------------
 !> Setup GeoVaLs (store nlocs, variables; don't do allocation yet)
 subroutine ufo_geovals_setup_c(c_key_self, c_nlocs, c_vars) bind(c,name='ufo_geovals_setup_f90')
