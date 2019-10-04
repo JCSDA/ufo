@@ -358,7 +358,7 @@ character(20)         :: radiometer_smap
    else
       ! Call the forward model call for each sensor
       ! -------------------------------------------
-      if (chinfo(n)%Sensor_Id /= radiometer_smap) THEN
+      if (self%conf%salinity_option /= "sss") THEN
       	 err_stat = CRTM_Forward( atm        , &  ! Input
                               	  sfc        , &  ! Input
                                   geo        , &  ! Input
