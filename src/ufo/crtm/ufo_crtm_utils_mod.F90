@@ -67,6 +67,7 @@ type crtm_conf
 
  integer :: inspect
  character(len=255) :: aerosol_option
+ character(len=255) :: salinity_option
 end type crtm_conf
 
 INTERFACE calculate_aero_layer_factor
@@ -236,6 +237,13 @@ integer(c_size_t),parameter :: csize = MAXVARLEN
  ELSE
     conf%n_Aerosols  = 0
     conf%aerosol_option = ""
+ ENDIF
+
+ ! Sea_Surface_Salinity
+ !---------
+ IF (f_confOpts%has("SalinityOption")) THEN
+    call f_confOpts%get_or_die("SalinityOption",str)
+    conf%salinity_option = str
  ENDIF
 
  !Allocate SENSOR_ID
@@ -533,10 +541,11 @@ real(kind_real), allocatable :: ObsTb(:,:)
    call ufo_geovals_get_var(geovals, var_sfc_soilt, geoval)
    sfc(k1)%Soil_Temperature = geoval%vals(1,k1)
    
-   if (chinfo(1)%sensor_id == radiometer_smap) THEN
+   !if (chinfo(1)%sensor_id == radiometer_smap) THEN
+   if (TRIM(conf%salinity_option) == "sss") THEN
       !Sea_Surface_Salinity
       call ufo_geovals_get_var(geovals, var_sfc_sss, geoval)
-       sfc(k1)%Salinity = geoval%vals(1,k1)
+      sfc(k1)%Salinity = geoval%vals(1,k1)
    end if
 
  end do
