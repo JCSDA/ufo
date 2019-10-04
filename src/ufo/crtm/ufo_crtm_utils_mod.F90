@@ -436,7 +436,6 @@ integer, parameter :: FRESH_SNOW_TYPE             =  2  ! NPOESS Snow type      
 integer, parameter :: FRESH_ICE_TYPE              =  1  ! NPOESS Ice type          for IR/VIS SfcOptics
 
 character(len=200) :: varname
-character(20)      :: radiometer_smap
 
 real(kind_real), allocatable :: ObsTb(:,:)
 
