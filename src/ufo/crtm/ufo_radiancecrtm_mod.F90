@@ -32,8 +32,8 @@ module ufo_radiancecrtm_mod
    procedure :: simobs => ufo_radiancecrtm_simobs
  end type ufo_radiancecrtm
 
- character(len=maxvarlen), dimension(21), parameter :: varin_default = &
-                            (/var_ts, var_prs, var_prsi,                                  &
+ character(len=maxvarlen), dimension(22), parameter :: varin_default = &
+                            (/var_ts, var_prs, var_prsi, var_sfc_sss,                     &
                               var_sfc_wfrac, var_sfc_lfrac, var_sfc_ifrac, var_sfc_sfrac, &
                               var_sfc_wtmp,  var_sfc_ltmp,  var_sfc_itmp,  var_sfc_stmp,  &
                               var_sfc_vegfrac, var_sfc_wspeed, var_sfc_wdir, var_sfc_lai, &
