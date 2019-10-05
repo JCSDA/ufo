@@ -540,10 +540,8 @@ real(kind_real), allocatable :: ObsTb(:,:)
    call ufo_geovals_get_var(geovals, var_sfc_soilt, geoval)
    sfc(k1)%Soil_Temperature = geoval%vals(1,k1)
    
-   !if (chinfo(1)%sensor_id == radiometer_smap) THEN
+   !Sea_Surface_Salinity
    if (TRIM(conf%salinity_option) == "sss") THEN
-      print *, "H_salinity ", TRIM(conf%salinity_option)
-      !Sea_Surface_Salinity
       call ufo_geovals_get_var(geovals, var_sfc_sss, geoval)
       sfc(k1)%Salinity = geoval%vals(1,k1)
    end if

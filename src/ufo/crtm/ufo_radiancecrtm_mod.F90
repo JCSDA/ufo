@@ -24,6 +24,7 @@ module ufo_radiancecrtm_mod
  type, public :: ufo_radiancecrtm
  private
    character(len=MAXVARLEN), public, allocatable :: varin(:)  ! variables requested from the model
+   !character(len=30), public, allocatable :: varin(:)  ! variables requested from the model
    integer, allocatable                          :: channels(:)
    type(crtm_conf) :: conf
  contains
@@ -32,13 +33,14 @@ module ufo_radiancecrtm_mod
    procedure :: simobs => ufo_radiancecrtm_simobs
  end type ufo_radiancecrtm
 
- character(len=maxvarlen), dimension(22), parameter :: varin_default = &
-                            (/var_ts, var_prs, var_prsi, var_sfc_sss,                     &
+ character(len=maxvarlen), dimension(21), parameter :: varin_default = &
+                            (/var_ts, var_prs, var_prsi,                                  &
                               var_sfc_wfrac, var_sfc_lfrac, var_sfc_ifrac, var_sfc_sfrac, &
                               var_sfc_wtmp,  var_sfc_ltmp,  var_sfc_itmp,  var_sfc_stmp,  &
                               var_sfc_vegfrac, var_sfc_wspeed, var_sfc_wdir, var_sfc_lai, &
                               var_sfc_soilm, var_sfc_soilt, var_sfc_landtyp,              &
                               var_sfc_vegtyp, var_sfc_soiltyp, var_sfc_sdepth/)
+ 
 
 contains
 
@@ -54,6 +56,7 @@ integer(c_int),            intent(in)    :: channels(:)  !List of channels to us
 integer :: nvars_in
 integer :: ind, jspec
 character(len=max_string) :: err_msg
+character(len=:), allocatable :: str
 type(fckit_configuration) :: f_confOpts
 
  call f_confOper%get_or_die("ObsOptions",f_confOpts)
@@ -71,9 +74,22 @@ type(fckit_configuration) :: f_confOpts
  ! request from the model all the hardcoded atmospheric & surface variables + 
  ! 1 * n_Absorbers
  ! 2 * n_Clouds (mass content and effective radius)
+ ! if sss is in ObsOptions + sss
  nvars_in = size(varin_default) + self%conf%n_Absorbers + 2 * self%conf%n_Clouds
- allocate(self%varin(nvars_in))
+ 
+ if (f_confOpts%has("SalinityOption")) then
+    nvars_in =  nvars_in + 1
+    allocate(self%varin(nvars_in))
+    call f_confOpts%get_or_die("SalinityOption",str)
+    if (str =="sss") then 
+       self%varin(nvars_in) = var_sfc_sss
+    endif
+ else
+    allocate(self%varin(nvars_in))
+ endif
+
  self%varin(1:size(varin_default)) = varin_default
+
  ind = size(varin_default) + 1
  !Use list of Absorbers and Clouds from conf
  do jspec = 1, self%conf%n_Absorbers
@@ -86,6 +102,9 @@ type(fckit_configuration) :: f_confOpts
    self%varin(ind) = self%conf%Clouds(jspec,2)
    ind = ind + 1
  end do
+ ! if sss is in ObsOptions + sss
+
+
 
  ! save channels
  allocate(self%channels(size(channels)))
@@ -152,7 +171,7 @@ integer :: jvar, jprofile, jlevel, jchannel, ichannel, jspec
 
 logical :: jacobian_needed
 character(max_string) :: err_msg
-character(20)         :: radiometer_smap
+
 
  ! Get number of profile and layers from geovals
  ! ---------------------------------------------
