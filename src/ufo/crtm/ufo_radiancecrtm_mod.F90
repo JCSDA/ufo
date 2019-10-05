@@ -24,7 +24,6 @@ module ufo_radiancecrtm_mod
  type, public :: ufo_radiancecrtm
  private
    character(len=MAXVARLEN), public, allocatable :: varin(:)  ! variables requested from the model
-   !character(len=30), public, allocatable :: varin(:)  ! variables requested from the model
    integer, allocatable                          :: channels(:)
    type(crtm_conf) :: conf
  contains
@@ -40,7 +39,6 @@ module ufo_radiancecrtm_mod
                               var_sfc_vegfrac, var_sfc_wspeed, var_sfc_wdir, var_sfc_lai, &
                               var_sfc_soilm, var_sfc_soilt, var_sfc_landtyp,              &
                               var_sfc_vegtyp, var_sfc_soiltyp, var_sfc_sdepth/)
- 
 
 contains
 
@@ -75,7 +73,8 @@ type(fckit_configuration) :: f_confOpts
  ! 1 * n_Absorbers
  ! 2 * n_Clouds (mass content and effective radius)
  ! if sss is in ObsOptions + sss
- nvars_in = size(varin_default) + self%conf%n_Absorbers + 2 * self%conf%n_Clouds
+ 
+nvars_in = size(varin_default) + self%conf%n_Absorbers + 2 * self%conf%n_Clouds
  
  if (f_confOpts%has("SalinityOption")) then
     nvars_in =  nvars_in + 1
@@ -89,7 +88,6 @@ type(fckit_configuration) :: f_confOpts
  endif
 
  self%varin(1:size(varin_default)) = varin_default
-
  ind = size(varin_default) + 1
  !Use list of Absorbers and Clouds from conf
  do jspec = 1, self%conf%n_Absorbers
@@ -102,9 +100,6 @@ type(fckit_configuration) :: f_confOpts
    self%varin(ind) = self%conf%Clouds(jspec,2)
    ind = ind + 1
  end do
- ! if sss is in ObsOptions + sss
-
-
 
  ! save channels
  allocate(self%channels(size(channels)))
@@ -154,7 +149,8 @@ type(CRTM_Geometry_type),   allocatable :: geo(:)
 type(CRTM_Atmosphere_type), allocatable :: atm(:)
 type(CRTM_Surface_type),    allocatable :: sfc(:)
 type(CRTM_RTSolution_type), allocatable :: rts(:,:)
-type(CRTM_Options_type),   allocatable  :: Options(:) 
+type(CRTM_Options_type), allocatable    :: Options(:) 
+type(CRTM_Options_type)                 :: Default_Options
 
 ! Define the K-MATRIX variables for hofxdiags
 type(CRTM_Atmosphere_type), allocatable :: atm_K(:,:)
@@ -171,7 +167,6 @@ integer :: jvar, jprofile, jlevel, jchannel, ichannel, jspec
 
 logical :: jacobian_needed
 character(max_string) :: err_msg
-
 
  ! Get number of profile and layers from geovals
  ! ---------------------------------------------
@@ -240,6 +235,7 @@ character(max_string) :: err_msg
              atm( n_Profiles ),               &
              sfc( n_Profiles ),               &
              rts( n_Channels, n_Profiles ),   &
+	     Options( n_Profiles ),           &
              STAT = alloc_stat )
    if ( alloc_stat /= 0 ) THEN
       message = 'Error allocating structure arrays'
@@ -375,23 +371,20 @@ character(max_string) :: err_msg
       end if
 
    else
+
+      Options = Default_Options
+      if (self%conf%salinity_option == "sss") THEN
+      	 Options%Use_Old_MWSSEM = .TRUE.
+      end if
       ! Call the forward model call for each sensor
       ! -------------------------------------------
-      if (self%conf%salinity_option /= "sss") THEN
-      	 err_stat = CRTM_Forward( atm        , &  ! Input
-                              	  sfc        , &  ! Input
-                                  geo        , &  ! Input
-                                  chinfo(n:n), &  ! Input
-                                  rts          )  ! Output
-      else
-         Options%Use_Old_MWSSEM = .TRUE.
-         err_stat = CRTM_Forward( atm        , &  ! Input
-                                  sfc        , &  ! Input
-                                  geo        , &  ! Input
-                                  chinfo(n:n), &  ! Input
-                                  rts        , &  ! Output
-			          Options     )   ! Optional input
-      end if
+      err_stat = CRTM_Forward( atm        , &  ! Input
+                               sfc        , &  ! Input
+                               geo        , &  ! Input
+                               chinfo(n:n), &  ! Input
+                               rts        , &  ! Output
+			       Options     )   ! Optional input
+      
       if ( err_stat /= SUCCESS ) THEN
          message = 'Error calling CRTM Forward Model for '//TRIM(self%conf%SENSOR_ID(n))
          call Display_Message( PROGRAM_NAME, message, FAILURE )
