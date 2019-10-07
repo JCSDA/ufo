@@ -13,7 +13,6 @@ use fckit_log_module, only : fckit_log
 use kinds
 use datetime_mod
 use duration_mod
-use twindow_utils_mod
 
 use ufo_geovals_mod, only: ufo_geovals, ufo_geoval, ufo_geovals_get_var
 use ufo_basis_mod, only: ufo_basis
