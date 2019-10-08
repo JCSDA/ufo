@@ -45,8 +45,9 @@ class Gaussian_Thinning : public FilterBase,
   void print(std::ostream &) const override;
   void applyFilter(const std::vector<bool> &, std::vector<std::vector<bool>> &) const override;
 
-  static int ll_to_idx(float in_lon, float in_lat, int n_lats, const std::vector<int> &n_lons);
-  static int pres_to_idx(float in_pres, int n_vmesh, float vertical_mesh, float vertical_max);
+  static int ll_to_idx(float in_lon, float in_lat, size_t n_lats,
+                       const std::vector<size_t> &n_lons);
+  static int pres_to_idx(float in_pres, size_t n_vmesh, float vertical_mesh, float vertical_max);
   static int dist_to_centroid(float ob_lon, float ob_lat, float c_lon, float c_lat);
 };
 

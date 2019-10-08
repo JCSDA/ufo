@@ -102,7 +102,6 @@ void QCmanager::print(std::ostream & os) const {
     size_t ifgss = 0;
     size_t ignss = 0;
     size_t ithin = 0;
-    size_t ihcor = 0;
     size_t iclw  = 0;
     size_t idiffref = 0;
     size_t iseaice  = 0;
@@ -121,7 +120,6 @@ void QCmanager::print(std::ostream & os) const {
       if (flags_[jj][jobs] == QCflags::diffref) ++idiffref;
       if (flags_[jj][jobs] == QCflags::seaice)  ++iseaice;
       if (flags_[jj][jobs] == 76 || flags_[jj][jobs] == 77)  ++ignss;
-      if (flags_[jj][jobs] == 80) ++ihcor;
     }
 
     obsdb_.comm().allReduceInPlace(iobs, eckit::mpi::sum());
@@ -136,7 +134,6 @@ void QCmanager::print(std::ostream & os) const {
     obsdb_.comm().allReduceInPlace(iclw,  eckit::mpi::sum());
     obsdb_.comm().allReduceInPlace(ignss, eckit::mpi::sum());
     obsdb_.comm().allReduceInPlace(ithin, eckit::mpi::sum());
-    obsdb_.comm().allReduceInPlace(ihcor, eckit::mpi::sum());
     obsdb_.comm().allReduceInPlace(idiffref, eckit::mpi::sum());
     obsdb_.comm().allReduceInPlace(iseaice,  eckit::mpi::sum());
 
@@ -153,7 +150,6 @@ void QCmanager::print(std::ostream & os) const {
       if (iclw  > 0) os << info << iclw  << " removed by cloud liquid water check." << std::endl;
       if (ifgss > 0) os << info << ifgss << " rejected by first-guess check." << std::endl;
       if (ignss > 0) os << info << ignss << " rejected by GNSSRO reality check." << std::endl;
-      if (ihcor > 0) os << info << ihcor << " rejected by HeightCorrection check." << std::endl;
       if (idiffref > 0) os << info << idiffref << " rejected by difference check." << std::endl;
       if (iseaice  > 0) os << info << iseaice  << " removed by sea ice check." << std::endl;
 
@@ -161,7 +157,7 @@ void QCmanager::print(std::ostream & os) const {
     }
 
     ASSERT(ipass + imiss + ipreq + ibnds + iwhit + iblck + iherr + ithin + iclw + ifgss + ignss \
-           + ihcor + idiffref + iseaice == iobs);
+           + idiffref + iseaice == iobs);
   }
 }
 

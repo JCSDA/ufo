@@ -43,9 +43,7 @@ HCorrection::~HCorrection() {
 
 void HCorrection::priorFilter(const GeoVaLs & gv) const {
   oops::Log::trace() << "HCorrection priorFilter" << std::endl;
-  flags_.save("FortranQC");
   ufo_hcorrection_prior_f90(key_, obsdb_, gv.toFortran());
-  flags_.read("FortranQC");
 }
 
 // -----------------------------------------------------------------------------

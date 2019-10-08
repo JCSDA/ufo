@@ -19,7 +19,10 @@ Observations:
      threshold: 3.0
    - Filter: HCorrection
      da_psfc_scheme: WRFDA
-     max_hdiff: 500
+   - Filter: Difference Check
+     reference: station_elevation@MetaData
+     value: surface_altitude@GeoVaLs
+     threshold: 500
    passedBenchmark: 30
  - ObsOperator:
      name: Identity
@@ -37,5 +40,8 @@ Observations:
      threshold: 3.0
    - Filter: HCorrection
      da_psfc_scheme: UKMO
-     max_hdiff: 500
+   - Filter: Difference Check
+     reference: station_elevation@MetaData
+     value: surface_altitude@GeoVaLs
+     threshold: 500
    passedBenchmark: 12

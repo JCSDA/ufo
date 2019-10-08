@@ -42,6 +42,7 @@ subroutine get_coordinate_value(fin, fout, x, nx, flag)
            ix=isrchf-1
         end if
      else
+        ix = 1
         call abor1_ftn('gnssro get_coordinate_value: flag must be set to "decreasing" or "increasing"')
      end if
      fout=float(ix)+(fin-x(ix))/(x(ix+1)-x(ix))
