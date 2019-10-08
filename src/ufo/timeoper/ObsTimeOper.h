@@ -50,16 +50,16 @@ class ObsTimeOper : public ObsOperatorBase,
 // Obs Operator
   void simulateObs(const GeoVaLs &, ioda::ObsVector &, ObsDiagnostics &) const override;
 
-  Locations * locations(const util::DateTime &, const util::DateTime &) const;
+  Locations * locations(const util::DateTime &, const util::DateTime &) const override;
 
 // Other
-  const oops::Variables & variables() const {return actualoperator_->variables();}
+  const oops::Variables & variables() const override {return actualoperator_->variables();}
 
   const util::DateTime & validTime() const {return time_;}
   util::DateTime & validTime() {return time_;}
 
  private:
-  void print(std::ostream &) const;
+  void print(std::ostream &) const override;
   std::unique_ptr<ObsOperatorBase> actualoperator_;
   F90hop keyTimeOper_;
   const ioda::ObsSpace& odb_;

@@ -296,8 +296,8 @@ end subroutine ufo_geovals_minmaxavg_c
 
 subroutine ufo_geovals_nlocs_c(c_key_self, kobs) bind(c, name='ufo_geovals_nlocs_f90')
 implicit none
-integer(c_int), intent(in) :: c_key_self
-integer(c_int), intent(inout) :: kobs
+integer(c_int),    intent(in) :: c_key_self
+integer(c_size_t), intent(inout) :: kobs
 type(ufo_geovals), pointer :: self
 
 call ufo_geovals_registry%get(c_key_self, self)

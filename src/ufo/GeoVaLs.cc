@@ -242,7 +242,7 @@ size_t GeoVaLs::nlevs(const std::string & var) const {
 /*! \brief Return all values for a specific 2D variable */
 void GeoVaLs::get(std::vector<float> & vals, const std::string & var) const {
   oops::Log::trace() << "GeoVaLs::get 2D starting" << std::endl;
-  int nlocs;
+  size_t nlocs;
   ufo_geovals_nlocs_f90(keyGVL_, nlocs);
   ASSERT(vals.size() == nlocs);
   ufo_geovals_get2d_f90(keyGVL_, var.size(), var.c_str(), nlocs, vals[0]);
@@ -252,7 +252,7 @@ void GeoVaLs::get(std::vector<float> & vals, const std::string & var) const {
 /*! \brief Return all values for a specific variable and level */
 void GeoVaLs::get(std::vector<float> & vals, const std::string & var, const int lev) const {
   oops::Log::trace() << "GeoVaLs::get starting" << std::endl;
-  int nlocs;
+  size_t nlocs;
   ufo_geovals_nlocs_f90(keyGVL_, nlocs);
   ASSERT(vals.size() == nlocs);
   ufo_geovals_get_f90(keyGVL_, var.size(), var.c_str(), lev, nlocs, vals[0]);
