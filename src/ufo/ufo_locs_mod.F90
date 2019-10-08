@@ -100,7 +100,6 @@ end subroutine ufo_locs_delete
 subroutine ufo_locs_init(self, obss, t1, t2)
   use kinds
   use datetime_mod
-  use twindow_utils_mod
   use obsspace_mod
 
   implicit none

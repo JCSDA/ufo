@@ -18,7 +18,6 @@ subroutine ufo_timeoper_locs_init(self, locs, obss, t0, t1, t2, t3, st)
 use kinds
 use datetime_mod
 use duration_mod
-use twindow_utils_mod
 use obsspace_mod
 
 implicit none

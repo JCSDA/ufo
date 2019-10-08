@@ -125,6 +125,8 @@ list( APPEND ufo_test_data
   atmosphere/satwind_geoval_2018041500_s.nc4
   atmosphere/scatwind_geoval_2018041500_m.nc4
   atmosphere/sfc_geoval_2018041500_m.nc4
+  atmosphere/gsisfc_tsen_geoval_2018041500_m.nc4
+  atmosphere/gsisfc_uv_geoval_2018041500_m.nc4
   atmosphere/ps_geovals_2018041500_0000.nc4
   atmosphere/seviri_m08_geoval_2018041500_m.nc4
   atmosphere/sndrd1_g15_geoval_2018041500_m.nc4
@@ -186,6 +188,8 @@ list (APPEND ioda_obs_test_data
   atmosphere/ssmis_f18_obs_2018041500_m.nc4
 
   atmosphere/sfc_obs_2018041500_m.nc4
+  atmosphere/gsisfc_tsen_obs_2018041500_m.nc4
+  atmosphere/gsisfc_uv_obs_2018041500_m.nc4
 
   atmosphere/sondes_obs_2018041500_m.nc4
   atmosphere/sondes_obs_2018041500_s.nc4
