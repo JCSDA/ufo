@@ -73,8 +73,7 @@ type(fckit_configuration) :: f_confOpts
  ! 1 * n_Absorbers
  ! 2 * n_Clouds (mass content and effective radius)
  ! if sss is in ObsOptions + sss
- 
-nvars_in = size(varin_default) + self%conf%n_Absorbers + 2 * self%conf%n_Clouds
+ nvars_in = size(varin_default) + self%conf%n_Absorbers + 2 * self%conf%n_Clouds
  
  if (f_confOpts%has("SalinityOption")) then
     nvars_in =  nvars_in + 1
