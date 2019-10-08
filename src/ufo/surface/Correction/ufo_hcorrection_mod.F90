@@ -28,7 +28,6 @@ type, public :: ufo_hcorrection
 private
   character(len=max_string), public, allocatable :: geovars(:)
   character(len=max_string) :: da_psfc_scheme
-  integer                   :: max_hdiff
 end type ufo_hcorrection
 
 ! ------------------------------------------------------------------------------
@@ -49,8 +48,6 @@ if (f_conf%has("da_psfc_scheme")) then
    call f_conf%get_or_die("da_psfc_scheme",str)
    self%da_psfc_scheme = str
 end if
-self%max_hdiff = 100
-if (f_conf%has("max_hdiff")) call f_conf%get_or_die("max_hdiff",self%max_hdiff)
 
 end subroutine ufo_hcorrection_create
 
@@ -83,7 +80,6 @@ character(max_string)             :: err_msg
 character(len=250)                :: buf
 real(kind_real)                   :: wf
 integer                           :: wi
-integer(c_int32_t), allocatable   :: flags(:)
 logical                           :: variable_present
 real(kind_real), dimension(:), allocatable :: obs_height, obs_t, obs_q, obs_psfc, obs_bias
 real(kind_real), dimension(:), allocatable :: model_tvs, model_zs, model_level1, model_p_2000, model_tv_2000, model_psfc
@@ -99,8 +95,6 @@ endif
 
 ! cor_psfc: observed surface pressure at model surface height, corresponding to P_o2m in da_intpsfc_prs* subroutines
 allocate(cor_psfc(nobs))
-allocate(flags(nobs))
-flags(:)  = 0
 
 ! get obs variables
 allocate(obs_height(nobs))
@@ -108,7 +102,6 @@ allocate(obs_psfc(nobs))
 allocate(obs_bias(nobs))
 call obsspace_get_db(obspace, "MetaData",  "station_elevation",obs_height)
 call obsspace_get_db(obspace, "ObsValue",  "surface_pressure", obs_psfc)
-call obsspace_get_db(obspace, "FortranQC", "surface_pressure", flags )
 
 ! get model variables
 call ufo_geovals_get_var(geovals, var_ps, model_ps)
@@ -130,18 +123,6 @@ allocate(model_psfc(nobs))
 model_zs = model_sfc_geomz%vals(1,:)
 model_level1 = model_geomz%vals(model_geomz%nval,:)   !reverse
 model_psfc = model_ps%vals(1,:)
-
-!QC
-do iobs = 1, nobs
-
-!TODO
-   if (abs (obs_height(iobs) - model_zs(iobs)) > self%max_hdiff ) then
-      obs_height(iobs) = missing
-      obs_bias(iobs) = missing
-      flags(iobs) = 80
-   end if
-
-end do
 
 ! do terrain height correction, two optional schemes
 select case (trim(self%da_psfc_scheme))
@@ -200,12 +181,10 @@ end select
 
 ! output
 call obsspace_put_db(obspace, "ObsBias", "surface_pressure", obs_bias)
-call obsspace_put_db(obspace, "FortranQC", "surface_pressure", flags)
 
 call fckit_log%info(buf)
 deallocate(obs_height)
 deallocate(obs_psfc)
-deallocate(flags)
 
 deallocate(model_zs)
 deallocate(model_level1)
