@@ -3,110 +3,132 @@ window_end: 2018-04-15T03:00:00Z
 
 Observations:
  ObsTypes: 
- - ObsOperator:
-     name: CRTM
-     Absorbers: [H2O,O3,CO2]
-     Clouds: [Water, Ice]
-     ObsOptions:
-       Sensor_ID: amsua_n19
-       EndianType: little_endian
-       CoefficientPath: Data/
-   ObsSpace:
-     name: amsua_n19
-     ObsDataIn: 
-       obsfile: Data/amsua_n19_obs_2018041500_m.nc4
-     ObsDataOut:
-       obsfile: Data/amsua_n19_hofx_2018041500_m_out.nc4
-     simulate:
-       variables: [brightness_temperature]
-       channels: 1-15
-   GeoVaLs: 
-     filename: Data/amsua_n19_geoval_2018041500_m.nc4
-   ObsFilters:
-   - Filter: Background Check
-     variables: [brightness_temperature]
-     channels: 1
-     threshold: 2.0
-   - Filter: Background Check
-     variables: [brightness_temperature]
-     channels: 15
-     threshold: 2.0
-     where:
-     - variable: water_area_fraction@GeoVaLs
-       minvalue: 0.5
-   passedBenchmark: 1446      # number of passed obs
-
- - ObsOperator:
-     name: VertInterp
-   ObsSpace:
-     name: Radiosonde
+ - ObsSpace:
+     name: test data
      ObsDataIn:
-       obsfile: Data/sondes_obs_2018041500_s.nc4
-     ObsDataOut:
-       obsfile: Data/sondes_hofx_2018041500_s_out.nc4
+       obsfile: Data/filters_testdata.nc4
      simulate:
-       variables: [air_temperature, eastward_wind, northward_wind]
-   GeoVaLs:
-     filename: Data/sondes_geoval_2018041500_s.nc4
+       variables: [variable1, variable2, variable3]
+   HofX: HofX
    ObsFilters:
-   - Filter: Background Check
-     variables: [air_temperature]
+   - Filter: Background Check     # test abs threshold with all variables
+     variables: [variable1, variable2, variable3]
+     absolute threshold: 2.0
+# Filter out where abs(ObsValue - HofX) < absolute_threshold
+#  variable1@ObsValue = 10, 11, 12, 13, 14, 15, 16, 17, 18, 19
+#  variable1@HofX     = 12, 13, 14, 15, 16, 17, 18, 19, 20, 21
+#  variable2@ObsValue = 10, 12, 14, 16, 18, 20, 22, 24, 26, 28
+#  variable2@HofX     = 10, 13, 16, 19, 22, 25, 28, 31, 34, 37
+#  variable3@ObsValue = 25, 24, 23, 22, 21, 20, 19, 18, 17, 16
+#  variable3@HofX     = 25, 23, 21, 19, 17, 15, 13, 11,  9,  7
+   passedBenchmark: 16
+ - ObsSpace:
+     name: test data
+     ObsDataIn:
+       obsfile: Data/filters_testdata.nc4
+     simulate:
+       variables: [variable1, variable2, variable3]
+   HofX: HofX
+   ObsFilters:
+   - Filter: Background Check     # test abs threshold with subset of variables
+     variables: [variable1, variable3]
+     absolute threshold: 2.0
+# Filter out where abs(ObsValue - HofX) < absolute_threshold
+#  variable1@ObsValue = 10, 11, 12, 13, 14, 15, 16, 17, 18, 19
+#  variable1@HofX     = 12, 13, 14, 15, 16, 17, 18, 19, 20, 21
+#  variable2 not filtered, all obs from variable2 pass
+#  variable3@ObsValue = 25, 24, 23, 22, 21, 20, 19, 18, 17, 16
+#  variable3@HofX     = 25, 23, 21, 19, 17, 15, 13, 11,  9,  7
+   passedBenchmark: 23
+ - ObsSpace:
+     name: test data
+     ObsDataIn:
+       obsfile: Data/filters_testdata.nc4
+     simulate:
+       variables: [variable1, variable2, variable3]
+   HofX: HofX
+   ObsFilters:
+   - Filter: Background Check     # test threshold with all variables
+     variables: [variable1, variable2, variable3]
      threshold: 2.0
-     absolute threshold: 1.0
-     action:
-       name: reject
-   - Filter: Background Check
-     variables: [eastward_wind, northward_wind]
+# Filter out where abs(ObsValue - HofX) < threshold * ObsError
+#  variable1@ObsValue = 10, 11, 12, 13, 14, 15, 16, 17, 18, 19
+#  variable1@HofX     = 12, 13, 14, 15, 16, 17, 18, 19, 20, 21
+#  variable1@ObsError =  1,  1,  1,  1,  1,  1,  1,  1,  1,  1
+#  variable2@ObsValue = 10, 12, 14, 16, 18, 20, 22, 24, 26, 28
+#  variable2@HofX     = 10, 13, 16, 19, 22, 25, 28, 31, 34, 37
+#  variable2@ObsError = 2, 2, 2, 2, 2, 1.5, 1.5, 1.5, 1.5, 1.5
+#  variable3@ObsValue = 25, 24, 23, 22, 21, 20, 19, 18, 17, 16
+#  variable3@HofX     = 25, 23, 21, 19, 17, 15, 13, 11,  9,  7
+#  variable3@ObsError =  2,  4,  2,  4,  2,  4,  2,  4,  2,  4
+   passedBenchmark: 22
+ - ObsSpace:
+     name: test data
+     ObsDataIn:
+       obsfile: Data/filters_testdata.nc4
+     simulate:
+       variables: [variable1, variable2, variable3]
+   HofX: HofX
+   ObsFilters:
+   - Filter: Background Check     # test threshold with subset of variables
+     variables: [variable1, variable2]
      threshold: 2.0
-     where:
-     - variable: latitude@MetaData
-       minvalue: -60.0
-       maxvalue: 60.0
+# Filter out where abs(ObsValue - HofX) < threshold * ObsError
+#  variable1@ObsValue = 10, 11, 12, 13, 14, 15, 16, 17, 18, 19
+#  variable1@HofX     = 12, 13, 14, 15, 16, 17, 18, 19, 20, 21
+#  variable1@ObsError =  1,  1,  1,  1,  1,  1,  1,  1,  1,  1
+#  variable2@ObsValue = 10, 12, 14, 16, 18, 20, 22, 24, 26, 28
+#  variable2@HofX     = 10, 13, 16, 19, 22, 25, 28, 31, 34, 37
+#  variable2@ObsError = 2, 2, 2, 2, 2, 1.5, 1.5, 1.5, 1.5, 1.5
+#  variable3 not filtered, all obs pass
+   passedBenchmark: 25
+ - ObsSpace:
+     name: test data
+     ObsDataIn:
+       obsfile: Data/filters_testdata.nc4
+     simulate:
+       variables: [variable1, variable2, variable3]
+   HofX: HofX
+   ObsFilters:
+   - Filter: Background Check     # test abs threshold and threshold
+     variables: [variable1, variable2, variable3]
+     threshold: 1.0
+     absolute threshold: 1.5
+# Filter out where abs(ObsValue - HofX) < min(absolute_threshold, threshold*ObsError)
+#  variable1@ObsValue = 10, 11, 12, 13, 14, 15, 16, 17, 18, 19
+#  variable1@HofX     = 12, 13, 14, 15, 16, 17, 18, 19, 20, 21
+#  variable1@ObsError =  1,  1,  1,  1,  1,  1,  1,  1,  1,  1
+#  variable2@ObsValue = 10, 12, 14, 16, 18, 20, 22, 24, 26, 28
+#  variable2@HofX     = 10, 13, 16, 19, 22, 25, 28, 31, 34, 37
+#  variable2@ObsError = 2, 2, 2, 2, 2, 1.5, 1.5, 1.5, 1.5, 1.5
+#  variable3@ObsValue = 25, 24, 23, 22, 21, 20, 19, 18, 17, 16
+#  variable3@HofX     = 25, 23, 21, 19, 17, 15, 13, 11,  9,  7
+#  variable3@ObsError =  2,  4,  2,  4,  2,  4,  2,  4,  2,  4
+   passedBenchmark: 4
+ - ObsSpace:
+     name: test data
+     ObsDataIn:
+       obsfile: Data/filters_testdata.nc4
+     simulate:
+       variables: [variable1, variable2, variable3]
+   HofX: HofX
+   ObsFilters:
+   - Filter: Background Check     # test error inflation (TODO: compare errors)
+     variables: [variable1, variable2, variable3]
+     threshold: 1.0
+     absolute threshold: 1.5
      action:
        name: inflate error
        inflation: 2.0
-   passedBenchmark: 142      # number of passed obs
-#    qcBenchmark: GsiQC       # benchmark QC from the file
- - ObsOperator:
-     name: GnssroBndNBAM
-     ObsOptions:
-       use_compress: 1
-       vertlayer: full
-   ObsSpace:
-     name: GnssroBndNBAM
-     ObsDataIn:
-       obsfile: Data/gnssro_obs_2018041500_m.nc4
-     simulate:
-       variables: [bending_angle]
-   GeoVaLs:
-     filename: Data/gnssro_geoval_2018041500_m.nc4
-   ObsFilters:
-   - Filter: Background Check
-     variables: [bending_angle]
-     threshold: 2.0
-     where:
-     - variable: impact_height@MetaData
-       minvalue: 0
-       maxvalue: 50000
-   passedBenchmark: 148      # number of passed obs
- - ObsOperator:
-      name: VertInterp
-   ObsSpace:
-      name: Aircraft 
-      ObsDataIn:
-        obsfile: Data/aircraft_obs_2018041500_m.nc4
-      simulate:
-        variables: [air_temperature, eastward_wind, northward_wind]
-   GeoVaLs:
-      filename: Data/aircraft_geoval_2018041500_m.nc4
-   ObsFilters:
-   - Filter: Background Check
-     variables: [eastward_wind, northward_wind]
-     threshold: 1.5
-     where:
-     - variable: air_pressure@MetaData
-       minvalue: 10000.
-     where:
-     - variable: air_temperature@HofX
-       minvalue: 275.
-   passedBenchmark: 1548      # number of passed obs
+# Filter out where abs(ObsValue - HofX) < min(absolute_threshold, threshold*ObsError)
+# Note: technically all obs "pass" since action does not change flags, inflates error instead
+#  variable1@ObsValue = 10, 11, 12, 13, 14, 15, 16, 17, 18, 19
+#  variable1@HofX     = 12, 13, 14, 15, 16, 17, 18, 19, 20, 21
+#  variable1@ObsError =  1,  1,  1,  1,  1,  1,  1,  1,  1,  1
+#  variable2@ObsValue = 10, 12, 14, 16, 18, 20, 22, 24, 26, 28
+#  variable2@HofX     = 10, 13, 16, 19, 22, 25, 28, 31, 34, 37
+#  variable2@ObsError = 2, 2, 2, 2, 2, 1.5, 1.5, 1.5, 1.5, 1.5
+#  variable3@ObsValue = 25, 24, 23, 22, 21, 20, 19, 18, 17, 16
+#  variable3@HofX     = 25, 23, 21, 19, 17, 15, 13, 11,  9,  7
+#  variable3@ObsError =  2,  4,  2,  4,  2,  4,  2,  4,  2,  4
+   passedBenchmark: 30

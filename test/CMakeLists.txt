@@ -59,14 +59,12 @@ list( APPEND ufo_test_input
   testinput/qc_boundscheck.yaml
   testinput/qc_cris.yaml
   testinput/qc_differencecheck.yaml
-  testinput/qc_domainchk_zenith.yaml
   testinput/qc_function_windspeed.yaml
   testinput/qc_thinning.yaml
   testinput/qc_backgroundcheck.yaml
   testinput/qc_thinning_rad.yaml
   testinput/qc_gauss_thinning.yaml
   testinput/radiosonde.yaml
-  testinput/radiosonde_qc.yaml
   testinput/satwind.yaml
   testinput/sbuv2_n19.yaml
   testinput/scatwind.yaml
@@ -79,8 +77,6 @@ list( APPEND ufo_test_input
   testinput/tprof.yaml
   testinput/qc_blacklist_latitude.yaml
   testinput/windprof.yaml
-  testinput/qc_domain_latitude.yaml
-  testinput/qc_domain_minpress.yaml
   testinput/obsdiag_crtm_jacobian.yaml
   testinput/function_velocity.yaml
   testinput/reflectivity.yaml
@@ -148,7 +144,7 @@ list( APPEND ufo_test_data
   marine/sst_obs-2018-04-15_geovals.nc
   atmosphere/radar_dbz_geoval_2019052222.nc4
   atmosphere/radar_rw_geoval_2019052222.nc4
-  filters/where_testdata.nc4
+  filters/filters_testdata.nc4
 )
 
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Data)
@@ -249,11 +245,6 @@ ecbuild_add_test( TARGET  test_ufo_obsdiag_crtm_jacobian
                   ARGS    "testinput/obsdiag_crtm_jacobian.yaml"
                   LIBS    ufo)
 
-ecbuild_add_test( TARGET  test_ufo_qc_domain_latitude
-                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-                  ARGS    "testinput/qc_domain_latitude.yaml"
-                  DEPENDS test_ObsFilters.x )
-
 ecbuild_add_test( TARGET  test_ufo_geovals
                   SOURCES mains/TestGeoVaLs.cc
                   ARGS    "testinput/geovals.yaml"
@@ -293,11 +284,6 @@ ecbuild_add_test( TARGET  test_ufo_amsua_obs_bias_covariance
                   SOURCES mains/TestObsBiasCovariance.cc
                   ARGS    "testinput/amsua_crtm_bc.yaml"
                   LIBS    ufo )
-
-ecbuild_add_test( TARGET  test_ufo_qc_domain_minpress
-	          COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-	          ARGS    "testinput/qc_domain_minpress.yaml"
-	          DEPENDS test_ObsFilters.x )
 
 ecbuild_add_test( TARGET  test_ufo_gsi_sfc_model_opr
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
@@ -480,11 +466,6 @@ ecbuild_add_test( TARGET  test_ufo_radiosonde_opr
                   ARGS    "testinput/radiosonde.yaml"
                   DEPENDS test_ObsOperator.x )
 
-ecbuild_add_test( TARGET  test_ufo_radiosonde_qc
-                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-                  ARGS    "testinput/radiosonde_qc.yaml"
-                  DEPENDS test_ObsFilters.x )
-
 ecbuild_add_test( TARGET  test_ufo_radiosonde_tlad
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
                   ARGS    "testinput/radiosonde.yaml"
@@ -551,29 +532,24 @@ ecbuild_add_test( TARGET  test_ufo_satwind_opr
 #                  ARGS    "testinput/windprof.yaml"
 #                  DEPENDS test_ObsOperator.x )
 
+ecbuild_add_test( TARGET  test_ufo_qc_backgroundcheck
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                  ARGS    "testinput/qc_backgroundcheck.yaml"
+                  DEPENDS test_ObsFilters.x )
+
 ecbuild_add_test( TARGET  test_ufo_qc_boundscheck
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
                   ARGS    "testinput/qc_boundscheck.yaml"
-                  DEPENDS test_ObsFilters.x )
-
-ecbuild_add_test( TARGET  test_ufo_qc_cris
-                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-                  ARGS    "testinput/qc_cris.yaml"
                   DEPENDS test_ObsFilters.x )
 
 ecbuild_add_test( TARGET  test_ufo_qc_differencecheck
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
                   ARGS    "testinput/qc_differencecheck.yaml"
                   DEPENDS test_ObsFilters.x )
-      
-ecbuild_add_test( TARGET  test_ufo_qc_backgroundcheck
-                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-                  ARGS    "testinput/qc_backgroundcheck.yaml"
-                  DEPENDS test_ObsFilters.x )
 
-ecbuild_add_test( TARGET  test_ufo_qc_domainchk_zenith
+ecbuild_add_test( TARGET  test_ufo_qc_cris
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-                  ARGS    "testinput/qc_domainchk_zenith.yaml"
+                  ARGS    "testinput/qc_cris.yaml"
                   DEPENDS test_ObsFilters.x )
 
 ecbuild_add_test( TARGET  test_ufo_qc_function_windspeed
