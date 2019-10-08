@@ -31,6 +31,8 @@ extern "C" {
   void ufo_locs_delete_f90(F90locs &);
   void ufo_locs_nobs_f90(const F90locs &, int &);
   void ufo_locs_coords_f90(const F90locs &, int &, double &, double &);
+  void ufo_locs_indx_f90(const F90locs &, int &, int &, int &);
+  void ufo_locs_concatenate_f90(const F90locs &, const F90locs &);
 
 // -----------------------------------------------------------------------------
 

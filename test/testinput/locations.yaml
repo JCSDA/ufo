@@ -1,15 +1,8 @@
-Locations: 
-  window_begin: 2018-04-14T21:00:00Z
-  window_end: 2018-04-15T03:00:00Z
-  ObsSpace:
-    name: Random Locations
-    simulate:
-      variables: []
-    Generate:
-      nobs: 500
-      lat1: -90
-      lat2: 90
-      lon1: 0
-      lon2: 360
-      obs_errors: []
-      random_seed: 29837
+window_begin: 2018-04-14T21:00:00Z
+window_end: 2018-04-15T03:00:00Z
+ObsSpace:
+  name: Radiosonde
+  ObsDataIn:
+    obsfile: Data/sondes_obs_2018041500_s.nc4
+  simulate:
+    variables: [air_temperature]
