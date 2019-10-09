@@ -14,8 +14,10 @@
 # PARASOL: 670 [~670]  865 
 # AERONET: 340 380 440 500 675 [~670] 870 [~865] 1020 1640
 
-n_channels: 1
-r_channels: .55e-6 
+#n_channels: 1
+#r_channels: .55e-6 
+n_channels: 4
+r_channels: .47e-6, .55e-6, .66e-6, .87e-6
 
 filename_optical_properties_DU: /discover/nobackup/projects/gmao/share/gmao_ops/fvInput_4dvar/PIESA/x/optics_DU.v15_3.nc
 filename_optical_properties_SS: /discover/nobackup/projects/gmao/share/gmao_ops/fvInput_4dvar/PIESA/x/optics_SS.v3_3.nc
