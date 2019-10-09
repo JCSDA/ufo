@@ -32,15 +32,15 @@ list( APPEND ufo_test_input
   testinput/amsua_crtm_bc.yaml
   testinput/amsua_rttov.yaml
   testinput/amsua_qc.yaml
-  testinput/iasi_qc.yaml
-  testinput/iasi_obsfunc_qc.yaml
   testinput/amsua_allsky_gsi_qc.yaml
   testinput/amsua_seaice_qc.yaml
-  testinput/atms_crtm.yaml
-  testinput/gmi_crtm.yaml
   testinput/aod_crtm.yaml
+  testinput/atms_crtm.yaml
   testinput/coolskin.yaml
   testinput/cris_crtm.yaml
+  testinput/cris_qc.yaml
+  testinput/function_velocity.yaml
+  testinput/gmi_crtm.yaml
   testinput/genericprof.yaml
   testinput/geovals.yaml
   testinput/gnssrobndropp1d.yaml
@@ -49,22 +49,24 @@ list( APPEND ufo_test_input
   testinput/gnssrobndnbam_obs_error.yaml
   testinput/gnssroref.yaml
   testinput/gnssro_domain_check.yaml
+  testinput/gsisfcmodel.yaml
   testinput/hirs4_crtm.yaml
   testinput/iasi_crtm.yaml
-  testinput/gsisfcmodel.yaml
-  testinput/surface_ps_qc.yaml
+  testinput/iasi_obsfunc_qc.yaml
+  testinput/iasi_qc.yaml
   testinput/locations.yaml
   testinput/mhs_crtm.yaml
+  testinput/obsdiag_crtm_jacobian.yaml
   testinput/obsfilterdata.yaml
-  testinput/qc_boundscheck.yaml
-  testinput/qc_cris.yaml
-  testinput/qc_differencecheck.yaml
-  testinput/qc_function_windspeed.yaml
-  testinput/qc_thinning.yaml
+  testinput/processwhere.yaml
   testinput/qc_backgroundcheck.yaml
-  testinput/qc_thinning_rad.yaml
+  testinput/qc_boundscheck.yaml
+  testinput/qc_differencecheck.yaml
   testinput/qc_gauss_thinning.yaml
+  testinput/qc_thinning.yaml
   testinput/radiosonde.yaml
+  testinput/radialvelocity.yaml
+  testinput/reflectivity.yaml
   testinput/satwind.yaml
   testinput/sbuv2_n19.yaml
   testinput/scatwind.yaml
@@ -73,16 +75,11 @@ list( APPEND ufo_test_input
   testinput/sea_surface_temp.yaml
   testinput/seviri_crtm.yaml
   testinput/sndrd1-4_crtm.yaml
+  testinput/surface_ps_qc.yaml
   testinput/timeoper.yaml
   testinput/tprof.yaml
-  testinput/qc_blacklist_latitude.yaml
-  testinput/windprof.yaml
-  testinput/obsdiag_crtm_jacobian.yaml
-  testinput/function_velocity.yaml
-  testinput/reflectivity.yaml
-  testinput/radialvelocity.yaml
-  testinput/processwhere.yaml
   testinput/variables.yaml
+  testinput/windprof.yaml
 )
 
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/testinput)
@@ -96,54 +93,56 @@ ecbuild_add_resources( TARGET ufo_test_scripts
 
 # Create Data directory for test data and symlink files
 list( APPEND ufo_test_data
+  atmosphere/abi_g16_geoval_2019042306_m.nc4
+  atmosphere/ahi_himawari8_geoval_2019042306_m.nc4
   atmosphere/aircraft_geoval_2018041500_m.nc4
   atmosphere/aircraft_geoval_2018041500_s.nc4
   atmosphere/airs_aqua_geoval_2018041500_m.nc4
   atmosphere/amsua_n19_geoval_2018041500_m.nc4
   atmosphere/amsua_n19_geoval_2018041500_s.nc4
-  atmosphere/atms_npp_geoval_2018041500_m.nc4
-  atmosphere/atms_npp_geoval_2018041500_s.nc4
-  atmosphere/gmi_gpm_geoval_2018041500_m.nc4
   atmosphere/aod_geoval_2018041500_m.nc4
   atmosphere/aod_geoval_2018041500_s.nc4
+  atmosphere/atms_npp_geoval_2018041500_m.nc4
+  atmosphere/atms_npp_geoval_2018041500_s.nc4
   atmosphere/cris-fsr_npp_geoval_2018041500_m.nc4
   atmosphere/geovals_rttov.nc4
+  atmosphere/gmi_gpm_geoval_2018041500_m.nc4
   atmosphere/gnssro_geoval_2018041500_s.nc4
   atmosphere/gnssro_geoval_2018041500_s_2d.nc4
   atmosphere/gnssro_geoval_2018041500_m.nc4
   atmosphere/gnssro_geoval_2018041500_l.nc4
-  atmosphere/hirs4_metop-a_geoval_2018041500_m.nc4
-  atmosphere/iasi_metop-a_geoval_2018041500_m.nc4
-  atmosphere/mhs_n19_geoval_2018041500_m.nc4
-  atmosphere/satbias_crtm_in
-  atmosphere/satwind_geoval_2018041500_m.nc4
-  atmosphere/sbuv2_n19_geoval_2018041500_m.nc4
-  atmosphere/satwind_geoval_2018041500_s.nc4
-  atmosphere/scatwind_geoval_2018041500_m.nc4
-  atmosphere/sfc_geoval_2018041500_m.nc4
   atmosphere/gsisfc_tsen_geoval_2018041500_m.nc4
   atmosphere/gsisfc_uv_geoval_2018041500_m.nc4
+  atmosphere/hirs4_metop-a_geoval_2018041500_m.nc4
+  atmosphere/iasi_metop-a_obsdiag_2018041500_m.nc4
+  atmosphere/iasi_metop-a_geoval_2018041500_m.nc4
+  atmosphere/mhs_n19_geoval_2018041500_m.nc4
   atmosphere/ps_geovals_2018041500_0000.nc4
+  atmosphere/radar_dbz_geoval_2019052222.nc4
+  atmosphere/radar_rw_geoval_2019052222.nc4
+  atmosphere/satbias_crtm_in
+  atmosphere/satwind_geoval_2018041500_m.nc4
+  atmosphere/satwind_geoval_2018041500_s.nc4
+  atmosphere/sbuv2_n19_geoval_2018041500_m.nc4
+  atmosphere/scatwind_geoval_2018041500_m.nc4
   atmosphere/seviri_m08_geoval_2018041500_m.nc4
+  atmosphere/sfc_geoval_2018041500_m.nc4
   atmosphere/sndrd1_g15_geoval_2018041500_m.nc4
   atmosphere/sndrd2_g15_geoval_2018041500_m.nc4
   atmosphere/sndrd3_g15_geoval_2018041500_m.nc4
   atmosphere/sndrd4_g15_geoval_2018041500_m.nc4
-  atmosphere/ahi_himawari8_geoval_2019042306_m.nc4
-  atmosphere/abi_g16_geoval_2019042306_m.nc4
   atmosphere/sondes_geoval_2018041500_m.nc4
   atmosphere/sondes_geoval_2018041500_s.nc4
   atmosphere/sondes_geoval_2018041500_vs.nc4
-  atmosphere/windprof_geoval_2018041500_m.nc4
   atmosphere/ssmis_f18_geoval_2018041500_m.nc4
+  atmosphere/windprof_geoval_2018041500_m.nc4
+  filters/filters_testdata.nc4
   marine/coolskin_fake_geovals_2018041500.nc
   marine/cryosat2-2018-04-15_geovals.nc
   marine/icec-2018-04-15_geovals.nc
   marine/Jason-2-2018-04-15_geovals.nc
   marine/profile_2018-04-15_geovals.nc
   marine/sst_obs-2018-04-15_geovals.nc
-  atmosphere/radar_dbz_geoval_2019052222.nc4
-  atmosphere/radar_rw_geoval_2019052222.nc4
   filters/filters_testdata.nc4
 )
 
@@ -152,44 +151,45 @@ CREATE_SYMLINK_FILENAME( ${CMAKE_CURRENT_SOURCE_DIR}/testinput ${CMAKE_CURRENT_B
 
 # Add ioda obs test data
 list (APPEND ioda_obs_test_data
+  atmosphere/abi_g16_obs_2019042306_m.nc4
+  atmosphere/ahi_himawari8_obs_2019042306_m.nc4
   atmosphere/aircraft_obs_2018041500_m.nc4
   atmosphere/aircraft_obs_2018041500_s.nc4
   atmosphere/airs_aqua_obs_2018041500_m.nc4
   atmosphere/amsua_n19_obs_2018041500_m.nc4
   atmosphere/amsua_n19_obs_2018041500_m_bc.nc4
-  atmosphere/gmi_gpm_obs_2018041500_m.nc4
   atmosphere/amsua_n19_obs_2018041500_s.nc4
-  atmosphere/atms_npp_obs_2018041500_m.nc4
-  atmosphere/ioda_metop_2_amsua.nc4
   atmosphere/aod_obs_2018041500_m.nc4
   atmosphere/aod_obs_2018041500_s.nc4
+  atmosphere/atms_npp_obs_2018041500_m.nc4
   atmosphere/cris-fsr_npp_obs_2018041500_m.nc4
+  atmosphere/gmi_gpm_obs_2018041500_m.nc4
   atmosphere/gnssro_obs_2018041500_s.nc4
   atmosphere/gnssro_obs_2018041500_m.nc4
   atmosphere/gnssro_obs_2018041500_l.nc4
+  atmosphere/gsisfc_tsen_obs_2018041500_m.nc4
+  atmosphere/gsisfc_uv_obs_2018041500_m.nc4
   atmosphere/hirs4_metop-a_obs_2018041500_m.nc4
   atmosphere/iasi_metop-a_obs_2018041500_m.nc4
+  atmosphere/ioda_metop_2_amsua.nc4
   atmosphere/mhs_n19_obs_2018041500_m.nc4
+  atmosphere/radar_dbz_obs_2019052222.nc4
+  atmosphere/radar_rw_obs_2019052222.nc4
   atmosphere/satwind_obs_2018041500_m.nc4
   atmosphere/satwind_obs_2018041500_s.nc4
   atmosphere/sbuv2_n19_obs_2018041500_m.nc4
   atmosphere/scatwind_obs_2018041500_m.nc4
   atmosphere/seviri_m08_obs_2018041500_m.nc4
+  atmosphere/sfc_obs_2018041500_m.nc4
   atmosphere/sndrd1_g15_obs_2018041500_m.nc4
   atmosphere/sndrd2_g15_obs_2018041500_m.nc4
   atmosphere/sndrd3_g15_obs_2018041500_m.nc4
   atmosphere/sndrd4_g15_obs_2018041500_m.nc4
-  atmosphere/ahi_himawari8_obs_2019042306_m.nc4
-  atmosphere/abi_g16_obs_2019042306_m.nc4
-  atmosphere/ssmis_f18_obs_2018041500_m.nc4
-
-  atmosphere/sfc_obs_2018041500_m.nc4
-  atmosphere/gsisfc_tsen_obs_2018041500_m.nc4
-  atmosphere/gsisfc_uv_obs_2018041500_m.nc4
-
   atmosphere/sondes_obs_2018041500_m.nc4
   atmosphere/sondes_obs_2018041500_s.nc4
   atmosphere/sondes_obs_2018041500_vs.nc4
+  atmosphere/ssmis_f18_obs_2018041500_m.nc4
+  atmosphere/sfc_obs_2018041500_m.nc4
   atmosphere/windprof_obs_2018041500_m.nc4
   marine/coolskin_fake_obs_2018041500.nc
   marine/cryosat2-2018-04-15.nc
@@ -197,24 +197,11 @@ list (APPEND ioda_obs_test_data
   marine/Jason-2-2018-04-15.nc
   marine/profile_2018-04-15.nc
   marine/sst_obs-2018-04-15.nc4
-
-  atmosphere/radar_dbz_obs_2019052222.nc4
-  atmosphere/radar_rw_obs_2019052222.nc4
-
   )
 
 CREATE_SYMLINK_FILENAME( ${ioda_SOURCE_DIR}/test/testinput
                          ${CMAKE_CURRENT_BINARY_DIR}/Data
                          ${ioda_obs_test_data} )
-
-# Add ufo obsdiag test data
-list (APPEND ufo_obsdiag_test_data
-  atmosphere/iasi_metop-a_obsdiag_2018041500_m.nc4
-  )
-
-CREATE_SYMLINK_FILENAME( ${CMAKE_CURRENT_SOURCE_DIR}/testinput
-                         ${CMAKE_CURRENT_BINARY_DIR}/Data
-                         ${ufo_obsdiag_test_data} )
 
 #####################################################################
 
@@ -234,16 +221,7 @@ ecbuild_add_executable( TARGET  test_ObsFilters.x
                        )
 
 ####################################################################
-
-ecbuild_add_test( TARGET  test_ufo_function_velocity
-                  SOURCES mains/TestObsFunction.cc
-                  ARGS    "testinput/function_velocity.yaml"
-                  LIBS    ufo)
-
-ecbuild_add_test( TARGET  test_ufo_obsdiag_crtm_jacobian
-                  SOURCES mains/TestObsDiagnostics.cc
-                  ARGS    "testinput/obsdiag_crtm_jacobian.yaml"
-                  LIBS    ufo)
+# Test Locations, GeoVaLs with oops tests:
 
 ecbuild_add_test( TARGET  test_ufo_geovals
                   SOURCES mains/TestGeoVaLs.cc
@@ -255,6 +233,8 @@ ecbuild_add_test( TARGET  test_ufo_locations
                   ARGS    "testinput/locations.yaml"
                   LIBS    ufo )
 
+# Test UFO-specific classes:
+
 ecbuild_add_test( TARGET  test_ufo_obsfilterdata
                   SOURCES mains/TestObsFilterData.cc
                   ARGS    "testinput/obsfilterdata.yaml"
@@ -265,301 +245,349 @@ ecbuild_add_test( TARGET  test_ufo_variables
                   ARGS    "testinput/variables.yaml"
                   LIBS    ufo )
 
-ecbuild_add_test( TARGET  test_ufo_processwhere
-                  SOURCES mains/TestProcessWhere.cc
-                  ARGS    "testinput/processwhere.yaml"
-                  LIBS    ufo )
+# Test Obs Operators and TLAD
 
-ecbuild_add_test( TARGET  test_ufo_amsua_obs_bias
-                  SOURCES mains/TestObsBias.cc
-                  ARGS    "testinput/amsua_crtm_bc.yaml"
-                  LIBS    ufo )
-
-ecbuild_add_test( TARGET  test_ufo_amsua_obs_bias_increment
-                  SOURCES mains/TestObsBiasIncrement.cc
-                  ARGS    "testinput/amsua_crtm_bc.yaml"
-                  LIBS    ufo )
-
-ecbuild_add_test( TARGET  test_ufo_amsua_obs_bias_covariance
-                  SOURCES mains/TestObsBiasCovariance.cc
-                  ARGS    "testinput/amsua_crtm_bc.yaml"
-                  LIBS    ufo )
-
-ecbuild_add_test( TARGET  test_ufo_gsi_sfc_model_opr
+ecbuild_add_test( TARGET  test_ufo_opr_gsi_sfc_model
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
                   ARGS    "testinput/gsisfcmodel.yaml"
                   DEPENDS test_ObsOperator.x )
 
-ecbuild_add_test( TARGET  test_ufo_surface_ps_qc
-                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-                  ARGS    "testinput/surface_ps_qc.yaml"
-                  DEPENDS test_ObsFilters.x )
-
-ecbuild_add_test( TARGET  test_ufo_amsua_opr_crtm
+ecbuild_add_test( TARGET  test_ufo_opr_crtm_amsua
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
                   ARGS    "testinput/amsua_crtm.yaml"
                   DEPENDS test_ObsOperator.x )
 
-ecbuild_add_test( TARGET  test_ufo_amsua_opr_crtm_bc
+ecbuild_add_test( TARGET  test_ufo_opr_crtm_bc_amsua
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
                   ARGS    "testinput/amsua_crtm_bc.yaml"
                   DEPENDS test_ObsOperator.x )
 
-ecbuild_add_test( TARGET  test_ufo_amsua_qc
-                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-                  ARGS    "testinput/amsua_qc.yaml"
-                  DEPENDS test_ObsFilters.x )
-
-ecbuild_add_test( TARGET  test_ufo_iasi_qc
-                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-                  ARGS    "testinput/iasi_qc.yaml"
-                  DEPENDS test_ObsFilters.x )
-
-ecbuild_add_test( TARGET  test_ufo_iasi_obsfunc_qc
-                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-                  ARGS    "testinput/iasi_obsfunc_qc.yaml"
-                  DEPENDS test_ObsFilters.x )
-
-ecbuild_add_test( TARGET  test_ufo_amsua_allsky_gsi_qc
-                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-                  ARGS    "testinput/amsua_allsky_gsi_qc.yaml"
-                  DEPENDS test_ObsFilters.x )
-
-ecbuild_add_test( TARGET  test_ufo_amsua_seaice_qc
-                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-                  ARGS    "testinput/amsua_seaice_qc.yaml"
-                  DEPENDS test_ObsFilters.x )
-
-ecbuild_add_test( TARGET  test_ufo_amsua_tlad_crtm
+ecbuild_add_test( TARGET  test_ufo_linopr_crtm_amsua
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
                   ARGS    "testinput/amsua_crtm.yaml"
                   DEPENDS test_ObsOperatorTLAD.x )
 
-ecbuild_add_test( TARGET  test_ufo_amsua_tlad_crtm_bc
-                  SOURCES mains/TestObsOperatorTLAD.cc
+ecbuild_add_test( TARGET  test_ufo_linopr_crtm_bc_amsua
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
                   ARGS    "testinput/amsua_crtm_bc.yaml"
-                  LIBS    ufo )
+                  DEPENDS test_ObsOperatorTLAD.x )
 
-#ecbuild_add_test( TARGET  test_ufo_atms_opr_crtm
+#ecbuild_add_test( TARGET  test_ufo_opr_crtm_atms
 #                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
 #                  ARGS    "testinput/atms_crtm.yaml"
 #                  DEPENDS test_ObsOperator.x )
 
-ecbuild_add_test( TARGET  test_ufo_atms_tlad_crtm
+ecbuild_add_test( TARGET  test_ufo_linopr_crtm_atms
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
                   ARGS    "testinput/atms_crtm.yaml"
                   DEPENDS test_ObsOperatorTLAD.x )
 
-ecbuild_add_test( TARGET  test_ufo_gmi_opr_crtm
+ecbuild_add_test( TARGET  test_ufo_opr_crtm_gmi
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
                   ARGS    "testinput/gmi_crtm.yaml"
                   DEPENDS test_ObsOperator.x )
 
-ecbuild_add_test( TARGET  test_ufo_gmi_tlad_crtm
+ecbuild_add_test( TARGET  test_ufo_linopr_crtm_gmi
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
                   ARGS    "testinput/gmi_crtm.yaml"
                   DEPENDS test_ObsOperatorTLAD.x )
 
-ecbuild_add_test( TARGET  test_ufo_seviri_opr_crtm
+ecbuild_add_test( TARGET  test_ufo_opr_crtm_seviri
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
                   ARGS    "testinput/seviri_crtm.yaml"
                   DEPENDS test_ObsOperator.x )
 
-ecbuild_add_test( TARGET  test_ufo_seviri_tlad_crtm
+ecbuild_add_test( TARGET  test_ufo_linopr_crtm_seviri
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
                   ARGS    "testinput/seviri_crtm.yaml"
                   DEPENDS test_ObsOperatorTLAD.x )
 
-ecbuild_add_test( TARGET  test_ufo_cris_opr_crtm
+ecbuild_add_test( TARGET  test_ufo_opr_crtm_cris
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
                   ARGS    "testinput/cris_crtm.yaml"
                   DEPENDS test_ObsOperator.x )
 
-ecbuild_add_test( TARGET  test_ufo_cris_tlad_crtm
+ecbuild_add_test( TARGET  test_ufo_linopr_crtm_cris
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
                   ARGS    "testinput/cris_crtm.yaml"
                   DEPENDS test_ObsOperatorTLAD.x )
 
-ecbuild_add_test( TARGET  test_ufo_mhs_opr_crtm
+ecbuild_add_test( TARGET  test_ufo_opr_crtm_mhs
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
                   ARGS    "testinput/mhs_crtm.yaml"
                   DEPENDS test_ObsOperator.x )
 
-ecbuild_add_test( TARGET  test_ufo_mhs_tlad_crtm
+ecbuild_add_test( TARGET  test_ufo_linopr_crtm_mhs
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
                   ARGS    "testinput/mhs_crtm.yaml"
                   DEPENDS test_ObsOperatorTLAD.x )
 
-ecbuild_add_test( TARGET  test_ufo_iasi_opr_crtm
+ecbuild_add_test( TARGET  test_ufo_opr_crtm_iasi
                   MPI     2
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
                   ARGS    "testinput/iasi_crtm.yaml"
                   DEPENDS test_ObsOperator.x )
 
-ecbuild_add_test( TARGET  test_ufo_iasi_tlad_crtm
+ecbuild_add_test( TARGET  test_ufo_linopr_crtm_iasi
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
                   ARGS    "testinput/iasi_crtm.yaml"
                   DEPENDS test_ObsOperatorTLAD.x )
 
-ecbuild_add_test( TARGET  test_ufo_sndrd1-4_opr_crtm
+ecbuild_add_test( TARGET  test_ufo_opr_crtm_sndrd1-4
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
                   ARGS    "testinput/sndrd1-4_crtm.yaml"
                   DEPENDS test_ObsOperator.x )
 
-ecbuild_add_test( TARGET  test_ufo_sndrd1-4_tlad_crtm
+ecbuild_add_test( TARGET  test_ufo_linopr_crtm_sndrd1-4
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
                   ARGS    "testinput/sndrd1-4_crtm.yaml"
                   DEPENDS test_ObsOperatorTLAD.x )
 
-ecbuild_add_test( TARGET  test_ufo_airs_opr_crtm
+ecbuild_add_test( TARGET  test_ufo_opr_crtm_airs
                   MPI     4
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
                   ARGS    "testinput/airs_crtm.yaml"
                   DEPENDS test_ObsOperator.x )
 
-ecbuild_add_test( TARGET  test_ufo_airs_tlad_crtm
+ecbuild_add_test( TARGET  test_ufo_linopr_crtm_airs
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
                   ARGS    "testinput/airs_crtm.yaml"
                   DEPENDS test_ObsOperatorTLAD.x )
 
-ecbuild_add_test( TARGET  test_ufo_hirs4_opr_crtm
+ecbuild_add_test( TARGET  test_ufo_opr_crtm_hirs4
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
                   ARGS    "testinput/hirs4_crtm.yaml"
                   DEPENDS test_ObsOperator.x )
 
-ecbuild_add_test( TARGET  test_ufo_hirs4_tlad_crtm
+ecbuild_add_test( TARGET  test_ufo_linopr_crtm_hirs4
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
                   ARGS    "testinput/hirs4_crtm.yaml"
                   DEPENDS test_ObsOperatorTLAD.x )
 
-ecbuild_add_test( TARGET  test_ufo_abi_ahi_opr_crtm
+ecbuild_add_test( TARGET  test_ufo_opr_crtm_abi_ahi
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
                   ARGS    "testinput/abi_ahi_crtm.yaml"
                   DEPENDS test_ObsOperator.x )
 
-ecbuild_add_test( TARGET  test_ufo_abi_ahi_tlad_crtm
+ecbuild_add_test( TARGET  test_ufo_linopr_crtm_abi_ahi
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
                   ARGS    "testinput/abi_ahi_crtm.yaml"
                   DEPENDS test_ObsOperatorTLAD.x )
-
 
 if( ${RTTOV_FOUND} )
-  ecbuild_add_test( TARGET  test_ufo_amsua_opr_rttov
+  ecbuild_add_test( TARGET  test_ufo_opr_rttov_amsua
                     COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
                     ARGS    "testinput/amsua_rttov.yaml"
                     DEPENDS test_ObsOperator.x )
 
-  ecbuild_add_test( TARGET  test_ufo_amsua_tlad_rttov
+  ecbuild_add_test( TARGET  test_ufo_linopr_rttov_amsua
                     COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
                     ARGS    "testinput/amsua_rttov.yaml"
                     DEPENDS test_ObsOperatorTLAD.x )
 endif( ${RTTOV_FOUND} )
 
-ecbuild_add_test( TARGET  test_ufo_sbuv2_n19_opr
+ecbuild_add_test( TARGET  test_ufo_opr_atminterplay_sbuv2_n19
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
                   ARGS    "testinput/sbuv2_n19.yaml"
                   DEPENDS test_ObsOperator.x )
 
-ecbuild_add_test( TARGET  test_ufo_radiosonde_opr
+ecbuild_add_test( TARGET  test_ufo_opr_vertinterp_radiosonde
                   MPI     4
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
                   ARGS    "testinput/radiosonde.yaml"
                   DEPENDS test_ObsOperator.x )
 
-ecbuild_add_test( TARGET  test_ufo_radiosonde_tlad
+ecbuild_add_test( TARGET  test_ufo_linopr_vertinterp_radiosonde
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
                   ARGS    "testinput/radiosonde.yaml"
                   DEPENDS test_ObsOperatorTLAD.x )
 
-ecbuild_add_test( TARGET  test_ufo_timeoper_opr
-                  MPI     4
-                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
-                  ARGS    "testinput/timeoper.yaml"
-                  DEPENDS test_ObsOperator.x )
-
-ecbuild_add_test( TARGET  test_ufo_aircraft_opr
+ecbuild_add_test( TARGET  test_ufo_opr_vertinterp_aircraft
                   MPI     4
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
                   ARGS    "testinput/aircraft.yaml"
                   DEPENDS test_ObsOperator.x )
 
-ecbuild_add_test( TARGET  test_ufo_aircraft_tlad
+ecbuild_add_test( TARGET  test_ufo_linopr_vertinterp_aircraft
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
                   ARGS    "testinput/aircraft.yaml"
                   DEPENDS test_ObsOperatorTLAD.x )
 
-ecbuild_add_test( TARGET  test_ufo_gnssroRef_opr
-                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
-                  ARGS    "testinput/gnssroref.yaml"
-                  DEPENDS test_ObsOperator.x )
-
-ecbuild_add_test( TARGET  test_ufo_gnssroRef_tlad
-                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
-                  ARGS    "testinput/gnssroref.yaml"
-                  DEPENDS test_ObsOperatorTLAD.x )
-
-
-ecbuild_add_test( TARGET  test_ufo_gnssroBndNBAM_opr
-                  MPI     2
-                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
-                  ARGS    "testinput/gnssrobndnbam.yaml"
-                  DEPENDS test_ObsOperator.x )
-
-ecbuild_add_test( TARGET  test_ufo_gnssroBndNBAM_tlad
-                  MPI     2
-                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
-                  ARGS    "testinput/gnssrobndnbam.yaml"
-                  DEPENDS test_ObsOperatorTLAD.x )
-
-ecbuild_add_test( TARGET  test_ufo_gnssroBndNBAM_obs_error
-                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-                  ARGS    "testinput/gnssrobndnbam_obs_error.yaml"
-                  DEPENDS test_ObsFilters.x )
-
-ecbuild_add_test( TARGET  test_ufo_gnssro_domain_check
-                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-                  ARGS    "testinput/gnssro_domain_check.yaml"
-                  DEPENDS test_ObsFilters.x )
-
-ecbuild_add_test( TARGET  test_ufo_satwind_opr
+ecbuild_add_test( TARGET  test_ufo_linopr_vertinterp_satwind
                   MPI     4
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
                   ARGS    "testinput/satwind.yaml"
                   DEPENDS test_ObsOperator.x )
 
-#ecbuild_add_test( TARGET  test_ufo_windprof_opr
+ecbuild_add_test( TARGET  test_ufo_opr_timeoper
+                  MPI     4
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
+                  ARGS    "testinput/timeoper.yaml"
+                  DEPENDS test_ObsOperator.x )
+
+ecbuild_add_test( TARGET  test_ufo_opr_gnssroRef
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
+                  ARGS    "testinput/gnssroref.yaml"
+                  DEPENDS test_ObsOperator.x )
+
+ecbuild_add_test( TARGET  test_ufo_linopr_gnssroRef
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
+                  ARGS    "testinput/gnssroref.yaml"
+                  DEPENDS test_ObsOperatorTLAD.x )
+
+ecbuild_add_test( TARGET  test_ufo_opr_gnssroBndNBAM
+                  MPI     2
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
+                  ARGS    "testinput/gnssrobndnbam.yaml"
+                  DEPENDS test_ObsOperator.x )
+
+ecbuild_add_test( TARGET  test_ufo_linopr_gnssroBndNBAM
+                  MPI     2
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
+                  ARGS    "testinput/gnssrobndnbam.yaml"
+                  DEPENDS test_ObsOperatorTLAD.x )
+
+if( ${ROPP-UFO_FOUND} )
+ecbuild_add_test( TARGET  test_ufo_opr_gnssroBndROPP1D
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
+                  ARGS    "testinput/gnssrobndropp1d.yaml"
+                  DEPENDS test_ObsOperator.x )
+
+ecbuild_add_test( TARGET  test_ufo_linopr_gnssroBndROPP1D
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
+                  ARGS    "testinput/gnssrobndropp1d.yaml"
+                  DEPENDS test_ObsOperatorTLAD.x )
+
+ecbuild_add_test( TARGET  test_ufo_opr_gnssroBndROPP2D
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
+                  ARGS    "testinput/gnssrobndropp2d.yaml"
+                  DEPENDS test_ObsOperator.x )
+
+ecbuild_add_test( TARGET  test_ufo_linopr_gnssroBndROPP2D
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
+                  ARGS    "testinput/gnssrobndropp2d.yaml"
+                  DEPENDS test_ObsOperatorTLAD.x )
+endif( ${ROPP-UFO_FOUND} )
+
+#ecbuild_add_test( TARGET  test_ufo_opr_windprof
 #                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
 #                  ARGS    "testinput/windprof.yaml"
 #                  DEPENDS test_ObsOperator.x )
 
-ecbuild_add_test( TARGET  test_ufo_qc_backgroundcheck
+# Marine UFO tests
+ecbuild_add_test( TARGET  test_ufo_opr_seaicefrac
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
+                  ARGS    "testinput/seaicefrac.yaml"
+                  DEPENDS test_ObsOperator.x )
+
+ecbuild_add_test( TARGET  test_ufo_linopr_seaicefrac
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
+                  ARGS    "testinput/seaicefrac.yaml"
+                  DEPENDS test_ObsOperatorTLAD.x )
+
+ecbuild_add_test( TARGET  test_ufo_opr_seaicethick
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
+                  ARGS    "testinput/seaicethick.yaml"
+                  DEPENDS test_ObsOperator.x )
+
+ecbuild_add_test( TARGET  test_ufo_linopr_seaicethick
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
+                  ARGS    "testinput/seaicethick.yaml"
+                  DEPENDS test_ObsOperatorTLAD.x )
+
+ecbuild_add_test( TARGET  test_ufo_opr_identity_sst
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
+                  ARGS    "testinput/sea_surface_temp.yaml"
+                  DEPENDS test_ObsOperator.x )
+
+ecbuild_add_test( TARGET  test_ufo_linopr_identity_sst
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
+                  ARGS    "testinput/sea_surface_temp.yaml"
+                  DEPENDS test_ObsOperatorTLAD.x )
+
+ecbuild_add_test( TARGET  test_ufo_opr_adt
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
+                  ARGS    "testinput/adt.yaml"
+                  DEPENDS test_ObsOperator.x )
+
+ecbuild_add_test( TARGET  test_ufo_linopr_adt
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
+                  ARGS    "testinput/adt.yaml"
+                  DEPENDS test_ObsOperatorTLAD.x )
+
+ecbuild_add_test( TARGET  test_ufo_opr_coolskin
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
+                  ARGS    "testinput/coolskin.yaml"
+                  DEPENDS test_ObsOperator.x )
+
+ecbuild_add_test( TARGET  test_ufo_linopr_coolskin
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
+                  ARGS    "testinput/coolskin.yaml"
+                  DEPENDS test_ObsOperatorTLAD.x )
+
+if( ${GSW_FOUND} )
+    ecbuild_add_test( TARGET  test_ufo_opr_insitutemperature
+                      COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
+                      ARGS    "testinput/tprof.yaml"
+                      DEPENDS test_ObsOperator.x )
+
+    ecbuild_add_test( TARGET  test_ufo_linopr_insitutemperature
+                      COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
+                      ARGS    "testinput/tprof.yaml"
+                      DEPENDS test_ObsOperatorTLAD.x )
+
+    ecbuild_add_test( TARGET  test_ufo_opr_marinevertinterp
+                      COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
+                      ARGS    "testinput/genericprof.yaml"
+                      DEPENDS test_ObsOperator.x )
+
+    ecbuild_add_test( TARGET  test_ufo_linopr_marinevertinterp
+                      COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
+                      ARGS    "testinput/genericprof.yaml"
+                      DEPENDS test_ObsOperatorTLAD.x )
+
+endif( ${GSW_FOUND} )
+
+ecbuild_add_test( TARGET  test_ufo_opr_aod
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
+                  ARGS    "testinput/aod_crtm.yaml"
+                  DEPENDS test_ObsOperator.x )
+
+ecbuild_add_test( TARGET  test_ufo_linopr_aod
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
+                  ARGS    "testinput/aod_crtm.yaml"
+                  DEPENDS test_ObsOperatorTLAD.x )
+
+ecbuild_add_test( TARGET  test_ufo_opr_radarreflectivity
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
+                  ARGS    "testinput/reflectivity.yaml"
+                  DEPENDS test_ObsOperator.x )
+
+ecbuild_add_test( TARGET  test_ufo_opr_radarradialvelocity
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
+                  ARGS    "testinput/radialvelocity.yaml"
+                  DEPENDS test_ObsOperator.x )
+
+# Test UFO ObsFilters (generic)
+
+ecbuild_add_test( TARGET  test_ufo_qc_gen_processwhere
+                  SOURCES mains/TestProcessWhere.cc
+                  ARGS    "testinput/processwhere.yaml"
+                  LIBS    ufo )
+
+ecbuild_add_test( TARGET  test_ufo_qc_gen_backgroundcheck
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
                   ARGS    "testinput/qc_backgroundcheck.yaml"
                   DEPENDS test_ObsFilters.x )
 
-ecbuild_add_test( TARGET  test_ufo_qc_boundscheck
+ecbuild_add_test( TARGET  test_ufo_qc_gen_boundscheck
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
                   ARGS    "testinput/qc_boundscheck.yaml"
                   DEPENDS test_ObsFilters.x )
 
-ecbuild_add_test( TARGET  test_ufo_qc_differencecheck
+ecbuild_add_test( TARGET  test_ufo_qc_gen_differencecheck
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
                   ARGS    "testinput/qc_differencecheck.yaml"
-                  DEPENDS test_ObsFilters.x )
-
-ecbuild_add_test( TARGET  test_ufo_qc_cris
-                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-                  ARGS    "testinput/qc_cris.yaml"
-                  DEPENDS test_ObsFilters.x )
-
-ecbuild_add_test( TARGET  test_ufo_qc_function_windspeed
-                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-                  ARGS    "testinput/qc_function_windspeed.yaml"
-                  DEPENDS test_ObsFilters.x )
-
-ecbuild_add_test( TARGET  test_ufo_qc_function_scattering
-                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-                  ARGS    "testinput/amsua_qc.yaml"
                   DEPENDS test_ObsFilters.x )
 
 ecbuild_add_test( TARGET  test_ufo_qc_thinning
@@ -567,143 +595,100 @@ ecbuild_add_test( TARGET  test_ufo_qc_thinning
                   ARGS    "testinput/qc_thinning.yaml"
                   DEPENDS test_ObsFilters.x )
 
-ecbuild_add_test( TARGET  test_ufo_qc_thinning_rad
-                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-                  ARGS    "testinput/qc_thinning_rad.yaml"
-                  DEPENDS test_ObsFilters.x )
-
 ecbuild_add_test( TARGET  test_ufo_qc_gauss_thinning
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
                   ARGS    "testinput/qc_gauss_thinning.yaml"
                   DEPENDS test_ObsFilters.x )
 
-ecbuild_add_test( TARGET  test_ufo_qc_blacklist_latitude
+# Test Functions
+
+ecbuild_add_test( TARGET  test_ufo_function_velocity
+                  SOURCES mains/TestObsFunction.cc
+                  ARGS    "testinput/function_velocity.yaml"
+                  LIBS    ufo)
+
+# Test Diagnostics
+
+ecbuild_add_test( TARGET  test_ufo_obsdiag_crtm_jacobian
+                  SOURCES mains/TestObsDiagnostics.cc
+                  ARGS    "testinput/obsdiag_crtm_jacobian.yaml"
+                  LIBS    ufo)
+
+# Test QC for specific instruments
+
+ecbuild_add_test( TARGET  test_ufo_qc_cris
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-                  ARGS    "testinput/qc_blacklist_latitude.yaml"
+                  ARGS    "testinput/cris_qc.yaml"
+                  DEPENDS test_ObsFilters.x )
+
+ecbuild_add_test( TARGET  test_ufo_qc_function_scattering
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                  ARGS    "testinput/amsua_qc.yaml"
                   DEPENDS test_ObsFilters.x )
 
 if( ${ROPP-UFO_FOUND} )
-ecbuild_add_test( TARGET  test_ufo_gnssroBndROPP1D_opr
-                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
-                  ARGS    "testinput/gnssrobndropp1d.yaml"
-                  DEPENDS test_ObsOperator.x )
-
-ecbuild_add_test( TARGET  test_ufo_gnssroBndROPP1D_tlad
-                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
-                  ARGS    "testinput/gnssrobndropp1d.yaml"
-                  DEPENDS test_ObsOperatorTLAD.x )
-
-ecbuild_add_test( TARGET  test_ufo_gnssroBndROPP1D_qc
+ecbuild_add_test( TARGET  test_ufo_qc_gnssroBndROPP1D
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
                   ARGS    "testinput/gnssrobndropp1d.yaml"
                   DEPENDS test_ObsFilters.x )
-
-ecbuild_add_test( TARGET  test_ufo_gnssroBndROPP2D_opr
-                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
-                  ARGS    "testinput/gnssrobndropp2d.yaml"
-                  DEPENDS test_ObsOperator.x )
-
-ecbuild_add_test( TARGET  test_ufo_gnssroBndROPP2D_tlad
-                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
-                  ARGS    "testinput/gnssrobndropp2d.yaml"
-                  DEPENDS test_ObsOperatorTLAD.x )
 endif( ${ROPP-UFO_FOUND} )
 
-# Marine UFO tests
-ecbuild_add_test( TARGET  test_ufo_seaicefrac_opr
-                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
-                  ARGS    "testinput/seaicefrac.yaml"
-                  DEPENDS test_ObsOperator.x )
+ecbuild_add_test( TARGET  test_ufo_qc_surface_ps
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                  ARGS    "testinput/surface_ps_qc.yaml"
+                  DEPENDS test_ObsFilters.x )
 
-ecbuild_add_test( TARGET  test_ufo_seaicefrac_tlad
-                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
-                  ARGS    "testinput/seaicefrac.yaml"
-                  DEPENDS test_ObsOperatorTLAD.x )
+ecbuild_add_test( TARGET  test_ufo_qc_amsua
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                  ARGS    "testinput/amsua_qc.yaml"
+                  DEPENDS test_ObsFilters.x )
 
-ecbuild_add_test( TARGET  test_ufo_seaicethick_opr
-                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
-                  ARGS    "testinput/seaicethick.yaml"
-                  DEPENDS test_ObsOperator.x )
+ecbuild_add_test( TARGET  test_ufo_qc_iasi
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                  ARGS    "testinput/iasi_qc.yaml"
+                  DEPENDS test_ObsFilters.x )
 
-ecbuild_add_test( TARGET  test_ufo_seaicethick_tlad
-                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
-                  ARGS    "testinput/seaicethick.yaml"
-                  DEPENDS test_ObsOperatorTLAD.x )
+ecbuild_add_test( TARGET  test_ufo_qc_iasi_obsfunc
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                  ARGS    "testinput/iasi_obsfunc_qc.yaml"
+                  DEPENDS test_ObsFilters.x )
 
-ecbuild_add_test( TARGET  test_ufo_sst_opr
-                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
-                  ARGS    "testinput/sea_surface_temp.yaml"
-                  DEPENDS test_ObsOperator.x )
+ecbuild_add_test( TARGET  test_ufo_qc_amsua_allsky_gsi
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                  ARGS    "testinput/amsua_allsky_gsi_qc.yaml"
+                  DEPENDS test_ObsFilters.x )
 
-ecbuild_add_test( TARGET  test_ufo_sst_tlad
-                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
-                  ARGS    "testinput/sea_surface_temp.yaml"
-                  DEPENDS test_ObsOperatorTLAD.x )
+ecbuild_add_test( TARGET  test_ufo_qc_amsua_seaice
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                  ARGS    "testinput/amsua_seaice_qc.yaml"
+                  DEPENDS test_ObsFilters.x )
 
-ecbuild_add_test( TARGET  test_ufo_adt_opr
-                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
-                  ARGS    "testinput/adt.yaml"
-                  DEPENDS test_ObsOperator.x )
+ecbuild_add_test( TARGET  test_ufo_qc_gnssroBndNBAM_obs_error
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                  ARGS    "testinput/gnssrobndnbam_obs_error.yaml"
+                  DEPENDS test_ObsFilters.x )
 
-ecbuild_add_test( TARGET  test_ufo_adt_tlad
-                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
-                  ARGS    "testinput/adt.yaml"
-                  DEPENDS test_ObsOperatorTLAD.x )
+ecbuild_add_test( TARGET  test_ufo_qc_gnssro_domain_check
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                  ARGS    "testinput/gnssro_domain_check.yaml"
+                  DEPENDS test_ObsFilters.x )
 
-ecbuild_add_test( TARGET  test_ufo_CoolSkin_opr
-                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
-                  ARGS    "testinput/coolskin.yaml"
-                  DEPENDS test_ObsOperator.x )
+# Test bias correction classes
 
-ecbuild_add_test( TARGET  test_ufo_CoolSkin_tlad
-                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
-                  ARGS    "testinput/coolskin.yaml"
-                  DEPENDS test_ObsOperatorTLAD.x )
+ecbuild_add_test( TARGET  test_ufo_bias_amsua
+                  SOURCES mains/TestObsBias.cc
+                  ARGS    "testinput/amsua_crtm_bc.yaml"
+                  LIBS    ufo )
 
+ecbuild_add_test( TARGET  test_ufo_bias_increment_amsua
+                  SOURCES mains/TestObsBiasIncrement.cc
+                  ARGS    "testinput/amsua_crtm_bc.yaml"
+                  LIBS    ufo )
 
-# Marine UFO tests
-if( ${GSW_FOUND} )
-    ecbuild_add_test( TARGET  test_ufo_insitutemperature_opr
-                      COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
-                      ARGS    "testinput/tprof.yaml"
-                      DEPENDS test_ObsOperator.x )
-
-    ecbuild_add_test( TARGET  test_ufo_insitutemperature_tlad
-                      COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
-                      ARGS    "testinput/tprof.yaml"
-                      DEPENDS test_ObsOperatorTLAD.x )
-
-    ecbuild_add_test( TARGET  test_ufo_marinevertinterp_opr
-                      COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
-                      ARGS    "testinput/genericprof.yaml"
-                      DEPENDS test_ObsOperator.x )
-
-    ecbuild_add_test( TARGET  test_ufo_marinevertinterp_tlad
-                      COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
-                      ARGS    "testinput/genericprof.yaml"
-                      DEPENDS test_ObsOperatorTLAD.x )
-
-endif( ${GSW_FOUND} )
-
-ecbuild_add_test( TARGET  test_ufo_aod_opr_crtm
-                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
-                  ARGS    "testinput/aod_crtm.yaml"
-                  DEPENDS test_ObsOperator.x )
-
-ecbuild_add_test( TARGET  test_ufo_aod_tlad_crtm
-                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
-                  ARGS    "testinput/aod_crtm.yaml"
-                  DEPENDS test_ObsOperatorTLAD.x )
-
-ecbuild_add_test( TARGET  test_ufo_radarreflectivity_opr
-                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
-                  ARGS    "testinput/reflectivity.yaml"
-                  DEPENDS test_ObsOperator.x )
-
-ecbuild_add_test( TARGET  test_ufo_radarradialvelocity_opr
-                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
-                  ARGS    "testinput/radialvelocity.yaml"
-                  DEPENDS test_ObsOperator.x )
+ecbuild_add_test( TARGET  test_ufo_bias_covariance_amsua
+                  SOURCES mains/TestObsBiasCovariance.cc
+                  ARGS    "testinput/amsua_crtm_bc.yaml"
+                  LIBS    ufo )
 
 #####################################################################
 # Files for CRTM tests
