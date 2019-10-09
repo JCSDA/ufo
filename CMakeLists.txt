@@ -44,7 +44,7 @@ include_directories( ${Boost_INCLUDE_DIR} )
 # NetCDF
 set( NETCDF_F90 ON CACHE BOOL "Compile with Fortran NetCDF" )
 find_package( NetCDF REQUIRED )
-include_directories( ${NETCDF_INCLUDE_DIR} )
+include_directories( ${NETCDF_INCLUDE_DIRS} )
 
 # eckit
 ecbuild_use_package( PROJECT eckit VERSION 0.18.0 REQUIRED )
@@ -96,7 +96,7 @@ endif( ${ROPP-UFO_FOUND} )
 # Export package info
 ################################################################################
 
-list( APPEND UFO_TPLS oops ioda crtm)
+list( APPEND UFO_TPLS oops ioda crtm )
 
 if( ${GSW_FOUND} )
     list ( APPEND UFO_TPLS gsw)
