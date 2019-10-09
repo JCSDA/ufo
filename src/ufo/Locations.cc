@@ -13,6 +13,7 @@
 #include "eckit/config/Configuration.h"
 #include "eckit/exception/Exceptions.h"
 
+#include "oops/util/DateTime.h"
 #include "oops/util/Logger.h"
 #include "oops/util/Random.h"
 
@@ -73,6 +74,13 @@ Locations::Locations(const eckit::Configuration & conf) {
 }
 
 // -----------------------------------------------------------------------------
+Locations & Locations::operator+=(const Locations & other) {
+  F90locs otherKeyLoc_ = other.toFortran();
+  ufo_locs_concatenate_f90(keyLoc_, otherKeyLoc_);
+  return *this;
+}
+
+// -----------------------------------------------------------------------------
 
 Locations::~Locations() {
   ufo_locs_delete_f90(keyLoc_);
@@ -89,17 +97,22 @@ int Locations::nobs() const {
 // -----------------------------------------------------------------------------
 
 void Locations::print(std::ostream & os) const {
-  int nobs;
+  int nobs, indx, max_indx, i(0);
   ufo_locs_nobs_f90(keyLoc_, nobs);
-  os << "Locations: " << nobs << " locations: ";
+  ufo_locs_indx_f90(keyLoc_, i, indx, max_indx);
+  os << "Locations: " << nobs << " locations: "
+                      << max_indx << " maximum indx:";
 
   // Write lat and lon to debug stream
   double lat, lon;
 
   for (int i=0; i < nobs; ++i) {
+    ufo_locs_indx_f90(keyLoc_, i, indx, max_indx);
     ufo_locs_coords_f90(keyLoc_, i, lat, lon);
-    oops::Log::debug() << "obs " << i << ": " << std::setprecision(2) << std::fixed
-                       << "lat = " << lat << ", lon = " << lon << std::endl;
+
+    oops::Log::debug() << "obs " << i << ": " << "gv index = " << indx
+                       << std::setprecision(2) << std::fixed
+                       << " lat = " << lat << ", lon = " << lon << std::endl;
   }
 }
 
