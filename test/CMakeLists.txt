@@ -79,13 +79,10 @@ list( APPEND ufo_test_input
   testinput/surface_ps_qc.yaml
   testinput/timeoper.yaml
   testinput/tprof.yaml
-<<<<<<< HEAD
   testinput/geosaod.rc
   testinput/Chem_MieRegistry.rc
   testinput/qc_blacklist_latitude.yaml
-=======
   testinput/variables.yaml
->>>>>>> develop
   testinput/windprof.yaml
 )
 
@@ -113,11 +110,8 @@ list( APPEND ufo_test_data
   atmosphere/atms_npp_geoval_2018041500_s.nc4
   atmosphere/cris-fsr_npp_geoval_2018041500_m.nc4
   atmosphere/geovals_rttov.nc4
-<<<<<<< HEAD
   atmosphere/geos_aod_geoval_2018041500_m.nc4
-=======
   atmosphere/gmi_gpm_geoval_2018041500_m.nc4
->>>>>>> develop
   atmosphere/gnssro_geoval_2018041500_s.nc4
   atmosphere/gnssro_geoval_2018041500_s_2d.nc4
   atmosphere/gnssro_geoval_2018041500_m.nc4
@@ -174,11 +168,8 @@ list (APPEND ioda_obs_test_data
   atmosphere/aod_obs_2018041500_s.nc4
   atmosphere/atms_npp_obs_2018041500_m.nc4
   atmosphere/cris-fsr_npp_obs_2018041500_m.nc4
-<<<<<<< HEAD
   atmosphere/geos_aod_obs_2018041500_m.nc4
-=======
   atmosphere/gmi_gpm_obs_2018041500_m.nc4
->>>>>>> develop
   atmosphere/gnssro_obs_2018041500_s.nc4
   atmosphere/gnssro_obs_2018041500_m.nc4
   atmosphere/gnssro_obs_2018041500_l.nc4
@@ -579,7 +570,7 @@ ecbuild_add_test( TARGET  test_ufo_geos_aero_tlad
 endif( ${GEOS-AERO_FOUND} )
 
 ecbuild_add_test( TARGET  test_ufo_aod_opr_crtm
-                  SOURCES mains/TestObsOperator.cc
+                  SOURCES mains/TestObsOperator.cc)
 ecbuild_add_test( TARGET  test_ufo_opr_aod
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
                   ARGS    "testinput/aod_crtm.yaml"
