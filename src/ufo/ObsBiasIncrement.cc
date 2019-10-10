@@ -19,100 +19,84 @@ namespace ufo {
 // -----------------------------------------------------------------------------
 
 ObsBiasIncrement::ObsBiasIncrement(const eckit::Configuration & conf)
-  : biasinc_() {
-  std::unique_ptr<ObsBiasBase> biasbase(ObsBiasFactory::create(conf));
-  if (biasbase) {
-    for (std::size_t ii = 0; ii < biasbase->size(); ++ii)
-      biasinc_.push_back(0.0);
-  }
+  : biasbase_(LinearObsBiasFactory::create(conf)), conf_(conf) {
 }
 
 // -----------------------------------------------------------------------------
 
 ObsBiasIncrement::ObsBiasIncrement(const ObsBiasIncrement & other, const bool copy)
-  : biasinc_(other.size(), 0.0) {
-  if (copy) {
-    for (std::size_t ii = 0; ii < other.size(); ++ii)
-      biasinc_[ii] = other[ii];
-  }
+  : biasbase_(LinearObsBiasFactory::create(other.config())), conf_(other.config()) {
+  if (copy && biasbase_) *biasbase_ = other;
 }
 
 // -----------------------------------------------------------------------------
 
 ObsBiasIncrement::ObsBiasIncrement(const ObsBiasIncrement & other,
                                    const eckit::Configuration & conf)
-  : biasinc_(other.size(), 0.0) {
-  for (std::size_t ii = 0; ii < other.size(); ++ii)
-    biasinc_[ii] = other[ii];
+  : biasbase_(LinearObsBiasFactory::create(conf)), conf_(conf) {
+  /*
+   * As we don't know the details now, it needs revisit later
+   */
+  if (biasbase_) *biasbase_ = other;
 }
 
 // -----------------------------------------------------------------------------
 
 void ObsBiasIncrement::diff(const ObsBias & b1, const ObsBias & b2) {
-  for (std::size_t ii = 0; ii < this->size(); ++ii) {
-    biasinc_[ii] = b1[ii] - b2[ii];
-  }
+  if (biasbase_) biasbase_->diff(b1, b2);
 }
 
 // -----------------------------------------------------------------------------
 
 void ObsBiasIncrement::zero() {
-  for (std::size_t ii = 0; ii < this->size(); ++ii) biasinc_[ii] = 0.0;
+  if (biasbase_) biasbase_->zero();
 }
 
 // -----------------------------------------------------------------------------
 
 void ObsBiasIncrement::random() {
-  util::NormalDistribution<double> x(this->size(), 0.0, 1.0, 5);
-  for (std::size_t jj = 0; jj < this->size(); ++jj) biasinc_[jj] = x[jj];
+  if (biasbase_) biasbase_->random();
 }
 
 // -----------------------------------------------------------------------------
 
 ObsBiasIncrement & ObsBiasIncrement::operator=(const ObsBiasIncrement & rhs) {
-  for (std::size_t ii = 0; ii < this->size(); ++ii)
-    biasinc_[ii] = rhs[ii];
+  if (biasbase_) *biasbase_ = rhs;
   return *this;
 }
 
 // -----------------------------------------------------------------------------
 
 ObsBiasIncrement & ObsBiasIncrement::operator+=(const ObsBiasIncrement & rhs) {
-  for (std::size_t ii = 0; ii < this->size(); ++ii)
-    biasinc_[ii] += rhs[ii];
+  if (biasbase_) *biasbase_ += rhs;
   return *this;
 }
 
 // -----------------------------------------------------------------------------
 
 ObsBiasIncrement & ObsBiasIncrement::operator-=(const ObsBiasIncrement & rhs) {
-  for (std::size_t ii = 0; ii < this->size(); ++ii)
-    biasinc_[ii] -= rhs[ii];
+  if (biasbase_) *biasbase_ -= rhs;
   return *this;
 }
 
 // -----------------------------------------------------------------------------
 
 ObsBiasIncrement & ObsBiasIncrement::operator*=(const double fact) {
-  for (std::size_t ii = 0; ii < this->size(); ++ii)
-    biasinc_[ii] *= fact;
+  if (biasbase_) *biasbase_ *= fact;
   return *this;
 }
 
 // -----------------------------------------------------------------------------
 
 void ObsBiasIncrement::axpy(const double fact, const ObsBiasIncrement & rhs) {
-  for (std::size_t ii = 0; ii < this->size(); ++ii)
-    biasinc_[ii] += fact * rhs[ii];
+  if (biasbase_) biasbase_->axpy(fact, rhs);
 }
 
 // -----------------------------------------------------------------------------
 
 double ObsBiasIncrement::dot_product_with(const ObsBiasIncrement & rhs) const {
   double zz = 0.0;
-  for (std::size_t ii = 0; ii < this->size(); ++ii) {
-    zz += biasinc_[ii] * rhs[ii];
-  }
+  if (biasbase_) zz = biasbase_->dot_product_with(rhs);
   return zz;
 }
 
@@ -120,11 +104,38 @@ double ObsBiasIncrement::dot_product_with(const ObsBiasIncrement & rhs) const {
 
 double ObsBiasIncrement::norm() const {
   double zz = 0.0;
-  for (std::size_t ii = 0; ii < this->size(); ++ii) {
-    zz += biasinc_[ii]*biasinc_[ii];
-  }
-  if (this->size() > 0) zz = std::sqrt(zz/this->size());
+  if (biasbase_) zz = biasbase_->norm();
   return zz;
+}
+
+// -----------------------------------------------------------------------------
+
+std::size_t ObsBiasIncrement::size() const {
+  std::size_t zz = 0.0;
+  if (biasbase_) zz = biasbase_->size();
+  return zz;
+}
+
+// -----------------------------------------------------------------------------
+
+void ObsBiasIncrement::computeObsBiasTL(const GeoVaLs & geovals,
+                                        ioda::ObsVector & ybiasinc,
+                                        const ioda::ObsSpace & odb) const {
+  if (biasbase_) biasbase_->computeObsBiasTL(geovals, ybiasinc, odb);
+}
+
+// -----------------------------------------------------------------------------
+
+void ObsBiasIncrement::computeObsBiasAD(GeoVaLs & geovals,
+                                        const ioda::ObsVector & ybiasinc,
+                                        const ioda::ObsSpace & odb) {
+  if (biasbase_) biasbase_->computeObsBiasAD(geovals, ybiasinc, odb);
+}
+
+// -----------------------------------------------------------------------------
+
+void ObsBiasIncrement::print(std::ostream & os) const {
+  if (biasbase_) os << *biasbase_;
 }
 
 // -----------------------------------------------------------------------------

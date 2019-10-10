@@ -18,6 +18,7 @@ namespace ufo {
 void splitVarGroup(const std::string & vargrp, std::string & var, std::string & grp) {
   const size_t at = vargrp.find("@");
   var = vargrp.substr(0, at);
+  grp = "";
   if (at != std::string::npos) {
     grp = vargrp.substr(at + 1, std::string::npos);
     const size_t no_at = grp.find("@");

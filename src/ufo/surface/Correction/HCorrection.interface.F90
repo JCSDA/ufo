@@ -17,7 +17,7 @@ private
 #define LISTED_TYPE ufo_hcorrection
 
 !> Linked list interface - defines registry_t type
-#include "../../linkedList_i.f"
+#include "oops/util/linkedList_i.f"
 
 !> Global registry
 type(registry_t) :: ufo_hcorrection_registry
@@ -26,7 +26,7 @@ type(registry_t) :: ufo_hcorrection_registry
 contains
 ! ------------------------------------------------------------------------------
 !> Linked list implementation
-#include "../../linkedList_c.f"
+#include "oops/util/linkedList_c.f"
 ! ------------------------------------------------------------------------------
 
 subroutine ufo_hcorrection_create_c(c_self, c_conf, c_varlist) bind(c,name='ufo_hcorrection_create_f90')
@@ -81,23 +81,6 @@ call ufo_geovals_registry%get(c_geovals, geovals)
 call ufo_hcorrection_prior(self, c_obspace, geovals)
 
 end subroutine ufo_hcorrection_prior_c
-
-! ------------------------------------------------------------------------------
-
-subroutine ufo_hcorrection_post_c(c_self, c_obspace, c_nvars, c_nlocs, c_hofx) bind(c,name='ufo_hcorrection_post_f90')
-implicit none
-integer(c_int), intent(in) :: c_self
-type(c_ptr), value, intent(in) :: c_obspace
-integer(c_int), intent(in) :: c_nvars, c_nlocs
-real(c_double), intent(in) :: c_hofx(c_nvars, c_nlocs)
-
-type(ufo_hcorrection), pointer :: self
-
-call ufo_hcorrection_registry%get(c_self, self)
-
-call ufo_hcorrection_post(self, c_obspace, c_nvars, c_nlocs, c_hofx)
-
-end subroutine ufo_hcorrection_post_c
 
 ! ------------------------------------------------------------------------------
 

@@ -22,7 +22,7 @@ private
 #define LISTED_TYPE ufo_locs
 
 !> Linked list interface - defines registry_t type
-#include "linkedList_i.f"
+#include "oops/util/linkedList_i.f"
 
 !> Global registry
 type(registry_t) :: ufo_locs_registry
@@ -31,18 +31,17 @@ type(registry_t) :: ufo_locs_registry
 contains
 ! ------------------------------------------------------------------------------
 !> Linked list implementation
-#include "linkedList_c.f"
+#include "oops/util/linkedList_c.f"
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_locs_create_c(key, klocs, klats, klons, rdist) bind(c,name='ufo_locs_create_f90')
+subroutine ufo_locs_create_c(key, klocs, klats, klons) bind(c,name='ufo_locs_create_f90')
 
 implicit none
 integer(c_int), intent(inout) :: key
 integer(c_int), intent(in) :: klocs
 real(c_double), intent(in) :: klats(klocs)
 real(c_double), intent(in) :: klons(klocs)
-integer(c_int), intent(in) :: rdist
 
 type(ufo_locs), pointer :: self
 real(kind_real) :: lats(klocs)
@@ -53,7 +52,7 @@ call ufo_locs_registry%setup(key, self)
 lats(:) = klats(:)
 lons(:) = klons(:)
 
-call ufo_locs_create(self, klocs, lats, lons, rdist)
+call ufo_locs_create(self, klocs, lats, lons)
 
 end subroutine ufo_locs_create_c
 
@@ -101,7 +100,7 @@ kobs = self%nlocs
 end subroutine ufo_locs_nobs_c
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_locs_coords_c(key,idx,mylat,mylon) bind(c,name='ufo_locs_coords_f90')
+subroutine ufo_locs_coords_c(key, idx, mylat, mylon) bind(c,name='ufo_locs_coords_f90')
 
 implicit none
 integer(c_int), intent(in) :: key
@@ -115,7 +114,39 @@ mylat = self%lat(idx+1)
 mylon = self%lon(idx+1)
 
 end subroutine ufo_locs_coords_c
+!---------------------------------------------------------------------------------
 
+subroutine ufo_locs_indx_c(key, idx, indx, max_indx) bind(c,name='ufo_locs_indx_f90')
+
+implicit none
+integer(c_int), intent(in) :: key
+integer(c_int), intent(in) :: idx
+integer(c_int), intent(inout) :: indx
+integer(c_int), intent(inout) :: max_indx
+
+type(ufo_locs), pointer :: self
+
+call ufo_locs_registry%get(key, self)
+max_indx = self%max_indx
+if (max_indx > 0) indx = self%indx(idx+1) - 1 ! the minus to take account of C++ starting from 0
+
+
+end subroutine ufo_locs_indx_c
+!------------------------------------------------------------------------------
+subroutine ufo_locs_concatenate_c(key, key2) bind(c,name='ufo_locs_concatenate_f90')
+
+implicit none
+integer(c_int), intent(in) :: key
+integer(c_int), intent(in) :: key2
+
+type(ufo_locs), pointer :: self
+type(ufo_locs), pointer :: other
+
+call ufo_locs_registry%get(key, self)
+call ufo_locs_registry%get(key2, other)
+call ufo_locs_concatenate(self, other)
+
+end subroutine ufo_locs_concatenate_c
 ! ------------------------------------------------------------------------------
 
 subroutine ufo_locs_init_c(c_key_self, c_obsspace, c_t1, c_t2) bind(c,name='ufo_locs_init_f90')

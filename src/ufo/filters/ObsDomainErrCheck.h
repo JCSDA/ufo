@@ -14,23 +14,19 @@
 
 #include "boost/shared_ptr.hpp"
 
-#include "eckit/config/LocalConfiguration.h"
-#include "ioda/ObsDataVector.h"
-#include "ioda/ObsSpace.h"
-#include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
-#include "oops/util/Printable.h"
-#include "ufo/filters/ObsFilterData.h"
+#include "ufo/filters/FilterBase.h"
 
-namespace eckit {class Configuration;}
+namespace eckit {
+  class Configuration;
+}
 
 namespace ioda {
-  class ObsVector;
+  template <typename DATATYPE> class ObsDataVector;
+  class ObsSpace;
 }
 
 namespace ufo {
-  class GeoVaLs;
-  class ObsDiagnostics;
 
 /// Domain check: AMSU-A scattering check and obserr inflation
 //  that obs are within domain
@@ -41,33 +37,20 @@ namespace ufo {
 // The same effect can be achieved with opposite criteria through BlackList,
 // the choice is a matter of convenience or which seems more natural.
 
-class ObsDomainErrCheck : public util::Printable,
-                       private util::ObjectCounter<ObsDomainErrCheck> {
+class ObsDomainErrCheck : public FilterBase,
+                          private util::ObjectCounter<ObsDomainErrCheck> {
  public:
   static const std::string classname() {return "ufo::ObsDomainErrCheck";}
 
   ObsDomainErrCheck(ioda::ObsSpace &, const eckit::Configuration &,
-                 boost::shared_ptr<ioda::ObsDataVector<int> >,
-                 boost::shared_ptr<ioda::ObsDataVector<float> >);
+                    boost::shared_ptr<ioda::ObsDataVector<int> >,
+                    boost::shared_ptr<ioda::ObsDataVector<float> >);
   ~ObsDomainErrCheck();
 
-  void preProcess() const {}
-  void priorFilter(const GeoVaLs &) const;
-  void postFilter(const ioda::ObsVector &, const ObsDiagnostics &) const {}
-
-  const oops::Variables & requiredGeoVaLs() const {return geovars_;}
-  const oops::Variables & requiredHdiagnostics() const {return diagvars_;}
-
  private:
-  void print(std::ostream &) const;
+  void print(std::ostream &) const override;
+  void applyFilter(const std::vector<bool> &, std::vector<std::vector<bool>> &) const override;
 
-  ioda::ObsSpace & obsdb_;
-  mutable ObsFilterData data_;
-  const eckit::LocalConfiguration config_;
-  const oops::Variables geovars_;
-  const oops::Variables diagvars_;
-  ioda::ObsDataVector<int> & flags_;
-  ioda::ObsDataVector<float> & obserr_;
   float parameter_;
 };
 

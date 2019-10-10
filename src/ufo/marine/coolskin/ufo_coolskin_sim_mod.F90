@@ -50,7 +50,7 @@ contains
 
   real(kind=kind_real) :: delta ,fc ,u, Td
   real(kind=kind_real) :: lamda ,Q0 ,Qb ,Ts ,dTc ,c0 ,y ,Q
-  real(kind=kind_real) :: const ,d_lamda_dQb ,dQb_dTs ,d_lamda_dTs,d_delta_dTs,dfc_d_delta,dQ_dTs
+  real(kind=kind_real) :: const ,d_lamda_dQb, dfc_d_delta
 
   u     = max(0.0002, u0) !friction velocity over water
 

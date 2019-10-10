@@ -35,6 +35,8 @@ class ObsDiagnostics : public util::Printable,
                        private boost::noncopyable {
  public:
   ObsDiagnostics(const ioda::ObsSpace &, const Locations &, const oops::Variables &);
+  ObsDiagnostics(const eckit::Configuration &, const ioda::ObsSpace &,
+                 const oops::Variables &);
   ~ObsDiagnostics() {}
 
 // I/O
@@ -45,7 +47,9 @@ class ObsDiagnostics : public util::Printable,
   const int & toFortran() const {return gdiags_.toFortran();}
 
   bool has(const std::string & var) const {return gdiags_.has(var);}
-  void get(std::vector<float> &, const std::string &, const int lev = 1) const;
+  size_t nlevs(const std::string &) const;
+  void get(std::vector<float> &, const std::string &) const;
+  void get(std::vector<float> &, const std::string &, const int) const;
 
  private:
   void print(std::ostream &) const;

@@ -17,7 +17,6 @@
 #include "oops/util/Logger.h"
 #include "ufo/GeoVaLs.h"
 #include "ufo/ObsBias.h"
-#include "ufo/ObsBiasIncrement.h"
 
 namespace ufo {
 
@@ -26,7 +25,7 @@ static LinearObsOperatorMaker<ObsADTTLAD> makerADTTL_("ADT");
 // -----------------------------------------------------------------------------
 
 ObsADTTLAD::ObsADTTLAD(const ioda::ObsSpace & odb, const eckit::Configuration & config)
-  : keyOper_(0), varin_(), odb_(odb)
+  : keyOper_(0), odb_(odb), varin_()
 {
   const std::vector<std::string> vv{"sea_surface_height_above_geoid"};
   varin_.reset(new oops::Variables(vv));
@@ -51,16 +50,14 @@ void ObsADTTLAD::setTrajectory(const GeoVaLs & geovals, const ObsBias & bias) {
 
 // -----------------------------------------------------------------------------
 
-void ObsADTTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec,
-                               const ObsBiasIncrement & bias) const {
+void ObsADTTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec) const {
   ufo_adt_simobs_tl_f90(keyOper_, geovals.toFortran(), odb_, ovec.size(), ovec.toFortran());
   oops::Log::trace() << "ObsADTTLAD: tangent linear observation operator run" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
-void ObsADTTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec,
-                             ObsBiasIncrement & bias) const {
+void ObsADTTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec) const {
   ufo_adt_simobs_ad_f90(keyOper_, geovals.toFortran(), odb_, ovec.size(), ovec.toFortran());
   oops::Log::trace() << "ObsADTTLAD: adjoint observation operator run" << std::endl;
 }

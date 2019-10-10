@@ -19,7 +19,7 @@ module ufo_radiancerttov_tlad_mod_c
 #define LISTED_TYPE ufo_radiancerttov_tlad
 
   !> Linked list interface - defines registry_t type
-#include "../linkedList_i.f"
+#include "oops/util/linkedList_i.f"
 
   !> Global registry
   type(registry_t) :: ufo_radiancerttov_tlad_registry
@@ -28,7 +28,7 @@ contains
 
   ! ------------------------------------------------------------------------------
   !> Linked list implementation
-#include "../linkedList_c.f"
+#include "oops/util/linkedList_c.f"
 
 ! ------------------------------------------------------------------------------
 

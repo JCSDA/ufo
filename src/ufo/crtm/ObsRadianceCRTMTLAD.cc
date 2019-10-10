@@ -19,7 +19,6 @@
 #include "oops/util/Logger.h"
 #include "ufo/GeoVaLs.h"
 #include "ufo/ObsBias.h"
-#include "ufo/ObsBiasIncrement.h"
 
 namespace ufo {
 
@@ -29,7 +28,7 @@ static LinearObsOperatorMaker<ObsRadianceCRTMTLAD> makerCRTMTL_("CRTM");
 
 ObsRadianceCRTMTLAD::ObsRadianceCRTMTLAD(const ioda::ObsSpace & odb,
                                          const eckit::Configuration & config)
-  : keyOperRadianceCRTM_(0), varin_(), odb_(odb)
+  : keyOperRadianceCRTM_(0), odb_(odb), varin_()
 {
   // parse channels from the config and create variable names
   const oops::Variables & observed = odb.obsvariables();
@@ -59,8 +58,7 @@ void ObsRadianceCRTMTLAD::setTrajectory(const GeoVaLs & geovals, const ObsBias &
 
 // -----------------------------------------------------------------------------
 
-void ObsRadianceCRTMTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec,
-                                    const ObsBiasIncrement & bias) const {
+void ObsRadianceCRTMTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec) const {
   ufo_radiancecrtm_simobs_tl_f90(keyOperRadianceCRTM_, geovals.toFortran(), odb_,
                              ovec.nvars(), ovec.nlocs(), ovec.toFortran());
   oops::Log::trace() << "ObsRadianceCRTMTLAD::simulateObsTL done" << std::endl;
@@ -68,8 +66,7 @@ void ObsRadianceCRTMTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector
 
 // -----------------------------------------------------------------------------
 
-void ObsRadianceCRTMTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec,
-                                    ObsBiasIncrement & bias) const {
+void ObsRadianceCRTMTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec) const {
   ufo_radiancecrtm_simobs_ad_f90(keyOperRadianceCRTM_, geovals.toFortran(), odb_,
                              ovec.nvars(), ovec.nlocs(), ovec.toFortran());
   oops::Log::trace() << "ObsRadianceCRTMTLAD::simulateObsAD done" << std::endl;

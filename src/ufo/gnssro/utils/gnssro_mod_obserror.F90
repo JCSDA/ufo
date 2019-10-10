@@ -6,12 +6,14 @@ use kinds
 use gnssro_mod_constants
 
 contains
-subroutine bending_angle_obserr_ROPP(obsImpH, obsValue, nobs,  obsErr, QCflags, missing)
+subroutine bending_angle_obserr_ECMWF(obsImpH, obsValue, nobs,  obsErr, QCflags, missing)
+implicit none
 integer,                         intent(in)  :: nobs
 real(kind_real), dimension(nobs),intent(in)  :: obsImpH, obsValue
 integer(c_int),  dimension(nobs),intent(in)  :: QCflags(:)
 real(kind_real), dimension(nobs),intent(out) :: obsErr
 real(kind_real)                  :: H_km, missing
+integer :: i
 
 obsErr = missing
 
@@ -33,15 +35,53 @@ end if
 
 end do
 
-end subroutine bending_angle_obserr_ROPP
-!-----------------------------------
+end subroutine bending_angle_obserr_ECMWF
+!----------------------------------------
 
-subroutine  bending_angle_obserr_GSI(obsLat, obsImpH, obsSaid, nobs, obsErr, QCflags, missing)
+subroutine bending_angle_obserr_NRL(obsLat, obsImpH, obsValue, nobs,  obsErr, QCflags, missing)
+implicit none
+integer,                         intent(in)  :: nobs
+real(kind_real), dimension(nobs),intent(in)  :: obsImpH, obsValue, obsLat
+integer(c_int),  dimension(nobs),intent(in)  :: QCflags(:)
+real(kind_real), dimension(nobs),intent(out) :: obsErr
+real(kind_real):: H_m, missing
+real(kind_real):: lat_in_rad,trop_proxy,damping_factor,errfac
+real(kind_real):: max_sfc_error, min_ba_error
+
+integer :: i
+
+obsErr = missing 
+max_sfc_error = 20.0   ! %
+min_ba_error  = 1.25   ! %
+
+do i = 1, nobs
+
+if (QCflags(i) .eq. 0) then
+   
+   H_m  = obsImpH(i)
+   lat_in_rad = deg2rad * obsLat(i)
+   trop_proxy = 8666.66 + 3333.33*cos(2.0*lat_in_rad)
+   damping_factor = 0.66 + cos(lat_in_rad)/3.0
+   errfac = max_sfc_error*damping_factor*(trop_proxy - H_m)/trop_proxy
+   errfac = max(min_ba_error, errfac)
+   obsErr(i) =  max(obsValue(i)*errfac/100.0, 3.0*1e-6) ! noise floor at top of RO profile
+
+end if
+
+end do
+
+end subroutine bending_angle_obserr_NRL
+!--------------------------------------
+
+subroutine  bending_angle_obserr_NBAM(obsLat, obsImpH, obsSaid, nobs, obsErr, QCflags, missing)
+implicit none
 integer,                         intent(in)  :: nobs
 real(kind_real), dimension(nobs),intent(in)  :: obsImpH, obsLat
 integer(c_int),  dimension(nobs),intent(in)  :: obsSaid, QCflags(:)
 real(kind_real), dimension(nobs),intent(out) ::  obsErr
 real(kind_real)                 :: H_km, missing
+
+integer :: i
 
 obsErr = missing
 
@@ -90,15 +130,18 @@ end if
 
 end do
 
-end subroutine bending_angle_obserr_GSI
-!--------------------------------------
+end subroutine bending_angle_obserr_NBAM
+!---------------------------------------
 
-subroutine refractivity_obserr_GSI(obsLat, obsZ, nobs, obsErr, QCflags,missing)
+subroutine refractivity_obserr_NBAM(obsLat, obsZ, nobs, obsErr, QCflags,missing)
+implicit none
 integer,                         intent(in)  :: nobs
 real(kind_real), dimension(nobs),intent(in)  :: obsLat, obsZ
 real(kind_real), dimension(nobs),intent(out) :: obsErr
 integer(c_int),  dimension(nobs),intent(in)  :: QCflags(:)
 real(kind_real)                   :: H_km, missing
+
+integer :: i
 
 obsErr = missing
 
@@ -119,7 +162,7 @@ do i = 1, nobs
   end if
 end do
 
-end subroutine refractivity_obserr_GSI
+end subroutine refractivity_obserr_NBAM
 
 end module gnssro_mod_obserror
 

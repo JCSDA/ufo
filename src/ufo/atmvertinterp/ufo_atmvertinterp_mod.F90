@@ -14,15 +14,13 @@ module ufo_atmvertinterp_mod
   use obsspace_mod
   use fckit_configuration_module, only: fckit_configuration
 
-  integer, parameter :: max_string=800
-
 ! ------------------------------------------------------------------------------
 
   type, public :: ufo_atmvertinterp
    private
      integer :: nvars  ! number of variables to be interpolated
-     character(len=max_string), public, allocatable :: varin(:)    ! size nvars+1 (+1 for log pressure)
-     character(len=max_string), public, allocatable :: varout(:)   ! size nvars
+     character(len=MAXVARLEN), public, allocatable :: varin(:)    ! size nvars+1 (+1 for log pressure)
+     character(len=MAXVARLEN), public, allocatable :: varout(:)   ! size nvars
      character(len=MAXVARLEN), public :: v_coord ! GeoVaL to use to interpolate in vertical
      logical, public :: use_ln ! if T, use ln(v_coord) not v_coord
    contains

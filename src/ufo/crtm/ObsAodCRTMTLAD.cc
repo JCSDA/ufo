@@ -19,7 +19,6 @@
 #include "oops/util/Logger.h"
 #include "ufo/GeoVaLs.h"
 #include "ufo/ObsBias.h"
-#include "ufo/ObsBiasIncrement.h"
 
 namespace ufo {
 
@@ -29,7 +28,7 @@ static LinearObsOperatorMaker<ObsAodCRTMTLAD> makerAodTL_("Aod");
 
 ObsAodCRTMTLAD::ObsAodCRTMTLAD(const ioda::ObsSpace & odb,
                                const eckit::Configuration & config)
-  : keyOperAodCRTM_(0), varin_(), odb_(odb), channels_(odb.obsvariables().channels())
+  : keyOperAodCRTM_(0), odb_(odb), varin_(), channels_(odb.obsvariables().channels())
 {
   const std::vector<std::string> vv{
     "sulf", "bc1", "bc2", "oc1", "oc2", "dust1", "dust2", "dust3", "dust4", "dust5",
@@ -57,8 +56,7 @@ void ObsAodCRTMTLAD::setTrajectory(const GeoVaLs & geovals, const ObsBias & bias
 
 // -----------------------------------------------------------------------------
 
-void ObsAodCRTMTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec,
-                                    const ObsBiasIncrement & bias) const {
+void ObsAodCRTMTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec) const {
   ufo_aodcrtm_simobs_tl_f90(keyOperAodCRTM_, geovals.toFortran(), odb_,
                              ovec.size(), ovec.toFortran(),
                              channels_.size(), channels_[0]);
@@ -66,8 +64,7 @@ void ObsAodCRTMTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ov
 
 // -----------------------------------------------------------------------------
 
-void ObsAodCRTMTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec,
-                                    ObsBiasIncrement & bias) const {
+void ObsAodCRTMTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec) const {
   ufo_aodcrtm_simobs_ad_f90(keyOperAodCRTM_, geovals.toFortran(), odb_,
                              ovec.size(), ovec.toFortran(),
                              channels_.size(), channels_[0]);

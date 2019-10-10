@@ -20,9 +20,6 @@ namespace ufo {
 
 // -----------------------------------------------------------------------------
 static ObsOperatorMaker<ObsAtmVertInterp> makerVertInterp_("VertInterp");
-static ObsOperatorMaker<ObsAtmVertInterp> makerRadiosonde_("Radiosonde");
-static ObsOperatorMaker<ObsAtmVertInterp> makerAircraft_("Aircraft");
-static ObsOperatorMaker<ObsAtmVertInterp> makerSatwnd_("Satwind");
 // -----------------------------------------------------------------------------
 
 ObsAtmVertInterp::ObsAtmVertInterp(const ioda::ObsSpace & odb,
@@ -49,8 +46,12 @@ ObsAtmVertInterp::~ObsAtmVertInterp() {
 
 void ObsAtmVertInterp::simulateObs(const GeoVaLs & gom, ioda::ObsVector & ovec,
                                    ObsDiagnostics &) const {
+  oops::Log::trace() << "ObsAtmVertInterp::simulateObs entered" << std::endl;
+
   ufo_atmvertinterp_simobs_f90(keyOperAtmVertInterp_, gom.toFortran(), odb_,
                                ovec.nvars(), ovec.nlocs(), ovec.toFortran());
+
+  oops::Log::trace() << "ObsAtmVertInterp::simulateObs exit" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

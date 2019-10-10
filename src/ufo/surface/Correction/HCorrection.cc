@@ -21,9 +21,6 @@
 namespace ufo {
 
 // -----------------------------------------------------------------------------
-static oops::FilterMaker<UfoTrait, oops::ObsFilter<UfoTrait, HCorrection> >
-  makerHCorrection_("HCorrection");
-// -----------------------------------------------------------------------------
 
 HCorrection::HCorrection(const ioda::ObsSpace & obsdb, const eckit::Configuration & config,
                          boost::shared_ptr<ioda::ObsDataVector<int> > flags,
@@ -46,16 +43,13 @@ HCorrection::~HCorrection() {
 
 void HCorrection::priorFilter(const GeoVaLs & gv) const {
   oops::Log::trace() << "HCorrection priorFilter" << std::endl;
-  flags_.save("FortranQC");
   ufo_hcorrection_prior_f90(key_, obsdb_, gv.toFortran());
-  flags_.read("FortranQC");
 }
 
 // -----------------------------------------------------------------------------
 
 void HCorrection::postFilter(const ioda::ObsVector & hofxb, const ObsDiagnostics &) const {
   oops::Log::trace() << "HCorrection postFilter" << std::endl;
-  ufo_hcorrection_post_f90(key_, obsdb_, hofxb.nvars(), hofxb.nlocs(), hofxb.toFortran());
 }
 
 // -----------------------------------------------------------------------------

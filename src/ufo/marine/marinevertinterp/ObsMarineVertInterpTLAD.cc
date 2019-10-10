@@ -15,12 +15,11 @@
 #include "oops/util/Logger.h"
 #include "ufo/GeoVaLs.h"
 #include "ufo/ObsBias.h"
-#include "ufo/ObsBiasIncrement.h"
 
 namespace ufo {
 
 // -----------------------------------------------------------------------------
-static LinearObsOperatorMaker<ObsMarineVertInterpTLAD> makerMarinevertinterpTL_("InsituSalinity");
+static LinearObsOperatorMaker<ObsMarineVertInterpTLAD> makerMarinevertinterpTL_("MarineVertInterp");
 // -----------------------------------------------------------------------------
 
 ObsMarineVertInterpTLAD::ObsMarineVertInterpTLAD(const ioda::ObsSpace & odb,
@@ -51,8 +50,7 @@ void ObsMarineVertInterpTLAD::setTrajectory(const GeoVaLs & geovals, const ObsBi
 
 // -----------------------------------------------------------------------------
 
-void ObsMarineVertInterpTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec,
-                             const ObsBiasIncrement & bias) const {
+void ObsMarineVertInterpTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec) const {
   ufo_marinevertinterp_simobs_tl_f90(keyOper_, geovals.toFortran(), odb_,
                                       ovec.size(), ovec.toFortran());
   oops::Log::trace() << "ObsMarineVertInterpTLAD: TL observation operator run" << std::endl;
@@ -60,8 +58,7 @@ void ObsMarineVertInterpTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVe
 
 // -----------------------------------------------------------------------------
 
-void ObsMarineVertInterpTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec,
-                             ObsBiasIncrement & bias) const {
+void ObsMarineVertInterpTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec) const {
   ufo_marinevertinterp_simobs_ad_f90(keyOper_, geovals.toFortran(), odb_,
                                       ovec.size(), ovec.toFortran());
   oops::Log::trace() << "ObsMarineVertInterpTLAD: adjoint observation operator run" << std::endl;

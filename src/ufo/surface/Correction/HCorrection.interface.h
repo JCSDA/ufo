@@ -33,8 +33,6 @@ extern "C" {
   void ufo_hcorrection_delete_f90(F90check &);
   void ufo_hcorrection_prior_f90(const F90check &, const ioda::ObsSpace &,
                              const F90goms &);
-  void ufo_hcorrection_post_f90(const F90check &, const ioda::ObsSpace &, const int &,
-                            const int &, const double &);
 }  // extern C
 
 }  // namespace ufo

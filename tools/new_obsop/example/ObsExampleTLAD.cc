@@ -15,7 +15,6 @@
 #include "oops/util/Logger.h"
 #include "ufo/GeoVaLs.h"
 #include "ufo/ObsBias.h"
-#include "ufo/ObsBiasIncrement.h"
 
 namespace ufo {
 
@@ -25,7 +24,7 @@ static LinearObsOperatorMaker<ObsExampleTLAD> makerExampleTL_("Example");
 
 ObsExampleTLAD::ObsExampleTLAD(const ioda::ObsSpace & odb,
                                const eckit::Configuration & config)
-  : keyOper_(0), varin_(), odb_(odb)
+  : keyOper_(0), odb_(odb), varin_()
 {
   const eckit::Configuration * configc = &config;
   const oops::Variables & observed = odb.obsvariables();
@@ -51,8 +50,7 @@ void ObsExampleTLAD::setTrajectory(const GeoVaLs & geovals, const ObsBias & bias
 
 // -----------------------------------------------------------------------------
 
-void ObsExampleTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec,
-                             const ObsBiasIncrement & bias) const {
+void ObsExampleTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec) const {
   ufo_example_simobs_tl_f90(keyOper_, geovals.toFortran(), odb_,
                             ovec.size(), ovec.toFortran());
   oops::Log::trace() << "ObsExampleTLAD: TL observation operator run" << std::endl;
@@ -60,8 +58,7 @@ void ObsExampleTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ov
 
 // -----------------------------------------------------------------------------
 
-void ObsExampleTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec,
-                             ObsBiasIncrement & bias) const {
+void ObsExampleTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec) const {
   ufo_example_simobs_ad_f90(keyOper_, geovals.toFortran(), odb_,
                             ovec.size(), ovec.toFortran());
   oops::Log::trace() << "ObsExampleTLAD: adjoint observation operator run" << std::endl;

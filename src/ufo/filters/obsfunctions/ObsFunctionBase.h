@@ -14,10 +14,11 @@
 #include <boost/noncopyable.hpp>
 
 #include "ioda/ObsDataVector.h"
-#include "oops/base/Variables.h"
 #include "ufo/filters/ObsFilterData.h"
 
 namespace ufo {
+
+class Variables;
 
 // -----------------------------------------------------------------------------
 /// Base class for computing functions on observation data
@@ -32,7 +33,7 @@ class ObsFunctionBase : private boost::noncopyable {
                        ioda::ObsDataVector<float> &) const = 0;
 
 /// geovals required to compute the function
-  virtual const oops::Variables & requiredGeoVaLs() const = 0;
+  virtual const ufo::Variables & requiredVariables() const = 0;
 };
 
 // -----------------------------------------------------------------------------

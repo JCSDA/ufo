@@ -37,6 +37,8 @@ class Locations : public util::Printable,
   explicit Locations(const eckit::Configuration &);
   ~Locations();
 
+  Locations & operator+=(const Locations &);
+
   int nobs() const;
   int toFortran() const {return keyLoc_;}
 

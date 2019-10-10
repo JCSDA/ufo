@@ -6,14 +6,9 @@
 set ( radarreflectivity_files
     ObsRadarReflectivity.h
     ObsRadarReflectivity.cc
-    ObsRadarReflectivityTLAD.h
-    ObsRadarReflectivityTLAD.cc
     ObsRadarReflectivity.interface.F90
     ObsRadarReflectivity.interface.h
-    ObsRadarReflectivityTLAD.interface.F90
-    ObsRadarReflectivityTLAD.interface.h
     ufo_radarreflectivity_mod.F90
-    ufo_radarreflectivity_tlad_mod.F90
 )
 
 PREPEND( _p_radarreflectivity_files     "radarreflectivity"     ${radarreflectivity_files} )

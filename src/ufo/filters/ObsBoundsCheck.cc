@@ -17,7 +17,6 @@
 #include "oops/util/abor1_cpp.h"
 #include "oops/util/Logger.h"
 #include "oops/util/missingValues.h"
-#include "ufo/filters/processWhere.h"
 #include "ufo/filters/QCflags.h"
 #include "ufo/UfoTrait.h"
 
@@ -27,13 +26,14 @@ namespace ufo {
 
 ObsBoundsCheck::ObsBoundsCheck(ioda::ObsSpace & obsdb, const eckit::Configuration & config,
                                boost::shared_ptr<ioda::ObsDataVector<int> > flags,
-                               boost::shared_ptr<ioda::ObsDataVector<float> >)
-  : obsdb_(obsdb), data_(obsdb_), config_(config), geovars_(preProcessWhere(config_, "GeoVaLs")),
-    diagvars_(preProcessWhere(config_, "ObsDiag")), flags_(*flags)
+                               boost::shared_ptr<ioda::ObsDataVector<float> > obserr)
+  : FilterBase(obsdb, config, flags, obserr)
 {
+  if (config_.has("test variables")) {
+    eckit::LocalConfiguration testvarconf(config_, "test variables");
+    allvars_ += ufo::Variables(testvarconf);
+  }
   oops::Log::debug() << "ObsBoundsCheck: config = " << config_ << std::endl;
-  oops::Log::debug() << "ObsBoundsCheck: geovars = " << geovars_ << std::endl;
-  oops::Log::debug() << "ObsBoundsCheck: diagvars = " << diagvars_ << std::endl;
 }
 
 // -----------------------------------------------------------------------------
@@ -42,33 +42,56 @@ ObsBoundsCheck::~ObsBoundsCheck() {}
 
 // -----------------------------------------------------------------------------
 
-void ObsBoundsCheck::priorFilter(const GeoVaLs & gv) const {
+void ObsBoundsCheck::applyFilter(const std::vector<bool> & apply,
+                                 std::vector<std::vector<bool>> & flagged) const {
   const float missing = util::missingValue(missing);
 
-  oops::Variables vars(config_);
-  if (vars.size() == 0) {
+// Find which variables to apply filter on
+  oops::Variables filtervars(config_);
+
+// Find which variables are tested and the conditions
+  ufo::Variables testvars;
+// Use variables specified in test variables for testing, otherwise filter variables
+  if (config_.has("test variables")) {
+    eckit::LocalConfiguration testvarconf(config_, "test variables");
+    testvars += ufo::Variables(testvarconf);
+  } else {
+    testvars += ufo::Variables(config_, "ObsValue");
+  }
+  const float vmin = config_.getFloat("minvalue", missing);
+  const float vmax = config_.getFloat("maxvalue", missing);
+
+// Sanity checks
+  if (filtervars.size() == 0) {
     oops::Log::error() << "No variables will be filtered out in filter "
                        << config_ << std::endl;
     ABORT("No variables specified to be filtered out in filter");
   }
+  if (filtervars.size() != testvars.size()) {
+    oops::Log::error() << "Filter and test variables in Bounds Check have "
+                       << "different sizes: " << filtervars.size() << " and "
+                       << testvars.size() << std::endl;
+    ABORT("Filter and test variables in Bounds Check have different sizes");
+  }
+  oops::Log::debug() << "ObsBoundsCheck: filtering " << filtervars << " with "
+                     << testvars << std::endl;
+
+// Find which variables are in flags/obserror
   oops::Variables observed = obsdb_.obsvariables();
 
-  ioda::ObsDataVector<float> obs(obsdb_, vars, "ObsValue");
-
-  const float vmin = config_.getFloat("minvalue", missing);
-  const float vmax = config_.getFloat("maxvalue", missing);
-
-// Select where the bounds check will apply
-  data_.associate(gv);
-  std::vector<bool> apply = processWhere(config_, data_);
-
-  for (size_t jv = 0; jv < vars.size(); ++jv) {
-    size_t iv = observed.find(vars[jv]);
-    for (size_t jobs = 0; jobs < obs.nlocs(); ++jobs) {
+// Loop over all variables to filter
+  for (size_t jv = 0; jv < filtervars.size(); ++jv) {
+//  find index of the filtered variable in flags/obserror
+    size_t iv = observed.find(filtervars[jv]);
+//  get test data for this variable
+    std::vector<float> testdata;
+    data_.get(testvars[jv], testdata);
+//  apply the filter
+    for (size_t jobs = 0; jobs < obsdb_.nlocs(); ++jobs) {
       if (apply[jobs] && flags_[iv][jobs] == 0) {
-        ASSERT(obs[jv][jobs] != missing);
-        if (vmin != missing && obs[jv][jobs] < vmin) flags_[iv][jobs] = QCflags::bounds;
-        if (vmax != missing && obs[jv][jobs] > vmax) flags_[iv][jobs] = QCflags::bounds;
+        ASSERT(testdata[jobs] != missing);
+        if (vmin != missing && testdata[jobs] < vmin) flags_[iv][jobs] = QCflags::bounds;
+        if (vmax != missing && testdata[jobs] > vmax) flags_[iv][jobs] = QCflags::bounds;
       }
     }
   }

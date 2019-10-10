@@ -7,7 +7,6 @@ set ( utils_files
       Constants.h
       SplitVarGroup.cc
       SplitVarGroup.h
-      twindow_utils_mod.F90
       vert_interp.F90
       thermo_utils.F90
 )

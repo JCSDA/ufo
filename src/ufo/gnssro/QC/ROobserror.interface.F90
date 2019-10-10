@@ -19,7 +19,7 @@ private
 #define LISTED_TYPE ufo_roobserror
 
 !> Linked list interface - defines registry_t type
-#include "../../linkedList_i.f"
+#include "oops/util/linkedList_i.f"
 
 !> Global registry
 type(registry_t) :: ufo_roobserror_registry
@@ -28,7 +28,7 @@ type(registry_t) :: ufo_roobserror_registry
 contains
 ! ------------------------------------------------------------------------------
 !> Linked list implementation
-#include "../../linkedList_c.f"
+#include "oops/util/linkedList_c.f"
 ! ------------------------------------------------------------------------------
 
 subroutine ufo_roobserror_create_c(c_self, c_obspace, c_conf) bind(c,name='ufo_roobserror_create_f90')
@@ -72,14 +72,6 @@ call ufo_roobserror_registry%get(c_self, self)
 call ufo_roobserror_prior(self)
 
 end subroutine ufo_roobserror_prior_c
-
-! ------------------------------------------------------------------------------
-
-subroutine ufo_roobserror_post_c(c_self) bind(c,name='ufo_roobserror_post_f90')
-implicit none
-integer(c_int), intent(in) :: c_self
-
-end subroutine ufo_roobserror_post_c
 
 ! ------------------------------------------------------------------------------
 

@@ -21,7 +21,6 @@
 #include "oops/util/Logger.h"
 #include "oops/util/missingValues.h"
 #include "ufo/filters/obsfunctions/ObsFunction.h"
-#include "ufo/filters/processWhere.h"
 #include "ufo/filters/QCflags.h"
 #include "ufo/UfoTrait.h"
 #include "ufo/utils/SplitVarGroup.h"
@@ -33,11 +32,10 @@ namespace ufo {
 ObsDomainErrCheck::ObsDomainErrCheck(ioda::ObsSpace & obsdb, const eckit::Configuration & config,
                                boost::shared_ptr<ioda::ObsDataVector<int> > flags,
                                boost::shared_ptr<ioda::ObsDataVector<float> > obserr)
-  : obsdb_(obsdb), data_(obsdb), config_(config), geovars_(preProcessWhere(config_, "GeoVaLs")),
-    diagvars_(), flags_(*flags), obserr_(*obserr), parameter_(0.0)
+  : FilterBase(obsdb, config, flags, obserr),
+    parameter_(0.0)
 {
   oops::Log::debug() << "ObsDomainErrCheck: config = " << config_ << std::endl;
-  oops::Log::debug() << "ObsDomainErrCheck: geovars = " << geovars_ << std::endl;
   ASSERT(obserr);
 
   const float missing = util::missingValue(missing);
@@ -51,8 +49,8 @@ ObsDomainErrCheck::~ObsDomainErrCheck() {}
 
 // -----------------------------------------------------------------------------
 
-void ObsDomainErrCheck::priorFilter(const GeoVaLs & gv) const {
-  data_.associate(gv);
+void ObsDomainErrCheck::applyFilter(const std::vector<bool> & inside,
+                                    std::vector<std::vector<bool>> & flagged) const {
   const oops::Variables vars(config_);
   if (vars.size() == 0) {
     oops::Log::error() << "No variables will be filtered out in filter "
@@ -83,8 +81,6 @@ void ObsDomainErrCheck::priorFilter(const GeoVaLs & gv) const {
       }
     }
   }
-
-  std::vector<bool> inside = processWhere(config_, data_);
 
   size_t count = 0;
   for (size_t jv = 0; jv < vars.size(); ++jv) {

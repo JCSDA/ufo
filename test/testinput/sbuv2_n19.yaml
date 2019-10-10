@@ -14,7 +14,7 @@ LinearObsOpTest:
 Observations:
   ObsTypes:
   - ObsOperator:
-      name: OzoneLayer
+      name: AtmVertInterpLay
     ObsSpace:
       name: OzoneLayer
       ObsDataIn:

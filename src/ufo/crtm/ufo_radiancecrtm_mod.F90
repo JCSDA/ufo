@@ -23,8 +23,8 @@ module ufo_radiancecrtm_mod
  !> Fortran derived type for radiancecrtm trajectory
  type, public :: ufo_radiancecrtm
  private
-   character(len=max_string), public, allocatable :: varin(:)  ! variables requested from the model
-   integer, allocatable                           :: channels(:)
+   character(len=MAXVARLEN), public, allocatable :: varin(:)  ! variables requested from the model
+   integer, allocatable                          :: channels(:)
    type(crtm_conf) :: conf
  contains
    procedure :: setup  => ufo_radiancecrtm_setup
@@ -51,8 +51,8 @@ class(ufo_radiancecrtm),   intent(inout) :: self
 type(fckit_configuration), intent(in)    :: f_confOper
 integer(c_int),            intent(in)    :: channels(:)  !List of channels to use
 
-integer :: nvars_in, nvars_out
-integer :: ind, jspec, ich
+integer :: nvars_in
+integer :: ind, jspec
 character(len=max_string) :: err_msg
 type(fckit_configuration) :: f_confOpts
 
@@ -120,7 +120,7 @@ type(c_ptr), value,       intent(in) :: obss         !ObsSpace
 character(*), parameter :: PROGRAM_NAME = 'ufo_radiancecrtm_mod.F90'
 character(255) :: message, version
 integer        :: err_stat, alloc_stat
-integer        :: l, m, n, s
+integer        :: l, m, n
 type(ufo_geoval), pointer :: temp
 
 integer :: n_Profiles
@@ -248,7 +248,7 @@ character(max_string) :: err_msg
    !Assign the data from the GeoVaLs
    !--------------------------------
    call Load_Atm_Data(n_Profiles,n_Layers,geovals,atm,self%conf)
-   call Load_Sfc_Data(n_Profiles,n_Layers,n_Channels,self%channels,geovals,sfc,chinfo,obss,self%conf)
+   call Load_Sfc_Data(n_Profiles,n_Channels,self%channels,geovals,sfc,chinfo,obss,self%conf)
    call Load_Geom_Data(obss,geo)
 
    ! Call THE CRTM inspection
@@ -263,16 +263,16 @@ character(max_string) :: err_msg
    !! Parse hofxdiags%variables into independent/dependent variables and channel
    !! assumed formats:
    !!   jacobian var -->     <ystr>_jacobian_<xstr>_<chstr>
-   !!   non-jacobian var --> <xstr>_<chstr>
+   !!   non-jacobian var --> <ystr>_<chstr>
 
    jacobian_needed = .false.
    do jvar = 1, hofxdiags%nvar
       varstr = hofxdiags%variables(jvar)
-      str_pos(4) = len(varstr)
+      str_pos(4) = len_trim(varstr)
       if (str_pos(4) < 1) cycle
       str_pos(3) = index(varstr,"_",back=.true.)        !final "_" before channel
       read(varstr(str_pos(3)+1:str_pos(4)),*) ch_diags(jvar)
-      str_pos(1) = index(varstr,jacobianstr) - 1
+      str_pos(1) = index(varstr,jacobianstr) - 1        !position before jacobianstr
       if (str_pos(1) == 0) then
          write(err_msg,*) 'ufo_radiancecrtm_simobs: _jacobian_ must be // &
                            & preceded by dependent variable in config: ', &
@@ -283,11 +283,14 @@ character(max_string) :: err_msg
          ystr_diags(jvar) = varstr(1:str_pos(1))
          str_pos(2) = str_pos(1) + len(jacobianstr) + 1 !begin xstr_diags
          jacobian_needed = .true.
-         xstr_diags(jvar) = varstr(str_pos(2):str_pos(3)-1)
+         str_pos(4) = str_pos(3) - str_pos(2)
+         xstr_diags(jvar)(1:str_pos(4)) = varstr(str_pos(2):str_pos(3)-1)
+         xstr_diags(jvar)(str_pos(4)+1:) = ""
       else !null
          !Diagnostic is a dependent variable (y)
-         xstr_diags(jvar)=""
-         ystr_diags(jvar) = varstr(1:str_pos(3)-1)
+         xstr_diags(jvar) = ""
+         ystr_diags(jvar)(1:str_pos(3)-1) = varstr(1:str_pos(3)-1)
+         ystr_diags(jvar)(str_pos(3):) = ""
       end if 
    end do
 
@@ -392,6 +395,7 @@ character(max_string) :: err_msg
          call abor1_ftn(err_msg)
       end if
 
+      jchannel = -1
       do ichannel = 1, size(self%channels)
          if (ch_diags(jvar) == self%channels(ichannel)) then
             jchannel = ichannel

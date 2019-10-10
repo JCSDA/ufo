@@ -107,7 +107,7 @@ type(c_ptr), value,      intent(in)    :: obss
 
 character(len=*), parameter :: myname_="ufo_coolskin_simobs_tl"
 character(max_string) :: err_msg
-integer :: iobs, nobs, cnt, cnt_glb
+integer :: iobs, nobs
 type(ufo_geoval), pointer :: S_ns,H_I,H_s,R_nl,Td,u
 
 
@@ -159,7 +159,7 @@ type(c_ptr), value,      intent(in)    :: obss
 character(len=*), parameter :: myname_="ufo_coolskin_simobs_ad"
 character(max_string) :: err_msg
 
-integer :: iobs, nobs, cnt, cnt_glb
+integer :: iobs, nobs
 
 type(ufo_geoval), pointer :: S_ns, H_I, H_s, R_nl, Td, u
 

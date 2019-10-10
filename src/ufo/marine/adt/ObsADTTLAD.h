@@ -31,7 +31,6 @@ namespace ioda {
 namespace ufo {
   class GeoVaLs;
   class ObsBias;
-  class ObsBiasIncrement;
 
 // -----------------------------------------------------------------------------
 /// ADT for observation operator TL and AD class
@@ -44,18 +43,18 @@ class ObsADTTLAD : public LinearObsOperatorBase,
   virtual ~ObsADTTLAD();
 
   // Obs Operators
-  void setTrajectory(const GeoVaLs &, const ObsBias &);
-  void simulateObsTL(const GeoVaLs &, ioda::ObsVector &, const ObsBiasIncrement &) const;
-  void simulateObsAD(GeoVaLs &, const ioda::ObsVector &, ObsBiasIncrement &) const;
+  void setTrajectory(const GeoVaLs &, const ObsBias &) override;
+  void simulateObsTL(const GeoVaLs &, ioda::ObsVector &) const override;
+  void simulateObsAD(GeoVaLs &, const ioda::ObsVector &) const override;
 
   // Other
-  const oops::Variables & variables() const {return *varin_;}
+  const oops::Variables & variables() const override {return *varin_;}
 
   int & toFortran() {return keyOper_;}
   const int & toFortran() const {return keyOper_;}
 
  private:
-  void print(std::ostream &) const;
+  void print(std::ostream &) const override;
   F90hop keyOper_;
   const ioda::ObsSpace& odb_;
   std::unique_ptr<const oops::Variables> varin_;

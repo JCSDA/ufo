@@ -3,15 +3,7 @@ window_end: 2018-04-15T03:00:00Z
 
 Observations: 
  ObsTypes: 
- - ObsOperator:
-     name: CRTM
-     Absorbers: [H2O,O3,CO2]
-     Clouds: [Water, Ice]
-     ObsOptions:
-       Sensor_ID: amsua_n19
-       EndianType: little_endian
-       CoefficientPath: Data/
-   ObsSpace:
+ - ObsSpace:
      name: amsua_n19
      ObsDataIn: 
        obsfile: Data/amsua_n19_obs_2018041500_m.nc4
@@ -31,15 +23,14 @@ Observations:
        channels: 1-2,15
        minvalue: 100.0
        maxvalue: 500.0
-   - Filter: MW SeaIce Check
-     # check is specific to AMSU-A requires ch1, ch2 and ch15
-     # flags land along with sea-ice
+   - Filter: BlackList
+     variables: [brightness_temperature]
+     channels: 1-6,15
      where:
      - variable: land_area_fraction@GeoVaLs
        maxvalue: 0.05
-     # apply check to these channels
-     variables: [brightness_temperature]
-     channels: 1-6,15
-     limits:
-       SeaIce_threshold: 10.0
+     # check is specific to AMSU-A requires ch1, ch2 and ch15
+     # flags land along with sea-ice
+     - variable: Scattering@ObsFunction
+       minvalue: 10.0
    passedBenchmark: 1360      # number of passed obs

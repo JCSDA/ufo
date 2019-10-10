@@ -5,15 +5,13 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
  */
 
-#include "ufo/UfoTrait.h"
 #include "oops/runs/Run.h"
-
 #include "test/interface/ObsAuxControl.h"
+#include "ufo/UfoTrait.h"
 
 int main(int argc,  char ** argv) {
   oops::Run run(argc, argv);
   test::ObsAuxControl<ufo::UfoTrait> tests;
   run.execute(tests);
   return 0;
-};
-
+}

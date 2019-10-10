@@ -30,7 +30,6 @@ namespace ioda {
 namespace ufo {
   class GeoVaLs;
   class ObsBias;
-  class ObsBiasIncrement;
 
 // -----------------------------------------------------------------------------
 /// Identity TL/AD observation operator class
@@ -43,19 +42,19 @@ class ObsIdentityTLAD : public LinearObsOperatorBase,
   virtual ~ObsIdentityTLAD();
 
   // Obs Operators
-  void setTrajectory(const GeoVaLs &, const ObsBias &);
-  void simulateObsTL(const GeoVaLs &, ioda::ObsVector &, const ObsBiasIncrement &) const;
-  void simulateObsAD(GeoVaLs &, const ioda::ObsVector &, ObsBiasIncrement &) const;
+  void setTrajectory(const GeoVaLs &, const ObsBias &) override;
+  void simulateObsTL(const GeoVaLs &, ioda::ObsVector &) const override;
+  void simulateObsAD(GeoVaLs &, const ioda::ObsVector &) const override;
 
   // Other
-  const oops::Variables & variables() const {return varin_;}
+  const oops::Variables & variables() const override {return varin_;}
 
 
   int & toFortran() {return keyOperObsIdentity_;}
   const int & toFortran() const {return keyOperObsIdentity_;}
 
  private:
-  void print(std::ostream &) const;
+  void print(std::ostream &) const override;
   F90hop keyOperObsIdentity_;
   const ioda::ObsSpace& odb_;
   oops::Variables varin_;

@@ -8,7 +8,7 @@
 #include "ufo/filters/obsfunctions/ObsFunction.h"
 
 #include "ioda/ObsDataVector.h"
-#include "oops/base/Variables.h"
+#include "ufo/filters/Variables.h"
 
 namespace ufo {
 
@@ -31,8 +31,8 @@ void ObsFunction::compute(const ObsFilterData & in,
 
 // -----------------------------------------------------------------------------
 
-const oops::Variables & ObsFunction::requiredGeoVaLs() const {
-  return obsfct_->requiredGeoVaLs();
+const ufo::Variables & ObsFunction::requiredVariables() const {
+  return obsfct_->requiredVariables();
 }
 
 // -----------------------------------------------------------------------------

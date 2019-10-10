@@ -13,8 +13,6 @@ contains
 subroutine ufo_gnssro_2d_locs_init(self, locs, obss, t1, t2)
   use kinds
   use datetime_mod
-  use twindow_utils_mod
-  use fckit_log_module, only : fckit_log
   use obsspace_mod
   use ufo_gnssro_bndropp2d_mod
 

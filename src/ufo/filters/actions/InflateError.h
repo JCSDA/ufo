@@ -8,6 +8,7 @@
 #ifndef UFO_FILTERS_ACTIONS_INFLATEERROR_H_
 #define UFO_FILTERS_ACTIONS_INFLATEERROR_H_
 
+#include <string>
 #include <vector>
 
 #include "ioda/ObsDataVector.h"
@@ -15,6 +16,8 @@
 #include "ufo/filters/actions/FilterActionBase.h"
 
 namespace ufo {
+
+class ObsFilterData;
 
 // -----------------------------------------------------------------------------
 
@@ -24,9 +27,10 @@ class InflateError : public FilterActionBase {
   ~InflateError() {}
 
   void apply(const oops::Variables &, const std::vector<std::vector<bool>> &,
+             const ObsFilterData &,
              ioda::ObsDataVector<int> &, ioda::ObsDataVector<float> &) const override;
  private:
-  const float fact_;
+  const std::string strfactor_;
 };
 
 // -----------------------------------------------------------------------------

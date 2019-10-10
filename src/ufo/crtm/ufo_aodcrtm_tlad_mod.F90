@@ -215,7 +215,7 @@ type(CRTM_RTSolution_type), allocatable :: rts_K(:,:)
    !Assign the data from the GeoVaLs
    !--------------------------------
    CALL Load_Atm_Data(self%N_PROFILES,self%N_LAYERS,geovals,atm,self%conf)
-!   call Load_Sfc_Data(self%N_PROFILES,self%N_LAYERS,self%N_Channels,geovals,sfc,chinfo,obss,self%conf)
+!   call Load_Sfc_Data(self%N_PROFILES,self%N_Channels,geovals,sfc,chinfo,obss,self%conf)
 !   call Load_Geom_Data(obss,geo)
 
    IF (TRIM(self%conf%aerosol_option) /= "") &

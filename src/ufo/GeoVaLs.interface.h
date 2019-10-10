@@ -46,7 +46,10 @@ extern "C" {
   void ufo_geovals_dotprod_f90(const F90goms &, const F90goms &, double &);
   void ufo_geovals_minmaxavg_f90(const F90goms &, int &, int &, double &, double &, double &);
   void ufo_geovals_maxloc_f90(const F90goms &, double &, int &, int &);
-  void ufo_geovals_nlocs_f90(const F90goms &, int &);
+  void ufo_geovals_nlocs_f90(const F90goms &, size_t &);
+  void ufo_geovals_nlevs_f90(const F90goms &, const int &, const char *, int &);
+  void ufo_geovals_get2d_f90(const F90goms &, const int &, const char *, const int &,
+                           float &);
   void ufo_geovals_get_f90(const F90goms &, const int &, const char *, const int &,
                            const int &, float &);
   void ufo_geovals_read_file_f90(const F90goms &,

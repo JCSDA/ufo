@@ -46,15 +46,15 @@ class ObsGnssroBndROPP2D : public ObsOperatorBase,
   void simulateObs(const GeoVaLs &, ioda::ObsVector &, ObsDiagnostics &) const override;
 
 // Other
-  const oops::Variables & variables() const {return *varin_;}
+  const oops::Variables & variables() const override {return *varin_;}
 
-  Locations * locations(const util::DateTime &, const util::DateTime &) const;
+  Locations * locations(const util::DateTime &, const util::DateTime &) const override;
 
   int & toFortran() {return keyOperGnssroBndROPP2D_;}
   const int & toFortran() const {return keyOperGnssroBndROPP2D_;}
 
  private:
-  void print(std::ostream &) const;
+  void print(std::ostream &) const override;
   F90hop keyOperGnssroBndROPP2D_;
   const ioda::ObsSpace& odb_;
   std::unique_ptr<const oops::Variables> varin_;

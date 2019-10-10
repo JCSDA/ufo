@@ -9,6 +9,7 @@
 
 #include "ioda/ObsDataVector.h"
 #include "oops/base/Variables.h"
+#include "ufo/filters/ObsFilterData.h"
 
 namespace ufo {
 
@@ -24,6 +25,7 @@ RejectObs::RejectObs(const eckit::Configuration & conf): flag_(conf.getInt("flag
 
 void RejectObs::apply(const oops::Variables & vars,
                       const std::vector<std::vector<bool>> & flagged,
+                      const ObsFilterData &,
                       ioda::ObsDataVector<int> & flags,
                       ioda::ObsDataVector<float> &) const {
   for (size_t jv = 0; jv < vars.size(); ++jv) {

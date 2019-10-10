@@ -22,12 +22,35 @@ namespace ufo {
 // -----------------------------------------------------------------------------
 
 ObsBiasCovariance::ObsBiasCovariance(const eckit::Configuration & conf)
-  : variance_(), conf_(conf) {
+  : conf_(conf), variance_() {
   std::unique_ptr<ObsBiasBase> biasbase(ObsBiasFactory::create(conf));
   if (biasbase) {
     for (std::size_t ii = 0; ii < biasbase->size(); ++ii)
       variance_.push_back(1.0);
   }
+}
+
+// -----------------------------------------------------------------------------
+
+void ObsBiasCovariance::linearize(const ObsBias &) {
+  oops::Log::warning() << "ObsBiasCovariance::linearize is not implmented" << std::endl;
+}
+
+// -----------------------------------------------------------------------------
+
+void ObsBiasCovariance::multiply(const ObsBiasIncrement & bx1, ObsBiasIncrement & bx2) const {
+  bx2 = bx1;
+  for (std::size_t ii = 0; ii < variance_.size(); ++ii)
+      bx2[ii] *= variance_[ii];
+}
+
+// -----------------------------------------------------------------------------
+
+void ObsBiasCovariance::inverseMultiply(const ObsBiasIncrement & bx1,
+                                        ObsBiasIncrement & bx2) const {
+  bx2 = bx1;
+  for (std::size_t ii = 0; ii < variance_.size(); ++ii)
+      bx2[ii] /= variance_[ii];
 }
 
 // -----------------------------------------------------------------------------

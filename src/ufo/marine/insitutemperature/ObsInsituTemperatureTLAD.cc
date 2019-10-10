@@ -17,7 +17,6 @@
 #include "oops/util/Logger.h"
 #include "ufo/GeoVaLs.h"
 #include "ufo/ObsBias.h"
-#include "ufo/ObsBiasIncrement.h"
 
 namespace ufo {
 
@@ -28,7 +27,7 @@ static LinearObsOperatorMaker<ObsInsituTemperatureTLAD>
 
 ObsInsituTemperatureTLAD::ObsInsituTemperatureTLAD(const ioda::ObsSpace & odb,
                                                    const eckit::Configuration & config)
-  : keyOper_(0), varin_(), odb_(odb)
+  : keyOper_(0), odb_(odb), varin_()
 {
   const std::vector<std::string> vv{"sea_water_potential_temperature",
                                     "sea_water_salinity",
@@ -55,8 +54,8 @@ void ObsInsituTemperatureTLAD::setTrajectory(const GeoVaLs & geovals, const ObsB
 
 // -----------------------------------------------------------------------------
 
-void ObsInsituTemperatureTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec,
-                             const ObsBiasIncrement & bias) const {
+void ObsInsituTemperatureTLAD::simulateObsTL(const GeoVaLs & geovals,
+                                             ioda::ObsVector & ovec) const {
   ufo_insitutemperature_simobs_tl_f90(keyOper_, geovals.toFortran(), odb_,
                                       ovec.size(), ovec.toFortran());
   oops::Log::trace() << "ObsInsituTemperatureTLAD: TL observation operator run" << std::endl;
@@ -64,8 +63,8 @@ void ObsInsituTemperatureTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsV
 
 // -----------------------------------------------------------------------------
 
-void ObsInsituTemperatureTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec,
-                             ObsBiasIncrement & bias) const {
+void ObsInsituTemperatureTLAD::simulateObsAD(GeoVaLs & geovals,
+                                             const ioda::ObsVector & ovec) const {
   ufo_insitutemperature_simobs_ad_f90(keyOper_, geovals.toFortran(), odb_,
                                       ovec.size(), ovec.toFortran());
   oops::Log::trace() << "ObsInsituTemperatureTLAD: adjoint observation operator run" << std::endl;

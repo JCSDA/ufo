@@ -9,10 +9,6 @@ Observations:
         obsfile: Data/aircraft_obs_2018041500_m.nc4
       simulate:
         variables: [air_temperature]
-    ObsOperator:
-      name: VertInterp
-    GeoVaLs:
-      filename: Data/aircraft_geoval_2018041500_m.nc4
     ObsFilters:
     - Filter: Gaussian_Thinning
       horizontal_mesh:   1111.949266 #km = 10 deg at equator
@@ -23,10 +19,6 @@ Observations:
         obsfile: Data/aircraft_obs_2018041500_m.nc4
       simulate:
         variables: [air_temperature]
-    ObsOperator:
-      name: VertInterp
-    GeoVaLs:
-      filename: Data/aircraft_geoval_2018041500_m.nc4
     ObsFilters:
     - Filter: Gaussian_Thinning
       horizontal_mesh:   1111.949266 #km = 10 deg at equator

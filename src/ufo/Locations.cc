@@ -13,6 +13,7 @@
 #include "eckit/config/Configuration.h"
 #include "eckit/exception/Exceptions.h"
 
+#include "oops/util/DateTime.h"
 #include "oops/util/Logger.h"
 #include "oops/util/Random.h"
 
@@ -57,58 +58,26 @@ Locations::Locations(const ioda::ObsSpace & odb,
  */
 
 Locations::Locations(const eckit::Configuration & conf) {
-  std::vector<double> lats = conf.getDoubleVector("lats");
-  std::vector<double> lons = conf.getDoubleVector("lons");
+  const eckit::LocalConfiguration obsconf(conf, "ObsSpace");
+  const util::DateTime bgn = util::DateTime(conf.getString("window_begin"));
+  const util::DateTime end = util::DateTime(conf.getString("window_end"));
 
-  ASSERT(lats.size() == lons.size());
-  int nloc = lats.size();
+  ioda::ObsSpace obspace(obsconf, bgn, end);
+  const int nlocs = obspace.nlocs();
 
-  int rdist = 0;
+  std::vector<double> lats(nlocs);
+  std::vector<double> lons(nlocs);
+  obspace.get_db("MetaData", "latitude", lats.size(), lats.data());
+  obspace.get_db("MetaData", "longitude", lons.size(), lons.data());
 
-  if (conf.has("Nrandom")) {
-    int Nrandom = conf.getInt("Nrandom");
+  ufo_locs_create_f90(keyLoc_, nlocs, &lats[0], &lons[0]);
+}
 
-    unsigned int rseed;
-    if (conf.has("random_seed")) {
-      rseed = conf.getInt("random_seed");
-    } else {
-      rseed = std::time(0);
-    }
-
-    // random longitudes
-    std::vector<double> lonrange;
-    if (conf.has("lonrange")) {
-      std::vector<double> config_lonrange = conf.getDoubleVector("lonrange");
-      ASSERT(config_lonrange.size() == 2);
-      lonrange.assign(begin(config_lonrange), end(config_lonrange));
-    } else {
-      lonrange.push_back(0.0);
-      lonrange.push_back(360.0);
-    }
-    util::UniformDistribution<double> xx(Nrandom, lonrange[0], lonrange[1], rseed);
-    for (size_t jj=0; jj < Nrandom; ++jj) lons.push_back(xx[jj]);
-
-    // random latitudes
-    std::vector<double> latrange;
-    if (conf.has("latrange")) {
-      std::vector<double> config_latrange = conf.getDoubleVector("latrange");
-      ASSERT(config_latrange.size() == 2);
-      latrange.assign(begin(config_latrange), end(config_latrange));
-    } else {
-      latrange.push_back(-90.0);
-      latrange.push_back(90.0);
-    }
-    util::UniformDistribution<double> yy(Nrandom, latrange[0], latrange[1], rseed);
-    for (size_t jj=0; jj < Nrandom; ++jj) lats.push_back(yy[jj]);
-
-    nloc += Nrandom;
-
-    if (conf.has("Rdist")) {
-      rdist = conf.getInt("Rdist");
-    }
-  }
-
-  ufo_locs_create_f90(keyLoc_, nloc, &lats[0], &lons[0], rdist);
+// -----------------------------------------------------------------------------
+Locations & Locations::operator+=(const Locations & other) {
+  F90locs otherKeyLoc_ = other.toFortran();
+  ufo_locs_concatenate_f90(keyLoc_, otherKeyLoc_);
+  return *this;
 }
 
 // -----------------------------------------------------------------------------
@@ -128,17 +97,22 @@ int Locations::nobs() const {
 // -----------------------------------------------------------------------------
 
 void Locations::print(std::ostream & os) const {
-  int nobs;
+  int nobs, indx, max_indx, i(0);
   ufo_locs_nobs_f90(keyLoc_, nobs);
-  os << "Locations: " << nobs << " locations: ";
+  ufo_locs_indx_f90(keyLoc_, i, indx, max_indx);
+  os << "Locations: " << nobs << " locations: "
+                      << max_indx << " maximum indx:";
 
   // Write lat and lon to debug stream
   double lat, lon;
 
   for (int i=0; i < nobs; ++i) {
+    ufo_locs_indx_f90(keyLoc_, i, indx, max_indx);
     ufo_locs_coords_f90(keyLoc_, i, lat, lon);
-    oops::Log::debug() << "obs " << i << ": " << std::setprecision(2) << std::fixed
-                       << "lat = " << lat << ", lon = " << lon << std::endl;
+
+    oops::Log::debug() << "obs " << i << ": " << "gv index = " << indx
+                       << std::setprecision(2) << std::fixed
+                       << " lat = " << lat << ", lon = " << lon << std::endl;
   }
 }
 

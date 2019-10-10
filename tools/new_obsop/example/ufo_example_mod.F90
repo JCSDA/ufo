@@ -17,15 +17,14 @@ module ufo_example_mod
 
  implicit none
  private
- integer, parameter :: max_string=800
 
 !> Fortran derived type for the observation type
 ! TODO: fill in if needed
  type, public :: ufo_example
  private
    integer, public :: nvars_in, nvars_out
-   character(len=max_string), public, allocatable :: varin(:)
-   character(len=max_string), public, allocatable :: varout(:)
+   character(len=MAXVARLEN), public, allocatable :: varin(:)
+   character(len=MAXVARLEN), public, allocatable :: varout(:)
  contains
    procedure :: setup  => ufo_example_setup
    procedure :: simobs => ufo_example_simobs

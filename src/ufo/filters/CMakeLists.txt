@@ -8,20 +8,18 @@ set ( filters_files
       BackgroundCheck.h
       BlackList.cc
       BlackList.h
-      DiagBoundsCheck.cc
-      DiagBoundsCheck.h
       DifferenceCheck.cc
       DifferenceCheck.h
+      FilterBase.cc
+      FilterBase.h
+      getScalarOrFilterData.cc
+      getScalarOrFilterData.h
       ObsBoundsCheck.cc
       ObsBoundsCheck.h
       MWCLWCheck.cc
       MWCLWCheck.h
-      MWSeaIceCheck.cc
-      MWSeaIceCheck.h
       ObsDomainCheck.cc
       ObsDomainCheck.h
-      ObsErrInflationCheck.cc
-      ObsErrInflationCheck.h
       ObsDomainErrCheck.cc
       ObsDomainErrCheck.h
       ObsFilterData.cc
@@ -33,6 +31,8 @@ set ( filters_files
       QCmanager.h
       Thinning.cc
       Thinning.h
+      Variables.cc
+      Variables.h
       Gaussian_Thinning.cc
       Gaussian_Thinning.h
       processWhere.cc

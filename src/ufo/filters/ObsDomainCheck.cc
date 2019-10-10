@@ -18,7 +18,6 @@
 #include "oops/util/abor1_cpp.h"
 #include "oops/util/Logger.h"
 #include "ufo/filters/obsfunctions/ObsFunction.h"
-#include "ufo/filters/processWhere.h"
 #include "ufo/filters/QCflags.h"
 #include "ufo/UfoTrait.h"
 #include "ufo/utils/SplitVarGroup.h"
@@ -29,12 +28,10 @@ namespace ufo {
 
 ObsDomainCheck::ObsDomainCheck(ioda::ObsSpace & obsdb, const eckit::Configuration & config,
                                boost::shared_ptr<ioda::ObsDataVector<int> > flags,
-                               boost::shared_ptr<ioda::ObsDataVector<float> >)
-  : obsdb_(obsdb), data_(obsdb_), config_(config),
-    geovars_(preProcessWhere(config_, "GeoVaLs")), diagvars_(), flags_(*flags)
+                               boost::shared_ptr<ioda::ObsDataVector<float> > obserr)
+  : FilterBase(obsdb, config, flags, obserr)
 {
   oops::Log::debug() << "ObsDomainCheck: config = " << config_ << std::endl;
-  oops::Log::debug() << "ObsDomainCheck: geovars = " << geovars_ << std::endl;
 }
 
 // -----------------------------------------------------------------------------
@@ -43,7 +40,8 @@ ObsDomainCheck::~ObsDomainCheck() {}
 
 // -----------------------------------------------------------------------------
 
-void ObsDomainCheck::priorFilter(const GeoVaLs & gv) const {
+void ObsDomainCheck::applyFilter(const std::vector<bool> & inside,
+                                 std::vector<std::vector<bool>> & flagged) const {
   const oops::Variables vars(config_);
   if (vars.size() == 0) {
     oops::Log::error() << "No variables will be filtered out in filter "
@@ -51,9 +49,6 @@ void ObsDomainCheck::priorFilter(const GeoVaLs & gv) const {
     ABORT("No variables specified to be filtered out in filter");
   }
   const oops::Variables observed = obsdb_.obsvariables();
-
-  data_.associate(gv);
-  std::vector<bool> inside = processWhere(config_, data_);
 
   for (size_t jv = 0; jv < vars.size(); ++jv) {
     size_t iv = observed.find(vars[jv]);

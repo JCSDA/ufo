@@ -10,56 +10,43 @@
 
 #include <ostream>
 #include <string>
+#include <vector>
+
+#include "boost/shared_ptr.hpp"
 
 #include "ioda/ObsDataVector.h"
-#include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
-#include "oops/util/Printable.h"
+#include "ufo/filters/FilterBase.h"
 #include "ROobserror.interface.h"
 
 namespace eckit {
   class Configuration;
 }
 
-namespace oops {
-  class Variables;
-}
-
 namespace ioda {
+  template <typename DATATYPE> class ObsDataVector;
   class ObsSpace;
-  class ObsVector;
 }
 
 namespace ufo {
-  class GeoVaLs;
-  class ObsDiagnostics;
 
 /// ROobserror: calculate observational errors
 
-class ROobserror : public util::Printable,
+class ROobserror : public FilterBase,
                    private util::ObjectCounter<ROobserror> {
  public:
   static const std::string classname() {return "ufo::ROobserror";}
 
-  ROobserror(const ioda::ObsSpace &, const eckit::Configuration &,
+  ROobserror(ioda::ObsSpace &, const eckit::Configuration &,
              boost::shared_ptr<ioda::ObsDataVector<int> >,
              boost::shared_ptr<ioda::ObsDataVector<float> >);
   ~ROobserror();
 
-  void preProcess() const {}
-  void priorFilter(const GeoVaLs &) const;
-  void postFilter(const ioda::ObsVector &, const ObsDiagnostics &) const {}
-
-  const oops::Variables & requiredGeoVaLs() const {return geovars_;}
-  const oops::Variables & requiredHdiagnostics() const {return diagvars_;}
-
  private:
-  void print(std::ostream &) const;
+  void print(std::ostream &) const override;
+  void applyFilter(const std::vector<bool> &, std::vector<std::vector<bool>> &) const override;
+
   F90roerr key_;
-  const oops::Variables geovars_;
-  const oops::Variables diagvars_;
-  boost::shared_ptr<ioda::ObsDataVector<int> > flags_;
-  boost::shared_ptr<ioda::ObsDataVector<float> > obserr_;
 };
 
 }  // namespace ufo

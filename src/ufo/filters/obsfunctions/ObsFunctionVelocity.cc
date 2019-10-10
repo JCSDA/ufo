@@ -11,7 +11,6 @@
 #include <vector>
 
 #include "ioda/ObsDataVector.h"
-#include "oops/base/Variables.h"
 
 namespace ufo {
 
@@ -20,7 +19,9 @@ static ObsFunctionMaker<ObsFunctionVelocity> makerObsFuncVelocity_("Velocity");
 // -----------------------------------------------------------------------------
 
 ObsFunctionVelocity::ObsFunctionVelocity()
-  : geovars_() {
+  : invars_() {
+  invars_ += "eastward_wind@ObsValue";
+  invars_ += "northward_wind@ObsValue";
 }
 
 // -----------------------------------------------------------------------------
@@ -33,8 +34,9 @@ void ObsFunctionVelocity::compute(const ObsFilterData & in,
                                   ioda::ObsDataVector<float> & out) const {
   // TODO(AS): should use constants for variable names
   const size_t nlocs = in.nlocs();
-  std::vector<float> u = in.get("eastward_wind@ObsValue");
-  std::vector<float> v = in.get("northward_wind@ObsValue");
+  std::vector<float> u, v;
+  in.get("eastward_wind@ObsValue", u);
+  in.get("northward_wind@ObsValue", v);
   for (size_t jj = 0; jj < nlocs; ++jj) {
     out[0][jj] = sqrt(pow(u[jj], 2) + pow(v[jj], 2));
     oops::Log::debug() << "u, v: " << u[jj] << ", "
@@ -44,8 +46,8 @@ void ObsFunctionVelocity::compute(const ObsFilterData & in,
 
 // -----------------------------------------------------------------------------
 
-const oops::Variables & ObsFunctionVelocity::requiredGeoVaLs() const {
-  return geovars_;
+const ufo::Variables & ObsFunctionVelocity::requiredVariables() const {
+  return invars_;
 }
 
 // -----------------------------------------------------------------------------

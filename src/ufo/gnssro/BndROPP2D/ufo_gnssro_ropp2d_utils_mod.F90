@@ -60,7 +60,7 @@ subroutine init_ropp_2d_statevec(rlon,rlat,temp,shum,pres,phi,lm, x, n_horiz, dt
   real(kind=kind_real), dimension(n_horiz), intent(in)     ::   rlon, rlat
   real(kind=kind_real), dimension(lm,n_horiz), intent(in)  :: temp,shum,pres,phi
 ! Local variables
-  integer :: n,i,j,k
+  integer :: n,k
   integer, optional, intent(in)  :: iflip
 !-------------------------------------------------------------------------
 ! number of profiles in plane
@@ -154,7 +154,6 @@ subroutine init_ropp_2d_statevec_ad(temp_d,shum_d,pres_d,phi_d,lm,x_ad,n_horiz,i
 
 ! Local variables
   integer ::  n,j,k
-  real    :: rlon_local
   integer, optional, intent(in)  :: iflip
 !-------------------------------------------------------------------------
   n = lm

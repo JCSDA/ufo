@@ -19,7 +19,7 @@ module ufo_gnssro_bndropp2d_mod_c
 #define LISTED_TYPE ufo_gnssro_BndROPP2D
   
   !> Linked list interface - defines registry_t type
-#include "../../linkedList_i.f"
+#include "oops/util/linkedList_i.f"
   
   !> Global registry
   type(registry_t) :: ufo_gnssro_BndROPP2D_registry
@@ -28,7 +28,7 @@ module ufo_gnssro_bndropp2d_mod_c
 contains
   ! ------------------------------------------------------------------------------
   !> Linked list implementation
-#include "../../linkedList_c.f"
+#include "oops/util/linkedList_c.f"
   
 ! ------------------------------------------------------------------------------
   
@@ -92,7 +92,6 @@ type(ufo_locs),              pointer :: locs
 type(ufo_gnssro_BndROPP2D),  pointer :: self
 
 integer, parameter            :: max_string = 800
-character(max_string)         :: err_msg
 type(datetime)                :: t1, t2
 
 call c_f_datetime(c_t1, t1)

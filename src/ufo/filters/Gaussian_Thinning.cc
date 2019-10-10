@@ -30,8 +30,8 @@ namespace ufo {
 
 Gaussian_Thinning::Gaussian_Thinning(ioda::ObsSpace & obsdb, const eckit::Configuration & config,
                                      boost::shared_ptr<ioda::ObsDataVector<int> > flags,
-                                     boost::shared_ptr<ioda::ObsDataVector<float> >)
-  : obsdb_(obsdb), config_(config), geovars_(), diagvars_(), flags_(*flags)
+                                     boost::shared_ptr<ioda::ObsDataVector<float> > obserr)
+  : FilterBase(obsdb, config, flags, obserr)
 {
   oops::Log::debug() << "Gaussian_Thinning: config = " << config_ << std::endl;
 }
@@ -42,8 +42,8 @@ Gaussian_Thinning::~Gaussian_Thinning() {}
 
 // -----------------------------------------------------------------------------
 
-int Gaussian_Thinning::ll_to_idx(float in_lon, float in_lat, int n_lats,
-                                 const std::vector<int> &n_lons) {
+int Gaussian_Thinning::ll_to_idx(float in_lon, float in_lat, size_t n_lats,
+                                 const std::vector<size_t> &n_lons) {
   // function to get i from lon/lat
   int ilat__ = 0;
   int ilon__ = 0;
@@ -61,7 +61,9 @@ int Gaussian_Thinning::ll_to_idx(float in_lon, float in_lat, int n_lats,
   return ilon__;
 }
 
-int Gaussian_Thinning::pres_to_idx(float in_pres, int n_vmesh,
+// -----------------------------------------------------------------------------
+
+int Gaussian_Thinning::pres_to_idx(float in_pres, size_t n_vmesh,
                                    float vertical_mesh, float vertical_max) {
   // function to go from pres to k (vert. index) from pressure
   int idx__ = 0;
@@ -75,6 +77,8 @@ int Gaussian_Thinning::pres_to_idx(float in_pres, int n_vmesh,
   }
   return idx__;
 }
+
+// -----------------------------------------------------------------------------
 
 int Gaussian_Thinning::dist_to_centroid(float ob_lon, float ob_lat, float c_lon, float c_lat) {
   // function to calculate distance from centroid
@@ -94,7 +98,10 @@ int Gaussian_Thinning::dist_to_centroid(float ob_lon, float ob_lat, float c_lon,
   return dij;
 }
 
-void Gaussian_Thinning::preProcess() const {
+// -----------------------------------------------------------------------------
+
+void Gaussian_Thinning::applyFilter(const std::vector<bool> & apply,
+                                    std::vector<std::vector<bool>> & flagged) const {
   const size_t nobs = obsdb_.nlocs();
   const oops::Variables vars = obsdb_.obsvariables();
   const float re = Constants::mean_earth_rad;  // km
@@ -117,7 +124,8 @@ void Gaussian_Thinning::preProcess() const {
   float cur_radius, cur_nlons;
   float clat, clon;
   float fn_vmesh;
-  int nlon, n_mesh, i_mesh, n_vmesh, i_vmesh, n_lats;
+  int nlon, i_mesh, i_vmesh;
+  size_t n_lats, n_mesh, n_vmesh;
   float ob_lon, ob_lat, dist;
   int ob_idx, ob_vidx;
 
@@ -135,7 +143,7 @@ void Gaussian_Thinning::preProcess() const {
 
   // get # of bins in lat direction
   n_lats = half_circum/grid_dist_km;
-  std::vector<int> n_lons(n_lats);
+  std::vector<size_t> n_lons(n_lats);
 
   // construct bins in lon direction (variable as f(lat)); count total
   n_mesh = 0;
@@ -183,7 +191,6 @@ void Gaussian_Thinning::preProcess() const {
   }
   oops::Log::debug() << "Gaussian_Thinning: number of vertical mesh bins = " << n_vmesh
                                                                              << std::endl;
-
 
   /* winner and scoring arrays - each mesh point will have an index corresponding to the winner and the 
      score.  Those which win survive, those which do not will get the QCflags::thinned label slapped on

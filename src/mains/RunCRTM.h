@@ -1,8 +1,8 @@
 /*
  * (C) Copyright 2017 UCAR
- * 
+ *
  * This software is licensed under the terms of the Apache Licence Version 2.0
- * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
 #ifndef MAINS_RUNCRTM_H_
@@ -18,6 +18,7 @@
 #include "oops/interface/ObsAuxControl.h"
 #include "oops/interface/ObsOperator.h"
 #include "oops/interface/ObsVector.h"
+#include "oops/parallel/mpi/mpi.h"
 #include "oops/runs/Application.h"
 #include "oops/util/DateTime.h"
 #include "oops/util/Duration.h"
@@ -36,7 +37,7 @@ template <typename MODEL> class RunCRTM : public oops::Application {
 
  public:
 // -----------------------------------------------------------------------------
-  RunCRTM() {}
+  explicit RunCRTM(const eckit::mpi::Comm & comm = oops::mpi::comm()) : Application(comm) {}
 // -----------------------------------------------------------------------------
   virtual ~RunCRTM() {}
 // -----------------------------------------------------------------------------

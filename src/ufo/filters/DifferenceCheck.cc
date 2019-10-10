@@ -19,7 +19,6 @@
 #include "oops/interface/ObsFilter.h"
 #include "oops/util/Logger.h"
 
-#include "ufo/filters/processWhere.h"
 #include "ufo/filters/QCflags.h"
 #include "ufo/GeoVaLs.h"
 #include "ufo/UfoTrait.h"
@@ -29,23 +28,15 @@ namespace ufo {
 
 // -----------------------------------------------------------------------------
 
-DifferenceCheck::DifferenceCheck(ioda::ObsSpace & os, const eckit::Configuration & config,
+DifferenceCheck::DifferenceCheck(ioda::ObsSpace & obsdb, const eckit::Configuration & config,
                                  boost::shared_ptr<ioda::ObsDataVector<int> > flags,
-                                 boost::shared_ptr<ioda::ObsDataVector<float> >)
-  : obsdb_(os), data_(obsdb_), flags_(*flags), config_(config), geovars_(), diagvars_(),
+                                 boost::shared_ptr<ioda::ObsDataVector<float> > obserr)
+  : FilterBase(obsdb, config, flags, obserr),
     ref_(config_.getString("reference")), val_(config_.getString("value"))
 {
   oops::Log::trace() << "DifferenceCheck contructor starting" << std::endl;
-
-
-  std::string var, grp;
-// Reference setup
-  splitVarGroup(ref_, var, grp);
-  if (grp == "GeoVaLs") geovars_.push_back(var);
-
-// Value to compare setup
-  splitVarGroup(val_, var, grp);
-  if (grp == "GeoVaLs") geovars_.push_back(var);
+  allvars_ += ref_;
+  allvars_ += val_;
 }
 
 // -----------------------------------------------------------------------------
@@ -56,7 +47,8 @@ DifferenceCheck::~DifferenceCheck() {
 
 // -----------------------------------------------------------------------------
 
-void DifferenceCheck::priorFilter(const GeoVaLs & gv) const {
+void DifferenceCheck::applyFilter(const std::vector<bool> & apply,
+                                  std::vector<std::vector<bool>> & flagged) const {
   oops::Log::trace() << "DifferenceCheck priorFilter" << std::endl;
 
   const float missing = util::missingValue(missing);
@@ -73,13 +65,10 @@ void DifferenceCheck::priorFilter(const GeoVaLs & gv) const {
     vmax = thresh;
   }
 
-// Process "where" mask
-  data_.associate(gv);
-  std::vector<bool> apply = processWhere(config_, data_);
-
 // Get reference values and values to compare (as floats)
-  std::vector<float> ref = data_.get(ref_);
-  std::vector<float> val = data_.get(val_);
+  std::vector<float> ref, val;
+  data_.get(ref_, ref);
+  data_.get(val_, val);
   ASSERT(ref.size() == val.size());
 
 // Loop over all obs

@@ -1,0 +1,16 @@
+---
+Variables:
+  - variables: [brightness_temperature@ObsValue]
+    channels: 1, 4-5
+    reference: [brightness_temperature_1@ObsValue, brightness_temperature_4@ObsValue, brightness_temperature_5@ObsValue]
+  - variables: [latitude@MetaData, height@MetaData]
+    reference: [latitude@MetaData, height@MetaData]
+  - variable: longitude@MetaData
+    reference: [longitude@MetaData]
+Variables with channels:
+  - variable name: brightness_temperature@ObsValue
+    channels: 1, 4-5
+    reference: [brightness_temperature_1@ObsValue, brightness_temperature_4@ObsValue, brightness_temperature_5@ObsValue]
+  - variable name: optical_thickness_of_atmosphere_layer@ObsDiag
+    channels: 23-25
+    reference: [optical_thickness_of_atmosphere_layer_23@ObsDiag, optical_thickness_of_atmosphere_layer_24@ObsDiag, optical_thickness_of_atmosphere_layer_25@ObsDiag]
