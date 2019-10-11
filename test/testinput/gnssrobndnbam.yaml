@@ -18,7 +18,7 @@ Observations:
      ObsDataIn: 
        obsfile: Data/gnssro_obs_2018041500_l.nc4
        obsgrouping: 
-         group_varable: "record_number"
+         group_variable: "record_number"
          sort_variable: "impact_height"
          sort_order: "ascending"
      ObsDataOut:
