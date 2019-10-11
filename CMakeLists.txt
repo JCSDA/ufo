@@ -13,6 +13,8 @@ project( ufo C CXX Fortran )
 
 set( CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake;${CMAKE_MODULE_PATH})
 
+set( CMAKE_DIRECTORY_LABELS "ufo" )
+
 set( ECBUILD_DEFAULT_BUILD_TYPE Release )
 set( ENABLE_OS_TESTS           OFF CACHE BOOL "Disable OS tests" FORCE )
 set( ENABLE_LARGE_FILE_SUPPORT OFF CACHE BOOL "Disable testing of large file support" FORCE )
@@ -42,7 +44,7 @@ include_directories( ${Boost_INCLUDE_DIR} )
 # NetCDF
 set( NETCDF_F90 ON CACHE BOOL "Compile with Fortran NetCDF" )
 find_package( NetCDF REQUIRED )
-include_directories( ${NETCDF_INCLUDE_DIR} )
+include_directories( ${NETCDF_INCLUDE_DIRS} )
 
 # eckit
 ecbuild_use_package( PROJECT eckit VERSION 0.18.0 REQUIRED )
@@ -94,7 +96,7 @@ endif( ${ROPP-UFO_FOUND} )
 # Export package info
 ################################################################################
 
-list( APPEND UFO_TPLS oops ioda crtm)
+list( APPEND UFO_TPLS oops ioda crtm )
 
 if( ${GSW_FOUND} )
     list ( APPEND UFO_TPLS gsw)

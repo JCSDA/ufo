@@ -11,17 +11,19 @@ module ufo_locs_mod
 use datetime_mod
 use iso_c_binding
 use kinds
+use fckit_log_module, only : fckit_log
 
 implicit none
 private
 public :: ufo_locs, ufo_locs_create, ufo_locs_setup, ufo_locs_delete
-public :: ufo_locs_init
+public :: ufo_locs_init, ufo_locs_concatenate
 
 ! ------------------------------------------------------------------------------
 
 !> Fortran derived type to hold observation locations
 type :: ufo_locs
   integer :: nlocs
+  integer :: max_indx
   real(kind_real), allocatable, dimension(:) :: lat     !< latitude
   real(kind_real), allocatable, dimension(:) :: lon     !< longitude
   type(datetime),  allocatable, dimension(:) :: time    !< obs-time
@@ -43,6 +45,7 @@ integer :: n
 character(len=20) :: fstring
 
 self%nlocs = nlocs
+self%max_indx = nlocs
 allocate(self%lat(nlocs), self%lon(nlocs), self%time(nlocs))
 allocate(self%indx(nlocs))
 self%lat(:) = lats(:)
@@ -69,6 +72,7 @@ integer :: n
 
 call ufo_locs_delete(self)
 
+self%max_indx = nlocs
 self%nlocs = nlocs
 allocate(self%lat(nlocs), self%lon(nlocs), self%time(nlocs), self%indx(nlocs))
 self%lat(:) = 0.0
@@ -92,8 +96,74 @@ if (allocated(self%lon)) deallocate(self%lon)
 if (allocated(self%time)) deallocate(self%time)
 if (allocated(self%indx)) deallocate(self%indx)
 self%nlocs = 0
+self%max_indx = -1 ! not set
 
 end subroutine ufo_locs_delete
+
+! ------------------------------------------------------------------------------
+
+subroutine ufo_locs_concatenate(self, other)
+implicit none
+type(ufo_locs), intent(inout) :: self
+type(ufo_locs), intent(in) :: other
+
+type(ufo_locs) :: temp_loc
+character(255) :: message
+integer :: n
+
+if ((self%max_indx < 0) .OR. (other%max_indx < 0)) then
+  write(message,'(A, A, I6, A, I6)') &
+    'ufo_locs_concatenate: either self or other needs to be constructed valid indices ', &
+    ' self%max_indx =', self%max_indx, ' other%max_indx = ', other%max_indx
+  call fckit_log%info(message)
+  stop
+end if
+
+! make a temporary copy of self
+temp_loc%nlocs = self%nlocs
+temp_loc%max_indx = self%max_indx
+allocate(temp_loc%lat(self%nlocs), temp_loc%lon(self%nlocs), &
+         temp_loc%time(self%nlocs), temp_loc%indx(self%nlocs))
+
+temp_loc%lat(:) = self%lat(:)
+temp_loc%lon(:) = self%lon(:)
+temp_loc%indx(:) = self%indx(:)
+do n = 1, self%nlocs
+  temp_loc%time(n) = self%time(n)
+end do
+
+! deallocate self
+call ufo_locs_delete(self)
+
+! reallocate self with combined concatenation
+self%nlocs = temp_loc%nlocs + other%nlocs
+allocate(self%lat(self%nlocs), self%lon(self%nlocs), &
+         self%time(self%nlocs), self%indx(self%nlocs))
+
+self%lat(1:temp_loc%nlocs) = temp_loc%lat(1:temp_loc%nlocs)
+self%lat(temp_loc%nlocs+1:) = other%lat(1:other%nlocs)
+
+self%lon(1:temp_loc%nlocs) = temp_loc%lon(1:temp_loc%nlocs)
+self%lon(temp_loc%nlocs+1:) = other%lon(1:other%nlocs)
+
+do n = 1, temp_loc%nlocs
+  self%time(n) = temp_loc%time(n)
+end do
+do n = 1, other%nlocs
+  self%time(temp_loc%nlocs + n) = other%time(n)
+end do
+
+self%indx(1:temp_loc%nlocs) = temp_loc%indx(1:temp_loc%nlocs)
+do n = 1, other%nlocs
+  self%indx(temp_loc%nlocs + n) = other%indx(n) + &
+                                  temp_loc%max_indx
+end do
+self%max_indx = temp_loc%max_indx + other%max_indx
+
+call ufo_locs_delete(temp_loc)
+
+end subroutine ufo_locs_concatenate
+
 
 ! ------------------------------------------------------------------------------
     
@@ -157,11 +227,13 @@ subroutine ufo_locs_init(self, obss, t1, t2)
     self%time(i) = date_time(tw_indx(i))
   enddo
   self%indx = tw_indx(1:tw_nlocs)
+  self%max_indx = nlocs
 
   do i = 1, nlocs
     call datetime_delete(date_time(i))
   enddo
   deallocate(date_time, lon, lat, tw_indx)
+
 
 end subroutine ufo_locs_init
 

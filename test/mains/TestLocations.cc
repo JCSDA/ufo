@@ -5,13 +5,12 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
  */
 
+#include "../ufo/Locations.h"
 #include "oops/runs/Run.h"
-#include "test/interface/Locations.h"
-#include "ufo/UfoTrait.h"
 
 int main(int argc,  char ** argv) {
   oops::Run run(argc, argv);
-  test::Locations<ufo::UfoTrait> tests;
+  ufo::test::Locations tests;
   run.execute(tests);
   return 0;
 }
