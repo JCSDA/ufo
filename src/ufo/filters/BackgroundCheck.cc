@@ -96,7 +96,8 @@ void BackgroundCheck::applyFilter(const std::vector<bool> & apply,
         ASSERT(hofx[jobs] != util::missingValue(hofx[jobs]));
 
 //      Threshold for current observation
-        float zz = std::min(abs_thr[jobs], thr[jobs] * obserr_[iv][jobs]);
+        float zz = (thr[jobs] == std::numeric_limits<float>::max()) ? abs_thr[jobs] :
+          std::min(abs_thr[jobs], thr[jobs] * obserr_[iv][jobs]);
         ASSERT(zz < std::numeric_limits<float>::max() && zz > 0.0);
 
 //      Apply bias correction
