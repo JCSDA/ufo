@@ -698,10 +698,6 @@ list( APPEND crtm_test_input
 AerosolCoeff/Little_Endian/AerosolCoeff.bin
 CloudCoeff/Little_Endian/CloudCoeff.bin
 EmisCoeff/MW_Water/Little_Endian/FASTEM6.MWwater.EmisCoeff.bin
-EmisCoeff/MW_Water/RSS_Emis/delta_EW_V5_B.dat
-EmisCoeff/MW_Water/RSS_Emis/deW_harm_coeffs_V9A_MI.dat
-EmisCoeff/MW_Water/RSS_Emis/dew_phi_VH34_harmonic_tab.dat
-EmisCoeff/MW_Water/RSS_Emis/dw_res_tab_spline.dat
 EmisCoeff/IR_Ice/SEcategory/Little_Endian/NPOESS.IRice.EmisCoeff.bin
 EmisCoeff/IR_Land/SEcategory/Little_Endian/NPOESS.IRland.EmisCoeff.bin
 EmisCoeff/IR_Snow/SEcategory/Little_Endian/NPOESS.IRsnow.EmisCoeff.bin
