@@ -81,7 +81,6 @@ list( APPEND ufo_test_input
   testinput/tprof.yaml
   testinput/geosaod.rc
   testinput/Chem_MieRegistry.rc
-  testinput/qc_blacklist_latitude.yaml
   testinput/variables.yaml
   testinput/windprof.yaml
 )
