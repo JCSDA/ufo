@@ -66,7 +66,6 @@ subroutine ufo_gnssro_bndnbam_simobs(self, geovals, hofx, obss)
   integer(c_size_t), allocatable          :: obsRecnum(:)
   real(kind_real), allocatable            :: temperature(:)
   real(kind_real)                         :: grids(ngrd)
-  real(kind_real)                         :: bendingAngle
   integer                                 :: iflip
   integer,allocatable                     :: nlocs_begin(:)
   integer,allocatable                     :: nlocs_end(:)
@@ -208,14 +207,13 @@ subroutine ufo_gnssro_bndnbam_simobs(self, geovals, hofx, obss)
     obs_loop: do icount = nlocs_begin(irec), nlocs_end(irec)
 
       iobs = iobs + 1
+      hofx(iobs) = missing
       call ufo_gnssro_bndnbam_simobs_single(   &
            obsLat(iobs), obsGeoid(iobs), obsLocR(iobs), obsImpP(iobs), &
            gesZ(:,iobs), gesT(:,iobs), gesQ(:,iobs), gesP(:,iobs), &
            grids, self%roconf%use_compress, &
            nlev, nlev1, nlevExt, nlevAdd, nlevCheck, ngrd, &
-           temperature(iobs), bendingAngle) 
-
-      hofx(iobs) = bendingAngle
+           temperature(iobs), hofx(iobs)) 
 
     end do obs_loop
   end do rec_loop
