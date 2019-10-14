@@ -7,13 +7,8 @@
 
 module ufo_example_mod
 
- use fckit_configuration_module, only: fckit_configuration
- use iso_c_binding
- use kinds
-
- use ufo_geovals_mod, only: ufo_geovals, ufo_geoval, ufo_geovals_get_var
+ use oops_variables_mod
  use ufo_vars_mod
- use obsspace_mod
 
  implicit none
  private
@@ -22,9 +17,8 @@ module ufo_example_mod
 ! TODO: fill in if needed
  type, public :: ufo_example
  private
-   integer, public :: nvars_in, nvars_out
-   character(len=MAXVARLEN), public, allocatable :: varin(:)
-   character(len=MAXVARLEN), public, allocatable :: varout(:)
+   type(oops_variables), public :: obsvars
+   type(oops_variables), public :: geovars
  contains
    procedure :: setup  => ufo_example_setup
    procedure :: simobs => ufo_example_simobs
@@ -35,18 +29,15 @@ contains
 
 ! ------------------------------------------------------------------------------
 ! TODO: add setup of your observation operator (optional)
-subroutine ufo_example_setup(self, f_conf, vars)
+subroutine ufo_example_setup(self, f_conf)
+use fckit_configuration_module, only: fckit_configuration
 implicit none
 class(ufo_example), intent(inout)     :: self
 type(fckit_configuration), intent(in) :: f_conf
-character(len=MAXVARLEN), dimension(:), intent(inout) :: vars
 
-  self%nvars_out = size(vars)
-  allocate(self%varout(self%nvars_out))
-  self%varout = vars
 
 ! TODO: add input variables (requested from the model)
-  self%nvars_in  = 0
+! self%geovars%push_back("variable name")
 
 end subroutine ufo_example_setup
 
@@ -56,15 +47,16 @@ subroutine destructor(self)
 implicit none
 type(ufo_example), intent(inout) :: self
 
-  if (allocated(self%varout)) deallocate(self%varout)
-  if (allocated(self%varin))  deallocate(self%varin)
-
 end subroutine destructor
 
 ! ------------------------------------------------------------------------------
 ! TODO: put code for your nonlinear observation operator in this routine
 ! Code in this routine is for example only, please remove and replace
 subroutine ufo_example_simobs(self, geovals, obss, nvars, nlocs, hofx)
+use kinds
+use ufo_geovals_mod, only: ufo_geovals, ufo_geoval, ufo_geovals_get_var
+use iso_c_binding
+use obsspace_mod
 implicit none
 class(ufo_example), intent(in)    :: self
 integer, intent(in)               :: nvars, nlocs
@@ -73,15 +65,15 @@ real(c_double),     intent(inout) :: hofx(nvars, nlocs)
 type(c_ptr), value, intent(in)    :: obss
 
 ! Local variables
-type(ufo_geoval), pointer :: geoval
-real(kind_real), dimension(:), allocatable :: obss_metadata
+!type(ufo_geoval), pointer :: geoval
+!real(kind_real), dimension(:), allocatable :: obss_metadata
 
 ! check if some variable is in geovals and get it (var_tv is defined in ufo_vars_mod)
-call ufo_geovals_get_var(geovals, var_tv, geoval)
+!call ufo_geovals_get_var(geovals, var_tv, geoval)
 
 ! get some metadata from obsspace
-allocate(obss_metadata(nlocs))
-call obsspace_get_db(obss, "MetaData", "some_metadata", obss_metadata)
+!allocate(obss_metadata(nlocs))
+!call obsspace_get_db(obss, "MetaData", "some_metadata", obss_metadata)
 
 ! put observation operator code here
 

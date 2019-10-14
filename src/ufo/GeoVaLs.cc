@@ -1,6 +1,6 @@
 /*
  * (C) Copyright 2017-2019 UCAR
- * 
+ *
  * This software is licensed under the terms of the Apache Licence Version 2.0
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
@@ -26,14 +26,14 @@ namespace ufo {
  *
  * \details This ufo::GeoVaLs constructor is typically used to initialize
  * GeoVaLs for the full time window (ufo::Locations hold all locations within
- * data assimilation window) and all variables (oops::Variables hold all 
+ * data assimilation window) and all variables (oops::Variables hold all
  * variables specified by the ObsOperator as input varialbes. Note that
  * nothing is allocated in the constructor currently, and getValues is
  * responsible for allocation
  *
  */
 GeoVaLs::GeoVaLs(const Locations & locs, const oops::Variables & vars)
-  : keyGVL_(-1), vars_(vars)
+  : keyGVL_(-1), vars_(vars), comm_(locs.getComm())
 {
   oops::Log::trace() << "GeoVaLs contructor starting" << std::endl;
   const eckit::Configuration * cvar = &vars_.toFortran();
@@ -50,7 +50,7 @@ GeoVaLs::GeoVaLs(const Locations & locs, const oops::Variables & vars)
 GeoVaLs::GeoVaLs(const eckit::Configuration & config,
                  const ioda::ObsSpace & obspace,
                  const oops::Variables & vars)
-  : keyGVL_(-1), vars_(vars)
+  : keyGVL_(-1), vars_(vars), comm_(obspace.comm())
 {
   oops::Log::trace() << "GeoVaLs constructor config starting" << std::endl;
   const eckit::Configuration * conf = &config;
@@ -64,7 +64,7 @@ GeoVaLs::GeoVaLs(const eckit::Configuration & config,
 /*! \brief Copy constructor */
 
 GeoVaLs::GeoVaLs(const GeoVaLs & other)
-  : keyGVL_(-1), vars_(other.vars_)
+  : keyGVL_(-1), vars_(other.vars_), comm_(other.comm_)
 {
   oops::Log::trace() << "GeoVaLs copy constructor starting" << std::endl;
   const eckit::Configuration * cvar = &vars_.toFortran();
@@ -84,12 +84,12 @@ GeoVaLs::~GeoVaLs() {
  *
  * \details This ufo::GeoVaLs constructor was introduced in May, 2018 for use with
  * the interpolation test.   If "analytic_init" is not specified in the
- * configuration then this does nothing.  If "analytic_init" **is** specified, then 
- * the values are replaced by values computed directly from one of several idealized 
+ * configuration then this does nothing.  If "analytic_init" **is** specified, then
+ * the values are replaced by values computed directly from one of several idealized
  * analytic states.
  *
  * \date May, 2018: Created (M. Miesch, JCSDA)
- * \date June, 2018: Split off from constructor into independent method 
+ * \date June, 2018: Split off from constructor into independent method
  *                   (M. Miesch, JCSDA)
  */
 void GeoVaLs::analytic_init(const Locations & locs,
@@ -190,7 +190,7 @@ GeoVaLs & GeoVaLs::operator/=(const GeoVaLs & other) {
 double GeoVaLs::dot_product_with(const GeoVaLs & other) const {
   oops::Log::trace() << "GeoVaLs::dot_product_with starting" << std::endl;
   double zz;
-  ufo_geovals_dotprod_f90(keyGVL_, other.keyGVL_, zz);
+  ufo_geovals_dotprod_f90(keyGVL_, other.keyGVL_, zz, comm_.name().size(), comm_.name().c_str());
   oops::Log::trace() << "GeoVaLs::dot_product_with done" << std::endl;
   return zz;
 }
@@ -273,7 +273,7 @@ void GeoVaLs::read(const eckit::Configuration & config,
 void GeoVaLs::write(const eckit::Configuration & config) const {
   oops::Log::trace() << "GeoVaLs::write starting" << std::endl;
   const eckit::Configuration * conf = &config;
-  ufo_geovals_write_file_f90(keyGVL_, &conf);
+  ufo_geovals_write_file_f90(keyGVL_, &conf, comm_.name().size(), comm_.name().c_str());
   oops::Log::trace() << "GeoVaLs::write done" << std::endl;
 }
 // -----------------------------------------------------------------------------

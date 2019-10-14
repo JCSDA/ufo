@@ -63,8 +63,13 @@ ecbuild_use_package( PROJECT oops VERSION 0.2.1 REQUIRED )
 include_directories( ${OOPS_INCLUDE_DIRS} )
 
 # crtm
-ecbuild_use_package( PROJECT crtm VERSION 2.2.3 REQUIRED )
-include_directories( ${CRTM_INCLUDE_DIRS} )
+ecbuild_use_package( PROJECT crtm VERSION 2.2.3 QUIET )
+if( ${CRTM_FOUND} )
+  message(STATUS "CRTM FOUND; Including CRTM Observation Operator")
+  include_directories( ${CRTM_INCLUDE_DIRS} )
+else( ${CRTM_FOUND} )
+  message(STATUS "CRTM NOT FOUND; Excluding CRTM Observation Operator")
+endif( ${CRTM_FOUND} )
 
 # RTTOV
 ecbuild_use_package( PROJECT rttov VERSION 12.1.0 QUIET )

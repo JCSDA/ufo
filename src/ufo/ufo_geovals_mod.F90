@@ -1,8 +1,8 @@
 !
 ! (C) Copyright 2017-2018 UCAR
-! 
+!
 ! This software is licensed under the terms of the Apache Licence Version 2.0
-! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
+! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 !
 module ufo_geovals_mod
 
@@ -139,7 +139,7 @@ end subroutine ufo_geovals_get_var
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_geovals_zero(self) 
+subroutine ufo_geovals_zero(self)
 implicit none
 type(ufo_geovals), intent(inout) :: self
 integer :: ivar
@@ -155,7 +155,7 @@ end subroutine ufo_geovals_zero
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_geovals_abs(self) 
+subroutine ufo_geovals_abs(self)
 implicit none
 type(ufo_geovals), intent(inout) :: self
 integer :: ivar
@@ -171,7 +171,7 @@ end subroutine ufo_geovals_abs
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_geovals_rms(self,vrms) 
+subroutine ufo_geovals_rms(self,vrms)
 implicit none
 type(ufo_geovals), intent(in) :: self
 real(kind_real), intent(inout) :: vrms
@@ -187,7 +187,7 @@ do jv = 1, self%nvar
    do jo = 1, self%nlocs
       vrms = vrms + Sum(self%geovals(jv)%vals(:,jo)**2)
       N=N+self%geovals(jv)%nval
-   enddo   
+   enddo
 enddo
 
 if ( N > 0) vrms = sqrt(vrms/N)
@@ -196,7 +196,7 @@ end subroutine ufo_geovals_rms
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_geovals_random(self) 
+subroutine ufo_geovals_random(self)
 use random_mod
 implicit none
 type(ufo_geovals), intent(inout) :: self
@@ -214,7 +214,7 @@ end subroutine ufo_geovals_random
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_geovals_scalmult(self, zz) 
+subroutine ufo_geovals_scalmult(self, zz)
 implicit none
 type(ufo_geovals), intent(inout) :: self
 real(kind_real), intent(in) :: zz
@@ -236,7 +236,7 @@ end subroutine ufo_geovals_scalmult
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_geovals_assign(self, rhs) 
+subroutine ufo_geovals_assign(self, rhs)
 implicit none
 type(ufo_geovals), intent(inout) :: self
 type(ufo_geovals), intent(in) :: rhs
@@ -277,7 +277,7 @@ end subroutine ufo_geovals_assign
 ! ------------------------------------------------------------------------------
 !> Sum of two GeoVaLs objects
 
-subroutine ufo_geovals_add(self, other) 
+subroutine ufo_geovals_add(self, other)
 implicit none
 type(ufo_geovals), intent(inout) :: self
 type(ufo_geovals), intent(in) :: other
@@ -316,7 +316,7 @@ end subroutine ufo_geovals_add
 ! ------------------------------------------------------------------------------
 !> Difference between two GeoVaLs objects
 
-subroutine ufo_geovals_diff(self, other) 
+subroutine ufo_geovals_diff(self, other)
 implicit none
 type(ufo_geovals), intent(inout) :: self
 type(ufo_geovals), intent(in) :: other
@@ -355,7 +355,7 @@ end subroutine ufo_geovals_diff
 ! ------------------------------------------------------------------------------
 !> Schur product of two GeoVaLs objects
 
-subroutine ufo_geovals_schurmult(self, other) 
+subroutine ufo_geovals_schurmult(self, other)
 implicit none
 type(ufo_geovals), intent(inout) :: self
 type(ufo_geovals), intent(in) :: other
@@ -395,7 +395,7 @@ end subroutine ufo_geovals_schurmult
 !> Copy one GeoVaLs object into another
 !!
 
-subroutine ufo_geovals_copy(self, other) 
+subroutine ufo_geovals_copy(self, other)
 implicit none
 type(ufo_geovals), intent(in) :: self
 type(ufo_geovals), intent(inout) :: other
@@ -428,7 +428,7 @@ end subroutine ufo_geovals_copy
 ! ------------------------------------------------------------------------------
 !> Initialize a GeoVaLs object based on an analytic state
 !!
-!! \details **ufo_geovals_analytic_init_c()** takes an existing ufo::GeoVaLs object 
+!! \details **ufo_geovals_analytic_init_c()** takes an existing ufo::GeoVaLs object
 !! and fills in values based on one of several analytic solutions.  This initialization
 !! is intended to be used with the **TestStateInterpolation()** test; see there for
 !! further information.
@@ -453,10 +453,10 @@ end subroutine ufo_geovals_copy
 !! \sa test::TestStateInterpolation()
 !!
 
-subroutine ufo_geovals_analytic_init(self, locs, ic) 
+subroutine ufo_geovals_analytic_init(self, locs, ic)
 use ufo_locs_mod, only : ufo_locs
 use dcmip_initial_conditions_test_1_2_3, only : test1_advection_deformation, &
-                                  test1_advection_hadley, test3_gravity_wave  
+                                  test1_advection_hadley, test3_gravity_wave
 use dcmip_initial_conditions_test_4, only : test4_baroclinic_wave
 
 implicit none
@@ -489,8 +489,8 @@ do ivar = 1, self%nvar-1
       ! convert lat and lon to radians
       rlat = deg_to_rad * locs%lat(iloc)
       rlon = deg_to_rad*modulo(locs%lon(iloc)+180.0_kind_real,360.0_kind_real) - pi
-    
-      do ival = 1, self%geovals(ivar)%nval                  
+
+      do ival = 1, self%geovals(ivar)%nval
 
          ! obtain height from the existing GeoVaLs object, which should be an
          ! output of the State::getValues() method
@@ -503,7 +503,7 @@ do ivar = 1, self%nvar-1
 
             call test1_advection_deformation(rlon,rlat,p0,kz,0,u0,v0,w0,&
                                              t0,phis0,ps0,rho0,hum0,q1,q2,q3,q4)
-            
+
          case ("dcmip-test-1-2")
 
             call test1_advection_hadley(rlon,rlat,p0,kz,0,u0,v0,w0,&
@@ -525,14 +525,14 @@ do ivar = 1, self%nvar-1
 
          end select init_option
 
-         ! currently only temperture is implemented         
+         ! currently only temperture is implemented
          if (trim(self%variables(ivar)) == trim(var_tv)) then
             ! Warning: we may need a conversion from temperature to
             ! virtual temperture here
             self%geovals(ivar)%vals(ival,iloc) = t0
          endif
-         
-      enddo      
+
+      enddo
    enddo
 enddo
 
@@ -541,9 +541,9 @@ end subroutine ufo_geovals_analytic_init
 ! ------------------------------------------------------------------------------
 !> Normalization of one GeoVaLs object by another
 !!
-!! \details This is a normalization operator that first computes the normalization 
-!! factor for each variable based on the rms amplitude of that variable across 
-!! all locations in the reference GeoVaLs object (other).  Then each element of 
+!! \details This is a normalization operator that first computes the normalization
+!! factor for each variable based on the rms amplitude of that variable across
+!! all locations in the reference GeoVaLs object (other).  Then each element of
 !! the input GeoVals object (self) is divided by these normalization factors.
 !! The operation is done in place.  So, after execution, the input GeoVaLs
 !! object will be nondimensional.
@@ -554,7 +554,7 @@ end subroutine ufo_geovals_analytic_init
 !! value in the State interpolation test.
 !!
 
-subroutine ufo_geovals_normalize(self, other) 
+subroutine ufo_geovals_normalize(self, other)
 implicit none
 type(ufo_geovals), intent(inout) :: self !> Input GeoVaLs object (LHS)
 type(ufo_geovals), intent(in) :: other   !> Reference GeoVaLs object (RHS)
@@ -574,7 +574,7 @@ endif
 
 do jv=1,self%nvar
 
-   !> Compute normalization factors for the errors based on the rms amplitude of 
+   !> Compute normalization factors for the errors based on the rms amplitude of
    !! each variable across all of the selected locations.  Use the "other" GeoVaLs
    !! object as a reference, since this may be the exact analytic answer
 
@@ -606,16 +606,14 @@ end subroutine ufo_geovals_normalize
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_geovals_dotprod(self, other, gprod) 
+subroutine ufo_geovals_dotprod(self, other, gprod, f_comm)
 implicit none
 real(kind_real), intent(inout) :: gprod
 type(ufo_geovals), intent(in) :: self, other
 integer :: ivar, iobs, ival, nval
 real(kind_real) :: prod
 
-type(fckit_mpi_comm) :: f_comm
-
-f_comm = fckit_mpi_comm()
+type(fckit_mpi_comm), intent(in) :: f_comm
 
 if (.not. self%linit) then
   call abor1_ftn("ufo_geovals_dotprod: geovals not allocated")
@@ -647,7 +645,7 @@ end subroutine ufo_geovals_dotprod
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_geovals_minmaxavg(self, kobs, kvar, pmin, pmax, prms) 
+subroutine ufo_geovals_minmaxavg(self, kobs, kvar, pmin, pmax, prms)
 implicit none
 integer, intent(inout) :: kobs
 integer, intent(in) :: kvar
@@ -677,8 +675,8 @@ end subroutine ufo_geovals_minmaxavg
 ! ------------------------------------------------------------------------------
 !> Location where the summed geovals value is maximum
 !!
-!! \details This routine computes the rms value over the vertical profile for 
-!! each location and observation then returns the location number and the 
+!! \details This routine computes the rms value over the vertical profile for
+!! each location and observation then returns the location number and the
 !! variable number where this rms value is maximum.  Intended for use with
 !! the State interpotation test in which the input GeoVaLs object is a
 !! nondimensional, positive-definite error measurement.
@@ -855,7 +853,7 @@ do ivar = 1, self%nvar
 
   ! set the missing value equal to IODA missing_value
   where (self%geovals(ivar)%vals > 1.0e08) self%geovals(ivar)%vals = self%missing_value
-    
+
 enddo
 
 if (allocated(dist_indx)) deallocate(dist_indx)

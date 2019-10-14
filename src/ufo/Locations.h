@@ -1,8 +1,8 @@
 /*
  * (C) Copyright 2017 UCAR
- * 
+ *
  * This software is licensed under the terms of the Apache Licence Version 2.0
- * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
 #ifndef UFO_LOCATIONS_H_
@@ -11,6 +11,7 @@
 #include <ostream>
 #include <string>
 
+#include "eckit/mpi/Comm.h"
 #include "oops/util/DateTime.h"
 #include "oops/util/ObjectCounter.h"
 #include "oops/util/Printable.h"
@@ -32,19 +33,21 @@ class Locations : public util::Printable,
  public:
   static const std::string classname() {return "ufo::Locations";}
 
-  Locations();
+  explicit Locations(const eckit::mpi::Comm &);
   Locations(const ioda::ObsSpace &, const util::DateTime &, const util::DateTime &);
-  explicit Locations(const eckit::Configuration &);
+  Locations(const eckit::Configuration &, const eckit::mpi::Comm &);
   ~Locations();
 
   Locations & operator+=(const Locations &);
 
   int nobs() const;
   int toFortran() const {return keyLoc_;}
+  const eckit::mpi::Comm & getComm() const {return comm_;}
 
  private:
   void print(std::ostream & os) const;
   F90locs keyLoc_;
+  const eckit::mpi::Comm & comm_;
 };
 
 }  // namespace ufo

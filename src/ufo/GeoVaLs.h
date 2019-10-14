@@ -1,8 +1,8 @@
 /*
  * (C) Copyright 2017-2018 UCAR
- * 
+ *
  * This software is licensed under the terms of the Apache Licence Version 2.0
- * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
 #ifndef UFO_GEOVALS_H_
@@ -11,6 +11,8 @@
 #include <ostream>
 #include <string>
 #include <vector>
+
+#include "eckit/mpi/Comm.h"
 
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
@@ -75,6 +77,7 @@ class GeoVaLs : public util::Printable,
 
   F90goms keyGVL_;
   oops::Variables vars_;
+  const eckit::mpi::Comm & comm_;
 };
 
 // -----------------------------------------------------------------------------

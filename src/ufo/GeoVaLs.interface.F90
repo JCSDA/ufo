@@ -1,12 +1,13 @@
 !
 ! (C) Copyright 2017-2018 UCAR
-! 
+!
 ! This software is licensed under the terms of the Apache Licence Version 2.0
-! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
+! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 !
 module ufo_geovals_mod_c
 
 use fckit_configuration_module, only: fckit_configuration
+use fckit_mpi_module, only: fckit_mpi_comm
 use iso_c_binding
 use ufo_geovals_mod
 use ufo_locs_mod
@@ -263,16 +264,25 @@ end subroutine ufo_geovals_normalize_c
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_geovals_dotprod_c(c_key_self, c_key_other, prod) bind(c,name='ufo_geovals_dotprod_f90')
+subroutine ufo_geovals_dotprod_c(c_key_self, c_key_other, prod, lcname, cname) bind(c,name='ufo_geovals_dotprod_f90')
 implicit none
 integer(c_int), intent(in) :: c_key_self, c_key_other
 real(c_double), intent(inout) :: prod
+integer(c_int),intent(in) :: lcname                        !< Communicator name length
+character(kind=c_char,len=1),intent(in) :: cname(lcname+1) !< Communicator name
+
 type(ufo_geovals), pointer :: self, other
+type(fckit_mpi_comm) :: f_comm
+character(len=lcname) :: name
 
 call ufo_geovals_registry%get(c_key_self, self)
 call ufo_geovals_registry%get(c_key_other, other)
 
-call ufo_geovals_dotprod(self, other, prod)
+call c_f_string(cname, name)
+f_comm = fckit_mpi_comm(name)
+
+
+call ufo_geovals_dotprod(self, other, prod, f_comm)
 
 end subroutine ufo_geovals_dotprod_c
 
@@ -398,7 +408,7 @@ end subroutine ufo_geovals_get_c
 
 subroutine ufo_geovals_maxloc_c(c_key_self, mxval, iloc, ivar) bind(c,name='ufo_geovals_maxloc_f90')
 implicit none
-integer(c_int), intent(in) :: c_key_self 
+integer(c_int), intent(in) :: c_key_self
 real(c_double), intent(inout) :: mxval
 integer(c_int), intent(inout) :: iloc, ivar
 type(ufo_geovals), pointer :: self
@@ -449,11 +459,12 @@ end subroutine ufo_geovals_read_file_c
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_geovals_write_file_c(c_key_self, c_conf) bind(c,name='ufo_geovals_write_file_f90')
-use fckit_mpi_module
+subroutine ufo_geovals_write_file_c(c_key_self, c_conf, lcname, cname) bind(c,name='ufo_geovals_write_file_f90')
 implicit none
 integer(c_int), intent(in) :: c_key_self
 type(c_ptr), intent(in) :: c_conf
+integer(c_int),intent(in) :: lcname                        !< Communicator name length
+character(kind=c_char,len=1),intent(in) :: cname(lcname+1) !< Communicator name
 
 type(ufo_geovals), pointer :: self
 character(max_string) :: fout, filename
@@ -463,6 +474,7 @@ character(len=10)         :: cproc
 integer                   :: ppos
 character(len=:), allocatable :: str
 type(fckit_configuration) :: f_conf
+character(len=lcname) :: name
 
 ! read filename for config
 f_conf = fckit_configuration(c_conf)
@@ -470,7 +482,9 @@ call f_conf%get_or_die("filename",str)
 filename = str
 
 ! get the process rank number
-comm = fckit_mpi_comm()
+call c_f_string(cname, name)
+comm= fckit_mpi_comm(name)
+
 write(cproc,fmt='(i4.4)') comm%rank()
 
 ! Find the left-most dot in the file name, and use that to pick off the file name

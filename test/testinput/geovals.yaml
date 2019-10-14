@@ -4,25 +4,17 @@ window_end: 2018-04-15T03:00:00Z
 Observations: 
  ObsTypes: 
  - ObsOperator:
-     name: CRTM
-     Absorbers: [H2O,O3,CO2]
-     Clouds: [Water, Ice]
-     ObsOptions:
-       Sensor_ID: amsua_n19
-       EndianType: little_endian
-       CoefficientPath: Data/
-   ObsSpace: 
-    name: Radiance
-    ObsDataIn: 
-     obsfile: Data/amsua_n19_obs_2018041500_m.nc4
+    name: Identity
+   ObsSpace:
+    name: SeaSurfaceTemp
+    ObsDataIn:
+     obsfile: Data/sst_obs-2018-04-15.nc4
     simulate:
-     variables: [brightness_temperature]
-     channels: 1-15
-   GeoVaLs: 
-    norm: 5948559.5380894365 
-    filename: Data/amsua_n19_geoval_2018041500_m.nc4
- - ObsType:
-   ObsSpace: 
+     variables: [sea_surface_temperature]
+   GeoVaLs:
+    norm: 212.13203435596427
+    filename: Data/sst_obs-2018-04-15_geovals.nc
+ - ObsSpace:
     name: Radiosonde
     ObsDataIn: 
      obsfile: Data/sondes_obs_2018041500_m.nc4
