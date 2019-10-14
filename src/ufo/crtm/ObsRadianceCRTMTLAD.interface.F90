@@ -10,7 +10,6 @@ module ufo_radiancecrtm_tlad_mod_c
   use fckit_configuration_module, only: fckit_configuration
   use iso_c_binding
   use ufo_radiancecrtm_tlad_mod
-  use string_f_c_mod
   use ufo_geovals_mod
   use ufo_geovals_mod_c,   only: ufo_geovals_registry
 
@@ -35,6 +34,7 @@ contains
 
 subroutine ufo_radiancecrtm_tlad_setup_c(c_key_self, c_conf, c_nchan, c_channels, c_varlist) &
                                     bind(c,name='ufo_radiancecrtm_tlad_setup_f90')
+use oops_variables_mod
 implicit none
 integer(c_int), intent(inout) :: c_key_self
 type(c_ptr),    intent(in)    :: c_conf
@@ -42,6 +42,7 @@ integer(c_int), intent(in) :: c_nchan
 integer(c_int), intent(in) :: c_channels(c_nchan)
 type(c_ptr), intent(in), value :: c_varlist
 
+type(oops_variables) :: oops_vars
 type(ufo_radiancecrtm_tlad), pointer :: self
 type(fckit_configuration) :: f_conf
 
@@ -51,7 +52,8 @@ f_conf = fckit_configuration(c_conf)
 call self%setup(f_conf, c_channels)
 
 !> Update C++ ObsOperator with input variable list
-call f_c_push_string_varlist(c_varlist, self%varin)
+oops_vars = oops_variables(c_varlist)
+call oops_vars%push_back( self%varin )
 
 end subroutine ufo_radiancecrtm_tlad_setup_c
 

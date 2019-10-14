@@ -10,7 +10,6 @@ module ufo_identity_tlad_mod_c
 
   use fckit_configuration_module, only: fckit_configuration
   use ufo_identity_tlad_mod
-  use string_f_c_mod
   implicit none
 
   private
@@ -33,6 +32,7 @@ contains
 
 subroutine ufo_identity_tlad_setup_c(c_key_self, c_conf, c_varconf, c_varlist) bind(c,name='ufo_identity_tlad_setup_f90')
 use ufo_vars_mod
+use oops_variables_mod
 implicit none
 integer(c_int), intent(inout) :: c_key_self
 type(c_ptr),    intent(in) :: c_conf
@@ -40,6 +40,7 @@ type(c_ptr),    intent(in) :: c_varconf ! config with variables to be simulated
 type(c_ptr),    intent(in), value :: c_varlist
 character(len=MAXVARLEN), dimension(:), allocatable :: vars
 
+type(oops_variables) :: oops_vars
 type(ufo_identity_tlad), pointer :: self
 type(fckit_configuration) :: f_conf, f_varconf
 
@@ -52,7 +53,8 @@ call self%setup(vars)
 deallocate(vars)
 
 !> Update C++ ObsOperator with input variable list
-call f_c_push_string_varlist(c_varlist, self%vars)
+oops_vars = oops_variables(c_varlist)
+call oops_vars%push_back( self%vars )
 
 end subroutine ufo_identity_tlad_setup_c
 

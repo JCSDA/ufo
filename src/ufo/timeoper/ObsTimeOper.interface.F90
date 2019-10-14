@@ -15,7 +15,6 @@ use ufo_locs_mod_c
 use ufo_timeoper_mod
 use ufo_timeoper_locs_mod
 
-use string_f_c_mod
 use ufo_geovals_mod,   only: ufo_geovals
 use ufo_geovals_mod_c, only: ufo_geovals_registry
 

@@ -30,12 +30,13 @@ contains
 ! ------------------------------------------------------------------------------
 
 subroutine ufo_hcorrection_create_c(c_self, c_conf, c_varlist) bind(c,name='ufo_hcorrection_create_f90')
-use string_f_c_mod
+use oops_variables_mod
 implicit none
 integer(c_int), intent(inout)  :: c_self
 type(c_ptr), value, intent(in) :: c_conf
 type(c_ptr), intent(in), value :: c_varlist ! list of geovals variables to be requested
 
+type(oops_variables) :: oops_vars
 type(ufo_hcorrection), pointer :: self
 type(fckit_configuration)      :: f_conf
 
@@ -45,7 +46,8 @@ call ufo_hcorrection_create(self, f_conf)
 
 !> Update C++ ObsFilter with geovals variables list
 if (allocated(self%geovars)) then
-  call f_c_push_string_varlist(c_varlist, self%geovars)
+  oops_vars = oops_variables(c_varlist)
+  call oops_vars%push_back( self%geovars )
 endif
 
 end subroutine ufo_hcorrection_create_c
