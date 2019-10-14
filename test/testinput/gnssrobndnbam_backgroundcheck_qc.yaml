@@ -1,0 +1,47 @@
+window_begin: 2018-04-14T21:00:00Z
+window_end: 2018-04-15T03:00:00Z
+
+Observations:
+ ObsTypes: 
+ - ObsOperator:
+     name: GnssroBndNBAM
+     ObsOptions:
+       use_compress: 1
+       vertlayer: full
+   ObsSpace:
+     name: GnssroBndNBAM
+     ObsDataIn:
+       obsfile: Data/gnssro_obs_2018041500_l.nc4
+     ObsDataOut:
+       obsfile: Data/gnssro_bndnbam_2018041500_l_backgroundcheck.nc4
+     simulate:
+       variables: [bending_angle]
+   GeoVaLs:
+     filename: Data/gnssro_geoval_2018041500_l.nc4
+   ObsFilters:
+   - Filter: ROobserror
+     variables: [bending_angle]
+     errmodel: NRL
+   - Filter: Background Check 
+     variables: [bending_angle]
+     threshold: 3
+   passedBenchmark: 383
+ - ObsOperator:
+     name: GnssroBndNBAM
+     ObsOptions:
+       use_compress: 1
+       vertlayer: full
+   ObsSpace:
+     name: GnssroBndNBAM
+     ObsDataIn:
+       obsfile: Data/gnssro_obs_2018041500_l.nc4
+     ObsDataOut:
+       obsfile: Data/gnssro_bndnbam_2018041500_l_backgroundcheckronbam.nc4
+     simulate:
+       variables: [bending_angle]
+   GeoVaLs:
+     filename: Data/gnssro_geoval_2018041500_l.nc4
+   ObsFilters:
+   - Filter: Background Check RONBAM
+     variables: [bending_angle]
+   passedBenchmark: 386
