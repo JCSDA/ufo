@@ -1,8 +1,8 @@
 /*
  * (C) Copyright 2019 UCAR
- * 
+ *
  * This software is licensed under the terms of the Apache Licence Version 2.0
- * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
 #ifndef TEST_UFO_OBSFUNCTION_H_
@@ -19,6 +19,7 @@
 #include "ioda/ObsSpace.h"
 #include "ioda/ObsVector.h"
 #include "oops/../test/TestEnvironment.h"
+#include "oops/parallel/mpi/mpi.h"
 #include "oops/runs/Test.h"
 #include "ufo/filters/ObsFilterData.h"
 #include "ufo/filters/obsfunctions/ObsFunction.h"
@@ -54,7 +55,7 @@ void testFunction() {
   util::DateTime bgn(conf.getString("window_begin"));
   util::DateTime end(conf.getString("window_end"));
   const eckit::LocalConfiguration obsconf(conf, "ObsSpace");
-  ioda::ObsSpace ospace(obsconf, bgn, end);
+  ioda::ObsSpace ospace(obsconf, oops::mpi::comm(), bgn, end);
 
 ///  Setup ObsFilterData
   ObsFilterData inputs(ospace);

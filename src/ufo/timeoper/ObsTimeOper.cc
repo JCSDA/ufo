@@ -1,8 +1,8 @@
 /*
  * (C) Copyright 2017-2018 UCAR
- * 
+ *
  * This software is licensed under the terms of the Apache Licence Version 2.0
- * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
 #include "ufo/timeoper/ObsTimeOper.h"
@@ -90,7 +90,7 @@ Locations * ObsTimeOper::locations(const util::DateTime & t1,
                                    const util::DateTime & t2) const {
   oops::Log::trace() << "entered ObsOperatorTime::locations" << std::endl;
 
-  Locations * locs = new Locations();
+  Locations * locs = new Locations(odb_.comm());
   int keylocs = locs->toFortran();
 
   util::DateTime t0, t3, stateTime;
@@ -171,5 +171,3 @@ void ObsTimeOper::print(std::ostream & os) const {
 // -----------------------------------------------------------------------------
 
 }  // namespace ufo
-
-

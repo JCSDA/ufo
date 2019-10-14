@@ -52,7 +52,7 @@ template <typename MODEL> class RunCRTM : public oops::Application {
 //  Setup observations
     eckit::LocalConfiguration obsconf(fullConfig, "Observations");
     oops::Log::debug() << "Observations configuration is:" << obsconf << std::endl;
-    ObsSpaces_ obsdb(obsconf, winbgn, winend);
+    ObsSpaces_ obsdb(obsconf, this->getComm(), winbgn, winend);
 
     oops::Variables diagvars;
 

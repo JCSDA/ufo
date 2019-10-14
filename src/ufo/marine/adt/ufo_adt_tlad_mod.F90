@@ -7,7 +7,7 @@
 
 module ufo_adt_tlad_mod
 
- use fckit_configuration_module, only: fckit_configuration 
+ use fckit_configuration_module, only: fckit_configuration
  use iso_c_binding
  use kinds
 
@@ -26,7 +26,7 @@ module ufo_adt_tlad_mod
  type, extends(ufo_basis_tlad), public :: ufo_adt_tlad
  private
   integer          :: nlocs           !< Local number of obs
-  real(c_double)   :: r_miss_val      !< Missing value flag  
+  real(c_double)   :: r_miss_val      !< Missing value flag
   type(ufo_geoval) :: geoval_adt      !< adt (traj)
  contains
   procedure :: setup  => ufo_adt_tlad_setup
@@ -94,7 +94,7 @@ type(ufo_geoval), pointer :: geoval_adt
 real(kind_real) :: offset_hofx, pe_offset_hofx
 type(fckit_mpi_comm) :: f_comm
 
-f_comm = fckit_mpi_comm()
+call obsspace_get_comm(obss, f_comm)
 
 ! check if trajectory was set
 if (.not. self%ltraj) then
@@ -153,13 +153,13 @@ type(ufo_geoval), pointer :: geoval_adt
 real(kind_real) :: offset_hofx, pe_offset_hofx
 type(fckit_mpi_comm) :: f_comm
 
+call obsspace_get_comm(obss, f_comm)
+
 ! check if trajectory was set
 if (.not. self%ltraj) then
   write(err_msg,*) myname_, ' trajectory wasnt set!'
   call abor1_ftn(err_msg)
 endif
-
-f_comm = fckit_mpi_comm()
 
 ! check if nlocs is consistent in geovals & hofx
 nlocs = self%nlocs
@@ -184,8 +184,8 @@ do iobs = 1, self%nlocs
 end do
 
 ! Global offset
-call f_comm%allreduce(pe_offset_hofx, offset_hofx, fckit_mpi_sum()) 
-call f_comm%allreduce(cnt, cnt_glb, fckit_mpi_sum()) 
+call f_comm%allreduce(pe_offset_hofx, offset_hofx, fckit_mpi_sum())
+call f_comm%allreduce(cnt, cnt_glb, fckit_mpi_sum())
 offset_hofx = offset_hofx/cnt_glb
 
 if (.not. allocated(geoval_adt%vals))  allocate(geoval_adt%vals(1,nlocs))

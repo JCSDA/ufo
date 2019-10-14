@@ -43,7 +43,8 @@ extern "C" {
   void ufo_geovals_diff_f90(const F90goms &, const F90goms &);
   void ufo_geovals_schurmult_f90(const F90goms &, const F90goms &);
   void ufo_geovals_normalize_f90(const F90goms &, const F90goms &);
-  void ufo_geovals_dotprod_f90(const F90goms &, const F90goms &, double &);
+  void ufo_geovals_dotprod_f90(const F90goms &, const F90goms &, double &,
+                               const int &, const char *);
   void ufo_geovals_minmaxavg_f90(const F90goms &, int &, int &, double &, double &, double &);
   void ufo_geovals_maxloc_f90(const F90goms &, double &, int &, int &);
   void ufo_geovals_nlocs_f90(const F90goms &, size_t &);
@@ -56,7 +57,8 @@ extern "C" {
                                  const eckit::Configuration * const *,
                                  const ioda::ObsSpace &,
                                  const eckit::Configuration * const *);
-  void ufo_geovals_write_file_f90(const F90goms &, const eckit::Configuration * const *);
+  void ufo_geovals_write_file_f90(const F90goms &, const eckit::Configuration * const *,
+                                  const int &, const char *);
 }  // extern C
 
 }  // namespace ufo

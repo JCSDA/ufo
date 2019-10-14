@@ -1,8 +1,8 @@
 /*
  * (C) Copyright 2019 UCAR
- * 
+ *
  * This software is licensed under the terms of the Apache Licence Version 2.0
- * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
 #ifndef TEST_UFO_OBSFILTERDATA_H_
@@ -18,6 +18,7 @@
 #include "ioda/ObsSpace.h"
 #include "ioda/ObsVector.h"
 #include "oops/../test/TestEnvironment.h"
+#include "oops/parallel/mpi/mpi.h"
 #include "oops/runs/Test.h"
 #include "ufo/filters/ObsFilterData.h"
 #include "ufo/filters/Variables.h"
@@ -40,7 +41,7 @@ void testObsFilterData() {
 ///  Setup ObsSpace
     const eckit::LocalConfiguration obsconf(confs[jconf], "ObsSpace");
     const eckit::LocalConfiguration obsvarconf(obsconf, "simulate");
-    ioda::ObsSpace ospace(obsconf, bgn, end);
+    ioda::ObsSpace ospace(obsconf, oops::mpi::comm(), bgn, end);
 
 ///  Setup GeoVaLs
     const eckit::LocalConfiguration gconf(confs[jconf], "GeoVaLs");

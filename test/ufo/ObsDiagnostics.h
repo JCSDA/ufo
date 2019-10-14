@@ -1,8 +1,8 @@
 /*
  * (C) Copyright 2019 UCAR
- * 
+ *
  * This software is licensed under the terms of the Apache Licence Version 2.0
- * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
 #ifndef TEST_UFO_OBSDIAGNOSTICS_H_
@@ -20,6 +20,7 @@
 #include "ioda/ObsVector.h"
 #include "oops/../test/TestEnvironment.h"
 #include "oops/base/Variables.h"
+#include "oops/parallel/mpi/mpi.h"
 #include "oops/runs/Test.h"
 #include "ufo/GeoVaLs.h"
 #include "ufo/ObsBias.h"
@@ -38,7 +39,7 @@ void testObsDiagnostics() {
   util::DateTime bgn(conf.getString("window_begin"));
   util::DateTime end(conf.getString("window_end"));
   const eckit::LocalConfiguration obsconf(conf, "ObsSpace");
-  ioda::ObsSpace ospace(obsconf, bgn, end);
+  ioda::ObsSpace ospace(obsconf, oops::mpi::comm(), bgn, end);
   const size_t nlocs = ospace.nlocs();
 
   // initialize observation operator (set variables requested from the model,
