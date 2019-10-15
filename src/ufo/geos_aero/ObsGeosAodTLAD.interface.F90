@@ -21,7 +21,7 @@ module ufo_geosaod_tlad_mod_c
 #define LISTED_TYPE ufo_geosaod_tlad
 
   !> Linked list interface - defines registry_t type
-#include "../linkedList_i.f"
+#include "oops/util/linkedList_i.f"
 
   !> Global registry
   type(registry_t) :: ufo_geosaod_tlad_registry
@@ -30,7 +30,7 @@ contains
 
   ! ------------------------------------------------------------------------------
   !> Linked list implementation
-#include "../linkedList_c.f"
+#include "oops/util/linkedList_c.f"
 
 ! ------------------------------------------------------------------------------
 subroutine ufo_geosaod_tlad_setup_c(c_key_self, c_conf, c_varlist, c_nvars_out) bind(c,name='ufo_geosaod_tlad_setup_f90')

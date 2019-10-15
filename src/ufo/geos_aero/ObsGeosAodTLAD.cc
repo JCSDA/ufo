@@ -18,7 +18,6 @@
 #include "oops/util/Logger.h"
 #include "ufo/GeoVaLs.h"
 #include "ufo/ObsBias.h"
-#include "ufo/ObsBiasIncrement.h"
 
 namespace ufo {
 
@@ -28,7 +27,7 @@ static LinearObsOperatorMaker<ObsGeosAodTLAD> makerGeosAodTL_("GeosAod");
 
 ObsGeosAodTLAD::ObsGeosAodTLAD(const ioda::ObsSpace & odb,
                                const eckit::Configuration & config)
-  : keyOper_(0), varin_(), odb_(odb)
+  : keyOper_(0), odb_(odb), varin_()
 {
   const eckit::Configuration * configc = &config;
 
@@ -57,8 +56,7 @@ void ObsGeosAodTLAD::setTrajectory(const GeoVaLs & geovals, const ObsBias & bias
 
 // -----------------------------------------------------------------------------
 
-void ObsGeosAodTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec,
-                             const ObsBiasIncrement & bias) const {
+void ObsGeosAodTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec) const {
   ufo_geosaod_simobs_tl_f90(keyOper_, geovals.toFortran(), odb_,
                             ovec.nvars(), ovec.nlocs(), ovec.toFortran());
   oops::Log::trace() << "ObsGeosAodTLAD: TL observation operator run" << std::endl;
@@ -66,8 +64,7 @@ void ObsGeosAodTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ov
 
 // -----------------------------------------------------------------------------
 
-void ObsGeosAodTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec,
-                             ObsBiasIncrement & bias) const {
+void ObsGeosAodTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec) const {
   ufo_geosaod_simobs_ad_f90(keyOper_, geovals.toFortran(), odb_,
                             ovec.nvars(), ovec.nlocs(), ovec.toFortran());
   oops::Log::trace() << "ObsGeosAodTLAD: adjoint observation operator run" << std::endl;

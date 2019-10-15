@@ -11,7 +11,7 @@
 #include "ioda/ObsSpace.h"
 
 #include "oops/base/Variables.h"
-#include "ufo/Fortran.h"'
+#include "ufo/Fortran.h"
 
 
 namespace ufo {

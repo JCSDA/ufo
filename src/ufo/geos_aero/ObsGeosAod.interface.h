@@ -9,7 +9,7 @@
 #define UFO_GEOS_AERO_OBSGEOSAOD_INTERFACE_H_
 
 #include "ioda/ObsSpace.h"
-
+#include "oops/base/Variables.h"
 #include "ufo/Fortran.h"
 
 namespace ufo {
