@@ -36,8 +36,7 @@ GeoVaLs::GeoVaLs(const Locations & locs, const oops::Variables & vars)
   : keyGVL_(-1), vars_(vars), comm_(locs.getComm())
 {
   oops::Log::trace() << "GeoVaLs contructor starting" << std::endl;
-  const eckit::Configuration * cvar = &vars_.toFortran();
-  ufo_geovals_setup_f90(keyGVL_, locs.nobs(), &cvar);
+  ufo_geovals_setup_f90(keyGVL_, locs.nobs(), vars_);
   oops::Log::trace() << "GeoVaLs contructor key = " << keyGVL_ << std::endl;
 }
 
@@ -54,10 +53,9 @@ GeoVaLs::GeoVaLs(const eckit::Configuration & config,
 {
   oops::Log::trace() << "GeoVaLs constructor config starting" << std::endl;
   const eckit::Configuration * conf = &config;
-  const eckit::Configuration * cvar = &vars_.toFortran();
-  ufo_geovals_setup_f90(keyGVL_, 0, &cvar);
+  ufo_geovals_setup_f90(keyGVL_, 0, vars_);
   // only read if there are variables specified
-  if (vars.size() > 0)  ufo_geovals_read_file_f90(keyGVL_, &conf, obspace, &cvar);
+  if (vars_.size() > 0)  ufo_geovals_read_file_f90(keyGVL_, &conf, obspace, vars_);
   oops::Log::trace() << "GeoVaLs contructor config key = " << keyGVL_ << std::endl;
 }
 // -----------------------------------------------------------------------------
@@ -67,8 +65,7 @@ GeoVaLs::GeoVaLs(const GeoVaLs & other)
   : keyGVL_(-1), vars_(other.vars_), comm_(other.comm_)
 {
   oops::Log::trace() << "GeoVaLs copy constructor starting" << std::endl;
-  const eckit::Configuration * cvar = &vars_.toFortran();
-  ufo_geovals_setup_f90(keyGVL_, 0, &cvar);
+  ufo_geovals_setup_f90(keyGVL_, 0, vars_);
   ufo_geovals_copy_f90(other.keyGVL_, keyGVL_);
   oops::Log::trace() << "GeoVaLs copy constructor key = " << keyGVL_ << std::endl;
 }
@@ -264,8 +261,7 @@ void GeoVaLs::read(const eckit::Configuration & config,
                    const ioda::ObsSpace & obspace) {
   oops::Log::trace() << "GeoVaLs::read starting" << std::endl;
   const eckit::Configuration * conf = &config;
-  const eckit::Configuration * cvar = &vars_.toFortran();
-  ufo_geovals_read_file_f90(keyGVL_, &conf, obspace, &cvar);
+  ufo_geovals_read_file_f90(keyGVL_, &conf, obspace, vars_);
   oops::Log::trace() << "GeoVaLs::read done" << std::endl;
 }
 // -----------------------------------------------------------------------------
