@@ -1,8 +1,8 @@
 /*
  * (C) Copyright 2017-2018 UCAR
- * 
+ *
  * This software is licensed under the terms of the Apache Licence Version 2.0
- * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
 #include "ufo/gnssro/BndROPP2D/ObsGnssroBndROPP2D.h"
@@ -60,7 +60,7 @@ void ObsGnssroBndROPP2D::simulateObs(const GeoVaLs & gom, ioda::ObsVector & ovec
 // -----------------------------------------------------------------------------
 Locations * ObsGnssroBndROPP2D::locations(const util::DateTime & t1,
                                           const util::DateTime & t2) const {
-  Locations * locs = new Locations();
+  Locations * locs = new Locations(odb_.comm());
 
   int keylocs = locs->toFortran();
   const util::DateTime * p1 = &t1;

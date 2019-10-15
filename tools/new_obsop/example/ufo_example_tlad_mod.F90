@@ -7,13 +7,8 @@
 
 module ufo_example_tlad_mod
 
- use fckit_configuration_module, only: fckit_configuration
- use iso_c_binding
- use kinds
-
- use ufo_geovals_mod, only: ufo_geovals, ufo_geoval, ufo_geovals_get_var
+ use oops_variables_mod
  use ufo_vars_mod
- use obsspace_mod
 
  implicit none
  private
@@ -23,8 +18,8 @@ module ufo_example_tlad_mod
  !       this type can hold information on trajectory, for example
  type, public :: ufo_example_tlad
  private
-  integer :: nvars_in
-  character(len=MAXVARLEN), public, allocatable :: varin(:)
+  type(oops_variables), public :: obsvars
+  type(oops_variables), public :: geovars
  contains
   procedure :: setup  => ufo_example_tlad_setup
   procedure :: settraj => ufo_example_tlad_settraj
@@ -38,13 +33,13 @@ contains
 ! ------------------------------------------------------------------------------
 ! TODO: add setup of your TL/AD observation operator (optional)
 subroutine ufo_example_tlad_setup(self, f_conf, vars)
+use fckit_configuration_module, only: fckit_configuration
 implicit none
 class(ufo_example_tlad), intent(inout) :: self
 type(fckit_configuration), intent(in)  :: f_conf
-character(len=MAXVARLEN), dimension(:), intent(inout) :: vars ! variables to be simulated
 
 ! TODO: setup input variables varin (updated model variables)
-  self%nvars_in = 0
+!  self%geovars%push_back("variable name")
 
 end subroutine ufo_example_tlad_setup
 
@@ -54,13 +49,14 @@ subroutine destructor(self)
 implicit none
 type(ufo_example_tlad), intent(inout) :: self
 
-  if (allocated(self%varin))   deallocate(self%varin)
-
 end subroutine destructor
 
 ! ------------------------------------------------------------------------------
 ! TODO: replace below function with your set trajectory for tl/ad code
 subroutine ufo_example_tlad_settraj(self, geovals, obss)
+use iso_c_binding
+use ufo_geovals_mod, only: ufo_geovals, ufo_geoval, ufo_geovals_get_var
+use obsspace_mod
 implicit none
 class(ufo_example_tlad), intent(inout) :: self
 type(ufo_geovals),       intent(in)    :: geovals
@@ -73,6 +69,9 @@ end subroutine ufo_example_tlad_settraj
 ! Note: this can use information saved from trajectory in your ufo_example_tlad type
 ! Input geovals parameter represents dx for tangent linear model
 subroutine ufo_example_simobs_tl(self, geovals, obss, nvars, nlocs, hofx)
+use iso_c_binding
+use ufo_geovals_mod, only: ufo_geovals, ufo_geoval, ufo_geovals_get_var
+use obsspace_mod
 implicit none
 class(ufo_example_tlad), intent(in)    :: self
 type(ufo_geovals),       intent(in)    :: geovals
@@ -86,6 +85,9 @@ end subroutine ufo_example_simobs_tl
 ! TODO: replace below function with your ad observation operator.
 ! Note: this can use information saved from trajectory in your ufo_example_tlad type
 subroutine ufo_example_simobs_ad(self, geovals, obss, nvars, nlocs, hofx)
+use iso_c_binding
+use ufo_geovals_mod, only: ufo_geovals, ufo_geoval, ufo_geovals_get_var
+use obsspace_mod
 implicit none
 class(ufo_example_tlad), intent(in)    :: self
 type(ufo_geovals),       intent(inout) :: geovals

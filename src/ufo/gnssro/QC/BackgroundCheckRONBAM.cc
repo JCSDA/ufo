@@ -29,9 +29,6 @@
 namespace ufo {
 
 // -----------------------------------------------------------------------------
-static oops::FilterMaker<UfoTrait, oops::ObsFilter<UfoTrait, BackgroundCheckRONBAM> >
-  makerBgChk_("Background Check RONBAM");
-// -----------------------------------------------------------------------------
 
 BackgroundCheckRONBAM::BackgroundCheckRONBAM(ioda::ObsSpace & obsdb,
                                            const eckit::Configuration & config,
@@ -39,9 +36,12 @@ BackgroundCheckRONBAM::BackgroundCheckRONBAM(ioda::ObsSpace & obsdb,
                                            boost::shared_ptr<ioda::ObsDataVector<float> > obserr)
   : FilterBase(obsdb, config, flags, obserr)
 {
-  oops::Log::trace() << "BackgroundCheckRONBAM contructor starting: "
+  oops::Log::trace() << "BackgroundCheckRONBAM contructor: "
                      << "using NBAM style BackgroundCheck for GnssroBndNBAM" << std::endl;
   oops::Log::debug() << "BackgroundCheckRONBAM: config = " << config << std::endl;
+
+  const oops::Variables vars(config_);
+  allvars_ += vars[0] + "@HofX";
 }
 
 // -----------------------------------------------------------------------------

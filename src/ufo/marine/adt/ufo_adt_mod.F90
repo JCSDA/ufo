@@ -7,7 +7,7 @@
 
 module ufo_adt_mod
 
- use fckit_configuration_module, only: fckit_configuration 
+ use fckit_configuration_module, only: fckit_configuration
  use iso_c_binding
  use kinds
 
@@ -62,17 +62,17 @@ implicit none
     type(ufo_geoval), pointer :: geoval_adt
     real(kind_real), allocatable :: obs_adt(:)
     integer :: obss_nlocs
-    integer :: iobs, cnt, cnt_glb    
+    integer :: iobs, cnt, cnt_glb
     real(kind_real) :: offset_hofx, pe_offset_hofx
     real(kind_real) :: offset_obs, pe_offset_obs
     type(fckit_mpi_comm) :: f_comm
     real(c_double) :: missing
-    
-    f_comm = fckit_mpi_comm()
+
+    call obsspace_get_comm(obss, f_comm)
 
     ! Set missing flag
     missing = missing_value(missing)
-    
+
     ! check if nlocs is consistent in geovals & hofx
     obss_nlocs = obsspace_get_nlocs(obss)
 
@@ -87,35 +87,35 @@ implicit none
 
     ! Read in obs data
     allocate(obs_adt(obss_nlocs))
-    
+
     call obsspace_get_db(obss, "ObsValue", "obs_absolute_dynamic_topography", obs_adt)
 
     ! Local offset
     pe_offset_hofx = 0.0
-    pe_offset_obs = 0.0    
+    pe_offset_obs = 0.0
     cnt = 0
     do iobs = 1, obss_nlocs
-       if (hofx(iobs)/=missing) then      
+       if (hofx(iobs)/=missing) then
           pe_offset_hofx = pe_offset_hofx + geoval_adt%vals(1,iobs)
-          pe_offset_obs = pe_offset_obs + obs_adt(iobs)          
+          pe_offset_obs = pe_offset_obs + obs_adt(iobs)
           cnt = cnt + 1
        end if
     end do
 
     ! Global offsets
     call f_comm%allreduce(pe_offset_hofx, offset_hofx, fckit_mpi_sum())
-    call f_comm%allreduce(pe_offset_obs, offset_obs, fckit_mpi_sum())     
-    call f_comm%allreduce(cnt, cnt_glb, fckit_mpi_sum()) 
+    call f_comm%allreduce(pe_offset_obs, offset_obs, fckit_mpi_sum())
+    call f_comm%allreduce(cnt, cnt_glb, fckit_mpi_sum())
     offset_hofx = offset_hofx/cnt_glb
-    offset_obs = offset_obs/cnt_glb    
-    
+    offset_obs = offset_obs/cnt_glb
+
     ! Adjust simulated obs to obs offset
     do iobs = 1, obss_nlocs
        hofx(iobs) = geoval_adt%vals(1,iobs) + (offset_obs-offset_hofx)
     enddo
 
     deallocate(obs_adt)
-    
+
   end subroutine ufo_adt_simobs
 
 end module ufo_adt_mod

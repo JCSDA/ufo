@@ -1,4 +1,4 @@
-! (C) Copyright 2017-2018 UCAR
+! (C) Copyright 2017-2019 UCAR
 !
 ! This software is licensed under the terms of the Apache Licence Version 2.0
 ! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
@@ -8,12 +8,8 @@
 
 module ufo_example_mod_c
 
-  use fckit_configuration_module, only: fckit_configuration
   use iso_c_binding
   use ufo_example_mod 
-  use string_f_c_mod
-  use ufo_geovals_mod,   only: ufo_geovals
-  use ufo_geovals_mod_c, only: ufo_geovals_registry
   implicit none
   private
 
@@ -36,28 +32,25 @@ contains
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_example_setup_c(c_key_self, c_conf, c_varconf, c_varlist) bind(c,name='ufo_example_setup_f90')
-use ufo_vars_mod
+subroutine ufo_example_setup_c(c_key_self, c_conf, c_obsvars, c_geovars) bind(c,name='ufo_example_setup_f90')
+use fckit_configuration_module, only: fckit_configuration
+use oops_variables_mod
 implicit none
-integer(c_int), intent(inout) :: c_key_self
-type(c_ptr),    intent(in)    :: c_conf
-type(c_ptr), intent(in) :: c_varconf ! config with variables to be simulated
-type(c_ptr), intent(in), value :: c_varlist
-character(len=MAXVARLEN), dimension(:), allocatable :: vars
+integer(c_int), intent(inout)  :: c_key_self
+type(c_ptr),    intent(in)     :: c_conf
+type(c_ptr), value, intent(in) :: c_obsvars ! variables to be simulated
+type(c_ptr), value, intent(in) :: c_geovars ! variables requested from the model
 
 type(ufo_example), pointer :: self
-type(fckit_configuration) :: f_conf, f_varconf
+type(fckit_configuration) :: f_conf
 
 call ufo_example_registry%setup(c_key_self, self)
 f_conf = fckit_configuration(c_conf)
-f_varconf = fckit_configuration(c_varconf)
 
-call ufo_vars_read(f_varconf, vars)
-call self%setup(f_conf, vars)
-deallocate(vars)
+self%obsvars = oops_variables(c_obsvars)
+self%geovars = oops_variables(c_geovars)
 
-!> Update C++ ObsOperator with input variable list
-call f_c_push_string_varlist(c_varlist, self%varin)
+call self%setup(f_conf)
 
 end subroutine ufo_example_setup_c
 
@@ -77,7 +70,8 @@ end subroutine ufo_example_delete_c
 
 subroutine ufo_example_simobs_c(c_key_self, c_key_geovals, c_obsspace, c_nvars, c_nlocs, &
                                 c_hofx) bind(c,name='ufo_example_simobs_f90')
-
+use ufo_geovals_mod,   only: ufo_geovals
+use ufo_geovals_mod_c, only: ufo_geovals_registry
 implicit none
 integer(c_int), intent(in) :: c_key_self
 integer(c_int), intent(in) :: c_key_geovals
@@ -86,7 +80,7 @@ integer(c_int), intent(in)     :: c_nvars, c_nlocs
 real(c_double), intent(inout)  :: c_hofx(c_nvars, c_nlocs)
 
 type(ufo_example), pointer :: self
-type(ufo_geovals),       pointer :: geovals
+type(ufo_geovals), pointer :: geovals
 
 call ufo_example_registry%get(c_key_self, self)
 call ufo_geovals_registry%get(c_key_geovals, geovals)

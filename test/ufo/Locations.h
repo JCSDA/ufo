@@ -1,8 +1,8 @@
 /*
  * (C) Copyright 2019 UK Met Office
- * 
+ *
  * This software is licensed under the terms of the Apache Licence Version 2.0
- * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
 #ifndef TEST_UFO_LOCATIONS_H_
@@ -18,6 +18,7 @@
 #include "eckit/testing/Test.h"
 #include "ioda/ObsSpace.h"
 #include "oops/../test/TestEnvironment.h"
+#include "oops/parallel/mpi/mpi.h"
 #include "oops/runs/Test.h"
 #include "oops/util/DateTime.h"
 #include "oops/util/Duration.h"
@@ -35,18 +36,18 @@ void testLocations() {
   util::DateTime bgn(conf.getString("window_begin"));
   util::DateTime end(conf.getString("window_end"));
   const eckit::LocalConfiguration obsconf(conf, "ObsSpace");
-  ioda::ObsSpace odb(obsconf, bgn, end);
+  ioda::ObsSpace odb(obsconf, oops::mpi::comm(), bgn, end);
   const size_t nlocs = odb.nlocs();
 
   // testConstructor:: Locations():
-  Locations locs;
+  Locations locs(oops::mpi::comm());
   EXPECT(locs.nobs() == 0);
-  oops::Log::test() << "Locs(empty constructor): " << locs << std::endl;
+  oops::Log::test() << "Locs(eckit mpi communicator): " << locs << std::endl;
 
   // testConstructor:: Locations(const eckit::Configuration &)
-  Locations locs1(conf);
+  Locations locs1(conf, oops::mpi::comm());
   EXPECT(locs1.nobs() == nlocs);
-  oops::Log::test() << "Locs(eckit constructor): " << locs1 << std::endl;
+  oops::Log::test() << "Locs(eckit constructor, eckit mpi communicator): " << locs1 << std::endl;
 
   // testConstructor::Locations(const ioda::ObsSpace &, const util::DateTime &,
   //                            const util::DateTime &);
