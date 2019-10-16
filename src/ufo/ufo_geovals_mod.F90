@@ -59,10 +59,11 @@ end type ufo_geovals
 contains
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_geovals_setup(self, c_vars, nlocs)
+subroutine ufo_geovals_setup(self, vars, nlocs)
+use oops_variables_mod
 implicit none
 type(ufo_geovals), intent(inout) :: self
-type(c_ptr), intent(in)    :: c_vars
+type(oops_variables), intent(in) :: vars
 integer, intent(in) :: nlocs
 
 integer :: ivar
@@ -72,11 +73,11 @@ call ufo_geovals_delete(self)
 self%nlocs = nlocs
 self%missing_value = missing_value(self%missing_value)
 
-f_vars = fckit_configuration(c_vars)
-call ufo_vars_read(f_vars, self%variables)
-self%nvar = size(self%variables)
+self%nvar = vars%nvars()
 allocate(self%geovals(self%nvar))
+allocate(self%variables(self%nvar))
 do ivar = 1, self%nvar
+  self%variables(ivar) = vars%variable(ivar)
   self%geovals(ivar)%nlocs = nlocs
   self%geovals(ivar)%nval = 0
 enddo
@@ -723,15 +724,15 @@ end subroutine ufo_geovals_maxloc
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_geovals_read_netcdf(self, filename, loc_multiplier, c_obspace, c_vars)
+subroutine ufo_geovals_read_netcdf(self, filename, loc_multiplier, c_obspace, vars)
 use netcdf
-
+use oops_variables_mod
 implicit none
 type(ufo_geovals), intent(inout)  :: self
 character(max_string), intent(in) :: filename
 integer, intent(in)               :: loc_multiplier
 type(c_ptr), intent(in)           :: c_obspace
-type(c_ptr), intent(in)           :: c_vars
+type(oops_variables), intent(in)  :: vars
 
 integer :: nlocs, gv_all_nlocs, nlocs_var
 integer :: nval
@@ -805,7 +806,7 @@ do iloc = 1,obs_nlocs
 enddo
 
 ! allocate geovals structure
-call ufo_geovals_setup(self, c_vars, nlocs)
+call ufo_geovals_setup(self, vars, nlocs)
 
 do ivar = 1, self%nvar
 

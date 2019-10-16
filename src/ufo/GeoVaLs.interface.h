@@ -28,7 +28,7 @@ namespace ufo {
  */
 
 extern "C" {
-  void ufo_geovals_setup_f90(F90goms &, const F90locs &, const eckit::Configuration * const *);
+  void ufo_geovals_setup_f90(F90goms &, const F90locs &, const oops::Variables &);
   void ufo_geovals_delete_f90(F90goms &);
   void ufo_geovals_copy_f90(const F90goms &, F90goms &);
   void ufo_geovals_zero_f90(const F90goms &);
@@ -55,8 +55,7 @@ extern "C" {
                            const int &, float &);
   void ufo_geovals_read_file_f90(const F90goms &,
                                  const eckit::Configuration * const *,
-                                 const ioda::ObsSpace &,
-                                 const eckit::Configuration * const *);
+                                 const ioda::ObsSpace &, const oops::Variables &);
   void ufo_geovals_write_file_f90(const F90goms &, const eckit::Configuration * const *,
                                   const int &, const char *);
 }  // extern C

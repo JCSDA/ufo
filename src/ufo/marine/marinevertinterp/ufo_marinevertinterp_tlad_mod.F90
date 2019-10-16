@@ -7,13 +7,10 @@
 
 module ufo_marinevertinterp_tlad_mod
 
- use iso_c_binding
+ use oops_variables_mod
  use kinds
-
  use ufo_geovals_mod, only: ufo_geovals, ufo_geoval, ufo_geovals_get_var
  use ufo_vars_mod
- use obsspace_mod
- use missing_values_mod
 
  implicit none
  private
@@ -23,9 +20,9 @@ module ufo_marinevertinterp_tlad_mod
  !> Fortran derived type for the tl/ad observation operator
  type, public :: ufo_marinevertinterp_tlad    
     private
+    type(oops_variables), public :: geovars
+    type(oops_variables), public :: obsvars
     logical,                    public :: ltraj = .false. !< trajectory set?    
-    character(len=max_string),  public :: varin(1)
-
     integer                            :: nlocs       !< Number of observations
     integer                            :: nval       !< Number of level in model's profiles 
     type(ufo_geoval)                   :: var        !< traj
@@ -45,13 +42,16 @@ module ufo_marinevertinterp_tlad_mod
 contains
 
 ! ------------------------------------------------------------------------------
-subroutine ufo_marinevertinterp_tlad_setup(self, vars)
+subroutine ufo_marinevertinterp_tlad_setup(self)
 implicit none
 class(ufo_marinevertinterp_tlad), intent(inout) :: self
-character(len=MAXVARLEN), dimension(:), intent(inout) :: vars
 
-! Set input variable names
-self%varin(1) = vars(1)
+integer :: ivar, nvars
+
+nvars = self%obsvars%nvars()
+do ivar = 1, nvars
+  call self%geovars%push_back(self%obsvars%variable(ivar))
+enddo
 
 end subroutine ufo_marinevertinterp_tlad_setup
 
@@ -74,7 +74,8 @@ end subroutine ufo_marinevertinterp_tlad_delete
 subroutine ufo_marinevertinterp_tlad_settraj(self, geovals, obss)
     use vert_interp_mod
     use ufo_tpsp2ti_mod
-        
+    use obsspace_mod
+    use iso_c_binding
     implicit none
     class(ufo_marinevertinterp_tlad), intent(inout)  :: self    !< Complete trajectory needed by the operator
     type(ufo_geovals), intent(in)                    :: geovals !< Model background
@@ -90,7 +91,7 @@ subroutine ufo_marinevertinterp_tlad_settraj(self, geovals, obss)
     integer :: obss_nlocs
 
     ! Associate geovals pointers
-    call ufo_geovals_get_var(geovals, self%varin(1), var)
+    call ufo_geovals_get_var(geovals, self%geovars%variable(1), var)
     call ufo_geovals_get_var(geovals, var_ocn_lay_thick, h)
 
     call ufo_marinevertinterp_tlad_delete(self)
@@ -137,6 +138,9 @@ subroutine ufo_marinevertinterp_simobs_tl(self, geovals, hofx, obss)
     use ufo_tpsp2ti_mod
     use gsw_pot_to_insitu
     use vert_interp_mod
+    use obsspace_mod
+    use missing_values_mod
+    use iso_c_binding
     implicit none
     class(ufo_marinevertinterp_tlad), intent(in)    :: self
     type(ufo_geovals),       intent(in)    :: geovals
@@ -161,7 +165,7 @@ subroutine ufo_marinevertinterp_simobs_tl(self, geovals, hofx, obss)
     endif
 
     ! Associate geovals
-    call ufo_geovals_get_var(geovals, self%varin(1), var_d)
+    call ufo_geovals_get_var(geovals, self%geovars%variable(1), var_d)
 
     nlev = var_d%nval
     nlocs = var_d%nlocs        
@@ -179,6 +183,9 @@ subroutine ufo_marinevertinterp_simobs_ad(self, geovals, hofx, obss)
     use ufo_tpsp2ti_mod
     use gsw_pot_to_insitu
     use vert_interp_mod
+    use obsspace_mod
+    use missing_values_mod
+    use iso_c_binding
     implicit none
     class(ufo_marinevertinterp_tlad), intent(in)    :: self
     type(ufo_geovals),       intent(inout) :: geovals

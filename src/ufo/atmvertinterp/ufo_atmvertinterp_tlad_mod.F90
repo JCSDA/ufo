@@ -1,32 +1,28 @@
-! (C) Copyright 2017-2018 UCAR
+! (C) Copyright 2017-2019 UCAR
 !
 ! This software is licensed under the terms of the Apache Licence Version 2.0
 ! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 
 module ufo_atmvertinterp_tlad_mod
 
-  use iso_c_binding
-  use kinds
+  use oops_variables_mod
   use ufo_vars_mod
   use ufo_geovals_mod
-  use ufo_geovals_mod_c,   only: ufo_geovals_registry
   use vert_interp_mod
-  use obsspace_mod
   use missing_values_mod
-  use fckit_configuration_module, only: fckit_configuration
 
 
 ! ------------------------------------------------------------------------------
 
   type, public :: ufo_atmvertinterp_tlad
   private
-     integer :: nvars
-     character(len=MAXVARLEN), public, allocatable :: varin(:)
-     integer :: nval, nlocs
-     real(kind_real), allocatable :: wf(:)
-     integer, allocatable :: wi(:)
-     character(len=MAXVARLEN), public :: v_coord ! GeoVaL to use to interpolate in vertical
-     logical, public :: use_ln ! if T, use ln(v_coord) not v_coord
+    type(oops_variables), public :: obsvars
+    type(oops_variables), public :: geovars
+    integer :: nval, nlocs
+    real(kind_real), allocatable :: wf(:)
+    integer, allocatable :: wi(:)
+    character(len=MAXVARLEN), public :: v_coord ! GeoVaL to use to interpolate in vertical
+    logical, public :: use_ln ! if T, use ln(v_coord) not v_coord
   contains
     procedure :: setup => atmvertinterp_tlad_setup_
     procedure :: cleanup => atmvertinterp_tlad_cleanup_
@@ -40,19 +36,20 @@ module ufo_atmvertinterp_tlad_mod
 contains
 ! ------------------------------------------------------------------------------
 
-subroutine atmvertinterp_tlad_setup_(self, grid_conf, vars)
+subroutine atmvertinterp_tlad_setup_(self, grid_conf)
+  use fckit_configuration_module, only: fckit_configuration
   implicit none
   class(ufo_atmvertinterp_tlad), intent(inout) :: self
-  character(len=MAXVARLEN), dimension(:), intent(inout) :: vars
+  type(fckit_configuration), intent(in) :: grid_conf
+
   character(kind=c_char,len=:), allocatable :: coord_name
-  type(fckit_configuration) :: grid_conf
+  integer :: ivar, nvars
 
-  !> Size of variables
-  self%nvars = size(vars)
-  !> Allocate varin
-  allocate(self%varin(self%nvars))
-  self%varin = vars
-
+  !> Fill in variables requested from the model
+  nvars = self%obsvars%nvars()
+  do ivar = 1, nvars
+    call self%geovars%push_back(self%obsvars%variable(ivar))
+  enddo
   !> grab what vertical coordinate/variable to use from the config
   self%use_ln = .false.
 
@@ -70,6 +67,7 @@ end subroutine atmvertinterp_tlad_setup_
 ! ------------------------------------------------------------------------------
 
 subroutine atmvertinterp_tlad_settraj_(self, geovals, obss)
+  use obsspace_mod
   implicit none
   class(ufo_atmvertinterp_tlad), intent(inout) :: self
   type(ufo_geovals),         intent(in)    :: geovals
@@ -130,9 +128,9 @@ subroutine atmvertinterp_simobs_tl_(self, geovals, obss, nvars, nlocs, hofx)
   type(ufo_geoval), pointer :: profile
   character(len=MAXVARLEN) :: geovar
 
-  do ivar = 1, self%nvars
+  do ivar = 1, nvars
     ! Get the name of input variable in geovals
-    geovar = self%varin(ivar)
+    geovar = self%geovars%variable(ivar)
 
     ! Get profile for this variable from geovals
     call ufo_geovals_get_var(geovals, geovar, profile)
@@ -162,9 +160,9 @@ subroutine atmvertinterp_simobs_ad_(self, geovals, obss, nvars, nlocs, hofx)
 
   missing = missing_value(missing)
 
-  do ivar = 1, self%nvars
+  do ivar = 1, nvars
     ! Get the name of input variable in geovals
-    geovar = self%varin(ivar)
+    geovar = self%geovars%variable(ivar)
 
     ! Get pointer to profile for this variable in geovals
     call ufo_geovals_get_var(geovals, geovar, profile)
@@ -205,8 +203,6 @@ subroutine  destructor(self)
   type(ufo_atmvertinterp_tlad), intent(inout)  :: self
 
   call self%cleanup()
-  self%nvars = 0
-  if (allocated(self%varin)) deallocate(self%varin)
 
 end subroutine destructor
 
