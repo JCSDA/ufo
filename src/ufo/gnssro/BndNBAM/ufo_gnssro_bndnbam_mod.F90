@@ -15,6 +15,8 @@ module ufo_gnssro_bndnbam_mod
   use missing_values_mod
   use gnssro_mod_conf
   use gnssro_mod_constants
+  use gnssro_mod_transform
+  use gnssro_mod_grids,  only : get_coordinate_value
   use fckit_log_module,  only : fckit_log
   use ufo_gnssro_bndnbam_util_mod
 
@@ -51,25 +53,30 @@ subroutine ufo_gnssro_bndnbam_simobs(self, geovals, hofx, obss)
   type(c_ptr), value,       intent(in)    :: obss
   character(len=*), parameter             :: myname  = "ufo_gnssro_bndnbam_simobs"
   character(max_string)                   :: err_msg
-  integer                                 :: nrecs
-  integer                                 :: nlocs
+  integer                                 :: nrecs, nlocs
   integer, parameter                      :: nlevAdd = 13 !num of additional levels on top of exsiting model levels
   integer, parameter                      :: ngrd    = 80 !num of new veritcal grids for bending angle computation
   integer                                 :: iobs, k, igrd, irec, icount
   integer                                 :: nlev, nlev1, nlevExt, nlevCheck
   type(ufo_geoval), pointer               :: t, q, gph, prs
   real(kind_real), allocatable            :: gesT(:,:), gesZ(:,:), gesP(:,:), gesQ(:,:), gesTv(:,:)
-  real(kind_real), allocatable            :: obsLat(:)
-  real(kind_real), allocatable            :: obsImpP(:)
-  real(kind_real), allocatable            :: obsLocR(:)
-  real(kind_real), allocatable            :: obsGeoid(:)
+  real(kind_real), allocatable            :: obsLat(:), obsImpP(:),obsLocR(:), obsGeoid(:), obsValue(:)
   integer(c_size_t), allocatable          :: obsRecnum(:)
   real(kind_real), allocatable            :: temperature(:)
+  real(kind_real)                         :: wf
+  integer                                 :: wi, wi2
   real(kind_real)                         :: grids(ngrd)
+  real(kind_real), allocatable            :: refIndex(:), refXrad(:), geomz(:)
+  real(kind_real), allocatable            :: ref(:), radius(:)
+  real(kind_real)                         :: sIndx
+  integer                                 :: indx
   integer                                 :: iflip
   integer,allocatable                     :: nlocs_begin(:)
   integer,allocatable                     :: nlocs_end(:)
   real(c_double)                          :: missing
+  integer,          allocatable           :: super_refraction_flag(:)
+  integer                                 :: sr_hgt_idx
+  real(kind_real)                         :: gradRef, obsImpH
 
   write(err_msg,*) myname, ": begin"
   call fckit_log%info(err_msg)
@@ -163,6 +170,7 @@ subroutine ufo_gnssro_bndnbam_simobs(self, geovals, hofx, obss)
   allocate(obsImpP(nlocs))
   allocate(obsLocR(nlocs))
   allocate(obsGeoid(nlocs))
+  allocate(obsValue(nlocs))
   allocate(obsRecnum(nlocs))
   allocate(nlocs_begin(nrecs))
   allocate(nlocs_end(nrecs))
@@ -171,6 +179,7 @@ subroutine ufo_gnssro_bndnbam_simobs(self, geovals, hofx, obss)
   call obsspace_get_db(obss, "MetaData", "impact_parameter", obsImpP)
   call obsspace_get_db(obss, "MetaData", "earth_radius_of_curvature", obsLocR)
   call obsspace_get_db(obss, "MetaData", "geoid_height_above_reference_ellipsoid", obsGeoid)
+  call obsspace_get_db(obss, "ObsValue", "bending_angle", obsValue)
   call obsspace_get_recnum(obss, obsRecnum)
 
   nlocs_begin=1
@@ -199,20 +208,53 @@ subroutine ufo_gnssro_bndnbam_simobs(self, geovals, hofx, obss)
 
   allocate(temperature(nlocs))
   temperature = missing
+  allocate(super_refraction_flag(nlocs))
+  super_refraction_flag = 0
 
 ! bending angle forward model starts
+  allocate(geomz(nlev))    ! geometric height
+  allocate(radius(nlev))   ! tangent point radisu to earth center
+  allocate(ref(nlevExt))   ! refractivity
+  allocate(refIndex(nlev))              !refactivity index n
+  allocate(refXrad(0:nlevExt+1))        !x=nr, model conuterpart impact parameter
+
   iobs = 0
+  hofx =  missing
   rec_loop: do irec = 1, nrecs
     obs_loop: do icount = nlocs_begin(irec), nlocs_end(irec)
 
-      iobs = iobs + 1
-      hofx(iobs) = missing
+      iobs = icount
+      do k = 1, nlev
+!        compute guess geometric height from geopotential height
+         call geop2geometric(obsLat(iobs), gesZ(k,iobs), geomz(k))
+         radius(k) = geomz(k) + obsGeoid(iobs) + obsLocR(iobs)   ! radius r
+!        guess refactivity, refactivity index,  and impact parameter
+         call compute_refractivity(gesT(k,iobs), gesQ(k,iobs), gesP(k,iobs),   &
+                                ref(k), self%roconf%use_compress)
+         refIndex(k) = one + (r1em6*ref(k))
+         refXrad(k)  = refIndex(k) * radius(k)
+      end do
+
+!     Data rejection based on model background !
+!     (1) skip data beyond model levels
+      call get_coordinate_value(obsImpP(iobs),sIndx,refXrad(1),nlev,"increasing")
+      if (sIndx < one .or. sIndx > float(nlev))  cycle obs_loop
+
+!     calculating temperature at obs location to obs space for BackgroundCheck RONBAM
+      indx=sIndx
+      wi=min(max(1,indx),nlev)
+      wi2=max(1,min(indx+1,nlev))
+      wf=indx-float(wi)
+      wf=max(zero,min(wf,one))
+      temperature(iobs)=gesT(wi,iobs)*(one-wf)+gesT(wi2,iobs)*wf
+
       call ufo_gnssro_bndnbam_simobs_single(   &
-           obsLat(iobs), obsGeoid(iobs), obsLocR(iobs), obsImpP(iobs), &
-           gesZ(:,iobs), gesT(:,iobs), gesQ(:,iobs), gesP(:,iobs), &
-           grids, self%roconf%use_compress, &
-           nlev, nlev1, nlevExt, nlevAdd, nlevCheck, ngrd, &
-           temperature(iobs), hofx(iobs)) 
+               obsLat(iobs), obsGeoid(iobs), obsLocR(iobs), obsImpP(iobs), &
+               grids, ngrd, &
+               nlev, nlevExt, nlevAdd, nlevCheck, &
+               radius(1:nlev),ref(1:nlevExt),refIndex(1:nlev),refXrad(0:nlevExt),  &
+               hofx(iobs))
+
 
     end do obs_loop
   end do rec_loop
@@ -222,6 +264,8 @@ subroutine ufo_gnssro_bndnbam_simobs(self, geovals, hofx, obss)
 
 ! putting temeprature at obs location to obs space for BackgroundCheck RONBAM
   call obsspace_put_db(obss, "MetaData", "temperature", temperature)
+! putting super refraction flag to obs space 
+  call obsspace_put_db(obss, "SRflag",   "bending_angle", super_refraction_flag)
 
   deallocate(obsLat)
   deallocate(obsImpP)
@@ -232,10 +276,16 @@ subroutine ufo_gnssro_bndnbam_simobs(self, geovals, hofx, obss)
   deallocate(gesT) 
   deallocate(gesTv) 
   deallocate(gesQ) 
+  deallocate(ref)
+  deallocate(refIndex)
+  deallocate(refXrad)
+  deallocate(geomz)
+  deallocate(radius)
   deallocate(temperature)
   deallocate(obsRecnum)
   deallocate(nlocs_begin)
   deallocate(nlocs_end)
+  deallocate(super_refraction_flag)
 
   write(err_msg,*) myname, ": complete"
   call fckit_log%info(err_msg)

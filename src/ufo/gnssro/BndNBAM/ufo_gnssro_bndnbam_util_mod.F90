@@ -22,66 +22,64 @@ module ufo_gnssro_bndnbam_util_mod
 ! ------------------------------------------------------------------------------
 subroutine ufo_gnssro_bndnbam_simobs_single( &
            obsLat, obsGeoid, obsLocR, obsImpP, &
-           gesZ, gesT, gesQ, gesP, &
-           grids, use_compress, &
-           nlev, nlev1, nlevExt, nlevAdd, nlevCheck, ngrd, &
-           temperature, bendingAngle)
+           grids, ngrd, &
+           nlev, nlevExt, nlevAdd, nlevCheck, &
+           radius,ref,refIndex,refXrad, &
+           bendingAngle)
 ! -------------------------------------------------------------------------------
-   character(len=*), parameter    :: myname  = "ufo_gnssro_bndnbam_simobs_single"
+  character(len=*), parameter    :: myname  = "ufo_gnssro_bndnbam_simobs_single"
 
-   real(kind_real), intent(out)   :: bendingAngle
+  real(kind_real), intent(out)   :: bendingAngle
  
-   integer, intent(in)            :: nlev
-   integer, intent(in)            :: nlev1
-   integer, intent(in)            :: nlevExt
-   integer, intent(in)            :: nlevAdd
-   integer, intent(in)            :: nlevCheck
-   integer, intent(in)            :: ngrd
-   integer, intent(in)            :: use_compress
+  integer, intent(in)            :: nlev
+  integer, intent(in)            :: nlev1
+  integer, intent(in)            :: nlevExt
+  integer, intent(in)            :: nlevAdd
+  integer, intent(in)            :: nlevCheck
+  integer, intent(in)            :: ngrd
+  integer, intent(in)            :: use_compress
+  real(kind_real), intent(in)    :: obsLat
+  real(kind_real), intent(in)    :: obsGeoid
+  real(kind_real), intent(in)    :: obsLocR
+  real(kind_real), intent(in)    :: obsImpP
  
-   real(kind_real), intent(in)    :: obsLat
-   real(kind_real), intent(in)    :: obsGeoid
-   real(kind_real), intent(in)    :: obsLocR
-   real(kind_real), intent(in)    :: obsImpP
+  real(kind_real), intent(in)    :: gesZ(nlev1)
+  real(kind_real), intent(in)    :: gesT(nlev)
+  real(kind_real), intent(in)    :: gesQ(nlev)
+  real(kind_real), intent(in)    :: gesP(nlev1)
+  real(kind_real), intent(in)    :: grids(ngrd)
  
-   real(kind_real), intent(in)    :: gesZ(nlev1)
-   real(kind_real), intent(in)    :: gesT(nlev)
-   real(kind_real), intent(in)    :: gesQ(nlev)
-   real(kind_real), intent(in)    :: gesP(nlev1)
-   real(kind_real), intent(in)    :: grids(ngrd)
+  real(kind_real)                :: radius(nlev)
+  real(kind_real)                :: ref(nlevExt)
+  real(kind_real)                :: refIndex(nlev)
+  real(kind_real)                :: refXrad(0:nlevExt+1)
+  real(kind_real)                :: lagConst(3,nlevExt)
  
- 
-   real(kind_real)                :: radius(nlev)
-   real(kind_real)                :: ref(nlevExt)
-   real(kind_real)                :: refIndex(nlev)
-   real(kind_real)                :: refXrad(0:nlevExt+1)
-   real(kind_real)                :: lagConst(3,nlevExt)
- 
-   real(kind_real)                 :: sIndx
-   real(kind_real)                 :: obsImpH
-   real(kind_real)                 :: geomz
-   integer                         :: klev
-   integer                         :: igrd
-   integer                         :: indx
-   integer                         :: wi
-   integer                         :: wi2
-   real(kind_real)                 :: wf
-   real(kind_real)                 :: temperature
-   logical                         :: qc_layer_SR
-   integer                         :: count_SR
-   integer                         :: top_layer_SR
-   integer                         :: bot_layer_SR 
-   real(kind_real)                 :: gradRef
-   real(kind_real)                 :: d_refXrad
-   real(kind_real)                 :: w4(4), dw4(4)
-   real(kind_real)                 :: bndIntgd
-   real(kind_real)                 :: rnlevExt
-   real(kind_real)                 :: derivRef_s(ngrd)
-   real(kind_real)                 :: refXrad_s(ngrd)
+  real(kind_real)                 :: sIndx
+  real(kind_real)                 :: obsImpH
+  real(kind_real)                 :: geomz
+  integer                         :: klev
+  integer                         :: igrd
+  integer                         :: indx
+  integer                         :: wi
+  integer                         :: wi2
+  real(kind_real)                 :: wf
+  real(kind_real)                 :: temperature
+  logical                         :: qc_layer_SR
+  integer                         :: count_SR
+  integer                         :: top_layer_SR
+  integer                         :: bot_layer_SR 
+  real(kind_real)                 :: gradRef
+  real(kind_real)                 :: d_refXrad
+  real(kind_real)                 :: w4(4), dw4(4)
+  real(kind_real)                 :: bndIntgd
+  real(kind_real)                 :: rnlevExt
+  real(kind_real)                 :: derivRef_s(ngrd)
+  real(kind_real)                 :: refXrad_s(ngrd)
 
 !------------------------------------------------------------
 
-   do klev = 1, nlev
+  do klev = 1, nlev
 !    compute guess geometric height from geopotential height
      call geop2geometric(obsLat, gesZ(klev), geomz)
      radius(klev) = geomz + obsGeoid + obsLocR   ! radius r
@@ -91,9 +89,9 @@ subroutine ufo_gnssro_bndnbam_simobs_single( &
                                 ref(klev), use_compress)
      refIndex(klev) = one + (r1em6*ref(klev))
      refXrad(klev)  = refIndex(klev) * radius(klev)
-   end do 
+  end do 
 
-!  data rejection based on model background !
+! data rejection based on model background !
 !  (1) skip data beyond model levels
    call get_coordinate_value(obsImpP,sIndx,refXrad(1),nlev,"increasing")
    if (sIndx < one .or. sIndx > float(nlev))  then
