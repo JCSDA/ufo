@@ -248,7 +248,59 @@ subroutine ufo_gnssro_bndnbam_simobs(self, geovals, hofx, obss)
       wf=max(zero,min(wf,one))
       temperature(iobs)=gesT(wi,iobs)*(one-wf)+gesT(wi2,iobs)*wf
 
-      call ufo_gnssro_bndnbam_simobs_single(   &
+!     (2) super-refaction
+!     (2.1) GSI style super refraction check
+      if(self%roconf%super_ref_qc == 1) then
+
+        obsImpH = (obsImpP(iobs) - obsLocR(iobs)) * r1em3 !impact heigt: a-r_earth
+
+        if (obsImpH <= six) then
+           do k = nlevCheck, 1, -1
+
+!             N gradient
+              gradRef = 1000.0 * (ref(k+1)-ref(k))/(radius(k+1)-radius(k))
+!             check for model SR layer
+              if (abs(gradRef) >= 0.75*crit_gradRefr .and. obsImpP(iobs) <= refXrad(k+2)) then
+                  super_refraction_flag(iobs) = 1
+                  cycle obs_loop
+              endif
+!             relax to close-to-SR conditions, and check if obs is inside model SR layer
+              if(self%roconf%sr_steps > 1) then
+                 if(abs(gradRef) >= half*crit_gradRefr &
+                    .and. maxval(obsValue(nlocs_begin(irec):nlocs_end(irec))) >= 0.03 ) then
+                    sr_hgt_idx = maxloc(obsValue(nlocs_begin(irec):nlocs_end(irec)), dim=1)
+                    where(obsImpP(nlocs_begin(irec):nlocs_end(irec)) >= obsImpP(sr_hgt_idx)  &
+                          .and. obsImpP(nlocs_begin(irec):nlocs_end(irec)) .ne. 1)           &
+                          super_refraction_flag(nlocs_begin(irec):nlocs_end(irec) ) = 2
+                    cycle rec_loop
+                 endif
+              end if
+           end do ! k
+
+        end if ! obsImpH <= six
+
+!    ROPP style super refraction check
+     else if(self%roconf%super_ref_qc == 2) then
+
+       sr_hgt_idx = 1
+       do k = nlev, 2, -1
+          if (refXrad(k) - refXrad(k-1) < 10.0) THEN
+             sr_hgt_idx = k
+             exit
+          end if
+       end do
+
+       if (obsImpP(iobs) < refXrad(sr_hgt_idx)) then
+          super_refraction_flag(iobs) = 1
+          cycle obs_loop
+       end if
+
+     else
+       write(err_msg,*) myname, ': super refraction method has to be 1 or 2!'
+       call abor1_ftn(err_msg)
+     end if
+
+     call ufo_gnssro_bndnbam_simobs_single(   &
                obsLat(iobs), obsGeoid(iobs), obsLocR(iobs), obsImpP(iobs), &
                grids, ngrd, &
                nlev, nlevExt, nlevAdd, nlevCheck, &
