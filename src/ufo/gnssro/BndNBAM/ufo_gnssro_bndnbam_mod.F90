@@ -56,7 +56,7 @@ subroutine ufo_gnssro_bndnbam_simobs(self, geovals, hofx, obss)
   integer                                 :: nrecs, nlocs
   integer, parameter                      :: nlevAdd = 13 !num of additional levels on top of exsiting model levels
   integer, parameter                      :: ngrd    = 80 !num of new veritcal grids for bending angle computation
-  integer                                 :: iobs, k, igrd, irec, icount
+  integer                                 :: iobs, k, igrd, irec, icount,kk
   integer                                 :: nlev, nlev1, nlevExt, nlevCheck
   type(ufo_geoval), pointer               :: t, q, gph, prs
   real(kind_real), allocatable            :: gesT(:,:), gesZ(:,:), gesP(:,:), gesQ(:,:), gesTv(:,:)
@@ -265,15 +265,16 @@ subroutine ufo_gnssro_bndnbam_simobs(self, geovals, hofx, obss)
                   cycle obs_loop
               endif
 !             relax to close-to-SR conditions, and check if obs is inside model SR layer
-              if(self%roconf%sr_steps > 1) then
-                 if(abs(gradRef) >= half*crit_gradRefr &
-                    .and. maxval(obsValue(nlocs_begin(irec):nlocs_end(irec))) >= 0.03 ) then
-                    sr_hgt_idx = maxloc(obsValue(nlocs_begin(irec):nlocs_end(irec)), dim=1)
-                    where(obsImpP(nlocs_begin(irec):nlocs_end(irec)) >= obsImpP(sr_hgt_idx)  &
-                          .and. obsImpP(nlocs_begin(irec):nlocs_end(irec)) .ne. 1)           &
-                          super_refraction_flag(nlocs_begin(irec):nlocs_end(irec) ) = 2
-                    cycle rec_loop
-                 endif
+              if(self%roconf%sr_steps > 1                 &
+                 .and. abs(gradRef) >= half*crit_gradRefr &
+                 .and. maxval(obsValue(nlocs_begin(irec):nlocs_end(irec))) >= 0.03 ) then
+                 sr_hgt_idx = maxloc(obsValue(nlocs_begin(irec):nlocs_end(irec)), dim=1)
+print*, "sr_hgt_idx", sr_hgt_idx, maxval(obsValue(nlocs_begin(irec):nlocs_end(irec))), nlocs_begin(irec), nlocs_end(irec)
+                 do kk = nlocs_begin(irec), nlocs_end(irec)
+                     if (obsImpP(kk) <= obsImpP(nlocs_begin(irec)-1+sr_hgt_idx))  &
+                        super_refraction_flag(kk)=2
+                 end do 
+                 cycle rec_loop
               end if
            end do ! k
 
