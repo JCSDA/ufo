@@ -37,15 +37,14 @@ subroutine ufo_gnssro_bndnbam_simobs_single( &
   integer, intent(in)            :: nlevCheck
   integer, intent(in)            :: ngrd
   real(kind_real), intent(in)    :: obsLat, obsGeoid, obsLocR, obsImpP ! obsspace
-
   real(kind_real), intent(in)    :: grids(ngrd)
  
-  real(kind_real)                :: radius(nlev)
-  real(kind_real)                :: ref(nlevExt)
-  real(kind_real)                :: refIndex(nlev)
-  real(kind_real)                :: refXrad(0:nlevExt+1)
+  real(kind_real), intent(in)    :: radius(nlev)
+  real(kind_real), intent(in)    :: refIndex(nlev)
+  real(kind_real), intent(inout) :: ref(nlevExt)
+  real(kind_real), intent(inout) :: refXrad(0:nlevExt+1)
   real(kind_real)                :: lagConst(3,nlevExt)
- 
+
   real(kind_real)                 :: sIndx
   real(kind_real)                 :: obsImpH
   integer                         :: k, igrd, indx
