@@ -75,7 +75,7 @@ subroutine ufo_gnssro_bndnbam_simobs(self, geovals, hofx, obss)
   call fckit_log%info(err_msg)
 
   nlocs   = obsspace_get_nlocs(obss) ! number of observations
-  nrecs   = obsspace_get_nrecs(obss) ! number of observations
+  nrecs   = obsspace_get_nrecs(obss) ! number of records/profiles
   write(err_msg,*) myname, ': nlocs from gelvals and hofx, nrecs', geovals%nlocs, nlocs, nrecs
   call fckit_log%info(err_msg)
 
@@ -197,11 +197,10 @@ subroutine ufo_gnssro_bndnbam_simobs(self, geovals, hofx, obss)
      grids(igrd+1) = igrd * ds
   end do 
 
-! bending angle forward model starts
-
   allocate(temperature(nlocs))
   temperature = missing
 
+! bending angle forward model starts
   iobs = 0
   rec_loop: do irec = 1, nrecs
     obs_loop: do icount = nlocs_begin(irec), nlocs_end(irec)
@@ -217,11 +216,6 @@ subroutine ufo_gnssro_bndnbam_simobs(self, geovals, hofx, obss)
 
     end do obs_loop
   end do rec_loop
-
-  if (iobs /= nlocs) then
-  write(err_msg,*) myname, ": number of obs are not consistent before and after grouping", nlocs, iobs
-  call abor1_ftn(err_msg)
-  end if
 
   write(err_msg,*) myname, ": complete"
   call fckit_log%info(err_msg)
