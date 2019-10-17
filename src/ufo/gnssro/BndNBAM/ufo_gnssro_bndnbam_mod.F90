@@ -185,8 +185,8 @@ subroutine ufo_gnssro_bndnbam_simobs(self, geovals, hofx, obss)
   end do
   nlocs_end(nrecs)= nlocs
   if (icount /= nrecs) then
-    write(err_msg,*) "record number is not consistent :", icount, nrecs
-    call fckit_log%info(err_msg)
+    write(err_msg,*) myname, ': record number is not consistent :', icount, nrecs
+    call abor1_ftn(err_msg)
   end if
 
   nlevExt   = nlev + nlevAdd
