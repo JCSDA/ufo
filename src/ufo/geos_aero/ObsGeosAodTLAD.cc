@@ -31,11 +31,7 @@ ObsGeosAodTLAD::ObsGeosAodTLAD(const ioda::ObsSpace & odb,
 {
   const eckit::Configuration * configc = &config;
 
-  const oops::Variables & observed = odb.obsvariables();
-  const int nvars_out = observed.size();
-
-  ufo_geosaod_tlad_setup_f90(keyOper_, &configc, varin_, nvars_out);
-
+  ufo_geosaod_tlad_setup_f90(keyOper_, &configc, odb.obsvariables(), varin_);
 
   oops::Log::trace() << "ObsGeosAodTLAD created" << std::endl;
 }

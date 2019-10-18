@@ -11,7 +11,6 @@ module ufo_geosaod_mod_c
   use iso_c_binding
   use fckit_configuration_module, only: fckit_configuration
   use ufo_geosaod_mod 
-  use string_f_c_mod
   use ufo_geovals_mod,   only: ufo_geovals
   use ufo_geovals_mod_c, only: ufo_geovals_registry
   implicit none
@@ -35,34 +34,25 @@ contains
 
 ! ------------------------------------------------------------------------------
 
-!subroutine ufo_geosaod_setup_c(c_key_self, c_conf, c_varconf, csin, c_str_size) bind(c,name='ufo_geosaod_setup_f90')
-subroutine ufo_geosaod_setup_c(c_key_self, c_conf, c_varconf, c_varlist) bind(c,name='ufo_geosaod_setup_f90')
+subroutine ufo_geosaod_setup_c(c_key_self, c_conf, c_obsvars, c_geovars) bind(c,name='ufo_geosaod_setup_f90')
+use oops_variables_mod
 use ufo_vars_mod
 implicit none
 integer(c_int), intent(inout) :: c_key_self
 type(c_ptr),    intent(in)    :: c_conf
-type(c_ptr), intent(in) :: c_varconf ! config with variables to be simulated
-!integer(c_int), intent(in) :: c_str_size
-!character(kind=c_char,len=1),intent(inout) :: csin(c_str_size+1)
-type(c_ptr), intent(in), value :: c_varlist
-character(len=MAXVARLEN), dimension(:), allocatable :: vars
-
 type(ufo_geosaod), pointer :: self
-type(fckit_configuration)  :: f_conf, f_varconf
+type(c_ptr), intent(in), value :: c_obsvars !< variables to be simulated
+type(c_ptr), intent(in), value :: c_geovars !< variables requested from the model
 
-f_conf = fckit_configuration(c_conf)
-f_varconf = fckit_configuration(c_varconf)
+type(fckit_configuration)  :: f_conf
 
 call ufo_geosaod_registry%setup(c_key_self, self)
-call ufo_vars_read(f_varconf, vars)
+f_conf = fckit_configuration(c_conf)
 
-call self%setup(f_conf, vars)
+self%obsvars = oops_variables(c_obsvars)
+self%geovars = oops_variables(c_geovars)
 
-!call f_c_string_vector(self%varin, csin)
-! Update C++ Obsoperator with input variable list
-call f_c_push_string_varlist(c_varlist, self%varin)
-
-deallocate(vars)
+call self%setup(f_conf)
 
 end subroutine ufo_geosaod_setup_c
 
@@ -90,8 +80,8 @@ type(c_ptr), value, intent(in) :: c_obsspace
 integer(c_int), intent(in)     :: c_nvars, c_nlocs
 real(c_double), intent(inout)  :: c_hofx(c_nvars, c_nlocs)
 
-type(ufo_geosaod), pointer :: self
-type(ufo_geovals),       pointer :: geovals
+type(ufo_geosaod),  pointer :: self
+type(ufo_geovals),  pointer :: geovals
 
 call ufo_geosaod_registry%get(c_key_self, self)
 call ufo_geovals_registry%get(c_key_geovals, geovals)

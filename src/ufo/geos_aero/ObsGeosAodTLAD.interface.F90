@@ -11,7 +11,6 @@ module ufo_geosaod_tlad_mod_c
   use iso_c_binding
   use fckit_configuration_module, only: fckit_configuration
   use ufo_geosaod_tlad_mod
-  use string_f_c_mod
   use ufo_geovals_mod_c, only: ufo_geovals_registry
   use ufo_geovals_mod,   only: ufo_geovals
 
@@ -33,27 +32,27 @@ contains
 #include "oops/util/linkedList_c.f"
 
 ! ------------------------------------------------------------------------------
-subroutine ufo_geosaod_tlad_setup_c(c_key_self, c_conf, c_varlist, c_nvars_out) bind(c,name='ufo_geosaod_tlad_setup_f90')
+subroutine ufo_geosaod_tlad_setup_c(c_key_self, c_conf, c_obsvars, c_geovars) bind(c,name='ufo_geosaod_tlad_setup_f90')
+use oops_variables_mod
 
 implicit none
 integer(c_int), intent(inout) :: c_key_self
 type(c_ptr), intent(in)    :: c_conf
-integer(c_int), intent(in) :: c_nvars_out
-type(c_ptr), intent(in), value :: c_varlist
+type(c_ptr), value, intent(in) :: c_geovars ! variables requested from the model
+type(c_ptr), value, intent(in) :: c_obsvars ! variables to be simulated
 
 type(ufo_geosaod_tlad), pointer :: self
 
 type(fckit_configuration)  :: f_conf
 
+call ufo_geosaod_tlad_registry%setup(c_key_self, self)
 f_conf = fckit_configuration(c_conf)
 
-
-call ufo_geosaod_tlad_registry%setup(c_key_self, self)
-
-call self%setup(f_conf, c_nvars_out)
-
 !> Set vars
-call f_c_push_string_varlist(c_varlist, self%varin)
+self%obsvars = oops_variables(c_obsvars)
+self%geovars = oops_variables(c_geovars)
+
+call self%setup(f_conf)
 
 end subroutine ufo_geosaod_tlad_setup_c
 

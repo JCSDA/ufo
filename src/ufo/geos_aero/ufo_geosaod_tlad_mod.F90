@@ -8,15 +8,16 @@
 module ufo_geosaod_tlad_mod
 
  use iso_c_binding
- use fckit_configuration_module, only: fckit_configuration
+
  use kinds
 
  use ufo_geovals_mod, only: ufo_geovals, ufo_geoval, ufo_geovals_get_var
  use ufo_vars_mod
- use obsspace_mod
  use ufo_constants_mod, only: grav
 
  use GEOS_MieObs_mod
+ use oops_variables_mod
+
 
  implicit none
  private
@@ -24,16 +25,16 @@ module ufo_geosaod_tlad_mod
 
  !> Fortran derived type for the tl/ad observation operator
  type, public :: ufo_geosaod_tlad
- private
-  integer :: nvars_in, nvars_out, nlocs, nlayers, ntracers
-  character(len=max_string), public, allocatable :: varin(:)
+  integer :: nlocs, nlayers, ntracers, nvars
+  type(oops_variables), public :: obsvars
+  type(oops_variables), public :: geovars
   real(kind=kind_real), allocatable :: bext(:,:,:,:)
   real(kind=kind_real), public, allocatable :: wavelength(:)
   character(len=maxvarlen),public:: rcfile
   real(kind=kind_real), dimension(:,:), allocatable :: delp(:,:)
  contains
   procedure :: setup  => ufo_geosaod_tlad_setup
-  procedure :: delete  => ufo_geosaod_tlad_delete
+  procedure :: delete => ufo_geosaod_tlad_delete
   procedure :: settraj => ufo_geosaod_tlad_settraj
   procedure :: simobs_tl  => ufo_geosaod_simobs_tl
   procedure :: simobs_ad  => ufo_geosaod_simobs_ad
@@ -43,12 +44,11 @@ contains
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_geosaod_tlad_setup(self, f_conf, c_nvars_out)
-
+subroutine ufo_geosaod_tlad_setup(self, f_conf)
+use fckit_configuration_module, only: fckit_configuration
 implicit none
 class(ufo_geosaod_tlad),  intent(inout) :: self
 type(fckit_configuration), intent(in)   :: f_conf
-integer(c_int),           intent(in)    :: c_nvars_out
 
 !Locals
 integer :: iq
@@ -61,17 +61,15 @@ character(len=:), allocatable :: str
  call f_conf%get_or_die("tracer_geovals",csize,tracer_variables)
  self%ntracers = f_conf%get_size("tracer_geovals")
 
- self%nvars_in =  self%ntracers
- allocate(self%varin(self%nvars_in))
- do iq = 1, self%nvars_in
-    self%varin(iq) = tracer_variables(iq)
+ do iq = 1, self%ntracers
+    call self%geovars%push_back(tracer_variables(iq))      ! aer MR
  enddo
-
  deallocate(tracer_variables)
 
- ! List of wavelenths
- self%nvars_out = c_nvars_out
- allocate(self%wavelength(self%nvars_out))
+ ! size of variables (number of obs type (wavelength for AOD))
+ self%nvars = self%obsvars%nvars()
+
+ allocate(self%wavelength(self%nvars))
  call f_conf%get_or_die("wavelengths", self%wavelength)
 
  ! RC File for ChemBase
@@ -86,16 +84,15 @@ subroutine ufo_geosaod_tlad_delete(self)
 
 implicit none
 class(ufo_geosaod_tlad), intent(inout) :: self
-
- if (allocated(self%varin))   deallocate(self%varin)
  if (allocated(self%bext))    deallocate(self%bext)
  if (allocated(self%delp))    deallocate(self%delp)
  if (allocated(self%wavelength)) deallocate(self%wavelength)
 end subroutine ufo_geosaod_tlad_delete
 
 ! ------------------------------------------------------------------------------
-subroutine ufo_geosaod_tlad_settraj(self, geovals, obss)
 
+subroutine ufo_geosaod_tlad_settraj(self, geovals, obss)
+use obsspace_mod
 implicit none
 class(ufo_geosaod_tlad), intent(inout) :: self
 type(ufo_geovals),       intent(in)    :: geovals
@@ -105,13 +102,15 @@ type(c_ptr), value,      intent(in)    :: obss
 type(ufo_geoval), pointer :: aer_profile
 type(ufo_geoval), pointer :: delp_profile
 type(ufo_geoval), pointer :: rh_profile
-integer :: rc, n
+integer :: rc, iq
 character(len=MAXVARLEN) :: geovar
+character(len=MAXVARLEN), dimension(:), allocatable:: tracer_name
 
 real(kind=kind_real), dimension(:,:),   allocatable :: rh(:,:)
 real(kind=kind_real), dimension(:,:,:), allocatable :: qm    ! aer concentration (kg/kg *delp/g) profiles at obs loc
 
- ! Get nlcos
+
+ ! Get number of locations
  self%nlocs = obsspace_get_nlocs(obss)
 
  ! Get delp and rh from model interp at obs loc (from geovals)
@@ -127,16 +126,18 @@ real(kind=kind_real), dimension(:,:,:), allocatable :: qm    ! aer concentration
 
  ! Get Aer profiles interpolated at obs loc
  allocate(qm(self%ntracers, self%nlayers, self%nlocs))
- do n = 1, self%ntracers
-    geovar = self%varin(n)                   !self%varin in setup contains tracers first then delp and rh
+ allocate(tracer_name(self%ntracers))
+ do iq = 1, self%ntracers
+    geovar = self%geovars%variable(iq)                   !self%geovars contains tracers 
+    tracer_name(iq) = geovar
     call ufo_geovals_get_var(geovals, geovar, aer_profile)
-    qm(n,:,:) = aer_profile%vals
-    qm(n,:,:) = qm(n,:,:) * self%delp / grav
+    qm(iq,:,:) = aer_profile%vals
+    qm(iq,:,:) = qm(iq,:,:) * self%delp / grav
  enddo
 
- allocate(self%bext(self%nlayers, self%nvars_out, self%ntracers, self%nlocs)) !mass extinction efficiency 
- call get_GEOS_AOD(self%nlayers, self%nlocs, self%nvars_out, self%ntracers, self%rcfile,  &
-                   real(self%wavelength,4), self%varin, qm, rh, ext=self%bext, rc = rc) 
+ allocate(self%bext(self%nlayers, self%nvars, self%ntracers, self%nlocs)) !mass extinction efficiency 
+ call get_GEOS_AOD(self%nlayers, self%nlocs, self%nvars, self%ntracers, self%rcfile,  &
+                   real(self%wavelength,4), tracer_name, qm, rh, ext=self%bext, rc = rc) 
 
  deallocate(rh)
  deallocate(qm)
@@ -155,7 +156,7 @@ type(c_ptr), value,      intent(in)    :: obss
 integer,                 intent(in)    :: nvars, nlocs
 real(c_double),          intent(inout) :: hofx(nvars, nlocs)
 
-integer :: n
+integer :: iq
 real(kind_real), dimension(:,:,:), allocatable :: qm_tl
 type(ufo_geoval), pointer :: aer_profile
 
@@ -164,14 +165,14 @@ character(len=MAXVARLEN) :: geovar
  ! Get Aer profiles interpolated at obs loc
  allocate(qm_tl(self%ntracers, self%nlayers, nlocs))
 
- do n = 1, self%ntracers
-    geovar = self%varin(n)
+ do iq = 1, self%ntracers
+    geovar = self%geovars%variable(iq)                      !self%geovars contains tracers 
     call ufo_geovals_get_var(geovals, geovar, aer_profile)
-    qm_tl(n,:,:) = aer_profile%vals                         ! aer mass mixing ratio
-    qm_tl(n,:,:) = qm_tl(n,:,:) * self%delp / grav          ! aer concentration
+    qm_tl(iq,:,:) = aer_profile%vals                         ! aer mass mixing ratio
+    qm_tl(iq,:,:) = qm_tl(iq,:,:) * self%delp / grav          ! aer concentration
  enddo
 
- call get_geos_aod_tl(self%nlayers, nlocs, self%nvars_out, self%ntracers, self%bext, qm_tl, aod_tot_tl=hofx)
+ call get_geos_aod_tl(self%nlayers, nlocs, nvars, self%ntracers, self%bext, qm_tl, aod_tot_tl=hofx)
 
  deallocate(qm_tl)
 
@@ -188,18 +189,18 @@ type(c_ptr), value,      intent(in)    :: obss
 integer,                 intent(in)    :: nvars, nlocs
 real(c_double),          intent(in)    :: hofx(nvars, nlocs)
 
-integer :: n
+integer :: iq
 real(kind_real), dimension(:,:,:), allocatable :: qm_ad
 type(ufo_geoval), pointer :: aer_profile
 character(len=MAXVARLEN) :: geovar
 
  allocate(qm_ad(self%ntracers, self%nlayers, nlocs))   
 
- call get_geos_aod_ad(self%nlayers, nlocs, self%nvars_out, self%ntracers, self%bext, hofx, qm_ad)
+ call get_geos_aod_ad(self%nlayers, nlocs, nvars, self%ntracers, self%bext, hofx, qm_ad)
  
- do n = self%ntracers,1,-1
+ do iq = self%ntracers,1,-1
 
-   geovar = self%varin(n)
+   geovar = self%geovars%variable(iq)                   !self%geovars contains tracers 
    call ufo_geovals_get_var(geovals, geovar, aer_profile)
    if (.not. allocated(aer_profile%vals)) then
        aer_profile%nlocs = nlocs
@@ -208,8 +209,8 @@ character(len=MAXVARLEN) :: geovar
        aer_profile%vals(:,:) = 0.0_kind_real
    endif
 
-   qm_ad(n,:,:) = qm_ad(n,:,:) * self%delp / grav
-   aer_profile%vals = qm_ad(n,:,:)
+   qm_ad(iq,:,:) = qm_ad(iq,:,:) * self%delp / grav
+   aer_profile%vals = qm_ad(iq,:,:)
 
  enddo
  
@@ -218,5 +219,6 @@ character(len=MAXVARLEN) :: geovar
 end subroutine ufo_geosaod_simobs_ad
 
 ! ------------------------------------------------------------------------------
+
 
 end module ufo_geosaod_tlad_mod
