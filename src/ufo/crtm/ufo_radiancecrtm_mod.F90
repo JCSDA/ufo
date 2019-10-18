@@ -270,6 +270,7 @@ character(max_string) :: err_msg
 
    ! Call THE CRTM inspection
    ! ------------------------
+   print *, "Hamideh_ufo",n_Profiles,sfc%Land_Coverage + sfc%Water_Coverage + sfc%Snow_Coverage + sfc%Ice_Coverage
    if (self%conf%inspect > 0) then
      call CRTM_Atmosphere_Inspect(atm(self%conf%inspect))
      call CRTM_Surface_Inspect(sfc(self%conf%inspect))
