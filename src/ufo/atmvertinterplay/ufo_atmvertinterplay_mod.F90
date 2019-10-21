@@ -7,72 +7,48 @@
 
 module ufo_atmvertinterplay_mod
 
- use iso_c_binding
- use kinds
-
- use ufo_geovals_mod, only: ufo_geovals, ufo_geoval, ufo_geovals_get_var
- use ufo_geovals_mod_c, only: ufo_geovals_registry
- use ufo_basis_mod, only: ufo_basis
+ use oops_variables_mod
  use ufo_vars_mod
- use ufo_constants_mod
- use obsspace_mod
 
  implicit none
  private
 
 !> Fortran derived type for the observation type
  type, public :: ufo_atmvertinterplay
- private
-   integer :: nvars  ! number of variables to be interpolated
-   character(len=MAXVARLEN), public, allocatable :: varin(:)
-   character(len=MAXVARLEN), public, allocatable :: varout(:)
+   type(oops_variables), public :: obsvars
+   type(oops_variables), public :: geovars
  contains
    procedure :: setup  => ufo_atmvertinterplay_setup
    procedure :: simobs => ufo_atmvertinterplay_simobs
-   final :: destructor
  end type ufo_atmvertinterplay
 
 contains
 
 ! ------------------------------------------------------------------------------
-subroutine ufo_atmvertinterplay_setup(self, vars)
+subroutine ufo_atmvertinterplay_setup(self)
 implicit none
 class(ufo_atmvertinterplay), intent(inout) :: self
-character(len=MAXVARLEN), dimension(:), intent(inout) :: vars
 
 !Local Variables
-integer :: i
+integer :: ivar, nvars
 
-  self%nvars = size(vars)
-  allocate(self%varout(self%nvars))
-  self%varout = vars
+! Fill in geovars: variables we need from the model
+!  need additional slot to hold vertical coord.
+nvars = self%obsvars%nvars()
+do ivar = 1, nvars
+  call self%geovars%push_back(self%obsvars%variable(ivar))
+enddo
 
-  ! Allocate varin: variables we need from the model
-  !  need additional slot to hold vertical coord.
-  allocate(self%varin(self%nvars+1))
-
-  ! Set vars_in based on vars_out
-  do i = 1, self%nvars
-    self%varin(i) = self%varout(i)
-  enddo
-
-  ! Put pressure to the varin (vars from the model) list
-  self%varin(self%nvars+1) = var_prsi
+! Put pressure to the geovars (vars from the model) list
+call self%geovars%push_back(var_prsi)
 
 end subroutine ufo_atmvertinterplay_setup
 
 ! ------------------------------------------------------------------------------
-subroutine destructor(self)
-implicit none
-type(ufo_atmvertinterplay), intent(inout) :: self
-
-  if (allocated(self%varout)) deallocate(self%varout)
-  if (allocated(self%varin))  deallocate(self%varin)
-
-end subroutine destructor
-
-! ------------------------------------------------------------------------------
 subroutine ufo_atmvertinterplay_simobs(self, geovals, obss, nvars, nlocs, hofx)
+use ufo_geovals_mod, only: ufo_geovals, ufo_geoval, ufo_geovals_get_var
+use ufo_constants_mod
+use obsspace_mod
 implicit none
 class(ufo_atmvertinterplay), intent(in)    :: self
 integer, intent(in)               :: nvars, nlocs
@@ -106,9 +82,9 @@ real :: pindex
   call obsspace_get_db(obss, "MetaData", "top_level_pressure", toppressure)
   call obsspace_get_db(obss, "MetaData", "bottom_level_pressure", botpressure)
 
-  do ivar = 1, self%nvars
+  do ivar = 1, nvars
     !get the name of input variable in geovals
-    geovar = self%varin(ivar)
+    geovar = self%geovars%variable(ivar)
 
     !Get model output
     call ufo_geovals_get_var(geovals, geovar, modelozone)

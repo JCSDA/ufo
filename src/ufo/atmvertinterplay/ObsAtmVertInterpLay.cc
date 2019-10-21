@@ -26,9 +26,7 @@ ObsAtmVertInterpLay::ObsAtmVertInterpLay(const ioda::ObsSpace & odb,
   : ObsOperatorBase(odb, config), keyOperAtmVertInterpLay_(0), odb_(odb), varin_()
 {
   const eckit::Configuration * configc = &config;
-  const oops::Variables & observed = odb.obsvariables();
-  const eckit::Configuration * varconfig = &observed.toFortran();
-  ufo_atmvertinterplay_setup_f90(keyOperAtmVertInterpLay_, &configc, &varconfig, varin_);
+  ufo_atmvertinterplay_setup_f90(keyOperAtmVertInterpLay_, &configc, odb.obsvariables(), varin_);
 
   oops::Log::trace() << "ObsAtmVertInterpLay created." << std::endl;
 }
