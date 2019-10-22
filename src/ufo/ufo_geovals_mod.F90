@@ -110,7 +110,7 @@ end subroutine ufo_geovals_delete
 subroutine ufo_geovals_get_var(self, varname, geoval)
 implicit none
 type(ufo_geovals), target, intent(in)    :: self
-character(MAXVARLEN), intent(in) :: varname
+character(len=*), intent(in) :: varname
 type(ufo_geoval), pointer, intent(inout)    :: geoval
 
 character(len=*), parameter :: myname_="ufo_geovals_get_var"

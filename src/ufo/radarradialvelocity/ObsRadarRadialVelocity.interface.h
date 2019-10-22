@@ -21,8 +21,7 @@ extern "C" {
 // -----------------------------------------------------------------------------
 
   void ufo_radarradialvelocity_setup_f90(F90hop &, const eckit::Configuration * const *,
-                             const eckit::Configuration * const *,
-                             oops::Variables &);
+                             const oops::Variables &, oops::Variables &);
   void ufo_radarradialvelocity_delete_f90(F90hop &);
   void ufo_radarradialvelocity_simobs_f90(const F90hop &, const F90goms &, const ioda::ObsSpace &,
                                const int &, const int &, double &);

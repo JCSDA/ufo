@@ -7,32 +7,24 @@
 
 module ufo_radarradialvelocity_mod
 
- use fckit_configuration_module, only: fckit_configuration
- use kinds
- use vert_interp_mod
-
- use ufo_geovals_mod, only: ufo_geovals, ufo_geoval, ufo_geovals_get_var
+ use oops_variables_mod
  use ufo_vars_mod
- use obsspace_mod
 
  implicit none
  private
 
 !> Fortran derived type for the observation type
-! DONE
  type, public :: ufo_radarradialvelocity
  private
-   integer, public :: nvars_in, nvars_out
-   character(len=MAXVARLEN), public, allocatable :: varin(:)
-   character(len=MAXVARLEN), public, allocatable :: varout(:)
+   type(oops_variables), public :: obsvars
+   type(oops_variables), public :: geovars
    character(len=MAXVARLEN), public :: v_coord ! GeoVaL to use to interpolate in vertical
  contains
    procedure :: setup  => ufo_radarradialvelocity_setup
    procedure :: simobs => ufo_radarradialvelocity_simobs
-   final :: destructor
  end type ufo_radarradialvelocity
 
- character(len=maxvarlen), dimension(3), parameter :: varin_default = (/var_u, &
+ character(len=maxvarlen), dimension(3), parameter :: geovars_default = (/var_u, &
                                                                         var_v, &
                                                                         var_w  /)
 
@@ -40,21 +32,16 @@ module ufo_radarradialvelocity_mod
 contains
 
 ! ------------------------------------------------------------------------------
-! Done
-subroutine ufo_radarradialvelocity_setup(self, yaml_conf, vars)
+subroutine ufo_radarradialvelocity_setup(self, yaml_conf)
+use fckit_configuration_module, only: fckit_configuration
+use iso_c_binding
 implicit none
 class(ufo_radarradialvelocity), intent(inout)     :: self
 type(fckit_configuration), intent(in) :: yaml_conf
-character(len=MAXVARLEN), dimension(:), intent(inout) :: vars
+
 character(kind=c_char,len=:), allocatable :: coord_name
 
-  self%nvars_out = size(vars)
-  allocate(self%varout(self%nvars_out))
-  self%varout = vars
-
-  self%nvars_in  = size(varin_default)
-  allocate(self%varin(self%nvars_in+1))
-  self%varin(1:self%nvars_in) = varin_default
+  call self%geovars%push_back(geovars_default)
 
   if( yaml_conf%has("VertCoord") ) then
       call yaml_conf%get_or_die("VertCoord",coord_name)
@@ -66,27 +53,17 @@ character(kind=c_char,len=:), allocatable :: coord_name
       self%v_coord = var_z
   endif
 
-  self%varin(self%nvars_in+1) = self%v_coord
+  call self%geovars%push_back(self%v_coord)
 
 end subroutine ufo_radarradialvelocity_setup
 
 ! ------------------------------------------------------------------------------
-! Done
-subroutine destructor(self)
-implicit none
-type(ufo_radarradialvelocity), intent(inout) :: self
-
-  if (allocated(self%varout)) deallocate(self%varout)
-  if (allocated(self%varin))  deallocate(self%varin)
-
-end subroutine destructor
-
-! ------------------------------------------------------------------------------
-! TODO: put code for your nonlinear observation operator in this routine
 ! Code in this routine is for radar radialvelocity only
-
 subroutine ufo_radarradialvelocity_simobs(self, geovals, obss, nvars, nlocs, hofx)
-
+  use kinds
+  use vert_interp_mod
+  use ufo_geovals_mod, only: ufo_geovals, ufo_geoval, ufo_geovals_get_var
+  use obsspace_mod
   implicit none
   class(ufo_radarradialvelocity), intent(in)    :: self
   integer, intent(in)               :: nvars, nlocs
@@ -95,7 +72,7 @@ subroutine ufo_radarradialvelocity_simobs(self, geovals, obss, nvars, nlocs, hof
   type(c_ptr), value, intent(in)    :: obss
 
   ! Local variables
-  integer :: iobs, ivar
+  integer :: iobs, ivar, nvars_geovars
   real(kind_real),  dimension(:), allocatable :: obsvcoord
   real(kind_real),  dimension(:), allocatable :: radarazim, radartilt, radardir, vterminal
   type(ufo_geoval), pointer :: vcoordprofile, profile
@@ -141,11 +118,13 @@ subroutine ufo_radarradialvelocity_simobs(self, geovals, obss, nvars, nlocs, hof
     call vert_interp_weights(vcoordprofile%nval, tmp2, tmp, wi(iobs), wf(iobs))
   enddo
 
-  allocate(vfields(self%nvars_in,nlocs))
+! Number of variables in geovars (without the vertical coordinate)
+  nvars_geovars = self%geovars%nvars() - 1
+  allocate(vfields(nvars_geovars,nlocs))
 
-  do ivar = 1, self%nvars_in
+  do ivar = 1, nvars_geovars
 ! Get the name of input variable in geovals
-    geovar = self%varin(ivar)
+    geovar = self%geovars%variable(ivar)
 
 ! Get profile for this variable from geovals
     call ufo_geovals_get_var(geovals, geovar, profile)
@@ -157,7 +136,7 @@ subroutine ufo_radarradialvelocity_simobs(self, geovals, obss, nvars, nlocs, hof
     enddo
   enddo
 
-  do ivar = 1, self%nvars_out
+  do ivar = 1, nvars
     do iobs=1,nlocs
       hofx(ivar,iobs) = vfields(1,iobs)*radarazim(iobs) &
                       + vfields(2,iobs)*radartilt(iobs) &
