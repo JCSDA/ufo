@@ -5,8 +5,8 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#ifndef UFO_FILTERS_OBSFUNCTIONS_OBSFUNCTIONERRINFLATIONFACTOR_H_
-#define UFO_FILTERS_OBSFUNCTIONS_OBSFUNCTIONERRINFLATIONFACTOR_H_
+#ifndef UFO_FILTERS_OBSFUNCTIONS_OBSFUNCTIONERRFLAT_H_
+#define UFO_FILTERS_OBSFUNCTIONS_OBSFUNCTIONERRFLAT_H_
 
 #include "ufo/filters/ObsFilterData.h"
 #include "ufo/filters/obsfunctions/ObsFunctionBase.h"
@@ -16,10 +16,10 @@ namespace ufo {
 
 // -----------------------------------------------------------------------------
 
-class ObsFunctionErrInflationFactor : public ObsFunctionBase {
+class ObsFunctionErrfLat : public ObsFunctionBase {
  public:
-  ObsFunctionErrInflationFactor();
-  ~ObsFunctionErrInflationFactor();
+  ObsFunctionErrfLat();
+  ~ObsFunctionErrfLat();
 
   void compute(const ObsFilterData &,
                ioda::ObsDataVector<float> &) const;
@@ -32,4 +32,4 @@ class ObsFunctionErrInflationFactor : public ObsFunctionBase {
 
 }  // namespace ufo
 
-#endif  // UFO_FILTERS_OBSFUNCTIONS_OBSFUNCTIONERRINFLATIONFACTOR_H_
+#endif  // UFO_FILTERS_OBSFUNCTIONS_OBSFUNCTIONERRFLAT_H_

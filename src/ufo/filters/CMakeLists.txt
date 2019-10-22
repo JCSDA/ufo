@@ -49,12 +49,12 @@ set ( filters_files
       obsfunctions/ObsFunction.h
       obsfunctions/ObsFunctionBase.cc
       obsfunctions/ObsFunctionBase.h
-      obsfunctions/ObsFunctionErrInflationFactor.cc
-      obsfunctions/ObsFunctionErrInflationFactor.h
       obsfunctions/ObsFunctionScattering.cc
       obsfunctions/ObsFunctionScattering.h
       obsfunctions/ObsFunctionVelocity.cc
       obsfunctions/ObsFunctionVelocity.h
+      obsfunctions/ObsFunctionErrfLat.cc
+      obsfunctions/ObsFunctionErrfLat.h
 )
 
 PREPEND( _p_filters_files       "filters"       ${filters_files} )
