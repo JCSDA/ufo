@@ -53,17 +53,17 @@ BackgroundCheckRONBAM::~BackgroundCheckRONBAM() {
 // -----------------------------------------------------------------------------
 
 void BackgroundCheckRONBAM::applyFilter(const std::vector<bool> & apply,
-                                       std::vector<std::vector<bool>> & flagged) const {
+                                        const oops::Variables & filtervars,
+                                        std::vector<std::vector<bool>> & flagged) const {
   oops::Log::trace() << "BackgroundCheckRONBAM postFilter" << std::endl;
 
-  const oops::Variables vars(config_);
   const oops::Variables observed = obsdb_.obsvariables();
   const float missing = util::missingValue(missing);
 
   oops::Log::debug() << "BackgroundCheckRONBAM flags: " << flags_;
 
-  ioda::ObsDataVector<float> obs(obsdb_, vars, "ObsValue");
-  ioda::ObsDataVector<float> bias(obsdb_, vars, "ObsBias", false);
+  ioda::ObsDataVector<float> obs(obsdb_, filtervars, "ObsValue");
+  ioda::ObsDataVector<float> bias(obsdb_, filtervars, "ObsBias", false);
   ioda::ObsDataVector<float> impactheight(obsdb_, "impact_height", "MetaData");
   ioda::ObsDataVector<float> latitude(obsdb_, "latitude", "MetaData");
   ioda::ObsDataVector<float> geoidheight(obsdb_, "geoid_height_above_reference_ellipsoid",
@@ -71,11 +71,11 @@ void BackgroundCheckRONBAM::applyFilter(const std::vector<bool> & apply,
   ioda::ObsDataVector<float> temperature(obsdb_, "temperature",
                                          "MetaData");  // background temperature at obs location
 
-  for (size_t jv = 0; jv < vars.size(); ++jv) {
-    size_t iv = observed.find(vars[jv]);
+  for (size_t jv = 0; jv < filtervars.size(); ++jv) {
+    size_t iv = observed.find(filtervars[jv]);
 
 //  H(x)
-    const std::string varhofx = vars[jv] + "@HofX";
+    const std::string varhofx = filtervars[jv] + "@HofX";
     std::vector<float> hofx;
     data_.get(varhofx, hofx);
 
@@ -125,7 +125,7 @@ void BackgroundCheckRONBAM::applyFilter(const std::vector<bool> & apply,
 
 //      NBAM style background check: if omb/o is greater than a cutoff
         if (std::abs(static_cast<float>(hofx[jobs])-yy) > yy*cutoff) {
-           flags_[iv][jobs] = QCflags::fguess; }
+           flagged[jv][jobs] = true; }
       }
     }
   }

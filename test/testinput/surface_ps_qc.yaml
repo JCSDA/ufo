@@ -20,6 +20,7 @@ Observations:
    - Filter: HCorrection
      da_psfc_scheme: WRFDA
    - Filter: Difference Check
+     variables: [surface_pressure]
      reference: station_elevation@MetaData
      value: surface_altitude@GeoVaLs
      threshold: 500
@@ -41,6 +42,7 @@ Observations:
    - Filter: HCorrection
      da_psfc_scheme: UKMO
    - Filter: Difference Check
+     variables: [surface_pressure]
      reference: station_elevation@MetaData
      value: surface_altitude@GeoVaLs
      threshold: 500

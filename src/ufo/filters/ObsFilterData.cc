@@ -18,7 +18,7 @@
 #include "ufo/filters/obsfunctions/ObsFunction.h"
 #include "ufo/GeoVaLs.h"
 #include "ufo/ObsDiagnostics.h"
-#include "ufo/utils/SplitVarGroup.h"
+#include "ufo/utils/StringUtils.h"
 
 namespace ufo {
 

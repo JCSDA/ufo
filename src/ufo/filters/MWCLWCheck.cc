@@ -17,11 +17,8 @@
 
 #include "ioda/ObsDataVector.h"
 #include "ioda/ObsSpace.h"
-#include "oops/interface/ObsFilter.h"
 #include "oops/util/Logger.h"
 #include "oops/util/missingValues.h"
-#include "ufo/filters/QCflags.h"
-#include "ufo/UfoTrait.h"
 
 namespace ufo {
 
@@ -47,11 +44,9 @@ MWCLWCheck::~MWCLWCheck() {}
 // -----------------------------------------------------------------------------
 
 void MWCLWCheck::applyFilter(const std::vector<bool> & apply,
+                             const oops::Variables & filtervars,
                              std::vector<std::vector<bool>> & flagged) const {
   oops::Log::trace() << "MWCLWCheck postFilter" << std::endl;
-
-  oops::Variables vars(config_);
-  oops::Variables observed = obsdb_.obsvariables();
 
   const float missing = util::missingValue(missing);
   float amsua_clw(float, float, float);
@@ -66,13 +61,13 @@ void MWCLWCheck::applyFilter(const std::vector<bool> & apply,
   oops::Log::debug() << "MWCLWCheck: config = " << config_ << std::endl;
 
 // Number of channels to be tested and number of thresholds needs to be the same
-  ASSERT(clw_thresholds.size() == vars.size());
+  ASSERT(clw_thresholds.size() == filtervars.size());
 // Check we have the correct number of channels to do the CLW calculation
   ASSERT(invars_.size() == 2);
 // Check clw_option is in range
   ASSERT(clw_option >= 1 && clw_option <=3);
 
-  ioda::ObsDataVector<float> obs(obsdb_, vars, "ObsValue");
+  ioda::ObsDataVector<float> obs(obsdb_, filtervars, "ObsValue");
   ioda::ObsDataVector<float> obs_for_calc(obsdb_, invars_, "ObsValue");
   ioda::ObsDataVector<float> sza(obsdb_, "sensor_zenith_angle", "MetaData");
   ioda::ObsDataVector<float> clw(obsdb_, "cloud_liquid_water", "Diagnostic", false);
@@ -115,11 +110,10 @@ void MWCLWCheck::applyFilter(const std::vector<bool> & apply,
       }
 
 // Apply CLW threshold to observations
-     for (size_t jv = 0; jv < vars.size(); ++jv) {
-        size_t iv = observed.find(vars[jv]);
-        if (apply[jobs] && flags_[iv][jobs] == 0) {
+     for (size_t jv = 0; jv < filtervars.size(); ++jv) {
+        if (apply[jobs]) {
            if (clw_thresholds[jv] != missing && (clw[0][jobs] == missing ||
-               clw[0][jobs] > clw_thresholds[jv])) flags_[iv][jobs] = QCflags::clw;
+               clw[0][jobs] > clw_thresholds[jv])) flagged[jv][jobs] = true;
       }
     }
   }

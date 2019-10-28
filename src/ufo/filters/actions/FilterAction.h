@@ -34,6 +34,7 @@ class FilterAction : private boost::noncopyable {
   void apply(const oops::Variables &, const std::vector<std::vector<bool>> &,
              const ObsFilterData &,
              ioda::ObsDataVector<int> &, ioda::ObsDataVector<float> &) const;
+  virtual const ufo::Variables & requiredVariables() const;
  private:
   std::unique_ptr<FilterActionBase> action_;
 };

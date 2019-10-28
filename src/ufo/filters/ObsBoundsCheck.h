@@ -16,6 +16,7 @@
 
 #include "oops/util/ObjectCounter.h"
 #include "ufo/filters/FilterBase.h"
+#include "ufo/filters/QCflags.h"
 
 namespace eckit {
   class Configuration;
@@ -44,7 +45,9 @@ class ObsBoundsCheck : public FilterBase,
 
  private:
   void print(std::ostream &) const override;
-  void applyFilter(const std::vector<bool> &, std::vector<std::vector<bool>> &) const override;
+  void applyFilter(const std::vector<bool> &, const oops::Variables &,
+                   std::vector<std::vector<bool>> &) const override;
+  int qcFlag() const override {return QCflags::bounds;}
 };
 
 }  // namespace ufo

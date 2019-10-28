@@ -11,6 +11,7 @@ Observations:
         variables: [air_temperature]
     ObsFilters:
     - Filter: Gaussian_Thinning
+      variables: [air_temperature]
       horizontal_mesh:   1111.949266 #km = 10 deg at equator
     passedBenchmark: 10
   - ObsSpace:
@@ -21,6 +22,7 @@ Observations:
         variables: [air_temperature]
     ObsFilters:
     - Filter: Gaussian_Thinning
+      variables: [air_temperature]
       horizontal_mesh:   1111.949266 #km = 10 deg at equator
       vertical_mesh:     10000 #Pa
     passedBenchmark: 33

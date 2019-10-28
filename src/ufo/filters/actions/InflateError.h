@@ -29,7 +29,9 @@ class InflateError : public FilterActionBase {
   void apply(const oops::Variables &, const std::vector<std::vector<bool>> &,
              const ObsFilterData &,
              ioda::ObsDataVector<int> &, ioda::ObsDataVector<float> &) const override;
+  const ufo::Variables & requiredVariables() const override {return allvars_;}
  private:
+  Variables allvars_;
   const std::string strfactor_;
 };
 

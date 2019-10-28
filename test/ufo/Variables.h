@@ -92,6 +92,22 @@ void testAllFromGroup() {
 }
 
 // -----------------------------------------------------------------------------
+// Test that ufo::Variables::hasGroup() works for functions
+void testHasGroup() {
+  ufo::Variables vars;
+  vars += ("latitude@MetaData");
+  vars += ("longitude@MetaData");
+
+  EXPECT(vars.hasGroup("MetaData"));
+  EXPECT(!vars.hasGroup("ObsValue"));
+
+  vars += ("Velocity@ObsFunction");
+
+  EXPECT(vars.hasGroup("ObsValue"));
+}
+
+
+// -----------------------------------------------------------------------------
 
 class Variables : public oops::Test {
  public:
@@ -111,6 +127,9 @@ class Variables : public oops::Test {
 
     ts.emplace_back(CASE("ufo/Variables/testAllFromGroup")
       { testAllFromGroup(); });
+
+    ts.emplace_back(CASE("ufo/Variables/testHasGroup")
+      { testHasGroup(); });
   }
 };
 

@@ -11,6 +11,7 @@
 #include "oops/base/Variables.h"
 #include "ufo/filters/getScalarOrFilterData.h"
 #include "ufo/filters/ObsFilterData.h"
+#include "ufo/utils/StringUtils.h"
 
 namespace ufo {
 
@@ -21,7 +22,10 @@ static FilterActionMaker<InflateError> makerInflateErr_("inflate error");
 // -----------------------------------------------------------------------------
 
 InflateError::InflateError(const eckit::Configuration & conf)
-  : strfactor_(conf.getString("inflation")) {
+  : allvars_(), strfactor_(conf.getString("inflation")) {
+  if (!isFloat(strfactor_)) {
+    allvars_ += strfactor_;
+  }
 }
 
 // -----------------------------------------------------------------------------
