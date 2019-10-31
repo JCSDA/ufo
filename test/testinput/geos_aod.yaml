@@ -10,15 +10,15 @@ Observations:
   ObsTypes:
   - ObsOperator:
       name: GeosAod
-      tracer_geovals: [ "dust_mixing_ratio_size_bin1", "dust_mixing_ratio_size_bin2",
-                        "dust_mixing_ratio_size_bin3", "dust_mixing_ratio_size_bin4",
-                        "dust_mixing_ratio_size_bin5", "sea_salt_mixing_ratio_size_bin1",
-                        "sea_salt_mixing_ratio_size_bin2", "sea_salt_mixing_ratio_size_bin3",
-                        "sea_salt_mixing_ratio_size_bin4", "sea_salt_mixing_ratio_size_bin5",
-                        "hydrophobic_black_carbon", "hydrophilic_black_carbon",
-                        "hydrophobic_organic_carbon", "hydrophilic_organic_carbon",
-                        "sulfate_aerosols", "nitrate_size_bin1", "nitrate_size_bin2",
-                        "nitrate_size_bin3"]
+      tracer_geovals: [ "mass_fraction_of_dust001_in_air", "mass_fraction_of_dust002_in_air",
+                        "mass_fraction_of_dust003_in_air", "mass_fraction_of_dust004_in_air",
+                        "mass_fraction_of_dust005_in_air", "mass_fraction_of_sea_salt001_in_air",
+                        "mass_fraction_of_sea_salt002_in_air", "mass_fraction_of_sea_salt003_in_air",
+                        "mass_fraction_of_sea_salt004_in_air", "mass_fraction_of_sea_salt005_in_air",
+                        "mass_fraction_of_hydrophobic_black_carbon_in_air", "mass_fraction_of_hydrophilic_black_carbon_in_air",
+                        "mass_fraction_of_hydrophobic_organic_carbon_in_air", "mass_fraction_of_hydrophilic_organic_carbon_in_air",
+                        "mass_fraction_of_sulfate_in_air", "mass_fraction_of_nitrate001_in_air", "mass_fraction_of_nitrate002_in_air",
+                        "mass_fraction_of_nitrate003_in_air"]
  
       RCFile: ["geosaod.rc"]
       wavelengths: [550.0]

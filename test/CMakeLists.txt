@@ -80,14 +80,13 @@ list( APPEND ufo_test_input
   testinput/surface_ps_qc.yaml
   testinput/timeoper.yaml
   testinput/tprof.yaml
-  testinput/geosaod.rc
-  testinput/Chem_MieRegistry.rc
   testinput/variables.yaml
   testinput/windprof.yaml
 )
 
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/testinput)
 CREATE_SYMLINK( ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR} ${ufo_test_input} )
+
 
 # Add files to cmake resources
 ecbuild_add_resources( TARGET ufo_test_scripts
@@ -883,3 +882,32 @@ CREATE_SYMLINK_FILENAME( ${rttov_SOURCE_DIR}/rtcoef_rttov12
                          ${CMAKE_CURRENT_BINARY_DIR}/Data
                          ${rttov_test_input} )
 endif( ${RTTOV_FOUND} )
+
+######
+#Files for geos-aero tests
+######
+
+if( ${GEOS-AERO_FOUND} )
+list( APPEND geosaero_test_data
+Data/optics_BC.v1_3_.nc
+Data/optics_BRC.v1_5_.nc
+Data/optics_DU.v15_3_.nc
+Data/optics_NI.v2_5_.nc
+Data/optics_OC.v1_3_.nc
+Data/optics_SS.v3_3_.nc
+Data/optics_SU.v1_3_.nc
+) 
+
+CREATE_SYMLINK_FILENAME( ${geosaero_SOURCE_DIR}/test/
+                         ${CMAKE_CURRENT_BINARY_DIR}/Data 
+                         ${geosaero_test_data} )
+
+list( APPEND geosaero_test_input
+testinput/geosaod.rc
+testinput/Chem_MieRegistry.rc) 
+
+CREATE_SYMLINK_FILENAME( ${geosaero_SOURCE_DIR}/test/
+                         ${CMAKE_CURRENT_BINARY_DIR}
+                         ${geosaero_test_input} )
+
+endif( ${GEOS-AERO_FOUND} )
