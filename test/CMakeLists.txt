@@ -77,7 +77,7 @@ list( APPEND ufo_test_input
   testinput/sea_surface_temp.yaml
   testinput/seviri_crtm.yaml
   testinput/sndrd1-4_crtm.yaml
-  testinput/surface_ps_qc.yaml
+  testinput/sfcpcorrected.yaml
   testinput/timeoper.yaml
   testinput/tprof.yaml
   testinput/variables.yaml
@@ -747,13 +747,11 @@ ecbuild_add_test( TARGET  test_ufo_qc_gnssroBndROPP1D
                   DEPENDS test_ObsFilters.x )
 endif( ${ROPP-UFO_FOUND} )
 
-ecbuild_add_test( TARGET  test_ufo_qc_surface_ps
-                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-                  ARGS    "testinput/surface_ps_qc.yaml"
+ecbuild_add_test( TARGET  test_ufo_opr_sfc_p
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
+                  ARGS    "testinput/sfcpcorrected.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
-                  DEPENDS test_ObsFilters.x )
-
-
+                  DEPENDS test_ObsOperator.x )
 
 ecbuild_add_test( TARGET  test_ufo_qc_amsua_seaice
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
