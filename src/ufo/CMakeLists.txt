@@ -64,7 +64,7 @@ if( ${RTTOV_FOUND} )
     add_subdirectory( rttov )
 endif( ${RTTOV_FOUND} )
 add_subdirectory( gnssro )
-add_subdirectory( surface )
+add_subdirectory( sfcpcorrected )
 add_subdirectory( marine )
 if( ${GEOS-AERO_FOUND} )
     add_subdirectory( geos_aero )
@@ -83,9 +83,8 @@ list( APPEND ufo_src_files
     ${crtm_src_files}
     ${rttov_src_files}
     ${gnssro_src_files}
-    ${surface_src_files}
-    ${ncdiag_src_files}
     ${geosaod_src_files}
+    ${sfcpcorrected_src_files}
     ${radarreflectivity_src_files}
     ${radarradialvelocity_src_files}
     ${timeoper_src_files}
