@@ -226,6 +226,8 @@ character(max_string) :: err_msg
       stop
    end if
 
+   if (n_Layers > 0) call CRTM_RTSolution_Create (rts, n_Layers) 
+
    ! Create the input FORWARD structure (atm)
    ! ----------------------------------------
    call CRTM_Atmosphere_Create( atm, n_Layers, self%conf%n_Absorbers, self%conf%n_Clouds, self%conf%n_Aerosols )

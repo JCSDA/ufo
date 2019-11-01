@@ -16,18 +16,12 @@
 
 #include "ioda/ObsDataVector.h"
 #include "ioda/ObsSpace.h"
-#include "ioda/ObsVector.h"
 
 #include "oops/interface/ObsFilter.h"
 #include "oops/util/abor1_cpp.h"
 #include "oops/util/Logger.h"
 
-#include "ufo/filters/actions/FilterAction.h"
 #include "ufo/filters/getScalarOrFilterData.h"
-#include "ufo/filters/QCflags.h"
-#include "ufo/GeoVaLs.h"
-#include "ufo/ObsDiagnostics.h"
-#include "ufo/UfoTrait.h"
 
 namespace ufo {
 
@@ -57,28 +51,21 @@ BackgroundCheck::~BackgroundCheck() {
 // -----------------------------------------------------------------------------
 
 void BackgroundCheck::applyFilter(const std::vector<bool> & apply,
+                                  const oops::Variables & filtervars,
                                   std::vector<std::vector<bool>> & flagged) const {
   oops::Log::trace() << "BackgroundCheck postFilter" << std::endl;
-  const oops::Variables vars(config_);
-  if (vars.size() == 0) {
-    oops::Log::error() << "No variables will be filtered out in filter "
-                       << config_ << std::endl;
-    ABORT("No variables specified to be filtered out in filter");
-  }
   const oops::Variables observed = obsdb_.obsvariables();
   const float missing = util::missingValue(missing);
 
-  oops::Log::debug() << "BackgroundCheck flags: " << flags_;
   oops::Log::debug() << "BackgroundCheck obserr: " << obserr_;
 
-  ioda::ObsDataVector<float> obs(obsdb_, vars, "ObsValue");
-  ioda::ObsDataVector<float> bias(obsdb_, vars, "ObsBias", false);
+  ioda::ObsDataVector<float> obs(obsdb_, filtervars, "ObsValue");
+  ioda::ObsDataVector<float> bias(obsdb_, filtervars, "ObsBias", false);
 
-  for (size_t jv = 0; jv < vars.size(); ++jv) {
-    size_t iv = observed.find(vars[jv]);
-
+  for (size_t jv = 0; jv < filtervars.size(); ++jv) {
+    size_t iv = observed.find(filtervars[jv]);
 //  H(x)
-    const std::string varhofx = vars[jv] + "@HofX";
+    const std::string varhofx = filtervars[jv] + "@HofX";
     std::vector<float> hofx;
     data_.get(varhofx, hofx);
 
@@ -104,17 +91,10 @@ void BackgroundCheck::applyFilter(const std::vector<bool> & apply,
         float yy = obs[jv][jobs] + bias[jv][jobs];
 
 //      Check distance from background
-        if (std::abs(static_cast<float>(hofx[jobs]) - yy) > zz) flagged[iv][jobs] = true;
+        if (std::abs(static_cast<float>(hofx[jobs]) - yy) > zz) flagged[jv][jobs] = true;
       }
     }
   }
-
-// Apply action
-  eckit::LocalConfiguration aconf;
-  config_.get("action", aconf);
-  aconf.set("flag", QCflags::fguess);
-  FilterAction action(aconf);
-  action.apply(vars, flagged, data_, flags_, obserr_);
 }
 
 // -----------------------------------------------------------------------------

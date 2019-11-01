@@ -14,12 +14,10 @@
 
 #include "ioda/ObsDataVector.h"
 #include "ioda/ObsSpace.h"
+
 #include "oops/base/Variables.h"
-#include "oops/interface/ObsFilter.h"
 #include "oops/util/abor1_cpp.h"
 #include "oops/util/Logger.h"
-#include "ufo/filters/QCflags.h"
-#include "ufo/UfoTrait.h"
 
 namespace ufo {
 
@@ -40,20 +38,11 @@ BlackList::~BlackList() {}
 // -----------------------------------------------------------------------------
 
 void BlackList::applyFilter(const std::vector<bool> & apply,
+                            const oops::Variables & filtervars,
                             std::vector<std::vector<bool>> & flagged) const {
-  const size_t nobs = obsdb_.nlocs();
-  const oops::Variables vars(config_);
-  if (vars.size() == 0) {
-    oops::Log::error() << "No variables will be filtered out in filter "
-                       << config_ << std::endl;
-    ABORT("No variables specified to be filtered out in filter");
-  }
-  const oops::Variables observed = obsdb_.obsvariables();
-
-  for (size_t jv = 0; jv < vars.size(); ++jv) {
-    size_t iv = observed.find(vars[jv]);
-    for (size_t jobs = 0; jobs < nobs; ++jobs) {
-      if (apply[jobs] && flags_[iv][jobs] == 0) flags_[iv][jobs] = QCflags::black;
+  for (size_t jv = 0; jv < filtervars.size(); ++jv) {
+    for (size_t jobs = 0; jobs < obsdb_.nlocs(); ++jobs) {
+      flagged[jv][jobs] = apply[jobs];
     }
   }
 }

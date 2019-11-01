@@ -17,8 +17,8 @@ ObsOperator:
 GeoVaLs:
   filename: Data/iasi_metop-a_geoval_2018041500_m.nc4
 ObsDiag:
-   variables: [brightness_temperature_jacobian_surface_temperature, brightness_temperature_jacobian_air_temperature]
+   variables: [brightness_temperature_jacobian_surface_temperature, brightness_temperature_jacobian_air_temperature, optical_thickness_of_atmosphere_layer]
    channels: 16, 29
 Reference ObsDiag:
   filename: Data/iasi_metop-a_obsdiag_2018041500_m.nc4
-tolerance: 1.e-7
+tolerance: 1.e-6

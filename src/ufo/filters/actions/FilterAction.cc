@@ -37,4 +37,10 @@ void FilterAction::apply(const oops::Variables & vars, const std::vector<std::ve
 
 // -----------------------------------------------------------------------------
 
+const ufo::Variables & FilterAction::requiredVariables() const {
+  return action_->requiredVariables();
+}
+
+// -----------------------------------------------------------------------------
+
 }  // namespace ufo

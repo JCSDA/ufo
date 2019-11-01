@@ -7,42 +7,42 @@
 !---------------------------------------------------------------------------------------------------
 module ufo_identity_mod
 
- use iso_c_binding
- use kinds
+ use oops_variables_mod
  use ufo_vars_mod
- use ufo_geovals_mod
-
- use obsspace_mod
 
 ! Fortran derived type for the observation type
 !---------------------------------------------------------------------------------------------------
  type, public :: ufo_identity
- private
-    integer, public :: nvars
-    character(len=MAXVARLEN), public, allocatable :: vars(:)
+   type(oops_variables), public :: obsvars
+   type(oops_variables), public :: geovars
  contains
    procedure :: setup  => identity_setup_
    procedure :: simobs => identity_simobs_
-   final :: destructor
  end type ufo_identity
 
 contains
 
 ! ------------------------------------------------------------------------------
-subroutine identity_setup_(self, vars)
-   implicit none
-   class(ufo_identity), intent(inout) :: self
-   character(len=MAXVARLEN), dimension(:), intent(inout) :: vars
+subroutine identity_setup_(self)
+implicit none
+class(ufo_identity), intent(inout) :: self
 
-  self%nvars = size(vars)
-  allocate(self%vars(self%nvars))
-  self%vars = vars
+integer :: nvars, ivar
+
+! set variables requested from the model (same as simulated):
+nvars = self%obsvars%nvars()
+do ivar = 1, nvars
+  call self%geovars%push_back(self%obsvars%variable(ivar))
+enddo
 
 end subroutine identity_setup_
 
 
 ! ------------------------------------------------------------------------------
 subroutine identity_simobs_(self, geovals, obss, nvars, nlocs, hofx)
+  use ufo_geovals_mod
+  use obsspace_mod
+  use iso_c_binding
   implicit none
   class(ufo_identity), intent(in)    :: self
   type(ufo_geovals),  intent(in)     :: geovals
@@ -54,9 +54,9 @@ subroutine identity_simobs_(self, geovals, obss, nvars, nlocs, hofx)
   type(ufo_geoval), pointer :: point
   character(len=MAXVARLEN) :: geovar
 
-  do ivar = 1, self%nvars
+  do ivar = 1, nvars
     !> Get the name of input variable in geovals
-    geovar = self%vars(ivar)
+    geovar = self%geovars%variable(ivar)
 
     !> Get profile for this variable from geovals
     call ufo_geovals_get_var(geovals, geovar, point)
@@ -68,13 +68,5 @@ subroutine identity_simobs_(self, geovals, obss, nvars, nlocs, hofx)
   enddo
 
 end subroutine identity_simobs_
-
-
-! ------------------------------------------------------------------------------
-subroutine destructor(self)
-  type(ufo_identity), intent(inout) :: self
-  if (allocated(self%vars)) deallocate(self%vars)
-end subroutine destructor
-
 
 end module ufo_identity_mod

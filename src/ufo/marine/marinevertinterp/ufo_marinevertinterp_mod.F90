@@ -7,11 +7,8 @@
 
 module ufo_marinevertinterp_mod
 
- use iso_c_binding
- use kinds
- use ufo_geovals_mod, only: ufo_geovals, ufo_geoval, ufo_geovals_get_var
  use ufo_vars_mod
- use obsspace_mod
+ use oops_variables_mod
 
  implicit none
  private
@@ -20,55 +17,46 @@ module ufo_marinevertinterp_mod
 
 !> Fortran derived type for the observation type
  type, public :: ufo_marinevertinterp    
-    private
-    character(len=max_string), public, allocatable :: varin(:)
-    character(len=max_string), public, allocatable :: varout(:)    
+   type(oops_variables), public :: geovars
+   type(oops_variables), public :: obsvars
  contains
    procedure :: setup  => ufo_marinevertinterp_setup
-   procedure :: delete => ufo_marinevertinterp_delete
    procedure :: simobs => ufo_marinevertinterp_simobs
  end type ufo_marinevertinterp
 
 contains
 
 ! ------------------------------------------------------------------------------
-subroutine ufo_marinevertinterp_setup(self, vars)
+subroutine ufo_marinevertinterp_setup(self)
 implicit none
 class(ufo_marinevertinterp), intent(inout) :: self
-character(len=MAXVARLEN), dimension(:), intent(inout) :: vars
 character(max_string)  :: err_msg
 
-! Get output variable name (hard-coded to 1)
-if (size(vars) /= 1) then
+integer :: ivar, nvars
+
+nvars = self%obsvars%nvars()
+if (nvars /= 1) then
   write(err_msg,*) 'ufo_marinevertinterp_setup error: only variables size 1 supported!'
   call abor1_ftn(err_msg)
 endif
 
-allocate(self%varout(size(vars)))
-self%varout = vars
-
-! Set input variable names (hard-coded to 2)
-allocate(self%varin(size(vars)+1))
-self%varin(1:size(vars)) = self%varout
-self%varin(size(vars)+1) = "sea_water_cell_thickness"
+! Set variables requested from the model
+do ivar = 1, nvars
+  call self%geovars%push_back(self%obsvars%variable(ivar))
+enddo
+call self%geovars%push_back("sea_water_cell_thickness")
 
 end subroutine ufo_marinevertinterp_setup
-
-! ------------------------------------------------------------------------------
-subroutine ufo_marinevertinterp_delete(self)
-implicit none
-class(ufo_marinevertinterp), intent(inout) :: self
-
-if (allocated(self%varin))  deallocate(self%varin)
-if (allocated(self%varout)) deallocate(self%varout)
-
-end subroutine ufo_marinevertinterp_delete
 
 ! ------------------------------------------------------------------------------
 subroutine ufo_marinevertinterp_simobs(self, geovals, hofx, obss)
 use gsw_pot_to_insitu
 use vert_interp_mod
 use ufo_tpsp2ti_mod
+use iso_c_binding
+use kinds
+use ufo_geovals_mod, only: ufo_geovals, ufo_geoval, ufo_geovals_get_var
+use obsspace_mod
 implicit none
 class(ufo_marinevertinterp), intent(in)    :: self
 type(ufo_geovals),  intent(in)    :: geovals
@@ -94,7 +82,7 @@ type(c_ptr), value, intent(in)    :: obss
     endif
 
     ! Associate geoval pointers
-    call ufo_geovals_get_var(geovals, self%varin(1), var)
+    call ufo_geovals_get_var(geovals, self%geovars%variable(1), var)
     call ufo_geovals_get_var(geovals, var_ocn_lay_thick, h)
 
     ! Read in obs data

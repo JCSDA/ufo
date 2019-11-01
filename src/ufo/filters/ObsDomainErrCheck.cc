@@ -16,14 +16,11 @@
 
 #include "ioda/ObsDataVector.h"
 #include "ioda/ObsSpace.h"
-#include "oops/interface/ObsFilter.h"
 #include "oops/util/abor1_cpp.h"
 #include "oops/util/Logger.h"
 #include "oops/util/missingValues.h"
 #include "ufo/filters/obsfunctions/ObsFunction.h"
-#include "ufo/filters/QCflags.h"
-#include "ufo/UfoTrait.h"
-#include "ufo/utils/SplitVarGroup.h"
+#include "ufo/utils/StringUtils.h"
 
 namespace ufo {
 
@@ -50,16 +47,11 @@ ObsDomainErrCheck::~ObsDomainErrCheck() {}
 // -----------------------------------------------------------------------------
 
 void ObsDomainErrCheck::applyFilter(const std::vector<bool> & inside,
+                                    const oops::Variables & filtervars,
                                     std::vector<std::vector<bool>> & flagged) const {
-  const oops::Variables vars(config_);
-  if (vars.size() == 0) {
-    oops::Log::error() << "No variables will be filtered out in filter "
-                       << config_ << std::endl;
-    ABORT("No variables specified to be filtered out in filter");
-  }
   const oops::Variables observed = obsdb_.obsvariables();
 
-  ioda::ObsDataVector<float> obs(obsdb_, vars, "ObsValue");
+  ioda::ObsDataVector<float> obs(obsdb_, filtervars, "ObsValue");
   size_t nlocs = obsdb_.nlocs();
 
 // compute function
@@ -83,11 +75,11 @@ void ObsDomainErrCheck::applyFilter(const std::vector<bool> & inside,
   }
 
   size_t count = 0;
-  for (size_t jv = 0; jv < vars.size(); ++jv) {
-    size_t iv = observed.find(vars[jv]);
+  for (size_t jv = 0; jv < filtervars.size(); ++jv) {
+    size_t iv = observed.find(filtervars[jv]);
     for (size_t jobs = 0; jobs < obsdb_.nlocs(); ++jobs) {
-      if (!inside[jobs] && flags_[iv][jobs] == 0) {
-        flags_[iv][jobs] = QCflags::domain;
+      if (!inside[jobs]) {
+        flagged[jv][jobs] = true;
       } else {
         ASSERT(obserr_[iv][jobs] != util::missingValue(obserr_[iv][jobs]));
         ASSERT(obs[jv][jobs] != util::missingValue(obs[jv][jobs]));

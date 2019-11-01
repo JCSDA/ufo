@@ -5,8 +5,8 @@
 
 set ( utils_files
       Constants.h
-      SplitVarGroup.cc
-      SplitVarGroup.h
+      StringUtils.cc
+      StringUtils.h
       vert_interp.F90
       thermo_utils.F90
 )

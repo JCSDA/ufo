@@ -17,7 +17,7 @@
 #include "oops/util/missingValues.h"
 #include "ufo/filters/ObsFilterData.h"
 #include "ufo/filters/Variables.h"
-#include "ufo/utils/SplitVarGroup.h"
+#include "ufo/utils/StringUtils.h"
 
 namespace ufo {
 

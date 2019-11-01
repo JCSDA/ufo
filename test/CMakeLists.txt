@@ -40,6 +40,7 @@ list( APPEND ufo_test_input
   testinput/cris_crtm.yaml
   testinput/cris_qc.yaml
   testinput/function_velocity.yaml
+  testinput/function_errflat.yaml
   testinput/gmi_crtm.yaml
   testinput/genericprof.yaml
   testinput/geovals.yaml
@@ -699,6 +700,12 @@ ecbuild_add_test( TARGET  test_ufo_qc_gauss_thinning
 ecbuild_add_test( TARGET  test_ufo_function_velocity
                   SOURCES mains/TestObsFunction.cc
                   ARGS    "testinput/function_velocity.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  LIBS    ufo)
+
+ecbuild_add_test( TARGET  test_ufo_function_errflat
+                  SOURCES mains/TestObsFunction.cc
+                  ARGS    "testinput/function_errflat.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   LIBS    ufo)
 

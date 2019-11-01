@@ -8,7 +8,6 @@
 
 module ufo_marinevertinterp_tlad_mod_c
 
-  use fckit_configuration_module, only: fckit_configuration
   use iso_c_binding
   use ufo_geovals_mod
   use ufo_geovals_mod_c,   only: ufo_geovals_registry    
@@ -32,31 +31,22 @@ contains
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_marinevertinterp_tlad_setup_c(c_key_self, c_conf, c_varconf, c_varlist) bind(c,name='ufo_marinevertinterp_tlad_setup_f90')
-use ufo_vars_mod
+subroutine ufo_marinevertinterp_tlad_setup_c(c_key_self, c_conf, c_obsvars, c_geovars) bind(c,name='ufo_marinevertinterp_tlad_setup_f90')
 use oops_variables_mod
 implicit none
-integer(c_int), intent(inout) :: c_key_self
-type(c_ptr), intent(in)    :: c_conf
-type(c_ptr), intent(in) :: c_varconf ! config with variables to be simulated
-type(c_ptr), intent(in), value :: c_varlist
+integer(c_int), intent(inout)  :: c_key_self
+type(c_ptr), intent(in)        :: c_conf
+type(c_ptr), value, intent(in) :: c_obsvars ! variables to be simulated
+type(c_ptr), value, intent(in) :: c_geovars ! variables requested from the model
 
-type(oops_variables) :: oops_vars
 type(ufo_marinevertinterp_tlad), pointer :: self
-character(len=MAXVARLEN), dimension(:), allocatable :: vars
-type(fckit_configuration) :: f_conf,f_varconf
 
 call ufo_marinevertinterp_tlad_registry%setup(c_key_self, self)
-f_conf = fckit_configuration(c_conf)
-f_varconf = fckit_configuration(c_varconf)
 
-call ufo_vars_read(f_varconf, vars)
-call self%setup(vars)
-deallocate(vars)
+self%obsvars = oops_variables(c_obsvars)
+self%geovars = oops_variables(c_geovars)
 
-!> Update C++ ObsOperator with input variable list
-oops_vars = oops_variables(c_varlist)
-call oops_vars%push_back( self%varin )
+call self%setup()
 
 end subroutine ufo_marinevertinterp_tlad_setup_c
 

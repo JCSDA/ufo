@@ -21,7 +21,7 @@
 #include "oops/util/Logger.h"
 
 #include "ufo/filters/obsfunctions/ObsFunction.h"
-#include "ufo/utils/SplitVarGroup.h"
+#include "ufo/utils/StringUtils.h"
 
 // -----------------------------------------------------------------------------
 namespace ufo {
@@ -193,6 +193,11 @@ bool Variables::hasGroup(const std::string & group) const {
     std::string var, grp;
     splitVarGroup(fullnames_[jj], var, grp);
     if (grp == group) found = true;
+    if (grp == "ObsFunction") {
+      ObsFunction obsfunc(var);
+      ufo::Variables funcvars = obsfunc.requiredVariables();
+      found = found || funcvars.hasGroup(group);
+    }
   }
   return found;
 }

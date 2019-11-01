@@ -12,8 +12,6 @@ use iso_c_binding
 use ufo_geovals_mod
 use ufo_locs_mod
 use ufo_locs_mod_c, only : ufo_locs_registry
-use ufo_vars_mod
-use string_f_c_mod
 use kinds
 
 implicit none
@@ -39,19 +37,21 @@ contains
 ! ------------------------------------------------------------------------------
 !> Setup GeoVaLs (store nlocs, variables; don't do allocation yet)
 subroutine ufo_geovals_setup_c(c_key_self, c_nlocs, c_vars) bind(c,name='ufo_geovals_setup_f90')
-
+use oops_variables_mod
 implicit none
-integer(c_int), intent(inout) :: c_key_self
-integer(c_int), intent(in) :: c_nlocs
-type(c_ptr), intent(in)    :: c_vars
+integer(c_int), intent(inout)  :: c_key_self
+integer(c_int), intent(in)     :: c_nlocs
+type(c_ptr), value, intent(in) :: c_vars
 
 type(ufo_geovals), pointer :: self
+type(oops_variables) :: vars
 
 call ufo_geovals_registry%init()
 call ufo_geovals_registry%add(c_key_self)
 call ufo_geovals_registry%get(c_key_self, self)
 
-call ufo_geovals_setup(self, c_vars, c_nlocs)
+vars = oops_variables(c_vars)
+call ufo_geovals_setup(self, vars, c_nlocs)
 
 end subroutine ufo_geovals_setup_c
 
@@ -265,6 +265,7 @@ end subroutine ufo_geovals_normalize_c
 ! ------------------------------------------------------------------------------
 
 subroutine ufo_geovals_dotprod_c(c_key_self, c_key_other, prod, lcname, cname) bind(c,name='ufo_geovals_dotprod_f90')
+use string_f_c_mod
 implicit none
 integer(c_int), intent(in) :: c_key_self, c_key_other
 real(c_double), intent(inout) :: prod
@@ -318,6 +319,8 @@ end subroutine ufo_geovals_nlocs_c
 ! ------------------------------------------------------------------------------
 
 subroutine ufo_geovals_nlevs_c(c_key_self, lvar, c_var, nlevs) bind(c, name='ufo_geovals_nlevs_f90')
+use ufo_vars_mod, only: MAXVARLEN
+use string_f_c_mod
 implicit none
 integer(c_int), intent(in) :: c_key_self
 integer(c_int), intent(in) :: lvar
@@ -340,6 +343,8 @@ end subroutine ufo_geovals_nlevs_c
 ! ------------------------------------------------------------------------------
 
 subroutine ufo_geovals_get2d_c(c_key_self, lvar, c_var, nlocs, values) bind(c, name='ufo_geovals_get2d_f90')
+use ufo_vars_mod, only: MAXVARLEN
+use string_f_c_mod
 implicit none
 integer(c_int), intent(in) :: c_key_self
 integer(c_int), intent(in) :: lvar
@@ -373,6 +378,8 @@ end subroutine ufo_geovals_get2d_c
 ! ------------------------------------------------------------------------------
 
 subroutine ufo_geovals_get_c(c_key_self, lvar, c_var, lev, nlocs, values) bind(c, name='ufo_geovals_get_f90')
+use ufo_vars_mod, only: MAXVARLEN
+use string_f_c_mod
 implicit none
 integer(c_int), intent(in) :: c_key_self
 integer(c_int), intent(in) :: lvar
@@ -422,20 +429,21 @@ end subroutine ufo_geovals_maxloc_c
 ! ------------------------------------------------------------------------------
 
 subroutine ufo_geovals_read_file_c(c_key_self, c_conf, c_obspace, c_vars) bind(c,name='ufo_geovals_read_file_f90')
-
+use oops_variables_mod
 use datetime_mod
 
 implicit none
-integer(c_int), intent(inout) :: c_key_self
-type(c_ptr), intent(in)    :: c_conf
-type(c_ptr), value, intent(in)    :: c_obspace
-type(c_ptr), intent(in)    :: c_vars
+integer(c_int), intent(inout)  :: c_key_self
+type(c_ptr), intent(in)        :: c_conf
+type(c_ptr), value, intent(in) :: c_obspace
+type(c_ptr), value, intent(in) :: c_vars
 
 type(ufo_geovals), pointer :: self
-character(max_string) :: filename
+character(max_string)      :: filename
 integer :: loc_multiplier
 character(len=:), allocatable :: str
 type(fckit_configuration) :: f_conf
+type(oops_variables)      :: vars
 
 call ufo_geovals_registry%init()
 call ufo_geovals_registry%add(c_key_self)
@@ -452,14 +460,16 @@ else
   loc_multiplier = 1
 endif
 
+vars = oops_variables(c_vars)
 ! read geovals
-call ufo_geovals_read_netcdf(self, filename, loc_multiplier, c_obspace, c_vars)
+call ufo_geovals_read_netcdf(self, filename, loc_multiplier, c_obspace, vars)
 
 end subroutine ufo_geovals_read_file_c
 
 ! ------------------------------------------------------------------------------
 
 subroutine ufo_geovals_write_file_c(c_key_self, c_conf, lcname, cname) bind(c,name='ufo_geovals_write_file_f90')
+use string_f_c_mod
 implicit none
 integer(c_int), intent(in) :: c_key_self
 type(c_ptr), intent(in) :: c_conf

@@ -7,28 +7,20 @@
 
 module ufo_atmsfcinterp_mod
 
-  use fckit_configuration_module, only: fckit_configuration
-  use iso_c_binding
-  use kinds
-
-  use ufo_geovals_mod, only: ufo_geovals, ufo_geoval, ufo_geovals_get_var
-  use ufo_geovals_mod_c, only: ufo_geovals_registry
-  use ufo_basis_mod, only: ufo_basis
+  use oops_variables_mod
   use ufo_vars_mod
-  use obsspace_mod
+  use kinds
 
   implicit none
   private
 
-  integer, parameter :: max_string = 50
   !> Fortran derived type for the observation type
   type, public :: ufo_atmsfcinterp
   private
-    integer :: nvars
+    type(oops_variables), public :: obsvars
+    type(oops_variables), public :: geovars
     logical :: use_fact10
     real(kind_real) :: magl
-    character(len=MAXVARLEN), public, allocatable :: varin(:)
-    character(len=MAXVARLEN), public, allocatable :: varout(:)
   contains
     procedure :: setup  => atmsfcinterp_setup_
     procedure :: simobs => atmsfcinterp_simobs_
@@ -37,19 +29,13 @@ module ufo_atmsfcinterp_mod
 contains
 
 ! ------------------------------------------------------------------------------
-subroutine atmsfcinterp_setup_(self, f_conf, vars)
+subroutine atmsfcinterp_setup_(self, f_conf)
+  use fckit_configuration_module, only: fckit_configuration
   implicit none
   class(ufo_atmsfcinterp), intent(inout) :: self
   type(fckit_configuration), intent(in)  :: f_conf
-  character(len=MAXVARLEN), dimension(:), intent(inout) :: vars
-  integer :: ii, nallvars, istart, fact10tmp
+  integer :: nvars, ivar, fact10tmp
 
-  !> Size of variables
-  self%nvars = size(vars)
-  !> Allocate varout: variables in the observation vector
-  allocate(self%varout(self%nvars))
-  !> Read variable list and store in varout
-  self%varout = vars
   ! check for if we need to look for wind reduction factor
   self%use_fact10 = .false.
   fact10tmp = 0
@@ -58,37 +44,29 @@ subroutine atmsfcinterp_setup_(self, f_conf, vars)
     self%use_fact10 = .true.
   end if
 
-  !> Allocate varin: variables we need from the model
-  if (self%use_fact10) then
-    istart = 14
-  else
-    istart = 13
-  end if
-  nallvars = self%nvars + istart
-  allocate(self%varin(nallvars))
-  do ii = 1, self%nvars
-    self%varin(ii+istart) = self%varout(ii)
-  enddo
-
   !> add geopotential height
-  self%varin(1) = var_z
+  call self%geovars%push_back(var_z)
   !> need skin temperature for near-surface interpolations
-  self%varin(2) = var_sfc_t
+  call self%geovars%push_back(var_sfc_t)
   !> need surface geopotential height to get difference from phi
-  self%varin(3) = var_sfc_z 
+  call self%geovars%push_back(var_sfc_z)
   !> need surface roughness
-  self%varin(4) = var_sfc_rough 
+  call self%geovars%push_back(var_sfc_rough)
   !> need surface and atmospheric pressure for potential temperature
-  self%varin(5) = var_ps
-  self%varin(6) = var_prs
-  self%varin(7) = var_prsi
-  self%varin(8) = var_ts
-  self%varin(9) = var_tv
-  self%varin(10) = var_q
-  self%varin(11) = var_u 
-  self%varin(12) = var_v 
-  self%varin(13) = var_sfc_lfrac
-  if (self%use_fact10)  self%varin(14) = var_sfc_fact10
+  call self%geovars%push_back(var_ps)
+  call self%geovars%push_back(var_prs)
+  call self%geovars%push_back(var_prsi)
+  call self%geovars%push_back(var_ts)
+  call self%geovars%push_back(var_tv)
+  call self%geovars%push_back(var_q)
+  call self%geovars%push_back(var_u)
+  call self%geovars%push_back(var_v)
+  call self%geovars%push_back(var_sfc_lfrac)
+  if (self%use_fact10)  call self%geovars%push_back(var_sfc_fact10)
+  nvars = self%obsvars%nvars()
+  do ivar = 1, nvars
+    call self%geovars%push_back(self%obsvars%variable(ivar))
+  enddo
 
 end subroutine atmsfcinterp_setup_
 
@@ -99,6 +77,9 @@ subroutine atmsfcinterp_simobs_(self, geovals, obss, nvars, nlocs, hofx)
                          calc_psi_vars_gsi
   use thermo_utils_mod, only: calc_theta, gsi_tp_to_qs 
   use ufo_constants_mod, only: grav, rv, rd, rd_over_cp, von_karman
+  use ufo_geovals_mod, only: ufo_geovals, ufo_geoval, ufo_geovals_get_var
+  use obsspace_mod
+  use iso_c_binding
   implicit none
   class(ufo_atmsfcinterp), intent(in)        :: self
   integer, intent(in)                         :: nvars, nlocs
@@ -186,9 +167,9 @@ subroutine atmsfcinterp_simobs_(self, geovals, obss, nvars, nlocs, hofx)
     call calc_psi_vars_gsi(rib, gzsoz0, gzzoz0, thv1, thv2, V2, th1,&
                            thg, phi%vals(1,iobs), obshgt(iobs)-obselev(iobs),&
                            psim, psih, psimz, psihz)
-    do ivar = 1, self%nvars
+    do ivar = 1, nvars
       ! Get the name of input variable in geovals
-      geovar = self%varout(ivar)
+      geovar = self%obsvars%variable(ivar)
       ! Get profile for this variable from geovals
       call ufo_geovals_get_var(geovals, geovar, profile)
 
@@ -223,8 +204,6 @@ subroutine atmsfcinterp_simobs_(self, geovals, obss, nvars, nlocs, hofx)
   end do
 
   deallocate(obshgt,obselev)
-
-
 
 end subroutine atmsfcinterp_simobs_
 

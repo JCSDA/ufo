@@ -29,8 +29,7 @@ ObsIdentityTLAD::ObsIdentityTLAD(const ioda::ObsSpace & odb,
   : keyOperObsIdentity_(0), odb_(odb), varin_()
 {
   const eckit::Configuration * configc = &config;
-  const eckit::Configuration * varconfig = &odb.obsvariables().toFortran();
-  ufo_identity_tlad_setup_f90(keyOperObsIdentity_, &configc, &varconfig, varin_);
+  ufo_identity_tlad_setup_f90(keyOperObsIdentity_, &configc, odb.obsvariables(), varin_);
 
   oops::Log::trace() << "ObsIdentityTLAD created." << std::endl;
 }

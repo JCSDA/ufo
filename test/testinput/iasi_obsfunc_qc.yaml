@@ -92,8 +92,8 @@ Observations:
    - Filter: Background Check           # reject all obs where abs(y-H(x)) > ErrInflationFactor * obs_error
      variables: [brightness_temperature]
      channels: *all_channels
-     threshold: ErrInflationFactor@ObsFunction
+     threshold: ErrfLat@ObsFunction
      action:
        name: inflate error
-       inflation: ErrInflationFactor@ObsFunction
+       inflation: ErrfLat@ObsFunction
    passedBenchmark: 24024 

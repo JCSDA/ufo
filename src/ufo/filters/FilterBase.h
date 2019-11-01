@@ -60,13 +60,15 @@ class FilterBase : public util::Printable {
   ioda::ObsDataVector<int> & flags_;
   ioda::ObsDataVector<float> & obserr_;
   ufo::Variables allvars_;
+  oops::Variables filtervars_;
   ObsFilterData data_;
 
  private:
   void doFilter() const;
   virtual void print(std::ostream &) const = 0;
-  virtual void applyFilter(const std::vector<bool> &, std::vector<std::vector<bool>> &) const = 0;
-
+  virtual void applyFilter(const std::vector<bool> &, const oops::Variables &,
+                           std::vector<std::vector<bool>> &) const = 0;
+  virtual int qcFlag() const = 0;
   bool prior_;
   bool post_;
 };
