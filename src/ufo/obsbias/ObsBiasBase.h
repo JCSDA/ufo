@@ -31,6 +31,7 @@ namespace ioda {
 
 namespace ufo {
   class GeoVaLs;
+  class ObsDiagnostics;
 
 // -----------------------------------------------------------------------------
 /// Base class for observation bias operators
@@ -53,10 +54,14 @@ class ObsBiasBase : public util::Printable,
 /// Bias model
   virtual void computeObsBias(const GeoVaLs &,
                               ioda::ObsVector &,
-                              const ioda::ObsSpace &) const = 0;
+                              const ioda::ObsSpace &,
+                              const ObsDiagnostics &) const = 0;
 
 /// Bias operator input required from Model
-  virtual const oops::Variables & variables() const = 0;
+  virtual const oops::Variables & requiredGeoVaLs() const = 0;
+
+/// Bias operator input required from ObsOperator diagnostics
+  virtual const oops::Variables & requiredHdiagnostics() const = 0;
 
 /// Bias parameters interface
   virtual double & operator[](const unsigned int) = 0;
