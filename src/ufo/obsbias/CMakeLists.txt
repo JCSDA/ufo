@@ -4,14 +4,19 @@
 # which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 
 set ( obsbias_files
+  clw_mod.f90
+  constants.f90
   LinearObsBiasBase.h
   LinearObsBiasBase.cc
   ObsBiasBase.h
   ObsBiasBase.cc
+  ObsBiasRadianceGSI.interface.h
+  ObsBiasRadianceGSI.interface.F90
   ObsBiasRadianceGSI.h
   ObsBiasRadianceGSI.cc
   ObsBiasRadianceGSITLAD.h
   ObsBiasRadianceGSITLAD.cc
+  tlap_mod.f90
 )
 
 PREPEND( _p_obsbias_files       "obsbias"       ${obsbias_files} )

@@ -15,18 +15,23 @@ namespace ufo {
 // -----------------------------------------------------------------------------
 
 ObsBias::ObsBias(const eckit::Configuration & conf)
-  : biasbase_(ObsBiasFactory::create(conf)), conf_(conf), vars_() {
-  if (biasbase_) vars_ = biasbase_->variables();
+  : biasbase_(ObsBiasFactory::create(conf)), conf_(conf), geovars_(), hdiags_() {
+  if (biasbase_) {
+    geovars_ += biasbase_->requiredGeoVaLs();
+    hdiags_  += biasbase_->requiredHdiagnostics();
+  }
 }
 
 // -----------------------------------------------------------------------------
 
 ObsBias::ObsBias(const ObsBias & other, const bool copy)
   : biasbase_(ObsBiasFactory::create(other.config())), conf_(other.config()),
-    vars_(other.vars_) {
+    geovars_(), hdiags_() {
   if (copy && biasbase_) {
     for (std::size_t jj =0; jj < other.size(); ++jj)
       (*biasbase_)[jj] = other[jj];
+    geovars_ += biasbase_->requiredGeoVaLs();
+    hdiags_  += biasbase_->requiredHdiagnostics();
   }
 }
 
@@ -53,8 +58,9 @@ void ObsBias::write(const eckit::Configuration & conf) const {
 
 void ObsBias::computeObsBias(const GeoVaLs & geovals,
                              ioda::ObsVector & ybias,
-                             const ioda::ObsSpace & os) const {
-  if (biasbase_) biasbase_->computeObsBias(geovals, ybias, os);
+                             const ioda::ObsSpace & os,
+                             const ObsDiagnostics & ydiags) const {
+  if (biasbase_) biasbase_->computeObsBias(geovals, ybias, os, ydiags);
 }
 
 // -----------------------------------------------------------------------------
@@ -71,12 +77,6 @@ std::size_t ObsBias::size() const {
   std::size_t zz = 0;
   if (biasbase_) zz = biasbase_->size();
   return zz;
-}
-
-// -----------------------------------------------------------------------------
-
-const oops::Variables & ObsBias::variables() const {
-  return vars_;
 }
 
 // -----------------------------------------------------------------------------
