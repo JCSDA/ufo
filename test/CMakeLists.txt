@@ -44,6 +44,7 @@ list( APPEND ufo_test_input
   testinput/gmi_crtm.yaml
   testinput/genericprof.yaml
   testinput/geovals.yaml
+  testinput/geovals_spec.yaml
   testinput/gnssrobndropp1d.yaml
   testinput/gnssrobndropp2d.yaml
   testinput/gnssrobndnbam.yaml
@@ -251,6 +252,12 @@ ecbuild_add_test( TARGET  test_ufo_variables
                   ENVIRONMENT OOPS_TRAPFPE=1
                   LIBS    ufo )
 
+ecbuild_add_test( TARGET  test_ufo_geovals_spec
+                  SOURCES mains/TestGeoVaLsSpec.cc
+                  ARGS    "testinput/geovals_spec.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  LIBS    ufo )
+
 # Test Obs Operators and TLAD
 
 ecbuild_add_test( TARGET  test_ufo_opr_gsi_sfc_model
@@ -452,7 +459,12 @@ ecbuild_add_test( TARGET  test_ufo_linopr_vertinterp_radiosonde
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsOperatorTLAD.x )
 
-ecbuild_add_test( TARGET  test_ufo_opr_vertinterp_aircraft
+ecbuild_add_test( TARGET  test_ufo_timeoper_opr
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
+                  ARGS    "testinput/timeoper.yaml"
+                  DEPENDS test_ObsOperator.x )
+
+ecbuild_add_test( TARGET  test_ufo_vertinterp_aircraft_opr
                   MPI     4
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
                   ARGS    "testinput/aircraft.yaml"
@@ -478,6 +490,13 @@ ecbuild_add_test( TARGET  test_ufo_opr_timeoper
                   ARGS    "testinput/timeoper.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsOperator.x )
+
+ecbuild_add_test( TARGET  test_ufo_linopr_timeoper
+                  MPI     4
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
+                  ARGS    "testinput/timeoper.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsOperatorTLAD.x )
 
 ecbuild_add_test( TARGET  test_ufo_opr_gnssroRef
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x

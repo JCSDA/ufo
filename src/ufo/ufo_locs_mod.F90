@@ -107,7 +107,7 @@ implicit none
 type(ufo_locs), intent(inout) :: self
 type(ufo_locs), intent(in) :: other
 
-type(ufo_locs) :: temp_loc
+type(ufo_locs) :: temp_self, temp_other
 character(255) :: message
 integer :: n
 
@@ -120,47 +120,61 @@ if ((self%max_indx < 0) .OR. (other%max_indx < 0)) then
 end if
 
 ! make a temporary copy of self
-temp_loc%nlocs = self%nlocs
-temp_loc%max_indx = self%max_indx
-allocate(temp_loc%lat(self%nlocs), temp_loc%lon(self%nlocs), &
-         temp_loc%time(self%nlocs), temp_loc%indx(self%nlocs))
+temp_self%nlocs = self%nlocs
+temp_self%max_indx = self%max_indx
+allocate(temp_self%lat(self%nlocs), temp_self%lon(self%nlocs), &
+         temp_self%time(self%nlocs), temp_self%indx(self%nlocs))
 
-temp_loc%lat(:) = self%lat(:)
-temp_loc%lon(:) = self%lon(:)
-temp_loc%indx(:) = self%indx(:)
+temp_self%lat(:) = self%lat(:)
+temp_self%lon(:) = self%lon(:)
+temp_self%indx(:) = self%indx(:)
 do n = 1, self%nlocs
-  temp_loc%time(n) = self%time(n)
+  temp_self%time(n) = self%time(n)
+end do
+
+! make a temporary copy of other
+temp_other%nlocs = other%nlocs
+temp_other%max_indx = other%max_indx
+allocate(temp_other%lat(other%nlocs), temp_other%lon(other%nlocs), &
+         temp_other%time(other%nlocs), temp_other%indx(other%nlocs))
+
+temp_other%lat(:) = other%lat(:)
+temp_other%lon(:) = other%lon(:)
+temp_other%indx(:) = other%indx(:)
+do n = 1, other%nlocs
+  temp_other%time(n) = other%time(n)
 end do
 
 ! deallocate self
 call ufo_locs_delete(self)
 
 ! reallocate self with combined concatenation
-self%nlocs = temp_loc%nlocs + other%nlocs
+self%nlocs = temp_self%nlocs + temp_other%nlocs
 allocate(self%lat(self%nlocs), self%lon(self%nlocs), &
          self%time(self%nlocs), self%indx(self%nlocs))
 
-self%lat(1:temp_loc%nlocs) = temp_loc%lat(1:temp_loc%nlocs)
-self%lat(temp_loc%nlocs+1:) = other%lat(1:other%nlocs)
+self%lat(1:temp_self%nlocs) = temp_self%lat(1:temp_self%nlocs)
+self%lat(temp_self%nlocs+1:) = temp_other%lat(1:temp_other%nlocs)
 
-self%lon(1:temp_loc%nlocs) = temp_loc%lon(1:temp_loc%nlocs)
-self%lon(temp_loc%nlocs+1:) = other%lon(1:other%nlocs)
+self%lon(1:temp_self%nlocs) = temp_self%lon(1:temp_self%nlocs)
+self%lon(temp_self%nlocs+1:) = temp_other%lon(1:temp_other%nlocs)
 
-do n = 1, temp_loc%nlocs
-  self%time(n) = temp_loc%time(n)
+do n = 1, temp_self%nlocs
+  self%time(n) = temp_self%time(n)
 end do
-do n = 1, other%nlocs
-  self%time(temp_loc%nlocs + n) = other%time(n)
+do n = 1, temp_other%nlocs
+  self%time(temp_self%nlocs + n) = temp_other%time(n)
 end do
 
-self%indx(1:temp_loc%nlocs) = temp_loc%indx(1:temp_loc%nlocs)
-do n = 1, other%nlocs
-  self%indx(temp_loc%nlocs + n) = other%indx(n) + &
-                                  temp_loc%max_indx
+self%indx(1:temp_self%nlocs) = temp_self%indx(1:temp_self%nlocs)
+do n = 1, temp_other%nlocs
+  self%indx(temp_self%nlocs + n) = temp_other%indx(n) + &
+                                  temp_self%max_indx
 end do
-self%max_indx = temp_loc%max_indx + other%max_indx
+self%max_indx = temp_self%max_indx + temp_other%max_indx
 
-call ufo_locs_delete(temp_loc)
+call ufo_locs_delete(temp_other)
+call ufo_locs_delete(temp_self)
 
 end subroutine ufo_locs_concatenate
 
@@ -227,12 +241,13 @@ subroutine ufo_locs_init(self, obss, t1, t2)
     self%time(i) = date_time(tw_indx(i))
   enddo
   self%indx = tw_indx(1:tw_nlocs)
-  self%max_indx = nlocs
 
   do i = 1, nlocs
     call datetime_delete(date_time(i))
   enddo
   deallocate(date_time, lon, lat, tw_indx)
+
+  self%max_indx = obsspace_get_gnlocs(obss)
 
 
 end subroutine ufo_locs_init
