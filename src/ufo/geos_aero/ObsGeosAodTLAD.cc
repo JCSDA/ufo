@@ -8,12 +8,10 @@
 #include "ufo/geos_aero/ObsGeosAodTLAD.h"
 
 #include <ostream>
-#include <set>
 
 #include "ioda/ObsSpace.h"
 #include "ioda/ObsVector.h"
 #include "oops/base/Variables.h"
-#include "oops/util/IntSetParser.h"
 
 #include "oops/util/Logger.h"
 #include "ufo/GeoVaLs.h"
@@ -46,8 +44,9 @@ ObsGeosAodTLAD::~ObsGeosAodTLAD() {
 // -----------------------------------------------------------------------------
 
 void ObsGeosAodTLAD::setTrajectory(const GeoVaLs & geovals, const ObsBias & bias) {
+  oops::Log::trace() << "ObsGeosAodTLAD: trajectory entering" << std::endl;
   ufo_geosaod_tlad_settraj_f90(keyOper_, geovals.toFortran(), odb_);
-  oops::Log::trace() << "ObsGeosAodTLAD: trajectory set" << std::endl;
+  oops::Log::trace() << "ObsGeosAodTLAD: set trajectory exiting" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

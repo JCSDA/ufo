@@ -74,6 +74,7 @@ character(len=:), allocatable :: str
   ! RC File needed for ChemBase 
   call f_conf%get_or_die("RCFile",str)
   self%rcfile = str
+  deallocate(str)
   
 end subroutine ufo_geosaod_setup
 
@@ -115,6 +116,7 @@ real(kind_real), dimension(:,:),   allocatable :: delp  ! air pressure thickness
 character(len=MAXVARLEN) :: geovar
 character(len=MAXVARLEN), dimension(:), allocatable:: tracer_name
 
+
   ! Get delp and rh from model interp at obs loc (from geovals)
   call ufo_geovals_get_var(geovals, var_delp, delp_profile)
   nlayers = delp_profile%nval                            ! number of model layers
@@ -142,12 +144,12 @@ character(len=MAXVARLEN), dimension(:), allocatable:: tracer_name
   ! -----------------------------
   hofx(:,:) = 0.0
   call get_GEOS_AOD(nlayers, nlocs, nvars, self%ntracers, self%rcfile,  &
-                    real(self%wavelength,4), tracer_name, qm, rh,       &
+                    self%wavelength, tracer_name, qm, rh,       &
                     aod_tot = hofx, rc = rc)  !self%varin includes rh and delp
 
   ! cleanup memory
   ! --------
-  deallocate(qm, rh, delp)
+  deallocate(qm, rh, delp, tracer_name)
 
 end subroutine ufo_geosaod_simobs
 

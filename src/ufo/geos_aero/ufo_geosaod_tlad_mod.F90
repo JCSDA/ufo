@@ -57,10 +57,8 @@ integer(c_size_t),parameter :: csize = MAXVARLEN
 character(len=:), allocatable :: str
 
  ! Let user choose specific aerosols needed.
-
  call f_conf%get_or_die("tracer_geovals",csize,tracer_variables)
  self%ntracers = f_conf%get_size("tracer_geovals")
-
  do iq = 1, self%ntracers
     call self%geovars%push_back(tracer_variables(iq))      ! aer MR
  enddo
@@ -71,10 +69,11 @@ character(len=:), allocatable :: str
 
  allocate(self%wavelength(self%nvars))
  call f_conf%get_or_die("wavelengths", self%wavelength)
-
- ! RC File for ChemBase
+ 
+! RC File for ChemBase
  call f_conf%get_or_die("RCFile",str)
  self%rcfile = str
+ deallocate(str)
 
 end subroutine ufo_geosaod_tlad_setup
 
@@ -95,6 +94,7 @@ subroutine ufo_geosaod_tlad_settraj(self, geovals, obss)
 use obsspace_mod
 implicit none
 class(ufo_geosaod_tlad), intent(inout) :: self
+
 type(ufo_geovals),       intent(in)    :: geovals
 type(c_ptr), value,      intent(in)    :: obss
 
@@ -106,9 +106,8 @@ integer :: rc, iq
 character(len=MAXVARLEN) :: geovar
 character(len=MAXVARLEN), dimension(:), allocatable:: tracer_name
 
-real(kind=kind_real), dimension(:,:),   allocatable :: rh(:,:)
+real(kind=kind_real), dimension(:,:),   allocatable :: rh
 real(kind=kind_real), dimension(:,:,:), allocatable :: qm    ! aer concentration (kg/kg *delp/g) profiles at obs loc
-
 
  ! Get number of locations
  self%nlocs = obsspace_get_nlocs(obss)
@@ -137,11 +136,12 @@ real(kind=kind_real), dimension(:,:,:), allocatable :: qm    ! aer concentration
 
  allocate(self%bext(self%nlayers, self%nvars, self%ntracers, self%nlocs)) !mass extinction efficiency 
  call get_GEOS_AOD(self%nlayers, self%nlocs, self%nvars, self%ntracers, self%rcfile,  &
-                   real(self%wavelength,4), tracer_name, qm, rh, ext=self%bext, rc = rc) 
+                   self%wavelength, tracer_name, qm, rh, ext=self%bext, rc = rc) 
 
  deallocate(rh)
  deallocate(qm)
  deallocate(self%wavelength)
+ deallocate(tracer_name)
 
 end subroutine ufo_geosaod_tlad_settraj
 
