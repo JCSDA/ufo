@@ -2,6 +2,7 @@ window_begin: 2018-04-14T21:00:00Z
 window_end: 2018-04-15T03:00:00Z
 
 LinearObsOpTest:
+  coefL: 1.0e-8
   coefTL: 1.0e-8
   toleranceTL: 1.0e-08
   toleranceAD: 1.0e-09
@@ -19,7 +20,6 @@ Observations:
                         "mass_fraction_of_hydrophobic_organic_carbon_in_air", "mass_fraction_of_hydrophilic_organic_carbon_in_air",
                         "mass_fraction_of_sulfate_in_air", "mass_fraction_of_nitrate001_in_air", "mass_fraction_of_nitrate002_in_air",
                         "mass_fraction_of_nitrate003_in_air"]
- 
       RCFile: ["geosaod.rc"]
       wavelengths: [550.0]
     ObsSpace:
@@ -27,7 +27,8 @@ Observations:
       ObsDataIn:
         obsfile: Data/geos_aod_obs_2018041500_m.nc4
       simulate:
-        variables: [Total_Aerosol_Optical_Depth_550]        
+        variables: [Total_Aerosol_Optical_Depth_550]    
+      ObsBias: {}    
     GeoVaLs:
       filename: Data/geos_aod_geoval_2018041500_m.nc4
     vecequiv: HofX
