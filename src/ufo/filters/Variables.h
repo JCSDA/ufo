@@ -15,6 +15,7 @@
 #include "eckit/config/LocalConfiguration.h"
 #include "oops/base/Variables.h"
 #include "oops/util/Printable.h"
+#include "ufo/filters/Variable.h"
 
 namespace ufo {
 
@@ -25,31 +26,32 @@ class Variables: public util::Printable {
   static const std::string classname() {return "ufo::Variables";}
 
   Variables();
-  explicit Variables(const eckit::Configuration &, const std::string & allgroup = "");
-  Variables(const std::string &, const std::vector<int> &);
+  explicit Variables(const std::vector<eckit::LocalConfiguration> &);
+  explicit Variables(const oops::Variables &);
+  Variables(const ufo::Variables &, const std::string &);
   ~Variables();
 
   Variables & operator+=(const Variables &);
-  Variables & operator+=(const std::string &);
+  Variables & operator+=(const Variable &);
 
-  size_t size() const {return fullnames_.size();}
-  const std::string & operator[](const size_t kk) const {return fullnames_.at(kk);}
+  size_t size() const;
+  const Variable & operator[](const size_t) const;
 
-  const std::string variable(const size_t) const;
-  const std::string group(const size_t) const;
-  oops::Variables allFromGroup(const std::string &) const;
+// the below two functions are for compatibility with oops::Variables and should
+// eventually be removed
+  size_t nvars() const;
+  Variable variable(const size_t) const;
 
-  bool has(const std::string &) const;
+  Variables allFromGroup(const std::string &) const;
+  oops::Variables toOopsVariables() const;
+
   bool hasGroup(const std::string &) const;
-  size_t find(const std::string &) const;
-  operator bool() const {return !fullnames_.empty();}
-
-  void removeDuplicates();
+  operator bool() const {return !vars_.empty();}
 
  private:
   void print(std::ostream &) const;
 
-  std::vector<std::string> fullnames_;  // full variable names (with channel and @)
+  std::vector<Variable> vars_;
 };
 
 // -----------------------------------------------------------------------------

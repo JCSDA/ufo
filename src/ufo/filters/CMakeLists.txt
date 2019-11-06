@@ -31,6 +31,8 @@ set ( filters_files
       QCmanager.h
       Thinning.cc
       Thinning.h
+      Variable.cc
+      Variable.h
       Variables.cc
       Variables.h
       Gaussian_Thinning.cc

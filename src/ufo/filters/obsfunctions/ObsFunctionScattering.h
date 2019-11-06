@@ -18,7 +18,8 @@ namespace ufo {
 
 class ObsFunctionScattering : public ObsFunctionBase {
  public:
-  ObsFunctionScattering();
+  explicit ObsFunctionScattering(const eckit::LocalConfiguration conf
+                                       = eckit::LocalConfiguration());
   ~ObsFunctionScattering();
 
   void compute(const ObsFilterData &,

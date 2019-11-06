@@ -8,6 +8,8 @@
 #ifndef UFO_FILTERS_OBSFUNCTIONS_OBSFUNCTIONVELOCITY_H_
 #define UFO_FILTERS_OBSFUNCTIONS_OBSFUNCTIONVELOCITY_H_
 
+#include <string>
+
 #include "ufo/filters/ObsFilterData.h"
 #include "ufo/filters/obsfunctions/ObsFunctionBase.h"
 #include "ufo/filters/Variables.h"
@@ -18,7 +20,7 @@ namespace ufo {
 
 class ObsFunctionVelocity : public ObsFunctionBase {
  public:
-  ObsFunctionVelocity();
+  explicit ObsFunctionVelocity(const eckit::LocalConfiguration);
   ~ObsFunctionVelocity();
 
   void compute(const ObsFilterData &,
@@ -26,6 +28,7 @@ class ObsFunctionVelocity : public ObsFunctionBase {
   const ufo::Variables & requiredVariables() const;
  private:
   ufo::Variables invars_;
+  std::string group_;
 };
 
 // -----------------------------------------------------------------------------

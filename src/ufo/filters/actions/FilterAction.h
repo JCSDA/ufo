@@ -16,6 +16,8 @@
 
 #include "ioda/ObsDataVector.h"
 #include "ufo/filters/actions/FilterActionBase.h"
+#include "ufo/filters/Variables.h"
+
 namespace eckit {
   class Configuration;
 }
@@ -31,7 +33,7 @@ class FilterAction : private boost::noncopyable {
   explicit FilterAction(const eckit::Configuration &);
   ~FilterAction();
 
-  void apply(const oops::Variables &, const std::vector<std::vector<bool>> &,
+  void apply(const ufo::Variables &, const std::vector<std::vector<bool>> &,
              const ObsFilterData &,
              ioda::ObsDataVector<int> &, ioda::ObsDataVector<float> &) const;
   virtual const ufo::Variables & requiredVariables() const;

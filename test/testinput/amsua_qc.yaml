@@ -22,24 +22,29 @@ Observations:
      filename: Data/amsua_n19_geoval_2018041500_m.nc4
    ObsFilters:
    - Filter: Bounds Check
-     variables: [brightness_temperature]
-     channels: 1
+     filter variables:
+     - name: brightness_temperature
+       channels: 1
      minvalue: 50.0
      maxvalue: 400.0
    - Filter: Bounds Check
-     variables: [brightness_temperature]
-     channels: 2-15
+     filter variables:
+     - name: brightness_temperature
+       channels: 2-15
      minvalue: 100.0
      maxvalue: 500.0
    - Filter: DomainErr Check
-     variables: [brightness_temperature]
-     channels: 1
+     filter variables:
+     - name: brightness_temperature
+       channels: 1
      infltparameter: 1.5
      where:
-     - variable: Scattering@ObsFunction
+     - variable:
+         name: Scattering@ObsFunction
        maxvalue: 100.0
    - Filter: Background Check
-     variables: [brightness_temperature]
-     channels: 1
+     filter variables:
+     - name: brightness_temperature
+       channels: 1
      threshold: 2.0
    passedBenchmark: 1496      # number of passed obs

@@ -12,7 +12,10 @@ Observations:
    HofX: HofX
    ObsFilters:
    - Filter: Background Check     # test abs threshold with all variables
-     variables: [variable1, variable2, variable3]
+     filter variables:
+     - name: variable1
+     - name: variable2
+     - name: variable3
      absolute threshold: 2.0
 # Filter out where abs(ObsValue - HofX) < absolute_threshold
 #  variable1@ObsValue = 10, 11, 12, 13, 14, 15, 16, 17, 18, 19
@@ -31,7 +34,9 @@ Observations:
    HofX: HofX
    ObsFilters:
    - Filter: Background Check     # test abs threshold with subset of variables
-     variables: [variable1, variable3]
+     filter variables:
+     - name: variable1
+     - name: variable3
      absolute threshold: 2.0
 # Filter out where abs(ObsValue - HofX) < absolute_threshold
 #  variable1@ObsValue = 10, 11, 12, 13, 14, 15, 16, 17, 18, 19
@@ -49,7 +54,10 @@ Observations:
    HofX: HofX
    ObsFilters:
    - Filter: Background Check     # test threshold with all variables
-     variables: [variable1, variable2, variable3]
+     filter variables:
+     - name: variable1
+     - name: variable2
+     - name: variable3
      threshold: 2.0
 # Filter out where abs(ObsValue - HofX) < threshold * ObsError
 #  variable1@ObsValue = 10, 11, 12, 13, 14, 15, 16, 17, 18, 19
@@ -71,7 +79,9 @@ Observations:
    HofX: HofX
    ObsFilters:
    - Filter: Background Check     # test threshold with subset of variables
-     variables: [variable1, variable2]
+     filter variables:
+     - name: variable1
+     - name: variable2
      threshold: 2.0
 # Filter out where abs(ObsValue - HofX) < threshold * ObsError
 #  variable1@ObsValue = 10, 11, 12, 13, 14, 15, 16, 17, 18, 19
@@ -91,7 +101,10 @@ Observations:
    HofX: HofX
    ObsFilters:
    - Filter: Background Check     # test abs threshold and threshold
-     variables: [variable1, variable2, variable3]
+     filter variables:
+     - name: variable1
+     - name: variable2
+     - name: variable3
      threshold: 1.0
      absolute threshold: 1.5
 # Filter out where abs(ObsValue - HofX) < min(absolute_threshold, threshold*ObsError)
@@ -114,7 +127,10 @@ Observations:
    HofX: HofX
    ObsFilters:
    - Filter: Background Check     # test error inflation (TODO: compare errors)
-     variables: [variable1, variable2, variable3]
+     filter variables:
+     - name: variable1
+     - name: variable2
+     - name: variable3
      threshold: 1.0
      absolute threshold: 1.5
      action:

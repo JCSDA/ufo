@@ -18,7 +18,7 @@ namespace ufo {
 
 class ObsFunctionErrfLat : public ObsFunctionBase {
  public:
-  ObsFunctionErrfLat();
+  explicit ObsFunctionErrfLat(const eckit::LocalConfiguration);
   ~ObsFunctionErrfLat();
 
   void compute(const ObsFilterData &,

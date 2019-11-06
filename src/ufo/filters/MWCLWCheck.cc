@@ -31,8 +31,8 @@ MWCLWCheck::MWCLWCheck(ioda::ObsSpace & obsdb, const eckit::Configuration & conf
     invars_(eckit::LocalConfiguration(config_, "inputs"))
 {
   oops::Log::debug() << "MWCLWCheck: config = " << config_ << std::endl;
-  const std::string var0 = invars_[0] + "@HofX";
-  const std::string var1 = invars_[1] + "@HofX";
+  const Variable var0(invars_[0] + "@HofX");
+  const Variable var1(invars_[1] + "@HofX");
   allvars_ += var0;
   allvars_ += var1;
 }
@@ -44,7 +44,7 @@ MWCLWCheck::~MWCLWCheck() {}
 // -----------------------------------------------------------------------------
 
 void MWCLWCheck::applyFilter(const std::vector<bool> & apply,
-                             const oops::Variables & filtervars,
+                             const Variables & filtervars,
                              std::vector<std::vector<bool>> & flagged) const {
   oops::Log::trace() << "MWCLWCheck postFilter" << std::endl;
 
@@ -61,13 +61,13 @@ void MWCLWCheck::applyFilter(const std::vector<bool> & apply,
   oops::Log::debug() << "MWCLWCheck: config = " << config_ << std::endl;
 
 // Number of channels to be tested and number of thresholds needs to be the same
-  ASSERT(clw_thresholds.size() == filtervars.size());
+  ASSERT(clw_thresholds.size() == filtervars.nvars());
 // Check we have the correct number of channels to do the CLW calculation
   ASSERT(invars_.size() == 2);
 // Check clw_option is in range
   ASSERT(clw_option >= 1 && clw_option <=3);
 
-  ioda::ObsDataVector<float> obs(obsdb_, filtervars, "ObsValue");
+  ioda::ObsDataVector<float> obs(obsdb_, filtervars.toOopsVariables(), "ObsValue");
   ioda::ObsDataVector<float> obs_for_calc(obsdb_, invars_, "ObsValue");
   ioda::ObsDataVector<float> sza(obsdb_, "sensor_zenith_angle", "MetaData");
   ioda::ObsDataVector<float> clw(obsdb_, "cloud_liquid_water", "Diagnostic", false);
@@ -75,8 +75,8 @@ void MWCLWCheck::applyFilter(const std::vector<bool> & apply,
   ioda::ObsDataVector<float> clw_obs_out(obsdb_, "clw_obs", "Diagnostic", false);
 
 //  H(x)
-    const std::string var0 = invars_[0] + "@HofX";
-    const std::string var1 = invars_[1] + "@HofX";
+    const Variable var0(invars_[0] + "@HofX");
+    const Variable var1(invars_[1] + "@HofX");
     std::vector<float> hofx0;
     data_.get(var0, hofx0);
     std::vector<float> hofx1;
@@ -110,7 +110,7 @@ void MWCLWCheck::applyFilter(const std::vector<bool> & apply,
       }
 
 // Apply CLW threshold to observations
-     for (size_t jv = 0; jv < filtervars.size(); ++jv) {
+     for (size_t jv = 0; jv < filtervars.nvars(); ++jv) {
         if (apply[jobs]) {
            if (clw_thresholds[jv] != missing && (clw[0][jobs] == missing ||
                clw[0][jobs] > clw_thresholds[jv])) flagged[jv][jobs] = true;

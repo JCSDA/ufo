@@ -1,16 +1,19 @@
 ---
 Variables:
-  - variables: [brightness_temperature@ObsValue]
+  - name: brightness_temperature@ObsValue
     channels: 1, 4-5
-    reference: [brightness_temperature_1@ObsValue, brightness_temperature_4@ObsValue, brightness_temperature_5@ObsValue]
-  - variables: [latitude@MetaData, height@MetaData]
-    reference: [latitude@MetaData, height@MetaData]
-  - variable: longitude@MetaData
-    reference: [longitude@MetaData]
-Variables with channels:
-  - variable name: brightness_temperature@ObsValue
-    channels: 1, 4-5
-    reference: [brightness_temperature_1@ObsValue, brightness_temperature_4@ObsValue, brightness_temperature_5@ObsValue]
-  - variable name: optical_thickness_of_atmosphere_layer@ObsDiag
+    reference names: [brightness_temperature_1, brightness_temperature_4, brightness_temperature_5]
+    reference group: ObsValue
+  - name: latitude@MetaData
+    reference names: [latitude]
+    reference group: MetaData
+  - name: optical_thickness_of_atmosphere_layer@ObsDiag
     channels: 23-25
-    reference: [optical_thickness_of_atmosphere_layer_23@ObsDiag, optical_thickness_of_atmosphere_layer_24@ObsDiag, optical_thickness_of_atmosphere_layer_25@ObsDiag]
+    reference names: [optical_thickness_of_atmosphere_layer_23, optical_thickness_of_atmosphere_layer_24, optical_thickness_of_atmosphere_layer_25]
+    reference group: ObsDiag
+oops variables:
+  - variables: ['var1', 'var2', 'var3']
+    reference names: ['var1', 'var2', 'var3']
+  - variables: ['var']
+    channels: 3-5,8
+    reference names: ['var_3', 'var_4', 'var_5', 'var_8']

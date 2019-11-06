@@ -37,7 +37,7 @@ Thinning::~Thinning() {}
 // -----------------------------------------------------------------------------
 
 void Thinning::applyFilter(const std::vector<bool> & apply,
-                           const oops::Variables & filtervars,
+                           const Variables & filtervars,
                            std::vector<std::vector<bool>> & flagged) const {
   const size_t nobs = obsdb_.nlocs();
   const float thinning = config_.getFloat("amount");
@@ -46,7 +46,7 @@ void Thinning::applyFilter(const std::vector<bool> & apply,
   unsigned int random_seed = config_.getInt("random_seed", std::time(0));
   util::UniformDistribution<float> rand(nobs, 0.0, 1.0, random_seed);
 
-  for (size_t jv = 0; jv < filtervars.size(); ++jv) {
+  for (size_t jv = 0; jv < filtervars.nvars(); ++jv) {
     for (size_t jobs = 0; jobs < nobs; ++jobs) {
       if ( apply[jobs] && rand[jobs] < thinning ) flagged[jv][jobs] = true;
     }

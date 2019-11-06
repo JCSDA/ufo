@@ -32,15 +32,17 @@ FilterBase::FilterBase(ioda::ObsSpace & os, const eckit::Configuration & config,
                        boost::shared_ptr<ioda::ObsDataVector<float> > obserr)
   : obsdb_(os), config_(config), flags_(*flags), obserr_(*obserr),
     allvars_(getAllWhereVariables(config_)),
-    filtervars_(config_), data_(obsdb_), prior_(false), post_(false)
+    filtervars_(), data_(obsdb_), prior_(false), post_(false)
 {
   oops::Log::trace() << "FilterBase contructor" << std::endl;
   ASSERT(flags);
   ASSERT(obserr);
-  if (filtervars_.size() == 0) {
-    oops::Log::error() << "No variables will be filtered out in filter "
-                       << config_ << std::endl;
-    ABORT("No variables specified to be filtered out in filter");
+  if (config_.has("filter variables")) {
+  // read filter variables
+    filtervars_ += Variables(config_.getSubConfigurations("filter variables"));
+  } else {
+  // if no filter variables explicitly specified, filter out all variables
+    filtervars_ += Variables(obsdb_.obsvariables());
   }
   eckit::LocalConfiguration aconf;
   config_.get("action", aconf);
@@ -102,7 +104,7 @@ void FilterBase::doFilter() const {
   std::vector<bool> apply = processWhere(config_, data_);
 
 // Allocate flagged obs indicator (false by default)
-  const size_t nvars = filtervars_.size();
+  const size_t nvars = filtervars_.nvars();
   std::vector<std::vector<bool>> flagged(nvars);
   for (size_t jv = 0; jv < flagged.size(); ++jv) flagged[jv].resize(obsdb_.nlocs());
 

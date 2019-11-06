@@ -17,7 +17,6 @@
 #include "oops/util/missingValues.h"
 #include "ufo/filters/ObsFilterData.h"
 #include "ufo/filters/Variables.h"
-#include "ufo/utils/StringUtils.h"
 
 namespace ufo {
 
@@ -29,7 +28,8 @@ ufo::Variables getAllWhereVariables(const eckit::Configuration & config) {
 
   ufo::Variables vars;
   for (size_t jm = 0; jm < masks.size(); ++jm) {
-    vars += ufo::Variables(masks[jm]);
+    eckit::LocalConfiguration varconf(masks[jm], "variable");
+    vars += ufo::Variable(varconf);
   }
   return vars;
 }
@@ -107,52 +107,55 @@ std::vector<bool> processWhere(const eckit::Configuration & config,
   std::vector<eckit::LocalConfiguration> masks;
   config.get("where", masks);
 
-  const ufo::Variables vars = getAllWhereVariables(config);
-  for (size_t jm = 0; jm < vars.size(); ++jm) {
-    if (vars.group(jm) != "VarMetaData") {
-//    Process masks on float values
-      const float vmin = masks[jm].getFloat("minvalue", missing);
-      const float vmax = masks[jm].getFloat("maxvalue", missing);
+  for (size_t jm = 0; jm < masks.size(); ++jm) {
+    eckit::LocalConfiguration varconf(masks[jm], "variable");
+    Variable var(varconf);
+    for (size_t jvar = 0; jvar < var.size(); ++jvar) {
+      if (var.group() != "VarMetaData") {
+//      Process masks on float values
+        const float vmin = masks[jm].getFloat("minvalue", missing);
+        const float vmax = masks[jm].getFloat("maxvalue", missing);
 
-//    Apply mask min/max
-      if (vmin != missing || vmax != missing) {
-        std::vector<float> data;
-        filterdata.get(vars[jm], data);
-        processWhereMinMax(data, vmin, vmax, where);
-      }
-
-//    Apply mask is_defined
-      if (masks[jm].has("is_defined")) {
-        if (filterdata.has(vars[jm])) {
+//      Apply mask min/max
+        if (vmin != missing || vmax != missing) {
           std::vector<float> data;
-          filterdata.get(vars[jm], data);
-          processWhereIsDefined(data, where);
-        } else {
-          std::fill(where.begin(), where.end(), false);
+          filterdata.get(var[jvar], data);
+          processWhereMinMax(data, vmin, vmax, where);
         }
-      }
 
-//    Apply mask is_not_defined
-      if (masks[jm].has("is_not_defined")) {
-        std::vector<float> data;
-        filterdata.get(vars[jm], data);
-        processWhereIsNotDefined(data, where);
-      }
+//      Apply mask is_defined
+        if (masks[jm].has("is_defined")) {
+          if (filterdata.has(var[jvar])) {
+            std::vector<float> data;
+            filterdata.get(var[jvar], data);
+            processWhereIsDefined(data, where);
+          } else {
+            std::fill(where.begin(), where.end(), false);
+          }
+        }
 
-//    Apply mask is_in
-      if (masks[jm].has("is_in")) {
-        std::vector<int> data;
-        filterdata.get(vars[jm], data);
-        std::set<int> whitelist = oops::parseIntSet(masks[jm].getString("is_in"));
-        processWhereIsIn(data, whitelist, where);
-      }
+//      Apply mask is_not_defined
+        if (masks[jm].has("is_not_defined")) {
+          std::vector<float> data;
+          filterdata.get(var[jvar], data);
+          processWhereIsNotDefined(data, where);
+        }
 
-//    Apply mask is_not_in
-      if (masks[jm].has("is_not_in")) {
-        std::vector<int> data;
-        filterdata.get(vars[jm], data);
-        std::set<int> blacklist = oops::parseIntSet(masks[jm].getString("is_not_in"));
-        processWhereIsNotIn(data, blacklist, where);
+//      Apply mask is_in
+        if (masks[jm].has("is_in")) {
+          std::vector<int> data;
+          filterdata.get(var[jvar], data);
+          std::set<int> whitelist = oops::parseIntSet(masks[jm].getString("is_in"));
+          processWhereIsIn(data, whitelist, where);
+        }
+
+//      Apply mask is_not_in
+        if (masks[jm].has("is_not_in")) {
+          std::vector<int> data;
+          filterdata.get(var[jvar], data);
+          std::set<int> blacklist = oops::parseIntSet(masks[jm].getString("is_not_in"));
+          processWhereIsNotIn(data, blacklist, where);
+        }
       }
     }
   }

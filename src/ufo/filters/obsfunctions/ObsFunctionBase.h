@@ -25,7 +25,7 @@ class Variables;
 
 class ObsFunctionBase : private boost::noncopyable {
  public:
-  ObsFunctionBase() {}
+  explicit ObsFunctionBase(const eckit::LocalConfiguration conf = eckit::LocalConfiguration()) {}
   virtual ~ObsFunctionBase() {}
 
 /// compute the result of the function
@@ -41,13 +41,13 @@ class ObsFunctionBase : private boost::noncopyable {
 /// Obs Function Factory
 class ObsFunctionFactory {
  public:
-  static ObsFunctionBase * create(const std::string &);
+  static ObsFunctionBase * create(const Variable &);
   virtual ~ObsFunctionFactory() { getMakers().clear(); }
   static bool functionExists(const std::string &);
  protected:
   explicit ObsFunctionFactory(const std::string &);
  private:
-  virtual ObsFunctionBase * make() = 0;
+  virtual ObsFunctionBase * make(const eckit::LocalConfiguration conf) = 0;
   static std::map < std::string, ObsFunctionFactory * > & getMakers() {
     static std::map < std::string, ObsFunctionFactory * > makers_;
     return makers_;
@@ -58,10 +58,11 @@ class ObsFunctionFactory {
 
 template<class T>
 class ObsFunctionMaker : public ObsFunctionFactory {
-  virtual ObsFunctionBase * make()
-    { return new T(); }
+  virtual ObsFunctionBase * make(const eckit::LocalConfiguration conf)
+    { return new T(conf); }
  public:
-  explicit ObsFunctionMaker(const std::string & name) : ObsFunctionFactory(name) {}
+  explicit ObsFunctionMaker(const std::string & name)
+    : ObsFunctionFactory(name) {}
 };
 
 // -----------------------------------------------------------------------------

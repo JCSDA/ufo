@@ -13,12 +13,10 @@
 #include "ioda/ObsDataVector.h"
 #include "ioda/ObsSpace.h"
 #include "ioda/ObsVector.h"
-#include "oops/util/IntSetParser.h"
 #include "oops/util/missingValues.h"
 #include "ufo/filters/obsfunctions/ObsFunction.h"
 #include "ufo/GeoVaLs.h"
 #include "ufo/ObsDiagnostics.h"
-#include "ufo/utils/StringUtils.h"
 
 namespace ufo {
 
@@ -59,14 +57,13 @@ size_t ObsFilterData::nlocs() const {
 
 // -----------------------------------------------------------------------------
 /*! Checks if requested data exists in ObsFilterData
- *  \param varname is a name of a variable requested (has to be formatted as
- *         name@group
+ *  \param varname is a name of a variable requested
  *  \return true if the variable is available for access from ObsFilterData,
  *          false otherwise
  */
-bool ObsFilterData::has(const std::string & varname) const {
-  std::string var, grp;
-  splitVarGroup(varname, var, grp);
+bool ObsFilterData::has(const Variable & varname) const {
+  const std::string var = varname.variable();
+  const std::string grp = varname.group();
   if (grp == "GeoVaLs") {
     return (gvals_ && gvals_->has(var));
   } else if (grp == "ObsFunction") {
@@ -83,15 +80,14 @@ bool ObsFilterData::has(const std::string & varname) const {
 
 // -----------------------------------------------------------------------------
 /*! Gets requested data from ObsFilterData
- *  \param varname is a name of a variable requested (has to be formatted as
- *         name@group
+ *  \param varname is a name of a variable requested
  *  \param values on output is data from varname (undefined on input)
  *  \return data associated with varname, in std::vector<float>
  *  \warning if data are unavailable, assertions would fail and method abort
  */
-void ObsFilterData::get(const std::string & varname, std::vector<float> & values) const {
-  std::string var, grp;
-  splitVarGroup(varname, var, grp);
+void ObsFilterData::get(const Variable & varname, std::vector<float> & values) const {
+  const std::string var = varname.variable();
+  const std::string grp = varname.group();
 
   std::size_t nvals = obsdb_.nlocs();
 ///  VarMetaData is a special case: size(nvars) instead of (nlocs)
@@ -106,7 +102,7 @@ void ObsFilterData::get(const std::string & varname, std::vector<float> & values
 ///  TODO(AS?): cache results of function computations
   } else if (grp == "ObsFunction") {
     ioda::ObsDataVector<float> vals(obsdb_, var, grp, false);
-    ObsFunction obsfunc(var);
+    ObsFunction obsfunc(varname);
     obsfunc.compute(*this, vals);
     for (size_t jj = 0; jj < nvals; ++jj) {
       values[jj] = vals[var][jj];
@@ -132,16 +128,15 @@ void ObsFilterData::get(const std::string & varname, std::vector<float> & values
 
 // -----------------------------------------------------------------------------
 /*! Gets requested integer data from ObsFilterData
- *  \param varname is a name of a variable requested (has to be formatted as
- *         name@group
+ *  \param varname is a name of a variable requested
  *  \param values on output is data from varname (undefined on input)
  *  \return data associated with varname, in std::vector<int>
  *  \warning if data are unavailable, assertions would fail and method abort
  *           only ObsSpace int data are supported currently
  */
-void ObsFilterData::get(const std::string & varname, std::vector<int> & values) const {
-  std::string var, grp;
-  splitVarGroup(varname, var, grp);
+void ObsFilterData::get(const Variable & varname, std::vector<int> & values) const {
+  const std::string var = varname.variable();
+  const std::string grp = varname.group();
 
   std::size_t nvals = obsdb_.nlocs();
 ///  VarMetaData is a special case: size(nvars) instead of (nlocs)
@@ -160,17 +155,17 @@ void ObsFilterData::get(const std::string & varname, std::vector<int> & values) 
 
 // -----------------------------------------------------------------------------
 /*! Gets requested data at requested level from ObsFilterData
- *  \param varname is a name of a variable requested (has to be formatted as
- *         name@group, group must be either GeoVaLs or ObsDiag
+ *  \param varname is a name of a variable requested
+ *         group must be either GeoVaLs or ObsDiag
  *  \param level is a level variable is requested at
  *  \param values on output is data from varname (undefined on input)
  *  \return data associated with varname, in std::vector<float>
  *  \warning if data are unavailable, assertions would fail and method abort
  */
-void ObsFilterData::get(const std::string & varname, const int level,
+void ObsFilterData::get(const Variable & varname, const int level,
                         std::vector<float> & values) const {
-  std::string var, grp;
-  splitVarGroup(varname, var, grp);
+  const std::string var = varname.variable();
+  const std::string grp = varname.group();
 
   ASSERT(grp == "GeoVaLs" || grp == "ObsDiag");
   values.resize(obsdb_.nlocs());
@@ -187,20 +182,19 @@ void ObsFilterData::get(const std::string & varname, const int level,
 
 // -----------------------------------------------------------------------------
 /*! Gets requested data from ObsFilterData into ObsDataVector
- *  \param varname is a name of a variable requested (has to be formatted as
- *         name@group
+ *  \param varname is a name of a variable requested
  *  \param values on output is data from varname (should be allocated on input)
  *  \return data associated with varname, in ioda::ObsDataVector<float>
  *  \warning only works for ObsFunction;
  *           if data are unavailable, assertions would fail and method abort
  */
-void ObsFilterData::get(const std::string & varname, ioda::ObsDataVector<float> & values) const {
-  std::string var, grp;
-  splitVarGroup(varname, var, grp);
+void ObsFilterData::get(const Variable & varname, ioda::ObsDataVector<float> & values) const {
+  const std::string var = varname.variable();
+  const std::string grp = varname.group();
 
   ASSERT(grp == "ObsFunction");
 
-  ObsFunction obsfunc(var);
+  ObsFunction obsfunc(varname);
   obsfunc.compute(*this, values);
 }
 
@@ -210,9 +204,9 @@ void ObsFilterData::get(const std::string & varname, ioda::ObsDataVector<float> 
  *  one if not 3D geovals or obsdiag
  *
  */
-size_t ObsFilterData::nlevs(const std::string & varname) const {
-  std::string var, grp;
-  splitVarGroup(varname, var, grp);
+size_t ObsFilterData::nlevs(const Variable & varname) const {
+  const std::string var = varname.variable();
+  const std::string grp = varname.group();
   if (grp == "GeoVaLs") {
     ASSERT(gvals_);
     return gvals_->nlevs(var);

@@ -24,13 +24,13 @@ static FilterActionMaker<InflateError> makerInflateErr_("inflate error");
 InflateError::InflateError(const eckit::Configuration & conf)
   : allvars_(), strfactor_(conf.getString("inflation")) {
   if (!isFloat(strfactor_)) {
-    allvars_ += strfactor_;
+    allvars_ += Variable(strfactor_);
   }
 }
 
 // -----------------------------------------------------------------------------
 
-void InflateError::apply(const oops::Variables & vars,
+void InflateError::apply(const Variables & vars,
                          const std::vector<std::vector<bool>> & flagged,
                          const ObsFilterData & data,
                          ioda::ObsDataVector<int> &,
@@ -38,8 +38,8 @@ void InflateError::apply(const oops::Variables & vars,
   std::vector<float> factors = getScalarOrFilterData(strfactor_, data);
   oops::Log::debug() << " input obserr: " << obserr << std::endl;
   ASSERT(factors.size() == obserr.nlocs());
-  for (size_t jv = 0; jv < vars.size(); ++jv) {
-    size_t iv = obserr.varnames().find(vars[jv]);
+  for (size_t jv = 0; jv < vars.nvars(); ++jv) {
+    size_t iv = obserr.varnames().find(vars.variable(jv).variable());
     for (size_t jobs = 0; jobs < obserr.nlocs(); ++jobs) {
       if (flagged[iv][jobs]) obserr[iv][jobs] *= factors[jobs];
     }

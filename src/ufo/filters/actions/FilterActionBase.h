@@ -16,7 +16,6 @@
 
 #include "eckit/config/Configuration.h"
 #include "ioda/ObsDataVector.h"
-#include "oops/base/Variables.h"
 #include "ufo/filters/Variables.h"
 
 namespace ufo {
@@ -32,7 +31,7 @@ class FilterActionBase : private boost::noncopyable {
   virtual ~FilterActionBase() {}
 
 /// compute the diagnostic
-  virtual void apply(const oops::Variables &, const std::vector<std::vector<bool>> &,
+  virtual void apply(const Variables &, const std::vector<std::vector<bool>> &,
                      const ObsFilterData &,
                      ioda::ObsDataVector<int> &, ioda::ObsDataVector<float> &) const = 0;
   virtual const Variables & requiredVariables() const = 0;

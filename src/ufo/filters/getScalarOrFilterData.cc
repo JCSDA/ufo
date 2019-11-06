@@ -12,6 +12,7 @@
 #include "oops/util/abor1_cpp.h"
 #include "oops/util/Logger.h"
 #include "ufo/filters/ObsFilterData.h"
+#include "ufo/filters/Variable.h"
 
 namespace ufo {
 
@@ -30,14 +31,15 @@ std::vector<float> getScalarOrFilterData(const std::string & strfactor,
     std::fill(factors.begin(), factors.end(), factor);
   } else {
 //  it's a string; get from ObsFilterData
-    oops::Log::debug() << "processing data: " << strfactor << std::endl;
-    if (!data.has(strfactor)) {
+    Variable var(strfactor);
+    oops::Log::debug() << "processing data: " << var << std::endl;
+    if (!data.has(var)) {
       oops::Log::error() << "getScalarOrFilterData: either a value or a valid variable from "
                          << "data available to filter should be specified instead of "
                          << strfactor << std::endl;
       ABORT("getScalarOrFilterData: either a value or a valid variable should be specified");
     }
-    data.get(strfactor, factors);
+    data.get(var, factors);
   }
   return factors;
 }

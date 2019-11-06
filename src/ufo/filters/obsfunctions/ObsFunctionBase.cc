@@ -27,14 +27,16 @@ ObsFunctionFactory::ObsFunctionFactory(const std::string & name) {
 
 // -----------------------------------------------------------------------------
 
-ObsFunctionBase * ObsFunctionFactory::create(const std::string & id) {
+ObsFunctionBase * ObsFunctionFactory::create(const Variable & var) {
   oops::Log::trace() << "ObsFunctionBase::create starting" << std::endl;
-  typename std::map<std::string, ObsFunctionFactory*>::iterator jloc = getMakers().find(id);
+  typename std::map<std::string, ObsFunctionFactory*>::iterator jloc =
+     getMakers().find(var.variable());
   if (jloc == getMakers().end()) {
-    oops::Log::error() << id << " does not exist in ufo::ObsFunctionFactory." << std::endl;
+    oops::Log::error() << var.variable() << " does not exist in ufo::ObsFunctionFactory."
+                       << std::endl;
     ABORT("Element does not exist in ufo::ObsFunctionFactory.");
   }
-  ObsFunctionBase * ptr = jloc->second->make();
+  ObsFunctionBase * ptr = jloc->second->make(var.options());
   oops::Log::trace() << "ObsFunctionBase::create done" << std::endl;
   return ptr;
 }

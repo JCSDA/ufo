@@ -11,6 +11,7 @@
 #include <vector>
 
 #include "ioda/ObsDataVector.h"
+#include "ufo/filters/Variable.h"
 
 namespace ufo {
 
@@ -18,9 +19,9 @@ static ObsFunctionMaker<ObsFunctionErrfLat> makerObsFuncErrfLat_("ErrfLat");
 
 // -----------------------------------------------------------------------------
 
-ObsFunctionErrfLat::ObsFunctionErrfLat()
+ObsFunctionErrfLat::ObsFunctionErrfLat(const eckit::LocalConfiguration)
   : invars_() {
-  invars_ += "latitude@MetaData";
+  invars_ += Variable("latitude@MetaData");
 }
 
 // -----------------------------------------------------------------------------
@@ -34,7 +35,7 @@ void ObsFunctionErrfLat::compute(const ObsFilterData & in,
   // TODO(AS): should use constants for variable names
   const size_t nlocs = in.nlocs();
   std::vector<float> lats;
-  in.get("latitude@MetaData", lats);
+  in.get(Variable("latitude@MetaData"), lats);
   for (size_t jj = 0; jj < nlocs; ++jj) {
     out[0][jj] = 1.0;
     if ( std::abs(lats[jj]) < 25.0 ) {

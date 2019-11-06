@@ -35,9 +35,9 @@ ObsDomainCheck::~ObsDomainCheck() {}
 // -----------------------------------------------------------------------------
 
 void ObsDomainCheck::applyFilter(const std::vector<bool> & inside,
-                                 const oops::Variables & filtervars,
+                                 const Variables & filtervars,
                                  std::vector<std::vector<bool>> & flagged) const {
-  for (size_t jv = 0; jv < filtervars.size(); ++jv) {
+  for (size_t jv = 0; jv < filtervars.nvars(); ++jv) {
     for (size_t jobs = 0; jobs < obsdb_.nlocs(); ++jobs) {
       flagged[jv][jobs] = !inside[jobs];
     }

@@ -11,7 +11,6 @@ Observations:
         variables: [air_temperature, eastward_wind, northward_wind]
     ObsFilters:
     - Filter: Thinning
-      variables: [air_temperature, eastward_wind, northward_wind]
       amount: 0.75
       random_seed: 0
     passedBenchmark: 268

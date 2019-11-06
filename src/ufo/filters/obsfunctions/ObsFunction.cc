@@ -14,8 +14,8 @@ namespace ufo {
 
 // -----------------------------------------------------------------------------
 
-ObsFunction::ObsFunction(const std::string & id)
-  : obsfct_(ObsFunctionFactory::create(id))
+ObsFunction::ObsFunction(const Variable & var)
+  : obsfct_(ObsFunctionFactory::create(var))
 {}
 
 // -----------------------------------------------------------------------------
