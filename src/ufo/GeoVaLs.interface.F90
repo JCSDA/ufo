@@ -35,6 +35,19 @@ contains
 !> Linked list implementation
 #include "oops/util/linkedList_c.f"
 ! ------------------------------------------------------------------------------
+!> Setup GeoVaLs (don't store anything; don't do allocation yet)
+subroutine ufo_geovals_default_constr_c(c_key_self) bind(c,name='ufo_geovals_default_constr_f90')
+implicit none
+integer(c_int), intent(inout)  :: c_key_self
+type(ufo_geovals), pointer :: self
+
+call ufo_geovals_registry%init()
+call ufo_geovals_registry%add(c_key_self)
+call ufo_geovals_registry%get(c_key_self, self)
+call ufo_geovals_default_constr(self)
+
+end subroutine ufo_geovals_default_constr_c
+
 !> Setup GeoVaLs (store nlocs, variables; don't do allocation yet)
 subroutine ufo_geovals_setup_c(c_key_self, c_nlocs, c_vars) bind(c,name='ufo_geovals_setup_f90')
 use oops_variables_mod
@@ -184,6 +197,21 @@ end subroutine ufo_geovals_scalmult_c
 
 ! ------------------------------------------------------------------------------
 
+subroutine ufo_geovals_profmult_c(c_key_self, nlocs, values) bind(c,name='ufo_geovals_profmult_f90')
+implicit none
+integer(c_int), intent(in) :: c_key_self
+integer(c_int), intent(in) :: nlocs
+real(c_float), intent(in) :: values(nlocs)
+type(ufo_geovals), pointer :: self
+
+call ufo_geovals_registry%get(c_key_self, self)
+
+call ufo_geovals_profmult(self, nlocs, values)
+
+end subroutine ufo_geovals_profmult_c
+
+! ------------------------------------------------------------------------------
+
 subroutine ufo_geovals_assign_c(c_key_self, c_key_rhs) bind(c,name='ufo_geovals_assign_f90')
 implicit none
 integer(c_int), intent(in) :: c_key_self
@@ -286,6 +314,36 @@ f_comm = fckit_mpi_comm(name)
 call ufo_geovals_dotprod(self, other, prod, f_comm)
 
 end subroutine ufo_geovals_dotprod_c
+
+! ------------------------------------------------------------------------------
+
+subroutine ufo_geovals_split_c(c_key_self, c_key_other1, c_key_other2) bind(c,name='ufo_geovals_split_f90')
+implicit none
+integer(c_int), intent(in) :: c_key_self, c_key_other1, c_key_other2
+type(ufo_geovals), pointer :: self, other1, other2
+
+call ufo_geovals_registry%get(c_key_self, self)
+call ufo_geovals_registry%get(c_key_other1, other1)
+call ufo_geovals_registry%get(c_key_other2, other2)
+
+call ufo_geovals_split(self, other1, other2)
+
+end subroutine ufo_geovals_split_c
+
+! ------------------------------------------------------------------------------
+
+subroutine ufo_geovals_merge_c(c_key_self, c_key_other1, c_key_other2) bind(c,name='ufo_geovals_merge_f90')
+implicit none
+integer(c_int), intent(in) :: c_key_self, c_key_other1, c_key_other2
+type(ufo_geovals), pointer :: self, other1, other2
+
+call ufo_geovals_registry%get(c_key_self, self)
+call ufo_geovals_registry%get(c_key_other1, other1)
+call ufo_geovals_registry%get(c_key_other2, other2)
+
+call ufo_geovals_merge(self, other1, other2)
+
+end subroutine ufo_geovals_merge_c
 
 ! ------------------------------------------------------------------------------
 

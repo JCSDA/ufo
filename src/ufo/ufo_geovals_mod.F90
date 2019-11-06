@@ -21,27 +21,31 @@ integer, parameter :: max_string=800
 
 public :: ufo_geovals, ufo_geoval
 public :: ufo_geovals_get_var
-public :: ufo_geovals_setup, ufo_geovals_delete, ufo_geovals_print
+public :: ufo_geovals_default_constr, ufo_geovals_setup, ufo_geovals_delete, ufo_geovals_print
 public :: ufo_geovals_zero, ufo_geovals_random, ufo_geovals_dotprod, ufo_geovals_scalmult
+public :: ufo_geovals_profmult
 public :: ufo_geovals_assign, ufo_geovals_add, ufo_geovals_diff, ufo_geovals_abs
+public :: ufo_geovals_split, ufo_geovals_merge
 public :: ufo_geovals_minmaxavg, ufo_geovals_normalize, ufo_geovals_maxloc, ufo_geovals_schurmult
 public :: ufo_geovals_read_netcdf, ufo_geovals_write_netcdf
 public :: ufo_geovals_rms, ufo_geovals_copy
 public :: ufo_geovals_analytic_init
+
+private :: ufo_geovals_reset_sec_arg
 
 ! ------------------------------------------------------------------------------
 
 !> type to hold interpolated field for one variable, one observation
 type :: ufo_geoval
   real(kind_real), allocatable :: vals(:,:) !< values (nval, nlocs)
-  integer :: nval                !< number of values in profile
-  integer :: nlocs                !< number of observations
+  integer :: nval = 0                !< number of values in profile
+  integer :: nlocs = 0               !< number of observations
 end type ufo_geoval
 
 !> type to hold interpolated fields required by the obs operators
 type :: ufo_geovals
-  integer :: nlocs                !< number of observations
-  integer :: nvar                !< number of variables (supposed to be the
+  integer :: nlocs  = 0          !< number of observations
+  integer :: nvar  = 0           !< number of variables (supposed to be the
                                  !  same for same obs operator
 
   type(ufo_geoval), allocatable :: geovals(:)  !< array of interpolated
@@ -51,13 +55,25 @@ type :: ufo_geovals
 
   real(c_double) :: missing_value !< obsspace missing value mark
 
-  logical :: linit               !< .true. if all the ufo_geoval arrays inside geovals
+  logical :: linit = .false.     !< .true. if all the ufo_geoval arrays inside geovals
                                  !  were allocated and have data
 end type ufo_geovals
 
 ! ------------------------------------------------------------------------------
 contains
 ! ------------------------------------------------------------------------------
+
+subroutine ufo_geovals_default_constr(self)
+implicit none
+type(ufo_geovals), intent(inout) :: self
+
+self%nlocs = 0
+self%missing_value = missing_value(0.0)
+self%nvar = 0
+self%linit = .false.
+
+end subroutine ufo_geovals_default_constr
+
 
 subroutine ufo_geovals_setup(self, vars, nlocs)
 use oops_variables_mod
@@ -96,12 +112,12 @@ if (allocated(self%geovals)) then
   do ivar = 1, self%nvar
     if (allocated(self%geovals(ivar)%vals)) deallocate(self%geovals(ivar)%vals)
   enddo
-  self%linit = .false.
   deallocate(self%geovals)
-  self%nvar = 0
-  self%nlocs = 0
-endif
+ endif
 if (allocated(self%variables)) deallocate(self%variables)
+self%nvar = 0
+self%nlocs = 0
+self%linit = .false.
 
 end subroutine ufo_geovals_delete
 
@@ -236,6 +252,28 @@ enddo
 end subroutine ufo_geovals_scalmult
 
 ! ------------------------------------------------------------------------------
+
+subroutine ufo_geovals_profmult(self, nlocs, values) 
+implicit none
+type(ufo_geovals), intent(inout) :: self
+integer(c_int), intent(in) :: nlocs
+real(c_float), intent(in) :: values(nlocs)
+integer :: jv, jo
+
+if (.not. self%linit) then
+  call abor1_ftn("ufo_geovals_profmult: geovals not allocated")
+endif
+
+do jv=1,self%nvar
+  do jo=1,self%nlocs
+     self%geovals(jv)%vals(:,jo) = values(jo) * self%geovals(jv)%vals(:,jo)
+  enddo
+enddo
+
+end subroutine ufo_geovals_profmult
+
+! ------------------------------------------------------------------------------
+
 
 subroutine ufo_geovals_assign(self, rhs)
 implicit none
@@ -644,6 +682,92 @@ call f_comm%allreduce(prod,gprod,fckit_mpi_sum())
 
 end subroutine ufo_geovals_dotprod
 
+!-------------------------------------------------------------------------------
+subroutine ufo_geovals_reset_sec_arg(self, other, nlocs)
+implicit none
+type(ufo_geovals), intent(in) :: self
+type(ufo_geovals), intent(inout) :: other
+integer, intent(in) :: nlocs
+integer :: ivar
+
+if (other%linit) call abor1_ftn("ufo_geovals_reset_sec_arg: other already have data")
+
+other%nlocs = nlocs
+other%nvar = self%nvar
+other%missing_value = self%missing_value
+allocate(other%variables(self%nvar))
+allocate(other%geovals(self%nvar))
+do ivar = 1, self%nvar
+  other%variables(ivar) = self%variables(ivar)
+  other%geovals(ivar)%nlocs = nlocs
+  other%geovals(ivar)%nval = self%geovals(ivar)%nval
+  allocate(other%geovals(ivar)%vals(self%geovals(ivar)%nval, nlocs))
+  other%geovals(ivar)%vals(:,:) = 0.0
+enddo
+other%linit = .false.
+
+end subroutine ufo_geovals_reset_sec_arg
+! ------------------------------------------------------------------------------
+
+subroutine ufo_geovals_split(self, other1, other2)
+implicit none
+type(ufo_geovals), intent(in) :: self
+type(ufo_geovals), intent(inout) :: other1
+type(ufo_geovals), intent(inout) :: other2
+
+integer :: ivar, iobs
+
+if (.not. self%linit) &
+  call abor1_ftn("ufo_geovals_split: geovals self is not allocated or has no data")
+
+if (other1%linit .or. other2%linit) &
+  call abor1_ftn("ufo_geovals_split: geovals other1 or other2 already have data")
+
+call ufo_geovals_delete(other1)
+call ufo_geovals_delete(other2)
+call ufo_geovals_reset_sec_arg(self, other1, self%nlocs/2)
+call ufo_geovals_reset_sec_arg(self, other2, self%nlocs - self%nlocs/2)
+
+do ivar = 1, self%nvar
+  do iobs = 1, self%nlocs/2
+    other1%geovals(ivar)%vals(:,iobs) = self%geovals(ivar)%vals(:,iobs)
+  enddo
+  do iobs = self%nlocs/2 + 1, self%nlocs
+    other2%geovals(ivar)%vals(:,iobs - self%nlocs/2) = self%geovals(ivar)%vals(:,iobs)
+  enddo
+enddo
+other1%linit = .true.
+other2%linit = .true.
+
+end subroutine ufo_geovals_split
+! ------------------------------------------------------------------------------
+
+subroutine ufo_geovals_merge(self, other1, other2)
+implicit none
+type(ufo_geovals), intent(inout) :: self
+type(ufo_geovals), intent(in) :: other1
+type(ufo_geovals), intent(in) :: other2
+
+integer :: ivar, iobs
+
+if ((.not. other1%linit) .or. (.not. other2%linit)) &
+  call abor1_ftn("ufo_geovals_merge: geovals other1 or other2 is not allocated or has no data")
+
+call ufo_geovals_delete(self)
+call ufo_geovals_reset_sec_arg(other1, self, other1%nlocs + other2%nlocs)
+
+do ivar = 1, self%nvar
+  do iobs = 1, other1%nlocs
+    self%geovals(ivar)%vals(:,iobs) = other1%geovals(ivar)%vals(:,iobs)
+  enddo
+  do iobs = other1%nlocs + 1, self%nlocs
+    self%geovals(ivar)%vals(:,iobs) = &
+      other2%geovals(ivar)%vals(:,iobs - other1%nlocs)
+  enddo
+enddo
+self%linit = .true.
+
+end subroutine ufo_geovals_merge
 ! ------------------------------------------------------------------------------
 
 subroutine ufo_geovals_minmaxavg(self, kobs, kvar, pmin, pmax, prms)
@@ -793,17 +917,29 @@ endif
 ! We have enough locations in the geovals file to cover the span of the
 ! number of locations in the obs file. Generate the dist_indx according
 ! to the loc_multiplier and obs_nlocs values.
-nlocs = loc_multiplier * obs_nlocs
-allocate(dist_indx(nlocs))
-iloc_new = 1
-do iloc = 1,obs_nlocs
-  jloc_start = ((obs_dist_indx(iloc) - 1) * loc_multiplier) + 1
-  jloc_end = obs_dist_indx(iloc) * loc_multiplier
-  do jloc = jloc_start, jloc_end
-    dist_indx(iloc_new) = jloc
-    iloc_new = iloc_new + 1
+if (loc_multiplier >= 0) then
+  nlocs = loc_multiplier * obs_nlocs
+  allocate(dist_indx(nlocs))
+  iloc_new = 1
+  do iloc = 1,obs_nlocs
+    jloc_start = ((obs_dist_indx(iloc) - 1) * loc_multiplier) + 1
+    jloc_end = obs_dist_indx(iloc) * loc_multiplier
+    do jloc = jloc_start, jloc_end
+      dist_indx(iloc_new) = jloc
+      iloc_new = iloc_new + 1
+    enddo
   enddo
-enddo
+else
+  nlocs = - loc_multiplier * obs_nlocs
+  allocate(dist_indx(nlocs))
+  iloc_new = 1
+  do jloc = 1, - loc_multiplier
+    do iloc = 1, obs_nlocs
+      dist_indx(iloc_new) = obs_dist_indx(iloc) + (jloc - 1) * obs_all_nlocs
+      iloc_new = iloc_new + 1
+    enddo
+  enddo
+end if
 
 ! allocate geovals structure
 call ufo_geovals_setup(self, vars, nlocs)

@@ -9,7 +9,7 @@ LinearObsOpTest:
 Observations:
   ObsTypes:
   - ObsOperator:
-      name: TimeOpInterp
+      name: TimeOperLinInterp
       windowSub: PT3H
       ObsOperator:
         name: VertInterp
@@ -21,7 +21,7 @@ Observations:
         variables: [air_temperature]
     GeoVaLs:
       filename: Data/sondes_geoval_2018041500_vs.nc4
-      loc_multiplier: 2
+      loc_multiplier: -2
     vecequiv: GsiHofX
     tolerance: 1.0e-06
 
