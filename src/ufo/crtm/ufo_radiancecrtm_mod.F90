@@ -234,7 +234,7 @@ character(max_string) :: err_msg
              atm( n_Profiles ),               &
              sfc( n_Profiles ),               &
              rts( n_Channels, n_Profiles ),   &
-	     Options( n_Profiles ),           &
+             Options( n_Profiles ),           &
              STAT = alloc_stat )
    if ( alloc_stat /= 0 ) THEN
       message = 'Error allocating structure arrays'
@@ -386,7 +386,7 @@ character(max_string) :: err_msg
                                geo        , &  ! Input
                                chinfo(n:n), &  ! Input
                                rts        , &  ! Output
-		       	       Options     )   ! Optional input
+                               Options     )   ! Optional input
       if ( err_stat /= SUCCESS ) THEN
          message = 'Error calling CRTM Forward Model for '//TRIM(self%conf%SENSOR_ID(n))
          call Display_Message( PROGRAM_NAME, message, FAILURE )
