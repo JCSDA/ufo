@@ -36,7 +36,7 @@ std::vector<std::vector<float>> timeWeightCreate(const ioda::ObsSpace & odb_,
   std::vector<float> TimeWeightObsAfterState(nlocs, 0.0);
 
   std::vector<util::DateTime> dateTimeIn(nlocs);
-  odb_.get_db("MetaData", "datetime", nlocs, dateTimeIn.data());
+  odb_.get_db("MetaData", "datetime", nlocs, dateTimeIn);
 
   oops::Log::debug() << "datetime =  " << dateTimeIn[0].toString() << std::endl;
 
