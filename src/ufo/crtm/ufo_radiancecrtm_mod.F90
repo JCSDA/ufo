@@ -386,8 +386,7 @@ character(max_string) :: err_msg
                                geo        , &  ! Input
                                chinfo(n:n), &  ! Input
                                rts        , &  ! Output
-			       Options     )   ! Optional input
-      
+		       	       Options     )   ! Optional input
       if ( err_stat /= SUCCESS ) THEN
          message = 'Error calling CRTM Forward Model for '//TRIM(self%conf%SENSOR_ID(n))
          call Display_Message( PROGRAM_NAME, message, FAILURE )
