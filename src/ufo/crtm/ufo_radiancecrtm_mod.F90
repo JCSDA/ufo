@@ -246,7 +246,6 @@ character(max_string) :: err_msg
 
    ! Create the input FORWARD structure (atm)
    ! ----------------------------------------
-   print *,"Hamideh_test", n_Profiles, n_Layers,n_Channels
    call CRTM_Atmosphere_Create( atm, n_Layers, self%conf%n_Absorbers, self%conf%n_Clouds, self%conf%n_Aerosols )
    if ( ANY(.NOT. CRTM_Atmosphere_Associated(atm)) ) THEN
       message = 'Error allocating CRTM Forward Atmosphere structure'
@@ -274,7 +273,6 @@ character(max_string) :: err_msg
 
    ! Call THE CRTM inspection
    ! ------------------------
-   print *, "Hamideh_ufo",n_Profiles,sfc%Land_Coverage + sfc%Water_Coverage + sfc%Snow_Coverage + sfc%Ice_Coverage
    if (self%conf%inspect > 0) then
      call CRTM_Atmosphere_Inspect(atm(self%conf%inspect))
      call CRTM_Surface_Inspect(sfc(self%conf%inspect))
