@@ -149,6 +149,7 @@ type(CRTM_Atmosphere_type), allocatable :: atm(:)
 type(CRTM_Surface_type),    allocatable :: sfc(:)
 type(CRTM_RTSolution_type), allocatable :: rts(:,:)
 type(CRTM_Options_type), allocatable    :: Options(:) 
+type(CRTM_Options_type)                 :: Default_Options
 
 ! Define the K-MATRIX variables for hofxdiags
 type(CRTM_Atmosphere_type), allocatable :: atm_K(:,:)
@@ -374,6 +375,7 @@ character(max_string) :: err_msg
 
    else
 
+      Options = Default_Options 
       if (self%conf%salinity_option == "sss") THEN
       	 Options%Use_Old_MWSSEM = .TRUE.
       end if
