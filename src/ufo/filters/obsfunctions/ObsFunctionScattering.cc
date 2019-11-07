@@ -11,6 +11,7 @@
 #include <vector>
 
 #include "ioda/ObsDataVector.h"
+#include "ufo/filters/Variable.h"
 
 namespace ufo {
 
@@ -18,11 +19,11 @@ static ObsFunctionMaker<ObsFunctionScattering> makerObsFuncScattering_("Scatteri
 
 // -----------------------------------------------------------------------------
 
-ObsFunctionScattering::ObsFunctionScattering() : invars_() {
+ObsFunctionScattering::ObsFunctionScattering(const eckit::LocalConfiguration)
+  : invars_() {
   // empiracal formula is used to calculate AMSU-A scattering over ocean
-  invars_ += "brightness_temperature_1@ObsValue";
-  invars_ += "brightness_temperature_2@ObsValue";
-  invars_ += "brightness_temperature_15@ObsValue";
+  std::vector<int> channels{1, 2, 15};
+  invars_ += Variable("brightness_temperature@ObsValue", channels);
 }
 
 // -----------------------------------------------------------------------------
@@ -36,9 +37,9 @@ void ObsFunctionScattering::compute(const ObsFilterData & input,
   // TODO(AS): should use constants for variable names
   const size_t nlocs = input.nlocs();
   std::vector<float> bt1, bt2, bt15;
-  input.get("brightness_temperature_1@ObsValue", bt1);
-  input.get("brightness_temperature_2@ObsValue", bt2);
-  input.get("brightness_temperature_15@ObsValue", bt15);
+  input.get(Variable("brightness_temperature_1@ObsValue"), bt1);
+  input.get(Variable("brightness_temperature_2@ObsValue"), bt2);
+  input.get(Variable("brightness_temperature_15@ObsValue"), bt15);
   for (size_t jj = 0; jj < nlocs; ++jj) {
     out[0][jj] = -113.2+(2.41-0.0049*bt1[jj])*bt1[jj]+0.454*bt2[jj]-bt15[jj];
     oops::Log::debug() << "Tb1, Tb2, Tb15: " << bt1[jj] << ", " << bt2[jj] << ", " << bt15[jj]

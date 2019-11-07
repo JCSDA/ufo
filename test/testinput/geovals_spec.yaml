@@ -1,0 +1,39 @@
+window_begin: 2018-04-14T21:00:00Z
+window_end: 2018-04-15T03:00:00Z
+
+GeoVaLsTest:
+- ObsSpace:
+    name: Satwind
+    ObsDataIn:
+      obsfile: Data/satwind_obs_2018041500_m.nc4
+    simulate:
+      variables: [eastward_wind, northward_wind]
+    integer data:
+      variables: [eastward_wind@ObsType, northward_wind@ObsType]
+  GeoVaLs:
+    filename: Data/satwind_geoval_2018041500_m.nc4
+    variables: [eastward_wind, northward_wind, air_pressure]
+    tolerance: 0.001
+- ObsSpace:
+    name: amsua_n19
+    ObsDataIn:
+      obsfile: Data/amsua_n19_obs_2018041500_m.nc4
+    simulate:
+      variables: [brightness_temperature]
+      channels: 1-10,15
+    integer data:
+      variables: [brightness_temperature_12@PreQC]
+  GeoVaLs:
+    filename: Data/amsua_n19_geoval_2018041500_m.nc4
+    variables:
+    - surface_temperature_where_snow
+    - soil_temperature
+    - volume_fraction_of_condensed_water_in_soil
+    - land_type_index
+    - surface_wind_speed
+    - soil_type
+    - air_temperature
+    - air_pressure
+    - air_pressure_levels
+    - humidity_mixing_ratio
+    tolerance: 0.001

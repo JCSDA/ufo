@@ -3,45 +3,45 @@
 ! This software is licensed under the terms of the Apache Licence Version 2.0
 ! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 
-!> Fortran module to implement hcorrection check
+!> Fortran module for sfcpcorrected observation operator
 
-module ufo_hcorrection_mod
+module ufo_sfcpcorrected_mod
 
-use fckit_configuration_module, only: fckit_configuration
-use kinds
-use ufo_geovals_mod
-use obsspace_mod
-use ufo_vars_mod
-use missing_values_mod
-use vert_interp_mod
-use fckit_log_module,  only : fckit_log
-use ufo_constants_mod, only : grav, rd, Lclr, t2tv
+ use oops_variables_mod
+ use ufo_vars_mod
+ use missing_values_mod
+ use iso_c_binding
+ use kinds
+ use ufo_constants_mod, only : grav, rd, Lclr, t2tv
 
-implicit none
-public :: ufo_hcorrection_create, ufo_hcorrection_delete, ufo_hcorrection_prior
-private
-integer, parameter :: max_string=800
+ implicit none
+ private
+ integer, parameter :: max_string = 800
 
-! ------------------------------------------------------------------------------
-!> TODO: fill in this type
-type, public :: ufo_hcorrection
-private
-  character(len=max_string), public, allocatable :: geovars(:)
-  character(len=max_string) :: da_psfc_scheme
-end type ufo_hcorrection
+!> Fortran derived type for the observation type
+ type, public :: ufo_sfcpcorrected
+ private
+   type(oops_variables), public :: obsvars
+   type(oops_variables), public :: geovars
+   character(len=MAXVARLEN)     :: da_psfc_scheme
+ contains
+   procedure :: setup  => ufo_sfcpcorrected_setup
+   procedure :: simobs => ufo_sfcpcorrected_simobs
+ end type ufo_sfcpcorrected
 
-! ------------------------------------------------------------------------------
+ character(len=MAXVARLEN), dimension(5), parameter :: geovars_default = (/ var_ps, var_geomz, var_sfc_geomz, var_tv, var_prs /)
+
 contains
+
 ! ------------------------------------------------------------------------------
-
-subroutine ufo_hcorrection_create(self, f_conf)
+subroutine ufo_sfcpcorrected_setup(self, f_conf)
+use fckit_configuration_module, only: fckit_configuration
 implicit none
-type(ufo_hcorrection), intent(inout) :: self
-type(fckit_configuration), intent(in):: f_conf
-character(len=:), allocatable        :: str
+class(ufo_sfcpcorrected), intent(inout)     :: self
+type(fckit_configuration), intent(in) :: f_conf
+character(len=:), allocatable         :: str
 
-allocate(self%geovars(5))
-self%geovars = (/var_tv,var_ps,var_prs,var_geomz,var_sfc_geomz/)
+call self%geovars%push_back(geovars_default)
 
 self%da_psfc_scheme = "UKMO"
 if (f_conf%has("da_psfc_scheme")) then
@@ -49,43 +49,38 @@ if (f_conf%has("da_psfc_scheme")) then
    self%da_psfc_scheme = str
 end if
 
-end subroutine ufo_hcorrection_create
+end subroutine ufo_sfcpcorrected_setup
 
 ! ------------------------------------------------------------------------------
-
-subroutine ufo_hcorrection_delete(self)
+subroutine ufo_sfcpcorrected_simobs(self, geovals, obss, nvars, nlocs, hofx)
+use ufo_geovals_mod, only: ufo_geovals, ufo_geoval, ufo_geovals_get_var
+use obsspace_mod
+use vert_interp_mod
+use fckit_log_module,  only : fckit_log
 implicit none
-type(ufo_hcorrection), intent(inout) :: self
-
-if (allocated(self%geovars))   deallocate(self%geovars)
-
-end subroutine ufo_hcorrection_delete
-
-! ------------------------------------------------------------------------------
-
-subroutine ufo_hcorrection_prior(self, obspace, geovals)
-use iso_c_binding
-implicit none
-type(ufo_hcorrection),  intent(in) :: self
-type(c_ptr), value, intent(in) :: obspace
-type(ufo_geovals),  intent(in) :: geovals
+class(ufo_sfcpcorrected), intent(in)    :: self
+integer, intent(in)               :: nvars, nlocs
+type(ufo_geovals),  intent(in)    :: geovals
+real(c_double),     intent(inout) :: hofx(nvars, nlocs)
+type(c_ptr), value, intent(in)    :: obss
 
 ! Local variables
-real(kind_real)                   :: missing, H2000 = 2000.0
-integer                           :: nobs, iobs
+real(c_double)                    :: missing
+real(kind_real)                   :: H2000 = 2000.0
+integer                           :: nobs, iobs, ivar
 real(kind_real),    allocatable   :: cor_psfc(:)
 type(ufo_geoval),   pointer       :: model_ps, model_p, model_sfc_geomz, model_tv, model_geomz
-character(len=*), parameter       :: myname_="ufo_surface_psfc_simobs"
+character(len=*), parameter       :: myname_="ufo_sfcpcorrected_simobs"
 character(max_string)             :: err_msg
 character(len=250)                :: buf
 real(kind_real)                   :: wf
 integer                           :: wi
 logical                           :: variable_present
-real(kind_real), dimension(:), allocatable :: obs_height, obs_t, obs_q, obs_psfc, obs_bias
+real(kind_real), dimension(:), allocatable :: obs_height, obs_t, obs_q, obs_psfc
 real(kind_real), dimension(:), allocatable :: model_tvs, model_zs, model_level1, model_p_2000, model_tv_2000, model_psfc
 
 missing = missing_value(missing)
-nobs    = obsspace_get_nlocs(obspace)
+nobs    = obsspace_get_nlocs(obss)
 
 ! check if nobs is consistent in geovals & nlocs
 if (geovals%nlocs /= nobs) then
@@ -99,9 +94,8 @@ allocate(cor_psfc(nobs))
 ! get obs variables
 allocate(obs_height(nobs))
 allocate(obs_psfc(nobs))
-allocate(obs_bias(nobs))
-call obsspace_get_db(obspace, "MetaData",  "station_elevation",obs_height)
-call obsspace_get_db(obspace, "ObsValue",  "surface_pressure", obs_psfc)
+call obsspace_get_db(obss, "MetaData",  "station_elevation",obs_height)
+call obsspace_get_db(obss, "ObsValue",  "surface_pressure", obs_psfc)
 
 ! get model variables
 call ufo_geovals_get_var(geovals, var_ps, model_ps)
@@ -111,7 +105,7 @@ call ufo_geovals_get_var(geovals, var_tv, model_tv)
 call ufo_geovals_get_var(geovals, var_prs, model_p)
 
 if (model_geomz%vals(1,1) .gt. model_geomz%vals(model_geomz%nval,1) ) then
-   write(err_msg,'(a)') '  ufo_surface_psfc:'//new_line('a')//                   &
+   write(err_msg,'(a)') '  ufo_sfcpcorrected:'//new_line('a')//                   &
                         '  Model vertical height profile is from top to bottom,'//new_line('a')
    call fckit_log%info(err_msg)
 end if
@@ -129,15 +123,15 @@ select case (trim(self%da_psfc_scheme))
 
 case ("WRFDA")
    ! get extra obs values
-   variable_present = obsspace_has(obspace, "ObsValue", "air_temperature")
+   variable_present = obsspace_has(obss, "ObsValue", "air_temperature")
    if (variable_present) then
       allocate(obs_t(nobs))
-      call obsspace_get_db(obspace, "ObsValue", "air_temperature", obs_t)
+      call obsspace_get_db(obss, "ObsValue", "air_temperature", obs_t)
    end if
-   variable_present = obsspace_has(obspace, "ObsValue", "specific_humidity")
+   variable_present = obsspace_has(obss, "ObsValue", "specific_humidity")
    if (variable_present) then
       allocate(obs_q(nobs))
-      call obsspace_get_db(obspace, "ObsValue", "specific_humidity", obs_q)
+      call obsspace_get_db(obss, "ObsValue", "specific_humidity", obs_q)
    end if
 
    ! get extra model values
@@ -146,9 +140,6 @@ case ("WRFDA")
 
    ! correction
    call da_intpsfc_prs(nobs, missing, cor_psfc, obs_height, obs_psfc, model_zs, model_tvs, obs_t, obs_q)
-
-   ! update the obs surface pressure
-   obs_bias = cor_psfc - obs_psfc
 
    deallocate(obs_t)
    deallocate(obs_q)
@@ -168,19 +159,21 @@ case ("UKMO")
    ! correction
    call da_intpsfc_prs_ukmo(nobs, missing, cor_psfc, obs_height, obs_psfc, model_zs, model_psfc, model_tv_2000, model_p_2000)
 
-   ! update the obs surface pressure
-   obs_bias = cor_psfc - obs_psfc
-
    deallocate(model_p_2000)
    deallocate(model_tv_2000)
 
 case default
-   write(err_msg,*) "ufo_surface_mod.F90: da_psfc_scheme must be WRFDA or UKMO"
+   write(err_msg,*) "ufo_sfcpcorrected_mod.F90: da_psfc_scheme must be WRFDA or UKMO"
    call fckit_log%info(err_msg)
+   call abor1_ftn(err_msg)
 end select
 
-! output
-call obsspace_put_db(obspace, "ObsBias", "surface_pressure", obs_bias)
+! update the obs surface pressure
+do ivar = 1, nvars
+   do iobs = 1, nlocs
+      hofx(ivar,iobs) = obs_psfc(iobs) - cor_psfc(iobs) + model_psfc(iobs)
+   enddo
+enddo
 
 call fckit_log%info(buf)
 deallocate(obs_height)
@@ -189,7 +182,8 @@ deallocate(obs_psfc)
 deallocate(model_zs)
 deallocate(model_level1)
 deallocate(model_psfc)
-end subroutine ufo_hcorrection_prior
+
+end subroutine ufo_sfcpcorrected_simobs
 
 ! ------------------------------------------------------------------------------
 !> \Conduct terrain height correction for surface pressure
@@ -216,7 +210,7 @@ end subroutine ufo_hcorrection_prior
 subroutine da_intpsfc_prs (nobs, missing, P_o2m, H_o, P_o, H_m, TV_m, T_o, Q_o)
 implicit none
 integer,                          intent (in)           :: nobs !<total observation number
-real(kind_real),                  intent (in)           :: missing
+real(c_double),                   intent (in)           :: missing
 real(kind_real), dimension(nobs), intent (out)          :: P_o2m !<observed PS at model sfc height
 real(kind_real), dimension(nobs), intent (in)           :: H_o, P_o !<observed Height and PS
 real(kind_real), dimension(nobs), intent (in)           :: H_m, TV_m !<model sfc height and TV
@@ -239,7 +233,7 @@ TV  = 0.5 * (TV_m + TV_o)
 ! 2.  extrapolate pressure from station height to model surface height
 ! --------------------------------------------------------------------
 
-where ( H_o /= missing ) 
+where ( H_o /= missing .and. P_o /= missing ) 
    P_o2m = P_o * exp ( - (H_m - H_o) * grav / (rd * TV) )
 elsewhere
    P_o2m = P_o
@@ -282,7 +276,7 @@ end subroutine da_intpsfc_prs
 subroutine da_intpsfc_prs_ukmo (nobs, missing, P_o2m, H_o, P_o, H_m, P_m, TV_2000, P_2000)
 implicit none
 integer,                          intent (in)           :: nobs !<total observation number
-real(kind_real),                  intent (in)           :: missing
+real(c_double),                   intent (in)           :: missing
 real(kind_real), dimension(nobs), intent (out)          :: P_o2m !<observed PS at model sfc height
 real(kind_real), dimension(nobs), intent (in)           :: H_o, P_o !<observed Height and PS
 real(kind_real), dimension(nobs), intent (in)           :: H_m, P_m, TV_2000, P_2000 !<model Height, PS, TV at 2000 m, and P at 2000 m
@@ -293,7 +287,7 @@ real(kind_real), dimension(nobs)                        :: P_m2o, T_m, T_m2o !<l
 ! define the constant power exponent
 ind = rd * Lclr / grav
 
-where ( H_o /= missing ) 
+where ( H_o /= missing .and. P_o /= missing ) 
    ! calculate T_m   -- background temperature at model surface height
    !           T_m2o -- background temperature at station height
    T_m = TV_2000 * (P_m / P_2000) ** ind
@@ -310,4 +304,4 @@ end subroutine da_intpsfc_prs_ukmo
 
 ! ------------------------------------------------------------------------------
 
-end module ufo_hcorrection_mod
+end module ufo_sfcpcorrected_mod

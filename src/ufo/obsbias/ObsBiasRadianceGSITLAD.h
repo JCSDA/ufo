@@ -82,8 +82,7 @@ class ObsBiasRadianceGSITLAD : public LinearObsBiasBase,
   std::vector<int> channels_;  // channel
 
   std::vector<double> biascoeffsinc_;
-
-  static const std::vector<std::string> predictors_;  // predictor names
+  std::vector<std::string> predictors_;
 };
 
 // -----------------------------------------------------------------------------

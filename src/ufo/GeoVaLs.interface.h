@@ -28,6 +28,7 @@ namespace ufo {
  */
 
 extern "C" {
+  void ufo_geovals_default_constr_f90(F90goms &);
   void ufo_geovals_setup_f90(F90goms &, const F90locs &, const oops::Variables &);
   void ufo_geovals_delete_f90(F90goms &);
   void ufo_geovals_copy_f90(const F90goms &, F90goms &);
@@ -38,6 +39,7 @@ extern "C" {
                                      const eckit::Configuration * const *);
   void ufo_geovals_random_f90(const F90goms &);
   void ufo_geovals_scalmult_f90(const F90goms &, const double &);
+  void ufo_geovals_profmult_f90(const F90goms &, const int &, const float &);
   void ufo_geovals_assign_f90(const F90goms &, const F90goms &);
   void ufo_geovals_add_f90(const F90goms &, const F90goms &);
   void ufo_geovals_diff_f90(const F90goms &, const F90goms &);
@@ -45,6 +47,8 @@ extern "C" {
   void ufo_geovals_normalize_f90(const F90goms &, const F90goms &);
   void ufo_geovals_dotprod_f90(const F90goms &, const F90goms &, double &,
                                const int &, const char *);
+  void ufo_geovals_split_f90(const F90goms &, const F90goms &, const F90goms &);
+  void ufo_geovals_merge_f90(const F90goms &, const F90goms &, const F90goms &);
   void ufo_geovals_minmaxavg_f90(const F90goms &, int &, int &, double &, double &, double &);
   void ufo_geovals_maxloc_f90(const F90goms &, double &, int &, int &);
   void ufo_geovals_nlocs_f90(const F90goms &, size_t &);

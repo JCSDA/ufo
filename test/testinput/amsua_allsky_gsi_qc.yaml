@@ -24,21 +24,21 @@ Observations:
      filename: Data/amsua_n19_geoval_2018041500_m.nc4
    ObsFilters:
    - Filter: Bounds Check
-     variables: [brightness_temperature]
-     channels: 1-15
-     bounds:
-     - variables: [brightness_temperature]
+     filter variables:
+     - name: brightness_temperature
        channels: 1
-       minvalue: 100.0
-       maxvalue: 500.0
+     minvalue: 100.0
+     maxvalue: 500.0
    - Filter: MWCLW Check
 # check is specific to AMSU-A requires ch1 and ch2 over sea
      where:
-     - variable: water_area_fraction@GeoVaLs
+     - variable:
+         name: water_area_fraction@GeoVaLs
        minvalue: 0.00
 # apply check to these channels
-     variables: [brightness_temperature]
-     channels: 1-2,14
+     filter variables:
+     - name: brightness_temperature
+       channels: 1-2,14
      clw_thresholds: [1.0, 1.0, 1.0]
 # clw_option controls how the clw is calculated:
 #     1) Use observed BTs
@@ -49,7 +49,8 @@ Observations:
        variables: [brightness_temperature]
        channels: 1-2
    - Filter: Background Check
-     variables: [brightness_temperature]
-     channels: 1
+     filter variables:
+     - name: brightness_temperature
+       channels: 1
      threshold: 2.0
    passedBenchmark: 1399      # number of passed obs

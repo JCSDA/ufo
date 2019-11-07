@@ -33,11 +33,7 @@ LinearObsOperatorBase * LinearObsOperatorFactory::create(const ioda::ObsSpace & 
 
   std::string id;
 
-  if (conf.has("lin_name")) {
-    id = conf.getString("lin_name");
-  } else {
-    id = conf.getString("name");
-  }
+  id = conf.getString("name");
 
   typename std::map<std::string, LinearObsOperatorFactory*>::iterator jloc = getMakers().find(id);
   if (jloc == getMakers().end()) {

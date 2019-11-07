@@ -51,8 +51,10 @@ class FilterBase : public util::Printable {
   void priorFilter(const GeoVaLs &);
   void postFilter(const ioda::ObsVector &, const ObsDiagnostics &);
 
-  oops::Variables requiredGeoVaLs() const {return allvars_.allFromGroup("GeoVaLs");}
-  oops::Variables requiredHdiagnostics() const {return allvars_.allFromGroup("ObsDiag");}
+  oops::Variables requiredGeoVaLs() const {
+    return allvars_.allFromGroup("GeoVaLs").toOopsVariables();}
+  oops::Variables requiredHdiagnostics() const {
+    return allvars_.allFromGroup("ObsDiag").toOopsVariables();}
 
  protected:
   ioda::ObsSpace & obsdb_;
@@ -60,13 +62,15 @@ class FilterBase : public util::Printable {
   ioda::ObsDataVector<int> & flags_;
   ioda::ObsDataVector<float> & obserr_;
   ufo::Variables allvars_;
+  ufo::Variables filtervars_;
   ObsFilterData data_;
 
  private:
   void doFilter() const;
   virtual void print(std::ostream &) const = 0;
-  virtual void applyFilter(const std::vector<bool> &, std::vector<std::vector<bool>> &) const = 0;
-
+  virtual void applyFilter(const std::vector<bool> &, const Variables &,
+                           std::vector<std::vector<bool>> &) const = 0;
+  virtual int qcFlag() const = 0;
   bool prior_;
   bool post_;
 };

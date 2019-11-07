@@ -44,6 +44,7 @@ list( APPEND ufo_test_input
   testinput/gmi_crtm.yaml
   testinput/genericprof.yaml
   testinput/geovals.yaml
+  testinput/geovals_spec.yaml
   testinput/gnssrobndropp1d.yaml
   testinput/gnssrobndropp2d.yaml
   testinput/gnssrobndnbam.yaml
@@ -77,7 +78,7 @@ list( APPEND ufo_test_input
   testinput/sea_surface_temp.yaml
   testinput/seviri_crtm.yaml
   testinput/sndrd1-4_crtm.yaml
-  testinput/surface_ps_qc.yaml
+  testinput/sfcpcorrected.yaml
   testinput/timeoper.yaml
   testinput/tprof.yaml
   testinput/variables.yaml
@@ -251,6 +252,12 @@ ecbuild_add_test( TARGET  test_ufo_variables
                   ENVIRONMENT OOPS_TRAPFPE=1
                   LIBS    ufo )
 
+ecbuild_add_test( TARGET  test_ufo_geovals_spec
+                  SOURCES mains/TestGeoVaLsSpec.cc
+                  ARGS    "testinput/geovals_spec.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  LIBS    ufo )
+
 # Test Obs Operators and TLAD
 
 ecbuild_add_test( TARGET  test_ufo_opr_gsi_sfc_model
@@ -278,11 +285,11 @@ if ( ${CRTM_FOUND} )
                       ENVIRONMENT OOPS_TRAPFPE=1
                       DEPENDS test_ObsOperatorTLAD.x )
 
-    ecbuild_add_test( TARGET  test_ufo_linopr_crtm_bc_amsua
-                      COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
-                      ARGS    "testinput/amsua_crtm_bc.yaml"
-                      ENVIRONMENT OOPS_TRAPFPE=1
-                      DEPENDS test_ObsOperatorTLAD.x )
+    #ecbuild_add_test( TARGET  test_ufo_linopr_crtm_bc_amsua
+    #                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
+    #                  ARGS    "testinput/amsua_crtm_bc.yaml"
+    #                  ENVIRONMENT OOPS_TRAPFPE=1
+    #                  DEPENDS test_ObsOperatorTLAD.x )
 
     #ecbuild_add_test( TARGET  test_ufo_opr_crtm_atms
     #                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
@@ -452,7 +459,12 @@ ecbuild_add_test( TARGET  test_ufo_linopr_vertinterp_radiosonde
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsOperatorTLAD.x )
 
-ecbuild_add_test( TARGET  test_ufo_opr_vertinterp_aircraft
+ecbuild_add_test( TARGET  test_ufo_timeoper_opr
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
+                  ARGS    "testinput/timeoper.yaml"
+                  DEPENDS test_ObsOperator.x )
+
+ecbuild_add_test( TARGET  test_ufo_vertinterp_aircraft_opr
                   MPI     4
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
                   ARGS    "testinput/aircraft.yaml"
@@ -478,6 +490,13 @@ ecbuild_add_test( TARGET  test_ufo_opr_timeoper
                   ARGS    "testinput/timeoper.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsOperator.x )
+
+ecbuild_add_test( TARGET  test_ufo_linopr_timeoper
+                  MPI     4
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
+                  ARGS    "testinput/timeoper.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsOperatorTLAD.x )
 
 ecbuild_add_test( TARGET  test_ufo_opr_gnssroRef
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
@@ -747,13 +766,11 @@ ecbuild_add_test( TARGET  test_ufo_qc_gnssroBndROPP1D
                   DEPENDS test_ObsFilters.x )
 endif( ${ROPP-UFO_FOUND} )
 
-ecbuild_add_test( TARGET  test_ufo_qc_surface_ps
-                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-                  ARGS    "testinput/surface_ps_qc.yaml"
+ecbuild_add_test( TARGET  test_ufo_opr_sfc_p
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
+                  ARGS    "testinput/sfcpcorrected.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
-                  DEPENDS test_ObsFilters.x )
-
-
+                  DEPENDS test_ObsOperator.x )
 
 ecbuild_add_test( TARGET  test_ufo_qc_amsua_seaice
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x

@@ -69,19 +69,22 @@ Observations:
      filename: Data/iasi_metop-a_geoval_2018041500_m.nc4
    ObsFilters:
    - Filter: Domain Check
-     variables: [brightness_temperature]
-     channels: *all_channels
+     filter variables:
+     - name: brightness_temperature
+       channels: *all_channels
      where:
 #    Remove data with solar zenith angle <= 89.0 
 #     - variable: solar_zenith_angle
 #       minvalue: 89.
 #    Remove data with water_area_fraction > 0.0  
-     - variable: water_area_fraction@GeoVaLs
+     - variable:
+         name: water_area_fraction@GeoVaLs
        maxvalue: 0.0 
    - Filter: Bounds Check
 #    Remove data with unphysical values
-     variables: [brightness_temperature]
-     channels: *all_channels 
+     filter variables:
+     - name: brightness_temperature
+       channels: *all_channels 
      minvalue: 50.0
      maxvalue: 550.0
 #  - Filter: Background Check
@@ -90,8 +93,9 @@ Observations:
 #    channels: *all_channels 
 #    threshold: 3.0
    - Filter: Background Check           # reject all obs where abs(y-H(x)) > ErrInflationFactor * obs_error
-     variables: [brightness_temperature]
-     channels: *all_channels
+     filter variables:
+     - name: brightness_temperature
+       channels: *all_channels
      threshold: ErrfLat@ObsFunction
      action:
        name: inflate error

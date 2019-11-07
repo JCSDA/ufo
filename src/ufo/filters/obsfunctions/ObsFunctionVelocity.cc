@@ -11,6 +11,7 @@
 #include <vector>
 
 #include "ioda/ObsDataVector.h"
+#include "ufo/filters/Variable.h"
 
 namespace ufo {
 
@@ -18,10 +19,11 @@ static ObsFunctionMaker<ObsFunctionVelocity> makerObsFuncVelocity_("Velocity");
 
 // -----------------------------------------------------------------------------
 
-ObsFunctionVelocity::ObsFunctionVelocity()
-  : invars_() {
-  invars_ += "eastward_wind@ObsValue";
-  invars_ += "northward_wind@ObsValue";
+ObsFunctionVelocity::ObsFunctionVelocity(const eckit::LocalConfiguration conf)
+  : invars_(), group_() {
+  group_ = conf.getString("type", "ObsValue");
+  invars_ += Variable("eastward_wind@" + group_);
+  invars_ += Variable("northward_wind@" + group_);
 }
 
 // -----------------------------------------------------------------------------
@@ -35,8 +37,8 @@ void ObsFunctionVelocity::compute(const ObsFilterData & in,
   // TODO(AS): should use constants for variable names
   const size_t nlocs = in.nlocs();
   std::vector<float> u, v;
-  in.get("eastward_wind@ObsValue", u);
-  in.get("northward_wind@ObsValue", v);
+  in.get(Variable("eastward_wind@" + group_), u);
+  in.get(Variable("northward_wind@" + group_), v);
   for (size_t jj = 0; jj < nlocs; ++jj) {
     out[0][jj] = sqrt(pow(u[jj], 2) + pow(v[jj], 2));
     oops::Log::debug() << "u, v: " << u[jj] << ", "

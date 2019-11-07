@@ -27,6 +27,7 @@ namespace ioda {
 
 namespace ufo {
   class ObsBiasIncrement;
+  class ObsDiagnostics;
 
 /// Class to handle observation bias model from GSI Radiance.
 
@@ -45,7 +46,7 @@ class ObsBiasRadianceGSI : public ObsBiasBase,
   void read(const eckit::Configuration &) override;
   void write(const eckit::Configuration &) const override;
   double norm() const override;
-  std::size_t size() const override { return biascoeffs_.size();};
+  std::size_t size() const override { return biascoeffs_.size();}
 
 /// Add increments
   ObsBiasRadianceGSI & operator+=(const ObsBiasIncrement &) override;
@@ -53,10 +54,18 @@ class ObsBiasRadianceGSI : public ObsBiasBase,
 /// Obs bias operator
   void computeObsBias(const GeoVaLs &,
                       ioda::ObsVector &,
-                      const ioda::ObsSpace &) const override;
+                      const ioda::ObsSpace &,
+                      const ObsDiagnostics &) const override;
+
+/// Obs bias predictor
+  void computeObsBiasPredictors(const GeoVaLs &,
+                                const ioda::ObsSpace &,
+                                const ObsDiagnostics &,
+                                std::vector<float> &) const;
 
 /// Other
-  const oops::Variables & variables() const override {return *varin_;}
+  const oops::Variables & requiredGeoVaLs() const override {return *geovars_;}
+  const oops::Variables & requiredHdiagnostics() const override {return *hdiags_;}
 
 /// Bias parameters interface
   double & operator[](const unsigned int ii) override {return biascoeffs_[ii];}
@@ -64,13 +73,18 @@ class ObsBiasRadianceGSI : public ObsBiasBase,
 
  private:
   void print(std::ostream &) const override;
-  std::unique_ptr<const oops::Variables> varin_;
+  std::unique_ptr<const oops::Variables> geovars_;
+  std::unique_ptr<const oops::Variables> hdiags_;
   std::string sensor_id_;  // sensor_id
   std::vector<int> channels_;  // channel
+  std::vector<float> tlapmean_;
 
   std::vector<double> biascoeffs_;
+  bool newpc4pred_;  //  controls preconditioning due to sat-bias correction term
+  bool adp_anglebc_;  //  logical to turn off or on the variational radiance angle bias correction
+  bool emiss_bc_;  //  logical to turn off or on the emissivity predictor
 
-  static const std::vector<std::string> predictors_;  // predictor names
+  std::vector<std::string> predictors_;
 };
 
 // -----------------------------------------------------------------------------

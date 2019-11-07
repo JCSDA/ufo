@@ -5,8 +5,9 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#include "ufo/utils/SplitVarGroup.h"
+#include "ufo/utils/StringUtils.h"
 
+#include <sstream>
 #include <string>
 
 #include "eckit/exception/Exceptions.h"
@@ -27,4 +28,20 @@ void splitVarGroup(const std::string & vargrp, std::string & var, std::string & 
 }
 
 // -----------------------------------------------------------------------------
+
+bool isFloat(const std::string & str) {
+  std::istringstream iss(str);
+  float factor;
+  iss >> factor;
+  return (iss.eof() && !iss.fail());
+}
+
+// -----------------------------------------------------------------------------
+
+bool readFloat(const std::string & str, float & num) {
+  std::istringstream iss(str);
+  iss >> num;
+  return (iss.eof() && !iss.fail());
+}
+
 }  // namespace ufo

@@ -15,6 +15,7 @@
 #include "ioda/ObsDataVector.h"
 #include "oops/util/ObjectCounter.h"
 #include "oops/util/Printable.h"
+#include "ufo/filters/Variable.h"
 
 namespace ioda {
   class ObsSpace;
@@ -51,20 +52,20 @@ class ObsFilterData : public util::Printable,
   void associate(const ObsDiagnostics &);
 
   //! Gets requested data from ObsFilterData
-  void get(const std::string &, std::vector<float> &) const;
+  void get(const Variable &, std::vector<float> &) const;
   //! Gets requested data at requested level from ObsFilterData
-  void get(const std::string &, const int, std::vector<float> &) const;
+  void get(const Variable &, const int, std::vector<float> &) const;
   //! Gets requested data from ObsFilterData
-  void get(const std::string &, std::vector<int> &) const;
+  void get(const Variable &, std::vector<int> &) const;
   //! Gets requested data from ObsFilterData (ObsDataVector has to be allocated)
-  void get(const std::string &, ioda::ObsDataVector<float> &) const;
+  void get(const Variable &, ioda::ObsDataVector<float> &) const;
   //! Checks if requested data exists in ObsFilterData
-  bool has(const std::string &) const;
+  bool has(const Variable &) const;
 
   //! Returns number of locations
   size_t nlocs() const;
   //! Returns number of levels for specified variable if 3D GeoVaLs or ObsDiags
-  size_t nlevs(const std::string &) const;
+  size_t nlevs(const Variable &) const;
  private:
   void print(std::ostream &) const;
 

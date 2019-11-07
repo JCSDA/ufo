@@ -22,6 +22,17 @@
 namespace ufo {
 
 // -----------------------------------------------------------------------------
+/*! \brief Default constructor - does not allocate fields
+*/
+GeoVaLs::GeoVaLs(const eckit::mpi::Comm & comm)
+  : keyGVL_(-1), comm_(comm)
+{
+  oops::Log::trace() << "GeoVaLs default constructor starting" << std::endl;
+  ufo_geovals_default_constr_f90(keyGVL_);
+  oops::Log::trace() << "GeoVaLs default constructor end" << std::endl;
+}
+
+// -----------------------------------------------------------------------------
 /*! \brief Constructor given Locations and Variables
  *
  * \details This ufo::GeoVaLs constructor is typically used to initialize
@@ -138,6 +149,18 @@ GeoVaLs & GeoVaLs::operator*=(const double zz) {
   return *this;
 }
 // -----------------------------------------------------------------------------
+/*! \brief Multiply by a constant scalar for each profile */
+GeoVaLs & GeoVaLs::operator*=(const std::vector<float> & vals) {
+  oops::Log::trace() << "GeoVaLs::operator*= starting" << std::endl;
+  size_t nlocs;
+  ufo_geovals_nlocs_f90(keyGVL_, nlocs);
+  oops::Log::trace() << "vals, nlocs = " << vals.size() << "   " << nlocs << std::endl;
+  ASSERT(vals.size() == nlocs);
+  ufo_geovals_profmult_f90(keyGVL_, nlocs, vals[0]);
+  oops::Log::trace() << "GeoVaLs::operator*= done" << std::endl;
+  return *this;
+}
+// -----------------------------------------------------------------------------
 /*! \brief Copy operator */
 GeoVaLs & GeoVaLs::operator=(const GeoVaLs & rhs) {
   oops::Log::trace() << "GeoVaLs::operator= starting" << std::endl;
@@ -190,6 +213,22 @@ double GeoVaLs::dot_product_with(const GeoVaLs & other) const {
   ufo_geovals_dotprod_f90(keyGVL_, other.keyGVL_, zz, comm_.name().size(), comm_.name().c_str());
   oops::Log::trace() << "GeoVaLs::dot_product_with done" << std::endl;
   return zz;
+}
+// -----------------------------------------------------------------------------
+/*! \brief Split two GeoVaLs */
+void GeoVaLs::split(GeoVaLs & other1, GeoVaLs & other2) const {
+  oops::Log::trace() << "GeoVaLs::split GeoVaLs into 2" << std::endl;
+  ufo_geovals_split_f90(keyGVL_, other1.keyGVL_, other2.keyGVL_);
+  oops::Log::trace() << "GeoVaLs::split GeoVaLs into 2" << std::endl;
+  return;
+}
+// -----------------------------------------------------------------------------
+/*! \brief Merge two GeoVaLs */
+void GeoVaLs::merge(const GeoVaLs & other1, const GeoVaLs & other2) {
+  oops::Log::trace() << "GeoVaLs::merge 2 GeoVaLs" << std::endl;
+  ufo_geovals_merge_f90(keyGVL_, other1.keyGVL_, other2.keyGVL_);
+  oops::Log::trace() << "GeoVaLs::merge 2 GeoVaLs" << std::endl;
+  return;
 }
 // -----------------------------------------------------------------------------
 /*! \brief Output GeoVaLs to a stream */

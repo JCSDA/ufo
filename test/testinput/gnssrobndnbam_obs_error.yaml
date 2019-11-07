@@ -20,7 +20,8 @@ Observations:
      filename: Data/gnssro_geoval_2018041500_m.nc4
    ObsFilters:
    - Filter: ROobserror
-     variables: [bending_angle]
+     filter variables:
+     - name: bending_angle
      errmodel: NBAM
    passedBenchmark: 150
  - ObsOperator:
@@ -38,7 +39,8 @@ Observations:
      filename: Data/gnssro_geoval_2018041500_m.nc4
    ObsFilters:
    - Filter: ROobserror
-     variables: [bending_angle]
+     filter variables:
+     - name: bending_angle
      errmodel: ECMWF
    passedBenchmark: 150
  - ObsOperator:
@@ -58,6 +60,7 @@ Observations:
      filename: Data/gnssro_geoval_2018041500_m.nc4
    ObsFilters:
    - Filter: ROobserror
-     variables: [bending_angle]
+     filter variables:
+     - name: bending_angle
      errmodel: NRL
    passedBenchmark: 150

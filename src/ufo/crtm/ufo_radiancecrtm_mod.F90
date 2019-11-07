@@ -242,6 +242,8 @@ character(max_string) :: err_msg
       stop
    end if
 
+   if (n_Layers > 0) call CRTM_RTSolution_Create (rts, n_Layers) 
+
    ! Create the input FORWARD structure (atm)
    ! ----------------------------------------
    print *,"Hamideh_test", n_Profiles, n_Layers,n_Channels
@@ -261,6 +263,8 @@ character(max_string) :: err_msg
       CALL Display_Message( PROGRAM_NAME, message, FAILURE )
       STOP
    END IF
+
+   CALL CRTM_RTSolution_Create(rts, n_Layers )
 
    !Assign the data from the GeoVaLs
    !--------------------------------
@@ -467,6 +471,14 @@ character(max_string) :: err_msg
                   ! atm(jprofile)%Cloud_Fraction > MIN_COVERAGE_THRESHOLD (1e.-6)
                   hofxdiags%geovals(jvar)%vals(1,jprofile) = &
                      rts(jchannel,jprofile) % Tb_Clear 
+               end do
+            ! variable: brightness_temperature_CH
+            case (var_tb)
+               hofxdiags%geovals(jvar)%nval = 1
+               allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,n_Profiles))
+               do jprofile = 1, n_Profiles
+                  hofxdiags%geovals(jvar)%vals(1,jprofile) = &
+                     rts(jchannel,jprofile) % Brightness_Temperature 
                end do
             case default
                write(err_msg,*) 'ufo_radiancecrtm_simobs: //&
