@@ -373,7 +373,6 @@ character(max_string) :: err_msg
       end if
 
    else
-
       ! Call the forward model call for each sensor
       ! -------------------------------------------
       if (self%conf%salinity_option == "sss") THEN
@@ -391,7 +390,6 @@ character(max_string) :: err_msg
                                   chinfo(n:n), &  ! Input
                                   rts         )   ! Output
       end if
-
       if ( err_stat /= SUCCESS ) THEN
          message = 'Error calling CRTM Forward Model for '//TRIM(self%conf%SENSOR_ID(n))
          call Display_Message( PROGRAM_NAME, message, FAILURE )
