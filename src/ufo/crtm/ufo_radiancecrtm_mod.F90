@@ -149,7 +149,6 @@ type(CRTM_Atmosphere_type), allocatable :: atm(:)
 type(CRTM_Surface_type),    allocatable :: sfc(:)
 type(CRTM_RTSolution_type), allocatable :: rts(:,:)
 type(CRTM_Options_type), allocatable    :: Options(:) 
-type(CRTM_Options_type)                 :: Default_Options
 
 ! Define the K-MATRIX variables for hofxdiags
 type(CRTM_Atmosphere_type), allocatable :: atm_K(:,:)
@@ -375,18 +374,24 @@ character(max_string) :: err_msg
 
    else
 
-      Options = Default_Options 
-      if (self%conf%salinity_option == "sss") THEN
-      	 Options%Use_Old_MWSSEM = .TRUE.
-      end if
       ! Call the forward model call for each sensor
       ! -------------------------------------------
-      err_stat = CRTM_Forward( atm        , &  ! Input
-                               sfc        , &  ! Input
-                               geo        , &  ! Input
-                               chinfo(n:n), &  ! Input
-                               rts        , &  ! Output
-                               Options     )   ! Optional input
+      if (self%conf%salinity_option == "sss") THEN
+      	 Options%Use_Old_MWSSEM = .TRUE.
+	 err_stat = CRTM_Forward( atm        , &  ! Input
+                                  sfc        , &  ! Input
+                                  geo        , &  ! Input
+                                  chinfo(n:n), &  ! Input
+                                  rts        , &  ! Output
+                                  Options     )   ! Optional input
+      else
+         err_stat = CRTM_Forward( atm        , &  ! Input
+                                  sfc        , &  ! Input
+                                  geo        , &  ! Input
+                                  chinfo(n:n), &  ! Input
+                                  rts         )   ! Output
+      end if
+
       if ( err_stat /= SUCCESS ) THEN
          message = 'Error calling CRTM Forward Model for '//TRIM(self%conf%SENSOR_ID(n))
          call Display_Message( PROGRAM_NAME, message, FAILURE )
