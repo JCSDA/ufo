@@ -294,9 +294,9 @@ end subroutine ufo_geovals_normalize_c
 
 subroutine ufo_geovals_dotprod_c(c_key_self, c_key_other, prod, c_comm) bind(c,name='ufo_geovals_dotprod_f90')
 implicit none
-integer(c_int), intent(in) :: c_key_self, c_key_other
-real(c_double), intent(inout) :: prod
-type(c_ptr), intent(in)       :: c_comm
+integer(c_int), intent(in)     :: c_key_self, c_key_other
+real(c_double), intent(inout)  :: prod
+type(c_ptr), value, intent(in) :: c_comm
 
 type(ufo_geovals), pointer :: self, other
 type(fckit_mpi_comm) :: f_comm
