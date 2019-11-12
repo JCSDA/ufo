@@ -523,7 +523,6 @@ end subroutine ufo_geovals_read_file_c
 ! ------------------------------------------------------------------------------
 
 subroutine ufo_geovals_write_file_c(c_key_self, c_conf, c_comm) bind(c,name='ufo_geovals_write_file_f90')
-use string_f_c_mod
 implicit none
 integer(c_int), intent(in) :: c_key_self
 type(c_ptr), intent(in) :: c_conf
