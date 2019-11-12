@@ -376,8 +376,8 @@ character(max_string) :: err_msg
       ! Call the forward model call for each sensor
       ! -------------------------------------------
       if (self%conf%salinity_option == "sss") THEN
-      	 Options%Use_Old_MWSSEM = .TRUE.
-	 err_stat = CRTM_Forward( atm        , &  ! Input
+         Options%Use_Old_MWSSEM = .TRUE.
+         err_stat = CRTM_Forward( atm        , &  ! Input
                                   sfc        , &  ! Input
                                   geo        , &  ! Input
                                   chinfo(n:n), &  ! Input
