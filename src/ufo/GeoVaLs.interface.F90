@@ -299,13 +299,12 @@ real(c_double), intent(inout)  :: prod
 type(c_ptr), value, intent(in) :: c_comm
 
 type(ufo_geovals), pointer :: self, other
-type(fckit_mpi_comm) :: f_comm
+type(fckit_mpi_comm)       :: f_comm
 
 call ufo_geovals_registry%get(c_key_self, self)
 call ufo_geovals_registry%get(c_key_other, other)
 
 f_comm = fckit_mpi_comm(c_comm)
-
 
 call ufo_geovals_dotprod(self, other, prod, f_comm)
 
@@ -524,18 +523,18 @@ end subroutine ufo_geovals_read_file_c
 
 subroutine ufo_geovals_write_file_c(c_key_self, c_conf, c_comm) bind(c,name='ufo_geovals_write_file_f90')
 implicit none
-integer(c_int), intent(in) :: c_key_self
-type(c_ptr), intent(in) :: c_conf
-type(c_ptr), intent(in) :: c_comm
+integer(c_int), intent(in)     :: c_key_self
+type(c_ptr), intent(in)        :: c_conf
+type(c_ptr), value, intent(in) :: c_comm
 
 type(ufo_geovals), pointer :: self
-character(max_string) :: fout, filename
+character(max_string)      :: fout, filename
 
-type(fckit_mpi_comm)      :: comm
-character(len=10)         :: cproc
-integer                   :: ppos
+type(fckit_mpi_comm)          :: comm
+character(len=10)             :: cproc
+integer                       :: ppos
 character(len=:), allocatable :: str
-type(fckit_configuration) :: f_conf
+type(fckit_configuration)     :: f_conf
 
 ! read filename for config
 f_conf = fckit_configuration(c_conf)
@@ -543,7 +542,7 @@ call f_conf%get_or_die("filename",str)
 filename = str
 
 ! get the process rank number
-comm= fckit_mpi_comm(c_comm)
+comm = fckit_mpi_comm(c_comm)
 
 write(cproc,fmt='(i4.4)') comm%rank()
 
