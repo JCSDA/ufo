@@ -132,8 +132,10 @@ phases:
       - pwd
       - ls
       - sed -i 's/BRANCH develop  UPDATE//' CMakeLists.txt
+      - sed -i 's/BRANCH develop //' CMakeLists.txt
       - sed -i -e '/ecbuild_bundle( PROJECT ufo/i\
         ecbuild_bundle( PROJECT ropp-ufo  GIT "https://github.com/JCSDA/ropp-test.git" )' CMakeLists.txt
+      - cat CMakeLists.txt
   build:
     commands:
       - echo Executing build phase
@@ -194,7 +196,9 @@ phases:
         && export LD_LIBRARY_PATH=/usr/local/lib
         && export LIBRARY_PATH=/usr/local/lib
         && . /opt/intel/compilers_and_libraries/linux/bin/compilervars.sh
-        && cd /build_container/ufo/
+        && cd /build_container/ufo
+        && echo $LD_LIBRARY_PATH
         && ctest -VV --rerun-failed";
         else echo "Build failed";
         fi
+
