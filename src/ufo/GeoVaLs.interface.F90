@@ -292,24 +292,19 @@ end subroutine ufo_geovals_normalize_c
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_geovals_dotprod_c(c_key_self, c_key_other, prod, lcname, cname) bind(c,name='ufo_geovals_dotprod_f90')
-use string_f_c_mod
+subroutine ufo_geovals_dotprod_c(c_key_self, c_key_other, prod, c_comm) bind(c,name='ufo_geovals_dotprod_f90')
 implicit none
-integer(c_int), intent(in) :: c_key_self, c_key_other
-real(c_double), intent(inout) :: prod
-integer(c_int),intent(in) :: lcname                        !< Communicator name length
-character(kind=c_char,len=1),intent(in) :: cname(lcname+1) !< Communicator name
+integer(c_int), intent(in)     :: c_key_self, c_key_other
+real(c_double), intent(inout)  :: prod
+type(c_ptr), value, intent(in) :: c_comm
 
 type(ufo_geovals), pointer :: self, other
-type(fckit_mpi_comm) :: f_comm
-character(len=lcname) :: name
+type(fckit_mpi_comm)       :: f_comm
 
 call ufo_geovals_registry%get(c_key_self, self)
 call ufo_geovals_registry%get(c_key_other, other)
 
-call c_f_string(cname, name)
-f_comm = fckit_mpi_comm(name)
-
+f_comm = fckit_mpi_comm(c_comm)
 
 call ufo_geovals_dotprod(self, other, prod, f_comm)
 
@@ -526,23 +521,20 @@ end subroutine ufo_geovals_read_file_c
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_geovals_write_file_c(c_key_self, c_conf, lcname, cname) bind(c,name='ufo_geovals_write_file_f90')
-use string_f_c_mod
+subroutine ufo_geovals_write_file_c(c_key_self, c_conf, c_comm) bind(c,name='ufo_geovals_write_file_f90')
 implicit none
-integer(c_int), intent(in) :: c_key_self
-type(c_ptr), intent(in) :: c_conf
-integer(c_int),intent(in) :: lcname                        !< Communicator name length
-character(kind=c_char,len=1),intent(in) :: cname(lcname+1) !< Communicator name
+integer(c_int), intent(in)     :: c_key_self
+type(c_ptr), intent(in)        :: c_conf
+type(c_ptr), value, intent(in) :: c_comm
 
 type(ufo_geovals), pointer :: self
-character(max_string) :: fout, filename
+character(max_string)      :: fout, filename
 
-type(fckit_mpi_comm)      :: comm
-character(len=10)         :: cproc
-integer                   :: ppos
+type(fckit_mpi_comm)          :: comm
+character(len=10)             :: cproc
+integer                       :: ppos
 character(len=:), allocatable :: str
-type(fckit_configuration) :: f_conf
-character(len=lcname) :: name
+type(fckit_configuration)     :: f_conf
 
 ! read filename for config
 f_conf = fckit_configuration(c_conf)
@@ -550,8 +542,7 @@ call f_conf%get_or_die("filename",str)
 filename = str
 
 ! get the process rank number
-call c_f_string(cname, name)
-comm= fckit_mpi_comm(name)
+comm = fckit_mpi_comm(c_comm)
 
 write(cproc,fmt='(i4.4)') comm%rank()
 
