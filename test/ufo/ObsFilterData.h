@@ -73,7 +73,7 @@ void testObsFilterData() {
       data.get(obsvars.variable(jvar), vec);
       std::vector<float> ref(ospace.nlocs());
       ospace.get_db(obsvars.variable(jvar).group(), obsvars.variable(jvar).variable(),
-                    ref.size(), ref.data());
+                    ref.size(), ref);
       EXPECT(vec == ref);
     }
 ///  Check that has() and get() work on integer variables in ObsSpace:
@@ -85,7 +85,7 @@ void testObsFilterData() {
       data.get(intvars.variable(jvar), vec);
       std::vector<int> ref(ospace.nlocs());
       ospace.get_db(intvars.variable(jvar).group(), intvars.variable(jvar).variable(),
-                    ref.size(), ref.data());
+                    ref.size(), ref);
       EXPECT(vec == ref);
     }
 
