@@ -122,7 +122,7 @@ void ObsFilterData::get(const Variable & varname, std::vector<float> & values) c
     diags_->get(values, var);
 ///  Else must be coming from ObsSpace
   } else {
-    obsdb_.get_db(grp, var, nvals, values);
+    obsdb_.get_db(grp, var, values);
   }
 }
 
@@ -148,7 +148,7 @@ void ObsFilterData::get(const Variable & varname, std::vector<int> & values) con
     oops::Log::error() << "ObsFilterData::get int values only supported for ObsSpace" << std::endl;
     ABORT("ObsFilterData::get int values only supported for ObsSpace");
   } else {
-    obsdb_.get_db(grp, var, nvals, values);
+    obsdb_.get_db(grp, var, values);
   }
 }
 
