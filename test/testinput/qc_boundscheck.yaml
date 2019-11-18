@@ -11,7 +11,10 @@ Observations:
        variables: [variable1, variable2, variable3]
    ObsFilters:
    - Filter: Bounds Check        # test min/max value with all variables
-     variables: [variable1, variable2, variable3]
+     filter variables:
+     - name: variable1
+     - name: variable2
+     - name: variable3
      minvalue: 14.0
      maxvalue: 19.0
 # Compare variables with minvalue/maxvalue
@@ -27,7 +30,9 @@ Observations:
        variables: [variable1, variable2, variable3]
    ObsFilters:
    - Filter: Bounds Check        # test min/max value with subset of variables
-     variables: [variable2, variable3]
+     filter variables:
+     - name: variable2
+     - name: variable3
      minvalue: 14.0
      maxvalue: 19.0
 # Compare variables with minvalue/maxvalue
@@ -43,7 +48,9 @@ Observations:
        variables: [variable1, variable2, variable3]
    ObsFilters:
    - Filter: Bounds Check       # test min/max value with subset of variables, ordered different from simulate vars
-     variables: [variable3, variable1]
+     filter variables:
+     - name: variable3
+     - name: variable1
      minvalue: 14.0
      maxvalue: 19.0
 # Compare variables with minvalue/maxvalue
@@ -59,9 +66,14 @@ Observations:
        variables: [variable1, variable2, variable3]
    ObsFilters:
    - Filter: Bounds Check       # test min/max value with different test vars
-     variables: [variable1, variable2, variable3]
+     filter variables:
+     - name: variable1
+     - name: variable2
+     - name: variable3
      test variables:
-       variables: [var1@MetaData, var2@MetaData, var3@MetaData]
+     - name: var1@MetaData
+     - name: var2@MetaData
+     - name: var3@MetaData
      minvalue: 14.0
      maxvalue: 19.0
 # Filter variable1, variable2, variable3 based on var1@MetaData, var2@MetaData, var3@MetaData values
@@ -77,9 +89,14 @@ Observations:
        variables: [variable1, variable2, variable3]
    ObsFilters:
    - Filter: Bounds Check       # test min/max value with different test vars
-     variables: [variable1, variable2, variable3]
+     filter variables:
+     - name: variable1
+     - name: variable2
+     - name: variable3
      test variables:
-       variables: [var1@MetaData, var2@MetaData, var3@MetaData]
+     - name: var1@MetaData
+     - name: var2@MetaData
+     - name: var3@MetaData
      minvalue: 1
      maxvalue: 3
 # Filter variable1, variable2, variable3 based on var1@MetaData, var2@MetaData, var3@MetaData values
@@ -95,9 +112,12 @@ Observations:
        variables: [variable1, variable2, variable3]
    ObsFilters:
    - Filter: Bounds Check       # test min/max value with different test vars and subset of vars
-     variables: [variable2, variable3]
+     filter variables:
+     - name: variable2
+     - name: variable3
      test variables:
-       variables: [var1@MetaData, var2@MetaData]
+     - name: var1@MetaData
+     - name: var2@MetaData
 # Filter variable2, variable3 based on var1@MetaData, var2@MetaData values
 # Note: variable1 is not specified in filtered variables, all obs for variable1 will pass
 #  var1@MetaData =  1, 2, 3, 4, 5, 6, 7, 8, 9, 10
@@ -113,9 +133,12 @@ Observations:
        variables: [variable1, variable2, variable3]
    ObsFilters:
    - Filter: Bounds Check       # test min/max value with different test vars and subset of vars
-     variables: [variable2, variable3]
+     filter variables:
+     - name: variable2
+     - name: variable3
      test variables:
-       variables: [var1@MetaData, var2@MetaData]
+     - name: var1@MetaData
+     - name: var2@MetaData
      minvalue: 1
      maxvalue: 3
 # Filter variable2, variable3 based on var1@MetaData, var2@MetaData values

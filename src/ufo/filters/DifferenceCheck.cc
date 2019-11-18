@@ -41,7 +41,7 @@ DifferenceCheck::~DifferenceCheck() {
 // -----------------------------------------------------------------------------
 
 void DifferenceCheck::applyFilter(const std::vector<bool> & apply,
-                                  const oops::Variables & filtervars,
+                                  const Variables & filtervars,
                                   std::vector<std::vector<bool>> & flagged) const {
   oops::Log::trace() << "DifferenceCheck priorFilter" << std::endl;
 
@@ -70,13 +70,13 @@ void DifferenceCheck::applyFilter(const std::vector<bool> & apply,
     if (apply[jobs]) {
       // check to see if one of the reference or value is missing
       if (val[jobs] == missing || ref[jobs] == missing) {
-        for (size_t jv = 0; jv < filtervars.size(); ++jv) {
+        for (size_t jv = 0; jv < filtervars.nvars(); ++jv) {
           flagged[jv][jobs] = true;
         }
       } else {
 // Check if difference is within min/max value range and set flag
         float diff = val[jobs] - ref[jobs];
-        for (size_t jv = 0; jv < filtervars.size(); ++jv) {
+        for (size_t jv = 0; jv < filtervars.nvars(); ++jv) {
           if (vmin != missing && diff < vmin) flagged[jv][jobs] = true;
           if (vmax != missing && diff > vmax) flagged[jv][jobs] = true;
         }

@@ -98,7 +98,7 @@ int Gaussian_Thinning::dist_to_centroid(float ob_lon, float ob_lat, float c_lon,
 // -----------------------------------------------------------------------------
 
 void Gaussian_Thinning::applyFilter(const std::vector<bool> & apply,
-                                    const oops::Variables & filtervars,
+                                    const Variables & filtervars,
                                     std::vector<std::vector<bool>> & flagged) const {
   const size_t nobs = obsdb_.nlocs();
   const float re = Constants::mean_earth_rad;  // km
@@ -229,7 +229,7 @@ void Gaussian_Thinning::applyFilter(const std::vector<bool> & apply,
   }
 
   // project the QC across all varialbes and fail all obs that do not pass thinning
-  for (size_t jv = 0; jv < filtervars.size(); ++jv) {
+  for (size_t jv = 0; jv < filtervars.nvars(); ++jv) {
      for (size_t jobs = 0; jobs < nobs; ++jobs) {
         if ( apply[jobs] && thin[jobs] ) flagged[jv][jobs] = true;
      }

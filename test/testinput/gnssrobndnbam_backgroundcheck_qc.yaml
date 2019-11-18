@@ -20,10 +20,12 @@ Observations:
      filename: Data/gnssro_geoval_2018041500_l.nc4
    ObsFilters:
    - Filter: ROobserror
-     variables: [bending_angle]
+     filter variables:
+     - name: bending_angle
      errmodel: NRL
    - Filter: Background Check 
-     variables: [bending_angle]
+     filter variables:
+     - name: bending_angle
      threshold: 3
    passedBenchmark: 383
  - ObsOperator:
@@ -43,5 +45,6 @@ Observations:
      filename: Data/gnssro_geoval_2018041500_l.nc4
    ObsFilters:
    - Filter: Background Check RONBAM
-     variables: [bending_angle]
+     filter variables:
+     - name: bending_angle
    passedBenchmark: 386

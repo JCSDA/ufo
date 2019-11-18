@@ -66,14 +66,14 @@ void testFunction() {
 
 ///  Get function name and which group to use for H(x)
   const eckit::LocalConfiguration obsfuncconf(conf, "ObsFunction");
-  std::string funcname = obsfuncconf.getString("name");
+  Variable funcname(obsfuncconf);
 
 ///  Setup function
   ObsFunction obsfunc(funcname);
   ufo::Variables allfuncvars = obsfunc.requiredVariables();
 
 ///  Setup GeoVaLs
-  const oops::Variables geovars = allfuncvars.allFromGroup("GeoVaLs");
+  const oops::Variables geovars = allfuncvars.allFromGroup("GeoVaLs").toOopsVariables();
   std::unique_ptr<GeoVaLs> gval;
   if (geovars.size() > 0) {
     const eckit::LocalConfiguration gconf(conf, "GeoVaLs");
@@ -82,7 +82,7 @@ void testFunction() {
   }
 
 ///  Setup ObsDiags
-  const oops::Variables diagvars = allfuncvars.allFromGroup("ObsDiag");
+  const oops::Variables diagvars = allfuncvars.allFromGroup("ObsDiag").toOopsVariables();
   std::unique_ptr<ObsDiagnostics> diags;
   if (diagvars.size() > 0) {
     const eckit::LocalConfiguration diagconf(conf, "ObsDiag");
@@ -100,7 +100,7 @@ void testFunction() {
 
 ///  Compute function result through ObsFilterData
   ioda::ObsDataVector<float> vals_ofd(ospace, outputvars, "ObsFunction", false);
-  inputs.get(funcname+"@ObsFunction", vals_ofd);
+  inputs.get(funcname, vals_ofd);
 
 ///  Read reference values from ObsSpace
   ioda::ObsDataVector<float> ref(ospace, outputvars, "TestReference");

@@ -210,7 +210,7 @@ GeoVaLs & GeoVaLs::operator/=(const GeoVaLs & other) {
 double GeoVaLs::dot_product_with(const GeoVaLs & other) const {
   oops::Log::trace() << "GeoVaLs::dot_product_with starting" << std::endl;
   double zz;
-  ufo_geovals_dotprod_f90(keyGVL_, other.keyGVL_, zz, comm_.name().size(), comm_.name().c_str());
+  ufo_geovals_dotprod_f90(keyGVL_, other.keyGVL_, zz, &comm_);
   oops::Log::trace() << "GeoVaLs::dot_product_with done" << std::endl;
   return zz;
 }
@@ -308,7 +308,7 @@ void GeoVaLs::read(const eckit::Configuration & config,
 void GeoVaLs::write(const eckit::Configuration & config) const {
   oops::Log::trace() << "GeoVaLs::write starting" << std::endl;
   const eckit::Configuration * conf = &config;
-  ufo_geovals_write_file_f90(keyGVL_, &conf, comm_.name().size(), comm_.name().c_str());
+  ufo_geovals_write_file_f90(keyGVL_, &conf, &comm_);
   oops::Log::trace() << "GeoVaLs::write done" << std::endl;
 }
 // -----------------------------------------------------------------------------

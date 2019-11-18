@@ -7,15 +7,28 @@ ObsFilterData:
       obsfile: Data/satwind_obs_2018041500_m.nc4
     simulate:
       variables: [eastward_wind, northward_wind]
-    integer data:
-      variables: [eastward_wind@ObsType, northward_wind@ObsType]
+    float variables:
+    - name: eastward_wind@ObsValue
+    - name: northward_wind@ObsError
+    - name: latitude@MetaData
+    integer variables:
+    - name: eastward_wind@ObsType
+    - name: northward_wind@ObsType
   GeoVaLs:
     filename: Data/satwind_geoval_2018041500_m.nc4
-    variables: [eastward_wind, northward_wind, air_pressure]
+    variables:
+    - name: eastward_wind@GeoVaLs
+    - name: northward_wind@GeoVaLs
+    - name: air_pressure@GeoVaLs
   ObsDiag:
     filename: Data/satwind_geoval_2018041500_m.nc4
-    variables: [surface_roughness_length]
-  HofX: GsiHofX
+    variables:
+    - name: surface_roughness_length@ObsDiag
+  HofX:
+    group: GsiHofX
+    variables:
+    - name: eastward_wind@HofX
+    - name: northward_wind@HofX
 - ObsSpace:
     name: amsua_n19
     ObsDataIn:
@@ -23,22 +36,31 @@ ObsFilterData:
     simulate:
       variables: [brightness_temperature]
       channels: 1-10,15
-    integer data:
-      variables: [brightness_temperature_12@PreQC]
+    float variables:
+    - name: brightness_temperature_1@ObsValue
+    - name: longitude@MetaData
+    integer variables:
+    - name: brightness_temperature_12@PreQC
   GeoVaLs:
     filename: Data/amsua_n19_geoval_2018041500_m.nc4
     variables:
-    - surface_temperature_where_snow
-    - soil_temperature
-    - volume_fraction_of_condensed_water_in_soil
-    - land_type_index
-    - surface_wind_speed
-    - soil_type
-    - air_temperature
-    - air_pressure
-    - air_pressure_levels
-    - humidity_mixing_ratio
+    - name: surface_temperature_where_snow@GeoVaLs
+    - name: soil_temperature@GeoVaLs
+    - name: volume_fraction_of_condensed_water_in_soil@GeoVaLs
+    - name: land_type_index@GeoVaLs
+    - name: surface_wind_speed@GeoVaLs
+    - name: soil_type@GeoVaLs
+    - name: air_temperature@GeoVaLs
+    - name: air_pressure@GeoVaLs
+    - name: air_pressure_levels@GeoVaLs
+    - name: humidity_mixing_ratio@GeoVaLs
   ObsDiag:
     filename: Data/amsua_n19_geoval_2018041500_m.nc4
-    variables: [surface_snow_thickness, vegetation_type_index]
-  HofX: GsiHofX
+    variables:
+    - name: surface_snow_thickness@ObsDiag
+    - name: vegetation_type_index@ObsDiag
+  HofX:
+    group: GsiHofX
+    variables:
+    - name: brightness_temperature@HofX
+      channels: 1-10,15

@@ -35,10 +35,7 @@ BackgroundCheck::BackgroundCheck(ioda::ObsSpace & obsdb, const eckit::Configurat
     threshold_(config_.getString("threshold", ""))
 {
   oops::Log::trace() << "BackgroundCheck contructor" << std::endl;
-  const oops::Variables vars(config_);
-  for (size_t jv = 0; jv < vars.size(); ++jv) {
-    allvars_ += vars[jv] + "@HofX";
-  }
+  allvars_ += Variables(filtervars_, "HofX");
   ASSERT(abs_threshold_ != "" || threshold_ != "");
 }
 
@@ -51,7 +48,7 @@ BackgroundCheck::~BackgroundCheck() {
 // -----------------------------------------------------------------------------
 
 void BackgroundCheck::applyFilter(const std::vector<bool> & apply,
-                                  const oops::Variables & filtervars,
+                                  const Variables & filtervars,
                                   std::vector<std::vector<bool>> & flagged) const {
   oops::Log::trace() << "BackgroundCheck postFilter" << std::endl;
   const oops::Variables observed = obsdb_.obsvariables();
@@ -59,15 +56,15 @@ void BackgroundCheck::applyFilter(const std::vector<bool> & apply,
 
   oops::Log::debug() << "BackgroundCheck obserr: " << obserr_;
 
-  ioda::ObsDataVector<float> obs(obsdb_, filtervars, "ObsValue");
-  ioda::ObsDataVector<float> bias(obsdb_, filtervars, "ObsBias", false);
+  ioda::ObsDataVector<float> obs(obsdb_, filtervars.toOopsVariables(), "ObsValue");
+  ioda::ObsDataVector<float> bias(obsdb_, filtervars.toOopsVariables(), "ObsBias", false);
 
-  for (size_t jv = 0; jv < filtervars.size(); ++jv) {
-    size_t iv = observed.find(filtervars[jv]);
+  Variables varhofx(filtervars_, "HofX");
+  for (size_t jv = 0; jv < filtervars.nvars(); ++jv) {
+    size_t iv = observed.find(filtervars.variable(jv).variable());
 //  H(x)
-    const std::string varhofx = filtervars[jv] + "@HofX";
     std::vector<float> hofx;
-    data_.get(varhofx, hofx);
+    data_.get(varhofx.variable(jv), hofx);
 
 //  Threshold for current variable
     std::vector<float> abs_thr(obsdb_.nlocs(), std::numeric_limits<float>::max());

@@ -19,8 +19,7 @@
 #include "oops/util/abor1_cpp.h"
 #include "oops/util/Logger.h"
 #include "oops/util/missingValues.h"
-#include "ufo/filters/obsfunctions/ObsFunction.h"
-#include "ufo/utils/StringUtils.h"
+#include "ufo/filters/obsfunctions/ObsFunctionScattering.h"
 
 namespace ufo {
 
@@ -47,36 +46,25 @@ ObsDomainErrCheck::~ObsDomainErrCheck() {}
 // -----------------------------------------------------------------------------
 
 void ObsDomainErrCheck::applyFilter(const std::vector<bool> & inside,
-                                    const oops::Variables & filtervars,
+                                    const Variables & filtervars,
                                     std::vector<std::vector<bool>> & flagged) const {
   const oops::Variables observed = obsdb_.obsvariables();
 
-  ioda::ObsDataVector<float> obs(obsdb_, filtervars, "ObsValue");
+  ioda::ObsDataVector<float> obs(obsdb_, filtervars.toOopsVariables(), "ObsValue");
   size_t nlocs = obsdb_.nlocs();
 
 // compute function
-  std::vector<eckit::LocalConfiguration> masks;
-  config_.get("where", masks);
   std::vector<float> values(nlocs);
-  for (size_t jm = 0; jm < masks.size(); ++jm) {
-//  Get variable and group
-    const std::string vargrp(masks[jm].getString("variable"));
-    std::string fvar, grp;
-    std::string obgrp = "MetaData";
-    splitVarGroup(vargrp, fvar, grp);
-    if (fvar == "Scattering" && grp == "ObsFunction") {
-      ioda::ObsDataVector<float> vals(obsdb_, fvar);
-      ObsFunction obsdiag(fvar);
-      obsdiag.compute(data_, vals);
-      for (size_t jj = 0; jj < nlocs; ++jj) {
-        values[jj] = vals[fvar][jj];
-      }
-    }
+  ioda::ObsDataVector<float> vals(obsdb_, "Scattering");
+  ObsFunctionScattering obsdiag;
+  obsdiag.compute(data_, vals);
+  for (size_t jj = 0; jj < nlocs; ++jj) {
+    values[jj] = vals["Scattering"][jj];
   }
 
   size_t count = 0;
-  for (size_t jv = 0; jv < filtervars.size(); ++jv) {
-    size_t iv = observed.find(filtervars[jv]);
+  for (size_t jv = 0; jv < filtervars.nvars(); ++jv) {
+    size_t iv = observed.find(filtervars.variable(jv).variable());
     for (size_t jobs = 0; jobs < obsdb_.nlocs(); ++jobs) {
       if (!inside[jobs]) {
         flagged[jv][jobs] = true;

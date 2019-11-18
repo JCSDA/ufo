@@ -46,7 +46,7 @@ class MWCLWCheck : public FilterBase,
 
  private:
   void print(std::ostream &) const override;
-  void applyFilter(const std::vector<bool> &, const oops::Variables &,
+  void applyFilter(const std::vector<bool> &, const Variables &,
                    std::vector<std::vector<bool>> &) const override;
   int qcFlag() const override {return QCflags::clw;}
 
