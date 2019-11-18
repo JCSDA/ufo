@@ -64,7 +64,7 @@ if( ${RTTOV_FOUND} )
     add_subdirectory( rttov )
 endif( ${RTTOV_FOUND} )
 add_subdirectory( gnssro )
-add_subdirectory( surface )
+add_subdirectory( sfcpcorrected )
 add_subdirectory( marine )
 add_subdirectory( timeoper )
 list( APPEND ufo_src_files
@@ -79,7 +79,7 @@ list( APPEND ufo_src_files
     ${crtm_src_files}
     ${rttov_src_files}
     ${gnssro_src_files}
-    ${surface_src_files}
+    ${sfcpcorrected_src_files}
     ${radarreflectivity_src_files}
     ${radarradialvelocity_src_files}
     ${timeoper_src_files}
@@ -104,5 +104,6 @@ ecbuild_add_library( TARGET   ufo
                      SOURCES  ${ufo_src_files}
                      LIBS     ${UFO_LIBS_DEP}
                      INSTALL_HEADERS LISTED
+                     HEADER_DESTINATION ${INSTALL_INCLUDE_DIR}/ufo
                      LINKER_LANGUAGE ${OOPS_LINKER_LANGUAGE}
                     )

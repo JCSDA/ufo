@@ -40,6 +40,7 @@ class GeoVaLs : public util::Printable,
  public:
   static const std::string classname() {return "ufo::GeoVaLs";}
 
+  explicit GeoVaLs(const eckit::mpi::Comm &);
   GeoVaLs(const Locations &, const oops::Variables &);
   GeoVaLs(const eckit::Configuration &, const ioda::ObsSpace &,
           const oops::Variables &);
@@ -49,11 +50,14 @@ class GeoVaLs : public util::Printable,
 
   GeoVaLs & operator = (const GeoVaLs &);
   GeoVaLs & operator *= (const double);
+  GeoVaLs & operator *= (const std::vector<float> &);
   GeoVaLs & operator += (const GeoVaLs &);
   GeoVaLs & operator -= (const GeoVaLs &);
   GeoVaLs & operator *= (const GeoVaLs &);
   GeoVaLs & operator /= (const GeoVaLs &);
   double dot_product_with(const GeoVaLs &) const;
+  void split(GeoVaLs &, GeoVaLs &) const;
+  void merge(const GeoVaLs &, const GeoVaLs &);
 
   void abs();
   void zero();

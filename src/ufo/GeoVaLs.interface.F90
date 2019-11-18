@@ -35,6 +35,19 @@ contains
 !> Linked list implementation
 #include "oops/util/linkedList_c.f"
 ! ------------------------------------------------------------------------------
+!> Setup GeoVaLs (don't store anything; don't do allocation yet)
+subroutine ufo_geovals_default_constr_c(c_key_self) bind(c,name='ufo_geovals_default_constr_f90')
+implicit none
+integer(c_int), intent(inout)  :: c_key_self
+type(ufo_geovals), pointer :: self
+
+call ufo_geovals_registry%init()
+call ufo_geovals_registry%add(c_key_self)
+call ufo_geovals_registry%get(c_key_self, self)
+call ufo_geovals_default_constr(self)
+
+end subroutine ufo_geovals_default_constr_c
+
 !> Setup GeoVaLs (store nlocs, variables; don't do allocation yet)
 subroutine ufo_geovals_setup_c(c_key_self, c_nlocs, c_vars) bind(c,name='ufo_geovals_setup_f90')
 use oops_variables_mod
@@ -184,6 +197,21 @@ end subroutine ufo_geovals_scalmult_c
 
 ! ------------------------------------------------------------------------------
 
+subroutine ufo_geovals_profmult_c(c_key_self, nlocs, values) bind(c,name='ufo_geovals_profmult_f90')
+implicit none
+integer(c_int), intent(in) :: c_key_self
+integer(c_int), intent(in) :: nlocs
+real(c_float), intent(in) :: values(nlocs)
+type(ufo_geovals), pointer :: self
+
+call ufo_geovals_registry%get(c_key_self, self)
+
+call ufo_geovals_profmult(self, nlocs, values)
+
+end subroutine ufo_geovals_profmult_c
+
+! ------------------------------------------------------------------------------
+
 subroutine ufo_geovals_assign_c(c_key_self, c_key_rhs) bind(c,name='ufo_geovals_assign_f90')
 implicit none
 integer(c_int), intent(in) :: c_key_self
@@ -264,28 +292,53 @@ end subroutine ufo_geovals_normalize_c
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_geovals_dotprod_c(c_key_self, c_key_other, prod, lcname, cname) bind(c,name='ufo_geovals_dotprod_f90')
-use string_f_c_mod
+subroutine ufo_geovals_dotprod_c(c_key_self, c_key_other, prod, c_comm) bind(c,name='ufo_geovals_dotprod_f90')
 implicit none
-integer(c_int), intent(in) :: c_key_self, c_key_other
-real(c_double), intent(inout) :: prod
-integer(c_int),intent(in) :: lcname                        !< Communicator name length
-character(kind=c_char,len=1),intent(in) :: cname(lcname+1) !< Communicator name
+integer(c_int), intent(in)     :: c_key_self, c_key_other
+real(c_double), intent(inout)  :: prod
+type(c_ptr), value, intent(in) :: c_comm
 
 type(ufo_geovals), pointer :: self, other
-type(fckit_mpi_comm) :: f_comm
-character(len=lcname) :: name
+type(fckit_mpi_comm)       :: f_comm
 
 call ufo_geovals_registry%get(c_key_self, self)
 call ufo_geovals_registry%get(c_key_other, other)
 
-call c_f_string(cname, name)
-f_comm = fckit_mpi_comm(name)
-
+f_comm = fckit_mpi_comm(c_comm)
 
 call ufo_geovals_dotprod(self, other, prod, f_comm)
 
 end subroutine ufo_geovals_dotprod_c
+
+! ------------------------------------------------------------------------------
+
+subroutine ufo_geovals_split_c(c_key_self, c_key_other1, c_key_other2) bind(c,name='ufo_geovals_split_f90')
+implicit none
+integer(c_int), intent(in) :: c_key_self, c_key_other1, c_key_other2
+type(ufo_geovals), pointer :: self, other1, other2
+
+call ufo_geovals_registry%get(c_key_self, self)
+call ufo_geovals_registry%get(c_key_other1, other1)
+call ufo_geovals_registry%get(c_key_other2, other2)
+
+call ufo_geovals_split(self, other1, other2)
+
+end subroutine ufo_geovals_split_c
+
+! ------------------------------------------------------------------------------
+
+subroutine ufo_geovals_merge_c(c_key_self, c_key_other1, c_key_other2) bind(c,name='ufo_geovals_merge_f90')
+implicit none
+integer(c_int), intent(in) :: c_key_self, c_key_other1, c_key_other2
+type(ufo_geovals), pointer :: self, other1, other2
+
+call ufo_geovals_registry%get(c_key_self, self)
+call ufo_geovals_registry%get(c_key_other1, other1)
+call ufo_geovals_registry%get(c_key_other2, other2)
+
+call ufo_geovals_merge(self, other1, other2)
+
+end subroutine ufo_geovals_merge_c
 
 ! ------------------------------------------------------------------------------
 
@@ -468,23 +521,20 @@ end subroutine ufo_geovals_read_file_c
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_geovals_write_file_c(c_key_self, c_conf, lcname, cname) bind(c,name='ufo_geovals_write_file_f90')
-use string_f_c_mod
+subroutine ufo_geovals_write_file_c(c_key_self, c_conf, c_comm) bind(c,name='ufo_geovals_write_file_f90')
 implicit none
-integer(c_int), intent(in) :: c_key_self
-type(c_ptr), intent(in) :: c_conf
-integer(c_int),intent(in) :: lcname                        !< Communicator name length
-character(kind=c_char,len=1),intent(in) :: cname(lcname+1) !< Communicator name
+integer(c_int), intent(in)     :: c_key_self
+type(c_ptr), intent(in)        :: c_conf
+type(c_ptr), value, intent(in) :: c_comm
 
 type(ufo_geovals), pointer :: self
-character(max_string) :: fout, filename
+character(max_string)      :: fout, filename
 
-type(fckit_mpi_comm)      :: comm
-character(len=10)         :: cproc
-integer                   :: ppos
+type(fckit_mpi_comm)          :: comm
+character(len=10)             :: cproc
+integer                       :: ppos
 character(len=:), allocatable :: str
-type(fckit_configuration) :: f_conf
-character(len=lcname) :: name
+type(fckit_configuration)     :: f_conf
 
 ! read filename for config
 f_conf = fckit_configuration(c_conf)
@@ -492,8 +542,7 @@ call f_conf%get_or_die("filename",str)
 filename = str
 
 ! get the process rank number
-call c_f_string(cname, name)
-comm= fckit_mpi_comm(name)
+comm = fckit_mpi_comm(c_comm)
 
 write(cproc,fmt='(i4.4)') comm%rank()
 

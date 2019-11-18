@@ -16,12 +16,9 @@
 #include "ioda/ObsDataVector.h"
 #include "ioda/ObsSpace.h"
 #include "oops/base/Variables.h"
-#include "oops/interface/ObsFilter.h"
 #include "oops/util/Logger.h"
 #include "oops/util/missingValues.h"
 #include "oops/util/Random.h"
-#include "ufo/filters/QCflags.h"
-#include "ufo/UfoTrait.h"
 #include "ufo/utils/Constants.h"
 
 namespace ufo {
@@ -101,9 +98,9 @@ int Gaussian_Thinning::dist_to_centroid(float ob_lon, float ob_lat, float c_lon,
 // -----------------------------------------------------------------------------
 
 void Gaussian_Thinning::applyFilter(const std::vector<bool> & apply,
+                                    const Variables & filtervars,
                                     std::vector<std::vector<bool>> & flagged) const {
   const size_t nobs = obsdb_.nlocs();
-  const oops::Variables vars = obsdb_.obsvariables();
   const float re = Constants::mean_earth_rad;  // km
   const float deg2rad = Constants::deg2rad;
   const float half_circum = M_PI * re;
@@ -232,9 +229,9 @@ void Gaussian_Thinning::applyFilter(const std::vector<bool> & apply,
   }
 
   // project the QC across all varialbes and fail all obs that do not pass thinning
-  for (size_t jv = 0; jv < vars.size(); ++jv) {
+  for (size_t jv = 0; jv < filtervars.nvars(); ++jv) {
      for (size_t jobs = 0; jobs < nobs; ++jobs) {
-        if ( thin[jobs] && flags_[jv][jobs] == 0) flags_[jv][jobs] = QCflags::thinned;
+        if ( apply[jobs] && thin[jobs] ) flagged[jv][jobs] = true;
      }
   }
 }

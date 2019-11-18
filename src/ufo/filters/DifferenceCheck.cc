@@ -14,15 +14,8 @@
 
 #include "ioda/ObsDataVector.h"
 #include "ioda/ObsSpace.h"
-#include "ioda/ObsVector.h"
 
-#include "oops/interface/ObsFilter.h"
 #include "oops/util/Logger.h"
-
-#include "ufo/filters/QCflags.h"
-#include "ufo/GeoVaLs.h"
-#include "ufo/UfoTrait.h"
-#include "ufo/utils/SplitVarGroup.h"
 
 namespace ufo {
 
@@ -48,6 +41,7 @@ DifferenceCheck::~DifferenceCheck() {
 // -----------------------------------------------------------------------------
 
 void DifferenceCheck::applyFilter(const std::vector<bool> & apply,
+                                  const Variables & filtervars,
                                   std::vector<std::vector<bool>> & flagged) const {
   oops::Log::trace() << "DifferenceCheck priorFilter" << std::endl;
 
@@ -76,15 +70,15 @@ void DifferenceCheck::applyFilter(const std::vector<bool> & apply,
     if (apply[jobs]) {
       // check to see if one of the reference or value is missing
       if (val[jobs] == missing || ref[jobs] == missing) {
-        for (size_t jv = 0; jv < flags_.nvars(); ++jv) {
-          if (flags_[jv][jobs] == 0) flags_[jv][jobs] = QCflags::diffref;
+        for (size_t jv = 0; jv < filtervars.nvars(); ++jv) {
+          flagged[jv][jobs] = true;
         }
       } else {
 // Check if difference is within min/max value range and set flag
         float diff = val[jobs] - ref[jobs];
-        for (size_t jv = 0; jv < flags_.nvars(); ++jv) {
-          if (vmin != missing && diff < vmin) flags_[jv][jobs] = QCflags::diffref;
-          if (vmax != missing && diff > vmax) flags_[jv][jobs] = QCflags::diffref;
+        for (size_t jv = 0; jv < filtervars.nvars(); ++jv) {
+          if (vmin != missing && diff < vmin) flagged[jv][jobs] = true;
+          if (vmax != missing && diff > vmax) flagged[jv][jobs] = true;
         }
       }
     }

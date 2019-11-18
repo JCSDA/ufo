@@ -8,6 +8,7 @@
 #ifndef UFO_GEOVALS_INTERFACE_H_
 #define UFO_GEOVALS_INTERFACE_H_
 
+#include "eckit/mpi/Comm.h"
 #include "Fortran.h"
 
 // Forward declarations
@@ -28,6 +29,7 @@ namespace ufo {
  */
 
 extern "C" {
+  void ufo_geovals_default_constr_f90(F90goms &);
   void ufo_geovals_setup_f90(F90goms &, const F90locs &, const oops::Variables &);
   void ufo_geovals_delete_f90(F90goms &);
   void ufo_geovals_copy_f90(const F90goms &, F90goms &);
@@ -38,13 +40,16 @@ extern "C" {
                                      const eckit::Configuration * const *);
   void ufo_geovals_random_f90(const F90goms &);
   void ufo_geovals_scalmult_f90(const F90goms &, const double &);
+  void ufo_geovals_profmult_f90(const F90goms &, const int &, const float &);
   void ufo_geovals_assign_f90(const F90goms &, const F90goms &);
   void ufo_geovals_add_f90(const F90goms &, const F90goms &);
   void ufo_geovals_diff_f90(const F90goms &, const F90goms &);
   void ufo_geovals_schurmult_f90(const F90goms &, const F90goms &);
   void ufo_geovals_normalize_f90(const F90goms &, const F90goms &);
   void ufo_geovals_dotprod_f90(const F90goms &, const F90goms &, double &,
-                               const int &, const char *);
+                               const eckit::mpi::Comm *);
+  void ufo_geovals_split_f90(const F90goms &, const F90goms &, const F90goms &);
+  void ufo_geovals_merge_f90(const F90goms &, const F90goms &, const F90goms &);
   void ufo_geovals_minmaxavg_f90(const F90goms &, int &, int &, double &, double &, double &);
   void ufo_geovals_maxloc_f90(const F90goms &, double &, int &, int &);
   void ufo_geovals_nlocs_f90(const F90goms &, size_t &);
@@ -57,7 +62,7 @@ extern "C" {
                                  const eckit::Configuration * const *,
                                  const ioda::ObsSpace &, const oops::Variables &);
   void ufo_geovals_write_file_f90(const F90goms &, const eckit::Configuration * const *,
-                                  const int &, const char *);
+                                  const eckit::mpi::Comm *);
 }  // extern C
 
 }  // namespace ufo

@@ -35,6 +35,8 @@ Observations:
         variables: [variable1]
     ObsFilters:
     - Filter: Difference Check     # test maxvalue (compare var3-var4 with max)
+      filter variables:
+      - name: variable1
       value: var3@MetaData         # var3@MetaData = 1, 1, 1, 1, 1, 0, 0, 0, 0, 0
       reference: var4@MetaData     # var4@MetaData = 0, 0, 0, 0, 0, 1, 2, 3, 4, 5
       maxvalue: -3.0
@@ -47,6 +49,8 @@ Observations:
         variables: [variable1]
     ObsFilters:
     - Filter: Difference Check        # test min and maxvalue (compare var3-var4 with min and max)
+      filter variables:
+      - name: variable1
       value: variable2@ObsValue       # variable2@ObsValue = 10, 12, 14, 16, 18, 20, 22, 24, 26, 28
       reference: variable1@ObsValue   # variable1@ObsValue = 10, 11, 12, 13, 14, 15, 16, 17, 18, 19
       minvalue: 2.0
@@ -60,6 +64,8 @@ Observations:
         variables: [variable1]
     ObsFilters:
     - Filter: Difference Check         # test threshold (compare abs(variable2 - variable1) with threshold)
+      filter variables:
+      - name: variable1
       value: variable2@ObsValue        # variable2@ObsValue = 10, 12, 14, 16, 18, 20, 22, 24, 26, 28
       reference: variable1@ObsValue    # variable1@ObsValue = 10, 11, 12, 13, 14, 15, 16, 17, 18, 19
       threshold: 3
@@ -72,6 +78,8 @@ Observations:
         variables: [variable1]
     ObsFilters:
     - Filter: Difference Check        # test min and maxvalue (equal), equivalent to previous test
+      filter variables:
+      - name: variable1
       value: variable2@ObsValue       # variable2@ObsValue = 10, 12, 14, 16, 18, 20, 22, 24, 26, 28
       reference: variable1@ObsValue   # variable1@ObsValue = 10, 11, 12, 13, 14, 15, 16, 17, 18, 19
       minvalue: -3

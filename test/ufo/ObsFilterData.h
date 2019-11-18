@@ -40,21 +40,24 @@ void testObsFilterData() {
   for (size_t jconf = 0; jconf < confs.size(); ++jconf) {
 ///  Setup ObsSpace
     const eckit::LocalConfiguration obsconf(confs[jconf], "ObsSpace");
-    const eckit::LocalConfiguration obsvarconf(obsconf, "simulate");
     ioda::ObsSpace ospace(obsconf, oops::mpi::comm(), bgn, end);
 
 ///  Setup GeoVaLs
     const eckit::LocalConfiguration gconf(confs[jconf], "GeoVaLs");
-    const oops::Variables ingeovars(gconf);
-    const GeoVaLs gval(gconf, ospace, ingeovars);
+    std::vector<eckit::LocalConfiguration> varconfs;
+    gconf.get("variables", varconfs);
+    const Variables geovars(varconfs);
+    const GeoVaLs gval(gconf, ospace, geovars.toOopsVariables());
 
 ///  Setup ObsDiags
     const eckit::LocalConfiguration obsdiagconf(confs[jconf], "ObsDiag");
-    const oops::Variables inobsdiagvars(obsdiagconf);
-    const ObsDiagnostics obsdiags(obsdiagconf, ospace, inobsdiagvars);
+    obsdiagconf.get("variables", varconfs);
+    const Variables diagvars(varconfs);
+    const ObsDiagnostics obsdiags(obsdiagconf, ospace, diagvars.toOopsVariables());
 
 ///  Setup H(x)
-    const std::string hofxgroup = confs[jconf].getString("HofX");
+    const eckit::LocalConfiguration hofxconf(confs[jconf], "HofX");
+    const std::string hofxgroup = hofxconf.getString("group");
     ioda::ObsVector hofx(ospace, hofxgroup);
 
 ///  Setup ObsFilterData and test nlocs
@@ -62,102 +65,104 @@ void testObsFilterData() {
     EXPECT(data.nlocs() == ospace.nlocs());
 
 ///  Check that has() and get() works on ObsSpace:
-    ufo::Variables obsvars(obsvarconf, "ObsValue");
-    for (size_t jvar = 0; jvar < obsvars.size(); ++jvar) {
-      EXPECT(data.has(obsvars[jvar]));
+    obsconf.get("float variables", varconfs);
+    ufo::Variables obsvars(varconfs);
+    for (size_t jvar = 0; jvar < obsvars.nvars(); ++jvar) {
+      EXPECT(data.has(obsvars.variable(jvar)));
       std::vector<float> vec;
-      data.get(obsvars[jvar], vec);
+      data.get(obsvars.variable(jvar), vec);
       std::vector<float> ref(ospace.nlocs());
-      ospace.get_db(obsvars.group(jvar), obsvars.variable(jvar), ref.size(), ref.data());
+      ospace.get_db(obsvars.variable(jvar).group(), obsvars.variable(jvar).variable(),
+                    ref.size(), ref);
       EXPECT(vec == ref);
     }
 ///  Check that has() and get() work on integer variables in ObsSpace:
-    const eckit::LocalConfiguration intvarconf(obsconf, "integer data");
-    ufo::Variables intvars(intvarconf);
-    for (size_t jvar = 0; jvar < intvars.size(); ++jvar) {
-      EXPECT(data.has(intvars[jvar]));
+    obsconf.get("integer variables", varconfs);
+    ufo::Variables intvars(varconfs);
+    for (size_t jvar = 0; jvar < intvars.nvars(); ++jvar) {
+      EXPECT(data.has(intvars.variable(jvar)));
       std::vector<int> vec;
-      data.get(intvars[jvar], vec);
+      data.get(intvars.variable(jvar), vec);
       std::vector<int> ref(ospace.nlocs());
-      ospace.get_db(intvars.group(jvar), intvars.variable(jvar), ref.size(), ref.data());
+      ospace.get_db(intvars.variable(jvar).group(), intvars.variable(jvar).variable(),
+                    ref.size(), ref);
       EXPECT(vec == ref);
     }
 
 ///  Check that associate(), has() and get() work on ObsVector:
-    ufo::Variables hofxvars(obsvarconf, "HofX");
 ///  H(x) not associated yet
-    for (size_t jvar = 0; jvar < hofxvars.size(); ++jvar) {
-      EXPECT(!data.has(hofxvars[jvar]));
+    hofxconf.get("variables", varconfs);
+    ufo::Variables hofxvars(varconfs);
+    for (size_t jvar = 0; jvar < hofxvars.nvars(); ++jvar) {
+      EXPECT(!data.has(hofxvars.variable(jvar)));
     }
     data.associate(hofx);
 ///  H(x) associated now
-    for (size_t jvar = 0; jvar < hofxvars.size(); ++jvar) {
-      EXPECT(data.has(hofxvars[jvar]));
+    for (size_t jvar = 0; jvar < hofxvars.nvars(); ++jvar) {
+      EXPECT(data.has(hofxvars.variable(jvar)));
       std::vector<float> vec;
-      data.get(hofxvars[jvar], vec);
+      data.get(hofxvars.variable(jvar), vec);
       std::vector<float> ref(hofx.nlocs());
       for (size_t jloc = 0; jloc < hofx.nlocs(); jloc++) {
-        ref[jloc] = hofx[hofxvars.size() * jloc + jvar];
+        ref[jloc] = hofx[hofxvars.nvars() * jloc + jvar];
       }
       EXPECT(vec == ref);
     }
 
 ///  Check that associate(), has() and get() work on GeoVaLs:
-    ufo::Variables geovars(gconf, "GeoVaLs");
 ///  GeoVaLs not associated yet
-    for (size_t jvar = 0; jvar < geovars.size(); ++jvar) {
-      EXPECT(!data.has(geovars[jvar]));
+    for (size_t jvar = 0; jvar < geovars.nvars(); ++jvar) {
+      EXPECT(!data.has(geovars.variable(jvar)));
     }
     data.associate(gval);
 ///  GeoVaLs associated now
-    for (size_t jvar = 0; jvar < geovars.size(); ++jvar) {
-      EXPECT(data.has(geovars[jvar]));
-      int nlevs = data.nlevs(geovars[jvar]);
-      int nlevs_ref = gval.nlevs(geovars.variable(jvar));
+    for (size_t jvar = 0; jvar < geovars.nvars(); ++jvar) {
+      EXPECT(data.has(geovars.variable(jvar)));
+      int nlevs = data.nlevs(geovars.variable(jvar));
+      int nlevs_ref = gval.nlevs(geovars.variable(jvar).variable());
       EXPECT(nlevs == nlevs_ref);
 ///  nlevs == 1: 2D geovals, could be retrieved with get(var)
       if (nlevs == 1) {
         std::vector<float> vec;
-        data.get(geovars[jvar], vec);
+        data.get(geovars.variable(jvar), vec);
         std::vector<float> ref(ospace.nlocs());
-        gval.get(ref, geovars.variable(jvar));
+        gval.get(ref, geovars.variable(jvar).variable());
         EXPECT(vec == ref);
 ///  otherwise need get(var, level) to retrieve
       } else {
         std::vector<float> vec;
-        data.get(geovars[jvar], nlevs, vec);
+        data.get(geovars.variable(jvar), nlevs, vec);
         std::vector<float> ref(ospace.nlocs());
-        gval.get(ref, geovars.variable(jvar), nlevs);
+        gval.get(ref, geovars.variable(jvar).variable(), nlevs);
         EXPECT(vec == ref);
       }
     }
 
 ///  Check that associate(), has() and get() work on ObsDiags:
-    ufo::Variables diagvars(obsdiagconf, "ObsDiag");
 ///  ObsDiags not associated yet
-    for (size_t jvar = 0; jvar < diagvars.size(); ++jvar) {
-      EXPECT(!data.has(diagvars[jvar]));
+    for (size_t jvar = 0; jvar < diagvars.nvars(); ++jvar) {
+      EXPECT(!data.has(diagvars.variable(jvar)));
     }
     data.associate(obsdiags);
 ///  ObsDiags associated now
-    for (size_t jvar = 0; jvar < diagvars.size(); ++jvar) {
-      EXPECT(data.has(diagvars[jvar]));
-      int nlevs = data.nlevs(diagvars[jvar]);
-      int nlevs_ref = obsdiags.nlevs(diagvars.variable(jvar));
+    for (size_t jvar = 0; jvar < diagvars.nvars(); ++jvar) {
+      EXPECT(data.has(diagvars.variable(jvar)));
+      int nlevs = data.nlevs(diagvars.variable(jvar));
+      int nlevs_ref = obsdiags.nlevs(diagvars.variable(jvar).variable());
       EXPECT(nlevs == nlevs_ref);
 ///  nlevs == 1: 2D obsdiags, could be retrieved with get(var)
       if (nlevs == 1) {
         std::vector<float> vec;
-        data.get(diagvars[jvar], vec);
+        data.get(diagvars.variable(jvar), vec);
         std::vector<float> ref(ospace.nlocs());
-        obsdiags.get(ref, diagvars.variable(jvar));
+        obsdiags.get(ref, diagvars.variable(jvar).variable());
         EXPECT(vec == ref);
 ///  otherwise need get(var, level) to retrieve
       } else {
         std::vector<float> vec;
-        data.get(diagvars[jvar], nlevs, vec);
+        data.get(diagvars.variable(jvar), nlevs, vec);
         std::vector<float> ref(ospace.nlocs());
-        obsdiags.get(ref, diagvars.variable(jvar), nlevs);
+        obsdiags.get(ref, diagvars.variable(jvar).variable(), nlevs);
         EXPECT(vec == ref);
       }
     }

@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2017-2018 UCAR
+ * (C) Copyright 2019 UK Met Office
  * 
  * This software is licensed under the terms of the Apache Licence Version 2.0
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
@@ -11,6 +11,7 @@
 #include <memory>
 #include <ostream>
 #include <string>
+#include <vector>
 
 #include "oops/base/Variables.h"
 #include "oops/util/DateTime.h"
@@ -19,7 +20,7 @@
 
 #include "ufo/Locations.h"
 #include "ufo/ObsOperatorBase.h"
-#include "ufo/timeoper/ObsTimeOper.interface.h"
+#include "ufo/timeoper/ObsTimeOperUtil.h"
 
 /// Forward declarations
 namespace eckit {
@@ -55,16 +56,11 @@ class ObsTimeOper : public ObsOperatorBase,
 // Other
   const oops::Variables & variables() const override {return actualoperator_->variables();}
 
-  const util::DateTime & validTime() const {return time_;}
-  util::DateTime & validTime() {return time_;}
-
  private:
   void print(std::ostream &) const override;
   std::unique_ptr<ObsOperatorBase> actualoperator_;
-  F90hop keyTimeOper_;
   const ioda::ObsSpace& odb_;
-  util::DateTime time_;
-  int timeStencil_;
+  std::vector<std::vector<float>> timeWeights_;
 };
 
 // -----------------------------------------------------------------------------

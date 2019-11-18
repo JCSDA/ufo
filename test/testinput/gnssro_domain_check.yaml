@@ -13,20 +13,25 @@ Observations:
        variables: [bending_angle]
    ObsFilters:
     - Filter: Domain Check
-      variables: [bending_angle]
+      filter variables:
+      - name: bending_angle
       where:
       # Earth radius of curvature limits in meters
       # note values in the raw BUFR data files is in km
-      - variable: earth_radius_of_curvature@MetaData
+      - variable:
+          name:  earth_radius_of_curvature@MetaData
         minvalue: 6250000.
         maxvalue: 6450000. 
-      - variable: geoid_height_above_reference_ellipsoid@MetaData
+      - variable:
+          name:  geoid_height_above_reference_ellipsoid@MetaData
         minvalue: -200.
         maxvalue: 200. 
-      - variable: latitude@MetaData
+      - variable:
+          name:  latitude@MetaData
         minvalue: -90.
         maxvalue: 90. 
-      - variable: longitude@MetaData
+      - variable:
+          name:  longitude@MetaData
         minvalue: -180.
         maxvalue: 360. 
    passedBenchmark: 150

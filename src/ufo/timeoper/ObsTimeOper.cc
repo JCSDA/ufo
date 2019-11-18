@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2017-2018 UCAR
+ * (C) Copyright 2019 UK Met Office
  *
  * This software is licensed under the terms of the Apache Licence Version 2.0
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
@@ -7,7 +7,9 @@
 
 #include "ufo/timeoper/ObsTimeOper.h"
 
+#include <algorithm>
 #include <ostream>
+#include <vector>
 
 #include "ioda/ObsVector.h"
 
@@ -20,11 +22,12 @@
 #include "ufo/Locations.h"
 #include "ufo/ObsDiagnostics.h"
 #include "ufo/ObsOperatorBase.h"
+#include "ufo/timeoper/ObsTimeOperUtil.h"
 
 namespace ufo {
 
 // -----------------------------------------------------------------------------
-static ObsOperatorMaker<ObsTimeOper> makerTimeOpInterp_("TimeOpInterp");
+static ObsOperatorMaker<ObsTimeOper> makerTimeOper_("TimeOperLinInterp");
 // -----------------------------------------------------------------------------
 
 ObsTimeOper::ObsTimeOper(const ioda::ObsSpace & odb,
@@ -32,49 +35,21 @@ ObsTimeOper::ObsTimeOper(const ioda::ObsSpace & odb,
   : ObsOperatorBase(odb, config),
     actualoperator_(ObsOperatorFactory::create(
     odb, eckit::LocalConfiguration(config, "ObsOperator"))),
-    odb_(odb), timeStencil_(2)
+    odb_(odb), timeWeights_(timeWeightCreate(odb, config))
 {
   oops::Log::trace() << "ObsTimeOper creating" << std::endl;
 
-  const eckit::Configuration * configc = &config;
-
-  ufo_timeoper_setup_f90(keyTimeOper_, &configc, odb_.nlocs(), timeStencil_);
-
   util::DateTime windowBegin(odb_.windowStart());
   util::DateTime windowEnd(odb_.windowEnd());
+
   util::Duration windowSub;
   windowSub = util::Duration(config.getString("windowSub"));
+  util::Duration window = windowEnd - windowBegin;
 
-  util::DateTime t0(windowBegin);
-  util::DateTime t3, stateTime;
-
-  for (util::DateTime stateTime = windowBegin;
-       stateTime <= windowEnd; stateTime = stateTime + windowSub) {
-    if (stateTime == windowBegin) {
-      t0 = windowBegin;
-      t3 = t0 + windowSub;
-    } else if (stateTime == windowEnd) {
-      t0 = windowEnd - windowSub;
-      t3 = windowEnd;
-    } else {
-      t0 = stateTime - windowSub;
-      t3 = stateTime + windowSub;
-    }
-    const util::DateTime * p0 = &t0;
-    const util::DateTime * p3 = &t3;
-    const util::DateTime * st = &stateTime;
-    const util::Duration * ws = &windowSub;
-
-    oops::Log::debug() << " t0 = " << t0.toString() << std::endl;
-    oops::Log::debug() << " t3 = " << t3.toString() << std::endl;
-    oops::Log::debug() << " stateTime = " << stateTime.toString() << std::endl;
-    oops::Log::debug() << " windowSub = " << windowSub.toString() << std::endl;
-
-    ufo_timeoper_set_timeweight_f90(keyTimeOper_, &configc,
-                                    odb_, &p0, &p3, &st, &ws);
+  if (window == windowSub) {
+    ABORT("Time Interpolation of obs not implemented when assimilation window = subWindow");
   }
-
-  oops::Log::trace() << "ObsTimeOper created." << std::endl;
+  oops::Log::trace() << "ObsTimeOper created" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
@@ -90,9 +65,6 @@ Locations * ObsTimeOper::locations(const util::DateTime & t1,
                                    const util::DateTime & t2) const {
   oops::Log::trace() << "entered ObsOperatorTime::locations" << std::endl;
 
-  Locations * locs = new Locations(odb_.comm());
-  int keylocs = locs->toFortran();
-
   util::DateTime t0, t3, stateTime;
   util::Duration initial_dt, windowSub;
 
@@ -101,19 +73,21 @@ Locations * ObsTimeOper::locations(const util::DateTime & t1,
 
   initial_dt = t2 - t1;
 
+  Locations * locs(nullptr);
+  Locations * locs2(nullptr);
   if ((t1 == windowBegin) && (t2 == windowEnd)) {
-    windowSub = initial_dt;
-    t0 = t1;
-    t3 = t2;
-    stateTime = t1 + initial_dt/2;
+    oops::Log::debug() << "locs: full window to concatenate"  << std::endl;
+    locs = new Locations(odb_, t1, t2);
+    *locs += *locs;
   } else {
+// define t0, t3, stateTime
     if ((t1 == windowBegin) || (t2 == windowEnd))
       windowSub = initial_dt * 2;
     else
       windowSub = initial_dt;
 
-    t0 = t1 - (windowSub/2) * (2 * (timeStencil_) - 3);
-    t3 = t2 + (windowSub/2) * (2 * (timeStencil_) - 3);
+    t0 = t1 - (windowSub/2);
+    t3 = t2 + (windowSub/2);
     stateTime = t1 + initial_dt/2;
 
     if (t1 == windowBegin) {
@@ -124,40 +98,45 @@ Locations * ObsTimeOper::locations(const util::DateTime & t1,
       t3 = windowEnd;
       stateTime = windowEnd;
     }
+
+    if ((t1 == windowBegin) && (t2 != windowEnd)) {
+      oops::Log::debug() << "locs: locsObsAfterState only"  << std::endl;
+      locs = new Locations(odb_, stateTime, t3);
+    } else if ((t1 != windowBegin) && (t2 == windowEnd)) {
+      oops::Log::debug() << " locs: locsObsBeforeState only "  << std::endl;
+      locs = new Locations(odb_, stateTime, stateTime);
+      // the above locs is mainly empty except for self%max_indx = obsspace_get_gnlocs(obss)
+      locs2 = new Locations(odb_, t0, stateTime);
+      *locs += *locs2;
+    } else {
+      oops::Log::debug() << "locs: internal window concatenate"  << std::endl;
+      locs = new Locations(odb_, stateTime, t3);
+      locs2 = new Locations(odb_, t0, stateTime);
+      *locs += *locs2;
+    }
   }
-  oops::Log::debug() << " timeStencil_ = " << timeStencil_ << std::endl;
-  oops::Log::debug() << " windowBegin = " << windowBegin.toString() << std::endl;
-  oops::Log::debug() << " windowEnd = " << windowEnd.toString() << std::endl;
-  oops::Log::debug() << " t0 = " << t0.toString() << std::endl;
-  oops::Log::debug() << " t1 = " << t1.toString() << std::endl;
-  oops::Log::debug() << " t2 = " << t2.toString() << std::endl;
-  oops::Log::debug() << " t3 = " << t3.toString() << std::endl;
-  oops::Log::debug() << " stateTime = " << stateTime.toString() << std::endl;
-
-  const util::DateTime * p0 = &t0;
-  const util::DateTime * p1 = &t1;
-  const util::DateTime * p2 = &t2;
-  const util::DateTime * p3 = &t3;
-  const util::DateTime * st = &stateTime;
-
-  ufo_timeoper_locs_init_f90(keyTimeOper_, keylocs, odb_, &p0, &p1, &p2, &p3, &st);
+  // create concatenation of Locations class
+  delete(locs2);
   return locs;
 }
-// -----------------------------------------------------------------------------
+
 
 void ObsTimeOper::simulateObs(const GeoVaLs & gv, ioda::ObsVector & ovec,
-                             ObsDiagnostics & ydiags) const {
+                              ObsDiagnostics & ydiags) const {
   oops::Log::trace() << "ObsTimeOper: simulateObs entered" << std::endl;
 
-  oops::Log::debug() << gv;
+  oops::Log::trace() << gv <<  std::endl;
 
-  ufo_timeoper_simobs_f90(keyTimeOper_, gv.toFortran(), odb_);
+  GeoVaLs gv1(odb_.comm()), gv2(odb_.comm());
+  gv.split(gv1, gv2);
 
-  oops::Log::debug() << gv;
+  oops::Log::trace() << gv1 << std::endl;
+  oops::Log::trace() << gv2 << std::endl;
 
-  actualoperator_->simulateObs(gv, ovec, ydiags);
-
-  oops::Log::debug() << gv;
+  gv1 *= timeWeights_[0];
+  gv2 *= timeWeights_[1];
+  gv1 += gv2;
+  actualoperator_->simulateObs(gv1, ovec, ydiags);
 
   oops::Log::trace() << "ObsTimeOper: simulateObs exit " <<  std::endl;
 }
@@ -171,3 +150,5 @@ void ObsTimeOper::print(std::ostream & os) const {
 // -----------------------------------------------------------------------------
 
 }  // namespace ufo
+
+

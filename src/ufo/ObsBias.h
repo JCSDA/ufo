@@ -28,6 +28,7 @@ namespace ioda {
 namespace ufo {
   class GeoVals;
   class ObsBiasIncrement;
+  class ObsDiagnostics;
 
 /// Class to handle observation bias parameters.
 
@@ -56,17 +57,23 @@ class ObsBias : public util::Printable,
 /// Obs bias model
   void computeObsBias(const GeoVaLs &,
                       ioda::ObsVector &,
-                      const ioda::ObsSpace &) const;
+                      const ioda::ObsSpace &,
+                      const ObsDiagnostics &) const;
 
 /// Other
-  const oops::Variables & variables() const;
+  const oops::Variables & requiredGeoVaLs() const {return geovars_;}
+  const oops::Variables & requiredHdiagnostics() const {return hdiags_;}
   const eckit::Configuration & config() const {return conf_;}
+
+/// Operator
+  operator bool() const {return biasbase_.get();}
 
  private:
   void print(std::ostream &) const;
   std::unique_ptr<ObsBiasBase> biasbase_;
   const eckit::LocalConfiguration conf_;
-  oops::Variables vars_;
+  oops::Variables geovars_;
+  oops::Variables hdiags_;
 };
 
 // -----------------------------------------------------------------------------

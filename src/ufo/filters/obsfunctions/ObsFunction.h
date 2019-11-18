@@ -14,6 +14,7 @@
 #include <boost/noncopyable.hpp>
 
 #include "ioda/ObsDataVector.h"
+#include "ioda/ObsSpace.h"
 #include "ufo/filters/ObsFilterData.h"
 #include "ufo/filters/obsfunctions/ObsFunctionBase.h"
 
@@ -25,7 +26,7 @@ namespace ufo {
 class ObsFunction : private boost::noncopyable {
  public:
 /// constructor takes function name (for factory) on input
-  explicit ObsFunction(const std::string &);
+  explicit ObsFunction(const Variable &);
   ~ObsFunction();
 
 /// compute(metadata, obs values, output)

@@ -62,16 +62,19 @@ Observations:
      filename: Data/iasi_metop-a_geoval_2018041500_m.nc4
    ObsFilters:
    - Filter: Domain Check
-     variables: [brightness_temperature]
-     channels: *all_channels
+     filter variables:
+     - name: brightness_temperature
+       channels: *all_channels
      where:
 #    - variable: solar_zenith_angle
 #      minvalue: 89.
-     - variable: water_area_fraction@GeoVaLs
+     - variable:
+         name: water_area_fraction@GeoVaLs
        maxvalue: 0.0 
    - Filter: Bounds Check
-     variables: [brightness_temperature]
-     channels: *all_channels 
+     filter variables:
+     - name: brightness_temperature
+       channels: *all_channels 
      minvalue: 50.0
      maxvalue: 550.0
 #    - Filter: Background Check

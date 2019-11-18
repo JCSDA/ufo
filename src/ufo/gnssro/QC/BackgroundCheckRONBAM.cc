@@ -39,9 +39,7 @@ BackgroundCheckRONBAM::BackgroundCheckRONBAM(ioda::ObsSpace & obsdb,
   oops::Log::trace() << "BackgroundCheckRONBAM contructor: "
                      << "using NBAM style BackgroundCheck for GnssroBndNBAM" << std::endl;
   oops::Log::debug() << "BackgroundCheckRONBAM: config = " << config << std::endl;
-
-  const oops::Variables vars(config_);
-  allvars_ += vars[0] + "@HofX";
+  allvars_ += Variables(filtervars_, "HofX");
 }
 
 // -----------------------------------------------------------------------------
@@ -53,17 +51,17 @@ BackgroundCheckRONBAM::~BackgroundCheckRONBAM() {
 // -----------------------------------------------------------------------------
 
 void BackgroundCheckRONBAM::applyFilter(const std::vector<bool> & apply,
-                                       std::vector<std::vector<bool>> & flagged) const {
+                                        const Variables & filtervars,
+                                        std::vector<std::vector<bool>> & flagged) const {
   oops::Log::trace() << "BackgroundCheckRONBAM postFilter" << std::endl;
 
-  const oops::Variables vars(config_);
   const oops::Variables observed = obsdb_.obsvariables();
   const float missing = util::missingValue(missing);
 
   oops::Log::debug() << "BackgroundCheckRONBAM flags: " << flags_;
 
-  ioda::ObsDataVector<float> obs(obsdb_, vars, "ObsValue");
-  ioda::ObsDataVector<float> bias(obsdb_, vars, "ObsBias", false);
+  ioda::ObsDataVector<float> obs(obsdb_, filtervars.toOopsVariables(), "ObsValue");
+  ioda::ObsDataVector<float> bias(obsdb_, filtervars.toOopsVariables(), "ObsBias", false);
   ioda::ObsDataVector<float> impactheight(obsdb_, "impact_height", "MetaData");
   ioda::ObsDataVector<float> latitude(obsdb_, "latitude", "MetaData");
   ioda::ObsDataVector<float> geoidheight(obsdb_, "geoid_height_above_reference_ellipsoid",
@@ -71,13 +69,14 @@ void BackgroundCheckRONBAM::applyFilter(const std::vector<bool> & apply,
   ioda::ObsDataVector<float> temperature(obsdb_, "temperature",
                                          "MetaData");  // background temperature at obs location
 
-  for (size_t jv = 0; jv < vars.size(); ++jv) {
-    size_t iv = observed.find(vars[jv]);
+  Variables varhofx(filtervars, "HofX");
+
+  for (size_t jv = 0; jv < filtervars.nvars(); ++jv) {
+    size_t iv = observed.find(filtervars.variable(jv).variable());
 
 //  H(x)
-    const std::string varhofx = vars[jv] + "@HofX";
     std::vector<float> hofx;
-    data_.get(varhofx, hofx);
+    data_.get(varhofx.variable(jv), hofx);
 
     for (size_t jobs = 0; jobs < obsdb_.nlocs(); ++jobs) {
       if (apply[jobs] && flags_[iv][jobs] == 0) {
@@ -125,7 +124,7 @@ void BackgroundCheckRONBAM::applyFilter(const std::vector<bool> & apply,
 
 //      NBAM style background check: if omb/o is greater than a cutoff
         if (std::abs(static_cast<float>(hofx[jobs])-yy) > yy*cutoff) {
-           flags_[iv][jobs] = QCflags::fguess; }
+           flagged[jv][jobs] = true; }
       }
     }
   }

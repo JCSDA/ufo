@@ -17,6 +17,7 @@
 #include "ioda/ObsDataVector.h"
 #include "oops/util/ObjectCounter.h"
 #include "ufo/filters/FilterBase.h"
+#include "ufo/filters/QCflags.h"
 
 namespace eckit {
   class Configuration;
@@ -43,7 +44,9 @@ class Gaussian_Thinning : public FilterBase,
 
  private:
   void print(std::ostream &) const override;
-  void applyFilter(const std::vector<bool> &, std::vector<std::vector<bool>> &) const override;
+  void applyFilter(const std::vector<bool> &, const Variables &,
+                   std::vector<std::vector<bool>> &) const override;
+  int qcFlag() const override {return QCflags::thinned;}
 
   static int ll_to_idx(float in_lon, float in_lat, size_t n_lats,
                        const std::vector<size_t> &n_lons);

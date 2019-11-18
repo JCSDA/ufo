@@ -9,8 +9,8 @@ phases:
   install:
     commands:
       - echo Executing install phase
-      - echo $CODEBUILD_WEBHOOK_TRIGGER 
-      - echo $CODEBUILD_WEBHOOK_BASE_REF 
+      - echo $CODEBUILD_WEBHOOK_TRIGGER
+      - echo $CODEBUILD_WEBHOOK_BASE_REF
       - echo $CODEBUILD_WEBHOOK_ACTOR_ACCOUNT_ID
       - echo $CODEBUILD_WEBHOOK_EVENT
       - echo $CODEBUILD_BUILD_SUCCEEDING
@@ -63,7 +63,7 @@ phases:
       - git lfs install # creates .gitconfig
       - cp ~/.gitconfig /home/jcsdauser/
 
-      # ufo-bunde 
+      # ufo-bunde
       - git clone https://$GIT_USER:$GIT_PASS@github.com/jcsda/ufo-bundle ufo-bundle
       - cd ufo-bundle
       - git checkout $CODEBUILD_GIT_BRANCH || echo "No branch named $CODEBUILD_GIT_BRANCH in ufo-bundle repo"
@@ -117,8 +117,11 @@ phases:
       - pwd
       - ls
       - sed -i 's/BRANCH develop  UPDATE//' CMakeLists.txt
+      - sed -i 's/BRANCH develop //' CMakeLists.txt
       - sed -i -e '/ecbuild_bundle( PROJECT ufo/i\
         ecbuild_bundle( PROJECT ropp-ufo  GIT "https://github.com/JCSDA/ropp-test.git" )' CMakeLists.txt
+      - cat CMakeLists.txt
+
   build:
     commands:
       - echo Executing build phase
@@ -126,7 +129,7 @@ phases:
       - export BUILD_STATUS="0"
       - echo $BUILD_STATUS
 
-      - su - jcsdauser -c "cd /build_container 
+      - su - jcsdauser -c "cd /build_container
         && echo $CC
         && echo $CXX
         && echo $FC
@@ -148,9 +151,9 @@ phases:
     commands:
       - echo Executing post_build phase
       - echo $CODEBUILD_BUILD_SUCCEEDING
-      - if [ "$BUILD_STATUS" = "1" && "$CODEBUILD_BUILD_SUCCEEDING" = "0" ]; 
+      - if [ "$BUILD_STATUS" = "1"] && ["$CODEBUILD_BUILD_SUCCEEDING" = "0" ];
         then echo "Build passed, rerunning failed tests";
         su - jcsdauser -c "cd /build_container/ufo
-        && ctest -VV --rerun-failed"; 
+        && ctest -VV --rerun-failed";
         else echo "Build failed";
         fi

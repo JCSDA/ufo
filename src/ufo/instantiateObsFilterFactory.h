@@ -23,7 +23,6 @@
 #include "ufo/filters/Thinning.h"
 #include "ufo/gnssro/QC/BackgroundCheckRONBAM.h"
 #include "ufo/gnssro/QC/ROobserror.h"
-#include "ufo/surface/Correction/HCorrection.h"
 
 namespace ufo {
 template<typename MODEL> void instantiateObsFilterFactory() {
@@ -52,8 +51,6 @@ template<typename MODEL> void instantiateObsFilterFactory() {
            makerChk10_("MWCLW Check");
   static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::ObsDomainErrCheck> >
            makerChk11_("DomainErr Check");
-  static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::HCorrection> >
-           makerChk12_("HCorrection");
   static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::BackgroundCheckRONBAM> >
            makerChk13_("Background Check RONBAM");
 }

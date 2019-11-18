@@ -8,6 +8,7 @@
 #ifndef TEST_UFO_OBSFUNCTION_H_
 #define TEST_UFO_OBSFUNCTION_H_
 
+#include <iomanip>
 #include <memory>
 #include <string>
 #include <vector>
@@ -32,19 +33,22 @@ namespace test {
 
 // -----------------------------------------------------------------------------
 
-float dataVectorDiff(const ioda::ObsSpace & ospace, ioda::ObsDataVector<float> & vals,
-                    const ioda::ObsDataVector<float> & ref) {
-  float rms = 0.0;
-  int nobs = 0;
-  for (size_t jj = 0; jj < ref.nlocs() ; ++jj) {
-    vals[0][jj] -= ref[0][jj];
-    rms += vals[0][jj] * vals[0][jj];
-    nobs++;
+void dataVectorDiff(const ioda::ObsSpace & ospace, ioda::ObsDataVector<float> & vals,
+                    const ioda::ObsDataVector<float> & ref, std::vector<float> & rms_out) {
+  /// Loop through variables and calculate rms for each variable
+  for (size_t ivar = 0; ivar < vals.nvars() ; ++ivar) {
+    float rms = 0.0;
+    int nobs = 0;
+    for (size_t jj = 0; jj < ref.nlocs() ; ++jj) {
+      vals[ivar][jj] -= ref[ivar][jj];
+      rms += vals[ivar][jj] * vals[ivar][jj];
+      nobs++;
+    }
+    ospace.comm().allReduceInPlace(rms, eckit::mpi::sum());
+    ospace.comm().allReduceInPlace(nobs, eckit::mpi::sum());
+    if (nobs > 0) rms = sqrt(rms / static_cast<float>(nobs));
+    rms_out[ivar] = rms;
   }
-  ospace.comm().allReduceInPlace(rms, eckit::mpi::sum());
-  ospace.comm().allReduceInPlace(nobs, eckit::mpi::sum());
-  if (nobs > 0) rms = sqrt(rms / static_cast<float>(nobs));
-  return rms;
 }
 
 // -----------------------------------------------------------------------------
@@ -62,14 +66,14 @@ void testFunction() {
 
 ///  Get function name and which group to use for H(x)
   const eckit::LocalConfiguration obsfuncconf(conf, "ObsFunction");
-  std::string funcname = obsfuncconf.getString("name");
+  Variable funcname(obsfuncconf);
 
 ///  Setup function
   ObsFunction obsfunc(funcname);
   ufo::Variables allfuncvars = obsfunc.requiredVariables();
 
 ///  Setup GeoVaLs
-  const oops::Variables geovars = allfuncvars.allFromGroup("GeoVaLs");
+  const oops::Variables geovars = allfuncvars.allFromGroup("GeoVaLs").toOopsVariables();
   std::unique_ptr<GeoVaLs> gval;
   if (geovars.size() > 0) {
     const eckit::LocalConfiguration gconf(conf, "GeoVaLs");
@@ -78,7 +82,7 @@ void testFunction() {
   }
 
 ///  Setup ObsDiags
-  const oops::Variables diagvars = allfuncvars.allFromGroup("ObsDiag");
+  const oops::Variables diagvars = allfuncvars.allFromGroup("ObsDiag").toOopsVariables();
   std::unique_ptr<ObsDiagnostics> diags;
   if (diagvars.size() > 0) {
     const eckit::LocalConfiguration diagconf(conf, "ObsDiag");
@@ -92,25 +96,35 @@ void testFunction() {
   ioda::ObsDataVector<float> vals(ospace, outputvars, "ObsFunction", false);
   obsfunc.compute(inputs, vals);
   vals.save("TestResult");
+  int nvars = vals.nvars();
 
 ///  Compute function result through ObsFilterData
   ioda::ObsDataVector<float> vals_ofd(ospace, outputvars, "ObsFunction", false);
-  inputs.get(funcname+"@ObsFunction", vals_ofd);
+  inputs.get(funcname, vals_ofd);
 
 ///  Read reference values from ObsSpace
   ioda::ObsDataVector<float> ref(ospace, outputvars, "TestReference");
 
+
   const double tol = obsfuncconf.getDouble("tolerance");
 
 ///  Calculate rms(f(x) - ref) and compare to tolerance
-  float rms = dataVectorDiff(ospace, vals, ref);
-  oops::Log::info() << "Vector difference between reference and computed: " << vals << std::endl;
-  EXPECT(rms < 100*tol);  //  change tol from percent to actual value.
+  std::vector<float> rms_out(nvars);
+  dataVectorDiff(ospace, vals, ref, rms_out);
 
-  rms = dataVectorDiff(ospace, vals_ofd, ref);
+  oops::Log::info() << "Vector difference between reference and computed: " << std::endl;
+  oops::Log::info() << vals << std::endl;
+  for (size_t ivar = 0; ivar < nvars; ivar++) {
+    EXPECT(rms_out[ivar] < 100*tol);  //  change tol from percent to actual value.
+  }
+
+  dataVectorDiff(ospace, vals_ofd, ref, rms_out);
   oops::Log::info() << "Vector difference between reference and computed via ObsFilterData: "
-                    << vals_ofd << std::endl;
-  EXPECT(rms < 100*tol);  //  change tol from percent to actual value.
+                    << std::endl;
+  oops::Log::info() << vals_ofd << std::endl;
+  for (size_t ivar = 0; ivar < nvars; ivar++) {
+    EXPECT(rms_out[ivar] < 100*tol);  //  change tol from percent to actual value.
+  }
 }
 
 // -----------------------------------------------------------------------------
