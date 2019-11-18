@@ -172,9 +172,9 @@ character(len=MAXVARLEN) :: geovar
     qm_tl(iq,:,:) = qm_tl(iq,:,:) * self%delp / grav          ! aer concentration
  enddo
 
- call get_geos_aod_tl(self%nlayers, nlocs, nvars, self%ntracers, self%bext, qm_tl, aod_tot_tl=hofx)
-
+ call get_geos_aod_tl(self%nlayers,self%nlocs, nvars, self%ntracers, self%bext, qm_tl, aod_tot_tl=hofx)
  deallocate(qm_tl)
+
 
 end subroutine ufo_geosaod_simobs_tl
 

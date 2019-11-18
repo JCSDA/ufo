@@ -139,7 +139,7 @@ character(len=MAXVARLEN), dimension(:), allocatable:: tracer_name
      qm(iq,:,:) = aer_profile%vals             ! mass mixing ratio
      qm(iq,:,:) = qm(iq,:,:) * delp / grav      ! aer concentration (kg/m2) 
   enddo
-
+ 
   ! call observation operator code
   ! -----------------------------
   hofx(:,:) = 0.0
