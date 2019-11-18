@@ -250,7 +250,7 @@ subroutine ufo_gnssro_bndnbam_simobs(self, geovals, hofx, obss)
 
 !     (2) super-refaction
 !     (2.1) GSI style super refraction check
-      if(self%roconf%super_ref_qc == 1) then
+      if(trim(self%roconf%super_ref_qc) == "NBAM") then
 
         obsImpH = (obsImpP(iobs) - obsLocR(iobs)) * r1em3 !impact heigt: a-r_earth
 
@@ -280,7 +280,7 @@ subroutine ufo_gnssro_bndnbam_simobs(self, geovals, hofx, obss)
         end if ! obsImpH <= six
 
 !    ROPP style super refraction check
-     else if(self%roconf%super_ref_qc == 2) then
+     else if(trim(self%roconf%super_ref_qc) == "ECMWF") then
 
        sr_hgt_idx = 1
        do k = nlev, 2, -1
@@ -296,7 +296,7 @@ subroutine ufo_gnssro_bndnbam_simobs(self, geovals, hofx, obss)
        end if
 
      else
-       write(err_msg,*) myname, ': super refraction method has to be 1 or 2!'
+       write(err_msg,*) myname, ': super refraction method has to be NBAM or ECMWF!'
        call abor1_ftn(err_msg)
      end if
 

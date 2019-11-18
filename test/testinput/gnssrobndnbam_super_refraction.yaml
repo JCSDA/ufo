@@ -6,7 +6,7 @@ Observations:
  - ObsOperator: 
      name: GnssroBndNBAM
      ObsOptions:
-       super_ref_qc: 1
+       super_ref_qc: NBAM
        sr_steps: 1
    ObsSpace: 
      name: GnssroBnd
@@ -27,7 +27,7 @@ Observations:
  - ObsOperator:
      name: GnssroBndNBAM
      ObsOptions:
-       super_ref_qc: 1
+       super_ref_qc: NBAM
        sr_steps: 2
    ObsSpace:
      name: GnssroBnd
@@ -48,7 +48,7 @@ Observations:
  - ObsOperator:
      name: GnssroBndNBAM
      ObsOptions:
-       super_ref_qc: 2
+       super_ref_qc: ECMWF
    ObsSpace:
      name: GnssroBnd
      ObsDataIn:
