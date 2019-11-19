@@ -377,19 +377,14 @@ character(max_string) :: err_msg
       ! -------------------------------------------
       if (self%conf%salinity_option == "sss") THEN
          Options%Use_Old_MWSSEM = .TRUE.
-         err_stat = CRTM_Forward( atm        , &  ! Input
-                                  sfc        , &  ! Input
-                                  geo        , &  ! Input
-                                  chinfo(n:n), &  ! Input
-                                  rts        , &  ! Output
-                                  Options     )   ! Optional input
-      else
-         err_stat = CRTM_Forward( atm        , &  ! Input
-                                  sfc        , &  ! Input
-                                  geo        , &  ! Input
-                                  chinfo(n:n), &  ! Input
-                                  rts         )   ! Output
       end if
+      err_stat = CRTM_Forward( atm        , &  ! Input
+                               sfc        , &  ! Input
+                               geo        , &  ! Input
+                               chinfo(n:n), &  ! Input
+                               rts        , &  ! Output
+                               Options     )   ! Optional input
+
       if ( err_stat /= SUCCESS ) THEN
          message = 'Error calling CRTM Forward Model for '//TRIM(self%conf%SENSOR_ID(n))
          call Display_Message( PROGRAM_NAME, message, FAILURE )
