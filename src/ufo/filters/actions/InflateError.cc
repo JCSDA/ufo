@@ -42,10 +42,9 @@ void InflateError::apply(const Variables & vars,
   oops::Log::debug() << " input obserr: " << obserr << std::endl;
   // Check float was read:
   if (isFloat(strfactor_)) {
-    std::istringstream iss(strfactor_);
     std::vector<float> factors(data.nlocs());
     float factor;
-    iss >> factor;
+    readFloat(strfactor_, factor);
     oops::Log::debug() << "processing a float: " << factor << std::endl;
     std::fill(factors.begin(), factors.end(), factor);
     ASSERT(factors.size() == obserr.nlocs());
