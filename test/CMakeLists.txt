@@ -51,6 +51,8 @@ list( APPEND ufo_test_input
   testinput/gnssrobndnbam.yaml
   testinput/gnssrobndnbam_obs_error.yaml
   testinput/gnssrobndnbam_backgroundcheck_qc.yaml
+  testinput/gnssrobndnbam_super_refraction.yaml
+
   testinput/gnssroref.yaml
   testinput/gnssro_domain_check.yaml
   testinput/gsisfcmodel.yaml
@@ -519,6 +521,13 @@ ecbuild_add_test( TARGET  test_ufo_opr_gnssroBndNBAM
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
                   ARGS    "testinput/gnssrobndnbam.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsOperator.x )
+
+
+ecbuild_add_test( TARGET  test_ufo_super_refraction_gnssroBndNBAM
+                  MPI     2
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
+                  ARGS    "testinput/gnssrobndnbam_super_refraction.yaml"
                   DEPENDS test_ObsOperator.x )
 
 ecbuild_add_test( TARGET  test_ufo_linopr_gnssroBndNBAM

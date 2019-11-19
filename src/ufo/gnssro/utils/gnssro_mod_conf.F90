@@ -15,6 +15,9 @@ type gnssro_conf
   integer(c_int)     :: ro_top_meter
   integer(c_int)     :: use_compress
   integer(c_int)     :: n_horiz
+  integer(c_int)     :: sr_steps
+  character(len=MAXVARLEN)      :: super_ref_qc
+  character(len=:), allocatable :: str
   real(kind_real)    :: res
   real(kind_real)    :: top_2d
   real(kind_real)    :: dtheta
@@ -52,6 +55,13 @@ if (f_conf%has("vertlayer")) then
    call f_conf%get_or_die("vertlayer",str)
    roconf%vertlayer = str
 end if
+roconf%super_ref_qc = "NBAM"
+if (f_conf%has("super_ref_qc"))  then
+  call f_conf%get_or_die("super_ref_qc",str)
+  roconf%super_ref_qc=trim(str)
+endif
+roconf%sr_steps = 2
+if (f_conf%has("sr_steps")) call f_conf%get_or_die("sr_steps",roconf%sr_steps)
 
 end subroutine gnssro_conf_setup
 
