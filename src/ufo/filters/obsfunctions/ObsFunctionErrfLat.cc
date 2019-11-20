@@ -36,8 +36,8 @@ void ObsFunctionErrfLat::compute(const ObsFilterData & in,
                                   ioda::ObsDataVector<float> & out) const {
   // TODO(AS): should use constants for variable names
   // Get parameters from options
-  // Parameters for reducing observation error bounds within latitude band defined by params[0] 
-  // params[1-3] give the maximum reduction at equator and decreasing towards params[0] 
+  // Parameters for reducing observation error bounds within latitude band defined by params[0]
+  // params[1-3] give the maximum reduction at equator and decreasing towards params[0]
   std::vector<float> params = conf_.getFloatVector("latitude_parameters");
 
   const size_t nlocs = in.nlocs();
