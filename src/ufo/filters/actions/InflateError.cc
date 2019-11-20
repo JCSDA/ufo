@@ -42,16 +42,13 @@ void InflateError::apply(const Variables & vars,
   oops::Log::debug() << " input obserr: " << obserr << std::endl;
   // Check float was read:
   if (isFloat(strfactor_)) {
-    std::vector<float> factors(data.nlocs());
     float factor;
     readFloat(strfactor_, factor);
     oops::Log::debug() << "processing a float: " << factor << std::endl;
-    std::fill(factors.begin(), factors.end(), factor);
-    ASSERT(factors.size() == obserr.nlocs());
     for (size_t jv = 0; jv < vars.nvars(); ++jv) {
       size_t iv = obserr.varnames().find(vars.variable(jv).variable());
       for (size_t jobs = 0; jobs < obserr.nlocs(); ++jobs) {
-        if (flagged[iv][jobs]) obserr[iv][jobs] *= factors[jobs];
+        if (flagged[iv][jobs]) obserr[iv][jobs] *= factor;
       }
     }
   // Check string was read:
@@ -66,12 +63,11 @@ void InflateError::apply(const Variables & vars,
       std::set<int> channelset = oops::parseIntSet(chlist);
       std::vector<int> channels;
       std::copy(channelset.begin(), channelset.end(), std::back_inserter(channels));
-      std::vector<std::string> fvars(channels.size());
-      for (size_t ich = 0; ich < channels.size(); ++ich) {
-        fvars[ich] = factorvar.variable()+"_"+std::to_string(channels[ich]);
-      }
-      oops::Variables ovars(fvars);
-      ioda::ObsDataVector<float> factors(data.obsspace(), ovars, "ObsFunction", false);
+      Variables fvars;
+      Variable fvar(factorvar.variable(), channels);
+      fvars += fvar;
+      ioda::ObsDataVector<float> factors(data.obsspace(), fvars.toOopsVariables(),
+                                         "ObsFunction", false);
       data.get(factorvar, factors);
       ASSERT(factors.nvars() == vars.nvars());
       for (size_t jv = 0; jv < vars.nvars(); ++jv) {
