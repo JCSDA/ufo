@@ -96,7 +96,7 @@ void testObsFilterData() {
     for (size_t jvar = 0; jvar < hofxvars.nvars(); ++jvar) {
       EXPECT(!data.has(hofxvars.variable(jvar)));
     }
-    data.associate(hofx);
+    data.associate(hofx, "HofX");
 ///  H(x) associated now
     for (size_t jvar = 0; jvar < hofxvars.nvars(); ++jvar) {
       EXPECT(data.has(hofxvars.variable(jvar)));

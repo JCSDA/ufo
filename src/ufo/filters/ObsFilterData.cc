@@ -22,7 +22,7 @@ namespace ufo {
 
 // -----------------------------------------------------------------------------
 ObsFilterData::ObsFilterData(ioda::ObsSpace & obsdb)
-  : obsdb_(obsdb), gvals_(NULL), hofx_(NULL), diags_(NULL) {
+  : obsdb_(obsdb), gvals_(NULL), ovecs_(), diags_(NULL) {
   oops::Log::trace() << "ObsFilterData created" << std::endl;
 }
 
@@ -39,8 +39,8 @@ void ObsFilterData::associate(const GeoVaLs & gvals) {
 
 // -----------------------------------------------------------------------------
 /*! Associates H(x) ObsVector with this ObsFilterData */
-void ObsFilterData::associate(const ioda::ObsVector & hofx) {
-  hofx_ = &hofx;
+void ObsFilterData::associate(const ioda::ObsVector & hofx, const std::string & name) {
+  ovecs_[name] = &hofx;
 }
 
 // -----------------------------------------------------------------------------
@@ -68,14 +68,23 @@ bool ObsFilterData::has(const Variable & varname) const {
     return (gvals_ && gvals_->has(var));
   } else if (grp == "ObsFunction") {
     return ObsFunctionFactory::functionExists(var);
-  } else if (grp == "HofX") {
-    return (hofx_ && hofx_->has(var));
   } else if (grp == "ObsDiag") {
     return (diags_ && diags_->has(var));
   } else {
-    return obsdb_.has(grp, var);
+    return this->hasVector(grp, var) || obsdb_.has(grp, var);
   }
   return false;
+}
+
+// -----------------------------------------------------------------------------
+
+bool ObsFilterData::hasVector(const std::string & grp, const std::string & var) const {
+  std::map<std::string, const ioda::ObsVector *>::const_iterator jj = ovecs_.find(grp);
+  if (jj == ovecs_.end()) {
+    return false;
+  } else {
+    return jj->second->has(var);
+  }
 }
 
 // -----------------------------------------------------------------------------
@@ -108,13 +117,12 @@ void ObsFilterData::get(const Variable & varname, std::vector<float> & values) c
       values[jj] = vals[var][jj];
     }
 ///  For HofX get from ObsVector H(x) (should be available)
-  } else if (grp == "HofX") {
-    ASSERT(hofx_);
-    ASSERT(hofx_->has(var));
-    size_t hofxnvars = hofx_->nvars();
-    size_t iv = hofx_->varnames().find(var);
+  } else if (this->hasVector(grp, var)) {
+    std::map<std::string, const ioda::ObsVector *>::const_iterator jv = ovecs_.find(grp);
+    size_t hofxnvars = jv->second->nvars();
+    size_t iv = jv->second->varnames().find(var);
     for (size_t jj = 0; jj < nvals; ++jj) {
-      values[jj] = (*hofx_)[iv + (jj * hofxnvars)];
+      values[jj] = (*jv->second)[iv + (jj * hofxnvars)];
     }
 ///  For ObsDiag get from ObsDiagnostics
   } else if (grp == "ObsDiag") {
@@ -144,6 +152,7 @@ void ObsFilterData::get(const Variable & varname, std::vector<int> & values) con
 
   values.resize(nvals);
 ///  GeoVaLs, HofX, ObsDiag are not supportd for int data
+// TODO(somebody): need something here about obs error
   if (grp == "GeoVaLs" || grp == "HofX" || grp == "ObsDiag" || grp == "ObsFunction") {
     oops::Log::error() << "ObsFilterData::get int values only supported for ObsSpace" << std::endl;
     ABORT("ObsFilterData::get int values only supported for ObsSpace");
@@ -224,8 +233,9 @@ void ObsFilterData::print(std::ostream & os) const {
   if (gvals_) {
     os << ", geovals";
   }
-  if (hofx_) {
-    os << ", hofx";
+  for (std::map<std::string, const ioda::ObsVector *>::const_iterator jj = ovecs_.begin();
+       jj != ovecs_.end(); ++jj) {
+    os << ", " << jj->first;
   }
   if (diags_) {
     os << ", diags";

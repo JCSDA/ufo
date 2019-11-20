@@ -8,6 +8,7 @@
 #ifndef UFO_FILTERS_OBSFILTERDATA_H_
 #define UFO_FILTERS_OBSFILTERDATA_H_
 
+#include <map>
 #include <ostream>
 #include <string>
 #include <vector>
@@ -47,7 +48,7 @@ class ObsFilterData : public util::Printable,
   //! Associates GeoVaLs with this ObsFilterData
   void associate(const GeoVaLs &);
   //! Associates H(x) ObsVector with this ObsFilterData
-  void associate(const ioda::ObsVector &);
+  void associate(const ioda::ObsVector &, const std::string &);
   //! Associates ObsDiagnostics from ObsOperator with this ObsFilterData
   void associate(const ObsDiagnostics &);
 
@@ -68,10 +69,11 @@ class ObsFilterData : public util::Printable,
   size_t nlevs(const Variable &) const;
  private:
   void print(std::ostream &) const;
+  bool hasVector(const std::string &, const std::string &) const;
 
   ioda::ObsSpace & obsdb_;                 //!< ObsSpace associated with this object
   const GeoVaLs mutable * gvals_;          //!< pointer to GeoVaLs associated with this object
-  const ioda::ObsVector mutable * hofx_;   //!< pointer to H(x) associated with this object
+  std::map<std::string, const ioda::ObsVector *> ovecs_; //!< ObsVectors associated with this object
   const ObsDiagnostics mutable * diags_;   //!< pointer to ObsDiagnostics associated with object
 };
 
