@@ -126,7 +126,7 @@ list( APPEND ufo_test_data
   atmosphere/ps_geovals_2018041500_0000.nc4
   atmosphere/radar_dbz_geoval_2019052222.nc4
   atmosphere/radar_rw_geoval_2019052222.nc4
-  atmosphere/radiometer_smap_geoval_2018041500_m.nc4
+  atmosphere/smap_geoval_2018041500_m.nc4
   atmosphere/satbias_crtm_in
   atmosphere/satwind_geoval_2018041500_m.nc4
   atmosphere/satwind_geoval_2018041500_s.nc4
@@ -182,7 +182,7 @@ list (APPEND ioda_obs_test_data
   atmosphere/mhs_n19_obs_2018041500_m.nc4
   atmosphere/radar_dbz_obs_2019052222.nc4
   atmosphere/radar_rw_obs_2019052222.nc4
-  atmosphere/radiometer_smap_obs_2018041500_m.nc4
+  atmosphere/smap_obs_2018041500_m.nc4
   atmosphere/satwind_obs_2018041500_m.nc4
   atmosphere/satwind_obs_2018041500_s.nc4
   atmosphere/sbuv2_n19_obs_2018041500_m.nc4
