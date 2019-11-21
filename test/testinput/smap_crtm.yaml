@@ -1,0 +1,35 @@
+window_begin: 2018-04-14T21:00:00Z
+window_end: 2018-04-15T03:00:00Z
+
+LinearObsOpTest: 
+ coefTL: 1.e-3
+ toleranceTL: 1.0e-3
+ toleranceAD: 1.0e-11
+
+Observations: 
+ ObsTypes: 
+ - ObsOperator:
+     name: CRTM
+     Absorbers: [H2O,O3,CO2]
+     Clouds: [Water, Ice]
+     LinearObsOperator:
+       Absorbers: [H2O,O3,CO2]
+       Clouds: [Water, Ice]
+     ObsOptions:
+       inspectProfile: 1
+       Sensor_ID: radiometer_smap
+       EndianType: little_endian
+       CoefficientPath: Data/
+   ObsSpace:
+     name: radiometer_smap
+     ObsDataIn: 
+       obsfile: Data/radiometer_smap_obs_2018041500_m.nc4
+     ObsDataOut:
+       obsfile: Data/radiometer_smap_obs_2018041500_m_out.nc4
+     simulate:
+       variables: [brightness_temperature]
+       channels: 1-4
+   GeoVaLs: 
+     filename: Data/radiometer_smap_geoval_2018041500_m.nc4
+   vecequiv: GsiHofX
+   tolerance: 1.e-6
