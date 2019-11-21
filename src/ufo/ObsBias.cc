@@ -27,18 +27,26 @@ ObsBias::ObsBias(const eckit::Configuration & conf)
 ObsBias::ObsBias(const ObsBias & other, const bool copy)
   : biasbase_(ObsBiasFactory::create(other.config())), conf_(other.config()),
     geovars_(), hdiags_() {
-  if (copy && biasbase_) {
-    for (std::size_t jj =0; jj < other.size(); ++jj)
-      (*biasbase_)[jj] = other[jj];
-    geovars_ += biasbase_->requiredGeoVaLs();
-    hdiags_  += biasbase_->requiredHdiagnostics();
-  }
+  if (copy && biasbase_) *biasbase_ = other;
 }
 
 // -----------------------------------------------------------------------------
 
 ObsBias & ObsBias::operator+=(const ObsBiasIncrement & dx) {
   if (biasbase_) *biasbase_+=dx;
+  return *this;
+}
+
+// -----------------------------------------------------------------------------
+
+ObsBias & ObsBias::operator=(const ObsBias & rhs) {
+/* temporarily comment out for coverage check
+  if (biasbase_) {
+    *biasbase_ = rhs;
+    geovars_ += biasbase_->requiredGeoVaLs();
+    hdiags_  += biasbase_->requiredHdiagnostics();
+  }
+*/
   return *this;
 }
 

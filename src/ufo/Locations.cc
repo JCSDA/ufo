@@ -68,8 +68,8 @@ Locations::Locations(const eckit::Configuration & conf,
 
   std::vector<double> lats(nlocs);
   std::vector<double> lons(nlocs);
-  obspace.get_db("MetaData", "latitude", lats.size(), lats.data());
-  obspace.get_db("MetaData", "longitude", lons.size(), lons.data());
+  obspace.get_db("MetaData", "latitude", lats);
+  obspace.get_db("MetaData", "longitude", lons);
 
   ufo_locs_create_f90(keyLoc_, nlocs, &lats[0], &lons[0]);
 }

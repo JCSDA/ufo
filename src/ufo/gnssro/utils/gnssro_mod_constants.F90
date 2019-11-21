@@ -9,6 +9,7 @@ implicit none
 public   :: gnssro_ref_constants
 real(kind_real),            public :: n_a, n_b,n_c
 integer, parameter,         public :: max_string    = 800
+integer, parameter,         public :: MAXVARLEN     = 20
 real(kind_real), parameter, public :: r1em6 = 1.0e-6_kind_real
 real(kind_real), parameter, public :: r1em3 = 1.0e-3_kind_real
 real(kind_real), parameter, public :: six   = 6.0_kind_real

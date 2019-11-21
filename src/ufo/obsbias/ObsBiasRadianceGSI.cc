@@ -12,6 +12,7 @@
 #include <utility>
 
 #include "ObsBiasRadianceGSI.interface.h"
+#include "ufo/ObsBias.h"
 #include "ufo/ObsDiagnostics.h"
 #include "ufo/utils/Constants.h"
 
@@ -27,7 +28,7 @@ static ObsBiasMaker<ObsBiasRadianceGSI> makerBiasRadianceGSI_("GSI");
 // -----------------------------------------------------------------------------
 
 ObsBiasRadianceGSI::ObsBiasRadianceGSI(const eckit::Configuration & conf)
-  : ObsBiasBase(conf), geovars_(), hdiags_(), tlapmean_(),
+  : ObsBiasBase(), geovars_(), hdiags_(), tlapmean_(),
     newpc4pred_(false), adp_anglebc_(false), emiss_bc_(false),
     predictors_() {
 // Default predictor names
@@ -240,7 +241,7 @@ void ObsBiasRadianceGSI::computeObsBiasPredictors(const GeoVaLs & geovals,
 
   // Retrieve the sensor_zenith_angle from ObsSpace
   std::vector<float> zasat(nlocs);
-  odb.get_db("MetaData", "sensor_zenith_angle", nlocs, zasat.data());
+  odb.get_db("MetaData", "sensor_zenith_angle", zasat);
 
   /*
    * pred(2,:)  = zenith angle predictor, is not used and set to zero now
@@ -302,7 +303,7 @@ void ObsBiasRadianceGSI::computeObsBiasPredictors(const GeoVaLs & geovals,
   std::vector<std::vector<float>> tb;
   for (std::size_t jc = 0; jc < nchanl; ++jc) {
     odb.get_db("ObsValue", "brightness_temperature_" +
-               std::to_string(channels_[jc]), nlocs, pred.data());
+               std::to_string(channels_[jc]), pred);
     tb.emplace_back(pred);
   }
   // Transpose the array
@@ -336,7 +337,7 @@ void ObsBiasRadianceGSI::computeObsBiasPredictors(const GeoVaLs & geovals,
 
   // Retrieve the scan_position from ObsSpace
   std::vector<float> nadir(nlocs);
-  odb.get_db("MetaData", "scan_position", nlocs, nadir.data());
+  odb.get_db("MetaData", "scan_position", nadir);
 
   /*
    * pred(3,:)  = cloud liquid water predictor for clear-sky microwave radiance assimilation
@@ -444,8 +445,8 @@ void ObsBiasRadianceGSI::computeObsBiasPredictors(const GeoVaLs & geovals,
   // Retrieve the sensor_azimuth_angle and latitude from ObsSpace
   std::vector<float> cenlat(nlocs);
   std::vector<float> node(nlocs);
-  odb.get_db("MetaData", "latitude", nlocs, cenlat.data());
-  odb.get_db("MetaData", "sensor_azimuth_angle", nlocs, node.data());
+  odb.get_db("MetaData", "latitude", cenlat);
+  odb.get_db("MetaData", "sensor_azimuth_angle", node);
 
   /*
    * pred(6,:)  = cosinusoidal predictor for SSMI/S ascending/descending bias
@@ -527,7 +528,7 @@ void ObsBiasRadianceGSI::computeObsBiasPredictors(const GeoVaLs & geovals,
   }
 
   // Retrieve the sensor_view_angle from ObsSpace
-  odb.get_db("MetaData", "sensor_view_angle", nlocs, pred.data());
+  odb.get_db("MetaData", "sensor_view_angle", pred);
 
   /*
    * pred(9,:)  = fourth order polynomial of angle bias correction
@@ -586,6 +587,14 @@ double ObsBiasRadianceGSI::norm() const {
 ObsBiasRadianceGSI & ObsBiasRadianceGSI::operator+=(const ObsBiasIncrement & dx) {
   for (unsigned int jj = 0; jj < biascoeffs_.size(); ++jj)
     biascoeffs_[jj] += dx[jj];
+  return *this;
+}
+
+// -----------------------------------------------------------------------------
+
+ObsBiasRadianceGSI & ObsBiasRadianceGSI::operator=(const ObsBias & rhs) {
+  for (unsigned int jj = 0; jj < biascoeffs_.size(); ++jj)
+    biascoeffs_[jj] = rhs[jj];
   return *this;
 }
 

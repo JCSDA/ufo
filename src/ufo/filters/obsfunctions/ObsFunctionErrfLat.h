@@ -26,6 +26,7 @@ class ObsFunctionErrfLat : public ObsFunctionBase {
   const ufo::Variables & requiredVariables() const;
  private:
   ufo::Variables invars_;
+  const eckit::LocalConfiguration conf_;
 };
 
 // -----------------------------------------------------------------------------
