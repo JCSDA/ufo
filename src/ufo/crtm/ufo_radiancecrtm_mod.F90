@@ -73,17 +73,14 @@ type(fckit_configuration) :: f_confOpts
  ! 1 * n_Absorbers
  ! 2 * n_Clouds (mass content and effective radius)
  ! if sss is in ObsOptions + sss
- nvars_in = size(varin_default) + self%conf%n_Absorbers + 2 * self%conf%n_Clouds
- 
- if (f_confOpts%has("SalinityOption")) then
-    nvars_in =  nvars_in + 1
-    allocate(self%varin(nvars_in))
-    call f_confOpts%get_or_die("SalinityOption",str)
-    if (str =="sss") then 
+ nvars_in = size(varin_default) + self%conf%n_Absorbers + 2 * self%conf%n_Clouds +self%conf%n_Salinity
+ allocate(self%varin(nvars_in))
+
+ if (f_confOpts%has("Salinity")) then
+    call f_confOpts%get_or_die("Salinity",str)
+    if (str =="on") then 
        self%varin(nvars_in) = var_sfc_sss
-    endif
- else
-    allocate(self%varin(nvars_in))
+    endif 
  endif
 
  self%varin(1:size(varin_default)) = varin_default
@@ -375,7 +372,7 @@ character(max_string) :: err_msg
    else
       ! Call the forward model call for each sensor
       ! -------------------------------------------
-      if (self%conf%salinity_option == "sss") THEN
+      if (self%conf%salinity_option == "on") THEN
          Options%Use_Old_MWSSEM = .TRUE.
       end if
       err_stat = CRTM_Forward( atm        , &  ! Input
