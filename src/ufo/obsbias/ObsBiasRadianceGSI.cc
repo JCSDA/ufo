@@ -12,6 +12,7 @@
 #include <utility>
 
 #include "ObsBiasRadianceGSI.interface.h"
+#include "ufo/ObsBias.h"
 #include "ufo/ObsDiagnostics.h"
 #include "ufo/utils/Constants.h"
 
@@ -27,7 +28,7 @@ static ObsBiasMaker<ObsBiasRadianceGSI> makerBiasRadianceGSI_("GSI");
 // -----------------------------------------------------------------------------
 
 ObsBiasRadianceGSI::ObsBiasRadianceGSI(const eckit::Configuration & conf)
-  : ObsBiasBase(conf), geovars_(), hdiags_(), tlapmean_(),
+  : ObsBiasBase(), geovars_(), hdiags_(), tlapmean_(),
     newpc4pred_(false), adp_anglebc_(false), emiss_bc_(false),
     predictors_() {
 // Default predictor names
@@ -586,6 +587,14 @@ double ObsBiasRadianceGSI::norm() const {
 ObsBiasRadianceGSI & ObsBiasRadianceGSI::operator+=(const ObsBiasIncrement & dx) {
   for (unsigned int jj = 0; jj < biascoeffs_.size(); ++jj)
     biascoeffs_[jj] += dx[jj];
+  return *this;
+}
+
+// -----------------------------------------------------------------------------
+
+ObsBiasRadianceGSI & ObsBiasRadianceGSI::operator=(const ObsBias & rhs) {
+  for (unsigned int jj = 0; jj < biascoeffs_.size(); ++jj)
+    biascoeffs_[jj] = rhs[jj];
   return *this;
 }
 

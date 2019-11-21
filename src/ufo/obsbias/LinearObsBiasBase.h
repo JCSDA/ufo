@@ -44,7 +44,6 @@ class LinearObsBiasBase : public util::Printable,
 /// Linear algebra operators
   virtual void diff(const ObsBias &, const ObsBias &) = 0;
   virtual void zero() = 0;
-  virtual void random() = 0;
   virtual LinearObsBiasBase & operator=(const ObsBiasIncrement &) = 0;
   virtual LinearObsBiasBase & operator+=(const ObsBiasIncrement &) = 0;
   virtual LinearObsBiasBase & operator-=(const ObsBiasIncrement &) = 0;
