@@ -32,6 +32,7 @@ class InflateError : public FilterActionBase {
  private:
   Variables allvars_;
   const std::string strfactor_;
+  const eckit::LocalConfiguration conf_;
 };
 
 // -----------------------------------------------------------------------------
