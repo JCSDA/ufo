@@ -322,7 +322,7 @@ if ( ${CRTM_FOUND} )
 
     ecbuild_add_test( TARGET  test_ufo_opr_crtm_smap
                       COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
-                      ARGS    "testinput/amsua_smap.yaml"
+                      ARGS    "testinput/smap_crtm.yaml"
                       ENVIRONMENT OOPS_TRAPFPE=1
                       DEPENDS test_ObsOperator.x )
 
