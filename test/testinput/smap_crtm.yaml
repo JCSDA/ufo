@@ -23,13 +23,13 @@ Observations:
    ObsSpace:
      name: radiometer_smap
      ObsDataIn: 
-       obsfile: Data/radiometer_smap_obs_2018041500_m.nc4
+       obsfile: Data/smap_obs_2018041500_m.nc4
      ObsDataOut:
-       obsfile: Data/radiometer_smap_obs_2018041500_m_out.nc4
+       obsfile: Data/smap_obs_2018041500_m_out.nc4
      simulate:
        variables: [brightness_temperature]
        channels: 1-4
    GeoVaLs: 
-     filename: Data/radiometer_smap_geoval_2018041500_m.nc4
+     filename: Data/smap_geoval_2018041500_m.nc4
    vecequiv: GsiHofX
    tolerance: 1.e-6
