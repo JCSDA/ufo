@@ -26,42 +26,12 @@ phases:
       - echo "CODEBUILD_GIT_BRANCH=${CODEBUILD_GIT_BRANCH}"
       - echo "CODEBUILD_SOURCE_VERSION=${CODEBUILD_SOURCE_VERSION}"
 
-      - echo MPI setup for Docker
-      - mkdir -p /var/run/sshd
-      - ssh-keygen -A
-      - sed -i 's/#PermitRootLogin yes/PermitRootLogin yes/g' /etc/ssh/sshd_config
-      - sed -i 's/#RSAAuthentication yes/RSAAuthentication yes/g' /etc/ssh/sshd_config
-      - sed -i 's/#PubkeyAuthentication yes/PubkeyAuthentication yes/g' /etc/ssh/sshd_config
-
-      - groupadd jcsda -g 9999
-      - useradd jcsdauser
-      - mkdir -p /jcsda /build_container
-      - chown -R jcsdauser:jcsda /build_container  /usr/local
-      - chmod 6755 /jcsda /build_container /usr/local
-
-      - mkdir /jcsda/.ssh ; echo "StrictHostKeyChecking no" > /jcsda/.ssh/config
-      - mkdir -p /jcsda/.openmpi
-      - mkdir -p /home/jcsdauser/.openmpi
-
-      - cp default-mca-params.conf /home/jcsdauser/.openmpi/mca-params.conf
-      - cat /home/jcsdauser/.openmpi/mca-params.conf
-      - chown -R jcsdauser:jcsda /jcsda/
-
-      - su - jcsdauser -c "ssh-keygen -f /jcsda/.ssh/id_rsa -t rsa -N ''
-        && chmod 600 /jcsda/.ssh/config
-        && chmod 700 /jcsda/.ssh
-        && cp /jcsda/.ssh/id_rsa.pub /jcsda/.ssh/authorized_keys
-        && echo MPI setup for Docker done"
-      - su - jcsdauser -c "echo $CC
-        && echo $CXX
-        && echo $FC
-        && whereis mpicc"
-
   pre_build:
     commands:
       - echo Executing pre_build phase
+      - mkdir /build_container
+      - mkdir /jcsda
       - git lfs install # creates .gitconfig
-      - cp ~/.gitconfig /home/jcsdauser/
 
       # ufo-bunde
       - git clone https://$GIT_USER:$GIT_PASS@github.com/jcsda/ufo-bundle ufo-bundle
@@ -129,10 +99,10 @@ phases:
       - export BUILD_STATUS="0"
       - echo $BUILD_STATUS
 
-      - su - jcsdauser -c "cd /build_container
-        ecbuild /jcsda/ufo-bundle/
-        && cd ufo
-        && make -j4"
+      - cd /build_container
+      - ecbuild /jcsda/ufo-bundle/
+      - cd ufo
+      - make -j4
 
       - if [ "$CODEBUILD_BUILD_SUCCEEDING" = "1" ];
         then export BUILD_STATUS="1";
@@ -140,9 +110,8 @@ phases:
         fi
       - echo $BUILD_STATUS
 
-      - su - jcsdauser -c "CC=mpicc CXX=mpicxx FC=mpifort
-        && cd /build_container/ufo
-        && ctest"
+      - cd /build_container/ufo
+      - ctest"
 
   post_build:
     commands:
@@ -150,7 +119,7 @@ phases:
       - echo $CODEBUILD_BUILD_SUCCEEDING
       - if [ "$BUILD_STATUS" = "1"] && ["$CODEBUILD_BUILD_SUCCEEDING" = "0" ];
         then echo "Build passed, rerunning failed tests";
-        su - jcsdauser -c "cd /build_container/ufo
-        && ctest -VV --rerun-failed";
+        cd /build_container/ufo;
+        ctest -VV --rerun-failed;
         else echo "Build failed";
         fi
