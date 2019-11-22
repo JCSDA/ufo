@@ -366,12 +366,13 @@ real(c_double) :: missing
  do n1 = 1, n_Channels
    call get_var_name(channels(n1),varname)
    call obsspace_get_db(obss, "ObsValue", varname, ObsVal(:,n1))
+!TODO: Use complete QC information
 !   call obsspace_get_db(obss, "EffectiveError", varname, EffObsErr(:,n1))
 !   call obsspace_get_db(obss, "EffectiveQC{iter}", varname, EffQC(:,n1))
  enddo
 
-! if (allocated(Mask)) deallocate(Mask)
-! allocate(Mask(n_Profiles))
+ if (allocated(Mask)) deallocate(Mask)
+ allocate(Mask(n_Profiles))
  !Loop over all n_Profiles, i.e. number of locations
  do k1 = 1, n_Profiles
     Mask(k1) = any(ObsVal(k1,:) /= missing)

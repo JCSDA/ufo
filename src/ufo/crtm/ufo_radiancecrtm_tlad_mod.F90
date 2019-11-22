@@ -282,7 +282,7 @@ type(CRTM_RTSolution_type), allocatable :: rts_K(:,:)
    rts_K%Brightness_Temperature = ONE
 
    call Mask_Profiles(self%n_Profiles,self%n_Channels,self%channels,obss,self%Mask)
-   do jprofile = 1, n_Profiles
+   do jprofile = 1, self%n_Profiles
       Options(jprofile)%Skip_Profile = .not.self%Mask(jprofile)
    end do
 
@@ -295,7 +295,8 @@ type(CRTM_RTSolution_type), allocatable :: rts_K(:,:)
                              chinfo(n:n) , &  ! Input
                              self%atm_K  , &  ! K-MATRIX Output
                              self%sfc_K  , &  ! K-MATRIX Output
-                             rts           )  ! FORWARD  Output
+                             rts         , &  ! FORWARD  Output
+                             Options       )  ! Input
 
    if ( err_stat /= SUCCESS ) THEN
       message = 'Error calling CRTM (setTraj) K-Matrix Model for '//TRIM(self%conf_traj%SENSOR_ID(n))
