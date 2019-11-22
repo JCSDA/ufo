@@ -27,7 +27,7 @@ public get_var_name
 public Load_Atm_Data
 public Load_Sfc_Data
 public Load_Geom_Data
-public Select_Profiles
+public Mask_Profiles
 
 PUBLIC Load_Aerosol_Data
 public assign_aerosol_names
@@ -335,21 +335,22 @@ end subroutine crtm_conf_delete
 
 ! ------------------------------------------------------------------------------
 
-subroutine Select_Profiles(n_Profiles,n_Channels,channels,obss,Profiles,Mask)
+subroutine Mask_Profiles(n_Profiles,n_Channels,channels,obss,Mask)!,Profiles)
 use missing_values_mod
 
 implicit none
-integer,              intent(in)  :: n_Profiles, n_Channels
-type(c_ptr), value,   intent(in)  :: obss
-integer(c_int),       intent(in)  :: channels(:)
-integer, allocatable, intent(out) :: Profiles(:)
-logical, allocatable, intent(out) :: Mask(:)
+integer,              intent(in)    :: n_Profiles, n_Channels
+type(c_ptr), value,   intent(in)    :: obss
+integer(c_int),       intent(in)    :: channels(:)
+!integer, allocatable, intent(inout) :: Profiles(:)
+logical, allocatable, intent(inout) :: Mask(:)
 
 integer :: k1, n1
 character(len=200) :: varname
 real(kind_real), allocatable :: ObsVal(:,:)
 !real(kind_real), allocatable :: EffObsErr(:,:)
 !integer, allocatable :: EffQC(:,:)
+!logical :: Mask(n_Profiles)
 
 real(c_double) :: missing
 
@@ -371,8 +372,8 @@ real(c_double) :: missing
 !   call obsspace_get_db(obss, "EffectiveQC{iter}", varname, EffQC(:,n1))
  enddo
 
- if (allocated(Mask)) deallocate(Mask)
- allocate(Mask(n_Profiles))
+! if (allocated(Mask)) deallocate(Mask)
+! allocate(Mask(n_Profiles))
  !Loop over all n_Profiles, i.e. number of locations
  do k1 = 1, n_Profiles
     Mask(k1) = any(ObsVal(k1,:) /= missing)
@@ -380,10 +381,10 @@ real(c_double) :: missing
 !    Mask(k1) = any(EffQC(k1,:) /= 0)
  end do
 
- if (allocated(Profiles)) deallocate(Profiles)
- Profiles = pack([(k1,k1=1,n_Profiles)], mask = Mask)
+! if (allocated(Profiles)) deallocate(Profiles)
+! Profiles = pack([(k1,k1=1,n_Profiles)], mask = Mask)
 
-end subroutine Select_Profiles
+end subroutine Mask_Profiles
 
 ! ------------------------------------------------------------------------------
 

@@ -36,7 +36,7 @@ module ufo_radiancecrtm_tlad_mod
   type(CRTM_Atmosphere_type), allocatable :: atm_K(:,:)
   type(CRTM_Surface_type), allocatable :: sfc_K(:,:)
   logical :: ltraj
-  integer, allocatable :: Profiles(:)
+  logical, allocatable :: Mask(:)
  contains
   procedure :: setup  => ufo_radiancecrtm_tlad_setup
   procedure :: delete  => ufo_radiancecrtm_tlad_delete
@@ -119,6 +119,8 @@ class(ufo_radiancecrtm_tlad), intent(inout) :: self
    deallocate(self%sfc_k)
  endif
 
+ if (allocated(self%Mask)) deallocate(self%Mask)
+
 end subroutine ufo_radiancecrtm_tlad_delete
 
 ! ------------------------------------------------------------------------------
@@ -135,7 +137,7 @@ type(c_ptr), value,       intent(in)    :: obss
 character(*), parameter :: PROGRAM_NAME = 'ufo_radiancecrtm_mod.F90'
 character(255) :: message, version
 integer        :: err_stat, alloc_stat
-integer        :: n
+integer        :: jprofile, n
 type(ufo_geoval), pointer :: temp
 
 ! Define the "non-demoninational" arguments
@@ -146,6 +148,7 @@ type(CRTM_Geometry_type),   allocatable :: geo(:)
 type(CRTM_Atmosphere_type), allocatable :: atm(:)
 type(CRTM_Surface_type),    allocatable :: sfc(:)
 type(CRTM_RTSolution_type), allocatable :: rts(:,:)
+type(CRTM_Options_type),    allocatable :: Options(:)
 
 ! Define the K-MATRIX variables
 type(CRTM_RTSolution_type), allocatable :: rts_K(:,:)
@@ -212,6 +215,7 @@ type(CRTM_RTSolution_type), allocatable :: rts_K(:,:)
              self%atm_K( self%n_Channels, self%n_Profiles ) , &
              self%sfc_K( self%n_Channels, self%n_Profiles ) , &
              rts_K( self%n_Channels, self%n_Profiles )      , &
+             Options( self%n_Profiles )                     , &
              STAT = alloc_stat                                )
    if ( alloc_stat /= 0 ) THEN
       message = 'Error allocating structure arrays (setTraj)'
@@ -261,9 +265,9 @@ type(CRTM_RTSolution_type), allocatable :: rts_K(:,:)
 
    !Assign the data from the GeoVaLs
    !--------------------------------
-   call Load_Atm_Data(self%N_PROFILES,self%N_LAYERS,geovals,atm,self%conf_traj)
-   call Load_Sfc_Data(self%N_PROFILES,self%n_Channels,self%channels,geovals,sfc,chinfo,obss,self%conf_traj)
-   call Load_Geom_Data(self%N_PROFILES,obss,geo)
+   call Load_Atm_Data(self%n_Profiles,self%n_Layers,geovals,atm,self%conf_traj)
+   call Load_Sfc_Data(self%n_Profiles,self%n_Channels,self%channels,geovals,sfc,chinfo,obss,self%conf_traj)
+   call Load_Geom_Data(self%n_Profiles,obss,geo)
 
 
    ! Zero the K-matrix OUTPUT structures
@@ -277,7 +281,10 @@ type(CRTM_RTSolution_type), allocatable :: rts_K(:,:)
    rts_K%Radiance               = ZERO
    rts_K%Brightness_Temperature = ONE
 
-   call Select_Profiles(self%n_Profiles,self%n_Channels,self%channels,obss,self%Profiles)
+   call Mask_Profiles(self%n_Profiles,self%n_Channels,self%channels,obss,self%Mask)
+   do jprofile = 1, n_Profiles
+      Options(jprofile)%Skip_Profile = .not.self%Mask(jprofile)
+   end do
 
    ! Call the K-matrix model
    ! -----------------------
@@ -289,14 +296,6 @@ type(CRTM_RTSolution_type), allocatable :: rts_K(:,:)
                              self%atm_K  , &  ! K-MATRIX Output
                              self%sfc_K  , &  ! K-MATRIX Output
                              rts           )  ! FORWARD  Output
-!   err_stat = CRTM_K_Matrix( atm( self%Profiles )           , &  ! FORWARD  Input
-!                             sfc( self%Profiles )           , &  ! FORWARD  Input
-!                             rts_K( :, self%Profiles )      , &  ! K-MATRIX Input
-!                             geo( self%Profiles )           , &  ! Input
-!                             chinfo(n:n)                    , &  ! Input
-!                             self%atm_K( :, self%Profiles ) , &  ! K-MATRIX Output
-!                             self%sfc_K( :, self%Profiles ) , &  ! K-MATRIX Output
-!                             rts( :, self%Profiles )          )  ! FORWARD  Output
 
    if ( err_stat /= SUCCESS ) THEN
       message = 'Error calling CRTM (setTraj) K-Matrix Model for '//TRIM(self%conf_traj%SENSOR_ID(n))
@@ -318,7 +317,7 @@ type(CRTM_RTSolution_type), allocatable :: rts_K(:,:)
 
    ! Deallocate all arrays
    ! ---------------------
-   deallocate(geo, atm, sfc, rts, rts_K, STAT = alloc_stat)
+   deallocate(geo, atm, sfc, rts, rts_K, Options, STAT = alloc_stat)
    if ( alloc_stat /= 0 ) THEN
       message = 'Error deallocating structure arrays (setTraj)'
       call Display_Message( PROGRAM_NAME, message, FAILURE )
@@ -395,6 +394,7 @@ type(ufo_geoval), pointer :: geoval_d
 
  ! Multiply by Jacobian and add to hofx
  do jprofile = 1, self%n_Profiles
+   if (.not.self%Mask(jprofile)) cycle
    do jchannel = 1, size(self%channels)
      do jlevel = 1, geoval_d%nval
        hofx(jchannel, jprofile) = hofx(jchannel, jprofile) + &
@@ -415,6 +415,7 @@ type(ufo_geoval), pointer :: geoval_d
 
    ! Multiply by Jacobian and add to hofx
    do jprofile = 1, self%n_Profiles
+     if (.not.self%Mask(jprofile)) cycle
      do jchannel = 1, size(self%channels)
        do jlevel = 1, geoval_d%nval
          hofx(jchannel, jprofile) = hofx(jchannel, jprofile) + &
@@ -436,6 +437,7 @@ type(ufo_geoval), pointer :: geoval_d
 
    ! Multiply by Jacobian and add to hofx
    do jprofile = 1, self%n_Profiles
+     if (.not.self%Mask(jprofile)) cycle
      do jchannel = 1, size(self%channels)
        do jlevel = 1, geoval_d%nval
          hofx(jchannel, jprofile) = hofx(jchannel, jprofile) + &
@@ -501,6 +503,7 @@ real(c_double) :: missing
 
  ! Multiply by Jacobian and add to hofx (adjoint)
  do jprofile = 1, self%n_Profiles
+   if (.not.self%Mask(jprofile)) cycle
    do jchannel = 1, size(self%channels)
      do jlevel = 1, geoval_d%nval
        if (hofx(jchannel, jprofile) /= missing) then
@@ -531,6 +534,7 @@ real(c_double) :: missing
 
    ! Multiply by Jacobian and add to hofx (adjoint)
    do jprofile = 1, self%n_Profiles
+     if (.not.self%Mask(jprofile)) cycle
      do jchannel = 1, size(self%channels)
        do jlevel = 1, geoval_d%nval
          if (hofx(jchannel, jprofile) /= missing) then
@@ -562,6 +566,7 @@ real(c_double) :: missing
 
    ! Multiply by Jacobian and add to hofx (adjoint)
    do jprofile = 1, self%n_Profiles
+     if (.not.self%Mask(jprofile)) cycle
      do jchannel = 1, size(self%channels)
        do jlevel = 1, geoval_d%nval
          if (hofx(jchannel, jprofile) /= missing) then
