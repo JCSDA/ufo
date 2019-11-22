@@ -34,6 +34,7 @@ module ufo_radiancecrtm_tlad_mod
   type(CRTM_Atmosphere_type), allocatable :: atm_K(:,:)
   type(CRTM_Surface_type), allocatable :: sfc_K(:,:)
   logical :: ltraj
+  integer, allocatable :: Profiles(:)
  contains
   procedure :: setup  => ufo_radiancecrtm_tlad_setup
   procedure :: delete  => ufo_radiancecrtm_tlad_delete
@@ -216,7 +217,6 @@ type(CRTM_RTSolution_type), allocatable :: rts_K(:,:)
       stop
    end if
 
-
    ! Create the input FORWARD structure (atm)
    ! ----------------------------------------
    call CRTM_Atmosphere_Create( atm, self%n_Layers, self%conf_traj%n_Absorbers, self%conf_traj%n_Clouds, self%conf_traj%n_Aerosols )
@@ -261,7 +261,7 @@ type(CRTM_RTSolution_type), allocatable :: rts_K(:,:)
    !--------------------------------
    call Load_Atm_Data(self%N_PROFILES,self%N_LAYERS,geovals,atm,self%conf_traj)
    call Load_Sfc_Data(self%N_PROFILES,self%n_Channels,self%channels,geovals,sfc,chinfo,obss,self%conf_traj)
-   call Load_Geom_Data(obss,geo)
+   call Load_Geom_Data(self%N_PROFILES,obss,geo)
 
 
    ! Zero the K-matrix OUTPUT structures
@@ -275,17 +275,18 @@ type(CRTM_RTSolution_type), allocatable :: rts_K(:,:)
    rts_K%Radiance               = ZERO
    rts_K%Brightness_Temperature = ONE
 
+   call Select_Profiles(self%n_Profiles,self%n_Channels,channels,obss,self%Profiles)
 
    ! Call the K-matrix model
    ! -----------------------
-   err_stat = CRTM_K_Matrix( atm         , &  ! FORWARD  Input
-                             sfc         , &  ! FORWARD  Input
-                             rts_K       , &  ! K-MATRIX Input
-                             geo         , &  ! Input
-                             chinfo(n:n) , &  ! Input
-                             self%atm_K  , &  ! K-MATRIX Output
-                             self%sfc_K  , &  ! K-MATRIX Output
-                             rts           )  ! FORWARD  Output
+   err_stat = CRTM_K_Matrix( atm( self%Profiles )           , &  ! FORWARD  Input
+                             sfc( self%Profiles )           , &  ! FORWARD  Input
+                             rts_K( :, self%Profiles )      , &  ! K-MATRIX Input
+                             geo( self%Profiles )           , &  ! Input
+                             chinfo(n:n)                    , &  ! Input
+                             self%atm_K( :, self%Profiles ) , &  ! K-MATRIX Output
+                             self%sfc_K( :, self%Profiles ) , &  ! K-MATRIX Output
+                             rts( :, self%Profiles )          )  ! FORWARD  Output
    if ( err_stat /= SUCCESS ) THEN
       message = 'Error calling CRTM (setTraj) K-Matrix Model for '//TRIM(self%conf_traj%SENSOR_ID(n))
       call Display_Message( PROGRAM_NAME, message, FAILURE )

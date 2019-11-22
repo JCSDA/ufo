@@ -26,6 +26,7 @@ module ufo_radiancecrtm_mod
    character(len=MAXVARLEN), public, allocatable :: varin(:)  ! variables requested from the model
    integer, allocatable                          :: channels(:)
    type(crtm_conf) :: conf
+   integer, allocatable :: profiles(:)
  contains
    procedure :: setup  => ufo_radiancecrtm_setup
    procedure :: delete => ufo_radiancecrtm_delete
@@ -152,6 +153,8 @@ integer :: jvar, jprofile, jlevel, jchannel, ichannel, jspec
 logical :: jacobian_needed
 character(max_string) :: err_msg
 
+real(c_double) :: missing
+
  ! Get number of profile and layers from geovals
  ! ---------------------------------------------
  n_Profiles = geovals%nlocs
@@ -253,7 +256,7 @@ character(max_string) :: err_msg
    !--------------------------------
    call Load_Atm_Data(n_Profiles,n_Layers,geovals,atm,self%conf)
    call Load_Sfc_Data(n_Profiles,n_Channels,self%channels,geovals,sfc,chinfo,obss,self%conf)
-   call Load_Geom_Data(obss,geo)
+   call Load_Geom_Data(n_Profiles,obss,geo)
 
    ! Call THE CRTM inspection
    ! ------------------------
@@ -297,6 +300,8 @@ character(max_string) :: err_msg
          ystr_diags(jvar)(str_pos(3):) = ""
       end if 
    end do
+
+   call Select_Profiles(n_Profiles,n_Channels,channels,obss,self%Profiles)
 
    if (jacobian_needed) then
       ! Allocate the ARRAYS (for CRTM_K_Matrix)
@@ -343,14 +348,14 @@ character(max_string) :: err_msg
 
       ! Call the K-matrix model
       ! -----------------------
-      err_stat = CRTM_K_Matrix( atm         , &  ! FORWARD  Input
-                                sfc         , &  ! FORWARD  Input
-                                rts_K       , &  ! K-MATRIX Input
-                                geo         , &  ! Input
-                                chinfo(n:n) , &  ! Input
-                                atm_K  , &  ! K-MATRIX Output
-                                sfc_K  , &  ! K-MATRIX Output
-                                rts           )  ! FORWARD  Output
+      err_stat = CRTM_K_Matrix( atm( self%Profiles )       , &  ! FORWARD  Input
+                                sfc( self%Profiles )       , &  ! FORWARD  Input
+                                rts_K( :, self%Profiles )  , &  ! K-MATRIX Input
+                                geo( self%Profiles )       , &  ! Input
+                                chinfo(n:n)                , &  ! Input
+                                atm_K( :, self%Profiles )  , &  ! K-MATRIX Output
+                                sfc_K( :, self%Profiles )  , &  ! K-MATRIX Output
+                                rts( :, self%Profiles )      )  ! FORWARD  Output
       if ( err_stat /= SUCCESS ) THEN
          message = 'Error calling CRTM (setTraj) K-Matrix Model for '//TRIM(self%conf%SENSOR_ID(n))
          call Display_Message( PROGRAM_NAME, message, FAILURE )
@@ -360,11 +365,11 @@ character(max_string) :: err_msg
    else
       ! Call the forward model call for each sensor
       ! -------------------------------------------
-      err_stat = CRTM_Forward( atm        , &  ! Input
-                               sfc        , &  ! Input
-                               geo        , &  ! Input
-                               chinfo(n:n), &  ! Input
-                               rts          )  ! Output
+      err_stat = CRTM_Forward( atm( self%Profiles )    , &  ! Input
+                               sfc( self%Profiles )    , &  ! Input
+                               geo( self%Profiles )    , &  ! Input
+                               chinfo(n:n)             , &  ! Input
+                               rts( :, self%Profiles )   )  ! Output
       if ( err_stat /= SUCCESS ) THEN
          message = 'Error calling CRTM Forward Model for '//TRIM(self%conf%SENSOR_ID(n))
          call Display_Message( PROGRAM_NAME, message, FAILURE )
@@ -373,18 +378,19 @@ character(max_string) :: err_msg
 
    end if ! jacobian_needed
 
-   !call CRTM_RTSolution_Inspect(rts)
+   !call CRTM_RTSolution_Inspect(rts( :, self%Profiles ))
 
    ! Put simulated brightness temperature into hofx
    ! ----------------------------------------------
 
-   !Set to zero and initialize counter
-   hofx(:,:) = 0.0_kind_real
+   ! Set missing value
+   missing = missing_value(missing)
 
-   do m = 1, n_Profiles
-     do l = 1, size(self%channels)
-       hofx(l,m) = rts(l,m)%Brightness_Temperature
-     end do
+   !Set to zero and initialize counter
+   hofx = missing
+
+   do l = 1, size(self%channels)
+     hofx(l,self%Profiles) = rts(l,self%Profiles)%Brightness_Temperature
    end do
 
    ! Put simulated diagnostics into hofxdiags

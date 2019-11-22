@@ -334,13 +334,55 @@ end subroutine crtm_conf_delete
 
 ! ------------------------------------------------------------------------------
 
-SUBROUTINE Load_Atm_Data(N_PROFILES,N_LAYERS,geovals,atm,conf)
+subroutine Select_Profiles(n_Profiles,n_Channels,channels,obss,profiles)
+use missing_values_mod
 
 implicit none
-integer, intent(in) :: N_PROFILES, N_LAYERS
+integer,              intent(in)  :: n_Profiles, n_Channels
+type(c_ptr), value,   intent(in)  :: obss
+integer(c_int),       intent(in)  :: channels(:)
+integer, allocatable, intent(out) :: profiles(:)
+
+integer :: k1, n1
+character(len=200) :: varname
+real(kind_real), allocatable :: ObsTb(:,:)
+integer :: all_profiles(n_Profiles) = (/k1, k1 = 1, n_Profiles, 1/)
+logical :: keep(n_Profiles)
+
+real(c_double) :: missing
+
+ allocate(ObsTb(n_Profiles, n_Channels))
+
+ ! Set missing value
+ missing = missing_value(missing)
+
+ ObsTb = missing
+
+ do n1 = 1, n_Channels
+   call get_var_name(channels(n1),varname)
+   call obsspace_get_db(obss, "ObsValue", varname, ObsTb(:,n1))
+ enddo
+
+ j1 = 0
+ !Loop over all n_Profiles, i.e. number of locations
+ do k1 = 1, n_Profiles
+    keep(k1) = any(ObsTb(k1,:) /= missing)
+ end do
+
+ if (allocated(profiles)) deallocate(profiles)
+ profiles = pack(all_profiles, mask = keep)
+
+end subroutine Select_Profiles
+
+! ------------------------------------------------------------------------------
+
+SUBROUTINE Load_Atm_Data(n_Profiles,n_Layers,geovals,atm,conf)
+
+implicit none
+integer, intent(in) :: n_Profiles, n_Layers
 type(ufo_geovals), intent(in) :: geovals
-type(CRTM_Atmosphere_type), intent(inout) :: atm(:)
-type(crtm_conf) :: conf
+type(CRTM_Atmosphere_type), intent(inout) :: atm(n_Profiles)
+type(crtm_conf), intent(in) :: conf
 
 ! Local variables
 integer :: k1,jspec
@@ -350,7 +392,7 @@ character(max_string) :: err_msg
 
  ! Populate the atmosphere structures for CRTM (atm(k1), for the k1-th profile)
  ! ----------------------------------------------------------------------------
- do k1 = 1,N_PROFILES
+ do k1 = 1,n_Profiles
     call ufo_geovals_get_var(geovals, var_ts, geoval)
 
     ! Check model levels is consistent in geovals & crtm
@@ -361,10 +403,10 @@ character(max_string) :: err_msg
       endif
     endif
 
-    atm(k1)%Temperature(1:N_LAYERS) = geoval%vals(:,k1)
+    atm(k1)%Temperature(1:n_Layers) = geoval%vals(:,k1)
 
     call ufo_geovals_get_var(geovals, var_prs, geoval)
-    atm(k1)%Pressure(1:N_LAYERS) = geoval%vals(:,k1) * 0.01  ! to hPa
+    atm(k1)%Pressure(1:n_Layers) = geoval%vals(:,k1) * 0.01  ! to hPa
     call ufo_geovals_get_var(geovals, var_prsi, geoval)
     atm(k1)%Level_Pressure(:) = geoval%vals(:,k1) * 0.01     ! to hPa
     atm(k1)%Climatology         = US_STANDARD_ATMOSPHERE
@@ -374,10 +416,10 @@ character(max_string) :: err_msg
        if ( trim(conf%Absorbers(jspec)) == trim(var_oz) .AND. &
             ufo_vars_getindex(geovals%variables, var_oz) < 0 .AND. &
             TRIM(conf%aerosol_option) /= "" ) then
-          atm(k1)%Absorber(1:N_LAYERS,jspec) = ozone_default_value
+          atm(k1)%Absorber(1:n_Layers,jspec) = ozone_default_value
        else
           CALL ufo_geovals_get_var(geovals, conf%Absorbers(jspec), geoval)
-          atm(k1)%Absorber(1:N_LAYERS,jspec) = geoval%vals(:,k1)
+          atm(k1)%Absorber(1:n_Layers,jspec) = geoval%vals(:,k1)
        end if
        atm(k1)%Absorber_Id(jspec)    = conf%Absorber_Id(jspec)
        atm(k1)%Absorber_Units(jspec) = conf%Absorber_Units(jspec)
@@ -407,7 +449,7 @@ subroutine Load_Sfc_Data(n_Profiles,n_Channels,channels,geovals,sfc,chinfo,obss,
 implicit none
 integer,                     intent(in)    :: n_Profiles, n_Channels
 type(ufo_geovals),           intent(in)    :: geovals
-type(CRTM_Surface_type),     intent(inout) :: sfc(:)
+type(CRTM_Surface_type),     intent(inout) :: sfc(n_Profiles)
 type(CRTM_ChannelInfo_type), intent(in)    :: chinfo(:)
 type(c_ptr), value,          intent(in)    :: obss
 integer(c_int),              intent(in)    :: channels(:)
@@ -440,8 +482,7 @@ real(kind_real), allocatable :: ObsTb(:,:)
  enddo
 
  !Loop over all n_Profiles, i.e. number of locations
- do k1 = 1,N_PROFILES
-
+ do k1 = 1,n_Profiles
    !Pass sensor information
    sfc(k1)%sensordata%sensor_id        = chinfo(1)%sensor_id
    sfc(k1)%sensordata%wmo_sensor_id    = chinfo(1)%wmo_sensor_id
@@ -452,87 +493,88 @@ real(kind_real), allocatable :: ObsTb(:,:)
    do n1 = 1, n_channels
      sfc(k1)%sensordata%tb(n1) = ObsTb(k1,n1)
    enddo
+ end do
 
-   !Water_type
-   sfc(k1)%Water_Type         = SEA_WATER_TYPE    !** NOTE: need to check how to determine fresh vs sea water types (salinity???)
+ !Water_type
+ sfc(1:n_Profiles)%Water_Type = SEA_WATER_TYPE    !** NOTE: need to check how to determine fresh vs sea water types (salinity???)
 
-   !Wind_Speed
-   call ufo_geovals_get_var(geovals, var_sfc_wspeed, geoval)
-   sfc(k1)%Wind_Speed = geoval%vals(1,k1)
+ !Wind_Speed
+ call ufo_geovals_get_var(geovals, var_sfc_wspeed, geoval)
+ sfc(1:n_Profiles)%Wind_Speed = geoval%vals(1,1:n_Profiles)
 
-   !Wind_Direction
-   call ufo_geovals_get_var(geovals, var_sfc_wdir, geoval)
-   sfc(k1)%Wind_Direction = geoval%vals(1,k1)
+ !Wind_Direction
+ call ufo_geovals_get_var(geovals, var_sfc_wdir, geoval)
+ sfc(1:n_Profiles)%Wind_Direction = geoval%vals(1,1:n_Profiles)
 
-   !Water_Coverage
-   call ufo_geovals_get_var(geovals, var_sfc_wfrac, geoval)
-   sfc(k1)%Water_Coverage = geoval%vals(1,k1)
+ !Water_Coverage
+ call ufo_geovals_get_var(geovals, var_sfc_wfrac, geoval)
+ sfc(1:n_Profiles)%Water_Coverage = geoval%vals(1,1:n_Profiles)
 
-   !Water_Temperature
-   call ufo_geovals_get_var(geovals, var_sfc_wtmp, geoval)
-   sfc(k1)%Water_Temperature = geoval%vals(1,k1)
+ !Water_Temperature
+ call ufo_geovals_get_var(geovals, var_sfc_wtmp, geoval)
+ sfc(1:n_Profiles)%Water_Temperature = geoval%vals(1,1:n_Profiles)
 
-   !Ice_Coverage
-   call ufo_geovals_get_var(geovals, var_sfc_ifrac, geoval)
-   sfc(k1)%Ice_Coverage = geoval%vals(1,k1)
+ !Ice_Coverage
+ call ufo_geovals_get_var(geovals, var_sfc_ifrac, geoval)
+ sfc(1:n_Profiles)%Ice_Coverage = geoval%vals(1,1:n_Profiles)
 
-   !Ice_Temperature
-   call ufo_geovals_get_var(geovals, var_sfc_itmp, geoval)
-   sfc(k1)%Ice_Temperature = geoval%vals(1,k1)
+ !Ice_Temperature
+ call ufo_geovals_get_var(geovals, var_sfc_itmp, geoval)
+ sfc(1:n_Profiles)%Ice_Temperature = geoval%vals(1,1:n_Profiles)
 
-   !Snow_Coverage
-   call ufo_geovals_get_var(geovals, var_sfc_sfrac, geoval)
-   sfc(k1)%Snow_Coverage      = geoval%vals(1,k1)
+ !Snow_Coverage
+ call ufo_geovals_get_var(geovals, var_sfc_sfrac, geoval)
+ sfc(1:n_Profiles)%Snow_Coverage      = geoval%vals(1,1:n_Profiles)
 
-   !Snow_Temperature
-   call ufo_geovals_get_var(geovals, var_sfc_stmp, geoval)
-   sfc(k1)%Snow_Temperature = geoval%vals(1,k1)
+ !Snow_Temperature
+ call ufo_geovals_get_var(geovals, var_sfc_stmp, geoval)
+ sfc(1:n_Profiles)%Snow_Temperature = geoval%vals(1,1:n_Profiles)
 
-   !Snow_Depth
-   call ufo_geovals_get_var(geovals, var_sfc_sdepth, geoval)
-   sfc(k1)%Snow_Depth = geoval%vals(1,k1)
+ !Snow_Depth
+ call ufo_geovals_get_var(geovals, var_sfc_sdepth, geoval)
+ sfc(1:n_Profiles)%Snow_Depth = geoval%vals(1,1:n_Profiles)
 
-   !Land_Coverage
-   call ufo_geovals_get_var(geovals, var_sfc_lfrac, geoval)
-   sfc(k1)%Land_Coverage = geoval%vals(1,k1)
+ !Land_Coverage
+ call ufo_geovals_get_var(geovals, var_sfc_lfrac, geoval)
+ sfc(1:n_Profiles)%Land_Coverage = geoval%vals(1,1:n_Profiles)
 
-   !Land_Type
-   ! + used to lookup land sfc emiss. for IR and VIS
-   ! + land sfc emiss. undefined over water/snow/ice
-   call ufo_geovals_get_var(geovals, var_sfc_landtyp, geoval)
+ !Land_Type
+ ! + used to lookup land sfc emiss. for IR and VIS
+ ! + land sfc emiss. undefined over water/snow/ice
+ call ufo_geovals_get_var(geovals, var_sfc_landtyp, geoval)
+ do k1 = 1,n_Profiles
    if (.not.any(int(geoval%vals(1,k1)) == conf%Land_WSI)) then
       sfc(k1)%Land_Type = int(geoval%vals(1,k1))
    end if
-
-   !Land_Temperature
-   call ufo_geovals_get_var(geovals, var_sfc_ltmp, geoval)
-   sfc(k1)%Land_Temperature = geoval%vals(1,k1)
-
-   !Lai
-   call ufo_geovals_get_var(geovals, var_sfc_lai, geoval)
-   sfc(k1)%Lai = geoval%vals(1,k1)
-
-   !Vegetation_Fraction
-   call ufo_geovals_get_var(geovals, var_sfc_vegfrac, geoval)
-   sfc(k1)%Vegetation_Fraction = geoval%vals(1,k1)
-
-   !Vegetation_Type
-   call ufo_geovals_get_var(geovals, var_sfc_vegtyp, geoval)
-   sfc(k1)%Vegetation_Type = int(geoval%vals(1,k1))
-
-   !Soil_Type
-   call ufo_geovals_get_var(geovals, var_sfc_soiltyp, geoval)
-   sfc(k1)%Soil_Type = int(geoval%vals(1,k1))
-
-   !Soil_Moisture_Content
-   call ufo_geovals_get_var(geovals, var_sfc_soilm, geoval)
-   sfc(k1)%Soil_Moisture_Content = geoval%vals(1,k1)
-
-   !Soil_Temperature
-   call ufo_geovals_get_var(geovals, var_sfc_soilt, geoval)
-   sfc(k1)%Soil_Temperature = geoval%vals(1,k1)
-
  end do
+
+ !Land_Temperature
+ call ufo_geovals_get_var(geovals, var_sfc_ltmp, geoval)
+ sfc(1:n_Profiles)%Land_Temperature = geoval%vals(1,1:n_Profiles)
+
+ !Lai
+ call ufo_geovals_get_var(geovals, var_sfc_lai, geoval)
+ sfc(1:n_Profiles)%Lai = geoval%vals(1,1:n_Profiles)
+
+ !Vegetation_Fraction
+ call ufo_geovals_get_var(geovals, var_sfc_vegfrac, geoval)
+ sfc(1:n_Profiles)%Vegetation_Fraction = geoval%vals(1,1:n_Profiles)
+
+ !Vegetation_Type
+ call ufo_geovals_get_var(geovals, var_sfc_vegtyp, geoval)
+ sfc(1:n_Profiles)%Vegetation_Type = int(geoval%vals(1,1:n_Profiles))
+
+ !Soil_Type
+ call ufo_geovals_get_var(geovals, var_sfc_soiltyp, geoval)
+ sfc(1:n_Profiles)%Soil_Type = int(geoval%vals(1,1:n_Profiles))
+
+ !Soil_Moisture_Content
+ call ufo_geovals_get_var(geovals, var_sfc_soilm, geoval)
+ sfc(1:n_Profiles)%Soil_Moisture_Content = geoval%vals(1,1:n_Profiles)
+
+ !Soil_Temperature
+ call ufo_geovals_get_var(geovals, var_sfc_soilt, geoval)
+ sfc(1:n_Profiles)%Soil_Temperature = geoval%vals(1,1:n_Profiles)
 
  deallocate(ObsTb)
 
@@ -540,16 +582,13 @@ end subroutine Load_Sfc_Data
 
 ! ------------------------------------------------------------------------------
 
-subroutine Load_Geom_Data(obss,geo)
+subroutine Load_Geom_Data(n_Profiles,obss,geo)
 
 implicit none
 type(c_ptr), value,       intent(in)    :: obss
-type(CRTM_Geometry_type), intent(inout) :: geo(:)
-real(kind_real), allocatable :: TmpVar(:)
-integer :: nlocs
+type(CRTM_Geometry_type), intent(inout) :: geo(n_Profiles)
 
- nlocs = obsspace_get_nlocs(obss)
- allocate(TmpVar(nlocs))
+real(kind_real) :: TmpVar(n_Profiles)
 
  call obsspace_get_db(obss, "MetaData", "sensor_zenith_angle", TmpVar)
  geo(:)%Sensor_Zenith_Angle = abs(TmpVar(:)) ! needs to be absolute value
@@ -583,8 +622,6 @@ integer :: nlocs
 
  where (abs(geo(:)%Sensor_Scan_Angle) > 80.0_kind_real) &
     geo(:)%Sensor_Scan_Angle = 0.0_kind_real
-
- deallocate(TmpVar)
 
 end subroutine Load_Geom_Data
 
