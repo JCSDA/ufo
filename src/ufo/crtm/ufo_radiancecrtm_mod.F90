@@ -7,15 +7,18 @@
 
 module ufo_radiancecrtm_mod
 
+ use crtm_module
+
  use fckit_configuration_module, only: fckit_configuration
  use iso_c_binding
  use kinds
+ use missing_values_mod
+
+ use obsspace_mod
 
  use ufo_geovals_mod, only: ufo_geovals, ufo_geoval, ufo_geovals_get_var
  use ufo_vars_mod
  use ufo_crtm_utils_mod
- use crtm_module
- use obsspace_mod
 
  implicit none
  private
@@ -301,7 +304,7 @@ real(c_double) :: missing
       end if 
    end do
 
-   call Select_Profiles(n_Profiles,n_Channels,channels,obss,self%Profiles)
+   call Select_Profiles(n_Profiles,n_Channels,self%channels,obss,self%Profiles)
 
    if (jacobian_needed) then
       ! Allocate the ARRAYS (for CRTM_K_Matrix)
@@ -348,14 +351,23 @@ real(c_double) :: missing
 
       ! Call the K-matrix model
       ! -----------------------
-      err_stat = CRTM_K_Matrix( atm( self%Profiles )       , &  ! FORWARD  Input
-                                sfc( self%Profiles )       , &  ! FORWARD  Input
-                                rts_K( :, self%Profiles )  , &  ! K-MATRIX Input
-                                geo( self%Profiles )       , &  ! Input
-                                chinfo(n:n)                , &  ! Input
-                                atm_K( :, self%Profiles )  , &  ! K-MATRIX Output
-                                sfc_K( :, self%Profiles )  , &  ! K-MATRIX Output
-                                rts( :, self%Profiles )      )  ! FORWARD  Output
+      err_stat = CRTM_K_Matrix( atm         , &  ! FORWARD  Input
+                                sfc         , &  ! FORWARD  Input
+                                rts_K       , &  ! K-MATRIX Input
+                                geo         , &  ! Input
+                                chinfo(n:n) , &  ! Input
+                                atm_K       , &  ! K-MATRIX Output
+                                sfc_K       , &  ! K-MATRIX Output
+                                rts           )  ! FORWARD  Output
+
+!      err_stat = CRTM_K_Matrix( atm( self%Profiles )       , &  ! FORWARD  Input
+!                                sfc( self%Profiles )       , &  ! FORWARD  Input
+!                                rts_K( :, self%Profiles )  , &  ! K-MATRIX Input
+!                                geo( self%Profiles )       , &  ! Input
+!                                chinfo(n:n)                , &  ! Input
+!                                atm_K( :, self%Profiles )  , &  ! K-MATRIX Output
+!                                sfc_K( :, self%Profiles )  , &  ! K-MATRIX Output
+!                                rts( :, self%Profiles )      )  ! FORWARD  Output
       if ( err_stat /= SUCCESS ) THEN
          message = 'Error calling CRTM (setTraj) K-Matrix Model for '//TRIM(self%conf%SENSOR_ID(n))
          call Display_Message( PROGRAM_NAME, message, FAILURE )
@@ -365,11 +377,17 @@ real(c_double) :: missing
    else
       ! Call the forward model call for each sensor
       ! -------------------------------------------
-      err_stat = CRTM_Forward( atm( self%Profiles )    , &  ! Input
-                               sfc( self%Profiles )    , &  ! Input
-                               geo( self%Profiles )    , &  ! Input
-                               chinfo(n:n)             , &  ! Input
-                               rts( :, self%Profiles )   )  ! Output
+      err_stat = CRTM_Forward( atm         , &  ! Input
+                               sfc         , &  ! Input
+                               geo         , &  ! Input
+                               chinfo(n:n) , &  ! Input
+                               rts           )  ! Output
+!      err_stat = CRTM_Forward( atm( self%Profiles )    , &  ! Input
+!                               sfc( self%Profiles )    , &  ! Input
+!                               geo( self%Profiles )    , &  ! Input
+!                               chinfo(n:n)             , &  ! Input
+!                               rts( :, self%Profiles )   )  ! Output
+
       if ( err_stat /= SUCCESS ) THEN
          message = 'Error calling CRTM Forward Model for '//TRIM(self%conf%SENSOR_ID(n))
          call Display_Message( PROGRAM_NAME, message, FAILURE )
@@ -386,7 +404,7 @@ real(c_double) :: missing
    ! Set missing value
    missing = missing_value(missing)
 
-   !Set to zero and initialize counter
+   !Set to missing, then retrieve non-missing profiles
    hofx = missing
 
    do l = 1, size(self%channels)

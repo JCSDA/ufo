@@ -7,16 +7,18 @@
 
 module ufo_radiancecrtm_tlad_mod
 
+ use crtm_module
+
  use fckit_configuration_module, only: fckit_configuration
  use iso_c_binding
  use kinds
+ use missing_values_mod
+
+ use obsspace_mod
 
  use ufo_geovals_mod, only: ufo_geovals, ufo_geoval, ufo_geovals_get_var
  use ufo_vars_mod
  use ufo_crtm_utils_mod
- use crtm_module
- use obsspace_mod
- use missing_values_mod
 
  implicit none
  private
@@ -275,18 +277,27 @@ type(CRTM_RTSolution_type), allocatable :: rts_K(:,:)
    rts_K%Radiance               = ZERO
    rts_K%Brightness_Temperature = ONE
 
-   call Select_Profiles(self%n_Profiles,self%n_Channels,channels,obss,self%Profiles)
+   call Select_Profiles(self%n_Profiles,self%n_Channels,self%channels,obss,self%Profiles)
 
    ! Call the K-matrix model
    ! -----------------------
-   err_stat = CRTM_K_Matrix( atm( self%Profiles )           , &  ! FORWARD  Input
-                             sfc( self%Profiles )           , &  ! FORWARD  Input
-                             rts_K( :, self%Profiles )      , &  ! K-MATRIX Input
-                             geo( self%Profiles )           , &  ! Input
-                             chinfo(n:n)                    , &  ! Input
-                             self%atm_K( :, self%Profiles ) , &  ! K-MATRIX Output
-                             self%sfc_K( :, self%Profiles ) , &  ! K-MATRIX Output
-                             rts( :, self%Profiles )          )  ! FORWARD  Output
+   err_stat = CRTM_K_Matrix( atm         , &  ! FORWARD  Input
+                             sfc         , &  ! FORWARD  Input
+                             rts_K       , &  ! K-MATRIX Input
+                             geo         , &  ! Input
+                             chinfo(n:n) , &  ! Input
+                             self%atm_K  , &  ! K-MATRIX Output
+                             self%sfc_K  , &  ! K-MATRIX Output
+                             rts           )  ! FORWARD  Output
+!   err_stat = CRTM_K_Matrix( atm( self%Profiles )           , &  ! FORWARD  Input
+!                             sfc( self%Profiles )           , &  ! FORWARD  Input
+!                             rts_K( :, self%Profiles )      , &  ! K-MATRIX Input
+!                             geo( self%Profiles )           , &  ! Input
+!                             chinfo(n:n)                    , &  ! Input
+!                             self%atm_K( :, self%Profiles ) , &  ! K-MATRIX Output
+!                             self%sfc_K( :, self%Profiles ) , &  ! K-MATRIX Output
+!                             rts( :, self%Profiles )          )  ! FORWARD  Output
+
    if ( err_stat /= SUCCESS ) THEN
       message = 'Error calling CRTM (setTraj) K-Matrix Model for '//TRIM(self%conf_traj%SENSOR_ID(n))
       call Display_Message( PROGRAM_NAME, message, FAILURE )

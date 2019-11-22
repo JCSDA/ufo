@@ -23,10 +23,11 @@ private
 public crtm_conf
 public crtm_conf_setup
 public crtm_conf_delete
+public get_var_name
 public Load_Atm_Data
 public Load_Sfc_Data
 public Load_Geom_Data
-public get_var_name
+public Select_Profiles
 
 PUBLIC Load_Aerosol_Data
 public assign_aerosol_names
@@ -334,43 +335,53 @@ end subroutine crtm_conf_delete
 
 ! ------------------------------------------------------------------------------
 
-subroutine Select_Profiles(n_Profiles,n_Channels,channels,obss,profiles)
+subroutine Select_Profiles(n_Profiles,n_Channels,channels,obss,Profiles,Mask)
 use missing_values_mod
 
 implicit none
 integer,              intent(in)  :: n_Profiles, n_Channels
 type(c_ptr), value,   intent(in)  :: obss
 integer(c_int),       intent(in)  :: channels(:)
-integer, allocatable, intent(out) :: profiles(:)
+integer, allocatable, intent(out) :: Profiles(:)
+logical, allocatable, intent(out) :: Mask(:)
 
 integer :: k1, n1
 character(len=200) :: varname
-real(kind_real), allocatable :: ObsTb(:,:)
-integer :: all_profiles(n_Profiles) = (/k1, k1 = 1, n_Profiles, 1/)
-logical :: keep(n_Profiles)
+real(kind_real), allocatable :: ObsVal(:,:)
+!real(kind_real), allocatable :: EffObsErr(:,:)
+!integer, allocatable :: EffQC(:,:)
 
 real(c_double) :: missing
 
- allocate(ObsTb(n_Profiles, n_Channels))
+ allocate(ObsVal(n_Profiles, n_Channels))
+! allocate(EffObsErr(n_Profiles, n_Channels))
+! allocate(EffQC(n_Profiles, n_Channels))
 
  ! Set missing value
  missing = missing_value(missing)
 
- ObsTb = missing
+ ObsVal = missing
+! EffObsErr = missing
+! EffQC = 0
 
  do n1 = 1, n_Channels
    call get_var_name(channels(n1),varname)
-   call obsspace_get_db(obss, "ObsValue", varname, ObsTb(:,n1))
+   call obsspace_get_db(obss, "ObsValue", varname, ObsVal(:,n1))
+!   call obsspace_get_db(obss, "EffectiveError", varname, EffObsErr(:,n1))
+!   call obsspace_get_db(obss, "EffectiveQC{iter}", varname, EffQC(:,n1))
  enddo
 
- j1 = 0
+ if (allocated(Mask)) deallocate(Mask)
+ allocate(Mask(n_Profiles))
  !Loop over all n_Profiles, i.e. number of locations
  do k1 = 1, n_Profiles
-    keep(k1) = any(ObsTb(k1,:) /= missing)
+    Mask(k1) = any(ObsVal(k1,:) /= missing)
+!    Mask(k1) = any(EffObsErr(k1,:) /= missing)
+!    Mask(k1) = any(EffQC(k1,:) /= 0)
  end do
 
- if (allocated(profiles)) deallocate(profiles)
- profiles = pack(all_profiles, mask = keep)
+ if (allocated(Profiles)) deallocate(Profiles)
+ Profiles = pack([(k1,k1=1,n_Profiles)], mask = Mask)
 
 end subroutine Select_Profiles
 
@@ -585,6 +596,7 @@ end subroutine Load_Sfc_Data
 subroutine Load_Geom_Data(n_Profiles,obss,geo)
 
 implicit none
+integer,                  intent(in)    :: n_Profiles
 type(c_ptr), value,       intent(in)    :: obss
 type(CRTM_Geometry_type), intent(inout) :: geo(n_Profiles)
 
