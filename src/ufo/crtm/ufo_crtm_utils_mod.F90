@@ -335,14 +335,13 @@ end subroutine crtm_conf_delete
 
 ! ------------------------------------------------------------------------------
 
-subroutine Mask_Profiles(n_Profiles,n_Channels,channels,obss,Mask)!,Profiles)
+subroutine Mask_Profiles(n_Profiles,n_Channels,channels,obss,Mask)
 use missing_values_mod
 
 implicit none
 integer,              intent(in)    :: n_Profiles, n_Channels
 type(c_ptr), value,   intent(in)    :: obss
 integer(c_int),       intent(in)    :: channels(:)
-!integer, allocatable, intent(inout) :: Profiles(:)
 logical, allocatable, intent(inout) :: Mask(:)
 
 integer :: k1, n1
@@ -350,7 +349,6 @@ character(len=200) :: varname
 real(kind_real), allocatable :: ObsVal(:,:)
 !real(kind_real), allocatable :: EffObsErr(:,:)
 !integer, allocatable :: EffQC(:,:)
-!logical :: Mask(n_Profiles)
 
 real(c_double) :: missing
 
@@ -380,9 +378,6 @@ real(c_double) :: missing
 !    Mask(k1) = any(EffObsErr(k1,:) /= missing)
 !    Mask(k1) = any(EffQC(k1,:) /= 0)
  end do
-
-! if (allocated(Profiles)) deallocate(Profiles)
-! Profiles = pack([(k1,k1=1,n_Profiles)], mask = Mask)
 
 end subroutine Mask_Profiles
 
