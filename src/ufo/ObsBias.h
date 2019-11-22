@@ -45,6 +45,7 @@ class ObsBias : public util::Printable,
   ~ObsBias() {}
 
   ObsBias & operator+=(const ObsBiasIncrement &);
+  ObsBias & operator=(const ObsBias &);
 
 /// I/O and diagnostics
   void read(const eckit::Configuration &);
@@ -52,6 +53,7 @@ class ObsBias : public util::Printable,
   double norm() const;
   std::size_t size() const;
 
+/// Bias parameters interface
   const double & operator[](const unsigned int ii) const {return (*biasbase_)[ii];}
 
 /// Obs bias model

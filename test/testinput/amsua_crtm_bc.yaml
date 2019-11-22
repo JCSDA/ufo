@@ -1,7 +1,8 @@
 window_begin: 2018-04-14T21:00:00Z
 window_end: 2018-04-15T03:00:00Z
 
-LinearObsOpTest: 
+LinearObsOpTest:
+ testiterTL: 2
  coefTL: 1.e-3
  toleranceTL: 1.0e-3
  toleranceAD: 1.0e-11
@@ -23,9 +24,9 @@ Observations:
    ObsSpace:
      name: amsua_n19
      ObsDataIn: 
-       obsfile: Data/amsua_n19_obs_2018041500_m_bc.nc4
+       obsfile: Data/amsua_n19_obs_2018041500_m.nc4
      ObsDataOut:
-       obsfile: Data/amsua_n19_obs_2018041500_m_bc_out.nc4
+       obsfile: Data/amsua_n19_obs_2018041500_m_out.nc4
      simulate:
        variables: [brightness_temperature]
        channels: 1-10,15
@@ -49,5 +50,5 @@ Observations:
                   BCPres_Third_Order_View_Angle_,
                   BCPres_Second_Order_View_Angle_,
                   BCPres_First_Order_View_Angle_]
-   rmsequiv: 239.409470162736
+   rmsequiv: 240.13289708962066
    tolerance: 1.e-5

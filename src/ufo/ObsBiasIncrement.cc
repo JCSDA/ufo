@@ -11,7 +11,6 @@
 #include "ufo/ObsBiasIncrement.h"
 
 #include "oops/util/Logger.h"
-#include "oops/util/Random.h"
 #include "ufo/ObsBias.h"
 
 namespace ufo {
@@ -50,12 +49,6 @@ void ObsBiasIncrement::diff(const ObsBias & b1, const ObsBias & b2) {
 
 void ObsBiasIncrement::zero() {
   if (biasbase_) biasbase_->zero();
-}
-
-// -----------------------------------------------------------------------------
-
-void ObsBiasIncrement::random() {
-  if (biasbase_) biasbase_->random();
 }
 
 // -----------------------------------------------------------------------------
