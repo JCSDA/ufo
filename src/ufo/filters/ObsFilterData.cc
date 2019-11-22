@@ -22,7 +22,7 @@ namespace ufo {
 
 // -----------------------------------------------------------------------------
 ObsFilterData::ObsFilterData(ioda::ObsSpace & obsdb)
-  : obsdb_(obsdb), gvals_(NULL), ovecs_(), diags_(NULL) {
+  : obsdb_(obsdb), gvals_(NULL), ovecs_(), diags_(NULL), dvecs_() {
   oops::Log::trace() << "ObsFilterData created" << std::endl;
 }
 
@@ -41,6 +41,12 @@ void ObsFilterData::associate(const GeoVaLs & gvals) {
 /*! Associates H(x) ObsVector with this ObsFilterData */
 void ObsFilterData::associate(const ioda::ObsVector & hofx, const std::string & name) {
   ovecs_[name] = &hofx;
+}
+
+// -----------------------------------------------------------------------------
+/*! Associates ObsDataVector with this ObsFilterData */
+void ObsFilterData::associate(const ioda::ObsDataVector<float> & data, const std::string & name) {
+  dvecs_[name] = &data;
 }
 
 // -----------------------------------------------------------------------------
@@ -71,7 +77,7 @@ bool ObsFilterData::has(const Variable & varname) const {
   } else if (grp == "ObsDiag") {
     return (diags_ && diags_->has(var));
   } else {
-    return this->hasVector(grp, var) || obsdb_.has(grp, var);
+    return this->hasVector(grp, var) || this->hasDataVector(grp, var) || obsdb_.has(grp, var);
   }
   return false;
 }
@@ -81,6 +87,17 @@ bool ObsFilterData::has(const Variable & varname) const {
 bool ObsFilterData::hasVector(const std::string & grp, const std::string & var) const {
   std::map<std::string, const ioda::ObsVector *>::const_iterator jj = ovecs_.find(grp);
   if (jj == ovecs_.end()) {
+    return false;
+  } else {
+    return jj->second->has(var);
+  }
+}
+
+// -----------------------------------------------------------------------------
+
+bool ObsFilterData::hasDataVector(const std::string & grp, const std::string & var) const {
+  std::map<std::string, const ioda::ObsDataVector<float> *>::const_iterator jj = dvecs_.find(grp);
+  if (jj == dvecs_.end()) {
     return false;
   } else {
     return jj->second->has(var);
@@ -128,6 +145,11 @@ void ObsFilterData::get(const Variable & varname, std::vector<float> & values) c
   } else if (grp == "ObsDiag") {
     ASSERT(diags_);
     diags_->get(values, var);
+///  For data from ObsDataVector if available
+  } else if (this->hasDataVector(grp, var)) {
+    std::map<std::string, const ioda::ObsDataVector<float> *>::const_iterator jv = dvecs_.find(grp);
+    size_t iv = jv->second->varnames().find(var);
+    values = (*jv->second)[iv];
 ///  Else must be coming from ObsSpace
   } else {
     obsdb_.get_db(grp, var, values);
@@ -201,10 +223,16 @@ void ObsFilterData::get(const Variable & varname, ioda::ObsDataVector<float> & v
   const std::string var = varname.variable();
   const std::string grp = varname.group();
 
-  ASSERT(grp == "ObsFunction");
-
-  ObsFunction obsfunc(varname);
-  obsfunc.compute(*this, values);
+  if (grp == "ObsFunction") {
+    ObsFunction obsfunc(varname);
+    obsfunc.compute(*this, values);
+///  For HofX get from ObsVector H(x) (should be available)
+  } else if (this->hasDataVector(grp, var)) {
+    std::map<std::string, const ioda::ObsDataVector<float> *>::const_iterator jv = dvecs_.find(grp);
+    values = *jv->second;
+  } else {
+    ABORT("ObsFilterData::get ObsDataVector Error");
+  }
 }
 
 
@@ -235,6 +263,10 @@ void ObsFilterData::print(std::ostream & os) const {
   }
   for (std::map<std::string, const ioda::ObsVector *>::const_iterator jj = ovecs_.begin();
        jj != ovecs_.end(); ++jj) {
+    os << ", " << jj->first;
+  }
+  for (std::map<std::string, const ioda::ObsDataVector<float> *>::const_iterator
+     jj = dvecs_.begin(); jj != dvecs_.end(); ++jj) {
     os << ", " << jj->first;
   }
   if (diags_) {
