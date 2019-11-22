@@ -111,7 +111,7 @@ phases:
       - echo $BUILD_STATUS
 
       - cd /build_container/ufo
-      - ctest"
+      - ctest
 
   post_build:
     commands:
