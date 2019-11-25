@@ -6,6 +6,10 @@
 set ( utils_files
       ArrowProxy.h
       Constants.h
+      DistanceCalculator.h
+      EquispacedBinSelector.h
+      GeodesicDistanceCalculator.h
+      MaxNormDistanceCalculator.h
       parameters/EnumParameter.h
       parameters/OptionalParameter.h
       parameters/Parameter.h
@@ -15,6 +19,7 @@ set ( utils_files
       parameters/Parameters.h
       RecursiveSplitter.cc
       RecursiveSplitter.h
+      SpatialBinSelector.h
       StringUtils.cc
       StringUtils.h
       vert_interp.F90

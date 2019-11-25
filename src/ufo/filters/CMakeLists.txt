@@ -37,6 +37,7 @@ set ( filters_files
       Variables.h
       Gaussian_Thinning.cc
       Gaussian_Thinning.h
+      GaussianThinningParameters.h
       processWhere.cc
       processWhere.h
       actions/FilterAction.cc
