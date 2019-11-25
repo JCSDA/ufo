@@ -69,6 +69,7 @@ list( APPEND ufo_test_input
   testinput/qc_boundscheck.yaml
   testinput/qc_differencecheck.yaml
   testinput/qc_gauss_thinning.yaml
+  testinput/qc_recursive_splitter.yaml
   testinput/qc_thinning.yaml
   testinput/radiosonde.yaml
   testinput/radialvelocity.yaml
@@ -703,6 +704,16 @@ ecbuild_add_test( TARGET  test_ufo_qc_gauss_thinning
                   ARGS    "testinput/qc_gauss_thinning.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsFilters.x )
+
+# Test UFO ObsFilters (specific)
+
+ecbuild_add_test( TARGET  test_ufo_recursivesplitter
+                  SOURCES mains/TestRecursiveSplitter.cc
+                  # This test doesn't need a configuration file, but oops::Run::Run() requires
+                  # a path to a configuration file to be passed in the first command-line parameter.
+                  ARGS    "testinput/qc_recursive_splitter.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  LIBS    ufo)
 
 # Test Functions
 

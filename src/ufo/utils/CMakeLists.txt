@@ -4,6 +4,7 @@
 # which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 
 set ( utils_files
+      ArrowProxy.h
       Constants.h
       parameters/EnumParameter.h
       parameters/OptionalParameter.h
@@ -12,6 +13,8 @@ set ( utils_files
       parameters/ParameterBase.h
       parameters/Parameters.cc
       parameters/Parameters.h
+      RecursiveSplitter.cc
+      RecursiveSplitter.h
       StringUtils.cc
       StringUtils.h
       vert_interp.F90
