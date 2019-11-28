@@ -10,6 +10,7 @@
 
 #include <string>
 
+#include "eckit/exception/Exceptions.h"
 #include "oops/util/parameters/OptionalParameter.h"
 #include "ufo/filters/Variable.h"
 
