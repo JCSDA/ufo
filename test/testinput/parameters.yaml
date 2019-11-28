@@ -1,24 +1,7 @@
 empty:
   # Nothing to see here
 full:
-  float_parameter: 3.5
-  int_parameter: 4
-  bool_parameter: false
-  opt_float_parameter: 5.5
   opt_variable_parameter:
     name: latitude@MetaData
-  opt_date_time_parameter: 2010-02-03T04:05:06Z
-  opt_duration_parameter: PT01H02M03S
-  fruit_parameter: apple
-error_in_float_parameter:
-  float_parameter: ABCDEF
-error_in_opt_float_parameter:
-  opt_float_parameter: ABCDEF
 error_in_opt_variable_parameter:
   opt_variable_parameter:
-error_in_opt_date_time_parameter:
-  opt_date_time_parameter: ABCDEF
-error_in_opt_duration_parameter:
-  opt_duration_parameter: ABCDEF
-error_in_fruit_parameter:
-  fruit_parameter: ABCDEF

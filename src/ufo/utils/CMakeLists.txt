@@ -5,13 +5,7 @@
 
 set ( utils_files
       Constants.h
-      parameters/EnumParameter.h
-      parameters/OptionalParameter.h
-      parameters/Parameter.h
-      parameters/ParameterBase.cc
-      parameters/ParameterBase.h
-      parameters/Parameters.cc
-      parameters/Parameters.h
+      parameters/OptionalParameterVariable.h
       StringUtils.cc
       StringUtils.h
       vert_interp.F90
