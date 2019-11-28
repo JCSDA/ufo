@@ -118,9 +118,7 @@ class GaussianThinningParameters : public oops::Parameters {
 
  private:
   static float defaultHorizontalMesh() {
-    const float earthRadius = Constants::mean_earth_rad;  // km
-    const float meridianLength = M_PI * earthRadius;
-    return 2 * M_PI * earthRadius / 360.0;
+    return static_cast<float>(2 * M_PI * Constants::mean_earth_rad / 360.0);
   }
 };
 
