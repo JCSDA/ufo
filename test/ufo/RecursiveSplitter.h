@@ -20,9 +20,8 @@
 
 #include "eckit/testing/Test.h"
 #include "oops/runs/Test.h"
+#include "oops/util/Expect.h"
 #include "ufo/utils/RecursiveSplitter.h"
-
-#include "../ufo/Expect.h"
 
 namespace ufo {
 namespace test {

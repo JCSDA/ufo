@@ -17,7 +17,6 @@
 
 #define ECKIT_TESTING_SELF_REGISTER_CASES 0
 
-#include "../ufo/Expect.h"
 #include "eckit/config/LocalConfiguration.h"
 #include "eckit/testing/Test.h"
 #include "ioda/ObsSpace.h"
@@ -25,6 +24,7 @@
 #include "oops/../test/TestEnvironment.h"
 #include "oops/parallel/mpi/mpi.h"
 #include "oops/runs/Test.h"
+#include "oops/util/Expect.h"
 #include "ufo/filters/Gaussian_Thinning.h"
 #include "ufo/filters/Variables.h"
 
