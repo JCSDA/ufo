@@ -8,6 +8,7 @@
 #ifndef UFO_UTILS_RECURSIVESPLITTER_H_
 #define UFO_UTILS_RECURSIVESPLITTER_H_
 
+#include <algorithm>
 #include <cassert>
 #include <cstddef>  // for size_t
 #include <vector>
@@ -285,6 +286,13 @@ class RecursiveSplitter
   /// \brief Return the range of equivalence classes consisting of more than one element.
   MultiElementGroupRange multiElementGroups() const { return MultiElementGroupRange(*this); }
 
+  /// \brief Sort the elements in each equivalence class in ascending order.
+  ///
+  /// The elements are compared using the binary comparison function \p comp. This function needs
+  /// to satisfy the same requirements as the \c comp argument of std::sort().
+  template <typename Compare>
+  void sortGroupsBy(Compare comp);
+
  private:
   void initializeEncodedGroups();
 
@@ -297,6 +305,17 @@ class RecursiveSplitter
   /// Encoded locations of multi-element equivalence classes in orderedIds_.
   std::vector<size_t> encodedGroups_;
 };
+
+template <typename Compare>
+void RecursiveSplitter::sortGroupsBy(Compare comp) {
+  for (Group group : multiElementGroups()) {
+    std::vector<size_t>::iterator nonConstGroupBegin =
+        orderedIds_.begin() + (group.begin() - orderedIds_.cbegin());
+    std::vector<size_t>::iterator nonConstGroupEnd =
+        orderedIds_.begin() + (group.end() - orderedIds_.cbegin());
+    std::sort(nonConstGroupBegin, nonConstGroupEnd, comp);
+  }
+}
 
 }  // namespace ufo
 
