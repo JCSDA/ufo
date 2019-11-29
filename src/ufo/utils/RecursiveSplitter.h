@@ -285,8 +285,6 @@ class RecursiveSplitter
   /// \brief Return the range of equivalence classes consisting of more than one element.
   MultiElementGroupRange multiElementGroups() const { return MultiElementGroupRange(*this); }
 
-  const std::vector<size_t> &orderedIds() const { return orderedIds_; }
-
  private:
   void initializeEncodedGroups();
 
