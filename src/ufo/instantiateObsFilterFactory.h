@@ -21,6 +21,7 @@
 #include "ufo/filters/PreQC.h"
 #include "ufo/filters/QCmanager.h"
 #include "ufo/filters/Thinning.h"
+#include "ufo/filters/TemporalThinning.h"
 #include "ufo/gnssro/QC/BackgroundCheckRONBAM.h"
 #include "ufo/gnssro/QC/ROobserror.h"
 
@@ -53,6 +54,8 @@ template<typename MODEL> void instantiateObsFilterFactory() {
            makerChk11_("DomainErr Check");
   static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::BackgroundCheckRONBAM> >
            makerChk13_("Background Check RONBAM");
+  static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::TemporalThinning> >
+           makerChk14_("TemporalThinning");
 }
 
 }  // namespace ufo
