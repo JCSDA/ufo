@@ -20,6 +20,7 @@ use obsspace_mod
 implicit none
 private
 
+public crtm_comm_stat_check
 public crtm_conf
 public crtm_conf_setup
 public crtm_conf_delete
@@ -332,6 +333,28 @@ type(crtm_conf), intent(inout) :: conf
  deallocate(conf%Cloud_Id)
 
 end subroutine crtm_conf_delete
+
+! ------------------------------------------------------------------------------
+
+subroutine crtm_comm_stat_check(stat, PROGRAM_NAME, message, f_comm)
+use fckit_mpi_module,   only: fckit_mpi_comm
+
+implicit none
+
+integer,              intent(in) :: stat
+character(*),         intent(in) :: PROGRAM_NAME
+character(*),         intent(in) :: message
+type(fckit_mpi_comm), intent(in) :: f_comm
+
+character(max_string) :: rank_message
+
+ if ( stat /= SUCCESS ) THEN
+    write(rank_message,*) trim(message)," on rank ",f_comm%rank()
+    call Display_Message( PROGRAM_NAME, rank_message, FAILURE )
+    call abor1_ftn("Abort from "//PROGRAM_NAME)
+ end if
+
+end subroutine crtm_comm_stat_check
 
 ! ------------------------------------------------------------------------------
 

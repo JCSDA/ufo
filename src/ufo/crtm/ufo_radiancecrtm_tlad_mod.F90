@@ -126,6 +126,7 @@ end subroutine ufo_radiancecrtm_tlad_delete
 ! ------------------------------------------------------------------------------
 
 subroutine ufo_radiancecrtm_tlad_settraj(self, geovals, obss)
+use fckit_mpi_module,   only: fckit_mpi_comm
 
 implicit none
 
@@ -153,6 +154,9 @@ type(CRTM_Options_type),    allocatable :: Options(:)
 ! Define the K-MATRIX variables
 type(CRTM_RTSolution_type), allocatable :: rts_K(:,:)
 
+type(fckit_mpi_comm)  :: f_comm
+
+ call obsspace_get_comm(obss, f_comm)
 
  ! Get number of profile and layers from geovals
  ! ---------------------------------------------
@@ -180,11 +184,8 @@ type(CRTM_RTSolution_type), allocatable :: rts_K(:,:)
             chinfo, &
             File_Path=trim(self%conf_traj%COEFFICIENT_PATH), &
             Quiet=.TRUE.)
- if ( err_stat /= SUCCESS ) THEN
-   message = 'Error initializing CRTM (setTraj)'
-   call Display_Message( PROGRAM_NAME, message, FAILURE )
-   stop
- end if
+ message = 'Error initializing CRTM (setTraj)'
+ call crtm_comm_stat_check(err_stat, PROGRAM_NAME, message, f_comm)
 
  ! Loop over all sensors. Not necessary if we're calling CRTM for each sensor
  ! ----------------------------------------------------------------------------
@@ -194,12 +195,8 @@ type(CRTM_RTSolution_type), allocatable :: rts_K(:,:)
    ! Pass channel list to CRTM
    ! -------------------------
    err_stat = CRTM_ChannelInfo_Subset(chinfo(n), self%channels, reset=.false.)
-   if ( err_stat /= SUCCESS ) THEN
-      message = 'Error subsetting channels'
-      call Display_Message( PROGRAM_NAME, message, FAILURE )
-      stop
-   end if
-
+   message = 'Error subsetting channels'
+   call crtm_comm_stat_check(err_stat, PROGRAM_NAME, message, f_comm)
 
    ! Determine the number of channels for the current sensor
    ! -------------------------------------------------------
@@ -217,11 +214,8 @@ type(CRTM_RTSolution_type), allocatable :: rts_K(:,:)
              rts_K( self%n_Channels, self%n_Profiles )      , &
              Options( self%n_Profiles )                     , &
              STAT = alloc_stat                                )
-   if ( alloc_stat /= 0 ) THEN
-      message = 'Error allocating structure arrays (setTraj)'
-      call Display_Message( PROGRAM_NAME, message, FAILURE )
-      stop
-   end if
+   message = 'Error allocating structure arrays (setTraj)'
+   call crtm_comm_stat_check(alloc_stat, PROGRAM_NAME, message, f_comm)
 
    ! Create the input FORWARD structure (atm)
    ! ----------------------------------------
@@ -297,12 +291,8 @@ type(CRTM_RTSolution_type), allocatable :: rts_K(:,:)
                              self%sfc_K  , &  ! K-MATRIX Output
                              rts         , &  ! FORWARD  Output
                              Options       )  ! Input
-
-   if ( err_stat /= SUCCESS ) THEN
-      message = 'Error calling CRTM (setTraj) K-Matrix Model for '//TRIM(self%conf_traj%SENSOR_ID(n))
-      call Display_Message( PROGRAM_NAME, message, FAILURE )
-      stop
-   end if
+   message = 'Error calling CRTM (setTraj) K-Matrix Model for '//TRIM(self%conf_traj%SENSOR_ID(n))
+   call crtm_comm_stat_check(err_stat, PROGRAM_NAME, message, f_comm)
 
    !call CRTM_RTSolution_Inspect(rts)
 
@@ -319,11 +309,8 @@ type(CRTM_RTSolution_type), allocatable :: rts_K(:,:)
    ! Deallocate all arrays
    ! ---------------------
    deallocate(geo, atm, sfc, rts, rts_K, Options, STAT = alloc_stat)
-   if ( alloc_stat /= 0 ) THEN
-      message = 'Error deallocating structure arrays (setTraj)'
-      call Display_Message( PROGRAM_NAME, message, FAILURE )
-      stop
-   end if
+   message = 'Error deallocating structure arrays (setTraj)'
+   call crtm_comm_stat_check(alloc_stat, PROGRAM_NAME, message, f_comm)
 
  end do Sensor_Loop
 
@@ -332,12 +319,8 @@ type(CRTM_RTSolution_type), allocatable :: rts_K(:,:)
  ! ---------------------
  write( *, '( /5x, "Destroying the CRTM (setTraj)..." )' )
  err_stat = CRTM_Destroy( chinfo )
- if ( err_stat /= SUCCESS ) THEN
-    message = 'Error destroying CRTM (setTraj)'
-    call Display_Message( PROGRAM_NAME, message, FAILURE )
-    stop
- end if
-
+ message = 'Error destroying CRTM (setTraj)'
+ call crtm_comm_stat_check(err_stat, PROGRAM_NAME, message, f_comm)
 
  ! Set flag that the tracectory was set
  ! ------------------------------------
