@@ -36,7 +36,7 @@ module ufo_radiancecrtm_tlad_mod
   type(CRTM_Atmosphere_type), allocatable :: atm_K(:,:)
   type(CRTM_Surface_type), allocatable :: sfc_K(:,:)
   logical :: ltraj
-  logical, allocatable :: Mask(:)
+  logical, allocatable :: Skip_Profiles(:)
  contains
   procedure :: setup  => ufo_radiancecrtm_tlad_setup
   procedure :: delete  => ufo_radiancecrtm_tlad_delete
@@ -119,7 +119,7 @@ class(ufo_radiancecrtm_tlad), intent(inout) :: self
    deallocate(self%sfc_k)
  endif
 
- if (allocated(self%Mask)) deallocate(self%Mask)
+ if (allocated(self%Skip_Profiles)) deallocate(self%Skip_Profiles)
 
 end subroutine ufo_radiancecrtm_tlad_delete
 
@@ -274,9 +274,11 @@ type(fckit_mpi_comm)  :: f_comm
    rts_K%Radiance               = ZERO
    rts_K%Brightness_Temperature = ONE
 
-   call Mask_Profiles(self%n_Profiles,self%n_Channels,self%channels,obss,self%Mask)
+   if (allocated(self%Skip_Profiles)) deallocate(self%Skip_Profiles)
+   allocate(self%Skip_Profiles(self%n_Profiles))
+   call ufo_crtm_skip_profiles(self%n_Profiles,self%n_Channels,self%channels,obss,self%Skip_Profiles)
    do jprofile = 1, self%n_Profiles
-      Options(jprofile)%Skip_Profile = .not.self%Mask(jprofile)
+      Options(jprofile)%Skip_Profile = self%Skip_Profiles(jprofile)
    end do
 
    ! Call the K-matrix model
@@ -377,14 +379,15 @@ type(ufo_geoval), pointer :: geoval_d
 
  ! Multiply by Jacobian and add to hofx
  do jprofile = 1, self%n_Profiles
-   if (.not.self%Mask(jprofile)) cycle
-   do jchannel = 1, size(self%channels)
-     do jlevel = 1, geoval_d%nval
-       hofx(jchannel, jprofile) = hofx(jchannel, jprofile) + &
-                    self%atm_K(jchannel,jprofile)%Temperature(jlevel) * &
-                    geoval_d%vals(jlevel,jprofile)
+   if (.not.self%Skip_Profiles(jprofile)) then
+     do jchannel = 1, size(self%channels)
+       do jlevel = 1, geoval_d%nval
+         hofx(jchannel, jprofile) = hofx(jchannel, jprofile) + &
+                      self%atm_K(jchannel,jprofile)%Temperature(jlevel) * &
+                      geoval_d%vals(jlevel,jprofile)
+       enddo
      enddo
-   enddo
+   end if
  enddo
 
  ! Absorbers
@@ -398,14 +401,15 @@ type(ufo_geoval), pointer :: geoval_d
 
    ! Multiply by Jacobian and add to hofx
    do jprofile = 1, self%n_Profiles
-     if (.not.self%Mask(jprofile)) cycle
-     do jchannel = 1, size(self%channels)
-       do jlevel = 1, geoval_d%nval
-         hofx(jchannel, jprofile) = hofx(jchannel, jprofile) + &
-                      self%atm_K(jchannel,jprofile)%Absorber(jlevel,ispec) * &
-                      geoval_d%vals(jlevel,jprofile)
+     if (.not.self%Skip_Profiles(jprofile)) then
+       do jchannel = 1, size(self%channels)
+         do jlevel = 1, geoval_d%nval
+           hofx(jchannel, jprofile) = hofx(jchannel, jprofile) + &
+                        self%atm_K(jchannel,jprofile)%Absorber(jlevel,ispec) * &
+                        geoval_d%vals(jlevel,jprofile)
+         enddo
        enddo
-     enddo
+     end if
    enddo
  end do
 
@@ -420,14 +424,15 @@ type(ufo_geoval), pointer :: geoval_d
 
    ! Multiply by Jacobian and add to hofx
    do jprofile = 1, self%n_Profiles
-     if (.not.self%Mask(jprofile)) cycle
-     do jchannel = 1, size(self%channels)
-       do jlevel = 1, geoval_d%nval
-         hofx(jchannel, jprofile) = hofx(jchannel, jprofile) + &
-                      self%atm_K(jchannel,jprofile)%Cloud(ispec)%Water_Content(jlevel) * &
-                      geoval_d%vals(jlevel,jprofile)
+     if (.not.self%Skip_Profiles(jprofile)) then
+       do jchannel = 1, size(self%channels)
+         do jlevel = 1, geoval_d%nval
+           hofx(jchannel, jprofile) = hofx(jchannel, jprofile) + &
+                        self%atm_K(jchannel,jprofile)%Cloud(ispec)%Water_Content(jlevel) * &
+                        geoval_d%vals(jlevel,jprofile)
+         enddo
        enddo
-     enddo
+     end if
    enddo
  end do
 
@@ -486,16 +491,17 @@ real(c_double) :: missing
 
  ! Multiply by Jacobian and add to hofx (adjoint)
  do jprofile = 1, self%n_Profiles
-   if (.not.self%Mask(jprofile)) cycle
-   do jchannel = 1, size(self%channels)
-     do jlevel = 1, geoval_d%nval
+   if (.not.self%Skip_Profiles(jprofile)) then
+     do jchannel = 1, size(self%channels)
        if (hofx(jchannel, jprofile) /= missing) then
-         geoval_d%vals(jlevel,jprofile) = geoval_d%vals(jlevel,jprofile) + &
-                                      self%atm_K(jchannel,jprofile)%Temperature(jlevel) * &
-                                      hofx(jchannel, jprofile)
+         do jlevel = 1, geoval_d%nval
+             geoval_d%vals(jlevel,jprofile) = geoval_d%vals(jlevel,jprofile) + &
+                                          self%atm_K(jchannel,jprofile)%Temperature(jlevel) * &
+                                          hofx(jchannel, jprofile)
+         enddo
        endif
      enddo
-   enddo
+   end if
  enddo
 
  ! Absorbers
@@ -517,16 +523,17 @@ real(c_double) :: missing
 
    ! Multiply by Jacobian and add to hofx (adjoint)
    do jprofile = 1, self%n_Profiles
-     if (.not.self%Mask(jprofile)) cycle
-     do jchannel = 1, size(self%channels)
-       do jlevel = 1, geoval_d%nval
+     if (.not.self%Skip_Profiles(jprofile)) then
+       do jchannel = 1, size(self%channels)
          if (hofx(jchannel, jprofile) /= missing) then
-           geoval_d%vals(jlevel,jprofile) = geoval_d%vals(jlevel,jprofile) + &
-                                        self%atm_K(jchannel,jprofile)%Absorber(jlevel,ispec) * &
-                                        hofx(jchannel, jprofile)
+           do jlevel = 1, geoval_d%nval
+               geoval_d%vals(jlevel,jprofile) = geoval_d%vals(jlevel,jprofile) + &
+                                            self%atm_K(jchannel,jprofile)%Absorber(jlevel,ispec) * &
+                                            hofx(jchannel, jprofile)
+           enddo
          endif
        enddo
-     enddo
+     end if
    enddo
  end do
 
@@ -549,16 +556,17 @@ real(c_double) :: missing
 
    ! Multiply by Jacobian and add to hofx (adjoint)
    do jprofile = 1, self%n_Profiles
-     if (.not.self%Mask(jprofile)) cycle
-     do jchannel = 1, size(self%channels)
-       do jlevel = 1, geoval_d%nval
+     if (.not.self%Skip_Profiles(jprofile)) then
+       do jchannel = 1, size(self%channels)
          if (hofx(jchannel, jprofile) /= missing) then
-           geoval_d%vals(jlevel,jprofile) = geoval_d%vals(jlevel,jprofile) + &
-                                        self%atm_K(jchannel,jprofile)%Cloud(ispec)%Water_Content(jlevel) * &
-                                        hofx(jchannel, jprofile)
+           do jlevel = 1, geoval_d%nval
+               geoval_d%vals(jlevel,jprofile) = geoval_d%vals(jlevel,jprofile) + &
+                                            self%atm_K(jchannel,jprofile)%Cloud(ispec)%Water_Content(jlevel) * &
+                                            hofx(jchannel, jprofile)
+           enddo
          endif
        enddo
-     enddo
+     end if
    enddo
  end do
 

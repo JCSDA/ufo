@@ -28,7 +28,7 @@ public get_var_name
 public Load_Atm_Data
 public Load_Sfc_Data
 public Load_Geom_Data
-public Mask_Profiles
+public ufo_crtm_skip_profiles
 
 PUBLIC Load_Aerosol_Data
 public assign_aerosol_names
@@ -358,14 +358,19 @@ end subroutine crtm_comm_stat_check
 
 ! ------------------------------------------------------------------------------
 
-subroutine Mask_Profiles(n_Profiles,n_Channels,channels,obss,Mask)
+subroutine ufo_crtm_skip_profiles(n_Profiles,n_Channels,channels,obss,Skip_Profiles)
+! Profiles are skipped when the ObsValue of all channels is missing.
+! TODO: Use complete QC information
+! It would be more comprehensive to use EffectiveQC or EffectiveError. That
+! would require those ObsSpace values to be initialized before calls to
+! this subroutine within ufo_radiancecrtm_simobs+ufo_radiancecrtm_tlad_settraj.
 use missing_values_mod
 
 implicit none
 integer,              intent(in)    :: n_Profiles, n_Channels
 type(c_ptr), value,   intent(in)    :: obss
 integer(c_int),       intent(in)    :: channels(:)
-logical, allocatable, intent(inout) :: Mask(:)
+logical,              intent(inout) :: Skip_Profiles(:)
 
 integer :: k1, n1
 character(len=200) :: varname
@@ -375,9 +380,9 @@ real(kind_real), allocatable :: ObsVal(:,:)
 
 real(c_double) :: missing
 
- allocate(ObsVal(n_Profiles, n_Channels))
-! allocate(EffObsErr(n_Profiles, n_Channels))
-! allocate(EffQC(n_Profiles, n_Channels))
+ allocate(ObsVal(n_Channels,n_Profiles))
+! allocate(EffObsErr(n_Channels,n_Profiles))
+! allocate(EffQC(n_Channels,n_Profiles))
 
  ! Set missing value
  missing = missing_value(missing)
@@ -388,22 +393,19 @@ real(c_double) :: missing
 
  do n1 = 1, n_Channels
    call get_var_name(channels(n1),varname)
-   call obsspace_get_db(obss, "ObsValue", varname, ObsVal(:,n1))
-!TODO: Use complete QC information
-!   call obsspace_get_db(obss, "EffectiveError", varname, EffObsErr(:,n1))
-!   call obsspace_get_db(obss, "EffectiveQC{iter}", varname, EffQC(:,n1))
+   call obsspace_get_db(obss, "ObsValue", varname, ObsVal(n1,:))
+!   call obsspace_get_db(obss, "EffectiveError", varname, EffObsErr(n1,:))
+!   call obsspace_get_db(obss, "EffectiveQC{iter}", varname, EffQC(n1,:))
  enddo
 
- if (allocated(Mask)) deallocate(Mask)
- allocate(Mask(n_Profiles))
  !Loop over all n_Profiles, i.e. number of locations
  do k1 = 1, n_Profiles
-    Mask(k1) = any(ObsVal(k1,:) /= missing)
-!    Mask(k1) = any(EffObsErr(k1,:) /= missing)
-!    Mask(k1) = any(EffQC(k1,:) /= 0)
+    Skip_Profiles(k1) = all(ObsVal(:,k1) == missing)
+!                        .OR. all(EffObsErr(:,k1) == missing) &
+!                        .OR. all(EffQC(:,k1) /= 0)
  end do
 
-end subroutine Mask_Profiles
+end subroutine ufo_crtm_skip_profiles
 
 ! ------------------------------------------------------------------------------
 
