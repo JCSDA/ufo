@@ -259,10 +259,9 @@ type(fckit_mpi_comm)  :: f_comm
 
    !Assign the data from the GeoVaLs
    !--------------------------------
-   call Load_Atm_Data(self%n_Profiles,self%n_Layers,geovals,atm,self%conf_traj)
-   call Load_Sfc_Data(self%n_Profiles,self%n_Channels,self%channels,geovals,sfc,chinfo,obss,self%conf_traj)
-   call Load_Geom_Data(self%n_Profiles,obss,geo)
-
+   call Load_Atm_Data(self%N_PROFILES,self%N_LAYERS,geovals,atm,self%conf_traj)
+   call Load_Sfc_Data(self%N_PROFILES,self%n_Channels,self%channels,geovals,sfc,chinfo,obss,self%conf_traj)
+   call Load_Geom_Data(obss,geo)
 
    ! Zero the K-matrix OUTPUT structures
    ! -----------------------------------

@@ -255,7 +255,7 @@ type(fckit_mpi_comm)  :: f_comm
    !--------------------------------
    call Load_Atm_Data(n_Profiles,n_Layers,geovals,atm,self%conf)
    call Load_Sfc_Data(n_Profiles,n_Channels,self%channels,geovals,sfc,chinfo,obss,self%conf)
-   call Load_Geom_Data(n_Profiles,obss,geo)
+   call Load_Geom_Data(obss,geo)
 
    ! Call THE CRTM inspection
    ! ------------------------
@@ -420,6 +420,7 @@ type(fckit_mpi_comm)  :: f_comm
             case (var_opt_depth)
                hofxdiags%geovals(jvar)%nval = n_Layers
                allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,n_Profiles))
+               hofxdiags%geovals(jvar)%vals = missing
                do jprofile = 1, n_Profiles
                   if (.not.Mask(jprofile)) cycle
                   do jlevel = 1, hofxdiags%geovals(jvar)%nval
@@ -432,6 +433,7 @@ type(fckit_mpi_comm)  :: f_comm
             case (var_radiance)
                hofxdiags%geovals(jvar)%nval = 1
                allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,n_Profiles))
+               hofxdiags%geovals(jvar)%vals = missing
                do jprofile = 1, n_Profiles
                   if (.not.Mask(jprofile)) cycle
                   hofxdiags%geovals(jvar)%vals(1,jprofile) = &
@@ -442,6 +444,7 @@ type(fckit_mpi_comm)  :: f_comm
             case (var_tb_clr)
                hofxdiags%geovals(jvar)%nval = 1
                allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,n_Profiles))
+               hofxdiags%geovals(jvar)%vals = missing
                do jprofile = 1, n_Profiles
                   if (.not.Mask(jprofile)) cycle
                   ! Note: Using Tb_Clear requires CRTM_Atmosphere_IsFractional(cloud_coverage_flag) 
@@ -454,6 +457,7 @@ type(fckit_mpi_comm)  :: f_comm
             case (var_tb)
                hofxdiags%geovals(jvar)%nval = 1
                allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,n_Profiles))
+               hofxdiags%geovals(jvar)%vals = missing
                do jprofile = 1, n_Profiles
                   if (.not.Mask(jprofile)) cycle
                   hofxdiags%geovals(jvar)%vals(1,jprofile) = &
@@ -472,6 +476,7 @@ type(fckit_mpi_comm)  :: f_comm
             case (var_ts)
                hofxdiags%geovals(jvar)%nval = n_Layers
                allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,n_Profiles))
+               hofxdiags%geovals(jvar)%vals = missing
                do jprofile = 1, n_Profiles
                   if (.not.Mask(jprofile)) cycle
                   do jlevel = 1, hofxdiags%geovals(jvar)%nval
@@ -483,6 +488,7 @@ type(fckit_mpi_comm)  :: f_comm
             case (var_mixr)
                hofxdiags%geovals(jvar)%nval = n_Layers
                allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,n_Profiles))
+               hofxdiags%geovals(jvar)%vals = missing
                jspec = ufo_vars_getindex(self%conf%Absorbers, var_mixr)
                do jprofile = 1, n_Profiles
                   if (.not.Mask(jprofile)) cycle
@@ -496,6 +502,7 @@ type(fckit_mpi_comm)  :: f_comm
             case (var_sfc_t)
                hofxdiags%geovals(jvar)%nval = 1
                allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,n_Profiles))
+               hofxdiags%geovals(jvar)%vals = missing
                do jprofile = 1, n_Profiles
                   if (.not.Mask(jprofile)) cycle
                   hofxdiags%geovals(jvar)%vals(1,jprofile) = &
@@ -509,6 +516,7 @@ type(fckit_mpi_comm)  :: f_comm
             case (var_sfc_emiss)
                hofxdiags%geovals(jvar)%nval = 1
                allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,n_Profiles))
+               hofxdiags%geovals(jvar)%vals = missing
                do jprofile = 1, n_Profiles
                   if (.not.Mask(jprofile)) cycle
                   hofxdiags%geovals(jvar)%vals(1,jprofile) = &
