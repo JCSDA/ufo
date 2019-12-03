@@ -56,27 +56,26 @@ class ObsBiasRadianceGSITLAD : public LinearObsBiasBase,
   void read(const eckit::Configuration &) override;
   void write(const eckit::Configuration &) const override;
   double norm() const override;
-  std::size_t size() const override { return biascoeffsinc_.size();};
 
 /// Linear obs bias operator
   void computeObsBiasTL(const GeoVaLs &,
-                        ioda::ObsVector &,
-                        const ioda::ObsSpace &) const override;
+                        const ioda::ObsSpace &,
+                        const std::vector<float> &,
+                        ioda::ObsVector &) const override;
 
   void computeObsBiasAD(GeoVaLs &,
-                        const ioda::ObsVector &,
-                        const ioda::ObsSpace &) override;
-
-/// Other
-  const oops::Variables & variables() const override {return *varin_;}
+                        const ioda::ObsSpace &,
+                        const std::vector<float> &,
+                        const ioda::ObsVector &) override;
 
 /// Bias parameters interface
   double & operator[](const unsigned int ii) override {return biascoeffsinc_[ii];}
   const double & operator[](const unsigned int ii) const override {return biascoeffsinc_[ii];}
+  const std::vector<double>::iterator begin() {return biascoeffsinc_.begin();}
+  const std::vector<double>::iterator end() {return biascoeffsinc_.end();}
 
  private:
   void print(std::ostream &) const override;
-  std::unique_ptr<const oops::Variables> varin_;
   std::string sensor_id_;  // sensor_id
   std::vector<int> channels_;  // channel
 
