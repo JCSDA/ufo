@@ -49,7 +49,8 @@ ObsAodCRTMTLAD::~ObsAodCRTMTLAD() {
 
 // -----------------------------------------------------------------------------
 
-void ObsAodCRTMTLAD::setTrajectory(const GeoVaLs & geovals, const ObsBias & bias) {
+void ObsAodCRTMTLAD::setTrajectory(const GeoVaLs & geovals, const ObsBias & bias,
+                                   ObsDiagnostics &) {
   ufo_aodcrtm_tlad_settraj_f90(keyOperAodCRTM_, geovals.toFortran(), odb_,
                                 channels_.size(), channels_[0]);
 }

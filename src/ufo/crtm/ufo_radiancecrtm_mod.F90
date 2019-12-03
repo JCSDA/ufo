@@ -265,13 +265,14 @@ type(fckit_mpi_comm)  :: f_comm
    !!   non-jacobian var --> <ystr>_<chstr>
 
    jacobian_needed = .false.
+   ch_diags = -9999
    do jvar = 1, hofxdiags%nvar
       varstr = hofxdiags%variables(jvar)
       str_pos(4) = len_trim(varstr)
       if (str_pos(4) < 1) cycle
       str_pos(3) = index(varstr,"_",back=.true.)        !final "_" before channel
-      read(varstr(str_pos(3)+1:str_pos(4)),*) ch_diags(jvar)
-      str_pos(1) = index(varstr,jacobianstr) - 1        !position before jacobianstr
+      read(varstr(str_pos(3)+1:str_pos(4)),*, err=999) ch_diags(jvar)
+ 999  str_pos(1) = index(varstr,jacobianstr) - 1        !position before jacobianstr
       if (str_pos(1) == 0) then
          write(err_msg,*) 'ufo_radiancecrtm_simobs: _jacobian_ must be // &
                            & preceded by dependent variable in config: ', &
@@ -290,7 +291,8 @@ type(fckit_mpi_comm)  :: f_comm
          xstr_diags(jvar) = ""
          ystr_diags(jvar)(1:str_pos(3)-1) = varstr(1:str_pos(3)-1)
          ystr_diags(jvar)(str_pos(3):) = ""
-      end if 
+         if (ch_diags(jvar) < 0) ystr_diags(jvar) = varstr
+      end if
    end do
 
    if (jacobian_needed) then
@@ -375,11 +377,13 @@ type(fckit_mpi_comm)  :: f_comm
    do jvar = 1, hofxdiags%nvar
       if (len(trim(hofxdiags%variables(jvar))) < 1) cycle
 
-      if (size(pack(self%channels,self%channels==ch_diags(jvar))) /= 1) then
-         write(err_msg,*) 'ufo_radiancecrtm_simobs: mismatch between// &
-                           & h(x) channels(', self%channels,') and// &
-                           & ch_diags(jvar) = ', ch_diags(jvar)
-         call abor1_ftn(err_msg)
+      if (ch_diags(jvar) > 0) then
+         if (size(pack(self%channels,self%channels==ch_diags(jvar))) /= 1) then
+            write(err_msg,*) 'ufo_radiancecrtm_simobs: mismatch between// &
+                              & h(x) channels(', self%channels,') and// &
+                              & ch_diags(jvar) = ', ch_diags(jvar)
+            call abor1_ftn(err_msg)
+         end if
       end if
 
       jchannel = -1
@@ -393,9 +397,9 @@ type(fckit_mpi_comm)  :: f_comm
       if (allocated(hofxdiags%geovals(jvar)%vals)) &
          deallocate(hofxdiags%geovals(jvar)%vals)
 
-      !=========================
-      ! Diagnostics used for QC
-      !=========================
+      !============================================
+      ! Diagnostics used for QC and bias correction
+      !============================================
       if (trim(xstr_diags(jvar)) == "") then
          ! forward h(x) diags
          select case(ystr_diags(jvar))

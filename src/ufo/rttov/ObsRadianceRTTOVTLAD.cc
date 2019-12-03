@@ -53,7 +53,8 @@ ObsRadianceRTTOVTLAD::~ObsRadianceRTTOVTLAD() {
 
 // -----------------------------------------------------------------------------
 
-void ObsRadianceRTTOVTLAD::setTrajectory(const GeoVaLs & geovals, const ObsBias & bias) {
+void ObsRadianceRTTOVTLAD::setTrajectory(const GeoVaLs & geovals, const ObsBias & bias,
+                                         ObsDiagnostics &) {
   ufo_radiancerttov_tlad_settraj_f90(keyOperRadianceRTTOV_, geovals.toFortran(), odb_,
                                 channels_.size(), channels_[0]);
   oops::Log::trace() << "ObsRadianceRTTOVTLAD: trajectory set" << std::endl;

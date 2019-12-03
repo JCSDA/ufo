@@ -10,7 +10,6 @@
 
 #include "ufo/ObsBias.h"
 #include "ufo/ObsBiasIncrement.h"
-#include "ufo/utils/Constants.h"
 
 #include "oops/util/Logger.h"
 #include "oops/util/missingValues.h"
@@ -24,7 +23,7 @@ static LinearObsBiasMaker<ObsBiasRadianceGSITLAD> makerBiasRadianceGSITLAD_("GSI
 // -----------------------------------------------------------------------------
 
 ObsBiasRadianceGSITLAD::ObsBiasRadianceGSITLAD(const eckit::Configuration & conf)
-  : varin_(), predictors_() {
+  : predictors_() {
 // Default predictor names
   predictors_ = {"BCPred_Constant_",
                  "BCPred_Scan_Angle_",
@@ -44,9 +43,6 @@ ObsBiasRadianceGSITLAD::ObsBiasRadianceGSITLAD(const eckit::Configuration & conf
     predictors_.clear();
     predictors_ = conf.getStringVector("ObsBias.predictors");
   }
-// GeoVals needed from model
-  const std::vector<std::string> vv{"air_temperature"};
-  varin_.reset(new oops::Variables(vv));
 
 // Parse Sensor_ID from the conf
   const eckit::LocalConfiguration obsoprconf(conf, "ObsOperator");
@@ -81,160 +77,53 @@ void ObsBiasRadianceGSITLAD::write(const eckit::Configuration & conf) const {
 // -----------------------------------------------------------------------------
 
 void ObsBiasRadianceGSITLAD::computeObsBiasTL(const GeoVaLs & geovals,
-                                              ioda::ObsVector & ybiasinc,
-                                              const ioda::ObsSpace & odb) const {
-  /* comment out for next PR
+                                              const ioda::ObsSpace & odb,
+                                              const std::vector<float> & preds,
+                                              ioda::ObsVector & ybiasinc) const {
   std::size_t npred = predictors_.size();
   std::size_t nchanl = channels_.size();
   std::size_t nlocs = ybiasinc.nlocs();
   ASSERT(ybiasinc.nlocs() == odb.nlocs());
 
-  // retrieve the bias predictors from obs file, it will be computed online
-  // From GSI
-  // radiance bias correction terms are as follows:
-  // pred(1,:)  = global offset
-  // pred(2,:)  = zenith angle predictor, is not used and set to zero now
-  // pred(3,:)  = cloud liquid water predictor for clear-sky microwave radiance assimilation
-  // pred(4,:)  = square of temperature laps rate predictor
-  // pred(5,:)  = temperature laps rate predictor
-  // pred(6,:)  = cosinusoidal predictor for SSMI/S ascending/descending bias
-  // pred(7,:)  = sinusoidal predictor for SSMI/S
-  // pred(8,:)  = emissivity sensitivity predictor for land/sea differences
-  // pred(9,:)  = fourth order polynomial of angle bias correction
-  // pred(10,:) = third order polynomial of angle bias correction
-  // pred(11,:) = second order polynomial of angle bias correction
-  // pred(12,:) = first order polynomial of angle bias correction
-
-  std::vector< std::vector<float> > preds;
-  std::vector <float> pred(nlocs, 0.0);
-  for (std::size_t v = 0; v < npred - 4; ++v) {
-    for (std::size_t jc = 0; jc < nchanl; ++jc) {
-      odb.get_db("BiasPred", predictors_[v]+std::to_string(jc+1),
-                 nlocs, pred.data());
-      preds.push_back(pred);
-    }
-  }
-  std::vector<float> viewing_angle(nlocs);
-  odb.get_db("MetaData", "sensor_view_angle", nlocs, viewing_angle.data());
-  for (std::size_t jc = 0; jc < nchanl; ++jc) {
-    for (std::size_t jl = 0; jl < nlocs; ++jl) {
-      pred[jl] = pow(viewing_angle[jl]*Constants::deg2rad, 4);
-    }
-    preds.push_back(pred);
-  }
-  for (std::size_t jc = 0; jc < nchanl; ++jc) {
-    for (std::size_t jl = 0; jl < nlocs; ++jl) {
-      pred[jl] = pow(viewing_angle[jl]*Constants::deg2rad, 3);
-    }
-    preds.push_back(pred);
-  }
-  for (std::size_t jc = 0; jc < nchanl; ++jc) {
-    for (std::size_t jl = 0; jl < nlocs; ++jl) {
-      pred[jl] = pow(viewing_angle[jl]*Constants::deg2rad, 2);
-    }
-    preds.push_back(pred);
-  }
-
-  for (std::size_t jc = 0; jc < nchanl; ++jc) {
-    for (std::size_t jl = 0; jl < nlocs; ++jl) {
-      pred[jl] = viewing_angle[jl]*Constants::deg2rad;
-    }
-    preds.push_back(pred);
-  }
-
   std::size_t index = 0;
   // Loop through each locations
   for (std::size_t jl = 0; jl < nlocs; ++jl) {
-    // Loop through each channel
     std::size_t idx_coeffs = 0;
+    // Loop through each channel
     for (std::size_t jc = 0; jc < nchanl; ++jc) {
-      // Linear combination
       ybiasinc[index] = 0.0;
+      // Linear combination
       for (std::size_t n = 0; n < npred; ++n) {
-        ybiasinc[index] += biascoeffsinc_[idx_coeffs] * preds[n*nchanl+jc][jl];
+        ybiasinc[index] += biascoeffsinc_[idx_coeffs] * preds.at(n*nchanl*nlocs+jc*nlocs+jl);
         ++idx_coeffs;
       }
       ++index;
     }
   }
-  */
   oops::Log::trace() << "ObsBiasRadianceGSITLAD::computeObsBiasTL done." << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
 void ObsBiasRadianceGSITLAD::computeObsBiasAD(GeoVaLs & geovals,
-                                              const ioda::ObsVector & ybiasinc,
-                                              const ioda::ObsSpace & odb) {
-  /* comment out for next PR
+                                              const ioda::ObsSpace & odb,
+                                              const std::vector<float> & preds,
+                                              const ioda::ObsVector & ybiasinc) {
   std::size_t npred = predictors_.size();
   std::size_t nchanl = channels_.size();
   std::size_t nlocs = ybiasinc.nlocs();
   ASSERT(ybiasinc.nlocs() == odb.nlocs());
 
-  // retrieve the bias predictors from obs file, it will be computed online
-  // From GSI
-  // radiance bias correction terms are as follows:
-  // pred(1,:)  = global offset
-  // pred(2,:)  = zenith angle predictor, is not used and set to zero now
-  // pred(3,:)  = cloud liquid water predictor for clear-sky microwave radiance assimilation
-  // pred(4,:)  = square of temperature laps rate predictor
-  // pred(5,:)  = temperature laps rate predictor
-  // pred(6,:)  = cosinusoidal predictor for SSMI/S ascending/descending bias
-  // pred(7,:)  = sinusoidal predictor for SSMI/S
-  // pred(8,:)  = emissivity sensitivity predictor for land/sea differences
-  // pred(9,:)  = fourth order polynomial of angle bias correction
-  // pred(10,:) = third order polynomial of angle bias correction
-  // pred(11,:) = second order polynomial of angle bias correction
-  // pred(12,:) = first order polynomial of angle bias correction
-
-  std::vector< std::vector<float> > preds;
-  std::vector <float> pred(nlocs, 0.0);
-  for (std::size_t v = 0; v < npred - 4; ++v) {
-    for (std::size_t jc = 0; jc < nchanl; ++jc) {
-      odb.get_db("BiasPred", predictors_[v]+std::to_string(jc+1),
-                 nlocs, pred.data());
-      preds.push_back(pred);
-    }
-  }
-  std::vector<float> viewing_angle(nlocs);
-  odb.get_db("MetaData", "sensor_view_angle", nlocs, viewing_angle.data());
-  for (std::size_t jc = 0; jc < nchanl; ++jc) {
-    for (std::size_t jl = 0; jl < nlocs; ++jl) {
-      pred[jl] = pow(viewing_angle[jl]*Constants::deg2rad, 4);
-    }
-    preds.push_back(pred);
-  }
-  for (std::size_t jc = 0; jc < nchanl; ++jc) {
-    for (std::size_t jl = 0; jl < nlocs; ++jl) {
-      pred[jl] = pow(viewing_angle[jl]*Constants::deg2rad, 3);
-    }
-    preds.push_back(pred);
-  }
-  for (std::size_t jc = 0; jc < nchanl; ++jc) {
-    for (std::size_t jl = 0; jl < nlocs; ++jl) {
-      pred[jl] = pow(viewing_angle[jl]*Constants::deg2rad, 2);
-    }
-    preds.push_back(pred);
-  }
-
-  for (std::size_t jc = 0; jc < nchanl; ++jc) {
-    for (std::size_t jl = 0; jl < nlocs; ++jl) {
-      pred[jl] = viewing_angle[jl]*Constants::deg2rad;
-    }
-    preds.push_back(pred);
-  }
-
   std::size_t index = 0;
   // Loop through each locations
   for (std::size_t jl = 0; jl < nlocs; ++jl) {
-    // Loop through each channel
     std::size_t idx_coeffs = 0;
+    // Loop through each channel
     for (std::size_t jc = 0; jc < nchanl; ++jc) {
       // Linear combination
       if (ybiasinc[index] != util::missingValue(ybiasinc[index])) {
         for (std::size_t n = 0; n < npred; ++n) {
-          biascoeffsinc_[idx_coeffs] += ybiasinc[index] * preds[n*nchanl+jc][jl];
+          biascoeffsinc_[idx_coeffs] += ybiasinc[index] * preds.at(n*nchanl*nlocs+jc*nlocs+jl);
           ++idx_coeffs;
         }
       } else {
@@ -244,8 +133,8 @@ void ObsBiasRadianceGSITLAD::computeObsBiasAD(GeoVaLs & geovals,
     }
   }
   // Sum across the processros
-  odb.comm().allReduceInPlace(biascoeffsinc_.begin(), biascoeffsinc_.end(), eckit::mpi::sum());
-  */
+  if (odb.isDistributed())
+    odb.comm().allReduceInPlace(biascoeffsinc_.begin(), biascoeffsinc_.end(), eckit::mpi::sum());
   oops::Log::trace() << "ObsBiasRadianceGSITLAD::computeObsBiasAD done." << std::endl;
 }
 
@@ -326,7 +215,6 @@ double ObsBiasRadianceGSITLAD::norm() const {
 // -----------------------------------------------------------------------------
 
 void ObsBiasRadianceGSITLAD::print(std::ostream & os) const {
-  /* comment out for next PR
   os << "ObsBiasRadianceGSITLAD::print " << sensor_id_ << std::endl;
   std::size_t pred_size = predictors_.size();
   std::size_t jc;
@@ -336,7 +224,6 @@ void ObsBiasRadianceGSITLAD::print(std::ostream & os) const {
       os << biascoeffsinc_[jc*pred_size+n] << " ";
     os << std::endl;
   }
-  */
 }
 
 // -----------------------------------------------------------------------------

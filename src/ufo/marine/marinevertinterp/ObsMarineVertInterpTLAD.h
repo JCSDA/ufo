@@ -30,6 +30,7 @@ namespace ioda {
 namespace ufo {
   class GeoVaLs;
   class ObsBias;
+  class ObsDiagnostics;
 
 // -----------------------------------------------------------------------------
 /// Marinevertinterp for observation operator TL and AD class
@@ -42,7 +43,7 @@ class ObsMarineVertInterpTLAD : public LinearObsOperatorBase,
   virtual ~ObsMarineVertInterpTLAD();
 
   // Obs Operators
-  void setTrajectory(const GeoVaLs &, const ObsBias &) override;
+  void setTrajectory(const GeoVaLs &, const ObsBias &, ObsDiagnostics &) override;
   void simulateObsTL(const GeoVaLs &, ioda::ObsVector &) const override;
   void simulateObsAD(GeoVaLs &, const ioda::ObsVector &) const override;
 
