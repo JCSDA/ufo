@@ -141,7 +141,7 @@ phases:
       - sed -i -e '/ecbuild_bundle( PROJECT ufo/i\
         ecbuild_bundle( PROJECT ropp-ufo  GIT "https://github.com/JCSDA/ropp-test.git" )' CMakeLists.txt
       - sed -i -e '/ecbuild_bundle( PROJECT ufo/i\
-        ecbuild_bundle( PROJECT geos-aero  GIT "https://github.com/JCSDA/geos-aero.git" )' CMakeLists.txt
+        ecbuild_bundle( PROJECT geosaero  GIT "https://github.com/JCSDA/geos-aero.git" )' CMakeLists.txt
       - cat CMakeLists.txt
   build:
     commands:

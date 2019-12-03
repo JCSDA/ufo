@@ -657,7 +657,7 @@ if( ${GSW_FOUND} )
 
 endif( ${GSW_FOUND} )
 
-if( ${GEOS-AERO_FOUND} )
+if( ${GEOSAERO_FOUND} )
 
 ecbuild_add_test( TARGET  test_ufo_geos_aero_opr
                   MPI     4
@@ -670,7 +670,7 @@ ecbuild_add_test( TARGET  test_ufo_geos_aero_tlad
                   ARGS    "testinput/geos_aod.yaml"
                   LIBS    ufo )
 
-endif( ${GEOS-AERO_FOUND} )
+endif( ${GEOSAERO_FOUND} )
 
 
 ecbuild_add_test( TARGET  test_ufo_opr_radarreflectivity
@@ -917,10 +917,10 @@ CREATE_SYMLINK_FILENAME( ${rttov_SOURCE_DIR}/rtcoef_rttov12
 endif( ${RTTOV_FOUND} )
 
 ######
-#Files for geos-aero tests
+#Files for geosaero tests
 ######
 
-if( ${GEOS-AERO_FOUND} )
+if( ${GEOSAERO_FOUND} )
 list( APPEND geosaero_test_data
 Data/optics_BC.v1_3_.nc
 Data/optics_BRC.v1_5_.nc
@@ -943,4 +943,4 @@ CREATE_SYMLINK_FILENAME( ${geosaero_SOURCE_DIR}/test/
                          ${CMAKE_CURRENT_BINARY_DIR}
                          ${geosaero_test_input} )
 
-endif( ${GEOS-AERO_FOUND} )
+endif( ${GEOSAERO_FOUND} )
