@@ -66,6 +66,8 @@ class ObsFilterData : public util::Printable,
   size_t nlocs() const;
   //! Returns number of levels for specified variable if 3D GeoVaLs or ObsDiags
   size_t nlevs(const Variable &) const;
+  //! Returns reference to ObsSpace associated with ObsFilterData
+  ioda::ObsSpace & obsspace() const {return obsdb_;}
  private:
   void print(std::ostream &) const;
 

@@ -50,6 +50,7 @@ class ObsBiasRadianceGSI : public ObsBiasBase,
 
 /// Add increments
   ObsBiasRadianceGSI & operator+=(const ObsBiasIncrement &) override;
+  ObsBiasRadianceGSI & operator=(const ObsBias &) override;
 
 /// Obs bias operator
   void computeObsBias(const GeoVaLs &,
@@ -69,7 +70,6 @@ class ObsBiasRadianceGSI : public ObsBiasBase,
 
 /// Bias parameters interface
   double & operator[](const unsigned int ii) override {return biascoeffs_[ii];}
-  const double & operator[](const unsigned int ii) const override {return biascoeffs_[ii];}
 
  private:
   void print(std::ostream &) const override;

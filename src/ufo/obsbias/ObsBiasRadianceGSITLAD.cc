@@ -14,7 +14,6 @@
 
 #include "oops/util/Logger.h"
 #include "oops/util/missingValues.h"
-#include "oops/util/Random.h"
 
 #include "ioda/ObsVector.h"
 
@@ -266,13 +265,6 @@ void ObsBiasRadianceGSITLAD::zero() {
 
 // -----------------------------------------------------------------------------
 
-void ObsBiasRadianceGSITLAD::random() {
-  util::NormalDistribution<double> x(biascoeffsinc_.size(), 0.0, 1.0, 5);
-  for (size_t jj = 0; jj < biascoeffsinc_.size(); ++jj) biascoeffsinc_[jj] = x[jj];
-}
-
-// -----------------------------------------------------------------------------
-
 ObsBiasRadianceGSITLAD & ObsBiasRadianceGSITLAD::operator=(const ObsBiasIncrement & rhs) {
   for (std::size_t jj = 0; jj < biascoeffsinc_.size(); ++jj)
     biascoeffsinc_[jj] = rhs[jj];
@@ -334,6 +326,7 @@ double ObsBiasRadianceGSITLAD::norm() const {
 // -----------------------------------------------------------------------------
 
 void ObsBiasRadianceGSITLAD::print(std::ostream & os) const {
+  /* comment out for next PR
   os << "ObsBiasRadianceGSITLAD::print " << sensor_id_ << std::endl;
   std::size_t pred_size = predictors_.size();
   std::size_t jc;
@@ -343,6 +336,7 @@ void ObsBiasRadianceGSITLAD::print(std::ostream & os) const {
       os << biascoeffsinc_[jc*pred_size+n] << " ";
     os << std::endl;
   }
+  */
 }
 
 // -----------------------------------------------------------------------------

@@ -39,7 +39,7 @@ namespace ufo {
 class ObsBiasBase : public util::Printable,
                     private boost::noncopyable {
  public:
-  explicit ObsBiasBase(const eckit::Configuration &) {}
+  ObsBiasBase() {}
   virtual ~ObsBiasBase() {}
 
 /// I/O and diagnostics
@@ -50,6 +50,7 @@ class ObsBiasBase : public util::Printable,
 
 /// Add increments
   virtual ObsBiasBase & operator+=(const ObsBiasIncrement &) = 0;
+  virtual ObsBiasBase & operator=(const ObsBias &) = 0;
 
 /// Bias model
   virtual void computeObsBias(const GeoVaLs &,
@@ -65,7 +66,6 @@ class ObsBiasBase : public util::Printable,
 
 /// Bias parameters interface
   virtual double & operator[](const unsigned int) = 0;
-  virtual const double & operator[](const unsigned int) const = 0;
 
  private:
   virtual void print(std::ostream &) const = 0;

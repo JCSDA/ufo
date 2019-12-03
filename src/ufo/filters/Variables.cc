@@ -119,6 +119,8 @@ Variable Variables::variable(const size_t jj) const {
     else
       curr_indx += vars_[ivar].size();
   }
+  ABORT("Variable index exceeds collective variable arrays size");
+  abort(); /* Prevent g++ warning of missing return */
 }
 
 // -----------------------------------------------------------------------------

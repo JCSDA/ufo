@@ -45,7 +45,6 @@ class ObsBiasRadianceGSITLAD : public LinearObsBiasBase,
 /// Linear algebra operators
   void diff(const ObsBias &, const ObsBias &) override;
   void zero() override;
-  void random() override;
   ObsBiasRadianceGSITLAD & operator=(const ObsBiasIncrement &) override;
   ObsBiasRadianceGSITLAD & operator+=(const ObsBiasIncrement &) override;
   ObsBiasRadianceGSITLAD & operator-=(const ObsBiasIncrement &) override;
