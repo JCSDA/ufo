@@ -66,9 +66,9 @@ endif( ${RTTOV_FOUND} )
 add_subdirectory( gnssro )
 add_subdirectory( sfcpcorrected )
 add_subdirectory( marine )
-if( ${GEOSAERO_FOUND} )
+if( ${GEOS-AERO_FOUND} )
     add_subdirectory( geos_aero )
-endif( ${GEOSAERO_FOUND} )
+endif( ${GEOS-AERO_FOUND} )
 add_subdirectory( timeoper )
 
 list( APPEND ufo_src_files
@@ -105,9 +105,9 @@ if( ${ROPP-UFO_FOUND} )
     list( APPEND UFO_LIBS_DEP ropp-ufo )
 endif( ${ROPP-UFO_FOUND} )
 
-if( ${GEOSAERO_FOUND} )
-    list( APPEND UFO_LIBS_DEP geosaero )
-endif( ${GEOSAERO_FOUND} )
+if( ${GEOS-AERO_FOUND} )
+    list( APPEND UFO_LIBS_DEP geos-aero )
+endif( ${GEOS-AERO_FOUND} )
 
 
 ecbuild_add_library( TARGET   ufo
