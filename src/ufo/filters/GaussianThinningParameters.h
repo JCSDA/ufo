@@ -11,12 +11,11 @@
 #include <string>
 
 #include "eckit/exception/Exceptions.h"
-#include "oops/util/parameters/EnumParameter.h"
 #include "oops/util/parameters/OptionalParameter.h"
 #include "oops/util/parameters/Parameter.h"
 #include "oops/util/parameters/Parameters.h"
 #include "ufo/utils/Constants.h"
-#include "ufo/utils/parameters/OptionalParameterVariable.h"
+#include "ufo/utils/parameters/ParameterTraitsVariable.h"
 
 namespace eckit {
   class Configuration;
@@ -33,13 +32,22 @@ enum class DistanceNorm {
 namespace oops {
 
 template <>
-inline ufo::DistanceNorm enumFromString(const std::string &s) {
-  if (s == "geodesic")
-    return ufo::DistanceNorm::GEODESIC;
-  if (s == "maximum")
-    return ufo::DistanceNorm::MAXIMUM;
-  throw eckit::BadParameter("Bad conversion from std::string '" + s + "' to DistanceNorm", Here());
-}
+struct ParameterTraits<ufo::DistanceNorm> {
+  static boost::optional<ufo::DistanceNorm> get(const eckit::Configuration &config,
+                                                const std::string& name) {
+    std::string value;
+    if (config.get(name, value)) {
+      if (value == "geodesic")
+        return ufo::DistanceNorm::GEODESIC;
+      if (value == "maximum")
+        return ufo::DistanceNorm::MAXIMUM;
+      throw eckit::BadParameter("Bad conversion from std::string '" + value + "' to DistanceNorm",
+                                Here());
+    } else {
+      return boost::none;
+    }
+  }
+};
 
 }  // namespace oops
 
@@ -114,7 +122,7 @@ class GaussianThinningParameters : public oops::Parameters {
   /// - \c maximum: retain the observation lying furthest from the cell's bounding box in the
   ///   system of coordinates in which the cell is a unit cube (all dimensions along which thinning
   ///   is enabled are taken into account).
-  oops::EnumParameter<DistanceNorm> distanceNorm{"distance_norm", DistanceNorm::GEODESIC, this};
+  oops::Parameter<DistanceNorm> distanceNorm{"distance_norm", DistanceNorm::GEODESIC, this};
 
  private:
   static float defaultHorizontalMesh() {
