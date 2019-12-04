@@ -44,7 +44,8 @@ ObsSeaIceFractionTLAD::~ObsSeaIceFractionTLAD() {
 
 // -----------------------------------------------------------------------------
 
-void ObsSeaIceFractionTLAD::setTrajectory(const GeoVaLs & geovals, const ObsBias & bias) {
+void ObsSeaIceFractionTLAD::setTrajectory(const GeoVaLs & geovals, const ObsBias & bias,
+                                          ObsDiagnostics &) {
   ufo_seaicefraction_tlad_settraj_f90(keyOper_, geovals.toFortran(), odb_);
   oops::Log::trace() << "ObsSeaIceFractionTLAD: trajectory set" << std::endl;
 }

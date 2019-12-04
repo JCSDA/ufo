@@ -30,6 +30,7 @@ namespace ioda {
 namespace ufo {
   class GeoVaLs;
   class ObsBias;
+  class ObsDiagnostics;
 
 // -----------------------------------------------------------------------------
 /// RadianceCRTM (currently only temperature) observation for UFO.
@@ -42,7 +43,7 @@ class ObsRadianceCRTMTLAD : public LinearObsOperatorBase,
   virtual ~ObsRadianceCRTMTLAD();
 
   // Obs Operators
-  void setTrajectory(const GeoVaLs &, const ObsBias &) override;
+  void setTrajectory(const GeoVaLs &, const ObsBias &, ObsDiagnostics &) override;
   void simulateObsTL(const GeoVaLs &, ioda::ObsVector &) const override;
   void simulateObsAD(GeoVaLs &, const ioda::ObsVector &) const override;
 

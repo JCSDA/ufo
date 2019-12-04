@@ -37,7 +37,6 @@ namespace ufo {
 class ObsBiasIncrement : public util::Printable {
  public:
 /// Constructor, destructor
-  ObsBiasIncrement() {}
   explicit ObsBiasIncrement(const eckit::Configuration &);
   ObsBiasIncrement(const ObsBiasIncrement &, const bool = true);
   ObsBiasIncrement(const ObsBiasIncrement &, const eckit::Configuration &);
@@ -57,19 +56,20 @@ class ObsBiasIncrement : public util::Printable {
   void read(const eckit::Configuration &) {}
   void write(const eckit::Configuration &) const {}
   double norm() const;
-  std::size_t size() const;
 
   double & operator[](const unsigned int ii) {return (*biasbase_)[ii];}
   const double & operator[](const unsigned int ii) const {return (*biasbase_)[ii];}
 
 /// Linear obs bias model
   void computeObsBiasTL(const GeoVaLs &,
-                        ioda::ObsVector &,
-                        const ioda::ObsSpace &) const;
+                        const ioda::ObsSpace &,
+                        const std::vector<float> &,
+                        ioda::ObsVector &) const;
 
   void computeObsBiasAD(GeoVaLs &,
-                        const ioda::ObsVector &,
-                        const ioda::ObsSpace &);
+                        const ioda::ObsSpace &,
+                        const std::vector<float> &,
+                        const ioda::ObsVector &);
 
 /// Serialize and deserialize
   std::size_t serialSize() const {return 0;}
@@ -78,6 +78,9 @@ class ObsBiasIncrement : public util::Printable {
 
 /// Other
   const eckit::Configuration & config() const {return conf_;}
+
+/// Operator
+  operator bool() const {return biasbase_.get();}
 
  private:
   void print(std::ostream &) const;

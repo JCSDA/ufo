@@ -103,26 +103,20 @@ double ObsBiasIncrement::norm() const {
 
 // -----------------------------------------------------------------------------
 
-std::size_t ObsBiasIncrement::size() const {
-  std::size_t zz = 0.0;
-  if (biasbase_) zz = biasbase_->size();
-  return zz;
-}
-
-// -----------------------------------------------------------------------------
-
 void ObsBiasIncrement::computeObsBiasTL(const GeoVaLs & geovals,
-                                        ioda::ObsVector & ybiasinc,
-                                        const ioda::ObsSpace & odb) const {
-  if (biasbase_) biasbase_->computeObsBiasTL(geovals, ybiasinc, odb);
+                                        const ioda::ObsSpace & odb,
+                                        const std::vector<float> & preds,
+                                        ioda::ObsVector & ybiasinc) const {
+  if (biasbase_) biasbase_->computeObsBiasTL(geovals, odb, preds, ybiasinc);
 }
 
 // -----------------------------------------------------------------------------
 
 void ObsBiasIncrement::computeObsBiasAD(GeoVaLs & geovals,
-                                        const ioda::ObsVector & ybiasinc,
-                                        const ioda::ObsSpace & odb) {
-  if (biasbase_) biasbase_->computeObsBiasAD(geovals, ybiasinc, odb);
+                                        const ioda::ObsSpace & odb,
+                                        const std::vector<float> & preds,
+                                        const ioda::ObsVector & ybiasinc) {
+  if (biasbase_) biasbase_->computeObsBiasAD(geovals, odb, preds, ybiasinc);
 }
 
 // -----------------------------------------------------------------------------
