@@ -64,7 +64,7 @@ character(len=:), allocatable :: str
   call self%geovars%push_back(varindefault)                 ! delp and rh (for concentration)
   deallocate(tracer_variables)
 
-  ! size of variables (number of obs type (wavelength for AOD))
+  ! Size of variables (number of obs type (wavelength for AOD))
   nvars = self%obsvars%nvars()
 
   ! List of wavelengths for the calculation of aod
