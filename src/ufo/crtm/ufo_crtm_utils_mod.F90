@@ -372,17 +372,13 @@ type(c_ptr), value,   intent(in)    :: obss
 integer(c_int),       intent(in)    :: channels(:)
 logical,              intent(inout) :: Skip_Profiles(:)
 
-integer :: k1, n1
-character(len=200) :: varname
-real(kind_real), allocatable :: ObsVal(:,:)
-!real(kind_real), allocatable :: EffObsErr(:,:)
-!integer, allocatable :: EffQC(:,:)
+integer :: jprofile, jchannel
+character(len=MAXVARLEN) :: varname
+real(kind_real)  :: ObsVal(n_Channels,n_Profiles)
+!real(kind_real) :: EffObsErr(n_Channels,n_Profiles)
+!integer         :: EffQC(n_Channels,n_Profiles)
 
 real(c_double) :: missing
-
- allocate(ObsVal(n_Channels,n_Profiles))
-! allocate(EffObsErr(n_Channels,n_Profiles))
-! allocate(EffQC(n_Channels,n_Profiles))
 
  ! Set missing value
  missing = missing_value(missing)
@@ -391,18 +387,18 @@ real(c_double) :: missing
 ! EffObsErr = missing
 ! EffQC = 0
 
- do n1 = 1, n_Channels
-   call get_var_name(channels(n1),varname)
-   call obsspace_get_db(obss, "ObsValue", varname, ObsVal(n1,:))
-!   call obsspace_get_db(obss, "EffectiveError", varname, EffObsErr(n1,:))
-!   call obsspace_get_db(obss, "EffectiveQC{iter}", varname, EffQC(n1,:))
+ do jchannel = 1, n_Channels
+   call get_var_name(channels(jchannel),varname)
+   call obsspace_get_db(obss, "ObsValue", varname, ObsVal(jchannel,:))
+!   call obsspace_get_db(obss, "EffectiveError", varname, EffObsErr(jchannel,:))
+!   call obsspace_get_db(obss, "EffectiveQC{iter}", varname, EffQC(jchannel,:))
  enddo
 
  !Loop over all n_Profiles, i.e. number of locations
- do k1 = 1, n_Profiles
-    Skip_Profiles(k1) = all(ObsVal(:,k1) == missing)
-!                        .OR. all(EffObsErr(:,k1) == missing) &
-!                        .OR. all(EffQC(:,k1) /= 0)
+ do jprofile = 1, n_Profiles
+    Skip_Profiles(jprofile) = all(ObsVal(:,jprofile) == missing)
+!                        .OR. all(EffObsErr(:,jprofile) == missing) &
+!                        .OR. all(EffQC(:,jprofile) /= 0)
  end do
 
 end subroutine ufo_crtm_skip_profiles
