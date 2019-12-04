@@ -68,6 +68,7 @@ list( APPEND ufo_test_input
   testinput/qc_boundscheck.yaml
   testinput/qc_differencecheck.yaml
   testinput/qc_gauss_thinning.yaml
+  testinput/qc_preqc.yaml
   testinput/qc_thinning.yaml
   testinput/radiosonde.yaml
   testinput/radialvelocity.yaml
@@ -700,6 +701,12 @@ ecbuild_add_test( TARGET  test_ufo_qc_thinning
 ecbuild_add_test( TARGET  test_ufo_qc_gauss_thinning
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
                   ARGS    "testinput/qc_gauss_thinning.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsFilters.x )
+
+ecbuild_add_test( TARGET  test_ufo_qc_preqc
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                  ARGS    "testinput/qc_preqc.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsFilters.x )
 
