@@ -99,6 +99,7 @@ std::unique_ptr<DistanceCalculator> Gaussian_Thinning::makeDistanceCalculator(
   case DistanceNorm::MAXIMUM:
     return std::unique_ptr<DistanceCalculator>(new MaxNormDistanceCalculator());
   }
+  throw eckit::BadParameter("Unrecognized distance norm", Here());
 }
 
 // -----------------------------------------------------------------------------
