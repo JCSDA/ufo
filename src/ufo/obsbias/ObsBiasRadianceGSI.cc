@@ -180,11 +180,11 @@ void ObsBiasRadianceGSI::computeObsBias(const GeoVaLs & geovals,
   std::size_t index = 0;
   // Loop through each location
   for (std::size_t jl = 0; jl < nlocs; ++jl) {
-    // Loop through each channel
     std::size_t idx_coeffs = 0;
+    // Loop through each channel
     for (std::size_t jc = 0; jc < nchanl; ++jc) {
-      // Linear combination
       ybias[index] = 0.0;
+      // Linear combination
       for (std::size_t n = 0; n < npred; ++n) {
         ybias[index] += biascoeffs_[idx_coeffs] * preds.at(n*nchanl*nlocs+jc*nlocs+jl);
         ++idx_coeffs;
@@ -415,7 +415,7 @@ void ObsBiasRadianceGSI::computeObsBiasPredictors(const GeoVaLs & geovals,
   }
 
   std::vector<std::vector<float>> tlap;
-  std::vector<float> tlapp(nchanl);
+  std::vector<float> tlapp(nchanl, 0.0);
 
   // Compute tlap
   for (std::size_t jl = 0; jl < nlocs; ++jl) {
@@ -539,36 +539,55 @@ void ObsBiasRadianceGSI::computeObsBiasPredictors(const GeoVaLs & geovals,
       preds.emplace_back(pow(pred[jl]*Constants::deg2rad, 4));
   }
 
-  if (adp_anglebc_) {
-    /*
-     * pred(10,:) = third order polynomial of angle bias correction
-     */
+  /*
+   * pred(10,:) = third order polynomial of angle bias correction
+   */
 
+  if (adp_anglebc_) {
     for (std::size_t jc = 0; jc < nchanl; ++jc) {
       for (std::size_t jl = 0; jl < nlocs; ++jl)
         preds.emplace_back(pow(pred[jl]*Constants::deg2rad, 3));
     }
+  } else {
+    for (std::size_t jc = 0; jc < nchanl; ++jc) {
+      for (std::size_t jl = 0; jl < nlocs; ++jl)
+        preds.emplace_back(0.0);
+    }
+  }
 
-    /*
-     * pred(11,:) = second order polynomial of angle bias correction
-     */
+  /*
+   * pred(11,:) = second order polynomial of angle bias correction
+   */
 
+  if (adp_anglebc_) {
     for (std::size_t jc = 0; jc < nchanl; ++jc) {
       for (std::size_t jl = 0; jl < nlocs; ++jl)
         preds.emplace_back(pow(pred[jl]*Constants::deg2rad, 2));
     }
+  } else {
+    for (std::size_t jc = 0; jc < nchanl; ++jc) {
+      for (std::size_t jl = 0; jl < nlocs; ++jl)
+        preds.emplace_back(0.0);
+    }
+  }
 
-    /*
-     * pred(12,:) = first order polynomial of angle bias correction
-     */
+  /*
+   * pred(12,:) = first order polynomial of angle bias correction
+   */
 
+  if (adp_anglebc_) {
     for (std::size_t jc = 0; jc < nchanl; ++jc) {
       for (std::size_t jl = 0; jl < nlocs; ++jl)
         preds.emplace_back(pred[jl]*Constants::deg2rad);
     }
+  } else {
+    for (std::size_t jc = 0; jc < nchanl; ++jc) {
+      for (std::size_t jl = 0; jl < nlocs; ++jl)
+        preds.emplace_back(0.0);
+    }
   }
 
-  oops::Log::trace() << "ObsBia>sRadianceGSI::computeObsBiasPredictors done." << std::endl;
+  oops::Log::trace() << "ObsBiasRadianceGSI::computeObsBiasPredictors done." << std::endl;
 }
 
 // -----------------------------------------------------------------------------

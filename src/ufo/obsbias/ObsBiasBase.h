@@ -9,6 +9,7 @@
 #define UFO_OBSBIAS_OBSBIASBASE_H_
 
 #include <map>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -57,6 +58,12 @@ class ObsBiasBase : public util::Printable,
                               ioda::ObsVector &,
                               const ioda::ObsSpace &,
                               const ObsDiagnostics &) const = 0;
+
+/// predictors model
+  virtual void computeObsBiasPredictors(const GeoVaLs &,
+                                const ioda::ObsSpace &,
+                                const ObsDiagnostics &,
+                                std::vector<float> &) const = 0;
 
 /// Bias operator input required from Model
   virtual const oops::Variables & requiredGeoVaLs() const = 0;

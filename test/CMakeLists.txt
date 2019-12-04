@@ -64,7 +64,6 @@ list( APPEND ufo_test_input
   testinput/obsdiag_crtm_jacobian.yaml
   testinput/obsfilterdata.yaml
   testinput/processwhere.yaml
-  testinput/parameters.yaml
   testinput/qc_backgroundcheck.yaml
   testinput/qc_boundscheck.yaml
   testinput/qc_differencecheck.yaml
@@ -288,11 +287,11 @@ if ( ${CRTM_FOUND} )
                       ENVIRONMENT OOPS_TRAPFPE=1
                       DEPENDS test_ObsOperatorTLAD.x )
 
-    #ecbuild_add_test( TARGET  test_ufo_linopr_crtm_bc_amsua
-    #                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
-    #                  ARGS    "testinput/amsua_crtm_bc.yaml"
-    #                  ENVIRONMENT OOPS_TRAPFPE=1
-    #                  DEPENDS test_ObsOperatorTLAD.x )
+    ecbuild_add_test( TARGET  test_ufo_linopr_crtm_bc_amsua
+                      COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
+                      ARGS    "testinput/amsua_crtm_bc.yaml"
+                      ENVIRONMENT OOPS_TRAPFPE=1
+                      DEPENDS test_ObsOperatorTLAD.x )
 
     #ecbuild_add_test( TARGET  test_ufo_opr_crtm_atms
     #                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
@@ -727,13 +726,6 @@ if ( ${CRTM_FOUND} )
                       ENVIRONMENT OOPS_TRAPFPE=1
                       LIBS    ufo)
 endif ( ${CRTM_FOUND} )
-
-# Test Parameters
-ecbuild_add_test( TARGET  test_ufo_parameters
-                  SOURCES mains/TestParameters.cc
-                  ARGS    "testinput/parameters.yaml"
-                  ENVIRONMENT OOPS_TRAPFPE=1
-                  LIBS    ufo)
 
 # Test QC for specific instruments
 

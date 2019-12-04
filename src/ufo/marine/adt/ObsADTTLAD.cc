@@ -43,7 +43,8 @@ ObsADTTLAD::~ObsADTTLAD() {
 
 // -----------------------------------------------------------------------------
 
-void ObsADTTLAD::setTrajectory(const GeoVaLs & geovals, const ObsBias & bias) {
+void ObsADTTLAD::setTrajectory(const GeoVaLs & geovals, const ObsBias & bias,
+                               ObsDiagnostics &) {
   ufo_adt_tlad_settraj_f90(keyOper_, geovals.toFortran(), odb_);
   oops::Log::trace() << "ObsADTTLAD: trajectory set" << std::endl;
 }

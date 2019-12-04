@@ -32,6 +32,7 @@ namespace ioda {
 namespace ufo {
   class GeoVaLs;
   class ObsBias;
+  class ObsDiagnostics;
 
 // -----------------------------------------------------------------------------
 /// RadianceRTTOV TL/AD observation operator class
@@ -44,7 +45,7 @@ class ObsRadianceRTTOVTLAD : public LinearObsOperatorBase,
   virtual ~ObsRadianceRTTOVTLAD();
 
   // Obs Operators
-  void setTrajectory(const GeoVaLs &, const ObsBias &) override;
+  void setTrajectory(const GeoVaLs &, const ObsBias &, ObsDiagnostics &) override;
   void simulateObsTL(const GeoVaLs &, ioda::ObsVector &) const override;
   void simulateObsAD(GeoVaLs &, const ioda::ObsVector &) const override;
 
