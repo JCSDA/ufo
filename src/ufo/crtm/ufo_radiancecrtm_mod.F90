@@ -107,8 +107,10 @@ end subroutine ufo_radiancecrtm_delete
 ! ------------------------------------------------------------------------------
 
 subroutine ufo_radiancecrtm_simobs(self, geovals, obss, nvars, nlocs, hofx, hofxdiags)
+use fckit_mpi_module,   only: fckit_mpi_comm
 
 implicit none
+
 class(ufo_radiancecrtm),  intent(in) :: self         !Radiance object
 type(ufo_geovals),        intent(in) :: geovals      !Inputs from the model
 integer,                  intent(in) :: nvars, nlocs
@@ -152,6 +154,10 @@ integer :: jvar, jprofile, jlevel, jchannel, ichannel, jspec
 logical :: jacobian_needed
 character(max_string) :: err_msg
 
+type(fckit_mpi_comm)  :: f_comm
+
+ call obsspace_get_comm(obss, f_comm)
+
  ! Get number of profile and layers from geovals
  ! ---------------------------------------------
  n_Profiles = geovals%nlocs
@@ -187,12 +193,8 @@ character(max_string) :: err_msg
                        VISiceCoeff_File=trim(self%conf%VISiceCoeff_File), &
                        MWwaterCoeff_File=trim(self%conf%MWwaterCoeff_File), &
                        Quiet=.TRUE.)
- if ( err_stat /= SUCCESS ) THEN
-   message = 'Error initializing CRTM'
-   call Display_Message( PROGRAM_NAME, message, FAILURE )
-   stop
- end if
-
+ message = 'Error initializing CRTM'
+ call crtm_comm_stat_check(err_stat, PROGRAM_NAME, message, f_comm)
 
  ! Loop over all sensors. Not necessary if we're calling CRTM for each sensor
  ! ----------------------------------------------------------------------------
@@ -202,12 +204,8 @@ character(max_string) :: err_msg
    ! Pass channel list to CRTM
    ! -------------------------
    err_stat = CRTM_ChannelInfo_Subset(chinfo(n), self%channels, reset=.false.)
-   if ( err_stat /= SUCCESS ) THEN
-      message = 'Error subsetting channels!'
-      call Display_Message( PROGRAM_NAME, message, FAILURE )
-      stop
-   end if
-
+   message = 'Error subsetting channels!'
+   call crtm_comm_stat_check(err_stat, PROGRAM_NAME, message, f_comm)
 
    ! Determine the number of channels for the current sensor
    ! -------------------------------------------------------
@@ -220,11 +218,8 @@ character(max_string) :: err_msg
              sfc( n_Profiles ),               &
              rts( n_Channels, n_Profiles ),   &
              STAT = alloc_stat )
-   if ( alloc_stat /= 0 ) THEN
-      message = 'Error allocating structure arrays'
-      call Display_Message( PROGRAM_NAME, message, FAILURE )
-      stop
-   end if
+   message = 'Error allocating structure arrays'
+   call crtm_comm_stat_check(alloc_stat, PROGRAM_NAME, message, f_comm)
 
    if (n_Layers > 0) call CRTM_RTSolution_Create (rts, n_Layers) 
 
@@ -270,13 +265,14 @@ character(max_string) :: err_msg
    !!   non-jacobian var --> <ystr>_<chstr>
 
    jacobian_needed = .false.
+   ch_diags = -9999
    do jvar = 1, hofxdiags%nvar
       varstr = hofxdiags%variables(jvar)
       str_pos(4) = len_trim(varstr)
       if (str_pos(4) < 1) cycle
       str_pos(3) = index(varstr,"_",back=.true.)        !final "_" before channel
-      read(varstr(str_pos(3)+1:str_pos(4)),*) ch_diags(jvar)
-      str_pos(1) = index(varstr,jacobianstr) - 1        !position before jacobianstr
+      read(varstr(str_pos(3)+1:str_pos(4)),*, err=999) ch_diags(jvar)
+ 999  str_pos(1) = index(varstr,jacobianstr) - 1        !position before jacobianstr
       if (str_pos(1) == 0) then
          write(err_msg,*) 'ufo_radiancecrtm_simobs: _jacobian_ must be // &
                            & preceded by dependent variable in config: ', &
@@ -295,7 +291,8 @@ character(max_string) :: err_msg
          xstr_diags(jvar) = ""
          ystr_diags(jvar)(1:str_pos(3)-1) = varstr(1:str_pos(3)-1)
          ystr_diags(jvar)(str_pos(3):) = ""
-      end if 
+         if (ch_diags(jvar) < 0) ystr_diags(jvar) = varstr
+      end if
    end do
 
    if (jacobian_needed) then
@@ -305,12 +302,8 @@ character(max_string) :: err_msg
                 sfc_K( n_Channels, n_Profiles ),   &
                 rts_K( n_Channels, n_Profiles ),   &
                 STAT = alloc_stat )
-
-      if ( alloc_stat /= 0 ) THEN
-         message = 'Error allocating K structure arrays'
-         call Display_Message( PROGRAM_NAME, message, FAILURE )
-         stop
-      end if
+      message = 'Error allocating K structure arrays'
+      call crtm_comm_stat_check(alloc_stat, PROGRAM_NAME, message, f_comm)
 
       ! Create output K-MATRIX structure (atm)
       ! --------------------------------------
@@ -351,12 +344,8 @@ character(max_string) :: err_msg
                                 atm_K  , &  ! K-MATRIX Output
                                 sfc_K  , &  ! K-MATRIX Output
                                 rts           )  ! FORWARD  Output
-      if ( err_stat /= SUCCESS ) THEN
-         message = 'Error calling CRTM (setTraj) K-Matrix Model for '//TRIM(self%conf%SENSOR_ID(n))
-         call Display_Message( PROGRAM_NAME, message, FAILURE )
-         stop
-      end if
-
+      message = 'Error calling CRTM (setTraj) K-Matrix Model for '//TRIM(self%conf%SENSOR_ID(n))
+      call crtm_comm_stat_check(err_stat, PROGRAM_NAME, message, f_comm)
    else
       ! Call the forward model call for each sensor
       ! -------------------------------------------
@@ -365,12 +354,8 @@ character(max_string) :: err_msg
                                geo        , &  ! Input
                                chinfo(n:n), &  ! Input
                                rts          )  ! Output
-      if ( err_stat /= SUCCESS ) THEN
-         message = 'Error calling CRTM Forward Model for '//TRIM(self%conf%SENSOR_ID(n))
-         call Display_Message( PROGRAM_NAME, message, FAILURE )
-         stop
-      end if
-
+      message = 'Error calling CRTM Forward Model for '//TRIM(self%conf%SENSOR_ID(n))
+      call crtm_comm_stat_check(err_stat, PROGRAM_NAME, message, f_comm)
    end if ! jacobian_needed
 
    !call CRTM_RTSolution_Inspect(rts)
@@ -392,11 +377,13 @@ character(max_string) :: err_msg
    do jvar = 1, hofxdiags%nvar
       if (len(trim(hofxdiags%variables(jvar))) < 1) cycle
 
-      if (size(pack(self%channels,self%channels==ch_diags(jvar))) /= 1) then
-         write(err_msg,*) 'ufo_radiancecrtm_simobs: mismatch between// &
-                           & h(x) channels(', self%channels,') and// &
-                           & ch_diags(jvar) = ', ch_diags(jvar)
-         call abor1_ftn(err_msg)
+      if (ch_diags(jvar) > 0) then
+         if (size(pack(self%channels,self%channels==ch_diags(jvar))) /= 1) then
+            write(err_msg,*) 'ufo_radiancecrtm_simobs: mismatch between// &
+                              & h(x) channels(', self%channels,') and// &
+                              & ch_diags(jvar) = ', ch_diags(jvar)
+            call abor1_ftn(err_msg)
+         end if
       end if
 
       jchannel = -1
@@ -410,9 +397,9 @@ character(max_string) :: err_msg
       if (allocated(hofxdiags%geovals(jvar)%vals)) &
          deallocate(hofxdiags%geovals(jvar)%vals)
 
-      !=========================
-      ! Diagnostics used for QC
-      !=========================
+      !============================================
+      ! Diagnostics used for QC and bias correction
+      !============================================
       if (trim(xstr_diags(jvar)) == "") then
          ! forward h(x) diags
          select case(ystr_diags(jvar))
@@ -531,11 +518,8 @@ character(max_string) :: err_msg
    ! Deallocate all arrays
    ! ---------------------
    deallocate(geo, atm, sfc, rts, STAT = alloc_stat)
-   if ( alloc_stat /= 0 ) THEN
-      message = 'Error deallocating structure arrays'
-      call Display_Message( PROGRAM_NAME, message, FAILURE )
-      stop
-   end if
+   message = 'Error deallocating structure arrays'
+   call crtm_comm_stat_check(alloc_stat, PROGRAM_NAME, message, f_comm)
 
    if (jacobian_needed) then
       ! Deallocate the K structures
@@ -547,11 +531,8 @@ character(max_string) :: err_msg
       ! Deallocate all K arrays
       ! -----------------------
       deallocate(atm_K, sfc_K, rts_K, STAT = alloc_stat)
-      if ( alloc_stat /= 0 ) THEN
-         message = 'Error deallocating K structure arrays'
-         call Display_Message( PROGRAM_NAME, message, FAILURE )
-         stop
-      end if
+      message = 'Error deallocating K structure arrays'
+      call crtm_comm_stat_check(alloc_stat, PROGRAM_NAME, message, f_comm)
    end if
 
  end do Sensor_Loop
@@ -561,11 +542,8 @@ character(max_string) :: err_msg
  ! ---------------------
  write( *, '( /5x, "Destroying the CRTM..." )' )
  err_stat = CRTM_Destroy( chinfo )
- if ( err_stat /= SUCCESS ) THEN
-    message = 'Error destroying CRTM'
-    call Display_Message( PROGRAM_NAME, message, FAILURE )
-    stop
- end if
+ message = 'Error destroying CRTM'
+ call crtm_comm_stat_check(err_stat, PROGRAM_NAME, message, f_comm)
 
 end subroutine ufo_radiancecrtm_simobs
 

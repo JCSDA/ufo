@@ -47,7 +47,9 @@ ObsTimeOperTLAD::~ObsTimeOperTLAD() {
 
 // -----------------------------------------------------------------------------
 
-void ObsTimeOperTLAD::setTrajectory(const GeoVaLs & geovals, const ObsBias & bias) {
+void ObsTimeOperTLAD::setTrajectory(const GeoVaLs & geovals,
+                                    const ObsBias & bias,
+                                    ObsDiagnostics & ydiags) {
   oops::Log::trace() << "ObsTimeOperTLAD::setTrajectory entering" << std::endl;
 
   oops::Log::debug() << "ObsTimeOperTLAD::setTrajectory input geovals "
@@ -69,7 +71,7 @@ void ObsTimeOperTLAD::setTrajectory(const GeoVaLs & geovals, const ObsBias & bia
   oops::Log::debug() << "ObsTimeOperTLAD::setTrajectory final geovals gv1 "
                      << gv1 << std::endl;
 
-  actualoperator_->setTrajectory(gv1, bias);
+  actualoperator_->setTrajectory(gv1, bias, ydiags);
 
   oops::Log::debug() << gv1;
 

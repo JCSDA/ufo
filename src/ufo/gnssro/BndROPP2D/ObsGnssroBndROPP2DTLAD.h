@@ -30,6 +30,7 @@ namespace ioda {
 namespace ufo {
   class GeoVaLs;
   class ObsBias;
+  class ObsDiagnostics;
 
 // -----------------------------------------------------------------------------
 /// GnssroBndROPP2D observation operator
@@ -42,7 +43,7 @@ class ObsGnssroBndROPP2DTLAD : public LinearObsOperatorBase,
   virtual ~ObsGnssroBndROPP2DTLAD();
 
   // Obs Operators
-  void setTrajectory(const GeoVaLs &, const ObsBias &) override;
+  void setTrajectory(const GeoVaLs &, const ObsBias &, ObsDiagnostics &) override;
   void simulateObsTL(const GeoVaLs &, ioda::ObsVector &) const override;
   void simulateObsAD(GeoVaLs &, const ioda::ObsVector &) const override;
 

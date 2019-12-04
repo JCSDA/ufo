@@ -62,6 +62,12 @@ class ObsBias : public util::Printable,
                       const ioda::ObsSpace &,
                       const ObsDiagnostics &) const;
 
+/// Obs Bias Predictors
+  void computeObsBiasPredictors(const GeoVaLs &,
+                                const ioda::ObsSpace &,
+                                const ObsDiagnostics &,
+                                std::vector<float> &) const;
+
 /// Other
   const oops::Variables & requiredGeoVaLs() const {return geovars_;}
   const oops::Variables & requiredHdiagnostics() const {return hdiags_;}

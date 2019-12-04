@@ -81,8 +81,8 @@ void testGeoVaLs() {
     oops::Log::debug()<< "gv1 gv2 dot products with itself after split "
                       << dp_gv1_split << " " << dp_gv2_split << std::endl;
 
-    EXPECT(gv1.norm() == gv2.norm());
-    EXPECT(gv1.norm() == gval.norm());
+    EXPECT(gv1.rms() == gv2.rms());
+    EXPECT(gv1.rms() == gval.rms());
     EXPECT(abs(dp_gv1_split - dp_gv2_split)/dp_gv1_split < tol);
     EXPECT(abs(dp_gv1_split - dp_gval)/dp_gv1_split < tol);
 
@@ -97,16 +97,16 @@ void testGeoVaLs() {
     {
       std::vector<float> tw(nlocs, 1.0f);
       gv1 *= tw;
-      EXPECT(gv1.norm() == gval.norm());
+      EXPECT(gv1.rms() == gval.rms());
     }
     {
       std::vector<float> tw(nlocs, 2.0f);
       gv1 *= tw;
-      double norm1, norm2;
-      norm1 = gv1.norm();
-      norm2 = 2.0 * gval.norm();
-      oops::Log::debug()<< "norm1, norm2 = " <<  norm1  << "  " << norm2 << std::endl;
-      EXPECT(norm1 == norm2);
+      double rms1, rms2;
+      rms1 = gv1.rms();
+      rms2 = 2.0 * gval.rms();
+      oops::Log::debug()<< "rms1, rms2 = " <<  rms1  << "  " << rms2 << std::endl;
+      EXPECT(rms1 == rms2);
     }
     oops::Log::trace() <<
       "GeoVaLs & operator *= (const std::vector<float>); test succeeded" << std::endl;

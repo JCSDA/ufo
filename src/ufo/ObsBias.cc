@@ -40,13 +40,11 @@ ObsBias & ObsBias::operator+=(const ObsBiasIncrement & dx) {
 // -----------------------------------------------------------------------------
 
 ObsBias & ObsBias::operator=(const ObsBias & rhs) {
-/* temporarily comment out for coverage check
   if (biasbase_) {
     *biasbase_ = rhs;
     geovars_ += biasbase_->requiredGeoVaLs();
     hdiags_  += biasbase_->requiredHdiagnostics();
   }
-*/
   return *this;
 }
 
@@ -69,6 +67,15 @@ void ObsBias::computeObsBias(const GeoVaLs & geovals,
                              const ioda::ObsSpace & os,
                              const ObsDiagnostics & ydiags) const {
   if (biasbase_) biasbase_->computeObsBias(geovals, ybias, os, ydiags);
+}
+
+// -----------------------------------------------------------------------------
+
+void ObsBias::computeObsBiasPredictors(const GeoVaLs & geovals,
+                                       const ioda::ObsSpace & os,
+                                       const ObsDiagnostics & ydiags,
+                                       std::vector<float> & preds) const {
+  if (biasbase_) biasbase_->computeObsBiasPredictors(geovals, os, ydiags, preds);
 }
 
 // -----------------------------------------------------------------------------

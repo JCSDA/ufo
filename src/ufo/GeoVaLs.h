@@ -54,15 +54,14 @@ class GeoVaLs : public util::Printable,
   GeoVaLs & operator += (const GeoVaLs &);
   GeoVaLs & operator -= (const GeoVaLs &);
   GeoVaLs & operator *= (const GeoVaLs &);
-  GeoVaLs & operator /= (const GeoVaLs &);
   double dot_product_with(const GeoVaLs &) const;
   void split(GeoVaLs &, GeoVaLs &) const;
   void merge(const GeoVaLs &, const GeoVaLs &);
 
-  void abs();
   void zero();
   void random();
-  double norm() const;
+  double rms() const;
+  double normalizedrms(const GeoVaLs &) const;
 
   bool has(const std::string & var) const {return vars_.has(var);}
   size_t nlevs(const std::string & var) const;

@@ -118,19 +118,22 @@ void GeoVaLs::zero() {
   oops::Log::trace() << "GeoVaLs::zero done" << std::endl;
 }
 // -----------------------------------------------------------------------------
-/*! \brief Absolute value */
-void GeoVaLs::abs() {
-  oops::Log::trace() << "GeoVaLs::abs starting" << std::endl;
-  ufo_geovals_abs_f90(keyGVL_);
-  oops::Log::trace() << "GeoVaLs::abs done" << std::endl;
-}
-// -----------------------------------------------------------------------------
-/*! \brief Calculate norm */
-double GeoVaLs::norm() const {
-  oops::Log::trace() << "GeoVaLs::norm starting" << std::endl;
+/*! \brief Calculate rms */
+double GeoVaLs::rms() const {
+  oops::Log::trace() << "GeoVaLs::rms starting" << std::endl;
   double zz;
   ufo_geovals_rms_f90(keyGVL_, zz);
-  oops::Log::trace() << "GeoVaLs::norm done" << std::endl;
+  oops::Log::trace() << "GeoVaLs::rms done" << std::endl;
+  return zz;
+}
+// -----------------------------------------------------------------------------
+/*! \brief Calculate normalized rms */
+double GeoVaLs::normalizedrms(const GeoVaLs & other) const {
+  oops::Log::trace() << "GeoVaLs::normalizerms starting" << std::endl;
+  GeoVaLs temp_gval(*this);
+  ufo_geovals_normalize_f90(temp_gval.keyGVL_, other.keyGVL_);
+  double zz = temp_gval.rms();
+  oops::Log::trace() << "GeoVaLs::normalizerms done" << std::endl;
   return zz;
 }
 // -----------------------------------------------------------------------------
@@ -190,19 +193,6 @@ GeoVaLs & GeoVaLs::operator*=(const GeoVaLs & other) {
   oops::Log::trace() << "GeoVaLs::operator*= starting" << std::endl;
   ufo_geovals_schurmult_f90(keyGVL_, other.keyGVL_);
   oops::Log::trace() << "GeoVaLs::operator*= done" << std::endl;
-  return *this;
-}
-// -----------------------------------------------------------------------------
-/*! \brief GeoVaLs normalization
- *
- * \details This operator is used to normalize each element of the input GeoVaLs
- * object (LHS) with the rms values of each variable on the RHS, across all
- * locations
- */
-GeoVaLs & GeoVaLs::operator/=(const GeoVaLs & other) {
-  oops::Log::trace() << "GeoVaLs::operator/= starting" << std::endl;
-  ufo_geovals_normalize_f90(keyGVL_, other.keyGVL_);
-  oops::Log::trace() << "GeoVaLs::operator/= done" << std::endl;
   return *this;
 }
 // -----------------------------------------------------------------------------

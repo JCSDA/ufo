@@ -45,7 +45,8 @@ ObsSeaIceThicknessTLAD::~ObsSeaIceThicknessTLAD() {
 
 // -----------------------------------------------------------------------------
 
-void ObsSeaIceThicknessTLAD::setTrajectory(const GeoVaLs & geovals, const ObsBias & bias) {
+void ObsSeaIceThicknessTLAD::setTrajectory(const GeoVaLs & geovals, const ObsBias & bias,
+                                           ObsDiagnostics &) {
   ufo_seaicethickness_tlad_settraj_f90(keyOper_, geovals.toFortran(), odb_);
   oops::Log::trace() << "ObsSeaIceThicknessTLAD: trajectory set" << std::endl;
 }

@@ -10,7 +10,7 @@ set ( utils_files
       EquispacedBinSelector.h
       GeodesicDistanceCalculator.h
       MaxNormDistanceCalculator.h
-      parameters/OptionalParameterVariable.h
+      parameters/ParameterTraitsVariable.h
       RecursiveSplitter.cc
       RecursiveSplitter.h
       SpatialBinSelector.h

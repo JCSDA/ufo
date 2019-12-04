@@ -30,7 +30,8 @@ extern "C" {
                                        const int &, const int &,
                                        oops::Variables &);
   void ufo_radiancecrtm_tlad_delete_f90(F90hop &);
-  void ufo_radiancecrtm_tlad_settraj_f90(const F90hop &, const F90goms &, const ioda::ObsSpace &);
+  void ufo_radiancecrtm_tlad_settraj_f90(const F90hop &, const F90goms &, const ioda::ObsSpace &,
+                                         const F90goms &);
   void ufo_radiancecrtm_simobs_tl_f90(const F90hop &, const F90goms &, const ioda::ObsSpace &,
                                   const int &, const int &, double &);
   void ufo_radiancecrtm_simobs_ad_f90(const F90hop &, const F90goms &, const ioda::ObsSpace &,

@@ -19,6 +19,7 @@
 #include "oops/util/Logger.h"
 #include "ufo/GeoVaLs.h"
 #include "ufo/ObsBias.h"
+#include "ufo/ObsDiagnostics.h"
 
 namespace ufo {
 
@@ -51,8 +52,10 @@ ObsRadianceCRTMTLAD::~ObsRadianceCRTMTLAD() {
 
 // -----------------------------------------------------------------------------
 
-void ObsRadianceCRTMTLAD::setTrajectory(const GeoVaLs & geovals, const ObsBias & bias) {
-  ufo_radiancecrtm_tlad_settraj_f90(keyOperRadianceCRTM_, geovals.toFortran(), odb_);
+void ObsRadianceCRTMTLAD::setTrajectory(const GeoVaLs & geovals, const ObsBias & bias,
+                                        ObsDiagnostics & ydiags) {
+  ufo_radiancecrtm_tlad_settraj_f90(keyOperRadianceCRTM_, geovals.toFortran(), odb_,
+                                    ydiags.toFortran());
   oops::Log::trace() << "ObsRadianceCRTMTLAD::setTrajectory done" << std::endl;
 }
 
