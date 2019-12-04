@@ -18,8 +18,9 @@
 #include "oops/../test/TestEnvironment.h"
 #include "oops/runs/Test.h"
 #include "oops/util/Expect.h"
+#include "oops/util/parameters/OptionalParameter.h"
 #include "oops/util/parameters/Parameters.h"
-#include "ufo/utils/parameters/OptionalParameterVariable.h"
+#include "ufo/utils/parameters/ParameterTraitsVariable.h"
 
 namespace ufo {
 namespace test {
