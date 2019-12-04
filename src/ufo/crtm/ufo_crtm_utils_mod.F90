@@ -374,9 +374,9 @@ logical,              intent(inout) :: Skip_Profiles(:)
 
 integer :: jprofile, jchannel
 character(len=MAXVARLEN) :: varname
-real(kind_real)  :: ObsVal(n_Channels,n_Profiles)
-!real(kind_real) :: EffObsErr(n_Channels,n_Profiles)
-!integer         :: EffQC(n_Channels,n_Profiles)
+real(kind_real)  :: ObsVal(n_Profiles,n_Channels)
+!real(kind_real) :: EffObsErr(n_Profiles,n_Channels)
+!integer         :: EffQC(n_Profiles,n_Channels)
 
 real(c_double) :: missing
 
@@ -389,16 +389,16 @@ real(c_double) :: missing
 
  do jchannel = 1, n_Channels
    call get_var_name(channels(jchannel),varname)
-   call obsspace_get_db(obss, "ObsValue", varname, ObsVal(jchannel,:))
-!   call obsspace_get_db(obss, "EffectiveError", varname, EffObsErr(jchannel,:))
-!   call obsspace_get_db(obss, "EffectiveQC{iter}", varname, EffQC(jchannel,:))
+   call obsspace_get_db(obss, "ObsValue", varname, ObsVal(:,jchannel))
+!   call obsspace_get_db(obss, "EffectiveError", varname, EffObsErr(:,jchannel))
+!   call obsspace_get_db(obss, "EffectiveQC{iter}", varname, EffQC(:,jchannel))
  enddo
 
  !Loop over all n_Profiles, i.e. number of locations
  do jprofile = 1, n_Profiles
-    Skip_Profiles(jprofile) = all(ObsVal(:,jprofile) == missing)
-!                        .OR. all(EffObsErr(:,jprofile) == missing) &
-!                        .OR. all(EffQC(:,jprofile) /= 0)
+   Skip_Profiles(jprofile) = all(ObsVal(jprofile,:) == missing)
+!                       .OR. all(EffObsErr(jprofile,:) == missing) &
+!                       .OR. all(EffQC(jprofile,:) /= 0)
  end do
 
 end subroutine ufo_crtm_skip_profiles
