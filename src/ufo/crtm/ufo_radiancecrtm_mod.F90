@@ -124,13 +124,16 @@ type(c_ptr), value,       intent(in) :: obss         !ObsSpace
 ! Local Variables
 character(*), parameter :: PROGRAM_NAME = 'ufo_radiancecrtm_mod.F90'
 character(255) :: message, version
+character(max_string) :: err_msg
 integer        :: err_stat, alloc_stat
 integer        :: l, m, n
 type(ufo_geoval), pointer :: temp
+integer :: jvar, jprofile, jlevel, jchannel, ichannel, jspec
+real(c_double) :: missing
+type(fckit_mpi_comm)  :: f_comm
 
-integer :: n_Profiles
-integer :: n_Layers
-integer :: n_Channels
+integer :: n_Profiles, n_Layers, n_Channels
+logical, allocatable :: Skip_Profiles(:)
 
 ! Define the "non-demoninational" arguments
 type(CRTM_ChannelInfo_type)             :: chinfo(self%conf%n_Sensors)
@@ -153,14 +156,7 @@ character(len=MAXVARLEN), dimension(hofxdiags%nvar) :: &
                           ystr_diags, xstr_diags
 character(10), parameter :: jacobianstr = "_jacobian_"
 integer :: str_pos(4), ch_diags(hofxdiags%nvar)
-integer :: jvar, jprofile, jlevel, jchannel, ichannel, jspec
-
 logical :: jacobian_needed
-character(max_string) :: err_msg
-
-logical, allocatable :: Skip_Profiles(:)
-real(c_double) :: missing
-type(fckit_mpi_comm)  :: f_comm
 
  call obsspace_get_comm(obss, f_comm)
 

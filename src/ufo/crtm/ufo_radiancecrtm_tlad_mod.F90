@@ -138,9 +138,14 @@ type(ufo_geovals),        intent(inout) :: hofxdiags    !non-h(x) diagnostics
 ! Local Variables
 character(*), parameter :: PROGRAM_NAME = 'ufo_radiancecrtm_mod.F90'
 character(255) :: message, version
+character(max_string) :: err_msg
 integer        :: err_stat, alloc_stat
-integer        :: jprofile, n
+integer        :: n
 type(ufo_geoval), pointer :: temp
+integer :: jvar, ichannel, jchannel, jprofile, jlevel, jspec
+real(c_double) :: missing
+type(fckit_mpi_comm)  :: f_comm
+
 
 ! Define the "non-demoninational" arguments
 type(CRTM_ChannelInfo_type)             :: chinfo(self%conf_traj%n_Sensors)
@@ -161,9 +166,6 @@ character(len=MAXVARLEN), dimension(hofxdiags%nvar) :: &
                           ystr_diags, xstr_diags
 character(10), parameter :: jacobianstr = "_jacobian_"
 integer :: str_pos(4), ch_diags(hofxdiags%nvar)
-integer :: jvar, ichannel, jchannel, jprofile, jlevel, jspec
-character(max_string) :: err_msg
-type(fckit_mpi_comm)  :: f_comm
 
  call obsspace_get_comm(obss, f_comm)
 
@@ -341,6 +343,9 @@ type(fckit_mpi_comm)  :: f_comm
       end if 
    end do
 
+   ! Set missing value
+   missing = missing_value(missing)
+
    ! Put simulated diagnostics into hofxdiags
    ! ----------------------------------------------
    do jvar = 1, hofxdiags%nvar
@@ -376,20 +381,26 @@ type(fckit_mpi_comm)  :: f_comm
             case (var_opt_depth)
                hofxdiags%geovals(jvar)%nval = self%n_Layers
                allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,self%n_Profiles))
+               hofxdiags%geovals(jvar)%vals = missing
                do jprofile = 1, self%n_Profiles
-                do jlevel = 1, hofxdiags%geovals(jvar)%nval
-                  hofxdiags%geovals(jvar)%vals(jlevel,jprofile) = &
-                    rts(jchannel,jprofile) % layer_optical_depth(jlevel)
-                  end do
+                  if (.not.self%Skip_Profiles(jprofile)) then
+                     do jlevel = 1, hofxdiags%geovals(jvar)%nval
+                        hofxdiags%geovals(jvar)%vals(jlevel,jprofile) = &
+                          rts(jchannel,jprofile) % layer_optical_depth(jlevel)
+                     end do
+                  end if
                end do
 
             ! variable: brightness_temperature_CH
             case (var_tb)
                hofxdiags%geovals(jvar)%nval = 1
                allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,self%n_Profiles))
+               hofxdiags%geovals(jvar)%vals = missing
                do jprofile = 1, self%n_Profiles
-                  hofxdiags%geovals(jvar)%vals(1,jprofile) = &
-                     rts(jchannel,jprofile) % Brightness_Temperature 
+                  if (.not.self%Skip_Profiles(jprofile)) then
+                     hofxdiags%geovals(jvar)%vals(1,jprofile) = &
+                        rts(jchannel,jprofile) % Brightness_Temperature 
+                  end if
                end do
 
             case default
@@ -405,9 +416,12 @@ type(fckit_mpi_comm)  :: f_comm
             case (var_sfc_emiss)
                hofxdiags%geovals(jvar)%nval = 1
                allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,self%n_Profiles))
+               hofxdiags%geovals(jvar)%vals = missing
                do jprofile = 1, self%n_Profiles
-                  hofxdiags%geovals(jvar)%vals(1,jprofile) = &
-                     rts_K(jchannel,jprofile) % surface_emissivity
+                  if (.not.self%Skip_Profiles(jprofile)) then
+                     hofxdiags%geovals(jvar)%vals(1,jprofile) = &
+                        rts_K(jchannel,jprofile) % surface_emissivity
+                  end if
                end do
             case default
                write(err_msg,*) 'ufo_radiancecrtm_simobs: //&
