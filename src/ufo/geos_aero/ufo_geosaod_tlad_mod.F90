@@ -64,7 +64,7 @@ character(len=:), allocatable :: str
  enddo
  deallocate(tracer_variables)
 
- ! size of variables (number of obs type (wavelength for AOD))
+ ! Size of variables (number of obs type (wavelength for AOD))
  self%nvars = self%obsvars%nvars()
 
  allocate(self%wavelength(self%nvars))
