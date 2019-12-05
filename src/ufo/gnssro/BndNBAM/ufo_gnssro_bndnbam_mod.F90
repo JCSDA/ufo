@@ -75,6 +75,7 @@ subroutine ufo_gnssro_bndnbam_simobs(self, geovals, hofx, obss)
   integer,allocatable                     :: nlocs_end(:)
   real(c_double)                          :: missing
   integer,          allocatable           :: super_refraction_flag(:)
+  integer,          allocatable           :: super(:)
   integer                                 :: sr_hgt_idx
   real(kind_real)                         :: gradRef, obsImpH
 
@@ -209,6 +210,7 @@ subroutine ufo_gnssro_bndnbam_simobs(self, geovals, hofx, obss)
   allocate(temperature(nlocs))
   temperature = missing
   allocate(super_refraction_flag(nlocs))
+  allocate(super(nrecs))
   super_refraction_flag = 0
 
 ! bending angle forward model starts
@@ -220,6 +222,7 @@ subroutine ufo_gnssro_bndnbam_simobs(self, geovals, hofx, obss)
 
   iobs = 0
   hofx =  missing
+  super= 0
   rec_loop: do irec = 1, nrecs
     obs_loop: do icount = nlocs_begin(irec), nlocs_end(irec)
 
@@ -266,6 +269,7 @@ subroutine ufo_gnssro_bndnbam_simobs(self, geovals, hofx, obss)
               endif
 !             relax to close-to-SR conditions, and check if obs is inside model SR layer
               if(self%roconf%sr_steps > 1                 &
+                 .and. super(irec) == 0                   &
                  .and. abs(gradRef) >= half*crit_gradRefr &
                  .and. maxval(obsValue(nlocs_begin(irec):nlocs_end(irec))) >= 0.03 ) then
                  sr_hgt_idx = maxloc(obsValue(nlocs_begin(irec):nlocs_end(irec)), dim=1)
@@ -273,7 +277,8 @@ subroutine ufo_gnssro_bndnbam_simobs(self, geovals, hofx, obss)
                      if (obsImpP(kk) <= obsImpP(nlocs_begin(irec)-1+sr_hgt_idx))  &
                         super_refraction_flag(kk)=2
                  end do 
-                 cycle rec_loop
+                 super(irec) = 1
+
               end if
            end do ! k
 
@@ -300,6 +305,7 @@ subroutine ufo_gnssro_bndnbam_simobs(self, geovals, hofx, obss)
        call abor1_ftn(err_msg)
      end if
 
+     if (super_refraction_flag(iobs) .eq. 0) then
      call ufo_gnssro_bndnbam_simobs_single(   &
                obsLat(iobs), obsGeoid(iobs), obsLocR(iobs), obsImpP(iobs), &
                grids, ngrd, &
@@ -307,7 +313,7 @@ subroutine ufo_gnssro_bndnbam_simobs(self, geovals, hofx, obss)
                radius(1:nlev),ref(1:nlevExt),refIndex(1:nlev),refXrad(0:nlevExt),  &
                hofx(iobs))
 
-
+     end if
     end do obs_loop
   end do rec_loop
 
