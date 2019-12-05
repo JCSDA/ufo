@@ -16,7 +16,7 @@ Observations:
       filename: Data/sondes_geoval_2018041500_m.nc4
     ObsFilters:
     - Filter: PreQC
-      threshold: 3
+      maxvalue: 3
     passedBenchmark: 155
   - ObsOperator:
       name: CRTM
