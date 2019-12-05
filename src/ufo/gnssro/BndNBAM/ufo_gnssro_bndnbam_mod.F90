@@ -344,7 +344,7 @@ subroutine ufo_gnssro_bndnbam_simobs(self, geovals, hofx, obss)
   deallocate(nlocs_begin)
   deallocate(nlocs_end)
   deallocate(super_refraction_flag)
-
+  deallocate(super)
   write(err_msg,*) myname, ": complete"
   call fckit_log%info(err_msg)
 end subroutine ufo_gnssro_bndnbam_simobs
