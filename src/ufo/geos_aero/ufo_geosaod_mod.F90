@@ -140,7 +140,7 @@ character(len=MAXVARLEN), dimension(:), allocatable:: tracer_name
      qm(iq,:,:) = qm(iq,:,:) * delp / grav      ! aer concentration (kg/m2) 
   enddo
  
-  ! call observation operator code
+  ! Call observation operator code
   ! -----------------------------
   hofx(:,:) = 0.0
   call get_GEOS_AOD(nlayers, nlocs, nvars, self%ntracers, self%rcfile,  &
