@@ -7,15 +7,18 @@
 
 module ufo_radiancecrtm_mod
 
+ use crtm_module
+
  use fckit_configuration_module, only: fckit_configuration
  use iso_c_binding
  use kinds
+ use missing_values_mod
+
+ use obsspace_mod
 
  use ufo_geovals_mod, only: ufo_geovals, ufo_geoval, ufo_geovals_get_var
  use ufo_vars_mod
  use ufo_crtm_utils_mod
- use crtm_module
- use obsspace_mod
 
  implicit none
  private
@@ -121,13 +124,16 @@ type(c_ptr), value,       intent(in) :: obss         !ObsSpace
 ! Local Variables
 character(*), parameter :: PROGRAM_NAME = 'ufo_radiancecrtm_mod.F90'
 character(255) :: message, version
+character(max_string) :: err_msg
 integer        :: err_stat, alloc_stat
 integer        :: l, m, n
 type(ufo_geoval), pointer :: temp
+integer :: jvar, jprofile, jlevel, jchannel, ichannel, jspec
+real(c_double) :: missing
+type(fckit_mpi_comm)  :: f_comm
 
-integer :: n_Profiles
-integer :: n_Layers
-integer :: n_Channels
+integer :: n_Profiles, n_Layers, n_Channels
+logical, allocatable :: Skip_Profiles(:)
 
 ! Define the "non-demoninational" arguments
 type(CRTM_ChannelInfo_type)             :: chinfo(self%conf%n_Sensors)
@@ -142,6 +148,7 @@ type(CRTM_RTSolution_type), allocatable :: rts(:,:)
 type(CRTM_Atmosphere_type), allocatable :: atm_K(:,:)
 type(CRTM_Surface_type),    allocatable :: sfc_K(:,:)
 type(CRTM_RTSolution_type), allocatable :: rts_K(:,:)
+type(CRTM_Options_type),    allocatable :: Options(:)
 
 ! Used to parse hofxdiags
 character(len=MAXVARLEN) :: varstr
@@ -149,12 +156,7 @@ character(len=MAXVARLEN), dimension(hofxdiags%nvar) :: &
                           ystr_diags, xstr_diags
 character(10), parameter :: jacobianstr = "_jacobian_"
 integer :: str_pos(4), ch_diags(hofxdiags%nvar)
-integer :: jvar, jprofile, jlevel, jchannel, ichannel, jspec
-
 logical :: jacobian_needed
-character(max_string) :: err_msg
-
-type(fckit_mpi_comm)  :: f_comm
 
  call obsspace_get_comm(obss, f_comm)
 
@@ -217,6 +219,7 @@ type(fckit_mpi_comm)  :: f_comm
              atm( n_Profiles ),               &
              sfc( n_Profiles ),               &
              rts( n_Channels, n_Profiles ),   &
+             Options( n_Profiles ),           &
              STAT = alloc_stat )
    message = 'Error allocating structure arrays'
    call crtm_comm_stat_check(alloc_stat, PROGRAM_NAME, message, f_comm)
@@ -295,6 +298,12 @@ type(fckit_mpi_comm)  :: f_comm
       end if
    end do
 
+   allocate(Skip_Profiles(n_Profiles))
+   call ufo_crtm_skip_profiles(n_Profiles,n_Channels,self%channels,obss,Skip_Profiles)
+   do jprofile = 1, n_Profiles
+      Options(jprofile)%Skip_Profile = Skip_Profiles(jprofile)
+   end do
+
    if (jacobian_needed) then
       ! Allocate the ARRAYS (for CRTM_K_Matrix)
       ! --------------------------------------
@@ -341,19 +350,21 @@ type(fckit_mpi_comm)  :: f_comm
                                 rts_K       , &  ! K-MATRIX Input
                                 geo         , &  ! Input
                                 chinfo(n:n) , &  ! Input
-                                atm_K  , &  ! K-MATRIX Output
-                                sfc_K  , &  ! K-MATRIX Output
-                                rts           )  ! FORWARD  Output
+                                atm_K       , &  ! K-MATRIX Output
+                                sfc_K       , &  ! K-MATRIX Output
+                                rts         , &  ! FORWARD  Output
+                                Options       )  ! Input
       message = 'Error calling CRTM (setTraj) K-Matrix Model for '//TRIM(self%conf%SENSOR_ID(n))
       call crtm_comm_stat_check(err_stat, PROGRAM_NAME, message, f_comm)
    else
       ! Call the forward model call for each sensor
       ! -------------------------------------------
-      err_stat = CRTM_Forward( atm        , &  ! Input
-                               sfc        , &  ! Input
-                               geo        , &  ! Input
-                               chinfo(n:n), &  ! Input
-                               rts          )  ! Output
+      err_stat = CRTM_Forward( atm         , &  ! Input
+                               sfc         , &  ! Input
+                               geo         , &  ! Input
+                               chinfo(n:n) , &  ! Input
+                               rts         , &  ! Output
+                               Options       )  ! Input
       message = 'Error calling CRTM Forward Model for '//TRIM(self%conf%SENSOR_ID(n))
       call crtm_comm_stat_check(err_stat, PROGRAM_NAME, message, f_comm)
    end if ! jacobian_needed
@@ -363,13 +374,17 @@ type(fckit_mpi_comm)  :: f_comm
    ! Put simulated brightness temperature into hofx
    ! ----------------------------------------------
 
-   !Set to zero and initialize counter
-   hofx(:,:) = 0.0_kind_real
+   ! Set missing value
+   missing = missing_value(missing)
 
+   !Set to missing, then retrieve non-missing profiles
+   hofx = missing
    do m = 1, n_Profiles
-     do l = 1, size(self%channels)
-       hofx(l,m) = rts(l,m)%Brightness_Temperature
-     end do
+     if (.not.Skip_Profiles(m)) then
+        do l = 1, size(self%channels)
+          hofx(l,m) = rts(l,m)%Brightness_Temperature
+        end do
+     end if
    end do
 
    ! Put simulated diagnostics into hofxdiags
@@ -407,40 +422,52 @@ type(fckit_mpi_comm)  :: f_comm
             case (var_opt_depth)
                hofxdiags%geovals(jvar)%nval = n_Layers
                allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,n_Profiles))
+               hofxdiags%geovals(jvar)%vals = missing
                do jprofile = 1, n_Profiles
-                  do jlevel = 1, hofxdiags%geovals(jvar)%nval
-                     hofxdiags%geovals(jvar)%vals(jlevel,jprofile) = &
-                        rts(jchannel,jprofile) % layer_optical_depth(jlevel)
-                  end do
+                  if (.not.Skip_Profiles(jprofile)) then
+                     do jlevel = 1, hofxdiags%geovals(jvar)%nval
+                        hofxdiags%geovals(jvar)%vals(jlevel,jprofile) = &
+                           rts(jchannel,jprofile) % layer_optical_depth(jlevel)
+                     end do
+                  end if
                end do
 
             ! variable: toa_outgoing_radiance_per_unit_wavenumber_CH [mW / (m^2 sr cm^-1)] (nval=1)
             case (var_radiance)
                hofxdiags%geovals(jvar)%nval = 1
                allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,n_Profiles))
+               hofxdiags%geovals(jvar)%vals = missing
                do jprofile = 1, n_Profiles
-                  hofxdiags%geovals(jvar)%vals(1,jprofile) = &
-                     rts(jchannel,jprofile) % Radiance
+                  if (.not.Skip_Profiles(jprofile)) then
+                     hofxdiags%geovals(jvar)%vals(1,jprofile) = &
+                        rts(jchannel,jprofile) % Radiance
+                  end if
                end do
 
             ! variable: brightness_temperature_assuming_clear_sky_CH
             case (var_tb_clr)
                hofxdiags%geovals(jvar)%nval = 1
                allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,n_Profiles))
+               hofxdiags%geovals(jvar)%vals = missing
                do jprofile = 1, n_Profiles
-                  ! Note: Using Tb_Clear requires CRTM_Atmosphere_IsFractional(cloud_coverage_flag) 
-                  ! to be true. For CRTM v2.3.0, that happens when 
-                  ! atm(jprofile)%Cloud_Fraction > MIN_COVERAGE_THRESHOLD (1e.-6)
-                  hofxdiags%geovals(jvar)%vals(1,jprofile) = &
-                     rts(jchannel,jprofile) % Tb_Clear 
+                  if (.not.Skip_Profiles(jprofile)) then
+                     ! Note: Using Tb_Clear requires CRTM_Atmosphere_IsFractional(cloud_coverage_flag) 
+                     ! to be true. For CRTM v2.3.0, that happens when 
+                     ! atm(jprofile)%Cloud_Fraction > MIN_COVERAGE_THRESHOLD (1e.-6)
+                     hofxdiags%geovals(jvar)%vals(1,jprofile) = &
+                        rts(jchannel,jprofile) % Tb_Clear 
+                  end if
                end do
             ! variable: brightness_temperature_CH
             case (var_tb)
                hofxdiags%geovals(jvar)%nval = 1
                allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,n_Profiles))
+               hofxdiags%geovals(jvar)%vals = missing
                do jprofile = 1, n_Profiles
-                  hofxdiags%geovals(jvar)%vals(1,jprofile) = &
-                     rts(jchannel,jprofile) % Brightness_Temperature 
+                  if (.not.Skip_Profiles(jprofile)) then
+                     hofxdiags%geovals(jvar)%vals(1,jprofile) = &
+                        rts(jchannel,jprofile) % Brightness_Temperature 
+                  end if
                end do
             case default
                write(err_msg,*) 'ufo_radiancecrtm_simobs: //&
@@ -455,43 +482,55 @@ type(fckit_mpi_comm)  :: f_comm
             case (var_ts)
                hofxdiags%geovals(jvar)%nval = n_Layers
                allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,n_Profiles))
+               hofxdiags%geovals(jvar)%vals = missing
                do jprofile = 1, n_Profiles
-                  do jlevel = 1, hofxdiags%geovals(jvar)%nval
-                     hofxdiags%geovals(jvar)%vals(jlevel,jprofile) = &
-                        atm_K(jchannel,jprofile) % Temperature(jlevel)
-                  end do
+                  if (.not.Skip_Profiles(jprofile)) then
+                     do jlevel = 1, hofxdiags%geovals(jvar)%nval
+                        hofxdiags%geovals(jvar)%vals(jlevel,jprofile) = &
+                           atm_K(jchannel,jprofile) % Temperature(jlevel)
+                     end do
+                  end if
                end do
             ! variable: brightness_temperature_jacobian_humidity_mixing_ratio_CH (nval==n_Layers) --> requires MAXVARLEN=58
             case (var_mixr)
                hofxdiags%geovals(jvar)%nval = n_Layers
                allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,n_Profiles))
+               hofxdiags%geovals(jvar)%vals = missing
                jspec = ufo_vars_getindex(self%conf%Absorbers, var_mixr)
                do jprofile = 1, n_Profiles
-                  do jlevel = 1, hofxdiags%geovals(jvar)%nval
-                     hofxdiags%geovals(jvar)%vals(jlevel,jprofile) = &
-                        atm_K(jchannel,jprofile) % Absorber(jlevel,jspec)
-                  end do
+                  if (.not.Skip_Profiles(jprofile)) then
+                     do jlevel = 1, hofxdiags%geovals(jvar)%nval
+                        hofxdiags%geovals(jvar)%vals(jlevel,jprofile) = &
+                           atm_K(jchannel,jprofile) % Absorber(jlevel,jspec)
+                     end do
+                  end if
                end do
 
             ! variable: brightness_temperature_jacobian_surface_temperature_CH (nval=1)
             case (var_sfc_t)
                hofxdiags%geovals(jvar)%nval = 1
                allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,n_Profiles))
+               hofxdiags%geovals(jvar)%vals = missing
                do jprofile = 1, n_Profiles
-                  hofxdiags%geovals(jvar)%vals(1,jprofile) = &
-                     sfc_K(jchannel,jprofile) % water_temperature &
-                   + sfc_K(jchannel,jprofile) % land_temperature &
-                   + sfc_K(jchannel,jprofile) % ice_temperature &
-                   + sfc_K(jchannel,jprofile) % snow_temperature
+                  if (.not.Skip_Profiles(jprofile)) then
+                     hofxdiags%geovals(jvar)%vals(1,jprofile) = &
+                        sfc_K(jchannel,jprofile) % water_temperature &
+                      + sfc_K(jchannel,jprofile) % land_temperature &
+                      + sfc_K(jchannel,jprofile) % ice_temperature &
+                      + sfc_K(jchannel,jprofile) % snow_temperature
+                  end if
                end do
 
             ! variable: brightness_temperature_jacobian_surface_emissivity_CH (nval=1)
             case (var_sfc_emiss)
                hofxdiags%geovals(jvar)%nval = 1
                allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,n_Profiles))
+               hofxdiags%geovals(jvar)%vals = missing
                do jprofile = 1, n_Profiles
-                  hofxdiags%geovals(jvar)%vals(1,jprofile) = &
-                     rts_K(jchannel,jprofile) % surface_emissivity
+                  if (.not.Skip_Profiles(jprofile)) then
+                     hofxdiags%geovals(jvar)%vals(1,jprofile) = &
+                        rts_K(jchannel,jprofile) % surface_emissivity
+                  end if
                end do
             case default
                write(err_msg,*) 'ufo_radiancecrtm_simobs: //&
@@ -507,7 +546,6 @@ type(fckit_mpi_comm)  :: f_comm
       end if
    end do
 
-
    ! Deallocate the structures
    ! -------------------------
    call CRTM_Geometry_Destroy(geo)
@@ -517,7 +555,7 @@ type(fckit_mpi_comm)  :: f_comm
 
    ! Deallocate all arrays
    ! ---------------------
-   deallocate(geo, atm, sfc, rts, STAT = alloc_stat)
+   deallocate(geo, atm, sfc, rts, Options, Skip_Profiles, STAT = alloc_stat)
    message = 'Error deallocating structure arrays'
    call crtm_comm_stat_check(alloc_stat, PROGRAM_NAME, message, f_comm)
 

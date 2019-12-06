@@ -20,14 +20,15 @@ use obsspace_mod
 implicit none
 private
 
+public crtm_comm_stat_check
 public crtm_conf
 public crtm_conf_setup
 public crtm_conf_delete
-public crtm_comm_stat_check
+public get_var_name
 public Load_Atm_Data
 public Load_Sfc_Data
 public Load_Geom_Data
-public get_var_name
+public ufo_crtm_skip_profiles
 
 PUBLIC Load_Aerosol_Data
 public assign_aerosol_names
@@ -354,6 +355,53 @@ character(max_string) :: rank_message
  end if
 
 end subroutine crtm_comm_stat_check
+
+! ------------------------------------------------------------------------------
+
+subroutine ufo_crtm_skip_profiles(n_Profiles,n_Channels,channels,obss,Skip_Profiles)
+! Profiles are skipped when the ObsValue of all channels is missing.
+! TODO: Use complete QC information
+! It would be more comprehensive to use EffectiveQC or EffectiveError. That
+! would require those ObsSpace values to be initialized before calls to
+! this subroutine within ufo_radiancecrtm_simobs+ufo_radiancecrtm_tlad_settraj.
+use missing_values_mod
+
+implicit none
+integer,              intent(in)    :: n_Profiles, n_Channels
+type(c_ptr), value,   intent(in)    :: obss
+integer(c_int),       intent(in)    :: channels(:)
+logical,              intent(inout) :: Skip_Profiles(:)
+
+integer :: jprofile, jchannel
+character(len=MAXVARLEN) :: varname
+real(kind_real)  :: ObsVal(n_Profiles,n_Channels)
+!real(kind_real) :: EffObsErr(n_Profiles,n_Channels)
+!integer         :: EffQC(n_Profiles,n_Channels)
+
+real(c_double) :: missing
+
+ ! Set missing value
+ missing = missing_value(missing)
+
+ ObsVal = missing
+! EffObsErr = missing
+! EffQC = 0
+
+ do jchannel = 1, n_Channels
+   call get_var_name(channels(jchannel),varname)
+   call obsspace_get_db(obss, "ObsValue", varname, ObsVal(:,jchannel))
+!   call obsspace_get_db(obss, "EffectiveError", varname, EffObsErr(:,jchannel))
+!   call obsspace_get_db(obss, "EffectiveQC{iter}", varname, EffQC(:,jchannel))
+ enddo
+
+ !Loop over all n_Profiles, i.e. number of locations
+ do jprofile = 1, n_Profiles
+   Skip_Profiles(jprofile) = all(ObsVal(jprofile,:) == missing)
+!                       .OR. all(EffObsErr(jprofile,:) == missing) &
+!                       .OR. all(EffQC(jprofile,:) /= 0)
+ end do
+
+end subroutine ufo_crtm_skip_profiles
 
 ! ------------------------------------------------------------------------------
 
