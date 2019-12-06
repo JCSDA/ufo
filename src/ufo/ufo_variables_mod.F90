@@ -24,6 +24,7 @@ character(len=MAXVARLEN), public, parameter :: var_u    = "eastward_wind"
 character(len=MAXVARLEN), public, parameter :: var_v    = "northward_wind"
 character(len=MAXVARLEN), public, parameter :: var_prs  = "air_pressure"
 character(len=MAXVARLEN), public, parameter :: var_prsi = "air_pressure_levels"
+character(len=MAXVARLEN), public, parameter :: var_delp = "air_pressure_thickness"
 character(len=MAXVARLEN), public, parameter :: var_ps   = "surface_pressure"
 character(len=MAXVARLEN), public, parameter :: var_z    = "geopotential_height"
 character(len=MAXVARLEN), public, parameter :: var_zi   = "geopotential_height_levels"
@@ -77,6 +78,7 @@ character(len=MAXVARLEN), public, parameter :: var_w           = "upward_air_vel
 
 !@mzp strings have to be same MAXVARLEN length for array constructor
 CHARACTER(len=MAXVARLEN), public, parameter :: var_rh          = "relative_humidity"
+
 CHARACTER(len=MAXVARLEN), DIMENSION(n_aerosols_gocart_default), PUBLIC, PARAMETER  :: &
      &var_aerosols_gocart_default = [&
      &"sulf                                                    ",&
@@ -136,6 +138,26 @@ character(len=MAXVARLEN), public :: var_latent_heat   = "upward_latent_heat_flux
 character(len=MAXVARLEN), public :: var_sens_heat     = "upward_sensible_heat_flux_in_air"
 character(len=MAXVARLEN), public :: var_lw_rad        = "net_downwelling_longwave_radiation"
 character(len=MAXVARLEN), public :: var_sea_fric_vel  = "friction_velocity_over_water"
+
+character(len=MAXVARLEN), public, parameter :: var_du001 = "mass_fraction_of_dust001_in_air"
+character(len=MAXVARLEN), public, parameter :: var_du002 = "mass_fraction_of_dust002_in_air"
+character(len=MAXVARLEN), public, parameter :: var_du003 = "mass_fraction_of_dust003_in_air"
+character(len=MAXVARLEN), public, parameter :: var_du004 = "mass_fraction_of_dust004_in_air"
+character(len=MAXVARLEN), public, parameter :: var_du005 = "mass_fraction_of_dust005_in_air"
+character(len=MAXVARLEN), public, parameter :: var_ss001 = "mass_fraction_of_sea_salt001_in_air"
+character(len=MAXVARLEN), public, parameter :: var_ss002 = "mass_fraction_of_sea_salt002_in_air"
+character(len=MAXVARLEN), public, parameter :: var_ss003 = "mass_fraction_of_sea_salt003_in_air"
+character(len=MAXVARLEN), public, parameter :: var_ss004 = "mass_fraction_of_sea_salt004_in_air"
+character(len=MAXVARLEN), public, parameter :: var_ss005 = "mass_fraction_of_sea_salt005_in_air"
+character(len=MAXVARLEN), public, parameter :: var_bcphobic = "mass_fraction_of_hydrophobic_black_carbon_in_air"
+character(len=MAXVARLEN), public, parameter :: var_bcphilic = "mass_fraction_of_hydrophilic_black_carbon_in_air"
+character(len=MAXVARLEN), public, parameter :: var_ocphobic = "mass_fraction_of_hydrophobic_organic_carbon_in_air"
+character(len=MAXVARLEN), public, parameter :: var_ocphilic = "mass_fraction_of_hydrophilic_organic_carbon_in_air"
+character(len=MAXVARLEN), public, parameter :: var_sulfate = "mass_fraction_of_sulfate_aerosols_in_air"
+character(len=MAXVARLEN), public, parameter :: var_no3an1 = "mass_fraction_of_nitrate001_in_air"
+character(len=MAXVARLEN), public, parameter :: var_no3an2 = "mass_fraction_of_nitrate002_in_air"
+character(len=MAXVARLEN), public, parameter :: var_no3an3 = "mass_fraction_of_nitrate003_in_air"
+
 
 ! ------------------------------------------------------------------------------
 contains

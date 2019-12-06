@@ -97,6 +97,15 @@ else( ${ROPP-UFO_FOUND} )
     message(STATUS "ROPP NOT FOUND: Excluding  GNSSRO Bending angle ROPP Operators")
 endif( ${ROPP-UFO_FOUND} )
 
+# GEOS-AERO
+ecbuild_use_package( PROJECT geos-aero QUIET )
+if( ${GEOS-AERO_FOUND} )
+    message(STATUS "GEOS-AERO FOUND; Including AOD operator from GEOS")
+    include_directories( ${GEOSAERO_INCLUDE_DIRS} )
+else( ${GEOS-AERO_FOUND} )
+    message(STATUS "GEOS-AERO NOT FOUND: Excluding  AOD operator from GEOS")
+endif( ${GEOS-AERO_FOUND} )
+
 ################################################################################
 # Export package info
 ################################################################################
@@ -110,6 +119,10 @@ endif( ${GSW_FOUND} )
 if( ${ROPP-UFO_FOUND} )
     list ( APPEND UFO_TPLS ropp-ufo )
 endif( ${ROPP-UFO_FOUND} )
+
+if( ${GEOS-AERO_FOUND} )
+    list ( APPEND UFO_TPLS geos-aero )
+endif( ${GEOS-AERO_FOUND} )
 
 if( ${RTTOV_FOUND} )
     list ( APPEND UFO_TPLS rttov)

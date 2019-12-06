@@ -75,6 +75,14 @@ before_install:
   - git clone https://github.com/jcsda/GSW-Fortran.git ${REPO_SOURCE_DIR}/ufo-bundle/gsw
   - git clone https://github.com/jcsda/fckit.git ${REPO_SOURCE_DIR}/ufo-bundle/fckit
 
+#  checkout for the same branch name in geos-aero
+  - git clone https://github.com/jcsda/geos-aero.git ${REPO_SOURCE_DIR}/ufo-bundle/geos-aero
+  - cd ${REPO_SOURCE_DIR}/ufo-bundle/geos-aero
+  - git checkout $BRANCH || echo "No branch named $BRANCH in geos-aero repo"
+  - cd $REPO_SOURCE_DIR  
+
+
+
 # do no switch to develop branch by removing 
 # develop UPDATE in CMakeLists.txt in ufo-bundle
 
@@ -82,6 +90,8 @@ before_install:
   - sed -i 's/BRANCH develop  UPDATE//' CMakeLists.txt
   - sed -i -e '/ecbuild_bundle( PROJECT ufo/i\
     ecbuild_bundle( PROJECT ropp-ufo  GIT "https://github.com/JCSDA/ropp-test.git" )' CMakeLists.txt
+  - sed -i -e '/ecbuild_bundle( PROJECT ufo/i\
+    ecbuild_bundle( PROJECT geos-aero  GIT "https://github.com/JCSDA/geos-aero.git" )' CMakeLists.txt
   - cat CMakeLists.txt
   - cd ${REPO_SOURCE_DIR}
   - ls ${REPO_SOURCE_DIR}
