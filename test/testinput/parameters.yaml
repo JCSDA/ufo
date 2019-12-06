@@ -1,0 +1,7 @@
+empty:
+  # Nothing to see here
+full:
+  opt_variable_parameter:
+    name: latitude@MetaData
+error_in_opt_variable_parameter:
+  opt_variable_parameter:

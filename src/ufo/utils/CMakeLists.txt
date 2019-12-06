@@ -5,6 +5,7 @@
 
 set ( utils_files
       Constants.h
+      parameters/ParameterTraitsVariable.h
       StringUtils.cc
       StringUtils.h
       vert_interp.F90

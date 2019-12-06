@@ -65,6 +65,7 @@ list( APPEND ufo_test_input
   testinput/obsdiag_crtm_jacobian.yaml
   testinput/obsfilterdata.yaml
   testinput/processwhere.yaml
+  testinput/parameters.yaml
   testinput/qc_backgroundcheck.yaml
   testinput/qc_boundscheck.yaml
   testinput/qc_differencecheck.yaml
@@ -746,6 +747,13 @@ if ( ${CRTM_FOUND} )
                       ENVIRONMENT OOPS_TRAPFPE=1
                       LIBS    ufo)
 endif ( ${CRTM_FOUND} )
+
+# Test Parameters
+ecbuild_add_test( TARGET  test_ufo_parameters
+                  SOURCES mains/TestParameters.cc
+                  ARGS    "testinput/parameters.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  LIBS    ufo)
 
 # Test QC for specific instruments
 
