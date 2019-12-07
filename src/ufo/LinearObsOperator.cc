@@ -8,14 +8,17 @@
 #include "ioda/ObsVector.h"
 #include "ufo/LinearObsOperator.h"
 #include "ufo/LinearObsOperatorBase.h"
+#include "ufo/Locations.h"
+#include "ufo/ObsBias.h"
 #include "ufo/ObsBiasIncrement.h"
+#include "ufo/ObsDiagnostics.h"
 
 namespace ufo {
 
 // -----------------------------------------------------------------------------
 
 LinearObsOperator::LinearObsOperator(ioda::ObsSpace & os, const eckit::Configuration & conf)
-  : oper_(LinearObsOperatorFactory::create(os, conf)), odb_(os)
+  : oper_(LinearObsOperatorFactory::create(os, conf)), odb_(os), biaspreds_(0)
 {}
 
 // -----------------------------------------------------------------------------
@@ -25,7 +28,11 @@ LinearObsOperator::~LinearObsOperator() {}
 // -----------------------------------------------------------------------------
 
 void LinearObsOperator::setTrajectory(const GeoVaLs & gvals, const ObsBias & bias) {
-  oper_->setTrajectory(gvals, bias);
+  oops::Variables vars;
+  if (bias) vars += bias.requiredHdiagnostics();
+  ObsDiagnostics ydiags(odb_, Locations(odb_, odb_.windowStart(), odb_.windowEnd()), vars);
+  oper_->setTrajectory(gvals, bias, ydiags);
+  if (bias) bias.computeObsBiasPredictors(gvals, odb_, ydiags, biaspreds_);
 }
 
 // -----------------------------------------------------------------------------
@@ -33,18 +40,22 @@ void LinearObsOperator::setTrajectory(const GeoVaLs & gvals, const ObsBias & bia
 void LinearObsOperator::simulateObsTL(const GeoVaLs & gvals, ioda::ObsVector & yy,
                                       const ObsBiasIncrement & bias) const {
   oper_->simulateObsTL(gvals, yy);
-  ioda::ObsVector ybiasinc(odb_);
-  bias.computeObsBiasTL(gvals, ybiasinc, odb_);
-  yy += ybiasinc;
+  if (bias) {
+    ioda::ObsVector ybiasinc(odb_);
+    bias.computeObsBiasTL(gvals, odb_, biaspreds_, ybiasinc);
+    yy += ybiasinc;
+  }
 }
 
 // -----------------------------------------------------------------------------
 
 void LinearObsOperator::simulateObsAD(GeoVaLs & gvals, const ioda::ObsVector & yy,
                                       ObsBiasIncrement & bias) const {
-  ioda::ObsVector ybiasinc(yy);
   oper_->simulateObsAD(gvals, yy);
-  bias.computeObsBiasAD(gvals, ybiasinc, odb_);
+  if (bias) {
+    ioda::ObsVector ybiasinc(yy);
+    bias.computeObsBiasAD(gvals, odb_, biaspreds_, ybiasinc);
+  }
 }
 
 // -----------------------------------------------------------------------------

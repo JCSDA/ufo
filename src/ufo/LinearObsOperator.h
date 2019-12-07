@@ -9,6 +9,7 @@
 #define UFO_LINEAROBSOPERATOR_H_
 
 #include <memory>
+#include <vector>
 
 #include <boost/noncopyable.hpp>
 
@@ -54,6 +55,7 @@ class LinearObsOperator : public util::Printable,
   void print(std::ostream &) const;
   std::unique_ptr<LinearObsOperatorBase> oper_;
   ioda::ObsSpace & odb_;
+  std::vector<float> biaspreds_;
 };
 
 // -----------------------------------------------------------------------------

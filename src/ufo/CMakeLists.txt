@@ -66,7 +66,11 @@ endif( ${RTTOV_FOUND} )
 add_subdirectory( gnssro )
 add_subdirectory( sfcpcorrected )
 add_subdirectory( marine )
+if( ${GEOS-AERO_FOUND} )
+    add_subdirectory( geos_aero )
+endif( ${GEOS-AERO_FOUND} )
 add_subdirectory( timeoper )
+
 list( APPEND ufo_src_files
     ${utils_src_files}
     ${basis_src_files}
@@ -79,6 +83,7 @@ list( APPEND ufo_src_files
     ${crtm_src_files}
     ${rttov_src_files}
     ${gnssro_src_files}
+    ${geosaod_src_files}
     ${sfcpcorrected_src_files}
     ${radarreflectivity_src_files}
     ${radarradialvelocity_src_files}
@@ -99,6 +104,11 @@ endif( ${RTTOV_FOUND} )
 if( ${ROPP-UFO_FOUND} )
     list( APPEND UFO_LIBS_DEP ropp-ufo )
 endif( ${ROPP-UFO_FOUND} )
+
+if( ${GEOS-AERO_FOUND} )
+    list( APPEND UFO_LIBS_DEP geos-aero )
+endif( ${GEOS-AERO_FOUND} )
+
 
 ecbuild_add_library( TARGET   ufo
                      SOURCES  ${ufo_src_files}

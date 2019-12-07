@@ -41,7 +41,8 @@ ObsMarineVertInterpTLAD::~ObsMarineVertInterpTLAD() {
 
 // -----------------------------------------------------------------------------
 
-void ObsMarineVertInterpTLAD::setTrajectory(const GeoVaLs & geovals, const ObsBias & bias) {
+void ObsMarineVertInterpTLAD::setTrajectory(const GeoVaLs & geovals, const ObsBias & bias,
+                                            ObsDiagnostics &) {
   ufo_marinevertinterp_tlad_settraj_f90(keyOper_, geovals.toFortran(), odb_);
   oops::Log::trace() << "ObsMarineVertInterpTLAD: trajectory set" << std::endl;
 }

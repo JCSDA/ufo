@@ -44,6 +44,7 @@ list( APPEND ufo_test_input
   testinput/gmi_crtm.yaml
   testinput/genericprof.yaml
   testinput/geovals.yaml
+  testinput/geos_aod.yaml
   testinput/geovals_spec.yaml
   testinput/gnssrobndropp1d.yaml
   testinput/gnssrobndropp2d.yaml
@@ -64,6 +65,7 @@ list( APPEND ufo_test_input
   testinput/obsdiag_crtm_jacobian.yaml
   testinput/obsfilterdata.yaml
   testinput/processwhere.yaml
+  testinput/parameters.yaml
   testinput/qc_backgroundcheck.yaml
   testinput/qc_boundscheck.yaml
   testinput/qc_differencecheck.yaml
@@ -90,6 +92,7 @@ list( APPEND ufo_test_input
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/testinput)
 CREATE_SYMLINK( ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR} ${ufo_test_input} )
 
+
 # Add files to cmake resources
 ecbuild_add_resources( TARGET ufo_test_scripts
                        SOURCES_PACK
@@ -111,6 +114,7 @@ list( APPEND ufo_test_data
   atmosphere/atms_npp_geoval_2018041500_s.nc4
   atmosphere/cris-fsr_npp_geoval_2018041500_m.nc4
   atmosphere/geovals_rttov.nc4
+  atmosphere/geos_aod_geoval_2018041500_m.nc4
   atmosphere/gmi_gpm_geoval_2018041500_m.nc4
   atmosphere/gnssro_geoval_2018041500_s.nc4
   atmosphere/gnssro_geoval_2018041500_s_2d.nc4
@@ -168,6 +172,7 @@ list (APPEND ioda_obs_test_data
   atmosphere/aod_obs_2018041500_s.nc4
   atmosphere/atms_npp_obs_2018041500_m.nc4
   atmosphere/cris-fsr_npp_obs_2018041500_m.nc4
+  atmosphere/geos_aod_obs_2018041500_m.nc4
   atmosphere/gmi_gpm_obs_2018041500_m.nc4
   atmosphere/gnssro_obs_2018041500_s.nc4
   atmosphere/gnssro_obs_2018041500_m.nc4
@@ -287,11 +292,11 @@ if ( ${CRTM_FOUND} )
                       ENVIRONMENT OOPS_TRAPFPE=1
                       DEPENDS test_ObsOperatorTLAD.x )
 
-    #ecbuild_add_test( TARGET  test_ufo_linopr_crtm_bc_amsua
-    #                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
-    #                  ARGS    "testinput/amsua_crtm_bc.yaml"
-    #                  ENVIRONMENT OOPS_TRAPFPE=1
-    #                  DEPENDS test_ObsOperatorTLAD.x )
+    ecbuild_add_test( TARGET  test_ufo_linopr_crtm_bc_amsua
+                      COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
+                      ARGS    "testinput/amsua_crtm_bc.yaml"
+                      ENVIRONMENT OOPS_TRAPFPE=1
+                      DEPENDS test_ObsOperatorTLAD.x )
 
     #ecbuild_add_test( TARGET  test_ufo_opr_crtm_atms
     #                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
@@ -653,6 +658,22 @@ if( ${GSW_FOUND} )
 
 endif( ${GSW_FOUND} )
 
+if( ${GEOS-AERO_FOUND} )
+
+ecbuild_add_test( TARGET  test_ufo_geos_aero_opr
+                  MPI     4
+                  SOURCES mains/TestObsOperator.cc
+                  ARGS    "testinput/geos_aod.yaml"
+                  LIBS    ufo )
+
+ecbuild_add_test( TARGET  test_ufo_geos_aero_tlad
+                  SOURCES mains/TestObsOperatorTLAD.cc
+                  ARGS    "testinput/geos_aod.yaml"
+                  LIBS    ufo )
+
+endif( ${GEOS-AERO_FOUND} )
+
+
 ecbuild_add_test( TARGET  test_ufo_opr_radarreflectivity
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
                   ARGS    "testinput/reflectivity.yaml"
@@ -726,6 +747,13 @@ if ( ${CRTM_FOUND} )
                       ENVIRONMENT OOPS_TRAPFPE=1
                       LIBS    ufo)
 endif ( ${CRTM_FOUND} )
+
+# Test Parameters
+ecbuild_add_test( TARGET  test_ufo_parameters
+                  SOURCES mains/TestParameters.cc
+                  ARGS    "testinput/parameters.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  LIBS    ufo)
 
 # Test QC for specific instruments
 
@@ -895,3 +923,32 @@ CREATE_SYMLINK_FILENAME( ${rttov_SOURCE_DIR}/rtcoef_rttov12
                          ${CMAKE_CURRENT_BINARY_DIR}/Data
                          ${rttov_test_input} )
 endif( ${RTTOV_FOUND} )
+
+######
+#Files for geos-aero tests
+######
+
+if( ${GEOS-AERO_FOUND} )
+list( APPEND geos-aero_test_data
+Data/optics_BC.v1_3_.nc
+Data/optics_BRC.v1_5_.nc
+Data/optics_DU.v15_3_.nc
+Data/optics_NI.v2_5_.nc
+Data/optics_OC.v1_3_.nc
+Data/optics_SS.v3_3_.nc
+Data/optics_SU.v1_3_.nc
+) 
+
+CREATE_SYMLINK_FILENAME( ${geos-aero_SOURCE_DIR}/test/
+                         ${CMAKE_CURRENT_BINARY_DIR}/Data 
+                         ${geos-aero_test_data} )
+
+list( APPEND geos-aero_test_input
+testinput/geosaod.rc
+testinput/Chem_MieRegistry.rc) 
+
+CREATE_SYMLINK_FILENAME( ${geos-aero_SOURCE_DIR}/test/
+                         ${CMAKE_CURRENT_BINARY_DIR}
+                         ${geos-aero_test_input} )
+
+endif( ${GEOS-AERO_FOUND} )

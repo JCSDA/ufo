@@ -9,6 +9,7 @@
 #define UFO_OBSBIAS_LINEAROBSBIASBASE_H_
 
 #include <map>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -55,19 +56,17 @@ class LinearObsBiasBase : public util::Printable,
   virtual void read(const eckit::Configuration &) = 0;
   virtual void write(const eckit::Configuration &) const = 0;
   virtual double norm() const = 0;
-  virtual std::size_t size() const = 0;
 
 /// Bias model
   virtual void computeObsBiasTL(const GeoVaLs &,
-                                ioda::ObsVector &,
-                                const ioda::ObsSpace &) const = 0;
+                                const ioda::ObsSpace &,
+                                const std::vector<float> &,
+                                ioda::ObsVector &) const = 0;
 
   virtual void computeObsBiasAD(GeoVaLs &,
-                                const ioda::ObsVector &,
-                                const ioda::ObsSpace &) = 0;
-
-/// Bias operator input required from Model
-  virtual const oops::Variables & variables() const = 0;
+                                const ioda::ObsSpace &,
+                                const std::vector<float> &,
+                                const ioda::ObsVector &) = 0;
 
 /// Bias parameters interface
   virtual double & operator[](const unsigned int) = 0;
