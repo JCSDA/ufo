@@ -106,7 +106,7 @@ call ufo_geovals_get_var(geovals, var_prs, model_p)
 
 if (model_geomz%vals(1,1) .gt. model_geomz%vals(model_geomz%nval,1) ) then
    write(err_msg,'(a)') '  ufo_sfcpcorrected:'//new_line('a')//                   &
-                        '  Model vertical height profile is from top to bottom,'//new_line('a')
+                        '  Model vertical height profile is from top to bottom'
    call fckit_log%info(err_msg)
 end if
 
