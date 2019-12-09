@@ -52,12 +52,15 @@ PreQC::PreQC(ioda::ObsSpace & obsdb, const eckit::Configuration & config,
   ioda::ObsDataVector<int> preqc(obsdb, observed, qcin);
   oops::Log::debug() << "PreQC::PreQC preqc: " << preqc;
 
-// Get threshold and reject above threshold
-  const int threshold = config.getInt("threshold", 0);
+// Get min and max values and reject outside range
+  const int qcmin = config.getInt("minvalue", 0);
+  const int qcmax = config.getInt("maxvalue", 0);
 
   for (size_t jv = 0; jv < observed.size(); ++jv) {
     for (size_t jobs = 0; jobs < obsdb.nlocs(); ++jobs) {
-      if (preqc[jv][jobs] == missing || preqc[jv][jobs] > threshold) {
+      if (preqc[jv][jobs] == missing ||
+          preqc[jv][jobs] > qcmax ||
+          preqc[jv][jobs] < qcmin) {
         (*qcflags)[jv][jobs] = QCflags::preQC;
       }
     }
