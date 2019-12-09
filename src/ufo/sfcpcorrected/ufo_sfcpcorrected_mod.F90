@@ -106,7 +106,7 @@ call ufo_geovals_get_var(geovals, var_prs, model_p)
 
 if (model_geomz%vals(1,1) .gt. model_geomz%vals(model_geomz%nval,1) ) then
    write(err_msg,'(a)') '  ufo_sfcpcorrected:'//new_line('a')//                   &
-                        '  Model vertical height profile is from top to bottom,'//new_line('a')
+                        '  Model vertical height profile is from top to bottom'
    call fckit_log%info(err_msg)
 end if
 
@@ -171,7 +171,11 @@ end select
 ! update the obs surface pressure
 do ivar = 1, nvars
    do iobs = 1, nlocs
-      hofx(ivar,iobs) = obs_psfc(iobs) - cor_psfc(iobs) + model_psfc(iobs)
+      if ( cor_psfc(iobs) /= missing) then
+         hofx(ivar,iobs) = obs_psfc(iobs) - cor_psfc(iobs) + model_psfc(iobs)
+      else
+         hofx(ivar,iobs) = model_psfc(iobs)
+      end if
    enddo
 enddo
 
