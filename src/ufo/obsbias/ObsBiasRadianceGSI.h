@@ -62,7 +62,7 @@ class ObsBiasRadianceGSI : public ObsBiasBase,
   void computeObsBiasPredictors(const GeoVaLs &,
                                 const ioda::ObsSpace &,
                                 const ObsDiagnostics &,
-                                std::vector<float> &) const;
+                                std::vector<float> &) const override;
 
 /// Other
   const oops::Variables & requiredGeoVaLs() const override {return *geovars_;}
