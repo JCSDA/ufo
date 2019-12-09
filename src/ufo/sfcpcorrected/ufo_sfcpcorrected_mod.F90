@@ -171,7 +171,11 @@ end select
 ! update the obs surface pressure
 do ivar = 1, nvars
    do iobs = 1, nlocs
-      hofx(ivar,iobs) = obs_psfc(iobs) - cor_psfc(iobs) + model_psfc(iobs)
+      if ( cor_psfc(iobs) /= missing) then
+         hofx(ivar,iobs) = obs_psfc(iobs) - cor_psfc(iobs) + model_psfc(iobs)
+      else
+         hofx(ivar,iobs) = model_psfc(iobs)
+      end if
    enddo
 enddo
 
