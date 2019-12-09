@@ -43,7 +43,7 @@ ObsGeosAodTLAD::~ObsGeosAodTLAD() {
 
 // -----------------------------------------------------------------------------
 
-void ObsGeosAodTLAD::setTrajectory(const GeoVaLs & geovals, const ObsBias & bias) {
+void ObsGeosAodTLAD::setTrajectory(const GeoVaLs & geovals, const ObsBias & bias, ObsDiagnostics &) {
   oops::Log::trace() << "ObsGeosAodTLAD: trajectory entering" << std::endl;
   ufo_geosaod_tlad_settraj_f90(keyOper_, geovals.toFortran(), odb_);
   oops::Log::trace() << "ObsGeosAodTLAD: set trajectory exiting" << std::endl;
