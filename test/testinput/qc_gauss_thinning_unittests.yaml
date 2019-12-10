@@ -295,6 +295,40 @@ Vertical mesh, two bins, two categories:
     distance_norm: maximum
   expected_thinned_obs_indices: [1, 3, 5, 7]
 
+Vertical mesh, two bins, two categories, where clause:
+  window_begin: 2000-01-01T00:00:00Z
+  window_end: 2030-01-01T00:00:00Z
+  ObsSpace:
+    name: Aircraft
+    simulate:
+      variables: [air_temperature]
+    Generate:
+      List:
+        lats: [1, 0, 1, 0, 0, 1, 0, 1]
+        lons: [0, 1, 2, 3, 4, 5, 6, 7]
+        datetimes: [ '2010-01-01T00:04:01Z', '2010-01-01T00:04:02Z', '2010-01-01T00:04:03Z',
+                     '2010-01-01T00:04:04Z', '2010-01-01T00:04:05Z', '2010-01-01T00:04:06Z',
+                     '2010-01-01T00:04:07Z', '2010-01-01T00:04:08Z']
+      obs_errors: [1.0]
+  air_pressures: [4, 4.4, 4, 4.3, 4.2, 4, 4.1, 4]
+  category: [1, 1, 0, 0, 0, 0, 1, 1]
+  GaussianThinning:
+    variables: [air_temperature]
+    horizontal_mesh: -1
+    vertical_mesh: 2
+    vertical_min: 1
+    vertical_max: 5
+    category_variable:
+      name: category@MetaData
+      group: MetaData
+      type: int
+    distance_norm: maximum
+    where:
+    - variable:
+        name: latitude@MetaData
+      maxvalue: 0
+  expected_thinned_obs_indices: [1, 3]
+
 Vertical mesh, two bins, equal priorities:
   window_begin: 2000-01-01T00:00:00Z
   window_end: 2030-01-01T00:00:00Z

@@ -193,13 +193,14 @@ void Gaussian_Thinning::groupObservationsByCategory(
   if (categoryVariable == boost::none)
     return;
 
-  eckit::LocalConfiguration varConf(config_, "category_variable");
-
   ioda::ObsDataVector<int> obsDataVector(obsdb_, categoryVariable.get().variable(),
                                          categoryVariable.get().group());
-  auto &category = obsDataVector[0];
+  const auto &category = obsDataVector[0];
 
-  splitter.groupBy(category);
+  std::vector<int> validObsCategories(validObsIds.size());
+  for (size_t validObsIndex = 0; validObsIndex < validObsIds.size(); ++validObsIndex)
+    validObsCategories[validObsIndex] = category[validObsIds[validObsIndex]];
+  splitter.groupBy(validObsCategories);
 }
 
 // -----------------------------------------------------------------------------
