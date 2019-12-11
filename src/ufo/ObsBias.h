@@ -11,7 +11,6 @@
 #include <memory>
 #include <string>
 #include <vector>
-#include <boost/noncopyable.hpp>
 
 #include "eckit/config/LocalConfiguration.h"
 
@@ -22,6 +21,7 @@
 #include "ufo/obsbias/ObsBiasBase.h"
 
 namespace ioda {
+  class ObsSpace;
   class ObsVector;
 }
 
@@ -35,12 +35,11 @@ namespace ufo {
 // -----------------------------------------------------------------------------
 
 class ObsBias : public util::Printable,
-                private boost::noncopyable,
                 private util::ObjectCounter<ObsBias> {
  public:
   static const std::string classname() {return "ufo::ObsBias";}
 
-  explicit ObsBias(const eckit::Configuration &);
+  ObsBias(const ioda::ObsSpace &, const eckit::Configuration &);
   ObsBias(const ObsBias &, const bool);
   ~ObsBias() {}
 
@@ -57,21 +56,17 @@ class ObsBias : public util::Printable,
   const double & operator[](const unsigned int ii) const {return (*biasbase_)[ii];}
 
 /// Obs bias model
-  void computeObsBias(const GeoVaLs &,
-                      ioda::ObsVector &,
-                      const ioda::ObsSpace &,
-                      const ObsDiagnostics &) const;
+  void computeObsBias(const GeoVaLs &, ioda::ObsVector &, const ObsDiagnostics &) const;
 
 /// Obs Bias Predictors
-  void computeObsBiasPredictors(const GeoVaLs &,
-                                const ioda::ObsSpace &,
-                                const ObsDiagnostics &,
+  void computeObsBiasPredictors(const GeoVaLs &, const ObsDiagnostics &,
                                 std::vector<float> &) const;
 
 /// Other
   const oops::Variables & requiredGeoVaLs() const {return geovars_;}
   const oops::Variables & requiredHdiagnostics() const {return hdiags_;}
   const eckit::Configuration & config() const {return conf_;}
+  const ioda::ObsSpace & obspace() const {return biasbase_->obspace();}
 
 /// Operator
   operator bool() const {return biasbase_.get();}

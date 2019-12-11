@@ -1,24 +1,21 @@
 /*
- * (C) Copyright 2019 UK Met Office
+ * (C) Copyright 2019 UCAR
  *
  * This software is licensed under the terms of the Apache Licence Version 2.0
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#ifndef UFO_TIMEOPER_OBSTIMEOPERTLAD_H_
-#define UFO_TIMEOPER_OBSTIMEOPERTLAD_H_
+#ifndef UFO_GEOS_AERO_OBSGEOSAODTLAD_H_
+#define UFO_GEOS_AERO_OBSGEOSAODTLAD_H_
 
-#include <memory>
 #include <ostream>
 #include <string>
-#include <vector>
 
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
 
+#include "ufo/geos_aero/ObsGeosAodTLAD.interface.h"
 #include "ufo/LinearObsOperatorBase.h"
-#include "ufo/timeoper/ObsTimeOperUtil.h"
-
 
 // Forward declarations
 namespace eckit {
@@ -33,17 +30,17 @@ namespace ioda {
 namespace ufo {
   class GeoVaLs;
   class ObsBias;
-  class ObsDiagnostics;
+  class ObsBiasIncrement;
 
 // -----------------------------------------------------------------------------
-/// TimeOper observation operator
-class ObsTimeOperTLAD : public LinearObsOperatorBase,
-                        private util::ObjectCounter<ObsTimeOperTLAD> {
+/// GeosAod TL/AD observation operator class
+class ObsGeosAodTLAD : public LinearObsOperatorBase,
+                       private util::ObjectCounter<ObsGeosAodTLAD> {
  public:
-  static const std::string classname() {return "ufo::ObsTimeOperTLAD";}
+  static const std::string classname() {return "ufo::ObsGeosAodTLAD";}
 
-  ObsTimeOperTLAD(const ioda::ObsSpace &, const eckit::Configuration &);
-  virtual ~ObsTimeOperTLAD();
+  ObsGeosAodTLAD(const ioda::ObsSpace &, const eckit::Configuration &);
+  virtual ~ObsGeosAodTLAD();
 
   // Obs Operators
   void setTrajectory(const GeoVaLs &, const ObsBias &, ObsDiagnostics &) override;
@@ -51,16 +48,19 @@ class ObsTimeOperTLAD : public LinearObsOperatorBase,
   void simulateObsAD(GeoVaLs &, const ioda::ObsVector &) const override;
 
   // Other
-  const oops::Variables & variables() const override {return actualoperator_->variables();}
+  const oops::Variables & variables() const override {return varin_;}
+
+  int & toFortran() {return keyOper_;}
+  const int & toFortran() const {return keyOper_;}
 
  private:
   void print(std::ostream &) const override;
-  std::unique_ptr<LinearObsOperatorBase> actualoperator_;
+  F90hop keyOper_;
   const ioda::ObsSpace& odb_;
-  std::vector<std::vector<float>> timeWeights_;
+  oops::Variables varin_;
 };
 
 // -----------------------------------------------------------------------------
 
 }  // namespace ufo
-#endif  // UFO_TIMEOPER_OBSTIMEOPERTLAD_H_
+#endif  // UFO_GEOS_AERO_OBSGEOSAODTLAD_H_

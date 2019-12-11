@@ -7,16 +7,18 @@
 
 module ufo_radiancecrtm_tlad_mod
 
+ use crtm_module
+
  use fckit_configuration_module, only: fckit_configuration
  use iso_c_binding
  use kinds
+ use missing_values_mod
+
+ use obsspace_mod
 
  use ufo_geovals_mod, only: ufo_geovals, ufo_geoval, ufo_geovals_get_var
  use ufo_vars_mod
  use ufo_crtm_utils_mod
- use crtm_module
- use obsspace_mod
- use missing_values_mod
 
  implicit none
  private
@@ -34,6 +36,7 @@ module ufo_radiancecrtm_tlad_mod
   type(CRTM_Atmosphere_type), allocatable :: atm_K(:,:)
   type(CRTM_Surface_type), allocatable :: sfc_K(:,:)
   logical :: ltraj
+  logical, allocatable :: Skip_Profiles(:)
  contains
   procedure :: setup  => ufo_radiancecrtm_tlad_setup
   procedure :: delete  => ufo_radiancecrtm_tlad_delete
@@ -116,6 +119,8 @@ class(ufo_radiancecrtm_tlad), intent(inout) :: self
    deallocate(self%sfc_k)
  endif
 
+ if (allocated(self%Skip_Profiles)) deallocate(self%Skip_Profiles)
+
 end subroutine ufo_radiancecrtm_tlad_delete
 
 ! ------------------------------------------------------------------------------
@@ -133,9 +138,14 @@ type(ufo_geovals),        intent(inout) :: hofxdiags    !non-h(x) diagnostics
 ! Local Variables
 character(*), parameter :: PROGRAM_NAME = 'ufo_radiancecrtm_mod.F90'
 character(255) :: message, version
+character(max_string) :: err_msg
 integer        :: err_stat, alloc_stat
 integer        :: n
 type(ufo_geoval), pointer :: temp
+integer :: jvar, ichannel, jchannel, jprofile, jlevel, jspec
+real(c_double) :: missing
+type(fckit_mpi_comm)  :: f_comm
+
 
 ! Define the "non-demoninational" arguments
 type(CRTM_ChannelInfo_type)             :: chinfo(self%conf_traj%n_Sensors)
@@ -145,6 +155,7 @@ type(CRTM_Geometry_type),   allocatable :: geo(:)
 type(CRTM_Atmosphere_type), allocatable :: atm(:)
 type(CRTM_Surface_type),    allocatable :: sfc(:)
 type(CRTM_RTSolution_type), allocatable :: rts(:,:)
+type(CRTM_Options_type),    allocatable :: Options(:)
 
 ! Define the K-MATRIX variables
 type(CRTM_RTSolution_type), allocatable :: rts_K(:,:)
@@ -155,9 +166,6 @@ character(len=MAXVARLEN), dimension(hofxdiags%nvar) :: &
                           ystr_diags, xstr_diags
 character(10), parameter :: jacobianstr = "_jacobian_"
 integer :: str_pos(4), ch_diags(hofxdiags%nvar)
-integer :: jvar, ichannel, jchannel, jprofile, jlevel, jspec
-character(max_string) :: err_msg
-type(fckit_mpi_comm)  :: f_comm
 
  call obsspace_get_comm(obss, f_comm)
 
@@ -215,6 +223,7 @@ type(fckit_mpi_comm)  :: f_comm
              self%atm_K( self%n_Channels, self%n_Profiles ) , &
              self%sfc_K( self%n_Channels, self%n_Profiles ) , &
              rts_K( self%n_Channels, self%n_Profiles )      , &
+             Options( self%n_Profiles )                     , &
              STAT = alloc_stat                                )
    message = 'Error allocating structure arrays (setTraj)'
    call crtm_comm_stat_check(alloc_stat, PROGRAM_NAME, message, f_comm)
@@ -265,7 +274,6 @@ type(fckit_mpi_comm)  :: f_comm
    call Load_Sfc_Data(self%N_PROFILES,self%n_Channels,self%channels,geovals,sfc,chinfo,obss,self%conf_traj)
    call Load_Geom_Data(obss,geo)
 
-
    ! Zero the K-matrix OUTPUT structures
    ! -----------------------------------
    call CRTM_Atmosphere_Zero( self%atm_K )
@@ -277,6 +285,12 @@ type(fckit_mpi_comm)  :: f_comm
    rts_K%Radiance               = ZERO
    rts_K%Brightness_Temperature = ONE
 
+   if (allocated(self%Skip_Profiles)) deallocate(self%Skip_Profiles)
+   allocate(self%Skip_Profiles(self%n_Profiles))
+   call ufo_crtm_skip_profiles(self%n_Profiles,self%n_Channels,self%channels,obss,self%Skip_Profiles)
+   do jprofile = 1, self%n_Profiles
+      Options(jprofile)%Skip_Profile = self%Skip_Profiles(jprofile)
+   end do
 
    ! Call the K-matrix model
    ! -----------------------
@@ -287,7 +301,8 @@ type(fckit_mpi_comm)  :: f_comm
                              chinfo(n:n) , &  ! Input
                              self%atm_K  , &  ! K-MATRIX Output
                              self%sfc_K  , &  ! K-MATRIX Output
-                             rts           )  ! FORWARD  Output
+                             rts         , &  ! FORWARD  Output
+                             Options       )  ! Input
    message = 'Error calling CRTM (setTraj) K-Matrix Model for '//TRIM(self%conf_traj%SENSOR_ID(n))
    call crtm_comm_stat_check(err_stat, PROGRAM_NAME, message, f_comm)
 
@@ -328,6 +343,9 @@ type(fckit_mpi_comm)  :: f_comm
       end if 
    end do
 
+   ! Set missing value
+   missing = missing_value(missing)
+
    ! Put simulated diagnostics into hofxdiags
    ! ----------------------------------------------
    do jvar = 1, hofxdiags%nvar
@@ -363,20 +381,26 @@ type(fckit_mpi_comm)  :: f_comm
             case (var_opt_depth)
                hofxdiags%geovals(jvar)%nval = self%n_Layers
                allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,self%n_Profiles))
+               hofxdiags%geovals(jvar)%vals = missing
                do jprofile = 1, self%n_Profiles
-                do jlevel = 1, hofxdiags%geovals(jvar)%nval
-                  hofxdiags%geovals(jvar)%vals(jlevel,jprofile) = &
-                    rts(jchannel,jprofile) % layer_optical_depth(jlevel)
-                  end do
+                  if (.not.self%Skip_Profiles(jprofile)) then
+                     do jlevel = 1, hofxdiags%geovals(jvar)%nval
+                        hofxdiags%geovals(jvar)%vals(jlevel,jprofile) = &
+                          rts(jchannel,jprofile) % layer_optical_depth(jlevel)
+                     end do
+                  end if
                end do
 
             ! variable: brightness_temperature_CH
             case (var_tb)
                hofxdiags%geovals(jvar)%nval = 1
                allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,self%n_Profiles))
+               hofxdiags%geovals(jvar)%vals = missing
                do jprofile = 1, self%n_Profiles
-                  hofxdiags%geovals(jvar)%vals(1,jprofile) = &
-                     rts(jchannel,jprofile) % Brightness_Temperature 
+                  if (.not.self%Skip_Profiles(jprofile)) then
+                     hofxdiags%geovals(jvar)%vals(1,jprofile) = &
+                        rts(jchannel,jprofile) % Brightness_Temperature 
+                  end if
                end do
 
             case default
@@ -392,9 +416,12 @@ type(fckit_mpi_comm)  :: f_comm
             case (var_sfc_emiss)
                hofxdiags%geovals(jvar)%nval = 1
                allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,self%n_Profiles))
+               hofxdiags%geovals(jvar)%vals = missing
                do jprofile = 1, self%n_Profiles
-                  hofxdiags%geovals(jvar)%vals(1,jprofile) = &
-                     rts_K(jchannel,jprofile) % surface_emissivity
+                  if (.not.self%Skip_Profiles(jprofile)) then
+                     hofxdiags%geovals(jvar)%vals(1,jprofile) = &
+                        rts_K(jchannel,jprofile) % surface_emissivity
+                  end if
                end do
             case default
                write(err_msg,*) 'ufo_radiancecrtm_simobs: //&
@@ -421,7 +448,7 @@ type(fckit_mpi_comm)  :: f_comm
 
    ! Deallocate all arrays
    ! ---------------------
-   deallocate(geo, atm, sfc, rts, rts_K, STAT = alloc_stat)
+   deallocate(geo, atm, sfc, rts, rts_K, Options, STAT = alloc_stat)
    message = 'Error deallocating structure arrays (setTraj)'
    call crtm_comm_stat_check(alloc_stat, PROGRAM_NAME, message, f_comm)
 
@@ -491,13 +518,15 @@ type(ufo_geoval), pointer :: geoval_d
 
  ! Multiply by Jacobian and add to hofx
  do jprofile = 1, self%n_Profiles
-   do jchannel = 1, size(self%channels)
-     do jlevel = 1, geoval_d%nval
-       hofx(jchannel, jprofile) = hofx(jchannel, jprofile) + &
-                    self%atm_K(jchannel,jprofile)%Temperature(jlevel) * &
-                    geoval_d%vals(jlevel,jprofile)
+   if (.not.self%Skip_Profiles(jprofile)) then
+     do jchannel = 1, size(self%channels)
+       do jlevel = 1, geoval_d%nval
+         hofx(jchannel, jprofile) = hofx(jchannel, jprofile) + &
+                      self%atm_K(jchannel,jprofile)%Temperature(jlevel) * &
+                      geoval_d%vals(jlevel,jprofile)
+       enddo
      enddo
-   enddo
+   end if
  enddo
 
  ! Absorbers
@@ -511,13 +540,15 @@ type(ufo_geoval), pointer :: geoval_d
 
    ! Multiply by Jacobian and add to hofx
    do jprofile = 1, self%n_Profiles
-     do jchannel = 1, size(self%channels)
-       do jlevel = 1, geoval_d%nval
-         hofx(jchannel, jprofile) = hofx(jchannel, jprofile) + &
-                      self%atm_K(jchannel,jprofile)%Absorber(jlevel,ispec) * &
-                      geoval_d%vals(jlevel,jprofile)
+     if (.not.self%Skip_Profiles(jprofile)) then
+       do jchannel = 1, size(self%channels)
+         do jlevel = 1, geoval_d%nval
+           hofx(jchannel, jprofile) = hofx(jchannel, jprofile) + &
+                        self%atm_K(jchannel,jprofile)%Absorber(jlevel,ispec) * &
+                        geoval_d%vals(jlevel,jprofile)
+         enddo
        enddo
-     enddo
+     end if
    enddo
  end do
 
@@ -532,13 +563,15 @@ type(ufo_geoval), pointer :: geoval_d
 
    ! Multiply by Jacobian and add to hofx
    do jprofile = 1, self%n_Profiles
-     do jchannel = 1, size(self%channels)
-       do jlevel = 1, geoval_d%nval
-         hofx(jchannel, jprofile) = hofx(jchannel, jprofile) + &
-                      self%atm_K(jchannel,jprofile)%Cloud(ispec)%Water_Content(jlevel) * &
-                      geoval_d%vals(jlevel,jprofile)
+     if (.not.self%Skip_Profiles(jprofile)) then
+       do jchannel = 1, size(self%channels)
+         do jlevel = 1, geoval_d%nval
+           hofx(jchannel, jprofile) = hofx(jchannel, jprofile) + &
+                        self%atm_K(jchannel,jprofile)%Cloud(ispec)%Water_Content(jlevel) * &
+                        geoval_d%vals(jlevel,jprofile)
+         enddo
        enddo
-     enddo
+     end if
    enddo
  end do
 
@@ -597,15 +630,17 @@ real(c_double) :: missing
 
  ! Multiply by Jacobian and add to hofx (adjoint)
  do jprofile = 1, self%n_Profiles
-   do jchannel = 1, size(self%channels)
-     do jlevel = 1, geoval_d%nval
+   if (.not.self%Skip_Profiles(jprofile)) then
+     do jchannel = 1, size(self%channels)
        if (hofx(jchannel, jprofile) /= missing) then
-         geoval_d%vals(jlevel,jprofile) = geoval_d%vals(jlevel,jprofile) + &
-                                      self%atm_K(jchannel,jprofile)%Temperature(jlevel) * &
-                                      hofx(jchannel, jprofile)
+         do jlevel = 1, geoval_d%nval
+             geoval_d%vals(jlevel,jprofile) = geoval_d%vals(jlevel,jprofile) + &
+                                          self%atm_K(jchannel,jprofile)%Temperature(jlevel) * &
+                                          hofx(jchannel, jprofile)
+         enddo
        endif
      enddo
-   enddo
+   end if
  enddo
 
  ! Absorbers
@@ -627,15 +662,17 @@ real(c_double) :: missing
 
    ! Multiply by Jacobian and add to hofx (adjoint)
    do jprofile = 1, self%n_Profiles
-     do jchannel = 1, size(self%channels)
-       do jlevel = 1, geoval_d%nval
+     if (.not.self%Skip_Profiles(jprofile)) then
+       do jchannel = 1, size(self%channels)
          if (hofx(jchannel, jprofile) /= missing) then
-           geoval_d%vals(jlevel,jprofile) = geoval_d%vals(jlevel,jprofile) + &
-                                        self%atm_K(jchannel,jprofile)%Absorber(jlevel,ispec) * &
-                                        hofx(jchannel, jprofile)
+           do jlevel = 1, geoval_d%nval
+               geoval_d%vals(jlevel,jprofile) = geoval_d%vals(jlevel,jprofile) + &
+                                            self%atm_K(jchannel,jprofile)%Absorber(jlevel,ispec) * &
+                                            hofx(jchannel, jprofile)
+           enddo
          endif
        enddo
-     enddo
+     end if
    enddo
  end do
 
@@ -658,15 +695,17 @@ real(c_double) :: missing
 
    ! Multiply by Jacobian and add to hofx (adjoint)
    do jprofile = 1, self%n_Profiles
-     do jchannel = 1, size(self%channels)
-       do jlevel = 1, geoval_d%nval
+     if (.not.self%Skip_Profiles(jprofile)) then
+       do jchannel = 1, size(self%channels)
          if (hofx(jchannel, jprofile) /= missing) then
-           geoval_d%vals(jlevel,jprofile) = geoval_d%vals(jlevel,jprofile) + &
-                                        self%atm_K(jchannel,jprofile)%Cloud(ispec)%Water_Content(jlevel) * &
-                                        hofx(jchannel, jprofile)
+           do jlevel = 1, geoval_d%nval
+               geoval_d%vals(jlevel,jprofile) = geoval_d%vals(jlevel,jprofile) + &
+                                            self%atm_K(jchannel,jprofile)%Cloud(ispec)%Water_Content(jlevel) * &
+                                            hofx(jchannel, jprofile)
+           enddo
          endif
        enddo
-     enddo
+     end if
    enddo
  end do
 

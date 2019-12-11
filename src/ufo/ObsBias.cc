@@ -7,6 +7,7 @@
 
 #include "ufo/ObsBias.h"
 
+#include "ioda/ObsSpace.h"
 #include "oops/util/Logger.h"
 #include "ufo/ObsBiasIncrement.h"
 
@@ -14,8 +15,8 @@ namespace ufo {
 
 // -----------------------------------------------------------------------------
 
-ObsBias::ObsBias(const eckit::Configuration & conf)
-  : biasbase_(ObsBiasFactory::create(conf)), conf_(conf), geovars_(), hdiags_() {
+ObsBias::ObsBias(const ioda::ObsSpace & obs, const eckit::Configuration & conf)
+  : biasbase_(ObsBiasFactory::create(obs, conf)), conf_(conf), geovars_(), hdiags_() {
   if (biasbase_) {
     geovars_ += biasbase_->requiredGeoVaLs();
     hdiags_  += biasbase_->requiredHdiagnostics();
@@ -25,9 +26,11 @@ ObsBias::ObsBias(const eckit::Configuration & conf)
 // -----------------------------------------------------------------------------
 
 ObsBias::ObsBias(const ObsBias & other, const bool copy)
-  : biasbase_(ObsBiasFactory::create(other.config())), conf_(other.config()),
-    geovars_(), hdiags_() {
-  if (copy && biasbase_) *biasbase_ = other;
+  : biasbase_(), conf_(other.config()), geovars_(), hdiags_() {
+  if (other) {
+    biasbase_.reset(ObsBiasFactory::create(other.obspace(), other.config()));
+    if (copy) *biasbase_ = other;
+  }
 }
 
 // -----------------------------------------------------------------------------
@@ -62,20 +65,16 @@ void ObsBias::write(const eckit::Configuration & conf) const {
 
 // -----------------------------------------------------------------------------
 
-void ObsBias::computeObsBias(const GeoVaLs & geovals,
-                             ioda::ObsVector & ybias,
-                             const ioda::ObsSpace & os,
+void ObsBias::computeObsBias(const GeoVaLs & geovals, ioda::ObsVector & ybias,
                              const ObsDiagnostics & ydiags) const {
-  if (biasbase_) biasbase_->computeObsBias(geovals, ybias, os, ydiags);
+  if (biasbase_) biasbase_->computeObsBias(geovals, ybias, ydiags);
 }
 
 // -----------------------------------------------------------------------------
 
-void ObsBias::computeObsBiasPredictors(const GeoVaLs & geovals,
-                                       const ioda::ObsSpace & os,
-                                       const ObsDiagnostics & ydiags,
+void ObsBias::computeObsBiasPredictors(const GeoVaLs & geovals, const ObsDiagnostics & ydiags,
                                        std::vector<float> & preds) const {
-  if (biasbase_) biasbase_->computeObsBiasPredictors(geovals, os, ydiags, preds);
+  if (biasbase_) biasbase_->computeObsBiasPredictors(geovals, ydiags, preds);
 }
 
 // -----------------------------------------------------------------------------

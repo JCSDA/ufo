@@ -52,7 +52,7 @@ void testObsDiagnostics() {
   const GeoVaLs gval(gconf, ospace, hop.variables());
 
   // initialize bias correction
-  const ObsBias ybias(conf);
+  const ObsBias ybias(ospace, conf);
 
   // create obsvector to hold H(x)
   ioda::ObsVector hofx(ospace);
