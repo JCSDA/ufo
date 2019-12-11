@@ -27,8 +27,9 @@ static ObsBiasMaker<ObsBiasRadianceGSI> makerBiasRadianceGSI_("GSI");
 
 // -----------------------------------------------------------------------------
 
-ObsBiasRadianceGSI::ObsBiasRadianceGSI(const eckit::Configuration & conf)
-  : ObsBiasBase(), geovars_(), hdiags_(), tlapmean_(),
+ObsBiasRadianceGSI::ObsBiasRadianceGSI(const ioda::ObsSpace & odb,
+                                       const eckit::Configuration & conf)
+  : ObsBiasBase(), odb_(odb), geovars_(), hdiags_(), tlapmean_(),
     newpc4pred_(false), adp_anglebc_(false), emiss_bc_(false),
     predictors_() {
 // Default predictor names
@@ -164,18 +165,17 @@ void ObsBiasRadianceGSI::write(const eckit::Configuration & conf) const {
 
 void ObsBiasRadianceGSI::computeObsBias(const GeoVaLs & geovals,
                                         ioda::ObsVector & ybias,
-                                        const ioda::ObsSpace & odb,
                                         const ObsDiagnostics & ydiags) const {
   const std::size_t npred = predictors_.size();
   const std::size_t nchanl = channels_.size();
   const std::size_t nlocs = ybias.nlocs();
-  ASSERT(ybias.nlocs() == odb.nlocs());
+  ASSERT(ybias.nlocs() == odb_.nlocs());
 
   // Allocate predictors
   std::vector<float> preds;
 
   // Compute the predictors
-  this->computeObsBiasPredictors(geovals, odb, ydiags, preds);
+  this->computeObsBiasPredictors(geovals, ydiags, preds);
 
   std::size_t index = 0;
   // Loop through each location
@@ -198,11 +198,10 @@ void ObsBiasRadianceGSI::computeObsBias(const GeoVaLs & geovals,
 // -----------------------------------------------------------------------------
 
 void ObsBiasRadianceGSI::computeObsBiasPredictors(const GeoVaLs & geovals,
-                                                  const ioda::ObsSpace & odb,
                                                   const ObsDiagnostics & ydiags,
                                                   std::vector<float> & preds) const {
   const std::size_t npred = predictors_.size();
-  const std::size_t nlocs = odb.nlocs();
+  const std::size_t nlocs = odb_.nlocs();
   const std::size_t nchanl = channels_.size();
 
   // Following variables should be moved to yaml file ?
@@ -241,7 +240,7 @@ void ObsBiasRadianceGSI::computeObsBiasPredictors(const GeoVaLs & geovals,
 
   // Retrieve the sensor_zenith_angle from ObsSpace
   std::vector<float> zasat(nlocs);
-  odb.get_db("MetaData", "sensor_zenith_angle", zasat);
+  odb_.get_db("MetaData", "sensor_zenith_angle", zasat);
 
   /*
    * pred(2,:)  = zenith angle predictor, is not used and set to zero now
@@ -302,7 +301,7 @@ void ObsBiasRadianceGSI::computeObsBiasPredictors(const GeoVaLs & geovals,
   // Retrieve the brightness temperature observation
   std::vector<std::vector<float>> tb;
   for (std::size_t jc = 0; jc < nchanl; ++jc) {
-    odb.get_db("ObsValue", "brightness_temperature_" +
+    odb_.get_db("ObsValue", "brightness_temperature_" +
                std::to_string(channels_[jc]), pred);
     tb.emplace_back(pred);
   }
@@ -337,7 +336,7 @@ void ObsBiasRadianceGSI::computeObsBiasPredictors(const GeoVaLs & geovals,
 
   // Retrieve the scan_position from ObsSpace
   std::vector<float> nadir(nlocs);
-  odb.get_db("MetaData", "scan_position", nadir);
+  odb_.get_db("MetaData", "scan_position", nadir);
 
   /*
    * pred(3,:)  = cloud liquid water predictor for clear-sky microwave radiance assimilation
@@ -445,8 +444,8 @@ void ObsBiasRadianceGSI::computeObsBiasPredictors(const GeoVaLs & geovals,
   // Retrieve the sensor_azimuth_angle and latitude from ObsSpace
   std::vector<float> cenlat(nlocs);
   std::vector<float> node(nlocs);
-  odb.get_db("MetaData", "latitude", cenlat);
-  odb.get_db("MetaData", "sensor_azimuth_angle", node);
+  odb_.get_db("MetaData", "latitude", cenlat);
+  odb_.get_db("MetaData", "sensor_azimuth_angle", node);
 
   /*
    * pred(6,:)  = cosinusoidal predictor for SSMI/S ascending/descending bias
@@ -528,7 +527,7 @@ void ObsBiasRadianceGSI::computeObsBiasPredictors(const GeoVaLs & geovals,
   }
 
   // Retrieve the sensor_view_angle from ObsSpace
-  odb.get_db("MetaData", "sensor_view_angle", pred);
+  odb_.get_db("MetaData", "sensor_view_angle", pred);
 
   /*
    * pred(9,:)  = fourth order polynomial of angle bias correction

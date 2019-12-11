@@ -10,6 +10,7 @@
 
 #include "ufo/ObsBiasIncrement.h"
 
+#include "ioda/ObsSpace.h"
 #include "oops/util/Logger.h"
 #include "ufo/ObsBias.h"
 
@@ -17,22 +18,25 @@ namespace ufo {
 
 // -----------------------------------------------------------------------------
 
-ObsBiasIncrement::ObsBiasIncrement(const eckit::Configuration & conf)
-  : biasbase_(LinearObsBiasFactory::create(conf)), conf_(conf) {
+ObsBiasIncrement::ObsBiasIncrement(const ioda::ObsSpace & obs, const eckit::Configuration & conf)
+  : biasbase_(LinearObsBiasFactory::create(obs, conf)), conf_(conf) {
 }
 
 // -----------------------------------------------------------------------------
 
 ObsBiasIncrement::ObsBiasIncrement(const ObsBiasIncrement & other, const bool copy)
-  : biasbase_(LinearObsBiasFactory::create(other.config())), conf_(other.config()) {
-  if (copy && biasbase_) *biasbase_ = other;
+  : biasbase_(), conf_(other.config()) {
+  if (other) {
+    biasbase_.reset(LinearObsBiasFactory::create(other.obspace(), other.config()));
+    if (copy) *biasbase_ = other;
+  }
 }
 
 // -----------------------------------------------------------------------------
 
 ObsBiasIncrement::ObsBiasIncrement(const ObsBiasIncrement & other,
                                    const eckit::Configuration & conf)
-  : biasbase_(LinearObsBiasFactory::create(conf)), conf_(conf) {
+  : biasbase_(LinearObsBiasFactory::create(other.obspace(), conf)), conf_(conf) {
   /*
    * As we don't know the details now, it needs revisit later
    */
@@ -104,19 +108,17 @@ double ObsBiasIncrement::norm() const {
 // -----------------------------------------------------------------------------
 
 void ObsBiasIncrement::computeObsBiasTL(const GeoVaLs & geovals,
-                                        const ioda::ObsSpace & odb,
                                         const std::vector<float> & preds,
                                         ioda::ObsVector & ybiasinc) const {
-  if (biasbase_) biasbase_->computeObsBiasTL(geovals, odb, preds, ybiasinc);
+  if (biasbase_) biasbase_->computeObsBiasTL(geovals, preds, ybiasinc);
 }
 
 // -----------------------------------------------------------------------------
 
 void ObsBiasIncrement::computeObsBiasAD(GeoVaLs & geovals,
-                                        const ioda::ObsSpace & odb,
                                         const std::vector<float> & preds,
                                         const ioda::ObsVector & ybiasinc) {
-  if (biasbase_) biasbase_->computeObsBiasAD(geovals, odb, preds, ybiasinc);
+  if (biasbase_) biasbase_->computeObsBiasAD(geovals, preds, ybiasinc);
 }
 
 // -----------------------------------------------------------------------------
