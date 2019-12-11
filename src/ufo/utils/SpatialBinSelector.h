@@ -8,7 +8,6 @@
 #ifndef UFO_UTILS_SPATIALBINSELECTOR_H_
 #define UFO_UTILS_SPATIALBINSELECTOR_H_
 
-#include <algorithm>
 #include <cmath>
 #include <vector>
 
@@ -45,28 +44,7 @@ class SpatialBinSelector {
   ///     in the zonal direction is as close as possible to that in the meridional direction.
   ///   - If set to DOWN, the number of bins is chosen so that the bin width in the zonal direction
   ///     is as small as possible, but no smaller than in the meridional direction.
-  SpatialBinSelector(IndexType numLatitudeBins, SpatialBinCountRoundingMode roundingMode)
-    : latitudeBinSelector_(latitudeLowerBound_, latitudeUpperBound_, numLatitudeBins) {
-    longitudeBinSelectors_.reserve(numLatitudeBins);
-    for (IndexType latBin = 0; latBin < numLatitudeBins; ++latBin) {
-      ValueType latBinCenter = latitudeBinCenter(latBin);
-      // NOTE: original code was rounding *down*.
-
-      const int equatorToMeridianLengthRatio = 2;
-      const float tentativeNumLongitudeBins =
-          equatorToMeridianLengthRatio * numLatitudeBins *
-          std::cos(latBinCenter * static_cast<float>(Constants::deg2rad));
-      IndexType numLonBins = static_cast<IndexType>(
-            roundingMode == SpatialBinCountRoundingMode::DOWN ?
-              tentativeNumLongitudeBins :
-              std::round(tentativeNumLongitudeBins));
-      numLonBins = std::max(1, numLonBins);
-
-      longitudeBinSelectors_.emplace_back(
-            static_cast<ValueType>(longitudeLowerBound_),
-            static_cast<ValueType>(longitudeUpperBound_), numLonBins);
-    }
-  }
+  SpatialBinSelector(IndexType numLatitudeBins, SpatialBinCountRoundingMode roundingMode);
 
   /// \brief Partitions a sphere into bins whose centers lie on a regular Gaussian grid.
   ///
@@ -74,12 +52,7 @@ class SpatialBinSelector {
   ///   The number of zonal bands of bins into which the sphere is split.
   /// \param numLongitudeBins
   ///   The number of meridional bands of bins into which the sphere is split.
-  SpatialBinSelector(IndexType numLatitudeBins, IndexType numLongitudeBins)
-    : latitudeBinSelector_(latitudeLowerBound_, latitudeUpperBound_, numLatitudeBins),
-      longitudeBinSelectors_(numLatitudeBins,
-                             EquispacedBinSelector(longitudeLowerBound_, longitudeUpperBound_,
-                                                   numLongitudeBins))
-  {}
+  SpatialBinSelector(IndexType numLatitudeBins, IndexType numLongitudeBins);
 
   /// \brief Return the index of the zonal band of bins containing points with a given latitude
   /// (in degrees, assumed to lie in the interval [-90, 90]).
@@ -105,12 +78,7 @@ class SpatialBinSelector {
   }
 
   /// \brief Return the number of bins into which the sphere is split.
-  IndexType totalNumBins() const {
-    size_t n = 0;
-    for (const EquispacedBinSelector & selector : longitudeBinSelectors_)
-      n += selector.numBins();
-    return n;
-  }
+  IndexType totalNumBins() const;
 
   /// \brief Return the width of each zonal band of bins.
   ValueType latitudeBinWidth() const {

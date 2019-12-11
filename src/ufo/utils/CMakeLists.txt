@@ -14,6 +14,7 @@ set ( utils_files
       RecursiveSplitter.cc
       RecursiveSplitter.h
       SpatialBinSelector.h
+      SpatialBinSelector.cc
       StringUtils.cc
       StringUtils.h
       vert_interp.F90
