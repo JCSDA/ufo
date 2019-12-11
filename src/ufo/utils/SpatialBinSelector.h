@@ -35,7 +35,7 @@ class SpatialBinSelector {
   static constexpr ValueType longitudeUpperBound_ = 360;
 
  public:
-  /// \brief Partitions a sphere into bins whose centers lie on a reduced Gaussian grid.
+  /// \brief Partition a sphere into bins whose centers lie on a reduced Gaussian grid.
   ///
   /// \param numLatitudeBins
   ///   The number of zonal bands of bins into which the sphere is split.
@@ -46,7 +46,7 @@ class SpatialBinSelector {
   ///     is as small as possible, but no smaller than in the meridional direction.
   SpatialBinSelector(IndexType numLatitudeBins, SpatialBinCountRoundingMode roundingMode);
 
-  /// \brief Partitions a sphere into bins whose centers lie on a regular Gaussian grid.
+  /// \brief Partition a sphere into bins whose centers lie on a regular Gaussian grid.
   ///
   /// \param numLatitudeBins
   ///   The number of zonal bands of bins into which the sphere is split.
@@ -100,6 +100,10 @@ class SpatialBinSelector {
   ValueType inverseLongitudeBinWidth(IndexType latitudeBin) const {
     return longitudeBinSelectors_[latitudeBin].inverseBinWidth();
   }
+
+  /// \brief Return \p idealNumBins rounded to a positive integer according to the rounding
+  /// strategy \p roundingMode.
+  static IndexType roundNumBins(float idealNumBins, SpatialBinCountRoundingMode roundingMode);
 
  private:
   EquispacedBinSelector latitudeBinSelector_;

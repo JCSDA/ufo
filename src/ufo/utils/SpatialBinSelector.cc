@@ -21,17 +21,12 @@ SpatialBinSelector::SpatialBinSelector(IndexType numLatitudeBins,
   longitudeBinSelectors_.reserve(numLatitudeBins);
   for (IndexType latBin = 0; latBin < numLatitudeBins; ++latBin) {
     ValueType latBinCenter = latitudeBinCenter(latBin);
-    // NOTE: original code was rounding *down*.
 
     const int equatorToMeridianLengthRatio = 2;
     const float tentativeNumLongitudeBins =
         equatorToMeridianLengthRatio * numLatitudeBins *
         std::cos(latBinCenter * static_cast<float>(Constants::deg2rad));
-    IndexType numLonBins = static_cast<IndexType>(
-          roundingMode == SpatialBinCountRoundingMode::DOWN ?
-            tentativeNumLongitudeBins :
-            std::round(tentativeNumLongitudeBins));
-    numLonBins = std::max(1, numLonBins);
+    const IndexType numLonBins = roundNumBins(tentativeNumLongitudeBins, roundingMode);
 
     longitudeBinSelectors_.emplace_back(
           static_cast<ValueType>(longitudeLowerBound_),
@@ -51,6 +46,14 @@ SpatialBinSelector::IndexType SpatialBinSelector::totalNumBins() const {
   for (const EquispacedBinSelector & selector : longitudeBinSelectors_)
     n += selector.numBins();
   return n;
+}
+
+SpatialBinSelector::IndexType SpatialBinSelector::roundNumBins(
+    float idealNumBins, SpatialBinCountRoundingMode roundingMode) {
+  IndexType numBins = static_cast<IndexType>(
+        roundingMode == SpatialBinCountRoundingMode::DOWN ?
+          idealNumBins : std::round(idealNumBins));
+  return std::max(1, numBins);
 }
 
 }  // namespace ufo

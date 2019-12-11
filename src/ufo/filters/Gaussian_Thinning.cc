@@ -169,10 +169,7 @@ boost::optional<SpatialBinSelector> Gaussian_Thinning::makeSpatialBinSelector(
   const float earthRadius = Constants::mean_earth_rad;  // km
   const float meridianLength = M_PI * earthRadius;
   const float tentativeNumLatBins = meridianLength / options.horizontalMesh;
-  int numLatBins = static_cast<int>(
-        roundingMode == SpatialBinCountRoundingMode::DOWN ?
-          tentativeNumLatBins : std::round(tentativeNumLatBins));
-  numLatBins = std::max(1, numLatBins);
+  const int numLatBins = SpatialBinSelector::roundNumBins(tentativeNumLatBins, roundingMode);
 
   if (options.useReducedHorizontalGrid) {
     // Use fewer bins at high latitudes
