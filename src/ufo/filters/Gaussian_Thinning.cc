@@ -113,7 +113,7 @@ void Gaussian_Thinning::groupObservationsBySpatialLocation(
   if (binSelector == boost::none)
     return;
 
-  oops::Log::debug() << "Gaussian_Thinning: actual horizontal bin size (degrees) = "
+  oops::Log::debug() << "Gaussian_Thinning: zonal band width (degrees) = "
                      << binSelector->latitudeBinWidth() << std::endl;
   oops::Log::debug() << "Gaussian_Thinning: number of horizontal bins = "
                      << binSelector->totalNumBins() << std::endl;
