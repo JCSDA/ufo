@@ -23,6 +23,7 @@
 #include "oops/parallel/mpi/mpi.h"
 #include "oops/runs/Test.h"
 #include "ufo/GeoVaLs.h"
+#include "ufo/Locations.h"
 #include "ufo/ObsBias.h"
 #include "ufo/ObsDiagnostics.h"
 #include "ufo/ObsOperator.h"
