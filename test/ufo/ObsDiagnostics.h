@@ -61,8 +61,8 @@ void testObsDiagnostics() {
   eckit::LocalConfiguration diagconf(conf, "ObsDiag");
   oops::Variables diagvars(diagconf);
   EXPECT(diagvars.size() > 0);
-  Locations * locs = hop.locations(bgn, end);
-  ObsDiagnostics diags(ospace, *locs, diagvars);
+  std::unique_ptr<Locations> locs(hop.locations(bgn, end));
+  ObsDiagnostics diags(ospace, *(locs.get()), diagvars);
 
   // call H(x) to compute diagnostics
   hop.simulateObs(gval, hofx, ybias, diags);
