@@ -76,11 +76,10 @@ void ObsSeaIceFractionTLAD::simulateObsAD(GeoVaLs & gv, const ioda::ObsVector & 
   int nlocs = ovec.size();
   int nlevs = gv.nlevs("sea_ice_category_area_fraction");
   float miss = 0.0;
-  // float miss=util::missingValue(miss);
   std::vector<double> aicen(nlocs);
   for ( std::size_t k = 1; k < nlevs+1; ++k ) {
     for ( std::size_t i = 0; i < nlocs; ++i ) {
-      if (ovec[i] > -99999.9)
+      if (ovec[i] != util::missingValue(ovec[i]))
         { aicen[i] = ovec[i]; }
       else
         { aicen[i] = 0.0; }
