@@ -285,6 +285,26 @@ void GeoVaLs::get(std::vector<float> & vals, const std::string & var, const int 
   oops::Log::trace() << "GeoVaLs::get done" << std::endl;
 }
 // -----------------------------------------------------------------------------
+/*! \brief Return all values for a specific variable and level */
+void GeoVaLs::get(std::vector<double> & vals, const std::string & var, const int lev) const {
+  oops::Log::trace() << "GeoVaLs::get starting" << std::endl;
+  size_t nlocs;
+  ufo_geovals_nlocs_f90(keyGVL_, nlocs);
+  ASSERT(vals.size() == nlocs);
+  ufo_geovals_getdouble_f90(keyGVL_, var.size(), var.c_str(), lev, nlocs, vals[0]);
+  oops::Log::trace() << "GeoVaLs::get done" << std::endl;
+}
+// -----------------------------------------------------------------------------
+/*! \brief Put values for a specific variable and level */
+void GeoVaLs::put(const std::vector<double> & vals, const std::string & var, const int lev) const {
+  oops::Log::trace() << "GeoVaLs::put starting" << std::endl;
+  size_t nlocs;
+  ufo_geovals_nlocs_f90(keyGVL_, nlocs);
+  ASSERT(vals.size() == nlocs);
+  ufo_geovals_put_f90(keyGVL_, var.size(), var.c_str(), lev, nlocs, vals[0]);
+  oops::Log::trace() << "GeoVaLs::get done" << std::endl;
+}
+// -----------------------------------------------------------------------------
 /*! \brief Read GeoVaLs from the file */
 void GeoVaLs::read(const eckit::Configuration & config,
                    const ioda::ObsSpace & obspace) {

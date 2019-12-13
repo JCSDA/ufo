@@ -20,7 +20,7 @@ private
 integer, parameter :: max_string=800
 
 public :: ufo_geovals, ufo_geoval
-public :: ufo_geovals_get_var
+public :: ufo_geovals_get_var, ufo_geovals_put_var
 public :: ufo_geovals_default_constr, ufo_geovals_setup, ufo_geovals_delete, ufo_geovals_print
 public :: ufo_geovals_zero, ufo_geovals_random, ufo_geovals_dotprod, ufo_geovals_scalmult
 public :: ufo_geovals_profmult
@@ -156,6 +156,21 @@ end subroutine ufo_geovals_get_var
 
 ! ------------------------------------------------------------------------------
 
+subroutine ufo_geovals_put_var(self, varname, geoval,k)
+type(ufo_geovals),intent(inout) :: self
+character(len=*),    intent(in) :: varname
+type(ufo_geoval),    intent(in) :: geoval
+integer,             intent(in) :: k
+
+integer :: ivar
+
+ivar = ufo_vars_getindex(self%variables, varname)
+self%geovals(ivar)%vals(k,:)=geoval%vals(k,:)
+
+end subroutine ufo_geovals_put_var
+
+! ------------------------------------------------------------------------------
+
 subroutine ufo_geovals_zero(self)
 implicit none
 type(ufo_geovals), intent(inout) :: self
@@ -253,7 +268,7 @@ end subroutine ufo_geovals_scalmult
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_geovals_profmult(self, nlocs, values) 
+subroutine ufo_geovals_profmult(self, nlocs, values)
 implicit none
 type(ufo_geovals), intent(inout) :: self
 integer(c_int), intent(in) :: nlocs

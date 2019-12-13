@@ -1,8 +1,8 @@
 /*
  * (C) Copyright 2017-2018 UCAR
- * 
+ *
  * This software is licensed under the terms of the Apache Licence Version 2.0
- * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
 #ifndef UFO_MARINE_SEAICEFRACTION_OBSSEAICEFRACTION_H_
@@ -15,7 +15,6 @@
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
 
-#include "ufo/marine/seaicefraction/ObsSeaIceFraction.interface.h"
 #include "ufo/ObsOperatorBase.h"
 
 /// Forward declarations
@@ -53,7 +52,7 @@ class ObsSeaIceFraction : public ObsOperatorBase,
 
  private:
   void print(std::ostream &) const override;
-  F90hop keyOper_;
+  int keyOper_;
   const ioda::ObsSpace& odb_;
   std::unique_ptr<const oops::Variables> varin_;
 };

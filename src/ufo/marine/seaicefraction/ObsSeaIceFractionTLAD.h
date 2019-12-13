@@ -16,7 +16,7 @@
 #include "oops/util/ObjectCounter.h"
 
 #include "ufo/LinearObsOperatorBase.h"
-#include "ufo/marine/seaicefraction/ObsSeaIceFractionTLAD.interface.h"
+#include "ufo/marine/utils/ObsSeaIceLinear.interface.h"
 
 // Forward declarations
 namespace eckit {
