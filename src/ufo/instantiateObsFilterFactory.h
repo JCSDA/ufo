@@ -20,8 +20,8 @@
 #include "ufo/filters/ObsDomainErrCheck.h"
 #include "ufo/filters/PreQC.h"
 #include "ufo/filters/QCmanager.h"
-#include "ufo/filters/Thinning.h"
 #include "ufo/filters/TemporalThinning.h"
+#include "ufo/filters/Thinning.h"
 #include "ufo/gnssro/QC/BackgroundCheckRONBAM.h"
 #include "ufo/gnssro/QC/ROobserror.h"
 
