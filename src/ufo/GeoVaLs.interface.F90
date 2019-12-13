@@ -430,8 +430,7 @@ end subroutine ufo_geovals_get2d_c
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_geovals_get_c(c_key_self, lvar, c_var, lev, nlocs, values)&
-  bind(c, name='ufo_geovals_get_f90')
+subroutine ufo_geovals_get_c(c_key_self, lvar, c_var, lev, nlocs, values) bind(c, name='ufo_geovals_get_f90')
 use ufo_vars_mod, only: MAXVARLEN
 use string_f_c_mod
 implicit none
