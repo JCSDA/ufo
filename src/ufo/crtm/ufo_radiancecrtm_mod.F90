@@ -77,7 +77,7 @@ type(fckit_configuration) :: f_confOpts
  ! 2 * n_Clouds (mass content and effective radius)
  ! if sss is in ObsOptions + sss
  nvars_in = size(varin_default) + self%conf%n_Absorbers + 2 * self%conf%n_Clouds 
- if (TRIM(conf%salinity_option) == "on") then
+ if (TRIM(self%conf%salinity_option) == "on") then
    nvars_in = nvars_in + 1
  end if
 
@@ -96,7 +96,7 @@ type(fckit_configuration) :: f_confOpts
    self%varin(ind) = self%conf%Clouds(jspec,2)
    ind = ind + 1
  end do
- if (TRIM(conf%salinity_option) == "on") then
+ if (TRIM(self%conf%salinity_option) == "on") then
    self%varin(ind) = var_sfc_sss
    ind = ind + 1
  end if
