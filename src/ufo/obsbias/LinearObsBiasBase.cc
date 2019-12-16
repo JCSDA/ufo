@@ -28,9 +28,10 @@ LinearObsBiasFactory::LinearObsBiasFactory(const std::string & name) {
 
 // -----------------------------------------------------------------------------
 
-LinearObsBiasBase * LinearObsBiasFactory::create(const eckit::Configuration & conf) {
+LinearObsBiasBase * LinearObsBiasFactory::create(const ioda::ObsSpace & os,
+                                                 const eckit::Configuration & conf) {
   oops::Log::trace() << "LinearObsBiasBase::create starting" << std::endl;
-  if (conf.has("ObsBias.name")) {
+  if (conf.has("ObsBias")) {
     std::string id = "";
     id = conf.getString("ObsBias.name");
     typename std::map<std::string, LinearObsBiasFactory*>::iterator jloc = getMakers().find(id);
@@ -40,7 +41,7 @@ LinearObsBiasBase * LinearObsBiasFactory::create(const eckit::Configuration & co
                            << " does not exist in ufo::LinearObsBiasFactory." << std::endl;
       return NULL;
     }
-    LinearObsBiasBase * ptr = jloc->second->make(conf);
+    LinearObsBiasBase * ptr = jloc->second->make(os, conf);
     oops::Log::trace() << "LinearObsBiasBase::create done" << std::endl;
     return ptr;
   } else {

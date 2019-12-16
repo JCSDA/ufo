@@ -22,8 +22,9 @@ static LinearObsBiasMaker<ObsBiasRadianceGSITLAD> makerBiasRadianceGSITLAD_("GSI
 
 // -----------------------------------------------------------------------------
 
-ObsBiasRadianceGSITLAD::ObsBiasRadianceGSITLAD(const eckit::Configuration & conf)
-  : predictors_() {
+ObsBiasRadianceGSITLAD::ObsBiasRadianceGSITLAD(const ioda::ObsSpace & odb,
+                                               const eckit::Configuration & conf)
+  : odb_(odb), predictors_() {
 // Default predictor names
   predictors_ = {"BCPred_Constant_",
                  "BCPred_Scan_Angle_",
@@ -77,13 +78,12 @@ void ObsBiasRadianceGSITLAD::write(const eckit::Configuration & conf) const {
 // -----------------------------------------------------------------------------
 
 void ObsBiasRadianceGSITLAD::computeObsBiasTL(const GeoVaLs & geovals,
-                                              const ioda::ObsSpace & odb,
                                               const std::vector<float> & preds,
                                               ioda::ObsVector & ybiasinc) const {
   std::size_t npred = predictors_.size();
   std::size_t nchanl = channels_.size();
   std::size_t nlocs = ybiasinc.nlocs();
-  ASSERT(ybiasinc.nlocs() == odb.nlocs());
+  ASSERT(ybiasinc.nlocs() == odb_.nlocs());
 
   std::size_t index = 0;
   // Loop through each locations
@@ -106,13 +106,12 @@ void ObsBiasRadianceGSITLAD::computeObsBiasTL(const GeoVaLs & geovals,
 // -----------------------------------------------------------------------------
 
 void ObsBiasRadianceGSITLAD::computeObsBiasAD(GeoVaLs & geovals,
-                                              const ioda::ObsSpace & odb,
                                               const std::vector<float> & preds,
                                               const ioda::ObsVector & ybiasinc) {
   std::size_t npred = predictors_.size();
   std::size_t nchanl = channels_.size();
   std::size_t nlocs = ybiasinc.nlocs();
-  ASSERT(ybiasinc.nlocs() == odb.nlocs());
+  ASSERT(ybiasinc.nlocs() == odb_.nlocs());
 
   std::size_t index = 0;
   // Loop through each locations
@@ -133,8 +132,8 @@ void ObsBiasRadianceGSITLAD::computeObsBiasAD(GeoVaLs & geovals,
     }
   }
   // Sum across the processros
-  if (odb.isDistributed())
-    odb.comm().allReduceInPlace(biascoeffsinc_.begin(), biascoeffsinc_.end(), eckit::mpi::sum());
+  if (odb_.isDistributed())
+    odb_.comm().allReduceInPlace(biascoeffsinc_.begin(), biascoeffsinc_.end(), eckit::mpi::sum());
   oops::Log::trace() << "ObsBiasRadianceGSITLAD::computeObsBiasAD done." << std::endl;
 }
 

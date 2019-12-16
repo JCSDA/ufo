@@ -11,6 +11,7 @@
 
 #include "ufo/ObsBiasCovariance.h"
 
+#include "ioda/ObsSpace.h"
 #include "oops/util/Logger.h"
 #include "oops/util/Random.h"
 
@@ -21,9 +22,9 @@ namespace ufo {
 
 // -----------------------------------------------------------------------------
 
-ObsBiasCovariance::ObsBiasCovariance(const eckit::Configuration & conf)
+ObsBiasCovariance::ObsBiasCovariance(const ioda::ObsSpace & obs, const eckit::Configuration & conf)
   : conf_(conf), variance_() {
-  std::unique_ptr<ObsBiasBase> biasbase(ObsBiasFactory::create(conf));
+  std::unique_ptr<ObsBiasBase> biasbase(ObsBiasFactory::create(obs, conf));
   if (biasbase) {
     for (std::size_t ii = 0; ii < biasbase->size(); ++ii)
       variance_.push_back(1.0);
@@ -41,7 +42,7 @@ void ObsBiasCovariance::linearize(const ObsBias &) {
 void ObsBiasCovariance::multiply(const ObsBiasIncrement & bx1, ObsBiasIncrement & bx2) const {
   bx2 = bx1;
   for (std::size_t ii = 0; ii < variance_.size(); ++ii)
-      bx2[ii] *= variance_[ii];
+    bx2[ii] *= variance_[ii];
 }
 
 // -----------------------------------------------------------------------------
@@ -50,7 +51,7 @@ void ObsBiasCovariance::inverseMultiply(const ObsBiasIncrement & bx1,
                                         ObsBiasIncrement & bx2) const {
   bx2 = bx1;
   for (std::size_t ii = 0; ii < variance_.size(); ++ii)
-      bx2[ii] /= variance_[ii];
+    bx2[ii] /= variance_[ii];
 }
 
 // -----------------------------------------------------------------------------

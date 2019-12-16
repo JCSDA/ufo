@@ -5,15 +5,15 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
  */
 
+#include "../ufo/ObsFilters.h"
 #include "oops/runs/Run.h"
-#include "test/base/ObsFilters.h"
 #include "ufo/instantiateObsFilterFactory.h"
 #include "ufo/UfoTrait.h"
 
 int main(int argc,  char ** argv) {
   oops::Run run(argc, argv);
   ufo::instantiateObsFilterFactory<ufo::UfoTrait>();
-  test::ObsFilters<ufo::UfoTrait> tests;
+  ufo::test::ObsFilters tests;
   run.execute(tests);
   return 0;
 }

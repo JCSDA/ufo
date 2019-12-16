@@ -47,23 +47,17 @@ class ObsBiasBase : public util::Printable,
   virtual void read(const eckit::Configuration &) = 0;
   virtual void write(const eckit::Configuration &) const = 0;
   virtual double norm() const = 0;
-  virtual std::size_t size() const = 0;
 
 /// Add increments
   virtual ObsBiasBase & operator+=(const ObsBiasIncrement &) = 0;
   virtual ObsBiasBase & operator=(const ObsBias &) = 0;
 
 /// Bias model
-  virtual void computeObsBias(const GeoVaLs &,
-                              ioda::ObsVector &,
-                              const ioda::ObsSpace &,
-                              const ObsDiagnostics &) const = 0;
+  virtual void computeObsBias(const GeoVaLs &, ioda::ObsVector &, const ObsDiagnostics &) const = 0;
 
 /// predictors model
-  virtual void computeObsBiasPredictors(const GeoVaLs &,
-                                const ioda::ObsSpace &,
-                                const ObsDiagnostics &,
-                                std::vector<float> &) const = 0;
+  virtual void computeObsBiasPredictors(const GeoVaLs &, const ObsDiagnostics &,
+                                        std::vector<float> &) const = 0;
 
 /// Bias operator input required from Model
   virtual const oops::Variables & requiredGeoVaLs() const = 0;
@@ -72,8 +66,10 @@ class ObsBiasBase : public util::Printable,
   virtual const oops::Variables & requiredHdiagnostics() const = 0;
 
 /// Bias parameters interface
+  virtual std::size_t size() const = 0;
   virtual double & operator[](const unsigned int) = 0;
 
+  virtual const ioda::ObsSpace & obspace() const = 0;
  private:
   virtual void print(std::ostream &) const = 0;
 };
@@ -83,14 +79,14 @@ class ObsBiasBase : public util::Printable,
 /// Observation bias operator Factory
 class ObsBiasFactory {
  public:
-  static ObsBiasBase * create(const eckit::Configuration &);
+  static ObsBiasBase * create(const ioda::ObsSpace &, const eckit::Configuration &);
   virtual ~ObsBiasFactory() { getMakers().clear(); }
 
  protected:
   explicit ObsBiasFactory(const std::string &);
 
  private:
-  virtual ObsBiasBase * make(const eckit::Configuration &) = 0;
+  virtual ObsBiasBase * make(const ioda::ObsSpace &, const eckit::Configuration &) = 0;
   static std::map < std::string, ObsBiasFactory * > & getMakers() {
     static std::map < std::string, ObsBiasFactory * > makers_;
     return makers_;
@@ -101,8 +97,8 @@ class ObsBiasFactory {
 
 template<class T>
 class ObsBiasMaker : public ObsBiasFactory {
-  virtual ObsBiasBase * make(const eckit::Configuration & conf)
-    { return new T(conf); }
+  virtual ObsBiasBase * make(const ioda::ObsSpace & obs, const eckit::Configuration & conf)
+    { return new T(obs, conf); }
  public:
   explicit ObsBiasMaker(const std::string & name) : ObsBiasFactory(name) {}
 };
