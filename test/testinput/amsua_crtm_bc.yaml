@@ -38,17 +38,17 @@ Observations:
      adp_anglebc: true
      emiss_bc: true
      abias_in: Data/satbias_crtm_in
-     predictors: [BCPred_Constant_,
-                  BCPred_Scan_Angle_,
-                  BCPred_Cloud_Liquid_Water_,
-                  BCPred_Lapse_Rate_Squared_,
-                  BCPred_Lapse_Rate_,
-                  BCPred_Cosine_Latitude_times_Node_,
-                  BCPred_Sine_Latitude_,
-                  BCPred_Emissivity_,
-                  BCPres_Fourth_Order_View_Angle_,
-                  BCPres_Third_Order_View_Angle_,
-                  BCPres_Second_Order_View_Angle_,
-                  BCPres_First_Order_View_Angle_]
+     predictors: [constant,
+                  scan_angle,
+                  cloud_liquid_water,
+                  lapse_rate_squared,
+                  lapse_rate,
+                  cosine_of_latitude_times_orbit_node,
+                  sine_of_latitude,
+                  emissivity,
+                  scan_angle_4th_order,
+                  scan_angle_3rd_order,
+                  scan_angle_2nd_order,
+                  scan_angle_1st_order]
    rmsequiv: 240.13289708962066
    tolerance: 1.e-5

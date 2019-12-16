@@ -30,21 +30,20 @@ static ObsBiasMaker<ObsBiasRadianceGSI> makerBiasRadianceGSI_("GSI");
 ObsBiasRadianceGSI::ObsBiasRadianceGSI(ioda::ObsSpace & odb,
                                        const eckit::Configuration & conf)
   : ObsBiasBase(), odb_(odb), geovars_(), hdiags_(), tlapmean_(),
-    newpc4pred_(false), adp_anglebc_(false), emiss_bc_(false),
-    predictors_() {
-// Default predictor names
-  predictors_ = {"BCPred_Constant_",
-                 "BCPred_Scan_Angle_",
-                 "BCPred_Cloud_Liquid_Water_",
-                 "BCPred_Lapse_Rate_Squared_",
-                 "BCPred_Lapse_Rate_",
-                 "BCPred_Cosine_Latitude_times_Node_",
-                 "BCPred_Sine_Latitude_",
-                 "BCPred_Emissivity_",
-                 "BCPres_Fourth_Order_View_Angle_",
-                 "BCPres_Third_Order_View_Angle_",
-                 "BCPres_Second_Order_View_Angle_",
-                 "BCPres_First_Order_View_Angle_"
+    newpc4pred_(false), adp_anglebc_(false), emiss_bc_(false), predictors_() {
+// Default predictor names from GSI
+  predictors_ = {"constant",
+                 "scan_angle",
+                 "cloud_liquid_water",
+                 "lapse_rate_squared",
+                 "lapse_rate",
+                 "cosine_of_latitude_times_orbit_node",
+                 "sine_of_latitude",
+                 "emissivity",
+                 "scan_angle_4th_order",
+                 "scan_angle_3rd_order",
+                 "scan_angle_2nd_order",
+                 "scan_angle_1st_order"
                 };
 // Parse predictors from the conf
   if (conf.has("ObsBias.predictors")) {
@@ -77,10 +76,8 @@ ObsBiasRadianceGSI::ObsBiasRadianceGSI(ioda::ObsSpace & odb,
   const eckit::LocalConfiguration obsoprconf(conf, "ObsOperator");
   sensor_id_ = obsoprconf.getString("ObsOptions.Sensor_ID");
 
-// Parse channels from the conf
-  const eckit::LocalConfiguration simconf(conf, "ObsSpace.simulate");
-  const oops::Variables observed(simconf);
-  channels_ = observed.channels();
+// Retrive the channels
+  channels_ = odb_.obsvariables().channels();
 
 // Replace "_CH" in hdiags_ with digitial Channel ID
   std::vector<std::string> vvtmp;
@@ -213,8 +210,8 @@ void ObsBiasRadianceGSI::computeObsBiasPredictors(
   if (!preds) {
     const oops::Variables pred_vars(predictors_, channels_);
     preds.reset(new ioda::ObsDataVector<float>(odb_, pred_vars, "", false));
-    ASSERT(preds->nvars() == npred*nchanl);
   }
+  ASSERT(preds->nvars() == npred*nchanl);
 
   // Following variables should be moved to yaml file ?
   const float ssmis_precond = 0.01;  //  default preconditioner for ssmis bias terms
