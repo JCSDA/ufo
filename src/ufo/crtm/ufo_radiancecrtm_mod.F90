@@ -76,15 +76,12 @@ type(fckit_configuration) :: f_confOpts
  ! 1 * n_Absorbers
  ! 2 * n_Clouds (mass content and effective radius)
  ! if sss is in ObsOptions + sss
- nvars_in = size(varin_default) + self%conf%n_Absorbers + 2 * self%conf%n_Clouds +self%conf%n_Salinity
- allocate(self%varin(nvars_in))
+ nvars_in = size(varin_default) + self%conf%n_Absorbers + 2 * self%conf%n_Clouds 
+ if (TRIM(conf%salinity_option) == "on") then
+   nvars_in = nvars_in + 1
+ end if
 
- if (f_confOpts%has("Salinity")) then
-    call f_confOpts%get_or_die("Salinity",str)
-    if (str =="on") then 
-       self%varin(nvars_in) = var_sfc_sss
-    endif 
- endif
+ allocate(self%varin(nvars_in))
 
  self%varin(1:size(varin_default)) = varin_default
  ind = size(varin_default) + 1
@@ -99,6 +96,10 @@ type(fckit_configuration) :: f_confOpts
    self%varin(ind) = self%conf%Clouds(jspec,2)
    ind = ind + 1
  end do
+ if (TRIM(conf%salinity_option) == "on") then
+   self%varin(ind) = var_sfc_sss
+   ind = ind + 1
+ end if
 
  ! save channels
  allocate(self%channels(size(channels)))

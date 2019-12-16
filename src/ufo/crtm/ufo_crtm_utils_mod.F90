@@ -52,7 +52,6 @@ type crtm_conf
  integer :: n_Absorbers
  integer :: n_Clouds
  integer :: n_Aerosols
- integer :: n_Salinity
  character(len=MAXVARLEN), allocatable :: Absorbers(:)
  integer, allocatable :: Absorber_Id(:)
  integer, allocatable :: Absorber_Units(:)
@@ -244,15 +243,11 @@ integer(c_size_t),parameter :: csize = MAXVARLEN
 
  ! Sea_Surface_Salinity
  !---------
- IF (f_confOpts%has("Salinity")) THEN
-    call f_confOpts%get_or_die("Salinity",str)
+ IF (f_confOpts%get("Salinity",str)) THEN
     conf%salinity_option = str
-    IF (TRIM(conf%salinity_option) == "on") THEN
-       conf%n_Salinity=1
-    ELSE
-       conf%n_Salinity=0
-    ENDIF
- ENDIF
+ ELSE
+    conf%salinity_option = 'off'
+ END IF
 
  !Allocate SENSOR_ID
  allocate(conf%SENSOR_ID(conf%n_Sensors))
