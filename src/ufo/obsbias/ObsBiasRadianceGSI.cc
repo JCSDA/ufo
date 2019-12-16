@@ -185,17 +185,15 @@ void ObsBiasRadianceGSI::computeObsBias(const GeoVaLs & geovals,
 
   pred_terms->save("ObsBiasTerms");
 
-  std::size_t index = 0;
+  ybias.zero();
   // Loop through each location
   for (std::size_t jl = 0; jl < nlocs; ++jl) {
     // Loop through each channel
     for (std::size_t jc = 0; jc < nchanl; ++jc) {
-      ybias[index] = 0.0;
       // Linear combination
       for (std::size_t n = 0; n < npred; ++n) {
-        ybias[index] += (*pred_terms)[n*nchanl+jc][jl];
+        ybias[jl*nchanl+jc] += (*pred_terms)[n*nchanl+jc][jl];
       }
-      ++index;
     }
   }
 
