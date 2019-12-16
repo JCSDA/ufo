@@ -78,7 +78,7 @@ void ObsBiasRadianceGSITLAD::write(const eckit::Configuration & conf) const {
 // -----------------------------------------------------------------------------
 
 void ObsBiasRadianceGSITLAD::computeObsBiasTL(const GeoVaLs & geovals,
-                                              const std::vector<float> & preds,
+                                              const ioda::ObsDataVector<float> & preds,
                                               ioda::ObsVector & ybiasinc) const {
   std::size_t npred = predictors_.size();
   std::size_t nchanl = channels_.size();
@@ -94,7 +94,7 @@ void ObsBiasRadianceGSITLAD::computeObsBiasTL(const GeoVaLs & geovals,
       ybiasinc[index] = 0.0;
       // Linear combination
       for (std::size_t n = 0; n < npred; ++n) {
-        ybiasinc[index] += biascoeffsinc_[idx_coeffs] * preds.at(n*nchanl*nlocs+jc*nlocs+jl);
+        ybiasinc[index] += biascoeffsinc_[idx_coeffs] * preds[n*nchanl+jc][jl];
         ++idx_coeffs;
       }
       ++index;
@@ -106,7 +106,7 @@ void ObsBiasRadianceGSITLAD::computeObsBiasTL(const GeoVaLs & geovals,
 // -----------------------------------------------------------------------------
 
 void ObsBiasRadianceGSITLAD::computeObsBiasAD(GeoVaLs & geovals,
-                                              const std::vector<float> & preds,
+                                              const ioda::ObsDataVector<float> & preds,
                                               const ioda::ObsVector & ybiasinc) {
   std::size_t npred = predictors_.size();
   std::size_t nchanl = channels_.size();
@@ -122,7 +122,7 @@ void ObsBiasRadianceGSITLAD::computeObsBiasAD(GeoVaLs & geovals,
       // Linear combination
       if (ybiasinc[index] != util::missingValue(ybiasinc[index])) {
         for (std::size_t n = 0; n < npred; ++n) {
-          biascoeffsinc_[idx_coeffs] += ybiasinc[index] * preds.at(n*nchanl*nlocs+jc*nlocs+jl);
+          biascoeffsinc_[idx_coeffs] += ybiasinc[index] * preds[n*nchanl+jc][jl];
           ++idx_coeffs;
         }
       } else {

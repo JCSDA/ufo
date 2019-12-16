@@ -12,6 +12,8 @@
 #include <string>
 #include <vector>
 
+#include "ioda/ObsDataVector.h"
+
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
 
@@ -38,7 +40,7 @@ class ObsBiasRadianceGSI : public ObsBiasBase,
   static const std::string classname() {return "ufo::ObsBiasRadianceGSI";}
 
 /// Constructor
-  ObsBiasRadianceGSI(const ioda::ObsSpace &, const eckit::Configuration &);
+  ObsBiasRadianceGSI(ioda::ObsSpace &, const eckit::Configuration &);
 
 /// Destructor
   virtual ~ObsBiasRadianceGSI() {}
@@ -57,7 +59,7 @@ class ObsBiasRadianceGSI : public ObsBiasBase,
 
 /// Obs bias predictor
   void computeObsBiasPredictors(const GeoVaLs &, const ObsDiagnostics &,
-                                std::vector<float> &) const override;
+                                std::unique_ptr<ioda::ObsDataVector<float>> &) const override;
 
 /// Other
   const oops::Variables & requiredGeoVaLs() const override {return *geovars_;}
@@ -71,7 +73,7 @@ class ObsBiasRadianceGSI : public ObsBiasBase,
  private:
   void print(std::ostream &) const override;
 
-  const ioda::ObsSpace & odb_;
+  ioda::ObsSpace & odb_;
   std::unique_ptr<const oops::Variables> geovars_;
   std::unique_ptr<const oops::Variables> hdiags_;
   std::string sensor_id_;  // sensor_id

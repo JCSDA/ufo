@@ -7,7 +7,6 @@
 
 #include "ufo/ObsBias.h"
 
-#include "ioda/ObsSpace.h"
 #include "oops/util/Logger.h"
 #include "ufo/ObsBiasIncrement.h"
 
@@ -15,21 +14,11 @@ namespace ufo {
 
 // -----------------------------------------------------------------------------
 
-ObsBias::ObsBias(const ioda::ObsSpace & obs, const eckit::Configuration & conf)
+ObsBias::ObsBias(ioda::ObsSpace & obs, const eckit::Configuration & conf)
   : biasbase_(ObsBiasFactory::create(obs, conf)), conf_(conf), geovars_(), hdiags_() {
   if (biasbase_) {
     geovars_ += biasbase_->requiredGeoVaLs();
     hdiags_  += biasbase_->requiredHdiagnostics();
-  }
-}
-
-// -----------------------------------------------------------------------------
-
-ObsBias::ObsBias(const ObsBias & other, const bool copy)
-  : biasbase_(), conf_(other.config()), geovars_(), hdiags_() {
-  if (other) {
-    biasbase_.reset(ObsBiasFactory::create(other.obspace(), other.config()));
-    if (copy) *biasbase_ = other;
   }
 }
 
@@ -73,7 +62,7 @@ void ObsBias::computeObsBias(const GeoVaLs & geovals, ioda::ObsVector & ybias,
 // -----------------------------------------------------------------------------
 
 void ObsBias::computeObsBiasPredictors(const GeoVaLs & geovals, const ObsDiagnostics & ydiags,
-                                       std::vector<float> & preds) const {
+                                       std::unique_ptr<ioda::ObsDataVector<float>> & preds) const {
   if (biasbase_) biasbase_->computeObsBiasPredictors(geovals, ydiags, preds);
 }
 

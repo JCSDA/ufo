@@ -17,6 +17,8 @@
 
 #include "eckit/config/Configuration.h"
 
+#include "ioda/ObsDataVector.h"
+
 #include "oops/util/Printable.h"
 
 #include "ufo/ObsBiasIncrement.h"
@@ -57,7 +59,7 @@ class ObsBiasBase : public util::Printable,
 
 /// predictors model
   virtual void computeObsBiasPredictors(const GeoVaLs &, const ObsDiagnostics &,
-                                        std::vector<float> &) const = 0;
+                                        std::unique_ptr<ioda::ObsDataVector<float>> &) const = 0;
 
 /// Bias operator input required from Model
   virtual const oops::Variables & requiredGeoVaLs() const = 0;
@@ -79,14 +81,14 @@ class ObsBiasBase : public util::Printable,
 /// Observation bias operator Factory
 class ObsBiasFactory {
  public:
-  static ObsBiasBase * create(const ioda::ObsSpace &, const eckit::Configuration &);
+  static ObsBiasBase * create(ioda::ObsSpace &, const eckit::Configuration &);
   virtual ~ObsBiasFactory() { getMakers().clear(); }
 
  protected:
   explicit ObsBiasFactory(const std::string &);
 
  private:
-  virtual ObsBiasBase * make(const ioda::ObsSpace &, const eckit::Configuration &) = 0;
+  virtual ObsBiasBase * make(ioda::ObsSpace &, const eckit::Configuration &) = 0;
   static std::map < std::string, ObsBiasFactory * > & getMakers() {
     static std::map < std::string, ObsBiasFactory * > makers_;
     return makers_;
@@ -97,7 +99,7 @@ class ObsBiasFactory {
 
 template<class T>
 class ObsBiasMaker : public ObsBiasFactory {
-  virtual ObsBiasBase * make(const ioda::ObsSpace & obs, const eckit::Configuration & conf)
+  virtual ObsBiasBase * make(ioda::ObsSpace & obs, const eckit::Configuration & conf)
     { return new T(obs, conf); }
  public:
   explicit ObsBiasMaker(const std::string & name) : ObsBiasFactory(name) {}

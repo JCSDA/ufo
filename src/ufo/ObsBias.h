@@ -14,6 +14,8 @@
 
 #include "eckit/config/LocalConfiguration.h"
 
+#include "ioda/ObsDataVector.h"
+
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
 #include "oops/util/Printable.h"
@@ -39,8 +41,7 @@ class ObsBias : public util::Printable,
  public:
   static const std::string classname() {return "ufo::ObsBias";}
 
-  ObsBias(const ioda::ObsSpace &, const eckit::Configuration &);
-  ObsBias(const ObsBias &, const bool);
+  ObsBias(ioda::ObsSpace &, const eckit::Configuration &);
   ~ObsBias() {}
 
   ObsBias & operator+=(const ObsBiasIncrement &);
@@ -60,7 +61,7 @@ class ObsBias : public util::Printable,
 
 /// Obs Bias Predictors
   void computeObsBiasPredictors(const GeoVaLs &, const ObsDiagnostics &,
-                                std::vector<float> &) const;
+                                std::unique_ptr<ioda::ObsDataVector<float>> &) const;
 
 /// Other
   const oops::Variables & requiredGeoVaLs() const {return geovars_;}
