@@ -15,8 +15,6 @@
 
 #include <boost/make_shared.hpp>
 
-#define ECKIT_TESTING_SELF_REGISTER_CASES 0
-
 #include "eckit/config/LocalConfiguration.h"
 #include "eckit/testing/Test.h"
 #include "ioda/ObsSpace.h"
@@ -66,23 +64,125 @@ void testTemporalThinning(const eckit::LocalConfiguration &conf) {
   EXPECT_EQUAL(thinnedObsIndices, expectedThinnedObsIndices);
 }
 
+CASE("ufo/TemporalThinning/Min_spacing below observation spacing") {
+  testTemporalThinning(eckit::LocalConfiguration(::test::TestEnvironment::config(),
+                                                 "Min_spacing below observation spacing"));
+}
+
+CASE("ufo/TemporalThinning/Min spacing equal to observation spacing") {
+  testTemporalThinning(eckit::LocalConfiguration(::test::TestEnvironment::config(),
+                                                 "Min spacing equal to observation spacing"));
+}
+
+CASE("ufo/TemporalThinning/Min spacing above observation spacing") {
+  testTemporalThinning(eckit::LocalConfiguration(::test::TestEnvironment::config(),
+                                                 "Min spacing above observation spacing"));
+}
+
+CASE("ufo/TemporalThinning/Categories") {
+  testTemporalThinning(eckit::LocalConfiguration(::test::TestEnvironment::config(),
+                                                 "Categories"));
+}
+
+CASE("ufo/TemporalThinning/Categories, observations sorted in descending order") {
+  testTemporalThinning(eckit::LocalConfiguration(::test::TestEnvironment::config(),
+                                                 "Categories, observations sorted "
+                                                 "in descending order"));
+}
+
+CASE("ufo/TemporalThinning/Categories, where clause") {
+  testTemporalThinning(eckit::LocalConfiguration(::test::TestEnvironment::config(),
+                                                 "Categories, where clause"));
+}
+
+CASE("ufo/TemporalThinning/Tolerance and priorities, "
+     "first observation in each group to be retained") {
+  testTemporalThinning(eckit::LocalConfiguration(::test::TestEnvironment::config(),
+                                                 "Tolerance and priorities, first observation in "
+                                                 "each group to be retained"));
+}
+
+CASE("ufo/TemporalThinning/Tolerance and priorities, "
+     "second observation in each group to be retained") {
+  testTemporalThinning(eckit::LocalConfiguration(::test::TestEnvironment::config(),
+                                                 "Tolerance and priorities, second observation in "
+                                                 "each group to be retained"));
+}
+
+CASE("ufo/TemporalThinning/Tolerance and priorities, "
+     "third observation in each group to be retained") {
+  testTemporalThinning(eckit::LocalConfiguration(::test::TestEnvironment::config(),
+                                                 "Tolerance and priorities, third observation in "
+                                                 "each group to be retained"));
+}
+
+CASE("ufo/TemporalThinning/Tolerance but no priorities") {
+  testTemporalThinning(eckit::LocalConfiguration(::test::TestEnvironment::config(),
+                                                 "Tolerance but no priorities"));
+}
+
+CASE("ufo/TemporalThinning/Seed time inside observation time range "
+     "(should pick preceding observation)") {
+  testTemporalThinning(eckit::LocalConfiguration(::test::TestEnvironment::config(),
+                                                 "Seed time inside observation time range (should "
+                                                 "pick preceding observation)"));
+}
+
+CASE("ufo/TemporalThinning/Seed time inside observation time range "
+     "(should pick following observation)") {
+  testTemporalThinning(eckit::LocalConfiguration(::test::TestEnvironment::config(),
+                                                 "Seed time inside observation time range "
+                                                 "(should pick following observation)"));
+}
+
+CASE("ufo/TemporalThinning/Seed time midway between two observations "
+     "(should pick following observation)") {
+  testTemporalThinning(eckit::LocalConfiguration(::test::TestEnvironment::config(),
+                                                 "Seed time midway between two observations "
+                                                 "(should pick following observation)"));
+}
+
+CASE("ufo/TemporalThinning/Seed time at earliest observation") {
+  testTemporalThinning(eckit::LocalConfiguration(::test::TestEnvironment::config(),
+                                                 "Seed time at earliest observation"));
+}
+
+CASE("ufo/TemporalThinning/Seed time before earliest observation") {
+  testTemporalThinning(eckit::LocalConfiguration(::test::TestEnvironment::config(),
+                                                 "Seed time before earliest observation"));
+}
+
+CASE("ufo/TemporalThinning/Seed time at latest observation") {
+  testTemporalThinning(eckit::LocalConfiguration(::test::TestEnvironment::config(),
+                                                 "Seed time at latest observation"));
+}
+
+CASE("ufo/TemporalThinning/Seed time after latest observation") {
+  testTemporalThinning(eckit::LocalConfiguration(::test::TestEnvironment::config(),
+                                                 "Seed time after latest observation"));
+}
+
+CASE("ufo/TemporalThinning/Tolerance, priorities and seed time at a low-priority observation "
+     "followed by a high-priority one") {
+  testTemporalThinning(eckit::LocalConfiguration(::test::TestEnvironment::config(),
+                                                 "Tolerance, priorities and seed time at "
+                                                 "a low-priority observation followed by "
+                                                 "a high-priority one"));
+}
+
+CASE("ufo/TemporalThinning/Tolerance, priorities and seed time at a low-priority observation "
+     "preceded by a high-priority one") {
+  testTemporalThinning(eckit::LocalConfiguration(::test::TestEnvironment::config(),
+                                                 "Tolerance, priorities and seed time at "
+                                                 "a low-priority observation preceded by "
+                                                 "a high-priority one"));
+}
+
 class TemporalThinning : public oops::Test {
  private:
   std::string testid() const override {return "ufo::test::TemporalThinning";}
 
-  void register_tests() const override {
-    std::vector<eckit::testing::Test>& ts = eckit::testing::specification();
-
-    const eckit::LocalConfiguration conf(::test::TestEnvironment::config());
-    for (const std::string & testCaseName : conf.keys())
-    {
-      const eckit::LocalConfiguration testCaseConf(::test::TestEnvironment::config(), testCaseName);
-      ts.emplace_back(CASE("ufo/TemporalThinning/" + testCaseName, testCaseConf)
-                      {
-                        testTemporalThinning(testCaseConf);
-                      });
-    }
-  }
+  void register_tests() const override {}
 };
 
 }  // namespace test
