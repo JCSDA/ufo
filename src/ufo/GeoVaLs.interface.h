@@ -60,7 +60,7 @@ extern "C" {
                            const int &, float &);
   void ufo_geovals_getdouble_f90(const F90goms &, const int &, const char *, const int &,
                            const int &, double &);
-  void ufo_geovals_put_f90(const F90goms &, const int &, const char *, const int &,
+  void ufo_geovals_putdouble_f90(const F90goms &, const int &, const char *, const int &,
                            const int &, const double &);
   void ufo_geovals_read_file_f90(const F90goms &,
                                  const eckit::Configuration * const *,

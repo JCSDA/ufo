@@ -47,13 +47,8 @@ class ObsSeaIceFraction : public ObsOperatorBase,
 // Other
   const oops::Variables & variables() const override {return *varin_;}
 
-  int & toFortran() {return keyOper_;}
-  const int & toFortran() const {return keyOper_;}
-
  private:
   void print(std::ostream &) const override;
-  int keyOper_;
-  const ioda::ObsSpace& odb_;
   std::unique_ptr<const oops::Variables> varin_;
 };
 

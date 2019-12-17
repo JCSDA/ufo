@@ -491,7 +491,7 @@ end subroutine ufo_geovals_getdouble_c
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_geovals_put_c(c_key_self, lvar, c_var, lev, nlocs, values) bind(c, name='ufo_geovals_put_f90')
+subroutine ufo_geovals_putdouble_c(c_key_self, lvar, c_var, lev, nlocs, values) bind(c, name='ufo_geovals_putdouble_f90')
 use ufo_vars_mod, only: MAXVARLEN
 use oops_variables_mod
 use string_f_c_mod
@@ -517,7 +517,7 @@ allocate(geoval%vals(geoval%nval,geoval%nlocs))
 geoval%vals(lev,:) = values(:)
 call ufo_geovals_put_var(self, varname, geoval, lev)
 
-end subroutine ufo_geovals_put_c
+end subroutine ufo_geovals_putdouble_c
 
 ! ------------------------------------------------------------------------------
 
