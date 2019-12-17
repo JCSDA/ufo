@@ -58,6 +58,10 @@ extern "C" {
                            float &);
   void ufo_geovals_get_f90(const F90goms &, const int &, const char *, const int &,
                            const int &, float &);
+  void ufo_geovals_getdouble_f90(const F90goms &, const int &, const char *, const int &,
+                           const int &, double &);
+  void ufo_geovals_putdouble_f90(const F90goms &, const int &, const char *, const int &,
+                           const int &, const double &);
   void ufo_geovals_read_file_f90(const F90goms &,
                                  const eckit::Configuration * const *,
                                  const ioda::ObsSpace &, const oops::Variables &);
