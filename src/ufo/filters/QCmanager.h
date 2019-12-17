@@ -48,8 +48,8 @@ class QCmanager : public util::Printable {
   const eckit::LocalConfiguration config_;
   const oops::Variables nogeovals_;
   const oops::Variables nodiags_;
-  ioda::ObsDataVector<int> & flags_;
-  boost::shared_ptr<ioda::ObsDataVector<float> > obserr_;
+  boost::shared_ptr<ioda::ObsDataVector<int>> flags_;
+  boost::shared_ptr<ioda::ObsDataVector<float>> obserr_;
   const oops::Variables & observed_;
 };
 

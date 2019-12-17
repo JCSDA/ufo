@@ -54,7 +54,7 @@ void BackgroundCheck::applyFilter(const std::vector<bool> & apply,
   const oops::Variables observed = obsdb_.obsvariables();
   const float missing = util::missingValue(missing);
 
-  oops::Log::debug() << "BackgroundCheck obserr: " << obserr_;
+  oops::Log::debug() << "BackgroundCheck obserr: " << *obserr_;
 
   ioda::ObsDataVector<float> obs(obsdb_, filtervars.toOopsVariables(), "ObsValue");
   ioda::ObsDataVector<float> bias(obsdb_, filtervars.toOopsVariables(), "ObsBias", false);
@@ -73,15 +73,15 @@ void BackgroundCheck::applyFilter(const std::vector<bool> & apply,
     if (threshold_ != "")     thr     = getScalarOrFilterData(threshold_, data_);
 
     for (size_t jobs = 0; jobs < obsdb_.nlocs(); ++jobs) {
-      if (apply[jobs] && flags_[iv][jobs] == 0) {
+      if (apply[jobs] && (*flags_)[iv][jobs] == 0) {
         size_t iobs = observed.size() * jobs + iv;
-        ASSERT(obserr_[iv][jobs] != util::missingValue(obserr_[iv][jobs]));
+        ASSERT((*obserr_)[iv][jobs] != util::missingValue((*obserr_)[iv][jobs]));
         ASSERT(obs[jv][jobs] != util::missingValue(obs[jv][jobs]));
         ASSERT(hofx[jobs] != util::missingValue(hofx[jobs]));
 
 //      Threshold for current observation
         float zz = (thr[jobs] == std::numeric_limits<float>::max()) ? abs_thr[jobs] :
-          std::min(abs_thr[jobs], thr[jobs] * obserr_[iv][jobs]);
+          std::min(abs_thr[jobs], thr[jobs] * (*obserr_)[iv][jobs]);
         ASSERT(zz < std::numeric_limits<float>::max() && zz > 0.0);
 
 //      Apply bias correction

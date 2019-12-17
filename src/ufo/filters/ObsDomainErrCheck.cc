@@ -69,12 +69,12 @@ void ObsDomainErrCheck::applyFilter(const std::vector<bool> & inside,
       if (!inside[jobs]) {
         flagged[jv][jobs] = true;
       } else {
-        ASSERT(obserr_[iv][jobs] != util::missingValue(obserr_[iv][jobs]));
+        ASSERT((*obserr_)[iv][jobs] != util::missingValue((*obserr_)[iv][jobs]));
         ASSERT(obs[jv][jobs] != util::missingValue(obs[jv][jobs]));
-        float bound = 2.5*obserr_[iv][jobs];
-        float obserrinc = parameter_ * std::max((values[jobs]-9.0), 0.0) * obserr_[iv][jobs];
-        obserrinc = std::max(obserr_[iv][jobs], bound);
-        obserr_[iv][jobs] = sqrt(pow(obserr_[iv][jobs], 2) + pow(obserrinc, 2));
+        float bound = 2.5 * (*obserr_)[iv][jobs];
+        float obserrinc = parameter_ * std::max((values[jobs]-9.0), 0.0) * (*obserr_)[iv][jobs];
+        obserrinc = std::max((*obserr_)[iv][jobs], bound);
+        (*obserr_)[iv][jobs] = sqrt(pow((*obserr_)[iv][jobs], 2) + pow(obserrinc, 2));
         ++count;
         }
       }

@@ -30,7 +30,7 @@ namespace ufo {
 FilterBase::FilterBase(ioda::ObsSpace & os, const eckit::Configuration & config,
                        boost::shared_ptr<ioda::ObsDataVector<int> > flags,
                        boost::shared_ptr<ioda::ObsDataVector<float> > obserr)
-  : obsdb_(os), config_(config), flags_(*flags), obserr_(*obserr),
+  : obsdb_(os), config_(config), flags_(flags), obserr_(obserr),
     allvars_(getAllWhereVariables(config_)),
     filtervars_(), data_(obsdb_), prior_(false), post_(false)
 {
@@ -118,7 +118,7 @@ void FilterBase::doFilter() const {
   config_.get("action", aconf);
   aconf.set("flag", this->qcFlag());
   FilterAction action(aconf);
-  action.apply(filtervars_, flagged, data_, flags_, obserr_);
+  action.apply(filtervars_, flagged, data_, *flags_, *obserr_);
 
 // Done
   oops::Log::trace() << "FilterBase doFilter end" << std::endl;
