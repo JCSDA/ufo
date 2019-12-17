@@ -180,7 +180,7 @@ void ObsBiasRadianceGSI::computeObsBias(const GeoVaLs & geovals,
     }
   }
 
-  pred_terms->save("ObsBiasTerms");
+  pred_terms->save("ObsBiasTerm");
 
   ybias.zero();
   // Loop through each location
@@ -208,7 +208,11 @@ void ObsBiasRadianceGSI::computeObsBiasPredictors(
   const std::size_t nchanl = channels_.size();
 
   if (!preds) {
-    const oops::Variables pred_vars(predictors_, channels_);
+    std::vector<std::string> bias_term_names;
+    for (std::size_t n = 0; n < npred; ++n) {
+      bias_term_names.push_back(predictors_[n] + "_bias_correction_term");
+    }
+    const oops::Variables pred_vars(bias_term_names, channels_);
     preds.reset(new ioda::ObsDataVector<float>(odb_, pred_vars, "", false));
   }
   ASSERT(preds->nvars() == npred*nchanl);
@@ -228,383 +232,357 @@ void ObsBiasRadianceGSI::computeObsBiasPredictors(
   bool gmi    {sensor_id_.find("gmi")    != std::string::npos};
   bool saphir {sensor_id_.find("saphir") != std::string::npos};
 
-  // Temporary storage for one predictor vector (size of nlocs)
+  // common vectors storage
   std::vector <float> pred(nlocs, 0.0);
 
-  std::size_t indx = 0;
-
-  /*
-   * pred(1,:)  = global offset
-   */
-
-  if (!newpc4pred_) {
-    for (std::size_t jc = 0; jc < nchanl; ++jc) {
-      for (std::size_t jl = 0; jl < nlocs; ++jl)
-        (*preds)[indx+jc][jl] = 0.01;
-    }
-  } else {
-    for (std::size_t jc = 0; jc < nchanl; ++jc) {
-      for (std::size_t jl = 0; jl < nlocs; ++jl)
-        (*preds)[indx+jc][jl] = 1.0;
-    }
-  }
-  indx += nchanl;
-
-  // Retrieve the sensor_zenith_angle from ObsSpace
-  std::vector<float> zasat(nlocs);
-  odb_.get_db("MetaData", "sensor_zenith_angle", zasat);
-
-  /*
-   * pred(2,:)  = zenith angle predictor, is not used and set to zero now
-   */
-
-  if (!newpc4pred_) {
-    if (ssmi || ssmis || amsre || gmi || amsr2) {
-      for (std::size_t jc = 0; jc < nchanl; ++jc) {
-        for (std::size_t jl = 0; jl < nlocs; ++jl)
-          (*preds)[indx+jc][jl] = 0.0;
-      }
-    } else {
-      for (std::size_t jc = 0; jc < nchanl; ++jc) {
-        for (std::size_t jl = 0; jl < nlocs; ++jl)
-          (*preds)[indx+jc][jl] = 0.10*pow(1.0/cos(zasat[jl]) - 1.0, 2) - .015;
-      }
-    }
-  } else {
-    if (adp_anglebc_) {
-      for (std::size_t jc = 0; jc < nchanl; ++jc) {
-        for (std::size_t jl = 0; jl < nlocs; ++jl)
-          (*preds)[indx+jc][jl] = 0.0;
-      }
-    } else {
-      for (std::size_t jc = 0; jc < nchanl; ++jc) {
-        for (std::size_t jl = 0; jl < nlocs; ++jl)
-          (*preds)[indx+jc][jl] = pow(1.0/cos(zasat[jl]) - 1.0, 2);
-      }
-    }
-  }
-  indx += nchanl;
-
-  // Comnpute the surface temperature (revisit needed)
-  std::vector<float> h2o_frac(nlocs);
-  std::vector<float> land_frac(nlocs);
-  std::vector<float> ice_frac(nlocs);
-  std::vector<float> snow_frac(nlocs);
-  std::vector<float> h2o_t(nlocs);
-  std::vector<float> land_t(nlocs);
-  std::vector<float> ice_t(nlocs);
-  std::vector<float> snow_t(nlocs);
-
-  geovals.get(h2o_frac, "water_area_fraction");
-  geovals.get(land_frac, "land_area_fraction");
-  geovals.get(ice_frac, "ice_area_fraction");
-  geovals.get(snow_frac, "surface_snow_area_fraction");
-
-  geovals.get(h2o_t, "surface_temperature_where_sea");
-  geovals.get(land_t, "surface_temperature_where_land");
-  geovals.get(ice_t, "surface_temperature_where_ice");
-  geovals.get(snow_t, "surface_temperature_where_snow");
-
-  std::vector<float> tsavg5(nlocs);
-  for (std::size_t jl = 0; jl < nlocs; ++jl)
-    tsavg5[jl] = (h2o_frac[jl]*h2o_t[jl] + land_frac[jl]*land_t[jl] +
-                  ice_frac[jl]*ice_t[jl] + snow_frac[jl]*snow_t[jl]) /
-                 (h2o_frac[jl] + land_frac[jl] + ice_frac[jl] +  snow_frac[jl]);
-
-  // Retrieve the brightness temperature observation
-  std::vector<std::vector<float>> tb;
-  for (std::size_t jc = 0; jc < nchanl; ++jc) {
-    odb_.get_db("ObsValue", "brightness_temperature_" +
-               std::to_string(channels_[jc]), pred);
-    tb.emplace_back(pred);
-  }
-  // Transpose the array
-  std::vector<std::vector<float>> tb_obs;
   std::vector<float> profile;
-  for (std::size_t jl = 0; jl < nlocs; ++jl) {
-    profile.clear();
-    for (std::size_t jc = 0; jc < nchanl; ++jc)
-      profile.emplace_back(tb[jc][jl]);
-    tb_obs.emplace_back(profile);
-  }
-
-  // Retrieve the simulated brightness temperature from Hdiag
-  tb.clear();
-  for (std::size_t jc = 0; jc < nchanl; ++jc) {
-    ydiags.get(pred, "brightness_temperature_" + std::to_string(channels_[jc]));
-    tb.emplace_back(pred);
-  }
-  // Transpose the array
-  std::vector<std::vector<float>> tsim;
-  for (std::size_t jl = 0; jl < nlocs; ++jl) {
-    profile.clear();
-    for (std::size_t jc = 0; jc < nchanl; ++jc)
-      profile.emplace_back(tb[jc][jl]);
-    tsim.emplace_back(profile);
-  }
-
-  // Retrieve the surface wind spped from geovals
-  std::vector<float> sfc_speed(nlocs, 0.0);
-  geovals.get(sfc_speed, "surface_wind_speed");
-
-  // Retrieve the scan_position from ObsSpace
-  std::vector<float> nadir(nlocs);
-  odb_.get_db("MetaData", "scan_position", nadir);
-
-  /*
-   * pred(3,:)  = cloud liquid water predictor for clear-sky microwave radiance assimilation
-   */
-
-  std::vector<float> clw(nlocs);
-
-  // Calculate the cloud liquid water
-  for (std::size_t jl = 0; jl < nlocs; ++jl) {
-    calc_clw_f90(static_cast<int>(nadir[jl]), tb_obs[jl][0], tsim[jl][0], channels_[0], nchanl,
-                 no85GHz, amsua, ssmi, ssmis, amsre, atms, amsr2, gmi, saphir,
-                 tsavg5[jl], sfc_speed[jl], zasat[jl], clw[jl]);
-  }
-
-  if (amsre) {
-    for (std::size_t jc = 0; jc < nchanl; ++jc) {
-      for (std::size_t jl = 0; jl < nlocs; ++jl)
-        (*preds)[indx+jc][jl] = clw[jl];
-    }
-  } else {
-    for (std::size_t jc = 0; jc < nchanl; ++jc) {
-      for (std::size_t jl = 0; jl < nlocs; ++jl)
-        (*preds)[indx+jc][jl] = clw[jl]*cos(zasat[jl]*cos(zasat[jl]));
-    }
-  }
-  indx += nchanl;
-
-  // Retrieve the optical_thickness_of_atmosphere_layer from Hdiag
-  std::string varname;
-  std::vector<std::vector<float>> data;
-  for (std::size_t jc = 0; jc < nchanl; ++jc) {
-    varname = "optical_thickness_of_atmosphere_layer_" +
-              std::to_string(channels_[jc]);
-    for (std::size_t js = 0; js < ydiags.nlevs(varname); ++js) {
-      ydiags.get(pred, "optical_thickness_of_atmosphere_layer_" +
-                 std::to_string(channels_[jc]), js+1);
-      data.emplace_back(pred);
-    }
-  }
-  // transpose
-  std::vector<std::vector<float>> ptau5;
-  for (std::size_t jl = 0; jl < nlocs; ++jl) {
-    profile.clear();
-    for (std::size_t jc = 0; jc < nchanl; ++jc) {
-      varname = "optical_thickness_of_atmosphere_layer_" +
-                std::to_string(channels_[jc]);
-      std::size_t nlevs = ydiags.nlevs(varname);
-      for (std::size_t js = 0; js < nlevs; ++js)
-        profile.emplace_back(data[jc*nlevs+js][jl]);
-    }
-    ptau5.emplace_back(profile);
-  }
-
-  // Retrieve the temperature (revisit the unit, in GSI, it is sensible T ?)
-  data.clear();
-  std::size_t nsig = geovals.nlevs("air_temperature");
-  for (std::size_t js = 0; js < nsig; ++js) {
-    geovals.get(pred, "air_temperature", js+1);
-    data.emplace_back(pred);
-  }
-  // transpose
-  std::vector<std::vector<float>> tvp;
-  for (std::size_t jc = 0; jc < nlocs; ++jc) {
-    profile.clear();
-    for (std::size_t js = 0; js < nsig; ++js)
-      profile.emplace_back(data[js][jc]);
-    tvp.emplace_back(profile);
-  }
-
-  nsig = geovals.nlevs("air_pressure");
-
-  // pick up tlapmean
-  std::vector<float> tlapmean;
-  for (std::size_t jc = 0; jc < nchanl; ++jc) {
-    tlapmean.emplace_back(tlapmean_[channels_[jc]]);
-  }
-
+  std::vector<float> tsavg5(nlocs, 0.0);
   std::vector<std::vector<float>> tlap;
-  std::vector<float> tlapp(nchanl, 0.0);
 
-  // Compute tlap
-  for (std::size_t jl = 0; jl < nlocs; ++jl) {
-    calc_tlap_f90(newpc4pred_, nsig, nchanl, ptau5[jl][0], tsavg5[jl],
-                  tvp[jl][0], tlapmean[0], tlapp[0]);
-    tlap.emplace_back(tlapp);
+  std::vector<float> zasat(nlocs, 0.0);
+  if (std::find(predictors_.begin(), predictors_.end(),
+              "scan_angle") != predictors_.end() ||
+      std::find(predictors_.begin(), predictors_.end(),
+              "cloud_liquid_water") != predictors_.end()) {
+    odb_.get_db("MetaData", "sensor_zenith_angle", zasat);
   }
 
-  /*
-   * pred(4,:)  = square of temperature laps rate predictor
-   */
-
-  for (std::size_t jc = 0; jc < nchanl; ++jc) {
-    for (std::size_t jl = 0; jl < nlocs; ++jl)
-      (*preds)[indx+jc][jl] = tlap[jl][jc]*tlap[jl][jc];
+  std::vector<float> cenlat(nlocs, 0.0);
+  std::vector<float> node(nlocs, 0.0);
+  if (std::find(predictors_.begin(), predictors_.end(),
+              "sine_of_latitude") != predictors_.end() ||
+      std::find(predictors_.begin(), predictors_.end(),
+              "cosine_of_latitude_times_orbit_node") != predictors_.end()) {
+    odb_.get_db("MetaData", "latitude", cenlat);
+    odb_.get_db("MetaData", "sensor_azimuth_angle", node);
   }
-  indx += nchanl;
 
-  /*
-   * pred(5,:)  = temperature laps rate predictor
-   */
-
-  for (std::size_t jc = 0; jc < nchanl; ++jc) {
-    for (std::size_t jl = 0; jl < nlocs; ++jl)
-      (*preds)[indx+jc][jl] = tlap[jl][jc];
+  std::vector<float> h2o_frac(nlocs, 0.0);
+  if (std::find(predictors_.begin(), predictors_.end(),
+              "cloud_liquid_water") != predictors_.end() ||
+      std::find(predictors_.begin(), predictors_.end(),
+              "emissivity") != predictors_.end()) {
+    geovals.get(h2o_frac, "water_area_fraction");
   }
-  indx += nchanl;
 
-  // Retrieve the sensor_azimuth_angle and latitude from ObsSpace
-  std::vector<float> cenlat(nlocs);
-  std::vector<float> node(nlocs);
-  odb_.get_db("MetaData", "latitude", cenlat);
-  odb_.get_db("MetaData", "sensor_azimuth_angle", node);
+  std::vector<float> view_angle(nlocs, 0.0);
+  if (std::find(predictors_.begin(), predictors_.end(),
+              "scan_angle_4th_order") != predictors_.end() ||
+      std::find(predictors_.begin(), predictors_.end(),
+              "scan_angle_3rd_order") != predictors_.end() ||
+      std::find(predictors_.begin(), predictors_.end(),
+              "scan_angle_2nd_order") != predictors_.end() ||
+      std::find(predictors_.begin(), predictors_.end(),
+              "scan_angle_1st_order") != predictors_.end()) {
+    odb_.get_db("MetaData", "sensor_view_angle", view_angle);
+  }
 
-  /*
-   * pred(6,:)  = cosinusoidal predictor for SSMI/S ascending/descending bias
-   */
-
-  if (ssmis) {
-    if (!newpc4pred_) {
-      for (std::size_t jc = 0; jc < nchanl; ++jc) {
-        for (std::size_t jl = 0; jl < nlocs; ++jl) {
-          if (node[jl] < 1000) {
-            (*preds)[indx+jc][jl] = ssmis_precond*node[jl]*cos(cenlat[jl]*Constants::deg2rad);
-          } else {
-            (*preds)[indx+jc][jl] = 0.0;
-          }
+  // Compute predictors one-by-one
+  std::size_t indx = 0;
+  for (std::size_t n = 0; n < npred; ++n) {
+    if (predictors_[n] == "constant") {
+      if (!newpc4pred_) {
+        for (std::size_t jc = 0; jc < nchanl; ++jc) {
+          for (std::size_t jl = 0; jl < nlocs; ++jl)
+            (*preds)[indx+jc][jl] = 0.01;
+        }
+      } else {
+        for (std::size_t jc = 0; jc < nchanl; ++jc) {
+          for (std::size_t jl = 0; jl < nlocs; ++jl)
+            (*preds)[indx+jc][jl] = 1.0;
         }
       }
-    } else {
-      for (std::size_t jc = 0; jc < nchanl; ++jc) {
-        for (std::size_t jl = 0; jl < nlocs; ++jl)
-          (*preds)[indx+jc][jl] = node[jl]*cos(cenlat[jl]*Constants::deg2rad);
-      }
-    }
-  } else {
-    for (std::size_t jc = 0; jc < nchanl; ++jc) {
-        for (std::size_t jl = 0; jl < nlocs; ++jl)
-          (*preds)[indx+jc][jl] = 0.0;
-    }
-  }
-  indx += nchanl;
-
-  /*
-   * pred(7,:)  = sinusoidal predictor for SSMI/S
-   */
-
-  if (ssmis) {
-    if (!newpc4pred_) {
-      for (std::size_t jc = 0; jc < nchanl; ++jc) {
-        for (std::size_t jl = 0; jl < nlocs; ++jl) {
-          if (node[jl] < 1000) {
-            (*preds)[indx+jc][jl] = ssmis_precond*sin(cenlat[jl]*Constants::deg2rad);
-          } else {
-            (*preds)[indx+jc][jl] = 0.0;
+      indx += nchanl;
+    } else if (predictors_[n] == "scan_angle") {
+      if (!newpc4pred_) {
+        if (ssmi || ssmis || amsre || gmi || amsr2) {
+          for (std::size_t jc = 0; jc < nchanl; ++jc) {
+            for (std::size_t jl = 0; jl < nlocs; ++jl)
+              (*preds)[indx+jc][jl] = 0.0;
           }
-        }
-      }
-    } else {
-      for (std::size_t jc = 0; jc < nchanl; ++jc) {
-        for (std::size_t jl = 0; jl < nlocs; ++jl)
-          (*preds)[indx+jc][jl] = sin(cenlat[jl]*Constants::deg2rad);
-      }
-    }
-  } else {
-    for (std::size_t jc = 0; jc < nchanl; ++jc) {
-      for (std::size_t jl = 0; jl < nlocs; ++jl)
-        (*preds)[indx+jc][jl] = 0.0;
-    }
-  }
-  indx += nchanl;
-
-  /*
-   * pred(8,:)  = emissivity sensitivity predictor for land/sea differences
-   */
-
-  if (adp_anglebc_ && emiss_bc_) {
-    for (std::size_t jc = 0; jc < nchanl; ++jc) {
-      ydiags.get(pred, "brightness_temperature_jacobian_surface_emissivity_" +
-                       std::to_string(channels_[jc]));
-      for (std::size_t jl = 0; jl < nlocs; ++jl) {
-        if (h2o_frac[jl] < 0.99 && abs(pred[jl]) > 0.01) {
-          (*preds)[indx+jc][jl] = pred[jl];
         } else {
+          for (std::size_t jc = 0; jc < nchanl; ++jc) {
+            for (std::size_t jl = 0; jl < nlocs; ++jl)
+              (*preds)[indx+jc][jl] = 0.10*pow(1.0/cos(zasat[jl]) - 1.0, 2) - .015;
+          }
+        }
+      } else {
+        if (adp_anglebc_) {
+          for (std::size_t jc = 0; jc < nchanl; ++jc) {
+            for (std::size_t jl = 0; jl < nlocs; ++jl)
+              (*preds)[indx+jc][jl] = 0.0;
+          }
+        } else {
+          for (std::size_t jc = 0; jc < nchanl; ++jc) {
+            for (std::size_t jl = 0; jl < nlocs; ++jl)
+              (*preds)[indx+jc][jl] = pow(1.0/cos(zasat[jl]) - 1.0, 2);
+          }
+        }
+      }
+      indx += nchanl;
+    } else if (predictors_[n] == "cloud_liquid_water") {
+      // Compute the surface temperature (revisit needed)
+      std::vector<float> land_frac(nlocs);
+      std::vector<float> ice_frac(nlocs);
+      std::vector<float> snow_frac(nlocs);
+      std::vector<float> h2o_t(nlocs);
+      std::vector<float> land_t(nlocs);
+      std::vector<float> ice_t(nlocs);
+      std::vector<float> snow_t(nlocs);
+      geovals.get(land_frac, "land_area_fraction");
+      geovals.get(ice_frac, "ice_area_fraction");
+      geovals.get(snow_frac, "surface_snow_area_fraction");
+      geovals.get(h2o_t, "surface_temperature_where_sea");
+      geovals.get(land_t, "surface_temperature_where_land");
+      geovals.get(ice_t, "surface_temperature_where_ice");
+      geovals.get(snow_t, "surface_temperature_where_snow");
+      for (std::size_t jl = 0; jl < nlocs; ++jl)
+        tsavg5[jl] = (h2o_frac[jl]*h2o_t[jl] + land_frac[jl]*land_t[jl] +
+                      ice_frac[jl]*ice_t[jl] + snow_frac[jl]*snow_t[jl]) /
+                     (h2o_frac[jl] + land_frac[jl] + ice_frac[jl] +  snow_frac[jl]);
+      // Retrieve the brightness temperature observation
+      std::vector<std::vector<float>> tb;
+      for (std::size_t jc = 0; jc < nchanl; ++jc) {
+        odb_.get_db("ObsValue", "brightness_temperature_" +
+                   std::to_string(channels_[jc]), pred);
+        tb.emplace_back(pred);
+      }
+      // Transpose the array
+      std::vector<std::vector<float>> tb_obs;
+      for (std::size_t jl = 0; jl < nlocs; ++jl) {
+        profile.clear();
+        for (std::size_t jc = 0; jc < nchanl; ++jc)
+          profile.emplace_back(tb[jc][jl]);
+        tb_obs.emplace_back(profile);
+      }
+      // Retrieve the simulated brightness temperature from Hdiag
+      tb.clear();
+      for (std::size_t jc = 0; jc < nchanl; ++jc) {
+        ydiags.get(pred, "brightness_temperature_" + std::to_string(channels_[jc]));
+        tb.emplace_back(pred);
+      }
+      // Transpose the array
+      std::vector<std::vector<float>> tsim;
+      for (std::size_t jl = 0; jl < nlocs; ++jl) {
+        profile.clear();
+        for (std::size_t jc = 0; jc < nchanl; ++jc)
+          profile.emplace_back(tb[jc][jl]);
+        tsim.emplace_back(profile);
+      }
+      // Retrieve the surface wind spped from geovals
+      std::vector<float> sfc_speed(nlocs, 0.0);
+      geovals.get(sfc_speed, "surface_wind_speed");
+      // Retrieve the scan_position from ObsSpace
+      std::vector<float> nadir(nlocs);
+      odb_.get_db("MetaData", "scan_position", nadir);
+      std::vector<float> clw(nlocs);
+      // Calculate the cloud liquid water
+      for (std::size_t jl = 0; jl < nlocs; ++jl) {
+        calc_clw_f90(static_cast<int>(nadir[jl]), tb_obs[jl][0], tsim[jl][0], channels_[0], nchanl,
+                     no85GHz, amsua, ssmi, ssmis, amsre, atms, amsr2, gmi, saphir,
+                     tsavg5[jl], sfc_speed[jl], zasat[jl], clw[jl]);
+      }
+      if (amsre) {
+        for (std::size_t jc = 0; jc < nchanl; ++jc) {
+          for (std::size_t jl = 0; jl < nlocs; ++jl)
+            (*preds)[indx+jc][jl] = clw[jl];
+        }
+      } else {
+        for (std::size_t jc = 0; jc < nchanl; ++jc) {
+          for (std::size_t jl = 0; jl < nlocs; ++jl)
+            (*preds)[indx+jc][jl] = clw[jl]*cos(zasat[jl]*cos(zasat[jl]));
+        }
+      }
+      indx += nchanl;
+    } else if (predictors_[n] == "lapse_rate_squared") {
+      // Retrieve the optical_thickness_of_atmosphere_layer from Hdiag
+      std::string varname;
+      std::vector<std::vector<float>> data;
+      for (std::size_t jc = 0; jc < nchanl; ++jc) {
+        varname = "optical_thickness_of_atmosphere_layer_" +
+                  std::to_string(channels_[jc]);
+        for (std::size_t js = 0; js < ydiags.nlevs(varname); ++js) {
+          ydiags.get(pred, "optical_thickness_of_atmosphere_layer_" +
+                     std::to_string(channels_[jc]), js+1);
+          data.emplace_back(pred);
+        }
+      }
+      // transpose
+      std::vector<std::vector<float>> ptau5;
+      for (std::size_t jl = 0; jl < nlocs; ++jl) {
+        profile.clear();
+        for (std::size_t jc = 0; jc < nchanl; ++jc) {
+          varname = "optical_thickness_of_atmosphere_layer_" +
+                    std::to_string(channels_[jc]);
+          std::size_t nlevs = ydiags.nlevs(varname);
+          for (std::size_t js = 0; js < nlevs; ++js)
+            profile.emplace_back(data[jc*nlevs+js][jl]);
+        }
+        ptau5.emplace_back(profile);
+      }
+      // Retrieve the temperature (revisit the unit, in GSI, it is sensible T ?)
+      data.clear();
+      std::size_t nsig = geovals.nlevs("air_temperature");
+      for (std::size_t js = 0; js < nsig; ++js) {
+        geovals.get(pred, "air_temperature", js+1);
+        data.emplace_back(pred);
+      }
+      // transpose
+      std::vector<std::vector<float>> tvp;
+      for (std::size_t jc = 0; jc < nlocs; ++jc) {
+        profile.clear();
+        for (std::size_t js = 0; js < nsig; ++js)
+          profile.emplace_back(data[js][jc]);
+        tvp.emplace_back(profile);
+      }
+      nsig = geovals.nlevs("air_pressure");
+      // pick up tlapmean
+      std::vector<float> tlapmean;
+      for (std::size_t jc = 0; jc < nchanl; ++jc) {
+        tlapmean.emplace_back(tlapmean_[channels_[jc]]);
+      }
+      std::vector<float> tlapp(nchanl, 0.0);
+      // Compute tlap
+      for (std::size_t jl = 0; jl < nlocs; ++jl) {
+        calc_tlap_f90(newpc4pred_, nsig, nchanl, ptau5[jl][0], tsavg5[jl],
+                      tvp[jl][0], tlapmean[0], tlapp[0]);
+        tlap.emplace_back(tlapp);
+      }
+      for (std::size_t jc = 0; jc < nchanl; ++jc) {
+        for (std::size_t jl = 0; jl < nlocs; ++jl)
+          (*preds)[indx+jc][jl] = tlap[jl][jc]*tlap[jl][jc];
+      }
+      indx += nchanl;
+    } else if (predictors_[n] == "lapse_rate") {
+      for (std::size_t jc = 0; jc < nchanl; ++jc) {
+        for (std::size_t jl = 0; jl < nlocs; ++jl)
+          (*preds)[indx+jc][jl] = tlap[jl][jc];
+      }
+      indx += nchanl;
+    } else if (predictors_[n] == "cosine_of_latitude_times_orbit_node") {
+      if (ssmis) {
+        if (!newpc4pred_) {
+          for (std::size_t jc = 0; jc < nchanl; ++jc) {
+            for (std::size_t jl = 0; jl < nlocs; ++jl) {
+              if (node[jl] < 1000) {
+                (*preds)[indx+jc][jl] = ssmis_precond*node[jl]*cos(cenlat[jl]*Constants::deg2rad);
+              } else {
+                (*preds)[indx+jc][jl] = 0.0;
+              }
+            }
+          }
+        } else {
+          for (std::size_t jc = 0; jc < nchanl; ++jc) {
+            for (std::size_t jl = 0; jl < nlocs; ++jl)
+              (*preds)[indx+jc][jl] = node[jl]*cos(cenlat[jl]*Constants::deg2rad);
+          }
+        }
+      } else {
+        for (std::size_t jc = 0; jc < nchanl; ++jc) {
+            for (std::size_t jl = 0; jl < nlocs; ++jl)
+              (*preds)[indx+jc][jl] = 0.0;
+        }
+      }
+      indx += nchanl;
+    } else if (predictors_[n] == "sine_of_latitude") {
+      if (ssmis) {
+        if (!newpc4pred_) {
+          for (std::size_t jc = 0; jc < nchanl; ++jc) {
+            for (std::size_t jl = 0; jl < nlocs; ++jl) {
+              if (node[jl] < 1000) {
+                (*preds)[indx+jc][jl] = ssmis_precond*sin(cenlat[jl]*Constants::deg2rad);
+              } else {
+                (*preds)[indx+jc][jl] = 0.0;
+              }
+            }
+          }
+        } else {
+          for (std::size_t jc = 0; jc < nchanl; ++jc) {
+            for (std::size_t jl = 0; jl < nlocs; ++jl)
+              (*preds)[indx+jc][jl] = sin(cenlat[jl]*Constants::deg2rad);
+          }
+        }
+      } else {
+        for (std::size_t jc = 0; jc < nchanl; ++jc) {
+          for (std::size_t jl = 0; jl < nlocs; ++jl)
+            (*preds)[indx+jc][jl] = 0.0;
+        }
+      }
+      indx += nchanl;
+    } else if (predictors_[n] == "emissivity") {
+      if (adp_anglebc_ && emiss_bc_) {
+        for (std::size_t jc = 0; jc < nchanl; ++jc) {
+          ydiags.get(pred, "brightness_temperature_jacobian_surface_emissivity_" +
+                           std::to_string(channels_[jc]));
+          for (std::size_t jl = 0; jl < nlocs; ++jl) {
+            if (h2o_frac[jl] < 0.99 && abs(pred[jl]) > 0.01) {
+              (*preds)[indx+jc][jl] = pred[jl];
+            } else {
+              (*preds)[indx+jc][jl] = 0.0;
+            }
+          }
+        }
+      } else {
+        for (std::size_t jc = 0; jc < nchanl; ++jc) {
+          for (std::size_t jl = 0; jl < nlocs; ++jl)
+            (*preds)[indx+jc][jl] = 0.0;
+        }
+      }
+      indx += nchanl;
+    } else if (predictors_[n] == "scan_angle_4th_order") {
+      for (std::size_t jc = 0; jc < nchanl; ++jc) {
+        for (std::size_t jl = 0; jl < nlocs; ++jl)
+          (*preds)[indx+jc][jl] = pow(view_angle[jl]*Constants::deg2rad, 4);
+      }
+      indx += nchanl;
+    } else if (predictors_[n] == "scan_angle_3rd_order") {
+      if (adp_anglebc_) {
+        for (std::size_t jc = 0; jc < nchanl; ++jc) {
+          for (std::size_t jl = 0; jl < nlocs; ++jl)
+            (*preds)[indx+jc][jl] = pow(view_angle[jl]*Constants::deg2rad, 3);
+        }
+      } else {
+        for (std::size_t jc = 0; jc < nchanl; ++jc) {
+          for (std::size_t jl = 0; jl < nlocs; ++jl)
+            (*preds)[indx+jc][jl] = 0.0;
+        }
+      }
+      indx += nchanl;
+    } else if (predictors_[n] == "scan_angle_2nd_order") {
+      if (adp_anglebc_) {
+        for (std::size_t jc = 0; jc < nchanl; ++jc) {
+          for (std::size_t jl = 0; jl < nlocs; ++jl)
+            (*preds)[indx+jc][jl] = pow(view_angle[jl]*Constants::deg2rad, 2);
+        }
+      } else {
+        for (std::size_t jc = 0; jc < nchanl; ++jc) {
+          for (std::size_t jl = 0; jl < nlocs; ++jl)
+            (*preds)[indx+jc][jl] = 0.0;
+        }
+      }
+      indx += nchanl;
+    } else if (predictors_[n] == "scan_angle_1st_order") {
+      if (adp_anglebc_) {
+        for (std::size_t jc = 0; jc < nchanl; ++jc) {
+          for (std::size_t jl = 0; jl < nlocs; ++jl)
+            (*preds)[indx+jc][jl] = view_angle[jl]*Constants::deg2rad;
+        }
+      } else {
+        for (std::size_t jc = 0; jc < nchanl; ++jc) {
+          for (std::size_t jl = 0; jl < nlocs; ++jl)
+            (*preds)[indx+jc][jl] = 0.0;
+        }
+      }
+      indx += nchanl;
+    } else {
+      for (std::size_t jc = 0; jc < nchanl; ++jc) {
+        for (std::size_t jl = 0; jl < nlocs; ++jl) {
           (*preds)[indx+jc][jl] = 0.0;
         }
       }
-    }
-  } else {
-    for (std::size_t jc = 0; jc < nchanl; ++jc) {
-      for (std::size_t jl = 0; jl < nlocs; ++jl)
-        (*preds)[indx+jc][jl] = 0.0;
-    }
-  }
-  indx += nchanl;
-
-  // Retrieve the sensor_view_angle from ObsSpace
-  odb_.get_db("MetaData", "sensor_view_angle", pred);
-
-  /*
-   * pred(9,:)  = fourth order polynomial of angle bias correction
-   */
-
-  for (std::size_t jc = 0; jc < nchanl; ++jc) {
-    for (std::size_t jl = 0; jl < nlocs; ++jl)
-      (*preds)[indx+jc][jl] = pow(pred[jl]*Constants::deg2rad, 4);
-  }
-  indx += nchanl;
-
-  /*
-   * pred(10,:) = third order polynomial of angle bias correction
-   */
-
-  if (adp_anglebc_) {
-    for (std::size_t jc = 0; jc < nchanl; ++jc) {
-      for (std::size_t jl = 0; jl < nlocs; ++jl)
-        (*preds)[indx+jc][jl] = pow(pred[jl]*Constants::deg2rad, 3);
-    }
-  } else {
-    for (std::size_t jc = 0; jc < nchanl; ++jc) {
-      for (std::size_t jl = 0; jl < nlocs; ++jl)
-        (*preds)[indx+jc][jl] = 0.0;
-    }
-  }
-  indx += nchanl;
-
-  /*
-   * pred(11,:) = second order polynomial of angle bias correction
-   */
-
-  if (adp_anglebc_) {
-    for (std::size_t jc = 0; jc < nchanl; ++jc) {
-      for (std::size_t jl = 0; jl < nlocs; ++jl)
-        (*preds)[indx+jc][jl] = pow(pred[jl]*Constants::deg2rad, 2);
-    }
-  } else {
-    for (std::size_t jc = 0; jc < nchanl; ++jc) {
-      for (std::size_t jl = 0; jl < nlocs; ++jl)
-        (*preds)[indx+jc][jl] = 0.0;
-    }
-  }
-  indx += nchanl;
-
-  /*
-   * pred(12,:) = first order polynomial of angle bias correction
-   */
-
-  if (adp_anglebc_) {
-    for (std::size_t jc = 0; jc < nchanl; ++jc) {
-      for (std::size_t jl = 0; jl < nlocs; ++jl)
-        (*preds)[indx+jc][jl] = pred[jl]*Constants::deg2rad;
-    }
-  } else {
-    for (std::size_t jc = 0; jc < nchanl; ++jc) {
-      for (std::size_t jl = 0; jl < nlocs; ++jl)
-        (*preds)[indx+jc][jl] = 0.0;
+      indx += nchanl;
+      oops::Log::info() << "predictor: " << predictors_[n] << " is not implemented, "
+                        << " ZERO will be filled in" << std::endl;
     }
   }
 
