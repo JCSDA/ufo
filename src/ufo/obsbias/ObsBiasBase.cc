@@ -19,8 +19,7 @@ namespace ufo {
 
 ObsBiasFactory::ObsBiasFactory(const std::string & name) {
   if (getMakers().find(name) != getMakers().end()) {
-    oops::Log::error() << name << " already registered in ufo::ObsBiasFactory."
-                       << std::endl;
+    oops::Log::error() << name << " already registered in ufo::ObsBiasFactory." << std::endl;
     ABORT("Element already registered in ufo::ObsBiasFactory.");
   }
   getMakers()[name] = this;
@@ -28,9 +27,9 @@ ObsBiasFactory::ObsBiasFactory(const std::string & name) {
 
 // -----------------------------------------------------------------------------
 
-ObsBiasBase * ObsBiasFactory::create(const eckit::Configuration & conf) {
+ObsBiasBase * ObsBiasFactory::create(const ioda::ObsSpace & os, const eckit::Configuration & conf) {
   oops::Log::trace() << "ObsBiasBase::create starting" << std::endl;
-  if (conf.has("ObsBias.name")) {
+  if (conf.has("ObsBias")) {
     std::string id = "";
     id = conf.getString("ObsBias.name");
     typename std::map<std::string, ObsBiasFactory*>::iterator jloc = getMakers().find(id);
@@ -38,7 +37,7 @@ ObsBiasBase * ObsBiasFactory::create(const eckit::Configuration & conf) {
       oops::Log::error() << id << " does not exist in ufo::ObsBiasFactory." << std::endl;
       ABORT("Element does not existed in ufo::ObsBiasFactory.");
     }
-    ObsBiasBase * ptr = jloc->second->make(conf);
+    ObsBiasBase * ptr = jloc->second->make(os, conf);
     oops::Log::trace() << "ObsBiasBase::create done" << std::endl;
     return ptr;
   } else {

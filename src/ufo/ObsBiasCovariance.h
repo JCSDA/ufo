@@ -20,6 +20,10 @@ namespace eckit {
   class Configuration;
 }
 
+namespace ioda {
+  class ObsSpace;
+}
+
 namespace ufo {
   class ObsBias;
   class ObsBiasIncrement;
@@ -33,7 +37,7 @@ class ObsBiasCovariance : public util::Printable,
   static const std::string classname() {return "ufo::ObsBiasCovariance";}
 
 /// Constructor, destructor
-  explicit ObsBiasCovariance(const eckit::Configuration &);
+  ObsBiasCovariance(const ioda::ObsSpace &, const eckit::Configuration &);
   ~ObsBiasCovariance() {}
 
 /// Linear algebra operators

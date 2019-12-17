@@ -22,6 +22,7 @@ namespace eckit {
 }
 
 namespace ioda {
+  class ObsSpace;
   class ObsVector;
 }
 
@@ -37,7 +38,7 @@ class ObsBiasRadianceGSI : public ObsBiasBase,
   static const std::string classname() {return "ufo::ObsBiasRadianceGSI";}
 
 /// Constructor
-  explicit ObsBiasRadianceGSI(const eckit::Configuration &);
+  ObsBiasRadianceGSI(const ioda::ObsSpace &, const eckit::Configuration &);
 
 /// Destructor
   virtual ~ObsBiasRadianceGSI() {}
@@ -46,33 +47,31 @@ class ObsBiasRadianceGSI : public ObsBiasBase,
   void read(const eckit::Configuration &) override;
   void write(const eckit::Configuration &) const override;
   double norm() const override;
-  std::size_t size() const override { return biascoeffs_.size();}
 
 /// Add increments
   ObsBiasRadianceGSI & operator+=(const ObsBiasIncrement &) override;
   ObsBiasRadianceGSI & operator=(const ObsBias &) override;
 
 /// Obs bias operator
-  void computeObsBias(const GeoVaLs &,
-                      ioda::ObsVector &,
-                      const ioda::ObsSpace &,
-                      const ObsDiagnostics &) const override;
+  void computeObsBias(const GeoVaLs &, ioda::ObsVector &, const ObsDiagnostics &) const override;
 
 /// Obs bias predictor
-  void computeObsBiasPredictors(const GeoVaLs &,
-                                const ioda::ObsSpace &,
-                                const ObsDiagnostics &,
-                                std::vector<float> &) const;
+  void computeObsBiasPredictors(const GeoVaLs &, const ObsDiagnostics &,
+                                std::vector<float> &) const override;
 
 /// Other
   const oops::Variables & requiredGeoVaLs() const override {return *geovars_;}
   const oops::Variables & requiredHdiagnostics() const override {return *hdiags_;}
 
 /// Bias parameters interface
+  std::size_t size() const override {return biascoeffs_.size();}
   double & operator[](const unsigned int ii) override {return biascoeffs_[ii];}
 
+  const ioda::ObsSpace & obspace() const override {return odb_;}
  private:
   void print(std::ostream &) const override;
+
+  const ioda::ObsSpace & odb_;
   std::unique_ptr<const oops::Variables> geovars_;
   std::unique_ptr<const oops::Variables> hdiags_;
   std::string sensor_id_;  // sensor_id

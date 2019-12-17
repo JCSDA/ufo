@@ -22,6 +22,7 @@ namespace eckit {
 }
 
 namespace ioda {
+  class ObsSpace;
   class ObsVector;
 }
 
@@ -37,7 +38,7 @@ class ObsBiasRadianceGSITLAD : public LinearObsBiasBase,
   static const std::string classname() {return "ufo::ObsBiasRadianceGSITLAD";}
 
 /// Constructor
-  explicit ObsBiasRadianceGSITLAD(const eckit::Configuration &);
+  ObsBiasRadianceGSITLAD(const ioda::ObsSpace &, const eckit::Configuration &);
 
 /// Destructor
   virtual ~ObsBiasRadianceGSITLAD() {}
@@ -58,14 +59,10 @@ class ObsBiasRadianceGSITLAD : public LinearObsBiasBase,
   double norm() const override;
 
 /// Linear obs bias operator
-  void computeObsBiasTL(const GeoVaLs &,
-                        const ioda::ObsSpace &,
-                        const std::vector<float> &,
+  void computeObsBiasTL(const GeoVaLs &, const std::vector<float> &,
                         ioda::ObsVector &) const override;
 
-  void computeObsBiasAD(GeoVaLs &,
-                        const ioda::ObsSpace &,
-                        const std::vector<float> &,
+  void computeObsBiasAD(GeoVaLs &, const std::vector<float> &,
                         const ioda::ObsVector &) override;
 
 /// Bias parameters interface
@@ -74,8 +71,11 @@ class ObsBiasRadianceGSITLAD : public LinearObsBiasBase,
   const std::vector<double>::iterator begin() {return biascoeffsinc_.begin();}
   const std::vector<double>::iterator end() {return biascoeffsinc_.end();}
 
+  const ioda::ObsSpace & obspace() const override {return odb_;}
  private:
   void print(std::ostream &) const override;
+
+  const ioda::ObsSpace & odb_;
   std::string sensor_id_;  // sensor_id
   std::vector<int> channels_;  // channel
 
