@@ -197,7 +197,7 @@ void Gaussian_Thinning::applyFilter(const std::vector<bool> & apply,
 
   // loop through obs and test score
   for (size_t jobs = 0; jobs < nobs; ++jobs) {
-     if (flags_[0][jobs] == 0) {     // only test obs that have passed QC to this point
+     if ((*flags_)[0][jobs] == 0) {     // only test obs that have passed QC to this point
         ob_lon = lon[jobs];
         ob_lat = lat[jobs];
         ob_idx = ll_to_idx(ob_lon, ob_lat, n_lats, n_lons);
