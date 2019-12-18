@@ -59,8 +59,8 @@ class FilterBase : public util::Printable {
  protected:
   ioda::ObsSpace & obsdb_;
   const eckit::LocalConfiguration config_;
-  ioda::ObsDataVector<int> & flags_;
-  ioda::ObsDataVector<float> & obserr_;
+  boost::shared_ptr<ioda::ObsDataVector<int>> flags_;
+  boost::shared_ptr<ioda::ObsDataVector<float>> obserr_;
   ufo::Variables allvars_;
   ufo::Variables filtervars_;
   ObsFilterData data_;

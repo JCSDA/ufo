@@ -67,6 +67,8 @@ class GeoVaLs : public util::Printable,
   size_t nlevs(const std::string & var) const;
   void get(std::vector<float> &, const std::string &) const;
   void get(std::vector<float> &, const std::string &, const int) const;
+  void get(std::vector<double> &, const std::string &, const int) const;
+  void put(const std::vector<double> &, const std::string &, const int) const;
 
   void read(const eckit::Configuration &, const ioda::ObsSpace &);
   void analytic_init(const Locations &, const eckit::Configuration &);
