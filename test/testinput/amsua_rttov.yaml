@@ -15,7 +15,7 @@ Observations:
     ObsSpace: 
       name: Radiance
       ObsDataIn:
-        obsfile: Data/ioda_metop_2_amsua.nc4
+        obsfile: Data/ioda/testinput_tier_1/ioda_metop_2_amsua.nc4
       simulate:
         variables: [brightness_temperature]
         channels: 5

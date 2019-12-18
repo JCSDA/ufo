@@ -25,7 +25,7 @@ Observations:
     ObsSpace:
       name: GeosAod
       ObsDataIn:
-        obsfile: Data/geos_aod_obs_2018041500_m.nc4
+        obsfile: Data/ioda/testinput_tier_1/geos_aod_obs_2018041500_m.nc4
       simulate:
         variables: [Total_Aerosol_Optical_Depth_550]    
       ObsBias: {}    

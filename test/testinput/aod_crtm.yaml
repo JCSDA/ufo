@@ -19,7 +19,7 @@ Observations:
    ObsSpace: 
      name: Aod
      ObsDataIn: 
-       obsfile: Data/aod_obs_2018041500_m.nc4
+       obsfile: Data/ioda/testinput_tier_1/aod_obs_2018041500_m.nc4
      simulate:
        variables: [aerosol_optical_depth]
        channels: 4

@@ -159,60 +159,34 @@ list( APPEND ufo_test_data
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Data)
 CREATE_SYMLINK_FILENAME( ${CMAKE_CURRENT_SOURCE_DIR}/testinput ${CMAKE_CURRENT_BINARY_DIR}/Data ${ufo_test_data} )
 
-# Add ioda obs test data
-list (APPEND ioda_obs_test_data
-  atmosphere/abi_g16_obs_2019042306_m.nc4
-  atmosphere/ahi_himawari8_obs_2019042306_m.nc4
-  atmosphere/aircraft_obs_2018041500_m.nc4
-  atmosphere/aircraft_obs_2018041500_s.nc4
-  atmosphere/airs_aqua_obs_2018041500_m.nc4
-  atmosphere/amsua_n19_obs_2018041500_m.nc4
-  atmosphere/amsua_n19_obs_2018041500_m_bc.nc4
-  atmosphere/amsua_n19_obs_2018041500_s.nc4
-  atmosphere/aod_obs_2018041500_m.nc4
-  atmosphere/aod_obs_2018041500_s.nc4
-  atmosphere/atms_npp_obs_2018041500_m.nc4
-  atmosphere/cris-fsr_npp_obs_2018041500_m.nc4
-  atmosphere/geos_aod_obs_2018041500_m.nc4
-  atmosphere/gmi_gpm_obs_2018041500_m.nc4
-  atmosphere/gnssro_obs_2018041500_s.nc4
-  atmosphere/gnssro_obs_2018041500_m.nc4
-  atmosphere/gnssro_obs_2018041500_l.nc4
-  atmosphere/gsisfc_tsen_obs_2018041500_m.nc4
-  atmosphere/gsisfc_uv_obs_2018041500_m.nc4
-  atmosphere/hirs4_metop-a_obs_2018041500_m.nc4
-  atmosphere/iasi_metop-a_obs_2018041500_m.nc4
-  atmosphere/ioda_metop_2_amsua.nc4
-  atmosphere/mhs_n19_obs_2018041500_m.nc4
-  atmosphere/radar_dbz_obs_2019052222.nc4
-  atmosphere/radar_rw_obs_2019052222.nc4
-  atmosphere/satwind_obs_2018041500_m.nc4
-  atmosphere/satwind_obs_2018041500_s.nc4
-  atmosphere/sbuv2_n19_obs_2018041500_m.nc4
-  atmosphere/scatwind_obs_2018041500_m.nc4
-  atmosphere/seviri_m08_obs_2018041500_m.nc4
-  atmosphere/sfc_obs_2018041500_m.nc4
-  atmosphere/sndrd1_g15_obs_2018041500_m.nc4
-  atmosphere/sndrd2_g15_obs_2018041500_m.nc4
-  atmosphere/sndrd3_g15_obs_2018041500_m.nc4
-  atmosphere/sndrd4_g15_obs_2018041500_m.nc4
-  atmosphere/sondes_obs_2018041500_m.nc4
-  atmosphere/sondes_obs_2018041500_s.nc4
-  atmosphere/sondes_obs_2018041500_vs.nc4
-  atmosphere/ssmis_f18_obs_2018041500_m.nc4
-  atmosphere/sfc_obs_2018041500_m.nc4
-  atmosphere/windprof_obs_2018041500_m.nc4
-  marine/coolskin_fake_obs_2018041500.nc
-  marine/cryosat2-2018-04-15.nc
-  marine/icec-2018-04-15.nc
-  marine/Jason-2-2018-04-15.nc
-  marine/profile_2018-04-15.nc
-  marine/sst_obs-2018-04-15.nc4
-  )
+# IODA test files
 
-CREATE_SYMLINK_FILENAME( ${ioda_SOURCE_DIR}/test/testinput
-                         ${CMAKE_CURRENT_BINARY_DIR}/Data
-                         ${ioda_obs_test_data} )
+if( NOT DEFINED LOCAL_PATH_TESTFILES )
+  list( APPEND ufo_ioda_test_data
+      testinput_tier_1.tar.gz
+      )
+  set(ECBUILD_DOWNLOAD_BASE_URL https://jedi-test-files.s3.amazonaws.com/ioda)
+
+  ecbuild_get_test_multidata ( TARGET get_ioda_test_data_ufo
+                               NAMES ${ufo_ioda_test_data}
+                               DIRNAME develop
+                               EXTRACT
+                             )
+  execute_process( COMMAND ${CMAKE_COMMAND} -E create_symlink
+                 ${PROJECT_SOURCE_DIR}/test_data_download
+                 ${CMAKE_CURRENT_BINARY_DIR}/Data/ioda
+                 )
+else()
+  execute_process( COMMAND ${CMAKE_COMMAND} -E create_symlink
+                 ${LOCAL_PATH_TESTFILES}
+                 ${CMAKE_CURRENT_BINARY_DIR}/Data/ioda
+                 )
+endif()
+
+
+#CREATE_SYMLINK_FILENAME( ${ioda_SOURCE_DIR}/test/testinput
+#                         ${CMAKE_CURRENT_BINARY_DIR}/Data
+#                         ${ioda_obs_test_data} )
 
 #####################################################################
 
