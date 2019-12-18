@@ -79,7 +79,7 @@ void BackgroundCheckRONBAM::applyFilter(const std::vector<bool> & apply,
     data_.get(varhofx.variable(jv), hofx);
 
     for (size_t jobs = 0; jobs < obsdb_.nlocs(); ++jobs) {
-      if (apply[jobs] && flags_[iv][jobs] == 0) {
+      if (apply[jobs] && (*flags_)[iv][jobs] == 0) {
         size_t iobs = observed.size() * jobs + iv;
         ASSERT(obs[jv][jobs] != util::missingValue(obs[jv][jobs]));
         ASSERT(hofx[jobs] != util::missingValue(hofx[jobs]));

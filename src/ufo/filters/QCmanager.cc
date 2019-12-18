@@ -32,7 +32,7 @@ namespace ufo {
 QCmanager::QCmanager(ioda::ObsSpace & obsdb, const eckit::Configuration & config,
                      boost::shared_ptr<ioda::ObsDataVector<int> > qcflags,
                      boost::shared_ptr<ioda::ObsDataVector<float> > obserr)
-  : obsdb_(obsdb), config_(config), nogeovals_(), nodiags_(), flags_(*qcflags),
+  : obsdb_(obsdb), config_(config), nogeovals_(), nodiags_(), flags_(qcflags),
     observed_(obsdb.obsvariables())
 {
   oops::Log::trace() << "QCmanager::QCmanager starting " << config_ << std::endl;
@@ -40,8 +40,8 @@ QCmanager::QCmanager(ioda::ObsSpace & obsdb, const eckit::Configuration & config
   ASSERT(qcflags);
   ASSERT(obserr);
 
-  ASSERT(flags_.nvars() == observed_.size());
-  ASSERT(flags_.nlocs() == obsdb_.nlocs());
+  ASSERT(flags_->nvars() == observed_.size());
+  ASSERT(flags_->nlocs() == obsdb_.nlocs());
   ASSERT(obserr->nvars() == observed_.size());
   ASSERT(obserr->nlocs() == obsdb_.nlocs());
 
@@ -52,8 +52,8 @@ QCmanager::QCmanager(ioda::ObsSpace & obsdb, const eckit::Configuration & config
 
   for (size_t jv = 0; jv < observed_.size(); ++jv) {
     for (size_t jobs = 0; jobs < obsdb_.nlocs(); ++jobs) {
-      if (flags_[jv][jobs] == imiss || obs[jv][jobs] == rmiss || (*obserr)[jv][jobs] == rmiss) {
-        flags_[jv][jobs] = QCflags::missing;
+      if ((*flags_)[jv][jobs] == imiss || obs[jv][jobs] == rmiss || (*obserr)[jv][jobs] == rmiss) {
+        (*flags_)[jv][jobs] = QCflags::missing;
       }
     }
   }
@@ -71,8 +71,8 @@ void QCmanager::postFilter(const ioda::ObsVector & hofx, const ObsDiagnostics &)
   for (size_t jv = 0; jv < observed_.size(); ++jv) {
     for (size_t jobs = 0; jobs < obsdb_.nlocs(); ++jobs) {
       size_t iobs = observed_.size() * jobs + jv;
-      if (flags_[jv][jobs] == 0 && hofx[iobs] == missing) {
-        flags_[jv][jobs] = QCflags::Hfailed;
+      if ((*flags_)[jv][jobs] == 0 && hofx[iobs] == missing) {
+        (*flags_)[jv][jobs] = QCflags::Hfailed;
       }
     }
   }
@@ -107,19 +107,19 @@ void QCmanager::print(std::ostream & os) const {
     size_t iseaice  = 0;
 
     for (size_t jobs = 0; jobs < iobs; ++jobs) {
-      if (flags_[jj][jobs] == QCflags::pass)    ++ipass;
-      if (flags_[jj][jobs] == QCflags::missing) ++imiss;
-      if (flags_[jj][jobs] == QCflags::preQC)   ++ipreq;
-      if (flags_[jj][jobs] == QCflags::bounds)  ++ibnds;
-      if (flags_[jj][jobs] == QCflags::domain)  ++iwhit;
-      if (flags_[jj][jobs] == QCflags::black)   ++iblck;
-      if (flags_[jj][jobs] == QCflags::Hfailed) ++iherr;
-      if (flags_[jj][jobs] == QCflags::fguess)  ++ifgss;
-      if (flags_[jj][jobs] == QCflags::thinned) ++ithin;
-      if (flags_[jj][jobs] == QCflags::clw)     ++iclw;
-      if (flags_[jj][jobs] == QCflags::diffref) ++idiffref;
-      if (flags_[jj][jobs] == QCflags::seaice)  ++iseaice;
-      if (flags_[jj][jobs] == 76 || flags_[jj][jobs] == 77)  ++ignss;
+      if ((*flags_)[jj][jobs] == QCflags::pass)    ++ipass;
+      if ((*flags_)[jj][jobs] == QCflags::missing) ++imiss;
+      if ((*flags_)[jj][jobs] == QCflags::preQC)   ++ipreq;
+      if ((*flags_)[jj][jobs] == QCflags::bounds)  ++ibnds;
+      if ((*flags_)[jj][jobs] == QCflags::domain)  ++iwhit;
+      if ((*flags_)[jj][jobs] == QCflags::black)   ++iblck;
+      if ((*flags_)[jj][jobs] == QCflags::Hfailed) ++iherr;
+      if ((*flags_)[jj][jobs] == QCflags::fguess)  ++ifgss;
+      if ((*flags_)[jj][jobs] == QCflags::thinned) ++ithin;
+      if ((*flags_)[jj][jobs] == QCflags::clw)     ++iclw;
+      if ((*flags_)[jj][jobs] == QCflags::diffref) ++idiffref;
+      if ((*flags_)[jj][jobs] == QCflags::seaice)  ++iseaice;
+      if ((*flags_)[jj][jobs] == 76 || (*flags_)[jj][jobs] == 77)  ++ignss;
     }
 
     obsdb_.comm().allReduceInPlace(iobs, eckit::mpi::sum());
@@ -139,7 +139,7 @@ void QCmanager::print(std::ostream & os) const {
 
 
     if (obsdb_.comm().rank() == 0) {
-      const std::string info = "QC " + flags_.obstype() + " " + observed_[jj] + ": ";
+      const std::string info = "QC " + flags_->obstype() + " " + observed_[jj] + ": ";
       if (imiss > 0) os << info << imiss << " missing values." << std::endl;
       if (ipreq > 0) os << info << ipreq << " rejected by pre QC." << std::endl;
       if (ibnds > 0) os << info << ibnds << " out of bounds." << std::endl;
