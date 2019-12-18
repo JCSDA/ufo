@@ -337,7 +337,7 @@ std::vector<size_t> TemporalThinning::getValidObservationIds(
     const std::vector<bool> & apply) const {
   std::vector<size_t> validObsIds;
   for (size_t obsId = 0; obsId < apply.size(); ++obsId)
-    if (apply[obsId] && flags_[0][obsId] == QCflags::pass)
+    if (apply[obsId] && (*flags_)[0][obsId] == QCflags::pass)
       validObsIds.push_back(obsId);
   return validObsIds;
 }
