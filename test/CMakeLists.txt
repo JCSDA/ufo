@@ -183,11 +183,6 @@ else()
                  )
 endif()
 
-
-#CREATE_SYMLINK_FILENAME( ${ioda_SOURCE_DIR}/test/testinput
-#                         ${CMAKE_CURRENT_BINARY_DIR}/Data
-#                         ${ioda_obs_test_data} )
-
 #####################################################################
 
 ecbuild_add_executable( TARGET  test_ObsOperator.x
