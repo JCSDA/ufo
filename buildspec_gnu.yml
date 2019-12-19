@@ -121,6 +121,7 @@ phases:
       - cd /jcsda/ufo-bundle
       - pwd
       - ls
+      - ls -lt /jcsda/ufo-bundle/ufo
       - sed -i 's/BRANCH develop  UPDATE//' CMakeLists.txt
       - sed -i 's/BRANCH develop //' CMakeLists.txt
       - sed -i -e '/ecbuild_bundle( PROJECT ufo/i\
@@ -129,7 +130,7 @@ phases:
         ecbuild_bundle( PROJECT geos-aero  GIT "https://github.com/JCSDA/geos-aero.git" )' CMakeLists.txt
       - cat CMakeLists.txt
       - chown -R jcsdauser:jcsda /jcsda/ufo-bundle/ufo/test_data_download
-
+      - ls -lt /jcsda/ufo-bundle/ufo
   build:
     commands:
       - echo Executing build phase
