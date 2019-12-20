@@ -47,11 +47,11 @@ void ROobserror::applyFilter(const std::vector<bool> & apply,
                              const Variables & filtervars,
                              std::vector<std::vector<bool>> & flagged) const {
   oops::Log::trace() << "ROobserror using priorFilter" << std::endl;
-  flags_.save("FortranQC");    // should pass values to fortran properly
-  obserr_.save("FortranERR");  // should pass values to fortran properly
+  flags_->save("FortranQC");    // should pass values to fortran properly
+  obserr_->save("FortranERR");  // should pass values to fortran properly
   ufo_roobserror_prior_f90(key_);
-  flags_.read("FortranQC");    // should get values from fortran properly
-  obserr_.read("FortranERR");  // should get values from fortran properly
+  flags_->read("FortranQC");    // should get values from fortran properly
+  obserr_->read("FortranERR");  // should get values from fortran properly
 }
 
 // -----------------------------------------------------------------------------
