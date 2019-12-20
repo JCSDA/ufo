@@ -291,7 +291,7 @@ void ObsBiasRadianceGSI::computeObsBiasPredictors(
                    (h2o_frac[jl] + land_frac[jl] + ice_frac[jl] +  snow_frac[jl]);
   }
 
-  std::vector<std::vector<float>> tlap( nchanl , std::vector<float>(nlocs, 0.0));
+  std::vector<std::vector<float>> tlap(nchanl , std::vector<float>(nlocs, 0.0));
   if (std::find(predictors_.begin(), predictors_.end(),
               "lapse_rate_squared") != predictors_.end() ||
       std::find(predictors_.begin(), predictors_.end(),
@@ -323,9 +323,9 @@ void ObsBiasRadianceGSI::computeObsBiasPredictors(
     float tlapchn;
     for (std::size_t jl = 0; jl < nlocs; ++jl) {
       for (std::size_t jc = 0; jc < nchanl; ++jc) {
-          tlapchn=(ptau5[jc][1][jl]-ptau5[jc][0][jl])*(tsavg5[jl]-tvp[1][jl]);
+          tlapchn = (ptau5[jc][1][jl]-ptau5[jc][0][jl])*(tsavg5[jl]-tvp[1][jl]);
           for (std::size_t k = 1; k < nlevs-1; ++k) {
-            tlapchn=tlapchn+(ptau5[jc][k+1][jl]-ptau5[jc][k][jl])*(tvp[k-1][jl]-tvp[k+1][jl]);
+            tlapchn = tlapchn+(ptau5[jc][k+1][jl]-ptau5[jc][k][jl])*(tvp[k-1][jl]-tvp[k+1][jl]);
           }
           if (!newpc4pred_) {
             tlapchn = 0.01*tlapchn;
