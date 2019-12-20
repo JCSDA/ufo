@@ -69,8 +69,10 @@ character(len=MAXVARLEN), public, parameter :: var_sfc_fact10  = "wind_reduction
 character(len=MAXVARLEN), public, parameter :: var_sfc_emiss   = "surface_emissivity"
 character(len=MAXVARLEN), public, parameter :: var_opt_depth   = "optical_thickness_of_atmosphere_layer"
 character(len=MAXVARLEN), public, parameter :: var_radiance    = "toa_outgoing_radiance_per_unit_wavenumber"
-character(len=MAXVARLEN), public, parameter :: var_tb     = "brightness_temperature"
-character(len=MAXVARLEN), public, parameter :: var_tb_clr = "brightness_temperature_assuming_clear_sky"
+character(len=MAXVARLEN), public, parameter :: var_tb          = "brightness_temperature"
+character(len=MAXVARLEN), public, parameter :: var_tb_clr      = "brightness_temperature_assuming_clear_sky"
+character(len=MAXVARLEN), public, parameter :: var_lvl_transmit= "transmittances_of_atmosphere_layer"
+character(len=MAXVARLEN), public, parameter :: var_tsavg5      = "average_surface_temperature_within_field_of_view"
 
 
 character(len=MAXVARLEN), public, parameter :: var_refl        = "equivalent_reflectivity_factor"
