@@ -421,7 +421,7 @@ real(kind_real), allocatable :: TmpVar(:)
                     total_od = 0.0
                     do jlevel = 1, self%n_Layers
                        total_od   = total_od + rts(jchannel,jprofile) % layer_optical_depth(jlevel)
-                       hofxdiags%geovals(jvar)%vals(self%n_Layers-jlevel+1,jprofile) = &
+                       hofxdiags%geovals(jvar)%vals(jlevel,jprofile) = &
                           exp(-min(limit_exp,total_od*secant_term))
                     end do
                  end if

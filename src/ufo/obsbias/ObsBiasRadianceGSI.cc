@@ -53,15 +53,7 @@ ObsBiasRadianceGSI::ObsBiasRadianceGSI(ioda::ObsSpace & odb,
 // GeoVals needed from model
   const std::vector<std::string> vv0{"air_temperature",
                                      "air_pressure",
-                                     "air_pressure_levels",
                                      "water_area_fraction",
-                                     "land_area_fraction",
-                                     "ice_area_fraction",
-                                     "surface_snow_area_fraction",
-                                     "surface_temperature_where_sea",
-                                     "surface_temperature_where_land",
-                                     "surface_temperature_where_ice",
-                                     "surface_temperature_where_snow",
                                      "average_surface_temperature_within_field_of_view"
                                     };
   geovars_.reset(new oops::Variables(vv0));
@@ -263,34 +255,18 @@ void ObsBiasRadianceGSI::computeObsBiasPredictors(
     odb_.get_db("MetaData", "sensor_azimuth_angle", node);
   }
 
-  // Compute the surface temperature (revisit may need)
+  // retrieve the average surface temperature
   std::vector<float> tsavg5(nlocs, 0.0);
-  std::vector<float> h2o_frac(nlocs);
-  std::vector<float> land_frac(nlocs);
-  std::vector<float> ice_frac(nlocs);
-  std::vector<float> snow_frac(nlocs);
-  std::vector<float> h2o_t(nlocs);
-  std::vector<float> land_t(nlocs);
-  std::vector<float> ice_t(nlocs);
-  std::vector<float> snow_t(nlocs);
   if (std::find(predictors_.begin(), predictors_.end(),
-              "cloud_liquid_water") != predictors_.end() ||
+              "lapse_rate_squared") != predictors_.end() ||
       std::find(predictors_.begin(), predictors_.end(),
-              "emissivity") != predictors_.end()) {
-    geovals.get(h2o_frac, "water_area_fraction");
-    geovals.get(land_frac, "land_area_fraction");
-    geovals.get(ice_frac, "ice_area_fraction");
-    geovals.get(snow_frac, "surface_snow_area_fraction");
-    geovals.get(h2o_t, "surface_temperature_where_sea");
-    geovals.get(land_t, "surface_temperature_where_land");
-    geovals.get(ice_t, "surface_temperature_where_ice");
-    geovals.get(snow_t, "surface_temperature_where_snow");
-    for (std::size_t jl = 0; jl < nlocs; ++jl)
-      tsavg5[jl] = (h2o_frac[jl]*h2o_t[jl] + land_frac[jl]*land_t[jl] +
-                    ice_frac[jl]*ice_t[jl] + snow_frac[jl]*snow_t[jl]) /
-                   (h2o_frac[jl] + land_frac[jl] + ice_frac[jl] +  snow_frac[jl]);
+              "lapse_rate") != predictors_.end()         ||
+      std::find(predictors_.begin(), predictors_.end(),
+              "cloud_liquid_water") != predictors_.end()) {
+    geovals.get(tsavg5, "average_surface_temperature_within_field_of_view");
   }
 
+  // calculate the lapse rate
   std::vector<std::vector<float>> tlap(nchanl , std::vector<float>(nlocs, 0.0));
   if (std::find(predictors_.begin(), predictors_.end(),
               "lapse_rate_squared") != predictors_.end() ||
@@ -318,14 +294,13 @@ void ObsBiasRadianceGSI::computeObsBiasPredictors(
       tvp.push_back(pred);
     }
     nlevs = geovals.nlevs("air_pressure");
-    // retrieve the average surface temperature
-    // geovals.get(tsavg5, "average_surface_temperature_within_field_of_view");
     float tlapchn;
     for (std::size_t jl = 0; jl < nlocs; ++jl) {
       for (std::size_t jc = 0; jc < nchanl; ++jc) {
-          tlapchn = (ptau5[jc][1][jl]-ptau5[jc][0][jl])*(tsavg5[jl]-tvp[1][jl]);
+          tlapchn = (ptau5[jc][nlevs-2][jl]-ptau5[jc][nlevs-1][jl])*(tsavg5[jl]-tvp[nlevs-2][jl]);
           for (std::size_t k = 1; k < nlevs-1; ++k) {
-            tlapchn = tlapchn+(ptau5[jc][k+1][jl]-ptau5[jc][k][jl])*(tvp[k-1][jl]-tvp[k+1][jl]);
+            tlapchn = tlapchn+(ptau5[jc][nlevs-k-2][jl]-ptau5[jc][nlevs-k-1][jl])*
+                      (tvp[nlevs-k][jl]-tvp[nlevs-k-2][jl]);
           }
           if (!newpc4pred_) {
             tlapchn = 0.01*tlapchn;
@@ -335,6 +310,7 @@ void ObsBiasRadianceGSI::computeObsBiasPredictors(
     }
   }
 
+  // retrieve the sensor view angle
   std::vector<float> view_angle(nlocs, 0.0);
   if (std::find(predictors_.begin(), predictors_.end(),
               "scan_angle_4th_order") != predictors_.end() ||
@@ -509,6 +485,8 @@ void ObsBiasRadianceGSI::computeObsBiasPredictors(
       indx += nchanl;
     } else if (predictors_[n] == "emissivity") {
       if (adp_anglebc_ && emiss_bc_) {
+        std::vector<float> h2o_frac(nlocs, 0.0);
+        geovals.get(h2o_frac, "water_area_fraction");
         for (std::size_t jc = 0; jc < nchanl; ++jc) {
           ydiags.get(pred, "brightness_temperature_jacobian_surface_emissivity_" +
                            std::to_string(channels_[jc]));
