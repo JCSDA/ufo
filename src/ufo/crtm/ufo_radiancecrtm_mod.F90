@@ -135,6 +135,7 @@ real(c_double) :: missing
 type(fckit_mpi_comm)  :: f_comm
 real(kind_real) :: total_od, secant_term
 real(kind_real), allocatable :: TmpVar(:)
+real(kind_real), allocatable :: Tao(:)
 
 integer :: n_Profiles, n_Layers, n_Channels
 logical, allocatable :: Skip_Profiles(:)
@@ -494,6 +495,36 @@ logical :: jacobian_needed
                   end if
                end do
                deallocate(TmpVar)
+
+            ! variable: weightingfunction_of_atmosphere_layer_CH
+            case (var_lvl_weightfunc)
+               ! get layer-to-space transmittance
+               hofxdiags%geovals(jvar)%nval = n_Layers
+               allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,n_Profiles))
+               hofxdiags%geovals(jvar)%vals = missing
+               allocate(TmpVar(n_Profiles))
+               allocate(Tao(n_Layers))
+               call obsspace_get_db(obss, "MetaData", "sensor_zenith_angle", TmpVar)
+               do jprofile = 1, n_Profiles
+                  if (.not.Skip_Profiles(jprofile)) then
+                     secant_term = one/cos(TmpVar(jprofile)*deg2rad)
+                     total_od = 0.0
+                     do jlevel = 1, n_Layers
+                        total_od = total_od + rts(jchannel,jprofile) % layer_optical_depth(jlevel)
+                        Tao(jlevel) = exp(-min(limit_exp,total_od*secant_term))
+                     end do
+                     do jlevel = n_Layers-1, 1, -1
+                        hofxdiags%geovals(jvar)%vals(jlevel,jprofile) = &
+                           abs( (Tao(jlevel+1)-Tao(jlevel))/ &
+                                (log(atm(jprofile)%pressure(jlevel+1))- &
+                                 log(atm(jprofile)%pressure(jlevel))) )
+                     end do
+                     hofxdiags%geovals(jvar)%vals(n_Layers,jprofile) = &
+                     hofxdiags%geovals(jvar)%vals(n_Layers-1,jprofile) 
+                  end if
+               end do
+               deallocate(TmpVar)
+               deallocate(Tao)
 
             case default
                write(err_msg,*) 'ufo_radiancecrtm_simobs: //&

@@ -1,0 +1,25 @@
+window_begin: 2018-04-14T20:00:00Z
+window_end: 2018-04-15T03:00:00Z
+ObsSpace:
+  name: amsua_n19
+  ObsDataIn:
+    obsfile: Data/amsua_n19_obs_2018041500_m_bc3.nc4
+  simulate:
+    variables: [brightness_temperature]
+    channels: &all_channels 1-15 
+ObsOperator:
+  name: CRTM
+  Absorbers: [H2O,O3,CO2]
+  Clouds: [Water, Ice]
+  ObsOptions:
+    Sensor_ID: amsua_n19 
+    EndianType: little_endian
+    CoefficientPath: Data/
+GeoVaLs:
+  filename: Data/amsua_n19_geoval_2018041500_m_bc3.nc4
+ObsDiag:
+   variables: [optical_thickness_of_atmosphere_layer, transmittances_of_atmosphere_layer, weightingfunction_of_atmosphere_layer]
+   channels: *all_channels 
+Reference ObsDiag:
+  filename: Data/amsua_n19_obsdiag_2018041500_m_bc3.nc4
+tolerance: 1.e-6
