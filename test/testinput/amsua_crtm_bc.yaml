@@ -50,5 +50,5 @@ Observations:
                   scan_angle_3rd_order,
                   scan_angle_2nd_order,
                   scan_angle_1st_order]
-   vecequiv: GsiHofX
+   vecequiv: GsiHofXBc
    tolerance: 1.e-5
