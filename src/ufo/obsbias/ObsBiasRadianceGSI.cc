@@ -491,7 +491,7 @@ void ObsBiasRadianceGSI::computeObsBiasPredictors(
           ydiags.get(pred, "brightness_temperature_jacobian_surface_emissivity_" +
                            std::to_string(channels_[jc]));
           for (std::size_t jl = 0; jl < nlocs; ++jl) {
-            if (h2o_frac[jl] < 0.99 && abs(pred[jl]) > 0.001) {
+            if (h2o_frac[jl] < 0.99 && std::fabs(pred[jl]) > 0.001) {
               (*preds)[indx+jc][jl] = pred[jl];
             } else {
               (*preds)[indx+jc][jl] = 0.0;
