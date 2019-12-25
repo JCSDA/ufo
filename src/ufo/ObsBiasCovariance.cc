@@ -22,7 +22,7 @@ namespace ufo {
 
 // -----------------------------------------------------------------------------
 
-ObsBiasCovariance::ObsBiasCovariance(ioda::ObsSpace & obs, const eckit::Configuration & conf)
+ObsBiasCovariance::ObsBiasCovariance(const ioda::ObsSpace & obs, const eckit::Configuration & conf)
   : conf_(conf), variance_() {
   std::unique_ptr<ObsBiasBase> biasbase(ObsBiasFactory::create(obs, conf));
   if (biasbase) {

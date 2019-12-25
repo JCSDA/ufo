@@ -111,7 +111,7 @@ list( APPEND ufo_test_data
   atmosphere/airs_aqua_geoval_2018041500_m.nc4
   atmosphere/amsua_n19_obsdiag_2018041500_m_bc3.nc4
   atmosphere/amsua_n19_geoval_2018041500_m_bc3.nc4
-  atmosphere/amsua_n19_geoval_2018041500_m_bc2.nc4
+  atmosphere/amsua_n19_geoval_2018041500_m.nc4
   atmosphere/amsua_n19_geoval_2018041500_s.nc4
   atmosphere/aod_geoval_2018041500_m.nc4
   atmosphere/aod_geoval_2018041500_s.nc4
@@ -172,7 +172,7 @@ list (APPEND ioda_obs_test_data
   atmosphere/airs_aqua_obs_2018041500_m.nc4
   atmosphere/amsua_n19_obs_2018041500_m.nc4
   atmosphere/amsua_n19_obs_2018041500_m_bc3.nc4
-  atmosphere/amsua_n19_obs_2018041500_m_bc2.nc4
+  atmosphere/amsua_n19_obs_2018041500_m_bc.nc4
   atmosphere/amsua_n19_obs_2018041500_s.nc4
   atmosphere/aod_obs_2018041500_m.nc4
   atmosphere/aod_obs_2018041500_s.nc4

@@ -27,7 +27,7 @@ ObsBiasFactory::ObsBiasFactory(const std::string & name) {
 
 // -----------------------------------------------------------------------------
 
-ObsBiasBase * ObsBiasFactory::create(ioda::ObsSpace & os, const eckit::Configuration & conf) {
+ObsBiasBase * ObsBiasFactory::create(const ioda::ObsSpace & os, const eckit::Configuration & conf) {
   oops::Log::trace() << "ObsBiasBase::create starting" << std::endl;
   if (conf.has("ObsBias")) {
     std::string id = "";

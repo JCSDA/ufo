@@ -27,10 +27,10 @@ static ObsBiasMaker<ObsBiasRadianceGSI> makerBiasRadianceGSI_("GSI");
 
 // -----------------------------------------------------------------------------
 
-ObsBiasRadianceGSI::ObsBiasRadianceGSI(ioda::ObsSpace & odb,
+ObsBiasRadianceGSI::ObsBiasRadianceGSI(const ioda::ObsSpace & odb,
                                        const eckit::Configuration & conf)
   : ObsBiasBase(), odb_(odb), geovars_(), hdiags_(), tlapmean_(),
-    newpc4pred_(false), adp_anglebc_(false), emiss_bc_(false), predictors_() {
+    newpc4pred_(false), adp_anglebc_(false), emiss_bc_(false), predictors_(), predNames_() {
 // Default predictor names from GSI
   predictors_ = {"constant",
                  "scan_angle",
@@ -45,11 +45,16 @@ ObsBiasRadianceGSI::ObsBiasRadianceGSI(ioda::ObsSpace & odb,
                  "scan_angle_2nd_order",
                  "scan_angle_1st_order"
                 };
+// Retrive the channels
+  channels_ = odb_.obsvariables().channels();
+
 // Parse predictors from the conf
   if (conf.has("ObsBias.predictors")) {
     predictors_.clear();
     predictors_ = conf.getStringVector("ObsBias.predictors");
+    predNames_.reset(new oops::Variables(predictors_, channels_));
   }
+
 // GeoVals needed from model
   const std::vector<std::string> vv0{"air_temperature",
                                      "air_pressure",
@@ -68,9 +73,6 @@ ObsBiasRadianceGSI::ObsBiasRadianceGSI(ioda::ObsSpace & odb,
 // Parse Sensor_ID from the conf
   const eckit::LocalConfiguration obsoprconf(conf, "ObsOperator");
   sensor_id_ = obsoprconf.getString("ObsOptions.Sensor_ID");
-
-// Retrive the channels
-  channels_ = odb_.obsvariables().channels();
 
 // Replace "_CH" in hdiags_ with digitial Channel ID
   std::vector<std::string> vvtmp;
@@ -158,29 +160,21 @@ void ObsBiasRadianceGSI::write(const eckit::Configuration & conf) const {
 
 // -----------------------------------------------------------------------------
 
-void ObsBiasRadianceGSI::computeObsBias(const GeoVaLs & geovals,
-                                        ioda::ObsVector & ybias,
-                                        const ObsDiagnostics & ydiags) const {
+void ObsBiasRadianceGSI::computeObsBias(ioda::ObsVector & ybias,
+                                        std::unique_ptr<ioda::ObsDataVector<float>> & predTerms)
+                                        const {
   const std::size_t npred = predictors_.size();
   const std::size_t nchanl = channels_.size();
   const std::size_t nlocs = ybias.nlocs();
   ASSERT(ybias.nlocs() == odb_.nlocs());
 
-  // Compute the predictors
-  std::unique_ptr<ioda::ObsDataVector<float>> pred_terms;
-  this->computeObsBiasPredictors(geovals, ydiags, pred_terms);
-
-  pred_terms->save("ObsBiasPredictor");
-
   for (std::size_t n = 0; n < npred; ++n) {
     for (std::size_t jc = 0; jc < nchanl; ++jc) {
       for (std::size_t jl = 0; jl < nlocs; ++jl) {
-        (*pred_terms)[n*nchanl+jc][jl] = biascoeffs_[jc*npred+n] * (*pred_terms)[n*nchanl+jc][jl];
+        (*predTerms)[n*nchanl+jc][jl] = biascoeffs_[jc*npred+n] * (*predTerms)[n*nchanl+jc][jl];
       }
     }
   }
-
-  pred_terms->save("ObsBiasTerm");
 
   ybias.zero();
   // Loop through each location
@@ -189,7 +183,7 @@ void ObsBiasRadianceGSI::computeObsBias(const GeoVaLs & geovals,
     for (std::size_t jc = 0; jc < nchanl; ++jc) {
       // Linear combination
       for (std::size_t n = 0; n < npred; ++n) {
-        ybias[jl*nchanl+jc] += (*pred_terms)[n*nchanl+jc][jl];
+        ybias[jl*nchanl+jc] += (*predTerms)[n*nchanl+jc][jl];
       }
     }
   }
@@ -207,15 +201,7 @@ void ObsBiasRadianceGSI::computeObsBiasPredictors(
   const std::size_t nlocs = odb_.nlocs();
   const std::size_t nchanl = channels_.size();
 
-  if (!preds) {
-    std::vector<std::string> bias_term_names;
-    for (std::size_t n = 0; n < npred; ++n) {
-      bias_term_names.push_back(predictors_[n] + "_bias_correction_term");
-    }
-    const oops::Variables pred_vars(bias_term_names, channels_);
-    preds.reset(new ioda::ObsDataVector<float>(odb_, pred_vars, "", false));
-  }
-  ASSERT(preds->nvars() == npred*nchanl);
+  ASSERT(preds && preds->nvars() == npred*nchanl);
 
   // Following variables should be moved to yaml file ?
   const float ssmis_precond = 0.01;  //  default preconditioner for ssmis bias terms

@@ -41,7 +41,8 @@ class ObsBias : public util::Printable,
  public:
   static const std::string classname() {return "ufo::ObsBias";}
 
-  ObsBias(ioda::ObsSpace &, const eckit::Configuration &);
+  ObsBias(const ioda::ObsSpace &, const eckit::Configuration &);
+  ObsBias(const ObsBias &, const bool);
   ~ObsBias() {}
 
   ObsBias & operator+=(const ObsBiasIncrement &);
@@ -57,7 +58,8 @@ class ObsBias : public util::Printable,
   const double & operator[](const unsigned int ii) const {return (*biasbase_)[ii];}
 
 /// Obs bias model
-  void computeObsBias(const GeoVaLs &, ioda::ObsVector &, const ObsDiagnostics &) const;
+  void computeObsBias(ioda::ObsVector &,
+                      std::unique_ptr<ioda::ObsDataVector<float>> &) const;
 
 /// Obs Bias Predictors
   void computeObsBiasPredictors(const GeoVaLs &, const ObsDiagnostics &,
@@ -66,6 +68,7 @@ class ObsBias : public util::Printable,
 /// Other
   const oops::Variables & requiredGeoVaLs() const {return geovars_;}
   const oops::Variables & requiredHdiagnostics() const {return hdiags_;}
+  const oops::Variables & predNames() const {return predNames_;}
   const eckit::Configuration & config() const {return conf_;}
   const ioda::ObsSpace & obspace() const {return biasbase_->obspace();}
 
@@ -78,6 +81,7 @@ class ObsBias : public util::Printable,
   const eckit::LocalConfiguration conf_;
   oops::Variables geovars_;
   oops::Variables hdiags_;
+  oops::Variables predNames_;
 };
 
 // -----------------------------------------------------------------------------

@@ -37,7 +37,12 @@ void ObsOperator::simulateObs(const GeoVaLs & gvals, ioda::ObsVector & yy,
   oper_->simulateObs(gvals, yy, ydiags);
   if (bias) {
     ioda::ObsVector ybias(odb_);
-    bias.computeObsBias(gvals, ybias, ydiags);
+    std::unique_ptr<ioda::ObsDataVector<float>>
+      predTerms(new ioda::ObsDataVector<float>(odb_, bias.predNames(), "", false));
+    bias.computeObsBiasPredictors(gvals, ydiags, predTerms);
+    predTerms->save("ObsBiasPredictors");
+    bias.computeObsBias(ybias, predTerms);
+    predTerms->save("ObsBiasTerm");
     ybias.save("ObsBias");
   }
 }

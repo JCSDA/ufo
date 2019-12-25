@@ -37,7 +37,7 @@ class ObsBiasCovariance : public util::Printable,
   static const std::string classname() {return "ufo::ObsBiasCovariance";}
 
 /// Constructor, destructor
-  ObsBiasCovariance(ioda::ObsSpace &, const eckit::Configuration &);
+  ObsBiasCovariance(const ioda::ObsSpace &, const eckit::Configuration &);
   ~ObsBiasCovariance() {}
 
 /// Linear algebra operators
