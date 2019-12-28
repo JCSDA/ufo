@@ -67,14 +67,14 @@ void ObsBias::write(const eckit::Configuration & conf) const {
 // -----------------------------------------------------------------------------
 
 void ObsBias::computeObsBias(ioda::ObsVector & ybias,
-                             std::unique_ptr<ioda::ObsDataVector<float>> & predTerms) const {
+                             ioda::ObsDataVector<float> & predTerms) const {
   if (biasbase_) biasbase_->computeObsBias(ybias, predTerms);
 }
 
 // -----------------------------------------------------------------------------
 
 void ObsBias::computeObsBiasPredictors(const GeoVaLs & geovals, const ObsDiagnostics & ydiags,
-                                       std::unique_ptr<ioda::ObsDataVector<float>> & preds)
+                                       ioda::ObsDataVector<float> & preds)
                                        const {
   if (biasbase_) biasbase_->computeObsBiasPredictors(geovals, ydiags, preds);
 }

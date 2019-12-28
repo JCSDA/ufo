@@ -50,7 +50,6 @@ ObsBiasRadianceGSI::ObsBiasRadianceGSI(const ioda::ObsSpace & odb,
 
 // Parse predictors from the conf
   if (conf.has("ObsBias.predictors")) {
-    predictors_.clear();
     predictors_ = conf.getStringVector("ObsBias.predictors");
     predNames_.reset(new oops::Variables(predictors_, channels_));
   }
@@ -161,7 +160,7 @@ void ObsBiasRadianceGSI::write(const eckit::Configuration & conf) const {
 // -----------------------------------------------------------------------------
 
 void ObsBiasRadianceGSI::computeObsBias(ioda::ObsVector & ybias,
-                                        std::unique_ptr<ioda::ObsDataVector<float>> & predTerms)
+                                        ioda::ObsDataVector<float> & predTerms)
                                         const {
   const std::size_t npred = predictors_.size();
   const std::size_t nchanl = channels_.size();
@@ -171,7 +170,7 @@ void ObsBiasRadianceGSI::computeObsBias(ioda::ObsVector & ybias,
   for (std::size_t n = 0; n < npred; ++n) {
     for (std::size_t jc = 0; jc < nchanl; ++jc) {
       for (std::size_t jl = 0; jl < nlocs; ++jl) {
-        (*predTerms)[n*nchanl+jc][jl] = biascoeffs_[jc*npred+n] * (*predTerms)[n*nchanl+jc][jl];
+        predTerms[n*nchanl+jc][jl] = biascoeffs_[jc*npred+n] * predTerms[n*nchanl+jc][jl];
       }
     }
   }
@@ -183,7 +182,7 @@ void ObsBiasRadianceGSI::computeObsBias(ioda::ObsVector & ybias,
     for (std::size_t jc = 0; jc < nchanl; ++jc) {
       // Linear combination
       for (std::size_t n = 0; n < npred; ++n) {
-        ybias[jl*nchanl+jc] += (*predTerms)[n*nchanl+jc][jl];
+        ybias[jl*nchanl+jc] += predTerms[n*nchanl+jc][jl];
       }
     }
   }
@@ -196,12 +195,12 @@ void ObsBiasRadianceGSI::computeObsBias(ioda::ObsVector & ybias,
 void ObsBiasRadianceGSI::computeObsBiasPredictors(
                                     const GeoVaLs & geovals,
                                     const ObsDiagnostics & ydiags,
-                                    std::unique_ptr<ioda::ObsDataVector<float>> & preds) const {
+                                    ioda::ObsDataVector<float> & preds) const {
   const std::size_t npred = predictors_.size();
   const std::size_t nlocs = odb_.nlocs();
   const std::size_t nchanl = channels_.size();
 
-  ASSERT(preds && preds->nvars() == npred*nchanl);
+  ASSERT(preds.nvars() == npred*nchanl);
 
   // Following variables should be moved to yaml file ?
   const float ssmis_precond = 0.01;  //  default preconditioner for ssmis bias terms
@@ -316,12 +315,12 @@ void ObsBiasRadianceGSI::computeObsBiasPredictors(
       if (!newpc4pred_) {
         for (std::size_t jc = 0; jc < nchanl; ++jc) {
           for (std::size_t jl = 0; jl < nlocs; ++jl)
-            (*preds)[indx+jc][jl] = 0.01;
+            preds[indx+jc][jl] = 0.01;
         }
       } else {
         for (std::size_t jc = 0; jc < nchanl; ++jc) {
           for (std::size_t jl = 0; jl < nlocs; ++jl)
-            (*preds)[indx+jc][jl] = 1.0;
+            preds[indx+jc][jl] = 1.0;
         }
       }
       indx += nchanl;
@@ -330,24 +329,24 @@ void ObsBiasRadianceGSI::computeObsBiasPredictors(
         if (ssmi || ssmis || amsre || gmi || amsr2) {
           for (std::size_t jc = 0; jc < nchanl; ++jc) {
             for (std::size_t jl = 0; jl < nlocs; ++jl)
-              (*preds)[indx+jc][jl] = 0.0;
+              preds[indx+jc][jl] = 0.0;
           }
         } else {
           for (std::size_t jc = 0; jc < nchanl; ++jc) {
             for (std::size_t jl = 0; jl < nlocs; ++jl)
-              (*preds)[indx+jc][jl] = 0.10*pow(1.0/cos(zasat[jl]) - 1.0, 2) - .015;
+              preds[indx+jc][jl] = 0.10*pow(1.0/cos(zasat[jl]) - 1.0, 2) - .015;
           }
         }
       } else {
         if (adp_anglebc_) {
           for (std::size_t jc = 0; jc < nchanl; ++jc) {
             for (std::size_t jl = 0; jl < nlocs; ++jl)
-              (*preds)[indx+jc][jl] = 0.0;
+              preds[indx+jc][jl] = 0.0;
           }
         } else {
           for (std::size_t jc = 0; jc < nchanl; ++jc) {
             for (std::size_t jl = 0; jl < nlocs; ++jl)
-              (*preds)[indx+jc][jl] = pow(1.0/cos(zasat[jl]) - 1.0, 2);
+              preds[indx+jc][jl] = pow(1.0/cos(zasat[jl]) - 1.0, 2);
           }
         }
       }
@@ -398,25 +397,25 @@ void ObsBiasRadianceGSI::computeObsBiasPredictors(
       if (amsre) {
         for (std::size_t jc = 0; jc < nchanl; ++jc) {
           for (std::size_t jl = 0; jl < nlocs; ++jl)
-            (*preds)[indx+jc][jl] = clw[jl];
+            preds[indx+jc][jl] = clw[jl];
         }
       } else {
         for (std::size_t jc = 0; jc < nchanl; ++jc) {
           for (std::size_t jl = 0; jl < nlocs; ++jl)
-            (*preds)[indx+jc][jl] = clw[jl]*cos(zasat[jl]*cos(zasat[jl]));
+            preds[indx+jc][jl] = clw[jl]*cos(zasat[jl]*cos(zasat[jl]));
         }
       }
       indx += nchanl;
     } else if (predictors_[n] == "lapse_rate_squared") {
       for (std::size_t jc = 0; jc < nchanl; ++jc) {
         for (std::size_t jl = 0; jl < nlocs; ++jl)
-          (*preds)[indx+jc][jl] = tlap[jc][jl]*tlap[jc][jl];
+          preds[indx+jc][jl] = tlap[jc][jl]*tlap[jc][jl];
       }
       indx += nchanl;
     } else if (predictors_[n] == "lapse_rate") {
       for (std::size_t jc = 0; jc < nchanl; ++jc) {
         for (std::size_t jl = 0; jl < nlocs; ++jl)
-          (*preds)[indx+jc][jl] = tlap[jc][jl];
+          preds[indx+jc][jl] = tlap[jc][jl];
       }
       indx += nchanl;
     } else if (predictors_[n] == "cosine_of_latitude_times_orbit_node") {
@@ -425,22 +424,22 @@ void ObsBiasRadianceGSI::computeObsBiasPredictors(
           for (std::size_t jc = 0; jc < nchanl; ++jc) {
             for (std::size_t jl = 0; jl < nlocs; ++jl) {
               if (node[jl] < 1000) {
-                (*preds)[indx+jc][jl] = ssmis_precond*node[jl]*cos(cenlat[jl]*Constants::deg2rad);
+                preds[indx+jc][jl] = ssmis_precond*node[jl]*cos(cenlat[jl]*Constants::deg2rad);
               } else {
-                (*preds)[indx+jc][jl] = 0.0;
+                preds[indx+jc][jl] = 0.0;
               }
             }
           }
         } else {
           for (std::size_t jc = 0; jc < nchanl; ++jc) {
             for (std::size_t jl = 0; jl < nlocs; ++jl)
-              (*preds)[indx+jc][jl] = node[jl]*cos(cenlat[jl]*Constants::deg2rad);
+              preds[indx+jc][jl] = node[jl]*cos(cenlat[jl]*Constants::deg2rad);
           }
         }
       } else {
         for (std::size_t jc = 0; jc < nchanl; ++jc) {
             for (std::size_t jl = 0; jl < nlocs; ++jl)
-              (*preds)[indx+jc][jl] = 0.0;
+              preds[indx+jc][jl] = 0.0;
         }
       }
       indx += nchanl;
@@ -450,22 +449,22 @@ void ObsBiasRadianceGSI::computeObsBiasPredictors(
           for (std::size_t jc = 0; jc < nchanl; ++jc) {
             for (std::size_t jl = 0; jl < nlocs; ++jl) {
               if (node[jl] < 1000) {
-                (*preds)[indx+jc][jl] = ssmis_precond*sin(cenlat[jl]*Constants::deg2rad);
+                preds[indx+jc][jl] = ssmis_precond*sin(cenlat[jl]*Constants::deg2rad);
               } else {
-                (*preds)[indx+jc][jl] = 0.0;
+                preds[indx+jc][jl] = 0.0;
               }
             }
           }
         } else {
           for (std::size_t jc = 0; jc < nchanl; ++jc) {
             for (std::size_t jl = 0; jl < nlocs; ++jl)
-              (*preds)[indx+jc][jl] = sin(cenlat[jl]*Constants::deg2rad);
+              preds[indx+jc][jl] = sin(cenlat[jl]*Constants::deg2rad);
           }
         }
       } else {
         for (std::size_t jc = 0; jc < nchanl; ++jc) {
           for (std::size_t jl = 0; jl < nlocs; ++jl)
-            (*preds)[indx+jc][jl] = 0.0;
+            preds[indx+jc][jl] = 0.0;
         }
       }
       indx += nchanl;
@@ -478,35 +477,35 @@ void ObsBiasRadianceGSI::computeObsBiasPredictors(
                            std::to_string(channels_[jc]));
           for (std::size_t jl = 0; jl < nlocs; ++jl) {
             if (h2o_frac[jl] < 0.99 && std::fabs(pred[jl]) > 0.001) {
-              (*preds)[indx+jc][jl] = pred[jl];
+              preds[indx+jc][jl] = pred[jl];
             } else {
-              (*preds)[indx+jc][jl] = 0.0;
+              preds[indx+jc][jl] = 0.0;
             }
           }
         }
       } else {
         for (std::size_t jc = 0; jc < nchanl; ++jc) {
           for (std::size_t jl = 0; jl < nlocs; ++jl)
-            (*preds)[indx+jc][jl] = 0.0;
+            preds[indx+jc][jl] = 0.0;
         }
       }
       indx += nchanl;
     } else if (predictors_[n] == "scan_angle_4th_order") {
       for (std::size_t jc = 0; jc < nchanl; ++jc) {
         for (std::size_t jl = 0; jl < nlocs; ++jl)
-          (*preds)[indx+jc][jl] = pow(view_angle[jl]*Constants::deg2rad, 4);
+          preds[indx+jc][jl] = pow(view_angle[jl]*Constants::deg2rad, 4);
       }
       indx += nchanl;
     } else if (predictors_[n] == "scan_angle_3rd_order") {
       if (adp_anglebc_) {
         for (std::size_t jc = 0; jc < nchanl; ++jc) {
           for (std::size_t jl = 0; jl < nlocs; ++jl)
-            (*preds)[indx+jc][jl] = pow(view_angle[jl]*Constants::deg2rad, 3);
+            preds[indx+jc][jl] = pow(view_angle[jl]*Constants::deg2rad, 3);
         }
       } else {
         for (std::size_t jc = 0; jc < nchanl; ++jc) {
           for (std::size_t jl = 0; jl < nlocs; ++jl)
-            (*preds)[indx+jc][jl] = 0.0;
+            preds[indx+jc][jl] = 0.0;
         }
       }
       indx += nchanl;
@@ -514,12 +513,12 @@ void ObsBiasRadianceGSI::computeObsBiasPredictors(
       if (adp_anglebc_) {
         for (std::size_t jc = 0; jc < nchanl; ++jc) {
           for (std::size_t jl = 0; jl < nlocs; ++jl)
-            (*preds)[indx+jc][jl] = pow(view_angle[jl]*Constants::deg2rad, 2);
+            preds[indx+jc][jl] = pow(view_angle[jl]*Constants::deg2rad, 2);
         }
       } else {
         for (std::size_t jc = 0; jc < nchanl; ++jc) {
           for (std::size_t jl = 0; jl < nlocs; ++jl)
-            (*preds)[indx+jc][jl] = 0.0;
+            preds[indx+jc][jl] = 0.0;
         }
       }
       indx += nchanl;
@@ -527,19 +526,19 @@ void ObsBiasRadianceGSI::computeObsBiasPredictors(
       if (adp_anglebc_) {
         for (std::size_t jc = 0; jc < nchanl; ++jc) {
           for (std::size_t jl = 0; jl < nlocs; ++jl)
-            (*preds)[indx+jc][jl] = view_angle[jl]*Constants::deg2rad;
+            preds[indx+jc][jl] = view_angle[jl]*Constants::deg2rad;
         }
       } else {
         for (std::size_t jc = 0; jc < nchanl; ++jc) {
           for (std::size_t jl = 0; jl < nlocs; ++jl)
-            (*preds)[indx+jc][jl] = 0.0;
+            preds[indx+jc][jl] = 0.0;
         }
       }
       indx += nchanl;
     } else {
       for (std::size_t jc = 0; jc < nchanl; ++jc) {
         for (std::size_t jl = 0; jl < nlocs; ++jl) {
-          (*preds)[indx+jc][jl] = 0.0;
+          preds[indx+jc][jl] = 0.0;
         }
       }
       indx += nchanl;

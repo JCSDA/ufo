@@ -34,7 +34,7 @@ void LinearObsOperator::setTrajectory(const GeoVaLs & gvals, const ObsBias & bia
   oper_->setTrajectory(gvals, bias, ydiags);
   if (bias) {
     biaspreds_.reset(new ioda::ObsDataVector<float>(odb_, bias.predNames(), "", false));
-    bias.computeObsBiasPredictors(gvals, ydiags, biaspreds_);
+    bias.computeObsBiasPredictors(gvals, ydiags, *biaspreds_);
   }
 }
 

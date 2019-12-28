@@ -1,5 +1,2 @@
 *.nc filter=lfs diff=lfs merge=lfs -text
 *.nc4 filter=lfs diff=lfs merge=lfs -text
-test/testinput/atmosphere/amsua_n19_geoval_2018041500_m_bc2.nc4 filter=lfs diff=lfs merge=lfs -text
-test/testinput/atmosphere/amsua_n19_geoval_2018041500_m_bc3.nc4 filter=lfs diff=lfs merge=lfs -text
-test/testinput/atmosphere/amsua_n19_obsdiag_2018041500_m_bc3.nc4 filter=lfs diff=lfs merge=lfs -text

@@ -56,11 +56,11 @@ class ObsBiasBase : public util::Printable,
 
 /// Bias model
   virtual void computeObsBias(ioda::ObsVector &,
-                              std::unique_ptr<ioda::ObsDataVector<float>> &) const = 0;
+                              ioda::ObsDataVector<float> &) const = 0;
 
 /// predictors model
   virtual void computeObsBiasPredictors(const GeoVaLs &, const ObsDiagnostics &,
-                                        std::unique_ptr<ioda::ObsDataVector<float>> &) const = 0;
+                                        ioda::ObsDataVector<float> &) const = 0;
 
 /// Bias operator input required from Model
   virtual const oops::Variables & requiredGeoVaLs() const = 0;

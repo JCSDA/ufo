@@ -758,17 +758,13 @@ if ( ${CRTM_FOUND} )
                       ARGS    "testinput/obsdiag_crtm_jacobian.yaml"
                       ENVIRONMENT OOPS_TRAPFPE=1
                       LIBS    ufo)
-endif ( ${CRTM_FOUND} )
 
-if ( ${CRTM_FOUND} )
     ecbuild_add_test( TARGET  test_ufo_obsdiag_crtm_amsua_optics
                       SOURCES mains/TestObsDiagnostics.cc
                       ARGS    "testinput/obsdiag_crtm_amsua_optics.yaml"
                       ENVIRONMENT OOPS_TRAPFPE=1
                       LIBS    ufo)
-endif ( ${CRTM_FOUND} )
 
-if ( ${CRTM_FOUND} )
     ecbuild_add_test( TARGET  test_ufo_obsdiag_crtm_amsua_jacobian
                       SOURCES mains/TestObsDiagnostics.cc
                       ARGS    "testinput/obsdiag_crtm_amsua_jacobian.yaml"

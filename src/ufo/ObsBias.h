@@ -58,12 +58,11 @@ class ObsBias : public util::Printable,
   const double & operator[](const unsigned int ii) const {return (*biasbase_)[ii];}
 
 /// Obs bias model
-  void computeObsBias(ioda::ObsVector &,
-                      std::unique_ptr<ioda::ObsDataVector<float>> &) const;
+  void computeObsBias(ioda::ObsVector &, ioda::ObsDataVector<float> &) const;
 
 /// Obs Bias Predictors
   void computeObsBiasPredictors(const GeoVaLs &, const ObsDiagnostics &,
-                                std::unique_ptr<ioda::ObsDataVector<float>> &) const;
+                                ioda::ObsDataVector<float> &) const;
 
 /// Other
   const oops::Variables & requiredGeoVaLs() const {return geovars_;}
