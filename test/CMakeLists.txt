@@ -159,32 +159,61 @@ list( APPEND ufo_test_data
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Data)
 CREATE_SYMLINK_FILENAME( ${CMAKE_CURRENT_SOURCE_DIR}/testinput ${CMAKE_CURRENT_BINARY_DIR}/Data ${ufo_test_data} )
 
-# IODA test files
+# IODA observation files 
+list( APPEND ufo_ioda_test_data
+      testinput_tier_1.tar.gz
+     )
+
+# Set URL for IODA test files
+set(ECBUILD_DOWNLOAD_BASE_URL https://jedi-test-files.s3.amazonaws.com/ioda)
+
+# If local path to testfiles is defined don't download
 if (DEFINED ENV{LOCAL_PATH_TESTFILES})
 	set(LOCAL_PATH_TESTFILES "$ENV{LOCAL_PATH_TESTFILES}")
 endif()
 
 if( NOT DEFINED LOCAL_PATH_TESTFILES )
-  list( APPEND ufo_ioda_test_data
-      testinput_tier_1.tar.gz
-      )
-  set(ECBUILD_DOWNLOAD_BASE_URL https://jedi-test-files.s3.amazonaws.com/ioda)
-
-  ecbuild_get_test_multidata ( TARGET get_ioda_test_data_ufo
-                               NAMES ${ufo_ioda_test_data}
-                               DIRNAME develop
-                               EXTRACT
-                             )
-  execute_process( COMMAND ${CMAKE_COMMAND} -E create_symlink
-                 ${PROJECT_SOURCE_DIR}/test_data_download
-                 ${CMAKE_CURRENT_BINARY_DIR}/Data/ioda
-                 )
+  set(TESTFILE_DIR ${CMAKE_BINARY_DIR}/test_data/ioda CACHE PATH "data dir for test data")
+  file(MAKE_DIRECTORY ${TESTFILE_DIR})
 else()
-  execute_process( COMMAND ${CMAKE_COMMAND} -E create_symlink
-                 ${LOCAL_PATH_TESTFILES}
-                 ${CMAKE_CURRENT_BINARY_DIR}/Data/ioda
-                 )
+  set(TESTFILE_DIR ${LOCAL_PATH_TESTFILES})
 endif()
+
+
+# Get the current git branch
+execute_process(
+    COMMAND git rev-parse --abbrev-ref HEAD
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    OUTPUT_VARIABLE GIT_BRANCH
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+
+# Check whether the URL exists or not 
+ecbuild_check_multiurl(NAMES   ${ufo_ioda_test_data}
+                       DIRHOST ${GIT_BRANCH}
+                       RESULT  SPECIFIC_TEST_FILES)
+
+# Set distant directory
+if(${SPECIFIC_TEST_FILES} MATCHES 0)
+    # Download and extract new test files (distant directory = git branch)
+    set(DIRHOST ${GIT_BRANCH})
+else()
+    # Download and extract develop test files (distant directory = develop)
+    set(DIRHOST "develop")
+endif()
+message(STATUS "Test data downloaded from: " ${ECBUILD_DOWNLOAD_BASE_URL}/${DIRHOST})
+
+# Run test to download data
+ecbuild_get_test_multidata ( TARGET get_ioda_test_data_ufo
+                             NAMES ${ufo_ioda_test_data}
+			     DIRHOST ${DIRHOST}
+                             DIRLOCAL ${TESTFILE_DIR}
+			     EXTRACT
+                            )
+execute_process( COMMAND ${CMAKE_COMMAND} -E create_symlink
+                 ${TESTFILE_DIR}
+                 ${CMAKE_CURRENT_BINARY_DIR}/Data/ioda
+		)
 
 #####################################################################
 
