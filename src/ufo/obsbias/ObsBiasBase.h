@@ -56,6 +56,7 @@ class ObsBiasBase : public util::Printable,
 
 /// Bias model
   virtual void computeObsBias(ioda::ObsVector &,
+                              const ioda::ObsDataVector<float> &,
                               ioda::ObsDataVector<float> &) const = 0;
 
 /// predictors model

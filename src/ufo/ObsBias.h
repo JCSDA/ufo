@@ -58,7 +58,8 @@ class ObsBias : public util::Printable,
   const double & operator[](const unsigned int ii) const {return (*biasbase_)[ii];}
 
 /// Obs bias model
-  void computeObsBias(ioda::ObsVector &, ioda::ObsDataVector<float> &) const;
+  void computeObsBias(ioda::ObsVector &, const ioda::ObsDataVector<float> &,
+                      ioda::ObsDataVector<float> &) const;
 
 /// Obs Bias Predictors
   void computeObsBiasPredictors(const GeoVaLs &, const ObsDiagnostics &,

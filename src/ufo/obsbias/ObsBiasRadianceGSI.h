@@ -56,6 +56,7 @@ class ObsBiasRadianceGSI : public ObsBiasBase,
 
 /// Obs bias operator
   void computeObsBias(ioda::ObsVector &,
+                      const ioda::ObsDataVector<float> &,
                       ioda::ObsDataVector<float> &) const override;
 
 /// Obs bias predictor

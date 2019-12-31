@@ -160,6 +160,7 @@ void ObsBiasRadianceGSI::write(const eckit::Configuration & conf) const {
 // -----------------------------------------------------------------------------
 
 void ObsBiasRadianceGSI::computeObsBias(ioda::ObsVector & ybias,
+                                        const ioda::ObsDataVector<float> & predictors,
                                         ioda::ObsDataVector<float> & predTerms)
                                         const {
   const std::size_t npred = predictors_.size();
@@ -170,7 +171,7 @@ void ObsBiasRadianceGSI::computeObsBias(ioda::ObsVector & ybias,
   for (std::size_t n = 0; n < npred; ++n) {
     for (std::size_t jc = 0; jc < nchanl; ++jc) {
       for (std::size_t jl = 0; jl < nlocs; ++jl) {
-        predTerms[n*nchanl+jc][jl] = biascoeffs_[jc*npred+n] * predTerms[n*nchanl+jc][jl];
+        predTerms[n*nchanl+jc][jl] = biascoeffs_[jc*npred+n] * predictors[n*nchanl+jc][jl];
       }
     }
   }
