@@ -361,7 +361,7 @@ void TemporalThinning::groupObservationsByCategory(const std::vector<size_t> &va
 std::unique_ptr<ioda::ObsDataVector<int>> TemporalThinning::getObservationPriorities() const {
   std::unique_ptr<ioda::ObsDataVector<int>> priorities;
   if (options_->priorityVariable.value() != boost::none) {
-    const ufo::Variable &priorityVariable = options_->priorityVariable.value().get();
+    const ufo::Variable priorityVariable = options_->priorityVariable.value().get();
     priorities.reset(new ioda::ObsDataVector<int>(
                        obsdb_, priorityVariable.variable(), priorityVariable.group()));
   }
