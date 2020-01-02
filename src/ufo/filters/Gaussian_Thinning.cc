@@ -309,12 +309,12 @@ boost::optional<EquispacedBinSelector> Gaussian_Thinning::makeTimeBinSelector(
       options.timeMax.value() == boost::none)
     return boost::none;
 
-  const util::Duration &timeMesh = options.timeMesh.value().get();
+  const util::Duration timeMesh = options.timeMesh.value().get();
   if (timeMesh.toSeconds() == 0)
     return boost::none;
 
-  const util::DateTime &timeMin = options.timeMin.value().get();
-  const util::DateTime &timeMax = options.timeMax.value().get();
+  const util::DateTime timeMin = options.timeMin.value().get();
+  const util::DateTime timeMax = options.timeMax.value().get();
 
   oops::Log::debug() << "(timeMax - timeMin).toSeconds() = "
                      << ((timeMax - timeMin).toSeconds()) << std::endl;
@@ -367,7 +367,7 @@ std::function<bool(size_t, size_t)> Gaussian_Thinning::makeObservationComparator
     };
   }
 
-  const ufo::Variable &priorityVariable = options_->priorityVariable.value().get();
+  const ufo::Variable priorityVariable = options_->priorityVariable.value().get();
   ioda::ObsDataVector<int> obsDataVector(obsdb_, priorityVariable.variable(),
                                          priorityVariable.group());
   const auto &priorities = obsDataVector[0];
