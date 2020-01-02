@@ -147,6 +147,19 @@ CASE("ufo/GaussianThinning/Vertical mesh, two bins, nonequal priorities") {
                                                  "Vertical mesh, two bins, nonequal priorities"));
 }
 
+CASE("ufo/GaussianThinning/Vertical mesh, single bin, nonequal priorities, where clause") {
+  testGaussianThinning(eckit::LocalConfiguration(::test::TestEnvironment::config(),
+                                                 "Vertical mesh, single bin, nonequal priorities, "
+                                                 "where clause"));
+}
+
+CASE("ufo/GaussianThinning/Vertical mesh, single bin, two categories, nonequal priorities, "
+     "where clause") {
+  testGaussianThinning(eckit::LocalConfiguration(::test::TestEnvironment::config(),
+                                                 "Vertical mesh, single bin, two categories, "
+                                                 "nonequal priorities, where clause"));
+}
+
 class GaussianThinning : public oops::Test {
  private:
   std::string testid() const override {return "ufo::test::GaussianThinning";}
