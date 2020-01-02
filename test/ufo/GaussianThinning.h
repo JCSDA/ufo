@@ -15,6 +15,8 @@
 
 #include <boost/make_shared.hpp>
 
+#define ECKIT_TESTING_SELF_REGISTER_CASES 0
+
 #include "eckit/config/LocalConfiguration.h"
 #include "eckit/testing/Test.h"
 #include "ioda/ObsSpace.h"
@@ -74,97 +76,23 @@ void testGaussianThinning(const eckit::LocalConfiguration &conf) {
   EXPECT(equal);
 }
 
-CASE("ufo/GaussianThinning/Horizontal mesh 20000") {
-  testGaussianThinning(eckit::LocalConfiguration(::test::TestEnvironment::config(),
-                                                 "Horizontal mesh 20000"));
-}
-
-CASE("ufo/GaussianThinning/Horizontal mesh 20000, extreme longitudes") {
-  testGaussianThinning(eckit::LocalConfiguration(::test::TestEnvironment::config(),
-                                                 "Horizontal mesh 20000, extreme longitudes"));
-}
-
-CASE("ufo/GaussianThinning/Horizontal mesh 20000, extreme latitudes") {
-  testGaussianThinning(eckit::LocalConfiguration(::test::TestEnvironment::config(),
-                                                 "Horizontal mesh 20000, extreme latitudes"));
-}
-
-CASE("ufo/GaussianThinning/Vertical mesh, single bin") {
-  testGaussianThinning(eckit::LocalConfiguration(::test::TestEnvironment::config(),
-                                                 "Vertical mesh, single bin"));
-}
-
-CASE("ufo/GaussianThinning/Vertical mesh, two bins") {
-  testGaussianThinning(eckit::LocalConfiguration(::test::TestEnvironment::config(),
-                                                 "Vertical mesh, two bins"));
-}
-
-CASE("ufo/GaussianThinning/Vertical mesh, two bins, all observations in single bin") {
-  testGaussianThinning(eckit::LocalConfiguration(::test::TestEnvironment::config(),
-                                                 "Vertical mesh, two bins, "
-                                                 "all observations in single bin"));
-}
-
-CASE("ufo/GaussianThinning/Thinning in time, single bin") {
-  testGaussianThinning(eckit::LocalConfiguration(::test::TestEnvironment::config(),
-                                                 "Thinning in time, single bin"));
-}
-
-CASE("ufo/GaussianThinning/Thinning in time, two bins") {
-  testGaussianThinning(eckit::LocalConfiguration(::test::TestEnvironment::config(),
-                                                 "Thinning in time, two bins"));
-}
-
-CASE("ufo/GaussianThinning/Thinning in time, two bins, all observations in single bin") {
-  testGaussianThinning(eckit::LocalConfiguration(::test::TestEnvironment::config(),
-                                                 "Thinning in time, two bins, "
-                                                 "all observations in single bin"));
-}
-
-CASE("ufo/GaussianThinning/Vertical mesh, two bins, single category") {
-  testGaussianThinning(eckit::LocalConfiguration(::test::TestEnvironment::config(),
-                                                 "Vertical mesh, two bins, single category"));
-}
-
-CASE("ufo/GaussianThinning/Vertical mesh, two bins, two categories") {
-  testGaussianThinning(eckit::LocalConfiguration(::test::TestEnvironment::config(),
-                                                 "Vertical mesh, two bins, two categories"));
-}
-
-CASE("ufo/GaussianThinning/Vertical mesh, two bins, two categories, where clause") {
-  testGaussianThinning(eckit::LocalConfiguration(::test::TestEnvironment::config(),
-                                                 "Vertical mesh, two bins, "
-                                                 "two categories, where clause"));
-}
-
-CASE("ufo/GaussianThinning/Vertical mesh, two bins, equal priorities") {
-  testGaussianThinning(eckit::LocalConfiguration(::test::TestEnvironment::config(),
-                                                 "Vertical mesh, two bins, equal priorities"));
-}
-
-CASE("ufo/GaussianThinning/Vertical mesh, two bins, nonequal priorities") {
-  testGaussianThinning(eckit::LocalConfiguration(::test::TestEnvironment::config(),
-                                                 "Vertical mesh, two bins, nonequal priorities"));
-}
-
-CASE("ufo/GaussianThinning/Vertical mesh, single bin, nonequal priorities, where clause") {
-  testGaussianThinning(eckit::LocalConfiguration(::test::TestEnvironment::config(),
-                                                 "Vertical mesh, single bin, nonequal priorities, "
-                                                 "where clause"));
-}
-
-CASE("ufo/GaussianThinning/Vertical mesh, single bin, two categories, nonequal priorities, "
-     "where clause") {
-  testGaussianThinning(eckit::LocalConfiguration(::test::TestEnvironment::config(),
-                                                 "Vertical mesh, single bin, two categories, "
-                                                 "nonequal priorities, where clause"));
-}
-
 class GaussianThinning : public oops::Test {
  private:
   std::string testid() const override {return "ufo::test::GaussianThinning";}
 
-  void register_tests() const override {}
+  void register_tests() const override {
+    std::vector<eckit::testing::Test>& ts = eckit::testing::specification();
+
+    const eckit::LocalConfiguration conf(::test::TestEnvironment::config());
+    for (const std::string & testCaseName : conf.keys())
+    {
+      const eckit::LocalConfiguration testCaseConf(::test::TestEnvironment::config(), testCaseName);
+      ts.emplace_back(CASE("ufo/GaussianThinning/" + testCaseName, testCaseConf)
+                      {
+                        testGaussianThinning(testCaseConf);
+                      });
+    }
+  }
 };
 
 }  // namespace test
