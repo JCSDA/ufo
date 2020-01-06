@@ -9,7 +9,6 @@ module ufo_obsbiasradiancegsi_utils_c
 
   use iso_c_binding
   use clw_mod, only : calc_clw
-  use tlap_mod, only : calc_tlap
 
   implicit none
   private
@@ -48,26 +47,6 @@ call calc_clw(nadir, tb_obs, tsim, ich, nchanl, &
               clw, tpwc, gwp, kraintype, ierrret)
 
 end subroutine calc_clw_c
-
-! ------------------------------------------------------------------------------
-
-subroutine calc_tlap_c(newpc4pred, nsig, nchanl, &
-                       ptau5, tsavg5, tvp, tlapmean, tlap) &
-                  bind(c,name='calc_tlap_f90')
-implicit none
-
-logical(c_bool)                       ,intent(in   ) :: newpc4pred
-integer(c_int)                        ,intent(in   ) :: nsig, nchanl
-real(c_float), dimension(nsig,nchanl) ,intent(in   ) :: ptau5
-real(c_float),                         intent(in   ) :: tsavg5
-real(c_float), dimension(nsig)        ,intent(in   ) :: tvp
-real(c_float), dimension(nchanl)      ,intent(in   ) :: tlapmean
-real(c_float), dimension(nchanl)      ,intent(  out) :: tlap
-
-call calc_tlap(newpc4pred, nsig, nchanl, &
-               ptau5, tsavg5, tvp, tlapmean, tlap) 
-
-end subroutine calc_tlap_c
 
 ! ------------------------------------------------------------------------------
 

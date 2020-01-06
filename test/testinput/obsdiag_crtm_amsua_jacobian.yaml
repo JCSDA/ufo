@@ -1,0 +1,25 @@
+window_begin: 2018-04-14T20:00:00Z
+window_end: 2018-04-15T03:00:00Z
+ObsSpace:
+  name: amsua_n19
+  ObsDataIn:
+    obsfile: Data/amsua_n19_obs_2018041500_m_bc3.nc4
+  simulate:
+    variables: [brightness_temperature]
+    channels: &all_channels 1-15 
+ObsOperator:
+  name: CRTM
+  Absorbers: [H2O,O3,CO2]
+  Clouds: [Water, Ice]
+  ObsOptions:
+    Sensor_ID: amsua_n19 
+    EndianType: little_endian
+    CoefficientPath: Data/
+GeoVaLs:
+  filename: Data/amsua_n19_geoval_2018041500_m_bc3.nc4
+ObsDiag:
+   variables: [brightness_temperature_jacobian_surface_emissivity, brightness_temperature_jacobian_surface_temperature, brightness_temperature_jacobian_air_temperature, brightness_temperature_jacobian_humidity_mixing_ratio]
+   channels: *all_channels 
+Reference ObsDiag:
+  filename: Data/amsua_n19_obsdiag_2018041500_m_bc3.nc4
+tolerance: 1.e-6

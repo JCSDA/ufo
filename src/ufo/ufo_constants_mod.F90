@@ -6,8 +6,6 @@ use kinds
 use iso_c_binding
 
 implicit none
-real(kind_real), parameter, public :: rad2deg = 57.29577954572      ! copy from fv3jedi_constants.f90
-real(kind_real), parameter, public :: deg2rad =  0.01745329251
 real(kind_real), parameter, public :: grav    = 9.80665e+0_kind_real
 real(kind_real), parameter, public :: t0c     = 2.7315e+2_kind_real ! temperature at zero celsius     (K)
 real(kind_real), parameter, public :: rd     = 2.8705e2_kind_real
@@ -43,5 +41,8 @@ real(kind_real), parameter, public :: Lclr   = 0.0065 ! constant lapse rate
 real(kind_real), parameter, public :: t2tv   = 0.608 ! constant lapse rate
 real(kind_real), parameter, public :: von_karman = 0.41_kind_real ! Von Karman Constant
 real(kind_real), parameter, public :: es_w_0 = 611.2_kind_real ! saturation vapor pressure of water at 0C
+real(kind_real), parameter, public :: pi      = acos(-one)
+real(kind_real), parameter, public :: deg2rad =  pi/180.0_kind_real
+real(kind_real), parameter, public :: rad2deg = one/deg2rad
 end module ufo_constants_mod
 
