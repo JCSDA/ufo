@@ -24,31 +24,31 @@ Observations:
    ObsSpace:
      name: amsua_n19
      ObsDataIn: 
-       obsfile: Data/amsua_n19_obs_2018041500_m.nc4
+       obsfile: Data/amsua_n19_obs_2018041500_m_bc3.nc4
      ObsDataOut:
-       obsfile: Data/amsua_n19_obs_2018041500_m_out.nc4
+       obsfile: Data/amsua_n19_obs_2018041500_m_bc3_out.nc4
      simulate:
        variables: [brightness_temperature]
-       channels: 1-10,15
+       channels: 1-15
    GeoVaLs: 
-     filename: Data/amsua_n19_geoval_2018041500_m.nc4
+     filename: Data/amsua_n19_geoval_2018041500_m_bc3.nc4
    ObsBias:
      name: GSI
      newpc4pred: true
      adp_anglebc: true
      emiss_bc: true
      abias_in: Data/satbias_crtm_in
-     predictors: [BCPred_Constant_,
-                  BCPred_Scan_Angle_,
-                  BCPred_Cloud_Liquid_Water_,
-                  BCPred_Lapse_Rate_Squared_,
-                  BCPred_Lapse_Rate_,
-                  BCPred_Cosine_Latitude_times_Node_,
-                  BCPred_Sine_Latitude_,
-                  BCPred_Emissivity_,
-                  BCPres_Fourth_Order_View_Angle_,
-                  BCPres_Third_Order_View_Angle_,
-                  BCPres_Second_Order_View_Angle_,
-                  BCPres_First_Order_View_Angle_]
-   rmsequiv: 240.13289708962066
+     predictors: [constant,
+                  scan_angle,
+                  cloud_liquid_water,
+                  lapse_rate_squared,
+                  lapse_rate,
+                  cosine_of_latitude_times_orbit_node,
+                  sine_of_latitude,
+                  emissivity,
+                  scan_angle_4th_order,
+                  scan_angle_3rd_order,
+                  scan_angle_2nd_order,
+                  scan_angle_1st_order]
+   vecequiv: GsiHofXBc
    tolerance: 1.e-5
