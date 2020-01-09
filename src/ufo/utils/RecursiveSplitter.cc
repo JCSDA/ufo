@@ -46,9 +46,10 @@ void RecursiveSplitter::groupByImpl(const std::vector<T> &categories) {
       break;
     lastIndexInGroup = encodedGroups_[firstIndexInGroup + 1];
 
-    std::sort(orderedIds_.begin() + firstIndexInGroup,
-              orderedIds_.begin() + lastIndexInGroup + 1,
-              [&categories](size_t idA, size_t idB) { return categories[idA] < categories[idB];});
+    std::stable_sort(orderedIds_.begin() + firstIndexInGroup,
+                     orderedIds_.begin() + lastIndexInGroup + 1,
+                     [&categories](size_t idA, size_t idB)
+                     { return categories[idA] < categories[idB];});
 
     // Now update the group
     size_t newFirstIndex = firstIndexInGroup;
