@@ -72,6 +72,8 @@ list( APPEND ufo_test_input
   testinput/qc_gauss_thinning.yaml
   testinput/qc_gauss_thinning_unittests.yaml
   testinput/qc_recursive_splitter.yaml
+  testinput/qc_poisson_disk_thinning.yaml
+  testinput/qc_poisson_disk_thinning_unittests.yaml
   testinput/qc_preqc.yaml
   testinput/qc_thinning.yaml
   testinput/radiosonde.yaml
@@ -149,7 +151,6 @@ list( APPEND ufo_test_data
   atmosphere/sondes_geoval_2018041500_vs.nc4
   atmosphere/ssmis_f18_geoval_2018041500_m.nc4
   atmosphere/windprof_geoval_2018041500_m.nc4
-  filters/filters_testdata.nc4
   marine/coolskin_fake_geovals_2018041500.nc
   marine/cryosat2-2018-04-15_geovals.nc
   marine/icec-2018-04-15_geovals.nc
@@ -157,6 +158,8 @@ list( APPEND ufo_test_data
   marine/profile_2018-04-15_geovals.nc
   marine/sst_obs-2018-04-15_geovals.nc
   filters/filters_testdata.nc4
+  filters/met_office_poisson_disk_thinning.nc4
+  filters/poisson_disk_thinning_3x3x3x3_regular_grid.nc4
 )
 
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Data)
@@ -728,6 +731,12 @@ ecbuild_add_test( TARGET  test_ufo_qc_gauss_thinning
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsFilters.x )
 
+ecbuild_add_test( TARGET  test_ufo_qc_poisson_disk_thinning
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                  ARGS    "testinput/qc_poisson_disk_thinning.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsFilters.x )
+
 ecbuild_add_test( TARGET  test_ufo_qc_preqc
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
                   ARGS    "testinput/qc_preqc.yaml"
@@ -747,6 +756,12 @@ ecbuild_add_test( TARGET  test_ufo_recursivesplitter
                   # This test doesn't need a configuration file, but oops::Run::Run() requires
                   # a path to a configuration file to be passed in the first command-line parameter.
                   ARGS    "testinput/qc_recursive_splitter.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  LIBS    ufo)
+
+ecbuild_add_test( TARGET  test_ufo_qc_poisson_disk_thinning_unittests
+                  SOURCES mains/TestPoissonDiskThinning.cc
+                  ARGS    "testinput/qc_poisson_disk_thinning_unittests.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   LIBS    ufo)
 
