@@ -167,6 +167,7 @@ void PoissonDiskThinning::applyFilter(const std::vector<bool> & apply,
 
   std::vector<bool> isThinned(apply.size(), false);
 
+  // Thin points from each category separately.
   RecursiveSplitter categorySplitter(validObsIds.size());
   groupObservationsByCategory(validObsIds, categorySplitter);
   for (auto categoryGroup : categorySplitter.multiElementGroups()) {
@@ -175,6 +176,8 @@ void PoissonDiskThinning::applyFilter(const std::vector<bool> & apply,
       obsIdsInCategory.push_back(validObsIds[validObsIndex]);
     }
 
+    // Within each category, sort points by descending priority and then (if requested)
+    // randomly shuffle points of equal priority.
     RecursiveSplitter prioritySplitter(obsIdsInCategory.size());
     groupObservationsByPriority(obsIdsInCategory, prioritySplitter);
     if (options_->shuffle) {
@@ -184,6 +187,7 @@ void PoissonDiskThinning::applyFilter(const std::vector<bool> & apply,
         prioritySplitter.shuffleGroups();
     }
 
+    // Select points to retain within the category.
     thinCategory(obsData, obsIdsInCategory, prioritySplitter, numSpatialDims, numNonspatialDims,
                  isThinned);
   }
