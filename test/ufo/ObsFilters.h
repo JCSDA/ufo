@@ -25,6 +25,7 @@
 #include "oops/interface/ObsOperator.h"
 #include "oops/interface/ObsVector.h"
 #include "oops/runs/Test.h"
+#include "oops/util/Expect.h"
 #include "oops/util/Logger.h"
 #include "test/interface/ObsTestsFixture.h"
 #include "test/TestEnvironment.h"
@@ -142,16 +143,15 @@ void testFilters() {
     obserr->save(errname);
 
 //  Compare with known results
-    const int passedBenchmark = typeconfs[jj].getInt("passedBenchmark");
-    const int passed = numZero(*qcflags);
-    EXPECT(passed == passedBenchmark);
-
     if (typeconfs[jj].has("passedObservationsBenchmark")) {
       const std::vector<size_t> passedObsBenchmark =
           typeconfs[jj].getUnsignedVector("passedObservationsBenchmark");
       const std::vector<size_t> passedObs = getPassedObservationIndices(qcflags->obsdatavector());
-      EXPECT(passedObs == passedObsBenchmark);
+      EXPECT_EQUAL(passedObs, passedObsBenchmark);
     }
+    const int passedBenchmark = typeconfs[jj].getInt("passedBenchmark");
+    const int passed = numZero(*qcflags);
+    EXPECT_EQUAL(passed, passedBenchmark);
   }
 }
 
