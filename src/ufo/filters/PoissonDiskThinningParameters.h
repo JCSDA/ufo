@@ -64,10 +64,13 @@ class PoissonDiskThinningParameters : public oops::Parameters {
 
   /// Size of the exclusion volume in the horizontal direction (in km).
   ///
-  /// If this size needs to vary from observation to observation, this parameter should be set
-  /// to the name of a variable storing the exclusion volume size for each observation. Otherwise
-  /// the parameter can be set to floating-point number. If the parameter is not set, horizontal
-  /// position is ignored during thinning.
+  /// This size must be a (weakly) monotonically decreasing function of observation priority,
+  /// i.e. the exclusion volumes of all observations with the same priority must have the same
+  /// size, and the exclusion volumes of lower-priority observations must be at least as large as
+  /// those of higher-priority ones. If this size should be the same for all observations, this
+  /// parameter can be set to a floating-point number. Otherwise is needs to be set to the name of
+  /// a variable storing the exclusion volume size for each observation. If the parameter is not
+  /// set, horizontal position is ignored during thinning.
   oops::OptionalParameter<std::string> minHorizontalSpacing{"min_horizontal_spacing", this};
 
   /// Size of the exclusion volume in the vertical direction (in Pa).
@@ -111,9 +114,10 @@ class PoissonDiskThinningParameters : public oops::Parameters {
   /// Variable storing observation priorities. An observation will not be retained if it lies
   /// within the exclusion volume of an observation with a higher priority.
   ///
-  /// \note The implementation assumes that the exclusion volumes of all observations with the same
-  /// priority have the same size, and the exclusion volume size increases or stays the same with
-  /// decreasing priority.
+  /// As noted in the documentation of min_horizontal_spacing, the exclusion volume size must be a
+  /// (weakly) monotonically decreasing function of observation priority, i.e. the exclusion volumes
+  /// of all observations with the same priority must have the same size, and the exclusion volumes
+  /// of lower-priority observations must be at least as large as those of higher-priority ones.
   ///
   /// If this parameter is not set, all observations are assumed to have equal priority.
   oops::OptionalParameter<Variable> priorityVariable{"priority_variable", this};
