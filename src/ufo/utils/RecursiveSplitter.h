@@ -287,6 +287,19 @@ class RecursiveSplitter
 
   const std::vector<size_t> &orderedIds() const { return orderedIds_; }
 
+  /// \brief Randomly shuffle the elements of each equivalence class.
+  ///
+  /// \param seed
+  ///   Seed with which to initialise the random number generator used by the shuffling algorithm
+  ///   if this hasn't been done before (in a previous call to shuffleGroups() or another function
+  ///   calling util::shuffle()).
+  void shuffleGroups(unsigned int seed);
+
+  /// \brief Randomly shuffle the elements of each equivalence class.
+  ///
+  /// This overload uses the defaul seed.
+  void shuffleGroups();
+
  private:
   void initializeEncodedGroups();
 

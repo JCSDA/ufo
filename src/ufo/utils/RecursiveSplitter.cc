@@ -10,6 +10,8 @@
 #include <algorithm>
 #include <numeric>
 
+#include "oops/util/Random.h"
+
 namespace ufo
 {
 
@@ -69,6 +71,26 @@ void RecursiveSplitter::groupByImpl(const std::vector<T> &categories) {
 
   if (lastIndexInLastGroup + 1 < numIds)
     encodedGroups_[lastIndexInLastGroup + 1] = numIds;
+}
+
+void RecursiveSplitter::shuffleGroups(unsigned int seed) {
+  for (Group group : multiElementGroups()) {
+    std::vector<size_t>::iterator nonConstGroupBegin =
+        orderedIds_.begin() + (group.begin() - orderedIds_.cbegin());
+    std::vector<size_t>::iterator nonConstGroupEnd =
+        orderedIds_.begin() + (group.end() - orderedIds_.cbegin());
+    util::shuffle(nonConstGroupBegin, nonConstGroupEnd, seed);
+  }
+}
+
+void RecursiveSplitter::shuffleGroups() {
+  for (Group group : multiElementGroups()) {
+    std::vector<size_t>::iterator nonConstGroupBegin =
+        orderedIds_.begin() + (group.begin() - orderedIds_.cbegin());
+    std::vector<size_t>::iterator nonConstGroupEnd =
+        orderedIds_.begin() + (group.end() - orderedIds_.cbegin());
+    util::shuffle(nonConstGroupBegin, nonConstGroupEnd);
+  }
 }
 
 template void RecursiveSplitter::groupByImpl(const std::vector<int> &);
