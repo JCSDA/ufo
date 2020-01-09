@@ -15,8 +15,6 @@
 
 #include <boost/make_shared.hpp>
 
-#define ECKIT_TESTING_SELF_REGISTER_CASES 0
-
 #include "eckit/config/LocalConfiguration.h"
 #include "eckit/testing/Test.h"
 #include "ioda/ObsSpace.h"
@@ -78,23 +76,121 @@ void testPoissonDiskThinning(const eckit::LocalConfiguration &conf) {
   EXPECT_EQUAL(thinnedObsIndices, expectedThinnedObsIndices);
 }
 
+CASE("ufo/PoissonDiskThinning/No thinning") {
+  testPoissonDiskThinning(eckit::LocalConfiguration(::test::TestEnvironment::config(),
+                                                 "No thinning"));
+}
+
+CASE("ufo/PoissonDiskThinning/"
+     "Horizontal thinning, min spacing smaller than nearest neighbor spacing") {
+  testPoissonDiskThinning(eckit::LocalConfiguration(::test::TestEnvironment::config(),
+                                                    "Horizontal thinning, min spacing "
+                                                    "smaller than nearest neighbor spacing"));
+}
+
+CASE("ufo/PoissonDiskThinning/"
+     "Horizontal thinning, min spacing larger than nearest neighbor spacing") {
+  testPoissonDiskThinning(eckit::LocalConfiguration(::test::TestEnvironment::config(),
+                                                 "Horizontal thinning, min spacing "
+                                                 "larger than nearest neighbor spacing"));
+}
+
+CASE("ufo/PoissonDiskThinning/"
+     "Vertical thinning, min spacing smaller than nearest neighbor spacing") {
+  testPoissonDiskThinning(eckit::LocalConfiguration(::test::TestEnvironment::config(),
+                                                 "Vertical thinning, min spacing "
+                                                 "smaller than nearest neighbor spacing"));
+}
+
+CASE("ufo/PoissonDiskThinning/"
+     "Vertical thinning, min spacing larger than nearest neighbor spacing") {
+  testPoissonDiskThinning(eckit::LocalConfiguration(::test::TestEnvironment::config(),
+                                                 "Vertical thinning, min spacing "
+                                                 "larger than nearest neighbor spacing"));
+}
+
+CASE("ufo/PoissonDiskThinning/Vertical thinning, where clause") {
+  testPoissonDiskThinning(eckit::LocalConfiguration(::test::TestEnvironment::config(),
+                                                 "Vertical thinning, where clause"));
+}
+
+CASE("ufo/PoissonDiskThinning/"
+     "Time thinning, min spacing equal to nearest neighbor spacing") {
+  testPoissonDiskThinning(eckit::LocalConfiguration(::test::TestEnvironment::config(),
+                                                 "Time thinning, min spacing "
+                                                 "equal to nearest neighbor spacing"));
+}
+
+CASE("ufo/PoissonDiskThinning/"
+     "Time thinning, min spacing larger than nearest neighbor spacing") {
+  testPoissonDiskThinning(eckit::LocalConfiguration(::test::TestEnvironment::config(),
+                                                 "Time thinning, min spacing "
+                                                 "larger than nearest neighbor spacing"));
+}
+
+CASE("ufo/PoissonDiskThinning/"
+     "Horizontal and vertical thinning, min spacing larger than nearest neighbor spacing") {
+  testPoissonDiskThinning(eckit::LocalConfiguration(::test::TestEnvironment::config(),
+                                                 "Horizontal and vertical thinning, min spacing "
+                                                 "larger than nearest neighbor spacing"));
+}
+
+CASE("ufo/PoissonDiskThinning/"
+     "Horizontal and time thinning, min spacing larger than nearest neighbor spacing") {
+  testPoissonDiskThinning(eckit::LocalConfiguration(::test::TestEnvironment::config(),
+                                                 "Horizontal and time thinning, min spacing "
+                                                 "larger than nearest neighbor spacing"));
+}
+
+CASE("ufo/PoissonDiskThinning/"
+     "Vertical and time thinning, min spacing larger than nearest neighbor spacing") {
+  testPoissonDiskThinning(eckit::LocalConfiguration(::test::TestEnvironment::config(),
+                                                 "Vertical and time thinning, min spacing "
+                                                 "larger than nearest neighbor spacing"));
+}
+
+CASE("ufo/PoissonDiskThinning/"
+     "Horizontal, vertical and time thinning, min spacing larger than nearest neighbor spacing") {
+  testPoissonDiskThinning(eckit::LocalConfiguration(::test::TestEnvironment::config(),
+                                                 "Horizontal, vertical and time thinning, min "
+                                                 "spacing larger than nearest neighbor spacing"));
+}
+
+CASE("ufo/PoissonDiskThinning/Priorities") {
+  testPoissonDiskThinning(eckit::LocalConfiguration(::test::TestEnvironment::config(),
+                                                 "Priorities"));
+}
+
+CASE("ufo/PoissonDiskThinning/Categories") {
+  testPoissonDiskThinning(eckit::LocalConfiguration(::test::TestEnvironment::config(),
+                                                 "Categories"));
+}
+
+CASE("ufo/PoissonDiskThinning/Variable min spacings") {
+  testPoissonDiskThinning(eckit::LocalConfiguration(::test::TestEnvironment::config(),
+                                                 "Variable min spacings"));
+}
+
+CASE("ufo/PoissonDiskThinning/Variable min spacings, shuffling") {
+  testPoissonDiskThinning(eckit::LocalConfiguration(::test::TestEnvironment::config(),
+                                                 "Variable min spacings, shuffling"));
+}
+
+CASE("ufo/PoissonDiskThinning/Cylindrical exclusion volumes") {
+  testPoissonDiskThinning(eckit::LocalConfiguration(::test::TestEnvironment::config(),
+                                                 "Cylindrical exclusion volumes"));
+}
+
+CASE("ufo/PoissonDiskThinning/Ellipsoidal exclusion volumes") {
+  testPoissonDiskThinning(eckit::LocalConfiguration(::test::TestEnvironment::config(),
+                                                 "Ellipsoidal exclusion volumes"));
+}
+
 class PoissonDiskThinning : public oops::Test {
  private:
   std::string testid() const override {return "ufo::test::PoissonDiskThinning";}
 
-  void register_tests() const override {
-    std::vector<eckit::testing::Test>& ts = eckit::testing::specification();
-
-    const eckit::LocalConfiguration conf(::test::TestEnvironment::config());
-    for (const std::string & testCaseName : conf.keys())
-    {
-      const eckit::LocalConfiguration testCaseConf(::test::TestEnvironment::config(), testCaseName);
-      ts.emplace_back(CASE("ufo/PoissonDiskThinning/" + testCaseName, testCaseConf)
-                      {
-                        testPoissonDiskThinning(testCaseConf);
-                      });
-    }
-  }
+  void register_tests() const override {}
 };
 
 }  // namespace test
