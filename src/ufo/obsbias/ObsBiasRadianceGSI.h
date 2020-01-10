@@ -77,8 +77,8 @@ class ObsBiasRadianceGSI : public ObsBiasBase,
   void print(std::ostream &) const override;
 
   const ioda::ObsSpace & odb_;
-  std::unique_ptr<const oops::Variables> geovars_;
-  std::unique_ptr<const oops::Variables> hdiags_;
+  std::unique_ptr<oops::Variables> geovars_;
+  std::unique_ptr<oops::Variables> hdiags_;
   std::unique_ptr<const oops::Variables> predNames_;
   std::string sensor_id_;  // sensor_id
   std::vector<int> channels_;  // channel
@@ -86,7 +86,6 @@ class ObsBiasRadianceGSI : public ObsBiasBase,
 
   std::vector<double> biascoeffs_;
   bool newpc4pred_;  //  controls preconditioning due to sat-bias correction term
-  bool adp_anglebc_;  //  logical to turn off or on the variational radiance angle bias correction
   bool emiss_bc_;  //  logical to turn off or on the emissivity predictor
 
   std::vector<std::string> predictors_;
