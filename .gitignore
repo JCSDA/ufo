@@ -3,4 +3,3 @@ build
 _static
 _templates
 *.swp
-test_data_download/
