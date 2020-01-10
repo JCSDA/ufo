@@ -87,7 +87,7 @@ ObsBiasRadianceGSI::ObsBiasRadianceGSI(const ioda::ObsSpace & odb,
   hdiags_.reset(new oops::Variables());
   if (vvtmp_w_ch.size() > 0)  *hdiags_ += oops::Variables(vvtmp_w_ch, channels_);
   if (vvtmp_wo_ch.size() > 0) *hdiags_ += oops::Variables(vvtmp_wo_ch);
-  
+
 // Read ObsBias parameters first guess if available
   const eckit::LocalConfiguration biasConf(conf, "ObsBias");
   if (biasConf.has("abias_in")) {
