@@ -61,8 +61,6 @@ class PoissonDiskThinning : public FilterBase,
 
  private:
   struct ObsData;
-  template <int DIMS>
-  using Size = std::array<float, DIMS>;
 
   void print(std::ostream &) const override;
   void applyFilter(const std::vector<bool> &, const Variables &,
