@@ -78,14 +78,15 @@ void ObsFunctionErrfWavenum::compute(const ObsFilterData & in,
   // surface type
   std::vector<float> tao_sfc(nlocs);
   for (size_t ich = 0; ich < nchans; ++ich) {
-    in.get(Variable("transmittances_of_atmosphere_layer@ObsDiag", channels_)[ich], nlevs, tao_sfc);
-    for (size_t iloc = 0; iloc < nlocs; ++iloc) {
-      out[ich][iloc] = 1.0;
-      if ((wavenumber[ich] > 2000. && wavenumber[ich] <= 2400.0) &&
-          (water_frac[iloc] > 0.0 && solza[iloc] <= 89.0)) {
+    for (size_t iloc = 0; iloc < nlocs; ++iloc) out[ich][iloc] = 1.0; 
+    if (wavenumber[ich] > 2000. && wavenumber[ich] <= 2400.0) {
+      in.get(Variable("transmittances_of_atmosphere_layer@ObsDiag", channels_)[ich], nlevs, tao_sfc);
+      for (size_t iloc = 0; iloc < nlocs; ++iloc) {
+        if (water_frac[iloc] > 0.0 && solza[iloc] <= 89.0) {
           float factor = std::max(0.0, cos(Constants::deg2rad * solza[iloc]));
           factor = tao_sfc[iloc] * factor *(1.0 / 400.0);
           out[ich][iloc] = sqrt(1.0 / (1.0 - (wavenumber[ich] - 2000.0) * factor));
+        }
       }
     }
   }
