@@ -15,8 +15,7 @@ Observations:
      ObsDataIn: 
        obsfile: Data/iasi_metop-a_obs_2018041500_m.nc4
      ObsDataOut:
-#       obsfile: Data/iasi_metop-a_obs_2018041500_m_out.nc4
-       obsfile: /scratch1/NCEPDEV/da/Emily.Liu/JEDI-PR/IDL/check_qc/data/iasi_metop-a_obs_2018041500_m_out.nc4
+       obsfile: Data/iasi_metop-a_obs_2018041500_m_out.nc4
      simulate:
        variables: [brightness_temperature]
        channels: &all_channels 16, 29, 32, 35, 38, 41, 44, 47, 49, 50, 51, 53,
