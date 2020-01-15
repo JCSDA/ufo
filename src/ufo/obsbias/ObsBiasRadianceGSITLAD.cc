@@ -26,18 +26,18 @@ ObsBiasRadianceGSITLAD::ObsBiasRadianceGSITLAD(const ioda::ObsSpace & odb,
                                                const eckit::Configuration & conf)
   : odb_(odb), predictors_() {
 // Default predictor names
-  predictors_ = {"BCPred_Constant_",
-                 "BCPred_Scan_Angle_",
-                 "BCPred_Cloud_Liquid_Water_",
-                 "BCPred_Lapse_Rate_Squared_",
-                 "BCPred_Lapse_Rate_",
-                 "BCPred_Cosine_Latitude_times_Node_",
-                 "BCPred_Sine_Latitude_",
-                 "BCPred_Emissivity_",
-                 "BCPres_Fourth_Order_View_Angle_",
-                 "BCPres_Third_Order_View_Angle_",
-                 "BCPres_Second_Order_View_Angle_",
-                 "BCPres_First_Order_View_Angle_"
+  predictors_ = {"constant",
+                 "scan_angle",
+                 "cloud_liquid_water",
+                 "lapse_rate_squared",
+                 "lapse_rate",
+                 "cosine_of_latitude_times_orbit_node",
+                 "sine_of_latitude",
+                 "emissivity",
+                 "scan_angle_4th_order",
+                 "scan_angle_3rd_order",
+                 "scan_angle_2nd_order",
+                 "scan_angle_1st_order"
                 };
 // Parse predictors from the conf
   if (conf.has("ObsBias.predictors")) {
@@ -49,10 +49,8 @@ ObsBiasRadianceGSITLAD::ObsBiasRadianceGSITLAD(const ioda::ObsSpace & odb,
   const eckit::LocalConfiguration obsoprconf(conf, "ObsOperator");
   sensor_id_ = obsoprconf.getString("ObsOptions.Sensor_ID");
 
-// Parse channels from the conf
-  const eckit::LocalConfiguration simconf(conf, "ObsSpace.simulate");
-  const oops::Variables observed(simconf);
-  channels_ = observed.channels();
+// Retrive the channels
+  channels_ = odb_.obsvariables().channels();
 
   // Initialize ObsBias parameters
   biascoeffsinc_.clear();
@@ -78,7 +76,7 @@ void ObsBiasRadianceGSITLAD::write(const eckit::Configuration & conf) const {
 // -----------------------------------------------------------------------------
 
 void ObsBiasRadianceGSITLAD::computeObsBiasTL(const GeoVaLs & geovals,
-                                              const std::vector<float> & preds,
+                                              const ioda::ObsDataVector<float> & preds,
                                               ioda::ObsVector & ybiasinc) const {
   std::size_t npred = predictors_.size();
   std::size_t nchanl = channels_.size();
@@ -94,7 +92,7 @@ void ObsBiasRadianceGSITLAD::computeObsBiasTL(const GeoVaLs & geovals,
       ybiasinc[index] = 0.0;
       // Linear combination
       for (std::size_t n = 0; n < npred; ++n) {
-        ybiasinc[index] += biascoeffsinc_[idx_coeffs] * preds.at(n*nchanl*nlocs+jc*nlocs+jl);
+        ybiasinc[index] += biascoeffsinc_[idx_coeffs] * preds[n*nchanl+jc][jl];
         ++idx_coeffs;
       }
       ++index;
@@ -106,7 +104,7 @@ void ObsBiasRadianceGSITLAD::computeObsBiasTL(const GeoVaLs & geovals,
 // -----------------------------------------------------------------------------
 
 void ObsBiasRadianceGSITLAD::computeObsBiasAD(GeoVaLs & geovals,
-                                              const std::vector<float> & preds,
+                                              const ioda::ObsDataVector<float> & preds,
                                               const ioda::ObsVector & ybiasinc) {
   std::size_t npred = predictors_.size();
   std::size_t nchanl = channels_.size();
@@ -122,7 +120,7 @@ void ObsBiasRadianceGSITLAD::computeObsBiasAD(GeoVaLs & geovals,
       // Linear combination
       if (ybiasinc[index] != util::missingValue(ybiasinc[index])) {
         for (std::size_t n = 0; n < npred; ++n) {
-          biascoeffsinc_[idx_coeffs] += ybiasinc[index] * preds.at(n*nchanl*nlocs+jc*nlocs+jl);
+          biascoeffsinc_[idx_coeffs] += ybiasinc[index] * preds[n*nchanl+jc][jl];
           ++idx_coeffs;
         }
       } else {

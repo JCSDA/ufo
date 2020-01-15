@@ -17,6 +17,8 @@
 
 #include "eckit/config/Configuration.h"
 
+#include "ioda/ObsDataVector.h"
+
 #include "oops/util/Printable.h"
 
 namespace oops {
@@ -58,10 +60,10 @@ class LinearObsBiasBase : public util::Printable,
   virtual double norm() const = 0;
 
 /// Bias model
-  virtual void computeObsBiasTL(const GeoVaLs &, const std::vector<float> &,
+  virtual void computeObsBiasTL(const GeoVaLs &, const ioda::ObsDataVector<float> &,
                                 ioda::ObsVector &) const = 0;
 
-  virtual void computeObsBiasAD(GeoVaLs &, const std::vector<float> &,
+  virtual void computeObsBiasAD(GeoVaLs &, const ioda::ObsDataVector<float> &,
                                 const ioda::ObsVector &) = 0;
 
 /// Bias parameters interface

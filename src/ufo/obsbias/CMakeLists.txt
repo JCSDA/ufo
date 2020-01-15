@@ -16,7 +16,6 @@ set ( obsbias_files
   ObsBiasRadianceGSI.cc
   ObsBiasRadianceGSITLAD.h
   ObsBiasRadianceGSITLAD.cc
-  tlap_mod.f90
 )
 
 PREPEND( _p_obsbias_files       "obsbias"       ${obsbias_files} )
