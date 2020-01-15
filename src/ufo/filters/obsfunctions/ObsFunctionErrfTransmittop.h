@@ -17,6 +17,11 @@
 namespace ufo {
 
 // -----------------------------------------------------------------------------
+// Error Inflation Factor for satellite radiance as a function of model
+// top-to-space transmittance:
+// x = model top-to-space transmittance
+// EIF = SQRT ( 1.0 / x )
+// -----------------------------------------------------------------------------
 
 class ObsFunctionErrfTransmittop : public ObsFunctionBase {
  public:

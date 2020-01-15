@@ -17,6 +17,14 @@
 namespace ufo {
 
 // -----------------------------------------------------------------------------
+// Error Inflation Factor (EIF) for satellite radiance with wavenumber in the
+// range of (2000, 2400] during daytime (sun zenith angle < 89) and containing
+// water fraction in the footprint:
+// x = wavenumber [1/cm]
+// y = surface-to-space transmittance
+// z = solar zenith angle [radian]
+// EIF = SQRT[ 1 / ( 1 - (x - 2000)) * y * MAX(0, COS(z)) / 4000 ]
+// -----------------------------------------------------------------------------
 
 class ObsFunctionErrfWavenum : public ObsFunctionBase {
  public:

@@ -17,6 +17,12 @@
 namespace ufo {
 
 // -----------------------------------------------------------------------------
+// Error Inflation Factor (EIF) for satellite radiance with footprint at
+// surface hight greater than 2000 meter:
+// H = surface height [m]
+// x = surface-to-space transmittance
+// EIF = SQRT [ 1 / ( 1 - (1 - (2000/H)^4) * x ]
+// -----------------------------------------------------------------------------
 
 class ObsFunctionErrfTopo : public ObsFunctionBase {
  public:
