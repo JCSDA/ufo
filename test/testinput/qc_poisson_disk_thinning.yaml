@@ -21,7 +21,7 @@ Observations:
         is_in: 1
     - Filter: Poisson Disk Thinning
       variables: [air_temperature]
-      min_horizontal_spacing: poisson_disk_radius@MetaData
+      min_horizontal_spacing: { "0": 2000, "1": 1000 }
       exclusion_volume_shape: ellipsoid
       shuffle: false # visit observations in the same order as the Met Office function did
       category_variable:

@@ -33,6 +33,7 @@ namespace ioda {
 
 namespace util {
   class DateTime;
+  template <typename Key, typename Value> class ScalarOrMap;
 }
 
 namespace ufo {
@@ -75,6 +76,10 @@ class PoissonDiskThinning : public FilterBase,
   /// \param[out] numNonspatialDims
   ///   Number of non-spatial dimensions used for thinning.
   ObsData getObsData(int &numSpatialDims, int &numNonspatialDims) const;
+
+  template <typename ValueType>
+  void validateSpacings(const util::ScalarOrMap<int, ValueType> &spacingsByPriority,
+      const std::string &parameterName) const;
 
   std::vector<size_t> getValidObservationIds(const std::vector<bool> &apply) const;
 

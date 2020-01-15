@@ -15,6 +15,7 @@
 #include "oops/util/parameters/OptionalParameter.h"
 #include "oops/util/parameters/Parameter.h"
 #include "oops/util/parameters/Parameters.h"
+#include "oops/util/parameters/ParameterTraitsScalarOrMap.h"
 #include "ufo/utils/parameters/ParameterTraitsVariable.h"
 
 namespace eckit {
@@ -60,30 +61,52 @@ namespace ufo {
 /// observations lying in the interior of its exclusion volume may be retained at the same time.
 class PoissonDiskThinningParameters : public oops::Parameters {
  public:
+  typedef int Priority;
+
   // Exclusion volume
 
   /// Size of the exclusion volume in the horizontal direction (in km).
   ///
-  /// This size must be a (weakly) monotonically decreasing function of observation priority,
-  /// i.e. the exclusion volumes of all observations with the same priority must have the same
-  /// size, and the exclusion volumes of lower-priority observations must be at least as large as
-  /// those of higher-priority ones. If this size should be the same for all observations, this
-  /// parameter can be set to a floating-point number. Otherwise is needs to be set to the name of
-  /// a variable storing the exclusion volume size for each observation. If the parameter is not
-  /// set, horizontal position is ignored during thinning.
-  oops::OptionalParameter<std::string> minHorizontalSpacing{"min_horizontal_spacing", this};
+  /// If the priority_variable parameter is not set and hence all observations have the same
+  /// priority, this parameter must be a floating-point constant. Otherwise it may also be a map
+  /// assigning an exclusion volume size to each observation priority. Exclusion volumes of
+  /// lower-priority observations must be at least as large as those of higher-priority ones.
+  /// If this parameter is not set, horizontal position is ignored during thinning.
+  ///
+  /// \note Owing to a bug in the eckit YAML parser, maps need to be written in the JSON style,
+  /// with keys quoted. Example:
+  ///
+  ///   min_horizontal_spacing: {"1": 123, "2": 321}
+  ///
+  /// This will not work:
+  ///
+  ///   min_horizontal_spacing: {1: 123, 2: 321}
+  ///
+  /// and neither will this:
+  ///
+  ///   min_horizontal_spacing:
+  ///     1: 123
+  ///     2: 321
+  ///
+  /// or this:
+  ///
+  ///   min_horizontal_spacing:
+  ///     "1": 123
+  ///     "2": 321
+  oops::OptionalParameter<util::ScalarOrMap<Priority, float>> minHorizontalSpacing{
+    "min_horizontal_spacing", this};
 
   /// Size of the exclusion volume in the vertical direction (in Pa).
   ///
-  /// Like min_horizontal_spacing, this can be either a variable name or a floating-point number.
-  oops::OptionalParameter<std::string> minVerticalSpacing{"min_vertical_spacing", this};
+  /// Like min_horizontal_spacing, this can be either a constant or a map.
+  oops::OptionalParameter<util::ScalarOrMap<Priority, float>> minVerticalSpacing{
+    "min_vertical_spacing", this};
 
   /// Size of the exclusion volume in the temporal direction.
   ///
-  /// This must be a duration (not a variable name).
-  // TODO(wsmigaj): allow this option to be set to a variable name. See comment in
-  // PoissonDiskThinning::getObsData() for explanation why this isn't currently supported.
-  oops::OptionalParameter<util::Duration> minTimeSpacing{"min_time_spacing", this};
+  /// Like min_horizontal_spacing, this can be either a constant or a map.
+  oops::OptionalParameter<util::ScalarOrMap<Priority, util::Duration>> minTimeSpacing{
+    "min_time_spacing", this};
 
   /// Shape of the exclusion volume surrounding each observation.
   ///

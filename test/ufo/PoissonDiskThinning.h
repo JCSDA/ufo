@@ -29,7 +29,8 @@
 namespace ufo {
 namespace test {
 
-void testPoissonDiskThinning(const eckit::LocalConfiguration &conf) {
+void testPoissonDiskThinning(const eckit::LocalConfiguration &conf,
+                             bool expectValidationError = false) {
   util::DateTime bgn(conf.getString("window_begin"));
   util::DateTime end(conf.getString("window_end"));
 
@@ -65,7 +66,12 @@ void testPoissonDiskThinning(const eckit::LocalConfiguration &conf) {
 
   const eckit::LocalConfiguration filterConf(conf, "Poisson Disk Thinning");
   ufo::PoissonDiskThinning filter(obsspace, filterConf, qcflags, obserr);
-  filter.preProcess();
+  if (expectValidationError) {
+    EXPECT_THROWS(filter.preProcess());
+    return;
+  } else {
+    filter.preProcess();
+  }
 
   const std::vector<size_t> expectedThinnedObsIndices =
       conf.getUnsignedVector("expected_thinned_obs_indices");
@@ -184,6 +190,24 @@ CASE("ufo/PoissonDiskThinning/Cylindrical exclusion volumes") {
 CASE("ufo/PoissonDiskThinning/Ellipsoidal exclusion volumes") {
   testPoissonDiskThinning(eckit::LocalConfiguration(::test::TestEnvironment::config(),
                                                  "Ellipsoidal exclusion volumes"));
+}
+
+CASE("ufo/PoissonDiskThinning/Incorrectly ordered min horizontal spacings") {
+  testPoissonDiskThinning(eckit::LocalConfiguration(::test::TestEnvironment::config(),
+                                                 "Incorrectly ordered min horizontal spacings"),
+                          true /*expectValidationError?*/);
+}
+
+CASE("ufo/PoissonDiskThinning/Incorrectly ordered min vertical spacings") {
+  testPoissonDiskThinning(eckit::LocalConfiguration(::test::TestEnvironment::config(),
+                                                 "Incorrectly ordered min vertical spacings"),
+                          true /*expectValidationError?*/);
+}
+
+CASE("ufo/PoissonDiskThinning/Incorrectly ordered min time spacings") {
+  testPoissonDiskThinning(eckit::LocalConfiguration(::test::TestEnvironment::config(),
+                                                 "Incorrectly ordered min time spacings"),
+                          true /*expectValidationError?*/);
 }
 
 class PoissonDiskThinning : public oops::Test {

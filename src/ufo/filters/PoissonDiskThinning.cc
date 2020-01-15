@@ -126,15 +126,17 @@ bool KDTree<numDims_>::isAnyPointInCylinderInterior(
 
 struct PoissonDiskThinning::ObsData
 {
-  boost::optional<std::vector<float>> minHorizontalSpacings;
+  boost::optional<util::ScalarOrMap<int, float>> minHorizontalSpacings;
   boost::optional<std::vector<float>> latitudes;
   boost::optional<std::vector<float>> longitudes;
 
-  boost::optional<std::vector<float>> minVerticalSpacings;
+  boost::optional<util::ScalarOrMap<int, float>> minVerticalSpacings;
   boost::optional<std::vector<float>> pressures;
 
-  boost::optional<std::vector<util::Duration>> minTimeSpacings;
+  boost::optional<util::ScalarOrMap<int, util::Duration>> minTimeSpacings;
   boost::optional<std::vector<util::DateTime>> times;
+
+  boost::optional<std::vector<int>> priorities;
 };
 
 PoissonDiskThinning::PoissonDiskThinning(ioda::ObsSpace & obsdb,
@@ -208,10 +210,9 @@ PoissonDiskThinning::ObsData PoissonDiskThinning::getObsData(int &numSpatialDims
   numNonspatialDims = 0;
 
   {
-    const boost::optional<std::string> &minHorizontalSpacing =
-        options_->minHorizontalSpacing.value();
-    if (minHorizontalSpacing != boost::none) {
-      obsData.minHorizontalSpacings = getScalarOrFilterData(minHorizontalSpacing.get(), data_);
+    obsData.minHorizontalSpacings = options_->minHorizontalSpacing.value();
+    if (obsData.minHorizontalSpacings != boost::none) {
+      validateSpacings(*obsData.minHorizontalSpacings, "min_horizontal_spacing");
       obsData.latitudes.emplace(obsdb_.nlocs());
       obsData.longitudes.emplace(obsdb_.nlocs());
       obsdb_.get_db("MetaData", "latitude", *obsData.latitudes);
@@ -221,9 +222,9 @@ PoissonDiskThinning::ObsData PoissonDiskThinning::getObsData(int &numSpatialDims
   }
 
   {
-    const boost::optional<std::string> &minVerticalSpacing = options_->minVerticalSpacing.value();
-    if (minVerticalSpacing != boost::none) {
-      obsData.minVerticalSpacings = getScalarOrFilterData(minVerticalSpacing.get(), data_);
+    obsData.minVerticalSpacings = options_->minVerticalSpacing.value();
+    if (obsData.minVerticalSpacings != boost::none) {
+      validateSpacings(*obsData.minVerticalSpacings, "min_vertical_spacing");
       obsData.pressures.emplace(obsdb_.nlocs());
       obsdb_.get_db("MetaData", "air_pressure", *obsData.pressures);
       ++numNonspatialDims;
@@ -231,18 +232,47 @@ PoissonDiskThinning::ObsData PoissonDiskThinning::getObsData(int &numSpatialDims
   }
 
   {
-    const boost::optional<util::Duration> &minTimeSpacing = options_->minTimeSpacing.value();
-    if (minTimeSpacing != boost::none) {
-      // getScalarOrFilterData only supports floating-point values.
-      // TODO(wsmigaj): generalize it to other data types such as util::Duration.
-      obsData.minTimeSpacings.emplace(obsdb_.nlocs(), minTimeSpacing.get());
+    obsData.minTimeSpacings = options_->minTimeSpacing.value();
+    if (obsData.minTimeSpacings != boost::none) {
+      validateSpacings(*obsData.minTimeSpacings, "min_time_spacing");
       obsData.times.emplace(obsdb_.nlocs());
       obsdb_.get_db("MetaData", "datetime", *obsData.times);
       ++numNonspatialDims;
     }
   }
 
+  {
+    const boost::optional<Variable> priorityVariable = options_->priorityVariable;
+    if (priorityVariable != boost::none) {
+      obsData.priorities.emplace(obsdb_.nlocs());
+      obsdb_.get_db(priorityVariable.get().group(), priorityVariable.get().variable(),
+                    *obsData.priorities);
+    }
+  }
+
   return obsData;
+}
+
+template <typename ValueType>
+void PoissonDiskThinning::validateSpacings(
+    const util::ScalarOrMap<int, ValueType> &spacingsByPriority,
+    const std::string &parameterName) const {
+  if (spacingsByPriority.isScalar())
+    return;
+
+  if (spacingsByPriority.begin() == spacingsByPriority.end())
+    throw eckit::BadParameter(parameterName + " must be a scalar or a non-empty map");
+
+  // The map is ordered by increasing priority, so the spacing of every item must be
+  // no larger than that of the previous item
+  ValueType prevSpacing = spacingsByPriority.begin()->second;
+  for (const auto &priorityAndSpacing : spacingsByPriority) {
+    const ValueType &spacing = priorityAndSpacing.second;
+    if (spacing > prevSpacing)
+      throw eckit::BadParameter(parameterName +
+                                ": exclusion volumes of lower-priority observations must be "
+                                "at least as large as those of higher-priority ones.");
+  }
 }
 
 std::vector<size_t> PoissonDiskThinning::getValidObservationIds(
@@ -384,13 +414,15 @@ std::array<float, numDims> PoissonDiskThinning::getExclusionVolumeSemiAxes(
 
   std::array<float, numDims> semiAxes;
 
+  const int priority = obsData.priorities == boost::none ? 0 : (*obsData.priorities)[obsId];
+
   unsigned int dim = 0;
 
   if (obsData.minHorizontalSpacings) {
     const float earthDiameter = 2 * Constants::mean_earth_rad;
     const float invEarthDiameter = 1 / earthDiameter;
 
-    const float minGeodesicDistance = (*obsData.minHorizontalSpacings)[obsId];
+    const float minGeodesicDistance = obsData.minHorizontalSpacings->at(priority);
     const float minEuclideanDistance =
         earthDiameter * std::sin(minGeodesicDistance * invEarthDiameter);
 
@@ -400,11 +432,11 @@ std::array<float, numDims> PoissonDiskThinning::getExclusionVolumeSemiAxes(
   }
 
   if (obsData.minVerticalSpacings) {
-    semiAxes[dim++] = (*obsData.minVerticalSpacings)[obsId];
+    semiAxes[dim++] = obsData.minVerticalSpacings->at(priority);
   }
 
   if (obsData.minTimeSpacings) {
-    semiAxes[dim++] = (*obsData.minTimeSpacings)[obsId].toSeconds();
+    semiAxes[dim++] = obsData.minTimeSpacings->at(priority).toSeconds();
   }
 
   return semiAxes;
