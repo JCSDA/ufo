@@ -12,6 +12,8 @@
 #include <string>
 #include <vector>
 
+#include "ioda/ObsDataVector.h"
+
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
 
@@ -59,10 +61,10 @@ class ObsBiasRadianceGSITLAD : public LinearObsBiasBase,
   double norm() const override;
 
 /// Linear obs bias operator
-  void computeObsBiasTL(const GeoVaLs &, const std::vector<float> &,
+  void computeObsBiasTL(const GeoVaLs &, const ioda::ObsDataVector<float> &,
                         ioda::ObsVector &) const override;
 
-  void computeObsBiasAD(GeoVaLs &, const std::vector<float> &,
+  void computeObsBiasAD(GeoVaLs &, const ioda::ObsDataVector<float> &,
                         const ioda::ObsVector &) override;
 
 /// Bias parameters interface

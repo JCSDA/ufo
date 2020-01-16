@@ -17,6 +17,8 @@
 
 #include "eckit/config/Configuration.h"
 
+#include "ioda/ObsDataVector.h"
+
 #include "oops/util/Printable.h"
 
 #include "ufo/ObsBiasIncrement.h"
@@ -53,17 +55,22 @@ class ObsBiasBase : public util::Printable,
   virtual ObsBiasBase & operator=(const ObsBias &) = 0;
 
 /// Bias model
-  virtual void computeObsBias(const GeoVaLs &, ioda::ObsVector &, const ObsDiagnostics &) const = 0;
+  virtual void computeObsBias(ioda::ObsVector &,
+                              const ioda::ObsDataVector<float> &,
+                              ioda::ObsDataVector<float> &) const = 0;
 
 /// predictors model
   virtual void computeObsBiasPredictors(const GeoVaLs &, const ObsDiagnostics &,
-                                        std::vector<float> &) const = 0;
+                                        ioda::ObsDataVector<float> &) const = 0;
 
 /// Bias operator input required from Model
   virtual const oops::Variables & requiredGeoVaLs() const = 0;
 
 /// Bias operator input required from ObsOperator diagnostics
   virtual const oops::Variables & requiredHdiagnostics() const = 0;
+
+/// Bias predictor names
+  virtual const oops::Variables & predNames() const = 0;
 
 /// Bias parameters interface
   virtual std::size_t size() const = 0;

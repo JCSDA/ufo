@@ -26,12 +26,6 @@ extern "C" {
                     const bool &, const bool &, const bool &, const bool &,
                     const float &, const float &, const float&, float &);
 // -----------------------------------------------------------------------------
-//  tlap
-// -----------------------------------------------------------------------------
-  void calc_tlap_f90(const bool &, const int &, const int &,
-                     const float &, const float &, const float&,
-                     const float&, float &);
-// -----------------------------------------------------------------------------
 
 }  // extern C
 
