@@ -108,7 +108,7 @@ double ObsBiasIncrement::norm() const {
 // -----------------------------------------------------------------------------
 
 void ObsBiasIncrement::computeObsBiasTL(const GeoVaLs & geovals,
-                                        const std::vector<float> & preds,
+                                        const ioda::ObsDataVector<float> & preds,
                                         ioda::ObsVector & ybiasinc) const {
   if (biasbase_) biasbase_->computeObsBiasTL(geovals, preds, ybiasinc);
 }
@@ -116,7 +116,7 @@ void ObsBiasIncrement::computeObsBiasTL(const GeoVaLs & geovals,
 // -----------------------------------------------------------------------------
 
 void ObsBiasIncrement::computeObsBiasAD(GeoVaLs & geovals,
-                                        const std::vector<float> & preds,
+                                        const ioda::ObsDataVector<float> & preds,
                                         const ioda::ObsVector & ybiasinc) {
   if (biasbase_) biasbase_->computeObsBiasAD(geovals, preds, ybiasinc);
 }
