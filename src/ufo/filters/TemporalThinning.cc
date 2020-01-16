@@ -187,7 +187,7 @@ void TemporalThinner::thinRange(Iterator validIndicesBegin,
                                 Advance advance,
                                 std::vector<bool> &isThinned) const {
   boost::optional<Observation> best;
-  for (auto it = validIndicesBegin; it != validIndicesEnd; ++it) {
+  for (Iterator it = validIndicesBegin; it != validIndicesEnd; ++it) {
     const size_t validObsIndex = *it;
     Observation current = getObservation(validObsIndex);
     if (best != boost::none) {
@@ -231,12 +231,12 @@ typename TemporalThinner::ForwardValidObsIndexIterator TemporalThinner::findSeed
 
   util::DateTime nearestToSeedTime = getObservation(*nearestToSeedIt).time;
 
-  auto acceptableBegin = std::lower_bound(
+  ForwardValidObsIndexIterator acceptableBegin = std::lower_bound(
         validObsIndicesBegin, nearestToSeedIt,
         nearestToSeedTime - options_.tolerance,
         [&](size_t validObsIndexA, const util::DateTime &timeB)
         { return getTime(validObsIndexA) < timeB; });
-  auto acceptableEnd = std::upper_bound(
+  ForwardValidObsIndexIterator acceptableEnd = std::upper_bound(
         acceptableBegin, validObsIndicesEnd,
         nearestToSeedTime + options_.tolerance,
         [&](const util::DateTime &timeA, size_t validObsIndexB)
@@ -350,7 +350,7 @@ void TemporalThinning::groupObservationsByCategory(const std::vector<size_t> &va
 
   ioda::ObsDataVector<int> obsDataVector(obsdb_, categoryVariable.get().variable(),
                                          categoryVariable.get().group());
-  auto &category = obsDataVector[0];
+  ioda::ObsDataRow<int> &category = obsDataVector[0];
 
   std::vector<int> validObsCategories(validObsIds.size());
   for (size_t validObsIndex = 0; validObsIndex < validObsIds.size(); ++validObsIndex)
