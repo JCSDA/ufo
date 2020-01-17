@@ -84,7 +84,6 @@ type(fckit_configuration) :: f_confOpts
  end if
 
  allocate(self%varin(nvars_in))
-
  self%varin(1:size(varin_default)) = varin_default
  ind = size(varin_default) + 1
  !Use list of Absorbers and Clouds from conf
@@ -384,10 +383,8 @@ logical :: jacobian_needed
                                chinfo(n:n) , &  ! Input
                                rts         , &  ! Output
                                Options       )  ! Input
-
       message = 'Error calling CRTM Forward Model for '//TRIM(self%conf%SENSOR_ID(n))
       call crtm_comm_stat_check(err_stat, PROGRAM_NAME, message, f_comm)
-
    end if ! jacobian_needed
 
    !call CRTM_RTSolution_Inspect(rts)
