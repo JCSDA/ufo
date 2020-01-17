@@ -212,8 +212,8 @@ integer(c_size_t),parameter :: csize = MAXVARLEN
        call abor1_ftn(message)
      end if
    else
-     message = trim(ROUTINE_NAME), &
-             ': Cloud_Fraction is not provided in conf.' //&
+     message = trim(ROUTINE_NAME) // &
+             ': Cloud_Fraction is not provided in conf.' // &
              ' Will request as a geoval.'
      CALL Display_Message(ROUTINE_NAME, TRIM(message), WARNING )
    end if
