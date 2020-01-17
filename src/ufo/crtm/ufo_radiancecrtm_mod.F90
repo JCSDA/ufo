@@ -157,7 +157,7 @@ type(CRTM_Geometry_type),   allocatable :: geo(:)
 ! Define the FORWARD variables
 type(CRTM_Atmosphere_type), allocatable :: atm(:)
 type(CRTM_Surface_type),    allocatable :: sfc(:)
-type(CRTM_RTSolution_type), allocatable :: rts(:,:) 
+type(CRTM_RTSolution_type), allocatable :: rts(:,:)
 
 ! Define the K-MATRIX variables for hofxdiags
 type(CRTM_Atmosphere_type), allocatable :: atm_K(:,:)
