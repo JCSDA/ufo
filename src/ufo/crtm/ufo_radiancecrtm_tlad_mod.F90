@@ -79,6 +79,10 @@ type(fckit_configuration) :: f_confOpts,f_confLinOper
  ! 1 * n_Absorbers
  ! 1 * n_Clouds (mass content only)
  nvars_in = size(varin_default) + self%conf%n_Absorbers + self%conf%n_Clouds
+ if ( self%conf%Cloud_Fraction < 0.0 .or. &
+      self%conf%Cloud_Fraction > 1.0 ) then
+    nvars_in = nvars_in + 1
+ end if
  allocate(self%varin(nvars_in))
  self%varin(1:size(varin_default)) = varin_default
  ind = size(varin_default) + 1
@@ -92,6 +96,11 @@ type(fckit_configuration) :: f_confOpts,f_confLinOper
    self%varin(ind) = self%conf%Clouds(jspec,1)
    ind = ind + 1
  end do
+ if ( self%conf%Cloud_Fraction < 0.0 .or. &
+      self%conf%Cloud_Fraction > 1.0 ) then
+   self%varin(ind) = var_cldfrac
+   ind = ind + 1
+ end if
 
  ! save channels
  allocate(self%channels(size(channels)))

@@ -66,7 +66,7 @@ type crtm_conf
     VISwaterCoeff_File, VISlandCoeff_File, VISsnowCoeff_File, VISiceCoeff_File, &
     MWwaterCoeff_File
  integer, allocatable :: Land_WSI(:)
-
+ real(kind_real) :: Cloud_Fraction = -1.0_kind_real
  integer :: inspect
  character(len=255) :: aerosol_option
 end type crtm_conf
@@ -137,9 +137,10 @@ type(crtm_conf),            intent(inout) :: conf
 type(fckit_configuration),  intent(in)    :: f_confOpts
 type(fckit_configuration),  intent(in)    :: f_confOper
 
+character(*), PARAMETER :: routine_name = 'crtm_conf_setup'
 character(len=255) :: IRVISwaterCoeff, IRVISlandCoeff, IRVISsnowCoeff, IRVISiceCoeff, MWwaterCoeff
 integer :: jspec, ivar
-character(len=max_string) :: err_msg
+character(len=max_string) :: message
 character(len=:), allocatable :: str
 character(kind=c_char,len=MAXVARLEN), allocatable :: char_array(:)
 integer(c_size_t),parameter :: csize = MAXVARLEN
@@ -171,8 +172,8 @@ integer(c_size_t),parameter :: csize = MAXVARLEN
  ! check for duplications
  do jspec = 2, conf%n_Absorbers
    if ( any(conf%Absorbers(jspec-1) == conf%Absorbers(jspec:conf%n_Absorbers)) ) then
-     write(err_msg,*) 'crtm_conf_setup error: ',trim(conf%Absorbers(jspec)),' is duplicated in Absorbers'
-     call abor1_ftn(err_msg)
+     write(message,*) trim(ROUTINE_NAME),' error: ',trim(conf%Absorbers(jspec)),' is duplicated in Absorbers'
+     call abor1_ftn(message)
    end if
  end do
 
@@ -180,8 +181,8 @@ integer(c_size_t),parameter :: csize = MAXVARLEN
  do jspec = 1, conf%n_Absorbers
    ivar = ufo_vars_getindex(CRTM_Absorbers, conf%Absorbers(jspec))
    if (ivar < 1 .or. ivar > size(UFO_Absorbers)) then
-     write(err_msg,*) 'crtm_conf_setup error: ',trim(conf%Absorbers(jspec)),' not supported by UFO_Absorbers'
-     call abor1_ftn(err_msg)
+     write(message,*) trim(ROUTINE_NAME),' error: ',trim(conf%Absorbers(jspec)),' not supported by UFO_Absorbers'
+     call abor1_ftn(message)
    end if
    conf%Absorbers(jspec) = UFO_Absorbers(ivar)
    conf%Absorber_Id(jspec) = CRTM_Absorber_Id(ivar)
@@ -199,13 +200,31 @@ integer(c_size_t),parameter :: csize = MAXVARLEN
  if (conf%n_Clouds > 0) then
    call f_confOper%get_or_die("Clouds",csize,char_array) 
    conf%Clouds(1:conf%n_Clouds,1) = char_array
+
+   if (f_confOper%has("Cloud_Fraction")) then
+     call f_confOper%get_or_die("Cloud_Fraction",conf%Cloud_Fraction)
+     if ( conf%Cloud_Fraction < 0.0 .or. &
+          conf%Cloud_Fraction > 1.0 ) then
+       write(message,*) trim(ROUTINE_NAME),' error: must specify ' // &
+                        ' 0.0 <= Cloud_Fraction <= 1.0' // &
+                        ' or remove Cloud_Fraction from conf' // &
+                        ' and provide as a geoval'
+       call abor1_ftn(message)
+     end if
+   else
+     message = trim(ROUTINE_NAME), &
+             ': Cloud_Fraction is not provided in conf.' //&
+             ' Will request as a geoval.'
+     CALL Display_Message(ROUTINE_NAME, TRIM(message), WARNING )
+   end if
  end if
 
  ! check for duplications
  do jspec = 2, conf%n_Clouds
    if ( any(conf%Clouds(jspec-1,1) == conf%Clouds(jspec:conf%n_Clouds,1)) ) then
-     write(err_msg,*) 'crtm_conf_setup error: ',trim(conf%Clouds(jspec,1)),' is duplicated in Clouds'
-     call abor1_ftn(err_msg)
+     write(message,*) trim(ROUTINE_NAME),' error: ',trim(conf%Clouds(jspec,1)), &
+                      ' is duplicated in Clouds'
+     call abor1_ftn(message)
    end if
  end do
 
@@ -213,8 +232,8 @@ integer(c_size_t),parameter :: csize = MAXVARLEN
  do jspec = 1, conf%n_Clouds
    ivar = ufo_vars_getindex(CRTM_Clouds, conf%Clouds(jspec,1))
    if (ivar < 1 .or. ivar > size(UFO_Clouds)) then
-     write(err_msg,*) 'crtm_conf_setup error: ',trim(conf%Clouds(jspec,1)),' not supported by UFO_Clouds'
-     call abor1_ftn(err_msg)
+     write(message,*) trim(ROUTINE_NAME),' error: ',trim(conf%Clouds(jspec,1)),' not supported by UFO_Clouds'
+     call abor1_ftn(message)
    end if
    conf%Clouds(jspec,1:2) = UFO_Clouds(ivar,1:2)
    conf%Cloud_Id(jspec)   = CRTM_Cloud_Id(ivar)
@@ -461,13 +480,21 @@ character(max_string) :: err_msg
        atm(k1)%Cloud(jspec)%Effective_Radius = geoval%vals(:,k1)
        atm(k1)%Cloud(jspec)%Type = conf%Cloud_Id(jspec)
     end do
-
-!** BTJ added 11/20/2018 for compatibility with CRTM REL 2.3.0+
-!** need to map to cloud fraction geoval, if it exists.  For now assume
-!** fully filled pixel.
-    if (conf%n_Clouds > 0) atm(k1)%Cloud_Fraction = 1.0_fp
-
  end do
+
+ ! When n_Clouds>0, Cloud_Fraction must either be provided as geoval or in conf
+ if (conf%n_Clouds > 0) then
+    if ( ufo_vars_getindex(geovals%variables, var_cldfrac) > 0 ) then
+       CALL ufo_geovals_get_var(geovals, var_cldfrac, geoval)
+       do k1 = 1,N_PROFILES
+          atm(k1)%Cloud_Fraction(:) = geoval%vals(:,k1)
+       end do
+    else
+       do k1 = 1,N_PROFILES
+          atm(k1)%Cloud_Fraction(:) = conf%Cloud_Fraction
+       end do
+    end if
+ end if
 
  end subroutine Load_Atm_Data
 
