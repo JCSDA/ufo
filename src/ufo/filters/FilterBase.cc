@@ -37,6 +37,8 @@ FilterBase::FilterBase(ioda::ObsSpace & os, const eckit::Configuration & config,
   oops::Log::trace() << "FilterBase contructor" << std::endl;
   ASSERT(flags);
   ASSERT(obserr);
+//  data_.associate(flags_, "QCflagsData");
+  data_.associate(*obserr_, "ObsErrorData");
   if (config_.has("filter variables")) {
   // read filter variables
     filtervars_ += Variables(config_.getSubConfigurations("filter variables"));
@@ -88,7 +90,7 @@ void FilterBase::priorFilter(const GeoVaLs & gv) {
 void FilterBase::postFilter(const ioda::ObsVector & hofx, const ObsDiagnostics & diags) {
   oops::Log::trace() << "FilterBase postFilter begin" << std::endl;
   if (post_) {
-    data_.associate(hofx);
+    data_.associate(hofx, "HofX");
     data_.associate(diags);
     this->doFilter();
   }

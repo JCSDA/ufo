@@ -41,6 +41,9 @@ list( APPEND ufo_test_input
   testinput/cris_qc.yaml
   testinput/function_velocity.yaml
   testinput/function_errflat.yaml
+  testinput/function_errftopo.yaml
+  testinput/function_errftransmittop.yaml
+  testinput/function_errfwavenum.yaml
   testinput/gmi_crtm.yaml
   testinput/genericprof.yaml
   testinput/geovals.yaml
@@ -58,8 +61,8 @@ list( APPEND ufo_test_input
   testinput/gsisfcmodel.yaml
   testinput/hirs4_crtm.yaml
   testinput/iasi_crtm.yaml
-  testinput/iasi_obsfunc_qc.yaml
   testinput/iasi_qc.yaml
+  testinput/iasi_qc_filters.yaml
   testinput/locations.yaml
   testinput/mhs_crtm.yaml
   testinput/obsdiag_crtm_jacobian.yaml
@@ -759,6 +762,24 @@ ecbuild_add_test( TARGET  test_ufo_function_errflat
                   ENVIRONMENT OOPS_TRAPFPE=1
                   LIBS    ufo)
 
+ecbuild_add_test( TARGET  test_ufo_function_errftopo
+                  SOURCES mains/TestObsFunction.cc
+                  ARGS    "testinput/function_errftopo.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  LIBS    ufo)
+
+ecbuild_add_test( TARGET  test_ufo_function_errftransmittop
+                  SOURCES mains/TestObsFunction.cc
+                  ARGS    "testinput/function_errftransmittop.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  LIBS    ufo)
+
+ecbuild_add_test( TARGET  test_ufo_function_errfwavenum
+                  SOURCES mains/TestObsFunction.cc
+                  ARGS    "testinput/function_errfwavenum.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  LIBS    ufo)
+
 # Test Diagnostics
 
 if ( ${CRTM_FOUND} )
@@ -815,9 +836,9 @@ if ( ${CRTM_FOUND} )
                       ENVIRONMENT OOPS_TRAPFPE=1
                       DEPENDS test_ObsFilters.x )
 
-    ecbuild_add_test( TARGET  test_ufo_qc_iasi_obsfunc
+    ecbuild_add_test( TARGET  test_ufo_qc_iasi_filters
                       COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-                      ARGS    "testinput/iasi_obsfunc_qc.yaml"
+                      ARGS    "testinput/iasi_qc_filters.yaml"
                       ENVIRONMENT OOPS_TRAPFPE=1
                       DEPENDS test_ObsFilters.x )
 

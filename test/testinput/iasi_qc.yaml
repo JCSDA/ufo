@@ -82,4 +82,4 @@ Observations:
 #      variables: [brightness_temperature]
 #      channels: *all_channels 
 #      threshold: 3.0
-   passedBenchmark: 24024 
+   passedBenchmark: 25872 
