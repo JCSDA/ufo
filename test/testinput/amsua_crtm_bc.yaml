@@ -17,7 +17,6 @@ Observations:
      LinearObsOperator:
        Absorbers: [H2O,O3,CO2]
        Clouds: [Water, Ice]
-       Cloud_Fraction: 1.0
      ObsOptions:
        inspectProfile: 1
        Sensor_ID: amsua_n19

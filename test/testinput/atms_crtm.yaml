@@ -16,7 +16,6 @@ Observations:
      LinearObsOperator:
        Absorbers: [H2O,O3,CO2]
        Clouds: [Water, Ice]
-       Cloud_Fraction: 1.0
      ObsOptions:
        Sensor_ID: atms_npp
        EndianType: little_endian
