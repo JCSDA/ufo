@@ -89,7 +89,7 @@ Observations:
        minvalue: 1.0e-12  
      action:
        name: reject 
-#   passedBenchmark: 60092   # GSI: 60092 
+#   passedBenchmark: 60092
    - Filter: BlackList
      filter variables:
      - name: brightness_temperature
@@ -99,7 +99,7 @@ Observations:
        inflation: ErrfWavenum@ObsFunction
        options:
          channels: *all_channels
-#   passedBenchmark: 60092   # GSI: 60092
+#   passedBenchmark: 60092
 #  Observation Range Sanity Check
    - Filter: Bounds Check
      filter variables:
@@ -109,7 +109,7 @@ Observations:
      maxvalue: 449.99999 
      action:
        name: reject 
-#   passedBenchmark: 60084   # GSI: 60084
+#   passedBenchmark: 60084
 #  Topography Check
    - Filter: BlackList 
      filter variables:
@@ -120,7 +120,7 @@ Observations:
        inflation: ErrfTopo@ObsFunction
        options:
          channels: *all_channels
-#   passedBenchmark: 60084   # GSI: 60084
+#   passedBenchmark: 60084
 #  Transmittance Top Check
    - Filter: BlackList 
      filter variables:
@@ -131,7 +131,7 @@ Observations:
        inflation: ErrfTransmittop@ObsFunction
        options:
          channels: *all_channels
-#   passedBenchmark: 60084   # GSI: 60084
+#   passedBenchmark: 60084
 #  Cloud Detection Check
    - Filter: Bounds Check
      filter variables:
@@ -210,4 +210,4 @@ Observations:
      maxvalue: 1.0e-12
      action:
        name: reject
-   passedBenchmark: 31019   # GSI: 31019
+   passedBenchmark: 31019
