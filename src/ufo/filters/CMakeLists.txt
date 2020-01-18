@@ -51,6 +51,8 @@ set ( filters_files
       obsfunctions/ObsFunction.h
       obsfunctions/ObsFunctionBase.cc
       obsfunctions/ObsFunctionBase.h
+      obsfunctions/ObsFunctionCloudDetect.cc
+      obsfunctions/ObsFunctionCloudDetect.h
       obsfunctions/ObsFunctionErrfLat.cc
       obsfunctions/ObsFunctionErrfLat.h
       obsfunctions/ObsFunctionErrfTopo.cc

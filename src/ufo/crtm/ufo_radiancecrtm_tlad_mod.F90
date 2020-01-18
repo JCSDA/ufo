@@ -169,9 +169,10 @@ character(len=MAXVARLEN), dimension(hofxdiags%nvar) :: &
 character(10), parameter :: jacobianstr = "_jacobian_"
 integer :: str_pos(4), ch_diags(hofxdiags%nvar)
 
-real(kind_real) :: total_od, secant_term
+real(kind_real) :: total_od, secant_term, wfunc_max
 real(kind_real), allocatable :: TmpVar(:)
 real(kind_real), allocatable :: Tao(:)
+real(kind_real), allocatable :: Wfunc(:)
 
  call obsspace_get_comm(obss, f_comm)
 
@@ -439,12 +440,14 @@ real(kind_real), allocatable :: Tao(:)
                call obsspace_get_db(obss, "MetaData", "sensor_zenith_angle", TmpVar)
                do jprofile = 1, self%n_Profiles
                   if (.not.self%Skip_Profiles(jprofile)) then
+                     ! get layer-to-space transmittance
                      secant_term = one/cos(TmpVar(jprofile)*deg2rad)
                      total_od = 0.0
                      do jlevel = 1, self%n_Layers
                         total_od = total_od + rts(jchannel,jprofile) % layer_optical_depth(jlevel)
                         Tao(jlevel) = exp(-min(limit_exp,total_od*secant_term))
                      end do
+                     ! get weighting function 
                      do jlevel = self%n_Layers-1, 1, -1
                         hofxdiags%geovals(jvar)%vals(jlevel,jprofile) = &
                            abs( (Tao(jlevel+1)-Tao(jlevel))/ &
@@ -457,6 +460,46 @@ real(kind_real), allocatable :: Tao(:)
                end do
                deallocate(TmpVar)
                deallocate(Tao)
+
+            ! variable: pressure_level_at_peak_of_weightingfunction_CH
+            case (var_pmaxlev_weightfunc)
+               hofxdiags%geovals(jvar)%nval = 1
+               allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,self%n_Profiles))
+               hofxdiags%geovals(jvar)%vals = missing
+               allocate(TmpVar(self%n_Profiles))
+               allocate(Tao(self%n_Layers))
+               allocate(Wfunc(self%n_Layers))
+               call obsspace_get_db(obss, "MetaData", "sensor_zenith_angle", TmpVar)
+               do jprofile = 1, self%n_Profiles
+                  if (.not.self%Skip_Profiles(jprofile)) then
+                     ! get layer-to-space transmittance
+                     secant_term = one/cos(TmpVar(jprofile)*deg2rad)
+                     total_od = 0.0
+                     do jlevel = 1, self%n_Layers
+                        total_od = total_od + rts(jchannel,jprofile) % layer_optical_depth(jlevel)
+                        Tao(jlevel) = exp(-min(limit_exp,total_od*secant_term))
+                     end do
+                     ! get weighting function 
+                     do jlevel = self%n_Layers-1, 1, -1
+                        Wfunc(jlevel) = &
+                           abs( (Tao(jlevel+1)-Tao(jlevel))/ &
+                                (log(atm(jprofile)%pressure(jlevel+1))- &
+                                 log(atm(jprofile)%pressure(jlevel))) )
+                     end do
+                     Wfunc(self%n_Layers) = Wfunc(self%n_Layers-1)
+                     ! get pressure level at the peak of the weighting function
+                     wfunc_max = -999.0
+                     do jlevel = self%n_Layers-1, 1, -1
+                        if (Wfunc(jlevel) > wfunc_max) then
+                           wfunc_max = Wfunc(jlevel)
+                           hofxdiags%geovals(jvar)%vals(1,jprofile) = jlevel
+                        endif
+                     enddo
+                  end if
+               end do
+               deallocate(TmpVar)
+               deallocate(Tao)
+               deallocate(Wfunc)
 
             case default
                write(err_msg,*) 'ufo_radiancecrtm_simobs: //&

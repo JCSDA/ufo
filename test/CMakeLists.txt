@@ -39,11 +39,12 @@ list( APPEND ufo_test_input
   testinput/coolskin.yaml
   testinput/cris_crtm.yaml
   testinput/cris_qc.yaml
-  testinput/function_velocity.yaml
+  testinput/function_clouddetect.yaml
   testinput/function_errflat.yaml
   testinput/function_errftopo.yaml
   testinput/function_errftransmittop.yaml
   testinput/function_errfwavenum.yaml
+  testinput/function_velocity.yaml
   testinput/gmi_crtm.yaml
   testinput/genericprof.yaml
   testinput/geovals.yaml
@@ -68,6 +69,8 @@ list( APPEND ufo_test_input
   testinput/obsdiag_crtm_jacobian.yaml
   testinput/obsdiag_crtm_amsua_jacobian.yaml
   testinput/obsdiag_crtm_amsua_optics.yaml
+  testinput/obsdiag_crtm_iasi_jacobian.yaml
+  testinput/obsdiag_crtm_iasi_optics.yaml
   testinput/obsfilterdata.yaml
   testinput/processwhere.yaml
   testinput/parameters.yaml
@@ -133,6 +136,7 @@ list( APPEND ufo_test_data
   atmosphere/hirs4_metop-a_geoval_2018041500_m.nc4
   atmosphere/iasi_metop-a_obsdiag_2018041500_m.nc4
   atmosphere/iasi_metop-a_geoval_2018041500_m.nc4
+  atmosphere/iasi_metop-a_geoval_2018041500.nc4
   atmosphere/mhs_n19_geoval_2018041500_m.nc4
   atmosphere/ps_geovals_2018041500_0000.nc4
   atmosphere/radar_dbz_geoval_2019052222.nc4
@@ -190,6 +194,7 @@ list (APPEND ioda_obs_test_data
   atmosphere/gsisfc_uv_obs_2018041500_m.nc4
   atmosphere/hirs4_metop-a_obs_2018041500_m.nc4
   atmosphere/iasi_metop-a_obs_2018041500_m.nc4
+  atmosphere/iasi_metop-a_obs_2018041500.nc4
   atmosphere/ioda_metop_2_amsua.nc4
   atmosphere/mhs_n19_obs_2018041500_m.nc4
   atmosphere/radar_dbz_obs_2019052222.nc4
@@ -741,9 +746,9 @@ ecbuild_add_test( TARGET  test_ufo_qc_preqc
 
 # Test Functions
 
-ecbuild_add_test( TARGET  test_ufo_function_velocity
+ecbuild_add_test( TARGET  test_ufo_function_clouddetect
                   SOURCES mains/TestObsFunction.cc
-                  ARGS    "testinput/function_velocity.yaml"
+                  ARGS    "testinput/function_clouddetect.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   LIBS    ufo)
 
@@ -771,6 +776,12 @@ ecbuild_add_test( TARGET  test_ufo_function_errfwavenum
                   ENVIRONMENT OOPS_TRAPFPE=1
                   LIBS    ufo)
 
+ecbuild_add_test( TARGET  test_ufo_function_velocity
+                  SOURCES mains/TestObsFunction.cc
+                  ARGS    "testinput/function_velocity.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  LIBS    ufo)
+
 # Test Diagnostics
 
 if ( ${CRTM_FOUND} )
@@ -791,6 +802,19 @@ if ( ${CRTM_FOUND} )
                       ARGS    "testinput/obsdiag_crtm_amsua_jacobian.yaml"
                       ENVIRONMENT OOPS_TRAPFPE=1
                       LIBS    ufo)
+
+    ecbuild_add_test( TARGET  test_ufo_obsdiag_crtm_iasi_optics
+                      SOURCES mains/TestObsDiagnostics.cc
+                      ARGS    "testinput/obsdiag_crtm_iasi_optics.yaml"
+                      ENVIRONMENT OOPS_TRAPFPE=1
+                      LIBS    ufo)
+
+    ecbuild_add_test( TARGET  test_ufo_obsdiag_crtm_iasi_jacobian
+                      SOURCES mains/TestObsDiagnostics.cc
+                      ARGS    "testinput/obsdiag_crtm_iasi_jacobian.yaml"
+                      ENVIRONMENT OOPS_TRAPFPE=1
+                      LIBS    ufo)
+
 endif ( ${CRTM_FOUND} )
 
 # Test Parameters
