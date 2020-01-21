@@ -59,7 +59,6 @@ integer(c_int),            intent(in)    :: channels(:)  !List of channels to us
 integer :: nvars_in
 integer :: ind, jspec
 character(len=max_string) :: err_msg
-character(len=:), allocatable :: str
 type(fckit_configuration) :: f_confOpts
 
  call f_confOper%get_or_die("ObsOptions",f_confOpts)
