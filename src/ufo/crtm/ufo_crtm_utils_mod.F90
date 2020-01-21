@@ -613,7 +613,7 @@ real(kind_real), allocatable :: ObsTb(:,:)
    sfc(k1)%Soil_Temperature = geoval%vals(1,k1)
    
    !Sea_Surface_Salinity
-   if (TRIM(conf%salinity_option) == "sss") THEN
+   if (TRIM(conf%salinity_option) == "on") THEN
       call ufo_geovals_get_var(geovals, var_sfc_sss, geoval)
       sfc(k1)%Salinity = geoval%vals(1,k1)
    end if
