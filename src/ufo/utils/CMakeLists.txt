@@ -4,8 +4,17 @@
 # which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 
 set ( utils_files
+      ArrowProxy.h
       Constants.h
+      DistanceCalculator.h
+      EquispacedBinSelector.h
+      GeodesicDistanceCalculator.h
+      MaxNormDistanceCalculator.h
       parameters/ParameterTraitsVariable.h
+      RecursiveSplitter.cc
+      RecursiveSplitter.h
+      SpatialBinSelector.h
+      SpatialBinSelector.cc
       StringUtils.cc
       StringUtils.h
       vert_interp.F90
