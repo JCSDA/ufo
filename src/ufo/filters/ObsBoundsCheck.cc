@@ -98,50 +98,29 @@ void ObsBoundsCheck::applyFilter(const std::vector<bool> & apply,
       }
     }
   } else {
-    // Get options from configuration
     std::vector<eckit::LocalConfiguration> varconfs;
     config_.get("test variables", varconfs);
-    const eckit::LocalConfiguration optconf(varconfs[0], "options");
-    oops::Log::debug() << "ObsBoundsCheck: optconf " <<  optconf << std::endl;
+    Variable testvar(varconfs[0]);
+    ioda::ObsDataVector<float> testdata(obsdb_, testvar.toOopsVariables(), testvar.group(), false);
+    data_.get(testvar, testdata);
 
-    if (optconf.has("channels")) {
-      // Get channels from options
-      const std::string chlist = optconf.getString("channels");
-      std::set<int> channelset = oops::parseIntSet(chlist);
-      std::vector<int> channels;
-      std::copy(channelset.begin(), channelset.end(), std::back_inserter(channels));
-      size_t nchans = channels.size();
+    // if testdata is 1D variable, apply the same testdata to all filterdata
+    // testdata_jv = {0, 0, 0, ..., 0} for all nvars
+    std::vector<size_t> testdata_jv(filtervars.nvars(), 0);
 
-      // Get test data from ObsFunction
-      Variables tvars;
-      Variable testvar(testname, optconf);
-      Variable tvar(testvar.variable(), channels);
-      tvars += tvar;
-      ioda::ObsDataVector<float> testdata(obsdb_, tvars.toOopsVariables(), "ObsFunction", false);
-      data_.get(Variable(testvar), testdata);
+    // if multiple variables ar in the testdata,  apply different testdatato different variables
+    // testdata_jv = {0, 1, 2, ..., nvars-1}
+    if (testvar.size() == filtervars.nvars()) {
+      std::iota(testdata_jv.begin(), testdata_jv.end(), 0);
+    }
 
-      // Loop over all variables to filter
-      for (size_t jv = 0; jv < filtervars.nvars(); ++jv) {
-        for (size_t jobs = 0; jobs < obsdb_.nlocs(); ++jobs) {
-          if (apply[jobs]) {
-            ASSERT(testdata[jv][jobs] != missing);
-            if (vmin != missing && testdata[jv][jobs] < vmin) flagged[jv][jobs] = true;
-            if (vmax != missing && testdata[jv][jobs] > vmax) flagged[jv][jobs] = true;
-          }
-        }
-      }
-    } else {
-      std::vector<float> testdata(data_.nlocs());
-      data_.get(Variable(testname, optconf), testdata);
-
-      // Loop over all variables to filter
-      for (size_t jv = 0; jv < filtervars.nvars(); ++jv) {
-        for (size_t jobs = 0; jobs < obsdb_.nlocs(); ++jobs) {
-          if (apply[jobs]) {
-            ASSERT(testdata[jobs] != missing);
-            if (vmin != missing && testdata[jobs] < vmin) flagged[jv][jobs] = true;
-            if (vmax != missing && testdata[jobs] > vmax) flagged[jv][jobs] = true;
-          }
+    // Loop over all variables to filter
+    for (size_t jv = 0; jv < filtervars.nvars(); ++jv) {
+      for (size_t jobs = 0; jobs < obsdb_.nlocs(); ++jobs) {
+        if (apply[jobs]) {
+          ASSERT(testdata[jv][jobs] != missing);
+          if (vmin != missing && testdata[jv][jobs] < vmin) flagged[jv][jobs] = true;
+          if (vmax != missing && testdata[jv][jobs] > vmax) flagged[jv][jobs] = true;
         }
       }
     }

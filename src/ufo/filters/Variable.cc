@@ -120,6 +120,17 @@ const std::string & Variable::group() const {
 
 // -----------------------------------------------------------------------------
 
+oops::Variables Variable::toOopsVariables() const {
+  oops::Variables vars;
+  for (size_t jj = 0; jj < this->size(); ++jj) {
+    vars.push_back(this->variable(jj));
+  }
+  return vars;
+}
+
+
+// -----------------------------------------------------------------------------
+
 void Variable::print(std::ostream & os) const {
   if (channels_.size() == 0) {
     os << varname_ + "@" + grpname_;

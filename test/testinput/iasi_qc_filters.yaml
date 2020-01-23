@@ -138,6 +138,7 @@ Observations:
        channels: *all_channels
      test variables:
      - name: CloudDetect@ObsFunction
+       channels: *all_channels
        options:
          channels: *all_channels
          use_flag: [1, -1, -1, -1, 1, -1, -1, -1, 1, -1, 1, -1, 1,
