@@ -118,7 +118,8 @@ void ObsFunctionCloudDetect::compute(const ObsFilterData & in,
     tmpvar.clear();
     for (size_t ilev = 0; ilev < nlevs; ++ilev) {
       int level = nlevs - ilev;
-      in.get(invars_[2][ichan], level,  values);
+      in.get(Variable("transmittances_of_atmosphere_layer@ObsDiag",
+             channels_)[ichan], level,  values);
       tmpvar.push_back(values);
     }
     tao.push_back(tmpvar);
