@@ -45,7 +45,6 @@ ObsFunctionCloudDetect::ObsFunctionCloudDetect(const eckit::LocalConfiguration c
   invars_ += Variable("brightness_temperature_jacobian_surface_temperature@ObsDiag", channels_);
   invars_ += Variable("brightness_temperature_jacobian_air_temperature@ObsDiag", channels_);
   invars_ += Variable("transmittances_of_atmosphere_layer@ObsDiag", channels_);
-  invars_ += Variable("weightingfunction_of_atmosphere_layer@ObsDiag", channels_);
   invars_ += Variable("pressure_level_at_peak_of_weightingfunction@ObsDiag", channels_);
 
   // Include list of required data from ObsSpace
@@ -123,19 +122,6 @@ void ObsFunctionCloudDetect::compute(const ObsFilterData & in,
       tmpvar.push_back(values);
     }
     tao.push_back(tmpvar);
-  }
-
-  // Get weighting function
-  std::vector<std::vector<std::vector<float>>> weightfunc;
-  for (size_t ichan = 0; ichan < nchans; ++ichan) {
-    tmpvar.clear();
-    for (size_t ilev = 0; ilev < nlevs; ++ilev) {
-      int level = nlevs - ilev;
-      in.get(Variable("weightingfunction_of_atmosphere_layer@ObsDiag",
-                       channels_)[ichan], level,  values);
-      tmpvar.push_back(values);
-    }
-    weightfunc.push_back(tmpvar);
   }
 
   // Get pressure level at the peak of the weighting function
