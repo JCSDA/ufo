@@ -196,7 +196,6 @@ list (APPEND ioda_obs_test_data
   atmosphere/gsisfc_uv_obs_2018041500_m.nc4
   atmosphere/hirs4_metop-a_obs_2018041500_m.nc4
   atmosphere/iasi_metop-a_obs_2018041500_m.nc4
-  atmosphere/iasi_metop-a_obs_2018041500.nc4
   atmosphere/ioda_metop_2_amsua.nc4
   atmosphere/mhs_n19_obs_2018041500_m.nc4
   atmosphere/radar_dbz_obs_2019052222.nc4
