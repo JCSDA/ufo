@@ -252,7 +252,7 @@ void ObsFunctionCloudDetect::compute(const ObsFilterData & in,
     // Set initial cloud condition
     int lcloud = 0;
     float cldfrac = 0.0;
-    float cldprs = prsl[0][iloc] * 0.01; // [Pa] ---> [hPa]
+    float cldprs = prsl[0][iloc] * 0.01;     // convert from [Pa] to [hPa]
 
     // Loop through vertical layer from surface to model top
     for (size_t k = 0 ; k < nlevs ; ++k) {
