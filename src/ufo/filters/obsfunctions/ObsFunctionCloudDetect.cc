@@ -99,7 +99,8 @@ void ObsFunctionCloudDetect::compute(const ObsFilterData & in,
 
   // Get temperature jacobian
   std::vector<std::vector<std::vector<float>>> dbtdt;
-  std::vector<std::vector<float>> tmpvar;
+  // std::vector<std::vector<std::vector<float>>> dbtdt(nchans, std::vector<std::vector<float>>(nlevs, std::vector<float>(nlocs)));
+  std::vector<std::vector<float>> tmpvar(nlevs, std::vector<float>(nlocs));
   for (size_t ichan = 0; ichan < nchans; ++ichan) {
     tmpvar.clear();
     for (size_t ilev = 0; ilev < nlevs; ++ilev) {
@@ -112,7 +113,8 @@ void ObsFunctionCloudDetect::compute(const ObsFilterData & in,
   }
 
   // Get layer-to-space transmittance
-  std::vector<std::vector<std::vector<float>>> tao;
+//std::vector<std::vector<std::vector<float>>> tao;
+  std::vector<std::vector<std::vector<float>>> tao(nchans, std::vector<std::vector<float>>(nlevs, std::vector<float>(nlocs)));
   for (size_t ichan = 0; ichan < nchans; ++ichan) {
     tmpvar.clear();
     for (size_t ilev = 0; ilev < nlevs; ++ilev) {
