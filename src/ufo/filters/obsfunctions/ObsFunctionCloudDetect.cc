@@ -87,46 +87,36 @@ void ObsFunctionCloudDetect::compute(const ObsFilterData & in,
 
   // Get variables from ObsDiag
   // Load surface temperature jacobian
-  std::vector<float> values(nlocs, 0.0);
   std::vector<std::vector<float>> dbtdts(nchans, std::vector<float>(nlocs));
   for (size_t ichan = 0; ichan < nchans; ++ichan) {
     in.get(Variable("brightness_temperature_jacobian_surface_temperature@ObsDiag",
-                     channels_)[ichan], values);
-    for (size_t iloc = 0; iloc < nlocs; ++iloc) {
-      dbtdts[ichan][iloc] = values[iloc];
-    }
+                     channels_)[ichan], dbtdts[ichan]);
   }
 
   // Get temperature jacobian
-  std::vector<std::vector<std::vector<float>>> dbtdt;
-  // std::vector<std::vector<std::vector<float>>> dbtdt(nchans, std::vector<std::vector<float>>(nlevs, std::vector<float>(nlocs)));
-  std::vector<std::vector<float>> tmpvar(nlevs, std::vector<float>(nlocs));
+  std::vector<std::vector<std::vector<float>>>
+       dbtdt(nchans, std::vector<std::vector<float>>(nlevs, std::vector<float>(nlocs)));
   for (size_t ichan = 0; ichan < nchans; ++ichan) {
-    tmpvar.clear();
     for (size_t ilev = 0; ilev < nlevs; ++ilev) {
       int level = nlevs - ilev;
       in.get(Variable("brightness_temperature_jacobian_air_temperature@ObsDiag",
-                       channels_)[ichan], level, values);
-      tmpvar.push_back(values);
+                       channels_)[ichan], level, dbtdt[ichan][ilev]);
     }
-    dbtdt.push_back(tmpvar);
   }
 
   // Get layer-to-space transmittance
-//std::vector<std::vector<std::vector<float>>> tao;
-  std::vector<std::vector<std::vector<float>>> tao(nchans, std::vector<std::vector<float>>(nlevs, std::vector<float>(nlocs)));
+  std::vector<std::vector<std::vector<float>>>
+       tao(nchans, std::vector<std::vector<float>>(nlevs, std::vector<float>(nlocs)));
   for (size_t ichan = 0; ichan < nchans; ++ichan) {
-    tmpvar.clear();
     for (size_t ilev = 0; ilev < nlevs; ++ilev) {
       int level = nlevs - ilev;
       in.get(Variable("transmittances_of_atmosphere_layer@ObsDiag",
-             channels_)[ichan], level,  values);
-      tmpvar.push_back(values);
+             channels_)[ichan], level,  tao[ichan][ilev]);
     }
-    tao.push_back(tmpvar);
   }
 
   // Get pressure level at the peak of the weighting function
+  std::vector<float> values(nlocs, 0.0);
   std::vector<std::vector<float>> wfunc_pmaxlev(nchans, std::vector<float>(nlocs));
   for (size_t ichan = 0; ichan < nchans; ++ichan) {
     in.get(Variable("pressure_level_at_peak_of_weightingfunction@ObsDiag",
@@ -150,10 +140,7 @@ void ObsFunctionCloudDetect::compute(const ObsFilterData & in,
   // Get bias corrected innovation (tbobs - hofx - bias)
   std::vector<std::vector<float>> innovation(nchans, std::vector<float>(nlocs));
   for (size_t ichan = 0; ichan < nchans; ++ichan) {
-    in.get(Variable("brightness_temperature@ObsValue", channels_)[ichan], values);
-    for (size_t iloc = 0; iloc < nlocs; ++iloc) {
-      innovation[ichan][iloc] = values[iloc];
-    }
+    in.get(Variable("brightness_temperature@ObsValue", channels_)[ichan], innovation[ichan]);
     in.get(Variable("brightness_temperature@HofX", channels_)[ichan], values);
     for (size_t iloc = 0; iloc < nlocs; ++iloc) {
       innovation[ichan][iloc] = innovation[ichan][iloc] - values[iloc];
@@ -167,19 +154,13 @@ void ObsFunctionCloudDetect::compute(const ObsFilterData & in,
   // Get original observation error (uninflated) from ObsSpaec
   std::vector<std::vector<float>> obserr(nchans, std::vector<float>(nlocs));
   for (size_t ichan = 0; ichan < nchans; ++ichan) {
-    in.get(Variable("brightness_temperature@ObsError", channels_)[ichan], values);
-    for (size_t iloc = 0; iloc < nlocs; ++iloc) {
-      obserr[ichan][iloc] = values[iloc];
-    }
+    in.get(Variable("brightness_temperature@ObsError", channels_)[ichan], obserr[ichan]);
   }
 
   // Get variables from GeoVaLS
-  // Get tropopause pressure [pa] ---> [hPa]
+  // Get tropopause pressure [Pa]
   std::vector<float> tropprs(nlocs);
   in.get(Variable("tropopause_pressure@GeoVaLs"), tropprs);
-  for (size_t iloc = 0; iloc < nlocs; ++iloc) {
-    tropprs[iloc] = tropprs[iloc]*0.01;
-  }
 
   // Get average surface temperature within FOV
   std::vector<float> tsavg(nlocs);
@@ -225,24 +206,18 @@ void ObsFunctionCloudDetect::compute(const ObsFilterData & in,
     }
   }
 
-  // Get air pressure [pa] ---> [hPa]
+  // Get air pressure [Pa]
   std::vector<std::vector<float>> prsl(nlevs, std::vector<float>(nlocs));
   for (size_t ilev = 0; ilev < nlevs; ++ilev) {
-    size_t level = ilev + 1;
-    in.get(Variable("air_pressure@GeoVaLs"), level, values);
-    for (size_t iloc = 0; iloc < nlocs; ++iloc) {
-      prsl[nlevs-ilev-1][iloc] = values[iloc]*0.01;
-    }
+    size_t level = nlevs - ilev;
+    in.get(Variable("air_pressure@GeoVaLs"), level, prsl[ilev]);
   }
 
   // Get air temperature
   std::vector<std::vector<float>> tair(nlevs, std::vector<float>(nlocs));
   for (size_t ilev = 0; ilev < nlevs; ++ilev) {
-    size_t level = ilev + 1;
-    in.get(Variable("air_temperature@GeoVaLs"), level, values);
-    for (size_t iloc = 0; iloc < nlocs; ++iloc) {
-      tair[nlevs-ilev-1][iloc] = values[iloc];
-    }
+    size_t level = nlevs - ilev;
+    in.get(Variable("air_temperature@GeoVaLs"), level, tair[ilev]);
   }
 
   // Minimum Residual Method (MRM) for Cloud Detection:
@@ -277,12 +252,12 @@ void ObsFunctionCloudDetect::compute(const ObsFilterData & in,
     // Set initial cloud condition
     int lcloud = 0;
     float cldfrac = 0.0;
-    float cldprs = prsl[0][iloc];
+    float cldprs = prsl[0][iloc] * 0.01; // [Pa] ---> [hPa]
 
     // Loop through vertical layer from surface to model top
     for (size_t k = 0 ; k < nlevs ; ++k) {
       // Perform cloud detection within troposphere
-      if (prsl[k][iloc] > tropprs[iloc]) {
+      if (prsl[k][iloc] * 0.01 > tropprs[iloc] * 0.01) {
         for (size_t ichan = 0; ichan < nchans; ++ichan) {
           dbt[ichan] = (tair[k][iloc] - tsavg[iloc]) * dbtdts[ichan][iloc];
         }
@@ -311,7 +286,7 @@ void ObsFunctionCloudDetect::compute(const ObsFilterData & in,
           sum3 = sum;
           lcloud = k + 1;   // array index + 1 -> model coordinate index
           cldfrac = cloudp;
-          cldprs = prsl[k][iloc];
+          cldprs = prsl[k][iloc] * 0.01;
         }
       }
     // end of vertical loop
