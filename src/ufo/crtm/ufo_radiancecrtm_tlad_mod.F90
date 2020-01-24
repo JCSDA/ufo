@@ -295,9 +295,16 @@ real(kind_real), allocatable :: Wfunc(:)
    if (allocated(self%Skip_Profiles)) deallocate(self%Skip_Profiles)
    allocate(self%Skip_Profiles(self%n_Profiles))
    call ufo_crtm_skip_profiles(self%n_Profiles,self%n_Channels,self%channels,obss,self%Skip_Profiles)
-   do jprofile = 1, self%n_Profiles
+   profile_loop: do jprofile = 1, self%n_Profiles
       Options(jprofile)%Skip_Profile = self%Skip_Profiles(jprofile)
-   end do
+      ! check for pressure monotonicity
+      do jlevel = atm(jprofile)%n_layers, 1, -1
+         if ( atm(jprofile)%level_pressure(jlevel) <= atm(jprofile)%level_pressure(jlevel-1) ) then
+            Options(jprofile)%Skip_Profile = .TRUE.
+            cycle profile_loop
+         end if
+      end do
+   end do profile_loop
 
    ! Call the K-matrix model
    ! -----------------------
