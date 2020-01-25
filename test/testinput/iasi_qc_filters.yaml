@@ -13,7 +13,9 @@ Observations:
    ObsSpace:
      name: iasi_metop-a 
      ObsDataIn: 
-       obsfile: Data/ioda/testinput_tier_1/iasi_metop-a_obs_2018041500_m.nc4
+       obsfile: Data/iasi_metop-a_obs_2018041500_m.nc4
+     ObsDataOut:
+       obsfile: Data/iasi_metop-a_obs_2018041500_m_out.nc4
      simulate:
        variables: [brightness_temperature]
        channels: &all_channels 16, 29, 32, 35, 38, 41, 44, 47, 49, 50, 51, 53,
@@ -68,27 +70,69 @@ Observations:
    GeoVaLs: 
      filename: Data/iasi_metop-a_geoval_2018041500_m.nc4
    ObsFilters:
-   - Filter: Domain Check
+#  Wavenumber Check
+   - Filter: BlackList 
      filter variables:
      - name: brightness_temperature
-       channels: *all_channels
+       channels: 7024, 7027, 7029, 7032, 7038, 7043, 7046, 7049,
+                 7069, 7072, 7076, 7081, 7084, 7089, 7099, 7209, 7222, 7231, 7235, 7247,
+                 7267, 7269, 7284, 7389, 7419, 7423, 7424, 7426, 7428, 7431, 7436, 7444,
+                 7475, 7549, 7584, 7665, 7666, 7831, 7836, 7853, 7865, 7885, 7888, 7912,
+                 7950, 7972, 7980, 7995, 8007, 8015, 8055, 8078 
      where:
      - variable:
+         name: solar_zenith_angle@MetaData
+       maxvalue: 88.9999    
+     - variable:
          name: water_area_fraction@GeoVaLs
-       maxvalue: 0.0 
-   - Filter: Bounds Check
-     filter variables:
-     - name: brightness_temperature
-       channels: *all_channels 
-     minvalue: 50.0
-     maxvalue: 550.0
-   - Filter: Domain Check 
+       minvalue: 1.0e-12  
+     action:
+       name: reject 
+#   passedBenchmark: 60092 
+#   passedBenchmark: 60092   # GSI
+   - Filter: BlackList
      filter variables:
      - name: brightness_temperature
        channels: *all_channels
      action:
        name: inflate error
-       inflation: ErrfLat@ObsFunction
+       inflation: ErrfWavenum@ObsFunction
        options:
-         latitude_parameters: [25.0, 0.5, 0.04, 1.0]
-   passedBenchmark: 24024 
+         channels: *all_channels
+#   passedBenchmark: 60092 
+#   passedBenchmark: 60092   # GSI
+#  Observation Range Sanity Check
+   - Filter: Bounds Check
+     filter variables:
+     - name: brightness_temperature
+       channels: *all_channels
+     minvalue: 50.00001 
+     maxvalue: 449.99999 
+     action:
+       name: reject 
+#   passedBenchmark: 60084 
+#   passedBenchmark: 60084   # GSI
+#  Topography Check
+   - Filter: BlackList 
+     filter variables:
+     - name: brightness_temperature
+       channels: *all_channels
+     action:
+       name: inflate error
+       inflation: ErrfTopo@ObsFunction
+       options:
+         channels: *all_channels
+#   passedBenchmark: 60084
+#   passedBenchmark: 60084   # GSI
+#  Transmittance Top Check
+   - Filter: BlackList
+     filter variables:
+     - name: brightness_temperature
+       channels: *all_channels
+     action:
+       name: inflate error
+       inflation: ErrfTransmittop@ObsFunction
+       options:
+         channels: *all_channels
+   passedBenchmark: 60084
+#   passedBenchmark: 60084   # GSI

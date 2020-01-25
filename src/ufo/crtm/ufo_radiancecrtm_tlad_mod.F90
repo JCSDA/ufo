@@ -20,6 +20,8 @@ module ufo_radiancecrtm_tlad_mod
  use ufo_vars_mod
  use ufo_crtm_utils_mod
 
+ use ufo_constants_mod, only: deg2rad
+
  implicit none
  private
 
@@ -167,6 +169,10 @@ character(len=MAXVARLEN), dimension(hofxdiags%nvar) :: &
 character(10), parameter :: jacobianstr = "_jacobian_"
 integer :: str_pos(4), ch_diags(hofxdiags%nvar)
 
+real(kind_real) :: total_od, secant_term
+real(kind_real), allocatable :: TmpVar(:)
+real(kind_real), allocatable :: Tao(:)
+
  call obsspace_get_comm(obss, f_comm)
 
  ! Get number of profile and layers from geovals
@@ -288,9 +294,16 @@ integer :: str_pos(4), ch_diags(hofxdiags%nvar)
    if (allocated(self%Skip_Profiles)) deallocate(self%Skip_Profiles)
    allocate(self%Skip_Profiles(self%n_Profiles))
    call ufo_crtm_skip_profiles(self%n_Profiles,self%n_Channels,self%channels,obss,self%Skip_Profiles)
-   do jprofile = 1, self%n_Profiles
+   profile_loop: do jprofile = 1, self%n_Profiles
       Options(jprofile)%Skip_Profile = self%Skip_Profiles(jprofile)
-   end do
+      ! check for pressure monotonicity
+      do jlevel = atm(jprofile)%n_layers, 1, -1
+         if ( atm(jprofile)%level_pressure(jlevel) <= atm(jprofile)%level_pressure(jlevel-1) ) then
+            Options(jprofile)%Skip_Profile = .TRUE.
+            cycle profile_loop
+         end if
+      end do
+   end do profile_loop
 
    ! Call the K-matrix model
    ! -----------------------
@@ -402,6 +415,55 @@ integer :: str_pos(4), ch_diags(hofxdiags%nvar)
                         rts(jchannel,jprofile) % Brightness_Temperature 
                   end if
                end do
+
+            ! variable: transmittances_of_atmosphere_layer_CH
+            case (var_lvl_transmit)
+              hofxdiags%geovals(jvar)%nval = self%n_Layers
+              allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,self%n_Profiles))
+              hofxdiags%geovals(jvar)%vals = missing
+              allocate(TmpVar(self%n_Profiles))
+              call obsspace_get_db(obss, "MetaData", "sensor_zenith_angle", TmpVar)
+              do jprofile = 1, self%n_Profiles
+                 if (.not.self%Skip_Profiles(jprofile)) then
+                    secant_term = one/cos(TmpVar(jprofile)*deg2rad)
+                    total_od = 0.0
+                    do jlevel = 1, self%n_Layers
+                       total_od   = total_od + rts(jchannel,jprofile) % layer_optical_depth(jlevel)
+                       hofxdiags%geovals(jvar)%vals(jlevel,jprofile) = &
+                          exp(-min(limit_exp,total_od*secant_term))
+                    end do
+                 end if
+              end do
+              deallocate(TmpVar)
+
+            ! variable: weightingfunction_of_atmosphere_layer_CH
+            case (var_lvl_weightfunc)
+               hofxdiags%geovals(jvar)%nval = self%n_Layers
+               allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,self%n_Profiles))
+               hofxdiags%geovals(jvar)%vals = missing
+               allocate(TmpVar(self%n_Profiles))
+               allocate(Tao(self%n_Layers))
+               call obsspace_get_db(obss, "MetaData", "sensor_zenith_angle", TmpVar)
+               do jprofile = 1, self%n_Profiles
+                  if (.not.self%Skip_Profiles(jprofile)) then
+                     secant_term = one/cos(TmpVar(jprofile)*deg2rad)
+                     total_od = 0.0
+                     do jlevel = 1, self%n_Layers
+                        total_od = total_od + rts(jchannel,jprofile) % layer_optical_depth(jlevel)
+                        Tao(jlevel) = exp(-min(limit_exp,total_od*secant_term))
+                     end do
+                     do jlevel = self%n_Layers-1, 1, -1
+                        hofxdiags%geovals(jvar)%vals(jlevel,jprofile) = &
+                           abs( (Tao(jlevel+1)-Tao(jlevel))/ &
+                                (log(atm(jprofile)%pressure(jlevel+1))- &
+                                 log(atm(jprofile)%pressure(jlevel))) )
+                     end do
+                     hofxdiags%geovals(jvar)%vals(self%n_Layers,jprofile) = &
+                     hofxdiags%geovals(jvar)%vals(self%n_Layers-1,jprofile)
+                  end if
+               end do
+               deallocate(TmpVar)
+               deallocate(Tao)
 
             case default
                write(err_msg,*) 'ufo_radiancecrtm_simobs: //&

@@ -12,6 +12,8 @@
 #include <string>
 #include <vector>
 
+#include "ioda/ObsDataVector.h"
+
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
 
@@ -53,15 +55,18 @@ class ObsBiasRadianceGSI : public ObsBiasBase,
   ObsBiasRadianceGSI & operator=(const ObsBias &) override;
 
 /// Obs bias operator
-  void computeObsBias(const GeoVaLs &, ioda::ObsVector &, const ObsDiagnostics &) const override;
+  void computeObsBias(ioda::ObsVector &,
+                      const ioda::ObsDataVector<float> &,
+                      ioda::ObsDataVector<float> &) const override;
 
 /// Obs bias predictor
   void computeObsBiasPredictors(const GeoVaLs &, const ObsDiagnostics &,
-                                std::vector<float> &) const override;
+                                ioda::ObsDataVector<float> &) const override;
 
 /// Other
   const oops::Variables & requiredGeoVaLs() const override {return *geovars_;}
   const oops::Variables & requiredHdiagnostics() const override {return *hdiags_;}
+  const oops::Variables & predNames() const override {return *predNames_;}
 
 /// Bias parameters interface
   std::size_t size() const override {return biascoeffs_.size();}
@@ -72,15 +77,15 @@ class ObsBiasRadianceGSI : public ObsBiasBase,
   void print(std::ostream &) const override;
 
   const ioda::ObsSpace & odb_;
-  std::unique_ptr<const oops::Variables> geovars_;
-  std::unique_ptr<const oops::Variables> hdiags_;
+  std::unique_ptr<oops::Variables> geovars_;
+  std::unique_ptr<oops::Variables> hdiags_;
+  std::unique_ptr<const oops::Variables> predNames_;
   std::string sensor_id_;  // sensor_id
   std::vector<int> channels_;  // channel
   std::vector<float> tlapmean_;
 
   std::vector<double> biascoeffs_;
   bool newpc4pred_;  //  controls preconditioning due to sat-bias correction term
-  bool adp_anglebc_;  //  logical to turn off or on the variational radiance angle bias correction
   bool emiss_bc_;  //  logical to turn off or on the emissivity predictor
 
   std::vector<std::string> predictors_;

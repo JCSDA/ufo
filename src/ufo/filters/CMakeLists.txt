@@ -37,6 +37,7 @@ set ( filters_files
       Variables.h
       Gaussian_Thinning.cc
       Gaussian_Thinning.h
+      GaussianThinningParameters.h
       processWhere.cc
       processWhere.h
       actions/FilterAction.cc
@@ -51,12 +52,18 @@ set ( filters_files
       obsfunctions/ObsFunction.h
       obsfunctions/ObsFunctionBase.cc
       obsfunctions/ObsFunctionBase.h
+      obsfunctions/ObsFunctionErrfLat.cc
+      obsfunctions/ObsFunctionErrfLat.h
+      obsfunctions/ObsFunctionErrfTopo.cc
+      obsfunctions/ObsFunctionErrfTopo.h
+      obsfunctions/ObsFunctionErrfTransmittop.cc
+      obsfunctions/ObsFunctionErrfTransmittop.h
+      obsfunctions/ObsFunctionErrfWavenum.cc
+      obsfunctions/ObsFunctionErrfWavenum.h
       obsfunctions/ObsFunctionScattering.cc
       obsfunctions/ObsFunctionScattering.h
       obsfunctions/ObsFunctionVelocity.cc
       obsfunctions/ObsFunctionVelocity.h
-      obsfunctions/ObsFunctionErrfLat.cc
-      obsfunctions/ObsFunctionErrfLat.h
 )
 
 PREPEND( _p_filters_files       "filters"       ${filters_files} )

@@ -41,6 +41,9 @@ list( APPEND ufo_test_input
   testinput/cris_qc.yaml
   testinput/function_velocity.yaml
   testinput/function_errflat.yaml
+  testinput/function_errftopo.yaml
+  testinput/function_errftransmittop.yaml
+  testinput/function_errfwavenum.yaml
   testinput/gmi_crtm.yaml
   testinput/genericprof.yaml
   testinput/geovals.yaml
@@ -58,11 +61,13 @@ list( APPEND ufo_test_input
   testinput/gsisfcmodel.yaml
   testinput/hirs4_crtm.yaml
   testinput/iasi_crtm.yaml
-  testinput/iasi_obsfunc_qc.yaml
   testinput/iasi_qc.yaml
+  testinput/iasi_qc_filters.yaml
   testinput/locations.yaml
   testinput/mhs_crtm.yaml
   testinput/obsdiag_crtm_jacobian.yaml
+  testinput/obsdiag_crtm_amsua_jacobian.yaml
+  testinput/obsdiag_crtm_amsua_optics.yaml
   testinput/obsfilterdata.yaml
   testinput/processwhere.yaml
   testinput/parameters.yaml
@@ -70,6 +75,8 @@ list( APPEND ufo_test_input
   testinput/qc_boundscheck.yaml
   testinput/qc_differencecheck.yaml
   testinput/qc_gauss_thinning.yaml
+  testinput/qc_gauss_thinning_unittests.yaml
+  testinput/qc_recursive_splitter.yaml
   testinput/qc_preqc.yaml
   testinput/qc_thinning.yaml
   testinput/radiosonde.yaml
@@ -107,6 +114,8 @@ list( APPEND ufo_test_data
   atmosphere/aircraft_geoval_2018041500_m.nc4
   atmosphere/aircraft_geoval_2018041500_s.nc4
   atmosphere/airs_aqua_geoval_2018041500_m.nc4
+  atmosphere/amsua_n19_obsdiag_2018041500_m_bc3.nc4
+  atmosphere/amsua_n19_geoval_2018041500_m_bc3.nc4
   atmosphere/amsua_n19_geoval_2018041500_m.nc4
   atmosphere/amsua_n19_geoval_2018041500_s.nc4
   atmosphere/aod_geoval_2018041500_m.nc4
@@ -126,6 +135,7 @@ list( APPEND ufo_test_data
   atmosphere/hirs4_metop-a_geoval_2018041500_m.nc4
   atmosphere/iasi_metop-a_obsdiag_2018041500_m.nc4
   atmosphere/iasi_metop-a_geoval_2018041500_m.nc4
+  atmosphere/met_office_thinning.nc4
   atmosphere/mhs_n19_geoval_2018041500_m.nc4
   atmosphere/ps_geovals_2018041500_0000.nc4
   atmosphere/radar_dbz_geoval_2019052222.nc4
@@ -159,64 +169,62 @@ list( APPEND ufo_test_data
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Data)
 CREATE_SYMLINK_FILENAME( ${CMAKE_CURRENT_SOURCE_DIR}/testinput ${CMAKE_CURRENT_BINARY_DIR}/Data ${ufo_test_data} )
 
-# IODA observation files 
-list( APPEND ufo_ioda_test_data
-      testinput_tier_1.tar.gz
-     )
 
-# Set URL for IODA test files
-set(ECBUILD_DOWNLOAD_BASE_URL https://jedi-test-files.s3.amazonaws.com/ioda)
+# Add ioda obs test data
+list (APPEND ioda_obs_test_data
+  atmosphere/abi_g16_obs_2019042306_m.nc4
+  atmosphere/ahi_himawari8_obs_2019042306_m.nc4
+  atmosphere/aircraft_obs_2018041500_m.nc4
+  atmosphere/aircraft_obs_2018041500_s.nc4
+  atmosphere/airs_aqua_obs_2018041500_m.nc4
+  atmosphere/amsua_n19_obs_2018041500_m.nc4
+  atmosphere/amsua_n19_obs_2018041500_m_bc3.nc4
+  atmosphere/amsua_n19_obs_2018041500_m_bc.nc4
+  atmosphere/amsua_n19_obs_2018041500_s.nc4
+  atmosphere/aod_obs_2018041500_m.nc4
+  atmosphere/aod_obs_2018041500_s.nc4
+  atmosphere/atms_npp_obs_2018041500_m.nc4
+  atmosphere/cris-fsr_npp_obs_2018041500_m.nc4
+  atmosphere/geos_aod_obs_2018041500_m.nc4
+  atmosphere/gmi_gpm_obs_2018041500_m.nc4
+  atmosphere/gnssro_obs_2018041500_s.nc4
+  atmosphere/gnssro_obs_2018041500_m.nc4
+  atmosphere/gnssro_obs_2018041500_l.nc4
+  atmosphere/gsisfc_tsen_obs_2018041500_m.nc4
+  atmosphere/gsisfc_uv_obs_2018041500_m.nc4
+  atmosphere/hirs4_metop-a_obs_2018041500_m.nc4
+  atmosphere/iasi_metop-a_obs_2018041500_m.nc4
+  atmosphere/ioda_metop_2_amsua.nc4
+  atmosphere/mhs_n19_obs_2018041500_m.nc4
+  atmosphere/radar_dbz_obs_2019052222.nc4
+  atmosphere/radar_rw_obs_2019052222.nc4
+  atmosphere/satwind_obs_2018041500_m.nc4
+  atmosphere/satwind_obs_2018041500_s.nc4
+  atmosphere/sbuv2_n19_obs_2018041500_m.nc4
+  atmosphere/scatwind_obs_2018041500_m.nc4
+  atmosphere/seviri_m08_obs_2018041500_m.nc4
+  atmosphere/sfc_obs_2018041500_m.nc4
+  atmosphere/sndrd1_g15_obs_2018041500_m.nc4
+  atmosphere/sndrd2_g15_obs_2018041500_m.nc4
+  atmosphere/sndrd3_g15_obs_2018041500_m.nc4
+  atmosphere/sndrd4_g15_obs_2018041500_m.nc4
+  atmosphere/sondes_obs_2018041500_m.nc4
+  atmosphere/sondes_obs_2018041500_s.nc4
+  atmosphere/sondes_obs_2018041500_vs.nc4
+  atmosphere/ssmis_f18_obs_2018041500_m.nc4
+  atmosphere/sfc_obs_2018041500_m.nc4
+  atmosphere/windprof_obs_2018041500_m.nc4
+  marine/coolskin_fake_obs_2018041500.nc
+  marine/cryosat2-2018-04-15.nc
+  marine/icec-2018-04-15.nc
+  marine/Jason-2-2018-04-15.nc
+  marine/profile_2018-04-15.nc
+  marine/sst_obs-2018-04-15.nc4
+  )
 
-# If local path to testfiles is defined don't download
-if (DEFINED ENV{LOCAL_PATH_TESTFILES})
-	set(LOCAL_PATH_TESTFILES "$ENV{LOCAL_PATH_TESTFILES}")
-endif()
-
-if( NOT DEFINED LOCAL_PATH_TESTFILES )
-  set(TESTFILE_DIR ${CMAKE_BINARY_DIR}/test_data/ioda CACHE PATH "data dir for test data")
-  file(MAKE_DIRECTORY ${TESTFILE_DIR})
-else()
-  set(TESTFILE_DIR ${LOCAL_PATH_TESTFILES})
-endif()
-
-
-# Get the current git branch
-execute_process(
-    COMMAND git rev-parse --abbrev-ref HEAD
-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-    OUTPUT_VARIABLE GIT_BRANCH
-    OUTPUT_STRIP_TRAILING_WHITESPACE
-)
-
-# Check whether the URL exists or not 
-ecbuild_check_multiurl(NAMES   ${ufo_ioda_test_data}
-                       DIRNAME ${GIT_BRANCH}
-                       RESULT  SPECIFIC_TEST_FILES)
-
-# Set distant directory
-if(${SPECIFIC_TEST_FILES} MATCHES 0)
-    # Download and extract new test files (distant directory = git branch)
-    set(DIRNAME ${GIT_BRANCH})
-    message(STATUS "GIT_BRANCH found")
-else()
-    # Download and extract develop test files (distant directory = develop)
-    set(DIRNAME "develop")
-    message(STATUS "GIT_BRANCH not found, download develop")
-
-endif()
-message(STATUS "Test data downloaded from: " ${ECBUILD_DOWNLOAD_BASE_URL}/${DIRNAME})
-
-# Run test to download data
-ecbuild_get_test_multidata ( TARGET get_ioda_test_data_ufo
-                             NAMES ${ufo_ioda_test_data}
-			     DIRNAME ${DIRNAME}
-                             DIRLOCAL ${TESTFILE_DIR}
-			     EXTRACT
-                            )
-execute_process( COMMAND ${CMAKE_COMMAND} -E create_symlink
-                 ${TESTFILE_DIR}
-                 ${CMAKE_CURRENT_BINARY_DIR}/Data/ioda
-		)
+CREATE_SYMLINK_FILENAME( ${ioda_SOURCE_DIR}/test/testinput
+                         ${CMAKE_CURRENT_BINARY_DIR}/Data
+                         ${ioda_obs_test_data} )
 
 #####################################################################
 
@@ -735,6 +743,22 @@ ecbuild_add_test( TARGET  test_ufo_qc_preqc
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsFilters.x )
 
+# Test UFO ObsFilters (specific)
+
+ecbuild_add_test( TARGET  test_ufo_gaussianthinning
+                  SOURCES mains/TestGaussianThinning.cc
+                  ARGS    "testinput/qc_gauss_thinning_unittests.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  LIBS    ufo)
+
+ecbuild_add_test( TARGET  test_ufo_recursivesplitter
+                  SOURCES mains/TestRecursiveSplitter.cc
+                  # This test doesn't need a configuration file, but oops::Run::Run() requires
+                  # a path to a configuration file to be passed in the first command-line parameter.
+                  ARGS    "testinput/qc_recursive_splitter.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  LIBS    ufo)
+
 # Test Functions
 
 ecbuild_add_test( TARGET  test_ufo_function_velocity
@@ -749,12 +773,42 @@ ecbuild_add_test( TARGET  test_ufo_function_errflat
                   ENVIRONMENT OOPS_TRAPFPE=1
                   LIBS    ufo)
 
+ecbuild_add_test( TARGET  test_ufo_function_errftopo
+                  SOURCES mains/TestObsFunction.cc
+                  ARGS    "testinput/function_errftopo.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  LIBS    ufo)
+
+ecbuild_add_test( TARGET  test_ufo_function_errftransmittop
+                  SOURCES mains/TestObsFunction.cc
+                  ARGS    "testinput/function_errftransmittop.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  LIBS    ufo)
+
+ecbuild_add_test( TARGET  test_ufo_function_errfwavenum
+                  SOURCES mains/TestObsFunction.cc
+                  ARGS    "testinput/function_errfwavenum.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  LIBS    ufo)
+
 # Test Diagnostics
 
 if ( ${CRTM_FOUND} )
     ecbuild_add_test( TARGET  test_ufo_obsdiag_crtm_jacobian
                       SOURCES mains/TestObsDiagnostics.cc
                       ARGS    "testinput/obsdiag_crtm_jacobian.yaml"
+                      ENVIRONMENT OOPS_TRAPFPE=1
+                      LIBS    ufo)
+
+    ecbuild_add_test( TARGET  test_ufo_obsdiag_crtm_amsua_optics
+                      SOURCES mains/TestObsDiagnostics.cc
+                      ARGS    "testinput/obsdiag_crtm_amsua_optics.yaml"
+                      ENVIRONMENT OOPS_TRAPFPE=1
+                      LIBS    ufo)
+
+    ecbuild_add_test( TARGET  test_ufo_obsdiag_crtm_amsua_jacobian
+                      SOURCES mains/TestObsDiagnostics.cc
+                      ARGS    "testinput/obsdiag_crtm_amsua_jacobian.yaml"
                       ENVIRONMENT OOPS_TRAPFPE=1
                       LIBS    ufo)
 endif ( ${CRTM_FOUND} )
@@ -793,9 +847,9 @@ if ( ${CRTM_FOUND} )
                       ENVIRONMENT OOPS_TRAPFPE=1
                       DEPENDS test_ObsFilters.x )
 
-    ecbuild_add_test( TARGET  test_ufo_qc_iasi_obsfunc
+    ecbuild_add_test( TARGET  test_ufo_qc_iasi_filters
                       COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-                      ARGS    "testinput/iasi_obsfunc_qc.yaml"
+                      ARGS    "testinput/iasi_qc_filters.yaml"
                       ENVIRONMENT OOPS_TRAPFPE=1
                       DEPENDS test_ObsFilters.x )
 
