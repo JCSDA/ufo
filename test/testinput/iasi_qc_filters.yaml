@@ -13,7 +13,7 @@ Observations:
    ObsSpace:
      name: iasi_metop-a 
      ObsDataIn: 
-       obsfile: Data/iasi_metop-a_obs_2018041500_m.nc4
+       obsfile: Data/ioda/testinput_tier_1/iasi_metop-a_obs_2018041500_m.nc4
      ObsDataOut:
        obsfile: Data/iasi_metop-a_obs_2018041500_m_out.nc4
      simulate:
