@@ -35,7 +35,6 @@ Observations:
    ObsBias:
      name: GSI
      newpc4pred: true
-     adp_anglebc: true
      emiss_bc: true
      abias_in: Data/satbias_crtm_in
      predictors: [constant,
