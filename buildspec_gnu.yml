@@ -158,7 +158,7 @@ phases:
     commands:
       - echo Executing post_build phase
       - echo $CODEBUILD_BUILD_SUCCEEDING
-      - if [ "$BUILD_STATUS" = "1"] && ["$CODEBUILD_BUILD_SUCCEEDING" = "0" ];
+      - if [ "$BUILD_STATUS" = "1" ] && [ "$CODEBUILD_BUILD_SUCCEEDING" = "0" ];
         then echo "Build passed, rerunning failed tests";
         su - jcsdauser -c "cd /build_container/ufo
         && ctest -VV --rerun-failed";
