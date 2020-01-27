@@ -167,6 +167,7 @@ list( APPEND ufo_test_data
 )
 
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Data)
+CREATE_SYMLINK_FILENAME( ${CMAKE_CURRENT_SOURCE_DIR}/testinput ${CMAKE_CURRENT_BINARY_DIR}/Data ${ufo_test_data} )	
 
 # IODA observation files 
 list( APPEND ufo_ioda_test_data
