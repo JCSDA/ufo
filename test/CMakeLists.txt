@@ -166,6 +166,8 @@ list( APPEND ufo_test_data
   filters/filters_testdata.nc4
 )
 
+file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Data)
+
 # IODA observation files 
 list( APPEND ufo_ioda_test_data
       testinput_tier_1.tar.gz
@@ -219,10 +221,12 @@ ecbuild_get_test_multidata ( TARGET get_ioda_test_data_ufo
                              DIRLOCAL ${TESTFILE_DIR}
                              EXTRACT
                             )
+
 execute_process( COMMAND ${CMAKE_COMMAND} -E create_symlink
                  ${TESTFILE_DIR}
                  ${CMAKE_CURRENT_BINARY_DIR}/Data/ioda
                 )
+
 
 #####################################################################
 
