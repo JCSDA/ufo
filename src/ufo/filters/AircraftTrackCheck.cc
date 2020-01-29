@@ -9,6 +9,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <map>
 #include <string>
 #include <utility>
 #include <vector>
@@ -26,8 +27,8 @@
 #include "oops/util/sqr.h"
 #include "ufo/filters/AircraftTrackCheckParameters.h"
 #include "ufo/utils/Constants.h"
-#include "ufo/utils/RecursiveSplitter.h"
 #include "ufo/utils/PiecewiseLinearInterpolation.h"
+#include "ufo/utils/RecursiveSplitter.h"
 
 namespace util {
 inline Duration abs(const Duration &duration) {
@@ -118,10 +119,22 @@ class AircraftTrackCheck::TrackObservation {
     numNeighborsVisitedInPreviousSweep_[dir] = num;
   }
 
+  /// Estimates the instantaneous speed and climb rate by comparing this observation against
+  /// \p buddyObs. Checks if these estimates are in the accepted ranges and if the two observations
+  /// are far enough from each other to be considered "distinct".
+  ///
+  /// \param buddyObs Observation to compare against.
+  /// \param options Track check options.
+  /// \param maxValidSpeedAtPressure
+  ///   Function mapping air pressure (in Pa) to the maximum realistic aircraft speed (in m/s).
+  /// \param referencePressure
+  ///   Pressure at which the maximum speed should be evaluated.
+  ///
+  /// \returns An object enapsulating the check results.
   CheckResult checkAgainstBuddy(const TrackObservation &buddyObs,
                                 const AircraftTrackCheckParameters &options,
                                 const PiecewiseLinearInterpolation &maxValidSpeedAtPressure,
-                                float minPressureBetween) const;
+                                float referencePressure) const;
 
   void registerCheckResult(const CheckResult &result);
   void unregisterCheckResult(const CheckResult &result);
@@ -142,7 +155,7 @@ AircraftTrackCheck::CheckResult AircraftTrackCheck::TrackObservation::checkAgain
     const TrackObservation &buddyObs,
     const AircraftTrackCheckParameters &options,
     const PiecewiseLinearInterpolation &maxValidSpeedAtPressure,
-    float minPressureBetween) const {
+    float referencePressure) const {
   CheckResult result;
 
   util::Duration temporalDistance = abs(buddyObs.time_ - time_);
@@ -152,7 +165,7 @@ AircraftTrackCheck::CheckResult AircraftTrackCheck::TrackObservation::checkAgain
   const float conservativeSpeedEstimate =
       (spatialDistance - options.spatialResolution) /
       (temporalDistance + options.temporalResolution).toSeconds();
-  const float maxSpeed = maxValidSpeedAtPressure(minPressureBetween);
+  const float maxSpeed = maxValidSpeedAtPressure(referencePressure);
   result.speedCheckPassed = (conservativeSpeedEstimate <= maxSpeed);
 
   // Estimate the climb rate and check if it is within the allowed range
@@ -263,7 +276,7 @@ void AircraftTrackCheck::sortTracksChronologically(const std::vector<size_t> &va
   std::vector<util::DateTime> times(obsdb_.nlocs());
   obsdb_.get_db("MetaData", "datetime", times);
   splitter.sortGroupsBy([&times, &validObsIds](size_t obsIndexA, size_t obsIndexB)
-                        { return times[validObsIds[obsIndexA]] < times[validObsIds[obsIndexB]]; });
+  { return times[validObsIds[obsIndexA]] < times[validObsIds[obsIndexB]]; });
 }
 
 AircraftTrackCheck::ObsData AircraftTrackCheck::collectObsData() const {
@@ -364,7 +377,7 @@ AircraftTrackCheck::SweepResult AircraftTrackCheck::sweepOverObservations(
       auto getNthNeighbor = [&trackObservations, obsIdx, dir](int n) -> const TrackObservation* {
         const int neighborObsIdx = obsIdx + (dir == FORWARD ? n : -n);
         if (neighborObsIdx < 0 || neighborObsIdx >= trackObservations.size())
-          return nullptr; // We've reached the end of the track
+          return nullptr;  // We've reached the end of the track
         else
           return &trackObservations[neighborObsIdx];
       };
@@ -381,10 +394,10 @@ AircraftTrackCheck::SweepResult AircraftTrackCheck::sweepOverObservations(
         minPressureBetween = std::min(minPressureBetween, neighborObs->pressure());
         if (neighborObs->rejectedInPreviousSweep()) {
           CheckResult result = obs.checkAgainstBuddy(*neighborObs, *options_,
-                                                    maxValidSpeedAtPressure, minPressureBetween);
+                                                     maxValidSpeedAtPressure, minPressureBetween);
           obs.unregisterCheckResult(result);
           if (result.isBuddyDistinct) {
-            // We must replace the rejected distinct buddy with another
+            // The rejected distinct buddy needs to be replaced with another
             ++numNewDistinctBuddiesToVisit;
           }
         }
@@ -395,7 +408,7 @@ AircraftTrackCheck::SweepResult AircraftTrackCheck::sweepOverObservations(
         minPressureBetween = std::min(minPressureBetween, neighborObs->pressure());
         if (!neighborObs->rejected()) {
           CheckResult result = obs.checkAgainstBuddy(*neighborObs, *options_,
-                                                    maxValidSpeedAtPressure, minPressureBetween);
+                                                     maxValidSpeedAtPressure, minPressureBetween);
           obs.registerCheckResult(result);
           if (result.isBuddyDistinct)
             --numNewDistinctBuddiesToVisit;
@@ -408,7 +421,6 @@ AircraftTrackCheck::SweepResult AircraftTrackCheck::sweepOverObservations(
     }  // end of loop over directions
 
     failedChecksFraction[obsIdx] = obs.failedChecksFraction();
-//        obs.numChecks != 0 ? static_cast<float>(obs.numFailedChecks) / obs.numChecks : 0;
   }
 
   const float maxFailedChecksFraction = *std::max_element(failedChecksFraction.begin(),

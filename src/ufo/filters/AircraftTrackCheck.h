@@ -49,7 +49,7 @@ class RecursiveSplitter;
 /// See AircraftTrackCheckParameters for the documentation of this filter's parameters.
 class AircraftTrackCheck : public FilterBase,
     private util::ObjectCounter<AircraftTrackCheck> {
-public:
+ public:
   static const std::string classname() {return "ufo::AircraftTrackCheck";}
 
   AircraftTrackCheck(ioda::ObsSpace &obsdb, const eckit::Configuration &config,
@@ -58,7 +58,7 @@ public:
 
   ~AircraftTrackCheck() override;
 
-private:
+ private:
   enum class SweepResult {NO_MORE_SWEEPS_REQUIRED, ANOTHER_SWEEP_REQUIRED};
   struct CheckResult;
   struct ObsData;
@@ -124,7 +124,7 @@ private:
   void flagRejectedObservations(const std::vector<bool> &isRejected,
                                 std::vector<std::vector<bool> > &flagged) const;
 
-private:
+ private:
   std::unique_ptr<AircraftTrackCheckParameters> options_;
 };
 

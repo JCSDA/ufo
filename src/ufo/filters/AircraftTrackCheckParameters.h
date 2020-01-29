@@ -8,6 +8,7 @@
 #ifndef UFO_FILTERS_AIRCRAFTTRACKCHECKPARAMETERS_H_
 #define UFO_FILTERS_AIRCRAFTTRACKCHECKPARAMETERS_H_
 
+#include <map>
 #include <string>
 
 #include "eckit/exception/Exceptions.h"
@@ -60,8 +61,8 @@ class AircraftTrackCheckParameters : public oops::Parameters {
 
   /// Maximum allowed rate of ascent and descent (Pa/s).
   oops::Parameter<float> maxClimbRate{"max_climb_rate", 300.0f, this};
-  /// Encoding of the function mapping air pressure (in Pa) to the maximum allowed aircraft speed
-  /// (in m/s).
+  /// Encoding of the function mapping air pressure (in Pa) to the maximum aircraft speed (in m/s)
+  /// considered to be realistic.
   ///
   /// The function is taken to be a linear interpolation of a series of (pressure, speed) points.
   /// The pressures and speeds at these points should be specified as keys and values of a
