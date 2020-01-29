@@ -315,7 +315,7 @@ AircraftTrackCheck::SweepResult AircraftTrackCheck::sweepOverObservations(
         const bool isCoreNeighbor =
             temporalDistance <= options_->coreTemporalNeighborhoodRadius ||
             spatialDistance <= coreSpatialNeighborhoodRadiusInMeters;
-        if ((isCoreNeighbor && firstSweep) ||
+        if ((isCoreNeighbor && !neighborVisitedInPreviousSweep) ||
             (!isCoreNeighbor && neighborVisitedInPreviousSweep)) {
           // This ensures we visit halfNumNoncoreNeighbors non-rejected non-core neighbors.
           ++obs.numNeighborsToVisit[dir];
