@@ -139,7 +139,7 @@ Observations:
       distinct_buddy_resolution_multiplier: 3
       num_distinct_buddies_per_direction: 3
       max_climb_rate:   200.000000
-      max_speed_interpolation_points: {"0":  1000.000000, "10000":   400.000000, "50000":   200.000000, "110000":   200.000000}
+      max_speed_interpolation_points: {"0":  1000.000000, "10000":   400.000000, "35000":   200.000000, "110000":   200.000000}
       rejection_threshold:     0.500000
       flight_id_variable:
         name: flight_id@MetaData
@@ -167,6 +167,17 @@ Observations:
         - 187
         - 188
         - 193
+        - 229
+        - 230
+        - 231
+        - 232
+        - 233
+        - 234
+        - 235
+        - 236
+        - 237
+        - 238
+        - 239
         - 268
         - 270
         - 307
@@ -219,6 +230,10 @@ Observations:
         - 1423
         - 1471
         - 1473
+        - 1511
+        - 1512
+        - 1514
+        - 1515
         - 1595
         - 1598
         - 1605
@@ -233,9 +248,12 @@ Observations:
         - 1810
         - 1911
         - 1913
+        - 1942
+        - 1943
+        - 1944
         - 2089
         - 2098
-    failedBenchmark: 91
+    failedBenchmark: 109
   - ObsSpace:
       name: Aircraft
       ObsDataIn:
@@ -250,7 +268,7 @@ Observations:
       distinct_buddy_resolution_multiplier: 3
       num_distinct_buddies_per_direction: 3
       max_climb_rate:   200.000000
-      max_speed_interpolation_points: {"0":  1000.000000, "20000":   400.000000, "100000":   150.000000, "110000":   100.000000}
+      max_speed_interpolation_points: {"0":  2000.000000, "20000":  2000.000000, "100000":  2000.000000, "110000":  2000.000000}
       rejection_threshold:     0.500000
       flight_id_variable:
         name: flight_id@MetaData
@@ -273,7 +291,6 @@ Observations:
         - 117
         - 119
         - 120
-        - 122
         - 184
         - 187
         - 188
@@ -346,7 +363,7 @@ Observations:
         - 1913
         - 2089
         - 2098
-    failedBenchmark: 91
+    failedBenchmark: 90
   - ObsSpace:
       name: Aircraft
       ObsDataIn:
