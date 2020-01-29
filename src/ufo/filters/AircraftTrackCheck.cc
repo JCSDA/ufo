@@ -65,10 +65,19 @@ Point pointFromLatLon(float latitude, float longitude) {
   return Point;
 }
 
-const int UNKNOWN = -1;
 enum Direction { FORWARD, BACKWARD, NUM_DIRECTIONS };
+static const int NO_PREVIOUS_SWEEP = -1;
 
 }  // namespace
+
+
+/// \brief Results of cross-checking an observation with another (a "buddy").
+struct AircraftTrackCheck::CheckResult {
+  bool isBuddyDistinct;
+  bool speedCheckPassed;
+  bool climbRateCheckPassed;
+};
+
 
 /// \brief Locations of all observations processed by the track checking filter.
 struct AircraftTrackCheck::ObsData {
@@ -78,33 +87,115 @@ struct AircraftTrackCheck::ObsData {
   std::vector<float> pressures;
 };
 
+
 /// \brief Attributes of an observation belonging to a track.
-struct AircraftTrackCheck::TrackObservation {
-  TrackObservation(float latitude, float longitude, const util::DateTime &time_, float pressure_)
-    : location(pointFromLatLon(latitude, longitude)), time(time_), pressure(pressure_),
-      rejectedInPreviousSweep(false), rejectedBeforePreviousSweep(false),
-      numNeighborsToVisit{UNKNOWN, UNKNOWN},
-      numFailedChecks(0), numChecks(0)
+class AircraftTrackCheck::TrackObservation {
+ public:
+  TrackObservation(float latitude, float longitude, const util::DateTime &time, float pressure)
+    : location_(pointFromLatLon(latitude, longitude)), time_(time), pressure_(pressure),
+      rejectedInPreviousSweep_(false), rejectedBeforePreviousSweep_(false),
+      numNeighborsVisitedInPreviousSweep_{NO_PREVIOUS_SWEEP, NO_PREVIOUS_SWEEP},
+      numFailedChecks_(0), numChecks_(0)
   {}
 
-  bool rejected() const { return rejectedInPreviousSweep || rejectedBeforePreviousSweep; }
+  const Point &location() const { return location_; }
+  const util::DateTime &time() const { return time_; }
+  float pressure() const { return pressure_; }
 
-  Point location;
-  util::DateTime time;
-  float pressure;
-  bool rejectedInPreviousSweep;
-  bool rejectedBeforePreviousSweep;
-  int numNeighborsToVisit[NUM_DIRECTIONS];
-  int numFailedChecks;
-  int numChecks;
+  bool rejectedInPreviousSweep() const { return rejectedInPreviousSweep_; }
+  bool rejectedBeforePreviousSweep() const { return rejectedBeforePreviousSweep_; }
+  bool rejected() const { return rejectedInPreviousSweep_ || rejectedBeforePreviousSweep_; }
+
+  float failedChecksFraction() const {
+    return numChecks_ != 0 ? static_cast<float>(numFailedChecks_) / numChecks_ : 0.0f;
+  }
+
+  int numNeighborsVisitedInPreviousSweep(Direction dir) const {
+    return numNeighborsVisitedInPreviousSweep_[dir];
+  }
+
+  void setNumNeighborsVisitedInPreviousSweep(Direction dir, int num) {
+    numNeighborsVisitedInPreviousSweep_[dir] = num;
+  }
+
+  CheckResult checkAgainstBuddy(const TrackObservation &buddyObs,
+                                const AircraftTrackCheckParameters &options,
+                                const PiecewiseLinearInterpolation &maxValidSpeedAtPressure,
+                                float minPressureBetween) const;
+
+  void registerCheckResult(const CheckResult &result);
+  void unregisterCheckResult(const CheckResult &result);
+  void registerSweepOutcome(bool rejectedInSweep);
+
+ private:
+  Point location_;
+  util::DateTime time_;
+  float pressure_;
+  bool rejectedInPreviousSweep_;
+  bool rejectedBeforePreviousSweep_;
+  int numNeighborsVisitedInPreviousSweep_[NUM_DIRECTIONS];
+  int numFailedChecks_;
+  int numChecks_;
 };
 
-/// \brief Results of cross-checking an observation with another (a "buddy").
-struct AircraftTrackCheck::CheckResult {
-  bool isBuddyDistinct;
-  bool speedCheckPassed;
-  bool climbRateCheckPassed;
-};
+AircraftTrackCheck::CheckResult AircraftTrackCheck::TrackObservation::checkAgainstBuddy(
+    const TrackObservation &buddyObs,
+    const AircraftTrackCheckParameters &options,
+    const PiecewiseLinearInterpolation &maxValidSpeedAtPressure,
+    float minPressureBetween) const {
+  CheckResult result;
+
+  util::Duration temporalDistance = abs(buddyObs.time_ - time_);
+  const float spatialDistance = distance(location_, buddyObs.location_);
+
+  // Estimate the speed and check if it is within the allowed range
+  const float conservativeSpeedEstimate =
+      (spatialDistance - options.spatialResolution) /
+      (temporalDistance + options.temporalResolution).toSeconds();
+  const float maxSpeed = maxValidSpeedAtPressure(minPressureBetween);
+  result.speedCheckPassed = (conservativeSpeedEstimate <= maxSpeed);
+
+  // Estimate the climb rate and check if it is within the allowed range
+  const float pressureDiff = std::abs(pressure_ - buddyObs.pressure_);
+  const float conservativeClimbRateEstimate =
+      pressureDiff / (temporalDistance + options.temporalResolution).toSeconds();
+  result.climbRateCheckPassed = (conservativeClimbRateEstimate <= options.maxClimbRate);
+
+  const int resolutionMultiplier = options.distinctBuddyResolutionMultiplier;
+  result.isBuddyDistinct =
+      temporalDistance > resolutionMultiplier * options.temporalResolution &&
+      spatialDistance > resolutionMultiplier * options.spatialResolution;
+
+  return result;
+}
+
+void AircraftTrackCheck::TrackObservation::registerCheckResult(const CheckResult &result) {
+  numChecks_ += 2;
+  if (!result.speedCheckPassed)
+    ++numFailedChecks_;
+  if (!result.climbRateCheckPassed)
+    ++numFailedChecks_;
+  assert(numChecks_ >= 0);
+  assert(numFailedChecks_ >= 0);
+  assert(numFailedChecks_ <= numChecks_);
+}
+
+void AircraftTrackCheck::TrackObservation::unregisterCheckResult(const CheckResult &result) {
+  numChecks_ -= 2;
+  if (!result.speedCheckPassed)
+    --numFailedChecks_;
+  if (!result.climbRateCheckPassed)
+    --numFailedChecks_;
+  assert(numChecks_ >= 0);
+  assert(numFailedChecks_ >= 0);
+  assert(numFailedChecks_ <= numChecks_);
+}
+
+void AircraftTrackCheck::TrackObservation::registerSweepOutcome(bool rejectedInSweep) {
+  rejectedBeforePreviousSweep_ = rejected();
+  rejectedInPreviousSweep_ = rejectedInSweep;
+}
+
 
 AircraftTrackCheck::AircraftTrackCheck(ioda::ObsSpace & obsdb, const eckit::Configuration & config,
                                        boost::shared_ptr<ioda::ObsDataVector<int> > flags,
@@ -265,8 +356,9 @@ AircraftTrackCheck::SweepResult AircraftTrackCheck::sweepOverObservations(
       continue;
 
     for (Direction dir : { FORWARD, BACKWARD}) {
-      const bool firstSweep = obs.numNeighborsToVisit[dir] == UNKNOWN;      
-      const int numNeighborsVisitedInPreviousSweep = firstSweep ? 0 : obs.numNeighborsToVisit[dir];
+      const bool firstSweep = obs.numNeighborsVisitedInPreviousSweep(dir) == NO_PREVIOUS_SWEEP;
+      const int numNeighborsVisitedInPreviousSweep =
+          firstSweep ? 0 : obs.numNeighborsVisitedInPreviousSweep(dir);
       int numNewDistinctBuddiesToVisit = firstSweep ? options_->numDistinctBuddiesPerDirection : 0;
 
       auto getNthNeighbor = [&trackObservations, obsIdx, dir](int n) -> const TrackObservation* {
@@ -277,21 +369,20 @@ AircraftTrackCheck::SweepResult AircraftTrackCheck::sweepOverObservations(
           return &trackObservations[neighborObsIdx];
       };
 
-      float minPressureBetween = obs.pressure;
+      float minPressureBetween = obs.pressure();
       int neighborIdx = 1;
       const TrackObservation *neighborObs = getNthNeighbor(neighborIdx);
       for (; neighborIdx <= numNeighborsVisitedInPreviousSweep && neighborObs != nullptr;
            neighborObs = getNthNeighbor(++neighborIdx)) {
         // Strictly speaking, neighborObs->pressure should be disregarded if neighborObs has already
         // been rejected. However, that would force us to check each pair of observations anew
-        // whenever an observation lying in-between is rejected, whereas as things stand, we only
-        // need to revisit
-        // sandwiching a rejected observation from
-        minPressureBetween = std::min(minPressureBetween, neighborObs->pressure);
-        if (neighborObs->rejectedInPreviousSweep) {
-          CheckResult result = checkObservationPair(obs, *neighborObs,
+        // whenever an observation between them is rejected, whereas as things stand, we only
+        // need to "undo" checks against rejected observations.
+        minPressureBetween = std::min(minPressureBetween, neighborObs->pressure());
+        if (neighborObs->rejectedInPreviousSweep()) {
+          CheckResult result = obs.checkAgainstBuddy(*neighborObs, *options_,
                                                     maxValidSpeedAtPressure, minPressureBetween);
-          unregisterCheckResult(obs, result);
+          obs.unregisterCheckResult(result);
           if (result.isBuddyDistinct) {
             // We must replace the rejected distinct buddy with another
             ++numNewDistinctBuddiesToVisit;
@@ -301,22 +392,23 @@ AircraftTrackCheck::SweepResult AircraftTrackCheck::sweepOverObservations(
 
       for (; numNewDistinctBuddiesToVisit > 0 && neighborObs != nullptr;
            neighborObs = getNthNeighbor(++neighborIdx)) {
-        minPressureBetween = std::min(minPressureBetween, neighborObs->pressure);
+        minPressureBetween = std::min(minPressureBetween, neighborObs->pressure());
         if (!neighborObs->rejected()) {
-          CheckResult result = checkObservationPair(obs, *neighborObs,
+          CheckResult result = obs.checkAgainstBuddy(*neighborObs, *options_,
                                                     maxValidSpeedAtPressure, minPressureBetween);
-          registerCheckResult(obs, result);
+          obs.registerCheckResult(result);
           if (result.isBuddyDistinct)
             --numNewDistinctBuddiesToVisit;
         }
       }
 
-      obs.numNeighborsToVisit[dir] = neighborIdx - 1;
-      assert(obs.numNeighborsToVisit[dir] >= numNeighborsVisitedInPreviousSweep);
+      const int numNeighborsVisitedInThisSweep = neighborIdx - 1;
+      assert(numNeighborsVisitedInThisSweep >= numNeighborsVisitedInPreviousSweep);
+      obs.setNumNeighborsVisitedInPreviousSweep(dir, numNeighborsVisitedInThisSweep);
     }  // end of loop over directions
 
-    failedChecksFraction[obsIdx] =
-        obs.numChecks != 0 ? static_cast<float>(obs.numFailedChecks) / obs.numChecks : 0;
+    failedChecksFraction[obsIdx] = obs.failedChecksFraction();
+//        obs.numChecks != 0 ? static_cast<float>(obs.numFailedChecks) / obs.numChecks : 0;
   }
 
   const float maxFailedChecksFraction = *std::max_element(failedChecksFraction.begin(),
@@ -326,66 +418,11 @@ AircraftTrackCheck::SweepResult AircraftTrackCheck::sweepOverObservations(
     return SweepResult::NO_MORE_SWEEPS_REQUIRED;
 
   for (int obsIdx = 0; obsIdx < trackObservations.size(); ++obsIdx) {
-    TrackObservation &obs = trackObservations[obsIdx];
-    obs.rejectedBeforePreviousSweep = obs.rejected();
-    obs.rejectedInPreviousSweep = failedChecksFraction[obsIdx] > failedChecksThreshold;
+    const bool rejected = failedChecksFraction[obsIdx] > failedChecksThreshold;
+    trackObservations[obsIdx].registerSweepOutcome(rejected);
   }
 
   return SweepResult::ANOTHER_SWEEP_REQUIRED;
-}
-
-AircraftTrackCheck::CheckResult AircraftTrackCheck::checkObservationPair(
-    const TrackObservation &obs, const TrackObservation &buddyObs,
-    const PiecewiseLinearInterpolation &maxValidSpeedAtPressure,
-    float minPressureBetween) const {
-  CheckResult result;
-
-  util::Duration temporalDistance = abs(buddyObs.time - obs.time);
-  const float spatialDistance = distance(obs.location, buddyObs.location);
-
-  // Estimate the speed and check if it is within the allowed range
-  const float conservativeSpeedEstimate =
-      (spatialDistance - options_->spatialResolution) /
-      (temporalDistance + options_->temporalResolution).toSeconds();
-  const float maxSpeed = maxValidSpeedAtPressure(minPressureBetween);
-  result.speedCheckPassed = (conservativeSpeedEstimate <= maxSpeed);
-
-  // Estimate the climb rate and check if it is within the allowed range
-  const float pressureDiff = std::abs(obs.pressure - buddyObs.pressure);
-  const float conservativeClimbRateEstimate =
-      pressureDiff / (temporalDistance + options_->temporalResolution).toSeconds();
-  result.climbRateCheckPassed = (conservativeClimbRateEstimate <= options_->maxClimbRate);
-
-  const int resolutionMultiplier = options_->distinctBuddyResolutionMultiplier;
-  result.isBuddyDistinct =
-      temporalDistance > resolutionMultiplier * options_->temporalResolution &&
-      spatialDistance > resolutionMultiplier * options_->spatialResolution;
-
-  return result;
-}
-
-void AircraftTrackCheck::registerCheckResult(TrackObservation &obs,
-                                               const CheckResult &result) const {
-  obs.numChecks += 2;
-  if (!result.speedCheckPassed)
-    ++obs.numFailedChecks;
-  if (!result.climbRateCheckPassed)
-    ++obs.numFailedChecks;
-  assert(obs.numChecks >= 0);
-  assert(obs.numFailedChecks >= 0);
-  assert(obs.numFailedChecks <= obs.numChecks);
-}
-
-void AircraftTrackCheck::unregisterCheckResult(TrackObservation &obs,
-                                               const CheckResult &result) const {
-  obs.numChecks -= 2;
-  if (!result.speedCheckPassed)
-    --obs.numFailedChecks;
-  if (!result.climbRateCheckPassed)
-    --obs.numFailedChecks;
-  assert(obs.numChecks >= 0);
-  assert(obs.numFailedChecks >= 0);
-  assert(obs.numFailedChecks <= obs.numChecks);
 }
 
 void AircraftTrackCheck::flagRejectedTrackObservations(

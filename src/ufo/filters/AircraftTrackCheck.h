@@ -60,9 +60,9 @@ public:
 
 private:
   enum class SweepResult {NO_MORE_SWEEPS_REQUIRED, ANOTHER_SWEEP_REQUIRED};
-  struct ObsData;
-  struct TrackObservation;
   struct CheckResult;
+  struct ObsData;
+  class TrackObservation;
 
   void print(std::ostream &) const override;
   void applyFilter(const std::vector<bool> &, const Variables &,
@@ -113,15 +113,6 @@ private:
       std::vector<TrackObservation> &trackObservations,
       const PiecewiseLinearInterpolation &maxValidSpeedAtPressure,
       std::vector<float> &workspace) const;
-
-  CheckResult checkObservationPair(
-      const TrackObservation &obs, const TrackObservation &buddyObs,
-      const PiecewiseLinearInterpolation &maxValidSpeedAtPressure,
-      float minPressureBetween) const;
-
-  void registerCheckResult(TrackObservation &obs, const CheckResult &result) const;
-
-  void unregisterCheckResult(TrackObservation &obs, const CheckResult &result) const;
 
   void flagRejectedTrackObservations(
       std::vector<size_t>::const_iterator trackObsIndicesBegin,
