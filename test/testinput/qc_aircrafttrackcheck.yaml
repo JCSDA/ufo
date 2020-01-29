@@ -1,3 +1,14 @@
+# These tests compare the output of the Aircraft Track Check filter against reference
+# results obtained with the Met Office OPS code (Ops_AirTrackCheck). The first test case is used as
+# a baseline; in each of the following test cases the filter's configuration contains one parameter
+# whose value differs from the first case.
+#
+# The input file aircraft_track_check.nc4 is derived from aircraft_obs_2018041500_m.nc4, with the
+# following differences:
+# * the only observed variable is air_temperature and there are no missing values
+# * an additional field flight_id stores an integer id having a 1-to-1 mapping to the
+#   (textual) station_id field.
+
 window_begin: 2000-01-01T00:00:00Z
 window_end: 2029-12-12T23:59:59Z
 
