@@ -40,27 +40,29 @@ namespace ufo {
 namespace {
 
 const int worldDim = 3;
-typedef std::array<float, worldDim> CartesianPointInMeters;
+typedef std::array<float, worldDim> Point;
 
-float distance2(const CartesianPointInMeters &a, const CartesianPointInMeters &b) {
+float distance2(const Point &a, const Point &b) {
   float sum = 0;
   for (size_t i = 0; i < a.size(); ++i)
     sum += util::sqr(a[i] - b[i]);
   return sum;
 }
 
-float distance(const CartesianPointInMeters &a, const CartesianPointInMeters &b) {
+float distance(const Point &a, const Point &b) {
   return std::sqrt(distance2(a, b));
 }
 
-CartesianPointInMeters pointFromLatLon(float latitude, float longitude) {
-  const double meanEarthRadiusInMeters = 1000 * Constants::mean_earth_rad;
+Point pointFromLatLon(float latitude, float longitude) {
+  // This local copy is needed because convertSphericalToCartesian takes the first parameter by
+  // reference, but Constants::mean_earth_rad has no out-of-line definition.
+  const double meanEarthRadius = Constants::mean_earth_rad;
   eckit::geometry::Point3 eckitPoint;
   eckit::geometry::Sphere::convertSphericalToCartesian(
-        meanEarthRadiusInMeters, eckit::geometry::Point2(longitude, latitude), eckitPoint);
-  CartesianPointInMeters CartesianPointInMeters;
-  std::copy(eckitPoint.begin(), eckitPoint.end(), CartesianPointInMeters.begin());
-  return CartesianPointInMeters;
+        meanEarthRadius, eckit::geometry::Point2(longitude, latitude), eckitPoint);
+  Point Point;
+  std::copy(eckitPoint.begin(), eckitPoint.end(), Point.begin());
+  return Point;
 }
 
 const int UNKNOWN = -1;
@@ -87,7 +89,7 @@ struct AircraftTrackCheck::TrackObservation {
 
   bool rejected() const { return rejectedInPreviousSweep || rejectedBeforePreviousSweep; }
 
-  CartesianPointInMeters location;
+  Point location;
   util::DateTime time;
   float pressure;
   bool rejectedInPreviousSweep;
@@ -194,7 +196,10 @@ PiecewiseLinearInterpolation AircraftTrackCheck::makeMaxSpeedByPressureInterpola
 
   for (const auto &pressureAndMaxSpeed : maxSpeedInterpolationPoints) {
     pressures.push_back(pressureAndMaxSpeed.first);
-    maxSpeeds.push_back(pressureAndMaxSpeed.second);
+    // The interpolator needs to produce speeds in km/s rather than m/s because observation
+    // locations are expressed in kilometers.
+    const int metersPerKm = 1000;
+    maxSpeeds.push_back(pressureAndMaxSpeed.second / metersPerKm);
   }
 
   return PiecewiseLinearInterpolation(std::move(pressures), std::move(maxSpeeds));
@@ -247,11 +252,6 @@ AircraftTrackCheck::SweepResult AircraftTrackCheck::sweepOverObservations(
   std::vector<float> &failedChecksFraction = workspace;
   failedChecksFraction.assign(trackObservations.size(), 0.0f);
 
-  const int metersPerKm = 1000;
-  const float spatialResolutionInMeters = metersPerKm * options_->spatialResolution;
-  const float coreSpatialNeighborhoodRadiusInMeters =
-      metersPerKm * options_->coreSpatialNeighborhoodRadius;
-
   for (int obsIdx = 0; obsIdx < trackObservations.size(); ++obsIdx) {
     TrackObservation &obs = trackObservations[obsIdx];
     if (obs.rejected())
@@ -298,7 +298,7 @@ AircraftTrackCheck::SweepResult AircraftTrackCheck::sweepOverObservations(
         // Estimate the speed and check if it is within the allowed range
         const float maxSpeed = maxValidSpeedAtPressure(minPressureBetweenObsAndNeighbor);
         const float conservativeSpeedEstimate =
-            (spatialDistance - spatialResolutionInMeters) /
+            (spatialDistance - options_->spatialResolution) /
             (temporalDistance + options_->temporalResolution).toSeconds();
         if (conservativeSpeedEstimate > maxSpeed)
           obs.numFailedChecks += checkCountIncrement;
@@ -314,7 +314,7 @@ AircraftTrackCheck::SweepResult AircraftTrackCheck::sweepOverObservations(
 
         const bool isCoreNeighbor =
             temporalDistance <= options_->coreTemporalNeighborhoodRadius ||
-            spatialDistance <= coreSpatialNeighborhoodRadiusInMeters;
+            spatialDistance <= options_->coreSpatialNeighborhoodRadius;
         if ((isCoreNeighbor && !neighborVisitedInPreviousSweep) ||
             (!isCoreNeighbor && neighborVisitedInPreviousSweep)) {
           // This ensures we visit halfNumNoncoreNeighbors non-rejected non-core neighbors.

@@ -80,6 +80,7 @@ private:
   void checkTracks(const std::vector<size_t> &validObsIds,
                    RecursiveSplitter &splitter) const;
 
+  /// Returns an interpolator mapping pressures (in Pa) to maximum accepted speeds (in km/s).
   PiecewiseLinearInterpolation makeMaxSpeedByPressureInterpolation() const;
 
   void identifyRejectedObservationsInTrack(
