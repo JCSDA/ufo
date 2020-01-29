@@ -314,9 +314,16 @@ logical :: jacobian_needed
 
    allocate(Skip_Profiles(n_Profiles))
    call ufo_crtm_skip_profiles(n_Profiles,n_Channels,self%channels,obss,Skip_Profiles)
-   do jprofile = 1, n_Profiles
+   profile_loop: do jprofile = 1, n_Profiles
       Options(jprofile)%Skip_Profile = Skip_Profiles(jprofile)
-   end do
+      ! check for pressure monotonicity
+      do jlevel = atm(jprofile)%n_layers, 1, -1
+         if ( atm(jprofile)%level_pressure(jlevel) <= atm(jprofile)%level_pressure(jlevel-1) ) then
+            Options(jprofile)%Skip_Profile = .TRUE.
+            cycle profile_loop
+         end if
+      end do
+   end do profile_loop
 
    if (jacobian_needed) then
       ! Allocate the ARRAYS (for CRTM_K_Matrix)
