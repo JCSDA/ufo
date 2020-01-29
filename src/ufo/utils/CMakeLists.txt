@@ -17,6 +17,8 @@ set ( utils_files
       SpatialBinSelector.cc
       StringUtils.cc
       StringUtils.h
+      VertInterp.interface.F90
+      VertInterp.interface.h
       vert_interp.F90
       thermo_utils.F90
 )
