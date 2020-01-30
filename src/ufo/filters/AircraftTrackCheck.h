@@ -43,7 +43,8 @@ class RecursiveSplitter;
 /// obtained by comparing the reported aircraft position with the positions reported during a
 /// number a nearby (earlier and later) observations that haven't been rejected in previous sweeps.
 /// An observation is rejected if a certain fraction of these estimates lie outside the valid
-/// range. Sweeps continue until one of them fails to reject any observations.
+/// range. Sweeps continue until one of them fails to reject any observations, i.e. the set of
+/// retained observations is self-consistent.
 ///
 /// See AircraftTrackCheckParameters for the documentation of this filter's parameters.
 class AircraftTrackCheck : public FilterBase,
@@ -61,6 +62,7 @@ private:
   enum class SweepResult {NO_MORE_SWEEPS_REQUIRED, ANOTHER_SWEEP_REQUIRED};
   struct ObsData;
   struct TrackObservation;
+  struct CheckResult;
 
   void print(std::ostream &) const override;
   void applyFilter(const std::vector<bool> &, const Variables &,
@@ -111,6 +113,15 @@ private:
       std::vector<TrackObservation> &trackObservations,
       const PiecewiseLinearInterpolation &maxValidSpeedAtPressure,
       std::vector<float> &workspace) const;
+
+  CheckResult checkObservationPair(
+      const TrackObservation &obs, const TrackObservation &buddyObs,
+      const PiecewiseLinearInterpolation &maxValidSpeedAtPressure,
+      float minPressureBetween) const;
+
+  void registerCheckResult(TrackObservation &obs, const CheckResult &result) const;
+
+  void unregisterCheckResult(TrackObservation &obs, const CheckResult &result) const;
 
   void flagRejectedTrackObservations(
       std::vector<size_t>::const_iterator trackObsIndicesBegin,

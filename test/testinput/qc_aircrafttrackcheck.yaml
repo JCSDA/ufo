@@ -13,10 +13,9 @@ Observations:
     - Filter: Aircraft Track Check
       variables: [air_temperature]
       temporal_resolution: PT00H00M30S
-      core_temporal_neighborhood_radius: PT00H01M30S
       spatial_resolution:    20.000000
-      core_spatial_neighborhood_radius:    60.000000
-      half_num_noncore_neighbors: 3
+      distinct_buddy_resolution_multiplier: 3
+      num_distinct_buddies_per_direction: 3
       max_climb_rate:   200.000000
       max_speed_interpolation_points: {"0":  1000.000000, "20000":   400.000000, "100000":   200.000000, "110000":   200.000000}
       rejection_threshold:     0.500000
@@ -125,10 +124,9 @@ Observations:
     - Filter: Aircraft Track Check
       variables: [air_temperature]
       temporal_resolution: PT00H00M30S
-      core_temporal_neighborhood_radius: PT00H01M30S
       spatial_resolution:    20.000000
-      core_spatial_neighborhood_radius:    60.000000
-      half_num_noncore_neighbors: 3
+      distinct_buddy_resolution_multiplier: 3
+      num_distinct_buddies_per_direction: 3
       max_climb_rate:   200.000000
       max_speed_interpolation_points: {"0":  1000.000000, "10000":   400.000000, "50000":   200.000000, "110000":   200.000000}
       rejection_threshold:     0.500000
@@ -237,10 +235,9 @@ Observations:
     - Filter: Aircraft Track Check
       variables: [air_temperature]
       temporal_resolution: PT00H00M30S
-      core_temporal_neighborhood_radius: PT00H01M30S
       spatial_resolution:    20.000000
-      core_spatial_neighborhood_radius:    60.000000
-      half_num_noncore_neighbors: 3
+      distinct_buddy_resolution_multiplier: 3
+      num_distinct_buddies_per_direction: 3
       max_climb_rate:   200.000000
       max_speed_interpolation_points: {"0":  1000.000000, "20000":   400.000000, "100000":   150.000000, "110000":   100.000000}
       rejection_threshold:     0.500000
@@ -349,10 +346,9 @@ Observations:
     - Filter: Aircraft Track Check
       variables: [air_temperature]
       temporal_resolution: PT00H00M30S
-      core_temporal_neighborhood_radius: PT00H01M30S
       spatial_resolution:    20.000000
-      core_spatial_neighborhood_radius:    60.000000
-      half_num_noncore_neighbors: 3
+      distinct_buddy_resolution_multiplier: 3
+      num_distinct_buddies_per_direction: 3
       max_climb_rate:   150.000000
       max_speed_interpolation_points: {"0":  1000.000000, "20000":   400.000000, "100000":   200.000000, "110000":   200.000000}
       rejection_threshold:     0.500000
@@ -551,10 +547,9 @@ Observations:
     - Filter: Aircraft Track Check
       variables: [air_temperature]
       temporal_resolution: PT00H00M30S
-      core_temporal_neighborhood_radius: PT00H01M30S
       spatial_resolution:    30.000000
-      core_spatial_neighborhood_radius:    90.000000
-      half_num_noncore_neighbors: 3
+      distinct_buddy_resolution_multiplier: 3
+      num_distinct_buddies_per_direction: 3
       max_climb_rate:   200.000000
       max_speed_interpolation_points: {"0":  1000.000000, "20000":   400.000000, "100000":   200.000000, "110000":   200.000000}
       rejection_threshold:     0.500000
@@ -660,10 +655,9 @@ Observations:
     - Filter: Aircraft Track Check
       variables: [air_temperature]
       temporal_resolution: PT00H00M45S
-      core_temporal_neighborhood_radius: PT00H02M15S
       spatial_resolution:    20.000000
-      core_spatial_neighborhood_radius:    60.000000
-      half_num_noncore_neighbors: 3
+      distinct_buddy_resolution_multiplier: 3
+      num_distinct_buddies_per_direction: 3
       max_climb_rate:   200.000000
       max_speed_interpolation_points: {"0":  1000.000000, "20000":   400.000000, "100000":   200.000000, "110000":   200.000000}
       rejection_threshold:     0.500000
@@ -709,10 +703,9 @@ Observations:
     - Filter: Aircraft Track Check
       variables: [air_temperature]
       temporal_resolution: PT00H00M30S
-      core_temporal_neighborhood_radius: PT00H01M30S
       spatial_resolution:    20.000000
-      core_spatial_neighborhood_radius:    60.000000
-      half_num_noncore_neighbors: 4
+      distinct_buddy_resolution_multiplier: 3
+      num_distinct_buddies_per_direction: 4
       max_climb_rate:   200.000000
       max_speed_interpolation_points: {"0":  1000.000000, "20000":   400.000000, "100000":   200.000000, "110000":   200.000000}
       rejection_threshold:     0.500000
@@ -822,10 +815,9 @@ Observations:
     - Filter: Aircraft Track Check
       variables: [air_temperature]
       temporal_resolution: PT00H00M30S
-      core_temporal_neighborhood_radius: PT00H01M30S
       spatial_resolution:    20.000000
-      core_spatial_neighborhood_radius:    60.000000
-      half_num_noncore_neighbors: 3
+      distinct_buddy_resolution_multiplier: 3
+      num_distinct_buddies_per_direction: 3
       max_climb_rate:   200.000000
       max_speed_interpolation_points: {"0":  1000.000000, "20000":   400.000000, "100000":   200.000000, "110000":   200.000000}
       rejection_threshold:     0.750000

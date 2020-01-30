@@ -43,25 +43,20 @@ class AircraftTrackCheckParameters : public oops::Parameters {
 
   /// Controls the size of the set of observations against which each observation is compared.
   ///
-  /// Each observation O(x, t) (taken at time t and location x) is compared against the set of all
-  /// observations O'(x', t') immediately preceding and following it that satisfy at least one of
-  /// the following two conditions:
-  /// * |t - t'| <= core_temporal_neighborhood_radius
-  /// * |x - x'| <= core_spatial_neighborhood_radius
-  /// and against half_num_noncore_neighbors non-rejected observations immediately following that
-  /// set and the same number of non-rejected observations immediately preceding that set.
-  oops::Parameter<util::Duration> coreTemporalNeighborhoodRadius{
-    "core_temporal_neighborhood_radius", util::Duration("PT2M"), this};
+  /// Each observation O(x, t) (taken at time t and location x) is compared against the smallest
+  /// set of observations O'(x', t') immediately preceding and following O(x, t) that contains
+  /// \c num_distinct_buddies_per_direction earlier observations meeting the following conditions:
+  /// * |t' - t| > distinct_buddy_resolution_multiplier * temporal_resolution
+  /// * |x' - x| > distinct_buddy_resolution_multiplier * spatial_resolution
+  /// * O' has not yet been rejected
+  /// and the same number of later observations meeting the same conditions.
+  oops::Parameter<int> numDistinctBuddiesPerDirection{
+    "num_distinct_buddies_per_direction", 3, this};
   /// Controls the size of the set of observations against which each observation is compared.
   ///
-  /// \see coreTemporalNeighborhoodRadius
-  oops::Parameter<float> coreSpatialNeighborhoodRadius{
-    "core_spatial_neighborhood_radius", 2.0f, this};
-  /// Controls the size of the set of observations against which each observation is compared.
-  ///
-  /// \see coreTemporalNeighborhoodRadius
-  oops::Parameter<int> halfNumNoncoreNeighbors{
-    "half_num_noncore_neighbors", 3, this};
+  /// \see numDistinctBuddiesPerDirection
+  oops::Parameter<int> distinctBuddyResolutionMultiplier{
+    "distinct_buddy_resolution_multiplier", 3, this};
 
   /// Maximum allowed rate of ascent and descent (Pa/s).
   oops::Parameter<float> maxClimbRate{"max_climb_rate", 300.0f, this};

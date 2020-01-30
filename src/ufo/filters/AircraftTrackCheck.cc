@@ -99,6 +99,13 @@ struct AircraftTrackCheck::TrackObservation {
   int numChecks;
 };
 
+/// \brief Results of cross-checking an observation with another (a "buddy").
+struct AircraftTrackCheck::CheckResult {
+  bool isBuddyDistinct;
+  bool speedCheckPassed;
+  bool climbRateCheckPassed;
+};
+
 AircraftTrackCheck::AircraftTrackCheck(ioda::ObsSpace & obsdb, const eckit::Configuration & config,
                                        boost::shared_ptr<ioda::ObsDataVector<int> > flags,
                                        boost::shared_ptr<ioda::ObsDataVector<float> > obserr)
@@ -258,69 +265,54 @@ AircraftTrackCheck::SweepResult AircraftTrackCheck::sweepOverObservations(
       continue;
 
     for (Direction dir : { FORWARD, BACKWARD}) {
-      const bool firstSweep = obs.numNeighborsToVisit[dir] == UNKNOWN;
+      const bool firstSweep = obs.numNeighborsToVisit[dir] == UNKNOWN;      
       const int numNeighborsVisitedInPreviousSweep = firstSweep ? 0 : obs.numNeighborsToVisit[dir];
-      if (firstSweep)
-        obs.numNeighborsToVisit[dir] = options_->halfNumNoncoreNeighbors;
+      int numNewDistinctBuddiesToVisit = firstSweep ? options_->numDistinctBuddiesPerDirection : 0;
 
-      float minPressureBetweenObsAndNeighbor = obs.pressure;
-      // Note: obs.numNeighborsToVisit[dir] may change inside the loop
-      for (int neighborIdx = 1; neighborIdx <= obs.numNeighborsToVisit[dir]; ++neighborIdx) {
-        const int neighborObsIdx = obsIdx + (dir == FORWARD ? neighborIdx : -neighborIdx);
+      auto getNthNeighbor = [&trackObservations, obsIdx, dir](int n) -> const TrackObservation* {
+        const int neighborObsIdx = obsIdx + (dir == FORWARD ? n : -n);
         if (neighborObsIdx < 0 || neighborObsIdx >= trackObservations.size())
-          break; // We've reached the end of the track
+          return nullptr; // We've reached the end of the track
+        else
+          return &trackObservations[neighborObsIdx];
+      };
 
-        const TrackObservation &neighborObs = trackObservations[neighborObsIdx];
-
-        minPressureBetweenObsAndNeighbor = std::min(minPressureBetweenObsAndNeighbor,
-                                                    neighborObs.pressure);
-
-        const bool neighborVisitedInPreviousSweep =
-            neighborIdx <= numNeighborsVisitedInPreviousSweep;
-        int checkCountIncrement = 1;
-        if (neighborVisitedInPreviousSweep) {
-          if (neighborObs.rejectedInPreviousSweep) {
-            // We need to undo whatever impact the comparison against this neighbor
-            // had on the check and error counts in the previous sweep
-            checkCountIncrement = -1;
-          } else {
-            // No need to check against this neighbor again
-            continue;
+      float minPressureBetween = obs.pressure;
+      int neighborIdx = 1;
+      const TrackObservation *neighborObs = getNthNeighbor(neighborIdx);
+      for (; neighborIdx <= numNeighborsVisitedInPreviousSweep && neighborObs != nullptr;
+           neighborObs = getNthNeighbor(++neighborIdx)) {
+        // Strictly speaking, neighborObs->pressure should be disregarded if neighborObs has already
+        // been rejected. However, that would force us to check each pair of observations anew
+        // whenever an observation lying in-between is rejected, whereas as things stand, we only
+        // need to revisit
+        // sandwiching a rejected observation from
+        minPressureBetween = std::min(minPressureBetween, neighborObs->pressure);
+        if (neighborObs->rejectedInPreviousSweep) {
+          CheckResult result = checkObservationPair(obs, *neighborObs,
+                                                    maxValidSpeedAtPressure, minPressureBetween);
+          unregisterCheckResult(obs, result);
+          if (result.isBuddyDistinct) {
+            // We must replace the rejected distinct buddy with another
+            ++numNewDistinctBuddiesToVisit;
           }
-        } else if (neighborObs.rejected()) {
-          ++obs.numNeighborsToVisit[dir];
-          continue;
         }
+      }
 
-        util::Duration temporalDistance = abs(neighborObs.time - obs.time);
-        const float spatialDistance = distance(obs.location, neighborObs.location);
-
-        // Estimate the speed and check if it is within the allowed range
-        const float maxSpeed = maxValidSpeedAtPressure(minPressureBetweenObsAndNeighbor);
-        const float conservativeSpeedEstimate =
-            (spatialDistance - options_->spatialResolution) /
-            (temporalDistance + options_->temporalResolution).toSeconds();
-        if (conservativeSpeedEstimate > maxSpeed)
-          obs.numFailedChecks += checkCountIncrement;
-        obs.numChecks += checkCountIncrement;
-
-        // Estimate the climb rate and check if it is within the allowed range
-        const float pressureDiff = std::abs(obs.pressure - neighborObs.pressure);
-        const float conservativeClimbRateEstimate =
-            pressureDiff / (temporalDistance + options_->temporalResolution).toSeconds();
-        if (conservativeClimbRateEstimate > options_->maxClimbRate)
-          obs.numFailedChecks += checkCountIncrement;
-        obs.numChecks += checkCountIncrement;
-
-        const bool isCoreNeighbor =
-            temporalDistance <= options_->coreTemporalNeighborhoodRadius ||
-            spatialDistance <= options_->coreSpatialNeighborhoodRadius;
-        if ((isCoreNeighbor && !neighborVisitedInPreviousSweep) ||
-            (!isCoreNeighbor && neighborVisitedInPreviousSweep)) {
-          // This ensures we visit halfNumNoncoreNeighbors non-rejected non-core neighbors.
-          ++obs.numNeighborsToVisit[dir];
+      for (; numNewDistinctBuddiesToVisit > 0 && neighborObs != nullptr;
+           neighborObs = getNthNeighbor(++neighborIdx)) {
+        minPressureBetween = std::min(minPressureBetween, neighborObs->pressure);
+        if (!neighborObs->rejected()) {
+          CheckResult result = checkObservationPair(obs, *neighborObs,
+                                                    maxValidSpeedAtPressure, minPressureBetween);
+          registerCheckResult(obs, result);
+          if (result.isBuddyDistinct)
+            --numNewDistinctBuddiesToVisit;
         }
-      }  // end of loop over neighbors in specific direction
+      }
+
+      obs.numNeighborsToVisit[dir] = neighborIdx - 1;
+      assert(obs.numNeighborsToVisit[dir] >= numNeighborsVisitedInPreviousSweep);
     }  // end of loop over directions
 
     failedChecksFraction[obsIdx] =
@@ -340,6 +332,60 @@ AircraftTrackCheck::SweepResult AircraftTrackCheck::sweepOverObservations(
   }
 
   return SweepResult::ANOTHER_SWEEP_REQUIRED;
+}
+
+AircraftTrackCheck::CheckResult AircraftTrackCheck::checkObservationPair(
+    const TrackObservation &obs, const TrackObservation &buddyObs,
+    const PiecewiseLinearInterpolation &maxValidSpeedAtPressure,
+    float minPressureBetween) const {
+  CheckResult result;
+
+  util::Duration temporalDistance = abs(buddyObs.time - obs.time);
+  const float spatialDistance = distance(obs.location, buddyObs.location);
+
+  // Estimate the speed and check if it is within the allowed range
+  const float conservativeSpeedEstimate =
+      (spatialDistance - options_->spatialResolution) /
+      (temporalDistance + options_->temporalResolution).toSeconds();
+  const float maxSpeed = maxValidSpeedAtPressure(minPressureBetween);
+  result.speedCheckPassed = (conservativeSpeedEstimate <= maxSpeed);
+
+  // Estimate the climb rate and check if it is within the allowed range
+  const float pressureDiff = std::abs(obs.pressure - buddyObs.pressure);
+  const float conservativeClimbRateEstimate =
+      pressureDiff / (temporalDistance + options_->temporalResolution).toSeconds();
+  result.climbRateCheckPassed = (conservativeClimbRateEstimate <= options_->maxClimbRate);
+
+  const int resolutionMultiplier = options_->distinctBuddyResolutionMultiplier;
+  result.isBuddyDistinct =
+      temporalDistance > resolutionMultiplier * options_->temporalResolution &&
+      spatialDistance > resolutionMultiplier * options_->spatialResolution;
+
+  return result;
+}
+
+void AircraftTrackCheck::registerCheckResult(TrackObservation &obs,
+                                               const CheckResult &result) const {
+  obs.numChecks += 2;
+  if (!result.speedCheckPassed)
+    ++obs.numFailedChecks;
+  if (!result.climbRateCheckPassed)
+    ++obs.numFailedChecks;
+  assert(obs.numChecks >= 0);
+  assert(obs.numFailedChecks >= 0);
+  assert(obs.numFailedChecks <= obs.numChecks);
+}
+
+void AircraftTrackCheck::unregisterCheckResult(TrackObservation &obs,
+                                               const CheckResult &result) const {
+  obs.numChecks -= 2;
+  if (!result.speedCheckPassed)
+    --obs.numFailedChecks;
+  if (!result.climbRateCheckPassed)
+    --obs.numFailedChecks;
+  assert(obs.numChecks >= 0);
+  assert(obs.numFailedChecks >= 0);
+  assert(obs.numFailedChecks <= obs.numChecks);
 }
 
 void AircraftTrackCheck::flagRejectedTrackObservations(

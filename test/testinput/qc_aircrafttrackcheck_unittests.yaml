@@ -17,10 +17,9 @@ Only valid observations:
   Aircraft Track Check:
     variables: [air_temperature]
     temporal_resolution: PT4S
-    core_temporal_neighborhood_radius: PT24S
     spatial_resolution: 1 # km
-    core_spatial_neighborhood_radius: 300 # km
-    num_noncore_neighbors: 0
+    distinct_buddy_resolution_multiplier: 3
+    num_distinct_buddies_per_direction: 1
     max_climb_rate: 2000 # Pa/s
     max_speed_interpolation_points: {"0": 500, "101000": 500} # Pa -> m/s
     rejection_threshold: 0.5
@@ -47,10 +46,9 @@ One observation with excessive speed:
   Aircraft Track Check:
     variables: [air_temperature]
     temporal_resolution: PT4S
-    core_temporal_neighborhood_radius: PT24S
     spatial_resolution: 1 # km
-    core_spatial_neighborhood_radius: 300 # km
-    half_num_noncore_neighbors: 1
+    distinct_buddy_resolution_multiplier: 3
+    num_distinct_buddies_per_direction: 1
     max_climb_rate: 2000 # Pa/s
     max_speed_interpolation_points: {"0": 500, "101000": 500} # Pa -> m/s
     rejection_threshold: 0.5
@@ -77,10 +75,9 @@ One observation with excessive climb rate:
   Aircraft Track Check:
     variables: [air_temperature]
     temporal_resolution: PT4S
-    core_temporal_neighborhood_radius: PT24S
     spatial_resolution: 1 # km
-    core_spatial_neighborhood_radius: 300 # km
-    half_num_noncore_neighbors: 1
+    distinct_buddy_resolution_multiplier: 3
+    num_distinct_buddies_per_direction: 1
     max_climb_rate: 2000 # Pa/s
     max_speed_interpolation_points: {"0": 500, "101000": 500} # Pa -> m/s
     rejection_threshold: 0.5
