@@ -276,7 +276,6 @@ Observations:
         - 99
         - 100
         - 102
-        - 103
         - 105
         - 109
         - 112
@@ -361,7 +360,7 @@ Observations:
         - 1913
         - 2089
         - 2098
-    failedBenchmark: 97
+    failedBenchmark: 96
   - ObsSpace:
       name: Aircraft
       ObsDataIn:

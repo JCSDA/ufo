@@ -271,6 +271,10 @@ AircraftTrackCheck::SweepResult AircraftTrackCheck::sweepOverObservations(
           break; // We've reached the end of the track
 
         const TrackObservation &neighborObs = trackObservations[neighborObsIdx];
+
+        minPressureBetweenObsAndNeighbor = std::min(minPressureBetweenObsAndNeighbor,
+                                                    neighborObs.pressure);
+
         const bool neighborVisitedInPreviousSweep =
             neighborIdx <= numNeighborsVisitedInPreviousSweep;
         int checkCountIncrement = 1;
@@ -287,10 +291,6 @@ AircraftTrackCheck::SweepResult AircraftTrackCheck::sweepOverObservations(
 
         util::Duration temporalDistance = abs(neighborObs.time - obs.time);
         const float spatialDistance = distance(obs.location, neighborObs.location);
-
-        // TODO(wsmigaj): This is in the wrong place: it should be before 'continue'
-        minPressureBetweenObsAndNeighbor = std::min(minPressureBetweenObsAndNeighbor,
-                                                    neighborObs.pressure);
 
         // Estimate the speed and check if it is within the allowed range
         const float maxSpeed = maxValidSpeedAtPressure(minPressureBetweenObsAndNeighbor);
