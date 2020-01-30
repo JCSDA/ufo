@@ -1,0 +1,93 @@
+/*
+ * (C) Copyright 2020 Met Office UK
+ *
+ * This software is licensed under the terms of the Apache Licence Version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ */
+
+#ifndef TEST_UFO_AIRCRAFTTRACKCHECK_H_
+#define TEST_UFO_AIRCRAFTTRACKCHECK_H_
+
+#include <iomanip>
+#include <memory>
+#include <string>
+#include <vector>
+
+#include <boost/make_shared.hpp>
+
+#define ECKIT_TESTING_SELF_REGISTER_CASES 0
+
+#include "eckit/config/LocalConfiguration.h"
+#include "eckit/testing/Test.h"
+#include "ioda/ObsSpace.h"
+#include "ioda/ObsVector.h"
+#include "oops/../test/TestEnvironment.h"
+#include "oops/parallel/mpi/mpi.h"
+#include "oops/runs/Test.h"
+#include "oops/util/Expect.h"
+#include "ufo/filters/AircraftTrackCheck.h"
+#include "ufo/filters/Variables.h"
+
+namespace ufo {
+namespace test {
+
+void testAircraftTrackCheck(const eckit::LocalConfiguration &conf) {
+  util::DateTime bgn(conf.getString("window_begin"));
+  util::DateTime end(conf.getString("window_end"));
+
+  const eckit::LocalConfiguration obsSpaceConf(conf, "ObsSpace");
+  ioda::ObsSpace obsspace(obsSpaceConf, oops::mpi::comm(), bgn, end);
+
+  if (conf.has("air_pressures")) {
+    const std::vector<float> airPressures = conf.getFloatVector("air_pressures");
+    obsspace.put_db("MetaData", "air_pressure", airPressures);
+    const std::vector<float> airPressureObserrors(airPressures.size(), 1.0f);
+    obsspace.put_db("ObsError", "air_pressure", airPressureObserrors);
+  }
+
+  if (conf.has("flight_ids")) {
+    const std::vector<int> flightIds = conf.getIntVector("flight_ids");
+    obsspace.put_db("MetaData", "flight_id", flightIds);
+  }
+
+  auto obserr = boost::make_shared<ioda::ObsDataVector<float>>(
+      obsspace, obsspace.obsvariables(), "ObsError");
+  auto qcflags = boost::make_shared<ioda::ObsDataVector<int>>(
+      obsspace, obsspace.obsvariables());
+
+  const eckit::LocalConfiguration filterConf(conf, "Aircraft Track Check");
+  ufo::AircraftTrackCheck filter(obsspace, filterConf, qcflags, obserr);
+  filter.preProcess();
+
+  const std::vector<size_t> expectedRejectedObsIndices =
+      conf.getUnsignedVector("expected_rejected_obs_indices");
+  std::vector<size_t> rejectedObsIndices;
+  for (size_t i = 0; i < qcflags->nlocs(); ++i)
+    if ((*qcflags)[0][i] == ufo::QCflags::track)
+      rejectedObsIndices.push_back(i);
+  EXPECT_EQUAL(rejectedObsIndices, expectedRejectedObsIndices);
+}
+
+class AircraftTrackCheck : public oops::Test {
+ private:
+  std::string testid() const override {return "ufo::test::AircraftTrackCheck";}
+
+  void register_tests() const override {
+    std::vector<eckit::testing::Test>& ts = eckit::testing::specification();
+
+    const eckit::LocalConfiguration conf(::test::TestEnvironment::config());
+    for (const std::string & testCaseName : conf.keys())
+    {
+      const eckit::LocalConfiguration testCaseConf(::test::TestEnvironment::config(), testCaseName);
+      ts.emplace_back(CASE("ufo/AircraftTrackCheck/" + testCaseName, testCaseConf)
+                      {
+                        testAircraftTrackCheck(testCaseConf);
+                      });
+    }
+  }
+};
+
+}  // namespace test
+}  // namespace ufo
+
+#endif  // TEST_UFO_AIRCRAFTTRACKCHECK_H_
