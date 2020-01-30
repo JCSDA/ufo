@@ -39,6 +39,7 @@ list( APPEND ufo_test_input
   testinput/coolskin.yaml
   testinput/cris_crtm.yaml
   testinput/cris_qc.yaml
+  testinput/empty.yaml
   testinput/function_velocity.yaml
   testinput/function_errflat.yaml
   testinput/function_errftopo.yaml
@@ -832,6 +833,13 @@ endif ( ${CRTM_FOUND} )
 ecbuild_add_test( TARGET  test_ufo_parameters
                   SOURCES mains/TestParameters.cc
                   ARGS    "testinput/parameters.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  LIBS    ufo)
+
+# Test piecewise linear interpolation
+ecbuild_add_test( TARGET  test_ufo_piecewise_linear_interpolation
+                  SOURCES mains/TestPiecewiseLinearInterpolation.cc
+                  ARGS    "testinput/empty.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   LIBS    ufo)
 
