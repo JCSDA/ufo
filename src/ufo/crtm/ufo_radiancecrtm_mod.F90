@@ -380,9 +380,6 @@ logical :: jacobian_needed
    else
       ! Call the forward model call for each sensor
       ! -------------------------------------------
-      if (self%conf%salinity_option == "on") THEN
-         Options%Use_Old_MWSSEM = .TRUE.
-      end if
       err_stat = CRTM_Forward( atm         , &  ! Input
                                sfc         , &  ! Input
                                geo         , &  ! Input
