@@ -34,7 +34,6 @@ Observations:
         - 98
         - 99
         - 100
-        - 102
         - 105
         - 109
         - 112
@@ -43,10 +42,6 @@ Observations:
         - 119
         - 120
         - 122
-        - 123
-        - 127
-        - 151
-        - 153
         - 184
         - 187
         - 188
@@ -119,7 +114,7 @@ Observations:
         - 1913
         - 2089
         - 2098
-    failedBenchmark: 96
+    failedBenchmark: 91
   - ObsSpace:
       name: Aircraft
       ObsDataIn:
@@ -151,9 +146,6 @@ Observations:
         - 98
         - 99
         - 100
-        - 101
-        - 102
-        - 103
         - 105
         - 109
         - 112
@@ -162,15 +154,6 @@ Observations:
         - 119
         - 120
         - 122
-        - 123
-        - 127
-        - 149
-        - 150
-        - 151
-        - 152
-        - 153
-        - 154
-        - 155
         - 184
         - 187
         - 188
@@ -243,7 +226,7 @@ Observations:
         - 1913
         - 2089
         - 2098
-    failedBenchmark: 103
+    failedBenchmark: 91
   - ObsSpace:
       name: Aircraft
       ObsDataIn:
@@ -275,7 +258,6 @@ Observations:
         - 98
         - 99
         - 100
-        - 102
         - 105
         - 109
         - 112
@@ -284,10 +266,6 @@ Observations:
         - 119
         - 120
         - 122
-        - 123
-        - 127
-        - 151
-        - 153
         - 184
         - 187
         - 188
@@ -360,7 +338,7 @@ Observations:
         - 1913
         - 2089
         - 2098
-    failedBenchmark: 96
+    failedBenchmark: 91
   - ObsSpace:
       name: Aircraft
       ObsDataIn:
@@ -392,7 +370,6 @@ Observations:
         - 98
         - 99
         - 100
-        - 102
         - 105
         - 109
         - 112
@@ -401,10 +378,6 @@ Observations:
         - 119
         - 120
         - 122
-        - 123
-        - 127
-        - 151
-        - 153
         - 184
         - 187
         - 189
@@ -567,7 +540,7 @@ Observations:
         - 2089
         - 2094
         - 2099
-    failedBenchmark: 186
+    failedBenchmark: 181
   - ObsSpace:
       name: Aircraft
       ObsDataIn:
@@ -599,8 +572,6 @@ Observations:
         - 98
         - 99
         - 100
-        - 102
-        - 105
         - 109
         - 112
         - 115
@@ -608,11 +579,6 @@ Observations:
         - 119
         - 120
         - 122
-        - 123
-        - 127
-        - 129
-        - 151
-        - 153
         - 188
         - 193
         - 195
@@ -683,7 +649,7 @@ Observations:
         - 1913
         - 2089
         - 2098
-    failedBenchmark: 95
+    failedBenchmark: 88
   - ObsSpace:
       name: Aircraft
       ObsDataIn:
@@ -715,7 +681,6 @@ Observations:
         - 98
         - 99
         - 100
-        - 102
         - 105
         - 109
         - 112
@@ -724,10 +689,6 @@ Observations:
         - 119
         - 120
         - 122
-        - 123
-        - 127
-        - 151
-        - 153
         - 193
         - 195
         - 1276
@@ -737,7 +698,7 @@ Observations:
         - 1663
         - 1911
         - 1913
-    failedBenchmark: 33
+    failedBenchmark: 28
   - ObsSpace:
       name: Aircraft
       ObsDataIn:
@@ -769,7 +730,6 @@ Observations:
         - 98
         - 99
         - 100
-        - 102
         - 105
         - 109
         - 112
@@ -779,17 +739,6 @@ Observations:
         - 120
         - 122
         - 123
-        - 127
-        - 129
-        - 131
-        - 136
-        - 138
-        - 139
-        - 142
-        - 145
-        - 146
-        - 151
-        - 153
         - 184
         - 187
         - 188
@@ -862,7 +811,7 @@ Observations:
         - 1913
         - 2089
         - 2098
-    failedBenchmark: 104
+    failedBenchmark: 92
   - ObsSpace:
       name: Aircraft
       ObsDataIn:
@@ -894,19 +843,10 @@ Observations:
         - 98
         - 99
         - 100
-        - 102
-        - 105
         - 109
         - 112
         - 115
         - 117
-        - 119
-        - 120
-        - 122
-        - 123
-        - 127
-        - 151
-        - 153
         - 188
         - 193
         - 268
@@ -973,4 +913,4 @@ Observations:
         - 1913
         - 2089
         - 2098
-    failedBenchmark: 90
+    failedBenchmark: 81

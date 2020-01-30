@@ -287,6 +287,9 @@ AircraftTrackCheck::SweepResult AircraftTrackCheck::sweepOverObservations(
             // No need to check against this neighbor again
             continue;
           }
+        } else if (neighborObs.rejected()) {
+          ++obs.numNeighborsToVisit[dir];
+          continue;
         }
 
         util::Duration temporalDistance = abs(neighborObs.time - obs.time);
