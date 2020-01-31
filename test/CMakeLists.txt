@@ -57,6 +57,8 @@ list( APPEND ufo_test_input
   testinput/gnssrobndnbam_super_refraction.yaml
 
   testinput/gnssroref.yaml
+  testinput/gnssroref_0obs.yaml
+  testinput/gnssroref_1obs.yaml
   testinput/gnssro_domain_check.yaml
   testinput/gsisfcmodel.yaml
   testinput/hirs4_crtm.yaml
@@ -126,6 +128,7 @@ list( APPEND ufo_test_data
   atmosphere/geovals_rttov.nc4
   atmosphere/geos_aod_geoval_2018041500_m.nc4
   atmosphere/gmi_gpm_geoval_2018041500_m.nc4
+  atmosphere/gnssro_geoval_2018041500_1obs.nc4
   atmosphere/gnssro_geoval_2018041500_s.nc4
   atmosphere/gnssro_geoval_2018041500_s_2d.nc4
   atmosphere/gnssro_geoval_2018041500_m.nc4
@@ -227,7 +230,6 @@ execute_process( COMMAND ${CMAKE_COMMAND} -E create_symlink
                  ${TESTFILE_DIR}
                  ${CMAKE_CURRENT_BINARY_DIR}/Data/ioda
                 )
-
 
 #####################################################################
 
@@ -524,6 +526,25 @@ ecbuild_add_test( TARGET  test_ufo_linopr_timeoper
 ecbuild_add_test( TARGET  test_ufo_opr_gnssroRef
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
                   ARGS    "testinput/gnssroref.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsOperator.x )
+
+ecbuild_add_test( TARGET  test_ufo_opr_gnssroRef_0obs
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
+                  ARGS    "testinput/gnssroref_0obs.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsOperator.x )
+
+ecbuild_add_test( TARGET  test_ufo_opr_gnssroRef_1obs
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
+                  ARGS    "testinput/gnssroref_1obs.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsOperator.x )
+
+ecbuild_add_test( TARGET  test_ufo_opr_gnssroRef_1obs_2pe
+                  MPI     2
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
+                  ARGS    "testinput/gnssroref_1obs.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsOperator.x )
 
