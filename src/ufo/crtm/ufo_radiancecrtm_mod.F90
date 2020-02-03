@@ -77,13 +77,18 @@ logical :: request_cldfrac
  ! request from the model all the hardcoded atmospheric & surface variables + 
  ! 1 * n_Absorbers
  ! 2 * n_Clouds (mass content and effective radius)
- nvars_in = size(varin_default) + self%conf%n_Absorbers + 2 * self%conf%n_Clouds
+ nvars_in = size(varin_default) + self%conf%n_Absorbers + 2 * self%conf%n_Clouds 
  request_cldfrac = &
-    self%conf%n_Clouds > 0 .and. &
-    self%conf%Cloud_Fraction < 0.0
+   self%conf%n_Clouds > 0 .and. &
+   self%conf%Cloud_Fraction < 0.0
  if ( request_cldfrac ) then
-    nvars_in = nvars_in + 1
+   nvars_in = nvars_in + 1
  end if
+ ! if sss is in ObsOptions + sss
+ if (TRIM(self%conf%salinity_option) == "on") then
+   nvars_in = nvars_in + 1
+ end if
+
  allocate(self%varin(nvars_in))
  self%varin(1:size(varin_default)) = varin_default
  ind = size(varin_default) + 1
@@ -100,6 +105,10 @@ logical :: request_cldfrac
  end do
  if ( request_cldfrac ) then
    self%varin(ind) = var_cldfrac
+   ind = ind + 1
+ end if
+ if (TRIM(self%conf%salinity_option) == "on") then
+   self%varin(ind) = var_sfc_sss
    ind = ind + 1
  end if
 
