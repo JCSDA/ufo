@@ -16,8 +16,6 @@
 #include "oops/interface/ObsFilter.h"
 #include "oops/util/Logger.h"
 
-#include "ufo/ObsDiagnostics.h"
-
 namespace ufo {
 
 // -----------------------------------------------------------------------------
@@ -37,22 +35,8 @@ ObsDiagnosticsWriter::ObsDiagnosticsWriter(
 
 // -----------------------------------------------------------------------------
 
-ObsDiagnosticsWriter::~ObsDiagnosticsWriter() {
-  oops::Log::trace() << "ObsDiagnosticsWriter destructed" << std::endl;
-}
-
-// -----------------------------------------------------------------------------
-
-void ObsDiagnosticsWriter::postFilter(const ioda::ObsVector &, const ObsDiagnostics & diags) {
-  oops::Log::trace() << "ObsDiagnosticsWriter postFilter begin" << std::endl;
-  diags.write(config_);
-  oops::Log::trace() << "ObsDiagnosticsWriter postFilter end" << std::endl;
-}
-
-// -----------------------------------------------------------------------------
-
 void ObsDiagnosticsWriter::print(std::ostream & os) const {
-  os << "ObsDiagnosticsWriter::print not yet implemented ";
+  os << "ObsDiagnosticsWriter: " << config_;
 }
 
 // -----------------------------------------------------------------------------

@@ -63,10 +63,4 @@ void ObsDiagnostics::print(std::ostream & os) const {
 
 // -----------------------------------------------------------------------------
 
-void ObsDiagnostics::write(const eckit::Configuration & config) const {
-  gdiags_.write(config);
-}
-
-// -----------------------------------------------------------------------------
-
 }  // namespace ufo

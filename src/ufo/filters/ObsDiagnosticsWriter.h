@@ -17,9 +17,11 @@
 #include "oops/base/Variables.h"
 #include "oops/util/Printable.h"
 #include "ufo/filters/Variables.h"
+#include "ufo/ObsDiagnostics.h"
 
 namespace eckit {
   class Configuration;
+  class LocalConfiguration;
 }
 
 namespace ioda {
@@ -30,7 +32,6 @@ namespace ioda {
 
 namespace ufo {
 class GeoVaLs;
-class ObsDiagnostics;
 
 class ObsDiagnosticsWriter : public util::Printable,
                              private util::ObjectCounter<ObsDiagnosticsWriter> {
@@ -40,11 +41,13 @@ class ObsDiagnosticsWriter : public util::Printable,
   ObsDiagnosticsWriter(ioda::ObsSpace &, const eckit::Configuration &,
                        boost::shared_ptr<ioda::ObsDataVector<int> >,
                        boost::shared_ptr<ioda::ObsDataVector<float> >);
-  ~ObsDiagnosticsWriter();
+  ~ObsDiagnosticsWriter() {}
 
   void preProcess() const {}
   void priorFilter(const GeoVaLs &) const {}
-  void postFilter(const ioda::ObsVector &, const ObsDiagnostics &);
+  void postFilter(const ioda::ObsVector &, const ObsDiagnostics & diags) {
+    diags.write(config_);
+  }
 
   const oops::Variables & requiredGeoVaLs() const {return nogeovals_;}
   const oops::Variables & requiredHdiagnostics() const {return extradiagvars_;}
