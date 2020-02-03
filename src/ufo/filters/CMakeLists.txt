@@ -18,6 +18,8 @@ set ( filters_files
       ObsBoundsCheck.h
       MWCLWCheck.cc
       MWCLWCheck.h
+      ObsDiagnosticsWriter.cc
+      ObsDiagnosticsWriter.h
       ObsDomainCheck.cc
       ObsDomainCheck.h
       ObsDomainErrCheck.cc

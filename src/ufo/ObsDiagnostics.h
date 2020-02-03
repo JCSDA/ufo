@@ -51,6 +51,8 @@ class ObsDiagnostics : public util::Printable,
   void get(std::vector<float> &, const std::string &) const;
   void get(std::vector<float> &, const std::string &, const int) const;
 
+  void write(const eckit::Configuration &) const;
+
  private:
   void print(std::ostream &) const;
   const ioda::ObsSpace & obsdb_;
