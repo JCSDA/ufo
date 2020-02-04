@@ -63,7 +63,7 @@ class TemporalThinner {
   }
 
   int getPriority(size_t validObsIndex) const {
-    assert(priorities_ != nullptr);
+    ASSERT(priorities_ != nullptr);
     return (*priorities_)[validObsIds_[validObsIndex]];
   }
 
