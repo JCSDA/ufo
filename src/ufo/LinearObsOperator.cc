@@ -18,7 +18,7 @@ namespace ufo {
 // -----------------------------------------------------------------------------
 
 LinearObsOperator::LinearObsOperator(ioda::ObsSpace & os, const eckit::Configuration & conf)
-  : oper_(LinearObsOperatorFactory::create(os, conf)), odb_(os), biaspreds_(0)
+  : oper_(LinearObsOperatorFactory::create(os, conf)), odb_(os), biaspreds_()
 {}
 
 // -----------------------------------------------------------------------------
@@ -32,7 +32,10 @@ void LinearObsOperator::setTrajectory(const GeoVaLs & gvals, const ObsBias & bia
   if (bias) vars += bias.requiredHdiagnostics();
   ObsDiagnostics ydiags(odb_, Locations(odb_, odb_.windowStart(), odb_.windowEnd()), vars);
   oper_->setTrajectory(gvals, bias, ydiags);
-  if (bias) bias.computeObsBiasPredictors(gvals, odb_, ydiags, biaspreds_);
+  if (bias) {
+    biaspreds_.reset(new ioda::ObsDataVector<float>(odb_, bias.predNames(), "", false));
+    bias.computeObsBiasPredictors(gvals, ydiags, *biaspreds_);
+  }
 }
 
 // -----------------------------------------------------------------------------
@@ -42,7 +45,7 @@ void LinearObsOperator::simulateObsTL(const GeoVaLs & gvals, ioda::ObsVector & y
   oper_->simulateObsTL(gvals, yy);
   if (bias) {
     ioda::ObsVector ybiasinc(odb_);
-    bias.computeObsBiasTL(gvals, odb_, biaspreds_, ybiasinc);
+    bias.computeObsBiasTL(gvals, *biaspreds_, ybiasinc);
     yy += ybiasinc;
   }
 }
@@ -54,7 +57,7 @@ void LinearObsOperator::simulateObsAD(GeoVaLs & gvals, const ioda::ObsVector & y
   oper_->simulateObsAD(gvals, yy);
   if (bias) {
     ioda::ObsVector ybiasinc(yy);
-    bias.computeObsBiasAD(gvals, odb_, biaspreds_, ybiasinc);
+    bias.computeObsBiasAD(gvals, *biaspreds_, ybiasinc);
   }
 }
 

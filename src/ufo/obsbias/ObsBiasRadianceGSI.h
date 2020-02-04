@@ -12,6 +12,8 @@
 #include <string>
 #include <vector>
 
+#include "ioda/ObsDataVector.h"
+
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
 
@@ -22,6 +24,7 @@ namespace eckit {
 }
 
 namespace ioda {
+  class ObsSpace;
   class ObsVector;
 }
 
@@ -37,7 +40,7 @@ class ObsBiasRadianceGSI : public ObsBiasBase,
   static const std::string classname() {return "ufo::ObsBiasRadianceGSI";}
 
 /// Constructor
-  explicit ObsBiasRadianceGSI(const eckit::Configuration &);
+  ObsBiasRadianceGSI(const ioda::ObsSpace &, const eckit::Configuration &);
 
 /// Destructor
   virtual ~ObsBiasRadianceGSI() {}
@@ -46,42 +49,43 @@ class ObsBiasRadianceGSI : public ObsBiasBase,
   void read(const eckit::Configuration &) override;
   void write(const eckit::Configuration &) const override;
   double norm() const override;
-  std::size_t size() const override { return biascoeffs_.size();}
 
 /// Add increments
   ObsBiasRadianceGSI & operator+=(const ObsBiasIncrement &) override;
   ObsBiasRadianceGSI & operator=(const ObsBias &) override;
 
 /// Obs bias operator
-  void computeObsBias(const GeoVaLs &,
-                      ioda::ObsVector &,
-                      const ioda::ObsSpace &,
-                      const ObsDiagnostics &) const override;
+  void computeObsBias(ioda::ObsVector &,
+                      const ioda::ObsDataVector<float> &,
+                      ioda::ObsDataVector<float> &) const override;
 
 /// Obs bias predictor
-  void computeObsBiasPredictors(const GeoVaLs &,
-                                const ioda::ObsSpace &,
-                                const ObsDiagnostics &,
-                                std::vector<float> &) const;
+  void computeObsBiasPredictors(const GeoVaLs &, const ObsDiagnostics &,
+                                ioda::ObsDataVector<float> &) const override;
 
 /// Other
   const oops::Variables & requiredGeoVaLs() const override {return *geovars_;}
   const oops::Variables & requiredHdiagnostics() const override {return *hdiags_;}
+  const oops::Variables & predNames() const override {return *predNames_;}
 
 /// Bias parameters interface
+  std::size_t size() const override {return biascoeffs_.size();}
   double & operator[](const unsigned int ii) override {return biascoeffs_[ii];}
 
+  const ioda::ObsSpace & obspace() const override {return odb_;}
  private:
   void print(std::ostream &) const override;
-  std::unique_ptr<const oops::Variables> geovars_;
-  std::unique_ptr<const oops::Variables> hdiags_;
+
+  const ioda::ObsSpace & odb_;
+  std::unique_ptr<oops::Variables> geovars_;
+  std::unique_ptr<oops::Variables> hdiags_;
+  std::unique_ptr<const oops::Variables> predNames_;
   std::string sensor_id_;  // sensor_id
   std::vector<int> channels_;  // channel
   std::vector<float> tlapmean_;
 
   std::vector<double> biascoeffs_;
   bool newpc4pred_;  //  controls preconditioning due to sat-bias correction term
-  bool adp_anglebc_;  //  logical to turn off or on the variational radiance angle bias correction
   bool emiss_bc_;  //  logical to turn off or on the emissivity predictor
 
   std::vector<std::string> predictors_;

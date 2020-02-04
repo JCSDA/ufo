@@ -30,13 +30,15 @@ namespace ufo {
 FilterBase::FilterBase(ioda::ObsSpace & os, const eckit::Configuration & config,
                        boost::shared_ptr<ioda::ObsDataVector<int> > flags,
                        boost::shared_ptr<ioda::ObsDataVector<float> > obserr)
-  : obsdb_(os), config_(config), flags_(*flags), obserr_(*obserr),
+  : obsdb_(os), config_(config), flags_(flags), obserr_(obserr),
     allvars_(getAllWhereVariables(config_)),
     filtervars_(), data_(obsdb_), prior_(false), post_(false)
 {
   oops::Log::trace() << "FilterBase contructor" << std::endl;
   ASSERT(flags);
   ASSERT(obserr);
+//  data_.associate(flags_, "QCflagsData");
+  data_.associate(*obserr_, "ObsErrorData");
   if (config_.has("filter variables")) {
   // read filter variables
     filtervars_ += Variables(config_.getSubConfigurations("filter variables"));
@@ -88,7 +90,7 @@ void FilterBase::priorFilter(const GeoVaLs & gv) {
 void FilterBase::postFilter(const ioda::ObsVector & hofx, const ObsDiagnostics & diags) {
   oops::Log::trace() << "FilterBase postFilter begin" << std::endl;
   if (post_) {
-    data_.associate(hofx);
+    data_.associate(hofx, "HofX");
     data_.associate(diags);
     this->doFilter();
   }
@@ -116,7 +118,7 @@ void FilterBase::doFilter() const {
   config_.get("action", aconf);
   aconf.set("flag", this->qcFlag());
   FilterAction action(aconf);
-  action.apply(filtervars_, flagged, data_, flags_, obserr_);
+  action.apply(filtervars_, flagged, data_, *flags_, *obserr_);
 
 // Done
   oops::Log::trace() << "FilterBase doFilter end" << std::endl;
