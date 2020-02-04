@@ -138,7 +138,7 @@ type(c_ptr), value,       intent(in)    :: obss
 type(ufo_geovals),        intent(inout) :: hofxdiags    !non-h(x) diagnostics
 
 ! Local Variables
-character(*), parameter :: PROGRAM_NAME = 'ufo_radiancecrtm_mod.F90'
+character(*), parameter :: PROGRAM_NAME = 'ufo_radiancecrtm_tlad_settraj'
 character(255) :: message, version
 character(max_string) :: err_msg
 integer        :: err_stat, alloc_stat
@@ -186,7 +186,7 @@ real(kind_real), allocatable :: Tao(:)
  ! --------------
  call CRTM_Version( Version )
  call Program_Message( PROGRAM_NAME, &
-                       'Check/example program for the CRTM Forward and K-Matrix (setTraj) functions using '//&
+                       'UFO interface for the CRTM Forward and K-Matrix (setTraj) functions using '//&
                        trim(self%conf_traj%ENDIAN_type)//' coefficient datafiles', &
                        'CRTM Version: '//TRIM(Version) )
 
@@ -197,9 +197,17 @@ real(kind_real), allocatable :: Tao(:)
  !**       CRTM_Lifecycle.f90 for more details.
 
  write( *,'(/5x,"Initializing the CRTM (setTraj) ...")' )
- err_stat = CRTM_Init( self%conf_traj%SENSOR_ID, &
-            chinfo, &
+ err_stat = CRTM_Init( self%conf_traj%SENSOR_ID, chinfo, &
             File_Path=trim(self%conf_traj%COEFFICIENT_PATH), &
+            IRwaterCoeff_File=trim(self%conf_traj%IRwaterCoeff_File), &
+            IRlandCoeff_File=trim(self%conf_traj%IRlandCoeff_File), &
+            IRsnowCoeff_File=trim(self%conf_traj%IRsnowCoeff_File), &
+            IRiceCoeff_File=trim(self%conf_traj%IRiceCoeff_File), &
+            VISwaterCoeff_File=trim(self%conf_traj%VISwaterCoeff_File), &
+            VISlandCoeff_File=trim(self%conf_traj%VISlandCoeff_File), &
+            VISsnowCoeff_File=trim(self%conf_traj%VISsnowCoeff_File), &
+            VISiceCoeff_File=trim(self%conf_traj%VISiceCoeff_File), &
+            MWwaterCoeff_File=trim(self%conf_traj%MWwaterCoeff_File), &
             Quiet=.TRUE.)
  message = 'Error initializing CRTM (setTraj)'
  call crtm_comm_stat_check(err_stat, PROGRAM_NAME, message, f_comm)
