@@ -33,6 +33,9 @@ set ( filters_files
       QCmanager.h
       Thinning.cc
       Thinning.h
+      TemporalThinning.cc
+      TemporalThinning.h
+      TemporalThinningParameters.h
       Variable.cc
       Variable.h
       Variables.cc
