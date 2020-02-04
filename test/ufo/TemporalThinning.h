@@ -5,8 +5,8 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#ifndef TEST_UFO_GAUSSIANTHINNING_H_
-#define TEST_UFO_GAUSSIANTHINNING_H_
+#ifndef TEST_UFO_TEMPORALTHINNING_H_
+#define TEST_UFO_TEMPORALTHINNING_H_
 
 #include <iomanip>
 #include <memory>
@@ -25,25 +25,18 @@
 #include "oops/parallel/mpi/mpi.h"
 #include "oops/runs/Test.h"
 #include "oops/util/Expect.h"
-#include "ufo/filters/Gaussian_Thinning.h"
+#include "ufo/filters/TemporalThinning.h"
 #include "ufo/filters/Variables.h"
 
 namespace ufo {
 namespace test {
 
-void testGaussianThinning(const eckit::LocalConfiguration &conf) {
+void testTemporalThinning(const eckit::LocalConfiguration &conf) {
   util::DateTime bgn(conf.getString("window_begin"));
   util::DateTime end(conf.getString("window_end"));
 
   const eckit::LocalConfiguration obsSpaceConf(conf, "ObsSpace");
   ioda::ObsSpace obsspace(obsSpaceConf, oops::mpi::comm(), bgn, end);
-
-  if (conf.has("air_pressures")) {
-    const std::vector<float> air_pressures = conf.getFloatVector("air_pressures");
-    obsspace.put_db("MetaData", "air_pressure", air_pressures);
-    const std::vector<float> air_pressure_obserrors(air_pressures.size(), 1.0f);
-    obsspace.put_db("ObsError", "air_pressure", air_pressure_obserrors);
-  }
 
   if (conf.has("category")) {
     const std::vector<int> categories = conf.getIntVector("category");
@@ -60,8 +53,8 @@ void testGaussianThinning(const eckit::LocalConfiguration &conf) {
   auto qcflags = boost::make_shared<ioda::ObsDataVector<int>>(
       obsspace, obsspace.obsvariables());
 
-  const eckit::LocalConfiguration filterConf(conf, "GaussianThinning");
-  ufo::Gaussian_Thinning filter(obsspace, filterConf, qcflags, obserr);
+  const eckit::LocalConfiguration filterConf(conf, "TemporalThinning");
+  ufo::TemporalThinning filter(obsspace, filterConf, qcflags, obserr);
   filter.preProcess();
 
   const std::vector<size_t> expectedThinnedObsIndices =
@@ -70,15 +63,12 @@ void testGaussianThinning(const eckit::LocalConfiguration &conf) {
   for (size_t i = 0; i < qcflags->nlocs(); ++i)
     if ((*qcflags)[0][i] == ufo::QCflags::thinned)
       thinnedObsIndices.push_back(i);
-  EXPECT_EQUAL(thinnedObsIndices.size(), expectedThinnedObsIndices.size());
-  const bool equal = std::equal(thinnedObsIndices.begin(), thinnedObsIndices.end(),
-                                expectedThinnedObsIndices.begin());
-  EXPECT(equal);
+  EXPECT_EQUAL(thinnedObsIndices, expectedThinnedObsIndices);
 }
 
-class GaussianThinning : public oops::Test {
+class TemporalThinning : public oops::Test {
  private:
-  std::string testid() const override {return "ufo::test::GaussianThinning";}
+  std::string testid() const override {return "ufo::test::TemporalThinning";}
 
   void register_tests() const override {
     std::vector<eckit::testing::Test>& ts = eckit::testing::specification();
@@ -87,9 +77,9 @@ class GaussianThinning : public oops::Test {
     for (const std::string & testCaseName : conf.keys())
     {
       const eckit::LocalConfiguration testCaseConf(::test::TestEnvironment::config(), testCaseName);
-      ts.emplace_back(CASE("ufo/GaussianThinning/" + testCaseName, testCaseConf)
+      ts.emplace_back(CASE("ufo/TemporalThinning/" + testCaseName, testCaseConf)
                       {
-                        testGaussianThinning(testCaseConf);
+                        testTemporalThinning(testCaseConf);
                       });
     }
   }
@@ -98,4 +88,4 @@ class GaussianThinning : public oops::Test {
 }  // namespace test
 }  // namespace ufo
 
-#endif  // TEST_UFO_GAUSSIANTHINNING_H_
+#endif  // TEST_UFO_TEMPORALTHINNING_H_

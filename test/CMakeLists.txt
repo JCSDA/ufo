@@ -81,6 +81,8 @@ list( APPEND ufo_test_input
   testinput/qc_recursive_splitter.yaml
   testinput/qc_preqc.yaml
   testinput/qc_thinning.yaml
+  testinput/qc_temporal_thinning.yaml
+  testinput/qc_temporal_thinning_unittests.yaml
   testinput/radiosonde.yaml
   testinput/radialvelocity.yaml
   testinput/reflectivity.yaml
@@ -91,6 +93,7 @@ list( APPEND ufo_test_input
   testinput/seaicethick.yaml
   testinput/sea_surface_temp.yaml
   testinput/seviri_crtm.yaml
+  testinput/smap_crtm.yaml
   testinput/sndrd1-4_crtm.yaml
   testinput/sfcpcorrected.yaml
   testinput/timeoper.yaml
@@ -139,10 +142,13 @@ list( APPEND ufo_test_data
   atmosphere/iasi_metop-a_obsdiag_2018041500_m.nc4
   atmosphere/iasi_metop-a_geoval_2018041500_m.nc4
   atmosphere/met_office_thinning.nc4
+  atmosphere/met_office_temporal_thinning_surface.nc4
+  atmosphere/met_office_temporal_thinning_sonde.nc4
   atmosphere/mhs_n19_geoval_2018041500_m.nc4
   atmosphere/ps_geovals_2018041500_0000.nc4
   atmosphere/radar_dbz_geoval_2019052222.nc4
   atmosphere/radar_rw_geoval_2019052222.nc4
+  atmosphere/smap_geoval_2018041500_m.nc4
   atmosphere/satbias_crtm_in
   atmosphere/satwind_geoval_2018041500_m.nc4
   atmosphere/satwind_geoval_2018041500_s.nc4
@@ -339,6 +345,12 @@ if ( ${CRTM_FOUND} )
                       ARGS    "testinput/gmi_crtm.yaml"
                       ENVIRONMENT OOPS_TRAPFPE=1
                       DEPENDS test_ObsOperatorTLAD.x )
+
+    ecbuild_add_test( TARGET  test_ufo_opr_crtm_smap
+                      COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
+                      ARGS    "testinput/smap_crtm.yaml"
+                      ENVIRONMENT OOPS_TRAPFPE=1
+                      DEPENDS test_ObsOperator.x )
 
     ecbuild_add_test( TARGET  test_ufo_opr_crtm_seviri
                       COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
@@ -767,6 +779,12 @@ ecbuild_add_test( TARGET  test_ufo_qc_preqc
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsFilters.x )
 
+ecbuild_add_test( TARGET  test_ufo_qc_temporalthinning
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                  ARGS    "testinput/qc_temporal_thinning.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsFilters.x )
+
 # Test UFO ObsFilters (specific)
 
 ecbuild_add_test( TARGET  test_ufo_gaussianthinning
@@ -780,6 +798,12 @@ ecbuild_add_test( TARGET  test_ufo_recursivesplitter
                   # This test doesn't need a configuration file, but oops::Run::Run() requires
                   # a path to a configuration file to be passed in the first command-line parameter.
                   ARGS    "testinput/qc_recursive_splitter.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  LIBS    ufo)
+
+ecbuild_add_test( TARGET  test_ufo_temporalthinning
+                  SOURCES mains/TestTemporalThinning.cc
+                  ARGS    "testinput/qc_temporal_thinning_unittests.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   LIBS    ufo)
 
@@ -992,6 +1016,8 @@ SpcCoeff/Little_Endian/abi_g16.SpcCoeff.bin
 TauCoeff/ODPS/Little_Endian/abi_g16.TauCoeff.bin
 SpcCoeff/Little_Endian/ahi_himawari8.SpcCoeff.bin
 TauCoeff/ODPS/Little_Endian/ahi_himawari8.TauCoeff.bin
+SpcCoeff/Little_Endian/radiometer_smap.SpcCoeff.bin
+TauCoeff/ODPS/Little_Endian/radiometer_smap.TauCoeff.bin
 )
 
 # Symlink all CRTM files

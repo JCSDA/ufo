@@ -76,7 +76,12 @@ type(fckit_configuration) :: f_confOpts
  ! request from the model all the hardcoded atmospheric & surface variables + 
  ! 1 * n_Absorbers
  ! 2 * n_Clouds (mass content and effective radius)
- nvars_in = size(varin_default) + self%conf%n_Absorbers + 2 * self%conf%n_Clouds
+ ! if sss is in ObsOptions + sss
+ nvars_in = size(varin_default) + self%conf%n_Absorbers + 2 * self%conf%n_Clouds 
+ if (TRIM(self%conf%salinity_option) == "on") then
+   nvars_in = nvars_in + 1
+ end if
+
  allocate(self%varin(nvars_in))
  self%varin(1:size(varin_default)) = varin_default
  ind = size(varin_default) + 1
@@ -91,6 +96,10 @@ type(fckit_configuration) :: f_confOpts
    self%varin(ind) = self%conf%Clouds(jspec,2)
    ind = ind + 1
  end do
+ if (TRIM(self%conf%salinity_option) == "on") then
+   self%varin(ind) = var_sfc_sss
+   ind = ind + 1
+ end if
 
  ! save channels
  allocate(self%channels(size(channels)))
