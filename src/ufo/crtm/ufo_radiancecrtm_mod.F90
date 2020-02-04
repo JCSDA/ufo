@@ -133,7 +133,7 @@ type(ufo_geovals),     intent(inout) :: hofxdiags    !non-h(x) diagnostics
 type(c_ptr), value,       intent(in) :: obss         !ObsSpace
 
 ! Local Variables
-character(*), parameter :: PROGRAM_NAME = 'ufo_radiancecrtm_mod.F90'
+character(*), parameter :: PROGRAM_NAME = 'ufo_radiancecrtm_simobs'
 character(255) :: message, version
 character(max_string) :: err_msg
 integer        :: err_stat, alloc_stat
@@ -186,7 +186,7 @@ logical :: jacobian_needed
  ! --------------
  call CRTM_Version( Version )
  call Program_Message( PROGRAM_NAME, &
-                       'Check/example program for the CRTM Forward and K-Matrix functions using '//&
+                       'UFO interface for the CRTM Forward and K-Matrix functions using '//&
                        trim(self%conf%ENDIAN_type)//' coefficient datafiles', &
                        'CRTM Version: '//TRIM(Version) )
 
