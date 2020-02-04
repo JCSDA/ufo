@@ -30,7 +30,7 @@ static ObsBiasMaker<ObsBiasRadianceGSI> makerBiasRadianceGSI_("GSI");
 ObsBiasRadianceGSI::ObsBiasRadianceGSI(const ioda::ObsSpace & odb,
                                        const eckit::Configuration & conf)
   : ObsBiasBase(), odb_(odb), geovars_(), hdiags_(), tlapmean_(),
-    newpc4pred_(false), adp_anglebc_(false), emiss_bc_(false), predictors_(), predNames_() {
+    newpc4pred_(false), emiss_bc_(false), predictors_(), predNames_() {
 // Default predictor names from GSI
   predictors_ = {"constant",
                  "scan_angle",
@@ -67,24 +67,26 @@ ObsBiasRadianceGSI::ObsBiasRadianceGSI(const ioda::ObsSpace & odb,
                               "transmittances_of_atmosphere_layer_CH",
                               "brightness_temperature_CH"
                               };
-  hdiags_.reset(new oops::Variables(vv));
 
 // Parse Sensor_ID from the conf
   const eckit::LocalConfiguration obsoprconf(conf, "ObsOperator");
   sensor_id_ = obsoprconf.getString("ObsOptions.Sensor_ID");
 
 // Replace "_CH" in hdiags_ with digitial Channel ID
-  std::vector<std::string> vvtmp;
+  std::vector<std::string> vvtmp_w_ch;
+  std::vector<std::string> vvtmp_wo_ch;
   for (std::size_t jv = 0; jv < vv.size(); ++jv) {
     std::size_t found = vv[jv].find("_CH");
     if (found != std::string::npos) {
       for (std::size_t jc = 0; jc < channels_.size(); ++jc)
-        vvtmp.push_back(vv[jv].replace(found, 3, '_'+std::to_string(channels_[jc])));
+        vvtmp_w_ch.push_back(vv[jv].erase(found, 3));
     } else {
-      vvtmp.push_back(vv[jv]);
+      vvtmp_wo_ch.push_back(vv[jv]);
     }
   }
-  if (vvtmp.size() > 0) hdiags_.reset(new oops::Variables(vvtmp));
+  hdiags_.reset(new oops::Variables());
+  if (vvtmp_w_ch.size() > 0)  *hdiags_ += oops::Variables(vvtmp_w_ch, channels_);
+  if (vvtmp_wo_ch.size() > 0) *hdiags_ += oops::Variables(vvtmp_wo_ch);
 
 // Read ObsBias parameters first guess if available
   const eckit::LocalConfiguration biasConf(conf, "ObsBias");
@@ -95,8 +97,6 @@ ObsBiasRadianceGSI::ObsBiasRadianceGSI(const ioda::ObsSpace & odb,
   }
 
   newpc4pred_ = biasConf.getBool("newpc4pred", false);
-
-  adp_anglebc_ = biasConf.getBool("adp_anglebc", false);
 
   emiss_bc_ = biasConf.getBool("emiss_bc", false);
 
@@ -339,16 +339,9 @@ void ObsBiasRadianceGSI::computeObsBiasPredictors(
           }
         }
       } else {
-        if (adp_anglebc_) {
-          for (std::size_t jc = 0; jc < nchanl; ++jc) {
-            for (std::size_t jl = 0; jl < nlocs; ++jl)
-              preds[indx+jc][jl] = 0.0;
-          }
-        } else {
-          for (std::size_t jc = 0; jc < nchanl; ++jc) {
-            for (std::size_t jl = 0; jl < nlocs; ++jl)
-              preds[indx+jc][jl] = pow(1.0/cos(zasat[jl]) - 1.0, 2);
-          }
+        for (std::size_t jc = 0; jc < nchanl; ++jc) {
+          for (std::size_t jl = 0; jl < nlocs; ++jl)
+            preds[indx+jc][jl] = 0.0;
         }
       }
       indx += nchanl;
@@ -470,7 +463,7 @@ void ObsBiasRadianceGSI::computeObsBiasPredictors(
       }
       indx += nchanl;
     } else if (predictors_[n] == "emissivity") {
-      if (adp_anglebc_ && emiss_bc_) {
+      if (emiss_bc_) {
         std::vector<float> h2o_frac(nlocs, 0.0);
         geovals.get(h2o_frac, "water_area_fraction");
         for (std::size_t jc = 0; jc < nchanl; ++jc) {
@@ -498,42 +491,21 @@ void ObsBiasRadianceGSI::computeObsBiasPredictors(
       }
       indx += nchanl;
     } else if (predictors_[n] == "scan_angle_3rd_order") {
-      if (adp_anglebc_) {
-        for (std::size_t jc = 0; jc < nchanl; ++jc) {
-          for (std::size_t jl = 0; jl < nlocs; ++jl)
-            preds[indx+jc][jl] = pow(view_angle[jl]*Constants::deg2rad, 3);
-        }
-      } else {
-        for (std::size_t jc = 0; jc < nchanl; ++jc) {
-          for (std::size_t jl = 0; jl < nlocs; ++jl)
-            preds[indx+jc][jl] = 0.0;
-        }
+      for (std::size_t jc = 0; jc < nchanl; ++jc) {
+        for (std::size_t jl = 0; jl < nlocs; ++jl)
+          preds[indx+jc][jl] = pow(view_angle[jl]*Constants::deg2rad, 3);
       }
       indx += nchanl;
     } else if (predictors_[n] == "scan_angle_2nd_order") {
-      if (adp_anglebc_) {
-        for (std::size_t jc = 0; jc < nchanl; ++jc) {
-          for (std::size_t jl = 0; jl < nlocs; ++jl)
-            preds[indx+jc][jl] = pow(view_angle[jl]*Constants::deg2rad, 2);
-        }
-      } else {
-        for (std::size_t jc = 0; jc < nchanl; ++jc) {
-          for (std::size_t jl = 0; jl < nlocs; ++jl)
-            preds[indx+jc][jl] = 0.0;
-        }
+      for (std::size_t jc = 0; jc < nchanl; ++jc) {
+        for (std::size_t jl = 0; jl < nlocs; ++jl)
+          preds[indx+jc][jl] = pow(view_angle[jl]*Constants::deg2rad, 2);
       }
       indx += nchanl;
     } else if (predictors_[n] == "scan_angle_1st_order") {
-      if (adp_anglebc_) {
-        for (std::size_t jc = 0; jc < nchanl; ++jc) {
-          for (std::size_t jl = 0; jl < nlocs; ++jl)
-            preds[indx+jc][jl] = view_angle[jl]*Constants::deg2rad;
-        }
-      } else {
-        for (std::size_t jc = 0; jc < nchanl; ++jc) {
-          for (std::size_t jl = 0; jl < nlocs; ++jl)
-            preds[indx+jc][jl] = 0.0;
-        }
+      for (std::size_t jc = 0; jc < nchanl; ++jc) {
+        for (std::size_t jl = 0; jl < nlocs; ++jl)
+          preds[indx+jc][jl] = view_angle[jl]*Constants::deg2rad;
       }
       indx += nchanl;
     } else {

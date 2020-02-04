@@ -57,6 +57,8 @@ list( APPEND ufo_test_input
   testinput/gnssrobndnbam_super_refraction.yaml
 
   testinput/gnssroref.yaml
+  testinput/gnssroref_0obs.yaml
+  testinput/gnssroref_1obs.yaml
   testinput/gnssro_domain_check.yaml
   testinput/gsisfcmodel.yaml
   testinput/hirs4_crtm.yaml
@@ -91,6 +93,7 @@ list( APPEND ufo_test_input
   testinput/seaicethick.yaml
   testinput/sea_surface_temp.yaml
   testinput/seviri_crtm.yaml
+  testinput/smap_crtm.yaml
   testinput/sndrd1-4_crtm.yaml
   testinput/sfcpcorrected.yaml
   testinput/timeoper.yaml
@@ -128,6 +131,7 @@ list( APPEND ufo_test_data
   atmosphere/geovals_rttov.nc4
   atmosphere/geos_aod_geoval_2018041500_m.nc4
   atmosphere/gmi_gpm_geoval_2018041500_m.nc4
+  atmosphere/gnssro_geoval_2018041500_1obs.nc4
   atmosphere/gnssro_geoval_2018041500_s.nc4
   atmosphere/gnssro_geoval_2018041500_s_2d.nc4
   atmosphere/gnssro_geoval_2018041500_m.nc4
@@ -144,6 +148,7 @@ list( APPEND ufo_test_data
   atmosphere/ps_geovals_2018041500_0000.nc4
   atmosphere/radar_dbz_geoval_2019052222.nc4
   atmosphere/radar_rw_geoval_2019052222.nc4
+  atmosphere/smap_geoval_2018041500_m.nc4
   atmosphere/satbias_crtm_in
   atmosphere/satwind_geoval_2018041500_m.nc4
   atmosphere/satwind_geoval_2018041500_s.nc4
@@ -190,6 +195,7 @@ list (APPEND ioda_obs_test_data
   atmosphere/cris-fsr_npp_obs_2018041500_m.nc4
   atmosphere/geos_aod_obs_2018041500_m.nc4
   atmosphere/gmi_gpm_obs_2018041500_m.nc4
+  atmosphere/gnssro_obs_2018041500_1obs.nc4
   atmosphere/gnssro_obs_2018041500_s.nc4
   atmosphere/gnssro_obs_2018041500_m.nc4
   atmosphere/gnssro_obs_2018041500_l.nc4
@@ -201,6 +207,7 @@ list (APPEND ioda_obs_test_data
   atmosphere/mhs_n19_obs_2018041500_m.nc4
   atmosphere/radar_dbz_obs_2019052222.nc4
   atmosphere/radar_rw_obs_2019052222.nc4
+  atmosphere/smap_obs_2018041500_m.nc4
   atmosphere/satwind_obs_2018041500_m.nc4
   atmosphere/satwind_obs_2018041500_s.nc4
   atmosphere/sbuv2_n19_obs_2018041500_m.nc4
@@ -337,6 +344,12 @@ if ( ${CRTM_FOUND} )
                       ARGS    "testinput/gmi_crtm.yaml"
                       ENVIRONMENT OOPS_TRAPFPE=1
                       DEPENDS test_ObsOperatorTLAD.x )
+
+    ecbuild_add_test( TARGET  test_ufo_opr_crtm_smap
+                      COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
+                      ARGS    "testinput/smap_crtm.yaml"
+                      ENVIRONMENT OOPS_TRAPFPE=1
+                      DEPENDS test_ObsOperator.x )
 
     ecbuild_add_test( TARGET  test_ufo_opr_crtm_seviri
                       COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
@@ -524,6 +537,25 @@ ecbuild_add_test( TARGET  test_ufo_linopr_timeoper
 ecbuild_add_test( TARGET  test_ufo_opr_gnssroRef
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
                   ARGS    "testinput/gnssroref.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsOperator.x )
+
+ecbuild_add_test( TARGET  test_ufo_opr_gnssroRef_0obs
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
+                  ARGS    "testinput/gnssroref_0obs.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsOperator.x )
+
+ecbuild_add_test( TARGET  test_ufo_opr_gnssroRef_1obs
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
+                  ARGS    "testinput/gnssroref_1obs.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsOperator.x )
+
+ecbuild_add_test( TARGET  test_ufo_opr_gnssroRef_1obs_2pe
+                  MPI     2
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
+                  ARGS    "testinput/gnssroref_1obs.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsOperator.x )
 
@@ -983,6 +1015,8 @@ SpcCoeff/Little_Endian/abi_g16.SpcCoeff.bin
 TauCoeff/ODPS/Little_Endian/abi_g16.TauCoeff.bin
 SpcCoeff/Little_Endian/ahi_himawari8.SpcCoeff.bin
 TauCoeff/ODPS/Little_Endian/ahi_himawari8.TauCoeff.bin
+SpcCoeff/Little_Endian/radiometer_smap.SpcCoeff.bin
+TauCoeff/ODPS/Little_Endian/radiometer_smap.TauCoeff.bin
 )
 
 # Symlink all CRTM files
