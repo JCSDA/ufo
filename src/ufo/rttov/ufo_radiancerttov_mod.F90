@@ -56,16 +56,18 @@ class(ufo_radiancerttov), intent(inout) :: self
 end subroutine ufo_radiancerttov_delete
 
 ! ------------------------------------------------------------------------------
-SUBROUTINE ufo_radiancerttov_simobs(self, geovals, hofx, obss, channels)
+SUBROUTINE ufo_radiancerttov_simobs(self, geovals, hofx, obss, channels, obs_info)
 
 use fckit_log_module, only : fckit_log
+use ufo_onedvarfortran_utils_mod, only: ObInfo_type
 
 implicit none
-class(ufo_radiancerttov), intent(in) :: self
-type(ufo_geovals),        intent(in) :: geovals
-real(c_double),        intent(inout) :: hofx(:)
-type(c_ptr), value,       intent(in) :: obss
-integer(c_int),           intent(in) :: channels(:)  !List of channels to use
+class(ufo_radiancerttov),    intent(in) :: self
+type(ufo_geovals),           intent(in) :: geovals
+real(c_double),              intent(inout) :: hofx(:)
+type(c_ptr), value,          intent(in) :: obss
+integer(c_int),              intent(in) :: channels(:)  ! List of channels to use
+type(ObInfo_type), optional, intent(in) :: obs_info     ! Used for onedvarcheck 
 
 ! Local Variables
 character(*), parameter          :: PROGRAM_NAME = 'ufo_radiancerttov_mod.F90'
@@ -186,9 +188,13 @@ Sensor_Loop:do i_inst = 1, self % conf % nSensors
 
     !Assign the data from the GeoVaLs
     !--------------------------------
-    call load_atm_data_rttov(geovals,obss,profiles,prof_start)
-
-    call load_geom_data_rttov(obss,profiles,prof_start)
+    if (present(obs_info)) then
+      call load_atm_data_rttov(geovals,obss,profiles,prof_start,obs_info=obs_info)
+      call load_geom_data_rttov(obss,profiles,prof_start,obs_info=obs_info)
+    else
+      call load_atm_data_rttov(geovals,obss,profiles,prof_start)
+      call load_geom_data_rttov(obss,profiles,prof_start)
+    end if    
 
     call rttov_user_profile_checkinput(rttov_errorstatus, &
       config_rttov % opts, &

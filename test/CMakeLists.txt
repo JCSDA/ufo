@@ -31,6 +31,7 @@ list( APPEND ufo_test_input
   testinput/amsua_crtm.yaml
   testinput/amsua_crtm_bc.yaml
   testinput/amsua_rttov.yaml
+  testinput/amsua_rttov_qc_1dvar.yaml
   testinput/amsua_qc.yaml
   testinput/amsua_allsky_gsi_qc.yaml
   testinput/amsua_seaice_qc.yaml
@@ -52,7 +53,6 @@ list( APPEND ufo_test_input
   testinput/gnssrobndnbam_obs_error.yaml
   testinput/gnssrobndnbam_backgroundcheck_qc.yaml
   testinput/gnssrobndnbam_super_refraction.yaml
-
   testinput/gnssroref.yaml
   testinput/gnssro_domain_check.yaml
   testinput/gsisfcmodel.yaml
@@ -114,6 +114,9 @@ list( APPEND ufo_test_data
   atmosphere/atms_npp_geoval_2018041500_s.nc4
   atmosphere/cris-fsr_npp_geoval_2018041500_m.nc4
   atmosphere/geovals_rttov.nc4
+  atmosphere/amsua_allsats_geoval_2018083000.nc4
+  atmosphere/amsua_allsats_obs_2018083000.nc4
+  atmosphere/atovs_bmatrix_70.dat
   atmosphere/geos_aod_geoval_2018041500_m.nc4
   atmosphere/gmi_gpm_geoval_2018041500_m.nc4
   atmosphere/gnssro_geoval_2018041500_s.nc4
@@ -439,6 +442,11 @@ if( ${RTTOV_FOUND} )
                     ARGS    "testinput/amsua_rttov.yaml"
                     ENVIRONMENT OOPS_TRAPFPE=1
                     DEPENDS test_ObsOperator.x )
+
+  ecbuild_add_test( TARGET  test_ufo_qc_amsua_rttov_1dvar
+                    COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                    ARGS    "testinput/amsua_rttov_qc_1dvar.yaml"
+                    DEPENDS test_ObsFilters.x )
 
   ecbuild_add_test( TARGET  test_ufo_linopr_rttov_amsua
                     COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x

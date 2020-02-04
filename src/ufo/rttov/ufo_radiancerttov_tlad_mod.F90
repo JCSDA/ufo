@@ -32,7 +32,7 @@ integer :: nlevels
 integer :: nchannels
 
 type(rttov_conf) :: conf
-type(rttov_profile), pointer :: profiles_k(:) => NULL()
+type(rttov_profile), pointer, public :: profiles_k(:) => NULL()
 type(rttov_chanprof), pointer :: chanprof(:) => NULL()
 logical :: ltraj
 contains
@@ -86,16 +86,19 @@ subroutine ufo_radiancerttov_tlad_delete(self)
 end subroutine ufo_radiancerttov_tlad_delete
 
 ! ------------------------------------------------------------------------------
-subroutine ufo_radiancerttov_tlad_settraj(self, geovals, obss, channels)
+subroutine ufo_radiancerttov_tlad_settraj(self, geovals, obss, channels, obs_info, BT)
 
 use ufo_radiancerttov_utils_mod , ONLY : config_rttov
+use ufo_onedvarfortran_utils_mod, ONLY : ObInfo_type
 
 implicit none
 
 class(ufo_radiancerttov_tlad), intent(inout) :: self
-type(ufo_geovals),       intent(in)          :: geovals
-type(c_ptr), value,      intent(in)          :: obss
-integer(c_int),           intent(in) :: channels(:)  !List of channels to use
+type(ufo_geovals),             intent(in)    :: geovals
+type(c_ptr), value,            intent(in)    :: obss
+integer(c_int),                intent(in)    :: channels(:) ! List of channels to use
+type(ObInfo_type), optional,   intent(in)    :: obs_info    ! Used for onedvarcheck
+real(kind_real), optional,     intent(out)   :: BT(:)       ! Used for onedvarcheck
 
 ! Local Variables
 character(*), parameter                      :: PROGRAM_NAME = 'ufo_radiancerttov_tlad_settraj'
@@ -266,10 +269,13 @@ Sensor_Loop:do i_inst = 1, self % conf % nSensors
     
     !Assign the data from the GeoVaLs
     !--------------------------------
-
-    call load_atm_data_rttov(geovals,obss,profiles,prof_start)
-
-    call load_geom_data_rttov(obss,profiles,prof_start)
+    if (present(obs_info)) then
+      call load_atm_data_rttov(geovals,obss,profiles,prof_start,obs_info=obs_info)
+      call load_geom_data_rttov(obss,profiles,prof_start,obs_info=obs_info)
+    else
+      call load_atm_data_rttov(geovals,obss,profiles,prof_start)
+      call load_geom_data_rttov(obss,profiles,prof_start)
+    end if
 
     idbg = idbg + 1
 
@@ -292,7 +298,7 @@ Sensor_Loop:do i_inst = 1, self % conf % nSensors
       self % chanprof(nchan_count + 1:nchan_count + nch), &! in LOCAL channel and profile index structure
       config_rttov % opts,                     &! in    options structure
       profiles,                                &! in    profile array
-      self % profiles_k(nchan_count + 1 : nchan_count + nch), &! in    profile array
+      self % profiles_k(nchan_count + 1 : nchan_count + nch), &! inout    profile array
       config_rttov % rttov_coef_array(i_inst), &! in    coefficients structure
       transmission,                            &! inout computed transmittances
       transmission_k,                          &! inout computed transmittances
@@ -313,6 +319,8 @@ Sensor_Loop:do i_inst = 1, self % conf % nSensors
     prof_start = prof_start + nprof_sim
     nchan_count = nchan_count + nch
   end do
+  
+  if (present(BT)) BT(:) = radiance % bt(:)
 
   ! Allocate structures for rttov_k
   call rttov_alloc_k(                        &

@@ -93,10 +93,11 @@ end subroutine rttov_conf_delete
 
 ! -----------------------------------------------------------------------------
 
-subroutine load_atm_data_rttov(geovals,obss,profiles,prof_start1)
+subroutine load_atm_data_rttov(geovals,obss,profiles,prof_start1,obs_info)
 
 use fckit_log_module, only : fckit_log
 use obsspace_mod, only : obsspace_get_db, obsspace_get_nlocs, obsspace_has
+use ufo_onedvarfortran_utils_mod, only: ObInfo_type
 
 implicit none
 
@@ -104,6 +105,7 @@ type(ufo_geovals), intent(in) :: geovals
 type(c_ptr), VALUE, intent(in) :: obss
 type(rttov_profile), intent(inout) :: profiles(:)
 integer, OPTIONAL, intent(IN) :: prof_start1
+type(ObInfo_type), optional, intent(in) :: obs_info  ! Used for onedvarcheck
 
 ! Local variables
 integer :: k1, nlocs_total, iprof
@@ -124,7 +126,11 @@ real, parameter :: q_mixratio_to_ppmv  = 1.60771704e+3 ! g/kg -> ppmv
 character(255) :: message
 logical :: variable_present
 
-nlocs_total = obsspace_get_nlocs(obss)
+if(PRESENT(obs_info)) then
+  nlocs_total = 1
+else
+  nlocs_total = obsspace_get_nlocs(obss)
+end if
 
 if(PRESENT(prof_start1)) then
   prof_start = prof_start1
@@ -293,36 +299,45 @@ end do
 !DAR: Could/should get emissivity here?
 ! call rttov_get_emissivity()
 
-allocate(TmpVar(nprofiles))
+if(PRESENT(obs_info)) then
+  profiles(1)%elevation = obs_info%elevation / 1000.0 ! m -> km
+  profiles(1)%latitude = obs_info%latitude
+  profiles(1)%longitude = obs_info%longitude
 
-variable_present = obsspace_has(obss, "MetaData", "elevation")
-if (variable_present) then
-  call obsspace_get_db(obss, "MetaData", "elevation", TmpVar(prof_start:prof_start + nprofiles - 1) )
-  profiles(1:nprofiles)%elevation = TmpVar(prof_start:prof_start + nprofiles - 1) / 1000.0 !m -> km for RTTOV
 else
-  write(message,'(A)') &
-    'MetaData elevation not in database: check implicit filtering'
-  call fckit_log%info(message)
-end if
 
-variable_present = obsspace_has(obss, "MetaData", "latitude")
-if (variable_present) then
-  call obsspace_get_db(obss, "MetaData", "latitude", TmpVar(prof_start:prof_start + nprofiles - 1) )
-  profiles(1:nprofiles)%latitude = TmpVar(prof_start:prof_start + nprofiles - 1)
-else
-  write(message,'(A)') &
-    'MetaData latitude not in database: check implicit filtering'
-  call fckit_log%info(message)
-end if
+  allocate(TmpVar(nprofiles))
 
-variable_present = obsspace_has(obss, "MetaData", "longitude")
-if (variable_present) then
-  call obsspace_get_db(obss, "MetaData", "longitude", TmpVar(prof_start:prof_start + nprofiles - 1) )
-  profiles(1:nprofiles)%longitude = TmpVar(prof_start:prof_start + nprofiles - 1)
-else
-  write(message,'(A)') &
-  'MetaData longitude not in database: check implicit filtering'
-  call fckit_log%info(message)
+  variable_present = obsspace_has(obss, "MetaData", "elevation")
+  if (variable_present) then
+    call obsspace_get_db(obss, "MetaData", "elevation", TmpVar(prof_start:prof_start + nprofiles - 1) )
+    profiles(1:nprofiles)%elevation = TmpVar(prof_start:prof_start + nprofiles - 1) / 1000.0 !m -> km for RTTOV
+  else
+    write(message,'(A)') &
+      'MetaData elevation not in database: check implicit filtering'
+    call fckit_log%info(message)
+  end if
+
+  variable_present = obsspace_has(obss, "MetaData", "latitude")
+  if (variable_present) then
+    call obsspace_get_db(obss, "MetaData", "latitude", TmpVar(prof_start:prof_start + nprofiles - 1) )
+    profiles(1:nprofiles)%latitude = TmpVar(prof_start:prof_start + nprofiles - 1)
+  else
+    write(message,'(A)') &
+      'MetaData latitude not in database: check implicit filtering'
+    call fckit_log%info(message)
+  end if
+
+  variable_present = obsspace_has(obss, "MetaData", "longitude")
+  if (variable_present) then
+    call obsspace_get_db(obss, "MetaData", "longitude", TmpVar(prof_start:prof_start + nprofiles - 1) )
+    profiles(1:nprofiles)%longitude = TmpVar(prof_start:prof_start + nprofiles - 1)
+  else
+    write(message,'(A)') &
+    'MetaData longitude not in database: check implicit filtering'
+    call fckit_log%info(message)
+  end if
+
 end if
 
 end subroutine load_atm_data_rttov
@@ -331,17 +346,19 @@ end subroutine load_atm_data_rttov
 !
 ! Internal subprogam to load some test geometry data
 !
-subroutine load_geom_data_rttov(obss,profiles,prof_start1)
+subroutine load_geom_data_rttov(obss,profiles,prof_start1,obs_info)
 
 ! Satellite viewing geometry
 ! DAR: check it's all within limits
 use obsspace_mod, only :  obsspace_get_nlocs, obsspace_get_db
+use ufo_onedvarfortran_utils_mod, only: ObInfo_type
 
 implicit none
 
 type(c_ptr), VALUE,       intent(in)    :: obss
 type(rttov_profile), intent(inout) :: profiles(:)
 integer, OPTIONAL, intent(IN) :: prof_start1
+type(ObInfo_type), optional, intent(in) :: obs_info  ! Used in onedvarcheck
 
 real(kind_real), allocatable :: TmpVar(:)
 
@@ -355,26 +372,40 @@ else
   prof_start = 1
 end if
 
-nlocs_total = obsspace_get_nlocs(obss)
-nprofiles = SIZE(profiles)
+if(PRESENT(obs_info)) then
+  nlocs_total = 1
+  nprofiles = 1
+  nlevels = SIZE(profiles(1)%p)
+  
+  profiles(1)%zenangle    = obs_info%sensor_zenith_angle
+  profiles(1)%azangle     = obs_info%sensor_azimuth_angle
+  profiles(1)%sunzenangle = obs_info%solar_zenith_angle
+  profiles(1)%sunazangle  = obs_info%solar_azimuth_angle    
+  
+else
 
-allocate(TmpVar(nprofiles))
+  nlocs_total = obsspace_get_nlocs(obss)
+  nprofiles = SIZE(profiles)
 
-nlevels = SIZE(profiles(1)%p)
+  allocate(TmpVar(nprofiles))
 
-call obsspace_get_db(obss, "MetaData", "sensor_zenith_angle", TmpVar(prof_start:prof_start + nprofiles - 1))
-profiles(1:nprofiles)%zenangle = TmpVar(prof_start:prof_start + nprofiles - 1)
+  nlevels = SIZE(profiles(1)%p)
 
-call obsspace_get_db(obss, "MetaData", "sensor_azimuth_angle", TmpVar(prof_start:prof_start + nprofiles - 1))
-profiles(1:nprofiles)%azangle = TmpVar(prof_start:prof_start + nprofiles - 1)
+  call obsspace_get_db(obss, "MetaData", "sensor_zenith_angle", TmpVar(prof_start:prof_start + nprofiles - 1))
+  profiles(1:nprofiles)%zenangle = TmpVar(prof_start:prof_start + nprofiles - 1)
 
-call obsspace_get_db(obss, "MetaData", "solar_zenith_angle", TmpVar(prof_start:prof_start + nprofiles - 1))
-profiles(1:nprofiles)%sunzenangle = TmpVar(prof_start:prof_start + nprofiles - 1)
+  call obsspace_get_db(obss, "MetaData", "sensor_azimuth_angle", TmpVar(prof_start:prof_start + nprofiles - 1))
+  profiles(1:nprofiles)%azangle = TmpVar(prof_start:prof_start + nprofiles - 1)
 
-call obsspace_get_db(obss, "MetaData", "solar_azimuth_angle", TmpVar(prof_start:prof_start + nprofiles - 1))
-profiles(1:nprofiles)%sunazangle = TmpVar(prof_start:prof_start + nprofiles - 1)
+  call obsspace_get_db(obss, "MetaData", "solar_zenith_angle", TmpVar(prof_start:prof_start + nprofiles - 1))
+  profiles(1:nprofiles)%sunzenangle = TmpVar(prof_start:prof_start + nprofiles - 1)
 
-deallocate(TmpVar)
+  call obsspace_get_db(obss, "MetaData", "solar_azimuth_angle", TmpVar(prof_start:prof_start + nprofiles - 1))
+  profiles(1:nprofiles)%sunazangle = TmpVar(prof_start:prof_start + nprofiles - 1)
+
+  deallocate(TmpVar)
+
+end if
 
 end subroutine load_geom_data_rttov
 

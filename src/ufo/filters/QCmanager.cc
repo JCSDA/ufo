@@ -105,6 +105,7 @@ void QCmanager::print(std::ostream & os) const {
     size_t iclw  = 0;
     size_t idiffref = 0;
     size_t iseaice  = 0;
+    size_t ionedvar  = 0;
 
     for (size_t jobs = 0; jobs < iobs; ++jobs) {
       if (flags_[jj][jobs] == QCflags::pass)    ++ipass;
@@ -119,6 +120,7 @@ void QCmanager::print(std::ostream & os) const {
       if (flags_[jj][jobs] == QCflags::clw)     ++iclw;
       if (flags_[jj][jobs] == QCflags::diffref) ++idiffref;
       if (flags_[jj][jobs] == QCflags::seaice)  ++iseaice;
+      if (flags_[jj][jobs] == QCflags::onedvar)  ++ionedvar;
       if (flags_[jj][jobs] == 76 || flags_[jj][jobs] == 77)  ++ignss;
     }
 
@@ -136,6 +138,7 @@ void QCmanager::print(std::ostream & os) const {
     obsdb_.comm().allReduceInPlace(ithin, eckit::mpi::sum());
     obsdb_.comm().allReduceInPlace(idiffref, eckit::mpi::sum());
     obsdb_.comm().allReduceInPlace(iseaice,  eckit::mpi::sum());
+    obsdb_.comm().allReduceInPlace(ionedvar,  eckit::mpi::sum());
 
 
     if (obsdb_.comm().rank() == 0) {
@@ -152,12 +155,13 @@ void QCmanager::print(std::ostream & os) const {
       if (ignss > 0) os << info << ignss << " rejected by GNSSRO reality check." << std::endl;
       if (idiffref > 0) os << info << idiffref << " rejected by difference check." << std::endl;
       if (iseaice  > 0) os << info << iseaice  << " removed by sea ice check." << std::endl;
+      if (ionedvar  > 0) os << info << ionedvar  << " removed by 1D Var check." << std::endl;
 
       os << info << ipass << " passed out of " << iobs << " observations." << std::endl;
     }
 
     ASSERT(ipass + imiss + ipreq + ibnds + iwhit + iblck + iherr + ithin + iclw + ifgss + ignss \
-           + idiffref + iseaice == iobs);
+           + idiffref + iseaice + ionedvar == iobs);
   }
 }
 
