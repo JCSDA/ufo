@@ -1,0 +1,46 @@
+---
+logging:
+  categories: Warning, Error, Debug
+test_framework_runtime_config: "--log_level=test_suite"
+
+window_begin: 2018-09-01T09:00:00Z
+window_end: 2018-09-01T15:00:00Z
+
+LinearObsOpTest: 
+ coefTL: 1.e-5
+ toleranceTL: 1.0e-5
+ toleranceAD: 1.0e-11
+
+Observations:
+  ObsTypes:
+  - ObsOperator:
+      name: RTTOV
+      Sensor_ID: noaa_19_amsua
+      CoefficientPath: Data/
+    GeoVaLs:
+      filename: Data/amsua_allsats_geoval_2018083000.nc4
+    ObsSpace: 
+      name: Radiance
+      ObsDataIn:
+        obsfile: &obs_file Data/amsua_allsats_obs_2018083000.nc4
+      ObsDataOut: 
+        obsfile: Data/amsua_allsats_obs_2018083000_m_out_20obs.nc4
+      simulate:
+        variables: [brightness_temperature]
+        channels: &ops_channels 1, 9-14
+    ObsFilters:
+    - Filter: OneDVar Check
+      applyfilter: 
+      - name: post@HofX
+      ModName: RTTOV
+      EndianType: little_endian
+      CoefficientPath: Data/
+      Sensor_ID: noaa_19_amsua
+      variables: [brightness_temperature]
+      channels: *ops_channels
+      model_variables:
+      - air_temperature
+      BMatrix: Data/atovs_bmatrix_70.dat
+    rmsequiv: 239.48475677393529
+    tolerance: 1.e-10
+    passedBenchmark: 1      # number of passed obs
