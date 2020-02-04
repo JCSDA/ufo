@@ -14,7 +14,7 @@ Observations:
    ObsSpace: 
     name: GnssroRef
     ObsDataIn: 
-     obsfile: Data/gnssro_obs_2018041500_1obs.nc4
+     obsfile: Data/ioda/testinput_tier_1/gnssro_obs_2018041500_1obs.nc4
     simulate:
      variables: [refractivity]
    GeoVaLs: 

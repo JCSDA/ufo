@@ -20,7 +20,7 @@ Observations:
    ObsSpace:
      name: hirs4_metop-a
      ObsDataIn: 
-       obsfile: Data/hirs4_metop-a_obs_2018041500_m.nc4
+       obsfile: Data/ioda/testinput_tier_1/hirs4_metop-a_obs_2018041500_m.nc4
      simulate:
        variables: [brightness_temperature]
        channels: 1-15
