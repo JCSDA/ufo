@@ -39,11 +39,12 @@ list( APPEND ufo_test_input
   testinput/coolskin.yaml
   testinput/cris_crtm.yaml
   testinput/cris_qc.yaml
-  testinput/function_velocity.yaml
+  testinput/function_clouddetect.yaml
   testinput/function_errflat.yaml
   testinput/function_errftopo.yaml
   testinput/function_errftransmittop.yaml
   testinput/function_errfwavenum.yaml
+  testinput/function_velocity.yaml
   testinput/gmi_crtm.yaml
   testinput/genericprof.yaml
   testinput/geovals.yaml
@@ -70,6 +71,8 @@ list( APPEND ufo_test_input
   testinput/obsdiag_crtm_jacobian.yaml
   testinput/obsdiag_crtm_amsua_jacobian.yaml
   testinput/obsdiag_crtm_amsua_optics.yaml
+  testinput/obsdiag_crtm_iasi_jacobian.yaml
+  testinput/obsdiag_crtm_iasi_optics.yaml
   testinput/obsfilterdata.yaml
   testinput/processwhere.yaml
   testinput/parameters.yaml
@@ -808,9 +811,9 @@ ecbuild_add_test( TARGET  test_ufo_temporalthinning
 
 # Test Functions
 
-ecbuild_add_test( TARGET  test_ufo_function_velocity
+ecbuild_add_test( TARGET  test_ufo_function_clouddetect
                   SOURCES mains/TestObsFunction.cc
-                  ARGS    "testinput/function_velocity.yaml"
+                  ARGS    "testinput/function_clouddetect.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   LIBS    ufo)
 
@@ -838,6 +841,12 @@ ecbuild_add_test( TARGET  test_ufo_function_errfwavenum
                   ENVIRONMENT OOPS_TRAPFPE=1
                   LIBS    ufo)
 
+ecbuild_add_test( TARGET  test_ufo_function_velocity
+                  SOURCES mains/TestObsFunction.cc
+                  ARGS    "testinput/function_velocity.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  LIBS    ufo)
+
 # Test Diagnostics
 
 if ( ${CRTM_FOUND} )
@@ -858,6 +867,19 @@ if ( ${CRTM_FOUND} )
                       ARGS    "testinput/obsdiag_crtm_amsua_jacobian.yaml"
                       ENVIRONMENT OOPS_TRAPFPE=1
                       LIBS    ufo)
+
+    ecbuild_add_test( TARGET  test_ufo_obsdiag_crtm_iasi_optics
+                      SOURCES mains/TestObsDiagnostics.cc
+                      ARGS    "testinput/obsdiag_crtm_iasi_optics.yaml"
+                      ENVIRONMENT OOPS_TRAPFPE=1
+                      LIBS    ufo)
+
+    ecbuild_add_test( TARGET  test_ufo_obsdiag_crtm_iasi_jacobian
+                      SOURCES mains/TestObsDiagnostics.cc
+                      ARGS    "testinput/obsdiag_crtm_iasi_jacobian.yaml"
+                      ENVIRONMENT OOPS_TRAPFPE=1
+                      LIBS    ufo)
+
 endif ( ${CRTM_FOUND} )
 
 # Test Parameters

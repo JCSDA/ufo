@@ -7,6 +7,8 @@
 
 #include "ufo/filters/ObsBoundsCheck.h"
 
+#include <algorithm>
+#include <set>
 #include <vector>
 
 #include "eckit/config/Configuration.h"
@@ -14,8 +16,11 @@
 #include "ioda/ObsDataVector.h"
 #include "ioda/ObsSpace.h"
 #include "oops/util/abor1_cpp.h"
+#include "oops/util/IntSetParser.h"
 #include "oops/util/Logger.h"
 #include "oops/util/missingValues.h"
+#include "ufo/filters/obsfunctions/ObsFunction.h"
+#include "ufo/utils/StringUtils.h"
 
 namespace ufo {
 
@@ -31,7 +36,7 @@ ObsBoundsCheck::ObsBoundsCheck(ioda::ObsSpace & obsdb, const eckit::Configuratio
     config_.get("test variables", testvarconf);
     allvars_ += ufo::Variables(testvarconf);
   }
-  oops::Log::debug() << "ObsBoundsCheck: config = " << config_ << std::endl;
+  oops::Log::debug() << "ObsBoundsCheck: config (constructor) = " << config_ << std::endl;
 }
 
 // -----------------------------------------------------------------------------
@@ -47,11 +52,14 @@ void ObsBoundsCheck::applyFilter(const std::vector<bool> & apply,
 
 // Find which variables are tested and the conditions
   ufo::Variables testvars;
+  std::string testname, testvar, testgrp;
 // Use variables specified in test variables for testing, otherwise filter variables
   if (config_.has("test variables")) {
     std::vector<eckit::LocalConfiguration> varconfs;
     config_.get("test variables", varconfs);
     testvars += ufo::Variables(varconfs);
+    testname = varconfs[0].getString("name");
+    splitVarGroup(testname, testvar, testgrp);
   } else {
     testvars += ufo::Variables(filtervars, "ObsValue");
   }
@@ -64,26 +72,56 @@ void ObsBoundsCheck::applyFilter(const std::vector<bool> & apply,
                        << config_ << std::endl;
     ABORT("No variables specified to be filtered out in filter");
   }
-  if (filtervars.nvars() != testvars.nvars()) {
-    oops::Log::error() << "Filter and test variables in Bounds Check have "
-                       << "different sizes: " << filtervars.nvars() << " and "
-                       << testvars.nvars() << std::endl;
-    ABORT("Filter and test variables in Bounds Check have different sizes");
-  }
-  oops::Log::debug() << "ObsBoundsCheck: filtering " << filtervars << " with "
-                     << testvars << std::endl;
 
-// Loop over all variables to filter
-  for (size_t jv = 0; jv < testvars.nvars(); ++jv) {
-//  get test data for this variable
-    std::vector<float> testdata;
-    data_.get(testvars.variable(jv), testdata);
-//  apply the filter
-    for (size_t jobs = 0; jobs < obsdb_.nlocs(); ++jobs) {
-      if (apply[jobs]) {
-        ASSERT(testdata[jobs] != missing);
-        if (vmin != missing && testdata[jobs] < vmin) flagged[jv][jobs] = true;
-        if (vmax != missing && testdata[jobs] > vmax) flagged[jv][jobs] = true;
+  if (testgrp != "ObsFunction") {
+    if (filtervars.nvars() != testvars.nvars()) {
+      oops::Log::error() << "Filter and test variables in Bounds Check have "
+                         << "different sizes: " << filtervars.nvars() << " and "
+                         << testvars.nvars() << std::endl;
+      ABORT("Filter and test variables in Bounds Check have different sizes");
+    }
+    oops::Log::debug() << "ObsBoundsCheck: filtering " << filtervars << " with "
+                       << testvars << std::endl;
+
+    // Loop over all variables to filter
+    for (size_t jv = 0; jv < testvars.nvars(); ++jv) {
+      //  get test data for this variable
+      std::vector<float> testdata;
+      data_.get(testvars.variable(jv), testdata);
+      //  apply the filter
+      for (size_t jobs = 0; jobs < obsdb_.nlocs(); ++jobs) {
+        if (apply[jobs]) {
+          ASSERT(testdata[jobs] != missing);
+          if (vmin != missing && testdata[jobs] < vmin) flagged[jv][jobs] = true;
+          if (vmax != missing && testdata[jobs] > vmax) flagged[jv][jobs] = true;
+        }
+      }
+    }
+  } else {
+    std::vector<eckit::LocalConfiguration> varconfs;
+    config_.get("test variables", varconfs);
+    Variable testvar(varconfs[0]);
+    ioda::ObsDataVector<float> testdata(obsdb_, testvar.toOopsVariables(), testvar.group(), false);
+    data_.get(testvar, testdata);
+
+    // if testdata is 1D variable, apply the same testdata to all filterdata
+    // testdata_jv = {0, 0, 0, ..., 0} for all nvars
+    std::vector<size_t> testdata_jv(filtervars.nvars(), 0);
+
+    // if multiple variables ar in the testdata,  apply different testdatato different variables
+    // testdata_jv = {0, 1, 2, ..., nvars-1}
+    if (testvar.size() == filtervars.nvars()) {
+      std::iota(testdata_jv.begin(), testdata_jv.end(), 0);
+    }
+
+    // Loop over all variables to filter
+    for (size_t jv = 0; jv < filtervars.nvars(); ++jv) {
+      for (size_t jobs = 0; jobs < obsdb_.nlocs(); ++jobs) {
+        if (apply[jobs]) {
+          ASSERT(testdata[jv][jobs] != missing);
+          if (vmin != missing && testdata[jv][jobs] < vmin) flagged[jv][jobs] = true;
+          if (vmax != missing && testdata[jv][jobs] > vmax) flagged[jv][jobs] = true;
+        }
       }
     }
   }
