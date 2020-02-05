@@ -13,7 +13,7 @@ Observations:
     ObsSpace:
       name: SeaSurfaceTemp
       ObsDataIn:
-        obsfile: Data/sst_obs-2018-04-15.nc4
+        obsfile: Data/ioda/testinput_tier_1/sst_obs-2018-04-15.nc4
       simulate:
         variables: [sea_surface_temperature]
     GeoVaLs:

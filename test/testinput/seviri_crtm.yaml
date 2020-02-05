@@ -18,7 +18,7 @@ Observations:
    ObsSpace: 
      name: seviri_m08
      ObsDataIn: 
-       obsfile: Data/seviri_m08_obs_2018041500_m.nc4
+       obsfile: Data/ioda/testinput_tier_1/seviri_m08_obs_2018041500_m.nc4
      simulate:
        variables: [brightness_temperature]
        channels: 5

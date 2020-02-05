@@ -31,6 +31,9 @@ set ( filters_files
       QCmanager.h
       Thinning.cc
       Thinning.h
+      TemporalThinning.cc
+      TemporalThinning.h
+      TemporalThinningParameters.h
       Variable.cc
       Variable.h
       Variables.cc
@@ -55,6 +58,8 @@ set ( filters_files
       obsfunctions/ObsFunction.h
       obsfunctions/ObsFunctionBase.cc
       obsfunctions/ObsFunctionBase.h
+      obsfunctions/ObsFunctionCloudDetect.cc
+      obsfunctions/ObsFunctionCloudDetect.h
       obsfunctions/ObsFunctionErrfLat.cc
       obsfunctions/ObsFunctionErrfLat.h
       obsfunctions/ObsFunctionErrfTopo.cc

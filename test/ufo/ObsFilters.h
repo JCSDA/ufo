@@ -149,6 +149,7 @@ void testFilters() {
       const std::vector<size_t> passedObs = getPassedObservationIndices(qcflags->obsdatavector());
       EXPECT_EQUAL(passedObs, passedObsBenchmark);
     }
+
     const int passedBenchmark = typeconfs[jj].getInt("passedBenchmark");
     const int passed = numZero(*qcflags);
     EXPECT_EQUAL(passed, passedBenchmark);

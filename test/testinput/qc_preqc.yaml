@@ -9,7 +9,7 @@ Observations:
     ObsSpace:
       name: Radiosonde
       ObsDataIn:
-        obsfile: Data/sondes_obs_2018041500_m.nc4
+        obsfile: Data/ioda/testinput_tier_1/sondes_obs_2018041500_m.nc4
       simulate:
         variables: [air_temperature]
     GeoVaLs:
@@ -29,7 +29,7 @@ Observations:
     ObsSpace:
       name: amsua_n19
       ObsDataIn: 
-        obsfile: Data/amsua_n19_obs_2018041500_m.nc4
+        obsfile: Data/ioda/testinput_tier_1/amsua_n19_obs_2018041500_m.nc4
       simulate:
         variables: [brightness_temperature]
         channels: 4-8

@@ -13,7 +13,7 @@ Observations:
     ObsSpace:
       name: CoolSkin
       ObsDataIn:
-        obsfile: Data/coolskin_fake_obs_2018041500.nc
+        obsfile: Data/ioda/testinput_tier_1/coolskin_fake_obs_2018041500.nc
       simulate:
         variables: [sea_surface_temperature]
     GeoVaLs:

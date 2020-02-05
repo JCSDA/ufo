@@ -76,7 +76,12 @@ type(fckit_configuration) :: f_confOpts
  ! request from the model all the hardcoded atmospheric & surface variables + 
  ! 1 * n_Absorbers
  ! 2 * n_Clouds (mass content and effective radius)
- nvars_in = size(varin_default) + self%conf%n_Absorbers + 2 * self%conf%n_Clouds
+ ! if sss is in ObsOptions + sss
+ nvars_in = size(varin_default) + self%conf%n_Absorbers + 2 * self%conf%n_Clouds 
+ if (TRIM(self%conf%salinity_option) == "on") then
+   nvars_in = nvars_in + 1
+ end if
+
  allocate(self%varin(nvars_in))
  self%varin(1:size(varin_default)) = varin_default
  ind = size(varin_default) + 1
@@ -91,6 +96,10 @@ type(fckit_configuration) :: f_confOpts
    self%varin(ind) = self%conf%Clouds(jspec,2)
    ind = ind + 1
  end do
+ if (TRIM(self%conf%salinity_option) == "on") then
+   self%varin(ind) = var_sfc_sss
+   ind = ind + 1
+ end if
 
  ! save channels
  allocate(self%channels(size(channels)))
@@ -124,7 +133,7 @@ type(ufo_geovals),     intent(inout) :: hofxdiags    !non-h(x) diagnostics
 type(c_ptr), value,       intent(in) :: obss         !ObsSpace
 
 ! Local Variables
-character(*), parameter :: PROGRAM_NAME = 'ufo_radiancecrtm_mod.F90'
+character(*), parameter :: PROGRAM_NAME = 'ufo_radiancecrtm_simobs'
 character(255) :: message, version
 character(max_string) :: err_msg
 integer        :: err_stat, alloc_stat
@@ -133,9 +142,10 @@ type(ufo_geoval), pointer :: temp
 integer :: jvar, jprofile, jlevel, jchannel, ichannel, jspec
 real(c_double) :: missing
 type(fckit_mpi_comm)  :: f_comm
-real(kind_real) :: total_od, secant_term
+real(kind_real) :: total_od, secant_term, wfunc_max
 real(kind_real), allocatable :: TmpVar(:)
 real(kind_real), allocatable :: Tao(:)
+real(kind_real), allocatable :: Wfunc(:)
 
 integer :: n_Profiles, n_Layers, n_Channels
 logical, allocatable :: Skip_Profiles(:)
@@ -177,7 +187,7 @@ logical :: jacobian_needed
  ! --------------
  call CRTM_Version( Version )
  call Program_Message( PROGRAM_NAME, &
-                       'Check/example program for the CRTM Forward and K-Matrix functions using '//&
+                       'UFO interface for the CRTM Forward and K-Matrix functions using '//&
                        trim(self%conf%ENDIAN_type)//' coefficient datafiles', &
                        'CRTM Version: '//TRIM(Version) )
 
@@ -305,9 +315,16 @@ logical :: jacobian_needed
 
    allocate(Skip_Profiles(n_Profiles))
    call ufo_crtm_skip_profiles(n_Profiles,n_Channels,self%channels,obss,Skip_Profiles)
-   do jprofile = 1, n_Profiles
+   profile_loop: do jprofile = 1, n_Profiles
       Options(jprofile)%Skip_Profile = Skip_Profiles(jprofile)
-   end do
+      ! check for pressure monotonicity
+      do jlevel = atm(jprofile)%n_layers, 1, -1
+         if ( atm(jprofile)%level_pressure(jlevel) <= atm(jprofile)%level_pressure(jlevel-1) ) then
+            Options(jprofile)%Skip_Profile = .TRUE.
+            cycle profile_loop
+         end if
+      end do
+   end do profile_loop
 
    if (jacobian_needed) then
       ! Allocate the ARRAYS (for CRTM_K_Matrix)
@@ -498,7 +515,6 @@ logical :: jacobian_needed
 
             ! variable: weightingfunction_of_atmosphere_layer_CH
             case (var_lvl_weightfunc)
-               ! get layer-to-space transmittance
                hofxdiags%geovals(jvar)%nval = n_Layers
                allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,n_Profiles))
                hofxdiags%geovals(jvar)%vals = missing
@@ -507,12 +523,14 @@ logical :: jacobian_needed
                call obsspace_get_db(obss, "MetaData", "sensor_zenith_angle", TmpVar)
                do jprofile = 1, n_Profiles
                   if (.not.Skip_Profiles(jprofile)) then
+                     ! get layer-to-space transmittance
                      secant_term = one/cos(TmpVar(jprofile)*deg2rad)
                      total_od = 0.0
                      do jlevel = 1, n_Layers
                         total_od = total_od + rts(jchannel,jprofile) % layer_optical_depth(jlevel)
                         Tao(jlevel) = exp(-min(limit_exp,total_od*secant_term))
                      end do
+                     ! get weighting function 
                      do jlevel = n_Layers-1, 1, -1
                         hofxdiags%geovals(jvar)%vals(jlevel,jprofile) = &
                            abs( (Tao(jlevel+1)-Tao(jlevel))/ &
@@ -525,6 +543,46 @@ logical :: jacobian_needed
                end do
                deallocate(TmpVar)
                deallocate(Tao)
+
+            ! variable: pressure_level_at_peak_of_weightingfunction_CH
+            case (var_pmaxlev_weightfunc)
+               hofxdiags%geovals(jvar)%nval = 1
+               allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,n_Profiles))
+               hofxdiags%geovals(jvar)%vals = missing
+               allocate(TmpVar(n_Profiles))
+               allocate(Tao(n_Layers))
+               allocate(Wfunc(n_Layers))
+               call obsspace_get_db(obss, "MetaData", "sensor_zenith_angle", TmpVar)
+               do jprofile = 1, n_Profiles
+                  if (.not.Skip_Profiles(jprofile)) then
+                    ! get layer-to-space transmittance
+                     secant_term = one/cos(TmpVar(jprofile)*deg2rad)
+                     total_od = 0.0
+                     do jlevel = 1, n_Layers
+                        total_od = total_od + rts(jchannel,jprofile) % layer_optical_depth(jlevel)
+                        Tao(jlevel) = exp(-min(limit_exp,total_od*secant_term))
+                     end do
+                     ! get weighting function 
+                     do jlevel = n_Layers-1, 1, -1
+                        Wfunc(jlevel) = &
+                           abs( (Tao(jlevel+1)-Tao(jlevel))/ &
+                                (log(atm(jprofile)%pressure(jlevel+1))- &
+                                 log(atm(jprofile)%pressure(jlevel))) )
+                     end do
+                     Wfunc(n_Layers) = Wfunc(n_Layers-1)
+                     ! get pressure level at the peak of the weighting function
+                     wfunc_max = -999.0 
+                     do jlevel = n_Layers-1, 1, -1
+                        if (Wfunc(jlevel) > wfunc_max) then 
+                           wfunc_max = Wfunc(jlevel)
+                           hofxdiags%geovals(jvar)%vals(1,jprofile) = jlevel 
+                        endif
+                     enddo 
+                  end if
+               end do
+               deallocate(TmpVar)
+               deallocate(Tao)
+               deallocate(Wfunc)
 
             case default
                write(err_msg,*) 'ufo_radiancecrtm_simobs: //&
