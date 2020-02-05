@@ -49,7 +49,7 @@ Observations:
      threshold: 2.0
    - Filter: YDIAGsaver
      filename: Data/amsua_n19_ydiag_2018041500_m_out.nc4
-     filter variables: 
+     filter variables:
      - name: brightness_temperature_assuming_clear_sky
        channels: 1-3
      - name: brightness_temperature_jacobian_air_temperature
