@@ -22,9 +22,9 @@ Observations:
    ObsSpace:
      name: Radiance
      ObsDataIn:
-       obsfile: Data/atms_npp_obs_2018041500_m.nc4
+       obsfile: Data/ioda/testinput_tier_1/atms_npp_obs_2018041500_m.nc4
      ObsDataOut:
-       obsfile: Data/atms_npp_obs_2018041500_m_out.nc4
+       obsfile: Data/ioda/testinput_tier_1/atms_npp_obs_2018041500_m_out.nc4
      simulate:
        variables: [brightness_temperature]
        channels: 1-3,5-17

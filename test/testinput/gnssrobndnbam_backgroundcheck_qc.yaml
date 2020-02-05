@@ -11,7 +11,7 @@ Observations:
    ObsSpace:
      name: GnssroBndNBAM
      ObsDataIn:
-       obsfile: Data/gnssro_obs_2018041500_l.nc4
+       obsfile: Data/ioda/testinput_tier_1/gnssro_obs_2018041500_l.nc4
      ObsDataOut:
        obsfile: Data/gnssro_bndnbam_2018041500_l_backgroundcheck.nc4
      simulate:
@@ -36,7 +36,7 @@ Observations:
    ObsSpace:
      name: GnssroBndNBAM
      ObsDataIn:
-       obsfile: Data/gnssro_obs_2018041500_l.nc4
+       obsfile: Data/ioda/testinput_tier_1/gnssro_obs_2018041500_l.nc4
      ObsDataOut:
        obsfile: Data/gnssro_bndnbam_2018041500_l_backgroundcheckronbam.nc4
      simulate:

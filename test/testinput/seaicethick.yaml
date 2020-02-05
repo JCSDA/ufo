@@ -13,7 +13,7 @@ Observations:
     ObsSpace:
       name: SeaIceThickness
       ObsDataIn:
-        obsfile: Data/cryosat2-2018-04-15.nc
+        obsfile: Data/ioda/testinput_tier_1/cryosat2-2018-04-15.nc
       simulate:
         variables: [sea_ice_thickness]
     GeoVaLs:

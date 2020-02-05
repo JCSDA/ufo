@@ -13,6 +13,7 @@
 #include <vector>
 
 #include "eckit/config/LocalConfiguration.h"
+#include "oops/base/Variables.h"
 #include "oops/util/Printable.h"
 
 namespace ufo {
@@ -35,6 +36,8 @@ class Variable: public util::Printable {
   const std::string & variable() const;
   std::string variable(const size_t) const;
   const std::string & group() const;
+
+  oops::Variables toOopsVariables() const;
 
   const eckit::LocalConfiguration & options() const {return options_;}
 
