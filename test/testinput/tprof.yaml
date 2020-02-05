@@ -13,7 +13,7 @@ Observations:
     ObsSpace:
       name: InsituTemperature
       ObsDataIn:
-        obsfile: Data/profile_2018-04-15.nc
+        obsfile: Data/ioda/testinput_tier_1/profile_2018-04-15.nc
       simulate:
         variables: [sea_water_temperature]
     GeoVaLs:

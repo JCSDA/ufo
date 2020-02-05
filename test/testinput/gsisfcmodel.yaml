@@ -14,9 +14,9 @@ Observations:
     ObsSpace:
       name: GSISfcModel
       ObsDataIn:
-        obsfile: Data/gsisfc_tsen_obs_2018041500_m.nc4
+        obsfile: Data/ioda/testinput_tier_1/gsisfc_tsen_obs_2018041500_m.nc4
       ObsDataOut:
-        obsfile: Data/gsisfc_tsen_2018041500_m_out.nc4
+        obsfile: Data/ioda/testinput_tier_1/gsisfc_tsen_2018041500_m_out.nc4
       simulate:
         variables: [air_temperature]
     GeoVaLs:
@@ -29,9 +29,9 @@ Observations:
     ObsSpace:
       name: GSISfcModel
       ObsDataIn:
-        obsfile: Data/gsisfc_uv_obs_2018041500_m.nc4
+        obsfile: Data/ioda/testinput_tier_1/gsisfc_uv_obs_2018041500_m.nc4
       ObsDataOut:
-        obsfile: Data/gsisfc_uv_fact10_2018041500_m_out.nc4
+        obsfile: Data/ioda/testinput_tier_1/gsisfc_uv_fact10_2018041500_m_out.nc4
       simulate:
         variables: [eastward_wind, northward_wind]
     GeoVaLs:
@@ -44,9 +44,9 @@ Observations:
     ObsSpace:
       name: GSISfcModel
       ObsDataIn:
-        obsfile: Data/gsisfc_uv_obs_2018041500_m.nc4
+        obsfile: Data/ioda/testinput_tier_1/gsisfc_uv_obs_2018041500_m.nc4
       ObsDataOut:
-        obsfile: Data/gsisfc_uv_2018041500_m_out.nc4
+        obsfile: Data/ioda/testinput_tier_1/gsisfc_uv_2018041500_m_out.nc4
       simulate:
         variables: [eastward_wind, northward_wind]
     GeoVaLs:
