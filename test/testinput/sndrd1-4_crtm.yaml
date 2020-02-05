@@ -20,7 +20,7 @@ Observations:
    ObsSpace: 
      name: sndrD1_g15
      ObsDataIn: 
-       obsfile: "Data/sndrd1_g15_obs_2018041500_m.nc4"
+       obsfile: "Data/ioda/testinput_tier_1/sndrd1_g15_obs_2018041500_m.nc4"
      simulate: &simobs
        variables: [brightness_temperature]
        channels: 1-15
@@ -36,7 +36,7 @@ Observations:
    ObsSpace: 
      name: sndrD2_g15
      ObsDataIn: 
-       obsfile: Data/sndrd2_g15_obs_2018041500_m.nc4
+       obsfile: Data/ioda/testinput_tier_1/sndrd2_g15_obs_2018041500_m.nc4
      simulate: *simobs
    GeoVaLs: 
      filename: Data/sndrd2_g15_geoval_2018041500_m.nc4
@@ -50,7 +50,7 @@ Observations:
    ObsSpace: 
      name: sndrD3_g15
      ObsDataIn: 
-       obsfile: Data/sndrd3_g15_obs_2018041500_m.nc4
+       obsfile: Data/ioda/testinput_tier_1/sndrd3_g15_obs_2018041500_m.nc4
      simulate: *simobs
    GeoVaLs: 
      filename: Data/sndrd3_g15_geoval_2018041500_m.nc4
@@ -64,7 +64,7 @@ Observations:
    ObsSpace: 
      name: sndrD4_g15
      ObsDataIn: 
-       obsfile: Data/sndrd4_g15_obs_2018041500_m.nc4
+       obsfile: Data/ioda/testinput_tier_1/sndrd4_g15_obs_2018041500_m.nc4
      simulate: *simobs
    GeoVaLs: 
      filename: Data/sndrd4_g15_geoval_2018041500_m.nc4

@@ -25,9 +25,9 @@ Observations:
    ObsSpace:
      name: radiometer_smap
      ObsDataIn: 
-       obsfile: Data/smap_obs_2018041500_m.nc4
+       obsfile: Data/ioda/testinput_tier_1/smap_obs_2018041500_m.nc4
      ObsDataOut:
-       obsfile: Data/smap_obs_2018041500_m_out.nc4
+       obsfile: Data/ioda/testinput_tier_1/smap_obs_2018041500_m_out.nc4
      simulate:
        variables: [brightness_temperature]
        channels: 1-4

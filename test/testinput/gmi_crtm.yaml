@@ -23,7 +23,7 @@ Observations:
    ObsSpace:
      name: gmi_gpm
      ObsDataIn: 
-       obsfile: Data/gmi_gpm_obs_2018041500_m.nc4
+       obsfile: Data/ioda/testinput_tier_1/gmi_gpm_obs_2018041500_m.nc4
      simulate:
        variables: [brightness_temperature]
        channels: 1-13

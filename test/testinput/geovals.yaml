@@ -8,7 +8,7 @@ Observations:
     ObsSpace:
       name: Satwind
       ObsDataIn:
-        obsfile: Data/satwind_obs_2018041500_m.nc4
+        obsfile: Data/ioda/testinput_tier_1/satwind_obs_2018041500_m.nc4
       simulate:
         variables: [eastward_wind, northward_wind]
       integer data:
@@ -29,7 +29,7 @@ Observations:
     ObsSpace:
       name: amsua_n19
       ObsDataIn:
-        obsfile: Data/amsua_n19_obs_2018041500_m.nc4
+        obsfile: Data/ioda/testinput_tier_1/amsua_n19_obs_2018041500_m.nc4
       simulate:
         variables: [brightness_temperature]
         channels: 1-10,15
