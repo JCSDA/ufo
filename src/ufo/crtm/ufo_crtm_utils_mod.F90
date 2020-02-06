@@ -139,7 +139,9 @@ type(fckit_configuration),  intent(in)    :: f_confOpts
 type(fckit_configuration),  intent(in)    :: f_confOper
 
 character(*), PARAMETER :: routine_name = 'crtm_conf_setup'
-character(len=255) :: IRVISwaterCoeff, IRVISlandCoeff, IRVISsnowCoeff, IRVISiceCoeff, MWwaterCoeff
+character(len=255) :: IRwaterCoeff, VISwaterCoeff, &
+                      IRVISlandCoeff, IRVISsnowCoeff, IRVISiceCoeff, &
+                      MWwaterCoeff
 integer :: jspec, ivar
 character(len=max_string) :: message
 character(len=:), allocatable :: str
@@ -284,10 +286,15 @@ integer(c_size_t),parameter :: csize = MAXVARLEN
  conf%COEFFICIENT_PATH = str
 
  ! Coefficient file prefixes
- IRVISwaterCoeff = "Nalli"
- if (f_confOpts%has("IRVISwaterCoeff")) then
-    call f_confOpts%get_or_die("IRVISwaterCoeff",str)
-    IRVISwaterCoeff = str
+ IRwaterCoeff = "Nalli"
+ if (f_confOpts%has("IRwaterCoeff")) then
+    call f_confOpts%get_or_die("IRwaterCoeff",str)
+    IRwaterCoeff = str
+ end if
+ VISwaterCoeff = "NPOESS"
+ if (f_confOpts%has("VISwaterCoeff")) then
+    call f_confOpts%get_or_die("VISwaterCoeff",str)
+    VISwaterCoeff = str
  end if
  IRVISlandCoeff = "NPOESS"
  if (f_confOpts%has("IRVISlandCoeff")) then
@@ -324,13 +331,13 @@ integer(c_size_t),parameter :: csize = MAXVARLEN
  end select
 
  ! IR emissivity coeff files
- conf%IRwaterCoeff_File = trim(IRVISwaterCoeff)//".IRwater.EmisCoeff.bin"
+ conf%IRwaterCoeff_File = trim(IRwaterCoeff)//".IRwater.EmisCoeff.bin"
  conf%IRlandCoeff_File  = trim(IRVISlandCoeff)//".IRland.EmisCoeff.bin"
  conf%IRsnowCoeff_File  = trim(IRVISsnowCoeff)//".IRsnow.EmisCoeff.bin"
  conf%IRiceCoeff_File   = trim(IRVISiceCoeff)//".IRice.EmisCoeff.bin"
 
  !VIS emissivity coeff files
- conf%VISwaterCoeff_File = trim(IRVISwaterCoeff)//".VISwater.EmisCoeff.bin"
+ conf%VISwaterCoeff_File = trim(VISwaterCoeff)//".VISwater.EmisCoeff.bin"
  conf%VISlandCoeff_File  = trim(IRVISlandCoeff)//".VISland.EmisCoeff.bin"
  conf%VISsnowCoeff_File  = trim(IRVISsnowCoeff)//".VISsnow.EmisCoeff.bin"
  conf%VISiceCoeff_File   = trim(IRVISiceCoeff)//".VISice.EmisCoeff.bin"
