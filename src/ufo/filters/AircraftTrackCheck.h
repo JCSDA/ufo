@@ -81,6 +81,11 @@ class AircraftTrackCheck : public FilterBase,
                                    const std::vector<size_t> &validObsIds,
                                    RecursiveSplitter &splitter) const;
 
+  template <typename VariableType>
+  void groupObservationsByTypedVariable(const Variable &variable,
+                                        const std::vector<size_t> &validObsIds,
+                                        RecursiveSplitter &splitter) const;
+
   void sortTracksChronologically(const std::vector<size_t> &validObsIds,
                                  RecursiveSplitter &splitter) const;
 

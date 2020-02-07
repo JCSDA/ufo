@@ -298,10 +298,30 @@ void AircraftTrackCheck::groupObservationsByVariable(
     const Variable &variable,
     const std::vector<size_t> &validObsIds,
     RecursiveSplitter &splitter) const {
-  ioda::ObsDataVector<int> obsDataVector(obsdb_, variable.variable(), variable.group());
-  const auto &flightIds = obsDataVector[0];
-  std::vector<int> validObsCategories = getValidObservationCategories(
-        flightIds, validObsIds);
+  switch (obsdb_.dtype(variable.group(), variable.variable())) {
+  case ioda::ObsDtype::Integer:
+    groupObservationsByTypedVariable<int>(variable, validObsIds, splitter);
+    break;
+
+  case ioda::ObsDtype::String:
+    groupObservationsByTypedVariable<std::string>(variable, validObsIds, splitter);
+    break;
+
+  default:
+    throw eckit::UserError("Only integer and string variables may be used as flight IDs", Here());
+  }
+}
+
+template <typename VariableType>
+void AircraftTrackCheck::groupObservationsByTypedVariable(
+    const Variable &variable,
+    const std::vector<size_t> &validObsIds,
+    RecursiveSplitter &splitter) const {
+  std::vector<VariableType> obsCategories(obsdb_.nlocs());
+  obsdb_.get_db(variable.group(), variable.variable(), obsCategories);
+  std::vector<VariableType> validObsCategories = getValidObservationCategories(
+        obsCategories, validObsIds);
+
   splitter.groupBy(validObsCategories);
 }
 
