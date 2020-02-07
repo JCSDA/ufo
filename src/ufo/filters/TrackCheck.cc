@@ -78,17 +78,28 @@ std::vector<T> getValidObservationCategories(const std::vector<T> &categories,
 }
 
 enum Direction { FORWARD, BACKWARD, NUM_DIRECTIONS };
+
+enum class CheckResult : char {
+  FAILED = false,
+  PASSED = true,
+  SKIPPED
+};
+
+/// \brief Results of cross-checking an observation with another (a "buddy").
+struct CheckResults {
+  CheckResults() :
+    isBuddyDistinct(false),
+    speedCheckResult(CheckResult::SKIPPED),
+    climbRateCheckResult(CheckResult::SKIPPED) {}
+
+  bool isBuddyDistinct;
+  CheckResult speedCheckResult;
+  CheckResult climbRateCheckResult;
+};
+
 static const int NO_PREVIOUS_SWEEP = -1;
 
 }  // namespace
-
-
-/// \brief Results of cross-checking an observation with another (a "buddy").
-struct TrackCheck::CheckResult {
-  bool isBuddyDistinct;
-  bool speedCheckPassed;
-  bool climbRateCheckPassed;
-};
 
 
 /// \brief Locations of all observations processed by the track checking filter.
@@ -142,13 +153,17 @@ class TrackCheck::TrackObservation {
   ///   Pressure at which the maximum speed should be evaluated.
   ///
   /// \returns An object enapsulating the check results.
-  CheckResult checkAgainstBuddy(const TrackObservation &buddyObs,
-                                const TrackCheckParameters &options,
-                                const PiecewiseLinearInterpolation &maxValidSpeedAtPressure,
-                                float referencePressure) const;
+  CheckResults checkAgainstBuddy(const TrackObservation &buddyObs,
+                                 const TrackCheckParameters &options,
+                                 const PiecewiseLinearInterpolation &maxValidSpeedAtPressure,
+                                 float referencePressure) const;
+
+  void registerCheckResults(const CheckResults &result);
+  void unregisterCheckResults(const CheckResults &result);
 
   void registerCheckResult(const CheckResult &result);
   void unregisterCheckResult(const CheckResult &result);
+
   void registerSweepOutcome(bool rejectedInSweep);
 
  private:
@@ -162,12 +177,12 @@ class TrackCheck::TrackObservation {
   int numChecks_;
 };
 
-TrackCheck::CheckResult TrackCheck::TrackObservation::checkAgainstBuddy(
+CheckResults TrackCheck::TrackObservation::checkAgainstBuddy(
     const TrackObservation &buddyObs,
     const TrackCheckParameters &options,
     const PiecewiseLinearInterpolation &maxValidSpeedAtPressure,
     float referencePressure) const {
-  CheckResult result;
+  CheckResults results;
 
   util::Duration temporalDistance = abs(buddyObs.time_ - time_);
   const float spatialDistance = distance(location_, buddyObs.location_);
@@ -177,42 +192,53 @@ TrackCheck::CheckResult TrackCheck::TrackObservation::checkAgainstBuddy(
       (spatialDistance - options.spatialResolution) /
       (temporalDistance + options.temporalResolution).toSeconds();
   const float maxSpeed = maxValidSpeedAtPressure(referencePressure);
-  result.speedCheckPassed = (conservativeSpeedEstimate <= maxSpeed);
+  results.speedCheckResult = CheckResult(conservativeSpeedEstimate <= maxSpeed);
 
   // Estimate the climb rate and check if it is within the allowed range
-  const float pressureDiff = std::abs(pressure_ - buddyObs.pressure_);
-  const float conservativeClimbRateEstimate =
-      pressureDiff / (temporalDistance + options.temporalResolution).toSeconds();
-  result.climbRateCheckPassed = (conservativeClimbRateEstimate <= options.maxClimbRate);
+  if (options.maxClimbRate.value() != boost::none) {
+    const float pressureDiff = std::abs(pressure_ - buddyObs.pressure_);
+    const float conservativeClimbRateEstimate =
+        pressureDiff / (temporalDistance + options.temporalResolution).toSeconds();
+    results.climbRateCheckResult =
+        CheckResult(conservativeClimbRateEstimate <= *options.maxClimbRate.value());
+  }
 
   const int resolutionMultiplier = options.distinctBuddyResolutionMultiplier;
-  result.isBuddyDistinct =
+  results.isBuddyDistinct =
       temporalDistance > resolutionMultiplier * options.temporalResolution &&
       spatialDistance > resolutionMultiplier * options.spatialResolution;
 
-  return result;
+  return results;
+}
+
+void TrackCheck::TrackObservation::registerCheckResults(const CheckResults &results) {
+  registerCheckResult(results.speedCheckResult);
+  registerCheckResult(results.climbRateCheckResult);
+  assert(numChecks_ >= 0);
+  assert(numFailedChecks_ >= 0);
+  assert(numFailedChecks_ <= numChecks_);
+}
+
+void TrackCheck::TrackObservation::unregisterCheckResults(const CheckResults &results) {
+  unregisterCheckResult(results.speedCheckResult);
+  unregisterCheckResult(results.climbRateCheckResult);
+  assert(numChecks_ >= 0);
+  assert(numFailedChecks_ >= 0);
+  assert(numFailedChecks_ <= numChecks_);
 }
 
 void TrackCheck::TrackObservation::registerCheckResult(const CheckResult &result) {
-  numChecks_ += 2;
-  if (!result.speedCheckPassed)
+  if (result != CheckResult::SKIPPED)
+    ++numChecks_;
+  if (result == CheckResult::FAILED)
     ++numFailedChecks_;
-  if (!result.climbRateCheckPassed)
-    ++numFailedChecks_;
-  assert(numChecks_ >= 0);
-  assert(numFailedChecks_ >= 0);
-  assert(numFailedChecks_ <= numChecks_);
 }
 
 void TrackCheck::TrackObservation::unregisterCheckResult(const CheckResult &result) {
-  numChecks_ -= 2;
-  if (!result.speedCheckPassed)
+  if (result != CheckResult::SKIPPED)
+    --numChecks_;
+  if (result == CheckResult::FAILED)
     --numFailedChecks_;
-  if (!result.climbRateCheckPassed)
-    --numFailedChecks_;
-  assert(numChecks_ >= 0);
-  assert(numFailedChecks_ >= 0);
-  assert(numFailedChecks_ <= numChecks_);
 }
 
 void TrackCheck::TrackObservation::registerSweepOutcome(bool rejectedInSweep) {
@@ -447,10 +473,10 @@ TrackCheck::SweepResult TrackCheck::sweepOverObservations(
         // need to "undo" checks against rejected observations.
         minPressureBetween = std::min(minPressureBetween, neighborObs->pressure());
         if (neighborObs->rejectedInPreviousSweep()) {
-          CheckResult result = obs.checkAgainstBuddy(*neighborObs, *options_,
-                                                     maxValidSpeedAtPressure, minPressureBetween);
-          obs.unregisterCheckResult(result);
-          if (result.isBuddyDistinct) {
+          CheckResults results = obs.checkAgainstBuddy(*neighborObs, *options_,
+                                                       maxValidSpeedAtPressure, minPressureBetween);
+          obs.unregisterCheckResults(results);
+          if (results.isBuddyDistinct) {
             // The rejected distinct buddy needs to be replaced with another
             ++numNewDistinctBuddiesToVisit;
           }
@@ -461,10 +487,10 @@ TrackCheck::SweepResult TrackCheck::sweepOverObservations(
            neighborObs = getNthNeighbor(++neighborIdx)) {
         minPressureBetween = std::min(minPressureBetween, neighborObs->pressure());
         if (!neighborObs->rejected()) {
-          CheckResult result = obs.checkAgainstBuddy(*neighborObs, *options_,
-                                                     maxValidSpeedAtPressure, minPressureBetween);
-          obs.registerCheckResult(result);
-          if (result.isBuddyDistinct)
+          CheckResults results = obs.checkAgainstBuddy(*neighborObs, *options_,
+                                                       maxValidSpeedAtPressure, minPressureBetween);
+          obs.registerCheckResults(results);
+          if (results.isBuddyDistinct)
             --numNewDistinctBuddiesToVisit;
         }
       }

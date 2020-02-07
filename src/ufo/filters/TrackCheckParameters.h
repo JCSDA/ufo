@@ -59,8 +59,8 @@ class TrackCheckParameters : public oops::Parameters {
   oops::Parameter<int> distinctBuddyResolutionMultiplier{
     "distinct_buddy_resolution_multiplier", 3, this};
 
-  /// Maximum allowed rate of ascent and descent (Pa/s).
-  oops::Parameter<float> maxClimbRate{"max_climb_rate", 300.0f, this};
+  /// Maximum allowed rate of ascent and descent (Pa/s). If not set, climb rate checks are disabled.
+  oops::OptionalParameter<float> maxClimbRate{"max_climb_rate", this};
   /// Encoding of the function mapping air pressure (in Pa) to the maximum speed (in m/s)
   /// considered to be realistic.
   ///

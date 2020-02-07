@@ -64,7 +64,6 @@ class TrackCheck : public FilterBase,
 
  private:
   enum class SweepResult {NO_MORE_SWEEPS_REQUIRED, ANOTHER_SWEEP_REQUIRED};
-  struct CheckResult;
   struct ObsData;
   class TrackObservation;
 
