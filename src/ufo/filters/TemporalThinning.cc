@@ -63,7 +63,7 @@ class TemporalThinner {
   }
 
   int getPriority(size_t validObsIndex) const {
-    assert(priorities_ != nullptr);
+    ASSERT(priorities_ != nullptr);
     return (*priorities_)[validObsIds_[validObsIndex]];
   }
 
@@ -85,6 +85,22 @@ class TemporalThinner {
                           util::DateTime deadline,
                           std::vector<bool> &isThinned) const;
 
+  /// \brief Common implementation shared by thinRangeForwards() and thinRangeBackwards().
+  ///
+  /// \tparam Iterator
+  ///   Iterator visiting indices of observations in chronological (reverse chronological) order
+  ///   when thinning forwards (backwards).
+  /// \tparam IsPast
+  ///   Binary functor taking two parameters of type util::DateTime and returning true if and only
+  ///   if the first argument is later (earlier) than the second when thinning forwards (backwards).
+  /// \tparam IsAtOrPast
+  ///   Binary functor taking two parameters of type util::DateTime and returning true if and only
+  ///   if the first argument is later (earlier) than or equal to the second when thinning forwards
+  ///   (backwards).
+  /// \tparam Advance
+  ///   Binary functor taking two parameters of types util::DateTime and util::Duration and
+  ///   returning the datetime obtained by adding (subtracting) the second argument to (from) the
+  ///   first argument when thinning forwards (backwards).
   template <typename Iterator, typename IsPast, typename IsAtOrPast, typename Advance>
   void thinRange(Iterator validIndicesBegin,
                  Iterator validIndicesEnd,

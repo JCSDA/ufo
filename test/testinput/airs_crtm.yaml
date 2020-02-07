@@ -18,7 +18,7 @@ Observations:
    ObsSpace: 
      name: airs_aqua
      ObsDataIn: 
-       obsfile: Data/airs_aqua_obs_2018041500_m.nc4
+       obsfile: Data/ioda/testinput_tier_1/airs_aqua_obs_2018041500_m.nc4
      simulate:
        variables: [brightness_temperature]
        channels: 1,6-7

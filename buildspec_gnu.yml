@@ -121,6 +121,7 @@ phases:
       - cd /jcsda/ufo-bundle
       - pwd
       - ls
+      - ls -lt /jcsda/ufo-bundle/ufo
       - sed -i 's/BRANCH develop  UPDATE//' CMakeLists.txt
       - sed -i 's/BRANCH develop //' CMakeLists.txt
       - sed -i -e '/ecbuild_bundle( PROJECT ufo/i\
@@ -128,7 +129,6 @@ phases:
       - sed -i -e '/ecbuild_bundle( PROJECT ufo/i\
         ecbuild_bundle( PROJECT geos-aero  GIT "https://github.com/JCSDA/geos-aero.git" )' CMakeLists.txt
       - cat CMakeLists.txt
-
   build:
     commands:
       - echo Executing build phase
@@ -158,7 +158,7 @@ phases:
     commands:
       - echo Executing post_build phase
       - echo $CODEBUILD_BUILD_SUCCEEDING
-      - if [ "$BUILD_STATUS" = "1"] && ["$CODEBUILD_BUILD_SUCCEEDING" = "0" ];
+      - if [ "$BUILD_STATUS" = "1" ] && [ "$CODEBUILD_BUILD_SUCCEEDING" = "0" ];
         then echo "Build passed, rerunning failed tests";
         su - jcsdauser -c "cd /build_container/ufo
         && ctest -VV --rerun-failed";
