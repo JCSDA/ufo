@@ -71,7 +71,14 @@ class AircraftTrackCheck : public FilterBase,
 
   std::vector<size_t> getValidObservationIds(const std::vector<bool> &apply) const;
 
-  void groupObservationsByFlightId(const std::vector<size_t> &validObsIds,
+  void groupObservationsByFlight(const std::vector<size_t> &validObsIds,
+                                 RecursiveSplitter &splitter) const;
+
+  void groupObservationsByRecordNumber(const std::vector<size_t> &validObsIds,
+                                       RecursiveSplitter &splitter) const;
+
+  void groupObservationsByVariable(const Variable &variable,
+                                   const std::vector<size_t> &validObsIds,
                                    RecursiveSplitter &splitter) const;
 
   void sortTracksChronologically(const std::vector<size_t> &validObsIds,

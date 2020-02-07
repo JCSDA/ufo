@@ -2,12 +2,6 @@
 # results obtained with the Met Office OPS code (Ops_AirTrackCheck). The first test case is used as
 # a baseline; in each of the following test cases the filter's configuration contains one parameter
 # whose value differs from the first case.
-#
-# The input file aircraft_track_check.nc4 is derived from aircraft_obs_2018041500_m.nc4, with the
-# following differences:
-# * the only observed variable is air_temperature and there are no missing values
-# * an additional field flight_id stores an integer id having a 1-to-1 mapping to the
-#   (textual) station_id field.
 
 window_begin: 2000-01-01T00:00:00Z
 window_end: 2029-12-12T23:59:59Z
@@ -17,12 +11,14 @@ Observations:
   - ObsSpace:
       name: Aircraft
       ObsDataIn:
-        obsfile: Data/aircraft_track_check.nc4
+        obsfile: Data/ioda/testinput_tier_1/aircraft_obs_2018041500_m.nc4
+        obsgrouping:
+          group_variable: "station_id"
       simulate:
-        variables: [air_temperature]
+        variables: [specific_humidity]
     ObsFilters:
     - Filter: Aircraft Track Check
-      variables: [air_temperature]
+      variables: [specific_humidity]
       temporal_resolution: PT00H00M30S
       spatial_resolution:    20.000000
       distinct_buddy_resolution_multiplier: 3
@@ -30,28 +26,7 @@ Observations:
       max_climb_rate:   200.000000
       max_speed_interpolation_points: {"0":  1000.000000, "20000":   400.000000, "100000":   200.000000, "110000":   200.000000}
       rejection_threshold:     0.500000
-      flight_id_variable:
-        name: flight_id@MetaData
-    failedObservationsBenchmark:
-        - 90
-        - 91
-        - 92
-        - 93
-        - 94
-        - 95
-        - 96
-        - 97
-        - 98
-        - 99
-        - 100
-        - 105
-        - 109
-        - 112
-        - 115
-        - 117
-        - 119
-        - 120
-        - 122
+    flaggedObservationsBenchmark:
         - 184
         - 187
         - 188
@@ -74,11 +49,6 @@ Observations:
         - 795
         - 806
         - 808
-        - 879
-        - 881
-        - 882
-        - 895
-        - 896
         - 990
         - 991
         - 996
@@ -89,51 +59,23 @@ Observations:
         - 1023
         - 1029
         - 1030
-        - 1177
-        - 1186
-        - 1274
-        - 1276
-        - 1277
-        - 1278
-        - 1284
-        - 1285
-        - 1290
-        - 1385
-        - 1391
-        - 1402
-        - 1411
-        - 1412
-        - 1418
-        - 1422
-        - 1423
-        - 1471
-        - 1473
-        - 1595
-        - 1598
-        - 1605
-        - 1607
-        - 1611
-        - 1612
-        - 1613
-        - 1622
-        - 1655
-        - 1663
         - 1809
         - 1810
-        - 1911
-        - 1913
         - 2089
         - 2098
-    failedBenchmark: 91
+    flaggedBenchmark: 36
+    benchmarkFlag: 12 # track
   - ObsSpace:
       name: Aircraft
       ObsDataIn:
-        obsfile: Data/aircraft_track_check.nc4
+        obsfile: Data/ioda/testinput_tier_1/aircraft_obs_2018041500_m.nc4
+        obsgrouping:
+          group_variable: "station_id"
       simulate:
-        variables: [air_temperature]
+        variables: [specific_humidity]
     ObsFilters:
     - Filter: Aircraft Track Check
-      variables: [air_temperature]
+      variables: [specific_humidity]
       temporal_resolution: PT00H00M30S
       spatial_resolution:    20.000000
       distinct_buddy_resolution_multiplier: 3
@@ -141,28 +83,7 @@ Observations:
       max_climb_rate:   200.000000
       max_speed_interpolation_points: {"0":  1000.000000, "10000":   400.000000, "35000":   200.000000, "110000":   200.000000}
       rejection_threshold:     0.500000
-      flight_id_variable:
-        name: flight_id@MetaData
-    failedObservationsBenchmark:
-        - 90
-        - 91
-        - 92
-        - 93
-        - 94
-        - 95
-        - 96
-        - 97
-        - 98
-        - 99
-        - 100
-        - 105
-        - 109
-        - 112
-        - 115
-        - 117
-        - 119
-        - 120
-        - 122
+    flaggedObservationsBenchmark:
         - 184
         - 187
         - 188
@@ -196,11 +117,6 @@ Observations:
         - 795
         - 806
         - 808
-        - 879
-        - 881
-        - 882
-        - 895
-        - 896
         - 990
         - 991
         - 996
@@ -211,90 +127,49 @@ Observations:
         - 1023
         - 1029
         - 1030
-        - 1177
-        - 1186
-        - 1274
-        - 1276
-        - 1277
-        - 1278
-        - 1284
-        - 1285
-        - 1290
-        - 1385
-        - 1391
-        - 1402
-        - 1411
-        - 1412
-        - 1418
-        - 1422
-        - 1423
-        - 1471
-        - 1473
-        - 1511
-        - 1512
-        - 1514
-        - 1515
-        - 1595
-        - 1598
-        - 1605
-        - 1607
-        - 1611
-        - 1612
-        - 1613
-        - 1622
-        - 1655
-        - 1663
         - 1809
         - 1810
-        - 1911
-        - 1913
-        - 1942
-        - 1943
-        - 1944
         - 2089
         - 2098
-    failedBenchmark: 109
+    flaggedBenchmark: 47
+    benchmarkFlag: 12 # track
   - ObsSpace:
       name: Aircraft
       ObsDataIn:
-        obsfile: Data/aircraft_track_check.nc4
+        obsfile: Data/ioda/testinput_tier_1/aircraft_obs_2018041500_m.nc4
+        obsgrouping:
+          group_variable: "station_id"
       simulate:
-        variables: [air_temperature]
+        variables: [specific_humidity]
     ObsFilters:
     - Filter: Aircraft Track Check
-      variables: [air_temperature]
+      variables: [specific_humidity]
       temporal_resolution: PT00H00M30S
       spatial_resolution:    20.000000
       distinct_buddy_resolution_multiplier: 3
       num_distinct_buddies_per_direction: 3
       max_climb_rate:   200.000000
-      max_speed_interpolation_points: {"0":  2000.000000, "20000":  2000.000000, "100000":  2000.000000, "110000":  2000.000000}
+      max_speed_interpolation_points: {"0":  1000.000000, "20000":   275.000000, "100000":    20.000000, "110000":    20.000000}
       rejection_threshold:     0.500000
-      flight_id_variable:
-        name: flight_id@MetaData
-    failedObservationsBenchmark:
-        - 90
-        - 91
-        - 92
-        - 93
-        - 94
-        - 95
-        - 96
-        - 97
-        - 98
-        - 99
-        - 100
-        - 105
-        - 109
-        - 112
-        - 115
-        - 117
-        - 119
-        - 120
+    flaggedObservationsBenchmark:
         - 184
         - 187
         - 188
         - 193
+        - 226
+        - 227
+        - 228
+        - 229
+        - 230
+        - 231
+        - 232
+        - 233
+        - 234
+        - 235
+        - 236
+        - 237
+        - 238
+        - 239
         - 268
         - 270
         - 307
@@ -313,11 +188,6 @@ Observations:
         - 795
         - 806
         - 808
-        - 879
-        - 881
-        - 882
-        - 895
-        - 896
         - 990
         - 991
         - 996
@@ -328,51 +198,23 @@ Observations:
         - 1023
         - 1029
         - 1030
-        - 1177
-        - 1186
-        - 1274
-        - 1276
-        - 1277
-        - 1278
-        - 1284
-        - 1285
-        - 1290
-        - 1385
-        - 1391
-        - 1402
-        - 1411
-        - 1412
-        - 1418
-        - 1422
-        - 1423
-        - 1471
-        - 1473
-        - 1595
-        - 1598
-        - 1605
-        - 1607
-        - 1611
-        - 1612
-        - 1613
-        - 1622
-        - 1655
-        - 1663
         - 1809
         - 1810
-        - 1911
-        - 1913
         - 2089
         - 2098
-    failedBenchmark: 90
+    flaggedBenchmark: 50
+    benchmarkFlag: 12 # track
   - ObsSpace:
       name: Aircraft
       ObsDataIn:
-        obsfile: Data/aircraft_track_check.nc4
+        obsfile: Data/ioda/testinput_tier_1/aircraft_obs_2018041500_m.nc4
+        obsgrouping:
+          group_variable: "station_id"
       simulate:
-        variables: [air_temperature]
+        variables: [specific_humidity]
     ObsFilters:
     - Filter: Aircraft Track Check
-      variables: [air_temperature]
+      variables: [specific_humidity]
       temporal_resolution: PT00H00M30S
       spatial_resolution:    20.000000
       distinct_buddy_resolution_multiplier: 3
@@ -380,28 +222,7 @@ Observations:
       max_climb_rate:   150.000000
       max_speed_interpolation_points: {"0":  1000.000000, "20000":   400.000000, "100000":   200.000000, "110000":   200.000000}
       rejection_threshold:     0.500000
-      flight_id_variable:
-        name: flight_id@MetaData
-    failedObservationsBenchmark:
-        - 90
-        - 91
-        - 92
-        - 93
-        - 94
-        - 95
-        - 96
-        - 97
-        - 98
-        - 99
-        - 100
-        - 105
-        - 109
-        - 112
-        - 115
-        - 117
-        - 119
-        - 120
-        - 122
+    flaggedObservationsBenchmark:
         - 184
         - 187
         - 189
@@ -440,14 +261,6 @@ Observations:
         - 471
         - 472
         - 473
-        - 535
-        - 536
-        - 537
-        - 538
-        - 539
-        - 552
-        - 553
-        - 554
         - 688
         - 690
         - 700
@@ -466,13 +279,6 @@ Observations:
         - 814
         - 819
         - 821
-        - 876
-        - 879
-        - 881
-        - 882
-        - 892
-        - 895
-        - 896
         - 990
         - 998
         - 1005
@@ -488,73 +294,8 @@ Observations:
         - 1095
         - 1101
         - 1102
-        - 1151
-        - 1153
-        - 1155
-        - 1162
-        - 1185
-        - 1186
-        - 1198
-        - 1270
-        - 1271
-        - 1274
-        - 1276
-        - 1277
-        - 1278
-        - 1279
-        - 1280
-        - 1285
-        - 1289
-        - 1290
-        - 1294
-        - 1299
-        - 1304
-        - 1380
-        - 1385
-        - 1399
-        - 1402
-        - 1403
-        - 1404
-        - 1412
-        - 1414
-        - 1416
-        - 1417
-        - 1418
-        - 1420
-        - 1422
-        - 1423
-        - 1465
-        - 1468
-        - 1471
-        - 1476
-        - 1483
-        - 1484
-        - 1491
-        - 1592
-        - 1593
-        - 1598
-        - 1607
-        - 1611
-        - 1612
-        - 1613
-        - 1621
-        - 1622
-        - 1650
-        - 1651
-        - 1652
-        - 1655
-        - 1657
-        - 1663
-        - 1668
-        - 1669
-        - 1683
-        - 1696
-        - 1698
         - 1806
         - 1810
-        - 1911
-        - 1913
-        - 1916
         - 2030
         - 2032
         - 2033
@@ -564,48 +305,29 @@ Observations:
         - 2089
         - 2094
         - 2099
-    failedBenchmark: 181
+    flaggedBenchmark: 82
+    benchmarkFlag: 12 # track
   - ObsSpace:
       name: Aircraft
       ObsDataIn:
-        obsfile: Data/aircraft_track_check.nc4
+        obsfile: Data/ioda/testinput_tier_1/aircraft_obs_2018041500_m.nc4
+        obsgrouping:
+          group_variable: "station_id"
       simulate:
-        variables: [air_temperature]
+        variables: [specific_humidity]
     ObsFilters:
     - Filter: Aircraft Track Check
-      variables: [air_temperature]
+      variables: [specific_humidity]
       temporal_resolution: PT00H00M30S
-      spatial_resolution:    30.000000
+      spatial_resolution:     0.500000
       distinct_buddy_resolution_multiplier: 3
       num_distinct_buddies_per_direction: 3
       max_climb_rate:   200.000000
       max_speed_interpolation_points: {"0":  1000.000000, "20000":   400.000000, "100000":   200.000000, "110000":   200.000000}
       rejection_threshold:     0.500000
-      flight_id_variable:
-        name: flight_id@MetaData
-    failedObservationsBenchmark:
-        - 90
-        - 91
-        - 92
-        - 93
-        - 94
-        - 95
-        - 96
-        - 97
-        - 98
-        - 99
-        - 100
-        - 109
-        - 112
-        - 115
-        - 117
-        - 119
-        - 120
-        - 122
+    flaggedObservationsBenchmark:
         - 188
         - 193
-        - 195
-        - 199
         - 268
         - 270
         - 307
@@ -624,9 +346,6 @@ Observations:
         - 795
         - 806
         - 808
-        - 879
-        - 881
-        - 882
         - 990
         - 991
         - 996
@@ -637,51 +356,23 @@ Observations:
         - 1023
         - 1029
         - 1030
-        - 1177
-        - 1186
-        - 1274
-        - 1276
-        - 1277
-        - 1278
-        - 1284
-        - 1285
-        - 1290
-        - 1385
-        - 1391
-        - 1402
-        - 1411
-        - 1412
-        - 1418
-        - 1422
-        - 1423
-        - 1471
-        - 1473
-        - 1595
-        - 1598
-        - 1605
-        - 1607
-        - 1611
-        - 1612
-        - 1613
-        - 1622
-        - 1655
-        - 1663
         - 1809
         - 1810
-        - 1911
-        - 1913
         - 2089
         - 2098
-    failedBenchmark: 88
+    flaggedBenchmark: 34
+    benchmarkFlag: 12 # track
   - ObsSpace:
       name: Aircraft
       ObsDataIn:
-        obsfile: Data/aircraft_track_check.nc4
+        obsfile: Data/ioda/testinput_tier_1/aircraft_obs_2018041500_m.nc4
+        obsgrouping:
+          group_variable: "station_id"
       simulate:
-        variables: [air_temperature]
+        variables: [specific_humidity]
     ObsFilters:
     - Filter: Aircraft Track Check
-      variables: [air_temperature]
+      variables: [specific_humidity]
       temporal_resolution: PT00H00M45S
       spatial_resolution:    20.000000
       distinct_buddy_resolution_multiplier: 3
@@ -689,79 +380,30 @@ Observations:
       max_climb_rate:   200.000000
       max_speed_interpolation_points: {"0":  1000.000000, "20000":   400.000000, "100000":   200.000000, "110000":   200.000000}
       rejection_threshold:     0.500000
-      flight_id_variable:
-        name: flight_id@MetaData
-    failedObservationsBenchmark:
-        - 90
-        - 91
-        - 92
-        - 93
-        - 94
-        - 95
-        - 96
-        - 97
-        - 98
-        - 99
-        - 100
-        - 105
-        - 109
-        - 112
-        - 115
-        - 117
-        - 119
-        - 120
-        - 122
+    flaggedObservationsBenchmark:
         - 193
         - 195
-        - 1276
-        - 1285
-        - 1290
-        - 1655
-        - 1663
-        - 1911
-        - 1913
-    failedBenchmark: 28
+    flaggedBenchmark: 2
+    benchmarkFlag: 12 # track
   - ObsSpace:
       name: Aircraft
       ObsDataIn:
-        obsfile: Data/aircraft_track_check.nc4
+        obsfile: Data/ioda/testinput_tier_1/aircraft_obs_2018041500_m.nc4
+        obsgrouping:
+          group_variable: "station_id"
       simulate:
-        variables: [air_temperature]
+        variables: [specific_humidity]
     ObsFilters:
     - Filter: Aircraft Track Check
-      variables: [air_temperature]
+      variables: [specific_humidity]
       temporal_resolution: PT00H00M30S
       spatial_resolution:    20.000000
       distinct_buddy_resolution_multiplier: 3
-      num_distinct_buddies_per_direction: 4
+      num_distinct_buddies_per_direction: 30
       max_climb_rate:   200.000000
       max_speed_interpolation_points: {"0":  1000.000000, "20000":   400.000000, "100000":   200.000000, "110000":   200.000000}
       rejection_threshold:     0.500000
-      flight_id_variable:
-        name: flight_id@MetaData
-    failedObservationsBenchmark:
-        - 90
-        - 91
-        - 92
-        - 93
-        - 94
-        - 95
-        - 96
-        - 97
-        - 98
-        - 99
-        - 100
-        - 105
-        - 109
-        - 112
-        - 115
-        - 117
-        - 119
-        - 120
-        - 122
-        - 123
-        - 184
-        - 187
+    flaggedObservationsBenchmark:
         - 188
         - 193
         - 268
@@ -782,11 +424,6 @@ Observations:
         - 795
         - 806
         - 808
-        - 879
-        - 881
-        - 882
-        - 895
-        - 896
         - 990
         - 991
         - 996
@@ -797,51 +434,23 @@ Observations:
         - 1023
         - 1029
         - 1030
-        - 1177
-        - 1186
-        - 1274
-        - 1276
-        - 1277
-        - 1278
-        - 1284
-        - 1285
-        - 1290
-        - 1385
-        - 1391
-        - 1402
-        - 1411
-        - 1412
-        - 1418
-        - 1422
-        - 1423
-        - 1471
-        - 1473
-        - 1595
-        - 1598
-        - 1605
-        - 1607
-        - 1611
-        - 1612
-        - 1613
-        - 1622
-        - 1655
-        - 1663
         - 1809
         - 1810
-        - 1911
-        - 1913
         - 2089
         - 2098
-    failedBenchmark: 92
+    flaggedBenchmark: 34
+    benchmarkFlag: 12 # track
   - ObsSpace:
       name: Aircraft
       ObsDataIn:
-        obsfile: Data/aircraft_track_check.nc4
+        obsfile: Data/ioda/testinput_tier_1/aircraft_obs_2018041500_m.nc4
+        obsgrouping:
+          group_variable: "station_id"
       simulate:
-        variables: [air_temperature]
+        variables: [specific_humidity]
     ObsFilters:
     - Filter: Aircraft Track Check
-      variables: [air_temperature]
+      variables: [specific_humidity]
       temporal_resolution: PT00H00M30S
       spatial_resolution:    20.000000
       distinct_buddy_resolution_multiplier: 3
@@ -849,24 +458,7 @@ Observations:
       max_climb_rate:   200.000000
       max_speed_interpolation_points: {"0":  1000.000000, "20000":   400.000000, "100000":   200.000000, "110000":   200.000000}
       rejection_threshold:     0.750000
-      flight_id_variable:
-        name: flight_id@MetaData
-    failedObservationsBenchmark:
-        - 90
-        - 91
-        - 92
-        - 93
-        - 94
-        - 95
-        - 96
-        - 97
-        - 98
-        - 99
-        - 100
-        - 109
-        - 112
-        - 115
-        - 117
+    flaggedObservationsBenchmark:
         - 188
         - 193
         - 268
@@ -887,9 +479,6 @@ Observations:
         - 795
         - 806
         - 808
-        - 879
-        - 881
-        - 882
         - 990
         - 991
         - 996
@@ -898,39 +487,9 @@ Observations:
         - 1013
         - 1018
         - 1023
-        - 1177
-        - 1186
-        - 1274
-        - 1276
-        - 1277
-        - 1278
-        - 1283
-        - 1284
-        - 1285
-        - 1289
-        - 1290
-        - 1385
-        - 1391
-        - 1402
-        - 1411
-        - 1418
-        - 1422
-        - 1423
-        - 1471
-        - 1473
-        - 1595
-        - 1605
-        - 1607
-        - 1611
-        - 1613
-        - 1622
-        - 1655
-        - 1659
-        - 1663
         - 1809
         - 1810
-        - 1911
-        - 1913
         - 2089
         - 2098
-    failedBenchmark: 81
+    flaggedBenchmark: 32
+    benchmarkFlag: 12 # track

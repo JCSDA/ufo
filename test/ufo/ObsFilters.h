@@ -87,6 +87,17 @@ std::vector<size_t> getFailedObservationIndices(const UfoTrait::ObsDataVector<in
 // -----------------------------------------------------------------------------
 
 //!
+//! Return the indices of observations whose quality control flag is set to \p flag in
+//! at least one variable.
+//!
+std::vector<size_t> getFlaggedObservationIndices(const UfoTrait::ObsDataVector<int> &qcFlags,
+                                                 int flag) {
+  return getObservationIndicesWhere(qcFlags, [flag](int qcFlag) { return qcFlag == flag; });
+}
+
+// -----------------------------------------------------------------------------
+
+//!
 //! Return the number of elements of \p data with at least one nonzero component.
 //!
 size_t numNonzero(const UfoTrait::ObsDataVector<int> & data) {
@@ -94,6 +105,22 @@ size_t numNonzero(const UfoTrait::ObsDataVector<int> & data) {
   for (size_t locIndex = 0; locIndex < data.nlocs(); ++locIndex) {
     for (size_t varIndex = 0; varIndex < data.nvars(); ++varIndex) {
       if (data[varIndex][locIndex] != 0)
+        ++result;
+    }
+  }
+  return result;
+}
+
+// -----------------------------------------------------------------------------
+
+//!
+//! Return the number of elements of \p data with at least one component equal to \p value.
+//!
+size_t numEqualTo(const UfoTrait::ObsDataVector<int> & data, int value) {
+  size_t result = 0;
+  for (size_t locIndex = 0; locIndex < data.nlocs(); ++locIndex) {
+    for (size_t varIndex = 0; varIndex < data.nvars(); ++varIndex) {
+      if (data[varIndex][locIndex] == value)
         ++result;
     }
   }
@@ -218,6 +245,26 @@ void testFilters() {
       const int failedBenchmark = typeconfs[jj].getInt("failedBenchmark");
       const int failed = numNonzero(qcflags->obsdatavector());
       EXPECT_EQUAL(failed, failedBenchmark);
+    }
+
+    if (typeconfs[jj].has("benchmarkFlag")) {
+      const int flag = typeconfs[jj].getInt("benchmarkFlag");
+
+      if (typeconfs[jj].has("flaggedObservationsBenchmark")) {
+        atLeastOneBenchmarkFound = true;
+        const std::vector<size_t> flaggedObsBenchmark =
+            typeconfs[jj].getUnsignedVector("flaggedObservationsBenchmark");
+        const std::vector<size_t> flaggedObs =
+            getFlaggedObservationIndices(qcflags->obsdatavector(), flag);
+        EXPECT_EQUAL(flaggedObsBenchmark, flaggedObsBenchmark);
+      }
+
+      if (typeconfs[jj].has("flaggedBenchmark")) {
+        atLeastOneBenchmarkFound = true;
+        const int flaggedBenchmark = typeconfs[jj].getInt("flaggedBenchmark");
+        const int flagged = numEqualTo(qcflags->obsdatavector(), flag);
+        EXPECT_EQUAL(flagged, flaggedBenchmark);
+      }
     }
 
     EXPECT(atLeastOneBenchmarkFound);

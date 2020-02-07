@@ -179,7 +179,6 @@ list( APPEND ufo_test_data
   marine/profile_2018-04-15_geovals.nc
   marine/sst_obs-2018-04-15_geovals.nc
   filters/filters_testdata.nc4
-  filters/aircraft_track_check.nc4
 )
 
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Data)

@@ -66,6 +66,17 @@ Point pointFromLatLon(float latitude, float longitude) {
   return Point;
 }
 
+/// Return the vector of elements of \p categories with indices \p validObsIds.
+template <typename T>
+std::vector<T> getValidObservationCategories(const std::vector<T> &categories,
+                                             const std::vector<size_t> validObsIds)  {
+  std::vector<T> validObsCategories(validObsIds.size());
+  for (size_t validObsIndex = 0; validObsIndex < validObsIds.size(); ++validObsIndex) {
+    validObsCategories[validObsIndex] = categories[validObsIds[validObsIndex]];
+  }
+  return validObsCategories;
+}
+
 enum Direction { FORWARD, BACKWARD, NUM_DIRECTIONS };
 static const int NO_PREVIOUS_SWEEP = -1;
 
@@ -231,7 +242,7 @@ void AircraftTrackCheck::applyFilter(const std::vector<bool> & apply,
   const std::vector<size_t> validObsIds = getValidObservationIds(apply);
 
   RecursiveSplitter splitter(validObsIds.size());
-  groupObservationsByFlightId(validObsIds, splitter);
+  groupObservationsByFlight(validObsIds, splitter);
   sortTracksChronologically(validObsIds, splitter);
 
   ObsData obsData = collectObsData();
@@ -258,16 +269,39 @@ std::vector<size_t> AircraftTrackCheck::getValidObservationIds(
   return validObsIds;
 }
 
-void AircraftTrackCheck::groupObservationsByFlightId(
+void AircraftTrackCheck::groupObservationsByFlight(
     const std::vector<size_t> &validObsIds,
     RecursiveSplitter &splitter) const {
-  ioda::ObsDataVector<int> obsDataVector(obsdb_, options_->flightIdVariable.value().variable(),
-                                         options_->flightIdVariable.value().group());
-  const auto &flightId = obsDataVector[0];
+  if (options_->flightIdVariable.value() == boost::none) {
+    if (obsdb_.obs_group_var().empty()) {
+      // Observations were not grouped into records.
+      // Assume all observations were taken during the same flight.
+      return;
+    } else {
+      groupObservationsByRecordNumber(validObsIds, splitter);
+    }
+  } else {
+    groupObservationsByVariable(*options_->flightIdVariable.value(), validObsIds, splitter);
+  }
+}
 
-  std::vector<int> validObsCategories(validObsIds.size());
-  for (size_t validObsIndex = 0; validObsIndex < validObsIds.size(); ++validObsIndex)
-    validObsCategories[validObsIndex] = flightId[validObsIds[validObsIndex]];
+void AircraftTrackCheck::groupObservationsByRecordNumber(
+    const std::vector<size_t> &validObsIds,
+    RecursiveSplitter &splitter) const {
+  const std::vector<size_t> &obsCategories = obsdb_.recnum();
+  std::vector<size_t> validObsCategories = getValidObservationCategories(
+        obsCategories, validObsIds);
+  splitter.groupBy(validObsCategories);
+}
+
+void AircraftTrackCheck::groupObservationsByVariable(
+    const Variable &variable,
+    const std::vector<size_t> &validObsIds,
+    RecursiveSplitter &splitter) const {
+  ioda::ObsDataVector<int> obsDataVector(obsdb_, variable.variable(), variable.group());
+  const auto &flightIds = obsDataVector[0];
+  std::vector<int> validObsCategories = getValidObservationCategories(
+        flightIds, validObsIds);
   splitter.groupBy(validObsCategories);
 }
 

@@ -82,8 +82,16 @@ class AircraftTrackCheckParameters : public oops::Parameters {
 
   /// Variable storing integer-valued flight IDs. Observations taken during each flight are
   /// checked separately.
-  oops::Parameter<Variable> flightIdVariable{
-    "flight_id_variable", Variable("flight_id@MetaData"), this};
+  ///
+  /// If not set and observations were grouped into records when the observation space was
+  /// constructed, each record is assumed to consist of observations taken during a separate
+  /// flight. If not set and observations were not grouped into records, all observations are
+  /// assumed to have been taken during a single flight.
+  ///
+  /// Note: the variable used to group observations into records can be set with the
+  /// \c ObsSpace.ObsDataIn.obsgrouping.group_variable YAML option.
+  oops::OptionalParameter<Variable> flightIdVariable{
+    "flight_id_variable", this};
 };
 
 }  // namespace ufo
