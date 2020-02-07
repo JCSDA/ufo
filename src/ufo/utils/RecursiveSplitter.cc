@@ -73,5 +73,6 @@ void RecursiveSplitter::groupByImpl(const std::vector<T> &categories) {
 
 template void RecursiveSplitter::groupByImpl(const std::vector<int> &);
 template void RecursiveSplitter::groupByImpl(const std::vector<size_t> &);
+template void RecursiveSplitter::groupByImpl(const std::vector<std::string> &);
 
 }  // namespace ufo

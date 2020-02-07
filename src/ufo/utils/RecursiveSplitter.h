@@ -11,6 +11,7 @@
 #include <algorithm>
 #include <cassert>
 #include <cstddef>  // for size_t
+#include <string>
 #include <vector>
 
 #include "ufo/utils/ArrowProxy.h"
@@ -277,6 +278,11 @@ class RecursiveSplitter
 
   /// \overload
   void groupBy(const std::vector<int> &categories) {
+      return groupByImpl(categories);
+  }
+
+  /// \overload
+  void groupBy(const std::vector<std::string> &categories) {
       return groupByImpl(categories);
   }
 
