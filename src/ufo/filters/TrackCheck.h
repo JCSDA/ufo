@@ -5,8 +5,8 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#ifndef UFO_FILTERS_AIRCRAFTTRACKCHECK_H_
-#define UFO_FILTERS_AIRCRAFTTRACKCHECK_H_
+#ifndef UFO_FILTERS_TRACKCHECK_H_
+#define UFO_FILTERS_TRACKCHECK_H_
 
 #include <memory>
 #include <ostream>
@@ -31,32 +31,36 @@ class ObsSpace;
 
 namespace ufo {
 
-class AircraftTrackCheckParameters;
+class TrackCheckParameters;
 class PiecewiseLinearInterpolation;
 class RecursiveSplitter;
 
-/// \brief Checks aircraft tracks, rejecting observations inconsistent with the rest of the track.
+/// \brief Checks tracks of mobile weather stations, rejecting observations inconsistent with the
+/// rest of the track.
 ///
-/// Each track (i.e. the observations taken during each flight) is checked separately. The
-/// algorithm performs a series of sweeps over the observations from each track. For each
-/// observation, multiple estimates of the instantaneous aircraft speed and ascent/descent rate are
-/// obtained by comparing the reported aircraft position with the positions reported during a
-/// number a nearby (earlier and later) observations that haven't been rejected in previous sweeps.
-/// An observation is rejected if a certain fraction of these estimates lie outside the valid
-/// range. Sweeps continue until one of them fails to reject any observations, i.e. the set of
-/// retained observations is self-consistent.
+/// Each track is checked separately. The algorithm performs a series of sweeps over the
+/// observations from each track. For each observation, multiple estimates of the instantaneous
+/// speed and ascent/descent rate are obtained by comparing the reported position with the
+/// positions reported during a number a nearby (earlier and later) observations that haven't been
+/// rejected in previous sweeps. An observation is rejected if a certain fraction of these
+/// estimates lie outside the valid range. Sweeps continue until one of them fails to reject any
+/// observations, i.e. the set of retained observations is self-consistent.
 ///
-/// See AircraftTrackCheckParameters for the documentation of this filter's parameters.
-class AircraftTrackCheck : public FilterBase,
-    private util::ObjectCounter<AircraftTrackCheck> {
+/// See TrackCheckParameters for the documentation of this filter's parameters.
+///
+/// Note: this filter was originally written with aircraft observations in mind. However, it can
+/// potentially be useful also for other observation types.
+///
+class TrackCheck : public FilterBase,
+    private util::ObjectCounter<TrackCheck> {
  public:
-  static const std::string classname() {return "ufo::AircraftTrackCheck";}
+  static const std::string classname() {return "ufo::TrackCheck";}
 
-  AircraftTrackCheck(ioda::ObsSpace &obsdb, const eckit::Configuration &config,
-                     boost::shared_ptr<ioda::ObsDataVector<int> > flags,
-                     boost::shared_ptr<ioda::ObsDataVector<float> > obserr);
+  TrackCheck(ioda::ObsSpace &obsdb, const eckit::Configuration &config,
+             boost::shared_ptr<ioda::ObsDataVector<int> > flags,
+             boost::shared_ptr<ioda::ObsDataVector<float> > obserr);
 
-  ~AircraftTrackCheck() override;
+  ~TrackCheck() override;
 
  private:
   enum class SweepResult {NO_MORE_SWEEPS_REQUIRED, ANOTHER_SWEEP_REQUIRED};
@@ -71,8 +75,8 @@ class AircraftTrackCheck : public FilterBase,
 
   std::vector<size_t> getValidObservationIds(const std::vector<bool> &apply) const;
 
-  void groupObservationsByFlight(const std::vector<size_t> &validObsIds,
-                                 RecursiveSplitter &splitter) const;
+  void groupObservationsByStation(const std::vector<size_t> &validObsIds,
+                                  RecursiveSplitter &splitter) const;
 
   void groupObservationsByRecordNumber(const std::vector<size_t> &validObsIds,
                                        RecursiveSplitter &splitter) const;
@@ -117,7 +121,7 @@ class AircraftTrackCheck : public FilterBase,
   /// \param[inout] trackObservations
   ///   Attributes of all observations in a track. Modified in place.
   /// \param[in]
-  ///   Dependence of the expected maximum aircraft speed on air pressure (and thus height).
+  ///   Dependence of the expected maximum speed on air pressure (and thus height).
   /// \param[inout] workspace
   ///   A vector used internally by the function, passed by parameter to avoid repeated memory
   ///   allocations and deallocations.
@@ -137,9 +141,9 @@ class AircraftTrackCheck : public FilterBase,
                                 std::vector<std::vector<bool> > &flagged) const;
 
  private:
-  std::unique_ptr<AircraftTrackCheckParameters> options_;
+  std::unique_ptr<TrackCheckParameters> options_;
 };
 
 }  // namespace ufo
 
-#endif  // UFO_FILTERS_AIRCRAFTTRACKCHECK_H_
+#endif  // UFO_FILTERS_TRACKCHECK_H_

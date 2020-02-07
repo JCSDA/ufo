@@ -4,9 +4,9 @@
 # which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 
 set ( filters_files
-      AircraftTrackCheck.cc
-      AircraftTrackCheck.h
-      AircraftTrackCheckParameters.h
+      TrackCheck.cc
+      TrackCheck.h
+      TrackCheckParameters.h
       BackgroundCheck.cc
       BackgroundCheck.h
       BlackList.cc

@@ -13,8 +13,8 @@ Only valid observations:
                      '2010-01-01T03:00:00Z', '2010-01-01T04:00:00Z' ]
       obs_errors: [1.0]
   air_pressures: [ 100000, 90000, 80000, 90000, 100000]
-  flight_ids: [ 1, 1, 1, 1, 1]
-  Aircraft Track Check:
+  station_ids: [ 1, 1, 1, 1, 1]
+  Track Check:
     variables: [air_temperature]
     temporal_resolution: PT4S
     spatial_resolution: 1 # km
@@ -23,8 +23,8 @@ Only valid observations:
     max_climb_rate: 2000 # Pa/s
     max_speed_interpolation_points: {"0": 500, "101000": 500} # Pa -> m/s
     rejection_threshold: 0.5
-    flight_id_variable:
-      name: flight_id@MetaData
+    station_id_variable:
+      name: station_id@MetaData
   expected_rejected_obs_indices: []
 
 One observation with excessive speed:
@@ -42,8 +42,8 @@ One observation with excessive speed:
                      '2010-01-01T03:00:00Z', '2010-01-01T04:00:00Z' ]
       obs_errors: [1.0]
   air_pressures: [ 100000, 90000, 80000, 90000, 100000]
-  flight_ids: [ 1, 1, 1, 1, 1]
-  Aircraft Track Check:
+  station_ids: [ 1, 1, 1, 1, 1]
+  Track Check:
     variables: [air_temperature]
     temporal_resolution: PT4S
     spatial_resolution: 1 # km
@@ -52,8 +52,8 @@ One observation with excessive speed:
     max_climb_rate: 2000 # Pa/s
     max_speed_interpolation_points: {"0": 500, "101000": 500} # Pa -> m/s
     rejection_threshold: 0.5
-    flight_id_variable:
-      name: flight_id@MetaData
+    station_id_variable:
+      name: station_id@MetaData
   expected_rejected_obs_indices: [2]
 
 One observation with excessive climb rate:
@@ -71,8 +71,8 @@ One observation with excessive climb rate:
                      '2010-01-01T03:00:00Z', '2010-01-01T04:00:00Z' ]
       obs_errors: [1.0]
   air_pressures: [ 100000, 90000, 1e20, 90000, 100000]
-  flight_ids: [ 1, 1, 1, 1, 1]
-  Aircraft Track Check:
+  station_ids: [ 1, 1, 1, 1, 1]
+  Track Check:
     variables: [air_temperature]
     temporal_resolution: PT4S
     spatial_resolution: 1 # km
@@ -81,8 +81,8 @@ One observation with excessive climb rate:
     max_climb_rate: 2000 # Pa/s
     max_speed_interpolation_points: {"0": 500, "101000": 500} # Pa -> m/s
     rejection_threshold: 0.5
-    flight_id_variable:
-      name: flight_id@MetaData
+    station_id_variable:
+      name: station_id@MetaData
   expected_rejected_obs_indices: [2]
 
 Where clause:
@@ -100,8 +100,8 @@ Where clause:
                      '2010-01-01T03:00:00Z', '2010-01-01T04:00:00Z' ]
       obs_errors: [1.0]
   air_pressures: [ 1e20, 90000, 1e20, 90000, 100000]
-  flight_ids: [ 1, 1, 1, 1, 1]
-  Aircraft Track Check:
+  station_ids: [ 1, 1, 1, 1, 1]
+  Track Check:
     variables: [air_temperature]
     temporal_resolution: PT4S
     spatial_resolution: 1 # km
@@ -110,8 +110,8 @@ Where clause:
     max_climb_rate: 2000 # Pa/s
     max_speed_interpolation_points: {"0": 500, "101000": 500} # Pa -> m/s
     rejection_threshold: 0.5
-    flight_id_variable:
-      name: flight_id@MetaData
+    station_id_variable:
+      name: station_id@MetaData
     where:
     - variable:
         name: latitude@MetaData
@@ -172,11 +172,11 @@ Multiple clusters of observations with excessive speed:
                    50000, 50000, 50000, 50000, 50000, 50000, 50000, 50000, 50000, 50000,
                    50000, 50000, 50000, 50000, 50000, 50000, 50000, 50000, 50000, 50000,
                    50000]
-  flight_ids: [ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  station_ids: [ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
                 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
                 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
                 1]
-  Aircraft Track Check:
+  Track Check:
     variables: [air_temperature]
     temporal_resolution: PT1M
     spatial_resolution: 112 # km
@@ -185,11 +185,11 @@ Multiple clusters of observations with excessive speed:
     max_climb_rate: 2000 # Pa/s
     max_speed_interpolation_points: {"0": 1000, "101000": 1000} # Pa -> m/s
     rejection_threshold: 0.5
-    flight_id_variable:
-      name: flight_id@MetaData
+    station_id_variable:
+      name: station_id@MetaData
   expected_rejected_obs_indices: [0, 9, 10, 18, 19, 20, 29, 30]
 
-Multiple flight ids:
+Multiple station ids:
   window_begin: 2000-01-01T00:00:00Z
   window_end: 2030-01-01T00:00:00Z
   ObsSpace:
@@ -207,8 +207,8 @@ Multiple flight ids:
                      '2010-01-01T04:00:00Z', '2010-01-01T04:00:00Z' ]
       obs_errors: [1.0]
   air_pressures: [ 100000, 100000, 90000, 90000, 80000, 80000, 90000, 90000, 100000, 100000]
-  flight_ids: [ 1, 2, 1, 2, 1, 2, 1, 2, 1, 2]
-  Aircraft Track Check:
+  station_ids: [ 1, 2, 1, 2, 1, 2, 1, 2, 1, 2]
+  Track Check:
     variables: [air_temperature]
     temporal_resolution: PT4S
     spatial_resolution: 1 # km
@@ -217,11 +217,11 @@ Multiple flight ids:
     max_climb_rate: 2000 # Pa/s
     max_speed_interpolation_points: {"0": 500, "101000": 500} # Pa -> m/s
     rejection_threshold: 0.5
-    flight_id_variable:
-      name: flight_id@MetaData
+    station_id_variable:
+      name: station_id@MetaData
   expected_rejected_obs_indices: [4, 5]
 
-No flight id variable, no observation grouping:
+No station id variable, no observation grouping:
   window_begin: 2000-01-01T00:00:00Z
   window_end: 2030-01-01T00:00:00Z
   ObsSpace:
@@ -236,7 +236,7 @@ No flight id variable, no observation grouping:
                      '2010-01-01T03:00:00Z', '2010-01-01T04:00:00Z' ]
       obs_errors: [1.0]
   air_pressures: [ 100000, 90000, 80000, 90000, 100000]
-  Aircraft Track Check:
+  Track Check:
     variables: [air_temperature]
     temporal_resolution: PT4S
     spatial_resolution: 1 # km

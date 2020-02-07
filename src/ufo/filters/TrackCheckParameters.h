@@ -5,8 +5,8 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
  */
 
-#ifndef UFO_FILTERS_AIRCRAFTTRACKCHECKPARAMETERS_H_
-#define UFO_FILTERS_AIRCRAFTTRACKCHECKPARAMETERS_H_
+#ifndef UFO_FILTERS_TRACKCHECKPARAMETERS_H_
+#define UFO_FILTERS_TRACKCHECKPARAMETERS_H_
 
 #include <map>
 #include <string>
@@ -25,15 +25,15 @@ namespace eckit {
 
 namespace ufo {
 
-/// \brief Options controlling the operation of the aircraft track check filter.
-class AircraftTrackCheckParameters : public oops::Parameters {
+/// \brief Options controlling the operation of the track check filter.
+class TrackCheckParameters : public oops::Parameters {
  public:
   /// Assumed temporal resolution of the observations, i.e. absolute accuracy of the reported
   /// observation times.
   oops::Parameter<util::Duration> temporalResolution{
     "temporal_resolution", util::Duration("PT1M"), this};
   /// Assumed spatial resolution of the observations (in km), i.e. absolute accuracy of the
-  /// reported aircraft positions.
+  /// reported positions.
   ///
   /// Instantaneous speeds are estimated conservatively with the formula
   ///
@@ -61,7 +61,7 @@ class AircraftTrackCheckParameters : public oops::Parameters {
 
   /// Maximum allowed rate of ascent and descent (Pa/s).
   oops::Parameter<float> maxClimbRate{"max_climb_rate", 300.0f, this};
-  /// Encoding of the function mapping air pressure (in Pa) to the maximum aircraft speed (in m/s)
+  /// Encoding of the function mapping air pressure (in Pa) to the maximum speed (in m/s)
   /// considered to be realistic.
   ///
   /// The function is taken to be a linear interpolation of a series of (pressure, speed) points.
@@ -80,20 +80,20 @@ class AircraftTrackCheckParameters : public oops::Parameters {
   oops::Parameter<float> rejectionThreshold{
     "rejection_threshold", 0.5f, this};
 
-  /// Variable storing integer-valued flight IDs. Observations taken during each flight are
+  /// Variable storing integer-valued station IDs. Observations taken by each station are
   /// checked separately.
   ///
   /// If not set and observations were grouped into records when the observation space was
-  /// constructed, each record is assumed to consist of observations taken during a separate
-  /// flight. If not set and observations were not grouped into records, all observations are
-  /// assumed to have been taken during a single flight.
+  /// constructed, each record is assumed to consist of observations taken by a separate
+  /// station. If not set and observations were not grouped into records, all observations are
+  /// assumed to have been taken by a single station.
   ///
   /// Note: the variable used to group observations into records can be set with the
   /// \c ObsSpace.ObsDataIn.obsgrouping.group_variable YAML option.
-  oops::OptionalParameter<Variable> flightIdVariable{
-    "flight_id_variable", this};
+  oops::OptionalParameter<Variable> stationIdVariable{
+    "station_id_variable", this};
 };
 
 }  // namespace ufo
 
-#endif  // UFO_FILTERS_AIRCRAFTTRACKCHECKPARAMETERS_H_
+#endif  // UFO_FILTERS_TRACKCHECKPARAMETERS_H_

@@ -5,8 +5,8 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#ifndef TEST_UFO_AIRCRAFTTRACKCHECK_H_
-#define TEST_UFO_AIRCRAFTTRACKCHECK_H_
+#ifndef TEST_UFO_TRACKCHECK_H_
+#define TEST_UFO_TRACKCHECK_H_
 
 #include <iomanip>
 #include <memory>
@@ -25,13 +25,13 @@
 #include "oops/parallel/mpi/mpi.h"
 #include "oops/runs/Test.h"
 #include "oops/util/Expect.h"
-#include "ufo/filters/AircraftTrackCheck.h"
+#include "ufo/filters/TrackCheck.h"
 #include "ufo/filters/Variables.h"
 
 namespace ufo {
 namespace test {
 
-void testAircraftTrackCheck(const eckit::LocalConfiguration &conf) {
+void testTrackCheck(const eckit::LocalConfiguration &conf) {
   util::DateTime bgn(conf.getString("window_begin"));
   util::DateTime end(conf.getString("window_end"));
 
@@ -45,9 +45,9 @@ void testAircraftTrackCheck(const eckit::LocalConfiguration &conf) {
     obsspace.put_db("ObsError", "air_pressure", airPressureObserrors);
   }
 
-  if (conf.has("flight_ids")) {
-    const std::vector<int> flightIds = conf.getIntVector("flight_ids");
-    obsspace.put_db("MetaData", "flight_id", flightIds);
+  if (conf.has("station_ids")) {
+    const std::vector<int> stationIds = conf.getIntVector("station_ids");
+    obsspace.put_db("MetaData", "station_id", stationIds);
   }
 
   auto obserr = boost::make_shared<ioda::ObsDataVector<float>>(
@@ -55,8 +55,8 @@ void testAircraftTrackCheck(const eckit::LocalConfiguration &conf) {
   auto qcflags = boost::make_shared<ioda::ObsDataVector<int>>(
       obsspace, obsspace.obsvariables());
 
-  const eckit::LocalConfiguration filterConf(conf, "Aircraft Track Check");
-  ufo::AircraftTrackCheck filter(obsspace, filterConf, qcflags, obserr);
+  const eckit::LocalConfiguration filterConf(conf, "Track Check");
+  ufo::TrackCheck filter(obsspace, filterConf, qcflags, obserr);
   filter.preProcess();
 
   const std::vector<size_t> expectedRejectedObsIndices =
@@ -68,9 +68,9 @@ void testAircraftTrackCheck(const eckit::LocalConfiguration &conf) {
   EXPECT_EQUAL(rejectedObsIndices, expectedRejectedObsIndices);
 }
 
-class AircraftTrackCheck : public oops::Test {
+class TrackCheck : public oops::Test {
  private:
-  std::string testid() const override {return "ufo::test::AircraftTrackCheck";}
+  std::string testid() const override {return "ufo::test::TrackCheck";}
 
   void register_tests() const override {
     std::vector<eckit::testing::Test>& ts = eckit::testing::specification();
@@ -79,9 +79,9 @@ class AircraftTrackCheck : public oops::Test {
     for (const std::string & testCaseName : conf.keys())
     {
       const eckit::LocalConfiguration testCaseConf(::test::TestEnvironment::config(), testCaseName);
-      ts.emplace_back(CASE("ufo/AircraftTrackCheck/" + testCaseName, testCaseConf)
+      ts.emplace_back(CASE("ufo/TrackCheck/" + testCaseName, testCaseConf)
                       {
-                        testAircraftTrackCheck(testCaseConf);
+                        testTrackCheck(testCaseConf);
                       });
     }
   }
@@ -90,4 +90,4 @@ class AircraftTrackCheck : public oops::Test {
 }  // namespace test
 }  // namespace ufo
 
-#endif  // TEST_UFO_AIRCRAFTTRACKCHECK_H_
+#endif  // TEST_UFO_TRACKCHECK_H_

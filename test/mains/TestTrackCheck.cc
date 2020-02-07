@@ -5,12 +5,12 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#include "../ufo/AircraftTrackCheck.h"
+#include "../ufo/TrackCheck.h"
 #include "oops/runs/Run.h"
 
 int main(int argc,  char ** argv) {
   oops::Run run(argc, argv);
-  ufo::test::AircraftTrackCheck tests;
+  ufo::test::TrackCheck tests;
   run.execute(tests);
   return 0;
 }

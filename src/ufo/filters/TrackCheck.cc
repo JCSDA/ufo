@@ -5,7 +5,7 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#include "ufo/filters/AircraftTrackCheck.h"
+#include "ufo/filters/TrackCheck.h"
 
 #include <algorithm>
 #include <cmath>
@@ -25,7 +25,7 @@
 #include "oops/util/Duration.h"
 #include "oops/util/Logger.h"
 #include "oops/util/sqr.h"
-#include "ufo/filters/AircraftTrackCheckParameters.h"
+#include "ufo/filters/TrackCheckParameters.h"
 #include "ufo/utils/Constants.h"
 #include "ufo/utils/PiecewiseLinearInterpolation.h"
 #include "ufo/utils/RecursiveSplitter.h"
@@ -84,7 +84,7 @@ static const int NO_PREVIOUS_SWEEP = -1;
 
 
 /// \brief Results of cross-checking an observation with another (a "buddy").
-struct AircraftTrackCheck::CheckResult {
+struct TrackCheck::CheckResult {
   bool isBuddyDistinct;
   bool speedCheckPassed;
   bool climbRateCheckPassed;
@@ -92,7 +92,7 @@ struct AircraftTrackCheck::CheckResult {
 
 
 /// \brief Locations of all observations processed by the track checking filter.
-struct AircraftTrackCheck::ObsData {
+struct TrackCheck::ObsData {
   std::vector<float> latitudes;
   std::vector<float> longitudes;
   std::vector<util::DateTime> datetimes;
@@ -101,7 +101,7 @@ struct AircraftTrackCheck::ObsData {
 
 
 /// \brief Attributes of an observation belonging to a track.
-class AircraftTrackCheck::TrackObservation {
+class TrackCheck::TrackObservation {
  public:
   TrackObservation(float latitude, float longitude, const util::DateTime &time, float pressure)
     : location_(pointFromLatLon(latitude, longitude)), time_(time), pressure_(pressure),
@@ -137,13 +137,13 @@ class AircraftTrackCheck::TrackObservation {
   /// \param buddyObs Observation to compare against.
   /// \param options Track check options.
   /// \param maxValidSpeedAtPressure
-  ///   Function mapping air pressure (in Pa) to the maximum realistic aircraft speed (in m/s).
+  ///   Function mapping air pressure (in Pa) to the maximum realistic speed (in m/s).
   /// \param referencePressure
   ///   Pressure at which the maximum speed should be evaluated.
   ///
   /// \returns An object enapsulating the check results.
   CheckResult checkAgainstBuddy(const TrackObservation &buddyObs,
-                                const AircraftTrackCheckParameters &options,
+                                const TrackCheckParameters &options,
                                 const PiecewiseLinearInterpolation &maxValidSpeedAtPressure,
                                 float referencePressure) const;
 
@@ -162,9 +162,9 @@ class AircraftTrackCheck::TrackObservation {
   int numChecks_;
 };
 
-AircraftTrackCheck::CheckResult AircraftTrackCheck::TrackObservation::checkAgainstBuddy(
+TrackCheck::CheckResult TrackCheck::TrackObservation::checkAgainstBuddy(
     const TrackObservation &buddyObs,
-    const AircraftTrackCheckParameters &options,
+    const TrackCheckParameters &options,
     const PiecewiseLinearInterpolation &maxValidSpeedAtPressure,
     float referencePressure) const {
   CheckResult result;
@@ -193,7 +193,7 @@ AircraftTrackCheck::CheckResult AircraftTrackCheck::TrackObservation::checkAgain
   return result;
 }
 
-void AircraftTrackCheck::TrackObservation::registerCheckResult(const CheckResult &result) {
+void TrackCheck::TrackObservation::registerCheckResult(const CheckResult &result) {
   numChecks_ += 2;
   if (!result.speedCheckPassed)
     ++numFailedChecks_;
@@ -204,7 +204,7 @@ void AircraftTrackCheck::TrackObservation::registerCheckResult(const CheckResult
   assert(numFailedChecks_ <= numChecks_);
 }
 
-void AircraftTrackCheck::TrackObservation::unregisterCheckResult(const CheckResult &result) {
+void TrackCheck::TrackObservation::unregisterCheckResult(const CheckResult &result) {
   numChecks_ -= 2;
   if (!result.speedCheckPassed)
     --numFailedChecks_;
@@ -215,34 +215,34 @@ void AircraftTrackCheck::TrackObservation::unregisterCheckResult(const CheckResu
   assert(numFailedChecks_ <= numChecks_);
 }
 
-void AircraftTrackCheck::TrackObservation::registerSweepOutcome(bool rejectedInSweep) {
+void TrackCheck::TrackObservation::registerSweepOutcome(bool rejectedInSweep) {
   rejectedBeforePreviousSweep_ = rejected();
   rejectedInPreviousSweep_ = rejectedInSweep;
 }
 
 
-AircraftTrackCheck::AircraftTrackCheck(ioda::ObsSpace & obsdb, const eckit::Configuration & config,
-                                       boost::shared_ptr<ioda::ObsDataVector<int> > flags,
-                                       boost::shared_ptr<ioda::ObsDataVector<float> > obserr)
+TrackCheck::TrackCheck(ioda::ObsSpace & obsdb, const eckit::Configuration & config,
+                       boost::shared_ptr<ioda::ObsDataVector<int> > flags,
+                       boost::shared_ptr<ioda::ObsDataVector<float> > obserr)
   : FilterBase(obsdb, config, flags, obserr)
 {
-  oops::Log::debug() << "AircraftTrackCheck: config = " << config_ << std::endl;
+  oops::Log::debug() << "TrackCheck: config = " << config_ << std::endl;
 
-  options_.reset(new AircraftTrackCheckParameters());
+  options_.reset(new TrackCheckParameters());
   options_->deserialize(config);
 }
 
 // Required for the correct destruction of options_.
-AircraftTrackCheck::~AircraftTrackCheck()
+TrackCheck::~TrackCheck()
 {}
 
-void AircraftTrackCheck::applyFilter(const std::vector<bool> & apply,
-                                     const Variables & filtervars,
-                                     std::vector<std::vector<bool>> & flagged) const {
+void TrackCheck::applyFilter(const std::vector<bool> & apply,
+                             const Variables & filtervars,
+                             std::vector<std::vector<bool>> & flagged) const {
   const std::vector<size_t> validObsIds = getValidObservationIds(apply);
 
   RecursiveSplitter splitter(validObsIds.size());
-  groupObservationsByFlight(validObsIds, splitter);
+  groupObservationsByStation(validObsIds, splitter);
   sortTracksChronologically(validObsIds, splitter);
 
   ObsData obsData = collectObsData();
@@ -256,11 +256,11 @@ void AircraftTrackCheck::applyFilter(const std::vector<bool> & apply,
   flagRejectedObservations(isRejected, flagged);
 
   if (filtervars.size() != 0) {
-    oops::Log::trace() << "AircraftTrackCheck: flagged? = " << flagged[0] << std::endl;
+    oops::Log::trace() << "TrackCheck: flagged? = " << flagged[0] << std::endl;
   }
 }
 
-std::vector<size_t> AircraftTrackCheck::getValidObservationIds(
+std::vector<size_t> TrackCheck::getValidObservationIds(
     const std::vector<bool> & apply) const {
   std::vector<size_t> validObsIds;
   for (size_t obsId = 0; obsId < apply.size(); ++obsId)
@@ -269,23 +269,23 @@ std::vector<size_t> AircraftTrackCheck::getValidObservationIds(
   return validObsIds;
 }
 
-void AircraftTrackCheck::groupObservationsByFlight(
+void TrackCheck::groupObservationsByStation(
     const std::vector<size_t> &validObsIds,
     RecursiveSplitter &splitter) const {
-  if (options_->flightIdVariable.value() == boost::none) {
+  if (options_->stationIdVariable.value() == boost::none) {
     if (obsdb_.obs_group_var().empty()) {
       // Observations were not grouped into records.
-      // Assume all observations were taken during the same flight.
+      // Assume all observations were taken during the same station.
       return;
     } else {
       groupObservationsByRecordNumber(validObsIds, splitter);
     }
   } else {
-    groupObservationsByVariable(*options_->flightIdVariable.value(), validObsIds, splitter);
+    groupObservationsByVariable(*options_->stationIdVariable.value(), validObsIds, splitter);
   }
 }
 
-void AircraftTrackCheck::groupObservationsByRecordNumber(
+void TrackCheck::groupObservationsByRecordNumber(
     const std::vector<size_t> &validObsIds,
     RecursiveSplitter &splitter) const {
   const std::vector<size_t> &obsCategories = obsdb_.recnum();
@@ -294,7 +294,7 @@ void AircraftTrackCheck::groupObservationsByRecordNumber(
   splitter.groupBy(validObsCategories);
 }
 
-void AircraftTrackCheck::groupObservationsByVariable(
+void TrackCheck::groupObservationsByVariable(
     const Variable &variable,
     const std::vector<size_t> &validObsIds,
     RecursiveSplitter &splitter) const {
@@ -308,12 +308,12 @@ void AircraftTrackCheck::groupObservationsByVariable(
     break;
 
   default:
-    throw eckit::UserError("Only integer and string variables may be used as flight IDs", Here());
+    throw eckit::UserError("Only integer and string variables may be used as station IDs", Here());
   }
 }
 
 template <typename VariableType>
-void AircraftTrackCheck::groupObservationsByTypedVariable(
+void TrackCheck::groupObservationsByTypedVariable(
     const Variable &variable,
     const std::vector<size_t> &validObsIds,
     RecursiveSplitter &splitter) const {
@@ -325,15 +325,15 @@ void AircraftTrackCheck::groupObservationsByTypedVariable(
   splitter.groupBy(validObsCategories);
 }
 
-void AircraftTrackCheck::sortTracksChronologically(const std::vector<size_t> &validObsIds,
-                                                   RecursiveSplitter &splitter) const {
+void TrackCheck::sortTracksChronologically(const std::vector<size_t> &validObsIds,
+                                           RecursiveSplitter &splitter) const {
   std::vector<util::DateTime> times(obsdb_.nlocs());
   obsdb_.get_db("MetaData", "datetime", times);
   splitter.sortGroupsBy([&times, &validObsIds](size_t obsIndexA, size_t obsIndexB)
   { return times[validObsIds[obsIndexA]] < times[validObsIds[obsIndexB]]; });
 }
 
-AircraftTrackCheck::ObsData AircraftTrackCheck::collectObsData() const {
+TrackCheck::ObsData TrackCheck::collectObsData() const {
   ObsData obsData;
 
   obsData.latitudes.resize(obsdb_.nlocs());
@@ -351,7 +351,7 @@ AircraftTrackCheck::ObsData AircraftTrackCheck::collectObsData() const {
   return obsData;
 }
 
-PiecewiseLinearInterpolation AircraftTrackCheck::makeMaxSpeedByPressureInterpolation() const {
+PiecewiseLinearInterpolation TrackCheck::makeMaxSpeedByPressureInterpolation() const {
   const std::map<float, float> &maxSpeedInterpolationPoints =
       options_->maxSpeedInterpolationPoints.value();
 
@@ -370,7 +370,7 @@ PiecewiseLinearInterpolation AircraftTrackCheck::makeMaxSpeedByPressureInterpola
   return PiecewiseLinearInterpolation(std::move(pressures), std::move(maxSpeeds));
 }
 
-void AircraftTrackCheck::identifyRejectedObservationsInTrack(
+void TrackCheck::identifyRejectedObservationsInTrack(
     std::vector<size_t>::const_iterator trackObsIndicesBegin,
     std::vector<size_t>::const_iterator trackObsIndicesEnd,
     const std::vector<size_t> &validObsIds,
@@ -391,7 +391,7 @@ void AircraftTrackCheck::identifyRejectedObservationsInTrack(
                                 validObsIds, trackObservations, isRejected);
 }
 
-std::vector<AircraftTrackCheck::TrackObservation> AircraftTrackCheck::collectTrackObservations(
+std::vector<TrackCheck::TrackObservation> TrackCheck::collectTrackObservations(
     std::vector<size_t>::const_iterator trackObsIndicesBegin,
     std::vector<size_t>::const_iterator trackObsIndicesEnd,
     const std::vector<size_t> &validObsIds,
@@ -409,7 +409,7 @@ std::vector<AircraftTrackCheck::TrackObservation> AircraftTrackCheck::collectTra
   return trackObservations;
 }
 
-AircraftTrackCheck::SweepResult AircraftTrackCheck::sweepOverObservations(
+TrackCheck::SweepResult TrackCheck::sweepOverObservations(
     std::vector<TrackObservation> &trackObservations,
     const PiecewiseLinearInterpolation &maxValidSpeedAtPressure,
     std::vector<float> &workspace) const {
@@ -491,7 +491,7 @@ AircraftTrackCheck::SweepResult AircraftTrackCheck::sweepOverObservations(
   return SweepResult::ANOTHER_SWEEP_REQUIRED;
 }
 
-void AircraftTrackCheck::flagRejectedTrackObservations(
+void TrackCheck::flagRejectedTrackObservations(
     std::vector<size_t>::const_iterator trackObsIndicesBegin,
     std::vector<size_t>::const_iterator trackObsIndicesEnd,
     const std::vector<size_t> &validObsIds,
@@ -504,16 +504,16 @@ void AircraftTrackCheck::flagRejectedTrackObservations(
       isRejected[validObsIds[*trackObsIndexIt]] = true;
 }
 
-void AircraftTrackCheck::flagRejectedObservations(const std::vector<bool> &isRejected,
-                                                  std::vector<std::vector<bool> > &flagged) const {
+void TrackCheck::flagRejectedObservations(const std::vector<bool> &isRejected,
+                                          std::vector<std::vector<bool> > &flagged) const {
   for (std::vector<bool> & variableFlagged : flagged)
     for (size_t obsId = 0; obsId < isRejected.size(); ++obsId)
       if (isRejected[obsId])
         variableFlagged[obsId] = true;
 }
 
-void AircraftTrackCheck::print(std::ostream & os) const {
-  os << "AircraftTrackCheck: config = " << config_ << std::endl;
+void TrackCheck::print(std::ostream & os) const {
+  os << "TrackCheck: config = " << config_ << std::endl;
 }
 
 }  // namespace ufo

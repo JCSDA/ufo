@@ -1,4 +1,4 @@
-# These tests compare the output of the Aircraft Track Check filter against reference
+# These tests compare the output of the Track Check filter against reference
 # results obtained with the Met Office OPS code (Ops_AirTrackCheck). The first test case is used as
 # a baseline; in subsequent test cases the filter's configuration contains one parameter
 # whose value differs from the first case. The last case is identical to the first one except that
@@ -18,7 +18,7 @@ Observations:
       simulate:
         variables: [specific_humidity]
     ObsFilters:
-    - Filter: Aircraft Track Check
+    - Filter: Track Check
       variables: [specific_humidity]
       temporal_resolution: PT00H00M30S
       spatial_resolution:    20.000000
@@ -75,7 +75,7 @@ Observations:
       simulate:
         variables: [specific_humidity]
     ObsFilters:
-    - Filter: Aircraft Track Check
+    - Filter: Track Check
       variables: [specific_humidity]
       temporal_resolution: PT00H00M30S
       spatial_resolution:    20.000000
@@ -143,7 +143,7 @@ Observations:
       simulate:
         variables: [specific_humidity]
     ObsFilters:
-    - Filter: Aircraft Track Check
+    - Filter: Track Check
       variables: [specific_humidity]
       temporal_resolution: PT00H00M30S
       spatial_resolution:    20.000000
@@ -214,7 +214,7 @@ Observations:
       simulate:
         variables: [specific_humidity]
     ObsFilters:
-    - Filter: Aircraft Track Check
+    - Filter: Track Check
       variables: [specific_humidity]
       temporal_resolution: PT00H00M30S
       spatial_resolution:    20.000000
@@ -317,7 +317,7 @@ Observations:
       simulate:
         variables: [specific_humidity]
     ObsFilters:
-    - Filter: Aircraft Track Check
+    - Filter: Track Check
       variables: [specific_humidity]
       temporal_resolution: PT00H00M30S
       spatial_resolution:     0.500000
@@ -372,7 +372,7 @@ Observations:
       simulate:
         variables: [specific_humidity]
     ObsFilters:
-    - Filter: Aircraft Track Check
+    - Filter: Track Check
       variables: [specific_humidity]
       temporal_resolution: PT00H00M45S
       spatial_resolution:    20.000000
@@ -395,7 +395,7 @@ Observations:
       simulate:
         variables: [specific_humidity]
     ObsFilters:
-    - Filter: Aircraft Track Check
+    - Filter: Track Check
       variables: [specific_humidity]
       temporal_resolution: PT00H00M30S
       spatial_resolution:    20.000000
@@ -450,7 +450,7 @@ Observations:
       simulate:
         variables: [specific_humidity]
     ObsFilters:
-    - Filter: Aircraft Track Check
+    - Filter: Track Check
       variables: [specific_humidity]
       temporal_resolution: PT00H00M30S
       spatial_resolution:    20.000000
@@ -501,7 +501,7 @@ Observations:
       simulate:
         variables: [specific_humidity]
     ObsFilters:
-    - Filter: Aircraft Track Check
+    - Filter: Track Check
       variables: [specific_humidity]
       temporal_resolution: PT00H00M30S
       spatial_resolution:    20.000000
@@ -510,7 +510,7 @@ Observations:
       max_climb_rate:   200.000000
       max_speed_interpolation_points: {"0":  1000.000000, "20000":   400.000000, "100000":   200.000000, "110000":   200.000000}
       rejection_threshold:     0.500000
-      flight_id_variable:
+      station_id_variable:
         name: station_id@MetaData
     flaggedObservationsBenchmark:
         - 184

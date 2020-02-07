@@ -10,7 +10,6 @@
 
 #include "oops/base/instantiateObsFilterFactory.h"
 #include "oops/interface/ObsFilter.h"
-#include "ufo/filters/AircraftTrackCheck.h"
 #include "ufo/filters/BackgroundCheck.h"
 #include "ufo/filters/BlackList.h"
 #include "ufo/filters/DifferenceCheck.h"
@@ -24,6 +23,7 @@
 #include "ufo/filters/QCmanager.h"
 #include "ufo/filters/TemporalThinning.h"
 #include "ufo/filters/Thinning.h"
+#include "ufo/filters/TrackCheck.h"
 #include "ufo/gnssro/QC/BackgroundCheckRONBAM.h"
 #include "ufo/gnssro/QC/ROobserror.h"
 
@@ -60,8 +60,8 @@ template<typename MODEL> void instantiateObsFilterFactory() {
            makerChk14_("TemporalThinning");
   static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::ObsDiagnosticsWriter> >
            makerChk15_("YDIAGsaver");
-  static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::AircraftTrackCheck> >
-           makerChk16_("Aircraft Track Check");
+  static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::TrackCheck> >
+           makerChk16_("Track Check");
 }
 
 }  // namespace ufo
