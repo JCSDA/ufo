@@ -21,6 +21,8 @@ set ( filters_files
       ObsBoundsCheck.h
       MWCLWCheck.cc
       MWCLWCheck.h
+      ObsDiagnosticsWriter.cc
+      ObsDiagnosticsWriter.h
       ObsDomainCheck.cc
       ObsDomainCheck.h
       ObsDomainErrCheck.cc
@@ -58,6 +60,8 @@ set ( filters_files
       obsfunctions/ObsFunction.h
       obsfunctions/ObsFunctionBase.cc
       obsfunctions/ObsFunctionBase.h
+      obsfunctions/ObsFunctionCloudDetect.cc
+      obsfunctions/ObsFunctionCloudDetect.h
       obsfunctions/ObsFunctionErrfLat.cc
       obsfunctions/ObsFunctionErrfLat.h
       obsfunctions/ObsFunctionErrfTopo.cc

@@ -1,5 +1,6 @@
-window_begin: 2018-04-14T21:00:00Z
-window_end: 2018-04-15T03:00:00Z
+# window is such that zero obs will be selected
+window_begin: 2017-04-14T21:00:00Z
+window_end: 2017-04-15T03:00:00Z
 
 LinearObsOpTest: 
  coefTL:  1.0e-6
@@ -14,10 +15,10 @@ Observations:
    ObsSpace: 
     name: GnssroRef
     ObsDataIn: 
-     obsfile: Data/ioda/testinput_tier_1/gnssro_obs_2018041500_s.nc4
+     obsfile: Data/ioda/testinput_tier_1/gnssro_obs_2018041500_1obs.nc4
     simulate:
      variables: [refractivity]
    GeoVaLs: 
-    filename: Data/gnssro_geoval_2018041500_s.nc4
-   rmsequiv: 128.44644215949972
+    filename: Data/gnssro_geoval_2018041500_1obs.nc4
+   rmsequiv: 0.0
    tolerance: 1.0e-13

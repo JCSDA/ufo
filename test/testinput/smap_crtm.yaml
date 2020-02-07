@@ -12,24 +12,25 @@ Observations:
      name: CRTM
      Absorbers: [H2O,O3,CO2]
      Clouds: [Water, Ice]
+     Salinity: on 
      LinearObsOperator:
        Absorbers: [H2O,O3,CO2]
        Clouds: [Water, Ice]
      ObsOptions:
        inspectProfile: 1
-       Sensor_ID: amsua_n19
+       Sensor_ID: radiometer_smap
        EndianType: little_endian
        CoefficientPath: Data/
    ObsSpace:
-     name: amsua_n19
+     name: radiometer_smap
      ObsDataIn: 
-       obsfile: Data/ioda/testinput_tier_1/amsua_n19_obs_2018041500_m.nc4
+       obsfile: Data/ioda/testinput_tier_1/smap_obs_2018041500_m.nc4
      ObsDataOut:
-       obsfile: Data/ioda/testinput_tier_1/amsua_n19_obs_2018041500_m_out.nc4
+       obsfile: Data/ioda/testinput_tier_1/smap_obs_2018041500_m_out.nc4
      simulate:
        variables: [brightness_temperature]
-       channels: 1-10,15
+       channels: 1-4
    GeoVaLs: 
-     filename: Data/amsua_n19_geoval_2018041500_m.nc4
-   vecequiv: GsiHofX
+     filename: Data/smap_geoval_2018041500_m.nc4
+   rmsequiv: 153.40487259580365
    tolerance: 1.e-6

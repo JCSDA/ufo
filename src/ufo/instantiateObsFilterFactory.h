@@ -17,6 +17,7 @@
 #include "ufo/filters/Gaussian_Thinning.h"
 #include "ufo/filters/MWCLWCheck.h"
 #include "ufo/filters/ObsBoundsCheck.h"
+#include "ufo/filters/ObsDiagnosticsWriter.h"
 #include "ufo/filters/ObsDomainCheck.h"
 #include "ufo/filters/ObsDomainErrCheck.h"
 #include "ufo/filters/PreQC.h"
@@ -57,6 +58,8 @@ template<typename MODEL> void instantiateObsFilterFactory() {
            makerChk13_("Background Check RONBAM");
   static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::TemporalThinning> >
            makerChk14_("TemporalThinning");
+  static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::ObsDiagnosticsWriter> >
+           makerChk15_("YDIAGsaver");
   static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::AircraftTrackCheck> >
            makerChk16_("Aircraft Track Check");
 }

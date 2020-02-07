@@ -6,7 +6,7 @@ Observations:
   - ObsSpace:
       name: Aircraft
       ObsDataIn:
-        obsfile: Data/aircraft_obs_2018041500_m.nc4
+        obsfile: Data/ioda/testinput_tier_1/aircraft_obs_2018041500_m.nc4
       simulate:
         variables: [air_temperature]
     ObsFilters:
@@ -16,7 +16,7 @@ Observations:
   - ObsSpace:
       name: Aircraft
       ObsDataIn:
-        obsfile: Data/aircraft_obs_2018041500_m.nc4
+        obsfile: Data/ioda/testinput_tier_1/aircraft_obs_2018041500_m.nc4
       simulate:
         variables: [air_temperature]
     ObsFilters:
@@ -28,7 +28,7 @@ Observations:
   - ObsSpace:
       name: Aircraft
       ObsDataIn:
-        obsfile: Data/aircraft_obs_2018041500_m.nc4
+        obsfile: Data/ioda/testinput_tier_1/aircraft_obs_2018041500_m.nc4
       simulate:
         variables: [air_temperature]
     ObsFilters:

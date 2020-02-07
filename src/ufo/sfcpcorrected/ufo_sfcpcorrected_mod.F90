@@ -72,7 +72,6 @@ real(kind_real),    allocatable   :: cor_psfc(:)
 type(ufo_geoval),   pointer       :: model_ps, model_p, model_sfc_geomz, model_tv, model_geomz
 character(len=*), parameter       :: myname_="ufo_sfcpcorrected_simobs"
 character(max_string)             :: err_msg
-character(len=250)                :: buf
 real(kind_real)                   :: wf
 integer                           :: wi
 logical                           :: variable_present
@@ -179,7 +178,6 @@ do ivar = 1, nvars
    enddo
 enddo
 
-call fckit_log%info(buf)
 deallocate(obs_height)
 deallocate(obs_psfc)
 
@@ -237,7 +235,7 @@ TV  = 0.5 * (TV_m + TV_o)
 ! 2.  extrapolate pressure from station height to model surface height
 ! --------------------------------------------------------------------
 
-where ( H_o /= missing .and. P_o /= missing ) 
+where ( H_o /= missing .and. P_o /= missing )
    P_o2m = P_o * exp ( - (H_m - H_o) * grav / (rd * TV) )
 elsewhere
    P_o2m = P_o
@@ -291,7 +289,7 @@ real(kind_real), dimension(nobs)                        :: P_m2o, T_m, T_m2o !<l
 ! define the constant power exponent
 ind = rd * Lclr / grav
 
-where ( H_o /= missing .and. P_o /= missing ) 
+where ( H_o /= missing .and. P_o /= missing )
    ! calculate T_m   -- background temperature at model surface height
    !           T_m2o -- background temperature at station height
    T_m = TV_2000 * (P_m / P_2000) ** ind
