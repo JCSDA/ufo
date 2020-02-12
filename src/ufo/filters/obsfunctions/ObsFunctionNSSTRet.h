@@ -18,7 +18,7 @@
 namespace ufo {
 
 // -----------------------------------------------------------------------------
-// QC using retrieved near sea surface temperatur (NSST) from radiances
+// QC using retrieved near sea surface temperature (NSST) from radiances
 // 2-step QC procedures:
 // (1) Perform NSST retrieval from radiances at obs location, and obtained
 //     increment of NSST from its first guess value
