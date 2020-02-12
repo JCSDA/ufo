@@ -67,6 +67,8 @@ set ( filters_files
       obsfunctions/ObsFunctionErrfTransmittop.h
       obsfunctions/ObsFunctionErrfWavenum.cc
       obsfunctions/ObsFunctionErrfWavenum.h
+      obsfunctions/ObsFunctionNSSTRet.cc
+      obsfunctions/ObsFunctionNSSTRet.h
       obsfunctions/ObsFunctionScattering.cc
       obsfunctions/ObsFunctionScattering.h
       obsfunctions/ObsFunctionVelocity.cc
