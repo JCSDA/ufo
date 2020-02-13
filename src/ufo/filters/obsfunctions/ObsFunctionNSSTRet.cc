@@ -157,9 +157,10 @@ void ObsFunctionNSSTRet::compute(const ObsFilterData & in,
 
   // Retrieved NSST increment (dtz) and average of surface temeprature jacobian (ts_ave)
   // Setup constants
+  // tschk: threshold for surface temperature jacobian
+  // tzchk: threshold for SST temperature at obs location
   const float tschk = 0.2, tzchk = 0.85;
   const float e_ts = 0.5, e_ta = 1.0, e_qa = 0.85;
-  const int iud = 1, iall = 0;
   const float t0c = Constants::t0c;
 
   // Loop through locations
