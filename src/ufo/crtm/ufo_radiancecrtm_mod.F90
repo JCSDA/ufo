@@ -60,6 +60,7 @@ integer :: nvars_in
 integer :: ind, jspec
 character(len=max_string) :: err_msg
 type(fckit_configuration) :: f_confOpts
+logical :: request_cldfrac
 
  call f_confOper%get_or_die("ObsOptions",f_confOpts)
 
@@ -76,8 +77,14 @@ type(fckit_configuration) :: f_confOpts
  ! request from the model all the hardcoded atmospheric & surface variables + 
  ! 1 * n_Absorbers
  ! 2 * n_Clouds (mass content and effective radius)
- ! if sss is in ObsOptions + sss
  nvars_in = size(varin_default) + self%conf%n_Absorbers + 2 * self%conf%n_Clouds 
+ request_cldfrac = &
+   self%conf%n_Clouds > 0 .and. &
+   self%conf%Cloud_Fraction < 0.0
+ if ( request_cldfrac ) then
+   nvars_in = nvars_in + 1
+ end if
+ ! if sss is in ObsOptions + sss
  if (TRIM(self%conf%salinity_option) == "on") then
    nvars_in = nvars_in + 1
  end if
@@ -96,6 +103,10 @@ type(fckit_configuration) :: f_confOpts
    self%varin(ind) = self%conf%Clouds(jspec,2)
    ind = ind + 1
  end do
+ if ( request_cldfrac ) then
+   self%varin(ind) = var_cldfrac
+   ind = ind + 1
+ end if
  if (TRIM(self%conf%salinity_option) == "on") then
    self%varin(ind) = var_sfc_sss
    ind = ind + 1
