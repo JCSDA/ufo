@@ -95,9 +95,11 @@ Observations:
        channels: *all_channels
      action:
        name: inflate error
-       inflation: ErrfWavenum@ObsFunction
-       options:
+       inflation variable:
+         name: ErrfWavenum@ObsFunction
          channels: *all_channels
+         options:
+           channels: *all_channels
 #   passedBenchmark: 60092
 #  Observation Range Sanity Check
    - Filter: Bounds Check
@@ -116,9 +118,11 @@ Observations:
        channels: *all_channels
      action:
        name: inflate error
-       inflation: ErrfTopo@ObsFunction
-       options:
+       inflation variable:
+         name: ErrfTopo@ObsFunction
          channels: *all_channels
+         options:
+           channels: *all_channels
 #   passedBenchmark: 60084
 #  Transmittance Top Check
    - Filter: BlackList 
@@ -127,16 +131,18 @@ Observations:
        channels: *all_channels
      action:
        name: inflate error
-       inflation: ErrfTransmittop@ObsFunction
-       options:
+       inflation variable:
+         name: ErrfTransmittop@ObsFunction
          channels: *all_channels
+         options:
+           channels: *all_channels
 #   passedBenchmark: 60084
 #  Cloud Detection Check
    - Filter: Bounds Check
      filter variables:
      - name: brightness_temperature
        channels: *all_channels
-     test variables:
+     test functions:
      - name: CloudDetect@ObsFunction
        channels: *all_channels
        options:
@@ -216,7 +222,7 @@ Observations:
      filter variables:
      - name: brightness_temperature
        channels: *all_channels
-     test variables:
+     test functions:
      - name: NSSTRet@ObsFunction
        channels: *all_channels
        options:

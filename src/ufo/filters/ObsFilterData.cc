@@ -112,47 +112,19 @@ bool ObsFilterData::hasDataVector(const std::string & grp, const std::string & v
  *  \warning if data are unavailable, assertions would fail and method abort
  */
 void ObsFilterData::get(const Variable & varname, std::vector<float> & values) const {
-  const std::string var = varname.variable();
+  const std::string var = varname.variable(0);
   const std::string grp = varname.group();
 
-  std::size_t nvals = obsdb_.nlocs();
-///  VarMetaData is a special case: size(nvars) instead of (nlocs)
-  if (grp == "VarMetaData")  nvals = obsdb_.nvars();
-
-  values.resize(nvals);
-///  For GeoVaLs read from GeoVaLs (should be available)
-  if (grp == "GeoVaLs") {
-    ASSERT(gvals_);
-    gvals_->get(values, var);
-///  For ObsFunction instantiate ObsFunction and calculate the result
-///  TODO(AS?): cache results of function computations
-  } else if (grp == "ObsFunction") {
-    ioda::ObsDataVector<float> vals(obsdb_, var, grp, false);
-    ObsFunction obsfunc(varname);
-    obsfunc.compute(*this, vals);
-    for (size_t jj = 0; jj < nvals; ++jj) {
-      values[jj] = vals[var][jj];
-    }
-///  For HofX get from ObsVector H(x) (should be available)
-  } else if (this->hasVector(grp, var)) {
-    std::map<std::string, const ioda::ObsVector *>::const_iterator jv = ovecs_.find(grp);
-    size_t hofxnvars = jv->second->nvars();
-    size_t iv = jv->second->varnames().find(var);
-    for (size_t jj = 0; jj < nvals; ++jj) {
-      values[jj] = (*jv->second)[iv + (jj * hofxnvars)];
-    }
-///  For ObsDiag get from ObsDiagnostics
-  } else if (grp == "ObsDiag") {
-    ASSERT(diags_);
-    diags_->get(values, var);
-///  For data from ObsDataVector if available
-  } else if (this->hasDataVector(grp, var)) {
-    std::map<std::string, const ioda::ObsDataVector<float> *>::const_iterator jv = dvecs_.find(grp);
-    size_t iv = jv->second->varnames().find(var);
-    values = (*jv->second)[iv];
-///  Else must be coming from ObsSpace
-  } else {
+  if (grp == "VarMetaData") {
+    values.resize(obsdb_.nvars());
     obsdb_.get_db(grp, var, values);
+  } else {
+    ioda::ObsDataVector<float> vec(obsdb_, varname.toOopsVariables(), grp, false);
+    this->get(varname, vec);
+    values.resize(obsdb_.nlocs());
+    for (size_t jj = 0; jj < obsdb_.nlocs(); ++jj) {
+      values[jj] = vec[var][jj];
+    }
   }
 }
 
@@ -220,18 +192,41 @@ void ObsFilterData::get(const Variable & varname, const int level,
  *           if data are unavailable, assertions would fail and method abort
  */
 void ObsFilterData::get(const Variable & varname, ioda::ObsDataVector<float> & values) const {
-  const std::string var = varname.variable();
+  const std::string var = varname.variable(0);
   const std::string grp = varname.group();
-
-  if (grp == "ObsFunction") {
+  /// For GeoVaLs read single variable and save in the relevant field
+  if (grp == "GeoVaLs") {
+    ASSERT(gvals_);
+    std::vector<float> vec(obsdb_.nlocs());
+    gvals_->get(vec, var);
+    values[var] = vec;
+  /// For Function call compute
+  } else if (grp == "ObsFunction") {
     ObsFunction obsfunc(varname);
     obsfunc.compute(*this, values);
+  ///  For HofX get from ObsVector H(x) (should be available)
+  } else if (this->hasVector(grp, var)) {
+    std::map<std::string, const ioda::ObsVector *>::const_iterator jv = ovecs_.find(grp);
+    size_t hofxnvars = jv->second->nvars();
+    for (size_t ivar = 0; ivar < varname.size(); ++ivar) {
+      const std::string currvar = varname.variable(ivar);
+      size_t iv = jv->second->varnames().find(currvar);
+      for (size_t jj = 0; jj < obsdb_.nlocs(); ++jj) {
+        values[currvar][jj] = (*jv->second)[iv + (jj * hofxnvars)];
+      }
+    }
+///  For ObsDiag get from ObsDiagnostics
+  } else if (grp == "ObsDiag") {
+    ASSERT(diags_);
+    std::vector<float> vec(obsdb_.nlocs());
+    diags_->get(vec, var);
+    values[var] = vec;
 ///  For HofX get from ObsVector H(x) (should be available)
   } else if (this->hasDataVector(grp, var)) {
     std::map<std::string, const ioda::ObsDataVector<float> *>::const_iterator jv = dvecs_.find(grp);
     values = *jv->second;
   } else {
-    ABORT("ObsFilterData::get ObsDataVector Error");
+    values.read(grp);
   }
 }
 
