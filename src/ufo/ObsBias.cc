@@ -29,7 +29,12 @@ ObsBias::ObsBias(const ObsBias & other, const bool copy)
   : biasbase_(), conf_(other.config()), geovars_(), hdiags_(), predNames_() {
   if (other) {
     biasbase_.reset(ObsBiasFactory::create(other.obspace(), other.config()));
-    if (copy) *biasbase_ = other;
+    if (copy) {
+      *biasbase_  = other;
+      geovars_   += biasbase_->requiredGeoVaLs();
+      hdiags_    += biasbase_->requiredHdiagnostics();
+      predNames_ += biasbase_->predNames();
+    }
   }
 }
 
@@ -45,9 +50,9 @@ ObsBias & ObsBias::operator+=(const ObsBiasIncrement & dx) {
 ObsBias & ObsBias::operator=(const ObsBias & rhs) {
   if (biasbase_) {
     *biasbase_ = rhs;
-    geovars_   += biasbase_->requiredGeoVaLs();
-    hdiags_    += biasbase_->requiredHdiagnostics();
-    predNames_ += biasbase_->predNames();
+    geovars_   = biasbase_->requiredGeoVaLs();
+    hdiags_    = biasbase_->requiredHdiagnostics();
+    predNames_ = biasbase_->predNames();
   }
   return *this;
 }
