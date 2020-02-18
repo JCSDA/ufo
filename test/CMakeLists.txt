@@ -197,43 +197,45 @@ endif()
 if( NOT DEFINED LOCAL_PATH_TESTFILES )
   set(TESTFILE_DIR ${CMAKE_BINARY_DIR}/test_data/ioda CACHE PATH "data dir for test data")
   file(MAKE_DIRECTORY ${TESTFILE_DIR})
-else()
-  set(TESTFILE_DIR ${LOCAL_PATH_TESTFILES})
-endif()
+  message(STATUS "LOCAL_PATH_TESTFILES is not defined, download test files")
 
-
-# Get the current git branch
-execute_process(
+  # Get the current git branch
+  execute_process(
     COMMAND git rev-parse --abbrev-ref HEAD
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     OUTPUT_VARIABLE GIT_BRANCH
     OUTPUT_STRIP_TRAILING_WHITESPACE
-)
+  )
 
-# Check whether the URL exists or not 
-ecbuild_check_multiurl(NAMES   ${ufo_ioda_test_data}
+  # Check whether the URL exists or not 
+  ecbuild_check_multiurl(NAMES   ${ufo_ioda_test_data}
                        DIRNAME ${GIT_BRANCH}
                        RESULT  SPECIFIC_TEST_FILES)
 
-# Set distant directory
-if(${SPECIFIC_TEST_FILES} MATCHES 0)
+  # Set distant directory
+  if(${SPECIFIC_TEST_FILES} MATCHES 0)
     # Download and extract new test files (distant directory = git branch)
     set(DIRNAME ${GIT_BRANCH})
     message(STATUS "GIT_BRANCH found")
-else()
+  else()
     # Download and extract develop test files (distant directory = develop)
     set(DIRNAME "develop")
     message(STATUS "GIT_BRANCH not found, download develop")
-
-endif()
-message(STATUS "Test data downloaded from: " ${ECBUILD_DOWNLOAD_BASE_URL}/${DIRNAME})
-# Run test to download data
-ecbuild_get_test_multidata ( TARGET get_ioda_test_data_ufo
+  endif()
+  message(STATUS "Test data downloaded from: " ${ECBUILD_DOWNLOAD_BASE_URL}/${DIRNAME})
+  # Run test to download data
+  ecbuild_get_test_multidata ( TARGET get_ioda_test_data_ufo
                              NAMES ${ufo_ioda_test_data}
                              DIRNAME ${DIRNAME}
                              DIRLOCAL ${TESTFILE_DIR}
                              EXTRACT
                             )
+
+else()
+  set(TESTFILE_DIR ${LOCAL_PATH_TESTFILES})
+  message(STATUS "use LOCAL_PATH_TESTFILES : "${LOCAL_PATH_TESTFILES})
+endif()
+
 
 execute_process( COMMAND ${CMAKE_COMMAND} -E create_symlink
                  ${TESTFILE_DIR}
