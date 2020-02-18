@@ -61,7 +61,7 @@ template<typename MODEL> void instantiateObsFilterFactory() {
   static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::PoissonDiskThinning> >
            makerChk15_("Poisson Disk Thinning");
   static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::ObsDiagnosticsWriter> >
-           makerChk15_("YDIAGsaver");
+           makerChk16_("YDIAGsaver");
 }
 
 }  // namespace ufo
