@@ -44,6 +44,7 @@ list( APPEND ufo_test_input
   testinput/function_errftopo.yaml
   testinput/function_errftransmittop.yaml
   testinput/function_errfwavenum.yaml
+  testinput/function_nsstret.yaml
   testinput/function_velocity.yaml
   testinput/gmi_crtm.yaml
   testinput/genericprof.yaml
@@ -839,6 +840,12 @@ ecbuild_add_test( TARGET  test_ufo_function_errftransmittop
 ecbuild_add_test( TARGET  test_ufo_function_errfwavenum
                   SOURCES mains/TestObsFunction.cc
                   ARGS    "testinput/function_errfwavenum.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  LIBS    ufo)
+
+ecbuild_add_test( TARGET  test_ufo_function_nsstret
+                  SOURCES mains/TestObsFunction.cc
+                  ARGS    "testinput/function_nsstret.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   LIBS    ufo)
 
