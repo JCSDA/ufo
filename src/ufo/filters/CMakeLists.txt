@@ -18,6 +18,8 @@ set ( filters_files
       ObsBoundsCheck.h
       MWCLWCheck.cc
       MWCLWCheck.h
+      ObsDiagnosticsWriter.cc
+      ObsDiagnosticsWriter.h
       ObsDomainCheck.cc
       ObsDomainCheck.h
       ObsDomainErrCheck.cc
@@ -68,6 +70,8 @@ set ( filters_files
       obsfunctions/ObsFunctionErrfTransmittop.h
       obsfunctions/ObsFunctionErrfWavenum.cc
       obsfunctions/ObsFunctionErrfWavenum.h
+      obsfunctions/ObsFunctionNSSTRet.cc
+      obsfunctions/ObsFunctionNSSTRet.h
       obsfunctions/ObsFunctionScattering.cc
       obsfunctions/ObsFunctionScattering.h
       obsfunctions/ObsFunctionVelocity.cc

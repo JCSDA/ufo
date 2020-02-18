@@ -16,6 +16,7 @@
 #include "ufo/filters/Gaussian_Thinning.h"
 #include "ufo/filters/MWCLWCheck.h"
 #include "ufo/filters/ObsBoundsCheck.h"
+#include "ufo/filters/ObsDiagnosticsWriter.h"
 #include "ufo/filters/ObsDomainCheck.h"
 #include "ufo/filters/ObsDomainErrCheck.h"
 #include "ufo/filters/PoissonDiskThinning.h"
@@ -59,6 +60,8 @@ template<typename MODEL> void instantiateObsFilterFactory() {
            makerChk14_("TemporalThinning");
   static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::PoissonDiskThinning> >
            makerChk15_("Poisson Disk Thinning");
+  static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::ObsDiagnosticsWriter> >
+           makerChk15_("YDIAGsaver");
 }
 
 }  // namespace ufo
