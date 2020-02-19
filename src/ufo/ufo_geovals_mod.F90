@@ -1039,7 +1039,7 @@ do i = 1, self%nvar
        nf90_def_dim(ncid,trim(self%variables(i))//"_nval",self%geovals(i)%nval, dimid_nval))
   dims(1) = dimid_nval
   call check('nf90_def_var',  &
-       nf90_def_var(ncid,trim(self%variables(i)),nf90_double,dims,ncid_var(i)))
+       nf90_def_var(ncid,trim(self%variables(i)),nf90_float,dims,ncid_var(i)))
 enddo
 
 call check('nf90_enddef', nf90_enddef(ncid))
