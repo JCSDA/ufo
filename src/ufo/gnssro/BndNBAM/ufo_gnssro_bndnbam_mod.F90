@@ -87,6 +87,9 @@ subroutine ufo_gnssro_bndnbam_simobs(self, geovals, hofx, obss)
   write(err_msg,*) myname, ': nlocs from gelvals and hofx, nrecs', geovals%nlocs, nlocs, nrecs
   call fckit_log%info(err_msg)
 
+  if (nlocs > 0) then ! check if zero obs
+ 
+
 ! check if nobs is consistent in geovals & hofx
   if (geovals%nlocs /= size(hofx)) then
     write(err_msg,*) myname, ': nlocs inconsistent!', geovals%nlocs, size(hofx)
@@ -317,9 +320,6 @@ subroutine ufo_gnssro_bndnbam_simobs(self, geovals, hofx, obss)
     end do obs_loop
   end do rec_loop
 
-  write(err_msg,*) myname, ": complete"
-  call fckit_log%info(err_msg)
-
 ! putting temeprature at obs location to obs space for BackgroundCheck RONBAM
   call obsspace_put_db(obss, "MetaData", "temperature", temperature)
 ! putting super refraction flag to obs space 
@@ -347,6 +347,8 @@ subroutine ufo_gnssro_bndnbam_simobs(self, geovals, hofx, obss)
   deallocate(super)
   write(err_msg,*) myname, ": complete"
   call fckit_log%info(err_msg)
+
+  end if ! end check if zero obs
 end subroutine ufo_gnssro_bndnbam_simobs
 ! ------------------------------------------------------------------------------
 end module ufo_gnssro_bndnbam_mod
