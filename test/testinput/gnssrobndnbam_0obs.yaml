@@ -10,15 +10,15 @@ LinearObsOpTest:
 Observations: 
  ObsTypes: 
  - ObsOperator:
-    name: GnssroRef
+    name: GnssroBndNBAM
     ObsOptions:
    ObsSpace: 
-    name: GnssroRef
+    name: GnssroBndNBAM
     ObsDataIn: 
-     obsfile: Data/ioda/testinput_tier_1/gnssro_obs_2018041500_1obs.nc4
+     obsfile: Data/ioda/testinput_tier_1/gnssro_obs_2018041500_1obs_bending_angle.nc4
     simulate:
-     variables: [refractivity]
+     variables: [bending_angle]
    GeoVaLs: 
-    filename: Data/gnssro_geoval_2018041500_1obs.nc4
+    filename: Data/gnssro_geoval_2018041500_1obs_bending_angle.nc4
    rmsequiv: 0.0
    tolerance: 1.0e-13
