@@ -558,10 +558,10 @@ ecbuild_add_test( TARGET  test_ufo_opr_gnssroBndNBAM_1obs
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsOperator.x )
 
-ecbuild_add_test( TARGET  test_ufo_opr_gnssroRef_1obs_2pe
+ecbuild_add_test( TARGET  test_ufo_opr_gnssroBndNBAM_1obs_2pe
                   MPI     2
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
-                  ARGS    "testinput/gnssroref_1obs.yaml"
+                  ARGS    "testinput/gnssrobndnbam_1obs.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsOperator.x )
 
