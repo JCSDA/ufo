@@ -24,6 +24,7 @@
 #include "ufo/filters/QCmanager.h"
 #include "ufo/filters/TemporalThinning.h"
 #include "ufo/filters/Thinning.h"
+#include "ufo/filters/TrackCheck.h"
 #include "ufo/gnssro/QC/BackgroundCheckRONBAM.h"
 #include "ufo/gnssro/QC/ROobserror.h"
 
@@ -62,6 +63,8 @@ template<typename MODEL> void instantiateObsFilterFactory() {
            makerChk15_("Poisson Disk Thinning");
   static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::ObsDiagnosticsWriter> >
            makerChk16_("YDIAGsaver");
+    static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::TrackCheck> >
+           makerChk17_("Track Check");
 }
 
 }  // namespace ufo

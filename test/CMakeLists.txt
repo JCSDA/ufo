@@ -78,6 +78,8 @@ list( APPEND ufo_test_input
   testinput/obsfilterdata.yaml
   testinput/processwhere.yaml
   testinput/parameters.yaml
+  testinput/qc_trackcheck.yaml
+  testinput/qc_trackcheck_unittests.yaml
   testinput/qc_backgroundcheck.yaml
   testinput/qc_boundscheck.yaml
   testinput/qc_differencecheck.yaml
@@ -801,6 +803,12 @@ ecbuild_add_test( TARGET  test_ufo_qc_temporalthinning
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsFilters.x )
 
+ecbuild_add_test( TARGET  test_ufo_qc_trackcheck
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                  ARGS    "testinput/qc_trackcheck.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsFilters.x )
+
 # Test UFO ObsFilters (specific)
 
 ecbuild_add_test( TARGET  test_ufo_gaussianthinning
@@ -820,6 +828,12 @@ ecbuild_add_test( TARGET  test_ufo_recursivesplitter
 ecbuild_add_test( TARGET  test_ufo_temporalthinning
                   SOURCES mains/TestTemporalThinning.cc
                   ARGS    "testinput/qc_temporal_thinning_unittests.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  LIBS    ufo)
+
+ecbuild_add_test( TARGET  test_ufo_qc_trackcheck_unittests
+                  SOURCES mains/TestTrackCheck.cc
+                  ARGS    "testinput/qc_trackcheck_unittests.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   LIBS    ufo)
 

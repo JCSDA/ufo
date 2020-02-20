@@ -16,8 +16,6 @@
 
 #include <boost/make_shared.hpp>
 
-#define ECKIT_TESTING_SELF_REGISTER_CASES 0
-
 #include "eckit/testing/Test.h"
 #include "oops/runs/Test.h"
 #include "oops/util/Expect.h"
@@ -51,7 +49,7 @@ Groups getMultiElementGroups(const RecursiveSplitter &splitter) {
   return groups;
 }
 
-void testZeroIds() {
+CASE("ufo/RecursiveSplitter/ZeroIds") {
   RecursiveSplitter splitter(0);
   {
     Groups expectedGroups;
@@ -77,7 +75,7 @@ void testZeroIds() {
   }
 }
 
-void testOneId() {
+CASE("ufo/RecursiveSplitter/OneId") {
   RecursiveSplitter splitter(1);
   {
     Groups expectedGroups{{0}};
@@ -103,7 +101,7 @@ void testOneId() {
   }
 }
 
-void testTenIds() {
+CASE("ufo/RecursiveSplitter/TenIds") {
   RecursiveSplitter splitter(10);
   {
     Groups expectedGroups{{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}};
@@ -158,6 +156,42 @@ void testTenIds() {
   }
 }
 
+CASE("ufo/RecursiveSplitter/IntCategories") {
+  RecursiveSplitter splitter(10);
+
+  {
+    std::vector<int> categories{1, 2, 1, 2, 1, 2, 1, 2, 1, 2};
+    splitter.groupBy(categories);
+
+    Groups expectedGroups{{0, 2, 4, 6, 8}, {1, 3, 5, 7, 9}};
+    Groups groups = getGroups(splitter);
+    EXPECT_EQUAL(groups, expectedGroups);
+
+    Groups expectedMultiElementGroups{{0, 2, 4, 6, 8}, {1, 3, 5, 7, 9}};
+    Groups multiElementGroups = getMultiElementGroups(splitter);
+    EXPECT_EQUAL(multiElementGroups, expectedMultiElementGroups);
+  }
+}
+
+CASE("ufo/RecursiveSplitter/StringCategories") {
+  RecursiveSplitter splitter(10);
+
+  {
+    std::vector<std::string> categories{"abc", "def", "abc", "def",
+                                        "abc", "def", "abc", "def",
+                                        "abc", "def"};
+    splitter.groupBy(categories);
+
+    Groups expectedGroups{{0, 2, 4, 6, 8}, {1, 3, 5, 7, 9}};
+    Groups groups = getGroups(splitter);
+    EXPECT_EQUAL(groups, expectedGroups);
+
+    Groups expectedMultiElementGroups{{0, 2, 4, 6, 8}, {1, 3, 5, 7, 9}};
+    Groups multiElementGroups = getMultiElementGroups(splitter);
+    EXPECT_EQUAL(multiElementGroups, expectedMultiElementGroups);
+  }
+}
+
 class RecursiveSplitter : public oops::Test {
  public:
   RecursiveSplitter() {}
@@ -165,13 +199,7 @@ class RecursiveSplitter : public oops::Test {
  private:
   std::string testid() const override {return "ufo::test::RecursiveSplitter";}
 
-  void register_tests() const override {
-    std::vector<eckit::testing::Test>& ts = eckit::testing::specification();
-
-    ts.emplace_back(CASE("ufo/RecursiveSplitter/ZeroIds"){ testZeroIds(); });
-    ts.emplace_back(CASE("ufo/RecursiveSplitter/OneId"){ testOneId(); });
-    ts.emplace_back(CASE("ufo/RecursiveSplitter/TenIds"){ testTenIds(); });
-  }
+  void register_tests() const override {}
 };
 
 }  // namespace test

@@ -96,5 +96,6 @@ void RecursiveSplitter::shuffleGroups() {
 
 template void RecursiveSplitter::groupByImpl(const std::vector<int> &);
 template void RecursiveSplitter::groupByImpl(const std::vector<size_t> &);
+template void RecursiveSplitter::groupByImpl(const std::vector<std::string> &);
 
 }  // namespace ufo
