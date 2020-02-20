@@ -43,6 +43,9 @@ set ( filters_files
       Gaussian_Thinning.cc
       Gaussian_Thinning.h
       GaussianThinningParameters.h
+      PoissonDiskThinning.cc
+      PoissonDiskThinning.h
+      PoissonDiskThinningParameters.h
       processWhere.cc
       processWhere.h
       actions/FilterAction.cc
