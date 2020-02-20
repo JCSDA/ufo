@@ -46,6 +46,9 @@ set ( filters_files
       Gaussian_Thinning.cc
       Gaussian_Thinning.h
       GaussianThinningParameters.h
+      PoissonDiskThinning.cc
+      PoissonDiskThinning.h
+      PoissonDiskThinningParameters.h
       processWhere.cc
       processWhere.h
       actions/FilterAction.cc
@@ -70,6 +73,8 @@ set ( filters_files
       obsfunctions/ObsFunctionErrfTransmittop.h
       obsfunctions/ObsFunctionErrfWavenum.cc
       obsfunctions/ObsFunctionErrfWavenum.h
+      obsfunctions/ObsFunctionNSSTRet.cc
+      obsfunctions/ObsFunctionNSSTRet.h
       obsfunctions/ObsFunctionScattering.cc
       obsfunctions/ObsFunctionScattering.h
       obsfunctions/ObsFunctionVelocity.cc
