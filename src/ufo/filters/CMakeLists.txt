@@ -4,6 +4,9 @@
 # which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 
 set ( filters_files
+      TrackCheck.cc
+      TrackCheck.h
+      TrackCheckParameters.h
       BackgroundCheck.cc
       BackgroundCheck.h
       BlackList.cc
@@ -43,6 +46,9 @@ set ( filters_files
       Gaussian_Thinning.cc
       Gaussian_Thinning.h
       GaussianThinningParameters.h
+      PoissonDiskThinning.cc
+      PoissonDiskThinning.h
+      PoissonDiskThinningParameters.h
       processWhere.cc
       processWhere.h
       actions/FilterAction.cc

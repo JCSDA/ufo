@@ -19,10 +19,12 @@
 #include "ufo/filters/ObsDiagnosticsWriter.h"
 #include "ufo/filters/ObsDomainCheck.h"
 #include "ufo/filters/ObsDomainErrCheck.h"
+#include "ufo/filters/PoissonDiskThinning.h"
 #include "ufo/filters/PreQC.h"
 #include "ufo/filters/QCmanager.h"
 #include "ufo/filters/TemporalThinning.h"
 #include "ufo/filters/Thinning.h"
+#include "ufo/filters/TrackCheck.h"
 #include "ufo/gnssro/QC/BackgroundCheckRONBAM.h"
 #include "ufo/gnssro/QC/ROobserror.h"
 
@@ -57,8 +59,12 @@ template<typename MODEL> void instantiateObsFilterFactory() {
            makerChk13_("Background Check RONBAM");
   static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::TemporalThinning> >
            makerChk14_("TemporalThinning");
+  static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::PoissonDiskThinning> >
+           makerChk15_("Poisson Disk Thinning");
   static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::ObsDiagnosticsWriter> >
-           makerChk15_("YDIAGsaver");
+           makerChk16_("YDIAGsaver");
+    static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::TrackCheck> >
+           makerChk17_("Track Check");
 }
 
 }  // namespace ufo

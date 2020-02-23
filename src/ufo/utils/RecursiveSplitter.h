@@ -11,6 +11,7 @@
 #include <algorithm>
 #include <cassert>
 #include <cstddef>  // for size_t
+#include <string>
 #include <vector>
 
 #include "ufo/utils/ArrowProxy.h"
@@ -280,6 +281,11 @@ class RecursiveSplitter
       return groupByImpl(categories);
   }
 
+  /// \overload
+  void groupBy(const std::vector<std::string> &categories) {
+      return groupByImpl(categories);
+  }
+
   /// \brief Return the range of equivalence classes.
   GroupRange groups() const { return GroupRange(*this); }
 
@@ -292,6 +298,19 @@ class RecursiveSplitter
   /// to satisfy the same requirements as the \c comp argument of std::sort().
   template <typename Compare>
   void sortGroupsBy(Compare comp);
+
+  /// \brief Randomly shuffle the elements of each equivalence class.
+  ///
+  /// \param seed
+  ///   Seed with which to initialise the random number generator used by the shuffling algorithm
+  ///   if this hasn't been done before (in a previous call to shuffleGroups() or another function
+  ///   calling util::shuffle()).
+  void shuffleGroups(unsigned int seed);
+
+  /// \brief Randomly shuffle the elements of each equivalence class.
+  ///
+  /// This overload uses the defaul seed.
+  void shuffleGroups();
 
  private:
   void initializeEncodedGroups();

@@ -39,6 +39,7 @@ list( APPEND ufo_test_input
   testinput/coolskin.yaml
   testinput/cris_crtm.yaml
   testinput/cris_qc.yaml
+  testinput/empty.yaml
   testinput/function_clouddetect.yaml
   testinput/function_errflat.yaml
   testinput/function_errftopo.yaml
@@ -80,12 +81,16 @@ list( APPEND ufo_test_input
   testinput/obsfilterdata.yaml
   testinput/processwhere.yaml
   testinput/parameters.yaml
+  testinput/qc_trackcheck.yaml
+  testinput/qc_trackcheck_unittests.yaml
   testinput/qc_backgroundcheck.yaml
   testinput/qc_boundscheck.yaml
   testinput/qc_differencecheck.yaml
   testinput/qc_gauss_thinning.yaml
   testinput/qc_gauss_thinning_unittests.yaml
   testinput/qc_recursive_splitter.yaml
+  testinput/qc_poisson_disk_thinning.yaml
+  testinput/qc_poisson_disk_thinning_unittests.yaml
   testinput/qc_preqc.yaml
   testinput/qc_thinning.yaml
   testinput/qc_temporal_thinning.yaml
@@ -172,7 +177,6 @@ list( APPEND ufo_test_data
   atmosphere/sondes_geoval_2018041500_vs.nc4
   atmosphere/ssmis_f18_geoval_2018041500_m.nc4
   atmosphere/windprof_geoval_2018041500_m.nc4
-  filters/filters_testdata.nc4
   marine/coolskin_fake_geovals_2018041500.nc
   marine/cryosat2-2018-04-15_geovals.nc
   marine/icec-2018-04-15_geovals.nc
@@ -180,6 +184,8 @@ list( APPEND ufo_test_data
   marine/profile_2018-04-15_geovals.nc
   marine/sst_obs-2018-04-15_geovals.nc
   filters/filters_testdata.nc4
+  filters/met_office_poisson_disk_thinning.nc4
+  filters/poisson_disk_thinning_3x3x3x3_regular_grid.nc4
 )
 
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Data)
@@ -201,43 +207,45 @@ endif()
 if( NOT DEFINED LOCAL_PATH_TESTFILES )
   set(TESTFILE_DIR ${CMAKE_BINARY_DIR}/test_data/ioda CACHE PATH "data dir for test data")
   file(MAKE_DIRECTORY ${TESTFILE_DIR})
-else()
-  set(TESTFILE_DIR ${LOCAL_PATH_TESTFILES})
-endif()
+  message(STATUS "LOCAL_PATH_TESTFILES is not defined, download test files")
 
-
-# Get the current git branch
-execute_process(
+  # Get the current git branch
+  execute_process(
     COMMAND git rev-parse --abbrev-ref HEAD
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     OUTPUT_VARIABLE GIT_BRANCH
     OUTPUT_STRIP_TRAILING_WHITESPACE
-)
+  )
 
-# Check whether the URL exists or not 
-ecbuild_check_multiurl(NAMES   ${ufo_ioda_test_data}
+  # Check whether the URL exists or not 
+  ecbuild_check_multiurl(NAMES   ${ufo_ioda_test_data}
                        DIRNAME ${GIT_BRANCH}
                        RESULT  SPECIFIC_TEST_FILES)
 
-# Set distant directory
-if(${SPECIFIC_TEST_FILES} MATCHES 0)
+  # Set distant directory
+  if(${SPECIFIC_TEST_FILES} MATCHES 0)
     # Download and extract new test files (distant directory = git branch)
     set(DIRNAME ${GIT_BRANCH})
     message(STATUS "GIT_BRANCH found")
-else()
+  else()
     # Download and extract develop test files (distant directory = develop)
     set(DIRNAME "develop")
     message(STATUS "GIT_BRANCH not found, download develop")
-
-endif()
-message(STATUS "Test data downloaded from: " ${ECBUILD_DOWNLOAD_BASE_URL}/${DIRNAME})
-# Run test to download data
-ecbuild_get_test_multidata ( TARGET get_ioda_test_data_ufo
+  endif()
+  message(STATUS "Test data downloaded from: " ${ECBUILD_DOWNLOAD_BASE_URL}/${DIRNAME})
+  # Run test to download data
+  ecbuild_get_test_multidata ( TARGET get_ioda_test_data_ufo
                              NAMES ${ufo_ioda_test_data}
                              DIRNAME ${DIRNAME}
                              DIRLOCAL ${TESTFILE_DIR}
                              EXTRACT
                             )
+
+else()
+  set(TESTFILE_DIR ${LOCAL_PATH_TESTFILES})
+  message(STATUS "use LOCAL_PATH_TESTFILES : "${LOCAL_PATH_TESTFILES})
+endif()
+
 
 execute_process( COMMAND ${CMAKE_COMMAND} -E create_symlink
                  ${TESTFILE_DIR}
@@ -780,6 +788,12 @@ ecbuild_add_test( TARGET  test_ufo_qc_gauss_thinning
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsFilters.x )
 
+ecbuild_add_test( TARGET  test_ufo_qc_poisson_disk_thinning
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                  ARGS    "testinput/qc_poisson_disk_thinning.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsFilters.x )
+
 ecbuild_add_test( TARGET  test_ufo_qc_preqc
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
                   ARGS    "testinput/qc_preqc.yaml"
@@ -789,6 +803,12 @@ ecbuild_add_test( TARGET  test_ufo_qc_preqc
 ecbuild_add_test( TARGET  test_ufo_qc_temporalthinning
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
                   ARGS    "testinput/qc_temporal_thinning.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsFilters.x )
+
+ecbuild_add_test( TARGET  test_ufo_qc_trackcheck
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                  ARGS    "testinput/qc_trackcheck.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsFilters.x )
 
@@ -811,6 +831,18 @@ ecbuild_add_test( TARGET  test_ufo_recursivesplitter
 ecbuild_add_test( TARGET  test_ufo_temporalthinning
                   SOURCES mains/TestTemporalThinning.cc
                   ARGS    "testinput/qc_temporal_thinning_unittests.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  LIBS    ufo)
+
+ecbuild_add_test( TARGET  test_ufo_qc_trackcheck_unittests
+                  SOURCES mains/TestTrackCheck.cc
+                  ARGS    "testinput/qc_trackcheck_unittests.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  LIBS    ufo)
+
+ecbuild_add_test( TARGET  test_ufo_qc_poisson_disk_thinning_unittests
+                  SOURCES mains/TestPoissonDiskThinning.cc
+                  ARGS    "testinput/qc_poisson_disk_thinning_unittests.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   LIBS    ufo)
 
@@ -897,6 +929,13 @@ endif ( ${CRTM_FOUND} )
 ecbuild_add_test( TARGET  test_ufo_parameters
                   SOURCES mains/TestParameters.cc
                   ARGS    "testinput/parameters.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  LIBS    ufo)
+
+# Test piecewise linear interpolation
+ecbuild_add_test( TARGET  test_ufo_piecewise_linear_interpolation
+                  SOURCES mains/TestPiecewiseLinearInterpolation.cc
+                  ARGS    "testinput/empty.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   LIBS    ufo)
 
