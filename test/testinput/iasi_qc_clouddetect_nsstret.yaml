@@ -78,7 +78,6 @@ Observations:
      - name: brightness_temperature
        channels: *all_channels
      test functions:
-#     test variables:
      - name: CloudDetect@ObsFunction
        channels: *all_channels
        options:
