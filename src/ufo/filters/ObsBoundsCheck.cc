@@ -71,10 +71,10 @@ void ObsBoundsCheck::applyFilter(const std::vector<bool> & apply,
                        << config_ << std::endl;
     ABORT("No variables specified to be filtered out in filter");
   }
-  if (filtervars.nvars() != testvars.nvars()) {
+  if (filtervars.size() != testvars.size()) {
     oops::Log::error() << "Filter and test variables in Bounds Check have "
-                       << "different sizes: " << filtervars.nvars() << " and "
-                       << testvars.nvars() << std::endl;
+                       << "different sizes: " << filtervars.size() << " and "
+                       << testvars.size() << std::endl;
     ABORT("Filter and test variables in Bounds Check have different sizes");
   }
   oops::Log::debug() << "ObsBoundsCheck: filtering " << filtervars << " with "
@@ -86,18 +86,29 @@ void ObsBoundsCheck::applyFilter(const std::vector<bool> & apply,
                                           "ObsFunction", false);
       data_.get(testvars[iv], testdata);
 
+      std::vector<size_t> test_jv(filtervars[iv].size(), 0);
+      if (testvars[iv].size() == filtervars[iv].size()) {
+        std::iota(test_jv.begin(), test_jv.end(), 0);
+      }
+
       // Loop over all variables to filter
-      for (size_t jv = 0; jv < testvars[iv].size(); ++jv) {
+      for (size_t jv = 0; jv < filtervars[iv].size(); ++jv) {
         for (size_t jobs = 0; jobs < obsdb_.nlocs(); ++jobs) {
           if (apply[jobs]) {
-            ASSERT(testdata[jv][jobs] != missing);
-            if (vmin != missing && testdata[jv][jobs] < vmin) flagged[jv][jobs] = true;
-            if (vmax != missing && testdata[jv][jobs] > vmax) flagged[jv][jobs] = true;
+            ASSERT(testdata[test_jv[jv]][jobs] != missing);
+            if (vmin != missing && testdata[test_jv[jv]][jobs] < vmin) flagged[jv][jobs] = true;
+            if (vmax != missing && testdata[test_jv[jv]][jobs] > vmax) flagged[jv][jobs] = true;
           }
         }
       }
     }
   } else {
+    if (filtervars.nvars() != testvars.nvars()) {
+      oops::Log::error() << "Filter and test variables in Bounds Check have "
+                         << "different sizes: " << filtervars.nvars() << " and "
+                         << testvars.nvars() << std::endl;
+      ABORT("Filter and test variables in Bounds Check have different sizes");
+    }
     // Loop over all variables to filter
     for (size_t jv = 0; jv < testvars.nvars(); ++jv) {
       //  get test data for this variable
