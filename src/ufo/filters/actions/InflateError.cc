@@ -29,6 +29,7 @@ InflateError::InflateError(const eckit::Configuration & conf)
   if (conf_.has("inflation variable")) {
     allvars_ += Variable(conf_.getSubConfiguration("inflation variable"));
   }
+  ASSERT(conf_.has("inflation variable") || conf_.has("inflation factor"));
 }
 
 // -----------------------------------------------------------------------------
@@ -53,8 +54,7 @@ void InflateError::apply(const Variables & vars,
     Variable factorvar(conf_.getSubConfiguration("inflation variable"));
     ASSERT(factorvar.size() == 1 || factorvar.size() == vars.nvars());
     oops::Log::debug() << "processing data: " << strfactor_ << std::endl;
-    ioda::ObsDataVector<float> factors(data.obsspace(), factorvar.toOopsVariables(),
-                                       factorvar.group(), false);
+    ioda::ObsDataVector<float> factors(data.obsspace(), factorvar.toOopsVariables());
     data.get(factorvar, factors);
     // if inflation factor is 1D variable, apply the same inflation factor to all variables
     // factor_jv = {0, 0, 0, ..., 0} for all nvars
