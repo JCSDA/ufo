@@ -60,6 +60,13 @@ before_install:
   - git checkout $BRANCH || echo "No branch named $BRANCH in oops repo"
   - cd $REPO_SOURCE_DIR  
 
+#  checkout for the same branch name in atlas
+  - git clone https://github.com/jcsda/atlas.git ${REPO_SOURCE_DIR}/ufo-bundle/atlas
+  - cd ${REPO_SOURCE_DIR}/ufo-bundle/atlas
+  - git checkout $BRANCH || echo "No branch named $BRANCH in atlas repo"
+  - cd $REPO_SOURCE_DIR  
+
+
 #  checkout for the same branch name in saber
   - git clone https://github.com/jcsda/saber.git ${REPO_SOURCE_DIR}/ufo-bundle/saber
   - cd ${REPO_SOURCE_DIR}/ufo-bundle/saber
