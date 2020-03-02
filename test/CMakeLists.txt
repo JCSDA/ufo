@@ -198,14 +198,14 @@ list( APPEND ufo_ioda_test_data
 set(ECBUILD_DOWNLOAD_BASE_URL https://jedi-test-files.s3.amazonaws.com/ioda)
 
 # If local path to testfiles is defined don't download
-if (DEFINED ENV{LOCAL_PATH_TESTFILES})
-        set(LOCAL_PATH_TESTFILES "$ENV{LOCAL_PATH_TESTFILES}")
+if (DEFINED ENV{LOCAL_PATH_TESTFILES_IODA})
+	set(LOCAL_PATH_TESTFILES_IODA "$ENV{LOCAL_PATH_TESTFILES_IODA}")
 endif()
 
-if( NOT DEFINED LOCAL_PATH_TESTFILES )
+if( NOT DEFINED LOCAL_PATH_TESTFILES_IODA )
   set(TESTFILE_DIR ${CMAKE_BINARY_DIR}/test_data/ioda CACHE PATH "data dir for test data")
   file(MAKE_DIRECTORY ${TESTFILE_DIR})
-  message(STATUS "LOCAL_PATH_TESTFILES is not defined, download test files")
+  message(STATUS "LOCAL_PATH_TESTFILES_IODA is not defined, download test files")
 
   # Get the current git branch
   execute_process(
@@ -231,6 +231,9 @@ if( NOT DEFINED LOCAL_PATH_TESTFILES )
     message(STATUS "GIT_BRANCH not found, download develop")
   endif()
   message(STATUS "Test data downloaded from: " ${ECBUILD_DOWNLOAD_BASE_URL}/${DIRNAME})
+
+  message(STATUS "Save data to " ${TESTFILE_DIR})
+
   # Run test to download data
   ecbuild_get_test_multidata ( TARGET get_ioda_test_data_ufo
                              NAMES ${ufo_ioda_test_data}
@@ -240,8 +243,8 @@ if( NOT DEFINED LOCAL_PATH_TESTFILES )
                             )
 
 else()
-  set(TESTFILE_DIR ${LOCAL_PATH_TESTFILES})
-  message(STATUS "use LOCAL_PATH_TESTFILES : "${LOCAL_PATH_TESTFILES})
+	set(TESTFILE_DIR ${LOCAL_PATH_TESTFILES_IODA})
+	message(STATUS "use LOCAL_PATH_TESTFILES_IODA : "${LOCAL_PATH_TESTFILES_IODA})
 endif()
 
 
