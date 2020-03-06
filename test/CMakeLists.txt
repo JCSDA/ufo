@@ -41,6 +41,8 @@ list( APPEND ufo_test_input
   testinput/cris_qc.yaml
   testinput/empty.yaml
   testinput/function_clouddetect.yaml
+  testinput/function_errfgrosschk.yaml
+  testinput/function_errfjsfc.yaml
   testinput/function_errflat.yaml
   testinput/function_errftopo.yaml
   testinput/function_errftransmittop.yaml
@@ -855,6 +857,18 @@ ecbuild_add_test( TARGET  test_ufo_qc_poisson_disk_thinning_unittests
 ecbuild_add_test( TARGET  test_ufo_function_clouddetect
                   SOURCES mains/TestObsFunction.cc
                   ARGS    "testinput/function_clouddetect.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  LIBS    ufo)
+
+ecbuild_add_test( TARGET  test_ufo_function_errfgrosschk
+                  SOURCES mains/TestObsFunction.cc
+                  ARGS    "testinput/function_errfgrosschk.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  LIBS    ufo)
+
+ecbuild_add_test( TARGET  test_ufo_function_errfjsfc
+                  SOURCES mains/TestObsFunction.cc
+                  ARGS    "testinput/function_errfjsfc.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   LIBS    ufo)
 

@@ -65,6 +65,10 @@ set ( filters_files
       obsfunctions/ObsFunctionBase.h
       obsfunctions/ObsFunctionCloudDetect.cc
       obsfunctions/ObsFunctionCloudDetect.h
+      obsfunctions/ObsFunctionErrfGrosschk.cc
+      obsfunctions/ObsFunctionErrfGrosschk.h
+      obsfunctions/ObsFunctionErrfJsfc.cc
+      obsfunctions/ObsFunctionErrfJsfc.h
       obsfunctions/ObsFunctionErrfLat.cc
       obsfunctions/ObsFunctionErrfLat.h
       obsfunctions/ObsFunctionErrfTopo.cc
