@@ -201,14 +201,14 @@ list( APPEND ufo_ioda_test_data
 set(ECBUILD_DOWNLOAD_BASE_URL https://jedi-test-files.s3.amazonaws.com/ioda)
 
 # If local path to testfiles is defined don't download
-if (DEFINED ENV{LOCAL_PATH_TESTFILES})
-        set(LOCAL_PATH_TESTFILES "$ENV{LOCAL_PATH_TESTFILES}")
+if (DEFINED ENV{LOCAL_PATH_TESTFILES_IODA})
+	set(LOCAL_PATH_TESTFILES_IODA "$ENV{LOCAL_PATH_TESTFILES_IODA}")
 endif()
 
-if( NOT DEFINED LOCAL_PATH_TESTFILES )
-  set(TESTFILE_DIR ${CMAKE_BINARY_DIR}/test_data/ioda CACHE PATH "data dir for test data")
-  file(MAKE_DIRECTORY ${TESTFILE_DIR})
-  message(STATUS "LOCAL_PATH_TESTFILES is not defined, download test files")
+if( NOT DEFINED LOCAL_PATH_TESTFILES_IODA )
+  set(TESTFILE_DIR_IODA ${CMAKE_BINARY_DIR}/test_data/ioda CACHE PATH "data dir for test data")
+  file(MAKE_DIRECTORY ${TESTFILE_DIR_IODA})
+  message(STATUS "LOCAL_PATH_TESTFILES_IODA is not defined, download test files")
 
   # Get the current git branch
   execute_process(
@@ -234,22 +234,25 @@ if( NOT DEFINED LOCAL_PATH_TESTFILES )
     message(STATUS "GIT_BRANCH not found, download develop")
   endif()
   message(STATUS "Test data downloaded from: " ${ECBUILD_DOWNLOAD_BASE_URL}/${DIRNAME})
+
+  message(STATUS "Save data to " ${TESTFILE_DIR_IODA})
+
   # Run test to download data
   ecbuild_get_test_multidata ( TARGET get_ioda_test_data_ufo
                              NAMES ${ufo_ioda_test_data}
                              DIRNAME ${DIRNAME}
-                             DIRLOCAL ${TESTFILE_DIR}
+                             DIRLOCAL ${TESTFILE_DIR_IODA}
                              EXTRACT
                             )
 
 else()
-  set(TESTFILE_DIR ${LOCAL_PATH_TESTFILES})
-  message(STATUS "use LOCAL_PATH_TESTFILES : "${LOCAL_PATH_TESTFILES})
+	set(TESTFILE_DIR_IODA ${LOCAL_PATH_TESTFILES_IODA})
+	message(STATUS "use LOCAL_PATH_TESTFILES_IODA : "${LOCAL_PATH_TESTFILES_IODA})
 endif()
 
 
 execute_process( COMMAND ${CMAKE_COMMAND} -E create_symlink
-                 ${TESTFILE_DIR}
+                 ${TESTFILE_DIR_IODA}
                  ${CMAKE_CURRENT_BINARY_DIR}/Data/ioda
                 )
 
