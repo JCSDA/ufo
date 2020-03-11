@@ -3,9 +3,7 @@ window_end: 2018-04-15T03:00:00Z
 
 Observations:
   ObsTypes:
-  - ObsOperator:
-      name: VertInterp
-    ObsSpace:
+  - ObsSpace:
       name: Satwind
       ObsDataIn:
         obsfile: Data/ioda/testinput_tier_1/satwind_obs_2018041500_m.nc4
@@ -17,16 +15,7 @@ Observations:
       filename: Data/satwind_geoval_2018041500_m.nc4
       variables: [eastward_wind, northward_wind, air_pressure]
       norm: 4307792.01444180
-  - ObsOperator:
-      name: CRTM
-      Absorbers: [H2O,O3,CO2]
-      Clouds: [Water, Ice]
-      Cloud_Fraction: 1.0
-      ObsOptions:
-        Sensor_ID: amsua_n19
-        EndianType: little_endian
-        CoefficientPath: Data/
-    ObsSpace:
+  - ObsSpace:
       name: amsua_n19
       ObsDataIn:
         obsfile: Data/ioda/testinput_tier_1/amsua_n19_obs_2018041500_m.nc4
@@ -38,16 +27,33 @@ Observations:
     GeoVaLs:
       filename: Data/amsua_n19_geoval_2018041500_m.nc4
       variables:
-      - surface_temperature_where_snow
-      - soil_temperature
-      - volume_fraction_of_condensed_water_in_soil
-      - land_type_index
-      - surface_wind_speed
-      - soil_type
       - air_temperature
       - air_pressure
       - air_pressure_levels
       - humidity_mixing_ratio
+      - mole_fraction_of_ozone_in_air
+      - mole_fraction_of_carbon_dioxide_in_air
+      - mass_content_of_cloud_liquid_water_in_atmosphere_layer
+      - mass_content_of_cloud_ice_in_atmosphere_layer
+      - effective_radius_of_cloud_liquid_water_particle
+      - effective_radius_of_cloud_ice_particle
+      - water_area_fraction
+      - land_area_fraction
+      - ice_area_fraction
+      - surface_snow_area_fraction
+      - surface_temperature_where_sea
+      - surface_temperature_where_land
+      - surface_temperature_where_ice
+      - surface_temperature_where_snow
+      - surface_snow_thickness
+      - vegetation_area_fraction
+      - surface_wind_speed
+      - surface_wind_from_direction
+      - leaf_area_index
+      - soil_temperature
+      - volume_fraction_of_condensed_water_in_soil
+      - land_type_index
+      - soil_type
       norm: 5948559.5381
 
 
