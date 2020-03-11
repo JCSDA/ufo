@@ -69,10 +69,11 @@ list( APPEND ufo_test_input
   testinput/hirs4_crtm.yaml
   testinput/iasi_crtm.yaml
   testinput/iasi_qc.yaml
-  testinput/iasi_qc_filters.yaml
   testinput/iasi_qc_clouddetect.yaml
-  testinput/iasi_qc_nsstret.yaml
   testinput/iasi_qc_clouddetect_nsstret.yaml
+  testinput/iasi_qc_errfgrosschk.yaml
+  testinput/iasi_qc_filters.yaml
+  testinput/iasi_qc_nsstret.yaml
   testinput/locations.yaml
   testinput/mhs_crtm.yaml
   testinput/obsdiag_crtm_jacobian.yaml
@@ -984,27 +985,33 @@ if ( ${CRTM_FOUND} )
                       ENVIRONMENT OOPS_TRAPFPE=1
                       DEPENDS test_ObsFilters.x )
 
-    ecbuild_add_test( TARGET  test_ufo_qc_iasi_filters
-                      COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-                      ARGS    "testinput/iasi_qc_filters.yaml"
-                      ENVIRONMENT OOPS_TRAPFPE=1
-                      DEPENDS test_ObsFilters.x )
-
     ecbuild_add_test( TARGET  test_ufo_qc_iasi_clouddetect
                       COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
                       ARGS    "testinput/iasi_qc_clouddetect.yaml"
                       ENVIRONMENT OOPS_TRAPFPE=1
                       DEPENDS test_ObsFilters.x )
 
-    ecbuild_add_test( TARGET  test_ufo_qc_iasi_nsstret
-                      COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-                      ARGS    "testinput/iasi_qc_nsstret.yaml"
-                      ENVIRONMENT OOPS_TRAPFPE=1
-                      DEPENDS test_ObsFilters.x )
-
     ecbuild_add_test( TARGET  test_ufo_qc_iasi_clouddetect_nsstret
                       COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
                       ARGS    "testinput/iasi_qc_clouddetect_nsstret.yaml"
+                      ENVIRONMENT OOPS_TRAPFPE=1
+                      DEPENDS test_ObsFilters.x )
+
+    ecbuild_add_test( TARGET  test_ufo_qc_iasi_errfgrosschk
+                      COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                      ARGS    "testinput/iasi_qc_errfgrosschk.yaml"
+                      ENVIRONMENT OOPS_TRAPFPE=1
+                      DEPENDS test_ObsFilters.x )
+
+    ecbuild_add_test( TARGET  test_ufo_qc_iasi_filters
+                      COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                      ARGS    "testinput/iasi_qc_filters.yaml"
+                      ENVIRONMENT OOPS_TRAPFPE=1
+                      DEPENDS test_ObsFilters.x )
+
+    ecbuild_add_test( TARGET  test_ufo_qc_iasi_nsstret
+                      COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                      ARGS    "testinput/iasi_qc_nsstret.yaml"
                       ENVIRONMENT OOPS_TRAPFPE=1
                       DEPENDS test_ObsFilters.x )
 
