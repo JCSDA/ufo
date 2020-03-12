@@ -7,6 +7,8 @@
 
 #include "ufo/filters/ObsBoundsCheck.h"
 
+#include <algorithm>
+#include <set>
 #include <vector>
 
 #include "eckit/config/Configuration.h"
@@ -14,8 +16,11 @@
 #include "ioda/ObsDataVector.h"
 #include "ioda/ObsSpace.h"
 #include "oops/util/abor1_cpp.h"
+#include "oops/util/IntSetParser.h"
 #include "oops/util/Logger.h"
 #include "oops/util/missingValues.h"
+#include "ufo/filters/obsfunctions/ObsFunction.h"
+#include "ufo/utils/StringUtils.h"
 
 namespace ufo {
 
@@ -26,12 +31,13 @@ ObsBoundsCheck::ObsBoundsCheck(ioda::ObsSpace & obsdb, const eckit::Configuratio
                                boost::shared_ptr<ioda::ObsDataVector<float> > obserr)
   : FilterBase(obsdb, config, flags, obserr)
 {
-  if (config_.has("test variables")) {
+  if (config_.has("test variables") || config_.has("test functions")) {
     std::vector<eckit::LocalConfiguration> testvarconf;
-    config_.get("test variables", testvarconf);
+    if (config_.has("test variables")) config_.get("test variables", testvarconf);
+    if (config_.has("test functions")) config_.get("test functions", testvarconf);
     allvars_ += ufo::Variables(testvarconf);
   }
-  oops::Log::debug() << "ObsBoundsCheck: config = " << config_ << std::endl;
+  oops::Log::debug() << "ObsBoundsCheck: config (constructor) = " << config_ << std::endl;
 }
 
 // -----------------------------------------------------------------------------
@@ -47,10 +53,11 @@ void ObsBoundsCheck::applyFilter(const std::vector<bool> & apply,
 
 // Find which variables are tested and the conditions
   ufo::Variables testvars;
-// Use variables specified in test variables for testing, otherwise filter variables
-  if (config_.has("test variables")) {
+// Use variables specified in test variables/functions for testing, otherwise filter variables
+  if (config_.has("test variables") || config_.has("test functions")) {
     std::vector<eckit::LocalConfiguration> varconfs;
-    config_.get("test variables", varconfs);
+    if (config_.has("test variables")) config_.get("test variables", varconfs);
+    if (config_.has("test functions")) config_.get("test functions", varconfs);
     testvars += ufo::Variables(varconfs);
   } else {
     testvars += ufo::Variables(filtervars, "ObsValue");
@@ -64,26 +71,56 @@ void ObsBoundsCheck::applyFilter(const std::vector<bool> & apply,
                        << config_ << std::endl;
     ABORT("No variables specified to be filtered out in filter");
   }
-  if (filtervars.nvars() != testvars.nvars()) {
+  if (filtervars.size() != testvars.size()) {
     oops::Log::error() << "Filter and test variables in Bounds Check have "
-                       << "different sizes: " << filtervars.nvars() << " and "
-                       << testvars.nvars() << std::endl;
+                       << "different sizes: " << filtervars.size() << " and "
+                       << testvars.size() << std::endl;
     ABORT("Filter and test variables in Bounds Check have different sizes");
   }
   oops::Log::debug() << "ObsBoundsCheck: filtering " << filtervars << " with "
                      << testvars << std::endl;
 
-// Loop over all variables to filter
-  for (size_t jv = 0; jv < testvars.nvars(); ++jv) {
-//  get test data for this variable
-    std::vector<float> testdata;
-    data_.get(testvars.variable(jv), testdata);
-//  apply the filter
-    for (size_t jobs = 0; jobs < obsdb_.nlocs(); ++jobs) {
-      if (apply[jobs]) {
-        ASSERT(testdata[jobs] != missing);
-        if (vmin != missing && testdata[jobs] < vmin) flagged[jv][jobs] = true;
-        if (vmax != missing && testdata[jobs] > vmax) flagged[jv][jobs] = true;
+  if (config_.has("test functions")) {
+    for (size_t iv = 0; iv < testvars.size(); ++iv) {
+      ioda::ObsDataVector<float> testdata(obsdb_, testvars[iv].toOopsVariables(),
+                                          "ObsFunction", false);
+      data_.get(testvars[iv], testdata);
+
+      std::vector<size_t> test_jv(filtervars[iv].size(), 0);
+      if (testvars[iv].size() == filtervars[iv].size()) {
+        std::iota(test_jv.begin(), test_jv.end(), 0);
+      }
+
+      // Loop over all variables to filter
+      for (size_t jv = 0; jv < filtervars[iv].size(); ++jv) {
+        for (size_t jobs = 0; jobs < obsdb_.nlocs(); ++jobs) {
+          if (apply[jobs]) {
+            ASSERT(testdata[test_jv[jv]][jobs] != missing);
+            if (vmin != missing && testdata[test_jv[jv]][jobs] < vmin) flagged[jv][jobs] = true;
+            if (vmax != missing && testdata[test_jv[jv]][jobs] > vmax) flagged[jv][jobs] = true;
+          }
+        }
+      }
+    }
+  } else {
+    if (filtervars.nvars() != testvars.nvars()) {
+      oops::Log::error() << "Filter and test variables in Bounds Check have "
+                         << "different sizes: " << filtervars.nvars() << " and "
+                         << testvars.nvars() << std::endl;
+      ABORT("Filter and test variables in Bounds Check have different sizes");
+    }
+    // Loop over all variables to filter
+    for (size_t jv = 0; jv < testvars.nvars(); ++jv) {
+      //  get test data for this variable
+      std::vector<float> testdata;
+      data_.get(testvars.variable(jv), testdata);
+      //  apply the filter
+      for (size_t jobs = 0; jobs < obsdb_.nlocs(); ++jobs) {
+        if (apply[jobs]) {
+          ASSERT(testdata[jobs] != missing);
+          if (vmin != missing && testdata[jobs] < vmin) flagged[jv][jobs] = true;
+          if (vmax != missing && testdata[jobs] > vmax) flagged[jv][jobs] = true;
+        }
       }
     }
   }

@@ -49,6 +49,7 @@ class BackgroundCheck : public FilterBase,
   int qcFlag() const override {return QCflags::fguess;}
   const std::string abs_threshold_;
   const std::string threshold_;
+  std::string function_abs_threshold_;
 };
 
 }  // namespace ufo

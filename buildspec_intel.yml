@@ -99,6 +99,11 @@ phases:
       # disable git-lfs
       - git lfs install --skip-smudge
 
+      # atlas
+      - git clone https://$GIT_USER:$GIT_PASS@github.com/jcsda/atlas ufo-bundle/atlas
+      - cd ufo-bundle/atlas
+      - git checkout $CODEBUILD_GIT_BRANCH || echo "No branch named $CODEBUILD_GIT_BRANCH in atlas repo"
+      - cd $CODEBUILD_SRC_DIR
       # saber
       - git clone https://$GIT_USER:$GIT_PASS@github.com/jcsda/saber ufo-bundle/saber
       - cd ufo-bundle/saber
@@ -143,6 +148,7 @@ phases:
       - sed -i -e '/ecbuild_bundle( PROJECT ufo/i\
         ecbuild_bundle( PROJECT geos-aero  GIT "https://github.com/JCSDA/geos-aero.git" )' CMakeLists.txt
       - cat CMakeLists.txt
+
   build:
     commands:
       - echo Executing build phase

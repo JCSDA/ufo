@@ -105,6 +105,7 @@ void QCmanager::print(std::ostream & os) const {
     size_t iclw  = 0;
     size_t idiffref = 0;
     size_t iseaice  = 0;
+    size_t itrack   = 0;
     size_t ionedvar  = 0;
 
     for (size_t jobs = 0; jobs < iobs; ++jobs) {
@@ -120,8 +121,9 @@ void QCmanager::print(std::ostream & os) const {
       if ((*flags_)[jj][jobs] == QCflags::clw)     ++iclw;
       if ((*flags_)[jj][jobs] == QCflags::diffref) ++idiffref;
       if ((*flags_)[jj][jobs] == QCflags::seaice)  ++iseaice;
-      if ((*flags_)[jj][jobs] == QCflags::onedvar) ++ionedvar;
       if ((*flags_)[jj][jobs] == 76 || (*flags_)[jj][jobs] == 77)  ++ignss;
+      if ((*flags_)[jj][jobs] == QCflags::track)  ++itrack;
+      if ((*flags_)[jj][jobs] == QCflags::onedvar) ++ionedvar;
     }
 
     obsdb_.comm().allReduceInPlace(iobs, eckit::mpi::sum());
@@ -138,6 +140,7 @@ void QCmanager::print(std::ostream & os) const {
     obsdb_.comm().allReduceInPlace(ithin, eckit::mpi::sum());
     obsdb_.comm().allReduceInPlace(idiffref, eckit::mpi::sum());
     obsdb_.comm().allReduceInPlace(iseaice,  eckit::mpi::sum());
+    obsdb_.comm().allReduceInPlace(itrack,  eckit::mpi::sum());
     obsdb_.comm().allReduceInPlace(ionedvar,  eckit::mpi::sum());
 
 
@@ -155,13 +158,14 @@ void QCmanager::print(std::ostream & os) const {
       if (ignss > 0) os << info << ignss << " rejected by GNSSRO reality check." << std::endl;
       if (idiffref > 0) os << info << idiffref << " rejected by difference check." << std::endl;
       if (iseaice  > 0) os << info << iseaice  << " removed by sea ice check." << std::endl;
+      if (itrack   > 0) os << info << itrack  << " removed by track check." << std::endl;
       if (ionedvar  > 0) os << info << ionedvar  << " removed by 1D Var check." << std::endl;
 
       os << info << ipass << " passed out of " << iobs << " observations." << std::endl;
     }
 
     ASSERT(ipass + imiss + ipreq + ibnds + iwhit + iblck + iherr + ithin + iclw + ifgss + ignss \
-           + idiffref + iseaice + ionedvar == iobs);
+           + idiffref + iseaice + itrack + ionedvar == iobs);
   }
 }
 

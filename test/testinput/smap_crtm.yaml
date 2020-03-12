@@ -12,6 +12,7 @@ Observations:
      name: CRTM
      Absorbers: [H2O,O3,CO2]
      Clouds: [Water, Ice]
+     Cloud_Fraction: 1.0
      Salinity: on 
      LinearObsOperator:
        Absorbers: [H2O,O3,CO2]
@@ -24,9 +25,9 @@ Observations:
    ObsSpace:
      name: radiometer_smap
      ObsDataIn: 
-       obsfile: Data/smap_obs_2018041500_m.nc4
+       obsfile: Data/ioda/testinput_tier_1/smap_obs_2018041500_m.nc4
      ObsDataOut:
-       obsfile: Data/smap_obs_2018041500_m_out.nc4
+       obsfile: Data/ioda/testinput_tier_1/smap_obs_2018041500_m_out.nc4
      simulate:
        variables: [brightness_temperature]
        channels: 1-4

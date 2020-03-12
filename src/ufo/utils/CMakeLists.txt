@@ -11,12 +11,16 @@ set ( utils_files
       GeodesicDistanceCalculator.h
       MaxNormDistanceCalculator.h
       parameters/ParameterTraitsVariable.h
+      PiecewiseLinearInterpolation.cc
+      PiecewiseLinearInterpolation.h
       RecursiveSplitter.cc
       RecursiveSplitter.h
       SpatialBinSelector.h
       SpatialBinSelector.cc
       StringUtils.cc
       StringUtils.h
+      VertInterp.interface.F90
+      VertInterp.interface.h
       vert_interp.F90
       thermo_utils.F90
 )

@@ -4,6 +4,9 @@
 # which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 
 set ( filters_files
+      TrackCheck.cc
+      TrackCheck.h
+      TrackCheckParameters.h
       BackgroundCheck.cc
       BackgroundCheck.h
       BlackList.cc
@@ -18,6 +21,8 @@ set ( filters_files
       ObsBoundsCheck.h
       MWCLWCheck.cc
       MWCLWCheck.h
+      ObsDiagnosticsWriter.cc
+      ObsDiagnosticsWriter.h
       ObsDomainCheck.cc
       ObsDomainCheck.h
       ObsDomainErrCheck.cc
@@ -31,6 +36,9 @@ set ( filters_files
       QCmanager.h
       Thinning.cc
       Thinning.h
+      TemporalThinning.cc
+      TemporalThinning.h
+      TemporalThinningParameters.h
       Variable.cc
       Variable.h
       Variables.cc
@@ -38,6 +46,9 @@ set ( filters_files
       Gaussian_Thinning.cc
       Gaussian_Thinning.h
       GaussianThinningParameters.h
+      PoissonDiskThinning.cc
+      PoissonDiskThinning.h
+      PoissonDiskThinningParameters.h
       processWhere.cc
       processWhere.h
       actions/FilterAction.cc
@@ -52,6 +63,12 @@ set ( filters_files
       obsfunctions/ObsFunction.h
       obsfunctions/ObsFunctionBase.cc
       obsfunctions/ObsFunctionBase.h
+      obsfunctions/ObsFunctionCloudDetect.cc
+      obsfunctions/ObsFunctionCloudDetect.h
+      obsfunctions/ObsFunctionErrfGrosschk.cc
+      obsfunctions/ObsFunctionErrfGrosschk.h
+      obsfunctions/ObsFunctionErrfJsfc.cc
+      obsfunctions/ObsFunctionErrfJsfc.h
       obsfunctions/ObsFunctionErrfLat.cc
       obsfunctions/ObsFunctionErrfLat.h
       obsfunctions/ObsFunctionErrfTopo.cc
@@ -60,6 +77,8 @@ set ( filters_files
       obsfunctions/ObsFunctionErrfTransmittop.h
       obsfunctions/ObsFunctionErrfWavenum.cc
       obsfunctions/ObsFunctionErrfWavenum.h
+      obsfunctions/ObsFunctionNSSTRet.cc
+      obsfunctions/ObsFunctionNSSTRet.h
       obsfunctions/ObsFunctionScattering.cc
       obsfunctions/ObsFunctionScattering.h
       obsfunctions/ObsFunctionVelocity.cc

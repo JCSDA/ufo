@@ -8,8 +8,10 @@
 #ifndef UFO_UTILS_RECURSIVESPLITTER_H_
 #define UFO_UTILS_RECURSIVESPLITTER_H_
 
+#include <algorithm>
 #include <cassert>
 #include <cstddef>  // for size_t
+#include <string>
 #include <vector>
 
 #include "ufo/utils/ArrowProxy.h"
@@ -279,13 +281,36 @@ class RecursiveSplitter
       return groupByImpl(categories);
   }
 
+  /// \overload
+  void groupBy(const std::vector<std::string> &categories) {
+      return groupByImpl(categories);
+  }
+
   /// \brief Return the range of equivalence classes.
   GroupRange groups() const { return GroupRange(*this); }
 
   /// \brief Return the range of equivalence classes consisting of more than one element.
   MultiElementGroupRange multiElementGroups() const { return MultiElementGroupRange(*this); }
 
-  const std::vector<size_t> &orderedIds() const { return orderedIds_; }
+  /// \brief Sort the elements in each equivalence class in ascending order.
+  ///
+  /// The elements are compared using the binary comparison function \p comp. This function needs
+  /// to satisfy the same requirements as the \c comp argument of std::sort().
+  template <typename Compare>
+  void sortGroupsBy(Compare comp);
+
+  /// \brief Randomly shuffle the elements of each equivalence class.
+  ///
+  /// \param seed
+  ///   Seed with which to initialise the random number generator used by the shuffling algorithm
+  ///   if this hasn't been done before (in a previous call to shuffleGroups() or another function
+  ///   calling util::shuffle()).
+  void shuffleGroups(unsigned int seed);
+
+  /// \brief Randomly shuffle the elements of each equivalence class.
+  ///
+  /// This overload uses the defaul seed.
+  void shuffleGroups();
 
  private:
   void initializeEncodedGroups();
@@ -299,6 +324,17 @@ class RecursiveSplitter
   /// Encoded locations of multi-element equivalence classes in orderedIds_.
   std::vector<size_t> encodedGroups_;
 };
+
+template <typename Compare>
+void RecursiveSplitter::sortGroupsBy(Compare comp) {
+  for (Group group : multiElementGroups()) {
+    std::vector<size_t>::iterator nonConstGroupBegin =
+        orderedIds_.begin() + (group.begin() - orderedIds_.cbegin());
+    std::vector<size_t>::iterator nonConstGroupEnd =
+        orderedIds_.begin() + (group.end() - orderedIds_.cbegin());
+    std::sort(nonConstGroupBegin, nonConstGroupEnd, comp);
+  }
+}
 
 }  // namespace ufo
 

@@ -13,7 +13,7 @@ Observations:
     ObsSpace:
       name: SeaIceFraction
       ObsDataIn:
-        obsfile: Data/icec-2018-04-15.nc
+        obsfile: Data/ioda/testinput_tier_1/icec-2018-04-15.nc
       simulate:
         variables: [sea_ice_area_fraction]
     GeoVaLs:

@@ -135,7 +135,7 @@ Observations:
      absolute threshold: 1.5
      action:
        name: inflate error
-       inflation: 2.0
+       inflation factor: 2.0
 # Filter out where abs(ObsValue - HofX) < min(absolute_threshold, threshold*ObsError)
 # Note: technically all obs "pass" since action does not change flags, inflates error instead
 #  variable1@ObsValue = 10, 11, 12, 13, 14, 15, 16, 17, 18, 19

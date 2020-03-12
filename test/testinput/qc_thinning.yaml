@@ -6,7 +6,7 @@ Observations:
   - ObsSpace:
       name: Radiosonde
       ObsDataIn:
-        obsfile: Data/sondes_obs_2018041500_m.nc4
+        obsfile: Data/ioda/testinput_tier_1/sondes_obs_2018041500_m.nc4
       simulate:
         variables: [air_temperature, eastward_wind, northward_wind]
     ObsFilters:

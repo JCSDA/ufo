@@ -23,7 +23,8 @@ namespace QCflags {
   constexpr int clw     = 9;   // observation removed due to cloud field
   constexpr int fguess  = 10;  // observation too far from guess
   constexpr int seaice  = 11;  // observation based sea ice detection, also flags land points
-  constexpr int onedvar = 12;  // observation failed to converge in 1dvar check
+  constexpr int track   = 12;  // observation removed as inconsistent with the rest of track
+  constexpr int onedvar = 13;  // observation failed to converge in 1dvar check
 };  // namespace QCflags
 
 }  // namespace ufo

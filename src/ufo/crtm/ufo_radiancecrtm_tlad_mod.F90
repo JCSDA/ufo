@@ -138,7 +138,7 @@ type(c_ptr), value,       intent(in)    :: obss
 type(ufo_geovals),        intent(inout) :: hofxdiags    !non-h(x) diagnostics
 
 ! Local Variables
-character(*), parameter :: PROGRAM_NAME = 'ufo_radiancecrtm_mod.F90'
+character(*), parameter :: PROGRAM_NAME = 'ufo_radiancecrtm_tlad_settraj'
 character(255) :: message, version
 character(max_string) :: err_msg
 integer        :: err_stat, alloc_stat
@@ -169,9 +169,10 @@ character(len=MAXVARLEN), dimension(hofxdiags%nvar) :: &
 character(10), parameter :: jacobianstr = "_jacobian_"
 integer :: str_pos(4), ch_diags(hofxdiags%nvar)
 
-real(kind_real) :: total_od, secant_term
+real(kind_real) :: total_od, secant_term, wfunc_max
 real(kind_real), allocatable :: TmpVar(:)
 real(kind_real), allocatable :: Tao(:)
+real(kind_real), allocatable :: Wfunc(:)
 
  call obsspace_get_comm(obss, f_comm)
 
@@ -186,7 +187,7 @@ real(kind_real), allocatable :: Tao(:)
  ! --------------
  call CRTM_Version( Version )
  call Program_Message( PROGRAM_NAME, &
-                       'Check/example program for the CRTM Forward and K-Matrix (setTraj) functions using '//&
+                       'UFO interface for the CRTM Forward and K-Matrix (setTraj) functions using '//&
                        trim(self%conf_traj%ENDIAN_type)//' coefficient datafiles', &
                        'CRTM Version: '//TRIM(Version) )
 
@@ -197,9 +198,17 @@ real(kind_real), allocatable :: Tao(:)
  !**       CRTM_Lifecycle.f90 for more details.
 
  write( *,'(/5x,"Initializing the CRTM (setTraj) ...")' )
- err_stat = CRTM_Init( self%conf_traj%SENSOR_ID, &
-            chinfo, &
+ err_stat = CRTM_Init( self%conf_traj%SENSOR_ID, chinfo, &
             File_Path=trim(self%conf_traj%COEFFICIENT_PATH), &
+            IRwaterCoeff_File=trim(self%conf_traj%IRwaterCoeff_File), &
+            IRlandCoeff_File=trim(self%conf_traj%IRlandCoeff_File), &
+            IRsnowCoeff_File=trim(self%conf_traj%IRsnowCoeff_File), &
+            IRiceCoeff_File=trim(self%conf_traj%IRiceCoeff_File), &
+            VISwaterCoeff_File=trim(self%conf_traj%VISwaterCoeff_File), &
+            VISlandCoeff_File=trim(self%conf_traj%VISlandCoeff_File), &
+            VISsnowCoeff_File=trim(self%conf_traj%VISsnowCoeff_File), &
+            VISiceCoeff_File=trim(self%conf_traj%VISiceCoeff_File), &
+            MWwaterCoeff_File=trim(self%conf_traj%MWwaterCoeff_File), &
             Quiet=.TRUE.)
  message = 'Error initializing CRTM (setTraj)'
  call crtm_comm_stat_check(err_stat, PROGRAM_NAME, message, f_comm)
@@ -446,12 +455,14 @@ real(kind_real), allocatable :: Tao(:)
                call obsspace_get_db(obss, "MetaData", "sensor_zenith_angle", TmpVar)
                do jprofile = 1, self%n_Profiles
                   if (.not.self%Skip_Profiles(jprofile)) then
+                     ! get layer-to-space transmittance
                      secant_term = one/cos(TmpVar(jprofile)*deg2rad)
                      total_od = 0.0
                      do jlevel = 1, self%n_Layers
                         total_od = total_od + rts(jchannel,jprofile) % layer_optical_depth(jlevel)
                         Tao(jlevel) = exp(-min(limit_exp,total_od*secant_term))
                      end do
+                     ! get weighting function 
                      do jlevel = self%n_Layers-1, 1, -1
                         hofxdiags%geovals(jvar)%vals(jlevel,jprofile) = &
                            abs( (Tao(jlevel+1)-Tao(jlevel))/ &
@@ -464,6 +475,46 @@ real(kind_real), allocatable :: Tao(:)
                end do
                deallocate(TmpVar)
                deallocate(Tao)
+
+            ! variable: pressure_level_at_peak_of_weightingfunction_CH
+            case (var_pmaxlev_weightfunc)
+               hofxdiags%geovals(jvar)%nval = 1
+               allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,self%n_Profiles))
+               hofxdiags%geovals(jvar)%vals = missing
+               allocate(TmpVar(self%n_Profiles))
+               allocate(Tao(self%n_Layers))
+               allocate(Wfunc(self%n_Layers))
+               call obsspace_get_db(obss, "MetaData", "sensor_zenith_angle", TmpVar)
+               do jprofile = 1, self%n_Profiles
+                  if (.not.self%Skip_Profiles(jprofile)) then
+                     ! get layer-to-space transmittance
+                     secant_term = one/cos(TmpVar(jprofile)*deg2rad)
+                     total_od = 0.0
+                     do jlevel = 1, self%n_Layers
+                        total_od = total_od + rts(jchannel,jprofile) % layer_optical_depth(jlevel)
+                        Tao(jlevel) = exp(-min(limit_exp,total_od*secant_term))
+                     end do
+                     ! get weighting function 
+                     do jlevel = self%n_Layers-1, 1, -1
+                        Wfunc(jlevel) = &
+                           abs( (Tao(jlevel+1)-Tao(jlevel))/ &
+                                (log(atm(jprofile)%pressure(jlevel+1))- &
+                                 log(atm(jprofile)%pressure(jlevel))) )
+                     end do
+                     Wfunc(self%n_Layers) = Wfunc(self%n_Layers-1)
+                     ! get pressure level at the peak of the weighting function
+                     wfunc_max = -999.0
+                     do jlevel = self%n_Layers-1, 1, -1
+                        if (Wfunc(jlevel) > wfunc_max) then
+                           wfunc_max = Wfunc(jlevel)
+                           hofxdiags%geovals(jvar)%vals(1,jprofile) = jlevel
+                        endif
+                     enddo
+                  end if
+               end do
+               deallocate(TmpVar)
+               deallocate(Tao)
+               deallocate(Wfunc)
 
             case default
                write(err_msg,*) 'ufo_radiancecrtm_simobs: //&

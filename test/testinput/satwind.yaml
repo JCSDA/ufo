@@ -13,9 +13,9 @@ Observations:
     ObsSpace:
       name: Satwind
       ObsDataIn:
-        obsfile: Data/satwind_obs_2018041500_m.nc4
+        obsfile: Data/ioda/testinput_tier_1/satwind_obs_2018041500_m.nc4
       ObsDataOut:
-        obsfile: Data/satwind_obs_2018041500_m_out.nc4
+        obsfile: Data/ioda/testinput_tier_1/satwind_obs_2018041500_m_out.nc4
       simulate:
         variables: [eastward_wind, northward_wind]
     GeoVaLs:
