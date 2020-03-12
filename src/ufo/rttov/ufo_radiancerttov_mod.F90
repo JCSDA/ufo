@@ -112,7 +112,7 @@ hofx(:) = 0.0_kind_real
 errorstatus = 0_jpim
 nchans_total = 0
 
-nchan_max_sim = 300 ! Maximum number of channels to pass to RTTOV to simulate
+nchan_max_sim = 2500 ! Maximum number of channels to pass to RTTOV to simulate
 
 if( .NOT. config_rttov % rttov_is_setup) then
   asw = 1
@@ -194,7 +194,7 @@ Sensor_Loop:do i_inst = 1, self % conf % nSensors
     else
       call load_atm_data_rttov(geovals,obss,profiles,prof_start)
       call load_geom_data_rttov(obss,profiles,prof_start)
-    end if    
+    end if
 
     call rttov_user_profile_checkinput(rttov_errorstatus, &
       config_rttov % opts, &

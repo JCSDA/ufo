@@ -116,7 +116,6 @@ type obinfo_type
   real(kind_real) :: sensor_azimuth_angle
   real(kind_real) :: solar_zenith_angle
   real(kind_real) :: solar_azimuth_angle
-  real(kind_real),allocatable :: hofx(:)
   real(kind_real),allocatable :: yobs(:)
 
 end type

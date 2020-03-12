@@ -12,6 +12,8 @@ set ( onedvarcheck_files
     ufo_onedvarfortran_utils_mod.F90
     ufo_onedvarfortran_init_mod.F90
     ufo_onedvarfortran_process_mod.F90
+    ufo_onedvarfortran_minimize_newton_mod.F90
+    ufo_onedvarfortran_minimize_ml_mod.F90
     ufo_onedvarfortran_forward_model_mod.F90
 )
 

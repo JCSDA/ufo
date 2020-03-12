@@ -3,8 +3,8 @@ logging:
   categories: Warning, Error, Debug
 test_framework_runtime_config: "--log_level=test_suite"
 
-window_begin: 2018-09-01T09:00:00Z
-window_end: 2018-09-01T15:00:00Z
+window_begin: 2018-08-29T21:00:00Z
+window_end: 2018-08-30T03:00:00Z
 
 LinearObsOpTest: 
  coefTL: 1.e-5
@@ -17,6 +17,9 @@ Observations:
       name: RTTOV
       Sensor_ID: noaa_19_amsua
       CoefficientPath: Data/
+      ExtraVars:
+        - mass_content_of_cloud_liquid_water_in_atmosphere_layer
+        - mass_content_of_cloud_ice_in_atmosphere_layer
     GeoVaLs:
       filename: Data/amsua_allsats_geoval_2018083000.nc4
     ObsSpace: 
@@ -40,7 +43,16 @@ Observations:
       channels: *ops_channels
       model_variables:
       - air_temperature
-      BMatrix: Data/atovs_bmatrix_70.dat
+      - specific_humidity
+      - air_temperature_at_two_meters_above_surface
+      - specific_humidity_at_two_meters_above_surface
+      - skin_temperature
+      - surface_air_pressure
+#      BMatrix: Data/atovs_bmatrix_70.dat
+      BMatrix: Data/atovs_bmatrix_70_q.dat
+      nlevels: 70
+      qtotal: 1 # 1=true
+      cost_convergence: 
     rmsequiv: 239.48475677393529
     tolerance: 1.e-10
     passedBenchmark: 1      # number of passed obs

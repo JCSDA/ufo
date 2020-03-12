@@ -29,7 +29,8 @@ static ObsOperatorMaker<ObsRadianceRTTOV> makerRTTOV_("RTTOV");
 ObsRadianceRTTOV::ObsRadianceRTTOV(const ioda::ObsSpace & odb, const eckit::Configuration & config)
   : ObsOperatorBase(odb, config), keyOperRadianceRTTOV_(0), odb_(odb), varin_()
 {
-  const std::vector<std::string> vv{
+
+  std::vector<std::string> vv{
     "air_pressure", "air_pressure_at_two_meters_above_surface",
     "air_temperature", "air_temperature_at_two_meters_above_surface",
     "eastward_wind", "northward_wind",
@@ -37,6 +38,16 @@ ObsRadianceRTTOV::ObsRadianceRTTOV(const ioda::ObsSpace & odb, const eckit::Conf
     "specific_humidity", "specific_humidity_at_two_meters_above_surface",
     "surface_air_pressure", "surface_temperature",
     "surface_type", "water_type"};
+
+
+  if (config.has("ExtraVars")) {
+    std::vector<std::string> extravars;
+    config.get("ExtraVars", extravars);
+    oops::Log::info() << "ObsRadianceRTTOV extravars: " << extravars << std::endl;
+    vv.insert(std::end(vv), std::begin(extravars), std::end(extravars));
+  }
+
+  oops::Log::info() << "ObsRadianceRTTOV vv: " << vv << std::endl;
 
   varin_.reset(new oops::Variables(vv));
 

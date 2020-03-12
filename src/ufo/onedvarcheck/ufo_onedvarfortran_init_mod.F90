@@ -130,11 +130,9 @@ ob_info % sensor_azimuth_angle = 0.0
 ob_info % solar_zenith_angle = 0.0
 ob_info % solar_azimuth_angle = 0.0
 
-allocate(ob_info%hofx(nchans))
-allocate(ob_info%yobs(nchans))
-
-ob_info % hofx = 0.0
-ob_info % yobs = 0.0
+! Moved this to obs loop to allow channel selection
+!allocate(ob_info%yobs(nchans))
+!ob_info % yobs = 0.0
 
 end subroutine ufo_onedvarfortran_InitObInfo
 

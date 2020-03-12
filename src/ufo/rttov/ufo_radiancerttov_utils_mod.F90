@@ -380,7 +380,7 @@ if(PRESENT(obs_info)) then
   profiles(1)%zenangle    = obs_info%sensor_zenith_angle
   profiles(1)%azangle     = obs_info%sensor_azimuth_angle
   profiles(1)%sunzenangle = obs_info%solar_zenith_angle
-  profiles(1)%sunazangle  = obs_info%solar_azimuth_angle    
+  profiles(1)%sunazangle  = obs_info%solar_azimuth_angle
   
 else
 
@@ -429,7 +429,8 @@ self % opts % rt_ir % n2o_data            = .FALSE. !   given trace gas (ensure 
 self % opts % rt_ir % ch4_data            = .FALSE. !   coef file supports the gas)
 self % opts % rt_ir % co_data             = .FALSE. !
 self % opts % rt_ir % so2_data            = .FALSE. !
-self % opts % rt_mw % clw_data            = .FALSE. !
+!self % opts % rt_mw % clw_data            = .FALSE. !
+self % opts % rt_mw % clw_data            = .TRUE. !
 
 self % opts % config % verbose            = .TRUE.  ! Enable printing of warnings
 self % opts % config % apply_reg_limits   = .TRUE.

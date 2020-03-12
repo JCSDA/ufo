@@ -78,27 +78,22 @@ end subroutine ufo_onedvarfortran_prior_c
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_onedvarfortran_post_c(c_self, c_nvar, c_nloc, c_hofx, c_var, c_geovals, c_conf) bind(c,name='ufo_onedvarfortran_post_f90')
+subroutine ufo_onedvarfortran_post_c(c_self, c_vars, c_geovals) bind(c,name='ufo_onedvarfortran_post_f90')
 implicit none
-integer(c_int), intent(in) :: c_self
-integer(c_int), intent(in) :: c_nvar
-integer(c_int), intent(in) :: c_nloc
-real(c_double), intent(in) :: c_hofx(c_nvar, c_nloc)
-type(c_ptr), value, intent(in) :: c_var
-integer(c_int), intent(in) :: c_geovals
-type(c_ptr), value, intent(in) :: c_conf
+integer(c_int), intent(in)     :: c_self
+type(c_ptr), value, intent(in) :: c_vars     !< List of variables
+integer(c_int), intent(in)     :: c_geovals
 
 type(ufo_onedvarfortran), pointer :: self
-type(ufo_geovals), pointer :: geovals
-character(len=max_string_length), allocatable :: vars(:)
-
-allocate(vars(c_nvar))
-vars = config_get_string_vector(c_var, max_string_length, "variables")
+type(oops_variables)              :: vars
+type(ufo_geovals), pointer        :: geovals
 
 call ufo_onedvarfortran_registry%get(c_self, self)
 call ufo_geovals_registry%get(c_geovals, geovals)
 
-call ufo_onedvarfortran_post(self, c_hofx, vars, geovals, c_conf)
+vars = oops_variables(c_vars)
+
+call ufo_onedvarfortran_post(self, vars, geovals)
 
 end subroutine ufo_onedvarfortran_post_c
 

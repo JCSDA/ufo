@@ -12,6 +12,7 @@
 
 #include "ufo/onedvarcheck/OneDVarCheck.h"
 #include "ufo/onedvarcheck/OneDVarFortran.interface.h"
+#include "ufo/GeoVaLs.h"
 
 #include "eckit/config/Configuration.h"
 
@@ -30,19 +31,9 @@ OneDVarCheck::OneDVarCheck(ioda::ObsSpace & obsdb, const eckit::Configuration & 
   oops::Log::debug() << "OneDVarCheck contructor starting" << std::endl;
 
   // parse channels from the config and create variable names
-  std::string chlist = config.getString("channels");
-  std::set<int> channels = oops::parseIntSet(chlist);
-  channels_.reserve(channels.size());
-  for (const int jj : channels) {
-    channels_.push_back(jj);
-  }
-  oops::Log::info() << "OneDVarCheck channels: " << channels_ << std::endl;
-
-  // Read in cost convergence criteria to change default
-  if (config_.has("variational.cost_convergence")) {
-    config_.get("variational.cost_convergence", cost_converge_);
-    oops::Log::info() << "OneDVarCheck updating cost convergence to: "
-                      << cost_converge_ << std::endl;
+  const oops::Variables & variables = obsdb.obsvariables();
+  if (config_.has("channels")) {
+    channels_ = variables.channels();
   }
 
   // Choose when to apply filter - this is a temporary fudge
@@ -83,26 +74,24 @@ void OneDVarCheck::applyFilter(const std::vector<bool> & apply,
 // Get GeoVaLs
   const ufo::GeoVaLs * gvals = data_.getGeoVaLs();
 
-// Get hofx
-  Variables varhofx(filtervars_, "HofX");
-  oops::Log::trace() << "OneDVarCheck Filter hofx vars = " << varhofx << std::endl;
+// Create oops variable
+  oops::Variables variables = filtervars.toOopsVariables();
+  oops::Log::trace() << "OneDVarCheck variables = " << variables << std::endl;
 
-  for (std::size_t jobs = 0; jobs < obsdb_.nlocs(); ++jobs) {
-    oops::Log::trace() << "OneDVarCheck Filter loop index = " << jobs << std::endl;
-
-    std::vector<float> hofx;
-    data_.get(varhofx.variable(jobs), hofx);
-    oops::Log::trace() << "OneDVarCheck hofx = " << hofx << std::endl;
-
-  }
+// Save qc flags to database for retrieval in fortran - needed for channel selection
+  flags_->save("FortranQC");    // should pass values to fortran properly
 
 // Pass it all to fortran
-//  const eckit::Configuration * conf = &config_;
-//  ufo_onedvarfortran_post_f90(key_, hofx->nvars(), hofx->nlocs(), hofx->toFortran(),
-//                              hofx->varnames().toFortranBetter(), gvals->toFortran(),
-//                              conf);
+  const eckit::Configuration * conf = &config_;
+  ufo_onedvarfortran_post_f90(key_, variables, gvals->toFortran());
 
-oops::Log::trace() << "OneDVarCheck Filter complete" << std::endl;
+// Read qc flags from database
+  flags_->read("FortranQC");    // should get values from fortran properly
+
+// Print output flags_
+  oops::Log::trace() << "OneDVarCheck flags_ = " << *flags_ << std::endl;
+
+  oops::Log::trace() << "OneDVarCheck Filter complete" << std::endl;
 
 }
 

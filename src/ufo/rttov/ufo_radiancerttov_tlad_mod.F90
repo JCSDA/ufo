@@ -152,7 +152,7 @@ nchan_count = 0
 
 asw = 1
 
-nchan_max_sim = 300 ! Maximum number of channels to pass to RTTOV to simulate
+nchan_max_sim = 2500 ! Maximum number of channels to pass to RTTOV to simulate
 
 if( .NOT. config_rttov % rttov_is_setup) then
   call config_rttov % setup(self % conf, asw)

@@ -26,11 +26,11 @@ typedef int F90onedvarcheck;
 /// Interface to Fortran routines
 
 extern "C" {
-  void ufo_onedvarfortran_create_f90(F90onedvarcheck &, const ioda::ObsSpace &, const eckit::Configuration *, const int &, const int &);
+  void ufo_onedvarfortran_create_f90(F90onedvarcheck &, const ioda::ObsSpace &, const eckit::Configuration *, 
+                                     const int &, const int &);
   void ufo_onedvarfortran_delete_f90(F90onedvarcheck &);
   void ufo_onedvarfortran_prior_f90(const F90onedvarcheck &, const F90goms &);
-  void ufo_onedvarfortran_post_f90(const F90onedvarcheck &, const int &, const int &, const double &,
-                            const eckit::Configuration *, const F90goms &, const eckit::Configuration *);
+  void ufo_onedvarfortran_post_f90(const F90onedvarcheck &, const oops::Variables &, const F90goms &);
 }  // extern C
 
 }  // namespace ufo
