@@ -3,7 +3,7 @@
 # This software is licensed under the terms of the Apache Licence Version 2.0
 # which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 
-set ( onedvarcheck_files
+set ( rttovonedvarcheck_files
     RTTOVOneDVarCheck.h
     RTTOVOneDVarCheck.cc
     RTTOVOneDVarCheck.interface.F90
@@ -17,10 +17,10 @@ set ( onedvarcheck_files
     ufo_rttovonedvarcheck_forward_model_mod.F90
 )
 
-PREPEND( _p_onedvarcheck_files        "onedvarcheck"                     ${onedvarcheck_files} )
+PREPEND( _p_rttovonedvarcheck_files        "rttovonedvarcheck"                     ${rttovonedvarcheck_files} )
 
-set ( onedvarcheck_src_files
-      ${_p_onedvarcheck_files}
+set ( rttovonedvarcheck_src_files
+      ${_p_rttovonedvarcheck_files}
       PARENT_SCOPE
 )
 

@@ -19,7 +19,9 @@ use ufo_rttovonedvarcheck_init_mod
 use ufo_rttovonedvarcheck_process_mod
 
 implicit none
-public  :: ufo_rttovonedvarcheck, ufo_rttovonedvarcheck_create, ufo_rttovonedvarcheck_delete, ufo_rttovonedvarcheck_prior, ufo_rttovonedvarcheck_post
+public :: ufo_rttovonedvarcheck
+public :: ufo_rttovonedvarcheck_create, ufo_rttovonedvarcheck_delete
+public :: ufo_rttovonedvarcheck_prior, ufo_rttovonedvarcheck_post
 
 ! ------------------------------------------------------------------------------
 type :: ufo_rttovonedvarcheck

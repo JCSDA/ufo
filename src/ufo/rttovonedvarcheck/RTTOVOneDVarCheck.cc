@@ -10,8 +10,8 @@
 #include <limits>
 #include <vector>
 
-#include "ufo/onedvarcheck/RTTOVOneDVarCheck.h"
-#include "ufo/onedvarcheck/RTTOVOneDVarCheck.interface.h"
+#include "ufo/rttovonedvarcheck/RTTOVOneDVarCheck.h"
+#include "ufo/rttovonedvarcheck/RTTOVOneDVarCheck.interface.h"
 #include "ufo/GeoVaLs.h"
 
 #include "eckit/config/Configuration.h"

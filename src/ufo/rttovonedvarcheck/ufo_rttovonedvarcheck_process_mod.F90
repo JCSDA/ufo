@@ -236,7 +236,7 @@ if (profindex % qt(1) > 0) then
   pressure(:) = geoval%vals(:, 1)    ! Pa
 
   ! Split qtotal to q(water_vapour), q(liquid), q(ice)
-  CALL Ops_SatRad_Qsplit (1,                                         & ! in
+  call Ops_SatRad_Qsplit (1,                                         & ! in
                           temperature(:),                            & ! in
                           pressure(:),                               & ! in
                           nlevels,                                   & ! in
@@ -343,7 +343,7 @@ real(kind_real), intent(out) :: Jcost(3)
 character(len=*), parameter  :: RoutineName = "ufo_rttovonedvarcheck_CostFunction"
 integer                      :: y_size
 real(kind_real)              :: Jb, Jo, Jcurrent
-real(kind_real)              :: DeltaProfOut(70)
+real(kind_real)              :: DeltaProfout(70)
 
 !-------------------------------------------------------------------------------
 
@@ -357,7 +357,7 @@ write(*,*) "binv profile = ",b_inv
 write(*,*) "Delta obs = ",DeltaObs
 write(*,*) "rinv profile = ",r_inv
 
-DeltaProfOut = matmul(b_inv,DeltaProf)
+DeltaProfout = matmul(b_inv,DeltaProf)
 
 Jb = 0.5_kind_real * dot_product(DeltaProf,(matmul(b_inv,DeltaProf)))
 Jo = 0.5_kind_real * dot_product(DeltaObs,(matmul(r_inv,DeltaObs)))
@@ -378,15 +378,15 @@ end subroutine ufo_rttovonedvarcheck_CostFunction
 ! (C) Crown copyright Met Office. All rights reserved.
 !     Refer to COPYRIGHT.txt of this distribution for details.
 !-------------------------------------------------------------------------------
-! IF output_type=1 : Split total water content (qtotal) into
+! if output_type=1 : Split total water content (qtotal) into
 !   water vapor content (q) and
 !   cloud liquid water content (ql) and
 !   cloud ice water content (qi)
-! If output_type ne 1 : Compute derivatives: (q) =dq/dqtotal
+! if output_type ne 1 : Compute derivatives: (q) =dq/dqtotal
 !                                            (ql)=dql/dqtotal
 !                                            (qi)=dqi/dqtotal
 !
-!  WARNING: The derivatives are not valid if LtemperatureVar=.TRUE. since
+!  WARNinG: The derivatives are not valid if LtemperatureVar=.TRUE. since
 !     qsaturated depends on temperature.
 !
 ! The partitioning of the excess moisture between ice and clw uses a temperature
@@ -394,7 +394,7 @@ end subroutine ufo_rttovonedvarcheck_CostFunction
 ! p126
 !-------------------------------------------------------------------------------
 
-SUBROUTINE Ops_SatRad_Qsplit (output_type, &
+subroutine Ops_SatRad_Qsplit (output_type, &
                               t,           &
                               p,           &
                               nlevels_q,   &
@@ -403,53 +403,53 @@ SUBROUTINE Ops_SatRad_Qsplit (output_type, &
                               ql,          &
                               qi)
 
-IMPLICIT NONE
+implicit none
 
-! Subroutine arguments:
-INTEGER, INTENT(IN)               :: output_type
-REAL(kind=kind_real), INTENT(IN)  :: t(:)
-REAL(kind=kind_real), INTENT(IN)  :: p(:)
-INTEGER, INTENT(IN)               :: nlevels_q         ! no. of wet levels
-REAL(kind=kind_real), INTENT(IN)  :: qtotal(nlevels_q)
-REAL(kind=kind_real), INTENT(OUT) :: q(nlevels_q)      ! humidity component q
-REAL(kind=kind_real), INTENT(OUT) :: ql(nlevels_q)     ! liquid component ql
-REAL(kind=kind_real), INTENT(OUT) :: qi(nlevels_q)     ! ice component qi
+! subroutine arguments:
+integer, intent(in)               :: output_type
+real(kind=kind_real), intent(in)  :: t(:)
+real(kind=kind_real), intent(in)  :: p(:)
+integer, intent(in)               :: nlevels_q         ! no. of wet levels
+real(kind=kind_real), intent(in)  :: qtotal(nlevels_q)
+real(kind=kind_real), intent(out) :: q(nlevels_q)      ! humidity component q
+real(kind=kind_real), intent(out) :: ql(nlevels_q)     ! liquid component ql
+real(kind=kind_real), intent(out) :: qi(nlevels_q)     ! ice component qi
 
 ! Local declarations:
-INTEGER                     :: nlevels_diff
-INTEGER                     :: i
-INTEGER                     :: toplevel_q
-INTEGER                     :: nlevels_mwclw
-INTEGER                     :: nlevels_1dvar
-REAL(kind=kind_real), PARAMETER :: lower_rh = 0.95
-REAL(kind=kind_real), PARAMETER :: upper_rh = 1.05
-REAL(kind=kind_real), PARAMETER :: Split_Factor = 0.5
-REAL(kind=kind_real), PARAMETER :: MinTempQl = 233.15     ! temperature (K) below which all cloud is ice
-REAL(kind=kind_real), PARAMETER :: ZeroDegC = 273.15
-REAL(kind=kind_real), PARAMETER :: Min_q = 3.0E-6         ! ( kg / kg )
-REAL(kind=kind_real) :: qsaturated(nlevels_q)
-REAL(kind=kind_real) :: RH_qtotal(nlevels_q)
-REAL(kind=kind_real) :: qnv(nlevels_q)         ! non vapour component
-REAL(kind=kind_real) :: qc(nlevels_q)          ! cloud component
-REAL(kind=kind_real) :: V1(nlevels_q)
-REAL(kind=kind_real) :: V2(nlevels_q)
-REAL(kind=kind_real) :: V1zero
-REAL(kind=kind_real) :: V2zero
-REAL(kind=kind_real) :: W(nlevels_q)
-REAL(kind=kind_real) :: Y1,Y2,Y3,Y4
-REAL(kind=kind_real) :: IntConst
-REAL(kind=kind_real) :: Aconst
-REAL(kind=kind_real) :: Bconst
-REAL(kind=kind_real) :: Cconst
-REAL(kind=kind_real) :: Dconst
-REAL(kind=kind_real) :: Denom
-REAL(kind=kind_real) :: SmallValue
-REAL(kind=kind_real) :: LF(nlevels_q)          ! fraction of ql to ql+qi
-REAL(kind=kind_real) :: QsplitRainParamA
-REAL(kind=kind_real) :: QsplitRainParamB
-REAL(kind=kind_real) :: QsplitRainParamC
-CHARACTER(len=*), PARAMETER :: RoutineName = "Ops_SatRad_Qsplit"
-LOGICAL                     :: UseQtsplitRain
+integer                     :: nlevels_diff
+integer                     :: i
+integer                     :: toplevel_q
+integer                     :: nlevels_mwclw
+integer                     :: nlevels_1dvar
+real(kind=kind_real), parameter :: lower_rh = 0.95
+real(kind=kind_real), parameter :: upper_rh = 1.05
+real(kind=kind_real), parameter :: Split_Factor = 0.5
+real(kind=kind_real), parameter :: MinTempQl = 233.15     ! temperature (K) below which all cloud is ice
+real(kind=kind_real), parameter :: ZeroDegC = 273.15
+real(kind=kind_real), parameter :: Min_q = 3.0E-6         ! ( kg / kg )
+real(kind=kind_real) :: qsaturated(nlevels_q)
+real(kind=kind_real) :: RH_qtotal(nlevels_q)
+real(kind=kind_real) :: qnv(nlevels_q)         ! non vapour component
+real(kind=kind_real) :: qc(nlevels_q)          ! cloud component
+real(kind=kind_real) :: V1(nlevels_q)
+real(kind=kind_real) :: V2(nlevels_q)
+real(kind=kind_real) :: V1zero
+real(kind=kind_real) :: V2zero
+real(kind=kind_real) :: W(nlevels_q)
+real(kind=kind_real) :: Y1,Y2,Y3,Y4
+real(kind=kind_real) :: intConst
+real(kind=kind_real) :: Aconst
+real(kind=kind_real) :: Bconst
+real(kind=kind_real) :: Cconst
+real(kind=kind_real) :: Dconst
+real(kind=kind_real) :: Denom
+real(kind=kind_real) :: SmallValue
+real(kind=kind_real) :: LF(nlevels_q)          ! fraction of ql to ql+qi
+real(kind=kind_real) :: QsplitRainParamA
+real(kind=kind_real) :: QsplitRainParamB
+real(kind=kind_real) :: QsplitRainParamC
+character(len=*), parameter :: RoutineName = "Ops_SatRad_Qsplit"
+logical                     :: UseQtsplitRain
 
 ! Addition to make it work
 nlevels_1dvar = nlevels_q
@@ -465,7 +465,7 @@ QsplitRainParamC = 50.0_kind_real
 
 ! Compute saturated water vapor profile for nlevels_q only
 
-CALL Ops_Qsat (qsaturated(1:nlevels_q),    & ! out
+call Ops_Qsat (qsaturated(1:nlevels_q),    & ! out
                t(1:nlevels_q),             & ! in
                p(1:nlevels_q),             & ! in
                nlevels_q)                    ! in
@@ -474,7 +474,7 @@ SmallValue = 1.0_kind_real / 8.5_kind_real
 Denom = SmallValue * (upper_rh - lower_rh)
 
 ! don't let rh exceed 2.0 to avoid cosh function blowing up
-RH_qtotal(:) = MIN (qtotal(:) / qsaturated(:), 2.0_kind_real)
+RH_qtotal(:) = Min (qtotal(:) / qsaturated(:), 2.0_kind_real)
 
 V1(:) = (RH_qtotal(:) - lower_rh) / Denom
 V2(:) = (RH_qtotal(:) - upper_rh) / Denom
@@ -491,48 +491,48 @@ Dconst = -(Y4 + Y3) / 2.0_kind_real
 
 ! Compute fraction of ql to ql+qi based on temperature profile
 
-WHERE (t(:) - ZeroDegC >= -0.01_kind_real) ! -0.01degc and above
+where (t(:) - ZeroDegC >= -0.01_kind_real) ! -0.01degc and above
 
   ! all ql
   LF(:) = 1.0_kind_real
 
-END WHERE
+end where
 
-WHERE (t(:) <= MinTempql)
+where (t(:) <= MinTempql)
 
   ! all qi
   LF(:) = 0.0_kind_real
 
-END WHERE
+end where
 
-WHERE (t(:) > MinTempql .AND. t(:) - ZeroDegC < -0.01_kind_real)
+where (t(:) > MinTempql .and. t(:) - ZeroDegC < -0.01_kind_real)
 
   ! Jones' parametrization
-  LF(:) = SQRT (-1.0_kind_real * LOG (-0.025_kind_real * (t(:) - ZeroDegC)) / 70.0_kind_real)
+  LF(:) = sqrt (-1.0_kind_real * log (-0.025_kind_real * (t(:) - ZeroDegC)) / 70.0_kind_real)
 
-END WHERE
+end where
 
 ! finally set LF to 0.0 for the rttov levels on which clw jacobians are not
 ! calculated since nlevels_mwclw < nlevels_q
 
 nlevels_diff = nlevels_q - nlevels_mwclw
 
-IF (nlevels_diff > 0) THEN
+if (nlevels_diff > 0) then
 
   LF(1:nlevels_diff) = 0.0_kind_real
 
-END IF
+end if
 
 V1zero = -1.0_kind_real * lower_rh / Denom
 V2zero = -1.0_kind_real * upper_rh / Denom
-IntConst = -(Aconst * Denom * LOG (COSH (V1zero)) + Bconst * Denom * LOG (COSH (V2zero)))
-W(:) = Aconst * Denom * LOG (COSH (V1(:))) + Bconst * Denom * LOG (COSH (V2(:))) + &
-       (Cconst + Dconst) * RH_qtotal(:) + IntConst
+intConst = -(Aconst * Denom * log (cosh (V1zero)) + Bconst * Denom * log (cosh (V2zero)))
+W(:) = Aconst * Denom * log (cosh (V1(:))) + Bconst * Denom * log (cosh (V2(:))) + &
+       (Cconst + Dconst) * RH_qtotal(:) + intConst
 
 ! store the components of qtotal
 ! ensuring that they are above lower limits
 
-IF (UseQtsplitRain) THEN
+if (UseQtsplitRain) then
 
   ! Split qtotal into q and qnv (non-vapour part - includes
   ! ql, qi, qr)
@@ -541,43 +541,43 @@ IF (UseQtsplitRain) THEN
 
   DO i = 1, nlevels_q
 
-    q(i) = MAX (W(i) * qsaturated(i), min_q)
-    qnv(i) = MAX (qtotal(i) - q(i), 0.0_kind_real)
+    q(i) = max (W(i) * qsaturated(i), min_q)
+    qnv(i) = max (qtotal(i) - q(i), 0.0_kind_real)
 
     ! Split qnv into a cloud and precipitation part
 
-    qc(i) = MAX (QsplitRainParamA * (QsplitRainParamB - (QsplitRainParamB / &
+    qc(i) = max (QsplitRainParamA * (QsplitRainParamB - (QsplitRainParamB / &
                                     ((QsplitRainParamC * qnv(i)) + 1_kind_real))), 0.0_kind_real)
 
     ! Finally split non-precip part into liquid and ice
 
-    ql(i) = MAX (LF(i) * qc(i), 0.0_kind_real)
-    qi(i) = MAX ((1.0_kind_real - LF(i)) * (qc(i)), 0.0_kind_real)
+    ql(i) = max (LF(i) * qc(i), 0.0_kind_real)
+    qi(i) = max ((1.0_kind_real - LF(i)) * (qc(i)), 0.0_kind_real)
 
-  END DO
+  end DO
 
 ELSE
   DO i = 1, nlevels_q
 
-    q(i) = MAX (W(i) * qsaturated(i), min_q)
-    ql(i) = MAX (LF(i) * (qtotal(i) - q(i)), 0.0_kind_real)
-    qi(i) = MAX ((1.0_kind_real - LF(i)) * (qtotal(i) - q(i)), 0.0_kind_real)
+    q(i) = max (W(i) * qsaturated(i), min_q)
+    ql(i) = max (LF(i) * (qtotal(i) - q(i)), 0.0_kind_real)
+    qi(i) = max ((1.0_kind_real - LF(i)) * (qtotal(i) - q(i)), 0.0_kind_real)
 
-  END DO
+  end DO
 
-END IF
+end if
 
 ! Values of q, ql and qi are overwritten if output_type /= 1
 ! and replaced with the derivatives
 
-IF (output_type /= 1) THEN
+if (output_type /= 1) then
 
   ! Compute derivates
   ! q = dq/dqtotal, ql = dql/dqtotal, qi=dqi/dqtotal
 
-  q(:) = Aconst * TANH (V1(:)) + Cconst + Bconst * TANH (V2(:)) + Dconst
+  q(:) = Aconst * tanh (V1(:)) + Cconst + Bconst * tanh (V2(:)) + Dconst
 
-  IF (UseQtsplitRain) THEN
+  if (UseQtsplitRain) then
 
     ql(:) = LF(:) * QsplitRainParamA * QsplitRainParamB * QsplitRainParamC * (1.0_kind_real - q(:)) /  &
                          ((QsplitRainParamC * qnv(:)) + 1.0_kind_real) ** 2
@@ -589,11 +589,11 @@ IF (output_type /= 1) THEN
     ql(:) = LF(:) * (1.0_kind_real - q(:))
     qi(:) = (1.0_kind_real - LF(:)) * (1.0_kind_real - q(:))
 
-  END IF
+  end if
 
-END IF
+end if
 
-END SUBROUTINE Ops_SatRad_Qsplit
+end subroutine Ops_SatRad_Qsplit
 
 !-----------------------------------------------------------------------
 ! (C) Crown copyright Met Office. All rights reserved.
@@ -606,7 +606,7 @@ END SUBROUTINE Ops_SatRad_Qsplit
 ! Returns a saturation mixing ratio given a temperature and pressure
 ! using saturation vapour pressures caluclated using the Goff-Gratch
 ! formulae, adopted by the WMO as taken from Landolt-Bornstein, 1987
-! Numerical Data and Functional relationships in Science and
+! Numerical data and Functional relationships in Science and
 ! Technology.  Group V/Vol 4B Meteorology.  Physical and Chemical
 ! properties of Air, P35.
 !
@@ -617,41 +617,41 @@ END SUBROUTINE Ops_SatRad_Qsplit
 !   Uses lookup tables to find eSAT, calculates qSAT directly from that.
 !-----------------------------------------------------------------------
 
-SUBROUTINE Ops_Qsat (QS,           &
+subroutine Ops_Qsat (QS,           &
                      T,            &
                      P,            &
                      NPNTS)
 
-IMPLICIT NONE
+implicit none
 
-! Subroutine arguments:
-INTEGER, INTENT(IN)                 :: NPNTS     ! Points being processed by qSAT scheme.
-REAL(kind=kind_real), INTENT(IN)    :: T(NPNTS)  ! Temperature (K)
-REAL(kind=kind_real), INTENT(IN)    :: P(NPNTS)  ! Pressure (Pa).
-REAL(kind=kind_real), INTENT(INOUT) :: QS(NPNTS) ! Saturation mixing ratio (KG/KG)
+! subroutine arguments:
+integer, intent(in)                 :: NPNTS     ! Points being processed by qSAT scheme.
+real(kind=kind_real), intent(in)    :: T(NPNTS)  ! Temperature (K)
+real(kind=kind_real), intent(in)    :: P(NPNTS)  ! Pressure (Pa).
+real(kind=kind_real), intent(inout) :: QS(NPNTS) ! Saturation mixing ratio (KG/KG)
 
 ! Local declarations:
-REAL(kind=kind_real), PARAMETER :: Epsilon   = 0.62198_kind_real
-REAL(kind=kind_real), PARAMETER :: ZeroDegC = 273.15_kind_real
-REAL(kind=kind_real), PARAMETER :: ONE_MINUS_EPSILON = 1.0_kind_real - Epsilon
-REAL(kind=kind_real), PARAMETER :: T_LOW = 183.15_kind_real  ! Lowest temperature for which look-up table is valid
-REAL(kind=kind_real), PARAMETER :: T_HIGH = 338.15_kind_real  ! Highest temperature for which look-up table is valid
-REAL(kind=kind_real), PARAMETER :: DELTA_T = 0.1_kind_real    ! Temperature increment of look-up table
-INTEGER, PARAMETER   :: N = ((T_HIGH - T_LOW + (DELTA_T * 0.5_kind_real)) / DELTA_T) + 1.0_kind_real ! Size of lookup-table (gives 1551)
-INTEGER              :: ITABLE
-REAL(kind=kind_real) :: ATABLE
-REAL(kind=kind_real) :: FSUBW      ! Converts from sat vapour pressure in pure water to pressure in air
-REAL(kind=kind_real) :: TT
-INTEGER              :: I
-INTEGER              :: IES
-REAL(kind=kind_real) :: ES(0:N + 1)    ! Table of saturation water vapour pressure (PA)
-CHARACTER(len=*), PARAMETER :: RoutineName = "Ops_Qsat"
+real(kind=kind_real), parameter :: EPSILON   = 0.62198_kind_real
+real(kind=kind_real), parameter :: ZeroDegC = 273.15_kind_real
+real(kind=kind_real), parameter :: ONE_MinUS_EPSILON = 1.0_kind_real - Epsilon
+real(kind=kind_real), parameter :: T_LOW = 183.15_kind_real  ! Lowest temperature for which look-up table is valid
+real(kind=kind_real), parameter :: T_HIGH = 338.15_kind_real  ! Highest temperature for which look-up table is valid
+real(kind=kind_real), parameter :: DELTA_T = 0.1_kind_real    ! Temperature increment of look-up table
+integer, parameter   :: N = ((T_HIGH - T_LOW + (DELTA_T * 0.5_kind_real)) / DELTA_T) + 1.0_kind_real ! Size of lookup-table (gives 1551)
+integer              :: ITABLE
+real(kind=kind_real) :: ATABLE
+real(kind=kind_real) :: FSUBW      ! Converts from sat vapour pressure in pure water to pressure in air
+real(kind=kind_real) :: TT
+integer              :: I
+integer              :: IES
+real(kind=kind_real) :: ES(0:N + 1)    ! Table of saturation water vapour pressure (PA)
+character(len=*), parameter :: RoutineName = "Ops_Qsat"
 
 ! Note: 0 element is a repeat of 1st element to cater for special case
 !       of low temperatures (.LE.T_LOW) for which the array index is
 !       rounded down due to machine precision.
 
-DATA (ES(IES), IES= 0, 95) / 0.966483E-02, &
+data (ES(IES), IES= 0, 95) / 0.966483E-02, &
 0.966483E-02,0.984279E-02,0.100240E-01,0.102082E-01,0.103957E-01, &
 0.105865E-01,0.107803E-01,0.109777E-01,0.111784E-01,0.113825E-01, &
 0.115902E-01,0.118016E-01,0.120164E-01,0.122348E-01,0.124572E-01, &
@@ -671,7 +671,7 @@ DATA (ES(IES), IES= 0, 95) / 0.966483E-02, &
 0.392248E-01,0.398889E-01,0.405633E-01,0.412474E-01,0.419430E-01, &
 0.426505E-01,0.433678E-01,0.440974E-01,0.448374E-01,0.455896E-01, &
 0.463545E-01,0.471303E-01,0.479191E-01,0.487190E-01,0.495322E-01/
-      DATA (ES(IES),IES= 96,190) / &
+      data (ES(IES),IES= 96,190) / &
 0.503591E-01,0.511977E-01,0.520490E-01,0.529145E-01,0.537931E-01, &
 0.546854E-01,0.555924E-01,0.565119E-01,0.574467E-01,0.583959E-01, &
 0.593592E-01,0.603387E-01,0.613316E-01,0.623409E-01,0.633655E-01, &
@@ -691,7 +691,7 @@ DATA (ES(IES), IES= 0, 95) / 0.966483E-02, &
 0.179342E+00,0.182096E+00,0.184893E+00,0.187724E+00,0.190600E+00, &
 0.193518E+00,0.196473E+00,0.199474E+00,0.202516E+00,0.205604E+00, &
 0.208730E+00,0.211905E+00,0.215127E+00,0.218389E+00,0.221701E+00/
-      DATA (ES(IES),IES=191,285) / &
+      data (ES(IES),IES=191,285) / &
 0.225063E+00,0.228466E+00,0.231920E+00,0.235421E+00,0.238976E+00, &
 0.242580E+00,0.246232E+00,0.249933E+00,0.253691E+00,0.257499E+00, &
 0.261359E+00,0.265278E+00,0.269249E+00,0.273274E+00,0.277358E+00, &
@@ -711,7 +711,7 @@ DATA (ES(IES), IES= 0, 95) / 0.966483E-02, &
 0.715622E+00,0.725641E+00,0.735799E+00,0.746082E+00,0.756495E+00, &
 0.767052E+00,0.777741E+00,0.788576E+00,0.799549E+00,0.810656E+00, &
 0.821914E+00,0.833314E+00,0.844854E+00,0.856555E+00,0.868415E+00/
-      DATA (ES(IES),IES=286,380) / &
+      data (ES(IES),IES=286,380) / &
 0.880404E+00,0.892575E+00,0.904877E+00,0.917350E+00,0.929974E+00, &
 0.942771E+00,0.955724E+00,0.968837E+00,0.982127E+00,0.995600E+00, &
 0.100921E+01,0.102304E+01,0.103700E+01,0.105116E+01,0.106549E+01, &
@@ -731,7 +731,7 @@ DATA (ES(IES), IES= 0, 95) / 0.966483E-02, &
 0.253560E+01,0.256814E+01,0.260099E+01,0.263431E+01,0.266800E+01, &
 0.270207E+01,0.273656E+01,0.277145E+01,0.280671E+01,0.284248E+01, &
 0.287859E+01,0.291516E+01,0.295219E+01,0.298962E+01,0.302746E+01/
-      DATA (ES(IES),IES=381,475) / &
+      data (ES(IES),IES=381,475) / &
 0.306579E+01,0.310454E+01,0.314377E+01,0.318351E+01,0.322360E+01, &
 0.326427E+01,0.330538E+01,0.334694E+01,0.338894E+01,0.343155E+01, &
 0.347456E+01,0.351809E+01,0.356216E+01,0.360673E+01,0.365184E+01, &
@@ -751,7 +751,7 @@ DATA (ES(IES), IES= 0, 95) / 0.966483E-02, &
 0.809435E+01,0.818967E+01,0.828606E+01,0.838343E+01,0.848194E+01, &
 0.858144E+01,0.868207E+01,0.878392E+01,0.888673E+01,0.899060E+01, &
 0.909567E+01,0.920172E+01,0.930909E+01,0.941765E+01,0.952730E+01/
-      DATA (ES(IES),IES=476,570) / &
+      data (ES(IES),IES=476,570) / &
 0.963821E+01,0.975022E+01,0.986352E+01,0.997793E+01,0.100937E+02, &
 0.102105E+02,0.103287E+02,0.104481E+02,0.105688E+02,0.106909E+02, &
 0.108143E+02,0.109387E+02,0.110647E+02,0.111921E+02,0.113207E+02, &
@@ -771,7 +771,7 @@ DATA (ES(IES), IES= 0, 95) / 0.966483E-02, &
 0.235651E+02,0.238211E+02,0.240794E+02,0.243404E+02,0.246042E+02, &
 0.248704E+02,0.251390E+02,0.254109E+02,0.256847E+02,0.259620E+02, &
 0.262418E+02,0.265240E+02,0.268092E+02,0.270975E+02,0.273883E+02/
-      DATA (ES(IES),IES=571,665) / &
+      data (ES(IES),IES=571,665) / &
 0.276822E+02,0.279792E+02,0.282789E+02,0.285812E+02,0.288867E+02, &
 0.291954E+02,0.295075E+02,0.298222E+02,0.301398E+02,0.304606E+02, &
 0.307848E+02,0.311119E+02,0.314424E+02,0.317763E+02,0.321133E+02, &
@@ -791,7 +791,7 @@ DATA (ES(IES), IES= 0, 95) / 0.966483E-02, &
 0.632204E+02,0.638550E+02,0.644959E+02,0.651418E+02,0.657942E+02, &
 0.664516E+02,0.671158E+02,0.677864E+02,0.684624E+02,0.691451E+02, &
 0.698345E+02,0.705293E+02,0.712312E+02,0.719398E+02,0.726542E+02/
-      DATA (ES(IES),IES=666,760) / &
+      data (ES(IES),IES=666,760) / &
 0.733754E+02,0.741022E+02,0.748363E+02,0.755777E+02,0.763247E+02, &
 0.770791E+02,0.778394E+02,0.786088E+02,0.793824E+02,0.801653E+02, &
 0.809542E+02,0.817509E+02,0.825536E+02,0.833643E+02,0.841828E+02, &
@@ -811,7 +811,7 @@ DATA (ES(IES), IES= 0, 95) / 0.966483E-02, &
 0.157678E+03,0.159148E+03,0.160624E+03,0.162117E+03,0.163621E+03, &
 0.165142E+03,0.166674E+03,0.168212E+03,0.169772E+03,0.171340E+03, &
 0.172921E+03,0.174522E+03,0.176129E+03,0.177755E+03,0.179388E+03/
-      DATA (ES(IES),IES=761,855) / &
+      data (ES(IES),IES=761,855) / &
 0.181040E+03,0.182707E+03,0.184382E+03,0.186076E+03,0.187782E+03, &
 0.189503E+03,0.191240E+03,0.192989E+03,0.194758E+03,0.196535E+03, &
 0.198332E+03,0.200141E+03,0.201963E+03,0.203805E+03,0.205656E+03, &
@@ -831,7 +831,7 @@ DATA (ES(IES), IES= 0, 95) / 0.966483E-02, &
 0.368407E+03,0.371599E+03,0.374802E+03,0.378042E+03,0.381293E+03, &
 0.384588E+03,0.387904E+03,0.391239E+03,0.394604E+03,0.397988E+03, &
 0.401411E+03,0.404862E+03,0.408326E+03,0.411829E+03,0.415352E+03/
-      DATA (ES(IES),IES=856,950) / &
+      data (ES(IES),IES=856,950) / &
 0.418906E+03,0.422490E+03,0.426095E+03,0.429740E+03,0.433398E+03, &
 0.437097E+03,0.440827E+03,0.444570E+03,0.448354E+03,0.452160E+03, &
 0.455999E+03,0.459870E+03,0.463765E+03,0.467702E+03,0.471652E+03, &
@@ -851,7 +851,7 @@ DATA (ES(IES), IES= 0, 95) / 0.966483E-02, &
 0.784701E+03,0.790265E+03,0.795849E+03,0.801483E+03,0.807137E+03, &
 0.812842E+03,0.818582E+03,0.824343E+03,0.830153E+03,0.835987E+03, &
 0.841871E+03,0.847791E+03,0.853733E+03,0.859727E+03,0.865743E+03/
-      DATA (ES(IES),IES=951,1045) / &
+      data (ES(IES),IES=951,1045) / &
 0.871812E+03,0.877918E+03,0.884046E+03,0.890228E+03,0.896433E+03, &
 0.902690E+03,0.908987E+03,0.915307E+03,0.921681E+03,0.928078E+03, &
 0.934531E+03,0.941023E+03,0.947539E+03,0.954112E+03,0.960708E+03, &
@@ -871,7 +871,7 @@ DATA (ES(IES), IES= 0, 95) / 0.966483E-02, &
 0.149672E+04,0.150655E+04,0.151641E+04,0.152635E+04,0.153633E+04, &
 0.154639E+04,0.155650E+04,0.156665E+04,0.157688E+04,0.158715E+04, &
 0.159750E+04,0.160791E+04,0.161836E+04,0.162888E+04,0.163945E+04/
-      DATA (ES(IES),IES=1046,1140) / &
+      data (ES(IES),IES=1046,1140) / &
 0.165010E+04,0.166081E+04,0.167155E+04,0.168238E+04,0.169325E+04, &
 0.170420E+04,0.171522E+04,0.172627E+04,0.173741E+04,0.174859E+04, &
 0.175986E+04,0.177119E+04,0.178256E+04,0.179402E+04,0.180552E+04, &
@@ -891,7 +891,7 @@ DATA (ES(IES), IES= 0, 95) / 0.966483E-02, &
 0.272447E+04,0.274108E+04,0.275774E+04,0.277453E+04,0.279137E+04, &
 0.280834E+04,0.282540E+04,0.284251E+04,0.285975E+04,0.287704E+04, &
 0.289446E+04,0.291198E+04,0.292954E+04,0.294725E+04,0.296499E+04/
-      DATA (ES(IES),IES=1141,1235) / &
+      data (ES(IES),IES=1141,1235) / &
 0.298288E+04,0.300087E+04,0.301890E+04,0.303707E+04,0.305529E+04, &
 0.307365E+04,0.309211E+04,0.311062E+04,0.312927E+04,0.314798E+04, &
 0.316682E+04,0.318577E+04,0.320477E+04,0.322391E+04,0.324310E+04, &
@@ -911,7 +911,7 @@ DATA (ES(IES), IES= 0, 95) / 0.966483E-02, &
 0.475477E+04,0.478175E+04,0.480880E+04,0.483605E+04,0.486336E+04, &
 0.489087E+04,0.491853E+04,0.494623E+04,0.497415E+04,0.500215E+04, &
 0.503034E+04,0.505867E+04,0.508707E+04,0.511568E+04,0.514436E+04/
-      DATA (ES(IES),IES=1236,1330) / &
+      data (ES(IES),IES=1236,1330) / &
 0.517325E+04,0.520227E+04,0.523137E+04,0.526068E+04,0.529005E+04, &
 0.531965E+04,0.534939E+04,0.537921E+04,0.540923E+04,0.543932E+04, &
 0.546965E+04,0.550011E+04,0.553064E+04,0.556139E+04,0.559223E+04, &
@@ -931,7 +931,7 @@ DATA (ES(IES), IES= 0, 95) / 0.966483E-02, &
 0.798802E+04,0.803028E+04,0.807259E+04,0.811525E+04,0.815798E+04, &
 0.820102E+04,0.824427E+04,0.828757E+04,0.833120E+04,0.837493E+04, &
 0.841895E+04,0.846313E+04,0.850744E+04,0.855208E+04,0.859678E+04/
-      DATA (ES(IES),IES=1331,1425) / &
+      data (ES(IES),IES=1331,1425) / &
 0.864179E+04,0.868705E+04,0.873237E+04,0.877800E+04,0.882374E+04, &
 0.886979E+04,0.891603E+04,0.896237E+04,0.900904E+04,0.905579E+04, &
 0.910288E+04,0.915018E+04,0.919758E+04,0.924529E+04,0.929310E+04, &
@@ -951,7 +951,7 @@ DATA (ES(IES), IES= 0, 95) / 0.966483E-02, &
 0.129644E+05,0.130285E+05,0.130927E+05,0.131573E+05,0.132220E+05, &
 0.132872E+05,0.133526E+05,0.134182E+05,0.134842E+05,0.135503E+05, &
 0.136168E+05,0.136836E+05,0.137505E+05,0.138180E+05,0.138854E+05/
-      DATA (ES(IES),IES=1426,1520) / &
+      data (ES(IES),IES=1426,1520) / &
 0.139534E+05,0.140216E+05,0.140900E+05,0.141588E+05,0.142277E+05, &
 0.142971E+05,0.143668E+05,0.144366E+05,0.145069E+05,0.145773E+05, &
 0.146481E+05,0.147192E+05,0.147905E+05,0.148622E+05,0.149341E+05, &
@@ -971,7 +971,7 @@ DATA (ES(IES), IES= 0, 95) / 0.966483E-02, &
 0.203910E+05,0.204853E+05,0.205798E+05,0.206749E+05,0.207701E+05, &
 0.208659E+05,0.209621E+05,0.210584E+05,0.211554E+05,0.212524E+05, &
 0.213501E+05,0.214482E+05,0.215465E+05,0.216452E+05,0.217442E+05/
-      DATA (ES(IES),IES=1521,1552) / &
+      data (ES(IES),IES=1521,1552) / &
 0.218439E+05,0.219439E+05,0.220440E+05,0.221449E+05,0.222457E+05, &
 0.223473E+05,0.224494E+05,0.225514E+05,0.226542E+05,0.227571E+05, &
 0.228606E+05,0.229646E+05,0.230687E+05,0.231734E+05,0.232783E+05, &
@@ -994,8 +994,8 @@ DO I = 1, NPNTS
 
   ! Use the lookup table to find saturated vapour pressure, and stored it in QS.
 
-  TT = MAX (T_LOW, T(I))
-  TT = MIN (T_HIGH, TT)
+  TT = max (T_LOW, T(I))
+  TT = Min (T_HIGH, TT)
 
   ATABLE = (TT - T_LOW + DELTA_T) / DELTA_T
   ITABLE = ATABLE
@@ -1014,10 +1014,10 @@ DO I = 1, NPNTS
   ! Note that at very low pressures we apply a fix, to prevent a
   ! singularity (Qsat tends to 1.0 kg/kg).
 
-  QS(I) = (EPSILON * QS(I)) / (MAX (P(I), QS(I)) - ONE_MINUS_EPSILON * QS(I))
+  QS(I) = (EPSILON * QS(I)) / (max (P(I), QS(I)) - ONE_MinUS_EPSILON * QS(I))
 
-END DO
+end DO
 
-END SUBROUTINE Ops_Qsat
+end subroutine Ops_Qsat
 
 end module ufo_rttovonedvarcheck_process_mod

@@ -44,16 +44,14 @@ real(kind_real), intent(out)                :: hofx(:)
 real(kind_real), intent(out)                :: H_matrix(:,:)
 
 ! local variables
-type(ufo_radiancerttov_tlad)                :: rttov_tlad      ! structure for holding original rttov_k setup data
+type(ufo_radiancerttov_tlad)                :: rttov_tlad   ! structure for holding original rttov_k setup data
 type(fckit_configuration)                   :: f_conf
 
 f_conf = fckit_configuration(conf)
 
 select case (trim(ob_info%forward_mod_name))
   case ("RTTOV")
-    write(*,*) "Setup RTTOV tlad"
     call rttov_tlad % setup(f_conf)
-    write(*,*) "Call get Hmatrix"
     call ufo_rttovonedvarcheck_GetHmatrixRTTOV(geovals, ob_info, obsdb, &
                                             channels(:), rttov_tlad, &
                                             profindex, prof_x(:), &
@@ -65,7 +63,7 @@ select case (trim(ob_info%forward_mod_name))
       stop
 end select
 
-end subroutine ufo_rttovonedvarcheck_ForwardModel
+end  subroutine ufo_rttovonedvarcheck_ForwardModel
 
 !------------------------------------------------------------------------------
 
@@ -92,7 +90,7 @@ real(kind_real), intent(out)                :: H_matrix(:,:)
 ! Local arguments
 integer :: nchans, nlevels, nq_levels
 integer :: i
-logical :: RTTOV_GasUnitConv = .false.
+logical :: RTTOV_GasunitConv = .false.
 real(kind_real),allocatable :: q_kgkg(:)
 real(kind_real)             :: s2m_kgkg
 type(ufo_geoval), pointer    :: geoval
@@ -177,7 +175,7 @@ if (profindex % qt(1) > 0) then
   pressure(:) = geoval%vals(:, 1)    ! Pa
 
   ! Calculate the gradients with respect to qtotal
-  CALL Ops_SatRad_Qsplit (0,               & ! in
+  call Ops_SatRad_Qsplit (0,               & ! in
                           temperature,     & ! in
                           pressure,        & ! in
                           nlevels,         & ! in
@@ -242,138 +240,138 @@ if (profindex % tstar > 0) then
   end do
 end if
 
-call Ops_SatRad_PrintHmatrix( &
+call ufo_rttovonedvarcheck_PrintHmatrix( &
   nchans,   &       ! in
   size(prof_x),  &  ! in
   Channels, &       ! in
   H_matrix, &       ! in
   profindex )       ! in
 
-end subroutine ufo_rttovonedvarcheck_GetHmatrixRTTOV
+end  subroutine ufo_rttovonedvarcheck_GetHmatrixRTTOV
 
 !---------------------------------------------------------------------------
 
 ! --------------------------------------------------------------------------
 
-SUBROUTINE Ops_SatRad_PrintHmatrix( &
+subroutine ufo_rttovonedvarcheck_PrintHmatrix( &
   nchans,   &       ! in
   nprofelements, &  ! in
   Channels, &       ! in
   H_matrix, &       ! in
   profindex )       ! in
 
-IMPLICIT NONE
+implicit none
 
 !Subroutine arguments:
-INTEGER,                INTENT(IN)  :: nchans
-INTEGER,                INTENT(IN)  :: nprofelements
-INTEGER(c_int),         INTENT(IN)  :: channels(nchans)
-REAL(kind_real),        INTENT(IN)  :: H_matrix(nchans,nprofelements)
-type(Profileinfo_type), INTENT(in)  :: profindex
+integer,                intent(IN)  :: nchans
+integer,                intent(IN)  :: nprofelements
+integer(c_int),         intent(IN)  :: channels(nchans)
+real(kind_real),        intent(IN)  :: H_matrix(nchans,nprofelements)
+type(Profileinfo_type), intent(in)  :: profindex
 
 ! Local variables:
-INTEGER :: i
-CHARACTER(LEN=10) :: int_fmt
-CHARACTER(LEN=12) :: real_fmt
-CHARACTER(LEN=3) :: txt_nchans
-CHARACTER(LEN=*), PARAMETER :: RoutineName = "Ops_SatRad_PrintHMatrix"
+integer :: i
+character(LEN=10) :: int_fmt
+character(LEN=12) :: real_fmt
+character(LEN=3) :: txt_nchans
+character(LEN=*), parameter :: RoutineName = "ufo_rttovonedvarcheck_PrintHmatrix"
 !-------------------------------------------------------------------------------
 
-WRITE( UNIT=txt_nchans,FMT='(i3)' )  nchans
-WRITE( UNIT=int_FMT,FMT='(a)' ) '(' // TRIM(txt_nchans) // 'I13)'
-WRITE( UNIT=real_FMT,FMT='(a)' ) '(' // TRIM(txt_nchans) // 'E13.5)'
+write( unit=txt_nchans,fmt='(i3)' )  nchans
+write( unit=int_fmt,fmt='(a)' ) '(' // trim(txt_nchans) // 'I13)'
+write( unit=real_fmt,fmt='(a)' ) '(' // trim(txt_nchans) // 'E13.5)'
 
-WRITE(*,*)
+write(*,*)
 
-WRITE(*, int_fmt) channels(:)
+write(*, int_fmt) channels(:)
 
-  IF ( profindex % t(1) > 0 ) THEN
-    WRITE(*, '(a)') 'Temperature Profile'
-    DO i = profindex%t(1),profindex%t(2)
-      WRITE(*, real_fmt)  H_matrix(:,i)
-    END DO
-  END IF
+  if ( profindex % t(1) > 0 ) THEN
+    write(*, '(a)') 'Temperature Profile'
+    do i = profindex%t(1),profindex%t(2)
+      write(*, real_fmt)  H_matrix(:,i)
+    end do
+  end if
 
-  IF ( profindex % q(1) > 0 ) THEN
-    WRITE(*, '(a)') 'q Profile'
-    DO i = profindex%q(1),profindex%q(2)
-      WRITE(*, real_fmt)  H_matrix(:,i)
-    END DO
-  END IF
+  if ( profindex % q(1) > 0 ) THEN
+    write(*, '(a)') 'q Profile'
+    do i = profindex%q(1),profindex%q(2)
+      write(*, real_fmt)  H_matrix(:,i)
+    end do
+  end if
 
-  IF ( profindex % qt(1) > 0 ) THEN
-    WRITE(*, '(a)') 'qt Profile /1000'
-    DO i = profindex%qt(1),profindex%qt(2)
-      WRITE(*, real_fmt)  H_matrix(:,i)/1000
-    END DO
-  END IF
+  if ( profindex % qt(1) > 0 ) THEN
+    write(*, '(a)') 'qt Profile /1000'
+    do i = profindex%qt(1),profindex%qt(2)
+      write(*, real_fmt)  H_matrix(:,i)/1000
+    end do
+  end if
 
-  IF ( profindex % o3profile(1) > 0 ) THEN
-    WRITE(*, '(a)') 'Ozone Profile'
-    DO i = profindex%o3profile(1),profindex%o3profile(2)
-      WRITE(*, real_fmt)  H_matrix(:,i)
-    END DO
-  END IF
+  if ( profindex % o3profile(1) > 0 ) THEN
+    write(*, '(a)') 'Ozone Profile'
+    do i = profindex%o3profile(1),profindex%o3profile(2)
+      write(*, real_fmt)  H_matrix(:,i)
+    end do
+  end if
 
-  IF ( profindex % o3total > 0 ) THEN
-    WRITE(*, '(a)') 'Total Column Ozone'
-    WRITE(*, real_fmt)  H_matrix(:,profindex%o3total)
-  END IF
-
-
-  IF ( profindex % lwp > 0 ) THEN
-    WRITE(*, '(a)') 'LWP'
-    WRITE(*, real_fmt)  H_matrix(i,profindex % lwp)
-  END IF
-
-  IF ( profindex % t2 > 0 ) THEN
-    WRITE(*, '(a)') '2m T'
-    WRITE(*, real_fmt)  H_matrix(:,profindex % t2)
-  END IF
-
-  IF ( profindex % q2 > 0 ) THEN
-    WRITE(*, '(a)') '2m q'
-    WRITE(*, real_fmt)  H_matrix(:,profindex % q2)
-  END IF
-
-  IF ( profindex % pstar > 0 ) THEN
-    WRITE(*, '(a)') 'P Star'
-    WRITE(*, real_fmt)  H_matrix(:,profindex % pstar)
-  END IF
-
-  IF ( profindex % windspeed > 0 ) THEN
-    WRITE(*, '(a)') 'Windspeed'
-    WRITE(*, real_fmt)  H_matrix(:,profindex % windspeed)
-  END IF
-
-  IF ( profindex % tstar > 0 ) THEN
-    WRITE(*, '(a)') 'Skin Temperature'
-    WRITE(*, real_fmt)  H_matrix(:,profindex % tstar)
-  END IF
-
-  IF ( profindex % mwemiss(1) > 0) THEN
-    WRITE(*, '(a)') 'Microwave emissivity retrieval'
-    DO i = profindex%mwemiss(1),profindex%mwemiss(2)
-      WRITE(*, real_fmt)  H_matrix(:,i)
-    END DO
-  END IF
-
-  IF ( profindex % cloudtopp > 0 ) THEN
-    WRITE(*, '(a)') 'Cloud top pressure'
-    WRITE(*, real_fmt)  H_matrix(:,profindex % cloudtopp)
-  END IF
-
-  IF ( profindex % cloudfrac > 0 ) THEN
-    WRITE(*, '(a)') 'Effective cloud fraction'
-    WRITE(*, real_fmt)  H_matrix(:,profindex % cloudfrac)
-  END IF
+  if ( profindex % o3total > 0 ) THEN
+    write(*, '(a)') 'Total Column Ozone'
+    write(*, real_fmt)  H_matrix(:,profindex%o3total)
+  end if
 
 
-WRITE(*,*)
-WRITE(*, '(a)') 'End H-Matrix'
-WRITE(*, '(a)') '------------------------'
+  if ( profindex % lwp > 0 ) THEN
+    write(*, '(a)') 'LWP'
+    write(*, real_fmt)  H_matrix(i,profindex % lwp)
+  end if
 
-END SUBROUTINE Ops_SatRad_PrintHmatrix
+  if ( profindex % t2 > 0 ) THEN
+    write(*, '(a)') '2m T'
+    write(*, real_fmt)  H_matrix(:,profindex % t2)
+  end if
+
+  if ( profindex % q2 > 0 ) THEN
+    write(*, '(a)') '2m q'
+    write(*, real_fmt)  H_matrix(:,profindex % q2)
+  end if
+
+  if ( profindex % pstar > 0 ) THEN
+    write(*, '(a)') 'P Star'
+    write(*, real_fmt)  H_matrix(:,profindex % pstar)
+  end if
+
+  if ( profindex % windspeed > 0 ) THEN
+    write(*, '(a)') 'Windspeed'
+    write(*, real_fmt)  H_matrix(:,profindex % windspeed)
+  end if
+
+  if ( profindex % tstar > 0 ) THEN
+    write(*, '(a)') 'Skin Temperature'
+    write(*, real_fmt)  H_matrix(:,profindex % tstar)
+  end if
+
+  if ( profindex % mwemiss(1) > 0) THEN
+    write(*, '(a)') 'Microwave emissivity retrieval'
+    do i = profindex%mwemiss(1),profindex%mwemiss(2)
+      write(*, real_fmt)  H_matrix(:,i)
+    end do
+  end if
+
+  if ( profindex % cloudtopp > 0 ) THEN
+    write(*, '(a)') 'Cloud top pressure'
+    write(*, real_fmt)  H_matrix(:,profindex % cloudtopp)
+  end if
+
+  if ( profindex % cloudfrac > 0 ) THEN
+    write(*, '(a)') 'Effective cloud fraction'
+    write(*, real_fmt)  H_matrix(:,profindex % cloudfrac)
+  end if
+
+
+write(*,*)
+write(*, '(a)') 'End H-Matrix'
+write(*, '(a)') '------------------------'
+
+end  subroutine ufo_rttovonedvarcheck_PrintHmatrix
 
 ! ------------------------------------------------------------
 

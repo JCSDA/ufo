@@ -19,7 +19,7 @@
 #include "oops/util/Printable.h"
 #include "ufo/filters/FilterBase.h"
 #include "ufo/filters/QCflags.h"
-#include "ufo/onedvarcheck/RTTOVOneDVarCheck.interface.h"
+#include "ufo/rttovonedvarcheck/RTTOVOneDVarCheck.interface.h"
 
 namespace eckit {
   class Configuration;

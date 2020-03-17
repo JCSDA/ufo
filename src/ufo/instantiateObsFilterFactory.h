@@ -27,7 +27,7 @@
 #include "ufo/filters/TrackCheck.h"
 #include "ufo/gnssro/QC/BackgroundCheckRONBAM.h"
 #include "ufo/gnssro/QC/ROobserror.h"
-#include "ufo/onedvarcheck/RTTOVOneDVarCheck.h"
+#include "ufo/rttovonedvarcheck/RTTOVOneDVarCheck.h"
 
 namespace ufo {
 template<typename MODEL> void instantiateObsFilterFactory() {

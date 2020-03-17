@@ -28,7 +28,7 @@ contains
 !     Refer to COPYRIGHT.txt of this distribution for details.
 !-------------------------------------------------------------------------------
 ! Find the most probable atmospheric state vector by minimizing a cost function
-! through a series of iterations. If a solution exists, the iterations will
+! through a series of iterations. if a solution exists, the iterations will
 ! converge when the iterative increments are acceptably small. A limit on the
 ! total number of iterations allowed, is imposed.
 !
@@ -47,16 +47,16 @@ contains
 !
 ! The loop is exited with convergence if either of the following conditions are
 ! true, depending on whether UseJforConvergence is true or false
-!   1) If UseJforConvergence is true then the change in total cost function from
+!   1) if UseJforConvergence is true then the change in total cost function from
 !      one iteration to the next is sufficiently small to imply convergence
-!   2) If UseJforConvergence is false then the increments to the atmospheric
+!   2) if UseJforConvergence is false then the increments to the atmospheric
 !      state vector are sufficiently small to imply convergence at an acceptable
 !      solution
 !   Either of the following two conditions will cause the 1dvar to stop and exit
 !   with an error.
 !   3) The increments are sufficiently large to suppose a solution will not
 !      be found.
-!   4) The maximum number of allowed iterations has been reached. In most
+!   4) The maximum number of allowed iterations has been reached. in most
 !      cases, one of the above criteria will have occurred.
 !
 ! References:
@@ -64,7 +64,7 @@ contains
 !   Rodgers, Retrieval of atmospheric temperature and composition from
 !   remote measurements of thermal radiation, Rev. Geophys.Sp.Phys. 14, 1976.
 !
-!   Eyre, Inversion of cloudy satellite sounding radiances by nonlinear
+!   Eyre, inversion of cloudy satellite sounding radiances by nonlinear
 !   optimal estimation. I: Theory and simulation for TOVS,QJ,July 89.
 !-------------------------------------------------------------------------------
 subroutine Ops_SatRad_MinimizeNewton_RTTOV12(ob_info,       &
@@ -99,47 +99,48 @@ real(kind_real), intent(in)          :: b_inv(:,:)
 type(ufo_geovals), intent(inout)     :: local_geovals
 type(Profileinfo_type), intent(in)   :: profile_index
 integer, intent(in)                  :: nprofelements
-type(c_ptr), VALUE, intent(in)       :: conf
-type(c_ptr), VALUE, intent(in)       :: obsdb
+type(c_ptr), value, intent(in)       :: conf
+type(c_ptr), value, intent(in)       :: obsdb
 integer(c_int), intent(in)           :: channels(:)
 logical, intent(out)                 :: onedvar_success
 
 ! Local declarations:
-CHARACTER(len=*), PARAMETER     :: RoutineName = "Ops_SatRad_MinimizeNewton_RTTOV12"
-INTEGER                         :: Inversionstatus
-LOGICAL                         :: OutOfRange
+character(len=*), parameter     :: RoutineName = "Ops_SatRad_MinimizeNewton_RTTOV12"
+integer                         :: inversionstatus
+LOGICAL                         :: outOfRange
 LOGICAL                         :: Converged
 LOGICAL                         :: Error
 LOGICAL                         :: UseJForConvergence
-INTEGER                         :: Max1DVarIterations
-INTEGER                         :: JConvergenceOption
-REAL                            :: cost_convergencefactor
-INTEGER                         :: iter
-INTEGER                         :: RTerrorcode
-INTEGER                         :: nchans
-REAL(kind_real)                 :: Jcost     ! current value
-REAL(kind_real)                 :: JcostOld  ! previous iteration value
-REAL(kind_real)                 :: JcostOrig ! initial value
-REAL(kind_real)                 :: DeltaJ
-REAL(kind_real)                 :: DeltaJo
+integer                         :: Max1DVarIterations
+integer                         :: JConvergenceOption
+real                            :: cost_convergencefactor
+integer                         :: iter
+integer                         :: RTerrorcode
+integer                         :: nchans
+real(kind_real)                 :: Jcost     ! current value
+real(kind_real)                 :: JcostOld  ! previous iteration value
+real(kind_real)                 :: JcostOrig ! initial value
+real(kind_real)                 :: DeltaJ
+real(kind_real)                 :: DeltaJo
 
-REAL(kind_real), allocatable    :: OldProfile(:)
-REAL(kind_real), allocatable    :: GuessProfile(:)
-REAL(kind_real), allocatable    :: BackProfile(:)
-REAL(kind_real), allocatable    :: H_matrix(:,:)
-REAL(kind_real), allocatable    :: Diffprofile(:)
-REAL(kind_real), allocatable    :: Ydiff(:)
-REAL(kind_real), allocatable    :: Y(:)
-REAL(kind_real), allocatable    :: Y0(:)
+real(kind_real), allocatable    :: OldProfile(:)
+real(kind_real), allocatable    :: GuessProfile(:)
+real(kind_real), allocatable    :: BackProfile(:)
+real(kind_real), allocatable    :: H_matrix(:,:)
+real(kind_real), allocatable    :: Diffprofile(:)
+real(kind_real), allocatable    :: Ydiff(:)
+real(kind_real), allocatable    :: Y(:)
+real(kind_real), allocatable    :: Y0(:)
 type(ufo_geovals)               :: geovals
 real(kind_real)                 :: Jout(3)
 
-! Interface blocks:
-!INCLUDE 'Ops_SatRad_CheckIteration.interface'
-!INCLUDE 'Ops_SatRad_CheckCloudyIteration.interface'
-!INCLUDE 'Ops_SatRad_PrintRTprofile_RTTOV12.interface'
+! interface blocks:
+!inCLUDE 'Ops_SatRad_CheckIteration.interface'
+!inCLUDE 'Ops_SatRad_CheckCloudyIteration.interface'
+!inCLUDE 'Ops_SatRad_PrintRTprofile_RTTOV12.interface'
 
 Converged = .FALSE.
+onedvar_success = .FALSE.
 Error = .FALSE.
 UseJForConvergence = .TRUE.
 Max1DVarIterations = 10
@@ -159,14 +160,14 @@ allocate(Y0(nchans))
 
 geovals = local_geovals
 
-Iterations: DO iter = 1, Max1DVarIterations
+Iterations: do iter = 1, Max1DVarIterations
 
   !-------------------------
   ! 1. Generate new profile
   !-------------------------
 
-  ! Initialise RTerrorcode and profile increments on first iteration
-  IF (iter == 1) THEN
+  ! initialise RTerrorcode and profile increments on first iteration
+  if (iter == 1) then
 
     RTerrorcode = 0
     Diffprofile(:) = 0.0
@@ -176,7 +177,7 @@ Iterations: DO iter = 1, Max1DVarIterations
     call ufo_rttovonedvarcheck_GeoVaLs2ProfVec(geovals, profile_index, nprofelements, GuessProfile(:))
     OldProfile(:) = GuessProfile(:)
 
-  END IF
+  end if
 
   ! call forward model to generate jacobian
   call ufo_rttovonedvarcheck_ForwardModel(geovals, ob_info, obsdb, &
@@ -186,29 +187,29 @@ Iterations: DO iter = 1, Max1DVarIterations
   write(*,*) "Observed BTs After bias correction: ",ob_info%yobs(:)
   write(*,*) "RTTOV BTs: = ",Y(:)
 
-  IF (iter == 1) THEN
+  if (iter == 1) then
     BackProfile(:) = GuessProfile(:)
     Y0(:) = Y(:)
-  END IF
+  end if
 
-  ! Exit on error
-  IF (RTerrorcode /= 0) THEN
+  ! exit on error
+  if (RTerrorcode /= 0) then
     write(*,*) "Radiative transfer error"
-    EXIT Iterations
-  END IF
+    exit Iterations
+  end if
 
   !-----------------------------------------------------
-  ! 1a. If UseJForConvergence is true
+  ! 1a. if UseJForConvergence is true
   !     then compute costfunction for latest profile
   !     and determine convergence using change in cost fn
   !-----------------------------------------------------
 
-  IF (UseJForConvergence) THEN
+  if (UseJForConvergence) then
 
     ! store cost function from previous cycle
-    IF (UseJForConvergence) THEN
+    if (UseJForConvergence) then
       JcostOld = Jcost
-    END IF
+    end if
 
     Diffprofile(:) = GuessProfile(:) - BackProfile(:)
     write(*,*) "Diffprofile = ",Diffprofile(:)
@@ -218,19 +219,19 @@ Iterations: DO iter = 1, Max1DVarIterations
     call ufo_rttovonedvarcheck_CostFunction(Diffprofile, b_inv, Ydiff, r_inv, Jout)
     Jcost = Jout(1)
 
-    ! Exit on error
-    !IF (InversionStatus /= 0) EXIT Iterations
+    ! exit on error
+    !if (inversionStatus /= 0) exit Iterations
 
     ! store initial cost value
-    IF (iter == 1) JCostOrig = jcost
+    if (iter == 1) JCostOrig = jcost
 
     ! check for convergence
-    IF (iter > 1) THEN
+    if (iter > 1) then
 
-      IF (JConvergenceOption == 1) THEN
+      if (JConvergenceOption == 1) then
 
         ! percentage change tested between iterations
-        DeltaJ = ABS ((Jcost - JcostOld) / MAX (Jcost, TINY (0.0)))
+        DeltaJ = ABS ((Jcost - JcostOld) / MAX (Jcost, TinY (0.0)))
 
         ! default test for checking that overall cost is getting smaller
         DeltaJo = -1.0
@@ -243,64 +244,65 @@ Iterations: DO iter = 1, Max1DVarIterations
         ! change between current cost and initial
         DeltaJo = Jcost - JCostorig
 
-      END IF
+      end if
 
-!      IF (SatRad_FullDiagnostics) THEN
-        WRITE (*, '(A,F12.5)') 'Cost Function=', Jcost
-        WRITE (*, '(A,F12.5)') 'Cost Function Increment=', deltaj
-        WRITE (*, '(A,F12.5)') 'cost_convergencefactor=', cost_convergencefactor
-!      END IF
+!      if (SatRad_FullDiagnostics) then
+        write (*, '(A,F12.5)') 'Cost Function=', Jcost
+        write (*, '(A,F12.5)') 'Cost Function increment=', deltaj
+        write (*, '(A,F12.5)') 'cost_convergencefactor=', cost_convergencefactor
+!      end if
 
-      IF (DeltaJ < cost_convergencefactor .AND. &
-          DeltaJo < 0.0)  THEN ! overall is cost getting smaller?
+      if (DeltaJ < cost_convergencefactor .AND. &
+          DeltaJo < 0.0)  then ! overall is cost getting smaller?
         converged = .TRUE.
+        onedvar_success = .TRUE.
 
-!        IF (SatRad_FullDiagnostics) THEN
-!          WRITE (*, '(A,I0)') 'Iteration', iter
-!          WRITE (*, '(A)') '------------'
-!          WRITE (*, '(A,L1)') 'Status: converged = ', Converged
-!          WRITE (*, '(A)') 'New profile:'
+!        if (SatRad_FullDiagnostics) then
+!          write (*, '(A,I0)') 'Iteration', iter
+!          write (*, '(A)') '------------'
+!          write (*, '(A,L1)') 'Status: converged = ', Converged
+!          write (*, '(A)') 'New profile:'
 !          CALL Ops_SatRad_PrintRTprofile_RTTOV12 (RTprof_Guess)
-!          WRITE (*, '(A)')
-!        END IF
+!          write (*, '(A)')
+!        end if
 
-        EXIT iterations
-      END IF
+        exit iterations
+      end if
 
-    END IF
+    end if
 
-  END IF ! end of specific code for cost test convergence
+  end if ! end of specific code for cost test convergence
 
   ! Iterate (Guess) profile vector
-  IF (nchans > nprofelements) THEN
+  if (nchans > nprofelements) then
     write(*,*) "Many Chans"
     CALL Ops_SatRad_NewtonManyChans (Ydiff,                     &
                                      nchans,                    &
                                      H_matrix(:,:),             & ! in
-                                     TRANSPOSE (H_matrix(:,:)), & ! in
+                                     transpose (H_matrix(:,:)), & ! in
                                      nprofelements,             &
                                      Diffprofile,               &
                                      b_inv,                     &
                                      r_matrix,                  &
-                                     InversionStatus)
+                                     inversionStatus)
   ELSE ! nchans <= nprofelements
     write(*,*) "Few Chans"
     CALL Ops_SatRad_NewtonFewChans (Ydiff,                     &
                                     nchans,                    &
                                     H_matrix(:,:),             & ! in
-                                    TRANSPOSE (H_matrix(:,:)), & ! in
+                                    transpose (H_matrix(:,:)), & ! in
                                     nprofelements,             &
                                     Diffprofile,               &
                                     b_matrix,                  &
                                     r_matrix,                  &
-                                    InversionStatus)
-  END IF
+                                    inversionStatus)
+  end if
 
-  IF (InversionStatus /= 0) THEN
-    InversionStatus = 1
-    write(*,*) "Inversion failed"
-    EXIT Iterations
-  END IF
+  if (inversionStatus /= 0) then
+    inversionStatus = 1
+    write(*,*) "inversion failed"
+    exit Iterations
+  end if
 
   GuessProfile(:) = BackProfile(:) + Diffprofile(:)
 
@@ -314,47 +316,47 @@ Iterations: DO iter = 1, Max1DVarIterations
 !                                  RTprof_Guess % rttov12_profile % s2m % t,            & ! in
 !                                  RTprof_Guess % rttov12_profile % t(:), & ! in
 !                                  GuessProfile(:),                                     & ! inout
-!                                  OutOfRange)                                            ! out
+!                                  outOfRange)                                            ! out
 !
   ! Update RT-format guess profile
   call ufo_rttovonedvarcheck_ProfVec2GeoVaLs(geovals, profile_index, nprofelements, GuessProfile)
   
-!  ! If qtotal in retrieval vector check cloud
+!  ! if qtotal in retrieval vector check cloud
 !  ! variables for current iteration
 !
-!  IF ((.NOT. OutofRange) .AND. &
-!      profindex % qt(1) > 0) THEN
+!  if ((.NOT. outofRange) .AND. &
+!      profindex % qt(1) > 0) then
 !
-!    IF (iter >= IterNumForLWPCheck) THEN
+!    if (iter >= IterNumForLWPCheck) then
 !    
-!      IF (RTTOV_mwscattSwitch) THEN
+!      if (RTTOV_mwscattSwitch) then
 !      
 !        !cloud information is from the scatt profile
-!        IF (RTprof_Guess % rttov12_profile_scatt % use_totalice) THEN
+!        if (RTprof_Guess % rttov12_profile_scatt % use_totalice) then
 !        
 !          CALL Ops_SatRad_CheckCloudyIteration (RTprof_Guess % rttov12_profile_scatt % clw(:),      & ! in
 !                                                RTprof_Guess % rttov12_profile_scatt % totalice(:), & ! in
-!                                                OutOfRange)                                                         ! out
+!                                                outOfRange)                                                         ! out
 !        ELSE
 !        
 !          CALL Ops_SatRad_CheckCloudyIteration (RTprof_Guess % rttov12_profile_scatt % clw(:), & ! in
 !                                                RTprof_Guess % rttov12_profile_scatt % ciw(:), & ! in
-!                                                OutOfRange)
+!                                                outOfRange)
 !        
-!        END IF
+!        end if
 !                                                                                               
 !      ELSE
 !      
 !        !clear air profile is used for clw and cloudice diagnostic 
 !        CALL Ops_SatRad_CheckCloudyIteration (RTprof_Guess % rttov12_profile % clw(:), & ! in
 !                                              CloudIce(:),                                           & ! in
-!                                              OutOfRange)                                              ! out
+!                                              outOfRange)                                              ! out
 !      
-!      END IF                                       
+!      end if                                       
 !    
-!    END IF                                                                                  
+!    end if                                                                                  
 !
-!  END IF
+!  end if
 
   !-------------------------------------------------
   ! 3. Check for convergence using change in profile
@@ -363,54 +365,54 @@ Iterations: DO iter = 1, Max1DVarIterations
 
 !  AbsDiffprofile(:) = 0.0
 !
-!  IF ((.NOT. OutOfRange) .AND. &
-!      (.NOT. UseJForConvergence))THEN
+!  if ((.NOT. outOfRange) .AND. &
+!      (.NOT. UseJForConvergence))then
 !    ABSDiffProfile(:) = ABS (GuessProfile(:) - OldProfile(:))
-!    IF (ALL (AbsDiffProfile(:) <= B_sigma(:) * ConvergenceFactor)) THEN
+!    if (ALL (AbsDiffProfile(:) <= B_sigma(:) * ConvergenceFactor)) then
 !      Converged = .TRUE.
-!    END IF
-!  END IF
+!    end if
+!  end if
 
   !---------------------
-  ! 4. Output diagnostics
+  ! 4. output diagnostics
   !---------------------
 
-!  IF (SatRad_FullDiagnostics) THEN
-!    WRITE (*, '(A,I0)') 'Iteration', iter
-!    WRITE (*, '(A)') '------------'
-!    WRITE (*, '(A,L1)') 'Status: converged = ', Converged
-!    IF (OutOfRange) WRITE (*, '(A)') 'Exiting with bad increments'
-!    WRITE (*, '(A)') 'New profile:'
+!  if (SatRad_FullDiagnostics) then
+!    write (*, '(A,I0)') 'Iteration', iter
+!    write (*, '(A)') '------------'
+!    write (*, '(A,L1)') 'Status: converged = ', Converged
+!    if (outOfRange) write (*, '(A)') 'exiting with bad increments'
+!    write (*, '(A)') 'New profile:'
 !    CALL Ops_SatRad_PrintRTprofile_RTTOV12 (RTprof_Guess)
-!    WRITE (*, '(A)')
-!  END IF
+!    write (*, '(A)')
+!  end if
 
-  ! Exit conditions
+  ! exit conditions
 
-  IF (Converged .OR. OutOfRange) EXIT iterations
+  if (Converged .OR. outOfRange) exit iterations
 
-END DO Iterations
+end do Iterations
 
 write(*,*) "----------------------------"
 write(*,*) "Starting cost = ",JCostorig
 write(*,*) "Final cost = ",Jcost
 write(*,*) "Converged? ", Converged
-write(*,*) "Out Profile = ",GuessProfile(:)
+write(*,*) "out Profile = ",GuessProfile(:)
 write(*,*) "----------------------------"
 
 !Ob % Niter = iter
-!IF (RTerrorcode /= 0 .OR. .NOT. Converged .OR. OutOfRange .OR. &
-!    InversionStatus /= 0) THEN
+!if (RTerrorcode /= 0 .OR. .NOT. Converged .OR. outOfRange .OR. &
+!    inversionStatus /= 0) then
 !  Error = .TRUE.
-!END IF
+!end if
 !
-!IF (.NOT. Error .AND. UseJForConvergence) THEN
+!if (.NOT. Error .AND. UseJForConvergence) then
 !  ! store final cost function and retrieved bts
 !  Ob % Jcost = Jcost
 !  Ob % Britemp(Channels_1dvar(:)) = Britemp(:)
-!END IF
+!end if
 
-END SUBROUTINE Ops_SatRad_MinimizeNewton_RTTOV12
+end subroutine Ops_SatRad_MinimizeNewton_RTTOV12
 
 !-------------------------------------------------------------------------------
 ! (C) Crown copyright Met Office. All rights reserved.
@@ -427,7 +429,7 @@ END SUBROUTINE Ops_SatRad_MinimizeNewton_RTTOV12
 !          ym is the measurement vector (i.e. observed brightness temperatures)
 !          y(xn) is the observation vector calculated for xn
 !          ym and y(xn) are not used individually at all, hence these are input
-!          as a dIfference vector DeltaBT.
+!          as a difference vector DeltaBT.
 !          B is the background error covariance matrix
 !          R is the combined forward model and ob error covariance matrix
 !          H is the forward model gradient (w.r.t. xn) matrix
@@ -444,7 +446,7 @@ END SUBROUTINE Ops_SatRad_MinimizeNewton_RTTOV12
 ! Note on input/output variable DeltaProfile:
 !
 !   On input, DeltaProfile is x(n-1)-xb.
-!   In construction of variable v, the sign is reversed:
+!   in construction of variable v, the sign is reversed:
 !   V = (ym-y(xn) + H.(xn-xb)) -- see equation in description above.
 !   On output, DeltaProfile is xn-xb and should be ADDED to the background
 !   profile
@@ -455,11 +457,11 @@ END SUBROUTINE Ops_SatRad_MinimizeNewton_RTTOV12
 !   Rodgers, Retrieval of atmospheric temperature and composition from
 !   remote measurements of thermal radiation, Rev. Geophys.Sp.Phys. 14, 1976.
 !
-!   Rodgers, Inverse Methods for Atmospheres: Theory and Practice.  World
-!            ScientIfic Publishing, 2000.
+!   Rodgers, inverse Methods for Atmospheres: Theory and Practice.  World
+!            Scientific Publishing, 2000.
 !-------------------------------------------------------------------------------
 
-SUBROUTINE Ops_SatRad_NewtonFewChans (DeltaBT,       &
+subroutine Ops_SatRad_NewtonFewChans (DeltaBT,       &
                                       nChans,        &
                                       H_Matrix,      &
                                       H_Matrix_T,    &
@@ -469,27 +471,27 @@ SUBROUTINE Ops_SatRad_NewtonFewChans (DeltaBT,       &
                                       R_matrix,      &
                                       Status)
 
-IMPLICIT NONE
+implicit none
 
-! Subroutine arguments:
-REAL(kind_real), INTENT(IN)     :: DeltaBT(:)        ! y-y(x)
-INTEGER, INTENT(IN)             :: nChans
-REAL(kind_real), INTENT(IN)     :: H_Matrix(:,:)     ! Jacobian
-REAL(kind_real), INTENT(IN)     :: H_Matrix_T(:,:)   ! (Jacobian)^T
-INTEGER, INTENT(IN)             :: nprofelements
-REAL(kind_real), INTENT(INOUT)  :: DeltaProfile(:)   ! see note in header
-REAL(kind_real), INTENT(IN)     :: B_matrix(:,:)
-REAL(kind_real), INTENT(IN)     :: R_matrix(:,:)
-INTEGER, INTENT(OUT)            :: Status
+! subroutine arguments:
+real(kind_real), intent(in)     :: DeltaBT(:)        ! y-y(x)
+integer, intent(in)             :: nChans
+real(kind_real), intent(in)     :: H_Matrix(:,:)     ! Jacobian
+real(kind_real), intent(in)     :: H_Matrix_T(:,:)   ! (Jacobian)^T
+integer, intent(in)             :: nprofelements
+real(kind_real), intent(inout)  :: DeltaProfile(:)   ! see note in header
+real(kind_real), intent(in)     :: B_matrix(:,:)
+real(kind_real), intent(in)     :: R_matrix(:,:)
+integer, intent(out)            :: Status
 
 ! Local declarations:
-CHARACTER(len=*), PARAMETER :: RoutineName = "Ops_SatRad_Minimize_101"
-INTEGER                     :: Element
-INTEGER                     :: i
-REAL(kind_real)             :: HB(nChans,nprofelements) ! Scratch vector
-REAL(kind_real)             :: Q(nChans)                ! Q = U^-1.V
-REAL(kind_real)             :: U(nChans,nChans)         ! U = H.B.H^T + R
-REAL(kind_real)             :: V(nChans)                ! V = (y-y(x_n))-H^T(xb-x_n)
+character(len=*), parameter :: RoutineName = "Ops_SatRad_Minimize_101"
+integer                     :: Element
+integer                     :: i
+real(kind_real)             :: HB(nChans,nprofelements) ! Scratch vector
+real(kind_real)             :: Q(nChans)                ! Q = U^-1.V
+real(kind_real)             :: U(nChans,nChans)         ! U = H.B.H^T + R
+real(kind_real)             :: V(nChans)                ! V = (y-y(x_n))-H^T(xb-x_n)
 
 Status = 0
 
@@ -503,13 +505,13 @@ write(*,*) "H_matrix shape = ",shape(H_matrix)
 write(*,*) "H_matrix_T shape = ",shape(H_matrix_T)
 write(*,*) "HB shape = ",shape(HB)
 
-HB = MATMUL (H_matrix, B_matrix)
-U = MATMUL (HB, H_matrix_T)
+HB = matmul(H_matrix, B_matrix)
+U = matmul(HB, H_matrix_T)
 
 ! Plus sign is not in error - it reverses sign of DeltaProfile to change
 ! from xn-xb to xb-xn
 
-V = DeltaBT + MATMUL (H_matrix, DeltaProfile)
+V = DeltaBT + matmul(H_matrix, DeltaProfile)
 
 !---------------------------------------------------------------------------
 ! 1.1. Add the R matrix into the U matrix.
@@ -524,16 +526,16 @@ CALL Ops_Cholesky (U,      &
                    nChans, &
                    Q,      &
                    Status)
-IF (Status /= 0) GOTO 9999
+if (Status /= 0) goto 9999
 
 ! Delta profile is (HB)^T.Q
 !------
 
-DeltaProfile = MATMUL (TRANSPOSE (HB), Q)
+DeltaProfile = matmul(transpose(HB), Q)
 
-9999 CONTINUE
+9999 continue
 
-END SUBROUTINE Ops_SatRad_NewtonFewChans
+end subroutine Ops_SatRad_NewtonFewChans
 
 !-------------------------------------------------------------------------------
 ! (C) Crown copyright Met Office. All rights reserved.
@@ -573,61 +575,61 @@ END SUBROUTINE Ops_SatRad_NewtonFewChans
 !   Rodgers, Retrieval of atmospheric temperature and composition from
 !   remote measurements of thermal radiation, Rev. Geophys.Sp.Phys. 14, 1976.
 !
-!   Rodgers, Inverse Methods for Atmospheres: Theory and Practice.  World
+!   Rodgers, inverse Methods for Atmospheres: Theory and Practice.  World
 !            Scientific Publishing, 2000.
 !-------------------------------------------------------------------------------
 
-SUBROUTINE Ops_SatRad_NewtonManyChans (DeltaBT,       &
+subroutine Ops_SatRad_NewtonManyChans (DeltaBT,       &
                                        nChans,        &
                                        H_Matrix,      &
                                        H_Matrix_T,    &
                                        nprofelements, &
                                        DeltaProfile,  &
-                                       B_Inverse,     &
+                                       B_inverse,     &
                                        R_matrix,      &
                                        Status)
 
-IMPLICIT NONE
+implicit none
 
-! Subroutine arguments:
-REAL(kind_real), INTENT(IN)     :: DeltaBT(:)        ! y-y(x)
-INTEGER, INTENT(IN)             :: nChans
-REAL(kind_real), INTENT(IN)     :: H_Matrix(:,:)     ! Jacobian
-REAL(kind_real), INTENT(IN)     :: H_Matrix_T(:,:)   ! (Jacobian)^T
-INTEGER, INTENT(IN)             :: nprofelements
-REAL(kind_real), INTENT(INOUT)  :: DeltaProfile(:)   ! see note in header
-REAL(kind_real), INTENT(IN)     :: B_Inverse(:,:)
-REAL(kind_real), INTENT(IN)     :: R_matrix(:,:)
-INTEGER, INTENT(OUT)            :: Status
+! subroutine arguments:
+real(kind_real), intent(in)     :: DeltaBT(:)        ! y-y(x)
+integer, intent(in)             :: nChans
+real(kind_real), intent(in)     :: H_Matrix(:,:)     ! Jacobian
+real(kind_real), intent(in)     :: H_Matrix_T(:,:)   ! (Jacobian)^T
+integer, intent(in)             :: nprofelements
+real(kind_real), intent(inout)  :: DeltaProfile(:)   ! see note in header
+real(kind_real), intent(in)     :: B_inverse(:,:)
+real(kind_real), intent(in)     :: R_matrix(:,:)
+integer, intent(out)            :: Status
 
 ! Local declarations:
-CHARACTER(len=*), PARAMETER :: RoutineName = 'Ops_SatRad_NewtonManyChans'
-REAL(kind_real)             :: HTR(nprofelements, nChans)              ! Scratch vector
-REAL(kind_real)             :: U(nprofelements, nprofelements)         ! U = H.B.H^T + R
-REAL(kind_real)             :: V(nprofelements)                        ! V = (y-y(x_n))-H^T(xb-x_n)
+character(len=*), parameter :: RoutineName = 'Ops_SatRad_NewtonManyChans'
+real(kind_real)             :: HTR(nprofelements, nChans)              ! Scratch vector
+real(kind_real)             :: U(nprofelements, nprofelements)         ! U = H.B.H^T + R
+real(kind_real)             :: V(nprofelements)                        ! V = (y-y(x_n))-H^T(xb-x_n)
 
 Status = 0
 
 !---------------------------------------------------------------------------
-! 1. Calculate HTR for the three allowed forms of R matrix. If required, the
+! 1. Calculate HTR for the three allowed forms of R matrix. if required, the
 !    matrix is tested to determine whether it is stored as an inverse and
 !    inverted if not.
 !---------------------------------------------------------------------------
-HTR = MATMUL (H_matrix_T, R_matrix(:,:))
+HTR = matmul(H_matrix_T, R_matrix(:,:))
 
 !---------------------------------------------------------------------------
 ! 2. Calculate U and V
 !---------------------------------------------------------------------------
 
-U = MATMUL (HTR, H_matrix)
-V = MATMUL (HTR, DeltaBT)
-V = V + MATMUL (U, DeltaProfile)
+U = matmul(HTR, H_matrix)
+V = matmul(HTR, DeltaBT)
+V = V + matmul(U, DeltaProfile)
 
 !---------------------------------------------------------------------------
 ! 3. Add on inverse of B-matrix to U.
 !---------------------------------------------------------------------------
 
-U = U + B_Inverse
+U = U + B_inverse
 
 !---------------------------------------------------------------------------
 ! 5. Calculate new profile increment.
@@ -639,7 +641,7 @@ CALL Ops_Cholesky (U,             &
                    DeltaProfile, &
                    Status)
 
-END SUBROUTINE Ops_SatRad_NewtonManyChans
+end subroutine Ops_SatRad_NewtonManyChans
 
 !-------------------------------------------------------------------------------
 ! (C) Crown copyright Met Office. All rights reserved.
@@ -649,73 +651,73 @@ END SUBROUTINE Ops_SatRad_NewtonManyChans
 ! matrix and U and Q are vectors of length N.  The method follows that in Golub
 ! and Van Loan although this is pretty standard.
 !
-! If U is not positive definite this will be detected by the program and flagged
+! if U is not positive definite this will be detected by the program and flagged
 ! as an error.  U is assumed to be symmetric as only the upper triangle is in
 ! fact used.
 !-------------------------------------------------------------------------------
 
-SUBROUTINE Ops_Cholesky (U,         &
+subroutine Ops_Cholesky (U,         &
                          V,         &
                          N,         &
                          Q,         &
                          ErrorCode)
 
-IMPLICIT NONE
+implicit none
 
-! Subroutine arguments:
-INTEGER, INTENT(IN)         :: n
-REAL(kind_real), INTENT(IN)            :: U(n,n)
-REAL(kind_real), INTENT(IN)            :: V(n)
-REAL(kind_real), INTENT(OUT)           :: Q(n)
-INTEGER, INTENT(OUT)        :: ErrorCode
+! subroutine arguments:
+integer, intent(in)          :: n
+real(kind_real), intent(in)  :: U(n,n)
+real(kind_real), intent(in)  :: V(n)
+real(kind_real), intent(out) :: Q(n)
+integer, intent(out)         :: ErrorCode
 
 ! Local declarations:
-CHARACTER(len=*), PARAMETER :: RoutineName = "Ops_Cholesky"
-REAL(kind_real), PARAMETER             :: Tolerance = TINY (0.0) * 100.0
-CHARACTER(len=80)           :: ErrorMessage
-INTEGER                     :: j
-INTEGER                     :: k
-REAL(kind_real)                        :: G(n,n)   ! The Cholesky Triangle Matrix
-REAL(kind_real)                        :: X(n)     ! Temporary array used in calculating G
+character(len=*), parameter  :: RoutineName = "Ops_Cholesky"
+real(kind_real), parameter   :: Tolerance = TinY (0.0) * 100.0
+character(len=80)            :: ErrorMessage
+integer                      :: j
+integer                      :: k
+real(kind_real)              :: G(n,n)   ! The Cholesky Triangle Matrix
+real(kind_real)              :: X(n)     ! Temporary array used in calculating G
 
 ErrorCode = 0
 
 ! Determine the Cholesky triangle matrix.
 
-DO j = 1, n
+do j = 1, n
   X(j:n) = U(j:n,j)
-  IF (j /= 1) THEN
-    DO k = 1, j - 1
+  if (j /= 1) then
+    do k = 1, j - 1
       X(j:n) = X(j:n) - G(j,k) * G(j:n,k)
-    END DO
-  END IF
-  IF (X(j) <= Tolerance) THEN
+    end do
+  end if
+  if (X(j) <= Tolerance) then
     ErrorCode = 1
     Errormessage = ' :U matrix is not positive definite'
     write(*,*) RoutineName,ErrorMessage
-    GOTO 9999
-  END IF
-  G(J:N,J) = X(J:N) / SQRT (X(J))
-END DO
+    goto 9999
+  end if
+  G(J:N,J) = X(J:N) / sqrt (X(J))
+end do
 
 ! Solve Gx=v for x by forward substitution
 
 X = V
 X(1) = X(1) / G(1,1)
-DO j = 2, n
-  X(j) = (X(j) - DOT_PRODUCT (G(j,1:j - 1), X(1:j - 1))) / G(j,j)
-END DO
+do j = 2, n
+  X(j) = (X(j) - dot_product(G(j,1:j - 1), X(1:j - 1))) / G(j,j)
+end do
 
 ! Solve G^T.q=x for q by backward substitution
 
 Q = x
 Q(n) = Q(n) / G(n,n)
-DO j = n - 1, 1, -1
-  Q(j) = (Q(j) - DOT_PRODUCT (G(j + 1:n,j), Q(j + 1:n))) / G(j,j)
-END DO
+do j = n - 1, 1, -1
+  Q(j) = (Q(j) - dot_product(G(j + 1:n,j), Q(j + 1:n))) / G(j,j)
+end do
 
-9999 CONTINUE
+9999 continue
 
-END SUBROUTINE Ops_Cholesky
+end subroutine Ops_Cholesky
 
 end module ufo_rttovonedvarcheck_minimize_newton_mod
