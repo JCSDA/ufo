@@ -5,13 +5,13 @@
 
 !> Fortran module to provide code shared between nonlinear and tlm/adm radiance calculations
 
-module ufo_onedvarfortran_process_mod
+module ufo_rttovonedvarcheck_process_mod
 
 use iso_c_binding
 use config_mod
 use kinds
 use ufo_geovals_mod
-use ufo_onedvarfortran_utils_mod
+use ufo_rttovonedvarcheck_utils_mod
 use ufo_radiancerttov_tlad_mod
 
 implicit none
@@ -19,14 +19,14 @@ implicit none
 private
 
 ! subroutines - all listed for complete
-public ufo_onedvarfortran_GeoVaLs2ProfVec
-public ufo_onedvarfortran_ProfVec2GeoVaLs
-public ufo_onedvarfortran_CostFunction
+public ufo_rttovonedvarcheck_GeoVaLs2ProfVec
+public ufo_rttovonedvarcheck_ProfVec2GeoVaLs
+public ufo_rttovonedvarcheck_CostFunction
 public Ops_SatRad_Qsplit
 
 contains
 
-subroutine ufo_onedvarfortran_GeoVaLs2ProfVec( geovals,       & ! in
+subroutine ufo_rttovonedvarcheck_GeoVaLs2ProfVec( geovals,       & ! in
                                              profindex,     & ! in
                                              nprofelements, & ! in
                                              prof_x )         ! out
@@ -47,7 +47,7 @@ integer, intent(in)                :: nprofelements
 real(kind_real), intent(out)       :: prof_x(:)
 
 ! Local arguments:
-character(len=*), parameter :: RoutineName = "ufo_onedvarfortran_GeoVaLs2ProfVec"
+character(len=*), parameter :: RoutineName = "ufo_rttovonedvarcheck_GeoVaLs2ProfVec"
 character(len=100)          :: varname
 
 type(ufo_geoval), pointer    :: geoval
@@ -147,11 +147,11 @@ end if
 
 write(*,*) trim(RoutineName)," end"
 
-end subroutine ufo_onedvarfortran_GeoVaLs2ProfVec
+end subroutine ufo_rttovonedvarcheck_GeoVaLs2ProfVec
 
 !-------------------------------------------------------------------------------
 
-subroutine ufo_onedvarfortran_ProfVec2GeoVaLs(geovals,       & ! out
+subroutine ufo_rttovonedvarcheck_ProfVec2GeoVaLs(geovals,       & ! out
                                             profindex,     & ! in
                                             nprofelements, & ! in
                                             prof_x )         ! in
@@ -172,7 +172,7 @@ integer, intent(in)                :: nprofelements
 real(kind_real), intent(in)        :: prof_x(:)
 
 ! Local arguments:
-character(len=*), parameter  :: RoutineName = "ufo_onedvarfortran_ProfVec2GeoVaLs"
+character(len=*), parameter  :: RoutineName = "ufo_rttovonedvarcheck_ProfVec2GeoVaLs"
 character(len=100)           :: varname
 integer                      :: gv_index, i
 integer                      :: nlevels
@@ -322,11 +322,11 @@ end if
 
 write(*,*) trim(RoutineName)," end"
 
-end subroutine ufo_onedvarfortran_ProfVec2GeoVaLs
+end subroutine ufo_rttovonedvarcheck_ProfVec2GeoVaLs
 
 !-------------------------------------------------------------------------------
 
-subroutine ufo_onedvarfortran_CostFunction(DeltaProf, b_inv, &
+subroutine ufo_rttovonedvarcheck_CostFunction(DeltaProf, b_inv, &
                                            DeltaObs, r_inv, &
                                            Jcost)
 
@@ -340,7 +340,7 @@ real(kind_real), intent(in)  :: r_inv(:,:)
 real(kind_real), intent(out) :: Jcost(3)
 
 ! Local arguments:
-character(len=*), parameter  :: RoutineName = "ufo_onedvarfortran_CostFunction"
+character(len=*), parameter  :: RoutineName = "ufo_rttovonedvarcheck_CostFunction"
 integer                      :: y_size
 real(kind_real)              :: Jb, Jo, Jcurrent
 real(kind_real)              :: DeltaProfOut(70)
@@ -372,7 +372,7 @@ write(*,*) "Jo, Jb, Jcurrent = ", Jo, Jb, Jcurrent
 
 write(*,*) trim(RoutineName)," end"
 
-end subroutine ufo_onedvarfortran_CostFunction
+end subroutine ufo_rttovonedvarcheck_CostFunction
 
 !-------------------------------------------------------------------------------
 ! (C) Crown copyright Met Office. All rights reserved.
@@ -1020,4 +1020,4 @@ END DO
 
 END SUBROUTINE Ops_Qsat
 
-end module ufo_onedvarfortran_process_mod
+end module ufo_rttovonedvarcheck_process_mod

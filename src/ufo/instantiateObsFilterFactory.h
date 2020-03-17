@@ -27,7 +27,7 @@
 #include "ufo/filters/TrackCheck.h"
 #include "ufo/gnssro/QC/BackgroundCheckRONBAM.h"
 #include "ufo/gnssro/QC/ROobserror.h"
-#include "ufo/onedvarcheck/OneDVarCheck.h"
+#include "ufo/onedvarcheck/RTTOVOneDVarCheck.h"
 
 namespace ufo {
 template<typename MODEL> void instantiateObsFilterFactory() {
@@ -66,8 +66,8 @@ template<typename MODEL> void instantiateObsFilterFactory() {
            makerChk16_("YDIAGsaver");
     static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::TrackCheck> >
            makerChk17_("Track Check");
-  static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::OneDVarCheck> >
-           makerChk18_("OneDVar Check");
+  static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::RTTOVOneDVarCheck> >
+           makerChk18_("RTTOV OneDVar Check");
 }
 
 }  // namespace ufo

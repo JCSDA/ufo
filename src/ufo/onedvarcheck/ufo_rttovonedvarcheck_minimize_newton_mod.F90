@@ -5,13 +5,13 @@
 
 !> Fortran module to provide code shared between nonlinear and tlm/adm radiance calculations
 
-module ufo_onedvarfortran_minimize_newton_mod
+module ufo_rttovonedvarcheck_minimize_newton_mod
 
 use iso_c_binding
 use config_mod
 use kinds
 use ufo_geovals_mod
-use ufo_onedvarfortran_utils_mod
+use ufo_rttovonedvarcheck_utils_mod
 use ufo_radiancerttov_tlad_mod
 
 implicit none
@@ -80,14 +80,14 @@ subroutine Ops_SatRad_MinimizeNewton_RTTOV12(ob_info,       &
                                          channels,      &
                                          onedvar_success)
 
-use ufo_onedvarfortran_process_mod, only: &
-                    ufo_onedvarfortran_GeoVaLs2ProfVec, &
-                    ufo_onedvarfortran_ProfVec2GeoVaLs, &
-                    ufo_onedvarfortran_CostFunction, &
+use ufo_rttovonedvarcheck_process_mod, only: &
+                    ufo_rttovonedvarcheck_GeoVaLs2ProfVec, &
+                    ufo_rttovonedvarcheck_ProfVec2GeoVaLs, &
+                    ufo_rttovonedvarcheck_CostFunction, &
                     Ops_SatRad_Qsplit
 
-use ufo_onedvarfortran_forward_model_mod, only: &
-                    ufo_onedvarfortran_ForwardModel
+use ufo_rttovonedvarcheck_forward_model_mod, only: &
+                    ufo_rttovonedvarcheck_ForwardModel
 
 implicit none
 
@@ -173,17 +173,18 @@ Iterations: DO iter = 1, Max1DVarIterations
     JcostOld = 1.0e4
 
     ! Map GeovaLs to 1D-var profile using B matrix profile structure
-    call ufo_onedvarfortran_GeoVaLs2ProfVec(geovals, profile_index, nprofelements, GuessProfile(:))
+    call ufo_rttovonedvarcheck_GeoVaLs2ProfVec(geovals, profile_index, nprofelements, GuessProfile(:))
     OldProfile(:) = GuessProfile(:)
 
   END IF
 
   ! call forward model to generate jacobian
-  call ufo_onedvarfortran_ForwardModel(geovals, ob_info, obsdb, &
+  call ufo_rttovonedvarcheck_ForwardModel(geovals, ob_info, obsdb, &
                                        channels(:), conf, &
                                        profile_index, GuessProfile(:), &
                                        Y(:), H_matrix)
-  write(*,*) "From forward model Y(:) = ",Y(:)
+  write(*,*) "Observed BTs After bias correction: ",ob_info%yobs(:)
+  write(*,*) "RTTOV BTs: = ",Y(:)
 
   IF (iter == 1) THEN
     BackProfile(:) = GuessProfile(:)
@@ -214,7 +215,7 @@ Iterations: DO iter = 1, Max1DVarIterations
     write(*,*) "GuessProfile = ",GuessProfile(:)
     write(*,*) "BackProfile(:) = ",BackProfile(:)
     Ydiff(:) = ob_info%yobs(:) - Y(:)
-    call ufo_onedvarfortran_CostFunction(Diffprofile, b_inv, Ydiff, r_inv, Jout)
+    call ufo_rttovonedvarcheck_CostFunction(Diffprofile, b_inv, Ydiff, r_inv, Jout)
     Jcost = Jout(1)
 
     ! Exit on error
@@ -316,7 +317,7 @@ Iterations: DO iter = 1, Max1DVarIterations
 !                                  OutOfRange)                                            ! out
 !
   ! Update RT-format guess profile
-  call ufo_onedvarfortran_ProfVec2GeoVaLs(geovals, profile_index, nprofelements, GuessProfile)
+  call ufo_rttovonedvarcheck_ProfVec2GeoVaLs(geovals, profile_index, nprofelements, GuessProfile)
   
 !  ! If qtotal in retrieval vector check cloud
 !  ! variables for current iteration
@@ -717,4 +718,4 @@ END DO
 
 END SUBROUTINE Ops_Cholesky
 
-end module ufo_onedvarfortran_minimize_newton_mod
+end module ufo_rttovonedvarcheck_minimize_newton_mod

@@ -5,13 +5,13 @@
 
 !> Fortran module to provide code shared between nonlinear and tlm/adm radiance calculations
 
-module ufo_onedvarfortran_minimize_ml_mod
+module ufo_rttovonedvarcheck_minimize_ml_mod
 
 use iso_c_binding
 use config_mod
 use kinds
 use ufo_geovals_mod
-use ufo_onedvarfortran_utils_mod
+use ufo_rttovonedvarcheck_utils_mod
 use ufo_radiancerttov_tlad_mod
 
 implicit none
@@ -19,24 +19,24 @@ implicit none
 private
 
 ! subroutines - all listed for complete
-public ufo_onedvarfortran_MinimizeML
+public ufo_rttovonedvarcheck_MinimizeML
 
 contains
 
 !------------------------------------------------------------------------------
 
-subroutine ufo_onedvarfortran_MinimizeML(ob_info, r_matrix, Syinv, b_matrix, Sxinv, &
+subroutine ufo_rttovonedvarcheck_MinimizeML(ob_info, r_matrix, Syinv, b_matrix, Sxinv, &
                                      local_geovals, profile_index, nprofelements, &
                                      conf, obsdb, channels, onedvar_success)
 
-use ufo_onedvarfortran_process_mod, only: &
-                    ufo_onedvarfortran_GeoVaLs2ProfVec, &
-                    ufo_onedvarfortran_ProfVec2GeoVaLs, &
-                    ufo_onedvarfortran_CostFunction, &
+use ufo_rttovonedvarcheck_process_mod, only: &
+                    ufo_rttovonedvarcheck_GeoVaLs2ProfVec, &
+                    ufo_rttovonedvarcheck_ProfVec2GeoVaLs, &
+                    ufo_rttovonedvarcheck_CostFunction, &
                     Ops_SatRad_Qsplit
 
-use ufo_onedvarfortran_forward_model_mod, only: &
-                    ufo_onedvarfortran_ForwardModel
+use ufo_rttovonedvarcheck_forward_model_mod, only: &
+                    ufo_rttovonedvarcheck_ForwardModel
 
 implicit none
 
@@ -103,12 +103,12 @@ real(kind_real), parameter         :: MaxIter = 10
 
 onedvar_success = .false. ! Assume failed
 
-write(*,*) "ufo_onedvarfortran_MinimizeML start"
+write(*,*) "ufo_rttovonedvarcheck_MinimizeML start"
 
 nchans = size(channels)
 geovals = local_geovals
 
-write(*,*) "ufo_onedvarfortran_MinimizeML nchans = ",nchans
+write(*,*) "ufo_rttovonedvarcheck_MinimizeML nchans = ",nchans
 
 ! allocate arrays
 allocate(Xb(nprofelements))
@@ -151,11 +151,11 @@ J2plus_A(:,:) = 0.0
 KxT_Syinv(:,:) = 0.0
 
 ! Map GeovaLs to 1D-var profile using B matrix profile structure
-call ufo_onedvarfortran_GeoVaLs2ProfVec(geovals, profile_index, nprofelements, X0(:))
+call ufo_rttovonedvarcheck_GeoVaLs2ProfVec(geovals, profile_index, nprofelements, X0(:))
 Xb(:) = X0(:)
 
 ! call forward model
-call ufo_onedvarfortran_ForwardModel(geovals, ob_info, obsdb, &
+call ufo_rttovonedvarcheck_ForwardModel(geovals, ob_info, obsdb, &
                                    channels(:), conf, &
                                    profile_index, X(:), &
                                    Y0(:), H_matrix)
@@ -181,7 +181,7 @@ write(*,*) "Initial X(:) = ",X(:)
 write(*,*) "Initial H(X)(:) = ",Y(:)
 write(*,*) "Obs = ",ob_info%yobs(:)
 
-call ufo_onedvarfortran_CostFunction(Xdiff, Sxinv, Ydiff, Syinv, Jout)
+call ufo_rttovonedvarcheck_CostFunction(Xdiff, Sxinv, Ydiff, Syinv, Jout)
 Jzero = Jout(1)
 Jinitial = Jzero
 
@@ -232,7 +232,7 @@ write(*,*) "d2J_dX2 = ",d2J_dX2
 write(*,*) "J2plus_A = ",J2plus_A
 write(*,*) "dJ_dX = ",dJ_dX
 
-call ufo_onedvarfortran_SolveCholesky(J2plus_A, -dJ_dX, delta_X, nprofelements, CholeskyStatus)
+call ufo_rttovonedvarcheck_SolveCholesky(J2plus_A, -dJ_dX, delta_X, nprofelements, CholeskyStatus)
 if (CholeskyStatus /= 0) write(*,*) 'Minimize: Error in Solve_Cholesky'
 
 ! Main iteration loop
@@ -258,10 +258,10 @@ Main_Loop_index: do
 ! ------------------------------------------------------------------------------------------------------------
 
   ! Profile to GeoVaLs
-  call ufo_onedvarfortran_ProfVec2GeoVaLs(geovals, profile_index, nprofelements, Xplus_dX)
+  call ufo_rttovonedvarcheck_ProfVec2GeoVaLs(geovals, profile_index, nprofelements, Xplus_dX)
 
   ! call forward model
-  call ufo_onedvarfortran_ForwardModel(geovals, ob_info, obsdb, &
+  call ufo_rttovonedvarcheck_ForwardModel(geovals, ob_info, obsdb, &
                                        channels(:), conf, &
                                        profile_index, Xplus_dx(:), &
                                        Y(:), H_matrix)
@@ -273,7 +273,7 @@ Main_Loop_index: do
   Xdiff(:) = Xplus_dX(:) - Xb(:)
   Ydiff(:) = ob_info%yobs(:) - Y(:)  ! amended from previous.
 
-  call ufo_onedvarfortran_CostFunction(Xdiff, Sxinv, Ydiff, Syinv, Jout)
+  call ufo_rttovonedvarcheck_CostFunction(Xdiff, Sxinv, Ydiff, Syinv, Jout)
   Jcurrent = Jout(1)
 
   !        Check J vs previous value. Lower value means progress:
@@ -317,7 +317,7 @@ Main_Loop_index: do
 
       dJ_dX   = 2*(matmul(Sxinv, Xdiff)) - 2*(matmul(KxT_Syinv, Ydiff)) ! amended from previous.
       J2plus_A = d2J_dX2 + (alpha * unit_matrix)
-      call ufo_onedvarfortran_SolveCholesky(J2plus_A, -dJ_dX, delta_X, nprofelements, CholeskyStatus)
+      call ufo_rttovonedvarcheck_SolveCholesky(J2plus_A, -dJ_dX, delta_X, nprofelements, CholeskyStatus)
       if (CholeskyStatus /= 0) print *, ' Error in Solve_Cholesky'
 
     end if
@@ -331,8 +331,8 @@ Main_Loop_index: do
 
     alpha = alpha * MqStep
     J2plus_A = d2J_dX2 + (alpha * unit_matrix)
-    call ufo_onedvarfortran_SolveCholesky(J2plus_A, -dJ_dX, delta_X, nprofelements, CholeskyStatus)
-    !           Check CholeskyStatus returned by ufo_onedvarfortran_SolveCholesky later
+    call ufo_rttovonedvarcheck_SolveCholesky(J2plus_A, -dJ_dX, delta_X, nprofelements, CholeskyStatus)
+    !           Check CholeskyStatus returned by ufo_rttovonedvarcheck_SolveCholesky later
   end if
 
   if (convergence) then
@@ -378,13 +378,13 @@ if (allocated(delta_X))     deallocate(delta_X)
 if (allocated(J2plus_A))    deallocate(J2plus_A)
 if (allocated(KxT_Syinv))   deallocate(KxT_Syinv)
 
-write(*,*) "ufo_onedvarfortran_MinimizeML end"
+write(*,*) "ufo_rttovonedvarcheck_MinimizeML end"
 
-end subroutine ufo_onedvarfortran_MinimizeML
+end subroutine ufo_rttovonedvarcheck_MinimizeML
 
 !---------------------------------------------------------------------------
 
-subroutine ufo_onedvarfortran_SolveCholeskyDC(A, b, x, n)
+subroutine ufo_rttovonedvarcheck_SolveCholeskyDC(A, b, x, n)
 
    implicit none
 
@@ -394,7 +394,7 @@ subroutine ufo_onedvarfortran_SolveCholeskyDC(A, b, x, n)
    real(kind_real), intent(out) :: x(n)
    integer :: i
 
-  write(*,*) "ufo_onedvarfortran_SolveCholeskyDC start"
+  write(*,*) "ufo_rttovonedvarcheck_SolveCholeskyDC start"
 !
 ! Solve L.y = b, storing y in x
 !
@@ -408,13 +408,13 @@ subroutine ufo_onedvarfortran_SolveCholeskyDC(A, b, x, n)
       x(i) = (x(i) - dot_product(A(i+1:n,i), x(i+1:n))) / A(i,i)
    end do
 
-  write(*,*) "ufo_onedvarfortran_SolveCholeskyDC end"
+  write(*,*) "ufo_rttovonedvarcheck_SolveCholeskyDC end"
 
-end subroutine ufo_onedvarfortran_SolveCholeskyDC
+end subroutine ufo_rttovonedvarcheck_SolveCholeskyDC
 
 !---------------------------------------------------------------------------
 
-subroutine ufo_onedvarfortran_DecomposeCholesky(A, n, Status)
+subroutine ufo_rttovonedvarcheck_DecomposeCholesky(A, n, Status)
 
    implicit none
 
@@ -423,7 +423,7 @@ subroutine ufo_onedvarfortran_DecomposeCholesky(A, n, Status)
    integer, intent(out) :: Status
    integer :: i
 
-   write(*,*) "ufo_onedvarfortran_DecomposeCholesky start"
+   write(*,*) "ufo_rttovonedvarcheck_DecomposeCholesky start"
 
    Status = 0
 
@@ -438,13 +438,13 @@ subroutine ufo_onedvarfortran_DecomposeCholesky(A, n, Status)
       A(i+1:n,i) = (A(i,i+1:n) - matmul(A(i+1:n,1:i-1), A(i,1:i-1))) / A(i,i)
    end do
 
-   write(*,*) "ufo_onedvarfortran_DecomposeCholesky end"
+   write(*,*) "ufo_rttovonedvarcheck_DecomposeCholesky end"
 
-end subroutine ufo_onedvarfortran_DecomposeCholesky
+end subroutine ufo_rttovonedvarcheck_DecomposeCholesky
 
 !---------------------------------------------------------------------------
 
-subroutine ufo_onedvarfortran_SolveCholesky(A, b, x, n, Status)
+subroutine ufo_rttovonedvarcheck_SolveCholesky(A, b, x, n, Status)
 
    implicit none
 
@@ -456,16 +456,16 @@ subroutine ufo_onedvarfortran_SolveCholesky(A, b, x, n, Status)
    
    real(kind_real) :: D(n,n)
 
-   write(*,*) "ufo_onedvarfortran_SolveCholesky start"
+   write(*,*) "ufo_rttovonedvarcheck_SolveCholesky start"
 
    D = A
     
-   call ufo_onedvarfortran_DecomposeCholesky(D, n, Status)
+   call ufo_rttovonedvarcheck_DecomposeCholesky(D, n, Status)
    if (Status /= 0) return
-   call ufo_onedvarfortran_SolveCholeskyDC(D, b, x, n)
+   call ufo_rttovonedvarcheck_SolveCholeskyDC(D, b, x, n)
 
-   write(*,*) "ufo_onedvarfortran_SolveCholesky end"
+   write(*,*) "ufo_rttovonedvarcheck_SolveCholesky end"
 
-end subroutine ufo_onedvarfortran_SolveCholesky
+end subroutine ufo_rttovonedvarcheck_SolveCholesky
 
-end module ufo_onedvarfortran_minimize_ml_mod
+end module ufo_rttovonedvarcheck_minimize_ml_mod

@@ -5,26 +5,26 @@
 
 !> Fortran module to provide code shared between nonlinear and tlm/adm radiance calculations
 
-module ufo_onedvarfortran_init_mod
+module ufo_rttovonedvarcheck_init_mod
 
 use iso_c_binding
 use config_mod
 use kinds
 use ufo_geovals_mod
-use ufo_onedvarfortran_utils_mod
+use ufo_rttovonedvarcheck_utils_mod
 
 implicit none
 
 private
 
 ! subroutines
-public ufo_onedvarfortran_InitBmatrix
-public ufo_onedvarfortran_InitProfInfo
-public ufo_onedvarfortran_InitObInfo
-public ufo_onedvarfortran_GetBmatrix
-public ufo_onedvarfortran_MapProfileToB
-public ufo_onedvarfortran_InvertMatrix
-public ufo_onedvarfortran_LocalGeoVals
+public ufo_rttovonedvarcheck_InitBmatrix
+public ufo_rttovonedvarcheck_InitProfInfo
+public ufo_rttovonedvarcheck_InitObInfo
+public ufo_rttovonedvarcheck_GetBmatrix
+public ufo_rttovonedvarcheck_MapProfileToB
+public ufo_rttovonedvarcheck_InvertMatrix
+public ufo_rttovonedvarcheck_LocalGeoVals
 
 contains
 
@@ -33,7 +33,7 @@ contains
 ! Order is inportant at the moment will look into interface blocks
 !===============================================================================
 
-subroutine ufo_onedvarfortran_InitBmatrix(bmatrix)
+subroutine ufo_rttovonedvarcheck_InitBmatrix(bmatrix)
 
 !-------------------------------------------------------------------------------
 ! nullify B matrix pointers.
@@ -44,7 +44,7 @@ implicit none
 ! subroutine arguments:
 type(bmatrix_type), intent(out) :: bmatrix
 
-character(len=*), parameter :: routinename = "ufo_onedvarfortran_InitBmatrix"
+character(len=*), parameter :: routinename = "ufo_rttovonedvarcheck_InitBmatrix"
 
 !-------------------------------------------------------------------------------
 
@@ -62,9 +62,9 @@ nullify( bmatrix % sigma_proxy )
 nullify( bmatrix % south       )
 nullify( bmatrix % north       )
 
-end subroutine ufo_onedvarfortran_InitBmatrix
+end subroutine ufo_rttovonedvarcheck_InitBmatrix
 
-subroutine ufo_onedvarfortran_InitProfInfo( profinfo ) ! out
+subroutine ufo_rttovonedvarcheck_InitProfInfo( profinfo ) ! out
 
 !-------------------------------------------------------------------------------
 ! initialize profile indices to zero. the profinfo structure is used to store
@@ -77,7 +77,7 @@ implicit none
 ! subroutine arguments:
 type(profileinfo_type), intent(out) :: profinfo
 
-character(len=*), parameter :: routinename = "ufo_onedvarfortran_InitProfInfo"
+character(len=*), parameter :: routinename = "ufo_rttovonedvarcheck_InitProfInfo"
 
 !-------------------------------------------------------------------------------
 
@@ -106,11 +106,11 @@ profinfo % cloudtopp = 0
 profinfo % cloudfrac = 0
 profinfo % emisspc = 0
 
-end subroutine ufo_onedvarfortran_InitProfInfo
+end subroutine ufo_rttovonedvarcheck_InitProfInfo
 
 !-------------------------------------------------------------------------------
 
-subroutine ufo_onedvarfortran_InitObInfo(ob_info, & ! out
+subroutine ufo_rttovonedvarcheck_InitObInfo(ob_info, & ! out
                                        nchans)    ! in
 
 implicit none
@@ -119,7 +119,7 @@ implicit none
 type(obinfo_type), intent(out) :: ob_info
 integer, intent(in)  :: nchans
 
-character(len=*), parameter :: routinename = "ufo_onedvarfortran_InitObInfo"
+character(len=*), parameter :: routinename = "ufo_rttovonedvarcheck_InitObInfo"
 
 ob_info % nlocs = 1
 ob_info % latitude = 0.0
@@ -134,11 +134,11 @@ ob_info % solar_azimuth_angle = 0.0
 !allocate(ob_info%yobs(nchans))
 !ob_info % yobs = 0.0
 
-end subroutine ufo_onedvarfortran_InitObInfo
+end subroutine ufo_rttovonedvarcheck_InitObInfo
 
 !-------------------------------------------------------------------------------
 
-subroutine ufo_onedvarfortran_GetBmatrix (fileunit, &
+subroutine ufo_rttovonedvarcheck_GetBmatrix (fileunit, &
                                   bmatrix,        &
                                   b_elementsused, &
                                   fieldlist)
@@ -192,7 +192,7 @@ integer, optional, intent(in)      :: b_elementsused(:)
 integer, optional, intent(inout)   :: fieldlist(:)
 
 ! local declarations:
-character(len=*), parameter        :: routinename = "ufo_onedvarfortran_GetBmatrix"
+character(len=*), parameter        :: routinename = "ufo_rttovonedvarcheck_GetBmatrix"
 integer                            :: i
 integer                            :: j
 integer                            :: k
@@ -213,7 +213,7 @@ real, allocatable                  :: bfromfile(:,:)
 logical, allocatable               :: list(:)
 integer, allocatable               :: bfields(:,:)
 integer, allocatable               :: elementsused(:)
-logical                            :: onedvarfortran_debug = .true.
+logical                            :: rttovonedvarcheck_debug = .true.
 
 !--------------------------
 ! 1. read header information
@@ -253,7 +253,7 @@ end if
 ! 1.3) output initial messages
 !----
 
-if (onedvarfortran_debug) then
+if (rttovonedvarcheck_debug) then
   write (*, '(a)') 'reading b matrix file:'
   write (*, '(a,i0)') 'number of latitude bands = ', nbands
   write (*, '(a,i0)') 'matrix size = ', matrixsize
@@ -317,7 +317,7 @@ if (present (fieldlist)) then
 
   ! 2.1.1) write messages
 
-  if (onedvarfortran_debug .and. any (fieldlist /= 0)) then
+  if (rttovonedvarcheck_debug .and. any (fieldlist /= 0)) then
     write (*, '(a)') 'the following requested retrieval fields are not in the b matrix:'
     do i = 1, size (fieldlist)
       if (fieldlist(i) /= 0) then
@@ -333,7 +333,7 @@ if (present (fieldlist)) then
     end do
   end if
 
-  if (onedvarfortran_debug) then
+  if (rttovonedvarcheck_debug) then
     write (*, '(a)') 'b matrix fields used to define the retrieval profile vector:'
     do i = 1, nbfields
       write (*, '(a)') fieldtype_text(bfields(i,1))
@@ -408,7 +408,7 @@ readallb : do
     read (fileunit, '(5e16.8)' ) (bfromfile(i,j), i = 1, matrixsize)
   end do
 
-  if (onedvarfortran_debug) then
+  if (rttovonedvarcheck_debug) then
     write (*, '(a,i0,a,2f8.2)') &
       'band no.', band, ' has southern and northern latitude limits of', &
       southlimit, northlimit
@@ -429,7 +429,7 @@ readallb : do
     end if
     bmatrix % south(band) = southlimit
     bmatrix % north(band) = northlimit
-  else if (onedvarfortran_debug) then
+  else if (rttovonedvarcheck_debug) then
     write (*, '(a,i0)') 'skipped matrix with band number ', band
   end if
 
@@ -452,7 +452,7 @@ allocate (bmatrix % inverse(nelements,nelements,nbands))
 bmatrix % inverse(:,:,:) = bmatrix % store(:,:,:)
 
 do k = 1, nbands
-  call ufo_onedvarfortran_InvertMatrix (nelements,                & ! in
+  call ufo_rttovonedvarcheck_InvertMatrix (nelements,                & ! in
                                       nelements,                & ! in
                                       bmatrix % inverse(:,:,k), & ! inout
                                       status)                     ! out
@@ -469,9 +469,9 @@ if (nmatrix < nbands) then
   write(*,*) routinename // ' : too few b matrices found in input file'
 end if
 
-end subroutine ufo_onedvarfortran_GetBmatrix
+end subroutine ufo_rttovonedvarcheck_GetBmatrix
 
-subroutine ufo_onedvarfortran_MapProfileToB( &
+subroutine ufo_rttovonedvarcheck_MapProfileToB( &
   bmatrix,  & ! in
   profinfo, & ! inout
   nelements ) ! out
@@ -497,7 +497,7 @@ type(profileinfo_type), intent(inout) :: profinfo  !profile information
 integer,                intent(out)   :: nelements !size of profile vector
 
 ! local constants:
-character(len=*), parameter :: routinename = "ufo_onedvarfortran_MapProfileToB"
+character(len=*), parameter :: routinename = "ufo_rttovonedvarcheck_MapProfileToB"
 
 ! local variables:
 integer :: i,j
@@ -609,14 +609,14 @@ do j = 1, bmatrix % nfields
 
 end do
 
-end subroutine ufo_onedvarfortran_MapProfileToB
+end subroutine ufo_rttovonedvarcheck_MapProfileToB
 
 !===============================================================================
 ! subroutines
 ! order is inportant at the moment will look into interface blocks
 !===============================================================================
 
-subroutine ufo_onedvarfortran_InvertMatrix (n,      &
+subroutine ufo_rttovonedvarcheck_InvertMatrix (n,      &
                                           m,      &
                                           a,      &
                                           status, &
@@ -673,7 +673,7 @@ integer, intent(out)          :: status      ! 0 if all ok 1 if matrix is not po
 real, optional, intent(inout) :: matrix(n,m) ! replaced by (matrix).a^-1 on exit
 
 ! local declarations:
-character(len=*), parameter   :: routinename = "ufo_onedvarfortran_InvertMatrix"
+character(len=*), parameter   :: routinename = "ufo_rttovonedvarcheck_InvertMatrix"
 character(len=80)             :: errormessage(2)
 real, parameter               :: tolerance = tiny (0.0) * 100.0
 integer                       :: i
@@ -762,11 +762,11 @@ end if
 
 9999 continue
 
-end subroutine ufo_onedvarfortran_InvertMatrix
+end subroutine ufo_rttovonedvarcheck_InvertMatrix
 
 !------------------------------------------------------------------------------
 
-subroutine ufo_onedvarfortran_LocalGeoVals(geovals_full,obn,other)
+subroutine ufo_rttovonedvarcheck_LocalGeoVals(geovals_full,obn,other)
 
 implicit none
 
@@ -791,8 +791,8 @@ enddo
 other%missing_value = geovals_full%missing_value
 other%linit = .true.
 
-end subroutine ufo_onedvarfortran_LocalGeoVals
+end subroutine ufo_rttovonedvarcheck_LocalGeoVals
 
 !------------------------------------------------------------------------------
 
-end module ufo_onedvarfortran_init_mod
+end module ufo_rttovonedvarcheck_init_mod

@@ -5,8 +5,8 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
  */
 
-#ifndef UFO_FILTERS_ONEDVARCHECK_H_
-#define UFO_FILTERS_ONEDVARCHECK_H_
+#ifndef UFO_FILTERS_RTTOVONEDVARCHECK_H_
+#define UFO_FILTERS_RTTOVONEDVARCHECK_H_
 
 #include <ostream>
 #include <string>
@@ -19,7 +19,7 @@
 #include "oops/util/Printable.h"
 #include "ufo/filters/FilterBase.h"
 #include "ufo/filters/QCflags.h"
-#include "ufo/onedvarcheck/OneDVarFortran.interface.h"
+#include "ufo/onedvarcheck/RTTOVOneDVarCheck.interface.h"
 
 namespace eckit {
   class Configuration;
@@ -32,17 +32,17 @@ namespace ioda {
 
 namespace ufo {
 
-/// OneDVarCheck: check observation closeness to background
+/// RTTOVOneDVarCheck: check observation closeness to background
 
-class OneDVarCheck : public FilterBase,
-                     private util::ObjectCounter<OneDVarCheck> {
+class RTTOVOneDVarCheck : public FilterBase,
+                     private util::ObjectCounter<RTTOVOneDVarCheck> {
  public:
-  static const std::string classname() {return "ufo::OneDVarCheck";}
+  static const std::string classname() {return "ufo::RTTOVOneDVarCheck";}
 
-  OneDVarCheck(ioda::ObsSpace &, const eckit::Configuration &,
+  RTTOVOneDVarCheck(ioda::ObsSpace &, const eckit::Configuration &,
                   boost::shared_ptr<ioda::ObsDataVector<int> >,
                   boost::shared_ptr<ioda::ObsDataVector<float> >);
-  ~OneDVarCheck();
+  ~RTTOVOneDVarCheck();
 
  private:
   void print(std::ostream &) const override;
@@ -59,4 +59,4 @@ class OneDVarCheck : public FilterBase,
 
 }  // namespace ufo
 
-#endif  // UFO_FILTERS_ONEDVARCHECK_H_
+#endif  // UFO_FILTERS_RTTOVONEDVARCHECK_H_

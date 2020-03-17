@@ -5,7 +5,7 @@
 
 !> fortran module to implement onedvar fortran check
 
-module ufo_onedvarfortran_mod
+module ufo_rttovonedvarcheck_mod
 
 use iso_c_binding
 use kinds
@@ -14,15 +14,15 @@ use ufo_vars_mod
 use oops_variables_mod
 use obsspace_mod
 use config_mod
-use ufo_onedvarfortran_utils_mod
-use ufo_onedvarfortran_init_mod
-use ufo_onedvarfortran_process_mod
+use ufo_rttovonedvarcheck_utils_mod
+use ufo_rttovonedvarcheck_init_mod
+use ufo_rttovonedvarcheck_process_mod
 
 implicit none
-public  :: ufo_onedvarfortran, ufo_onedvarfortran_create, ufo_onedvarfortran_delete, ufo_onedvarfortran_prior, ufo_onedvarfortran_post
+public  :: ufo_rttovonedvarcheck, ufo_rttovonedvarcheck_create, ufo_rttovonedvarcheck_delete, ufo_rttovonedvarcheck_prior, ufo_rttovonedvarcheck_post
 
 ! ------------------------------------------------------------------------------
-type :: ufo_onedvarfortran
+type :: ufo_rttovonedvarcheck
   character(len=max_string_length) :: qcname
   character(len=max_string_length) :: b_matrix_path
   character(len=max_string_length) :: forward_mod_name
@@ -33,21 +33,21 @@ type :: ufo_onedvarfortran
   character(len=max_string_length), allocatable :: model_variables(:)
   integer :: nchans
   integer(c_int), allocatable        :: channels(:)
-end type ufo_onedvarfortran
+end type ufo_rttovonedvarcheck
 
 ! ------------------------------------------------------------------------------
 contains
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_onedvarfortran_create(self, obspace, conf, channels)
+subroutine ufo_rttovonedvarcheck_create(self, obspace, conf, channels)
 
   implicit none
-  type(ufo_onedvarfortran), intent(inout) :: self
+  type(ufo_rttovonedvarcheck), intent(inout) :: self
   type(c_ptr), value, intent(in)          :: obspace
   type(c_ptr), value, intent(in)          :: conf
   integer(c_int), intent(in)              :: channels(:)
 
-  self%qcname = "onedvarfortran"
+  self%qcname = "rttovonedvarcheck"
   self%b_matrix_path = config_get_string(conf, max_string_length, "BMatrix")
   self%forward_mod_name = config_get_string(conf, max_string_length, "ModName")
   self%qtotal = config_get_int(conf, "qtotal")
@@ -65,45 +65,45 @@ subroutine ufo_onedvarfortran_create(self, obspace, conf, channels)
   write(*,*) "nchans setup = ",self%nchans
   write(*,*) "channels setup = ",self%channels
 
-end subroutine ufo_onedvarfortran_create
+end subroutine ufo_rttovonedvarcheck_create
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_onedvarfortran_delete(self)
+subroutine ufo_rttovonedvarcheck_delete(self)
 
   implicit none
-  type(ufo_onedvarfortran), intent(inout) :: self
+  type(ufo_rttovonedvarcheck), intent(inout) :: self
 
   if (allocated(self % model_variables)) deallocate(self % model_variables)
   if (allocated(self % channels))        deallocate(self % channels)
 
-end subroutine ufo_onedvarfortran_delete
+end subroutine ufo_rttovonedvarcheck_delete
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_onedvarfortran_prior(self, geovals)
+subroutine ufo_rttovonedvarcheck_prior(self, geovals)
 
   implicit none
-  type(ufo_onedvarfortran), intent(in) :: self
+  type(ufo_rttovonedvarcheck), intent(in) :: self
   type(ufo_geovals), intent(in) :: geovals
 
-end subroutine ufo_onedvarfortran_prior
+end subroutine ufo_rttovonedvarcheck_prior
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_onedvarfortran_post(self, vars, geovals)
+subroutine ufo_rttovonedvarcheck_post(self, vars, geovals)
 
   ! ------------------------------------------
   ! load modules only used in this subroutine
   ! ------------------------------------------
   use missing_values_mod
-  use ufo_onedvarfortran_minimize_newton_mod, only: &
+  use ufo_rttovonedvarcheck_minimize_newton_mod, only: &
                     Ops_SatRad_MinimizeNewton_RTTOV12
-  use ufo_onedvarfortran_minimize_ml_mod, only: &
-                    ufo_onedvarfortran_MinimizeML
+  use ufo_rttovonedvarcheck_minimize_ml_mod, only: &
+                    ufo_rttovonedvarcheck_MinimizeML
 
   implicit none
-  type(ufo_onedvarfortran), intent(inout) :: self        ! one d var check setup info
+  type(ufo_rttovonedvarcheck), intent(inout) :: self        ! one d var check setup info
   type(oops_variables), intent(in)        :: vars
   type(ufo_geovals), intent(in)           :: geovals     ! model values at observation space
 
@@ -240,19 +240,19 @@ subroutine ufo_onedvarfortran_post(self, vars, geovals)
   ! setup and read in background covariance
   inquire(file=trim(self%b_matrix_path), exist=file_exists)
   if (file_exists) then
-    call ufo_onedvarfortran_IOGetFreeUnit(fileunit)
+    call ufo_rttovonedvarcheck_IOGetFreeUnit(fileunit)
     open(unit = fileunit, file = trim(self%b_matrix_path))
-    call ufo_onedvarfortran_InitBmatrix(full_b_matrix)
-    !call ufo_onedvarfortran_GetBmatrix(fileunit, full_b_matrix)
-    call ufo_onedvarfortran_GetBmatrix(fileunit, full_b_matrix, fieldlist=fields_in)
+    call ufo_rttovonedvarcheck_InitBmatrix(full_b_matrix)
+    !call ufo_rttovonedvarcheck_GetBmatrix(fileunit, full_b_matrix)
+    call ufo_rttovonedvarcheck_GetBmatrix(fileunit, full_b_matrix, fieldlist=fields_in)
     close(unit = fileunit)
   else
-    write(*,*) "onedvarfortran bmatrix file not found"
+    write(*,*) "rttovonedvarcheck bmatrix file not found"
   end if
 
   ! get mapping for 1d-var profile from b-matrix
-  call ufo_onedvarfortran_InitProfInfo(profile_index)
-  call ufo_onedvarfortran_MapProfileToB(full_b_matrix, profile_index, nprofelements)
+  call ufo_rttovonedvarcheck_InitProfInfo(profile_index)
+  call ufo_rttovonedvarcheck_MapProfileToB(full_b_matrix, profile_index, nprofelements)
   write(*,*) "1DVar number of profile elements = ",nprofelements
   allocate(b_matrix(nprofelements,nprofelements))
   allocate(b_inverse(nprofelements,nprofelements))
@@ -262,7 +262,7 @@ subroutine ufo_onedvarfortran_post(self, vars, geovals)
   write(*,*) "time to read in b matrix and map profile = ",(t2-t1)
 
   ! initialize ob info type
-  call ufo_onedvarfortran_InitObInfo(ob_info,self%nchans)
+  call ufo_rttovonedvarcheck_InitObInfo(ob_info,self%nchans)
 
   ! print geovals infor
   !call ufo_geovals_print(geovals, 1)
@@ -272,13 +272,13 @@ subroutine ufo_onedvarfortran_post(self, vars, geovals)
   ! ------------------------------------------
   print *,"beginning observations loop: ",self%qcname
   !do jobs = 1, iloc
-  do jobs = 1, 5
+  do jobs = 1, 1
 
     !---------------------------------------------------
     ! Setup Jb terms
     !---------------------------------------------------
     ! create one ob geovals from full all obs geovals
-    call ufo_onedvarfortran_LocalGeovals(geovals,jobs,local_geovals)
+    call ufo_rttovonedvarcheck_LocalGeovals(geovals,jobs,local_geovals)
     call ufo_geovals_print(geovals, 1)
 
     ! select appropriate b matrix for latitude of observation
@@ -345,7 +345,7 @@ subroutine ufo_onedvarfortran_post(self, vars, geovals)
     ! Call minimization
     !---------------------------------------------------
     ! do 1d-var using marquardt-levenberg
-    !call ufo_onedvarfortran_MinimizeML(ob_info, r_matrix, r_inverse, b_matrix, &
+    !call ufo_rttovonedvarcheck_MinimizeML(ob_info, r_matrix, r_inverse, b_matrix, &
     !                                   b_inverse, local_geovals, & 
     !                                   profile_index, nprofelements, self%conf, &
     !                                   self%obsdb, channels_used, onedvar_success)
@@ -400,6 +400,6 @@ subroutine ufo_onedvarfortran_post(self, vars, geovals)
   if (allocated(b_inverse)) deallocate(b_inverse)
   if (allocated(iter_hofx)) deallocate(iter_hofx)
 
-end subroutine ufo_onedvarfortran_post
+end subroutine ufo_rttovonedvarcheck_post
 
-end module ufo_onedvarfortran_mod
+end module ufo_rttovonedvarcheck_mod

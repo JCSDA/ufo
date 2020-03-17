@@ -5,13 +5,13 @@
 
 !> Fortran module to provide code shared between nonlinear and tlm/adm radiance calculations
 
-module ufo_onedvarfortran_forward_model_mod
+module ufo_rttovonedvarcheck_forward_model_mod
 
 use fckit_configuration_module, only: fckit_configuration
 use iso_c_binding
 use kinds
 use ufo_geovals_mod
-use ufo_onedvarfortran_utils_mod
+use ufo_rttovonedvarcheck_utils_mod
 use ufo_radiancerttov_tlad_mod
 
 implicit none
@@ -19,13 +19,13 @@ implicit none
 private
 
 ! subroutines - all listed for complete
-public ufo_onedvarfortran_ForwardModel
+public ufo_rttovonedvarcheck_ForwardModel
 
 contains
 
 !------------------------------------------------------------------------------
 
-subroutine ufo_onedvarfortran_ForwardModel(geovals, ob_info, obsdb, &
+subroutine ufo_rttovonedvarcheck_ForwardModel(geovals, ob_info, obsdb, &
                                            channels, conf, &
                                            profindex, prof_x, &
                                            hofx, H_matrix)
@@ -54,7 +54,7 @@ select case (trim(ob_info%forward_mod_name))
     write(*,*) "Setup RTTOV tlad"
     call rttov_tlad % setup(f_conf)
     write(*,*) "Call get Hmatrix"
-    call ufo_onedvarfortran_GetHmatrixRTTOV(geovals, ob_info, obsdb, &
+    call ufo_rttovonedvarcheck_GetHmatrixRTTOV(geovals, ob_info, obsdb, &
                                             channels(:), rttov_tlad, &
                                             profindex, prof_x(:), &
                                             hofx(:), H_matrix)
@@ -65,16 +65,16 @@ select case (trim(ob_info%forward_mod_name))
       stop
 end select
 
-end subroutine ufo_onedvarfortran_ForwardModel
+end subroutine ufo_rttovonedvarcheck_ForwardModel
 
 !------------------------------------------------------------------------------
 
-subroutine ufo_onedvarfortran_GetHmatrixRTTOV(geovals, ob_info, obsdb, &
+subroutine ufo_rttovonedvarcheck_GetHmatrixRTTOV(geovals, ob_info, obsdb, &
                                        channels, rttov_data, &
                                        profindex, prof_x, &
                                        hofx, H_matrix)
 
-use ufo_onedvarfortran_process_mod, only: Ops_SatRad_Qsplit
+use ufo_rttovonedvarcheck_process_mod, only: Ops_SatRad_Qsplit
 
 implicit none
 
@@ -249,7 +249,7 @@ call Ops_SatRad_PrintHmatrix( &
   H_matrix, &       ! in
   profindex )       ! in
 
-end subroutine ufo_onedvarfortran_GetHmatrixRTTOV
+end subroutine ufo_rttovonedvarcheck_GetHmatrixRTTOV
 
 !---------------------------------------------------------------------------
 
@@ -377,4 +377,4 @@ END SUBROUTINE Ops_SatRad_PrintHmatrix
 
 ! ------------------------------------------------------------
 
-end module ufo_onedvarfortran_forward_model_mod
+end module ufo_rttovonedvarcheck_forward_model_mod

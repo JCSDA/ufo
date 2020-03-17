@@ -5,7 +5,7 @@
 
 !> fortran module to provide code shared between nonlinear and tlm/adm radiance calculations
 
-module ufo_onedvarfortran_utils_mod
+module ufo_rttovonedvarcheck_utils_mod
 
 use iso_c_binding
 use config_mod
@@ -201,7 +201,7 @@ contains
 ! order is inportant at the moment will look into interface blocks
 !===============================================================================
 
-subroutine ufo_onedvarfortran_iogetfreeunit(unit)
+subroutine ufo_rttovonedvarcheck_iogetfreeunit(unit)
 
 !-------------------------------------------------------------------------------
 ! initialize profile indices to zero. the profinfo structure is used to store
@@ -229,7 +229,7 @@ do lun=unit_min,unit_max
 end do
 unit=newunit
 
-end subroutine ufo_onedvarfortran_iogetfreeunit
+end subroutine ufo_rttovonedvarcheck_iogetfreeunit
 
 !===============================================================================
 ! functions
@@ -254,4 +254,4 @@ function find_index(vars, var)
 
 end function find_index
 
-end module ufo_onedvarfortran_utils_mod
+end module ufo_rttovonedvarcheck_utils_mod
