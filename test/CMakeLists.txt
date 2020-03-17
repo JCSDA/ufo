@@ -31,7 +31,6 @@ list( APPEND ufo_test_input
   testinput/amsua_crtm.yaml
   testinput/amsua_crtm_bc.yaml
   testinput/amsua_rttov.yaml
-  testinput/amsua_rttov_qc_1dvar.yaml
   testinput/atms_rttov_qc_1dvar.yaml
   testinput/amsua_qc.yaml
   testinput/amsua_allsky_gsi_qc.yaml
@@ -145,10 +144,6 @@ list( APPEND ufo_test_data
   atmosphere/atms_npp_geoval_2018041500_s.nc4
   atmosphere/cris-fsr_npp_geoval_2018041500_m.nc4
   atmosphere/geovals_rttov.nc4
-  atmosphere/amsua_allsats_geoval_2018083000.nc4
-  atmosphere/amsua_allsats_obs_2018083000.nc4
-  atmosphere/atovs_bmatrix_70.dat
-  atmosphere/atovs_bmatrix_70_q.dat
   atmosphere/atms_allsats_geoval_2019112700-init.nc4
   atmosphere/atms_allsats_obs_2019112700-init.nc4
   atmosphere/atms_bmatrix_70.dat
@@ -499,11 +494,6 @@ if( ${RTTOV_FOUND} )
                     ARGS    "testinput/amsua_rttov.yaml"
                     ENVIRONMENT OOPS_TRAPFPE=1
                     DEPENDS test_ObsOperator.x )
-
-  ecbuild_add_test( TARGET  test_ufo_qc_amsua_rttov_1dvar
-                    COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-                    ARGS    "testinput/amsua_rttov_qc_1dvar.yaml"
-                    DEPENDS test_ObsFilters.x )
 
   ecbuild_add_test( TARGET  test_ufo_qc_atms_rttov_1dvar
                     COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
