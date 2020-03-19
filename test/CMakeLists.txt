@@ -218,8 +218,9 @@ if( NOT DEFINED LOCAL_PATH_TESTFILES_IODA )
   message(STATUS "IODA GIT_BRANCH is " ${GIT_BRANCH})
 
   # Check whether the URL exists or not 
+  set(ECBUILD_DOWNLOAD_BASE_URL ${IODA_DOWNLOAD_BASE_URL}/ioda)
   ecbuild_check_multiurl(NAMES   ${ufo_ioda_test_data}
-                       DIRNAME ${GIT_BRANCH}
+                       DIRHOST ${GIT_BRANCH}
                        RESULT  SPECIFIC_TEST_FILES)
 
   # Set distant directory
@@ -233,7 +234,7 @@ if( NOT DEFINED LOCAL_PATH_TESTFILES_IODA )
     message(STATUS "GIT_BRANCH not found, download develop")
   endif()
 
-  message(STATUS "Test data downloaded from: " ${ECBUILD_DOWNLOAD_BASE_URL}/${DIRNAME})
+  message(STATUS "Test data downloaded from: " ${IODA_DOWNLOAD_BASE_URL}/${DIRNAME})
   message(STATUS "Save data to " ${TESTFILE_DIR_IODA})
 
   set(TESTFILE_DIR_IODA ${CMAKE_BINARY_DIR}/test_data/ioda/${DIRNAME} CACHE PATH "data dir for test data")
