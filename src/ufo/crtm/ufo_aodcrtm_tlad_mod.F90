@@ -10,6 +10,7 @@ module ufo_aodcrtm_tlad_mod
  use fckit_configuration_module, only: fckit_configuration
  use iso_c_binding
  use kinds
+ use missing_values_mod
 
  use ufo_geovals_mod, only: ufo_geovals, ufo_geoval, ufo_geovals_get_var
  use ufo_vars_mod
@@ -23,6 +24,8 @@ module ufo_aodcrtm_tlad_mod
  !> Fortran derived type for aod trajectory
  type, public :: ufo_aodcrtm_tlad
  private
+  character(len=MAXVARLEN), public, allocatable :: varin(:)  ! variablesrequested from the model
+  integer, allocatable                          :: channels(:)
   type(crtm_conf) :: conf
   integer :: n_Profiles
   integer :: n_Layers
@@ -39,20 +42,33 @@ module ufo_aodcrtm_tlad_mod
   procedure :: simobs_ad  => ufo_aodcrtm_simobs_ad
  end type ufo_aodcrtm_tlad
 
+ character(len=maxvarlen), dimension(14), parameter :: varin_default = (/var_aerosols_gocart_default/)
+
 contains
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_aodcrtm_tlad_setup(self, f_confOper)
+subroutine ufo_aodcrtm_tlad_setup(self, f_confOper, channels)
 
 implicit none
 class(ufo_aodcrtm_tlad),   intent(inout) :: self
 type(fckit_configuration), intent(in)    :: f_confOper
+integer(c_int),               intent(in)    :: channels(:)  !List of channels to use
+
 type(fckit_configuration) :: f_confOpts
+integer :: nvars_in
 
  call f_confOper%get_or_die("ObsOptions",f_confOpts)
 
  call crtm_conf_setup(self%conf, f_confOpts, f_confOper)
+
+ nvars_in = size(varin_default)
+ allocate(self%varin(nvars_in))
+ self%varin(1:size(varin_default)) = varin_default
+
+ ! save channels
+ allocate(self%channels(size(channels)))
+ self%channels(:) = channels(:)
 
 end subroutine ufo_aodcrtm_tlad_setup
 
@@ -85,14 +101,13 @@ end subroutine ufo_aodcrtm_tlad_delete
 
 ! ------------------------------------------------------------------------------
 
-SUBROUTINE ufo_aodcrtm_tlad_settraj(self, geovals, obss, channels)
+SUBROUTINE ufo_aodcrtm_tlad_settraj(self, geovals, obss)
 
 implicit none
 
 class(ufo_aodcrtm_tlad), intent(inout) :: self
 type(ufo_geovals),        intent(in)    :: geovals
 type(c_ptr), value,       intent(in)    :: obss
-INTEGER(c_int),           intent(in)    :: channels(:)  !List of channels to use
 
 ! Local Variables
 character(*), parameter :: PROGRAM_NAME = 'ufo_aodcrtm_tlad_mod.F90'
@@ -183,16 +198,6 @@ type(CRTM_RTSolution_type), allocatable :: rts_K(:,:)
       STOP
    END IF
 
-   ! Create the input FORWARD structure (sfc)
-   ! ----------------------------------------
-!   call CRTM_Surface_Create(sfc, self%N_Channels)
-!   IF ( ANY(.NOT. CRTM_Surface_Associated(sfc)) ) THEN
-!      message = 'Error allocating CRTM Surface structure (setTraj)'
-!      CALL Display_Message( PROGRAM_NAME, message, FAILURE )
-!      STOP
-!   END IF
-
-
    ! Create output K-MATRIX structure (atm)
    ! --------------------------------------
    call CRTM_Atmosphere_Create( self%atm_K, self%n_Layers, self%conf%n_Absorbers, self%conf%n_Clouds, self%conf%n_Aerosols )
@@ -202,21 +207,9 @@ type(CRTM_RTSolution_type), allocatable :: rts_K(:,:)
       STOP
    END IF
 
-   ! Create output K-MATRIX structure (sfc)
-   ! --------------------------------------
-!   call CRTM_Surface_Create(self%sfc_K, self%N_Channels)
-!   IF ( ANY(.NOT. CRTM_Surface_Associated(self%sfc_K)) ) THEN
-!      message = 'Error allocating CRTM K-matrix Surface structure (setTraj)'
-!      CALL Display_Message( PROGRAM_NAME, message, FAILURE )
-!      STOP
-!   END IF
-
-
    !Assign the data from the GeoVaLs
    !--------------------------------
    CALL Load_Atm_Data(self%N_PROFILES,self%N_LAYERS,geovals,atm,self%conf)
-!   call Load_Sfc_Data(self%N_PROFILES,self%N_Channels,geovals,sfc,chinfo,obss,self%conf)
-!   call Load_Geom_Data(obss,geo)
 
    IF (TRIM(self%conf%aerosol_option) /= "") &
         &CALL load_aerosol_data(self%n_profiles,self%n_layers,geovals,&
@@ -228,7 +221,6 @@ type(CRTM_RTSolution_type), allocatable :: rts_K(:,:)
    ! Zero the K-matrix OUTPUT structures
    ! -----------------------------------
    call CRTM_Atmosphere_Zero( self%atm_K )
-!   call CRTM_Surface_Zero( self%sfc_K )
 
    CALL calculate_aero_layer_factor(atm,self%scaling_factor)
 
@@ -252,11 +244,9 @@ type(CRTM_RTSolution_type), allocatable :: rts_K(:,:)
 
    ! Deallocate the structures
    ! -------------------------
-!   call CRTM_Geometry_Destroy(geo)
    call CRTM_Atmosphere_Destroy(atm)
    call CRTM_RTSolution_Destroy(rts_K)
    call CRTM_RTSolution_Destroy(rts)
-!   call CRTM_Surface_Destroy(sfc)
 
 
 
@@ -291,18 +281,18 @@ end subroutine ufo_aodcrtm_tlad_settraj
 
 ! ------------------------------------------------------------------------------
 
-SUBROUTINE ufo_aodcrtm_simobs_tl(self, geovals, obss, hofx, channels)
+SUBROUTINE ufo_aodcrtm_simobs_tl(self, geovals, obss, nvars, nlocs, hofx)
 
 implicit none
 class(ufo_aodcrtm_tlad), intent(in) :: self
 type(ufo_geovals),        intent(in) :: geovals
 type(c_ptr), value,    intent(in)    :: obss
-real(c_double),        intent(inout) :: hofx(:)
-INTEGER(c_int),           intent(in)    :: channels(:)  !List of channels to use
+integer,                  intent(in)    :: nvars, nlocs
+real(c_double),        intent(inout) :: hofx(nvars, nlocs)
 
 character(len=*), parameter :: myname_="ufo_aodcrtm_simobs_tl"
 character(max_string) :: err_msg
-integer :: job, jprofile, jchannel, jlevel, jaero
+integer :: jprofile, jchannel, jlevel, jaero
 type(ufo_geoval), pointer :: var_p
 
 CHARACTER(MAXVARLEN), DIMENSION(self%conf%n_aerosols) :: var_aerosols
@@ -335,19 +325,18 @@ CHARACTER(MAXVARLEN), DIMENSION(self%conf%n_aerosols) :: var_aerosols
 
  ! Initialize hofx
  ! ---------------
- hofx(:) = 0.0_kind_real
+ hofx(:,:) = 0.0_kind_real
 
  ! Multiply by Jacobian and add to hofx
- job = 0
  do jprofile = 1, self%n_profiles
 
-   do jchannel = 1, size(channels)
-     job = job + 1
+   do jchannel = 1, size(self%channels)
      DO jaero = 1, self%conf%n_aerosols
         CALL ufo_geovals_get_var(geovals, var_aerosols(jaero), var_p)
         DO jlevel = 1, var_p%nval
-           hofx(job) = hofx(job) + &
-                self%atm_k(channels(jchannel),jprofile)%aerosol(jaero)%concentration(jlevel) * var_p%vals(jlevel,jprofile) * self%scaling_factor(jlevel,jprofile)
+           hofx(jchannel, jprofile) = hofx(jchannel, jprofile) + &
+                                      self%atm_k(self%channels(jchannel),jprofile)%aerosol(jaero)%concentration(jlevel) *  &
+                                      var_p%vals(jlevel,jprofile) * self%scaling_factor(jlevel,jprofile)
         ENDDO
      ENDDO
    enddo
@@ -357,19 +346,20 @@ end subroutine ufo_aodcrtm_simobs_tl
 
 ! ------------------------------------------------------------------------------
 
-SUBROUTINE ufo_aodcrtm_simobs_ad(self, geovals, obss, hofx, channels)
+SUBROUTINE ufo_aodcrtm_simobs_ad(self, geovals, obss, nvars, nlocs, hofx)
 
 implicit none
 class(ufo_aodcrtm_tlad), intent(in) :: self
 type(ufo_geovals),     intent(inout) :: geovals
 type(c_ptr), value,    intent(in)    :: obss
-real(c_double),           intent(in) :: hofx(:)
-INTEGER(c_int),           intent(in)    :: channels(:)  !List of channels to use
+integer,                  intent(in)    :: nvars, nlocs
+real(c_double),           intent(in) :: hofx(nvars, nlocs)
 
 character(len=*), parameter :: myname_="ufo_aodcrtm_simobs_ad"
 character(max_string) :: err_msg
-integer :: job, jprofile, jchannel, jlevel
+integer :: jprofile, jchannel, jlevel
 type(ufo_geoval), pointer :: var_p
+real(c_double) :: missing
 
 CHARACTER(MAXVARLEN), DIMENSION(self%conf%n_aerosols) :: var_aerosols
 INTEGER :: jaero
@@ -389,6 +379,9 @@ INTEGER :: jaero
    call abor1_ftn(err_msg)
  endif
 
+ ! Set missing value
+ missing = missing_value(missing)
+
  CALL assign_aerosol_names(self%conf%aerosol_option,var_aerosols)
 
  DO jaero=1,self%conf%n_aerosols
@@ -403,13 +396,11 @@ INTEGER :: jaero
     ENDIF
 
 ! Multiply by Jacobian and add to hofx (adjoint)
-    job = 0
     DO jprofile = 1, self%n_Profiles
-       DO jchannel = 1, size(channels)
-          job = job + 1
+       DO jchannel = 1, size(self%channels)
           DO jlevel = 1, var_p%nval
              var_p%vals(jlevel,jprofile) = var_p%vals(jlevel,jprofile) + &
-                  self%atm_k(channels(jchannel),jprofile)%aerosol(jaero)%concentration(jlevel) * hofx(job) 
+                  self%atm_k(self%channels(jchannel),jprofile)%aerosol(jaero)%concentration(jlevel) * hofx(jchannel, jprofile) 
           ENDDO
        ENDDO
     ENDDO
