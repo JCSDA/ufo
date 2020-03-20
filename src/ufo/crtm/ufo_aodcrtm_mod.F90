@@ -10,6 +10,7 @@ module ufo_aodcrtm_mod
  use fckit_configuration_module, only: fckit_configuration
  use iso_c_binding
  use kinds
+ use missing_values_mod
 
  use ufo_geovals_mod, only: ufo_geovals, ufo_geoval, ufo_geovals_get_var
  use ufo_vars_mod
@@ -23,12 +24,17 @@ module ufo_aodcrtm_mod
  !> Fortran derived type for aod trajectory
  type, public :: ufo_aodcrtm
  private
+  character(len=MAXVARLEN), public, allocatable :: varin(:)  ! variablesrequested from the model
+  integer, allocatable                          :: channels(:)
   type(crtm_conf) :: conf
  contains
    procedure :: setup  => ufo_aodcrtm_setup
    procedure :: delete => ufo_aodcrtm_delete
    procedure :: simobs => ufo_aodcrtm_simobs
  end type ufo_aodcrtm
+ character(len=maxvarlen), dimension(19), parameter :: varin_default = &
+                                (/var_ts, var_mixr, var_rh, var_prs, var_prsi, &
+                                  var_aerosols_gocart_default/)
 
  CHARACTER(MAXVARLEN), PARAMETER :: varname_tmplate="aerosol_optical_depth"
 
@@ -36,12 +42,14 @@ contains
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_aodcrtm_setup(self, f_confOper)
+subroutine ufo_aodcrtm_setup(self, f_confOper, channels)
 
 implicit none
 class(ufo_aodcrtm),        intent(inout) :: self
 type(fckit_configuration), intent(in)    :: f_confOper
+integer(c_int),            intent(in)    :: channels(:)  !List of channels to use
 
+integer :: nvars_in
 character(len=max_string) :: err_msg
 type(fckit_configuration) :: f_confOpts
 
@@ -56,6 +64,14 @@ type(fckit_configuration) :: f_confOpts
    write(err_msg,*) 'ufo_aodcrtm_setup error: O3 must be included in CRTM Absorbers'
    call abor1_ftn(err_msg)
  end if
+
+ nvars_in = size(varin_default)
+ allocate(self%varin(nvars_in))
+ self%varin(1:size(varin_default)) = varin_default
+
+ ! save channels
+ allocate(self%channels(size(channels)))
+ self%channels(:) = channels(:)
 
 end subroutine ufo_aodcrtm_setup
 
@@ -72,14 +88,14 @@ end subroutine ufo_aodcrtm_delete
 
 ! ------------------------------------------------------------------------------
 
-SUBROUTINE ufo_aodcrtm_simobs(self, geovals, hofx, obss, channels)
+SUBROUTINE ufo_aodcrtm_simobs(self, geovals, obss, nvars, nlocs, hofx)
 
 implicit none
 class(ufo_aodcrtm),      intent(in) :: self
 type(ufo_geovals),        intent(in) :: geovals
-real(c_double),        intent(inout) :: hofx(:)
+integer,                  intent(in) :: nvars, nlocs
+real(c_double),        intent(inout) :: hofx(nvars, nlocs)
 type(c_ptr), value,       intent(in) :: obss
-INTEGER(c_int),           intent(in) :: channels(:)  !List of channels to use
 
 ! Local Variables
 character(*), parameter :: PROGRAM_NAME = 'ufo_aodcrtm_mod.F90'
@@ -87,6 +103,7 @@ character(255) :: message, version
 integer        :: err_stat, alloc_stat
 integer        :: l, m, n, i
 type(ufo_geoval), pointer :: temp
+real(c_double) :: missing
 
 integer :: n_Profiles
 integer :: n_Layers
@@ -173,17 +190,6 @@ TYPE(CRTM_RTSolution_type), ALLOCATABLE :: rts_K(:,:)
       STOP
    END IF
 
-
-   ! Create the input FORWARD structure (sfc)
-   ! ----------------------------------------
-!   call CRTM_Surface_Create(sfc, N_Channels)
-!   IF ( ANY(.NOT. CRTM_Surface_Associated(sfc)) ) THEN
-!      message = 'Error allocating CRTM Surface structure'
-!      CALL Display_Message( PROGRAM_NAME, message, FAILURE )
-!      STOP
-!   END IF
-
-
    ALLOCATE( atm_K( n_channels, N_PROFILES ), &
         rts_K( n_channels, N_PROFILES ), &
         STAT = alloc_stat )
@@ -207,8 +213,6 @@ TYPE(CRTM_RTSolution_type), ALLOCATABLE :: rts_K(:,:)
    !Assign the data from the GeoVaLs
    !--------------------------------
    CALL Load_Atm_Data(n_Profiles,n_Layers,geovals,atm,self%conf)
-!   CALL Load_Sfc_Data(n_Profiles,n_Channels,geovals,sfc,chinfo,obss,self%conf)
-!   CALL Load_Geom_Data(obss,geo)
 
    IF (TRIM(self%conf%aerosol_option) /= "") &
         &CALL load_aerosol_data(n_profiles,n_layers,geovals,&
@@ -218,18 +222,8 @@ TYPE(CRTM_RTSolution_type), ALLOCATABLE :: rts_K(:,:)
    ! ------------------------
    IF (self%conf%inspect > 0) THEN
       CALL CRTM_Atmosphere_Inspect(atm(self%conf%inspect))
-!   call CRTM_Surface_Inspect(sfc(self%conf%inspect))
-!   call CRTM_Geometry_Inspect(geo(self%conf%inspect))
       CALL CRTM_ChannelInfo_Inspect(chinfo(n))
    ENDIF
-
-   ! Call the forward model call for each sensor
-   ! -------------------------------------------
-!   err_stat = CRTM_Forward( atm        , &  ! Input
-!                            sfc        , &  ! Input
-!                            geo        , &  ! Input
-!                            chinfo(n:n), &  ! Input
-!                            rts          )  ! Output
 
 ! 8b.1 The K-matrix model for AOD
 ! ----------------------
@@ -249,14 +243,13 @@ TYPE(CRTM_RTSolution_type), ALLOCATABLE :: rts_K(:,:)
    ! Put simulated brightness temperature into hofx
    ! ----------------------------------------------
 
-   !Set to zero and initializ counter
-   hofx(:) = 0.0_kind_real
-   i = 1
+   ! Set missing value
+   missing = missing_value(missing)
+   hofx = missing
 
    DO m = 1, n_profiles
-      DO l = 1, SIZE(channels)
-         hofx(i) = SUM(rts(channels(l),m)%layer_optical_depth)
-         i = i + 1
+       DO l = 1, size(self%channels)
+         hofx(l,m) = SUM(rts(self%channels(l),m)%layer_optical_depth)
       END DO
    END DO
 

@@ -35,18 +35,28 @@ contains
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_aodcrtm_setup_c(c_key_self, c_conf) bind(c,name='ufo_aodcrtm_setup_f90')
+subroutine ufo_aodcrtm_setup_c(c_key_self, c_conf, c_nchan, c_channels, c_varlist) & 
+                               bind(c,name='ufo_aodcrtm_setup_f90')
+use oops_variables_mod
 implicit none
 integer(c_int), intent(inout) :: c_key_self
 type(c_ptr),    intent(in)    :: c_conf
+integer(c_int), intent(in) :: c_nchan
+integer(c_int), intent(in) :: c_channels(c_nchan)
+type(c_ptr), intent(in), value :: c_varlist
 
+type(oops_variables) :: oops_vars
 type(ufo_aodcrtm), pointer :: self
 type(fckit_configuration) :: f_conf
 
 call ufo_aodcrtm_registry%setup(c_key_self, self)
 f_conf = fckit_configuration(c_conf)
 
-call self%setup(f_conf)
+call self%setup(f_conf, c_channels)
+
+!> Update C++ ObsOperator with input variable list
+oops_vars = oops_variables(c_varlist)
+call oops_vars%push_back( self%varin )
 
 end subroutine ufo_aodcrtm_setup_c
 
@@ -68,17 +78,15 @@ end subroutine ufo_aodcrtm_delete_c
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_aodcrtm_simobs_c(c_key_self, c_key_geovals, c_obsspace, c_nobs, c_hofx, &
-                                 c_nchan, c_channels) bind(c,name='ufo_aodcrtm_simobs_f90')
+subroutine ufo_aodcrtm_simobs_c(c_key_self, c_key_geovals, c_obsspace, c_nvars, &
+                                c_nlocs, c_hofx) bind(c,name='ufo_aodcrtm_simobs_f90')
 
 implicit none
 integer(c_int), intent(in) :: c_key_self
 integer(c_int), intent(in) :: c_key_geovals
 type(c_ptr), value, intent(in) :: c_obsspace
-integer(c_int), intent(in) :: c_nobs
-real(c_double), intent(inout) :: c_hofx(c_nobs)
-integer(c_int), intent(in) :: c_nchan
-integer(c_int), intent(in) :: c_channels(c_nchan)
+integer(c_int), intent(in) :: c_nvars, c_nlocs
+real(c_double), intent(inout) :: c_hofx(c_nvars, c_nlocs)
 
 
 type(ufo_aodcrtm), pointer :: self
@@ -90,7 +98,7 @@ call ufo_aodcrtm_registry%get(c_key_self, self)
 
 call ufo_geovals_registry%get(c_key_geovals,geovals)
 
-call self%simobs(geovals, c_hofx, c_obsspace, c_channels)
+call self%simobs(geovals, c_obsspace, c_nvars, c_nlocs, c_hofx)
 
 end subroutine ufo_aodcrtm_simobs_c
 

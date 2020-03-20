@@ -47,7 +47,7 @@ class ObsAodCRTM : public ObsOperatorBase,
   void simulateObs(const GeoVaLs &, ioda::ObsVector &, ObsDiagnostics &) const override;
 
 // Other
-  const oops::Variables & variables() const override {return *varin_;}
+  const oops::Variables & variables() const override {return varin_;}
 
   int & toFortran() {return keyOperAodCRTM_;}
   const int & toFortran() const {return keyOperAodCRTM_;}
@@ -56,8 +56,7 @@ class ObsAodCRTM : public ObsOperatorBase,
   void print(std::ostream &) const override;
   F90hop keyOperAodCRTM_;
   const ioda::ObsSpace& odb_;
-  std::unique_ptr<const oops::Variables> varin_;
-  std::vector<int> channels_;
+  oops::Variables varin_;
 };
 
 // -----------------------------------------------------------------------------

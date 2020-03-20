@@ -200,11 +200,10 @@ CREATE_SYMLINK_FILENAME( ${CMAKE_CURRENT_SOURCE_DIR}/testinput ${CMAKE_CURRENT_B
 
 # IODA observation files 
 list( APPEND ufo_ioda_test_data
-      testinput_tier_1.tar.gz
-     )
+      testinput_tier_1.tar.gz)
 
 # Set URL for IODA test files
-set(ECBUILD_DOWNLOAD_BASE_URL https://jedi-test-files.s3.amazonaws.com/ioda)
+set(IODA_DOWNLOAD_BASE_URL https://jedi-test-files.s3.amazonaws.com)
 
 # If local path to testfiles is defined don't download
 if (DEFINED ENV{LOCAL_PATH_TESTFILES_IODA})
@@ -212,21 +211,19 @@ if (DEFINED ENV{LOCAL_PATH_TESTFILES_IODA})
 endif()
 
 if( NOT DEFINED LOCAL_PATH_TESTFILES_IODA )
-  set(TESTFILE_DIR_IODA ${CMAKE_BINARY_DIR}/test_data/ioda CACHE PATH "data dir for test data")
-  file(MAKE_DIRECTORY ${TESTFILE_DIR_IODA})
-  message(STATUS "LOCAL_PATH_TESTFILES_IODA is not defined, download test files")
 
-  # Get the current git branch
+  # Get the current git branch of ioda repo
   execute_process(
     COMMAND git rev-parse --abbrev-ref HEAD
-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/ioda
     OUTPUT_VARIABLE GIT_BRANCH
-    OUTPUT_STRIP_TRAILING_WHITESPACE
-  )
+    OUTPUT_STRIP_TRAILING_WHITESPACE)
+  message(STATUS "IODA GIT_BRANCH is " ${GIT_BRANCH})
 
   # Check whether the URL exists or not 
+  set(ECBUILD_DOWNLOAD_BASE_URL ${IODA_DOWNLOAD_BASE_URL}/ioda)
   ecbuild_check_multiurl(NAMES   ${ufo_ioda_test_data}
-                       DIRNAME ${GIT_BRANCH}
+                       DIRHOST ${GIT_BRANCH}
                        RESULT  SPECIFIC_TEST_FILES)
 
   # Set distant directory
@@ -239,28 +236,41 @@ if( NOT DEFINED LOCAL_PATH_TESTFILES_IODA )
     set(DIRNAME "develop")
     message(STATUS "GIT_BRANCH not found, download develop")
   endif()
-  message(STATUS "Test data downloaded from: " ${ECBUILD_DOWNLOAD_BASE_URL}/${DIRNAME})
 
+  message(STATUS "Test data downloaded from: " ${IODA_DOWNLOAD_BASE_URL}/${DIRNAME})
   message(STATUS "Save data to " ${TESTFILE_DIR_IODA})
 
-  # Run test to download data
-  ecbuild_get_test_multidata ( TARGET get_ioda_test_data_ufo
-                             NAMES ${ufo_ioda_test_data}
-                             DIRNAME ${DIRNAME}
-                             DIRLOCAL ${TESTFILE_DIR_IODA}
-                             EXTRACT
-                            )
+  set(TESTFILE_DIR_IODA ${CMAKE_BINARY_DIR}/test_data/ioda/${DIRNAME} CACHE PATH "data dir for test data")
+  file(MAKE_DIRECTORY ${TESTFILE_DIR_IODA})
+  message(STATUS "LOCAL_PATH_TESTFILES_IODA is not defined, download test files")
+
+  set(IODA_REP_NAME ioda)
+  set(IODA_TESTFILES_NAME ${ufo_ioda_test_data})
+  set(IODA_BRANCH_NAME ${DIRNAME})
+  set(IODA_TESTFILES_PATH ${CMAKE_BINARY_DIR}/test_data/ioda/${DIRNAME})
+
+  CONF_TARGETS_DEPS (ioda_data_downloader.py
+                  ${CMAKE_SOURCE_DIR}/ioda/test
+                  ${CMAKE_BINARY_DIR}/bin
+                  bin_ioda_test_download_scripts_ufo_deps)
+
+  add_custom_target( bin_ioda_test_download_scripts_ufo ALL
+      COMMAND chmod +x ${bin_ioda_test_download_scripts_ufo_deps}
+      DEPENDS ${bin_ioda_test_download_scripts_ufo_deps})
+
+  ecbuild_add_test( TARGET    ufo_get_ioda_test_data
+                    TYPE      SCRIPT
+                    COMMAND    ${CMAKE_BINARY_DIR}/bin/ioda_data_downloader.py
+                    ARGS      testoutput/download_test_ufo.log)
 
 else()
-	set(TESTFILE_DIR_IODA ${LOCAL_PATH_TESTFILES_IODA})
-	message(STATUS "use LOCAL_PATH_TESTFILES_IODA : "${LOCAL_PATH_TESTFILES_IODA})
+  set(TESTFILE_DIR_IODA ${LOCAL_PATH_TESTFILES_IODA})
+  message(STATUS "use LOCAL_PATH_TESTFILES_IODA : " ${LOCAL_PATH_TESTFILES_IODA})
 endif()
-
 
 execute_process( COMMAND ${CMAKE_COMMAND} -E create_symlink
                  ${TESTFILE_DIR_IODA}
-                 ${CMAKE_CURRENT_BINARY_DIR}/Data/ioda
-                )
+                 ${CMAKE_CURRENT_BINARY_DIR}/Data/ioda)
 
 #####################################################################
 
