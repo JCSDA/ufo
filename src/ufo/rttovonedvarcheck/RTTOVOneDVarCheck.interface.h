@@ -5,8 +5,8 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#ifndef UFO_RTTOVONEDVARCHECK_INTERFACE_H_
-#define UFO_RTTOVONEDVARCHECK_INTERFACE_H_
+#ifndef UFO_RTTOVONEDVARCHECK_RTTOVONEDVARCHECK_INTERFACE_H_
+#define UFO_RTTOVONEDVARCHECK_RTTOVONEDVARCHECK_INTERFACE_H_
 
 #include "../Fortran.h"
 
@@ -26,13 +26,14 @@ typedef int F90onedvarcheck;
 /// Interface to Fortran routines
 
 extern "C" {
-  void ufo_rttovonedvarcheck_create_f90(F90onedvarcheck &, const ioda::ObsSpace &, const eckit::Configuration *, 
-                                     const int &, const int &);
+  void ufo_rttovonedvarcheck_create_f90(F90onedvarcheck &, const ioda::ObsSpace &,
+                      const eckit::Configuration *, const int &, const int &);
   void ufo_rttovonedvarcheck_delete_f90(F90onedvarcheck &);
   void ufo_rttovonedvarcheck_prior_f90(const F90onedvarcheck &, const F90goms &);
-  void ufo_rttovonedvarcheck_post_f90(const F90onedvarcheck &, const oops::Variables &, const F90goms &);
+  void ufo_rttovonedvarcheck_post_f90(const F90onedvarcheck &, const oops::Variables &,
+                      const F90goms &, const int &, const char &);
 }  // extern C
 
 }  // namespace ufo
 
-#endif  // UFO_RTTOVONEDVARCHECK_INTERFACE_H_
+#endif  // UFO_RTTOVONEDVARCHECK_RTTOVONEDVARCHECK_INTERFACE_H_

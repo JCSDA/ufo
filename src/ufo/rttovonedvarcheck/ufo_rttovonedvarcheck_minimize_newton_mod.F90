@@ -1,5 +1,4 @@
 ! (C) Copyright 2018 UCAR
-!
 ! This software is licensed under the terms of the Apache Licence Version 2.0
 ! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 
@@ -165,6 +164,10 @@ Iterations: do iter = 1, Max1DVarIterations
   !-------------------------
   ! 1. Generate new profile
   !-------------------------
+  ! Save cost from previous iteration
+  if (UseJForConvergence) then
+    JcostOld = Jcost
+  end if
 
   ! initialise RTerrorcode and profile increments on first iteration
   if (iter == 1) then
@@ -175,9 +178,11 @@ Iterations: do iter = 1, Max1DVarIterations
 
     ! Map GeovaLs to 1D-var profile using B matrix profile structure
     call ufo_rttovonedvarcheck_GeoVaLs2ProfVec(geovals, profile_index, nprofelements, GuessProfile(:))
-    OldProfile(:) = GuessProfile(:)
 
   end if
+
+  ! Save current profile
+  OldProfile(:) = GuessProfile(:)
 
   ! call forward model to generate jacobian
   call ufo_rttovonedvarcheck_ForwardModel(geovals, ob_info, obsdb, &
@@ -206,15 +211,7 @@ Iterations: do iter = 1, Max1DVarIterations
 
   if (UseJForConvergence) then
 
-    ! store cost function from previous cycle
-    if (UseJForConvergence) then
-      JcostOld = Jcost
-    end if
-
     Diffprofile(:) = GuessProfile(:) - BackProfile(:)
-    write(*,*) "Diffprofile = ",Diffprofile(:)
-    write(*,*) "GuessProfile = ",GuessProfile(:)
-    write(*,*) "BackProfile(:) = ",BackProfile(:)
     Ydiff(:) = ob_info%yobs(:) - Y(:)
     call ufo_rttovonedvarcheck_CostFunction(Diffprofile, b_inv, Ydiff, r_inv, Jout)
     Jcost = Jout(1)
@@ -224,6 +221,8 @@ Iterations: do iter = 1, Max1DVarIterations
 
     ! store initial cost value
     if (iter == 1) JCostOrig = jcost
+
+    write(*,*) "iter,Jcost,JcostOld,JCostorig = ",iter,Jcost,JcostOld,JCostorig
 
     ! check for convergence
     if (iter > 1) then

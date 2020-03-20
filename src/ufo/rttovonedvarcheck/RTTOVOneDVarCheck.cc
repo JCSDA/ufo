@@ -10,9 +10,9 @@
 #include <limits>
 #include <vector>
 
+#include "ufo/GeoVaLs.h"
 #include "ufo/rttovonedvarcheck/RTTOVOneDVarCheck.h"
 #include "ufo/rttovonedvarcheck/RTTOVOneDVarCheck.interface.h"
-#include "ufo/GeoVaLs.h"
 
 #include "eckit/config/Configuration.h"
 
@@ -48,7 +48,6 @@ RTTOVOneDVarCheck::RTTOVOneDVarCheck(ioda::ObsSpace & obsdb, const eckit::Config
   ufo_rttovonedvarcheck_create_f90(key_, obsdb, conf, channels_.size(), channels_[0]);
 
   oops::Log::debug() << "RTTOVOneDVarCheck contructor complete. " << std::endl;
-
 }
 
 // -----------------------------------------------------------------------------
@@ -63,7 +62,6 @@ RTTOVOneDVarCheck::~RTTOVOneDVarCheck() {
 void RTTOVOneDVarCheck::applyFilter(const std::vector<bool> & apply,
                                const Variables & filtervars,
                                std::vector<std::vector<bool>> & flagged) const {
-
   oops::Log::trace() << "RTTOVOneDVarCheck Filter starting" << std::endl;
 
   /* 1-D var qc
@@ -76,14 +74,20 @@ void RTTOVOneDVarCheck::applyFilter(const std::vector<bool> & apply,
 
 // Create oops variable
   oops::Variables variables = filtervars.toOopsVariables();
-  oops::Log::trace() << "RTTOVOneDVarCheck variables = " << variables << std::endl;
+
+// Convert apply to char for passing to fortran
+  std::vector<char> apply_char(apply.size(), 'F');
+  for (size_t i = 0; i < apply_char.size(); i++)
+    { if (apply[i]) {apply_char[i]='T';} }
+  oops::Log::trace() << "RTTOVOneDVarCheck apply_char = " << apply_char << std::endl;
 
 // Save qc flags to database for retrieval in fortran - needed for channel selection
   flags_->save("FortranQC");    // should pass values to fortran properly
 
 // Pass it all to fortran
   const eckit::Configuration * conf = &config_;
-  ufo_rttovonedvarcheck_post_f90(key_, variables, gvals->toFortran());
+  ufo_rttovonedvarcheck_post_f90(key_, variables, gvals->toFortran(),
+                                      apply_char.size(), apply_char[0]);
 
 // Read qc flags from database
   flags_->read("FortranQC");    // should get values from fortran properly
@@ -92,7 +96,6 @@ void RTTOVOneDVarCheck::applyFilter(const std::vector<bool> & apply,
   oops::Log::trace() << "RTTOVOneDVarCheck flags_ = " << *flags_ << std::endl;
 
   oops::Log::trace() << "RTTOVOneDVarCheck Filter complete" << std::endl;
-
 }
 
 // -----------------------------------------------------------------------------

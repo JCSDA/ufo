@@ -81,6 +81,18 @@ GeoVaLs::GeoVaLs(const GeoVaLs & other)
   oops::Log::trace() << "GeoVaLs copy constructor key = " << keyGVL_ << std::endl;
 }
 // -----------------------------------------------------------------------------
+/*! \brief Copy one GeoVal into a new object constructor */
+
+GeoVaLs::GeoVaLs(const GeoVaLs & other, const int & index)
+  : keyGVL_(-1), vars_(other.vars_), comm_(other.comm_)
+{
+  oops::Log::trace() << "GeoVaLs copy constructor starting" << std::endl;
+  ufo_geovals_setup_f90(keyGVL_, 0, vars_);
+  int fort_index = index + 1; // Fortran numbers from 1
+  ufo_geovals_copy_one_f90(other.keyGVL_, keyGVL_, fort_index);
+  oops::Log::trace() << "GeoVaLs copy constructor key = " << keyGVL_ << std::endl;
+}
+// -----------------------------------------------------------------------------
 /*? \brief Destructor */
 GeoVaLs::~GeoVaLs() {
   oops::Log::trace() << "GeoVaLs destructor starting" << std::endl;

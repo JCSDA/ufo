@@ -28,7 +28,7 @@ public :: ufo_geovals_assign, ufo_geovals_add, ufo_geovals_diff, ufo_geovals_abs
 public :: ufo_geovals_split, ufo_geovals_merge
 public :: ufo_geovals_minmaxavg, ufo_geovals_normalize, ufo_geovals_maxloc, ufo_geovals_schurmult
 public :: ufo_geovals_read_netcdf, ufo_geovals_write_netcdf
-public :: ufo_geovals_rms, ufo_geovals_copy
+public :: ufo_geovals_rms, ufo_geovals_copy, ufo_geovals_copy_one
 public :: ufo_geovals_analytic_init
 
 private :: ufo_geovals_reset_sec_arg
@@ -478,6 +478,41 @@ other%missing_value = self%missing_value
 other%linit = .true.
 
 end subroutine ufo_geovals_copy
+
+! ------------------------------------------------------------------------------
+!> Copy one location from GeoVaLs into a new object
+!!
+
+subroutine ufo_geovals_copy_one(self, other, ind)
+implicit none
+type(ufo_geovals), intent(in) :: self
+type(ufo_geovals), intent(inout) :: other
+integer, intent(in) :: ind
+integer :: jv
+
+if (.not. self%linit) then
+  call abor1_ftn("ufo_geovals_copy_one: geovals not defined")
+endif
+
+call ufo_geovals_delete(other)
+
+other%nlocs = 1
+other%nvar = self%nvar
+allocate(other%variables(other%nvar))
+other%variables(:) = self%variables(:)
+
+allocate(other%geovals(other%nvar))
+do jv = 1, other%nvar
+  other%geovals(jv)%nval = self%geovals(jv)%nval
+  other%geovals(jv)%nlocs = self%geovals(jv)%nlocs
+  allocate(other%geovals(jv)%vals(other%geovals(jv)%nval, other%geovals(jv)%nlocs))
+  other%geovals(jv)%vals(:,other%nlocs) = self%geovals(jv)%vals(:,ind)
+enddo
+
+other%missing_value = self%missing_value
+other%linit = .true.
+
+end subroutine ufo_geovals_copy_one
 
 ! ------------------------------------------------------------------------------
 !> Initialize a GeoVaLs object based on an analytic state
@@ -1039,7 +1074,7 @@ do i = 1, self%nvar
        nf90_def_dim(ncid,trim(self%variables(i))//"_nval",self%geovals(i)%nval, dimid_nval))
   dims(1) = dimid_nval
   call check('nf90_def_var',  &
-       nf90_def_var(ncid,trim(self%variables(i)),nf90_float,dims,ncid_var(i)))
+       nf90_def_var(ncid,trim(self%variables(i)),nf90_double,dims,ncid_var(i)))
 enddo
 
 call check('nf90_enddef', nf90_enddef(ncid))

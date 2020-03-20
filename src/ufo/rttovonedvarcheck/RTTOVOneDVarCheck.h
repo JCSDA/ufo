@@ -5,13 +5,13 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
  */
 
-#ifndef UFO_FILTERS_RTTOVONEDVARCHECK_H_
-#define UFO_FILTERS_RTTOVONEDVARCHECK_H_
+#ifndef UFO_RTTOVONEDVARCHECK_RTTOVONEDVARCHECK_H_
+#define UFO_RTTOVONEDVARCHECK_RTTOVONEDVARCHECK_H_
 
+#include <cmath>
 #include <ostream>
 #include <string>
 #include <vector>
-#include <cmath>
 
 #include "boost/shared_ptr.hpp"
 
@@ -59,4 +59,4 @@ class RTTOVOneDVarCheck : public FilterBase,
 
 }  // namespace ufo
 
-#endif  // UFO_FILTERS_RTTOVONEDVARCHECK_H_
+#endif  // UFO_RTTOVONEDVARCHECK_RTTOVONEDVARCHECK_H_

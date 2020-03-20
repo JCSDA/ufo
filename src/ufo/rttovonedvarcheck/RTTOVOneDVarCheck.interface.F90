@@ -61,7 +61,8 @@ end subroutine ufo_rttovonedvarcheck_delete_c
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_rttovonedvarcheck_prior_c(c_self, c_geovals) bind(c,name='ufo_rttovonedvarcheck_prior_f90')
+subroutine ufo_rttovonedvarcheck_prior_c(c_self, c_geovals) &
+               bind(c,name='ufo_rttovonedvarcheck_prior_f90')
 implicit none
 integer(c_int), intent(in) :: c_self
 integer(c_int), intent(in) :: c_geovals
@@ -78,22 +79,32 @@ end subroutine ufo_rttovonedvarcheck_prior_c
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_rttovonedvarcheck_post_c(c_self, c_vars, c_geovals) bind(c,name='ufo_rttovonedvarcheck_post_f90')
+subroutine ufo_rttovonedvarcheck_post_c(c_self, c_vars, c_geovals, c_nobs, c_apply) &
+               bind(c,name='ufo_rttovonedvarcheck_post_f90')
 implicit none
 integer(c_int), intent(in)     :: c_self
 type(c_ptr), value, intent(in) :: c_vars     !< List of variables
 integer(c_int), intent(in)     :: c_geovals
+integer(c_int), intent(in)     :: c_nobs
+character(c_char), intent(in)  :: c_apply(c_nobs)
 
 type(ufo_rttovonedvarcheck), pointer :: self
-type(oops_variables)              :: vars
-type(ufo_geovals), pointer        :: geovals
+type(oops_variables)                 :: vars
+type(ufo_geovals), pointer           :: geovals
+integer                              :: ii
+logical                              :: apply(c_nobs)
 
 call ufo_rttovonedvarcheck_registry%get(c_self, self)
 call ufo_geovals_registry%get(c_geovals, geovals)
 
 vars = oops_variables(c_vars)
 
-call ufo_rttovonedvarcheck_post(self, vars, geovals)
+apply(:) = .false.
+where (c_apply == 'T')
+  apply = .true.
+end where
+
+call ufo_rttovonedvarcheck_post(self, vars, geovals, apply)
 
 end subroutine ufo_rttovonedvarcheck_post_c
 

@@ -45,6 +45,7 @@ class GeoVaLs : public util::Printable,
   GeoVaLs(const eckit::Configuration &, const ioda::ObsSpace &,
           const oops::Variables &);
   GeoVaLs(const GeoVaLs &);
+  GeoVaLs(const GeoVaLs &, const int &);
 
   ~GeoVaLs();
 

@@ -24,7 +24,6 @@ public ufo_rttovonedvarcheck_InitObInfo
 public ufo_rttovonedvarcheck_GetBmatrix
 public ufo_rttovonedvarcheck_MapProfileToB
 public ufo_rttovonedvarcheck_InvertMatrix
-public ufo_rttovonedvarcheck_LocalGeoVals
 
 contains
 
@@ -763,35 +762,6 @@ end if
 9999 continue
 
 end subroutine ufo_rttovonedvarcheck_InvertMatrix
-
-!------------------------------------------------------------------------------
-
-subroutine ufo_rttovonedvarcheck_LocalGeoVals(geovals_full,obn,other)
-
-implicit none
-
-type(ufo_geovals), intent(in)  :: geovals_full  ! full geovals 
-integer, intent(in)            :: obn           ! observation number in full geovals
-type(ufo_geovals), intent(out) :: other         ! geoval for just this ob
-integer                        :: jv            ! counter
-
-other%nlocs = 1
-other%nvar = geovals_full%nvar
-allocate(other%variables(other%nvar))
-other%variables(:) = geovals_full%variables(:)
-
-allocate(other%geovals(other%nvar))
-do jv = 1, other%nvar
-  other%geovals(jv)%nval = geovals_full%geovals(jv)%nval
-  other%geovals(jv)%nlocs = geovals_full%geovals(jv)%nlocs
-  allocate(other%geovals(jv)%vals(other%geovals(jv)%nval, other%geovals(jv)%nlocs))
-  other%geovals(jv)%vals(:,other%nlocs) = geovals_full%geovals(jv)%vals(:,obn)
-enddo
-
-other%missing_value = geovals_full%missing_value
-other%linit = .true.
-
-end subroutine ufo_rttovonedvarcheck_LocalGeoVals
 
 !------------------------------------------------------------------------------
 

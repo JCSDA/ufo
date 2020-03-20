@@ -93,7 +93,7 @@ end subroutine ufo_rttovonedvarcheck_prior
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_rttovonedvarcheck_post(self, vars, geovals)
+subroutine ufo_rttovonedvarcheck_post(self, vars, geovals, apply)
 
   ! ------------------------------------------
   ! load modules only used in this subroutine
@@ -108,6 +108,7 @@ subroutine ufo_rttovonedvarcheck_post(self, vars, geovals)
   type(ufo_rttovonedvarcheck), intent(inout) :: self        ! one d var check setup info
   type(oops_variables), intent(in)        :: vars
   type(ufo_geovals), intent(in)           :: geovals     ! model values at observation space
+  logical, intent(in)                     :: apply(:)
 
   integer, allocatable               :: fields_in(:)
   integer                            :: iloc, jvar, jobs, ivar, band ! counters
@@ -147,6 +148,7 @@ subroutine ufo_rttovonedvarcheck_post(self, vars, geovals)
   logical                            :: file_exists     ! check if a file exists logical
   logical                            :: onedvar_success
   character(len=255)                 :: sensor_id
+  integer                            :: apply_count
 
   type(obinfo_type)                  :: ob_info
 
@@ -273,134 +275,146 @@ subroutine ufo_rttovonedvarcheck_post(self, vars, geovals)
   ! 2. beginning mains observations loop
   ! ------------------------------------------
   print *,"beginning observations loop: ",self%qcname
-  !do jobs = 1, iloc
-  do jobs = 1, 1
+  apply_count = 0
+  do jobs = 1, iloc
+  !do jobs = 1, 1
+    write(*,*) "Apply for ob number = ",jobs,apply(jobs)
+    if (apply(jobs)) then
 
-    !---------------------------------------------------
-    ! Setup Jb terms
-    !---------------------------------------------------
-    ! create one ob geovals from full all obs geovals
-    call ufo_rttovonedvarcheck_LocalGeovals(geovals,jobs,local_geovals)
-    call ufo_geovals_print(geovals, 1)
-
-    ! select appropriate b matrix for latitude of observation
-    b_matrix(:,:) = 0.0
-    b_inverse(:,:) = 0.0
-    do band = 1, full_b_matrix % nbands
-      if (lat(jobs) <  full_b_matrix % north(band)) exit
-    end do
-    write(*,*) "band = ",band
-    b_matrix(:,:) = full_b_matrix % store(:,:,band)
-    b_inverse(:,:) = full_b_matrix % inverse(:,:,band)
-    write(*,'(144E13.5)') b_matrix(:,:)
-
-    !---------------------------------------------------
-    ! Setup Jo terms
-    !---------------------------------------------------
-    ! setup ob data for this observation
-    ob_info%forward_mod_name=self%forward_mod_name
-    ob_info%latitude=lat(jobs)
-    ob_info%longitude=lon(jobs)
-    ob_info%elevation=elevation(jobs)
-    ob_info%sensor_zenith_angle=sat_zen(jobs)
-    ob_info%sensor_azimuth_angle=sat_azi(jobs)
-    ob_info%solar_zenith_angle=sol_zen(jobs)
-    ob_info%solar_azimuth_angle=sol_azi(jobs)
-
-    ! Channel selection based on previous filter flags
-    chans_used = 0
-    do jvar = 1, self%nchans
-      if( QCflags(jvar,jobs) == 0 ) then
-        chans_used = chans_used + 1
-      end if
-    end do
-
-    ! allocate arrays
-    allocate(ob_info%yobs(chans_used))
-    allocate(r_matrix(chans_used,chans_used))
-    allocate(r_inverse(chans_used,chans_used))
-    allocate(channels_used(chans_used))
-
-    ! create obs vector and r matrix
-    r_matrix(:,:) = 0.0_kind_real
-    r_inverse(:,:) = 0.0_kind_real
-    jchans_used = 0
-    do jvar = 1, self%nchans
-      if( QCflags(jvar,jobs) == 0 ) then
-        jchans_used = jchans_used + 1
-        obs_error = yerr(jvar, jobs)
-        write(*,*) "jchans_used err = ",jchans_used,obs_error
-        r_matrix(jchans_used,jchans_used) = obs_error * obs_error
-        r_inverse(jchans_used,jchans_used) = 1.0_kind_real / (obs_error * obs_error)
-        ob_info%yobs(jchans_used) = yobs(jvar, jobs)
-        channels_used(jchans_used) = self%channels(jvar)
-      end if
-    end do
-
-    write(*,*) "Ob number = ",jobs
-    write(*,*) "channels used = ",channels_used(:)
-    write(*,*) "channels used number = ",chans_used
-    write(*,*) "r_inverse = ",r_inverse
-    write(*,*) "r_matrix = ",r_matrix
-
-    !---------------------------------------------------
-    ! Call minimization
-    !---------------------------------------------------
-    ! do 1d-var using marquardt-levenberg
-    !call ufo_rttovonedvarcheck_MinimizeML(ob_info, r_matrix, r_inverse, b_matrix, &
-    !                                   b_inverse, local_geovals, & 
-    !                                   profile_index, nprofelements, self%conf, &
-    !                                   self%obsdb, channels_used, onedvar_success)
-    call Ops_SatRad_MinimizeNewton_RTTOV12(ob_info, r_matrix, r_inverse, b_matrix, &
-                                       b_inverse, local_geovals, & 
-                                       profile_index, nprofelements, self%conf, &
-                                       self%obsdb, channels_used, onedvar_success)
-    
-    ! Set QCflags based on output from minimization
-    if (onedvar_success) then
-      do jvar = 1, jchans_used
-        QCflags(jvar,jobs) = 0
+      apply_count = apply_count + 1
+      !---------------------------------------------------
+      ! Setup Jb terms
+      !---------------------------------------------------
+      ! create one ob geovals from full all obs geovals
+      call ufo_geovals_copy_one(geovals, local_geovals, jobs)
+      call ufo_geovals_print(local_geovals, 1)
+  
+      ! select appropriate b matrix for latitude of observation
+      b_matrix(:,:) = 0.0
+      b_inverse(:,:) = 0.0
+      do band = 1, full_b_matrix % nbands
+        if (lat(jobs) <  full_b_matrix % north(band)) exit
       end do
-    else
-      do jvar = 1, jchans_used
-        QCflags(jvar,jobs) = 1
+      write(*,*) "band = ",band
+      b_matrix(:,:) = full_b_matrix % store(:,:,band)
+      b_inverse(:,:) = full_b_matrix % inverse(:,:,band)
+      write(*,'(144E13.5)') b_matrix(:,:)
+
+      !---------------------------------------------------
+      ! Setup Jo terms
+      !---------------------------------------------------
+      ! setup ob data for this observation
+      ob_info%forward_mod_name=self%forward_mod_name
+      ob_info%latitude=lat(jobs)
+      ob_info%longitude=lon(jobs)
+      ob_info%elevation=elevation(jobs)
+      ob_info%sensor_zenith_angle=sat_zen(jobs)
+      ob_info%sensor_azimuth_angle=sat_azi(jobs)
+      ob_info%solar_zenith_angle=sol_zen(jobs)
+      ob_info%solar_azimuth_angle=sol_azi(jobs)
+
+      ! Channel selection based on previous filter flags
+      chans_used = 0
+      do jvar = 1, self%nchans
+        if( QCflags(jvar,jobs) == 0 ) then
+          chans_used = chans_used + 1
+        end if
       end do
-    end if
 
-    ! Deallocate arrays allocated in loop
-    if (allocated(ob_info%yobs))  deallocate(ob_info%yobs)
-    if (allocated(r_matrix))      deallocate(r_matrix)
-    if (allocated(r_inverse))     deallocate(r_inverse)
-    if (allocated(channels_used)) deallocate(channels_used)
+      ! allocate arrays
+      allocate(ob_info%yobs(chans_used))
+      allocate(r_matrix(chans_used,chans_used))
+      allocate(r_inverse(chans_used,chans_used))
+      allocate(channels_used(chans_used))
 
-    ! tidy up
-    call ufo_geovals_delete(local_geovals)
+      ! create obs vector and r matrix
+      r_matrix(:,:) = 0.0_kind_real
+      r_inverse(:,:) = 0.0_kind_real
+      jchans_used = 0
+      do jvar = 1, self%nchans
+        if( QCflags(jvar,jobs) == 0 ) then
+          jchans_used = jchans_used + 1
+          obs_error = yerr(jvar, jobs)
+          write(*,*) "jchans_used err = ",jchans_used,obs_error
+          r_matrix(jchans_used,jchans_used) = obs_error * obs_error
+          r_inverse(jchans_used,jchans_used) = 1.0_kind_real / (obs_error * obs_error)
+          ob_info%yobs(jchans_used) = yobs(jvar, jobs)
+          channels_used(jchans_used) = self%channels(jvar)
+        end if
+      end do
+
+      write(*,*) "Ob number = ",jobs
+      write(*,*) "channels used = ",channels_used(:)
+      write(*,*) "channels used number = ",chans_used
+      write(*,*) "r_inverse = ",r_inverse
+      write(*,*) "r_matrix = ",r_matrix
+
+      !---------------------------------------------------
+      ! Call minimization
+      !---------------------------------------------------
+      ! do 1d-var using marquardt-levenberg
+      !call ufo_rttovonedvarcheck_MinimizeML(ob_info, r_matrix, r_inverse, b_matrix, &
+      !                                   b_inverse, local_geovals, & 
+      !                                   profile_index, nprofelements, self%conf, &
+      !                                   self%obsdb, channels_used, onedvar_success)
+      call Ops_SatRad_MinimizeNewton_RTTOV12(ob_info, r_matrix, r_inverse, b_matrix, &
+                                         b_inverse, local_geovals, & 
+                                         profile_index, nprofelements, self%conf, &
+                                         self%obsdb, channels_used, onedvar_success)
     
+      ! Set QCflags based on output from minimization
+      if (.NOT. onedvar_success) then
+        do jvar = 1, self%nchans
+          QCflags(jvar,jobs) = 1
+        end do
+      end if
+
+      ! Deallocate arrays allocated in loop
+      if (allocated(ob_info%yobs))  deallocate(ob_info%yobs)
+      if (allocated(r_matrix))      deallocate(r_matrix)
+      if (allocated(r_inverse))     deallocate(r_inverse)
+      if (allocated(channels_used)) deallocate(channels_used)
+
+      ! tidy up
+      call ufo_geovals_delete(local_geovals)
+
+      write(*,*) "iteration = ",jobs
+      write(*,*) "QCflags = ",QCflags(:,jobs)
+
+    endif
   end do
+
+  write(*,*) "Number being tested by 1dvar = ",apply_count
 
   ! Put QC flags back in database
   do jvar = 1, self%nchans
     var = vars%variable(jvar)
-    write(*,*) "QCflags(jvar,:) = ",QCflags(jvar,:)
-    call obsspace_get_db(self%obsdb, "FortranQC", trim(var), QCflags(jvar,:))
+    call obsspace_put_db(self%obsdb, "FortranQC", trim(var), QCflags(jvar,:))
   end do
 
+  ! Put QC flags back in database
+  !do jvar = 1, self%nchans
+  !  var = vars%variable(jvar)
+  !  write(*,*) "QCflags(jvar,:) = ",QCflags(jvar,:)
+  !  call obsspace_get_db(self%obsdb, "FortranQC", trim(var), QCflags(jvar,:))
+  !end do
+
   ! tidy up
-  if (allocated(yobs))      deallocate(yobs)
-  if (allocated(yerr))      deallocate(yerr)
-  if (allocated(lat))       deallocate(lat)
-  if (allocated(lon))       deallocate(lon)
-  if (allocated(elevation)) deallocate(elevation)
-  if (allocated(sat_zen))   deallocate(sat_zen)
-  if (allocated(sat_azi))   deallocate(sat_azi)
-  if (allocated(sol_zen))   deallocate(sol_zen)
-  if (allocated(sol_azi))   deallocate(sol_azi)
-  if (allocated(flags))     deallocate(flags)
-  if (allocated(r_matrix))  deallocate(r_matrix)
-  if (allocated(r_inverse)) deallocate(r_inverse)
-  if (allocated(b_matrix))  deallocate(b_matrix)
-  if (allocated(b_inverse)) deallocate(b_inverse)
-  if (allocated(iter_hofx)) deallocate(iter_hofx)
+  if (allocated(yobs))            deallocate(yobs)
+  if (allocated(yerr))            deallocate(yerr)
+  if (allocated(lat))             deallocate(lat)
+  if (allocated(lon))             deallocate(lon)
+  if (allocated(elevation))       deallocate(elevation)
+  if (allocated(sat_zen))         deallocate(sat_zen)
+  if (allocated(sat_azi))         deallocate(sat_azi)
+  if (allocated(sol_zen))         deallocate(sol_zen)
+  if (allocated(sol_azi))         deallocate(sol_azi)
+  if (allocated(flags))           deallocate(flags)
+  if (allocated(r_matrix))        deallocate(r_matrix)
+  if (allocated(r_inverse))       deallocate(r_inverse)
+  if (allocated(b_matrix))        deallocate(b_matrix)
+  if (allocated(b_inverse))       deallocate(b_inverse)
+  if (allocated(iter_hofx))       deallocate(iter_hofx)
 
 end subroutine ufo_rttovonedvarcheck_post
 
