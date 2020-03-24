@@ -30,16 +30,20 @@ contains
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_seaicethickness_tlad_setup_c(c_key_self, c_conf) bind(c,name='ufo_seaicethickness_tlad_setup_f90')
+subroutine ufo_seaicethickness_tlad_setup_c(c_key_self, c_conf, c_obsvars) bind(c,name='ufo_seaicethickness_tlad_setup_f90')
+use oops_variables_mod
 implicit none
 integer(c_int), intent(inout) :: c_key_self
 type(c_ptr), intent(in)    :: c_conf
     
 type(ufo_seaicethickness_tlad), pointer :: self
 type(fckit_configuration) :: f_conf
+type(c_ptr), value, intent(in) :: c_obsvars ! variables to be simulated                                                       \
 
 call ufo_seaicethickness_tlad_registry%setup(c_key_self, self)
 f_conf = fckit_configuration(c_conf)
+
+self%obsvars = oops_variables(c_obsvars)
 
 call self%setup(f_conf)
 

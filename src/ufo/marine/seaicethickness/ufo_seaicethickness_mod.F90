@@ -15,6 +15,7 @@ module ufo_seaicethickness_mod
  use ufo_basis_mod, only: ufo_basis
  use ufo_vars_mod
  use obsspace_mod
+ use oops_variables_mod
 
  implicit none
  private
@@ -23,7 +24,10 @@ module ufo_seaicethickness_mod
 
 !> Fortran derived type for the observation type
  type, extends(ufo_basis), public :: ufo_seaicethickness
- private
+    type(oops_variables), public :: obsvars
+    real(kind=kind_real) :: rho_ice  = 905.0 !< [kg/m3]
+    real(kind=kind_real) :: rho_snow = 330.0 !< [kg/m3]
+    real(kind=kind_real) :: rho_water= 1000.0!< [kg/m3]   
  contains
    procedure :: setup  => ufo_seaicethickness_setup
    procedure :: delete => ufo_seaicethickness_delete
@@ -37,6 +41,14 @@ subroutine ufo_seaicethickness_setup(self, f_conf)
 implicit none
 class(ufo_seaicethickness), intent(inout) :: self
 type(fckit_configuration),  intent(in)    :: f_conf
+integer :: ivar, nvars
+character(max_string)  :: err_msg
+
+nvars = self%obsvars%nvars()
+if (nvars /= 1) then
+  write(err_msg,*) 'ufo_seaicethickness_setup error: only variables size 1 supported!'
+  call abor1_ftn(err_msg)
+endif
 
 end subroutine ufo_seaicethickness_setup
 
@@ -59,27 +71,50 @@ type(c_ptr), value, intent(in)    :: obss
     character(max_string) :: err_msg
 
     integer :: iobs, icat, ncat
-    type(ufo_geoval), pointer :: icethick, icefrac
-    
+    type(ufo_geoval), pointer :: icethick, icefrac, snowthick
+    real(kind=kind_real) :: rho_wiw, rho_wsw
+
     ! check if nlocs is consistent in geovals & hofx
     if (geovals%nlocs /= size(hofx,1)) then
        write(err_msg,*) myname_, ' error: nlocs inconsistent!'
        call abor1_ftn(err_msg)
+    endif 
+
+    if (trim(self%obsvars%variable(1)) == "sea_ice_freeboard") then
+       rho_wiw = (self%rho_water-self%rho_ice)/self%rho_water
+       rho_wsw = (self%rho_water-self%rho_snow)/self%rho_water
     endif
 
     ! check if sea ice fraction variable is in geovals and get it
     call ufo_geovals_get_var(geovals, var_seaicefrac, icefrac)
+    ! check if snow thickness variable is in geovals and get it
+    if (trim(self%obsvars%variable(1)) == "sea_ice_freeboard") &
+       call ufo_geovals_get_var(geovals, var_seaicesnowthick, snowthick)
     ! check if sea ice thickness variable is in geovals and get it
     call ufo_geovals_get_var(geovals, var_seaicethick, icethick)
 
     ncat = icefrac%nval
     hofx = 0.0
+
     ! total sea ice fraction obs operator
-    do iobs = 1, size(hofx,1)
-       do icat = 1, ncat
-          hofx(iobs) = hofx(iobs) + icefrac%vals(icat,iobs) * icethick%vals(icat,iobs)
+    select case (trim(self%obsvars%variable(1)))
+    case ("sea_ice_freeboard")
+       do iobs = 1, size(hofx,1)
+          do icat = 1, ncat
+             hofx(iobs) = hofx(iobs)+ rho_wiw*icefrac%vals(icat,iobs) * icethick%vals(icat,iobs)&
+                                    + rho_wsw*icefrac%vals(icat,iobs) * snowthick%vals(icat,iobs)
+          enddo
        enddo
-    enddo
+    case ("sea_ice_thickness")
+       do iobs = 1, size(hofx,1)
+          do icat = 1, ncat
+             hofx(iobs) = hofx(iobs) + icefrac%vals(icat,iobs) * icethick%vals(icat,iobs)
+          enddo
+       enddo
+    case default
+       write(err_msg,*) myname_, ' error: no match seaice thickness_option!'
+       call abor1_ftn(err_msg)
+    end select
 
 end subroutine ufo_seaicethickness_simobs
 
