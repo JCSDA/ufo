@@ -16,7 +16,7 @@ Observations:
       ObsDataIn:
         obsfile: Data/ioda/testinput_tier_1/sfc_obs_2018041500_m.nc4
       ObsDataOut:
-        obsfile: Data/ioda/testinput_tier_1/sfc_2018041500_m_out.nc4
+        obsfile: Data/sfc_2018041500_m_out.nc4
       simulate:
         variables: [surface_pressure]
     GeoVaLs:
@@ -31,7 +31,7 @@ Observations:
       ObsDataIn:
         obsfile: Data/ioda/testinput_tier_1/sfc_obs_2018041500_m.nc4
       ObsDataOut:
-        obsfile: Data/ioda/testinput_tier_1/sfc_2018041500_m_out.nc4
+        obsfile: Data/sfc_2018041500_m_out.nc4
       simulate:
         variables: [surface_pressure]
     GeoVaLs:
