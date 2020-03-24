@@ -20,6 +20,7 @@
 #include "oops/util/Logger.h"
 #include "oops/util/missingValues.h"
 #include "ufo/filters/obsfunctions/ObsFunction.h"
+#include "ufo/filters/QCflags.h"
 #include "ufo/utils/StringUtils.h"
 
 namespace ufo {
@@ -50,6 +51,7 @@ void ObsBoundsCheck::applyFilter(const std::vector<bool> & apply,
                                  const Variables & filtervars,
                                  std::vector<std::vector<bool>> & flagged) const {
   const float missing = util::missingValue(missing);
+  const oops::Variables observed = obsdb_.obsvariables();
 
 // Find which variables are tested and the conditions
   ufo::Variables testvars;
@@ -80,6 +82,12 @@ void ObsBoundsCheck::applyFilter(const std::vector<bool> & apply,
   oops::Log::debug() << "ObsBoundsCheck: filtering " << filtervars << " with "
                      << testvars << std::endl;
 
+// Initialize map from filtervars to observed variables
+  std::vector<size_t> filt2obs;
+  for (size_t jv = 0; jv < filtervars.nvars(); ++jv) {
+    filt2obs.push_back(observed.find(filtervars.variable(jv).variable()));
+  }
+
   if (config_.has("test functions")) {
     for (size_t iv = 0; iv < testvars.size(); ++iv) {
       ioda::ObsDataVector<float> testdata(obsdb_, testvars[iv].toOopsVariables(),
@@ -94,7 +102,7 @@ void ObsBoundsCheck::applyFilter(const std::vector<bool> & apply,
       // Loop over all variables to filter
       for (size_t jv = 0; jv < filtervars[iv].size(); ++jv) {
         for (size_t jobs = 0; jobs < obsdb_.nlocs(); ++jobs) {
-          if (apply[jobs]) {
+          if (apply[jobs] && (*flags_)[filt2obs[jv]][jobs] == QCflags::pass) {
             ASSERT(testdata[test_jv[jv]][jobs] != missing);
             if (vmin != missing && testdata[test_jv[jv]][jobs] < vmin) flagged[jv][jobs] = true;
             if (vmax != missing && testdata[test_jv[jv]][jobs] > vmax) flagged[jv][jobs] = true;
@@ -116,7 +124,7 @@ void ObsBoundsCheck::applyFilter(const std::vector<bool> & apply,
       data_.get(testvars.variable(jv), testdata);
       //  apply the filter
       for (size_t jobs = 0; jobs < obsdb_.nlocs(); ++jobs) {
-        if (apply[jobs]) {
+        if (apply[jobs] && (*flags_)[filt2obs[jv]][jobs] == QCflags::pass) {
           ASSERT(testdata[jobs] != missing);
           if (vmin != missing && testdata[jobs] < vmin) flagged[jv][jobs] = true;
           if (vmax != missing && testdata[jobs] > vmax) flagged[jv][jobs] = true;

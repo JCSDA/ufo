@@ -26,6 +26,7 @@
 #include "oops/util/Logger.h"
 
 #include "ufo/filters/getScalarOrFilterData.h"
+#include "ufo/filters/QCflags.h"
 
 namespace ufo {
 
@@ -88,7 +89,7 @@ void BackgroundCheck::applyFilter(const std::vector<bool> & apply,
       std::vector<float> hofx;
       data_.get(varhofx.variable(jv), hofx);
       for (size_t jobs = 0; jobs < obsdb_.nlocs(); ++jobs) {
-        if (apply[jobs] && (*flags_)[iv][jobs] == 0) {
+        if (apply[jobs] && (*flags_)[iv][jobs] == QCflags::pass) {
           ASSERT((*obserr_)[iv][jobs] != util::missingValue((*obserr_)[iv][jobs]));
           ASSERT(obs[jv][jobs] != util::missingValue(obs[jv][jobs]));
           ASSERT(hofx[jobs] != util::missingValue(hofx[jobs]));
@@ -120,7 +121,7 @@ void BackgroundCheck::applyFilter(const std::vector<bool> & apply,
       if (threshold_ != "")     thr     = getScalarOrFilterData(threshold_, data_);
 
       for (size_t jobs = 0; jobs < obsdb_.nlocs(); ++jobs) {
-        if (apply[jobs] && (*flags_)[iv][jobs] == 0) {
+        if (apply[jobs] && (*flags_)[iv][jobs] == QCflags::pass) {
           size_t iobs = observed.size() * jobs + iv;
           ASSERT((*obserr_)[iv][jobs] != util::missingValue((*obserr_)[iv][jobs]));
           ASSERT(obs[jv][jobs] != util::missingValue(obs[jv][jobs]));

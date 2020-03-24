@@ -32,6 +32,7 @@ list( APPEND ufo_test_input
   testinput/amsua_crtm_bc.yaml
   testinput/amsua_rttov.yaml
   testinput/amsua_qc.yaml
+  testinput/amsua_qc_miss_val.yaml
   testinput/amsua_allsky_gsi_qc.yaml
   testinput/amsua_seaice_qc.yaml
   testinput/aod_crtm.yaml
@@ -986,6 +987,12 @@ if ( ${CRTM_FOUND} )
     ecbuild_add_test( TARGET  test_ufo_qc_amsua
                       COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
                       ARGS    "testinput/amsua_qc.yaml"
+                      ENVIRONMENT OOPS_TRAPFPE=1
+                      DEPENDS test_ObsFilters.x )
+
+    ecbuild_add_test( TARGET  test_ufo_qc_amsua_miss_val
+                      COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                      ARGS    "testinput/amsua_qc_miss_val.yaml"
                       ENVIRONMENT OOPS_TRAPFPE=1
                       DEPENDS test_ObsFilters.x )
 
