@@ -1,0 +1,80 @@
+window_begin: 2018-04-14T21:00:00Z
+window_end: 2018-04-15T03:00:00Z
+
+Observations: 
+ ObsTypes: 
+ - ObsOperator:
+     name: CRTM
+     Absorbers: [H2O,O3,CO2]
+     Clouds: [Water, Ice]
+     Cloud_Fraction: 1.0
+     ObsOptions:
+       Sensor_ID: amsua_n19 
+       EndianType: little_endian
+       CoefficientPath: Data/
+   ObsSpace:
+     name: amsua_n19 
+     ObsDataIn: 
+       obsfile: Data/ioda/testinput_tier_1/amsua_n19_obs_2018041500_m.nc4 
+     ObsDataOut:
+       obsfile: Data/amsua_n19_obs_2018041500_m_out.nc4
+     simulate:
+       variables: [brightness_temperature]
+       channels: &all_channels 1-15 
+   GeoVaLs: 
+     filename: Data/amsua_n19_geoval_2018041500_m.nc4
+   ObsFilters:
+   - Filter: BlackList 
+     filter variables:
+     - name: brightness_temperature
+       channels: *all_channels 
+     action:
+       name: assign error
+       error function:
+         name: ObsErrorMean@ObsFunction
+         channels: *all_channels 
+         options:
+           channels: *all_channels 
+           clwret_type: [ObsValue, HofX]
+           clw_clr:    [ 0.050,  0.030,  0.030,  0.020,  0.000,  0.100,  0.000,  0.000,  0.000,  0.000,
+                         0.000,  0.000,  0.000,  0.000,  0.030]
+           clw_cld:    [ 0.600,  0.450,  0.400,  0.450,  1.000,  1.500,  0.000,  0.000,  0.000,  0.000,
+                         0.000,  0.000,  0.000,  0.000,  0.200]
+           obserr_clr: [ 2.500,  2.200,  2.000,  0.550,  0.300,  0.230,  0.230,  0.250,  0.250,  0.350,
+                         0.400,  0.550,  0.800,  3.000,  3.500]
+           obserr_cld: [20.000, 18.000, 12.000,  3.000,  0.500,  0.300,  0.230,  0.250,  0.250,  0.350,
+                         0.400,  0.550,  0.800,  3.000, 18.000]
+#   passedBenchmark: 1500 
+#  CLW Retrieval Check
+   - Filter: Bounds Check
+     filter variables:
+     - name: brightness_temperature
+       channels: 1-6, 15 
+     test functions:
+     - name: CLWRet@ObsFunction
+       options:
+         clwret_type: [ObsValue]
+     maxvalue: 999.0 
+     action:
+       name: reject 
+#  CLW Retrieval Check
+   - Filter: Bounds Check
+     filter variables:
+     - name: brightness_temperature
+       channels: 1-6, 15 
+     test functions:
+     - name: CLWRet@ObsFunction
+       options:
+         clwret_type: [HofX]
+     maxvalue: 999.0 
+     action:
+       name: reject 
+#   passedBenchmark: 1472
+#  Useflag check
+   - Filter: BlackList
+     filter variables:
+     - name: brightness_temperature
+       channels: 7, 8, 14
+     action:
+       name: reject
+   passedBenchmark: 1172 

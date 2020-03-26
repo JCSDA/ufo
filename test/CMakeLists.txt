@@ -32,6 +32,7 @@ list( APPEND ufo_test_input
   testinput/amsua_crtm_bc.yaml
   testinput/amsua_rttov.yaml
   testinput/amsua_qc.yaml
+  testinput/amsua_qc_filters.yaml
   testinput/amsua_qc_miss_val.yaml
   testinput/amsua_allsky_gsi_qc.yaml
   testinput/amsua_seaice_qc.yaml
@@ -42,6 +43,9 @@ list( APPEND ufo_test_input
   testinput/cris_qc.yaml
   testinput/empty.yaml
   testinput/function_clouddetect.yaml
+  testinput/function_clwret.yaml
+  testinput/function_clwret_hofx.yaml
+  testinput/function_clwret_obsval.yaml
   testinput/function_errfgrosschk.yaml
   testinput/function_errfjsfc.yaml
   testinput/function_errflat.yaml
@@ -49,6 +53,7 @@ list( APPEND ufo_test_input
   testinput/function_errftransmittop.yaml
   testinput/function_errfwavenum.yaml
   testinput/function_nsstret.yaml
+  testinput/function_obserrmean.yaml
   testinput/function_velocity.yaml
   testinput/gmi_crtm.yaml
   testinput/genericprof.yaml
@@ -142,6 +147,7 @@ list( APPEND ufo_test_data
   atmosphere/amsua_n19_obsdiag_2018041500_s.nc4
   atmosphere/amsua_n19_geoval_2018041500_m.nc4
   atmosphere/amsua_n19_geoval_2018041500_s.nc4
+  atmosphere/amsua_n19_geoval_2018041500.nc4
   atmosphere/aod_geoval_2018041500_m.nc4
   atmosphere/aod_geoval_2018041500_s.nc4
   atmosphere/atms_npp_geoval_2018041500_m.nc4
@@ -888,9 +894,21 @@ ecbuild_add_test( TARGET  test_ufo_qc_met_office_buddy_pair_finder
 
 # Test Functions
 
-ecbuild_add_test( TARGET  test_ufo_function_clouddetect
+ecbuild_add_test( TARGET  test_ufo_function_clwret
                   SOURCES mains/TestObsFunction.cc
-                  ARGS    "testinput/function_clouddetect.yaml"
+                  ARGS    "testinput/function_clwret.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  LIBS    ufo)
+
+ecbuild_add_test( TARGET  test_ufo_function_clwret_hofx
+                  SOURCES mains/TestObsFunction.cc
+                  ARGS    "testinput/function_clwret_hofx.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  LIBS    ufo)
+
+ecbuild_add_test( TARGET  test_ufo_function_clwret_obsval
+                  SOURCES mains/TestObsFunction.cc
+                  ARGS    "testinput/function_clwret_obsval.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   LIBS    ufo)
 
@@ -933,6 +951,12 @@ ecbuild_add_test( TARGET  test_ufo_function_errfwavenum
 ecbuild_add_test( TARGET  test_ufo_function_nsstret
                   SOURCES mains/TestObsFunction.cc
                   ARGS    "testinput/function_nsstret.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  LIBS    ufo)
+
+ecbuild_add_test( TARGET  test_ufo_function_obserrmean
+                  SOURCES mains/TestObsFunction.cc
+                  ARGS    "testinput/function_obserrmean.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   LIBS    ufo)
 
@@ -1009,6 +1033,12 @@ if ( ${CRTM_FOUND} )
     ecbuild_add_test( TARGET  test_ufo_qc_amsua
                       COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
                       ARGS    "testinput/amsua_qc.yaml"
+                      ENVIRONMENT OOPS_TRAPFPE=1
+                      DEPENDS test_ObsFilters.x )
+
+    ecbuild_add_test( TARGET  test_ufo_qc_amsua_filters
+                      COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                      ARGS    "testinput/amsua_qc_filters.yaml"
                       ENVIRONMENT OOPS_TRAPFPE=1
                       DEPENDS test_ObsFilters.x )
 

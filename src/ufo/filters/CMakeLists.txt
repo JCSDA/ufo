@@ -63,6 +63,8 @@ set ( filters_files
       PoissonDiskThinningParameters.h
       processWhere.cc
       processWhere.h
+      actions/AssignError.cc
+      actions/AssignError.h
       actions/FilterAction.cc
       actions/FilterAction.h
       actions/FilterActionBase.cc
@@ -77,6 +79,12 @@ set ( filters_files
       obsfunctions/ObsFunctionBase.h
       obsfunctions/ObsFunctionCloudDetect.cc
       obsfunctions/ObsFunctionCloudDetect.h
+      obsfunctions/ObsFunctionCLWRet.cc
+      obsfunctions/ObsFunctionCLWRet.h
+      obsfunctions/ObsFunctionCLWRetMean.cc
+      obsfunctions/ObsFunctionCLWRetMean.h
+      obsfunctions/ObsFunctionObsErrorMean.cc
+      obsfunctions/ObsFunctionObsErrorMean.h
       obsfunctions/ObsFunctionErrfGrosschk.cc
       obsfunctions/ObsFunctionErrfGrosschk.h
       obsfunctions/ObsFunctionErrfJsfc.cc
