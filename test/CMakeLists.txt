@@ -92,6 +92,9 @@ list( APPEND ufo_test_input
   testinput/qc_differencecheck.yaml
   testinput/qc_gauss_thinning.yaml
   testinput/qc_gauss_thinning_unittests.yaml
+  testinput/qc_met_office_buddy_check.yaml
+  testinput/qc_met_office_buddy_check_unittests.yaml
+  testinput/qc_met_office_buddy_pair_finder.yaml
   testinput/qc_recursive_splitter.yaml
   testinput/qc_poisson_disk_thinning.yaml
   testinput/qc_poisson_disk_thinning_unittests.yaml
@@ -190,6 +193,7 @@ list( APPEND ufo_test_data
   marine/sst_obs-2018-04-15_geovals.nc
   filters/filters_testdata.nc4
   filters/met_office_poisson_disk_thinning.nc4
+  filters/met_office_buddy_check.nc4
   filters/poisson_disk_thinning_3x3x3x3_regular_grid.nc4
 )
 
@@ -806,6 +810,12 @@ ecbuild_add_test( TARGET  test_ufo_qc_gauss_thinning
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsFilters.x )
 
+ecbuild_add_test( TARGET  test_ufo_qc_met_office_buddy_check
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                  ARGS    "testinput/qc_met_office_buddy_check.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsFilters.x )
+
 ecbuild_add_test( TARGET  test_ufo_qc_poisson_disk_thinning
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
                   ARGS    "testinput/qc_poisson_disk_thinning.yaml"
@@ -861,6 +871,18 @@ ecbuild_add_test( TARGET  test_ufo_qc_trackcheck_unittests
 ecbuild_add_test( TARGET  test_ufo_qc_poisson_disk_thinning_unittests
                   SOURCES mains/TestPoissonDiskThinning.cc
                   ARGS    "testinput/qc_poisson_disk_thinning_unittests.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  LIBS    ufo)
+
+ecbuild_add_test( TARGET  test_ufo_qc_met_office_buddy_check_unittests
+                  SOURCES mains/TestMetOfficeBuddyCheck.cc
+                  ARGS    "testinput/qc_met_office_buddy_check_unittests.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  LIBS    ufo)
+
+ecbuild_add_test( TARGET  test_ufo_qc_met_office_buddy_pair_finder
+                  SOURCES mains/TestMetOfficeBuddyPairFinder.cc
+                  ARGS    "testinput/qc_met_office_buddy_pair_finder.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   LIBS    ufo)
 

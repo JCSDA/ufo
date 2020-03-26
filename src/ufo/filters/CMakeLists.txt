@@ -19,6 +19,18 @@ set ( filters_files
       getScalarOrFilterData.h
       ObsBoundsCheck.cc
       ObsBoundsCheck.h
+      MetOfficeBuddyCheck.cc
+      MetOfficeBuddyCheck.h
+      MetOfficeBuddyCheckParameters.h
+      MetOfficeBuddyCollector.cc
+      MetOfficeBuddyCollector.h
+      MetOfficeBuddyCollectorV1.cc
+      MetOfficeBuddyCollectorV1.h
+      MetOfficeBuddyCollectorV2.cc
+      MetOfficeBuddyCollectorV2.h
+      MetOfficeBuddyPair.h
+      MetOfficeBuddyPairFinder.cc
+      MetOfficeBuddyPairFinder.h
       MWCLWCheck.cc
       MWCLWCheck.h
       ObsDiagnosticsWriter.cc
