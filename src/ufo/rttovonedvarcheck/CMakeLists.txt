@@ -17,7 +17,7 @@ set ( rttovonedvarcheck_files
     ufo_rttovonedvarcheck_forward_model_mod.F90
 )
 
-PREPEND( _p_rttovonedvarcheck_files        "rttovonedvarcheck"                     ${rttovonedvarcheck_files} )
+PREPEND( _p_rttovonedvarcheck_files        "rttovonedvarcheck"        ${rttovonedvarcheck_files} )
 
 set ( rttovonedvarcheck_src_files
       ${_p_rttovonedvarcheck_files}

@@ -25,9 +25,20 @@ contains
 
 !------------------------------------------------------------------------------
 
-subroutine ufo_rttovonedvarcheck_MinimizeML(ob_info, r_matrix, Syinv, b_matrix, Sxinv, &
-                                     local_geovals, profile_index, nprofelements, &
-                                     conf, obsdb, channels, onedvar_success)
+subroutine ufo_rttovonedvarcheck_MinimizeML(self,       &
+                                         ob_info,       &
+                                         r_matrix,      &
+                                         Syinv,         &
+                                         b_matrix,      &
+                                         Sxinv,         &
+                                         local_geovals, &
+                                         profile_index, &
+                                         nprofelements, &
+                                         channels,      &
+                                         onedvar_success)
+
+use ufo_rttovonedvarcheck_utils_mod, only: &
+                    ufo_rttovonedvarcheck
 
 use ufo_rttovonedvarcheck_process_mod, only: &
                     ufo_rttovonedvarcheck_GeoVaLs2ProfVec, &
@@ -40,6 +51,7 @@ use ufo_rttovonedvarcheck_forward_model_mod, only: &
 
 implicit none
 
+type(ufo_rttovonedvarcheck), intent(in)     :: self
 type(Obinfo_type), intent(in)               :: ob_info
 real(kind_real), intent(in)                 :: r_matrix(:,:)
 real(kind_real), intent(in)                 :: Syinv(:,:)
@@ -48,8 +60,6 @@ real(kind_real), intent(in)                 :: Sxinv(:,:)
 type(ufo_geovals), intent(inout)            :: local_geovals
 type(Profileinfo_type), intent(in)          :: profile_index
 integer, intent(in)                         :: nprofelements
-type(c_ptr), VALUE, intent(in)              :: conf
-type(c_ptr), VALUE, intent(in)              :: obsdb
 integer(c_int), intent(in)                  :: channels(:)
 logical, intent(out)                        :: onedvar_success
 
@@ -94,20 +104,19 @@ real(kind_real)                    :: DeltaJ
 type(ufo_geovals)                  :: geovals
 real(kind_real)                    :: Jlowest
 real(kind_real)                    :: Jout(3)
+real(kind_real)                    :: Ccj
+real(kind_real)                    :: Mqstart = 0.001 ! Marquardt starting parameter
+real(kind_real)                    :: Mqstep = 5.0    ! Marquardt step parameter
 
-! Values to move to yaml file
-real(kind_real), parameter         :: Ccj = 0.01      ! Cost convergence criterion
-real(kind_real), parameter         :: Mqstart = 0.001 ! Marquardt starting parameter
-real(kind_real), parameter         :: Mqstep = 5.0    ! Marquardt step parameter
-real(kind_real), parameter         :: MaxIter = 10
-
+! Setup variables
 onedvar_success = .false. ! Assume failed
-
-write(*,*) "ufo_rttovonedvarcheck_MinimizeML start"
-
+ccj = self % Cost_ConvergenceFactor
+Mqstart = self % Mqstart
+Mqstep = self % Mqstep
 nchans = size(channels)
 geovals = local_geovals
 
+write(*,*) "ufo_rttovonedvarcheck_MinimizeML start"
 write(*,*) "ufo_rttovonedvarcheck_MinimizeML nchans = ",nchans
 
 ! allocate arrays
@@ -155,8 +164,8 @@ call ufo_rttovonedvarcheck_GeoVaLs2ProfVec(geovals, profile_index, nprofelements
 Xb(:) = X0(:)
 
 ! call forward model
-call ufo_rttovonedvarcheck_ForwardModel(geovals, ob_info, obsdb, &
-                                   channels(:), conf, &
+call ufo_rttovonedvarcheck_ForwardModel(geovals, ob_info, self % obsdb, &
+                                   channels(:), self % conf, &
                                    profile_index, X(:), &
                                    Y0(:), H_matrix)
 
@@ -261,8 +270,8 @@ Main_Loop_index: do
   call ufo_rttovonedvarcheck_ProfVec2GeoVaLs(geovals, profile_index, nprofelements, Xplus_dX)
 
   ! call forward model
-  call ufo_rttovonedvarcheck_ForwardModel(geovals, ob_info, obsdb, &
-                                       channels(:), conf, &
+  call ufo_rttovonedvarcheck_ForwardModel(geovals, ob_info, self % obsdb, &
+                                       channels(:), self % conf, &
                                        profile_index, Xplus_dx(:), &
                                        Y(:), H_matrix)
 
@@ -344,7 +353,7 @@ Main_Loop_index: do
   ! passed. (increment after breakpoint output so that counter value
   ! is correct in the output).
 
-  if (iter == MaxIter) then
+  if (iter == self % Max1DVarIterations) then
     onedvar_success = .false.
     exit Main_Loop_index ! Drops out of the iteration do loop
   end if
@@ -354,7 +363,7 @@ Main_Loop_index: do
 
 end do Main_Loop_index
 
-write(*,'(A34,3F10.3,I5)') "J initial, final, lowest, iter = ",Jinitial,Jcurrent,Jlowest,iter
+write(*,'(A45,3F10.3,I5,L5)') "J initial, final, lowest, iter, converged = ",Jinitial,Jcurrent,Jlowest,iter,onedvar_success
 write(*,*) "Obs, initial hofx, final hofx = ",ob_info%yobs(1),Y0(1),Y(1)
 
 ! deallocate arrays

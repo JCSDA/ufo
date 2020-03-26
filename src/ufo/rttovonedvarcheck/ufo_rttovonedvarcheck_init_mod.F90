@@ -18,6 +18,7 @@ implicit none
 private
 
 ! subroutines
+public ufo_rttovonedvarcheck_setup
 public ufo_rttovonedvarcheck_InitBmatrix
 public ufo_rttovonedvarcheck_InitProfInfo
 public ufo_rttovonedvarcheck_InitObInfo
@@ -29,8 +30,119 @@ contains
 
 !===============================================================================
 ! Subroutines
-! Order is inportant at the moment will look into interface blocks
 !===============================================================================
+
+subroutine ufo_rttovonedvarcheck_setup(self, channels)
+
+implicit none
+
+! subroutine arguments
+type(ufo_rttovonedvarcheck), intent(inout) :: self
+integer(c_int), intent(in)                 :: channels(:)
+
+! local variables
+character(len=max_string_length) :: tmp
+
+! Setup core paths and names
+self % qcname = "rttovonedvarcheck"
+self % b_matrix_path = config_get_string(self % conf, max_string_length, "BMatrix")
+self % forward_mod_name = config_get_string(self % conf, max_string_length, "ModName")
+self % nlevels = config_get_int(self % conf, "nlevels")
+
+! Variables for profile (x,xb)
+self % nmvars = size(config_get_string_vector(self % conf, max_string_length, "model_variables"))
+allocate(self % model_variables(self % nmvars))
+self % model_variables = config_get_string_vector(self % conf, max_string_length, "model_variables")
+
+! Satellite channels
+self % nchans = size(channels)
+allocate(self % channels(self % nchans))
+self % channels(:) = channels(:)
+write(*,*) "nchans setup = ",self%nchans
+write(*,*) "channels setup = ",self%channels
+
+! Set defaults for 1D-var
+self % qtotal = .false.
+self % RTTOV_mwscattSwitch = .false.
+self % use_totalice = .false.
+self % UseMLMinimization = .false.
+self % UseJforConvergence = .true.
+self % Max1DVarIterations = 7
+self % JConvergenceOption = 1
+self % IterNumForLWPCheck = 2
+self % ConvergenceFactor = 0.40
+self % Cost_ConvergenceFactor = 0.01
+self % Mqstart = 0.001 ! Marquardt starting parameter
+self % Mqstep = 5.0    ! Marquardt step parameter
+
+! Flag for total humidity
+if (config_element_exists(self % conf, "qtotal")) then
+  tmp = config_get_string(self % conf, max_string_length, "qtotal")
+  if (trim(tmp) == 'true') self % qtotal = .true.
+end if
+
+! Flag for RTTOV MW scatt
+if (config_element_exists(self % conf, "RTTOV_mwscattSwitch")) then
+  tmp = config_get_string(self % conf, max_string_length, "RTTOV_mwscattSwitch")
+  if (trim(tmp) == 'true') self % RTTOV_mwscattSwitch = .true.
+end if
+
+! Flag for use of total ice in RTTOV MW scatt
+if (config_element_exists(self % conf, "use_totalice")) then
+  tmp = config_get_string(self % conf, max_string_length, "use_totalice")
+  if (trim(tmp) == 'true') self % use_totalice = .true.
+end if
+
+! Flag to turn on marquardt-levenberg minimiser
+if (config_element_exists(self % conf, "UseMLMinimization")) then
+  tmp = config_get_string(self % conf, max_string_length, "UseMLMinimization")
+  if (trim(tmp) == 'true') self % UseMLMinimization = .true.
+end if
+
+! Flag to Use J for convergence
+if (config_element_exists(self % conf, "UseJforConvergence")) then
+  tmp = config_get_string(self % conf, max_string_length, "UseJforConvergence")
+  if (trim(tmp) == 'true') self % UseJforConvergence = .true.
+end if
+
+! Flag to specify if delta_x has to be negative for converg. to be true
+if (config_element_exists(self % conf, "Max1DVarIterations")) then
+  self % Max1DVarIterations = config_get_int(self % conf, "Max1DVarIterations")
+end if
+
+! Flag to specify if delta_x has to be negative for converg. to be true
+if (config_element_exists(self % conf, "JConvergenceOption")) then
+  self % UseJforConvergence = config_get_int(self % conf, "UseJforConvergence")
+end if
+
+! Choose which iteration to start checking LWP
+if (config_element_exists(self % conf, "IterNumForLWPCheck")) then
+  self % IterNumForLWPCheck = config_get_int(self % conf, "IterNumForLWPCheck")
+end if
+
+! Flag to specify if delta_x has to be negative for converg. to be true
+if (config_element_exists(self % conf, "ConvergenceFactor")) then
+  self % ConvergenceFactor = config_get_real(self % conf, "ConvergenceFactor")
+end if
+
+! Flag to specify if delta_x has to be negative for converg. to be true
+if (config_element_exists(self % conf, "Cost_ConvergenceFactor")) then
+  self % ConvergenceFactor = config_get_real(self % conf, "Cost_ConvergenceFactor")
+end if
+
+! Flag to specify if delta_x has to be negative for converg. to be true
+if (config_element_exists(self % conf, "Mqstart")) then
+  self % Mqstart = config_get_real(self % conf, "Mqstart")
+end if
+
+! Flag to specify if delta_x has to be negative for converg. to be true
+if (config_element_exists(self % conf, "Mqstep")) then
+  self % Mqstep = config_get_real(self % conf, "Mqstep")
+end if
+
+end subroutine
+
+!-------------------------------------------------------------------------------
 
 subroutine ufo_rttovonedvarcheck_InitBmatrix(bmatrix)
 

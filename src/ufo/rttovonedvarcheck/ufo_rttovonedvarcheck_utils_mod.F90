@@ -10,7 +10,6 @@ module ufo_rttovonedvarcheck_utils_mod
 use iso_c_binding
 use config_mod
 use kinds
-use ufo_geovals_mod
 
 implicit none
 
@@ -21,6 +20,35 @@ integer, parameter :: max_string_length=99 !
 !===============================================================================
 ! type definitions
 !===============================================================================
+
+!---------------
+! 0. 1DVar type
+!---------------
+
+type :: ufo_rttovonedvarcheck
+  character(len=max_string_length) :: qcname
+  character(len=max_string_length) :: b_matrix_path
+  character(len=max_string_length) :: forward_mod_name
+  character(len=max_string_length), allocatable :: model_variables(:)
+  type(c_ptr)                      :: obsdb
+  type(c_ptr)                      :: conf
+  integer                          :: nlevels   ! number 1D-Var model levels
+  integer                          :: nmvars
+  integer                          :: nchans
+  integer(c_int), allocatable      :: channels(:)
+  logical                          :: qtotal
+  logical                          :: RTTOV_mwscattSwitch
+  logical                          :: use_totalice
+  logical                          :: UseMLMinimization
+  logical                          :: UseJforConvergence
+  integer                          :: Max1DVarIterations
+  integer                          :: JConvergenceOption
+  integer                          :: IterNumForLWPCheck
+  real(kind_real)                  :: ConvergenceFactor
+  real(kind_real)                  :: Cost_ConvergenceFactor
+  real(kind_real)                  :: Mqstart
+  real(kind_real)                  :: Mqstep
+end type ufo_rttovonedvarcheck
 
 !-------------
 ! 1. B matrix
@@ -102,7 +130,7 @@ type profileinfo_type
 end type
 
 !---------------------------------------------------------
-! 2. container for information about a single observation
+! 3. container for information about a single observation
 !---------------------------------------------------------
 
 type obinfo_type
@@ -193,6 +221,24 @@ integer, parameter :: &
 
 ! for now default ozone profile to be provided by model
 integer :: ozonesource = source_bg
+
+!===============================================================================
+!Physical Constants
+!===============================================================================
+
+real(kind_real), parameter :: &
+  IR_Emiss       =      0.98,   & ! surf emiss to use for IR channels
+  MaxTotalOzone  =    650.0,    & ! ( Dobson units )
+  MinTotalOzone  =     70.0,    & ! ( Dobson units )
+  MaxSurfaceP    =   1200.0,    & ! ( hPa )
+  MinSurfaceP    =    300.0,    & ! ( hPa )
+  Min_q          =      3.0E-6, & ! ( kg / kg )
+  MaxTemperature =    340.0,    & ! ( K )
+  MinTemperature =     70.0,    & ! ( K )
+  IceShelfLimit  =    -72.0,    & ! assumed limit of SH seaice
+  WetLevelLid    =    115.0,    & ! uppermost wet pressure level
+  MWCloudLevelLid=    310.0,    & ! uppermost clw pressure lvl for mwcalcs(hpa)
+  g              =      9.80665   ! gravity at the surface (m/s2)
 
 contains
 

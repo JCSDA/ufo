@@ -24,20 +24,6 @@ public :: ufo_rttovonedvarcheck_create, ufo_rttovonedvarcheck_delete
 public :: ufo_rttovonedvarcheck_prior, ufo_rttovonedvarcheck_post
 
 ! ------------------------------------------------------------------------------
-type :: ufo_rttovonedvarcheck
-  character(len=max_string_length) :: qcname
-  character(len=max_string_length) :: b_matrix_path
-  character(len=max_string_length) :: forward_mod_name
-  integer     :: qtotal
-  type(c_ptr) :: obsdb
-  type(c_ptr) :: conf
-  integer :: nmvars
-  character(len=max_string_length), allocatable :: model_variables(:)
-  integer :: nchans
-  integer(c_int), allocatable        :: channels(:)
-end type ufo_rttovonedvarcheck
-
-! ------------------------------------------------------------------------------
 contains
 ! ------------------------------------------------------------------------------
 
@@ -45,27 +31,14 @@ subroutine ufo_rttovonedvarcheck_create(self, obspace, conf, channels)
 
   implicit none
   type(ufo_rttovonedvarcheck), intent(inout) :: self
-  type(c_ptr), value, intent(in)          :: obspace
-  type(c_ptr), value, intent(in)          :: conf
-  integer(c_int), intent(in)              :: channels(:)
+  type(c_ptr), value, intent(in)             :: obspace
+  type(c_ptr), value, intent(in)             :: conf
+  integer(c_int), intent(in)                 :: channels(:)
 
-  self%qcname = "rttovonedvarcheck"
-  self%b_matrix_path = config_get_string(conf, max_string_length, "BMatrix")
-  self%forward_mod_name = config_get_string(conf, max_string_length, "ModName")
-  self%qtotal = config_get_int(conf, "qtotal")
   self%obsdb = obspace
   self%conf = conf
 
-  self%nmvars = size(config_get_string_vector(conf, max_string_length, "model_variables"))
-  allocate(self%model_variables(self%nmvars))
-  self%model_variables = config_get_string_vector(conf, max_string_length, "model_variables")
-
-  self%nchans = size(channels)
-  allocate(self%channels(self%nchans))
-  self%channels(:) = channels(:)
-
-  write(*,*) "nchans setup = ",self%nchans
-  write(*,*) "channels setup = ",self%channels
+  call ufo_rttovonedvarcheck_setup(self, channels) ! from init
 
 end subroutine ufo_rttovonedvarcheck_create
 
@@ -216,7 +189,7 @@ subroutine ufo_rttovonedvarcheck_post(self, vars, geovals, apply)
         fields_in(1) = 1 ! air_temperature
 
       case ("specific_humidity")
-        if (self%qtotal == 1) then
+        if (self % qtotal) then
           fields_in(2) = 10 ! water profile in bmatrix - specific humidity in geovals!?!
         else
           fields_in(2) = 2 ! water profile in bmatrix - specific humidity in geovals!?!
@@ -277,7 +250,6 @@ subroutine ufo_rttovonedvarcheck_post(self, vars, geovals, apply)
   print *,"beginning observations loop: ",self%qcname
   apply_count = 0
   do jobs = 1, iloc
-  !do jobs = 1, 1
     write(*,*) "Apply for ob number = ",jobs,apply(jobs)
     if (apply(jobs)) then
 
@@ -352,16 +324,18 @@ subroutine ufo_rttovonedvarcheck_post(self, vars, geovals, apply)
       !---------------------------------------------------
       ! Call minimization
       !---------------------------------------------------
-      ! do 1d-var using marquardt-levenberg
-      !call ufo_rttovonedvarcheck_MinimizeML(ob_info, r_matrix, r_inverse, b_matrix, &
-      !                                   b_inverse, local_geovals, & 
-      !                                   profile_index, nprofelements, self%conf, &
-      !                                   self%obsdb, channels_used, onedvar_success)
-      call Ops_SatRad_MinimizeNewton_RTTOV12(ob_info, r_matrix, r_inverse, b_matrix, &
-                                         b_inverse, local_geovals, & 
-                                         profile_index, nprofelements, self%conf, &
-                                         self%obsdb, channels_used, onedvar_success)
-    
+      if (self % UseMLMinimization) then
+        call ufo_rttovonedvarcheck_MinimizeML(self, ob_info, r_matrix, r_inverse, b_matrix, &
+                                           b_inverse, local_geovals, & 
+                                           profile_index, nprofelements, self%conf, &
+                                           self%obsdb, channels_used, onedvar_success)
+      else
+        call Ops_SatRad_MinimizeNewton_RTTOV12(self, ob_info, r_matrix, r_inverse, b_matrix, &
+                                           b_inverse, local_geovals, & 
+                                           profile_index, nprofelements, self%conf, &
+                                           self%obsdb, channels_used, onedvar_success)
+      end if
+
       ! Set QCflags based on output from minimization
       if (.NOT. onedvar_success) then
         do jvar = 1, self%nchans

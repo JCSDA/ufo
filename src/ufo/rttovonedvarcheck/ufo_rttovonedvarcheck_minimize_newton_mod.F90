@@ -66,7 +66,8 @@ contains
 !   Eyre, inversion of cloudy satellite sounding radiances by nonlinear
 !   optimal estimation. I: Theory and simulation for TOVS,QJ,July 89.
 !-------------------------------------------------------------------------------
-subroutine Ops_SatRad_MinimizeNewton_RTTOV12(ob_info,       &
+subroutine Ops_SatRad_MinimizeNewton_RTTOV12(self, &
+                                         ob_info,       &
                                          r_matrix,      &
                                          r_inv,         &
                                          b_matrix,      &
@@ -74,22 +75,27 @@ subroutine Ops_SatRad_MinimizeNewton_RTTOV12(ob_info,       &
                                          local_geovals, &
                                          profile_index, &
                                          nprofelements, &
-                                         conf,          &
-                                         obsdb,         &
                                          channels,      &
                                          onedvar_success)
+
+
+use ufo_rttovonedvarcheck_utils_mod, only: &
+                    ufo_rttovonedvarcheck
 
 use ufo_rttovonedvarcheck_process_mod, only: &
                     ufo_rttovonedvarcheck_GeoVaLs2ProfVec, &
                     ufo_rttovonedvarcheck_ProfVec2GeoVaLs, &
                     ufo_rttovonedvarcheck_CostFunction, &
-                    Ops_SatRad_Qsplit
+                    Ops_SatRad_Qsplit, &
+                    Ops_SatRad_CheckIteration, &
+                    Ops_SatRad_CheckCloudyIteration
 
 use ufo_rttovonedvarcheck_forward_model_mod, only: &
                     ufo_rttovonedvarcheck_ForwardModel
 
 implicit none
 
+type(ufo_rttovonedvarcheck), intent(inout) :: self
 type(Obinfo_type), intent(in)        :: ob_info
 real(kind_real), intent(in)          :: r_matrix(:,:)
 real(kind_real), intent(in)          :: r_inv(:,:)
@@ -98,21 +104,15 @@ real(kind_real), intent(in)          :: b_inv(:,:)
 type(ufo_geovals), intent(inout)     :: local_geovals
 type(Profileinfo_type), intent(in)   :: profile_index
 integer, intent(in)                  :: nprofelements
-type(c_ptr), value, intent(in)       :: conf
-type(c_ptr), value, intent(in)       :: obsdb
 integer(c_int), intent(in)           :: channels(:)
 logical, intent(out)                 :: onedvar_success
 
 ! Local declarations:
 character(len=*), parameter     :: RoutineName = "Ops_SatRad_MinimizeNewton_RTTOV12"
 integer                         :: inversionstatus
-LOGICAL                         :: outOfRange
-LOGICAL                         :: Converged
-LOGICAL                         :: Error
-LOGICAL                         :: UseJForConvergence
-integer                         :: Max1DVarIterations
-integer                         :: JConvergenceOption
-real                            :: cost_convergencefactor
+logical                         :: outOfRange
+logical                         :: Converged
+logical                         :: Error
 integer                         :: iter
 integer                         :: RTerrorcode
 integer                         :: nchans
@@ -124,48 +124,53 @@ real(kind_real)                 :: DeltaJo
 
 real(kind_real), allocatable    :: OldProfile(:)
 real(kind_real), allocatable    :: GuessProfile(:)
+real(kind_real), allocatable    :: GuessProfileBefore(:)
 real(kind_real), allocatable    :: BackProfile(:)
 real(kind_real), allocatable    :: H_matrix(:,:)
 real(kind_real), allocatable    :: Diffprofile(:)
+real(kind_real), allocatable    :: AbsDiffProfile(:)
 real(kind_real), allocatable    :: Ydiff(:)
 real(kind_real), allocatable    :: Y(:)
 real(kind_real), allocatable    :: Y0(:)
 type(ufo_geovals)               :: geovals
 real(kind_real)                 :: Jout(3)
 
+integer                         :: ii
+
 ! interface blocks:
 !inCLUDE 'Ops_SatRad_CheckIteration.interface'
 !inCLUDE 'Ops_SatRad_CheckCloudyIteration.interface'
 !inCLUDE 'Ops_SatRad_PrintRTprofile_RTTOV12.interface'
 
-Converged = .FALSE.
-onedvar_success = .FALSE.
-Error = .FALSE.
-UseJForConvergence = .TRUE.
-Max1DVarIterations = 10
-JConvergenceOption = -1
-cost_convergencefactor = 0.0001
+Converged = .false.
+onedvar_success = .false.
+Error = .false.
 nchans = size(channels)
 
 ! allocate arrays
 allocate(OldProfile(nprofelements))
 allocate(GuessProfile(nprofelements))
+allocate(GuessProfileBefore(nprofelements))
 allocate(BackProfile(nprofelements))
 allocate(H_matrix(nchans,nprofelements))
 allocate(Diffprofile(nprofelements))
+allocate(AbsDiffprofile(nprofelements))
 allocate(Ydiff(nchans))
 allocate(Y(nchans))
 allocate(Y0(nchans))
 
 geovals = local_geovals
 
-Iterations: do iter = 1, Max1DVarIterations
+write(*,*) "Geovals before minimizations = "
+call ufo_geovals_print(geovals,1)
+
+Iterations: do iter = 1, self % max1DVarIterations
 
   !-------------------------
   ! 1. Generate new profile
   !-------------------------
   ! Save cost from previous iteration
-  if (UseJForConvergence) then
+  if (self % UseJForConvergence) then
     JcostOld = Jcost
   end if
 
@@ -185,8 +190,8 @@ Iterations: do iter = 1, Max1DVarIterations
   OldProfile(:) = GuessProfile(:)
 
   ! call forward model to generate jacobian
-  call ufo_rttovonedvarcheck_ForwardModel(geovals, ob_info, obsdb, &
-                                       channels(:), conf, &
+  call ufo_rttovonedvarcheck_ForwardModel(geovals, ob_info, self % obsdb, &
+                                       channels(:), self % conf, &
                                        profile_index, GuessProfile(:), &
                                        Y(:), H_matrix)
   write(*,*) "Observed BTs After bias correction: ",ob_info%yobs(:)
@@ -209,7 +214,7 @@ Iterations: do iter = 1, Max1DVarIterations
   !     and determine convergence using change in cost fn
   !-----------------------------------------------------
 
-  if (UseJForConvergence) then
+  if (self % UseJForConvergence) then
 
     Diffprofile(:) = GuessProfile(:) - BackProfile(:)
     Ydiff(:) = ob_info%yobs(:) - Y(:)
@@ -227,18 +232,18 @@ Iterations: do iter = 1, Max1DVarIterations
     ! check for convergence
     if (iter > 1) then
 
-      if (JConvergenceOption == 1) then
+      if (self % JConvergenceOption == 1) then
 
         ! percentage change tested between iterations
-        DeltaJ = ABS ((Jcost - JcostOld) / MAX (Jcost, TinY (0.0)))
+        DeltaJ = abs ((Jcost - JcostOld) / max (Jcost, tiny (0.0)))
 
         ! default test for checking that overall cost is getting smaller
         DeltaJo = -1.0
 
-      ELSE
+      else
 
         ! absolute change tested between iterations
-        DeltaJ = ABS (Jcost - JcostOld)
+        DeltaJ = abs (Jcost - JcostOld)
 
         ! change between current cost and initial
         DeltaJo = Jcost - JCostorig
@@ -248,20 +253,19 @@ Iterations: do iter = 1, Max1DVarIterations
 !      if (SatRad_FullDiagnostics) then
         write (*, '(A,F12.5)') 'Cost Function=', Jcost
         write (*, '(A,F12.5)') 'Cost Function increment=', deltaj
-        write (*, '(A,F12.5)') 'cost_convergencefactor=', cost_convergencefactor
+        write (*, '(A,F12.5)') 'cost_convergencefactor=', self % cost_convergencefactor
 !      end if
 
-      if (DeltaJ < cost_convergencefactor .AND. &
+      if (DeltaJ < self % cost_convergencefactor .and. &
           DeltaJo < 0.0)  then ! overall is cost getting smaller?
-        converged = .TRUE.
-        onedvar_success = .TRUE.
+        converged = .true.
 
 !        if (SatRad_FullDiagnostics) then
 !          write (*, '(A,I0)') 'Iteration', iter
 !          write (*, '(A)') '------------'
 !          write (*, '(A,L1)') 'Status: converged = ', Converged
 !          write (*, '(A)') 'New profile:'
-!          CALL Ops_SatRad_PrintRTprofile_RTTOV12 (RTprof_Guess)
+!          call Ops_SatRad_PrintRTprofile_RTTOV12 (RTprof_Guess)
 !          write (*, '(A)')
 !        end if
 
@@ -275,7 +279,7 @@ Iterations: do iter = 1, Max1DVarIterations
   ! Iterate (Guess) profile vector
   if (nchans > nprofelements) then
     write(*,*) "Many Chans"
-    CALL Ops_SatRad_NewtonManyChans (Ydiff,                     &
+    call Ops_SatRad_NewtonManyChans (Ydiff,                     &
                                      nchans,                    &
                                      H_matrix(:,:),             & ! in
                                      transpose (H_matrix(:,:)), & ! in
@@ -284,9 +288,9 @@ Iterations: do iter = 1, Max1DVarIterations
                                      b_inv,                     &
                                      r_matrix,                  &
                                      inversionStatus)
-  ELSE ! nchans <= nprofelements
+  else ! nchans <= nprofelements
     write(*,*) "Few Chans"
-    CALL Ops_SatRad_NewtonFewChans (Ydiff,                     &
+    call Ops_SatRad_NewtonFewChans (Ydiff,                     &
                                     nchans,                    &
                                     H_matrix(:,:),             & ! in
                                     transpose (H_matrix(:,:)), & ! in
@@ -305,70 +309,85 @@ Iterations: do iter = 1, Max1DVarIterations
 
   GuessProfile(:) = BackProfile(:) + Diffprofile(:)
 
-!  !---------------------------------------------------------
-!  ! 2. Check new profile and transfer to forward model format
-!  !---------------------------------------------------------
-!
-!  ! Check profile and constrain humidity variables
-!
-!  CALL Ops_SatRad_CheckIteration (RTprof_Guess % rttov12_profile % s2m % p,            & ! in
-!                                  RTprof_Guess % rttov12_profile % s2m % t,            & ! in
-!                                  RTprof_Guess % rttov12_profile % t(:), & ! in
-!                                  GuessProfile(:),                                     & ! inout
-!                                  outOfRange)                                            ! out
-!
+  !---------------------------------------------------------
+  ! 2. Check new profile and transfer to forward model format
+  !---------------------------------------------------------
+
+  ! Check profile and constrain humidity variables
+
+  GuessProfileBefore(:) = GuessProfile(:)
+  call Ops_SatRad_CheckIteration (geovals,         & ! in
+                                  profile_index,   & ! in
+                                  self % nlevels,  & ! in
+                                  GuessProfile(:), & ! inout
+                                  outOfRange)        ! out
+  !write(*,*) "GuessProfile before and after check = "
+  !do ii = 1, nprofelements
+  !  write(*,'(3F15.5)') GuessProfileBefore(ii),GuessProfile(ii),GuessProfileBefore(ii)-GuessProfile(ii)
+  !end do 
+  !write(*,*) "Checkiteration outOfRange = ",outOfRange
+
   ! Update RT-format guess profile
   call ufo_rttovonedvarcheck_ProfVec2GeoVaLs(geovals, profile_index, nprofelements, GuessProfile)
   
-!  ! if qtotal in retrieval vector check cloud
-!  ! variables for current iteration
-!
-!  if ((.NOT. outofRange) .AND. &
-!      profindex % qt(1) > 0) then
-!
-!    if (iter >= IterNumForLWPCheck) then
-!    
-!      if (RTTOV_mwscattSwitch) then
-!      
-!        !cloud information is from the scatt profile
-!        if (RTprof_Guess % rttov12_profile_scatt % use_totalice) then
-!        
-!          CALL Ops_SatRad_CheckCloudyIteration (RTprof_Guess % rttov12_profile_scatt % clw(:),      & ! in
+  ! if qtotal in retrieval vector check cloud
+  ! variables for current iteration
+
+  if ((.NOT. outofRange) .and. profile_index % qt(1) > 0) then
+
+    if (iter >= self % IterNumForLWPCheck) then
+
+      if (self % RTTOV_mwscattSwitch) then
+      
+        !cloud information is from the scatt profile
+        if (self % use_totalice) then
+
+          call Ops_SatRad_CheckCloudyIteration( geovals,         & ! in
+                                                profile_index,   & ! in
+                                                self % nlevels,  & ! in
+                                                OutOfRange )
+
+!          call Ops_SatRad_CheckCloudyIteration (RTprof_Guess % rttov12_profile_scatt % clw(:),      & ! in
 !                                                RTprof_Guess % rttov12_profile_scatt % totalice(:), & ! in
 !                                                outOfRange)                                                         ! out
-!        ELSE
-!        
-!          CALL Ops_SatRad_CheckCloudyIteration (RTprof_Guess % rttov12_profile_scatt % clw(:), & ! in
+        else
+
+          call Ops_SatRad_CheckCloudyIteration( geovals,         & ! in
+                                                profile_index,   & ! in
+                                                self % nlevels,  & ! in
+                                                OutOfRange )
+
+!          call Ops_SatRad_CheckCloudyIteration (RTprof_Guess % rttov12_profile_scatt % clw(:), & ! in
 !                                                RTprof_Guess % rttov12_profile_scatt % ciw(:), & ! in
 !                                                outOfRange)
-!        
-!        end if
-!                                                                                               
-!      ELSE
-!      
-!        !clear air profile is used for clw and cloudice diagnostic 
-!        CALL Ops_SatRad_CheckCloudyIteration (RTprof_Guess % rttov12_profile % clw(:), & ! in
-!                                              CloudIce(:),                                           & ! in
-!                                              outOfRange)                                              ! out
-!      
-!      end if                                       
-!    
-!    end if                                                                                  
-!
-!  end if
+
+        end if
+                                                                                               
+      else
+
+        call Ops_SatRad_CheckCloudyIteration( geovals,         & ! in
+                                              profile_index,   & ! in
+                                              self % nlevels,  & ! in
+                                              OutOfRange )
+
+      end if                                       
+    
+    end if                                                                                  
+
+  end if
 
   !-------------------------------------------------
   ! 3. Check for convergence using change in profile
   !    This is performed if UseJforConvergence is false
   !-------------------------------------------------
 
-!  AbsDiffprofile(:) = 0.0
-!
-!  if ((.NOT. outOfRange) .AND. &
-!      (.NOT. UseJForConvergence))then
-!    ABSDiffProfile(:) = ABS (GuessProfile(:) - OldProfile(:))
-!    if (ALL (AbsDiffProfile(:) <= B_sigma(:) * ConvergenceFactor)) then
-!      Converged = .TRUE.
+!  absDiffprofile(:) = 0.0
+
+!  if ((.NOT. outOfRange) .and. &
+!      (.NOT. self % UseJForConvergence))then
+!    absDiffProfile(:) = abs (GuessProfile(:) - OldProfile(:))
+!    if (ALL (absDiffProfile(:) <= B_sigma(:) * self % ConvergenceFactor)) then
+!      Converged = .true.
 !    end if
 !  end if
 
@@ -382,7 +401,7 @@ Iterations: do iter = 1, Max1DVarIterations
 !    write (*, '(A,L1)') 'Status: converged = ', Converged
 !    if (outOfRange) write (*, '(A)') 'exiting with bad increments'
 !    write (*, '(A)') 'New profile:'
-!    CALL Ops_SatRad_PrintRTprofile_RTTOV12 (RTprof_Guess)
+!    call Ops_SatRad_PrintRTprofile_RTTOV12 (RTprof_Guess)
 !    write (*, '(A)')
 !  end if
 
@@ -392,24 +411,45 @@ Iterations: do iter = 1, Max1DVarIterations
 
 end do Iterations
 
+! Pass convergence flag out
+onedvar_success = converged
+
 write(*,*) "----------------------------"
 write(*,*) "Starting cost = ",JCostorig
 write(*,*) "Final cost = ",Jcost
 write(*,*) "Converged? ", Converged
-write(*,*) "out Profile = ",GuessProfile(:)
+write(*,*) "Iterations = ",iter
+write(*,*) "Geovals after iterations = "
+call ufo_geovals_print(geovals,1)
 write(*,*) "----------------------------"
+
+write(*,'(A45,3F10.3,I5,L5)') "J initial, final, lowest, iter, converged = ",JCostorig,Jcost,Jcost,iter,onedvar_success
 
 !Ob % Niter = iter
 !if (RTerrorcode /= 0 .OR. .NOT. Converged .OR. outOfRange .OR. &
 !    inversionStatus /= 0) then
-!  Error = .TRUE.
+!  Error = .true.
 !end if
-!
-!if (.NOT. Error .AND. UseJForConvergence) then
+
+!if (.NOT. Error .and. self % UseJForConvergence) then
 !  ! store final cost function and retrieved bts
 !  Ob % Jcost = Jcost
 !  Ob % Britemp(Channels_1dvar(:)) = Britemp(:)
 !end if
+
+! ----------
+! Tidy up
+! ----------
+if (allocated(OldProfile))         deallocate(OldProfile)
+if (allocated(GuessProfile))       deallocate(GuessProfile)
+if (allocated(GuessProfileBefore)) deallocate(GuessProfileBefore)
+if (allocated(BackProfile))        deallocate(BackProfile)
+if (allocated(H_matrix))           deallocate(H_matrix)
+if (allocated(Diffprofile))        deallocate(Diffprofile)
+if (allocated(AbsDiffprofile))     deallocate(AbsDiffprofile)
+if (allocated(Ydiff))              deallocate(Ydiff)
+if (allocated(Y))                  deallocate(Y)
+if (allocated(Y0))                 deallocate(Y0)
 
 end subroutine Ops_SatRad_MinimizeNewton_RTTOV12
 
@@ -520,7 +560,7 @@ U = U + R_Matrix
 ! Calculate Q=(U^-1).V
 !------
 
-CALL Ops_Cholesky (U,      &
+call Ops_Cholesky (U,      &
                    V,      &
                    nChans, &
                    Q,      &
@@ -634,7 +674,7 @@ U = U + B_inverse
 ! 5. Calculate new profile increment.
 !---------------------------------------------------------------------------
 
-CALL Ops_Cholesky (U,             &
+call Ops_Cholesky (U,             &
                    V,             &
                    nprofelements, &
                    DeltaProfile, &
@@ -672,7 +712,7 @@ integer, intent(out)         :: ErrorCode
 
 ! Local declarations:
 character(len=*), parameter  :: RoutineName = "Ops_Cholesky"
-real(kind_real), parameter   :: Tolerance = TinY (0.0) * 100.0
+real(kind_real), parameter   :: Tolerance = tiny (0.0) * 100.0
 character(len=80)            :: ErrorMessage
 integer                      :: j
 integer                      :: k
