@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2017-2018 UCAR
+ * (C) Copyright 2017-2020 Met Office
  * 
  * This software is licensed under the terms of the Apache Licence Version 2.0
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
@@ -53,8 +53,6 @@ class RTTOVOneDVarCheck : public FilterBase,
   F90onedvarcheck key_;
   const eckit::LocalConfiguration config_;
   std::vector<int> channels_;
-  const GeoVaLs mutable * gv_;
-  double cost_converge_;
 };
 
 }  // namespace ufo

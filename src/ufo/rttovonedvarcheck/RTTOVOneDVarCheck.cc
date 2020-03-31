@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2017-2018 UCAR
+ * (C) Copyright 2017-2020 Met Office
  *
  * This software is licensed under the terms of the Apache Licence Version 2.0
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
@@ -25,8 +25,7 @@ namespace ufo {
 RTTOVOneDVarCheck::RTTOVOneDVarCheck(ioda::ObsSpace & obsdb, const eckit::Configuration & config,
                                  boost::shared_ptr<ioda::ObsDataVector<int> > flags,
                                  boost::shared_ptr<ioda::ObsDataVector<float> > obserr)
-  : FilterBase(obsdb, config, flags, obserr), config_(config),
-    gv_(NULL), cost_converge_(0.01)
+  : FilterBase(obsdb, config, flags, obserr), config_(config)
 {
   oops::Log::debug() << "RTTOVOneDVarCheck contructor starting" << std::endl;
 
@@ -66,7 +65,7 @@ void RTTOVOneDVarCheck::applyFilter(const std::vector<bool> & apply,
 
   /* 1-D var qc
      J(x) = (x-xb)T B-1 (x-xb) + (y-H(x))T R-1 (y-H(x))
-     Code adapted from Variational.h and IncrementalAssimilation.h
+     Code adapted from Met Office OPS System
   */
 
 // Get GeoVaLs
@@ -86,7 +85,7 @@ void RTTOVOneDVarCheck::applyFilter(const std::vector<bool> & apply,
 
 // Pass it all to fortran
   const eckit::Configuration * conf = &config_;
-  ufo_rttovonedvarcheck_post_f90(key_, variables, gvals->toFortran(),
+  ufo_rttovonedvarcheck_apply_f90(key_, variables, gvals->toFortran(),
                                       apply_char.size(), apply_char[0]);
 
 // Read qc flags from database

@@ -1,5 +1,4 @@
-! (C) Copyright 2018 UCAR
-!
+! (C) Copyright 2020 Met Office
 ! This software is licensed under the terms of the Apache Licence Version 2.0
 ! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 
@@ -13,468 +12,657 @@ use kinds
 use ufo_geovals_mod
 use ufo_rttovonedvarcheck_utils_mod
 use ufo_radiancerttov_tlad_mod
-
-implicit none
-
-private
-
-! subroutines - all listed for complete
-public ufo_rttovonedvarcheck_MinimizeML
-
-contains
-
-!------------------------------------------------------------------------------
-
-subroutine ufo_rttovonedvarcheck_MinimizeML(self,       &
-                                         ob_info,       &
-                                         r_matrix,      &
-                                         Syinv,         &
-                                         b_matrix,      &
-                                         Sxinv,         &
-                                         local_geovals, &
-                                         profile_index, &
-                                         nprofelements, &
-                                         channels,      &
-                                         onedvar_success)
-
-use ufo_rttovonedvarcheck_utils_mod, only: &
-                    ufo_rttovonedvarcheck
+use ufo_rttovonedvarcheck_rmatrix_mod, only: &
+        rmatrix_type, &
+        rmatrix_add_to_u, &
+        rmatrix_multiply, &
+        rmatrix_multiply_matrix, &
+        rmatrix_inv_multiply, &
+        rmatrix_multiply_inv_matrix
 
 use ufo_rttovonedvarcheck_process_mod, only: &
-                    ufo_rttovonedvarcheck_GeoVaLs2ProfVec, &
-                    ufo_rttovonedvarcheck_ProfVec2GeoVaLs, &
-                    ufo_rttovonedvarcheck_CostFunction, &
-                    Ops_SatRad_Qsplit
+        ufo_rttovonedvarcheck_GeoVaLs2ProfVec, &
+        ufo_rttovonedvarcheck_ProfVec2GeoVaLs, &
+        ufo_rttovonedvarcheck_CostFunction, &
+        ufo_rttovonedvarcheck_CheckIteration, &
+        ufo_rttovonedvarcheck_CheckCloudyIteration, &
+        ufo_rttovonedvarcheck_Cholesky
 
 use ufo_rttovonedvarcheck_forward_model_mod, only: &
                     ufo_rttovonedvarcheck_ForwardModel
 
 implicit none
 
-type(ufo_rttovonedvarcheck), intent(in)     :: self
-type(Obinfo_type), intent(in)               :: ob_info
-real(kind_real), intent(in)                 :: r_matrix(:,:)
-real(kind_real), intent(in)                 :: Syinv(:,:)
-real(kind_real), intent(in)                 :: b_matrix(:,:)
-real(kind_real), intent(in)                 :: Sxinv(:,:)
-type(ufo_geovals), intent(inout)            :: local_geovals
-type(Profileinfo_type), intent(in)          :: profile_index
-integer, intent(in)                         :: nprofelements
-integer(c_int), intent(in)                  :: channels(:)
-logical, intent(out)                        :: onedvar_success
+private
 
-! Local Variables
-real(kind_real), allocatable       :: X(:)    ! x vector for 1D-var
-real(kind_real), allocatable       :: Xb(:)   ! Xb background vector for 1D-var
-real(kind_real), allocatable       :: X0(:)   ! Xb background vector for 1D-var
-real(kind_real)                    :: J_old        ! initial cost before
-real(kind_real)                    :: J_new        ! initial cost before
-real(kind_real), allocatable       :: H_matrix(:,:)
-real(kind_real), allocatable       :: Kx(:,:)
-integer                            :: nchans
-real(kind_real), allocatable       :: Xdiff(:)      ! profile increments
-real(kind_real), allocatable       :: Ydiff(:)       ! BT differences
-real(kind_real), allocatable       :: Y(:)       ! update hofx
-real(kind_real), allocatable       :: Y0(:)       ! initial hofx
-integer                            :: iter              ! iterative loop counter
-real(kind_real), allocatable       :: unit_matrix(:,:)
-integer                            :: i
-real(kind_real)                    :: Jzero
-real(kind_real)                    :: Jcurrent
-real(kind_real)                    :: Jinitial
-real(kind_real)                    :: delta_J         ! Cost difference
-real(kind_real), allocatable       :: Sx(:,:)         ! Error covariance matrix of the a priori (background) state vector
-real(kind_real), allocatable       :: invVarRad(:)    ! inverse of variances of radiances
-real(kind_real), allocatable       :: Xplus_dX(:)     ! State vector being checked in a given iteration (Xn + delta_X)
-real(kind_real), allocatable       :: dJ_dX(:)        ! 1st derivative of J wrt state variables (Tau and Re)
-real(kind_real), allocatable       :: d2J_dX2(:,:)    ! 2nd derivative of J wrt state variables
-real(kind_real), allocatable       :: delta_X(:)      ! Step to be applied to state variables
-real(kind_real), allocatable       :: J2plus_A(:,:)   ! Temporary array to hold sum of d2J_dX2 and alpha * unit_matrix.
-real(kind_real), allocatable       :: KxT_Syinv(:,:)  ! intermediate matrix product
+! public subroutines
+public ufo_rttovonedvarcheck_minimize_ml
 
-!real(kind_real), parameter         :: Ccj = 0.01      ! Cost convergence criterion
-real(kind_real)                    :: Ccj_Ny          ! Cost convergence criterion adjusted for number of channels
-logICAL                            :: convergence
-integer                            :: CholeskyStatus
-real(kind_real)                    :: Av_Hess         ! Average of Hessian (d2J_dX2) diagonal
-real(kind_real)                    :: alpha           ! Marquardt control variable
-integer                            :: m, ii
-real(kind_real)                    :: sum_errors
-real(kind_real)                    :: DeltaJ
-type(ufo_geovals)                  :: geovals
-real(kind_real)                    :: Jlowest
-real(kind_real)                    :: Jout(3)
-real(kind_real)                    :: Ccj
-real(kind_real)                    :: Mqstart = 0.001 ! Marquardt starting parameter
-real(kind_real)                    :: Mqstep = 5.0    ! Marquardt step parameter
+contains
 
-! Setup variables
-onedvar_success = .false. ! Assume failed
-ccj = self % Cost_ConvergenceFactor
-Mqstart = self % Mqstart
-Mqstep = self % Mqstep
+!-------------------------------------------------------------------------------
+! (C) Crown copyright Met Office. All rights reserved.
+!     Refer to COPYRIGHT.txt of this distribution for details.
+!-------------------------------------------------------------------------------
+! Find the most probable atmospheric state vector by minimizing a cost function
+! through a series of iterations. if a solution exists, the iterations will
+! converge when the iterative increments are acceptably small. A limit on the
+! total number of iterations allowed is imposed.
+!
+! Using the formulation given by Rodgers (1976) :
+!
+!   Delta_x = xn + (xb-xn).I' + Wn.(ym-y(xn) - H.(xb-xn))
+!   where: x is an atmospheric state vector, subscripted b=background,n=nth
+!           iteration
+!          I' is a diagonal matrix with I'(J,J) = B_damped(J,J)/B_undamped(J,J)
+!           although, however, damping will no longer be used
+!          Wn = B.Hn'.(Hn.B.Hn'+R)^-1
+!          B is the background error covariance matrix
+!          R is the combined forward model and ob error covariance matrix
+!
+!   Delta_x is checked for convergence after each iteration
+!
+! The loop is exited with convergence if either of the following conditions are
+! true, depending on whether UseJforConvergence is true or false
+!   1) if UseJforConvergence is true then the change in total cost function from
+!      one iteration to the next is sufficiently small to imply convergence
+!   2) if UseJforConvergence is false then the increments to the atmospheric
+!      state vector are sufficiently small to imply convergence at an acceptable
+!      solution
+!   Either of the following two conditions will cause the 1dvar to stop and exit
+!   with an error.
+!   3) The increments are sufficiently large to suppose a solution will not
+!      be found.
+!   4) The maximum number of allowed iterations has been reached. In most
+!      cases, one of the above criteria will have occurred.
+!
+! References:
+!
+!   Rodgers, Retrieval of atmospheric temperature and composition from
+!   remote measurements of thermal radiation, Rev. Geophys.Sp.Phys. 14, 1976.
+!
+!   Eyre, Inversion of cloudy satellite sounding radiances by nonlinear
+!   optimal estimation. I: Theory and simulation for TOVS,QJ,July 89.
+!-------------------------------------------------------------------------------
+subroutine ufo_rttovonedvarcheck_minimize_ml(self,      &
+                                         ob_info,       &
+                                         r_matrix,      &
+                                         r_inv,         &
+                                         r_matrix_obj,  &
+                                         b_matrix,      &
+                                         b_inv,         &
+                                         local_geovals, &
+                                         profile_index, &
+                                         nprofelements, &
+                                         channels,      &
+                                         onedvar_success)
+
+implicit none
+
+type(ufo_rttovonedvarcheck), intent(inout) :: self
+type(Obinfo_type), intent(in)        :: ob_info
+real(kind_real), intent(in)          :: r_matrix(:,:)
+real(kind_real), intent(in)          :: r_inv(:,:)
+type(rmatrix_type), intent(in)       :: r_matrix_obj
+real(kind_real), intent(in)          :: b_matrix(:,:)
+real(kind_real), intent(in)          :: b_inv(:,:)
+type(ufo_geovals), intent(inout)     :: local_geovals
+type(Profileinfo_type), intent(in)   :: profile_index
+integer, intent(in)                  :: nprofelements
+integer(c_int), intent(in)           :: channels(:)
+logical, intent(out)                 :: onedvar_success
+
+! Local declarations:
+character(len=*), parameter     :: RoutineName = "ufo_rttovonedvarcheck_minimize_ml"
+integer                         :: inversionstatus ! status of minimisation
+logical                         :: outOfRange      ! out of range flag for check iteration
+logical                         :: Converged       ! converged flag
+logical                         :: Error           ! error flag
+integer                         :: iter            ! iteration counter
+integer                         :: RTerrorcode     ! error code for RTTOV
+integer                         :: nchans          ! number of satellite channels used
+integer                         :: ii              ! counter
+real(kind_real)                 :: Gamma           ! steepness of descent parameter
+real(kind_real)                 :: Jcost           ! current cost value
+real(kind_real)                 :: JcostOld        ! previous iteration cost value
+real(kind_real)                 :: JcostOrig       ! initial cost value
+real(kind_real)                 :: DeltaJ          ! change in cost during iteration
+real(kind_real)                 :: DeltaJo         ! change in cost from original
+
+real(kind_real), allocatable    :: OldProfile(:)
+real(kind_real), allocatable    :: GuessProfile(:)
+real(kind_real), allocatable    :: GuessProfileBefore(:)
+real(kind_real), allocatable    :: BackProfile(:)
+real(kind_real), allocatable    :: H_matrix(:,:)
+real(kind_real), allocatable    :: Diffprofile(:)
+real(kind_real), allocatable    :: AbsDiffProfile(:)
+real(kind_real), allocatable    :: Ydiff(:)
+real(kind_real), allocatable    :: Y(:)
+real(kind_real), allocatable    :: Y0(:)
+real(kind_real)                 :: Jout(3)
+
+type(ufo_geovals)               :: geovals
+
+Converged = .false.
+onedvar_success = .false.
+Error = .false.
 nchans = size(channels)
-geovals = local_geovals
-
-write(*,*) "ufo_rttovonedvarcheck_MinimizeML start"
-write(*,*) "ufo_rttovonedvarcheck_MinimizeML nchans = ",nchans
+Gamma = 1.0E-4
+JcostOld = 1.0e4
 
 ! allocate arrays
-allocate(Xb(nprofelements))
-allocate(X(nprofelements))
-allocate(X0(nprofelements))
+allocate(OldProfile(nprofelements))
+allocate(GuessProfile(nprofelements))
+allocate(GuessProfileBefore(nprofelements))
+allocate(BackProfile(nprofelements))
 allocate(H_matrix(nchans,nprofelements))
-allocate(Kx(nchans,nprofelements))
-allocate(Xdiff(nprofelements))
+allocate(Diffprofile(nprofelements))
+allocate(AbsDiffprofile(nprofelements))
 allocate(Ydiff(nchans))
 allocate(Y(nchans))
 allocate(Y0(nchans))
-allocate(unit_matrix(nprofelements,nprofelements))
-allocate(Sx(nprofelements,nprofelements))
-allocate(invVarRad(nchans))
-allocate(Xplus_dX(nprofelements))
-allocate(dJ_dX(nprofelements))
-allocate(d2J_dX2(nprofelements,nprofelements))
-allocate(delta_X(nprofelements))
-allocate(J2plus_A(nprofelements,nprofelements))
-allocate(KxT_Syinv(nprofelements,nchans))
 
-! Set everything to zero
-Xb(:) = 0.0
-X(:) = 0.0
-X0(:) = 0.0
-H_matrix(:,:) = 0.0
-Kx(:,:) = 0.0
-Xdiff(:) = 0.0
-Ydiff(:) = 0.0
-Y(:) = 0.0
-Y0(:) = 0.0
-unit_matrix(:,:) = 0.0
-Sx(:,:) = 0.0
-invVarRad(:) = 0.0
-Xplus_dX(:) = 0.0
-dJ_dX(:) = 0.0
-d2J_dX2(:,:) = 0.0
-delta_X(:) = 0.0
-J2plus_A(:,:) = 0.0
-KxT_Syinv(:,:) = 0.0
+geovals = local_geovals
+!write(*,*) "Geovals before minimizations = "
+!call ufo_geovals_print(geovals,1)
 
 ! Map GeovaLs to 1D-var profile using B matrix profile structure
-call ufo_rttovonedvarcheck_GeoVaLs2ProfVec(geovals, profile_index, nprofelements, X0(:))
-Xb(:) = X0(:)
+call ufo_rttovonedvarcheck_GeoVaLs2ProfVec(geovals, profile_index, nprofelements, GuessProfile(:))
 
-! call forward model
-call ufo_rttovonedvarcheck_ForwardModel(geovals, ob_info, self % obsdb, &
-                                   channels(:), self % conf, &
-                                   profile_index, X(:), &
-                                   Y0(:), H_matrix)
+Iterations: do iter = 1, self % max1DVarIterations
 
-Y(:) = Y0(:)
+  !-------------------------
+  ! 1. Generate new profile
+  !-------------------------
 
-Kx(:, :) = H_matrix(:, :)
-write(*,*) "Kx(:,:) = ",Kx
+  ! Save current profile
+  OldProfile(:) = GuessProfile(:)
 
-!  Calculate Ydiff, the difference between the measurements and calculated values for X.
-Ydiff(:) = ob_info%yobs(:) - Y(:) ! amended from previous.
-
-! Update state vector for first iteration
-
-X(:) = X0(:)
-
-!  Calculate Xdiff, the difference between the current state and the a priori (background)
-
-Xdiff(:) = X(:) - Xb(:) ! Will be zero initially in this case, but not generally true
-
-!  Calculate cost at X0.
-write(*,*) "Initial X(:) = ",X(:)
-write(*,*) "Initial H(X)(:) = ",Y(:)
-write(*,*) "Obs = ",ob_info%yobs(:)
-
-call ufo_rttovonedvarcheck_CostFunction(Xdiff, Sxinv, Ydiff, Syinv, Jout)
-Jzero = Jout(1)
-Jinitial = Jzero
-
-!  Adjust cost convergence criteria for the number of active channels,
-!  since final costs will be divided by this for output.
-
-Ccj_Ny = Ccj * nchans
-
-!  Set up unit_matrix matrix
-
-unit_matrix(:,:) = 0.0
-do i = 1, nprofelements
-  unit_matrix(i,i) = 1.0
-end do
-
-convergence = .false.
-iter = 1
-CholeskyStatus = 0
-delta_X(:) = 0.0
-
-! Calculate derivatives of starting cost (required for setting Marquardt
-! parameters). Needs Kx, the scaled version of dY_dX.
-
-KxT_Syinv = matmul(transpose(Kx), Syinv) ! intermediate product, used twice below.
-dJ_dX   = 2*(matmul(Sxinv, Xdiff)) - 2*(matmul(KxT_Syinv, Ydiff)) ! amended from previous.
-d2J_dX2 = 2*(matmul(KxT_Syinv, Kx) + Sxinv) ! amended from previous.
-
-! Set Marquardt parameters (initial weighting favours steepest descent)
-! unit_matrix matrix and inverse function required.
-
-! Average leading diagonal of Hessian d2J_dX2 in order to set alpha.,
-! then use alpha and d2J_dX2 to set delta_X.
-! Solve_Cholesky is used to find delta_X. The equation to be solved is:
-! dX = -(J'' + alphaI)^-1 * J' or delta_X = - (inv(J2plus_A) * dJ_dX)
-! Multiplying through by J2_plusA we get:
-!   J2plus_A * delta_X = -dJ_dX
-! which we can solve for delta_X using Solve_Cholesky.
-
-Av_Hess = 0
-do m = 1, nprofelements
-  Av_Hess = Av_Hess + d2J_dX2(m,m)
-end do
-Av_Hess  = Av_Hess / FLOAT(nprofelements)
-alpha    = MqStart * Av_Hess
-J2plus_A = d2J_dX2 + (alpha * unit_matrix)
-
-write(*,*) "d2J_dX2 = ",d2J_dX2
-write(*,*) "J2plus_A = ",J2plus_A
-write(*,*) "dJ_dX = ",dJ_dX
-
-call ufo_rttovonedvarcheck_SolveCholesky(J2plus_A, -dJ_dX, delta_X, nprofelements, CholeskyStatus)
-if (CholeskyStatus /= 0) write(*,*) 'Minimize: Error in Solve_Cholesky'
-
-! Main iteration loop
-!Jzero = 1.0e4
-Jlowest = Jzero
-
-Main_Loop_index: do
-
-  ! N.B. Jumps out of the loop if convergence occurs,
-  ! or if Max no. of iterations is reached, or if CholeskyStatus not zero
-
-  if (CholeskyStatus /= 0) exit Main_Loop_index
-
-  ! Apply step delta_x to the active state variables
-  ! Assumes Xn and delta_X are both unscaled.
-
-  write(*,*) "X in loop = ",X(:)
-  write(*,*) "delta_X in loop = ",delta_X(:)
-  Xplus_dX(:)  = X(:) + delta_X(:)
-
-! ------------------------------------------------------------------------------------------------------------
-! do the next forward model calculations. i.e. Calculate Y for Xn + delta_X. Xplus_dX is currently un-scaled.
-! ------------------------------------------------------------------------------------------------------------
-
-  ! Profile to GeoVaLs
-  call ufo_rttovonedvarcheck_ProfVec2GeoVaLs(geovals, profile_index, nprofelements, Xplus_dX)
-
-  ! call forward model
+  ! call forward model to generate jacobian
   call ufo_rttovonedvarcheck_ForwardModel(geovals, ob_info, self % obsdb, &
                                        channels(:), self % conf, &
-                                       profile_index, Xplus_dx(:), &
+                                       profile_index, GuessProfile(:), &
                                        Y(:), H_matrix)
 
-  Kx(:, :) = H_matrix(:, :)
+  if (iter == 1) then
+    RTerrorcode = 0
+    Diffprofile(:) = 0.0
+    BackProfile(:) = GuessProfile(:)
+    Y0(:) = Y(:)
+  end if
 
-  ! Calculate new cost, J.
+  ! exit on error
+  if (RTerrorcode /= 0) then
+    write(*,*) "Radiative transfer error"
+    exit Iterations
+  end if
 
-  Xdiff(:) = Xplus_dX(:) - Xb(:)
-  Ydiff(:) = ob_info%yobs(:) - Y(:)  ! amended from previous.
+  ! Calculate Obs diff and initial cost
+  Ydiff(:) = ob_info%yobs(:) - Y(:)
+  if (iter == 1) then
+    Diffprofile(:) = GuessProfile(:) - BackProfile(:)
+    call ufo_rttovonedvarcheck_CostFunction(Diffprofile, b_inv, Ydiff, r_inv, Jout)
+    Jcost = Jout(1)
+  end if
 
-  call ufo_rttovonedvarcheck_CostFunction(Xdiff, Sxinv, Ydiff, Syinv, Jout)
-  Jcurrent = Jout(1)
+  !-----------------------------------------------------
+  ! 1a. if UseJForConvergence is true
+  !     then compute costfunction for latest profile
+  !     and determine convergence using change in cost fn
+  !-----------------------------------------------------
 
-  !        Check J vs previous value. Lower value means progress:
-  !        "accept" the step delta_X and reset the Marquardt values.
+  if (self % UseJForConvergence) then
 
-  delta_J = Jcurrent-Jzero
+    ! exit on error
+    !if (inversionStatus /= 0) exit Iterations
 
-  if (Jcurrent < Jlowest) Jlowest = Jcurrent
+    ! store initial cost value
+    if (iter == 1) JCostOrig = jcost
 
-  if (Jcurrent <= Jzero) then
-    write(*,*) "Good step"
-    ! Calculate the Hessian (J'') as this is required for error analysis
-    ! if convergence is reached or for setting new delta_X.
+    write(*,*) "iter,Jcost,JcostOld,JCostorig = ",iter,Jcost,JcostOld,JCostorig
 
-    X(:) = Xplus_dX(:)
-    KxT_Syinv = matmul(transpose(Kx), Syinv)
-    d2J_dX2 = 2*(matmul(KxT_Syinv, Kx) + Sxinv) ! amended from previous.
+    ! check for convergence
+    if (iter > 1) then
 
-    ! Check for convergence.
-    DeltaJ = ABS (Jcurrent - Jzero)
-    !sum_errors = 0.0
-    !do ii=1,nprofelements
-    !  sum_errors = sum_errors + (dJ_dX(ii)*dJ_dX(ii))
-    !end do
-    !if (SQRT(sum_errors) <= Ccj_Ny) then ! Note: dJ_dX is scaled
-    !  convergence = .true.
-    !if (DeltaJ < Ccj_Ny .and. (Jcurrent - Jzero) < 0.0_kind_real) then
-    !  convergence = .true.
-    !else
-    if (DeltaJ < Ccj .and. (Jcurrent - Jzero) < 0.0_kind_real) then
-      convergence = .true.
-    else
-    ! Decrease steepest descent part for next iteration
-    ! Save new J as J0 for checking next time round
+      if (self % JConvergenceOption == 1) then
 
-      alpha = alpha / MqStep
-      Jzero = Jcurrent
+        ! percentage change tested between iterations
+        DeltaJ = abs ((Jcost - JcostOld) / max (Jcost, tiny (0.0)))
 
-      ! Calculate values required to set the new step delta_X based on
-      ! derivatives of J (delta_X itself is set after this "if")
+        ! default test for checking that overall cost is getting smaller
+        DeltaJo = -1.0_kind_real
 
-      dJ_dX   = 2*(matmul(Sxinv, Xdiff)) - 2*(matmul(KxT_Syinv, Ydiff)) ! amended from previous.
-      J2plus_A = d2J_dX2 + (alpha * unit_matrix)
-      call ufo_rttovonedvarcheck_SolveCholesky(J2plus_A, -dJ_dX, delta_X, nprofelements, CholeskyStatus)
-      if (CholeskyStatus /= 0) print *, ' Error in Solve_Cholesky'
+      else
+
+        ! absolute change tested between iterations
+        DeltaJ = abs (Jcost - JcostOld)
+
+        ! change between current cost and initial
+        DeltaJo = Jcost - JCostorig
+
+      end if
+
+!      if (SatRad_FullDiagnostics) then
+        write (*, '(A,F12.5)') 'Cost Function current = ', Jcost
+        write (*, '(A,F12.5)') 'Cost Function previous = ', JcostOld
+        write (*, '(A,F12.5)') 'Cost Function original = ', Jcostorig
+        write (*, '(A,F12.5)') 'Cost Function increment = ', Deltaj
+        write (*, '(A,F12.5)') 'Cost Function increment from original = ', DeltaJo
+        write (*, '(A,F12.5)') 'cost_convergencefactor = ', self % cost_convergencefactor
+!      end if
+
+      if (DeltaJ < self % cost_convergencefactor .and. &
+          DeltaJo < 0.0)  then ! overall is cost getting smaller?
+        converged = .true.
+        exit iterations
+      end if
 
     end if
 
-  else ! No improvement in cost
+  end if ! end of specific code for cost test convergence
 
-    write(*,*) "Bad step"
-
-  ! increase steepest descent part for next iteration and set values
-  ! required for setting new deltaX using old cost derivatives.
-
-    alpha = alpha * MqStep
-    J2plus_A = d2J_dX2 + (alpha * unit_matrix)
-    call ufo_rttovonedvarcheck_SolveCholesky(J2plus_A, -dJ_dX, delta_X, nprofelements, CholeskyStatus)
-    !           Check CholeskyStatus returned by ufo_rttovonedvarcheck_SolveCholesky later
+  ! store cost function from previous cycle
+  if (self % UseJForConvergence) then
+   JcostOld = Jcost
   end if
 
-  if (convergence) then
-    onedvar_success = .true.
-    exit Main_Loop_index ! Drops out of the iteration do loop
+  ! Iterate (Guess) profile vector
+  call ufo_rttovonedvarcheck_ML_RTTOV12 ( self,       &
+                                      Ydiff,               &
+                                      nChans,              &
+                                      ob_info,             &
+                                      H_Matrix,            &
+                                      transpose(H_Matrix), &
+                                      nprofelements,       &
+                                      profile_index,       &
+                                      DiffProfile,         &
+                                      GuessProfile,        &
+                                      BackProfile,         &
+                                      b_inv,               &
+                                      r_matrix_obj,        &
+                                      r_inv,               &
+                                      geovals,             &
+                                      channels,            &
+                                      gamma,               &
+                                      Jcost,               &
+                                      inversionStatus)
+
+  if (inversionStatus /= 0) then
+    inversionStatus = 1
+    write(*,*) "inversion failed"
+    exit Iterations
   end if
 
-  ! increment iteration counter and check whether the maximum has been
-  ! passed. (increment after breakpoint output so that counter value
-  ! is correct in the output).
+  !---------------------------------------------------------
+  ! 2. Check new profile and transfer to forward model format
+  !---------------------------------------------------------
 
-  if (iter == self % Max1DVarIterations) then
-    onedvar_success = .false.
-    exit Main_Loop_index ! Drops out of the iteration do loop
-  end if
-  iter = iter + 1
+  ! Check profile and constrain humidity variables
+  call ufo_rttovonedvarcheck_CheckIteration (geovals,         & ! in
+                                  profile_index,   & ! in
+                                  self % nlevels,  & ! in
+                                  GuessProfile(:), & ! inout
+                                  outOfRange)        ! out
 
-  write(*,'(A40,4F10.3,I5)') "J initial, J current, Jb, Jo, iter = ",Jinitial,Jcurrent,Jout(2),Jout(3),iter
+  ! Update RT-format guess profile
+  call ufo_rttovonedvarcheck_ProfVec2GeoVaLs(geovals, profile_index, nprofelements, GuessProfile)
+  
+  ! if qtotal in retrieval vector check cloud
+  ! variables for current iteration
 
-end do Main_Loop_index
+  if ((.not. outofRange) .and. profile_index % qt(1) > 0) then
 
-write(*,'(A45,3F10.3,I5,L5)') "J initial, final, lowest, iter, converged = ",Jinitial,Jcurrent,Jlowest,iter,onedvar_success
-write(*,*) "Obs, initial hofx, final hofx = ",ob_info%yobs(1),Y0(1),Y(1)
+    if (iter >= self % IterNumForLWPCheck) then
 
-! deallocate arrays
-call ufo_geovals_delete(geovals)
-if (allocated(X))           deallocate(X)
-if (allocated(X0))          deallocate(X0)
-if (allocated(Xb))          deallocate(Xb)
-if (allocated(H_matrix))    deallocate(H_matrix)
-if (allocated(Kx))          deallocate(Kx)
-if (allocated(Xdiff))       deallocate(Xdiff)
-if (allocated(Ydiff))       deallocate(Ydiff)
-if (allocated(Y))           deallocate(Y)
-if (allocated(Y0))          deallocate(Y0)
-if (allocated(unit_matrix)) deallocate(unit_matrix)
-if (allocated(Sx))          deallocate(Sx)
-if (allocated(invVarRad))   deallocate(invVarRad)
-if (allocated(Xplus_dX))    deallocate(Xplus_dX)
-if (allocated(dJ_dX))       deallocate(dJ_dX)
-if (allocated(d2J_dX2))     deallocate(d2J_dX2)
-if (allocated(delta_X))     deallocate(delta_X)
-if (allocated(J2plus_A))    deallocate(J2plus_A)
-if (allocated(KxT_Syinv))   deallocate(KxT_Syinv)
+      if (self % RTTOV_mwscattSwitch) then
+      
+        !cloud information is from the scatt profile
+        if (self % use_totalice) then
 
-write(*,*) "ufo_rttovonedvarcheck_MinimizeML end"
+          call ufo_rttovonedvarcheck_CheckCloudyIteration( geovals,         & ! in
+                                                profile_index,   & ! in
+                                                self % nlevels,  & ! in
+                                                OutOfRange )
 
-end subroutine ufo_rttovonedvarcheck_MinimizeML
+!          call ufo_rttovonedvarcheck_CheckCloudyIteration (RTprof_Guess % rttov12_profile_scatt % clw(:),      & ! in
+!                                                RTprof_Guess % rttov12_profile_scatt % totalice(:), & ! in
+!                                                outOfRange)                                                         ! out
+        else
 
-!---------------------------------------------------------------------------
+          call ufo_rttovonedvarcheck_CheckCloudyIteration( geovals,         & ! in
+                                                profile_index,   & ! in
+                                                self % nlevels,  & ! in
+                                                OutOfRange )
 
-subroutine ufo_rttovonedvarcheck_SolveCholeskyDC(A, b, x, n)
+!          call ufo_rttovonedvarcheck_CheckCloudyIteration (RTprof_Guess % rttov12_profile_scatt % clw(:), & ! in
+!                                                RTprof_Guess % rttov12_profile_scatt % ciw(:), & ! in
+!                                                outOfRange)
 
-   implicit none
+        end if
+                                                                                               
+      else
 
-   integer, intent(in) :: n
-   real(kind_real), intent(in) :: A(n,n)
-   real(kind_real), intent(in) :: b(n)
-   real(kind_real), intent(out) :: x(n)
-   integer :: i
+        call ufo_rttovonedvarcheck_CheckCloudyIteration( geovals,         & ! in
+                                              profile_index,   & ! in
+                                              self % nlevels,  & ! in
+                                              OutOfRange )
 
-  write(*,*) "ufo_rttovonedvarcheck_SolveCholeskyDC start"
-!
-! Solve L.y = b, storing y in x
-!
-   do i = 1, n
-      x(i) = (b(i) - dot_product(A(i,1:i-1), x(1:i-1))) / A(i,i)
-   end do
-!
-! Solve L^T·x = y
-!
-   do i = n, 1, -1
-      x(i) = (x(i) - dot_product(A(i+1:n,i), x(i+1:n))) / A(i,i)
-   end do
-
-  write(*,*) "ufo_rttovonedvarcheck_SolveCholeskyDC end"
-
-end subroutine ufo_rttovonedvarcheck_SolveCholeskyDC
-
-!---------------------------------------------------------------------------
-
-subroutine ufo_rttovonedvarcheck_DecomposeCholesky(A, n, Status)
-
-   implicit none
-
-   integer, intent(in) :: n
-   real(kind_real), intent(inout) :: A(n,n)
-   integer, intent(out) :: Status
-   integer :: i
-
-   write(*,*) "ufo_rttovonedvarcheck_DecomposeCholesky start"
-
-   Status = 0
-
-   do i = 1, n
-      A(i,i) = A(i,i) - dot_product(A(i,1:i-1), A(i,1:i-1))
-      if (A(i,i) <= 0.0_kind_real) then
-         Status = 9999
-         print *,"Error in decomposing cholesky"
-         return
-      end if
-      A(i,i) = sqrt(A(i,i))
-      A(i+1:n,i) = (A(i,i+1:n) - matmul(A(i+1:n,1:i-1), A(i,1:i-1))) / A(i,i)
-   end do
-
-   write(*,*) "ufo_rttovonedvarcheck_DecomposeCholesky end"
-
-end subroutine ufo_rttovonedvarcheck_DecomposeCholesky
-
-!---------------------------------------------------------------------------
-
-subroutine ufo_rttovonedvarcheck_SolveCholesky(A, b, x, n, Status)
-
-   implicit none
-
-   integer, intent(in) :: n
-   real(kind_real), intent(in) :: A(n,n)
-   real(kind_real), intent(in) :: b(n)
-   real(kind_real), intent(out) :: x(n)
-   integer, intent(out) :: Status
-   
-   real(kind_real) :: D(n,n)
-
-   write(*,*) "ufo_rttovonedvarcheck_SolveCholesky start"
-
-   D = A
+      end if                                       
     
-   call ufo_rttovonedvarcheck_DecomposeCholesky(D, n, Status)
-   if (Status /= 0) return
-   call ufo_rttovonedvarcheck_SolveCholeskyDC(D, b, x, n)
+    end if                                                                                  
 
-   write(*,*) "ufo_rttovonedvarcheck_SolveCholesky end"
+  end if
 
-end subroutine ufo_rttovonedvarcheck_SolveCholesky
+  !-------------------------------------------------
+  ! 3. Check for convergence using change in profile
+  !    This is performed if UseJforConvergence is false
+  !-------------------------------------------------
+
+!  absDiffprofile(:) = 0.0
+
+!  if ((.not. outOfRange) .and. &
+!      (.not. self % UseJForConvergence))then
+!    absDiffProfile(:) = abs (GuessProfile(:) - OldProfile(:))
+!    if (ALL (absDiffProfile(:) <= B_sigma(:) * self % ConvergenceFactor)) then
+!      Converged = .true.
+!    end if
+!  end if
+
+  !---------------------
+  ! 4. output diagnostics
+  !---------------------
+
+!  if (SatRad_FullDiagnostics) then
+!    write (*, '(A,I0)') 'Iteration', iter
+!    write (*, '(A)') '------------'
+!    write (*, '(A,L1)') 'Status: converged = ', Converged
+!    if (outOfRange) write (*, '(A)') 'exiting with bad increments'
+!    write (*, '(A)') 'New profile:'
+!    call ufo_rttovonedvarcheck_PrintRTprofile_RTTOV12 (RTprof_Guess)
+!    write (*, '(A)')
+!  end if
+
+  ! exit conditions
+
+  if (Converged .OR. outOfRange) exit iterations
+
+end do Iterations
+
+! Pass convergence flag out
+onedvar_success = converged
+
+write(*,*) "----------------------------"
+write(*,*) "Starting cost = ",JCostorig
+write(*,*) "Final cost = ",Jcost
+write(*,*) "Converged? ", Converged
+write(*,*) "Iterations = ",iter
+write(*,*) "Geovals after iterations = "
+call ufo_geovals_print(geovals,1)
+write(*,*) "----------------------------"
+
+write(*,'(A45,3F10.3,I5,L5)') "J initial, final, lowest, iter, converged = ",JCostorig,Jcost,Jcost,iter,onedvar_success
+
+!Ob % Niter = iter
+!if (RTerrorcode /= 0 .OR. .not. Converged .OR. outOfRange .OR. &
+!    inversionStatus /= 0) then
+!  Error = .true.
+!end if
+
+!if (.not. Error .and. self % UseJForConvergence) then
+!  ! store final cost function and retrieved bts
+!  Ob % Jcost = Jcost
+!  Ob % Britemp(Channels_1dvar(:)) = Britemp(:)
+!end if
+
+! ----------
+! Tidy up
+! ----------
+if (allocated(OldProfile))         deallocate(OldProfile)
+if (allocated(GuessProfile))       deallocate(GuessProfile)
+if (allocated(GuessProfileBefore)) deallocate(GuessProfileBefore)
+if (allocated(BackProfile))        deallocate(BackProfile)
+if (allocated(H_matrix))           deallocate(H_matrix)
+if (allocated(Diffprofile))        deallocate(Diffprofile)
+if (allocated(AbsDiffprofile))     deallocate(AbsDiffprofile)
+if (allocated(Ydiff))              deallocate(Ydiff)
+if (allocated(Y))                  deallocate(Y)
+if (allocated(Y0))                 deallocate(Y0)
+
+end subroutine ufo_rttovonedvarcheck_minimize_ml
+
+!-------------------------------------------------------------------------------
+! (C) Crown copyright Met Office. All rights reserved.
+!     Refer to COPYRIGHT.txt of this distribution for details.
+!-------------------------------------------------------------------------------
+! Updates the profile vector DeltaProfile according to Rodgers (1976), Eqn. 100,
+! extended to allow for additional cost function terms and Marquardt-Levenberg
+! descent.
+!
+!   x_(n+1) = xb + U^-1.V
+!   where U=(B^-1 + H^T R^-1 H + J2)
+!         V=H^T R^-1 [(ym-y(x_n))+H(x_n-xb)] - J1
+!   and   J_extra=J0+J1.(x-xb)+(x-xb)^T.J2.(x-xb) is the additional cost
+!         function
+!         x is an atmospheric state vector, subscripted b=background,n=nth
+!         iteration
+!         ym is the measurement vector (i.e. observed brightness temperatures)
+!         y(xn) is the observation vector calculated for xn
+!         ym and y(xn) are not used individually at all, hence these are input
+!         as a difference vector DeltaBT.
+!         B is the background error covariance matrix
+!         R is the combined forward model and ob error covariance matrix
+!         H is the forward model gradient (w.r.t. xn) matrix
+!         H' is the transpose of H
+
+!   When J_extra is zero this is simply Rogers (1976), Eqn. 100.
+!
+!   U^-1.V is solved using Cholesky decomposition.
+!
+! This routine should be used when:
+!     1) The length of the observation vector is greater than the length
+!        of the state vector,
+!     2) Additional cost function terms are provided and
+!     3) where Newtonian minimisation is desired.
+!
+! References:
+!
+!   Rodgers, Retrieval of atmospheric temperature and composition from
+!   remote measurements of thermal radiation, Rev. Geophys.Sp.Phys. 14, 1976.
+!
+!   Rodgers, Inverse Methods for Atmospheres: Theory and Practice.  World
+!            Scientific Publishing, 2000.
+!-------------------------------------------------------------------------------
+
+subroutine ufo_rttovonedvarcheck_ML_RTTOV12 ( self, &
+                                      DeltaBT,       &
+                                      nChans,        &
+                                      ob_info,       &
+                                      H_Matrix,      &
+                                      H_Matrix_T,    &
+                                      nprofelements, &
+                                      profile_index, &
+                                      DeltaProfile,  &
+                                      GuessProfile,  &
+                                      BackProfile,   &
+                                      b_inv,         &
+                                      r_matrix,      &
+                                      r_inv,         &
+                                      geovals,       &
+                                      channels,      &
+                                      gamma,         &
+                                      Jold,          &
+                                      Status)
+
+implicit none
+
+! subroutine arguments:
+type(ufo_rttovonedvarcheck), intent(in) :: self
+real(kind_real), intent(in)             :: DeltaBT(:)        ! y-y(x)
+integer, intent(in)                     :: nChans
+type(Obinfo_type), intent(in)           :: ob_info
+real(kind_real), intent(in)             :: H_Matrix(:,:)     ! Jacobian
+real(kind_real), intent(in)             :: H_Matrix_T(:,:)   ! (Jacobian)^T
+integer, intent(in)                     :: nprofelements
+type(Profileinfo_type), intent(in)      :: profile_index
+real(kind_real), intent(inout)          :: DeltaProfile(:)   ! see note in header
+real(kind_real), intent(inout)          :: GuessProfile(:)
+real(kind_real), intent(in)             :: BackProfile(:)
+real(kind_real), intent(in)             :: b_inv(:,:)
+type(rmatrix_type), intent(in)          :: r_matrix
+real(kind_real), intent(in)             :: r_inv(:,:)
+type(ufo_geovals), intent(inout)        :: geovals
+integer(c_int), intent(in)              :: channels(:)
+real(kind_real), intent(inout)          :: gamma
+real(kind_real), intent(inout)          :: Jold
+integer, intent(out)                    :: Status
+
+! Local declarations:
+character(len=*), parameter         :: RoutineName = 'ufo_rttovonedvarcheck_ML_RTTOV12'
+integer                             :: i
+integer                             :: Iter_ML                ! M-L iteration count
+real(kind_real)                     :: JOut(3)                ! J, Jb, Jo
+real(kind_real)                     :: JCost                  ! Cost function,
+logical                             :: OutOfRange
+real(kind_real)                     :: HTR(nprofelements, nChans)              ! Scratch vector
+real(kind_real)                     :: U(nprofelements, nprofelements)         ! U = H.B.H^T + R
+real(kind_real)                     :: V(nprofelements)                        ! V = (y-y(x_n))-H^T(xb-x_n)
+real(kind_real)                     :: USave(nprofelements, nprofelements)     ! U = H.B.H^T + R
+real(kind_real)                     :: VSave(nprofelements)                    ! V = (y-y(x_n))-H^T(xb-x_n)
+real(kind_real)                     :: New_DeltaProfile(nprofelements)
+real(kind_real)                     :: Tau_Surf(nchans)                ! Transmittance from surface
+real(kind_real)                     :: BriTemp(nchans)                 ! Forward modelled brightness temperatures
+real(kind_real)                     :: Ydiff(nchans)
+real(kind_real)                     :: Emiss(nchans)
+logical                             :: CalcEmiss(nchans)
+integer                             :: StatusOK = 0
+real(kind_real)                     :: H_matrix_tmp(nchans,nprofelements)
+integer                             :: RTStatus = 0
+
+Status = StatusOK
+
+!---------------------------------------------------------------------------
+! 1. Calculate HTR-1 for the three allowed forms of R matrix. if required, the
+!    matrix is tested to determine whether it is stored as an inverse and
+!    inverted if not.
+!---------------------------------------------------------------------------
+
+!HTR(-1) = matmul(H_matrix_T, R_inverse)
+call rmatrix_multiply_inv_matrix(R_matrix,H_matrix_T,HTR)
+
+!---------------------------------------------------------------------------
+! 2. Calculate U and V
+!---------------------------------------------------------------------------
+
+U = matmul (HTR, H_matrix)
+V = matmul (HTR, DeltaBT)
+V = V + matmul (U, DeltaProfile)
+
+!---------------------------------------------------------------------------
+! 3. Add on inverse of B-matrix to U.
+!---------------------------------------------------------------------------
+
+U = U + b_inv
+
+!---------------------------------------------------------------------------
+! 5. Start Marquardt-Levenberg loop.
+!    Search for a value of gamma that reduces the cost function.
+!---------------------------------------------------------------------------
+
+JCost = 1.0E10
+Gamma = Gamma / 10.0
+USave = U
+VSave = V
+Iter_ML = 0
+
+DescentLoop : do while (JCost > JOld .and.              &
+                        Iter_ML < self % MaxMLIterations .and. &
+                        Gamma <= 1.0E25)
+
+  Iter_ML = Iter_ML + 1
+
+  !------------------------------------------------------------------------
+  ! 5.1 Add on Marquardt-Levenberg terms to U and V.
+  !------------------------------------------------------------------------
+
+  Gamma = Gamma * 10.0
+
+  do I = 1, nprofelements
+    U(I,I) = USave(I,I) + Gamma
+  end do
+  V = VSave + Gamma * DeltaProfile
+
+  !------------------------------------------------------------------------
+  ! 5.2 Calculate new profile increment.
+  !------------------------------------------------------------------------
+
+  call ufo_rttovonedvarcheck_Cholesky (U,                &
+                                       V,                &
+                                       nprofelements,    &
+                                       New_DeltaProfile, &
+                                       Status)
+  if (Status /= 0) then
+     write(*,*) 'Error in Cholesky decomposition'
+  end if
+
+  !------------------------------------------------------------------------
+  ! 5.3. Calculate the radiances for the new profile.
+  !------------------------------------------------------------------------
+
+  GuessProfile(:) = BackProfile(:) + New_DeltaProfile(:)
+
+  call ufo_rttovonedvarcheck_CheckIteration (geovals,         & ! in
+                                  profile_index,   & ! in
+                                  self % nlevels,  & ! in
+                                  GuessProfile(:), & ! inout
+                                  outOfRange)        ! out
+
+  if (.not. OutOfRange) then
+    call ufo_rttovonedvarcheck_ProfVec2GeoVaLs(geovals, profile_index, nprofelements, GuessProfile)
+
+    !Emiss(1:nchans) = RTprof_Guess % Emissivity(Channels(1:nchans))
+    !CalcEmiss(1:nchans) = RTprof_Guess % CalcEmiss(Channels(1:nchans))
+
+   ! call forward model
+   call ufo_rttovonedvarcheck_ForwardModel(geovals, ob_info, self % obsdb, &
+                                           channels(:), self % conf, &
+                                           profile_index, GuessProfile(:), &
+                                           BriTemp(:), H_matrix_tmp)
+
+    !------------------------------------------------------------------------
+    ! 5.6. Calculate the new cost function.
+    !------------------------------------------------------------------------
+
+    if (RTStatus > 0) then
+
+      ! In case of RT error, set cost to large value and
+      ! continue with next iteration
+
+      Jcost = 1.0E10
+    else
+      DeltaProfile(:) = GuessProfile(:) - BackProfile(:)
+      Ydiff(:) = ob_info%yobs(:) - BriTemp(:)
+      call ufo_rttovonedvarcheck_CostFunction(DeltaProfile, b_inv, Ydiff, r_inv, Jout)
+      Jcost = Jout(1)
+!      if (Status /= StatusOK) GOTO 9999
+    end if
+
+  else
+
+    ! if profile out of range, set cost to large value and
+    ! continue with next iteration
+
+    Jcost = 1.0E10
+
+  end if
+
+end do DescentLoop
+
+DeltaProfile = New_DeltaProfile
+Gamma = Gamma / 10.0
+JOld = JCost
+
+9999 continue
+
+end subroutine ufo_rttovonedvarcheck_ML_RTTOV12
 
 end module ufo_rttovonedvarcheck_minimize_ml_mod

@@ -1,4 +1,4 @@
-! (C) Copyright 2018 UCAR
+! (C) Copyright 2020 Met Office
 !
 ! This software is licensed under the terms of the Apache Licence Version 2.0
 ! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
@@ -22,9 +22,10 @@ private ! default
 public ufo_rttovonedvarcheck_GeoVaLs2ProfVec
 public ufo_rttovonedvarcheck_ProfVec2GeoVaLs
 public ufo_rttovonedvarcheck_CostFunction
-public Ops_SatRad_Qsplit
-public Ops_SatRad_CheckIteration
-public Ops_SatRad_CheckCloudyIteration
+public ufo_rttovonedvarcheck_Qsplit
+public ufo_rttovonedvarcheck_CheckIteration
+public ufo_rttovonedvarcheck_CheckCloudyIteration
+public ufo_rttovonedvarcheck_Cholesky
 
 ! subroutines - private to the module
 private Ops_Qsat
@@ -41,7 +42,7 @@ subroutine ufo_rttovonedvarcheck_GeoVaLs2ProfVec( geovals,       & ! in
 ! Copy profile data from the GeoVaLs-format into the
 ! minimisation-format vector Prof. We only copy fields that are being retrieved,
 ! as indicated by the profindex structure.
-! This has heritage from Ops_SatRad_RTprof2Vec_RTTOVxx.f90
+! This has heritage from ufo_rttovonedvarcheck_RTprof2Vec_RTTOVxx.f90
 !-------------------------------------------------------------------------------
 
 implicit none
@@ -166,7 +167,7 @@ subroutine ufo_rttovonedvarcheck_ProfVec2GeoVaLs(geovals,       & ! out
 ! Copy profile data from the GeoVaLs-format into the
 ! minimisation-format vector Prof. We only copy fields that are being retrieved,
 ! as indicated by the profindex structure.
-! This has heritage from Ops_SatRad_RTprof2Vec_RTTOVxx.f90
+! This has heritage from ufo_rttovonedvarcheck_RTprof2Vec_RTTOVxx.f90
 !-------------------------------------------------------------------------------
 
 implicit none
@@ -242,7 +243,7 @@ if (profindex % qt(1) > 0) then
   pressure(:) = geoval%vals(:, 1)    ! Pa
 
   ! Split qtotal to q(water_vapour), q(liquid), q(ice)
-  call Ops_SatRad_Qsplit (1,                                         & ! in
+  call ufo_rttovonedvarcheck_Qsplit (1,                                         & ! in
                           temperature(:),                            & ! in
                           pressure(:),                               & ! in
                           nlevels,                                   & ! in
@@ -400,7 +401,7 @@ end subroutine ufo_rttovonedvarcheck_CostFunction
 ! p126
 !-------------------------------------------------------------------------------
 
-subroutine Ops_SatRad_Qsplit (output_type, &
+subroutine ufo_rttovonedvarcheck_Qsplit (output_type, &
                               t,           &
                               p,           &
                               nlevels_q,   &
@@ -454,7 +455,7 @@ real(kind=kind_real) :: LF(nlevels_q)          ! fraction of ql to ql+qi
 real(kind=kind_real) :: QsplitRainParamA
 real(kind=kind_real) :: QsplitRainParamB
 real(kind=kind_real) :: QsplitRainParamC
-character(len=*), parameter :: RoutineName = "Ops_SatRad_Qsplit"
+character(len=*), parameter :: RoutineName = "ufo_rttovonedvarcheck_Qsplit"
 logical                     :: useQtsplitRain
 
 ! Addition to make it work
@@ -599,7 +600,7 @@ if (output_type /= 1) then
 
 end if
 
-end subroutine Ops_SatRad_Qsplit
+end subroutine ufo_rttovonedvarcheck_Qsplit
 
 !-----------------------------------------------------------------------
 ! (C) Crown copyright Met Office. All rights reserved.
@@ -1462,7 +1463,7 @@ end subroutine Ops_QsatWat
 ! Constrain profile humidity and check temperature values are okay
 !-------------------------------------------------------------------------------
 
-subroutine Ops_SatRad_CheckIteration (geovals,    &
+subroutine ufo_rttovonedvarcheck_CheckIteration (geovals,    &
                                       profindex,  &
                                       nlevels_1dvar, &
                                       profile,    &
@@ -1506,7 +1507,7 @@ real(kind_real)              :: Temp2(1)
 real(kind_real)              :: rtbase
 integer                      :: nlevels_q
 integer                      :: toplevel_q
-character(len=*), parameter  :: RoutineName = "Ops_SatRad_CheckIteration"
+character(len=*), parameter  :: RoutineName = "ufo_rttovonedvarcheck_CheckIteration"
 type(ufo_geoval), pointer    :: geoval
 character(len=100)           :: varname
 logical                      :: useRHwaterForQC
@@ -1737,7 +1738,7 @@ if (allocated(qsaturated))        deallocate(qsaturated)
 if (allocated(scaled_qsaturated)) deallocate(scaled_qsaturated)
 if (allocated(Plevels_1DVar))     deallocate(Plevels_1DVar)
 
-end subroutine Ops_SatRad_CheckIteration
+end subroutine ufo_rttovonedvarcheck_CheckIteration
 
 !-------------------------------------------------------------------------------
 ! (C) Crown copyright Met Office. All rights reserved.
@@ -1748,7 +1749,7 @@ end subroutine Ops_SatRad_CheckIteration
 ! 1dvar and reject profile
 !-------------------------------------------------------------------------------
 
-subroutine Ops_SatRad_CheckCloudyIteration( &
+subroutine ufo_rttovonedvarcheck_CheckCloudyIteration( &
   geovals,       & ! in
   profindex,     & ! in
   nlevels_1dvar, & ! in
@@ -1772,7 +1773,7 @@ real(kind_real) :: meanql
 real(kind_real) :: meanqi
 integer         :: i
 integer         :: nlevels_q, toplevel_q
-character(len=*), parameter :: RoutineName = "Ops_SatRad_CheckCloudyIteration"
+character(len=*), parameter :: RoutineName = "ufo_rttovonedvarcheck_CheckCloudyIteration"
 
 real(kind_real), parameter   :: MaxLWP = 2.0
 real(kind_real), parameter   :: MaxIWP = 3.0
@@ -1862,7 +1863,84 @@ if (any(ciw(:) > 0.0) .or. &
 
 end if
 
-end subroutine Ops_SatRad_CheckCloudyIteration
+end subroutine ufo_rttovonedvarcheck_CheckCloudyIteration
+
+!-------------------------------------------------------------------------------
+! (C) Crown copyright Met Office. All rights reserved.
+!     Refer to COPYRIGHT.txt of this distribution for details.
+!-------------------------------------------------------------------------------
+! Solves the Linear equation UQ=V for Q where U is a symmetric positive definite
+! matrix and U and Q are vectors of length N.  The method follows that in Golub
+! and Van Loan although this is pretty standard.
+!
+! if U is not positive definite this will be detected by the program and flagged
+! as an error.  U is assumed to be symmetric as only the upper triangle is in
+! fact used.
+!-------------------------------------------------------------------------------
+
+subroutine ufo_rttovonedvarcheck_Cholesky (U,         &
+                         V,         &
+                         N,         &
+                         Q,         &
+                         ErrorCode)
+
+implicit none
+
+! subroutine arguments:
+integer, intent(in)          :: n
+real(kind_real), intent(in)  :: U(n,n)
+real(kind_real), intent(in)  :: V(n)
+real(kind_real), intent(out) :: Q(n)
+integer, intent(out)         :: ErrorCode
+
+! Local declarations:
+character(len=*), parameter  :: RoutineName = "ufo_rttovonedvarcheck_Cholesky"
+real(kind_real), parameter   :: Tolerance = tiny (0.0) * 100.0
+character(len=80)            :: ErrorMessage
+integer                      :: j
+integer                      :: k
+real(kind_real)              :: G(n,n)   ! The Cholesky Triangle Matrix
+real(kind_real)              :: X(n)     ! Temporary array used in calculating G
+
+ErrorCode = 0
+
+! Determine the Cholesky triangle matrix.
+
+do j = 1, n
+  X(j:n) = U(j:n,j)
+  if (j /= 1) then
+    do k = 1, j - 1
+      X(j:n) = X(j:n) - G(j,k) * G(j:n,k)
+    end do
+  end if
+  if (X(j) <= Tolerance) then
+    ErrorCode = 1
+    Errormessage = ' :U matrix is not positive definite'
+    write(*,*) RoutineName,ErrorMessage
+    goto 9999
+  end if
+  G(J:N,J) = X(J:N) / sqrt (X(J))
+end do
+
+! Solve Gx=v for x by forward substitution
+
+X = V
+X(1) = X(1) / G(1,1)
+do j = 2, n
+  X(j) = (X(j) - dot_product(G(j,1:j - 1), X(1:j - 1))) / G(j,j)
+end do
+
+! Solve G^T.q=x for q by backward substitution
+
+Q = x
+Q(n) = Q(n) / G(n,n)
+do j = n - 1, 1, -1
+  Q(j) = (Q(j) - dot_product(G(j + 1:n,j), Q(j + 1:n))) / G(j,j)
+end do
+
+9999 continue
+
+end subroutine ufo_rttovonedvarcheck_Cholesky
 
 ! ----------------------------------------------------------
 

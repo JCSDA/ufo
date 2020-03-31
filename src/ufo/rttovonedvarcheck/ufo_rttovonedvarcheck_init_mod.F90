@@ -1,4 +1,4 @@
-! (C) Copyright 2018 UCAR
+! (C) Copyright 2020 Met Office
 !
 ! This software is licensed under the terms of the apache licence version 2.0
 ! which can be obtained at http://www.apache.org/licenses/license-2.0.
@@ -62,6 +62,7 @@ write(*,*) "nchans setup = ",self%nchans
 write(*,*) "channels setup = ",self%channels
 
 ! Set defaults for 1D-var
+self % rtype = "diagonal"
 self % qtotal = .false.
 self % RTTOV_mwscattSwitch = .false.
 self % use_totalice = .false.
@@ -74,6 +75,12 @@ self % ConvergenceFactor = 0.40
 self % Cost_ConvergenceFactor = 0.01
 self % Mqstart = 0.001 ! Marquardt starting parameter
 self % Mqstep = 5.0    ! Marquardt step parameter
+self % MaxMLIterations = 7
+
+! R matrix type to use
+if (config_element_exists(self % conf, "rtype")) then
+  self % rtype = config_get_string(self % conf, max_string_length, "rtype")
+end if
 
 ! Flag for total humidity
 if (config_element_exists(self % conf, "qtotal")) then
@@ -127,7 +134,7 @@ end if
 
 ! Flag to specify if delta_x has to be negative for converg. to be true
 if (config_element_exists(self % conf, "Cost_ConvergenceFactor")) then
-  self % ConvergenceFactor = config_get_real(self % conf, "Cost_ConvergenceFactor")
+  self % Cost_ConvergenceFactor = config_get_real(self % conf, "Cost_ConvergenceFactor")
 end if
 
 ! Flag to specify if delta_x has to be negative for converg. to be true
@@ -290,7 +297,7 @@ subroutine ufo_rttovonedvarcheck_GetBmatrix (fileunit, &
 ! example, to take account of the different surface temperature errors for land
 ! and sea. this routine makes no assumption about the use of these variables,
 ! hence no space is allocated. nullification of unused pointers should take
-! place outside (use the ops_satrad_initbmatrix routine).
+! place outside (use the ufo_rttovonedvarcheck_initbmatrix routine).
 !-------------------------------------------------------------------------------
 
 

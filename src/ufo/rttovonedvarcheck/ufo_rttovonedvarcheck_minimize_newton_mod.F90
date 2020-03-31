@@ -1,4 +1,4 @@
-! (C) Copyright 2018 UCAR
+! (C) Copyright 2020 Met Office
 ! This software is licensed under the terms of the Apache Licence Version 2.0
 ! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 
@@ -12,13 +12,32 @@ use kinds
 use ufo_geovals_mod
 use ufo_rttovonedvarcheck_utils_mod
 use ufo_radiancerttov_tlad_mod
+use ufo_rttovonedvarcheck_rmatrix_mod, only: &
+                    rmatrix_type, &
+                    rmatrix_add_to_u, &
+                    rmatrix_multiply, &
+                    rmatrix_multiply_matrix, &
+                    rmatrix_inv_multiply, &
+                    rmatrix_multiply_inv_matrix
+
+use ufo_rttovonedvarcheck_process_mod, only: &
+        ufo_rttovonedvarcheck_GeoVaLs2ProfVec, &
+        ufo_rttovonedvarcheck_ProfVec2GeoVaLs, &
+        ufo_rttovonedvarcheck_CostFunction, &
+        ufo_rttovonedvarcheck_CheckIteration, &
+        ufo_rttovonedvarcheck_CheckCloudyIteration, &
+        ufo_rttovonedvarcheck_Cholesky
+
+use ufo_rttovonedvarcheck_forward_model_mod, only: &
+        ufo_rttovonedvarcheck_ForwardModel
+
 
 implicit none
 
 private
 
 ! public subroutines
-public Ops_SatRad_MinimizeNewton_RTTOV12
+public ufo_rttovonedvarcheck_minimize_newton
 
 contains
 
@@ -66,10 +85,11 @@ contains
 !   Eyre, inversion of cloudy satellite sounding radiances by nonlinear
 !   optimal estimation. I: Theory and simulation for TOVS,QJ,July 89.
 !-------------------------------------------------------------------------------
-subroutine Ops_SatRad_MinimizeNewton_RTTOV12(self, &
+subroutine ufo_rttovonedvarcheck_minimize_newton(self, &
                                          ob_info,       &
                                          r_matrix,      &
                                          r_inv,         &
+                                         r_matrix_obj,  &
                                          b_matrix,      &
                                          b_inv,         &
                                          local_geovals, &
@@ -78,27 +98,13 @@ subroutine Ops_SatRad_MinimizeNewton_RTTOV12(self, &
                                          channels,      &
                                          onedvar_success)
 
-
-use ufo_rttovonedvarcheck_utils_mod, only: &
-                    ufo_rttovonedvarcheck
-
-use ufo_rttovonedvarcheck_process_mod, only: &
-                    ufo_rttovonedvarcheck_GeoVaLs2ProfVec, &
-                    ufo_rttovonedvarcheck_ProfVec2GeoVaLs, &
-                    ufo_rttovonedvarcheck_CostFunction, &
-                    Ops_SatRad_Qsplit, &
-                    Ops_SatRad_CheckIteration, &
-                    Ops_SatRad_CheckCloudyIteration
-
-use ufo_rttovonedvarcheck_forward_model_mod, only: &
-                    ufo_rttovonedvarcheck_ForwardModel
-
 implicit none
 
 type(ufo_rttovonedvarcheck), intent(inout) :: self
 type(Obinfo_type), intent(in)        :: ob_info
 real(kind_real), intent(in)          :: r_matrix(:,:)
 real(kind_real), intent(in)          :: r_inv(:,:)
+type(rmatrix_type), intent(in)       :: r_matrix_obj
 real(kind_real), intent(in)          :: b_matrix(:,:)
 real(kind_real), intent(in)          :: b_inv(:,:)
 type(ufo_geovals), intent(inout)     :: local_geovals
@@ -108,7 +114,7 @@ integer(c_int), intent(in)           :: channels(:)
 logical, intent(out)                 :: onedvar_success
 
 ! Local declarations:
-character(len=*), parameter     :: RoutineName = "Ops_SatRad_MinimizeNewton_RTTOV12"
+character(len=*), parameter     :: RoutineName = "ufo_rttovonedvarcheck_minimize_newton"
 integer                         :: inversionstatus
 logical                         :: outOfRange
 logical                         :: Converged
@@ -138,9 +144,9 @@ real(kind_real)                 :: Jout(3)
 integer                         :: ii
 
 ! interface blocks:
-!inCLUDE 'Ops_SatRad_CheckIteration.interface'
-!inCLUDE 'Ops_SatRad_CheckCloudyIteration.interface'
-!inCLUDE 'Ops_SatRad_PrintRTprofile_RTTOV12.interface'
+!inCLUDE 'ufo_rttovonedvarcheck_CheckIteration.interface'
+!inCLUDE 'ufo_rttovonedvarcheck_CheckCloudyIteration.interface'
+!inCLUDE 'ufo_rttovonedvarcheck_PrintRTprofile_RTTOV12.interface'
 
 Converged = .false.
 onedvar_success = .false.
@@ -265,7 +271,7 @@ Iterations: do iter = 1, self % max1DVarIterations
 !          write (*, '(A)') '------------'
 !          write (*, '(A,L1)') 'Status: converged = ', Converged
 !          write (*, '(A)') 'New profile:'
-!          call Ops_SatRad_PrintRTprofile_RTTOV12 (RTprof_Guess)
+!          call ufo_rttovonedvarcheck_PrintRTprofile_RTTOV12 (RTprof_Guess)
 !          write (*, '(A)')
 !        end if
 
@@ -279,18 +285,19 @@ Iterations: do iter = 1, self % max1DVarIterations
   ! Iterate (Guess) profile vector
   if (nchans > nprofelements) then
     write(*,*) "Many Chans"
-    call Ops_SatRad_NewtonManyChans (Ydiff,                     &
+    call ufo_rttovonedvarcheck_NewtonManyChans (Ydiff,                     &
                                      nchans,                    &
                                      H_matrix(:,:),             & ! in
                                      transpose (H_matrix(:,:)), & ! in
                                      nprofelements,             &
                                      Diffprofile,               &
                                      b_inv,                     &
-                                     r_matrix,                  &
+                                     r_inv,                     &
+                                     r_matrix_obj,              &
                                      inversionStatus)
   else ! nchans <= nprofelements
     write(*,*) "Few Chans"
-    call Ops_SatRad_NewtonFewChans (Ydiff,                     &
+    call ufo_rttovonedvarcheck_NewtonFewChans (Ydiff,                     &
                                     nchans,                    &
                                     H_matrix(:,:),             & ! in
                                     transpose (H_matrix(:,:)), & ! in
@@ -298,6 +305,7 @@ Iterations: do iter = 1, self % max1DVarIterations
                                     Diffprofile,               &
                                     b_matrix,                  &
                                     r_matrix,                  &
+                                    r_matrix_obj,              &
                                     inversionStatus)
   end if
 
@@ -316,7 +324,7 @@ Iterations: do iter = 1, self % max1DVarIterations
   ! Check profile and constrain humidity variables
 
   GuessProfileBefore(:) = GuessProfile(:)
-  call Ops_SatRad_CheckIteration (geovals,         & ! in
+  call ufo_rttovonedvarcheck_CheckIteration (geovals,         & ! in
                                   profile_index,   & ! in
                                   self % nlevels,  & ! in
                                   GuessProfile(:), & ! inout
@@ -342,22 +350,22 @@ Iterations: do iter = 1, self % max1DVarIterations
         !cloud information is from the scatt profile
         if (self % use_totalice) then
 
-          call Ops_SatRad_CheckCloudyIteration( geovals,         & ! in
+          call ufo_rttovonedvarcheck_CheckCloudyIteration( geovals,         & ! in
                                                 profile_index,   & ! in
                                                 self % nlevels,  & ! in
                                                 OutOfRange )
 
-!          call Ops_SatRad_CheckCloudyIteration (RTprof_Guess % rttov12_profile_scatt % clw(:),      & ! in
+!          call ufo_rttovonedvarcheck_CheckCloudyIteration (RTprof_Guess % rttov12_profile_scatt % clw(:),      & ! in
 !                                                RTprof_Guess % rttov12_profile_scatt % totalice(:), & ! in
 !                                                outOfRange)                                                         ! out
         else
 
-          call Ops_SatRad_CheckCloudyIteration( geovals,         & ! in
+          call ufo_rttovonedvarcheck_CheckCloudyIteration( geovals,         & ! in
                                                 profile_index,   & ! in
                                                 self % nlevels,  & ! in
                                                 OutOfRange )
 
-!          call Ops_SatRad_CheckCloudyIteration (RTprof_Guess % rttov12_profile_scatt % clw(:), & ! in
+!          call ufo_rttovonedvarcheck_CheckCloudyIteration (RTprof_Guess % rttov12_profile_scatt % clw(:), & ! in
 !                                                RTprof_Guess % rttov12_profile_scatt % ciw(:), & ! in
 !                                                outOfRange)
 
@@ -365,7 +373,7 @@ Iterations: do iter = 1, self % max1DVarIterations
                                                                                                
       else
 
-        call Ops_SatRad_CheckCloudyIteration( geovals,         & ! in
+        call ufo_rttovonedvarcheck_CheckCloudyIteration( geovals,         & ! in
                                               profile_index,   & ! in
                                               self % nlevels,  & ! in
                                               OutOfRange )
@@ -401,7 +409,7 @@ Iterations: do iter = 1, self % max1DVarIterations
 !    write (*, '(A,L1)') 'Status: converged = ', Converged
 !    if (outOfRange) write (*, '(A)') 'exiting with bad increments'
 !    write (*, '(A)') 'New profile:'
-!    call Ops_SatRad_PrintRTprofile_RTTOV12 (RTprof_Guess)
+!    call ufo_rttovonedvarcheck_PrintRTprofile_RTTOV12 (RTprof_Guess)
 !    write (*, '(A)')
 !  end if
 
@@ -451,7 +459,7 @@ if (allocated(Ydiff))              deallocate(Ydiff)
 if (allocated(Y))                  deallocate(Y)
 if (allocated(Y0))                 deallocate(Y0)
 
-end subroutine Ops_SatRad_MinimizeNewton_RTTOV12
+end subroutine ufo_rttovonedvarcheck_minimize_newton
 
 !-------------------------------------------------------------------------------
 ! (C) Crown copyright Met Office. All rights reserved.
@@ -500,7 +508,7 @@ end subroutine Ops_SatRad_MinimizeNewton_RTTOV12
 !            Scientific Publishing, 2000.
 !-------------------------------------------------------------------------------
 
-subroutine Ops_SatRad_NewtonFewChans (DeltaBT,       &
+subroutine ufo_rttovonedvarcheck_NewtonFewChans (DeltaBT,       &
                                       nChans,        &
                                       H_Matrix,      &
                                       H_Matrix_T,    &
@@ -508,6 +516,7 @@ subroutine Ops_SatRad_NewtonFewChans (DeltaBT,       &
                                       DeltaProfile,  &
                                       B_matrix,      &
                                       R_matrix,      &
+                                      r_matrix_obj,  &
                                       Status)
 
 implicit none
@@ -521,16 +530,18 @@ integer, intent(in)             :: nprofelements
 real(kind_real), intent(inout)  :: DeltaProfile(:)   ! see note in header
 real(kind_real), intent(in)     :: B_matrix(:,:)
 real(kind_real), intent(in)     :: R_matrix(:,:)
+type(rmatrix_type), intent(in)  :: r_matrix_obj
 integer, intent(out)            :: Status
 
 ! Local declarations:
-character(len=*), parameter :: RoutineName = "Ops_SatRad_Minimize_101"
+character(len=*), parameter :: RoutineName = "ufo_rttovonedvarcheck_Minimize_101"
 integer                     :: Element
 integer                     :: i
 real(kind_real)             :: HB(nChans,nprofelements) ! Scratch vector
 real(kind_real)             :: Q(nChans)                ! Q = U^-1.V
 real(kind_real)             :: U(nChans,nChans)         ! U = H.B.H^T + R
 real(kind_real)             :: V(nChans)                ! V = (y-y(x_n))-H^T(xb-x_n)
+
 
 Status = 0
 
@@ -553,18 +564,19 @@ U = matmul(HB, H_matrix_T)
 V = DeltaBT + matmul(H_matrix, DeltaProfile)
 
 !---------------------------------------------------------------------------
-! 1.1. Add the R matrix into the U matrix.
+! 1.1. Add the R matrix into the U matrix. U = U + R
 !---------------------------------------------------------------------------
-U = U + R_Matrix
+!U = U + R_Matrix
+call rmatrix_add_to_u(r_matrix_obj,U,U)
 
 ! Calculate Q=(U^-1).V
 !------
 
-call Ops_Cholesky (U,      &
-                   V,      &
-                   nChans, &
-                   Q,      &
-                   Status)
+call ufo_rttovonedvarcheck_Cholesky (U,      &
+                                     V,      &
+                                     nChans, &
+                                     Q,      &
+                                     Status)
 if (Status /= 0) goto 9999
 
 ! Delta profile is (HB)^T.Q
@@ -574,7 +586,7 @@ DeltaProfile = matmul(transpose(HB), Q)
 
 9999 continue
 
-end subroutine Ops_SatRad_NewtonFewChans
+end subroutine ufo_rttovonedvarcheck_NewtonFewChans
 
 !-------------------------------------------------------------------------------
 ! (C) Crown copyright Met Office. All rights reserved.
@@ -618,14 +630,15 @@ end subroutine Ops_SatRad_NewtonFewChans
 !            Scientific Publishing, 2000.
 !-------------------------------------------------------------------------------
 
-subroutine Ops_SatRad_NewtonManyChans (DeltaBT,       &
+subroutine ufo_rttovonedvarcheck_NewtonManyChans (DeltaBT,       &
                                        nChans,        &
                                        H_Matrix,      &
                                        H_Matrix_T,    &
                                        nprofelements, &
                                        DeltaProfile,  &
                                        B_inverse,     &
-                                       R_matrix,      &
+                                       R_inverse,      &
+                                       R_matrix_obj,  &
                                        Status)
 
 implicit none
@@ -638,11 +651,12 @@ real(kind_real), intent(in)     :: H_Matrix_T(:,:)   ! (Jacobian)^T
 integer, intent(in)             :: nprofelements
 real(kind_real), intent(inout)  :: DeltaProfile(:)   ! see note in header
 real(kind_real), intent(in)     :: B_inverse(:,:)
-real(kind_real), intent(in)     :: R_matrix(:,:)
+real(kind_real), intent(in)     :: R_inverse(:,:)
+type(rmatrix_type), intent(in)  :: R_matrix_obj
 integer, intent(out)            :: Status
 
 ! Local declarations:
-character(len=*), parameter :: RoutineName = 'Ops_SatRad_NewtonManyChans'
+character(len=*), parameter :: RoutineName = 'ufo_rttovonedvarcheck_NewtonManyChans'
 real(kind_real)             :: HTR(nprofelements, nChans)              ! Scratch vector
 real(kind_real)             :: U(nprofelements, nprofelements)         ! U = H.B.H^T + R
 real(kind_real)             :: V(nprofelements)                        ! V = (y-y(x_n))-H^T(xb-x_n)
@@ -654,7 +668,9 @@ Status = 0
 !    matrix is tested to determine whether it is stored as an inverse and
 !    inverted if not.
 !---------------------------------------------------------------------------
-HTR = matmul(H_matrix_T, R_matrix(:,:))
+!HTR = matmul(H_matrix_T, R_inverse(:,:))
+!HTR = matmul(H_matrix_T, R_inverse)
+call rmatrix_multiply_inv_matrix(R_matrix_obj,H_matrix_T,HTR)
 
 !---------------------------------------------------------------------------
 ! 2. Calculate U and V
@@ -674,89 +690,12 @@ U = U + B_inverse
 ! 5. Calculate new profile increment.
 !---------------------------------------------------------------------------
 
-call Ops_Cholesky (U,             &
-                   V,             &
-                   nprofelements, &
-                   DeltaProfile, &
-                   Status)
+call ufo_rttovonedvarcheck_Cholesky (U,             &
+                                     V,             &
+                                     nprofelements, &
+                                     DeltaProfile, &
+                                     Status)
 
-end subroutine Ops_SatRad_NewtonManyChans
-
-!-------------------------------------------------------------------------------
-! (C) Crown copyright Met Office. All rights reserved.
-!     Refer to COPYRIGHT.txt of this distribution for details.
-!-------------------------------------------------------------------------------
-! Solves the Linear equation UQ=V for Q where U is a symmetric positive definite
-! matrix and U and Q are vectors of length N.  The method follows that in Golub
-! and Van Loan although this is pretty standard.
-!
-! if U is not positive definite this will be detected by the program and flagged
-! as an error.  U is assumed to be symmetric as only the upper triangle is in
-! fact used.
-!-------------------------------------------------------------------------------
-
-subroutine Ops_Cholesky (U,         &
-                         V,         &
-                         N,         &
-                         Q,         &
-                         ErrorCode)
-
-implicit none
-
-! subroutine arguments:
-integer, intent(in)          :: n
-real(kind_real), intent(in)  :: U(n,n)
-real(kind_real), intent(in)  :: V(n)
-real(kind_real), intent(out) :: Q(n)
-integer, intent(out)         :: ErrorCode
-
-! Local declarations:
-character(len=*), parameter  :: RoutineName = "Ops_Cholesky"
-real(kind_real), parameter   :: Tolerance = tiny (0.0) * 100.0
-character(len=80)            :: ErrorMessage
-integer                      :: j
-integer                      :: k
-real(kind_real)              :: G(n,n)   ! The Cholesky Triangle Matrix
-real(kind_real)              :: X(n)     ! Temporary array used in calculating G
-
-ErrorCode = 0
-
-! Determine the Cholesky triangle matrix.
-
-do j = 1, n
-  X(j:n) = U(j:n,j)
-  if (j /= 1) then
-    do k = 1, j - 1
-      X(j:n) = X(j:n) - G(j,k) * G(j:n,k)
-    end do
-  end if
-  if (X(j) <= Tolerance) then
-    ErrorCode = 1
-    Errormessage = ' :U matrix is not positive definite'
-    write(*,*) RoutineName,ErrorMessage
-    goto 9999
-  end if
-  G(J:N,J) = X(J:N) / sqrt (X(J))
-end do
-
-! Solve Gx=v for x by forward substitution
-
-X = V
-X(1) = X(1) / G(1,1)
-do j = 2, n
-  X(j) = (X(j) - dot_product(G(j,1:j - 1), X(1:j - 1))) / G(j,j)
-end do
-
-! Solve G^T.q=x for q by backward substitution
-
-Q = x
-Q(n) = Q(n) / G(n,n)
-do j = n - 1, 1, -1
-  Q(j) = (Q(j) - dot_product(G(j + 1:n,j), Q(j + 1:n))) / G(j,j)
-end do
-
-9999 continue
-
-end subroutine Ops_Cholesky
+end subroutine ufo_rttovonedvarcheck_NewtonManyChans
 
 end module ufo_rttovonedvarcheck_minimize_newton_mod

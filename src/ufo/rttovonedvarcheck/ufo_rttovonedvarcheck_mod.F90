@@ -1,4 +1,4 @@
-! (C) Copyright 2017-2018 ucar
+! (C) Copyright 2017-2020 Met Office
 ! 
 ! this software is licensed under the terms of the apache licence version 2.0
 ! which can be obtained at http://www.apache.org/licenses/license-2.0.
@@ -21,7 +21,7 @@ use ufo_rttovonedvarcheck_process_mod
 implicit none
 public :: ufo_rttovonedvarcheck
 public :: ufo_rttovonedvarcheck_create, ufo_rttovonedvarcheck_delete
-public :: ufo_rttovonedvarcheck_prior, ufo_rttovonedvarcheck_post
+public :: ufo_rttovonedvarcheck_apply
 
 ! ------------------------------------------------------------------------------
 contains
@@ -56,32 +56,27 @@ end subroutine ufo_rttovonedvarcheck_delete
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_rttovonedvarcheck_prior(self, geovals)
-
-  implicit none
-  type(ufo_rttovonedvarcheck), intent(in) :: self
-  type(ufo_geovals), intent(in) :: geovals
-
-end subroutine ufo_rttovonedvarcheck_prior
-
-! ------------------------------------------------------------------------------
-
-subroutine ufo_rttovonedvarcheck_post(self, vars, geovals, apply)
+subroutine ufo_rttovonedvarcheck_apply(self, vars, geovals, apply)
 
   ! ------------------------------------------
   ! load modules only used in this subroutine
   ! ------------------------------------------
   use missing_values_mod
   use ufo_rttovonedvarcheck_minimize_newton_mod, only: &
-                    Ops_SatRad_MinimizeNewton_RTTOV12
+                    ufo_rttovonedvarcheck_minimize_newton
   use ufo_rttovonedvarcheck_minimize_ml_mod, only: &
-                    ufo_rttovonedvarcheck_MinimizeML
+                    ufo_rttovonedvarcheck_minimize_ml
+  use ufo_rttovonedvarcheck_rmatrix_mod, only: &
+                    rmatrix_type, &
+                    rmatrix_setup, &
+                    rmatrix_delete, &
+                    rmatrix_print
 
   implicit none
-  type(ufo_rttovonedvarcheck), intent(inout) :: self        ! one d var check setup info
-  type(oops_variables), intent(in)        :: vars
-  type(ufo_geovals), intent(in)           :: geovals     ! model values at observation space
-  logical, intent(in)                     :: apply(:)
+  type(ufo_rttovonedvarcheck), intent(inout) :: self     ! one d var check setup info
+  type(oops_variables), intent(in)           :: vars
+  type(ufo_geovals), intent(in)              :: geovals  ! model values at observation space
+  logical, intent(in)                        :: apply(:)
 
   integer, allocatable               :: fields_in(:)
   integer                            :: iloc, jvar, jobs, ivar, band ! counters
@@ -94,6 +89,7 @@ subroutine ufo_rttovonedvarcheck_post(self, vars, geovals, apply)
   character(len=100)                 :: varname
   real(kind_real), allocatable       :: r_matrix(:,:)   ! r-matrix = obs + forward model error
   real(kind_real), allocatable       :: r_inverse(:,:)  ! inverse of the r-matrix 
+  type(rmatrix_type)                 :: r_matrix_obj    ! new r_matrix object
   type(bmatrix_type)                 :: full_b_matrix   ! full b matrix
   real(kind_real), allocatable       :: b_matrix(:,:)   ! 1d-var profile b matrix
   real(kind_real), allocatable       :: b_inverse(:,:)  ! inverse for each 1d-var profile b matrix
@@ -101,7 +97,7 @@ subroutine ufo_rttovonedvarcheck_post(self, vars, geovals, apply)
   integer                            :: nprofelements   ! number of elements in 1d-var state profile
   type(ufo_geovals)                  :: local_geovals   ! geoval for one observation
   real(c_double), allocatable        :: iter_hofx(:)    ! model equivalent of observations during 1d-var
-  real(kind_real)                    :: obs_error
+  real(kind_real), allocatable       :: obs_error(:)
   integer, allocatable               :: channels_used(:)
 
   ! variables from ioda
@@ -173,8 +169,6 @@ subroutine ufo_rttovonedvarcheck_post(self, vars, geovals, apply)
   call obsspace_get_db(self%obsdb,  "MetaData", "sensor_azimuth_angle", sat_azi(:))
   call obsspace_get_db(self%obsdb,  "MetaData", "solar_zenith_angle", sol_zen(:))
   call obsspace_get_db(self%obsdb,  "MetaData", "solar_azimuth_angle", sol_azi(:))
-
-  !QCflags(1,1) = 1
 
   call cpu_time(t1)
 
@@ -267,10 +261,8 @@ subroutine ufo_rttovonedvarcheck_post(self, vars, geovals, apply)
       do band = 1, full_b_matrix % nbands
         if (lat(jobs) <  full_b_matrix % north(band)) exit
       end do
-      write(*,*) "band = ",band
       b_matrix(:,:) = full_b_matrix % store(:,:,band)
       b_inverse(:,:) = full_b_matrix % inverse(:,:,band)
-      write(*,'(144E13.5)') b_matrix(:,:)
 
       !---------------------------------------------------
       ! Setup Jo terms
@@ -298,6 +290,7 @@ subroutine ufo_rttovonedvarcheck_post(self, vars, geovals, apply)
       allocate(r_matrix(chans_used,chans_used))
       allocate(r_inverse(chans_used,chans_used))
       allocate(channels_used(chans_used))
+      allocate(obs_error(chans_used))
 
       ! create obs vector and r matrix
       r_matrix(:,:) = 0.0_kind_real
@@ -306,34 +299,37 @@ subroutine ufo_rttovonedvarcheck_post(self, vars, geovals, apply)
       do jvar = 1, self%nchans
         if( QCflags(jvar,jobs) == 0 ) then
           jchans_used = jchans_used + 1
-          obs_error = yerr(jvar, jobs)
-          write(*,*) "jchans_used err = ",jchans_used,obs_error
-          r_matrix(jchans_used,jchans_used) = obs_error * obs_error
-          r_inverse(jchans_used,jchans_used) = 1.0_kind_real / (obs_error * obs_error)
+          obs_error(jchans_used) = yerr(jvar, jobs)
+          write(*,*) "jchans_used err = ",jchans_used,obs_error(jchans_used)
+          r_matrix(jchans_used,jchans_used) = obs_error(jchans_used) * obs_error(jchans_used)
+          r_inverse(jchans_used,jchans_used) = 1.0_kind_real / &
+                            (obs_error(jchans_used) * obs_error(jchans_used))
           ob_info%yobs(jchans_used) = yobs(jvar, jobs)
           channels_used(jchans_used) = self%channels(jvar)
         end if
       end do
+      call rmatrix_setup(r_matrix_obj, self % rtype, chans_used, obs_error)
 
       write(*,*) "Ob number = ",jobs
       write(*,*) "channels used = ",channels_used(:)
       write(*,*) "channels used number = ",chans_used
       write(*,*) "r_inverse = ",r_inverse
       write(*,*) "r_matrix = ",r_matrix
+      call rmatrix_print(r_matrix_obj)
 
       !---------------------------------------------------
       ! Call minimization
       !---------------------------------------------------
       if (self % UseMLMinimization) then
-        call ufo_rttovonedvarcheck_MinimizeML(self, ob_info, r_matrix, r_inverse, b_matrix, &
-                                           b_inverse, local_geovals, & 
-                                           profile_index, nprofelements, self%conf, &
-                                           self%obsdb, channels_used, onedvar_success)
+        call ufo_rttovonedvarcheck_minimize_ml(self, ob_info, r_matrix, r_inverse, &
+                                      r_matrix_obj, b_matrix, b_inverse,           &
+                                      local_geovals, profile_index,                &
+                                      nprofelements, channels_used, onedvar_success)
       else
-        call Ops_SatRad_MinimizeNewton_RTTOV12(self, ob_info, r_matrix, r_inverse, b_matrix, &
-                                           b_inverse, local_geovals, & 
-                                           profile_index, nprofelements, self%conf, &
-                                           self%obsdb, channels_used, onedvar_success)
+        call ufo_rttovonedvarcheck_minimize_newton(self, ob_info, r_matrix, &
+                                      r_inverse, r_matrix_obj, b_matrix,           &
+                                      b_inverse, local_geovals, profile_index,     & 
+                                      nprofelements, channels_used, onedvar_success)
       end if
 
       ! Set QCflags based on output from minimization
@@ -348,6 +344,8 @@ subroutine ufo_rttovonedvarcheck_post(self, vars, geovals, apply)
       if (allocated(r_matrix))      deallocate(r_matrix)
       if (allocated(r_inverse))     deallocate(r_inverse)
       if (allocated(channels_used)) deallocate(channels_used)
+      if (allocated(obs_error))     deallocate(obs_error)
+      call rmatrix_delete(r_matrix_obj)
 
       ! tidy up
       call ufo_geovals_delete(local_geovals)
@@ -366,13 +364,6 @@ subroutine ufo_rttovonedvarcheck_post(self, vars, geovals, apply)
     call obsspace_put_db(self%obsdb, "FortranQC", trim(var), QCflags(jvar,:))
   end do
 
-  ! Put QC flags back in database
-  !do jvar = 1, self%nchans
-  !  var = vars%variable(jvar)
-  !  write(*,*) "QCflags(jvar,:) = ",QCflags(jvar,:)
-  !  call obsspace_get_db(self%obsdb, "FortranQC", trim(var), QCflags(jvar,:))
-  !end do
-
   ! tidy up
   if (allocated(yobs))            deallocate(yobs)
   if (allocated(yerr))            deallocate(yerr)
@@ -390,6 +381,6 @@ subroutine ufo_rttovonedvarcheck_post(self, vars, geovals, apply)
   if (allocated(b_inverse))       deallocate(b_inverse)
   if (allocated(iter_hofx))       deallocate(iter_hofx)
 
-end subroutine ufo_rttovonedvarcheck_post
+end subroutine ufo_rttovonedvarcheck_apply
 
 end module ufo_rttovonedvarcheck_mod

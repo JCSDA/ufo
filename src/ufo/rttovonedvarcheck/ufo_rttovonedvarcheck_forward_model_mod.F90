@@ -1,4 +1,4 @@
-! (C) Copyright 2018 UCAR
+! (C) Copyright 2020 Met Office
 !
 ! This software is licensed under the terms of the Apache Licence Version 2.0
 ! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
@@ -72,7 +72,7 @@ subroutine ufo_rttovonedvarcheck_GetHmatrixRTTOV(geovals, ob_info, obsdb, &
                                        profindex, prof_x, &
                                        hofx, H_matrix)
 
-use ufo_rttovonedvarcheck_process_mod, only: Ops_SatRad_Qsplit
+use ufo_rttovonedvarcheck_process_mod, only: ufo_rttovonedvarcheck_Qsplit
 
 implicit none
 
@@ -175,7 +175,7 @@ if (profindex % qt(1) > 0) then
   pressure(:) = geoval%vals(:, 1)    ! Pa
 
   ! Calculate the gradients with respect to qtotal
-  call Ops_SatRad_Qsplit (0,               & ! in
+  call ufo_rttovonedvarcheck_Qsplit (0,               & ! in
                           temperature,     & ! in
                           pressure,        & ! in
                           nlevels,         & ! in

@@ -1,4 +1,4 @@
-# (C) Copyright 2017-2018 UCAR.
+# (C) Copyright 2017-2020 Met Office.
 #
 # This software is licensed under the terms of the Apache Licence Version 2.0
 # which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
@@ -15,6 +15,7 @@ set ( rttovonedvarcheck_files
     ufo_rttovonedvarcheck_minimize_newton_mod.F90
     ufo_rttovonedvarcheck_minimize_ml_mod.F90
     ufo_rttovonedvarcheck_forward_model_mod.F90
+    ufo_rttovonedvarcheck_rmatrix_mod.F90
 )
 
 PREPEND( _p_rttovonedvarcheck_files        "rttovonedvarcheck"        ${rttovonedvarcheck_files} )

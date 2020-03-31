@@ -75,11 +75,11 @@ Observations:
         channels: &ops_channels 6-22
     ObsFilters:
     - Filter: RTTOV OneDVar Check
-      where:
-      - variable:
-          name: qc_flags@MetaData
-        minvalue: -0.5 # Values of 0 and 1
-        maxvalue:  1.5 # Values of 0 and 1
+#      where:
+#      - variable:
+#          name: qc_flags@MetaData
+#        minvalue: -0.5 # Values of 0 and 1
+#        maxvalue:  1.5 # Values of 0 and 1
       applyfilter: 
       - name: post@HofX
       ModName: RTTOV
@@ -97,10 +97,10 @@ Observations:
       - surface_air_pressure
       BMatrix: Data/atms_bmatrix_70.dat
       nlevels: 70
+      rtype: full # diagonal or full R matrix
       qtotal: true
-      cost_convergence: 0.01
       RTTOV_mwscattSwitch: false
-      UseMLMinimization: false
+      UseMLMinimization: true
       UseJforConvergence: true
       JConvergenceOption: 1
       ConvergenceFactor: 0.40

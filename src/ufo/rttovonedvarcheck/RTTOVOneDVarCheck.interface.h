@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2018 UCAR
+ * (C) Copyright 2020 Met Office
  *
  * This software is licensed under the terms of the Apache Licence Version 2.0
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
@@ -29,8 +29,7 @@ extern "C" {
   void ufo_rttovonedvarcheck_create_f90(F90onedvarcheck &, const ioda::ObsSpace &,
                       const eckit::Configuration *, const int &, const int &);
   void ufo_rttovonedvarcheck_delete_f90(F90onedvarcheck &);
-  void ufo_rttovonedvarcheck_prior_f90(const F90onedvarcheck &, const F90goms &);
-  void ufo_rttovonedvarcheck_post_f90(const F90onedvarcheck &, const oops::Variables &,
+  void ufo_rttovonedvarcheck_apply_f90(const F90onedvarcheck &, const oops::Variables &,
                       const F90goms &, const int &, const char &);
 }  // extern C
 

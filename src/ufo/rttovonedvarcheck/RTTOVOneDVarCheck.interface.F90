@@ -1,5 +1,5 @@
 
-! (C) Copyright 2017-2018 UCAR
+! (C) Copyright 2017-2020 Met Office
 ! 
 ! This software is licensed under the terms of the Apache Licence Version 2.0
 ! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
@@ -30,7 +30,8 @@ contains
 #include "oops/util/linkedList_c.f"
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_rttovonedvarcheck_create_c(c_self, c_obspace, c_conf, c_nchan, c_channels) bind(c,name='ufo_rttovonedvarcheck_create_f90')
+subroutine ufo_rttovonedvarcheck_create_c(c_self, c_obspace, c_conf, c_nchan, c_channels) &
+                                            bind(c,name='ufo_rttovonedvarcheck_create_f90')
 implicit none
 integer(c_int), intent(inout)  :: c_self
 type(c_ptr), value, intent(in) :: c_obspace
@@ -47,7 +48,8 @@ end subroutine ufo_rttovonedvarcheck_create_c
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_rttovonedvarcheck_delete_c(c_self) bind(c,name='ufo_rttovonedvarcheck_delete_f90')
+subroutine ufo_rttovonedvarcheck_delete_c(c_self) &
+                      bind(c,name='ufo_rttovonedvarcheck_delete_f90')
 implicit none
 integer(c_int), intent(inout) :: c_self
 
@@ -61,26 +63,8 @@ end subroutine ufo_rttovonedvarcheck_delete_c
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_rttovonedvarcheck_prior_c(c_self, c_geovals) &
-               bind(c,name='ufo_rttovonedvarcheck_prior_f90')
-implicit none
-integer(c_int), intent(in) :: c_self
-integer(c_int), intent(in) :: c_geovals
-
-type(ufo_rttovonedvarcheck), pointer :: self
-type(ufo_geovals), pointer :: geovals
-
-call ufo_rttovonedvarcheck_registry%get(c_self, self)
-call ufo_geovals_registry%get(c_geovals, geovals)
-
-call ufo_rttovonedvarcheck_prior(self, geovals)
-
-end subroutine ufo_rttovonedvarcheck_prior_c
-
-! ------------------------------------------------------------------------------
-
-subroutine ufo_rttovonedvarcheck_post_c(c_self, c_vars, c_geovals, c_nobs, c_apply) &
-               bind(c,name='ufo_rttovonedvarcheck_post_f90')
+subroutine ufo_rttovonedvarcheck_apply_c(c_self, c_vars, c_geovals, c_nobs, c_apply) &
+               bind(c,name='ufo_rttovonedvarcheck_apply_f90')
 implicit none
 integer(c_int), intent(in)     :: c_self
 type(c_ptr), value, intent(in) :: c_vars     !< List of variables
@@ -99,14 +83,15 @@ call ufo_geovals_registry%get(c_geovals, geovals)
 
 vars = oops_variables(c_vars)
 
+! Convert character to logical for passing to Fortran
 apply(:) = .false.
 where (c_apply == 'T')
   apply = .true.
 end where
 
-call ufo_rttovonedvarcheck_post(self, vars, geovals, apply)
+call ufo_rttovonedvarcheck_apply(self, vars, geovals, apply)
 
-end subroutine ufo_rttovonedvarcheck_post_c
+end subroutine ufo_rttovonedvarcheck_apply_c
 
 ! ------------------------------------------------------------------------------
 

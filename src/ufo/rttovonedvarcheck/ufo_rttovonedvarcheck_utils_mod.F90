@@ -1,4 +1,4 @@
-! (C) copyright 2018 UCAR
+! (C) copyright 2020 Met Office
 !
 ! this software is licensed under the terms of the apache licence version 2.0
 ! which can be obtained at http://www.apache.org/licenses/license-2.0.
@@ -27,6 +27,7 @@ integer, parameter :: max_string_length=99 !
 
 type :: ufo_rttovonedvarcheck
   character(len=max_string_length) :: qcname
+  character(len=max_string_length) :: rtype
   character(len=max_string_length) :: b_matrix_path
   character(len=max_string_length) :: forward_mod_name
   character(len=max_string_length), allocatable :: model_variables(:)
@@ -48,6 +49,7 @@ type :: ufo_rttovonedvarcheck
   real(kind_real)                  :: Cost_ConvergenceFactor
   real(kind_real)                  :: Mqstart
   real(kind_real)                  :: Mqstep
+  real(kind_real)                  :: MaxMLIterations
 end type ufo_rttovonedvarcheck
 
 !-------------
@@ -83,7 +85,7 @@ end type bmatrix_type
 !that retrieval fields also require b matrix fieldtype definitions (see
 !section 13 below).
 
-!also, remember to update ops_satrad_initprofinfo and ops_satrad_mapprofiletob
+!also, remember to update ufo_rttovonedvarcheck_initprofinfo and ufo_rttovonedvarcheck_mapprofiletob
 !if adding fields to this structure.
 
 type profileinfo_type
