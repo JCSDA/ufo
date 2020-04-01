@@ -8,7 +8,6 @@
 module ufo_rttovonedvarcheck_init_mod
 
 use iso_c_binding
-use config_mod
 use kinds
 use ufo_geovals_mod
 use ufo_rttovonedvarcheck_utils_mod
@@ -42,17 +41,23 @@ integer(c_int), intent(in)                 :: channels(:)
 
 ! local variables
 character(len=max_string_length) :: tmp
+character(len=:), allocatable :: str
+character(kind=c_char, len=max_string_length), allocatable :: char_array(:)
+integer(c_size_t),parameter :: csize = max_string_length
 
 ! Setup core paths and names
 self % qcname = "rttovonedvarcheck"
-self % b_matrix_path = config_get_string(self % conf, max_string_length, "BMatrix")
-self % forward_mod_name = config_get_string(self % conf, max_string_length, "ModName")
-self % nlevels = config_get_int(self % conf, "nlevels")
+call self % conf % get_or_die("BMatrix",str)
+self % b_matrix_path = str
+call self % conf % get_or_die("ModName",str)
+self % forward_mod_name = str
+call self % conf % get_or_die("nlevels",self % nlevels)
 
 ! Variables for profile (x,xb)
-self % nmvars = size(config_get_string_vector(self % conf, max_string_length, "model_variables"))
+self % nmvars = self % conf % get_size("model_variables")
 allocate(self % model_variables(self % nmvars))
-self % model_variables = config_get_string_vector(self % conf, max_string_length, "model_variables")
+call self % conf % get_or_die("model_variables", csize, char_array)
+self % model_variables(1:self % nmvars) = char_array
 
 ! Satellite channels
 self % nchans = size(channels)
@@ -78,74 +83,89 @@ self % Mqstep = 5.0    ! Marquardt step parameter
 self % MaxMLIterations = 7
 
 ! R matrix type to use
-if (config_element_exists(self % conf, "rtype")) then
-  self % rtype = config_get_string(self % conf, max_string_length, "rtype")
+if (self % conf % has("rtype")) then
+  call self % conf % get_or_die("rtype",str)
+  self % rtype = str
 end if
 
 ! Flag for total humidity
-if (config_element_exists(self % conf, "qtotal")) then
-  tmp = config_get_string(self % conf, max_string_length, "qtotal")
-  if (trim(tmp) == 'true') self % qtotal = .true.
+if (self % conf % has("qtotal")) then
+  call self % conf % get_or_die("qtotal",str)
+  if (trim(str) == 'true') self % qtotal = .true.
 end if
 
 ! Flag for RTTOV MW scatt
-if (config_element_exists(self % conf, "RTTOV_mwscattSwitch")) then
-  tmp = config_get_string(self % conf, max_string_length, "RTTOV_mwscattSwitch")
-  if (trim(tmp) == 'true') self % RTTOV_mwscattSwitch = .true.
+if (self % conf % has("RTTOV_mwscattSwitch")) then
+  call self % conf % get_or_die("RTTOV_mwscattSwitch",str)
+  if (trim(str) == 'true') self % RTTOV_mwscattSwitch = .true.
 end if
 
 ! Flag for use of total ice in RTTOV MW scatt
-if (config_element_exists(self % conf, "use_totalice")) then
-  tmp = config_get_string(self % conf, max_string_length, "use_totalice")
-  if (trim(tmp) == 'true') self % use_totalice = .true.
+if (self % conf % has("use_totalice")) then
+  call self % conf % get_or_die("use_totalice",str)
+  if (trim(str) == 'true') self % use_totalice = .true.
 end if
 
 ! Flag to turn on marquardt-levenberg minimiser
-if (config_element_exists(self % conf, "UseMLMinimization")) then
-  tmp = config_get_string(self % conf, max_string_length, "UseMLMinimization")
-  if (trim(tmp) == 'true') self % UseMLMinimization = .true.
+if (self % conf % has("UseMLMinimization")) then
+  call self % conf % get_or_die("UseMLMinimization",str)
+  if (trim(str) == 'true') self % UseMLMinimization = .true.
 end if
 
 ! Flag to Use J for convergence
-if (config_element_exists(self % conf, "UseJforConvergence")) then
-  tmp = config_get_string(self % conf, max_string_length, "UseJforConvergence")
-  if (trim(tmp) == 'true') self % UseJforConvergence = .true.
+if (self % conf % has("UseJforConvergence")) then
+  call self % conf % get_or_die("UseJforConvergence",str)
+  if (trim(str) == 'true') self % UseJforConvergence = .true.
 end if
 
 ! Flag to specify if delta_x has to be negative for converg. to be true
-if (config_element_exists(self % conf, "Max1DVarIterations")) then
-  self % Max1DVarIterations = config_get_int(self % conf, "Max1DVarIterations")
+if (self % conf % has("Max1DVarIterations")) then
+  call self % conf % get_or_die("Max1DVarIterations",self % Max1DVarIterations)
 end if
 
 ! Flag to specify if delta_x has to be negative for converg. to be true
-if (config_element_exists(self % conf, "JConvergenceOption")) then
-  self % UseJforConvergence = config_get_int(self % conf, "UseJforConvergence")
+if (self % conf % has("JConvergenceOption")) then
+  call self % conf % get_or_die("JConvergenceOption",self % JConvergenceOption)
 end if
 
 ! Choose which iteration to start checking LWP
-if (config_element_exists(self % conf, "IterNumForLWPCheck")) then
-  self % IterNumForLWPCheck = config_get_int(self % conf, "IterNumForLWPCheck")
+if (self % conf % has("IterNumForLWPCheck")) then
+  call self % conf % get_or_die("IterNumForLWPCheck",self % IterNumForLWPCheck)
 end if
 
 ! Flag to specify if delta_x has to be negative for converg. to be true
-if (config_element_exists(self % conf, "ConvergenceFactor")) then
-  self % ConvergenceFactor = config_get_real(self % conf, "ConvergenceFactor")
+if (self % conf % has("ConvergenceFactor")) then
+  call self % conf % get_or_die("ConvergenceFactor",self % ConvergenceFactor)
 end if
 
 ! Flag to specify if delta_x has to be negative for converg. to be true
-if (config_element_exists(self % conf, "Cost_ConvergenceFactor")) then
-  self % Cost_ConvergenceFactor = config_get_real(self % conf, "Cost_ConvergenceFactor")
+if (self % conf % has("Cost_ConvergenceFactor")) then
+  call self % conf % get_or_die("Cost_ConvergenceFactor",self % Cost_ConvergenceFactor)
 end if
 
-! Flag to specify if delta_x has to be negative for converg. to be true
-if (config_element_exists(self % conf, "Mqstart")) then
-  self % Mqstart = config_get_real(self % conf, "Mqstart")
-end if
-
-! Flag to specify if delta_x has to be negative for converg. to be true
-if (config_element_exists(self % conf, "Mqstep")) then
-  self % Mqstep = config_get_real(self % conf, "Mqstep")
-end if
+! Print self
+!write(*,*) "qcname = ",self % qcname
+!write(*,*) "rtype = ",self % rtype
+!write(*,*) "b_matrix_path = ",self % b_matrix_path
+!write(*,*) "forward_mod_name = ",self % forward_mod_name
+!write(*,*) "model_variables(:) = ",self % model_variables(:)
+!write(*,*) "nlevels = ",self %  nlevels  ! number 1D-Var model levels
+!write(*,*) "nmvars = ",self % nmvars
+!write(*,*) "nchans = ",self % nchans
+!write(*,*) "channels(:) = ",self % channels(:)
+!write(*,*) "qtotal = ",self % qtotal
+!write(*,*) "RTTOV_mwscattSwitch = ",self % RTTOV_mwscattSwitch
+!write(*,*) "use_totalice = ",self % use_totalice
+!write(*,*) "UseMLMinimization = ",self % UseMLMinimization
+!write(*,*) "UseJforConvergence = ",self % UseJforConvergence
+!write(*,*) "Max1DVarIterations = ",self % Max1DVarIterations
+!write(*,*) "JConvergenceOption = ",self % JConvergenceOption
+!write(*,*) "IterNumForLWPCheck = ",self % IterNumForLWPCheck
+!write(*,*) "ConvergenceFactor = ",self % ConvergenceFactor
+!write(*,*) "Cost_ConvergenceFactor = ",self % Cost_ConvergenceFactor
+!write(*,*) "Mqstart = ",self % Mqstart
+!write(*,*) "Mqstep = ",self % Mqstep
+!write(*,*) "MaxMLIterations = ",self % MaxMLIterations
 
 end subroutine
 

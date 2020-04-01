@@ -7,8 +7,8 @@
 
 module ufo_rttovonedvarcheck_utils_mod
 
+use fckit_configuration_module, only: fckit_configuration
 use iso_c_binding
-use config_mod
 use kinds
 
 implicit none
@@ -32,7 +32,7 @@ type :: ufo_rttovonedvarcheck
   character(len=max_string_length) :: forward_mod_name
   character(len=max_string_length), allocatable :: model_variables(:)
   type(c_ptr)                      :: obsdb
-  type(c_ptr)                      :: conf
+  type(fckit_configuration)        :: conf
   integer                          :: nlevels   ! number 1D-Var model levels
   integer                          :: nmvars
   integer                          :: nchans

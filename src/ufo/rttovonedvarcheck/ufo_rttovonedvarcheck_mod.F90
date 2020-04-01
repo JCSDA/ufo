@@ -7,13 +7,13 @@
 
 module ufo_rttovonedvarcheck_mod
 
+use fckit_configuration_module, only: fckit_configuration
 use iso_c_binding
 use kinds
 use ufo_geovals_mod
 use ufo_vars_mod
 use oops_variables_mod
 use obsspace_mod
-use config_mod
 use ufo_rttovonedvarcheck_utils_mod
 use ufo_rttovonedvarcheck_init_mod
 use ufo_rttovonedvarcheck_process_mod
@@ -27,16 +27,16 @@ public :: ufo_rttovonedvarcheck_apply
 contains
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_rttovonedvarcheck_create(self, obspace, conf, channels)
+subroutine ufo_rttovonedvarcheck_create(self, obspace, f_conf, channels)
 
   implicit none
   type(ufo_rttovonedvarcheck), intent(inout) :: self
   type(c_ptr), value, intent(in)             :: obspace
-  type(c_ptr), value, intent(in)             :: conf
+  type(fckit_configuration), intent(in)      :: f_conf
   integer(c_int), intent(in)                 :: channels(:)
 
-  self%obsdb = obspace
-  self%conf = conf
+  self % obsdb = obspace
+  self % conf = f_conf
 
   call ufo_rttovonedvarcheck_setup(self, channels) ! from init
 

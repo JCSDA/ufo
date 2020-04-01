@@ -6,6 +6,7 @@
 
 module ufo_rttovonedvarcheck_mod_c
 
+use fckit_configuration_module, only: fckit_configuration
 use iso_c_binding
 use ufo_rttovonedvarcheck_mod
 use ufo_rttovonedvarcheck_utils_mod, only: max_string_length
@@ -40,9 +41,12 @@ integer(c_int), intent(in) :: c_nchan
 integer(c_int), intent(in) :: c_channels(c_nchan)
 
 type(ufo_rttovonedvarcheck), pointer :: self
+type(fckit_configuration) :: f_conf
 
 call ufo_rttovonedvarcheck_registry%setup(c_self, self)
-call ufo_rttovonedvarcheck_create(self, c_obspace, c_conf, c_channels)
+f_conf = fckit_configuration(c_conf)
+
+call ufo_rttovonedvarcheck_create(self, c_obspace, f_conf, c_channels)
 
 end subroutine ufo_rttovonedvarcheck_create_c
 

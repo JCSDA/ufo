@@ -7,7 +7,6 @@
 module ufo_rttovonedvarcheck_minimize_ml_mod
 
 use iso_c_binding
-use config_mod
 use kinds
 use ufo_geovals_mod
 use ufo_rttovonedvarcheck_utils_mod
@@ -29,7 +28,7 @@ use ufo_rttovonedvarcheck_process_mod, only: &
         ufo_rttovonedvarcheck_Cholesky
 
 use ufo_rttovonedvarcheck_forward_model_mod, only: &
-                    ufo_rttovonedvarcheck_ForwardModel
+        ufo_rttovonedvarcheck_ForwardModel
 
 implicit none
 

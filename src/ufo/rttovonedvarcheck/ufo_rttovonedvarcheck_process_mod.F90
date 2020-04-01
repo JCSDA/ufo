@@ -8,7 +8,6 @@
 module ufo_rttovonedvarcheck_process_mod
 
 use iso_c_binding
-use config_mod
 use kinds
 use ufo_geovals_mod
 use ufo_rttovonedvarcheck_utils_mod

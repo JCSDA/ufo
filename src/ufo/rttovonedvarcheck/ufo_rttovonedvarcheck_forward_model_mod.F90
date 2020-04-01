@@ -37,7 +37,7 @@ type(ufo_geovals), intent(in)               :: geovals
 type(Obinfo_type), intent(in)               :: ob_info
 type(c_ptr), value, intent(in)              :: obsdb
 integer(c_int), intent(in)                  :: channels(:)
-type(c_ptr), value, intent(in)              :: conf
+type(fckit_configuration), intent(in)       :: conf
 type(Profileinfo_type), intent(in)          :: profindex
 real(kind_real), intent(in)                 :: prof_x(:)    ! x vector for 1D-var
 real(kind_real), intent(out)                :: hofx(:)
@@ -45,13 +45,10 @@ real(kind_real), intent(out)                :: H_matrix(:,:)
 
 ! local variables
 type(ufo_radiancerttov_tlad)                :: rttov_tlad   ! structure for holding original rttov_k setup data
-type(fckit_configuration)                   :: f_conf
-
-f_conf = fckit_configuration(conf)
 
 select case (trim(ob_info%forward_mod_name))
   case ("RTTOV")
-    call rttov_tlad % setup(f_conf)
+    call rttov_tlad % setup(conf)
     call ufo_rttovonedvarcheck_GetHmatrixRTTOV(geovals, ob_info, obsdb, &
                                             channels(:), rttov_tlad, &
                                             profindex, prof_x(:), &

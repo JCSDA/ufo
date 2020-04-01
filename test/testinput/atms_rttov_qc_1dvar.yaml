@@ -100,7 +100,7 @@ Observations:
       rtype: full # diagonal or full R matrix
       qtotal: true
       RTTOV_mwscattSwitch: false
-      UseMLMinimization: true
+      UseMLMinimization: false
       UseJforConvergence: true
       JConvergenceOption: 1
       ConvergenceFactor: 0.40

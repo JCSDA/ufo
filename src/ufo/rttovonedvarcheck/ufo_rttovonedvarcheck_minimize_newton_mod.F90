@@ -7,18 +7,17 @@
 module ufo_rttovonedvarcheck_minimize_newton_mod
 
 use iso_c_binding
-use config_mod
 use kinds
 use ufo_geovals_mod
 use ufo_rttovonedvarcheck_utils_mod
 use ufo_radiancerttov_tlad_mod
 use ufo_rttovonedvarcheck_rmatrix_mod, only: &
-                    rmatrix_type, &
-                    rmatrix_add_to_u, &
-                    rmatrix_multiply, &
-                    rmatrix_multiply_matrix, &
-                    rmatrix_inv_multiply, &
-                    rmatrix_multiply_inv_matrix
+        rmatrix_type, &
+        rmatrix_add_to_u, &
+        rmatrix_multiply, &
+        rmatrix_multiply_matrix, &
+        rmatrix_inv_multiply, &
+        rmatrix_multiply_inv_matrix
 
 use ufo_rttovonedvarcheck_process_mod, only: &
         ufo_rttovonedvarcheck_GeoVaLs2ProfVec, &
