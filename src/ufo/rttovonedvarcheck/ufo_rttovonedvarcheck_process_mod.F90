@@ -333,50 +333,49 @@ end subroutine ufo_rttovonedvarcheck_ProfVec2GeoVaLs
 !-------------------------------------------------------------------------------
 
 subroutine ufo_rttovonedvarcheck_CostFunction(DeltaProf, b_inv, &
-                                           DeltaObs, r_inv, &
-                                           Jcost)
+                                              DeltaObs, r_matrix, &
+                                              Jcost)
+
+use ufo_rttovonedvarcheck_rmatrix_mod, only: &
+    rmatrix_type, &
+    rmatrix_inv_multiply
 
 implicit none
 
 ! subroutine arguments:
-real(kind_real), intent(in)  :: DeltaProf(:)
-real(kind_real), intent(in)  :: b_inv(:,:)
-real(kind_real), intent(in)  :: DeltaObs(:)
-real(kind_real), intent(in)  :: r_inv(:,:)
-real(kind_real), intent(out) :: Jcost(3)
+real(kind_real), intent(in)    :: DeltaProf(:)
+real(kind_real), intent(in)    :: b_inv(:,:)
+real(kind_real), intent(in)    :: DeltaObs(:)
+type(rmatrix_type), intent(in) :: r_matrix
+real(kind_real), intent(out)   :: Jcost(3)
 
 ! Local arguments:
 character(len=*), parameter  :: RoutineName = "ufo_rttovonedvarcheck_CostFunction"
 integer                      :: y_size
 real(kind_real)              :: Jb, Jo, Jcurrent
-real(kind_real)              :: DeltaProfout(70)
+real(kind_real), allocatable :: RinvDeltaY(:)
 
 !-------------------------------------------------------------------------------
 
 write(*,*) trim(RoutineName)," start"
 
-Jcost = 0.0_kind_real
+allocate(RinvDeltaY, source=DeltaObs)
+
 y_size = size(DeltaObs)
+Jcost(:) = 0.0_kind_real
+call rmatrix_inv_multiply(r_matrix, DeltaObs, RinvDeltaY)
 
-write(*,*) "Delta profile = ",DeltaProf
-write(*,*) "binv profile = ",b_inv
-write(*,*) "Delta obs = ",DeltaObs
-write(*,*) "rinv profile = ",r_inv
-
-DeltaProfout = matmul(b_inv,DeltaProf)
-
-Jb = 0.5_kind_real * dot_product(DeltaProf,(matmul(b_inv,DeltaProf)))
-Jo = 0.5_kind_real * dot_product(DeltaObs,(matmul(r_inv,DeltaObs)))
+Jo = 0.5_kind_real * dot_product(DeltaObs, RinvDeltaY)
+Jb = 0.5_kind_real * dot_product(DeltaProf, (matmul(b_inv, DeltaProf)))
 Jcurrent = Jb + Jo
 
-!Jcost = (Jo + Jb) * 2.0 / real (y_size) ! Normalize cost by nchans
 Jcost(1) = (Jo + Jb) / real (y_size)     ! Normalize cost by nchans
 Jcost(2) = Jb / real (y_size)            ! Normalize cost by nchans
 Jcost(3) = Jo / real (y_size)            ! Normalize cost by nchans
 
 write(*,*) "Jo, Jb, Jcurrent = ", Jo, Jb, Jcurrent
 
-write(*,*) trim(RoutineName)," end"
+deallocate(RinvDeltaY)
 
 end subroutine ufo_rttovonedvarcheck_CostFunction
 

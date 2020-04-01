@@ -87,8 +87,6 @@ contains
 subroutine ufo_rttovonedvarcheck_minimize_newton(self, &
                                          ob_info,       &
                                          r_matrix,      &
-                                         r_inv,         &
-                                         r_matrix_obj,  &
                                          b_matrix,      &
                                          b_inv,         &
                                          local_geovals, &
@@ -101,9 +99,7 @@ implicit none
 
 type(ufo_rttovonedvarcheck), intent(inout) :: self
 type(Obinfo_type), intent(in)        :: ob_info
-real(kind_real), intent(in)          :: r_matrix(:,:)
-real(kind_real), intent(in)          :: r_inv(:,:)
-type(rmatrix_type), intent(in)       :: r_matrix_obj
+type(rmatrix_type), intent(in)       :: r_matrix
 real(kind_real), intent(in)          :: b_matrix(:,:)
 real(kind_real), intent(in)          :: b_inv(:,:)
 type(ufo_geovals), intent(inout)     :: local_geovals
@@ -223,7 +219,7 @@ Iterations: do iter = 1, self % max1DVarIterations
 
     Diffprofile(:) = GuessProfile(:) - BackProfile(:)
     Ydiff(:) = ob_info%yobs(:) - Y(:)
-    call ufo_rttovonedvarcheck_CostFunction(Diffprofile, b_inv, Ydiff, r_inv, Jout)
+    call ufo_rttovonedvarcheck_CostFunction(Diffprofile, b_inv, Ydiff, r_matrix, Jout)
     Jcost = Jout(1)
 
     ! exit on error
@@ -291,8 +287,7 @@ Iterations: do iter = 1, self % max1DVarIterations
                                      nprofelements,             &
                                      Diffprofile,               &
                                      b_inv,                     &
-                                     r_inv,                     &
-                                     r_matrix_obj,              &
+                                     r_matrix,                  &
                                      inversionStatus)
   else ! nchans <= nprofelements
     write(*,*) "Few Chans"
@@ -304,7 +299,6 @@ Iterations: do iter = 1, self % max1DVarIterations
                                     Diffprofile,               &
                                     b_matrix,                  &
                                     r_matrix,                  &
-                                    r_matrix_obj,              &
                                     inversionStatus)
   end if
 
@@ -514,8 +508,7 @@ subroutine ufo_rttovonedvarcheck_NewtonFewChans (DeltaBT,       &
                                       nprofelements, &
                                       DeltaProfile,  &
                                       B_matrix,      &
-                                      R_matrix,      &
-                                      r_matrix_obj,  &
+                                      r_matrix,      &
                                       Status)
 
 implicit none
@@ -528,8 +521,7 @@ real(kind_real), intent(in)     :: H_Matrix_T(:,:)   ! (Jacobian)^T
 integer, intent(in)             :: nprofelements
 real(kind_real), intent(inout)  :: DeltaProfile(:)   ! see note in header
 real(kind_real), intent(in)     :: B_matrix(:,:)
-real(kind_real), intent(in)     :: R_matrix(:,:)
-type(rmatrix_type), intent(in)  :: r_matrix_obj
+type(rmatrix_type), intent(in)  :: r_matrix
 integer, intent(out)            :: Status
 
 ! Local declarations:
@@ -566,7 +558,7 @@ V = DeltaBT + matmul(H_matrix, DeltaProfile)
 ! 1.1. Add the R matrix into the U matrix. U = U + R
 !---------------------------------------------------------------------------
 !U = U + R_Matrix
-call rmatrix_add_to_u(r_matrix_obj,U,U)
+call rmatrix_add_to_u(r_matrix,U,U)
 
 ! Calculate Q=(U^-1).V
 !------
@@ -636,8 +628,7 @@ subroutine ufo_rttovonedvarcheck_NewtonManyChans (DeltaBT,       &
                                        nprofelements, &
                                        DeltaProfile,  &
                                        B_inverse,     &
-                                       R_inverse,      &
-                                       R_matrix_obj,  &
+                                       r_matrix,      &
                                        Status)
 
 implicit none
@@ -650,8 +641,7 @@ real(kind_real), intent(in)     :: H_Matrix_T(:,:)   ! (Jacobian)^T
 integer, intent(in)             :: nprofelements
 real(kind_real), intent(inout)  :: DeltaProfile(:)   ! see note in header
 real(kind_real), intent(in)     :: B_inverse(:,:)
-real(kind_real), intent(in)     :: R_inverse(:,:)
-type(rmatrix_type), intent(in)  :: R_matrix_obj
+type(rmatrix_type), intent(in)  :: r_matrix
 integer, intent(out)            :: Status
 
 ! Local declarations:
@@ -667,9 +657,8 @@ Status = 0
 !    matrix is tested to determine whether it is stored as an inverse and
 !    inverted if not.
 !---------------------------------------------------------------------------
-!HTR = matmul(H_matrix_T, R_inverse(:,:))
 !HTR = matmul(H_matrix_T, R_inverse)
-call rmatrix_multiply_inv_matrix(R_matrix_obj,H_matrix_T,HTR)
+call rmatrix_multiply_inv_matrix(r_matrix,H_matrix_T,HTR)
 
 !---------------------------------------------------------------------------
 ! 2. Calculate U and V

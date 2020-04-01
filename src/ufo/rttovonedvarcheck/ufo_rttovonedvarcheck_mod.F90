@@ -20,7 +20,8 @@ use ufo_rttovonedvarcheck_process_mod
 
 implicit none
 public :: ufo_rttovonedvarcheck
-public :: ufo_rttovonedvarcheck_create, ufo_rttovonedvarcheck_delete
+public :: ufo_rttovonedvarcheck_create
+public :: ufo_rttovonedvarcheck_delete
 public :: ufo_rttovonedvarcheck_apply
 
 ! ------------------------------------------------------------------------------
@@ -87,9 +88,7 @@ subroutine ufo_rttovonedvarcheck_apply(self, vars, geovals, apply)
   real(kind_real)                    :: missing         ! missing value
   character(len=max_string_length)   :: var
   character(len=100)                 :: varname
-  real(kind_real), allocatable       :: r_matrix(:,:)   ! r-matrix = obs + forward model error
-  real(kind_real), allocatable       :: r_inverse(:,:)  ! inverse of the r-matrix 
-  type(rmatrix_type)                 :: r_matrix_obj    ! new r_matrix object
+  type(rmatrix_type)                 :: r_matrix    ! new r_matrix object
   type(bmatrix_type)                 :: full_b_matrix   ! full b matrix
   real(kind_real), allocatable       :: b_matrix(:,:)   ! 1d-var profile b matrix
   real(kind_real), allocatable       :: b_inverse(:,:)  ! inverse for each 1d-var profile b matrix
@@ -287,47 +286,38 @@ subroutine ufo_rttovonedvarcheck_apply(self, vars, geovals, apply)
 
       ! allocate arrays
       allocate(ob_info%yobs(chans_used))
-      allocate(r_matrix(chans_used,chans_used))
-      allocate(r_inverse(chans_used,chans_used))
       allocate(channels_used(chans_used))
       allocate(obs_error(chans_used))
 
       ! create obs vector and r matrix
-      r_matrix(:,:) = 0.0_kind_real
-      r_inverse(:,:) = 0.0_kind_real
       jchans_used = 0
       do jvar = 1, self%nchans
         if( QCflags(jvar,jobs) == 0 ) then
           jchans_used = jchans_used + 1
           obs_error(jchans_used) = yerr(jvar, jobs)
           write(*,*) "jchans_used err = ",jchans_used,obs_error(jchans_used)
-          r_matrix(jchans_used,jchans_used) = obs_error(jchans_used) * obs_error(jchans_used)
-          r_inverse(jchans_used,jchans_used) = 1.0_kind_real / &
-                            (obs_error(jchans_used) * obs_error(jchans_used))
           ob_info%yobs(jchans_used) = yobs(jvar, jobs)
           channels_used(jchans_used) = self%channels(jvar)
         end if
       end do
-      call rmatrix_setup(r_matrix_obj, self % rtype, chans_used, obs_error)
+      call rmatrix_setup(r_matrix, self % rtype, chans_used, obs_error)
 
       write(*,*) "Ob number = ",jobs
       write(*,*) "channels used = ",channels_used(:)
       write(*,*) "channels used number = ",chans_used
-      write(*,*) "r_inverse = ",r_inverse
-      write(*,*) "r_matrix = ",r_matrix
-      call rmatrix_print(r_matrix_obj)
+      call rmatrix_print(r_matrix)
 
       !---------------------------------------------------
       ! Call minimization
       !---------------------------------------------------
       if (self % UseMLMinimization) then
-        call ufo_rttovonedvarcheck_minimize_ml(self, ob_info, r_matrix, r_inverse, &
-                                      r_matrix_obj, b_matrix, b_inverse,           &
+        call ufo_rttovonedvarcheck_minimize_ml(self, ob_info, &
+                                      r_matrix, b_matrix, b_inverse,           &
                                       local_geovals, profile_index,                &
                                       nprofelements, channels_used, onedvar_success)
       else
-        call ufo_rttovonedvarcheck_minimize_newton(self, ob_info, r_matrix, &
-                                      r_inverse, r_matrix_obj, b_matrix,           &
+        call ufo_rttovonedvarcheck_minimize_newton(self, ob_info, &
+                                      r_matrix, b_matrix,           &
                                       b_inverse, local_geovals, profile_index,     & 
                                       nprofelements, channels_used, onedvar_success)
       end if
@@ -341,11 +331,9 @@ subroutine ufo_rttovonedvarcheck_apply(self, vars, geovals, apply)
 
       ! Deallocate arrays allocated in loop
       if (allocated(ob_info%yobs))  deallocate(ob_info%yobs)
-      if (allocated(r_matrix))      deallocate(r_matrix)
-      if (allocated(r_inverse))     deallocate(r_inverse)
       if (allocated(channels_used)) deallocate(channels_used)
       if (allocated(obs_error))     deallocate(obs_error)
-      call rmatrix_delete(r_matrix_obj)
+      call rmatrix_delete(r_matrix)
 
       ! tidy up
       call ufo_geovals_delete(local_geovals)
@@ -375,8 +363,6 @@ subroutine ufo_rttovonedvarcheck_apply(self, vars, geovals, apply)
   if (allocated(sol_zen))         deallocate(sol_zen)
   if (allocated(sol_azi))         deallocate(sol_azi)
   if (allocated(flags))           deallocate(flags)
-  if (allocated(r_matrix))        deallocate(r_matrix)
-  if (allocated(r_inverse))       deallocate(r_inverse)
   if (allocated(b_matrix))        deallocate(b_matrix)
   if (allocated(b_inverse))       deallocate(b_inverse)
   if (allocated(iter_hofx))       deallocate(iter_hofx)

@@ -12,23 +12,23 @@ use ufo_geovals_mod
 use ufo_rttovonedvarcheck_utils_mod
 use ufo_radiancerttov_tlad_mod
 use ufo_rttovonedvarcheck_rmatrix_mod, only: &
-        rmatrix_type, &
-        rmatrix_add_to_u, &
-        rmatrix_multiply, &
-        rmatrix_multiply_matrix, &
-        rmatrix_inv_multiply, &
-        rmatrix_multiply_inv_matrix
+    rmatrix_type, &
+    rmatrix_add_to_u, &
+    rmatrix_multiply, &
+    rmatrix_multiply_matrix, &
+    rmatrix_inv_multiply, &
+    rmatrix_multiply_inv_matrix
 
 use ufo_rttovonedvarcheck_process_mod, only: &
-        ufo_rttovonedvarcheck_GeoVaLs2ProfVec, &
-        ufo_rttovonedvarcheck_ProfVec2GeoVaLs, &
-        ufo_rttovonedvarcheck_CostFunction, &
-        ufo_rttovonedvarcheck_CheckIteration, &
-        ufo_rttovonedvarcheck_CheckCloudyIteration, &
-        ufo_rttovonedvarcheck_Cholesky
+    ufo_rttovonedvarcheck_GeoVaLs2ProfVec, &
+    ufo_rttovonedvarcheck_ProfVec2GeoVaLs, &
+    ufo_rttovonedvarcheck_CostFunction, &
+    ufo_rttovonedvarcheck_CheckIteration, &
+    ufo_rttovonedvarcheck_CheckCloudyIteration, &
+    ufo_rttovonedvarcheck_Cholesky
 
 use ufo_rttovonedvarcheck_forward_model_mod, only: &
-        ufo_rttovonedvarcheck_ForwardModel
+    ufo_rttovonedvarcheck_ForwardModel
 
 implicit none
 
@@ -86,8 +86,6 @@ contains
 subroutine ufo_rttovonedvarcheck_minimize_ml(self,      &
                                          ob_info,       &
                                          r_matrix,      &
-                                         r_inv,         &
-                                         r_matrix_obj,  &
                                          b_matrix,      &
                                          b_inv,         &
                                          local_geovals, &
@@ -100,9 +98,7 @@ implicit none
 
 type(ufo_rttovonedvarcheck), intent(inout) :: self
 type(Obinfo_type), intent(in)        :: ob_info
-real(kind_real), intent(in)          :: r_matrix(:,:)
-real(kind_real), intent(in)          :: r_inv(:,:)
-type(rmatrix_type), intent(in)       :: r_matrix_obj
+type(rmatrix_type), intent(in)       :: r_matrix
 real(kind_real), intent(in)          :: b_matrix(:,:)
 real(kind_real), intent(in)          :: b_inv(:,:)
 type(ufo_geovals), intent(inout)     :: local_geovals
@@ -200,7 +196,7 @@ Iterations: do iter = 1, self % max1DVarIterations
   Ydiff(:) = ob_info%yobs(:) - Y(:)
   if (iter == 1) then
     Diffprofile(:) = GuessProfile(:) - BackProfile(:)
-    call ufo_rttovonedvarcheck_CostFunction(Diffprofile, b_inv, Ydiff, r_inv, Jout)
+    call ufo_rttovonedvarcheck_CostFunction(Diffprofile, b_inv, Ydiff, r_matrix, Jout)
     Jcost = Jout(1)
   end if
 
@@ -278,8 +274,7 @@ Iterations: do iter = 1, self % max1DVarIterations
                                       GuessProfile,        &
                                       BackProfile,         &
                                       b_inv,               &
-                                      r_matrix_obj,        &
-                                      r_inv,               &
+                                      r_matrix,            &
                                       geovals,             &
                                       channels,            &
                                       gamma,               &
@@ -485,7 +480,6 @@ subroutine ufo_rttovonedvarcheck_ML_RTTOV12 ( self, &
                                       BackProfile,   &
                                       b_inv,         &
                                       r_matrix,      &
-                                      r_inv,         &
                                       geovals,       &
                                       channels,      &
                                       gamma,         &
@@ -508,7 +502,6 @@ real(kind_real), intent(inout)          :: GuessProfile(:)
 real(kind_real), intent(in)             :: BackProfile(:)
 real(kind_real), intent(in)             :: b_inv(:,:)
 type(rmatrix_type), intent(in)          :: r_matrix
-real(kind_real), intent(in)             :: r_inv(:,:)
 type(ufo_geovals), intent(inout)        :: geovals
 integer(c_int), intent(in)              :: channels(:)
 real(kind_real), intent(inout)          :: gamma
@@ -546,7 +539,7 @@ Status = StatusOK
 !---------------------------------------------------------------------------
 
 !HTR(-1) = matmul(H_matrix_T, R_inverse)
-call rmatrix_multiply_inv_matrix(R_matrix,H_matrix_T,HTR)
+call rmatrix_multiply_inv_matrix(r_matrix,H_matrix_T,HTR)
 
 !---------------------------------------------------------------------------
 ! 2. Calculate U and V
@@ -640,7 +633,7 @@ DescentLoop : do while (JCost > JOld .and.              &
     else
       DeltaProfile(:) = GuessProfile(:) - BackProfile(:)
       Ydiff(:) = ob_info%yobs(:) - BriTemp(:)
-      call ufo_rttovonedvarcheck_CostFunction(DeltaProfile, b_inv, Ydiff, r_inv, Jout)
+      call ufo_rttovonedvarcheck_CostFunction(DeltaProfile, b_inv, Ydiff, r_matrix, Jout)
       Jcost = Jout(1)
 !      if (Status /= StatusOK) GOTO 9999
     end if

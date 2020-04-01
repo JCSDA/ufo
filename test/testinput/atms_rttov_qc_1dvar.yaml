@@ -97,7 +97,7 @@ Observations:
       - surface_air_pressure
       BMatrix: Data/atms_bmatrix_70.dat
       nlevels: 70
-      rtype: full # diagonal or full R matrix
+      rtype: diagonal # diagonal or full R matrix
       qtotal: true
       RTTOV_mwscattSwitch: false
       UseMLMinimization: false
