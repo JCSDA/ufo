@@ -78,7 +78,7 @@ type(fckit_configuration) :: f_confOpts,f_confLinOper
  ! request from the model var_ts +
  ! 1 * n_Absorbers
  ! 1 * n_Clouds (mass content only)
- nvars_in = size(varin_default) + self%conf%n_Absorbers + self%conf%n_Clouds
+ nvars_in = size(varin_default) + self%conf%n_Absorbers + self%conf%n_Clouds + self%conf%n_Surfaces
  allocate(self%varin(nvars_in))
  self%varin(1:size(varin_default)) = varin_default
  ind = size(varin_default) + 1
@@ -90,6 +90,10 @@ type(fckit_configuration) :: f_confOpts,f_confLinOper
  end do
  do jspec = 1, self%conf%n_Clouds
    self%varin(ind) = self%conf%Clouds(jspec,1)
+   ind = ind + 1
+ end do
+ do jspec = 1, self%conf%n_Surfaces
+   self%varin(ind) = self%conf%Surfaces(jspec)
    ind = ind + 1
  end do
 
@@ -597,7 +601,6 @@ character(max_string) :: err_msg
 integer :: jprofile, jchannel, jlevel, jspec, ispec
 type(ufo_geoval), pointer :: geoval_d
 
-
  ! Initial checks
  ! --------------
 
@@ -687,6 +690,69 @@ type(ufo_geoval), pointer :: geoval_d
      end if
    enddo
  end do
+
+ ! Surface Variables
+ ! --------------------------
+
+ do jspec = 1, self%conf%n_Surfaces
+   ! Get Surface from geovals
+   call ufo_geovals_get_var(geovals, self%conf%Surfaces(jspec), geoval_d)
+
+   select case(self%conf%Surfaces(jspec))
+
+      case(var_sfc_wtmp)
+
+         ! Multiply by Jacobian and add to hofx
+         do jprofile = 1, self%n_Profiles
+            if (.not.self%Skip_Profiles(jprofile)) then
+               do jchannel = 1, size(self%channels)
+                  jlevel = 1
+                  hofx(jchannel, jprofile) = hofx(jchannel, jprofile) + &
+                        self%sfc_K(jchannel,jprofile)%water_temperature * &
+                        geoval_d%vals(jlevel,jprofile)
+               enddo
+            end if
+         enddo
+      case(var_sfc_wspeed)
+         ! Multiply by Jacobian and add to hofx
+         do jprofile = 1, self%n_Profiles
+            if (.not.self%Skip_Profiles(jprofile)) then
+               do jchannel = 1, size(self%channels)
+                  jlevel = 1
+                  hofx(jchannel, jprofile) = hofx(jchannel, jprofile) + &
+                        self%sfc_K(jchannel,jprofile)%wind_speed * & 
+                        geoval_d%vals(jlevel,jprofile)
+               enddo
+            end if
+         enddo
+      case(var_sfc_wdir)
+         ! Multiply by Jacobian and add to hofx
+         do jprofile = 1, self%n_Profiles
+            if (.not.self%Skip_Profiles(jprofile)) then
+               do jchannel = 1, size(self%channels)
+                  jlevel = 1
+                  hofx(jchannel, jprofile) = hofx(jchannel, jprofile) + &
+                        self%sfc_K(jchannel,jprofile)%wind_direction * & 
+                        geoval_d%vals(jlevel,jprofile)
+               enddo
+            end if
+         enddo
+      case(var_sfc_sss)
+         ! Multiply by Jacobian and add to hofx
+         do jprofile = 1, self%n_Profiles
+            if (.not.self%Skip_Profiles(jprofile)) then
+               do jchannel = 1, size(self%channels)
+                  jlevel = 1
+                  hofx(jchannel, jprofile) = hofx(jchannel, jprofile) + &
+                        self%sfc_K(jchannel,jprofile)%salinity * & 
+                        geoval_d%vals(jlevel,jprofile)
+               enddo
+            end if
+         enddo
+
+   end select
+ end do
+
 
 end subroutine ufo_radiancecrtm_simobs_tl
 
@@ -821,6 +887,84 @@ real(c_double) :: missing
      end if
    enddo
  end do
+
+
+ ! Surface Variables
+ ! --------------------------
+ do jspec = 1, self%conf%n_Surfaces
+   ! Get Cloud from geovals
+   call ufo_geovals_get_var(geovals, self%conf%Surfaces(jspec), geoval_d)
+
+   ! allocate if not yet allocated
+   if (.not. allocated(geoval_d%vals)) then
+      geoval_d%nlocs = self%n_Profiles
+      geoval_d%nval = self%n_Layers
+      allocate(geoval_d%vals(geoval_d%nval,geoval_d%nlocs))
+      geoval_d%vals = 0.0_kind_real
+   endif
+
+   select case(self%conf%Surfaces(jspec))
+     
+      case(var_sfc_wtmp)
+         ! Multiply by Jacobian and add to hofx
+         do jprofile = 1, self%n_Profiles
+            if (.not.self%Skip_Profiles(jprofile)) then
+               do jchannel = 1, size(self%channels)
+                  if (hofx(jchannel, jprofile) /= missing) then
+                     jlevel = 1
+                     geoval_d%vals(jlevel, jprofile) = geoval_d%vals(jlevel,jprofile) + &
+                          self%sfc_K(jchannel,jprofile)%water_temperature * & 
+                          hofx(jchannel,jprofile)
+                  endif
+               enddo
+            end if
+         enddo
+      case(var_sfc_wspeed)
+         ! Multiply by Jacobian and add to hofx
+         do jprofile = 1, self%n_Profiles
+            if (.not.self%Skip_Profiles(jprofile)) then
+               do jchannel = 1, size(self%channels)
+                  if (hofx(jchannel, jprofile) /= missing) then                  
+                     jlevel = 1
+                     geoval_d%vals(jlevel, jprofile) = geoval_d%vals(jlevel,jprofile) + &
+                          self%sfc_K(jchannel,jprofile)%wind_speed * & 
+                          hofx(jchannel,jprofile)
+                  endif
+               enddo
+            end if
+         enddo
+      case(var_sfc_wdir)
+         ! Multiply by Jacobian and add to hofx
+         do jprofile = 1, self%n_Profiles
+            if (.not.self%Skip_Profiles(jprofile)) then
+               do jchannel = 1, size(self%channels)
+                  if (hofx(jchannel, jprofile) /= missing) then                 
+                     jlevel = 1
+                     geoval_d%vals(jlevel, jprofile) = geoval_d%vals(jlevel,jprofile) + &
+                          self%sfc_K(jchannel,jprofile)%wind_direction * & 
+                          hofx(jchannel,jprofile)
+                  endif
+               enddo
+            end if
+         enddo
+      case(var_sfc_sss)
+         ! Multiply by Jacobian and add to hofx
+         do jprofile = 1, self%n_Profiles
+            if (.not.self%Skip_Profiles(jprofile)) then
+               do jchannel = 1, size(self%channels)
+                  if (hofx(jchannel, jprofile) /= missing) then
+                     jlevel = 1
+                     geoval_d%vals(jlevel, jprofile) = geoval_d%vals(jlevel,jprofile) + &
+                          self%sfc_K(jchannel,jprofile)%salinity * & 
+                          hofx(jchannel,jprofile)
+                  endif
+               enddo
+            end if
+         enddo
+
+   end select
+
+ enddo
 
  ! Once all geovals set replace flag
  ! ---------------------------------

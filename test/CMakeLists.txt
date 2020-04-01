@@ -402,6 +402,12 @@ if ( ${CRTM_FOUND} )
                       ENVIRONMENT OOPS_TRAPFPE=1
                       DEPENDS test_ObsOperator.x )
 
+    ecbuild_add_test( TARGET  test_ufo_linopr_crtm_smap
+                      COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
+                      ARGS    "testinput/smap_crtm.yaml"
+                      ENVIRONMENT OOPS_TRAPFPE=1
+                      DEPENDS test_ObsOperatorTLAD.x )
+
     ecbuild_add_test( TARGET  test_ufo_opr_crtm_seviri
                       COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
                       ARGS    "testinput/seviri_crtm.yaml"

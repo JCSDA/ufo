@@ -52,11 +52,13 @@ type crtm_conf
  integer :: n_Absorbers
  integer :: n_Clouds
  integer :: n_Aerosols
+ integer :: n_Surfaces
  character(len=MAXVARLEN), allocatable :: Absorbers(:)
  integer, allocatable :: Absorber_Id(:)
  integer, allocatable :: Absorber_Units(:)
  character(len=MAXVARLEN), allocatable :: Clouds(:,:)
  integer, allocatable :: Cloud_Id(:)
+ character(len=MAXVARLEN), allocatable :: Surfaces(:)
 
  character(len=255), allocatable :: SENSOR_ID(:)
  character(len=255) :: ENDIAN_TYPE
@@ -126,6 +128,16 @@ END INTERFACE
               SNOW_CLOUD, &
            GRAUPEL_CLOUD, &
               HAIL_CLOUD  ]
+
+! Surface Variables
+
+ character(len=MAXVARLEN), parameter :: &
+      UFO_Surfaces(4) = &
+         [ var_sfc_wtmp, var_sfc_wspeed,var_sfc_wdir, var_sfc_sss]
+
+ character(len=MAXVARLEN), parameter :: & 
+      CRTM_Surfaces(4) = &
+         [  character(len=MAXVARLEN):: 'Water_Temperature', 'Wind_Speed', 'Wind_Direction', 'Salinity' ]
 
 contains
 
@@ -261,6 +273,38 @@ integer(c_size_t),parameter :: csize = MAXVARLEN
     conf%n_Aerosols  = 0
     conf%aerosol_option = ""
  ENDIF
+
+ ! Surface variables
+ !----------
+ conf%n_Surfaces = 0
+ if (f_confOper%has("Surfaces")) &
+   conf%n_Surfaces = conf%n_Surfaces + f_confOper%get_size("Surfaces")
+
+ allocate( conf%Surfaces    ( conf%n_Surfaces ))
+
+ if (conf%n_Surfaces > 0) then
+   call f_confOper%get_or_die("Surfaces",csize,char_array)
+   conf%Surfaces(1:conf%n_Surfaces) = char_array
+ end if
+
+ ! check for duplications
+ do jspec = 2, conf%n_Surfaces
+   if ( any(conf%Surfaces(jspec-1) == conf%Surfaces(jspec:conf%n_Surfaces)) ) then
+     write(message,*) 'crtm_conf_setup error: ',trim(conf%Surfaces(jspec)),' is duplicated in Surfaces'
+     call abor1_ftn(message)
+   end if
+ end do
+
+ ! convert from CRTM names to UFO CF names and define Id and Units
+ do jspec = 1, conf%n_Surfaces
+   ivar = ufo_vars_getindex(CRTM_Surfaces, conf%Surfaces(jspec))
+   if (ivar < 1 .or. ivar > size(UFO_Surfaces)) then
+     write(message,*) 'crtm_conf_setup error: ',trim(conf%Surfaces(jspec)),' not supported by UFO_Surfaces'
+     call abor1_ftn(message)
+   end if
+   conf%Surfaces(jspec) = UFO_Surfaces(ivar)
+
+ end do
 
  ! Sea_Surface_Salinity
  !---------
