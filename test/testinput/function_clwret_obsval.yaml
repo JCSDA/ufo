@@ -11,8 +11,11 @@ ObsSpace:
 GeoVaLs:
   filename: Data/amsua_n19_geoval_2018041500_m.nc4
 ObsFunction:
-  name: CLWRet@ObsFunction 
+  name: CLWRet@ObsFunction
   options:
-    clwret_type: [ObsValue]
+    clwret_ch238: 1
+    clwret_ch314: 2
+    clwret_types: [ObsValue]
+    test_group: GsiObsBias
   variables: [clw_retrieved_from_observation]
   tolerance: 1.0e-8

@@ -28,20 +28,38 @@ static ObsFunctionMaker<ObsFunctionObsErrorMean> makerObsFuncObsErrorMean_("ObsE
 
 // ----------------------------------------------------------------------------------
 
-ObsFunctionObsErrorMean::ObsFunctionObsErrorMean(const eckit::LocalConfiguration conf)
-  : invars_(), channels_(), conf_(conf) {
-  // Check options
-  ASSERT(conf_.has("clwret_type") && conf_.has("channels") &&
-         conf_.has("clw_clr") && conf_.has("clw_cld") &&
-         conf_.has("obserr_clr") && conf_.has("obserr_cld"));
+ObsFunctionObsErrorMean::ObsFunctionObsErrorMean(const eckit::LocalConfiguration & conf)
+  : invars_() {
+  // Initialize options
+  options_.deserialize(conf);
 
+  // Check required variables
   // Get channels from options
-  const std::string chlist = conf_.getString("channels");
-  std::set<int> channelset = oops::parseIntSet(chlist);
+  std::set<int> channelset = oops::parseIntSet(options_.chList);
   std::copy(channelset.begin(), channelset.end(), std::back_inserter(channels_));
+  ASSERT(channels_.size() > 0);
+
+  // Get channels for CLW retrieval from options
+  const std::vector<int> channels_clwret_ = {options_.ch238.value(), options_.ch314.value()};
+  ASSERT(options_.ch238 !=0 && options_.ch314 !=0 && channels_clwret_.size() == 2);
+
+  // Get variable groups for CLW retrieval
+  ASSERT(options_.varGrp.value().size() == 2);
+
+  // Get observation error model parameters from options
+  ASSERT(channels_.size() == options_.clwClr.value().size());
+  ASSERT(channels_.size() == options_.clwCld.value().size());
+  ASSERT(channels_.size() == options_.obserrMin.value().size());
+  ASSERT(channels_.size() == options_.obserrMax.value().size());
 
   // Get required variables from function
+  conf_.set("clwret_ch238", options_.ch238);
+  conf_.set("clwret_ch314", options_.ch314);
+  conf_.set("clwret_types", options_.varGrp);
+  conf_.set("test_group", options_.testGrp);
+  conf_.set("bias_application", options_.addBias);
   ObsFunctionCLWRetMean clwretfunc(conf_);
+
   invars_ += clwretfunc.requiredVariables();
 }
 
@@ -57,27 +75,28 @@ void ObsFunctionObsErrorMean::compute(const ObsFilterData & in,
   size_t nlocs = in.nlocs();
   size_t nchans = channels_.size();
 
-  // Get parameters for observation errors from options
-  std::vector<float> clw_clr = conf_.getFloatVector("clw_clr");
-  std::vector<float> clw_cld = conf_.getFloatVector("clw_cld");
-  std::vector<float> obserr_clr = conf_.getFloatVector("obserr_clr");
-  std::vector<float> obserr_cld = conf_.getFloatVector("obserr_cld");
-
   // Get Mean CLW retrievals from function
   std::vector<float> clwretmean(nlocs);
   in.get(Variable("CLWRetMean@ObsFunction", conf_), clwretmean);
 
+  const std::vector<float> &clw_clr_ = options_.clwClr;
+  const std::vector<float> &clw_cld_ = options_.clwCld;
+  const std::vector<float> &obserr_min_ = options_.obserrMin;
+  const std::vector<float> &obserr_max_ = options_.obserrMax;
   // Calculate observation error for each channel
   for (size_t ichan = 0; ichan < nchans; ++ichan) {
     for (size_t iloc = 0; iloc < nlocs; ++iloc) {
-      if (clwretmean[iloc] <= clw_clr[ichan]) {
-        out[ichan][iloc] = obserr_clr[ichan];
-      } else if (clwretmean[iloc] > clw_clr[ichan] && clwretmean[iloc] < clw_cld[ichan]) {
-        out[ichan][iloc] = obserr_clr[ichan] + (clwretmean[iloc] - clw_clr[ichan]) *
-                          (obserr_cld[ichan] - obserr_clr[ichan]) /
-                          (clw_cld[ichan] - clw_clr[ichan]);
+      // constant obs error for clear sky
+      if (clwretmean[iloc] <= clw_clr_[ichan]) {
+        out[ichan][iloc] = obserr_min_[ichan];
+      // observation error grows linearly with increaseing cloud amount under cloudy condition
+      } else if (clwretmean[iloc] > clw_clr_[ichan] && clwretmean[iloc] < clw_cld_[ichan]) {
+        float slope = (obserr_max_[ichan] - obserr_min_[ichan]) /
+                      (clw_cld_[ichan] - clw_clr_[ichan]);
+        out[ichan][iloc] = obserr_min_[ichan] + slope * (clwretmean[iloc] - clw_clr_[ichan]);
+      // maxumum obs error for cloudy sky
       } else {
-        out[ichan][iloc] = obserr_cld[ichan];
+        out[ichan][iloc] = obserr_max_[ichan];
       }
     }
   }

@@ -24,24 +24,24 @@ namespace ufo {
 
 static ObsFunctionMaker<ObsFunctionCLWRet> makerObsFuncCLWRet_("CLWRet");
 
-ObsFunctionCLWRet::ObsFunctionCLWRet(const eckit::LocalConfiguration conf)
-  : invars_(), group_() {
-  // Check options
-  ASSERT(conf.has("clwret_type"));
+ObsFunctionCLWRet::ObsFunctionCLWRet(const eckit::LocalConfiguration & conf)
+  : invars_() {
+  // Initialize options
+  options_.deserialize(conf);
 
-  // Get group type from option
-  group_ = conf.getStringVector("clwret_type");
+  // Check required parameters
+  // Get variable group types for CLW retrieval from option
+  ASSERT(options_.varGrp.value().size() == 1 || options_.varGrp.value().size() == 2);
 
-  // Set channels
-  std::vector<int> channels{1, 2};
+  // Get channels for CLW retrieval from options
+  const std::vector<int> channels_ = {options_.ch238.value(), options_.ch314.value()};
+  ASSERT(options_.ch238 !=0 && options_.ch314 !=0 && channels_.size() == 2);
 
-  // Include list of required data from ObsSpace and HofX (or GsiHofX for testing)
-  for (size_t igrp = 0; igrp < group_.size(); ++igrp) {
-    invars_ += Variable("brightness_temperature@" + group_[igrp], channels);
-    if (group_[igrp] == "HofX" || group_[igrp] == "GsiHofX") {
-      invars_ += Variable("brightness_temperature@ObsBias", channels);
-    }
+  // Include list of required data from ObsSpace
+  for (size_t igrp = 0; igrp < options_.varGrp.value().size(); ++igrp) {
+    invars_ += Variable("brightness_temperature@" + options_.varGrp.value()[igrp], channels_);
   }
+  invars_ += Variable("brightness_temperature@" + options_.testGrp.value(), channels_);
   invars_ += Variable("sensor_zenith_angle@MetaData");
 
   // Include list of required data from GeoVaLs
@@ -58,9 +58,13 @@ ObsFunctionCLWRet::~ObsFunctionCLWRet() {}
 
 void ObsFunctionCLWRet::compute(const ObsFilterData & in,
                                     ioda::ObsDataVector<float> & out) const {
+  // Get required parameters
+  const std::vector<std::string> &vargrp_ = options_.varGrp;
+  const std::vector<int> channels_ = {options_.ch238, options_.ch314};
+
   // Get dimension
   const size_t nlocs = in.nlocs();
-  const size_t ngrps = group_.size();
+  const size_t ngrps = vargrp_.size();
 
   // Get variables from ObsSpace
   // Get sensor zenith angle
@@ -77,22 +81,29 @@ void ObsFunctionCLWRet::compute(const ObsFilterData & in,
   in.get(Variable("water_area_fraction@GeoVaLs"), water_frac);
 
   // Calculate retrieved cloud liquid water
-  std::vector<float> bt1(nlocs), bt2(nlocs);
-  oops::Log::debug() << "ObsFunctionCLWRet: ngrps = " << ngrps << std::endl;
+  std::vector<float> bt238(nlocs), bt314(nlocs);
   for (size_t igrp = 0; igrp < ngrps; ++igrp) {
     // Get data based on group type
-    in.get(Variable("brightness_temperature_1@"+group_[igrp]), bt1);
-    in.get(Variable("brightness_temperature_2@"+group_[igrp]), bt2);
-
-    // Get bias and bias corrected obs
-    if (group_[igrp] == "HofX" || group_[igrp] == "GsiHofX") {
-      std::vector<float> bias1(nlocs), bias2(nlocs);
-      in.get(Variable("brightness_temperature_1@ObsBias"), bias1);
-      in.get(Variable("brightness_temperature_2@ObsBias"), bias2);
-
-      for (size_t iloc = 0; iloc < nlocs; ++iloc) {
-        bt1[iloc] = bt1[iloc] + bias1[iloc];
-        bt2[iloc] = bt2[iloc] + bias2[iloc];
+    in.get(Variable("brightness_temperature@" + vargrp_[igrp], channels_)[channels_[0]-1], bt238);
+    in.get(Variable("brightness_temperature@" + vargrp_[igrp], channels_)[channels_[1]-1], bt314);
+    // Get bias based on group type
+    if (options_.addBias.value() == vargrp_[igrp]) {
+      std::vector<float> bias238(nlocs), bias314(nlocs);
+      in.get(Variable("brightness_temperature@" + options_.testGrp.value(), channels_)
+                      [channels_[0]-1], bias238);
+      in.get(Variable("brightness_temperature@" + options_.testGrp.value(), channels_)
+                      [channels_[1]-1], bias314);
+      // Add bias correction to the assigned group
+      if (options_.addBias.value() == "ObsValue") {
+        for (size_t iloc = 0; iloc < nlocs; ++iloc) {
+          bt238[iloc] = bt238[iloc] - bias238[iloc];
+          bt314[iloc] = bt314[iloc] - bias314[iloc];
+        }
+      } else {
+        for (size_t iloc = 0; iloc < nlocs; ++iloc) {
+          bt238[iloc] = bt238[iloc] + bias238[iloc];
+          bt314[iloc] = bt314[iloc] + bias314[iloc];
+        }
       }
     }
     const float t0c = Constants::t0c;
@@ -102,10 +113,10 @@ void ObsFunctionCLWRet::compute(const ObsFilterData & in,
       if (water_frac[iloc] >= 0.99) {
         float cossza = cos(Constants::deg2rad * szas[iloc]);
         float d0 = c1 - (c2 - c3 * cossza) * cossza;
-        if (tsavg[iloc] > t0c - 1.f && bt1[iloc] <= 284.f && bt2[iloc] <= 284.f
-                                    && bt1[iloc] > 0.f && bt2[iloc] > 0.f) {
-          out[igrp][iloc] = cossza * (d0 + d1 * std::log(285.f - bt1[iloc])
-                                          + d2 * std::log(285.f - bt2[iloc]));
+        if (tsavg[iloc] > t0c - 1.f && bt238[iloc] <= 284.f && bt314[iloc] <= 284.f
+                                    && bt238[iloc] > 0.f && bt314[iloc] > 0.f) {
+          out[igrp][iloc] = cossza * (d0 + d1 * std::log(285.f - bt238[iloc])
+                                          + d2 * std::log(285.f - bt314[iloc]));
           out[igrp][iloc] = std::fmax(0.f, out[igrp][iloc]);
         } else {
           out[igrp][iloc] = getBadValue();

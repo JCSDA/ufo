@@ -54,4 +54,4 @@ Observations:
      - name: brightness_temperature
        channels: 1
      threshold: 2.0
-   passedBenchmark: 1418      # number of passed obs
+   passedBenchmark: 1416     # number of passed obs

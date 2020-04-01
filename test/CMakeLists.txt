@@ -44,6 +44,7 @@ list( APPEND ufo_test_input
   testinput/empty.yaml
   testinput/function_clouddetect.yaml
   testinput/function_clwret.yaml
+  testinput/function_clwretmean.yaml
   testinput/function_clwret_hofx.yaml
   testinput/function_clwret_obsval.yaml
   testinput/function_errfgrosschk.yaml
@@ -907,9 +908,21 @@ ecbuild_add_test( TARGET  test_ufo_qc_met_office_buddy_pair_finder
 
 # Test Functions
 
+ecbuild_add_test( TARGET  test_ufo_function_clouddetect
+                  SOURCES mains/TestObsFunction.cc
+                  ARGS    "testinput/function_clouddetect.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  LIBS    ufo)
+
 ecbuild_add_test( TARGET  test_ufo_function_clwret
                   SOURCES mains/TestObsFunction.cc
                   ARGS    "testinput/function_clwret.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  LIBS    ufo)
+
+ecbuild_add_test( TARGET  test_ufo_function_clwretmean
+                  SOURCES mains/TestObsFunction.cc
+                  ARGS    "testinput/function_clwretmean.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   LIBS    ufo)
 

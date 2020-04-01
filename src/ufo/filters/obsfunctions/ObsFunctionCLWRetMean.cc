@@ -27,15 +27,13 @@ static ObsFunctionMaker<ObsFunctionCLWRetMean> makerObsFuncCLWRetMean_("CLWRetMe
 
 // -----------------------------------------------------------------------------
 
-ObsFunctionCLWRetMean::ObsFunctionCLWRetMean(const eckit::LocalConfiguration conf)
-  : invars_(), group_(), funcname_(), conf_(conf) {
-  // Check options
-  ASSERT(conf_.has("clwret_type"));
-
-  group_ = conf_.getStringVector("clwret_type");
-  ASSERT(group_.size() == 2);
+ObsFunctionCLWRetMean::ObsFunctionCLWRetMean(const eckit::LocalConfiguration & conf)
+  : invars_(), conf_(conf) {
+  // Initialize options
+  options_.deserialize(conf_);
 
   ObsFunctionCLWRet clwretfunc(conf_);
+
   invars_ += clwretfunc.requiredVariables();
 }
 
@@ -51,7 +49,7 @@ void ObsFunctionCLWRetMean::compute(const ObsFilterData & in,
   const size_t nlocs = in.nlocs();
 
   // Get Mean CLW retrievals from function
-  oops::Variables clwvars(group_);
+  oops::Variables clwvars(options_.varGrp.value());
   ioda::ObsDataVector<float> clwret(in.obsspace(), clwvars, "ObsFunction", false);
   ObsFunctionCLWRet clwretfunc(conf_);
   clwretfunc.compute(in, clwret);

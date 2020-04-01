@@ -13,6 +13,10 @@ GeoVaLs:
 ObsFunction:
   name: CLWRet@ObsFunction 
   options:
-    clwret_type: [ObsValue, GsiHofX]
+    clwret_ch238: 1 
+    clwret_ch314: 2 
+    clwret_types: [ObsValue, GsiHofX]
+    test_group: GsiObsBias 
+    bias_application: GsiHofX
   variables: [clw_retrieved_from_observation, clw_retrieved_from_background]
   tolerance: 1.0e-8

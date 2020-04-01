@@ -35,14 +35,18 @@ Observations:
          channels: *all_channels 
          options:
            channels: *all_channels 
-           clwret_type: [ObsValue, HofX]
-           clw_clr:    [ 0.050,  0.030,  0.030,  0.020,  0.000,  0.100,  0.000,  0.000,  0.000,  0.000,
+           clwret_ch238: 1
+           clwret_ch314: 2
+           clwret_types: [ObsValue, HofX]
+           test_group: GsiObsBias
+           bias_application: HofX
+           clw_clr_threshold:    [ 0.050,  0.030,  0.030,  0.020,  0.000,  0.100,  0.000,  0.000,  0.000,  0.000,
                          0.000,  0.000,  0.000,  0.000,  0.030]
-           clw_cld:    [ 0.600,  0.450,  0.400,  0.450,  1.000,  1.500,  0.000,  0.000,  0.000,  0.000,
+           clw_cld_threshold:    [ 0.600,  0.450,  0.400,  0.450,  1.000,  1.500,  0.000,  0.000,  0.000,  0.000,
                          0.000,  0.000,  0.000,  0.000,  0.200]
-           obserr_clr: [ 2.500,  2.200,  2.000,  0.550,  0.300,  0.230,  0.230,  0.250,  0.250,  0.350,
+           obserr_min: [ 2.500,  2.200,  2.000,  0.550,  0.300,  0.230,  0.230,  0.250,  0.250,  0.350,
                          0.400,  0.550,  0.800,  3.000,  3.500]
-           obserr_cld: [20.000, 18.000, 12.000,  3.000,  0.500,  0.300,  0.230,  0.250,  0.250,  0.350,
+           obserr_max: [20.000, 18.000, 12.000,  3.000,  0.500,  0.300,  0.230,  0.250,  0.250,  0.350,
                          0.400,  0.550,  0.800,  3.000, 18.000]
 #   passedBenchmark: 1500 
 #  CLW Retrieval Check
@@ -53,7 +57,10 @@ Observations:
      test functions:
      - name: CLWRet@ObsFunction
        options:
-         clwret_type: [ObsValue]
+         clwret_ch238: 1
+         clwret_ch314: 2
+         clwret_types: [ObsValue]
+         test_group: GsiObsBias
      maxvalue: 999.0 
      action:
        name: reject 
@@ -65,7 +72,11 @@ Observations:
      test functions:
      - name: CLWRet@ObsFunction
        options:
-         clwret_type: [HofX]
+         clwret_ch238: 1
+         clwret_ch314: 2
+         clwret_types: [HofX]
+         test_group: GsiObsBias
+         bias_application: HofX
      maxvalue: 999.0 
      action:
        name: reject 
