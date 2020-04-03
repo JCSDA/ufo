@@ -28,13 +28,16 @@ static ObsFunctionMaker<ObsFunctionCloudDetect> makerObsFuncCloudDetect_("CloudD
 // -----------------------------------------------------------------------------
 
 ObsFunctionCloudDetect::ObsFunctionCloudDetect(const eckit::LocalConfiguration conf)
-  : invars_(), group_("ObsErrorData"), channels_(), conf_(conf) {
+  : invars_(), errgrp_("ObsErrorData"), hofxgrp_("HofX"), biasgrp_("ObsBias"),
+    channels_(), conf_(conf) {
   // Check options
   ASSERT(conf_.has("channels") && conf_.has("use_flag") && conf_.has("use_flag_clddet") &&
          conf_.has("obserr_dtempf"));
 
   // Check if using user-defined obserr (should be available from obs file) for testing
-  if (conf_.has("obserr_test")) group_ = conf_.getString("obserr_test");
+  if (conf_.has("obserr_test")) errgrp_ = conf_.getString("obserr_test");
+  if (conf_.has("hofx_test")) hofxgrp_ = conf_.getString("hofx_test");
+  if (conf_.has("bias_test")) biasgrp_ = conf_.getString("bias_test");
 
   // Get channels from options
   const std::string chlist = conf.getString("channels");
@@ -48,10 +51,10 @@ ObsFunctionCloudDetect::ObsFunctionCloudDetect(const eckit::LocalConfiguration c
   invars_ += Variable("pressure_level_at_peak_of_weightingfunction@ObsDiag", channels_);
 
   // Include list of required data from ObsSpace
-  invars_ += Variable("brightness_temperature@"+group_, channels_);
+  invars_ += Variable("brightness_temperature@"+errgrp_, channels_);
+  invars_ += Variable("brightness_temperature@"+biasgrp_, channels_);
+  invars_ += Variable("brightness_temperature@"+hofxgrp_, channels_);
   invars_ += Variable("brightness_temperature@ObsValue", channels_);
-  invars_ += Variable("brightness_temperature@ObsBias", channels_);
-  invars_ += Variable("brightness_temperature@HofX", channels_);
   invars_ += Variable("brightness_temperature@ObsError", channels_);
 
   // Include list of required data from GeoVaLs
@@ -130,7 +133,7 @@ void ObsFunctionCloudDetect::compute(const ObsFilterData & in,
   // Get effective observation error and convert it to inverse of the error variance
   std::vector<std::vector<float>> varinv_use(nchans, std::vector<float>(nlocs, 0.0));
   for (size_t ichan = 0; ichan < nchans; ++ichan) {
-    in.get(Variable("brightness_temperature@"+group_, channels_)[ichan], values);
+    in.get(Variable("brightness_temperature@"+errgrp_, channels_)[ichan], values);
     for (size_t iloc = 0; iloc < nlocs; ++iloc) {
       values[iloc] = 1.0 / pow(values[iloc], 2);
       if (use_flag_clddet[ichan] > 0) varinv_use[ichan][iloc] = values[iloc];
@@ -141,11 +144,11 @@ void ObsFunctionCloudDetect::compute(const ObsFilterData & in,
   std::vector<std::vector<float>> innovation(nchans, std::vector<float>(nlocs));
   for (size_t ichan = 0; ichan < nchans; ++ichan) {
     in.get(Variable("brightness_temperature@ObsValue", channels_)[ichan], innovation[ichan]);
-    in.get(Variable("brightness_temperature@HofX", channels_)[ichan], values);
+    in.get(Variable("brightness_temperature@"+hofxgrp_, channels_)[ichan], values);
     for (size_t iloc = 0; iloc < nlocs; ++iloc) {
       innovation[ichan][iloc] = innovation[ichan][iloc] - values[iloc];
     }
-    in.get(Variable("brightness_temperature@ObsBias", channels_)[ichan], values);
+    in.get(Variable("brightness_temperature@"+biasgrp_, channels_)[ichan], values);
     for (size_t iloc = 0; iloc < nlocs; ++iloc) {
       innovation[ichan][iloc] = innovation[ichan][iloc] - values[iloc];
     }

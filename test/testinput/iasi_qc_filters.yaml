@@ -161,6 +161,7 @@ Observations:
        channels: *all_channels
        options:
          channels: *all_channels
+         bias_test: GsiBc
          use_flag: [ 1, -1, -1, -1,  1, -1, -1, -1,  1, -1,
                      1, -1,  1, -1,  1,  1,  1, -1,  1,  1,
                     -1,  1,  1,  1, -1, -1,  1,  1, -1,  1,
@@ -300,6 +301,7 @@ Observations:
        channels: *all_channels
        options:
          channels: *all_channels
+         bias_test: GsiBc
          use_flag: [ 1, -1, -1, -1,  1, -1, -1, -1,  1, -1,
                      1, -1,  1, -1,  1,  1,  1, -1,  1,  1,
                     -1,  1,  1,  1, -1, -1,  1,  1, -1,  1,
@@ -510,4 +512,4 @@ Observations:
                  8055, 8078
      action:
        name: reject
-   passedBenchmark: 9757 
+   passedBenchmark: 9722   # TODO(EL) 9757 

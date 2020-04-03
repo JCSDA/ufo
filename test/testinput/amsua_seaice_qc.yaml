@@ -34,4 +34,4 @@ Observations:
      - variable:
          name: Scattering@ObsFunction
        minvalue: 10.0
-   passedBenchmark: 1381      # number of passed obs
+   passedBenchmark: 1360      # number of passed obs

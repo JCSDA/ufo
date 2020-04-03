@@ -28,12 +28,15 @@ static ObsFunctionMaker<ObsFunctionNSSTRet> makerObsFuncNSSTRet_("NSSTRet");
 // -----------------------------------------------------------------------------
 
 ObsFunctionNSSTRet::ObsFunctionNSSTRet(const eckit::LocalConfiguration conf)
-  : invars_(), group_("ObsErrorData"), channels_(), conf_(conf) {
+  : invars_(), errgrp_("ObsErrorData"), hofxgrp_("HofX"), biasgrp_("ObsBias"),
+    channels_(), conf_(conf) {
   // Check options
   ASSERT(conf_.has("channels") && conf_.has("use_flag"));
 
   // Check if using obserr from GSI for testing
-  if (conf_.has("obserr_test")) group_ = conf_.getString("obserr_test");
+  if (conf_.has("obserr_test")) errgrp_ = conf_.getString("obserr_test");
+  if (conf_.has("hofx_test")) hofxgrp_ = conf_.getString("hofx_test");
+  if (conf_.has("bias_test")) biasgrp_ = conf_.getString("bias_test");
 
   // Get channels from options
   const std::string chlist = conf.getString("channels");
@@ -46,10 +49,10 @@ ObsFunctionNSSTRet::ObsFunctionNSSTRet(const eckit::LocalConfiguration conf)
   invars_ += Variable("brightness_temperature_jacobian_humidity_mixing_ratio@ObsDiag", channels_);
 
   // Include list of required data from ObsSpace
-  invars_ += Variable("brightness_temperature@"+group_, channels_);
+  invars_ += Variable("brightness_temperature@"+errgrp_, channels_);
+  invars_ += Variable("brightness_temperature@"+hofxgrp_, channels_);
+  invars_ += Variable("brightness_temperature@"+biasgrp_, channels_);
   invars_ += Variable("brightness_temperature@ObsValue", channels_);
-  invars_ += Variable("brightness_temperature@ObsBias", channels_);
-  invars_ += Variable("brightness_temperature@HofX", channels_);
   invars_ += Variable("brightness_temperature@ObsError", channels_);
   invars_ += Variable("sensor_band_central_radiation_wavenumber@VarMetaData");
 
@@ -116,7 +119,7 @@ void ObsFunctionNSSTRet::compute(const ObsFilterData & in,
   // Get effective observation error and convert it to inverse of the error variance
   std::vector<std::vector<float>> varinv(nchans, std::vector<float>(nlocs));
   for (size_t ichan = 0; ichan < nchans; ++ichan) {
-    in.get(Variable("brightness_temperature@"+group_, channels_)[ichan], values);
+    in.get(Variable("brightness_temperature@"+errgrp_, channels_)[ichan], values);
     for (size_t iloc = 0; iloc < nlocs; ++iloc) {
       varinv[ichan][iloc] = 1.0 / pow(values[iloc], 2);
     }
@@ -126,11 +129,11 @@ void ObsFunctionNSSTRet::compute(const ObsFilterData & in,
   std::vector<std::vector<float>> innovation(nchans, std::vector<float>(nlocs));
   for (size_t ichan = 0; ichan < nchans; ++ichan) {
     in.get(Variable("brightness_temperature@ObsValue", channels_)[ichan], innovation[ichan]);
-    in.get(Variable("brightness_temperature@HofX", channels_)[ichan], values);
+    in.get(Variable("brightness_temperature@"+hofxgrp_, channels_)[ichan], values);
     for (size_t iloc = 0; iloc < nlocs; ++iloc) {
       innovation[ichan][iloc] = innovation[ichan][iloc] - values[iloc];
     }
-    in.get(Variable("brightness_temperature@ObsBias", channels_)[ichan], values);
+    in.get(Variable("brightness_temperature@"+biasgrp_, channels_)[ichan], values);
     for (size_t iloc = 0; iloc < nlocs; ++iloc) {
       innovation[ichan][iloc] = innovation[ichan][iloc] - values[iloc];
     }

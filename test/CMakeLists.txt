@@ -144,8 +144,10 @@ list( APPEND ufo_test_data
   atmosphere/aircraft_geoval_2018041500_m.nc4
   atmosphere/aircraft_geoval_2018041500_s.nc4
   atmosphere/airs_aqua_geoval_2018041500_m.nc4
-  atmosphere/amsua_n19_obsdiag_2018041500_m.nc4
-  atmosphere/amsua_n19_obsdiag_2018041500_s.nc4
+  atmosphere/amsua_n19_obsdiag_2018041500_m_qc.nc4
+  atmosphere/amsua_n19_obsdiag_2018041500_s_qc.nc4
+  atmosphere/amsua_n19_geoval_2018041500_m_qc.nc4
+  atmosphere/amsua_n19_geoval_2018041500_s_qc.nc4
   atmosphere/amsua_n19_geoval_2018041500_m.nc4
   atmosphere/amsua_n19_geoval_2018041500_s.nc4
   atmosphere/amsua_n19_geoval_2018041500.nc4

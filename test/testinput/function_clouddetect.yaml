@@ -67,6 +67,8 @@ ObsFunction:
   options:
     channels: *all_channels
     obserr_test: GsiObsError_clddet 
+    hofx_test: GsiHofX 
+    bias_test: GsiBc 
     use_flag: [1, -1, -1, -1, 1, -1, -1, -1, 1, -1, 1, -1, 1, 
               -1, 1, 1, 1, -1, 1, 1, -1, 1, 1, 1, -1, -1, 1, 1, -1, 1, -1, 1, -1, 1, 
               -1, -1, -1, -1, -1, -1, -1, -1, 1, 1, 1, -1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 
