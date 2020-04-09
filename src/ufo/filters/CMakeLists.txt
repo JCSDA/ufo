@@ -73,6 +73,8 @@ set ( filters_files
       actions/InflateError.h
       actions/RejectObs.cc
       actions/RejectObs.h
+      obsfunctions/ObsErrorModelRamp.cc
+      obsfunctions/ObsErrorModelRamp.h
       obsfunctions/ObsFunction.cc
       obsfunctions/ObsFunction.h
       obsfunctions/ObsFunctionBase.cc
@@ -83,8 +85,6 @@ set ( filters_files
       obsfunctions/ObsFunctionCLWRet.h
       obsfunctions/ObsFunctionCLWRetMean.cc
       obsfunctions/ObsFunctionCLWRetMean.h
-      obsfunctions/ObsFunctionObsErrorMean.cc
-      obsfunctions/ObsFunctionObsErrorMean.h
       obsfunctions/ObsFunctionErrfGrosschk.cc
       obsfunctions/ObsFunctionErrfGrosschk.h
       obsfunctions/ObsFunctionErrfJsfc.cc

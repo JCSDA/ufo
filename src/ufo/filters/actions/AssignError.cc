@@ -13,6 +13,7 @@
 #include "ioda/ObsDataVector.h"
 #include "oops/base/Variables.h"
 #include "oops/util/IntSetParser.h"
+#include "oops/util/missingValues.h"
 #include "ufo/filters/ObsFilterData.h"
 #include "ufo/utils/StringUtils.h"
 
@@ -57,6 +58,8 @@ void AssignError::apply(const Variables & vars,
     ioda::ObsDataVector<float> errors(data.obsspace(), errorvar.toOopsVariables(),
                                        errorvar.group(), false);
     data.get(errorvar, errors);
+    const float missing = util::missingValue(missing);
+
     // if assigned error function is 1D variable, apply the same error to all variables
     // error_jv = {0, 0, 0, ..., 0} for all nvars
     std::vector<size_t> error_jv(vars.nvars(), 0);
@@ -71,7 +74,8 @@ void AssignError::apply(const Variables & vars,
       // find current variable index in obserr
       size_t iv = obserr.varnames().find(vars.variable(jv).variable());
       for (size_t jobs = 0; jobs < obserr.nlocs(); ++jobs) {
-        if (flagged[iv][jobs]) obserr[iv][jobs] = errors[error_jv[jv]][jobs];
+        if (flagged[iv][jobs] && errors[error_jv[jv]][jobs] != missing)
+          obserr[iv][jobs] = errors[error_jv[jv]][jobs];
       }
     }
   }
