@@ -63,7 +63,7 @@ GeoVaLs:
 ObsDiag:
   filename: Data/iasi_metop-a_obsdiag_2018041500_m.nc4
 ObsFunction:
-  name: ErrfWavenum@ObsFunction 
+  name: ObsErrorFactorWavenumIR@ObsFunction 
   options:
     channels: *all_channels
   variables: [error_inflation_factor_wavenum]

@@ -230,12 +230,16 @@ void testFilters() {
       oops::Variables vars;
       vars += hop.variables();
       vars += filters.requiredGeoVaLs();
+      if (typeconfs[jj].has("ObsBias")) vars += ybias.requiredGeoVaLs();
       const eckit::LocalConfiguration gconf(typeconfs[jj], "GeoVaLs");
       const GeoVaLs_ gval(gconf, Test_::obspace()[jj], vars);
+      oops::Variables diagvars;
+      diagvars += filters.requiredHdiagnostics();
+      if (typeconfs[jj].has("ObsBias")) diagvars += ybias.requiredHdiagnostics();
       ObsDiags_ diags(Test_::obspace()[jj],
                       hop.locations(Test_::obspace()[jj].windowStart(),
                                     Test_::obspace()[jj].windowEnd()),
-                      filters.requiredHdiagnostics());
+                                    diagvars);
       filters.priorFilter(gval);
       hop.simulateObs(gval, hofx, ybias, diags);
       filters.postFilter(hofx, diags);

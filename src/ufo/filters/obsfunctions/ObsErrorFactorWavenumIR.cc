@@ -5,7 +5,7 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#include "ufo/filters/obsfunctions/ObsFunctionErrfWavenum.h"
+#include "ufo/filters/obsfunctions/ObsErrorFactorWavenumIR.h"
 
 #include <math.h>
 
@@ -23,19 +23,20 @@
 
 namespace ufo {
 
-static ObsFunctionMaker<ObsFunctionErrfWavenum> makerObsFuncErrfWavenum_("ErrfWavenum");
+static ObsFunctionMaker<ObsErrorFactorWavenumIR>
+       makerObsFuncObsErrorFactorWavenumIR_("ObsErrorFactorWavenumIR");
 
 // -----------------------------------------------------------------------------
 
-ObsFunctionErrfWavenum::ObsFunctionErrfWavenum(const eckit::LocalConfiguration conf)
-  : invars_(), channels_(), conf_(conf) {
+ObsErrorFactorWavenumIR::ObsErrorFactorWavenumIR(const eckit::LocalConfiguration & conf)
+  : invars_() {
   // Check options
-  ASSERT(conf_.has("channels"));
+  options_.deserialize(conf);
 
   // Get channels from options
-  const std::string chlist = conf_.getString("channels");
-  std::set<int> channelset = oops::parseIntSet(chlist);
+  std::set<int> channelset = oops::parseIntSet(options_.chlist);
   std::copy(channelset.begin(), channelset.end(), std::back_inserter(channels_));
+  ASSERT(channels_.size() > 0);
 
   // Include required variables from ObsDiag
   invars_ += Variable("transmittances_of_atmosphere_layer@ObsDiag", channels_);
@@ -50,11 +51,11 @@ ObsFunctionErrfWavenum::ObsFunctionErrfWavenum(const eckit::LocalConfiguration c
 
 // -----------------------------------------------------------------------------
 
-ObsFunctionErrfWavenum::~ObsFunctionErrfWavenum() {}
+ObsErrorFactorWavenumIR::~ObsErrorFactorWavenumIR() {}
 
 // -----------------------------------------------------------------------------
 
-void ObsFunctionErrfWavenum::compute(const ObsFilterData & in,
+void ObsErrorFactorWavenumIR::compute(const ObsFilterData & in,
                                   ioda::ObsDataVector<float> & out) const {
   // Get dimensions
   size_t nlocs = in.nlocs();
@@ -78,15 +79,15 @@ void ObsFunctionErrfWavenum::compute(const ObsFilterData & in,
   // surface type
   std::vector<float> tao_sfc(nlocs);
   for (size_t ich = 0; ich < nchans; ++ich) {
-    for (size_t iloc = 0; iloc < nlocs; ++iloc) out[ich][iloc] = 1.0;
-    if (wavenumber[ich] > 2000. && wavenumber[ich] <= 2400.0) {
+    for (size_t iloc = 0; iloc < nlocs; ++iloc) out[ich][iloc] = 1.f;
+    if (wavenumber[ich] > 2000.f && wavenumber[ich] <= 2400.f) {
       in.get(Variable("transmittances_of_atmosphere_layer@ObsDiag", channels_)[ich],
              nlevs, tao_sfc);
       for (size_t iloc = 0; iloc < nlocs; ++iloc) {
-        if (water_frac[iloc] > 0.0 && solza[iloc] <= 89.0) {
-          float factor = std::max(0.0, cos(Constants::deg2rad * solza[iloc]));
-          factor = tao_sfc[iloc] * factor *(1.0 / 400.0);
-          out[ich][iloc] = sqrt(1.0 / (1.0 - (wavenumber[ich] - 2000.0) * factor));
+        if (water_frac[iloc] > 0.f && solza[iloc] <= 89.f) {
+          float factor = std::fmax(0.f, cos(Constants::deg2rad * solza[iloc]));
+          factor = tao_sfc[iloc] * factor *(1.f / 400.f);
+          out[ich][iloc] = sqrt(1.f / (1.f - (wavenumber[ich] - 2000.f) * factor));
         }
       }
     }
@@ -95,7 +96,7 @@ void ObsFunctionErrfWavenum::compute(const ObsFilterData & in,
 
 // -----------------------------------------------------------------------------
 
-const ufo::Variables & ObsFunctionErrfWavenum::requiredVariables() const {
+const ufo::Variables & ObsErrorFactorWavenumIR::requiredVariables() const {
   return invars_;
 }
 

@@ -69,6 +69,23 @@ Observations:
                                7950, 7972, 7980, 7995, 8007, 8015, 8055, 8078 
    GeoVaLs: 
      filename: Data/iasi_metop-a_geoval_2018041500_m.nc4
+   ObsBias:
+     name: GSI
+     newpc4pred: true
+     emiss_bc: true
+     abias_in: Data/satbias_crtm_in
+     predictors: [constant,
+                  scan_angle,
+                  cloud_liquid_water,
+                  lapse_rate_squared,
+                  lapse_rate,
+                  cosine_of_latitude_times_orbit_node,
+                  sine_of_latitude,
+                  emissivity,
+                  scan_angle_4th_order,
+                  scan_angle_3rd_order,
+                  scan_angle_2nd_order,
+                  scan_angle_1st_order]
    ObsFilters:
 #  Gross check
    - Filter: Background Check
@@ -110,4 +127,5 @@ Observations:
                      6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6]
      action:
        name: reject
-   passedBenchmark: 51681   # TODO(EL) 52039 
+   passedBenchmark: 52039 
+#   passedBenchmark: 51681   # for zero ObsBias 

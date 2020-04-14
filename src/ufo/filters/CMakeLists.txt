@@ -95,8 +95,8 @@ set ( filters_files
       obsfunctions/ObsFunctionErrfTopo.h
       obsfunctions/ObsFunctionErrfTransmittop.cc
       obsfunctions/ObsFunctionErrfTransmittop.h
-      obsfunctions/ObsFunctionErrfWavenum.cc
-      obsfunctions/ObsFunctionErrfWavenum.h
+      obsfunctions/ObsErrorFactorWavenumIR.cc
+      obsfunctions/ObsErrorFactorWavenumIR.h
       obsfunctions/ObsFunctionNSSTRet.cc
       obsfunctions/ObsFunctionNSSTRet.h
       obsfunctions/ObsFunctionScattering.cc
