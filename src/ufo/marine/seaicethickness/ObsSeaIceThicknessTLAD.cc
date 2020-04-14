@@ -32,7 +32,7 @@ ObsSeaIceThicknessTLAD::ObsSeaIceThicknessTLAD(const ioda::ObsSpace & odb,
                                     "sea_ice_category_thickness"};
   varin_.reset(new oops::Variables(vv));
   const eckit::Configuration * configc = &config;
-  ufo_seaicethickness_tlad_setup_f90(keyOper_, &configc);
+  ufo_seaicethickness_tlad_setup_f90(keyOper_, &configc, odb.obsvariables());
   oops::Log::trace() << "ObsSeaIceThicknessTLAD created" << std::endl;
 }
 

@@ -19,6 +19,18 @@ set ( filters_files
       getScalarOrFilterData.h
       ObsBoundsCheck.cc
       ObsBoundsCheck.h
+      MetOfficeBuddyCheck.cc
+      MetOfficeBuddyCheck.h
+      MetOfficeBuddyCheckParameters.h
+      MetOfficeBuddyCollector.cc
+      MetOfficeBuddyCollector.h
+      MetOfficeBuddyCollectorV1.cc
+      MetOfficeBuddyCollectorV1.h
+      MetOfficeBuddyCollectorV2.cc
+      MetOfficeBuddyCollectorV2.h
+      MetOfficeBuddyPair.h
+      MetOfficeBuddyPairFinder.cc
+      MetOfficeBuddyPairFinder.h
       MWCLWCheck.cc
       MWCLWCheck.h
       ObsDiagnosticsWriter.cc
@@ -51,6 +63,8 @@ set ( filters_files
       PoissonDiskThinningParameters.h
       processWhere.cc
       processWhere.h
+      actions/AssignError.cc
+      actions/AssignError.h
       actions/FilterAction.cc
       actions/FilterAction.h
       actions/FilterActionBase.cc
@@ -59,12 +73,18 @@ set ( filters_files
       actions/InflateError.h
       actions/RejectObs.cc
       actions/RejectObs.h
+      obsfunctions/ObsErrorModelRamp.cc
+      obsfunctions/ObsErrorModelRamp.h
       obsfunctions/ObsFunction.cc
       obsfunctions/ObsFunction.h
       obsfunctions/ObsFunctionBase.cc
       obsfunctions/ObsFunctionBase.h
       obsfunctions/ObsFunctionCloudDetect.cc
       obsfunctions/ObsFunctionCloudDetect.h
+      obsfunctions/ObsFunctionCLWRet.cc
+      obsfunctions/ObsFunctionCLWRet.h
+      obsfunctions/ObsFunctionCLWRetMean.cc
+      obsfunctions/ObsFunctionCLWRetMean.h
       obsfunctions/ObsFunctionErrfGrosschk.cc
       obsfunctions/ObsFunctionErrfGrosschk.h
       obsfunctions/ObsFunctionErrfJsfc.cc
@@ -75,8 +95,8 @@ set ( filters_files
       obsfunctions/ObsFunctionErrfTopo.h
       obsfunctions/ObsFunctionErrfTransmittop.cc
       obsfunctions/ObsFunctionErrfTransmittop.h
-      obsfunctions/ObsFunctionErrfWavenum.cc
-      obsfunctions/ObsFunctionErrfWavenum.h
+      obsfunctions/ObsErrorFactorWavenumIR.cc
+      obsfunctions/ObsErrorFactorWavenumIR.h
       obsfunctions/ObsFunctionNSSTRet.cc
       obsfunctions/ObsFunctionNSSTRet.h
       obsfunctions/ObsFunctionScattering.cc

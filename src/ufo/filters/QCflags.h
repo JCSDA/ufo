@@ -24,7 +24,8 @@ namespace QCflags {
   constexpr int fguess  = 10;  // observation too far from guess
   constexpr int seaice  = 11;  // observation based sea ice detection, also flags land points
   constexpr int track   = 12;  // observation removed as inconsistent with the rest of track
-  constexpr int onedvar = 13;  // observation failed to converge in 1dvar check
+  constexpr int buddy   = 13;  // observation rejected by the buddy check
+  constexpr int onedvar = 14;  // observation failed to converge in 1dvar check
 };  // namespace QCflags
 
 }  // namespace ufo

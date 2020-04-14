@@ -15,7 +15,7 @@ Observations:
      ObsDataIn: 
        obsfile: Data/ioda/testinput_tier_1/iasi_metop-a_obs_2018041500_m.nc4
      ObsDataOut:
-       obsfile: Data/ioda/testinput_tier_1/iasi_metop-a_obs_2018041500_m_out.nc4
+       obsfile: Data/iasi_metop-a_obs_2018041500_m_out.nc4
      simulate:
        variables: [brightness_temperature]
        channels: &all_channels 16, 29, 32, 35, 38, 41, 44, 47, 49, 50,
@@ -82,6 +82,23 @@ Observations:
                                7980, 7995, 8007, 8015, 8055, 8078 
    GeoVaLs: 
      filename: Data/iasi_metop-a_geoval_2018041500_m.nc4
+   ObsBias:
+     name: GSI
+     newpc4pred: true
+     emiss_bc: true
+     abias_in: Data/satbias_crtm_in
+     predictors: [constant,
+                  scan_angle,
+                  cloud_liquid_water,
+                  lapse_rate_squared,
+                  lapse_rate,
+                  cosine_of_latitude_times_orbit_node,
+                  sine_of_latitude,
+                  emissivity,
+                  scan_angle_4th_order,
+                  scan_angle_3rd_order,
+                  scan_angle_2nd_order,
+                  scan_angle_1st_order]
    ObsFilters:
 #  Wavenumber Check
    - Filter: BlackList 
@@ -110,7 +127,7 @@ Observations:
      action:
        name: inflate error
        inflation variable:
-         name: ErrfWavenum@ObsFunction
+         name: ObsErrorFactorWavenumIR@ObsFunction
          channels: *all_channels
          options:
            channels: *all_channels
@@ -161,6 +178,7 @@ Observations:
        channels: *all_channels
        options:
          channels: *all_channels
+         bias_test: GsiBc
          use_flag: [ 1, -1, -1, -1,  1, -1, -1, -1,  1, -1,
                      1, -1,  1, -1,  1,  1,  1, -1,  1,  1,
                     -1,  1,  1,  1, -1, -1,  1,  1, -1,  1,
@@ -300,6 +318,7 @@ Observations:
        channels: *all_channels
        options:
          channels: *all_channels
+         bias_test: GsiBc
          use_flag: [ 1, -1, -1, -1,  1, -1, -1, -1,  1, -1,
                      1, -1,  1, -1,  1,  1,  1, -1,  1,  1,
                     -1,  1,  1,  1, -1, -1,  1,  1, -1,  1,
@@ -511,3 +530,4 @@ Observations:
      action:
        name: reject
    passedBenchmark: 9757 
+#   passedBenchmark: 9722   # for zero ObsBias 

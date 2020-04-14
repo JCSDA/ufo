@@ -25,11 +25,24 @@
 #include "oops/interface/ObsOperator.h"
 #include "oops/interface/ObsVector.h"
 #include "oops/runs/Test.h"
+#include "oops/util/DateTime.h"
+#include "oops/util/Duration.h"
 #include "oops/util/Expect.h"
 #include "oops/util/Logger.h"
 #include "test/interface/ObsTestsFixture.h"
 #include "test/TestEnvironment.h"
+#include "ufo/filters/Variable.h"
 #include "ufo/UfoTrait.h"
+
+namespace eckit
+{
+  // Don't use the contracted output for these types: the current implementation works only
+  // with integer types.
+  // TODO(wsmigaj) Report this (especially for floats) as a bug in eckit?
+  template <> struct VectorPrintSelector<float> { typedef VectorPrintSimple selector; };
+  template <> struct VectorPrintSelector<util::DateTime> { typedef VectorPrintSimple selector; };
+  template <> struct VectorPrintSelector<util::Duration> { typedef VectorPrintSimple selector; };
+}  // namespace eckit
 
 namespace ufo {
 namespace test {
@@ -129,6 +142,34 @@ size_t numEqualTo(const UfoTrait::ObsDataVector<int> & data, int value) {
 
 // -----------------------------------------------------------------------------
 
+template <typename T>
+void expectVariablesEqual(const UfoTrait::ObsSpace &obsspace,
+                          const ufo::Variable &referenceVariable,
+                          const ufo::Variable &testVariable)
+{
+  std::vector<T> reference(obsspace.nlocs());
+  obsspace.get_db(referenceVariable.group(), referenceVariable.variable(), reference);
+  std::vector<T> test(obsspace.nlocs());
+  obsspace.get_db(testVariable.group(), testVariable.variable(), test);
+  EXPECT_EQUAL(reference, test);
+}
+
+// -----------------------------------------------------------------------------
+
+void expectVariablesApproximatelyEqual(const UfoTrait::ObsSpace &obsspace,
+                                       const ufo::Variable &referenceVariable,
+                                       const ufo::Variable &testVariable,
+                                       float absTol)
+{
+  std::vector<float> reference(obsspace.nlocs());
+  obsspace.get_db(referenceVariable.group(), referenceVariable.variable(), reference);
+  std::vector<float> test(obsspace.nlocs());
+  obsspace.get_db(testVariable.group(), testVariable.variable(), test);
+  EXPECT(oops::are_all_close_absolute(reference, test, absTol));
+}
+
+// -----------------------------------------------------------------------------
+
 void testFilters() {
   typedef ::test::ObsTestsFixture<UfoTrait> Test_;
   typedef oops::GeoVaLs<ufo::UfoTrait>           GeoVaLs_;
@@ -137,6 +178,7 @@ void testFilters() {
   typedef oops::ObsFilters<ufo::UfoTrait>        ObsFilters_;
   typedef oops::ObsOperator<ufo::UfoTrait>       ObsOperator_;
   typedef oops::ObsVector<ufo::UfoTrait>         ObsVector_;
+  typedef oops::ObsSpace<ufo::UfoTrait>          ObsSpace_;
 
   const eckit::LocalConfiguration obsconf(::test::TestEnvironment::config(), "Observations");
   std::vector<eckit::LocalConfiguration> typeconfs;
@@ -188,12 +230,16 @@ void testFilters() {
       oops::Variables vars;
       vars += hop.variables();
       vars += filters.requiredGeoVaLs();
+      if (typeconfs[jj].has("ObsBias")) vars += ybias.requiredGeoVaLs();
       const eckit::LocalConfiguration gconf(typeconfs[jj], "GeoVaLs");
       const GeoVaLs_ gval(gconf, Test_::obspace()[jj], vars);
+      oops::Variables diagvars;
+      diagvars += filters.requiredHdiagnostics();
+      if (typeconfs[jj].has("ObsBias")) diagvars += ybias.requiredHdiagnostics();
       ObsDiags_ diags(Test_::obspace()[jj],
                       hop.locations(Test_::obspace()[jj].windowStart(),
                                     Test_::obspace()[jj].windowEnd()),
-                      filters.requiredHdiagnostics());
+                                    diagvars);
       filters.priorFilter(gval);
       hop.simulateObs(gval, hofx, ybias, diags);
       filters.postFilter(hofx, diags);
@@ -264,6 +310,39 @@ void testFilters() {
         const int flaggedBenchmark = typeconfs[jj].getInt("flaggedBenchmark");
         const int flagged = numEqualTo(qcflags->obsdatavector(), flag);
         EXPECT_EQUAL(flagged, flaggedBenchmark);
+      }
+    }
+
+    if (typeconfs[jj].has("compareVariables")) {
+      for (const eckit::LocalConfiguration &compareVariablesConf :
+           typeconfs[jj].getSubConfigurations("compareVariables")) {
+        atLeastOneBenchmarkFound = true;
+
+        ufo::Variable referenceVariable(compareVariablesConf.getSubConfiguration("reference"));
+        ufo::Variable testVariable(compareVariablesConf.getSubConfiguration("test"));
+
+        const UfoTrait::ObsSpace &obsspace = Test_::obspace()[jj].obsspace();
+        switch (obsspace.dtype(referenceVariable.group(), referenceVariable.variable())) {
+        case ioda::ObsDtype::Integer:
+          expectVariablesEqual<int>(obsspace, referenceVariable, testVariable);
+          break;
+        case ioda::ObsDtype::String:
+          expectVariablesEqual<std::string>(obsspace, referenceVariable, testVariable);
+          break;
+        case ioda::ObsDtype::DateTime:
+          expectVariablesEqual<util::DateTime>(obsspace, referenceVariable, testVariable);
+          break;
+        case ioda::ObsDtype::Float:
+          if (!compareVariablesConf.has("absTol")) {
+            expectVariablesEqual<float>(obsspace, referenceVariable, testVariable);
+          } else {
+            const float tol = compareVariablesConf.getFloat("absTol");
+            expectVariablesApproximatelyEqual(obsspace, referenceVariable, testVariable, tol);
+          }
+          break;
+        case ioda::ObsDtype::None:
+          ASSERT_MSG(false, "Reference variable not found in observation space");
+        }
       }
     }
 

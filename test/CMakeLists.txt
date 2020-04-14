@@ -33,6 +33,8 @@ list( APPEND ufo_test_input
   testinput/amsua_rttov.yaml
   testinput/atms_rttov_qc_1dvar.yaml
   testinput/amsua_qc.yaml
+  testinput/amsua_qc_filters.yaml
+  testinput/amsua_qc_miss_val.yaml
   testinput/amsua_allsky_gsi_qc.yaml
   testinput/amsua_seaice_qc.yaml
   testinput/aod_crtm.yaml
@@ -42,6 +44,10 @@ list( APPEND ufo_test_input
   testinput/cris_qc.yaml
   testinput/empty.yaml
   testinput/function_clouddetect.yaml
+  testinput/function_clwret.yaml
+  testinput/function_clwretmean.yaml
+  testinput/function_clwret_hofx.yaml
+  testinput/function_clwret_obsval.yaml
   testinput/function_errfgrosschk.yaml
   testinput/function_errfjsfc.yaml
   testinput/function_errflat.yaml
@@ -49,6 +55,7 @@ list( APPEND ufo_test_input
   testinput/function_errftransmittop.yaml
   testinput/function_errfwavenum.yaml
   testinput/function_nsstret.yaml
+  testinput/function_obserrmean.yaml
   testinput/function_velocity.yaml
   testinput/gmi_crtm.yaml
   testinput/genericprof.yaml
@@ -91,6 +98,9 @@ list( APPEND ufo_test_input
   testinput/qc_differencecheck.yaml
   testinput/qc_gauss_thinning.yaml
   testinput/qc_gauss_thinning_unittests.yaml
+  testinput/qc_met_office_buddy_check.yaml
+  testinput/qc_met_office_buddy_check_unittests.yaml
+  testinput/qc_met_office_buddy_pair_finder.yaml
   testinput/qc_recursive_splitter.yaml
   testinput/qc_poisson_disk_thinning.yaml
   testinput/qc_poisson_disk_thinning_unittests.yaml
@@ -134,10 +144,13 @@ list( APPEND ufo_test_data
   atmosphere/aircraft_geoval_2018041500_m.nc4
   atmosphere/aircraft_geoval_2018041500_s.nc4
   atmosphere/airs_aqua_geoval_2018041500_m.nc4
-  atmosphere/amsua_n19_obsdiag_2018041500_m_bc3.nc4
-  atmosphere/amsua_n19_geoval_2018041500_m_bc3.nc4
+  atmosphere/amsua_n19_obsdiag_2018041500_m_qc.nc4
+  atmosphere/amsua_n19_obsdiag_2018041500_s_qc.nc4
+  atmosphere/amsua_n19_geoval_2018041500_m_qc.nc4
+  atmosphere/amsua_n19_geoval_2018041500_s_qc.nc4
   atmosphere/amsua_n19_geoval_2018041500_m.nc4
   atmosphere/amsua_n19_geoval_2018041500_s.nc4
+  atmosphere/amsua_n19_geoval_2018041500.nc4
   atmosphere/aod_geoval_2018041500_m.nc4
   atmosphere/aod_geoval_2018041500_s.nc4
   atmosphere/atms_npp_geoval_2018041500_m.nc4
@@ -192,6 +205,7 @@ list( APPEND ufo_test_data
   marine/sst_obs-2018-04-15_geovals.nc
   filters/filters_testdata.nc4
   filters/met_office_poisson_disk_thinning.nc4
+  filters/met_office_buddy_check.nc4
   filters/poisson_disk_thinning_3x3x3x3_regular_grid.nc4
 )
 
@@ -203,73 +217,86 @@ list( APPEND ufo_ioda_test_data
       testinput_tier_1.tar.gz)
 
 # Set URL for IODA test files
-set(IODA_DOWNLOAD_BASE_URL https://jedi-test-files.s3.amazonaws.com)
+set(UFO_IODA_DOWNLOAD_BASE_URL https://jedi-test-files.s3.amazonaws.com)
 
 # If local path to testfiles is defined don't download
 if (DEFINED ENV{LOCAL_PATH_TESTFILES_IODA})
-	set(LOCAL_PATH_TESTFILES_IODA "$ENV{LOCAL_PATH_TESTFILES_IODA}")
+        set(LOCAL_PATH_TESTFILES_IODA "$ENV{LOCAL_PATH_TESTFILES_IODA}")
 endif()
 
 if( NOT DEFINED LOCAL_PATH_TESTFILES_IODA )
 
-  # Get the current git branch of ioda repo
-  execute_process(
-    COMMAND git rev-parse --abbrev-ref HEAD
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/ioda
-    OUTPUT_VARIABLE GIT_BRANCH
-    OUTPUT_STRIP_TRAILING_WHITESPACE)
-  message(STATUS "IODA GIT_BRANCH is " ${GIT_BRANCH})
+  message(STATUS "LOCAL_PATH_TESTFILES_IODA is not defined, download test files")
+  if ( NOT DEFINED UFO_IODA_TESTFILES_BRANCH)
 
-  # Check whether the URL exists or not 
-  set(ECBUILD_DOWNLOAD_BASE_URL ${IODA_DOWNLOAD_BASE_URL}/ioda)
+    # Get the current git branch of ioda repo
+    execute_process(
+      COMMAND git rev-parse --abbrev-ref HEAD
+      WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+      OUTPUT_VARIABLE GIT_BRANCH_UFO
+      OUTPUT_STRIP_TRAILING_WHITESPACE)
+    message(STATUS "UFO is in branch " ${GIT_BRANCH_UFO})
+
+  else()
+    message(STATUS "Branch name provided by user")
+    set(GIT_BRANCH_UFO ${UFO_IODA_TESTFILES_BRANCH})
+  endif()
+
+  # Check whether the URL exists or not
+  set(ECBUILD_DOWNLOAD_BASE_URL ${UFO_IODA_DOWNLOAD_BASE_URL}/ioda)
+
   ecbuild_check_multiurl(NAMES   ${ufo_ioda_test_data}
-                       DIRHOST ${GIT_BRANCH}
-                       RESULT  SPECIFIC_TEST_FILES)
+                         DIRHOST ${GIT_BRANCH_UFO}
+                         RESULT  UFO_SPECIFIC_TEST_FILES)
 
   # Set distant directory
-  if(${SPECIFIC_TEST_FILES} MATCHES 0)
+  if(${UFO_SPECIFIC_TEST_FILES} MATCHES 0)
     # Download and extract new test files (distant directory = git branch)
-    set(DIRNAME ${GIT_BRANCH})
-    message(STATUS "GIT_BRANCH found")
+    set(DIRNAME ${GIT_BRANCH_UFO})
+    message(STATUS "GIT_BRANCH_UFO found, will download " ${GIT_BRANCH_UFO})
   else()
     # Download and extract develop test files (distant directory = develop)
     set(DIRNAME "develop")
-    message(STATUS "GIT_BRANCH not found, download develop")
+    message(STATUS "GIT_BRANCH_UFO not found, will download develop")
   endif()
 
-  message(STATUS "Test data downloaded from: " ${IODA_DOWNLOAD_BASE_URL}/${DIRNAME})
+  message(STATUS "Test data will be download from: " ${UFO_IODA_DOWNLOAD_BASE_URL}/${DIRNAME})
+
+  set(UFO_IODA_REP_NAME ioda)
+  set(UFO_IODA_TESTFILES_NAME ${ufo_ioda_test_data})
+  set(UFO_IODA_BRANCH_NAME ${DIRNAME})
+  set(UFO_IODA_TESTFILES_PATH ${CMAKE_BINARY_DIR}/test_data/ioda/${DIRNAME})
   message(STATUS "Save data to " ${TESTFILE_DIR_IODA})
+  file(MAKE_DIRECTORY ${UFO_IODA_TESTFILES_PATH})
 
-  set(TESTFILE_DIR_IODA ${CMAKE_BINARY_DIR}/test_data/ioda/${DIRNAME} CACHE PATH "data dir for test data")
-  file(MAKE_DIRECTORY ${TESTFILE_DIR_IODA})
-  message(STATUS "LOCAL_PATH_TESTFILES_IODA is not defined, download test files")
+  # Create download script for get_ioda_test_data test
+  set ( FILENAME ufo_ioda_data_downloader.py)
+  set ( SOURCE_FILE ${CMAKE_CURRENT_SOURCE_DIR}/${FILENAME} )
+  set ( DEST_FILE ${CMAKE_BINARY_DIR}/bin/${FILENAME} )
+  list( APPEND bin_ufo_ioda_test_download_scripts_deps ${DEST_FILE} )
 
-  set(IODA_REP_NAME ioda)
-  set(IODA_TESTFILES_NAME ${ufo_ioda_test_data})
-  set(IODA_BRANCH_NAME ${DIRNAME})
-  set(IODA_TESTFILES_PATH ${CMAKE_BINARY_DIR}/test_data/ioda/${DIRNAME})
+  if( EXISTS "${SOURCE_FILE}.in" )
+    configure_file( ${SOURCE_FILE}.in ${DEST_FILE} @ONLY )
+  else()
+    configure_file( ${SOURCE_FILE}    ${DEST_FILE} @ONLY )
+  endif()
 
-  CONF_TARGETS_DEPS (ioda_data_downloader.py
-                  ${CMAKE_SOURCE_DIR}/ioda/test
-                  ${CMAKE_BINARY_DIR}/bin
-                  bin_ioda_test_download_scripts_ufo_deps)
-
-  add_custom_target( bin_ioda_test_download_scripts_ufo ALL
-      COMMAND chmod +x ${bin_ioda_test_download_scripts_ufo_deps}
-      DEPENDS ${bin_ioda_test_download_scripts_ufo_deps})
+  add_custom_target( bin_ufo_ioda_test_download_scripts ALL
+      COMMAND chmod +x ${bin_ufo_ioda_test_download_scripts_deps}
+      DEPENDS ${bin_ufo_ioda_test_download_scripts_deps})
 
   ecbuild_add_test( TARGET    ufo_get_ioda_test_data
                     TYPE      SCRIPT
-                    COMMAND    ${CMAKE_BINARY_DIR}/bin/ioda_data_downloader.py
+                    COMMAND    ${CMAKE_BINARY_DIR}/bin/ufo_ioda_data_downloader.py
                     ARGS      testoutput/download_test_ufo.log)
 
 else()
-  set(TESTFILE_DIR_IODA ${LOCAL_PATH_TESTFILES_IODA})
+  set(UFO_IODA_TESTFILES_PATH ${LOCAL_PATH_TESTFILES_IODA})
   message(STATUS "use LOCAL_PATH_TESTFILES_IODA : " ${LOCAL_PATH_TESTFILES_IODA})
 endif()
 
 execute_process( COMMAND ${CMAKE_COMMAND} -E create_symlink
-                 ${TESTFILE_DIR_IODA}
+                 ${UFO_IODA_TESTFILES_PATH}
                  ${CMAKE_CURRENT_BINARY_DIR}/Data/ioda)
 
 #####################################################################
@@ -386,6 +413,12 @@ if ( ${CRTM_FOUND} )
                       ARGS    "testinput/smap_crtm.yaml"
                       ENVIRONMENT OOPS_TRAPFPE=1
                       DEPENDS test_ObsOperator.x )
+
+    ecbuild_add_test( TARGET  test_ufo_linopr_crtm_smap
+                      COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
+                      ARGS    "testinput/smap_crtm.yaml"
+                      ENVIRONMENT OOPS_TRAPFPE=1
+                      DEPENDS test_ObsOperatorTLAD.x )
 
     ecbuild_add_test( TARGET  test_ufo_opr_crtm_seviri
                       COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
@@ -813,6 +846,12 @@ ecbuild_add_test( TARGET  test_ufo_qc_gauss_thinning
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsFilters.x )
 
+ecbuild_add_test( TARGET  test_ufo_qc_met_office_buddy_check
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                  ARGS    "testinput/qc_met_office_buddy_check.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsFilters.x )
+
 ecbuild_add_test( TARGET  test_ufo_qc_poisson_disk_thinning
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
                   ARGS    "testinput/qc_poisson_disk_thinning.yaml"
@@ -871,11 +910,47 @@ ecbuild_add_test( TARGET  test_ufo_qc_poisson_disk_thinning_unittests
                   ENVIRONMENT OOPS_TRAPFPE=1
                   LIBS    ufo)
 
+ecbuild_add_test( TARGET  test_ufo_qc_met_office_buddy_check_unittests
+                  SOURCES mains/TestMetOfficeBuddyCheck.cc
+                  ARGS    "testinput/qc_met_office_buddy_check_unittests.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  LIBS    ufo)
+
+ecbuild_add_test( TARGET  test_ufo_qc_met_office_buddy_pair_finder
+                  SOURCES mains/TestMetOfficeBuddyPairFinder.cc
+                  ARGS    "testinput/qc_met_office_buddy_pair_finder.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  LIBS    ufo)
+
 # Test Functions
 
 ecbuild_add_test( TARGET  test_ufo_function_clouddetect
                   SOURCES mains/TestObsFunction.cc
                   ARGS    "testinput/function_clouddetect.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  LIBS    ufo)
+
+ecbuild_add_test( TARGET  test_ufo_function_clwret
+                  SOURCES mains/TestObsFunction.cc
+                  ARGS    "testinput/function_clwret.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  LIBS    ufo)
+
+ecbuild_add_test( TARGET  test_ufo_function_clwretmean
+                  SOURCES mains/TestObsFunction.cc
+                  ARGS    "testinput/function_clwretmean.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  LIBS    ufo)
+
+ecbuild_add_test( TARGET  test_ufo_function_clwret_hofx
+                  SOURCES mains/TestObsFunction.cc
+                  ARGS    "testinput/function_clwret_hofx.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  LIBS    ufo)
+
+ecbuild_add_test( TARGET  test_ufo_function_clwret_obsval
+                  SOURCES mains/TestObsFunction.cc
+                  ARGS    "testinput/function_clwret_obsval.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   LIBS    ufo)
 
@@ -918,6 +993,12 @@ ecbuild_add_test( TARGET  test_ufo_function_errfwavenum
 ecbuild_add_test( TARGET  test_ufo_function_nsstret
                   SOURCES mains/TestObsFunction.cc
                   ARGS    "testinput/function_nsstret.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  LIBS    ufo)
+
+ecbuild_add_test( TARGET  test_ufo_function_obserrmean
+                  SOURCES mains/TestObsFunction.cc
+                  ARGS    "testinput/function_obserrmean.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   LIBS    ufo)
 
@@ -994,6 +1075,18 @@ if ( ${CRTM_FOUND} )
     ecbuild_add_test( TARGET  test_ufo_qc_amsua
                       COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
                       ARGS    "testinput/amsua_qc.yaml"
+                      ENVIRONMENT OOPS_TRAPFPE=1
+                      DEPENDS test_ObsFilters.x )
+
+    ecbuild_add_test( TARGET  test_ufo_qc_amsua_filters
+                      COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                      ARGS    "testinput/amsua_qc_filters.yaml"
+                      ENVIRONMENT OOPS_TRAPFPE=1
+                      DEPENDS test_ObsFilters.x )
+
+    ecbuild_add_test( TARGET  test_ufo_qc_amsua_miss_val
+                      COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                      ARGS    "testinput/amsua_qc_miss_val.yaml"
                       ENVIRONMENT OOPS_TRAPFPE=1
                       DEPENDS test_ObsFilters.x )
 

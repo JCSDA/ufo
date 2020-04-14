@@ -14,6 +14,7 @@
 #include "ufo/filters/BlackList.h"
 #include "ufo/filters/DifferenceCheck.h"
 #include "ufo/filters/Gaussian_Thinning.h"
+#include "ufo/filters/MetOfficeBuddyCheck.h"
 #include "ufo/filters/MWCLWCheck.h"
 #include "ufo/filters/ObsBoundsCheck.h"
 #include "ufo/filters/ObsDiagnosticsWriter.h"
@@ -64,10 +65,12 @@ template<typename MODEL> void instantiateObsFilterFactory() {
            makerChk15_("Poisson Disk Thinning");
   static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::ObsDiagnosticsWriter> >
            makerChk16_("YDIAGsaver");
-    static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::TrackCheck> >
+  static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::TrackCheck> >
            makerChk17_("Track Check");
+  static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::MetOfficeBuddyCheck> >
+           makerChk18_("Met Office Buddy Check");
   static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::RTTOVOneDVarCheck> >
-           makerChk18_("RTTOV OneDVar Check");
+           makerChk19_("RTTOV OneDVar Check");
 }
 
 }  // namespace ufo

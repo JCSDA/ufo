@@ -14,6 +14,7 @@
 #include "oops/base/Variables.h"
 #include "oops/util/IntSetParser.h"
 #include "ufo/filters/ObsFilterData.h"
+#include "ufo/filters/QCflags.h"
 #include "ufo/utils/StringUtils.h"
 
 namespace ufo {
@@ -37,7 +38,7 @@ InflateError::InflateError(const eckit::Configuration & conf)
 void InflateError::apply(const Variables & vars,
                          const std::vector<std::vector<bool>> & flagged,
                          const ObsFilterData & data,
-                         ioda::ObsDataVector<int> &,
+                         ioda::ObsDataVector<int> & flags,
                          ioda::ObsDataVector<float> & obserr) const {
   oops::Log::debug() << " input obserr: " << obserr << std::endl;
   // If float factor is specified
@@ -45,8 +46,11 @@ void InflateError::apply(const Variables & vars,
     float factor = conf_.getFloat("inflation factor");
     for (size_t jv = 0; jv < vars.nvars(); ++jv) {
       size_t iv = obserr.varnames().find(vars.variable(jv).variable());
+      size_t kv = flags.varnames().find(vars.variable(jv).variable());
       for (size_t jobs = 0; jobs < obserr.nlocs(); ++jobs) {
-        if (flagged[iv][jobs]) obserr[iv][jobs] *= factor;
+        if (flagged[iv][jobs] && flags[kv][jobs] == QCflags::pass) {
+          obserr[iv][jobs] *= factor;
+        }
       }
     }
   // If variable is specified
@@ -69,8 +73,11 @@ void InflateError::apply(const Variables & vars,
     for (size_t jv = 0; jv < vars.nvars(); ++jv) {
       // find current variable index in obserr
       size_t iv = obserr.varnames().find(vars.variable(jv).variable());
+      size_t kv = flags.varnames().find(vars.variable(jv).variable());
       for (size_t jobs = 0; jobs < obserr.nlocs(); ++jobs) {
-        if (flagged[iv][jobs]) obserr[iv][jobs] *= factors[factor_jv[jv]][jobs];
+        if (flagged[iv][jobs] && flags[kv][jobs] == QCflags::pass) {
+          obserr[iv][jobs] *= factors[factor_jv[jv]][jobs];
+        }
       }
     }
   }

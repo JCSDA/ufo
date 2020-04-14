@@ -36,7 +36,9 @@ class ObsFunctionCloudDetect : public ObsFunctionBase {
   const ufo::Variables & requiredVariables() const;
  private:
   ufo::Variables invars_;
-  std::string group_;
+  std::string biasgrp_;
+  std::string errgrp_;
+  std::string hofxgrp_;
   std::vector<int> channels_;
   const eckit::LocalConfiguration conf_;
 };

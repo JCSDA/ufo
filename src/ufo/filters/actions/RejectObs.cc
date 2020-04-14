@@ -9,6 +9,7 @@
 
 #include "ioda/ObsDataVector.h"
 #include "ufo/filters/ObsFilterData.h"
+#include "ufo/filters/QCflags.h"
 
 namespace ufo {
 
@@ -33,7 +34,7 @@ void RejectObs::apply(const Variables & vars,
   for (size_t jv = 0; jv < vars.nvars(); ++jv) {
     size_t iv = flags.varnames().find(vars.variable(jv).variable());
     for (size_t jobs = 0; jobs < flags.nlocs(); ++jobs) {
-      if (flagged[jv][jobs] && flags[iv][jobs] == 0) flags[iv][jobs] = flag;
+      if (flagged[jv][jobs] && flags[iv][jobs] == QCflags::pass) flags[iv][jobs] = flag;
     }
   }
 }

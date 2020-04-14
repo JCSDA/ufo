@@ -28,11 +28,14 @@ ObsSeaIceThickness::ObsSeaIceThickness(const ioda::ObsSpace & odb,
                                        const eckit::Configuration & config)
   : ObsOperatorBase(odb, config), keyOper_(0), odb_(odb), varin_()
 {
-  const std::vector<std::string> vvin{"sea_ice_category_area_fraction",
-                                      "sea_ice_category_thickness"};
+  std::vector<std::string> vvin{"sea_ice_category_area_fraction",
+                                "sea_ice_category_thickness"};
+  if (odb.obsvariables().has("sea_ice_freeboard")) {
+    vvin.push_back("sea_ice_category_snow_thickness");
+  }
   varin_.reset(new oops::Variables(vvin));
   const eckit::Configuration * configc = &config;
-  ufo_seaicethickness_setup_f90(keyOper_, &configc);
+  ufo_seaicethickness_setup_f90(keyOper_, &configc, odb.obsvariables());
   oops::Log::trace() << "ObsSeaIceThickness created." << std::endl;
 }
 

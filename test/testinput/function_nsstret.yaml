@@ -66,6 +66,8 @@ ObsFunction:
   name: NSSTRet@ObsFunction 
   options:
     obserr_test: GsiObsError_nsstret 
+    hofx_test: GsiHofX 
+    bias_test: GsiBc 
     channels: *all_channels
     use_flag: [1, -1, -1, -1, 1, -1, -1, -1, 1, -1, 1, -1, 1,
               -1, 1, 1, 1, -1, 1, 1, -1, 1, 1, 1, -1, -1, 1, 1, -1, 1, -1, 1, -1, 1,

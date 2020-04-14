@@ -9,7 +9,7 @@
 #define UFO_MARINE_SEAICETHICKNESS_OBSSEAICETHICKNESS_INTERFACE_H_
 
 #include "ioda/ObsSpace.h"
-
+#include "oops/base/Variables.h"
 #include "ufo/Fortran.h"
 
 namespace ufo {
@@ -20,7 +20,8 @@ extern "C" {
 
 // -----------------------------------------------------------------------------
 
-  void ufo_seaicethickness_setup_f90(F90hop &, const eckit::Configuration * const *);
+  void ufo_seaicethickness_setup_f90(F90hop &, const eckit::Configuration * const *,
+                               const oops::Variables &);
   void ufo_seaicethickness_delete_f90(F90hop &);
   void ufo_seaicethickness_simobs_f90(const F90hop &, const F90goms &, const ioda::ObsSpace &,
                                const int &, double &);
