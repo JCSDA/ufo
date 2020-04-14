@@ -51,7 +51,12 @@ implicit none
 class(ufo_radiancerttov_tlad), intent(inout) :: self
 type(fckit_configuration),     intent(in)    :: f_conf
 
-call rttov_conf_setup(self % conf,f_conf)
+! Local variables
+type(fckit_configuration) :: f_confOpts
+
+! Setup conf
+call f_conf % get_or_die("ObsOptions", f_confOpts)
+call rttov_conf_setup(self % conf, f_confOpts)
 
 end subroutine ufo_radiancerttov_tlad_setup
 
@@ -156,6 +161,8 @@ nchan_max_sim = 2500 ! Maximum number of channels to pass to RTTOV to simulate
 
 if( .NOT. config_rttov % rttov_is_setup) then
   call config_rttov % setup(self % conf, asw)
+else
+  write(*,*) "Config rttov TLAD already setup"
 end if
 
 Sensor_Loop:do i_inst = 1, self % conf % nSensors

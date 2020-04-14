@@ -16,7 +16,7 @@ Observations:
 #  - ObsOperator:
 #      name: RTTOV
 #      Sensor_ID: noaa_20_atms
-#      CoefficientPath: /home/h06/mcooke/JEDI/ufo_bundle_SatRadOneDVar/ufo-bundle/rttov/rtcoef_rttov12/rttov7pred54L/
+#      CoefficientPath: /home/h06/mcooke/JEDI/ufo_bundle_RTTOVOneDVar/ufo-bundle/rttov/rtcoef_rttov12/rttov7pred54L/
 #      ExtraVars:
 #        - mass_content_of_cloud_liquid_water_in_atmosphere_layer
 #        - mass_content_of_cloud_ice_in_atmosphere_layer
@@ -57,8 +57,10 @@ Observations:
 #    passedBenchmark: 1598      # number of passed obs
   - ObsOperator:
       name: RTTOV
-      Sensor_ID: noaa_20_atms
-      CoefficientPath: /home/h06/mcooke/JEDI/ufo_bundle_SatRadOneDVar/ufo-bundle/rttov/rtcoef_rttov12/rttov7pred54L/
+      ObsOptions:
+        Sensor_ID: noaa_20_atms
+        CoefficientPath: /home/h06/mcooke/JEDI/ufo_bundle_RTTOVOneDVar/ufo-bundle/rttov/rtcoef_rttov12/rttov7pred54L/
+        mw_clw: true
       ExtraVars:
         - mass_content_of_cloud_liquid_water_in_atmosphere_layer
         - mass_content_of_cloud_ice_in_atmosphere_layer
@@ -83,9 +85,9 @@ Observations:
       applyfilter: 
       - name: post@HofX
       ModName: RTTOV
-      EndianType: little_endian
-      CoefficientPath: Data/
-      Sensor_ID: noaa_20_atms
+      ObsOptions:
+        Sensor_ID: noaa_20_atms
+        CoefficientPath: /home/h06/mcooke/JEDI/ufo_bundle_RTTOVOneDVar/ufo-bundle/rttov/rtcoef_rttov12/rttov7pred54L/
       variables: [brightness_temperature]
       channels: *ops_channels
       model_variables:
@@ -102,7 +104,7 @@ Observations:
       RTTOV_mwscattSwitch: false
       UseMLMinimization: false
       UseJforConvergence: true
-      JConvergenceOption: 1
+      JConvergenceOption: 0
       ConvergenceFactor: 0.40
       Cost_ConvergenceFactor: 0.01
       Max1DVarIterations: 7

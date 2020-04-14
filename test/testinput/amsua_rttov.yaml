@@ -10,8 +10,9 @@ Observations:
   ObsTypes:
   - ObsOperator:
       name: RTTOV
-      Sensor_ID: noaa_19_amsua
-      CoefficientPath: Data/
+      ObsOptions:
+        Sensor_ID: noaa_19_amsua
+        CoefficientPath: Data/
     ObsSpace: 
       name: Radiance
       ObsDataIn:

@@ -35,15 +35,16 @@ integer, public  :: rttov_errorstatus
 
 !Type for general config
 type rttov_conf
- integer              :: nsensors
+ integer                         :: nsensors
  character(len=255), allocatable :: SENSOR_ID(:)
- character(len=255) :: COEFFICIENT_PATH
+ character(len=255)              :: COEFFICIENT_PATH
+ logical                         :: mw_clw = .FALSE.  ! flag for mw clw
 end type rttov_conf
 
 type conf_type_rttov
   type(rttov_coefs), allocatable :: rttov_coef_array(:)
-  type(rttov_options) :: opts
-  logical :: rttov_is_setup = .FALSE.
+  type(rttov_options)            :: opts
+  logical                        :: rttov_is_setup = .FALSE.
   contains
     PROCEDURE :: set_opts => set_options_rttov
     PROCEDURE :: setup =>    setup_rttov
@@ -65,18 +66,23 @@ character(len=:),allocatable :: str
 
 !Number of sensors, each call to RTTOV will be for a single sensor
 !type (zenith/scan angle will be different)
-conf%nSensors = 1
+conf % nSensors = 1
 
-!Allocate SENSOR_ID
-allocate(conf%SENSOR_ID(conf%nSensors))
+! Allocate SENSOR_ID
+allocate(conf % SENSOR_ID(conf % nSensors))
 
-!Get sensor ID from config
-call f_conf%get_or_die("Sensor_ID",str)
-conf%SENSOR_ID(conf%nSensors) = str
+! Get sensor ID from config
+call f_conf % get_or_die("Sensor_ID",str)
+conf % SENSOR_ID(conf%nSensors) = str
 
-!Path to coefficient files
-call f_conf%get_or_die("CoefficientPath",str)
-conf%COEFFICIENT_PATH = str
+! Path to coefficient files
+call f_conf % get_or_die("CoefficientPath",str)
+conf % COEFFICIENT_PATH = str
+
+! Flag to turn on mw cloud liquid water (clw)
+if (f_conf % has("mw_clw")) then
+  call f_conf % get_or_die("mw_clw", conf % mw_clw)
+end if
 
 end subroutine rttov_conf_setup
 
@@ -342,10 +348,9 @@ end if
 
 end subroutine load_atm_data_rttov
 
+! ------------------------------------------------------------------------------
 
-!
 ! Internal subprogam to load some test geometry data
-!
 subroutine load_geom_data_rttov(obss,profiles,prof_start1,obs_info)
 
 ! Satellite viewing geometry
@@ -409,10 +414,12 @@ end if
 
 end subroutine load_geom_data_rttov
 
+! ------------------------------------------------------------------------------
 
-subroutine set_options_rttov(self)
+subroutine set_options_rttov(self, conf)
 implicit none
 class(conf_type_rttov), intent(INOUT) :: self
+type(rttov_conf), intent(in) :: conf
 
 self % opts % rt_ir % addsolar            = .FALSE. ! Do not include solar radiation
 self % opts % interpolation % addinterp   = .TRUE.  ! Allow interpolation of input profile
@@ -429,16 +436,18 @@ self % opts % rt_ir % n2o_data            = .FALSE. !   given trace gas (ensure 
 self % opts % rt_ir % ch4_data            = .FALSE. !   coef file supports the gas)
 self % opts % rt_ir % co_data             = .FALSE. !
 self % opts % rt_ir % so2_data            = .FALSE. !
-!self % opts % rt_mw % clw_data            = .FALSE. !
-self % opts % rt_mw % clw_data            = .TRUE. !
+self % opts % rt_mw % clw_data            = .FALSE. !
 
 self % opts % config % verbose            = .TRUE.  ! Enable printing of warnings
 self % opts % config % apply_reg_limits   = .TRUE.
 self % opts % config % do_checkinput      = .TRUE.
 
-end subroutine set_options_rttov
-! ------------------------------------------------------------------------------
+! Update based on rttov conf input
+if (conf % mw_clw) self % opts % rt_mw % clw_data = .TRUE.
 
+end subroutine set_options_rttov
+
+! ------------------------------------------------------------------------------
 
 subroutine setup_rttov(self, conf, asw)
 class(conf_type_rttov) :: self
@@ -454,7 +463,11 @@ rttov_errorstatus = 0
 
 if(asw == 1) then
 
-  call self % set_opts()
+  ! --------------------------------------------------------------------------
+  ! 1. Setup rttov options
+  ! --------------------------------------------------------------------------
+  call self % set_opts(conf)
+
   ! --------------------------------------------------------------------------
   ! 2. Read coefficients
   ! --------------------------------------------------------------------------
@@ -487,6 +500,8 @@ end if
 
 end subroutine setup_rttov
 
+! ------------------------------------------------------------------------------
+
 subroutine get_var_name(varname_tmplate,n,varname)
 
 character(len=*), intent(in) :: varname_tmplate
@@ -516,5 +531,7 @@ character(len=3) :: chan
  varname = trim(varname_tmplate) // '_' // trim(chan)
 
 end subroutine get_var_name_new
+
+! ------------------------------------------------------------------------------
 
 end module ufo_radiancerttov_utils_mod
