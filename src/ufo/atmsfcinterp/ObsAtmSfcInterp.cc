@@ -26,8 +26,7 @@ ObsAtmSfcInterp::ObsAtmSfcInterp(const ioda::ObsSpace & odb, const eckit::Config
   : ObsOperatorBase(odb, config), keyOperAtmSfcInterp_(0),
     odb_(odb), varin_()
 {
-  const eckit::Configuration * configc = &config;
-  ufo_atmsfcinterp_setup_f90(keyOperAtmSfcInterp_, &configc, odb.obsvariables(), varin_);
+  ufo_atmsfcinterp_setup_f90(keyOperAtmSfcInterp_, config, odb.obsvariables(), varin_);
 
   oops::Log::trace() << "ObsAtmSfcInterp created." << std::endl;
 }

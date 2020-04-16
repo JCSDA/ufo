@@ -34,8 +34,7 @@ ObsAodCRTMTLAD::ObsAodCRTMTLAD(const ioda::ObsSpace & odb,
   const oops::Variables & observed = odb.obsvariables();
   std::vector<int> channels_list = observed.channels();
 
-  const eckit::Configuration * configc = &config;
-  ufo_aodcrtm_tlad_setup_f90(keyOperAodCRTM_, &configc,
+  ufo_aodcrtm_tlad_setup_f90(keyOperAodCRTM_, config,
                              channels_list.size(), channels_list[0], varin_);
   oops::Log::info() << "ObsAodCRTMTLAD variables: " << varin_ << std::endl;
   oops::Log::info() << "ObsAodCRTMTLAD channels: " << channels_list << std::endl;

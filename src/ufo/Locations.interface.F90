@@ -154,7 +154,7 @@ use datetime_mod
 implicit none
 integer(c_int), intent(inout)  :: c_key_self
 type(c_ptr), value, intent(in) :: c_obsspace
-type(c_ptr), intent(in)        :: c_t1, c_t2
+type(c_ptr), value, intent(in) :: c_t1, c_t2
 
 type(ufo_locs), pointer :: self
 

@@ -27,8 +27,7 @@ ObsAtmVertInterp::ObsAtmVertInterp(const ioda::ObsSpace & odb,
   : ObsOperatorBase(odb, config), keyOperAtmVertInterp_(0),
     odb_(odb), varin_()
 {
-  const eckit::Configuration * configc = &config;
-  ufo_atmvertinterp_setup_f90(keyOperAtmVertInterp_, &configc, odb.obsvariables(), varin_);
+  ufo_atmvertinterp_setup_f90(keyOperAtmVertInterp_, config, odb.obsvariables(), varin_);
 
   oops::Log::trace() << "ObsAtmVertInterp created." << std::endl;
 }
