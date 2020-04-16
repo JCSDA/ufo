@@ -78,7 +78,7 @@ Observations:
      - name: brightness_temperature
        channels: *all_channels
      test functions:
-     - name: CloudDetect@ObsFunction
+     - name: CloudDetectMinResidualIR@ObsFunction
        channels: *all_channels
        options:
          channels: *all_channels
@@ -149,7 +149,7 @@ Observations:
                    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
                    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1]
          obserr_dtempf: [0.5,2.0,4.0,2.0,4.0]
-     - name: NSSTRet@ObsFunction
+     - name: NearSSTRetCheckIR@ObsFunction
        channels: *all_channels
        options:
          channels: *all_channels

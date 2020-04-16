@@ -79,26 +79,26 @@ set ( filters_files
       obsfunctions/ObsFunction.h
       obsfunctions/ObsFunctionBase.cc
       obsfunctions/ObsFunctionBase.h
-      obsfunctions/ObsFunctionCloudDetect.cc
-      obsfunctions/ObsFunctionCloudDetect.h
+      obsfunctions/CloudDetectMinResidualIR.cc
+      obsfunctions/CloudDetectMinResidualIR.h
       obsfunctions/ObsFunctionCLWRet.cc
       obsfunctions/ObsFunctionCLWRet.h
       obsfunctions/ObsFunctionCLWRetMean.cc
       obsfunctions/ObsFunctionCLWRetMean.h
-      obsfunctions/ObsFunctionErrfGrosschk.cc
-      obsfunctions/ObsFunctionErrfGrosschk.h
-      obsfunctions/ObsFunctionErrfJsfc.cc
-      obsfunctions/ObsFunctionErrfJsfc.h
-      obsfunctions/ObsFunctionErrfLat.cc
-      obsfunctions/ObsFunctionErrfLat.h
-      obsfunctions/ObsFunctionErrfTopo.cc
-      obsfunctions/ObsFunctionErrfTopo.h
-      obsfunctions/ObsFunctionErrfTransmittop.cc
-      obsfunctions/ObsFunctionErrfTransmittop.h
+      obsfunctions/ObsErrorBoundRad.cc
+      obsfunctions/ObsErrorBoundRad.h
+      obsfunctions/ObsErrorFactorSurfJacobianRad.cc
+      obsfunctions/ObsErrorFactorSurfJacobianRad.h
+      obsfunctions/ObsErrorFactorLatRad.cc
+      obsfunctions/ObsErrorFactorLatRad.h
+      obsfunctions/ObsErrorFactorTopoRad.cc
+      obsfunctions/ObsErrorFactorTopoRad.h
+      obsfunctions/ObsErrorFactorTransmitTopRad.cc
+      obsfunctions/ObsErrorFactorTransmitTopRad.h
       obsfunctions/ObsErrorFactorWavenumIR.cc
       obsfunctions/ObsErrorFactorWavenumIR.h
-      obsfunctions/ObsFunctionNSSTRet.cc
-      obsfunctions/ObsFunctionNSSTRet.h
+      obsfunctions/NearSSTRetCheckIR.cc
+      obsfunctions/NearSSTRetCheckIR.h
       obsfunctions/ObsFunctionScattering.cc
       obsfunctions/ObsFunctionScattering.h
       obsfunctions/ObsFunctionVelocity.cc

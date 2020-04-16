@@ -5,8 +5,8 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#ifndef UFO_FILTERS_OBSFUNCTIONS_OBSERRORFACTORWAVENUMIR_H_
-#define UFO_FILTERS_OBSFUNCTIONS_OBSERRORFACTORWAVENUMIR_H_
+#ifndef UFO_FILTERS_OBSFUNCTIONS_OBSERRORFACTORTRANSMITTOPRAD_H_
+#define UFO_FILTERS_OBSFUNCTIONS_OBSERRORFACTORTRANSMITTOPRAD_H_
 
 #include <string>
 #include <vector>
@@ -22,40 +22,38 @@
 namespace ufo {
 
 ///
-/// \brief Options applying to observation error inflation as a function of wavenumber,
-/// solar zenith angle and surface type for Infrared sensors
+/// \brief Options applying to observation error inflation as a function to
+/// model top-to-space transmittance
 ///
-class ObsErrorFactorWavenumIRParameters : public oops::Parameters {
+class ObsErrorFactorTransmitTopRadParameters : public oops::Parameters {
  public:
   /// List of channels to which the observation error factor applies
   oops::RequiredParameter<std::string> channelList{"channels", this};
 };
 
 ///
-/// \brief Error Inflation Factor (EIF) for channels with wavenumber in the
-/// range of (2000, 2400] during daytime (sun zenith angle < 89) and containing
-/// water fraction in the field-of-view
-/// x = wavenumber [1/cm]
-/// y = surface-to-space transmittance
-/// z = solar zenith angle [radian]
-/// EIF = SQRT[ 1 / ( 1 - (x - 2000)) * y * MAX(0, COS(z)) / 4000 ]
+/// \brief Error Inflation Factor (EIF) for satellite radiance as a function of model
+/// top-to-space transmittance:
+/// tao = model top-to-space transmittance
+/// EIF = SQRT ( 1.0 / tao )
 ///
-class ObsErrorFactorWavenumIR : public ObsFunctionBase {
+class ObsErrorFactorTransmitTopRad : public ObsFunctionBase {
  public:
-  explicit ObsErrorFactorWavenumIR(const eckit::LocalConfiguration &);
-  ~ObsErrorFactorWavenumIR();
+  explicit ObsErrorFactorTransmitTopRad(const eckit::LocalConfiguration &);
+  ~ObsErrorFactorTransmitTopRad();
 
   void compute(const ObsFilterData &,
                ioda::ObsDataVector<float> &) const;
   const ufo::Variables & requiredVariables() const;
  private:
-  ObsErrorFactorWavenumIRParameters options_;
+  ObsErrorFactorTransmitTopRadParameters options_;
   ufo::Variables invars_;
   std::vector<int> channels_;
+  const eckit::LocalConfiguration conf_;
 };
 
 // -----------------------------------------------------------------------------
 
 }  // namespace ufo
 
-#endif  // UFO_FILTERS_OBSFUNCTIONS_OBSERRORFACTORWAVENUMIR_H_
+#endif  // UFO_FILTERS_OBSFUNCTIONS_OBSERRORFACTORTRANSMITTOPRAD_H_

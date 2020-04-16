@@ -63,7 +63,7 @@ GeoVaLs:
 ObsDiag:
   filename: Data/iasi_metop-a_obsdiag_2018041500_m.nc4
 ObsFunction:
-  name: ErrfLat@ObsFunction
+  name: ObsErrorFactorLatRad@ObsFunction
   options:
     latitude_parameters: [25.0, 0.5, 0.04, 1.0]
   variables: [error_inflation_factor_lat]

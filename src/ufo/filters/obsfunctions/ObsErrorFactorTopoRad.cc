@@ -5,7 +5,7 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#include "ufo/filters/obsfunctions/ObsFunctionErrfTopo.h"
+#include "ufo/filters/obsfunctions/ObsErrorFactorTopoRad.h"
 
 #include <math.h>
 
@@ -23,19 +23,20 @@
 
 namespace ufo {
 
-static ObsFunctionMaker<ObsFunctionErrfTopo> makerObsFuncErrfTopo_("ErrfTopo");
+static ObsFunctionMaker<ObsErrorFactorTopoRad>
+       makerObsErrorFactorTopoRad_("ObsErrorFactorTopoRad");
 
 // -----------------------------------------------------------------------------
 
-ObsFunctionErrfTopo::ObsFunctionErrfTopo(const eckit::LocalConfiguration conf)
-  : invars_(), channels_(), conf_(conf) {
+ObsErrorFactorTopoRad::ObsErrorFactorTopoRad(const eckit::LocalConfiguration & conf)
+  : invars_() {
   // Check options
-  ASSERT(conf_.has("channels"));
+  options_.deserialize(conf);
 
   // Get channels from options
-  const std::string chlist = conf_.getString("channels");
-  std::set<int> channelset = oops::parseIntSet(chlist);
+  std::set<int> channelset = oops::parseIntSet(options_.channelList);
   std::copy(channelset.begin(), channelset.end(), std::back_inserter(channels_));
+  ASSERT(channels_.size() > 0);
 
   // Include required variables from ObsDiag
   invars_ += Variable("transmittances_of_atmosphere_layer@ObsDiag", channels_);
@@ -46,11 +47,11 @@ ObsFunctionErrfTopo::ObsFunctionErrfTopo(const eckit::LocalConfiguration conf)
 
 // -----------------------------------------------------------------------------
 
-ObsFunctionErrfTopo::~ObsFunctionErrfTopo() {}
+ObsErrorFactorTopoRad::~ObsErrorFactorTopoRad() {}
 
 // -----------------------------------------------------------------------------
 
-void ObsFunctionErrfTopo::compute(const ObsFilterData & in,
+void ObsErrorFactorTopoRad::compute(const ObsFilterData & in,
                                   ioda::ObsDataVector<float> & out) const {
   // Get dimensions
   size_t nlocs = in.nlocs();
@@ -77,7 +78,7 @@ void ObsFunctionErrfTopo::compute(const ObsFilterData & in,
 
 // -----------------------------------------------------------------------------
 
-const ufo::Variables & ObsFunctionErrfTopo::requiredVariables() const {
+const ufo::Variables & ObsErrorFactorTopoRad::requiredVariables() const {
   return invars_;
 }
 

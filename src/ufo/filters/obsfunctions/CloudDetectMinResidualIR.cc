@@ -5,7 +5,7 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#include "ufo/filters/obsfunctions/ObsFunctionCloudDetect.h"
+#include "ufo/filters/obsfunctions/CloudDetectMinResidualIR.h"
 
 #include <cmath>
 
@@ -23,26 +23,25 @@
 
 namespace ufo {
 
-static ObsFunctionMaker<ObsFunctionCloudDetect> makerObsFuncCloudDetect_("CloudDetect");
+static ObsFunctionMaker<CloudDetectMinResidualIR>
+       makerCloudDetectMinResidualIR_("CloudDetectMinResidualIR");
 
 // -----------------------------------------------------------------------------
 
-ObsFunctionCloudDetect::ObsFunctionCloudDetect(const eckit::LocalConfiguration conf)
-  : invars_(), errgrp_("ObsErrorData"), hofxgrp_("HofX"), biasgrp_("ObsBias"),
-    channels_(), conf_(conf) {
+CloudDetectMinResidualIR::CloudDetectMinResidualIR(const eckit::LocalConfiguration & conf)
+  : invars_() {
   // Check options
-  ASSERT(conf_.has("channels") && conf_.has("use_flag") && conf_.has("use_flag_clddet") &&
-         conf_.has("obserr_dtempf"));
-
-  // Check if using user-defined obserr (should be available from obs file) for testing
-  if (conf_.has("obserr_test")) errgrp_ = conf_.getString("obserr_test");
-  if (conf_.has("hofx_test")) hofxgrp_ = conf_.getString("hofx_test");
-  if (conf_.has("bias_test")) biasgrp_ = conf_.getString("bias_test");
+  options_.deserialize(conf);
 
   // Get channels from options
-  const std::string chlist = conf.getString("channels");
-  std::set<int> channelset = oops::parseIntSet(chlist);
+  std::set<int> channelset = oops::parseIntSet(options_.channelList);
   std::copy(channelset.begin(), channelset.end(), std::back_inserter(channels_));
+  ASSERT(channels_.size() > 0);
+
+  // Get test groups from options
+  const std::string &errgrp_ = options_.testObserr.value();
+  const std::string &biasgrp_ = options_.testBias.value();
+  const std::string &hofxgrp_ = options_.testHofX.value();
 
   // Include required variables from ObsDiag
   invars_ += Variable("brightness_temperature_jacobian_surface_temperature@ObsDiag", channels_);
@@ -70,23 +69,28 @@ ObsFunctionCloudDetect::ObsFunctionCloudDetect(const eckit::LocalConfiguration c
 
 // -----------------------------------------------------------------------------
 
-ObsFunctionCloudDetect::~ObsFunctionCloudDetect() {}
+CloudDetectMinResidualIR::~CloudDetectMinResidualIR() {}
 
 // -----------------------------------------------------------------------------
 
-void ObsFunctionCloudDetect::compute(const ObsFilterData & in,
+void CloudDetectMinResidualIR::compute(const ObsFilterData & in,
                                   ioda::ObsDataVector<float> & out) const {
   // Get channel use flags from options
-  std::vector<int> use_flag = conf_.getIntVector("use_flag");
-  std::vector<int> use_flag_clddet = conf_.getIntVector("use_flag_clddet");
+  std::vector<int> use_flag = options_.useflagChannel.value();
+  std::vector<int> use_flag_clddet = options_.useflagCloudDetect.value();
 
   // Get tuning parameters for surface sensitivity over sea/land/oce/snow/mixed from options
-  std::vector<float> dtempf_in = conf_.getFloatVector("obserr_dtempf");
+  std::vector<float> dtempf_in = options_.obserrScaleFactorTsfc.value();
 
   // Get dimensions
   size_t nlocs = in.nlocs();
   size_t nchans = channels_.size();
   size_t nlevs = in.nlevs(Variable("air_pressure@GeoVaLs"));
+
+  // Get test groups from options
+  const std::string &errgrp_ = options_.testObserr.value();
+  const std::string &biasgrp_ = options_.testBias.value();
+  const std::string &hofxgrp_ = options_.testHofX.value();
 
   // Get variables from ObsDiag
   // Load surface temperature jacobian
@@ -237,7 +241,7 @@ void ObsFunctionCloudDetect::compute(const ObsFilterData & in,
   // std::vector<int> cloud_lev(nlocs);
 
   // Loop through locations
-  const float btmax = 550.0, btmin = 50.0;
+  const float btmax = 550.f, btmin = 50.f;
   for (size_t iloc=0; iloc < nlocs; ++iloc) {
     // Initialize at each location
     // cloud_lev[iloc] = 0;
@@ -277,7 +281,7 @@ void ObsFunctionCloudDetect::compute(const ObsFilterData & in,
             sum2 = sum2 +  dbt[ichan] * dbt[ichan] * varinv_use[ichan][iloc];
           }
         }
-        cloudp = std::min(std::max(static_cast<double>(sum/sum2), 0.0), 1.0);
+        cloudp = std::min(std::max((sum/sum2), 0.f), 1.f);
         sum = 0.0;
         for (size_t ichan = 0; ichan < nchans; ++ichan) {
          // if (varinv_use[ichan][iloc] > 0.0) {
@@ -342,7 +346,7 @@ void ObsFunctionCloudDetect::compute(const ObsFilterData & in,
 
 // -----------------------------------------------------------------------------
 
-const ufo::Variables & ObsFunctionCloudDetect::requiredVariables() const {
+const ufo::Variables & CloudDetectMinResidualIR::requiredVariables() const {
   return invars_;
 }
 

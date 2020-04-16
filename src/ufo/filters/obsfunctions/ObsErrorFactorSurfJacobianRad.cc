@@ -5,7 +5,7 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#include "ufo/filters/obsfunctions/ObsFunctionErrfJsfc.h"
+#include "ufo/filters/obsfunctions/ObsErrorFactorSurfJacobianRad.h"
 
 #include <cmath>
 
@@ -23,29 +23,30 @@
 
 namespace ufo {
 
-static ObsFunctionMaker<ObsFunctionErrfJsfc> makerObsFuncErrfJsfc_("ErrfJsfc");
+static ObsFunctionMaker<ObsErrorFactorSurfJacobianRad>
+       makerObsErrorFactorSurfJacobianRad_("ObsErrorFactorSurfJacobianRad");
 
 // -----------------------------------------------------------------------------
 
-ObsFunctionErrfJsfc::ObsFunctionErrfJsfc(const eckit::LocalConfiguration conf)
-  : invars_(), group_("ObsErrorData"), channels_(), conf_(conf) {
+ObsErrorFactorSurfJacobianRad::ObsErrorFactorSurfJacobianRad(const eckit::LocalConfiguration & conf)
+  : invars_() {
   // Check options
-  ASSERT(conf_.has("channels") && conf_.has("obserr_demisf") && conf_.has("obserr_dtempf"));
+  options_.deserialize(conf);
 
-  // Check if using obserr from GSI for testing
-  if (conf_.has("obserr_test")) group_ = conf_.getString("obserr_test");
-
-  // Get channels
-  const std::string chlist = conf.getString("channels");
-  std::set<int> channelset = oops::parseIntSet(chlist);
+  // Get channels from options
+  std::set<int> channelset = oops::parseIntSet(options_.channelList);
   std::copy(channelset.begin(), channelset.end(), std::back_inserter(channels_));
+  ASSERT(channels_.size() > 0);
+
+  // Get test groups from options
+  const std::string &errgrp_ = options_.testObserr.value();
 
   // Include required variables from ObsDiag
   invars_ += Variable("brightness_temperature_jacobian_surface_temperature@ObsDiag", channels_);
   invars_ += Variable("brightness_temperature_jacobian_surface_emissivity@ObsDiag", channels_);
 
   // Include list of required data from ObsSpace
-  invars_ += Variable("brightness_temperature@"+group_, channels_);
+  invars_ += Variable("brightness_temperature@"+errgrp_, channels_);
 
   // Include list of required data from GeoVaLs
   invars_ += Variable("water_area_fraction@GeoVaLs");
@@ -56,20 +57,16 @@ ObsFunctionErrfJsfc::ObsFunctionErrfJsfc(const eckit::LocalConfiguration conf)
 
 // -----------------------------------------------------------------------------
 
-ObsFunctionErrfJsfc::~ObsFunctionErrfJsfc() {}
+ObsErrorFactorSurfJacobianRad::~ObsErrorFactorSurfJacobianRad() {}
 
 // -----------------------------------------------------------------------------
 
-void ObsFunctionErrfJsfc::compute(const ObsFilterData & in,
+void ObsErrorFactorSurfJacobianRad::compute(const ObsFilterData & in,
                                   ioda::ObsDataVector<float> & out) const {
   // Get options from configuration
   // Get dimensions
   size_t nlocs = in.nlocs();
   size_t nchans = channels_.size();
-
-  // Get observation tuning parameters over sea/land/oce/snow/mixed from options
-  std::vector<float> demisf_in = conf_.getFloatVector("obserr_demisf");
-  std::vector<float> dtempf_in = conf_.getFloatVector("obserr_dtempf");
 
   // Load area fraction of each surface type
   std::vector<float> water_frac(nlocs);
@@ -80,6 +77,10 @@ void ObsFunctionErrfJsfc::compute(const ObsFilterData & in,
   in.get(Variable("land_area_fraction@GeoVaLs"), land_frac);
   in.get(Variable("ice_area_fraction@GeoVaLs"), ice_frac);
   in.get(Variable("surface_snow_area_fraction@GeoVaLs"), snow_frac);
+
+  // Get observation tuning parameters over sea/land/oce/snow/mixed from options
+  const std::vector<float> &demisf_in = options_.obserrScaleFactorEsfc.value();
+  const std::vector<float> &dtempf_in = options_.obserrScaleFactorTsfc.value();
 
   // Setup weight for each surface type
   std::vector<float> demisf(nlocs);
@@ -118,12 +119,13 @@ void ObsFunctionErrfJsfc::compute(const ObsFilterData & in,
   std::vector<float> obserrdata;
   std::vector<float> dbtdts(nlocs);
   std::vector<float> dbtdes(nlocs);
+  const std::string &errgrp_ = options_.testObserr.value();
   for (size_t ichan = 0; ichan < nchans; ++ichan) {
     in.get(Variable("brightness_temperature_jacobian_surface_temperature@ObsDiag",
                      channels_)[ichan], dbtdts);
     in.get(Variable("brightness_temperature_jacobian_surface_emissivity@ObsDiag",
                      channels_)[ichan], dbtdes);
-    in.get(Variable("brightness_temperature@"+group_, channels_)[ichan], obserrdata);
+    in.get(Variable("brightness_temperature@"+errgrp_, channels_)[ichan], obserrdata);
     for (size_t iloc = 0; iloc < nlocs; ++iloc) {
       out[ichan][iloc] = 1.0;
       float varinv = 1.0 / pow(obserrdata[iloc], 2);
@@ -141,7 +143,7 @@ void ObsFunctionErrfJsfc::compute(const ObsFilterData & in,
 
 // -----------------------------------------------------------------------------
 
-const ufo::Variables & ObsFunctionErrfJsfc::requiredVariables() const {
+const ufo::Variables & ObsErrorFactorSurfJacobianRad::requiredVariables() const {
   return invars_;
 }
 

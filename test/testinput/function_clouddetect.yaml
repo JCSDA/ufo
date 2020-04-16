@@ -63,7 +63,7 @@ GeoVaLs:
 ObsDiag:
   filename: Data/iasi_metop-a_obsdiag_2018041500_m.nc4
 ObsFunction:
-  name: CloudDetect@ObsFunction 
+  name: CloudDetectMinResidualIR@ObsFunction 
   options:
     channels: *all_channels
     obserr_test: GsiObsError_clddet 

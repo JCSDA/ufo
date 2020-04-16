@@ -5,7 +5,7 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#include "ufo/filters/obsfunctions/ObsFunctionErrfLat.h"
+#include "ufo/filters/obsfunctions/ObsErrorFactorLatRad.h"
 
 #include <math.h>
 #include <vector>
@@ -15,29 +15,30 @@
 
 namespace ufo {
 
-static ObsFunctionMaker<ObsFunctionErrfLat> makerObsFuncErrfLat_("ErrfLat");
+static ObsFunctionMaker<ObsErrorFactorLatRad> makerObsErrorFactorLatRad_("ObsErrorFactorLatRad");
 
 // -----------------------------------------------------------------------------
 
-ObsFunctionErrfLat::ObsFunctionErrfLat(const eckit::LocalConfiguration conf)
-  : invars_(), conf_(conf) {
+ObsErrorFactorLatRad::ObsErrorFactorLatRad(const eckit::LocalConfiguration & conf)
+  : invars_() {
   // Check options
-  ASSERT(conf_.has("latitude_parameters"));
+  options_.deserialize(conf);
+
+  ASSERT((options_.latitudeParameters.value()).size() == 4);
+
   invars_ += Variable("latitude@MetaData");
 }
 
 // -----------------------------------------------------------------------------
 
-ObsFunctionErrfLat::~ObsFunctionErrfLat() {}
+ObsErrorFactorLatRad::~ObsErrorFactorLatRad() {}
 
 // -----------------------------------------------------------------------------
 
-void ObsFunctionErrfLat::compute(const ObsFilterData & in,
+void ObsErrorFactorLatRad::compute(const ObsFilterData & in,
                                   ioda::ObsDataVector<float> & out) const {
   // Get parameters from options
-  // Parameters for reducing observation error bounds within latitude band defined by params[0]
-  // params[1-3] give the maximum reduction at equator and decreasing towards params[0]
-  std::vector<float> params = conf_.getFloatVector("latitude_parameters");
+  const std::vector<float> &params = options_.latitudeParameters.value();
 
   const size_t nlocs = in.nlocs();
   std::vector<float> lats;
@@ -53,7 +54,7 @@ void ObsFunctionErrfLat::compute(const ObsFilterData & in,
 
 // -----------------------------------------------------------------------------
 
-const ufo::Variables & ObsFunctionErrfLat::requiredVariables() const {
+const ufo::Variables & ObsErrorFactorLatRad::requiredVariables() const {
   return invars_;
 }
 
