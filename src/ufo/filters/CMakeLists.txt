@@ -37,6 +37,8 @@ set ( filters_files
       ObsDiagnosticsWriter.h
       ObsDomainCheck.cc
       ObsDomainCheck.h
+      ObsDerivativeCheck.cc
+      ObsDerivativeCheck.h
       ObsDomainErrCheck.cc
       ObsDomainErrCheck.h
       ObsFilterData.cc

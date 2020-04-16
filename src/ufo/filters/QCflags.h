@@ -1,8 +1,8 @@
 /*
  * (C) Copyright 2018-2019 UCAR
- * 
+ *
  * This software is licensed under the terms of the Apache Licence Version 2.0
- * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
 #ifndef UFO_FILTERS_QCFLAGS_H_
@@ -25,6 +25,7 @@ namespace QCflags {
   constexpr int seaice  = 11;  // observation based sea ice detection, also flags land points
   constexpr int track   = 12;  // observation removed as inconsistent with the rest of track
   constexpr int buddy   = 13;  // observation rejected by the buddy check
+  constexpr int derivative = 14;  // observation removed due to metadata derivative value
 };  // namespace QCflags
 
 }  // namespace ufo

@@ -95,6 +95,8 @@ list( APPEND ufo_test_input
   testinput/qc_trackcheck_unittests.yaml
   testinput/qc_backgroundcheck.yaml
   testinput/qc_boundscheck.yaml
+  testinput/qc_derivative_dpdt.yaml
+  testinput/qc_derivative_dxdt.yaml
   testinput/qc_differencecheck.yaml
   testinput/qc_gauss_thinning.yaml
   testinput/qc_gauss_thinning_unittests.yaml
@@ -638,6 +640,15 @@ ecbuild_add_test( TARGET  test_ufo_opr_gnssroBndNBAM
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsOperator.x )
 
+ecbuild_add_test( TARGET  test_ufo_qc_derivative_ascent
+                  SOURCES mains/TestObsFilters.cc
+                  ARGS    "testinput/qc_derivative_dpdt.yaml"
+                  LIBS    ufo )
+
+ecbuild_add_test( TARGET  test_ufo_qc_derivative_speed
+                  SOURCES mains/TestObsFilters.cc
+                  ARGS    "testinput/qc_derivative_dxdt.yaml"
+                  LIBS    ufo )
 
 ecbuild_add_test( TARGET  test_ufo_super_refraction_gnssroBndNBAM
                   MPI     2
