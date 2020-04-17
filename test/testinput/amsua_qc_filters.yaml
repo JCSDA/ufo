@@ -36,7 +36,7 @@ Observations:
          options:
            channels: *all_channels
            xvar:
-             name: CLWRetMean@ObsFunction
+             name: CLWRetSymmetricMW@ObsFunction
              options:
                clwret_ch238: 1
                clwret_ch314: 2
@@ -62,7 +62,7 @@ Observations:
      - name: brightness_temperature
        channels: 1-6, 15 
      test functions:
-     - name: CLWRet@ObsFunction
+     - name: CLWRetMW@ObsFunction
        options:
          clwret_ch238: 1
          clwret_ch314: 2
@@ -77,7 +77,7 @@ Observations:
      - name: brightness_temperature
        channels: 1-6, 15 
      test functions:
-     - name: CLWRet@ObsFunction
+     - name: CLWRetMW@ObsFunction
        options:
          clwret_ch238: 1
          clwret_ch314: 2

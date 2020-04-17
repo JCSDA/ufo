@@ -5,7 +5,7 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#include "ufo/filters/obsfunctions/ObsFunctionCLWRet.h"
+#include "ufo/filters/obsfunctions/CLWRetMW.h"
 
 #include <algorithm>
 #include <cmath>
@@ -22,26 +22,26 @@
 
 namespace ufo {
 
-static ObsFunctionMaker<ObsFunctionCLWRet> makerObsFuncCLWRet_("CLWRet");
+static ObsFunctionMaker<CLWRetMW> makerCLWRetMW_("CLWRetMW");
 
-ObsFunctionCLWRet::ObsFunctionCLWRet(const eckit::LocalConfiguration & conf)
+CLWRetMW::CLWRetMW(const eckit::LocalConfiguration & conf)
   : invars_() {
   // Initialize options
   options_.deserialize(conf);
 
   // Check required parameters
   // Get variable group types for CLW retrieval from option
-  ASSERT(options_.varGrp.value().size() == 1 || options_.varGrp.value().size() == 2);
+  ASSERT(options_.varGroup.value().size() == 1 || options_.varGroup.value().size() == 2);
 
   // Get channels for CLW retrieval from options
   const std::vector<int> channels_ = {options_.ch238.value(), options_.ch314.value()};
   ASSERT(options_.ch238 !=0 && options_.ch314 !=0 && channels_.size() == 2);
 
   // Include list of required data from ObsSpace
-  for (size_t igrp = 0; igrp < options_.varGrp.value().size(); ++igrp) {
-    invars_ += Variable("brightness_temperature@" + options_.varGrp.value()[igrp], channels_);
+  for (size_t igrp = 0; igrp < options_.varGroup.value().size(); ++igrp) {
+    invars_ += Variable("brightness_temperature@" + options_.varGroup.value()[igrp], channels_);
   }
-  invars_ += Variable("brightness_temperature@" + options_.testGrp.value(), channels_);
+  invars_ += Variable("brightness_temperature@" + options_.testGroup.value(), channels_);
   invars_ += Variable("sensor_zenith_angle@MetaData");
 
   // Include list of required data from GeoVaLs
@@ -52,14 +52,14 @@ ObsFunctionCLWRet::ObsFunctionCLWRet(const eckit::LocalConfiguration & conf)
 
 // -----------------------------------------------------------------------------
 
-ObsFunctionCLWRet::~ObsFunctionCLWRet() {}
+CLWRetMW::~CLWRetMW() {}
 
 // -----------------------------------------------------------------------------
 
-void ObsFunctionCLWRet::compute(const ObsFilterData & in,
+void CLWRetMW::compute(const ObsFilterData & in,
                                     ioda::ObsDataVector<float> & out) const {
   // Get required parameters
-  const std::vector<std::string> &vargrp_ = options_.varGrp;
+  const std::vector<std::string> &vargrp_ = options_.varGroup;
   const std::vector<int> channels_ = {options_.ch238, options_.ch314};
 
   // Get dimension
@@ -89,9 +89,9 @@ void ObsFunctionCLWRet::compute(const ObsFilterData & in,
     // Get bias based on group type
     if (options_.addBias.value() == vargrp_[igrp]) {
       std::vector<float> bias238(nlocs), bias314(nlocs);
-      in.get(Variable("brightness_temperature@" + options_.testGrp.value(), channels_)
+      in.get(Variable("brightness_temperature@" + options_.testGroup.value(), channels_)
                       [channels_[0]-1], bias238);
-      in.get(Variable("brightness_temperature@" + options_.testGrp.value(), channels_)
+      in.get(Variable("brightness_temperature@" + options_.testGroup.value(), channels_)
                       [channels_[1]-1], bias314);
       // Add bias correction to the assigned group
       if (options_.addBias.value() == "ObsValue") {
@@ -113,11 +113,11 @@ void ObsFunctionCLWRet::compute(const ObsFilterData & in,
       if (water_frac[iloc] >= 0.99) {
         float cossza = cos(Constants::deg2rad * szas[iloc]);
         float d0 = c1 - (c2 - c3 * cossza) * cossza;
-        if (tsavg[iloc] > t0c - 1.f && bt238[iloc] <= 284.f && bt314[iloc] <= 284.f
-                                    && bt238[iloc] > 0.f && bt314[iloc] > 0.f) {
-          out[igrp][iloc] = cossza * (d0 + d1 * std::log(285.f - bt238[iloc])
-                                          + d2 * std::log(285.f - bt314[iloc]));
-          out[igrp][iloc] = std::fmax(0.f, out[igrp][iloc]);
+        if (tsavg[iloc] > t0c - 1.0 && bt238[iloc] <= 284.0 && bt314[iloc] <= 284.0
+                                    && bt238[iloc] > 0.0 && bt314[iloc] > 0.0) {
+          out[igrp][iloc] = cossza * (d0 + d1 * std::log(285.0 - bt238[iloc])
+                                          + d2 * std::log(285.0 - bt314[iloc]));
+          out[igrp][iloc] = std::max(0.f, out[igrp][iloc]);
         } else {
           out[igrp][iloc] = getBadValue();
         }
@@ -128,7 +128,7 @@ void ObsFunctionCLWRet::compute(const ObsFilterData & in,
 
 // -----------------------------------------------------------------------------
 
-const ufo::Variables & ObsFunctionCLWRet::requiredVariables() const {
+const ufo::Variables & CLWRetMW::requiredVariables() const {
   return invars_;
 }
 

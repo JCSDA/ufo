@@ -75,6 +75,10 @@ set ( filters_files
       actions/InflateError.h
       actions/RejectObs.cc
       actions/RejectObs.h
+      obsfunctions/CLWRetMW.cc
+      obsfunctions/CLWRetMW.h
+      obsfunctions/CLWRetSymmetricMW.cc
+      obsfunctions/CLWRetSymmetricMW.h
       obsfunctions/ObsErrorModelRamp.cc
       obsfunctions/ObsErrorModelRamp.h
       obsfunctions/ObsFunction.cc
@@ -83,10 +87,6 @@ set ( filters_files
       obsfunctions/ObsFunctionBase.h
       obsfunctions/CloudDetectMinResidualIR.cc
       obsfunctions/CloudDetectMinResidualIR.h
-      obsfunctions/ObsFunctionCLWRet.cc
-      obsfunctions/ObsFunctionCLWRet.h
-      obsfunctions/ObsFunctionCLWRetMean.cc
-      obsfunctions/ObsFunctionCLWRetMean.h
       obsfunctions/ObsErrorBoundRad.cc
       obsfunctions/ObsErrorBoundRad.h
       obsfunctions/ObsErrorFactorSurfJacobianRad.cc
