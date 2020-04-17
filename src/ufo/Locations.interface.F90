@@ -1,8 +1,8 @@
 !
 !  (C) Copyright 2017 UCAR
-!  
+!
 !  This software is licensed under the terms of the Apache Licence Version 2.0
-!  which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
+!  which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 !
 
 module ufo_locs_mod_c
@@ -35,11 +35,12 @@ contains
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_locs_create_c(key, klocs, klats, klons) bind(c,name='ufo_locs_create_f90')
+subroutine ufo_locs_create_c(key, klocs, c_obsspace, klats, klons) bind(c,name='ufo_locs_create_f90')
 
 implicit none
 integer(c_int), intent(inout) :: key
 integer(c_int), intent(in) :: klocs
+type(c_ptr), value, intent(in) :: c_obsspace
 real(c_double), intent(in) :: klats(klocs)
 real(c_double), intent(in) :: klons(klocs)
 
@@ -52,7 +53,7 @@ call ufo_locs_registry%setup(key, self)
 lats(:) = klats(:)
 lons(:) = klons(:)
 
-call ufo_locs_create(self, klocs, lats, lons)
+call ufo_locs_create(self, c_obsspace, klocs, lats, lons)
 
 end subroutine ufo_locs_create_c
 
@@ -70,6 +71,24 @@ call ufo_locs_registry%setup(key, self)
 call ufo_locs_setup(self, nlocs)
 
 end subroutine ufo_locs_setup_c
+
+!------------------------------------------------------------------------------
+
+subroutine ufo_locs_copy_c(key, key2) bind(c,name='ufo_locs_copy_f90')
+
+implicit none
+integer(c_int), intent(inout) :: key
+integer(c_int), intent(in)    :: key2
+
+type(ufo_locs), pointer :: self
+type(ufo_locs), pointer :: other
+
+call ufo_locs_registry%setup(key, self)
+call ufo_locs_registry%get(key2, other)
+
+call ufo_locs_copy(self, other)
+
+end subroutine ufo_locs_copy_c
 
 ! ------------------------------------------------------------------------------
 
