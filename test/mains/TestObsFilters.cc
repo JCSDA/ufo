@@ -14,6 +14,5 @@ int main(int argc,  char ** argv) {
   oops::Run run(argc, argv);
   ufo::instantiateObsFilterFactory<ufo::UfoTrait>();
   ufo::test::ObsFilters tests;
-  run.execute(tests);
-  return 0;
+  return run.execute(tests);
 }

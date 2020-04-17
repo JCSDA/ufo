@@ -11,6 +11,5 @@
 int main(int argc,  char ** argv) {
   oops::Run run(argc, argv);
   ufo::test::RecursiveSplitter tests;
-  run.execute(tests);
-  return 0;
+  return run.execute(tests);
 }
