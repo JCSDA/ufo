@@ -40,7 +40,7 @@ void AssignError::apply(const Variables & vars,
                          const ObsFilterData & data,
                          ioda::ObsDataVector<int> &,
                          ioda::ObsDataVector<float> & obserr) const {
-  oops::Log::debug() << " input obserr: " << obserr << std::endl;
+  oops::Log::debug() << " AssignError input obserr: " << obserr << std::endl;
   // If float error is specified
   if (conf_.has("error parameter")) {
     float error = conf_.getFloat("error parameter");
@@ -54,7 +54,6 @@ void AssignError::apply(const Variables & vars,
   } else if (conf_.has("error function")) {
     Variable errorvar(conf_.getSubConfiguration("error function"));
     ASSERT(errorvar.size() == 1 || errorvar.size() == vars.nvars());
-    oops::Log::debug() << "processing data: " << strerror_ << std::endl;
     ioda::ObsDataVector<float> errors(data.obsspace(), errorvar.toOopsVariables(),
                                        errorvar.group(), false);
     data.get(errorvar, errors);
@@ -69,6 +68,7 @@ void AssignError::apply(const Variables & vars,
     if (errorvar.size() == vars.nvars()) {
       std::iota(error_jv.begin(), error_jv.end(), 0);
     }
+
     // loop over all variables to update
     for (size_t jv = 0; jv < vars.nvars(); ++jv) {
       // find current variable index in obserr

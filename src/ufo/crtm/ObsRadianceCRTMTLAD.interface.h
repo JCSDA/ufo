@@ -26,7 +26,7 @@ extern "C" {
 //  Radiance observation operator and its tl/ad
 // -----------------------------------------------------------------------------
 
-  void ufo_radiancecrtm_tlad_setup_f90(F90hop &, const eckit::Configuration * const *,
+  void ufo_radiancecrtm_tlad_setup_f90(F90hop &, const eckit::Configuration &,
                                        const int &, const int &,
                                        oops::Variables &);
   void ufo_radiancecrtm_tlad_delete_f90(F90hop &);

@@ -63,10 +63,9 @@ GeoVaLs::GeoVaLs(const eckit::Configuration & config,
   : keyGVL_(-1), vars_(vars), comm_(obspace.comm())
 {
   oops::Log::trace() << "GeoVaLs constructor config starting" << std::endl;
-  const eckit::Configuration * conf = &config;
   ufo_geovals_setup_f90(keyGVL_, 0, vars_);
   // only read if there are variables specified
-  if (vars_.size() > 0)  ufo_geovals_read_file_f90(keyGVL_, &conf, obspace, vars_);
+  if (vars_.size() > 0)  ufo_geovals_read_file_f90(keyGVL_, config, obspace, vars_);
   oops::Log::trace() << "GeoVaLs contructor config key = " << keyGVL_ << std::endl;
 }
 // -----------------------------------------------------------------------------
@@ -116,9 +115,8 @@ void GeoVaLs::analytic_init(const Locations & locs,
                             const eckit::Configuration & config)
 {
   oops::Log::trace() << "GeoVaLs::analytic_init starting" << std::endl;
-  const eckit::Configuration * conf = &config;
   if (config.has("analytic_init")) {
-      ufo_geovals_analytic_init_f90(keyGVL_, locs.toFortran(), &conf);
+      ufo_geovals_analytic_init_f90(keyGVL_, locs.toFortran(), config);
   }
   oops::Log::trace() << "GeoVaLs::analytic_init done" << std::endl;
 }
@@ -212,7 +210,7 @@ GeoVaLs & GeoVaLs::operator*=(const GeoVaLs & other) {
 double GeoVaLs::dot_product_with(const GeoVaLs & other) const {
   oops::Log::trace() << "GeoVaLs::dot_product_with starting" << std::endl;
   double zz;
-  ufo_geovals_dotprod_f90(keyGVL_, other.keyGVL_, zz, &comm_);
+  ufo_geovals_dotprod_f90(keyGVL_, other.keyGVL_, zz, comm_);
   oops::Log::trace() << "GeoVaLs::dot_product_with done" << std::endl;
   return zz;
 }
@@ -321,16 +319,14 @@ void GeoVaLs::put(const std::vector<double> & vals, const std::string & var, con
 void GeoVaLs::read(const eckit::Configuration & config,
                    const ioda::ObsSpace & obspace) {
   oops::Log::trace() << "GeoVaLs::read starting" << std::endl;
-  const eckit::Configuration * conf = &config;
-  ufo_geovals_read_file_f90(keyGVL_, &conf, obspace, vars_);
+  ufo_geovals_read_file_f90(keyGVL_, config, obspace, vars_);
   oops::Log::trace() << "GeoVaLs::read done" << std::endl;
 }
 // -----------------------------------------------------------------------------
 /*! \brief Write GeoVaLs to the file */
 void GeoVaLs::write(const eckit::Configuration & config) const {
   oops::Log::trace() << "GeoVaLs::write starting" << std::endl;
-  const eckit::Configuration * conf = &config;
-  ufo_geovals_write_file_f90(keyGVL_, &conf, &comm_);
+  ufo_geovals_write_file_f90(keyGVL_, config, comm_);
   oops::Log::trace() << "GeoVaLs::write done" << std::endl;
 }
 // -----------------------------------------------------------------------------

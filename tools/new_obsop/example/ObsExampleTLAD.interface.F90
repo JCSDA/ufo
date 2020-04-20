@@ -34,7 +34,7 @@ use fckit_configuration_module, only: fckit_configuration
 use oops_variables_mod
 implicit none
 integer(c_int), intent(inout)  :: c_key_self
-type(c_ptr), intent(in)        :: c_conf
+type(c_ptr), value, intent(in) :: c_conf
 type(c_ptr), value, intent(in) :: c_obsvars ! variables to be simulated
 type(c_ptr), value, intent(in) :: c_geovars ! variables requested from the model
 

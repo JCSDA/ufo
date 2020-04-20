@@ -5,8 +5,8 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#ifndef UFO_FILTERS_OBSFUNCTIONS_OBSFUNCTIONCLWRETMEAN_H_
-#define UFO_FILTERS_OBSFUNCTIONS_OBSFUNCTIONCLWRETMEAN_H_
+#ifndef UFO_FILTERS_OBSFUNCTIONS_CLWRETSYMMETRICMW_H_
+#define UFO_FILTERS_OBSFUNCTIONS_CLWRETSYMMETRICMW_H_
 
 #include <string>
 #include <vector>
@@ -16,42 +16,32 @@
 #include "oops/util/parameters/RequiredParameter.h"
 
 #include "ufo/filters/ObsFilterData.h"
+#include "ufo/filters/obsfunctions/CLWRetMW.h"
 #include "ufo/filters/obsfunctions/ObsFunctionBase.h"
 #include "ufo/filters/Variables.h"
 
 namespace ufo {
 
 ///
+/// \brief Options applying to the calculation of symmetric cloud amount
+///
+typedef CLWRetMWParameters CLWRetSymmetricMWParameters;
+
+///
 /// \brief Calculate symmetric (mean) cloud amount from the cloud amount retrieved
 /// from the observed and simulated measurements
 ///
-class ObsFunctionCLWRetMeanParameters : public oops::Parameters {
+class CLWRetSymmetricMW : public ObsFunctionBase {
  public:
-  ///
-  /// Required Parameters:
-  ///
-  /// Names of the data group used to retrieve the cloud liquid water
-  /// Example: get retrieved CLW from observation and simulated observation respectively
-  ///          clwret_types: [ObsValue, HofX]
-  /// Example: get retrieved CLW from observation or simulated observation only
-  ///          clwret_types: [ObsValue]
-  ///          clwret_types: [HofX]
-  oops::RequiredParameter<std::vector<std::string>> varGrp{"clwret_types", this};
-  ///
-};
-
-class ObsFunctionCLWRetMean : public ObsFunctionBase {
- public:
-  explicit ObsFunctionCLWRetMean(const eckit::LocalConfiguration &
+  explicit CLWRetSymmetricMW(const eckit::LocalConfiguration &
                                        = eckit::LocalConfiguration());
-  ~ObsFunctionCLWRetMean();
+  ~CLWRetSymmetricMW();
 
   void compute(const ObsFilterData &,
                ioda::ObsDataVector<float> &) const;
   const ufo::Variables & requiredVariables() const;
  private:
   ufo::Variables invars_;
-  ObsFunctionCLWRetMeanParameters options_;
   eckit::LocalConfiguration conf_;
 };
 
@@ -59,4 +49,4 @@ class ObsFunctionCLWRetMean : public ObsFunctionBase {
 
 }  // namespace ufo
 
-#endif  // UFO_FILTERS_OBSFUNCTIONS_OBSFUNCTIONCLWRETMEAN_H_
+#endif  // UFO_FILTERS_OBSFUNCTIONS_CLWRETSYMMETRICMW_H_

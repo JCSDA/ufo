@@ -24,7 +24,7 @@
 namespace ufo {
 
 static ObsFunctionMaker<ObsErrorFactorWavenumIR>
-       makerObsFuncObsErrorFactorWavenumIR_("ObsErrorFactorWavenumIR");
+       makerObsErrorFactorWavenumIR_("ObsErrorFactorWavenumIR");
 
 // -----------------------------------------------------------------------------
 
@@ -34,7 +34,7 @@ ObsErrorFactorWavenumIR::ObsErrorFactorWavenumIR(const eckit::LocalConfiguration
   options_.deserialize(conf);
 
   // Get channels from options
-  std::set<int> channelset = oops::parseIntSet(options_.chlist);
+  std::set<int> channelset = oops::parseIntSet(options_.channelList);
   std::copy(channelset.begin(), channelset.end(), std::back_inserter(channels_));
   ASSERT(channels_.size() > 0);
 
@@ -79,8 +79,8 @@ void ObsErrorFactorWavenumIR::compute(const ObsFilterData & in,
   // surface type
   std::vector<float> tao_sfc(nlocs);
   for (size_t ich = 0; ich < nchans; ++ich) {
-    for (size_t iloc = 0; iloc < nlocs; ++iloc) out[ich][iloc] = 1.f;
-    if (wavenumber[ich] > 2000.f && wavenumber[ich] <= 2400.f) {
+    for (size_t iloc = 0; iloc < nlocs; ++iloc) out[ich][iloc] = 1.0;
+    if (wavenumber[ich] > 2000.0 && wavenumber[ich] <= 2400.0) {
       in.get(Variable("transmittances_of_atmosphere_layer@ObsDiag", channels_)[ich],
              nlevs, tao_sfc);
       for (size_t iloc = 0; iloc < nlocs; ++iloc) {

@@ -21,23 +21,21 @@
 
 namespace ufo {
 
-// -----------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 
 Locations::Locations(const eckit::mpi::Comm & comm) : comm_(comm) {
   int nobs = 0;
   ufo_locs_setup_f90(keyLoc_, nobs);
 }
 
-// -----------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 
 Locations::Locations(const ioda::ObsSpace & odb,
                      const util::DateTime & t1, const util::DateTime & t2) : comm_(odb.comm()) {
-  const util::DateTime * p1 = &t1;
-  const util::DateTime * p2 = &t2;
-  ufo_locs_init_f90(keyLoc_, odb, &p1, &p2);
+  ufo_locs_init_f90(keyLoc_, odb, t1, t2);
 }
 
-// -----------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 /*! UFO Locations Constructor with Configuration
  *
  * \details This constructor can be used to generate user-specified
@@ -71,23 +69,29 @@ Locations::Locations(const eckit::Configuration & conf,
   obspace.get_db("MetaData", "latitude", lats);
   obspace.get_db("MetaData", "longitude", lons);
 
-  ufo_locs_create_f90(keyLoc_, nlocs, &lats[0], &lons[0]);
+  ufo_locs_create_f90(keyLoc_, nlocs, obspace, &lats[0], &lons[0]);
 }
 
-// -----------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
+
+Locations::Locations(const Locations & other) : comm_(other.comm_) {
+  ufo_locs_copy_f90(keyLoc_, other.toFortran());
+}
+
+// -------------------------------------------------------------------------------------------------
 Locations & Locations::operator+=(const Locations & other) {
   F90locs otherKeyLoc_ = other.toFortran();
   ufo_locs_concatenate_f90(keyLoc_, otherKeyLoc_);
   return *this;
 }
 
-// -----------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 
 Locations::~Locations() {
   ufo_locs_delete_f90(keyLoc_);
 }
 
-// -----------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 
 int Locations::nobs() const {
   int nobs;
@@ -95,7 +99,7 @@ int Locations::nobs() const {
   return nobs;
 }
 
-// -----------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 
 void Locations::print(std::ostream & os) const {
   int nobs, indx, max_indx, i(0);
@@ -117,6 +121,6 @@ void Locations::print(std::ostream & os) const {
   }
 }
 
-// -----------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 
 }  // namespace ufo

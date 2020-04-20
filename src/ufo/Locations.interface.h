@@ -23,10 +23,10 @@ namespace ufo {
 extern "C" {
 
   void ufo_locs_init_f90(F90locs &, const ioda::ObsSpace &,
-                                    const util::DateTime * const *,
-                                    const util::DateTime * const *);
-  void ufo_locs_create_f90(F90locs &, const int  &, const double *,
-                            const double *);
+                         const util::DateTime &, const util::DateTime &);
+  void ufo_locs_create_f90(F90locs &, const int &, const ioda::ObsSpace &,
+                           const double *, const double *);
+  void ufo_locs_copy_f90(F90locs &, const F90locs &);
   void ufo_locs_setup_f90(F90locs &, const int  &);
   void ufo_locs_delete_f90(F90locs &);
   void ufo_locs_nobs_f90(const F90locs &, int &);

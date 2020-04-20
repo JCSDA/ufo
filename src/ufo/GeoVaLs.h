@@ -65,6 +65,8 @@ class GeoVaLs : public util::Printable,
   double normalizedrms(const GeoVaLs &) const;
 
   bool has(const std::string & var) const {return vars_.has(var);}
+  const oops::Variables & getVars() const {return vars_;}
+
   size_t nlevs(const std::string & var) const;
   void get(std::vector<float> &, const std::string &) const;
   void get(std::vector<float> &, const std::string &, const int) const;

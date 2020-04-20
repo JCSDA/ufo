@@ -111,7 +111,7 @@ subroutine ufo_geovals_analytic_init_c(c_key_self, c_key_locs, c_conf) bind(c,na
 implicit none
 integer(c_int), intent(in) :: c_key_self
 integer(c_int), intent(in) :: c_key_locs
-type(c_ptr), intent(in)    :: c_conf
+type(c_ptr), value, intent(in) :: c_conf
 
 type(ufo_geovals), pointer :: self
 type(ufo_locs), pointer :: locs
@@ -560,7 +560,7 @@ use datetime_mod
 
 implicit none
 integer(c_int), intent(inout)  :: c_key_self
-type(c_ptr), intent(in)        :: c_conf
+type(c_ptr), value, intent(in) :: c_conf
 type(c_ptr), value, intent(in) :: c_obspace
 type(c_ptr), value, intent(in) :: c_vars
 
@@ -597,7 +597,7 @@ end subroutine ufo_geovals_read_file_c
 subroutine ufo_geovals_write_file_c(c_key_self, c_conf, c_comm) bind(c,name='ufo_geovals_write_file_f90')
 implicit none
 integer(c_int), intent(in)     :: c_key_self
-type(c_ptr), intent(in)        :: c_conf
+type(c_ptr), value, intent(in) :: c_conf
 type(c_ptr), value, intent(in) :: c_comm
 
 type(ufo_geovals), pointer :: self

@@ -5,7 +5,7 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#include "ufo/filters/obsfunctions/ObsFunctionErrfGrosschk.h"
+#include "ufo/filters/obsfunctions/ObsErrorBoundRad.h"
 
 #include <algorithm>
 #include <cmath>
@@ -17,82 +17,82 @@
 
 #include "ioda/ObsDataVector.h"
 #include "oops/util/IntSetParser.h"
-#include "ufo/filters/obsfunctions/ObsFunctionErrfLat.h"
-#include "ufo/filters/obsfunctions/ObsFunctionErrfTransmittop.h"
+#include "ufo/filters/obsfunctions/ObsErrorFactorLatRad.h"
+#include "ufo/filters/obsfunctions/ObsErrorFactorTransmitTopRad.h"
 #include "ufo/filters/Variable.h"
 #include "ufo/utils/Constants.h"
 
 namespace ufo {
 
-static ObsFunctionMaker<ObsFunctionErrfGrosschk> makerObsFuncErrfGrosschk_("ErrfGrosschk");
+static ObsFunctionMaker<ObsErrorBoundRad> makerObsErrorBoundRad_("ObsErrorBoundRad");
 
 // -----------------------------------------------------------------------------
 
-ObsFunctionErrfGrosschk::ObsFunctionErrfGrosschk(const eckit::LocalConfiguration conf)
-  : invars_(), group_("ObsErrorData"), channels_(), conf_(conf) {
+ObsErrorBoundRad::ObsErrorBoundRad(const eckit::LocalConfiguration & conf)
+  : invars_() {
   // Check options
-  ASSERT(conf_.has("channels") && conf_.has("obserr_max") && conf_.has("latitude_parameters"));
-
-  // Check if using obserr from GSI for testing
-  if (conf_.has("obserr_test")) group_ = conf_.getString("obserr_test");
+  options_.deserialize(conf);
 
   // Get channels from options
-  const std::string chlist = conf.getString("channels");
-  std::set<int> channelset = oops::parseIntSet(chlist);
+  std::set<int> channelset = oops::parseIntSet(options_.channelList);
   std::copy(channelset.begin(), channelset.end(), std::back_inserter(channels_));
+  ASSERT(channels_.size() > 0);
+
+  const Variable &obserrlat = options_.obserrBoundLat.value();
+  invars_ += obserrlat;
+
+  const Variable &obserrtaotop = options_.obserrBoundTransmittop.value();
+
+  invars_ += obserrtaotop;
+
+  // Get test groups from options
+  const std::string &errgrp_ = options_.testObserr.value();
 
   // Include list of required data from ObsSpace
-  invars_ += Variable("brightness_temperature@"+group_, channels_);
+  invars_ += Variable("brightness_temperature@"+errgrp_, channels_);
   invars_ += Variable("brightness_temperature@ObsError", channels_);
   invars_ += Variable("latitude@MetaData");
   invars_ += Variable("longitude@MetaData");
-
-  // Include required variables from ObsFunction
-  ObsFunctionErrfTransmittop taotopfunc(conf_);
-  invars_ += taotopfunc.requiredVariables();
-
-  ObsFunctionErrfLat latfunc(conf_);
-  invars_ += latfunc.requiredVariables();
 }
 
 // -----------------------------------------------------------------------------
 
-ObsFunctionErrfGrosschk::~ObsFunctionErrfGrosschk() {}
+ObsErrorBoundRad::~ObsErrorBoundRad() {}
 
 // -----------------------------------------------------------------------------
 
-void ObsFunctionErrfGrosschk::compute(const ObsFilterData & in,
+void ObsErrorBoundRad::compute(const ObsFilterData & in,
                                   ioda::ObsDataVector<float> & out) const {
   // Get observation error bounds from options
-  std::vector<float> obserr_max = conf_.getFloatVector("obserr_max");
-
+  const std::vector<float> &obserr_bound_max = options_.obserrBoundMax.value();
   // Get dimensions
   size_t nlocs = in.nlocs();
   size_t nchans = channels_.size();
 
   // Get error factor from ObsFunction
-  Variable fvar1(conf_);
-  ioda::ObsDataVector<float> errftaotop(in.obsspace(), fvar1.toOopsVariables());
-  ObsFunctionErrfTransmittop taotopfunc(conf_);
-  taotopfunc.compute(in, errftaotop);
+  const Variable &obserrlat = options_.obserrBoundLat.value();
+  ioda::ObsDataVector<float> errflat(in.obsspace(), obserrlat.toOopsVariables());
+  in.get(obserrlat, errflat);
 
   // Get error factor from ObsFunction
-  std::vector<float> errflat(nlocs);
-  in.get(Variable("ErrfLat@ObsFunction", conf_), errflat);
+  const Variable &obserrtaotop = options_.obserrBoundTransmittop.value();
+  ioda::ObsDataVector<float> errftaotop(in.obsspace(), obserrtaotop.toOopsVariables());
+  in.get(obserrtaotop, errftaotop);
 
   // Output integrated error bound for gross check
   std::vector<float> obserr(nlocs);
   std::vector<float> obserrdata(nlocs);
+  const std::string &errgrp_ = options_.testObserr.value();
   for (size_t ichan = 0; ichan < nchans; ++ichan) {
-    in.get(Variable("brightness_temperature@"+group_, channels_)[ichan], obserrdata);
+    in.get(Variable("brightness_temperature@"+errgrp_, channels_)[ichan], obserrdata);
     in.get(Variable("brightness_temperature@ObsError", channels_)[ichan], obserr);
     for (size_t iloc = 0; iloc < nlocs; ++iloc) {
       float varinv = 1.0 / pow(obserrdata[iloc], 2);
       out[ichan][iloc] = obserr[iloc];
       if (varinv > 0.0) {
-        out[ichan][iloc] = std::fmin(3.0f * obserr[iloc]
-                               * (1.0f / pow(errflat[iloc], 2))
-                               * (1.0f / pow(errftaotop[ichan][iloc], 2)), obserr_max[ichan]);
+        out[ichan][iloc] = std::fmin(3.0 * obserr[iloc]
+                               * (1.0 / pow(errflat[0][iloc], 2))
+                               * (1.0 / pow(errftaotop[ichan][iloc], 2)), obserr_bound_max[ichan]);
       }
     }
   }
@@ -100,7 +100,7 @@ void ObsFunctionErrfGrosschk::compute(const ObsFilterData & in,
 
 // -----------------------------------------------------------------------------
 
-const ufo::Variables & ObsFunctionErrfGrosschk::requiredVariables() const {
+const ufo::Variables & ObsErrorBoundRad::requiredVariables() const {
   return invars_;
 }
 

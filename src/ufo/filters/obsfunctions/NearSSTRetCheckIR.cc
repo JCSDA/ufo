@@ -5,7 +5,7 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#include "ufo/filters/obsfunctions/ObsFunctionNSSTRet.h"
+#include "ufo/filters/obsfunctions/NearSSTRetCheckIR.h"
 
 #include <cmath>
 
@@ -23,25 +23,24 @@
 
 namespace ufo {
 
-static ObsFunctionMaker<ObsFunctionNSSTRet> makerObsFuncNSSTRet_("NSSTRet");
+static ObsFunctionMaker<NearSSTRetCheckIR> makerNearSSTRetCheckIR_("NearSSTRetCheckIR");
 
 // -----------------------------------------------------------------------------
 
-ObsFunctionNSSTRet::ObsFunctionNSSTRet(const eckit::LocalConfiguration conf)
-  : invars_(), errgrp_("ObsErrorData"), hofxgrp_("HofX"), biasgrp_("ObsBias"),
-    channels_(), conf_(conf) {
+NearSSTRetCheckIR::NearSSTRetCheckIR(const eckit::LocalConfiguration conf)
+  : invars_() {
   // Check options
-  ASSERT(conf_.has("channels") && conf_.has("use_flag"));
-
-  // Check if using obserr from GSI for testing
-  if (conf_.has("obserr_test")) errgrp_ = conf_.getString("obserr_test");
-  if (conf_.has("hofx_test")) hofxgrp_ = conf_.getString("hofx_test");
-  if (conf_.has("bias_test")) biasgrp_ = conf_.getString("bias_test");
+  options_.deserialize(conf);
 
   // Get channels from options
-  const std::string chlist = conf.getString("channels");
-  std::set<int> channelset = oops::parseIntSet(chlist);
+  std::set<int> channelset = oops::parseIntSet(options_.channelList);
   std::copy(channelset.begin(), channelset.end(), std::back_inserter(channels_));
+  ASSERT(channels_.size() > 0);
+
+  // Get test groups from options
+  const std::string &errgrp_ = options_.testObserr.value();
+  const std::string &biasgrp_ = options_.testBias.value();
+  const std::string &hofxgrp_ = options_.testHofX.value();
 
   // Include required variables from ObsDiag
   invars_ += Variable("brightness_temperature_jacobian_surface_temperature@ObsDiag", channels_);
@@ -63,20 +62,25 @@ ObsFunctionNSSTRet::ObsFunctionNSSTRet(const eckit::LocalConfiguration conf)
 
 // -----------------------------------------------------------------------------
 
-ObsFunctionNSSTRet::~ObsFunctionNSSTRet() {}
+NearSSTRetCheckIR::~NearSSTRetCheckIR() {}
 
 // -----------------------------------------------------------------------------
 
-void ObsFunctionNSSTRet::compute(const ObsFilterData & in,
+void NearSSTRetCheckIR::compute(const ObsFilterData & in,
                                   ioda::ObsDataVector<float> & out) const {
   // Get channel usage information from options
-  std::vector<int> use_flag = conf_.getIntVector("use_flag");
+  std::vector<int> use_flag = options_.useflagChannel.value();
 
   // Get dimensions
   size_t nlocs = in.nlocs();
   size_t nchans = channels_.size();
   size_t nlevs = in.nlevs(Variable("brightness_temperature_jacobian_air_temperature@ObsDiag",
                                     channels_)[0]);
+
+  // Get test groups from options
+  const std::string &errgrp_ = options_.testObserr.value();
+  const std::string &biasgrp_ = options_.testBias.value();
+  const std::string &hofxgrp_ = options_.testHofX.value();
 
   // Setup vectors to get 2D variables
   std::vector<float> values(nlocs);
@@ -163,15 +167,16 @@ void ObsFunctionNSSTRet::compute(const ObsFilterData & in,
   // tschk: threshold for surface temperature jacobian
   // tzchk: threshold for SST temperature at obs location
   const float tschk = 0.2, tzchk = 0.85;
-  const float e_ts = 0.5, e_ta = 1.0, e_qa = 0.85;
+  const float e_ts = 0.5, e_ta = 1.f, e_qa = 0.85;
   const float t0c = Constants::t0c;
 
   // Loop through locations
+  // TODO(emilyhcLiu): review the use of irday with EMC
   std::vector<int> irday(nchans, 1);
   for (size_t iloc=0; iloc < nlocs; ++iloc) {
     bool sea = water_frac[iloc] >= 0.99;
     for (size_t ichan = 0; ichan < nchans; ++ichan) {
-      out[ichan][iloc] = 0;
+      out[ichan][iloc] = 0.0;
       if (water_frac[iloc] > 0.0 && solza[iloc] <= 89.0 && wavenumber[ichan] > 2400.0) {
         irday[ichan] = 0;
       }
@@ -198,8 +203,8 @@ void ObsFunctionNSSTRet::compute(const ObsFilterData & in,
       }
       ws = 1.0 / pow(e_ts, 2);
       wa = 1.0 / pow(e_ta, 2);
-      wq = 1.0 / pow(e_qa * (std::max((static_cast<double>(tzbgr[iloc]) - t0c)
-                                       * 0.03, 0.0) + 0.1), 2);
+      wq = 1.0 / pow(e_qa * (std::max(((tzbgr[iloc]) - t0c)
+                          * 0.03, 0.0) + 0.1), 2);
       a11 = ws;
       a22 = wa;
       a33 = wq;
@@ -253,7 +258,7 @@ void ObsFunctionNSSTRet::compute(const ObsFilterData & in,
 
 // -----------------------------------------------------------------------------
 
-const ufo::Variables & ObsFunctionNSSTRet::requiredVariables() const {
+const ufo::Variables & NearSSTRetCheckIR::requiredVariables() const {
   return invars_;
 }
 

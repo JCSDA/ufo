@@ -36,8 +36,8 @@ subroutine ufo_radiancecrtm_tlad_setup_c(c_key_self, c_conf, c_nchan, c_channels
                                     bind(c,name='ufo_radiancecrtm_tlad_setup_f90')
 use oops_variables_mod
 implicit none
-integer(c_int), intent(inout) :: c_key_self
-type(c_ptr),    intent(in)    :: c_conf
+integer(c_int), intent(inout)  :: c_key_self
+type(c_ptr), value, intent(in) :: c_conf
 integer(c_int), intent(in) :: c_nchan
 integer(c_int), intent(in) :: c_channels(c_nchan)
 type(c_ptr), intent(in), value :: c_varlist

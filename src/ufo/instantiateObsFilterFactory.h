@@ -17,6 +17,7 @@
 #include "ufo/filters/MetOfficeBuddyCheck.h"
 #include "ufo/filters/MWCLWCheck.h"
 #include "ufo/filters/ObsBoundsCheck.h"
+#include "ufo/filters/ObsDerivativeCheck.h"
 #include "ufo/filters/ObsDiagnosticsWriter.h"
 #include "ufo/filters/ObsDomainCheck.h"
 #include "ufo/filters/ObsDomainErrCheck.h"
@@ -69,8 +70,10 @@ template<typename MODEL> void instantiateObsFilterFactory() {
            makerChk17_("Track Check");
   static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::MetOfficeBuddyCheck> >
            makerChk18_("Met Office Buddy Check");
+  static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::ObsDerivativeCheck> >
+           makerChk19_("Derivative Check");
   static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::RTTOVOneDVarCheck> >
-           makerChk19_("RTTOV OneDVar Check");
+           makerChk20_("RTTOV OneDVar Check");
 }
 
 }  // namespace ufo

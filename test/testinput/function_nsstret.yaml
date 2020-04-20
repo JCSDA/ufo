@@ -63,7 +63,7 @@ GeoVaLs:
 ObsDiag:
   filename: Data/iasi_metop-a_obsdiag_2018041500_m.nc4
 ObsFunction:
-  name: NSSTRet@ObsFunction 
+  name: NearSSTRetCheckIR@ObsFunction 
   options:
     obserr_test: GsiObsError_nsstret 
     hofx_test: GsiHofX 

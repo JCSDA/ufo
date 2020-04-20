@@ -102,6 +102,7 @@ void QCmanager::print(std::ostream & os) const {
     size_t ifgss = 0;
     size_t ignss = 0;
     size_t ithin = 0;
+    size_t idydx = 0;
     size_t iclw  = 0;
     size_t idiffref = 0;
     size_t iseaice  = 0;
@@ -125,6 +126,7 @@ void QCmanager::print(std::ostream & os) const {
       if ((*flags_)[jj][jobs] == 76 || (*flags_)[jj][jobs] == 77)  ++ignss;
       if ((*flags_)[jj][jobs] == QCflags::track)  ++itrack;
       if ((*flags_)[jj][jobs] == QCflags::buddy)  ++ibuddy;
+      if ((*flags_)[jj][jobs] == QCflags::derivative) ++idydx;
       if ((*flags_)[jj][jobs] == QCflags::onedvar) ++ionedvar;
     }
 
@@ -144,6 +146,7 @@ void QCmanager::print(std::ostream & os) const {
     obsdb_.comm().allReduceInPlace(iseaice,  eckit::mpi::sum());
     obsdb_.comm().allReduceInPlace(itrack,  eckit::mpi::sum());
     obsdb_.comm().allReduceInPlace(ibuddy,  eckit::mpi::sum());
+    obsdb_.comm().allReduceInPlace(idydx,   eckit::mpi::sum());
     obsdb_.comm().allReduceInPlace(ionedvar,  eckit::mpi::sum());
 
     if (obsdb_.comm().rank() == 0) {
@@ -155,6 +158,7 @@ void QCmanager::print(std::ostream & os) const {
       if (iblck > 0) os << info << iblck << " black-listed." << std::endl;
       if (iherr > 0) os << info << iherr << " H(x) failed." << std::endl;
       if (ithin > 0) os << info << ithin << " removed by thinning." << std::endl;
+      if (idydx > 0) os << info << idydx << " dy/dx out of valid range." << std::endl;
       if (iclw  > 0) os << info << iclw  << " removed by cloud liquid water check." << std::endl;
       if (ifgss > 0) os << info << ifgss << " rejected by first-guess check." << std::endl;
       if (ignss > 0) os << info << ignss << " rejected by GNSSRO reality check." << std::endl;
@@ -168,7 +172,7 @@ void QCmanager::print(std::ostream & os) const {
     }
 
     ASSERT(ipass + imiss + ipreq + ibnds + iwhit + iblck + iherr + ithin + iclw + ifgss + ignss \
-           + idiffref + iseaice + itrack + ibuddy + ionedvar == iobs);
+           + idiffref + iseaice + itrack + ibuddy + idydx  + ionedvar == iobs);
   }
 }
 

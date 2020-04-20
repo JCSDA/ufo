@@ -36,6 +36,7 @@ class Locations : public util::Printable,
   explicit Locations(const eckit::mpi::Comm &);
   Locations(const ioda::ObsSpace &, const util::DateTime &, const util::DateTime &);
   Locations(const eckit::Configuration &, const eckit::mpi::Comm &);
+  explicit Locations(const ufo::Locations &);
   ~Locations();
 
   Locations & operator+=(const Locations &);

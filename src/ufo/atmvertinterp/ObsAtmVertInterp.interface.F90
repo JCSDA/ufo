@@ -38,7 +38,7 @@ subroutine ufo_atmvertinterp_setup_c(c_key_self, c_conf, c_obsvars, c_geovars) b
 use oops_variables_mod
 implicit none
 integer(c_int), intent(inout) :: c_key_self
-type(c_ptr), intent(in) :: c_conf
+type(c_ptr), intent(in), value :: c_conf
 type(c_ptr), intent(in), value :: c_obsvars !< variables to be simulated
 type(c_ptr), intent(in), value :: c_geovars !< variables requested from the model
 

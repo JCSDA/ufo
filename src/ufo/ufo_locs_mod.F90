@@ -1,8 +1,8 @@
 !
 ! (C) Copyright 2017 UCAR
-! 
+!
 ! This software is licensed under the terms of the Apache Licence Version 2.0
-! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
+! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 
 !> Fortran module handling observation locations
 
@@ -12,13 +12,14 @@ use datetime_mod
 use iso_c_binding
 use kinds
 use fckit_log_module, only : fckit_log
+use obsspace_mod
 
 implicit none
 private
-public :: ufo_locs, ufo_locs_create, ufo_locs_setup, ufo_locs_delete
-public :: ufo_locs_init, ufo_locs_concatenate
+public :: ufo_locs, ufo_locs_create, ufo_locs_copy, ufo_locs_setup, ufo_locs_delete
+public :: ufo_locs_init, ufo_locs_concatenate, ufo_locs_time_mask
 
-! ------------------------------------------------------------------------------
+! --------------------------------------------------------------------------------------------------
 
 !> Fortran derived type to hold observation locations
 type :: ufo_locs
@@ -30,29 +31,43 @@ type :: ufo_locs
   integer,         allocatable, dimension(:) :: indx    !< indices of locations in the full [geovals] array
 end type ufo_locs
 
-! ------------------------------------------------------------------------------
+! --------------------------------------------------------------------------------------------------
 contains
-! ------------------------------------------------------------------------------
+! --------------------------------------------------------------------------------------------------
 
-subroutine ufo_locs_create(self, nlocs, lats, lons)
+subroutine ufo_locs_create(self, obss, nlocs, lats, lons)
 implicit none
-type(ufo_locs), intent(inout) :: self
-integer, intent(in)           :: nlocs
-real(kind_real), intent(in) :: lats(nlocs)
-real(kind_real), intent(in) :: lons(nlocs)
+type(ufo_locs),     intent(inout) :: self
+type(c_ptr), value, intent(in)    :: obss
+integer,            intent(in)    :: nlocs
+real(kind_real),    intent(in)    :: lats(nlocs)
+real(kind_real),    intent(in)    :: lons(nlocs)
 
 integer :: n
-character(len=20) :: fstring
-
+character(len=20), allocatable :: fstring(:)
+type(datetime), dimension(:), allocatable :: date_time
 self%nlocs = nlocs
 self%max_indx = nlocs
 allocate(self%lat(nlocs), self%lon(nlocs), self%time(nlocs))
 allocate(self%indx(nlocs))
 self%lat(:) = lats(:)
 self%lon(:) = lons(:)
-fstring="9999-09-09T09:09:09Z"
+
+allocate(fstring(nlocs))
+
+if (obsspace_has(obss,"MetaData", "datetime")) then
+  allocate(date_time(nlocs))
+  call obsspace_get_db(obss, "MetaData", "datetime", date_time)
+  do n = 1, self%nlocs
+    call datetime_to_string(date_time(n), fstring(n))
+  enddo
+  deallocate(date_time)
+else
+  fstring(:) = "9999-09-09T09:09:09Z"
+endif
+
 do n = 1, self%nlocs
-  call datetime_create(fstring, self%time(n))
+  call datetime_create(fstring(n), self%time(n))
 enddo
 do n = 1, self%nlocs
   self%indx(n) = n
@@ -60,7 +75,7 @@ enddo
 
 end subroutine ufo_locs_create
 
-! ------------------------------------------------------------------------------
+! --------------------------------------------------------------------------------------------------
 
 subroutine ufo_locs_setup(self, nlocs)
 implicit none
@@ -85,7 +100,30 @@ self%indx(:) = 0
 
 end subroutine ufo_locs_setup
 
-! ------------------------------------------------------------------------------
+! --------------------------------------------------------------------------------------------------
+
+subroutine ufo_locs_copy(self, other)
+
+implicit none
+type(ufo_locs), intent(inout) :: self
+type(ufo_locs), intent(in)    :: other
+
+self%nlocs = other%nlocs
+self%max_indx = other%max_indx
+
+allocate(self%lat (self%nlocs))
+allocate(self%lon (self%nlocs))
+allocate(self%time(self%nlocs))
+allocate(self%indx(self%nlocs))
+
+self%lat  = other%lat
+self%lon  = other%lon
+self%time = other%time
+self%indx = other%indx
+
+end subroutine ufo_locs_copy
+
+! --------------------------------------------------------------------------------------------------
 
 subroutine ufo_locs_delete(self)
 implicit none
@@ -100,7 +138,7 @@ self%max_indx = -1 ! not set
 
 end subroutine ufo_locs_delete
 
-! ------------------------------------------------------------------------------
+! --------------------------------------------------------------------------------------------------
 
 subroutine ufo_locs_concatenate(self, other)
 implicit none
@@ -179,12 +217,9 @@ call ufo_locs_delete(temp_self)
 end subroutine ufo_locs_concatenate
 
 
-! ------------------------------------------------------------------------------
-    
+! --------------------------------------------------------------------------------------------------
+
 subroutine ufo_locs_init(self, obss, t1, t2)
-  use kinds
-  use datetime_mod
-  use obsspace_mod
 
   implicit none
 
@@ -252,6 +287,39 @@ subroutine ufo_locs_init(self, obss, t1, t2)
 
 end subroutine ufo_locs_init
 
-! ------------------------------------------------------------------------------
+! --------------------------------------------------------------------------------------------------
+
+subroutine ufo_locs_time_mask(self, t1, t2, time_mask)
+
+type(ufo_locs),       intent(in)    :: self
+type(datetime),       intent(in)    :: t1
+type(datetime),       intent(in)    :: t2
+logical, allocatable, intent(inout) :: time_mask(:)
+
+! Locals
+integer :: n
+
+! Return a mask that is true where the location times are between t1 and t2
+
+! Check for sensible inputs
+if (t1>t2) call abor1_ftn("ufo_locs_mod.ufo_locs_time_mask t2 is not greater than or equal to t1")
+
+! Allocate the array to output
+if (.not.allocated(time_mask)) allocate(time_mask(self%nlocs))
+time_mask = .false.
+
+! Loop over times and check if between two times
+do n = 1, self%nlocs
+
+  ! Check if in the time range
+  if (self%time(n) > t1 .and. self%time(n) <= t2 ) then
+    time_mask(n) = .true.
+  endif
+
+enddo
+
+end subroutine ufo_locs_time_mask
+
+! --------------------------------------------------------------------------------------------------
 
 end module ufo_locs_mod

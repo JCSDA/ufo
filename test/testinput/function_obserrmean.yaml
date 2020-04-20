@@ -19,7 +19,7 @@ ObsFunction:
   options:
     channels: *all_channels 
     xvar:
-      name: CLWRetMean@ObsFunction
+      name: CLWRetSymmetricMW@ObsFunction
       options:
         clwret_ch238: 1
         clwret_ch314: 2

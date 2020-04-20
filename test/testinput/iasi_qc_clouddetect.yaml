@@ -76,7 +76,7 @@ Observations:
      - name: brightness_temperature
        channels: *all_channels
      test functions:
-     - name: CloudDetect@ObsFunction
+     - name: CloudDetectMinResidualIR@ObsFunction
        channels: *all_channels
        options:
          channels: *all_channels

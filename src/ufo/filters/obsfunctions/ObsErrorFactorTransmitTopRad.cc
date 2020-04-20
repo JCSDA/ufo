@@ -5,7 +5,7 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#include "ufo/filters/obsfunctions/ObsFunctionErrfTransmittop.h"
+#include "ufo/filters/obsfunctions/ObsErrorFactorTransmitTopRad.h"
 
 #include <math.h>
 
@@ -23,19 +23,20 @@
 
 namespace ufo {
 
-static ObsFunctionMaker<ObsFunctionErrfTransmittop> makerObsFuncErrfTransmittop_("ErrfTransmittop");
+static ObsFunctionMaker<ObsErrorFactorTransmitTopRad>
+       makerObsErrorFactorTransmitTopRad_("ObsErrorFactorTransmitTopRad");
 
 // -----------------------------------------------------------------------------
 
-ObsFunctionErrfTransmittop::ObsFunctionErrfTransmittop(const eckit::LocalConfiguration conf)
-  : invars_(), channels_(), conf_(conf) {
+ObsErrorFactorTransmitTopRad::ObsErrorFactorTransmitTopRad(const eckit::LocalConfiguration & conf)
+  : invars_() {
   // Check options
-  ASSERT(conf_.has("channels"));
+  options_.deserialize(conf);
 
   // Get channels from options
-  const std::string chlist = conf_.getString("channels");
-  std::set<int> channelset = oops::parseIntSet(chlist);
+  std::set<int> channelset = oops::parseIntSet(options_.channelList);
   std::copy(channelset.begin(), channelset.end(), std::back_inserter(channels_));
+  ASSERT(channels_.size() > 0);
 
   // Include required variables from ObsDiag
   invars_ += Variable("transmittances_of_atmosphere_layer@ObsDiag", channels_);
@@ -43,11 +44,11 @@ ObsFunctionErrfTransmittop::ObsFunctionErrfTransmittop(const eckit::LocalConfigu
 
 // -----------------------------------------------------------------------------
 
-ObsFunctionErrfTransmittop::~ObsFunctionErrfTransmittop() {}
+ObsErrorFactorTransmitTopRad::~ObsErrorFactorTransmitTopRad() {}
 
 // -----------------------------------------------------------------------------
 
-void ObsFunctionErrfTransmittop::compute(const ObsFilterData & in,
+void ObsErrorFactorTransmitTopRad::compute(const ObsFilterData & in,
                                   ioda::ObsDataVector<float> & out) const {
   // Get dimensions
   size_t nlocs = in.nlocs();
@@ -65,7 +66,7 @@ void ObsFunctionErrfTransmittop::compute(const ObsFilterData & in,
 
 // -----------------------------------------------------------------------------
 
-const ufo::Variables & ObsFunctionErrfTransmittop::requiredVariables() const {
+const ufo::Variables & ObsErrorFactorTransmitTopRad::requiredVariables() const {
   return invars_;
 }
 

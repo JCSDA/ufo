@@ -5,7 +5,7 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#include "ufo/filters/obsfunctions/ObsFunctionCLWRetMean.h"
+#include "ufo/filters/obsfunctions/CLWRetSymmetricMW.h"
 
 #include <algorithm>
 #include <cmath>
@@ -17,43 +17,40 @@
 
 #include "ioda/ObsDataVector.h"
 #include "oops/util/IntSetParser.h"
-#include "ufo/filters/obsfunctions/ObsFunctionCLWRet.h"
+#include "ufo/filters/obsfunctions/CLWRetMW.h"
 #include "ufo/filters/Variable.h"
 #include "ufo/utils/Constants.h"
 
 namespace ufo {
 
-static ObsFunctionMaker<ObsFunctionCLWRetMean> makerObsFuncCLWRetMean_("CLWRetMean");
+static ObsFunctionMaker<CLWRetSymmetricMW> makerCLWRetSymmetricMW_("CLWRetSymmetricMW");
 
 // -----------------------------------------------------------------------------
 
-ObsFunctionCLWRetMean::ObsFunctionCLWRetMean(const eckit::LocalConfiguration & conf)
+CLWRetSymmetricMW::CLWRetSymmetricMW(const eckit::LocalConfiguration & conf)
   : invars_(), conf_(conf) {
-  // Initialize options
-  options_.deserialize(conf_);
-
-  ObsFunctionCLWRet clwretfunc(conf_);
-
+  CLWRetMW clwretfunc(conf_);
   invars_ += clwretfunc.requiredVariables();
 }
 
 // -----------------------------------------------------------------------------
 
-ObsFunctionCLWRetMean::~ObsFunctionCLWRetMean() {}
+CLWRetSymmetricMW::~CLWRetSymmetricMW() {}
 
 // -----------------------------------------------------------------------------
 
-void ObsFunctionCLWRetMean::compute(const ObsFilterData & in,
+void CLWRetSymmetricMW::compute(const ObsFilterData & in,
                                     ioda::ObsDataVector<float> & out) const {
   // Get dimension
   const size_t nlocs = in.nlocs();
 
-  // Get Mean CLW retrievals from function
-  oops::Variables clwvars(options_.varGrp.value());
+  // Get CLW retrievals from function
+  CLWRetMW clwretfunc(conf_);
+  oops::Variables clwvars(clwretfunc.clwVariableGroups());
   ioda::ObsDataVector<float> clwret(in.obsspace(), clwvars, "ObsFunction", false);
-  ObsFunctionCLWRet clwretfunc(conf_);
   clwretfunc.compute(in, clwret);
 
+  // Get symmetric CLW amount
   for (size_t iloc = 0; iloc < nlocs; ++iloc) {
     out[0][iloc] = 0.5 * (clwret[0][iloc] + clwret[1][iloc]);
     if (clwret[0][iloc] >= clwretfunc.getBadValue() || clwret[1][iloc] >= clwretfunc.getBadValue())
@@ -63,7 +60,7 @@ void ObsFunctionCLWRetMean::compute(const ObsFilterData & in,
 
 // -----------------------------------------------------------------------------
 
-const ufo::Variables & ObsFunctionCLWRetMean::requiredVariables() const {
+const ufo::Variables & CLWRetSymmetricMW::requiredVariables() const {
   return invars_;
 }
 

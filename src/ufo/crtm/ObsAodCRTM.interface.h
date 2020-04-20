@@ -26,7 +26,7 @@ extern "C" {
 //  Aod observation operator
 // -----------------------------------------------------------------------------
 
-  void ufo_aodcrtm_setup_f90(F90hop &, const eckit::Configuration * const *,
+  void ufo_aodcrtm_setup_f90(F90hop &, const eckit::Configuration &,
                              const int &, const int &,
                              oops::Variables &);
   void ufo_aodcrtm_delete_f90(F90hop &);
