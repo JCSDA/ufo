@@ -16,7 +16,7 @@ use oops_variables_mod
 use obsspace_mod
 use ufo_rttovonedvarcheck_utils_mod
 use ufo_rttovonedvarcheck_init_mod
-use ufo_rttovonedvarcheck_process_mod
+use ufo_rttovonedvarcheck_minimize_utils_mod
 
 implicit none
 public :: ufo_rttovonedvarcheck
@@ -64,14 +64,16 @@ subroutine ufo_rttovonedvarcheck_apply(self, vars, geovals, apply)
   ! ------------------------------------------
   use missing_values_mod
   use ufo_rttovonedvarcheck_minimize_newton_mod, only: &
-                    ufo_rttovonedvarcheck_minimize_newton
+          ufo_rttovonedvarcheck_minimize_newton
   use ufo_rttovonedvarcheck_minimize_ml_mod, only: &
-                    ufo_rttovonedvarcheck_minimize_ml
+          ufo_rttovonedvarcheck_minimize_ml
   use ufo_rttovonedvarcheck_rmatrix_mod, only: &
-                    rmatrix_type, &
-                    rmatrix_setup, &
-                    rmatrix_delete, &
-                    rmatrix_print
+          rmatrix_type, &
+          rmatrix_setup, &
+          rmatrix_delete, &
+          rmatrix_print
+  use ufo_rttovonedvarcheck_bmatrix_mod, only: &
+          bmatrix_type
 
   implicit none
   type(ufo_rttovonedvarcheck), intent(inout) :: self     ! one d var check setup info
@@ -86,16 +88,15 @@ subroutine ufo_rttovonedvarcheck_apply(self, vars, geovals, apply)
   integer                            :: fileunit        ! unit number for reading in files
   integer(c_int32_t), allocatable    :: flags(:,:)      ! qc flag for return to var obs file
   real(kind_real)                    :: missing         ! missing value
-  character(len=max_string_length)   :: var
-  character(len=100)                 :: varname
+  character(len=max_string)          :: var
+  character(len=max_string)          :: varname
   type(rmatrix_type)                 :: r_matrix    ! new r_matrix object
-  type(bmatrix_type)                 :: full_b_matrix   ! full b matrix
+  type(bmatrix_type)                 :: full_bmatrix
   real(kind_real), allocatable       :: b_matrix(:,:)   ! 1d-var profile b matrix
   real(kind_real), allocatable       :: b_inverse(:,:)  ! inverse for each 1d-var profile b matrix
   type(profileinfo_type)             :: profile_index   ! index for mapping geovals to 1d-var state profile
   integer                            :: nprofelements   ! number of elements in 1d-var state profile
   type(ufo_geovals)                  :: local_geovals   ! geoval for one observation
-  real(c_double), allocatable        :: iter_hofx(:)    ! model equivalent of observations during 1d-var
   real(kind_real), allocatable       :: obs_error(:)
   integer, allocatable               :: channels_used(:)
 
@@ -115,7 +116,7 @@ subroutine ufo_rttovonedvarcheck_apply(self, vars, geovals, apply)
 
   logical                            :: file_exists     ! check if a file exists logical
   logical                            :: onedvar_success
-  character(len=255)                 :: sensor_id
+  character(len=max_string)          :: sensor_id
   integer                            :: apply_count
 
   type(obinfo_type)                  :: ob_info
@@ -138,7 +139,6 @@ subroutine ufo_rttovonedvarcheck_apply(self, vars, geovals, apply)
   allocate(sol_zen(iloc))
   allocate(sol_azi(iloc))
   allocate(flags(self%nchans,iloc))
-  allocate(iter_hofx(self%nchans))
 
   ! initialize arrays
   yobs(:,:) = 0.0
@@ -151,9 +151,8 @@ subroutine ufo_rttovonedvarcheck_apply(self, vars, geovals, apply)
   sol_zen(:) = 0.0
   sol_azi(:) = 0.0
   flags(:,:) = 0
-  iter_hofx(:) = 0.0
 
-  ! read in observations and associated errors
+  ! read in observations and associated errors for full ObsSpace
   do jvar = 1, self%nchans
     var = vars%variable(jvar)
     call obsspace_get_db(self%obsdb, "ObsValue",  trim(var), yobs(jvar,:))
@@ -169,70 +168,16 @@ subroutine ufo_rttovonedvarcheck_apply(self, vars, geovals, apply)
   call obsspace_get_db(self%obsdb,  "MetaData", "solar_zenith_angle", sol_zen(:))
   call obsspace_get_db(self%obsdb,  "MetaData", "solar_azimuth_angle", sol_azi(:))
 
-  call cpu_time(t1)
+  ! Setup full B matrix object
+  call full_bmatrix % setup(self % model_variables, self%b_matrix_path, self % qtotal)
 
-  ! Select fields for B matrix
-  allocate(fields_in(7))
-  fields_in(:) = 0
-  do jvar = 1, self % nmvars
-    varname = self % model_variables(jvar)
-    select case (trim(varname))
+  ! Create profile index for mapping 1d-var profile to b-matrix
+  call ufo_rttovonedvarcheck_profile_setup(full_bmatrix, profile_index)
 
-      case ("air_temperature")
-        fields_in(1) = 1 ! air_temperature
-
-      case ("specific_humidity")
-        if (self % qtotal) then
-          fields_in(2) = 10 ! water profile in bmatrix - specific humidity in geovals!?!
-        else
-          fields_in(2) = 2 ! water profile in bmatrix - specific humidity in geovals!?!
-        end if
-
-      case("air_temperature_at_two_meters_above_surface")
-        fields_in(3) = 3 ! 2m air_temperature
-
-      case("specific_humidity_at_two_meters_above_surface")
-        fields_in(4) = 4 ! 2m specific_humidity
-
-      case("skin_temperature")
-        fields_in(5) = 5 ! surface skin temperature
-
-      case("surface_air_pressure")
-        fields_in(6) = 6 ! surface air pressure
-
-      case default
-        write(*,*) "Variable not implemented yet in OneDVarCheck Covariance"
-
-    end select
-  end do
-  write(*,*) "fields in = ",fields_in(:)
-
-  ! setup and read in background covariance
-  inquire(file=trim(self%b_matrix_path), exist=file_exists)
-  if (file_exists) then
-    call ufo_rttovonedvarcheck_IOGetFreeUnit(fileunit)
-    open(unit = fileunit, file = trim(self%b_matrix_path))
-    call ufo_rttovonedvarcheck_InitBmatrix(full_b_matrix)
-    !call ufo_rttovonedvarcheck_GetBmatrix(fileunit, full_b_matrix)
-    call ufo_rttovonedvarcheck_GetBmatrix(fileunit, full_b_matrix, fieldlist=fields_in)
-    close(unit = fileunit)
-  else
-    write(*,*) "rttovonedvarcheck bmatrix file not found"
-  end if
-
-  ! get mapping for 1d-var profile from b-matrix
-  call ufo_rttovonedvarcheck_InitProfInfo(profile_index)
-  call ufo_rttovonedvarcheck_MapProfileToB(full_b_matrix, profile_index, nprofelements)
-  write(*,*) "1DVar number of profile elements = ",nprofelements
-  allocate(b_matrix(nprofelements,nprofelements))
-  allocate(b_inverse(nprofelements,nprofelements))
-
-  call cpu_time(t2)
-
-  write(*,*) "time to read in b matrix and map profile = ",(t2-t1)
-
-  ! initialize ob info type
-  call ufo_rttovonedvarcheck_InitObInfo(ob_info,self%nchans)
+  ! Initialize data arrays
+  call ufo_rttovonedvarcheck_InitObInfo(ob_info, self%nchans)
+  allocate(b_matrix(profile_index % nprofelements,profile_index % nprofelements))
+  allocate(b_inverse(profile_index % nprofelements,profile_index % nprofelements))
 
   ! print geovals infor
   !call ufo_geovals_print(geovals, 1)
@@ -257,11 +202,11 @@ subroutine ufo_rttovonedvarcheck_apply(self, vars, geovals, apply)
       ! select appropriate b matrix for latitude of observation
       b_matrix(:,:) = 0.0
       b_inverse(:,:) = 0.0
-      do band = 1, full_b_matrix % nbands
-        if (lat(jobs) <  full_b_matrix % north(band)) exit
+      do band = 1, full_bmatrix % nbands
+        if (lat(jobs) <  full_bmatrix % north(band)) exit
       end do
-      b_matrix(:,:) = full_b_matrix % store(:,:,band)
-      b_inverse(:,:) = full_b_matrix % inverse(:,:,band)
+      b_matrix(:,:) = full_bmatrix % store(:,:,band)
+      b_inverse(:,:) = full_bmatrix % inverse(:,:,band)
 
       !---------------------------------------------------
       ! Setup Jo terms
@@ -296,15 +241,11 @@ subroutine ufo_rttovonedvarcheck_apply(self, vars, geovals, apply)
           jchans_used = jchans_used + 1
           obs_error(jchans_used) = yerr(jvar, jobs)
           write(*,*) "jchans_used err = ",jchans_used,obs_error(jchans_used)
-          ob_info%yobs(jchans_used) = yobs(jvar, jobs)
+          ob_info % yobs(jchans_used) = yobs(jvar, jobs)
           channels_used(jchans_used) = self%channels(jvar)
         end if
       end do
       call rmatrix_setup(r_matrix, self % rtype, chans_used, obs_error)
-
-      write(*,*) "Ob number = ",jobs
-      write(*,*) "channels used = ",channels_used(:)
-      write(*,*) "channels used number = ",chans_used
       call rmatrix_print(r_matrix)
 
       !---------------------------------------------------
@@ -314,19 +255,19 @@ subroutine ufo_rttovonedvarcheck_apply(self, vars, geovals, apply)
         call ufo_rttovonedvarcheck_minimize_ml(self, ob_info, &
                                       r_matrix, b_matrix, b_inverse,           &
                                       local_geovals, profile_index,                &
-                                      nprofelements, channels_used, onedvar_success)
+                                      channels_used, onedvar_success)
       else
         call ufo_rttovonedvarcheck_minimize_newton(self, ob_info, &
                                       r_matrix, b_matrix,           &
                                       b_inverse, local_geovals, profile_index,     & 
-                                      nprofelements, channels_used, onedvar_success)
+                                      channels_used, onedvar_success)
       end if
 
       ! Set QCflags based on output from minimization
       if (.NOT. onedvar_success) then
-        do jvar = 1, self%nchans
-          QCflags(jvar,jobs) = 1
-        end do
+!        do jvar = 1, self%nchans
+          QCflags(:,jobs) = 1
+!        end do
       end if
 
       ! Deallocate arrays allocated in loop
@@ -365,7 +306,6 @@ subroutine ufo_rttovonedvarcheck_apply(self, vars, geovals, apply)
   if (allocated(flags))           deallocate(flags)
   if (allocated(b_matrix))        deallocate(b_matrix)
   if (allocated(b_inverse))       deallocate(b_inverse)
-  if (allocated(iter_hofx))       deallocate(iter_hofx)
 
 end subroutine ufo_rttovonedvarcheck_apply
 

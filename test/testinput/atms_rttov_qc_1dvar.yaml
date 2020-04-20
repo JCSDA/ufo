@@ -13,48 +13,6 @@ LinearObsOpTest:
 
 Observations:
   ObsTypes:
-#  - ObsOperator:
-#      name: RTTOV
-#      Sensor_ID: noaa_20_atms
-#      CoefficientPath: /home/h06/mcooke/JEDI/ufo_bundle_RTTOVOneDVar/ufo-bundle/rttov/rtcoef_rttov12/rttov7pred54L/
-#      ExtraVars:
-#        - mass_content_of_cloud_liquid_water_in_atmosphere_layer
-#        - mass_content_of_cloud_ice_in_atmosphere_layer
-#    GeoVaLs:
-#      filename: Data/atms_allsats_geoval_2019112700-init.nc4
-#    ObsSpace: 
-#      name: Radiance
-#      ObsDataIn:
-#        obsfile: &obs_file Data/atms_allsats_obs_2019112700-init.nc4
-#      ObsDataOut: 
-#        obsfile: Data/atms_allsats_obs_2019112700-out.nc4
-#      simulate:
-#        variables: [brightness_temperature]
-#        channels: &ops_channels 6-22
-#    ObsFilters:
-#    - Filter: RTTOV OneDVar Check
-#      applyfilter: 
-#      - name: post@HofX
-#      ModName: RTTOV
-#      EndianType: little_endian
-#      CoefficientPath: Data/
-#      Sensor_ID: noaa_20_atms
-#      variables: [brightness_temperature]
-#      channels: *ops_channels
-#      model_variables:
-#      - air_temperature
-#      - specific_humidity
-#      - air_temperature_at_two_meters_above_surface
-#      - specific_humidity_at_two_meters_above_surface
-#      - skin_temperature
-#      - surface_air_pressure
-#      BMatrix: Data/atms_bmatrix_70.dat
-#      nlevels: 70
-#      qtotal: 1 # 1=true
-#      cost_convergence: 
-#    rmsequiv: 239.48475677393529
-#    tolerance: 1.e-10
-#    passedBenchmark: 1598      # number of passed obs
   - ObsOperator:
       name: RTTOV
       ObsOptions:
@@ -110,4 +68,4 @@ Observations:
       Max1DVarIterations: 7
     rmsequiv: 239.48475677393529
     tolerance: 1.e-10
-    passedBenchmark: 1700      # number of passed obs
+    passedBenchmark: 1649      # number of passed obs

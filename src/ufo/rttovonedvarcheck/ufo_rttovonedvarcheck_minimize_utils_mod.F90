@@ -5,7 +5,7 @@
 
 !> Fortran module to provide code shared between nonlinear and tlm/adm radiance calculations
 
-module ufo_rttovonedvarcheck_process_mod
+module ufo_rttovonedvarcheck_minimize_utils_mod
 
 use iso_c_binding
 use kinds
@@ -54,7 +54,7 @@ real(kind_real), intent(out)       :: prof_x(:)
 
 ! Local arguments:
 character(len=*), parameter :: RoutineName = "ufo_rttovonedvarcheck_GeoVaLs2ProfVec"
-character(len=100)          :: varname
+character(len=max_string)   :: varname
 
 type(ufo_geoval), pointer    :: geoval
 integer                      :: nlevels
@@ -179,7 +179,7 @@ real(kind_real), intent(in)        :: prof_x(:)
 
 ! Local arguments:
 character(len=*), parameter  :: RoutineName = "ufo_rttovonedvarcheck_ProfVec2GeoVaLs"
-character(len=100)           :: varname
+character(len=max_string)    :: varname
 integer                      :: gv_index, i
 integer                      :: nlevels
 type(ufo_geoval), pointer    :: geoval
@@ -1507,7 +1507,7 @@ integer                      :: nlevels_q
 integer                      :: toplevel_q
 character(len=*), parameter  :: RoutineName = "ufo_rttovonedvarcheck_CheckIteration"
 type(ufo_geoval), pointer    :: geoval
-character(len=100)           :: varname
+character(len=max_string)    :: varname
 logical                      :: useRHwaterForQC
 integer                      :: ii
 
@@ -1779,7 +1779,7 @@ real(kind_real)              :: Plevels_1DVar(nlevels_1dvar)
 type(ufo_geoval), pointer    :: geoval
 real(kind_real)              :: clw(nlevels_1dvar)
 real(kind_real)              :: ciw(nlevels_1dvar)
-character(len=100)           :: varname
+character(len=max_string)    :: varname
 
 !-------------------------------------------------------------------------------
 
@@ -1894,7 +1894,7 @@ integer, intent(out)         :: ErrorCode
 ! Local declarations:
 character(len=*), parameter  :: RoutineName = "ufo_rttovonedvarcheck_Cholesky"
 real(kind_real), parameter   :: Tolerance = tiny (0.0) * 100.0
-character(len=80)            :: ErrorMessage
+character(len=max_string)    :: ErrorMessage
 integer                      :: j
 integer                      :: k
 real(kind_real)              :: G(n,n)   ! The Cholesky Triangle Matrix
@@ -1942,4 +1942,4 @@ end subroutine ufo_rttovonedvarcheck_Cholesky
 
 ! ----------------------------------------------------------
 
-end module ufo_rttovonedvarcheck_process_mod
+end module ufo_rttovonedvarcheck_minimize_utils_mod

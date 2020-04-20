@@ -5,27 +5,28 @@
 
 !> Fortran module to provide code shared between nonlinear and tlm/adm radiance calculations
 
-module ufo_rttovonedvarcheck_forward_model_mod
+module ufo_rttovonedvarcheck_get_jacobian_mod
 
 use fckit_configuration_module, only: fckit_configuration
 use iso_c_binding
 use kinds
 use ufo_geovals_mod
-use ufo_rttovonedvarcheck_utils_mod
 use ufo_radiancerttov_tlad_mod
+use ufo_rttovonedvarcheck_utils_mod
+use ufo_rttovonedvarcheck_minimize_utils_mod, only: ufo_rttovonedvarcheck_Qsplit
 
 implicit none
 
 private
 
 ! subroutines - all listed for complete
-public ufo_rttovonedvarcheck_ForwardModel
+public ufo_rttovonedvarcheck_get_jacobian
 
 contains
 
 !------------------------------------------------------------------------------
 
-subroutine ufo_rttovonedvarcheck_ForwardModel(geovals, ob_info, obsdb, &
+subroutine ufo_rttovonedvarcheck_get_jacobian(geovals, ob_info, obsdb, &
                                            channels, conf, &
                                            profindex, prof_x, &
                                            hofx, H_matrix)
@@ -46,13 +47,13 @@ real(kind_real), intent(out)                :: H_matrix(:,:)
 ! local variables
 type(ufo_radiancerttov_tlad)                :: rttov_tlad   ! structure for holding original rttov_k setup data
 
-select case (trim(ob_info%forward_mod_name))
+select case (trim(ob_info % forward_mod_name))
   case ("RTTOV")
     call rttov_tlad % setup(conf)
     call ufo_rttovonedvarcheck_GetHmatrixRTTOV(geovals, ob_info, obsdb, &
                                             channels(:), rttov_tlad, &
                                             profindex, prof_x(:), &
-                                            hofx(:), H_matrix)
+                                            hofx(:), H_matrix) ! out
     call rttov_tlad % delete()
 
    case default
@@ -60,7 +61,7 @@ select case (trim(ob_info%forward_mod_name))
       stop
 end select
 
-end  subroutine ufo_rttovonedvarcheck_ForwardModel
+end  subroutine ufo_rttovonedvarcheck_get_jacobian
 
 !------------------------------------------------------------------------------
 
@@ -68,8 +69,6 @@ subroutine ufo_rttovonedvarcheck_GetHmatrixRTTOV(geovals, ob_info, obsdb, &
                                        channels, rttov_data, &
                                        profindex, prof_x, &
                                        hofx, H_matrix)
-
-use ufo_rttovonedvarcheck_process_mod, only: ufo_rttovonedvarcheck_Qsplit
 
 implicit none
 
@@ -248,8 +247,6 @@ end  subroutine ufo_rttovonedvarcheck_GetHmatrixRTTOV
 
 !---------------------------------------------------------------------------
 
-! --------------------------------------------------------------------------
-
 subroutine ufo_rttovonedvarcheck_PrintHmatrix( &
   nchans,   &       ! in
   nprofelements, &  ! in
@@ -372,4 +369,4 @@ end  subroutine ufo_rttovonedvarcheck_PrintHmatrix
 
 ! ------------------------------------------------------------
 
-end module ufo_rttovonedvarcheck_forward_model_mod
+end module ufo_rttovonedvarcheck_get_jacobian_mod

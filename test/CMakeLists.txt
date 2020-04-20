@@ -541,6 +541,7 @@ if( ${RTTOV_FOUND} )
   ecbuild_add_test( TARGET  test_ufo_qc_atms_rttov_1dvar
                     COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
                     ARGS    "testinput/atms_rttov_qc_1dvar.yaml"
+                    ENVIRONMENT OOPS_TRAPFPE=1
                     DEPENDS test_ObsFilters.x )
 
   ecbuild_add_test( TARGET  test_ufo_linopr_rttov_amsua

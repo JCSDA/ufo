@@ -19,7 +19,7 @@ use ufo_rttovonedvarcheck_rmatrix_mod, only: &
         rmatrix_inv_multiply, &
         rmatrix_multiply_inv_matrix
 
-use ufo_rttovonedvarcheck_process_mod, only: &
+use ufo_rttovonedvarcheck_minimize_utils_mod, only: &
         ufo_rttovonedvarcheck_GeoVaLs2ProfVec, &
         ufo_rttovonedvarcheck_ProfVec2GeoVaLs, &
         ufo_rttovonedvarcheck_CostFunction, &
@@ -27,8 +27,8 @@ use ufo_rttovonedvarcheck_process_mod, only: &
         ufo_rttovonedvarcheck_CheckCloudyIteration, &
         ufo_rttovonedvarcheck_Cholesky
 
-use ufo_rttovonedvarcheck_forward_model_mod, only: &
-        ufo_rttovonedvarcheck_ForwardModel
+use ufo_rttovonedvarcheck_get_jacobian_mod, only: &
+        ufo_rttovonedvarcheck_get_jacobian
 
 
 implicit none
@@ -91,7 +91,6 @@ subroutine ufo_rttovonedvarcheck_minimize_newton(self, &
                                          b_inv,         &
                                          local_geovals, &
                                          profile_index, &
-                                         nprofelements, &
                                          channels,      &
                                          onedvar_success)
 
@@ -104,7 +103,6 @@ real(kind_real), intent(in)          :: b_matrix(:,:)
 real(kind_real), intent(in)          :: b_inv(:,:)
 type(ufo_geovals), intent(inout)     :: local_geovals
 type(Profileinfo_type), intent(in)   :: profile_index
-integer, intent(in)                  :: nprofelements
 integer(c_int), intent(in)           :: channels(:)
 logical, intent(out)                 :: onedvar_success
 
@@ -117,6 +115,7 @@ logical                         :: Error
 integer                         :: iter
 integer                         :: RTerrorcode
 integer                         :: nchans
+integer                         :: nprofelements
 real(kind_real)                 :: Jcost     ! current value
 real(kind_real)                 :: JcostOld  ! previous iteration value
 real(kind_real)                 :: JcostOrig ! initial value
@@ -147,6 +146,7 @@ Converged = .false.
 onedvar_success = .false.
 Error = .false.
 nchans = size(channels)
+nprofelements = profile_index % nprofelements
 
 ! allocate arrays
 allocate(OldProfile(nprofelements))
@@ -190,8 +190,8 @@ Iterations: do iter = 1, self % max1DVarIterations
   ! Save current profile
   OldProfile(:) = GuessProfile(:)
 
-  ! call forward model to generate jacobian
-  call ufo_rttovonedvarcheck_ForwardModel(geovals, ob_info, self % obsdb, &
+  ! Get jacobian and hofx
+  call ufo_rttovonedvarcheck_get_jacobian(geovals, ob_info, self % obsdb, &
                                        channels(:), self % conf, &
                                        profile_index, GuessProfile(:), &
                                        Y(:), H_matrix)

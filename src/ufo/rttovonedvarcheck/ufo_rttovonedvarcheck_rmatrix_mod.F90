@@ -6,6 +6,7 @@
 module ufo_rttovonedvarcheck_rmatrix_mod
 
 use kinds
+use ufo_rttovonedvarcheck_utils_mod, only: max_string
 
 implicit none
 
@@ -37,7 +38,8 @@ real(kind_real), intent(in)       :: obs_error(nchans)
 
 character(len=*), parameter :: &
       routinename = "ufo_rttovonedvarcheck_InitRmatrix"
-integer :: ii
+character(len=max_string)   :: err_msg
+integer                     :: ii
 
 self % nchans = nchans
 self % full_flag = .false.
@@ -61,8 +63,8 @@ select case (trim(mat_type))
       self % diagonal_flag = .true.
       self % diagonal(:) = obs_error(:) * obs_error(:)
    case default
-      write(*,*) "Unknown r matrix type"
-      stop
+      write(err_msg,*) 'Unknown r matrix type'
+      call abor1_ftn(err_msg)
 end select
 
 end subroutine rmatrix_setup

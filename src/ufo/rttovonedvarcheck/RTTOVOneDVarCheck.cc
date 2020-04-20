@@ -1,8 +1,13 @@
 /*
- * (C) Copyright 2017-2020 Met Office
+ * (C) Copyright 2020 Met Office
  *
  * This software is licensed under the terms of the Apache Licence Version 2.0
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ */
+
+/* 1-D var qc
+ *   J(x) = (x-xb)T B-1 (x-xb) + (y-H(x))T R-1 (y-H(x))
+ *   Code adapted from Met Office OPS System
  */
 
 #include <algorithm>
@@ -63,11 +68,6 @@ void RTTOVOneDVarCheck::applyFilter(const std::vector<bool> & apply,
                                std::vector<std::vector<bool>> & flagged) const {
   oops::Log::trace() << "RTTOVOneDVarCheck Filter starting" << std::endl;
 
-  /* 1-D var qc
-     J(x) = (x-xb)T B-1 (x-xb) + (y-H(x))T R-1 (y-H(x))
-     Code adapted from Met Office OPS System
-  */
-
 // Get GeoVaLs
   const ufo::GeoVaLs * gvals = data_.getGeoVaLs();
 
@@ -76,20 +76,20 @@ void RTTOVOneDVarCheck::applyFilter(const std::vector<bool> & apply,
 
 // Convert apply to char for passing to fortran
   std::vector<char> apply_char(apply.size(), 'F');
-  for (size_t i = 0; i < apply_char.size(); i++)
-    { if (apply[i]) {apply_char[i]='T';} }
-  oops::Log::trace() << "RTTOVOneDVarCheck apply_char = " << apply_char << std::endl;
+  for (size_t i = 0; i < apply_char.size(); i++) {
+    if (apply[i]) {apply_char[i]='T';}
+  }
 
 // Save qc flags to database for retrieval in fortran - needed for channel selection
-  flags_->save("FortranQC");    // should pass values to fortran properly
+  flags_->save("FortranQC");    // temporary measure
 
 // Pass it all to fortran
   const eckit::Configuration * conf = &config_;
   ufo_rttovonedvarcheck_apply_f90(key_, variables, gvals->toFortran(),
-                                      apply_char.size(), apply_char[0]);
+                                  apply_char.size(), apply_char[0]);
 
 // Read qc flags from database
-  flags_->read("FortranQC");    // should get values from fortran properly
+  flags_->read("FortranQC");    // temporary measure
 
 // Print output flags_
   oops::Log::trace() << "RTTOVOneDVarCheck flags_ = " << *flags_ << std::endl;

@@ -14,23 +14,25 @@ use kinds
 implicit none
 
 ! defaults are public
+! defined types : ufo_rttovonedvarcheck, profileinfo_type, obinfo_type
+!
 
-integer, parameter :: max_string_length=99 !
+integer, parameter :: max_string = 200
 
 !===============================================================================
 ! type definitions
 !===============================================================================
 
 !---------------
-! 0. 1DVar type
+! 1. 1DVar type
 !---------------
 
 type :: ufo_rttovonedvarcheck
-  character(len=max_string_length) :: qcname
-  character(len=max_string_length) :: rtype
-  character(len=max_string_length) :: b_matrix_path
-  character(len=max_string_length) :: forward_mod_name
-  character(len=max_string_length), allocatable :: model_variables(:)
+  character(len=max_string)        :: qcname
+  character(len=max_string)        :: rtype
+  character(len=max_string)        :: b_matrix_path
+  character(len=max_string)        :: forward_mod_name
+  character(len=max_string), allocatable :: model_variables(:)
   type(c_ptr)                      :: obsdb
   type(fckit_configuration)        :: conf
   integer                          :: nlevels   ! number 1D-Var model levels
@@ -52,30 +54,6 @@ type :: ufo_rttovonedvarcheck
   real(kind_real)                  :: MaxMLIterations
 end type ufo_rttovonedvarcheck
 
-!-------------
-! 1. B matrix
-!-------------
-
-!The B-matrix is read from the file into this structure, but see also the
-!fieldtype definitions in section 13 which help define the format of the
-!contents.
-
-type bmatrix_type
-  logical :: status                    ! status indicator
-  integer :: nbands                    ! number of latitude bands
-  integer :: nsurf                     ! number of surface type variations
-  integer :: nfields                   ! number of fields
-  integer, pointer :: fields(:,:)      ! fieldtypes and no. elements in each
-  real, pointer :: store(:,:,:)        ! original b-matrices read from the file
-  real, pointer :: inverse(:,:,:)      ! inverse of above
-  real, pointer :: sigma(:,:)          ! diagonal elements
-  real, pointer :: proxy(:,:)          ! copy of original for manipulation
-  real, pointer :: inv_proxy(:,:)      ! copy of inverse
-  real, pointer :: sigma_proxy(:,:)    ! copy of diagonal
-  real, pointer :: south(:)            ! s limit of each latitude band
-  real, pointer :: north(:)            ! n limit of each latitude band
-end type bmatrix_type
-
 !----------------------
 ! 2. Profile Information
 !----------------------
@@ -92,7 +70,7 @@ type profileinfo_type
 
  !general
 
-  integer :: nelements
+  integer :: nprofelements
 
  !atmosphere (locate start and end points of relevant fields)
 
@@ -137,7 +115,7 @@ end type
 
 type obinfo_type
 
-  character(len=max_string_length) :: forward_mod_name
+  character(len=max_string) :: forward_mod_name
   integer         :: nlocs
   real(kind_real) :: latitude
   real(kind_real) :: longitude
@@ -241,65 +219,5 @@ real(kind_real), parameter :: &
   WetLevelLid    =    115.0,    & ! uppermost wet pressure level
   MWCloudLevelLid=    310.0,    & ! uppermost clw pressure lvl for mwcalcs(hpa)
   g              =      9.80665   ! gravity at the surface (m/s2)
-
-contains
-
-!===============================================================================
-! subroutines
-! order is inportant at the moment will look into interface blocks
-!===============================================================================
-
-subroutine ufo_rttovonedvarcheck_iogetfreeunit(unit)
-
-!-------------------------------------------------------------------------------
-! initialize profile indices to zero. the profinfo structure is used to store
-! the locations of fields in the retrieval vector. zero will indicate absence of
-! a field.
-!-------------------------------------------------------------------------------
-
-implicit none
-
-integer, intent(out) :: unit
-
-integer, parameter :: unit_min=10
-integer, parameter :: unit_max=1000
-logical            :: opened
-integer            :: lun
-integer            :: newunit
-
-newunit=-1
-do lun=unit_min,unit_max
-  inquire(unit=lun,opened=opened)
-  if (.not. opened) then
-      newunit=lun
-    exit
-  end if
-end do
-unit=newunit
-
-end subroutine ufo_rttovonedvarcheck_iogetfreeunit
-
-!===============================================================================
-! functions
-!===============================================================================
-
-! this function should be moved to a variables_mod to handle variables in fortran
-function find_index(vars, var)
-  
-  character(len=max_string_length)  :: vars(:)
-  character(len=max_string_length)  :: var
-  integer             :: find_index
-  integer             :: jv
-  character(len=250)  :: buf
-
-  find_index = -1
-  do jv = 1, size(vars)
-    if (trim(vars(jv)) == trim(var)) find_index = jv
-  end do
-
-  write(buf,*)'ufo background check: unknown variable: ',trim(var)
-  if (find_index < 1) call abor1_ftn(buf)
-
-end function find_index
 
 end module ufo_rttovonedvarcheck_utils_mod

@@ -19,7 +19,7 @@ use ufo_rttovonedvarcheck_rmatrix_mod, only: &
     rmatrix_inv_multiply, &
     rmatrix_multiply_inv_matrix
 
-use ufo_rttovonedvarcheck_process_mod, only: &
+use ufo_rttovonedvarcheck_minimize_utils_mod, only: &
     ufo_rttovonedvarcheck_GeoVaLs2ProfVec, &
     ufo_rttovonedvarcheck_ProfVec2GeoVaLs, &
     ufo_rttovonedvarcheck_CostFunction, &
@@ -27,8 +27,8 @@ use ufo_rttovonedvarcheck_process_mod, only: &
     ufo_rttovonedvarcheck_CheckCloudyIteration, &
     ufo_rttovonedvarcheck_Cholesky
 
-use ufo_rttovonedvarcheck_forward_model_mod, only: &
-    ufo_rttovonedvarcheck_ForwardModel
+use ufo_rttovonedvarcheck_get_jacobian_mod, only: &
+    ufo_rttovonedvarcheck_get_jacobian
 
 implicit none
 
@@ -90,7 +90,6 @@ subroutine ufo_rttovonedvarcheck_minimize_ml(self,      &
                                          b_inv,         &
                                          local_geovals, &
                                          profile_index, &
-                                         nprofelements, &
                                          channels,      &
                                          onedvar_success)
 
@@ -103,7 +102,6 @@ real(kind_real), intent(in)          :: b_matrix(:,:)
 real(kind_real), intent(in)          :: b_inv(:,:)
 type(ufo_geovals), intent(inout)     :: local_geovals
 type(Profileinfo_type), intent(in)   :: profile_index
-integer, intent(in)                  :: nprofelements
 integer(c_int), intent(in)           :: channels(:)
 logical, intent(out)                 :: onedvar_success
 
@@ -117,6 +115,7 @@ integer                         :: iter            ! iteration counter
 integer                         :: RTerrorcode     ! error code for RTTOV
 integer                         :: nchans          ! number of satellite channels used
 integer                         :: ii              ! counter
+integer                         :: nprofelements   ! number of profile elements
 real(kind_real)                 :: Gamma           ! steepness of descent parameter
 real(kind_real)                 :: Jcost           ! current cost value
 real(kind_real)                 :: JcostOld        ! previous iteration cost value
@@ -144,6 +143,7 @@ Error = .false.
 nchans = size(channels)
 Gamma = 1.0E-4
 JcostOld = 1.0e4
+nprofelements = profile_index % nprofelements
 
 ! allocate arrays
 allocate(OldProfile(nprofelements))
@@ -173,8 +173,8 @@ Iterations: do iter = 1, self % max1DVarIterations
   ! Save current profile
   OldProfile(:) = GuessProfile(:)
 
-  ! call forward model to generate jacobian
-  call ufo_rttovonedvarcheck_ForwardModel(geovals, ob_info, self % obsdb, &
+  ! Get jacobian and new hofx
+  call ufo_rttovonedvarcheck_get_jacobian(geovals, ob_info, self % obsdb, &
                                        channels(:), self % conf, &
                                        profile_index, GuessProfile(:), &
                                        Y(:), H_matrix)
@@ -614,8 +614,8 @@ DescentLoop : do while (JCost > JOld .and.              &
     !Emiss(1:nchans) = RTprof_Guess % Emissivity(Channels(1:nchans))
     !CalcEmiss(1:nchans) = RTprof_Guess % CalcEmiss(Channels(1:nchans))
 
-   ! call forward model
-   call ufo_rttovonedvarcheck_ForwardModel(geovals, ob_info, self % obsdb, &
+   ! Get Jabobian and new hofx
+   call ufo_rttovonedvarcheck_get_jacobian(geovals, ob_info, self % obsdb, &
                                            channels(:), self % conf, &
                                            profile_index, GuessProfile(:), &
                                            BriTemp(:), H_matrix_tmp)
