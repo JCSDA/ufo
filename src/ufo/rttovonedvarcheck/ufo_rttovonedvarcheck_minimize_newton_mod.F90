@@ -89,6 +89,7 @@ subroutine ufo_rttovonedvarcheck_minimize_newton(self, &
                                          r_matrix,      &
                                          b_matrix,      &
                                          b_inv,         &
+                                         b_sigma,       &
                                          local_geovals, &
                                          profile_index, &
                                          channels,      &
@@ -101,6 +102,7 @@ type(Obinfo_type), intent(in)        :: ob_info
 type(rmatrix_type), intent(in)       :: r_matrix
 real(kind_real), intent(in)          :: b_matrix(:,:)
 real(kind_real), intent(in)          :: b_inv(:,:)
+real(kind_real), intent(in)          :: b_sigma(:)
 type(ufo_geovals), intent(inout)     :: local_geovals
 type(Profileinfo_type), intent(in)   :: profile_index
 integer(c_int), intent(in)           :: channels(:)
@@ -137,18 +139,15 @@ real(kind_real)                 :: Jout(3)
 
 integer                         :: ii
 
-! interface blocks:
-!inCLUDE 'ufo_rttovonedvarcheck_CheckIteration.interface'
-!inCLUDE 'ufo_rttovonedvarcheck_CheckCloudyIteration.interface'
-!inCLUDE 'ufo_rttovonedvarcheck_PrintRTprofile_RTTOV12.interface'
-
+! ---------
+! Setup
+! ---------
 Converged = .false.
 onedvar_success = .false.
 Error = .false.
 nchans = size(channels)
+inversionstatus = 0
 nprofelements = profile_index % nprofelements
-
-! allocate arrays
 allocate(OldProfile(nprofelements))
 allocate(GuessProfile(nprofelements))
 allocate(GuessProfileBefore(nprofelements))
@@ -159,11 +158,10 @@ allocate(AbsDiffprofile(nprofelements))
 allocate(Ydiff(nchans))
 allocate(Y(nchans))
 allocate(Y0(nchans))
-
 geovals = local_geovals
 
-write(*,*) "Geovals before minimizations = "
 call ufo_geovals_print(geovals,1)
+write(*,*) "Using Newton solver"
 
 Iterations: do iter = 1, self % max1DVarIterations
 
@@ -195,8 +193,6 @@ Iterations: do iter = 1, self % max1DVarIterations
                                        channels(:), self % conf, &
                                        profile_index, GuessProfile(:), &
                                        Y(:), H_matrix)
-  write(*,*) "Observed BTs After bias correction: ",ob_info%yobs(:)
-  write(*,*) "RTTOV BTs: = ",Y(:)
 
   if (iter == 1) then
     BackProfile(:) = GuessProfile(:)
@@ -215,20 +211,20 @@ Iterations: do iter = 1, self % max1DVarIterations
   !     and determine convergence using change in cost fn
   !-----------------------------------------------------
 
+  ! Profile differences
+  Ydiff(:) = ob_info%yobs(:) - Y(:)
+  Diffprofile(:) = GuessProfile(:) - BackProfile(:)
+
   if (self % UseJForConvergence) then
 
-    Diffprofile(:) = GuessProfile(:) - BackProfile(:)
-    Ydiff(:) = ob_info%yobs(:) - Y(:)
     call ufo_rttovonedvarcheck_CostFunction(Diffprofile, b_inv, Ydiff, r_matrix, Jout)
     Jcost = Jout(1)
 
     ! exit on error
-    !if (inversionStatus /= 0) exit Iterations
+    if (inversionStatus /= 0) exit Iterations
 
     ! store initial cost value
     if (iter == 1) JCostOrig = jcost
-
-    write(*,*) "iter,Jcost,JcostOld,JCostorig = ",iter,Jcost,JcostOld,JCostorig
 
     ! check for convergence
     if (iter > 1) then
@@ -251,25 +247,14 @@ Iterations: do iter = 1, self % max1DVarIterations
 
       end if
 
-!      if (SatRad_FullDiagnostics) then
-        write (*, '(A,F12.5)') 'Cost Function=', Jcost
-        write (*, '(A,F12.5)') 'Cost Function increment=', deltaj
-        write (*, '(A,F12.5)') 'cost_convergencefactor=', self % cost_convergencefactor
-!      end if
+      if (self % FullDiagnostics) then
+        write (*, '(A,3F12.5)') 'Cost Function, increment, cost_convergencefactor = ', &
+                                Jcost, deltaj, self % cost_convergencefactor
+      end if
 
       if (DeltaJ < self % cost_convergencefactor .and. &
           DeltaJo < 0.0)  then ! overall is cost getting smaller?
         converged = .true.
-
-!        if (SatRad_FullDiagnostics) then
-!          write (*, '(A,I0)') 'Iteration', iter
-!          write (*, '(A)') '------------'
-!          write (*, '(A,L1)') 'Status: converged = ', Converged
-!          write (*, '(A)') 'New profile:'
-!          call ufo_rttovonedvarcheck_PrintRTprofile_RTTOV12 (RTprof_Guess)
-!          write (*, '(A)')
-!        end if
-
         exit iterations
       end if
 
@@ -280,7 +265,7 @@ Iterations: do iter = 1, self % max1DVarIterations
   ! Iterate (Guess) profile vector
   if (nchans > nprofelements) then
     write(*,*) "Many Chans"
-    call ufo_rttovonedvarcheck_NewtonManyChans (Ydiff,                     &
+    call ufo_rttovonedvarcheck_NewtonManyChans (Ydiff,          &
                                      nchans,                    &
                                      H_matrix(:,:),             & ! in
                                      transpose (H_matrix(:,:)), & ! in
@@ -291,7 +276,7 @@ Iterations: do iter = 1, self % max1DVarIterations
                                      inversionStatus)
   else ! nchans <= nprofelements
     write(*,*) "Few Chans"
-    call ufo_rttovonedvarcheck_NewtonFewChans (Ydiff,                     &
+    call ufo_rttovonedvarcheck_NewtonFewChans (Ydiff,          &
                                     nchans,                    &
                                     H_matrix(:,:),             & ! in
                                     transpose (H_matrix(:,:)), & ! in
@@ -322,11 +307,6 @@ Iterations: do iter = 1, self % max1DVarIterations
                                   self % nlevels,  & ! in
                                   GuessProfile(:), & ! inout
                                   outOfRange)        ! out
-  !write(*,*) "GuessProfile before and after check = "
-  !do ii = 1, nprofelements
-  !  write(*,'(3F15.5)') GuessProfileBefore(ii),GuessProfile(ii),GuessProfileBefore(ii)-GuessProfile(ii)
-  !end do 
-  !write(*,*) "Checkiteration outOfRange = ",outOfRange
 
   ! Update RT-format guess profile
   call ufo_rttovonedvarcheck_ProfVec2GeoVaLs(geovals, profile_index, nprofelements, GuessProfile)
@@ -363,7 +343,7 @@ Iterations: do iter = 1, self % max1DVarIterations
 !                                                outOfRange)
 
         end if
-                                                                                               
+
       else
 
         call ufo_rttovonedvarcheck_CheckCloudyIteration( geovals,         & ! in
@@ -371,9 +351,9 @@ Iterations: do iter = 1, self % max1DVarIterations
                                               self % nlevels,  & ! in
                                               OutOfRange )
 
-      end if                                       
-    
-    end if                                                                                  
+      end if
+
+    end if
 
   end if
 
@@ -382,29 +362,29 @@ Iterations: do iter = 1, self % max1DVarIterations
   !    This is performed if UseJforConvergence is false
   !-------------------------------------------------
 
-!  absDiffprofile(:) = 0.0
+  absDiffprofile(:) = 0.0
 
-!  if ((.NOT. outOfRange) .and. &
-!      (.NOT. self % UseJForConvergence))then
-!    absDiffProfile(:) = abs (GuessProfile(:) - OldProfile(:))
-!    if (ALL (absDiffProfile(:) <= B_sigma(:) * self % ConvergenceFactor)) then
-!      Converged = .true.
-!    end if
-!  end if
+  if ((.NOT. outOfRange) .and. (.NOT. self % UseJForConvergence))then
+    absDiffProfile(:) = abs(GuessProfile(:) - OldProfile(:))
+    if (ALL (absDiffProfile(:) <= B_sigma(:) * self % ConvergenceFactor)) then
+      write(*,*) "Profile used for convergence"
+      Converged = .true.
+    end if
+  end if
 
   !---------------------
   ! 4. output diagnostics
   !---------------------
 
-!  if (SatRad_FullDiagnostics) then
-!    write (*, '(A,I0)') 'Iteration', iter
-!    write (*, '(A)') '------------'
-!    write (*, '(A,L1)') 'Status: converged = ', Converged
-!    if (outOfRange) write (*, '(A)') 'exiting with bad increments'
-!    write (*, '(A)') 'New profile:'
-!    call ufo_rttovonedvarcheck_PrintRTprofile_RTTOV12 (RTprof_Guess)
-!    write (*, '(A)')
-!  end if
+  if (self % FullDiagnostics) then
+    write (*, '(A,I0)') 'Iteration', iter
+    write (*, '(A)') '------------'
+    write (*, '(A,L1)') 'Status: converged = ', Converged
+    if (outOfRange) write (*, '(A)') 'exiting with bad increments'
+    write (*, '(A)') 'New profile:'
+    call ufo_geovals_print(geovals, 1)
+    write (*, '(A)')
+  end if
 
   ! exit conditions
 
@@ -415,16 +395,14 @@ end do Iterations
 ! Pass convergence flag out
 onedvar_success = converged
 
-write(*,*) "----------------------------"
-write(*,*) "Starting cost = ",JCostorig
-write(*,*) "Final cost = ",Jcost
-write(*,*) "Converged? ", Converged
-write(*,*) "Iterations = ",iter
-write(*,*) "Geovals after iterations = "
-call ufo_geovals_print(geovals,1)
-write(*,*) "----------------------------"
+!---------------------
+! 4. output diagnostics
+!---------------------
 
-write(*,'(A45,3F10.3,I5,L5)') "J initial, final, lowest, iter, converged = ",JCostorig,Jcost,Jcost,iter,onedvar_success
+if (self % UseJForConvergence) then
+  write(*,'(A45,3F10.3,I5,L5)') "J initial, final, lowest, iter, converged = ", &
+                                 JCostorig, Jcost,  Jcost, iter, onedvar_success
+end if
 
 !Ob % Niter = iter
 !if (RTerrorcode /= 0 .OR. .NOT. Converged .OR. outOfRange .OR. &

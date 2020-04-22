@@ -62,6 +62,7 @@ Observations:
       RTTOV_mwscattSwitch: false
       UseMLMinimization: false
       UseJforConvergence: true
+      FullDiagnostics: true
       JConvergenceOption: 0
       ConvergenceFactor: 0.40
       Cost_ConvergenceFactor: 0.01

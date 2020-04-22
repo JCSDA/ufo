@@ -94,6 +94,7 @@ subroutine ufo_rttovonedvarcheck_apply(self, vars, geovals, apply)
   type(bmatrix_type)                 :: full_bmatrix
   real(kind_real), allocatable       :: b_matrix(:,:)   ! 1d-var profile b matrix
   real(kind_real), allocatable       :: b_inverse(:,:)  ! inverse for each 1d-var profile b matrix
+  real(kind_real), allocatable       :: b_sigma(:)      ! b_matrix diagonal error
   type(profileinfo_type)             :: profile_index   ! index for mapping geovals to 1d-var state profile
   integer                            :: nprofelements   ! number of elements in 1d-var state profile
   type(ufo_geovals)                  :: local_geovals   ! geoval for one observation
@@ -122,7 +123,7 @@ subroutine ufo_rttovonedvarcheck_apply(self, vars, geovals, apply)
   type(obinfo_type)                  :: ob_info
 
   ! ------------------------------------------
-  ! 1. setup
+  ! Setup
   ! ------------------------------------------
   missing = missing_value(missing)
   iloc = obsspace_get_nlocs(self%obsdb)
@@ -178,12 +179,13 @@ subroutine ufo_rttovonedvarcheck_apply(self, vars, geovals, apply)
   call ufo_rttovonedvarcheck_InitObInfo(ob_info, self%nchans)
   allocate(b_matrix(profile_index % nprofelements,profile_index % nprofelements))
   allocate(b_inverse(profile_index % nprofelements,profile_index % nprofelements))
+  allocate(b_sigma(profile_index % nprofelements))
 
   ! print geovals infor
   !call ufo_geovals_print(geovals, 1)
 
   ! ------------------------------------------
-  ! 2. beginning mains observations loop
+  ! Beginning mains observations loop
   ! ------------------------------------------
   print *,"beginning observations loop: ",self%qcname
   apply_count = 0
@@ -202,11 +204,13 @@ subroutine ufo_rttovonedvarcheck_apply(self, vars, geovals, apply)
       ! select appropriate b matrix for latitude of observation
       b_matrix(:,:) = 0.0
       b_inverse(:,:) = 0.0
+      b_sigma(:) = 0.0
       do band = 1, full_bmatrix % nbands
         if (lat(jobs) <  full_bmatrix % north(band)) exit
       end do
       b_matrix(:,:) = full_bmatrix % store(:,:,band)
       b_inverse(:,:) = full_bmatrix % inverse(:,:,band)
+      b_sigma(:) = full_bmatrix % sigma(:,band)
 
       !---------------------------------------------------
       ! Setup Jo terms
@@ -253,34 +257,27 @@ subroutine ufo_rttovonedvarcheck_apply(self, vars, geovals, apply)
       !---------------------------------------------------
       if (self % UseMLMinimization) then
         call ufo_rttovonedvarcheck_minimize_ml(self, ob_info, &
-                                      r_matrix, b_matrix, b_inverse,           &
-                                      local_geovals, profile_index,                &
+                                      r_matrix, b_matrix, b_inverse, b_sigma, &
+                                      local_geovals, profile_index,           &
                                       channels_used, onedvar_success)
       else
         call ufo_rttovonedvarcheck_minimize_newton(self, ob_info, &
-                                      r_matrix, b_matrix,           &
-                                      b_inverse, local_geovals, profile_index,     & 
+                                      r_matrix, b_matrix, b_inverse, b_sigma, &
+                                      local_geovals, profile_index,           &
                                       channels_used, onedvar_success)
       end if
 
       ! Set QCflags based on output from minimization
       if (.NOT. onedvar_success) then
-!        do jvar = 1, self%nchans
-          QCflags(:,jobs) = 1
-!        end do
+        QCflags(:,jobs) = 1
       end if
 
-      ! Deallocate arrays allocated in loop
+      ! Tidy up memory specific to a single observation
       if (allocated(ob_info%yobs))  deallocate(ob_info%yobs)
       if (allocated(channels_used)) deallocate(channels_used)
       if (allocated(obs_error))     deallocate(obs_error)
       call rmatrix_delete(r_matrix)
-
-      ! tidy up
       call ufo_geovals_delete(local_geovals)
-
-      write(*,*) "iteration = ",jobs
-      write(*,*) "QCflags = ",QCflags(:,jobs)
 
     endif
   end do
@@ -294,18 +291,19 @@ subroutine ufo_rttovonedvarcheck_apply(self, vars, geovals, apply)
   end do
 
   ! tidy up
-  if (allocated(yobs))            deallocate(yobs)
-  if (allocated(yerr))            deallocate(yerr)
-  if (allocated(lat))             deallocate(lat)
-  if (allocated(lon))             deallocate(lon)
-  if (allocated(elevation))       deallocate(elevation)
-  if (allocated(sat_zen))         deallocate(sat_zen)
-  if (allocated(sat_azi))         deallocate(sat_azi)
-  if (allocated(sol_zen))         deallocate(sol_zen)
-  if (allocated(sol_azi))         deallocate(sol_azi)
-  if (allocated(flags))           deallocate(flags)
-  if (allocated(b_matrix))        deallocate(b_matrix)
-  if (allocated(b_inverse))       deallocate(b_inverse)
+  if (allocated(yobs))       deallocate(yobs)
+  if (allocated(yerr))       deallocate(yerr)
+  if (allocated(lat))        deallocate(lat)
+  if (allocated(lon))        deallocate(lon)
+  if (allocated(elevation))  deallocate(elevation)
+  if (allocated(sat_zen))    deallocate(sat_zen)
+  if (allocated(sat_azi))    deallocate(sat_azi)
+  if (allocated(sol_zen))    deallocate(sol_zen)
+  if (allocated(sol_azi))    deallocate(sol_azi)
+  if (allocated(flags))      deallocate(flags)
+  if (allocated(b_matrix))   deallocate(b_matrix)
+  if (allocated(b_inverse))  deallocate(b_inverse)
+  if (allocated(b_sigma))    deallocate(b_sigma)
 
 end subroutine ufo_rttovonedvarcheck_apply
 

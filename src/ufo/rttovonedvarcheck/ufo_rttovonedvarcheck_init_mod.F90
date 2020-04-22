@@ -45,6 +45,7 @@ character(len=max_string) :: tmp
 character(len=:), allocatable :: str
 character(kind=c_char, len=max_string), allocatable :: char_array(:)
 integer(c_size_t),parameter :: csize = max_string
+integer :: ii
 
 ! Setup core paths and names
 self % qcname = "rttovonedvarcheck"
@@ -73,14 +74,13 @@ self % qtotal = .false.
 self % RTTOV_mwscattSwitch = .false.
 self % use_totalice = .false.
 self % UseMLMinimization = .false.
-self % UseJforConvergence = .true.
+self % UseJforConvergence = .false.
+self % FullDiagnostics = .false.
 self % Max1DVarIterations = 7
 self % JConvergenceOption = 1
 self % IterNumForLWPCheck = 2
 self % ConvergenceFactor = 0.40
 self % Cost_ConvergenceFactor = 0.01
-self % Mqstart = 0.001 ! Marquardt starting parameter
-self % Mqstep = 5.0    ! Marquardt step parameter
 self % MaxMLIterations = 7
 
 ! R matrix type to use
@@ -91,82 +91,86 @@ end if
 
 ! Flag for total humidity
 if (self % conf % has("qtotal")) then
-  call self % conf % get_or_die("qtotal",str)
-  if (trim(str) == 'true') self % qtotal = .true.
+  call self % conf % get_or_die("qtotal", self % qtotal)
 end if
 
 ! Flag for RTTOV MW scatt
 if (self % conf % has("RTTOV_mwscattSwitch")) then
-  call self % conf % get_or_die("RTTOV_mwscattSwitch",str)
-  if (trim(str) == 'true') self % RTTOV_mwscattSwitch = .true.
+  call self % conf % get_or_die("RTTOV_mwscattSwitch", self % RTTOV_mwscattSwitch)
 end if
 
 ! Flag for use of total ice in RTTOV MW scatt
 if (self % conf % has("use_totalice")) then
-  call self % conf % get_or_die("use_totalice",str)
-  if (trim(str) == 'true') self % use_totalice = .true.
+  call self % conf % get_or_die("use_totalice", self % use_totalice)
 end if
 
 ! Flag to turn on marquardt-levenberg minimiser
 if (self % conf % has("UseMLMinimization")) then
-  call self % conf % get_or_die("UseMLMinimization",str)
-  if (trim(str) == 'true') self % UseMLMinimization = .true.
+  call self % conf % get_or_die("UseMLMinimization", self % UseMLMinimization)
 end if
 
 ! Flag to Use J for convergence
 if (self % conf % has("UseJforConvergence")) then
-  call self % conf % get_or_die("UseJforConvergence",str)
-  if (trim(str) == 'true') self % UseJforConvergence = .true.
+  call self % conf % get_or_die("UseJforConvergence", self % UseJforConvergence)
+end if
+
+! Flag to turn on full diagnostics
+if (self % conf % has("FullDiagnostics")) then
+  call self % conf % get_or_die("FullDiagnostics", self % FullDiagnostics)
 end if
 
 ! Flag to specify if delta_x has to be negative for converg. to be true
 if (self % conf % has("Max1DVarIterations")) then
-  call self % conf % get_or_die("Max1DVarIterations",self % Max1DVarIterations)
+  call self % conf % get_or_die("Max1DVarIterations", self % Max1DVarIterations)
 end if
 
 ! Flag to specify if delta_x has to be negative for converg. to be true
 if (self % conf % has("JConvergenceOption")) then
-  call self % conf % get_or_die("JConvergenceOption",self % JConvergenceOption)
+  call self % conf % get_or_die("JConvergenceOption", self % JConvergenceOption)
 end if
 
 ! Choose which iteration to start checking LWP
 if (self % conf % has("IterNumForLWPCheck")) then
-  call self % conf % get_or_die("IterNumForLWPCheck",self % IterNumForLWPCheck)
+  call self % conf % get_or_die("IterNumForLWPCheck", self % IterNumForLWPCheck)
 end if
 
 ! Flag to specify if delta_x has to be negative for converg. to be true
 if (self % conf % has("ConvergenceFactor")) then
-  call self % conf % get_or_die("ConvergenceFactor",self % ConvergenceFactor)
+  call self % conf % get_or_die("ConvergenceFactor", self % ConvergenceFactor)
 end if
 
 ! Flag to specify if delta_x has to be negative for converg. to be true
 if (self % conf % has("Cost_ConvergenceFactor")) then
-  call self % conf % get_or_die("Cost_ConvergenceFactor",self % Cost_ConvergenceFactor)
+  call self % conf % get_or_die("Cost_ConvergenceFactor", self % Cost_ConvergenceFactor)
 end if
 
 ! Print self
-!write(*,*) "qcname = ",self % qcname
-!write(*,*) "rtype = ",self % rtype
-!write(*,*) "b_matrix_path = ",self % b_matrix_path
-!write(*,*) "forward_mod_name = ",self % forward_mod_name
-!write(*,*) "model_variables(:) = ",self % model_variables(:)
-!write(*,*) "nlevels = ",self %  nlevels  ! number 1D-Var model levels
-!write(*,*) "nmvars = ",self % nmvars
-!write(*,*) "nchans = ",self % nchans
-!write(*,*) "channels(:) = ",self % channels(:)
-!write(*,*) "qtotal = ",self % qtotal
-!write(*,*) "RTTOV_mwscattSwitch = ",self % RTTOV_mwscattSwitch
-!write(*,*) "use_totalice = ",self % use_totalice
-!write(*,*) "UseMLMinimization = ",self % UseMLMinimization
-!write(*,*) "UseJforConvergence = ",self % UseJforConvergence
-!write(*,*) "Max1DVarIterations = ",self % Max1DVarIterations
-!write(*,*) "JConvergenceOption = ",self % JConvergenceOption
-!write(*,*) "IterNumForLWPCheck = ",self % IterNumForLWPCheck
-!write(*,*) "ConvergenceFactor = ",self % ConvergenceFactor
-!write(*,*) "Cost_ConvergenceFactor = ",self % Cost_ConvergenceFactor
-!write(*,*) "Mqstart = ",self % Mqstart
-!write(*,*) "Mqstep = ",self % Mqstep
-!write(*,*) "MaxMLIterations = ",self % MaxMLIterations
+if (self % FullDiagnostics) then
+  write(*,*) "qcname = ",trim(self % qcname)
+  write(*,*) "rtype = ",trim(self % rtype)
+  write(*,*) "b_matrix_path = ",trim(self % b_matrix_path)
+  write(*,*) "forward_mod_name = ",trim(self % forward_mod_name)
+  write(*,*) "model_variables = "
+  do ii = 1, self % nmvars
+    write(*,*) trim(self % model_variables(ii))," "
+  end do
+  write(*,*) "nlevels = ",self %  nlevels
+  write(*,*) "nmvars = ",self % nmvars
+  write(*,*) "nchans = ",self % nchans
+  write(*,*) "channels(:) = ",self % channels(:)
+  write(*,*) "qtotal = ",self % qtotal
+  write(*,*) "RTTOV_mwscattSwitch = ",self % RTTOV_mwscattSwitch
+  write(*,*) "use_totalice = ",self % use_totalice
+  write(*,*) "UseMLMinimization = ",self % UseMLMinimization
+  write(*,*) "UseJforConvergence = ",self % UseJforConvergence
+  write(*,*) "FullDiagnostics = ",self % FullDiagnostics
+  write(*,*) "Max1DVarIterations = ",self % Max1DVarIterations
+  write(*,*) "JConvergenceOption = ",self % JConvergenceOption
+  write(*,*) "IterNumForLWPCheck = ",self % IterNumForLWPCheck
+  write(*,*) "ConvergenceFactor = ",self % ConvergenceFactor
+  write(*,*) "Cost_ConvergenceFactor = ",self % Cost_ConvergenceFactor
+  write(*,*) "MaxMLIterations = ",self % MaxMLIterations
+end if
 
 end subroutine
 

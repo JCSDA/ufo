@@ -44,13 +44,12 @@ type :: ufo_rttovonedvarcheck
   logical                          :: use_totalice
   logical                          :: UseMLMinimization
   logical                          :: UseJforConvergence
+  logical                          :: FullDiagnostics
   integer                          :: Max1DVarIterations
   integer                          :: JConvergenceOption
   integer                          :: IterNumForLWPCheck
   real(kind_real)                  :: ConvergenceFactor
   real(kind_real)                  :: Cost_ConvergenceFactor
-  real(kind_real)                  :: Mqstart
-  real(kind_real)                  :: Mqstep
   real(kind_real)                  :: MaxMLIterations
 end type ufo_rttovonedvarcheck
 
