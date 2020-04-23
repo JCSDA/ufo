@@ -61,7 +61,7 @@ Observations:
      filter variables:
      - name: brightness_temperature
        channels: 1-6, 15 
-     test functions:
+     test variables:
      - name: CLWRetMW@ObsFunction
        options:
          clwret_ch238: 1
@@ -76,7 +76,7 @@ Observations:
      filter variables:
      - name: brightness_temperature
        channels: 1-6, 15 
-     test functions:
+     test variables:
      - name: CLWRetMW@ObsFunction
        options:
          clwret_ch238: 1
