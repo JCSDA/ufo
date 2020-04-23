@@ -15,7 +15,6 @@ use ufo_vars_mod
 use oops_variables_mod
 use obsspace_mod
 use ufo_rttovonedvarcheck_utils_mod
-use ufo_rttovonedvarcheck_init_mod
 use ufo_rttovonedvarcheck_minimize_utils_mod
 
 implicit none
@@ -72,8 +71,8 @@ subroutine ufo_rttovonedvarcheck_apply(self, vars, geovals, apply)
           rmatrix_setup, &
           rmatrix_delete, &
           rmatrix_print
-  use ufo_rttovonedvarcheck_bmatrix_mod, only: &
-          bmatrix_type
+  use ufo_rttovonedvarcheck_bmatrix_mod, only: bmatrix_type
+  use ufo_rttovonedvarcheck_profindex_mod, only: profindex_type
 
   implicit none
   type(ufo_rttovonedvarcheck), intent(inout) :: self     ! one d var check setup info
@@ -95,7 +94,7 @@ subroutine ufo_rttovonedvarcheck_apply(self, vars, geovals, apply)
   real(kind_real), allocatable       :: b_matrix(:,:)   ! 1d-var profile b matrix
   real(kind_real), allocatable       :: b_inverse(:,:)  ! inverse for each 1d-var profile b matrix
   real(kind_real), allocatable       :: b_sigma(:)      ! b_matrix diagonal error
-  type(profileinfo_type)             :: profile_index   ! index for mapping geovals to 1d-var state profile
+  type(profindex_type)               :: prof_index      !< index for mapping geovals to 1d-var state profile
   integer                            :: nprofelements   ! number of elements in 1d-var state profile
   type(ufo_geovals)                  :: local_geovals   ! geoval for one observation
   real(kind_real), allocatable       :: obs_error(:)
@@ -173,13 +172,13 @@ subroutine ufo_rttovonedvarcheck_apply(self, vars, geovals, apply)
   call full_bmatrix % setup(self % model_variables, self%b_matrix_path, self % qtotal)
 
   ! Create profile index for mapping 1d-var profile to b-matrix
-  call ufo_rttovonedvarcheck_profile_setup(full_bmatrix, profile_index)
+  call prof_index % setup(full_bmatrix)
 
   ! Initialize data arrays
   call ufo_rttovonedvarcheck_InitObInfo(ob_info, self%nchans)
-  allocate(b_matrix(profile_index % nprofelements,profile_index % nprofelements))
-  allocate(b_inverse(profile_index % nprofelements,profile_index % nprofelements))
-  allocate(b_sigma(profile_index % nprofelements))
+  allocate(b_matrix(prof_index % nprofelements,prof_index % nprofelements))
+  allocate(b_inverse(prof_index % nprofelements,prof_index % nprofelements))
+  allocate(b_sigma(prof_index % nprofelements))
 
   ! print geovals infor
   !call ufo_geovals_print(geovals, 1)
@@ -258,12 +257,12 @@ subroutine ufo_rttovonedvarcheck_apply(self, vars, geovals, apply)
       if (self % UseMLMinimization) then
         call ufo_rttovonedvarcheck_minimize_ml(self, ob_info, &
                                       r_matrix, b_matrix, b_inverse, b_sigma, &
-                                      local_geovals, profile_index,           &
+                                      local_geovals, prof_index,           &
                                       channels_used, onedvar_success)
       else
         call ufo_rttovonedvarcheck_minimize_newton(self, ob_info, &
                                       r_matrix, b_matrix, b_inverse, b_sigma, &
-                                      local_geovals, profile_index,           &
+                                      local_geovals, prof_index,           &
                                       channels_used, onedvar_success)
       end if
 

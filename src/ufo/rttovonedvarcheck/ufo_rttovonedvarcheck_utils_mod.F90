@@ -53,61 +53,6 @@ type :: ufo_rttovonedvarcheck
   real(kind_real)                  :: MaxMLIterations
 end type ufo_rttovonedvarcheck
 
-!----------------------
-! 2. Profile Information
-!----------------------
-
-!The profile variables locate a particular field, or element thereof, in the
-!1d-var profile vector. absence of a field will be designated with zero. note
-!that retrieval fields also require b matrix fieldtype definitions (see
-!section 13 below).
-
-!also, remember to update ufo_rttovonedvarcheck_initprofinfo and ufo_rttovonedvarcheck_mapprofiletob
-!if adding fields to this structure.
-
-type profileinfo_type
-
- !general
-
-  integer :: nprofelements
-
- !atmosphere (locate start and end points of relevant fields)
-
-  integer :: t(2)           ! temperature profile
-  integer :: q(2)           ! water vapour profile (specific humidity)
-  integer :: ql(2)          ! liquid water profile
-  integer :: qt(2)          ! total water profile
-  integer :: qi(2)          ! frozen ice  profile
-  integer :: cf(2)          ! cloud fraction profile
-  integer :: o3total        ! total column ozone
-  integer :: o3profile(2)   ! ozone profile
-  integer :: lwp            ! liquid water path
-
- !surface
-
-  integer :: t2             ! screen temperature
-  integer :: q2             ! screen specific humidity
-  integer :: rh2            ! screen relative humidity
-  integer :: tstar          ! skin temperature
-  integer :: pstar          ! surface pressure
-  integer :: mwemiss(2)     ! microwave emissivity
-  integer :: emisspc(2)     ! emissivity principal components
-  integer :: windspeed      ! surface windspeed
-
- !cloud (single-level grey cloud only)
-  integer :: cloudtopp      ! single-level cloud top pressure
-  integer :: cloudfrac      ! effective cloud fraction
-
- !other
-
-  integer :: t70hpa         ! temperature at 70hpa
-  integer :: t700hpa        ! temperature at 700hpa
-  integer :: t950hpa        ! temperature at 950hpa
-  integer :: t1000hpa       ! temperature at 1000hpa
-  integer :: qsurf          ! surface specific humidity
-
-end type
-
 !---------------------------------------------------------
 ! 3. container for information about a single observation
 !---------------------------------------------------------
@@ -218,5 +163,183 @@ real(kind_real), parameter :: &
   WetLevelLid    =    115.0,    & ! uppermost wet pressure level
   MWCloudLevelLid=    310.0,    & ! uppermost clw pressure lvl for mwcalcs(hpa)
   g              =      9.80665   ! gravity at the surface (m/s2)
+
+contains
+
+!===============================================================================
+! Subroutines
+!===============================================================================
+
+subroutine ufo_rttovonedvarcheck_setup(self, channels)
+
+implicit none
+
+! subroutine arguments
+type(ufo_rttovonedvarcheck), intent(inout) :: self
+integer(c_int), intent(in)                 :: channels(:)
+
+! local variables
+character(len=max_string) :: tmp
+character(len=:), allocatable :: str
+character(kind=c_char, len=max_string), allocatable :: char_array(:)
+integer(c_size_t),parameter :: csize = max_string
+integer :: ii
+
+! Setup core paths and names
+self % qcname = "rttovonedvarcheck"
+call self % conf % get_or_die("BMatrix",str)
+self % b_matrix_path = str
+call self % conf % get_or_die("ModName",str)
+self % forward_mod_name = str
+call self % conf % get_or_die("nlevels",self % nlevels)
+
+! Variables for profile (x,xb)
+self % nmvars = self % conf % get_size("model_variables")
+allocate(self % model_variables(self % nmvars))
+call self % conf % get_or_die("model_variables", csize, char_array)
+self % model_variables(1:self % nmvars) = char_array
+
+! Satellite channels
+self % nchans = size(channels)
+allocate(self % channels(self % nchans))
+self % channels(:) = channels(:)
+write(*,*) "nchans setup = ",self%nchans
+write(*,*) "channels setup = ",self%channels
+
+! Set defaults for 1D-var
+self % rtype = "diagonal"
+self % qtotal = .false.
+self % RTTOV_mwscattSwitch = .false.
+self % use_totalice = .false.
+self % UseMLMinimization = .false.
+self % UseJforConvergence = .false.
+self % FullDiagnostics = .false.
+self % Max1DVarIterations = 7
+self % JConvergenceOption = 1
+self % IterNumForLWPCheck = 2
+self % ConvergenceFactor = 0.40
+self % Cost_ConvergenceFactor = 0.01
+self % MaxMLIterations = 7
+
+! R matrix type to use
+if (self % conf % has("rtype")) then
+  call self % conf % get_or_die("rtype",str)
+  self % rtype = str
+end if
+
+! Flag for total humidity
+if (self % conf % has("qtotal")) then
+  call self % conf % get_or_die("qtotal", self % qtotal)
+end if
+
+! Flag for RTTOV MW scatt
+if (self % conf % has("RTTOV_mwscattSwitch")) then
+  call self % conf % get_or_die("RTTOV_mwscattSwitch", self % RTTOV_mwscattSwitch)
+end if
+
+! Flag for use of total ice in RTTOV MW scatt
+if (self % conf % has("use_totalice")) then
+  call self % conf % get_or_die("use_totalice", self % use_totalice)
+end if
+
+! Flag to turn on marquardt-levenberg minimiser
+if (self % conf % has("UseMLMinimization")) then
+  call self % conf % get_or_die("UseMLMinimization", self % UseMLMinimization)
+end if
+
+! Flag to Use J for convergence
+if (self % conf % has("UseJforConvergence")) then
+  call self % conf % get_or_die("UseJforConvergence", self % UseJforConvergence)
+end if
+
+! Flag to turn on full diagnostics
+if (self % conf % has("FullDiagnostics")) then
+  call self % conf % get_or_die("FullDiagnostics", self % FullDiagnostics)
+end if
+
+! Flag to specify if delta_x has to be negative for converg. to be true
+if (self % conf % has("Max1DVarIterations")) then
+  call self % conf % get_or_die("Max1DVarIterations", self % Max1DVarIterations)
+end if
+
+! Flag to specify if delta_x has to be negative for converg. to be true
+if (self % conf % has("JConvergenceOption")) then
+  call self % conf % get_or_die("JConvergenceOption", self % JConvergenceOption)
+end if
+
+! Choose which iteration to start checking LWP
+if (self % conf % has("IterNumForLWPCheck")) then
+  call self % conf % get_or_die("IterNumForLWPCheck", self % IterNumForLWPCheck)
+end if
+
+! Flag to specify if delta_x has to be negative for converg. to be true
+if (self % conf % has("ConvergenceFactor")) then
+  call self % conf % get_or_die("ConvergenceFactor", self % ConvergenceFactor)
+end if
+
+! Flag to specify if delta_x has to be negative for converg. to be true
+if (self % conf % has("Cost_ConvergenceFactor")) then
+  call self % conf % get_or_die("Cost_ConvergenceFactor", self % Cost_ConvergenceFactor)
+end if
+
+! Print self
+if (self % FullDiagnostics) then
+  write(*,*) "qcname = ",trim(self % qcname)
+  write(*,*) "rtype = ",trim(self % rtype)
+  write(*,*) "b_matrix_path = ",trim(self % b_matrix_path)
+  write(*,*) "forward_mod_name = ",trim(self % forward_mod_name)
+  write(*,*) "model_variables = "
+  do ii = 1, self % nmvars
+    write(*,*) trim(self % model_variables(ii))," "
+  end do
+  write(*,*) "nlevels = ",self %  nlevels
+  write(*,*) "nmvars = ",self % nmvars
+  write(*,*) "nchans = ",self % nchans
+  write(*,*) "channels(:) = ",self % channels(:)
+  write(*,*) "qtotal = ",self % qtotal
+  write(*,*) "RTTOV_mwscattSwitch = ",self % RTTOV_mwscattSwitch
+  write(*,*) "use_totalice = ",self % use_totalice
+  write(*,*) "UseMLMinimization = ",self % UseMLMinimization
+  write(*,*) "UseJforConvergence = ",self % UseJforConvergence
+  write(*,*) "FullDiagnostics = ",self % FullDiagnostics
+  write(*,*) "Max1DVarIterations = ",self % Max1DVarIterations
+  write(*,*) "JConvergenceOption = ",self % JConvergenceOption
+  write(*,*) "IterNumForLWPCheck = ",self % IterNumForLWPCheck
+  write(*,*) "ConvergenceFactor = ",self % ConvergenceFactor
+  write(*,*) "Cost_ConvergenceFactor = ",self % Cost_ConvergenceFactor
+  write(*,*) "MaxMLIterations = ",self % MaxMLIterations
+end if
+
+end subroutine
+
+!-------------------------------------------------------------------------------
+
+subroutine ufo_rttovonedvarcheck_InitObInfo(ob_info, & ! out
+                                            nchans)    ! in
+
+implicit none
+
+! subroutine arguments:
+type(obinfo_type), intent(out) :: ob_info
+integer, intent(in)  :: nchans
+
+character(len=*), parameter :: routinename = "ufo_rttovonedvarcheck_InitObInfo"
+
+ob_info % nlocs = 1
+ob_info % latitude = 0.0
+ob_info % longitude = 0.0
+ob_info % elevation = 0.0
+ob_info % sensor_zenith_angle = 0.0
+ob_info % sensor_azimuth_angle = 0.0
+ob_info % solar_zenith_angle = 0.0
+ob_info % solar_azimuth_angle = 0.0
+
+! Moved this to obs loop to allow channel selection
+!allocate(ob_info%yobs(nchans))
+!ob_info % yobs = 0.0
+
+end subroutine ufo_rttovonedvarcheck_InitObInfo
+
+!-------------------------------------------------------------------------------
 
 end module ufo_rttovonedvarcheck_utils_mod

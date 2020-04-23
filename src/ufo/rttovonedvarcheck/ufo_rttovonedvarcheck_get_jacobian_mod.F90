@@ -14,6 +14,7 @@ use ufo_geovals_mod
 use ufo_radiancerttov_tlad_mod
 use ufo_rttovonedvarcheck_utils_mod
 use ufo_rttovonedvarcheck_minimize_utils_mod, only: ufo_rttovonedvarcheck_Qsplit
+use ufo_rttovonedvarcheck_profindex_mod, only: profindex_type
 
 implicit none
 
@@ -39,7 +40,7 @@ type(Obinfo_type), intent(in)               :: ob_info
 type(c_ptr), value, intent(in)              :: obsdb
 integer(c_int), intent(in)                  :: channels(:)
 type(fckit_configuration), intent(in)       :: conf
-type(Profileinfo_type), intent(in)          :: profindex
+type(profindex_type), intent(in)          :: profindex
 real(kind_real), intent(in)                 :: prof_x(:)    ! x vector for 1D-var
 real(kind_real), intent(out)                :: hofx(:)
 real(kind_real), intent(out)                :: H_matrix(:,:)
@@ -78,7 +79,7 @@ type(Obinfo_type), intent(in)               :: ob_info
 type(c_ptr), value, intent(in)              :: obsdb
 integer(c_int), intent(in)                  :: channels(:)
 type(ufo_radiancerttov_tlad), intent(inout) :: rttov_data      ! structure for running rttov_k
-type(Profileinfo_type), intent(in)          :: profindex
+type(profindex_type), intent(in)          :: profindex
 real(kind_real), intent(in)                 :: prof_x(:)    ! x vector for 1D-var
 real(kind_real), intent(out)                :: hofx(:)
 real(kind_real), intent(out)                :: H_matrix(:,:)
@@ -257,11 +258,11 @@ subroutine ufo_rttovonedvarcheck_PrintHmatrix( &
 implicit none
 
 !Subroutine arguments:
-integer,                intent(IN)  :: nchans
-integer,                intent(IN)  :: nprofelements
-integer(c_int),         intent(IN)  :: channels(nchans)
-real(kind_real),        intent(IN)  :: H_matrix(nchans,nprofelements)
-type(Profileinfo_type), intent(in)  :: profindex
+integer,                intent(IN) :: nchans
+integer,                intent(IN) :: nprofelements
+integer(c_int),         intent(IN) :: channels(nchans)
+real(kind_real),        intent(IN) :: H_matrix(nchans,nprofelements)
+type(profindex_type), intent(in)   :: profindex
 
 ! Local variables:
 integer :: i

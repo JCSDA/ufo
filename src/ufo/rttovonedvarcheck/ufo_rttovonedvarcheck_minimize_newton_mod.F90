@@ -30,6 +30,8 @@ use ufo_rttovonedvarcheck_minimize_utils_mod, only: &
 use ufo_rttovonedvarcheck_get_jacobian_mod, only: &
         ufo_rttovonedvarcheck_get_jacobian
 
+use ufo_rttovonedvarcheck_profindex_mod, only: profindex_type
+
 
 implicit none
 
@@ -98,15 +100,15 @@ subroutine ufo_rttovonedvarcheck_minimize_newton(self, &
 implicit none
 
 type(ufo_rttovonedvarcheck), intent(inout) :: self
-type(Obinfo_type), intent(in)        :: ob_info
-type(rmatrix_type), intent(in)       :: r_matrix
-real(kind_real), intent(in)          :: b_matrix(:,:)
-real(kind_real), intent(in)          :: b_inv(:,:)
-real(kind_real), intent(in)          :: b_sigma(:)
-type(ufo_geovals), intent(inout)     :: local_geovals
-type(Profileinfo_type), intent(in)   :: profile_index
-integer(c_int), intent(in)           :: channels(:)
-logical, intent(out)                 :: onedvar_success
+type(Obinfo_type), intent(in)    :: ob_info
+type(rmatrix_type), intent(in)   :: r_matrix
+real(kind_real), intent(in)      :: b_matrix(:,:)
+real(kind_real), intent(in)      :: b_inv(:,:)
+real(kind_real), intent(in)      :: b_sigma(:)
+type(ufo_geovals), intent(inout) :: local_geovals
+type(profindex_type), intent(in) :: profile_index
+integer(c_int), intent(in)       :: channels(:)
+logical, intent(out)             :: onedvar_success
 
 ! Local declarations:
 character(len=*), parameter     :: RoutineName = "ufo_rttovonedvarcheck_minimize_newton"

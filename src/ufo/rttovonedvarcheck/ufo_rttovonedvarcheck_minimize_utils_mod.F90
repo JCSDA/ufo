@@ -12,6 +12,7 @@ use kinds
 use ufo_geovals_mod
 use ufo_rttovonedvarcheck_utils_mod
 use ufo_radiancerttov_tlad_mod
+use ufo_rttovonedvarcheck_profindex_mod, only: profindex_type
 
 implicit none
 
@@ -47,10 +48,10 @@ subroutine ufo_rttovonedvarcheck_GeoVaLs2ProfVec( geovals,       & ! in
 implicit none
 
 ! subroutine arguments:
-type(ufo_geovals), intent(in)      :: geovals
-type(Profileinfo_type), intent(in) :: profindex
-integer, intent(in)                :: nprofelements
-real(kind_real), intent(out)       :: prof_x(:)
+type(ufo_geovals), intent(in)    :: geovals
+type(profindex_type), intent(in) :: profindex
+integer, intent(in)              :: nprofelements
+real(kind_real), intent(out)     :: prof_x(:)
 
 ! Local arguments:
 character(len=*), parameter :: RoutineName = "ufo_rttovonedvarcheck_GeoVaLs2ProfVec"
@@ -172,10 +173,10 @@ subroutine ufo_rttovonedvarcheck_ProfVec2GeoVaLs(geovals,       & ! out
 implicit none
 
 ! subroutine arguments:
-type(ufo_geovals), intent(inout)   :: geovals
-type(Profileinfo_type), intent(in) :: profindex
-integer, intent(in)                :: nprofelements
-real(kind_real), intent(in)        :: prof_x(:)
+type(ufo_geovals), intent(inout) :: geovals
+type(profindex_type), intent(in) :: profindex
+integer, intent(in)              :: nprofelements
+real(kind_real), intent(in)      :: prof_x(:)
 
 ! Local arguments:
 character(len=*), parameter  :: RoutineName = "ufo_rttovonedvarcheck_ProfVec2GeoVaLs"
@@ -219,7 +220,8 @@ if (profindex % q(1) > 0) then
   do i=1,geovals%nvar
     if (varname == trim(geovals%variables(i))) gv_index = i
   end do
-  geovals%geovals(gv_index)%vals(:,1) = EXP (prof_x(profindex % q(1):profindex % q(2))) / 1000.0_kind_real ! ln(g/kg) => kg/kg
+  geovals%geovals(gv_index)%vals(:,1) = EXP (prof_x(profindex % q(1):profindex % q(2))) / &
+                                                  1000.0_kind_real ! ln(g/kg) => kg/kg
 end if
 
 ! specific_humidity - kg/kg - for retrieval is ln(g/kg)
@@ -233,7 +235,8 @@ if (profindex % qt(1) > 0) then
   allocate(qi(nlevels))
   
   ! Convert from ln(g/kg) to kg/kg
-  humidity_total(:) = EXP (prof_x(profindex % qt(1):profindex % qt(2))) / 1000.0_kind_real ! ln(g/kg) => kg/kg
+  humidity_total(:) = EXP (prof_x(profindex % qt(1):profindex % qt(2))) / &
+                                1000.0_kind_real ! ln(g/kg) => kg/kg
 
   ! Get temperature and pressure from geovals
   call ufo_geovals_get_var(geovals, "air_temperature", geoval)
@@ -242,14 +245,14 @@ if (profindex % qt(1) > 0) then
   pressure(:) = geoval%vals(:, 1)    ! Pa
 
   ! Split qtotal to q(water_vapour), q(liquid), q(ice)
-  call ufo_rttovonedvarcheck_Qsplit (1,                                         & ! in
-                          temperature(:),                            & ! in
-                          pressure(:),                               & ! in
-                          nlevels,                                   & ! in
-                          humidity_total(:),                         & ! in
-                          q(:),                                      & ! out
-                          ql(:),                                     & ! out
-                          qi(:))                                       ! out
+  call ufo_rttovonedvarcheck_Qsplit (1,      & ! in
+                          temperature(:),    & ! in
+                          pressure(:),       & ! in
+                          nlevels,           & ! in
+                          humidity_total(:), & ! in
+                          q(:),              & ! out
+                          ql(:),             & ! out
+                          qi(:))               ! out
 
   ! Assign values to geovals
   varname = "specific_humidity"  ! kg/kg
@@ -1485,14 +1488,11 @@ use ufo_rttovonedvarcheck_utils_mod, only: &
 implicit none
 
 ! subroutine arguments:
-!real(kind_real), intent(in)        :: Pstar_mb
-!real(kind_real), intent(in)        :: t2
-!real(kind_real), intent(in)        :: t(nlevels_1dvar)
-type(ufo_geovals), intent(in)      :: geovals
-type(Profileinfo_type), intent(in) :: profindex
-integer, intent(in)                :: nlevels_1dvar
-real(kind_real), intent(inout)     :: profile(:)
-logical, intent(out)               :: OutOfRange
+type(ufo_geovals), intent(in)    :: geovals
+type(profindex_type), intent(in) :: profindex
+integer, intent(in)              :: nlevels_1dvar
+real(kind_real), intent(inout)   :: profile(:)
+logical, intent(out)             :: OutOfRange
 
 ! Local declarations:
 real(kind_real), allocatable :: qsaturated(:)
@@ -1758,10 +1758,10 @@ use ufo_rttovonedvarcheck_utils_mod, only : &
 
 implicit none
 
-type(ufo_geovals), intent(in)      :: geovals
-type(Profileinfo_type), intent(in) :: profindex
-integer, intent(in)                :: nlevels_1dvar
-logical, intent(out)               :: OutOfRange
+type(ufo_geovals), intent(in)    :: geovals
+type(profindex_type), intent(in) :: profindex
+integer, intent(in)              :: nlevels_1dvar
+logical, intent(out)             :: OutOfRange
 
 ! Local variables:
 real(kind_real) :: LWP
