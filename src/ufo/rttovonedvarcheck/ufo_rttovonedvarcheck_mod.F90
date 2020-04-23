@@ -66,11 +66,7 @@ subroutine ufo_rttovonedvarcheck_apply(self, vars, geovals, apply)
           ufo_rttovonedvarcheck_minimize_newton
   use ufo_rttovonedvarcheck_minimize_ml_mod, only: &
           ufo_rttovonedvarcheck_minimize_ml
-  use ufo_rttovonedvarcheck_rmatrix_mod, only: &
-          rmatrix_type, &
-          rmatrix_setup, &
-          rmatrix_delete, &
-          rmatrix_print
+  use ufo_rttovonedvarcheck_rmatrix_mod, only: rmatrix_type
   use ufo_rttovonedvarcheck_bmatrix_mod, only: bmatrix_type
   use ufo_rttovonedvarcheck_profindex_mod, only: profindex_type
 
@@ -80,30 +76,32 @@ subroutine ufo_rttovonedvarcheck_apply(self, vars, geovals, apply)
   type(ufo_geovals), intent(in)              :: geovals  ! model values at observation space
   logical, intent(in)                        :: apply(:)
 
-  integer, allocatable               :: fields_in(:)
+  type(bmatrix_type)   :: full_bmatrix
+  type(ufo_geovals)    :: local_geovals  !< geoval for one observation
+  type(obinfo_type)    :: ob_info
+  type(profindex_type) :: prof_index     !< index for mapping geovals to 1d-var state profile
+  type(rmatrix_type)   :: r_submatrix    !< r_submatrix object
+  character(len=max_string)          :: sensor_id
+  character(len=max_string)          :: var
+  character(len=max_string)          :: varname
   integer                            :: iloc, jvar, jobs, ivar, band ! counters
   integer                            :: chans_used      ! counter for number of channels used for an ob
   integer                            :: jchans_used
   integer                            :: fileunit        ! unit number for reading in files
+  integer                            :: apply_count
+  integer                            :: nprofelements   ! number of elements in 1d-var state profile
   integer(c_int32_t), allocatable    :: flags(:,:)      ! qc flag for return to var obs file
+  integer, allocatable               :: channels_used(:)
+  integer, allocatable               :: fields_in(:)
+  integer, allocatable               :: QCflags(:,:)    ! current qc flags needed for channel selection
   real(kind_real)                    :: missing         ! missing value
-  character(len=max_string)          :: var
-  character(len=max_string)          :: varname
-  type(rmatrix_type)                 :: r_matrix    ! new r_matrix object
-  type(bmatrix_type)                 :: full_bmatrix
+  real(kind_real)                    :: t1, t2          ! timing
   real(kind_real), allocatable       :: b_matrix(:,:)   ! 1d-var profile b matrix
   real(kind_real), allocatable       :: b_inverse(:,:)  ! inverse for each 1d-var profile b matrix
   real(kind_real), allocatable       :: b_sigma(:)      ! b_matrix diagonal error
-  type(profindex_type)               :: prof_index      !< index for mapping geovals to 1d-var state profile
-  integer                            :: nprofelements   ! number of elements in 1d-var state profile
-  type(ufo_geovals)                  :: local_geovals   ! geoval for one observation
   real(kind_real), allocatable       :: obs_error(:)
-  integer, allocatable               :: channels_used(:)
-
-  ! variables from ioda
   real(kind_real), allocatable       :: yobs(:,:)       ! observation value from obs files
   real(kind_real), allocatable       :: yerr(:,:)       ! observation error from obs files
-  integer, allocatable               :: QCflags(:,:)    ! current qc flags needed for channel selection
   real(kind_real), allocatable       :: lat(:)          ! observation latitude
   real(kind_real), allocatable       :: lon(:)          ! observation longitude
   real(kind_real), allocatable       :: elevation(:)    ! observation elevation
@@ -111,15 +109,8 @@ subroutine ufo_rttovonedvarcheck_apply(self, vars, geovals, apply)
   real(kind_real), allocatable       :: sat_azi(:)      ! observation satellite azimuth angle
   real(kind_real), allocatable       :: sol_zen(:)      ! observation solar zenith angle
   real(kind_real), allocatable       :: sol_azi(:)      ! observation solar azimuth angle
-
-  real                               :: t2,t1           ! timing
-
   logical                            :: file_exists     ! check if a file exists logical
   logical                            :: onedvar_success
-  character(len=max_string)          :: sensor_id
-  integer                            :: apply_count
-
-  type(obinfo_type)                  :: ob_info
 
   ! ------------------------------------------
   ! Setup
@@ -169,7 +160,7 @@ subroutine ufo_rttovonedvarcheck_apply(self, vars, geovals, apply)
   call obsspace_get_db(self%obsdb,  "MetaData", "solar_azimuth_angle", sol_azi(:))
 
   ! Setup full B matrix object
-  call full_bmatrix % setup(self % model_variables, self%b_matrix_path, self % qtotal)
+  call full_bmatrix % setup(self % model_variables, self % b_matrix_path, self % qtotal)
 
   ! Create profile index for mapping 1d-var profile to b-matrix
   call prof_index % setup(full_bmatrix)
@@ -248,20 +239,20 @@ subroutine ufo_rttovonedvarcheck_apply(self, vars, geovals, apply)
           channels_used(jchans_used) = self%channels(jvar)
         end if
       end do
-      call rmatrix_setup(r_matrix, self % rtype, chans_used, obs_error)
-      call rmatrix_print(r_matrix)
+      call r_submatrix % setup(self % rtype, chans_used, obs_error)
+      call r_submatrix % info()
 
       !---------------------------------------------------
       ! Call minimization
       !---------------------------------------------------
       if (self % UseMLMinimization) then
         call ufo_rttovonedvarcheck_minimize_ml(self, ob_info, &
-                                      r_matrix, b_matrix, b_inverse, b_sigma, &
+                                      r_submatrix, b_matrix, b_inverse, b_sigma, &
                                       local_geovals, prof_index,           &
                                       channels_used, onedvar_success)
       else
         call ufo_rttovonedvarcheck_minimize_newton(self, ob_info, &
-                                      r_matrix, b_matrix, b_inverse, b_sigma, &
+                                      r_submatrix, b_matrix, b_inverse, b_sigma, &
                                       local_geovals, prof_index,           &
                                       channels_used, onedvar_success)
       end if
@@ -275,7 +266,7 @@ subroutine ufo_rttovonedvarcheck_apply(self, vars, geovals, apply)
       if (allocated(ob_info%yobs))  deallocate(ob_info%yobs)
       if (allocated(channels_used)) deallocate(channels_used)
       if (allocated(obs_error))     deallocate(obs_error)
-      call rmatrix_delete(r_matrix)
+      call r_submatrix % delete()
       call ufo_geovals_delete(local_geovals)
 
     endif

@@ -10,8 +10,10 @@ use ufo_rttovonedvarcheck_utils_mod, only: max_string
 
 implicit none
 
+private
+
 !> Fortran derived type to hold configuration data for the observation covariance
-type :: rmatrix_type
+type, public :: rmatrix_type
 
   integer :: nchans
   real(kind_real), allocatable :: matrix(:,:)
@@ -19,6 +21,16 @@ type :: rmatrix_type
   real(kind_real), allocatable :: diagonal(:)
   logical :: diagonal_flag
   logical :: full_flag
+
+contains
+  procedure :: setup  => rmatrix_setup
+  procedure :: delete => rmatrix_delete
+  procedure :: info => rmatrix_print
+  procedure :: multiply_vector => rmatrix_multiply
+  procedure :: multiply_matrix => rmatrix_multiply_matrix
+  procedure :: multiply_inverse_vector => rmatrix_inv_multiply
+  procedure :: multiply_inverse_matrix => rmatrix_multiply_inv_matrix
+  procedure :: add_to_matrix => rmatrix_add_to_u
 
 end type rmatrix_type
 
@@ -31,13 +43,13 @@ contains
 subroutine rmatrix_setup(self,mat_type,nchans,obs_error)
 
 implicit none
-type(rmatrix_type), intent(inout) :: self
+class(rmatrix_type), intent(inout) :: self
 character(len=*), intent(in)      :: mat_type
 integer, intent(in)               :: nchans
 real(kind_real), intent(in)       :: obs_error(nchans)
 
 character(len=*), parameter :: &
-      routinename = "ufo_rttovonedvarcheck_InitRmatrix"
+      routinename = "rmatrix_setup"
 character(len=max_string)   :: err_msg
 integer                     :: ii
 
@@ -74,7 +86,7 @@ end subroutine rmatrix_setup
 subroutine rmatrix_delete(self)
 
 implicit none
-type(rmatrix_type), intent(inout) :: self  !< R mtrix structure
+class(rmatrix_type), intent(inout) :: self  !< R mtrix structure
 
 if (allocated(self % matrix))       deallocate(self % matrix)
 if (allocated(self % inv_matrix))   deallocate(self % inv_matrix)
@@ -87,7 +99,7 @@ end subroutine rmatrix_delete
 subroutine rmatrix_multiply(self,xin,xout)
 
 implicit none
-type(rmatrix_type), intent(in)  :: self
+class(rmatrix_type), intent(in)  :: self
 real(kind_real), intent(in)     :: xin(:)
 real(kind_real), intent(inout)  :: xout(:)
 
@@ -112,7 +124,7 @@ end subroutine rmatrix_multiply
 subroutine rmatrix_multiply_matrix(self,xin,xout)
 
 implicit none
-type(rmatrix_type), intent(in)  :: self
+class(rmatrix_type), intent(in)  :: self
 real(kind_real), intent(in)     :: xin(:,:)
 real(kind_real), intent(inout)  :: xout(:,:)
 
@@ -135,7 +147,7 @@ end subroutine rmatrix_multiply_matrix
 subroutine rmatrix_inv_multiply(self,xin,xout)
 
 implicit none
-type(rmatrix_type), intent(in)  :: self
+class(rmatrix_type), intent(in)  :: self
 real(kind_real), intent(in)     :: xin(:)
 real(kind_real), intent(inout)  :: xout(:)
 
@@ -160,7 +172,7 @@ end subroutine rmatrix_inv_multiply
 subroutine rmatrix_multiply_inv_matrix(self,xin,xout)
 
 implicit none
-type(rmatrix_type), intent(in) :: self
+class(rmatrix_type), intent(in) :: self
 real(kind_real), intent(in)    :: xin(:,:)
 real(kind_real), intent(out)   :: xout(:,:)
 
@@ -185,7 +197,7 @@ end subroutine rmatrix_multiply_inv_matrix
 subroutine rmatrix_add_to_u(self,uin,uout)
 
 implicit none
-type(rmatrix_type), intent(in)  :: self
+class(rmatrix_type), intent(in)  :: self
 real(kind_real), intent(in)     :: uin(:,:)
 real(kind_real), intent(inout)  :: uout(:,:)
 
@@ -218,7 +230,7 @@ end subroutine rmatrix_add_to_u
 subroutine rmatrix_print(self)
 
 implicit none
-type(rmatrix_type), intent(in)  :: self
+class(rmatrix_type), intent(in)  :: self
 
 integer :: ii
 

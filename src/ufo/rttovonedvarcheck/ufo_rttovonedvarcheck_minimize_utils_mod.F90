@@ -339,9 +339,7 @@ subroutine ufo_rttovonedvarcheck_CostFunction(DeltaProf, b_inv, &
                                               DeltaObs, r_matrix, &
                                               Jcost)
 
-use ufo_rttovonedvarcheck_rmatrix_mod, only: &
-    rmatrix_type, &
-    rmatrix_inv_multiply
+use ufo_rttovonedvarcheck_rmatrix_mod, only: rmatrix_type
 
 implicit none
 
@@ -366,7 +364,7 @@ allocate(RinvDeltaY, source=DeltaObs)
 
 y_size = size(DeltaObs)
 Jcost(:) = 0.0_kind_real
-call rmatrix_inv_multiply(r_matrix, DeltaObs, RinvDeltaY)
+call r_matrix % multiply_inverse_vector(DeltaObs, RinvDeltaY)
 
 Jo = 0.5_kind_real * dot_product(DeltaObs, RinvDeltaY)
 Jb = 0.5_kind_real * dot_product(DeltaProf, (matmul(b_inv, DeltaProf)))

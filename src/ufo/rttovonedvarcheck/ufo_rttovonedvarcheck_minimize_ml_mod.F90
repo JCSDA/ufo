@@ -11,13 +11,7 @@ use kinds
 use ufo_geovals_mod
 use ufo_rttovonedvarcheck_utils_mod
 use ufo_radiancerttov_tlad_mod
-use ufo_rttovonedvarcheck_rmatrix_mod, only: &
-    rmatrix_type, &
-    rmatrix_add_to_u, &
-    rmatrix_multiply, &
-    rmatrix_multiply_matrix, &
-    rmatrix_inv_multiply, &
-    rmatrix_multiply_inv_matrix
+use ufo_rttovonedvarcheck_rmatrix_mod, only: rmatrix_type
 
 use ufo_rttovonedvarcheck_minimize_utils_mod, only: &
     ufo_rttovonedvarcheck_GeoVaLs2ProfVec, &
@@ -526,7 +520,7 @@ Status = StatusOK
 !---------------------------------------------------------------------------
 
 !HTR(-1) = matmul(H_matrix_T, R_inverse)
-call rmatrix_multiply_inv_matrix(r_matrix,H_matrix_T,HTR)
+call r_matrix % multiply_inverse_matrix(H_matrix_T, HTR)
 
 !---------------------------------------------------------------------------
 ! 2. Calculate U and V

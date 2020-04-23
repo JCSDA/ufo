@@ -11,14 +11,7 @@ use kinds
 use ufo_geovals_mod
 use ufo_rttovonedvarcheck_utils_mod
 use ufo_radiancerttov_tlad_mod
-use ufo_rttovonedvarcheck_rmatrix_mod, only: &
-        rmatrix_type, &
-        rmatrix_add_to_u, &
-        rmatrix_multiply, &
-        rmatrix_multiply_matrix, &
-        rmatrix_inv_multiply, &
-        rmatrix_multiply_inv_matrix
-
+use ufo_rttovonedvarcheck_rmatrix_mod, only: rmatrix_type
 use ufo_rttovonedvarcheck_minimize_utils_mod, only: &
         ufo_rttovonedvarcheck_GeoVaLs2ProfVec, &
         ufo_rttovonedvarcheck_ProfVec2GeoVaLs, &
@@ -26,10 +19,8 @@ use ufo_rttovonedvarcheck_minimize_utils_mod, only: &
         ufo_rttovonedvarcheck_CheckIteration, &
         ufo_rttovonedvarcheck_CheckCloudyIteration, &
         ufo_rttovonedvarcheck_Cholesky
-
 use ufo_rttovonedvarcheck_get_jacobian_mod, only: &
         ufo_rttovonedvarcheck_get_jacobian
-
 use ufo_rttovonedvarcheck_profindex_mod, only: profindex_type
 
 
@@ -538,7 +529,7 @@ V = DeltaBT + matmul(H_matrix, DeltaProfile)
 ! 1.1. Add the R matrix into the U matrix. U = U + R
 !---------------------------------------------------------------------------
 !U = U + R_Matrix
-call rmatrix_add_to_u(r_matrix,U,U)
+call r_matrix % add_to_matrix(U, U)
 
 ! Calculate Q=(U^-1).V
 !------
@@ -638,7 +629,7 @@ Status = 0
 !    inverted if not.
 !---------------------------------------------------------------------------
 !HTR = matmul(H_matrix_T, R_inverse)
-call rmatrix_multiply_inv_matrix(r_matrix,H_matrix_T,HTR)
+call r_matrix % multiply_inverse_matrix(H_matrix_T,HTR)
 
 !---------------------------------------------------------------------------
 ! 2. Calculate U and V
