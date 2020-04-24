@@ -13,6 +13,8 @@ set ( utils_files
       parameters/ParameterTraitsVariable.h
       PiecewiseLinearInterpolation.cc
       PiecewiseLinearInterpolation.h
+      ParallelObsDistribution.cc
+      ParallelObsDistribution.h
       RecursiveSplitter.cc
       RecursiveSplitter.h
       SpatialBinSelector.h

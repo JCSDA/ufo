@@ -91,6 +91,7 @@ list( APPEND ufo_test_input
   testinput/obsdiag_crtm_iasi_optics.yaml
   testinput/obsfilterdata.yaml
   testinput/processwhere.yaml
+  testinput/parallel_obs_distribution.yaml
   testinput/parameters.yaml
   testinput/qc_trackcheck.yaml
   testinput/qc_trackcheck_unittests.yaml
@@ -845,6 +846,7 @@ ecbuild_add_test( TARGET  test_ufo_qc_thinning
                   DEPENDS test_ObsFilters.x )
 
 ecbuild_add_test( TARGET  test_ufo_qc_gauss_thinning
+                  MPI     4
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
                   ARGS    "testinput/qc_gauss_thinning.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
@@ -1058,6 +1060,14 @@ ecbuild_add_test( TARGET  test_ufo_parameters
 ecbuild_add_test( TARGET  test_ufo_piecewise_linear_interpolation
                   SOURCES mains/TestPiecewiseLinearInterpolation.cc
                   ARGS    "testinput/empty.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  LIBS    ufo)
+
+# Test parallel observation distribution
+ecbuild_add_test( TARGET  test_ufo_parallel_obs_distribution
+                  MPI     4
+                  SOURCES mains/TestParallelObsDistribution.cc
+                  ARGS    "testinput/parallel_obs_distribution.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   LIBS    ufo)
 
