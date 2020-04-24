@@ -32,7 +32,7 @@ namespace test {
 // -----------------------------------------------------------------------------
 
 void testGeoVaLs() {
-  const eckit::LocalConfiguration conf = ::test::TestEnvironment::config();
+  const eckit::LocalConfiguration conf(::test::TestEnvironment::config());
   util::DateTime bgn(conf.getString("window_begin"));
   util::DateTime end(conf.getString("window_end"));
 
