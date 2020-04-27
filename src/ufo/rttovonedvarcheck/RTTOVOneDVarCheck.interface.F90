@@ -8,6 +8,7 @@ module ufo_rttovonedvarcheck_mod_c
 
 use fckit_configuration_module, only: fckit_configuration
 use iso_c_binding
+use oops_variables_mod
 use ufo_geovals_mod
 use ufo_geovals_mod_c,   only: ufo_geovals_registry
 use ufo_rttovonedvarcheck_mod

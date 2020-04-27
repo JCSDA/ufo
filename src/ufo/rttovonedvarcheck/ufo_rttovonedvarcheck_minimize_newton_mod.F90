@@ -25,7 +25,6 @@ use ufo_rttovonedvarcheck_profindex_mod, only: profindex_type
 
 
 implicit none
-
 private
 
 ! public subroutines

@@ -15,7 +15,6 @@ use ufo_rttovonedvarcheck_utils_mod, only: &
         nfieldtypes
 
 implicit none
-
 private
 
 ! public types and subroutines

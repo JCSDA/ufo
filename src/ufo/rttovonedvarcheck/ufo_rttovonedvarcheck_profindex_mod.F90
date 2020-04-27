@@ -13,7 +13,6 @@ use ufo_rttovonedvarcheck_bmatrix_mod, only: &
         bmatrix_type
 
 implicit none
-
 private
 
 ! public types and subroutines
@@ -154,18 +153,10 @@ do j = 1, bmatrix % nfields
       self % qt(2)        = lastelement
 
     case( fieldtype_o3profile )
-      self % o3profile(1) = firstelement
-      self % o3profile(2) = lastelement
-      if ( ozonesource /= source_bg .and. self % o3profile(1) > 0 ) then
-        write(*,*) 'o3 profile retrieval requested but no cx % ozone available'
-        write(*,*) 'o3 profile retrieval may result in high rejection rate'
-      end if
+      call abor1_ftn("fieldtype_o3profile: Not currently implemented aborting")
 
     case( fieldtype_o3total )
-      self % o3total      = firstelement
-
-    case( fieldtype_lwp )
-      self % lwp          = firstelement
+      call abor1_ftn("fieldtype_o3total: Not currently implemented aborting")
 
    !-------
    !surface

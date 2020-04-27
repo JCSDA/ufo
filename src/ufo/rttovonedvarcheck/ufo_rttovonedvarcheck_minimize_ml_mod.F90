@@ -27,7 +27,6 @@ use ufo_rttovonedvarcheck_get_jacobian_mod, only: &
 use ufo_rttovonedvarcheck_profindex_mod, only: profindex_type
 
 implicit none
-
 private
 
 ! public subroutines

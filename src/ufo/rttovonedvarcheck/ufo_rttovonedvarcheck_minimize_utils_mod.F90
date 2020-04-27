@@ -15,7 +15,6 @@ use ufo_radiancerttov_tlad_mod
 use ufo_rttovonedvarcheck_profindex_mod, only: profindex_type
 
 implicit none
-
 private ! default
 
 ! subroutines - public

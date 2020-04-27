@@ -9,7 +9,6 @@ use kinds
 use ufo_rttovonedvarcheck_utils_mod, only: max_string
 
 implicit none
-
 private
 
 !> Fortran derived type to hold configuration data for the observation covariance

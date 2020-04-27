@@ -12,12 +12,12 @@ use iso_c_binding
 use kinds
 
 implicit none
+private
 
-! defaults are public
-! defined types : ufo_rttovonedvarcheck, profileinfo_type, obinfo_type
-!
+public ufo_rttovonedvarcheck_setup
+public ufo_rttovonedvarcheck_InitObInfo
 
-integer, parameter :: max_string = 200
+integer, parameter, public :: max_string = 200
 
 !===============================================================================
 ! type definitions
@@ -27,7 +27,7 @@ integer, parameter :: max_string = 200
 ! 1. 1DVar type
 !---------------
 
-type :: ufo_rttovonedvarcheck
+type, public :: ufo_rttovonedvarcheck
   character(len=max_string)        :: qcname
   character(len=max_string)        :: rtype
   character(len=max_string)        :: b_matrix_path
@@ -57,7 +57,7 @@ end type ufo_rttovonedvarcheck
 ! 3. container for information about a single observation
 !---------------------------------------------------------
 
-type obinfo_type
+type, public :: obinfo_type
 
   character(len=max_string) :: forward_mod_name
   integer         :: nlocs
@@ -87,8 +87,8 @@ end type
 ! new definitions should be made in conjunction with the profileinfo_type
 ! structure found in section 3 above.
 
-integer, parameter :: nfieldtypes = 19
-integer, parameter :: &
+integer, parameter, public :: nfieldtypes = 19
+integer, parameter, public :: &
   fieldtype_t          =  1, &   ! temperature
   fieldtype_q          =  2, &   ! specific humidity profile
   fieldtype_t2         =  3, &   ! surface air temperature
@@ -109,7 +109,7 @@ integer, parameter :: &
   fieldtype_emisspc    = 18, &   ! emissivity prinipal components
   fieldtype_cf         = 19      ! cloud fraction profile
 
-character(len=*), parameter :: fieldtype_text(nfieldtypes) = &
+character(len=*), parameter, public :: fieldtype_text(nfieldtypes) = &
   (/ 't                   ', &
      'q water vapour      ', &
      't2                  ', &
@@ -137,20 +137,20 @@ character(len=*), parameter :: fieldtype_text(nfieldtypes) = &
 !data source codes, used to assign background ozone information. the numbers
 !are arbitrary.
 
-integer, parameter :: &
+integer, parameter, public :: &
   source_bg        = 1, &
   source_estimate  = 2, &
   source_product   = 3, &
   source_reference = 4
 
 ! for now default ozone profile to be provided by model
-integer :: ozonesource = source_bg
+integer, public :: ozonesource = source_bg
 
 !===============================================================================
 !Physical Constants
 !===============================================================================
 
-real(kind_real), parameter :: &
+real(kind_real), parameter, public :: &
   IR_Emiss       =      0.98,   & ! surf emiss to use for IR channels
   MaxTotalOzone  =    650.0,    & ! ( Dobson units )
   MinTotalOzone  =     70.0,    & ! ( Dobson units )

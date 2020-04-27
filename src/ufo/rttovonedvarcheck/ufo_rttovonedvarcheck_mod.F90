@@ -18,6 +18,7 @@ use ufo_rttovonedvarcheck_utils_mod
 use ufo_rttovonedvarcheck_minimize_utils_mod
 
 implicit none
+private
 public :: ufo_rttovonedvarcheck
 public :: ufo_rttovonedvarcheck_create
 public :: ufo_rttovonedvarcheck_delete
@@ -170,9 +171,6 @@ subroutine ufo_rttovonedvarcheck_apply(self, vars, geovals, apply)
   allocate(b_matrix(prof_index % nprofelements,prof_index % nprofelements))
   allocate(b_inverse(prof_index % nprofelements,prof_index % nprofelements))
   allocate(b_sigma(prof_index % nprofelements))
-
-  ! print geovals infor
-  !call ufo_geovals_print(geovals, 1)
 
   ! ------------------------------------------
   ! Beginning mains observations loop

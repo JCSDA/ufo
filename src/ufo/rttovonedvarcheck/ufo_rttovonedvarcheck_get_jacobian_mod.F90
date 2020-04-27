@@ -17,7 +17,6 @@ use ufo_rttovonedvarcheck_minimize_utils_mod, only: ufo_rttovonedvarcheck_Qsplit
 use ufo_rttovonedvarcheck_profindex_mod, only: profindex_type
 
 implicit none
-
 private
 
 ! subroutines - all listed for complete
