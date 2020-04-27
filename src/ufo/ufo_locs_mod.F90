@@ -242,12 +242,7 @@ subroutine ufo_locs_init(self, obss, t1, t2)
 
   allocate(date_time(nlocs), lon(nlocs), lat(nlocs))
 
-!TODO(JG): Add "MetaData" or similar group attribute to all ioda ObsSpace objects
-  if (obsspace_has(obss,"MetaData", "datetime")) then
-    call obsspace_get_db(obss, "MetaData", "datetime", date_time)
-  else
-    call obsspace_get_db(obss, "", "datetime", date_time)
-  endif
+  call obsspace_get_db(obss, "MetaData", "datetime", date_time)
 
   ! Generate the timing window indices
   allocate(tw_indx(nlocs))
@@ -259,14 +254,8 @@ subroutine ufo_locs_init(self, obss, t1, t2)
     endif
   enddo
 
-!TODO(JG): Add "MetaData" or similar group attribute to all ioda ObsSpace objects
-  if (obsspace_has(obss,"MetaData", "longitude")) then
-    call obsspace_get_db(obss, "MetaData", "longitude", lon)
-    call obsspace_get_db(obss, "MetaData", "latitude", lat)
-  else
-    call obsspace_get_db(obss, "", "longitude", lon)
-    call obsspace_get_db(obss, "", "latitude", lat)
-  endif
+  call obsspace_get_db(obss, "MetaData", "longitude", lon)
+  call obsspace_get_db(obss, "MetaData", "latitude", lat)
 
   !Setup ufo locations
   call ufo_locs_setup(self, tw_nlocs)

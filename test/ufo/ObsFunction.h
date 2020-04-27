@@ -54,7 +54,7 @@ void dataVectorDiff(const ioda::ObsSpace & ospace, ioda::ObsDataVector<float> & 
 // -----------------------------------------------------------------------------
 
 void testFunction() {
-  const eckit::LocalConfiguration conf = ::test::TestEnvironment::config();
+  const eckit::LocalConfiguration conf(::test::TestEnvironment::config());
 ///  Setup ObsSpace
   util::DateTime bgn(conf.getString("window_begin"));
   util::DateTime end(conf.getString("window_end"));

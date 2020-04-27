@@ -41,6 +41,7 @@ class EquispacedBinSelector;
 class GaussianThinningParameters;
 class RecursiveSplitter;
 class SpatialBinSelector;
+class ParallelObsDistribution;
 
 /// \brief Group observations into grid cells and preserve only one observation in each cell.
 ///
@@ -72,36 +73,44 @@ class Gaussian_Thinning : public FilterBase,
                    std::vector<std::vector<bool>> &) const override;
   int qcFlag() const override {return QCflags::thinned;}
 
-  std::vector<size_t> getValidObservationIds(const std::vector<bool> &apply) const;
+  std::vector<size_t> getValidObservationIds(const std::vector<bool> &apply,
+                                             const ParallelObsDistribution &obsDistribution) const;
 
   void groupObservationsByCategory(const std::vector<size_t> &validObsIds,
+                                   const ParallelObsDistribution &obsDistribution,
                                    RecursiveSplitter &splitter) const;
 
   void groupObservationsBySpatialLocation(const std::vector<size_t> &validObsIds,
                                           const DistanceCalculator &distanceCalculator,
+                                          const ParallelObsDistribution &obsDistribution,
                                           RecursiveSplitter &splitter,
                                           std::vector<float> &distancesToBinCenter) const;
 
   void groupObservationsByPressure(const std::vector<size_t> &validObsIds,
                                    const DistanceCalculator &distanceCalculator,
+                                   const ParallelObsDistribution &obsDistribution,
                                    RecursiveSplitter &splitter,
                                    std::vector<float> &distancesToBinCenter) const;
 
   void groupObservationsByTime(const std::vector<size_t> &validObsIds,
                                const DistanceCalculator &distanceCalculator,
+                               const ParallelObsDistribution &obsDistribution,
                                RecursiveSplitter &splitter,
                                std::vector<float> &distancesToBinCenter) const;
 
-  std::vector<bool> identifyThinnedObservations(size_t numObservations,
-                                                const std::vector<size_t> &validObsIds,
-                                                const std::vector<float> &distancesToBinCenter,
-                                                const RecursiveSplitter &splitter) const;
+  std::vector<bool> identifyThinnedObservations(
+      const std::vector<size_t> &validObsIds,
+      const ParallelObsDistribution &obsDistribution,
+      const RecursiveSplitter &splitter,
+      const std::vector<float> &distancesToBinCenter) const;
 
   std::function<bool(size_t, size_t)> makeObservationComparator(
       const std::vector<size_t> &validObsIds,
-      const std::vector<float> &distancesToBinCenter) const;
+      const std::vector<float> &distancesToBinCenter,
+      const ParallelObsDistribution &obsDistribution) const;
 
   void flagThinnedObservations(const std::vector<bool> &isThinned,
+                               const ParallelObsDistribution &obsDistribution,
                                std::vector<std::vector<bool> > &flagged) const;
 
   static boost::optional<SpatialBinSelector> makeSpatialBinSelector(

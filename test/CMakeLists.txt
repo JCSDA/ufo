@@ -33,6 +33,7 @@ list( APPEND ufo_test_input
   testinput/amsua_rttov.yaml
   testinput/atms_rttov_qc_1dvar.yaml
   testinput/amsua_qc.yaml
+  testinput/amsua_qc_clwretmw.yaml
   testinput/amsua_qc_filters.yaml
   testinput/amsua_qc_miss_val.yaml
   testinput/amsua_allsky_gsi_qc.yaml
@@ -90,6 +91,7 @@ list( APPEND ufo_test_input
   testinput/obsdiag_crtm_iasi_optics.yaml
   testinput/obsfilterdata.yaml
   testinput/processwhere.yaml
+  testinput/parallel_obs_distribution.yaml
   testinput/parameters.yaml
   testinput/qc_trackcheck.yaml
   testinput/qc_trackcheck_unittests.yaml
@@ -853,6 +855,7 @@ ecbuild_add_test( TARGET  test_ufo_qc_thinning
                   DEPENDS test_ObsFilters.x )
 
 ecbuild_add_test( TARGET  test_ufo_qc_gauss_thinning
+                  MPI     4
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
                   ARGS    "testinput/qc_gauss_thinning.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
@@ -1069,6 +1072,14 @@ ecbuild_add_test( TARGET  test_ufo_piecewise_linear_interpolation
                   ENVIRONMENT OOPS_TRAPFPE=1
                   LIBS    ufo)
 
+# Test parallel observation distribution
+ecbuild_add_test( TARGET  test_ufo_parallel_obs_distribution
+                  MPI     4
+                  SOURCES mains/TestParallelObsDistribution.cc
+                  ARGS    "testinput/parallel_obs_distribution.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  LIBS    ufo)
+
 # Test QC for specific instruments
 
 if ( ${CRTM_FOUND} )
@@ -1087,6 +1098,12 @@ if ( ${CRTM_FOUND} )
     ecbuild_add_test( TARGET  test_ufo_qc_amsua
                       COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
                       ARGS    "testinput/amsua_qc.yaml"
+                      ENVIRONMENT OOPS_TRAPFPE=1
+                      DEPENDS test_ObsFilters.x )
+
+    ecbuild_add_test( TARGET  test_ufo_qc_amsua_clwretmw
+                      COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                      ARGS    "testinput/amsua_qc_clwretmw.yaml"
                       ENVIRONMENT OOPS_TRAPFPE=1
                       DEPENDS test_ObsFilters.x )
 

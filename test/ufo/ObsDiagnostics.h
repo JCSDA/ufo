@@ -34,7 +34,7 @@ namespace test {
 // -----------------------------------------------------------------------------
 
 void testObsDiagnostics() {
-  const eckit::LocalConfiguration conf = ::test::TestEnvironment::config();
+  const eckit::LocalConfiguration conf(::test::TestEnvironment::config());
 
   //  Setup ObsSpace
   util::DateTime bgn(conf.getString("window_begin"));

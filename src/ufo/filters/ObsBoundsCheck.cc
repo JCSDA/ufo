@@ -32,10 +32,9 @@ ObsBoundsCheck::ObsBoundsCheck(ioda::ObsSpace & obsdb, const eckit::Configuratio
                                boost::shared_ptr<ioda::ObsDataVector<float> > obserr)
   : FilterBase(obsdb, config, flags, obserr)
 {
-  if (config_.has("test variables") || config_.has("test functions")) {
+  if (config_.has("test variables")) {
     std::vector<eckit::LocalConfiguration> testvarconf;
-    if (config_.has("test variables")) config_.get("test variables", testvarconf);
-    if (config_.has("test functions")) config_.get("test functions", testvarconf);
+    config_.get("test variables", testvarconf);
     allvars_ += ufo::Variables(testvarconf);
   }
   oops::Log::debug() << "ObsBoundsCheck: config (constructor) = " << config_ << std::endl;
@@ -56,10 +55,9 @@ void ObsBoundsCheck::applyFilter(const std::vector<bool> & apply,
 // Find which variables are tested and the conditions
   ufo::Variables testvars;
 // Use variables specified in test variables/functions for testing, otherwise filter variables
-  if (config_.has("test variables") || config_.has("test functions")) {
+  if (config_.has("test variables")) {
     std::vector<eckit::LocalConfiguration> varconfs;
-    if (config_.has("test variables")) config_.get("test variables", varconfs);
-    if (config_.has("test functions")) config_.get("test functions", varconfs);
+    config_.get("test variables", varconfs);
     testvars += ufo::Variables(varconfs);
   } else {
     testvars += ufo::Variables(filtervars, "ObsValue");
@@ -88,46 +86,32 @@ void ObsBoundsCheck::applyFilter(const std::vector<bool> & apply,
     filt2obs.push_back(observed.find(filtervars.variable(jv).variable()));
   }
 
-  if (config_.has("test functions")) {
-    for (size_t iv = 0; iv < testvars.size(); ++iv) {
-      ioda::ObsDataVector<float> testdata(obsdb_, testvars[iv].toOopsVariables(),
-                                          "ObsFunction", false);
+// Loop over all test variables to get data
+  for (size_t iv = 0; iv < testvars.size(); ++iv) {
+    const std::string grp = testvars[iv].group();
+    ioda::ObsDataVector<float> testdata(obsdb_, testvars[iv].toOopsVariables());
+    if (grp == "ObsFunction") {
       data_.get(testvars[iv], testdata);
-
-      std::vector<size_t> test_jv(filtervars[iv].size(), 0);
-      if (testvars[iv].size() == filtervars[iv].size()) {
-        std::iota(test_jv.begin(), test_jv.end(), 0);
-      }
-
-      // Loop over all variables to filter
-      for (size_t jv = 0; jv < filtervars[iv].size(); ++jv) {
-        for (size_t jobs = 0; jobs < obsdb_.nlocs(); ++jobs) {
-          if (apply[jobs] && (*flags_)[filt2obs[jv]][jobs] == QCflags::pass) {
-            ASSERT(testdata[test_jv[jv]][jobs] != missing);
-            if (vmin != missing && testdata[test_jv[jv]][jobs] < vmin) flagged[jv][jobs] = true;
-            if (vmax != missing && testdata[test_jv[jv]][jobs] > vmax) flagged[jv][jobs] = true;
-          }
-        }
+    } else {
+      for (size_t ii = 0; ii < testvars[iv].size(); ++ii) {
+        size_t kv = ii + iv * testvars[iv].size();
+        data_.get(testvars.variable(kv), testdata[ii]);
       }
     }
-  } else {
-    if (filtervars.nvars() != testvars.nvars()) {
-      oops::Log::error() << "Filter and test variables in Bounds Check have "
-                         << "different sizes: " << filtervars.nvars() << " and "
-                         << testvars.nvars() << std::endl;
-      ABORT("Filter and test variables in Bounds Check have different sizes");
+
+    std::vector<size_t> test_jv(filtervars[iv].size(), 0);
+    if (testvars[iv].size() == filtervars[iv].size()) {
+      std::iota(test_jv.begin(), test_jv.end(), 0);
     }
+
     // Loop over all variables to filter
-    for (size_t jv = 0; jv < testvars.nvars(); ++jv) {
-      //  get test data for this variable
-      std::vector<float> testdata;
-      data_.get(testvars.variable(jv), testdata);
-      //  apply the filter
+    for (size_t jv = 0; jv < filtervars[iv].size(); ++jv) {
       for (size_t jobs = 0; jobs < obsdb_.nlocs(); ++jobs) {
         if (apply[jobs] && (*flags_)[filt2obs[jv]][jobs] == QCflags::pass) {
-          ASSERT(testdata[jobs] != missing);
-          if (vmin != missing && testdata[jobs] < vmin) flagged[jv][jobs] = true;
-          if (vmax != missing && testdata[jobs] > vmax) flagged[jv][jobs] = true;
+          ASSERT(testdata[test_jv[jv]][jobs] != missing);
+          size_t kv = jv + filtervars[iv].size() * iv;
+          if (vmin != missing && testdata[test_jv[jv]][jobs] < vmin) flagged[kv][jobs] = true;
+          if (vmax != missing && testdata[test_jv[jv]][jobs] > vmax) flagged[kv][jobs] = true;
         }
       }
     }
