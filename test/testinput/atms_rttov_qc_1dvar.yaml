@@ -17,7 +17,7 @@ Observations:
       name: RTTOV
       ObsOptions:
         Sensor_ID: noaa_20_atms
-        CoefficientPath: /home/h06/mcooke/JEDI/ufo_bundle_RTTOVOneDVar/ufo-bundle/rttov/rtcoef_rttov12/rttov7pred54L/
+        CoefficientPath: &rttov_coeff Data/
         mw_clw: true
       ExtraVars:
         - mass_content_of_cloud_liquid_water_in_atmosphere_layer
@@ -45,7 +45,7 @@ Observations:
       ModName: RTTOV
       ObsOptions:
         Sensor_ID: noaa_20_atms
-        CoefficientPath: /home/h06/mcooke/JEDI/ufo_bundle_RTTOVOneDVar/ufo-bundle/rttov/rtcoef_rttov12/rttov7pred54L/
+        CoefficientPath: *rttov_coeff
       variables: [brightness_temperature]
       channels: *ops_channels
       model_variables:
