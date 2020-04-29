@@ -61,7 +61,7 @@ void ifTIsDoubleCastDoublesToFloats(std::vector<double> &v) {
 
 template <typename T>
 void testVariable(const std::string &section) {
-  const eckit::LocalConfiguration &topConf = ::test::TestEnvironment::config();
+  const eckit::Configuration &topConf = ::test::TestEnvironment::config();
 
   util::DateTime bgn(topConf.getString("window_begin"));
   util::DateTime end(topConf.getString("window_end"));
@@ -102,7 +102,7 @@ CASE("ufo/ParallelObsDistribution/getGlobalDateTimeVariableValues") {
 }
 
 CASE("ufo/ParallelObsDistribution/members") {
-  const eckit::LocalConfiguration &topConf = ::test::TestEnvironment::config();
+  const eckit::Configuration &topConf = ::test::TestEnvironment::config();
 
   util::DateTime bgn(topConf.getString("window_begin"));
   util::DateTime end(topConf.getString("window_end"));
