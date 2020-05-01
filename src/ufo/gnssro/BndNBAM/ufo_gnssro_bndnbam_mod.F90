@@ -78,6 +78,7 @@ subroutine ufo_gnssro_bndnbam_simobs(self, geovals, hofx, obss)
   integer,          allocatable           :: super(:)
   integer                                 :: sr_hgt_idx
   real(kind_real)                         :: gradRef, obsImpH
+  integer,          allocatable           :: LayerIdx(:)
 
   write(err_msg,*) myname, ": begin"
   call fckit_log%info(err_msg)
@@ -86,17 +87,22 @@ subroutine ufo_gnssro_bndnbam_simobs(self, geovals, hofx, obss)
   nrecs   = obsspace_get_nrecs(obss) ! number of records/profiles
   write(err_msg,*) myname, ': nlocs from gelvals and hofx, nrecs', geovals%nlocs, nlocs, nrecs
   call fckit_log%info(err_msg)
+  missing = missing_value(missing)
 
-  if (nlocs > 0) then ! check if zero obs
- 
+  allocate(temperature(nlocs))
+  temperature = missing
+  allocate(super_refraction_flag(nlocs))
+  super_refraction_flag = 0
+  allocate(LayerIdx(nlocs))
+  LayerIdx = 0
+
+  if (nlocs > 0) then ! check if ZERO OBS
 
 ! check if nobs is consistent in geovals & hofx
   if (geovals%nlocs /= size(hofx)) then
     write(err_msg,*) myname, ': nlocs inconsistent!', geovals%nlocs, size(hofx)
     call abor1_ftn(err_msg)
   endif
-
-  missing = missing_value(missing)
 
 ! get variables from geovals
   call ufo_geovals_get_var(geovals, var_ts,  t)         ! air temperature
@@ -210,11 +216,7 @@ subroutine ufo_gnssro_bndnbam_simobs(self, geovals, hofx, obss)
      grids(igrd+1) = igrd * ds
   end do 
 
-  allocate(temperature(nlocs))
-  temperature = missing
-  allocate(super_refraction_flag(nlocs))
   allocate(super(nrecs))
-  super_refraction_flag = 0
 
 ! bending angle forward model starts
   allocate(geomz(nlev))    ! geometric height
@@ -226,6 +228,7 @@ subroutine ufo_gnssro_bndnbam_simobs(self, geovals, hofx, obss)
   iobs = 0
   hofx =  missing
   super= 0
+
   rec_loop: do irec = 1, nrecs
     obs_loop: do icount = nlocs_begin(irec), nlocs_end(irec)
 
@@ -245,6 +248,9 @@ subroutine ufo_gnssro_bndnbam_simobs(self, geovals, hofx, obss)
 !     (1) skip data beyond model levels
       call get_coordinate_value(obsImpP(iobs),sIndx,refXrad(1),nlev,"increasing")
       if (sIndx < one .or. sIndx > float(nlev))  cycle obs_loop
+
+!     save the obs vertical location index (unit: model layer)
+      LayerIdx(iobs) = min(max(1, int(sIndx)), nlev)
 
 !     calculating temperature at obs location to obs space for BackgroundCheck RONBAM
       indx=sIndx
@@ -320,11 +326,6 @@ subroutine ufo_gnssro_bndnbam_simobs(self, geovals, hofx, obss)
     end do obs_loop
   end do rec_loop
 
-! putting temeprature at obs location to obs space for BackgroundCheck RONBAM
-  call obsspace_put_db(obss, "MetaData", "temperature", temperature)
-! putting super refraction flag to obs space 
-  call obsspace_put_db(obss, "SRflag",   "bending_angle", super_refraction_flag)
-
   deallocate(obsLat)
   deallocate(obsImpP)
   deallocate(obsLocR)
@@ -339,16 +340,25 @@ subroutine ufo_gnssro_bndnbam_simobs(self, geovals, hofx, obss)
   deallocate(refXrad)
   deallocate(geomz)
   deallocate(radius)
-  deallocate(temperature)
   deallocate(obsRecnum)
   deallocate(nlocs_begin)
   deallocate(nlocs_end)
-  deallocate(super_refraction_flag)
   deallocate(super)
+
   write(err_msg,*) myname, ": complete"
   call fckit_log%info(err_msg)
+  end if ! end check if ZERO OBS
 
-  end if ! end check if zero obs
+! putting temeprature at obs location to obs space for BackgroundCheck RONBAM
+  call obsspace_put_db(obss, "MetaData", "temperature", temperature)
+! putting super refraction flag to obs space 
+  call obsspace_put_db(obss, "SRflag",   "bending_angle", super_refraction_flag)
+! saving obs vertical model layer postion for later
+  call obsspace_put_db(obss, "LayerIdx",   "bending_angle", LayerIdx)
+  deallocate(super_refraction_flag)
+  deallocate(temperature)
+  deallocate(LayerIdx)
+
 end subroutine ufo_gnssro_bndnbam_simobs
 ! ------------------------------------------------------------------------------
 end module ufo_gnssro_bndnbam_mod

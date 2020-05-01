@@ -11,6 +11,8 @@ set (  qc_src_files
        ufo_roobserror_mod.F90
        BackgroundCheckRONBAM.h
        BackgroundCheckRONBAM.cc
+       actions/ROobserrInflation.cc
+       actions/ROobserrInflation.h
 PARENT_SCOPE
 )
 

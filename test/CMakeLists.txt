@@ -68,7 +68,7 @@ list( APPEND ufo_test_input
   testinput/gnssrobndnbam_obs_error.yaml
   testinput/gnssrobndnbam_backgroundcheck_qc.yaml
   testinput/gnssrobndnbam_super_refraction.yaml
-
+  testinput/gnssrobndnbam_qc_action_obserr_inflation.yaml
   testinput/gnssroref.yaml
   testinput/gnssrobndnbam_0obs.yaml
   testinput/gnssrobndnbam_1obs.yaml
@@ -1189,6 +1189,12 @@ ecbuild_add_test( TARGET  test_ufo_qc_gnssro_backgroundcheck
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
                   ENVIRONMENT OOPS_TRAPFPE=1
                   ARGS    "testinput/gnssrobndnbam_backgroundcheck_qc.yaml"
+                  DEPENDS test_ObsFilters.x )
+
+ecbuild_add_test( TARGET  test_ufo_qc_action_gnssroBndNBAM_obserr_inflation
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  ARGS    "testinput/gnssrobndnbam_qc_action_obserr_inflation.yaml"
                   DEPENDS test_ObsFilters.x )
 
 # Test bias correction classes
