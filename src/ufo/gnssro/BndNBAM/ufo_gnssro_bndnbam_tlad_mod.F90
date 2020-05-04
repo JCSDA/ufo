@@ -71,14 +71,11 @@ subroutine ufo_gnssro_bndnbam_tlad_settraj(self, geovals, obss)
   real(kind_real)                 :: geomzi
   real(kind_real), allocatable    :: obsLat(:), obsImpP(:), obsLocR(:), obsGeoid(:)
   integer(c_size_t), allocatable  :: obsRecnum(:)
-  real(kind_real)                 :: d_refXrad, gradRef,obsImpH
+  real(kind_real)                 :: d_refXrad, gradRef
   real(kind_real)                 :: d_refXrad_tl
   real(kind_real)                 :: grids(ngrd)
   real(kind_real)                 :: sIndx 
   integer                         :: indx
-  logical                         :: qc_layer_SR
-  integer                         :: count_SR, top_layer_SR, bot_layer_SR !for super refraction
-  integer                         :: count_rejection
   real(kind_real)                 :: p_coef, t_coef, q_coef
   real(kind_real)                 :: fv, pw
   real(kind_real)                 :: dbetaxi, dbetan
@@ -93,7 +90,10 @@ subroutine ufo_gnssro_bndnbam_tlad_settraj(self, geovals, obss)
   real(kind_real), allocatable    :: dndp(:,:), dndt(:,:), dndq(:,:)
   real(kind_real), allocatable    :: dxidp(:,:), dxidt(:,:), dxidq(:,:)
   real(kind_real), allocatable    :: dbenddxi(:), dbenddn(:)
- 
+  integer,         allocatable    :: super_refraction_flag(:)
+  integer,         allocatable    :: obsSRflag(:)
+  integer                         :: hasSRflag
+
   write(err_msg,*) myname, ": begin"
   call fckit_log%info(err_msg)
 
@@ -106,6 +106,7 @@ subroutine ufo_gnssro_bndnbam_tlad_settraj(self, geovals, obss)
   write(err_msg,*) myname, ': nlocs from gelvals and hofx, nrecs', nlocs, nrecs
   call fckit_log%info(err_msg)
 
+if (nlocs > 0 ) then
 ! get variables from geovals
   call ufo_geovals_get_var(geovals, var_ts,  t)         ! air temperature
   call ufo_geovals_get_var(geovals, var_q,   q)         ! specific humidity
@@ -113,9 +114,6 @@ subroutine ufo_gnssro_bndnbam_tlad_settraj(self, geovals, obss)
   if (self%roconf%vertlayer .eq. "mass") then
     call ufo_geovals_get_var(geovals, var_prs,   prs)       ! pressure
     call ufo_geovals_get_var(geovals, var_z,     gph)       ! geopotential height
-  else if (self%roconf%vertlayer .eq. "full") then
-    call ufo_geovals_get_var(geovals, var_prsi,  prs)       ! pressure
-    call ufo_geovals_get_var(geovals, var_zi,    gph)       ! geopotential height
   else
     call ufo_geovals_get_var(geovals, var_prsi,  prs)       ! pressure
     call ufo_geovals_get_var(geovals, var_zi,    gph)
@@ -188,6 +186,14 @@ subroutine ufo_gnssro_bndnbam_tlad_settraj(self, geovals, obss)
   call obsspace_get_db(obss, "MetaData", "geoid_height_above_reference_ellipsoid", obsGeoid)
   call obsspace_get_recnum(obss, obsRecnum)
 
+  if (  obsspace_has(obss,  "SR_flag",  "bending_angle") ) then
+    allocate(obsSRflag(nlocs))
+    call obsspace_get_db(obss,  "SR_flag", "bending_angle", obsSRflag)
+    hasSRflag = 1 ! SR_flag generated in hofx for real case run
+  else
+    hasSRflag = 0 ! SR_flag does not exist in ctest
+  end if
+
   self%nlocs_begin=1
   self%nlocs_end=1
 
@@ -200,10 +206,6 @@ subroutine ufo_gnssro_bndnbam_tlad_settraj(self, geovals, obss)
     end if
   end do
   self%nlocs_end(nrecs)= nlocs
-
-!to remove
- ! write(err_msg,*) "nlocs begin and end",(self%nlocs_begin(iobs), self%nlocs_end(iobs), iobs=1, nrecs)
- ! call fckit_log%info(err_msg)
 
   if (icount /= nrecs) then
     write(err_msg,*) "record number is not consistent :", icount, nrecs
@@ -245,7 +247,6 @@ subroutine ufo_gnssro_bndnbam_tlad_settraj(self, geovals, obss)
      grids(j) = (j-1) * ds
   end do
 
-  count_rejection = 0
 ! calculate jacobian
   call gnssro_ref_constants(self%roconf%use_compress)
 
@@ -254,6 +255,10 @@ subroutine ufo_gnssro_bndnbam_tlad_settraj(self, geovals, obss)
     obs_loop: do icount = self%nlocs_begin(irec), self%nlocs_end(irec)
 
       iobs = iobs + 1
+
+      if (hasSRflag == 1) then
+         if (obsSRflag(iobs) > 0)  cycle obs_loop
+      end if
 
       dxidt=zero; dxidp=zero; dxidq=zero
       dndt=zero;  dndq=zero;  dndp=zero
@@ -277,46 +282,6 @@ subroutine ufo_gnssro_bndnbam_tlad_settraj(self, geovals, obss)
          cycle obs_loop
       end if
 
-!     (2) super-refaction
-      qc_layer_SR  = .false.
-      count_SR     = 0
-      top_layer_SR = 0
-      bot_layer_SR = 0
-
-      obsImpH = (obsImpP(iobs) - obsLocR(iobs)) * r1em3 !impact heigt: a-r_earth
-      if (obsImpH <= six) then
-       do k = nlevCheck, 1, -1
-!         check for model SR layer
-          gradRef = 1000.0_kind_real * (ref(k+1)-ref(k)) /       &
-                                    (radius(k+1)-radius(k))
-
-!         PLEASE KEEP this COMMENT:
-!         this check needs RO profile, which was done with MPI reduce in NBAM
-!         not applied here yet
-
-!         only check once - SR-likely layer detected
-          if (.not.qc_layer_SR .and. abs(gradRef)>= half*crit_gradRefr) then
-             qc_layer_SR=.true.
-          endif
-
-!         relax to close-to-SR conditions
-          if (abs(gradRef) >= 0.75_kind_real*crit_gradRefr) then
-             count_SR=count_SR+1        ! layers of SR
-             if (count_SR > 1 ) then
-                bot_layer_SR=k
-             else
-                top_layer_SR=k
-                bot_layer_SR=top_layer_SR
-             endif
-          endif
-       end do
-
-!      obs inside model SR layer
-       if (top_layer_SR >= 1 .and. obsImpP(iobs) <= refXrad(top_layer_SR+2)) then
-          cycle obs_loop
-       end if
-
-      end if ! obsImpH <= six
       do k = 1, nlev
 
 !       jacobian for refractivity(N)
@@ -443,7 +408,6 @@ subroutine ufo_gnssro_bndnbam_tlad_settraj(self, geovals, obss)
     end do obs_loop
   end do rec_loop
 
-  self%ltraj = .true.
 
   deallocate(obsLat)
   deallocate(obsImpP)
@@ -474,7 +438,10 @@ subroutine ufo_gnssro_bndnbam_tlad_settraj(self, geovals, obss)
   deallocate(lagConst)
   deallocate(lagConst_tl)
   deallocate(obsRecnum)
+  if (allocated(obsSRflag)) deallocate(obsSRflag)
 
+end if
+  self%ltraj = .true.
   write(err_msg,*) myname, ": complete"
   call fckit_log%info(err_msg)
 
@@ -498,17 +465,18 @@ subroutine ufo_gnssro_bndnbam_simobs_tl(self, geovals, hofx, obss)
   write(err_msg,*) myname, ": begin"
   call fckit_log%info(err_msg)
 
-! missing = missing_value(missing)
-  hofx = missing_value(missing)
-
 ! check if trajectory was set
   if (.not. self%ltraj) then
       write(err_msg,*) myname, ' trajectory was not set!'
       call abor1_ftn(err_msg)
   endif
 
+
+if (geovals%nlocs > 0 ) then
+  hofx = missing_value(missing)
+
 ! check if nlocs is consistent in geovals & hofx
-  if (geovals%nlocs /= size(hofx)) then
+  if (self%nlocs /= size(hofx)) then
       write(err_msg,*) myname, ' error: nlocs inconsistent!'
       call abor1_ftn(err_msg)
   endif
@@ -517,8 +485,6 @@ subroutine ufo_gnssro_bndnbam_simobs_tl(self, geovals, hofx, obss)
   call ufo_geovals_get_var(geovals, var_q,   q_tl)         ! specific humidity
   if (self%roconf%vertlayer .eq. "mass") then
     call ufo_geovals_get_var(geovals, var_prs,   prs_tl)       ! pressure
-  else if (self%roconf%vertlayer .eq. "full") then
-    call ufo_geovals_get_var(geovals, var_prsi,  prs_tl)       ! pressure
   else
     call ufo_geovals_get_var(geovals, var_prsi,  prs_tl)       ! pressure
   end if
@@ -526,7 +492,6 @@ subroutine ufo_gnssro_bndnbam_simobs_tl(self, geovals, hofx, obss)
   nlocs = self%nlocs
   nlev  = self%nlev
   nlev1 = self%nlev1
-
   allocate(gesT_tl(nlev, nlocs)) 
   allocate(gesQ_tl(nlev, nlocs))
   allocate(gesP_tl(nlev1,nlocs)) 
@@ -562,7 +527,7 @@ subroutine ufo_gnssro_bndnbam_simobs_tl(self, geovals, hofx, obss)
   rec_loop: do irec = 1, self%nrecs
      obs_loop: do icount = self%nlocs_begin(irec), self%nlocs_end(irec)
         iobs = iobs + 1
-        if (self%jac_t(1,iobs) /= missing ) then ! .and. hofx(iobs) /= missing) then
+        if (self%jac_t(1,iobs) /= missing ) then
         sumIntgl = 0.0
         do k = 1, nlev
             sumIntgl = sumIntgl + self%jac_t(k,iobs)*gesT_tl(k,iobs) &
@@ -578,6 +543,8 @@ subroutine ufo_gnssro_bndnbam_simobs_tl(self, geovals, hofx, obss)
   deallocate(gesT_tl)
   deallocate(gesP_tl)
   deallocate(gesQ_tl)
+
+end if
 
   write(err_msg,*) "TRACE: ufo_gnssro_bndnbam_simobs_tl: begin"
   call fckit_log%info(err_msg)
@@ -605,7 +572,9 @@ subroutine ufo_gnssro_bndnbam_simobs_ad(self, geovals, hofx, obss)
      write(err_msg,*) myname, ' trajectory wasnt set!'
      call abor1_ftn(err_msg)
   endif
-  
+ 
+if (self%nlocs > 0 ) then
+ 
 ! check if nlocs is consistent in geovals & hofx
   if (geovals%nlocs /= size(hofx)) then
       write(err_msg,*) myname, ' error: nlocs inconsistent!'
@@ -617,8 +586,6 @@ subroutine ufo_gnssro_bndnbam_simobs_ad(self, geovals, hofx, obss)
 
   if (self%roconf%vertlayer .eq. "mass") then
     call ufo_geovals_get_var(geovals, var_prs,   prs_ad)       ! pressure
-  else if (self%roconf%vertlayer .eq. "full") then
-    call ufo_geovals_get_var(geovals, var_prsi,  prs_ad)       ! pressure
   else
     call ufo_geovals_get_var(geovals, var_prsi,  prs_ad)       ! pressure
   end if
@@ -705,7 +672,7 @@ subroutine ufo_gnssro_bndnbam_simobs_ad(self, geovals, hofx, obss)
   deallocate(gesT_ad)
   deallocate(gesP_ad)
   deallocate(gesQ_ad)
-
+end if
   write(err_msg,*) "TRACE: ufo_gnssro_bndnbam_simobs_ad: begin"
   call fckit_log%info(err_msg)
 
