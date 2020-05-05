@@ -80,7 +80,7 @@ Observations:
        channels: *all_channels
        options:
          channels: *all_channels
-         bias_test: GsiBc
+         test_bias: GsiBc
          use_flag: [1, -1, -1, -1, 1, -1, -1, -1, 1, -1, 1, -1, 1,
                    -1, 1, 1, 1, -1, 1, 1, -1, 1, 1, 1, -1, -1, 1, 1, -1, 1, -1, 1, -1, 1,
                    -1, -1, -1, -1, -1, -1, -1, -1, 1, 1, 1, -1, 1, 1, 1, 1, 1, 1, 1, 1, 1,

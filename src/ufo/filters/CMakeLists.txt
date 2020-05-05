@@ -79,6 +79,8 @@ set ( filters_files
       obsfunctions/CLWRetMW.h
       obsfunctions/CLWRetSymmetricMW.cc
       obsfunctions/CLWRetSymmetricMW.h
+      obsfunctions/HydrometeorCheckAMSUA.cc
+      obsfunctions/HydrometeorCheckAMSUA.h
       obsfunctions/ObsErrorModelRamp.cc
       obsfunctions/ObsErrorModelRamp.h
       obsfunctions/ObsFunction.cc
@@ -87,8 +89,8 @@ set ( filters_files
       obsfunctions/ObsFunctionBase.h
       obsfunctions/CloudDetectMinResidualIR.cc
       obsfunctions/CloudDetectMinResidualIR.h
-      obsfunctions/ObsErrorBoundRad.cc
-      obsfunctions/ObsErrorBoundRad.h
+      obsfunctions/ObsErrorBoundIR.cc
+      obsfunctions/ObsErrorBoundIR.h
       obsfunctions/ObsErrorFactorSurfJacobianRad.cc
       obsfunctions/ObsErrorFactorSurfJacobianRad.h
       obsfunctions/ObsErrorFactorLatRad.cc

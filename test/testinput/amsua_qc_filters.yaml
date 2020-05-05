@@ -23,6 +23,23 @@ Observations:
        channels: &all_channels 1-15 
    GeoVaLs: 
      filename: Data/amsua_n19_geoval_2018041500_m_qc.nc4
+   ObsBias:
+     name: GSI
+     newpc4pred: true
+     emiss_bc: true
+     abias_in: Data/satbias_crtm_in
+     predictors: [constant,
+                  scan_angle,
+                  cloud_liquid_water,
+                  lapse_rate_squared,
+                  lapse_rate,
+                  cosine_of_latitude_times_orbit_node,
+                  sine_of_latitude,
+                  emissivity,
+                  scan_angle_4th_order,
+                  scan_angle_3rd_order,
+                  scan_angle_2nd_order,
+                  scan_angle_1st_order]
    ObsFilters:
    - Filter: BlackList 
      filter variables:
@@ -41,8 +58,6 @@ Observations:
                clwret_ch238: 1
                clwret_ch314: 2
                clwret_types: [ObsValue, HofX]
-               test_group: GsiObsBias
-               bias_application: HofX
            x0:    [ 0.050,  0.030,  0.030,  0.020,  0.000,
                     0.100,  0.000,  0.000,  0.000,  0.000,
                     0.000,  0.000,  0.000,  0.000,  0.030]
@@ -67,7 +82,6 @@ Observations:
          clwret_ch238: 1
          clwret_ch314: 2
          clwret_types: [ObsValue]
-         test_group: GsiObsBias
      maxvalue: 999.0 
      action:
        name: reject 
@@ -82,12 +96,55 @@ Observations:
          clwret_ch238: 1
          clwret_ch314: 2
          clwret_types: [HofX]
-         test_group: GsiObsBias
-         bias_application: HofX
      maxvalue: 999.0 
      action:
        name: reject 
 #   passedBenchmark: 1472
+#  Hydrometeor Check (cloud/precipitation affected chanels)
+   - Filter: Bounds Check
+     filter variables:
+     - name: brightness_temperature
+       channels: *all_channels
+     test variables:
+     - name: HydrometeorCheckAMSUA@ObsFunction
+       channels: *all_channels
+       options:
+         channels: *all_channels
+         obserr_clearsky: [ 2.500, 2.200, 2.000, 0.550, 0.300,
+                            0.230, 0.230, 0.250, 0.250, 0.350,
+                            0.400, 0.550, 0.800, 3.000, 3.500]
+         clwret_function:
+           name: CLWRetMW@ObsFunction
+           options:
+             clwret_ch238: 1
+             clwret_ch314: 2
+             clwret_types: [ObsValue]
+         obserr_function:
+           name: ObsErrorModelRamp@ObsFunction
+           channels: *all_channels
+           options:
+             channels: *all_channels
+             xvar:
+               name: CLWRetSymmetricMW@ObsFunction
+               options:
+                 clwret_ch238: 1
+                 clwret_ch314: 2
+                 clwret_types: [ObsValue, HofX]
+             x0:    [ 0.050,  0.030,  0.030,  0.020,  0.000,
+                      0.100,  0.000,  0.000,  0.000,  0.000,
+                      0.000,  0.000,  0.000,  0.000,  0.030]
+             x1:    [ 0.600,  0.450,  0.400,  0.450,  1.000,
+                      1.500,  0.000,  0.000,  0.000,  0.000,
+                      0.000,  0.000,  0.000,  0.000,  0.200]
+             err0:  [ 2.500,  2.200,  2.000,  0.550,  0.300,
+                      0.230,  0.230,  0.250,  0.250,  0.350,
+                      0.400,  0.550,  0.800,  3.000,  3.500]
+             err1:  [20.000, 18.000, 12.000,  3.000,  0.500,
+                      0.300,  0.230,  0.250,  0.250,  0.350,
+                      0.400,  0.550,  0.800,  3.000, 18.000]
+     maxvalue: 0.0
+     action:
+       name: reject
 #  Useflag check
    - Filter: BlackList
      filter variables:
@@ -95,4 +152,5 @@ Observations:
        channels: 7, 8, 14
      action:
        name: reject
-   passedBenchmark: 1172 
+   passedBenchmark: 972    # before Grosschk 
+#   passedBenchmark: 1172  # before HydrometeorCheck   

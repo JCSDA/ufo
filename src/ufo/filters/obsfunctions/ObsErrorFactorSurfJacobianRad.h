@@ -39,7 +39,7 @@ class ObsErrorFactorSurfJacobianRadParameters : public oops::Parameters {
   oops::RequiredParameter<std::vector<float>> obserrScaleFactorEsfc{"obserr_demisf", this};
 
   /// Name of the data group to which the observation error is applied (default: ObsErrorData)
-  oops::Parameter<std::string> testObserr{"obserr_test", "ObsErrorData", this};
+  oops::Parameter<std::string> testObserr{"test_obserr", "ObsErrorData", this};
 };
 
 ///

@@ -35,13 +35,13 @@ CLWRetMW::CLWRetMW(const eckit::LocalConfiguration & conf)
 
   // Get channels for CLW retrieval from options
   const std::vector<int> channels_ = {options_.ch238.value(), options_.ch314.value()};
-  ASSERT(options_.ch238 !=0 && options_.ch314 !=0 && channels_.size() == 2);
+  ASSERT(options_.ch238 != 0 && options_.ch314 != 0 && channels_.size() == 2);
 
   // Include list of required data from ObsSpace
   for (size_t igrp = 0; igrp < options_.varGroup.value().size(); ++igrp) {
     invars_ += Variable("brightness_temperature@" + options_.varGroup.value()[igrp], channels_);
   }
-  invars_ += Variable("brightness_temperature@" + options_.testGroup.value(), channels_);
+  invars_ += Variable("brightness_temperature@" + options_.testBias.value(), channels_);
   invars_ += Variable("sensor_zenith_angle@MetaData");
 
   // Include list of required data from GeoVaLs
@@ -59,8 +59,8 @@ CLWRetMW::~CLWRetMW() {}
 void CLWRetMW::compute(const ObsFilterData & in,
                                     ioda::ObsDataVector<float> & out) const {
   // Get required parameters
-  const std::vector<std::string> &vargrp_ = options_.varGroup;
-  const std::vector<int> channels_ = {options_.ch238, options_.ch314};
+  const std::vector<std::string> &vargrp_ = options_.varGroup.value();
+  const std::vector<int> channels_ = {options_.ch238.value(), options_.ch314.value()};
 
   // Get dimension
   const size_t nlocs = in.nlocs();
@@ -89,9 +89,9 @@ void CLWRetMW::compute(const ObsFilterData & in,
     // Get bias based on group type
     if (options_.addBias.value() == vargrp_[igrp]) {
       std::vector<float> bias238(nlocs), bias314(nlocs);
-      in.get(Variable("brightness_temperature@" + options_.testGroup.value(), channels_)
+      in.get(Variable("brightness_temperature@" + options_.testBias.value(), channels_)
                       [channels_[0]-1], bias238);
-      in.get(Variable("brightness_temperature@" + options_.testGroup.value(), channels_)
+      in.get(Variable("brightness_temperature@" + options_.testBias.value(), channels_)
                       [channels_[1]-1], bias314);
       // Add bias correction to the assigned group
       if (options_.addBias.value() == "ObsValue") {

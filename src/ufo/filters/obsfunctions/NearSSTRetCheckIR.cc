@@ -27,7 +27,7 @@ static ObsFunctionMaker<NearSSTRetCheckIR> makerNearSSTRetCheckIR_("NearSSTRetCh
 
 // -----------------------------------------------------------------------------
 
-NearSSTRetCheckIR::NearSSTRetCheckIR(const eckit::LocalConfiguration conf)
+NearSSTRetCheckIR::NearSSTRetCheckIR(const eckit::LocalConfiguration & conf)
   : invars_() {
   // Check options
   options_.deserialize(conf);

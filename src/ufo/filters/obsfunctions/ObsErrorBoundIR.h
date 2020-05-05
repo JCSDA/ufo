@@ -5,8 +5,8 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#ifndef UFO_FILTERS_OBSFUNCTIONS_OBSERRORBOUNDRAD_H_
-#define UFO_FILTERS_OBSFUNCTIONS_OBSERRORBOUNDRAD_H_
+#ifndef UFO_FILTERS_OBSFUNCTIONS_OBSERRORBOUNDIR_H_
+#define UFO_FILTERS_OBSFUNCTIONS_OBSERRORBOUNDIR_H_
 
 #include <string>
 #include <vector>
@@ -26,7 +26,7 @@ namespace ufo {
 /// \brief Options applying to the determination of observation error bounds as a function
 /// transmittance at model top and latitude
 ///
-class ObsErrorBoundRadParameters : public oops::Parameters {
+class ObsErrorBoundIRParameters : public oops::Parameters {
  public:
   /// List of channels available for assimilation
   oops::RequiredParameter<std::string> channelList{"channels", this};
@@ -34,14 +34,15 @@ class ObsErrorBoundRadParameters : public oops::Parameters {
   /// Maximum value of the observation error bound for each channel in channelList
   oops::RequiredParameter<std::vector<float>> obserrBoundMax{"obserr_bound_max", this};
 
-  /// Name of the variable used to retrieve the cloud liquid water from observation
+  /// Function used to set the observation bound based on Latitude (ObsErrorFactorLatRad)
   oops::RequiredParameter<Variable> obserrBoundLat{"obserr_bound_latitude", this};
 
-  /// Name of the variable used to retrieve the cloud liquid water from background
+  /// Function used to set the observation bound based on transmittance at model top
+  /// (ObsErrorFactorTransmitTopRad)
   oops::RequiredParameter<Variable> obserrBoundTransmittop{"obserr_bound_transmittop", this};
 
   /// Name of the data group to which the observation error is applied (default: ObsErrorData)
-  oops::Parameter<std::string> testObserr{"obserr_test", "ObsErrorData", this};
+  oops::Parameter<std::string> testObserr{"test_obserr", "ObsErrorData", this};
 };
 
 ///
@@ -54,16 +55,16 @@ class ObsErrorBoundRadParameters : public oops::Parameters {
 /// Residual Threshold = MIN( (3.0 * ( 1 / Errflat )^2 * (1 / Errftaotop )^2), ErrobsMax )
 /// Filter out data if |obs-h(x)| > Residual Threshold
 ///
-class ObsErrorBoundRad : public ObsFunctionBase {
+class ObsErrorBoundIR : public ObsFunctionBase {
  public:
-  explicit ObsErrorBoundRad(const eckit::LocalConfiguration &);
-  ~ObsErrorBoundRad();
+  explicit ObsErrorBoundIR(const eckit::LocalConfiguration &);
+  ~ObsErrorBoundIR();
 
   void compute(const ObsFilterData &,
                ioda::ObsDataVector<float> &) const;
   const ufo::Variables & requiredVariables() const;
  private:
-  ObsErrorBoundRadParameters options_;
+  ObsErrorBoundIRParameters options_;
   ufo::Variables invars_;
   std::vector<int> channels_;
 };
@@ -72,4 +73,4 @@ class ObsErrorBoundRad : public ObsFunctionBase {
 
 }  // namespace ufo
 
-#endif  // UFO_FILTERS_OBSFUNCTIONS_OBSERRORBOUNDRAD_H_
+#endif  // UFO_FILTERS_OBSFUNCTIONS_OBSERRORBOUNDIR_H_

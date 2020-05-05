@@ -34,13 +34,13 @@ class NearSSTRetCheckIRParameters : public oops::Parameters {
   oops::RequiredParameter<std::vector<int>> useflagChannel{"use_flag", this};
 
   /// Name of the data group to which the observation error is applied (default: ObsErrorData)
-  oops::Parameter<std::string> testObserr{"obserr_test", "ObsErrorData", this};
+  oops::Parameter<std::string> testObserr{"test_obserr", "ObsErrorData", this};
 
   /// Name of the HofX group used to replace the default group (default is HofX)
-  oops::Parameter<std::string> testHofX{"hofx_test", "HofX", this};
+  oops::Parameter<std::string> testHofX{"test_hofx", "HofX", this};
 
   /// Name of the bias correction group used to replace the default group (default is ObsBias)
-  oops::Parameter<std::string> testBias{"bias_test", "ObsBias", this};
+  oops::Parameter<std::string> testBias{"test_bias", "ObsBias", this};
 };
 
 ///
@@ -57,7 +57,7 @@ class NearSSTRetCheckIRParameters : public oops::Parameters {
 ///
 class NearSSTRetCheckIR : public ObsFunctionBase {
  public:
-  explicit NearSSTRetCheckIR(const eckit::LocalConfiguration);
+  explicit NearSSTRetCheckIR(const eckit::LocalConfiguration &);
   ~NearSSTRetCheckIR();
 
   void compute(const ObsFilterData &,

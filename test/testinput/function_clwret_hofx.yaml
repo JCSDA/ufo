@@ -16,7 +16,7 @@ ObsFunction:
     clwret_ch238: 1
     clwret_ch314: 2
     clwret_types: [GsiHofX]
-    test_group: GsiObsBias
+    test_bias: GsiObsBias
     bias_application: GsiHofX
   variables: [clw_retrieved_from_background]
   tolerance: 1.0e-8

@@ -30,6 +30,8 @@ static ObsFunctionMaker<CLWRetSymmetricMW> makerCLWRetSymmetricMW_("CLWRetSymmet
 CLWRetSymmetricMW::CLWRetSymmetricMW(const eckit::LocalConfiguration & conf)
   : invars_(), conf_(conf) {
   CLWRetMW clwretfunc(conf_);
+  ASSERT(clwretfunc.clwVariableGroups().size() == 2);
+
   invars_ += clwretfunc.requiredVariables();
 }
 

@@ -5,7 +5,7 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#include "ufo/filters/obsfunctions/ObsErrorBoundRad.h"
+#include "ufo/filters/obsfunctions/ObsErrorBoundIR.h"
 
 #include <algorithm>
 #include <cmath>
@@ -24,11 +24,11 @@
 
 namespace ufo {
 
-static ObsFunctionMaker<ObsErrorBoundRad> makerObsErrorBoundRad_("ObsErrorBoundRad");
+static ObsFunctionMaker<ObsErrorBoundIR> makerObsErrorBoundIR_("ObsErrorBoundIR");
 
 // -----------------------------------------------------------------------------
 
-ObsErrorBoundRad::ObsErrorBoundRad(const eckit::LocalConfiguration & conf)
+ObsErrorBoundIR::ObsErrorBoundIR(const eckit::LocalConfiguration & conf)
   : invars_() {
   // Check options
   options_.deserialize(conf);
@@ -51,17 +51,15 @@ ObsErrorBoundRad::ObsErrorBoundRad(const eckit::LocalConfiguration & conf)
   // Include list of required data from ObsSpace
   invars_ += Variable("brightness_temperature@"+errgrp_, channels_);
   invars_ += Variable("brightness_temperature@ObsError", channels_);
-  invars_ += Variable("latitude@MetaData");
-  invars_ += Variable("longitude@MetaData");
 }
 
 // -----------------------------------------------------------------------------
 
-ObsErrorBoundRad::~ObsErrorBoundRad() {}
+ObsErrorBoundIR::~ObsErrorBoundIR() {}
 
 // -----------------------------------------------------------------------------
 
-void ObsErrorBoundRad::compute(const ObsFilterData & in,
+void ObsErrorBoundIR::compute(const ObsFilterData & in,
                                   ioda::ObsDataVector<float> & out) const {
   // Get observation error bounds from options
   const std::vector<float> &obserr_bound_max = options_.obserrBoundMax.value();
@@ -100,7 +98,7 @@ void ObsErrorBoundRad::compute(const ObsFilterData & in,
 
 // -----------------------------------------------------------------------------
 
-const ufo::Variables & ObsErrorBoundRad::requiredVariables() const {
+const ufo::Variables & ObsErrorBoundIR::requiredVariables() const {
   return invars_;
 }
 

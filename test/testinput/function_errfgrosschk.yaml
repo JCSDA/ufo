@@ -63,10 +63,10 @@ GeoVaLs:
 ObsDiag:
   filename: Data/iasi_metop-a_obsdiag_2018041500_m.nc4
 ObsFunction:
-  name: ObsErrorBoundRad@ObsFunction 
+  name: ObsErrorBoundIR@ObsFunction 
   options:
     channels: *all_channels
-    obserr_test: GsiObsError_grosschk 
+    test_obserr: GsiObsError_grosschk 
     obserr_bound_latitude:
       name: ObsErrorFactorLatRad@ObsFunction
       options:

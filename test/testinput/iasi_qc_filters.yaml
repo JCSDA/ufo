@@ -178,7 +178,6 @@ Observations:
        channels: *all_channels
        options:
          channels: *all_channels
-         bias_test: GsiBc
          use_flag: [ 1, -1, -1, -1,  1, -1, -1, -1,  1, -1,
                      1, -1,  1, -1,  1,  1,  1, -1,  1,  1,
                     -1,  1,  1,  1, -1, -1,  1,  1, -1,  1,
@@ -318,7 +317,6 @@ Observations:
        channels: *all_channels
        options:
          channels: *all_channels
-         bias_test: GsiBc
          use_flag: [ 1, -1, -1, -1,  1, -1, -1, -1,  1, -1,
                      1, -1,  1, -1,  1,  1,  1, -1,  1,  1,
                     -1,  1,  1,  1, -1, -1,  1,  1, -1,  1,
@@ -408,7 +406,7 @@ Observations:
      - name: brightness_temperature
        channels: *all_channels
      function absolute threshold:
-     - name: ObsErrorBoundRad@ObsFunction
+     - name: ObsErrorBoundIR@ObsFunction
        channels: *all_channels
        options:
          channels: *all_channels

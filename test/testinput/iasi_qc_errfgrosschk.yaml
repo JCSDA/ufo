@@ -93,7 +93,7 @@ Observations:
      - name: brightness_temperature
        channels: *all_channels
      function absolute threshold:
-     - name: ObsErrorBoundRad@ObsFunction
+     - name: ObsErrorBoundIR@ObsFunction
        channels: *all_channels
        options:
          channels: *all_channels
