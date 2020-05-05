@@ -65,6 +65,7 @@ ObsDiag:
 ObsFunction:
   name: NearSSTRetCheckIR@ObsFunction 
   options:
+    test_qcflag: PreQC 
     test_obserr: GsiObsError_nsstret 
     test_hofx: GsiHofX 
     test_bias: GsiBc 

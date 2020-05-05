@@ -18,6 +18,7 @@
 
 #include "ioda/ObsDataVector.h"
 #include "oops/util/IntSetParser.h"
+#include "oops/util/missingValues.h"
 #include "ufo/filters/Variable.h"
 #include "ufo/utils/Constants.h"
 
@@ -40,6 +41,7 @@ ObsErrorFactorSurfJacobianRad::ObsErrorFactorSurfJacobianRad(const eckit::LocalC
 
   // Get test groups from options
   const std::string &errgrp_ = options_.testObserr.value();
+  const std::string &flaggrp_ = options_.testQCflag.value();
 
   // Include required variables from ObsDiag
   invars_ += Variable("brightness_temperature_jacobian_surface_temperature@ObsDiag", channels_);
@@ -47,6 +49,7 @@ ObsErrorFactorSurfJacobianRad::ObsErrorFactorSurfJacobianRad(const eckit::LocalC
 
   // Include list of required data from ObsSpace
   invars_ += Variable("brightness_temperature@"+errgrp_, channels_);
+  invars_ += Variable("brightness_temperature@"+flaggrp_, channels_);
 
   // Include list of required data from GeoVaLs
   invars_ += Variable("water_area_fraction@GeoVaLs");
@@ -116,19 +119,26 @@ void ObsErrorFactorSurfJacobianRad::compute(const ObsFilterData & in,
   }
 
   // Calculate error factors for each channel
+  std::vector<int> qcflagdata;
   std::vector<float> obserrdata;
   std::vector<float> dbtdts(nlocs);
   std::vector<float> dbtdes(nlocs);
+  float varinv = 0.0;
   const std::string &errgrp_ = options_.testObserr.value();
+  const std::string &flaggrp_ = options_.testQCflag.value();
+  const float missing = util::missingValue(missing);
   for (size_t ichan = 0; ichan < nchans; ++ichan) {
     in.get(Variable("brightness_temperature_jacobian_surface_temperature@ObsDiag",
                      channels_)[ichan], dbtdts);
     in.get(Variable("brightness_temperature_jacobian_surface_emissivity@ObsDiag",
                      channels_)[ichan], dbtdes);
     in.get(Variable("brightness_temperature@"+errgrp_, channels_)[ichan], obserrdata);
+    in.get(Variable("brightness_temperature@"+flaggrp_, channels_)[ichan], qcflagdata);
     for (size_t iloc = 0; iloc < nlocs; ++iloc) {
+      if (flaggrp_ == "PreQC") obserrdata[iloc] == missing ? qcflagdata[iloc] = 100
+                                                           : qcflagdata[iloc] = 0;
+      (qcflagdata[iloc] == 0) ? (varinv = 1.0 / pow(obserrdata[iloc], 2)) : (varinv = 0.0);
       out[ichan][iloc] = 1.0;
-      float varinv = 1.0 / pow(obserrdata[iloc], 2);
       if (varinv > 0.0) {
         float vaux = demisf[iloc] * std::fabs(dbtdes[iloc]) +
                dtempf[iloc] * std::fabs(dbtdts[iloc]);

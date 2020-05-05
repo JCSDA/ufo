@@ -22,7 +22,7 @@ namespace ufo {
 
 // -----------------------------------------------------------------------------
 ObsFilterData::ObsFilterData(ioda::ObsSpace & obsdb)
-  : obsdb_(obsdb), gvals_(NULL), ovecs_(), diags_(NULL), dvecs_() {
+  : obsdb_(obsdb), gvals_(NULL), ovecs_(), diags_(NULL), dvecsf_(), dvecsi_() {
   oops::Log::trace() << "ObsFilterData created" << std::endl;
 }
 
@@ -46,7 +46,13 @@ void ObsFilterData::associate(const ioda::ObsVector & hofx, const std::string & 
 // -----------------------------------------------------------------------------
 /*! Associates ObsDataVector with this ObsFilterData */
 void ObsFilterData::associate(const ioda::ObsDataVector<float> & data, const std::string & name) {
-  dvecs_[name] = &data;
+  dvecsf_[name] = &data;
+}
+
+// -----------------------------------------------------------------------------
+/*! Associates ObsDataVector with this ObsFilterData */
+void ObsFilterData::associate(const ioda::ObsDataVector<int> & data, const std::string & name) {
+  dvecsi_[name] = &data;
 }
 
 // -----------------------------------------------------------------------------
@@ -96,8 +102,19 @@ bool ObsFilterData::hasVector(const std::string & grp, const std::string & var) 
 // -----------------------------------------------------------------------------
 
 bool ObsFilterData::hasDataVector(const std::string & grp, const std::string & var) const {
-  std::map<std::string, const ioda::ObsDataVector<float> *>::const_iterator jj = dvecs_.find(grp);
-  if (jj == dvecs_.end()) {
+  std::map<std::string, const ioda::ObsDataVector<float> *>::const_iterator jj = dvecsf_.find(grp);
+  if (jj == dvecsf_.end()) {
+    return false;
+  } else {
+    return jj->second->has(var);
+  }
+}
+
+// -----------------------------------------------------------------------------
+
+bool ObsFilterData::hasDataVectorInt(const std::string & grp, const std::string & var) const {
+  std::map<std::string, const ioda::ObsDataVector<int> *>::const_iterator jj = dvecsi_.find(grp);
+  if (jj == dvecsi_.end()) {
     return false;
   } else {
     return jj->second->has(var);
@@ -140,18 +157,22 @@ void ObsFilterData::get(const Variable & varname, std::vector<int> & values) con
   const std::string var = varname.variable();
   const std::string grp = varname.group();
 
-  std::size_t nvals = obsdb_.nlocs();
-///  VarMetaData is a special case: size(nvars) instead of (nlocs)
-  if (grp == "VarMetaData")  nvals = obsdb_.nvars();
-
-  values.resize(nvals);
-///  GeoVaLs, HofX, ObsDiag are not supportd for int data
-// TODO(somebody): need something here about obs error
-  if (grp == "GeoVaLs" || grp == "HofX" || grp == "ObsDiag" || grp == "ObsFunction") {
-    oops::Log::error() << "ObsFilterData::get int values only supported for ObsSpace" << std::endl;
-    ABORT("ObsFilterData::get int values only supported for ObsSpace");
-  } else {
+  if (grp == "VarMetaData") {
+    values.resize(obsdb_.nvars());
     obsdb_.get_db(grp, var, values);
+  } else {
+    if (grp == "GeoVaLs" || grp == "HofX" || grp == "ObsDiag" || grp == "ObsFunction") {
+      oops::Log::error() << "ObsFilterData::get int values only supported for ObsSpace"
+                         << std::endl;
+      ABORT("ObsFilterData::get int values only supported for ObsSpace");
+    } else {
+      ioda::ObsDataVector<int> vec(obsdb_, varname.toOopsVariables(), grp, false);
+      this->get(varname, vec);
+      values.resize(obsdb_.nlocs());
+      for (size_t jj = 0; jj < obsdb_.nlocs(); ++jj) {
+        values[jj] = vec[var][jj];
+      }
+    }
   }
 }
 
@@ -221,15 +242,32 @@ void ObsFilterData::get(const Variable & varname, ioda::ObsDataVector<float> & v
     std::vector<float> vec(obsdb_.nlocs());
     diags_->get(vec, var);
     values[var] = vec;
-///  For HofX get from ObsVector H(x) (should be available)
+///  For ObsDataVector
   } else if (this->hasDataVector(grp, var)) {
-    std::map<std::string, const ioda::ObsDataVector<float> *>::const_iterator jv = dvecs_.find(grp);
+    std::map<std::string, const ioda::ObsDataVector<float> *>::const_iterator
+                          jv = dvecsf_.find(grp);
     values = *jv->second;
   } else {
     values.read(grp);
   }
 }
 
+// -----------------------------------------------------------------------------
+/*! Gets requested data from ObsFilterData into ObsDataVector
+ *  \param varname is a name of a variable requested
+ *  \param values on output is data from varname (should be allocated on input)
+ *  \return data associated with varname, in ioda::ObsDataVector<int>
+*/
+void ObsFilterData::get(const Variable & varname, ioda::ObsDataVector<int> & values) const {
+  const std::string var = varname.variable(0);
+  const std::string grp = varname.group();
+  if (this->hasDataVectorInt(grp, var)) {
+    std::map<std::string, const ioda::ObsDataVector<int> *>::const_iterator jv = dvecsi_.find(grp);
+    values = *jv->second;
+  } else {
+    values.read(grp);
+  }
+}
 
 // -----------------------------------------------------------------------------
 /*! Returns number of levels in 3D geovals and obsdiags or
@@ -261,7 +299,11 @@ void ObsFilterData::print(std::ostream & os) const {
     os << ", " << jj->first;
   }
   for (std::map<std::string, const ioda::ObsDataVector<float> *>::const_iterator
-     jj = dvecs_.begin(); jj != dvecs_.end(); ++jj) {
+     jj = dvecsf_.begin(); jj != dvecsf_.end(); ++jj) {
+    os << ", " << jj->first;
+  }
+  for (std::map<std::string, const ioda::ObsDataVector<int> *>::const_iterator
+     jj = dvecsi_.begin(); jj != dvecsi_.end(); ++jj) {
     os << ", " << jj->first;
   }
   if (diags_) {

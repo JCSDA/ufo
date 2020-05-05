@@ -37,7 +37,7 @@ FilterBase::FilterBase(ioda::ObsSpace & os, const eckit::Configuration & config,
   oops::Log::trace() << "FilterBase contructor" << std::endl;
   ASSERT(flags);
   ASSERT(obserr);
-//  data_.associate(flags_, "QCflagsData");
+  data_.associate(*flags_, "QCflagsData");
   data_.associate(*obserr_, "ObsErrorData");
   if (config_.has("filter variables")) {
   // read filter variables

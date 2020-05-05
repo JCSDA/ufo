@@ -40,6 +40,9 @@ class ObsErrorFactorSurfJacobianRadParameters : public oops::Parameters {
 
   /// Name of the data group to which the observation error is applied (default: ObsErrorData)
   oops::Parameter<std::string> testObserr{"test_obserr", "ObsErrorData", this};
+
+  /// Name of the data group to which the QC flag is applied  (default is QCflagsData)
+  oops::Parameter<std::string> testQCflag{"test_qcflag", "QCflagsData", this};
 };
 
 ///

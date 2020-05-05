@@ -17,6 +17,7 @@
 
 #include "ioda/ObsDataVector.h"
 #include "oops/util/IntSetParser.h"
+#include "oops/util/missingValues.h"
 #include "ufo/filters/obsfunctions/ObsErrorFactorLatRad.h"
 #include "ufo/filters/obsfunctions/ObsErrorFactorTransmitTopRad.h"
 #include "ufo/filters/Variable.h"
@@ -47,8 +48,10 @@ ObsErrorBoundIR::ObsErrorBoundIR(const eckit::LocalConfiguration & conf)
 
   // Get test groups from options
   const std::string &errgrp_ = options_.testObserr.value();
+  const std::string &flaggrp_ = options_.testQCflag.value();
 
   // Include list of required data from ObsSpace
+  invars_ += Variable("brightness_temperature@"+flaggrp_, channels_);
   invars_ += Variable("brightness_temperature@"+errgrp_, channels_);
   invars_ += Variable("brightness_temperature@ObsError", channels_);
 }
@@ -78,14 +81,21 @@ void ObsErrorBoundIR::compute(const ObsFilterData & in,
   in.get(obserrtaotop, errftaotop);
 
   // Output integrated error bound for gross check
-  std::vector<float> obserr(nlocs);
-  std::vector<float> obserrdata(nlocs);
+  std::vector<float> obserr(nlocs);      //!< original obs error
+  std::vector<float> obserrdata(nlocs);  //!< effective obs err
+  std::vector<int> qcflagdata(nlocs);    //!< effective qcflag
   const std::string &errgrp_ = options_.testObserr.value();
+  const std::string &flaggrp_ = options_.testQCflag.value();
+  const float missing = util::missingValue(missing);
+  float varinv = 0.0;
   for (size_t ichan = 0; ichan < nchans; ++ichan) {
+    in.get(Variable("brightness_temperature@"+flaggrp_, channels_)[ichan], qcflagdata);
     in.get(Variable("brightness_temperature@"+errgrp_, channels_)[ichan], obserrdata);
     in.get(Variable("brightness_temperature@ObsError", channels_)[ichan], obserr);
     for (size_t iloc = 0; iloc < nlocs; ++iloc) {
-      float varinv = 1.0 / pow(obserrdata[iloc], 2);
+      if (flaggrp_ == "PreQC") obserrdata[iloc] == missing ? qcflagdata[iloc] = 100
+                                                           : qcflagdata[iloc] = 0;
+      (qcflagdata[iloc] == 0) ? (varinv = 1.0 / pow(obserrdata[iloc], 2)) : (varinv = 0.0);
       out[ichan][iloc] = obserr[iloc];
       if (varinv > 0.0) {
         out[ichan][iloc] = std::fmin(3.0 * obserr[iloc]

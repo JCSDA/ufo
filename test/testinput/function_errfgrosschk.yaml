@@ -66,6 +66,7 @@ ObsFunction:
   name: ObsErrorBoundIR@ObsFunction 
   options:
     channels: *all_channels
+    test_qcflag: PreQC
     test_obserr: GsiObsError_grosschk 
     obserr_bound_latitude:
       name: ObsErrorFactorLatRad@ObsFunction
