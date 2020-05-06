@@ -4,24 +4,24 @@
 # which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 
 set ( obsbias_files
-  clw_mod.f90
-  constants.f90
   LinearObsBiasBase.h
   LinearObsBiasBase.cc
   ObsBiasBase.h
   ObsBiasBase.cc
-  ObsBiasRadianceGSI.interface.h
-  ObsBiasRadianceGSI.interface.F90
-  ObsBiasRadianceGSI.h
-  ObsBiasRadianceGSI.cc
-  ObsBiasRadianceGSITLAD.h
-  ObsBiasRadianceGSITLAD.cc
+  ObsBiasLinearCombination.h
+  ObsBiasLinearCombination.cc
+  ObsBiasLinearCombinationTLAD.h
+  ObsBiasLinearCombinationTLAD.cc
 )
 
-PREPEND( _p_obsbias_files       "obsbias"       ${obsbias_files} )
+add_subdirectory( predictors )
+
+PREPEND( _p_obsbias_files       "obsbias"               ${obsbias_files} )
+PREPEND( _p_predictor_files     "obsbias/predictors"    ${predictor_files} )
 
 set ( obsbias_src_files
       ${_p_obsbias_files}
+      ${_p_predictor_files}
       PARENT_SCOPE
 )
 

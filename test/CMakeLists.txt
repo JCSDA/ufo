@@ -158,6 +158,7 @@ list( APPEND ufo_test_data
   atmosphere/amsua_n19_geoval_2018041500_m.nc4
   atmosphere/amsua_n19_geoval_2018041500_s.nc4
   atmosphere/amsua_n19_geoval_2018041500.nc4
+  atmosphere/amsua_n19_tlapmean.txt
   atmosphere/aod_geoval_2018041500_m.nc4
   atmosphere/aod_geoval_2018041500_s.nc4
   atmosphere/atms_npp_geoval_2018041500_m.nc4
@@ -177,6 +178,7 @@ list( APPEND ufo_test_data
   atmosphere/hirs4_metop-a_geoval_2018041500_m.nc4
   atmosphere/iasi_metop-a_obsdiag_2018041500_m.nc4
   atmosphere/iasi_metop-a_geoval_2018041500_m.nc4
+  atmosphere/iasi_metop-a_tlapmean.txt
   atmosphere/met_office_thinning.nc4
   atmosphere/met_office_temporal_thinning_surface.nc4
   atmosphere/met_office_temporal_thinning_sonde.nc4
@@ -1119,11 +1121,13 @@ if ( ${CRTM_FOUND} )
                       ENVIRONMENT OOPS_TRAPFPE=1
                       DEPENDS test_ObsFilters.x )
 
-    ecbuild_add_test( TARGET  test_ufo_qc_amsua_filters
-                      COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-                      ARGS    "testinput/amsua_qc_filters.yaml"
-                      ENVIRONMENT OOPS_TRAPFPE=1
-                      DEPENDS test_ObsFilters.x )
+#  Test to be uncommented in coming PR (2020-05-06)
+#    ecbuild_add_test( TARGET  test_ufo_qc_amsua_filters
+#                      COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+#                      ARGS    "testinput/amsua_qc_filters.yaml"
+#                      ENVIRONMENT OOPS_TRAPFPE=1
+#                      DEPENDS test_ObsFilters.x )
+#  Test to be uncommented in coming PR (2020-05-06)
 
     ecbuild_add_test( TARGET  test_ufo_qc_amsua_miss_val
                       COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x

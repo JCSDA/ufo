@@ -106,21 +106,42 @@ void CLWRetMW::compute(const ObsFilterData & in,
         }
       }
     }
-    const float t0c = Constants::t0c;
-    const float d1 = 0.754, d2 = -2.265;
-    const float c1 = 8.240, c2 = 2.622, c3 = 1.846;
-    for (size_t iloc = 0; iloc < nlocs; ++iloc) {
-      if (water_frac[iloc] >= 0.99) {
-        float cossza = cos(Constants::deg2rad * szas[iloc]);
-        float d0 = c1 - (c2 - c3 * cossza) * cossza;
-        if (tsavg[iloc] > t0c - 1.0 && bt238[iloc] <= 284.0 && bt314[iloc] <= 284.0
-                                    && bt238[iloc] > 0.0 && bt314[iloc] > 0.0) {
-          out[igrp][iloc] = cossza * (d0 + d1 * std::log(285.0 - bt238[iloc])
-                                          + d2 * std::log(285.0 - bt314[iloc]));
-          out[igrp][iloc] = std::max(0.f, out[igrp][iloc]);
-        } else {
-          out[igrp][iloc] = getBadValue();
-        }
+
+    // Compute the cloud liquid qater
+    cloudLiquidWater(szas, tsavg, water_frac, bt238, bt314, out[igrp], nlocs);
+  }
+}
+
+// -----------------------------------------------------------------------------
+
+void CLWRetMW::cloudLiquidWater(const std::vector<float> & szas,
+                                         const std::vector<float> & tsavg,
+                                         const std::vector<float> & water_frac,
+                                         const std::vector<float> & bt238,
+                                         const std::vector<float> & bt314,
+                                         std::vector<float> & out,
+                                         const std::size_t nlocs) {
+  ///
+  /// \brief Retrieve cloud liquid water from AMSU-A 23.8 GHz and 31.4 GHz channels.
+  ///
+  /// Reference: Grody et al. (2001)
+  /// Determination of precipitable water and cloud liquid water over oceans from
+  /// the NOAA 15 advanced microwave sounding unit
+  ///
+  const float t0c = Constants::t0c;
+  const float d1 = 0.754, d2 = -2.265;
+  const float c1 = 8.240, c2 = 2.622, c3 = 1.846;
+  for (size_t iloc = 0; iloc < nlocs; ++iloc) {
+    if (water_frac[iloc] >= 0.99) {
+      float cossza = cos(Constants::deg2rad * szas[iloc]);
+      float d0 = c1 - (c2 - c3 * cossza) * cossza;
+      if (tsavg[iloc] > t0c - 1.0 && bt238[iloc] <= 284.0 && bt314[iloc] <= 284.0
+                                  && bt238[iloc] > 0.0 && bt314[iloc] > 0.0) {
+        out[iloc] = cossza * (d0 + d1 * std::log(285.0 - bt238[iloc])
+                                 + d2 * std::log(285.0 - bt314[iloc]));
+        out[iloc] = std::max(0.f, out[iloc]);
+      } else {
+        out[iloc] = getBadValue();
       }
     }
   }

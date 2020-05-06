@@ -8,12 +8,30 @@
 #include <cmath>
 #include <string>
 
+#include "eckit/config/LocalConfiguration.h"
+
 #include "ufo/obsbias/ObsBiasBase.h"
 
 #include "oops/util/abor1_cpp.h"
+#include "oops/util/IntSetParser.h"
 #include "oops/util/Logger.h"
 
 namespace ufo {
+
+// -----------------------------------------------------------------------------
+
+ObsBiasBase::ObsBiasBase(const eckit::Configuration & conf)
+  : input_filename_(), output_filename_() {
+  // Bias coefficients input file name
+  if (conf.has("ObsBias.abias_in")) {
+    input_filename_ = conf.getString("ObsBias.abias_in");
+  }
+
+  // Bias coefficients output file name
+  if (conf.has("ObsBias.abias_out")) {
+    output_filename_ = conf.getString("ObsBias.abias_out");
+  }
+}
 
 // -----------------------------------------------------------------------------
 
@@ -27,7 +45,9 @@ ObsBiasFactory::ObsBiasFactory(const std::string & name) {
 
 // -----------------------------------------------------------------------------
 
-ObsBiasBase * ObsBiasFactory::create(const ioda::ObsSpace & os, const eckit::Configuration & conf) {
+ObsBiasBase * ObsBiasFactory::create(const eckit::Configuration & conf,
+                                     const std::vector<std::string> & preds,
+                                     const std::vector<int> & jobs) {
   oops::Log::trace() << "ObsBiasBase::create starting" << std::endl;
   if (conf.has("ObsBias")) {
     std::string id = "";
@@ -37,7 +57,7 @@ ObsBiasBase * ObsBiasFactory::create(const ioda::ObsSpace & os, const eckit::Con
       oops::Log::error() << id << " does not exist in ufo::ObsBiasFactory." << std::endl;
       ABORT("Element does not existed in ufo::ObsBiasFactory.");
     }
-    ObsBiasBase * ptr = jloc->second->make(os, conf);
+    ObsBiasBase * ptr = jloc->second->make(conf, preds, jobs);
     oops::Log::trace() << "ObsBiasBase::create done" << std::endl;
     return ptr;
   } else {

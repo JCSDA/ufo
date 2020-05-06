@@ -8,10 +8,13 @@
 #include <cmath>
 #include <memory>
 #include <random>
+#include <set>
 
 #include "ufo/ObsBiasCovariance.h"
 
 #include "ioda/ObsSpace.h"
+
+#include "oops/util/IntSetParser.h"
 #include "oops/util/Logger.h"
 #include "oops/util/Random.h"
 
@@ -22,13 +25,22 @@ namespace ufo {
 
 // -----------------------------------------------------------------------------
 
-ObsBiasCovariance::ObsBiasCovariance(const ioda::ObsSpace & obs, const eckit::Configuration & conf)
-  : conf_(conf), variance_() {
-  std::unique_ptr<ObsBiasBase> biasbase(ObsBiasFactory::create(obs, conf));
-  if (biasbase) {
-    for (std::size_t ii = 0; ii < biasbase->size(); ++ii)
-      variance_.push_back(1.0);
+ObsBiasCovariance::ObsBiasCovariance(const ioda::ObsSpace & odb, const eckit::Configuration & conf)
+  : conf_(conf), variance_(0) {
+  // Get the number of predictors
+  std::vector<eckit::LocalConfiguration> confs;
+  if (conf_.has("ObsBias.predictors")) {
+    conf_.get("ObsBias.predictors", confs);
   }
+
+  /// Get the jobs(channels)
+  std::set<int> jobs;
+  if (conf_.has("ObsBias.jobs")) {
+    jobs = oops::parseIntSet(conf_.getString("ObsBias.jobs"));
+  }
+
+  for (std::size_t ii = 0; ii < confs.size()*jobs.size(); ++ii)
+    variance_.push_back(1.0);
 }
 
 // -----------------------------------------------------------------------------
@@ -41,8 +53,9 @@ void ObsBiasCovariance::linearize(const ObsBias &) {
 
 void ObsBiasCovariance::multiply(const ObsBiasIncrement & bx1, ObsBiasIncrement & bx2) const {
   bx2 = bx1;
-  for (std::size_t ii = 0; ii < variance_.size(); ++ii)
+  for (std::size_t ii = 0; ii < variance_.size(); ++ii) {
     bx2[ii] *= variance_[ii];
+  }
 }
 
 // -----------------------------------------------------------------------------

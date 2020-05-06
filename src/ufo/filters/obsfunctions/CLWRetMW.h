@@ -80,6 +80,13 @@ class CLWRetMW : public ObsFunctionBase {
   const std::vector<std::string> &clwVariableGroups() const {
     return options_.varGroup.value();
   }
+  static void cloudLiquidWater(const std::vector<float> &,
+                               const std::vector<float> &,
+                               const std::vector<float> &,
+                               const std::vector<float> &,
+                               const std::vector<float> &,
+                               std::vector<float> &,
+                               const std::size_t);
   inline static float getBadValue() {return bad_clwret_value_;}
  private:
   ufo::Variables invars_;

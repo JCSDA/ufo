@@ -5,8 +5,8 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
  */
 
-#ifndef UFO_OBSBIAS_OBSBIASRADIANCEGSITLAD_H_
-#define UFO_OBSBIAS_OBSBIASRADIANCEGSITLAD_H_
+#ifndef UFO_OBSBIAS_OBSBIASLINEARCOMBINATIONTLAD_H_
+#define UFO_OBSBIAS_OBSBIASLINEARCOMBINATIONTLAD_H_
 
 #include <memory>
 #include <string>
@@ -32,39 +32,44 @@ namespace ufo {
   class ObsBias;
   class ObsBiasIncrement;
 
-/// Class to handle linear observation bias model from GSI Radiance.
+/// Class to handle linear combination TLAD
 
-class ObsBiasRadianceGSITLAD : public LinearObsBiasBase,
-                               private util::ObjectCounter<ObsBiasRadianceGSITLAD> {
+class ObsBiasLinearCombinationTLAD : public LinearObsBiasBase,
+                               private util::ObjectCounter<ObsBiasLinearCombinationTLAD> {
  public:
-  static const std::string classname() {return "ufo::ObsBiasRadianceGSITLAD";}
+  static const std::string classname() {return "ufo::ObsBiasLinearCombinationTLAD";}
 
 /// Constructor
-  ObsBiasRadianceGSITLAD(const ioda::ObsSpace &, const eckit::Configuration &);
+  ObsBiasLinearCombinationTLAD(const ioda::ObsSpace &,
+                               const eckit::Configuration &,
+                               const std::vector<std::string> &,
+                               const std::vector<int> &);
 
 /// Destructor
-  virtual ~ObsBiasRadianceGSITLAD() {}
+  virtual ~ObsBiasLinearCombinationTLAD() {}
 
 /// Linear algebra operators
   void diff(const ObsBias &, const ObsBias &) override;
   void zero() override;
-  ObsBiasRadianceGSITLAD & operator=(const ObsBiasIncrement &) override;
-  ObsBiasRadianceGSITLAD & operator+=(const ObsBiasIncrement &) override;
-  ObsBiasRadianceGSITLAD & operator-=(const ObsBiasIncrement &) override;
-  ObsBiasRadianceGSITLAD & operator*=(const double) override;
+  ObsBiasLinearCombinationTLAD & operator=(const ObsBiasIncrement &) override;
+  ObsBiasLinearCombinationTLAD & operator+=(const ObsBiasIncrement &) override;
+  ObsBiasLinearCombinationTLAD & operator-=(const ObsBiasIncrement &) override;
+  ObsBiasLinearCombinationTLAD & operator*=(const double) override;
   void axpy(const double, const ObsBiasIncrement &) override;
   double dot_product_with(const ObsBiasIncrement &) const override;
 
 /// I/O and diagnostics
-  void read(const eckit::Configuration &) override;
+  void read(const eckit::Configuration &) const override;
   void write(const eckit::Configuration &) const override;
   double norm() const override;
 
 /// Linear obs bias operator
-  void computeObsBiasTL(const GeoVaLs &, const ioda::ObsDataVector<float> &,
+  void computeObsBiasTL(const GeoVaLs &,
+                        const Eigen::MatrixXd &,
                         ioda::ObsVector &) const override;
 
-  void computeObsBiasAD(GeoVaLs &, const ioda::ObsDataVector<float> &,
+  void computeObsBiasAD(GeoVaLs &,
+                        const Eigen::MatrixXd &,
                         const ioda::ObsVector &) override;
 
 /// Bias parameters interface
@@ -73,20 +78,20 @@ class ObsBiasRadianceGSITLAD : public LinearObsBiasBase,
   const std::vector<double>::iterator begin() {return biascoeffsinc_.begin();}
   const std::vector<double>::iterator end() {return biascoeffsinc_.end();}
 
-  const ioda::ObsSpace & obspace() const override {return odb_;}
+  const ioda::ObsSpace & obsspace() const override {return odb_;}
+
  private:
   void print(std::ostream &) const override;
 
   const ioda::ObsSpace & odb_;
-  std::string sensor_id_;  // sensor_id
-  std::vector<int> channels_;  // channel
 
   std::vector<double> biascoeffsinc_;
-  std::vector<std::string> predictors_;
+  const std::vector<std::string> prednames_;
+  const std::vector<int> jobs_;
 };
 
 // -----------------------------------------------------------------------------
 
 }  // namespace ufo
 
-#endif  // UFO_OBSBIAS_OBSBIASRADIANCEGSITLAD_H_
+#endif  // UFO_OBSBIAS_OBSBIASLINEARCOMBINATIONTLAD_H_

@@ -8,19 +8,24 @@
 #ifndef UFO_OBSBIAS_H_
 #define UFO_OBSBIAS_H_
 
+#include <Eigen/Core>
+
 #include <memory>
 #include <string>
 #include <vector>
 
 #include "eckit/config/LocalConfiguration.h"
 
-#include "ioda/ObsDataVector.h"
-
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
 #include "oops/util/Printable.h"
 
 #include "ufo/obsbias/ObsBiasBase.h"
+#include "ufo/obsbias/predictors/PredictorBase.h"
+
+namespace oops {
+  class Variables;
+}
 
 namespace ioda {
   class ObsSpace;
@@ -48,40 +53,40 @@ class ObsBias : public util::Printable,
   ObsBias & operator+=(const ObsBiasIncrement &);
   ObsBias & operator=(const ObsBias &);
 
-/// I/O and diagnostics
+  // I/O and diagnostics
   void read(const eckit::Configuration &);
   void write(const eckit::Configuration &) const;
   double norm() const;
   std::size_t size() const;
 
-/// Bias parameters interface
+  // Bias parameters interface
   const double & operator[](const unsigned int ii) const {return (*biasbase_)[ii];}
 
-/// Obs bias model
-  void computeObsBias(ioda::ObsVector &, const ioda::ObsDataVector<float> &,
-                      ioda::ObsDataVector<float> &) const;
+  // Obs bias model
+  void computeObsBias(ioda::ObsVector &, const Eigen::MatrixXd &) const;
 
-/// Obs Bias Predictors
-  void computeObsBiasPredictors(const GeoVaLs &, const ObsDiagnostics &,
-                                ioda::ObsDataVector<float> &) const;
+  // Obs Bias Predictors
+  Eigen::MatrixXd computePredictors(const GeoVaLs &, const ObsDiagnostics &) const;
 
-/// Other
+  // Required variables
   const oops::Variables & requiredGeoVaLs() const {return geovars_;}
   const oops::Variables & requiredHdiagnostics() const {return hdiags_;}
-  const oops::Variables & predNames() const {return predNames_;}
-  const eckit::Configuration & config() const {return conf_;}
-  const ioda::ObsSpace & obspace() const {return biasbase_->obspace();}
 
-/// Operator
+  // Operator
   operator bool() const {return biasbase_.get();}
 
  private:
   void print(std::ostream &) const;
+
+  const ioda::ObsSpace & odb_;
+  eckit::LocalConfiguration conf_;
+
   std::unique_ptr<ObsBiasBase> biasbase_;
-  const eckit::LocalConfiguration conf_;
+  std::vector<std::shared_ptr<PredictorBase>> predbases_;
+  std::vector<std::string> prednames_;
+  std::vector<int> jobs_;
   oops::Variables geovars_;
   oops::Variables hdiags_;
-  oops::Variables predNames_;
 };
 
 // -----------------------------------------------------------------------------
