@@ -66,6 +66,7 @@ class CLWRetMWParameters : public oops::Parameters {
 /// Reference: Grody et al. (2001)
 /// Determination of precipitable water and cloud liquid water over oceans from
 /// the NOAA 15 advanced microwave sounding unit
+/// Journal of Geophysical Research (Vol. 106, No. D3, Pages 2943-2953)
 ///
 class CLWRetMW : public ObsFunctionBase {
  public:

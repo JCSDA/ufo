@@ -75,6 +75,8 @@ set ( filters_files
       actions/InflateError.h
       actions/RejectObs.cc
       actions/RejectObs.h
+      obsfunctions/CLWMatchIndexMW.cc
+      obsfunctions/CLWMatchIndexMW.h
       obsfunctions/CLWRetMW.cc
       obsfunctions/CLWRetMW.h
       obsfunctions/CLWRetSymmetricMW.cc
@@ -107,6 +109,8 @@ set ( filters_files
       obsfunctions/ObsFunctionScattering.h
       obsfunctions/ObsFunctionVelocity.cc
       obsfunctions/ObsFunctionVelocity.h
+      obsfunctions/SCATRetMW.cc
+      obsfunctions/SCATRetMW.h
 )
 
 PREPEND( _p_filters_files       "filters"       ${filters_files} )

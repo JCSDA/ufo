@@ -44,6 +44,7 @@ list( APPEND ufo_test_input
   testinput/cris_qc.yaml
   testinput/empty.yaml
   testinput/function_clouddetect.yaml
+  testinput/function_clwmatchidx.yaml
   testinput/function_clwret.yaml
   testinput/function_clwretmean.yaml
   testinput/function_clwret_hofx.yaml
@@ -57,6 +58,7 @@ list( APPEND ufo_test_input
   testinput/function_hydrometeorchk.yaml
   testinput/function_nsstret.yaml
   testinput/function_obserrmean.yaml
+  testinput/function_scatret.yaml
   testinput/function_velocity.yaml
   testinput/gmi_crtm.yaml
   testinput/genericprof.yaml
@@ -937,6 +939,12 @@ ecbuild_add_test( TARGET  test_ufo_function_clouddetect
                   ENVIRONMENT OOPS_TRAPFPE=1
                   LIBS    ufo)
 
+ecbuild_add_test( TARGET  test_ufo_function_clwmatchidx
+                  SOURCES mains/TestObsFunction.cc
+                  ARGS    "testinput/function_clwmatchidx.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  LIBS    ufo)
+
 ecbuild_add_test( TARGET  test_ufo_function_clwret
                   SOURCES mains/TestObsFunction.cc
                   ARGS    "testinput/function_clwret.yaml"
@@ -1012,6 +1020,12 @@ ecbuild_add_test( TARGET  test_ufo_function_nsstret
 ecbuild_add_test( TARGET  test_ufo_function_obserrmean
                   SOURCES mains/TestObsFunction.cc
                   ARGS    "testinput/function_obserrmean.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  LIBS    ufo)
+
+ecbuild_add_test( TARGET  test_ufo_function_scatret
+                  SOURCES mains/TestObsFunction.cc
+                  ARGS    "testinput/function_scatret.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   LIBS    ufo)
 
