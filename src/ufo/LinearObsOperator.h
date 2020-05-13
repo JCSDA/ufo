@@ -53,7 +53,7 @@ class LinearObsOperator : public util::Printable,
   void simulateObsAD(GeoVaLs &, const ioda::ObsVector &, ObsBiasIncrement &) const;
 
 /// Operator input required from Model
-  const oops::Variables & variables() const;
+  const oops::Variables & requiredVars() const;
 
  private:
   void print(std::ostream &) const;

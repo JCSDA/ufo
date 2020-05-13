@@ -38,7 +38,7 @@ class QCmanager : public util::Printable {
   void priorFilter(const GeoVaLs &) const {}
   void postFilter(const ioda::ObsVector &, const ObsDiagnostics &) const;
 
-  const oops::Variables & requiredGeoVaLs() const {return nogeovals_;}
+  const oops::Variables & requiredVars() const {return nogeovals_;}
   const oops::Variables & requiredHdiagnostics() const {return nodiags_;}
 
  private:

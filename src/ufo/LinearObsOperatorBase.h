@@ -43,7 +43,7 @@ class LinearObsOperatorBase : public util::Printable,
   virtual void simulateObsAD(GeoVaLs &, const ioda::ObsVector &) const = 0;
 
 /// Operator input required from Model
-  virtual const oops::Variables & variables() const = 0;
+  virtual const oops::Variables & requiredVars() const = 0;
 
  private:
   virtual void print(std::ostream &) const = 0;

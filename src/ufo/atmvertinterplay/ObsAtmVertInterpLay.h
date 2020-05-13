@@ -44,7 +44,7 @@ class ObsAtmVertInterpLay : public ObsOperatorBase,
   void simulateObs(const GeoVaLs &, ioda::ObsVector &, ObsDiagnostics &) const override;
 
 // Other
-  const oops::Variables & variables() const override {return varin_;}
+  const oops::Variables & requiredVars() const override {return varin_;}
 
   int & toFortran() {return keyOperAtmVertInterpLay_;}
   const int & toFortran() const {return keyOperAtmVertInterpLay_;}

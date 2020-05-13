@@ -62,8 +62,8 @@ void LinearObsOperator::simulateObsAD(GeoVaLs & gvals, const ioda::ObsVector & y
 
 // -----------------------------------------------------------------------------
 
-const oops::Variables & LinearObsOperator::variables() const {
-  return oper_->variables();
+const oops::Variables & LinearObsOperator::requiredVars() const {
+  return oper_->requiredVars();
 }
 
 // -----------------------------------------------------------------------------

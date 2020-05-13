@@ -51,7 +51,7 @@ class ObsTimeOperTLAD : public LinearObsOperatorBase,
   void simulateObsAD(GeoVaLs &, const ioda::ObsVector &) const override;
 
   // Other
-  const oops::Variables & variables() const override {return actualoperator_->variables();}
+  const oops::Variables & requiredVars() const override {return actualoperator_->requiredVars();}
 
  private:
   void print(std::ostream &) const override;

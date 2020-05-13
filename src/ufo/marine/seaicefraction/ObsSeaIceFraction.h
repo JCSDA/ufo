@@ -45,7 +45,7 @@ class ObsSeaIceFraction : public ObsOperatorBase,
   void simulateObs(const GeoVaLs &, ioda::ObsVector &, ObsDiagnostics &) const override;
 
 // Other
-  const oops::Variables & variables() const override {return *varin_;}
+  const oops::Variables & requiredVars() const override {return *varin_;}
 
  private:
   void print(std::ostream &) const override;

@@ -47,7 +47,7 @@ class ObsRadianceRTTOV : public ObsOperatorBase,
   void simulateObs(const GeoVaLs &, ioda::ObsVector &, ObsDiagnostics &) const override;
 
 // Other
-  const oops::Variables & variables() const override {return *varin_;}
+  const oops::Variables & requiredVars() const override {return *varin_;}
 
   int & toFortran() {return keyOperRadianceRTTOV_;}
   const int & toFortran() const {return keyOperRadianceRTTOV_;}

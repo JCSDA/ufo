@@ -46,7 +46,7 @@ class ObsGnssroBndROPP2D : public ObsOperatorBase,
   void simulateObs(const GeoVaLs &, ioda::ObsVector &, ObsDiagnostics &) const override;
 
 // Other
-  const oops::Variables & variables() const override {return *varin_;}
+  const oops::Variables & requiredVars() const override {return *varin_;}
 
   Locations * locations(const util::DateTime &, const util::DateTime &) const override;
 

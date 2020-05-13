@@ -69,7 +69,7 @@ class ObsBias : public util::Printable,
   Eigen::MatrixXd computePredictors(const GeoVaLs &, const ObsDiagnostics &) const;
 
   // Required variables
-  const oops::Variables & requiredGeoVaLs() const {return geovars_;}
+  const oops::Variables & requiredVars() const {return geovars_;}
   const oops::Variables & requiredHdiagnostics() const {return hdiags_;}
 
   // Operator

@@ -249,7 +249,7 @@ void testFilters() {
     filters.preProcess();
 
 /// call priorFilter and postFilter if hofx is available
-    oops::Variables geovars = filters.requiredGeoVaLs();
+    oops::Variables geovars = filters.requiredVars();
     oops::Variables diagvars = filters.requiredHdiagnostics();
     if (typeconfs[jj].has("HofX")) {
 ///   read GeoVaLs from file if required
@@ -279,9 +279,9 @@ void testFilters() {
       const ObsAuxCtrl_ ybias(Test_::obspace()[jj], typeconfs[jj]);
       ObsVector_ hofx(Test_::obspace()[jj]);
       oops::Variables vars;
-      vars += hop.variables();
-      vars += filters.requiredGeoVaLs();
-      if (typeconfs[jj].has("ObsBias")) vars += ybias.requiredGeoVaLs();
+      vars += hop.requiredVars();
+      vars += filters.requiredVars();
+      if (typeconfs[jj].has("ObsBias")) vars += ybias.requiredVars();
       const eckit::LocalConfiguration gconf(typeconfs[jj], "GeoVaLs");
       const GeoVaLs_ gval(gconf, Test_::obspace()[jj], vars);
       oops::Variables diagvars;

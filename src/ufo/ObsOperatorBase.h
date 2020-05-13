@@ -43,7 +43,7 @@ class ObsOperatorBase : public util::Printable,
   virtual void simulateObs(const GeoVaLs &, ioda::ObsVector &, ObsDiagnostics &) const = 0;
 
 /// Operator input required from Model
-  virtual const oops::Variables & variables() const = 0;
+  virtual const oops::Variables & requiredVars() const = 0;
 
 /// Locations for GeoVaLs
   virtual Locations * locations(const util::DateTime &, const util::DateTime &) const;

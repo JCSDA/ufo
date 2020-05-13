@@ -47,8 +47,8 @@ void ObsOperator::simulateObs(const GeoVaLs & gvals, ioda::ObsVector & yy,
 
 // -----------------------------------------------------------------------------
 
-const oops::Variables & ObsOperator::variables() const {
-  return oper_->variables();
+const oops::Variables & ObsOperator::requiredVars() const {
+  return oper_->requiredVars();
 }
 
 // -----------------------------------------------------------------------------
