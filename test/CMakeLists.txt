@@ -128,11 +128,16 @@ list( APPEND ufo_test_input
   testinput/smap_crtm.yaml
   testinput/sndrd1-4_crtm.yaml
   testinput/sfcpcorrected.yaml
+  testinput/profileconsistencychecks_monolithicfilter.yaml
+  testinput/profileconsistencychecks_OPScomparison.yaml
+  testinput/profileconsistencychecks_separatefilters.yaml
+  testinput/profileconsistencychecks_unittests.yaml
   testinput/timeoper.yaml
   testinput/tprof.yaml
   testinput/variables.yaml
   testinput/windprof.yaml
 )
+
 
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/testinput)
 CREATE_SYMLINK( ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR} ${ufo_test_input} )
@@ -213,6 +218,8 @@ list( APPEND ufo_test_data
   filters/met_office_poisson_disk_thinning.nc4
   filters/met_office_buddy_check.nc4
   filters/poisson_disk_thinning_3x3x3x3_regular_grid.nc4
+  filters/met_office_profile_consistency_checks.nc4
+  filters/met_office_profile_consistency_checks_unittests.nc4
 )
 
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Data)
@@ -887,6 +894,24 @@ ecbuild_add_test( TARGET  test_ufo_qc_trackcheck
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsFilters.x )
 
+ecbuild_add_test( TARGET  test_ufo_profileconsistencychecks_monolithicfilter
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                  ARGS    "testinput/profileconsistencychecks_monolithicfilter.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsFilters.x )
+
+ecbuild_add_test( TARGET  test_ufo_profileconsistencychecks_separatefilters
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                  ARGS    "testinput/profileconsistencychecks_separatefilters.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsFilters.x )
+
+ecbuild_add_test( TARGET  test_ufo_profileconsistencychecks_unittests
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                  ARGS    "testinput/profileconsistencychecks_unittests.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsFilters.x )
+
 # Test UFO ObsFilters (specific)
 
 ecbuild_add_test( TARGET  test_ufo_gaussianthinning
@@ -918,6 +943,12 @@ ecbuild_add_test( TARGET  test_ufo_qc_trackcheck_unittests
 ecbuild_add_test( TARGET  test_ufo_qc_poisson_disk_thinning_unittests
                   SOURCES mains/TestPoissonDiskThinning.cc
                   ARGS    "testinput/qc_poisson_disk_thinning_unittests.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  LIBS    ufo)
+
+ecbuild_add_test( TARGET  test_ufo_profileconsistencychecks_OPScomparison
+                  SOURCES mains/TestProfileConsistencyChecks.cc
+                  ARGS    "testinput/profileconsistencychecks_OPScomparison.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   LIBS    ufo)
 

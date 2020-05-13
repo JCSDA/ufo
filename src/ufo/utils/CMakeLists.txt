@@ -8,6 +8,7 @@ set ( utils_files
       Constants.h
       DistanceCalculator.h
       EquispacedBinSelector.h
+      Flags.h
       GeodesicDistanceCalculator.h
       MaxNormDistanceCalculator.h
       parameters/ParameterTraitsVariable.h

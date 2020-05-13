@@ -48,6 +48,9 @@ set ( filters_files
       QCflags.h
       QCmanager.cc
       QCmanager.h
+      ProfileConsistencyChecks.cc
+      ProfileConsistencyChecks.h
+      ProfileConsistencyCheckParameters.h
       Thinning.cc
       Thinning.h
       TemporalThinning.cc
