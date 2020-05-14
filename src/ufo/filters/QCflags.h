@@ -26,7 +26,7 @@ namespace QCflags {
   constexpr int track   = 12;  // observation removed as inconsistent with the rest of track
   constexpr int buddy   = 13;  // observation rejected by the buddy check
   constexpr int derivative = 14;  // observation removed due to metadata derivative value
-  constexpr int profile = 15;  // observation rejected by at least one profile QC ehck
+  constexpr int profile = 15;  // observation rejected by at least one profile QC check
 };  // namespace QCflags
 
 }  // namespace ufo

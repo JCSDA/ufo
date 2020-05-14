@@ -82,7 +82,7 @@ namespace ufo {
     const std::vector <bool> &apply_;
 
     /// Profile numbers for the entire sample
-    const std::vector <uint64_t> profileNums_;
+    const std::vector <size_t> profileNums_;
 
     /// Iterator over profile indices (used for sorting)
     ProfIdxMap profidx_;
