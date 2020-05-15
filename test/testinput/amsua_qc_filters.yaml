@@ -9,7 +9,7 @@ Observations:
      Clouds: [Water, Ice]
      Cloud_Fraction: 1.0
      ObsOptions:
-       Sensor_ID: amsua_n19 
+       Sensor_ID: &Sensor_ID amsua_n19 
        EndianType: little_endian
        CoefficientPath: Data/
    ObsSpace:
@@ -24,22 +24,45 @@ Observations:
    GeoVaLs: 
      filename: Data/amsua_n19_geoval_2018041500_m_qc.nc4
    ObsBias:
-     name: GSI
-     newpc4pred: true
-     emiss_bc: true
+     name: LinearCombination
      abias_in: Data/satbias_crtm_in
-     predictors: [constant,
-                  scan_angle,
-                  cloud_liquid_water,
-                  lapse_rate_squared,
-                  lapse_rate,
-                  cosine_of_latitude_times_orbit_node,
-                  sine_of_latitude,
-                  emissivity,
-                  scan_angle_4th_order,
-                  scan_angle_3rd_order,
-                  scan_angle_2nd_order,
-                  scan_angle_1st_order]
+     abias_out: Data/satbias_crtm_out
+     sensor: *Sensor_ID
+     jobs: *all_channels
+     predictors:
+     - predictor:
+         name: constant
+     - predictor:
+         name: cloud_liquid_water
+         options:
+           clwret_ch238: 1
+           clwret_ch314: 2
+           clwret_types: [GsiHofX]
+     - predictor:
+         name: lapse_rate
+         options:
+           order: 2
+           tlapse: &amsua19tlap Data/amsua_n19_tlapmean.txt
+     - predictor:
+         name: lapse_rate
+         options:
+           tlapse: *amsua19tlap
+     - predictor:
+         name: emissivity
+     - predictor:
+         name: scan_angle
+         options:
+           order: 4
+     - predictor:
+         name: scan_angle
+         options:
+           order: 3
+     - predictor:
+         name: scan_angle
+         options:
+           order: 2
+     - predictor:
+         name: scan_angle
    ObsFilters:
    - Filter: BlackList 
      filter variables:

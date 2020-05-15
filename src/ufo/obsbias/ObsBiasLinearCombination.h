@@ -61,6 +61,11 @@ class ObsBiasLinearCombination : public ObsBiasBase,
 /// Obs bias operator
   void computeObsBias(ioda::ObsVector &, const Eigen::MatrixXd &) const override;
 
+/// save Bias Terms for QC
+  void saveObsBiasTerms(ioda::ObsSpace &,
+                        const std::string &,
+                        const Eigen::MatrixXd &) const override;
+
 /// Bias parameters interface
   std::size_t size() const override {return biascoeffs_.size();}
   double & operator[](const unsigned int ii) override {return biascoeffs_[ii];}

@@ -13,6 +13,7 @@
 #include "oops/base/Variables.h"
 #include "oops/util/IntSetParser.h"
 #include "oops/util/Logger.h"
+
 #include "ufo/ObsBiasIncrement.h"
 
 namespace ufo {
@@ -128,24 +129,36 @@ Eigen::MatrixXd ObsBias::computePredictors(const GeoVaLs & geovals,
 
   Eigen::MatrixXd predData(npreds*njobs, nlocs);
 
-  // temporary workspace
-  Eigen::MatrixXd tmp(njobs, nlocs);
+  if (biasbase_) {
+    // temporary workspace
+    Eigen::MatrixXd tmp(njobs, nlocs);
 
-  for (std::size_t r = 0; r < npreds; ++r) {
-    // initialize with zero
-    tmp.setConstant(0.0);
+    for (std::size_t r = 0; r < npreds; ++r) {
+      // initialize with zero
+      tmp.setConstant(0.0);
 
-    // calculate the predData if it is available
-    predbases_[r]->compute(odb_, geovals, ydiags, jobs_, tmp);
+      // calculate the predictor
+      predbases_[r]->compute(odb_, geovals, ydiags, jobs_, tmp);
 
-    // save
-    for (std::size_t i = 0; i < njobs; ++i) {
-      predData.row(r+i*npreds) = tmp.row(i);
+      // save
+      for (std::size_t i = 0; i < njobs; ++i) {
+        predData.row(r+i*npreds) = tmp.row(i);
+      }
     }
   }
 
   oops::Log::trace() << "ObsBias::computePredictors done." << std::endl;
   return predData;
+}
+
+// -----------------------------------------------------------------------------
+
+void ObsBias::saveObsBiasTerms(ioda::ObsSpace & odb,
+                               const std::string & group,
+                               const Eigen::MatrixXd & predData) const {
+  if (biasbase_) {
+    biasbase_->saveObsBiasTerms(odb, group, predData);
+  }
 }
 
 // -----------------------------------------------------------------------------

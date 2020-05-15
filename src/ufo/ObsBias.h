@@ -68,6 +68,9 @@ class ObsBias : public util::Printable,
   // Obs Bias Predictors
   Eigen::MatrixXd computePredictors(const GeoVaLs &, const ObsDiagnostics &) const;
 
+  // save Bias Terms for QC
+  void saveObsBiasTerms(ioda::ObsSpace &, const std::string &, const Eigen::MatrixXd &) const;
+
   // Required variables
   const oops::Variables & requiredVars() const {return geovars_;}
   const oops::Variables & requiredHdiagnostics() const {return hdiags_;}

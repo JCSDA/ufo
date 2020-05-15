@@ -24,6 +24,7 @@ namespace oops {
 }
 
 namespace ioda {
+  class ObsSpace;
   class ObsVector;
 }
 
@@ -51,6 +52,11 @@ class ObsBiasBase : public util::Printable {
 
   // Bias model
   virtual void computeObsBias(ioda::ObsVector &, const Eigen::MatrixXd &) const = 0;
+
+  // save Bias Terms for QC
+  virtual void saveObsBiasTerms(ioda::ObsSpace &,
+                                const std::string &,
+                                const Eigen::MatrixXd &) const = 0;
 
   // Bias parameters interface
   virtual std::size_t size() const = 0;

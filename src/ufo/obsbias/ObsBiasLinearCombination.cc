@@ -151,7 +151,15 @@ void ObsBiasLinearCombination::computeObsBias(ioda::ObsVector & ybias,
    * ...|
    */
 
-  // map bias coeff to eigen matrix npreds X njobs (read only)
+  /* map bias coeff to eigen matrix npreds X njobs (read only)
+   * bias coeff memory layout (njobs*npreds X nlocs)
+   *        ch1    ch2    ch3     ch4
+   *       --------------------------
+   * pred1 | 0      1      2       4
+   * pred2 | 5      6      7       8
+   * pred3 | 9     10     11      12 
+   * ....  |
+   */
   Eigen::Map<const Eigen::MatrixXd> coeffs(biascoeffs_.data(), npreds, njobs);
 
   Eigen::VectorXd tmp;  // nlocs X 1
@@ -165,6 +173,35 @@ void ObsBiasLinearCombination::computeObsBias(ioda::ObsVector & ybias,
   }
 
   oops::Log::trace() << "ObsBiasLinearCombination::compute done." << std::endl;
+}
+
+// -----------------------------------------------------------------------------
+
+void ObsBiasLinearCombination::saveObsBiasTerms(ioda::ObsSpace & odb,
+                                                const std::string & group,
+                                                const Eigen::MatrixXd & predData) const {
+  oops::Log::trace() << "ObsBias::saveObsBiasTerms startng." << std::endl;
+  const std::size_t nlocs = odb.nlocs();
+  const std::size_t npreds = prednames_.size();
+  const std::size_t njobs = jobs_.size();
+
+  ASSERT(predData.rows() == npreds*njobs && predData.cols() == nlocs);
+
+  //  map bias coeff to eigen matrix npreds X njobs (read only)
+  Eigen::Map<const Eigen::MatrixXd> coeffs(biascoeffs_.data(), npreds, njobs);
+
+  // save ObsBiasTerms (bias_coeff x predictor) for QC
+  std::string varname;
+  std::vector<double> vec(nlocs);
+  for (std::size_t jch = 0; jch < njobs; ++jch) {
+    for (std::size_t jpred = 0; jpred < npreds; ++jpred) {
+      varname = prednames_[jpred] + "_" + std::to_string(jobs_[jch]);
+      Eigen::VectorXd::Map(&vec[0], nlocs) = predData.row(jpred+jch*npreds) * coeffs(jpred, jch);
+      odb.put_db(group, varname, vec);
+    }
+  }
+
+  oops::Log::trace() << "ObsBias::saveObsBiasTerms done." << std::endl;
 }
 
 // -----------------------------------------------------------------------------

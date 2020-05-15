@@ -10,10 +10,13 @@
 #include <Eigen/Core>
 
 #include "eckit/config/Configuration.h"
+
 #include "ioda/ObsSpace.h"
 #include "ioda/ObsVector.h"
+
 #include "oops/base/Variables.h"
 #include "oops/util/DateTime.h"
+
 #include "ufo/GeoVaLs.h"
 #include "ufo/Locations.h"
 #include "ufo/ObsBias.h"
@@ -41,6 +44,7 @@ void ObsOperator::simulateObs(const GeoVaLs & gvals, ioda::ObsVector & yy,
     ioda::ObsVector ybias(odb_);
     Eigen::MatrixXd predData = bias.computePredictors(gvals, ydiags);
     bias.computeObsBias(ybias, predData);
+    bias.saveObsBiasTerms(odb_, "ObsBiasTerm", predData);
     ybias.save("ObsBias");
   }
 }

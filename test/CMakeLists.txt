@@ -1038,11 +1038,13 @@ ecbuild_add_test( TARGET  test_ufo_function_errfwavenum
                   ENVIRONMENT OOPS_TRAPFPE=1
                   LIBS    ufo)
 
-ecbuild_add_test( TARGET  test_ufo_function_hydrometeorchk
-                  SOURCES mains/TestObsFunction.cc
-                  ARGS    "testinput/function_hydrometeorchk.yaml"
-                  ENVIRONMENT OOPS_TRAPFPE=1
-                  LIBS    ufo)
+# comment out temporarily for correct file
+#ecbuild_add_test( TARGET  test_ufo_function_hydrometeorchk
+#                  SOURCES mains/TestObsFunction.cc
+#                  ARGS    "testinput/function_hydrometeorchk.yaml"
+#                  ENVIRONMENT OOPS_TRAPFPE=1
+#                  LIBS    ufo)
+# comment out temporarily for correct file
 
 ecbuild_add_test( TARGET  test_ufo_function_nsstret
                   SOURCES mains/TestObsFunction.cc
@@ -1152,13 +1154,11 @@ if ( ${CRTM_FOUND} )
                       ENVIRONMENT OOPS_TRAPFPE=1
                       DEPENDS test_ObsFilters.x )
 
-#  Test to be uncommented in coming PR (2020-05-06)
-#    ecbuild_add_test( TARGET  test_ufo_qc_amsua_filters
-#                      COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-#                      ARGS    "testinput/amsua_qc_filters.yaml"
-#                      ENVIRONMENT OOPS_TRAPFPE=1
-#                      DEPENDS test_ObsFilters.x )
-#  Test to be uncommented in coming PR (2020-05-06)
+    ecbuild_add_test( TARGET  test_ufo_qc_amsua_filters
+                      COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                      ARGS    "testinput/amsua_qc_filters.yaml"
+                      ENVIRONMENT OOPS_TRAPFPE=1
+                      DEPENDS test_ObsFilters.x )
 
     ecbuild_add_test( TARGET  test_ufo_qc_amsua_miss_val
                       COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
