@@ -11,16 +11,13 @@
 #include <Eigen/Core>
 
 #include <map>
-#include <memory>
 #include <string>
 #include <vector>
 
 #include "oops/util/Printable.h"
 
-#include "ufo/ObsBiasIncrement.h"
-
-namespace oops {
-  class Variables;
+namespace eckit {
+  class Configuration;
 }
 
 namespace ioda {
@@ -29,9 +26,8 @@ namespace ioda {
 }
 
 namespace ufo {
-  class FunctionBase;
-  class GeoVaLs;
-  class ObsDiagnostics;
+  class ObsBias;
+  class ObsBiasIncrement;
 
 // -----------------------------------------------------------------------------
 /// Base class for observation bias operators

@@ -8,7 +8,6 @@
 #include "ufo/obsbias/predictors/CloudLiquidWater.h"
 
 #include <string>
-#include <vector>
 
 #include "ioda/ObsSpace.h"
 
@@ -27,11 +26,12 @@ static PredictorMaker<CloudLiquidWater>
 
 // -----------------------------------------------------------------------------
 
-CloudLiquidWater::CloudLiquidWater(const eckit::Configuration & conf)
-  : PredictorBase(conf)
+CloudLiquidWater::CloudLiquidWater(const eckit::Configuration & conf, const std::vector<int> & jobs)
+  : PredictorBase(conf, jobs)
 {
   // required variables
-  this->updateGeovars({"water_area_fraction", "average_surface_temperature_within_field_of_view"});
+  geovars_ += oops::Variables({"water_area_fraction",
+                               "average_surface_temperature_within_field_of_view"});
 
   // Get channels for CLW retrieval from options
   if (conf.has("predictor.options")) {
@@ -53,15 +53,12 @@ CloudLiquidWater::CloudLiquidWater(const eckit::Configuration & conf)
 void CloudLiquidWater::compute(const ioda::ObsSpace & odb,
                                const GeoVaLs & geovals,
                                const ObsDiagnostics & ydiags,
-                               const std::vector<int> & jobs,
                                Eigen::MatrixXd & out) const {
-  const std::size_t njobs = jobs.size();
+  const std::size_t njobs = jobs_.size();
   const std::size_t nlocs = odb.nlocs();
 
   // assure shape of out
   ASSERT(out.rows() == njobs && out.cols() == nlocs);
-
-  std::vector<int> channels(jobs.begin(), jobs.end());
 
   // Retrieve the brightness temperature from ODB
   std::vector<float> bt238(nlocs), bt314(nlocs);

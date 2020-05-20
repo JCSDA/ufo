@@ -6,7 +6,6 @@
  */
 
 #include <string>
-#include <vector>
 
 #include "ufo/obsbias/predictors/ScanAngle.h"
 
@@ -23,8 +22,8 @@ static PredictorMaker<ScanAngle> makerFuncScanAngle_("scan_angle");
 
 // -----------------------------------------------------------------------------
 
-ScanAngle::ScanAngle(const eckit::Configuration & conf)
-  : PredictorBase(conf), order_(1) {
+ScanAngle::ScanAngle(const eckit::Configuration & conf, const std::vector<int> & jobs)
+  : PredictorBase(conf, jobs), order_(1) {
   // get the order if it is provided in options
   if (conf.has("predictor.options.order")) {
     conf.get("predictor.options.order", order_);
@@ -39,9 +38,8 @@ ScanAngle::ScanAngle(const eckit::Configuration & conf)
 void ScanAngle::compute(const ioda::ObsSpace & odb,
                         const GeoVaLs &,
                         const ObsDiagnostics &,
-                        const std::vector<int> & jobs,
                         Eigen::MatrixXd & out) const {
-  const std::size_t njobs = jobs.size();
+  const std::size_t njobs = jobs_.size();
   const std::size_t nlocs = odb.nlocs();
 
   // assure shape of out

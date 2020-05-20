@@ -6,7 +6,6 @@
  */
 
 #include <string>
-#include <vector>
 
 #include "ufo/obsbias/predictors/Emissivity.h"
 
@@ -15,17 +14,26 @@
 #include "ufo/GeoVaLs.h"
 #include "ufo/ObsDiagnostics.h"
 
+#include "oops/base/Variables.h"
+#include "oops/util/abor1_cpp.h"
+#include "oops/util/Logger.h"
+
 namespace ufo {
 
 static PredictorMaker<Emissivity> makerFuncEmissivity_("emissivity");
 
 // -----------------------------------------------------------------------------
 
-Emissivity::Emissivity(const eckit::Configuration & conf)
-  : PredictorBase(conf) {
+Emissivity::Emissivity(const eckit::Configuration & conf, const std::vector<int> & jobs)
+  : PredictorBase(conf, jobs) {
   // required variables
-  this->updateGeovars({"water_area_fraction"});
-  this->updateHdiagnostics({"brightness_temperature_jacobian_surface_emissivity_CH"});
+  geovars_ += oops::Variables({"water_area_fraction"});
+  if (jobs.size() > 0) {
+    hdiags_ += oops::Variables({"brightness_temperature_jacobian_surface_emissivity"}, jobs);
+  } else {
+    oops::Log::error() << "Channels size is ZERO !" << std::endl;
+    ABORT("Channels size is ZERO !");
+  }
 }
 
 // -----------------------------------------------------------------------------
@@ -33,9 +41,8 @@ Emissivity::Emissivity(const eckit::Configuration & conf)
 void Emissivity::compute(const ioda::ObsSpace & odb,
                          const GeoVaLs & geovals,
                          const ObsDiagnostics & ydiags,
-                         const std::vector<int> & jobs,
                          Eigen::MatrixXd & out) const {
-  const std::size_t njobs = jobs.size();
+  const std::size_t njobs = jobs_.size();
   const std::size_t nlocs = odb.nlocs();
 
   // assure shape of out
@@ -46,7 +53,7 @@ void Emissivity::compute(const ioda::ObsSpace & odb,
   geovals.get(h2o_frac, "water_area_fraction");
   std::string hdiags;
   for (std::size_t jb = 0; jb < njobs; ++jb) {
-    hdiags = "brightness_temperature_jacobian_surface_emissivity_" + std::to_string(jobs[jb]);
+    hdiags = "brightness_temperature_jacobian_surface_emissivity_" + std::to_string(jobs_[jb]);
     ydiags.get(pred, hdiags);
     for (std::size_t jl = 0; jl < nlocs; ++jl) {
       if (h2o_frac[jl] < 0.99 && std::fabs(pred[jl]) > 0.001) {

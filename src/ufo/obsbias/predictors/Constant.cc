@@ -5,8 +5,6 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#include <string>
-
 #include "ufo/obsbias/predictors/Constant.h"
 
 #include "ioda/ObsSpace.h"
@@ -17,8 +15,8 @@ static PredictorMaker<Constant> makerFuncConstant_("constant");
 
 // -----------------------------------------------------------------------------
 
-Constant::Constant(const eckit::Configuration & conf)
-  : PredictorBase(conf) {
+Constant::Constant(const eckit::Configuration & conf, const std::vector<int> & jobs)
+  : PredictorBase(conf, jobs) {
 }
 
 // -----------------------------------------------------------------------------
@@ -26,9 +24,8 @@ Constant::Constant(const eckit::Configuration & conf)
 void Constant::compute(const ioda::ObsSpace & odb,
                        const GeoVaLs &,
                        const ObsDiagnostics &,
-                       const std::vector<int> & jobs,
                        Eigen::MatrixXd & out) const {
-  const std::size_t njobs = jobs.size();
+  const std::size_t njobs = jobs_.size();
   const std::size_t nlocs = odb.nlocs();
 
   // assure shape of out

@@ -6,9 +6,7 @@
  */
 #include <fstream>
 #include <iterator>
-#include <map>
 #include <string>
-#include <vector>
 
 #include "ufo/obsbias/predictors/LapseRate.h"
 
@@ -27,8 +25,8 @@ static PredictorMaker<LapseRate> makerFuncLapseRate_("lapse_rate");
 
 // -----------------------------------------------------------------------------
 
-LapseRate::LapseRate(const eckit::Configuration & conf)
-  : PredictorBase(conf), order_(1)
+LapseRate::LapseRate(const eckit::Configuration & conf, const std::vector<int> & jobs)
+  : PredictorBase(conf, jobs), order_(1)
 {
   // get the order if it is provided in options
   if (conf.has("predictor.options.order")) {
@@ -39,10 +37,15 @@ LapseRate::LapseRate(const eckit::Configuration & conf)
   }
 
   // required variables
-  this->updateGeovars({"air_temperature",
-                       "air_pressure",
-                       "average_surface_temperature_within_field_of_view"});
-  this->updateHdiagnostics({"transmittances_of_atmosphere_layer_CH"});
+  geovars_ += oops::Variables({"air_temperature",
+                               "air_pressure",
+                               "average_surface_temperature_within_field_of_view"});
+  if (jobs.size() > 0) {
+    hdiags_ += oops::Variables({"transmittances_of_atmosphere_layer"}, jobs);
+  } else {
+    oops::Log::error() << "Channels size is ZERO !" << std::endl;
+    ABORT("Channels size is ZERO !");
+  }
 
   // This is a very preliminary method, please revisit
   // more flexibilites are needed
@@ -77,9 +80,8 @@ LapseRate::LapseRate(const eckit::Configuration & conf)
 void LapseRate::compute(const ioda::ObsSpace & odb,
                         const GeoVaLs & geovals,
                         const ObsDiagnostics & ydiags,
-                        const std::vector<int> & jobs,
                         Eigen::MatrixXd & out) const {
-  const std::size_t njobs = jobs.size();
+  const std::size_t njobs = jobs_.size();
   const std::size_t nlocs = odb.nlocs();
 
   // assure shape of out
@@ -98,7 +100,7 @@ void LapseRate::compute(const ioda::ObsSpace & odb,
 
   std::string hdiags;
   for (std::size_t jb = 0; jb < njobs; ++jb) {
-    hdiags = "transmittances_of_atmosphere_layer_" + std::to_string(jobs[jb]);
+    hdiags = "transmittances_of_atmosphere_layer_" + std::to_string(jobs_[jb]);
     tmpvar.clear();
     for (std::size_t js = 0; js < ydiags.nlevs(hdiags); ++js) {
       ydiags.get(pred, hdiags, js+1);
@@ -120,11 +122,11 @@ void LapseRate::compute(const ioda::ObsSpace & odb,
   // sort out the tlapmean based on jobs
   std::vector<float> tlap;
   for (std::size_t jb = 0; jb < njobs; ++jb) {
-    auto it = tlapmean_.find(jobs[jb]);
+    auto it = tlapmean_.find(jobs_[jb]);
     if (it != tlapmean_.end()) {
       tlap.push_back(it->second);
     } else {
-      oops::Log::error() << "Could not locate tlapemean for channel: " << jobs[jb] << std::endl;
+      oops::Log::error() << "Could not locate tlapemean for channel: " << jobs_[jb] << std::endl;
       ABORT("Could not locate tlapemean value");
     }
   }

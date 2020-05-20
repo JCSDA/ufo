@@ -11,13 +11,14 @@
 #include <Eigen/Dense>
 
 #include <map>
-#include <set>
 #include <string>
 #include <vector>
 
 #include <boost/noncopyable.hpp>
 
 #include "eckit/config/LocalConfiguration.h"
+
+#include "oops/base/Variables.h"
 
 namespace eckit {
   class Configuration;
@@ -36,36 +37,32 @@ namespace ufo {
 
 class PredictorBase : private boost::noncopyable {
  public:
-  explicit PredictorBase(const eckit::Configuration &);
+  explicit PredictorBase(const eckit::Configuration &, const std::vector<int> &);
   virtual ~PredictorBase() {}
 
   /// compute the predictor
   virtual void compute(const ioda::ObsSpace &,
                        const GeoVaLs &,
                        const ObsDiagnostics &,
-                       const std::vector<int> &,
                        Eigen::MatrixXd &) const = 0;
 
   /// geovars names required to compute the predictor
-  const std::vector<std::string> & requiredGeovars() const {return geovars_;}
-
-  /// update geovars required to compute the predictor
-  void updateGeovars(const std::vector<std::string>);
+  const oops::Variables & requiredGeovars() const {return geovars_;}
 
   /// hdiags names required to compute the predictor
-  const std::vector<std::string> & requiredHdiagnostics() const {return hdiags_;}
-
-  /// update hdiags names required to compute the predictor
-  void updateHdiagnostics(const std::vector<std::string>);
+  const oops::Variables & requiredHdiagnostics() const {return hdiags_;}
 
   /// predictor name
   std::string & name() {return func_name_;}
   const std::string & name() const {return func_name_;}
 
+ protected:
+  const std::vector<int> jobs_;  ///<  jobs(channels)
+  oops::Variables geovars_;      ///<  required GeoVaLs
+  oops::Variables hdiags_;       ///<  required ObsDiagnostics
+
  private:
-  std::string func_name_;         ///<  predictor name
-  std::vector<std::string> geovars_;    ///<  required GeoVaLs
-  std::vector<std::string> hdiags_;     ///<  required ObsDiagnostics
+  std::string func_name_;        ///<  predictor name
 };
 
 // -----------------------------------------------------------------------------
@@ -73,13 +70,13 @@ class PredictorBase : private boost::noncopyable {
 /// Predictor Factory
 class PredictorFactory {
  public:
-  static PredictorBase * create(const eckit::Configuration &);
+  static PredictorBase * create(const eckit::Configuration &, const std::vector<int> &);
   virtual ~PredictorFactory() { getMakers().clear(); }
   static bool predictorExists(const std::string &);
  protected:
   explicit PredictorFactory(const std::string &);
  private:
-  virtual PredictorBase * make(const eckit::Configuration &) = 0;
+  virtual PredictorBase * make(const eckit::Configuration &, const std::vector<int> &) = 0;
   static std::map < std::string, PredictorFactory * > & getMakers() {
     static std::map < std::string, PredictorFactory * > makers_;
     return makers_;
@@ -90,8 +87,8 @@ class PredictorFactory {
 
 template<class T>
 class PredictorMaker : public PredictorFactory {
-  virtual PredictorBase * make(const eckit::Configuration & conf)
-    { return new T(conf); }
+  virtual PredictorBase * make(const eckit::Configuration & conf, const std::vector<int> & jobs)
+    { return new T(conf, jobs); }
  public:
   explicit PredictorMaker(const std::string & name)
     : PredictorFactory(name) {}

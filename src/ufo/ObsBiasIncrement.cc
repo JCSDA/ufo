@@ -24,24 +24,24 @@ ObsBiasIncrement::ObsBiasIncrement(const ioda::ObsSpace & odb, const eckit::Conf
   : biasbase_(), predbases_(0), jobs_(0), odb_(odb), conf_(conf) {
   oops::Log::trace() << "ObsBiasIncrement::create starting." << std::endl;
 
-  // Predictor factory
-  if (conf_.has("ObsBias.predictors")) {
-    std::vector<eckit::LocalConfiguration> confs;
-    conf_.get("ObsBias.predictors", confs);
-    typedef std::unique_ptr<PredictorBase> predictor;
-    for (std::size_t j = 0; j < confs.size(); ++j) {
-      predbases_.push_back(predictor(PredictorFactory::create(confs[j])));
-      prednames_.push_back(predbases_[j]->name());
-    }
-  }
-
-  ///  get the jobs(channels)
+  /// Get the jobs(channels)
   if (conf_.has("ObsBias.jobs")) {
     const std::set<int> jobs = oops::parseIntSet(conf_.getString("ObsBias.jobs"));
     jobs_.assign(jobs.begin(), jobs.end());
   }
 
-  // bias model factory
+  /// Predictor factory
+  if (conf_.has("ObsBias.predictors")) {
+    std::vector<eckit::LocalConfiguration> confs;
+    conf_.get("ObsBias.predictors", confs);
+    typedef std::unique_ptr<PredictorBase> predictor;
+    for (std::size_t j = 0; j < confs.size(); ++j) {
+      predbases_.push_back(predictor(PredictorFactory::create(confs[j], jobs_)));
+      prednames_.push_back(predbases_[j]->name());
+    }
+  }
+
+  /// Bias model factory
   biasbase_.reset(LinearObsBiasFactory::create(odb_, conf_, prednames_, jobs_));
 
   oops::Log::trace() << "ObsBiasIncrement::create done." << std::endl;
@@ -54,10 +54,10 @@ ObsBiasIncrement::ObsBiasIncrement(const ObsBiasIncrement & other, const bool co
     predbases_(other.predbases_), prednames_(other.prednames_), jobs_(other.jobs_) {
   oops::Log::trace() << "ObsBiasIncrement::copy ctor starting" << std::endl;
 
-  // Creat a new bias model object
+  /// Create a new bias model object
   biasbase_.reset(LinearObsBiasFactory::create(odb_, conf_, prednames_, jobs_));
 
-  // copy the bias model coeff data
+  /// Copy the bias model coeff data
   if (copy && biasbase_) *biasbase_ = other;
 
   oops::Log::trace() << "ObsBiasIncrement::copy ctor done." << std::endl;
@@ -69,27 +69,27 @@ ObsBiasIncrement::ObsBiasIncrement(const ObsBiasIncrement & other,
                                    const eckit::Configuration & conf)
   : odb_(other.odb_), conf_(conf), biasbase_(), predbases_(), prednames_(), jobs_() {
   oops::Log::trace() << "ObsBiasIncrement::copy ctor starting." << std::endl;
-  // Predictor factory
-  if (conf_.has("ObsBias.predictors")) {
-    std::vector<eckit::LocalConfiguration> confs;
-    conf_.get("ObsBias.predictors", confs);
-    typedef std::unique_ptr<PredictorBase> predictor;
-    for (std::size_t j = 0; j < confs.size(); ++j) {
-      predbases_.push_back(predictor(PredictorFactory::create(confs[j])));
-      prednames_.push_back(predbases_[j]->name());
-    }
-  }
-
-  ///  get the jobs(channels)
+  /// Get the jobs(channels)
   if (conf_.has("ObsBias.jobs")) {
     const std::set<int> jobs = oops::parseIntSet(conf_.getString("ObsBias.jobs"));
     jobs_.assign(jobs.begin(), jobs.end());
   }
 
-  // bias model factory
+  /// Predictor factory
+  if (conf_.has("ObsBias.predictors")) {
+    std::vector<eckit::LocalConfiguration> confs;
+    conf_.get("ObsBias.predictors", confs);
+    typedef std::unique_ptr<PredictorBase> predictor;
+    for (std::size_t j = 0; j < confs.size(); ++j) {
+      predbases_.push_back(predictor(PredictorFactory::create(confs[j], jobs_)));
+      prednames_.push_back(predbases_[j]->name());
+    }
+  }
+
+  /// Bias model factory
   biasbase_.reset(LinearObsBiasFactory::create(odb_, conf_, prednames_, jobs_));
 
-  // Copy the data
+  /// Copy the data
   if (biasbase_) *biasbase_ = other;
 
   oops::Log::trace() << "ObsBiasIncrement::copy ctor done." << std::endl;

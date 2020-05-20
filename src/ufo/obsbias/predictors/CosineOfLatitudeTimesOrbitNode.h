@@ -8,8 +8,6 @@
 #ifndef UFO_OBSBIAS_PREDICTORS_COSINEOFLATITUDETIMESORBITNODE_H_
 #define UFO_OBSBIAS_PREDICTORS_COSINEOFLATITUDETIMESORBITNODE_H_
 
-#include <map>
-#include <string>
 #include <vector>
 
 #include "ufo/obsbias/predictors/PredictorBase.h"
@@ -28,13 +26,12 @@ namespace ufo {
 
 class CosineOfLatitudeTimesOrbitNode : public PredictorBase {
  public:
-  explicit CosineOfLatitudeTimesOrbitNode(const eckit::Configuration &);
+  CosineOfLatitudeTimesOrbitNode(const eckit::Configuration &, const std::vector<int> &);
   ~CosineOfLatitudeTimesOrbitNode() {}
 
   void compute(const ioda::ObsSpace &,
                const GeoVaLs &,
                const ObsDiagnostics &,
-               const std::vector<int> &,
                Eigen::MatrixXd &) const override;
 };
 

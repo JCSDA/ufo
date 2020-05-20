@@ -11,7 +11,6 @@
 #include <Eigen/Core>
 
 #include <map>
-#include <memory>
 #include <string>
 #include <vector>
 
@@ -22,10 +21,6 @@
 #include "ioda/ObsDataVector.h"
 
 #include "oops/util/Printable.h"
-
-namespace oops {
-  class Variables;
-}
 
 namespace ioda {
   class ObsVector;

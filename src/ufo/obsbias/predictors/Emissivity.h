@@ -8,7 +8,6 @@
 #ifndef UFO_OBSBIAS_PREDICTORS_EMISSIVITY_H_
 #define UFO_OBSBIAS_PREDICTORS_EMISSIVITY_H_
 
-#include <string>
 #include <vector>
 
 #include "ufo/obsbias/predictors/PredictorBase.h"
@@ -27,13 +26,12 @@ namespace ufo {
 
 class Emissivity : public PredictorBase {
  public:
-  explicit Emissivity(const eckit::Configuration &);
+  Emissivity(const eckit::Configuration &, const std::vector<int> &);
   ~Emissivity() {}
 
   void compute(const ioda::ObsSpace &,
                const GeoVaLs &,
                const ObsDiagnostics &,
-               const std::vector<int> &,
                Eigen::MatrixXd &) const override;
 };
 

@@ -27,9 +27,7 @@ namespace ioda {
 }
 
 namespace ufo {
-  class FunctionBase;
   class ObsBiasIncrement;
-  class ObsDiagnostics;
 
 /// Class to handle observation bias model using linear combination
 

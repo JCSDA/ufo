@@ -7,11 +7,7 @@
 #include "ufo/obsbias/ObsBiasLinearCombination.h"
 
 #include <Eigen/Core>
-
-#include <algorithm>
-#include <cmath>
 #include <fstream>
-#include <utility>
 
 #include "ioda/ObsVector.h"
 
@@ -19,6 +15,7 @@
 #include "oops/util/Logger.h"
 
 #include "ufo/ObsBias.h"
+#include "ufo/ObsBiasIncrement.h"
 
 namespace ufo {
 

@@ -30,29 +30,23 @@ ObsBias::ObsBias(const ioda::ObsSpace & odb, const eckit::Configuration & conf)
     jobs_.assign(jobs.begin(), jobs.end());
   }
 
-  // Predictor factory
+  /// Predictor factory
   if (conf_.has("ObsBias.predictors")) {
     std::vector<eckit::LocalConfiguration> confs;
     conf_.get("ObsBias.predictors", confs);
     for (std::size_t j = 0; j < confs.size(); ++j) {
-      std::shared_ptr<PredictorBase> pred(PredictorFactory::create(confs[j]));
+      std::shared_ptr<PredictorBase> pred(PredictorFactory::create(confs[j], jobs_));
       predbases_.push_back(pred);
       prednames_.push_back(pred->name());
-      geovars_ += oops::Variables(pred->requiredGeovars());
-      for (auto  item : pred->requiredHdiagnostics()) {
-        if (item.size() > 3 && item.substr(item.size() - 3) == "_CH") {
-          hdiags_ += oops::Variables({item.substr(0, item.length() - 3)}, jobs_);
-        } else {
-          hdiags_ += oops::Variables({item});
-        }
-      }
+      geovars_ += pred->requiredGeovars();
+      hdiags_ += pred->requiredHdiagnostics();
     }
   }
 
-  // bias model factory
+  /// Bias model factory
   biasbase_.reset(ObsBiasFactory::create(conf_, prednames_, jobs_));
 
-  /// read or initialize bias coefficients
+  /// Read or initialize bias coefficients
   this->read(conf);
 
   oops::Log::trace() << "ObsBias::create done." << std::endl;
@@ -66,10 +60,10 @@ ObsBias::ObsBias(const ObsBias & other, const bool copy)
     geovars_(other.geovars_), hdiags_(other.hdiags_) {
   oops::Log::trace() << "ObsBias::copy ctor starting." << std::endl;
 
-  // Creat a new bias model object
+  /// Create a new bias model object
   biasbase_.reset(ObsBiasFactory::create(conf_, prednames_, jobs_));
 
-  // copy the bias model coeff data
+  /// Copy the bias model coeff data
   if (copy && biasbase_) *biasbase_ = *other.biasbase_;
 
   oops::Log::trace() << "ObsBias::copy ctor done." << std::endl;
@@ -130,17 +124,17 @@ Eigen::MatrixXd ObsBias::computePredictors(const GeoVaLs & geovals,
   Eigen::MatrixXd predData(npreds*njobs, nlocs);
 
   if (biasbase_) {
-    // temporary workspace
+    /// Temporary workspace
     Eigen::MatrixXd tmp(njobs, nlocs);
 
     for (std::size_t r = 0; r < npreds; ++r) {
-      // initialize with zero
+      /// Initialize with zero
       tmp.setConstant(0.0);
 
-      // calculate the predictor
-      predbases_[r]->compute(odb_, geovals, ydiags, jobs_, tmp);
+      /// Calculate the predictor
+      predbases_[r]->compute(odb_, geovals, ydiags, tmp);
 
-      // save
+      /// Save
       for (std::size_t i = 0; i < njobs; ++i) {
         predData.row(r+i*npreds) = tmp.row(i);
       }

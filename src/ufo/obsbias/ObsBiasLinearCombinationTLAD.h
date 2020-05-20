@@ -8,7 +8,6 @@
 #ifndef UFO_OBSBIAS_OBSBIASLINEARCOMBINATIONTLAD_H_
 #define UFO_OBSBIAS_OBSBIASLINEARCOMBINATIONTLAD_H_
 
-#include <memory>
 #include <string>
 #include <vector>
 
