@@ -47,7 +47,7 @@ RTTOVOneDVarCheck::RTTOVOneDVarCheck(ioda::ObsSpace & obsdb, const eckit::Config
 
   // Setup fortran object
   const eckit::Configuration * conf = &config_;
-  ufo_rttovonedvarcheck_create_f90(key_, obsdb, conf, channels_.size(), channels_[0], 
+  ufo_rttovonedvarcheck_create_f90(key_, obsdb, conf, channels_.size(), channels_[0],
                                    RTTOVOneDVarCheck::qcFlag());
 
   oops::Log::debug() << "RTTOVOneDVarCheck contructor complete. " << std::endl;
