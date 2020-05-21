@@ -66,9 +66,10 @@ ObsFunction:
   name: CloudDetectMinResidualIR@ObsFunction 
   options:
     channels: *all_channels
-    obserr_test: GsiObsError_clddet 
-    hofx_test: GsiHofX 
-    bias_test: GsiBc 
+    test_qcflag: PreQC
+    test_obserr: GsiObsError_clddet 
+    test_hofx: GsiHofX 
+    test_bias: GsiBc 
     use_flag: [1, -1, -1, -1, 1, -1, -1, -1, 1, -1, 1, -1, 1, 
               -1, 1, 1, 1, -1, 1, 1, -1, 1, 1, 1, -1, -1, 1, 1, -1, 1, -1, 1, -1, 1, 
               -1, -1, -1, -1, -1, -1, -1, -1, 1, 1, 1, -1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 

@@ -54,7 +54,7 @@ class ObsTimeOper : public ObsOperatorBase,
   Locations * locations(const util::DateTime &, const util::DateTime &) const override;
 
 // Other
-  const oops::Variables & variables() const override {return actualoperator_->variables();}
+  const oops::Variables & requiredVars() const override {return actualoperator_->requiredVars();}
 
  private:
   void print(std::ostream &) const override;

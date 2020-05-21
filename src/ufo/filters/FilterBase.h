@@ -51,7 +51,7 @@ class FilterBase : public util::Printable {
   void priorFilter(const GeoVaLs &);
   void postFilter(const ioda::ObsVector &, const ObsDiagnostics &);
 
-  oops::Variables requiredGeoVaLs() const {
+  oops::Variables requiredVars() const {
     return allvars_.allFromGroup("GeoVaLs").toOopsVariables();}
   oops::Variables requiredHdiagnostics() const {
     return allvars_.allFromGroup("ObsDiag").toOopsVariables();}

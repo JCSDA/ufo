@@ -45,6 +45,7 @@ list( APPEND ufo_test_input
   testinput/cris_qc.yaml
   testinput/empty.yaml
   testinput/function_clouddetect.yaml
+  testinput/function_clwmatchidx.yaml
   testinput/function_clwret.yaml
   testinput/function_clwretmean.yaml
   testinput/function_clwret_hofx.yaml
@@ -55,8 +56,10 @@ list( APPEND ufo_test_input
   testinput/function_errftopo.yaml
   testinput/function_errftransmittop.yaml
   testinput/function_errfwavenum.yaml
+  testinput/function_hydrometeorchk.yaml
   testinput/function_nsstret.yaml
   testinput/function_obserrmean.yaml
+  testinput/function_scatret.yaml
   testinput/function_velocity.yaml
   testinput/gmi_crtm.yaml
   testinput/genericprof.yaml
@@ -126,11 +129,16 @@ list( APPEND ufo_test_input
   testinput/smap_crtm.yaml
   testinput/sndrd1-4_crtm.yaml
   testinput/sfcpcorrected.yaml
+  testinput/profileconsistencychecks_monolithicfilter.yaml
+  testinput/profileconsistencychecks_OPScomparison.yaml
+  testinput/profileconsistencychecks_separatefilters.yaml
+  testinput/profileconsistencychecks_unittests.yaml
   testinput/timeoper.yaml
   testinput/tprof.yaml
   testinput/variables.yaml
   testinput/windprof.yaml
 )
+
 
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/testinput)
 CREATE_SYMLINK( ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR} ${ufo_test_input} )
@@ -156,6 +164,7 @@ list( APPEND ufo_test_data
   atmosphere/amsua_n19_geoval_2018041500_m.nc4
   atmosphere/amsua_n19_geoval_2018041500_s.nc4
   atmosphere/amsua_n19_geoval_2018041500.nc4
+  atmosphere/amsua_n19_tlapmean.txt
   atmosphere/aod_geoval_2018041500_m.nc4
   atmosphere/aod_geoval_2018041500_s.nc4
   atmosphere/atms_npp_geoval_2018041500_m.nc4
@@ -178,6 +187,7 @@ list( APPEND ufo_test_data
   atmosphere/hirs4_metop-a_geoval_2018041500_m.nc4
   atmosphere/iasi_metop-a_obsdiag_2018041500_m.nc4
   atmosphere/iasi_metop-a_geoval_2018041500_m.nc4
+  atmosphere/iasi_metop-a_tlapmean.txt
   atmosphere/met_office_thinning.nc4
   atmosphere/met_office_temporal_thinning_surface.nc4
   atmosphere/met_office_temporal_thinning_sonde.nc4
@@ -212,6 +222,8 @@ list( APPEND ufo_test_data
   filters/met_office_poisson_disk_thinning.nc4
   filters/met_office_buddy_check.nc4
   filters/poisson_disk_thinning_3x3x3x3_regular_grid.nc4
+  filters/met_office_profile_consistency_checks.nc4
+  filters/met_office_profile_consistency_checks_unittests.nc4
 )
 
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Data)
@@ -892,6 +904,24 @@ ecbuild_add_test( TARGET  test_ufo_qc_trackcheck
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsFilters.x )
 
+ecbuild_add_test( TARGET  test_ufo_profileconsistencychecks_monolithicfilter
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                  ARGS    "testinput/profileconsistencychecks_monolithicfilter.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsFilters.x )
+
+ecbuild_add_test( TARGET  test_ufo_profileconsistencychecks_separatefilters
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                  ARGS    "testinput/profileconsistencychecks_separatefilters.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsFilters.x )
+
+ecbuild_add_test( TARGET  test_ufo_profileconsistencychecks_unittests
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                  ARGS    "testinput/profileconsistencychecks_unittests.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsFilters.x )
+
 # Test UFO ObsFilters (specific)
 
 ecbuild_add_test( TARGET  test_ufo_gaussianthinning
@@ -926,6 +956,12 @@ ecbuild_add_test( TARGET  test_ufo_qc_poisson_disk_thinning_unittests
                   ENVIRONMENT OOPS_TRAPFPE=1
                   LIBS    ufo)
 
+ecbuild_add_test( TARGET  test_ufo_profileconsistencychecks_OPScomparison
+                  SOURCES mains/TestProfileConsistencyChecks.cc
+                  ARGS    "testinput/profileconsistencychecks_OPScomparison.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  LIBS    ufo)
+
 ecbuild_add_test( TARGET  test_ufo_qc_met_office_buddy_check_unittests
                   SOURCES mains/TestMetOfficeBuddyCheck.cc
                   ARGS    "testinput/qc_met_office_buddy_check_unittests.yaml"
@@ -943,6 +979,12 @@ ecbuild_add_test( TARGET  test_ufo_qc_met_office_buddy_pair_finder
 ecbuild_add_test( TARGET  test_ufo_function_clouddetect
                   SOURCES mains/TestObsFunction.cc
                   ARGS    "testinput/function_clouddetect.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  LIBS    ufo)
+
+ecbuild_add_test( TARGET  test_ufo_function_clwmatchidx
+                  SOURCES mains/TestObsFunction.cc
+                  ARGS    "testinput/function_clwmatchidx.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   LIBS    ufo)
 
@@ -1006,6 +1048,14 @@ ecbuild_add_test( TARGET  test_ufo_function_errfwavenum
                   ENVIRONMENT OOPS_TRAPFPE=1
                   LIBS    ufo)
 
+# comment out temporarily for correct file
+#ecbuild_add_test( TARGET  test_ufo_function_hydrometeorchk
+#                  SOURCES mains/TestObsFunction.cc
+#                  ARGS    "testinput/function_hydrometeorchk.yaml"
+#                  ENVIRONMENT OOPS_TRAPFPE=1
+#                  LIBS    ufo)
+# comment out temporarily for correct file
+
 ecbuild_add_test( TARGET  test_ufo_function_nsstret
                   SOURCES mains/TestObsFunction.cc
                   ARGS    "testinput/function_nsstret.yaml"
@@ -1015,6 +1065,12 @@ ecbuild_add_test( TARGET  test_ufo_function_nsstret
 ecbuild_add_test( TARGET  test_ufo_function_obserrmean
                   SOURCES mains/TestObsFunction.cc
                   ARGS    "testinput/function_obserrmean.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  LIBS    ufo)
+
+ecbuild_add_test( TARGET  test_ufo_function_scatret
+                  SOURCES mains/TestObsFunction.cc
+                  ARGS    "testinput/function_scatret.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   LIBS    ufo)
 

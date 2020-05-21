@@ -29,13 +29,10 @@ LinearObsOperator::~LinearObsOperator() {}
 
 void LinearObsOperator::setTrajectory(const GeoVaLs & gvals, const ObsBias & bias) {
   oops::Variables vars;
-  if (bias) vars += bias.requiredHdiagnostics();
+  vars += bias.requiredHdiagnostics();
   ObsDiagnostics ydiags(odb_, Locations(odb_, odb_.windowStart(), odb_.windowEnd()), vars);
   oper_->setTrajectory(gvals, bias, ydiags);
-  if (bias) {
-    biaspreds_.reset(new ioda::ObsDataVector<float>(odb_, bias.predNames(), "", false));
-    bias.computeObsBiasPredictors(gvals, ydiags, *biaspreds_);
-  }
+  biaspreds_.reset(new Eigen::MatrixXd(bias.computePredictors(gvals, ydiags)));
 }
 
 // -----------------------------------------------------------------------------
@@ -63,8 +60,8 @@ void LinearObsOperator::simulateObsAD(GeoVaLs & gvals, const ioda::ObsVector & y
 
 // -----------------------------------------------------------------------------
 
-const oops::Variables & LinearObsOperator::variables() const {
-  return oper_->variables();
+const oops::Variables & LinearObsOperator::requiredVars() const {
+  return oper_->requiredVars();
 }
 
 // -----------------------------------------------------------------------------

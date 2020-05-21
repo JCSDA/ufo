@@ -48,6 +48,9 @@ set ( filters_files
       QCflags.h
       QCmanager.cc
       QCmanager.h
+      ProfileConsistencyChecks.cc
+      ProfileConsistencyChecks.h
+      ProfileConsistencyCheckParameters.h
       Thinning.cc
       Thinning.h
       TemporalThinning.cc
@@ -75,10 +78,14 @@ set ( filters_files
       actions/InflateError.h
       actions/RejectObs.cc
       actions/RejectObs.h
+      obsfunctions/CLWMatchIndexMW.cc
+      obsfunctions/CLWMatchIndexMW.h
       obsfunctions/CLWRetMW.cc
       obsfunctions/CLWRetMW.h
       obsfunctions/CLWRetSymmetricMW.cc
       obsfunctions/CLWRetSymmetricMW.h
+      obsfunctions/HydrometeorCheckAMSUA.cc
+      obsfunctions/HydrometeorCheckAMSUA.h
       obsfunctions/ObsErrorModelRamp.cc
       obsfunctions/ObsErrorModelRamp.h
       obsfunctions/ObsFunction.cc
@@ -87,8 +94,8 @@ set ( filters_files
       obsfunctions/ObsFunctionBase.h
       obsfunctions/CloudDetectMinResidualIR.cc
       obsfunctions/CloudDetectMinResidualIR.h
-      obsfunctions/ObsErrorBoundRad.cc
-      obsfunctions/ObsErrorBoundRad.h
+      obsfunctions/ObsErrorBoundIR.cc
+      obsfunctions/ObsErrorBoundIR.h
       obsfunctions/ObsErrorFactorSurfJacobianRad.cc
       obsfunctions/ObsErrorFactorSurfJacobianRad.h
       obsfunctions/ObsErrorFactorLatRad.cc
@@ -105,6 +112,8 @@ set ( filters_files
       obsfunctions/ObsFunctionScattering.h
       obsfunctions/ObsFunctionVelocity.cc
       obsfunctions/ObsFunctionVelocity.h
+      obsfunctions/SCATRetMW.cc
+      obsfunctions/SCATRetMW.h
 )
 
 PREPEND( _p_filters_files       "filters"       ${filters_files} )

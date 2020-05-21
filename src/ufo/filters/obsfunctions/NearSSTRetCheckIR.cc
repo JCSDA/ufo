@@ -18,6 +18,7 @@
 
 #include "ioda/ObsDataVector.h"
 #include "oops/util/IntSetParser.h"
+#include "oops/util/missingValues.h"
 #include "ufo/filters/Variable.h"
 #include "ufo/utils/Constants.h"
 
@@ -27,7 +28,7 @@ static ObsFunctionMaker<NearSSTRetCheckIR> makerNearSSTRetCheckIR_("NearSSTRetCh
 
 // -----------------------------------------------------------------------------
 
-NearSSTRetCheckIR::NearSSTRetCheckIR(const eckit::LocalConfiguration conf)
+NearSSTRetCheckIR::NearSSTRetCheckIR(const eckit::LocalConfiguration & conf)
   : invars_() {
   // Check options
   options_.deserialize(conf);
@@ -38,6 +39,7 @@ NearSSTRetCheckIR::NearSSTRetCheckIR(const eckit::LocalConfiguration conf)
   ASSERT(channels_.size() > 0);
 
   // Get test groups from options
+  const std::string &flaggrp_ = options_.testQCflag.value();
   const std::string &errgrp_ = options_.testObserr.value();
   const std::string &biasgrp_ = options_.testBias.value();
   const std::string &hofxgrp_ = options_.testHofX.value();
@@ -48,6 +50,7 @@ NearSSTRetCheckIR::NearSSTRetCheckIR(const eckit::LocalConfiguration conf)
   invars_ += Variable("brightness_temperature_jacobian_humidity_mixing_ratio@ObsDiag", channels_);
 
   // Include list of required data from ObsSpace
+  invars_ += Variable("brightness_temperature@"+flaggrp_, channels_);
   invars_ += Variable("brightness_temperature@"+errgrp_, channels_);
   invars_ += Variable("brightness_temperature@"+hofxgrp_, channels_);
   invars_ += Variable("brightness_temperature@"+biasgrp_, channels_);
@@ -78,6 +81,7 @@ void NearSSTRetCheckIR::compute(const ObsFilterData & in,
                                     channels_)[0]);
 
   // Get test groups from options
+  const std::string &flaggrp_ = options_.testQCflag.value();
   const std::string &errgrp_ = options_.testObserr.value();
   const std::string &biasgrp_ = options_.testBias.value();
   const std::string &hofxgrp_ = options_.testHofX.value();
@@ -121,11 +125,16 @@ void NearSSTRetCheckIR::compute(const ObsFilterData & in,
   in.get(Variable("sensor_band_central_radiation_wavenumber@VarMetaData"), wavenumber);
 
   // Get effective observation error and convert it to inverse of the error variance
+  const float missing = util::missingValue(missing);
+  std::vector<int> qcflag(nlocs, 0);
   std::vector<std::vector<float>> varinv(nchans, std::vector<float>(nlocs));
   for (size_t ichan = 0; ichan < nchans; ++ichan) {
     in.get(Variable("brightness_temperature@"+errgrp_, channels_)[ichan], values);
+    in.get(Variable("brightness_temperature@"+flaggrp_, channels_)[ichan], qcflag);
     for (size_t iloc = 0; iloc < nlocs; ++iloc) {
-      varinv[ichan][iloc] = 1.0 / pow(values[iloc], 2);
+      if (flaggrp_ == "PreQC") values[iloc] == missing ? qcflag[iloc] = 100 : qcflag[iloc] = 0;
+      (qcflag[iloc] == 0) ? (varinv[ichan][iloc] = 1.0 / pow(values[iloc], 2))
+                          : (varinv[ichan][iloc] = 0.0);
     }
   }
 

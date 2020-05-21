@@ -51,8 +51,10 @@ class ObsFilterData : public util::Printable,
   void associate(const ioda::ObsVector &, const std::string &);
   //! Associates ObsDiagnostics from ObsOperator with this ObsFilterData
   void associate(const ObsDiagnostics &);
-  //! Associates ObsDataVector with this ObsFilterData
+  //! Associates ObsDataVector with this ObsFilterData (float)
   void associate(const ioda::ObsDataVector<float> &, const std::string &);
+  //! Associates ObsDataVector with this ObsFilterData (int)
+  void associate(const ioda::ObsDataVector<int> &, const std::string &);
 
   //! Gets requested data from ObsFilterData
   void get(const Variable &, std::vector<float> &) const;
@@ -62,6 +64,8 @@ class ObsFilterData : public util::Printable,
   void get(const Variable &, std::vector<int> &) const;
   //! Gets requested data from ObsFilterData (ObsDataVector has to be allocated)
   void get(const Variable &, ioda::ObsDataVector<float> &) const;
+  //! Gets requested data from ObsFilterData (ObsDataVector has to be allocated)
+  void get(const Variable &, ioda::ObsDataVector<int> &) const;
   //! Checks if requested data exists in ObsFilterData
   bool has(const Variable &) const;
 
@@ -77,12 +81,14 @@ class ObsFilterData : public util::Printable,
   void print(std::ostream &) const;
   bool hasVector(const std::string &, const std::string &) const;
   bool hasDataVector(const std::string &, const std::string &) const;
+  bool hasDataVectorInt(const std::string &, const std::string &) const;
 
   ioda::ObsSpace & obsdb_;                 //!< ObsSpace associated with this object
   const GeoVaLs mutable * gvals_;          //!< pointer to GeoVaLs associated with this object
   std::map<std::string, const ioda::ObsVector *> ovecs_;  //!< Associated ObsVectors
   const ObsDiagnostics mutable * diags_;   //!< pointer to ObsDiagnostics associated with object
-  std::map<std::string, const ioda::ObsDataVector<float> *> dvecs_;  //!< Associated ObsDataVectors
+  std::map<std::string, const ioda::ObsDataVector<float> *> dvecsf_;  //!< Associated ObsDataVectors
+  std::map<std::string, const ioda::ObsDataVector<int> *> dvecsi_;  //!< Associated ObsDataVectors
 };
 
 }  // namespace ufo

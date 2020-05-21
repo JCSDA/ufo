@@ -7,35 +7,66 @@
 
 #include "ufo/ObsBias.h"
 
+#include <Eigen/Core>
+#include <set>
+
+#include "oops/base/Variables.h"
+#include "oops/util/IntSetParser.h"
 #include "oops/util/Logger.h"
+
 #include "ufo/ObsBiasIncrement.h"
 
 namespace ufo {
 
 // -----------------------------------------------------------------------------
 
-ObsBias::ObsBias(const ioda::ObsSpace & obs, const eckit::Configuration & conf)
-  : biasbase_(ObsBiasFactory::create(obs, conf)), conf_(conf), geovars_(), hdiags_(), predNames_() {
-  if (biasbase_) {
-    geovars_   += biasbase_->requiredGeoVaLs();
-    hdiags_    += biasbase_->requiredHdiagnostics();
-    predNames_ += biasbase_->predNames();
+ObsBias::ObsBias(const ioda::ObsSpace & odb, const eckit::Configuration & conf)
+  : biasbase_(), predbases_(0), jobs_(0), odb_(odb), conf_(conf) {
+  oops::Log::trace() << "ObsBias::create starting." << std::endl;
+
+  /// Get the jobs(channels)
+  if (conf_.has("ObsBias.jobs")) {
+    const std::set<int> jobs = oops::parseIntSet(conf_.getString("ObsBias.jobs"));
+    jobs_.assign(jobs.begin(), jobs.end());
   }
+
+  /// Predictor factory
+  if (conf_.has("ObsBias.predictors")) {
+    std::vector<eckit::LocalConfiguration> confs;
+    conf_.get("ObsBias.predictors", confs);
+    for (std::size_t j = 0; j < confs.size(); ++j) {
+      std::shared_ptr<PredictorBase> pred(PredictorFactory::create(confs[j], jobs_));
+      predbases_.push_back(pred);
+      prednames_.push_back(pred->name());
+      geovars_ += pred->requiredGeovars();
+      hdiags_ += pred->requiredHdiagnostics();
+    }
+  }
+
+  /// Bias model factory
+  biasbase_.reset(ObsBiasFactory::create(conf_, prednames_, jobs_));
+
+  /// Read or initialize bias coefficients
+  this->read(conf);
+
+  oops::Log::trace() << "ObsBias::create done." << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
 ObsBias::ObsBias(const ObsBias & other, const bool copy)
-  : biasbase_(), conf_(other.config()), geovars_(), hdiags_(), predNames_() {
-  if (other) {
-    biasbase_.reset(ObsBiasFactory::create(other.obspace(), other.config()));
-    if (copy) {
-      *biasbase_  = other;
-      geovars_   += biasbase_->requiredGeoVaLs();
-      hdiags_    += biasbase_->requiredHdiagnostics();
-      predNames_ += biasbase_->predNames();
-    }
-  }
+  : odb_(other.odb_), conf_(other.conf_), biasbase_(), predbases_(other.predbases_),
+    prednames_(other.prednames_), jobs_(other.jobs_),
+    geovars_(other.geovars_), hdiags_(other.hdiags_) {
+  oops::Log::trace() << "ObsBias::copy ctor starting." << std::endl;
+
+  /// Create a new bias model object
+  biasbase_.reset(ObsBiasFactory::create(conf_, prednames_, jobs_));
+
+  /// Copy the bias model coeff data
+  if (copy && biasbase_) *biasbase_ = *other.biasbase_;
+
+  oops::Log::trace() << "ObsBias::copy ctor done." << std::endl;
 }
 
 // -----------------------------------------------------------------------------
@@ -48,11 +79,15 @@ ObsBias & ObsBias::operator+=(const ObsBiasIncrement & dx) {
 // -----------------------------------------------------------------------------
 
 ObsBias & ObsBias::operator=(const ObsBias & rhs) {
-  if (biasbase_) {
-    *biasbase_ = rhs;
-    geovars_   = biasbase_->requiredGeoVaLs();
-    hdiags_    = biasbase_->requiredHdiagnostics();
-    predNames_ = biasbase_->predNames();
+  if (rhs) {
+    ASSERT(biasbase_);
+    conf_ = rhs.conf_;
+    *biasbase_ = *rhs.biasbase_;
+    predbases_ = rhs.predbases_;
+    prednames_ = rhs.prednames_;
+    jobs_ = rhs.jobs_;
+    geovars_ = rhs.geovars_;
+    hdiags_ = rhs.hdiags_;
   }
   return *this;
 }
@@ -60,7 +95,10 @@ ObsBias & ObsBias::operator=(const ObsBias & rhs) {
 // -----------------------------------------------------------------------------
 
 void ObsBias::read(const eckit::Configuration & conf) {
-  if (biasbase_) biasbase_->read(conf);
+  if (biasbase_) {
+    std::string sensor = conf.getString("ObsBias.sensor");
+    biasbase_->read(sensor);
+  }
 }
 
 // -----------------------------------------------------------------------------
@@ -72,17 +110,49 @@ void ObsBias::write(const eckit::Configuration & conf) const {
 // -----------------------------------------------------------------------------
 
 void ObsBias::computeObsBias(ioda::ObsVector & ybias,
-                             const ioda::ObsDataVector<float> & predictors,
-                             ioda::ObsDataVector<float> & predTerms) const {
-  if (biasbase_) biasbase_->computeObsBias(ybias, predictors, predTerms);
+                             const Eigen::MatrixXd & predData) const {
+  if (biasbase_) biasbase_->computeObsBias(ybias, predData);
+}
+
+// -----------------------------------------------------------------------------
+Eigen::MatrixXd ObsBias::computePredictors(const GeoVaLs & geovals,
+                                           const ObsDiagnostics & ydiags) const {
+  const std::size_t nlocs  = odb_.nlocs();
+  const std::size_t npreds = predbases_.size();
+  const std::size_t njobs  = jobs_.size();
+
+  Eigen::MatrixXd predData(npreds*njobs, nlocs);
+
+  if (biasbase_) {
+    /// Temporary workspace
+    Eigen::MatrixXd tmp(njobs, nlocs);
+
+    for (std::size_t r = 0; r < npreds; ++r) {
+      /// Initialize with zero
+      tmp.setConstant(0.0);
+
+      /// Calculate the predictor
+      predbases_[r]->compute(odb_, geovals, ydiags, tmp);
+
+      /// Save
+      for (std::size_t i = 0; i < njobs; ++i) {
+        predData.row(r+i*npreds) = tmp.row(i);
+      }
+    }
+  }
+
+  oops::Log::trace() << "ObsBias::computePredictors done." << std::endl;
+  return predData;
 }
 
 // -----------------------------------------------------------------------------
 
-void ObsBias::computeObsBiasPredictors(const GeoVaLs & geovals, const ObsDiagnostics & ydiags,
-                                       ioda::ObsDataVector<float> & predictors)
-                                       const {
-  if (biasbase_) biasbase_->computeObsBiasPredictors(geovals, ydiags, predictors);
+void ObsBias::saveObsBiasTerms(ioda::ObsSpace & odb,
+                               const std::string & group,
+                               const Eigen::MatrixXd & predData) const {
+  if (biasbase_) {
+    biasbase_->saveObsBiasTerms(odb, group, predData);
+  }
 }
 
 // -----------------------------------------------------------------------------

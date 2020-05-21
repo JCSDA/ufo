@@ -35,13 +35,13 @@ CLWRetMW::CLWRetMW(const eckit::LocalConfiguration & conf)
 
   // Get channels for CLW retrieval from options
   const std::vector<int> channels_ = {options_.ch238.value(), options_.ch314.value()};
-  ASSERT(options_.ch238 !=0 && options_.ch314 !=0 && channels_.size() == 2);
+  ASSERT(options_.ch238 != 0 && options_.ch314 != 0 && channels_.size() == 2);
 
   // Include list of required data from ObsSpace
   for (size_t igrp = 0; igrp < options_.varGroup.value().size(); ++igrp) {
     invars_ += Variable("brightness_temperature@" + options_.varGroup.value()[igrp], channels_);
   }
-  invars_ += Variable("brightness_temperature@" + options_.testGroup.value(), channels_);
+  invars_ += Variable("brightness_temperature@" + options_.testBias.value(), channels_);
   invars_ += Variable("sensor_zenith_angle@MetaData");
 
   // Include list of required data from GeoVaLs
@@ -59,8 +59,8 @@ CLWRetMW::~CLWRetMW() {}
 void CLWRetMW::compute(const ObsFilterData & in,
                                     ioda::ObsDataVector<float> & out) const {
   // Get required parameters
-  const std::vector<std::string> &vargrp_ = options_.varGroup;
-  const std::vector<int> channels_ = {options_.ch238, options_.ch314};
+  const std::vector<std::string> &vargrp_ = options_.varGroup.value();
+  const std::vector<int> channels_ = {options_.ch238.value(), options_.ch314.value()};
 
   // Get dimension
   const size_t nlocs = in.nlocs();
@@ -89,9 +89,9 @@ void CLWRetMW::compute(const ObsFilterData & in,
     // Get bias based on group type
     if (options_.addBias.value() == vargrp_[igrp]) {
       std::vector<float> bias238(nlocs), bias314(nlocs);
-      in.get(Variable("brightness_temperature@" + options_.testGroup.value(), channels_)
+      in.get(Variable("brightness_temperature@" + options_.testBias.value(), channels_)
                       [channels_[0]-1], bias238);
-      in.get(Variable("brightness_temperature@" + options_.testGroup.value(), channels_)
+      in.get(Variable("brightness_temperature@" + options_.testBias.value(), channels_)
                       [channels_[1]-1], bias314);
       // Add bias correction to the assigned group
       if (options_.addBias.value() == "ObsValue") {
@@ -106,21 +106,42 @@ void CLWRetMW::compute(const ObsFilterData & in,
         }
       }
     }
-    const float t0c = Constants::t0c;
-    const float d1 = 0.754, d2 = -2.265;
-    const float c1 = 8.240, c2 = 2.622, c3 = 1.846;
-    for (size_t iloc = 0; iloc < nlocs; ++iloc) {
-      if (water_frac[iloc] >= 0.99) {
-        float cossza = cos(Constants::deg2rad * szas[iloc]);
-        float d0 = c1 - (c2 - c3 * cossza) * cossza;
-        if (tsavg[iloc] > t0c - 1.0 && bt238[iloc] <= 284.0 && bt314[iloc] <= 284.0
-                                    && bt238[iloc] > 0.0 && bt314[iloc] > 0.0) {
-          out[igrp][iloc] = cossza * (d0 + d1 * std::log(285.0 - bt238[iloc])
-                                          + d2 * std::log(285.0 - bt314[iloc]));
-          out[igrp][iloc] = std::max(0.f, out[igrp][iloc]);
-        } else {
-          out[igrp][iloc] = getBadValue();
-        }
+
+    // Compute the cloud liquid qater
+    cloudLiquidWater(szas, tsavg, water_frac, bt238, bt314, out[igrp], nlocs);
+  }
+}
+
+// -----------------------------------------------------------------------------
+
+void CLWRetMW::cloudLiquidWater(const std::vector<float> & szas,
+                                         const std::vector<float> & tsavg,
+                                         const std::vector<float> & water_frac,
+                                         const std::vector<float> & bt238,
+                                         const std::vector<float> & bt314,
+                                         std::vector<float> & out,
+                                         const std::size_t nlocs) {
+  ///
+  /// \brief Retrieve cloud liquid water from AMSU-A 23.8 GHz and 31.4 GHz channels.
+  ///
+  /// Reference: Grody et al. (2001)
+  /// Determination of precipitable water and cloud liquid water over oceans from
+  /// the NOAA 15 advanced microwave sounding unit
+  ///
+  const float t0c = Constants::t0c;
+  const float d1 = 0.754, d2 = -2.265;
+  const float c1 = 8.240, c2 = 2.622, c3 = 1.846;
+  for (size_t iloc = 0; iloc < nlocs; ++iloc) {
+    if (water_frac[iloc] >= 0.99) {
+      float cossza = cos(Constants::deg2rad * szas[iloc]);
+      float d0 = c1 - (c2 - c3 * cossza) * cossza;
+      if (tsavg[iloc] > t0c - 1.0 && bt238[iloc] <= 284.0 && bt314[iloc] <= 284.0
+                                  && bt238[iloc] > 0.0 && bt314[iloc] > 0.0) {
+        out[iloc] = cossza * (d0 + d1 * std::log(285.0 - bt238[iloc])
+                                 + d2 * std::log(285.0 - bt314[iloc]));
+        out[iloc] = std::max(0.f, out[iloc]);
+      } else {
+        out[iloc] = getBadValue();
       }
     }
   }

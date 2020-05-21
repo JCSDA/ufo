@@ -52,7 +52,7 @@ class ObsOperator : public util::Printable,
   void simulateObs(const GeoVaLs &, ioda::ObsVector &, const ObsBias &, ObsDiagnostics &) const;
 
 /// Operator input required from Model
-  const oops::Variables & variables() const;
+  const oops::Variables & requiredVars() const;
 
 /// Operator locations
   Locations * locations(const util::DateTime &, const util::DateTime &) const;

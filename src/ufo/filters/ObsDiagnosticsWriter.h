@@ -49,7 +49,7 @@ class ObsDiagnosticsWriter : public util::Printable,
     diags.write(config_);
   }
 
-  const oops::Variables & requiredGeoVaLs() const {return nogeovals_;}
+  const oops::Variables & requiredVars() const {return nogeovals_;}
   const oops::Variables & requiredHdiagnostics() const {return extradiagvars_;}
 
  private:

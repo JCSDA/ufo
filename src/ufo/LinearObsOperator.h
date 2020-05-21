@@ -8,6 +8,8 @@
 #ifndef UFO_LINEAROBSOPERATOR_H_
 #define UFO_LINEAROBSOPERATOR_H_
 
+#include <Eigen/Core>
+
 #include <memory>
 #include <vector>
 
@@ -51,13 +53,13 @@ class LinearObsOperator : public util::Printable,
   void simulateObsAD(GeoVaLs &, const ioda::ObsVector &, ObsBiasIncrement &) const;
 
 /// Operator input required from Model
-  const oops::Variables & variables() const;
+  const oops::Variables & requiredVars() const;
 
  private:
   void print(std::ostream &) const;
   std::unique_ptr<LinearObsOperatorBase> oper_;
   ioda::ObsSpace & odb_;
-  std::unique_ptr<ioda::ObsDataVector<float>> biaspreds_;
+  std::unique_ptr<Eigen::MatrixXd> biaspreds_;
 };
 
 // -----------------------------------------------------------------------------

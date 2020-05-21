@@ -7,11 +7,16 @@
 
 #include "ufo/ObsOperator.h"
 
+#include <Eigen/Core>
+
 #include "eckit/config/Configuration.h"
+
 #include "ioda/ObsSpace.h"
 #include "ioda/ObsVector.h"
+
 #include "oops/base/Variables.h"
 #include "oops/util/DateTime.h"
+
 #include "ufo/GeoVaLs.h"
 #include "ufo/Locations.h"
 #include "ufo/ObsBias.h"
@@ -37,20 +42,17 @@ void ObsOperator::simulateObs(const GeoVaLs & gvals, ioda::ObsVector & yy,
   oper_->simulateObs(gvals, yy, ydiags);
   if (bias) {
     ioda::ObsVector ybias(odb_);
-    ioda::ObsDataVector<float> predictors(odb_, bias.predNames(), "", false);
-    ioda::ObsDataVector<float> predTerms(odb_, bias.predNames(), "", false);
-    bias.computeObsBiasPredictors(gvals, ydiags, predictors);
-    predictors.save("ObsBiasPredictor");
-    bias.computeObsBias(ybias, predictors, predTerms);
-    predTerms.save("ObsBiasTerm");
+    Eigen::MatrixXd predData = bias.computePredictors(gvals, ydiags);
+    bias.computeObsBias(ybias, predData);
+    bias.saveObsBiasTerms(odb_, "ObsBiasTerm", predData);
     ybias.save("ObsBias");
   }
 }
 
 // -----------------------------------------------------------------------------
 
-const oops::Variables & ObsOperator::variables() const {
-  return oper_->variables();
+const oops::Variables & ObsOperator::requiredVars() const {
+  return oper_->requiredVars();
 }
 
 // -----------------------------------------------------------------------------

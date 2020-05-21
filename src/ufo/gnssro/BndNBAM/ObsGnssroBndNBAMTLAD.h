@@ -49,7 +49,7 @@ class ObsGnssroBndNBAMTLAD : public LinearObsOperatorBase,
   void simulateObsAD(GeoVaLs &, const ioda::ObsVector &) const override;
 
   // Other
-  const oops::Variables & variables() const override {return *varin_;}
+  const oops::Variables & requiredVars() const override {return *varin_;}
 
   int & toFortran() {return keyOperGnssroBndNBAM_;}
   const int & toFortran() const {return keyOperGnssroBndNBAM_;}

@@ -50,7 +50,7 @@ void testObsDiagnostics() {
 
   // read geovals from the file
   eckit::LocalConfiguration gconf(conf, "GeoVaLs");
-  const GeoVaLs gval(gconf, ospace, hop.variables());
+  const GeoVaLs gval(gconf, ospace, hop.requiredVars());
 
   // initialize bias correction
   const ObsBias ybias(ospace, conf);

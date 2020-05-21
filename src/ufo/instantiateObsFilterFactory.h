@@ -23,6 +23,7 @@
 #include "ufo/filters/ObsDomainErrCheck.h"
 #include "ufo/filters/PoissonDiskThinning.h"
 #include "ufo/filters/PreQC.h"
+#include "ufo/filters/ProfileConsistencyChecks.h"
 #include "ufo/filters/QCmanager.h"
 #include "ufo/filters/TemporalThinning.h"
 #include "ufo/filters/Thinning.h"
@@ -58,6 +59,8 @@ template<typename MODEL> void instantiateObsFilterFactory() {
            makerChk10_("MWCLW Check");
   static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::ObsDomainErrCheck> >
            makerChk11_("DomainErr Check");
+  static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::ProfileConsistencyChecks> >
+           makerChk12_("ProfileConsistencyChecks");
   static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::BackgroundCheckRONBAM> >
            makerChk13_("Background Check RONBAM");
   static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::TemporalThinning> >

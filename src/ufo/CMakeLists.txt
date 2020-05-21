@@ -70,6 +70,7 @@ if( ${GEOS-AERO_FOUND} )
     add_subdirectory( geos_aero )
 endif( ${GEOS-AERO_FOUND} )
 add_subdirectory( timeoper )
+add_subdirectory( profile )
 add_subdirectory( rttovonedvarcheck )
 
 list( APPEND ufo_src_files
@@ -89,6 +90,7 @@ list( APPEND ufo_src_files
     ${radarreflectivity_src_files}
     ${radarradialvelocity_src_files}
     ${timeoper_src_files}
+    ${profile_src_files}
     ${rttovonedvarcheck_src_files}
 )
 list( APPEND ufo_src_files ${marine_src_files} )

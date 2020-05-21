@@ -8,8 +8,10 @@
 #ifndef UFO_OBSBIASINCREMENT_H_
 #define UFO_OBSBIASINCREMENT_H_
 
-#include <iostream>
+#include <Eigen/Core>
+
 #include <memory>
+#include <string>
 #include <vector>
 
 #include "eckit/config/LocalConfiguration.h"
@@ -17,6 +19,7 @@
 #include "oops/util/Printable.h"
 
 #include "ufo/obsbias/LinearObsBiasBase.h"
+#include "ufo/obsbias/predictors/PredictorBase.h"
 
 namespace ioda {
   class ObsSpace;
@@ -61,27 +64,32 @@ class ObsBiasIncrement : public util::Printable {
   const double & operator[](const unsigned int ii) const {return (*biasbase_)[ii];}
 
 /// Linear obs bias model
-  void computeObsBiasTL(const GeoVaLs &, const ioda::ObsDataVector<float> &,
+  void computeObsBiasTL(const GeoVaLs &,
+                        const Eigen::MatrixXd &,
                         ioda::ObsVector &) const;
 
-  void computeObsBiasAD(GeoVaLs &, const ioda::ObsDataVector<float> &, const ioda::ObsVector &);
+  void computeObsBiasAD(GeoVaLs &,
+                        const Eigen::MatrixXd &,
+                        const ioda::ObsVector &);
 
 /// Serialize and deserialize
   std::size_t serialSize() const {return 0;}
   void serialize(std::vector<double> &) const {}
   void deserialize(const std::vector<double> &, std::size_t &) {}
 
-/// Other
-  const eckit::Configuration & config() const {return conf_;}
-  const ioda::ObsSpace & obspace() const {return biasbase_->obspace();}
-
 /// Operator
   operator bool() const {return biasbase_.get();}
 
  private:
   void print(std::ostream &) const;
-  std::unique_ptr<LinearObsBiasBase> biasbase_;
+
+  const ioda::ObsSpace & odb_;
   const eckit::LocalConfiguration conf_;
+
+  std::unique_ptr<LinearObsBiasBase> biasbase_;
+  std::vector<std::shared_ptr<PredictorBase>> predbases_;
+  std::vector<std::string> prednames_;
+  std::vector<int> jobs_;
 };
 
 // -----------------------------------------------------------------------------
