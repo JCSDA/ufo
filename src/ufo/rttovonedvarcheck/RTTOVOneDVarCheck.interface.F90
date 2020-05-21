@@ -31,14 +31,16 @@ contains
 #include "oops/util/linkedList_c.f"
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_rttovonedvarcheck_create_c(c_self, c_obspace, c_conf, c_nchan, c_channels) &
-                                            bind(c,name='ufo_rttovonedvarcheck_create_f90')
+subroutine ufo_rttovonedvarcheck_create_c(c_self, c_obspace, c_conf, c_nchan, &
+                                          c_channels, c_onedvarflag) &
+                        bind(c,name='ufo_rttovonedvarcheck_create_f90')
 implicit none
 integer(c_int), intent(inout)  :: c_self
 type(c_ptr), value, intent(in) :: c_obspace
 type(c_ptr), value, intent(in) :: c_conf
 integer(c_int), intent(in) :: c_nchan
 integer(c_int), intent(in) :: c_channels(c_nchan)
+integer(c_int), intent(in) :: c_onedvarflag
 
 type(ufo_rttovonedvarcheck), pointer :: self
 type(fckit_configuration) :: f_conf
@@ -46,7 +48,8 @@ type(fckit_configuration) :: f_conf
 call ufo_rttovonedvarcheck_registry%setup(c_self, self)
 f_conf = fckit_configuration(c_conf)
 
-call ufo_rttovonedvarcheck_create(self, c_obspace, f_conf, c_channels)
+call ufo_rttovonedvarcheck_create(self, c_obspace, f_conf, c_channels, &
+                                  c_onedvarflag)
 
 end subroutine ufo_rttovonedvarcheck_create_c
 

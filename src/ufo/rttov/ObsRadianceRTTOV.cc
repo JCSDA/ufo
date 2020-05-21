@@ -35,7 +35,6 @@ ObsRadianceRTTOV::ObsRadianceRTTOV(const ioda::ObsSpace & odb, const eckit::Conf
     "eastward_wind", "northward_wind",
     "skin_temperature",
     "specific_humidity", "specific_humidity_at_two_meters_above_surface",
-    "surface_air_pressure", "surface_temperature",
     "surface_type", "water_type"};
 
 

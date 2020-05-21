@@ -89,6 +89,8 @@ subroutine ufo_rttovonedvarcheck_minimize_ml(self,      &
                                          channels,      &
                                          onedvar_success)
 
+! Heritage: Ops_SatRad_MinimizeML_RTTOV12.f90
+
 implicit none
 
 type(ufo_rttovonedvarcheck), intent(inout) :: self
@@ -465,6 +467,8 @@ subroutine ufo_rttovonedvarcheck_ML_RTTOV12 ( self, &
                                       gamma,         &
                                       Jold,          &
                                       Status)
+
+! Heritage: Ops_SatRad_MarquardtLevenberg_RTTOV12.f90
 
 implicit none
 

@@ -41,8 +41,9 @@ subroutine ufo_rttovonedvarcheck_GeoVaLs2ProfVec( geovals,       & ! in
 ! Copy profile data from the GeoVaLs-format into the
 ! minimisation-format vector Prof. We only copy fields that are being retrieved,
 ! as indicated by the profindex structure.
-! This has heritage from ufo_rttovonedvarcheck_RTprof2Vec_RTTOVxx.f90
 !-------------------------------------------------------------------------------
+
+! Heritage: Ops_SatRad_RTprof2Vec_RTTOV12.f90
 
 implicit none
 
@@ -168,6 +169,8 @@ subroutine ufo_rttovonedvarcheck_ProfVec2GeoVaLs(geovals,       & ! out
 ! as indicated by the profindex structure.
 ! This has heritage from ufo_rttovonedvarcheck_RTprof2Vec_RTTOVxx.f90
 !-------------------------------------------------------------------------------
+
+! Heritage: Ops_SatRad_Vec2RTprof_RTTOV12.f90
 
 implicit none
 
@@ -338,8 +341,9 @@ subroutine ufo_rttovonedvarcheck_CostFunction(DeltaProf, b_inv, &
                                               DeltaObs, r_matrix, &
                                               Jcost)
 
-use ufo_rttovonedvarcheck_rmatrix_mod, only: rmatrix_type
+! Heritage: Ops_SatRad_CostFunction.f90
 
+use ufo_rttovonedvarcheck_rmatrix_mod, only: rmatrix_type
 implicit none
 
 ! subroutine arguments:
@@ -369,11 +373,11 @@ Jo = 0.5_kind_real * dot_product(DeltaObs, RinvDeltaY)
 Jb = 0.5_kind_real * dot_product(DeltaProf, (matmul(b_inv, DeltaProf)))
 Jcurrent = Jb + Jo
 
-Jcost(1) = (Jo + Jb) / real (y_size)     ! Normalize cost by nchans
-Jcost(2) = Jb / real (y_size)            ! Normalize cost by nchans
-Jcost(3) = Jo / real (y_size)            ! Normalize cost by nchans
+Jcost(1) = (Jo + Jb) * 2.0_kind_real / real (y_size)     ! Normalize cost by nchans
+Jcost(2) = Jb * 2.0_kind_real / real (y_size)            ! Normalize cost by nchans
+Jcost(3) = Jo * 2.0_kind_real / real (y_size)            ! Normalize cost by nchans
 
-write(*,*) "Jo, Jb, Jcurrent = ", Jo, Jb, Jcurrent
+write(*,*) "Jo, Jb, Jcurrent = ", Jcost(3), Jcost(2), Jcost(1)
 
 deallocate(RinvDeltaY)
 
@@ -407,6 +411,8 @@ subroutine ufo_rttovonedvarcheck_Qsplit (output_type, &
                               q,           &
                               ql,          &
                               qi)
+
+! Heritage: Ops_SatRad_Qsplit.f90
 
 implicit none
 
@@ -626,6 +632,8 @@ subroutine Ops_Qsat (QS,           &
                      T,            &
                      P,            &
                      NPNTS)
+
+! Heritage: Ops_Qsat.inc
 
 implicit none
 
@@ -1056,6 +1064,8 @@ subroutine Ops_QsatWat (QS,    &
                         P,     &
                         NPNTS)
 
+! Heritage: Ops_QsatWat.inc
+
 implicit none
 
 ! subroutine arguments:
@@ -1467,6 +1477,8 @@ subroutine ufo_rttovonedvarcheck_CheckIteration (geovals,    &
                                       profile,    &
                                       OutOfRange)
 
+! Heritage: Ops_SatRad_CheckIteration.f90
+
 !use OpsMod_SatRad_Info, only: &
 !    EmisEigenvec
 
@@ -1750,6 +1762,8 @@ subroutine ufo_rttovonedvarcheck_CheckCloudyIteration( &
   nlevels_1dvar, & ! in
   OutOfRange )     ! out
 
+! Heritage: Ops_SatRad_CheckCloudyIteration.f90
+
 use ufo_rttovonedvarcheck_utils_mod, only : &
     g
 
@@ -1822,19 +1836,19 @@ if (any(ciw(:) > 0.0) .or. &
 
 !1.1 compute iwp, lwp
 
-  do i=toplevel_q+1, nlevels_1dvar 
+  do i=1, nlevels_1dvar-1
 
-    dp = Plevels_1DVar(i) - Plevels_1DVar(i-1)
+    dp =  Plevels_1DVar(i) - Plevels_1DVar(i+1)
 
     ! Calculate layer mean from CloudIce on levels
     meanqi = 0.5 * &
-      (ciw(i) + ciw(i-1))
+      (ciw(i) + ciw(i+1))
     if (meanqi > 0.0) then
       IWP = IWP + dp * meanqi
     end if
 
     ! Calculate layer mean from CLW on levels
-    meanql = 0.5 * (clw(i) + clw(i-1))
+    meanql = 0.5 * (clw(i) + clw(i+1))
     if (meanql > 0.0) then
       LWP = LWP + dp * meanql
     end if
@@ -1878,6 +1892,8 @@ subroutine ufo_rttovonedvarcheck_Cholesky (U,         &
                          N,         &
                          Q,         &
                          ErrorCode)
+
+! Heritage: Ops_Cholesky.inc
 
 implicit none
 

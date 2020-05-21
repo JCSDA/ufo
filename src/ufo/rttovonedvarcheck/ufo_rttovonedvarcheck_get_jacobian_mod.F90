@@ -13,7 +13,8 @@ use kinds
 use ufo_geovals_mod
 use ufo_radiancerttov_tlad_mod
 use ufo_rttovonedvarcheck_utils_mod
-use ufo_rttovonedvarcheck_minimize_utils_mod, only: ufo_rttovonedvarcheck_Qsplit
+use ufo_rttovonedvarcheck_minimize_utils_mod, only: &
+                          ufo_rttovonedvarcheck_Qsplit
 use ufo_rttovonedvarcheck_profindex_mod, only: profindex_type
 
 implicit none
@@ -34,15 +35,15 @@ subroutine ufo_rttovonedvarcheck_get_jacobian(geovals, ob_info, obsdb, &
 implicit none
 
 ! subroutine arguments
-type(ufo_geovals), intent(in)               :: geovals
-type(Obinfo_type), intent(in)               :: ob_info
-type(c_ptr), value, intent(in)              :: obsdb
-integer(c_int), intent(in)                  :: channels(:)
-type(fckit_configuration), intent(in)       :: conf
-type(profindex_type), intent(in)          :: profindex
-real(kind_real), intent(in)                 :: prof_x(:)    ! x vector for 1D-var
-real(kind_real), intent(out)                :: hofx(:)
-real(kind_real), intent(out)                :: H_matrix(:,:)
+type(ufo_geovals), intent(in)         :: geovals        !< model data
+type(Obinfo_type), intent(in)         :: ob_info        !< satellite metadata
+type(c_ptr), value, intent(in)        :: obsdb          !< observation database
+integer(c_int), intent(in)            :: channels(:)    !< satellite channels
+type(fckit_configuration), intent(in) :: conf           !< configuration
+type(profindex_type), intent(in)      :: profindex      !< index array for x vector
+real(kind_real), intent(in)           :: prof_x(:)      !< x vector
+real(kind_real), intent(out)          :: hofx(:)        !< BT's
+real(kind_real), intent(out)          :: H_matrix(:,:)  !< Jacobian
 
 ! local variables
 type(ufo_radiancerttov_tlad)                :: rttov_tlad   ! structure for holding original rttov_k setup data
@@ -51,9 +52,9 @@ select case (trim(ob_info % forward_mod_name))
   case ("RTTOV")
     call rttov_tlad % setup(conf)
     call ufo_rttovonedvarcheck_GetHmatrixRTTOV(geovals, ob_info, obsdb, &
-                                            channels(:), rttov_tlad, &
-                                            profindex, prof_x(:), &
-                                            hofx(:), H_matrix) ! out
+                                               channels(:), rttov_tlad, &
+                                               profindex, prof_x(:), &
+                                               hofx(:), H_matrix) ! out
     call rttov_tlad % delete()
 
    case default
@@ -70,6 +71,8 @@ subroutine ufo_rttovonedvarcheck_GetHmatrixRTTOV(geovals, ob_info, obsdb, &
                                        profindex, prof_x, &
                                        hofx, H_matrix)
 
+! Heritage: Ops_SatRad_GetHmatrix_RTTOV12.f90
+
 implicit none
 
 ! subroutine arguments
@@ -78,7 +81,7 @@ type(Obinfo_type), intent(in)               :: ob_info
 type(c_ptr), value, intent(in)              :: obsdb
 integer(c_int), intent(in)                  :: channels(:)
 type(ufo_radiancerttov_tlad), intent(inout) :: rttov_data      ! structure for running rttov_k
-type(profindex_type), intent(in)          :: profindex
+type(profindex_type), intent(in)            :: profindex
 real(kind_real), intent(in)                 :: prof_x(:)    ! x vector for 1D-var
 real(kind_real), intent(out)                :: hofx(:)
 real(kind_real), intent(out)                :: H_matrix(:,:)
@@ -87,8 +90,8 @@ real(kind_real), intent(out)                :: H_matrix(:,:)
 integer :: nchans, nlevels, nq_levels
 integer :: i
 logical :: RTTOV_GasunitConv = .false.
-real(kind_real),allocatable :: q_kgkg(:)
-real(kind_real)             :: s2m_kgkg
+real(kind_real),allocatable  :: q_kgkg(:)
+real(kind_real)              :: s2m_kgkg
 type(ufo_geoval), pointer    :: geoval
 real(kind_real), allocatable :: temperature(:)
 real(kind_real), allocatable :: pressure(:)
@@ -96,18 +99,11 @@ real(kind_real), allocatable :: dq_dqt(:)
 real(kind_real), allocatable :: dql_dqt(:)
 real(kind_real), allocatable :: dqi_dqt(:)
 
-! call rttov k code?
-!call rttov_data%settraj(geovals, obsdb, channels, obs_info=ob_info, Hx=H_matrix, BT=hofx)
-call rttov_data%settraj(geovals, obsdb, channels, obs_info=ob_info, BT=hofx)
+! call rttov k code
+call rttov_data % settraj(geovals, obsdb, channels, obs_info=ob_info, BT=hofx)
 
 nchans = size(channels)
 nlevels = size(rttov_data % profiles_k(1) % t)
-
-! ----------------
-! output new hofx
-! ---------------
-
-!hofx(:) = rttov_data % bt(:)
 
 !----------------------------------------------------------------
 ! 1.1) Temperature - invert as RTTOV level 1 as top of atmosphere and
@@ -254,6 +250,8 @@ subroutine ufo_rttovonedvarcheck_PrintHmatrix( &
   H_matrix, &       ! in
   profindex )       ! in
 
+! Heritage: Ops_SatRad_PrintHMatrix.f90
+
 implicit none
 
 !Subroutine arguments:
@@ -281,28 +279,28 @@ write(*, int_fmt) channels(:)
 
   if ( profindex % t(1) > 0 ) THEN
     write(*, '(a)') 'Temperature Profile'
-    do i = profindex%t(1),profindex%t(2)
+    do i = profindex%t(2),profindex%t(1),-1
       write(*, real_fmt)  H_matrix(:,i)
     end do
   end if
 
   if ( profindex % q(1) > 0 ) THEN
     write(*, '(a)') 'q Profile'
-    do i = profindex%q(1),profindex%q(2)
+    do i = profindex%q(2),profindex%q(1),-1
       write(*, real_fmt)  H_matrix(:,i)
     end do
   end if
 
   if ( profindex % qt(1) > 0 ) THEN
     write(*, '(a)') 'qt Profile /1000'
-    do i = profindex%qt(1),profindex%qt(2)
+    do i = profindex%qt(2),profindex%qt(1),-1
       write(*, real_fmt)  H_matrix(:,i)/1000
     end do
   end if
 
   if ( profindex % o3profile(1) > 0 ) THEN
     write(*, '(a)') 'Ozone Profile'
-    do i = profindex%o3profile(1),profindex%o3profile(2)
+    do i = profindex%o3profile(2),profindex%o3profile(1),-1
       write(*, real_fmt)  H_matrix(:,i)
     end do
   end if

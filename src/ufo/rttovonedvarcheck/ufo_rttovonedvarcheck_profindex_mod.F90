@@ -70,6 +70,8 @@ contains
 
 subroutine ufo_rttovonedvarcheck_profindex_setup(self, bmatrix)
 
+! Heritage: Ops_SatRad_InitProfInfo.f90
+
 implicit none
 
 ! subroutine arguments:
@@ -77,7 +79,7 @@ class(profindex_type), intent(inout) :: self    !< profindex structure
 type(bmatrix_type), intent(in)       :: bmatrix !< background error covariances
 
 ! local constants:
-character(len=*), parameter :: routinename = "ufo_rttovonedvarcheck_profile_setup"
+character(len=*), parameter :: routinename = "ufo_rttovonedvarcheck_profindex_setup"
 
 ! local variables:
 integer :: i,j
@@ -215,6 +217,7 @@ end subroutine ufo_rttovonedvarcheck_profindex_setup
 ! ------------------------------------------------------------------------------
 
 subroutine ufo_rttovonedvarcheck_profindex_delete(self)
+
 implicit none
 class(profindex_type), intent(inout) :: self  !< Covariance structure
 

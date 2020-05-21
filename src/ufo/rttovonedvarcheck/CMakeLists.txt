@@ -16,6 +16,7 @@ set ( rttovonedvarcheck_files
     ufo_rttovonedvarcheck_mod.F90
     ufo_rttovonedvarcheck_profindex_mod.F90
     ufo_rttovonedvarcheck_rmatrix_mod.F90
+    ufo_rttovonedvarcheck_setup_mod.F90
     ufo_rttovonedvarcheck_utils_mod.F90
 )
 

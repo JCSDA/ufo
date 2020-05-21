@@ -15,6 +15,7 @@ use ufo_vars_mod
 use oops_variables_mod
 use obsspace_mod
 use ufo_rttovonedvarcheck_utils_mod
+use ufo_rttovonedvarcheck_setup_mod
 use ufo_rttovonedvarcheck_minimize_utils_mod
 
 implicit none
@@ -28,16 +29,19 @@ public :: ufo_rttovonedvarcheck_apply
 contains
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_rttovonedvarcheck_create(self, obspace, f_conf, channels)
+subroutine ufo_rttovonedvarcheck_create(self, obspace, f_conf, channels, &
+                                        onedvarflag)
 
   implicit none
   type(ufo_rttovonedvarcheck), intent(inout) :: self
   type(c_ptr), value, intent(in)             :: obspace
   type(fckit_configuration), intent(in)      :: f_conf
   integer(c_int), intent(in)                 :: channels(:)
+  integer(c_int), intent(in)                 :: onedvarflag
 
   self % obsdb = obspace
   self % conf = f_conf
+  self % onedvarflag = onedvarflag
 
   call ufo_rttovonedvarcheck_setup(self, channels) ! from init
 
@@ -58,6 +62,8 @@ end subroutine ufo_rttovonedvarcheck_delete
 ! ------------------------------------------------------------------------------
 
 subroutine ufo_rttovonedvarcheck_apply(self, vars, geovals, apply)
+
+  ! Heritage : Ops_SatRad_Do1DVar_RTTOV12.f90
 
   ! ------------------------------------------
   ! load modules only used in this subroutine
@@ -172,12 +178,14 @@ subroutine ufo_rttovonedvarcheck_apply(self, vars, geovals, apply)
   allocate(b_inverse(prof_index % nprofelements,prof_index % nprofelements))
   allocate(b_sigma(prof_index % nprofelements))
 
+  write(*,*) "QCflags before ob 2 = ", QCflags(:,2)
+
   ! ------------------------------------------
   ! Beginning mains observations loop
   ! ------------------------------------------
   print *,"beginning observations loop: ",self%qcname
   apply_count = 0
-  do jobs = 1, iloc
+  obs_loop: do jobs = 1, iloc
     write(*,*) "Apply for ob number = ",jobs,apply(jobs)
     if (apply(jobs)) then
 
@@ -187,6 +195,7 @@ subroutine ufo_rttovonedvarcheck_apply(self, vars, geovals, apply)
       !---------------------------------------------------
       ! create one ob geovals from full all obs geovals
       call ufo_geovals_copy_one(geovals, local_geovals, jobs)
+      call ufo_rttovonedvarcheck_check_geovals(local_geovals, prof_index)
       call ufo_geovals_print(local_geovals, 1)
   
       ! select appropriate b matrix for latitude of observation
@@ -220,6 +229,11 @@ subroutine ufo_rttovonedvarcheck_apply(self, vars, geovals, apply)
           chans_used = chans_used + 1
         end if
       end do
+      if (chans_used == 0) then
+        write(*,*) "No channels selected for observation number ", &
+                    jobs, " : skipping"
+        cycle obs_loop
+      end if
 
       ! allocate arrays
       allocate(ob_info%yobs(chans_used))
@@ -232,13 +246,15 @@ subroutine ufo_rttovonedvarcheck_apply(self, vars, geovals, apply)
         if( QCflags(jvar,jobs) == 0 ) then
           jchans_used = jchans_used + 1
           obs_error(jchans_used) = yerr(jvar, jobs)
-          write(*,*) "jchans_used err = ",jchans_used,obs_error(jchans_used)
+          write(*,*) "jchans_used, ob number = ",trim(vars%variable(jvar)),jobs
           ob_info % yobs(jchans_used) = yobs(jvar, jobs)
           channels_used(jchans_used) = self%channels(jvar)
         end if
       end do
       call r_submatrix % setup(self % rtype, chans_used, obs_error)
       call r_submatrix % info()
+
+      write(*,*) "Observations used = ",ob_info % yobs(:)
 
       !---------------------------------------------------
       ! Call minimization
@@ -257,7 +273,11 @@ subroutine ufo_rttovonedvarcheck_apply(self, vars, geovals, apply)
 
       ! Set QCflags based on output from minimization
       if (.NOT. onedvar_success) then
-        QCflags(:,jobs) = 1
+        do jvar = 1, self%nchans
+          if( QCflags(jvar,jobs) == 0 ) then
+            QCflags(jvar,jobs) = self % onedvarflag
+          end if
+        end do
       end if
 
       ! Tidy up memory specific to a single observation
@@ -267,8 +287,11 @@ subroutine ufo_rttovonedvarcheck_apply(self, vars, geovals, apply)
       call r_submatrix % delete()
       call ufo_geovals_delete(local_geovals)
 
+    else
+      write(*,*) "Final 1Dvar cost = not apply"
+
     endif
-  end do
+  end do obs_loop
 
   write(*,*) "Number being tested by 1dvar = ",apply_count
 
@@ -278,7 +301,8 @@ subroutine ufo_rttovonedvarcheck_apply(self, vars, geovals, apply)
     call obsspace_put_db(self%obsdb, "FortranQC", trim(var), QCflags(jvar,:))
   end do
 
-  ! tidy up
+  ! Tidy up memory used for all observations
+  call full_bmatrix % delete()
   if (allocated(yobs))       deallocate(yobs)
   if (allocated(yerr))       deallocate(yerr)
   if (allocated(lat))        deallocate(lat)

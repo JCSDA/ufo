@@ -32,14 +32,137 @@ Observations:
         obsfile: Data/atms_allsats_obs_2019112700-out.nc4
       simulate:
         variables: [brightness_temperature]
-        channels: &ops_channels 6-22
+        channels: &ops_channels 6-15, 18-22
     ObsFilters:
+#   Blacklisting represents channel rejection which will be rejected 
+#   by other filters eventually and qc_info will not be used.
+    - Filter: BlackList
+      filter variables:
+      - name: brightness_temperature
+        channels: 6
+      where:
+      - variable:
+          name: qc_info@MetaData
+        minvalue: 8396930.0
+        maxvalue: 8618514.0
+      action:
+        name: reject
+    - Filter: BlackList
+      filter variables:
+      - name: brightness_temperature
+        channels: 7-8
+      where:
+      - variable:
+          name: qc_info@MetaData
+        minvalue: 8397185.5
+        maxvalue: 8397186.5
+    - Filter: BlackList
+      filter variables:
+      - name: brightness_temperature
+        channels: 7-8
+      where:
+      - variable:
+          name: qc_info@MetaData
+        minvalue: 8486913.5
+        maxvalue: 8618514.5
+      action:
+        name: reject
+    - Filter: BlackList
+      filter variables:
+      - name: brightness_temperature
+        channels: 9
+      where:
+      - variable:
+          name: qc_info@MetaData
+        minvalue: 8397185.5
+        maxvalue: 8397186.5
+      action:
+        name: reject
+    - Filter: BlackList
+      filter variables:
+      - name: brightness_temperature
+        channels: 9
+      where:
+      - variable:
+          name: qc_info@MetaData
+        minvalue: 8528257.5
+        maxvalue: 8528642.5
+      action:
+        name: reject
+    - Filter: BlackList
+      filter variables:
+      - name: brightness_temperature
+        channels: 18
+      where:
+      - variable:
+          name: qc_info@MetaData
+        minvalue: 8396803
+      action:
+        name: reject
+    - Filter: BlackList
+      filter variables:
+      - name: brightness_temperature
+        channels: 19,20
+      where:
+      - variable:
+          name: qc_info@MetaData
+        minvalue: 8396817
+        maxvalue: 8396819
+      action:
+        name: reject
+    - Filter: BlackList
+      filter variables:
+      - name: brightness_temperature
+        channels: 19
+      where:
+      - variable:
+          name: qc_info@MetaData
+        minvalue: 8397185
+      action:
+        name: reject
+    - Filter: BlackList
+      filter variables:
+      - name: brightness_temperature
+        channels: 20
+      where:
+      - variable:
+          name: qc_info@MetaData
+        minvalue: 8396945
+        maxvalue: 8397187
+      action:
+        name: reject
+    - Filter: BlackList
+      filter variables:
+      - name: brightness_temperature
+        channels: 20
+      where:
+      - variable:
+          name: qc_info@MetaData
+        minvalue: 8421393
+      action:
+        name: reject
+    - Filter: BlackList
+      filter variables:
+      - name: brightness_temperature
+        channels: 21-22
+      where:
+      - variable:
+          name: qc_info@MetaData
+        minvalue: 8397185
+        maxvalue: 8397187
+      action:
+        name: reject
+    - Filter: BlackList
+      filter variables:
+      - name: brightness_temperature
+        channels: 21-22
+      where:
+      - variable:
+          name: qc_info@MetaData
+        minvalue: 8421889
+      action:
+        name: reject
     - Filter: RTTOV OneDVar Check
-#      where:
-#      - variable:
-#          name: qc_flags@MetaData
-#        minvalue: -0.5 # Values of 0 and 1
-#        maxvalue:  1.5 # Values of 0 and 1
       applyfilter: 
       - name: post@HofX
       ModName: RTTOV
@@ -63,10 +186,8 @@ Observations:
       UseMLMinimization: false
       UseJforConvergence: true
       FullDiagnostics: true
-      JConvergenceOption: 0
+      JConvergenceOption: 1
       ConvergenceFactor: 0.40
       Cost_ConvergenceFactor: 0.01
       Max1DVarIterations: 7
-    rmsequiv: 239.48475677393529
-    tolerance: 1.e-10
-    passedBenchmark: 1649      # number of passed obs
+    passedBenchmark: 973      # number of passed obs

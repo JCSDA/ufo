@@ -36,9 +36,7 @@ RTTOVOneDVarCheck::RTTOVOneDVarCheck(ioda::ObsSpace & obsdb, const eckit::Config
 
   // parse channels from the config and create variable names
   const oops::Variables & variables = obsdb.obsvariables();
-  if (config_.has("channels")) {
-    channels_ = variables.channels();
-  }
+  channels_ = variables.channels();
 
   // Choose when to apply filter - this is a temporary fudge
   if (config_.has("applyfilter")) {
@@ -49,7 +47,8 @@ RTTOVOneDVarCheck::RTTOVOneDVarCheck(ioda::ObsSpace & obsdb, const eckit::Config
 
   // Setup fortran object
   const eckit::Configuration * conf = &config_;
-  ufo_rttovonedvarcheck_create_f90(key_, obsdb, conf, channels_.size(), channels_[0]);
+  ufo_rttovonedvarcheck_create_f90(key_, obsdb, conf, channels_.size(), channels_[0], 
+                                   RTTOVOneDVarCheck::qcFlag());
 
   oops::Log::debug() << "RTTOVOneDVarCheck contructor complete. " << std::endl;
 }
@@ -90,9 +89,6 @@ void RTTOVOneDVarCheck::applyFilter(const std::vector<bool> & apply,
 
 // Read qc flags from database
   flags_->read("FortranQC");    // temporary measure
-
-// Print output flags_
-  oops::Log::trace() << "RTTOVOneDVarCheck flags_ = " << *flags_ << std::endl;
 
   oops::Log::trace() << "RTTOVOneDVarCheck Filter complete" << std::endl;
 }

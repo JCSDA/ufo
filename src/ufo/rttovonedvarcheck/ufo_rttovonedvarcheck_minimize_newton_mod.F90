@@ -87,6 +87,8 @@ subroutine ufo_rttovonedvarcheck_minimize_newton(self, &
                                          channels,      &
                                          onedvar_success)
 
+! Heritage: Ops_SatRad_MinimizeNewton_RTTOV12.f90
+
 implicit none
 
 type(ufo_rttovonedvarcheck), intent(inout) :: self
@@ -207,6 +209,11 @@ Iterations: do iter = 1, self % max1DVarIterations
   Ydiff(:) = ob_info%yobs(:) - Y(:)
   Diffprofile(:) = GuessProfile(:) - BackProfile(:)
 
+  write(*,*) "Ob BT = "
+  write(*,'(10F8.3)') ob_info%yobs(:)
+  write(*,*) "HofX BT = "
+  write(*,'(10F8.3)') Y(:)
+
   if (self % UseJForConvergence) then
 
     call ufo_rttovonedvarcheck_CostFunction(Diffprofile, b_inv, Ydiff, r_matrix, Jout)
@@ -239,9 +246,21 @@ Iterations: do iter = 1, self % max1DVarIterations
 
       end if
 
-      if (self % FullDiagnostics) then
+      if (self % FullDiagnostics) THEN
+        write (*, '(A,F12.5)') 'Cost Function=', Jcost
+        write (*, '(A,F12.5)') 'Cost Function Increment=', deltaj
+      end if
+
+      if (DeltaJ < self % cost_convergencefactor .AND. &
+          DeltaJo < 0.0 .AND. self % FullDiagnostics)  THEN ! overall is cost getting smaller?
+        write (*, '(A,I0)') 'Iteration', iter
+        write (*, '(A)') '------------'
+        write (*, '(A,L1)') 'Status: converged = ', Converged
+        write (*, '(A)') 'New profile:'
+        call ufo_geovals_print(geovals, 1)
+        write (*, '(A)')
         write (*, '(A,3F12.5)') 'Cost Function, increment, cost_convergencefactor = ', &
-                                Jcost, deltaj, self % cost_convergencefactor
+                                 Jcost, deltaj, self % cost_convergencefactor
       end if
 
       if (DeltaJ < self % cost_convergencefactor .and. &
@@ -394,6 +413,7 @@ onedvar_success = converged
 if (self % UseJForConvergence) then
   write(*,'(A45,3F10.3,I5,L5)') "J initial, final, lowest, iter, converged = ", &
                                  JCostorig, Jcost,  Jcost, iter, onedvar_success
+  write(*,*) "Final 1Dvar cost = ",Jcost
 end if
 
 !Ob % Niter = iter
@@ -480,6 +500,8 @@ subroutine ufo_rttovonedvarcheck_NewtonFewChans (DeltaBT,       &
                                       B_matrix,      &
                                       r_matrix,      &
                                       Status)
+
+! Heritage: Ops_SatRad_NewtonFewChans.f90
 
 implicit none
 
@@ -600,6 +622,8 @@ subroutine ufo_rttovonedvarcheck_NewtonManyChans (DeltaBT,       &
                                        B_inverse,     &
                                        r_matrix,      &
                                        Status)
+
+! Heritage: Ops_SatRad_NewtonManyChans.f90
 
 implicit none
 

@@ -9,27 +9,14 @@ use kinds
 use iso_c_binding
 use fckit_configuration_module, only: fckit_configuration
 use fckit_log_module, only : fckit_log
-use ufo_rttovonedvarcheck_utils_mod, only: &
-        max_string, &
-        fieldtype_text, &
-        nfieldtypes
+use ufo_rttovonedvarcheck_utils_mod
 
 implicit none
 private
 
-! public types and subroutines
-
-! private list for easy naviagtion
-! onedvarcheck_covariance_InitBmatrix
-! onedvarcheck_covariance_GetBmatrix
-! onedvarcheck_covariance_InvertMatrix
-! onedvarcheck_covariance_iogetfreeunit
-! public ufo_rttovonedvarcheck_bmatrix_setup
-! public ufo_rttovonedvarcheck_bmatrix_delete
-
 type, public :: bmatrix_type
-  !private
   logical :: status                                 ! status indicator
+  logical :: debug                                  ! flag for printing verbose output
   integer :: nbands                                 ! number of latitude bands
   integer :: nsurf                                  ! number of surface type variations
   integer :: nfields                                ! number of fields
@@ -62,7 +49,7 @@ logical                           :: qtotal_flag   !< Flag for qtotal
 logical                       :: file_exists  !< Check if a file exists logical
 integer                       :: fileunit     !< Unit number for reading in files
 integer, allocatable          :: fields_in(:)
-integer                       :: nx, ny, jvar
+integer                       :: jvar
 integer                       :: nmvars
 character(len=max_string)     :: varname
 real(kind=kind_real)          :: t1,t2
@@ -114,7 +101,7 @@ do jvar = 1, nmvars
       if (.NOT. qtotal_flag) fields_in(8) = 9  ! liquid water profile
 
     case default
-      call abor1_ftn("Variable not implemented yet in OneDVarCheck Covariance")
+      call abor1_ftn("Variable not implemented yet in rttovonedvarcheck Covariance")
 
   end select
 
@@ -122,19 +109,18 @@ end do
 
 inquire(file=trim(filepath), exist=file_exists)
 if (file_exists) then
-  call onedvarcheck_covariance_IOGetFreeUnit(fileunit)
+  call rttovonedvarcheck_iogetfreeunit(fileunit)
   open(unit = fileunit, file = trim(filepath))
-  call onedvarcheck_covariance_InitBmatrix(self)
-  !call onedvarcheck_covariance_GetBmatrix(fileunit, self, fieldlist=fields_in) ! used for development
-  call onedvarcheck_covariance_GetBmatrix(fileunit, self)
+  call rttovonedvarcheck_covariance_InitBmatrix(self)
+  !call rttovonedvarcheck_covariance_GetBmatrix(self, fileunit, fieldlist=fields_in) ! used for development
+  call rttovonedvarcheck_covariance_GetBmatrix(self, fileunit)
   close(unit = fileunit)
-  call fckit_log % info("onedvarcheck bmatrix file exists and read in")
+  call fckit_log % info("rttovonedvarcheck bmatrix file exists and read in")
 else
-  call abor1_ftn("onedvarcheck bmatrix file not found")
+  call abor1_ftn("rttovonedvarcheck bmatrix file not found")
 end if
 
-nx = size(self % store,1)
-ny = size(self % store,2)
+self % debug = .true.
 
 call cpu_time(t2)
 
@@ -146,45 +132,63 @@ end subroutine ufo_rttovonedvarcheck_bmatrix_setup
 ! ------------------------------------------------------------------------------
 
 subroutine ufo_rttovonedvarcheck_bmatrix_delete(self)
+
+! Heritage: Ops_SatRad_SquashBmatrix.f90
+
 implicit none
 class(bmatrix_type), intent(inout) :: self  !< Covariance structure
+
+self % status = .false.
+self % debug = .false.
+self % nbands = 0
+self % nsurf = 0
+if ( associated(self % fields)      ) deallocate( self % fields      )
+if ( associated(self % store)       ) deallocate( self % store       )
+if ( associated(self % inverse)     ) deallocate( self % inverse     )
+if ( associated(self % sigma)       ) deallocate( self % sigma       )
+if ( associated(self % proxy)       ) deallocate( self % proxy       )
+if ( associated(self % inv_proxy)   ) deallocate( self % inv_proxy   )
+if ( associated(self % sigma_proxy) ) deallocate( self % sigma_proxy )
+if ( associated(self % south)       ) deallocate( self % south       )
+if ( associated(self % north)       ) deallocate( self % north       )
 
 end subroutine ufo_rttovonedvarcheck_bmatrix_delete
 
 ! ------------------------------------------------------------------------------
 
-subroutine onedvarcheck_covariance_InitBmatrix(bmatrix)
+subroutine rttovonedvarcheck_covariance_InitBmatrix(self)
 
 ! nullify B matrix pointers.
+! Heritage: Ops_SatRad_InitBmatrix.f90
 
 implicit none
 
 ! subroutine arguments:
-type(bmatrix_type), intent(out) :: bmatrix
-character(len=*), parameter     :: routinename = "onedvarcheck_covariance_InitBmatrix"
+type(bmatrix_type), intent(out) :: self
+character(len=*), parameter     :: routinename = "rttovonedvarcheck_covariance_InitBmatrix"
 
-bmatrix % status = .false.
-bmatrix % nbands = 0
-bmatrix % nsurf = 0
+self % status = .false.
+self % debug = .false.
+self % nbands = 0
+self % nsurf = 0
+nullify( self % fields      )
+nullify( self % store       )
+nullify( self % inverse     )
+nullify( self % sigma       )
+nullify( self % proxy       )
+nullify( self % inv_proxy   )
+nullify( self % sigma_proxy )
+nullify( self % south       )
+nullify( self % north       )
 
-nullify( bmatrix % fields      )
-nullify( bmatrix % store       )
-nullify( bmatrix % inverse     )
-nullify( bmatrix % sigma       )
-nullify( bmatrix % proxy       )
-nullify( bmatrix % inv_proxy   )
-nullify( bmatrix % sigma_proxy )
-nullify( bmatrix % south       )
-nullify( bmatrix % north       )
-
-end subroutine onedvarcheck_covariance_InitBmatrix
+end subroutine rttovonedvarcheck_covariance_InitBmatrix
 
 !-------------------------------------------------------------------------------
 
-subroutine onedvarcheck_covariance_GetBmatrix (fileunit, &
-                                               bmatrix,        &
-                                               b_elementsused, &
-                                               fieldlist)
+subroutine rttovonedvarcheck_covariance_GetBmatrix (self,           &
+                                                    fileunit,       &
+                                                    b_elementsused, &
+                                                    fieldlist)
 
 !-------------------------------------------------------------------------------
 ! read the input file and allocate and fill in all the components of the bmatrix
@@ -223,19 +227,21 @@ subroutine onedvarcheck_covariance_GetBmatrix (fileunit, &
 ! and sea. this routine makes no assumption about the use of these variables,
 ! hence no space is allocated. nullification of unused pointers should take
 ! place outside (use the ops_satrad_initbmatrix routine).
+!
 !-------------------------------------------------------------------------------
 
+! Heritage: Ops_SatRad_GetBmatrix.f90
 
 implicit none
 
 ! subroutine arguments:
+type (bmatrix_type), intent(inout) :: self
 integer, intent(in)                :: fileunit
-type (bmatrix_type), intent(inout) :: bmatrix
 integer, optional, intent(in)      :: b_elementsused(:)
 integer, optional, intent(inout)   :: fieldlist(:)
 
 ! local declarations:
-character(len=*), parameter        :: routinename = "onedvarcheck_covariance_GetBmatrix"
+character(len=*), parameter        :: routinename = "rttovonedvarcheck_covariance_GetBmatrix"
 integer                            :: i
 integer                            :: j
 integer                            :: k
@@ -256,7 +262,6 @@ real(kind=kind_real), allocatable  :: bfromfile(:,:)
 logical, allocatable               :: list(:)
 integer, allocatable               :: bfields(:,:)
 integer, allocatable               :: elementsused(:)
-logical                            :: onedvarcheck_debug = .true.
 
 !--------------------------
 ! 1. read header information
@@ -296,7 +301,7 @@ end if
 ! 1.3) output initial messages
 !----
 
-if (onedvarcheck_debug) then
+if (self % debug) then
   write (*, '(a)') 'reading b matrix file:'
   write (*, '(a,i0)') 'number of latitude bands = ', nbands
   write (*, '(a,i0)') 'matrix size = ', matrixsize
@@ -323,12 +328,12 @@ end if
 ! this method is to provide the element numbers explicitly in the argument
 ! b_elementsused.
 
-allocate (bmatrix % fields(nfieldtypes,2))
-bmatrix % fields(:,:) = 0
-bmatrix % status = .true.
+allocate (self % fields(nfieldtypes,2))
+self % fields(:,:) = 0
+self % status = .true.
 nelements = 0
 nelements_total = 0
-bmatrix % nfields = 0
+self % nfields = 0
 
 if (present (fieldlist)) then
 
@@ -360,7 +365,7 @@ if (present (fieldlist)) then
 
   ! 2.1.1) write messages
 
-  if (onedvarcheck_debug .and. any (fieldlist /= 0)) then
+  if (self % debug .and. any (fieldlist /= 0)) then
     write (*, '(a)') 'the following requested retrieval fields are not in the b matrix:'
     do i = 1, size (fieldlist)
       if (fieldlist(i) /= 0) then
@@ -376,7 +381,7 @@ if (present (fieldlist)) then
     end do
   end if
 
-  if (onedvarcheck_debug) then
+  if (self % debug) then
     write (*, '(a)') 'b matrix fields used to define the retrieval profile vector:'
     do i = 1, nbfields
       write (*, '(a)') fieldtype_text(bfields(i,1))
@@ -417,16 +422,16 @@ end if
 
 ! set field list in structure variable
 
-if (nbfields > 0) bmatrix % fields(1:nbfields,:) = bfields(1:nbfields,:)
-bmatrix % nfields = nbfields
+if (nbfields > 0) self % fields(1:nbfields,:) = bfields(1:nbfields,:)
+self % nfields = nbfields
 
 ! initialize the rest
 
-bmatrix % nbands = nbands
-allocate (bmatrix % store(nelements,nelements,nbands))
-allocate (bmatrix % south(nbands))
-allocate (bmatrix % north(nbands))
-bmatrix % store(:,:,:) = 0.0_kind_real
+self % nbands = nbands
+allocate (self % store(nelements,nelements,nbands))
+allocate (self % south(nbands))
+allocate (self % north(nbands))
+self % store(:,:,:) = 0.0_kind_real
 
 ! allocate dummy variables for file input
 
@@ -451,7 +456,7 @@ readallb : do
     read (fileunit, '(5e16.8)' ) (bfromfile(i,j), i = 1, matrixsize)
   end do
 
-  if (onedvarcheck_debug) then
+  if (self % debug) then
     write (*, '(a,i0,a,2f8.2)') &
       'band no.', band, ' has southern and northern latitude limits of', &
       southlimit, northlimit
@@ -465,14 +470,14 @@ readallb : do
     list(band) = .true.
     nmatrix = nmatrix + 1
     if (nelements < matrixsize) then
-      bmatrix % store(:,:,band) = &
+      self % store(:,:,band) = &
         bfromfile(elementsused(1:nelements),elementsused(1:nelements))
     else
-      bmatrix % store(:,:,band) = bfromfile(:,:)
+      self % store(:,:,band) = bfromfile(:,:)
     end if
-    bmatrix % south(band) = southlimit
-    bmatrix % north(band) = northlimit
-  else if (onedvarcheck_debug) then
+    self % south(band) = southlimit
+    self % north(band) = northlimit
+  else if (self % debug) then
     write (*, '(a,i0)') 'skipped matrix with band number ', band
   end if
 
@@ -482,23 +487,23 @@ end do readallb
 ! 4. store error vector
 !---------------------
 
-allocate (bmatrix % sigma(nelements,nbands))
+allocate (self % sigma(nelements,nbands))
 do i = 1, nelements
-  bmatrix % sigma(i,:) = sqrt (bmatrix % store(i,i,:))
+  self % sigma(i,:) = sqrt (self % store(i,i,:))
 end do
 
 !----------------
 ! 5. invert matrix
 !----------------
 
-allocate (bmatrix % inverse(nelements,nelements,nbands))
-bmatrix % inverse(:,:,:) = bmatrix % store(:,:,:)
+allocate (self % inverse(nelements,nelements,nbands))
+self % inverse(:,:,:) = self % store(:,:,:)
 
 do k = 1, nbands
-  call onedvarcheck_covariance_InvertMatrix (nelements,          & ! in
-                                             nelements,                 & ! in
-                                             bmatrix % inverse(:,:,k),  & ! inout
-                                             status)                      ! out
+  call rttovonedvarcheck_covariance_InvertMatrix (nelements,       & ! in
+                                           nelements,              & ! in
+                                           self % inverse(:,:,k),  & ! inout
+                                           status)                   ! out
   if (status /= 0) then
     write(*,*) routinename // ' : b matrix is not invertible'
   end if
@@ -512,11 +517,11 @@ if (nmatrix < nbands) then
   write(*,*) routinename // ' : too few b matrices found in input file'
 end if
 
-end subroutine onedvarcheck_covariance_GetBmatrix
+end subroutine rttovonedvarcheck_covariance_GetBmatrix
 
 !-------------------------------------------------------------------------------
 
-subroutine onedvarcheck_covariance_InvertMatrix (n,      &
+subroutine rttovonedvarcheck_covariance_InvertMatrix (n,      &
                                                  m,      &
                                                  a,      &
                                                  status, &
@@ -561,7 +566,10 @@ subroutine onedvarcheck_covariance_InvertMatrix (n,      &
 !
 ! if the the optional parameter matrix is present, it is replaced by
 ! (matrix).a^-1 on exit and a is left unchanged.
+!
 !-------------------------------------------------------------------------------
+
+! Heritage: Ops_SatRad_InvertMatrix.inc
 
 implicit none
 
@@ -573,7 +581,7 @@ integer, intent(out)                          :: status      ! 0 if all ok 1 if 
 real(kind=kind_real), optional, intent(inout) :: matrix(n,m) ! replaced by (matrix).a^-1 on exit
 
 ! local declarations:
-character(len=*), parameter   :: routinename = "onedvarcheck_covariance_InvertMatrix"
+character(len=*), parameter   :: routinename = "rttovonedvarcheck_covariance_InvertMatrix"
 character(len=80)             :: errormessage(2)
 real(kind=kind_real), parameter :: tolerance = tiny (0.0_kind_real) * 100.0_kind_real
 integer                       :: i
@@ -662,33 +670,7 @@ end if
 
 9999 continue
 
-end subroutine onedvarcheck_covariance_InvertMatrix
-
-!-------------------------------------------------------------------------------
-
-subroutine onedvarcheck_covariance_iogetfreeunit(unit)
-
-implicit none
-
-integer, intent(out) :: unit
-
-integer, parameter :: unit_min=10
-integer, parameter :: unit_max=1000
-logical            :: opened
-integer            :: lun
-integer            :: newunit
-
-newunit=-1
-do lun=unit_min,unit_max
-  inquire(unit=lun,opened=opened)
-  if (.not. opened) then
-      newunit=lun
-    exit
-  end if
-end do
-unit=newunit
-
-end subroutine onedvarcheck_covariance_iogetfreeunit
+end subroutine rttovonedvarcheck_covariance_InvertMatrix
 
 ! ------------------------------------------------------------------------------
 
