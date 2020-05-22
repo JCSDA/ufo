@@ -524,7 +524,10 @@ real(kind_real), allocatable :: Wfunc(:)
                write(err_msg,*) 'ufo_radiancecrtm_simobs: //&
                                  & ObsDiagnostic is unsupported, ', &
                                  & hofxdiags%variables(jvar)
-               call abor1_ftn(err_msg)
+               ! call abor1_ftn(err_msg)
+               hofxdiags%geovals(jvar)%nval = 1
+               allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,self%n_Profiles))
+               hofxdiags%geovals(jvar)%vals = missing
          end select
       else if (ystr_diags(jvar) == var_tb) then
          ! var_tb jacobians

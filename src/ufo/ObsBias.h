@@ -63,13 +63,10 @@ class ObsBias : public util::Printable,
   const double & operator[](const unsigned int ii) const {return (*biasbase_)[ii];}
 
   // Obs bias model
-  void computeObsBias(ioda::ObsVector &, const Eigen::MatrixXd &) const;
+  void computeObsBias(ioda::ObsVector &, ObsDiagnostics &, const Eigen::MatrixXd &) const;
 
   // Obs Bias Predictors
   Eigen::MatrixXd computePredictors(const GeoVaLs &, const ObsDiagnostics &) const;
-
-  // save Bias Terms for QC
-  void saveObsBiasTerms(ioda::ObsSpace &, const std::string &, const Eigen::MatrixXd &) const;
 
   // Required variables
   const oops::Variables & requiredVars() const {return geovars_;}
@@ -80,6 +77,9 @@ class ObsBias : public util::Printable,
 
  private:
   void print(std::ostream &) const;
+
+  // save Bias Terms for QC
+  void saveObsBiasTerms(ObsDiagnostics &, const Eigen::MatrixXd &) const;
 
   const ioda::ObsSpace & odb_;
   eckit::LocalConfiguration conf_;

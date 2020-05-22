@@ -40,6 +40,15 @@ ObsBias::ObsBias(const ioda::ObsSpace & odb, const eckit::Configuration & conf)
       prednames_.push_back(pred->name());
       geovars_ += pred->requiredGeovars();
       hdiags_ += pred->requiredHdiagnostics();
+
+      /// Reserve the space for ObsBiasTerm for predictor
+      if (jobs_.size() > 0) {
+        for (auto & job : jobs_) {
+          hdiags_ += oops::Variables({prednames_.back() + "_" + std::to_string(job)});
+        }
+      } else {
+        hdiags_ += oops::Variables({prednames_.back()});
+      }
     }
   }
 
@@ -110,8 +119,12 @@ void ObsBias::write(const eckit::Configuration & conf) const {
 // -----------------------------------------------------------------------------
 
 void ObsBias::computeObsBias(ioda::ObsVector & ybias,
+                             ObsDiagnostics & ydiags,
                              const Eigen::MatrixXd & predData) const {
-  if (biasbase_) biasbase_->computeObsBias(ybias, predData);
+  if (biasbase_) {
+    biasbase_->computeObsBias(ybias, predData);
+    this->saveObsBiasTerms(ydiags, predData);
+  }
 }
 
 // -----------------------------------------------------------------------------
@@ -147,11 +160,10 @@ Eigen::MatrixXd ObsBias::computePredictors(const GeoVaLs & geovals,
 
 // -----------------------------------------------------------------------------
 
-void ObsBias::saveObsBiasTerms(ioda::ObsSpace & odb,
-                               const std::string & group,
+void ObsBias::saveObsBiasTerms(ObsDiagnostics & ydiags,
                                const Eigen::MatrixXd & predData) const {
   if (biasbase_) {
-    biasbase_->saveObsBiasTerms(odb, group, predData);
+    biasbase_->saveObsBiasTerms(ydiags, predData);
   }
 }
 

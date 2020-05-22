@@ -43,8 +43,7 @@ void ObsOperator::simulateObs(const GeoVaLs & gvals, ioda::ObsVector & yy,
   if (bias) {
     ioda::ObsVector ybias(odb_);
     Eigen::MatrixXd predData = bias.computePredictors(gvals, ydiags);
-    bias.computeObsBias(ybias, predData);
-    bias.saveObsBiasTerms(odb_, "ObsBiasTerm", predData);
+    bias.computeObsBias(ybias, ydiags, predData);
     ybias.save("ObsBias");
   }
 }

@@ -80,7 +80,7 @@ bool ObsFilterData::has(const Variable & varname) const {
     return (gvals_ && gvals_->has(var));
   } else if (grp == "ObsFunction") {
     return ObsFunctionFactory::functionExists(var);
-  } else if (grp == "ObsDiag") {
+  } else if (grp == "ObsDiag" || grp == "ObsBiasTerm") {
     return (diags_ && diags_->has(var));
   } else {
     return this->hasVector(grp, var) || this->hasDataVector(grp, var) || obsdb_.has(grp, var);
@@ -161,7 +161,8 @@ void ObsFilterData::get(const Variable & varname, std::vector<int> & values) con
     values.resize(obsdb_.nvars());
     obsdb_.get_db(grp, var, values);
   } else {
-    if (grp == "GeoVaLs" || grp == "HofX" || grp == "ObsDiag" || grp == "ObsFunction") {
+    if (grp == "GeoVaLs" || grp == "HofX" || grp == "ObsDiag" ||
+        grp == "ObsBiasTerm" || grp == "ObsFunction") {
       oops::Log::error() << "ObsFilterData::get int values only supported for ObsSpace"
                          << std::endl;
       ABORT("ObsFilterData::get int values only supported for ObsSpace");
@@ -191,14 +192,14 @@ void ObsFilterData::get(const Variable & varname, const int level,
   const std::string var = varname.variable();
   const std::string grp = varname.group();
 
-  ASSERT(grp == "GeoVaLs" || grp == "ObsDiag");
+  ASSERT(grp == "GeoVaLs" || grp == "ObsDiag" || grp == "ObsBiasTerm");
   values.resize(obsdb_.nlocs());
 ///  For GeoVaLs read from GeoVaLs (should be available)
   if (grp == "GeoVaLs") {
     ASSERT(gvals_);
     gvals_->get(values, var, level);
 ///  For ObsDiag get from ObsDiagnostics
-  } else if (grp == "ObsDiag") {
+  } else if (grp == "ObsDiag" || grp == "ObsBiasTerm") {
     ASSERT(diags_);
     diags_->get(values, var, level);
   }
@@ -236,8 +237,8 @@ void ObsFilterData::get(const Variable & varname, ioda::ObsDataVector<float> & v
         values[currvar][jj] = (*jv->second)[iv + (jj * hofxnvars)];
       }
     }
-///  For ObsDiag get from ObsDiagnostics
-  } else if (grp == "ObsDiag") {
+///  For ObsDiag or ObsBiasTerm,  get it from ObsDiagnostics
+  } else if (grp == "ObsDiag" || grp == "ObsBiasTerm") {
     ASSERT(diags_);
     std::vector<float> vec(obsdb_.nlocs());
     diags_->get(vec, var);
@@ -280,7 +281,7 @@ size_t ObsFilterData::nlevs(const Variable & varname) const {
   if (grp == "GeoVaLs") {
     ASSERT(gvals_);
     return gvals_->nlevs(var);
-  } else if (grp == "ObsDiag") {
+  } else if (grp == "ObsDiag" || grp == "ObsBiasTerm") {
     ASSERT(diags_);
     return diags_->nlevs(var);
   }

@@ -16,6 +16,7 @@
 
 #include "ufo/ObsBias.h"
 #include "ufo/ObsBiasIncrement.h"
+#include "ufo/ObsDiagnostics.h"
 
 namespace ufo {
 
@@ -174,27 +175,32 @@ void ObsBiasLinearCombination::computeObsBias(ioda::ObsVector & ybias,
 
 // -----------------------------------------------------------------------------
 
-void ObsBiasLinearCombination::saveObsBiasTerms(ioda::ObsSpace & odb,
-                                                const std::string & group,
+void ObsBiasLinearCombination::saveObsBiasTerms(ObsDiagnostics & ydiags,
                                                 const Eigen::MatrixXd & predData) const {
   oops::Log::trace() << "ObsBias::saveObsBiasTerms startng." << std::endl;
-  const std::size_t nlocs = odb.nlocs();
+  // const std::size_t nlocs = odb.nlocs();
+  const std::size_t nlocs = predData.cols();
   const std::size_t npreds = prednames_.size();
   const std::size_t njobs = jobs_.size();
 
   ASSERT(predData.rows() == npreds*njobs && predData.cols() == nlocs);
 
-  //  map bias coeff to eigen matrix npreds X njobs (read only)
+  /// Map bias coeff to eigen matrix npreds X njobs (read only)
   Eigen::Map<const Eigen::MatrixXd> coeffs(biascoeffs_.data(), npreds, njobs);
 
-  // save ObsBiasTerms (bias_coeff x predictor) for QC
+  /// Save ObsBiasTerms (bias_coeff x predictor) for QC
   std::string varname;
-  std::vector<double> vec(nlocs);
+  std::vector<double> vec(nlocs, 0.0);
   for (std::size_t jch = 0; jch < njobs; ++jch) {
     for (std::size_t jpred = 0; jpred < npreds; ++jpred) {
       varname = prednames_[jpred] + "_" + std::to_string(jobs_[jch]);
-      Eigen::VectorXd::Map(&vec[0], nlocs) = predData.row(jpred+jch*npreds) * coeffs(jpred, jch);
-      odb.put_db(group, varname, vec);
+      if (ydiags.has(varname)) {
+        Eigen::VectorXd::Map(&vec[0], nlocs) = predData.row(jpred+jch*npreds) * coeffs(jpred, jch);
+        ydiags.save(vec, varname, 1);
+      } else {
+        oops::Log::error() << varname << " is not reserved in ydiags !" << std::endl;
+        ABORT("ObsBiasTerm variable is not reserved in ydiags");
+      }
     }
   }
 

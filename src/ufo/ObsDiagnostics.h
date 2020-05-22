@@ -40,7 +40,7 @@ class ObsDiagnostics : public util::Printable,
   ~ObsDiagnostics() {}
 
 // I/O
-  void save(const std::string &) const;
+  void save(const std::vector<double> &, const std::string &, const int);
 
 // Interfaces
   int & toFortran() {return gdiags_.toFortran();}
