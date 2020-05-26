@@ -25,7 +25,7 @@
 namespace ufo {
 
 ///
-/// \brief Options applying to the determination of cloud match index based on
+/// \brief Options applying to the determination of the cloud match index based on
 /// retrieved CLW from observation and background
 ///
 class CLWMatchIndexMWParameters : public oops::Parameters {
@@ -33,14 +33,14 @@ class CLWMatchIndexMWParameters : public oops::Parameters {
   /// List of channels available for assimilation
   oops::RequiredParameter<std::string> channelList{"channels", this};
 
-  /// Observation error for each channel under clear-sky condition
+  /// Symmetric cloud amount threshold for each channel
+  /// Channel is considered insensitivity to the cloud amount less than the threshold
   oops::RequiredParameter<std::vector<float>> clwretClearSky{"clwret_clearsky", this};
 
-  /// Function used to retrieve the cloud liquid water from observation (CLWRetMW with ObsValue)
+  /// Function to retrieve the cloud liquid water from observation
   oops::RequiredParameter<Variable> clwobsFunction{"clwobs_function", this};
 
-  /// Function used to retrieve the cloud liquid water from simulated observation
-  /// (CLWRetMW with HofX)
+  /// Function to retrieve the cloud liquid water from the simulated observation
   oops::RequiredParameter<Variable> clwbkgFunction{"clwbkg_function", this};
 };
 

@@ -31,11 +31,11 @@ class ObsErrorFactorSurfJacobianRadParameters : public oops::Parameters {
   oops::RequiredParameter<std::string> channelList{"channels", this};
 
   /// Observation error scale factors applied to surface temperature jacobians
-  /// over 5 surface types: [sea, land, ice, snow and mixed]
+  /// over five surface types: [sea, land, ice, snow and mixed]
   oops::RequiredParameter<std::vector<float>> obserrScaleFactorTsfc{"obserr_dtempf", this};
 
   /// Observation error scale factors applied to surface emissivity jacobians
-  /// over 5 surface types: [sea, land, ice, snow and mixed]
+  /// over five surface types: [sea, land, ice, snow and mixed]
   oops::RequiredParameter<std::vector<float>> obserrScaleFactorEsfc{"obserr_demisf", this};
 
   /// Name of the data group to which the observation error is applied (default: ObsErrorData)

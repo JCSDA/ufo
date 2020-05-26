@@ -59,6 +59,7 @@ list( APPEND ufo_test_input
   testinput/function_nsstret.yaml
   testinput/function_obserrmean.yaml
   testinput/function_scatret.yaml
+  testinput/function_errfsdoei.yaml
   testinput/function_velocity.yaml
   testinput/gmi_crtm.yaml
   testinput/genericprof.yaml
@@ -80,11 +81,7 @@ list( APPEND ufo_test_input
   testinput/hirs4_crtm.yaml
   testinput/iasi_crtm.yaml
   testinput/iasi_qc.yaml
-  testinput/iasi_qc_clouddetect.yaml
-  testinput/iasi_qc_clouddetect_nsstret.yaml
-  testinput/iasi_qc_errfgrosschk.yaml
   testinput/iasi_qc_filters.yaml
-  testinput/iasi_qc_nsstret.yaml
   testinput/locations.yaml
   testinput/mhs_crtm.yaml
   testinput/obsdiag_crtm_jacobian.yaml
@@ -162,7 +159,6 @@ list( APPEND ufo_test_data
   atmosphere/amsua_n19_geoval_2018041500_s_qc.nc4
   atmosphere/amsua_n19_geoval_2018041500_m.nc4
   atmosphere/amsua_n19_geoval_2018041500_s.nc4
-  atmosphere/amsua_n19_geoval_2018041500.nc4
   atmosphere/amsua_n19_tlapmean.txt
   atmosphere/aod_geoval_2018041500_m.nc4
   atmosphere/aod_geoval_2018041500_s.nc4
@@ -1039,11 +1035,11 @@ ecbuild_add_test( TARGET  test_ufo_function_errfwavenum
                   LIBS    ufo)
 
 # comment out temporarily for correct file
-#ecbuild_add_test( TARGET  test_ufo_function_hydrometeorchk
-#                  SOURCES mains/TestObsFunction.cc
-#                  ARGS    "testinput/function_hydrometeorchk.yaml"
-#                  ENVIRONMENT OOPS_TRAPFPE=1
-#                  LIBS    ufo)
+ecbuild_add_test( TARGET  test_ufo_function_hydrometeorchk
+                  SOURCES mains/TestObsFunction.cc
+                  ARGS    "testinput/function_hydrometeorchk.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  LIBS    ufo)
 # comment out temporarily for correct file
 
 ecbuild_add_test( TARGET  test_ufo_function_nsstret
@@ -1061,6 +1057,12 @@ ecbuild_add_test( TARGET  test_ufo_function_obserrmean
 ecbuild_add_test( TARGET  test_ufo_function_scatret
                   SOURCES mains/TestObsFunction.cc
                   ARGS    "testinput/function_scatret.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  LIBS    ufo)
+
+ecbuild_add_test( TARGET  test_ufo_function_errfsdoei
+                  SOURCES mains/TestObsFunction.cc
+                  ARGS    "testinput/function_errfsdoei.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   LIBS    ufo)
 
@@ -1172,33 +1174,9 @@ if ( ${CRTM_FOUND} )
                       ENVIRONMENT OOPS_TRAPFPE=1
                       DEPENDS test_ObsFilters.x )
 
-    ecbuild_add_test( TARGET  test_ufo_qc_iasi_clouddetect
-                      COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-                      ARGS    "testinput/iasi_qc_clouddetect.yaml"
-                      ENVIRONMENT OOPS_TRAPFPE=1
-                      DEPENDS test_ObsFilters.x )
-
-    ecbuild_add_test( TARGET  test_ufo_qc_iasi_clouddetect_nsstret
-                      COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-                      ARGS    "testinput/iasi_qc_clouddetect_nsstret.yaml"
-                      ENVIRONMENT OOPS_TRAPFPE=1
-                      DEPENDS test_ObsFilters.x )
-
-    ecbuild_add_test( TARGET  test_ufo_qc_iasi_errfgrosschk
-                      COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-                      ARGS    "testinput/iasi_qc_errfgrosschk.yaml"
-                      ENVIRONMENT OOPS_TRAPFPE=1
-                      DEPENDS test_ObsFilters.x )
-
     ecbuild_add_test( TARGET  test_ufo_qc_iasi_filters
                       COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
                       ARGS    "testinput/iasi_qc_filters.yaml"
-                      ENVIRONMENT OOPS_TRAPFPE=1
-                      DEPENDS test_ObsFilters.x )
-
-    ecbuild_add_test( TARGET  test_ufo_qc_iasi_nsstret
-                      COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-                      ARGS    "testinput/iasi_qc_nsstret.yaml"
                       ENVIRONMENT OOPS_TRAPFPE=1
                       DEPENDS test_ObsFilters.x )
 

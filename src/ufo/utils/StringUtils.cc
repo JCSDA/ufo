@@ -29,6 +29,19 @@ void splitVarGroup(const std::string & vargrp, std::string & var, std::string & 
 
 // -----------------------------------------------------------------------------
 
+void splitInstSat(const std::string & instsat, std::string & inst, std::string & sat) {
+  const size_t at = instsat.find("_");
+  inst = instsat.substr(0, at);
+  sat = "";
+  if (at != std::string::npos) {
+    sat = instsat.substr(at + 1, std::string::npos);
+    const size_t no_at = sat.find("_");
+    ASSERT(no_at == std::string::npos);
+  }
+}
+
+// -----------------------------------------------------------------------------
+
 bool isFloat(const std::string & str) {
   std::istringstream iss(str);
   float factor;
