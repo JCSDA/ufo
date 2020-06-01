@@ -78,6 +78,8 @@ set ( filters_files
       actions/InflateError.h
       actions/RejectObs.cc
       actions/RejectObs.h
+      obsfunctions/ChannelUseflagCheckRad.cc
+      obsfunctions/ChannelUseflagCheckRad.h
       obsfunctions/CLWMatchIndexMW.cc
       obsfunctions/CLWMatchIndexMW.h
       obsfunctions/CLWRetMW.cc
@@ -86,6 +88,8 @@ set ( filters_files
       obsfunctions/CLWRetSymmetricMW.h
       obsfunctions/HydrometeorCheckAMSUA.cc
       obsfunctions/HydrometeorCheckAMSUA.h
+      obsfunctions/InterChannelConsistencyCheck.cc
+      obsfunctions/InterChannelConsistencyCheck.h
       obsfunctions/ObsErrorModelRamp.cc
       obsfunctions/ObsErrorModelRamp.h
       obsfunctions/ObsFunction.cc
@@ -96,6 +100,10 @@ set ( filters_files
       obsfunctions/CloudDetectMinResidualIR.h
       obsfunctions/ObsErrorBoundIR.cc
       obsfunctions/ObsErrorBoundIR.h
+      obsfunctions/ObsErrorBoundMW.cc
+      obsfunctions/ObsErrorBoundMW.h
+      obsfunctions/ObsErrorFactorSituDependMW.cc
+      obsfunctions/ObsErrorFactorSituDependMW.h
       obsfunctions/ObsErrorFactorSurfJacobianRad.cc
       obsfunctions/ObsErrorFactorSurfJacobianRad.h
       obsfunctions/ObsErrorFactorLatRad.cc

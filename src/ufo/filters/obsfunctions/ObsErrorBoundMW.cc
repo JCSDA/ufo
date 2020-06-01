@@ -1,11 +1,11 @@
 /*
- * (C) Copyright 2019 UCAR
+ * (C) Copyright 2020 UCAR
  *
  * This software is licensed under the terms of the Apache Licence Version 2.0
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#include "ufo/filters/obsfunctions/ObsErrorBoundIR.h"
+#include "ufo/filters/obsfunctions/ObsErrorBoundMW.h"
 
 #include <algorithm>
 #include <cmath>
@@ -20,16 +20,17 @@
 #include "oops/util/missingValues.h"
 #include "ufo/filters/obsfunctions/ObsErrorFactorLatRad.h"
 #include "ufo/filters/obsfunctions/ObsErrorFactorTransmitTopRad.h"
+#include "ufo/filters/obsfunctions/ObsErrorModelRamp.h"
 #include "ufo/filters/Variable.h"
 #include "ufo/utils/Constants.h"
 
 namespace ufo {
 
-static ObsFunctionMaker<ObsErrorBoundIR> makerObsErrorBoundIR_("ObsErrorBoundIR");
+static ObsFunctionMaker<ObsErrorBoundMW> makerObsErrorBoundMW_("ObsErrorBoundMW");
 
 // -----------------------------------------------------------------------------
 
-ObsErrorBoundIR::ObsErrorBoundIR(const eckit::LocalConfiguration & conf)
+ObsErrorBoundMW::ObsErrorBoundMW(const eckit::LocalConfiguration & conf)
   : invars_() {
   // Check options
   options_.deserialize(conf);
@@ -39,13 +40,6 @@ ObsErrorBoundIR::ObsErrorBoundIR(const eckit::LocalConfiguration & conf)
   std::copy(channelset.begin(), channelset.end(), std::back_inserter(channels_));
   ASSERT(channels_.size() > 0);
 
-  const Variable &obserrlat = options_.obserrBoundLat.value();
-  invars_ += obserrlat;
-
-  const Variable &obserrtaotop = options_.obserrBoundTransmittop.value();
-
-  invars_ += obserrtaotop;
-
   // Get test groups from options
   const std::string &errgrp = options_.testObserr.value();
   const std::string &flaggrp = options_.testQCflag.value();
@@ -54,21 +48,41 @@ ObsErrorBoundIR::ObsErrorBoundIR(const eckit::LocalConfiguration & conf)
   invars_ += Variable("brightness_temperature@"+flaggrp, channels_);
   invars_ += Variable("brightness_temperature@"+errgrp, channels_);
   invars_ += Variable("brightness_temperature@ObsError", channels_);
+
+  // Include list of required data from GeoVaLs
+  invars_ += Variable("water_area_fraction@GeoVaLs");
+
+  const Variable &obserrlat = options_.obserrBoundLat.value();
+  invars_ += obserrlat;
+
+  const Variable &obserrtaotop = options_.obserrBoundTransmittop.value();
+  invars_ += obserrtaotop;
+
+  const Variable &obserrtopo = options_.obserrBoundTopo.value();
+  invars_ += obserrtopo;
+
+  const Variable &obserr = options_.obserrFunction.value();
+  invars_ += obserr;
 }
 
 // -----------------------------------------------------------------------------
 
-ObsErrorBoundIR::~ObsErrorBoundIR() {}
+ObsErrorBoundMW::~ObsErrorBoundMW() {}
 
 // -----------------------------------------------------------------------------
 
-void ObsErrorBoundIR::compute(const ObsFilterData & in,
+void ObsErrorBoundMW::compute(const ObsFilterData & in,
                                   ioda::ObsDataVector<float> & out) const {
-  // Get observation error bounds from options
-  const std::vector<float> &obserr_bound_max = options_.obserrBoundMax.value();
   // Get dimensions
   size_t nlocs = in.nlocs();
   size_t nchans = channels_.size();
+
+  // Get observation error bounds from options
+  const std::vector<float> &obserr_bound_max = options_.obserrBoundMax.value();
+
+  // Get area fraction of each surface type
+  std::vector<float> water_frac(nlocs);
+  in.get(Variable("water_area_fraction@GeoVaLs"), water_frac);
 
   // Get error factor from ObsFunction
   const Variable &obserrlat = options_.obserrBoundLat.value();
@@ -80,27 +94,56 @@ void ObsErrorBoundIR::compute(const ObsFilterData & in,
   ioda::ObsDataVector<float> errftaotop(in.obsspace(), obserrtaotop.toOopsVariables());
   in.get(obserrtaotop, errftaotop);
 
+  // Get error factor from ObsFunction
+  const Variable &obserrtopo = options_.obserrBoundTopo.value();
+  ioda::ObsDataVector<float> errftopo(in.obsspace(), obserrtopo.toOopsVariables());
+  in.get(obserrtopo, errftopo);
+
+  // Get all-sky observation error from ObsFunction
+  const Variable &obserrvar = options_.obserrFunction.value();
+  ioda::ObsDataVector<float> obserr(in.obsspace(), obserrvar.toOopsVariables());
+  in.get(obserrvar, obserr);
+
+  // Set channel index
+  int ich238 = 1, ich314 = 2, ich503 = 3, ich528 = 4, ich536 = 5;
+  int ich544 = 6, ich549 = 7, ich890 = 15;
   // Output integrated error bound for gross check
-  std::vector<float> obserr(nlocs);      //!< original obs error
-  std::vector<float> obserrdata(nlocs);  //!< effective obs err
-  std::vector<int> qcflagdata(nlocs);    //!< effective qcflag
+  std::vector<float> obserrdata(nlocs);
+  std::vector<int> qcflagdata(nlocs);
   const std::string &errgrp = options_.testObserr.value();
   const std::string &flaggrp = options_.testQCflag.value();
   const float missing = util::missingValue(missing);
   float varinv = 0.0;
   for (size_t ichan = 0; ichan < nchans; ++ichan) {
+    int channel = ichan + 1;
     in.get(Variable("brightness_temperature@"+flaggrp, channels_)[ichan], qcflagdata);
     in.get(Variable("brightness_temperature@"+errgrp, channels_)[ichan], obserrdata);
-    in.get(Variable("brightness_temperature@ObsError", channels_)[ichan], obserr);
     for (size_t iloc = 0; iloc < nlocs; ++iloc) {
       if (flaggrp == "PreQC") obserrdata[iloc] == missing ? qcflagdata[iloc] = 100
                                                            : qcflagdata[iloc] = 0;
       (qcflagdata[iloc] == 0) ? (varinv = 1.0 / pow(obserrdata[iloc], 2)) : (varinv = 0.0);
-      out[ichan][iloc] = obserr[iloc];
+      out[ichan][iloc] = obserr[ichan][iloc];
       if (varinv > 0.0) {
-        out[ichan][iloc] = std::fmin(3.0 * obserr[iloc]
-                               * (1.0 / pow(errflat[0][iloc], 2))
-                               * (1.0 / pow(errftaotop[ichan][iloc], 2)), obserr_bound_max[ichan]);
+        if (water_frac[iloc] > 0.99) {
+          if (channel <= ich536  || channel == ich890) {
+            out[ichan][iloc] = 3.0 * obserr[ichan][iloc]
+                                   * (1.0 / pow(errflat[0][iloc], 2))
+                                   * (1.0 / pow(errftaotop[ichan][iloc], 2))
+                                   * (1.0 / pow(errftopo[ichan][iloc], 2));
+          } else {
+            out[ichan][iloc] = std::fmin((3.0 * obserr[ichan][iloc]
+                                   * (1.0 / pow(errflat[0][iloc], 2))
+                                   * (1.0 / pow(errftaotop[ichan][iloc], 2))
+                                   * (1.0 / pow(errftopo[ichan][iloc], 2))),
+                                      obserr_bound_max[ichan]);
+          }
+        } else {
+          out[ichan][iloc] = std::fmin((3.0 * obserr[ichan][iloc]
+                                 * (1.0 / pow(errflat[0][iloc], 2))
+                                 * (1.0 / pow(errftaotop[ichan][iloc], 2))
+                                 * (1.0 / pow(errftopo[ichan][iloc], 2))),
+                                    obserr_bound_max[ichan]);
+        }
       }
     }
   }
@@ -108,7 +151,7 @@ void ObsErrorBoundIR::compute(const ObsFilterData & in,
 
 // -----------------------------------------------------------------------------
 
-const ufo::Variables & ObsErrorBoundIR::requiredVariables() const {
+const ufo::Variables & ObsErrorBoundMW::requiredVariables() const {
   return invars_;
 }
 

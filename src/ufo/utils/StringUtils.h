@@ -13,6 +13,7 @@
 
 namespace ufo {
   void splitVarGroup(const std::string &, std::string &, std::string &);
+  void splitInstSat(const std::string &, std::string &, std::string &);
   bool isFloat(const std::string &);
   bool readFloat(const std::string &, float &);
 }  // namespace ufo

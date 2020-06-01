@@ -22,7 +22,6 @@ namespace eckit {
 }
 
 namespace ioda {
-  class ObsSpace;
   class ObsVector;
 }
 
@@ -60,8 +59,7 @@ class ObsBiasLinearCombination : public ObsBiasBase,
   void computeObsBias(ioda::ObsVector &, const Eigen::MatrixXd &) const override;
 
 /// save Bias Terms for QC
-  void saveObsBiasTerms(ioda::ObsSpace &,
-                        const std::string &,
+  void saveObsBiasTerms(ObsDiagnostics &,
                         const Eigen::MatrixXd &) const override;
 
 /// Bias parameters interface

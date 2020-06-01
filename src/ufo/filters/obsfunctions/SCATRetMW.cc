@@ -62,7 +62,7 @@ void SCATRetMW::compute(const ObsFilterData & in,
   const size_t ngrps = options_.varGroup.value().size();
 
   // Get required parameters
-  const std::vector<std::string> &vargrp_ = options_.varGroup.value();
+  const std::vector<std::string> &vargrp = options_.varGroup.value();
   const std::vector<int> channels_ = {options_.ch238.value(), options_.ch314.value(),
                                       options_.ch890.value()};
 
@@ -74,11 +74,11 @@ void SCATRetMW::compute(const ObsFilterData & in,
   std::vector<float> bt238(nlocs), bt314(nlocs), bt890(nlocs);
   for (size_t igrp = 0; igrp < ngrps; ++igrp) {
     // Get data based on group type
-    in.get(Variable("brightness_temperature@"+vargrp_[igrp], channels_)[0], bt238);
-    in.get(Variable("brightness_temperature@"+vargrp_[igrp], channels_)[1], bt314);
-    in.get(Variable("brightness_temperature@"+vargrp_[igrp], channels_)[2], bt890);
+    in.get(Variable("brightness_temperature@"+vargrp[igrp], channels_)[0], bt238);
+    in.get(Variable("brightness_temperature@"+vargrp[igrp], channels_)[1], bt314);
+    in.get(Variable("brightness_temperature@"+vargrp[igrp], channels_)[2], bt890);
     // Get bias based on group type
-    if (options_.addBias.value() == vargrp_[igrp]) {
+    if (options_.addBias.value() == vargrp[igrp]) {
       std::vector<float> bias238(nlocs), bias314(nlocs), bias890(nlocs);
       in.get(Variable("brightness_temperature@"+options_.testBias.value(), channels_)[0], bias238);
       in.get(Variable("brightness_temperature@"+options_.testBias.value(), channels_)[1], bias314);

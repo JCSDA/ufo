@@ -66,6 +66,7 @@ ObsFunction:
   name: ObsErrorFactorTopoRad@ObsFunction 
   options:
     channels: *all_channels
+    sensor: iasi_metop-a 
   variables: [error_inflation_factor_topo]
   channels: *all_channels
   tolerance: 1.0e-8

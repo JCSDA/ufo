@@ -39,10 +39,10 @@ NearSSTRetCheckIR::NearSSTRetCheckIR(const eckit::LocalConfiguration & conf)
   ASSERT(channels_.size() > 0);
 
   // Get test groups from options
-  const std::string &flaggrp_ = options_.testQCflag.value();
-  const std::string &errgrp_ = options_.testObserr.value();
-  const std::string &biasgrp_ = options_.testBias.value();
-  const std::string &hofxgrp_ = options_.testHofX.value();
+  const std::string &flaggrp = options_.testQCflag.value();
+  const std::string &errgrp = options_.testObserr.value();
+  const std::string &biasgrp = options_.testBias.value();
+  const std::string &hofxgrp = options_.testHofX.value();
 
   // Include required variables from ObsDiag
   invars_ += Variable("brightness_temperature_jacobian_surface_temperature@ObsDiag", channels_);
@@ -50,10 +50,10 @@ NearSSTRetCheckIR::NearSSTRetCheckIR(const eckit::LocalConfiguration & conf)
   invars_ += Variable("brightness_temperature_jacobian_humidity_mixing_ratio@ObsDiag", channels_);
 
   // Include list of required data from ObsSpace
-  invars_ += Variable("brightness_temperature@"+flaggrp_, channels_);
-  invars_ += Variable("brightness_temperature@"+errgrp_, channels_);
-  invars_ += Variable("brightness_temperature@"+hofxgrp_, channels_);
-  invars_ += Variable("brightness_temperature@"+biasgrp_, channels_);
+  invars_ += Variable("brightness_temperature@"+flaggrp, channels_);
+  invars_ += Variable("brightness_temperature@"+errgrp, channels_);
+  invars_ += Variable("brightness_temperature@"+hofxgrp, channels_);
+  invars_ += Variable("brightness_temperature@"+biasgrp, channels_);
   invars_ += Variable("brightness_temperature@ObsValue", channels_);
   invars_ += Variable("brightness_temperature@ObsError", channels_);
   invars_ += Variable("sensor_band_central_radiation_wavenumber@VarMetaData");
@@ -81,10 +81,10 @@ void NearSSTRetCheckIR::compute(const ObsFilterData & in,
                                     channels_)[0]);
 
   // Get test groups from options
-  const std::string &flaggrp_ = options_.testQCflag.value();
-  const std::string &errgrp_ = options_.testObserr.value();
-  const std::string &biasgrp_ = options_.testBias.value();
-  const std::string &hofxgrp_ = options_.testHofX.value();
+  const std::string &flaggrp = options_.testQCflag.value();
+  const std::string &errgrp = options_.testObserr.value();
+  const std::string &biasgrp = options_.testBias.value();
+  const std::string &hofxgrp = options_.testHofX.value();
 
   // Setup vectors to get 2D variables
   std::vector<float> values(nlocs);
@@ -129,10 +129,10 @@ void NearSSTRetCheckIR::compute(const ObsFilterData & in,
   std::vector<int> qcflag(nlocs, 0);
   std::vector<std::vector<float>> varinv(nchans, std::vector<float>(nlocs));
   for (size_t ichan = 0; ichan < nchans; ++ichan) {
-    in.get(Variable("brightness_temperature@"+errgrp_, channels_)[ichan], values);
-    in.get(Variable("brightness_temperature@"+flaggrp_, channels_)[ichan], qcflag);
+    in.get(Variable("brightness_temperature@"+errgrp, channels_)[ichan], values);
+    in.get(Variable("brightness_temperature@"+flaggrp, channels_)[ichan], qcflag);
     for (size_t iloc = 0; iloc < nlocs; ++iloc) {
-      if (flaggrp_ == "PreQC") values[iloc] == missing ? qcflag[iloc] = 100 : qcflag[iloc] = 0;
+      if (flaggrp == "PreQC") values[iloc] == missing ? qcflag[iloc] = 100 : qcflag[iloc] = 0;
       (qcflag[iloc] == 0) ? (varinv[ichan][iloc] = 1.0 / pow(values[iloc], 2))
                           : (varinv[ichan][iloc] = 0.0);
     }
@@ -142,11 +142,11 @@ void NearSSTRetCheckIR::compute(const ObsFilterData & in,
   std::vector<std::vector<float>> innovation(nchans, std::vector<float>(nlocs));
   for (size_t ichan = 0; ichan < nchans; ++ichan) {
     in.get(Variable("brightness_temperature@ObsValue", channels_)[ichan], innovation[ichan]);
-    in.get(Variable("brightness_temperature@"+hofxgrp_, channels_)[ichan], values);
+    in.get(Variable("brightness_temperature@"+hofxgrp, channels_)[ichan], values);
     for (size_t iloc = 0; iloc < nlocs; ++iloc) {
       innovation[ichan][iloc] = innovation[ichan][iloc] - values[iloc];
     }
-    in.get(Variable("brightness_temperature@"+biasgrp_, channels_)[ichan], values);
+    in.get(Variable("brightness_temperature@"+biasgrp, channels_)[ichan], values);
     for (size_t iloc = 0; iloc < nlocs; ++iloc) {
       innovation[ichan][iloc] = innovation[ichan][iloc] - values[iloc];
     }
@@ -177,10 +177,10 @@ void NearSSTRetCheckIR::compute(const ObsFilterData & in,
   // tzchk: threshold for SST temperature at obs location
   const float tschk = 0.2, tzchk = 0.85;
   const float e_ts = 0.5, e_ta = 1.f, e_qa = 0.85;
-  const float t0c = Constants::t0c;
+  const float ttp = Constants::ttp;
 
   // Loop through locations
-  // TODO(emilyhcLiu): review the use of irday with EMC
+  // TODO(EL): review the use of irday with EMC
   std::vector<int> irday(nchans, 1);
   for (size_t iloc=0; iloc < nlocs; ++iloc) {
     bool sea = water_frac[iloc] >= 0.99;
@@ -204,7 +204,7 @@ void NearSSTRetCheckIR::compute(const ObsFilterData & in,
                                  && dbtdts[ichan][iloc] >= tschk) {
           tb_ta[ichan] = dbtdt[ichan][nlevs-1][iloc];
           tb_qa[ichan] = dbtdq[ichan][nlevs-1][iloc];
-          for (size_t ilev = 0; ilev < nlevs-2; ++ilev) {
+          for (size_t ilev = 0; ilev < nlevs-1; ++ilev) {
             tb_ta[ichan] = tb_ta[ichan] + dbtdt[ichan][ilev][iloc];
             tb_qa[ichan] = tb_qa[ichan] + dbtdq[ichan][ilev][iloc];
           }
@@ -212,7 +212,7 @@ void NearSSTRetCheckIR::compute(const ObsFilterData & in,
       }
       ws = 1.0 / pow(e_ts, 2);
       wa = 1.0 / pow(e_ta, 2);
-      wq = 1.0 / pow(e_qa * (std::max(((tzbgr[iloc]) - t0c)
+      wq = 1.0 / pow(e_qa * (std::max(((tzbgr[iloc]) - ttp)
                           * 0.03, 0.0) + 0.1), 2);
       a11 = ws;
       a22 = wa;

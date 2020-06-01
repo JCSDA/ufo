@@ -40,10 +40,10 @@ CloudDetectMinResidualIR::CloudDetectMinResidualIR(const eckit::LocalConfigurati
   ASSERT(channels_.size() > 0);
 
   // Get test groups from options
-  const std::string &flaggrp_ = options_.testQCflag.value();
-  const std::string &errgrp_ = options_.testObserr.value();
-  const std::string &biasgrp_ = options_.testBias.value();
-  const std::string &hofxgrp_ = options_.testHofX.value();
+  const std::string &flaggrp = options_.testQCflag.value();
+  const std::string &errgrp = options_.testObserr.value();
+  const std::string &biasgrp = options_.testBias.value();
+  const std::string &hofxgrp = options_.testHofX.value();
 
   // Include required variables from ObsDiag
   invars_ += Variable("brightness_temperature_jacobian_surface_temperature@ObsDiag", channels_);
@@ -52,10 +52,10 @@ CloudDetectMinResidualIR::CloudDetectMinResidualIR(const eckit::LocalConfigurati
   invars_ += Variable("pressure_level_at_peak_of_weightingfunction@ObsDiag", channels_);
 
   // Include list of required data from ObsSpace
-  invars_ += Variable("brightness_temperature@"+flaggrp_, channels_);
-  invars_ += Variable("brightness_temperature@"+errgrp_, channels_);
-  invars_ += Variable("brightness_temperature@"+biasgrp_, channels_);
-  invars_ += Variable("brightness_temperature@"+hofxgrp_, channels_);
+  invars_ += Variable("brightness_temperature@"+flaggrp, channels_);
+  invars_ += Variable("brightness_temperature@"+errgrp, channels_);
+  invars_ += Variable("brightness_temperature@"+biasgrp, channels_);
+  invars_ += Variable("brightness_temperature@"+hofxgrp, channels_);
   invars_ += Variable("brightness_temperature@ObsValue", channels_);
   invars_ += Variable("brightness_temperature@ObsError", channels_);
 
@@ -91,10 +91,10 @@ void CloudDetectMinResidualIR::compute(const ObsFilterData & in,
   size_t nlevs = in.nlevs(Variable("air_pressure@GeoVaLs"));
 
   // Get test groups from options
-  const std::string &flaggrp_ = options_.testQCflag.value();
-  const std::string &errgrp_ = options_.testObserr.value();
-  const std::string &biasgrp_ = options_.testBias.value();
-  const std::string &hofxgrp_ = options_.testHofX.value();
+  const std::string &flaggrp = options_.testQCflag.value();
+  const std::string &errgrp = options_.testObserr.value();
+  const std::string &biasgrp = options_.testBias.value();
+  const std::string &hofxgrp = options_.testHofX.value();
 
   // Get variables from ObsDiag
   // Load surface temperature jacobian
@@ -143,10 +143,10 @@ void CloudDetectMinResidualIR::compute(const ObsFilterData & in,
   std::vector<int> qcflag(nlocs, 0);
   std::vector<std::vector<float>> varinv_use(nchans, std::vector<float>(nlocs, 0.0));
   for (size_t ichan = 0; ichan < nchans; ++ichan) {
-    in.get(Variable("brightness_temperature@"+errgrp_, channels_)[ichan], values);
-    in.get(Variable("brightness_temperature@"+flaggrp_, channels_)[ichan], qcflag);
+    in.get(Variable("brightness_temperature@"+errgrp, channels_)[ichan], values);
+    in.get(Variable("brightness_temperature@"+flaggrp, channels_)[ichan], qcflag);
     for (size_t iloc = 0; iloc < nlocs; ++iloc) {
-      if (flaggrp_ == "PreQC") values[iloc] == missing ? qcflag[iloc] = 100 : qcflag[iloc] = 0;
+      if (flaggrp == "PreQC") values[iloc] == missing ? qcflag[iloc] = 100 : qcflag[iloc] = 0;
       (qcflag[iloc] == 0) ? (values[iloc] = 1.0 / pow(values[iloc], 2)) : (values[iloc] = 0.0);
       if (use_flag_clddet[ichan] > 0) varinv_use[ichan][iloc] = values[iloc];
     }
@@ -156,11 +156,11 @@ void CloudDetectMinResidualIR::compute(const ObsFilterData & in,
   std::vector<std::vector<float>> innovation(nchans, std::vector<float>(nlocs));
   for (size_t ichan = 0; ichan < nchans; ++ichan) {
     in.get(Variable("brightness_temperature@ObsValue", channels_)[ichan], innovation[ichan]);
-    in.get(Variable("brightness_temperature@"+hofxgrp_, channels_)[ichan], values);
+    in.get(Variable("brightness_temperature@"+hofxgrp, channels_)[ichan], values);
     for (size_t iloc = 0; iloc < nlocs; ++iloc) {
       innovation[ichan][iloc] = innovation[ichan][iloc] - values[iloc];
     }
-    in.get(Variable("brightness_temperature@"+biasgrp_, channels_)[ichan], values);
+    in.get(Variable("brightness_temperature@"+biasgrp, channels_)[ichan], values);
     for (size_t iloc = 0; iloc < nlocs; ++iloc) {
       innovation[ichan][iloc] = innovation[ichan][iloc] - values[iloc];
     }
@@ -317,7 +317,7 @@ void CloudDetectMinResidualIR::compute(const ObsFilterData & in,
         // Passive channels
         if (use_flag[ichan] < 0 && lcloud  >= wfunc_pmaxlev[ichan][iloc]) out[ichan][iloc] = 1;
         // Active channels
-        if (out[ichan][iloc] != 1 && tao_cld > 0.02) out[ichan][iloc] = 1;
+        if (out[ichan][iloc] < 1 && tao_cld > 0.02) out[ichan][iloc] = 1;
       }
       // cloud infomation output at model level
       // cloud_lev[iloc] = lcloud;

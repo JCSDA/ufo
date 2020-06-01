@@ -21,13 +21,13 @@ namespace eckit {
 }
 
 namespace ioda {
-  class ObsSpace;
   class ObsVector;
 }
 
 namespace ufo {
   class ObsBias;
   class ObsBiasIncrement;
+  class ObsDiagnostics;
 
 // -----------------------------------------------------------------------------
 /// Base class for observation bias operators
@@ -50,8 +50,7 @@ class ObsBiasBase : public util::Printable {
   virtual void computeObsBias(ioda::ObsVector &, const Eigen::MatrixXd &) const = 0;
 
   // save Bias Terms for QC
-  virtual void saveObsBiasTerms(ioda::ObsSpace &,
-                                const std::string &,
+  virtual void saveObsBiasTerms(ObsDiagnostics &,
                                 const Eigen::MatrixXd &) const = 0;
 
   // Bias parameters interface
