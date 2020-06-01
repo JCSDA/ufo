@@ -9,6 +9,7 @@ module ufo_rttovonedvarcheck_minimize_utils_mod
 
 use iso_c_binding
 use kinds
+use ufo_constants_mod, only: grav, zero, t0c, half, one, two
 use ufo_geovals_mod
 use ufo_rttovonedvarcheck_utils_mod
 use ufo_radiancerttov_tlad_mod
@@ -65,7 +66,7 @@ real(kind_real), allocatable :: humidity_total(:)
 
 write(*,*) trim(RoutineName)," start"
 
-prof_x(:) = 0.0_kind_real
+prof_x(:) = zero
 
 !------------------------------
 ! 2. Set multi-level variables
@@ -93,7 +94,7 @@ end if
 if (profindex % qt(1) > 0) then
   nlevels = profindex%qt(2) - profindex%qt(1) + 1
   allocate(humidity_total(nlevels))
-  humidity_total(:) = 0.0_kind_real
+  humidity_total(:) = zero
   
   ! Get humidity data from geovals
   call ufo_geovals_get_var(geovals, "specific_humidity", geoval)
@@ -366,16 +367,16 @@ write(*,*) trim(RoutineName)," start"
 allocate(RinvDeltaY, source=DeltaObs)
 
 y_size = size(DeltaObs)
-Jcost(:) = 0.0_kind_real
+Jcost(:) = zero
 call r_matrix % multiply_inverse_vector(DeltaObs, RinvDeltaY)
 
-Jo = 0.5_kind_real * dot_product(DeltaObs, RinvDeltaY)
-Jb = 0.5_kind_real * dot_product(DeltaProf, (matmul(b_inv, DeltaProf)))
+Jo = half * dot_product(DeltaObs, RinvDeltaY)
+Jb = half * dot_product(DeltaProf, (matmul(b_inv, DeltaProf)))
 Jcurrent = Jb + Jo
 
-Jcost(1) = (Jo + Jb) * 2.0_kind_real / real (y_size)     ! Normalize cost by nchans
-Jcost(2) = Jb * 2.0_kind_real / real (y_size)            ! Normalize cost by nchans
-Jcost(3) = Jo * 2.0_kind_real / real (y_size)            ! Normalize cost by nchans
+Jcost(1) = (Jo + Jb) * two / real (y_size)     ! Normalize cost by nchans
+Jcost(2) = Jb * two / real (y_size)            ! Normalize cost by nchans
+Jcost(3) = Jo * two / real (y_size)            ! Normalize cost by nchans
 
 write(*,*) "Jo, Jb, Jcurrent = ", Jcost(3), Jcost(2), Jcost(1)
 
@@ -436,7 +437,6 @@ real(kind=kind_real), parameter :: lower_rh = 0.95
 real(kind=kind_real), parameter :: upper_rh = 1.05
 real(kind=kind_real), parameter :: Split_Factor = 0.5
 real(kind=kind_real), parameter :: minTempQl = 233.15     ! temperature (K) below which all cloud is ice
-real(kind=kind_real), parameter :: ZeroDegC = 273.15
 real(kind=kind_real), parameter :: min_q = 3.0E-6         ! ( kg / kg )
 real(kind=kind_real) :: qsaturated(nlevels_q)
 real(kind=kind_real) :: RH_qtotal(nlevels_q)
@@ -481,45 +481,45 @@ call Ops_Qsat (qsaturated(1:nlevels_q),    & ! out
                p(1:nlevels_q),             & ! in
                nlevels_q)                    ! in
 
-SmallValue = 1.0_kind_real / 8.5_kind_real
+SmallValue = one / 8.5_kind_real
 Denom = SmallValue * (upper_rh - lower_rh)
 
 ! don't let rh exceed 2.0 to avoid cosh function blowing up
-RH_qtotal(:) = min (qtotal(:) / qsaturated(:), 2.0_kind_real)
+RH_qtotal(:) = min (qtotal(:) / qsaturated(:), two)
 
 V1(:) = (RH_qtotal(:) - lower_rh) / Denom
 V2(:) = (RH_qtotal(:) - upper_rh) / Denom
 
-Y1 = 1.0_kind_real
+Y1 = one
 Y2 = Split_Factor
-Y3 = 0.0_kind_real
+Y3 = zero
 Y4 = Split_Factor
 
-Aconst = (Y2 - Y1) / 2.0_kind_real
-Bconst = -(Y4 - Y3) / 2.0_kind_real
-Cconst = (Y2 + Y1) / 2.0_kind_real
-Dconst = -(Y4 + Y3) / 2.0_kind_real
+Aconst = (Y2 - Y1) / two
+Bconst = -(Y4 - Y3) / two
+Cconst = (Y2 + Y1) / two
+Dconst = -(Y4 + Y3) / two
 
 ! Compute fraction of ql to ql+qi based on temperature profile
 
-where (t(:) - ZeroDegC >= -0.01_kind_real) ! -0.01degc and above
+where (t(:) - t0c >= -0.01_kind_real) ! -0.01degc and above
 
   ! all ql
-  LF(:) = 1.0_kind_real
+  LF(:) = one
 
 end where
 
 where (t(:) <= minTempql)
 
   ! all qi
-  LF(:) = 0.0_kind_real
+  LF(:) = zero
 
 end where
 
-where (t(:) > minTempql .and. t(:) - ZeroDegC < -0.01_kind_real)
+where (t(:) > minTempql .and. t(:) - t0c < -0.01_kind_real)
 
   ! Jones' parametrization
-  LF(:) = sqrt (-1.0_kind_real * log (-0.025_kind_real * (t(:) - ZeroDegC)) / 70.0_kind_real)
+  LF(:) = sqrt (-1.0_kind_real * log (-0.025_kind_real * (t(:) - t0c)) / 70.0_kind_real)
 
 end where
 
@@ -530,7 +530,7 @@ nlevels_diff = nlevels_q - nlevels_mwclw
 
 if (nlevels_diff > 0) then
 
-  LF(1:nlevels_diff) = 0.0_kind_real
+  LF(1:nlevels_diff) = zero
 
 end if
 
@@ -553,17 +553,17 @@ if (useQtsplitRain) then
   do i = 1, nlevels_q
 
     q(i) = max (W(i) * qsaturated(i), min_q)
-    qnv(i) = max (qtotal(i) - q(i), 0.0_kind_real)
+    qnv(i) = max (qtotal(i) - q(i), zero)
 
     ! Split qnv into a cloud and precipitation part
 
     qc(i) = max (QsplitRainParamA * (QsplitRainParamB - (QsplitRainParamB / &
-                                    ((QsplitRainParamC * qnv(i)) + 1_kind_real))), 0.0_kind_real)
+                                    ((QsplitRainParamC * qnv(i)) + one))), zero)
 
     ! Finally split non-precip part into liquid and ice
 
-    ql(i) = max (LF(i) * qc(i), 0.0_kind_real)
-    qi(i) = max ((1.0_kind_real - LF(i)) * (qc(i)), 0.0_kind_real)
+    ql(i) = max (LF(i) * qc(i), zero)
+    qi(i) = max ((one - LF(i)) * (qc(i)), zero)
 
   end do
 
@@ -571,8 +571,8 @@ else
   do i = 1, nlevels_q
 
     q(i) = max (W(i) * qsaturated(i), min_q)
-    ql(i) = max (LF(i) * (qtotal(i) - q(i)), 0.0_kind_real)
-    qi(i) = max ((1.0_kind_real - LF(i)) * (qtotal(i) - q(i)), 0.0_kind_real)
+    ql(i) = max (LF(i) * (qtotal(i) - q(i)), zero)
+    qi(i) = max ((one - LF(i)) * (qtotal(i) - q(i)), zero)
 
   end do
 
@@ -590,15 +590,15 @@ if (output_type /= 1) then
 
   if (useQtsplitRain) then
 
-    ql(:) = LF(:) * QsplitRainParamA * QsplitRainParamB * QsplitRainParamC * (1.0_kind_real - q(:)) /  &
-                         ((QsplitRainParamC * qnv(:)) + 1.0_kind_real) ** 2
-    qi(:) = (1.0 - LF(:)) * QsplitRainParamA * QsplitRainParamB * QsplitRainParamC * (1.0_kind_real - q(:)) / &
-                         ((QsplitRainParamC * qnv(:)) + 1.0_kind_real) ** 2
+    ql(:) = LF(:) * QsplitRainParamA * QsplitRainParamB * QsplitRainParamC * (one - q(:)) /  &
+                         ((QsplitRainParamC * qnv(:)) + one) ** 2
+    qi(:) = (1.0 - LF(:)) * QsplitRainParamA * QsplitRainParamB * QsplitRainParamC * (one - q(:)) / &
+                         ((QsplitRainParamC * qnv(:)) + one) ** 2
 
   else
 
-    ql(:) = LF(:) * (1.0_kind_real - q(:))
-    qi(:) = (1.0_kind_real - LF(:)) * (1.0_kind_real - q(:))
+    ql(:) = LF(:) * (one - q(:))
+    qi(:) = (one - LF(:)) * (one - q(:))
 
   end if
 
@@ -645,12 +645,11 @@ real(kind=kind_real), intent(inout) :: QS(NPNTS) ! Saturation mixing ratio (KG/K
 
 ! Local declarations:
 real(kind=kind_real), parameter :: EPSILON   = 0.62198_kind_real
-real(kind=kind_real), parameter :: ZeroDegC = 273.15_kind_real
-real(kind=kind_real), parameter :: ONE_minUS_EPSILON = 1.0_kind_real - Epsilon
+real(kind=kind_real), parameter :: ONE_minUS_EPSILON = one - Epsilon
 real(kind=kind_real), parameter :: T_LOW = 183.15_kind_real  ! Lowest temperature for which look-up table is valid
 real(kind=kind_real), parameter :: T_HIGH = 338.15_kind_real  ! Highest temperature for which look-up table is valid
 real(kind=kind_real), parameter :: deLTA_T = 0.1_kind_real    ! Temperature increment of look-up table
-integer, parameter   :: N = ((T_HIGH - T_LOW + (deLTA_T * 0.5_kind_real)) / deLTA_T) + 1.0_kind_real ! Size of lookup-table (gives 1551)
+integer, parameter   :: N = ((T_HIGH - T_LOW + (deLTA_T * 0.5_kind_real)) / deLTA_T) + one ! Size of lookup-table (gives 1551)
 integer              :: ITABLE
 real(kind=kind_real) :: ATABLE
 real(kind=kind_real) :: FSUBW      ! Converts from sat vapour pressure in pure water to pressure in air
@@ -1002,8 +1001,8 @@ do I = 1, NPNTS
   ! temperature in Celsius, so conversion of units leads to the slightly
   ! different equation used here.
 
-  FSUBW = 1.0_kind_real + 1.0E-8_kind_real * P(I) * &
-                          (4.5_kind_real+ 6.0E-4_kind_real * (T(I) - ZEROdeGC) * (T(I) - ZEROdeGC))
+  FSUBW = one + 1.0E-8_kind_real * P(I) * &
+                          (4.5_kind_real+ 6.0E-4_kind_real * (T(I) - t0c) * (T(I) - t0c))
 
   ! use the lookup table to find saturated vapour pressure, and stored it in QS.
 
@@ -1014,7 +1013,7 @@ do I = 1, NPNTS
   ITABLE = ATABLE
   ATABLE = ATABLE - ITABLE
 
-  QS(I) = (1.0_kind_real - ATABLE) * ES(ITABLE) + ATABLE * ES(ITABLE + 1)
+  QS(I) = (one - ATABLE) * ES(ITABLE) + ATABLE * ES(ITABLE + 1)
 
   ! Multiply by FSUBW to convert to saturated vapour pressure in air (equation A4.6
   ! of Adrian Gill's book)
@@ -1077,7 +1076,6 @@ real(kind=kind_real)        :: QS(NPNTS) ! Saturation mixing ratio at temperatur
 ! Local declarations:
 ! Local declarations:
 real(kind=kind_real), parameter :: Epsilon   = 0.62198_kind_real
-real(kind=kind_real), parameter :: ZeroDegC = 273.15_kind_real
 real(kind=kind_real), parameter :: ONE_minUS_EPSILON = 1.0 - Epsilon
 real(kind=kind_real), parameter :: T_LOW = 183.15
 real(kind=kind_real), parameter :: T_HIGH = 338.15
@@ -1434,7 +1432,7 @@ do I = 1, NPNTS
   ! temperature in Celsius, so conversion of units leads to the slightly
   ! different equation used here.
 
-  FSUBW = 1.0 + 1.0E-8 * P(I) * (4.5 + 6.0E-4 * (T(I) - ZEROdeGC) * (T(I) - ZEROdeGC))
+  FSUBW = 1.0 + 1.0E-8 * P(I) * (4.5 + 6.0E-4 * (T(I) - t0c) * (T(I) - t0c))
 
   ! use the lookup table to find saturated vapour pressure, and store it in QS
 
@@ -1489,10 +1487,6 @@ subroutine ufo_rttovonedvarcheck_CheckIteration (geovals,    &
 !use OpsMod_SatRad_SetUp, only: &
 !    LimitCTPtorTBase,          &
 !    useLogForCloud
-
-use ufo_rttovonedvarcheck_utils_mod, only: &
-    minTemperature,           &
-    maxTemperature
 
 implicit none
 
@@ -1764,9 +1758,6 @@ subroutine ufo_rttovonedvarcheck_CheckCloudyIteration( &
 
 ! Heritage: Ops_SatRad_CheckCloudyIteration.f90
 
-use ufo_rttovonedvarcheck_utils_mod, only : &
-    g
-
 implicit none
 
 type(ufo_geovals), intent(in)    :: geovals
@@ -1855,8 +1846,8 @@ if (any(ciw(:) > 0.0) .or. &
 
   end do
 
-  IWP = IWP / g
-  LWP = LWP / g
+  IWP = IWP / grav
+  LWP = LWP / grav
 
 
 !2.1 test if lwp iwp exceeds thresholds

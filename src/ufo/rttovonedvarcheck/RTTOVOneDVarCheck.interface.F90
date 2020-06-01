@@ -24,12 +24,12 @@ private
 !> Global registry
 type(registry_t) :: ufo_rttovonedvarcheck_registry
 
-! ------------------------------------------------------------------------------
+! ------------------------------------------------------------------------------------------------
 contains
-! ------------------------------------------------------------------------------
+! ------------------------------------------------------------------------------------------------
 !> Linked list implementation
 #include "oops/util/linkedList_c.f"
-! ------------------------------------------------------------------------------
+! ------------------------------------------------------------------------------------------------
 
 subroutine ufo_rttovonedvarcheck_create_c(c_self, c_obspace, c_conf, c_nchan, &
                                           c_channels, c_onedvarflag) &
@@ -53,7 +53,7 @@ call ufo_rttovonedvarcheck_create(self, c_obspace, f_conf, c_channels, &
 
 end subroutine ufo_rttovonedvarcheck_create_c
 
-! ------------------------------------------------------------------------------
+! ------------------------------------------------------------------------------------------------
 
 subroutine ufo_rttovonedvarcheck_delete_c(c_self) &
                       bind(c,name='ufo_rttovonedvarcheck_delete_f90')
@@ -68,7 +68,7 @@ call ufo_rttovonedvarcheck_registry%delete(c_self, self)
 
 end subroutine ufo_rttovonedvarcheck_delete_c
 
-! ------------------------------------------------------------------------------
+! ------------------------------------------------------------------------------------------------
 
 subroutine ufo_rttovonedvarcheck_apply_c(c_self, c_vars, c_geovals, c_nobs, c_apply) &
                bind(c,name='ufo_rttovonedvarcheck_apply_f90')
@@ -100,7 +100,7 @@ call ufo_rttovonedvarcheck_apply(self, vars, geovals, apply)
 
 end subroutine ufo_rttovonedvarcheck_apply_c
 
-! ------------------------------------------------------------------------------
+! ------------------------------------------------------------------------------------------------
 
 end module ufo_rttovonedvarcheck_mod_c
 

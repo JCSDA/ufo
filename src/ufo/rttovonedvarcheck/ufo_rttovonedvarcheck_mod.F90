@@ -8,6 +8,7 @@
 module ufo_rttovonedvarcheck_mod
 
 use fckit_configuration_module, only: fckit_configuration
+use fckit_log_module, only : fckit_log
 use iso_c_binding
 use kinds
 use ufo_geovals_mod
@@ -91,6 +92,7 @@ subroutine ufo_rttovonedvarcheck_apply(self, vars, geovals, apply)
   character(len=max_string)          :: sensor_id
   character(len=max_string)          :: var
   character(len=max_string)          :: varname
+  character(len=max_string)          :: message
   integer                            :: iloc, jvar, jobs, ivar, band ! counters
   integer                            :: chans_used      ! counter for number of channels used for an ob
   integer                            :: jchans_used
@@ -178,15 +180,12 @@ subroutine ufo_rttovonedvarcheck_apply(self, vars, geovals, apply)
   allocate(b_inverse(prof_index % nprofelements,prof_index % nprofelements))
   allocate(b_sigma(prof_index % nprofelements))
 
-  write(*,*) "QCflags before ob 2 = ", QCflags(:,2)
-
   ! ------------------------------------------
   ! Beginning mains observations loop
   ! ------------------------------------------
-  print *,"beginning observations loop: ",self%qcname
+  write(*,*) "Beginning observations loop: ",self%qcname
   apply_count = 0
   obs_loop: do jobs = 1, iloc
-    write(*,*) "Apply for ob number = ",jobs,apply(jobs)
     if (apply(jobs)) then
 
       apply_count = apply_count + 1
@@ -196,8 +195,8 @@ subroutine ufo_rttovonedvarcheck_apply(self, vars, geovals, apply)
       ! create one ob geovals from full all obs geovals
       call ufo_geovals_copy_one(geovals, local_geovals, jobs)
       call ufo_rttovonedvarcheck_check_geovals(local_geovals, prof_index)
-      call ufo_geovals_print(local_geovals, 1)
-  
+      if (self % FullDiagnostics) call ufo_geovals_print(local_geovals, 1)
+
       ! select appropriate b matrix for latitude of observation
       b_matrix(:,:) = 0.0
       b_inverse(:,:) = 0.0
@@ -205,6 +204,7 @@ subroutine ufo_rttovonedvarcheck_apply(self, vars, geovals, apply)
       do band = 1, full_bmatrix % nbands
         if (lat(jobs) <  full_bmatrix % north(band)) exit
       end do
+      ! Call to Ops_SatRad_ResetCovariances
       b_matrix(:,:) = full_bmatrix % store(:,:,band)
       b_inverse(:,:) = full_bmatrix % inverse(:,:,band)
       b_sigma(:) = full_bmatrix % sigma(:,band)
@@ -230,8 +230,9 @@ subroutine ufo_rttovonedvarcheck_apply(self, vars, geovals, apply)
         end if
       end do
       if (chans_used == 0) then
-        write(*,*) "No channels selected for observation number ", &
+        write(message, *) "No channels selected for observation number ", &
                     jobs, " : skipping"
+        call fckit_log % info(message)
         cycle obs_loop
       end if
 
@@ -252,9 +253,10 @@ subroutine ufo_rttovonedvarcheck_apply(self, vars, geovals, apply)
         end if
       end do
       call r_submatrix % setup(self % rtype, chans_used, obs_error)
-      call r_submatrix % info()
-
-      write(*,*) "Observations used = ",ob_info % yobs(:)
+      if (self % FullDiagnostics) then
+        call r_submatrix % info()
+        write(*, *) "Observations used = ",ob_info % yobs(:)
+      end if
 
       !---------------------------------------------------
       ! Call minimization
@@ -288,12 +290,15 @@ subroutine ufo_rttovonedvarcheck_apply(self, vars, geovals, apply)
       call ufo_geovals_delete(local_geovals)
 
     else
-      write(*,*) "Final 1Dvar cost = not apply"
+      call fckit_log % info("Final 1Dvar cost, apply = F")
 
     endif
   end do obs_loop
 
-  write(*,*) "Number being tested by 1dvar = ",apply_count
+  write(message, *) "Total number of observations = ",iloc
+  call fckit_log % info(message)
+  write(message, *) "Number tested by 1dvar = ",apply_count
+  call fckit_log % info(message)
 
   ! Put QC flags back in database
   do jvar = 1, self%nchans

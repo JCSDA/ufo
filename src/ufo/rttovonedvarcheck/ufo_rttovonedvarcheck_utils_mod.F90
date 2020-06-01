@@ -161,8 +161,7 @@ real(kind_real), parameter, public :: &
   MinTemperature =     70.0,    & ! ( K )
   IceShelfLimit  =    -72.0,    & ! assumed limit of SH seaice
   WetLevelLid    =    115.0,    & ! uppermost wet pressure level
-  MWCloudLevelLid=    310.0,    & ! uppermost clw pressure lvl for mwcalcs(hpa)
-  g              =      9.80665   ! gravity at the surface (m/s2)
+  MWCloudLevelLid=    310.0       ! uppermost clw pressure lvl for mwcalcs(hpa)
 
 contains
 

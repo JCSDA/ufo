@@ -103,11 +103,7 @@ real(kind_real), intent(in)     :: xin(:)
 real(kind_real), intent(inout)  :: xout(:)
 
 if (size(xout) /= self % nchans) then
-  write(*,*) "R-matrix and increment are not the same size stopping"
-  write(*,*) "R-matrix and increment sizes are: ",self % nchans, &
-                                                  size(xin), &
-                                                  size(xout)
-  stop
+  call abor1_ftn("rmatrix_multiply: arrays incompatible sizes")
 end if
 
 ! Full R matrix
@@ -128,6 +124,10 @@ real(kind_real), intent(in)     :: xin(:,:)
 real(kind_real), intent(inout)  :: xout(:,:)
 
 integer :: ii
+
+if (size(xout, 2) /= self % nchans) then
+  call abor1_ftn("rmatrix_multiply_matrix: arrays incompatible sizes")
+end if
 
 ! Full R matrix
 if (self % full_flag) xout = matmul(xin, self % matrix(:,:))
@@ -151,11 +151,7 @@ real(kind_real), intent(in)     :: xin(:)
 real(kind_real), intent(inout)  :: xout(:)
 
 if (size(xout) /= self % nchans) then
-  write(*,*) "R-matrix and increment are not the same size stopping"
-  write(*,*) "R-matrix and increment sizes are: ",self % nchans, &
-                                                  size(xin), &
-                                                  size(xout)
-  stop
+  call abor1_ftn("rmatrix_inv_multiply: arrays incompatible sizes")
 end if
 
 ! Full R matrix
@@ -177,9 +173,11 @@ real(kind_real), intent(out)   :: xout(:,:)
 
 integer :: ii
 
+if (size(xout, 2) /= self % nchans) then
+  call abor1_ftn("rmatrix_multiply_inv_matrix: arrays incompatible sizes")
+end if
+
 ! Full R matrix
-write(*,*) "xin = ",xin
-write(*,*) "self % inv_matrix(:,:) = ",self % inv_matrix(:,:)
 if (self % full_flag)  xout = matmul(xin, self % inv_matrix(:,:))
 
 ! Diagonal R matrix
@@ -202,14 +200,8 @@ real(kind_real), intent(inout)  :: uout(:,:)
 
 integer :: ii
 
-write(*,*) "Using rmatrix_add_to_u ",self % full_flag,self % diagonal_flag
-
-if (size(uout) /= self % nchans*self % nchans) then
-  write(*,*) "R-matrix and U are not the same size stopping"
-  write(*,*) "R-matrix and U sizes are: ",self % nchans, &
-                                          size(uin), &
-                                          size(uout)
-  stop
+if (size(uout) /= self % nchans * self % nchans) then
+  call abor1_ftn("rmatrix_add_to_u: arrays incompatible sizes")
 end if
 
 ! Full R matrix

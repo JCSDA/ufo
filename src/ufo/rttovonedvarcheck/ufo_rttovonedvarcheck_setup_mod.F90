@@ -226,7 +226,7 @@ write(*,*) routinename, " : started"
 ! Specific humidity total
 !-------------------------
 
-IF (profindex % qt(1) > 0) THEN
+if (profindex % qt(1) > 0) then
 
   nlevels = profindex % qt(2) - profindex % qt(1) + 1
   allocate(temperature(nlevels))
@@ -288,7 +288,7 @@ IF (profindex % qt(1) > 0) THEN
   deallocate(ql)
   deallocate(qi)
 
-END IF
+end if
 
 ! Tidy up
 if (allocated(temperature))    deallocate(temperature)

@@ -36,7 +36,7 @@ end type bmatrix_type
 
 contains
 
-! ------------------------------------------------------------------------------
+! ------------------------------------------------------------------------------------------------
 
 subroutine ufo_rttovonedvarcheck_bmatrix_setup(self, variables, filepath, qtotal_flag)
 
@@ -49,71 +49,28 @@ logical                           :: qtotal_flag   !< Flag for qtotal
 logical                       :: file_exists  !< Check if a file exists logical
 integer                       :: fileunit     !< Unit number for reading in files
 integer, allocatable          :: fields_in(:)
-integer                       :: jvar
-integer                       :: nmvars
-character(len=max_string)     :: varname
 real(kind=kind_real)          :: t1,t2
 logical                       :: flag
 character(len=max_string)     :: message
 character(len=:), allocatable :: str
+logical                       :: testing = .false.
 
 call fckit_log % info("ufo_rttovonedvarcheck_bmatrix_setup start")
 
 call CPU_TIME(t1)
 
-! Which fields are being used from b matrix file - temporary until rttov can handle all fields
-allocate(fields_in(8))
-fields_in(:) = 0
-
-nmvars = size(variables)
-do jvar = 1, nmvars
-
-  varname = variables(jvar)
-
-  select case (trim(varname))
-
-    case ("air_temperature")
-      fields_in(1) = 1 ! air_temperature
-
-    case ("specific_humidity")
-      if (qtotal_flag) then
-        fields_in(2) = 10 ! total water profile in bmatrix - specific humidity in geovals!?!
-      else
-        fields_in(2) = 2 ! water profile in bmatrix - specific humidity in geovals!?!
-      end if
-
-    case("air_temperature_at_two_meters_above_surface")
-      fields_in(3) = 3 ! 2m air_temperature
-
-    case("specific_humidity_at_two_meters_above_surface")
-      fields_in(4) = 4 ! 2m specific_humidity
-
-    case("skin_temperature")
-      fields_in(5) = 5 ! surface skin temperature
-
-    case("surface_air_pressure")
-      fields_in(6) = 6 ! surface air pressure
-
-    case ("mass_content_of_cloud_ice_in_atmosphere_layer")
-      if (.NOT. qtotal_flag) fields_in(7) = 15 ! solid water profile
-
-    case ("mass_content_of_cloud_liquid_water_in_atmosphere_layer")
-      if (.NOT. qtotal_flag) fields_in(8) = 9  ! liquid water profile
-
-    case default
-      call abor1_ftn("Variable not implemented yet in rttovonedvarcheck Covariance")
-
-  end select
-
-end do
-
+! Open file and read in b-matrix
 inquire(file=trim(filepath), exist=file_exists)
 if (file_exists) then
   call rttovonedvarcheck_iogetfreeunit(fileunit)
   open(unit = fileunit, file = trim(filepath))
   call rttovonedvarcheck_covariance_InitBmatrix(self)
-  !call rttovonedvarcheck_covariance_GetBmatrix(self, fileunit, fieldlist=fields_in) ! used for development
-  call rttovonedvarcheck_covariance_GetBmatrix(self, fileunit)
+  if (testing) then
+    call rttovonedvarcheck_create_fields_in(fields_in, variables, qtotal_flag)
+    call rttovonedvarcheck_covariance_GetBmatrix(self, fileunit, fieldlist=fields_in)
+  else
+    call rttovonedvarcheck_covariance_GetBmatrix(self, fileunit)
+  end if
   close(unit = fileunit)
   call fckit_log % info("rttovonedvarcheck bmatrix file exists and read in")
 else
@@ -129,7 +86,7 @@ call fckit_log % info(message)
 
 end subroutine ufo_rttovonedvarcheck_bmatrix_setup
 
-! ------------------------------------------------------------------------------
+! ------------------------------------------------------------------------------------------------
 
 subroutine ufo_rttovonedvarcheck_bmatrix_delete(self)
 
@@ -137,6 +94,8 @@ subroutine ufo_rttovonedvarcheck_bmatrix_delete(self)
 
 implicit none
 class(bmatrix_type), intent(inout) :: self  !< Covariance structure
+
+character(len=*), parameter :: RoutineName = "ufo_rttovonedvarcheck_bmatrix_delete"
 
 self % status = .false.
 self % debug = .false.
@@ -154,7 +113,7 @@ if ( associated(self % north)       ) deallocate( self % north       )
 
 end subroutine ufo_rttovonedvarcheck_bmatrix_delete
 
-! ------------------------------------------------------------------------------
+! ------------------------------------------------------------------------------------------------
 
 subroutine rttovonedvarcheck_covariance_InitBmatrix(self)
 
@@ -183,14 +142,14 @@ nullify( self % north       )
 
 end subroutine rttovonedvarcheck_covariance_InitBmatrix
 
-!-------------------------------------------------------------------------------
+! ------------------------------------------------------------------------------------------------
 
 subroutine rttovonedvarcheck_covariance_GetBmatrix (self,           &
                                                     fileunit,       &
                                                     b_elementsused, &
                                                     fieldlist)
 
-!-------------------------------------------------------------------------------
+! ------------------------------------------------------------------------------------------------
 ! read the input file and allocate and fill in all the components of the bmatrix
 ! structure, with the exception of proxy variables.
 !
@@ -228,7 +187,7 @@ subroutine rttovonedvarcheck_covariance_GetBmatrix (self,           &
 ! hence no space is allocated. nullification of unused pointers should take
 ! place outside (use the ops_satrad_initbmatrix routine).
 !
-!-------------------------------------------------------------------------------
+! ------------------------------------------------------------------------------------------------
 
 ! Heritage: Ops_SatRad_GetBmatrix.f90
 
@@ -519,7 +478,7 @@ end if
 
 end subroutine rttovonedvarcheck_covariance_GetBmatrix
 
-!-------------------------------------------------------------------------------
+! ------------------------------------------------------------------------------------------------
 
 subroutine rttovonedvarcheck_covariance_InvertMatrix (n,      &
                                                  m,      &
@@ -527,7 +486,7 @@ subroutine rttovonedvarcheck_covariance_InvertMatrix (n,      &
                                                  status, &
                                                  matrix)
 
-!-------------------------------------------------------------------------------
+! ------------------------------------------------------------------------------------------------
 ! invert a matrix and optionally premultiply by another matrix.
 !
 ! variables with intent in:
@@ -567,7 +526,7 @@ subroutine rttovonedvarcheck_covariance_InvertMatrix (n,      &
 ! if the the optional parameter matrix is present, it is replaced by
 ! (matrix).a^-1 on exit and a is left unchanged.
 !
-!-------------------------------------------------------------------------------
+! ------------------------------------------------------------------------------------------------
 
 ! Heritage: Ops_SatRad_InvertMatrix.inc
 
@@ -672,6 +631,70 @@ end if
 
 end subroutine rttovonedvarcheck_covariance_InvertMatrix
 
-! ------------------------------------------------------------------------------
+! ------------------------------------------------------------------------------------------------
+
+subroutine rttovonedvarcheck_create_fields_in(fields_in, variables, qtotal_flag)
+
+implicit none
+
+integer, allocatable, intent(inout) :: fields_in(:) !< Array to specify fields used
+character(len=*), intent(in)        :: variables(:) !< Model variables in B matrix
+logical, intent(in)                 :: qtotal_flag  !< Flag for qtotal
+
+character(len=max_string) :: varname
+integer                   :: jvar
+integer                   :: nmvars
+
+call fckit_log % info("rttovonedvarcheck_create_fields_in: starting")
+
+! Which fields are being used from b matrix file - temporary until rttov can handle all fields
+allocate(fields_in(8))
+fields_in(:) = 0
+
+nmvars = size(variables)
+do jvar = 1, nmvars
+
+  varname = variables(jvar)
+
+  select case (trim(varname))
+
+    case ("air_temperature")
+      fields_in(1) = 1 ! air_temperature
+
+    case ("specific_humidity")
+      if (qtotal_flag) then
+        fields_in(2) = 10 ! total water profile in bmatrix - specific humidity in geovals!?!
+      else
+        fields_in(2) = 2 ! water profile in bmatrix - specific humidity in geovals!?!
+      end if
+
+    case("air_temperature_at_two_meters_above_surface")
+      fields_in(3) = 3 ! 2m air_temperature
+
+    case("specific_humidity_at_two_meters_above_surface")
+      fields_in(4) = 4 ! 2m specific_humidity
+
+    case("skin_temperature")
+      fields_in(5) = 5 ! surface skin temperature
+
+    case("surface_air_pressure")
+      fields_in(6) = 6 ! surface air pressure
+
+    case ("mass_content_of_cloud_ice_in_atmosphere_layer")
+      if (.NOT. qtotal_flag) fields_in(7) = 15 ! solid water profile
+
+    case ("mass_content_of_cloud_liquid_water_in_atmosphere_layer")
+      if (.NOT. qtotal_flag) fields_in(8) = 9  ! liquid water profile
+
+    case default
+      call abor1_ftn("Variable not implemented yet in rttovonedvarcheck Covariance")
+
+  end select
+
+end do
+
+end subroutine rttovonedvarcheck_create_fields_in
+
+! ------------------------------------------------------------------------------------------------
 
 end module ufo_rttovonedvarcheck_bmatrix_mod
