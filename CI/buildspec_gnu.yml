@@ -43,7 +43,7 @@ phases:
       - mkdir -p /jcsda/.openmpi
       - mkdir -p /home/jcsdauser/.openmpi
 
-      - cp default-mca-params.conf /home/jcsdauser/.openmpi/mca-params.conf
+      - cp CI/default-mca-params.conf /home/jcsdauser/.openmpi/mca-params.conf
       - cat /home/jcsdauser/.openmpi/mca-params.conf
       - chown -R jcsdauser:jcsda /jcsda/
 
@@ -64,41 +64,42 @@ phases:
       - cp ~/.gitconfig /home/jcsdauser/
 
       - cd CI
+
       # ufo-bundle
-      - ./clone.sh $GIT_USER $GIT_PASS ufo-bundle $CODEBUILD_GIT_BRANCH ufo-bundle /jcsda
+      - ./clone.sh $GIT_USER $GIT_PASS ufo-bundle $CODEBUILD_GIT_BRANCH ufo-bundle /jcsda develop
 
       # ufo
-      - ./clone.sh $GIT_USER $GIT_PASS ufo $CODEBUILD_GIT_BRANCH ufo /jcsda/ufo-bundle
+      - ./clone.sh $GIT_USER $GIT_PASS ufo $CODEBUILD_GIT_BRANCH ufo /jcsda/ufo-bundle develop
 
       # crtm
-      - ./clone.sh $GIT_USER $GIT_PASS crtm $CODEBUILD_GIT_BRANCH crtm /jcsda/ufo-bundle
+      - ./clone.sh $GIT_USER $GIT_PASS crtm $CODEBUILD_GIT_BRANCH crtm /jcsda/ufo-bundle develop
 
       # ioda
-      - ./clone.sh $GIT_USER $GIT_PASS ioda $CODEBUILD_GIT_BRANCH ioda /jcsda/ufo-bundle
+      - ./clone.sh $GIT_USER $GIT_PASS ioda $CODEBUILD_GIT_BRANCH ioda /jcsda/ufo-bundle develop
 
       # disable git-lfs
       - git lfs install --skip-smudge
 
       # atlas
-      - ./clone.sh $GIT_USER $GIT_PASS atlas $CODEBUILD_GIT_BRANCH atlas /jcsda/ufo-bundle
+      - ./clone.sh $GIT_USER $GIT_PASS atlas $CODEBUILD_GIT_BRANCH atlas /jcsda/ufo-bundle release-stable
 
       # saber
-      - ./clone.sh $GIT_USER $GIT_PASS saber $CODEBUILD_GIT_BRANCH saber /jcsda/ufo-bundle
+      - ./clone.sh $GIT_USER $GIT_PASS saber $CODEBUILD_GIT_BRANCH saber /jcsda/ufo-bundle develop
 
       # oops
-      - ./clone.sh $GIT_USER $GIT_PASS oops $CODEBUILD_GIT_BRANCH oops /jcsda/ufo-bundle
+      - ./clone.sh $GIT_USER $GIT_PASS oops $CODEBUILD_GIT_BRANCH oops /jcsda/ufo-bundle develop
 
       # ropp
-      - ./clone.sh $GIT_USER $GIT_PASS ropp-test $CODEBUILD_GIT_BRANCH ropp-ufo /jcsda/ufo-bundle
+      - ./clone.sh $GIT_USER $GIT_PASS ropp-test $CODEBUILD_GIT_BRANCH ropp-ufo /jcsda/ufo-bundle develop
 
       # geos-aero
-      - ./clone.sh $GIT_USER $GIT_PASS geos-aero $CODEBUILD_GIT_BRANCH geos-aero /jcsda/ufo-bundle
+      - ./clone.sh $GIT_USER $GIT_PASS geos-aero $CODEBUILD_GIT_BRANCH geos-aero /jcsda/ufo-bundle develop
 
       #fckit
-      - ./clone.sh $GIT_USER $GIT_PASS fckit $CODEBUILD_GIT_BRANCH fckit /jcsda/ufo-bundle
+      - ./clone.sh $GIT_USER $GIT_PASS fckit $CODEBUILD_GIT_BRANCH fckit /jcsda/ufo-bundle release-stable
 
       #gsw
-      - ./clone.sh $GIT_USER $GIT_PASS GSW-Fortran $CODEBUILD_GIT_BRANCH gsw /jcsda/ufo-bundle
+      - ./clone.sh $GIT_USER $GIT_PASS GSW-Fortran $CODEBUILD_GIT_BRANCH gsw /jcsda/ufo-bundle develop
 
       - ls
       - pwd
@@ -108,6 +109,7 @@ phases:
       - ls -lt /jcsda/ufo-bundle/ufo
       - sed -i 's/BRANCH develop  UPDATE//' CMakeLists.txt
       - sed -i 's/BRANCH develop //' CMakeLists.txt
+      - sed -i 's/BRANCH release-stable UPDATE//' CMakeLists.txt
       - sed -i -e '/ecbuild_bundle( PROJECT ufo/i\
         ecbuild_bundle( PROJECT ropp-ufo  GIT "https://github.com/JCSDA/ropp-test.git" )' CMakeLists.txt
       - sed -i -e '/ecbuild_bundle( PROJECT ufo/i\
@@ -120,11 +122,20 @@ phases:
       - export BUILD_STATUS="0"
       - echo $BUILD_STATUS
 
+      - gcc --version
+      - g++ --version
+      - gfortran --version
+      - which gfortran
+      - which gcc
+      - which g++
+      - ls /usr/local/bin
+      - echo $PATH
+
       - su - jcsdauser -c "cd /build_container
         && echo $CC
         && echo $CXX
         && echo $FC
-        && CC=mpicc CXX=mpicxx FC=mpifort ecbuild /jcsda/ufo-bundle/
+        && CC=mpicc CXX=mpicxx FC=mpifort ecbuild -DCMAKE_CXX_COMPILER=$(which g++) -DCMAKE_C_COMPILER=$(which gcc) -DCMAKE_Fortran_COMPILER=$(which gfortran) /jcsda/ufo-bundle/
         && cd ufo
         && make -j4"
 
