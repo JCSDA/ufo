@@ -42,9 +42,13 @@ list( APPEND ufo_test_input
   testinput/atms_crtm.yaml
   testinput/coolskin.yaml
   testinput/cris_crtm.yaml
+  testinput/cris_crtm_bc.yaml
   testinput/cris_qc.yaml
+  testinput/cris_qc_filters.yaml
+  testinput/cris_qc_land.yaml
   testinput/empty.yaml
   testinput/function_clouddetect.yaml
+  testinput/function_clouddetect_cris.yaml
   testinput/function_clwmatchidx.yaml
   testinput/function_clwret.yaml
   testinput/function_clwretmean.yaml
@@ -88,6 +92,8 @@ list( APPEND ufo_test_input
   testinput/obsdiag_crtm_jacobian.yaml
   testinput/obsdiag_crtm_amsua_jacobian.yaml
   testinput/obsdiag_crtm_amsua_optics.yaml
+  testinput/obsdiag_crtm_cris_jacobian.yaml
+  testinput/obsdiag_crtm_cris_optics.yaml
   testinput/obsdiag_crtm_iasi_jacobian.yaml
   testinput/obsdiag_crtm_iasi_optics.yaml
   testinput/obsfilterdata.yaml
@@ -166,6 +172,9 @@ list( APPEND ufo_test_data
   atmosphere/atms_npp_geoval_2018041500_m.nc4
   atmosphere/atms_npp_geoval_2018041500_s.nc4
   atmosphere/cris-fsr_npp_geoval_2018041500_m.nc4
+  atmosphere/cris-fsr_npp_geoval_2018041500_m_qc.nc4
+  atmosphere/cris-fsr_npp_obsdiag_2018041500_m_qc.nc4
+  atmosphere/cris-fsr_npp_tlapmean.txt
   atmosphere/geovals_rttov.nc4
   atmosphere/atms_allsats_geoval_2019112700-init.nc4
   atmosphere/atms_allsats_obs_2019112700-init.nc4
@@ -193,6 +202,7 @@ list( APPEND ufo_test_data
   atmosphere/radar_rw_geoval_2019052222.nc4
   atmosphere/smap_geoval_2018041500_m.nc4
   atmosphere/satbias_crtm_in
+  atmosphere/satbias_crtm_in_test
   atmosphere/satwind_geoval_2018041500_m.nc4
   atmosphere/satwind_geoval_2018041500_s.nc4
   atmosphere/sbuv2_n19_geoval_2018041500_m.nc4
@@ -978,6 +988,12 @@ ecbuild_add_test( TARGET  test_ufo_function_clouddetect
                   ENVIRONMENT OOPS_TRAPFPE=1
                   LIBS    ufo)
 
+ecbuild_add_test( TARGET  test_ufo_function_clouddetect_cris
+                  SOURCES mains/TestObsFunction.cc
+                  ARGS    "testinput/function_clouddetect_cris.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  LIBS    ufo)
+
 ecbuild_add_test( TARGET  test_ufo_function_clwmatchidx
                   SOURCES mains/TestObsFunction.cc
                   ARGS    "testinput/function_clwmatchidx.yaml"
@@ -1044,13 +1060,11 @@ ecbuild_add_test( TARGET  test_ufo_function_errfwavenum
                   ENVIRONMENT OOPS_TRAPFPE=1
                   LIBS    ufo)
 
-# comment out temporarily for correct file
 ecbuild_add_test( TARGET  test_ufo_function_hydrometeorchk
                   SOURCES mains/TestObsFunction.cc
                   ARGS    "testinput/function_hydrometeorchk.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   LIBS    ufo)
-# comment out temporarily for correct file
 
 ecbuild_add_test( TARGET  test_ufo_function_nsstret
                   SOURCES mains/TestObsFunction.cc
@@ -1103,6 +1117,18 @@ if ( ${CRTM_FOUND} )
                       ENVIRONMENT OOPS_TRAPFPE=1
                       LIBS    ufo)
 
+    ecbuild_add_test( TARGET  test_ufo_obsdiag_crtm_cris_optics
+                      SOURCES mains/TestObsDiagnostics.cc
+                      ARGS    "testinput/obsdiag_crtm_cris_optics.yaml"
+                      ENVIRONMENT OOPS_TRAPFPE=1
+                      LIBS    ufo)
+
+    ecbuild_add_test( TARGET  test_ufo_obsdiag_crtm_cris_jacobian
+                      SOURCES mains/TestObsDiagnostics.cc
+                      ARGS    "testinput/obsdiag_crtm_cris_jacobian.yaml"
+                      ENVIRONMENT OOPS_TRAPFPE=1
+                      LIBS    ufo)
+
     ecbuild_add_test( TARGET  test_ufo_obsdiag_crtm_iasi_optics
                       SOURCES mains/TestObsDiagnostics.cc
                       ARGS    "testinput/obsdiag_crtm_iasi_optics.yaml"
@@ -1148,6 +1174,12 @@ if ( ${CRTM_FOUND} )
                       ENVIRONMENT OOPS_TRAPFPE=1
                       DEPENDS test_ObsFilters.x )
 
+    ecbuild_add_test( TARGET  test_ufo_qc_cris_land
+                      COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                      ARGS    "testinput/cris_qc_land.yaml"
+                      ENVIRONMENT OOPS_TRAPFPE=1
+                      DEPENDS test_ObsFilters.x )
+
     ecbuild_add_test( TARGET  test_ufo_qc_function_scattering
                       COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
                       ARGS    "testinput/amsua_qc.yaml"
@@ -1175,6 +1207,12 @@ if ( ${CRTM_FOUND} )
     ecbuild_add_test( TARGET  test_ufo_qc_amsua_miss_val
                       COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
                       ARGS    "testinput/amsua_qc_miss_val.yaml"
+                      ENVIRONMENT OOPS_TRAPFPE=1
+                      DEPENDS test_ObsFilters.x )
+
+    ecbuild_add_test( TARGET  test_ufo_qc_cris_filters
+                      COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                      ARGS    "testinput/cris_qc_filters.yaml"
                       ENVIRONMENT OOPS_TRAPFPE=1
                       DEPENDS test_ObsFilters.x )
 
@@ -1246,6 +1284,12 @@ ecbuild_add_test( TARGET  test_ufo_qc_action_gnssroBndNBAM_obserr_inflation
 ecbuild_add_test( TARGET  test_ufo_bias_amsua
                   SOURCES mains/TestObsBias.cc
                   ARGS    "testinput/amsua_crtm_bc.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  LIBS    ufo )
+
+ecbuild_add_test( TARGET  test_ufo_bias_cris
+                  SOURCES mains/TestObsBias.cc
+                  ARGS    "testinput/cris_crtm_bc.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   LIBS    ufo )
 

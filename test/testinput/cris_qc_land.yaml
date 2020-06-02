@@ -1,11 +1,6 @@
 window_begin: 2018-04-14T21:00:00Z
 window_end: 2018-04-15T03:00:00Z
 
-LinearObsOpTest: 
- coefTL: 1.e-3
- toleranceTL: 2.0e-3
- toleranceAD: 1.0e-11
-
 Observations: 
  ObsTypes: 
  - ObsOperator:
@@ -18,10 +13,12 @@ Observations:
    ObsSpace:
      name: cris-fsr_npp
      ObsDataIn: 
-       obsfile: Data/ioda/testinput_tier_1/cris-fsr_npp_obs_2018041500_m.nc4
+       obsfile: Data/ioda/testinput_tier_1/cris-fsr_npp_obs_2018041500_m_qc.nc4
+     ObsDataOut: 
+       obsfile: Data/iasi_metop-a_obs_2018041500_m_out.nc4
      simulate:
        variables: [brightness_temperature]
-       channels: &all_channels
+       channels: &all_channels 
                  19, 24, 26, 27, 28, 31, 32, 33, 37, 39, 42, 44, 47, 49, 50,
                  51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68,
                  69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86,
@@ -55,6 +52,19 @@ Observations:
                  1981, 1982, 1983, 1984, 1985, 1986, 1987, 2119, 2140, 2143, 2147, 2153,
                  2158, 2161, 2168, 2171, 2175, 2182
    GeoVaLs: 
-     filename: Data/cris-fsr_npp_geoval_2018041500_m.nc4
-   vecequiv: GsiHofX
-   tolerance: 1.e-6
+     filename: Data/cris-fsr_npp_geoval_2018041500_m_qc.nc4
+   ObsFilters:
+   - Filter: Bounds Check
+     filter variables:
+     - name: brightness_temperature
+       channels: *all_channels
+     where:
+     - variable:
+         name: water_area_fraction@GeoVaLs
+       maxvalue: 0.99 
+#      maxvalue: 0.01 
+     test variables:
+     - name: brightness_temperature_jacobian_surface_temperature@ObsDiag
+       channels: *all_channels
+     maxvalue: 0.2
+   passedBenchmark: 37665 # number of passed obs

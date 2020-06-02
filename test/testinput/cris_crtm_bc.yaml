@@ -1,9 +1,10 @@
 window_begin: 2018-04-14T21:00:00Z
 window_end: 2018-04-15T03:00:00Z
 
-LinearObsOpTest: 
+LinearObsOpTest:
+ testiterTL: 2
  coefTL: 1.e-3
- toleranceTL: 2.0e-3
+ toleranceTL: 1.0e-3
  toleranceAD: 1.0e-11
 
 Observations: 
@@ -11,17 +12,22 @@ Observations:
  - ObsOperator:
      name: CRTM
      Absorbers: [H2O,O3,CO2]
+     LinearObsOperator:
+       Absorbers: [H2O,O3,CO2]
      ObsOptions:
-       Sensor_ID: cris-fsr_npp
+       inspectProfile: 1
+       Sensor_ID: &Sensor_ID cris-fsr_npp 
        EndianType: little_endian
        CoefficientPath: Data/
    ObsSpace:
-     name: cris-fsr_npp
+     name: cris-fsr_npp 
      ObsDataIn: 
-       obsfile: Data/ioda/testinput_tier_1/cris-fsr_npp_obs_2018041500_m.nc4
+       obsfile: Data/ioda/testinput_tier_1/cris-fsr_npp_obs_2018041500_m_qc.nc4
+     ObsDataOut: 
+       obsfile: Data/cris-fsr_npp_obs_2018041500_m_qc_out.nc4
      simulate:
        variables: [brightness_temperature]
-       channels: &all_channels
+       channels: &channels
                  19, 24, 26, 27, 28, 31, 32, 33, 37, 39, 42, 44, 47, 49, 50,
                  51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68,
                  69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86,
@@ -55,6 +61,40 @@ Observations:
                  1981, 1982, 1983, 1984, 1985, 1986, 1987, 2119, 2140, 2143, 2147, 2153,
                  2158, 2161, 2168, 2171, 2175, 2182
    GeoVaLs: 
-     filename: Data/cris-fsr_npp_geoval_2018041500_m.nc4
-   vecequiv: GsiHofX
-   tolerance: 1.e-6
+     filename: Data/cris-fsr_npp_geoval_2018041500_m_qc.nc4
+   ObsBias:
+     name: LinearCombination
+     abias_in: Data/satbias_crtm_in
+     abias_out: Data/satbias_crtm_out
+     sensor: *Sensor_ID
+     jobs: *channels
+     predictors:
+     - predictor:
+         name: constant
+     - predictor:
+         name: lapse_rate
+         options:
+           order: 2
+           tlapse: &cris-fsr_npp_tlap Data/cris-fsr_npp_tlapmean.txt
+     - predictor:
+         name: lapse_rate
+         options:
+           tlapse: *cris-fsr_npp_tlap
+     - predictor:
+         name: emissivity
+     - predictor:
+         name: scan_angle
+         options:
+           order: 4
+     - predictor:
+         name: scan_angle
+         options:
+           order: 3
+     - predictor:
+         name: scan_angle
+         options:
+           order: 2
+     - predictor:
+         name: scan_angle
+   vecequiv: GsiHofXBc
+   tolerance: 1.e-5
