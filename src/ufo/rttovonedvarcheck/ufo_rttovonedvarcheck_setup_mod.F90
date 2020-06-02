@@ -12,13 +12,16 @@ use kinds
 use ufo_geovals_mod
 use ufo_rttovonedvarcheck_utils_mod
 use ufo_rttovonedvarcheck_profindex_mod, only: profindex_type
+use missing_values_mod
 
 implicit none
 private
 
 public ufo_rttovonedvarcheck_setup
-public ufo_rttovonedvarcheck_InitObInfo
 public ufo_rttovonedvarcheck_check_geovals
+public ufo_rttovonedvarcheck_InitObInfo
+public ufo_rttovonedvarcheck_InitEmiss
+public ufo_rttovonedvarcheck_DeleteObInfo
 
 contains
 
@@ -76,6 +79,10 @@ self % IterNumForLWPCheck = 2
 self % ConvergenceFactor = 0.40
 self % Cost_ConvergenceFactor = 0.01
 self % MaxMLIterations = 7
+self % EmissLandDefault = 0.95    ! default land surface emissivity
+self % EmissSeaIceDefault = 0.92  ! default seaice surface emissivity
+self % MwEmiss = .false.
+self % IREmiss = .false.
 
 ! R matrix type to use
 if (self % conf % has("rtype")) then
@@ -138,6 +145,26 @@ if (self % conf % has("Cost_ConvergenceFactor")) then
   call self % conf % get_or_die("Cost_ConvergenceFactor", self % Cost_ConvergenceFactor)
 end if
 
+! Default emissivity value to use over land
+if (self % conf % has("EmissLandDefault")) then
+  call self % conf % get_or_die("EmissLandDefault", self % EmissLandDefault)
+end if
+
+! Default emissivity value to use over seaice
+if (self % conf % has("EmissSeaIceDefault")) then
+  call self % conf % get_or_die("EmissSeaIceDefault", self % EmissSeaIceDefault)
+end if
+
+! Flag to specify if microwave emissivity is used
+if (self % conf % has("MwEmiss")) then
+  call self % conf % get_or_die("MwEmiss", self % MwEmiss)
+end if
+
+! Flag to specify if infrared emissivity is used
+if (self % conf % has("IREmiss")) then
+  call self % conf % get_or_die("IREmiss", self % IREmiss)
+end if
+
 ! Print self
 if (self % FullDiagnostics) then
   write(*,*) "qcname = ",trim(self % qcname)
@@ -164,36 +191,13 @@ if (self % FullDiagnostics) then
   write(*,*) "ConvergenceFactor = ",self % ConvergenceFactor
   write(*,*) "Cost_ConvergenceFactor = ",self % Cost_ConvergenceFactor
   write(*,*) "MaxMLIterations = ",self % MaxMLIterations
+  write(*,*) "EmissLandDefault = ",self % EmissLandDefault
+  write(*,*) "EmissSeaIceDefault = ",self % EmissSeaIceDefault
+  write(*,*) "MwEmiss = ",self % MwEmiss
+  write(*,*) "IREmiss = ",self % IREmiss
 end if
 
 end subroutine
-
-!-------------------------------------------------------------------------------
-
-subroutine ufo_rttovonedvarcheck_InitObInfo(ob_info, & ! out
-                                            nchans)    ! in
-
-implicit none
-
-! subroutine arguments:
-type(obinfo_type), intent(out) :: ob_info
-integer, intent(in)  :: nchans
-
-character(len=*), parameter :: routinename = "ufo_rttovonedvarcheck_InitObInfo"
-
-ob_info % nlocs = 1
-ob_info % latitude = 0.0
-ob_info % longitude = 0.0
-ob_info % elevation = 0.0
-ob_info % sensor_zenith_angle = 0.0
-ob_info % sensor_azimuth_angle = 0.0
-ob_info % solar_zenith_angle = 0.0
-ob_info % solar_azimuth_angle = 0.0
-
-! In obs loop to allow channel selection
-! allocate(ob_info%yobs(nchans))
-
-end subroutine ufo_rttovonedvarcheck_InitObInfo
 
 !-------------------------------------------------------------------------------
 
@@ -301,6 +305,115 @@ if (allocated(qi))             deallocate(qi)
 write(*,*) routinename, " : ended"
 
 end subroutine ufo_rttovonedvarcheck_check_geovals
+
+!-------------------------------------------------------------------------------
+
+subroutine ufo_rttovonedvarcheck_InitObInfo(ob_info, & ! out
+                                            nchans)    ! in
+
+implicit none
+
+! subroutine arguments:
+type(obinfo_type), intent(out) :: ob_info
+integer, intent(in)  :: nchans
+
+character(len=*), parameter :: routinename = "ufo_rttovonedvarcheck_InitObInfo"
+real(kind_real) :: missing
+
+missing = missing_value(missing)
+
+ob_info % nlocs = 1
+ob_info % latitude = 0.0
+ob_info % longitude = 0.0
+ob_info % elevation = 0.0
+ob_info % surface_type = 0
+ob_info % sensor_zenith_angle = 0.0
+ob_info % sensor_azimuth_angle = 0.0
+ob_info % solar_zenith_angle = 0.0
+ob_info % solar_azimuth_angle = 0.0
+
+allocate(ob_info % yobs(nchans))
+allocate(ob_info % emiss(nchans))
+allocate(ob_info % calc_emiss(nchans))
+
+ob_info % yobs(nchans) = missing
+ob_info % emiss(:) = 0.0
+ob_info % calc_emiss(:) = .false.
+
+end subroutine ufo_rttovonedvarcheck_InitObInfo
+
+!-------------------------------------------------------------------------------
+
+subroutine ufo_rttovonedvarcheck_InitEmiss(self, geovals, ob_info)
+
+implicit none
+
+! subroutine arguments:
+type(ufo_rttovonedvarcheck), intent(in) :: self
+type(ufo_geovals), intent(inout)        :: geovals
+type(obinfo_type), intent(inout)        :: ob_info
+
+type(ufo_geoval), pointer    :: geoval
+
+! ----------------------------------
+! 1.0 Get surface type from geovals
+!-----------------------------------
+call ufo_geovals_get_var(geovals, "surface_type", geoval)
+ob_info % surface_type = geoval%vals(1, 1)
+
+!-------------
+! 2.1 Defaults
+!-------------
+
+if (self % MwEmiss) then
+
+  ! Only calculate in RTTOV over sea
+  if (ob_info % surface_type == RTSea) then
+    ob_info % calc_emiss(:) = .true.
+  else
+    ob_info % calc_emiss(:) = .false.
+  end if
+
+  ! The default emissivity for land is a very crude estimate - the same
+  ! for all surface types and all frequencies. However, we do not use
+  ! channels which see the surface over land where we rely on this default.
+  ob_info % emiss(:) = 0.0
+  if (ob_info % surface_type == RTLand) then
+    ob_info % emiss(:) = self % EmissLandDefault
+  else if (ob_info % surface_type == RTIce) then
+    ob_info % emiss(:) = self % EmissSeaIceDefault
+  end if
+
+end if
+
+end subroutine ufo_rttovonedvarcheck_InitEmiss
+
+!-------------------------------------------------------------------------------
+
+subroutine ufo_rttovonedvarcheck_DeleteObInfo(ob_info)    ! inout
+
+implicit none
+
+! subroutine arguments:
+type(obinfo_type), intent(inout) :: ob_info
+
+character(len=*), parameter :: routinename = "ufo_rttovonedvarcheck_InitObInfo"
+
+ob_info % nlocs = 1
+ob_info % latitude = 0.0
+ob_info % longitude = 0.0
+ob_info % elevation = 0.0
+ob_info % surface_type = 0
+ob_info % sensor_zenith_angle = 0.0
+ob_info % sensor_azimuth_angle = 0.0
+ob_info % solar_zenith_angle = 0.0
+ob_info % solar_azimuth_angle = 0.0
+
+if (allocated(ob_info % yobs))       deallocate(ob_info % yobs)
+if (allocated(ob_info % emiss))      deallocate(ob_info % emiss)
+if (allocated(ob_info % calc_emiss)) deallocate(ob_info % calc_emiss)
+
+end subroutine ufo_rttovonedvarcheck_DeleteObInfo
 
 !-------------------------------------------------------------------------------
 

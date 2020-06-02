@@ -31,7 +31,7 @@ list( APPEND ufo_test_input
   testinput/amsua_crtm.yaml
   testinput/amsua_crtm_bc.yaml
   testinput/amsua_rttov.yaml
-  testinput/atms_rttov_qc_1dvar.yaml
+  testinput/atms_qc_rttovonedvarcheck.yaml
   testinput/amsua_qc.yaml
   testinput/amsua_qc_clwretmw.yaml
   testinput/amsua_qc_filters.yaml
@@ -557,9 +557,9 @@ if( ${RTTOV_FOUND} )
                     ENVIRONMENT OOPS_TRAPFPE=1
                     DEPENDS test_ObsOperatorTLAD.x )
 
-  ecbuild_add_test( TARGET  test_ufo_qc_atms_rttov_1dvar
+  ecbuild_add_test( TARGET  test_ufo_atms_qc_rttovonedvarcheck
                     COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-                    ARGS    "testinput/atms_rttov_qc_1dvar.yaml"
+                    ARGS    "testinput/atms_qc_rttovonedvarcheck.yaml"
                     ENVIRONMENT OOPS_TRAPFPE=1
                     DEPENDS test_ObsFilters.x )
 endif( ${RTTOV_FOUND} )

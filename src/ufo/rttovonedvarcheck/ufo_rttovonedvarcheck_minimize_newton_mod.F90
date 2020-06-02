@@ -251,21 +251,19 @@ Iterations: do iter = 1, self % max1DVarIterations
         write (*, '(A,F12.5)') 'Cost Function Increment=', deltaj
       end if
 
-      if (DeltaJ < self % cost_convergencefactor .AND. &
-          DeltaJo < 0.0 .AND. self % FullDiagnostics)  THEN ! overall is cost getting smaller?
-        write (*, '(A,I0)') 'Iteration', iter
-        write (*, '(A)') '------------'
-        write (*, '(A,L1)') 'Status: converged = ', Converged
-        write (*, '(A)') 'New profile:'
-        call ufo_geovals_print(geovals, 1)
-        write (*, '(A)')
-        write (*, '(A,3F12.5)') 'Cost Function, increment, cost_convergencefactor = ', &
-                                 Jcost, deltaj, self % cost_convergencefactor
-      end if
-
       if (DeltaJ < self % cost_convergencefactor .and. &
           DeltaJo < 0.0)  then ! overall is cost getting smaller?
         converged = .true.
+        if (self % FullDiagnostics) then
+          write (*, '(A,I0)') 'Iteration', iter
+          write (*, '(A)') '------------'
+          write (*, '(A,L1)') 'Status: converged = ', Converged
+          write (*, '(A)') 'New profile:'
+          call ufo_geovals_print(geovals, 1)
+          write (*, '(A)')
+          write (*, '(A,3F12.5)') 'Cost Function, increment, cost_convergencefactor = ', &
+                                   Jcost, deltaj, self % cost_convergencefactor
+        end if 
         exit iterations
       end if
 

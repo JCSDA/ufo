@@ -193,21 +193,6 @@ Sensor_Loop:do i_inst = 1, self % conf % nSensors
       end do
     end do
 
-    !Assign the data from the GeoVaLs
-    !--------------------------------
-    if (present(obs_info)) then
-      call load_atm_data_rttov(geovals,obss,profiles,prof_start,obs_info=obs_info)
-      call load_geom_data_rttov(obss,profiles,prof_start,obs_info=obs_info)
-    else
-      call load_atm_data_rttov(geovals,obss,profiles,prof_start)
-      call load_geom_data_rttov(obss,profiles,prof_start)
-    end if
-
-    call rttov_user_profile_checkinput(rttov_errorstatus, &
-      config_rttov % opts, &
-      config_rttov % rttov_coef_array(i_inst), &
-      profiles(1))
-
     ! --------------------------------------------------------------------------
     ! 6. Specify surface emissivity and reflectance
     ! --------------------------------------------------------------------------
@@ -218,6 +203,23 @@ Sensor_Loop:do i_inst = 1, self % conf % nSensors
     ! Calculate emissivity within RTTOV where the input emissivity value is
     ! zero or less (all channels in this case)
     calcemis(:) = (emissivity(:) % emis_in <= 0._jprb)
+
+    !Assign the data from the GeoVaLs
+    !--------------------------------
+    if (present(obs_info)) then
+      call load_atm_data_rttov(geovals,obss,profiles,prof_start,obs_info=obs_info)
+      call load_geom_data_rttov(obss,profiles,prof_start,obs_info=obs_info)
+      emissivity(:) % emis_in = obs_info % emiss(:)
+      calcemis(:) = obs_info % calc_emiss(:)
+    else
+      call load_atm_data_rttov(geovals,obss,profiles,prof_start)
+      call load_geom_data_rttov(obss,profiles,prof_start)
+    end if
+
+    call rttov_user_profile_checkinput(rttov_errorstatus, &
+      config_rttov % opts, &
+      config_rttov % rttov_coef_array(i_inst), &
+      profiles(1))
 
     call rttov_print_profile(profiles(1))
 

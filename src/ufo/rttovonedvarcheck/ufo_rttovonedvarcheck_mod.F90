@@ -175,7 +175,6 @@ subroutine ufo_rttovonedvarcheck_apply(self, vars, geovals, apply)
   call prof_index % setup(full_bmatrix)
 
   ! Initialize data arrays
-  call ufo_rttovonedvarcheck_InitObInfo(ob_info, self%nchans)
   allocate(b_matrix(prof_index % nprofelements,prof_index % nprofelements))
   allocate(b_inverse(prof_index % nprofelements,prof_index % nprofelements))
   allocate(b_sigma(prof_index % nprofelements))
@@ -212,16 +211,6 @@ subroutine ufo_rttovonedvarcheck_apply(self, vars, geovals, apply)
       !---------------------------------------------------
       ! Setup Jo terms
       !---------------------------------------------------
-      ! setup ob data for this observation
-      ob_info%forward_mod_name=self%forward_mod_name
-      ob_info%latitude=lat(jobs)
-      ob_info%longitude=lon(jobs)
-      ob_info%elevation=elevation(jobs)
-      ob_info%sensor_zenith_angle=sat_zen(jobs)
-      ob_info%sensor_azimuth_angle=sat_azi(jobs)
-      ob_info%solar_zenith_angle=sol_zen(jobs)
-      ob_info%solar_azimuth_angle=sol_azi(jobs)
-
       ! Channel selection based on previous filter flags
       chans_used = 0
       do jvar = 1, self%nchans
@@ -236,8 +225,22 @@ subroutine ufo_rttovonedvarcheck_apply(self, vars, geovals, apply)
         cycle obs_loop
       end if
 
+      ! setup ob data for this observation
+      call ufo_rttovonedvarcheck_InitObInfo(ob_info, chans_used)
+      call ufo_rttovonedvarcheck_InitEmiss(self, local_geovals, ob_info)
+      ob_info % forward_mod_name = self % forward_mod_name
+      ob_info % latitude = lat(jobs)
+      ob_info % longitude = lon(jobs)
+      ob_info % elevation = elevation(jobs)
+      ob_info % sensor_zenith_angle = sat_zen(jobs)
+      ob_info % sensor_azimuth_angle = sat_azi(jobs)
+      ob_info % solar_zenith_angle = sol_zen(jobs)
+      ob_info % solar_azimuth_angle = sol_azi(jobs)
+
+      write(*,*) "ob_info % emiss = ",ob_info % emiss
+      write(*,*) "ob_info % calc_emiss = ",ob_info % calc_emiss
+
       ! allocate arrays
-      allocate(ob_info%yobs(chans_used))
       allocate(channels_used(chans_used))
       allocate(obs_error(chans_used))
 
@@ -283,7 +286,7 @@ subroutine ufo_rttovonedvarcheck_apply(self, vars, geovals, apply)
       end if
 
       ! Tidy up memory specific to a single observation
-      if (allocated(ob_info%yobs))  deallocate(ob_info%yobs)
+      call ufo_rttovonedvarcheck_DeleteObInfo(ob_info)
       if (allocated(channels_used)) deallocate(channels_used)
       if (allocated(obs_error))     deallocate(obs_error)
       call r_submatrix % delete()
@@ -308,19 +311,19 @@ subroutine ufo_rttovonedvarcheck_apply(self, vars, geovals, apply)
 
   ! Tidy up memory used for all observations
   call full_bmatrix % delete()
-  if (allocated(yobs))       deallocate(yobs)
-  if (allocated(yerr))       deallocate(yerr)
-  if (allocated(lat))        deallocate(lat)
-  if (allocated(lon))        deallocate(lon)
-  if (allocated(elevation))  deallocate(elevation)
-  if (allocated(sat_zen))    deallocate(sat_zen)
-  if (allocated(sat_azi))    deallocate(sat_azi)
-  if (allocated(sol_zen))    deallocate(sol_zen)
-  if (allocated(sol_azi))    deallocate(sol_azi)
-  if (allocated(flags))      deallocate(flags)
-  if (allocated(b_matrix))   deallocate(b_matrix)
-  if (allocated(b_inverse))  deallocate(b_inverse)
-  if (allocated(b_sigma))    deallocate(b_sigma)
+  if (allocated(yobs))      deallocate(yobs)
+  if (allocated(yerr))      deallocate(yerr)
+  if (allocated(lat))       deallocate(lat)
+  if (allocated(lon))       deallocate(lon)
+  if (allocated(elevation)) deallocate(elevation)
+  if (allocated(sat_zen))   deallocate(sat_zen)
+  if (allocated(sat_azi))   deallocate(sat_azi)
+  if (allocated(sol_zen))   deallocate(sol_zen)
+  if (allocated(sol_azi))   deallocate(sol_azi)
+  if (allocated(flags))     deallocate(flags)
+  if (allocated(b_matrix))  deallocate(b_matrix)
+  if (allocated(b_inverse)) deallocate(b_inverse)
+  if (allocated(b_sigma))   deallocate(b_sigma)
 
 end subroutine ufo_rttovonedvarcheck_apply
 

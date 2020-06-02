@@ -190,4 +190,7 @@ Observations:
       ConvergenceFactor: 0.40
       Cost_ConvergenceFactor: 0.01
       Max1DVarIterations: 7
+      MwEmiss: true
+      EmissLandDefault: 0.95
+      EmissSeaIceDefault: 0.92
     passedBenchmark: 973      # number of passed obs

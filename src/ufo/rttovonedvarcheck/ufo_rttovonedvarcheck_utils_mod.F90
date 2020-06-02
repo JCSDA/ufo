@@ -51,6 +51,10 @@ type, public :: ufo_rttovonedvarcheck
   real(kind_real)                  :: ConvergenceFactor
   real(kind_real)                  :: Cost_ConvergenceFactor
   real(kind_real)                  :: MaxMLIterations
+  real(kind_real)                  :: EmissLandDefault
+  real(kind_real)                  :: EmissSeaIceDefault
+  logical                          :: MwEmiss
+  logical                          :: IREmiss
 end type ufo_rttovonedvarcheck
 
 !---------------------------------------------------------
@@ -64,11 +68,14 @@ type, public :: obinfo_type
   real(kind_real) :: latitude
   real(kind_real) :: longitude
   real(kind_real) :: elevation
+  integer         :: surface_type
   real(kind_real) :: sensor_zenith_angle
   real(kind_real) :: sensor_azimuth_angle
   real(kind_real) :: solar_zenith_angle
   real(kind_real) :: solar_azimuth_angle
   real(kind_real), allocatable :: yobs(:)
+  real(kind_real), allocatable :: emiss(:)
+  logical, allocatable :: calc_emiss(:)
 
 end type
 
@@ -162,6 +169,11 @@ real(kind_real), parameter, public :: &
   IceShelfLimit  =    -72.0,    & ! assumed limit of SH seaice
   WetLevelLid    =    115.0,    & ! uppermost wet pressure level
   MWCloudLevelLid=    310.0       ! uppermost clw pressure lvl for mwcalcs(hpa)
+
+integer, parameter, public :: &
+  RTLand = 0, &
+  RTSea  = 1, &
+  RTIce  = 2
 
 contains
 

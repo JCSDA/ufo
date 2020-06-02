@@ -306,10 +306,9 @@ end do
 ! call rttov_get_emissivity()
 
 if(PRESENT(obs_info)) then
-  profiles(1)%elevation = obs_info%elevation / 1000.0 ! m -> km
-  profiles(1)%latitude = obs_info%latitude
-  profiles(1)%longitude = obs_info%longitude
-
+  profiles(1) % elevation = obs_info % elevation / 1000.0 ! m -> km
+  profiles(1) % latitude = obs_info % latitude
+  profiles(1) % longitude = obs_info % longitude
 else
 
   allocate(TmpVar(nprofiles))
