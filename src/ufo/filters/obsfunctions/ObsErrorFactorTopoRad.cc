@@ -46,8 +46,9 @@ ObsErrorFactorTopoRad::ObsErrorFactorTopoRad(const eckit::LocalConfiguration & c
   // Get instrument and satellite from sensor
   std::string inst, sat;
   splitInstSat(sensor, inst, sat);
+  ASSERT(inst == "amsua" || inst == "atms" || inst == "iasi" || inst == "cris-fsr");
 
-  if (inst == "amsua") {
+  if (inst == "amsua" || inst == "atms") {
     // Get test groups from options
     const std::string &errgrp = options_.testObserr.value();
     const std::string &flaggrp = options_.testQCflag.value();
@@ -89,7 +90,7 @@ void ObsErrorFactorTopoRad::compute(const ObsFilterData & in,
   in.get(Variable("surface_geopotential_height@GeoVaLs"), zsges);
 
   // Inflate obs error as a function of terrian height (>2000) and surface-to-space transmittance
-  if (inst == "iasi") {
+  if (inst == "iasi" || inst == "cris-fsr") {
     std::vector<float> tao_sfc(nlocs);
     for (size_t ich = 0; ich < nchans; ++ich) {
       in.get(Variable("transmittances_of_atmosphere_layer@ObsDiag", channels_)[ich],
@@ -139,7 +140,7 @@ void ObsErrorFactorTopoRad::compute(const ObsFilterData & in,
     }
   } else {
     oops::Log::error() << "ObsErrorFactorTopoRad: Invalid instrument (sensor) specified: " << inst
-                       << "  The valid instruments are: iasi and amsua" << std::endl;
+                       << "  The valid instruments are: iasi, cris-fsr, and amsua" << std::endl;
   }
 }
 

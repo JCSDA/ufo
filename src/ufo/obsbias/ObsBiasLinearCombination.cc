@@ -7,6 +7,7 @@
 #include "ufo/obsbias/ObsBiasLinearCombination.h"
 
 #include <Eigen/Core>
+#include <algorithm>
 #include <fstream>
 
 #include "ioda/ObsVector.h"
@@ -32,6 +33,10 @@ ObsBiasLinearCombination::ObsBiasLinearCombination(const eckit::Configuration & 
 
   // Initialize the biascoeffs
   biascoeffs_.resize(prednames_.size() * jobs_.size(), 0.0);
+
+  for (int ii=0; ii < prednames_.size(); ++ii) {
+    oops::Log::trace() << "prednames_ " << prednames_[ii] << std::endl;
+  }
 
   oops::Log::trace() << "ObsBiasLinearCombination created." << std::endl;
 }
@@ -66,7 +71,6 @@ void ObsBiasLinearCombination::read(const std::string & sensor) {
 
   if (infile.is_open())
   {
-    biascoeffs_.clear();
     float par;
     while (!infile.eof())
     {
@@ -76,13 +80,18 @@ void ObsBiasLinearCombination::read(const std::string & sensor) {
       infile >> tlap;
       infile >> tsum;
       infile >> ntlapupdate;
-      if (nusis == sensor &&
-           std::find(jobs_.begin(), jobs_.end(), nuchan) != jobs_.end()) {
-        for (auto & item : gsi_predictors) {
-          infile >> par;
-          if (std::find(prednames_.begin(), prednames_.end(), item)
-              != prednames_.end()) {
-            biascoeffs_.push_back(static_cast<double>(par));
+      if (nusis == sensor) {
+        auto it = std::find(jobs_.begin(), jobs_.end(), nuchan);
+        if (it != jobs_.end()) {
+          int j = std::distance(jobs_.begin(), it);
+
+          for (auto & item : gsi_predictors) {
+            infile >> par;
+            auto it = std::find(prednames_.begin(), prednames_.end(), item);
+            if (it != prednames_.end()) {
+              int p = std::distance(prednames_.begin(), it);
+              biascoeffs_.at(j*prednames_.size() + p) = static_cast<double>(par);
+            }
           }
         }
       } else {

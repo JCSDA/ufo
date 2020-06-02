@@ -29,7 +29,7 @@ Observations:
        obsfile: Data/amsua_n19_obs_2018041500_m_out.nc4
      simulate:
        variables: [brightness_temperature]
-       channels: 1-10,15
+       channels: 1-15 
    GeoVaLs: 
      filename: Data/amsua_n19_geoval_2018041500_m.nc4
    vecequiv: GsiHofX

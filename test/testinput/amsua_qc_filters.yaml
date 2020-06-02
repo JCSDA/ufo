@@ -180,8 +180,8 @@ Observations:
          name: ObsErrorFactorTopoRad@ObsFunction
          channels: *all_channels
          options:
-           channels: *all_channels
            sensor: *Sensor_ID 
+           channels: *all_channels
 #  Transmittnace Top Check
    - Filter: BlackList
      filter variables:
@@ -219,6 +219,7 @@ Observations:
          name: ObsErrorFactorSituDependMW@ObsFunction
          channels: *all_channels
          options:
+           sensor: *Sensor_ID 
            channels: *all_channels
            clwobs_function:
              name: CLWRetMW@ObsFunction
@@ -275,6 +276,7 @@ Observations:
      - name: ObsErrorBoundMW@ObsFunction
        channels: *all_channels
        options:
+         sensor: *Sensor_ID 
          channels: *all_channels
          obserr_bound_latitude:
            name: ObsErrorFactorLatRad@ObsFunction
