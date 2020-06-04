@@ -73,6 +73,9 @@ type, public :: obinfo_type
   real(kind_real) :: sensor_azimuth_angle
   real(kind_real) :: solar_zenith_angle
   real(kind_real) :: solar_azimuth_angle
+  real(kind_real) :: cloudtopp
+  real(kind_real) :: cloudfrac
+  logical         :: retrievecloud
   real(kind_real), allocatable :: yobs(:)
   real(kind_real), allocatable :: emiss(:)
   logical, allocatable :: calc_emiss(:)

@@ -100,7 +100,7 @@ real(kind_real), allocatable :: dql_dqt(:)
 real(kind_real), allocatable :: dqi_dqt(:)
 
 ! call rttov k code
-call rttov_data % settraj(geovals, obsdb, channels, obs_info=ob_info, BT=hofx)
+call rttov_data % settraj(geovals, obsdb, channels, ob_info=ob_info, BT=hofx)
 
 nchans = size(channels)
 nlevels = size(rttov_data % profiles_k(1) % t)
@@ -224,11 +224,37 @@ if (profindex % pstar > 0) then
   end do
 end if
 
-! 2.4) Skin temperature
+! 2.4) Windspeed
+
+if (profindex % windspeed > 0) then
+  ! Remember that all wind has been transferred to u and v is set to zero for
+  ! windspeed retrieval.
+  do i = 1, nchans
+    H_matrix(i,profindex % windspeed) = rttov_data % profiles_k(i) % s2m % u
+  end do
+end if
+
+! 2.5) Skin temperature
 
 if (profindex % tstar > 0) then
   do i = 1, nchans
     H_matrix(i,profindex % tstar) = rttov_data % profiles_k(i) % skin % t
+  end do
+end if
+
+! 2.5) Cloud top pressure
+
+if (profindex % cloudtopp > 0) then
+  do i = 1, nchans
+    H_matrix(i,profindex % cloudtopp) = rttov_data % profiles_k(i) % ctp
+  end do
+end if
+
+! 2.6) Effective cloud fraction
+
+if (profindex % cloudfrac > 0) then
+  do i = 1, nchans
+    H_matrix(i,profindex % cloudfrac) = rttov_data % profiles_k(i) % cfraction
   end do
 end if
 
@@ -357,7 +383,6 @@ write(*, int_fmt) channels(:)
     write(*, '(a)') 'Effective cloud fraction'
     write(*, real_fmt)  H_matrix(:,profindex % cloudfrac)
   end if
-
 
 write(*,*)
 write(*, '(a)') 'End H-Matrix'

@@ -94,7 +94,7 @@ subroutine ufo_rttovonedvarcheck_minimize_ml(self,      &
 implicit none
 
 type(ufo_rttovonedvarcheck), intent(inout) :: self
-type(Obinfo_type), intent(in)    :: ob_info
+type(Obinfo_type), intent(inout) :: ob_info
 type(rmatrix_type), intent(in)   :: r_matrix
 real(kind_real), intent(in)      :: b_matrix(:,:)
 real(kind_real), intent(in)      :: b_inv(:,:)
@@ -161,7 +161,7 @@ geovals = local_geovals
 write(*,*) "Using ML solver"
 
 ! Map GeovaLs to 1D-var profile using B matrix profile structure
-call ufo_rttovonedvarcheck_GeoVaLs2ProfVec(geovals, profile_index, nprofelements, GuessProfile(:))
+call ufo_rttovonedvarcheck_GeoVaLs2ProfVec(geovals, profile_index, ob_info, GuessProfile(:))
 
 Iterations: do iter = 1, self % max1DVarIterations
 
@@ -192,7 +192,7 @@ Iterations: do iter = 1, self % max1DVarIterations
   end if
 
   ! Calculate Obs diff and initial cost
-  Ydiff(:) = ob_info%yobs(:) - Y(:)
+  Ydiff(:) = ob_info % yobs(:) - Y(:)
   if (iter == 1) then
     Diffprofile(:) = GuessProfile(:) - BackProfile(:)
     call ufo_rttovonedvarcheck_CostFunction(Diffprofile, b_inv, Ydiff, r_matrix, Jout)
@@ -283,7 +283,7 @@ Iterations: do iter = 1, self % max1DVarIterations
                                   outOfRange)        ! out
 
   ! Update RT-format guess profile
-  call ufo_rttovonedvarcheck_ProfVec2GeoVaLs(geovals, profile_index, nprofelements, GuessProfile)
+  call ufo_rttovonedvarcheck_ProfVec2GeoVaLs(geovals, profile_index, ob_info, GuessProfile)
   
   ! if qtotal in retrieval vector check cloud
   ! variables for current iteration
@@ -476,7 +476,7 @@ implicit none
 type(ufo_rttovonedvarcheck), intent(in) :: self
 real(kind_real), intent(in)             :: DeltaBT(:)        ! y-y(x)
 integer, intent(in)                     :: nChans
-type(Obinfo_type), intent(in)           :: ob_info
+type(Obinfo_type), intent(inout)        :: ob_info
 real(kind_real), intent(in)             :: H_Matrix(:,:)     ! Jacobian
 real(kind_real), intent(in)             :: H_Matrix_T(:,:)   ! (Jacobian)^T
 integer, intent(in)                     :: nprofelements
@@ -593,7 +593,7 @@ DescentLoop : do while (JCost > JOld .and.              &
                                   outOfRange)        ! out
 
   if (.not. OutOfRange) then
-    call ufo_rttovonedvarcheck_ProfVec2GeoVaLs(geovals, profile_index, nprofelements, GuessProfile)
+    call ufo_rttovonedvarcheck_ProfVec2GeoVaLs(geovals, profile_index, ob_info, GuessProfile)
 
     !Emiss(1:nchans) = RTprof_Guess % Emissivity(Channels(1:nchans))
     !CalcEmiss(1:nchans) = RTprof_Guess % CalcEmiss(Channels(1:nchans))

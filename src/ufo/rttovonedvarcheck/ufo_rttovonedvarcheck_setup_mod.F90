@@ -331,6 +331,9 @@ ob_info % sensor_zenith_angle = 0.0
 ob_info % sensor_azimuth_angle = 0.0
 ob_info % solar_zenith_angle = 0.0
 ob_info % solar_azimuth_angle = 0.0
+ob_info % cloudtopp = 500.0
+ob_info % cloudfrac = 0.0
+ob_info % retrievecloud = .false.
 
 allocate(ob_info % yobs(nchans))
 allocate(ob_info % emiss(nchans))
@@ -408,6 +411,9 @@ ob_info % sensor_zenith_angle = 0.0
 ob_info % sensor_azimuth_angle = 0.0
 ob_info % solar_zenith_angle = 0.0
 ob_info % solar_azimuth_angle = 0.0
+ob_info % cloudtopp = 500.0
+ob_info % cloudfrac = 0.0
+ob_info % retrievecloud = .false.
 
 if (allocated(ob_info % yobs))       deallocate(ob_info % yobs)
 if (allocated(ob_info % emiss))      deallocate(ob_info % emiss)

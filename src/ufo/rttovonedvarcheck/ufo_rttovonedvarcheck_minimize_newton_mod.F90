@@ -92,7 +92,7 @@ subroutine ufo_rttovonedvarcheck_minimize_newton(self, &
 implicit none
 
 type(ufo_rttovonedvarcheck), intent(inout) :: self
-type(Obinfo_type), intent(in)    :: ob_info
+type(Obinfo_type), intent(inout) :: ob_info
 type(rmatrix_type), intent(in)   :: r_matrix
 real(kind_real), intent(in)      :: b_matrix(:,:)
 real(kind_real), intent(in)      :: b_inv(:,:)
@@ -175,7 +175,8 @@ Iterations: do iter = 1, self % max1DVarIterations
     JcostOld = 1.0e4
 
     ! Map GeovaLs to 1D-var profile using B matrix profile structure
-    call ufo_rttovonedvarcheck_GeoVaLs2ProfVec(geovals, profile_index, nprofelements, GuessProfile(:))
+    call ufo_rttovonedvarcheck_GeoVaLs2ProfVec(geovals, profile_index, &
+                                               ob_info, GuessProfile(:))
 
   end if
 
@@ -206,7 +207,7 @@ Iterations: do iter = 1, self % max1DVarIterations
   !-----------------------------------------------------
 
   ! Profile differences
-  Ydiff(:) = ob_info%yobs(:) - Y(:)
+  Ydiff(:) = ob_info % yobs(:) - Y(:)
   Diffprofile(:) = GuessProfile(:) - BackProfile(:)
 
   write(*,*) "Ob BT = "
@@ -318,7 +319,8 @@ Iterations: do iter = 1, self % max1DVarIterations
                                   outOfRange)        ! out
 
   ! Update RT-format guess profile
-  call ufo_rttovonedvarcheck_ProfVec2GeoVaLs(geovals, profile_index, nprofelements, GuessProfile)
+  call ufo_rttovonedvarcheck_ProfVec2GeoVaLs(geovals, profile_index, &
+                                             ob_info, GuessProfile)
   
   ! if qtotal in retrieval vector check cloud
   ! variables for current iteration

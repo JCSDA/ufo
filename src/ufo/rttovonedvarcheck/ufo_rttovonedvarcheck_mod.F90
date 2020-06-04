@@ -94,6 +94,7 @@ subroutine ufo_rttovonedvarcheck_apply(self, vars, geovals, apply)
   character(len=max_string)          :: varname
   character(len=max_string)          :: message
   integer                            :: iloc, jvar, jobs, ivar, band ! counters
+  integer                            :: ii
   integer                            :: chans_used      ! counter for number of channels used for an ob
   integer                            :: jchans_used
   integer                            :: fileunit        ! unit number for reading in files
@@ -120,6 +121,7 @@ subroutine ufo_rttovonedvarcheck_apply(self, vars, geovals, apply)
   real(kind_real), allocatable       :: sol_azi(:)      ! observation solar azimuth angle
   logical                            :: file_exists     ! check if a file exists logical
   logical                            :: onedvar_success
+  logical                            :: cloud_retrieval = .false.
 
   ! ------------------------------------------
   ! Setup
@@ -160,16 +162,24 @@ subroutine ufo_rttovonedvarcheck_apply(self, vars, geovals, apply)
     call obsspace_get_db(self%obsdb, "FortranQC", trim(var), QCflags(jvar,:))
   end do
 
-  call obsspace_get_db(self%obsdb,  "MetaData", "latitude", lat(:))
-  call obsspace_get_db(self%obsdb,  "MetaData", "longitude", lon(:))
-  call obsspace_get_db(self%obsdb,  "MetaData", "elevation", elevation(:))
-  call obsspace_get_db(self%obsdb,  "MetaData", "sensor_zenith_angle", sat_zen(:))
-  call obsspace_get_db(self%obsdb,  "MetaData", "sensor_azimuth_angle", sat_azi(:))
-  call obsspace_get_db(self%obsdb,  "MetaData", "solar_zenith_angle", sol_zen(:))
-  call obsspace_get_db(self%obsdb,  "MetaData", "solar_azimuth_angle", sol_azi(:))
+  call obsspace_get_db(self%obsdb, "MetaData", "latitude", lat(:))
+  call obsspace_get_db(self%obsdb, "MetaData", "longitude", lon(:))
+  call obsspace_get_db(self%obsdb, "MetaData", "elevation", elevation(:))
+  call obsspace_get_db(self%obsdb, "MetaData", "sensor_zenith_angle", sat_zen(:))
+  call obsspace_get_db(self%obsdb, "MetaData", "sensor_azimuth_angle", sat_azi(:))
+  call obsspace_get_db(self%obsdb, "MetaData", "solar_zenith_angle", sol_zen(:))
+  call obsspace_get_db(self%obsdb, "MetaData", "solar_azimuth_angle", sol_azi(:))
 
   ! Setup full B matrix object
   call full_bmatrix % setup(self % model_variables, self % b_matrix_path, self % qtotal)
+  
+  ! Check if cloud retrievals needed
+  do ii = 1, size(self % model_variables)
+    if (trim(self % model_variables(ii)) == "cloud_top_pressure") then
+      write(*,*) "Simple cloud is part of the state vector"
+      cloud_retrieval = .true.
+    end if
+  end do
 
   ! Create profile index for mapping 1d-var profile to b-matrix
   call prof_index % setup(full_bmatrix)
@@ -236,6 +246,7 @@ subroutine ufo_rttovonedvarcheck_apply(self, vars, geovals, apply)
       ob_info % sensor_azimuth_angle = sat_azi(jobs)
       ob_info % solar_zenith_angle = sol_zen(jobs)
       ob_info % solar_azimuth_angle = sol_azi(jobs)
+      ob_info % retrievecloud = cloud_retrieval
 
       write(*,*) "ob_info % emiss = ",ob_info % emiss
       write(*,*) "ob_info % calc_emiss = ",ob_info % calc_emiss
@@ -260,6 +271,7 @@ subroutine ufo_rttovonedvarcheck_apply(self, vars, geovals, apply)
         call r_submatrix % info()
         write(*, *) "Observations used = ",ob_info % yobs(:)
       end if
+      write(*,*) "Channels used = ",channels_used
 
       !---------------------------------------------------
       ! Call minimization

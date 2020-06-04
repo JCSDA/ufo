@@ -33,9 +33,9 @@ private Ops_QsatWat
 
 contains
 
-subroutine ufo_rttovonedvarcheck_GeoVaLs2ProfVec( geovals,       & ! in
+subroutine ufo_rttovonedvarcheck_GeoVaLs2ProfVec( geovals,  & ! in
                                              profindex,     & ! in
-                                             nprofelements, & ! in
+                                             ob_info,       & ! in
                                              prof_x )         ! out
 
 !-------------------------------------------------------------------------------
@@ -51,7 +51,7 @@ implicit none
 ! subroutine arguments:
 type(ufo_geovals), intent(in)    :: geovals
 type(profindex_type), intent(in) :: profindex
-integer, intent(in)              :: nprofelements
+type(obinfo_type), intent(in)    :: ob_info
 real(kind_real), intent(out)     :: prof_x(:)
 
 ! Local arguments:
@@ -142,6 +142,16 @@ if (profindex % tstar > 0) then
   prof_x(profindex % tstar) = geoval%vals(1, 1)
 end if
 
+! cloud top pressure
+if (profindex % cloudtopp > 0) then
+  prof_x(profindex % cloudtopp) = ob_info % cloudtopp ! carried around as hPa
+end if
+
+! cloud fraction
+if (profindex % cloudfrac > 0) then
+  prof_x(profindex % cloudfrac) = ob_info % cloudfrac
+end if
+
 !-----------------------
 ! 4. Microwave Emissivity
 !-----------------------
@@ -159,9 +169,9 @@ end subroutine ufo_rttovonedvarcheck_GeoVaLs2ProfVec
 
 !-------------------------------------------------------------------------------
 
-subroutine ufo_rttovonedvarcheck_ProfVec2GeoVaLs(geovals,       & ! out
+subroutine ufo_rttovonedvarcheck_ProfVec2GeoVaLs(geovals,  & ! inout
                                             profindex,     & ! in
-                                            nprofelements, & ! in
+                                            ob_info,       & ! inout
                                             prof_x )         ! in
 
 !-------------------------------------------------------------------------------
@@ -178,7 +188,7 @@ implicit none
 ! subroutine arguments:
 type(ufo_geovals), intent(inout) :: geovals
 type(profindex_type), intent(in) :: profindex
-integer, intent(in)              :: nprofelements
+type(obinfo_type), intent(inout) :: ob_info
 real(kind_real), intent(in)      :: prof_x(:)
 
 ! Local arguments:
@@ -330,6 +340,16 @@ if (profindex % tstar > 0) then
     if (varname == trim(geovals%variables(i))) gv_index = i
   end do
   geovals%geovals(gv_index)%vals(1,1) = prof_x(profindex % tstar)
+end if
+
+! cloud top pressure - passed through via the ob_info
+if (profindex % cloudtopp > 0) then
+  ob_info % cloudtopp = prof_x(profindex % cloudtopp) ! stored in ob_info as hPa
+end if
+
+! cloud fraction - passed through via the ob_info
+if (profindex % cloudfrac > 0) then
+  ob_info % cloudfrac = prof_x(profindex % cloudfrac)
 end if
 
 write(*,*) trim(RoutineName)," end"
@@ -1718,19 +1738,6 @@ Constrain: if (.not. OutOfRange) then
 !  end if
 
 end if Constrain
-
-!--------
-! 3) Ozone
-!--------
-
-if (.not. OutOfRange) then
-  if (profindex % o3total > 0) then
-    if (profile(profindex % o3total) <= 0.0) OutOfRange = .true.
-  end if
-  if (profindex % o3profile(1) > 0) then
-    if (any (profile(profindex % o3profile(1):profindex % o3profile(2))<= 0.0)) OutOfRange = .true.
-  end if
-end if
 
 ! --------
 ! Tidy up

@@ -91,7 +91,7 @@ subroutine ufo_radiancerttov_tlad_delete(self)
 end subroutine ufo_radiancerttov_tlad_delete
 
 ! ------------------------------------------------------------------------------
-subroutine ufo_radiancerttov_tlad_settraj(self, geovals, obss, channels, obs_info, BT)
+subroutine ufo_radiancerttov_tlad_settraj(self, geovals, obss, channels, ob_info, BT)
 
 use ufo_radiancerttov_utils_mod , ONLY : config_rttov
 use ufo_rttovonedvarcheck_utils_mod, ONLY : ObInfo_type
@@ -102,7 +102,7 @@ class(ufo_radiancerttov_tlad), intent(inout) :: self
 type(ufo_geovals),             intent(in)    :: geovals
 type(c_ptr), value,            intent(in)    :: obss
 integer(c_int),                intent(in)    :: channels(:) ! List of channels to use
-type(ObInfo_type), optional,   intent(in)    :: obs_info    ! Used for rttovonedvarcheck
+type(ObInfo_type), optional,   intent(in)    :: ob_info    ! Used for rttovonedvarcheck
 real(kind_real), optional,     intent(out)   :: BT(:)       ! Used for rttovonedvarcheck
 
 ! Local Variables
@@ -287,11 +287,11 @@ Sensor_Loop:do i_inst = 1, self % conf % nSensors
 
     !Assign the data from the GeoVaLs
     !--------------------------------
-    if (present(obs_info)) then
-      call load_atm_data_rttov(geovals,obss,profiles,prof_start,obs_info=obs_info)
-      call load_geom_data_rttov(obss,profiles,prof_start,obs_info=obs_info)
-      emissivity(:) % emis_in = obs_info % emiss(:)
-      calcemis(:) = obs_info % calc_emiss(:)
+    if (present(ob_info)) then
+      call load_atm_data_rttov(geovals,obss,profiles,prof_start,ob_info=ob_info)
+      call load_geom_data_rttov(obss,profiles,prof_start,ob_info=ob_info)
+      emissivity(:) % emis_in = ob_info % emiss(:)
+      calcemis(:) = ob_info % calc_emiss(:)
     else
       call load_atm_data_rttov(geovals,obss,profiles,prof_start)
       call load_geom_data_rttov(obss,profiles,prof_start)

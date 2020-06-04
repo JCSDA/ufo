@@ -648,7 +648,7 @@ integer                   :: nmvars
 call fckit_log % info("rttovonedvarcheck_create_fields_in: starting")
 
 ! Which fields are being used from b matrix file - temporary until rttov can handle all fields
-allocate(fields_in(8))
+allocate(fields_in(19))
 fields_in(:) = 0
 
 nmvars = size(variables)
@@ -663,9 +663,9 @@ do jvar = 1, nmvars
 
     case ("specific_humidity")
       if (qtotal_flag) then
-        fields_in(2) = 10 ! total water profile in bmatrix - specific humidity in geovals!?!
+        fields_in(10) = 10 ! total water profile
       else
-        fields_in(2) = 2 ! water profile in bmatrix - specific humidity in geovals!?!
+        fields_in(2) = 2 ! water profile
       end if
 
     case("air_temperature_at_two_meters_above_surface")
@@ -680,11 +680,34 @@ do jvar = 1, nmvars
     case("surface_air_pressure")
       fields_in(6) = 6 ! surface air pressure
 
-    case ("mass_content_of_cloud_ice_in_atmosphere_layer")
-      if (.NOT. qtotal_flag) fields_in(7) = 15 ! solid water profile
+    ! 7 - o3total is not implmented yet
+    ! 8 - not used is not implmented yet
 
     case ("mass_content_of_cloud_liquid_water_in_atmosphere_layer")
-      if (.NOT. qtotal_flag) fields_in(8) = 9  ! liquid water profile
+      if (.NOT. qtotal_flag) fields_in(9) = 9  ! liquid water profile
+
+    case ("surface_wind_speed") ! surface wind speed
+      fields_in(11) = 11
+
+    ! 12 - o3profile is not implmented yet
+    ! 13 - lwp (liquid water path) is not implmented yet
+
+    case ("surface_emissivity") ! microwave emissivity
+      fields_in(14) = 14
+
+    case ("mass_content_of_cloud_ice_in_atmosphere_layer")
+      if (.NOT. qtotal_flag) fields_in(15) = 15 ! ice profile
+
+    case ("cloud_top")
+      fields_in(16) = 16
+
+    case ("effective_cloud_fraction") ! effective cloud fraction
+      fields_in(17) = 17
+
+    case ("emissivity_pc") ! emissivity prinipal components
+      fields_in(18) = 18
+
+    ! 19 cloud fraction profile - not currently used
 
     case default
       call abor1_ftn("Variable not implemented yet in rttovonedvarcheck Covariance")

@@ -99,7 +99,7 @@ end subroutine rttov_conf_delete
 
 ! -----------------------------------------------------------------------------
 
-subroutine load_atm_data_rttov(geovals,obss,profiles,prof_start1,obs_info)
+subroutine load_atm_data_rttov(geovals,obss,profiles,prof_start1,ob_info)
 
 use fckit_log_module, only : fckit_log
 use obsspace_mod, only : obsspace_get_db, obsspace_get_nlocs, obsspace_has
@@ -111,7 +111,7 @@ type(ufo_geovals), intent(in) :: geovals
 type(c_ptr), VALUE, intent(in) :: obss
 type(rttov_profile), intent(inout) :: profiles(:)
 integer, OPTIONAL, intent(IN) :: prof_start1
-type(ObInfo_type), optional, intent(in) :: obs_info  ! Used for rttovonedvarcheck
+type(ObInfo_type), optional, intent(in) :: ob_info  ! Used for rttovonedvarcheck
 
 ! Local variables
 integer :: k1, nlocs_total, iprof
@@ -132,7 +132,7 @@ real, parameter :: q_mixratio_to_ppmv  = 1.60771704e+3 ! g/kg -> ppmv
 character(255) :: message
 logical :: variable_present
 
-if(PRESENT(obs_info)) then
+if(PRESENT(ob_info)) then
   nlocs_total = 1
 else
   nlocs_total = obsspace_get_nlocs(obss)
@@ -305,10 +305,16 @@ end do
 !DAR: Could/should get emissivity here?
 ! call rttov_get_emissivity()
 
-if(PRESENT(obs_info)) then
-  profiles(1) % elevation = obs_info % elevation / 1000.0 ! m -> km
-  profiles(1) % latitude = obs_info % latitude
-  profiles(1) % longitude = obs_info % longitude
+if(PRESENT(ob_info)) then
+  profiles(1) % elevation = ob_info % elevation / 1000.0 ! m -> km
+  profiles(1) % latitude = ob_info % latitude
+  profiles(1) % longitude = ob_info % longitude
+  if (ob_info % retrievecloud) then
+    profiles(1) % ctp = ob_info % cloudtopp
+    profiles(1) % cfraction = ob_info % cloudfrac
+    write(*,*) "rttov input cloud top pressure and fraction = "
+    write(*,*) profiles(1) % ctp, profiles(1) % cfraction
+  end if
 else
 
   allocate(TmpVar(nprofiles))
@@ -350,7 +356,7 @@ end subroutine load_atm_data_rttov
 ! ------------------------------------------------------------------------------
 
 ! Internal subprogam to load some test geometry data
-subroutine load_geom_data_rttov(obss,profiles,prof_start1,obs_info)
+subroutine load_geom_data_rttov(obss,profiles,prof_start1,ob_info)
 
 ! Satellite viewing geometry
 ! DAR: check it's all within limits
@@ -362,7 +368,7 @@ implicit none
 type(c_ptr), VALUE,       intent(in)    :: obss
 type(rttov_profile), intent(inout) :: profiles(:)
 integer, OPTIONAL, intent(IN) :: prof_start1
-type(ObInfo_type), optional, intent(in) :: obs_info  ! Used in rttovonedvarcheck
+type(ObInfo_type), optional, intent(in) :: ob_info  ! Used in rttovonedvarcheck
 
 real(kind_real), allocatable :: TmpVar(:)
 
@@ -376,15 +382,15 @@ else
   prof_start = 1
 end if
 
-if(PRESENT(obs_info)) then
+if(PRESENT(ob_info)) then
   nlocs_total = 1
   nprofiles = 1
   nlevels = SIZE(profiles(1)%p)
   
-  profiles(1)%zenangle    = obs_info%sensor_zenith_angle
-  profiles(1)%azangle     = obs_info%sensor_azimuth_angle
-  profiles(1)%sunzenangle = obs_info%solar_zenith_angle
-  profiles(1)%sunazangle  = obs_info%solar_azimuth_angle
+  profiles(1)%zenangle    = ob_info%sensor_zenith_angle
+  profiles(1)%azangle     = ob_info%sensor_azimuth_angle
+  profiles(1)%sunzenangle = ob_info%solar_zenith_angle
+  profiles(1)%sunazangle  = ob_info%solar_azimuth_angle
   
 else
 
