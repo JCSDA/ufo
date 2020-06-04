@@ -9,6 +9,7 @@
 #define TEST_UFO_OBSFILTERS_H_
 
 #include <algorithm>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -253,10 +254,11 @@ void testFilters() {
     oops::Variables diagvars = filters.requiredHdiagnostics();
     if (typeconfs[jj].has("HofX")) {
 ///   read GeoVaLs from file if required
+      std::unique_ptr<const GeoVaLs_> gval;
       if (geovars.size() > 0) {
         const eckit::LocalConfiguration gconf(typeconfs[jj], "GeoVaLs");
-        const GeoVaLs_ gval(gconf, Test_::obspace()[jj], geovars);
-        filters.priorFilter(gval);
+        gval.reset(new GeoVaLs_(gconf, Test_::obspace()[jj], geovars));
+        filters.priorFilter(*gval);
       } else {
         oops::Log::info() << "Filters don't require geovals, priorFilter not called" << std::endl;
       }
