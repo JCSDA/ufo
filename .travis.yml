@@ -1,6 +1,10 @@
 #======================================================================
 # Project settings
 #======================================================================
+env:
+  global:
+    secure: CUp08dHssPh8u2769hB+YbH7tkZ3ScFZ1N3lPkaFVhUWSv/76UTgUHJEsKgEXiyxbGbP6QEWPug9nVBD/hdf+8ApodoJSL/Ji34/8N0xMs4eRFYBKZ5S6PONJiRLIRKBBIYk6P7zHUGlFN9TpSIUQyBK9kM6/VGSVofBPuxDmRQKIMcsvKVkCsJQn6/fNzIe7bpM8FPaBIKLsCTQWyNx1qOsH489VVl9JfP/ujoM/qNzTDK0dGEPaGr+uTCkikPNvKVCQR26i5Wt/+Lp8Ho5uu2ymdjJh5amjovhVBKYAnYVCrlR5BsB3ZQeSlDJ6/VcuEPpwwiLMDLLl2FEBhnrcei9IVebKCMQ289O4Nz3RRQaN9NZudtI2lHMAP3NBR97EzOITNxJcCDXAksWAlmYsYckaogn7qqQc78Zb17fgKNU40FNnRHMTotDmShfee4VYcqsGXuapaDhABDJsXa/bhmknCavojSS9Zm4YykSJtUpBHR1mNuv9ksZQgY0pN161f/sOv8V0EgcyAgAhuJd+E5fAke+K0Pt+kfeDc2AxsuMRkOcFzFREExB0Eer4Qn4K9hwaRB/g5o4A7tazWGxS3slMt94runWdc93DiUn3SrMpAeZZ5G3F/29kmYrnW7sRvy3mIn397x8uHzkbzhA4qUyjmy+aIeC7fzbY4VGI/Q=
+ 
 branches:
   only:
     - develop
@@ -10,10 +14,10 @@ language: cpp
 services:
   - docker
 
-git:
-  clone: false
-
 before_install:
+  - echo -e "machine github.com\n  login $GITHUB_TOKEN" > ~/.netrc
+  - git lfs pull
+
   - date
   - REPO_SOURCE_DIR=${TRAVIS_BUILD_DIR}/jcsda/src_repo
 #  create the same file structure on Travis VM and Docker container
@@ -28,25 +32,26 @@ before_install:
 # Clone all repos
 #======================================================================
   - pwd
+
 #  checkout for the same branch name in ufo-bundle
-  - git clone https://github.com/jcsda/ufo-bundle.git ${REPO_SOURCE_DIR}/ufo-bundle
+  - git clone https://${GH_TOKEN}@github.com/jcsda/ufo-bundle.git ${REPO_SOURCE_DIR}/ufo-bundle
   - cd ${REPO_SOURCE_DIR}/ufo-bundle
   - git checkout $BRANCH || echo "No branch named $BRANCH in oops repo"
   - cd $REPO_SOURCE_DIR  
 
 #  clone the testing branch of ufo
-  - git clone -b $BRANCH https://github.com/jcsda/ufo.git ${REPO_SOURCE_DIR}/ufo-bundle/ufo 
+  - git clone -b $BRANCH https://${GH_TOKEN}@github.com/jcsda/ufo.git ${REPO_SOURCE_DIR}/ufo-bundle/ufo 
 
 #  checkout for the same branch name in crtm
   - date
-  - git clone https://github.com/jcsda/crtm.git ${REPO_SOURCE_DIR}/ufo-bundle/crtm
+  - git clone https://${GH_TOKEN}@github.com/jcsda/crtm.git ${REPO_SOURCE_DIR}/ufo-bundle/crtm
   - cd ${REPO_SOURCE_DIR}/ufo-bundle/crtm
   - git checkout $BRANCH || echo "No branch named $BRANCH in crtm repo"
   - cd $REPO_SOURCE_DIR
   - date  
 
 #  checkout for the same branch name in ioda
-  - git clone https://github.com/jcsda/ioda.git ${REPO_SOURCE_DIR}/ufo-bundle/ioda
+  - git clone https://${GH_TOKEN}@github.com/jcsda/ioda.git ${REPO_SOURCE_DIR}/ufo-bundle/ioda
   - cd ${REPO_SOURCE_DIR}/ufo-bundle/ioda
   - git checkout $BRANCH || echo "No branch named $BRANCH in ioda repo"
   - cd $REPO_SOURCE_DIR  
@@ -55,46 +60,49 @@ before_install:
   - git lfs install --skip-smudge
 
 #  checkout for the same branch name in oops
-  - git clone https://github.com/jcsda/oops.git ${REPO_SOURCE_DIR}/ufo-bundle/oops
+  - git clone https://${GH_TOKEN}@github.com/jcsda/oops.git ${REPO_SOURCE_DIR}/ufo-bundle/oops
   - cd ${REPO_SOURCE_DIR}/ufo-bundle/oops
   - git checkout $BRANCH || echo "No branch named $BRANCH in oops repo"
   - cd $REPO_SOURCE_DIR  
 
 #  checkout for the same branch name in atlas
-  - git clone https://github.com/jcsda/atlas.git ${REPO_SOURCE_DIR}/ufo-bundle/atlas
+  - git clone https://${GH_TOKEN}@github.com/jcsda/atlas.git ${REPO_SOURCE_DIR}/ufo-bundle/atlas
   - cd ${REPO_SOURCE_DIR}/ufo-bundle/atlas
-  - git checkout $BRANCH || echo "No branch named $BRANCH in atlas repo"
-  - cd $REPO_SOURCE_DIR  
-
+  - git checkout $BRANCH || echo "No branch named $BRANCH in atlas repo"; git checkout release-stable
+  - cd $REPO_SOURCE_DIR
 
 #  checkout for the same branch name in saber
-  - git clone https://github.com/jcsda/saber.git ${REPO_SOURCE_DIR}/ufo-bundle/saber
+  - git clone https://${GH_TOKEN}@github.com/jcsda/saber.git ${REPO_SOURCE_DIR}/ufo-bundle/saber
   - cd ${REPO_SOURCE_DIR}/ufo-bundle/saber
   - git checkout $BRANCH || echo "No branch named $BRANCH in saber repo"
   - cd $REPO_SOURCE_DIR  
 
 #  checkout for the same branch name in ropp
-  - git clone https://github.com/jcsda/ropp-test.git ${REPO_SOURCE_DIR}/ufo-bundle/ropp-ufo
+  - git clone https://${GH_TOKEN}@github.com/jcsda/ropp-test.git ${REPO_SOURCE_DIR}/ufo-bundle/ropp-ufo
   - cd ${REPO_SOURCE_DIR}/ufo-bundle/ropp-ufo
   - git checkout $BRANCH || echo "No branch named $BRANCH in ioda repo"
   - cd $REPO_SOURCE_DIR  
 
-  - git clone https://github.com/jcsda/GSW-Fortran.git ${REPO_SOURCE_DIR}/ufo-bundle/gsw
-  - git clone https://github.com/jcsda/fckit.git ${REPO_SOURCE_DIR}/ufo-bundle/fckit
+  - git clone https://${GH_TOKEN}@github.com/jcsda/GSW-Fortran.git ${REPO_SOURCE_DIR}/ufo-bundle/gsw
+
+#  checkout for the same branch name in fckit
+  - git clone https://${GH_TOKEN}@github.com/jcsda/fckit.git ${REPO_SOURCE_DIR}/ufo-bundle/fckit
+  - cd ${REPO_SOURCE_DIR}/ufo-bundle/fckit
+  - git checkout $BRANCH || echo "No branch named $BRANCH in atlas repo"; git checkout release-stable
+  - cd $REPO_SOURCE_DIR
 
 #  checkout for the same branch name in geos-aero
-  - git clone https://github.com/jcsda/geos-aero.git ${REPO_SOURCE_DIR}/ufo-bundle/geos-aero
+  - git clone https://${GH_TOKEN}@github.com/jcsda/geos-aero.git ${REPO_SOURCE_DIR}/ufo-bundle/geos-aero
   - cd ${REPO_SOURCE_DIR}/ufo-bundle/geos-aero
   - git checkout $BRANCH || echo "No branch named $BRANCH in geos-aero repo"
   - cd $REPO_SOURCE_DIR  
-
-
 
 # do no switch to develop branch by removing 
 # develop UPDATE in CMakeLists.txt in ufo-bundle
 
   - cd ufo-bundle
   - sed -i 's/BRANCH develop  UPDATE//' CMakeLists.txt
+  - sed -i 's/BRANCH release-stable UPDATE//' CMakeLists.txt
   - sed -i -e '/ecbuild_bundle( PROJECT ufo/i\
     ecbuild_bundle( PROJECT ropp-ufo  GIT "https://github.com/JCSDA/ropp-test.git" )' CMakeLists.txt
   - sed -i -e '/ecbuild_bundle( PROJECT ufo/i\
@@ -111,6 +119,7 @@ before_install:
 #======================================================================
   - cd ${REPO_SOURCE_DIR}/ufo-bundle/ufo
   - date
+  - cd CI
   - docker build -t jcsda/docker --build-arg=Dockerfile .  #Dockerfile handles ssh for mpi
   - date
   - docker images
@@ -132,11 +141,11 @@ script:
   - date
   - docker exec jcsda_container bash -c 'cd /build_container/ufo && ctest'
   - date
+# disabled to fix lcov issue 
 ##  run lcov inside container
-  - docker exec jcsda_container bash -c 'cd /build_container/ufo && lcov --capture --directory . --output-file coverage.info'
-  - docker exec jcsda_container bash -c 'cd /build_container/ufo && lcov --remove coverage.info "/usr/*" --output-file coverage.info'  #  filter system-files 
-  - docker exec jcsda_container bash -c 'cd /build_container/ufo && lcov --list coverage.info'  #  debug info
-  - docker exec jcsda_container bash -c 'cp /jcsda/src_repo/ufo/codecov.yml /build_container/ufo/'  #  debug info
-
-  - docker exec jcsda_container bash -c 'cd /build_container/ufo && bash <(curl -s https://codecov.io/bash) -t e23dfd1d-85be-4e0f-aaf3-81911fec7178  -X gcov -f coverage.info -R /jcsda/src_repo/ufo/'
+#  - docker exec jcsda_container bash -c 'cd /build_container/ufo && lcov --capture --directory . --output-file coverage.info'
+#  - docker exec jcsda_container bash -c 'cd /build_container/ufo && lcov --remove coverage.info "/usr/*" --output-file coverage.info'  #  filter system-files 
+#  - docker exec jcsda_container bash -c 'cd /build_container/ufo && lcov --list coverage.info'  #  debug info
+#  - docker exec jcsda_container bash -c 'cp /jcsda/src_repo/ufo/codecov.yml /build_container/ufo/'  #  debug info
+#  - docker exec jcsda_container bash -c 'cd /build_container/ufo && bash <(curl -s https://codecov.io/bash) -t e23dfd1d-85be-4e0f-aaf3-81911fec7178  -X gcov -f coverage.info -R /jcsda/src_repo/ufo/'
 
