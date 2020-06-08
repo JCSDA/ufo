@@ -55,8 +55,8 @@ subroutine ufo_rttovonedvarcheck_delete(self)
   implicit none
   type(ufo_rttovonedvarcheck), intent(inout) :: self
 
-  if (allocated(self % model_variables)) deallocate(self % model_variables)
-  if (allocated(self % channels))        deallocate(self % channels)
+  if (allocated(self % retrieval_variables)) deallocate(self % retrieval_variables)
+  if (allocated(self % channels))            deallocate(self % channels)
 
 end subroutine ufo_rttovonedvarcheck_delete
 
@@ -119,6 +119,7 @@ subroutine ufo_rttovonedvarcheck_apply(self, vars, geovals, apply)
   real(kind_real), allocatable       :: sat_azi(:)      ! observation satellite azimuth angle
   real(kind_real), allocatable       :: sol_zen(:)      ! observation solar zenith angle
   real(kind_real), allocatable       :: sol_azi(:)      ! observation solar azimuth angle
+  real(kind_real), allocatable       :: emissivity(:,:) ! initial surface emissivity
   logical                            :: file_exists     ! check if a file exists logical
   logical                            :: onedvar_success
   logical                            :: cloud_retrieval = .false.
@@ -154,12 +155,23 @@ subroutine ufo_rttovonedvarcheck_apply(self, vars, geovals, apply)
   sol_azi(:) = 0.0
   flags(:,:) = 0
 
+  ! Setup optional arrays
+  if (self % ReadMWemiss .or. self % ReadIRemiss) then
+    allocate(emissivity(self%nchans,iloc))
+    emissivity(:,:) = 0.0
+  end if
+
   ! read in observations and associated errors for full ObsSpace
   do jvar = 1, self%nchans
     var = vars%variable(jvar)
     call obsspace_get_db(self%obsdb, "ObsValue",  trim(var), yobs(jvar,:))
     call obsspace_get_db(self%obsdb, "ObsError",  trim(var), yerr(jvar,:))
     call obsspace_get_db(self%obsdb, "FortranQC", trim(var), QCflags(jvar,:))
+    if (self % ReadMWemiss) then
+      call obsspace_get_db(self%obsdb, "MwEmiss",   trim(var), emissivity(jvar,:))
+    else if (self % ReadIRemiss) then
+      call obsspace_get_db(self%obsdb, "IREmiss",   trim(var), emissivity(jvar,:))
+    end if
   end do
 
   call obsspace_get_db(self%obsdb, "MetaData", "latitude", lat(:))
@@ -171,11 +183,11 @@ subroutine ufo_rttovonedvarcheck_apply(self, vars, geovals, apply)
   call obsspace_get_db(self%obsdb, "MetaData", "solar_azimuth_angle", sol_azi(:))
 
   ! Setup full B matrix object
-  call full_bmatrix % setup(self % model_variables, self % b_matrix_path, self % qtotal)
+  call full_bmatrix % setup(self % retrieval_variables, self % b_matrix_path, self % qtotal)
   
   ! Check if cloud retrievals needed
-  do ii = 1, size(self % model_variables)
-    if (trim(self % model_variables(ii)) == "cloud_top_pressure") then
+  do ii = 1, size(self % retrieval_variables)
+    if (trim(self % retrieval_variables(ii)) == "cloud_top_pressure") then
       write(*,*) "Simple cloud is part of the state vector"
       cloud_retrieval = .true.
     end if
@@ -248,14 +260,12 @@ subroutine ufo_rttovonedvarcheck_apply(self, vars, geovals, apply)
       ob_info % solar_azimuth_angle = sol_azi(jobs)
       ob_info % retrievecloud = cloud_retrieval
 
-      write(*,*) "ob_info % emiss = ",ob_info % emiss
-      write(*,*) "ob_info % calc_emiss = ",ob_info % calc_emiss
-
       ! allocate arrays
       allocate(channels_used(chans_used))
       allocate(obs_error(chans_used))
 
       ! create obs vector and r matrix
+      ! if emissivity read in use that
       jchans_used = 0
       do jvar = 1, self%nchans
         if( QCflags(jvar,jobs) == 0 ) then
@@ -264,8 +274,21 @@ subroutine ufo_rttovonedvarcheck_apply(self, vars, geovals, apply)
           write(*,*) "jchans_used, ob number = ",trim(vars%variable(jvar)),jobs
           ob_info % yobs(jchans_used) = yobs(jvar, jobs)
           channels_used(jchans_used) = self%channels(jvar)
+          if (self % ReadMWemiss .OR. self % ReadIRemiss) then
+            write(*,*) "Copying emissivity from db"
+            ob_info % emiss(jchans_used) = emissivity(jvar, jobs)
+            where(ob_info % emiss == 0.0_kind_real) 
+              ob_info % calc_emiss = .true.
+            else where
+              ob_info % calc_emiss = .false.
+            end where
+          end if
         end if
       end do
+
+      write(*,*) "ob_info % emiss = ",ob_info % emiss
+      write(*,*) "ob_info % calc_emiss = ",ob_info % calc_emiss
+
       call r_submatrix % setup(self % rtype, chans_used, obs_error)
       if (self % FullDiagnostics) then
         call r_submatrix % info()
@@ -299,10 +322,10 @@ subroutine ufo_rttovonedvarcheck_apply(self, vars, geovals, apply)
 
       ! Tidy up memory specific to a single observation
       call ufo_rttovonedvarcheck_DeleteObInfo(ob_info)
-      if (allocated(channels_used)) deallocate(channels_used)
-      if (allocated(obs_error))     deallocate(obs_error)
       call r_submatrix % delete()
       call ufo_geovals_delete(local_geovals)
+      if (allocated(channels_used)) deallocate(channels_used)
+      if (allocated(obs_error))     deallocate(obs_error)
 
     else
       call fckit_log % info("Final 1Dvar cost, apply = F")
@@ -323,19 +346,20 @@ subroutine ufo_rttovonedvarcheck_apply(self, vars, geovals, apply)
 
   ! Tidy up memory used for all observations
   call full_bmatrix % delete()
-  if (allocated(yobs))      deallocate(yobs)
-  if (allocated(yerr))      deallocate(yerr)
-  if (allocated(lat))       deallocate(lat)
-  if (allocated(lon))       deallocate(lon)
-  if (allocated(elevation)) deallocate(elevation)
-  if (allocated(sat_zen))   deallocate(sat_zen)
-  if (allocated(sat_azi))   deallocate(sat_azi)
-  if (allocated(sol_zen))   deallocate(sol_zen)
-  if (allocated(sol_azi))   deallocate(sol_azi)
-  if (allocated(flags))     deallocate(flags)
-  if (allocated(b_matrix))  deallocate(b_matrix)
-  if (allocated(b_inverse)) deallocate(b_inverse)
-  if (allocated(b_sigma))   deallocate(b_sigma)
+  if (allocated(yobs))       deallocate(yobs)
+  if (allocated(yerr))       deallocate(yerr)
+  if (allocated(lat))        deallocate(lat)
+  if (allocated(lon))        deallocate(lon)
+  if (allocated(elevation))  deallocate(elevation)
+  if (allocated(sat_zen))    deallocate(sat_zen)
+  if (allocated(sat_azi))    deallocate(sat_azi)
+  if (allocated(sol_zen))    deallocate(sol_zen)
+  if (allocated(sol_azi))    deallocate(sol_azi)
+  if (allocated(flags))      deallocate(flags)
+  if (allocated(b_matrix))   deallocate(b_matrix)
+  if (allocated(b_inverse))  deallocate(b_inverse)
+  if (allocated(b_sigma))    deallocate(b_sigma)
+  if (allocated(emissivity)) deallocate(emissivity)
 
 end subroutine ufo_rttovonedvarcheck_apply
 

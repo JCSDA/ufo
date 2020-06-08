@@ -53,10 +53,10 @@ self % forward_mod_name = str
 call self % conf % get_or_die("nlevels",self % nlevels)
 
 ! Variables for profile (x,xb)
-self % nmvars = self % conf % get_size("model_variables")
-allocate(self % model_variables(self % nmvars))
-call self % conf % get_or_die("model_variables", csize, char_array)
-self % model_variables(1:self % nmvars) = char_array
+self % nmvars = self % conf % get_size("retrieval_variables")
+allocate(self % retrieval_variables(self % nmvars))
+call self % conf % get_or_die("retrieval_variables", csize, char_array)
+self % retrieval_variables(1:self % nmvars) = char_array
 
 ! Satellite channels
 self % nchans = size(channels)
@@ -81,8 +81,8 @@ self % Cost_ConvergenceFactor = 0.01
 self % MaxMLIterations = 7
 self % EmissLandDefault = 0.95    ! default land surface emissivity
 self % EmissSeaIceDefault = 0.92  ! default seaice surface emissivity
-self % MwEmiss = .false.
-self % IREmiss = .false.
+self % ReadMWemiss = .false.
+self % ReadIRemiss = .false.
 
 ! R matrix type to use
 if (self % conf % has("rtype")) then
@@ -155,14 +155,14 @@ if (self % conf % has("EmissSeaIceDefault")) then
   call self % conf % get_or_die("EmissSeaIceDefault", self % EmissSeaIceDefault)
 end if
 
-! Flag to specify if microwave emissivity is used
-if (self % conf % has("MwEmiss")) then
-  call self % conf % get_or_die("MwEmiss", self % MwEmiss)
+! Flag to specify if read microwave emissivity from db
+if (self % conf % has("ReadMWemiss")) then
+  call self % conf % get_or_die("ReadMWemiss", self % ReadMWemiss)
 end if
 
-! Flag to specify if infrared emissivity is used
-if (self % conf % has("IREmiss")) then
-  call self % conf % get_or_die("IREmiss", self % IREmiss)
+! Flag to specify if read infrared emissivity from db
+if (self % conf % has("ReadIRemiss")) then
+  call self % conf % get_or_die("ReadIRemiss", self % ReadIRemiss)
 end if
 
 ! Print self
@@ -171,9 +171,9 @@ if (self % FullDiagnostics) then
   write(*,*) "rtype = ",trim(self % rtype)
   write(*,*) "b_matrix_path = ",trim(self % b_matrix_path)
   write(*,*) "forward_mod_name = ",trim(self % forward_mod_name)
-  write(*,*) "model_variables = "
+  write(*,*) "retrieval_variables = "
   do ii = 1, self % nmvars
-    write(*,*) trim(self % model_variables(ii))," "
+    write(*,*) trim(self % retrieval_variables(ii))," "
   end do
   write(*,*) "nlevels = ",self %  nlevels
   write(*,*) "nmvars = ",self % nmvars
@@ -193,8 +193,8 @@ if (self % FullDiagnostics) then
   write(*,*) "MaxMLIterations = ",self % MaxMLIterations
   write(*,*) "EmissLandDefault = ",self % EmissLandDefault
   write(*,*) "EmissSeaIceDefault = ",self % EmissSeaIceDefault
-  write(*,*) "MwEmiss = ",self % MwEmiss
-  write(*,*) "IREmiss = ",self % IREmiss
+  write(*,*) "ReadMWemiss = ",self % ReadMWemiss
+  write(*,*) "ReadIRemiss = ",self % ReadIRemiss
 end if
 
 end subroutine
@@ -349,6 +349,8 @@ end subroutine ufo_rttovonedvarcheck_InitObInfo
 
 subroutine ufo_rttovonedvarcheck_InitEmiss(self, geovals, ob_info)
 
+! Routine to setup emiss and calcemiss
+
 implicit none
 
 ! subroutine arguments:
@@ -368,25 +370,21 @@ ob_info % surface_type = geoval%vals(1, 1)
 ! 2.1 Defaults
 !-------------
 
-if (self % MwEmiss) then
+! Only calculate in RTTOV over sea
+if (ob_info % surface_type == RTSea) then
+  ob_info % calc_emiss(:) = .true.
+else
+  ob_info % calc_emiss(:) = .false.
+end if
 
-  ! Only calculate in RTTOV over sea
-  if (ob_info % surface_type == RTSea) then
-    ob_info % calc_emiss(:) = .true.
-  else
-    ob_info % calc_emiss(:) = .false.
-  end if
-
-  ! The default emissivity for land is a very crude estimate - the same
-  ! for all surface types and all frequencies. However, we do not use
-  ! channels which see the surface over land where we rely on this default.
-  ob_info % emiss(:) = 0.0
-  if (ob_info % surface_type == RTLand) then
-    ob_info % emiss(:) = self % EmissLandDefault
-  else if (ob_info % surface_type == RTIce) then
-    ob_info % emiss(:) = self % EmissSeaIceDefault
-  end if
-
+! The default emissivity for land is a very crude estimate - the same
+! for all surface types and all frequencies. However, we do not use
+! channels which see the surface over land where we rely on this default.
+ob_info % emiss(:) = 0.0
+if (ob_info % surface_type == RTLand) then
+  ob_info % emiss(:) = self % EmissLandDefault
+else if (ob_info % surface_type == RTIce) then
+  ob_info % emiss(:) = self % EmissSeaIceDefault
 end if
 
 end subroutine ufo_rttovonedvarcheck_InitEmiss

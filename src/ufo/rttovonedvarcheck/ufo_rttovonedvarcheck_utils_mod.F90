@@ -31,7 +31,7 @@ type, public :: ufo_rttovonedvarcheck
   character(len=max_string)        :: rtype
   character(len=max_string)        :: b_matrix_path
   character(len=max_string)        :: forward_mod_name
-  character(len=max_string), allocatable :: model_variables(:)
+  character(len=max_string), allocatable :: retrieval_variables(:)
   type(c_ptr)                      :: obsdb
   type(fckit_configuration)        :: conf
   integer(c_int)                   :: onedvarflag
@@ -53,8 +53,8 @@ type, public :: ufo_rttovonedvarcheck
   real(kind_real)                  :: MaxMLIterations
   real(kind_real)                  :: EmissLandDefault
   real(kind_real)                  :: EmissSeaIceDefault
-  logical                          :: MwEmiss
-  logical                          :: IREmiss
+  logical                          :: ReadMWemiss
+  logical                          :: ReadIRemiss
 end type ufo_rttovonedvarcheck
 
 !---------------------------------------------------------

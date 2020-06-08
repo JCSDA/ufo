@@ -171,7 +171,7 @@ Observations:
         CoefficientPath: *rttov_coeff
       variables: [brightness_temperature]
       channels: *ops_channels
-      model_variables:
+      retrieval_variables:
       - air_temperature
       - specific_humidity
       - air_temperature_at_two_meters_above_surface
@@ -190,7 +190,8 @@ Observations:
       ConvergenceFactor: 0.40
       Cost_ConvergenceFactor: 0.01
       Max1DVarIterations: 7
-      MwEmiss: true
+      ReadMWemiss: true
+      ReadIRemiss: false
       EmissLandDefault: 0.95
       EmissSeaIceDefault: 0.92
     passedBenchmark: 973      # number of passed obs
