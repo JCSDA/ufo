@@ -55,7 +55,7 @@ class LinearObsOperatorBase : public util::Printable,
 class LinearObsOperatorFactory {
  public:
   static LinearObsOperatorBase * create(const ioda::ObsSpace &, const eckit::Configuration &);
-  virtual ~LinearObsOperatorFactory() { getMakers().clear(); }
+  virtual ~LinearObsOperatorFactory() = default;
  protected:
   explicit LinearObsOperatorFactory(const std::string &);
  private:

@@ -59,7 +59,7 @@ class ObsOperatorBase : public util::Printable,
 class ObsOperatorFactory {
  public:
   static ObsOperatorBase * create(const ioda::ObsSpace &, const eckit::Configuration &);
-  virtual ~ObsOperatorFactory() { getMakers().clear(); }
+  virtual ~ObsOperatorFactory() = default;
  protected:
   explicit ObsOperatorFactory(const std::string &);
  private:

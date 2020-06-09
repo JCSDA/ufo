@@ -88,7 +88,7 @@ class LinearObsBiasFactory {
                                     const eckit::Configuration &,
                                     const std::vector<std::string> &,
                                     const std::vector<int> &);
-  virtual ~LinearObsBiasFactory() { getMakers().clear(); }
+  virtual ~LinearObsBiasFactory() = default;
 
  protected:
   explicit LinearObsBiasFactory(const std::string &);
