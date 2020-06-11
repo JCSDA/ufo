@@ -1,34 +1,37 @@
-! (C) British Crown Copyright 2017-2018 Met Office
+! (C) British Crown Copyright 2020 Met Office
 ! 
 ! This software is licensed under the terms of the Apache Licence Version 2.0
 ! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 
+!> Fortran module containing the full b-matrix data type and methods for the 1D-Var.
+
 module ufo_rttovonedvarcheck_bmatrix_mod
 
-use kinds
-use iso_c_binding
 use fckit_configuration_module, only: fckit_configuration
 use fckit_log_module, only : fckit_log
+use kinds
+use iso_c_binding
+use ufo_rttovonedvarcheck_constants_mod
 use ufo_rttovonedvarcheck_utils_mod
 
 implicit none
 private
 
 type, public :: bmatrix_type
-  logical :: status                                 ! status indicator
-  logical :: debug                                  ! flag for printing verbose output
-  integer :: nbands                                 ! number of latitude bands
-  integer :: nsurf                                  ! number of surface type variations
-  integer :: nfields                                ! number of fields
-  integer, pointer      :: fields(:,:)              ! fieldtypes and no. elements in each
-  real(kind=kind_real), pointer :: store(:,:,:)     ! original b-matrices read from the file
-  real(kind=kind_real), pointer :: inverse(:,:,:)   ! inverse of above
-  real(kind=kind_real), pointer :: sigma(:,:)       ! diagonal elements
-  real(kind=kind_real), pointer :: proxy(:,:)       ! copy of original for manipulation
-  real(kind=kind_real), pointer :: inv_proxy(:,:)   ! copy of inverse
-  real(kind=kind_real), pointer :: sigma_proxy(:,:) ! copy of diagonal
-  real(kind=kind_real), pointer :: south(:)         ! s limit of each latitude band
-  real(kind=kind_real), pointer :: north(:)         ! n limit of each latitude band
+  logical :: status                                 !< status indicator
+  logical :: debug                                  !< flag for printing verbose output
+  integer :: nbands                                 !< number of latitude bands
+  integer :: nsurf                                  !< number of surface type variations
+  integer :: nfields                                !< number of fields
+  integer, pointer      :: fields(:,:)              !< fieldtypes and no. elements in each
+  real(kind=kind_real), pointer :: store(:,:,:)     !< original b-matrices read from the file
+  real(kind=kind_real), pointer :: inverse(:,:,:)   !< inverse of above
+  real(kind=kind_real), pointer :: sigma(:,:)       !< diagonal elements
+  real(kind=kind_real), pointer :: proxy(:,:)       !< copy of original for manipulation
+  real(kind=kind_real), pointer :: inv_proxy(:,:)   !< copy of inverse
+  real(kind=kind_real), pointer :: sigma_proxy(:,:) !< copy of diagonal
+  real(kind=kind_real), pointer :: south(:)         !< s limit of each latitude band
+  real(kind=kind_real), pointer :: north(:)         !< n limit of each latitude band
 contains
   procedure :: setup  => ufo_rttovonedvarcheck_bmatrix_setup
   procedure :: delete => ufo_rttovonedvarcheck_bmatrix_delete
@@ -37,20 +40,24 @@ end type bmatrix_type
 contains
 
 ! ------------------------------------------------------------------------------------------------
-
+!> Routine to read and setup the 1D-Var B-matrix
+!!
+!! \author M. Cooke (Met Office)
+!!
+!! \date 09/06/2020: Created
+!!
 subroutine ufo_rttovonedvarcheck_bmatrix_setup(self, variables, filepath, qtotal_flag)
 
 implicit none
-class(bmatrix_type), intent(inout) :: self         !< Covariance structure
-character(len=*), intent(in)      :: variables(:)  !< Model variables in B matrix
-character(len=*), intent(in)      :: filepath      !< Path to B matrix file
-logical                           :: qtotal_flag   !< Flag for qtotal
+class(bmatrix_type), intent(inout) :: self         !< B-matrix Covariance
+character(len=*), intent(in)       :: variables(:) !< Model variables in B matrix
+character(len=*), intent(in)       :: filepath     !< Path to B matrix file
+logical, intent(in)                :: qtotal_flag  !< Flag for qtotal
 
-logical                       :: file_exists  !< Check if a file exists logical
-integer                       :: fileunit     !< Unit number for reading in files
-integer, allocatable          :: fields_in(:)
-real(kind=kind_real)          :: t1,t2
-logical                       :: flag
+logical                       :: file_exists  ! Check if a file exists logical
+integer                       :: fileunit     ! Unit number for reading in files
+integer, allocatable          :: fields_in(:) ! Fields_in used to subset b-matrix for testing.
+real(kind=kind_real)          :: t1,t2        ! Time values for logging
 character(len=max_string)     :: message
 character(len=:), allocatable :: str
 logical                       :: testing = .false.
@@ -62,7 +69,7 @@ call CPU_TIME(t1)
 ! Open file and read in b-matrix
 inquire(file=trim(filepath), exist=file_exists)
 if (file_exists) then
-  call rttovonedvarcheck_iogetfreeunit(fileunit)
+  call ufo_rttovonedvarcheck_iogetfreeunit(fileunit)
   open(unit = fileunit, file = trim(filepath))
   call rttovonedvarcheck_covariance_InitBmatrix(self)
   if (testing) then
@@ -87,13 +94,18 @@ call fckit_log % info(message)
 end subroutine ufo_rttovonedvarcheck_bmatrix_setup
 
 ! ------------------------------------------------------------------------------------------------
-
+!> Routine to delete and squash the 1D-Var B-matrix
+!!
+!! \details Met Office OPS Heritage: Ops_SatRad_SquashBmatrix.f90
+!!
+!! \author M. Cooke (Met Office)
+!!
+!! \date 09/06/2020: Created
+!!
 subroutine ufo_rttovonedvarcheck_bmatrix_delete(self)
 
-! Heritage: Ops_SatRad_SquashBmatrix.f90
-
 implicit none
-class(bmatrix_type), intent(inout) :: self  !< Covariance structure
+class(bmatrix_type), intent(inout) :: self  !< B-matrix Covariance
 
 character(len=*), parameter :: RoutineName = "ufo_rttovonedvarcheck_bmatrix_delete"
 
@@ -114,16 +126,21 @@ if ( associated(self % north)       ) deallocate( self % north       )
 end subroutine ufo_rttovonedvarcheck_bmatrix_delete
 
 ! ------------------------------------------------------------------------------------------------
-
+!> \brief Routine to initialize the 1D-Var B-matrix
+!!
+!! \details Met Office OPS Heritage: Ops_SatRad_InitBmatrix.f90
+!!
+!! \author M. Cooke (Met Office)
+!!
+!! \date 09/06/2020: Created
+!!
 subroutine rttovonedvarcheck_covariance_InitBmatrix(self)
-
-! nullify B matrix pointers.
-! Heritage: Ops_SatRad_InitBmatrix.f90
 
 implicit none
 
 ! subroutine arguments:
-type(bmatrix_type), intent(out) :: self
+type(bmatrix_type), intent(out) :: self !< B-matrix Covariance 
+
 character(len=*), parameter     :: routinename = "rttovonedvarcheck_covariance_InitBmatrix"
 
 self % status = .false.
@@ -143,61 +160,63 @@ nullify( self % north       )
 end subroutine rttovonedvarcheck_covariance_InitBmatrix
 
 ! ------------------------------------------------------------------------------------------------
-
+!> Routine to initialize the 1D-Var B-matrix
+!!
+!! \details Met Office OPS Heritage: Ops_SatRad_GetBmatrix.f90
+!!
+!! read the input file and allocate and fill in all the components of the bmatrix
+!! structure, with the exception of proxy variables.
+!!
+!! notes:
+!!
+!! it is assumed a valid bmatrix file is available and has been opened ready for
+!! reading, accessed via the input unit number.
+!!
+!! two optional arguments are provided to allow a submatrix to be formed from the
+!! original file, either depending on a list of fields to be used for retrieval,
+!! or a list of specific element numbers to be retained.
+!!
+!! the file header may begin with any number of comment lines, which are defined
+!! as those using either # or ! as the first non-blank character.
+!!
+!! immediately following any comments, the header should then contain information
+!! on the size of the matrix to be read in, and a description of each matrix
+!! element. memory will be allocated depending on these matrix specifications.
+!!
+!! each matrix should then have a one line header containing the latitude bounds
+!! and a latitude band id. band id numbers should be sequential in latitude. i.e.
+!! band 1 will begin at -90.0, band 2 from -60.0 ... (or however wide we choose
+!! the bands).
+!!
+!! we also calculate an inverse of each b matrix, used in the current 1d-var for
+!! cost function monitoring only but it may be required for other minimization
+!! methods at some point.
+!!
+!! standard deviations are also stored in a separate vector.
+!!
+!! proxy variables are provided to allow manipulation of the chosen matrix during
+!! processing without affecting the original. we might wish to do this, for
+!! example, to take account of the different surface temperature errors for land
+!! and sea. this routine makes no assumption about the use of these variables,
+!! hence no space is allocated. nullification of unused pointers should take
+!! place outside (use the ops_satrad_initbmatrix routine).
+!!
+!! \author M. Cooke (Met Office)
+!!
+!! \date 09/06/2020: Created
+!!
 subroutine rttovonedvarcheck_covariance_GetBmatrix (self,           &
                                                     fileunit,       &
                                                     b_elementsused, &
                                                     fieldlist)
 
-! ------------------------------------------------------------------------------------------------
-! read the input file and allocate and fill in all the components of the bmatrix
-! structure, with the exception of proxy variables.
-!
-! notes:
-!
-! it is assumed a valid bmatrix file is available and has been opened ready for
-! reading, accessed via the input unit number.
-!
-! two optional arguments are provided to allow a submatrix to be formed from the
-! original file, either depending on a list of fields to be used for retrieval,
-! or a list of specific element numbers to be retained.
-!
-! the file header may begin with any number of comment lines, which are defined
-! as those using either # or ! as the first non-blank character.
-!
-! immediately following any comments, the header should then contain information
-! on the size of the matrix to be read in, and a description of each matrix
-! element. memory will be allocated depending on these matrix specifications.
-!
-! each matrix should then have a one line header containing the latitude bounds
-! and a latitude band id. band id numbers should be sequential in latitude. i.e.
-! band 1 will begin at -90.0, band 2 from -60.0 ... (or however wide we choose
-! the bands).
-!
-! we also calculate an inverse of each b matrix, used in the current 1d-var for
-! cost function monitoring only but it may be required for other minimization
-! methods at some point.
-!
-! standard deviations are also stored in a separate vector.
-!
-! proxy variables are provided to allow manipulation of the chosen matrix during
-! processing without affecting the original. we might wish to do this, for
-! example, to take account of the different surface temperature errors for land
-! and sea. this routine makes no assumption about the use of these variables,
-! hence no space is allocated. nullification of unused pointers should take
-! place outside (use the ops_satrad_initbmatrix routine).
-!
-! ------------------------------------------------------------------------------------------------
-
-! Heritage: Ops_SatRad_GetBmatrix.f90
-
 implicit none
 
 ! subroutine arguments:
-type (bmatrix_type), intent(inout) :: self
-integer, intent(in)                :: fileunit
-integer, optional, intent(in)      :: b_elementsused(:)
-integer, optional, intent(inout)   :: fieldlist(:)
+type (bmatrix_type), intent(inout) :: self               !< B-matrix covariance
+integer, intent(in)                :: fileunit           !< free file unit number
+integer, optional, intent(in)      :: b_elementsused(:)  !< optional: list of elements used
+integer, optional, intent(inout)   :: fieldlist(:)       !< optional: list of fields used
 
 ! local declarations:
 character(len=*), parameter        :: routinename = "rttovonedvarcheck_covariance_GetBmatrix"
@@ -479,65 +498,67 @@ end if
 end subroutine rttovonedvarcheck_covariance_GetBmatrix
 
 ! ------------------------------------------------------------------------------------------------
-
+!> Routine to invert the 1D-Var B-matrix
+!!
+!! \details Met Office OPS Heritage: Ops_SatRad_InvertMatrix.f90
+!!
+!! invert a matrix and optionally premultiply by another matrix.
+!!
+!! variables with intent in:
+!!
+!!     n:  size of the matrix being inverted <br>
+!!     m:  if matrix is not present this is the same as n, else this is
+!!         the other dimension of matrix.
+!!
+!! variables with intent inout:
+!!
+!!     a:               real matrix (assumed square and symmetrical)
+!!                      overwritten by its inverse if matrix is not
+!!                      present.
+!!
+!! variables with intent out:
+!!
+!!     status:          0: ok, 1: a is not positive definite.
+!!
+!! optional variables with intent inout:
+!!
+!!     matrix:          if present this input matrix is replaced by
+!!                      (matrix).a^-1 on exit (leaving a unchanged).
+!!
+!! uses cholesky decomposition - a method particularly suitable for real
+!! symmetric matrices.
+!!
+!! cholesky decomposition solves the linear equation uq=v for q where u is a
+!! symmetric positive definite matrix and u and q are vectors of length n.
+!!
+!! the method follows that in golub and van loan although this is pretty
+!! standard.
+!!
+!! if u is not positive definite this will be detected by the program and flagged
+!! as an error.  u is assumed to be symmetric as only the upper triangle is in
+!! fact used.
+!!
+!! if the the optional parameter matrix is present, it is replaced by
+!! (matrix).a^-1 on exit and a is left unchanged.
+!!
+!! \author M. Cooke (Met Office)
+!!
+!! \date 09/06/2020: Created
+!!
 subroutine rttovonedvarcheck_covariance_InvertMatrix (n,      &
                                                  m,      &
                                                  a,      &
                                                  status, &
                                                  matrix)
 
-! ------------------------------------------------------------------------------------------------
-! invert a matrix and optionally premultiply by another matrix.
-!
-! variables with intent in:
-!
-!     n:  size of the matrix being inverted
-!     m:  if matrix is not present this is the same as n, else this is
-!         the other dimension of matrix.
-!
-! variables with intent inout:
-!
-!     a:               real matrix (assumed square and symmetrical)
-!                      overwritten by its inverse if matrix is not
-!                      present.
-!
-! variables with intent out:
-!
-!     status:          0: ok, 1: a is not positive definite.
-!
-! optional variables with intent inout:
-!
-!     matrix:          if present this input matrix is replaced by
-!                      (matrix).a^-1 on exit (leaving a unchanged).
-!
-! uses cholesky decomposition - a method particularly suitable for real
-! symmetric matrices.
-!
-! cholesky decomposition solves the linear equation uq=v for q where u is a
-! symmetric positive definite matrix and u and q are vectors of length n.
-!
-! the method follows that in golub and van loan although this is pretty
-! standard.
-!
-! if u is not positive definite this will be detected by the program and flagged
-! as an error.  u is assumed to be symmetric as only the upper triangle is in
-! fact used.
-!
-! if the the optional parameter matrix is present, it is replaced by
-! (matrix).a^-1 on exit and a is left unchanged.
-!
-! ------------------------------------------------------------------------------------------------
-
-! Heritage: Ops_SatRad_InvertMatrix.inc
-
 implicit none
 
 ! subroutine arguments:
-integer, intent(in)                           :: n           ! order of a
-integer, intent(in)                           :: m           ! order of optional matrix, if required
-real(kind=kind_real), intent(inout)           :: a(n,n)      ! square mx, overwritten by its inverse
-integer, intent(out)                          :: status      ! 0 if all ok 1 if matrix is not positive definite
-real(kind=kind_real), optional, intent(inout) :: matrix(n,m) ! replaced by (matrix).a^-1 on exit
+integer, intent(in)                           :: n           !< order of a
+integer, intent(in)                           :: m           !< order of optional matrix, if required
+real(kind=kind_real), intent(inout)           :: a(n,n)      !< square mx, overwritten by its inverse
+integer, intent(out)                          :: status      !< 0 if all ok 1 if matrix is not positive definite
+real(kind=kind_real), optional, intent(inout) :: matrix(n,m) !< replaced by (matrix).a^-1 on exit
 
 ! local declarations:
 character(len=*), parameter   :: routinename = "rttovonedvarcheck_covariance_InvertMatrix"
@@ -632,7 +653,12 @@ end if
 end subroutine rttovonedvarcheck_covariance_InvertMatrix
 
 ! ------------------------------------------------------------------------------------------------
-
+!> Create a subset of the b-matrix.  Used for testing.
+!!
+!! \author M. Cooke (Met Office)
+!!
+!! \date 09/06/2020: Created
+!!
 subroutine rttovonedvarcheck_create_fields_in(fields_in, variables, qtotal_flag)
 
 implicit none

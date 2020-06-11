@@ -9,14 +9,15 @@ set ( rttovonedvarcheck_files
     RTTOVOneDVarCheck.interface.F90
     RTTOVOneDVarCheck.interface.h
     ufo_rttovonedvarcheck_bmatrix_mod.F90
-    ufo_rttovonedvarcheck_get_jacobian_mod.F90
+    ufo_rttovonedvarcheck_constants_mod.F90
+    ufo_rttovonedvarcheck_minimize_jacobian_mod.F90
     ufo_rttovonedvarcheck_minimize_ml_mod.F90
     ufo_rttovonedvarcheck_minimize_newton_mod.F90
     ufo_rttovonedvarcheck_minimize_utils_mod.F90
     ufo_rttovonedvarcheck_mod.F90
     ufo_rttovonedvarcheck_profindex_mod.F90
     ufo_rttovonedvarcheck_rmatrix_mod.F90
-    ufo_rttovonedvarcheck_setup_mod.F90
+    ufo_rttovonedvarcheck_obinfo_mod.F90
     ufo_rttovonedvarcheck_utils_mod.F90
 )
 

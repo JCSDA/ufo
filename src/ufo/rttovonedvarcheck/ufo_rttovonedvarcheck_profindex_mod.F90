@@ -3,60 +3,55 @@
 ! This software is licensed under the terms of the Apache Licence Version 2.0
 ! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 
+!> Fortran module containing profile index
+
 module ufo_rttovonedvarcheck_profindex_mod
 
 use kinds
 use fckit_configuration_module, only: fckit_configuration
 use fckit_log_module, only : fckit_log
-use ufo_rttovonedvarcheck_utils_mod
-use ufo_rttovonedvarcheck_bmatrix_mod, only: &
-        bmatrix_type
+use ufo_rttovonedvarcheck_bmatrix_mod
+use ufo_rttovonedvarcheck_constants_mod
 
 implicit none
 private
 
-! public types and subroutines
-
-! private list for easy naviagtion
-! public ufo_rttovonedvarcheck_profindex_setup
-! public ufo_rttovonedvarcheck_profindex_delete
-
 type, public :: profindex_type
 
   ! general
-  integer :: nprofelements
+  integer :: nprofelements !< number of profile elements being used
 
   ! atmosphere (locate start and end points of relevant fields)
-  integer :: t(2)           ! temperature profile
-  integer :: q(2)           ! water vapour profile (specific humidity)
-  integer :: ql(2)          ! liquid water profile
-  integer :: qt(2)          ! total water profile
-  integer :: qi(2)          ! frozen ice  profile
-  integer :: cf(2)          ! cloud fraction profile
-  integer :: o3total        ! total column ozone
-  integer :: o3profile(2)   ! ozone profile
-  integer :: lwp            ! liquid water path
+  integer :: t(2)           !< temperature profile
+  integer :: q(2)           !< water vapour profile (specific humidity)
+  integer :: ql(2)          !< liquid water profile
+  integer :: qt(2)          !< total water profile
+  integer :: qi(2)          !< frozen ice  profile
+  integer :: cf(2)          !< cloud fraction profile
+  integer :: o3total        !< total column ozone
+  integer :: o3profile(2)   !< ozone profile
+  integer :: lwp            !< liquid water path
 
   ! surface
-  integer :: t2             ! screen temperature
-  integer :: q2             ! screen specific humidity
-  integer :: rh2            ! screen relative humidity
-  integer :: tstar          ! skin temperature
-  integer :: pstar          ! surface pressure
-  integer :: mwemiss(2)     ! microwave emissivity
-  integer :: emisspc(2)     ! emissivity principal components
-  integer :: windspeed      ! surface windspeed
+  integer :: t2             !< screen temperature
+  integer :: q2             !< screen specific humidity
+  integer :: rh2            !< screen relative humidity
+  integer :: tstar          !< skin temperature
+  integer :: pstar          !< surface pressure
+  integer :: mwemiss(2)     !< microwave emissivity
+  integer :: emisspc(2)     !< emissivity principal components
+  integer :: windspeed      !< surface windspeed
 
   ! cloud (single-level grey cloud only)
-  integer :: cloudtopp      ! single-level cloud top pressure
-  integer :: cloudfrac      ! effective cloud fraction
+  integer :: cloudtopp      !< single-level cloud top pressure
+  integer :: cloudfrac      !< effective cloud fraction
 
   ! other
-  integer :: t70hpa         ! temperature at 70hpa
-  integer :: t700hpa        ! temperature at 700hpa
-  integer :: t950hpa        ! temperature at 950hpa
-  integer :: t1000hpa       ! temperature at 1000hpa
-  integer :: qsurf          ! surface specific humidity
+  integer :: t70hpa         !< temperature at 70hpa - used for ozone profile, not currently implemented
+  integer :: t700hpa        !< temperature at 700hpa - used for ozone profile, not currently implemented
+  integer :: t950hpa        !< temperature at 950hpa - used for ozone profile, not currently implemented
+  integer :: t1000hpa       !< temperature at 1000hpa - used for ozone profile, not currently implemented
+  integer :: qsurf          !< surface specific humidity
 
 contains
   procedure :: setup  => ufo_rttovonedvarcheck_profindex_setup
@@ -66,17 +61,24 @@ end type
 
 contains
 
-! ------------------------------------------------------------------------------
-
+!-------------------------------------------------------------------------------
+!> Profile index setup
+!!
+!! \details Heritage: Ops_SatRad_InitProfInfo.f90
+!!
+!! Setup the profile index which requires the bmatrix object.
+!!
+!! \author M. Cooke (Met Office)
+!!
+!! \date 09/06/2020: Created
+!!
 subroutine ufo_rttovonedvarcheck_profindex_setup(self, bmatrix)
-
-! Heritage: Ops_SatRad_InitProfInfo.f90
 
 implicit none
 
 ! subroutine arguments:
 class(profindex_type), intent(inout) :: self    !< profindex structure
-type(bmatrix_type), intent(in)       :: bmatrix !< background error covariances
+type(bmatrix_type), intent(in)       :: bmatrix !< state error covariances
 
 ! local constants:
 character(len=*), parameter :: routinename = "ufo_rttovonedvarcheck_profindex_setup"
@@ -214,12 +216,19 @@ self % nprofelements = nelements
 
 end subroutine ufo_rttovonedvarcheck_profindex_setup
 
-! ------------------------------------------------------------------------------
-
+!-------------------------------------------------------------------------------
+!> Delete profile index
+!!
+!! \details Reset profile index
+!!
+!! \author M. Cooke (Met Office)
+!!
+!! \date 09/06/2020: Created
+!!
 subroutine ufo_rttovonedvarcheck_profindex_delete(self)
 
 implicit none
-class(profindex_type), intent(inout) :: self  !< Covariance structure
+class(profindex_type), intent(inout) :: self !< profile index structure
 
 ! Zero all values
 self % nprofelements = 0

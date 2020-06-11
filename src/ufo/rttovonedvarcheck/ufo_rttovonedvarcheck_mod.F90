@@ -3,7 +3,7 @@
 ! this software is licensed under the terms of the apache licence version 2.0
 ! which can be obtained at http://www.apache.org/licenses/license-2.0.
 
-!> fortran module to implement onedvar fortran check
+!> Thae main Fortran module for implementing the rttov onedvar check
 
 module ufo_rttovonedvarcheck_mod
 
@@ -11,17 +11,23 @@ use fckit_configuration_module, only: fckit_configuration
 use fckit_log_module, only : fckit_log
 use iso_c_binding
 use kinds
-use ufo_geovals_mod
-use ufo_vars_mod
-use oops_variables_mod
+use missing_values_mod
 use obsspace_mod
-use ufo_rttovonedvarcheck_utils_mod
-use ufo_rttovonedvarcheck_setup_mod
+use oops_variables_mod
+use ufo_geovals_mod
+use ufo_rttovonedvarcheck_bmatrix_mod
+use ufo_rttovonedvarcheck_constants_mod
 use ufo_rttovonedvarcheck_minimize_utils_mod
+use ufo_rttovonedvarcheck_minimize_newton_mod
+use ufo_rttovonedvarcheck_minimize_ml_mod
+use ufo_rttovonedvarcheck_obinfo_mod
+use ufo_rttovonedvarcheck_profindex_mod
+use ufo_rttovonedvarcheck_rmatrix_mod
+use ufo_rttovonedvarcheck_utils_mod
+use ufo_vars_mod
 
 implicit none
 private
-public :: ufo_rttovonedvarcheck
 public :: ufo_rttovonedvarcheck_create
 public :: ufo_rttovonedvarcheck_delete
 public :: ufo_rttovonedvarcheck_apply
@@ -29,16 +35,23 @@ public :: ufo_rttovonedvarcheck_apply
 ! ------------------------------------------------------------------------------
 contains
 ! ------------------------------------------------------------------------------
-
+!> Setup the main rttov onedvar object in Fortran
+!!
+!! \details Makes a call to the main setup routine.
+!!
+!! \author M. Cooke (Met Office)
+!!
+!! \date 09/06/2020: Created
+!!
 subroutine ufo_rttovonedvarcheck_create(self, obspace, f_conf, channels, &
                                         onedvarflag)
 
   implicit none
-  type(ufo_rttovonedvarcheck), intent(inout) :: self
-  type(c_ptr), value, intent(in)             :: obspace
-  type(fckit_configuration), intent(in)      :: f_conf
-  integer(c_int), intent(in)                 :: channels(:)
-  integer(c_int), intent(in)                 :: onedvarflag
+  type(ufo_rttovonedvarcheck), intent(inout) :: self         !< rttovonedvarcheck main object
+  type(c_ptr), value, intent(in)             :: obspace      !< observation database pointer
+  type(fckit_configuration), intent(in)      :: f_conf       !< yaml file contents
+  integer(c_int), intent(in)                 :: channels(:)  !< all channels that can be used in 1D-Var
+  integer(c_int), intent(in)                 :: onedvarflag  !< flag for qc manager
 
   self % obsdb = obspace
   self % conf = f_conf
@@ -49,11 +62,16 @@ subroutine ufo_rttovonedvarcheck_create(self, obspace, f_conf, channels, &
 end subroutine ufo_rttovonedvarcheck_create
 
 ! ------------------------------------------------------------------------------
-
+!> Delete the main rttov onedvar object in Fortran
+!!
+!! \author M. Cooke (Met Office)
+!!
+!! \date 09/06/2020: Created
+!!
 subroutine ufo_rttovonedvarcheck_delete(self)
 
   implicit none
-  type(ufo_rttovonedvarcheck), intent(inout) :: self
+  type(ufo_rttovonedvarcheck), intent(inout) :: self !< rttovonedvarcheck main object
 
   if (allocated(self % retrieval_variables)) deallocate(self % retrieval_variables)
   if (allocated(self % channels))            deallocate(self % channels)
@@ -61,34 +79,30 @@ subroutine ufo_rttovonedvarcheck_delete(self)
 end subroutine ufo_rttovonedvarcheck_delete
 
 ! ------------------------------------------------------------------------------
-
+!> The main routine that applys the rttov onedvar filter
+!!
+!! \details Heritage : Ops_SatRad_Do1DVar_RTTOV12.f90
+!!
+!! This routine is called from the c++ apply method.  The filter performs 
+!! a 1D-Var minimization using rttov
+!!
+!! \author M. Cooke (Met Office)
+!!
+!! \date 09/06/2020: Created
+!!
 subroutine ufo_rttovonedvarcheck_apply(self, vars, geovals, apply)
 
-  ! Heritage : Ops_SatRad_Do1DVar_RTTOV12.f90
-
-  ! ------------------------------------------
-  ! load modules only used in this subroutine
-  ! ------------------------------------------
-  use missing_values_mod
-  use ufo_rttovonedvarcheck_minimize_newton_mod, only: &
-          ufo_rttovonedvarcheck_minimize_newton
-  use ufo_rttovonedvarcheck_minimize_ml_mod, only: &
-          ufo_rttovonedvarcheck_minimize_ml
-  use ufo_rttovonedvarcheck_rmatrix_mod, only: rmatrix_type
-  use ufo_rttovonedvarcheck_bmatrix_mod, only: bmatrix_type
-  use ufo_rttovonedvarcheck_profindex_mod, only: profindex_type
-
   implicit none
-  type(ufo_rttovonedvarcheck), intent(inout) :: self     ! one d var check setup info
-  type(oops_variables), intent(in)           :: vars
-  type(ufo_geovals), intent(in)              :: geovals  ! model values at observation space
-  logical, intent(in)                        :: apply(:)
+  type(ufo_rttovonedvarcheck), intent(inout) :: self     !< rttovonedvarcheck main object
+  type(oops_variables), intent(in)           :: vars     !< channels for 1D-Var
+  type(ufo_geovals), intent(in)              :: geovals  !< model values at observation space
+  logical, intent(in)                        :: apply(:) !< qc manager flags
 
   type(bmatrix_type)   :: full_bmatrix
-  type(ufo_geovals)    :: local_geovals  !< geoval for one observation
+  type(ufo_geovals)    :: local_geovals  ! geoval for one observation
   type(obinfo_type)    :: ob_info
-  type(profindex_type) :: prof_index     !< index for mapping geovals to 1d-var state profile
-  type(rmatrix_type)   :: r_submatrix    !< r_submatrix object
+  type(profindex_type) :: prof_index     ! index for mapping geovals to 1d-var state profile
+  type(rmatrix_type)   :: r_submatrix    ! r_submatrix object
   character(len=max_string)          :: sensor_id
   character(len=max_string)          :: var
   character(len=max_string)          :: varname
@@ -248,8 +262,8 @@ subroutine ufo_rttovonedvarcheck_apply(self, vars, geovals, apply)
       end if
 
       ! setup ob data for this observation
-      call ufo_rttovonedvarcheck_InitObInfo(ob_info, chans_used)
-      call ufo_rttovonedvarcheck_InitEmiss(self, local_geovals, ob_info)
+      call ob_info % setup(chans_used)
+      call ob_info % init_emiss(self, local_geovals)
       ob_info % forward_mod_name = self % forward_mod_name
       ob_info % latitude = lat(jobs)
       ob_info % longitude = lon(jobs)
@@ -321,7 +335,7 @@ subroutine ufo_rttovonedvarcheck_apply(self, vars, geovals, apply)
       end if
 
       ! Tidy up memory specific to a single observation
-      call ufo_rttovonedvarcheck_DeleteObInfo(ob_info)
+      call ob_info % delete()
       call r_submatrix % delete()
       call ufo_geovals_delete(local_geovals)
       if (allocated(channels_used)) deallocate(channels_used)

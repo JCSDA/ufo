@@ -3,23 +3,24 @@
 ! This software is licensed under the terms of the Apache Licence Version 2.0
 ! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 
+!> Fortran derived type to hold configuration data for the observation covariance
+
 module ufo_rttovonedvarcheck_rmatrix_mod
 
 use kinds
-use ufo_rttovonedvarcheck_utils_mod, only: max_string
+use ufo_rttovonedvarcheck_constants_mod, only: max_string
 
 implicit none
 private
 
-!> Fortran derived type to hold configuration data for the observation covariance
 type, public :: rmatrix_type
 
-  integer :: nchans
-  real(kind_real), allocatable :: matrix(:,:)
-  real(kind_real), allocatable :: inv_matrix(:,:)
-  real(kind_real), allocatable :: diagonal(:)
-  logical :: diagonal_flag
-  logical :: full_flag
+  integer :: nchans !< number of channels used in current r matrix
+  real(kind_real), allocatable :: matrix(:,:) !< full matrix
+  real(kind_real), allocatable :: inv_matrix(:,:) !< inverse full matrix
+  real(kind_real), allocatable :: diagonal(:) !< diagonal matrix
+  logical :: diagonal_flag !< flag to use diagonal r-matrix
+  logical :: full_flag !< flag to use full r-matrix
 
 contains
   procedure :: setup  => rmatrix_setup
@@ -36,9 +37,12 @@ end type rmatrix_type
 ! ------------------------------------------------------------------------------
 contains
 ! ------------------------------------------------------------------------------
-
 !> Setup for the r_matrix
-
+!!
+!! \author M. Cooke (Met Office)
+!!
+!! \date 09/06/2020: Created
+!!
 subroutine rmatrix_setup(self,mat_type,nchans,obs_error)
 
 implicit none
@@ -81,7 +85,12 @@ end select
 end subroutine rmatrix_setup
 
 ! ------------------------------------------------------------------------------
-
+!> Delete method for the r_matrix
+!!
+!! \author M. Cooke (Met Office)
+!!
+!! \date 09/06/2020: Created
+!!
 subroutine rmatrix_delete(self)
 
 implicit none
@@ -94,7 +103,12 @@ if (allocated(self % diagonal))     deallocate(self % diagonal)
 end subroutine rmatrix_delete
 
 ! ------------------------------------------------------------------------------
-
+!> Multiply a vector by the r-matrix
+!!
+!! \author M. Cooke (Met Office)
+!!
+!! \date 09/06/2020: Created
+!!
 subroutine rmatrix_multiply(self,xin,xout)
 
 implicit none
@@ -115,7 +129,12 @@ if (self % diagonal_flag) xout(:) = xin(:) * self % diagonal(:)
 end subroutine rmatrix_multiply
 
 ! ------------------------------------------------------------------------------
-
+!> Multiply a matrix by the r-matrix
+!!
+!! \author M. Cooke (Met Office)
+!!
+!! \date 09/06/2020: Created
+!!
 subroutine rmatrix_multiply_matrix(self,xin,xout)
 
 implicit none
@@ -142,7 +161,12 @@ end if
 end subroutine rmatrix_multiply_matrix
 
 ! ------------------------------------------------------------------------------
-
+!> Multiply a vector by the inverse of the r-matrix
+!!
+!! \author M. Cooke (Met Office)
+!!
+!! \date 09/06/2020: Created
+!!
 subroutine rmatrix_inv_multiply(self,xin,xout)
 
 implicit none
@@ -163,7 +187,12 @@ if (self % diagonal_flag) xout(:) = xin(:) / self % diagonal(:)
 end subroutine rmatrix_inv_multiply
 
 ! ------------------------------------------------------------------------------
-
+!> Multiply a matrix by the inverse of the r-matrix
+!!
+!! \author M. Cooke (Met Office)
+!!
+!! \date 09/06/2020: Created
+!!
 subroutine rmatrix_multiply_inv_matrix(self,xin,xout)
 
 implicit none
@@ -189,8 +218,13 @@ end if
 
 end subroutine rmatrix_multiply_inv_matrix
 
-! -----------------------------------------------------------------------------
-
+! ------------------------------------------------------------------------------
+!> Add a matrix to the r-matrix
+!!
+!! \author M. Cooke (Met Office)
+!!
+!! \date 09/06/2020: Created
+!!
 subroutine rmatrix_add_to_u(self,uin,uout)
 
 implicit none
@@ -217,7 +251,12 @@ end if
 end subroutine rmatrix_add_to_u
 
 ! ------------------------------------------------------------------------------
-
+!> Print the contents of the r-matrix
+!!
+!! \author M. Cooke (Met Office)
+!!
+!! \date 09/06/2020: Created
+!!
 subroutine rmatrix_print(self)
 
 implicit none

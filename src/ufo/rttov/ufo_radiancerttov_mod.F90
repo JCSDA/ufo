@@ -64,7 +64,7 @@ end subroutine ufo_radiancerttov_delete
 SUBROUTINE ufo_radiancerttov_simobs(self, geovals, hofx, obss, channels, ob_info)
 
 use fckit_log_module, only : fckit_log
-use ufo_rttovonedvarcheck_utils_mod, only: ObInfo_type
+use ufo_rttovonedvarcheck_obinfo_mod, only: ObInfo_type
 
 implicit none
 class(ufo_radiancerttov),    intent(in) :: self

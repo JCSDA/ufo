@@ -12,6 +12,7 @@ use oops_variables_mod
 use ufo_geovals_mod
 use ufo_geovals_mod_c,   only: ufo_geovals_registry
 use ufo_rttovonedvarcheck_mod
+use ufo_rttovonedvarcheck_utils_mod, only: ufo_rttovonedvarcheck
 
 implicit none
 private
@@ -34,13 +35,20 @@ contains
 subroutine ufo_rttovonedvarcheck_create_c(c_self, c_obspace, c_conf, c_nchan, &
                                           c_channels, c_onedvarflag) &
                         bind(c,name='ufo_rttovonedvarcheck_create_f90')
+
+!> \brief Interface to the Fortran create method
+!!
+!! \author M. Cooke (Met Office)
+!!
+!! \date 09/06/2020: Created
+!!
 implicit none
-integer(c_int), intent(inout)  :: c_self
-type(c_ptr), value, intent(in) :: c_obspace
-type(c_ptr), value, intent(in) :: c_conf
-integer(c_int), intent(in) :: c_nchan
-integer(c_int), intent(in) :: c_channels(c_nchan)
-integer(c_int), intent(in) :: c_onedvarflag
+integer(c_int), intent(inout)  :: c_self     !< self - inout
+type(c_ptr), value, intent(in) :: c_obspace  !< obsspace - input
+type(c_ptr), value, intent(in) :: c_conf     !< yaml configuration - input
+integer(c_int), intent(in) :: c_nchan        !< number of channels - input
+integer(c_int), intent(in) :: c_channels(c_nchan) !< channel numbers - input
+integer(c_int), intent(in) :: c_onedvarflag  !< flag for qc manager logging - input
 
 type(ufo_rttovonedvarcheck), pointer :: self
 type(fckit_configuration) :: f_conf
@@ -57,8 +65,16 @@ end subroutine ufo_rttovonedvarcheck_create_c
 
 subroutine ufo_rttovonedvarcheck_delete_c(c_self) &
                       bind(c,name='ufo_rttovonedvarcheck_delete_f90')
+
+!> \brief Interface to the Fortran delete method
+!!
+!! \author M. Cooke (Met Office)
+!!
+!! \date 09/06/2020: Created
+!!
+
 implicit none
-integer(c_int), intent(inout) :: c_self
+integer(c_int), intent(inout) :: c_self !< self - input
 
 type(ufo_rttovonedvarcheck), pointer :: self
 
@@ -72,12 +88,20 @@ end subroutine ufo_rttovonedvarcheck_delete_c
 
 subroutine ufo_rttovonedvarcheck_apply_c(c_self, c_vars, c_geovals, c_nobs, c_apply) &
                bind(c,name='ufo_rttovonedvarcheck_apply_f90')
+
+!> \brief Interface to filter apply method
+!!
+!! \author M. Cooke (Met Office)
+!!
+!! \date 09/06/2020: Created
+!!
+
 implicit none
-integer(c_int), intent(in)     :: c_self
-type(c_ptr), value, intent(in) :: c_vars     !< List of variables
-integer(c_int), intent(in)     :: c_geovals
-integer(c_int), intent(in)     :: c_nobs
-character(c_char), intent(in)  :: c_apply(c_nobs)
+integer(c_int), intent(in)     :: c_self          !< self - input
+type(c_ptr), value, intent(in) :: c_vars          !< list of variables - input
+integer(c_int), intent(in)     :: c_geovals       !< Geovals - input
+integer(c_int), intent(in)     :: c_nobs          !< number of observations - input
+character(c_char), intent(in)  :: c_apply(c_nobs) !< apply flag (converted to logical) - input
 
 type(ufo_rttovonedvarcheck), pointer :: self
 type(oops_variables)                 :: vars

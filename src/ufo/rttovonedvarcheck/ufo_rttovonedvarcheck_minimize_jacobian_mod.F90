@@ -3,39 +3,45 @@
 ! This software is licensed under the terms of the Apache Licence Version 2.0
 ! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 
-!> Fortran module to provide code shared between nonlinear and tlm/adm radiance calculations
+!> Fortran module to get the jacobian for the 1D-Var
 
-module ufo_rttovonedvarcheck_get_jacobian_mod
+module ufo_rttovonedvarcheck_minimize_jacobian_mod
 
 use fckit_configuration_module, only: fckit_configuration
 use iso_c_binding
 use kinds
 use ufo_geovals_mod
 use ufo_radiancerttov_tlad_mod
-use ufo_rttovonedvarcheck_utils_mod
+use ufo_rttovonedvarcheck_constants_mod
 use ufo_rttovonedvarcheck_minimize_utils_mod, only: &
-                          ufo_rttovonedvarcheck_Qsplit
-use ufo_rttovonedvarcheck_profindex_mod, only: profindex_type
+        ufo_rttovonedvarcheck_Qsplit
+use ufo_rttovonedvarcheck_obinfo_mod
+use ufo_rttovonedvarcheck_profindex_mod
 
 implicit none
 private
 
-! subroutines - all listed for complete
 public ufo_rttovonedvarcheck_get_jacobian
 
 contains
 
 !------------------------------------------------------------------------------
-
+!> Get the jacobian used in the 1D-Var.
+!!
+!! \author M. Cooke (Met Office)
+!!
+!! \date 09/06/2020: Created
+!!
 subroutine ufo_rttovonedvarcheck_get_jacobian(geovals, ob_info, obsdb, &
                                            channels, conf, &
                                            profindex, prof_x, &
                                            hofx, H_matrix)
 
+
 implicit none
 
 ! subroutine arguments
-type(ufo_geovals), intent(in)         :: geovals        !< model data
+type(ufo_geovals), intent(in)         :: geovals        !< model data at obs location
 type(Obinfo_type), intent(in)         :: ob_info        !< satellite metadata
 type(c_ptr), value, intent(in)        :: obsdb          !< observation database
 integer(c_int), intent(in)            :: channels(:)    !< satellite channels
@@ -46,7 +52,7 @@ real(kind_real), intent(out)          :: hofx(:)        !< BT's
 real(kind_real), intent(out)          :: H_matrix(:,:)  !< Jacobian
 
 ! local variables
-type(ufo_radiancerttov_tlad)                :: rttov_tlad   ! structure for holding original rttov_k setup data
+type(ufo_radiancerttov_tlad) :: rttov_tlad   ! structure for holding original rttov_k setup data
 
 select case (trim(ob_info % forward_mod_name))
   case ("RTTOV")
@@ -65,26 +71,34 @@ end select
 end  subroutine ufo_rttovonedvarcheck_get_jacobian
 
 !------------------------------------------------------------------------------
-
+!> Get the jacobian from rttov and if neccessary convert 
+!! to variables used in the 1D-Var.
+!!
+!! \details Heritage: Ops_SatRad_GetHmatrix_RTTOV12.f90
+!!
+!! \warning mwemiss and emisspc not implemented yet
+!!
+!! \author M. Cooke (Met Office)
+!!
+!! \date 09/06/2020: Created
+!!
 subroutine ufo_rttovonedvarcheck_GetHmatrixRTTOV(geovals, ob_info, obsdb, &
                                        channels, rttov_data, &
                                        profindex, prof_x, &
                                        hofx, H_matrix)
 
-! Heritage: Ops_SatRad_GetHmatrix_RTTOV12.f90
-
 implicit none
 
 ! subroutine arguments
-type(ufo_geovals), intent(in)               :: geovals
-type(Obinfo_type), intent(in)               :: ob_info
-type(c_ptr), value, intent(in)              :: obsdb
-integer(c_int), intent(in)                  :: channels(:)
-type(ufo_radiancerttov_tlad), intent(inout) :: rttov_data      ! structure for running rttov_k
-type(profindex_type), intent(in)            :: profindex
-real(kind_real), intent(in)                 :: prof_x(:)    ! x vector for 1D-var
-real(kind_real), intent(out)                :: hofx(:)
-real(kind_real), intent(out)                :: H_matrix(:,:)
+type(ufo_geovals), intent(in)               :: geovals     !< model data at obs location
+type(Obinfo_type), intent(in)               :: ob_info     !< satellite metadata
+type(c_ptr), value, intent(in)              :: obsdb       !< observation database
+integer(c_int), intent(in)                  :: channels(:) !< satellite channels
+type(ufo_radiancerttov_tlad), intent(inout) :: rttov_data  !< structure for running rttov_k
+type(profindex_type), intent(in)            :: profindex   !< index array for x vector
+real(kind_real), intent(in)                 :: prof_x(:)   !< x vector
+real(kind_real), intent(out)                :: hofx(:)     !< BT's
+real(kind_real), intent(out)                :: H_matrix(:,:) !< Jacobian
 
 ! Local arguments
 integer :: nchans, nlevels, nq_levels
@@ -258,6 +272,48 @@ if (profindex % cloudfrac > 0) then
   end do
 end if
 
+! 2.7) Microwave Emissivity
+
+!IF (profindex % mwemiss(1) > 0) THEN
+!  ! The emissivity matrix needs to be "unpacked" as it is only one
+!  ! dimensional over channels - implying you want to retrieve a
+!  ! single emissivity value. It is unpacked here so that each emissivity
+!  ! has a corresponding entry for the relevant channel. Note that this is
+!  ! a bit physically dubious as several channels have the same frequency, etc.
+!  ! This complexity is dealt with in the B Matrix.
+!  ! Check that we want only the diagonal elements to be non-zero
+!  DO j = 1, SIZE (EmissMap)
+!    IF (ops_ticket_1810_atlas) THEN
+!      chan = EmissMap_new(j)
+!    ELSE
+!      chan = EmissMap(j)
+!    END IF
+!
+!    DO i = 1, nchans
+!      IF (Channels(i) == chan) THEN
+!        H_matrix(i,profindex % mwemiss(1) + j - 1) = rttov_data % profiles_k(i) % emissivity(1)
+!      END IF
+!    END DO
+!  END DO
+!END IF
+
+
+! 2.4) Infrared Emissivity
+
+!IF (profindex % emisspc(1) > 0) THEN
+!
+!  DO i = 1, nchans
+!    emissivity_K(i) = rttov_data % profiles_k(i) % emissivity(1)
+!  END DO
+!
+!  CALL Ops_SatRad_EmisKToPC (nchans,                                                           & ! in
+!                             Channels,                                                         & ! in
+!                             nemisspc,                                                         & ! in
+!                             emiss(:),                                                         & ! in
+!                             emissivity_K(:),                                                  & ! in
+!                             H_matrix(1:nchans,profindex % emisspc(1):profindex % emisspc(2)))   ! out
+!END IF
+
 call ufo_rttovonedvarcheck_PrintHmatrix( &
   nchans,   &       ! in
   size(prof_x),  &  ! in
@@ -268,7 +324,14 @@ call ufo_rttovonedvarcheck_PrintHmatrix( &
 end  subroutine ufo_rttovonedvarcheck_GetHmatrixRTTOV
 
 !---------------------------------------------------------------------------
-
+!> Routine to print the contents of the jacobian for testing
+!!
+!! \details Heritage: Ops_SatRad_PrintHMatrix.f90
+!!
+!! \author M. Cooke (Met Office)
+!!
+!! \date 09/06/2020: Created
+!!
 subroutine ufo_rttovonedvarcheck_PrintHmatrix( &
   nchans,   &       ! in
   nprofelements, &  ! in
@@ -276,23 +339,21 @@ subroutine ufo_rttovonedvarcheck_PrintHmatrix( &
   H_matrix, &       ! in
   profindex )       ! in
 
-! Heritage: Ops_SatRad_PrintHMatrix.f90
-
 implicit none
 
 !Subroutine arguments:
-integer,                intent(IN) :: nchans
-integer,                intent(IN) :: nprofelements
-integer(c_int),         intent(IN) :: channels(nchans)
-real(kind_real),        intent(IN) :: H_matrix(nchans,nprofelements)
-type(profindex_type), intent(in)   :: profindex
+integer, intent(in)              :: nchans
+integer, intent(in)              :: nprofelements
+integer(c_int), intent(in)       :: channels(nchans)
+real(kind_real), intent(in)      :: H_matrix(nchans,nprofelements)
+type(profindex_type), intent(in) :: profindex
 
 ! Local variables:
 integer :: i
-character(LEN=10) :: int_fmt
-character(LEN=12) :: real_fmt
-character(LEN=3) :: txt_nchans
-character(LEN=*), parameter :: RoutineName = "ufo_rttovonedvarcheck_PrintHmatrix"
+character(len=10) :: int_fmt
+character(len=12) :: real_fmt
+character(len=3) :: txt_nchans
+character(len=*), parameter :: RoutineName = "ufo_rttovonedvarcheck_PrintHmatrix"
 !-------------------------------------------------------------------------------
 
 write( unit=txt_nchans,fmt='(i3)' )  nchans
@@ -392,4 +453,4 @@ end  subroutine ufo_rttovonedvarcheck_PrintHmatrix
 
 ! ------------------------------------------------------------
 
-end module ufo_rttovonedvarcheck_get_jacobian_mod
+end module ufo_rttovonedvarcheck_minimize_jacobian_mod

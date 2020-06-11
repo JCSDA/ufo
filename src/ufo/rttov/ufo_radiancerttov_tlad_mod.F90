@@ -94,7 +94,7 @@ end subroutine ufo_radiancerttov_tlad_delete
 subroutine ufo_radiancerttov_tlad_settraj(self, geovals, obss, channels, ob_info, BT)
 
 use ufo_radiancerttov_utils_mod , ONLY : config_rttov
-use ufo_rttovonedvarcheck_utils_mod, ONLY : ObInfo_type
+use ufo_rttovonedvarcheck_obinfo_mod, ONLY : ObInfo_type
 
 implicit none
 

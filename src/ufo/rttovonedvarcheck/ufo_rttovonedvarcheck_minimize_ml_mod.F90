@@ -2,82 +2,81 @@
 ! This software is licensed under the terms of the Apache Licence Version 2.0
 ! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 
-!> Fortran module to provide code shared between nonlinear and tlm/adm radiance calculations
+!> Fortran module containing the routines to perform a Marquardt-Levenberg 
+!! minimization.
 
 module ufo_rttovonedvarcheck_minimize_ml_mod
 
 use iso_c_binding
 use kinds
 use ufo_geovals_mod
-use ufo_rttovonedvarcheck_utils_mod
 use ufo_radiancerttov_tlad_mod
-use ufo_rttovonedvarcheck_rmatrix_mod, only: rmatrix_type
-
-use ufo_rttovonedvarcheck_minimize_utils_mod, only: &
-    ufo_rttovonedvarcheck_GeoVaLs2ProfVec, &
-    ufo_rttovonedvarcheck_ProfVec2GeoVaLs, &
-    ufo_rttovonedvarcheck_CostFunction, &
-    ufo_rttovonedvarcheck_CheckIteration, &
-    ufo_rttovonedvarcheck_CheckCloudyIteration, &
-    ufo_rttovonedvarcheck_Cholesky
-
-use ufo_rttovonedvarcheck_get_jacobian_mod, only: &
-    ufo_rttovonedvarcheck_get_jacobian
-
-use ufo_rttovonedvarcheck_profindex_mod, only: profindex_type
+use ufo_rttovonedvarcheck_constants_mod
+use ufo_rttovonedvarcheck_minimize_jacobian_mod
+use ufo_rttovonedvarcheck_minimize_utils_mod
+use ufo_rttovonedvarcheck_profindex_mod
+use ufo_rttovonedvarcheck_rmatrix_mod
+use ufo_rttovonedvarcheck_obinfo_mod
+use ufo_rttovonedvarcheck_utils_mod
 
 implicit none
 private
 
-! public subroutines
 public ufo_rttovonedvarcheck_minimize_ml
 
 contains
 
 !-------------------------------------------------------------------------------
-! (C) Crown copyright Met Office. All rights reserved.
-!     Refer to COPYRIGHT.txt of this distribution for details.
-!-------------------------------------------------------------------------------
-! Find the most probable atmospheric state vector by minimizing a cost function
-! through a series of iterations. if a solution exists, the iterations will
-! converge when the iterative increments are acceptably small. A limit on the
-! total number of iterations allowed is imposed.
-!
-! Using the formulation given by Rodgers (1976) :
-!
-!   Delta_x = xn + (xb-xn).I' + Wn.(ym-y(xn) - H.(xb-xn))
-!   where: x is an atmospheric state vector, subscripted b=background,n=nth
-!           iteration
-!          I' is a diagonal matrix with I'(J,J) = B_damped(J,J)/B_undamped(J,J)
-!           although, however, damping will no longer be used
-!          Wn = B.Hn'.(Hn.B.Hn'+R)^-1
-!          B is the background error covariance matrix
-!          R is the combined forward model and ob error covariance matrix
-!
-!   Delta_x is checked for convergence after each iteration
-!
-! The loop is exited with convergence if either of the following conditions are
-! true, depending on whether UseJforConvergence is true or false
-!   1) if UseJforConvergence is true then the change in total cost function from
-!      one iteration to the next is sufficiently small to imply convergence
-!   2) if UseJforConvergence is false then the increments to the atmospheric
-!      state vector are sufficiently small to imply convergence at an acceptable
-!      solution
-!   Either of the following two conditions will cause the 1dvar to stop and exit
-!   with an error.
-!   3) The increments are sufficiently large to suppose a solution will not
-!      be found.
-!   4) The maximum number of allowed iterations has been reached. In most
-!      cases, one of the above criteria will have occurred.
-!
-! References:
-!
-!   Rodgers, Retrieval of atmospheric temperature and composition from
-!   remote measurements of thermal radiation, Rev. Geophys.Sp.Phys. 14, 1976.
-!
-!   Eyre, Inversion of cloudy satellite sounding radiances by nonlinear
-!   optimal estimation. I: Theory and simulation for TOVS,QJ,July 89.
-!-------------------------------------------------------------------------------
+!> Perform a minimization using the Marquardt-Levenberg method.
+!!
+!! \details Heritage: Ops_SatRad_MinimizeML_RTTOV12.f90
+!!
+!! Find the most probable atmospheric state vector by minimizing a cost function
+!! through a series of iterations. if a solution exists, the iterations will
+!! converge when the iterative increments are acceptably small. A limit on the
+!! total number of iterations allowed is imposed.
+!!
+!! Using the formulation given by Rodgers (1976) :
+!!
+!!   Delta_x = xn + (xb-xn).I' + Wn.(ym-y(xn) - H.(xb-xn)) <br>
+!!   where: <br>
+!!          x is an atmospheric state vector, subscripted b=background,n=nth
+!!           iteration <br>
+!!          I' is a diagonal matrix with I'(J,J) = B_damped(J,J)/B_undamped(J,J)
+!!           although, however, damping will no longer be used <br>
+!!          Wn = B.Hn'.(Hn.B.Hn'+R)^-1 <br>
+!!          B is the background error covariance matrix <br>
+!!          R is the combined forward model and ob error covariance matrix <br>
+!!
+!!   Delta_x is checked for convergence after each iteration
+!!
+!! The loop is exited with convergence if either of the following conditions are
+!! true, depending on whether UseJforConvergence is true or false
+!!   -# if UseJforConvergence is true then the change in total cost function from
+!!      one iteration to the next is sufficiently small to imply convergence
+!!   -# if UseJforConvergence is false then the increments to the atmospheric
+!!      state vector are sufficiently small to imply convergence at an acceptable
+!!      solution
+!!
+!! Either of the following two conditions will cause the 1dvar to stop and exit
+!! with an error.
+!!   -# The increments are sufficiently large to suppose a solution will not
+!!      be found.
+!!   -# The maximum number of allowed iterations has been reached. In most
+!!      cases, one of the above criteria will have occurred.
+!!
+!! References:
+!!
+!!   Rodgers, Retrieval of atmospheric temperature and composition from
+!!   remote measurements of thermal radiation, Rev. Geophys.Sp.Phys. 14, 1976.
+!!
+!!   Eyre, Inversion of cloudy satellite sounding radiances by nonlinear
+!!   optimal estimation. I: Theory and simulation for TOVS,QJ,July 89.
+!!
+!! \author M. Cooke (Met Office)
+!!
+!! \date 09/06/2020: Created
+!!
 subroutine ufo_rttovonedvarcheck_minimize_ml(self,      &
                                          ob_info,       &
                                          r_matrix,      &
@@ -89,20 +88,18 @@ subroutine ufo_rttovonedvarcheck_minimize_ml(self,      &
                                          channels,      &
                                          onedvar_success)
 
-! Heritage: Ops_SatRad_MinimizeML_RTTOV12.f90
-
 implicit none
 
-type(ufo_rttovonedvarcheck), intent(inout) :: self
-type(Obinfo_type), intent(inout) :: ob_info
-type(rmatrix_type), intent(in)   :: r_matrix
-real(kind_real), intent(in)      :: b_matrix(:,:)
-real(kind_real), intent(in)      :: b_inv(:,:)
-real(kind_real), intent(in)      :: b_sigma(:)
-type(ufo_geovals), intent(inout) :: local_geovals
-type(profindex_type), intent(in) :: profile_index
-integer(c_int), intent(in)       :: channels(:)
-logical, intent(out)             :: onedvar_success
+type(ufo_rttovonedvarcheck), intent(inout) :: self  !< structure containing settings
+type(Obinfo_type), intent(inout) :: ob_info         !< satellite metadata
+type(rmatrix_type), intent(in)   :: r_matrix        !< observation error covariance
+real(kind_real), intent(in)      :: b_matrix(:,:)   !< state error covariance
+real(kind_real), intent(in)      :: b_inv(:,:)      !< inverse state error covariance
+real(kind_real), intent(in)      :: b_sigma(:)      !< standard deviations of the state error covariance diagonal
+type(ufo_geovals), intent(inout) :: local_geovals   !< model data at obs location
+type(profindex_type), intent(in) :: profile_index   !< index array for x vector
+integer(c_int), intent(in)       :: channels(:)     !< list of channels used
+logical, intent(out)             :: onedvar_success !< convergence flag
 
 ! Local declarations:
 character(len=*), parameter     :: RoutineName = "ufo_rttovonedvarcheck_minimize_ml"
@@ -406,49 +403,56 @@ if (allocated(Y0))                 deallocate(Y0)
 
 end subroutine ufo_rttovonedvarcheck_minimize_ml
 
-!-------------------------------------------------------------------------------
-! (C) Crown copyright Met Office. All rights reserved.
-!     Refer to COPYRIGHT.txt of this distribution for details.
-!-------------------------------------------------------------------------------
-! Updates the profile vector DeltaProfile according to Rodgers (1976), Eqn. 100,
-! extended to allow for additional cost function terms and Marquardt-Levenberg
-! descent.
-!
-!   x_(n+1) = xb + U^-1.V
-!   where U=(B^-1 + H^T R^-1 H + J2)
-!         V=H^T R^-1 [(ym-y(x_n))+H(x_n-xb)] - J1
-!   and   J_extra=J0+J1.(x-xb)+(x-xb)^T.J2.(x-xb) is the additional cost
-!         function
-!         x is an atmospheric state vector, subscripted b=background,n=nth
-!         iteration
-!         ym is the measurement vector (i.e. observed brightness temperatures)
-!         y(xn) is the observation vector calculated for xn
-!         ym and y(xn) are not used individually at all, hence these are input
-!         as a difference vector DeltaBT.
-!         B is the background error covariance matrix
-!         R is the combined forward model and ob error covariance matrix
-!         H is the forward model gradient (w.r.t. xn) matrix
-!         H' is the transpose of H
-
-!   When J_extra is zero this is simply Rogers (1976), Eqn. 100.
-!
-!   U^-1.V is solved using Cholesky decomposition.
-!
-! This routine should be used when:
-!     1) The length of the observation vector is greater than the length
-!        of the state vector,
-!     2) Additional cost function terms are provided and
-!     3) where Newtonian minimisation is desired.
-!
-! References:
-!
-!   Rodgers, Retrieval of atmospheric temperature and composition from
-!   remote measurements of thermal radiation, Rev. Geophys.Sp.Phys. 14, 1976.
-!
-!   Rodgers, Inverse Methods for Atmospheres: Theory and Practice.  World
-!            Scientific Publishing, 2000.
-!-------------------------------------------------------------------------------
-
+!---------------------------------------------------------------------
+!> Updates the profile vector during the Marquardt-Levenberg 
+!! minimization.
+!!
+!! \details Heritage: Ops_SatRad_MarquardtLevenberg_RTTOV12.f90
+!!
+!! Updates the profile vector DeltaProfile according to Rodgers (1976), Eqn. 100,
+!! extended to allow for additional cost function terms and Marquardt-Levenberg
+!! descent.
+!!
+!!   x_(n+1) = xb + U^-1.V <br>
+!!   where <br>
+!!         U=(B^-1 + H^T R^-1 H + J2) <br>
+!!         V=H^T R^-1 [(ym-y(x_n))+H(x_n-xb)] - J1 <br>
+!!   and   <br>
+!!         J_extra=J0+J1.(x-xb)+(x-xb)^T.J2.(x-xb) is the additional cost
+!!         function <br>
+!!         x is an atmospheric state vector, subscripted b=background,n=nth
+!!         iteration <br>
+!!         ym is the measurement vector (i.e. observed brightness temperatures) <br>
+!!         y(xn) is the observation vector calculated for xn <br>
+!!         ym and y(xn) are not used individually at all, hence these are input <br>
+!!         as a difference vector DeltaBT. <br>
+!!         B is the background error covariance matrix <br>
+!!         R is the combined forward model and ob error covariance matrix <br>
+!!         H is the forward model gradient (w.r.t. xn) matrix <br>
+!!         H' is the transpose of H <br>
+!!
+!!   When J_extra is zero this is simply Rogers (1976), Eqn. 100.
+!!
+!!   U^-1.V is solved using Cholesky decomposition.
+!!
+!! This routine should be used when:
+!!     -# The length of the observation vector is greater than the length
+!!        of the state vector,
+!!     -# Additional cost function terms are provided and
+!!     -# where Newtonian minimisation is desired.
+!!
+!! References:
+!!
+!!   Rodgers, Retrieval of atmospheric temperature and composition from
+!!   remote measurements of thermal radiation, Rev. Geophys.Sp.Phys. 14, 1976.
+!!
+!!   Rodgers, Inverse Methods for Atmospheres: Theory and Practice.  World
+!!            Scientific Publishing, 2000.
+!!
+!! \author M. Cooke (Met Office)
+!!
+!! \date 09/06/2020: Created
+!!
 subroutine ufo_rttovonedvarcheck_ML_RTTOV12 ( self, &
                                       DeltaBT,       &
                                       nChans,        &
@@ -468,29 +472,27 @@ subroutine ufo_rttovonedvarcheck_ML_RTTOV12 ( self, &
                                       Jold,          &
                                       Status)
 
-! Heritage: Ops_SatRad_MarquardtLevenberg_RTTOV12.f90
-
 implicit none
 
 ! subroutine arguments:
-type(ufo_rttovonedvarcheck), intent(in) :: self
-real(kind_real), intent(in)             :: DeltaBT(:)        ! y-y(x)
-integer, intent(in)                     :: nChans
-type(Obinfo_type), intent(inout)        :: ob_info
-real(kind_real), intent(in)             :: H_Matrix(:,:)     ! Jacobian
-real(kind_real), intent(in)             :: H_Matrix_T(:,:)   ! (Jacobian)^T
-integer, intent(in)                     :: nprofelements
-type(profindex_type), intent(in)        :: profile_index
-real(kind_real), intent(inout)          :: DeltaProfile(:)   ! see note in header
-real(kind_real), intent(inout)          :: GuessProfile(:)
-real(kind_real), intent(in)             :: BackProfile(:)
-real(kind_real), intent(in)             :: b_inv(:,:)
-type(rmatrix_type), intent(in)          :: r_matrix
-type(ufo_geovals), intent(inout)        :: geovals
-integer(c_int), intent(in)              :: channels(:)
-real(kind_real), intent(inout)          :: gamma
-real(kind_real), intent(inout)          :: Jold
-integer, intent(out)                    :: Status
+type(ufo_rttovonedvarcheck), intent(in) :: self            !< structure containing settings
+real(kind_real), intent(in)             :: DeltaBT(:)      !< y-y(x)
+integer, intent(in)                     :: nChans          !< number of channels
+type(Obinfo_type), intent(inout)        :: ob_info         !< satellite metadata
+real(kind_real), intent(in)             :: H_Matrix(:,:)   !< Jacobian
+real(kind_real), intent(in)             :: H_Matrix_T(:,:) !< transpose  of the Jacobian
+integer, intent(in)                     :: nprofelements   !< number of profile elements
+type(profindex_type), intent(in)        :: profile_index   !< index array for x vector
+real(kind_real), intent(inout)          :: DeltaProfile(:) !< x_(n+1) - xb
+real(kind_real), intent(inout)          :: GuessProfile(:) !< x_(n+1)
+real(kind_real), intent(in)             :: BackProfile(:)  !< xb
+real(kind_real), intent(in)             :: b_inv(:,:)      !< inverse of the state error covariance
+type(rmatrix_type), intent(in)          :: r_matrix        !< observation error covariance
+type(ufo_geovals), intent(inout)        :: geovals         !< model data at obs location
+integer(c_int), intent(in)              :: channels(:)     !< channels used
+real(kind_real), intent(inout)          :: gamma           !< steepness of descent parameter
+real(kind_real), intent(inout)          :: Jold            !< previous steps cost which gets update by good step
+integer, intent(out)                    :: Status          !< code to capture failed Cholesky decomposition
 
 ! Local declarations:
 character(len=*), parameter         :: RoutineName = 'ufo_rttovonedvarcheck_ML_RTTOV12'
@@ -616,10 +618,10 @@ DescentLoop : do while (JCost > JOld .and.              &
       Jcost = 1.0E10
     else
       DeltaProfile(:) = GuessProfile(:) - BackProfile(:)
-      Ydiff(:) = ob_info%yobs(:) - BriTemp(:)
+      Ydiff(:) = ob_info % yobs(:) - BriTemp(:)
       call ufo_rttovonedvarcheck_CostFunction(DeltaProfile, b_inv, Ydiff, r_matrix, Jout)
       Jcost = Jout(1)
-!      if (Status /= StatusOK) GOTO 9999
+      if (Status /= StatusOK) goto 9999
     end if
 
   else

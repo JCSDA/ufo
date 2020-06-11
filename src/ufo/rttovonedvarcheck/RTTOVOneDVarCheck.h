@@ -32,7 +32,18 @@ namespace ioda {
 
 namespace ufo {
 
-/// RTTOVOneDVarCheck: check observation closeness to background
+//! \brief RTTOVOneDVarCheck
+//!
+//! \details RTTOVOneDVarCheck performs a 1D-Var minimization for satellite using the rttov
+//! forward operator.  If a profile does not converge the all channels for this observation
+//! are removed.  Some parameters (e.g. surface emissivity) are retrieved and saved in the 
+//! obsspace for use in 4D-Var.  The code is based on the Met Office 1D-Var scheme and thus
+//! is predominently in Fortran.
+//!
+//! \author M. Cooke (Met Office)
+//!
+//! \date 09/06/2020
+//!
 
 class RTTOVOneDVarCheck : public FilterBase,
                      private util::ObjectCounter<RTTOVOneDVarCheck> {

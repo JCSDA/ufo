@@ -3,7 +3,7 @@
 ! This software is licensed under the terms of the Apache Licence Version 2.0
 ! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 
-!> Fortran module to provide code shared between nonlinear and tlm/adm radiance calculations
+!> Fortran module containing subroutines used by both minimizers.
 
 module ufo_rttovonedvarcheck_minimize_utils_mod
 
@@ -11,16 +11,18 @@ use iso_c_binding
 use kinds
 use ufo_constants_mod, only: grav, zero, t0c, half, one, two
 use ufo_geovals_mod
-use ufo_rttovonedvarcheck_utils_mod
 use ufo_radiancerttov_tlad_mod
-use ufo_rttovonedvarcheck_profindex_mod, only: profindex_type
+use ufo_rttovonedvarcheck_constants_mod
+use ufo_rttovonedvarcheck_obinfo_mod
+use ufo_rttovonedvarcheck_profindex_mod
 
 implicit none
-private ! default
+private
 
 ! subroutines - public
 public ufo_rttovonedvarcheck_GeoVaLs2ProfVec
 public ufo_rttovonedvarcheck_ProfVec2GeoVaLs
+public ufo_rttovonedvarcheck_check_geovals
 public ufo_rttovonedvarcheck_CostFunction
 public ufo_rttovonedvarcheck_Qsplit
 public ufo_rttovonedvarcheck_CheckIteration
@@ -28,31 +30,36 @@ public ufo_rttovonedvarcheck_CheckCloudyIteration
 public ufo_rttovonedvarcheck_Cholesky
 
 ! subroutines - private to the module
-private Ops_Qsat
-private Ops_QsatWat
+private ufo_rttovonedvarcheck_Qsat
+private ufo_rttovonedvarcheck_QsatWat
 
 contains
 
+!-------------------------------------------------------------------------------
+!> Copy geovals data (and ob_info) to profile.
+!!
+!! \details Heritage: Ops_SatRad_RTprof2Vec_RTTOV12.f90
+!!
+!! Convert profile data from the GeoVaLs format (and ob_info) into the minimisation
+!! format vector profile. We only copy fields that are being retrieved, as indicated by
+!! the profindex structure.
+!!
+!! \author M. Cooke (Met Office)
+!!
+!! \date 09/06/2020: Created
+!!
 subroutine ufo_rttovonedvarcheck_GeoVaLs2ProfVec( geovals,  & ! in
                                              profindex,     & ! in
                                              ob_info,       & ! in
                                              prof_x )         ! out
 
-!-------------------------------------------------------------------------------
-! Copy profile data from the GeoVaLs-format into the
-! minimisation-format vector Prof. We only copy fields that are being retrieved,
-! as indicated by the profindex structure.
-!-------------------------------------------------------------------------------
-
-! Heritage: Ops_SatRad_RTprof2Vec_RTTOV12.f90
-
 implicit none
 
 ! subroutine arguments:
-type(ufo_geovals), intent(in)    :: geovals
-type(profindex_type), intent(in) :: profindex
-type(obinfo_type), intent(in)    :: ob_info
-real(kind_real), intent(out)     :: prof_x(:)
+type(ufo_geovals), intent(in)    :: geovals   !< model data at obs location
+type(profindex_type), intent(in) :: profindex !< index array for x vector
+type(obinfo_type), intent(in)    :: ob_info   !< satellite metadata
+real(kind_real), intent(out)     :: prof_x(:) !< x vector
 
 ! Local arguments:
 character(len=*), parameter :: RoutineName = "ufo_rttovonedvarcheck_GeoVaLs2ProfVec"
@@ -152,44 +159,46 @@ if (profindex % cloudfrac > 0) then
   prof_x(profindex % cloudfrac) = ob_info % cloudfrac
 end if
 
-!-----------------------
-! 4. Microwave Emissivity
-!-----------------------
+! Microwave Emissivity
+if (profindex % mwemiss(1) > 0) then
+  prof_x(profindex % mwemiss(1):profindex % mwemiss(2)) = ob_info % emiss
+end if
 
-!! Emissivity Retrieval - this is not in the GeoVaLs at the moment
-!if (profindex % mwemiss(1) > 0) then
-!    varname = "emissivity"
-!    call ufo_geovals_get_var(geovals, varname, geoval)
-!    prof_x(profindex % mwemiss(1):profindex % mwemiss(2)) = geoval%vals(:, 1)
-!end if
+! Retrieval of emissivity principal components
+IF (profindex % emisspc(1) > 0) THEN
+  ! convert ob_info % emiss to emiss pc using
+  ! Ops_SatRad_PCToEmis
+  ! Prof(profindex % emisspc(1):profindex % emisspc(2)) = emiss_pc
+END IF
 
 write(*,*) trim(RoutineName)," end"
 
 end subroutine ufo_rttovonedvarcheck_GeoVaLs2ProfVec
 
 !-------------------------------------------------------------------------------
-
+!> Copy profile data to geovals (and ob_info).
+!!
+!! \details Heritage: Ops_SatRad_Vec2RTprof_RTTOV12.f90
+!!
+!! Convert profile data to the GeoVaLs (and ob_info) format.  We only copy fields 
+!! that are being retrieved, as indicated by the profindex structure.
+!!
+!! \author M. Cooke (Met Office)
+!!
+!! \date 09/06/2020: Created
+!!
 subroutine ufo_rttovonedvarcheck_ProfVec2GeoVaLs(geovals,  & ! inout
                                             profindex,     & ! in
                                             ob_info,       & ! inout
                                             prof_x )         ! in
 
-!-------------------------------------------------------------------------------
-! Copy profile data from the GeoVaLs-format into the
-! minimisation-format vector Prof. We only copy fields that are being retrieved,
-! as indicated by the profindex structure.
-! This has heritage from ufo_rttovonedvarcheck_RTprof2Vec_RTTOVxx.f90
-!-------------------------------------------------------------------------------
-
-! Heritage: Ops_SatRad_Vec2RTprof_RTTOV12.f90
-
 implicit none
 
 ! subroutine arguments:
-type(ufo_geovals), intent(inout) :: geovals
-type(profindex_type), intent(in) :: profindex
-type(obinfo_type), intent(inout) :: ob_info
-real(kind_real), intent(in)      :: prof_x(:)
+type(ufo_geovals), intent(inout) :: geovals   !< model data at obs location
+type(profindex_type), intent(in) :: profindex !< index array for x vector
+type(obinfo_type), intent(inout) :: ob_info   !< satellite metadata
+real(kind_real), intent(in)      :: prof_x(:) !< x vector
 
 ! Local arguments:
 character(len=*), parameter  :: RoutineName = "ufo_rttovonedvarcheck_ProfVec2GeoVaLs"
@@ -352,17 +361,152 @@ if (profindex % cloudfrac > 0) then
   ob_info % cloudfrac = prof_x(profindex % cloudfrac)
 end if
 
+! Microwave Emissivity
+if (profindex % mwemiss(1) > 0) then
+  ob_info % emiss = prof_x(profindex % mwemiss(1):profindex % mwemiss(2))
+end if
+
+! Retrieval of emissivity principal components
+IF (profindex % emisspc(1) > 0) THEN
+  ! emiss_pc = prof_x(profindex % emisspc(1):profindex % emisspc(2)) 
+  ! convert emiss_pc to ob_info % emissivity using
+  ! Ops_SatRad_EmisToPC
+END IF
+
 write(*,*) trim(RoutineName)," end"
 
 end subroutine ufo_rttovonedvarcheck_ProfVec2GeoVaLs
 
 !-------------------------------------------------------------------------------
+!> Check the geovals are ready for the first iteration
+!!
+!! \details Heritage: Ops_SatRad_SetUpRTprofBg_RTTOV12.f90
+!!
+!! Check the geovals profile is ready for the first iteration.  The
+!! only check included at the moment if the first calculation for 
+!! q total.
+!!
+!! \author M. Cooke (Met Office)
+!!
+!! \date 09/06/2020: Created
+!!
+subroutine ufo_rttovonedvarcheck_check_geovals(geovals, profindex)
 
+implicit none
+
+! subroutine arguments:
+type(ufo_geovals), intent(inout) :: geovals   !< model data at obs location
+type(profindex_type), intent(in) :: profindex !< index array for x vector
+
+character(len=*), parameter  :: routinename = "ufo_rttovonedvarcheck_check_geovals"
+character(len=max_string)    :: varname
+type(ufo_geoval), pointer    :: geoval
+integer                      :: gv_index, i     ! counters
+integer                      :: nlevels
+real(kind_real), allocatable :: temperature(:)  ! temperature (K)
+real(kind_real), allocatable :: pressure(:)     ! pressure (Pa)
+real(kind_real), allocatable :: humidity_total(:)
+real(kind_real), allocatable :: q(:)            ! specific humidity (kg/kg)
+real(kind_real), allocatable :: ql(:)
+real(kind_real), allocatable :: qi(:)
+
+write(*,*) routinename, " : started"
+
+!-------------------------
+! Specific humidity total
+!-------------------------
+
+if (profindex % qt(1) > 0) then
+
+  nlevels = profindex % qt(2) - profindex % qt(1) + 1
+  allocate(temperature(nlevels))
+  allocate(pressure(nlevels))
+  allocate(humidity_total(nlevels))
+  allocate(q(nlevels))
+  allocate(ql(nlevels))
+  allocate(qi(nlevels))
+
+  ! Get temperature and pressure from geovals
+  call ufo_geovals_get_var(geovals, "air_temperature", geoval)
+  temperature(:) = geoval%vals(:, 1) ! K
+  call ufo_geovals_get_var(geovals, "air_pressure", geoval)
+  pressure(:) = geoval%vals(:, 1)    ! Pa
+
+  ! Get humidity data from geovals
+  humidity_total(:) = 0.0
+  call ufo_geovals_get_var(geovals, "specific_humidity", geoval)
+  humidity_total(:) = humidity_total(:) + geoval%vals(:, 1)
+  call ufo_geovals_get_var(geovals, "mass_content_of_cloud_liquid_water_in_atmosphere_layer", geoval)
+  humidity_total(:) = humidity_total(:) + geoval%vals(:, 1)
+
+  ! Split qtotal to q(water_vapour), q(liquid), q(ice)
+  call ufo_rttovonedvarcheck_Qsplit (1,      & ! in
+                          temperature(:),    & ! in
+                          pressure(:),       & ! in
+                          nlevels,           & ! in
+                          humidity_total(:), & ! in
+                          q(:),              & ! out
+                          ql(:),             & ! out
+                          qi(:))               ! out
+
+  ! Assign values to geovals
+  varname = "specific_humidity"  ! kg/kg
+  gv_index = 0
+  do i=1,geovals%nvar
+    if (varname == trim(geovals%variables(i))) gv_index = i
+  end do
+  geovals%geovals(gv_index) % vals(:,1) = q(:)
+
+  varname = "mass_content_of_cloud_liquid_water_in_atmosphere_layer"  ! kg/kg
+  gv_index = 0
+  do i=1,geovals%nvar
+    if (varname == trim(geovals%variables(i))) gv_index = i
+  end do
+  geovals%geovals(gv_index) % vals(:,1) = ql(:)
+
+  varname = "mass_content_of_cloud_ice_in_atmosphere_layer"  ! kg/kg
+  gv_index = 0
+  do i=1,geovals%nvar
+    if (varname == trim(geovals%variables(i))) gv_index = i
+  end do
+  geovals%geovals(gv_index)%vals(:,1) = qi(:)
+
+  deallocate(temperature)
+  deallocate(pressure)
+  deallocate(humidity_total)
+  deallocate(q)
+  deallocate(ql)
+  deallocate(qi)
+
+end if
+
+! Tidy up
+if (allocated(temperature))    deallocate(temperature)
+if (allocated(pressure))       deallocate(pressure)
+if (allocated(humidity_total)) deallocate(humidity_total)
+if (allocated(q))              deallocate(q)
+if (allocated(ql))             deallocate(ql)
+if (allocated(qi))             deallocate(qi)
+
+write(*,*) routinename, " : ended"
+
+end subroutine ufo_rttovonedvarcheck_check_geovals
+
+!-------------------------------------------------------------------------------
+!> Calculate the cost function.
+!!
+!! \details Heritage: Ops_SatRad_CostFunction.f90
+!!
+!! Caculate the cost function from the input delta's and error
+!! covariances.
+!!
+!! \author M. Cooke (Met Office)
+!!
+!! \date 09/06/2020: Created
+!!
 subroutine ufo_rttovonedvarcheck_CostFunction(DeltaProf, b_inv, &
                                               DeltaObs, r_matrix, &
                                               Jcost)
-
-! Heritage: Ops_SatRad_CostFunction.f90
 
 use ufo_rttovonedvarcheck_rmatrix_mod, only: rmatrix_type
 implicit none
@@ -405,25 +549,30 @@ deallocate(RinvDeltaY)
 end subroutine ufo_rttovonedvarcheck_CostFunction
 
 !-------------------------------------------------------------------------------
-! (C) Crown copyright Met Office. All rights reserved.
-!     Refer to COPYRIGHT.txt of this distribution for details.
-!-------------------------------------------------------------------------------
-! if output_type=1 : Split total water content (qtotal) into
-!   water vapor content (q) and
-!   cloud liquid water content (ql) and
-!   cloud ice water content (qi)
-! if output_type ne 1 : Compute derivatives: (q) =dq/dqtotal
-!                                            (ql)=dql/dqtotal
-!                                            (qi)=dqi/dqtotal
-!
-!  WARNinG: The derivatives are not valid if LtemperatureVar=.true. since
-!     qsaturated depends on temperature.
-!
-! The partitioning of the excess moisture between ice and clw uses a temperature
-! based parametrization based on aircraft data Ref: Jones DC Reading phdthesis
-! p126
-!-------------------------------------------------------------------------------
-
+!> Split the humidity into water vapour, liquid water and ice.
+!!
+!! \details Heritage: Ops_SatRad_Qsplit.f90
+!!
+!! if output_type=1 : Split total water content (qtotal) into <br>
+!!   water vapor content (q) and <br>
+!!   cloud liquid water content (ql) and <br>
+!!   cloud ice water content (qi) <br>
+!!
+!! if output_type ne 1 : Compute derivatives: (q) =dq/dqtotal <br>
+!!                                            (ql)=dql/dqtotal <br>
+!!                                            (qi)=dqi/dqtotal <br>
+!!
+!! \warning The derivatives are not valid if LtemperatureVar=.true. since
+!!     qsaturated depends on temperature.
+!!
+!! The partitioning of the excess moisture between ice and clw uses a temperature
+!! based parametrization based on aircraft data Ref: Jones DC Reading phdthesis
+!! p126
+!!
+!! \author M. Cooke (Met Office)
+!!
+!! \date 09/06/2020: Created
+!!
 subroutine ufo_rttovonedvarcheck_Qsplit (output_type, &
                               t,           &
                               p,           &
@@ -433,19 +582,17 @@ subroutine ufo_rttovonedvarcheck_Qsplit (output_type, &
                               ql,          &
                               qi)
 
-! Heritage: Ops_SatRad_Qsplit.f90
-
 implicit none
 
 ! subroutine arguments:
-integer, intent(in)               :: output_type
-real(kind=kind_real), intent(in)  :: t(:)
-real(kind=kind_real), intent(in)  :: p(:)
-integer, intent(in)               :: nlevels_q         ! no. of wet levels
-real(kind=kind_real), intent(in)  :: qtotal(nlevels_q)
-real(kind=kind_real), intent(out) :: q(nlevels_q)      ! humidity component q
-real(kind=kind_real), intent(out) :: ql(nlevels_q)     ! liquid component ql
-real(kind=kind_real), intent(out) :: qi(nlevels_q)     ! ice component qi
+integer, intent(in)               :: output_type       !< output profiles or gradients
+real(kind=kind_real), intent(in)  :: t(:)              !< air temperature
+real(kind=kind_real), intent(in)  :: p(:)              !< air pressure
+integer, intent(in)               :: nlevels_q         !< no. of levels
+real(kind=kind_real), intent(in)  :: qtotal(nlevels_q) !< humidity total (kg/kg)
+real(kind=kind_real), intent(out) :: q(nlevels_q)      !< water vapour component q
+real(kind=kind_real), intent(out) :: ql(nlevels_q)     !< liquid component ql
+real(kind=kind_real), intent(out) :: qi(nlevels_q)     !< ice component qi
 
 ! Local declarations:
 integer                     :: nlevels_diff
@@ -496,10 +643,10 @@ QsplitRainParamC = 50.0_kind_real
 
 ! Compute saturated water vapor profile for nlevels_q only
 
-call Ops_Qsat (qsaturated(1:nlevels_q),    & ! out
-               t(1:nlevels_q),             & ! in
-               p(1:nlevels_q),             & ! in
-               nlevels_q)                    ! in
+call ufo_rttovonedvarcheck_Qsat (qsaturated(1:nlevels_q), & ! out
+                           t(1:nlevels_q),                & ! in
+                           p(1:nlevels_q),                & ! in
+                           nlevels_q)                       ! in
 
 SmallValue = one / 8.5_kind_real
 Denom = SmallValue * (upper_rh - lower_rh)
@@ -626,42 +773,41 @@ end if
 
 end subroutine ufo_rttovonedvarcheck_Qsplit
 
-!-----------------------------------------------------------------------
-! (C) Crown copyright Met Office. All rights reserved.
-!     Refer to COPYRIGHT.txt of this distribution for details.
-!-----------------------------------------------------------------------
-! Saturation Specific Humidity Scheme (Qsat): Vapour to Liquid/Ice.
-!
-! Purpose:
-!
-! Returns a saturation mixing ratio given a temperature and pressure
-! using saturation vapour pressures caluclated using the Goff-Gratch
-! formulae, adopted by the WMO as taken from Landolt-Bornstein, 1987
-! Numerical data and Functional relationships in Science and
-! Technology.  Group V/Vol 4B Meteorology.  Physical and Chemical
-! properties of Air, P35.
-!
-! Value in the lookup table are over water above 0 degrees C and over
-! ice below this temperatures.
-!
-! Method:
-!   uses lookup tables to find eSAT, calculates qSAT directly from that.
-!-----------------------------------------------------------------------
+!-------------------------------------------------------------------------------
+!> Calculate the Saturation Specific Humidity Scheme (Qsat): Vapour to Liquid/Ice.
+!!
+!! \details Heritage: Ops_Qsat.inc
+!!
+!! Returns a saturation mixing ratio given a temperature and pressure
+!! using saturation vapour pressures caluclated using the Goff-Gratch
+!! formulae, adopted by the WMO as taken from Landolt-Bornstein, 1987
+!! Numerical data and Functional relationships in Science and
+!! Technology.  Group V/Vol 4B Meteorology.  Physical and Chemical
+!! properties of Air, P35.
+!!
+!! Value in the lookup table are over water above 0 degrees C and over
+!! ice below this temperatures.
+!!
+!! Method: <br>
+!!   uses lookup tables to find eSAT, calculates qSAT directly from that.
+!!
+!! \author M. Cooke (Met Office)
+!!
+!! \date 09/06/2020: Created
+!!
 
-subroutine Ops_Qsat (QS,           &
-                     T,            &
-                     P,            &
-                     NPNTS)
-
-! Heritage: Ops_Qsat.inc
+subroutine ufo_rttovonedvarcheck_Qsat (QS, &
+                                       T,  &
+                                       P,  &
+                                       NPNTS)
 
 implicit none
 
 ! subroutine arguments:
-integer, intent(in)                 :: NPNTS     ! Points being processed by qSAT scheme.
-real(kind=kind_real), intent(in)    :: T(NPNTS)  ! Temperature (K)
-real(kind=kind_real), intent(in)    :: P(NPNTS)  ! Pressure (Pa).
-real(kind=kind_real), intent(inout) :: QS(NPNTS) ! Saturation mixing ratio (KG/KG)
+integer, intent(in)                 :: NPNTS     !< Points being processed by qSAT scheme.
+real(kind=kind_real), intent(in)    :: T(NPNTS)  !< Temperature (K)
+real(kind=kind_real), intent(in)    :: P(NPNTS)  !< Pressure (Pa).
+real(kind=kind_real), intent(inout) :: QS(NPNTS) !< Saturation mixing ratio (KG/KG)
 
 ! Local declarations:
 real(kind=kind_real), parameter :: EPSILON   = 0.62198_kind_real
@@ -677,7 +823,7 @@ real(kind=kind_real) :: TT
 integer              :: I
 integer              :: IES
 real(kind=kind_real) :: ES(0:N + 1)    ! Table of saturation water vapour pressure (PA)
-character(len=*), parameter :: RoutineName = "Ops_Qsat"
+character(len=*), parameter :: RoutineName = "ufo_rttovonedvarcheck_Qsat"
 
 ! Note: 0 element is a repeat of 1st element to cater for special case
 !       of low temperatures (.LE.T_LOW) for which the array index is
@@ -1050,40 +1196,40 @@ do I = 1, NPNTS
 
 end do
 
-end subroutine Ops_Qsat
+end subroutine ufo_rttovonedvarcheck_Qsat
 
-!-----------------------------------------------------------------------
-! (C) Crown copyright Met Office. All rights reserved.
-!     Refer to COPYRIGHT.txt of this distribution for details.
-!-----------------------------------------------------------------------
-! Saturation Specific Humidity Scheme: Vapour to Liquid.
-!
-! Returns a saturation mixing ratio given a temperature and pressure
-! using saturation vapour pressure calculated using the Goff-Gratch
-! Formulaie, adopted by the WMO as taken from Landolt-Bornstein, 1987
-! Numerical Data and Functional Relationships in Science and
-! Technology.  Group V/Vol 4B Meteorology.  Physical and Chemical
-! Properties of Air, P35
-!
-! Values in the lookup table are over water above and below 0 degrees C.
-!
-! Note: For vapour pressure oever water this formula is valid for
-! temperatures between 373K and 223K.  The values for saturated vapour
-! over water in the lookup table below are out of the lower end of
-! this range.  However it is standard WMO practice to use the formula
-! below its accepted range for use with the calculation of dew points
-! in the upper atmosphere
-!
-! Method:
-!   uses lookup tables to find eSAT, calculates qSAT directly from that.
-!-----------------------------------------------------------------------
-
-subroutine Ops_QsatWat (QS,    &
-                        T,     &
-                        P,     &
-                        NPNTS)
-
-! Heritage: Ops_QsatWat.inc
+!-------------------------------------------------------------------------------
+!> Saturation Specific Humidity Scheme: Vapour to Liquid.
+!!
+!! \details Heritage: Ops_QsatWat.inc
+!!
+!! Returns a saturation mixing ratio given a temperature and pressure
+!! using saturation vapour pressure calculated using the Goff-Gratch
+!! Formulaie, adopted by the WMO as taken from Landolt-Bornstein, 1987
+!! Numerical Data and Functional Relationships in Science and
+!! Technology.  Group V/Vol 4B Meteorology.  Physical and Chemical
+!! Properties of Air, P35
+!!
+!! Values in the lookup table are over water above and below 0 degrees C.
+!!
+!! Note: For vapour pressure oever water this formula is valid for
+!! temperatures between 373K and 223K.  The values for saturated vapour
+!! over water in the lookup table below are out of the lower end of
+!! this range.  However it is standard WMO practice to use the formula
+!! below its accepted range for use with the calculation of dew points
+!! in the upper atmosphere
+!!
+!! Method: <br>
+!!   uses lookup tables to find eSAT, calculates qSAT directly from that.
+!!
+!! \author M. Cooke (Met Office)
+!!
+!! \date 09/06/2020: Created
+!!
+subroutine ufo_rttovonedvarcheck_QsatWat (QS, &
+                                          T,  &
+                                          P,  &
+                                          NPNTS)
 
 implicit none
 
@@ -1108,7 +1254,7 @@ real                        :: TT
 integer                     :: I
 integer                     :: IES
 real                        :: ES(0:N + 1)   ! Table of saturation water vapour pressure (PA)
-character(len=*), parameter :: RoutineName = "Ops_QsatWat"
+character(len=*), parameter :: RoutineName = "ufo_rttovonedvarcheck_QsatWat"
 
 ! Note: 0 element is a repeat of 1st element to cater for special case
 !       of low temperatures (.LE.T_LOW) for which the array index is
@@ -1480,33 +1626,24 @@ do I = 1, NPNTS
 
 end do
 
-end subroutine Ops_QsatWat
+end subroutine ufo_rttovonedvarcheck_QsatWat
 
 !-------------------------------------------------------------------------------
-! (C) Crown copyright Met Office. All rights reserved.
-!     Refer to COPYRIGHT.txt of this distribution for details.
-!-------------------------------------------------------------------------------
-! Constrain profile humidity and check temperature values are okay
-!-------------------------------------------------------------------------------
-
+!> Constrain profile humidity and check temperature values are okay
+!!
+!! \details Heritage: Ops_SatRad_CheckIteration.f90
+!!
+!! Check humidity and temperature profiles.
+!!
+!! \author M. Cooke (Met Office)
+!!
+!! \date 09/06/2020: Created
+!!
 subroutine ufo_rttovonedvarcheck_CheckIteration (geovals,    &
                                       profindex,  &
                                       nlevels_1dvar, &
                                       profile,    &
                                       OutOfRange)
-
-! Heritage: Ops_SatRad_CheckIteration.f90
-
-!use OpsMod_SatRad_Info, only: &
-!    EmisEigenvec
-
-!use OpsMod_SatRad_RTmodel, only: &
-!    Plevels_RTModel,             &
-!    nemisspc
-
-!use OpsMod_SatRad_SetUp, only: &
-!    LimitCTPtorTBase,          &
-!    useLogForCloud
 
 implicit none
 
@@ -1620,15 +1757,15 @@ Constrain: if (.not. OutOfRange) then
   if (profindex % q(1) > 0) then
 
     if (useRHwaterForQC) then
-      call Ops_QsatWat (qsaturated(1:nlevels_q),    & ! out (qsat levels)
-                        Temp(1:nlevels_q),          & ! in  (t levels)
-                        Plevels_1DVar(1:nlevels_q), & ! in  (p levels)
-                        nlevels_q)                    ! in
+      call ufo_rttovonedvarcheck_QsatWat(qsaturated(1:nlevels_q), & ! out (qsat levels)
+                                 Temp(1:nlevels_q),               & ! in  (t levels)
+                                 Plevels_1DVar(1:nlevels_q),      & ! in  (p levels)
+                                 nlevels_q)                         ! in
     else
-      call Ops_Qsat (qsaturated(1:nlevels_q),    & ! out
-                     Temp(1:nlevels_q),          & ! in
-                     Plevels_1DVar(1:nlevels_q), & ! in
-                     nlevels_q)                    ! in
+      call ufo_rttovonedvarcheck_Qsat(qsaturated(1:nlevels_q), & ! out
+                                 Temp(1:nlevels_q),            & ! in
+                                 Plevels_1DVar(1:nlevels_q),   & ! in
+                                 nlevels_q)                      ! in
     end if
 
     qsaturated(1:nlevels_q) = log (qsaturated(1:nlevels_q) * 1000.0)
@@ -1641,10 +1778,10 @@ Constrain: if (.not. OutOfRange) then
   if (profindex % qt(1) > 0) then
 
     ! Qtotal is not included in the relative humidity quality control changes
-    call Ops_Qsat (qsaturated(1:nlevels_q),    & ! out
-                   Temp(1:nlevels_q),          & ! in
-                   Plevels_1DVar(1:nlevels_q), & ! in
-                   nlevels_q)                    ! in
+    call ufo_rttovonedvarcheck_Qsat (qsaturated(1:nlevels_q), & ! out
+                               Temp(1:nlevels_q),             & ! in
+                               Plevels_1DVar(1:nlevels_q),    & ! in
+                               nlevels_q)                       ! in
 
     ! scaled_qsaturated is generated as an upper limit on the value of qtot , and
     ! is set to 2*qsat.
@@ -1665,15 +1802,15 @@ Constrain: if (.not. OutOfRange) then
     call ufo_geovals_get_var(geovals, varname, geoval)
     Pstar_Pa(1) = geoval%vals(1, 1)
     if (useRHwaterForQC) then
-      call Ops_QsatWat (q2_sat(1:1),    & ! out
-                        Temp2,          & ! in
-                        Pstar_Pa(1:1),  & ! in
-                        1)                ! in
+      call ufo_rttovonedvarcheck_QsatWat (q2_sat(1:1), & ! out
+                                 Temp2,                & ! in
+                                 Pstar_Pa(1:1),        & ! in
+                                 1)                      ! in
     else
-      call Ops_Qsat (q2_sat(1:1),   & ! out
-                     Temp2,         & ! in
-                     Pstar_Pa(1:1), & ! in
-                     1)               ! in
+      call ufo_rttovonedvarcheck_Qsat (q2_sat(1:1), & ! out
+                                 Temp2,             & ! in
+                                 Pstar_Pa(1:1),     & ! in
+                                 1)                   ! in
     end if
     q2_sat(1) = log (q2_sat(1) * 1000.0)
     write(*,*) "profile(profindex % q2) = ",profile(profindex % q2)
@@ -1749,21 +1886,23 @@ if (allocated(Plevels_1DVar))     deallocate(Plevels_1DVar)
 end subroutine ufo_rttovonedvarcheck_CheckIteration
 
 !-------------------------------------------------------------------------------
-! (C) Crown copyright Met Office. All rights reserved.
-!     Refer to COPYRIGHT.txt of this distribution for details.
-!-------------------------------------------------------------------------------
-! For a 1dvar profile using cloud variables, check that the liquid water path
-! and the ice water path are sensible. if they are beyond sensible values stop
-! 1dvar and reject profile
-!-------------------------------------------------------------------------------
-
+!> Check cloud during iteration.
+!!
+!! \details Heritage: Ops_SatRad_CheckCloudyIteration.f90
+!!
+!! For a 1dvar profile using cloud variables, check that the liquid water path
+!! and the ice water path are sensible. if they are beyond sensible values stop
+!! 1dvar and reject profile
+!!
+!! \author M. Cooke (Met Office)
+!!
+!! \date 09/06/2020: Created
+!!
 subroutine ufo_rttovonedvarcheck_CheckCloudyIteration( &
   geovals,       & ! in
   profindex,     & ! in
   nlevels_1dvar, & ! in
   OutOfRange )     ! out
-
-! Heritage: Ops_SatRad_CheckCloudyIteration.f90
 
 implicit none
 
@@ -1873,25 +2012,27 @@ end if
 end subroutine ufo_rttovonedvarcheck_CheckCloudyIteration
 
 !-------------------------------------------------------------------------------
-! (C) Crown copyright Met Office. All rights reserved.
-!     Refer to COPYRIGHT.txt of this distribution for details.
-!-------------------------------------------------------------------------------
-! Solves the Linear equation UQ=V for Q where U is a symmetric positive definite
-! matrix and U and Q are vectors of length N.  The method follows that in Golub
-! and Van Loan although this is pretty standard.
-!
-! if U is not positive definite this will be detected by the program and flagged
-! as an error.  U is assumed to be symmetric as only the upper triangle is in
-! fact used.
-!-------------------------------------------------------------------------------
-
+!> Do cholesky decomposition
+!!
+!! \details Heritage: Ops_Cholesky.inc
+!!
+!! Solves the Linear equation UQ=V for Q where U is a symmetric positive definite
+!! matrix and U and Q are vectors of length N.  The method follows that in Golub
+!! and Van Loan although this is pretty standard.
+!!
+!! if U is not positive definite this will be detected by the program and flagged
+!! as an error.  U is assumed to be symmetric as only the upper triangle is in
+!! fact used.
+!!
+!! \author M. Cooke (Met Office)
+!!
+!! \date 09/06/2020: Created
+!!
 subroutine ufo_rttovonedvarcheck_Cholesky (U,         &
                          V,         &
                          N,         &
                          Q,         &
                          ErrorCode)
-
-! Heritage: Ops_Cholesky.inc
 
 implicit none
 

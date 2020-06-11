@@ -38,7 +38,8 @@ RTTOVOneDVarCheck::RTTOVOneDVarCheck(ioda::ObsSpace & obsdb, const eckit::Config
   const oops::Variables & variables = obsdb.obsvariables();
   channels_ = variables.channels();
 
-  // Choose when to apply filter - this is a temporary fudge
+  // Choose when to apply filter - this is a temporary fix
+  // to run as a post filter
   if (config_.has("applyfilter")) {
     std::vector<eckit::LocalConfiguration> testvarconf;
     config_.get("applyfilter", testvarconf);
@@ -74,13 +75,14 @@ void RTTOVOneDVarCheck::applyFilter(const std::vector<bool> & apply,
   oops::Variables variables = filtervars.toOopsVariables();
 
 // Convert apply to char for passing to fortran
+// needed for channel selection
   std::vector<char> apply_char(apply.size(), 'F');
   for (size_t i = 0; i < apply_char.size(); i++) {
     if (apply[i]) {apply_char[i]='T';}
   }
 
 // Save qc flags to database for retrieval in fortran - needed for channel selection
-  flags_->save("FortranQC");    // temporary measure
+  flags_->save("FortranQC");    // temporary measure as per gnss qc
 
 // Pass it all to fortran
   const eckit::Configuration * conf = &config_;
@@ -88,7 +90,7 @@ void RTTOVOneDVarCheck::applyFilter(const std::vector<bool> & apply,
                                   apply_char.size(), apply_char[0]);
 
 // Read qc flags from database
-  flags_->read("FortranQC");    // temporary measure
+  flags_->read("FortranQC");    // temporary measure as per gnss qc
 
   oops::Log::trace() << "RTTOVOneDVarCheck Filter complete" << std::endl;
 }
