@@ -3,7 +3,7 @@ window_end: 2018-04-15T03:00:00Z
 ObsSpace:
   name: iasi_metop-a
   ObsDataIn:
-    obsfile: Data/ioda/testinput_tier_1/iasi_metop-a_obs_2018041500_m.nc4
+    obsfile: Data/ioda/testinput_tier_1/iasi_metop-a_obs_2018041500_m_unittest.nc4
   simulate:
     variables: [brightness_temperature]
     channels: &all_channels 16, 29, 32, 35, 38, 41, 44, 47, 49, 50, 51, 53,
@@ -63,10 +63,10 @@ ObsOperator:
     EndianType: little_endian
     CoefficientPath: Data/
 GeoVaLs:
-  filename: Data/iasi_metop-a_geoval_2018041500_m.nc4
+  filename: Data/iasi_metop-a_geoval_2018041500_m_unittest.nc4
 ObsDiag:
    variables: [brightness_temperature_jacobian_surface_emissivity, brightness_temperature_jacobian_surface_temperature, brightness_temperature_jacobian_air_temperature, brightness_temperature_jacobian_humidity_mixing_ratio] 
    channels: *all_channels 
 Reference ObsDiag:
-  filename: Data/iasi_metop-a_obsdiag_2018041500_m.nc4
+  filename: Data/iasi_metop-a_obsdiag_2018041500_m_unittest.nc4
 tolerance: 1.e-6

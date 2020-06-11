@@ -3,7 +3,7 @@ window_end: 2018-04-15T03:00:00Z
 ObsSpace:
   name: iasi_metop-a
   ObsDataIn:
-    obsfile: Data/ioda/testinput_tier_1/iasi_metop-a_obs_2018041500_m.nc4
+    obsfile: Data/ioda/testinput_tier_1/iasi_metop-a_obs_2018041500_m_unittest.nc4
   simulate:
     variables: [brightness_temperature]
     channels: &all_channels 16, 29, 32, 35, 38, 41, 44, 47, 49, 50, 51, 53,
@@ -63,10 +63,10 @@ ObsOperator:
     EndianType: little_endian
     CoefficientPath: Data/
 GeoVaLs:
-  filename: Data/iasi_metop-a_geoval_2018041500_m.nc4
+  filename: Data/iasi_metop-a_geoval_2018041500_m_unittest.nc4
 ObsDiag:
    variables: [optical_thickness_of_atmosphere_layer, transmittances_of_atmosphere_layer, weightingfunction_of_atmosphere_layer] 
    channels: *all_channels 
 Reference ObsDiag:
-  filename: Data/iasi_metop-a_obsdiag_2018041500_m.nc4
+  filename: Data/iasi_metop-a_obsdiag_2018041500_m_unittest.nc4
 tolerance: 1.e-6

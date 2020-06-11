@@ -18,7 +18,7 @@ Observations:
    ObsSpace:
      name: cris-fsr_npp
      ObsDataIn: 
-       obsfile: Data/ioda/testinput_tier_1/cris-fsr_npp_obs_2018041500_m.nc4
+       obsfile: Data/ioda/testinput_tier_1/cris-fsr_npp_obs_2018041500_m_unittest.nc4
      simulate:
        variables: [brightness_temperature]
        channels: &all_channels
@@ -55,6 +55,6 @@ Observations:
                  1981, 1982, 1983, 1984, 1985, 1986, 1987, 2119, 2140, 2143, 2147, 2153,
                  2158, 2161, 2168, 2171, 2175, 2182
    GeoVaLs: 
-     filename: Data/cris-fsr_npp_geoval_2018041500_m.nc4
+     filename: Data/cris-fsr_npp_geoval_2018041500_m_unittest.nc4
    vecequiv: GsiHofX
    tolerance: 1.e-6

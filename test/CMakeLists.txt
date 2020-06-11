@@ -88,7 +88,6 @@ list( APPEND ufo_test_input
   testinput/iasi_qc_filters.yaml
   testinput/locations.yaml
   testinput/mhs_crtm.yaml
-  testinput/obsdiag_crtm_jacobian.yaml
   testinput/obsdiag_crtm_amsua_jacobian.yaml
   testinput/obsdiag_crtm_amsua_optics.yaml
   testinput/obsdiag_crtm_cris_jacobian.yaml
@@ -159,6 +158,8 @@ list( APPEND ufo_test_data
   atmosphere/aircraft_geoval_2018041500_m.nc4
   atmosphere/aircraft_geoval_2018041500_s.nc4
   atmosphere/airs_aqua_geoval_2018041500_m.nc4
+  atmosphere/airs_aqua_geoval_2018041500_m_qc.nc4
+  atmosphere/airs_aqua_geoval_2018041500_m_unittest.nc4
   atmosphere/amsua_n19_obsdiag_2018041500_m_qc.nc4
   atmosphere/amsua_n19_obsdiag_2018041500_s_qc.nc4
   atmosphere/amsua_n19_geoval_2018041500_m_qc.nc4
@@ -172,7 +173,9 @@ list( APPEND ufo_test_data
   atmosphere/atms_npp_geoval_2018041500_s.nc4
   atmosphere/cris-fsr_npp_geoval_2018041500_m.nc4
   atmosphere/cris-fsr_npp_geoval_2018041500_m_qc.nc4
+  atmosphere/cris-fsr_npp_geoval_2018041500_m_unittest.nc4
   atmosphere/cris-fsr_npp_obsdiag_2018041500_m_qc.nc4
+  atmosphere/cris-fsr_npp_obsdiag_2018041500_m_unittest.nc4
   atmosphere/cris-fsr_npp_tlapmean.txt
   atmosphere/geovals_rttov.nc4
   atmosphere/geos_aod_geoval_2018041500_m.nc4
@@ -187,7 +190,11 @@ list( APPEND ufo_test_data
   atmosphere/gsisfc_uv_geoval_2018041500_m.nc4
   atmosphere/hirs4_metop-a_geoval_2018041500_m.nc4
   atmosphere/iasi_metop-a_obsdiag_2018041500_m.nc4
+  atmosphere/iasi_metop-a_obsdiag_2018041500_m_qc.nc4
+  atmosphere/iasi_metop-a_obsdiag_2018041500_m_unittest.nc4
   atmosphere/iasi_metop-a_geoval_2018041500_m.nc4
+  atmosphere/iasi_metop-a_geoval_2018041500_m_qc.nc4
+  atmosphere/iasi_metop-a_geoval_2018041500_m_unittest.nc4
   atmosphere/iasi_metop-a_tlapmean.txt
   atmosphere/met_office_thinning.nc4
   atmosphere/met_office_temporal_thinning_surface.nc4
@@ -1089,12 +1096,6 @@ ecbuild_add_test( TARGET  test_ufo_function_velocity
 # Test Diagnostics
 
 if ( ${CRTM_FOUND} )
-    ecbuild_add_test( TARGET  test_ufo_obsdiag_crtm_jacobian
-                      SOURCES mains/TestObsDiagnostics.cc
-                      ARGS    "testinput/obsdiag_crtm_jacobian.yaml"
-                      ENVIRONMENT OOPS_TRAPFPE=1
-                      LIBS    ufo)
-
     ecbuild_add_test( TARGET  test_ufo_obsdiag_crtm_amsua_optics
                       SOURCES mains/TestObsDiagnostics.cc
                       ARGS    "testinput/obsdiag_crtm_amsua_optics.yaml"
