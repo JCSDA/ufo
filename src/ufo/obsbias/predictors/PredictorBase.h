@@ -71,7 +71,7 @@ class PredictorBase : private boost::noncopyable {
 class PredictorFactory {
  public:
   static PredictorBase * create(const eckit::Configuration &, const std::vector<int> &);
-  virtual ~PredictorFactory() { getMakers().clear(); }
+  virtual ~PredictorFactory() = default;
   static bool predictorExists(const std::string &);
  protected:
   explicit PredictorFactory(const std::string &);

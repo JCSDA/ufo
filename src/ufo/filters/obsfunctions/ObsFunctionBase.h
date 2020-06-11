@@ -42,7 +42,7 @@ class ObsFunctionBase : private boost::noncopyable {
 class ObsFunctionFactory {
  public:
   static ObsFunctionBase * create(const Variable &);
-  virtual ~ObsFunctionFactory() { getMakers().clear(); }
+  virtual ~ObsFunctionFactory() = default;
   static bool functionExists(const std::string &);
  protected:
   explicit ObsFunctionFactory(const std::string &);

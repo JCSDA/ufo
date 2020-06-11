@@ -73,7 +73,7 @@ class ObsBiasFactory {
   static ObsBiasBase * create(const eckit::Configuration &,
                               const std::vector<std::string> &,
                               const std::vector<int> &);
-  virtual ~ObsBiasFactory() { getMakers().clear(); }
+  virtual ~ObsBiasFactory() = default;
 
  protected:
   explicit ObsBiasFactory(const std::string &);

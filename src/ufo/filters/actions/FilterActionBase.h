@@ -43,7 +43,7 @@ class FilterActionBase : private boost::noncopyable {
 class FilterActionFactory {
  public:
   static FilterActionBase * create(const eckit::Configuration &);
-  virtual ~FilterActionFactory() { getMakers().clear(); }
+  virtual ~FilterActionFactory() = default;
  protected:
   explicit FilterActionFactory(const std::string &);
  private:
