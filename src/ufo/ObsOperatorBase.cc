@@ -17,9 +17,9 @@ namespace ufo {
 
 // -----------------------------------------------------------------------------
 
-Locations * ObsOperatorBase::locations(const util::DateTime & t1,
+std::unique_ptr<Locations> ObsOperatorBase::locations(const util::DateTime & t1,
                                        const util::DateTime & t2) const {
-  return new Locations(odb_, t1, t2);
+  return std::unique_ptr<Locations>(new Locations(odb_, t1, t2));
 }
 
 // -----------------------------------------------------------------------------

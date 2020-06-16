@@ -58,9 +58,9 @@ void ObsGnssroBndROPP2D::simulateObs(const GeoVaLs & gom, ioda::ObsVector & ovec
 }
 
 // -----------------------------------------------------------------------------
-Locations * ObsGnssroBndROPP2D::locations(const util::DateTime & t1,
+std::unique_ptr<Locations> ObsGnssroBndROPP2D::locations(const util::DateTime & t1,
                                           const util::DateTime & t2) const {
-  Locations * locs = new Locations(odb_.comm());
+  std::unique_ptr<Locations> locs(new Locations(odb_.comm()));
 
   int keylocs = locs->toFortran();
   const util::DateTime * p1 = &t1;

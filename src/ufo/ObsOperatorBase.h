@@ -9,6 +9,7 @@
 #define UFO_OBSOPERATORBASE_H_
 
 #include <map>
+#include <memory>
 #include <string>
 
 #include <boost/noncopyable.hpp>
@@ -46,7 +47,8 @@ class ObsOperatorBase : public util::Printable,
   virtual const oops::Variables & requiredVars() const = 0;
 
 /// Locations for GeoVaLs
-  virtual Locations * locations(const util::DateTime &, const util::DateTime &) const;
+  virtual std::unique_ptr<Locations> locations(const util::DateTime &,
+                                               const util::DateTime &) const;
 
  private:
   virtual void print(std::ostream &) const = 0;

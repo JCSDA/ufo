@@ -56,8 +56,8 @@ const oops::Variables & ObsOperator::requiredVars() const {
 
 // -----------------------------------------------------------------------------
 
-Locations * ObsOperator::locations(const util::DateTime & t1,
-                                   const util::DateTime & t2) const {
+std::unique_ptr<Locations> ObsOperator::locations(const util::DateTime & t1,
+                                                  const util::DateTime & t2) const {
   return oper_->locations(t1, t2);
 }
 
