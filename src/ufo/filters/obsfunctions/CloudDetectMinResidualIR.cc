@@ -260,7 +260,9 @@ void CloudDetectMinResidualIR::compute(const ObsFilterData & in,
     float cloudp = 0.0;
     std::vector<float> dbt(nchans);
     for (size_t ichan=0; ichan < nchans; ++ichan) {
-      sum3 = sum3 + innovation[ichan][iloc] * innovation[ichan][iloc] * varinv_use[ichan][iloc];
+      if (varinv_use[ichan][iloc] > 0) {
+        sum3 = sum3 + innovation[ichan][iloc] * innovation[ichan][iloc] * varinv_use[ichan][iloc];
+      }
     }
     sum3 = 0.75 * sum3;
 

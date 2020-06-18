@@ -31,6 +31,9 @@ class ObsErrorFactorSituDependMWParameters : public oops::Parameters {
   /// List of channels available for assimilation
   oops::RequiredParameter<std::string> channelList{"channels", this};
 
+  /// Name of the sensor for which the observation error factor applies
+  oops::RequiredParameter<std::string> sensor{"sensor", this};
+
   /// Observation error for each channel under the clear-sky condition
   oops::RequiredParameter<std::vector<float>> obserrClearSky{"obserr_clearsky", this};
 

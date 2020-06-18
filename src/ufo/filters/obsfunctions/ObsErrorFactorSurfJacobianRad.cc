@@ -137,7 +137,7 @@ void ObsErrorFactorSurfJacobianRad::compute(const ObsFilterData & in,
 
     for (size_t iloc = 0; iloc < nlocs; ++iloc) {
       if (flaggrp == "PreQC") obserrdata[iloc] == missing ? qcflagdata[iloc] = 100
-                                                           : qcflagdata[iloc] = 0;
+                                                          : qcflagdata[iloc] = 0;
       (qcflagdata[iloc] == 0) ? (varinv = 1.0 / pow(obserrdata[iloc], 2)) : (varinv = 0.0);
       out[ichan][iloc] = 1.0;
 

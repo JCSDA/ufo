@@ -46,7 +46,8 @@ ObsErrorFactorTopoRad::ObsErrorFactorTopoRad(const eckit::LocalConfiguration & c
   // Get instrument and satellite from sensor
   std::string inst, sat;
   splitInstSat(sensor, inst, sat);
-  ASSERT(inst == "amsua" || inst == "atms" || inst == "iasi" || inst == "cris-fsr");
+  ASSERT(inst == "amsua" || inst == "atms" ||
+         inst == "iasi" || inst == "cris-fsr" || inst == "airs");
 
   if (inst == "amsua" || inst == "atms") {
     // Get test groups from options
@@ -90,7 +91,7 @@ void ObsErrorFactorTopoRad::compute(const ObsFilterData & in,
   in.get(Variable("surface_geopotential_height@GeoVaLs"), zsges);
 
   // Inflate obs error as a function of terrian height (>2000) and surface-to-space transmittance
-  if (inst == "iasi" || inst == "cris-fsr") {
+  if (inst == "iasi" || inst == "cris-fsr" || inst == "airs") {
     std::vector<float> tao_sfc(nlocs);
     for (size_t ich = 0; ich < nchans; ++ich) {
       in.get(Variable("transmittances_of_atmosphere_layer@ObsDiag", channels_)[ich],
@@ -103,12 +104,18 @@ void ObsErrorFactorTopoRad::compute(const ObsFilterData & in,
         }
       }
     }
-  } else if (inst == "amsua") {
-    // Set channel number
-    int ich238 = 1, ich314 = 2, ich503 = 3, ich528 = 4, ich536 = 5;
-    int ich544 = 6, ich549 = 7, ich890 = 15;
+  } else if (inst == "amsua" || inst == "atms") {
+    // Set channel numbers
+    int ich238, ich314, ich503, ich528, ich536, ich544, ich549, ich890;
+    if (inst == "amsua") {
+      ich238 = 1, ich314 = 2, ich503 = 3, ich528 = 4, ich536 = 5;
+      ich544 = 6, ich549 = 7, ich890 = 15;
+    } else if (inst == "atms") {
+      ich238 = 1, ich314 = 2, ich503 = 3, ich528 = 5, ich536 = 6;
+      ich544 = 7, ich549 = 8, ich890 = 16;
+    }
 
-    float varinv, factor;
+    float factor;
     std::vector<int> qcflagdata;
     std::vector<float> obserrdata;
     const std::string &errgrp = options_.testObserr.value();
@@ -124,7 +131,6 @@ void ObsErrorFactorTopoRad::compute(const ObsFilterData & in,
         out[ichan][iloc] = 1.0;
         if (flaggrp == "PreQC") obserrdata[iloc] == missing ? qcflagdata[iloc] = 100
                                                              : qcflagdata[iloc] = 0;
-        (qcflagdata[iloc] == 0) ? (varinv = 1.0 / pow(obserrdata[iloc], 2)) : (varinv = 0.0);
         (qcflagdata[iloc] != 0) ? (factor = 0.0) : (factor = 1.0);
 
         if (zsges[iloc] > 2000.0) {
@@ -140,7 +146,8 @@ void ObsErrorFactorTopoRad::compute(const ObsFilterData & in,
     }
   } else {
     oops::Log::error() << "ObsErrorFactorTopoRad: Invalid instrument (sensor) specified: " << inst
-                       << "  The valid instruments are: iasi, cris-fsr, and amsua" << std::endl;
+                       << "  The valid instruments are: iasi, cris-fsr, airs, amsua and atms"
+                       << std::endl;
   }
 }
 

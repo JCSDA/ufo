@@ -31,6 +31,9 @@ class ObsErrorBoundMWParameters : public oops::Parameters {
   /// List of channels available for assimilation
   oops::RequiredParameter<std::string> channelList{"channels", this};
 
+  /// Name of the sensor for which the observation error factor applies
+  oops::RequiredParameter<std::string> sensor{"sensor", this};
+
   /// The maximum value of the observation error bound for each channel in channelList
   oops::RequiredParameter<std::vector<float>> obserrBoundMax{"obserr_bound_max", this};
 

@@ -89,7 +89,8 @@ void InterChannelConsistencyCheck::compute(const ObsFilterData & in,
   }
 
   // Inter-channel consistency check
-  const size_t ncheck = 6;
+  size_t ncheck = 6;
+  if (inst == "atms") ncheck = 7;
   for (size_t iloc = 0; iloc < nlocs; ++iloc) {
     for (int ichan = 0; ichan < nchans; ++ichan) out[ichan][iloc] = 0;
     int kval = 0;
@@ -102,8 +103,18 @@ void InterChannelConsistencyCheck::compute(const ObsFilterData & in,
     }
     if (kval > 0) {
       for (int ichan = 0; ichan < kval; ++ichan) out[ichan][iloc] = 1;
-      int channel = 15;
-      out[channel-1][iloc] = 1;
+      if (inst == "amsua") {
+        int channel = 15;
+        out[channel-1][iloc] = 1;
+      }
+      if (inst == "atms") {
+        int channel = 16;
+        out[channel-1][iloc] = 1;
+        channel = 17;
+        out[channel-1][iloc] = 1;
+        channel = 18;
+        out[channel-1][iloc] = 1;
+      }
     }
   }
 }

@@ -95,4 +95,4 @@ Observations:
      - predictor:
          name: scan_angle
    vecequiv: GsiHofXBc
-   tolerance: 1.e-5
+   tolerance: 1.e-8

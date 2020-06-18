@@ -23,6 +23,7 @@
 #include "ufo/filters/obsfunctions/ObsErrorModelRamp.h"
 #include "ufo/filters/Variable.h"
 #include "ufo/utils/Constants.h"
+#include "ufo/utils/StringUtils.h"
 
 namespace ufo {
 
@@ -34,6 +35,14 @@ ObsErrorBoundMW::ObsErrorBoundMW(const eckit::LocalConfiguration & conf)
   : invars_() {
   // Check options
   options_.deserialize(conf);
+
+  // Get sensor information from options
+  const std::string &sensor = options_.sensor.value();
+
+  // Get instrument and satellite from sensor
+  std::string inst, sat;
+  splitInstSat(sensor, inst, sat);
+  ASSERT(inst == "amsua" || inst == "atms");
 
   // Get channels from options
   std::set<int> channelset = oops::parseIntSet(options_.channelList);
@@ -73,6 +82,14 @@ ObsErrorBoundMW::~ObsErrorBoundMW() {}
 
 void ObsErrorBoundMW::compute(const ObsFilterData & in,
                                   ioda::ObsDataVector<float> & out) const {
+  // Get sensor information from options
+  const std::string &sensor = options_.sensor.value();
+
+  // Get instrument and satellite from sensor
+  std::string inst, sat;
+  splitInstSat(sensor, inst, sat);
+  ASSERT(inst == "amsua" || inst == "atms");
+
   // Get dimensions
   size_t nlocs = in.nlocs();
   size_t nchans = channels_.size();
@@ -104,9 +121,16 @@ void ObsErrorBoundMW::compute(const ObsFilterData & in,
   ioda::ObsDataVector<float> obserr(in.obsspace(), obserrvar.toOopsVariables());
   in.get(obserrvar, obserr);
 
-  // Set channel index
-  int ich238 = 1, ich314 = 2, ich503 = 3, ich528 = 4, ich536 = 5;
-  int ich544 = 6, ich549 = 7, ich890 = 15;
+  // Set channel numbers
+  int ich238, ich314, ich503, ich528, ich536, ich544, ich549, ich890;
+  if (inst == "amsua") {
+    ich238 = 1, ich314 = 2, ich503 = 3, ich528 = 4, ich536 = 5;
+    ich544 = 6, ich549 = 7, ich890 = 15;
+  } else if (inst == "atms") {
+    ich238 = 1, ich314 = 2, ich503 = 3, ich528 = 5, ich536 = 6;
+    ich544 = 7, ich549 = 8, ich890 = 16;
+  }
+
   // Output integrated error bound for gross check
   std::vector<float> obserrdata(nlocs);
   std::vector<int> qcflagdata(nlocs);
@@ -120,22 +144,38 @@ void ObsErrorBoundMW::compute(const ObsFilterData & in,
     in.get(Variable("brightness_temperature@"+errgrp, channels_)[ichan], obserrdata);
     for (size_t iloc = 0; iloc < nlocs; ++iloc) {
       if (flaggrp == "PreQC") obserrdata[iloc] == missing ? qcflagdata[iloc] = 100
-                                                           : qcflagdata[iloc] = 0;
+                                                          : qcflagdata[iloc] = 0;
       (qcflagdata[iloc] == 0) ? (varinv = 1.0 / pow(obserrdata[iloc], 2)) : (varinv = 0.0);
       out[ichan][iloc] = obserr[ichan][iloc];
       if (varinv > 0.0) {
         if (water_frac[iloc] > 0.99) {
-          if (channel <= ich536  || channel == ich890) {
-            out[ichan][iloc] = 3.0 * obserr[ichan][iloc]
-                                   * (1.0 / pow(errflat[0][iloc], 2))
-                                   * (1.0 / pow(errftaotop[ichan][iloc], 2))
-                                   * (1.0 / pow(errftopo[ichan][iloc], 2));
-          } else {
-            out[ichan][iloc] = std::fmin((3.0 * obserr[ichan][iloc]
-                                   * (1.0 / pow(errflat[0][iloc], 2))
-                                   * (1.0 / pow(errftaotop[ichan][iloc], 2))
-                                   * (1.0 / pow(errftopo[ichan][iloc], 2))),
-                                      obserr_bound_max[ichan]);
+          if (inst == "amsua") {
+            if (channel <= ich536  || channel == ich890) {
+              out[ichan][iloc] = 3.0 * obserr[ichan][iloc]
+                                     * (1.0 / pow(errflat[0][iloc], 2))
+                                     * (1.0 / pow(errftaotop[ichan][iloc], 2))
+                                     * (1.0 / pow(errftopo[ichan][iloc], 2));
+            } else {
+              out[ichan][iloc] = std::fmin((3.0 * obserr[ichan][iloc]
+                                     * (1.0 / pow(errflat[0][iloc], 2))
+                                     * (1.0 / pow(errftaotop[ichan][iloc], 2))
+                                     * (1.0 / pow(errftopo[ichan][iloc], 2))),
+                                        obserr_bound_max[ichan]);
+            }
+          }
+          if (inst == "atms") {
+            if (channel <= ich536  || channel >= ich890) {
+              out[ichan][iloc] = std::fmin((3.0 * obserr[ichan][iloc]
+                                     * (1.0 / pow(errflat[0][iloc], 2))
+                                     * (1.0 / pow(errftaotop[ichan][iloc], 2))
+                                     * (1.0 / pow(errftopo[ichan][iloc], 2))), 10.0);
+            } else {
+              out[ichan][iloc] = std::fmin((3.0 * obserr[ichan][iloc]
+                                     * (1.0 / pow(errflat[0][iloc], 2))
+                                     * (1.0 / pow(errftaotop[ichan][iloc], 2))
+                                     * (1.0 / pow(errftopo[ichan][iloc], 2))),
+                                        obserr_bound_max[ichan]);
+            }
           }
         } else {
           out[ichan][iloc] = std::fmin((3.0 * obserr[ichan][iloc]

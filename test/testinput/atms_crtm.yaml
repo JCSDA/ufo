@@ -23,13 +23,13 @@ Observations:
    ObsSpace:
      name: Radiance
      ObsDataIn:
-       obsfile: Data/ioda/testinput_tier_1/atms_npp_obs_2018041500_m.nc4
+       obsfile: Data/ioda/testinput_tier_1/atms_npp_obs_2018041500_m_qc.nc4
      ObsDataOut:
-       obsfile: Data/atms_npp_obs_2018041500_m_out.nc4
+       obsfile: Data/atms_npp_obs_2018041500_m_qc_out.nc4
      simulate:
        variables: [brightness_temperature]
-       channels: 1-3,5-17
+       channels: 1-22 
    GeoVaLs:
-     filename: Data/atms_npp_geoval_2018041500_m.nc4
+     filename: Data/atms_npp_geoval_2018041500_m_qc.nc4
    vecequiv: GsiHofX
-   tolerance: 1.e-6
+   tolerance: 1.e-7

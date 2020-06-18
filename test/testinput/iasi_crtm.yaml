@@ -73,4 +73,4 @@ Observations:
    GeoVaLs: 
      filename: Data/iasi_metop-a_geoval_2018041500_m_unittest.nc4
    vecequiv: GsiHofX
-   tolerance: 1.e-5
+   tolerance: 1.e-7
