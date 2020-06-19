@@ -16,8 +16,10 @@
 #include "ufo/profile/ProfileChecker.h"
 #include "ufo/profile/ProfileCheckHydrostatic.h"
 #include "ufo/profile/ProfileCheckInterpolation.h"
+#include "ufo/profile/ProfileCheckRH.h"
 #include "ufo/profile/ProfileCheckSamePDiffT.h"
 #include "ufo/profile/ProfileCheckSign.h"
+#include "ufo/profile/ProfileCheckUInterp.h"
 #include "ufo/profile/ProfileCheckUnstableLayer.h"
 
 #include "ufo/utils/Flags.h"
@@ -50,44 +52,13 @@ namespace ufo {
   {
     // Run all checks requested
     for (auto check : checks_) {
-      std::unique_ptr <ProfileCheckBase> profileCheck(nullptr);
-      if (check == "Basic") {
-        profileCheck.reset(new ProfileCheckBasic(options_,
-                                                 profileIndices_,
-                                                 profileData_,
-                                                 profileFlags_,
-                                                 profileCheckValidator_));
-      } else if (check == "SamePDiffT") {
-        profileCheck.reset(new ProfileCheckSamePDiffT(options_,
-                                                      profileIndices_,
-                                                      profileData_,
-                                                      profileFlags_,
-                                                      profileCheckValidator_));
-      } else if (check == "Sign") {
-        profileCheck.reset(new ProfileCheckSign(options_,
-                                                profileIndices_,
-                                                profileData_,
-                                                profileFlags_,
-                                                profileCheckValidator_));
-      } else if (check == "UnstableLayer") {
-        profileCheck.reset(new ProfileCheckUnstableLayer(options_,
-                                                         profileIndices_,
-                                                         profileData_,
-                                                         profileFlags_,
-                                                         profileCheckValidator_));
-      } else if (check == "Interpolation") {
-        profileCheck.reset(new ProfileCheckInterpolation(options_,
-                                                         profileIndices_,
-                                                         profileData_,
-                                                         profileFlags_,
-                                                         profileCheckValidator_));
-      } else if (check == "Hydrostatic") {
-        profileCheck.reset(new ProfileCheckHydrostatic(options_,
-                                                       profileIndices_,
-                                                       profileData_,
-                                                       profileFlags_,
-                                                       profileCheckValidator_));
-      }
+      std::unique_ptr<ProfileCheckBase> profileCheck =
+        ProfileCheckFactory::create(check,
+                                    options_,
+                                    profileIndices_,
+                                    profileData_,
+                                    profileFlags_,
+                                    profileCheckValidator_);
       if (profileCheck) {
         profileCheck->runCheck();
         // Fill validation information if required

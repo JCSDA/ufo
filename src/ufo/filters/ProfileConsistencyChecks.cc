@@ -113,19 +113,20 @@ namespace ufo {
       // Run checks
       profileChecker.runChecks();
 
-      // Optionally compare check results with OPS values
-      if (options_->compareWithOPS.value() && profileFlags.getBasicCheckResult()) {
-        profileCheckValidator.fillProfileValues();
-        profileCheckValidator.setProfileNum(jprof);
-        profileCheckValidator.validate();
-        nMismatches_.emplace_back(profileCheckValidator.getMismatches());
-      }
-
       // Set final report flags if a certain number of errors have occurred
       profileFlags.setFinalReportFlags();
 
       // Update flags in the entire sample (using values in this profile)
       profileFlags.updateFlags();
+
+      // Optionally compare check results with OPS values
+      if (options_->compareWithOPS.value() && profileFlags.getBasicCheckResult()) {
+        profileCheckValidator.setReportFlags(profileFlags.getReportFlags());
+        profileCheckValidator.fillProfileValues();
+        profileCheckValidator.setProfileNum(jprof);
+        profileCheckValidator.validate();
+        nMismatches_.emplace_back(profileCheckValidator.getMismatches());
+      }
     }
 
     // Modify flagged

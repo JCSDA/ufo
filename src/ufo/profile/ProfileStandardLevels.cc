@@ -90,4 +90,45 @@ namespace ufo {
     auto it100 = std::lower_bound(StandardLevels_.rbegin(), StandardLevels_.rend(), 100.0);
     Ind100_ = std::distance(StandardLevels_.begin(), it100.base()) - 1;
   }
+
+  void ProfileStandardLevels::calcStdLevelsUV(const int numLevelsToCheck,
+                                              const std::vector <float> &pressures,
+                                              const std::vector <float> &uObs,
+                                              const std::vector <float> &vObs,
+                                              const std::vector <int> &uFlags)
+  {
+    oops::Log::debug() << " Finding standard levels for U and V data" << std::endl;
+
+    // Reset calculated values
+    NumSig_ = 0;
+    NumStd_ = 0;
+    StdLev_.assign(numLevelsToCheck, -1);
+    SigBelow_.assign(numLevelsToCheck, -1);
+    SigAbove_.assign(numLevelsToCheck, -1);
+    LogP_.assign(numLevelsToCheck, 0.0);
+
+    /// Missing value (float)
+    const float missingValueFloat = util::missingValue(1.0f);
+
+    int SigPrev = -1;  // Previous significant level
+    int jlevStdA = 0;  // Standard level below previous significant level
+
+    for (int jlev = 0; jlev < numLevelsToCheck; ++jlev) {
+      if (uObs[jlev] != missingValueFloat && vObs[jlev] != missingValueFloat) {
+        LogP_[jlev] = std::log(pressures[jlev]);
+        if (uFlags[jlev] & ufo::FlagsProfile::StandardLevelFlag) {  // Standard level
+          NumStd_++;
+          StdLev_[NumStd_ - 1] = jlev;
+          SigBelow_[NumStd_ - 1] = SigPrev;
+        } else {
+          NumSig_++;
+          for (int jlevstd = jlevStdA; jlevstd < NumStd_; ++jlevstd) {
+            SigAbove_[jlevstd] = jlev;
+          }
+          jlevStdA = NumStd_;
+          SigPrev = jlev;
+        }
+      }
+    }
+  }
 }  // namespace ufo

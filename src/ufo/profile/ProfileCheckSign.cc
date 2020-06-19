@@ -8,6 +8,9 @@
 #include "ufo/profile/ProfileCheckSign.h"
 
 namespace ufo {
+
+  static ProfileCheckMaker<ProfileCheckSign> makerProfileCheckSign_("Sign");
+
   ProfileCheckSign::ProfileCheckSign(const ProfileConsistencyCheckParameters &options,
                                      const ProfileIndices &profileIndices,
                                      const ProfileData &profileData,
@@ -28,6 +31,17 @@ namespace ufo {
     std::vector <int> &tFlags = profileFlags_.gettFlags();
     std::vector <float> &tObsCorrection =
       profileFlags_.gettObsCorrection();  // Potentially modified here
+
+    if (oops::anyVectorEmpty(pressures, tObs, tBkg, PstarBackgr, tFlags, tObsCorrection)) {
+      oops::Log::warning() << "At least one vector is empty. "
+                           << "Check will not be performed." << std::endl;
+      return;
+    }
+    if (!oops::allVectorsSameSize(pressures, tObs, tBkg, PstarBackgr, tFlags, tObsCorrection)) {
+      oops::Log::warning() << "Not all vectors have the same size. "
+                           << "Check will not be performed." << std::endl;
+      return;
+    }
 
     for (int jlev = 0; jlev < numLevelsToCheck; ++jlev) {
       if (tFlags[jlev] & ufo::FlagsElem::FinalRejectFlag) continue;  // Ignore this level

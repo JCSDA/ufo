@@ -8,6 +8,9 @@
 #include "ufo/profile/ProfileCheckSamePDiffT.h"
 
 namespace ufo {
+
+  static ProfileCheckMaker<ProfileCheckSamePDiffT> makerProfileCheckSamePDiffT_("SamePDiffT");
+
   ProfileCheckSamePDiffT::ProfileCheckSamePDiffT(const ProfileConsistencyCheckParameters &options,
                                                  const ProfileIndices &profileIndices,
                                                  const ProfileData &profileData,
@@ -28,6 +31,18 @@ namespace ufo {
     const std::vector <float> &tBkg = profileData_.gettBkg();
     std::vector <int> &tFlags = profileFlags_.gettFlags();
     const std::vector <float> &tObsCorrection = profileFlags_.gettObsCorrection();
+
+    if (oops::anyVectorEmpty(pressures, tObs, tBkg, tFlags, tObsCorrection)) {
+      oops::Log::warning() << "At least one vector is empty. "
+                           << "Check will not be performed." << std::endl;
+      return;
+    }
+    if (!oops::allVectorsSameSize(pressures, tObs, tBkg, tFlags, tObsCorrection)) {
+      oops::Log::warning() << "Not all vectors have the same size. "
+                           << "Check will not be performed." << std::endl;
+      return;
+    }
+
     std::vector <float> tObsFinal;
     correctVector(tObs, tObsCorrection, tObsFinal);
 

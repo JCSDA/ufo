@@ -64,10 +64,6 @@ namespace ufo {
     typedef ProfIdxMap::const_iterator ProfIdxIter;
 
    private:  // functions
-    /// Custom descending sort which ensures indices are ascending
-    /// (used if "descending" requested in configuration file)
-    void descendingSortWithAscendingIndices();
-
     // Ensure number of profiles is consistent with quantity reported by obsdb
     void validateTotalNumProf();
 

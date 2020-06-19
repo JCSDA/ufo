@@ -51,8 +51,14 @@ namespace ufo {
     /// Return profile tFlags
     std::vector <int> &gettFlags() {return tFlags_prof_;}
 
+    /// Return profile RHFlags
+    std::vector <int> &getRHFlags() {return RHFlags_prof_;}
+
     /// Return profile zFlags
     std::vector <int> &getzFlags() {return zFlags_prof_;}
+
+    /// Return profile uFlags
+    std::vector <int> &getuFlags() {return uFlags_prof_;}
 
     /// Return profile ReportFlags
     std::vector <int> &getReportFlags() {return ReportFlags_prof_;}
@@ -88,14 +94,30 @@ namespace ufo {
     /// Otherwise initialise to 0 everywhere.
     void initialiseCounter(const std::string &countname);
 
+    /// Update element of one vector with a value from another vector.
+    template <typename T>
+      void updateValueIfPresent(const std::vector <T> &vecIn, const size_t &idxIn,
+                                std::vector <T> &vecOut, const size_t &idxOut)
+      {
+        // Ensure neither vector is empty
+        if (oops::anyVectorEmpty(vecIn, vecOut)) return;
+        vecOut[idxOut] = vecIn[idxIn];
+      }
+
    private:  // members
     //=== Entire sample values ===//
 
     /// Entire sample tFlags
     std::vector <int> tFlags_;
 
+    /// Entire sample RHFlags
+    std::vector <int> RHFlags_;
+
     /// Entire sample zFlags
     std::vector <int> zFlags_;
+
+    /// Entire sample uFlags
+    std::vector <int> uFlags_;
 
     /// Entire sample ReportFlags
     std::vector <int> ReportFlags_;
@@ -111,8 +133,14 @@ namespace ufo {
     /// Individual profile tFlags
     std::vector <int> tFlags_prof_;
 
+    /// Individual profile RHFlags
+    std::vector <int> RHFlags_prof_;
+
     /// Individual profile zFLags
     std::vector <int> zFlags_prof_;
+
+    /// Individual profile uFlags
+    std::vector <int> uFlags_prof_;
 
     /// Individual profile ReportFlags
     std::vector <int> ReportFlags_prof_;
@@ -160,6 +188,21 @@ namespace ufo {
 
     /// Number of other standard level gaps in each profile
     std::vector <int> NumStdMiss_;
+
+    /// Number of profiles with cloud errors
+    std::vector <int> TotCProfs_;
+
+    /// Number of profiles with moisture errors
+    std::vector <int> TotHProfs_;
+
+    /// Number of levels with cloud errors
+    std::vector <int> TotCFlags_;
+
+    /// Number of levels with moisture errors
+    std::vector <int> TotHFlags_;
+
+    /// Number of levels above a T threshold with moisture errors
+    std::vector <int> TotLFlags_;
 
     /// Basic check result
     bool basicCheckResult_ = true;

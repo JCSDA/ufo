@@ -28,7 +28,9 @@ namespace ufo {
   {
     // Get OPS values from obsdb
     retrieveDataVector("OPS_tFlags", "MetaData", OPS_tFlags_);
+    retrieveDataVector("OPS_RHFlags", "MetaData", OPS_RHFlags_);
     retrieveDataVector("OPS_zFlags", "MetaData", OPS_zFlags_);
+    retrieveDataVector("OPS_uFlags", "MetaData", OPS_uFlags_);
     retrieveDataVector("OPS_ReportFlags", "MetaData", OPS_ReportFlags_);
     retrieveDataVector("OPS_NumStd", "MetaData", OPS_NumStd_);
     retrieveDataVector("OPS_NumSig", "MetaData", OPS_NumSig_);
@@ -50,19 +52,36 @@ namespace ufo {
     retrieveDataVector("OPS_LevErrors", "MetaData", OPS_LevErrors_);
     retrieveDataVector("OPS_IndStd", "MetaData", OPS_IndStd_);
     retrieveDataVector("OPS_tInterp", "MetaData", OPS_tInterp_);
+    retrieveDataVector("OPS_uInterp", "MetaData", OPS_uInterp_);
+    retrieveDataVector("OPS_vInterp", "MetaData", OPS_vInterp_);
     retrieveDataVector("OPS_LogP", "MetaData", OPS_LogP_);
     retrieveDataVector("OPS_DC", "MetaData", OPS_DC_);
     retrieveDataVector("OPS_ETol", "MetaData", OPS_ETol_);
     retrieveDataVector("OPS_D", "MetaData", OPS_D_);
     retrieveDataVector("OPS_E", "MetaData", OPS_E_);
     retrieveDataVector("OPS_HydError", "MetaData", OPS_HydError_);
+    retrieveDataVector("OPS_TotCProfs", "MetaData", OPS_TotCProfs_);
+    retrieveDataVector("OPS_TotHProfs", "MetaData", OPS_TotHProfs_);
+    retrieveDataVector("OPS_TotCFlags", "MetaData", OPS_TotCFlags_);
+    retrieveDataVector("OPS_TotHFlags", "MetaData", OPS_TotHFlags_);
+    retrieveDataVector("OPS_TotLFlags", "MetaData", OPS_TotLFlags_);
+    retrieveDataVector("OPS_Press", "MetaData", OPS_Press_);
+    retrieveDataVector("OPS_Temp", "MetaData", OPS_Temp_);
+    retrieveDataVector("OPS_rh", "MetaData", OPS_rh_);
+    retrieveDataVector("OPS_td", "MetaData", OPS_td_);
+    retrieveDataVector("OPS_tbk", "MetaData", OPS_tbk_);
+    retrieveDataVector("OPS_rhbk", "MetaData", OPS_rhbk_);
+    retrieveDataVector("OPS_FlagH", "MetaData", OPS_FlagH_);
+    retrieveDataVector("OPS_Indx", "MetaData", OPS_Indx_);
   }
 
   void ProfileCheckValidator::fillProfileValues()
   {
     // Fill OPS information for a particular profile
     fillProfileData(OPS_tFlags_, OPS_tFlags_prof_);
+    fillProfileData(OPS_RHFlags_, OPS_RHFlags_prof_);
     fillProfileData(OPS_zFlags_, OPS_zFlags_prof_);
+    fillProfileData(OPS_uFlags_, OPS_uFlags_prof_);
     fillProfileData(OPS_ReportFlags_, OPS_ReportFlags_prof_);
     fillProfileData(OPS_NumStd_, OPS_NumStd_prof_);
     fillProfileData(OPS_NumSig_, OPS_NumSig_prof_);
@@ -84,12 +103,27 @@ namespace ufo {
     fillProfileData(OPS_LevErrors_, OPS_LevErrors_prof_);
     fillProfileData(OPS_IndStd_, OPS_IndStd_prof_);
     fillProfileData(OPS_tInterp_, OPS_tInterp_prof_);
+    fillProfileData(OPS_uInterp_, OPS_uInterp_prof_);
+    fillProfileData(OPS_vInterp_, OPS_vInterp_prof_);
     fillProfileData(OPS_LogP_, OPS_LogP_prof_);
     fillProfileData(OPS_DC_, OPS_DC_prof_);
     fillProfileData(OPS_ETol_, OPS_ETol_prof_);
     fillProfileData(OPS_D_, OPS_D_prof_);
     fillProfileData(OPS_E_, OPS_E_prof_);
     fillProfileData(OPS_HydError_, OPS_HydError_prof_);
+    fillProfileData(OPS_TotCProfs_, OPS_TotCProfs_prof_);
+    fillProfileData(OPS_TotHProfs_, OPS_TotHProfs_prof_);
+    fillProfileData(OPS_TotCFlags_, OPS_TotCFlags_prof_);
+    fillProfileData(OPS_TotHFlags_, OPS_TotHFlags_prof_);
+    fillProfileData(OPS_TotLFlags_, OPS_TotLFlags_prof_);
+    fillProfileData(OPS_Press_, OPS_Press_prof_);
+    fillProfileData(OPS_Temp_, OPS_Temp_prof_);
+    fillProfileData(OPS_rh_, OPS_rh_prof_);
+    fillProfileData(OPS_td_, OPS_td_prof_);
+    fillProfileData(OPS_tbk_, OPS_tbk_prof_);
+    fillProfileData(OPS_rhbk_, OPS_rhbk_prof_);
+    fillProfileData(OPS_FlagH_, OPS_FlagH_prof_);
+    fillProfileData(OPS_Indx_, OPS_Indx_prof_);
   }
 
   /// Comparison of single values
@@ -117,6 +151,22 @@ namespace ufo {
                                             const float tol,
                                             int &n)
   {
+    // Do not compare vectors if at least one is empty
+    if (oops::anyVectorEmpty(vec1, vec2))
+      {
+        if (vec1.empty())
+          oops::Log::warning() << "Vector of " << desc << " in OPS output is empty" << std::endl;
+        if (vec2.empty())
+          oops::Log::warning() << "Vector of " << desc << " in this code is empty" << std::endl;
+        return;
+      }
+    // Warn if vectors are different size but allow to continue
+    if (!oops::allVectorsSameSize(vec1, vec2))
+      {
+        oops::Log::warning() << "Vectors to be compared for "
+                             << desc << " are of different size" << std::endl;
+      }
+
     const size_t vecsize = std::min(vec1.size(), vec2.size());
 
     for (size_t jvec = 0; jvec < vecsize; ++jvec) {
@@ -139,7 +189,9 @@ namespace ufo {
 
     std::vector <std::string> checks = options_.Checks.value();
 
-    // Compare OPS value with this code value
+    // Compare OPS value with this code value.
+    // Comparisons are not performed if either of the vectors is empty.
+
     compareOutput("tFlags",
                   OPS_tFlags_prof_,
                   tFlags_prof_,
@@ -152,24 +204,31 @@ namespace ufo {
                   OPS_ReportFlags_prof_,
                   ReportFlags_prof_,
                   0, tol, nMismatches_);
-    compareOutput("NumAnyErrors",
-                  OPS_NumAnyErrors_prof_[0],
-                  NumAnyErrors_[jprof_],
-                  0, tol, nMismatches_);
-
     for (auto check : checks) {
       if (check == "Basic") {
       } else if (check == "SamePDiffT") {
+        compareOutput("NumAnyErrors",
+                      OPS_NumAnyErrors_prof_[0],
+                      NumAnyErrors_[jprof_],
+                      0, tol, nMismatches_);
         compareOutput("NumSamePErrObs",
                       OPS_NumSamePErrObs_prof_[0],
                       NumSamePErrObs_[jprof_],
                       0, tol, nMismatches_);
       } else if (check == "Sign") {
+        compareOutput("NumAnyErrors",
+                      OPS_NumAnyErrors_prof_[0],
+                      NumAnyErrors_[jprof_],
+                      0, tol, nMismatches_);
         compareOutput("NumSignChange",
                       OPS_NumSignChange_prof_[0],
                       NumSignChange_[jprof_],
                       0, tol, nMismatches_);
       } else if (check == "UnstableLayer") {
+        compareOutput("NumAnyErrors",
+                      OPS_NumAnyErrors_prof_[0],
+                      NumAnyErrors_[jprof_],
+                      0, tol, nMismatches_);
         compareOutput("NumSuperadiabat",
                       OPS_NumSuperadiabat_prof_[0],
                       NumSuperadiabat_[jprof_],
@@ -179,6 +238,10 @@ namespace ufo {
                       PBottom_,
                       0, tol, nMismatches_);
       } else if (check == "Interpolation") {
+        compareOutput("NumAnyErrors",
+                      OPS_NumAnyErrors_prof_[0],
+                      NumAnyErrors_[jprof_],
+                      0, tol, nMismatches_);
         compareOutput("NumInterpErrors",
                       OPS_NumInterpErrors_prof_[0],
                       NumInterpErrors_[jprof_],
@@ -224,6 +287,10 @@ namespace ufo {
                       LogP_prof_,
                       0, tol, nMismatches_);
       } else if (check == "Hydrostatic") {
+        compareOutput("NumAnyErrors",
+                      OPS_NumAnyErrors_prof_[0],
+                      NumAnyErrors_[jprof_],
+                      0, tol, nMismatches_);
         compareOutput("Num925Miss",
                       OPS_Num925Miss_prof_[0],
                       Num925Miss_[jprof_],
@@ -264,6 +331,112 @@ namespace ufo {
                       OPS_HydError_prof_,
                       HydError_prof_,
                       0, tol, nMismatches_);
+      } else if (check == "UInterp") {
+        compareOutput("uFlags",
+                      OPS_uFlags_prof_,
+                      uFlags_prof_,
+                      0, tol, nMismatches_);
+        compareOutput("uInterp",
+                      OPS_uInterp_prof_,
+                      uInterp_prof_,
+                      0, tol, nMismatches_);
+        compareOutput("vInterp",
+                      OPS_vInterp_prof_,
+                      vInterp_prof_,
+                      0, tol, nMismatches_);
+        compareOutput("NumSamePErrObs",
+                      OPS_NumSamePErrObs_prof_[0],
+                      NumSamePErrObs_[jprof_],
+                      0, tol, nMismatches_);
+        compareOutput("NumInterpErrObs",
+                      OPS_NumInterpErrObs_prof_[0],
+                      NumInterpErrObs_[jprof_],
+                      0, tol, nMismatches_);
+        compareOutput("StdLev",
+                      OPS_StdLev_prof_,
+                      StdLev_prof_,
+                      1, tol, nMismatches_);
+        compareOutput("SigBelow",
+                      OPS_SigBelow_prof_,
+                      SigBelow_prof_,
+                      1, tol, nMismatches_);
+        compareOutput("SigAbove",
+                      OPS_SigAbove_prof_,
+                      SigAbove_prof_,
+                      1, tol, nMismatches_);
+        compareOutput("LevErrors",
+                      OPS_LevErrors_prof_,
+                      LevErrors_prof_,
+                      1, tol, nMismatches_);
+        compareOutput("LogP",
+                      OPS_LogP_prof_,
+                      LogP_prof_,
+                      0, tol, nMismatches_);
+        compareOutput("NumStd",
+                      OPS_NumStd_prof_[0],
+                      NumStd_,
+                      0, tol, nMismatches_);
+        compareOutput("NumSig",
+                      OPS_NumSig_prof_[0],
+                      NumSig_,
+                      0, tol, nMismatches_);
+      } else if (check == "RH") {
+        compareOutput("RHFlags",
+                      OPS_RHFlags_prof_,
+                      RHFlags_prof_,
+                      0, tol, nMismatches_);
+        compareOutput("TotCProfs",
+                      OPS_TotCProfs_prof_[0],
+                      TotCProfs_[jprof_],
+                      0, tol, nMismatches_);
+        compareOutput("TotHProfs",
+                      OPS_TotHProfs_prof_[0],
+                      TotHProfs_[jprof_],
+                      0, tol, nMismatches_);
+        compareOutput("TotCFlags",
+                      OPS_TotCFlags_prof_[0],
+                      TotCFlags_[jprof_],
+                      0, tol, nMismatches_);
+        compareOutput("TotHFlags",
+                      OPS_TotHFlags_prof_[0],
+                      TotHFlags_[jprof_],
+                      0, tol, nMismatches_);
+        compareOutput("TotLFlags",
+                      OPS_TotLFlags_prof_[0],
+                      TotLFlags_[jprof_],
+                      0, tol, nMismatches_);
+        compareOutput("Press",
+                      OPS_Press_prof_,
+                      Press_prof_,
+                      0, tol, nMismatches_);
+        compareOutput("Temp",
+                      OPS_Temp_prof_,
+                      Temp_prof_,
+                      0, tol, nMismatches_);
+        compareOutput("rh",
+                      OPS_rh_prof_,
+                      rh_prof_,
+                      0, tol, nMismatches_);
+        compareOutput("td",
+                      OPS_td_prof_,
+                      td_prof_,
+                      0, tol, nMismatches_);
+        compareOutput("tbk",
+                      OPS_tbk_prof_,
+                      tbk_prof_,
+                      0, tol, nMismatches_);
+        compareOutput("rhbk",
+                      OPS_rhbk_prof_,
+                      rhbk_prof_,
+                      0, tol, nMismatches_);
+        compareOutput("FlagH",
+                      OPS_FlagH_prof_,
+                      FlagH_prof_,
+                      0, tol, nMismatches_);
+        compareOutput("Indx",
+                      OPS_Indx_prof_,
+                      Indx_prof_,
+                      1, tol, nMismatches_);
       }
     }
 

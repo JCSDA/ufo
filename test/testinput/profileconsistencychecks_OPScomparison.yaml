@@ -11,18 +11,9 @@ Sondes:
       obsfile: Data/met_office_profile_consistency_checks.nc4
       obsgrouping:
         group_variable: "station_id"
-        sort_variable: "air_pressure"
-        sort_order: "descending"
+        #Sorting is not performed for this test in order to ensure exact correspondence with OPS
     simulate:
       variables: [air_temperature, geopotential_height]
-    Generate:
-      List:
-        lats: [0]
-        lons: [0]
-        datetimes: ['2010-01-01T00:04:00Z']
-  HofX:
-    variables:
-    - name: air_temperature@HofX, geopotential_height@HofX
   ObsDiag:
   ProfileConsistencyChecks:
     Checks: ["Basic", "SamePDiffT", "Sign", "UnstableLayer", "Interpolation", "Hydrostatic"]
@@ -66,5 +57,5 @@ Sondes:
     HCheck_CorrectZ: true
     Comparison_Tol: 0.4
     StandardLevels: [1000, 925, 850, 700, 500, 400, 300, 250, 200, 150, 100, 70, 50, 30, 20, 10, 7, 3, 2, 1]
-    BigGaps: [150, 150, 150, 150, 100, 100, 100, 75, 75, 50, 50, 20, 20, 20, 10, 10, 10, 10, 10, 10]
+    ICheck_BigGaps: [150, 150, 150, 150, 100, 100, 100, 75, 75, 50, 50, 20, 20, 20, 10, 10, 10, 10, 10, 10]
     HydDesc: ["Hyd: OK", "Hyd: Z err", "Hyd: T err", "Hyd: T/Z err", "Hyd: T/Z Bot", "Hyd: T/Z Top", "Hyd: Z upward", "Hyd: ?????"]

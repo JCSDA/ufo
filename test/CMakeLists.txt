@@ -153,6 +153,11 @@ list( APPEND ufo_test_input
   testinput/profileconsistencychecks_OPScomparison.yaml
   testinput/profileconsistencychecks_separatefilters.yaml
   testinput/profileconsistencychecks_unittests.yaml
+  testinput/profileconsistencychecks_unittest_oneprofileMPI.yaml
+  testinput/profileconsistencychecks_RH_obsfilter.yaml
+  testinput/profileconsistencychecks_RH_OPScomparison.yaml
+  testinput/profileconsistencychecks_UInterp_obsfilter.yaml
+  testinput/profileconsistencychecks_UInterp_OPScomparison.yaml
   testinput/timeoper.yaml
   testinput/tprof.yaml
   testinput/variables.yaml
@@ -260,7 +265,10 @@ list( APPEND ufo_test_data
   filters/met_office_buddy_check.nc4
   filters/poisson_disk_thinning_3x3x3x3_regular_grid.nc4
   filters/met_office_profile_consistency_checks.nc4
+  filters/met_office_profile_consistency_checks_rh.nc4
   filters/met_office_profile_consistency_checks_unittests.nc4
+  filters/met_office_profile_consistency_checks_oneprofile.nc4
+  filters/met_office_profile_consistency_checks_uinterp.nc4
 )
 
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Data)
@@ -367,6 +375,11 @@ ecbuild_add_executable( TARGET  test_ObsOperatorTLAD.x
 
 ecbuild_add_executable( TARGET  test_ObsFilters.x
                         SOURCES mains/TestObsFilters.cc
+                        LIBS    ufo
+                       )
+
+ecbuild_add_executable( TARGET  test_ProfileConsistencyChecks.x
+                        SOURCES mains/TestProfileConsistencyChecks.cc
                         LIBS    ufo
                        )
 
@@ -953,6 +966,25 @@ ecbuild_add_test( TARGET  test_ufo_profileconsistencychecks_unittests
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsFilters.x )
 
+ecbuild_add_test( TARGET  test_ufo_profileconsistencychecks_unittest_oneprofileMPI
+                  MPI     2
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                  ARGS    "testinput/profileconsistencychecks_unittest_oneprofileMPI.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsFilters.x )
+
+ecbuild_add_test( TARGET  test_ufo_profileconsistencychecks_RH_obsfilter
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                  ARGS    "testinput/profileconsistencychecks_RH_obsfilter.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsFilters.x )
+
+ecbuild_add_test( TARGET  test_ufo_profileconsistencychecks_UInterp_obsfilter
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                  ARGS    "testinput/profileconsistencychecks_UInterp_obsfilter.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsFilters.x )
+
 # Test UFO ObsFilters (specific)
 
 ecbuild_add_test( TARGET  test_ufo_gaussianthinning
@@ -988,10 +1020,22 @@ ecbuild_add_test( TARGET  test_ufo_qc_poisson_disk_thinning_unittests
                   LIBS    ufo)
 
 ecbuild_add_test( TARGET  test_ufo_profileconsistencychecks_OPScomparison
-                  SOURCES mains/TestProfileConsistencyChecks.cc
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ProfileConsistencyChecks.x
                   ARGS    "testinput/profileconsistencychecks_OPScomparison.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
-                  LIBS    ufo)
+                  DEPENDS test_ProfileConsistencyChecks.x )
+
+ecbuild_add_test( TARGET  test_ufo_profileconsistencychecks_RH_OPScomparison
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ProfileConsistencyChecks.x
+                  ARGS    "testinput/profileconsistencychecks_RH_OPScomparison.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ProfileConsistencyChecks.x )
+
+ecbuild_add_test( TARGET  test_ufo_profileconsistencychecks_UInterp_OPScomparison
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ProfileConsistencyChecks.x
+                  ARGS    "testinput/profileconsistencychecks_UInterp_OPScomparison.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ProfileConsistencyChecks.x )
 
 ecbuild_add_test( TARGET  test_ufo_qc_met_office_buddy_check_unittests
                   SOURCES mains/TestMetOfficeBuddyCheck.cc

@@ -1,0 +1,36 @@
+#
+#=== Profile consistency checks for RH: comparison with OPS values ===#
+#
+
+Sondes:
+  window_begin: 2000-01-01T00:00:00Z
+  window_end: 2030-01-01T00:00:00Z
+  ObsSpace:
+    name: Radiosonde
+    ObsDataIn:
+      obsfile: Data/met_office_profile_consistency_checks_rh.nc4
+      obsgrouping:
+        group_variable: "station_id"
+        #Sorting is not performed for this test in order to ensure exact correspondence with OPS
+    simulate:
+      variables: [air_temperature, relative_humidity, dew_point_temperature]
+  ObsDiag:
+  ProfileConsistencyChecks:
+    Checks: ["Basic", "RH"]
+    maxlev: 10000
+    compareWithOPS: true
+    flagBasicChecksFail: true
+    nErrorsFail: 8
+    BChecks_Skip: true
+    RHCheck_TminInit: 400.0
+    RHCheck_SondeRHHiTol: 20.0
+    RHCheck_PressInitThresh: 100.0
+    RHCheck_PressThresh: 400.0
+    RHCheck_PressDiff0Thresh: 100.0
+    RHCheck_tdDiffThresh: 2.0
+    RHCheck_RHThresh: 90.0
+    RHCheck_PressDiffAdjThresh: 20.0
+    RHCheck_MinRHThresh: 85.0
+    RHCheck_TminThresh: 223.15
+    RHCheck_TempThresh: 233.15
+    Comparison_Tol: 0.1

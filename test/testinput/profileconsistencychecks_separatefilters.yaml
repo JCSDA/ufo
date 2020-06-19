@@ -62,7 +62,7 @@ Observations:
       nErrorsFail: 8
       FS_MinP: 0.0
       StandardLevels: [1000, 925, 850, 700, 500, 400, 300, 250, 200, 150, 100, 70, 50, 30, 20, 10, 7, 3, 2, 1]
-      BigGaps: [150, 150, 150, 150, 100, 100, 100, 75, 75, 50, 50, 20, 20, 20, 10, 10, 10, 10, 10, 10]
+      ICheck_BigGaps: [150, 150, 150, 150, 100, 100, 100, 75, 75, 50, 50, 20, 20, 20, 10, 10, 10, 10, 10, 10]
       ICheck_BigGapInit: 1000.0
       ICheck_TolRelaxPThresh: 30000.0
       ICheck_TolRelax: 1.5
@@ -75,7 +75,7 @@ Observations:
       nErrorsFail: 8
       FS_MinP: 0.0
       StandardLevels: [1000, 925, 850, 700, 500, 400, 300, 250, 200, 150, 100, 70, 50, 30, 20, 10, 7, 3, 2, 1]
-      BigGaps: [150, 150, 150, 150, 100, 100, 100, 75, 75, 50, 50, 20, 20, 20, 10, 10, 10, 10, 10, 10]
+      ICheck_BigGaps: [150, 150, 150, 150, 100, 100, 100, 75, 75, 50, 50, 20, 20, 20, 10, 10, 10, 10, 10, 10]
       HCheck_SurfacePThresh: 15100.0
       HCheck_ETolMult: 0.375
       HCheck_ETolMax: 50.0
@@ -97,6 +97,6 @@ Observations:
       HydDesc: ["Hyd: OK", "Hyd: Z err", "Hyd: T err", "Hyd: T/Z err", "Hyd: T/Z Bot", "Hyd: T/Z Top", "Hyd: Z upward", "Hyd: ?????"]
     HofX: HofX
     ObsDiag:
-    passedBenchmark: 79755
+    passedBenchmark: 79434
     benchmarkFlag: 15
-    flaggedBenchmark: 189
+    flaggedBenchmark: 510

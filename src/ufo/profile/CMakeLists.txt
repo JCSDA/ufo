@@ -14,10 +14,14 @@ set ( profile_files
       ProfileCheckHydrostatic.h
       ProfileCheckInterpolation.cc
       ProfileCheckInterpolation.h
+      ProfileCheckRH.cc
+      ProfileCheckRH.h
       ProfileCheckSamePDiffT.cc
       ProfileCheckSamePDiffT.h
       ProfileCheckSign.cc
       ProfileCheckSign.h
+      ProfileCheckUInterp.cc
+      ProfileCheckUInterp.h
       ProfileCheckUnstableLayer.cc
       ProfileCheckUnstableLayer.h
       ProfileCheckValidator.cc

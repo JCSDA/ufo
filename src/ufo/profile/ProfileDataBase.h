@@ -18,6 +18,8 @@
 #include "ioda/ObsDataVector.h"
 #include "ioda/ObsSpace.h"
 
+#include "oops/util/CompareNVectors.h"
+
 #include "ufo/filters/ProfileConsistencyCheckParameters.h"
 
 #include "ufo/profile/ProfileIndices.h"
@@ -46,8 +48,10 @@ namespace ufo {
                            std::vector <T> &vec_prof)
       {
         vec_prof.clear();
-        for (auto profileIndex : profileIndices_.getProfileIndices()) {
-          vec_prof.emplace_back(vec_all[profileIndex]);
+        if (vec_all.size() > 0) {
+          for (auto profileIndex : profileIndices_.getProfileIndices()) {
+            vec_prof.emplace_back(vec_all[profileIndex]);
+          }
         }
       }
 
@@ -58,11 +62,11 @@ namespace ufo {
                               std::vector <T> &datavec,
                               bool optional = false)
       {
-        datavec.assign(obsdb_.nlocs(), 0);
         if (obsdb_.has(groupname, varname)) {
+          datavec.assign(obsdb_.nlocs(), 0);
           obsdb_.get_db(groupname, varname, datavec);
-        } else if (!optional) {
-          throw eckit::BadValue(varname + "@" + groupname + " not present in obsdb", Here());
+        } else if (optional) {
+          datavec.assign(obsdb_.nlocs(), 0);
         }
       }
 
@@ -72,11 +76,11 @@ namespace ufo {
                             std::vector <std::string> &datavec,
                             bool optional = false)
     {
-      datavec.assign(obsdb_.nlocs(), "");
       if (obsdb_.has(groupname, varname)) {
+        datavec.assign(obsdb_.nlocs(), "");
         obsdb_.get_db(groupname, varname, datavec);
-      } else if (!optional) {
-        throw eckit::BadValue(varname + "@" + groupname + " not present in obsdb", Here());
+      } else if (optional) {
+        datavec.assign(obsdb_.nlocs(), "");
       }
     }
 
@@ -98,6 +102,7 @@ namespace ufo {
                          const std::string &groupname,
                          const std::vector <T> &datavec) const
       {
+        if (datavec.empty()) return;
         obsdb_.put_db(groupname, varname, datavec);
       }
 

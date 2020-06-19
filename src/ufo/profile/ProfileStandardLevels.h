@@ -43,6 +43,13 @@ namespace ufo {
     /// Compute indices of particular standard levels for the hydrostatic check
     void findHCheckStdLevs();
 
+    /// Calculate standard levels for U and V data
+    void calcStdLevelsUV(const int numLevelsToCheck,
+                         const std::vector <float> &pressures,
+                         const std::vector <float> &uObs,
+                         const std::vector <float> &vObs,
+                         const std::vector <int> &uFlags);
+
    protected:  // members
     /// Standard levels (hPa)
     std::vector <float> StandardLevels_;

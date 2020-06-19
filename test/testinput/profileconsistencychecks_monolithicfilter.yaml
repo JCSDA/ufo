@@ -1,5 +1,5 @@
 #
-#=== Profile consistency checks one monolithic fiter ===#
+#=== Profile consistency checks using one monolithic filter ===#
 #
 
 window_begin: 2018-04-14T20:30:00Z
@@ -62,10 +62,10 @@ Observations:
       HCheck_CorrectZ: true
       Comparison_Tol: 0.1
       StandardLevels: [1000, 925, 850, 700, 500, 400, 300, 250, 200, 150, 100, 70, 50, 30, 20, 10, 7, 3, 2, 1]
-      BigGaps: [150, 150, 150, 150, 100, 100, 100, 75, 75, 50, 50, 20, 20, 20, 10, 10, 10, 10, 10, 10]
+      ICheck_BigGaps: [150, 150, 150, 150, 100, 100, 100, 75, 75, 50, 50, 20, 20, 20, 10, 10, 10, 10, 10, 10]
       HydDesc: ["Hyd: OK", "Hyd: Z err", "Hyd: T err", "Hyd: T/Z err", "Hyd: T/Z Bot", "Hyd: T/Z Top", "Hyd: Z upward", "Hyd: ?????"]
     HofX: HofX
     ObsDiag:
-    passedBenchmark: 79755
+    passedBenchmark: 79434
     benchmarkFlag: 15
-    flaggedBenchmark: 189
+    flaggedBenchmark: 510
