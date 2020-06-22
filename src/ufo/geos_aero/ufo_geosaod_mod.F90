@@ -47,15 +47,14 @@ type(fckit_configuration), intent(in) :: f_conf
 
 !Locals
 integer :: iq, nvars
-character(kind=c_char,len=MAXVARLEN), allocatable :: tracer_variables(:)
-integer(c_size_t),parameter :: csize = MAXVARLEN
+character(kind=c_char,len=:), allocatable :: tracer_variables(:)
 character(len=:), allocatable :: str
 
   ! Fill in geovars: variables we need from the model
   ! Need slots for RH and delp 
   ! Let user choose specific aerosols needed in aod calculation.
 
-  call f_conf%get_or_die("tracer_geovals",csize,tracer_variables)
+  call f_conf%get_or_die("tracer_geovals",tracer_variables)
   self%ntracers = f_conf%get_size("tracer_geovals")
 
   do iq = 1, self%ntracers

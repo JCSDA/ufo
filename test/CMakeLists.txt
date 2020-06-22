@@ -307,9 +307,8 @@ if( NOT DEFINED LOCAL_PATH_TESTFILES_IODA )
   # Check whether the URL exists or not
   set(ECBUILD_DOWNLOAD_BASE_URL ${UFO_IODA_DOWNLOAD_BASE_URL}/ioda)
 
-  ecbuild_check_multiurl(NAMES   ${ufo_ioda_test_data}
-                         DIRHOST ${GIT_BRANCH_UFO}
-                         RESULT  UFO_SPECIFIC_TEST_FILES)
+  ecbuild_check_urls(NAMES ${GIT_BRANCH_UFO}/${ufo_ioda_test_data}
+                     RESULT UFO_SPECIFIC_TEST_FILES)
 
   # Set distant directory
   if(${UFO_SPECIFIC_TEST_FILES} MATCHES 0)

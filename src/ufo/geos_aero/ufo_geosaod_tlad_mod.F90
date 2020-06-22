@@ -52,12 +52,11 @@ type(fckit_configuration), intent(in)   :: f_conf
 
 !Locals
 integer :: iq
-character(len=maxvarlen), allocatable :: tracer_variables(:)
-integer(c_size_t),parameter :: csize = MAXVARLEN
+character(len=:), allocatable :: tracer_variables(:)
 character(len=:), allocatable :: str
 
  ! Let user choose specific aerosols needed.
- call f_conf%get_or_die("tracer_geovals",csize,tracer_variables)
+ call f_conf%get_or_die("tracer_geovals",tracer_variables)
  self%ntracers = f_conf%get_size("tracer_geovals")
  do iq = 1, self%ntracers
     call self%geovars%push_back(tracer_variables(iq))      ! aer MR

@@ -111,11 +111,12 @@ CASE("ufo/ParallelObsDistribution/members") {
   ioda::ObsSpace obsSpace(obsSpaceConf, oops::mpi::comm(), bgn, end);
 
   ParallelObsDistribution obsDistribution(obsSpace);
-
-  EXPECT_EQUAL(obsDistribution.globalObsCount(), obsSpace.gnlocs());
+  const size_t gnlocs = obsSpace.gnlocs();
+  EXPECT_EQUAL(obsDistribution.globalObsCount(), gnlocs);
 
   const size_t rank = obsSpace.comm().rank();
-  EXPECT_EQUAL(obsDistribution.localObsCounts()[rank], obsSpace.nlocs());
+  const size_t nlocs = obsSpace.nlocs();
+  EXPECT_EQUAL(obsDistribution.localObsCounts()[rank], nlocs);
 }
 
 class ParallelObsDistribution : public oops::Test {
