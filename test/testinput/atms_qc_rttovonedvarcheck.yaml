@@ -165,4 +165,4 @@ Observations:
       ReadIRemiss: false
       EmissLandDefault: 0.95
       EmissSeaIceDefault: 0.92
-    passedBenchmark: 973      # number of passed obs
+    passedBenchmark: 879      # number of passed obs
