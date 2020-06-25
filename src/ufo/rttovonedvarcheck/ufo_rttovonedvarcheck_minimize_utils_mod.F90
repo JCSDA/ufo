@@ -7,7 +7,6 @@
 
 module ufo_rttovonedvarcheck_minimize_utils_mod
 
-use iso_c_binding
 use kinds
 use ufo_constants_mod, only: grav, zero, t0c, half, one, two
 use ufo_geovals_mod

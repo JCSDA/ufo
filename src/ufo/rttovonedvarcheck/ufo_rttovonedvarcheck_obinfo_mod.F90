@@ -7,7 +7,6 @@
 
 module ufo_rttovonedvarcheck_obinfo_mod
 
-use iso_c_binding
 use kinds
 use missing_values_mod
 use ufo_geovals_mod

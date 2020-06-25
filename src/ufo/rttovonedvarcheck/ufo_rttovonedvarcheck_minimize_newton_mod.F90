@@ -6,7 +6,6 @@
 
 module ufo_rttovonedvarcheck_minimize_newton_mod
 
-use iso_c_binding
 use kinds
 use ufo_geovals_mod
 use ufo_radiancerttov_tlad_mod
@@ -96,7 +95,7 @@ real(kind_real), intent(in)      :: b_inv(:,:)      !< inverse of the state erro
 real(kind_real), intent(in)      :: b_sigma(:)      !< standard deviations of the state error covariance diagonal
 type(ufo_geovals), intent(inout) :: local_geovals   !< model data at obs location
 type(profindex_type), intent(in) :: profile_index   !< index array for x vector
-integer(c_int), intent(in)       :: channels(:)     !< list of channels used
+integer, intent(in)              :: channels(:)     !< list of channels used
 logical, intent(out)             :: onedvar_success !< convergence flag
 
 ! Local declarations:

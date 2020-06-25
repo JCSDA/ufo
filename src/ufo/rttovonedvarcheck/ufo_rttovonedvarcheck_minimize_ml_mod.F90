@@ -7,7 +7,6 @@
 
 module ufo_rttovonedvarcheck_minimize_ml_mod
 
-use iso_c_binding
 use kinds
 use ufo_geovals_mod
 use ufo_radiancerttov_tlad_mod
@@ -98,7 +97,7 @@ real(kind_real), intent(in)      :: b_inv(:,:)      !< inverse state error covar
 real(kind_real), intent(in)      :: b_sigma(:)      !< standard deviations of the state error covariance diagonal
 type(ufo_geovals), intent(inout) :: local_geovals   !< model data at obs location
 type(profindex_type), intent(in) :: profile_index   !< index array for x vector
-integer(c_int), intent(in)       :: channels(:)     !< list of channels used
+integer, intent(in)              :: channels(:)     !< list of channels used
 logical, intent(out)             :: onedvar_success !< convergence flag
 
 ! Local declarations:
@@ -459,7 +458,7 @@ real(kind_real), intent(in)             :: BackProfile(:)  !< xb
 real(kind_real), intent(in)             :: b_inv(:,:)      !< inverse of the state error covariance
 type(rmatrix_type), intent(in)          :: r_matrix        !< observation error covariance
 type(ufo_geovals), intent(inout)        :: geovals         !< model data at obs location
-integer(c_int), intent(in)              :: channels(:)     !< channels used
+integer, intent(in)                     :: channels(:)     !< channels used
 real(kind_real), intent(inout)          :: gamma           !< steepness of descent parameter
 real(kind_real), intent(inout)          :: Jold            !< previous steps cost which gets update by good step
 integer, intent(out)                    :: Status          !< code to capture failed Cholesky decomposition

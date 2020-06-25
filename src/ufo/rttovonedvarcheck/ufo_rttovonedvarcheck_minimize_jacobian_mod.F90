@@ -44,7 +44,7 @@ implicit none
 type(ufo_geovals), intent(in)         :: geovals        !< model data at obs location
 type(Obinfo_type), intent(in)         :: ob_info        !< satellite metadata
 type(c_ptr), value, intent(in)        :: obsdb          !< observation database
-integer(c_int), intent(in)            :: channels(:)    !< satellite channels
+integer, intent(in)                   :: channels(:)    !< satellite channels
 type(fckit_configuration), intent(in) :: conf           !< configuration
 type(profindex_type), intent(in)      :: profindex      !< index array for x vector
 real(kind_real), intent(in)           :: prof_x(:)      !< x vector
@@ -343,7 +343,7 @@ implicit none
 !Subroutine arguments:
 integer, intent(in)              :: nchans
 integer, intent(in)              :: nprofelements
-integer(c_int), intent(in)       :: channels(nchans)
+integer, intent(in)              :: channels(nchans)
 real(kind_real), intent(in)      :: H_matrix(nchans,nprofelements)
 type(profindex_type), intent(in) :: profindex
 
