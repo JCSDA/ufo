@@ -40,11 +40,11 @@ RTTOVOneDVarCheck::RTTOVOneDVarCheck(ioda::ObsSpace & obsdb, const eckit::Config
 
   // Choose when to apply filter - this is a temporary fix
   // to run as a post filter
-  if (config_.has("applyfilter")) {
-    std::vector<eckit::LocalConfiguration> testvarconf;
-    config_.get("applyfilter", testvarconf);
-    allvars_ += ufo::Variables(testvarconf);
-  }
+//  if (config_.has("applyfilter")) {
+//    std::vector<eckit::LocalConfiguration> testvarconf;
+//    config_.get("applyfilter", testvarconf);
+//    allvars_ += ufo::Variables(testvarconf);
+//  }
 
   // Setup fortran object
   const eckit::Configuration * conf = &config_;

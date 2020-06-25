@@ -32,7 +32,8 @@ FilterBase::FilterBase(ioda::ObsSpace & os, const eckit::Configuration & config,
                        boost::shared_ptr<ioda::ObsDataVector<float> > obserr)
   : obsdb_(os), config_(config), flags_(flags), obserr_(obserr),
     allvars_(getAllWhereVariables(config_)),
-    filtervars_(), data_(obsdb_), prior_(false), post_(false)
+    filtervars_(), data_(obsdb_), prior_(false), post_(false), 
+    defer_to_post_(false)
 {
   oops::Log::trace() << "FilterBase contructor" << std::endl;
   ASSERT(flags);
@@ -45,6 +46,10 @@ FilterBase::FilterBase(ioda::ObsSpace & os, const eckit::Configuration & config,
   } else {
   // if no filter variables explicitly specified, filter out all variables
     filtervars_ += Variables(obsdb_.obsvariables());
+  }
+  // Defer filter to run as a post filter even if hofx not needed.
+  if (config_.has("defer_to_post")) {
+    config_.get("defer_to_post",defer_to_post_);
   }
   eckit::LocalConfiguration aconf;
   config_.get("action", aconf);
@@ -64,7 +69,8 @@ void FilterBase::preProcess() {
   oops::Log::trace() << "FilterBase preProcess begin" << std::endl;
 // Cannot determine earlier when to apply filter because subclass
 // constructors add to allvars
-  if (allvars_.hasGroup("HofX") || allvars_.hasGroup("ObsDiag")) {
+  if (allvars_.hasGroup("HofX") || allvars_.hasGroup("ObsDiag") ||
+      defer_to_post_ ) {
     post_ = true;
   } else {
     if (allvars_.hasGroup("GeoVaLs")) {

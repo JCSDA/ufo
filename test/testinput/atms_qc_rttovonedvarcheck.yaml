@@ -133,8 +133,9 @@ Observations:
         is_in: 1
     # Do 1D-Var check
     - Filter: RTTOV OneDVar Check
-      applyfilter: 
-      - name: post@HofX
+#      applyfilter: 
+#      - name: post@HofX
+      defer_to_post: true
       ModName: RTTOV
       ObsOptions:
         Sensor_ID: noaa_20_atms
