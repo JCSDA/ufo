@@ -724,7 +724,7 @@ do jvar = 1, nmvars
     case ("mass_content_of_cloud_ice_in_atmosphere_layer")
       if (.NOT. qtotal_flag) fields_in(15) = 15 ! ice profile
 
-    case ("cloud_top")
+    case ("cloud_top_pressure")
       fields_in(16) = 16
 
     case ("effective_cloud_fraction") ! effective cloud fraction

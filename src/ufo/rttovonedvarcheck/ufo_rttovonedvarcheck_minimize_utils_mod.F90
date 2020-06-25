@@ -67,6 +67,7 @@ character(len=max_string)   :: varname
 
 type(ufo_geoval), pointer    :: geoval
 integer                      :: nlevels
+integer                      :: ii
 real(kind_real), allocatable :: humidity_total(:)
 
 !-------------------------------------------------------------------------------
@@ -159,9 +160,26 @@ if (profindex % cloudfrac > 0) then
   prof_x(profindex % cloudfrac) = ob_info % cloudfrac
 end if
 
+! windspeed. Remember that all wind have been transferred to u and v is set to zero
+! for windspeed retrievals
+if (profindex % windspeed > 0) then
+  varname = "eastward_wind"
+  call ufo_geovals_get_var(geovals, varname, geoval)
+  prof_x(profindex % windspeed) = geoval%vals(1, 1)
+end if
+
+!----------------------------
+! 4. Emissivities
+!----------------------------
+
 ! Microwave Emissivity
 if (profindex % mwemiss(1) > 0) then
-  prof_x(profindex % mwemiss(1):profindex % mwemiss(2)) = ob_info % emiss
+  ! Check that emissivity map is the correct size for the profile
+  if ((profindex % mwemiss(2) - profindex % mwemiss(1) + 1) /= size(EmissMap_new)) then
+    call abor1_ftn("mwemiss size differs from emissivity map")
+  end if
+  ! Copy microwave emissivity to profile
+    prof_x(profindex % mwemiss(1):profindex % mwemiss(2)) = ob_info % emiss(EmissMap_new)
 end if
 
 ! Retrieval of emissivity principal components
@@ -203,8 +221,9 @@ real(kind_real), intent(in)      :: prof_x(:) !< x vector
 ! Local arguments:
 character(len=*), parameter  :: RoutineName = "ufo_rttovonedvarcheck_ProfVec2GeoVaLs"
 character(len=max_string)    :: varname
-integer                      :: gv_index, i
+integer                      :: gv_index, i, ii
 integer                      :: nlevels
+integer                      :: EmissElement
 type(ufo_geoval), pointer    :: geoval
 real(kind_real), allocatable :: temperature(:)
 real(kind_real), allocatable :: pressure(:)
@@ -361,9 +380,28 @@ if (profindex % cloudfrac > 0) then
   ob_info % cloudfrac = prof_x(profindex % cloudfrac)
 end if
 
-! Microwave Emissivity
-if (profindex % mwemiss(1) > 0) then
-  ob_info % emiss = prof_x(profindex % mwemiss(1):profindex % mwemiss(2))
+! windspeed
+IF (profindex % windspeed > 0) THEN
+  ! Remember that we transfer all wind to u and set v to zero for
+  ! windspeed retrieval.
+  varname = "eastward_wind"
+  gv_index = 0
+  do i=1,geovals%nvar
+    if (varname == trim(geovals%variables(i))) gv_index = i
+  end do
+  geovals%geovals(gv_index)%vals(1,1) = prof_x(profindex % windspeed)
+END IF
+
+!----------------------------
+! 4. Emissivities
+!------------------------
+
+! Retrieval of microwave emissivity directly
+if (profindex % mwemiss(1) > 0) THEN
+  do ii = 1, size(ob_info % channels_used)
+    EmissElement = EmissElements_new(ob_info % channels_used(ii))
+    ob_info % emiss(ii) = prof_x(profindex % mwemiss(1) + EmissElement - 1)
+  end do
 end if
 
 ! Retrieval of emissivity principal components
@@ -409,11 +447,15 @@ real(kind_real), allocatable :: humidity_total(:)
 real(kind_real), allocatable :: q(:)            ! specific humidity (kg/kg)
 real(kind_real), allocatable :: ql(:)
 real(kind_real), allocatable :: qi(:)
+real(kind_real)              :: u_wind
+real(kind_real)              :: v_wind
+real(kind_real)              :: new_u_wind
+real(kind_real)              :: new_v_wind
 
 write(*,*) routinename, " : started"
 
 !-------------------------
-! Specific humidity total
+! 1. Specific humidity total
 !-------------------------
 
 if (profindex % qt(1) > 0) then
@@ -477,6 +519,46 @@ if (profindex % qt(1) > 0) then
   deallocate(q)
   deallocate(ql)
   deallocate(qi)
+
+end if
+
+!-------
+! 2. Wind
+!-------
+
+! RTTOV is isotropic, therefore if we only want to retrieve a "total" windspeed,
+! with no directional information, we can put all the wind into u and set v to
+! zero. If we are not retrieving windspeed, we just leave u and v separate to
+! avoid confusion.
+
+if (profindex % windspeed > 0) THEN
+  ! Get winds from geovals
+  varname = "eastward_wind"  ! m/s
+  call ufo_geovals_get_var(geovals, varname, geoval)
+  u_wind = geoval%vals(1,1)
+
+  varname = "northward_wind"  ! m/s
+  call ufo_geovals_get_var(geovals, varname, geoval)
+  v_wind = geoval%vals(1,1)
+
+  ! Convert to "total" windspeed
+  new_u_wind = sqrt(u_wind * u_wind + v_wind * v_wind)
+  new_v_wind = zero
+
+  ! Write back to geovals
+  varname = "eastward_wind"  ! m/s
+  gv_index = 0
+  do i=1,geovals%nvar
+    if (varname == trim(geovals%variables(i))) gv_index = i
+  end do
+  geovals%geovals(gv_index)%vals(1,1) = new_u_wind
+
+  varname = "northward_wind"  ! m/s
+  gv_index = 0
+  do i=1,geovals%nvar
+    if (varname == trim(geovals%variables(i))) gv_index = i
+  end do
+  geovals%geovals(gv_index)%vals(1,1) = new_v_wind
 
 end if
 
@@ -600,6 +682,7 @@ integer                     :: i
 integer                     :: toplevel_q
 integer                     :: nlevels_mwclw
 integer                     :: nlevels_1dvar
+integer                     :: Qsplit_MixPhaseParam = 1
 real(kind=kind_real), parameter :: lower_rh = 0.95
 real(kind=kind_real), parameter :: upper_rh = 1.05
 real(kind=kind_real), parameter :: Split_Factor = 0.5
@@ -627,6 +710,7 @@ real(kind=kind_real) :: QsplitRainParamA
 real(kind=kind_real) :: QsplitRainParamB
 real(kind=kind_real) :: QsplitRainParamC
 character(len=*), parameter :: RoutineName = "ufo_rttovonedvarcheck_Qsplit"
+character(len=max_string)   :: message
 logical                     :: useQtsplitRain
 
 ! Addition to make it work
@@ -667,28 +751,57 @@ Bconst = -(Y4 - Y3) / two
 Cconst = (Y2 + Y1) / two
 Dconst = -(Y4 + Y3) / two
 
+! Deal with mixed phase clouds
 ! Compute fraction of ql to ql+qi based on temperature profile
 
-where (t(:) - t0c >= -0.01_kind_real) ! -0.01degc and above
+! Either
+!Qsplit_MixPhaseParam=1 Jones Method
 
-  ! all ql
-  LF(:) = one
+if (Qsplit_MixPhaseParam == 1) then
 
-end where
+  where (t(:) - t0c >= -0.01_kind_real) ! -0.01degc and above
 
-where (t(:) <= minTempql)
+    ! all ql
+    LF(:) = one
 
-  ! all qi
-  LF(:) = zero
+  end where
 
-end where
+  where (t(:) <= minTempql)
 
-where (t(:) > minTempql .and. t(:) - t0c < -0.01_kind_real)
+    ! all qi
+    LF(:) = zero
 
-  ! Jones' parametrization
-  LF(:) = sqrt (-1.0_kind_real * log (-0.025_kind_real * (t(:) - t0c)) / 70.0_kind_real)
+  end where
 
-end where
+  where (t(:) > minTempql .and. t(:) - t0c < -0.01_kind_real)
+
+    ! Jones' parametrization
+    LF(:) = sqrt (-1.0_kind_real * log (-0.025_kind_real * (t(:) - t0c)) / 70.0_kind_real)
+
+  end where
+
+!Or
+!Bower et al 1996 parameterisation for ls cloud. Follows UM partitioning
+
+else if (Qsplit_MixPhaseParam == 2) then
+
+  LF(:) = (one/9.0_kind_real)*(T(:)-t0c)+one
+  
+  where( LF(:) > one )
+    LF(:) = one
+  end where
+
+  where( LF(:) < zero )
+    LF(:) = zero
+  end where
+
+!incorrect value supplied bale out
+else
+
+  write(message,'(A,I10)') 'Invalid option for Qsplit_MixPhaseParam. Value=', Qsplit_MixPhaseParam
+  call abor1_ftn(message)
+
+end if
 
 ! finally set LF to 0.0 for the rttov levels on which clw jacobians are not
 ! calculated since nlevels_mwclw < nlevels_q
@@ -799,23 +912,22 @@ end subroutine ufo_rttovonedvarcheck_Qsplit
 subroutine ufo_rttovonedvarcheck_Qsat (QS, &
                                        T,  &
                                        P,  &
-                                       NPNTS)
+                                       npnts)
 
 implicit none
 
 ! subroutine arguments:
-integer, intent(in)                 :: NPNTS     !< Points being processed by qSAT scheme.
-real(kind=kind_real), intent(in)    :: T(NPNTS)  !< Temperature (K)
-real(kind=kind_real), intent(in)    :: P(NPNTS)  !< Pressure (Pa).
-real(kind=kind_real), intent(inout) :: QS(NPNTS) !< Saturation mixing ratio (KG/KG)
+integer, intent(in)                 :: npnts     !< Points being processed by qSAT scheme.
+real(kind=kind_real), intent(in)    :: T(npnts)  !< Temperature (K)
+real(kind=kind_real), intent(in)    :: P(npnts)  !< Pressure (Pa).
+real(kind=kind_real), intent(inout) :: QS(npnts) !< Saturation mixing ratio (KG/KG)
 
 ! Local declarations:
-real(kind=kind_real), parameter :: EPSILON   = 0.62198_kind_real
-real(kind=kind_real), parameter :: ONE_minUS_EPSILON = one - Epsilon
-real(kind=kind_real), parameter :: T_LOW = 183.15_kind_real  ! Lowest temperature for which look-up table is valid
-real(kind=kind_real), parameter :: T_HIGH = 338.15_kind_real  ! Highest temperature for which look-up table is valid
-real(kind=kind_real), parameter :: deLTA_T = 0.1_kind_real    ! Temperature increment of look-up table
-integer, parameter   :: N = ((T_HIGH - T_LOW + (deLTA_T * 0.5_kind_real)) / deLTA_T) + one ! Size of lookup-table (gives 1551)
+real(kind=kind_real), parameter :: one_minus_epsilon = one - epsilon
+real(kind=kind_real), parameter :: T_low = 183.15_kind_real  ! Lowest temperature for which look-up table is valid
+real(kind=kind_real), parameter :: T_high = 338.15_kind_real  ! Highest temperature for which look-up table is valid
+real(kind=kind_real), parameter :: delta_T = 0.1_kind_real    ! Temperature increment of look-up table
+integer, parameter   :: N = ((T_high - T_low + (delta_T * 0.5_kind_real)) / delta_T) + one ! Size of lookup-table (gives 1551)
 integer              :: ITABLE
 real(kind=kind_real) :: ATABLE
 real(kind=kind_real) :: FSUBW      ! Converts from sat vapour pressure in pure water to pressure in air
@@ -826,7 +938,7 @@ real(kind=kind_real) :: ES(0:N + 1)    ! Table of saturation water vapour pressu
 character(len=*), parameter :: RoutineName = "ufo_rttovonedvarcheck_Qsat"
 
 ! Note: 0 element is a repeat of 1st element to cater for special case
-!       of low temperatures (.LE.T_LOW) for which the array index is
+!       of low temperatures (.LE.T_low) for which the array index is
 !       rounded down due to machine precision.
 
 data (ES(IES), IES= 0, 95) / 0.966483E-02, &
@@ -1158,7 +1270,7 @@ data (ES(IES), IES= 0, 95) / 0.966483E-02, &
 0.244611E+05,0.245712E+05,0.246814E+05,0.247923E+05,0.249034E+05, &
 0.250152E+05,0.250152E+05/
 
-do I = 1, NPNTS
+do I = 1, npnts
 
   ! Compute the factor that converts from sat vapour pressure in a
   ! pure water system to sat vapour pressure in air, FSUBW.  This formula
@@ -1172,10 +1284,10 @@ do I = 1, NPNTS
 
   ! use the lookup table to find saturated vapour pressure, and stored it in QS.
 
-  TT = max (T_LOW, T(I))
-  TT = min (T_HIGH, TT)
+  TT = max (T_low, T(I))
+  TT = min (T_high, TT)
 
-  ATABLE = (TT - T_LOW + deLTA_T) / deLTA_T
+  ATABLE = (TT - T_low + delta_T) / delta_T
   ITABLE = ATABLE
   ATABLE = ATABLE - ITABLE
 
@@ -1192,7 +1304,7 @@ do I = 1, NPNTS
   ! Note that at very low pressures we apply a fix, to prevent a
   ! singularity (Qsat tends to 1.0 kg/kg).
 
-  QS(I) = (EPSILON * QS(I)) / (max (P(I), QS(I)) - ONE_minUS_EPSILON * QS(I))
+  QS(I) = (epsilon * QS(I)) / (max (P(I), QS(I)) - one_minus_epsilon * QS(I))
 
 end do
 
@@ -1229,24 +1341,22 @@ end subroutine ufo_rttovonedvarcheck_Qsat
 subroutine ufo_rttovonedvarcheck_QsatWat (QS, &
                                           T,  &
                                           P,  &
-                                          NPNTS)
+                                          npnts)
 
 implicit none
 
 ! subroutine arguments:
-integer                     :: NPNTS     ! Points (=horizontal dimensions) being processed by qSAT scheme.
-real(kind=kind_real)        :: T(NPNTS)  ! Temperature (K).
-real(kind=kind_real)        :: P(NPNTS)  ! Pressure (Pa).
-real(kind=kind_real)        :: QS(NPNTS) ! Saturation mixing ratio at temperature T and pressure P (KG/KG)
+integer                     :: npnts     ! Points (=horizontal dimensions) being processed by qSAT scheme.
+real(kind=kind_real)        :: T(npnts)  ! Temperature (K).
+real(kind=kind_real)        :: P(npnts)  ! Pressure (Pa).
+real(kind=kind_real)        :: QS(npnts) ! Saturation mixing ratio at temperature T and pressure P (KG/KG)
 
 ! Local declarations:
-! Local declarations:
-real(kind=kind_real), parameter :: Epsilon   = 0.62198_kind_real
-real(kind=kind_real), parameter :: ONE_minUS_EPSILON = 1.0 - Epsilon
-real(kind=kind_real), parameter :: T_LOW = 183.15
-real(kind=kind_real), parameter :: T_HIGH = 338.15
-real(kind=kind_real), parameter :: deLTA_T = 0.1
-integer, parameter          :: N = ((T_HIGH - T_LOW + (deLTA_T * 0.5)) / deLTA_T) + 1.0  ! gives N = 1551
+real(kind=kind_real), parameter :: one_minus_epsilon = 1.0 - epsilon
+real(kind=kind_real), parameter :: T_low = 183.15
+real(kind=kind_real), parameter :: T_high = 338.15
+real(kind=kind_real), parameter :: delta_T = 0.1
+integer, parameter          :: N = ((T_high - T_low + (delta_T * 0.5)) / delta_T) + 1.0  ! gives N = 1551
 integer                     :: ITABLE
 real                        :: ATABLE
 real                        :: FSUBW
@@ -1257,7 +1367,7 @@ real                        :: ES(0:N + 1)   ! Table of saturation water vapour 
 character(len=*), parameter :: RoutineName = "ufo_rttovonedvarcheck_QsatWat"
 
 ! Note: 0 element is a repeat of 1st element to cater for special case
-!       of low temperatures (.LE.T_LOW) for which the array index is
+!       of low temperatures (.LE.T_low) for which the array index is
 !       rounded down due to machine precision.
 
 data (ES(IES),IES=    0, 95) / 0.186905E-01, &
@@ -1589,7 +1699,7 @@ data (ES(IES),IES=1521,1552) / &
 0.244611E+05,0.245712E+05,0.246814E+05,0.247923E+05,0.249034E+05, &
 0.250152E+05,0.250152E+05/
 
-do I = 1, NPNTS
+do I = 1, npnts
 
   ! Compute the factor that converts from sat vapour pressure in a
   ! pure water system to sat vapour pressure in air, FSUBW.  This formula
@@ -1602,10 +1712,10 @@ do I = 1, NPNTS
 
   ! use the lookup table to find saturated vapour pressure, and store it in QS
 
-  TT = max (T_LOW, T(I))
-  TT = min (T_HIGH, TT)
+  TT = max (T_low, T(I))
+  TT = min (T_high, TT)
 
-  ATABLE = (TT - T_LOW + deLTA_T) / deLTA_T
+  ATABLE = (TT - T_low + delta_T) / delta_T
   ITABLE = ATABLE
   ATABLE = ATABLE - ITABLE
 
@@ -1622,7 +1732,7 @@ do I = 1, NPNTS
   ! Note that at very low pressures we apply a fix, to prevent a singularity
   ! (Qsat tends to 1.0 kg/kg)
 
-  QS(I) = (EPSILON * QS(I)) / (max (P(I), QS(I)) - ONE_minUS_EPSILON * QS(I))
+  QS(I) = (epsilon * QS(I)) / (max (P(I), QS(I)) - one_minus_epsilon * QS(I))
 
 end do
 

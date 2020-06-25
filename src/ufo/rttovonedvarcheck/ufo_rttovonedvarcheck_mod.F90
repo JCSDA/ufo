@@ -115,7 +115,6 @@ subroutine ufo_rttovonedvarcheck_apply(self, vars, geovals, apply)
   integer                            :: apply_count
   integer                            :: nprofelements   ! number of elements in 1d-var state profile
   integer(c_int32_t), allocatable    :: flags(:,:)      ! qc flag for return to var obs file
-  integer, allocatable               :: channels_used(:)
   integer, allocatable               :: fields_in(:)
   integer, allocatable               :: QCflags(:,:)    ! current qc flags needed for channel selection
   real(kind_real)                    :: missing         ! missing value
@@ -224,12 +223,16 @@ subroutine ufo_rttovonedvarcheck_apply(self, vars, geovals, apply)
     if (apply(jobs)) then
 
       apply_count = apply_count + 1
+      write(*,*) "starting obs number    ",jobs
       !---------------------------------------------------
       ! Setup Jb terms
       !---------------------------------------------------
       ! create one ob geovals from full all obs geovals
       call ufo_geovals_copy_one(geovals, local_geovals, jobs)
+      if (self % FullDiagnostics) write(*,*) "GeoVaLs first iteration before check"
+      if (self % FullDiagnostics) call ufo_geovals_print(local_geovals, 1)
       call ufo_rttovonedvarcheck_check_geovals(local_geovals, prof_index)
+      if (self % FullDiagnostics) write(*,*) "GeoVaLs first iteration after check"
       if (self % FullDiagnostics) call ufo_geovals_print(local_geovals, 1)
 
       ! select appropriate b matrix for latitude of observation
@@ -239,7 +242,7 @@ subroutine ufo_rttovonedvarcheck_apply(self, vars, geovals, apply)
       do band = 1, full_bmatrix % nbands
         if (lat(jobs) <  full_bmatrix % north(band)) exit
       end do
-      ! Call to Ops_SatRad_ResetCovariances
+      ! Heritage: Ops_SatRad_ResetCovariances
       b_matrix(:,:) = full_bmatrix % store(:,:,band)
       b_inverse(:,:) = full_bmatrix % inverse(:,:,band)
       b_sigma(:) = full_bmatrix % sigma(:,band)
@@ -273,9 +276,10 @@ subroutine ufo_rttovonedvarcheck_apply(self, vars, geovals, apply)
       ob_info % solar_zenith_angle = sol_zen(jobs)
       ob_info % solar_azimuth_angle = sol_azi(jobs)
       ob_info % retrievecloud = cloud_retrieval
+      if(self % RTTOV_mwscattSwitch) ob_info % mwscatt = .true.
+      if(self % RTTOV_usetotalice) ob_info % mwscatt_totalice = .true.
 
       ! allocate arrays
-      allocate(channels_used(chans_used))
       allocate(obs_error(chans_used))
 
       ! create obs vector and r matrix
@@ -285,9 +289,8 @@ subroutine ufo_rttovonedvarcheck_apply(self, vars, geovals, apply)
         if( QCflags(jvar,jobs) == 0 ) then
           jchans_used = jchans_used + 1
           obs_error(jchans_used) = yerr(jvar, jobs)
-          write(*,*) "jchans_used, ob number = ",trim(vars%variable(jvar)),jobs
           ob_info % yobs(jchans_used) = yobs(jvar, jobs)
-          channels_used(jchans_used) = self%channels(jvar)
+          ob_info % channels_used(jchans_used) = self%channels(jvar)
           if (self % ReadMWemiss .OR. self % ReadIRemiss) then
             write(*,*) "Copying emissivity from db"
             ob_info % emiss(jchans_used) = emissivity(jvar, jobs)
@@ -299,16 +302,16 @@ subroutine ufo_rttovonedvarcheck_apply(self, vars, geovals, apply)
           end if
         end if
       end do
-
-      write(*,*) "ob_info % emiss = ",ob_info % emiss
-      write(*,*) "ob_info % calc_emiss = ",ob_info % calc_emiss
-
       call r_submatrix % setup(self % rtype, chans_used, obs_error)
+
       if (self % FullDiagnostics) then
         call r_submatrix % info()
         write(*, *) "Observations used = ",ob_info % yobs(:)
+        write(*,*) "ob_info % emiss = ",ob_info % emiss
+        write(*,*) "ob_info % calc_emiss = ",ob_info % calc_emiss
+        write(*,*) "Channel selection = "
+        write(*,'(15I5)') ob_info % channels_used
       end if
-      write(*,*) "Channels used = ",channels_used
 
       !---------------------------------------------------
       ! Call minimization
@@ -317,12 +320,12 @@ subroutine ufo_rttovonedvarcheck_apply(self, vars, geovals, apply)
         call ufo_rttovonedvarcheck_minimize_ml(self, ob_info, &
                                       r_submatrix, b_matrix, b_inverse, b_sigma, &
                                       local_geovals, prof_index,           &
-                                      channels_used, onedvar_success)
+                                      ob_info % channels_used, onedvar_success)
       else
         call ufo_rttovonedvarcheck_minimize_newton(self, ob_info, &
                                       r_submatrix, b_matrix, b_inverse, b_sigma, &
                                       local_geovals, prof_index,           &
-                                      channels_used, onedvar_success)
+                                      ob_info % channels_used, onedvar_success)
       end if
 
       ! Set QCflags based on output from minimization
@@ -337,8 +340,6 @@ subroutine ufo_rttovonedvarcheck_apply(self, vars, geovals, apply)
       ! Tidy up memory specific to a single observation
       call ob_info % delete()
       call r_submatrix % delete()
-      call ufo_geovals_delete(local_geovals)
-      if (allocated(channels_used)) deallocate(channels_used)
       if (allocated(obs_error))     deallocate(obs_error)
 
     else

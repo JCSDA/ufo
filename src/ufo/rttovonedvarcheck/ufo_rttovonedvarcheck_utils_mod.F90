@@ -42,7 +42,7 @@ type, public :: ufo_rttovonedvarcheck
   integer(c_int), allocatable      :: channels(:) !< integer list of channels
   logical                          :: qtotal !< flag to enable total humidity retrievals
   logical                          :: RTTOV_mwscattSwitch !< flag to switch on RTTOV-scatt
-  logical                          :: use_totalice !< flag for use of total ice in RTTOV MW scatt
+  logical                          :: RTTOV_usetotalice !< flag for use of total ice in RTTOV MW scatt
   logical                          :: UseMLMinimization !< flag to turn on marquardt-levenberg minimizer
   logical                          :: UseJforConvergence !< flag to Use J for convergence
   logical                          :: FullDiagnostics !< flag to turn on full diagnostics
@@ -108,7 +108,7 @@ write(*,*) "channels setup = ",self%channels
 self % rtype = "diagonal"
 self % qtotal = .false.
 self % RTTOV_mwscattSwitch = .false.
-self % use_totalice = .false.
+self % RTTOV_usetotalice = .false.
 self % UseMLMinimization = .false.
 self % UseJforConvergence = .false.
 self % FullDiagnostics = .false.
@@ -140,8 +140,8 @@ if (self % conf % has("RTTOV_mwscattSwitch")) then
 end if
 
 ! Flag for use of total ice in RTTOV MW scatt
-if (self % conf % has("use_totalice")) then
-  call self % conf % get_or_die("use_totalice", self % use_totalice)
+if (self % conf % has("RTTOV_usetotalice")) then
+  call self % conf % get_or_die("RTTOV_usetotalice", self % RTTOV_usetotalice)
 end if
 
 ! Flag to turn on marquardt-levenberg minimiser
@@ -225,7 +225,7 @@ if (self % FullDiagnostics) then
   write(*,*) "channels(:) = ",self % channels(:)
   write(*,*) "qtotal = ",self % qtotal
   write(*,*) "RTTOV_mwscattSwitch = ",self % RTTOV_mwscattSwitch
-  write(*,*) "use_totalice = ",self % use_totalice
+  write(*,*) "RTTOV_usetotalice = ",self % RTTOV_usetotalice
   write(*,*) "UseMLMinimization = ",self % UseMLMinimization
   write(*,*) "UseJforConvergence = ",self % UseJforConvergence
   write(*,*) "FullDiagnostics = ",self % FullDiagnostics

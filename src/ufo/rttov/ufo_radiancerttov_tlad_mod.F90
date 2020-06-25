@@ -140,6 +140,7 @@ include 'rttov_k.interface'
 include 'rttov_alloc_k.interface'
 include 'rttov_alloc_prof.interface'
 include 'rttov_print_profile.interface'
+include 'rttov_print_opts.interface'
 include 'rttov_user_profile_checkinput.interface'
 
 ! Get number of profile and layers from geovals
@@ -299,6 +300,9 @@ Sensor_Loop:do i_inst = 1, self % conf % nSensors
 
     idbg = idbg + 1
 
+    write(*,*) "Rttov options before call to k code"
+    call rttov_print_opts(config_rttov % opts)
+
     ! --------------------------------------------------------------------------
     ! 7. Call RTTOV forward model
     ! --------------------------------------------------------------------------
@@ -325,10 +329,13 @@ Sensor_Loop:do i_inst = 1, self % conf % nSensors
 !     STOP
     end if
 
+    write(*,*) "emissivity_k(1) % emis_in = ",emissivity_k(1) % emis_in
+    write(*,*) "emissivity_k(1) % emis_out = ",emissivity_k(1) % emis_out
+
     prof_start = prof_start + nprof_sim
     nchan_count = nchan_count + nch
   end do
-  
+
   if (present(BT)) BT(:) = radiance % bt(:)
 
   ! Allocate structures for rttov_k

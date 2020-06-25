@@ -33,7 +33,10 @@ type, public :: obinfo_type
   real(kind_real) :: cloudtopp !< cloud top pressure (used in if cloudy retrieval used)
   real(kind_real) :: cloudfrac !< cloud fraction (used in if cloudy retrieval used)
   logical         :: retrievecloud  !< flag to turn on retrieve cloud
+  logical         :: mwscatt !< flag to use rttov-scatt model through the interface
+  logical         :: mwscatt_totalice !< flag to use total ice (rather then ciw) for rttov-scatt simulations
   real(kind_real), allocatable :: yobs(:) !< satellite BTs
+  integer, allocatable :: channels_used(:) !< channels used for this observation
   real(kind_real), allocatable :: emiss(:) !< surface emissivity
   logical, allocatable :: calc_emiss(:) !< flag to decide if RTTOV calculates emissivity
 
@@ -79,8 +82,11 @@ ob_info % solar_azimuth_angle = 0.0
 ob_info % cloudtopp = 500.0
 ob_info % cloudfrac = 0.0
 ob_info % retrievecloud = .false.
+ob_info % mwscatt = .false.
+ob_info % mwscatt_totalice = .false.
 
 allocate(ob_info % yobs(nchans))
+allocate(ob_info % channels_used(nchans))
 allocate(ob_info % emiss(nchans))
 allocate(ob_info % calc_emiss(nchans))
 
@@ -165,10 +171,13 @@ ob_info % solar_azimuth_angle = 0.0
 ob_info % cloudtopp = 500.0
 ob_info % cloudfrac = 0.0
 ob_info % retrievecloud = .false.
+ob_info % mwscatt = .false.
+ob_info % mwscatt_totalice = .false.
 
-if (allocated(ob_info % yobs))       deallocate(ob_info % yobs)
-if (allocated(ob_info % emiss))      deallocate(ob_info % emiss)
-if (allocated(ob_info % calc_emiss)) deallocate(ob_info % calc_emiss)
+if (allocated(ob_info % yobs))          deallocate(ob_info % yobs)
+if (allocated(ob_info % channels_used)) deallocate(ob_info % channels_used)
+if (allocated(ob_info % emiss))         deallocate(ob_info % emiss)
+if (allocated(ob_info % calc_emiss))    deallocate(ob_info % calc_emiss)
 
 end subroutine ufo_rttovonedvarcheck_DeleteObInfo
 

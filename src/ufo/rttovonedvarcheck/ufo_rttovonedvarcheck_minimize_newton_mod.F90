@@ -326,40 +326,10 @@ Iterations: do iter = 1, self % max1DVarIterations
 
     if (iter >= self % IterNumForLWPCheck) then
 
-      if (self % RTTOV_mwscattSwitch) then
-      
-        !cloud information is from the scatt profile
-        if (self % use_totalice) then
-
-          call ufo_rttovonedvarcheck_CheckCloudyIteration( geovals,         & ! in
-                                                profile_index,   & ! in
-                                                self % nlevels,  & ! in
-                                                OutOfRange )
-
-!          call ufo_rttovonedvarcheck_CheckCloudyIteration (RTprof_Guess % rttov12_profile_scatt % clw(:),      & ! in
-!                                                RTprof_Guess % rttov12_profile_scatt % totalice(:), & ! in
-!                                                outOfRange)                                                         ! out
-        else
-
-          call ufo_rttovonedvarcheck_CheckCloudyIteration( geovals,         & ! in
-                                                profile_index,   & ! in
-                                                self % nlevels,  & ! in
-                                                OutOfRange )
-
-!          call ufo_rttovonedvarcheck_CheckCloudyIteration (RTprof_Guess % rttov12_profile_scatt % clw(:), & ! in
-!                                                RTprof_Guess % rttov12_profile_scatt % ciw(:), & ! in
-!                                                outOfRange)
-
-        end if
-
-      else
-
-        call ufo_rttovonedvarcheck_CheckCloudyIteration( geovals,         & ! in
-                                              profile_index,   & ! in
-                                              self % nlevels,  & ! in
+        call ufo_rttovonedvarcheck_CheckCloudyIteration( geovals, & ! in
+                                              profile_index,      & ! in
+                                              self % nlevels,     & ! in
                                               OutOfRange )
-
-      end if
 
     end if
 

@@ -171,13 +171,13 @@ list( APPEND ufo_test_data
   atmosphere/aod_geoval_2018041500_s.nc4
   atmosphere/atms_npp_geoval_2018041500_m.nc4
   atmosphere/atms_npp_geoval_2018041500_s.nc4
+  atmosphere/atms_allsats_geoval_2019112800.nc4
+  atmosphere/atms_allsats_obs_2019112800.nc4
   atmosphere/cris-fsr_npp_geoval_2018041500_m.nc4
   atmosphere/cris-fsr_npp_geoval_2018041500_m_qc.nc4
   atmosphere/cris-fsr_npp_obsdiag_2018041500_m_qc.nc4
   atmosphere/cris-fsr_npp_tlapmean.txt
   atmosphere/geovals_rttov.nc4
-  atmosphere/atms_allsats_geoval_2019112700-init.nc4
-  atmosphere/atms_allsats_obs_2019112700-init.nc4
   atmosphere/atms_bmatrix_70.dat
   atmosphere/geos_aod_geoval_2018041500_m.nc4
   atmosphere/gmi_gpm_geoval_2018041500_m.nc4

@@ -3,8 +3,8 @@ logging:
   categories: Warning, Error, Debug
 test_framework_runtime_config: "--log_level=test_suite"
 
-window_begin: &win_begin 2019-11-26T21:00:00Z
-window_end: &win_end 2019-11-27T03:00:00Z
+window_begin: &win_begin 2019-11-27T21:00:00Z
+window_end: &win_end 2019-11-28T03:00:00Z
 
 LinearObsOpTest: 
  coefTL: 1.e-5
@@ -23,145 +23,115 @@ Observations:
         - mass_content_of_cloud_liquid_water_in_atmosphere_layer
         - mass_content_of_cloud_ice_in_atmosphere_layer
     GeoVaLs:
-      filename: Data/atms_allsats_geoval_2019112700-init.nc4
+      filename: Data/atms_allsats_geoval_2019112800.nc4
     ObsSpace: 
       name: Radiance
       ObsDataIn:
-        obsfile: &obs_file Data/atms_allsats_obs_2019112700-init.nc4
+        obsfile: &obs_file Data/atms_allsats_obs_2019112800.nc4
       ObsDataOut: 
-        obsfile: Data/atms_allsats_obs_2019112700-out.nc4
+        obsfile: Data/atms_allsats_obs_2019112800-out.nc4
       simulate:
         variables: [brightness_temperature]
         channels: &ops_channels 6-15, 18-22
     ObsFilters:
-#   Blacklisting represents channel rejection which will be rejected 
-#   by other filters eventually and qc_info will not be used.
+    # Reject cannel 7 over land in the tropics
     - Filter: BlackList
       filter variables:
       - name: brightness_temperature
-        channels: 6
+        channels: 7
       where:
       - variable:
-          name: qc_info@MetaData
-        minvalue: 8396930.0
-        maxvalue: 8618514.0
-      action:
-        name: reject
+          name: qci_surftype_land@MetaData
+        is_in: 1
+      - variable:
+          name: latitude@MetaData
+        minvalue: -30.0
+        maxvalue: 30.0
+    # Reject channel 7 to 9 over sea when bennartz rain detected
     - Filter: BlackList
       filter variables:
       - name: brightness_temperature
-        channels: 7-8
+        channels: 7-9
       where:
       - variable:
-          name: qc_info@MetaData
-        minvalue: 8397185.5
-        maxvalue: 8397186.5
+          name: qci_surftype_sea@MetaData
+        is_in: 1
+      - variable:
+          name: qci_cloudtype_bennartzrain@MetaData
+        is_in: 1
+    # Reject channels when mwcloudy flag
     - Filter: BlackList
       filter variables:
       - name: brightness_temperature
-        channels: 7-8
+        channels: 6, 18
       where:
       - variable:
-          name: qc_info@MetaData
-        minvalue: 8486913.5
-        maxvalue: 8618514.5
-      action:
-        name: reject
+          name: qci_cloudtype_mwcloudy@MetaData
+        is_in: 1
+    # Reject channels when mwbcloudy flag
     - Filter: BlackList
       filter variables:
       - name: brightness_temperature
-        channels: 9
+        channels: 18-20
       where:
       - variable:
-          name: qc_info@MetaData
-        minvalue: 8397185.5
-        maxvalue: 8397186.5
-      action:
-        name: reject
+          name: qci_cloudtype_mwbcloudy@MetaData
+        is_in: 1
+    # Reject channels when rain detected
     - Filter: BlackList
       filter variables:
       - name: brightness_temperature
-        channels: 9
+        channels: 6-9, 18-22
       where:
       - variable:
-          name: qc_info@MetaData
-        minvalue: 8528257.5
-        maxvalue: 8528642.5
-      action:
-        name: reject
+          name: qci_cloudtype_rain@MetaData
+        is_in: 1
+    # Reject channels when bennartz rain detected
     - Filter: BlackList
       filter variables:
       - name: brightness_temperature
-        channels: 18
+        channels: 6, 18-22
       where:
       - variable:
-          name: qc_info@MetaData
-        minvalue: 8396803
-      action:
-        name: reject
+          name: qci_cloudtype_bennartzrain@MetaData
+        is_in: 1
+    # Reject channels when over seaice surfaces
     - Filter: BlackList
       filter variables:
       - name: brightness_temperature
-        channels: 19,20
+        channels: 6, 18-22
       where:
       - variable:
-          name: qc_info@MetaData
-        minvalue: 8396817
-        maxvalue: 8396819
-      action:
-        name: reject
+          name: qci_surftype_seaice@MetaData
+        is_in: 1
+    # Reject channels when over land
     - Filter: BlackList
       filter variables:
       - name: brightness_temperature
-        channels: 19
+        channels: 6, 18
       where:
       - variable:
-          name: qc_info@MetaData
-        minvalue: 8397185
-      action:
-        name: reject
+          name: qci_surftype_land@MetaData
+        is_in: 1
+    # Reject channels when over high land
     - Filter: BlackList
       filter variables:
       - name: brightness_temperature
-        channels: 20
+        channels: 6-8, 18-22
       where:
       - variable:
-          name: qc_info@MetaData
-        minvalue: 8396945
-        maxvalue: 8397187
-      action:
-        name: reject
+          name: qci_surftype_highland@MetaData
+        is_in: 1
+    # Reject channels for mismatch surface type
     - Filter: BlackList
       filter variables:
       - name: brightness_temperature
-        channels: 20
+        channels: 6-8, 18-22
       where:
       - variable:
-          name: qc_info@MetaData
-        minvalue: 8421393
-      action:
-        name: reject
-    - Filter: BlackList
-      filter variables:
-      - name: brightness_temperature
-        channels: 21-22
-      where:
-      - variable:
-          name: qc_info@MetaData
-        minvalue: 8397185
-        maxvalue: 8397187
-      action:
-        name: reject
-    - Filter: BlackList
-      filter variables:
-      - name: brightness_temperature
-        channels: 21-22
-      where:
-      - variable:
-          name: qc_info@MetaData
-        minvalue: 8421889
-      action:
-        name: reject
+          name: qci_surftype_mismatch@MetaData
+        is_in: 1
+    # Do 1D-Var check
     - Filter: RTTOV OneDVar Check
       applyfilter: 
       - name: post@HofX
@@ -183,6 +153,7 @@ Observations:
       rtype: diagonal # diagonal or full R matrix
       qtotal: true
       RTTOV_mwscattSwitch: false
+      RTTOV_usetotalice: false
       UseMLMinimization: false
       UseJforConvergence: true
       FullDiagnostics: true

@@ -102,7 +102,8 @@ real(kind_real), intent(out)                :: H_matrix(:,:) !< Jacobian
 
 ! Local arguments
 integer :: nchans, nlevels, nq_levels
-integer :: i
+integer :: i, j
+integer :: chan
 logical :: RTTOV_GasunitConv = .false.
 real(kind_real),allocatable  :: q_kgkg(:)
 real(kind_real)              :: s2m_kgkg
@@ -121,7 +122,7 @@ nlevels = size(rttov_data % profiles_k(1) % t)
 
 !----------------------------------------------------------------
 ! 1.1) Temperature - invert as RTTOV level 1 as top of atmosphere and
-!               1Dvar profile is from the surface up. 
+!               1Dvar profile  and is from the surface up.
 !----------------------------------------------------------------
 
 if (profindex % t(1) > 0) then
@@ -272,33 +273,31 @@ if (profindex % cloudfrac > 0) then
   end do
 end if
 
-! 2.7) Microwave Emissivity
+!----
+! 3.) Emissivities - waiting for DR to update the RTTOV interface these will then come from hofxdiags
+!----
 
-!IF (profindex % mwemiss(1) > 0) THEN
-!  ! The emissivity matrix needs to be "unpacked" as it is only one
-!  ! dimensional over channels - implying you want to retrieve a
-!  ! single emissivity value. It is unpacked here so that each emissivity
-!  ! has a corresponding entry for the relevant channel. Note that this is
-!  ! a bit physically dubious as several channels have the same frequency, etc.
-!  ! This complexity is dealt with in the B Matrix.
-!  ! Check that we want only the diagonal elements to be non-zero
-!  DO j = 1, SIZE (EmissMap)
-!    IF (ops_ticket_1810_atlas) THEN
-!      chan = EmissMap_new(j)
-!    ELSE
-!      chan = EmissMap(j)
-!    END IF
-!
-!    DO i = 1, nchans
-!      IF (Channels(i) == chan) THEN
-!        H_matrix(i,profindex % mwemiss(1) + j - 1) = rttov_data % profiles_k(i) % emissivity(1)
-!      END IF
-!    END DO
-!  END DO
-!END IF
+! 3.1 Microwave Emissivity
 
+if (profindex % mwemiss(1) > 0) then
+  ! The emissivity matrix needs to be "unpacked" as it is only one
+  ! dimensional over channels - implying you want to retrieve a
+  ! single emissivity value. It is unpacked here so that each emissivity
+  ! has a corresponding entry for the relevant channel. Note that this is
+  ! a bit physically dubious as several channels have the same frequency, etc.
+  ! This complexity is dealt with in the B Matrix.
+  ! Check that we want only the diagonal elements to be non-zero
+  do j = 1, size(EmissMap_new)
+      chan = EmissMap_new(j)
+    do i = 1, nchans
+      !if (channels(i) == chan) then
+      !  H_matrix(i,profindex % mwemiss(1) + j - 1) = rttov_data % Emissivity(1)
+      !end if
+    end do
+  end do
+end if
 
-! 2.4) Infrared Emissivity
+! 3.2. Infrared Emissivity
 
 !IF (profindex % emisspc(1) > 0) THEN
 !

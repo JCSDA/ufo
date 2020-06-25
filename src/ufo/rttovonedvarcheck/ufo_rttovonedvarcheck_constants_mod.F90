@@ -32,7 +32,7 @@ integer, parameter, public :: &
 ! file and it's that list which decides the form of the retrieval vector.
 !
 ! new definitions should be made in conjunction with the profileinfo_type
-! structure found in section 3 above.
+! structure found in ufo_rttovonedvarcheck_profindex_mod.F90.
 
 integer, parameter, public :: nfieldtypes = 19 !< number of fieldtypes
 integer, parameter, public :: &
@@ -89,8 +89,24 @@ real(kind_real), parameter, public :: &
   Min_q           =     3.0E-6, & !< Minimum humidity ( kg / kg )
   MaxTemperature  =   340.0,    & !< Maximum temperature ( K )
   MinTemperature  =    70.0,    & !< Minimum temperature ( K )
-  IceShelfLimit   =   -72.0,    & !< assumed limit of SH seaice
-  WetLevelLid     =   115.0,    & !< uppermost wet pressure level
-  MWCloudLevelLid =   310.0       !< uppermost clw pressure lvl for mwcalcs(hpa)
+  IceShelfLimit   =   -72.0,    & !< Assumed limit of SH seaice
+  WetLevelLid     =   115.0,    & !< Uppermost wet pressure level
+  MWCloudLevelLid =   310.0,    & !< Uppermost clw pressure lvl for mwcalcs (hpa)
+  Epsilon         =     0.62198   !< Epsilon is the ratio of molecular weights of water and dry air
+
+!-----------------------------------------------------------------------------
+! 4. Information for emissivity retrieval
+!-----------------------------------------------------------------------------
+
+! With ops_ticket_1810_atlas=T the channel mapping changes so that
+! for AMSU-B [MHS] the 183 GHz channels are mapped to 150 GHz emissivity
+integer, parameter, public :: EmissElements_new(20) = &
+  (/ 1,2,3,3,3,3,3,3,3,3,3,3,3,3,4, &  ! AMSU-A mapping
+     4,5,5,5,5                      /) ! AMSU-B mapping
+
+! With ops_ticket_1810_atlas=T channel 35 is removed from the retrieval vector
+! (failed channel on MetOp-B) and substituted by channel 36 (also 89 GHz).
+! Also introduce channel 37 (150 GHz) for the first time.
+integer, parameter, public :: EmissMap_new(5) = (/ 1, 2, 3, 16, 17 /)
 
 end module ufo_rttovonedvarcheck_constants_mod
