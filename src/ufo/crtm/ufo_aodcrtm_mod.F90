@@ -133,11 +133,11 @@ TYPE(CRTM_RTSolution_type), ALLOCATABLE :: rts_K(:,:)
 
  ! Program header
  ! --------------
- call CRTM_Version( Version )
- call Program_Message( PROGRAM_NAME, &
-                       'Check/example program for the CRTM Forward and K-Matrix functions using '//&
-                       trim(self%conf%ENDIAN_type)//' coefficient datafiles', &
-                       'CRTM Version: '//TRIM(Version) )
+ ! call CRTM_Version( Version )
+ ! call Program_Message( PROGRAM_NAME, &
+ !                       'Check/example program for the CRTM Forward and K-Matrix functions using '//&
+ !                       trim(self%conf%ENDIAN_type)//' coefficient datafiles', &
+ !                       'CRTM Version: '//TRIM(Version) )
 
 
  ! Initialise all the sensors at once
@@ -145,7 +145,7 @@ TYPE(CRTM_RTSolution_type), ALLOCATABLE :: rts_K(:,:)
  !** NOTE: CRTM_Init points to the various binary files needed for CRTM.  See the
  !**       CRTM_Lifecycle.f90 for more details.
 
- write( *,'(/5x,"Initializing the CRTM...")' )
+ ! write( *,'(/5x,"Initializing the CRTM...")' )
  err_stat = CRTM_Init( self%conf%SENSOR_ID, &
             chinfo, &
             File_Path=trim(self%conf%COEFFICIENT_PATH), &
@@ -274,7 +274,7 @@ end do Sensor_Loop
 
  ! Destroy CRTM instance
  ! ---------------------
- write( *, '( /5x, "Destroying the CRTM..." )' )
+ ! write( *, '( /5x, "Destroying the CRTM..." )' )
  err_stat = CRTM_Destroy( chinfo )
  if ( err_stat /= SUCCESS ) THEN
     message = 'Error destroying CRTM'
