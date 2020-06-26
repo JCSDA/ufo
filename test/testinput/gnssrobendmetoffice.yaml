@@ -1,0 +1,25 @@
+window_begin: 2019-05-06T21:00:00Z
+window_end: 2019-05-07T03:00:00Z
+
+Observations: 
+ ObsTypes: 
+ - ObsOperator: 
+     name: GnssroBendMetOffice
+     ObsOptions:
+       vert_interp_ops: true
+       pseudo_ops: true
+   ObsSpace: 
+     name: GnssroBnd
+     ObsDataIn: 
+       obsfile: Data/ioda/testinput_tier_1/gnssro_obs_2019050700_1obs.nc4
+     simulate: 
+       variables: [bending_angle]
+   GeoVaLs: 
+     filename: Data/gnssro_geoval_2019050700_1obs.nc4
+   ObsFilters:
+   - Filter: Background Check
+     filter variables:
+     - name: bending_angle
+     threshold: 3.0
+   normequiv: MetOfficeHofX
+   tolerance: 1.0e-5

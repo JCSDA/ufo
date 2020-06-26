@@ -33,6 +33,8 @@ real(kind_real), parameter, public :: sig   = 5.67e-6  !> Stefan-Boltzmann const
 real(kind_real), parameter, public :: alpha = 2.7e-4 !> Water thermal expansion coefficient
 real(kind_real), parameter, public :: cw    = 0.015     !> Water specific heat
 real(kind_real), parameter, public :: v_w   = 0.8e-6     !> Water kinematic viscosity  
+real(kind_real), parameter, public :: mw_ratio   = 0.62198       ! Ratio of molecular weights of water and dry air
+real(kind_real), parameter, public :: c_virtual = 1./mw_ratio-1. ! Related to mw_ratio
 real(kind_real), parameter, public :: S_B   = 0.026
 real(kind_real), parameter, public :: gr    = 9.81
 real(kind_real), parameter, public :: Rou    = 1000.0
@@ -44,5 +46,16 @@ real(kind_real), parameter, public :: es_w_0 = 611.2_kind_real ! saturation vapo
 real(kind_real), parameter, public :: pi      = acos(-one)
 real(kind_real), parameter, public :: deg2rad =  pi/180.0_kind_real
 real(kind_real), parameter, public :: rad2deg = one/deg2rad
+real(kind_real), parameter, public :: pref = 1.0E5
+! constants relating to WGS-84 ellipsoid and gravity above ellipsoid
+real(kind_real), parameter, public :: ecc = 0.081819            ! eccentricity
+real(kind_real), parameter, public :: k_somig = 1.931853E-3     ! Somigliana's constant
+real(kind_real), parameter, public :: g_equat = 9.7803253359    ! equatorial gravity (ms-2)
+real(kind_real), parameter, public :: a_earth = 6378.137E3      ! semi-major axis of earth (m)
+real(kind_real), parameter, public :: flatt = 0.003352811       ! flattening
+real(kind_real), parameter, public :: m_ratio= 0.003449787      ! gravity ratio
+! Refractivity constants
+real(kind_real), parameter, public :: n_alpha = 0.776           ! Refractivity constant a
+real(kind_real), parameter, public :: n_beta  = 3.73E3          ! Refractivity constant b
 end module ufo_constants_mod
 

@@ -29,6 +29,8 @@ struct Constants {
                                                            //      for air
     static constexpr double cv             = 7.1760e2;     // heat capacity at constant volume
                                                            //      for air
+    static constexpr double pref           = 1.0e5;        // Reference pressure for calculating
+                                                           //      exner
     static constexpr double rd_over_rv     = rd/rv;
     static constexpr double rd_over_cp     = rd/cp;
     static constexpr double cv_over_cp     = cv/cp;

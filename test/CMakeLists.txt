@@ -84,6 +84,7 @@ list( APPEND ufo_test_input
   testinput/geovals.yaml
   testinput/geos_aod.yaml
   testinput/geovals_spec.yaml
+  testinput/gnssrobendmetoffice.yaml
   testinput/gnssrobndropp1d.yaml
   testinput/gnssrobndropp2d.yaml
   testinput/gnssrobndnbam.yaml
@@ -219,6 +220,7 @@ list( APPEND ufo_test_data
   atmosphere/gnssro_geoval_2018041500_s_2d.nc4
   atmosphere/gnssro_geoval_2018041500_m.nc4
   atmosphere/gnssro_geoval_2018041500_l.nc4
+  atmosphere/gnssro_geoval_2019050700_1obs.nc4
   atmosphere/gsisfc_tsen_geoval_2018041500_m.nc4
   atmosphere/gsisfc_uv_geoval_2018041500_m.nc4
   atmosphere/hirs4_metop-a_geoval_2018041500_m.nc4
@@ -729,6 +731,12 @@ ecbuild_add_test( TARGET  test_ufo_linopr_gnssroBndNBAM
                   ARGS    "testinput/gnssrobndnbam.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsOperatorTLAD.x )
+
+ecbuild_add_test( TARGET  test_ufo_opr_gnssroBendMetOffice
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
+                  ARGS    "testinput/gnssrobendmetoffice.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsOperator.x )
 
 if( ${ROPP-UFO_FOUND} )
 ecbuild_add_test( TARGET  test_ufo_opr_gnssroBndROPP1D
