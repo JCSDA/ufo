@@ -79,8 +79,7 @@ integer(c_int), intent(in)                 :: channels(:)
 ! local variables
 character(len=max_string) :: tmp
 character(len=:), allocatable :: str
-character(kind=c_char, len=max_string), allocatable :: char_array(:)
-integer(c_size_t),parameter :: csize = max_string
+character(len=:), allocatable :: str_array(:)
 integer :: ii
 
 ! Setup core paths and names
@@ -94,8 +93,8 @@ call self % conf % get_or_die("nlevels",self % nlevels)
 ! Variables for profile (x,xb)
 self % nmvars = self % conf % get_size("retrieval_variables")
 allocate(self % retrieval_variables(self % nmvars))
-call self % conf % get_or_die("retrieval_variables", csize, char_array)
-self % retrieval_variables(1:self % nmvars) = char_array
+call self % conf % get_or_die("retrieval_variables", str_array)
+self % retrieval_variables(1:self % nmvars) = str_array
 
 ! Satellite channels
 self % nchans = size(channels)
