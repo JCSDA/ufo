@@ -157,8 +157,7 @@ character(len=255) :: IRwaterCoeff, VISwaterCoeff, &
 integer :: jspec, ivar
 character(len=max_string) :: message
 character(len=:), allocatable :: str
-character(kind=c_char,len=MAXVARLEN), allocatable :: char_array(:)
-integer(c_size_t),parameter :: csize = MAXVARLEN
+character(len=:), allocatable :: str_array(:)
 
  !Some config needs to come from user
  !-----------------------------------
@@ -180,8 +179,8 @@ integer(c_size_t),parameter :: csize = MAXVARLEN
            conf%Absorber_Units( conf%n_Absorbers ) )
 
  if (conf%n_Absorbers > 0) then
-   call f_confOper%get_or_die("Absorbers",csize,char_array)
-   conf%Absorbers(1:conf%n_Absorbers) = char_array
+   call f_confOper%get_or_die("Absorbers",str_array)
+   conf%Absorbers(1:conf%n_Absorbers) = str_array
  end if
 
  ! check for duplications
@@ -213,8 +212,8 @@ integer(c_size_t),parameter :: csize = MAXVARLEN
  allocate( conf%Clouds  ( conf%n_Clouds,2), &
            conf%Cloud_Id( conf%n_Clouds ) )
  if (conf%n_Clouds > 0) then
-   call f_confOper%get_or_die("Clouds",csize,char_array) 
-   conf%Clouds(1:conf%n_Clouds,1) = char_array
+   call f_confOper%get_or_die("Clouds",str_array) 
+   conf%Clouds(1:conf%n_Clouds,1) = str_array
 
    if (f_confOper%has("Cloud_Fraction")) then
      call f_confOper%get_or_die("Cloud_Fraction",conf%Cloud_Fraction)
@@ -283,8 +282,8 @@ integer(c_size_t),parameter :: csize = MAXVARLEN
  allocate( conf%Surfaces    ( conf%n_Surfaces ))
 
  if (conf%n_Surfaces > 0) then
-   call f_confOper%get_or_die("Surfaces",csize,char_array)
-   conf%Surfaces(1:conf%n_Surfaces) = char_array
+   call f_confOper%get_or_die("Surfaces",str_array)
+   conf%Surfaces(1:conf%n_Surfaces) = str_array
  end if
 
  ! check for duplications

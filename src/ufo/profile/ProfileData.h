@@ -44,11 +44,26 @@ namespace ufo {
     /// Return profile tBkg
     std::vector <float> gettBkg() const {return tBkg_prof_;}
 
+    /// Return profile RHObs
+    std::vector <float> getRHObs() const {return RHObs_prof_;}
+
+    /// Return profile RHBkg
+    std::vector <float> getRHBkg() const {return RHBkg_prof_;}
+
+    /// Return profile tdObs
+    std::vector <float> gettdObs() const {return tdObs_prof_;}
+
     /// Return profile zObs
     std::vector <float> getzObs() const {return zObs_prof_;}
 
     /// Return profile zBkg
     std::vector <float> getzBkg() const {return zBkg_prof_;}
+
+    /// Return profile uObs
+    std::vector <float> getuObs() const {return uObs_prof_;}
+
+    /// Return profile vObs
+    std::vector <float> getvObs() const {return vObs_prof_;}
 
     /// Return profile PstarBackgr
     std::vector <float> getPstarBackgr() const {return PstarBackgr_prof_;}
@@ -77,11 +92,26 @@ namespace ufo {
     /// Entire sample tBkg
     std::vector <float> tBkg_;
 
+    /// Entire sample RHObs
+    std::vector <float> RHObs_;
+
+    /// Entire sample RHBkg
+    std::vector <float> RHBkg_;
+
+    /// Entire sample tdObs
+    std::vector <float> tdObs_;
+
     /// Entire sample zObs
     std::vector <float> zObs_;
 
     /// Entire sample zBkg
     std::vector <float> zBkg_;
+
+    /// Entire sample uObs
+    std::vector <float> uObs_;
+
+    /// Entire sample vObs
+    std::vector <float> vObs_;
 
     /// Entire sample PstarBackgr
     std::vector <float> PstarBackgr_;
@@ -100,11 +130,26 @@ namespace ufo {
     /// Individual profile tBkg
     std::vector <float> tBkg_prof_;
 
+    /// Individual profile RHObs
+    std::vector <float> RHObs_prof_;
+
+    /// Individual profile RHBkg
+    std::vector <float> RHBkg_prof_;
+
+    /// Individual profile tdObs
+    std::vector <float> tdObs_prof_;
+
     /// Individual profile zObs
     std::vector <float> zObs_prof_;
 
     /// Individual profile zBkg
     std::vector <float> zBkg_prof_;
+
+    /// Individual profile uObs
+    std::vector <float> uObs_prof_;
+
+    /// Individual profile vObs
+    std::vector <float> vObs_prof_;
 
     /// Individual profile PstarBackgr
     std::vector <float> PstarBackgr_prof_;

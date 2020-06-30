@@ -44,8 +44,14 @@ namespace ufo {
     /// Set tFlags
     void settFlags(const std::vector <int> &v) {tFlags_prof_ = v;}
 
+    /// Set RHFlags
+    void setRHFlags(const std::vector <int> &v) {RHFlags_prof_ = v;}
+
     /// Set zFlags
     void setzFlags(const std::vector <int> &v) {zFlags_prof_ = v;}
+
+    /// Set uFlags
+    void setuFlags(const std::vector <int> &v) {uFlags_prof_ = v;}
 
     /// Set ReportFlags
     void setReportFlags(const std::vector <int> &v) {ReportFlags_prof_ = v;}
@@ -110,6 +116,12 @@ namespace ufo {
     /// Set tInterp
     void settInterp(const std::vector <float> &v) {tInterp_prof_ = v;}
 
+    /// Set uInterp
+    void setuInterp(const std::vector <float> &v) {uInterp_prof_ = v;}
+
+    /// Set vInterp
+    void setvInterp(const std::vector <float> &v) {vInterp_prof_ = v;}
+
     /// Set LogP
     void setLogP(const std::vector <float> &v) {LogP_prof_ = v;}
 
@@ -127,6 +139,45 @@ namespace ufo {
 
     /// Set HydError
     void setHydError(const std::vector <int> &v) {HydError_prof_ = v;}
+
+    /// Set TotCProfs
+    void setTotCProfs(const std::vector <int> &v) {TotCProfs_ = v;}
+
+    /// Set TotHProfs
+    void setTotHProfs(const std::vector <int> &v) {TotHProfs_ = v;}
+
+    /// Set TotCFlags
+    void setTotCFlags(const std::vector <int> &v) {TotCFlags_ = v;}
+
+    /// Set TotHFlags
+    void setTotHFlags(const std::vector <int> &v) {TotHFlags_ = v;}
+
+    /// Set TotLFlags
+    void setTotLFlags(const std::vector <int> &v) {TotLFlags_ = v;}
+
+    /// Set Press
+    void setPress(const std::vector <float> &v) {Press_prof_ = v;}
+
+    /// Set Temp
+    void setTemp(const std::vector <float> &v) {Temp_prof_ = v;}
+
+    /// Set rh
+    void setrh(const std::vector <float> &v) {rh_prof_ = v;}
+
+    /// Set td
+    void settd(const std::vector <float> &v) {td_prof_ = v;}
+
+    /// Set tbk
+    void settbk(const std::vector <float> &v) {tbk_prof_ = v;}
+
+    /// Set rhbk
+    void setrhbk(const std::vector <float> &v) {rhbk_prof_ = v;}
+
+    /// Set FlagH
+    void setFlagH(const std::vector <int> &v) {FlagH_prof_ = v;}
+
+    /// Set Indx
+    void setIndx(const std::vector <int> &v) {Indx_prof_ = v;}
 
    private:  // functions
     /// Retrieve values of all variables for entire sample
@@ -164,8 +215,14 @@ namespace ufo {
     /// Entire sample OPS tFlags
     std::vector <int> OPS_tFlags_;
 
+    /// Entire sample OPS RHFlags
+    std::vector <int> OPS_RHFlags_;
+
     /// Entire sample OPS zFlags
     std::vector <int> OPS_zFlags_;
+
+    /// Entire sample OPS uFlags
+    std::vector <int> OPS_uFlags_;
 
     /// Entire sample OPS ReportFlags
     std::vector <int> OPS_ReportFlags_;
@@ -230,6 +287,12 @@ namespace ufo {
     /// Entire sample OPS tInterp
     std::vector <float> OPS_tInterp_;
 
+    /// Entire sample OPS uInterp
+    std::vector <float> OPS_uInterp_;
+
+    /// Entire sample OPS vInterp
+    std::vector <float> OPS_vInterp_;
+
     /// Entire sample OPS LogP
     std::vector <float> OPS_LogP_;
 
@@ -248,13 +311,58 @@ namespace ufo {
     /// Entire sample OPS HydError
     std::vector <int> OPS_HydError_;
 
+    /// Entire sample OPS TotCProfs
+    std::vector <int> OPS_TotCProfs_;
+
+    /// Entire sample OPS TotHProfs
+    std::vector <int> OPS_TotHProfs_;
+
+    /// Entire sample OPS TotCFlags
+    std::vector <int> OPS_TotCFlags_;
+
+    /// Entire sample OPS TotHFlags
+    std::vector <int> OPS_TotHFlags_;
+
+    /// Entire sample OPS TotLFlags
+    std::vector <int> OPS_TotLFlags_;
+
+    /// Entire sample OPS Press
+    std::vector <float> OPS_Press_;
+
+    /// Entire sample OPS Temp
+    std::vector <float> OPS_Temp_;
+
+    /// Entire sample OPS rh
+    std::vector <float> OPS_rh_;
+
+    /// Entire sample OPS td
+    std::vector <float> OPS_td_;
+
+    /// Entire sample OPS tbk
+    std::vector <float> OPS_tbk_;
+
+    /// Entire sample OPS rhbk
+    std::vector <float> OPS_rhbk_;
+
+    /// Entire sample OPS FlagH
+    std::vector <int> OPS_FlagH_;
+
+    /// Entire sample OPS Indx
+    std::vector <int> OPS_Indx_;
+
     //=== Profile values ===//
 
     /// Individual profile OPS tFlags
     std::vector <int> OPS_tFlags_prof_;
 
+    /// Individual profile OPS RHFlags
+    std::vector <int> OPS_RHFlags_prof_;
+
     /// Individual profile OPS zFlags
     std::vector <int> OPS_zFlags_prof_;
+
+    /// Individual profile OPS uFlags
+    std::vector <int> OPS_uFlags_prof_;
 
     /// Individual profile OPS ReportFlags
     std::vector <int> OPS_ReportFlags_prof_;
@@ -319,6 +427,12 @@ namespace ufo {
     /// Individual profile OPS tInterp
     std::vector <float> OPS_tInterp_prof_;
 
+    /// Individual profile OPS uInterp
+    std::vector <float> OPS_uInterp_prof_;
+
+    /// Individual profile OPS vInterp
+    std::vector <float> OPS_vInterp_prof_;
+
     /// Individual profile OPS LogP
     std::vector <float> OPS_LogP_prof_;
 
@@ -337,13 +451,58 @@ namespace ufo {
     /// Individual profile OPS HydError
     std::vector <int> OPS_HydError_prof_;
 
+    /// Individual profile OPS TotCProfs
+    std::vector <int> OPS_TotCProfs_prof_;
+
+    /// Individual profile OPS TotHProfs
+    std::vector <int> OPS_TotHProfs_prof_;
+
+    /// Individual profile OPS TotCFlags
+    std::vector <int> OPS_TotCFlags_prof_;
+
+    /// Individual profile OPS TotHFlags
+    std::vector <int> OPS_TotHFlags_prof_;
+
+    /// Individual profile OPS TotLFlags
+    std::vector <int> OPS_TotLFlags_prof_;
+
+    /// Individual profile OPS Press
+    std::vector <float> OPS_Press_prof_;
+
+    /// Individual profile OPS Temp
+    std::vector <float> OPS_Temp_prof_;
+
+    /// Individual profile OPS rh
+    std::vector <float> OPS_rh_prof_;
+
+    /// Individual profile OPS td
+    std::vector <float> OPS_td_prof_;
+
+    /// Individual profile OPS tbk
+    std::vector <float> OPS_tbk_prof_;
+
+    /// Individual profile OPS rhbk
+    std::vector <float> OPS_rhbk_prof_;
+
+    /// Individual profile OPS FlagH
+    std::vector <int> OPS_FlagH_prof_;
+
+    /// Individual profile OPS Indx
+    std::vector <int> OPS_Indx_prof_;
+
     //=== Values obtained by the profile checks ===//
 
     /// Individual profile tFlags
     std::vector <int> tFlags_prof_;
 
+    /// Individual profile RHFlags
+    std::vector <int> RHFlags_prof_;
+
     /// Individual profile zFlags
     std::vector <int> zFlags_prof_;
+
+    /// Individual profile uFlags
+    std::vector <int> uFlags_prof_;
 
     /// Individual profile ReportFlags
     std::vector <int> ReportFlags_prof_;
@@ -408,6 +567,12 @@ namespace ufo {
     /// Individual profile tInterp
     std::vector <float> tInterp_prof_;
 
+    /// Individual profile uInterp
+    std::vector <float> uInterp_prof_;
+
+    /// Individual profile vInterp
+    std::vector <float> vInterp_prof_;
+
     /// Individual profile LogP
     std::vector <float> LogP_prof_;
 
@@ -425,6 +590,45 @@ namespace ufo {
 
     /// Individual profile HydError
     std::vector <int> HydError_prof_;
+
+    /// Individual profile TotCProfs
+    std::vector <int> TotCProfs_;
+
+    /// Individual profile TotHProfs
+    std::vector <int> TotHProfs_;
+
+    /// Individual profile TotCFlags
+    std::vector <int> TotCFlags_;
+
+    /// Individual profile TotHFlags
+    std::vector <int> TotHFlags_;
+
+    /// Individual profile TotLFlags
+    std::vector <int> TotLFlags_;
+
+    /// Individual profile Press
+    std::vector <float> Press_prof_;
+
+    /// Individual profile Temp
+    std::vector <float> Temp_prof_;
+
+    /// Individual profile rh
+    std::vector <float> rh_prof_;
+
+    /// Individual profile td
+    std::vector <float> td_prof_;
+
+    /// Individual profile tbk
+    std::vector <float> tbk_prof_;
+
+    /// Individual profile rhbk
+    std::vector <float> rhbk_prof_;
+
+    /// Individual profile FlagH
+    std::vector <int> FlagH_prof_;
+
+    /// Individual profile Indx
+    std::vector <int> Indx_prof_;
   };
 }  // namespace ufo
 

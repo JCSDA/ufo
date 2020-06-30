@@ -43,12 +43,12 @@ Observations:
      predictors:
      - predictor:
          name: constant
-     - predictor:
-         name: cloud_liquid_water
-         options:
-           clwret_ch238: 1
-           clwret_ch314: 2
-           clwret_types: [GsiHofX]
+#     - predictor:
+#         name: cloud_liquid_water
+#         options:
+#           clwret_ch238: 1
+#           clwret_ch314: 2
+#           clwret_types: [GsiHofX]
      - predictor:
          name: lapse_rate
          options:
@@ -75,4 +75,4 @@ Observations:
      - predictor:
          name: scan_angle
    vecequiv: GsiHofXBc
-   tolerance: 1.e-5
+   tolerance: 1.e-7

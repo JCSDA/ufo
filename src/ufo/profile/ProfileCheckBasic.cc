@@ -8,6 +8,9 @@
 #include "ufo/profile/ProfileCheckBasic.h"
 
 namespace ufo {
+
+  static ProfileCheckMaker<ProfileCheckBasic> makerProfileCheckBasic_("Basic");
+
   ProfileCheckBasic::ProfileCheckBasic(const ProfileConsistencyCheckParameters &options,
                                        const ProfileIndices &profileIndices,
                                        const ProfileData &profileData,
@@ -20,12 +23,34 @@ namespace ufo {
   {
     oops::Log::debug() << " Basic checks" << std::endl;
 
+    // Set basic check result to true
+    result_ = true;
+    profileFlags_.setBasicCheckResult(result_);
+
+    // Skip this routine if specifically requested
+    if (options_.BChecks_Skip.value())
+      {
+        oops::Log::warning() << "Skipping basic checks" << std::endl;
+        return;
+      }
+
     const int numLevelsToCheck = profileIndices_.getNumLevelsToCheck();
     const std::vector <float> &pressures = profileData_.getPressures();
+    // All QC flags are retrieved for the basic checks.
+    // (Some might be empty; that is checked before they are used.)
     std::vector <int> &tFlags = profileFlags_.gettFlags();
+    std::vector <int> &zFlags = profileFlags_.getzFlags();
+    std::vector <int> &uFlags = profileFlags_.getuFlags();
+
+    // Warn and exit if pressures vector is empty
+    if (pressures.empty()) {
+      result_ = false;
+      profileFlags_.setBasicCheckResult(result_);
+      oops::Log::warning() << "Pressures vector is empty" << std::endl;
+      return;
+     }
 
     // Is the number of levels to check OK?
-    // (Original OPS condition is (numLevelsToCheck != 0 && numLevelsToCheck != IMDI_))
     bool numLevelsToCheckOK = (numLevelsToCheck > 0);
 
     // Are any levels in the wrong order?
@@ -35,12 +60,12 @@ namespace ufo {
       if (!pressOrderOK) break;
     }
 
-    // Is the first level > maximum value pressure?
+    // Is the pressure at the first level > maximum value pressure?
     bool maxPressOK = (pressures.size() > 0 ?
                        pressures.front() <= options_.BChecks_maxValidP.value() :
                        false);
 
-    // Is the last level < minimum value pressure?
+    // Is the pressure at the final level < minimum value pressure?
     bool minPressOK = (pressures.size() > 0 ?
                        pressures.back() > options_.BChecks_minValidP.value() :
                        false);
@@ -57,14 +82,22 @@ namespace ufo {
     // This is not done in the OPS sonde consistency checks, but is done in Ops_SondeAverage.inc
     if (options_.flagBasicChecksFail.value() && !result_) {
       for (int jlev = 0; jlev < numLevelsToCheck; ++jlev) {
-        tFlags[jlev] |= ufo::FlagsElem::FinalRejectFlag;
+        if (!tFlags.empty()) tFlags[jlev] |= ufo::FlagsElem::FinalRejectFlag;
+        if (!zFlags.empty()) zFlags[jlev] |= ufo::FlagsElem::FinalRejectFlag;
+        if (!uFlags.empty()) uFlags[jlev] |= ufo::FlagsElem::FinalRejectFlag;
       }
     }
   }
 
   void ProfileCheckBasic::fillValidator()
   {
-    profileCheckValidator_.settFlags(profileFlags_.gettFlags());
+    const std::vector <int> &tFlags = profileFlags_.gettFlags();
+    const std::vector <int> &zFlags = profileFlags_.getzFlags();
+    const std::vector <int> &uFlags = profileFlags_.getuFlags();
+
+    if (!tFlags.empty()) profileCheckValidator_.settFlags(profileFlags_.gettFlags());
+    if (!zFlags.empty()) profileCheckValidator_.setzFlags(profileFlags_.getzFlags());
+    if (!uFlags.empty()) profileCheckValidator_.setuFlags(profileFlags_.getuFlags());
     profileCheckValidator_.setNumAnyErrors(profileFlags_.getCounter("NumAnyErrors"));
   }
 }  // namespace ufo

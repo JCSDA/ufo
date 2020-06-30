@@ -39,9 +39,10 @@ namespace ufo {
 
 namespace ufo {
 
-  /// \brief Check profile temperature/height data for internal consistency.
+  /// \brief Profile QC checks.
   ///
-  /// See OSDP 5 section 3. The checks made are as follows:
+  /// See OSDP 5 section 3.
+  /// The temperature consistency checks available are as follows:
   ///    -# Basic checks of pressure
   ///    -# Check for different temperatures at the same pressure
   ///    -# Temperature sign change test using model background
@@ -52,6 +53,8 @@ namespace ufo {
   ///       -# calculation of thickness residuals
   ///       -# decision making algorithm used where there are large residuals
   ///    -# Junk whole report if > 8 errors
+  //
+  /// There are also consistency checks for the interpolated wind speed and the relative humidity.
   ///
   /// The sign, standard level and hydrostatic checks are largely based on methods described in the
   /// WMO Guide on the Global Data-Procesing System (1993).

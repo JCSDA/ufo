@@ -32,12 +32,12 @@ Observations:
      predictors:
      - predictor:
          name: constant
-     - predictor:
-         name: cloud_liquid_water
-         options:
-           clwret_ch238: 1
-           clwret_ch314: 2
-           clwret_types: [HofX]
+#     - predictor:
+#         name: cloud_liquid_water
+#         options:
+#           clwret_ch238: 1
+#           clwret_ch314: 2
+#           clwret_types: [HofX]
      - predictor:
          name: lapse_rate
          options:

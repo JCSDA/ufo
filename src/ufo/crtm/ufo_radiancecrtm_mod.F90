@@ -196,11 +196,11 @@ logical :: jacobian_needed
 
  ! Program header
  ! --------------
- call CRTM_Version( Version )
- call Program_Message( PROGRAM_NAME, &
-                       'UFO interface for the CRTM Forward and K-Matrix functions using '//&
-                       trim(self%conf%ENDIAN_type)//' coefficient datafiles', &
-                       'CRTM Version: '//TRIM(Version) )
+ ! call CRTM_Version( Version )
+ ! call Program_Message( PROGRAM_NAME, &
+ !                       'UFO interface for the CRTM Forward and K-Matrix functions using '//&
+ !                       trim(self%conf%ENDIAN_type)//' coefficient datafiles', &
+ !                       'CRTM Version: '//TRIM(Version) )
 
 
  ! Initialise all the sensors at once
@@ -208,7 +208,7 @@ logical :: jacobian_needed
  !** NOTE: CRTM_Init points to the various binary files needed for CRTM.  See the
  !**       CRTM_Lifecycle.f90 for more details.
 
- write( *,'(/5x,"Initializing the CRTM...")' )
+ ! write( *,'(/5x,"Initializing the CRTM...")' )
  err_stat = CRTM_Init( self%conf%SENSOR_ID, chinfo, &
                        File_Path=trim(self%conf%COEFFICIENT_PATH), &
                        IRwaterCoeff_File=trim(self%conf%IRwaterCoeff_File), &
@@ -707,7 +707,7 @@ logical :: jacobian_needed
 
  ! Destroy CRTM instance
  ! ---------------------
- write( *, '( /5x, "Destroying the CRTM..." )' )
+ ! write( *, '( /5x, "Destroying the CRTM..." )' )
  err_stat = CRTM_Destroy( chinfo )
  message = 'Error destroying CRTM'
  call crtm_comm_stat_check(err_stat, PROGRAM_NAME, message, f_comm)

@@ -18,7 +18,7 @@ Observations:
    ObsSpace: 
      name: iasi_metop-a
      ObsDataIn: 
-       obsfile: Data/ioda/testinput_tier_1/iasi_metop-a_obs_2018041500_m.nc4
+       obsfile: Data/ioda/testinput_tier_1/iasi_metop-a_obs_2018041500_m_unittest.nc4
      simulate:
        variables: [brightness_temperature]
        channels: &all_channels 16, 29, 32, 35, 38, 41, 44, 47, 49, 50, 51, 53,
@@ -71,6 +71,6 @@ Observations:
                                7475, 7549, 7584, 7665, 7666, 7831, 7836, 7853, 7865, 7885, 7888, 7912,
                                7950, 7972, 7980, 7995, 8007, 8015, 8055, 8078
    GeoVaLs: 
-     filename: Data/iasi_metop-a_geoval_2018041500_m.nc4
+     filename: Data/iasi_metop-a_geoval_2018041500_m_unittest.nc4
    vecequiv: GsiHofX
-   tolerance: 1.e-5
+   tolerance: 1.e-7

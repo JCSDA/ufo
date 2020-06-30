@@ -138,11 +138,11 @@ type(CRTM_RTSolution_type), allocatable :: rts_K(:,:)
 
  ! Program header
  ! --------------
- call CRTM_Version( Version )
- call Program_Message( PROGRAM_NAME, &
-                       'Check/example program for the CRTM Forward and K-Matrix (setTraj) functions using '//&
-                       trim(self%conf%ENDIAN_type)//' coefficient datafiles', &
-                       'CRTM Version: '//TRIM(Version) )
+ ! call CRTM_Version( Version )
+ ! call Program_Message( PROGRAM_NAME, &
+ !                      'Check/example program for the CRTM Forward and K-Matrix (setTraj) functions using '//&
+ !                      trim(self%conf%ENDIAN_type)//' coefficient datafiles', &
+ !                      'CRTM Version: '//TRIM(Version) )
 
 
  ! Initialise all the sensors at once
@@ -150,7 +150,7 @@ type(CRTM_RTSolution_type), allocatable :: rts_K(:,:)
  !** NOTE: CRTM_Init points to the various binary files needed for CRTM.  See the
  !**       CRTM_Lifecycle.f90 for more details.
 
- write( *,'(/5x,"Initializing the CRTM (setTraj) ...")' )
+ ! write( *,'(/5x,"Initializing the CRTM (setTraj) ...")' )
  err_stat = CRTM_Init( self%conf%SENSOR_ID, &
             chinfo, &
             File_Path=trim(self%conf%COEFFICIENT_PATH), &
@@ -264,7 +264,7 @@ type(CRTM_RTSolution_type), allocatable :: rts_K(:,:)
 
  ! Destroy CRTM instance
  ! ---------------------
- write( *, '( /5x, "Destroying the CRTM (setTraj)..." )' )
+ ! write( *, '( /5x, "Destroying the CRTM (setTraj)..." )' )
  err_stat = CRTM_Destroy( chinfo )
  if ( err_stat /= SUCCESS ) THEN
     message = 'Error destroying CRTM (setTraj)'

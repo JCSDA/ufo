@@ -1,0 +1,78 @@
+window_begin: 2018-04-14T21:00:00Z
+window_end: 2018-04-15T03:00:00Z
+
+LinearObsOpTest:
+ testiterTL: 2
+ coefTL: 1.e-3
+ toleranceTL: 1.0e-3
+ toleranceAD: 1.0e-11
+
+Observations: 
+ ObsTypes: 
+ - ObsOperator:
+     name: CRTM
+     Absorbers: [H2O,O3,CO2]
+     Clouds: [Water, Ice]
+     Cloud_Fraction: 1.0
+     LinearObsOperator:
+       Absorbers: [H2O,O3,CO2]
+       Clouds: [Water, Ice]
+     ObsOptions:
+       inspectProfile: 1
+       Sensor_ID: &Sensor_ID atms_npp 
+       EndianType: little_endian
+       CoefficientPath: Data/
+   ObsSpace:
+     name: atms_npp 
+     ObsDataIn: 
+       obsfile: Data/ioda/testinput_tier_1/atms_npp_obs_2018041500_m_qc.nc4
+     ObsDataOut: 
+       obsfile: Data/atms_npp_obs_2018041500_m_qc_out.nc4
+     simulate:
+       variables: [brightness_temperature]
+       channels: &channels
+         1-22
+   GeoVaLs: 
+     filename: Data/atms_npp_geoval_2018041500_m_qc.nc4
+   ObsBias:
+     name: LinearCombination
+     abias_in: Data/satbias_crtm_in
+     abias_out: Data/satbias_crtm_out
+     sensor: *Sensor_ID
+     jobs: *channels
+     predictors:
+     - predictor:
+         name: constant
+#     - predictor:
+#         name: cloud_liquid_water
+#         options:
+#           clwret_ch238: 1
+#           clwret_ch314: 2
+#           clwret_types: [GsiHofX]
+     - predictor:
+         name: lapse_rate
+         options:
+           order: 2
+           tlapse: &atms_npp_tlap Data/atms_npp_tlapmean.txt
+     - predictor:
+         name: lapse_rate
+         options:
+           tlapse: *atms_npp_tlap
+     - predictor:
+         name: emissivity
+     - predictor:
+         name: scan_angle
+         options:
+           order: 4
+     - predictor:
+         name: scan_angle
+         options:
+           order: 3
+     - predictor:
+         name: scan_angle
+         options:
+           order: 2
+     - predictor:
+         name: scan_angle
+   vecequiv: GsiHofXBc
+   tolerance: 1.e-7

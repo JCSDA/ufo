@@ -88,6 +88,8 @@ set ( filters_files
       obsfunctions/CLWRetSymmetricMW.h
       obsfunctions/HydrometeorCheckAMSUA.cc
       obsfunctions/HydrometeorCheckAMSUA.h
+      obsfunctions/HydrometeorCheckATMS.cc
+      obsfunctions/HydrometeorCheckATMS.h
       obsfunctions/InterChannelConsistencyCheck.cc
       obsfunctions/InterChannelConsistencyCheck.h
       obsfunctions/ObsErrorModelRamp.cc

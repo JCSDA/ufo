@@ -4,7 +4,7 @@ window_end: 2018-04-15T03:00:00Z
 ObsSpace:
   name: iasi_metop-a 
   ObsDataIn:
-    obsfile: Data/ioda/testinput_tier_1/iasi_metop-a_obs_2018041500_m.nc4 
+    obsfile: Data/ioda/testinput_tier_1/iasi_metop-a_obs_2018041500_m_unittest.nc4 
   simulate:
     variables: [brightness_temperature] 
     channels: &all_channels 16, 29, 32, 35, 38, 41, 44, 47, 49, 50, 51, 53,
@@ -58,17 +58,17 @@ ObsSpace:
                             7950, 7972, 7980, 7995, 8007, 8015, 8055, 8078
 # can have GeoVaLs section like below
 GeoVaLs:
-  filename: Data/iasi_metop-a_geoval_2018041500_m.nc4
+  filename: Data/iasi_metop-a_geoval_2018041500_m_unittest.nc4
 # can have ObsDiag section like below
 ObsDiag:
-  filename: Data/iasi_metop-a_obsdiag_2018041500_m.nc4
+  filename: Data/iasi_metop-a_obsdiag_2018041500_m_unittest.nc4
 ObsFunction:
   name: NearSSTRetCheckIR@ObsFunction 
   options:
     test_qcflag: PreQC 
     test_obserr: GsiObsError_nsstret 
     test_hofx: GsiHofX 
-    test_bias: GsiBc 
+    test_bias: GsiObsBias 
     channels: *all_channels
     use_flag: [1, -1, -1, -1, 1, -1, -1, -1, 1, -1, 1, -1, 1,
               -1, 1, 1, 1, -1, 1, 1, -1, 1, 1, 1, -1, -1, 1, 1, -1, 1, -1, 1, -1, 1,

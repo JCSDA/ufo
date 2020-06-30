@@ -11,6 +11,7 @@
 #include <algorithm>
 #include <cmath>
 #include <functional>
+#include <map>
 #include <memory>
 #include <ostream>
 #include <string>
@@ -19,6 +20,7 @@
 #include "eckit/exception/Exceptions.h"
 #include "eckit/types/FloatCompare.h"
 
+#include "oops/util/CompareNVectors.h"
 #include "oops/util/Logger.h"
 #include "oops/util/missingValues.h"
 
@@ -84,6 +86,54 @@ namespace ufo {
     /// Missing value (float)
     const float missingValueFloat = util::missingValue(1.0f);
   };
+
+  /// Profile check factory
+  class ProfileCheckFactory
+  {
+   public:
+    static std::unique_ptr<ProfileCheckBase> create(const std::string&,
+                                                    const ProfileConsistencyCheckParameters&,
+                                                    const ProfileIndices&,
+                                                    const ProfileData&,
+                                                    ProfileFlags&,
+                                                    ProfileCheckValidator&);
+    virtual ~ProfileCheckFactory() = default;
+   protected:
+    explicit ProfileCheckFactory(const std::string &);
+   private:
+    virtual std::unique_ptr<ProfileCheckBase> make(const ProfileConsistencyCheckParameters&,
+                                                   const ProfileIndices&,
+                                                   const ProfileData&,
+                                                   ProfileFlags&,
+                                                   ProfileCheckValidator&) = 0;
+
+    static std::map <std::string, ProfileCheckFactory*> & getMakers()
+      {
+        static std::map <std::string, ProfileCheckFactory*> makers_;
+        return makers_;
+      }
+  };
+
+  template<class T>
+    class ProfileCheckMaker : public ProfileCheckFactory
+    {
+      virtual std::unique_ptr<ProfileCheckBase>
+        make(const ProfileConsistencyCheckParameters &options,
+             const ProfileIndices &profileIndices,
+             const ProfileData &profileData,
+             ProfileFlags &profileFlags,
+             ProfileCheckValidator &profileCheckValidator)
+      {
+        return std::unique_ptr<ProfileCheckBase>(new T(options,
+                                                       profileIndices,
+                                                       profileData,
+                                                       profileFlags,
+                                                       profileCheckValidator));
+      }
+     public:
+      explicit ProfileCheckMaker(const std::string & name)
+        : ProfileCheckFactory(name) {}
+    };
 }  // namespace ufo
 
 #endif  // UFO_PROFILE_PROFILECHECKBASE_H_

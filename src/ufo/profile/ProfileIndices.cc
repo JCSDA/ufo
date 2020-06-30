@@ -31,10 +31,10 @@ namespace ufo {
       validateTotalNumProf();
     }
 
-    // If sorting observations, ensure indices remain ascending
+    // If sorting observations, point to beginning of record index iterator
     if (!obsdb_.obs_sort_var().empty() &&
         obsdb_.obs_sort_order() == "descending") {
-      descendingSortWithAscendingIndices();
+      profidx_current_ = obsdb_.recidx_begin();
     }
   }
 
@@ -81,6 +81,11 @@ namespace ufo {
     // Number of levels to which QC checks should be applied
     numLevelsToCheck_ = static_cast<int> (profileIndices_.size());
 
+    if (numLevelsToCheck_ > 0) {
+      oops::Log::debug() << "First and last profile indices: " << profileIndices_.front()
+                         << ", " << profileIndices_.back() << std::endl;
+    }
+
     // Replace with maxlev if defined (a legacy of the OPS code)
     if (options_.maxlev.value() != boost::none) {
       numLevelsToCheck_ = std::min(options_.maxlev.value().get(), numLevelsToCheck_);
@@ -97,51 +102,6 @@ namespace ufo {
         std::advance(profidx_current_, 1);
       }
     }
-  }
-
-  void ProfileIndices::descendingSortWithAscendingIndices() {
-    // This is a modified version of ioda::ObsData::BuildSortedObsGroups.
-    // The sort variable can in theory be anything but it is usually air_pressure.
-    // The code sorts such that pressure is descending
-    // but, when at least two pressures are equal,
-    // the associated profile indices are sorted to be ascending
-    // (unlike the version in BuildSortedObsGroups for which the indices descend).
-
-    const size_t nlocs = obsdb_.nlocs();
-
-    // Get the sort variable from the data store, and convert to a vector of floats.
-    std::vector<float> SortValues(nlocs);
-    obsdb_.get_db("MetaData", obsdb_.obs_sort_var(), SortValues);
-
-    // Construct a temporary structure to do the sorting, then transfer the results
-    // to the data member profidx_.
-    TmpProfIdxMap TmpProfIdx;
-    for (size_t iloc = 0; iloc < nlocs; iloc++) {
-      TmpProfIdx[profileNums_[iloc]].push_back(std::make_pair(SortValues[iloc], iloc));
-    }
-
-    for (TmpProfIdxIter iprof = TmpProfIdx.begin(); iprof != TmpProfIdx.end(); ++iprof) {
-      // Use a lambda function to access implement a descending order sort
-      // In BuildSortedObsGroups this is just p1 > p2
-      // This implementation reverses the treatment of the indices
-      // i.e. p1.second < p2.second would usually be p1.second > p2.second
-      sort(iprof->second.begin(), iprof->second.end(),
-           [](const std::pair<float, std::size_t> & p1,
-              const std::pair<float, std::size_t> & p2) {
-             return(p2.first < p1.first ||
-                    (!(p2.first < p1.first) && p1.second < p2.second));});
-    }
-
-    // Copy indexing to the profidx_ data member.
-    for (TmpProfIdxIter iprof = TmpProfIdx.begin(); iprof != TmpProfIdx.end(); ++iprof) {
-      profidx_[iprof->first].resize(iprof->second.size());
-      for (std::size_t iloc = 0; iloc < iprof->second.size(); iloc++) {
-        profidx_[iprof->first][iloc] = iprof->second[iloc].second;
-      }
-    }
-
-    // Iterator pointing to beginning of indices
-    profidx_current_ = profidx_.begin();
   }
 
   void ProfileIndices::validateTotalNumProf() {

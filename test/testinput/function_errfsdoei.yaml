@@ -17,6 +17,7 @@ ObsDiag:
 ObsFunction:
   name: ObsErrorFactorSituDependMW@ObsFunction 
   options:
+    sensor: amsua_n19
     channels: *all_channels
     clwobs_function:
       name: CLWRetMW@ObsFunction
@@ -70,7 +71,7 @@ ObsFunction:
                       0.400, 0.550, 0.800, 3.000, 3.500]
     test_obserr: GsiObsError_sdoei 
     test_hofx: GsiHofX 
-    test_bias: GsiBc 
+    test_bias: GsiObsBias 
     test_qcflag: PreQC
   variables: [error_inflation_factor_sdoei]
   channels: *all_channels

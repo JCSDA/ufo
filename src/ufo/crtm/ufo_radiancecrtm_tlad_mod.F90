@@ -189,11 +189,11 @@ real(kind_real), allocatable :: Wfunc(:)
 
  ! Program header
  ! --------------
- call CRTM_Version( Version )
- call Program_Message( PROGRAM_NAME, &
-                       'UFO interface for the CRTM Forward and K-Matrix (setTraj) functions using '//&
-                       trim(self%conf_traj%ENDIAN_type)//' coefficient datafiles', &
-                       'CRTM Version: '//TRIM(Version) )
+ ! call CRTM_Version( Version )
+ ! call Program_Message( PROGRAM_NAME, &
+ !                       'UFO interface for the CRTM Forward and K-Matrix (setTraj) functions using '//&
+ !                       trim(self%conf_traj%ENDIAN_type)//' coefficient datafiles', &
+ !                       'CRTM Version: '//TRIM(Version) )
 
 
  ! Initialise all the sensors at once
@@ -201,7 +201,7 @@ real(kind_real), allocatable :: Wfunc(:)
  !** NOTE: CRTM_Init points to the various binary files needed for CRTM.  See the
  !**       CRTM_Lifecycle.f90 for more details.
 
- write( *,'(/5x,"Initializing the CRTM (setTraj) ...")' )
+ ! write( *,'(/5x,"Initializing the CRTM (setTraj) ...")' )
  err_stat = CRTM_Init( self%conf_traj%SENSOR_ID, chinfo, &
             File_Path=trim(self%conf_traj%COEFFICIENT_PATH), &
             IRwaterCoeff_File=trim(self%conf_traj%IRwaterCoeff_File), &
@@ -577,7 +577,7 @@ real(kind_real), allocatable :: Wfunc(:)
 
  ! Destroy CRTM instance
  ! ---------------------
- write( *, '( /5x, "Destroying the CRTM (setTraj)..." )' )
+ ! write( *, '( /5x, "Destroying the CRTM (setTraj)..." )' )
  err_stat = CRTM_Destroy( chinfo )
  message = 'Error destroying CRTM (setTraj)'
  call crtm_comm_stat_check(err_stat, PROGRAM_NAME, message, f_comm)

@@ -174,7 +174,7 @@ ecbuild_print_summary()
 
 ecbuild_add_test( TARGET ufo_coding_norms
                   TYPE SCRIPT
-                  COMMAND ${CMAKE_BINARY_DIR}/bin/cpplint.py
-                  ARGS --quiet --recursive ${CMAKE_CURRENT_SOURCE_DIR}
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/${PROJECT_NAME}_cpplint.py
+                  ARGS --quiet --recursive ${CMAKE_SOURCE_DIR}/src ${CMAKE_SOURCE_DIR}/test
                   WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/bin )
 

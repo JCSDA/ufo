@@ -15,6 +15,8 @@
 
 #include <boost/make_shared.hpp>
 
+#define ECKIT_TESTING_SELF_REGISTER_CASES 0
+
 #include "eckit/config/LocalConfiguration.h"
 #include "eckit/testing/Test.h"
 #include "ioda/ObsSpace.h"
@@ -37,7 +39,6 @@ void testProfileConsistencyChecks(const eckit::LocalConfiguration &conf) {
   const eckit::LocalConfiguration obsSpaceConf(conf, "ObsSpace");
   ioda::ObsSpace obsspace(obsSpaceConf, oops::mpi::comm(), bgn, end);
 
-  const eckit::LocalConfiguration hofxconf(conf, "HofX");
   ioda::ObsVector hofx(obsspace);
 
   const eckit::LocalConfiguration obsdiagconf(conf, "ObsDiag");
@@ -64,16 +65,23 @@ void testProfileConsistencyChecks(const eckit::LocalConfiguration &conf) {
     }
 }
 
-CASE("ufo/ProfileConsistencyChecks/Sondes") {
-  testProfileConsistencyChecks(eckit::LocalConfiguration(::test::TestEnvironment::config(),
-                                                         "Sondes"));
-}
-
 class ProfileConsistencyChecks : public oops::Test {
  private:
   std::string testid() const override {return "ufo::test::ProfileConsistencyChecks";}
 
-  void register_tests() const override {}
+  void register_tests() const override {
+    std::vector<eckit::testing::Test>& ts = eckit::testing::specification();
+
+    const eckit::LocalConfiguration conf(::test::TestEnvironment::config());
+    for (const std::string & testCaseName : conf.keys())
+    {
+      const eckit::LocalConfiguration testCaseConf(::test::TestEnvironment::config(), testCaseName);
+      ts.emplace_back(CASE("ufo/ProfileConsistencyChecks/" + testCaseName, testCaseConf)
+                      {
+                        testProfileConsistencyChecks(testCaseConf);
+                      });
+    }
+  }
 };
 
 }  // namespace test

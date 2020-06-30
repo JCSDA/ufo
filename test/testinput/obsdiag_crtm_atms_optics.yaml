@@ -1,0 +1,26 @@
+window_begin: 2018-04-14T20:00:00Z
+window_end: 2018-04-15T03:00:00Z
+ObsSpace:
+  name: atms_npp 
+  ObsDataIn:
+    obsfile: Data/ioda/testinput_tier_1/atms_npp_obs_2018041500_m_qc.nc4
+  simulate:
+    variables: [brightness_temperature]
+    channels: &all_channels 1-22
+ObsOperator:
+  name: CRTM
+  Absorbers: [H2O,O3,CO2]
+  Clouds: [Water, Ice]
+  Cloud_Fraction: 1.0
+  ObsOptions:
+    Sensor_ID: atms_npp 
+    EndianType: little_endian
+    CoefficientPath: Data/
+GeoVaLs:
+  filename: Data/atms_npp_geoval_2018041500_m_qc.nc4
+ObsDiag:
+   variables: [optical_thickness_of_atmosphere_layer, transmittances_of_atmosphere_layer, weightingfunction_of_atmosphere_layer]
+   channels: *all_channels 
+Reference ObsDiag:
+  filename: Data/atms_npp_obsdiag_2018041500_m_qc.nc4
+tolerance: 1.e-6

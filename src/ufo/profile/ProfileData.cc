@@ -22,8 +22,13 @@ namespace ufo {
     retrieveDataVector("air_pressure", "MetaData", pressures_);
     retrieveDataVector("air_temperature", "ObsValue", tObs_);
     retrieveDataVector("air_temperature", "HofX", tBkg_);
+    retrieveDataVector("relative_humidity", "ObsValue", RHObs_);
+    retrieveDataVector("relative_humidity", "HofX", RHBkg_);
+    retrieveDataVector("dew_point_temperature", "ObsValue", tdObs_);
     retrieveDataVector("geopotential_height", "ObsValue", zObs_);
     retrieveDataVector("geopotential_height", "HofX", zBkg_);
+    retrieveDataVector("eastward_wind", "ObsValue", uObs_);
+    retrieveDataVector("northward_wind", "ObsValue", vObs_);
     retrieveDataVector("PstarBackgr", "MetaData", PstarBackgr_);
     retrieveDataVector("station_id", "MetaData", stationID_);
   }
@@ -34,8 +39,13 @@ namespace ufo {
     fillProfileData(pressures_, pressures_prof_);
     fillProfileData(tObs_, tObs_prof_);
     fillProfileData(tBkg_, tBkg_prof_);
+    fillProfileData(RHObs_, RHObs_prof_);
+    fillProfileData(RHBkg_, RHBkg_prof_);
+    fillProfileData(tdObs_, tdObs_prof_);
     fillProfileData(zObs_, zObs_prof_);
     fillProfileData(zBkg_, zBkg_prof_);
+    fillProfileData(uObs_, uObs_prof_);
+    fillProfileData(vObs_, vObs_prof_);
     fillProfileData(PstarBackgr_, PstarBackgr_prof_);
     fillProfileData(stationID_, stationID_prof_);
   }
