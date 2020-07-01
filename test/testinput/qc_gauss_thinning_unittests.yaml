@@ -19,7 +19,7 @@ Horizontal mesh 20000:
     round_horizontal_bin_count_to_nearest: true
   expected_thinned_obs_indices: [1, 2, 3]
 
-Horizontal mesh 20000, extreme longitudes:
+Horizontal mesh 20000, extreme longitudes, 0 to 360 degrees:
   window_begin: 2000-01-01T00:00:00Z
   window_end: 2030-01-01T00:00:00Z
   ObsSpace:
@@ -30,6 +30,27 @@ Horizontal mesh 20000, extreme longitudes:
       List:
         lats: [ 0,  0,   0,   0,   0,   0 ]
         lons: [ 0, 90, 179, 181, 270, 359.9999 ]
+        datetimes: [ '2010-01-01T00:04:00Z', '2010-01-01T00:04:12Z', '2010-01-01T00:04:24Z',
+                     '2010-01-01T00:04:36Z', '2010-01-01T00:04:48Z', '2010-01-01T00:05:00Z' ]
+      obs_errors: [1.0]
+  air_pressures: [ 100000, 100000, 100000, 100000, 100000, 100000]
+  GaussianThinning:
+    variables: [air_temperature]
+    horizontal_mesh: 20000
+    round_horizontal_bin_count_to_nearest: true
+  expected_thinned_obs_indices: [0, 2, 3, 5]
+
+Horizontal mesh 20000, extreme longitudes, -180 to 180 degrees:
+  window_begin: 2000-01-01T00:00:00Z
+  window_end: 2030-01-01T00:00:00Z
+  ObsSpace:
+    name: Aircraft
+    simulate:
+      variables: [air_temperature]
+    Generate:
+      List:
+        lats: [ 0,  0,   0,   0,   0,   0 ]
+        lons: [ 0, 90, 179, -179, -90, -0.0001 ]
         datetimes: [ '2010-01-01T00:04:00Z', '2010-01-01T00:04:12Z', '2010-01-01T00:04:24Z',
                      '2010-01-01T00:04:36Z', '2010-01-01T00:04:48Z', '2010-01-01T00:05:00Z' ]
       obs_errors: [1.0]
