@@ -23,7 +23,7 @@ extern "C" {
 // -----------------------------------------------------------------------------
 // Gnssro bending angle observation operators - (ROPP1D)
 // -----------------------------------------------------------------------------
-  void ufo_gnssro_bndropp1d_setup_f90(F90hop &, const eckit::Configuration * const *);
+  void ufo_gnssro_bndropp1d_setup_f90(F90hop &, const eckit::Configuration &);
   void ufo_gnssro_bndropp1d_delete_f90(F90hop &);
   void ufo_gnssro_bndropp1d_simobs_f90(const F90hop &, const F90goms &, const ioda::ObsSpace &,
                                        const int &, double &);

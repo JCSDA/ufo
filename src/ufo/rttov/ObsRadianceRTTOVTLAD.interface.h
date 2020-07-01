@@ -26,7 +26,7 @@ extern "C" {
 //  Radiance observation operator and its tl/ad
 // -----------------------------------------------------------------------------
 
-  void ufo_radiancerttov_tlad_setup_f90(F90hop &, const eckit::Configuration * const *);
+  void ufo_radiancerttov_tlad_setup_f90(F90hop &, const eckit::Configuration &);
   void ufo_radiancerttov_tlad_delete_f90(F90hop &);
   void ufo_radiancerttov_tlad_settraj_f90(const F90hop &, const F90goms &, const ioda::ObsSpace &,
                                      const int &, const int &);

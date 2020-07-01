@@ -33,8 +33,7 @@ ObsInsituTemperatureTLAD::ObsInsituTemperatureTLAD(const ioda::ObsSpace & odb,
                                     "sea_water_salinity",
                                     "sea_water_cell_thickness"};
   varin_.reset(new oops::Variables(vv));
-  const eckit::Configuration * configc = &config;
-  ufo_insitutemperature_tlad_setup_f90(keyOper_, &configc);
+  ufo_insitutemperature_tlad_setup_f90(keyOper_, config);
   oops::Log::trace() << "ObsInsituTemperatureTLAD created" << std::endl;
 }
 

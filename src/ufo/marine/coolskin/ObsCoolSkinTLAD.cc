@@ -34,8 +34,7 @@ ObsCoolSkinTLAD::ObsCoolSkinTLAD(const ioda::ObsSpace & odb, const eckit::Config
                                     "net_downwelling_longwave_radiation",
                                     "friction_velocity_over_water"};
   varin_.reset(new oops::Variables(vv));
-  const eckit::Configuration * configc = &config;
-  ufo_CoolSkin_tlad_setup_f90(keyOper_, &configc);
+  ufo_CoolSkin_tlad_setup_f90(keyOper_, config);
   oops::Log::trace() << "ObsCoolSkinTLAD created" << std::endl;
 }
 

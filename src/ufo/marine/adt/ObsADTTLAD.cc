@@ -29,8 +29,7 @@ ObsADTTLAD::ObsADTTLAD(const ioda::ObsSpace & odb, const eckit::Configuration & 
 {
   const std::vector<std::string> vv{"sea_surface_height_above_geoid"};
   varin_.reset(new oops::Variables(vv));
-  const eckit::Configuration * configc = &config;
-  ufo_adt_tlad_setup_f90(keyOper_, &configc);
+  ufo_adt_tlad_setup_f90(keyOper_, config);
   oops::Log::trace() << "ObsADTTLAD created" << std::endl;
 }
 

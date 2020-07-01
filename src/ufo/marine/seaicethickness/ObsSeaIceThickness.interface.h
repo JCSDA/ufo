@@ -20,7 +20,7 @@ extern "C" {
 
 // -----------------------------------------------------------------------------
 
-  void ufo_seaicethickness_setup_f90(F90hop &, const eckit::Configuration * const *,
+  void ufo_seaicethickness_setup_f90(F90hop &, const eckit::Configuration &,
                                const oops::Variables &);
   void ufo_seaicethickness_delete_f90(F90hop &);
   void ufo_seaicethickness_simobs_f90(const F90hop &, const F90goms &, const ioda::ObsSpace &,

@@ -33,8 +33,7 @@ ObsGnssroBndROPP1D::ObsGnssroBndROPP1D(const ioda::ObsSpace & odb,
                                     "geopotential_height", "surface_geopotential_height"};
   varin_.reset(new oops::Variables(vv));
 
-  const eckit::Configuration * configc = &config;
-  ufo_gnssro_bndropp1d_setup_f90(keyOperGnssroBndROPP1D_, &configc);
+  ufo_gnssro_bndropp1d_setup_f90(keyOperGnssroBndROPP1D_, config);
   oops::Log::trace() << "ObsGnssroBndROPP1D created." << std::endl;
 }
 

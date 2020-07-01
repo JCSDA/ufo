@@ -31,9 +31,7 @@ ObsGeosAod::ObsGeosAod(const ioda::ObsSpace & odb,
                        const eckit::Configuration & config)
   : ObsOperatorBase(odb, config), keyOper_(0), odb_(odb), varin_()
 {
-  const eckit::Configuration * configc = &config;
-
-  ufo_geosaod_setup_f90(keyOper_, &configc, odb.obsvariables(), varin_);
+  ufo_geosaod_setup_f90(keyOper_, config, odb.obsvariables(), varin_);
 
   oops::Log::trace() << "ObsGeosAod created." << std::endl;
 }

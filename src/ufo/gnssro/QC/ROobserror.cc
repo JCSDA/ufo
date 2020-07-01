@@ -29,8 +29,7 @@ ROobserror::ROobserror(ioda::ObsSpace & obsdb,
   : FilterBase(obsdb, config, qc, oberr)
 {
   oops::Log::trace() << "ROobserror contructor starting" << std::endl;
-  const eckit::Configuration * conf = &config;
-  ufo_roobserror_create_f90(key_, obsdb, conf);
+  ufo_roobserror_create_f90(key_, obsdb, config);
   oops::Log::trace() << "ROobserror contructor key = " << key_ << std::endl;
 }
 
