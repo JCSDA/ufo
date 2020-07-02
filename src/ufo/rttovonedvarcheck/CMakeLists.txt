@@ -8,17 +8,17 @@ set ( rttovonedvarcheck_files
     RTTOVOneDVarCheck.cc
     RTTOVOneDVarCheck.interface.F90
     RTTOVOneDVarCheck.interface.h
-    ufo_rttovonedvarcheck_bmatrix_mod.F90
-    ufo_rttovonedvarcheck_constants_mod.F90
-    ufo_rttovonedvarcheck_minimize_jacobian_mod.F90
-    ufo_rttovonedvarcheck_minimize_ml_mod.F90
-    ufo_rttovonedvarcheck_minimize_newton_mod.F90
-    ufo_rttovonedvarcheck_minimize_utils_mod.F90
-    ufo_rttovonedvarcheck_mod.F90
-    ufo_rttovonedvarcheck_profindex_mod.F90
-    ufo_rttovonedvarcheck_rmatrix_mod.F90
-    ufo_rttovonedvarcheck_obinfo_mod.F90
-    ufo_rttovonedvarcheck_utils_mod.F90
+    ufo_rttovonedvarcheck_bmatrix_mod.f90
+    ufo_rttovonedvarcheck_constants_mod.f90
+    ufo_rttovonedvarcheck_minimize_jacobian_mod.f90
+    ufo_rttovonedvarcheck_minimize_ml_mod.f90
+    ufo_rttovonedvarcheck_minimize_newton_mod.f90
+    ufo_rttovonedvarcheck_minimize_utils_mod.f90
+    ufo_rttovonedvarcheck_mod.f90
+    ufo_rttovonedvarcheck_profindex_mod.f90
+    ufo_rttovonedvarcheck_rmatrix_mod.f90
+    ufo_rttovonedvarcheck_obinfo_mod.f90
+    ufo_rttovonedvarcheck_utils_mod.f90
 )
 
 PREPEND( _p_rttovonedvarcheck_files        "rttovonedvarcheck"        ${rttovonedvarcheck_files} )
