@@ -49,7 +49,7 @@ namespace ufo {
     const std::vector <size_t> &getProfileIndices() const {return profileIndices_;}
 
     /// Return number of levels to which QC checks should be applied
-    const int getNumLevelsToCheck() const {return numLevelsToCheck_;}
+    int getNumLevelsToCheck() const {return numLevelsToCheck_;}
 
     /// Typedef used for descending sort method
     typedef std::map<std::size_t, std::vector<std::size_t>> ProfIdxMap;
