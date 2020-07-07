@@ -15,13 +15,8 @@
 #include "oops/interface/ObsFilter.h"
 #include "oops/util/Logger.h"
 
-#include "ufo/UfoTrait.h"
-
 namespace ufo {
 
-// -----------------------------------------------------------------------------
-static oops::FilterMaker<UfoTrait, oops::ObsFilter<UfoTrait, Example> >
-  makerExample_("Example");
 // -----------------------------------------------------------------------------
 
 Example::Example(ioda::ObsSpace & obsdb, const eckit::Configuration & config,

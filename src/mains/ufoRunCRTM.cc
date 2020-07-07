@@ -10,10 +10,10 @@
 
 #include "./RunCRTM.h"
 #include "oops/runs/Run.h"
-#include "ufo/UfoTrait.h"
+#include "ufo/ObsTraits.h"
 
 int main(int argc,  char ** argv) {
   oops::Run run(argc, argv);
-  ufo::RunCRTM<ufo::UfoTrait> var;
+  ufo::RunCRTM<ufo::ObsTraits> var;
   return run.execute(var);
 }

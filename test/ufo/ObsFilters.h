@@ -34,7 +34,7 @@
 #include "test/interface/ObsTestsFixture.h"
 #include "test/TestEnvironment.h"
 #include "ufo/filters/Variable.h"
-#include "ufo/UfoTrait.h"
+#include "ufo/ObsTraits.h"
 
 namespace eckit
 {
@@ -104,7 +104,7 @@ std::vector<T> allGatherv(const eckit::mpi::Comm &comm, const std::vector<T> &v)
 template <typename Predicate>
 std::vector<size_t> getObservationIndicesWhere(
     const eckit::mpi::Comm &comm,
-    const UfoTrait::ObsDataVector<int> &qcFlags,
+    const ObsTraits::ObsDataVector<int> &qcFlags,
     const Predicate &predicate) {
   std::vector<size_t> indices;
   for (size_t locIndex = 0; locIndex < qcFlags.nlocs(); ++locIndex) {
@@ -133,7 +133,7 @@ std::vector<size_t> getObservationIndicesWhere(
 //! at least one variable.
 //!
 std::vector<size_t> getPassedObservationIndices(const eckit::mpi::Comm &comm,
-                                                const UfoTrait::ObsDataVector<int> &qcFlags) {
+                                                const ObsTraits::ObsDataVector<int> &qcFlags) {
   return getObservationIndicesWhere(comm, qcFlags, [](int qcFlag) { return qcFlag == 0; });
 }
 
@@ -144,7 +144,7 @@ std::vector<size_t> getPassedObservationIndices(const eckit::mpi::Comm &comm,
 //! at least one variable.
 //!
 std::vector<size_t> getFailedObservationIndices(const eckit::mpi::Comm &comm,
-                                                const UfoTrait::ObsDataVector<int> &qcFlags) {
+                                                const ObsTraits::ObsDataVector<int> &qcFlags) {
   return getObservationIndicesWhere(comm, qcFlags, [](int qcFlag) { return qcFlag != 0; });
 }
 
@@ -155,7 +155,7 @@ std::vector<size_t> getFailedObservationIndices(const eckit::mpi::Comm &comm,
 //! at least one variable.
 //!
 std::vector<size_t> getFlaggedObservationIndices(const eckit::mpi::Comm &comm,
-                                                 const UfoTrait::ObsDataVector<int> &qcFlags,
+                                                 const ObsTraits::ObsDataVector<int> &qcFlags,
                                                  int flag) {
   return getObservationIndicesWhere(comm, qcFlags, [flag](int qcFlag) { return qcFlag == flag; });
 }
@@ -165,7 +165,7 @@ std::vector<size_t> getFlaggedObservationIndices(const eckit::mpi::Comm &comm,
 //!
 //! Return the number of elements of \p data with at least one nonzero component.
 //!
-size_t numNonzero(const UfoTrait::ObsDataVector<int> & data) {
+size_t numNonzero(const ObsTraits::ObsDataVector<int> & data) {
   size_t result = 0;
   for (size_t locIndex = 0; locIndex < data.nlocs(); ++locIndex) {
     for (size_t varIndex = 0; varIndex < data.nvars(); ++varIndex) {
@@ -181,7 +181,7 @@ size_t numNonzero(const UfoTrait::ObsDataVector<int> & data) {
 //!
 //! Return the number of elements of \p data with at least one component equal to \p value.
 //!
-size_t numEqualTo(const UfoTrait::ObsDataVector<int> & data, int value) {
+size_t numEqualTo(const ObsTraits::ObsDataVector<int> & data, int value) {
   size_t result = 0;
   for (size_t locIndex = 0; locIndex < data.nlocs(); ++locIndex) {
     for (size_t varIndex = 0; varIndex < data.nvars(); ++varIndex) {
@@ -195,7 +195,7 @@ size_t numEqualTo(const UfoTrait::ObsDataVector<int> & data, int value) {
 // -----------------------------------------------------------------------------
 
 template <typename T>
-void expectVariablesEqual(const UfoTrait::ObsSpace &obsspace,
+void expectVariablesEqual(const ObsTraits::ObsSpace &obsspace,
                           const ufo::Variable &referenceVariable,
                           const ufo::Variable &testVariable)
 {
@@ -208,7 +208,7 @@ void expectVariablesEqual(const UfoTrait::ObsSpace &obsspace,
 
 // -----------------------------------------------------------------------------
 
-void expectVariablesApproximatelyEqual(const UfoTrait::ObsSpace &obsspace,
+void expectVariablesApproximatelyEqual(const ObsTraits::ObsSpace &obsspace,
                                        const ufo::Variable &referenceVariable,
                                        const ufo::Variable &testVariable,
                                        float absTol)
@@ -223,14 +223,14 @@ void expectVariablesApproximatelyEqual(const UfoTrait::ObsSpace &obsspace,
 // -----------------------------------------------------------------------------
 
 void testFilters() {
-  typedef ::test::ObsTestsFixture<UfoTrait> Test_;
-  typedef oops::GeoVaLs<ufo::UfoTrait>           GeoVaLs_;
-  typedef oops::ObsDiagnostics<ufo::UfoTrait>    ObsDiags_;
-  typedef oops::ObsAuxControl<ufo::UfoTrait>     ObsAuxCtrl_;
-  typedef oops::ObsFilters<ufo::UfoTrait>        ObsFilters_;
-  typedef oops::ObsOperator<ufo::UfoTrait>       ObsOperator_;
-  typedef oops::ObsVector<ufo::UfoTrait>         ObsVector_;
-  typedef oops::ObsSpace<ufo::UfoTrait>          ObsSpace_;
+  typedef ::test::ObsTestsFixture<ObsTraits> Test_;
+  typedef oops::GeoVaLs<ufo::ObsTraits>           GeoVaLs_;
+  typedef oops::ObsDiagnostics<ufo::ObsTraits>    ObsDiags_;
+  typedef oops::ObsAuxControl<ufo::ObsTraits>     ObsAuxCtrl_;
+  typedef oops::ObsFilters<ufo::ObsTraits>        ObsFilters_;
+  typedef oops::ObsOperator<ufo::ObsTraits>       ObsOperator_;
+  typedef oops::ObsVector<ufo::ObsTraits>         ObsVector_;
+  typedef oops::ObsSpace<ufo::ObsTraits>          ObsSpace_;
 
   const eckit::LocalConfiguration obsconf(::test::TestEnvironment::config(), "Observations");
   std::vector<eckit::LocalConfiguration> typeconfs;
@@ -238,11 +238,11 @@ void testFilters() {
 
   for (std::size_t jj = 0; jj < Test_::obspace().size(); ++jj) {
 /// init QC and error
-    boost::shared_ptr<oops::ObsDataVector<ufo::UfoTrait, float> > obserr
-      (new oops::ObsDataVector<ufo::UfoTrait, float>(Test_::obspace()[jj],
+    boost::shared_ptr<oops::ObsDataVector<ufo::ObsTraits, float> > obserr
+      (new oops::ObsDataVector<ufo::ObsTraits, float>(Test_::obspace()[jj],
                Test_::obspace()[jj].obsvariables(), "ObsError"));
-    boost::shared_ptr<oops::ObsDataVector<ufo::UfoTrait, int> >
-      qcflags(new oops::ObsDataVector<ufo::UfoTrait, int>  (Test_::obspace()[jj],
+    boost::shared_ptr<oops::ObsDataVector<ufo::ObsTraits, int> >
+      qcflags(new oops::ObsDataVector<ufo::ObsTraits, int>  (Test_::obspace()[jj],
                Test_::obspace()[jj].obsvariables()));
 
 //  Create filters and run preProcess
@@ -315,7 +315,7 @@ void testFilters() {
 
 //  Compare with known results
     bool atLeastOneBenchmarkFound = false;
-    const UfoTrait::ObsSpace &obsspace = Test_::obspace()[jj].obsspace();
+    const ObsTraits::ObsSpace &obsspace = Test_::obspace()[jj].obsspace();
 
     if (typeconfs[jj].has("passedObservationsBenchmark")) {
       atLeastOneBenchmarkFound = true;

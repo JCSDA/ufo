@@ -30,7 +30,7 @@ list( APPEND ufo_src_files
     ObsOperator.h
     ObsOperatorBase.cc
     ObsOperatorBase.h
-    UfoTrait.h
+    ObsTraits.h
     ufo_geovals_mod.F90
     ufo_locs_mod.F90
     ufo_variables_mod.F90

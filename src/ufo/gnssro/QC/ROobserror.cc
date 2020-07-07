@@ -16,7 +16,6 @@
 #include "oops/interface/ObsFilter.h"
 #include "oops/util/Logger.h"
 #include "ufo/GeoVaLs.h"
-#include "ufo/UfoTrait.h"
 
 namespace ufo {
 
