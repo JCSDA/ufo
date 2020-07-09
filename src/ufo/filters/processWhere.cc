@@ -72,25 +72,32 @@ void processWhereIsNotDefined(const std::vector<float> & data,
 }
 
 // -----------------------------------------------------------------------------
-
-void processWhereIsIn(const std::vector<int> & data,
-                      const std::set<int> & whitelist,
+template <class T>
+void processWhereIsIn(const std::vector<T> & data,
+                      const std::set<T> & whitelist,
                       std::vector<bool> & mask) {
-  const size_t n = data.size();
-  for (size_t jj = 0; jj < n; ++jj) {
+  for (size_t jj = 0; jj < data.size(); ++jj) {
     if (!oops::contains(whitelist, data[jj])) mask[jj] = false;
   }
 }
 
 // -----------------------------------------------------------------------------
-
-void processWhereIsNotIn(const std::vector<int> & data,
-                         const std::set<int> & blacklist,
+template <class T>
+void processWhereIsNotIn(const std::vector<T> & data,
+                         const std::set<T> & blacklist,
                          std::vector<bool> & mask) {
-  const int missing = util::missingValue(missing);
-  const size_t n = data.size();
-  for (size_t jj = 0; jj < n; ++jj) {
+  const T missing = util::missingValue(missing);
+  for (size_t jj = 0; jj < data.size(); ++jj) {
     if (data[jj] == missing || oops::contains(blacklist, data[jj])) mask[jj] = false;
+  }
+}
+
+// -----------------------------------------------------------------------------
+void processWhereIsNotIn(const std::vector<std::string> & data,
+                         const std::set<std::string> & blacklist,
+                         std::vector<bool> & mask) {
+  for (size_t jj = 0; jj < data.size(); ++jj) {
+    if (oops::contains(blacklist, data[jj])) mask[jj] = false;
   }
 }
 
@@ -112,6 +119,9 @@ std::vector<bool> processWhere(const eckit::Configuration & config,
     Variable var(varconf);
     for (size_t jvar = 0; jvar < var.size(); ++jvar) {
       if (var.group() != "VarMetaData") {
+        const Variable varname = var[jvar];
+        ioda::ObsDtype dtype = filterdata.dtype(varname);
+
 //      Process masks on float values
         const float vmin = masks[jm].getFloat("minvalue", missing);
         const float vmax = masks[jm].getFloat("maxvalue", missing);
@@ -119,15 +129,15 @@ std::vector<bool> processWhere(const eckit::Configuration & config,
 //      Apply mask min/max
         if (vmin != missing || vmax != missing) {
           std::vector<float> data;
-          filterdata.get(var[jvar], data);
+          filterdata.get(varname, data);
           processWhereMinMax(data, vmin, vmax, where);
         }
 
 //      Apply mask is_defined
         if (masks[jm].has("is_defined")) {
-          if (filterdata.has(var[jvar])) {
+          if (filterdata.has(varname)) {
             std::vector<float> data;
-            filterdata.get(var[jvar], data);
+            filterdata.get(varname, data);
             processWhereIsDefined(data, where);
           } else {
             std::fill(where.begin(), where.end(), false);
@@ -137,24 +147,44 @@ std::vector<bool> processWhere(const eckit::Configuration & config,
 //      Apply mask is_not_defined
         if (masks[jm].has("is_not_defined")) {
           std::vector<float> data;
-          filterdata.get(var[jvar], data);
+          filterdata.get(varname, data);
           processWhereIsNotDefined(data, where);
         }
 
 //      Apply mask is_in
         if (masks[jm].has("is_in")) {
-          std::vector<int> data;
-          filterdata.get(var[jvar], data);
-          std::set<int> whitelist = oops::parseIntSet(masks[jm].getString("is_in"));
-          processWhereIsIn(data, whitelist, where);
+          if (dtype == ioda::ObsDtype::String) {
+            std::vector<std::string> data;
+            std::vector<std::string> whitelistvec = masks[jm].getStringVector("is_in");
+            std::set<std::string> whitelist(whitelistvec.begin(), whitelistvec.end());
+            filterdata.get(varname, data);
+            processWhereIsIn(data, whitelist, where);
+          } else if (dtype == ioda::ObsDtype::Integer) {
+            std::vector<int> data;
+            std::set<int> whitelist = oops::parseIntSet(masks[jm].getString("is_in"));
+            filterdata.get(varname, data);
+            processWhereIsIn(data, whitelist, where);
+          } else {
+            throw eckit::UserError("Only integer and string variables may be used for processWhere 'is_in'", Here());
+          }
         }
 
 //      Apply mask is_not_in
         if (masks[jm].has("is_not_in")) {
-          std::vector<int> data;
-          filterdata.get(var[jvar], data);
-          std::set<int> blacklist = oops::parseIntSet(masks[jm].getString("is_not_in"));
-          processWhereIsNotIn(data, blacklist, where);
+          if (dtype == ioda::ObsDtype::String) {
+            std::vector<std::string> data;
+            std::vector<std::string> blacklistvec = masks[jm].getStringVector("is_not_in");
+            std::set<std::string> blacklist(blacklistvec.begin(), blacklistvec.end());
+            filterdata.get(varname, data);
+            processWhereIsNotIn(data, blacklist, where);
+          } else if (dtype == ioda::ObsDtype::Integer) {
+            std::vector<int> data;
+            filterdata.get(varname, data);
+            std::set<int> blacklist = oops::parseIntSet(masks[jm].getString("is_not_in"));
+            processWhereIsNotIn(data, blacklist, where);
+          } else {
+            throw eckit::UserError("Only integer and string variables may be used for processWhere 'is_not_in'", Here());
+          }
         }
       }
     }

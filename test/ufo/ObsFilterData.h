@@ -28,6 +28,7 @@
 namespace ufo {
 namespace test {
 
+
 // -----------------------------------------------------------------------------
 
 void testObsFilterData() {
@@ -51,6 +52,7 @@ void testObsFilterData() {
 
 ///  Setup ObsDiags
     const eckit::LocalConfiguration obsdiagconf(confs[jconf], "ObsDiag");
+    varconfs.clear();
     obsdiagconf.get("variables", varconfs);
     const Variables diagvars(varconfs);
     const ObsDiagnostics obsdiags(obsdiagconf, ospace, diagvars.toOopsVariables());
@@ -64,22 +66,30 @@ void testObsFilterData() {
     ObsFilterData data(ospace);
     EXPECT(data.nlocs() == ospace.nlocs());
 
-///  Check that has() and get() works on ObsSpace:
+///  Check that has(), get() and dtype() works on ObsSpace:
+    varconfs.clear();
     obsconf.get("float variables", varconfs);
     ufo::Variables obsvars(varconfs);
     for (size_t jvar = 0; jvar < obsvars.nvars(); ++jvar) {
       EXPECT(data.has(obsvars.variable(jvar)));
+
+      EXPECT(data.dtype(obsvars.variable(jvar)) == ioda::ObsDtype::Float);
+
       std::vector<float> vec;
       data.get(obsvars.variable(jvar), vec);
       std::vector<float> ref(ospace.nlocs());
       ospace.get_db(obsvars.variable(jvar).group(), obsvars.variable(jvar).variable(), ref);
       EXPECT(vec == ref);
     }
-///  Check that has() and get() work on integer variables in ObsSpace:
+///  Check that has(), get() and dtype() work on integer variables in ObsSpace:
+    varconfs.clear();
     obsconf.get("integer variables", varconfs);
     ufo::Variables intvars(varconfs);
     for (size_t jvar = 0; jvar < intvars.nvars(); ++jvar) {
       EXPECT(data.has(intvars.variable(jvar)));
+
+      EXPECT(data.dtype(intvars.variable(jvar)) == ioda::ObsDtype::Integer);
+
       std::vector<int> vec;
       data.get(intvars.variable(jvar), vec);
       std::vector<int> ref(ospace.nlocs());
@@ -87,8 +97,23 @@ void testObsFilterData() {
       EXPECT(vec == ref);
     }
 
-///  Check that associate(), has() and get() work on ObsVector:
+    ///  Check that get() works on string variables in ObsSpace:
+    varconfs.clear();
+    obsconf.get("string variables", varconfs);
+    ufo::Variables strvars(varconfs);
+    for (size_t jvar = 0; jvar < strvars.nvars(); ++jvar) {
+      std::vector<std::string> vec;
+      data.get(strvars.variable(jvar), vec);
+      std::vector<std::string> ref(ospace.nlocs());
+      ospace.get_db(strvars.variable(jvar).group(), strvars.variable(jvar).variable(), ref);
+      EXPECT(vec == ref);
+    }
+
+///  Check that associate(), has(), get() and dtype() work on ObsVector:
 ///  H(x) not associated yet
+///  The important aspect of dtype handling here is it not being in ObsSpace so we
+///  needn't test for other containers.
+    varconfs.clear();
     hofxconf.get("variables", varconfs);
     ufo::Variables hofxvars(varconfs);
     for (size_t jvar = 0; jvar < hofxvars.nvars(); ++jvar) {
@@ -98,6 +123,9 @@ void testObsFilterData() {
 ///  H(x) associated now
     for (size_t jvar = 0; jvar < hofxvars.nvars(); ++jvar) {
       EXPECT(data.has(hofxvars.variable(jvar)));
+
+      EXPECT(data.dtype(hofxvars.variable(jvar)) == ioda::ObsDtype::Float);
+
       std::vector<float> vec;
       data.get(hofxvars.variable(jvar), vec);
       std::vector<float> ref(hofx.nlocs());

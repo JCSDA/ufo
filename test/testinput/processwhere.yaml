@@ -1,192 +1,251 @@
-window_begin: 2018-04-14T20:00:00Z
-window_end: 2018-04-15T03:00:00Z
-ObsSpace:
-  name: ProcessWhere Test Data
-  ObsDataIn:
-    obsfile: Data/filters_testdata.nc4
-  simulate:
-    variables: []
-  nlocs: 10
-ProcessWhere:
-  - where:                      # test minvalue when all are >= min
-    - variable:
-        name:  var1@MetaData
-      minvalue: 1
-# var1@MetaData = 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
-    size where true: 10
-  - where:                      # test minvalue when it's in the middle of the range
-    - variable:
-        name:  var1@MetaData
-      minvalue: 4
-# var1@MetaData = 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
-    size where true: 7
-  - where:                      # test minvalue when all are < min
-    - variable:
-        name:  var1@MetaData
-      minvalue: 11
-# var1@MetaData = 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
-    size where true: 0
-  - where:                      # test maxvalue when all are <= max
-    - variable:
-        name:  var1@MetaData
-      maxvalue: 10
-# var1@MetaData = 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
-    size where true: 10
-  - where:                      # test maxvalue when all but one are > max, one == max
-    - variable:
-        name:  var1@MetaData
-      maxvalue: 1
-# var1@MetaData = 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
-    size where true: 1
-  - where:                      # test min & max at the same time when all should pass
-    - variable:
-        name:  var2@MetaData
-      minvalue: 1
-      maxvalue: 10
-# var2@MetaData = 10, 9, 8, 7, 6, 5, 4, 3, 2, 1
-    size where true: 10
-  - where:                      # test min & max at the same time when some should pass
-    - variable:
-        name:  var2@MetaData
-      minvalue: 2
-      maxvalue: 5
-# var2@MetaData = 10, 9, 8, 7, 6, 5, 4, 3, 2, 1
-    size where true: 4
-  - where:                      # test min & max at the same time when max < min
-    - variable:
-        name:  var2@MetaData
-      minvalue: 6
-      maxvalue: 4
-# var2@MetaData = 10, 9, 8, 7, 6, 5, 4, 3, 2, 1
-    size where true: 0
-  - where:                      # test min & max at the same time when max == min
-    - variable:
-        name:  var2@MetaData
-      minvalue: 7
-      maxvalue: 7
-# var2@MetaData = 10, 9, 8, 7, 6, 5, 4, 3, 2, 1
-    size where true: 1
-  - where:                      # test min & max  for variable with missing values
-    - variable:
-        name:  var5@MetaData
-      minvalue: 2
-      maxvalue: 5
-# var5@MetaData = 1, _, 2, _, 3, _, 4, _, 5, 0
-    size where true: 4
-  - where:                      # test min & max  for variable with missing values
-    - variable:
-        name:  var5@MetaData
-      minvalue: 0
-      maxvalue: 100
-# var5@MetaData = 1, _, 2, _, 3, _, 4, _, 5, 0
-    size where true: 6
-  - where:                      # test min & max  for variable with missing values
-    - variable:
-        name:  var5@MetaData
-      minvalue: 100
-# var5@MetaData = 1, _, 2, _, 3, _, 4, _, 5, 0
-    size where true: 0
-  - where:                      # test that AND for 2 conditions works as expected
-    - variable:
-        name:  var1@MetaData
-      maxvalue: 5
-    - variable:
-        name:  var2@MetaData
-      maxvalue: 6
-# var1@MetaData = 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
-# var2@MetaData = 10, 9, 8, 7, 6, 5, 4, 3, 2, 1
-    size where true: 1
-  - where:                      # test that AND for 2 conditions works as expected
-    - variable:
-        name:  var1@MetaData
-      maxvalue: 5
-    - variable:
-        name:  var2@MetaData
-      minvalue: 6
-# var1@MetaData = 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
-# var2@MetaData = 10, 9, 8, 7, 6, 5, 4, 3, 2, 1
-    size where true: 5
-  - where:                      # test that is_defined works when all is defined
-    - variable:
-        name:  var1@MetaData
-      is_defined:
-# var1@MetaData = 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
-    size where true: 10
-  - where:                      # test that is_not_defined works when all is defined
-    - variable:
-        name:  var1@MetaData
-      is_not_defined:
-# var1@MetaData = 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
-    size where true: 0
-  - where:                      # test that is_defined works when some are defined
-    - variable:
-        name:  var5@MetaData
-      is_defined:
-# var5@MetaData = 1, _, 2, _, 3, _, 4, _, 5, 0
-    size where true: 6
-  - where:                      # test that is_not_defined works when some are defined
-    - variable:
-        name:  var5@MetaData
-      is_not_defined:
-# var5@MetaData = 1, _, 2, _, 3, _, 4, _, 5, 0
-    size where true: 4
-  - where:                       # test is_in
-    - variable:
-        name:  intvar3@MetaData
-      is_in: 1
-# intvar3@MetaData = 1, 1, 1, 1, 1, 0, 0, 0, 0, 0
-    size where true: 5
-  - where:                       # test is_in
-    - variable:
-        name:  intvar4@MetaData
-      is_in: 0-3
-# intvar4@MetaData = 0, 0, 0, 0, 0, 1, 2, 3, 4, 5
-    size where true: 8
-  - where:                       # test is_in when nothing is in
-    - variable:
-        name:  intvar3@MetaData
-      is_in: 5-22
-# intvar3@MetaData = 1, 1, 1, 1, 1, 0, 0, 0, 0, 0
-    size where true: 0
-  - where:                       # test is_in when all is in
-    - variable:
-        name:  intvar3@MetaData
-      is_in: 0, 1
-# intvar3@MetaData = 1, 1, 1, 1, 1, 0, 0, 0, 0, 0
-    size where true: 10
-  - where:                       # test is_in when some values are missing
-    - variable:
-        name:  intvar5@MetaData
-      is_in: 0-3
-# intvar5@MetaData = 1, _, 2, _, 3, _, 4, _, 5, 0
-    size where true: 4
-  - where:                       # test is_not_in
-    - variable:
-        name:  intvar3@MetaData
-      is_not_in: 1
-# intvar3@MetaData = 1, 1, 1, 1, 1, 0, 0, 0, 0, 0
-    size where true: 5
-  - where:                       # test is_not_in
-    - variable:
-        name:  intvar4@MetaData
-      is_not_in: 0-3
-# intvar4@MetaData = 0, 0, 0, 0, 0, 1, 2, 3, 4, 5
-    size where true: 2
-  - where:                       # test is_not_in when nothing is in
-    - variable:
-        name:  intvar3@MetaData
-      is_not_in: 5-22
-# intvar3@MetaData = 1, 1, 1, 1, 1, 0, 0, 0, 0, 0
-    size where true: 10
-  - where:                       # test is_not_in when all is in
-    - variable:
-        name:  intvar3@MetaData
-      is_not_in: 0, 1
-# intvar3@MetaData = 1, 1, 1, 1, 1, 0, 0, 0, 0, 0
-    size where true: 0
-  - where:                       # test is_not_in when some values are missing
-    - variable:
-        name:  intvar5@MetaData
-      is_not_in: 0-3
-# intvar5@MetaData = 1, _, 2, _, 3, _, 4, _, 5, 0
-    size where true: 2
+successful:
+  window_begin: 2018-04-14T20:00:00Z
+  window_end: 2018-04-15T03:00:00Z
+  ObsSpace:
+    name: ProcessWhere Test Data
+    ObsDataIn:
+      obsfile: Data/filters_testdata.nc4
+    simulate:
+      variables: []
+    nlocs: 10
+  ProcessWhere:
+    - where:                      # test minvalue when all are >= min
+      - variable:
+          name:  var1@MetaData
+        minvalue: 1
+  # var1@MetaData = 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+      size where true: 10
+    - where:                      # test minvalue when it's in the middle of the range
+      - variable:
+          name:  var1@MetaData
+        minvalue: 4
+  # var1@MetaData = 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+      size where true: 7
+    - where:                      # test minvalue when all are < min
+      - variable:
+          name:  var1@MetaData
+        minvalue: 11
+  # var1@MetaData = 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+      size where true: 0
+    - where:                      # test maxvalue when all are <= max
+      - variable:
+          name:  var1@MetaData
+        maxvalue: 10
+  # var1@MetaData = 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+      size where true: 10
+    - where:                      # test maxvalue when all but one are > max, one == max
+      - variable:
+          name:  var1@MetaData
+        maxvalue: 1
+  # var1@MetaData = 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+      size where true: 1
+    - where:                      # test min & max at the same time when all should pass
+      - variable:
+          name:  var2@MetaData
+        minvalue: 1
+        maxvalue: 10
+  # var2@MetaData = 10, 9, 8, 7, 6, 5, 4, 3, 2, 1
+      size where true: 10
+    - where:                      # test min & max at the same time when some should pass
+      - variable:
+          name:  var2@MetaData
+        minvalue: 2
+        maxvalue: 5
+  # var2@MetaData = 10, 9, 8, 7, 6, 5, 4, 3, 2, 1
+      size where true: 4
+    - where:                      # test min & max at the same time when max < min
+      - variable:
+          name:  var2@MetaData
+        minvalue: 6
+        maxvalue: 4
+  # var2@MetaData = 10, 9, 8, 7, 6, 5, 4, 3, 2, 1
+      size where true: 0
+    - where:                      # test min & max at the same time when max == min
+      - variable:
+          name:  var2@MetaData
+        minvalue: 7
+        maxvalue: 7
+  # var2@MetaData = 10, 9, 8, 7, 6, 5, 4, 3, 2, 1
+      size where true: 1
+    - where:                      # test min & max  for variable with missing values
+      - variable:
+          name:  var5@MetaData
+        minvalue: 2
+        maxvalue: 5
+  # var5@MetaData = 1, _, 2, _, 3, _, 4, _, 5, 0
+      size where true: 4
+    - where:                      # test min & max  for variable with missing values
+      - variable:
+          name:  var5@MetaData
+        minvalue: 0
+        maxvalue: 100
+  # var5@MetaData = 1, _, 2, _, 3, _, 4, _, 5, 0
+      size where true: 6
+    - where:                      # test min & max  for variable with missing values
+      - variable:
+          name:  var5@MetaData
+        minvalue: 100
+  # var5@MetaData = 1, _, 2, _, 3, _, 4, _, 5, 0
+      size where true: 0
+    - where:                      # test that AND for 2 conditions works as expected
+      - variable:
+          name:  var1@MetaData
+        maxvalue: 5
+      - variable:
+          name:  var2@MetaData
+        maxvalue: 6
+  # var1@MetaData = 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+  # var2@MetaData = 10, 9, 8, 7, 6, 5, 4, 3, 2, 1
+      size where true: 1
+    - where:                      # test that AND for 2 conditions works as expected
+      - variable:
+          name:  var1@MetaData
+        maxvalue: 5
+      - variable:
+          name:  var2@MetaData
+        minvalue: 6
+  # var1@MetaData = 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+  # var2@MetaData = 10, 9, 8, 7, 6, 5, 4, 3, 2, 1
+      size where true: 5
+    - where:                      # test that is_defined works when all is defined
+      - variable:
+          name:  var1@MetaData
+        is_defined:
+  # var1@MetaData = 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+      size where true: 10
+    - where:                      # test that is_not_defined works when all is defined
+      - variable:
+          name:  var1@MetaData
+        is_not_defined:
+  # var1@MetaData = 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+      size where true: 0
+    - where:                      # test that is_defined works when some are defined
+      - variable:
+          name:  var5@MetaData
+        is_defined:
+  # var5@MetaData = 1, _, 2, _, 3, _, 4, _, 5, 0
+      size where true: 6
+    - where:                      # test that is_not_defined works when some are defined
+      - variable:
+          name:  var5@MetaData
+        is_not_defined:
+  # var5@MetaData = 1, _, 2, _, 3, _, 4, _, 5, 0
+      size where true: 4
+    - where:                       # test is_in
+      - variable:
+          name:  intvar3@MetaData
+        is_in: 1
+  # intvar3@MetaData = 1, 1, 1, 1, 1, 0, 0, 0, 0, 0
+      size where true: 5
+    - where:                       # test is_in
+      - variable:
+          name:  intvar4@MetaData
+        is_in: 0-3
+  # intvar4@MetaData = 0, 0, 0, 0, 0, 1, 2, 3, 4, 5
+      size where true: 8
+    - where:                       # test is_in for string-based inputs
+      - variable:
+          name:  station_id@MetaData
+        is_in: [WARUBAJH, MTLGWTHE, XKEHXQSD]
+  # station_id@MetaData = WARUBAJH, HUAVFIBU, DKPAIDZX, MTLGWTHE, LESDCYOD, UGCMFXFK, HSMHFHQI, JALVYAAR, MOYSUYWB, XKEHXQSD
+      size where true: 3
+    - where:                       # test is_in for string-based inputs, ignore value not present (DUMMYVAL)
+      - variable:
+          name:  station_id@MetaData
+        is_in: [WARUBAJH, MTLGWTHE, XKEHXQSD, DUMMYVAL]
+  # station_id@MetaData = WARUBAJH, HUAVFIBU, DKPAIDZX, MTLGWTHE, LESDCYOD, UGCMFXFK, HSMHFHQI, JALVYAAR, MOYSUYWB, XKEHXQSD
+      size where true: 3
+    - where:                       # test is_in for string-based inputs with duplicates
+      - variable:
+          name:  station_id@MetaData
+        is_in: [WARUBAJH, MTLGWTHE, XKEHXQSD, XKEHXQSD]
+  # station_id@MetaData = WARUBAJH, HUAVFIBU, DKPAIDZX, MTLGWTHE, LESDCYOD, UGCMFXFK, HSMHFHQI, JALVYAAR, MOYSUYWB, XKEHXQSD
+      size where true: 3
+    - where:                       # test is_in when nothing is in
+      - variable:
+          name:  intvar3@MetaData
+        is_in: 5-22
+  # intvar3@MetaData = 1, 1, 1, 1, 1, 0, 0, 0, 0, 0
+      size where true: 0
+    - where:                       # test is_in when all is in
+      - variable:
+          name:  intvar3@MetaData
+        is_in: 0, 1
+  # intvar3@MetaData = 1, 1, 1, 1, 1, 0, 0, 0, 0, 0
+      size where true: 10
+    - where:                       # test is_in when some values are missing
+      - variable:
+          name:  intvar5@MetaData
+        is_in: 0-3
+  # intvar5@MetaData = 1, _, 2, _, 3, _, 4, _, 5, 0
+      size where true: 4
+    - where:                       # test is_not_in
+      - variable:
+          name:  intvar3@MetaData
+        is_not_in: 1
+  # intvar3@MetaData = 1, 1, 1, 1, 1, 0, 0, 0, 0, 0
+      size where true: 5
+    - where:                       # test is_not_in
+      - variable:
+          name:  intvar4@MetaData
+        is_not_in: 0-3
+  # intvar4@MetaData = 0, 0, 0, 0, 0, 1, 2, 3, 4, 5
+      size where true: 2
+    - where:                       # test is_not_in when nothing is in
+      - variable:
+          name:  intvar3@MetaData
+        is_not_in: 5-22
+  # intvar3@MetaData = 1, 1, 1, 1, 1, 0, 0, 0, 0, 0
+      size where true: 10
+    - where:                       # test is_not_in when all is in
+      - variable:
+          name:  intvar3@MetaData
+        is_not_in: 0, 1
+  # intvar3@MetaData = 1, 1, 1, 1, 1, 0, 0, 0, 0, 0
+      size where true: 0
+    - where:                       # test is_not_in when some values are missing
+      - variable:
+          name:  intvar5@MetaData
+        is_not_in: 0-3
+  # intvar5@MetaData = 1, _, 2, _, 3, _, 4, _, 5, 0
+      size where true: 2
+    - where:                       # test is_not_in for string-based inputs
+      - variable:
+          name:  station_id@MetaData
+        is_not_in: [WARUBAJH, MTLGWTHE, XKEHXQSD]
+  # station_id@MetaData = WARUBAJH, HUAVFIBU, DKPAIDZX, MTLGWTHE, LESDCYOD, UGCMFXFK, HSMHFHQI, JALVYAAR, MOYSUYWB, XKEHXQSD
+      size where true: 7
+    - where:                       # test is_not_in for string-based inputs, ignore value not present (DUMMYVAL)
+      - variable:
+          name:  station_id@MetaData
+        is_not_in: [WARUBAJH, MTLGWTHE, XKEHXQSD, DUMMYVAL]
+  # station_id@MetaData = WARUBAJH, HUAVFIBU, DKPAIDZX, MTLGWTHE, LESDCYOD, UGCMFXFK, HSMHFHQI, JALVYAAR, MOYSUYWB, XKEHXQSD
+      size where true: 7
+    - where:                       # test is_not_in for string-based inputs with duplicates
+      - variable:
+          name:  station_id@MetaData
+        is_not_in: [WARUBAJH, MTLGWTHE, XKEHXQSD, XKEHXQSD]
+  # station_id@MetaData = WARUBAJH, HUAVFIBU, DKPAIDZX, MTLGWTHE, LESDCYOD, UGCMFXFK, HSMHFHQI, JALVYAAR, MOYSUYWB, XKEHXQSD
+      size where true: 7
+
+user_error_type_handling_is_in:
+  window_begin: 2018-04-14T20:00:00Z
+  window_end: 2018-04-15T03:00:00Z
+  ObsSpace:
+    name: ProcessWhere Test Data
+    ObsDataIn:
+      obsfile: Data/filters_testdata.nc4
+    simulate:
+      variables: []
+    nlocs: 10
+  ProcessWhere:
+    - where:                       # test is_not_in for unsupported type (float)
+      - variable:
+          name:  var1@MetaData
+        is_not_in: 0.5
+      size where true: 0
+    - where:                       # test is_in for unsupported type (float)
+      - variable:
+          name:  var1@MetaData
+        is_in: 0.5
+      size where true: 0
