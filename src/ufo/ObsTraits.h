@@ -13,6 +13,7 @@
 #include "ioda/ObsDataVector.h"
 #include "ioda/ObsSpace.h"
 #include "ioda/ObsVector.h"
+#include "AnalyticInit.h"
 #include "Locations.h"
 #include "GeoVaLs.h"
 #include "ObsBias.h"
@@ -27,6 +28,7 @@ namespace ufo {
 struct ObsTraits {
   static std::string name() {return "UFO and IODA observations";}
 
+  typedef ufo::AnalyticInit        AnalyticInit;
   typedef ufo::GeoVaLs             GeoVaLs;
   typedef ufo::ObsDiagnostics      ObsDiagnostics;
   typedef ufo::Locations           Locations;

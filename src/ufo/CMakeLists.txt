@@ -5,6 +5,8 @@
 
 list( APPEND ufo_src_files
     Fortran.h
+    AnalyticInit.cc
+    AnalyticInit.h
     GeoVaLs.cc
     GeoVaLs.h
     GeoVaLs.interface.F90
