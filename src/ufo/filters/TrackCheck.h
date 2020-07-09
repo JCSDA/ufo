@@ -19,6 +19,7 @@
 #include "oops/util/ObjectCounter.h"
 #include "ufo/filters/FilterBase.h"
 #include "ufo/filters/QCflags.h"
+#include "ufo/filters/TrackCheckUtils.h"
 
 namespace eckit {
 class Configuration;
@@ -53,49 +54,96 @@ class RecursiveSplitter;
 ///
 class TrackCheck : public FilterBase,
     private util::ObjectCounter<TrackCheck> {
+  enum Direction { FORWARD, BACKWARD, NUM_DIRECTIONS };
+
+  /// \brief Results of cross-checking an observation with another (a "buddy").
+  struct CheckResults {
+    CheckResults() :
+      isBuddyDistinct(false),
+      speedCheckResult(TrackCheckUtils::CheckResult::SKIPPED),
+      climbRateCheckResult(TrackCheckUtils::CheckResult::SKIPPED) {}
+
+    bool isBuddyDistinct;
+    TrackCheckUtils::CheckResult speedCheckResult;
+    TrackCheckUtils::CheckResult climbRateCheckResult;
+  };
+
+  static const int NO_PREVIOUS_SWEEP = -1;
+
+  struct ObsGroupPressureLocationTime {
+    TrackCheckUtils::ObsGroupLocationTimes locationTimes;
+    std::vector<float> pressures;
+  };
+
+  ObsGroupPressureLocationTime collectObsPressuresLocationsTimes() const;
  public:
-  static const std::string classname() {return "ufo::TrackCheck";}
+  static const std::string classname() { return "ufo::TrackCheck"; }
 
   TrackCheck(ioda::ObsSpace &obsdb, const eckit::Configuration &config,
              boost::shared_ptr<ioda::ObsDataVector<int> > flags,
              boost::shared_ptr<ioda::ObsDataVector<float> > obserr);
 
   ~TrackCheck() override;
-
  private:
-  enum class SweepResult {NO_MORE_SWEEPS_REQUIRED, ANOTHER_SWEEP_REQUIRED};
-  struct ObsData;
-  class TrackObservation;
+  /// \brief Attributes of an observation belonging to a track.
+  class TrackObservation {
+   public:
+    TrackObservation(float latitude, float longitude, const util::DateTime &time, float pressure);
+    float pressure() const { return pressure_; }
+    bool rejectedInPreviousSweep() const { return rejectedInPreviousSweep_; }
+    bool rejectedBeforePreviousSweep() const { return rejectedBeforePreviousSweep_; }
+    bool rejected() const {
+      return rejectedInPreviousSweep_ || rejectedBeforePreviousSweep_;
+    }
+    int numNeighborsVisitedInPreviousSweep(Direction dir) const {
+      return numNeighborsVisitedInPreviousSweep_[dir];
+    }
+    void setNumNeighborsVisitedInPreviousSweep(Direction dir, int num) {
+      numNeighborsVisitedInPreviousSweep_[dir] = num;
+    }
+
+    /// Estimates the instantaneous speed and climb rate by comparing this observation against
+    /// \p buddyObs. Checks if these estimates are in the accepted ranges and if the two observations
+    /// are far enough from each other to be considered "distinct".
+    ///
+    /// \param buddyObs Observation to compare against.
+    /// \param options Track check options.
+    /// \param maxValidSpeedAtPressure
+    ///   Function mapping air pressure (in Pa) to the maximum realistic speed (in m/s).
+    /// \param referencePressure
+    ///   Pressure at which the maximum speed should be evaluated.
+    ///
+    /// \returns An object enapsulating the check results.
+    CheckResults checkAgainstBuddy(const TrackObservation &buddyObs,
+                                   const TrackCheckParameters &options,
+                                   const PiecewiseLinearInterpolation &maxValidSpeedAtPressure,
+                                   float referencePressure) const;
+    void registerCheckResults(const CheckResults &result);
+    void unregisterCheckResults(const CheckResults &result);
+    void registerSweepOutcome(bool rejectedInSweep);
+    float getFailedChecksFraction();
+
+   private:
+    TrackCheckUtils::ObsLocationTime obsLocationTime_;
+    TrackCheckUtils::CheckCounter checkCounter_;
+    float pressure_;
+    bool rejectedInPreviousSweep_;
+    bool rejectedBeforePreviousSweep_;
+    int numNeighborsVisitedInPreviousSweep_[NUM_DIRECTIONS];
+  };
+
+  void flagRejectedTrackObservations(
+      std::vector<size_t>::const_iterator trackObsIndicesBegin,
+      std::vector<size_t>::const_iterator trackObsIndicesEnd,
+      const std::vector<size_t> &validObsIds,
+      const std::vector<TrackObservation> &trackObservations,
+      std::vector<bool> &isRejected) const;
 
   void print(std::ostream &) const override;
   void applyFilter(const std::vector<bool> &, const Variables &,
                    std::vector<std::vector<bool>> &) const override;
   int qcFlag() const override {return QCflags::track;}
 
-  std::vector<size_t> getValidObservationIds(const std::vector<bool> &apply) const;
-
-  void groupObservationsByStation(const std::vector<size_t> &validObsIds,
-                                  RecursiveSplitter &splitter) const;
-
-  void groupObservationsByRecordNumber(const std::vector<size_t> &validObsIds,
-                                       RecursiveSplitter &splitter) const;
-
-  void groupObservationsByVariable(const Variable &variable,
-                                   const std::vector<size_t> &validObsIds,
-                                   RecursiveSplitter &splitter) const;
-
-  template <typename VariableType>
-  void groupObservationsByTypedVariable(const Variable &variable,
-                                        const std::vector<size_t> &validObsIds,
-                                        RecursiveSplitter &splitter) const;
-
-  void sortTracksChronologically(const std::vector<size_t> &validObsIds,
-                                 RecursiveSplitter &splitter) const;
-
-  ObsData collectObsData() const;
-
-  void checkTracks(const std::vector<size_t> &validObsIds,
-                   RecursiveSplitter &splitter) const;
 
   /// Returns an interpolator mapping pressures (in Pa) to maximum accepted speeds (in km/s).
   PiecewiseLinearInterpolation makeMaxSpeedByPressureInterpolation() const;
@@ -104,7 +152,7 @@ class TrackCheck : public FilterBase,
       std::vector<size_t>::const_iterator trackObsIndicesBegin,
       std::vector<size_t>::const_iterator trackObsIndicesEnd,
       const std::vector<size_t> &validObsIds,
-      const ObsData &obsData,
+      const ObsGroupPressureLocationTime &obsPressureLoc,
       const PiecewiseLinearInterpolation &maxSpeedByPressure,
       std::vector<bool> &isRejected) const;
 
@@ -112,7 +160,7 @@ class TrackCheck : public FilterBase,
       std::vector<size_t>::const_iterator trackObsIndicesBegin,
       std::vector<size_t>::const_iterator trackObsIndicesEnd,
       const std::vector<size_t> &validObsIds,
-      const ObsData &obsData) const;
+      const ObsGroupPressureLocationTime &obsPressureLoc) const;
 
   /// Iterate once over all observations in \p trackObservations, rejecting those inconsistent
   /// with nearby observations.
@@ -124,20 +172,10 @@ class TrackCheck : public FilterBase,
   /// \param[inout] workspace
   ///   A vector used internally by the function, passed by parameter to avoid repeated memory
   ///   allocations and deallocations.
-  SweepResult sweepOverObservations(
+  TrackCheckUtils::SweepResult sweepOverObservations(
       std::vector<TrackObservation> &trackObservations,
       const PiecewiseLinearInterpolation &maxValidSpeedAtPressure,
       std::vector<float> &workspace) const;
-
-  void flagRejectedTrackObservations(
-      std::vector<size_t>::const_iterator trackObsIndicesBegin,
-      std::vector<size_t>::const_iterator trackObsIndicesEnd,
-      const std::vector<size_t> &validObsIds,
-      const std::vector<TrackObservation> &TrackObservation,
-      std::vector<bool> &isRejected) const;
-
-  void flagRejectedObservations(const std::vector<bool> &isRejected,
-                                std::vector<std::vector<bool> > &flagged) const;
 
  private:
   std::unique_ptr<TrackCheckParameters> options_;
