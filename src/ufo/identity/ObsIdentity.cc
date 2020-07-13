@@ -27,8 +27,7 @@ ObsIdentity::ObsIdentity(const ioda::ObsSpace & odb,
                          const eckit::Configuration & config)
   : ObsOperatorBase(odb, config), keyOperObsIdentity_(0), odb_(odb), varin_()
 {
-  const eckit::Configuration * configc = &config;
-  ufo_identity_setup_f90(keyOperObsIdentity_, &configc, odb.obsvariables(), varin_);
+  ufo_identity_setup_f90(keyOperObsIdentity_, config, odb.obsvariables(), varin_);
 
   oops::Log::trace() << "ObsIdentity created." << std::endl;
 }

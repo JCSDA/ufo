@@ -30,9 +30,8 @@ ObsGnssroRefTLAD::ObsGnssroRefTLAD(const ioda::ObsSpace & odb, const eckit::Conf
   : keyOperGnssroRef_(0), odb_(odb), varin_()
 {
   const eckit::LocalConfiguration obsOptions(config, "ObsOptions");
-  const eckit::Configuration * configc = &obsOptions;
 
-  ufo_gnssro_ref_tlad_setup_f90(keyOperGnssroRef_, &configc);
+  ufo_gnssro_ref_tlad_setup_f90(keyOperGnssroRef_, obsOptions);
   const std::vector<std::string> vv{"air_temperature", "specific_humidity", "air_pressure"};
 
   varin_.reset(new oops::Variables(vv));

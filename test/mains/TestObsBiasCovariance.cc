@@ -7,10 +7,10 @@
 
 #include "oops/runs/Run.h"
 #include "test/interface/ObsAuxCovariance.h"
-#include "ufo/UfoTrait.h"
+#include "ufo/ObsTraits.h"
 
 int main(int argc,  char ** argv) {
   oops::Run run(argc, argv);
-  test::ObsAuxCovariance<ufo::UfoTrait> tests;
+  test::ObsAuxCovariance<ufo::ObsTraits> tests;
   return run.execute(tests);
 }

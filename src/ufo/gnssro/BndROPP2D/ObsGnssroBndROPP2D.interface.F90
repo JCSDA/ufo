@@ -34,9 +34,9 @@ contains
   
 subroutine ufo_gnssro_bndropp2d_setup_c(c_key_self, c_conf,c_size) bind(c,name='ufo_gnssro_bndropp2d_setup_f90')
 implicit none
-integer(c_int), intent(inout) :: c_key_self
-type(c_ptr),    intent(in)    :: c_conf
-integer(c_int), intent(in)    :: c_size  ! obsspace vector length
+integer(c_int), intent(inout)  :: c_key_self
+type(c_ptr), value, intent(in) :: c_conf
+integer(c_int), intent(in)     :: c_size  ! obsspace vector length
 
 type(ufo_gnssro_BndROPP2D), pointer :: self
 type(fckit_configuration) :: f_conf
@@ -86,7 +86,7 @@ implicit none
 integer(c_int),     intent(in)     :: c_key_self  ! operator key
 integer(c_int),     intent(inout)  :: c_key_locs  ! location key
 type(c_ptr), value, intent(in)     :: c_obsspace
-type(c_ptr),        intent(in)     :: c_t1, c_t2
+type(c_ptr), value, intent(in)     :: c_t1, c_t2
 
 type(ufo_locs),              pointer :: locs
 type(ufo_gnssro_BndROPP2D),  pointer :: self

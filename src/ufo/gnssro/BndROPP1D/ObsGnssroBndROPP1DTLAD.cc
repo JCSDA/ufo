@@ -31,9 +31,8 @@ ObsGnssroBndROPP1DTLAD::ObsGnssroBndROPP1DTLAD(const ioda::ObsSpace & odb,
   : keyOperGnssroBndROPP1D_(0), odb_(odb), varin_()
 {
   const eckit::LocalConfiguration obsOptions(config, "ObsOptions");
-  const eckit::Configuration * configc = &obsOptions;
 
-  ufo_gnssro_bndropp1d_tlad_setup_f90(keyOperGnssroBndROPP1D_, &configc);
+  ufo_gnssro_bndropp1d_tlad_setup_f90(keyOperGnssroBndROPP1D_, obsOptions);
   const std::vector<std::string> vv{"air_temperature", "specific_humidity", "air_pressure"};
 
   varin_.reset(new oops::Variables(vv));

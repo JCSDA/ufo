@@ -24,7 +24,6 @@
 #include "ufo/filters/processWhere.h"
 #include "ufo/filters/QCflags.h"
 #include "ufo/GeoVaLs.h"
-#include "ufo/UfoTrait.h"
 
 namespace ufo {
 

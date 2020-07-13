@@ -18,7 +18,6 @@
 #include "oops/util/Logger.h"
 #include "oops/util/missingValues.h"
 #include "ufo/filters/QCflags.h"
-#include "ufo/UfoTrait.h"
 
 namespace ufo {
 

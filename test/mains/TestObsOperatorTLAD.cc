@@ -7,10 +7,10 @@
 
 #include "oops/runs/Run.h"
 #include "test/interface/LinearObsOperator.h"
-#include "ufo/UfoTrait.h"
+#include "ufo/ObsTraits.h"
 
 int main(int argc,  char ** argv) {
   oops::Run run(argc, argv);
-  test::LinearObsOperator<ufo::UfoTrait> tests;
+  test::LinearObsOperator<ufo::ObsTraits> tests;
   return run.execute(tests);
 }

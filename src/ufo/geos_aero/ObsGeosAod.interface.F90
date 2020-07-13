@@ -39,7 +39,7 @@ use oops_variables_mod
 use ufo_vars_mod
 implicit none
 integer(c_int), intent(inout) :: c_key_self
-type(c_ptr),    intent(in)    :: c_conf
+type(c_ptr), intent(in), value :: c_conf
 type(ufo_geosaod), pointer :: self
 type(c_ptr), intent(in), value :: c_obsvars !< variables to be simulated
 type(c_ptr), intent(in), value :: c_geovars !< variables requested from the model

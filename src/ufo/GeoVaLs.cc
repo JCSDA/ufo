@@ -99,28 +99,6 @@ GeoVaLs::~GeoVaLs() {
   oops::Log::trace() << "GeoVaLs destructor done" << std::endl;
 }
 // -----------------------------------------------------------------------------
-/*! \brief Analytic initialization for GeoVaLs
- *
- * \details This ufo::GeoVaLs constructor was introduced in May, 2018 for use with
- * the interpolation test.   If "analytic_init" is not specified in the
- * configuration then this does nothing.  If "analytic_init" **is** specified, then
- * the values are replaced by values computed directly from one of several idealized
- * analytic states.
- *
- * \date May, 2018: Created (M. Miesch, JCSDA)
- * \date June, 2018: Split off from constructor into independent method
- *                   (M. Miesch, JCSDA)
- */
-void GeoVaLs::analytic_init(const Locations & locs,
-                            const eckit::Configuration & config)
-{
-  oops::Log::trace() << "GeoVaLs::analytic_init starting" << std::endl;
-  if (config.has("analytic_init")) {
-      ufo_geovals_analytic_init_f90(keyGVL_, locs.toFortran(), config);
-  }
-  oops::Log::trace() << "GeoVaLs::analytic_init done" << std::endl;
-}
-// -----------------------------------------------------------------------------
 /*! \brief Zero out the GeoVaLs */
 void GeoVaLs::zero() {
   oops::Log::trace() << "GeoVaLs::zero starting" << std::endl;

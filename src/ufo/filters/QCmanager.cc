@@ -14,12 +14,12 @@
 
 #include "ioda/ObsDataVector.h"
 #include "ioda/ObsSpace.h"
+#include "ioda/ObsVector.h"
 #include "oops/base/Variables.h"
 #include "oops/interface/ObsFilter.h"
 #include "oops/util/Logger.h"
 #include "oops/util/missingValues.h"
 #include "ufo/filters/QCflags.h"
-#include "ufo/UfoTrait.h"
 
 namespace ufo {
 

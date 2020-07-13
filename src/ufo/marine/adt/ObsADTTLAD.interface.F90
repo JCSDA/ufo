@@ -32,8 +32,8 @@ contains
 
 subroutine ufo_adt_tlad_setup_c(c_key_self, c_conf) bind(c,name='ufo_adt_tlad_setup_f90')
 implicit none
-integer(c_int), intent(inout) :: c_key_self
-type(c_ptr), intent(in)    :: c_conf
+integer(c_int), intent(inout)  :: c_key_self
+type(c_ptr), value, intent(in) :: c_conf
     
 type(ufo_adt_tlad), pointer :: self
 type(fckit_configuration) :: f_conf

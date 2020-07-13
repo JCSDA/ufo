@@ -31,7 +31,6 @@ ObsGnssroBndNBAM::ObsGnssroBndNBAM(const ioda::ObsSpace & odb, const eckit::Conf
   std::vector<std::string> vv{"air_temperature", "specific_humidity"};
 
   const eckit::LocalConfiguration obsOptions(config, "ObsOptions");
-  const eckit::Configuration * configc = &obsOptions;
 
   std::string vertlayer;
 
@@ -47,7 +46,7 @@ ObsGnssroBndNBAM::ObsGnssroBndNBAM(const ioda::ObsSpace & odb, const eckit::Conf
 
   varin_.reset(new oops::Variables(vv));
 
-  ufo_gnssro_bndnbam_setup_f90(keyOperGnssroBndNBAM_, &configc);
+  ufo_gnssro_bndnbam_setup_f90(keyOperGnssroBndNBAM_, obsOptions);
   oops::Log::trace() << "ObsGnssroBndNBAM created." << std::endl;
 }
 

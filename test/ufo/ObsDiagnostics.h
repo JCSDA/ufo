@@ -18,7 +18,7 @@
 #include "eckit/testing/Test.h"
 #include "ioda/ObsSpace.h"
 #include "ioda/ObsVector.h"
-#include "oops/../test/TestEnvironment.h"
+#include "test/TestEnvironment.h"
 #include "oops/base/Variables.h"
 #include "oops/parallel/mpi/mpi.h"
 #include "oops/runs/Test.h"

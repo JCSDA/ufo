@@ -37,10 +37,7 @@ ObsRadianceRTTOVTLAD::ObsRadianceRTTOVTLAD(const ioda::ObsSpace & odb,
   const oops::Variables & observed = odb.obsvariables();
   channels_ = observed.channels();
 
-//  const eckit::LocalConfiguration obsOptions(config, "ObsOptions");
-//  const eckit::Configuration * configc = &obsOptions;
-  const eckit::Configuration * configc = &config;
-  ufo_radiancerttov_tlad_setup_f90(keyOperRadianceRTTOV_, &configc);
+  ufo_radiancerttov_tlad_setup_f90(keyOperRadianceRTTOV_, config);
   oops::Log::trace() << "ObsRadianceRTTOVTLAD created" << std::endl;
 }
 

@@ -34,8 +34,7 @@ ObsSeaIceThickness::ObsSeaIceThickness(const ioda::ObsSpace & odb,
     vvin.push_back("sea_ice_category_snow_thickness");
   }
   varin_.reset(new oops::Variables(vvin));
-  const eckit::Configuration * configc = &config;
-  ufo_seaicethickness_setup_f90(keyOper_, &configc, odb.obsvariables());
+  ufo_seaicethickness_setup_f90(keyOper_, config, odb.obsvariables());
   oops::Log::trace() << "ObsSeaIceThickness created." << std::endl;
 }
 

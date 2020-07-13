@@ -144,8 +144,14 @@ void Gaussian_Thinning::groupObservationsBySpatialLocation(
 
   const std::vector<float> lat = getGlobalVariableValues<float>(
         obsdb_, obsDistribution, "latitude", "MetaData");
-  const std::vector<float> lon = getGlobalVariableValues<float>(
+  std::vector<float> lon = getGlobalVariableValues<float>(
         obsdb_, obsDistribution, "longitude", "MetaData");
+  // Longitudes will typically be either in the [-180, 180] degree range or in the [0, 360]
+  // degree range. The spatial bin selector is written with the latter convention in mind,
+  // so let's shift any negative longitudes up by 360 degrees.
+  for (float &longitude : lon)
+    if (longitude < 0)
+      longitude += 360;
 
   std::vector<size_t> latBins;
   std::vector<size_t> lonBins;

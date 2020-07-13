@@ -35,8 +35,7 @@ ObsCoolSkin::ObsCoolSkin(const ioda::ObsSpace & odb, const eckit::Configuration 
                                       "friction_velocity_over_water"};
   varin_.reset(new oops::Variables(vvin));
 
-  const eckit::Configuration * configc = &config;
-  ufo_CoolSkin_setup_f90(keyOper_, &configc);
+  ufo_CoolSkin_setup_f90(keyOper_, config);
   oops::Log::trace() << "ObsCoolSkin created." << std::endl;
 }
 

@@ -32,13 +32,12 @@ ObsGnssroBndROPP2D::ObsGnssroBndROPP2D(const ioda::ObsSpace & odb,
   : ObsOperatorBase(odb, config), keyOperGnssroBndROPP2D_(0), odb_(odb), varin_()
 {
   const std::vector<std::string> vv{"air_temperature", "specific_humidity", "air_pressure",
-                                    "geopotential_height", "surface_geopotential_height"};
+                                    "geopotential_height", "surface_altitude"};
   varin_.reset(new oops::Variables(vv));
 
   const eckit::LocalConfiguration obsOptions(config, "ObsOptions");
-  const eckit::Configuration * configc = &obsOptions;
 
-  ufo_gnssro_bndropp2d_setup_f90(keyOperGnssroBndROPP2D_, &configc, odb_.nlocs());
+  ufo_gnssro_bndropp2d_setup_f90(keyOperGnssroBndROPP2D_, obsOptions, odb_.nlocs());
   oops::Log::trace() << "ObsGnssroBndROPP2D created." << std::endl;
 }
 
@@ -63,10 +62,8 @@ std::unique_ptr<Locations> ObsGnssroBndROPP2D::locations(const util::DateTime & 
   std::unique_ptr<Locations> locs(new Locations(odb_.comm()));
 
   int keylocs = locs->toFortran();
-  const util::DateTime * p1 = &t1;
-  const util::DateTime * p2 = &t2;
 
-  ufo_gnssro_2d_locs_init_f90(keyOperGnssroBndROPP2D_, keylocs, odb_, &p1, &p2);
+  ufo_gnssro_2d_locs_init_f90(keyOperGnssroBndROPP2D_, keylocs, odb_, t1, t2);
 
   return locs;
 }

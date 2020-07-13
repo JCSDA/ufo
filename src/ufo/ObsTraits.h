@@ -1,18 +1,19 @@
 /*
- * (C) Copyright 2017-2018 UCAR
+ * (C) Copyright 2017-2020 UCAR
  * 
  * This software is licensed under the terms of the Apache Licence Version 2.0
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
  */
 
-#ifndef UFO_UFOTRAIT_H_
-#define UFO_UFOTRAIT_H_
+#ifndef UFO_OBSTRAITS_H_
+#define UFO_OBSTRAITS_H_
 
 #include <string>
 
 #include "ioda/ObsDataVector.h"
 #include "ioda/ObsSpace.h"
 #include "ioda/ObsVector.h"
+#include "AnalyticInit.h"
 #include "Locations.h"
 #include "GeoVaLs.h"
 #include "ObsBias.h"
@@ -24,9 +25,10 @@
 
 namespace ufo {
 
-struct UfoTrait {
-  static std::string name() {return "UFO";}
+struct ObsTraits {
+  static std::string name() {return "UFO and IODA observations";}
 
+  typedef ufo::AnalyticInit        AnalyticInit;
   typedef ufo::GeoVaLs             GeoVaLs;
   typedef ufo::ObsDiagnostics      ObsDiagnostics;
   typedef ufo::Locations           Locations;
@@ -44,4 +46,4 @@ struct UfoTrait {
 
 }  // namespace ufo
 
-#endif  // UFO_UFOTRAIT_H_
+#endif  // UFO_OBSTRAITS_H_

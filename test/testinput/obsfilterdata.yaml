@@ -14,6 +14,8 @@ ObsFilterData:
     integer variables:
     - name: eastward_wind@ObsType
     - name: northward_wind@ObsType
+    string variables:
+    - name: station_id@MetaData
   GeoVaLs:
     filename: Data/satwind_geoval_2018041500_m.nc4
     variables:

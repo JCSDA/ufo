@@ -74,7 +74,6 @@ class GeoVaLs : public util::Printable,
   void put(const std::vector<double> &, const std::string &, const int) const;
 
   void read(const eckit::Configuration &, const ioda::ObsSpace &);
-  void analytic_init(const Locations &, const eckit::Configuration &);
   void write(const eckit::Configuration &) const;
 
   int & toFortran() {return keyGVL_;}
