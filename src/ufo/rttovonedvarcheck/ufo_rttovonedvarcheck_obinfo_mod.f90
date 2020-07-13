@@ -51,7 +51,7 @@ contains
 !-------------------------------------------------------------------------------
 !> Initialize observation object
 !!
-!! \author M. Cooke (Met Office)
+!! \author Met Office
 !!
 !! \date 09/06/2020: Created
 !!
@@ -98,7 +98,7 @@ end subroutine ufo_rttovonedvarcheck_InitObInfo
 !------------------------------------------------------------------------------
 !> Initialize the emissivity arrays within the single obs structure
 !!
-!! \author M. Cooke (Met Office)
+!! \author Met Office
 !!
 !! \date 09/06/2020: Created
 !!
@@ -145,7 +145,7 @@ end subroutine ufo_rttovonedvarcheck_InitEmiss
 !------------------------------------------------------------------------------
 !> Delete the single observation object
 !!
-!! \author M. Cooke (Met Office)
+!! \author Met Office
 !!
 !! \date 09/06/2020: Created
 !!

@@ -68,7 +68,7 @@ contains
 !!
 !! Setup the profile index which requires the bmatrix object.
 !!
-!! \author M. Cooke (Met Office)
+!! \author Met Office
 !!
 !! \date 09/06/2020: Created
 !!
@@ -221,7 +221,7 @@ end subroutine ufo_rttovonedvarcheck_profindex_setup
 !!
 !! \details Reset profile index
 !!
-!! \author M. Cooke (Met Office)
+!! \author Met Office
 !!
 !! \date 09/06/2020: Created
 !!

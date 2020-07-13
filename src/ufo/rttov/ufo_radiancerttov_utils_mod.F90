@@ -131,6 +131,9 @@ real(kind_real), allocatable :: TmpVar(:)
 real, parameter :: q_mixratio_to_ppmv  = 1.60771704e+3 ! g/kg -> ppmv
 character(255) :: message
 logical :: variable_present
+logical :: model_surface_present
+
+write(*,*) "load_atm_data_rttov starting"
 
 if(PRESENT(ob_info)) then
   nlocs_total = 1
@@ -254,10 +257,12 @@ varname = "skin_temperature"
 call ufo_geovals_get_var(geovals, varname, geoval)
 profiles(1:nprofiles)%skin%t = geoval%vals(1,prof_start:prof_start + nprofiles - 1)
 
+write(*,*) "load_atm_data_rttov: getting water_type"
 varname = "water_type"
 call ufo_geovals_get_var(geovals, varname, geoval)
 profiles(1:nprofiles)%skin%watertype = geoval%vals(1,prof_start:prof_start + nprofiles - 1)
 
+write(*,*) "load_atm_data_rttov: getting surface_type"
 varname = "surface_type"
 call ufo_geovals_get_var(geovals, varname, geoval)
 profiles(1:nprofiles)%skin%surftype = geoval%vals(1,prof_start:prof_start + nprofiles - 1)
@@ -306,6 +311,7 @@ end do
 ! call rttov_get_emissivity()
 
 if(PRESENT(ob_info)) then
+  write(*,*) "load_atm_data_rttov: getting from ob info"
   profiles(1) % elevation = ob_info % elevation / 1000.0 ! m -> km
   profiles(1) % latitude = ob_info % latitude
   profiles(1) % longitude = ob_info % longitude
@@ -320,15 +326,28 @@ else
   allocate(TmpVar(nprofiles))
 
   variable_present = obsspace_has(obss, "MetaData", "elevation")
+  write(*,*) "load_atm_data_rttov: elevation = ",variable_present
   if (variable_present) then
     call obsspace_get_db(obss, "MetaData", "elevation", TmpVar(prof_start:prof_start + nprofiles - 1) )
+    write(*,*) "load_atm_data_rttov: elevation tmpvar = ", TmpVar(prof_start:prof_start + nprofiles - 1)
     profiles(1:nprofiles)%elevation = TmpVar(prof_start:prof_start + nprofiles - 1) / 1000.0 !m -> km for RTTOV
   else
-    write(message,'(A)') &
-      'MetaData elevation not in database: check implicit filtering'
-    call fckit_log%info(message)
+    model_surface_present = obsspace_has(obss, "MetaData", "model_surface")
+    write(*,*) "load_atm_data_rttov: model_surface_present = ",model_surface_present
+    write(*,*) "load_atm_data_rttov: nprofiles = ",nprofiles
+    if (model_surface_present) then
+      call obsspace_get_db(obss, "MetaData", "model_surface", TmpVar(prof_start:prof_start + nprofiles - 1) )
+      write(*,*) "load_atm_data_rttov: model_surface for elevation = "
+      profiles(1:nprofiles)%elevation = TmpVar(prof_start:prof_start + nprofiles - 1) / 1000.0 !m -> km for RTTOV
+    else
+      write(message,'(A)') &
+        'MetaData elevation and model surface not in database: setting to zero'
+      call fckit_log%info(message)
+      profiles(1:nprofiles)%elevation = 0.0
+    end if
   end if
 
+  write(*,*) "load_atm_data_rttov: getting latitude"
   variable_present = obsspace_has(obss, "MetaData", "latitude")
   if (variable_present) then
     call obsspace_get_db(obss, "MetaData", "latitude", TmpVar(prof_start:prof_start + nprofiles - 1) )
@@ -339,6 +358,7 @@ else
     call fckit_log%info(message)
   end if
 
+  write(*,*) "load_atm_data_rttov: getting longitude"
   variable_present = obsspace_has(obss, "MetaData", "longitude")
   if (variable_present) then
     call obsspace_get_db(obss, "MetaData", "longitude", TmpVar(prof_start:prof_start + nprofiles - 1) )
@@ -350,6 +370,8 @@ else
   end if
 
 end if
+
+write(*,*) "load_atm_data_rttov complete"
 
 end subroutine load_atm_data_rttov
 
@@ -375,6 +397,8 @@ real(kind_real), allocatable :: TmpVar(:)
 integer :: prof_start
 integer :: nlocs_total, nprofiles
 integer :: nlevels
+
+write(*,*) "load_geom_data_rttov starting"
 
 if(PRESENT(prof_start1)) then
   prof_start = prof_start1
@@ -416,6 +440,8 @@ else
   deallocate(TmpVar)
 
 end if
+
+write(*,*) "load_geom_data_rttov finished"
 
 end subroutine load_geom_data_rttov
 

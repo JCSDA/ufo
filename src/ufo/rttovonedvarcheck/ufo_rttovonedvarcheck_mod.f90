@@ -39,7 +39,7 @@ contains
 !!
 !! \details Makes a call to the main setup routine.
 !!
-!! \author M. Cooke (Met Office)
+!! \author Met Office
 !!
 !! \date 09/06/2020: Created
 !!
@@ -64,7 +64,7 @@ end subroutine ufo_rttovonedvarcheck_create
 ! ------------------------------------------------------------------------------
 !> Delete the main rttov onedvar object in Fortran
 !!
-!! \author M. Cooke (Met Office)
+!! \author Met Office
 !!
 !! \date 09/06/2020: Created
 !!
@@ -86,7 +86,7 @@ end subroutine ufo_rttovonedvarcheck_delete
 !! This routine is called from the c++ apply method.  The filter performs 
 !! a 1D-Var minimization using rttov
 !!
-!! \author M. Cooke (Met Office)
+!! \author Met Office
 !!
 !! \date 09/06/2020: Created
 !!
@@ -136,6 +136,8 @@ subroutine ufo_rttovonedvarcheck_apply(self, vars, geovals, apply)
   logical                            :: file_exists     ! check if a file exists logical
   logical                            :: onedvar_success
   logical                            :: cloud_retrieval = .false.
+  logical                            :: variable_present = .false.
+  logical                            :: model_surface_present = .false.
 
   ! ------------------------------------------
   ! Setup
@@ -189,11 +191,23 @@ subroutine ufo_rttovonedvarcheck_apply(self, vars, geovals, apply)
 
   call obsspace_get_db(self%obsdb, "MetaData", "latitude", lat(:))
   call obsspace_get_db(self%obsdb, "MetaData", "longitude", lon(:))
-  call obsspace_get_db(self%obsdb, "MetaData", "elevation", elevation(:))
   call obsspace_get_db(self%obsdb, "MetaData", "sensor_zenith_angle", sat_zen(:))
   call obsspace_get_db(self%obsdb, "MetaData", "sensor_azimuth_angle", sat_azi(:))
   call obsspace_get_db(self%obsdb, "MetaData", "solar_zenith_angle", sol_zen(:))
   call obsspace_get_db(self%obsdb, "MetaData", "solar_azimuth_angle", sol_azi(:))
+
+  ! Read in elevation for all obs
+  variable_present = obsspace_has(self%obsdb, "MetaData", "elevation")
+  if (variable_present) then
+    call obsspace_get_db(self%obsdb, "MetaData", "elevation", elevation(:))
+  else
+    model_surface_present = obsspace_has(self%obsdb, "MetaData", "model_surface")
+    if (model_surface_present) then
+      call obsspace_get_db(self%obsdb, "MetaData", "model_surface", elevation(:))
+    else
+      elevation(:) = 0.0
+    end if
+  end if
 
   ! Setup full B matrix object
   call full_bmatrix % setup(self % retrieval_variables, self % b_matrix_path, self % qtotal)

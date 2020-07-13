@@ -40,7 +40,7 @@ namespace ufo {
 //! obsspace for use in 4D-Var.  The code is based on the Met Office 1D-Var scheme and thus
 //! is predominently in Fortran.
 //!
-//! \author M. Cooke (Met Office)
+//! \author Met Office
 //!
 //! \date 09/06/2020
 //!

@@ -38,7 +38,7 @@ subroutine ufo_rttovonedvarcheck_create_c(c_self, c_obspace, c_conf, c_nchan, &
 
 !> \brief Interface to the Fortran create method
 !!
-!! \author M. Cooke (Met Office)
+!! \author Met Office
 !!
 !! \date 09/06/2020: Created
 !!
@@ -68,7 +68,7 @@ subroutine ufo_rttovonedvarcheck_delete_c(c_self) &
 
 !> \brief Interface to the Fortran delete method
 !!
-!! \author M. Cooke (Met Office)
+!! \author Met Office
 !!
 !! \date 09/06/2020: Created
 !!
@@ -91,7 +91,7 @@ subroutine ufo_rttovonedvarcheck_apply_c(c_self, c_vars, c_geovals, c_nobs, c_ap
 
 !> \brief Interface to filter apply method
 !!
-!! \author M. Cooke (Met Office)
+!! \author Met Office
 !!
 !! \date 09/06/2020: Created
 !!

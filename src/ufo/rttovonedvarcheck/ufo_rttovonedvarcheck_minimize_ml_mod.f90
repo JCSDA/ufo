@@ -72,7 +72,7 @@ contains
 !!   Eyre, Inversion of cloudy satellite sounding radiances by nonlinear
 !!   optimal estimation. I: Theory and simulation for TOVS,QJ,July 89.
 !!
-!! \author M. Cooke (Met Office)
+!! \author Met Office
 !!
 !! \date 09/06/2020: Created
 !!
@@ -418,7 +418,7 @@ end subroutine ufo_rttovonedvarcheck_minimize_ml
 !!   Rodgers, Inverse Methods for Atmospheres: Theory and Practice.  World
 !!            Scientific Publishing, 2000.
 !!
-!! \author M. Cooke (Met Office)
+!! \author Met Office
 !!
 !! \date 09/06/2020: Created
 !!

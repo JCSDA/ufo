@@ -43,7 +43,7 @@ contains
 !! format vector profile. We only copy fields that are being retrieved, as indicated by
 !! the profindex structure.
 !!
-!! \author M. Cooke (Met Office)
+!! \author Met Office
 !!
 !! \date 09/06/2020: Created
 !!
@@ -200,7 +200,7 @@ end subroutine ufo_rttovonedvarcheck_GeoVaLs2ProfVec
 !! Convert profile data to the GeoVaLs (and ob_info) format.  We only copy fields 
 !! that are being retrieved, as indicated by the profindex structure.
 !!
-!! \author M. Cooke (Met Office)
+!! \author Met Office
 !!
 !! \date 09/06/2020: Created
 !!
@@ -423,7 +423,7 @@ end subroutine ufo_rttovonedvarcheck_ProfVec2GeoVaLs
 !! only check included at the moment if the first calculation for 
 !! q total.
 !!
-!! \author M. Cooke (Met Office)
+!! \author Met Office
 !!
 !! \date 09/06/2020: Created
 !!
@@ -581,7 +581,7 @@ end subroutine ufo_rttovonedvarcheck_check_geovals
 !! Caculate the cost function from the input delta's and error
 !! covariances.
 !!
-!! \author M. Cooke (Met Office)
+!! \author Met Office
 !!
 !! \date 09/06/2020: Created
 !!
@@ -650,7 +650,7 @@ end subroutine ufo_rttovonedvarcheck_CostFunction
 !! based parametrization based on aircraft data Ref: Jones DC Reading phdthesis
 !! p126
 !!
-!! \author M. Cooke (Met Office)
+!! \author Met Office
 !!
 !! \date 09/06/2020: Created
 !!
@@ -903,7 +903,7 @@ end subroutine ufo_rttovonedvarcheck_Qsplit
 !! Method: <br>
 !!   uses lookup tables to find eSAT, calculates qSAT directly from that.
 !!
-!! \author M. Cooke (Met Office)
+!! \author Met Office
 !!
 !! \date 09/06/2020: Created
 !!
@@ -1333,7 +1333,7 @@ end subroutine ufo_rttovonedvarcheck_Qsat
 !! Method: <br>
 !!   uses lookup tables to find eSAT, calculates qSAT directly from that.
 !!
-!! \author M. Cooke (Met Office)
+!! \author Met Office
 !!
 !! \date 09/06/2020: Created
 !!
@@ -1744,7 +1744,7 @@ end subroutine ufo_rttovonedvarcheck_QsatWat
 !!
 !! Check humidity and temperature profiles.
 !!
-!! \author M. Cooke (Met Office)
+!! \author Met Office
 !!
 !! \date 09/06/2020: Created
 !!
@@ -2003,7 +2003,7 @@ end subroutine ufo_rttovonedvarcheck_CheckIteration
 !! and the ice water path are sensible. if they are beyond sensible values stop
 !! 1dvar and reject profile
 !!
-!! \author M. Cooke (Met Office)
+!! \author Met Office
 !!
 !! \date 09/06/2020: Created
 !!
@@ -2133,7 +2133,7 @@ end subroutine ufo_rttovonedvarcheck_CheckCloudyIteration
 !! as an error.  U is assumed to be symmetric as only the upper triangle is in
 !! fact used.
 !!
-!! \author M. Cooke (Met Office)
+!! \author Met Office
 !!
 !! \date 09/06/2020: Created
 !!

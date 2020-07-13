@@ -28,7 +28,7 @@ contains
 !------------------------------------------------------------------------------
 !> Get the jacobian used in the 1D-Var.
 !!
-!! \author M. Cooke (Met Office)
+!! \author Met Office
 !!
 !! \date 09/06/2020: Created
 !!
@@ -78,7 +78,7 @@ end  subroutine ufo_rttovonedvarcheck_get_jacobian
 !!
 !! \warning mwemiss and emisspc not implemented yet
 !!
-!! \author M. Cooke (Met Office)
+!! \author Met Office
 !!
 !! \date 09/06/2020: Created
 !!
@@ -327,7 +327,7 @@ end  subroutine ufo_rttovonedvarcheck_GetHmatrixRTTOV
 !!
 !! \details Heritage: Ops_SatRad_PrintHMatrix.f90
 !!
-!! \author M. Cooke (Met Office)
+!! \author Met Office
 !!
 !! \date 09/06/2020: Created
 !!

@@ -64,7 +64,7 @@ contains
 !> Setup the defaults for the main rttovonedvarcheck object and read in the 
 !! contents of the yaml file.
 !!
-!! \author M. Cooke (Met Office)
+!! \author Met Office
 !!
 !! \date 09/06/2020: Created
 !!
@@ -245,7 +245,7 @@ end subroutine ufo_rttovonedvarcheck_setup
 !------------------------------------------------------------------------------
 !> Find a free file unit.
 !!
-!! \author M. Cooke (Met Office)
+!! \author Met Office
 !!
 !! \date 09/06/2020: Created
 !!

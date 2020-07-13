@@ -41,7 +41,7 @@ contains
 ! ------------------------------------------------------------------------------------------------
 !> Routine to read and setup the 1D-Var B-matrix
 !!
-!! \author M. Cooke (Met Office)
+!! \author Met Office
 !!
 !! \date 09/06/2020: Created
 !!
@@ -59,7 +59,7 @@ integer, allocatable          :: fields_in(:) ! Fields_in used to subset b-matri
 real(kind=kind_real)          :: t1,t2        ! Time values for logging
 character(len=max_string)     :: message
 character(len=:), allocatable :: str
-logical                       :: testing = .false.
+logical                       :: testing = .true.
 
 call fckit_log % info("ufo_rttovonedvarcheck_bmatrix_setup start")
 
@@ -97,7 +97,7 @@ end subroutine ufo_rttovonedvarcheck_bmatrix_setup
 !!
 !! \details Met Office OPS Heritage: Ops_SatRad_SquashBmatrix.f90
 !!
-!! \author M. Cooke (Met Office)
+!! \author Met Office
 !!
 !! \date 09/06/2020: Created
 !!
@@ -129,7 +129,7 @@ end subroutine ufo_rttovonedvarcheck_bmatrix_delete
 !!
 !! \details Met Office OPS Heritage: Ops_SatRad_InitBmatrix.f90
 !!
-!! \author M. Cooke (Met Office)
+!! \author Met Office
 !!
 !! \date 09/06/2020: Created
 !!
@@ -200,7 +200,7 @@ end subroutine rttovonedvarcheck_covariance_InitBmatrix
 !! hence no space is allocated. nullification of unused pointers should take
 !! place outside (use the ops_satrad_initbmatrix routine).
 !!
-!! \author M. Cooke (Met Office)
+!! \author Met Office
 !!
 !! \date 09/06/2020: Created
 !!
@@ -540,7 +540,7 @@ end subroutine rttovonedvarcheck_covariance_GetBmatrix
 !! if the the optional parameter matrix is present, it is replaced by
 !! (matrix).a^-1 on exit and a is left unchanged.
 !!
-!! \author M. Cooke (Met Office)
+!! \author Met Office
 !!
 !! \date 09/06/2020: Created
 !!
@@ -654,7 +654,7 @@ end subroutine rttovonedvarcheck_covariance_InvertMatrix
 ! ------------------------------------------------------------------------------------------------
 !> Create a subset of the b-matrix.  Used for testing.
 !!
-!! \author M. Cooke (Met Office)
+!! \author Met Office
 !!
 !! \date 09/06/2020: Created
 !!

@@ -39,7 +39,7 @@ contains
 ! ------------------------------------------------------------------------------
 !> Setup for the r_matrix
 !!
-!! \author M. Cooke (Met Office)
+!! \author Met Office
 !!
 !! \date 09/06/2020: Created
 !!
@@ -87,7 +87,7 @@ end subroutine rmatrix_setup
 ! ------------------------------------------------------------------------------
 !> Delete method for the r_matrix
 !!
-!! \author M. Cooke (Met Office)
+!! \author Met Office
 !!
 !! \date 09/06/2020: Created
 !!
@@ -105,7 +105,7 @@ end subroutine rmatrix_delete
 ! ------------------------------------------------------------------------------
 !> Multiply a vector by the r-matrix
 !!
-!! \author M. Cooke (Met Office)
+!! \author Met Office
 !!
 !! \date 09/06/2020: Created
 !!
@@ -131,7 +131,7 @@ end subroutine rmatrix_multiply
 ! ------------------------------------------------------------------------------
 !> Multiply a matrix by the r-matrix
 !!
-!! \author M. Cooke (Met Office)
+!! \author Met Office
 !!
 !! \date 09/06/2020: Created
 !!
@@ -163,7 +163,7 @@ end subroutine rmatrix_multiply_matrix
 ! ------------------------------------------------------------------------------
 !> Multiply a vector by the inverse of the r-matrix
 !!
-!! \author M. Cooke (Met Office)
+!! \author Met Office
 !!
 !! \date 09/06/2020: Created
 !!
@@ -189,7 +189,7 @@ end subroutine rmatrix_inv_multiply
 ! ------------------------------------------------------------------------------
 !> Multiply a matrix by the inverse of the r-matrix
 !!
-!! \author M. Cooke (Met Office)
+!! \author Met Office
 !!
 !! \date 09/06/2020: Created
 !!
@@ -221,7 +221,7 @@ end subroutine rmatrix_multiply_inv_matrix
 ! ------------------------------------------------------------------------------
 !> Add a matrix to the r-matrix
 !!
-!! \author M. Cooke (Met Office)
+!! \author Met Office
 !!
 !! \date 09/06/2020: Created
 !!
@@ -253,7 +253,7 @@ end subroutine rmatrix_add_to_u
 ! ------------------------------------------------------------------------------
 !> Print the contents of the r-matrix
 !!
-!! \author M. Cooke (Met Office)
+!! \author Met Office
 !!
 !! \date 09/06/2020: Created
 !!

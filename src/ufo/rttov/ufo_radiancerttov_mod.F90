@@ -117,7 +117,7 @@ hofx(:) = 0.0_kind_real
 errorstatus = 0_jpim
 nchans_total = 0
 
-nchan_max_sim = 2500 ! Maximum number of channels to pass to RTTOV to simulate
+nchan_max_sim = 10000 ! Maximum number of channels to pass to RTTOV to simulate
 
 if( .NOT. config_rttov % rttov_is_setup) then
   asw = 1
