@@ -17,9 +17,9 @@
 
 #include "eckit/config/LocalConfiguration.h"
 #include "eckit/testing/Test.h"
-#include "test/TestEnvironment.h"
 #include "oops/base/Variables.h"
 #include "oops/runs/Test.h"
+#include "test/TestEnvironment.h"
 #include "ufo/filters/Variable.h"
 #include "ufo/filters/Variables.h"
 

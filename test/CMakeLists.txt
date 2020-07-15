@@ -391,13 +391,15 @@ ecbuild_add_test( TARGET  test_ufo_geovals
                   SOURCES mains/TestGeoVaLs.cc
                   ARGS    "testinput/geovals.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
-                  LIBS    ufo )
+                  LIBS    ufo 
+                  TEST_DEPENDS ufo_get_ioda_test_data )
 
 ecbuild_add_test( TARGET  test_ufo_locations
                   SOURCES mains/TestLocations.cc
                   ARGS    "testinput/locations.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
-                  LIBS    ufo )
+                  LIBS    ufo
+                  TEST_DEPENDS ufo_get_ioda_test_data )
 
 # Test UFO-specific classes:
 
@@ -405,7 +407,8 @@ ecbuild_add_test( TARGET  test_ufo_obsfilterdata
                   SOURCES mains/TestObsFilterData.cc
                   ARGS    "testinput/obsfilterdata.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
-                  LIBS    ufo )
+                  LIBS    ufo
+                  TEST_DEPENDS ufo_get_ioda_test_data )
 
 ecbuild_add_test( TARGET  test_ufo_variables
                   SOURCES mains/TestVariables.cc
@@ -417,7 +420,8 @@ ecbuild_add_test( TARGET  test_ufo_geovals_spec
                   SOURCES mains/TestGeoVaLsSpec.cc
                   ARGS    "testinput/geovals_spec.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
-                  LIBS    ufo )
+                  LIBS    ufo
+                  TEST_DEPENDS ufo_get_ioda_test_data )
 
 # Test Obs Operators and TLAD
 
@@ -425,7 +429,8 @@ ecbuild_add_test( TARGET  test_ufo_opr_gsi_sfc_model
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
                   ARGS    "testinput/gsisfcmodel.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
-                  DEPENDS test_ObsOperator.x )
+                  DEPENDS test_ObsOperator.x
+                  TEST_DEPENDS ufo_get_ioda_test_data )
 
 if ( ${CRTM_FOUND} )
     ecbuild_add_test( TARGET  test_ufo_opr_crtm_amsua

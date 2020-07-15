@@ -16,10 +16,10 @@
 #include "eckit/config/LocalConfiguration.h"
 #include "eckit/testing/Test.h"
 #include "ioda/ObsSpace.h"
-#include "test/TestEnvironment.h"
 #include "oops/parallel/mpi/mpi.h"
 #include "oops/runs/Test.h"
 #include "oops/util/Logger.h"
+#include "test/TestEnvironment.h"
 #include "ufo/filters/ObsFilterData.h"
 #include "ufo/filters/processWhere.h"
 #include "ufo/filters/Variables.h"
@@ -73,7 +73,7 @@ class ProcessWhere : public oops::Test {
 
     ts.emplace_back(CASE("ufo/ProcessWhere/testProcessWhere_successful") {
       testProcessWhere(eckit::LocalConfiguration(::test::TestEnvironment::config(),
-			                         "successful"));
+                                                "successful"));
     });
 
     ts.emplace_back(CASE("ufo/ProcessWhere/testProcessWhere_isin_usererror") {

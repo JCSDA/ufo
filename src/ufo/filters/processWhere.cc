@@ -165,7 +165,9 @@ std::vector<bool> processWhere(const eckit::Configuration & config,
             filterdata.get(varname, data);
             processWhereIsIn(data, whitelist, where);
           } else {
-            throw eckit::UserError("Only integer and string variables may be used for processWhere 'is_in'", Here());
+            throw eckit::UserError(
+              "Only integer and string variables may be used for processWhere 'is_in'",
+              Here());
           }
         }
 
@@ -183,7 +185,9 @@ std::vector<bool> processWhere(const eckit::Configuration & config,
             std::set<int> blacklist = oops::parseIntSet(masks[jm].getString("is_not_in"));
             processWhereIsNotIn(data, blacklist, where);
           } else {
-            throw eckit::UserError("Only integer and string variables may be used for processWhere 'is_not_in'", Here());
+            throw eckit::UserError(
+              "Only integer and string variables may be used for processWhere 'is_not_in'",
+              Here());
           }
         }
       }

@@ -22,8 +22,8 @@
 #include "oops/util/Duration.h"
 #include "oops/util/Logger.h"
 #include "oops/util/sqr.h"
-#include "ufo/filters/TrackCheckUtils.h"
 #include "ufo/filters/TrackCheckParameters.h"
+#include "ufo/filters/TrackCheckUtils.h"
 #include "ufo/utils/Constants.h"
 #include "ufo/utils/PiecewiseLinearInterpolation.h"
 #include "ufo/utils/RecursiveSplitter.h"
@@ -46,7 +46,7 @@ TrackCheck::CheckResults TrackCheck::TrackObservation::checkAgainstBuddy(
   util::Duration temporalDistance = abs(buddyObs.obsLocationTime_.time() -
                                         this->obsLocationTime_.time());
   const float spatialDistance = TrackCheckUtils::distance(this->obsLocationTime_.location(),
-                                                                     buddyObs.obsLocationTime_.location());
+                                                          buddyObs.obsLocationTime_.location());
 
   // Estimate the speed and check if it is within the allowed range
   const float conservativeSpeedEstimate =
@@ -61,7 +61,8 @@ TrackCheck::CheckResults TrackCheck::TrackObservation::checkAgainstBuddy(
     const float conservativeClimbRateEstimate =
         pressureDiff / (temporalDistance + options.temporalResolution).toSeconds();
     results.climbRateCheckResult =
-        TrackCheckUtils::CheckResult(conservativeClimbRateEstimate <= *options.maxClimbRate.value());
+        TrackCheckUtils::CheckResult
+        (conservativeClimbRateEstimate <= *options.maxClimbRate.value());
   }
 
   const int resolutionMultiplier = options.distinctBuddyResolutionMultiplier;

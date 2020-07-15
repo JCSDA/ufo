@@ -103,7 +103,8 @@ class TrackCheck : public FilterBase,
     }
 
     /// Estimates the instantaneous speed and climb rate by comparing this observation against
-    /// \p buddyObs. Checks if these estimates are in the accepted ranges and if the two observations
+    /// \p buddyObs.
+    /// Checks if these estimates are in the accepted ranges and if the two observations
     /// are far enough from each other to be considered "distinct".
     ///
     /// \param buddyObs Observation to compare against.

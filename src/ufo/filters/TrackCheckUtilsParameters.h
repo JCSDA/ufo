@@ -5,8 +5,8 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#ifndef UFO_FILTERS_TRACKCHECKBASEPARAMETERS_H_
-#define UFO_FILTERS_TRACKCHECKBASEPARAMETERS_H_
+#ifndef UFO_FILTERS_TRACKCHECKUTILSPARAMETERS_H_
+#define UFO_FILTERS_TRACKCHECKUTILSPARAMETERS_H_
 
 #include "oops/util/parameters/OptionalParameter.h"
 #include "oops/util/parameters/Parameters.h"
@@ -21,8 +21,8 @@ namespace ufo {
 /// \brief Options controlling the operation of the track check filter.
 class TrackCheckUtilsParameters : public oops::Parameters {
  public:
-  /// Variable storing integer-valued or string-valued station IDs. Observations taken by each station are
-  /// checked separately.
+  /// Variable storing integer-valued or string-valued station IDs.
+  /// Observations taken by each station are checked separately.
   ///
   /// If not set and observations were grouped into records when the observation space was
   /// constructed, each record is assumed to consist of observations taken by a separate
@@ -37,4 +37,4 @@ class TrackCheckUtilsParameters : public oops::Parameters {
 
 }  // namespace ufo
 
-#endif  // UFO_FILTERS_TRACKCHECKBASEPARAMETERS_H_
+#endif  // UFO_FILTERS_TRACKCHECKUTILSPARAMETERS_H_
