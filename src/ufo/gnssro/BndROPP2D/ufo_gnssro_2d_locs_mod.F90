@@ -75,12 +75,12 @@ subroutine ufo_gnssro_2d_locs_init(self, locs, obss, t1, t2)
     call ropp_fm_2d_plane(lat(tw_indx(i)),lon(tw_indx(i)),obsAzim(tw_indx(i)),dtheta,n_horiz,plat_2d,plon_2d,kerror)
     locs%lon( (i-1)*n_horiz+1 : i*n_horiz) =  plon_2d
     locs%lat( (i-1)*n_horiz+1 : i*n_horiz) =  plat_2d
-    locs%time((i-1)*n_horiz+1 : i*n_horiz) =  date_time(tw_indx(i))
   ! save ufo_locs to self
     self%obsLat2d( (i-1)*n_horiz+1 : i*n_horiz)  = locs%lat( (i-1)*n_horiz+1 : i*n_horiz) 
     self%obsLon2d( (i-1)*n_horiz+1 : i*n_horiz)  = locs%lon( (i-1)*n_horiz+1 : i*n_horiz) 
     do j = 1, n_horiz
       locs%indx((i-1)*n_horiz+j) =  (tw_indx(i)-1)*n_horiz+j
+      locs%time((i-1)*n_horiz+j) =  date_time(tw_indx(i))
     end do
   end do
 
