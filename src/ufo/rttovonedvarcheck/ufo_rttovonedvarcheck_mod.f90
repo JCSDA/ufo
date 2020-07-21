@@ -54,7 +54,7 @@ subroutine ufo_rttovonedvarcheck_create(self, obsspace, f_conf, channels, &
   integer(c_int), intent(in)                 :: channels(:)  !< all channels that can be used in 1D-Var
   integer(c_int), intent(in)                 :: onedvarflag  !< flag for qc manager
 
-  self % obsdb = obspace
+  self % obsdb = obsspace
   self % conf = f_conf
   self % onedvarflag = onedvarflag
 
