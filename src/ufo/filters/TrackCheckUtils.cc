@@ -73,7 +73,8 @@ std::vector<size_t> TrackCheckUtils::getValidObservationIds(
 }
 
 void TrackCheckUtils::groupObservationsByStation(const std::vector<size_t> &validObsIds,
-                                                 RecursiveSplitter &splitter, const eckit::Configuration &config,
+                                                 RecursiveSplitter &splitter,
+                                                 const eckit::Configuration &config,
                                                  const ioda::ObsSpace &obsdb) {
   std::unique_ptr<TrackCheckUtilsParameters> baseOptions_;
   baseOptions_.reset(new TrackCheckUtilsParameters());
@@ -140,7 +141,8 @@ void TrackCheckUtils::sortTracksChronologically(const std::vector<size_t> &valid
   { return times[validObsIds[obsIndexA]] < times[validObsIds[obsIndexB]]; });
 }
 
-TrackCheckUtils::ObsGroupLocationTimes TrackCheckUtils::collectObservationsLocations(const ioda::ObsSpace &obsdb) {
+TrackCheckUtils::ObsGroupLocationTimes
+  TrackCheckUtils::collectObservationsLocations(const ioda::ObsSpace &obsdb) {
   ObsGroupLocationTimes locationTimes;
 
   locationTimes.latitudes.resize(obsdb.nlocs());

@@ -13,9 +13,9 @@
 
 #include "eckit/config/LocalConfiguration.h"
 #include "eckit/testing/Test.h"
-#include "test/TestEnvironment.h"
 #include "oops/runs/Test.h"
 #include "oops/util/Expect.h"
+#include "test/TestEnvironment.h"
 #include "ufo/utils/PiecewiseLinearInterpolation.h"
 
 namespace ufo {

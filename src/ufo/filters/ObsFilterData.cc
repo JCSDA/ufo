@@ -353,7 +353,7 @@ ioda::ObsDtype ObsFilterData::dtype(const Variable & varname) const {
   ioda::ObsDtype res = ioda::ObsDtype::Float;
   if (obsdb_.has(grp, var)) {
     res = obsdb_.dtype(grp, var);
-  } else if (! this->has(varname)) {
+  } else if (!this->has(varname)) {
     oops::Log::error() << "ObsFilterData::dtype unable to find provided variable."
                        << std::endl;
     ABORT("ObsFilterData::dtype unable to find provided variable.");
