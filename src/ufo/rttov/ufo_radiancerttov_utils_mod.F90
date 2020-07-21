@@ -19,6 +19,7 @@ use rttov_const, only : errorstatus_success, deg2rad
 use ufo_vars_mod
 use ufo_geovals_mod, only: ufo_geovals, ufo_geoval, ufo_geovals_get_var
 use ufo_basis_mod, only: ufo_basis
+use obsspace_mod, only : obsspace_get_db, obsspace_get_nlocs, obsspace_has
 
 implicit none
 private
@@ -102,7 +103,6 @@ end subroutine rttov_conf_delete
 subroutine load_atm_data_rttov(geovals,obss,profiles,prof_start1,ob_info)
 
 use fckit_log_module, only : fckit_log
-use obsspace_mod, only : obsspace_get_db, obsspace_get_nlocs, obsspace_has
 use ufo_rttovonedvarcheck_obinfo_mod, only: ObInfo_type
 
 implicit none
@@ -397,6 +397,7 @@ real(kind_real), allocatable :: TmpVar(:)
 integer :: prof_start
 integer :: nlocs_total, nprofiles
 integer :: nlevels
+logical :: variable_present
 
 write(*,*) "load_geom_data_rttov starting"
 
@@ -428,14 +429,29 @@ else
   call obsspace_get_db(obss, "MetaData", "sensor_zenith_angle", TmpVar(prof_start:prof_start + nprofiles - 1))
   profiles(1:nprofiles)%zenangle = TmpVar(prof_start:prof_start + nprofiles - 1)
 
-  call obsspace_get_db(obss, "MetaData", "sensor_azimuth_angle", TmpVar(prof_start:prof_start + nprofiles - 1))
-  profiles(1:nprofiles)%azangle = TmpVar(prof_start:prof_start + nprofiles - 1)
+  variable_present = obsspace_has(obss, "MetaData", "sensor_azimuth_angle")
+  if (variable_present) then
+    call obsspace_get_db(obss, "MetaData", "sensor_azimuth_angle", TmpVar(prof_start:prof_start + nprofiles - 1))
+    profiles(1:nprofiles)%azangle = TmpVar(prof_start:prof_start + nprofiles - 1)
+  else
+    profiles(1:nprofiles)%azangle = 0.0_kind_real
+  end if
 
-  call obsspace_get_db(obss, "MetaData", "solar_zenith_angle", TmpVar(prof_start:prof_start + nprofiles - 1))
-  profiles(1:nprofiles)%sunzenangle = TmpVar(prof_start:prof_start + nprofiles - 1)
+  variable_present = obsspace_has(obss, "MetaData", "solar_zenith_angle")
+  if (variable_present) then
+    call obsspace_get_db(obss, "MetaData", "solar_zenith_angle", TmpVar(prof_start:prof_start + nprofiles - 1))
+    profiles(1:nprofiles)%sunzenangle = TmpVar(prof_start:prof_start + nprofiles - 1)
+  else
+    profiles(1:nprofiles)%azangle = 0.0_kind_real
+  end if
 
-  call obsspace_get_db(obss, "MetaData", "solar_azimuth_angle", TmpVar(prof_start:prof_start + nprofiles - 1))
-  profiles(1:nprofiles)%sunazangle = TmpVar(prof_start:prof_start + nprofiles - 1)
+  variable_present = obsspace_has(obss, "MetaData", "solar_azimuth_angle")
+  if (variable_present) then
+    call obsspace_get_db(obss, "MetaData", "solar_azimuth_angle", TmpVar(prof_start:prof_start + nprofiles - 1))
+    profiles(1:nprofiles)%sunazangle = TmpVar(prof_start:prof_start + nprofiles - 1)
+  else
+    profiles(1:nprofiles)%azangle = 0.0_kind_real
+  end if
 
   deallocate(TmpVar)
 

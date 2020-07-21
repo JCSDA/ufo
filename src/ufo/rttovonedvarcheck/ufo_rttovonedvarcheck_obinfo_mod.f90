@@ -20,23 +20,23 @@ private
 type, public :: obinfo_type
 
   character(len=max_string) :: forward_mod_name !< forward model name (RTTOV only one at the moment)
-  integer         :: nlocs !< number of locations = 1
-  real(kind_real) :: latitude !< latitude of observation
-  real(kind_real) :: longitude !< longitude of observation
-  real(kind_real) :: elevation  !< elevation above sea level of observation
-  integer         :: surface_type  !< surface type of observation
-  real(kind_real) :: sensor_zenith_angle  !< sensor zenith of observation
-  real(kind_real) :: sensor_azimuth_angle  !< sensor azimuth of observation
-  real(kind_real) :: solar_zenith_angle !< solar zenith of observation
-  real(kind_real) :: solar_azimuth_angle  !< solar azimuth of observation
-  real(kind_real) :: cloudtopp !< cloud top pressure (used in if cloudy retrieval used)
-  real(kind_real) :: cloudfrac !< cloud fraction (used in if cloudy retrieval used)
-  logical         :: retrievecloud  !< flag to turn on retrieve cloud
-  logical         :: mwscatt !< flag to use rttov-scatt model through the interface
-  logical         :: mwscatt_totalice !< flag to use total ice (rather then ciw) for rttov-scatt simulations
-  real(kind_real), allocatable :: yobs(:) !< satellite BTs
+  integer              :: nlocs !< number of locations = 1
+  integer              :: surface_type  !< surface type of observation
   integer, allocatable :: channels_used(:) !< channels used for this observation
+  real(kind_real)      :: latitude !< latitude of observation
+  real(kind_real)      :: longitude !< longitude of observation
+  real(kind_real)      :: elevation  !< elevation above sea level of observation
+  real(kind_real)      :: sensor_zenith_angle  !< sensor zenith of observation
+  real(kind_real)      :: sensor_azimuth_angle  !< sensor azimuth of observation
+  real(kind_real)      :: solar_zenith_angle !< solar zenith of observation
+  real(kind_real)      :: solar_azimuth_angle  !< solar azimuth of observation
+  real(kind_real)      :: cloudtopp !< cloud top pressure (used in if cloudy retrieval used)
+  real(kind_real)      :: cloudfrac !< cloud fraction (used in if cloudy retrieval used)
+  real(kind_real), allocatable :: yobs(:) !< satellite BTs
   real(kind_real), allocatable :: emiss(:) !< surface emissivity
+  logical              :: retrievecloud  !< flag to turn on retrieve cloud
+  logical              :: mwscatt !< flag to use rttov-scatt model through the interface
+  logical              :: mwscatt_totalice !< flag to use total ice (rather then ciw) for rttov-scatt simulations
   logical, allocatable :: calc_emiss(:) !< flag to decide if RTTOV calculates emissivity
 
 contains

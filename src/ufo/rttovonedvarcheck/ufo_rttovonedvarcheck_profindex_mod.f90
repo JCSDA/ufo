@@ -8,7 +8,6 @@
 module ufo_rttovonedvarcheck_profindex_mod
 
 use kinds
-use fckit_configuration_module, only: fckit_configuration
 use fckit_log_module, only : fckit_log
 use ufo_rttovonedvarcheck_bmatrix_mod
 use ufo_rttovonedvarcheck_constants_mod

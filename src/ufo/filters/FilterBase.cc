@@ -48,9 +48,7 @@ FilterBase::FilterBase(ioda::ObsSpace & os, const eckit::Configuration & config,
     filtervars_ += Variables(obsdb_.obsvariables());
   }
   // Defer filter to run as a post filter even if hofx not needed.
-  if (config_.has("defer_to_post")) {
-    config_.get("defer_to_post",defer_to_post_);
-  }
+  defer_to_post_ = config_.getBool("defer to post", false);
   eckit::LocalConfiguration aconf;
   config_.get("action", aconf);
   FilterAction action(aconf);
