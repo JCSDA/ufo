@@ -32,7 +32,7 @@ FilterBase::FilterBase(ioda::ObsSpace & os, const eckit::Configuration & config,
                        boost::shared_ptr<ioda::ObsDataVector<float> > obserr)
   : obsdb_(os), config_(config), flags_(flags), obserr_(obserr),
     allvars_(getAllWhereVariables(config_)),
-    filtervars_(), data_(obsdb_), prior_(false), post_(false), 
+    filtervars_(), data_(obsdb_), prior_(false), post_(false),
     defer_to_post_(false)
 {
   oops::Log::trace() << "FilterBase contructor" << std::endl;
