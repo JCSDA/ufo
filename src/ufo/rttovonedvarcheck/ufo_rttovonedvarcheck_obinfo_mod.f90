@@ -17,7 +17,7 @@ implicit none
 private
 
 ! Ob info type definition
-type, public :: obinfo_type
+type, public :: ufo_rttovonedvarcheck_obinfo
 
   character(len=max_string) :: forward_mod_name !< forward model name (RTTOV only one at the moment)
   integer              :: nlocs !< number of locations = 1
@@ -44,7 +44,7 @@ contains
   procedure :: init_emiss  => ufo_rttovonedvarcheck_InitEmiss
   procedure :: delete => ufo_rttovonedvarcheck_DeleteObInfo
 
-end type
+end type ufo_rttovonedvarcheck_obinfo
 
 contains
 
@@ -56,13 +56,13 @@ contains
 !! \date 09/06/2020: Created
 !!
 subroutine ufo_rttovonedvarcheck_InitObInfo(ob_info, & ! out
-                                            nchans)    ! in
+                                            nchans)    ! in 
 
 implicit none
 
 ! subroutine arguments:
-class(obinfo_type), intent(out) :: ob_info !< observation metadata type
-integer, intent(in)  :: nchans !< number of channels used for this particular observation
+class(ufo_rttovonedvarcheck_obinfo), intent(out) :: ob_info !< observation metadata type
+integer, intent(in) :: nchans !< number of channels used for this particular observation
 
 character(len=*), parameter :: routinename = "ufo_rttovonedvarcheck_InitObInfo"
 real(kind_real) :: missing
@@ -107,7 +107,7 @@ subroutine ufo_rttovonedvarcheck_InitEmiss(ob_info, self, geovals)
 implicit none
 
 ! subroutine arguments:
-class(obinfo_type), intent(inout)       :: ob_info !< observation metadata type
+class(ufo_rttovonedvarcheck_obinfo), intent(inout) :: ob_info !< observation metadata type
 type(ufo_rttovonedvarcheck), intent(in) :: self !< main rttovonedvarcheck type
 type(ufo_geovals), intent(in)           :: geovals !< model data at obs location
 
@@ -154,7 +154,7 @@ subroutine ufo_rttovonedvarcheck_DeleteObInfo(ob_info)    ! inout
 implicit none
 
 ! subroutine arguments:
-class(obinfo_type), intent(inout) :: ob_info !< observation metadata type
+class(ufo_rttovonedvarcheck_obinfo), intent(inout) :: ob_info !< observation metadata type
 
 character(len=*), parameter :: routinename = "ufo_rttovonedvarcheck_InitObInfo"
 

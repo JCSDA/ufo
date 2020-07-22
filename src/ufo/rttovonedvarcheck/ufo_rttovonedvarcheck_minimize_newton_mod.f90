@@ -14,7 +14,7 @@ use ufo_rttovonedvarcheck_minimize_jacobian_mod
 use ufo_rttovonedvarcheck_minimize_utils_mod
 use ufo_rttovonedvarcheck_obinfo_mod
 use ufo_rttovonedvarcheck_profindex_mod
-use ufo_rttovonedvarcheck_rmatrix_mod
+use ufo_rttovonedvarcheck_rsubmatrix_mod
 use ufo_rttovonedvarcheck_utils_mod
 
 implicit none
@@ -88,15 +88,15 @@ subroutine ufo_rttovonedvarcheck_minimize_newton(self, &
 implicit none
 
 type(ufo_rttovonedvarcheck), intent(inout) :: self  !< Main 1D-Var object
-type(Obinfo_type), intent(inout) :: ob_info         !< satellite metadata
-type(rmatrix_type), intent(in)   :: r_matrix        !< observation error covariance
-real(kind_real), intent(in)      :: b_matrix(:,:)   !< state error covariance
-real(kind_real), intent(in)      :: b_inv(:,:)      !< inverse of the state error covariance
-real(kind_real), intent(in)      :: b_sigma(:)      !< standard deviations of the state error covariance diagonal
-type(ufo_geovals), intent(inout) :: local_geovals   !< model data at obs location
-type(profindex_type), intent(in) :: profile_index   !< index array for x vector
-integer, intent(in)              :: channels(:)     !< list of channels used
-logical, intent(out)             :: onedvar_success !< convergence flag
+type(ufo_rttovonedvarcheck_obinfo), intent(inout)  :: ob_info  !< satellite metadata
+type(ufo_rttovonedvarcheck_rsubmatrix), intent(in) :: r_matrix !< observation error covariance
+real(kind_real), intent(in)       :: b_matrix(:,:)   !< state error covariance
+real(kind_real), intent(in)       :: b_inv(:,:)      !< inverse of the state error covariance
+real(kind_real), intent(in)       :: b_sigma(:)      !< standard deviations of the state error covariance diagonal
+type(ufo_geovals), intent(inout)  :: local_geovals   !< model data at obs location
+type(ufo_rttovonedvarcheck_profindex), intent(in) :: profile_index !< index array for x vector
+integer, intent(in)               :: channels(:)     !< list of channels used
+logical, intent(out)              :: onedvar_success !< convergence flag
 
 ! Local declarations:
 character(len=*), parameter     :: RoutineName = "ufo_rttovonedvarcheck_minimize_newton"
@@ -474,15 +474,15 @@ subroutine ufo_rttovonedvarcheck_NewtonFewChans (DeltaBT,       &
 implicit none
 
 ! subroutine arguments:
-real(kind_real), intent(in)     :: DeltaBT(:)      !< y-y(x)
-integer, intent(in)             :: nChans          !< number of channels
-real(kind_real), intent(in)     :: H_Matrix(:,:)   !< Jacobian
-real(kind_real), intent(in)     :: H_Matrix_T(:,:) !< (Jacobian)^T
-integer, intent(in)             :: nprofelements   !< number of elements in x profile
-real(kind_real), intent(inout)  :: DeltaProfile(:) !< x-xb
-real(kind_real), intent(in)     :: B_matrix(:,:)   !< state error covariance
-type(rmatrix_type), intent(in)  :: r_matrix        !< observation error covariance
-integer, intent(out)            :: Status          !< check if Cholesky decomposition fails
+real(kind_real), intent(in)      :: DeltaBT(:)      !< y-y(x)
+integer, intent(in)              :: nChans          !< number of channels
+real(kind_real), intent(in)      :: H_Matrix(:,:)   !< Jacobian
+real(kind_real), intent(in)      :: H_Matrix_T(:,:) !< (Jacobian)^T
+integer, intent(in)              :: nprofelements   !< number of elements in x profile
+real(kind_real), intent(inout)   :: DeltaProfile(:) !< x-xb
+real(kind_real), intent(in)      :: B_matrix(:,:)   !< state error covariance
+type(ufo_rttovonedvarcheck_rsubmatrix), intent(in) :: r_matrix !< observation error covariance
+integer, intent(out)              :: Status          !< check if Cholesky decomposition fails
 
 ! Local declarations:
 character(len=*), parameter :: RoutineName = "ufo_rttovonedvarcheck_Minimize_101"
@@ -598,15 +598,15 @@ subroutine ufo_rttovonedvarcheck_NewtonManyChans (DeltaBT, &
 implicit none
 
 ! subroutine arguments:
-real(kind_real), intent(in)     :: DeltaBT(:)      !< y-y(x)
-integer, intent(in)             :: nChans          !< number of channels
-real(kind_real), intent(in)     :: H_Matrix(:,:)   !< Jacobian
-real(kind_real), intent(in)     :: H_Matrix_T(:,:) !< (Jacobian)^T
-integer, intent(in)             :: nprofelements   !< number of elements in profile vector
-real(kind_real), intent(inout)  :: DeltaProfile(:) !< x-xb
-real(kind_real), intent(in)     :: B_inverse(:,:)  !< inverse state error covariance
-type(rmatrix_type), intent(in)  :: r_matrix        !< observation error covariance
-integer, intent(out)            :: Status          !< check if Cholesky decomposition fails
+real(kind_real), intent(in)       :: DeltaBT(:)      !< y-y(x)
+integer, intent(in)               :: nChans          !< number of channels
+real(kind_real), intent(in)       :: H_Matrix(:,:)   !< Jacobian
+real(kind_real), intent(in)       :: H_Matrix_T(:,:) !< (Jacobian)^T
+integer, intent(in)               :: nprofelements   !< number of elements in profile vector
+real(kind_real), intent(inout)    :: DeltaProfile(:) !< x-xb
+real(kind_real), intent(in)       :: B_inverse(:,:)  !< inverse state error covariance
+type(ufo_rttovonedvarcheck_rsubmatrix), intent(in) :: r_matrix !< observation error covariance
+integer, intent(out)              :: Status          !< check if Cholesky decomposition fails
 
 ! Local declarations:
 character(len=*), parameter :: RoutineName = 'ufo_rttovonedvarcheck_NewtonManyChans'

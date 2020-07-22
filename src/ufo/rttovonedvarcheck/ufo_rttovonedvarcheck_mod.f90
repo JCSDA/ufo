@@ -24,6 +24,7 @@ use ufo_rttovonedvarcheck_obinfo_mod
 use ufo_rttovonedvarcheck_obs_mod
 use ufo_rttovonedvarcheck_profindex_mod
 use ufo_rttovonedvarcheck_rmatrix_mod
+use ufo_rttovonedvarcheck_rsubmatrix_mod
 use ufo_rttovonedvarcheck_utils_mod
 use ufo_vars_mod
 
@@ -99,18 +100,19 @@ subroutine ufo_rttovonedvarcheck_apply(self, vars, geovals, apply)
   type(ufo_geovals), intent(in)              :: geovals  !< model values at observation space
   logical, intent(in)                        :: apply(:) !< qc manager flags
 
-  type(obs_type)       :: obs
-  type(bmatrix_type)   :: full_bmatrix
-  type(ufo_geovals)    :: local_geovals  ! geoval for one observation
-  type(obinfo_type)    :: ob_info
-  type(profindex_type) :: prof_index     ! index for mapping geovals to 1d-var state profile
-  type(rmatrix_type)   :: r_submatrix    ! r_submatrix object
+  type(ufo_rttovonedvarcheck_obs)        :: obs           ! data for all observations read from db
+  type(ufo_rttovonedvarcheck_bmatrix)    :: full_bmatrix  ! full bmatrix read from file
+  type(ufo_geovals)                      :: local_geovals ! geoval for one observation
+  type(ufo_rttovonedvarcheck_obinfo)     :: ob_info       ! observation data for a single observation
+  type(ufo_rttovonedvarcheck_profindex)  :: prof_index    ! index for mapping geovals to 1d-var state profile
+  type(ufo_rttovonedvarcheck_rmatrix)    :: full_rmatrix  ! full r_matrix read from file
+  type(ufo_rttovonedvarcheck_rsubmatrix) :: r_submatrix   ! r_submatrix object
   character(len=max_string)          :: sensor_id
   character(len=max_string)          :: var
   character(len=max_string)          :: varname
   character(len=max_string)          :: message
   integer                            :: jvar, jobs, band, ii ! counters
-  integer                            :: chans_used      ! counter for number of channels used for an ob
+  integer                            :: nchans_used      ! counter for number of channels used for an ob
   integer                            :: jchans_used
   integer                            :: fileunit        ! unit number for reading in files
   integer                            :: apply_count
@@ -121,7 +123,6 @@ subroutine ufo_rttovonedvarcheck_apply(self, vars, geovals, apply)
   real(kind_real), allocatable       :: b_matrix(:,:)   ! 1d-var profile b matrix
   real(kind_real), allocatable       :: b_inverse(:,:)  ! inverse for each 1d-var profile b matrix
   real(kind_real), allocatable       :: b_sigma(:)      ! b_matrix diagonal error
-  real(kind_real), allocatable       :: obs_error(:)
   logical                            :: file_exists     ! check if a file exists logical
   logical                            :: onedvar_success
   logical                            :: cloud_retrieval = .false.
@@ -139,6 +140,9 @@ subroutine ufo_rttovonedvarcheck_apply(self, vars, geovals, apply)
   call full_bmatrix % setup(self % retrieval_variables, self % b_matrix_path, &
                             self % qtotal)
   
+  ! Setup full R matrix object
+  call full_rmatrix % setup(self % r_matrix_path)
+
   ! Check if cloud retrievals needed
   do ii = 1, size(self % retrieval_variables)
     if (trim(self % retrieval_variables(ii)) == "cloud_top_pressure") then
@@ -188,13 +192,13 @@ subroutine ufo_rttovonedvarcheck_apply(self, vars, geovals, apply)
       ! 2.2 Setup Jo terms
       !---------------------------------------------------
       ! Channel selection based on previous filter flags
-      chans_used = 0
+      nchans_used = 0
       do jvar = 1, self%nchans
         if( obs % QCflags(jvar,jobs) == 0 ) then
-          chans_used = chans_used + 1
+          nchans_used = nchans_used + 1
         end if
       end do
-      if (chans_used == 0) then
+      if (nchans_used == 0) then
         write(message, *) "No channels selected for observation number ", &
                     jobs, " : skipping"
         call fckit_log % info(message)
@@ -202,7 +206,7 @@ subroutine ufo_rttovonedvarcheck_apply(self, vars, geovals, apply)
       end if
 
       ! setup ob data for this observation
-      call ob_info % setup(chans_used)
+      call ob_info % setup(nchans_used)
       call ob_info % init_emiss(self, local_geovals)
       ob_info % forward_mod_name = self % forward_mod_name
       ob_info % latitude = obs % lat(jobs)
@@ -216,16 +220,12 @@ subroutine ufo_rttovonedvarcheck_apply(self, vars, geovals, apply)
       if(self % RTTOV_mwscattSwitch) ob_info % mwscatt = .true.
       if(self % RTTOV_usetotalice) ob_info % mwscatt_totalice = .true.
 
-      ! allocate arrays
-      allocate(obs_error(chans_used))
-
       ! create obs vector and r matrix
       ! if emissivity read in use that
       jchans_used = 0
       do jvar = 1, self%nchans
         if( obs % QCflags(jvar,jobs) == 0 ) then
           jchans_used = jchans_used + 1
-          obs_error(jchans_used) = obs % yerr(jvar, jobs)
           ob_info % yobs(jchans_used) = obs % yobs(jvar, jobs)
           ob_info % channels_used(jchans_used) = self%channels(jvar)
           if (self % ReadMWemiss .OR. self % ReadIRemiss) then
@@ -239,7 +239,7 @@ subroutine ufo_rttovonedvarcheck_apply(self, vars, geovals, apply)
           end if
         end if
       end do
-      call r_submatrix % setup(self % rtype, chans_used, obs_error)
+      call r_submatrix % setup(nchans_used, ob_info % channels_used, full_rmatrix=full_rmatrix)
 
       if (self % FullDiagnostics) then
         call r_submatrix % info()
@@ -277,7 +277,6 @@ subroutine ufo_rttovonedvarcheck_apply(self, vars, geovals, apply)
       ! Tidy up memory specific to a single observation
       call ob_info % delete()
       call r_submatrix % delete()
-      if (allocated(obs_error)) deallocate(obs_error)
 
     else
       call fckit_log % info("Final 1Dvar cost, apply = F")
@@ -302,6 +301,7 @@ subroutine ufo_rttovonedvarcheck_apply(self, vars, geovals, apply)
 
   ! Tidy up memory used for all observations
   call full_bmatrix % delete()
+  call full_rmatrix % delete()
   call obs % delete()
   if (allocated(b_matrix))   deallocate(b_matrix)
   if (allocated(b_inverse))  deallocate(b_inverse)

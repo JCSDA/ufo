@@ -103,7 +103,7 @@ end subroutine rttov_conf_delete
 subroutine load_atm_data_rttov(geovals,obss,profiles,prof_start1,ob_info)
 
 use fckit_log_module, only : fckit_log
-use ufo_rttovonedvarcheck_obinfo_mod, only: ObInfo_type
+use ufo_rttovonedvarcheck_obinfo_mod
 
 implicit none
 
@@ -111,7 +111,7 @@ type(ufo_geovals), intent(in) :: geovals
 type(c_ptr), VALUE, intent(in) :: obss
 type(rttov_profile), intent(inout) :: profiles(:)
 integer, OPTIONAL, intent(IN) :: prof_start1
-type(ObInfo_type), optional, intent(in) :: ob_info  ! Used for rttovonedvarcheck
+type(ufo_rttovonedvarcheck_obinfo), optional, intent(in) :: ob_info  ! Used for rttovonedvarcheck
 
 ! Local variables
 integer :: k1, nlocs_total, iprof
@@ -383,14 +383,14 @@ subroutine load_geom_data_rttov(obss,profiles,prof_start1,ob_info)
 ! Satellite viewing geometry
 ! DAR: check it's all within limits
 use obsspace_mod, only :  obsspace_get_nlocs, obsspace_get_db
-use ufo_rttovonedvarcheck_obinfo_mod, only: ObInfo_type
+use ufo_rttovonedvarcheck_obinfo_mod
 
 implicit none
 
 type(c_ptr), VALUE,       intent(in)    :: obss
 type(rttov_profile), intent(inout) :: profiles(:)
 integer, OPTIONAL, intent(IN) :: prof_start1
-type(ObInfo_type), optional, intent(in) :: ob_info  ! Used in rttovonedvarcheck
+type(ufo_rttovonedvarcheck_obinfo), optional, intent(in) :: ob_info  ! Used in rttovonedvarcheck
 
 real(kind_real), allocatable :: TmpVar(:)
 

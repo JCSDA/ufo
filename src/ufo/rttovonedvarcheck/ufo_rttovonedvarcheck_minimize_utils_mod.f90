@@ -14,6 +14,7 @@ use ufo_radiancerttov_tlad_mod
 use ufo_rttovonedvarcheck_constants_mod
 use ufo_rttovonedvarcheck_obinfo_mod
 use ufo_rttovonedvarcheck_profindex_mod
+use ufo_rttovonedvarcheck_rsubmatrix_mod
 
 implicit none
 private
@@ -56,8 +57,8 @@ implicit none
 
 ! subroutine arguments:
 type(ufo_geovals), intent(in)    :: geovals   !< model data at obs location
-type(profindex_type), intent(in) :: profindex !< index array for x vector
-type(obinfo_type), intent(in)    :: ob_info   !< satellite metadata
+type(ufo_rttovonedvarcheck_profindex), intent(in) :: profindex !< index array for x vector
+type(ufo_rttovonedvarcheck_obinfo), intent(in)    :: ob_info   !< satellite metadata
 real(kind_real), intent(out)     :: prof_x(:) !< x vector
 
 ! Local arguments:
@@ -213,8 +214,8 @@ implicit none
 
 ! subroutine arguments:
 type(ufo_geovals), intent(inout) :: geovals   !< model data at obs location
-type(profindex_type), intent(in) :: profindex !< index array for x vector
-type(obinfo_type), intent(inout) :: ob_info   !< satellite metadata
+type(ufo_rttovonedvarcheck_profindex), intent(in) :: profindex !< index array for x vector
+type(ufo_rttovonedvarcheck_obinfo), intent(inout) :: ob_info   !< satellite metadata
 real(kind_real), intent(in)      :: prof_x(:) !< x vector
 
 ! Local arguments:
@@ -433,7 +434,7 @@ implicit none
 
 ! subroutine arguments:
 type(ufo_geovals), intent(inout) :: geovals   !< model data at obs location
-type(profindex_type), intent(in) :: profindex !< index array for x vector
+type(ufo_rttovonedvarcheck_profindex), intent(in) :: profindex !< index array for x vector
 
 character(len=*), parameter  :: routinename = "ufo_rttovonedvarcheck_check_geovals"
 character(len=max_string)    :: varname
@@ -589,15 +590,14 @@ subroutine ufo_rttovonedvarcheck_CostFunction(DeltaProf, b_inv, &
                                               DeltaObs, r_matrix, &
                                               Jcost)
 
-use ufo_rttovonedvarcheck_rmatrix_mod, only: rmatrix_type
 implicit none
 
 ! subroutine arguments:
-real(kind_real), intent(in)    :: DeltaProf(:)
-real(kind_real), intent(in)    :: b_inv(:,:)
-real(kind_real), intent(in)    :: DeltaObs(:)
-type(rmatrix_type), intent(in) :: r_matrix
-real(kind_real), intent(out)   :: Jcost(3)
+real(kind_real), intent(in)       :: DeltaProf(:)
+real(kind_real), intent(in)       :: b_inv(:,:)
+real(kind_real), intent(in)       :: DeltaObs(:)
+type(ufo_rttovonedvarcheck_rsubmatrix), intent(in) :: r_matrix
+real(kind_real), intent(out)      :: Jcost(3)
 
 ! Local arguments:
 character(len=*), parameter  :: RoutineName = "ufo_rttovonedvarcheck_CostFunction"
@@ -1758,7 +1758,7 @@ implicit none
 
 ! subroutine arguments:
 type(ufo_geovals), intent(in)    :: geovals
-type(profindex_type), intent(in) :: profindex
+type(ufo_rttovonedvarcheck_profindex), intent(in) :: profindex
 integer, intent(in)              :: nlevels_1dvar
 real(kind_real), intent(inout)   :: profile(:)
 logical, intent(out)             :: OutOfRange
@@ -2016,7 +2016,7 @@ subroutine ufo_rttovonedvarcheck_CheckCloudyIteration( &
 implicit none
 
 type(ufo_geovals), intent(in)    :: geovals
-type(profindex_type), intent(in) :: profindex
+type(ufo_rttovonedvarcheck_profindex), intent(in) :: profindex
 integer, intent(in)              :: nlevels_1dvar
 logical, intent(out)             :: OutOfRange
 

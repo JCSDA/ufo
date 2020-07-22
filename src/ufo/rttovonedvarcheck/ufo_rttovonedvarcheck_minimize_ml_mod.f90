@@ -14,7 +14,7 @@ use ufo_rttovonedvarcheck_constants_mod
 use ufo_rttovonedvarcheck_minimize_jacobian_mod
 use ufo_rttovonedvarcheck_minimize_utils_mod
 use ufo_rttovonedvarcheck_profindex_mod
-use ufo_rttovonedvarcheck_rmatrix_mod
+use ufo_rttovonedvarcheck_rsubmatrix_mod
 use ufo_rttovonedvarcheck_obinfo_mod
 use ufo_rttovonedvarcheck_utils_mod
 
@@ -90,15 +90,15 @@ subroutine ufo_rttovonedvarcheck_minimize_ml(self,      &
 implicit none
 
 type(ufo_rttovonedvarcheck), intent(inout) :: self  !< structure containing settings
-type(Obinfo_type), intent(inout) :: ob_info         !< satellite metadata
-type(rmatrix_type), intent(in)   :: r_matrix        !< observation error covariance
-real(kind_real), intent(in)      :: b_matrix(:,:)   !< state error covariance
-real(kind_real), intent(in)      :: b_inv(:,:)      !< inverse state error covariance
-real(kind_real), intent(in)      :: b_sigma(:)      !< standard deviations of the state error covariance diagonal
-type(ufo_geovals), intent(inout) :: local_geovals   !< model data at obs location
-type(profindex_type), intent(in) :: profile_index   !< index array for x vector
-integer, intent(in)              :: channels(:)     !< list of channels used
-logical, intent(out)             :: onedvar_success !< convergence flag
+type(ufo_rttovonedvarcheck_obinfo), intent(inout)  :: ob_info !< satellite metadata
+type(ufo_rttovonedvarcheck_rsubmatrix), intent(in) :: r_matrix !< observation error covariance
+real(kind_real), intent(in)       :: b_matrix(:,:)   !< state error covariance
+real(kind_real), intent(in)       :: b_inv(:,:)      !< inverse state error covariance
+real(kind_real), intent(in)       :: b_sigma(:)      !< standard deviations of the state error covariance diagonal
+type(ufo_geovals), intent(inout)  :: local_geovals   !< model data at obs location
+type(ufo_rttovonedvarcheck_profindex), intent(in) :: profile_index !< index array for x vector
+integer, intent(in)               :: channels(:)     !< list of channels used
+logical, intent(out)              :: onedvar_success !< convergence flag
 
 ! Local declarations:
 character(len=*), parameter     :: RoutineName = "ufo_rttovonedvarcheck_minimize_ml"
@@ -447,16 +447,16 @@ implicit none
 type(ufo_rttovonedvarcheck), intent(in) :: self            !< structure containing settings
 real(kind_real), intent(in)             :: DeltaBT(:)      !< y-y(x)
 integer, intent(in)                     :: nChans          !< number of channels
-type(Obinfo_type), intent(inout)        :: ob_info         !< satellite metadata
+type(ufo_rttovonedvarcheck_obinfo), intent(inout) :: ob_info !< satellite metadata
 real(kind_real), intent(in)             :: H_Matrix(:,:)   !< Jacobian
 real(kind_real), intent(in)             :: H_Matrix_T(:,:) !< transpose  of the Jacobian
 integer, intent(in)                     :: nprofelements   !< number of profile elements
-type(profindex_type), intent(in)        :: profile_index   !< index array for x vector
+type(ufo_rttovonedvarcheck_profindex), intent(in) :: profile_index !< index array for x vector
 real(kind_real), intent(inout)          :: DeltaProfile(:) !< x_(n+1) - xb
 real(kind_real), intent(inout)          :: GuessProfile(:) !< x_(n+1)
 real(kind_real), intent(in)             :: BackProfile(:)  !< xb
 real(kind_real), intent(in)             :: b_inv(:,:)      !< inverse of the state error covariance
-type(rmatrix_type), intent(in)          :: r_matrix        !< observation error covariance
+type(ufo_rttovonedvarcheck_rsubmatrix), intent(in) :: r_matrix !< observation error covariance
 type(ufo_geovals), intent(inout)        :: geovals         !< model data at obs location
 integer, intent(in)                     :: channels(:)     !< channels used
 real(kind_real), intent(inout)          :: gamma           !< steepness of descent parameter

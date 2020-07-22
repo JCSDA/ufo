@@ -29,8 +29,8 @@ public ufo_rttovonedvarcheck_iogetfreeunit
 
 type, public :: ufo_rttovonedvarcheck
   character(len=max_string)        :: qcname !< name of the filter
-  character(len=max_string)        :: rtype  !< observation error covariance type (diagonal or full)
   character(len=max_string)        :: b_matrix_path !< path to the b-matrix file
+  character(len=max_string)        :: r_matrix_path !< path to the r-matrix file
   character(len=max_string)        :: forward_mod_name !< forward model name (only RTTOV at the moment)
   character(len=max_string), allocatable :: retrieval_variables(:) !< list of variables which form the 1D-var retrieval vector
   type(c_ptr)                      :: obsdb !< pointer to the observation space
@@ -86,6 +86,8 @@ integer :: ii
 self % qcname = "rttovonedvarcheck"
 call self % conf % get_or_die("BMatrix",str)
 self % b_matrix_path = str
+call self % conf % get_or_die("RMatrix",str)
+self % r_matrix_path = str
 call self % conf % get_or_die("ModName",str)
 self % forward_mod_name = str
 call self % conf % get_or_die("nlevels",self % nlevels)
@@ -104,7 +106,6 @@ write(*,*) "nchans setup = ",self%nchans
 write(*,*) "channels setup = ",self%channels
 
 ! Set defaults for 1D-var
-self % rtype = "diagonal"
 self % qtotal = .false.
 self % RTTOV_mwscattSwitch = .false.
 self % RTTOV_usetotalice = .false.
@@ -121,12 +122,6 @@ self % EmissLandDefault = 0.95    ! default land surface emissivity
 self % EmissSeaIceDefault = 0.92  ! default seaice surface emissivity
 self % ReadMWemiss = .false.
 self % ReadIRemiss = .false.
-
-! R matrix type to use
-if (self % conf % has("rtype")) then
-  call self % conf % get_or_die("rtype",str)
-  self % rtype = str
-end if
 
 ! Flag for total humidity
 if (self % conf % has("qtotal")) then
@@ -211,8 +206,8 @@ end if
 ! Print self
 if (self % FullDiagnostics) then
   write(*,*) "qcname = ",trim(self % qcname)
-  write(*,*) "rtype = ",trim(self % rtype)
   write(*,*) "b_matrix_path = ",trim(self % b_matrix_path)
+  write(*,*) "r_matrix_path = ",trim(self % r_matrix_path)
   write(*,*) "forward_mod_name = ",trim(self % forward_mod_name)
   write(*,*) "retrieval_variables = "
   do ii = 1, self % nmvars

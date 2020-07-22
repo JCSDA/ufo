@@ -20,7 +20,7 @@ implicit none
 private
 
 ! Ob info type definition
-type, public :: obs_type
+type, public :: ufo_rttovonedvarcheck_obs
 
 integer                      :: iloc
 integer, allocatable         :: QCflags(:,:)    ! current qc flags needed for channel selection
@@ -61,7 +61,7 @@ subroutine ufo_rttovonedvarcheck_obs_setup(self,     & ! out
 implicit none
 
 ! subroutine arguments:
-class(obs_type), intent(out)     :: self     !< observation metadata type
+class(ufo_rttovonedvarcheck_obs), intent(out) :: self !< observation metadata type
 type(c_ptr), value, intent(in)   :: obsspace !< observation database pointer
 integer, intent(in)              :: nchans   !< total number of channels
 type(oops_variables), intent(in) :: vars     !< channels for 1D-Var
@@ -187,7 +187,7 @@ subroutine ufo_rttovonedvarcheck_obs_delete(self)    ! inout
 implicit none
 
 ! subroutine arguments:
-class(obs_type), intent(inout) :: self !< observation metadata type
+class(ufo_rttovonedvarcheck_obs), intent(inout) :: self !< observation metadata type
 
 character(len=*), parameter :: routinename = "ufo_rttovonedvarcheck_obs_delete"
 

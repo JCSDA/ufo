@@ -15,7 +15,7 @@ use ufo_rttovonedvarcheck_constants_mod
 implicit none
 private
 
-type, public :: profindex_type
+type, public :: ufo_rttovonedvarcheck_profindex
 
   ! general
   integer :: nprofelements !< number of profile elements being used
@@ -76,8 +76,8 @@ subroutine ufo_rttovonedvarcheck_profindex_setup(self, bmatrix)
 implicit none
 
 ! subroutine arguments:
-class(profindex_type), intent(inout) :: self    !< profindex structure
-type(bmatrix_type), intent(in)       :: bmatrix !< state error covariances
+class(ufo_rttovonedvarcheck_profindex), intent(inout) :: self    !< profindex structure
+type(ufo_rttovonedvarcheck_bmatrix), intent(in)       :: bmatrix !< state error covariances
 
 ! local constants:
 character(len=*), parameter :: routinename = "ufo_rttovonedvarcheck_profindex_setup"
@@ -227,7 +227,7 @@ end subroutine ufo_rttovonedvarcheck_profindex_setup
 subroutine ufo_rttovonedvarcheck_profindex_delete(self)
 
 implicit none
-class(profindex_type), intent(inout) :: self !< profile index structure
+class(ufo_rttovonedvarcheck_profindex), intent(inout) :: self !< profile index structure
 
 ! Zero all values
 self % nprofelements = 0

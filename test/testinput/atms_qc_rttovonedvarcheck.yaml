@@ -148,8 +148,8 @@ Observations:
       - skin_temperature
       - surface_air_pressure
       BMatrix: Data/atms_bmatrix_70.dat
+      RMatrix: Data/atms_noaa_20_rmatrix.nc4
       nlevels: 70
-      rtype: diagonal # diagonal or full R matrix
       qtotal: true
       RTTOV_mwscattSwitch: false
       RTTOV_usetotalice: false

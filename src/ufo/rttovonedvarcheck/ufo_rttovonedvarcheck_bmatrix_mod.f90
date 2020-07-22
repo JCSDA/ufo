@@ -15,7 +15,7 @@ use ufo_rttovonedvarcheck_utils_mod
 implicit none
 private
 
-type, public :: bmatrix_type
+type, public :: ufo_rttovonedvarcheck_bmatrix
   logical :: status                                 !< status indicator
   logical :: debug                                  !< flag for printing verbose output
   integer :: nbands                                 !< number of latitude bands
@@ -33,7 +33,7 @@ type, public :: bmatrix_type
 contains
   procedure :: setup  => ufo_rttovonedvarcheck_bmatrix_setup
   procedure :: delete => ufo_rttovonedvarcheck_bmatrix_delete
-end type bmatrix_type
+end type ufo_rttovonedvarcheck_bmatrix
 
 contains
 
@@ -47,7 +47,7 @@ contains
 subroutine ufo_rttovonedvarcheck_bmatrix_setup(self, variables, filepath, qtotal_flag)
 
 implicit none
-class(bmatrix_type), intent(inout) :: self         !< B-matrix Covariance
+class(ufo_rttovonedvarcheck_bmatrix), intent(inout) :: self !< B-matrix Covariance
 character(len=*), intent(in)       :: variables(:) !< Model variables in B matrix
 character(len=*), intent(in)       :: filepath     !< Path to B matrix file
 logical, intent(in)                :: qtotal_flag  !< Flag for qtotal
@@ -103,7 +103,7 @@ end subroutine ufo_rttovonedvarcheck_bmatrix_setup
 subroutine ufo_rttovonedvarcheck_bmatrix_delete(self)
 
 implicit none
-class(bmatrix_type), intent(inout) :: self  !< B-matrix Covariance
+class(ufo_rttovonedvarcheck_bmatrix), intent(inout) :: self  !< B-matrix Covariance
 
 character(len=*), parameter :: RoutineName = "ufo_rttovonedvarcheck_bmatrix_delete"
 
@@ -137,7 +137,7 @@ subroutine rttovonedvarcheck_covariance_InitBmatrix(self)
 implicit none
 
 ! subroutine arguments:
-type(bmatrix_type), intent(out) :: self !< B-matrix Covariance 
+type(ufo_rttovonedvarcheck_bmatrix), intent(out) :: self !< B-matrix Covariance 
 
 character(len=*), parameter     :: routinename = "rttovonedvarcheck_covariance_InitBmatrix"
 
@@ -211,7 +211,7 @@ subroutine rttovonedvarcheck_covariance_GetBmatrix (self,           &
 implicit none
 
 ! subroutine arguments:
-type (bmatrix_type), intent(inout) :: self               !< B-matrix covariance
+type (ufo_rttovonedvarcheck_bmatrix), intent(inout) :: self !< B-matrix covariance
 integer, intent(in)                :: fileunit           !< free file unit number
 integer, optional, intent(in)      :: b_elementsused(:)  !< optional: list of elements used
 integer, optional, intent(inout)   :: fieldlist(:)       !< optional: list of fields used
