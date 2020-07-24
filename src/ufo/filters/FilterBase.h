@@ -73,6 +73,7 @@ class FilterBase : public util::Printable {
   virtual int qcFlag() const = 0;
   bool prior_;
   bool post_;
+  bool defer_to_post_;
 };
 
 }  // namespace ufo

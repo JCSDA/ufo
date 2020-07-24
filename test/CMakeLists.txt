@@ -122,6 +122,7 @@ list( APPEND ufo_test_input
   testinput/qc_trackcheck_unittests.yaml
   testinput/qc_backgroundcheck.yaml
   testinput/qc_boundscheck.yaml
+  testinput/qc_defer_to_post.yaml
   testinput/qc_derivative_dpdt.yaml
   testinput/qc_derivative_dxdt.yaml
   testinput/qc_differencecheck.yaml
@@ -908,6 +909,12 @@ ecbuild_add_test( TARGET  test_ufo_qc_gen_backgroundcheck
 ecbuild_add_test( TARGET  test_ufo_qc_gen_boundscheck
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
                   ARGS    "testinput/qc_boundscheck.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsFilters.x )
+
+ecbuild_add_test( TARGET  test_ufo_qc_gen_defer_to_post
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                  ARGS    "testinput/qc_defer_to_post.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsFilters.x )
 
