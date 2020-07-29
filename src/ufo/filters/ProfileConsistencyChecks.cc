@@ -50,7 +50,7 @@ namespace ufo {
     // It is essential for observations to be grouped according to (e.g.) station ID
     // (unless there is only one profile in the sample, which would be very unusual)
     if (obsdb.obs_group_var().empty())
-      throw eckit::BadParameter("ObsDataIn.obsgrouping.group_var is empty.", Here());
+      throw eckit::BadParameter("obsdatain.obsgrouping.group_var is empty.", Here());
   }
 
   // -----------------------------------------------------------------------------

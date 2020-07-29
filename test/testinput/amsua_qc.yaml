@@ -1,60 +1,58 @@
-window_begin: 2018-04-14T21:00:00Z
-window_end: 2018-04-15T03:00:00Z
+window begin: 2018-04-14T21:00:00Z
+window end: 2018-04-15T03:00:00Z
 
-Observations: 
- ObsTypes: 
- - ObsOperator:
-     name: CRTM
-     Absorbers: [H2O,O3,CO2]
-     Clouds: [Water, Ice]
-     Cloud_Fraction: 1.0
-     ObsOptions:
-       Sensor_ID: amsua_n19
-       EndianType: little_endian
-       CoefficientPath: Data/
-   ObsSpace:
-     name: amsua_n19
-     ObsDataIn: 
-       obsfile: Data/ioda/testinput_tier_1/amsua_n19_obs_2018041500_m.nc4
-     simulate:
-       variables: [brightness_temperature]
-       channels: 1-15
-   GeoVaLs: 
-     filename: Data/amsua_n19_geoval_2018041500_m.nc4
-   ObsFilters:
-   - Filter: Bounds Check
-     filter variables:
-     - name: brightness_temperature
-       channels: 1
-     minvalue: 50.0
-     maxvalue: 400.0
-   - Filter: Bounds Check
-     filter variables:
-     - name: brightness_temperature
-       channels: 2-15
-     minvalue: 100.0
-     maxvalue: 500.0
-   - Filter: DomainErr Check
-     filter variables:
-     - name: brightness_temperature
-       channels: 1
-     infltparameter: 1.5
-     where:
-     - variable:
-         name: Scattering@ObsFunction
-       maxvalue: 100.0
-   - Filter: Background Check
-     filter variables:
-     - name: brightness_temperature
-       channels: 1
-     threshold: 2.0
-   - Filter: YDIAGsaver
-     filename: Data/amsua_n19_ydiag_2018041500_m_out.nc4
-     filter variables:
-     - name: brightness_temperature_assuming_clear_sky
-       channels: 1-3
-     - name: brightness_temperature_jacobian_air_temperature
-       channels: 5,6
-     - name: weightingfunction_of_atmosphere_layer
-       channels: 10
-   passedBenchmark: 1496      # number of passed obs
+observations:
+- obs operator:
+    name: CRTM
+    Absorbers: [H2O,O3,CO2]
+    Clouds: [Water, Ice]
+    Cloud_Fraction: 1.0
+    obs options:
+      Sensor_ID: amsua_n19
+      EndianType: little_endian
+      CoefficientPath: Data/
+  obs space:
+    name: amsua_n19
+    obsdatain:
+      obsfile: Data/ioda/testinput_tier_1/amsua_n19_obs_2018041500_m.nc4
+    simulated variables: [brightness_temperature]
+    channels: 1-15
+  geovals:
+    filename: Data/amsua_n19_geoval_2018041500_m.nc4
+  obs filters:
+  - filter: Bounds Check
+    filter variables:
+    - name: brightness_temperature
+      channels: 1
+    minvalue: 50.0
+    maxvalue: 400.0
+  - filter: Bounds Check
+    filter variables:
+    - name: brightness_temperature
+      channels: 2-15
+    minvalue: 100.0
+    maxvalue: 500.0
+  - filter: DomainErr Check
+    filter variables:
+    - name: brightness_temperature
+      channels: 1
+    infltparameter: 1.5
+    where:
+    - variable:
+        name: Scattering@ObsFunction
+      maxvalue: 100.0
+  - filter: Background Check
+    filter variables:
+    - name: brightness_temperature
+      channels: 1
+    threshold: 2.0
+  - filter: YDIAGsaver
+    filename: Data/amsua_n19_ydiag_2018041500_m_out.nc4
+    filter variables:
+    - name: brightness_temperature_assuming_clear_sky
+      channels: 1-3
+    - name: brightness_temperature_jacobian_air_temperature
+      channels: 5,6
+    - name: weightingfunction_of_atmosphere_layer
+      channels: 10
+  passedBenchmark: 1496      # number of passed obs

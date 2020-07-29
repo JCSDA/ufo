@@ -63,10 +63,10 @@ template <typename T>
 void testVariable(const std::string &section) {
   const eckit::Configuration &topConf = ::test::TestEnvironment::config();
 
-  util::DateTime bgn(topConf.getString("window_begin"));
-  util::DateTime end(topConf.getString("window_end"));
+  util::DateTime bgn(topConf.getString("window begin"));
+  util::DateTime end(topConf.getString("window end"));
 
-  const eckit::LocalConfiguration obsSpaceConf(topConf, "ObsSpace");
+  const eckit::LocalConfiguration obsSpaceConf(topConf, "obs space");
   ioda::ObsSpace obsSpace(obsSpaceConf, oops::mpi::comm(), bgn, end);
 
   TestParameters<T> parameters;
@@ -104,10 +104,10 @@ CASE("ufo/ParallelObsDistribution/getGlobalDateTimeVariableValues") {
 CASE("ufo/ParallelObsDistribution/members") {
   const eckit::Configuration &topConf = ::test::TestEnvironment::config();
 
-  util::DateTime bgn(topConf.getString("window_begin"));
-  util::DateTime end(topConf.getString("window_end"));
+  util::DateTime bgn(topConf.getString("window begin"));
+  util::DateTime end(topConf.getString("window end"));
 
-  const eckit::LocalConfiguration obsSpaceConf(topConf, "ObsSpace");
+  const eckit::LocalConfiguration obsSpaceConf(topConf, "obs space");
   ioda::ObsSpace obsSpace(obsSpaceConf, oops::mpi::comm(), bgn, end);
 
   ParallelObsDistribution obsDistribution(obsSpace);

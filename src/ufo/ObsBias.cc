@@ -1,8 +1,8 @@
 /*
  * (C) Copyright 2017-2019 UCAR
- * 
+ *
  * This software is licensed under the terms of the Apache Licence Version 2.0
- * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
 #include "ufo/ObsBias.h"
@@ -25,15 +25,15 @@ ObsBias::ObsBias(const ioda::ObsSpace & odb, const eckit::Configuration & conf)
   oops::Log::trace() << "ObsBias::create starting." << std::endl;
 
   /// Get the jobs(channels)
-  if (conf_.has("ObsBias.jobs")) {
-    const std::set<int> jobs = oops::parseIntSet(conf_.getString("ObsBias.jobs"));
+  if (conf_.has("obs bias.jobs")) {
+    const std::set<int> jobs = oops::parseIntSet(conf_.getString("obs bias.jobs"));
     jobs_.assign(jobs.begin(), jobs.end());
   }
 
   /// Predictor factory
-  if (conf_.has("ObsBias.predictors")) {
+  if (conf_.has("obs bias.predictors")) {
     std::vector<eckit::LocalConfiguration> confs;
-    conf_.get("ObsBias.predictors", confs);
+    conf_.get("obs bias.predictors", confs);
     for (std::size_t j = 0; j < confs.size(); ++j) {
       std::shared_ptr<PredictorBase> pred(PredictorFactory::create(confs[j], jobs_));
       predbases_.push_back(pred);
@@ -105,7 +105,7 @@ ObsBias & ObsBias::operator=(const ObsBias & rhs) {
 
 void ObsBias::read(const eckit::Configuration & conf) {
   if (biasbase_) {
-    std::string sensor = conf.getString("ObsBias.sensor");
+    std::string sensor = conf.getString("obs bias.sensor");
     biasbase_->read(sensor);
   }
 }

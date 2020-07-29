@@ -1,22 +1,21 @@
-window_begin: 2018-04-14T20:00:00Z
-window_end: 2018-04-15T03:00:00Z
+window begin: 2018-04-14T20:00:00Z
+window end: 2018-04-15T03:00:00Z
 
-ObsSpace:
+obs space:
   name: Satwind
-  ObsDataIn:
+  obsdatain:
     obsfile: Data/ioda/testinput_tier_1/satwind_obs_2018041500_m.nc4
-  ObsDataOut:
+  obsdataout:
     obsfile: Data/satwind_obs_2018041500_function_output.nc4
-  simulate:
-    variables: [eastward_wind, northward_wind]
+  simulated variables: [eastward_wind, northward_wind]
 # can have GeoVaLs section like below
-#GeoVaLs:
+#geovals:
 #  filename: Data/satwind_geoval_2018041500_m.nc4
 #
 # can have ObsDiag section like below
-#ObsDiag:
+#obs diagnostics:
 #  filename: Data/satwind_obsdiag_2018041500_m.nc4
-ObsFunction:
+obs function:
   name: Velocity@ObsFunction
   options:
     type: ObsValue

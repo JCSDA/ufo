@@ -1,8 +1,8 @@
 /*
  * (C) Copyright 2018-2019 UCAR
- * 
+ *
  * This software is licensed under the terms of the Apache Licence Version 2.0
- * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
 #include <cmath>
@@ -29,14 +29,14 @@ ObsBiasCovariance::ObsBiasCovariance(const ioda::ObsSpace & odb, const eckit::Co
   : conf_(conf), variance_(0) {
   // Get the number of predictors
   std::vector<eckit::LocalConfiguration> confs;
-  if (conf_.has("ObsBias.predictors")) {
-    conf_.get("ObsBias.predictors", confs);
+  if (conf_.has("obs bias.predictors")) {
+    conf_.get("obs bias.predictors", confs);
   }
 
   /// Get the jobs(channels)
   std::set<int> jobs;
-  if (conf_.has("ObsBias.jobs")) {
-    jobs = oops::parseIntSet(conf_.getString("ObsBias.jobs"));
+  if (conf_.has("obs bias.jobs")) {
+    jobs = oops::parseIntSet(conf_.getString("obs bias.jobs"));
   }
 
   for (std::size_t ii = 0; ii < confs.size()*jobs.size(); ++ii)

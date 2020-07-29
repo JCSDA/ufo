@@ -45,7 +45,7 @@ ObsRadianceRTTOV::ObsRadianceRTTOV(const ioda::ObsSpace & odb, const eckit::Conf
   channels_ = observed.channels();
 
   // call Fortran setup routine
-//  const eckit::LocalConfiguration obsOptions(config, "ObsOptions");
+//  const eckit::LocalConfiguration obsOptions(config, "obs options");
 //  const eckit::Configuration * configc = &obsOptions;
   ufo_radiancerttov_setup_f90(keyOperRadianceRTTOV_, config);
   oops::Log::info() << "ObsRadianceRTTOV channels: " << channels_ << std::endl;

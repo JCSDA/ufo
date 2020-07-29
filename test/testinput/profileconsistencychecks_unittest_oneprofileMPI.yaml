@@ -2,37 +2,35 @@
 #=== Unit test with one profile for the profile consistency checks ===#
 #
 
-window_begin: 2018-04-14T20:30:00Z
-window_end: 2018-04-15T03:30:00Z
+window begin: 2018-04-14T20:30:00Z
+window end: 2018-04-15T03:30:00Z
 
-Observations:
-  ObsTypes:
-  - ObsSpace:
-      name: Radiosonde
-      ObsDataIn:
-        obsfile: Data/met_office_profile_consistency_checks_oneprofile.nc4
-        obsgrouping:
-          group_variable: "station_id"
-          sort_variable: "air_pressure"
-          sort_order: "descending"
-      simulate:
-        variables: [air_temperature, geopotential_height]
-    ObsFilters:
-    - Filter: ProfileConsistencyChecks
-      filter variables:
-      - name: air_temperature
-      - name: geopotential_height
-      Checks: ["Basic", "SamePDiffT", "Sign", "UnstableLayer", "Interpolation", "Hydrostatic"]
-      compareWithOPS: false
-      flagBasicChecksFail: true
-      nErrorsFail: 8
-      BChecks_minValidP: 0.0
-      BChecks_maxValidP: 110.0e3
-      where:
-      - variable:
-          name: test_id@MetaData
-        is_in: 0
-    HofX: HofX
-    ObsDiag:
-    benchmarkFlag: 15
-    flaggedBenchmark: 0
+observations:
+- obs space:
+    name: Radiosonde
+    obsdatain:
+      obsfile: Data/met_office_profile_consistency_checks_oneprofile.nc4
+      obsgrouping:
+        group variable: "station_id"
+        sort variable: "air_pressure"
+        sort order: "descending"
+    simulated variables: [air_temperature, geopotential_height]
+  obs filters:
+  - filter: ProfileConsistencyChecks
+    filter variables:
+    - name: air_temperature
+    - name: geopotential_height
+    Checks: ["Basic", "SamePDiffT", "Sign", "UnstableLayer", "Interpolation", "Hydrostatic"]
+    compareWithOPS: false
+    flagBasicChecksFail: true
+    nErrorsFail: 8
+    BChecks_minValidP: 0.0
+    BChecks_maxValidP: 110.0e3
+    where:
+    - variable:
+        name: test_id@MetaData
+      is_in: 0
+  HofX: HofX
+  obs diagnostics:
+  benchmarkFlag: 15
+  flaggedBenchmark: 0

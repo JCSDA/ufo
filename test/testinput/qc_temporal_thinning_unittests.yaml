@@ -1,12 +1,11 @@
 Min_spacing below observation spacing:
-  window_begin: 2000-01-01T00:00:00Z
-  window_end: 2030-01-01T00:00:00Z
-  ObsSpace:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
     name: Aircraft
-    simulate:
-      variables: [air_temperature]
-    Generate:
-      List:
+    simulated variables: [air_temperature]
+    generate:
+      list:
         lats: [ 0, 0, 0, 0, 0, 0, 0 ]
         lons: [ 0, 0, 0, 0, 0, 0, 0 ]
         datetimes:
@@ -17,21 +16,20 @@ Min_spacing below observation spacing:
           - 2010-01-01T00:04:40Z
           - 2010-01-01T00:04:50Z
           - 2010-01-01T00:05:00Z
-      obs_errors: [1.0]
+      obs errors: [1.0]
   TemporalThinning:
     variables: [air_temperature]
     min_spacing: PT9S
   expected_thinned_obs_indices: []
 
 Min spacing equal to observation spacing:
-  window_begin: 2000-01-01T00:00:00Z
-  window_end: 2030-01-01T00:00:00Z
-  ObsSpace:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
     name: Aircraft
-    simulate:
-      variables: [air_temperature]
-    Generate:
-      List:
+    simulated variables: [air_temperature]
+    generate:
+      list:
         lats: [ 0, 0, 0, 0, 0, 0, 0 ]
         lons: [ 0, 0, 0, 0, 0, 0, 0 ]
         datetimes:
@@ -42,21 +40,20 @@ Min spacing equal to observation spacing:
           - 2010-01-01T00:04:40Z
           - 2010-01-01T00:04:50Z
           - 2010-01-01T00:05:00Z
-      obs_errors: [1.0]
+      obs errors: [1.0]
   TemporalThinning:
     variables: [air_temperature]
     min_spacing: PT10S
   expected_thinned_obs_indices: []
 
 Min spacing above observation spacing:
-  window_begin: 2000-01-01T00:00:00Z
-  window_end: 2030-01-01T00:00:00Z
-  ObsSpace:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
     name: Aircraft
-    simulate:
-      variables: [air_temperature]
-    Generate:
-      List:
+    simulated variables: [air_temperature]
+    generate:
+      list:
         lats: [ 0, 0, 0, 0, 0, 0, 0 ]
         lons: [ 0, 0, 0, 0, 0, 0, 0 ]
         datetimes:
@@ -67,21 +64,20 @@ Min spacing above observation spacing:
           - 2010-01-01T00:04:40Z
           - 2010-01-01T00:04:50Z
           - 2010-01-01T00:05:00Z
-      obs_errors: [1.0]
+      obs errors: [1.0]
   TemporalThinning:
     variables: [air_temperature]
     min_spacing: PT11S
   expected_thinned_obs_indices: [1, 3, 5]
 
 Categories:
-  window_begin: 2000-01-01T00:00:00Z
-  window_end: 2030-01-01T00:00:00Z
-  ObsSpace:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
     name: Aircraft
-    simulate:
-      variables: [air_temperature]
-    Generate:
-      List:
+    simulated variables: [air_temperature]
+    generate:
+      list:
         lats: [ 0, 0, 0, 0, 0, 0, 0 ]
         lons: [ 0, 0, 0, 0, 0, 0, 0 ]
         datetimes:
@@ -92,7 +88,7 @@ Categories:
           - 2010-01-01T00:04:40Z
           - 2010-01-01T00:04:50Z
           - 2010-01-01T00:05:00Z
-      obs_errors: [1.0]
+      obs errors: [1.0]
   category: [0, 0, 0, 1, 1, 1, 1]
   TemporalThinning:
     variables: [air_temperature]
@@ -102,14 +98,13 @@ Categories:
   expected_thinned_obs_indices: [1, 4, 6]
 
 Categories, observations sorted in descending order:
-  window_begin: 2000-01-01T00:00:00Z
-  window_end: 2030-01-01T00:00:00Z
-  ObsSpace:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
     name: Aircraft
-    simulate:
-      variables: [air_temperature]
-    Generate:
-      List:
+    simulated variables: [air_temperature]
+    generate:
+      list:
         lats: [ 0, 0, 0, 0, 0, 0, 0 ]
         lons: [ 0, 0, 0, 0, 0, 0, 0 ]
         datetimes:
@@ -120,7 +115,7 @@ Categories, observations sorted in descending order:
           - 2010-01-01T00:04:20Z
           - 2010-01-01T00:04:10Z
           - 2010-01-01T00:04:00Z
-      obs_errors: [1.0]
+      obs errors: [1.0]
   category: [1, 1, 1, 1, 0, 0, 0]
   TemporalThinning:
     variables: [air_temperature]
@@ -130,14 +125,13 @@ Categories, observations sorted in descending order:
   expected_thinned_obs_indices: [0, 2, 5]
 
 Categories, where clause:
-  window_begin: 2000-01-01T00:00:00Z
-  window_end: 2030-01-01T00:00:00Z
-  ObsSpace:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
     name: Aircraft
-    simulate:
-      variables: [air_temperature]
-    Generate:
-      List:
+    simulated variables: [air_temperature]
+    generate:
+      list:
         lats: [ 1, 0, 0, 0, 0, 0, 1 ]
         lons: [ 0, 0, 0, 0, 0, 0, 0 ]
         datetimes:
@@ -148,7 +142,7 @@ Categories, where clause:
           - 2010-01-01T00:04:20Z
           - 2010-01-01T00:04:10Z
           - 2010-01-01T00:04:00Z
-      obs_errors: [1.0]
+      obs errors: [1.0]
   category: [1, 1, 1, 1, 0, 0, 0]
   TemporalThinning:
     variables: [air_temperature]
@@ -162,14 +156,13 @@ Categories, where clause:
   expected_thinned_obs_indices: [2, 4]
 
 Tolerance and priorities, first observation in each group to be retained:
-  window_begin: 2000-01-01T00:00:00Z
-  window_end: 2030-01-01T00:00:00Z
-  ObsSpace:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
     name: Aircraft
-    simulate:
-      variables: [air_temperature]
-    Generate:
-      List:
+    simulated variables: [air_temperature]
+    generate:
+      list:
         lats: [0, 0, 0,   0, 0, 0,
                0, 0, 0,   0, 0, 0,
                0, 0, 0,   0, 0, 0,
@@ -200,7 +193,7 @@ Tolerance and priorities, first observation in each group to be retained:
           - 2010-01-01T00:05:00Z # group 6
           - 2010-01-01T00:05:01Z
           - 2010-01-01T00:05:02Z
-      obs_errors: [1.0]
+      obs errors: [1.0]
   priority: [0, 0, 0,   0, 0, 0,
              0, 0, 0,   0, 0, 0,
              0, 0, 0,   0, 0, 0,
@@ -217,14 +210,13 @@ Tolerance and priorities, first observation in each group to be retained:
                                  19, 20]
 
 Tolerance and priorities, second observation in each group to be retained:
-  window_begin: 2000-01-01T00:00:00Z
-  window_end: 2030-01-01T00:00:00Z
-  ObsSpace:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
     name: Aircraft
-    simulate:
-      variables: [air_temperature]
-    Generate:
-      List:
+    simulated variables: [air_temperature]
+    generate:
+      list:
         lats: [0, 0, 0,   0, 0, 0,
                0, 0, 0,   0, 0, 0,
                0, 0, 0,   0, 0, 0,
@@ -255,7 +247,7 @@ Tolerance and priorities, second observation in each group to be retained:
           - 2010-01-01T00:05:00Z # group 6
           - 2010-01-01T00:05:01Z
           - 2010-01-01T00:05:02Z
-      obs_errors: [1.0]
+      obs errors: [1.0]
   priority: [0, 1, 1,   0, 1, 1,
              0, 1, 1,   0, 1, 1,
              0, 1, 1,   0, 1, 1,
@@ -272,14 +264,13 @@ Tolerance and priorities, second observation in each group to be retained:
                                  18, 20]
 
 Tolerance and priorities, third observation in each group to be retained:
-  window_begin: 2000-01-01T00:00:00Z
-  window_end: 2030-01-01T00:00:00Z
-  ObsSpace:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
     name: Aircraft
-    simulate:
-      variables: [air_temperature]
-    Generate:
-      List:
+    simulated variables: [air_temperature]
+    generate:
+      list:
         lats: [0, 0, 0,   0, 0, 0,
                0, 0, 0,   0, 0, 0,
                0, 0, 0,   0, 0, 0,
@@ -310,7 +301,7 @@ Tolerance and priorities, third observation in each group to be retained:
           - 2010-01-01T00:05:00Z # group 6
           - 2010-01-01T00:05:01Z
           - 2010-01-01T00:05:02Z
-      obs_errors: [1.0]
+      obs errors: [1.0]
   priority: [0, 0, 1,   0, 0, 1,
              0, 0, 1,   0, 0, 1,
              0, 0, 1,   0, 0, 1,
@@ -327,14 +318,13 @@ Tolerance and priorities, third observation in each group to be retained:
                                  18, 19]
 
 Tolerance but no priorities:
-  window_begin: 2000-01-01T00:00:00Z
-  window_end: 2030-01-01T00:00:00Z
-  ObsSpace:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
     name: Aircraft
-    simulate:
-      variables: [air_temperature]
-    Generate:
-      List:
+    simulated variables: [air_temperature]
+    generate:
+      list:
         lats: [0, 0, 0,   0, 0, 0,
                0, 0, 0,   0, 0, 0,
                0, 0, 0,   0, 0, 0,
@@ -365,7 +355,7 @@ Tolerance but no priorities:
           - 2010-01-01T00:05:00Z # group 6
           - 2010-01-01T00:05:01Z
           - 2010-01-01T00:05:02Z
-      obs_errors: [1.0]
+      obs errors: [1.0]
   TemporalThinning:
     variables: [air_temperature]
     min_spacing: PT15S
@@ -376,14 +366,13 @@ Tolerance but no priorities:
                                  19, 20]
 
 Seed time inside observation time range (should pick preceding observation):
-  window_begin: 2000-01-01T00:00:00Z
-  window_end: 2030-01-01T00:00:00Z
-  ObsSpace:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
     name: Aircraft
-    simulate:
-      variables: [air_temperature]
-    Generate:
-      List:
+    simulated variables: [air_temperature]
+    generate:
+      list:
         lats: [ 0, 0, 0, 0, 0, 0, 0 ]
         lons: [ 0, 0, 0, 0, 0, 0, 0 ]
         datetimes:
@@ -394,7 +383,7 @@ Seed time inside observation time range (should pick preceding observation):
           - 2010-01-01T00:04:40Z
           - 2010-01-01T00:04:50Z
           - 2010-01-01T00:05:00Z
-      obs_errors: [1.0]
+      obs errors: [1.0]
   TemporalThinning:
     variables: [air_temperature]
     min_spacing: PT15S
@@ -402,14 +391,13 @@ Seed time inside observation time range (should pick preceding observation):
   expected_thinned_obs_indices: [0, 2, 4, 6]
 
 Seed time inside observation time range (should pick following observation):
-  window_begin: 2000-01-01T00:00:00Z
-  window_end: 2030-01-01T00:00:00Z
-  ObsSpace:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
     name: Aircraft
-    simulate:
-      variables: [air_temperature]
-    Generate:
-      List:
+    simulated variables: [air_temperature]
+    generate:
+      list:
         lats: [ 0, 0, 0, 0, 0, 0, 0 ]
         lons: [ 0, 0, 0, 0, 0, 0, 0 ]
         datetimes:
@@ -420,7 +408,7 @@ Seed time inside observation time range (should pick following observation):
           - 2010-01-01T00:04:40Z # should be picked as seed
           - 2010-01-01T00:04:50Z
           - 2010-01-01T00:05:00Z
-      obs_errors: [1.0]
+      obs errors: [1.0]
   TemporalThinning:
     variables: [air_temperature]
     min_spacing: PT15S
@@ -428,14 +416,13 @@ Seed time inside observation time range (should pick following observation):
   expected_thinned_obs_indices: [1, 3, 5]
 
 Seed time midway between two observations (should pick following observation):
-  window_begin: 2000-01-01T00:00:00Z
-  window_end: 2030-01-01T00:00:00Z
-  ObsSpace:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
     name: Aircraft
-    simulate:
-      variables: [air_temperature]
-    Generate:
-      List:
+    simulated variables: [air_temperature]
+    generate:
+      list:
         lats: [ 0, 0, 0, 0, 0, 0, 0 ]
         lons: [ 0, 0, 0, 0, 0, 0, 0 ]
         datetimes:
@@ -446,7 +433,7 @@ Seed time midway between two observations (should pick following observation):
           - 2010-01-01T00:04:40Z
           - 2010-01-01T00:04:50Z
           - 2010-01-01T00:05:00Z
-      obs_errors: [1.0]
+      obs errors: [1.0]
   TemporalThinning:
     variables: [air_temperature]
     min_spacing: PT15S
@@ -454,14 +441,13 @@ Seed time midway between two observations (should pick following observation):
   expected_thinned_obs_indices: [0, 2, 4, 6]
 
 Seed time at earliest observation:
-  window_begin: 2000-01-01T00:00:00Z
-  window_end: 2030-01-01T00:00:00Z
-  ObsSpace:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
     name: Aircraft
-    simulate:
-      variables: [air_temperature]
-    Generate:
-      List:
+    simulated variables: [air_temperature]
+    generate:
+      list:
         lats: [ 0, 0, 0, 0, 0, 0, 0 ]
         lons: [ 0, 0, 0, 0, 0, 0, 0 ]
         datetimes:
@@ -472,7 +458,7 @@ Seed time at earliest observation:
           - 2010-01-01T00:04:40Z
           - 2010-01-01T00:04:50Z
           - 2010-01-01T00:05:00Z
-      obs_errors: [1.0]
+      obs errors: [1.0]
   TemporalThinning:
     variables: [air_temperature]
     min_spacing: PT15S
@@ -480,14 +466,13 @@ Seed time at earliest observation:
   expected_thinned_obs_indices: [1, 3, 5]
 
 Seed time before earliest observation:
-  window_begin: 2000-01-01T00:00:00Z
-  window_end: 2030-01-01T00:00:00Z
-  ObsSpace:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
     name: Aircraft
-    simulate:
-      variables: [air_temperature]
-    Generate:
-      List:
+    simulated variables: [air_temperature]
+    generate:
+      list:
         lats: [ 0, 0, 0, 0, 0, 0, 0 ]
         lons: [ 0, 0, 0, 0, 0, 0, 0 ]
         datetimes:
@@ -498,7 +483,7 @@ Seed time before earliest observation:
           - 2010-01-01T00:04:40Z
           - 2010-01-01T00:04:50Z
           - 2010-01-01T00:05:00Z
-      obs_errors: [1.0]
+      obs errors: [1.0]
   TemporalThinning:
     variables: [air_temperature]
     min_spacing: PT15S
@@ -506,14 +491,13 @@ Seed time before earliest observation:
   expected_thinned_obs_indices: [1, 3, 5]
 
 Seed time at latest observation:
-  window_begin: 2000-01-01T00:00:00Z
-  window_end: 2030-01-01T00:00:00Z
-  ObsSpace:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
     name: Aircraft
-    simulate:
-      variables: [air_temperature]
-    Generate:
-      List:
+    simulated variables: [air_temperature]
+    generate:
+      list:
         lats: [ 0, 0, 0, 0, 0, 0, 0 ]
         lons: [ 0, 0, 0, 0, 0, 0, 0 ]
         datetimes:
@@ -524,7 +508,7 @@ Seed time at latest observation:
           - 2010-01-01T00:04:40Z
           - 2010-01-01T00:04:50Z
           - 2010-01-01T00:05:00Z
-      obs_errors: [1.0]
+      obs errors: [1.0]
   TemporalThinning:
     variables: [air_temperature]
     min_spacing: PT15S
@@ -532,14 +516,13 @@ Seed time at latest observation:
   expected_thinned_obs_indices: [1, 3, 5]
 
 Seed time after latest observation:
-  window_begin: 2000-01-01T00:00:00Z
-  window_end: 2030-01-01T00:00:00Z
-  ObsSpace:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
     name: Aircraft
-    simulate:
-      variables: [air_temperature]
-    Generate:
-      List:
+    simulated variables: [air_temperature]
+    generate:
+      list:
         lats: [ 0, 0, 0, 0, 0, 0, 0 ]
         lons: [ 0, 0, 0, 0, 0, 0, 0 ]
         datetimes:
@@ -550,7 +533,7 @@ Seed time after latest observation:
           - 2010-01-01T00:04:40Z
           - 2010-01-01T00:04:50Z
           - 2010-01-01T00:05:00Z
-      obs_errors: [1.0]
+      obs errors: [1.0]
   TemporalThinning:
     variables: [air_temperature]
     min_spacing: PT15S
@@ -558,14 +541,13 @@ Seed time after latest observation:
   expected_thinned_obs_indices: [1, 3, 5]
 
 Tolerance, priorities and seed time at a low-priority observation followed by a high-priority one:
-  window_begin: 2000-01-01T00:00:00Z
-  window_end: 2030-01-01T00:00:00Z
-  ObsSpace:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
     name: Aircraft
-    simulate:
-      variables: [air_temperature]
-    Generate:
-      List:
+    simulated variables: [air_temperature]
+    generate:
+      list:
         lats: [0, 0, 0,   0, 0, 0,
                0, 0, 0,   0, 0, 0,
                0, 0, 0,   0, 0, 0,
@@ -596,7 +578,7 @@ Tolerance, priorities and seed time at a low-priority observation followed by a 
           - 2010-01-01T00:05:00Z # group 6
           - 2010-01-01T00:05:01Z
           - 2010-01-01T00:05:02Z
-      obs_errors: [1.0]
+      obs errors: [1.0]
   priority: [0, 0, 1,   0, 0, 1,
              0, 0, 1,   0, 0, 1,
              0, 0, 1,   0, 0, 1,
@@ -614,14 +596,13 @@ Tolerance, priorities and seed time at a low-priority observation followed by a 
                                  18, 19, 20]
 
 Tolerance, priorities and seed time at a low-priority observation preceded by a high-priority one:
-  window_begin: 2000-01-01T00:00:00Z
-  window_end: 2030-01-01T00:00:00Z
-  ObsSpace:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
     name: Aircraft
-    simulate:
-      variables: [air_temperature]
-    Generate:
-      List:
+    simulated variables: [air_temperature]
+    generate:
+      list:
         lats: [0, 0, 0,   0, 0, 0,
                0, 0, 0,   0, 0, 0,
                0, 0, 0,   0, 0, 0,
@@ -652,7 +633,7 @@ Tolerance, priorities and seed time at a low-priority observation preceded by a 
           - 2010-01-01T00:05:00Z # group 6
           - 2010-01-01T00:05:01Z
           - 2010-01-01T00:05:02Z
-      obs_errors: [1.0]
+      obs errors: [1.0]
   priority: [1, 0, 0,   1, 0, 0,
              1, 0, 0,   1, 0, 0,
              1, 0, 0,   1, 0, 0,

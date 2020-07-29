@@ -2,38 +2,36 @@
 #=== Profile consistency checks for wind speed interpolation ===#
 #
 
-window_begin: 2018-04-14T20:30:00Z
-window_end: 2018-04-15T03:30:00Z
+window begin: 2018-04-14T20:30:00Z
+window end: 2018-04-15T03:30:00Z
 
-Observations:
-  ObsTypes:
-  - ObsSpace:
-      name: Radiosonde
-      ObsDataIn:
-        obsfile: Data/met_office_profile_consistency_checks_uinterp.nc4
-        obsgrouping:
-          group_variable: "station_id"
-          sort_variable: "air_pressure"
-          sort_order: "descending"
-      simulate:
-        variables: [eastward_wind, northward_wind]
-    ObsFilters:
-    - Filter: ProfileConsistencyChecks
-      filter variables:
-      - name: eastward_wind
-      - name: northward_wind
-      Checks: ["Basic", "UInterp"]
-      compareWithOPS: false
-      flagBasicChecksFail: true
-      nErrorsFail: 8
-      UICheck_TInterpIdenticalPTolSq: 4.0
-      UICheck_TInterpTolSq: 64.0
-      UICheck_BigGapLowP: 1000.0
-      UICheck_BigGaps: [15000.0, 10000.0, 7500.0, 5000.0, 2000.0]
-      UICheck_BigGapsPThresh: [65000.0, 27500.0, 17500.0, 8500.0, 2500.0]
-      Comparison_Tol: 0.1
-    HofX: HofX
-    ObsDiag:
-    passedBenchmark: 212206
-    benchmarkFlag: 15
-    flaggedBenchmark: 9058
+observations:
+- obs space:
+    name: Radiosonde
+    obsdatain:
+      obsfile: Data/met_office_profile_consistency_checks_uinterp.nc4
+      obsgrouping:
+        group variable: "station_id"
+        sort variable: "air_pressure"
+        sort order: "descending"
+    simulated variables: [eastward_wind, northward_wind]
+  obs filters:
+  - filter: ProfileConsistencyChecks
+    filter variables:
+    - name: eastward_wind
+    - name: northward_wind
+    Checks: ["Basic", "UInterp"]
+    compareWithOPS: false
+    flagBasicChecksFail: true
+    nErrorsFail: 8
+    UICheck_TInterpIdenticalPTolSq: 4.0
+    UICheck_TInterpTolSq: 64.0
+    UICheck_BigGapLowP: 1000.0
+    UICheck_BigGaps: [15000.0, 10000.0, 7500.0, 5000.0, 2000.0]
+    UICheck_BigGapsPThresh: [65000.0, 27500.0, 17500.0, 8500.0, 2500.0]
+    Comparison_Tol: 0.1
+  HofX: HofX
+  obs diagnostics:
+  passedBenchmark: 212206
+  benchmarkFlag: 15
+  flaggedBenchmark: 9058

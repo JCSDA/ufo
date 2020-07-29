@@ -57,9 +57,9 @@ Locations::Locations(const ioda::ObsSpace & odb,
 
 Locations::Locations(const eckit::Configuration & conf,
                      const eckit::mpi::Comm & comm) : comm_(comm) {
-  const eckit::LocalConfiguration obsconf(conf, "ObsSpace");
-  const util::DateTime bgn = util::DateTime(conf.getString("window_begin"));
-  const util::DateTime end = util::DateTime(conf.getString("window_end"));
+  const eckit::LocalConfiguration obsconf(conf, "obs space");
+  const util::DateTime bgn = util::DateTime(conf.getString("window begin"));
+  const util::DateTime end = util::DateTime(conf.getString("window end"));
 
   ioda::ObsSpace obspace(obsconf, comm, bgn, end);
   const int nlocs = obspace.nlocs();

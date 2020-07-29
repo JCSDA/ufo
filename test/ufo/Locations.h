@@ -33,9 +33,9 @@ void testLocations() {
   const eckit::LocalConfiguration conf(::test::TestEnvironment::config());
 
   //  Setup ObsSpace
-  util::DateTime bgn(conf.getString("window_begin"));
-  util::DateTime end(conf.getString("window_end"));
-  const eckit::LocalConfiguration obsconf(conf, "ObsSpace");
+  util::DateTime bgn(conf.getString("window begin"));
+  util::DateTime end(conf.getString("window end"));
+  const eckit::LocalConfiguration obsconf(conf, "obs space");
   ioda::ObsSpace odb(obsconf, oops::mpi::comm(), bgn, end);
   const size_t nlocs = odb.nlocs();
 

@@ -1,17 +1,16 @@
 Horizontal mesh 20000:
-  window_begin: 2000-01-01T00:00:00Z
-  window_end: 2030-01-01T00:00:00Z
-  ObsSpace:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
     name: Aircraft
-    simulate:
-      variables: [air_temperature]
-    Generate:
-      List:
+    simulated variables: [air_temperature]
+    generate:
+      list:
         lats: [ -2, -1, 0, 1, 2 ]
         lons: [ 178, 179, 180, 181, 182 ]
         datetimes: [ '2010-01-01T00:04:00Z', '2010-01-01T00:04:12Z', '2010-01-01T00:04:24Z',
                      '2010-01-01T00:04:36Z', '2010-01-01T00:04:48Z' ]
-      obs_errors: [1.0]
+      obs errors: [1.0]
   air_pressures: [ 100000, 100000, 100000, 100000, 100000]
   GaussianThinning:
     variables: [air_temperature]
@@ -20,19 +19,18 @@ Horizontal mesh 20000:
   expected_thinned_obs_indices: [1, 2, 3]
 
 Horizontal mesh 20000, extreme longitudes, 0 to 360 degrees:
-  window_begin: 2000-01-01T00:00:00Z
-  window_end: 2030-01-01T00:00:00Z
-  ObsSpace:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
     name: Aircraft
-    simulate:
-      variables: [air_temperature]
-    Generate:
-      List:
+    simulated variables: [air_temperature]
+    generate:
+      list:
         lats: [ 0,  0,   0,   0,   0,   0 ]
         lons: [ 0, 90, 179, 181, 270, 359.9999 ]
         datetimes: [ '2010-01-01T00:04:00Z', '2010-01-01T00:04:12Z', '2010-01-01T00:04:24Z',
                      '2010-01-01T00:04:36Z', '2010-01-01T00:04:48Z', '2010-01-01T00:05:00Z' ]
-      obs_errors: [1.0]
+      obs errors: [1.0]
   air_pressures: [ 100000, 100000, 100000, 100000, 100000, 100000]
   GaussianThinning:
     variables: [air_temperature]
@@ -41,19 +39,18 @@ Horizontal mesh 20000, extreme longitudes, 0 to 360 degrees:
   expected_thinned_obs_indices: [0, 2, 3, 5]
 
 Horizontal mesh 20000, extreme longitudes, -180 to 180 degrees:
-  window_begin: 2000-01-01T00:00:00Z
-  window_end: 2030-01-01T00:00:00Z
-  ObsSpace:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
     name: Aircraft
-    simulate:
-      variables: [air_temperature]
-    Generate:
-      List:
+    simulated variables: [air_temperature]
+    generate:
+      list:
         lats: [ 0,  0,   0,   0,   0,   0 ]
         lons: [ 0, 90, 179, -179, -90, -0.0001 ]
         datetimes: [ '2010-01-01T00:04:00Z', '2010-01-01T00:04:12Z', '2010-01-01T00:04:24Z',
                      '2010-01-01T00:04:36Z', '2010-01-01T00:04:48Z', '2010-01-01T00:05:00Z' ]
-      obs_errors: [1.0]
+      obs errors: [1.0]
   air_pressures: [ 100000, 100000, 100000, 100000, 100000, 100000]
   GaussianThinning:
     variables: [air_temperature]
@@ -62,19 +59,18 @@ Horizontal mesh 20000, extreme longitudes, -180 to 180 degrees:
   expected_thinned_obs_indices: [0, 2, 3, 5]
 
 Horizontal mesh 20000, extreme latitudes:
-  window_begin: 2000-01-01T00:00:00Z
-  window_end: 2030-01-01T00:00:00Z
-  ObsSpace:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
     name: Aircraft
-    simulate:
-      variables: [air_temperature]
-    Generate:
-      List:
+    simulated variables: [air_temperature]
+    generate:
+      list:
         lats: [ -90, -45, 0, 45, 90 ]
         lons: [ 90, 90, 90, 90, 90 ]
         datetimes: [ '2010-01-01T00:04:00Z', '2010-01-01T00:04:12Z', '2010-01-01T00:04:24Z',
                      '2010-01-01T00:04:36Z', '2010-01-01T00:04:48Z' ]
-      obs_errors: [1.0]
+      obs errors: [1.0]
   air_pressures: [ 100000, 100000, 100000, 100000, 100000]
   GaussianThinning:
     variables: [air_temperature]
@@ -83,20 +79,19 @@ Horizontal mesh 20000, extreme latitudes:
   expected_thinned_obs_indices: [0, 1, 3, 4]
 
 Horizontal mesh 10000:
-  window_begin: 2000-01-01T00:00:00Z
-  window_end: 2030-01-01T00:00:00Z
-  ObsSpace:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
     name: Aircraft
-    simulate:
-      variables: [air_temperature]
-    Generate:
-      List:
+    simulated variables: [air_temperature]
+    generate:
+      list:
         lats: [0, 0, 0,    0,   0,   0,    0,   0,   0     ]
         lons: [0, 1, 2,  238, 239, 240,  358, 359, 359.9999]
         datetimes: [ '2010-01-01T00:04:00Z', '2010-01-01T00:04:00Z', '2010-01-01T00:04:00Z',
                      '2010-01-01T00:04:00Z', '2010-01-01T00:04:00Z', '2010-01-01T00:04:00Z',
                      '2010-01-01T00:04:00Z', '2010-01-01T00:04:00Z', '2010-01-01T00:04:00Z']
-      obs_errors: [1.0]
+      obs errors: [1.0]
   air_pressures: [1, 1, 1,  1, 1, 1,  1, 1, 1]
   GaussianThinning:
     variables: [air_temperature]
@@ -105,20 +100,19 @@ Horizontal mesh 10000:
   expected_thinned_obs_indices: [0, 1, 4, 5, 7, 8]
 
 Vertical mesh, single bin:
-  window_begin: 2000-01-01T00:00:00Z
-  window_end: 2030-01-01T00:00:00Z
-  ObsSpace:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
     name: Aircraft
-    simulate:
-      variables: [air_temperature]
-    Generate:
-      List:
+    simulated variables: [air_temperature]
+    generate:
+      list:
         lats: [0, 1, 2, 3, 4, 5, 6, 7]
         lons: [0, 1, 2, 3, 4, 5, 6, 7]
         datetimes: [ '2010-01-01T00:04:01Z', '2010-01-01T00:04:02Z', '2010-01-01T00:04:03Z',
                      '2010-01-01T00:04:04Z', '2010-01-01T00:04:05Z', '2010-01-01T00:04:06Z',
                      '2010-01-01T00:04:07Z', '2010-01-01T00:04:08Z']
-      obs_errors: [1.0]
+      obs errors: [1.0]
   air_pressures: [8, 7, 6, 5, 4, 3, 2, 1]
   GaussianThinning:
     variables: [air_temperature]
@@ -130,20 +124,19 @@ Vertical mesh, single bin:
   expected_thinned_obs_indices: [0, 1, 2, 3, 5, 6, 7]
 
 Vertical mesh, two bins:
-  window_begin: 2000-01-01T00:00:00Z
-  window_end: 2030-01-01T00:00:00Z
-  ObsSpace:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
     name: Aircraft
-    simulate:
-      variables: [air_temperature]
-    Generate:
-      List:
+    simulated variables: [air_temperature]
+    generate:
+      list:
         lats: [0, 1, 2, 3, 4, 5, 6, 7]
         lons: [0, 1, 2, 3, 4, 5, 6, 7]
         datetimes: [ '2010-01-01T00:04:01Z', '2010-01-01T00:04:02Z', '2010-01-01T00:04:03Z',
                      '2010-01-01T00:04:04Z', '2010-01-01T00:04:05Z', '2010-01-01T00:04:06Z',
                      '2010-01-01T00:04:07Z', '2010-01-01T00:04:08Z']
-      obs_errors: [1.0]
+      obs errors: [1.0]
   air_pressures: [8, 7, 6, 5, 4, 3, 2, 1]
   GaussianThinning:
     variables: [air_temperature]
@@ -155,20 +148,19 @@ Vertical mesh, two bins:
   expected_thinned_obs_indices: [0, 1, 2, 3, 5, 7]
 
 Vertical mesh, two bins, all observations in single bin:
-  window_begin: 2000-01-01T00:00:00Z
-  window_end: 2030-01-01T00:00:00Z
-  ObsSpace:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
     name: Aircraft
-    simulate:
-      variables: [air_temperature]
-    Generate:
-      List:
+    simulated variables: [air_temperature]
+    generate:
+      list:
         lats: [0, 1, 2, 3, 4, 5, 6, 7]
         lons: [0, 1, 2, 3, 4, 5, 6, 7]
         datetimes: [ '2010-01-01T00:04:01Z', '2010-01-01T00:04:02Z', '2010-01-01T00:04:03Z',
                      '2010-01-01T00:04:04Z', '2010-01-01T00:04:05Z', '2010-01-01T00:04:06Z',
                      '2010-01-01T00:04:07Z', '2010-01-01T00:04:08Z']
-      obs_errors: [1.0]
+      obs errors: [1.0]
   air_pressures: [8, 7, 6, 5, 4, 3, 2, 1]
   GaussianThinning:
     variables: [air_temperature]
@@ -180,20 +172,19 @@ Vertical mesh, two bins, all observations in single bin:
   expected_thinned_obs_indices: [1, 2, 3, 4, 5, 6, 7]
 
 Thinning in time, single bin:
-  window_begin: 2000-01-01T00:00:00Z
-  window_end: 2030-01-01T00:00:00Z
-  ObsSpace:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
     name: Aircraft
-    simulate:
-      variables: [air_temperature]
-    Generate:
-      List:
+    simulated variables: [air_temperature]
+    generate:
+      list:
         lats: [0, 1, 2, 3, 4, 5, 6, 7]
         lons: [0, 1, 2, 3, 4, 5, 6, 7]
         datetimes: [ '2010-01-01T00:04:08Z', '2010-01-01T00:04:07Z', '2010-01-01T00:04:06Z',
                      '2010-01-01T00:04:05Z', '2010-01-01T00:04:04Z', '2010-01-01T00:04:03Z',
                      '2010-01-01T00:04:02Z', '2010-01-01T00:04:01Z']
-      obs_errors: [1.0]
+      obs errors: [1.0]
   air_pressures: [0, 1, 2, 3, 4, 5, 6, 7]
   GaussianThinning:
     variables: [air_temperature]
@@ -206,20 +197,19 @@ Thinning in time, single bin:
   expected_thinned_obs_indices: [0, 1, 2, 3, 5, 6, 7]
 
 Thinning in time, two bins:
-  window_begin: 2000-01-01T00:00:00Z
-  window_end: 2030-01-01T00:00:00Z
-  ObsSpace:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
     name: Aircraft
-    simulate:
-      variables: [air_temperature]
-    Generate:
-      List:
+    simulated variables: [air_temperature]
+    generate:
+      list:
         lats: [0, 1, 2, 3, 4, 5, 6, 7]
         lons: [0, 1, 2, 3, 4, 5, 6, 7]
         datetimes: [ '2010-01-01T00:04:08Z', '2010-01-01T00:04:07Z', '2010-01-01T00:04:06Z',
                      '2010-01-01T00:04:05Z', '2010-01-01T00:04:04Z', '2010-01-01T00:04:03Z',
                      '2010-01-01T00:04:02Z', '2010-01-01T00:04:01Z']
-      obs_errors: [1.0]
+      obs errors: [1.0]
   air_pressures: [0, 1, 2, 3, 4, 5, 6, 7]
   GaussianThinning:
     variables: [air_temperature]
@@ -232,20 +222,19 @@ Thinning in time, two bins:
   expected_thinned_obs_indices: [0, 1, 2, 3, 5, 7]
 
 Thinning in time, two bins, all observations in single bin:
-  window_begin: 2000-01-01T00:00:00Z
-  window_end: 2030-01-01T00:00:00Z
-  ObsSpace:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
     name: Aircraft
-    simulate:
-      variables: [air_temperature]
-    Generate:
-      List:
+    simulated variables: [air_temperature]
+    generate:
+      list:
         lats: [0, 1, 2, 3, 4, 5, 6, 7]
         lons: [0, 1, 2, 3, 4, 5, 6, 7]
         datetimes: [ '2010-01-01T00:04:08Z', '2010-01-01T00:04:07Z', '2010-01-01T00:04:06Z',
                      '2010-01-01T00:04:05Z', '2010-01-01T00:04:04Z', '2010-01-01T00:04:03Z',
                      '2010-01-01T00:04:02Z', '2010-01-01T00:04:01Z']
-      obs_errors: [1.0]
+      obs errors: [1.0]
   air_pressures: [0, 1, 2, 3, 4, 5, 6, 7]
   GaussianThinning:
     variables: [air_temperature]
@@ -257,20 +246,19 @@ Thinning in time, two bins, all observations in single bin:
   expected_thinned_obs_indices: [1, 2, 3, 4, 5, 6, 7]
 
 Vertical mesh, two bins, single category:
-  window_begin: 2000-01-01T00:00:00Z
-  window_end: 2030-01-01T00:00:00Z
-  ObsSpace:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
     name: Aircraft
-    simulate:
-      variables: [air_temperature]
-    Generate:
-      List:
+    simulated variables: [air_temperature]
+    generate:
+      list:
         lats: [0, 1, 2, 3, 4, 5, 6, 7]
         lons: [0, 1, 2, 3, 4, 5, 6, 7]
         datetimes: [ '2010-01-01T00:04:01Z', '2010-01-01T00:04:02Z', '2010-01-01T00:04:03Z',
                      '2010-01-01T00:04:04Z', '2010-01-01T00:04:05Z', '2010-01-01T00:04:06Z',
                      '2010-01-01T00:04:07Z', '2010-01-01T00:04:08Z']
-      obs_errors: [1.0]
+      obs errors: [1.0]
   air_pressures: [8, 7, 6, 5, 4, 3, 2, 1]
   category: [0, 0, 0, 0, 0, 0, 0, 0]
   GaussianThinning:
@@ -287,20 +275,19 @@ Vertical mesh, two bins, single category:
   expected_thinned_obs_indices: [0, 1, 2, 3, 5, 7]
 
 Vertical mesh, two bins, two categories:
-  window_begin: 2000-01-01T00:00:00Z
-  window_end: 2030-01-01T00:00:00Z
-  ObsSpace:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
     name: Aircraft
-    simulate:
-      variables: [air_temperature]
-    Generate:
-      List:
+    simulated variables: [air_temperature]
+    generate:
+      list:
         lats: [0, 1, 2, 3, 4, 5, 6, 7]
         lons: [0, 1, 2, 3, 4, 5, 6, 7]
         datetimes: [ '2010-01-01T00:04:01Z', '2010-01-01T00:04:02Z', '2010-01-01T00:04:03Z',
                      '2010-01-01T00:04:04Z', '2010-01-01T00:04:05Z', '2010-01-01T00:04:06Z',
                      '2010-01-01T00:04:07Z', '2010-01-01T00:04:08Z']
-      obs_errors: [1.0]
+      obs errors: [1.0]
   air_pressures: [4, 3, 4, 3, 2, 1, 2, 1]
   category: [1, 1, 0, 0, 0, 0, 1, 1]
   GaussianThinning:
@@ -317,20 +304,19 @@ Vertical mesh, two bins, two categories:
   expected_thinned_obs_indices: [1, 3, 5, 7]
 
 Vertical mesh, two bins, two categories, where clause:
-  window_begin: 2000-01-01T00:00:00Z
-  window_end: 2030-01-01T00:00:00Z
-  ObsSpace:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
     name: Aircraft
-    simulate:
-      variables: [air_temperature]
-    Generate:
-      List:
+    simulated variables: [air_temperature]
+    generate:
+      list:
         lats: [1, 0, 1, 0, 0, 1, 0, 1]
         lons: [0, 1, 2, 3, 4, 5, 6, 7]
         datetimes: [ '2010-01-01T00:04:01Z', '2010-01-01T00:04:02Z', '2010-01-01T00:04:03Z',
                      '2010-01-01T00:04:04Z', '2010-01-01T00:04:05Z', '2010-01-01T00:04:06Z',
                      '2010-01-01T00:04:07Z', '2010-01-01T00:04:08Z']
-      obs_errors: [1.0]
+      obs errors: [1.0]
   air_pressures: [4, 4.4, 4, 4.3, 4.2, 4, 4.1, 4]
   category: [1, 1, 0, 0, 0, 0, 1, 1]
   GaussianThinning:
@@ -351,20 +337,19 @@ Vertical mesh, two bins, two categories, where clause:
   expected_thinned_obs_indices: [1, 3]
 
 Vertical mesh, two bins, equal priorities:
-  window_begin: 2000-01-01T00:00:00Z
-  window_end: 2030-01-01T00:00:00Z
-  ObsSpace:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
     name: Aircraft
-    simulate:
-      variables: [air_temperature]
-    Generate:
-      List:
+    simulated variables: [air_temperature]
+    generate:
+      list:
         lats: [0, 1, 2, 3, 4, 5, 6, 7]
         lons: [0, 1, 2, 3, 4, 5, 6, 7]
         datetimes: [ '2010-01-01T00:04:01Z', '2010-01-01T00:04:02Z', '2010-01-01T00:04:03Z',
                      '2010-01-01T00:04:04Z', '2010-01-01T00:04:05Z', '2010-01-01T00:04:06Z',
                      '2010-01-01T00:04:07Z', '2010-01-01T00:04:08Z']
-      obs_errors: [1.0]
+      obs errors: [1.0]
   air_pressures: [8, 7, 6, 5, 4, 3, 2, 1]
   priority: [0, 0, 0, 0, 0, 0, 0, 0]
   GaussianThinning:
@@ -381,20 +366,19 @@ Vertical mesh, two bins, equal priorities:
   expected_thinned_obs_indices: [0, 1, 2, 3, 5, 7]
 
 Vertical mesh, two bins, nonequal priorities:
-  window_begin: 2000-01-01T00:00:00Z
-  window_end: 2030-01-01T00:00:00Z
-  ObsSpace:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
     name: Aircraft
-    simulate:
-      variables: [air_temperature]
-    Generate:
-      List:
+    simulated variables: [air_temperature]
+    generate:
+      list:
         lats: [0, 1, 2, 3, 4, 5, 6, 7]
         lons: [0, 1, 2, 3, 4, 5, 6, 7]
         datetimes: [ '2010-01-01T00:04:01Z', '2010-01-01T00:04:02Z', '2010-01-01T00:04:03Z',
                      '2010-01-01T00:04:04Z', '2010-01-01T00:04:05Z', '2010-01-01T00:04:06Z',
                      '2010-01-01T00:04:07Z', '2010-01-01T00:04:08Z']
-      obs_errors: [1.0]
+      obs errors: [1.0]
   air_pressures: [4, 3, 4, 3, 2, 1, 2, 1]
   priority: [1, 1, 0, 0, 0, 0, 1, 1]
   GaussianThinning:
@@ -411,20 +395,19 @@ Vertical mesh, two bins, nonequal priorities:
   expected_thinned_obs_indices: [1, 2, 3, 4, 5, 7]
 
 Vertical mesh, single bin, nonequal priorities, where clause:
-  window_begin: 2000-01-01T00:00:00Z
-  window_end: 2030-01-01T00:00:00Z
-  ObsSpace:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
     name: Aircraft
-    simulate:
-      variables: [air_temperature]
-    Generate:
-      List:
+    simulated variables: [air_temperature]
+    generate:
+      list:
         lats: [1, 0, 1, 0, 0, 1, 0, 1]
         lons: [0, 1, 2, 3, 4, 5, 6, 7]
         datetimes: [ '2010-01-01T00:04:01Z', '2010-01-01T00:04:02Z', '2010-01-01T00:04:03Z',
                      '2010-01-01T00:04:04Z', '2010-01-01T00:04:05Z', '2010-01-01T00:04:06Z',
                      '2010-01-01T00:04:07Z', '2010-01-01T00:04:08Z']
-      obs_errors: [1.0]
+      obs errors: [1.0]
   air_pressures: [4, 4.4, 4, 4.3, 4.2, 4, 4.1, 4]
   priority: [0, 0, 0, 1, 1, 0, 0, 0]
   GaussianThinning:
@@ -445,14 +428,13 @@ Vertical mesh, single bin, nonequal priorities, where clause:
   expected_thinned_obs_indices: [1, 3, 6]
 
 Vertical mesh, single bin, two categories, nonequal priorities, where clause:
-  window_begin: 2000-01-01T00:00:00Z
-  window_end: 2030-01-01T00:00:00Z
-  ObsSpace:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
     name: Aircraft
-    simulate:
-      variables: [air_temperature]
-    Generate:
-      List:
+    simulated variables: [air_temperature]
+    generate:
+      list:
         lats: [1, 0, 1, 0, 0, 1, 0, 1, 1, 0, 1, 0, 0, 1, 0, 1]
         lons: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
         datetimes: [ '2010-01-01T00:04:01Z', '2010-01-01T00:04:02Z', '2010-01-01T00:04:03Z',
@@ -461,7 +443,7 @@ Vertical mesh, single bin, two categories, nonequal priorities, where clause:
                      '2010-01-01T00:04:01Z', '2010-01-01T00:04:02Z', '2010-01-01T00:04:03Z',
                      '2010-01-01T00:04:04Z', '2010-01-01T00:04:05Z', '2010-01-01T00:04:06Z',
                      '2010-01-01T00:04:07Z', '2010-01-01T00:04:08Z']
-      obs_errors: [1.0]
+      obs errors: [1.0]
   air_pressures: [4, 4.4, 4, 4.3, 4.2, 4, 4.1, 4, 4, 4.1, 4, 4.2, 4.3, 4, 4.4, 4]
   category: [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1]
   priority: [0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0]

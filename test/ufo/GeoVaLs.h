@@ -33,20 +33,19 @@ namespace test {
 
 void testGeoVaLs() {
   const eckit::LocalConfiguration conf(::test::TestEnvironment::config());
-  util::DateTime bgn(conf.getString("window_begin"));
-  util::DateTime end(conf.getString("window_end"));
+  util::DateTime bgn(conf.getString("window begin"));
+  util::DateTime end(conf.getString("window end"));
 
   std::vector<eckit::LocalConfiguration> confs;
-  conf.get("GeoVaLsTest", confs);
+  conf.get("geovals test", confs);
   for (size_t jconf = 0; jconf < confs.size(); ++jconf) {
 /// Setup ObsSpace
-    const eckit::LocalConfiguration obsconf(confs[jconf], "ObsSpace");
-    const eckit::LocalConfiguration obsvarconf(obsconf, "simulate");
+    const eckit::LocalConfiguration obsconf(confs[jconf], "obs space");
     ioda::ObsSpace ospace(obsconf, oops::mpi::comm(), bgn, end);
 
 /// Setup GeoVaLs
-    const eckit::LocalConfiguration gconf(confs[jconf], "GeoVaLs");
-    const oops::Variables ingeovars(gconf);
+    const eckit::LocalConfiguration gconf(confs[jconf], "geovals");
+    const oops::Variables ingeovars(gconf, "state variables");
     const GeoVaLs gval(gconf, ospace, ingeovars);
 
     const double tol = gconf.getDouble("tolerance");

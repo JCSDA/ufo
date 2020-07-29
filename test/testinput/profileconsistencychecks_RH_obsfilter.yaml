@@ -2,45 +2,43 @@
 #=== Profile consistency checks for wind speed interpolation ===#
 #
 
-window_begin: 2018-04-14T20:30:00Z
-window_end: 2018-04-15T03:30:00Z
+window begin: 2018-04-14T20:30:00Z
+window end: 2018-04-15T03:30:00Z
 
-Observations:
-  ObsTypes:
-  - ObsSpace:
-      name: Radiosonde
-      ObsDataIn:
-        obsfile: Data/met_office_profile_consistency_checks_rh.nc4
-        obsgrouping:
-          group_variable: "station_id"
-          sort_variable: "air_pressure"
-          sort_order: "descending"
-      simulate:
-        variables: [air_temperature, relative_humidity]
-    ObsFilters:
-    - Filter: ProfileConsistencyChecks
-      filter variables:
-      - name: air_temperature
-      - name: relative_humidity
-      Checks: ["Basic", "RH"]
-      compareWithOPS: false
-      flagBasicChecksFail: true
-      nErrorsFail: 8
-      BChecks_Skip: true
-      RHCheck_TminInit: 400.0
-      RHCheck_SondeRHHiTol: 20.0
-      RHCheck_PressInitThresh: 100.0
-      RHCheck_PressThresh: 400.0
-      RHCheck_PressDiff0Thresh: 100.0
-      RHCheck_tdDiffThresh: 2.0
-      RHCheck_RHThresh: 90.0
-      RHCheck_PressDiffAdjThresh: 20.0
-      RHCheck_MinRHThresh: 85.0
-      RHCheck_TminThresh: 223.15
-      RHCheck_TempThresh: 233.15
-      Comparison_Tol: 0.1
-    HofX: HofX
-    ObsDiag:
-    passedBenchmark: 78792
-    benchmarkFlag: 15
-    flaggedBenchmark: 758
+observations:
+- obs space:
+    name: Radiosonde
+    obsdatain:
+      obsfile: Data/met_office_profile_consistency_checks_rh.nc4
+      obsgrouping:
+        group variable: "station_id"
+        sort variable: "air_pressure"
+        sort order: "descending"
+    simulated variables: [air_temperature, relative_humidity]
+  obs filters:
+  - filter: ProfileConsistencyChecks
+    filter variables:
+    - name: air_temperature
+    - name: relative_humidity
+    Checks: ["Basic", "RH"]
+    compareWithOPS: false
+    flagBasicChecksFail: true
+    nErrorsFail: 8
+    BChecks_Skip: true
+    RHCheck_TminInit: 400.0
+    RHCheck_SondeRHHiTol: 20.0
+    RHCheck_PressInitThresh: 100.0
+    RHCheck_PressThresh: 400.0
+    RHCheck_PressDiff0Thresh: 100.0
+    RHCheck_tdDiffThresh: 2.0
+    RHCheck_RHThresh: 90.0
+    RHCheck_PressDiffAdjThresh: 20.0
+    RHCheck_MinRHThresh: 85.0
+    RHCheck_TminThresh: 223.15
+    RHCheck_TempThresh: 233.15
+    Comparison_Tol: 0.1
+  HofX: HofX
+  obs diagnostics:
+  passedBenchmark: 78792
+  benchmarkFlag: 15
+  flaggedBenchmark: 758

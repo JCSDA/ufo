@@ -43,28 +43,24 @@ template <typename MODEL> class RunCRTM : public oops::Application {
 // -----------------------------------------------------------------------------
   int execute(const eckit::Configuration & fullConfig) const {
 //  Setup observation window
-    const eckit::LocalConfiguration windowConf(fullConfig, "Assimilation Window");
-    const util::Duration winlen(windowConf.getString("Length"));
-    const util::DateTime winbgn(windowConf.getString("Begin"));
+    const util::DateTime winbgn(fullConfig.getString("window begin"));
+    const util::Duration winlen(fullConfig.getString("window length"));
     const util::DateTime winend(winbgn + winlen);
-    oops::Log::info() << "Observation window is:" << windowConf << std::endl;
 
 //  Setup observations
-    eckit::LocalConfiguration obsconf(fullConfig, "Observations");
-    oops::Log::debug() << "Observations configuration is:" << obsconf << std::endl;
-    ObsSpaces_ obsdb(obsconf, this->getComm(), winbgn, winend);
+    ObsSpaces_ obsdb(fullConfig, this->getComm(), winbgn, winend);
 
     oops::Variables diagvars;
 
     std::vector<eckit::LocalConfiguration> conf;
-    obsconf.get("ObsTypes", conf);
+    fullConfig.get("observations", conf);
 
     for (std::size_t jj = 0; jj < obsdb.size(); ++jj) {
-      eckit::LocalConfiguration obsopconf(conf[jj], "ObsOperator");
+      eckit::LocalConfiguration obsopconf(conf[jj], "obs operator");
 
       ObsOperator_ hop(obsdb[jj], obsopconf);
 
-      const eckit::LocalConfiguration gconf(conf[jj], "GeoVaLs");
+      const eckit::LocalConfiguration gconf(conf[jj], "geovals");
       const GeoVaLs_ gval(gconf, obsdb[jj], hop.requiredVars());
 
       const ObsAuxCtrl_ ybias(obsdb[jj], conf[jj]);
@@ -77,7 +73,7 @@ template <typename MODEL> class RunCRTM : public oops::Application {
       hop.simulateObs(gval, hofx, ybias, diag);
 
       const double zz = hofx.rms();
-      const double xx = conf[jj].getDouble("rmsequiv");
+      const double xx = conf[jj].getDouble("rms ref");
       const double tol = conf[jj].getDouble("tolerance");
 //      BOOST_CHECK_CLOSE(xx, zz, tol);
     }

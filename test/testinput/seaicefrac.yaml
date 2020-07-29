@@ -1,22 +1,21 @@
-window_begin: 2018-04-14T21:00:00Z
-window_end: 2018-04-15T03:00:00Z
+window begin: 2018-04-14T21:00:00Z
+window end: 2018-04-15T03:00:00Z
 
-LinearObsOpTest:
-  coefTL: 0.1
-  toleranceTL: 1.0e-14
-  toleranceAD: 1.0e-12
-
-Observations:
-  ObsTypes:
-  - ObsOperator:
-      name: SeaIceFraction
-    ObsSpace:
-      name: SeaIceFraction
-      ObsDataIn:
-        obsfile: Data/ioda/testinput_tier_1/icec-2018-04-15.nc
-      simulate:
-        variables: [sea_ice_area_fraction]
-    GeoVaLs:
-      filename: Data/icec-2018-04-15_geovals.nc
-    rmsequiv: 2.5
-    tolerance: 1.0e-8
+observations:
+- obs operator:
+    name: SeaIceFraction
+  linear obs operator:
+    name: SeaIceFraction
+  obs space:
+    name: SeaIceFraction
+    obsdatain:
+      obsfile: Data/ioda/testinput_tier_1/icec-2018-04-15.nc
+    simulated variables: [sea_ice_area_fraction]
+  geovals:
+    filename: Data/icec-2018-04-15_geovals.nc
+  rms ref: 2.5
+  tolerance: 1.0e-8
+  linear obs operator test:
+    coef TL: 0.1
+    tolerance TL: 1.0e-14
+    tolerance AD: 1.0e-12

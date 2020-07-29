@@ -1,57 +1,54 @@
-window_begin: 2018-04-14T21:00:00Z
-window_end: 2018-04-15T03:00:00Z
+window begin: 2018-04-14T21:00:00Z
+window end: 2018-04-15T03:00:00Z
 
-Observations: 
- ObsTypes: 
- - ObsOperator:
-     name: CRTM
-     Absorbers: [H2O,O3,CO2]
-     Clouds: [Water, Ice]
-     Cloud_Fraction: 1.0
-     ObsOptions:
-       Sensor_ID: amsua_n19
-       EndianType: little_endian
-       CoefficientPath: Data/
-   ObsSpace:
-     name: amsua_n19
-     ObsDataIn: 
-       obsfile: Data/ioda/testinput_tier_1/amsua_n19_obs_2018041500_m.nc4
-     ObsDataOut:
-       obsfile: Data/amsua_n19_obs_2018041500_m_out.nc4
-     simulate:
-       variables: [brightness_temperature]
-       channels: 1-15
-   GeoVaLs: 
-     filename: Data/amsua_n19_geoval_2018041500_m.nc4
-   ObsFilters:
-   - Filter: Bounds Check
-     filter variables:
-     - name: brightness_temperature
-       channels: 1
-     minvalue: 100.0
-     maxvalue: 500.0
-   - Filter: MWCLW Check
+observations:
+- obs operator:
+    name: CRTM
+    Absorbers: [H2O,O3,CO2]
+    Clouds: [Water, Ice]
+    Cloud_Fraction: 1.0
+    obs options:
+      Sensor_ID: amsua_n19
+      EndianType: little_endian
+      CoefficientPath: Data/
+  obs space:
+    name: amsua_n19
+    obsdatain:
+      obsfile: Data/ioda/testinput_tier_1/amsua_n19_obs_2018041500_m.nc4
+    obsdataout:
+      obsfile: Data/amsua_n19_obs_2018041500_m_out.nc4
+    simulated variables: [brightness_temperature]
+    channels: 1-15
+  geovals:
+    filename: Data/amsua_n19_geoval_2018041500_m.nc4
+  obs filters:
+  - filter: Bounds Check
+    filter variables:
+    - name: brightness_temperature
+      channels: 1
+    minvalue: 100.0
+    maxvalue: 500.0
+  - filter: MWCLW Check
 # check is specific to AMSU-A requires ch1 and ch2 over sea
-     where:
-     - variable:
-         name: water_area_fraction@GeoVaLs
-       minvalue: 0.00
+    where:
+    - variable:
+        name: water_area_fraction@GeoVaLs
+      minvalue: 0.00
 # apply check to these channels
-     filter variables:
-     - name: brightness_temperature
-       channels: 1-2,14
-     clw_thresholds: [1.0, 1.0, 1.0]
+    filter variables:
+    - name: brightness_temperature
+      channels: 1-2,14
+    clw_thresholds: [1.0, 1.0, 1.0]
 # clw_option controls how the clw is calculated:
 #     1) Use observed BTs
 #     2) Use calculated BTs
 #     3) Symmetric calculation
-     clw_option: 3
-     inputs:
-       variables: [brightness_temperature]
-       channels: 1-2
-   - Filter: Background Check
-     filter variables:
-     - name: brightness_temperature
-       channels: 1
-     threshold: 2.0
-   passedBenchmark: 1399     # number of passed obs
+    clw_option: 3
+    clw variables: [brightness_temperature]
+    channels: 1-2
+  - filter: Background Check
+    filter variables:
+    - name: brightness_temperature
+      channels: 1
+    threshold: 2.0
+  passedBenchmark: 1399     # number of passed obs

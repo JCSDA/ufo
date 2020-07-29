@@ -1,19 +1,18 @@
-window_begin: 2018-04-14T20:00:00Z
-window_end: 2018-04-15T03:00:00Z
+window begin: 2018-04-14T20:00:00Z
+window end: 2018-04-15T03:00:00Z
 
-ObsSpace:
-  name: atms_npp 
-  ObsDataIn:
-    obsfile: Data/ioda/testinput_tier_1/atms_npp_obs_2018041500_m_qc.nc4 
-  simulate:
-    variables: [brightness_temperature] 
-    channels: &all_channels 1-22
-GeoVaLs:
+obs space:
+  name: atms_npp
+  obsdatain:
+    obsfile: Data/ioda/testinput_tier_1/atms_npp_obs_2018041500_m_qc.nc4
+  simulated variables: [brightness_temperature]
+  channels: &all_channels 1-22
+geovals:
   filename: Data/atms_npp_geoval_2018041500_m_qc.nc4
-ObsFunction:
-  name: CLWMatchIndexMW@ObsFunction 
+obs function:
+  name: CLWMatchIndexMW@ObsFunction
   options:
-    channels: *all_channels 
+    channels: *all_channels
     clwobs_function:
       name: CLWRetMW@ObsFunction
       options:

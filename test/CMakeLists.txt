@@ -143,7 +143,6 @@ list( APPEND ufo_test_input
   testinput/reflectivity.yaml
   testinput/satwind.yaml
   testinput/sbuv2_n19.yaml
-  testinput/scatwind.yaml
   testinput/seaicefrac.yaml
   testinput/seaicethick.yaml
   testinput/sea_surface_temp.yaml
@@ -245,7 +244,6 @@ list( APPEND ufo_test_data
   atmosphere/satwind_geoval_2018041500_m.nc4
   atmosphere/satwind_geoval_2018041500_s.nc4
   atmosphere/sbuv2_n19_geoval_2018041500_m.nc4
-  atmosphere/scatwind_geoval_2018041500_m.nc4
   atmosphere/seviri_m08_geoval_2018041500_m.nc4
   atmosphere/sfc_geoval_2018041500_m.nc4
   atmosphere/sndrd1_g15_geoval_2018041500_m.nc4

@@ -32,10 +32,10 @@ namespace ufo {
 namespace test {
 
 void testTrackCheck(const eckit::LocalConfiguration &conf) {
-  util::DateTime bgn(conf.getString("window_begin"));
-  util::DateTime end(conf.getString("window_end"));
+  util::DateTime bgn(conf.getString("window begin"));
+  util::DateTime end(conf.getString("window end"));
 
-  const eckit::LocalConfiguration obsSpaceConf(conf, "ObsSpace");
+  const eckit::LocalConfiguration obsSpaceConf(conf, "obs space");
   ioda::ObsSpace obsspace(obsSpaceConf, oops::mpi::comm(), bgn, end);
 
   if (conf.has("air_pressures")) {

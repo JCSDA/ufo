@@ -52,7 +52,7 @@ class MetOfficeBuddyCheckParameters : public oops::Parameters {
   /// assumed to have been taken by a single station.
   ///
   /// Note: the variable used to group observations into records can be set with the
-  /// \c ObsSpace.ObsDataIn.obsgrouping.group_variable YAML option.
+  /// \c obs space.obsdatain.obsgrouping.group_variable YAML option.
   oops::OptionalParameter<Variable> stationIdVariable{"station_id_variable", this};
 
   /// Number of zonal bands to split the Earth's surface into when building a search data structure.

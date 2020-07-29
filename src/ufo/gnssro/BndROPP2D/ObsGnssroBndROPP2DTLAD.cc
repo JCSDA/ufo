@@ -30,7 +30,7 @@ ObsGnssroBndROPP2DTLAD::ObsGnssroBndROPP2DTLAD(const ioda::ObsSpace & odb,
                                                const eckit::Configuration & config)
   : keyOperGnssroBndROPP2D_(0), odb_(odb), varin_()
 {
-  const eckit::LocalConfiguration obsOptions(config, "ObsOptions");
+  const eckit::LocalConfiguration obsOptions(config, "obs options");
 
   ufo_gnssro_bndropp2d_tlad_setup_f90(keyOperGnssroBndROPP2D_, obsOptions);
   const std::vector<std::string> vv{"air_temperature", "specific_humidity", "air_pressure"};

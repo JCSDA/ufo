@@ -1,20 +1,19 @@
-window_begin: 2018-04-14T20:00:00Z
-window_end: 2018-04-15T03:00:00Z
+window begin: 2018-04-14T20:00:00Z
+window end: 2018-04-15T03:00:00Z
 
-ObsSpace:
+obs space:
   name: atms_npp 
-  ObsDataIn:
+  obsdatain:
     obsfile: Data/ioda/testinput_tier_1/atms_npp_obs_2018041500_m_qc.nc4 
-  simulate:
-    variables: [brightness_temperature] 
-    channels: &all_channels 1-22 
+  simulated variables: [brightness_temperature]
+  channels: &all_channels 1-22 
 # can have GeoVaLs section like below
-GeoVaLs:
+geovals:
   filename: Data/atms_npp_geoval_2018041500_m_qc.nc4
 # can have ObsDiag section like below
-ObsDiag:
+obs diagnostics:
   filename: Data/atms_npp_obsdiag_2018041500_m_qc.nc4
-ObsFunction:
+obs function:
   name: ObsErrorFactorSituDependMW@ObsFunction 
   options:
     sensor: atms_npp

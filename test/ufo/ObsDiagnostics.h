@@ -37,19 +37,19 @@ void testObsDiagnostics() {
   const eckit::LocalConfiguration conf(::test::TestEnvironment::config());
 
   //  Setup ObsSpace
-  util::DateTime bgn(conf.getString("window_begin"));
-  util::DateTime end(conf.getString("window_end"));
-  const eckit::LocalConfiguration obsconf(conf, "ObsSpace");
+  util::DateTime bgn(conf.getString("window begin"));
+  util::DateTime end(conf.getString("window end"));
+  const eckit::LocalConfiguration obsconf(conf, "obs space");
   ioda::ObsSpace ospace(obsconf, oops::mpi::comm(), bgn, end);
   const size_t nlocs = ospace.nlocs();
 
   // initialize observation operator (set variables requested from the model,
   // variables simulated by the observation operator, other init)
-  eckit::LocalConfiguration obsopconf(conf, "ObsOperator");
+  eckit::LocalConfiguration obsopconf(conf, "obs operator");
   ObsOperator hop(ospace, obsopconf);
 
   // read geovals from the file
-  eckit::LocalConfiguration gconf(conf, "GeoVaLs");
+  eckit::LocalConfiguration gconf(conf, "geovals");
   const GeoVaLs gval(gconf, ospace, hop.requiredVars());
 
   // initialize bias correction
@@ -59,8 +59,8 @@ void testObsDiagnostics() {
   ioda::ObsVector hofx(ospace);
 
   // create diagnostics to hold HofX diags
-  eckit::LocalConfiguration diagconf(conf, "ObsDiag");
-  oops::Variables diagvars(diagconf);
+  eckit::LocalConfiguration diagconf(conf, "obs diagnostics");
+  oops::Variables diagvars(diagconf, "variables");
   EXPECT(diagvars.size() > 0);
   std::unique_ptr<Locations> locs(hop.locations(bgn, end));
   ObsDiagnostics diags(ospace, *(locs.get()), diagvars);
@@ -70,7 +70,7 @@ void testObsDiagnostics() {
 
   // read tolerance and reference Diagnostics
   const double tol = conf.getDouble("tolerance");
-  eckit::LocalConfiguration diagrefconf(conf, "Reference ObsDiag");
+  eckit::LocalConfiguration diagrefconf(conf, "reference obs diagnostics");
   ObsDiagnostics diagref(diagrefconf, ospace, diagvars);
 
   // loop over all diag variables and levels and compare with reference

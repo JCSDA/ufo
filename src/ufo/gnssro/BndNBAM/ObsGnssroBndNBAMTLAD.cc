@@ -32,7 +32,7 @@ ObsGnssroBndNBAMTLAD::ObsGnssroBndNBAMTLAD(const ioda::ObsSpace & odb,
 {
   std::vector<std::string> vv{"air_temperature", "specific_humidity"};
 
-  const eckit::LocalConfiguration obsOptions(config, "ObsOptions");
+  const eckit::LocalConfiguration obsOptions(config, "obs options");
 
   std::string vertlayer;
 
