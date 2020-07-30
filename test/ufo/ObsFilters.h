@@ -33,6 +33,7 @@
 #include "oops/util/Logger.h"
 #include "test/interface/ObsTestsFixture.h"
 #include "test/TestEnvironment.h"
+#include "ufo/filters/QCflags.h"
 #include "ufo/filters/Variable.h"
 #include "ufo/ObsTraits.h"
 
@@ -329,7 +330,7 @@ void testFilters() {
     if (typeconfs[jj].has("passedBenchmark")) {
       atLeastOneBenchmarkFound = true;
       const int passedBenchmark = typeconfs[jj].getInt("passedBenchmark");
-      int passed = numZero(*qcflags);
+      int passed = numEqualTo(qcflags->obsdatavector(), ufo::QCflags::pass);
       obsspace.comm().allReduceInPlace(passed, eckit::mpi::Operation::SUM);
       EXPECT_EQUAL(passed, passedBenchmark);
     }
