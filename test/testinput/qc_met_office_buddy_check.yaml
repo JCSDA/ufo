@@ -1,203 +1,198 @@
-window_begin: 2000-01-01T00:00:00Z
-window_end: 2030-12-31T23:59:59Z
+window begin: 2000-01-01T00:00:00Z
+window end: 2030-12-31T23:59:59Z
 
-Observations:
-  ObsTypes:
-  - ObsSpace: # Basic comparison against results produced by the Met Office OPS system
-      name: Aircraft
-      ObsDataIn:
-        obsfile: Data/met_office_buddy_check.nc4
-        obsgrouping:
-          group_variable: "station_id"
-      simulate:
-        variables: [air_temperature, eastward_wind, northward_wind]
-    ObsFilters:
-    - Filter: Met Office Buddy Check
-      filter variables:
-      - name: air_temperature
-      - name: eastward_wind
-        options:
-          first_component_of_two: true
-      - name: northward_wind
-      # Maps latitudes to kms
-      horizontal_correlation_scale: {"90": 7200, "30": 7200, "20": 8400,
-                                     "-20": 8400, "-30": 9600, "-90": 9600}
-      vertical_correlation_scale: 6
-      temporal_correlation_scale: PT6H
-      num_zonal_bands: 36
-      search_radius: 3000 # km
-      max_total_num_buddies: 9
-      max_num_buddies_from_single_band: 6
-      max_num_buddies_with_same_station_id: 0
-      damping_factor_1: 1.0
-      damping_factor_2: 0.5
-      non_divergence_constraint: 1.0
-      use_legacy_buddy_collector: true
-      traced_boxes:
-        - min_latitude: -90
-          max_latitude:  90
-          min_longitude: -180
-          max_longitude:  180
-    HofX: HofX
-    passedBenchmark: 2940
-    compareVariables:
-      - reference:
-          name: air_temperature@GrossErrorProbabilityAfterOpsBuddyCheck1
-        test:
-          name: air_temperature@GrossErrorProbability
-        absTol: 5e-5 # The relative difference in Earth radius assumed by OPS and JEDI is ~4e-5
-      - reference:
-          name: eastward_wind@GrossErrorProbabilityAfterOpsBuddyCheck1
-        test:
-          name: eastward_wind@GrossErrorProbability
-        absTol: 5e-5
-  - ObsSpace: # Test of the sort_by_pressure option
-      name: Aircraft
-      ObsDataIn:
-        obsfile: Data/met_office_buddy_check.nc4
-        obsgrouping:
-          group_variable: "station_id"
-      simulate:
-        variables: [air_temperature, eastward_wind, northward_wind]
-    ObsFilters:
-    - Filter: Met Office Buddy Check
-      filter variables:
-      - name: air_temperature
-      - name: eastward_wind
-        options:
-          first_component_of_two: true
-      - name: northward_wind
-      # Maps latitudes to kms
-      sort_by_pressure: true
-      horizontal_correlation_scale: {"90": 7200, "30": 7200, "20": 8400,
-                                     "-20": 8400, "-30": 9600, "-90": 9600}
-      vertical_correlation_scale: 6
-      temporal_correlation_scale: PT6H
-      num_zonal_bands: 36
-      search_radius: 3000 # km
-      max_total_num_buddies: 9
-      max_num_buddies_from_single_band: 6
-      max_num_buddies_with_same_station_id: 0
-      damping_factor_1: 1.0
-      damping_factor_2: 0.5
-      non_divergence_constraint: 1.0
-      use_legacy_buddy_collector: true
-      traced_boxes:
-        - min_latitude: -90
-          max_latitude:  90
-          min_longitude: -180
-          max_longitude:  180
-    HofX: HofX
-    passedBenchmark: 2940
-    compareVariables:
-      - reference:
-          name: air_temperature@GrossErrorProbabilityAfterOpsBuddyCheck2
-        test:
-          name: air_temperature@GrossErrorProbability
-        absTol: 5e-5 # The relative difference in Earth radius assumed by OPS and JEDI is ~4e-5
-      - reference:
-          name: eastward_wind@GrossErrorProbabilityAfterOpsBuddyCheck2
-        test:
-          name: eastward_wind@GrossErrorProbability
-        absTol: 5e-5
-  - ObsSpace: # Test of the 'where' clause handler
-      name: Aircraft
-      ObsDataIn:
-        obsfile: Data/met_office_buddy_check.nc4
-        obsgrouping:
-          group_variable: "station_id"
-      simulate:
-        variables: [air_temperature, eastward_wind, northward_wind]
-    ObsFilters:
-    - Filter: Met Office Buddy Check
-      filter variables:
-      - name: air_temperature
-      - name: eastward_wind
-        options:
-          first_component_of_two: true
-      - name: northward_wind
-      where:
-      - variable:
-          name: latitude@MetaData
-        minvalue: 0
-      # Maps latitudes to kms
-      horizontal_correlation_scale: {"90": 7200, "30": 7200, "20": 8400,
-                                     "-20": 8400, "-30": 9600, "-90": 9600}
-      vertical_correlation_scale: 6
-      temporal_correlation_scale: PT6H
-      num_zonal_bands: 36
-      search_radius: 3000 # km
-      max_total_num_buddies: 9
-      max_num_buddies_from_single_band: 6
-      max_num_buddies_with_same_station_id: 0
-      damping_factor_1: 1.0
-      damping_factor_2: 0.5
-      non_divergence_constraint: 1.0
-      use_legacy_buddy_collector: true
-      traced_boxes:
-        - min_latitude: -90
-          max_latitude:  90
-          min_longitude: -180
-          max_longitude:  180
-    HofX: HofX
-    passedBenchmark: 2958
-    compareVariables:
-      - reference:
-          name: air_temperature@GrossErrorProbabilityAfterOpsBuddyCheck3
-        test:
-          name: air_temperature@GrossErrorProbability
-        absTol: 5e-5 # The relative difference in Earth radius assumed by OPS and JEDI is ~4e-5
-      - reference:
-          name: eastward_wind@GrossErrorProbabilityAfterOpsBuddyCheck3
-        test:
-          name: eastward_wind@GrossErrorProbability
-        absTol: 5e-5
-  - ObsSpace: # Test of station ID assignment directly from a string-valued variable
-              # (rather than record numbers)
-      name: Aircraft
-      ObsDataIn:
-        obsfile: Data/met_office_buddy_check.nc4
-      simulate:
-        variables: [air_temperature, eastward_wind, northward_wind]
-    ObsFilters:
-    - Filter: Met Office Buddy Check
-      filter variables:
-      - name: air_temperature
-      - name: eastward_wind
-        options:
-          first_component_of_two: true
-      - name: northward_wind
-      # Maps latitudes to kms
-      horizontal_correlation_scale: {"90": 7200, "30": 7200, "20": 8400,
-                                     "-20": 8400, "-30": 9600, "-90": 9600}
-      vertical_correlation_scale: 6
-      temporal_correlation_scale: PT6H
-      num_zonal_bands: 36
-      search_radius: 3000 # km
-      max_total_num_buddies: 9
-      max_num_buddies_from_single_band: 6
-      max_num_buddies_with_same_station_id: 0
-      damping_factor_1: 1.0
-      damping_factor_2: 0.5
-      non_divergence_constraint: 1.0
-      use_legacy_buddy_collector: true
-      station_id_variable:
-        name: station_id@MetaData
-      traced_boxes:
-        - min_latitude: -90
-          max_latitude:  90
-          min_longitude: -180
-          max_longitude:  180
-    HofX: HofX
-    passedBenchmark: 2940
-    compareVariables:
-      - reference:
-          name: air_temperature@GrossErrorProbabilityAfterOpsBuddyCheck1
-        test:
-          name: air_temperature@GrossErrorProbability
-        absTol: 5e-5 # The relative difference in Earth radius assumed by OPS and JEDI is ~4e-5
-      - reference:
-          name: eastward_wind@GrossErrorProbabilityAfterOpsBuddyCheck1
-        test:
-          name: eastward_wind@GrossErrorProbability
-        absTol: 5e-5
+observations:
+- obs space: # Basic comparison against results produced by the Met Office OPS system
+    name: Aircraft
+    obsdatain:
+      obsfile: Data/met_office_buddy_check.nc4
+      obsgrouping:
+        group variable: "station_id"
+    simulated variables: [air_temperature, eastward_wind, northward_wind]
+  obs filters:
+  - filter: Met Office Buddy Check
+    filter variables:
+    - name: air_temperature
+    - name: eastward_wind
+      options:
+        first_component_of_two: true
+    - name: northward_wind
+    # Maps latitudes to kms
+    horizontal_correlation_scale: {"90": 7200, "30": 7200, "20": 8400,
+                                   "-20": 8400, "-30": 9600, "-90": 9600}
+    vertical_correlation_scale: 6
+    temporal_correlation_scale: PT6H
+    num_zonal_bands: 36
+    search_radius: 3000 # km
+    max_total_num_buddies: 9
+    max_num_buddies_from_single_band: 6
+    max_num_buddies_with_same_station_id: 0
+    damping_factor_1: 1.0
+    damping_factor_2: 0.5
+    non_divergence_constraint: 1.0
+    use_legacy_buddy_collector: true
+    traced_boxes:
+      - min_latitude: -90
+        max_latitude:  90
+        min_longitude: -180
+        max_longitude:  180
+  HofX: HofX
+  passedBenchmark: 2940
+  compareVariables:
+    - reference:
+        name: air_temperature@GrossErrorProbabilityAfterOpsBuddyCheck1
+      test:
+        name: air_temperature@GrossErrorProbability
+      absTol: 5e-5 # The relative difference in Earth radius assumed by OPS and JEDI is ~4e-5
+    - reference:
+        name: eastward_wind@GrossErrorProbabilityAfterOpsBuddyCheck1
+      test:
+        name: eastward_wind@GrossErrorProbability
+      absTol: 5e-5
+- obs space: # Test of the sort_by_pressure option
+    name: Aircraft
+    obsdatain:
+      obsfile: Data/met_office_buddy_check.nc4
+      obsgrouping:
+        group variable: "station_id"
+    simulated variables: [air_temperature, eastward_wind, northward_wind]
+  obs filters:
+  - filter: Met Office Buddy Check
+    filter variables:
+    - name: air_temperature
+    - name: eastward_wind
+      options:
+        first_component_of_two: true
+    - name: northward_wind
+    # Maps latitudes to kms
+    sort_by_pressure: true
+    horizontal_correlation_scale: {"90": 7200, "30": 7200, "20": 8400,
+                                   "-20": 8400, "-30": 9600, "-90": 9600}
+    vertical_correlation_scale: 6
+    temporal_correlation_scale: PT6H
+    num_zonal_bands: 36
+    search_radius: 3000 # km
+    max_total_num_buddies: 9
+    max_num_buddies_from_single_band: 6
+    max_num_buddies_with_same_station_id: 0
+    damping_factor_1: 1.0
+    damping_factor_2: 0.5
+    non_divergence_constraint: 1.0
+    use_legacy_buddy_collector: true
+    traced_boxes:
+      - min_latitude: -90
+        max_latitude:  90
+        min_longitude: -180
+        max_longitude:  180
+  HofX: HofX
+  passedBenchmark: 2940
+  compareVariables:
+    - reference:
+        name: air_temperature@GrossErrorProbabilityAfterOpsBuddyCheck2
+      test:
+        name: air_temperature@GrossErrorProbability
+      absTol: 5e-5 # The relative difference in Earth radius assumed by OPS and JEDI is ~4e-5
+    - reference:
+        name: eastward_wind@GrossErrorProbabilityAfterOpsBuddyCheck2
+      test:
+        name: eastward_wind@GrossErrorProbability
+      absTol: 5e-5
+- obs space: # Test of the 'where' clause handler
+    name: Aircraft
+    obsdatain:
+      obsfile: Data/met_office_buddy_check.nc4
+      obsgrouping:
+        group variable: "station_id"
+    simulated variables: [air_temperature, eastward_wind, northward_wind]
+  obs filters:
+  - filter: Met Office Buddy Check
+    filter variables:
+    - name: air_temperature
+    - name: eastward_wind
+      options:
+        first_component_of_two: true
+    - name: northward_wind
+    where:
+    - variable:
+        name: latitude@MetaData
+      minvalue: 0
+    # Maps latitudes to kms
+    horizontal_correlation_scale: {"90": 7200, "30": 7200, "20": 8400,
+                                   "-20": 8400, "-30": 9600, "-90": 9600}
+    vertical_correlation_scale: 6
+    temporal_correlation_scale: PT6H
+    num_zonal_bands: 36
+    search_radius: 3000 # km
+    max_total_num_buddies: 9
+    max_num_buddies_from_single_band: 6
+    max_num_buddies_with_same_station_id: 0
+    damping_factor_1: 1.0
+    damping_factor_2: 0.5
+    non_divergence_constraint: 1.0
+    use_legacy_buddy_collector: true
+    traced_boxes:
+      - min_latitude: -90
+        max_latitude:  90
+        min_longitude: -180
+        max_longitude:  180
+  HofX: HofX
+  passedBenchmark: 2958
+  compareVariables:
+    - reference:
+        name: air_temperature@GrossErrorProbabilityAfterOpsBuddyCheck3
+      test:
+        name: air_temperature@GrossErrorProbability
+      absTol: 5e-5 # The relative difference in Earth radius assumed by OPS and JEDI is ~4e-5
+    - reference:
+        name: eastward_wind@GrossErrorProbabilityAfterOpsBuddyCheck3
+      test:
+        name: eastward_wind@GrossErrorProbability
+      absTol: 5e-5
+- obs space: # Test of station ID assignment directly from a string-valued variable
+            # (rather than record numbers)
+    name: Aircraft
+    obsdatain:
+      obsfile: Data/met_office_buddy_check.nc4
+    simulated variables: [air_temperature, eastward_wind, northward_wind]
+  obs filters:
+  - filter: Met Office Buddy Check
+    filter variables:
+    - name: air_temperature
+    - name: eastward_wind
+      options:
+        first_component_of_two: true
+    - name: northward_wind
+    # Maps latitudes to kms
+    horizontal_correlation_scale: {"90": 7200, "30": 7200, "20": 8400,
+                                   "-20": 8400, "-30": 9600, "-90": 9600}
+    vertical_correlation_scale: 6
+    temporal_correlation_scale: PT6H
+    num_zonal_bands: 36
+    search_radius: 3000 # km
+    max_total_num_buddies: 9
+    max_num_buddies_from_single_band: 6
+    max_num_buddies_with_same_station_id: 0
+    damping_factor_1: 1.0
+    damping_factor_2: 0.5
+    non_divergence_constraint: 1.0
+    use_legacy_buddy_collector: true
+    station_id_variable:
+      name: station_id@MetaData
+    traced_boxes:
+      - min_latitude: -90
+        max_latitude:  90
+        min_longitude: -180
+        max_longitude:  180
+  HofX: HofX
+  passedBenchmark: 2940
+  compareVariables:
+    - reference:
+        name: air_temperature@GrossErrorProbabilityAfterOpsBuddyCheck1
+      test:
+        name: air_temperature@GrossErrorProbability
+      absTol: 5e-5 # The relative difference in Earth radius assumed by OPS and JEDI is ~4e-5
+    - reference:
+        name: eastward_wind@GrossErrorProbabilityAfterOpsBuddyCheck1
+      test:
+        name: eastward_wind@GrossErrorProbability
+      absTol: 5e-5

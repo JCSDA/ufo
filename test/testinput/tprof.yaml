@@ -1,22 +1,19 @@
-window_begin: 2018-04-14T21:00:00Z
-window_end: 2018-04-15T03:00:00Z
+window begin: 2018-04-14T21:00:00Z
+window end: 2018-04-15T03:00:00Z
 
-LinearObsOpTest:
-  coefTL: 1.0e-4
-  toleranceTL: 1.0e-6
-  toleranceAD: 1.0e-12
-
-Observations:
-  ObsTypes:
-  - ObsOperator:
-      name: InsituTemperature
-    ObsSpace:
-      name: InsituTemperature
-      ObsDataIn:
-        obsfile: Data/ioda/testinput_tier_1/profile_2018-04-15.nc
-      simulate:
-        variables: [sea_water_temperature]
-    GeoVaLs:
-      filename: Data/profile_2018-04-15_geovals.nc
-    rmsequiv: 15.020734025831988              
-    tolerance: 1.0e-10
+observations:
+- obs operator:
+    name: InsituTemperature
+  obs space:
+    name: InsituTemperature
+    obsdatain:
+      obsfile: Data/ioda/testinput_tier_1/profile_2018-04-15.nc
+    simulated variables: [sea_water_temperature]
+  geovals:
+    filename: Data/profile_2018-04-15_geovals.nc
+  rms ref: 15.020734025831988
+  tolerance: 1.0e-10
+  linear obs operator test:
+    coef TL: 1.0e-4
+    tolerance TL: 1.0e-6
+    tolerance AD: 1.0e-12

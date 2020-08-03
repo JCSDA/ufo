@@ -33,6 +33,7 @@
 #include "oops/util/Logger.h"
 #include "test/interface/ObsTestsFixture.h"
 #include "test/TestEnvironment.h"
+#include "ufo/filters/QCflags.h"
 #include "ufo/filters/Variable.h"
 #include "ufo/ObsTraits.h"
 
@@ -232,9 +233,8 @@ void testFilters() {
   typedef oops::ObsVector<ufo::ObsTraits>         ObsVector_;
   typedef oops::ObsSpace<ufo::ObsTraits>          ObsSpace_;
 
-  const eckit::LocalConfiguration obsconf(::test::TestEnvironment::config(), "Observations");
   std::vector<eckit::LocalConfiguration> typeconfs;
-  obsconf.get("ObsTypes", typeconfs);
+  ::test::TestEnvironment::config().get("observations", typeconfs);
 
   for (std::size_t jj = 0; jj < Test_::obspace().size(); ++jj) {
 /// init QC and error
@@ -256,7 +256,7 @@ void testFilters() {
 ///   read GeoVaLs from file if required
       std::unique_ptr<const GeoVaLs_> gval;
       if (geovars.size() > 0) {
-        const eckit::LocalConfiguration gconf(typeconfs[jj], "GeoVaLs");
+        const eckit::LocalConfiguration gconf(typeconfs[jj], "geovals");
         gval.reset(new GeoVaLs_(gconf, Test_::obspace()[jj], geovars));
         filters.priorFilter(*gval);
       } else {
@@ -268,27 +268,28 @@ void testFilters() {
       ObsVector_ hofx(Test_::obspace()[jj], hofxgroup);
       eckit::LocalConfiguration obsdiagconf;
       if (diagvars.size() > 0) {
-        obsdiagconf = eckit::LocalConfiguration(typeconfs[jj], "ObsDiag");
-        oops::Log::info() << "ObsDiag section speciifed, reading ObsDiag from file" << std::endl;
+        obsdiagconf = eckit::LocalConfiguration(typeconfs[jj], "obs diagnostics");
+        oops::Log::info() << "Obs diagnostics section specified, reading obs diagnostics from file"
+                          << std::endl;
       }
       const ObsDiags_ diags(obsdiagconf, Test_::obspace()[jj], diagvars);
       filters.postFilter(hofx, diags);
-    } else if (typeconfs[jj].has("ObsOperator")) {
+    } else if (typeconfs[jj].has("obs operator")) {
 ///   read GeoVaLs, compute H(x) and ObsDiags
       oops::Log::info() << "ObsOperator section specified, computing HofX" << std::endl;
-      const eckit::LocalConfiguration obsopconf(typeconfs[jj], "ObsOperator");
+      const eckit::LocalConfiguration obsopconf(typeconfs[jj], "obs operator");
       ObsOperator_ hop(Test_::obspace()[jj], obsopconf);
       const ObsAuxCtrl_ ybias(Test_::obspace()[jj], typeconfs[jj]);
       ObsVector_ hofx(Test_::obspace()[jj]);
       oops::Variables vars;
       vars += hop.requiredVars();
       vars += filters.requiredVars();
-      if (typeconfs[jj].has("ObsBias")) vars += ybias.requiredVars();
-      const eckit::LocalConfiguration gconf(typeconfs[jj], "GeoVaLs");
+      if (typeconfs[jj].has("obs bias")) vars += ybias.requiredVars();
+      const eckit::LocalConfiguration gconf(typeconfs[jj], "geovals");
       const GeoVaLs_ gval(gconf, Test_::obspace()[jj], vars);
       oops::Variables diagvars;
       diagvars += filters.requiredHdiagnostics();
-      if (typeconfs[jj].has("ObsBias")) diagvars += ybias.requiredHdiagnostics();
+      if (typeconfs[jj].has("obs bias")) diagvars += ybias.requiredHdiagnostics();
       ObsDiags_ diags(Test_::obspace()[jj],
                       hop.locations(Test_::obspace()[jj].windowStart(),
                                     Test_::obspace()[jj].windowEnd()),
@@ -298,7 +299,7 @@ void testFilters() {
       filters.postFilter(hofx, diags);
     } else if (geovars.size() > 0) {
 ///   Only call priorFilter
-      const eckit::LocalConfiguration gconf(typeconfs[jj], "GeoVaLs");
+      const eckit::LocalConfiguration gconf(typeconfs[jj], "geovals");
       const GeoVaLs_ gval(gconf, Test_::obspace()[jj], geovars);
       filters.priorFilter(gval);
       oops::Log::info() << "HofX or ObsOperator sections not provided for filters, " <<
@@ -329,7 +330,7 @@ void testFilters() {
     if (typeconfs[jj].has("passedBenchmark")) {
       atLeastOneBenchmarkFound = true;
       const int passedBenchmark = typeconfs[jj].getInt("passedBenchmark");
-      int passed = numZero(*qcflags);
+      int passed = numEqualTo(qcflags->obsdatavector(), ufo::QCflags::pass);
       obsspace.comm().allReduceInPlace(passed, eckit::mpi::Operation::SUM);
       EXPECT_EQUAL(passed, passedBenchmark);
     }

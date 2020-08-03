@@ -1,23 +1,16 @@
-window_begin: 2018-04-14T21:00:00Z
-window_end: 2018-04-15T03:00:00Z
+window begin: 2018-04-14T21:00:00Z
+window end: 2018-04-15T03:00:00Z
 
-LinearObsOpTest: 
- coefTL:  1.0e-6
- toleranceTL: 1.0e-4
- toleranceAD: 1.0e-13
-
-Observations: 
- ObsTypes: 
- - ObsOperator:
-    name: GnssroBndNBAM
-    ObsOptions:
-   ObsSpace: 
-    name: GnssroBndNBAM
-    ObsDataIn:
-     obsfile: Data/ioda/testinput_tier_1/gnssro_obs_2018041500_1obs_bending_angle.nc4 
-    simulate:
-     variables: [bending_angle]
-   GeoVaLs: 
-    filename: Data/gnssro_geoval_2018041500_1obs_bending_angle.nc4
-   vecequiv: GsiHofX
-   tolerance: 1.0e-7
+observations:
+- obs operator:
+   name: GnssroBndNBAM
+   obs options:
+  obs space:
+   name: GnssroBndNBAM
+   obsdatain:
+    obsfile: Data/ioda/testinput_tier_1/gnssro_obs_2018041500_1obs_bending_angle.nc4
+   simulated variables: [bending_angle]
+  geovals:
+   filename: Data/gnssro_geoval_2018041500_1obs_bending_angle.nc4
+  vector ref: GsiHofX
+  tolerance: 1.0e-7

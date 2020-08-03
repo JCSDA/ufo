@@ -1,22 +1,19 @@
-window_begin: 2018-04-14T21:00:00Z
-window_end: 2018-04-15T03:00:00Z
+window begin: 2018-04-14T21:00:00Z
+window end: 2018-04-15T03:00:00Z
 
-LinearObsOpTest:
-  coefTL: 1.0e-7
-  toleranceTL: 1.0e-6
-  toleranceAD: 1.0e-12
-
-Observations:
-  ObsTypes:
-  - ObsOperator:
-      name: CoolSkin
-    ObsSpace:
-      name: CoolSkin
-      ObsDataIn:
-        obsfile: Data/ioda/testinput_tier_1/coolskin_fake_obs_2018041500.nc
-      simulate:
-        variables: [sea_surface_temperature]
-    GeoVaLs:
-      filename: Data/coolskin_fake_geovals_2018041500.nc
-    rmsequiv: 26.41465434950436
-    tolerance: 1.0e-10
+observations:
+- obs operator:
+    name: CoolSkin
+  linear obs operator test:
+    coef TL: 1.0e-7
+    tolerance TL: 1.0e-6
+    tolerance AD: 1.0e-12
+  obs space:
+    name: CoolSkin
+    obsdatain:
+      obsfile: Data/ioda/testinput_tier_1/coolskin_fake_obs_2018041500.nc
+    simulated variables: [sea_surface_temperature]
+  geovals:
+    filename: Data/coolskin_fake_geovals_2018041500.nc
+  rms ref: 26.41465434950436
+  tolerance: 1.0e-10

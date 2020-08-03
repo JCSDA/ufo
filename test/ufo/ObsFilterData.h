@@ -33,25 +33,25 @@ namespace test {
 
 void testObsFilterData() {
   const eckit::LocalConfiguration conf(::test::TestEnvironment::config());
-  util::DateTime bgn(conf.getString("window_begin"));
-  util::DateTime end(conf.getString("window_end"));
+  util::DateTime bgn(conf.getString("window begin"));
+  util::DateTime end(conf.getString("window end"));
 
   std::vector<eckit::LocalConfiguration> confs;
-  conf.get("ObsFilterData", confs);
+  conf.get("obs filter data", confs);
   for (size_t jconf = 0; jconf < confs.size(); ++jconf) {
 ///  Setup ObsSpace
-    const eckit::LocalConfiguration obsconf(confs[jconf], "ObsSpace");
+    const eckit::LocalConfiguration obsconf(confs[jconf], "obs space");
     ioda::ObsSpace ospace(obsconf, oops::mpi::comm(), bgn, end);
 
 ///  Setup GeoVaLs
-    const eckit::LocalConfiguration gconf(confs[jconf], "GeoVaLs");
+    const eckit::LocalConfiguration gconf(confs[jconf], "geovals");
     std::vector<eckit::LocalConfiguration> varconfs;
     gconf.get("variables", varconfs);
     const Variables geovars(varconfs);
     const GeoVaLs gval(gconf, ospace, geovars.toOopsVariables());
 
 ///  Setup ObsDiags
-    const eckit::LocalConfiguration obsdiagconf(confs[jconf], "ObsDiag");
+    const eckit::LocalConfiguration obsdiagconf(confs[jconf], "obs diagnostics");
     varconfs.clear();
     obsdiagconf.get("variables", varconfs);
     const Variables diagvars(varconfs);

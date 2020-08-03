@@ -1,23 +1,20 @@
-window_begin: 2018-04-14T21:00:00Z
-window_end: 2018-04-15T03:00:00Z
+window begin: 2018-04-14T21:00:00Z
+window end: 2018-04-15T03:00:00Z
 
-LinearObsOpTest:
-  coefTL: 0.1
-  toleranceTL: 1.0e-13
-  toleranceAD: 1.0e-11
-
-Observations:
-  ObsTypes:
-  - ObsOperator:
-      name: VertInterp
-      VertCoord: air_pressure
-    ObsSpace:
-      name: Radiosonde
-      ObsDataIn:
-        obsfile: Data/ioda/testinput_tier_1/sondes_obs_2018041500_m.nc4
-      simulate:
-        variables: [air_temperature]
-    GeoVaLs:
-      filename: Data/sondes_geoval_2018041500_m.nc4
-    vecequiv: GsiHofX
-    tolerance: 1.0e-06
+observations:
+- obs operator:
+    name: VertInterp
+    vertical coordinate: air_pressure
+  linear obs operator test:
+    coef TL: 0.1
+    tolerance TL: 1.0e-13
+    tolerance AD: 1.0e-11
+  obs space:
+    name: Radiosonde
+    obsdatain:
+      obsfile: Data/ioda/testinput_tier_1/sondes_obs_2018041500_m.nc4
+    simulated variables: [air_temperature]
+  geovals:
+    filename: Data/sondes_geoval_2018041500_m.nc4
+  vector ref: GsiHofX
+  tolerance: 1.0e-06

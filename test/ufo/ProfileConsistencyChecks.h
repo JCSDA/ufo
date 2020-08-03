@@ -33,15 +33,15 @@ namespace ufo {
 namespace test {
 
 void testProfileConsistencyChecks(const eckit::LocalConfiguration &conf) {
-  util::DateTime bgn(conf.getString("window_begin"));
-  util::DateTime end(conf.getString("window_end"));
+  util::DateTime bgn(conf.getString("window begin"));
+  util::DateTime end(conf.getString("window end"));
 
-  const eckit::LocalConfiguration obsSpaceConf(conf, "ObsSpace");
+  const eckit::LocalConfiguration obsSpaceConf(conf, "obs space");
   ioda::ObsSpace obsspace(obsSpaceConf, oops::mpi::comm(), bgn, end);
 
   ioda::ObsVector hofx(obsspace);
 
-  const eckit::LocalConfiguration obsdiagconf(conf, "ObsDiag");
+  const eckit::LocalConfiguration obsdiagconf(conf, "obs diagnostics");
   std::vector<eckit::LocalConfiguration> varconfs;
   obsdiagconf.get("variables", varconfs);
   const Variables diagvars(varconfs);

@@ -1,8 +1,7 @@
-window_begin: 2018-04-14T21:00:00Z
-window_end: 2018-04-15T03:00:00Z
-ObsSpace:
+window begin: 2018-04-14T21:00:00Z
+window end: 2018-04-15T03:00:00Z
+obs space:
   name: Radiosonde
-  ObsDataIn:
+  obsdatain:
     obsfile: Data/ioda/testinput_tier_1/sondes_obs_2018041500_s.nc4
-  simulate:
-    variables: [air_temperature]
+  simulated variables: [air_temperature]

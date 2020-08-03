@@ -34,7 +34,7 @@ ObsTimeOper::ObsTimeOper(const ioda::ObsSpace & odb,
                          const eckit::Configuration & config)
   : ObsOperatorBase(odb, config),
     actualoperator_(ObsOperatorFactory::create(
-    odb, eckit::LocalConfiguration(config, "ObsOperator"))),
+    odb, eckit::LocalConfiguration(config, "obs operator"))),
     odb_(odb), timeWeights_(timeWeightCreate(odb, config))
 {
   oops::Log::trace() << "ObsTimeOper creating" << std::endl;

@@ -1,17 +1,16 @@
 Only valid observations:
-  window_begin: 2000-01-01T00:00:00Z
-  window_end: 2030-01-01T00:00:00Z
-  ObsSpace:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
     name: Aircraft
-    simulate:
-      variables: [air_temperature]
-    Generate:
-      List:
+    simulated variables: [air_temperature]
+    generate:
+      list:
         lats: [ -2, -1, 0, 1, 2 ]
         lons: [ 178, 179, 180, 181, 182 ]
         datetimes: [ '2010-01-01T00:00:00Z', '2010-01-01T01:00:00Z', '2010-01-01T02:00:00Z',
                      '2010-01-01T03:00:00Z', '2010-01-01T04:00:00Z' ]
-      obs_errors: [1.0]
+      obs errors: [1.0]
   air_pressures: [ 100000, 90000, 80000, 90000, 100000]
   station_ids: [ 1, 1, 1, 1, 1]
   Track Check:
@@ -28,19 +27,18 @@ Only valid observations:
   expected_rejected_obs_indices: []
 
 One observation with excessive speed:
-  window_begin: 2000-01-01T00:00:00Z
-  window_end: 2030-01-01T00:00:00Z
-  ObsSpace:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
     name: Aircraft
-    simulate:
-      variables: [air_temperature]
-    Generate:
-      List:
+    simulated variables: [air_temperature]
+    generate:
+      list:
         lats: [ -2, -1, 0, 1, 2 ]
         lons: [ 178, 179, 359, 181, 182 ]
         datetimes: [ '2010-01-01T00:00:00Z', '2010-01-01T01:00:00Z', '2010-01-01T02:00:00Z',
                      '2010-01-01T03:00:00Z', '2010-01-01T04:00:00Z' ]
-      obs_errors: [1.0]
+      obs errors: [1.0]
   air_pressures: [ 100000, 90000, 80000, 90000, 100000]
   station_ids: [ 1, 1, 1, 1, 1]
   Track Check:
@@ -57,19 +55,18 @@ One observation with excessive speed:
   expected_rejected_obs_indices: [2]
 
 One observation with excessive climb rate:
-  window_begin: 2000-01-01T00:00:00Z
-  window_end: 2030-01-01T00:00:00Z
-  ObsSpace:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
     name: Aircraft
-    simulate:
-      variables: [air_temperature]
-    Generate:
-      List:
+    simulated variables: [air_temperature]
+    generate:
+      list:
         lats: [ -2, -1, 0, 1, 2 ]
         lons: [ 178, 179, 180, 181, 182 ]
         datetimes: [ '2010-01-01T00:00:00Z', '2010-01-01T01:00:00Z', '2010-01-01T02:00:00Z',
                      '2010-01-01T03:00:00Z', '2010-01-01T04:00:00Z' ]
-      obs_errors: [1.0]
+      obs errors: [1.0]
   air_pressures: [ 100000, 90000, 1e20, 90000, 100000]
   station_ids: [ 1, 1, 1, 1, 1]
   Track Check:
@@ -86,19 +83,18 @@ One observation with excessive climb rate:
   expected_rejected_obs_indices: [2]
 
 Climb rate checks disabled:
-  window_begin: 2000-01-01T00:00:00Z
-  window_end: 2030-01-01T00:00:00Z
-  ObsSpace:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
     name: Aircraft
-    simulate:
-      variables: [air_temperature]
-    Generate:
-      List:
+    simulated variables: [air_temperature]
+    generate:
+      list:
         lats: [ -2, -1, 0, 1, 2 ]
         lons: [ 178, 179, 180, 181, 182 ]
         datetimes: [ '2010-01-01T00:00:00Z', '2010-01-01T01:00:00Z', '2010-01-01T02:00:00Z',
                      '2010-01-01T03:00:00Z', '2010-01-01T04:00:00Z' ]
-      obs_errors: [1.0]
+      obs errors: [1.0]
   air_pressures: [ 100000, 90000, 1e20, 90000, 100000]
   station_ids: [ 1, 1, 1, 1, 1]
   Track Check:
@@ -114,19 +110,18 @@ Climb rate checks disabled:
   expected_rejected_obs_indices: []
 
 Where clause:
-  window_begin: 2000-01-01T00:00:00Z
-  window_end: 2030-01-01T00:00:00Z
-  ObsSpace:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
     name: Aircraft
-    simulate:
-      variables: [air_temperature]
-    Generate:
-      List:
+    simulated variables: [air_temperature]
+    generate:
+      list:
         lats: [ -2, -1, 0, 1, 2 ]
         lons: [ 178, 179, 180, 181, 182 ]
         datetimes: [ '2010-01-01T00:00:00Z', '2010-01-01T01:00:00Z', '2010-01-01T02:00:00Z',
                      '2010-01-01T03:00:00Z', '2010-01-01T04:00:00Z' ]
-      obs_errors: [1.0]
+      obs errors: [1.0]
   air_pressures: [ 1e20, 90000, 1e20, 90000, 100000]
   station_ids: [ 1, 1, 1, 1, 1]
   Track Check:
@@ -147,14 +142,13 @@ Where clause:
   expected_rejected_obs_indices: [2]
 
 Multiple clusters of observations with excessive speed:
-  window_begin: 2000-01-01T00:00:00Z
-  window_end: 2030-01-01T00:00:00Z
-  ObsSpace:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
     name: Aircraft
-    simulate:
-      variables: [air_temperature]
-    Generate:
-      List:
+    simulated variables: [air_temperature]
+    generate:
+      list:
         lats: [ 90, 0, 0, 0, 0, 0, 0, 0, 0, -90,
                 90, 0, 0, 0, 0, 0, 0, 0, 45, -90,
                 90, 0, 0, 0, 0, 0, 0, 0, 0, -90,
@@ -195,7 +189,7 @@ Multiple clusters of observations with excessive speed:
           - '2010-01-01T00:56:00Z'
           - '2010-01-01T00:58:00Z'
           - '2010-01-01T01:00:00Z'
-      obs_errors: [ 1.0]
+      obs errors: [ 1.0]
   air_pressures: [ 50000, 50000, 50000, 50000, 50000, 50000, 50000, 50000, 50000, 50000,
                    50000, 50000, 50000, 50000, 50000, 50000, 50000, 50000, 50000, 50000,
                    50000, 50000, 50000, 50000, 50000, 50000, 50000, 50000, 50000, 50000,
@@ -218,14 +212,13 @@ Multiple clusters of observations with excessive speed:
   expected_rejected_obs_indices: [0, 9, 10, 18, 19, 20, 29, 30]
 
 Multiple station ids:
-  window_begin: 2000-01-01T00:00:00Z
-  window_end: 2030-01-01T00:00:00Z
-  ObsSpace:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
     name: Aircraft
-    simulate:
-      variables: [air_temperature]
-    Generate:
-      List:
+    simulated variables: [air_temperature]
+    generate:
+      list:
         lats: [ -2, -2, -1, -1, 0, 0, 1, 1, 2, 2 ]
         lons: [ 178, 88, 179, 89, 359, 269, 181, 91, 182, 92 ]
         datetimes: [ '2010-01-01T00:00:00Z', '2010-01-01T00:00:00Z',
@@ -233,7 +226,7 @@ Multiple station ids:
                      '2010-01-01T02:00:00Z', '2010-01-01T02:00:00Z',
                      '2010-01-01T03:00:00Z', '2010-01-01T03:00:00Z',
                      '2010-01-01T04:00:00Z', '2010-01-01T04:00:00Z' ]
-      obs_errors: [1.0]
+      obs errors: [1.0]
   air_pressures: [ 100000, 100000, 90000, 90000, 80000, 80000, 90000, 90000, 100000, 100000]
   station_ids: [ 1, 2, 1, 2, 1, 2, 1, 2, 1, 2]
   Track Check:
@@ -250,19 +243,18 @@ Multiple station ids:
   expected_rejected_obs_indices: [4, 5]
 
 No station id variable, no observation grouping:
-  window_begin: 2000-01-01T00:00:00Z
-  window_end: 2030-01-01T00:00:00Z
-  ObsSpace:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
     name: Aircraft
-    simulate:
-      variables: [air_temperature]
-    Generate:
-      List:
+    simulated variables: [air_temperature]
+    generate:
+      list:
         lats: [ -2, -1, 0, 1, 2 ]
         lons: [ 178, 179, 359, 181, 182 ]
         datetimes: [ '2010-01-01T00:00:00Z', '2010-01-01T01:00:00Z', '2010-01-01T02:00:00Z',
                      '2010-01-01T03:00:00Z', '2010-01-01T04:00:00Z' ]
-      obs_errors: [1.0]
+      obs errors: [1.0]
   air_pressures: [ 100000, 90000, 80000, 90000, 100000]
   Track Check:
     variables: [air_temperature]

@@ -22,13 +22,13 @@ namespace ufo {
 ObsBiasBase::ObsBiasBase(const eckit::Configuration & conf)
   : input_filename_(), output_filename_() {
   // Bias coefficients input file name
-  if (conf.has("ObsBias.abias_in")) {
-    input_filename_ = conf.getString("ObsBias.abias_in");
+  if (conf.has("obs bias.abias_in")) {
+    input_filename_ = conf.getString("obs bias.abias_in");
   }
 
   // Bias coefficients output file name
-  if (conf.has("ObsBias.abias_out")) {
-    output_filename_ = conf.getString("ObsBias.abias_out");
+  if (conf.has("obs bias.abias_out")) {
+    output_filename_ = conf.getString("obs bias.abias_out");
   }
 }
 
@@ -48,9 +48,9 @@ ObsBiasBase * ObsBiasFactory::create(const eckit::Configuration & conf,
                                      const std::vector<std::string> & preds,
                                      const std::vector<int> & jobs) {
   oops::Log::trace() << "ObsBiasBase::create starting" << std::endl;
-  if (conf.has("ObsBias")) {
+  if (conf.has("obs bias")) {
     std::string id = "";
-    id = conf.getString("ObsBias.name");
+    id = conf.getString("obs bias.name");
     typename std::map<std::string, ObsBiasFactory*>::iterator jloc = getMakers().find(id);
     if (jloc == getMakers().end()) {
       oops::Log::error() << id << " does not exist in ufo::ObsBiasFactory." << std::endl;

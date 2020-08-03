@@ -1,5 +1,5 @@
 ---
-Variables:
+test variables:
   - name: brightness_temperature@ObsValue
     channels: 1, 4-5
     reference names: [brightness_temperature_1, brightness_temperature_4, brightness_temperature_5]

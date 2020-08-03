@@ -32,10 +32,10 @@ namespace test {
 
 void testProcessWhere(const eckit::LocalConfiguration &conf,
                       bool is_in_usererror = false) {
-  util::DateTime bgn(conf.getString("window_begin"));
-  util::DateTime end(conf.getString("window_end"));
+  util::DateTime bgn(conf.getString("window begin"));
+  util::DateTime end(conf.getString("window end"));
 
-  eckit::LocalConfiguration obsconf(conf, "ObsSpace");
+  eckit::LocalConfiguration obsconf(conf, "obs space");
 
   ioda::ObsSpace ospace(obsconf, oops::mpi::comm(), bgn, end);
   ObsFilterData data(ospace);
