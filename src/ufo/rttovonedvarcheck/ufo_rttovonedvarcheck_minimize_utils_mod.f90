@@ -175,11 +175,11 @@ end if
 ! Microwave Emissivity
 if (profindex % mwemiss(1) > 0) then
   ! Check that emissivity map is the correct size for the profile
-  if ((profindex % mwemiss(2) - profindex % mwemiss(1) + 1) /= size(EmissMap_new)) then
+  if ((profindex % mwemiss(2) - profindex % mwemiss(1) + 1) /= size(EmissMap)) then
     call abor1_ftn("mwemiss size differs from emissivity map")
   end if
   ! Copy microwave emissivity to profile
-    prof_x(profindex % mwemiss(1):profindex % mwemiss(2)) = ob_info % emiss(EmissMap_new)
+    prof_x(profindex % mwemiss(1):profindex % mwemiss(2)) = ob_info % emiss(EmissMap)
 end if
 
 ! Retrieval of emissivity principal components
@@ -399,7 +399,7 @@ END IF
 ! Retrieval of microwave emissivity directly
 if (profindex % mwemiss(1) > 0) THEN
   do ii = 1, size(ob_info % channels_used)
-    EmissElement = EmissElements_new(ob_info % channels_used(ii))
+    EmissElement = EmissElements(ob_info % channels_used(ii))
     ob_info % emiss(ii) = prof_x(profindex % mwemiss(1) + EmissElement - 1)
   end do
 end if

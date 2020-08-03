@@ -173,7 +173,7 @@ subroutine ufo_rttovonedvarcheck_apply(self, vars, geovals, apply)
       ! 2.1 Setup Jb terms
       !---------------------------------------------------
       ! create one ob geovals from full all obs geovals
-      call ufo_geovals_copy_one(geovals, local_geovals, jobs)
+      call ufo_geovals_copy_one(local_geovals, geovals, jobs)
       call ufo_rttovonedvarcheck_check_geovals(local_geovals, prof_index)
 
       ! select appropriate b matrix for latitude of observation
@@ -275,6 +275,7 @@ subroutine ufo_rttovonedvarcheck_apply(self, vars, geovals, apply)
       end if
 
       ! Tidy up memory specific to a single observation
+      call ufo_geovals_delete(local_geovals)
       call ob_info % delete()
       call r_submatrix % delete()
 

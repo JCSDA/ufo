@@ -80,7 +80,6 @@ integer(c_int), intent(in)                 :: channels(:)
 character(len=max_string) :: tmp
 character(len=:), allocatable :: str
 character(len=:), allocatable :: str_array(:)
-integer :: ii
 
 ! Setup core paths and names
 self % qcname = "rttovonedvarcheck"
@@ -205,37 +204,56 @@ end if
 
 ! Print self
 if (self % FullDiagnostics) then
-  write(*,*) "qcname = ",trim(self % qcname)
-  write(*,*) "b_matrix_path = ",trim(self % b_matrix_path)
-  write(*,*) "r_matrix_path = ",trim(self % r_matrix_path)
-  write(*,*) "forward_mod_name = ",trim(self % forward_mod_name)
-  write(*,*) "retrieval_variables = "
-  do ii = 1, self % nmvars
-    write(*,*) trim(self % retrieval_variables(ii))," "
-  end do
-  write(*,*) "nlevels = ",self %  nlevels
-  write(*,*) "nmvars = ",self % nmvars
-  write(*,*) "nchans = ",self % nchans
-  write(*,*) "channels(:) = ",self % channels(:)
-  write(*,*) "qtotal = ",self % qtotal
-  write(*,*) "RTTOV_mwscattSwitch = ",self % RTTOV_mwscattSwitch
-  write(*,*) "RTTOV_usetotalice = ",self % RTTOV_usetotalice
-  write(*,*) "UseMLMinimization = ",self % UseMLMinimization
-  write(*,*) "UseJforConvergence = ",self % UseJforConvergence
-  write(*,*) "FullDiagnostics = ",self % FullDiagnostics
-  write(*,*) "Max1DVarIterations = ",self % Max1DVarIterations
-  write(*,*) "JConvergenceOption = ",self % JConvergenceOption
-  write(*,*) "IterNumForLWPCheck = ",self % IterNumForLWPCheck
-  write(*,*) "ConvergenceFactor = ",self % ConvergenceFactor
-  write(*,*) "Cost_ConvergenceFactor = ",self % Cost_ConvergenceFactor
-  write(*,*) "MaxMLIterations = ",self % MaxMLIterations
-  write(*,*) "EmissLandDefault = ",self % EmissLandDefault
-  write(*,*) "EmissSeaIceDefault = ",self % EmissSeaIceDefault
-  write(*,*) "ReadMWemiss = ",self % ReadMWemiss
-  write(*,*) "ReadIRemiss = ",self % ReadIRemiss
+  call ufo_rttovonedvarcheck_print(self)
 end if
 
 end subroutine ufo_rttovonedvarcheck_setup
+
+!------------------------------------------------------------------------------
+!> Print contents of rttovonedvarcheck object
+!!
+!! \author Met Office
+!!
+!! \date 03/08/2020: Created
+!!
+subroutine ufo_rttovonedvarcheck_print(self)
+
+implicit none
+
+type(ufo_rttovonedvarcheck), intent(in) :: self
+
+integer :: ii
+
+write(*,*) "qcname = ",trim(self % qcname)
+write(*,*) "b_matrix_path = ",trim(self % b_matrix_path)
+write(*,*) "r_matrix_path = ",trim(self % r_matrix_path)
+write(*,*) "forward_mod_name = ",trim(self % forward_mod_name)
+write(*,*) "retrieval_variables = "
+do ii = 1, self % nmvars
+  write(*,*) trim(self % retrieval_variables(ii))," "
+end do
+write(*,*) "nlevels = ",self %  nlevels
+write(*,*) "nmvars = ",self % nmvars
+write(*,*) "nchans = ",self % nchans
+write(*,*) "channels(:) = ",self % channels(:)
+write(*,*) "qtotal = ",self % qtotal
+write(*,*) "RTTOV_mwscattSwitch = ",self % RTTOV_mwscattSwitch
+write(*,*) "RTTOV_usetotalice = ",self % RTTOV_usetotalice
+write(*,*) "UseMLMinimization = ",self % UseMLMinimization
+write(*,*) "UseJforConvergence = ",self % UseJforConvergence
+write(*,*) "FullDiagnostics = ",self % FullDiagnostics
+write(*,*) "Max1DVarIterations = ",self % Max1DVarIterations
+write(*,*) "JConvergenceOption = ",self % JConvergenceOption
+write(*,*) "IterNumForLWPCheck = ",self % IterNumForLWPCheck
+write(*,*) "ConvergenceFactor = ",self % ConvergenceFactor
+write(*,*) "Cost_ConvergenceFactor = ",self % Cost_ConvergenceFactor
+write(*,*) "MaxMLIterations = ",self % MaxMLIterations
+write(*,*) "EmissLandDefault = ",self % EmissLandDefault
+write(*,*) "EmissSeaIceDefault = ",self % EmissSeaIceDefault
+write(*,*) "ReadMWemiss = ",self % ReadMWemiss
+write(*,*) "ReadIRemiss = ",self % ReadIRemiss
+
+end subroutine ufo_rttovonedvarcheck_print
 
 !------------------------------------------------------------------------------
 !> Find a free file unit.

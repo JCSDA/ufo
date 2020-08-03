@@ -483,34 +483,34 @@ end subroutine ufo_geovals_copy
 !> Copy one location from GeoVaLs into a new object
 !!
 
-subroutine ufo_geovals_copy_one(self, other, ind)
+subroutine ufo_geovals_copy_one(self, other, loc_index)
 implicit none
-type(ufo_geovals), intent(in) :: self
-type(ufo_geovals), intent(inout) :: other
-integer, intent(in) :: ind
+type(ufo_geovals), intent(inout) :: self !> GeoVaLs for one location
+type(ufo_geovals), intent(in) :: other   !> GeoVaLs for many location
+integer, intent(in) :: loc_index !> Index of the location in the "other" geoval
 integer :: jv
 
-if (.not. self%linit) then
+if (.not. other%linit) then
   call abor1_ftn("ufo_geovals_copy_one: geovals not defined")
 endif
 
-call ufo_geovals_delete(other)
+call ufo_geovals_delete(self)
 
-other%nlocs = 1
-other%nvar = self%nvar
-allocate(other%variables(other%nvar))
-other%variables(:) = self%variables(:)
+self%nlocs = 1
+self%nvar = other%nvar
+allocate(self%variables(self%nvar))
+self%variables(:) = other%variables(:)
 
-allocate(other%geovals(other%nvar))
-do jv = 1, other%nvar
-  other%geovals(jv)%nval = self%geovals(jv)%nval
-  other%geovals(jv)%nlocs = self%geovals(jv)%nlocs
-  allocate(other%geovals(jv)%vals(other%geovals(jv)%nval, other%geovals(jv)%nlocs))
-  other%geovals(jv)%vals(:,other%nlocs) = self%geovals(jv)%vals(:,ind)
+allocate(self%geovals(self%nvar))
+do jv = 1, self%nvar
+  self%geovals(jv)%nval = other%geovals(jv)%nval
+  self%geovals(jv)%nlocs = 1
+  allocate(self%geovals(jv)%vals(self%geovals(jv)%nval, self%geovals(jv)%nlocs))
+  self%geovals(jv)%vals(:,self%nlocs) = other%geovals(jv)%vals(:,loc_index)
 enddo
 
-other%missing_value = self%missing_value
-other%linit = .true.
+self%missing_value = other%missing_value
+self%linit = .true.
 
 end subroutine ufo_geovals_copy_one
 

@@ -25,7 +25,6 @@ type, public :: ufo_rttovonedvarcheck_obs
 integer                      :: iloc
 integer, allocatable         :: QCflags(:,:)    ! current qc flags needed for channel selection
 real(kind_real), allocatable :: yobs(:,:)       ! observation value from obs files
-real(kind_real), allocatable :: yerr(:,:)       ! observation error from obs files
 real(kind_real), allocatable :: ybias(:,:)      ! observation bias from obs files
 real(kind_real), allocatable :: lat(:)          ! observation latitude
 real(kind_real), allocatable :: lon(:)          ! observation longitude
@@ -81,7 +80,6 @@ self % iloc = obsspace_get_nlocs(obsspace)
 
 ! allocate arrays
 allocate(self % yobs(nchans, self % iloc))
-allocate(self % yerr(nchans, self % iloc))
 allocate(self % ybias(nchans, self % iloc))
 allocate(self % QCflags(nchans, self % iloc))
 allocate(self % lat(self % iloc))
@@ -94,7 +92,6 @@ allocate(self % sol_azi(self % iloc))
 
 ! initialize arrays
 self % yobs(:,:) = 0.0
-self % yerr(:,:) = 0.0
 self % ybias(:,:) = 0.0
 self % QCflags(:,:) = 0
 self % lat(:) = 0.0
@@ -117,7 +114,6 @@ do jvar = 1, nchans
   var = vars % variable(jvar)
   call obsspace_get_db(obsspace, "FortranQC", trim(var), self % QCflags(jvar,:))
   call obsspace_get_db(obsspace, "ObsValue",  trim(var), self % yobs(jvar,:))
-  call obsspace_get_db(obsspace, "ObsError",  trim(var), self % yerr(jvar,:))
 
   ! Optionally get the observation bias
   variable_present = obsspace_has(obsspace, "ObsBias", trim(var))
@@ -194,7 +190,6 @@ character(len=*), parameter :: routinename = "ufo_rttovonedvarcheck_obs_delete"
 ! deallocate arrays
 if (allocated(self % QCflags))    deallocate(self % QCflags)
 if (allocated(self % yobs))       deallocate(self % yobs)
-if (allocated(self % yerr))       deallocate(self % yerr)
 if (allocated(self % ybias))      deallocate(self % ybias)
 if (allocated(self % lat))        deallocate(self % lat)
 if (allocated(self % lon))        deallocate(self % lon)

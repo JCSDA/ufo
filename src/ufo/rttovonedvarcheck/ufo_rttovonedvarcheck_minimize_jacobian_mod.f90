@@ -287,8 +287,8 @@ if (profindex % mwemiss(1) > 0) then
   ! a bit physically dubious as several channels have the same frequency, etc.
   ! This complexity is dealt with in the B Matrix.
   ! Check that we want only the diagonal elements to be non-zero
-  do j = 1, size(EmissMap_new)
-      chan = EmissMap_new(j)
+  do j = 1, size(EmissMap)
+      chan = EmissMap(j)
     do i = 1, nchans
       !if (channels(i) == chan) then
       !  H_matrix(i,profindex % mwemiss(1) + j - 1) = rttov_data % Emissivity(1)

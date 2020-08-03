@@ -98,15 +98,12 @@ real(kind_real), parameter, public :: &
 ! 4. Information for emissivity retrieval
 !-----------------------------------------------------------------------------
 
-! With ops_ticket_1810_atlas=T the channel mapping changes so that
-! for AMSU-B [MHS] the 183 GHz channels are mapped to 150 GHz emissivity
-integer, parameter, public :: EmissElements_new(20) = &
+!< Mapping for each of the 20 ATOVS channels (1-15 AMSU-A; 6-20 AMSU-B)
+integer, parameter, public :: EmissElements(20) = &
   (/ 1,2,3,3,3,3,3,3,3,3,3,3,3,3,4, &  ! AMSU-A mapping
      4,5,5,5,5                      /) ! AMSU-B mapping
 
-! With ops_ticket_1810_atlas=T channel 35 is removed from the retrieval vector
-! (failed channel on MetOp-B) and substituted by channel 36 (also 89 GHz).
-! Also introduce channel 37 (150 GHz) for the first time.
-integer, parameter, public :: EmissMap_new(5) = (/ 1, 2, 3, 16, 17 /)
+!< ATOVS Channel numbers for each of the 5 emissivity values
+integer, parameter, public :: EmissMap(5) = (/ 1, 2, 3, 16, 17 /)
 
 end module ufo_rttovonedvarcheck_constants_mod

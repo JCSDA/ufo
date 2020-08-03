@@ -63,7 +63,7 @@ contains
 !-------------------------------------------------------------------------------
 !> Profile index setup
 !!
-!! \details Heritage: Ops_SatRad_InitProfInfo.f90
+!! \details Heritage: Ops_SatRad_MapProfileToB
 !!
 !! Setup the profile index which requires the bmatrix object.
 !!
@@ -89,31 +89,7 @@ integer :: lastelement
 integer :: nelements
 
 ! Initialise to zeros
-self % nprofelements = 0
-self % t = 0
-self % q = 0
-self % ql = 0
-self % qt = 0
-self % qi = 0
-self % cf = 0
-self % o3total = 0
-self % o3profile = 0
-self % t2 = 0
-self % q2 = 0
-self % rh2 = 0
-self % tstar = 0
-self % pstar = 0
-self % windspeed = 0
-self % t70hpa = 0
-self % t700hpa = 0
-self % t950hpa = 0
-self % t1000hpa = 0
-self % qsurf = 0
-self % lwp = 0
-self % mwemiss = 0
-self % cloudtopp = 0
-self % cloudfrac = 0
-self % emisspc = 0
+call self % delete()
 nelements = 0
 
 !loop through fields in bmatrix. the number of elements that the field is composed of
@@ -218,7 +194,9 @@ end subroutine ufo_rttovonedvarcheck_profindex_setup
 !-------------------------------------------------------------------------------
 !> Delete profile index
 !!
-!! \details Reset profile index
+!! \details Heritage: Ops_SatRad_InitProfInfo.f90
+!!
+!! Reset profile index
 !!
 !! \author Met Office
 !!
