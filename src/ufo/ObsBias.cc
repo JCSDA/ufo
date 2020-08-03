@@ -8,20 +8,25 @@
 #include "ufo/ObsBias.h"
 
 #include <Eigen/Core>
+#include <fstream>
+#include <iomanip>
 #include <set>
+
+#include "ioda/ObsVector.h"
 
 #include "oops/base/Variables.h"
 #include "oops/util/IntSetParser.h"
 #include "oops/util/Logger.h"
 
 #include "ufo/ObsBiasIncrement.h"
+#include "ufo/ObsDiagnostics.h"
 
 namespace ufo {
 
 // -----------------------------------------------------------------------------
 
 ObsBias::ObsBias(const ioda::ObsSpace & odb, const eckit::Configuration & conf)
-  : biasbase_(), predbases_(0), jobs_(0), odb_(odb), conf_(conf) {
+  : predbases_(0), jobs_(0), odb_(odb), conf_(conf) {
   oops::Log::trace() << "ObsBias::create starting." << std::endl;
 
   /// Get the jobs(channels)
@@ -52,11 +57,13 @@ ObsBias::ObsBias(const ioda::ObsSpace & odb, const eckit::Configuration & conf)
     }
   }
 
-  /// Bias model factory
-  biasbase_.reset(ObsBiasFactory::create(conf_, prednames_, jobs_));
+  if (prednames_.size() * jobs_.size() > 0) {
+    /// Initialize the biascoeffs to ZERO
+    biascoeffs_.resize(prednames_.size() * jobs_.size(), 0.0);
 
-  /// Read or initialize bias coefficients
-  this->read(conf);
+    /// Read or initialize bias coefficients
+    this->read(conf);
+  }
 
   oops::Log::trace() << "ObsBias::create done." << std::endl;
 }
@@ -64,16 +71,16 @@ ObsBias::ObsBias(const ioda::ObsSpace & odb, const eckit::Configuration & conf)
 // -----------------------------------------------------------------------------
 
 ObsBias::ObsBias(const ObsBias & other, const bool copy)
-  : odb_(other.odb_), conf_(other.conf_), biasbase_(), predbases_(other.predbases_),
+  : odb_(other.odb_), conf_(other.conf_), predbases_(other.predbases_),
     prednames_(other.prednames_), jobs_(other.jobs_),
     geovars_(other.geovars_), hdiags_(other.hdiags_) {
   oops::Log::trace() << "ObsBias::copy ctor starting." << std::endl;
 
-  /// Create a new bias model object
-  biasbase_.reset(ObsBiasFactory::create(conf_, prednames_, jobs_));
+  /// Initialize the biascoeffs
+  biascoeffs_.resize(prednames_.size() * jobs_.size(), 0.0);
 
-  /// Copy the bias model coeff data
-  if (copy && biasbase_) *biasbase_ = *other.biasbase_;
+  /// Copy the bias coeff data
+  if (copy && biascoeffs_.size() > 0) *this = other;
 
   oops::Log::trace() << "ObsBias::copy ctor done." << std::endl;
 }
@@ -81,22 +88,22 @@ ObsBias::ObsBias(const ObsBias & other, const bool copy)
 // -----------------------------------------------------------------------------
 
 ObsBias & ObsBias::operator+=(const ObsBiasIncrement & dx) {
-  if (biasbase_) *biasbase_+=dx;
+  for (std::size_t jj = 0; jj < biascoeffs_.size(); ++jj)
+      biascoeffs_[jj] += dx[jj];
   return *this;
 }
 
 // -----------------------------------------------------------------------------
 
 ObsBias & ObsBias::operator=(const ObsBias & rhs) {
-  if (rhs) {
-    ASSERT(biasbase_);
-    conf_ = rhs.conf_;
-    *biasbase_ = *rhs.biasbase_;
-    predbases_ = rhs.predbases_;
-    prednames_ = rhs.prednames_;
-    jobs_ = rhs.jobs_;
-    geovars_ = rhs.geovars_;
-    hdiags_ = rhs.hdiags_;
+  if (rhs.size() > 0 && this->size() == rhs.size()) {
+    conf_       = rhs.conf_;
+    biascoeffs_ = rhs.biascoeffs_;
+    predbases_  = rhs.predbases_;
+    prednames_  = rhs.prednames_;
+    jobs_       = rhs.jobs_;
+    geovars_    = rhs.geovars_;
+    hdiags_     = rhs.hdiags_;
   }
   return *this;
 }
@@ -104,16 +111,101 @@ ObsBias & ObsBias::operator=(const ObsBias & rhs) {
 // -----------------------------------------------------------------------------
 
 void ObsBias::read(const eckit::Configuration & conf) {
-  if (biasbase_) {
+  oops::Log::trace() << "ObsBias::read and initialize from file, starting "<< std::endl;
+
+  /// Bias coefficients input file name
+  std::string input_filename;
+  if (conf.has("obs bias.abias_in")) {
+    input_filename = conf.getString("obs bias.abias_in");
+    oops::Log::debug() << "ObsBias::initialize coefficients from file: "
+                       << input_filename <<  std::endl;
+
+    /// Default predictor names from GSI
+    /// temporary solution, we should have a self-explanatory obsbias file
+    const std::vector<std::string> gsi_predictors = {"constant",
+                                                     "zenith_angle",
+                                                     "cloud_liquid_water",
+                                                     "lapse_rate_order_2",
+                                                     "lapse_rate",
+                                                     "cosine_of_latitude_times_orbit_node",
+                                                     "sine_of_latitude",
+                                                     "emissivity",
+                                                     "scan_angle_order_4",
+                                                     "scan_angle_order_3",
+                                                     "scan_angle_order_2",
+                                                     "scan_angle"
+                                                     };
+    std::ifstream infile(input_filename);
+
+    /// get the sensor id
     std::string sensor = conf.getString("obs bias.sensor");
-    biasbase_->read(sensor);
+    oops::Log::debug() << "ObsBias::initialize coefficients for sensor: "
+                       << sensor <<  std::endl;
+
+    std::size_t ich;     //  sequential number
+    std::string nusis;   //  sensor/instrument/satellite
+    std::size_t nuchan;  //  channel number
+    float tlap, tsum;
+    std::size_t ntlapupdate;
+
+    if (infile.is_open())
+    {
+      oops::Log::debug() << "ObsBias:: prior file is opened" << std::endl;
+      float par;
+      while (!infile.eof())
+      {
+        infile >> ich;
+        infile >> nusis;
+        infile >> nuchan;
+        infile >> tlap;
+        infile >> tsum;
+        infile >> ntlapupdate;
+        if (nusis == sensor) {
+          auto ijob = std::find(jobs_.begin(), jobs_.end(), nuchan);
+          if (ijob != jobs_.end()) {
+            int j = std::distance(jobs_.begin(), ijob);
+
+            for (auto & item : gsi_predictors) {
+              infile >> par;
+              auto ipred = std::find(prednames_.begin(), prednames_.end(), item);
+              if (ipred != prednames_.end()) {
+                int p = std::distance(prednames_.begin(), ipred);
+                biascoeffs_.at(j*prednames_.size() + p) = static_cast<double>(par);
+              }
+            }
+          }
+        } else {
+          for (auto item : gsi_predictors) {
+            infile >> par;
+          }
+        }
+      }
+      infile.close();
+      oops::Log::debug() << "ObsBias:: read prior from " << input_filename << std::endl;
+    } else {
+      oops::Log::error() << "Unable to open file : " << input_filename << std::endl;
+      ABORT("Unable to open bias prior file ");
+    }
+  } else {
+    oops::Log::warning() << "ObsBias::prior file is NOT available, starting from ZERO"
+                         << std::endl;
   }
+
+  oops::Log::trace() << "ObsBias::read and initilization done " << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
 void ObsBias::write(const eckit::Configuration & conf) const {
-  if (biasbase_) biasbase_->write(conf);
+  oops::Log::trace() << "ObsBias::write to file not implemented" << std::endl;
+
+  /// Bias coefficients output file name
+  std::string output_filename;
+  if (conf.has("ObsBias.abias_out")) {
+    output_filename = conf.getString("ObsBias.abias_out");
+  }
+
+  oops::Log::trace() << "ObsBias::write to file done" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
@@ -121,10 +213,67 @@ void ObsBias::write(const eckit::Configuration & conf) const {
 void ObsBias::computeObsBias(ioda::ObsVector & ybias,
                              ObsDiagnostics & ydiags,
                              const Eigen::MatrixXd & predData) const {
-  if (biasbase_) {
-    biasbase_->computeObsBias(ybias, predData);
+  oops::Log::trace() << "ObsBias::computeObsBias starting" << std::endl;
+
+  if (this->size() > 0) {
+    const std::size_t nlocs  = ybias.nlocs();
+    const std::size_t npreds = prednames_.size();
+    const std::size_t njobs  = jobs_.size();
+
+    ASSERT(biascoeffs_.size() == npreds*njobs);
+    ASSERT(predData.rows() == npreds*njobs);
+    ASSERT(predData.cols() == nlocs);
+    ASSERT(ybias.nvars() == njobs);
+
+    /* predData memory layout (njobs*npreds X nlocs)
+     *     Loc     0      1      2       3
+     *           --------------------------
+     * ch1 pred1 | 0      1      2       4
+     *     pred2 | 5      6      7       8
+     *     pred3 | 9     10     11      12 
+     * ch2 pred1 |13     14     15      16
+     *     pred2 |17     18     19      20
+     *     ....  |
+     */
+
+    ybias.zero();
+
+    /* ybias memory layout (nlocs X njobs)
+     *     ch1    ch2    ch3     ch4
+     * Loc --------------------------
+     *  0 | 0      1      2       3
+     *  1 | 4      5      6       7
+     *  2 | 8      9     10      11 
+     *  3 |12     13     14      15
+     *  4 |16     17     18      19
+     * ...|
+     */
+
+    /* map bias coeff to eigen matrix npreds X njobs (read only)
+     * bias coeff memory layout (npreds X njobs)
+     *        ch1    ch2    ch3     ch4
+     *       --------------------------
+     * pred1 | 0      1      2       4
+     * pred2 | 5      6      7       8
+     * pred3 | 9     10     11      12 
+     * ....  |
+     */
+    Eigen::Map<const Eigen::MatrixXd> coeffs(biascoeffs_.data(), npreds, njobs);
+
+    Eigen::VectorXd tmp;  // nlocs X 1
+    for (std::size_t jch = 0; jch < njobs; ++jch) {
+      //  ( nlocs X 1 ) =  ( nlocs X npreds ) * (  npreds X 1 )
+      tmp = predData.transpose().block(0, jch*npreds , nlocs, npreds) *
+            coeffs.block(0, jch, npreds, 1);
+      for (std::size_t jrow = 0; jrow < nlocs; ++jrow) {
+        ybias[jrow*njobs+jch] = tmp(jrow);
+      }
+    }
+
     this->saveObsBiasTerms(ydiags, predData);
   }
+
+  oops::Log::trace() << "ObsBias::computeObsBias done." << std::endl;
 }
 
 // -----------------------------------------------------------------------------
@@ -135,8 +284,7 @@ Eigen::MatrixXd ObsBias::computePredictors(const GeoVaLs & geovals,
   const std::size_t njobs  = jobs_.size();
 
   Eigen::MatrixXd predData(npreds*njobs, nlocs);
-
-  if (biasbase_) {
+  if (this->size() > 0) {
     /// Temporary workspace
     Eigen::MatrixXd tmp(njobs, nlocs);
 
@@ -162,31 +310,73 @@ Eigen::MatrixXd ObsBias::computePredictors(const GeoVaLs & geovals,
 
 void ObsBias::saveObsBiasTerms(ObsDiagnostics & ydiags,
                                const Eigen::MatrixXd & predData) const {
-  if (biasbase_) {
-    biasbase_->saveObsBiasTerms(ydiags, predData);
+  oops::Log::trace() << "ObsBias::saveObsBiasTerms startng." << std::endl;
+  // const std::size_t nlocs = odb.nlocs();
+  const std::size_t nlocs = predData.cols();
+  const std::size_t npreds = prednames_.size();
+  const std::size_t njobs = jobs_.size();
+
+  ASSERT(predData.rows() == npreds*njobs && predData.cols() == nlocs);
+
+  /// Map bias coeff to eigen matrix npreds X njobs (read only)
+  Eigen::Map<const Eigen::MatrixXd> coeffs(biascoeffs_.data(), npreds, njobs);
+
+  /// Save ObsBiasTerms (bias_coeff x predictor) for QC
+  std::string varname;
+  std::vector<double> vec(nlocs, 0.0);
+  for (std::size_t jch = 0; jch < njobs; ++jch) {
+    for (std::size_t jpred = 0; jpred < npreds; ++jpred) {
+      varname = prednames_[jpred] + "_" + std::to_string(jobs_[jch]);
+      if (ydiags.has(varname)) {
+        Eigen::VectorXd::Map(&vec[0], nlocs) = predData.row(jpred+jch*npreds) * coeffs(jpred, jch);
+        ydiags.save(vec, varname, 1);
+      } else {
+        oops::Log::error() << varname << " is not reserved in ydiags !" << std::endl;
+        ABORT("ObsBiasTerm variable is not reserved in ydiags");
+      }
+    }
   }
+
+  oops::Log::trace() << "ObsBias::saveObsBiasTerms done." << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
 double ObsBias::norm() const {
+  oops::Log::trace() << "ObsBias::norm starting." << std::endl;
   double zz = 0.0;
-  if (biasbase_) zz = biasbase_->norm();
-  return zz;
-}
-
-// -----------------------------------------------------------------------------
-
-std::size_t ObsBias::size() const {
-  std::size_t zz = 0;
-  if (biasbase_) zz = biasbase_->size();
+  for (std::size_t jj = 0; jj < biascoeffs_.size(); ++jj) {
+    zz += biascoeffs_[jj] * biascoeffs_[jj];
+  }
+  if (biascoeffs_.size() > 0) zz = std::sqrt(zz/biascoeffs_.size());
+  oops::Log::trace() << "ObsBias::norm done." << std::endl;
   return zz;
 }
 
 // -----------------------------------------------------------------------------
 
 void ObsBias::print(std::ostream & os) const {
-  if (biasbase_) os << *biasbase_;
+  if (this->size() > 0) {
+    // map bias coeffs to eigen matrix (writable)
+    Eigen::Map<const Eigen::MatrixXd>
+      coeffs(biascoeffs_.data(), prednames_.size(), jobs_.size());
+
+    os << "ObsBias::print " << std::endl;
+    os << "---------------------------------------------------------------" << std::endl;
+    auto njobs = jobs_.size();
+    for (std::size_t p = 0; p < prednames_.size(); ++p) {
+      os << std::fixed << std::setw(20) << prednames_[p]
+         << ":  Min= " << std::setw(15) << std::setprecision(8)
+         << coeffs.row(p).minCoeff()
+         << ",  Max= " << std::setw(15) << std::setprecision(8)
+         << coeffs.row(p).maxCoeff()
+         << ",  Norm= " << std::setw(15) << std::setprecision(8)
+         << coeffs.row(p).norm()
+         << std::endl;
+    }
+    os << "---------------------------------------------------------------" << std::endl;
+    os << "ObsBias::print done" << std::endl;
+  }
 }
 
 // -----------------------------------------------------------------------------

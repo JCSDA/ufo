@@ -5,12 +5,12 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#ifndef UFO_OBSBIAS_PREDICTORS_SCANANGLE_H_
-#define UFO_OBSBIAS_PREDICTORS_SCANANGLE_H_
+#ifndef UFO_PREDICTORS_CONSTANT_H_
+#define UFO_PREDICTORS_CONSTANT_H_
 
 #include <vector>
 
-#include "ufo/obsbias/predictors/PredictorBase.h"
+#include "ufo/predictors/PredictorBase.h"
 
 namespace eckit {
   class Configuration;
@@ -24,22 +24,19 @@ namespace ufo {
 
 // -----------------------------------------------------------------------------
 
-class ScanAngle : public PredictorBase {
+class Constant : public PredictorBase {
  public:
-  ScanAngle(const eckit::Configuration &, const std::vector<int> &);
-  ~ScanAngle() {}
+  Constant(const eckit::Configuration &, const std::vector<int> &);
+  ~Constant() {}
 
   void compute(const ioda::ObsSpace &,
                const GeoVaLs &,
                const ObsDiagnostics &,
                Eigen::MatrixXd &) const override;
-
- private:
-  int order_;
 };
 
 // -----------------------------------------------------------------------------
 
 }  // namespace ufo
 
-#endif  // UFO_OBSBIAS_PREDICTORS_SCANANGLE_H_
+#endif  // UFO_PREDICTORS_CONSTANT_H_

@@ -8,7 +8,7 @@
 #include <iterator>
 #include <string>
 
-#include "ufo/obsbias/predictors/LapseRate.h"
+#include "ufo/predictors/LapseRate.h"
 
 #include "ioda/ObsSpace.h"
 

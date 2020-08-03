@@ -5,7 +5,7 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#include "ufo/obsbias/predictors/CloudLiquidWater.h"
+#include "ufo/predictors/CloudLiquidWater.h"
 
 #include <string>
 

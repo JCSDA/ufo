@@ -7,7 +7,7 @@
 
 #include <string>
 
-#include "ufo/obsbias/predictors/ScanAngle.h"
+#include "ufo/predictors/ScanAngle.h"
 
 #include "ioda/ObsSpace.h"
 
