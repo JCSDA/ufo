@@ -81,6 +81,7 @@ subroutine ufo_rttovonedvarcheck_minimize_newton(self, &
                                          b_inv,         &
                                          b_sigma,       &
                                          local_geovals, &
+                                         hofxdiags,     &
                                          profile_index, &
                                          channels,      &
                                          onedvar_success)
@@ -94,6 +95,7 @@ real(kind_real), intent(in)       :: b_matrix(:,:)   !< state error covariance
 real(kind_real), intent(in)       :: b_inv(:,:)      !< inverse of the state error covariance
 real(kind_real), intent(in)       :: b_sigma(:)      !< standard deviations of the state error covariance diagonal
 type(ufo_geovals), intent(inout)  :: local_geovals   !< model data at obs location
+type(ufo_geovals), intent(inout)  :: hofxdiags       !< model data containing the jacobian
 type(ufo_rttovonedvarcheck_profindex), intent(in) :: profile_index !< index array for x vector
 integer, intent(in)               :: channels(:)     !< list of channels used
 logical, intent(out)              :: onedvar_success !< convergence flag
@@ -183,7 +185,7 @@ Iterations: do iter = 1, self % max1DVarIterations
   call ufo_rttovonedvarcheck_get_jacobian(geovals, ob_info, self % obsdb, &
                                        channels(:), self % conf, &
                                        profile_index, GuessProfile(:), &
-                                       Y(:), H_matrix)
+                                       hofxdiags, Y(:), H_matrix)
 
   if (iter == 1) then
     BackProfile(:) = GuessProfile(:)

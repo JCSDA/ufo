@@ -4,8 +4,9 @@ window end: 2018-09-01T15:00:00Z
 observations:
 - obs operator:
     name: RTTOV
-    Sensor_ID: noaa_19_amsua
-    CoefficientPath: Data/
+    ObsOptions:
+      Sensor_ID: noaa_19_amsua
+      CoefficientPath: Data/
   obs space:
     name: Radiance
     obsdatain:

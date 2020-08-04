@@ -1,167 +1,157 @@
----
-logging:
-  categories: Warning, Error, Debug
-test_framework_runtime_config: "--log_level=test_suite"
+window begin: &win_begin 2019-11-27T21:00:00Z
+window end: &win_end 2019-11-28T03:00:00Z
 
-window_begin: &win_begin 2019-11-27T21:00:00Z
-window_end: &win_end 2019-11-28T03:00:00Z
-
-LinearObsOpTest: 
- coefTL: 1.e-5
- toleranceTL: 1.0e-5
- toleranceAD: 1.0e-11
-
-Observations:
-  ObsTypes:
-  - ObsOperator:
-      name: RTTOV
-      ObsOptions:
-        Sensor_ID: noaa_20_atms
-        CoefficientPath: &rttov_coeff Data/
-        mw_clw: true
-      ExtraVars:
-        - mass_content_of_cloud_liquid_water_in_atmosphere_layer
-        - mass_content_of_cloud_ice_in_atmosphere_layer
-    GeoVaLs:
-      filename: Data/atms_allsats_geoval_2019112800.nc4
-    ObsSpace: 
-      name: Radiance
-      ObsDataIn:
-        obsfile: &obs_file Data/atms_allsats_obs_2019112800.nc4
-      ObsDataOut: 
-        obsfile: Data/atms_allsats_obs_2019112800-out.nc4
-      simulate:
-        variables: [brightness_temperature]
-        channels: &ops_channels 6-15, 18-22
-    ObsFilters:
-    # Reject cannel 7 over land in the tropics
-    - Filter: BlackList
-      filter variables:
-      - name: brightness_temperature
-        channels: 7
-      where:
-      - variable:
-          name: qci_surftype_land@MetaData
-        is_in: 1
-      - variable:
-          name: latitude@MetaData
-        minvalue: -30.0
-        maxvalue: 30.0
-    # Reject channel 7 to 9 over sea when bennartz rain detected
-    - Filter: BlackList
-      filter variables:
-      - name: brightness_temperature
-        channels: 7-9
-      where:
-      - variable:
-          name: qci_surftype_sea@MetaData
-        is_in: 1
-      - variable:
-          name: qci_cloudtype_bennartzrain@MetaData
-        is_in: 1
-    # Reject channels when mwcloudy flag
-    - Filter: BlackList
-      filter variables:
-      - name: brightness_temperature
-        channels: 6, 18
-      where:
-      - variable:
-          name: qci_cloudtype_mwcloudy@MetaData
-        is_in: 1
-    # Reject channels when mwbcloudy flag
-    - Filter: BlackList
-      filter variables:
-      - name: brightness_temperature
-        channels: 18-20
-      where:
-      - variable:
-          name: qci_cloudtype_mwbcloudy@MetaData
-        is_in: 1
-    # Reject channels when rain detected
-    - Filter: BlackList
-      filter variables:
-      - name: brightness_temperature
-        channels: 6-9, 18-22
-      where:
-      - variable:
-          name: qci_cloudtype_rain@MetaData
-        is_in: 1
-    # Reject channels when bennartz rain detected
-    - Filter: BlackList
-      filter variables:
-      - name: brightness_temperature
-        channels: 6, 18-22
-      where:
-      - variable:
-          name: qci_cloudtype_bennartzrain@MetaData
-        is_in: 1
-    # Reject channels when over seaice surfaces
-    - Filter: BlackList
-      filter variables:
-      - name: brightness_temperature
-        channels: 6, 18-22
-      where:
-      - variable:
-          name: qci_surftype_seaice@MetaData
-        is_in: 1
-    # Reject channels when over land
-    - Filter: BlackList
-      filter variables:
-      - name: brightness_temperature
-        channels: 6, 18
-      where:
-      - variable:
-          name: qci_surftype_land@MetaData
-        is_in: 1
-    # Reject channels when over high land
-    - Filter: BlackList
-      filter variables:
-      - name: brightness_temperature
-        channels: 6-8, 18-22
-      where:
-      - variable:
-          name: qci_surftype_highland@MetaData
-        is_in: 1
-    # Reject channels for mismatch surface type
-    - Filter: BlackList
-      filter variables:
-      - name: brightness_temperature
-        channels: 6-8, 18-22
-      where:
-      - variable:
-          name: qci_surftype_mismatch@MetaData
-        is_in: 1
-    # Do 1D-Var check
-    - Filter: RTTOV OneDVar Check
-      defer to post: true
-      ModName: RTTOV
-      ObsOptions:
-        Sensor_ID: noaa_20_atms
-        CoefficientPath: *rttov_coeff
-      variables: [brightness_temperature]
-      channels: *ops_channels
-      retrieval_variables:
-      - air_temperature
-      - specific_humidity
-      - air_temperature_at_two_meters_above_surface
-      - specific_humidity_at_two_meters_above_surface
-      - skin_temperature
-      - surface_air_pressure
-      BMatrix: Data/atms_bmatrix_70.dat
-      RMatrix: Data/atms_noaa_20_rmatrix.nc4
-      nlevels: 70
-      qtotal: true
-      RTTOV_mwscattSwitch: false
-      RTTOV_usetotalice: false
-      UseMLMinimization: false
-      UseJforConvergence: true
-      FullDiagnostics: true
-      JConvergenceOption: 1
-      ConvergenceFactor: 0.40
-      Cost_ConvergenceFactor: 0.01
-      Max1DVarIterations: 7
-      ReadMWemiss: true
-      ReadIRemiss: false
-      EmissLandDefault: 0.95
-      EmissSeaIceDefault: 0.92
-    passedBenchmark: 879      # number of passed obs
+observations:
+- obs operator:
+    name: RTTOV
+    ObsOptions:
+      Sensor_ID: noaa_20_atms
+      CoefficientPath: &rttov_coeff Data/
+      mw_clw: true
+    ExtraVars:
+      - mass_content_of_cloud_liquid_water_in_atmosphere_layer
+      - mass_content_of_cloud_ice_in_atmosphere_layer
+  geovals:
+    filename: Data/atms_allsats_geoval_2019112800.nc4
+  obs space:
+    name: Radiance
+    obsdatain:
+      obsfile: &obs_file Data/atms_allsats_obs_2019112800.nc4
+    obsdataout:
+      obsfile: Data/atms_allsats_obs_2019112800-out.nc4
+    simulated variables: [brightness_temperature]
+    channels: &ops_channels 6-15, 18-22
+  obs filters:
+  # Reject cannel 7 over land in the tropics
+  - filter: BlackList
+    filter variables:
+    - name: brightness_temperature
+      channels: 7
+    where:
+    - variable:
+        name: qci_surftype_land@MetaData
+      is_in: 1
+    - variable:
+        name: latitude@MetaData
+      minvalue: -30.0
+      maxvalue: 30.0
+  # Reject channel 7 to 9 over sea when bennartz rain detected
+  - filter: BlackList
+    filter variables:
+    - name: brightness_temperature
+      channels: 7-9
+    where:
+    - variable:
+        name: qci_surftype_sea@MetaData
+      is_in: 1
+    - variable:
+        name: qci_cloudtype_bennartzrain@MetaData
+      is_in: 1
+  # Reject channels when mwcloudy flag
+  - filter: BlackList
+    filter variables:
+    - name: brightness_temperature
+      channels: 6, 18
+    where:
+    - variable:
+        name: qci_cloudtype_mwcloudy@MetaData
+      is_in: 1
+  # Reject channels when mwbcloudy flag
+  - filter: BlackList
+    filter variables:
+    - name: brightness_temperature
+      channels: 18-20
+    where:
+    - variable:
+        name: qci_cloudtype_mwbcloudy@MetaData
+      is_in: 1
+  # Reject channels when rain detected
+  - filter: BlackList
+    filter variables:
+    - name: brightness_temperature
+      channels: 6-9, 18-22
+    where:
+    - variable:
+        name: qci_cloudtype_rain@MetaData
+      is_in: 1
+  # Reject channels when bennartz rain detected
+  - filter: BlackList
+    filter variables:
+    - name: brightness_temperature
+      channels: 6, 18-22
+    where:
+    - variable:
+        name: qci_cloudtype_bennartzrain@MetaData
+      is_in: 1
+  # Reject channels when over seaice surfaces
+  - filter: BlackList
+    filter variables:
+    - name: brightness_temperature
+      channels: 6, 18-22
+    where:
+    - variable:
+        name: qci_surftype_seaice@MetaData
+      is_in: 1
+  # Reject channels when over land
+  - filter: BlackList
+    filter variables:
+    - name: brightness_temperature
+      channels: 6, 18
+    where:
+    - variable:
+        name: qci_surftype_land@MetaData
+      is_in: 1
+  # Reject channels when over high land
+  - filter: BlackList
+    filter variables:
+    - name: brightness_temperature
+      channels: 6-8, 18-22
+    where:
+    - variable:
+        name: qci_surftype_highland@MetaData
+      is_in: 1
+  # Reject channels for mismatch surface type
+  - filter: BlackList
+    filter variables:
+    - name: brightness_temperature
+      channels: 6-8, 18-22
+    where:
+    - variable:
+        name: qci_surftype_mismatch@MetaData
+      is_in: 1
+  # Do 1D-Var check
+  - filter: RTTOV OneDVar Check
+    defer to post: true
+    ModName: RTTOV
+    ObsOptions:
+      Sensor_ID: noaa_20_atms
+      CoefficientPath: *rttov_coeff
+    variables: [brightness_temperature]
+    channels: *ops_channels
+    retrieval variables:
+    - air_temperature
+    - specific_humidity
+    - mass_content_of_cloud_liquid_water_in_atmosphere_layer
+    - mass_content_of_cloud_ice_in_atmosphere_layer
+    - air_temperature_at_two_meters_above_surface
+    - specific_humidity_at_two_meters_above_surface
+    - skin_temperature
+    - surface_air_pressure
+    BMatrix: Data/atms_bmatrix_70.dat
+    RMatrix: Data/atms_noaa_20_rmatrix.nc4
+    nlevels: 70
+    qtotal: true
+    RTTOV_mwscattSwitch: false
+    RTTOV_usetotalice: false
+    UseMLMinimization: false
+    UseJforConvergence: true
+    FullDiagnostics: true
+    JConvergenceOption: 1
+    ConvergenceFactor: 0.40
+    Cost_ConvergenceFactor: 0.01
+    Max1DVarIterations: 7
+    ReadMWemiss: true
+    ReadIRemiss: false
+    EmissLandDefault: 0.95
+    EmissSeaIceDefault: 0.92
+  passedBenchmark: 879      # number of passed obs

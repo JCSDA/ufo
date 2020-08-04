@@ -35,8 +35,8 @@ contains
 subroutine ufo_rttovonedvarcheck_get_jacobian(geovals, ob_info, obsdb, &
                                            channels, conf, &
                                            profindex, prof_x, &
+                                           hofxdiags, &
                                            hofx, H_matrix)
-
 
 implicit none
 
@@ -48,6 +48,7 @@ integer, intent(in)                               :: channels(:)   !< satellite 
 type(fckit_configuration), intent(in)             :: conf          !< configuration
 type(ufo_rttovonedvarcheck_profindex), intent(in) :: profindex     !< index array for x vector
 real(kind_real), intent(in)                       :: prof_x(:)     !< x vector
+type(ufo_geovals), intent(inout)                  :: hofxdiags     !< model data to pass the jacobian
 real(kind_real), intent(out)                      :: hofx(:)       !< BT's
 real(kind_real), intent(out)                      :: H_matrix(:,:) !< Jacobian
 
@@ -59,7 +60,7 @@ select case (trim(ob_info % forward_mod_name))
     call rttov_tlad % setup(conf)
     call ufo_rttovonedvarcheck_GetHmatrixRTTOV(geovals, ob_info, obsdb, &
                                                channels(:), rttov_tlad, &
-                                               profindex, prof_x(:), &
+                                               profindex, prof_x(:), hofxdiags, &
                                                hofx(:), H_matrix) ! out
     call rttov_tlad % delete()
 
@@ -84,20 +85,21 @@ end  subroutine ufo_rttovonedvarcheck_get_jacobian
 !!
 subroutine ufo_rttovonedvarcheck_GetHmatrixRTTOV(geovals, ob_info, obsdb, &
                                        channels, rttov_data, &
-                                       profindex, prof_x, &
+                                       profindex, prof_x, hofxdiags, &
                                        hofx, H_matrix)
 
 implicit none
 
 ! subroutine arguments
-type(ufo_geovals), intent(in)                     :: geovals !< model data at obs location
-type(ufo_rttovonedvarcheck_obinfo), intent(in)    :: ob_info !< satellite metadata
-type(c_ptr), value, intent(in)                    :: obsdb !< observation database
+type(ufo_geovals), intent(in)                     :: geovals     !< model data at obs location
+type(ufo_rttovonedvarcheck_obinfo), intent(in)    :: ob_info     !< satellite metadata
+type(c_ptr), value, intent(in)                    :: obsdb       !< observation database
 integer(c_int), intent(in)                        :: channels(:) !< satellite channels
-type(ufo_radiancerttov_tlad), intent(inout)       :: rttov_data !< structure for running rttov_k
-type(ufo_rttovonedvarcheck_profindex), intent(in) :: profindex !< index array for x vector
-real(kind_real), intent(in)                       :: prof_x(:) !< x vector
-real(kind_real), intent(out)                      :: hofx(:) !< BT's
+type(ufo_radiancerttov_tlad), intent(inout)       :: rttov_data  !< structure for running rttov_k
+type(ufo_rttovonedvarcheck_profindex), intent(in) :: profindex   !< index array for x vector
+real(kind_real), intent(in)                       :: prof_x(:)   !< x vector
+type(ufo_geovals), intent(inout)                  :: hofxdiags   !< model data to pass the jacobian
+real(kind_real), intent(out)                      :: hofx(:)     !< BT's
 real(kind_real), intent(out)                      :: H_matrix(:,:) !< Jacobian
 
 ! Local arguments

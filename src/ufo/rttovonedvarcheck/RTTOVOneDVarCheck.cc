@@ -30,7 +30,7 @@ namespace ufo {
 RTTOVOneDVarCheck::RTTOVOneDVarCheck(ioda::ObsSpace & obsdb, const eckit::Configuration & config,
                                  boost::shared_ptr<ioda::ObsDataVector<int> > flags,
                                  boost::shared_ptr<ioda::ObsDataVector<float> > obserr)
-  : FilterBase(obsdb, config, flags, obserr), config_(config)
+  : FilterBase(obsdb, config, flags, obserr), config_(config), channels_(), retrieved_vars_()
 {
   oops::Log::debug() << "RTTOVOneDVarCheck contructor starting" << std::endl;
 
@@ -41,7 +41,7 @@ RTTOVOneDVarCheck::RTTOVOneDVarCheck(ioda::ObsSpace & obsdb, const eckit::Config
   // Setup fortran object
   const eckit::Configuration * conf = &config_;
   ufo_rttovonedvarcheck_create_f90(key_, obsdb, conf, channels_.size(), channels_[0],
-                                   RTTOVOneDVarCheck::qcFlag());
+                                   retrieved_vars_, RTTOVOneDVarCheck::qcFlag());
 
   oops::Log::debug() << "RTTOVOneDVarCheck contructor complete. " << std::endl;
 }
@@ -63,7 +63,7 @@ void RTTOVOneDVarCheck::applyFilter(const std::vector<bool> & apply,
 // Get GeoVaLs
   const ufo::GeoVaLs * gvals = data_.getGeoVaLs();
 
-// Create oops variable
+// Create oops variable with the list of channels
   oops::Variables variables = filtervars.toOopsVariables();
 
 // Convert apply to char for passing to fortran
@@ -74,15 +74,16 @@ void RTTOVOneDVarCheck::applyFilter(const std::vector<bool> & apply,
   }
 
 // Save qc flags to database for retrieval in fortran - needed for channel selection
-  flags_->save("FortranQC");    // temporary measure as per gnss qc
+  flags_->save("FortranQC");    // temporary measure as per ROobserror qc
 
 // Pass it all to fortran
   const eckit::Configuration * conf = &config_;
-  ufo_rttovonedvarcheck_apply_f90(key_, variables, gvals->toFortran(),
+  ufo_rttovonedvarcheck_apply_f90(key_, variables, retrieved_vars_,
+                                  gvals->toFortran(),
                                   apply_char.size(), apply_char[0]);
 
 // Read qc flags from database
-  flags_->read("FortranQC");    // temporary measure as per gnss qc
+  flags_->read("FortranQC");    // temporary measure as per ROobserror qc
 
   oops::Log::trace() << "RTTOVOneDVarCheck Filter complete" << std::endl;
 }

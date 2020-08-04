@@ -92,9 +92,9 @@ self % forward_mod_name = str
 call self % conf % get_or_die("nlevels",self % nlevels)
 
 ! Variables for profile (x,xb)
-self % nmvars = self % conf % get_size("retrieval_variables")
+self % nmvars = self % conf % get_size("retrieval variables")
 allocate(self % retrieval_variables(self % nmvars))
-call self % conf % get_or_die("retrieval_variables", str_array)
+call self % conf % get_or_die("retrieval variables", str_array)
 self % retrieval_variables(1:self % nmvars) = str_array
 
 ! Satellite channels

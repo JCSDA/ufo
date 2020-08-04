@@ -92,21 +92,23 @@ end subroutine ufo_rttovonedvarcheck_delete
 !!
 !! \date 09/06/2020: Created
 !!
-subroutine ufo_rttovonedvarcheck_apply(self, vars, geovals, apply)
+subroutine ufo_rttovonedvarcheck_apply(self, vars, retrieval_vars, geovals, apply)
 
   implicit none
   type(ufo_rttovonedvarcheck), intent(inout) :: self     !< rttovonedvarcheck main object
   type(oops_variables), intent(in)           :: vars     !< channels for 1D-Var
+  type(oops_variables), intent(in)           :: retrieval_vars !< retrieval variables for 1D-Var
   type(ufo_geovals), intent(in)              :: geovals  !< model values at observation space
   logical, intent(in)                        :: apply(:) !< qc manager flags
 
-  type(ufo_rttovonedvarcheck_obs)        :: obs           ! data for all observations read from db
-  type(ufo_rttovonedvarcheck_bmatrix)    :: full_bmatrix  ! full bmatrix read from file
-  type(ufo_geovals)                      :: local_geovals ! geoval for one observation
-  type(ufo_rttovonedvarcheck_obinfo)     :: ob_info       ! observation data for a single observation
-  type(ufo_rttovonedvarcheck_profindex)  :: prof_index    ! index for mapping geovals to 1d-var state profile
-  type(ufo_rttovonedvarcheck_rmatrix)    :: full_rmatrix  ! full r_matrix read from file
-  type(ufo_rttovonedvarcheck_rsubmatrix) :: r_submatrix   ! r_submatrix object
+  type(ufo_rttovonedvarcheck_obs)        :: obs            ! data for all observations read from db
+  type(ufo_rttovonedvarcheck_bmatrix)    :: full_bmatrix   ! full bmatrix read from file
+  type(ufo_geovals)                      :: local_geovals  ! geoval for one observation
+  type(ufo_rttovonedvarcheck_obinfo)     :: ob_info        ! observation data for a single observation
+  type(ufo_rttovonedvarcheck_profindex)  :: prof_index     ! index for mapping geovals to 1d-var state profile
+  type(ufo_rttovonedvarcheck_rmatrix)    :: full_rmatrix   ! full r_matrix read from file
+  type(ufo_rttovonedvarcheck_rsubmatrix) :: r_submatrix    ! r_submatrix object
+  type(ufo_geovals)                      :: hofxdiags      ! hofxdiags containing jacobian
   character(len=max_string)          :: sensor_id
   character(len=max_string)          :: var
   character(len=max_string)          :: varname
@@ -241,6 +243,9 @@ subroutine ufo_rttovonedvarcheck_apply(self, vars, geovals, apply)
       end do
       call r_submatrix % setup(nchans_used, ob_info % channels_used, full_rmatrix=full_rmatrix)
 
+      ! Setup hofxdiags for this retrieval
+      call ufo_geovals_setup(hofxdiags, retrieval_vars, 1)
+
       if (self % FullDiagnostics) then
         call r_submatrix % info()
         write(*, *) "Observations used = ",ob_info % yobs(:)
@@ -256,12 +261,12 @@ subroutine ufo_rttovonedvarcheck_apply(self, vars, geovals, apply)
       if (self % UseMLMinimization) then
         call ufo_rttovonedvarcheck_minimize_ml(self, ob_info, &
                                       r_submatrix, b_matrix, b_inverse, b_sigma, &
-                                      local_geovals, prof_index,           &
+                                      local_geovals, hofxdiags, prof_index, &
                                       ob_info % channels_used, onedvar_success)
       else
         call ufo_rttovonedvarcheck_minimize_newton(self, ob_info, &
                                       r_submatrix, b_matrix, b_inverse, b_sigma, &
-                                      local_geovals, prof_index,           &
+                                      local_geovals, hofxdiags, prof_index, &
                                       ob_info % channels_used, onedvar_success)
       end if
 
@@ -304,6 +309,7 @@ subroutine ufo_rttovonedvarcheck_apply(self, vars, geovals, apply)
   call full_bmatrix % delete()
   call full_rmatrix % delete()
   call obs % delete()
+  call ufo_geovals_delete(hofxdiags)
   if (allocated(b_matrix))   deallocate(b_matrix)
   if (allocated(b_inverse))  deallocate(b_inverse)
   if (allocated(b_sigma))    deallocate(b_sigma)

@@ -33,7 +33,7 @@ contains
 ! ------------------------------------------------------------------------------------------------
 
 subroutine ufo_rttovonedvarcheck_create_c(c_self, c_obspace, c_conf, c_nchan, &
-                                          c_channels, c_onedvarflag) &
+                                          c_channels, c_varlist, c_onedvarflag) &
                         bind(c,name='ufo_rttovonedvarcheck_create_f90')
 
 !> \brief Interface to the Fortran create method
@@ -48,16 +48,22 @@ type(c_ptr), value, intent(in) :: c_obspace  !< obsspace - input
 type(c_ptr), value, intent(in) :: c_conf     !< yaml configuration - input
 integer(c_int), intent(in) :: c_nchan        !< number of channels - input
 integer(c_int), intent(in) :: c_channels(c_nchan) !< channel numbers - input
+type(c_ptr), intent(in), value :: c_varlist  !< retrieved variables pointer - in
 integer(c_int), intent(in) :: c_onedvarflag  !< flag for qc manager logging - input
 
 type(ufo_rttovonedvarcheck), pointer :: self
 type(fckit_configuration) :: f_conf
+type(oops_variables) :: oops_vars
 
 call ufo_rttovonedvarcheck_registry%setup(c_self, self)
 f_conf = fckit_configuration(c_conf)
 
 call ufo_rttovonedvarcheck_create(self, c_obspace, f_conf, c_channels, &
                                   c_onedvarflag)
+
+!> Update C++ ObsFilter with input variable list
+oops_vars = oops_variables(c_varlist)
+call oops_vars%push_back( self % retrieval_variables )
 
 end subroutine ufo_rttovonedvarcheck_create_c
 
@@ -86,7 +92,7 @@ end subroutine ufo_rttovonedvarcheck_delete_c
 
 ! ------------------------------------------------------------------------------------------------
 
-subroutine ufo_rttovonedvarcheck_apply_c(c_self, c_vars, c_geovals, c_nobs, c_apply) &
+subroutine ufo_rttovonedvarcheck_apply_c(c_self, c_vars, c_retvars, c_geovals, c_nobs, c_apply) &
                bind(c,name='ufo_rttovonedvarcheck_apply_f90')
 
 !> \brief Interface to filter apply method
@@ -99,12 +105,14 @@ subroutine ufo_rttovonedvarcheck_apply_c(c_self, c_vars, c_geovals, c_nobs, c_ap
 implicit none
 integer(c_int), intent(in)     :: c_self          !< self - input
 type(c_ptr), value, intent(in) :: c_vars          !< list of variables - input
+type(c_ptr), value, intent(in) :: c_retvars       !< list of retrieval variables - input
 integer(c_int), intent(in)     :: c_geovals       !< Geovals - input
 integer(c_int), intent(in)     :: c_nobs          !< number of observations - input
 character(c_char), intent(in)  :: c_apply(c_nobs) !< apply flag (converted to logical) - input
 
 type(ufo_rttovonedvarcheck), pointer :: self
 type(oops_variables)                 :: vars
+type(oops_variables)                 :: retrieval_vars
 type(ufo_geovals), pointer           :: geovals
 integer                              :: ii
 logical                              :: apply(c_nobs)
@@ -113,6 +121,7 @@ call ufo_rttovonedvarcheck_registry%get(c_self, self)
 call ufo_geovals_registry%get(c_geovals, geovals)
 
 vars = oops_variables(c_vars)
+retrieval_vars = oops_variables(c_retvars)
 
 ! Convert character to logical for passing to Fortran
 apply(:) = .false.
@@ -120,7 +129,7 @@ where (c_apply == 'T')
   apply = .true.
 end where
 
-call ufo_rttovonedvarcheck_apply(self, vars, geovals, apply)
+call ufo_rttovonedvarcheck_apply(self, vars, retrieval_vars, geovals, apply)
 
 end subroutine ufo_rttovonedvarcheck_apply_c
 

@@ -64,6 +64,7 @@ class RTTOVOneDVarCheck : public FilterBase,
   F90onedvarcheck key_;
   const eckit::LocalConfiguration config_;
   std::vector<int> channels_;
+  oops::Variables retrieved_vars_;
 };
 
 }  // namespace ufo
