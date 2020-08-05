@@ -66,13 +66,16 @@ subroutine ufo_gnssro_bndropp2d_simobs(self, geovals, hofx, obss)
   integer                         :: nlev, nobs, iobs, nvprof, obss_nobs
   type(ufo_geoval), pointer          :: t, q, prs, gph !, gph_sfc
   real(kind_real), allocatable       :: obsLat(:), obsLon(:), obsImpP(:), obsLocR(:), obsGeoid(:)
+  integer                         :: n_horiz
 
 
-  write(err_msg,*) "TRACE: ufo_gnssro_bndropp2d_simobs: begin"
+  write(err_msg,*) "TRACE: ufo_gnssro_bndropp2d_simobs_stub: begin"
   call fckit_log%info(err_msg)
 
+  n_horiz = self%roconf%n_horiz
+
 ! check if nlocs is consistent in geovals & hofx
-  if (geovals%nlocs /= size(hofx)) then
+  if (geovals%nlocs /= size(hofx)*n_horiz) then
       write(err_msg,*) myname_, ' error: nlocs inconsistent!'
       call abor1_ftn(err_msg)
   endif
@@ -99,10 +102,10 @@ subroutine ufo_gnssro_bndropp2d_simobs(self, geovals, hofx, obss)
   call obsspace_get_db(obss, "MetaData", "latitude",         obsLat)
   call obsspace_get_db(obss, "MetaData", "impact_parameter", obsImpP)
   call obsspace_get_db(obss, "MetaData", "earth_radius_of_curvature", obsLocR)
-  call obsspace_get_db(obss, " ", "geoid_height_above_reference_ellipsoid", obsGeoid)
+  call obsspace_get_db(obss, "MetaData", "geoid_height_above_reference_ellipsoid", obsGeoid)
 
 
-  write(err_msg,*) "TRACE: ufo_gnssro_bndropp2d_simobs: begin observation loop, nobs =  ", nobs
+  write(err_msg,*) "TRACE: ufo_gnssro_bndropp2d_simobs_stub: begin observation loop, nobs =  ", nobs
   call fckit_log%info(err_msg)
 
   deallocate(obsLat)
@@ -111,7 +114,7 @@ subroutine ufo_gnssro_bndropp2d_simobs(self, geovals, hofx, obss)
   deallocate(obsLocR)
   deallocate(obsGeoid)
 
-  write(err_msg,*) "TRACE: ufo_gnssro_bndropp2d_simobs: completed"
+  write(err_msg,*) "TRACE: ufo_gnssro_bndropp2d_simobs_stub: completed"
   call fckit_log%info(err_msg)
      
   return

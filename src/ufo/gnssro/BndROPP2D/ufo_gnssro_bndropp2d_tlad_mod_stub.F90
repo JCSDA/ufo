@@ -114,8 +114,11 @@ subroutine ufo_gnssro_bndropp2d_simobs_tl(self, geovals, hofx, obss)
   real(kind_real)              :: gph_sfc_d_zero 
   real(kind_real), allocatable :: obsLat(:), obsLon(:), obsImpP(:), obsLocR(:), obsGeoid(:)
 ! hack - set local geopotential height to zero for ropp routines
+  integer                       :: n_horiz
 
-  write(err_msg,*) "TRACE: ufo_gnssro_bndropp2d_simobs_tl: begin"
+  n_horiz = self%roconf%n_horiz
+
+  write(err_msg,*) "TRACE: ufo_gnssro_bndropp2d_simobs_tl_stub: begin"
   call fckit_log%info(err_msg)
 
 ! check if trajectory was set
@@ -125,7 +128,7 @@ subroutine ufo_gnssro_bndropp2d_simobs_tl(self, geovals, hofx, obss)
   endif
       
 ! check if nlocs is consistent in geovals & hofx
-  if (geovals%nlocs /= size(hofx)) then
+  if (geovals%nlocs /= size(hofx)*n_horiz) then
      write(err_msg,*) myname_, ' error: nlocs inconsistent!'
      call abor1_ftn(err_msg)
   endif
@@ -163,7 +166,7 @@ subroutine ufo_gnssro_bndropp2d_simobs_tl(self, geovals, hofx, obss)
   deallocate(obsLocR)
   deallocate(obsGeoid)
 
-  write(err_msg,*) "TRACE: ufo_gnssro_bndropp2d_simobs_tl: complete"
+  write(err_msg,*) "TRACE: ufo_gnssro_bndropp2d_simobs_tl_stub: complete"
   call fckit_log%info(err_msg)
 
   return
@@ -188,10 +191,12 @@ subroutine ufo_gnssro_bndropp2d_simobs_ad(self, geovals, hofx, obss)
 
   real(kind_real),    allocatable :: obsLat(:), obsLon(:), obsImpP(:), obsLocR(:), obsGeoid(:)
   integer                         :: iobs,nlev, nlocs, nvprof
+  integer                         :: n_horiz
   character(len=*), parameter     :: myname_="ufo_gnssro_bndropp2d_simobs_ad"
   character(max_string)           :: err_msg
 
-  write(err_msg,*) "TRACE: ufo_gnssro_bndropp2d_simobs_ad: begin"
+
+  write(err_msg,*) "TRACE: ufo_gnssro_bndropp2d_simobs_ad_stub: begin"
   call fckit_log%info(err_msg)
 
 ! check if trajectory was set
@@ -199,8 +204,11 @@ subroutine ufo_gnssro_bndropp2d_simobs_ad(self, geovals, hofx, obss)
      write(err_msg,*) myname_, ' trajectory wasnt set!'
      call abor1_ftn(err_msg)
   endif
+
+  n_horiz = self%roconf%n_horiz
+
 ! check if nlocs is consistent in geovals & hofx
-  if (geovals%nlocs /= size(hofx)) then
+  if (geovals%nlocs /= size(hofx)*n_horiz) then
      write(err_msg,*) myname_, ' error: nlocs inconsistent!'
      call abor1_ftn(err_msg)
   endif
@@ -263,7 +271,7 @@ subroutine ufo_gnssro_bndropp2d_simobs_ad(self, geovals, hofx, obss)
   deallocate(obsGeoid)
   deallocate(gph_d_zero)
 
-  write(err_msg,*) "TRACE: ufo_gnssro_bndropp2d_simobs_ad: complete"
+  write(err_msg,*) "TRACE: ufo_gnssro_bndropp2d_simobs_ad_stub: complete"
   call fckit_log%info(err_msg)
 
   return
