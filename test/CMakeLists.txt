@@ -120,6 +120,7 @@ list( APPEND ufo_test_input
   testinput/parameters.yaml
   testinput/qc_trackcheck.yaml
   testinput/qc_trackcheck_unittests.yaml
+  testinput/qc_trackcheckship_unittests.yaml
   testinput/qc_backgroundcheck.yaml
   testinput/qc_boundscheck.yaml
   testinput/qc_defer_to_post.yaml
@@ -1094,6 +1095,12 @@ ecbuild_add_test( TARGET  test_ufo_temporalthinning
 ecbuild_add_test( TARGET  test_ufo_qc_trackcheck_unittests
                   SOURCES mains/TestTrackCheck.cc
                   ARGS    "testinput/qc_trackcheck_unittests.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  LIBS    ufo)
+
+ecbuild_add_test( TARGET  test_ufo_qc_trackcheckship_unittests
+                  SOURCES mains/TestTrackCheckShip.cc
+                  ARGS    "testinput/qc_trackcheckship_unittests.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   LIBS    ufo)
 
