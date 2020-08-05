@@ -86,6 +86,24 @@ call ufo_geovals_copy(self, other)
 end subroutine ufo_geovals_copy_c
 
 ! ------------------------------------------------------------------------------
+!> Copy one GeoVaLs location into another object
+
+subroutine ufo_geovals_copy_one_c(c_key_self, c_key_other, ind) bind(c,name='ufo_geovals_copy_one_f90')
+implicit none
+integer(c_int), intent(in) :: c_key_self
+integer(c_int), intent(in) :: c_key_other
+integer(c_int), intent(in) :: ind
+type(ufo_geovals), pointer :: self
+type(ufo_geovals), pointer :: other
+
+call ufo_geovals_registry%get(c_key_self, self)
+call ufo_geovals_registry%get(c_key_other, other)
+
+call ufo_geovals_copy_one(self, other, ind)
+
+end subroutine ufo_geovals_copy_one_c
+
+! ------------------------------------------------------------------------------
 !> Analytic init
 
 subroutine ufo_geovals_analytic_init_c(c_key_self, c_key_locs, c_conf) bind(c,name='ufo_geovals_analytic_init_f90')

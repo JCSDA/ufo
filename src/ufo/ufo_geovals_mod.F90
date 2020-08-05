@@ -28,7 +28,7 @@ public :: ufo_geovals_assign, ufo_geovals_add, ufo_geovals_diff, ufo_geovals_abs
 public :: ufo_geovals_split, ufo_geovals_merge
 public :: ufo_geovals_minmaxavg, ufo_geovals_normalize, ufo_geovals_maxloc, ufo_geovals_schurmult
 public :: ufo_geovals_read_netcdf, ufo_geovals_write_netcdf
-public :: ufo_geovals_rms, ufo_geovals_copy
+public :: ufo_geovals_rms, ufo_geovals_copy, ufo_geovals_copy_one
 public :: ufo_geovals_analytic_init
 
 private :: ufo_geovals_reset_sec_arg
@@ -478,6 +478,41 @@ other%missing_value = self%missing_value
 other%linit = .true.
 
 end subroutine ufo_geovals_copy
+
+! ------------------------------------------------------------------------------
+!> Copy one location from GeoVaLs into a new object
+!!
+
+subroutine ufo_geovals_copy_one(self, other, loc_index)
+implicit none
+type(ufo_geovals), intent(inout) :: self !> GeoVaLs for one location
+type(ufo_geovals), intent(in) :: other   !> GeoVaLs for many location
+integer, intent(in) :: loc_index !> Index of the location in the "other" geoval
+integer :: jv
+
+if (.not. other%linit) then
+  call abor1_ftn("ufo_geovals_copy_one: geovals not defined")
+endif
+
+call ufo_geovals_delete(self)
+
+self%nlocs = 1
+self%nvar = other%nvar
+allocate(self%variables(self%nvar))
+self%variables(:) = other%variables(:)
+
+allocate(self%geovals(self%nvar))
+do jv = 1, self%nvar
+  self%geovals(jv)%nval = other%geovals(jv)%nval
+  self%geovals(jv)%nlocs = 1
+  allocate(self%geovals(jv)%vals(self%geovals(jv)%nval, self%geovals(jv)%nlocs))
+  self%geovals(jv)%vals(:,self%nlocs) = other%geovals(jv)%vals(:,loc_index)
+enddo
+
+self%missing_value = other%missing_value
+self%linit = .true.
+
+end subroutine ufo_geovals_copy_one
 
 ! ------------------------------------------------------------------------------
 !> Initialize a GeoVaLs object based on an analytic state
