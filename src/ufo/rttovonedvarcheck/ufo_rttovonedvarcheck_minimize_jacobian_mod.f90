@@ -15,7 +15,7 @@ use ufo_radiancerttov_tlad_mod
 use ufo_rttovonedvarcheck_constants_mod
 use ufo_rttovonedvarcheck_minimize_utils_mod, only: &
         ufo_rttovonedvarcheck_Qsplit
-use ufo_rttovonedvarcheck_obinfo_mod
+use ufo_rttovonedvarcheck_ob_mod
 use ufo_rttovonedvarcheck_profindex_mod
 
 implicit none
@@ -32,9 +32,8 @@ contains
 !!
 !! \date 09/06/2020: Created
 !!
-subroutine ufo_rttovonedvarcheck_get_jacobian(geovals, ob_info, obsdb, &
-                                           channels, conf, &
-                                           profindex, prof_x, &
+subroutine ufo_rttovonedvarcheck_get_jacobian(geovals, ob, obsdb, &
+                                           conf, profindex, prof_x, &
                                            hofxdiags, &
                                            hofx, H_matrix)
 
@@ -42,9 +41,8 @@ implicit none
 
 ! subroutine arguments
 type(ufo_geovals), intent(in)                     :: geovals       !< model data at obs location
-type(ufo_rttovonedvarcheck_obinfo), intent(in)    :: ob_info       !< satellite metadata
+type(ufo_rttovonedvarcheck_ob), intent(in)        :: ob            !< satellite metadata
 type(c_ptr), value, intent(in)                    :: obsdb         !< observation database
-integer, intent(in)                               :: channels(:)   !< satellite channels
 type(fckit_configuration), intent(in)             :: conf          !< configuration
 type(ufo_rttovonedvarcheck_profindex), intent(in) :: profindex     !< index array for x vector
 real(kind_real), intent(in)                       :: prof_x(:)     !< x vector
@@ -55,11 +53,11 @@ real(kind_real), intent(out)                      :: H_matrix(:,:) !< Jacobian
 ! local variables
 type(ufo_radiancerttov_tlad) :: rttov_tlad   ! structure for holding original rttov_k setup data
 
-select case (trim(ob_info % forward_mod_name))
+select case (trim(ob % forward_mod_name))
   case ("RTTOV")
     call rttov_tlad % setup(conf)
-    call ufo_rttovonedvarcheck_GetHmatrixRTTOV(geovals, ob_info, obsdb, &
-                                               channels(:), rttov_tlad, &
+    call ufo_rttovonedvarcheck_GetHmatrixRTTOV(geovals, ob, obsdb, &
+                                               rttov_tlad, &
                                                profindex, prof_x(:), hofxdiags, &
                                                hofx(:), H_matrix) ! out
     call rttov_tlad % delete()
@@ -83,18 +81,16 @@ end  subroutine ufo_rttovonedvarcheck_get_jacobian
 !!
 !! \date 09/06/2020: Created
 !!
-subroutine ufo_rttovonedvarcheck_GetHmatrixRTTOV(geovals, ob_info, obsdb, &
-                                       channels, rttov_data, &
-                                       profindex, prof_x, hofxdiags, &
-                                       hofx, H_matrix)
+subroutine ufo_rttovonedvarcheck_GetHmatrixRTTOV(geovals, ob, obsdb, &
+                                       rttov_data, profindex, prof_x, &
+                                       hofxdiags, hofx, H_matrix)
 
 implicit none
 
 ! subroutine arguments
 type(ufo_geovals), intent(in)                     :: geovals     !< model data at obs location
-type(ufo_rttovonedvarcheck_obinfo), intent(in)    :: ob_info     !< satellite metadata
+type(ufo_rttovonedvarcheck_ob), intent(in)        :: ob          !< satellite metadata
 type(c_ptr), value, intent(in)                    :: obsdb       !< observation database
-integer(c_int), intent(in)                        :: channels(:) !< satellite channels
 type(ufo_radiancerttov_tlad), intent(inout)       :: rttov_data  !< structure for running rttov_k
 type(ufo_rttovonedvarcheck_profindex), intent(in) :: profindex   !< index array for x vector
 real(kind_real), intent(in)                       :: prof_x(:)   !< x vector
@@ -117,9 +113,9 @@ real(kind_real), allocatable :: dql_dqt(:)
 real(kind_real), allocatable :: dqi_dqt(:)
 
 ! call rttov k code
-call rttov_data % settraj(geovals, obsdb, channels, ob_info=ob_info, BT=hofx)
+call rttov_data % settraj(geovals, obsdb, ob % channels_used, ob_info=ob, BT=hofx)
 
-nchans = size(channels)
+nchans = size(ob % channels_used)
 nlevels = size(rttov_data % profiles_k(1) % t)
 
 !----------------------------------------------------------------
@@ -316,11 +312,11 @@ end if
 !END IF
 
 call ufo_rttovonedvarcheck_PrintHmatrix( &
-  nchans,   &       ! in
-  size(prof_x),  &  ! in
-  Channels, &       ! in
-  H_matrix, &       ! in
-  profindex )       ! in
+  nchans,   &           ! in
+  size(prof_x),  &      ! in
+  ob % channels_used, & ! in
+  H_matrix, &           ! in
+  profindex )           ! in
 
 end  subroutine ufo_rttovonedvarcheck_GetHmatrixRTTOV
 
@@ -336,7 +332,7 @@ end  subroutine ufo_rttovonedvarcheck_GetHmatrixRTTOV
 subroutine ufo_rttovonedvarcheck_PrintHmatrix( &
   nchans,   &       ! in
   nprofelements, &  ! in
-  Channels, &       ! in
+  channels, &       ! in
   H_matrix, &       ! in
   profindex )       ! in
 

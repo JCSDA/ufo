@@ -103,7 +103,7 @@ end subroutine rttov_conf_delete
 subroutine load_atm_data_rttov(geovals,obss,profiles,prof_start1,ob_info)
 
 use fckit_log_module, only : fckit_log
-use ufo_rttovonedvarcheck_obinfo_mod
+use ufo_rttovonedvarcheck_ob_mod
 
 implicit none
 
@@ -111,7 +111,7 @@ type(ufo_geovals), intent(in) :: geovals
 type(c_ptr), VALUE, intent(in) :: obss
 type(rttov_profile), intent(inout) :: profiles(:)
 integer, OPTIONAL, intent(IN) :: prof_start1
-type(ufo_rttovonedvarcheck_obinfo), optional, intent(in) :: ob_info  ! Used for rttovonedvarcheck
+type(ufo_rttovonedvarcheck_ob), optional, intent(in) :: ob_info  ! Used for rttovonedvarcheck
 
 ! Local variables
 integer :: k1, nlocs_total, iprof
@@ -383,14 +383,14 @@ subroutine load_geom_data_rttov(obss,profiles,prof_start1,ob_info)
 ! Satellite viewing geometry
 ! DAR: check it's all within limits
 use obsspace_mod, only :  obsspace_get_nlocs, obsspace_get_db
-use ufo_rttovonedvarcheck_obinfo_mod
+use ufo_rttovonedvarcheck_ob_mod
 
 implicit none
 
 type(c_ptr), VALUE,       intent(in)    :: obss
 type(rttov_profile), intent(inout) :: profiles(:)
 integer, OPTIONAL, intent(IN) :: prof_start1
-type(ufo_rttovonedvarcheck_obinfo), optional, intent(in) :: ob_info  ! Used in rttovonedvarcheck
+type(ufo_rttovonedvarcheck_ob), optional, intent(in) :: ob_info  ! Used in rttovonedvarcheck
 
 real(kind_real), allocatable :: TmpVar(:)
 
@@ -470,6 +470,7 @@ type(rttov_conf), intent(in) :: conf
 
 self % opts % rt_ir % addsolar            = .FALSE. ! Do not include solar radiation
 self % opts % interpolation % addinterp   = .TRUE.  ! Allow interpolation of input profile
+!self % opts % interpolation % interp_mode = 4       ! Set interpolation method
 self % opts % interpolation % interp_mode = 1       ! Set interpolation method
 self % opts % interpolation % reg_limit_extrap = .TRUE. ! Set interpolation methodreg_limit_extrap
 self % opts % rt_all % addrefrac          = .TRUE.  ! Include refraction in path calc
@@ -487,6 +488,7 @@ self % opts % rt_mw % clw_data            = .FALSE. !
 
 self % opts % config % verbose            = .TRUE.  ! Enable printing of warnings
 self % opts % config % apply_reg_limits   = .TRUE.
+!self % opts % config % do_checkinput      = .FALSE.
 self % opts % config % do_checkinput      = .TRUE.
 
 ! Update based on rttov conf input

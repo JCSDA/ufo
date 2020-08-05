@@ -15,7 +15,7 @@ use ufo_rttovonedvarcheck_minimize_jacobian_mod
 use ufo_rttovonedvarcheck_minimize_utils_mod
 use ufo_rttovonedvarcheck_profindex_mod
 use ufo_rttovonedvarcheck_rsubmatrix_mod
-use ufo_rttovonedvarcheck_obinfo_mod
+use ufo_rttovonedvarcheck_ob_mod
 use ufo_rttovonedvarcheck_utils_mod
 
 implicit none
@@ -77,7 +77,7 @@ contains
 !! \date 09/06/2020: Created
 !!
 subroutine ufo_rttovonedvarcheck_minimize_ml(self,      &
-                                         ob_info,       &
+                                         ob,            &
                                          r_matrix,      &
                                          b_matrix,      &
                                          b_inv,         &
@@ -85,13 +85,12 @@ subroutine ufo_rttovonedvarcheck_minimize_ml(self,      &
                                          local_geovals, &
                                          hofxdiags,     &
                                          profile_index, &
-                                         channels,      &
                                          onedvar_success)
 
 implicit none
 
 type(ufo_rttovonedvarcheck), intent(inout) :: self  !< structure containing settings
-type(ufo_rttovonedvarcheck_obinfo), intent(inout)  :: ob_info !< satellite metadata
+type(ufo_rttovonedvarcheck_ob), intent(inout) :: ob !< satellite metadata
 type(ufo_rttovonedvarcheck_rsubmatrix), intent(in) :: r_matrix !< observation error covariance
 real(kind_real), intent(in)       :: b_matrix(:,:)   !< state error covariance
 real(kind_real), intent(in)       :: b_inv(:,:)      !< inverse state error covariance
@@ -99,7 +98,6 @@ real(kind_real), intent(in)       :: b_sigma(:)      !< standard deviations of t
 type(ufo_geovals), intent(inout)  :: local_geovals   !< model data at obs location
 type(ufo_geovals), intent(inout)  :: hofxdiags       !< model data containing the jacobian
 type(ufo_rttovonedvarcheck_profindex), intent(in) :: profile_index !< index array for x vector
-integer, intent(in)               :: channels(:)     !< list of channels used
 logical, intent(out)              :: onedvar_success !< convergence flag
 
 ! Local declarations:
@@ -140,7 +138,7 @@ type(ufo_geovals)               :: geovals
 Converged = .false.
 onedvar_success = .false.
 Error = .false.
-nchans = size(channels)
+nchans = size(ob % channels_used)
 Gamma = 1.0E-4
 JcostOld = 1.0e4
 nprofelements = profile_index % nprofelements
@@ -159,7 +157,7 @@ geovals = local_geovals
 write(*,*) "Using ML solver"
 
 ! Map GeovaLs to 1D-var profile using B matrix profile structure
-call ufo_rttovonedvarcheck_GeoVaLs2ProfVec(geovals, profile_index, ob_info, GuessProfile(:))
+call ufo_rttovonedvarcheck_GeoVaLs2ProfVec(geovals, profile_index, ob, GuessProfile(:))
 
 Iterations: do iter = 1, self % max1DVarIterations
 
@@ -171,8 +169,8 @@ Iterations: do iter = 1, self % max1DVarIterations
   OldProfile(:) = GuessProfile(:)
 
   ! Get jacobian and new hofx
-  call ufo_rttovonedvarcheck_get_jacobian(geovals, ob_info, self % obsdb, &
-                                       channels(:), self % conf, &
+  call ufo_rttovonedvarcheck_get_jacobian(geovals, ob, self % obsdb, &
+                                       self % conf, &
                                        profile_index, GuessProfile(:), &
                                        hofxdiags, Y(:), H_matrix)
 
@@ -190,7 +188,7 @@ Iterations: do iter = 1, self % max1DVarIterations
   end if
 
   ! Calculate Obs diff and initial cost
-  Ydiff(:) = ob_info % yobs(:) - Y(:)
+  Ydiff(:) = ob % yobs(:) - Y(:)
   if (iter == 1) then
     Diffprofile(:) = GuessProfile(:) - BackProfile(:)
     call ufo_rttovonedvarcheck_CostFunction(Diffprofile, b_inv, Ydiff, r_matrix, Jout)
@@ -244,10 +242,10 @@ Iterations: do iter = 1, self % max1DVarIterations
   JcostOld = Jcost
 
   ! Iterate (Guess) profile vector
-  call ufo_rttovonedvarcheck_ML_RTTOV12 ( self,       &
+  call ufo_rttovonedvarcheck_ML_RTTOV12 ( self,            &
                                       Ydiff,               &
                                       nChans,              &
-                                      ob_info,             &
+                                      ob,                  &
                                       H_Matrix,            &
                                       transpose(H_Matrix), &
                                       nprofelements,       &
@@ -259,7 +257,6 @@ Iterations: do iter = 1, self % max1DVarIterations
                                       r_matrix,            &
                                       geovals,             &
                                       hofxdiags,           &
-                                      channels,            &
                                       gamma,               &
                                       Jcost,               &
                                       inversionStatus)
@@ -282,7 +279,7 @@ Iterations: do iter = 1, self % max1DVarIterations
                                   outOfRange)        ! out
 
   ! Update RT-format guess profile
-  call ufo_rttovonedvarcheck_ProfVec2GeoVaLs(geovals, profile_index, ob_info, GuessProfile)
+  call ufo_rttovonedvarcheck_ProfVec2GeoVaLs(geovals, profile_index, ob, GuessProfile)
   
   ! if qtotal in retrieval vector check cloud
   ! variables for current iteration
@@ -425,10 +422,10 @@ end subroutine ufo_rttovonedvarcheck_minimize_ml
 !!
 !! \date 09/06/2020: Created
 !!
-subroutine ufo_rttovonedvarcheck_ML_RTTOV12 ( self, &
+subroutine ufo_rttovonedvarcheck_ML_RTTOV12 ( self,  &
                                       DeltaBT,       &
                                       nChans,        &
-                                      ob_info,       &
+                                      ob,            &
                                       H_Matrix,      &
                                       H_Matrix_T,    &
                                       nprofelements, &
@@ -440,7 +437,6 @@ subroutine ufo_rttovonedvarcheck_ML_RTTOV12 ( self, &
                                       r_matrix,      &
                                       geovals,       &
                                       hofxdiags,     &
-                                      channels,      &
                                       gamma,         &
                                       Jold,          &
                                       Status)
@@ -451,7 +447,7 @@ implicit none
 type(ufo_rttovonedvarcheck), intent(in) :: self            !< structure containing settings
 real(kind_real), intent(in)             :: DeltaBT(:)      !< y-y(x)
 integer, intent(in)                     :: nChans          !< number of channels
-type(ufo_rttovonedvarcheck_obinfo), intent(inout) :: ob_info !< satellite metadata
+type(ufo_rttovonedvarcheck_ob), intent(inout) :: ob        !< satellite metadata
 real(kind_real), intent(in)             :: H_Matrix(:,:)   !< Jacobian
 real(kind_real), intent(in)             :: H_Matrix_T(:,:) !< transpose  of the Jacobian
 integer, intent(in)                     :: nprofelements   !< number of profile elements
@@ -463,7 +459,6 @@ real(kind_real), intent(in)             :: b_inv(:,:)      !< inverse of the sta
 type(ufo_rttovonedvarcheck_rsubmatrix), intent(in) :: r_matrix !< observation error covariance
 type(ufo_geovals), intent(inout)        :: geovals         !< model data at obs location
 type(ufo_geovals), intent(inout)        :: hofxdiags       !< model data containing the jacobian
-integer, intent(in)                     :: channels(:)     !< channels used
 real(kind_real), intent(inout)          :: gamma           !< steepness of descent parameter
 real(kind_real), intent(inout)          :: Jold            !< previous steps cost which gets update by good step
 integer, intent(out)                    :: Status          !< code to capture failed Cholesky decomposition
@@ -569,14 +564,14 @@ DescentLoop : do while (JCost > JOld .and.              &
                                   outOfRange)        ! out
 
   if (.not. OutOfRange) then
-    call ufo_rttovonedvarcheck_ProfVec2GeoVaLs(geovals, profile_index, ob_info, GuessProfile)
+    call ufo_rttovonedvarcheck_ProfVec2GeoVaLs(geovals, profile_index, ob, GuessProfile)
 
     !Emiss(1:nchans) = RTprof_Guess % Emissivity(Channels(1:nchans))
     !CalcEmiss(1:nchans) = RTprof_Guess % CalcEmiss(Channels(1:nchans))
 
    ! Get Jabobian and new hofx
-   call ufo_rttovonedvarcheck_get_jacobian(geovals, ob_info, self % obsdb, &
-                                           channels(:), self % conf, &
+   call ufo_rttovonedvarcheck_get_jacobian(geovals, ob, self % obsdb, &
+                                           self % conf, &
                                            profile_index, GuessProfile(:), &
                                            hofxdiags, BriTemp(:), H_matrix_tmp)
 
@@ -592,7 +587,7 @@ DescentLoop : do while (JCost > JOld .and.              &
       Jcost = 1.0E10
     else
       DeltaProfile(:) = GuessProfile(:) - BackProfile(:)
-      Ydiff(:) = ob_info % yobs(:) - BriTemp(:)
+      Ydiff(:) = ob % yobs(:) - BriTemp(:)
       call ufo_rttovonedvarcheck_CostFunction(DeltaProfile, b_inv, Ydiff, r_matrix, Jout)
       Jcost = Jout(1)
       if (Status /= StatusOK) goto 9999

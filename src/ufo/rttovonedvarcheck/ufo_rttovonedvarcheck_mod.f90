@@ -20,8 +20,9 @@ use ufo_rttovonedvarcheck_constants_mod
 use ufo_rttovonedvarcheck_minimize_utils_mod
 use ufo_rttovonedvarcheck_minimize_newton_mod
 use ufo_rttovonedvarcheck_minimize_ml_mod
-use ufo_rttovonedvarcheck_obinfo_mod
+use ufo_rttovonedvarcheck_ob_mod
 use ufo_rttovonedvarcheck_obs_mod
+use ufo_rttovonedvarcheck_pcemis_mod
 use ufo_rttovonedvarcheck_profindex_mod
 use ufo_rttovonedvarcheck_rmatrix_mod
 use ufo_rttovonedvarcheck_rsubmatrix_mod
@@ -104,11 +105,12 @@ subroutine ufo_rttovonedvarcheck_apply(self, vars, retrieval_vars, geovals, appl
   type(ufo_rttovonedvarcheck_obs)        :: obs            ! data for all observations read from db
   type(ufo_rttovonedvarcheck_bmatrix)    :: full_bmatrix   ! full bmatrix read from file
   type(ufo_geovals)                      :: local_geovals  ! geoval for one observation
-  type(ufo_rttovonedvarcheck_obinfo)     :: ob_info        ! observation data for a single observation
+  type(ufo_rttovonedvarcheck_ob)         :: ob             ! observation data for a single observation
   type(ufo_rttovonedvarcheck_profindex)  :: prof_index     ! index for mapping geovals to 1d-var state profile
   type(ufo_rttovonedvarcheck_rmatrix)    :: full_rmatrix   ! full r_matrix read from file
   type(ufo_rttovonedvarcheck_rsubmatrix) :: r_submatrix    ! r_submatrix object
   type(ufo_geovals)                      :: hofxdiags      ! hofxdiags containing jacobian
+  type(ufo_rttovonedvarcheck_pcemis), target :: IR_pcemis  ! Infrared principal components object
   character(len=max_string)          :: sensor_id
   character(len=max_string)          :: var
   character(len=max_string)          :: varname
@@ -156,13 +158,17 @@ subroutine ufo_rttovonedvarcheck_apply(self, vars, retrieval_vars, geovals, appl
   ! Create profile index for mapping 1d-var profile to b-matrix
   call prof_index % setup(full_bmatrix)
 
+  ! Setup IR PC emissivity if needed
+  !if (self % ReadIRemiss) call IR_pcemis % setup(self % EmisEigVecPath)
+  if (len(trim(self % EmisEigVecPath)) > 4) call IR_pcemis % setup(self % EmisEigVecPath)
+
   ! Initialize data arrays
   allocate(b_matrix(prof_index % nprofelements,prof_index % nprofelements))
   allocate(b_inverse(prof_index % nprofelements,prof_index % nprofelements))
   allocate(b_sigma(prof_index % nprofelements))
 
   ! ------------------------------------------
-  ! 2. Beginning mains observations loop
+  ! 2. Beginning main observation loop
   ! ------------------------------------------
   write(*,*) "Beginning observations loop: ",self%qcname
   apply_count = 0
@@ -208,19 +214,20 @@ subroutine ufo_rttovonedvarcheck_apply(self, vars, retrieval_vars, geovals, appl
       end if
 
       ! setup ob data for this observation
-      call ob_info % setup(nchans_used)
-      call ob_info % init_emiss(self, local_geovals)
-      ob_info % forward_mod_name = self % forward_mod_name
-      ob_info % latitude = obs % lat(jobs)
-      ob_info % longitude = obs % lon(jobs)
-      ob_info % elevation = obs % elevation(jobs)
-      ob_info % sensor_zenith_angle = obs % sat_zen(jobs)
-      ob_info % sensor_azimuth_angle = obs % sat_azi(jobs)
-      ob_info % solar_zenith_angle = obs % sol_zen(jobs)
-      ob_info % solar_azimuth_angle = obs % sol_azi(jobs)
-      ob_info % retrievecloud = cloud_retrieval
-      if(self % RTTOV_mwscattSwitch) ob_info % mwscatt = .true.
-      if(self % RTTOV_usetotalice) ob_info % mwscatt_totalice = .true.
+      call ob % setup(nchans_used)
+      call ob % init_emiss(self, local_geovals)
+      ob % forward_mod_name = self % forward_mod_name
+      ob % latitude = obs % lat(jobs)
+      ob % longitude = obs % lon(jobs)
+      ob % elevation = obs % elevation(jobs)
+      ob % sensor_zenith_angle = obs % sat_zen(jobs)
+      ob % sensor_azimuth_angle = obs % sat_azi(jobs)
+      ob % solar_zenith_angle = obs % sol_zen(jobs)
+      ob % solar_azimuth_angle = obs % sol_azi(jobs)
+      ob % retrievecloud = cloud_retrieval
+      ob % pcemis => IR_pcemis
+      if(self % RTTOV_mwscattSwitch) ob % mwscatt = .true.
+      if(self % RTTOV_usetotalice) ob % mwscatt_totalice = .true.
 
       ! create obs vector and r matrix
       ! if emissivity read in use that
@@ -228,46 +235,47 @@ subroutine ufo_rttovonedvarcheck_apply(self, vars, retrieval_vars, geovals, appl
       do jvar = 1, self%nchans
         if( obs % QCflags(jvar,jobs) == 0 ) then
           jchans_used = jchans_used + 1
-          ob_info % yobs(jchans_used) = obs % yobs(jvar, jobs)
-          ob_info % channels_used(jchans_used) = self%channels(jvar)
+          ob % yobs(jchans_used) = obs % yobs(jvar, jobs)
+          ob % channels_used(jchans_used) = self%channels(jvar)
           if (self % ReadMWemiss .OR. self % ReadIRemiss) then
             write(*,*) "Copying emissivity from db"
-            ob_info % emiss(jchans_used) = obs % emissivity(jvar, jobs)
-            where(ob_info % emiss == 0.0_kind_real) 
-              ob_info % calc_emiss = .true.
+            ob % emiss(jchans_used) = obs % emissivity(jvar, jobs)
+            where(ob % emiss == 0.0_kind_real) 
+              ob % calc_emiss = .true.
             else where
-              ob_info % calc_emiss = .false.
+              ob % calc_emiss = .false.
             end where
           end if
         end if
       end do
-      call r_submatrix % setup(nchans_used, ob_info % channels_used, full_rmatrix=full_rmatrix)
+      call r_submatrix % setup(nchans_used, ob % channels_used, full_rmatrix=full_rmatrix)
 
       ! Setup hofxdiags for this retrieval
       call ufo_geovals_setup(hofxdiags, retrieval_vars, 1)
 
       if (self % FullDiagnostics) then
+        call ob % info()
         call r_submatrix % info()
-        write(*, *) "Observations used = ",ob_info % yobs(:)
-        write(*,*) "ob_info % emiss = ",ob_info % emiss
-        write(*,*) "ob_info % calc_emiss = ",ob_info % calc_emiss
+        write(*, *) "Observations used = ",ob % yobs(:)
+        write(*,*) "ob % emiss = ",ob % emiss
+        write(*,*) "ob % calc_emiss = ",ob % calc_emiss
         write(*,*) "Channel selection = "
-        write(*,'(15I5)') ob_info % channels_used
+        write(*,'(15I5)') ob % channels_used
       end if
 
       !---------------------------------------------------
       ! 2.3 Call minimization
       !---------------------------------------------------
       if (self % UseMLMinimization) then
-        call ufo_rttovonedvarcheck_minimize_ml(self, ob_info, &
+        call ufo_rttovonedvarcheck_minimize_ml(self, ob, &
                                       r_submatrix, b_matrix, b_inverse, b_sigma, &
                                       local_geovals, hofxdiags, prof_index, &
-                                      ob_info % channels_used, onedvar_success)
+                                      onedvar_success)
       else
-        call ufo_rttovonedvarcheck_minimize_newton(self, ob_info, &
+        call ufo_rttovonedvarcheck_minimize_newton(self, ob, &
                                       r_submatrix, b_matrix, b_inverse, b_sigma, &
                                       local_geovals, hofxdiags, prof_index, &
-                                      ob_info % channels_used, onedvar_success)
+                                      onedvar_success)
       end if
 
       ! Set QCflags based on output from minimization
@@ -281,7 +289,7 @@ subroutine ufo_rttovonedvarcheck_apply(self, vars, retrieval_vars, geovals, appl
 
       ! Tidy up memory specific to a single observation
       call ufo_geovals_delete(local_geovals)
-      call ob_info % delete()
+      call ob % delete()
       call r_submatrix % delete()
 
     else
@@ -310,6 +318,7 @@ subroutine ufo_rttovonedvarcheck_apply(self, vars, retrieval_vars, geovals, appl
   call full_rmatrix % delete()
   call obs % delete()
   call ufo_geovals_delete(hofxdiags)
+  if (self % ReadIRemiss) call IR_pcemis % delete()
   if (allocated(b_matrix))   deallocate(b_matrix)
   if (allocated(b_inverse))  deallocate(b_inverse)
   if (allocated(b_sigma))    deallocate(b_sigma)

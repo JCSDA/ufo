@@ -12,7 +12,7 @@ use ufo_constants_mod, only: grav, zero, t0c, half, one, two
 use ufo_geovals_mod
 use ufo_radiancerttov_tlad_mod
 use ufo_rttovonedvarcheck_constants_mod
-use ufo_rttovonedvarcheck_obinfo_mod
+use ufo_rttovonedvarcheck_ob_mod
 use ufo_rttovonedvarcheck_profindex_mod
 use ufo_rttovonedvarcheck_rsubmatrix_mod
 
@@ -36,11 +36,11 @@ private ufo_rttovonedvarcheck_QsatWat
 contains
 
 !-------------------------------------------------------------------------------
-!> Copy geovals data (and ob_info) to profile.
+!> Copy geovals data (and ob) to profile.
 !!
 !! \details Heritage: Ops_SatRad_RTprof2Vec_RTTOV12.f90
 !!
-!! Convert profile data from the GeoVaLs format (and ob_info) into the minimisation
+!! Convert profile data from the GeoVaLs format (and ob) into the minimisation
 !! format vector profile. We only copy fields that are being retrieved, as indicated by
 !! the profindex structure.
 !!
@@ -48,17 +48,17 @@ contains
 !!
 !! \date 09/06/2020: Created
 !!
-subroutine ufo_rttovonedvarcheck_GeoVaLs2ProfVec( geovals,  & ! in
-                                             profindex,     & ! in
-                                             ob_info,       & ! in
-                                             prof_x )         ! out
+subroutine ufo_rttovonedvarcheck_GeoVaLs2ProfVec( geovals, & ! in
+                                             profindex,    & ! in
+                                             ob,           & ! in
+                                             prof_x )        ! out
 
 implicit none
 
 ! subroutine arguments:
 type(ufo_geovals), intent(in)    :: geovals   !< model data at obs location
 type(ufo_rttovonedvarcheck_profindex), intent(in) :: profindex !< index array for x vector
-type(ufo_rttovonedvarcheck_obinfo), intent(in)    :: ob_info   !< satellite metadata
+type(ufo_rttovonedvarcheck_ob), intent(in) :: ob   !< satellite metadata
 real(kind_real), intent(out)     :: prof_x(:) !< x vector
 
 ! Local arguments:
@@ -152,12 +152,12 @@ end if
 
 ! cloud top pressure
 if (profindex % cloudtopp > 0) then
-  prof_x(profindex % cloudtopp) = ob_info % cloudtopp ! carried around as hPa
+  prof_x(profindex % cloudtopp) = ob % cloudtopp ! carried around as hPa
 end if
 
 ! cloud fraction
 if (profindex % cloudfrac > 0) then
-  prof_x(profindex % cloudfrac) = ob_info % cloudfrac
+  prof_x(profindex % cloudfrac) = ob % cloudfrac
 end if
 
 ! windspeed. Remember that all wind have been transferred to u and v is set to zero
@@ -179,12 +179,12 @@ if (profindex % mwemiss(1) > 0) then
     call abor1_ftn("mwemiss size differs from emissivity map")
   end if
   ! Copy microwave emissivity to profile
-    prof_x(profindex % mwemiss(1):profindex % mwemiss(2)) = ob_info % emiss(EmissMap)
+    prof_x(profindex % mwemiss(1):profindex % mwemiss(2)) = ob % emiss(EmissMap)
 end if
 
 ! Retrieval of emissivity principal components
 IF (profindex % emisspc(1) > 0) THEN
-  ! convert ob_info % emiss to emiss pc using
+  ! convert ob % emiss to emiss pc using
   ! Ops_SatRad_PCToEmis
   ! Prof(profindex % emisspc(1):profindex % emisspc(2)) = emiss_pc
 END IF
@@ -194,28 +194,28 @@ write(*,*) trim(RoutineName)," end"
 end subroutine ufo_rttovonedvarcheck_GeoVaLs2ProfVec
 
 !-------------------------------------------------------------------------------
-!> Copy profile data to geovals (and ob_info).
+!> Copy profile data to geovals (and ob).
 !!
 !! \details Heritage: Ops_SatRad_Vec2RTprof_RTTOV12.f90
 !!
-!! Convert profile data to the GeoVaLs (and ob_info) format.  We only copy fields 
+!! Convert profile data to the GeoVaLs (and ob) format.  We only copy fields 
 !! that are being retrieved, as indicated by the profindex structure.
 !!
 !! \author Met Office
 !!
 !! \date 09/06/2020: Created
 !!
-subroutine ufo_rttovonedvarcheck_ProfVec2GeoVaLs(geovals,  & ! inout
-                                            profindex,     & ! in
-                                            ob_info,       & ! inout
-                                            prof_x )         ! in
+subroutine ufo_rttovonedvarcheck_ProfVec2GeoVaLs(geovals, & ! inout
+                                            profindex,    & ! in
+                                            ob,           & ! inout
+                                            prof_x )        ! in
 
 implicit none
 
 ! subroutine arguments:
 type(ufo_geovals), intent(inout) :: geovals   !< model data at obs location
 type(ufo_rttovonedvarcheck_profindex), intent(in) :: profindex !< index array for x vector
-type(ufo_rttovonedvarcheck_obinfo), intent(inout) :: ob_info   !< satellite metadata
+type(ufo_rttovonedvarcheck_ob), intent(inout) :: ob   !< satellite metadata
 real(kind_real), intent(in)      :: prof_x(:) !< x vector
 
 ! Local arguments:
@@ -370,14 +370,14 @@ if (profindex % tstar > 0) then
   geovals%geovals(gv_index)%vals(1,1) = prof_x(profindex % tstar)
 end if
 
-! cloud top pressure - passed through via the ob_info
+! cloud top pressure - passed through via the ob
 if (profindex % cloudtopp > 0) then
-  ob_info % cloudtopp = prof_x(profindex % cloudtopp) ! stored in ob_info as hPa
+  ob % cloudtopp = prof_x(profindex % cloudtopp) ! stored in ob as hPa
 end if
 
-! cloud fraction - passed through via the ob_info
+! cloud fraction - passed through via the ob
 if (profindex % cloudfrac > 0) then
-  ob_info % cloudfrac = prof_x(profindex % cloudfrac)
+  ob % cloudfrac = prof_x(profindex % cloudfrac)
 end if
 
 ! windspeed
@@ -398,16 +398,16 @@ END IF
 
 ! Retrieval of microwave emissivity directly
 if (profindex % mwemiss(1) > 0) THEN
-  do ii = 1, size(ob_info % channels_used)
-    EmissElement = EmissElements(ob_info % channels_used(ii))
-    ob_info % emiss(ii) = prof_x(profindex % mwemiss(1) + EmissElement - 1)
+  do ii = 1, size(ob % channels_used)
+    EmissElement = EmissElements(ob % channels_used(ii))
+    ob % emiss(ii) = prof_x(profindex % mwemiss(1) + EmissElement - 1)
   end do
 end if
 
 ! Retrieval of emissivity principal components
 IF (profindex % emisspc(1) > 0) THEN
   ! emiss_pc = prof_x(profindex % emisspc(1):profindex % emisspc(2)) 
-  ! convert emiss_pc to ob_info % emissivity using
+  ! convert emiss_pc to ob % emissivity using
   ! Ops_SatRad_EmisToPC
 END IF
 

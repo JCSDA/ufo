@@ -15,10 +15,11 @@ set ( rttovonedvarcheck_files
     ufo_rttovonedvarcheck_minimize_newton_mod.f90
     ufo_rttovonedvarcheck_minimize_utils_mod.f90
     ufo_rttovonedvarcheck_mod.f90
+    ufo_rttovonedvarcheck_pcemis_mod.f90
     ufo_rttovonedvarcheck_profindex_mod.f90
     ufo_rttovonedvarcheck_rmatrix_mod.f90
     ufo_rttovonedvarcheck_rsubmatrix_mod.f90
-    ufo_rttovonedvarcheck_obinfo_mod.f90
+    ufo_rttovonedvarcheck_ob_mod.f90
     ufo_rttovonedvarcheck_obs_mod.f90
     ufo_rttovonedvarcheck_utils_mod.f90
 )

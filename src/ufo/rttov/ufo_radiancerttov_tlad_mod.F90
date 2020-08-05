@@ -94,7 +94,7 @@ end subroutine ufo_radiancerttov_tlad_delete
 subroutine ufo_radiancerttov_tlad_settraj(self, geovals, obss, channels, ob_info, BT)
 
 use ufo_radiancerttov_utils_mod , ONLY : config_rttov
-use ufo_rttovonedvarcheck_obinfo_mod
+use ufo_rttovonedvarcheck_ob_mod
 
 implicit none
 
@@ -102,7 +102,7 @@ class(ufo_radiancerttov_tlad), intent(inout) :: self
 type(ufo_geovals),             intent(in)    :: geovals
 type(c_ptr), value,            intent(in)    :: obss
 integer(c_int),                intent(in)    :: channels(:) ! List of channels to use
-type(ufo_rttovonedvarcheck_obinfo), optional, intent(in) :: ob_info ! Used for rttovonedvarcheck
+type(ufo_rttovonedvarcheck_ob), optional, intent(in) :: ob_info ! Used for rttovonedvarcheck
 real(kind_real), optional,     intent(out)   :: BT(:)       ! Used for rttovonedvarcheck
 
 ! Local Variables

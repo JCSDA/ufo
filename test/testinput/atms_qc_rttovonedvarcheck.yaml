@@ -154,4 +154,5 @@ observations:
     ReadIRemiss: false
     EmissLandDefault: 0.95
     EmissSeaIceDefault: 0.92
+#    EmisEigVecPath: /data/users/mcooke/OPS/ops_data/trunk/SatRad_coeffs/default/IASI_EmisEigenVec
   passedBenchmark: 879      # number of passed obs

@@ -12,7 +12,7 @@ use ufo_radiancerttov_tlad_mod
 use ufo_rttovonedvarcheck_constants_mod
 use ufo_rttovonedvarcheck_minimize_jacobian_mod
 use ufo_rttovonedvarcheck_minimize_utils_mod
-use ufo_rttovonedvarcheck_obinfo_mod
+use ufo_rttovonedvarcheck_ob_mod
 use ufo_rttovonedvarcheck_profindex_mod
 use ufo_rttovonedvarcheck_rsubmatrix_mod
 use ufo_rttovonedvarcheck_utils_mod
@@ -74,8 +74,8 @@ contains
 !!
 !! \date 09/06/2020: Created
 !!
-subroutine ufo_rttovonedvarcheck_minimize_newton(self, &
-                                         ob_info,       &
+subroutine ufo_rttovonedvarcheck_minimize_newton(self,  &
+                                         ob,            &
                                          r_matrix,      &
                                          b_matrix,      &
                                          b_inv,         &
@@ -83,13 +83,12 @@ subroutine ufo_rttovonedvarcheck_minimize_newton(self, &
                                          local_geovals, &
                                          hofxdiags,     &
                                          profile_index, &
-                                         channels,      &
                                          onedvar_success)
 
 implicit none
 
-type(ufo_rttovonedvarcheck), intent(inout) :: self  !< Main 1D-Var object
-type(ufo_rttovonedvarcheck_obinfo), intent(inout)  :: ob_info  !< satellite metadata
+type(ufo_rttovonedvarcheck), intent(inout) :: self   !< Main 1D-Var object
+type(ufo_rttovonedvarcheck_ob), intent(inout) :: ob  !< satellite metadata
 type(ufo_rttovonedvarcheck_rsubmatrix), intent(in) :: r_matrix !< observation error covariance
 real(kind_real), intent(in)       :: b_matrix(:,:)   !< state error covariance
 real(kind_real), intent(in)       :: b_inv(:,:)      !< inverse of the state error covariance
@@ -97,7 +96,6 @@ real(kind_real), intent(in)       :: b_sigma(:)      !< standard deviations of t
 type(ufo_geovals), intent(inout)  :: local_geovals   !< model data at obs location
 type(ufo_geovals), intent(inout)  :: hofxdiags       !< model data containing the jacobian
 type(ufo_rttovonedvarcheck_profindex), intent(in) :: profile_index !< index array for x vector
-integer, intent(in)               :: channels(:)     !< list of channels used
 logical, intent(out)              :: onedvar_success !< convergence flag
 
 ! Local declarations:
@@ -137,7 +135,7 @@ integer                         :: ii
 Converged = .false.
 onedvar_success = .false.
 Error = .false.
-nchans = size(channels)
+nchans = size(ob % channels_used)
 inversionstatus = 0
 nprofelements = profile_index % nprofelements
 allocate(OldProfile(nprofelements))
@@ -174,7 +172,7 @@ Iterations: do iter = 1, self % max1DVarIterations
 
     ! Map GeovaLs to 1D-var profile using B matrix profile structure
     call ufo_rttovonedvarcheck_GeoVaLs2ProfVec(geovals, profile_index, &
-                                               ob_info, GuessProfile(:))
+                                               ob, GuessProfile(:))
 
   end if
 
@@ -182,8 +180,8 @@ Iterations: do iter = 1, self % max1DVarIterations
   OldProfile(:) = GuessProfile(:)
 
   ! Get jacobian and hofx
-  call ufo_rttovonedvarcheck_get_jacobian(geovals, ob_info, self % obsdb, &
-                                       channels(:), self % conf, &
+  call ufo_rttovonedvarcheck_get_jacobian(geovals, ob, self % obsdb, &
+                                       self % conf, &
                                        profile_index, GuessProfile(:), &
                                        hofxdiags, Y(:), H_matrix)
 
@@ -205,11 +203,11 @@ Iterations: do iter = 1, self % max1DVarIterations
   !-----------------------------------------------------
 
   ! Profile differences
-  Ydiff(:) = ob_info % yobs(:) - Y(:)
+  Ydiff(:) = ob % yobs(:) - Y(:)
   Diffprofile(:) = GuessProfile(:) - BackProfile(:)
 
   write(*,*) "Ob BT = "
-  write(*,'(10F8.3)') ob_info % yobs(:)
+  write(*,'(10F8.3)') ob % yobs(:)
   write(*,*) "HofX BT = "
   write(*,'(10F8.3)') Y(:)
 
@@ -318,7 +316,7 @@ Iterations: do iter = 1, self % max1DVarIterations
 
   ! Update RT-format guess profile
   call ufo_rttovonedvarcheck_ProfVec2GeoVaLs(geovals, profile_index, &
-                                             ob_info, GuessProfile)
+                                             ob, GuessProfile)
   
   ! if qtotal in retrieval vector check cloud
   ! variables for current iteration
