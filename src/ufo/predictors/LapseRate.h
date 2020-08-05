@@ -5,12 +5,15 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#ifndef UFO_OBSBIAS_PREDICTORS_COSINEOFLATITUDETIMESORBITNODE_H_
-#define UFO_OBSBIAS_PREDICTORS_COSINEOFLATITUDETIMESORBITNODE_H_
+#ifndef UFO_PREDICTORS_LAPSERATE_H_
+#define UFO_PREDICTORS_LAPSERATE_H_
 
+#include <map>
 #include <vector>
 
-#include "ufo/obsbias/predictors/PredictorBase.h"
+#include "eckit/config/LocalConfiguration.h"
+
+#include "ufo/predictors/PredictorBase.h"
 
 namespace eckit {
   class Configuration;
@@ -24,19 +27,23 @@ namespace ufo {
 
 // -----------------------------------------------------------------------------
 
-class CosineOfLatitudeTimesOrbitNode : public PredictorBase {
+class LapseRate : public PredictorBase {
  public:
-  CosineOfLatitudeTimesOrbitNode(const eckit::Configuration &, const std::vector<int> &);
-  ~CosineOfLatitudeTimesOrbitNode() {}
+  LapseRate(const eckit::Configuration &, const std::vector<int> &);
+  ~LapseRate() {}
 
   void compute(const ioda::ObsSpace &,
                const GeoVaLs &,
                const ObsDiagnostics &,
                Eigen::MatrixXd &) const override;
+
+ private:
+  std::map<int, float> tlapmean_;  // <channel, tlaps>
+  int order_;
 };
 
 // -----------------------------------------------------------------------------
 
 }  // namespace ufo
 
-#endif  // UFO_OBSBIAS_PREDICTORS_COSINEOFLATITUDETIMESORBITNODE_H_
+#endif  // UFO_PREDICTORS_LAPSERATE_H_

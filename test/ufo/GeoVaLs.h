@@ -20,6 +20,7 @@
 #include "ioda/ObsSpace.h"
 #include "oops/parallel/mpi/mpi.h"
 #include "oops/runs/Test.h"
+#include "oops/util/FloatCompare.h"
 #include "oops/util/Logger.h"
 #include "test/TestEnvironment.h"
 #include "ufo/GeoVaLs.h"
@@ -54,6 +55,29 @@ void testGeoVaLs() {
      oops::Log::trace() <<
       "GeoVaLs default constructor - does not allocate fields" << std::endl;
     GeoVaLs gv_temp(ospace.comm());
+
+/// Check that GeoVaLs constructor to create a GeoVaLs with one location works
+    if (gconf.has("one location check")) {
+      oops::Log::trace() << "Check that GeoVaLs constructor for one location works" << std::endl;
+      const eckit::LocalConfiguration gconfone(gconf, "one location check");
+      const std::string var = gconfone.getString("variable");
+      const std::vector<int> ind = gconfone.getIntVector("indices");
+      const std::vector<float> values = gconfone.getFloatVector("values");
+      const float oneloctol = gconfone.getFloat("tolerance");
+
+      // Loop over each location and test just the lowest level
+      oops::TestVerbosity verbosity = oops::TestVerbosity::LOG_SUCCESS_AND_FAILURE;
+      for (std::size_t i = 0; i < ind.size(); ++i) {
+        GeoVaLs gv_one(gval, ind[i]);
+        std::vector<float> gv_val(1);
+        gv_one.get(gv_val, var, 1);
+        EXPECT(oops::is_close_absolute(gv_val[0], values[i], oneloctol, verbosity));
+      }
+    } else {
+      oops::Log::trace() << "Test just the constructor for a one location GeoVaLs" << std::endl;
+      int index = 0;
+      GeoVaLs gv_one(gval, index);
+    }
 
 /// Check that GeoVaLs merge followed by a split gives back the original geovals
     oops::Log::trace() <<

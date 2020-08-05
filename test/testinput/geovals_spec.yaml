@@ -31,3 +31,8 @@ geovals test:
     - air_pressure_levels
     - humidity_mixing_ratio
     tolerance: 0.001
+    one location check:
+      variable: air_temperature
+      indices: [0, 25, 50, 75, 99]
+      values: [249.33, 248.46, 250.24, 252.75, 247.10]
+      tolerance: 0.1

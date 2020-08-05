@@ -5,8 +5,8 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#ifndef UFO_OBSBIAS_PREDICTORS_PREDICTORBASE_H_
-#define UFO_OBSBIAS_PREDICTORS_PREDICTORBASE_H_
+#ifndef UFO_PREDICTORS_PREDICTORBASE_H_
+#define UFO_PREDICTORS_PREDICTORBASE_H_
 
 #include <Eigen/Dense>
 
@@ -98,4 +98,4 @@ class PredictorMaker : public PredictorFactory {
 
 }  // namespace ufo
 
-#endif  // UFO_OBSBIAS_PREDICTORS_PREDICTORBASE_H_
+#endif  // UFO_PREDICTORS_PREDICTORBASE_H_

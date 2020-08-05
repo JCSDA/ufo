@@ -5,12 +5,12 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#ifndef UFO_OBSBIAS_PREDICTORS_CONSTANT_H_
-#define UFO_OBSBIAS_PREDICTORS_CONSTANT_H_
+#ifndef UFO_PREDICTORS_COSINEOFLATITUDETIMESORBITNODE_H_
+#define UFO_PREDICTORS_COSINEOFLATITUDETIMESORBITNODE_H_
 
 #include <vector>
 
-#include "ufo/obsbias/predictors/PredictorBase.h"
+#include "ufo/predictors/PredictorBase.h"
 
 namespace eckit {
   class Configuration;
@@ -24,10 +24,10 @@ namespace ufo {
 
 // -----------------------------------------------------------------------------
 
-class Constant : public PredictorBase {
+class CosineOfLatitudeTimesOrbitNode : public PredictorBase {
  public:
-  Constant(const eckit::Configuration &, const std::vector<int> &);
-  ~Constant() {}
+  CosineOfLatitudeTimesOrbitNode(const eckit::Configuration &, const std::vector<int> &);
+  ~CosineOfLatitudeTimesOrbitNode() {}
 
   void compute(const ioda::ObsSpace &,
                const GeoVaLs &,
@@ -39,4 +39,4 @@ class Constant : public PredictorBase {
 
 }  // namespace ufo
 
-#endif  // UFO_OBSBIAS_PREDICTORS_CONSTANT_H_
+#endif  // UFO_PREDICTORS_COSINEOFLATITUDETIMESORBITNODE_H_

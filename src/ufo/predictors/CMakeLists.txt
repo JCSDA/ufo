@@ -20,5 +20,11 @@ set ( predictor_files
   ScanAngle.cc
   SineOfLatitude.h
   SineOfLatitude.cc
-  PARENT_SCOPE
+)
+
+PREPEND( _p_predictor_files     "predictors"            ${predictor_files} )
+
+set ( predictor_src_files
+      ${_p_predictor_files}
+      PARENT_SCOPE
 )

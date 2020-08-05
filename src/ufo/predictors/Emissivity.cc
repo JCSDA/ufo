@@ -7,7 +7,7 @@
 
 #include <string>
 
-#include "ufo/obsbias/predictors/Emissivity.h"
+#include "ufo/predictors/Emissivity.h"
 
 #include "ioda/ObsSpace.h"
 

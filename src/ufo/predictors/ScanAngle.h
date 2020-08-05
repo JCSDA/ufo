@@ -5,12 +5,12 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#ifndef UFO_OBSBIAS_PREDICTORS_CLOUDLIQUIDWATER_H_
-#define UFO_OBSBIAS_PREDICTORS_CLOUDLIQUIDWATER_H_
+#ifndef UFO_PREDICTORS_SCANANGLE_H_
+#define UFO_PREDICTORS_SCANANGLE_H_
 
 #include <vector>
 
-#include "ufo/obsbias/predictors/PredictorBase.h"
+#include "ufo/predictors/PredictorBase.h"
 
 namespace eckit {
   class Configuration;
@@ -24,10 +24,10 @@ namespace ufo {
 
 // -----------------------------------------------------------------------------
 
-class CloudLiquidWater : public PredictorBase {
+class ScanAngle : public PredictorBase {
  public:
-  CloudLiquidWater(const eckit::Configuration &, const std::vector<int> &);
-  ~CloudLiquidWater() {}
+  ScanAngle(const eckit::Configuration &, const std::vector<int> &);
+  ~ScanAngle() {}
 
   void compute(const ioda::ObsSpace &,
                const GeoVaLs &,
@@ -35,12 +35,11 @@ class CloudLiquidWater : public PredictorBase {
                Eigen::MatrixXd &) const override;
 
  private:
-  int ch238;
-  int ch314;
+  int order_;
 };
 
 // -----------------------------------------------------------------------------
 
 }  // namespace ufo
 
-#endif  // UFO_OBSBIAS_PREDICTORS_CLOUDLIQUIDWATER_H_
+#endif  // UFO_PREDICTORS_SCANANGLE_H_
