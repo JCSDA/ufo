@@ -1628,7 +1628,7 @@ TauCoeff/ODPS/Little_Endian/radiometer_smap.TauCoeff.bin
 )
 
 # Symlink all CRTM files
-CREATE_SYMLINK_FILENAME( ${crtm_SOURCE_DIR}/fix
+CREATE_SYMLINK_FILENAME( ${crtm_COEFFICIENT_DIR}
                          ${CMAKE_CURRENT_BINARY_DIR}/Data
                          ${crtm_test_input} )
 
