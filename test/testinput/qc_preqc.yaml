@@ -16,23 +16,12 @@ observations:
   - filter: PreQC
     maxvalue: 3
   passedBenchmark: 155
-- obs operator:
-    name: CRTM
-    Absorbers: [H2O,O3,CO2]
-    Clouds: [Water, Ice]
-    Cloud_Fraction: 1.0
-    obs options:
-      Sensor_ID: amsua_n19
-      EndianType: little_endian
-      CoefficientPath: Data/
-  obs space:
+- obs space:
     name: amsua_n19
     obsdatain:
       obsfile: Data/ioda/testinput_tier_1/amsua_n19_obs_2018041500_m.nc4
     simulated variables: [brightness_temperature]
     channels: 4-8
-  geovals:
-    filename: Data/amsua_n19_geoval_2018041500_m.nc4
   obs filters:
   - filter: PreQC
     minvalue: -2
