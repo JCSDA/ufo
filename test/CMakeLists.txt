@@ -299,7 +299,7 @@ if( NOT DEFINED LOCAL_PATH_TESTFILES_IODA )
       WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
       OUTPUT_VARIABLE GIT_BRANCH_UFO
       OUTPUT_STRIP_TRAILING_WHITESPACE)
-    message(STATUS "UFO is in branch " ${GIT_BRANCH_UFO})
+    message(STATUS "UFO is in branch: ${GIT_BRANCH_UFO}")
 
   else()
     message(STATUS "Branch name provided by user")
@@ -316,20 +316,20 @@ if( NOT DEFINED LOCAL_PATH_TESTFILES_IODA )
   if(${UFO_SPECIFIC_TEST_FILES} MATCHES 0)
     # Download and extract new test files (distant directory = git branch)
     set(DIRNAME ${GIT_BRANCH_UFO})
-    message(STATUS "GIT_BRANCH_UFO found, will download " ${GIT_BRANCH_UFO})
+    message(STATUS "GIT_BRANCH_UFO found, will download: ${GIT_BRANCH_UFO}")
   else()
     # Download and extract develop test files (distant directory = develop)
     set(DIRNAME "develop")
     message(STATUS "GIT_BRANCH_UFO not found, will download develop")
   endif()
 
-  message(STATUS "Test data will be download from: " ${UFO_IODA_DOWNLOAD_BASE_URL}/${DIRNAME})
+  message(STATUS "Test data will be download from: ${UFO_IODA_DOWNLOAD_BASE_URL}/${DIRNAME}")
 
   set(UFO_IODA_REP_NAME ioda)
   set(UFO_IODA_TESTFILES_NAME ${ufo_ioda_test_data})
   set(UFO_IODA_BRANCH_NAME ${DIRNAME})
   set(UFO_IODA_TESTFILES_PATH ${CMAKE_BINARY_DIR}/test_data/ioda/${DIRNAME})
-  message(STATUS "Save data to " ${TESTFILE_DIR_IODA})
+  message(STATUS "Save data to: ${TESTFILE_DIR_IODA}")
   file(MAKE_DIRECTORY ${UFO_IODA_TESTFILES_PATH})
 
   # Create download script for get_ioda_test_data test
@@ -355,7 +355,7 @@ if( NOT DEFINED LOCAL_PATH_TESTFILES_IODA )
 
 else()
   set(UFO_IODA_TESTFILES_PATH ${LOCAL_PATH_TESTFILES_IODA})
-  message(STATUS "use LOCAL_PATH_TESTFILES_IODA : " ${LOCAL_PATH_TESTFILES_IODA})
+  message(STATUS "use LOCAL_PATH_TESTFILES_IODA: ${LOCAL_PATH_TESTFILES_IODA}")
 endif()
 
 execute_process( COMMAND ${CMAKE_COMMAND} -E create_symlink
@@ -432,7 +432,7 @@ ecbuild_add_test( TARGET  test_ufo_opr_gsi_sfc_model
                   DEPENDS test_ObsOperator.x
                   TEST_DEPENDS ufo_get_ioda_test_data )
 
-if ( ${CRTM_FOUND} )
+if( crtm_FOUND )
     ecbuild_add_test( TARGET  test_ufo_opr_crtm_amsua
                       COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
                       ARGS    "testinput/amsua_crtm.yaml"
@@ -629,7 +629,7 @@ if ( ${CRTM_FOUND} )
                       ENVIRONMENT OOPS_TRAPFPE=1
                       DEPENDS test_ObsOperatorTLAD.x 
                       TEST_DEPENDS ufo_get_ioda_test_data )
-endif ( ${CRTM_FOUND} )
+endif( crtm_FOUND )
 
 if( ${RTTOV_FOUND} )
   ecbuild_add_test( TARGET  test_ufo_opr_rttov_amsua
@@ -1318,7 +1318,7 @@ ecbuild_add_test( TARGET  test_ufo_function_velocity
 
 # Test Diagnostics
 
-if ( ${CRTM_FOUND} )
+if( crtm_FOUND )
     ecbuild_add_test( TARGET  test_ufo_obsdiag_crtm_airs_optics
                       SOURCES mains/TestObsDiagnostics.cc
                       ARGS    "testinput/obsdiag_crtm_airs_optics.yaml"
@@ -1378,8 +1378,7 @@ if ( ${CRTM_FOUND} )
                       ARGS    "testinput/obsdiag_crtm_iasi_jacobian.yaml"
                       ENVIRONMENT OOPS_TRAPFPE=1
                       LIBS    ufo)
-
-endif ( ${CRTM_FOUND} )
+endif( crtm_FOUND )
 
 # Test Parameters
 ecbuild_add_test( TARGET  test_ufo_parameters
@@ -1405,7 +1404,7 @@ ecbuild_add_test( TARGET  test_ufo_parallel_obs_distribution
 
 # Test QC for specific instruments
 
-if ( ${CRTM_FOUND} )
+if( crtm_FOUND )
     ecbuild_add_test( TARGET  test_ufo_qc_airs_filters
                       COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
                       ARGS    "testinput/airs_qc_filters.yaml"
@@ -1483,7 +1482,7 @@ if ( ${CRTM_FOUND} )
                       ARGS    "testinput/amsua_allsky_gsi_qc.yaml"
                       ENVIRONMENT OOPS_TRAPFPE=1
                       DEPENDS test_ObsFilters.x )
-endif ( ${CRTM_FOUND} )
+endif( crtm_FOUND )
 
 if( ${ROPP-UFO_FOUND} )
 ecbuild_add_test( TARGET  test_ufo_qc_gnssroBndROPP1D
@@ -1627,10 +1626,13 @@ SpcCoeff/Little_Endian/radiometer_smap.SpcCoeff.bin
 TauCoeff/ODPS/Little_Endian/radiometer_smap.TauCoeff.bin
 )
 
-# Symlink all CRTM files
-CREATE_SYMLINK_FILENAME( ${crtm_COEFFICIENT_DIR}
-                         ${CMAKE_CURRENT_BINARY_DIR}/Data
-                         ${crtm_test_input} )
+if( crtm_FOUND )
+    # symlink to selected CRTM coefficient files.
+    # crtm_COEFFICIENT_DIR is exported by crtm-config.cmake
+    create_symlink_filename( ${crtm_COEFFICIENT_DIR}
+                             ${CMAKE_CURRENT_BINARY_DIR}/Data
+                             ${crtm_test_input} )
+endif()
 
 #####################################################################
 # Files for RTTOV tests
