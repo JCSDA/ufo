@@ -6,6 +6,7 @@
  */
 
 #include "ufo/profile/ProfileCheckRH.h"
+#include "ufo/profile/VariableNames.h"
 
 namespace ufo {
 
@@ -14,10 +15,9 @@ namespace ufo {
   ProfileCheckRH::ProfileCheckRH
   (const ProfileConsistencyCheckParameters &options,
    const ProfileIndices &profileIndices,
-   const ProfileData &profileData,
-   ProfileFlags &profileFlags,
+   ProfileDataHandler &profileDataHandler,
    ProfileCheckValidator &profileCheckValidator)
-    : ProfileCheckBase(options, profileIndices, profileData, profileFlags, profileCheckValidator)
+    : ProfileCheckBase(options, profileIndices, profileDataHandler, profileCheckValidator)
   {}
 
   void ProfileCheckRH::runCheck()
@@ -25,15 +25,35 @@ namespace ufo {
     oops::Log::debug() << " Relative humidity check" << std::endl;
 
     const int numLevelsToCheck = profileIndices_.getNumLevelsToCheck();
-    const std::vector <float> &pressures = profileData_.getPressures();
-    const std::vector <float> &tObs = profileData_.gettObs();
-    const std::vector <float> &tBkg = profileData_.gettBkg();
-    const std::vector <float> &RHObs = profileData_.getRHObs();
-    const std::vector <float> &RHBkg = profileData_.getRHBkg();
-    const std::vector <float> &tdObs = profileData_.gettdObs();
-    const std::vector <int> &tFlags = profileFlags_.gettFlags();
-    std::vector <int> &RHFlags = profileFlags_.getRHFlags();
-    const std::vector <float> &tObsCorrection = profileFlags_.gettObsCorrection();
+    const std::vector <float> &pressures =
+       profileDataHandler_.get<float>(ufo::VariableNames::name_air_pressure);
+    const std::vector <float> &tObs =
+       profileDataHandler_.get<float>(ufo::VariableNames::name_obs_air_temperature);
+    const std::vector <float> &tBkg =
+       profileDataHandler_.get<float>(ufo::VariableNames::name_hofx_air_temperature);
+    const std::vector <float> &RHObs =
+       profileDataHandler_.get<float>(ufo::VariableNames::name_obs_relative_humidity);
+    const std::vector <float> &RHBkg =
+       profileDataHandler_.get<float>(ufo::VariableNames::name_hofx_relative_humidity);
+    const std::vector <float> &tdObs =
+       profileDataHandler_.get<float>(ufo::VariableNames::name_obs_dew_point_temperature);
+    const std::vector <int> &tFlags =
+       profileDataHandler_.get<int>(ufo::VariableNames::name_qc_tFlags);
+    std::vector <int> &RHFlags =
+       profileDataHandler_.get<int>(ufo::VariableNames::name_qc_RHFlags);
+    const std::vector <float> &tObsCorrection =
+       profileDataHandler_.get<float>(ufo::VariableNames::name_tObsCorrection);
+
+    std::vector <int> &TotCProfs =
+       profileDataHandler_.get<int>(ufo::VariableNames::name_counter_TotCProfs);
+    std::vector <int> &TotHProfs =
+       profileDataHandler_.get<int>(ufo::VariableNames::name_counter_TotHProfs);
+    std::vector <int> &TotCFlags =
+       profileDataHandler_.get<int>(ufo::VariableNames::name_counter_TotCFlags);
+    std::vector <int> &TotHFlags =
+       profileDataHandler_.get<int>(ufo::VariableNames::name_counter_TotHFlags);
+    std::vector <int> &TotLFlags =
+       profileDataHandler_.get<int>(ufo::VariableNames::name_counter_TotLFlags);
 
     if (oops::anyVectorEmpty(pressures, tObs, tBkg, RHObs, RHBkg,
                              tdObs, tFlags, RHFlags, tObsCorrection)) {
@@ -54,9 +74,9 @@ namespace ufo {
     // Set up arrays and counters
 
     int NumLev = 0;
-    float PTrop = 0.0;
-    int Nover100 = 0;
-    float RHDover100 = 0.0;
+    float PTrop = 0.0;  // Tropopause pressure level
+    int NLowP = 0;  // Number of RH reports above 100 hPa
+    float RHDLowP = 0.0;  // Mean RH O-B above 100 hPa
     Press_.assign(numLevelsToCheck, 0.0);
     Temp_.assign(numLevelsToCheck, 0.0);
     rh_.assign(numLevelsToCheck, 0.0);
@@ -82,8 +102,8 @@ namespace ufo {
         tbk_[NumLev] = tBkg[jlev];
         rhbk_[NumLev] = RHBkg[jlev];
         if (Press_[NumLev] <= options_.RHCheck_PressInitThresh.value()) {
-          Nover100++;
-          RHDover100 = RHDover100 + rh_[NumLev] - rhbk_[NumLev];
+          NLowP++;
+          RHDLowP = RHDLowP + rh_[NumLev] - rhbk_[NumLev];
         }
         NumLev++;
       }
@@ -102,14 +122,14 @@ namespace ufo {
            rh_[jlev - 1] >= RHThresh) ||
           (td_[jlev] > td_[jlev - 1] &&
            std::min(rh_[jlev - 1], rh_[jlev]) >= RHThresh)) {
-        float MinRHabove = rh_[jlev];
+        float MinRHabove = rh_[jlev];  // Min RH in levels close in pressure to test level
         for (int klev = jlev + 1; klev < NumLev; ++klev) {
           if (Press_[jlev] - Press_[klev] > PressDiffAdjThresh) break;
           MinRHabove = std::min(MinRHabove, rh_[klev]);
         }
         if (MinRHabove < options_.RHCheck_MinRHThresh.value()) {
           FlagH_[jlev] = 2;
-          profileFlags_.incrementCounterCumul("TotCProfs");
+          TotCProfs[0]++;
           oops::Log::debug() << " -> Error at top of cloud layer for level " << jlev << std::endl;
           for (int klev = jlev + 1; klev < NumLev; ++klev) {
             if (Press_[jlev] - Press_[klev] > PressDiffAdjThresh) break;
@@ -120,7 +140,7 @@ namespace ufo {
       }
     }
 
-    if (Nover100 > 0) RHDover100 = RHDover100 / static_cast <float> (Nover100);
+    if (NLowP > 0) RHDLowP = RHDLowP / static_cast <float> (NLowP);
 
     // Simple check for sonde ascent too moist at high levels
     // Start at top and work down
@@ -134,7 +154,7 @@ namespace ufo {
         Tmin < options_.RHCheck_TminThresh.value()) {
       for (int ilev = NumLev - 1; ilev >= 0; ilev--) {
         if (rh_[ilev] > rhbk_[ilev] + SondeRHHiTol ||
-            (Press_[ilev] <= 100.0 && RHDover100 > SondeRHHiTol)) {
+            (Press_[ilev] <= options_.RHCheck_PressInitThresh.value() && RHDLowP > SondeRHHiTol)) {
           if (FlagH_[ilev] == 0) {
             oops::Log::debug() << " -> Sonde ascent too moist for level " << ilev << std::endl;
             FlagH_[ilev] = 1;
@@ -152,14 +172,14 @@ namespace ufo {
       if (FlagH_[i] == 2) ++NumCFlags;
     }
 
-    if (NumHFlags > 0) profileFlags_.incrementCounterCumul("TotHProfs");
+    if (NumHFlags > 0) TotHProfs[0]++;
 
     for (int n = 0; n < NumCFlags; ++n)
-      profileFlags_.incrementCounterCumul("TotCFlags");
+      TotCFlags[0]++;
     for (int n = 0; n < NumHFlags; ++n)
-      profileFlags_.incrementCounterCumul("TotHFlags");
+      TotHFlags[0]++;
     for (int n = 0; n < NumLFlags; ++n)
-      profileFlags_.incrementCounterCumul("TotLFlags");
+      TotLFlags[0]++;
 
     if (NumCFlags + NumHFlags > 0) {
       for (int jlev = 0; jlev < NumLev; ++jlev) {
@@ -174,19 +194,13 @@ namespace ufo {
 
   void ProfileCheckRH::fillValidator()
   {
-    profileCheckValidator_.setRHFlags(profileFlags_.getuFlags());
-    profileCheckValidator_.setTotCProfs(profileFlags_.getCounter("TotCProfs"));
-    profileCheckValidator_.setTotHProfs(profileFlags_.getCounter("TotHProfs"));
-    profileCheckValidator_.setTotCFlags(profileFlags_.getCounter("TotCFlags"));
-    profileCheckValidator_.setTotHFlags(profileFlags_.getCounter("TotHFlags"));
-    profileCheckValidator_.setTotLFlags(profileFlags_.getCounter("TotLFlags"));
-    profileCheckValidator_.setPress(Press_);
-    profileCheckValidator_.setTemp(Temp_);
-    profileCheckValidator_.setrh(rh_);
-    profileCheckValidator_.settd(td_);
-    profileCheckValidator_.settbk(tbk_);
-    profileCheckValidator_.setrhbk(rhbk_);
-    profileCheckValidator_.setFlagH(FlagH_);
-    profileCheckValidator_.setIndx(Indx_);
+    profileDataHandler_.set(ufo::VariableNames::name_Press, std::move(Press_));
+    profileDataHandler_.set(ufo::VariableNames::name_Temp, std::move(Temp_));
+    profileDataHandler_.set(ufo::VariableNames::name_rh, std::move(rh_));
+    profileDataHandler_.set(ufo::VariableNames::name_td, std::move(td_));
+    profileDataHandler_.set(ufo::VariableNames::name_tbk, std::move(tbk_));
+    profileDataHandler_.set(ufo::VariableNames::name_rhbk, std::move(rhbk_));
+    profileDataHandler_.set(ufo::VariableNames::name_FlagH, std::move(FlagH_));
+    profileDataHandler_.set(ufo::VariableNames::name_Indx, std::move(Indx_));
   }
 }  // namespace ufo

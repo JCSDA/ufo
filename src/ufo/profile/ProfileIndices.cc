@@ -20,6 +20,7 @@ namespace ufo {
       options_(options),
       apply_(apply),
       profileNums_(obsdb.recnum()),
+      profileNumCurrent_(0),
       profileNumToFind_(0),
       profIndex_(0)
   {
@@ -74,7 +75,7 @@ namespace ufo {
         }
       } else {
         // This will not work for pressures in ascending order
-        throw eckit::NotImplemented("ascending profile sort order", Here());
+        throw eckit::BadParameter("sort order is ascending.", Here());
       }
     }
 
@@ -92,6 +93,10 @@ namespace ufo {
     }
 
     // Update counters and iterators (if used)
+
+    // Current profile number
+    profileNumCurrent_  = profileNumToFind_;
+
     // Return value indicates whether or not the end of the entire sample has been reached
     if (profIndex_ < profileNums_.size()) {
       // Next profile number to find

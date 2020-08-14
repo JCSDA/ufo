@@ -7,6 +7,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <cstring>
 #include <iomanip>
 #include <limits>
 #include <vector>
@@ -24,11 +25,12 @@
 #include "ufo/filters/ProfileConsistencyCheckParameters.h"
 #include "ufo/filters/ProfileConsistencyChecks.h"
 
+#include "ufo/profile/EntireSampleDataHandler.h"
 #include "ufo/profile/ProfileChecker.h"
 #include "ufo/profile/ProfileCheckValidator.h"
-#include "ufo/profile/ProfileData.h"
-#include "ufo/profile/ProfileFlags.h"
+#include "ufo/profile/ProfileDataHandler.h"
 #include "ufo/profile/ProfileIndices.h"
+#include "ufo/profile/VariableNames.h"
 
 namespace ufo {
 
@@ -46,11 +48,11 @@ namespace ufo {
 
     allvars_ += Variables(filtervars_, "HofX");
 
-    // Throw exception if expected configuration options are missing.
+    // Throw exception if expected configuration option is missing.
     // It is essential for observations to be grouped according to (e.g.) station ID
     // (unless there is only one profile in the sample, which would be very unusual)
     if (obsdb.obs_group_var().empty())
-      throw eckit::BadParameter("obsdatain.obsgrouping.group_var is empty.", Here());
+      throw eckit::BadParameter("group variable is empty.", Here());
   }
 
   // -----------------------------------------------------------------------------
@@ -63,35 +65,35 @@ namespace ufo {
                                              const Variables & filtervars,
                                              std::vector<std::vector<bool>> & flagged) const
   {
+    print(oops::Log::trace());
+
     const int nlocs = static_cast <int> (obsdb_.nlocs());
     const int nprofs = static_cast <int> (obsdb_.nrecs());
+
+    // Handles data in entire sample
+    EntireSampleDataHandler entireSampleDataHandler(obsdb_,
+                                                    *options_);
 
     // Determines indices of profile's observations in entire sample
     ProfileIndices profileIndices(obsdb_,
                                   *options_,
                                   apply);
 
-    // Gets individual profile data
-    ProfileData profileData(obsdb_,
-                            *options_,
-                            profileIndices);
-
-    // Gets individual profile flags and counters and modifies them as required
-    ProfileFlags profileFlags(obsdb_,
-                              *options_,
-                              profileIndices);
+    // Handles individual profile data
+    ProfileDataHandler profileDataHandler(obsdb_,
+                                          *options_,
+                                          entireSampleDataHandler,
+                                          profileIndices);
 
     // (Optionally) validates check results against OPS values
-    ProfileCheckValidator profileCheckValidator(obsdb_,
-                                                *options_,
-                                                profileIndices);
+    ProfileCheckValidator profileCheckValidator(*options_,
+                                                profileDataHandler);
 
     // Applies checks to each profile
-    const ProfileChecker profileChecker(*options_,
-                                        profileIndices,
-                                        profileData,
-                                        profileFlags,
-                                        profileCheckValidator);
+    ProfileChecker profileChecker(*options_,
+                                  profileIndices,
+                                  profileDataHandler,
+                                  profileCheckValidator);
 
     // Loop over profiles
     oops::Log::debug() << "Starting loop over profiles..." << std::endl;
@@ -99,41 +101,42 @@ namespace ufo {
     for (int jprof = 0; jprof < nprofs; ++jprof) {
       oops::Log::debug() << "Profile " << (jprof + 1) << " / " << nprofs << std::endl;
 
-      // Determine indices in total sample that correspond to this profile
+      // Determine indices in entire sample that correspond to this profile
       profileIndices.determineProfileIndices();
 
-      // Load values of physical variables (for both observations and model)
-      profileData.fillProfileValues();
-      oops::Log::debug() << "Station ID: " << profileData.getStationID() << std::endl;
+      // Reset contents of profile data handler
+      profileDataHandler.reset();
 
-      // Load QC flags and counters
-      profileFlags.fillProfileValues();
-      profileFlags.setProfileNum(jprof);
+      // Print station ID if requested
+      if (options_->PrintStationID.value()) {
+        const std::vector <std::string> &station_ID =
+          profileDataHandler.get<std::string>(ufo::VariableNames::name_station_ID);
+        if (!station_ID.empty())
+          oops::Log::debug() << "Station ID: " << station_ID[0] << std::endl;
+      }
 
       // Run checks
       profileChecker.runChecks();
 
-      // Set final report flags if a certain number of errors have occurred
-      profileFlags.setFinalReportFlags();
+      // After all checks have run, set final report flags in this profile
+      profileDataHandler.setFinalReportFlags();
 
-      // Update flags in the entire sample (using values in this profile)
-      profileFlags.updateFlags();
+      // Modify 'flagged' vector for each filter variable based on check results
+      profileDataHandler.setFlagged(filtervars.nvars(), flagged);
+
+      // If any variables in the current profile were modified by the checks,
+      // the equivalent variables in the entire sample are set to the modified values.
+      profileDataHandler.updateEntireSampleData();
 
       // Optionally compare check results with OPS values
-      if (options_->compareWithOPS.value() && profileFlags.getBasicCheckResult()) {
-        profileCheckValidator.setReportFlags(profileFlags.getReportFlags());
-        profileCheckValidator.fillProfileValues();
-        profileCheckValidator.setProfileNum(jprof);
+      if (options_->compareWithOPS.value() && profileChecker.getBasicCheckResult()) {
         profileCheckValidator.validate();
         nMismatches_.emplace_back(profileCheckValidator.getMismatches());
       }
     }
 
-    // Modify flagged
-    profileFlags.setFlagged(nlocs, filtervars.nvars(), flagged);
-
-    // Write out flags, counters and data corrections to obsdb
-    profileFlags.writeFlags();
+    // Write out any quantities that may have changed to obsdb
+    entireSampleDataHandler.writeQuantitiesToObsdb();
 
     oops::Log::debug() << "... Finished loop over profiles" << std::endl;
     oops::Log::debug() << std::endl;

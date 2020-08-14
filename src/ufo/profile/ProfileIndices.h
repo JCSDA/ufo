@@ -45,57 +45,57 @@ namespace ufo {
     /// Determine indices in entire sample for this profile.
     void determineProfileIndices();
 
-    /// Return indices for the current profile
+    /// Return indices for the current profile.
     const std::vector <size_t> &getProfileIndices() const {return profileIndices_;}
 
-    /// Return number of levels to which QC checks should be applied
+    /// Return number of levels to which QC checks should be applied.
     int getNumLevelsToCheck() const {return numLevelsToCheck_;}
 
-    /// Typedef used for descending sort method
+    /// Get number of current profile.
+    size_t getProfileNumCurrent() const {return profileNumCurrent_;}
+
+    /// Profile index map.
     typedef std::map<std::size_t, std::vector<std::size_t>> ProfIdxMap;
 
-    /// Typedef used for descending sort method
-    typedef std::map<std::size_t, std::vector<std::pair<float, std::size_t>>> TmpProfIdxMap;
-
-    /// Typedef used for descending sort method
-    typedef TmpProfIdxMap::iterator TmpProfIdxIter;
-
-    /// Typedef used for descending sort method
+    /// Profile index map iterator.
     typedef ProfIdxMap::const_iterator ProfIdxIter;
 
    private:  // functions
-    // Ensure number of profiles is consistent with quantity reported by obsdb
+    // Ensure number of profiles is consistent with quantity reported by obsdb.
     void validateTotalNumProf();
 
-   private:  // members
-    /// Observation database
+   private:  // variables
+    /// Observation database.
     ioda::ObsSpace &obsdb_;
 
-    /// Configurable parameters
+    /// Configurable parameters.
     const ProfileConsistencyCheckParameters &options_;
 
-    /// Observations to apply the filter to
+    /// Observations to apply the filter to.
     const std::vector <bool> &apply_;
 
-    /// Profile numbers for the entire sample
+    /// Profile numbers for the entire sample.
     const std::vector <size_t> profileNums_;
 
-    /// Iterator over profile indices (used for sorting)
+    /// Iterator over profile indices (used for sorting).
     ProfIdxMap profidx_;
 
-    /// Iterator pointing to current profile index (initially points to beginning)
+    /// Iterator pointing to current profile index (initially points to beginning).
     ProfIdxIter profidx_current_;
 
-    /// Indices for this profile
+    /// Indices for this profile.
     std::vector <size_t> profileIndices_;
 
-    /// Number of profile levels to which QC checks should be applied
+    /// Number of profile levels to which QC checks should be applied.
     int numLevelsToCheck_;
 
-    /// Profile number to find in the sample
+    /// Current profile number in the sample.
+    size_t profileNumCurrent_;
+
+    /// Next profile number to find in the sample.
     size_t profileNumToFind_;
 
-    // Current index within the entire sample
+    // Current index within the entire sample.
     size_t profIndex_;
   };
 }  // namespace ufo

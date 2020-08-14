@@ -9,12 +9,12 @@
 #define UFO_PROFILE_PROFILECHECKRH_H_
 
 #include <algorithm>
+#include <utility>
 #include <vector>
 
 #include "ufo/profile/ProfileCheckBase.h"
 #include "ufo/profile/ProfileCheckValidator.h"
-#include "ufo/profile/ProfileData.h"
-#include "ufo/profile/ProfileFlags.h"
+#include "ufo/profile/ProfileDataHandler.h"
 #include "ufo/profile/ProfileIndices.h"
 
 namespace ufo {
@@ -31,8 +31,7 @@ namespace ufo {
    public:
       ProfileCheckRH(const ProfileConsistencyCheckParameters &options,
                      const ProfileIndices &profileIndices,
-                     const ProfileData &profileData,
-                     ProfileFlags &profileFlags,
+                     ProfileDataHandler &profileDataHandler,
                      ProfileCheckValidator &profileCheckValidator);
 
     /// Run check

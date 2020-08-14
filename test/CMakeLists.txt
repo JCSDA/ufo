@@ -154,6 +154,7 @@ list( APPEND ufo_test_input
   testinput/sfcpcorrected.yaml
   testinput/profileconsistencychecks_monolithicfilter.yaml
   testinput/profileconsistencychecks_OPScomparison.yaml
+  testinput/profileconsistencychecks_wrongOPScomparison.yaml
   testinput/profileconsistencychecks_separatefilters.yaml
   testinput/profileconsistencychecks_unittests.yaml
   testinput/profileconsistencychecks_unittest_oneprofileMPI.yaml
@@ -270,8 +271,10 @@ list( APPEND ufo_test_data
   filters/poisson_disk_thinning_3x3x3x3_regular_grid.nc4
   filters/met_office_profile_consistency_checks.nc4
   filters/met_office_profile_consistency_checks_rh.nc4
+  filters/met_office_profile_consistency_checks_rh_wrong.nc4
   filters/met_office_profile_consistency_checks_unittests.nc4
   filters/met_office_profile_consistency_checks_oneprofile.nc4
+  filters/met_office_profile_consistency_checks_oneprofile_wrong.nc4
   filters/met_office_profile_consistency_checks_uinterp.nc4
 )
 
@@ -1128,6 +1131,12 @@ ecbuild_add_test( TARGET  test_ufo_profileconsistencychecks_OPScomparison
 ecbuild_add_test( TARGET  test_ufo_profileconsistencychecks_RH_OPScomparison
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ProfileConsistencyChecks.x
                   ARGS    "testinput/profileconsistencychecks_RH_OPScomparison.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ProfileConsistencyChecks.x )
+
+ecbuild_add_test( TARGET  test_ufo_profileconsistencychecks_wrongOPScomparison
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ProfileConsistencyChecks.x
+                  ARGS    "testinput/profileconsistencychecks_wrongOPScomparison.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ProfileConsistencyChecks.x )
 

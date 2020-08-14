@@ -20,6 +20,7 @@ Sondes:
     compareWithOPS: true
     flagBasicChecksFail: true
     nErrorsFail: 8
+    PrintStationID: true
     UICheck_TInterpIdenticalPTolSq: 4.0
     UICheck_TInterpTolSq: 64.0
     UICheck_BigGapLowP: 1000.0

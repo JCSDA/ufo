@@ -23,9 +23,16 @@
 #include "oops/runs/Test.h"
 #include "oops/util/Expect.h"
 #include "test/TestEnvironment.h"
+#include "ufo/filters/ProfileConsistencyCheckParameters.h"
 #include "ufo/filters/ProfileConsistencyChecks.h"
 #include "ufo/filters/Variables.h"
 #include "ufo/ObsDiagnostics.h"
+
+#include "ufo/profile/EntireSampleDataHandler.h"
+#include "ufo/profile/ProfileCheckBase.h"
+#include "ufo/profile/ProfileCheckUInterp.h"
+#include "ufo/profile/ProfileDataHandler.h"
+#include "ufo/profile/VariableNames.h"
 
 namespace ufo {
 namespace test {
@@ -52,15 +59,72 @@ void testProfileConsistencyChecks(const eckit::LocalConfiguration &conf) {
       obsspace, obsspace.obsvariables()));
 
   const eckit::LocalConfiguration filterConf(conf, "ProfileConsistencyChecks");
-  ufo::ProfileConsistencyChecks filter(obsspace, filterConf, qcflags, obserr);
 
+  // Determine whether an exception is expected to be thrown.
+  // Exceptions can be thrown in two places: on instantiation of the filter,
+  // and during the operation of the filter.
+  bool expectThrowOnInstantiation = conf.getBool("ExpectThrowOnInstantiation", false);
+  bool expectThrowDuringOperation = conf.getBool("ExpectThrowDuringOperation", false);
+
+  if (expectThrowOnInstantiation) {
+    EXPECT_THROWS(ufo::ProfileConsistencyChecks filterThrow(obsspace, filterConf, qcflags, obserr));
+    // Do not proceed further in this case.
+    return;
+  }
+
+  ufo::ProfileConsistencyChecks filter(obsspace, filterConf, qcflags, obserr);
   filter.preProcess();
-  filter.postFilter(hofx, obsdiags);
+
+  if (expectThrowDuringOperation)
+    EXPECT_THROWS(filter.postFilter(hofx, obsdiags));
+  else
+    filter.postFilter(hofx, obsdiags);
+
+  // Determine whether the mismatch check should be bypassed or not.
+  // It might be necessary to disable the mismatch check in tests which are
+  // designed to reach code paths that would normally result in failure.
+  bool bypassMismatchComparison = conf.getBool("BypassMismatchComparison", false);
 
   // Check there are no mismatches between the values produced by this code and the OPS equivalents
-  for (auto nMM : filter.getMismatches()) {
+  if (!bypassMismatchComparison) {
+    for (auto nMM : filter.getMismatches())
       EXPECT_EQUAL(nMM, 0);
-    }
+  }
+
+  // === Additional tests of exceptions === //
+
+  // Test whether adding the same check twice throws an exception.
+  bool addDuplicateCheck = conf.getBool("AddDuplicateCheck", false);
+  if (addDuplicateCheck) {
+    static ProfileCheckMaker<ProfileCheckUInterp> makerDuplicate1_("duplicate");
+    EXPECT_THROWS(static ProfileCheckMaker<ProfileCheckUInterp> makerDuplicate2_("duplicate"));
+  }
+
+  // Test whether using the get function with the wrong type throws an exception.
+  bool getWrongType = conf.getBool("GetWrongType", false);
+  if (getWrongType) {
+    std::unique_ptr <ProfileConsistencyCheckParameters> options_;
+    options_.reset(new ProfileConsistencyCheckParameters());
+    options_->deserialize(conf);
+    EntireSampleDataHandler entireSampleDataHandler(obsspace,
+                                                    *options_);
+    // Load data from obsspace
+    entireSampleDataHandler.get<float>(ufo::VariableNames::name_air_pressure);
+    // Attempt to access data with incorrect type
+    EXPECT_THROWS(entireSampleDataHandler.get<int>(ufo::VariableNames::name_air_pressure));
+    std::vector<bool> apply(obsspace.nlocs(), true);
+    ProfileIndices profileIndices(obsspace,
+                                  *options_,
+                                  apply);
+    ProfileDataHandler profileDataHandler(obsspace,
+                                          *options_,
+                                          entireSampleDataHandler,
+                                          profileIndices);
+    // Obtain profile data
+    profileDataHandler.get<float>(ufo::VariableNames::name_air_pressure);
+    // Attempt to access data with incorrect type
+    EXPECT_THROWS(profileDataHandler.get<int>(ufo::VariableNames::name_air_pressure));
+  }
 }
 
 class ProfileConsistencyChecks : public oops::Test {

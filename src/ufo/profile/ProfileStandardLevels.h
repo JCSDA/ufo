@@ -50,7 +50,7 @@ namespace ufo {
                          const std::vector <float> &vObs,
                          const std::vector <int> &uFlags);
 
-   protected:  // members
+   protected:  // variables
     /// Standard levels (hPa)
     std::vector <float> StandardLevels_;
 

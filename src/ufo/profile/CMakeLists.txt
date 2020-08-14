@@ -4,6 +4,8 @@
 # which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 
 set ( profile_files
+      EntireSampleDataHandler.cc
+      EntireSampleDataHandler.h
       ProfileChecker.cc
       ProfileChecker.h
       ProfileCheckBase.cc
@@ -26,16 +28,14 @@ set ( profile_files
       ProfileCheckUnstableLayer.h
       ProfileCheckValidator.cc
       ProfileCheckValidator.h
-      ProfileData.cc
-      ProfileData.h
-      ProfileDataBase.cc
-      ProfileDataBase.h
-      ProfileFlags.cc
-      ProfileFlags.h
+      ProfileDataHandler.cc
+      ProfileDataHandler.h
       ProfileIndices.cc
       ProfileIndices.h
       ProfileStandardLevels.cc
       ProfileStandardLevels.h
+      VariableNames.h
+      VariableNames.cc
 )
 
 PREPEND( _p_profile_files       "profile"       ${profile_files} )
