@@ -13,8 +13,6 @@
 #include <string>
 #include <vector>
 
-#include <boost/make_shared.hpp>
-
 #include "eckit/config/LocalConfiguration.h"
 #include "eckit/testing/Test.h"
 #include "ioda/ObsSpace.h"
@@ -59,10 +57,10 @@ void testPoissonDiskThinning(const eckit::LocalConfiguration &conf,
     obsspace.put_db("MetaData", "priority", priorities);
   }
 
-  auto obserr = boost::make_shared<ioda::ObsDataVector<float>>(
-      obsspace, obsspace.obsvariables(), "ObsError");
-  auto qcflags = boost::make_shared<ioda::ObsDataVector<int>>(
-      obsspace, obsspace.obsvariables());
+  std::shared_ptr<ioda::ObsDataVector<float>> obserr(new ioda::ObsDataVector<float>(
+      obsspace, obsspace.obsvariables(), "ObsError"));
+  std::shared_ptr<ioda::ObsDataVector<int>> qcflags(new ioda::ObsDataVector<int>(
+      obsspace, obsspace.obsvariables()));
 
   const eckit::LocalConfiguration filterConf(conf, "Poisson Disk Thinning");
   ufo::PoissonDiskThinning filter(obsspace, filterConf, qcflags, obserr);

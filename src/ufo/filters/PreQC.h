@@ -8,9 +8,8 @@
 #ifndef UFO_FILTERS_PREQC_H_
 #define UFO_FILTERS_PREQC_H_
 
+#include <memory>
 #include <ostream>
-
-#include "boost/shared_ptr.hpp"
 
 #include "eckit/config/LocalConfiguration.h"
 #include "ioda/ObsDataVector.h"
@@ -30,8 +29,8 @@ class ObsDiagnostics;
 class PreQC : public util::Printable {
  public:
   PreQC(ioda::ObsSpace &, const eckit::Configuration &,
-        boost::shared_ptr<ioda::ObsDataVector<int> >,
-        boost::shared_ptr<ioda::ObsDataVector<float> >);
+        std::shared_ptr<ioda::ObsDataVector<int> >,
+        std::shared_ptr<ioda::ObsDataVector<float> >);
   ~PreQC() {}
 
   void preProcess() const {}

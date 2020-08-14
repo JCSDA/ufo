@@ -8,11 +8,10 @@
 #ifndef UFO_FILTERS_OBSDOMAINCHECK_H_
 #define UFO_FILTERS_OBSDOMAINCHECK_H_
 
+#include <memory>
 #include <ostream>
 #include <string>
 #include <vector>
-
-#include "boost/shared_ptr.hpp"
 
 #include "oops/util/ObjectCounter.h"
 #include "ufo/filters/FilterBase.h"
@@ -43,8 +42,8 @@ class ObsDomainCheck : public FilterBase,
   static const std::string classname() {return "ufo::ObsDomainCheck";}
 
   ObsDomainCheck(ioda::ObsSpace &, const eckit::Configuration &,
-                 boost::shared_ptr<ioda::ObsDataVector<int> >,
-                 boost::shared_ptr<ioda::ObsDataVector<float> >);
+                 std::shared_ptr<ioda::ObsDataVector<int> >,
+                 std::shared_ptr<ioda::ObsDataVector<float> >);
   ~ObsDomainCheck();
 
  private:

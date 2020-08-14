@@ -30,8 +30,8 @@ namespace ufo {
 // -----------------------------------------------------------------------------
 
 QCmanager::QCmanager(ioda::ObsSpace & obsdb, const eckit::Configuration & config,
-                     boost::shared_ptr<ioda::ObsDataVector<int> > qcflags,
-                     boost::shared_ptr<ioda::ObsDataVector<float> > obserr)
+                     std::shared_ptr<ioda::ObsDataVector<int> > qcflags,
+                     std::shared_ptr<ioda::ObsDataVector<float> > obserr)
   : obsdb_(obsdb), config_(config), nogeovals_(), nodiags_(), flags_(qcflags),
     observed_(obsdb.obsvariables())
 {

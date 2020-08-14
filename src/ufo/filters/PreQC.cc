@@ -28,8 +28,8 @@ namespace ufo {
 // -----------------------------------------------------------------------------
 
 PreQC::PreQC(ioda::ObsSpace & obsdb, const eckit::Configuration & config,
-             boost::shared_ptr<ioda::ObsDataVector<int> > qcflags,
-             boost::shared_ptr<ioda::ObsDataVector<float> > obserr)
+             std::shared_ptr<ioda::ObsDataVector<int> > qcflags,
+             std::shared_ptr<ioda::ObsDataVector<float> > obserr)
   : nogeovals_()
 {
   oops::Log::trace() << "PreQC::PreQC starting " << config << std::endl;

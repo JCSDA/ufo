@@ -13,8 +13,6 @@
 #include <string>
 #include <vector>
 
-#include <boost/make_shared.hpp>
-
 #define ECKIT_TESTING_SELF_REGISTER_CASES 0
 
 #include "eckit/config/LocalConfiguration.h"
@@ -55,10 +53,10 @@ void testGaussianThinning(const eckit::LocalConfiguration &conf) {
     obsspace.put_db("MetaData", "priority", priorities);
   }
 
-  auto obserr = boost::make_shared<ioda::ObsDataVector<float>>(
-      obsspace, obsspace.obsvariables(), "ObsError");
-  auto qcflags = boost::make_shared<ioda::ObsDataVector<int>>(
-      obsspace, obsspace.obsvariables());
+  std::shared_ptr<ioda::ObsDataVector<float>> obserr(new ioda::ObsDataVector<float>(
+      obsspace, obsspace.obsvariables(), "ObsError"));
+  std::shared_ptr<ioda::ObsDataVector<int>> qcflags(new ioda::ObsDataVector<int>(
+      obsspace, obsspace.obsvariables()));
 
   const eckit::LocalConfiguration filterConf(conf, "GaussianThinning");
   ufo::Gaussian_Thinning filter(obsspace, filterConf, qcflags, obserr);

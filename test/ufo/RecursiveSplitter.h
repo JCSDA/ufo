@@ -14,8 +14,6 @@
 #include <string>
 #include <vector>
 
-#include <boost/make_shared.hpp>
-
 #include "eckit/testing/Test.h"
 #include "oops/runs/Test.h"
 #include "oops/util/Expect.h"

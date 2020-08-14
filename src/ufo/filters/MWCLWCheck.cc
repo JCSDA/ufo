@@ -26,8 +26,8 @@ namespace ufo {
 // -----------------------------------------------------------------------------
 
 MWCLWCheck::MWCLWCheck(ioda::ObsSpace & obsdb, const eckit::Configuration & config,
-                       boost::shared_ptr<ioda::ObsDataVector<int> > flags,
-                       boost::shared_ptr<ioda::ObsDataVector<float> > obserr)
+                       std::shared_ptr<ioda::ObsDataVector<int> > flags,
+                       std::shared_ptr<ioda::ObsDataVector<float> > obserr)
   : FilterBase(obsdb, config, flags, obserr), invars_(config_, "clw variables") {
   oops::Log::debug() << "MWCLWCheck: config = " << config_ << std::endl;
   const Variable var0(invars_[0] + "@HofX");

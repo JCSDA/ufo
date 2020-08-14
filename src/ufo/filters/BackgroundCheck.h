@@ -8,11 +8,10 @@
 #ifndef UFO_FILTERS_BACKGROUNDCHECK_H_
 #define UFO_FILTERS_BACKGROUNDCHECK_H_
 
+#include <memory>
 #include <ostream>
 #include <string>
 #include <vector>
-
-#include "boost/shared_ptr.hpp"
 
 #include "oops/util/ObjectCounter.h"
 #include "oops/util/Printable.h"
@@ -38,8 +37,8 @@ class BackgroundCheck : public FilterBase,
   static const std::string classname() {return "ufo::BackgroundCheck";}
 
   BackgroundCheck(ioda::ObsSpace &, const eckit::Configuration &,
-                  boost::shared_ptr<ioda::ObsDataVector<int> >,
-                  boost::shared_ptr<ioda::ObsDataVector<float> >);
+                  std::shared_ptr<ioda::ObsDataVector<int> >,
+                  std::shared_ptr<ioda::ObsDataVector<float> >);
   ~BackgroundCheck();
 
  private:

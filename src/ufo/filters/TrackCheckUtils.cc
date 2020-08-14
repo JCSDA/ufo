@@ -64,7 +64,7 @@ std::vector<T> getValidObservationCategories(const std::vector<T> &categories,
 }
 
 std::vector<size_t> TrackCheckUtils::getValidObservationIds(
-    const std::vector<bool> &apply, const boost::shared_ptr<ioda::ObsDataVector<int>> &flags) {
+    const std::vector<bool> &apply, const std::shared_ptr<ioda::ObsDataVector<int>> &flags) {
   std::vector<size_t> validObsIds;
   for (size_t obsId = 0; obsId < apply.size(); ++obsId)
     if (apply[obsId] && (*(flags))[0][obsId] == QCflags::pass)

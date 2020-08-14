@@ -80,8 +80,8 @@ TrackCheckShip::TrackObservation::TrackObservation(double latitude, double longi
   : obsLocationTime_(latitude, longitude, time), fullTrackStatistics_(ts) {}
 
 TrackCheckShip::TrackCheckShip(ioda::ObsSpace &obsdb, const eckit::Configuration &config,
-                               boost::shared_ptr<ioda::ObsDataVector<int> > flags,
-                               boost::shared_ptr<ioda::ObsDataVector<float> > obserr)
+                               std::shared_ptr<ioda::ObsDataVector<int> > flags,
+                               std::shared_ptr<ioda::ObsDataVector<float> > obserr)
   : FilterBase(obsdb, config, flags, obserr)
 {
   oops::Log::debug() << "TrackCheckShip: config = " << config << std::endl;

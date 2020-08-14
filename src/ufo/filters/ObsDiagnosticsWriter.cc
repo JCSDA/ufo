@@ -22,8 +22,8 @@ namespace ufo {
 
 ObsDiagnosticsWriter::ObsDiagnosticsWriter(
                        ioda::ObsSpace &, const eckit::Configuration & config,
-                       boost::shared_ptr<ioda::ObsDataVector<int> >,
-                       boost::shared_ptr<ioda::ObsDataVector<float> >)
+                       std::shared_ptr<ioda::ObsDataVector<int> >,
+                       std::shared_ptr<ioda::ObsDataVector<float> >)
   : config_(config), extradiagvars_()
 {
   oops::Log::trace() << "ObsDiagnosticsWriter contructor" << std::endl;

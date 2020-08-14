@@ -8,11 +8,10 @@
 #ifndef UFO_FILTERS_THINNING_H_
 #define UFO_FILTERS_THINNING_H_
 
+#include <memory>
 #include <ostream>
 #include <string>
 #include <vector>
-
-#include "boost/shared_ptr.hpp"
 
 #include "ioda/ObsDataVector.h"
 #include "oops/util/ObjectCounter.h"
@@ -38,8 +37,8 @@ class Thinning : public FilterBase,
   static const std::string classname() {return "ufo::Thinning";}
 
   Thinning(ioda::ObsSpace &, const eckit::Configuration &,
-           boost::shared_ptr<ioda::ObsDataVector<int> >,
-           boost::shared_ptr<ioda::ObsDataVector<float> >);
+           std::shared_ptr<ioda::ObsDataVector<int> >,
+           std::shared_ptr<ioda::ObsDataVector<float> >);
   ~Thinning();
 
  private:

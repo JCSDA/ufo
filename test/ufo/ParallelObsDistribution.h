@@ -13,8 +13,6 @@
 #include <string>
 #include <vector>
 
-#include <boost/make_shared.hpp>
-
 #include "eckit/config/LocalConfiguration.h"
 #include "eckit/testing/Test.h"
 #include "ioda/ObsSpace.h"

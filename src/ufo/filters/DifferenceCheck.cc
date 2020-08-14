@@ -22,8 +22,8 @@ namespace ufo {
 // -----------------------------------------------------------------------------
 
 DifferenceCheck::DifferenceCheck(ioda::ObsSpace & obsdb, const eckit::Configuration & config,
-                                 boost::shared_ptr<ioda::ObsDataVector<int> > flags,
-                                 boost::shared_ptr<ioda::ObsDataVector<float> > obserr)
+                                 std::shared_ptr<ioda::ObsDataVector<int> > flags,
+                                 std::shared_ptr<ioda::ObsDataVector<float> > obserr)
   : FilterBase(obsdb, config, flags, obserr),
     ref_(config_.getString("reference")), val_(config_.getString("value"))
 {

@@ -52,8 +52,8 @@ std::vector<T> allGatherv(const eckit::mpi::Comm &comm, const std::vector<T> &v)
 // -----------------------------------------------------------------------------
 
 Gaussian_Thinning::Gaussian_Thinning(ioda::ObsSpace & obsdb, const eckit::Configuration & config,
-                                     boost::shared_ptr<ioda::ObsDataVector<int> > flags,
-                                     boost::shared_ptr<ioda::ObsDataVector<float> > obserr)
+                                     std::shared_ptr<ioda::ObsDataVector<int> > flags,
+                                     std::shared_ptr<ioda::ObsDataVector<float> > obserr)
   : FilterBase(obsdb, config, flags, obserr)
 {
   oops::Log::debug() << "Gaussian_Thinning: config = " << config_ << std::endl;
