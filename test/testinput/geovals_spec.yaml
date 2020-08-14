@@ -36,3 +36,20 @@ geovals test:
       indices: [0, 25, 50, 75, 99]
       values: [249.33, 248.46, 250.24, 252.75, 247.10]
       tolerance: 0.1
+    reorderzdir check:
+      direction: bottom2top
+      tolerance: 1.0e-12 
+- obs space:
+    name: OzoneLayer 
+    obsdatain:
+      obsfile: Data/ioda/testinput_tier_1/sbuv2_n19_obs_2018041500_m.nc4
+    simulated variables: [integrated_layer_ozone_in_air]
+  geovals:
+    filename: Data/sbuv2_n19_geoval_2018041500_m.nc4
+    state variables:
+    - mole_fraction_of_ozone_in_air
+    - air_pressure_levels
+    tolerance: 0.001 
+    reorderzdir check:
+      direction: top2bottom
+      tolerance: 1.0e-12 

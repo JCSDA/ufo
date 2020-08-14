@@ -109,6 +109,14 @@ void GeoVaLs::zero() {
   oops::Log::trace() << "GeoVaLs::zero done" << std::endl;
 }
 // -----------------------------------------------------------------------------
+/*! \brief Reorder GeoVaLs in vertical dimension based on vertical coordinate variable */
+void GeoVaLs::reorderzdir(const std::string & varname, const std::string & vardir) {
+  oops::Log::trace() << "GeoVaLs::reorderzdir starting" << std::endl;
+  ufo_geovals_reorderzdir_f90(keyGVL_, varname.size(), varname.c_str(),
+                              vardir.size(), vardir.c_str());
+  oops::Log::trace() << "GeoVaLs::reorderzdir done" << std::endl;
+}
+// -----------------------------------------------------------------------------
 /*! \brief Calculate rms */
 double GeoVaLs::rms() const {
   oops::Log::trace() << "GeoVaLs::rms starting" << std::endl;

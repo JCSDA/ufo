@@ -96,6 +96,8 @@ list( APPEND ufo_test_input
   testinput/gnssrobndnbam_0obs.yaml
   testinput/gnssrobndnbam_1obs.yaml
   testinput/gnssro_domain_check.yaml
+  testinput/gome_metop-a.yaml
+  testinput/gome_metop-a_flipz.yaml
   testinput/gsisfcmodel.yaml
   testinput/hirs4_crtm.yaml
   testinput/iasi_crtm.yaml
@@ -115,6 +117,12 @@ list( APPEND ufo_test_input
   testinput/obsdiag_crtm_iasi_jacobian.yaml
   testinput/obsdiag_crtm_iasi_optics.yaml
   testinput/obsfilterdata.yaml
+  testinput/omi_aura.yaml
+  testinput/omi_aura_flipz.yaml
+  testinput/ompsnp_npp.yaml
+  testinput/ompsnp_npp_flipz.yaml
+  testinput/ompstc_npp.yaml
+  testinput/ompstc_npp_flipz.yaml
   testinput/processwhere.yaml
   testinput/parallel_obs_distribution.yaml
   testinput/parameters.yaml
@@ -144,6 +152,7 @@ list( APPEND ufo_test_input
   testinput/reflectivity.yaml
   testinput/satwind.yaml
   testinput/sbuv2_n19.yaml
+  testinput/sbuv2_n19_flipz.yaml
   testinput/seaicefrac.yaml
   testinput/seaicethick.yaml
   testinput/chleuzintegr.yaml
@@ -185,7 +194,6 @@ list( APPEND ufo_test_data
   atmosphere/ahi_himawari8_geoval_2019042306_m.nc4
   atmosphere/aircraft_geoval_2018041500_m.nc4
   atmosphere/aircraft_geoval_2018041500_s.nc4
-  atmosphere/airs_aqua_geoval_2018041500.nc4
   atmosphere/airs_aqua_geoval_2018041500_m.nc4
   atmosphere/airs_aqua_geoval_2018041500_m_qc.nc4
   atmosphere/airs_aqua_geoval_2018041500_m_unittest.nc4
@@ -224,6 +232,8 @@ list( APPEND ufo_test_data
   atmosphere/gnssro_geoval_2018041500_m.nc4
   atmosphere/gnssro_geoval_2018041500_l.nc4
   atmosphere/gnssro_geoval_2019050700_1obs.nc4
+  atmosphere/gome_metop-a_geoval_2019101700_m.nc4
+  atmosphere/gome_metop-a_geoval_flipz_2019101700_m.nc4
   atmosphere/gsisfc_tsen_geoval_2018041500_m.nc4
   atmosphere/gsisfc_uv_geoval_2018041500_m.nc4
   atmosphere/hirs4_metop-a_geoval_2018041500_m.nc4
@@ -238,6 +248,12 @@ list( APPEND ufo_test_data
   atmosphere/met_office_temporal_thinning_surface.nc4
   atmosphere/met_office_temporal_thinning_sonde.nc4
   atmosphere/mhs_n19_geoval_2018041500_m.nc4
+  atmosphere/omi_aura_geoval_2019101700_m.nc4
+  atmosphere/omi_aura_geoval_flipz_2019101700_m.nc4
+  atmosphere/ompsnp_npp_geoval_2019101700_m.nc4
+  atmosphere/ompsnp_npp_geoval_flipz_2019101700_m.nc4
+  atmosphere/ompstc8_npp_geoval_2019101700_m.nc4
+  atmosphere/ompstc8_npp_geoval_flipz_2019101700_m.nc4
   atmosphere/ps_geovals_2018041500_0000.nc4
   atmosphere/radar_dbz_geoval_2019052222.nc4
   atmosphere/radar_rw_geoval_2019052222.nc4
@@ -247,6 +263,9 @@ list( APPEND ufo_test_data
   atmosphere/satwind_geoval_2018041500_m.nc4
   atmosphere/satwind_geoval_2018041500_s.nc4
   atmosphere/sbuv2_n19_geoval_2018041500_m.nc4
+  atmosphere/sbuv2_n19_geoval_flipz_2018041500_m.nc4
+  atmosphere/sbuv2_n19_geoval_2019101700_m.nc4
+  atmosphere/sbuv2_n19_geoval_flipz_2019101700_m.nc4
   atmosphere/seviri_m08_geoval_2018041500_m.nc4
   atmosphere/sfc_geoval_2018041500_m.nc4
   atmosphere/sndrd1_g15_geoval_2018041500_m.nc4
@@ -651,9 +670,73 @@ if( ${RTTOV_FOUND} )
                     DEPENDS test_ObsOperatorTLAD.x )
 endif( ${RTTOV_FOUND} )
 
+
+ecbuild_add_test( TARGET  test_ufo_opr_atminterplay_gome_metop-a
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
+                  ARGS    "testinput/gome_metop-a.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsOperator.x
+                  TEST_DEPENDS ufo_get_ioda_test_data )
+
+ecbuild_add_test( TARGET  test_ufo_opr_atminterplay_gome_metop-a_flipz
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
+                  ARGS    "testinput/gome_metop-a_flipz.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsOperator.x
+                  TEST_DEPENDS ufo_get_ioda_test_data )
+
+ecbuild_add_test( TARGET  test_ufo_opr_atminterplay_omi_aura
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
+                  ARGS    "testinput/omi_aura.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsOperator.x
+                  TEST_DEPENDS ufo_get_ioda_test_data )
+
+ecbuild_add_test( TARGET  test_ufo_opr_atminterplay_omi_aura_flipz
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
+                  ARGS    "testinput/omi_aura_flipz.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsOperator.x
+                  TEST_DEPENDS ufo_get_ioda_test_data )
+
+ecbuild_add_test( TARGET  test_ufo_opr_atminterplay_ompsnp_npp
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
+                  ARGS    "testinput/ompsnp_npp.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsOperator.x
+                  TEST_DEPENDS ufo_get_ioda_test_data )
+
+ecbuild_add_test( TARGET  test_ufo_opr_atminterplay_ompsnp_npp_flipz
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
+                  ARGS    "testinput/ompsnp_npp_flipz.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsOperator.x
+                  TEST_DEPENDS ufo_get_ioda_test_data )
+
+ecbuild_add_test( TARGET  test_ufo_opr_atminterplay_ompstc_npp
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
+                  ARGS    "testinput/ompstc_npp.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsOperator.x
+                  TEST_DEPENDS ufo_get_ioda_test_data )
+
+ecbuild_add_test( TARGET  test_ufo_opr_atminterplay_ompstc_npp_flipz
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
+                  ARGS    "testinput/ompstc_npp_flipz.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsOperator.x
+                  TEST_DEPENDS ufo_get_ioda_test_data )
+
 ecbuild_add_test( TARGET  test_ufo_opr_atminterplay_sbuv2_n19
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
                   ARGS    "testinput/sbuv2_n19.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsOperator.x
+                  TEST_DEPENDS ufo_get_ioda_test_data )
+
+ecbuild_add_test( TARGET  test_ufo_opr_atminterplay_sbuv2_n19_flipz
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
+                  ARGS    "testinput/sbuv2_n19_flipz.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsOperator.x
                   TEST_DEPENDS ufo_get_ioda_test_data )

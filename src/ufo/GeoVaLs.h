@@ -60,6 +60,7 @@ class GeoVaLs : public util::Printable,
   void merge(const GeoVaLs &, const GeoVaLs &);
 
   void zero();
+  void reorderzdir(const std::string &, const std::string &);
   void random();
   double rms() const;
   double normalizedrms(const GeoVaLs &) const;
