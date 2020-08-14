@@ -146,6 +146,7 @@ list( APPEND ufo_test_input
   testinput/sbuv2_n19.yaml
   testinput/seaicefrac.yaml
   testinput/seaicethick.yaml
+  testinput/chleuzintegr.yaml
   testinput/sea_surface_temp.yaml
   testinput/seviri_crtm.yaml
   testinput/smap_crtm.yaml
@@ -262,6 +263,7 @@ list( APPEND ufo_test_data
   marine/Jason-2-2018-04-15_geovals.nc
   marine/profile_2018-04-15_geovals.nc
   marine/sst_obs-2018-04-15_geovals.nc
+  marine/viirs_jpss1_oc_l2_2018-04-15_geovals.nc
   filters/filters_testdata.nc4
   filters/met_office_poisson_disk_thinning.nc4
   filters/met_office_buddy_check.nc4
@@ -851,6 +853,12 @@ ecbuild_add_test( TARGET  test_ufo_linopr_seaicethick
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsOperatorTLAD.x
                   TEST_DEPENDS ufo_get_ioda_test_data )
+
+ecbuild_add_test( TARGET  test_ufo_opr_chleuzintegr
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
+                  ARGS    "testinput/chleuzintegr.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsOperator.x )
 
 ecbuild_add_test( TARGET  test_ufo_opr_identity_sst
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
