@@ -19,6 +19,7 @@ class TrackCheckShipDiagnostics
   typedef TrackCheckShip::TrackStatistics TrkStats;
   typedef std::pair<ObsStatsVec, TrkStats> SingleTrackDiagnostics;
   std::vector<SingleTrackDiagnostics> fullRunDiagnostics_;
+  std::vector<bool> earlyBreaks_;
  public:
   /// \brief Updates the collection of track diagnostics to include
   /// the calculated values from a new track.
@@ -29,6 +30,17 @@ class TrackCheckShipDiagnostics
   /// track.
   const std::vector<SingleTrackDiagnostics> &getDiagnostics() const {
     return fullRunDiagnostics_;
+  }
+
+  /// \brief Stores the indicator as to if the track was deemed not worth
+  /// checking after the initial calculations were performed
+  void storeEarlyBreakResult(bool result) {
+    earlyBreaks_.push_back(result);
+  }
+  /// \brief Returns the collection of indicators as to which tracks were
+  /// deemed not worth checking.
+  const std::vector<bool> &getEarlyBreaks() const {
+    return earlyBreaks_;
   }
 };
 }  // namespace ufo

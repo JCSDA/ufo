@@ -41,6 +41,19 @@ namespace ufo {
 class TrackCheckShipDiagnostics;
 class TrackCheckShipParameters;
 class RecursiveSplitter;
+/// \brief Checks tracks of ships and buoys, rejecting observations whose locations
+/// and timestamps make them inconsistent with the rest of the track.
+///
+/// Each track is checked separately. The algorithm will first calculate speeds and distances
+/// between every two adjacent and alternating observations, and angles between any three adjacent
+/// observations. Based on these values, it will increment a set of "error counters" that reflect
+/// how many errors exist within the track. By default, if the "error counters" sum up to a value
+/// greater than or equal to half of the segments, the filter will be stopped.
+///
+/// \todo the implementation of the remainder of the filter is still in progress.
+///
+/// See TrackCheckShipsParameters for the documentation of this filter's parameters.
+///
 class TrackCheckShip: public FilterBase,
     private util::ObjectCounter<TrackCheckShip> {
  public:
@@ -52,7 +65,8 @@ class TrackCheckShip: public FilterBase,
 
   ~TrackCheckShip() override;
 
-
+  /// \brief Relevant calculated values that are specific to each pair or triplet
+  /// of adjacent/alternating observations
   struct ObservationStatistics {
     /// Simultaneous holds \p true if the same-index observation is
     /// occurring at the same time-stamp as either
@@ -81,7 +95,7 @@ class TrackCheckShip: public FilterBase,
     double distanceAveraged{};
   };
 
-  /// A container for all track-wise counters and calculations
+  /// \brief A container for all track-wise counters and calculations
   /// that indicate the overall quality of the tracks' data.
   struct TrackStatistics {
     /// \p numRejectedObs_ is currently unused, but will be updated in
@@ -179,6 +193,9 @@ class TrackCheckShip: public FilterBase,
       std::vector<size_t>::const_iterator trackObsIndicesEnd,
       const std::vector<size_t> &validObsIds,
       const TrackCheckUtils::ObsGroupLocationTimes &obsLoc) const;
+
+  bool earlyBreak(const std::vector<TrackObservation> &trackObs) const;
+
   std::unique_ptr<TrackCheckShipParameters> options_;
 };
 

@@ -55,13 +55,6 @@ class TrackCheckShipParameters : public TrackCheckUtilsParameters {
     "debug window end", this
   };
 
-  enum class InputCategory : int
-  {
-    FIXED = 1,
-    SHIP = 2,
-    SHIP_AUTO = 3  // GPS unavailable; ship assumed
-  };
-
   oops::Parameter<int> inputCategory {
     "input category", 2, this  // 1 for buoy/other fixed input; 2 for ship; 3 for ship_auto
   };
@@ -77,8 +70,6 @@ class TrackCheckShipParameters : public TrackCheckUtilsParameters {
 
   /// \brief If \p earlyBreakCheck set to true, check will stop early based on the number
   /// of short-spaced, fast, and bended segments of the track
-  ///
-  /// \todo implementation in progress
   oops::Parameter<bool> earlyBreakCheck {
     "early break check", true, this
   };

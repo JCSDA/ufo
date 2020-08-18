@@ -103,7 +103,8 @@ void TrackCheckShip::print(std::ostream & os) const {
 /// \todo This section is not yet fully implemented. Current implementation includes separating
 /// observations into tracks based on \p Station_Id, calculating distances, speeds, and
 /// angles between observations, and incrementing track-specific counters should the
-/// calculations produce unexpected values.
+/// calculations produce unexpected values. Based on the counter values, the filter
+/// may be stopped early.
 void TrackCheckShip::applyFilter(const std::vector<bool> & apply,
                                  const Variables & filtervars,
                                  std::vector<std::vector<bool>> & flagged) const {
@@ -119,6 +120,10 @@ void TrackCheckShip::applyFilter(const std::vector<bool> & apply,
     std::vector<TrackObservation> trackObservations = collectTrackObservations(
           track.begin(), track.end(), validObsIds, obsLocTime);
     calculateTrackSegmentProperties(trackObservations, true);
+    if (!trackObservations.empty() && this->options_->earlyBreakCheck &&
+       TrackCheckShip::earlyBreak(trackObservations)) {
+      continue;
+    }
   }
 }
 
@@ -140,6 +145,38 @@ std::vector<TrackCheckShip::TrackObservation> TrackCheckShip::collectTrackObserv
                                                  obsLocTime.datetimes[obsId], ts));
   }
   return trackObservations;
+}
+
+/// \brief \returns true if at least half of the track segments have
+/// incremented the relevant rejection counters
+///
+/// This filter is best for mostly-accurate observation tracks. If the track has
+/// many "errors" (as indicated by the counters that are incremented before
+/// any observations are removed), it will stop early by default.
+bool TrackCheckShip::earlyBreak(const std::vector<TrackObservation> &trackObs) const {
+  bool breakResult = false;
+  const auto& trackStats = *(trackObs[0].getFullTrackStatistics());
+  // if at least half of the track segments have a time difference of less than an hour
+  // (if non-buoy), are faster than a configured maximum speed, or exhibit at least a 90
+  // degree bend
+  if ((2 * ((options_->inputCategory != 1)  // 1 is input category of buoy
+            * trackStats.numShort_ + trackStats.numFast_) + trackStats.numBends_)
+           >= (trackObs.size() - 1)) {
+    std::string stationId = "no station id provided";
+    if (options_->stationIdVariable.value() != boost::none) {
+      stationId = (options_->stationIdVariable.value().get()).variable();
+    }
+    oops::Log::warning() << "ShipTrackCheck: " << stationId << "\n" <<
+                       "Time difference < 1 hour: " << trackStats.numShort_ << "\n" <<
+                          "Fast: " << trackStats.numFast_ << "\n" <<
+                          "Bends: " << trackStats.numBends_ << "\n" <<
+                          "Track was not checked." << std::endl;
+
+    breakResult = true;
+  }
+  if (options_->testingMode)
+    diagnostics_->storeEarlyBreakResult(breakResult);
+  return breakResult;
 }
 
 /// Calculates all of the statistics that require only two

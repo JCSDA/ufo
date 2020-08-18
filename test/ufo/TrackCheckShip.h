@@ -113,6 +113,33 @@ void testTrackCheckShipInitialCalculations(const eckit::LocalConfiguration &conf
           .05));
 }
 
+void testEarlyBreakCondition(const eckit::LocalConfiguration &conf) {
+  util::DateTime bgn(conf.getString("window begin"));
+  util::DateTime end(conf.getString("window end"));
+  std::vector<int> expectedEarlyBreaks(conf.getIntVector("expected early breaks"));
+  std::vector<int> calculatedEarlyBreaks;
+
+  const eckit::LocalConfiguration obsSpaceConf(conf, "obs space");
+  ioda::ObsSpace obsspace(obsSpaceConf, oops::mpi::comm(), bgn, end);
+
+  if (conf.has("station_ids")) {
+    const std::vector<int> stationIds = conf.getIntVector("station_ids");
+    obsspace.put_db("MetaData", "station_id", stationIds);
+  }
+
+  std::shared_ptr<ioda::ObsDataVector<float>> obserr(new ioda::ObsDataVector<float>(
+      obsspace, obsspace.obsvariables(), "ObsError"));
+  std::shared_ptr<ioda::ObsDataVector<int>> qcflags(new ioda::ObsDataVector<int>(
+      obsspace, obsspace.obsvariables()));
+  const eckit::LocalConfiguration filterConf(conf, "Ship Track Check");
+  ufo::TrackCheckShip filter(obsspace, filterConf, qcflags, obserr);
+  filter.preProcess();
+  for (auto const& earlyBreakResults : filter.diagnostics()->getEarlyBreaks()) {
+    calculatedEarlyBreaks.push_back(earlyBreakResults);
+  }
+  EXPECT_EQUAL(expectedEarlyBreaks, calculatedEarlyBreaks);
+}
+
 class TrackCheckShip : public oops::Test {
  private:
   std::string testid() const override {return "ufo::test::TrackCheckShip";}
@@ -127,6 +154,7 @@ class TrackCheckShip : public oops::Test {
       ts.emplace_back(CASE("ufo/TrackCheckShip/" + testCaseName, testCaseConf)
       {
                         testTrackCheckShipInitialCalculations(testCaseConf);
+                        testEarlyBreakCondition(testCaseConf);
                       });
     }
   }
