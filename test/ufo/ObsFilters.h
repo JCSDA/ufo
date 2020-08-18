@@ -294,6 +294,7 @@ void testFilters() {
                                     diagvars);
       filters.priorFilter(gval);
       hop.simulateObs(gval, hofx, ybias, diags);
+      hofx.save("hofx");
       filters.postFilter(hofx, diags);
     } else if (geovars.size() > 0) {
 ///   Only call priorFilter
