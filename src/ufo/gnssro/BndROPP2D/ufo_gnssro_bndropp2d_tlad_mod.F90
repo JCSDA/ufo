@@ -151,6 +151,7 @@ subroutine ufo_gnssro_bndropp2d_simobs_tl(self, geovals, hofx, obss)
   type(ufo_geovals),                intent(in)    :: geovals   ! perturbed quantities
   real(kind_real),                  intent(inout) :: hofx(:)
   type(c_ptr),   value,             intent(in)    :: obss
+  real(c_double)                                  :: missing
 
   type(State2dFM)                 :: x,x_tl
   type(State1dFM)                 :: x1d,x1d_tl
@@ -166,11 +167,13 @@ subroutine ufo_gnssro_bndropp2d_simobs_tl(self, geovals, hofx, obss)
   real(kind_real), allocatable  :: gph_d_zero(:,:)
   real(kind_real)               :: gph_sfc_d_zero
 ! hack - set local geopotential height to zero for ropp routines
-  real(kind_real), allocatable  :: obsImpP(:),obsLocR(:),obsGeoid(:) !nlocs
-  real(kind_real), allocatable  :: obsLat(:),obsLon(:)               !nlocs
+  real(kind_real), allocatable  :: obsImpP(:),obsLocR(:),obsGeoid(:),obsAzim(:) !nlocs
+  real(kind_real), allocatable  :: obsLat(:),obsLon(:)                          !nlocs
   integer                       :: n_horiz
   real(kind_real)               :: dtheta
   real(kind_real)               :: ob_time
+
+  missing = missing_value(missing)
 
   n_horiz = self%roconf%n_horiz
   dtheta  = self%roconf%dtheta
@@ -209,12 +212,13 @@ subroutine ufo_gnssro_bndropp2d_simobs_tl(self, geovals, hofx, obss)
   allocate(obsImpP(nlocs))
   allocate(obsLocR(nlocs))
   allocate(obsGeoid(nlocs))
-
+  allocate(obsAzim(nlocs))
   call obsspace_get_db(obss, "MetaData", "longitude",        obsLon)
   call obsspace_get_db(obss, "MetaData", "latitude",         obsLat)
   call obsspace_get_db(obss, "MetaData", "impact_parameter", obsImpP)
   call obsspace_get_db(obss, "MetaData", "earth_radius_of_curvature", obsLocR)
   call obsspace_get_db(obss, "MetaData", "geoid_height_above_reference_ellipsoid", obsGeoid)
+  call obsspace_get_db(obss, "MetaData", "sensor_azimuth_angle", obsAzim)
 
   nvprof  = 1  ! no. of bending angles in profile 
   ob_time = 0.0
@@ -222,7 +226,8 @@ subroutine ufo_gnssro_bndropp2d_simobs_tl(self, geovals, hofx, obss)
 ! loop through the obs
   obs_loop: do iobs = 1, nlocs   ! order of loop doesn't matter
 
-    if ( ( obsImpP(iobs)-obsLocR(iobs)-obsGeoid(iobs) ) <= self%roconf%top_2d ) then
+    if ( ( obsImpP(iobs)-obsLocR(iobs)-obsGeoid(iobs) ) <= self%roconf%top_2d .and. &
+           obsAzim(iobs) /= missing ) then
 
 !      map the trajectory to ROPP 2D structure x
        call init_ropp_2d_statevec(self%obsLon2d( (iobs-1)*n_horiz+1:iobs*n_horiz ), &
@@ -262,7 +267,7 @@ subroutine ufo_gnssro_bndropp2d_simobs_tl(self, geovals, hofx, obss)
 !      tidy up -deallocate ropp structures 
        call ropp_tidy_up_tlad_2d(x,x_tl,y,y_tl)
 
-    else ! apply ropp1d above top_2d
+    else ! apply ropp1d above top_2d or when azimuth angle is missing
 
 !      map the trajectory to ROPP 1D structure x1d
        call init_ropp_1d_statevec(ob_time,             &
@@ -313,6 +318,7 @@ subroutine ufo_gnssro_bndropp2d_simobs_tl(self, geovals, hofx, obss)
   deallocate(obsImpP)
   deallocate(obsLocR)
   deallocate(obsGeoid)
+  deallocate(obsAzim)
   deallocate(gph_d_zero)
 
   write(err_msg,*) "TRACE: ufo_gnssro_bndropp2d_simobs_tl: complete"
@@ -345,6 +351,7 @@ subroutine ufo_gnssro_bndropp2d_simobs_ad(self, geovals, hofx, obss)
   real(kind_real)                 :: gph_sfc_d_zero
 
   real(kind_real),    allocatable :: obsLat(:), obsLon(:), obsImpP(:), obsLocR(:), obsGeoid(:)
+  real(kind_real),    allocatable :: obsAzim(:)
   type(State2dFM)                 :: x,x_ad
   type(State1dFM)                 :: x1d,x1d_ad
   type(Obs1dBangle)               :: y,y_ad
@@ -414,12 +421,14 @@ subroutine ufo_gnssro_bndropp2d_simobs_ad(self, geovals, hofx, obss)
   allocate(obsImpP(nlocs))
   allocate(obsLocR(nlocs))
   allocate(obsGeoid(nlocs))
+  allocate(obsAzim(nlocs))
 
   call obsspace_get_db(obss, "MetaData", "longitude",        obsLon)
   call obsspace_get_db(obss, "MetaData", "latitude",         obsLat)
   call obsspace_get_db(obss, "MetaData", "impact_parameter", obsImpP)
   call obsspace_get_db(obss, "MetaData", "earth_radius_of_curvature", obsLocR)
   call obsspace_get_db(obss, "MetaData", "geoid_height_above_reference_ellipsoid", obsGeoid)
+  call obsspace_get_db(obss, "MetaData", "sensor_azimuth_angle", obsAzim)
 
   missing = missing_value(missing)
 
@@ -430,8 +439,9 @@ subroutine ufo_gnssro_bndropp2d_simobs_ad(self, geovals, hofx, obss)
   obs_loop: do iobs = 1, nlocs 
 
     if (hofx(iobs) .gt. missing) then
-       if ( ( obsImpP(iobs)-obsLocR(iobs)-obsGeoid(iobs) ) <= self%roconf%top_2d ) then
-
+       if ( ( obsImpP(iobs)-obsLocR(iobs)-obsGeoid(iobs) ) <= self%roconf%top_2d .and. &
+              obsAzim(iobs) /= missing ) then
+ 
 !       map the trajectory to ROPP structure x
         call init_ropp_2d_statevec(self%obsLon2d((iobs-1)*n_horiz+1:iobs*n_horiz), &
                                    self%obsLat2d((iobs-1)*n_horiz+1:iobs*n_horiz), &
@@ -483,7 +493,7 @@ subroutine ufo_gnssro_bndropp2d_simobs_ad(self, geovals, hofx, obss)
 !     tidy up - deallocate ropp structures  
       call ropp_tidy_up_tlad_2d(x,x_ad,y,y_ad)
 
-      else ! apply ropp1d above top_2d
+      else ! apply ropp1d above top_2d or when azimuth angle is missing
 
 !       map the trajectory to ROPP 1D structure x1d
         call init_ropp_1d_statevec( ob_time,   &
@@ -553,6 +563,7 @@ subroutine ufo_gnssro_bndropp2d_simobs_ad(self, geovals, hofx, obss)
   deallocate(obsImpP)
   deallocate(obsLocR)
   deallocate(obsGeoid)
+  deallocate(obsAzim)
   deallocate(gph_d_zero)
 
   write(err_msg,*) "TRACE: ufo_gnssro_bndropp2d_simobs_ad: complete"
