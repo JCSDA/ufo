@@ -31,7 +31,7 @@
 namespace ufo {
 namespace test {
 
-void testTrackCheckShipInitialCalculations(const eckit::LocalConfiguration &conf) {
+const ufo::TrackCheckShipDiagnostics setupRunFilter(const eckit::LocalConfiguration &conf) {
   util::DateTime bgn(conf.getString("window begin"));
   util::DateTime end(conf.getString("window end"));
 
@@ -51,6 +51,11 @@ void testTrackCheckShipInitialCalculations(const eckit::LocalConfiguration &conf
   const eckit::LocalConfiguration filterConf(conf, "Ship Track Check");
   ufo::TrackCheckShip filter(obsspace, filterConf, qcflags, obserr);
   filter.preProcess();
+  return *filter.diagnostics();
+}
+
+void testTrackCheckShipInitialCalculations(const eckit::LocalConfiguration &conf) {
+  auto diagnostics = setupRunFilter(conf);
   const std::vector<double> expectedDistances = conf.getDoubleVector("expected distance");
   const std::vector<double> expectedSpeeds = conf.getDoubleVector("expected speed");
   const std::vector<double> expectedDistancesAveraged =
@@ -66,12 +71,11 @@ void testTrackCheckShipInitialCalculations(const eckit::LocalConfiguration &conf
   const std::vector<double> expectedSumSpeeds = conf.getDoubleVector("expected sum speed");
   const std::vector<double> expectedMeanSpeeds = conf.getDoubleVector("expected mean speed");
   std::vector<double> calculatedDistances, calculatedSpeeds, calculatedDistancesAveraged,
-      calculatedSpeedsAveraged,
-      calculatedSumSpeeds, calculatedMeanSpeeds;
+      calculatedSpeedsAveraged, calculatedSumSpeeds, calculatedMeanSpeeds;
   std::vector<float> calculatedAngles;
   std::vector<int> calculatedShort, calculatedFast, calculatedBends,
       calculatedDist0, calculatedSimultaneous;
-  for (auto const& tracks : filter.diagnostics()->getDiagnostics()) {
+  for (auto const& tracks : diagnostics.getInitialCalculationResults()) {
     for (auto const& obsStats : tracks.first) {
       calculatedDistances.push_back(obsStats.distance);
       calculatedSpeeds.push_back(obsStats.speed);
@@ -114,30 +118,65 @@ void testTrackCheckShipInitialCalculations(const eckit::LocalConfiguration &conf
 }
 
 void testEarlyBreakCondition(const eckit::LocalConfiguration &conf) {
-  util::DateTime bgn(conf.getString("window begin"));
-  util::DateTime end(conf.getString("window end"));
+  const eckit::LocalConfiguration filterConf(conf, "Ship Track Check");
+  if (!filterConf.getBool("early break check", true)) {
+    return;
+  }
+
+  auto diagnostics = setupRunFilter(conf);
+
   std::vector<int> expectedEarlyBreaks(conf.getIntVector("expected early breaks"));
   std::vector<int> calculatedEarlyBreaks;
 
-  const eckit::LocalConfiguration obsSpaceConf(conf, "obs space");
-  ioda::ObsSpace obsspace(obsSpaceConf, oops::mpi::comm(), bgn, end);
-
-  if (conf.has("station_ids")) {
-    const std::vector<int> stationIds = conf.getIntVector("station_ids");
-    obsspace.put_db("MetaData", "station_id", stationIds);
-  }
-
-  std::shared_ptr<ioda::ObsDataVector<float>> obserr(new ioda::ObsDataVector<float>(
-      obsspace, obsspace.obsvariables(), "ObsError"));
-  std::shared_ptr<ioda::ObsDataVector<int>> qcflags(new ioda::ObsDataVector<int>(
-      obsspace, obsspace.obsvariables()));
-  const eckit::LocalConfiguration filterConf(conf, "Ship Track Check");
-  ufo::TrackCheckShip filter(obsspace, filterConf, qcflags, obserr);
-  filter.preProcess();
-  for (auto const& earlyBreakResults : filter.diagnostics()->getEarlyBreaks()) {
+  for (auto const& earlyBreakResults : diagnostics.getEarlyBreaks()) {
     calculatedEarlyBreaks.push_back(earlyBreakResults);
   }
   EXPECT_EQUAL(expectedEarlyBreaks, calculatedEarlyBreaks);
+}
+
+void testDeferSimultaneous(const eckit::LocalConfiguration &conf) {
+  const eckit::LocalConfiguration filterConf(conf, "Ship Track Check");
+  if (!filterConf.getBool("deferred check simultaneous", false)) {
+    return;
+  }
+
+  auto diagnostics = setupRunFilter(conf);
+
+  const std::vector<double> expectedDistancesDeferred = conf.getDoubleVector(
+        "expected deferred distance");
+  const std::vector<double> expectedSpeedsDeferred = conf.getDoubleVector(
+        "expected deferred speed");
+  const std::vector<double> expectedDistancesAveragedDeferred =
+      conf.getDoubleVector("expected deferred distance averaged");
+  const std::vector<double> expectedSpeedsAveragedDeferred =
+      conf.getDoubleVector("expected deferred speed averaged");
+  const std::vector<float> expectedAnglesDeferred = conf.getFloatVector("expected deferred angle");
+  std::vector<double> calculatedDistancesDeferred, calculatedSpeedsDeferred,
+      calculatedDistancesAveragedDeferred,
+      calculatedSpeedsAveragedDeferred;
+  std::vector<float> calculatedAnglesDeferred;
+  for (auto const& recalcIteration : (diagnostics.getCalculatedResultsSimultaneousDeferred())) {
+    for (auto const& obs : recalcIteration) {
+      calculatedAnglesDeferred.push_back(obs.angle);
+      calculatedDistancesDeferred.push_back(obs.distance);
+      calculatedSpeedsDeferred.push_back(obs.speed);
+      calculatedDistancesAveragedDeferred.push_back(obs.distanceAveraged);
+      calculatedSpeedsAveragedDeferred.push_back(obs.speedAveraged);
+    }
+  }
+  EXPECT(oops::are_all_close_relative(calculatedDistancesDeferred, expectedDistancesDeferred,
+                                                .05));
+  EXPECT(oops::are_all_close_relative(calculatedSpeedsDeferred, expectedSpeedsDeferred,
+                                                .05));
+  EXPECT(oops::are_all_close_relative(
+           calculatedDistancesAveragedDeferred, expectedDistancesAveragedDeferred,
+           .05));
+  EXPECT(oops::are_all_close_relative(
+           calculatedSpeedsAveragedDeferred, expectedSpeedsAveragedDeferred,
+           .05));
+  EXPECT(oops::are_all_close_absolute(
+           calculatedAnglesDeferred, expectedAnglesDeferred,
+           5.0f));
 }
 
 class TrackCheckShip : public oops::Test {
@@ -155,6 +194,7 @@ class TrackCheckShip : public oops::Test {
       {
                         testTrackCheckShipInitialCalculations(testCaseConf);
                         testEarlyBreakCondition(testCaseConf);
+                        testDeferSimultaneous(testCaseConf);
                       });
     }
   }

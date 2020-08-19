@@ -17,19 +17,21 @@ class TrackCheckShipDiagnostics
 {
   typedef std::vector<TrackCheckShip::ObservationStatistics> ObsStatsVec;
   typedef TrackCheckShip::TrackStatistics TrkStats;
-  typedef std::pair<ObsStatsVec, TrkStats> SingleTrackDiagnostics;
-  std::vector<SingleTrackDiagnostics> fullRunDiagnostics_;
+  typedef std::pair<ObsStatsVec, TrkStats> SingleTrackInitialCalculationResults;
+  std::vector<SingleTrackInitialCalculationResults> multipleTrackInitialCalculationResults_;
+  std::vector<ObsStatsVec> calculatedResultsSimultaneousDeferred_;
   std::vector<bool> earlyBreaks_;
  public:
   /// \brief Updates the collection of track diagnostics to include
   /// the calculated values from a new track.
-  void storeDiagnostics(SingleTrackDiagnostics singleTrackDiagnostics) {
-    fullRunDiagnostics_.push_back(singleTrackDiagnostics);
+  void storeInitialCalculationResults(SingleTrackInitialCalculationResults
+                                      singleTrackInitalCalcResults) {
+    multipleTrackInitialCalculationResults_.push_back(singleTrackInitalCalcResults);
   }
   /// \brief Returns the full collection of track diagnostics, separated by
   /// track.
-  const std::vector<SingleTrackDiagnostics> &getDiagnostics() const {
-    return fullRunDiagnostics_;
+  const std::vector<SingleTrackInitialCalculationResults> &getInitialCalculationResults() const {
+    return multipleTrackInitialCalculationResults_;
   }
 
   /// \brief Stores the indicator as to if the track was deemed not worth
@@ -41,6 +43,19 @@ class TrackCheckShipDiagnostics
   /// deemed not worth checking.
   const std::vector<bool> &getEarlyBreaks() const {
     return earlyBreaks_;
+  }
+
+  /// \brief Stores the recalculations of values after deferring simultaneous observations.
+  ///
+  /// Does not store counter values, because those are not updated after the first iteration.
+  void storeCalculatedResultsSimultaneousDeferred(ObsStatsVec obsStatsVec) {
+    calculatedResultsSimultaneousDeferred_.push_back(obsStatsVec);
+  }
+
+  /// \brief Returns the recalculated values calculated after deferring simultaneous
+  /// observations
+  const std::vector<ObsStatsVec> &getCalculatedResultsSimultaneousDeferred() const {
+    return calculatedResultsSimultaneousDeferred_;
   }
 };
 }  // namespace ufo

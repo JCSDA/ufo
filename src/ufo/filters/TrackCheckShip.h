@@ -128,7 +128,7 @@ class TrackCheckShip: public FilterBase,
    public:
     TrackObservation(double latitude, double longitude,
                      const util::DateTime &time,
-                     const std::shared_ptr<TrackStatistics> & ts);
+                     const std::shared_ptr<TrackStatistics> & trackStatistics);
     const TrackCheckUtils::Point& getLocation() const {
       return obsLocationTime_.location();
     }
@@ -185,8 +185,11 @@ class TrackCheckShip: public FilterBase,
                    std::vector<std::vector<bool>> &) const override;
   int qcFlag() const override {return QCflags::track;}
 
-  void calculateTrackSegmentProperties(std::vector<TrackObservation> &trackObservations,
-                                       bool firstIteration = false) const;
+  enum CalculationMethod { FIRSTITERATION, SIMULTANEOUSDEFERRAL, MAINLOOP };
+
+  void calculateTrackSegmentProperties(
+      const std::vector<std::reference_wrapper<TrackObservation>> &trackObservations,
+      CalculationMethod calculationMethod = MAINLOOP) const;
 
   std::vector<TrackObservation> collectTrackObservations(
       std::vector<size_t>::const_iterator trackObsIndicesBegin,
@@ -194,7 +197,9 @@ class TrackCheckShip: public FilterBase,
       const std::vector<size_t> &validObsIds,
       const TrackCheckUtils::ObsGroupLocationTimes &obsLoc) const;
 
-  bool earlyBreak(const std::vector<TrackObservation> &trackObs) const;
+  std::vector<std::reference_wrapper<TrackObservation>> removeSimultaneousObservations(
+      const std::vector<std::reference_wrapper<TrackObservation>> &trackObs) const;
+  bool earlyBreak(const std::vector<std::reference_wrapper<TrackObservation>> &trackObs) const;
 
   std::unique_ptr<TrackCheckShipParameters> options_;
 };

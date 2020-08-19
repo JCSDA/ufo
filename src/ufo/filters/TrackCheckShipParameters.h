@@ -62,8 +62,6 @@ class TrackCheckShipParameters : public TrackCheckUtilsParameters {
   /// \brief If \p deferredCheckSimultaneous set to true, check of simultaneous
   /// observations will be deferred until the end, at which point flagged observations
   /// may be reinstated.
-  ///
-  /// \todo implementation in progress
   oops::Parameter<bool> deferredCheckSimultaneous {
     "deferred check simultaneous", false, this
   };

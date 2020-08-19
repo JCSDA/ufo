@@ -12,6 +12,7 @@
 #include <algorithm>
 #include <cassert>
 #include <cmath>
+#include <functional>
 #include <map>
 #include <string>
 #include <tuple>
@@ -104,7 +105,9 @@ void TrackCheckShip::print(std::ostream & os) const {
 /// observations into tracks based on \p Station_Id, calculating distances, speeds, and
 /// angles between observations, and incrementing track-specific counters should the
 /// calculations produce unexpected values. Based on the counter values, the filter
-/// may be stopped early.
+/// may be stopped early. Simultaneous observations are then optionally ignored for later
+/// re-inclusion or rejection.
+
 void TrackCheckShip::applyFilter(const std::vector<bool> & apply,
                                  const Variables & filtervars,
                                  std::vector<std::vector<bool>> & flagged) const {
@@ -119,10 +122,21 @@ void TrackCheckShip::applyFilter(const std::vector<bool> & apply,
   for (auto track : splitter.multiElementGroups()) {
     std::vector<TrackObservation> trackObservations = collectTrackObservations(
           track.begin(), track.end(), validObsIds, obsLocTime);
-    calculateTrackSegmentProperties(trackObservations, true);
-    if (!trackObservations.empty() && this->options_->earlyBreakCheck &&
-       TrackCheckShip::earlyBreak(trackObservations)) {
+    std::vector<std::reference_wrapper<TrackObservation>> trackObservationsReferences;
+    trackObservationsReferences.reserve(trackObservations.size());
+    std::transform(trackObservations.begin(), trackObservations.end(),
+                   std::back_inserter(trackObservationsReferences),
+                   [](TrackObservation &obs) {
+      return std::ref<TrackObservation>(obs); });
+    calculateTrackSegmentProperties(trackObservationsReferences, CalculationMethod::FIRSTITERATION);
+    if (!trackObservationsReferences.empty() && this->options_->earlyBreakCheck &&
+       TrackCheckShip::earlyBreak(trackObservationsReferences)) {
       continue;
+    }
+    if (options_->deferredCheckSimultaneous) {
+      auto trackInitialLoop = removeSimultaneousObservations(trackObservationsReferences);
+    } else {
+      auto trackInitialLoop = std::move(trackObservationsReferences);
     }
   }
 }
@@ -136,13 +150,13 @@ std::vector<TrackCheckShip::TrackObservation> TrackCheckShip::collectTrackObserv
     const TrackCheckUtils::ObsGroupLocationTimes &obsLocTime) const {
   std::vector<TrackObservation> trackObservations;
   trackObservations.reserve(trackObsIndicesEnd - trackObsIndicesBegin);
-  std::shared_ptr<TrackStatistics> ts = std::make_shared<TrackStatistics>();
+  std::shared_ptr<TrackStatistics> trackStatistics(new TrackStatistics());
   for (std::vector<size_t>::const_iterator it = trackObsIndicesBegin;
        it != trackObsIndicesEnd; ++it) {
     const size_t obsId = validObsIds[*it];
     trackObservations.push_back(TrackObservation(obsLocTime.latitudes[obsId],
                                                  obsLocTime.longitudes[obsId],
-                                                 obsLocTime.datetimes[obsId], ts));
+                                                 obsLocTime.datetimes[obsId], trackStatistics));
   }
   return trackObservations;
 }
@@ -153,9 +167,10 @@ std::vector<TrackCheckShip::TrackObservation> TrackCheckShip::collectTrackObserv
 /// This filter is best for mostly-accurate observation tracks. If the track has
 /// many "errors" (as indicated by the counters that are incremented before
 /// any observations are removed), it will stop early by default.
-bool TrackCheckShip::earlyBreak(const std::vector<TrackObservation> &trackObs) const {
+bool TrackCheckShip::earlyBreak(const std::vector<std::reference_wrapper<TrackObservation>>
+                                &trackObs) const {
   bool breakResult = false;
-  const auto& trackStats = *(trackObs[0].getFullTrackStatistics());
+  const auto& trackStats = *(trackObs[0].get().getFullTrackStatistics());
   // if at least half of the track segments have a time difference of less than an hour
   // (if non-buoy), are faster than a configured maximum speed, or exhibit at least a 90
   // degree bend
@@ -179,9 +194,23 @@ bool TrackCheckShip::earlyBreak(const std::vector<TrackObservation> &trackObs) c
   return breakResult;
 }
 
-/// Calculates all of the statistics that require only two
-/// adjacent \p TrackObservations,
-/// storing within the righthand observation. This includes
+/// \brief Filters out all observations that have been marked simultaneous for
+/// rechecking at the end.
+std::vector<std::reference_wrapper<TrackCheckShip::TrackObservation>>
+TrackCheckShip::removeSimultaneousObservations(
+    const std::vector<std::reference_wrapper<TrackObservation>> &trackObs) const {
+  std::vector<std::reference_wrapper<TrackObservation>> reducedTrackObs;
+  std::copy_if(trackObs.begin(), trackObs.end(), std::back_inserter(reducedTrackObs),
+               [](const TrackObservation &obs){
+    return !(obs.getObservationStatistics().simultaneous);});
+  calculateTrackSegmentProperties(reducedTrackObs, CalculationMethod::SIMULTANEOUSDEFERRAL);
+  return reducedTrackObs;
+}
+
+/// \brief Calculates all of the statistics that require only two
+/// adjacent \p TrackObservations, storing within the righthand observation.
+///
+/// This includes
 /// distance between the two observations,
 /// time difference between the observations, speed between the
 /// observations, and if the
@@ -233,26 +262,22 @@ void TrackCheckShip::TrackObservation::calculateThreeObservationValues(
 
 /// This performs all of the necessary calculations based on the
 /// observations' locations and timestamps by calling
-/// \p calculateTwoObservationValues
-/// and \p calculateThreeObservationValues for the
+/// \p calculateTwoObservationValues and \p calculateThreeObservationValues for the
 /// non-edge-case observations.
-///
-/// \todo After an observation rejection and removal,
-/// certain calculations will need to be reperformed.
-/// This feature is in progress.
 void TrackCheckShip::calculateTrackSegmentProperties(
-    std::vector<TrackObservation> &trackObservations,
-    bool firstIteration) const {
+    const std::vector<std::reference_wrapper<TrackObservation>> &trackObservations,
+    CalculationMethod calculationMethod) const {
   if (trackObservations.size()) {
     for (size_t obsIdx = 1; obsIdx < trackObservations.size(); obsIdx++) {
       TrackObservation &obs = trackObservations[obsIdx];
       TrackObservation &prevObs = trackObservations[obsIdx - 1];
-      obs.calculateTwoObservationValues(prevObs, firstIteration, *options_);
+      obs.calculateTwoObservationValues(prevObs, calculationMethod == FIRSTITERATION, *options_);
       if (obsIdx > 1) {
         const TrackObservation &prevPrevObs = trackObservations[obsIdx - 2];
-        prevObs.calculateThreeObservationValues(prevPrevObs, obs, firstIteration, *options_);
+        prevObs.calculateThreeObservationValues(prevPrevObs, obs,
+                                                calculationMethod == FIRSTITERATION, *options_);
       }
-      if (firstIteration && (obsIdx == trackObservations.size() - 1)) {
+      if (calculationMethod == FIRSTITERATION && (obsIdx == trackObservations.size() - 1)) {
         int potentialDenominator = trackObservations.size() - 1 -
             obs.getFullTrackStatistics()->numShort_ - obs.getFullTrackStatistics()->numFast_;
         (obs.getFullTrackStatistics()->meanSpeed_) = (obs.getFullTrackStatistics()->sumSpeed_) /
@@ -262,10 +287,13 @@ void TrackCheckShip::calculateTrackSegmentProperties(
     if (options_->testingMode) {
       std::vector<TrackCheckShip::ObservationStatistics> obsStats;
       for (size_t obsIdx = 0; obsIdx < trackObservations.size(); ++obsIdx) {
-        obsStats.push_back(trackObservations[obsIdx].getObservationStatistics());
+        obsStats.push_back(trackObservations[obsIdx].get().getObservationStatistics());
       }
-      auto trackStats = *(trackObservations[0].getFullTrackStatistics());
-      diagnostics_->storeDiagnostics(std::make_pair(obsStats, trackStats));
+      auto trackStats = *(trackObservations[0].get().getFullTrackStatistics());
+      if (calculationMethod == FIRSTITERATION)
+        diagnostics_->storeInitialCalculationResults(std::make_pair(obsStats, trackStats));
+      else if (calculationMethod == SIMULTANEOUSDEFERRAL)
+        diagnostics_->storeCalculatedResultsSimultaneousDeferred(obsStats);
     }
   }
 }
