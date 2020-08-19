@@ -66,7 +66,8 @@ end subroutine ufo_insitutemperature_delete_c
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_insitutemperature_simobs_c(c_key_self, c_key_geovals, c_obsspace, c_nobs, c_hofx) bind(c,name='ufo_insitutemperature_simobs_f90')
+subroutine ufo_insitutemperature_simobs_c(c_key_self, c_key_geovals, c_obsspace, c_nobs, c_hofx) &
+    bind(c,name='ufo_insitutemperature_simobs_f90')
 
 implicit none
 integer(c_int), intent(in) :: c_key_self

@@ -405,7 +405,8 @@ INTEGER :: jaero
        ENDDO
     ENDDO
 
-    FORALL (jlevel=1:var_p%nval,jprofile=1:self%n_profiles) var_p%vals(jlevel,jprofile)=var_p%vals(jlevel,jprofile)*self%scaling_factor(jlevel,jprofile)
+    FORALL (jlevel=1:var_p%nval,jprofile=1:self%n_profiles) &
+        var_p%vals(jlevel,jprofile)=var_p%vals(jlevel,jprofile)*self%scaling_factor(jlevel,jprofile)
 
  ENDDO
 

@@ -77,7 +77,8 @@ end subroutine ufo_gnssro_ref_tlad_settraj_c
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_gnssro_ref_simobs_tl_c(c_key_self, c_key_geovals, c_obsspace, c_nobs, c_hofx) bind(c,name='ufo_gnssro_ref_simobs_tl_f90')
+subroutine ufo_gnssro_ref_simobs_tl_c(c_key_self, c_key_geovals, c_obsspace, c_nobs, c_hofx) &
+    bind(c,name='ufo_gnssro_ref_simobs_tl_f90')
 
 implicit none
 integer(c_int), intent(in) :: c_key_self
@@ -97,7 +98,8 @@ end subroutine ufo_gnssro_ref_simobs_tl_c
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_gnssro_ref_simobs_ad_c(c_key_self, c_key_geovals, c_obsspace, c_nobs, c_hofx) bind(c,name='ufo_gnssro_ref_simobs_ad_f90')
+subroutine ufo_gnssro_ref_simobs_ad_c(c_key_self, c_key_geovals, c_obsspace, c_nobs, c_hofx) &
+    bind(c,name='ufo_gnssro_ref_simobs_ad_f90')
 
 implicit none
 integer(c_int), intent(in) :: c_key_self
