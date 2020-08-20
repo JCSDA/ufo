@@ -41,25 +41,26 @@ Emissivity::Emissivity(const eckit::Configuration & conf, const std::vector<int>
 void Emissivity::compute(const ioda::ObsSpace & odb,
                          const GeoVaLs & geovals,
                          const ObsDiagnostics & ydiags,
-                         Eigen::MatrixXd & out) const {
+                         ioda::ObsDataVector<double> & out) const {
   const std::size_t njobs = jobs_.size();
   const std::size_t nlocs = odb.nlocs();
 
   // assure shape of out
-  ASSERT(out.rows() == njobs && out.cols() == nlocs);
+  ASSERT(out.nlocs() == nlocs);
 
   std::vector <float> pred(nlocs, 0.0);
   std::vector<float> h2o_frac(nlocs, 0.0);
   geovals.get(h2o_frac, "water_area_fraction");
   std::string hdiags;
   for (std::size_t jb = 0; jb < njobs; ++jb) {
+    const std::string varname = name() + "_" + std::to_string(jobs_[jb]);
     hdiags = "brightness_temperature_jacobian_surface_emissivity_" + std::to_string(jobs_[jb]);
     ydiags.get(pred, hdiags);
     for (std::size_t jl = 0; jl < nlocs; ++jl) {
       if (h2o_frac[jl] < 0.99 && std::fabs(pred[jl]) > 0.001) {
-        out(jb, jl) = pred[jl];
+        out[varname][jl] = pred[jl];
       } else {
-        out(jb, jl) = 0.0;
+        out[varname][jl] = 0.0;
       }
     }
   }

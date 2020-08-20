@@ -8,6 +8,8 @@
 #ifndef UFO_PREDICTORS_COSINEOFLATITUDETIMESORBITNODE_H_
 #define UFO_PREDICTORS_COSINEOFLATITUDETIMESORBITNODE_H_
 
+#include <string>
+
 #include <vector>
 
 #include "ufo/predictors/PredictorBase.h"
@@ -32,7 +34,7 @@ class CosineOfLatitudeTimesOrbitNode : public PredictorBase {
   void compute(const ioda::ObsSpace &,
                const GeoVaLs &,
                const ObsDiagnostics &,
-               Eigen::MatrixXd &) const override;
+               ioda::ObsDataVector<double> &) const override;
 };
 
 // -----------------------------------------------------------------------------

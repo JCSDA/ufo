@@ -53,12 +53,11 @@ CloudLiquidWater::CloudLiquidWater(const eckit::Configuration & conf, const std:
 void CloudLiquidWater::compute(const ioda::ObsSpace & odb,
                                const GeoVaLs & geovals,
                                const ObsDiagnostics & ydiags,
-                               Eigen::MatrixXd & out) const {
-  const std::size_t njobs = jobs_.size();
+                               ioda::ObsDataVector<double> & out) const {
   const std::size_t nlocs = odb.nlocs();
 
   // assure shape of out
-  ASSERT(out.rows() == njobs && out.cols() == nlocs);
+  ASSERT(out.nlocs() == nlocs);
 
   // Retrieve the brightness temperature from ODB
   std::vector<float> bt238(nlocs), bt314(nlocs);
@@ -83,8 +82,11 @@ void CloudLiquidWater::compute(const ioda::ObsSpace & odb,
   CLWRetMW::cloudLiquidWater(szas, tsavg, water_frac, bt238, bt314, clw, nlocs);
 
   // weighted by cos(zenith_angle)
-  for (std::size_t jl = 0; jl < nlocs; ++jl) {
-    out.col(jl).setConstant(clw[jl]*cos(szas[jl])*cos(szas[jl]));
+  for (const auto & job : jobs_) {
+    const std::string varname = name() + "_" + std::to_string(job);
+    for (std::size_t jl = 0; jl < nlocs; ++jl) {
+      out[varname][jl] = clw[jl]*cos(szas[jl])*cos(szas[jl]);
+    }
   }
 }
 

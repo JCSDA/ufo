@@ -5,6 +5,8 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
+#include <string>
+
 #include "ufo/predictors/SineOfLatitude.h"
 
 #include "ioda/ObsSpace.h"
@@ -27,19 +29,21 @@ SineOfLatitude::SineOfLatitude(const eckit::Configuration & conf, const std::vec
 void SineOfLatitude::compute(const ioda::ObsSpace & odb,
                              const GeoVaLs &,
                              const ObsDiagnostics &,
-                             Eigen::MatrixXd & out) const {
-  const std::size_t njobs = jobs_.size();
+                             ioda::ObsDataVector<double> & out) const {
   const std::size_t nlocs = odb.nlocs();
 
   // assure shape of out
-  ASSERT(out.rows() == njobs && out.cols() == nlocs);
+  ASSERT(out.nlocs() == nlocs);
 
   // retrieve the sensor view angle
   std::vector<float> cenlat(nlocs, 0.0);
   odb.get_db("MetaData", "latitude", cenlat);
 
-  for (std::size_t jl = 0; jl < nlocs; ++jl) {
-    out.col(jl).setConstant(sin(cenlat[jl]*Constants::deg2rad));
+  for (const auto & job : jobs_) {
+    const std::string varname = name() + "_" + std::to_string(job);
+    for (std::size_t jl = 0; jl < nlocs; ++jl) {
+      out[varname][jl] = sin(cenlat[jl]*Constants::deg2rad);
+    }
   }
 }
 

@@ -24,16 +24,14 @@ CosineOfLatitudeTimesOrbitNode::CosineOfLatitudeTimesOrbitNode(
 }
 
 // -----------------------------------------------------------------------------
-
 void CosineOfLatitudeTimesOrbitNode::compute(const ioda::ObsSpace & odb,
                                              const GeoVaLs &,
                                              const ObsDiagnostics &,
-                                             Eigen::MatrixXd & out) const {
-  const std::size_t njobs = jobs_.size();
+                                             ioda::ObsDataVector<double> & out) const {
   const std::size_t nlocs = odb.nlocs();
 
   // assure shape of out
-  ASSERT(out.rows() == njobs && out.cols() == nlocs);
+  ASSERT(out.nlocs() == nlocs);
 
   // Following variables should be moved to yaml file ?
   const double ssmis_precond = 0.01;  //  default preconditioner for ssmis bias terms
@@ -44,8 +42,11 @@ void CosineOfLatitudeTimesOrbitNode::compute(const ioda::ObsSpace & odb,
   odb.get_db("MetaData", "latitude", cenlat);
   odb.get_db("MetaData", "sensor_azimuth_angle", node);
 
-  for (std::size_t jl = 0; jl < nlocs; ++jl) {
-    out.col(jl).setConstant(node[jl]*cos(cenlat[jl]*Constants::deg2rad));
+  for (const auto & job : jobs_) {
+    const std::string varname = name() + "_" + std::to_string(job);
+    for (std::size_t jl = 0; jl < nlocs; ++jl) {
+      out[varname][jl] = node[jl]*cos(cenlat[jl]*Constants::deg2rad);
+    }
   }
 }
 

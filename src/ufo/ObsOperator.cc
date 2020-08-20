@@ -11,6 +11,7 @@
 
 #include "eckit/config/Configuration.h"
 
+#include "ioda/ObsDataVector.h"
 #include "ioda/ObsSpace.h"
 #include "ioda/ObsVector.h"
 
@@ -42,7 +43,7 @@ void ObsOperator::simulateObs(const GeoVaLs & gvals, ioda::ObsVector & yy,
   oper_->simulateObs(gvals, yy, ydiags);
   if (bias) {
     ioda::ObsVector ybias(odb_);
-    Eigen::MatrixXd predData = bias.computePredictors(gvals, ydiags);
+    ioda::ObsDataVector<double> predData = bias.computePredictors(gvals, ydiags);
     bias.computeObsBias(ybias, ydiags, predData);
     ybias.save("ObsBias");
   }

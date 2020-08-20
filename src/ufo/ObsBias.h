@@ -16,6 +16,8 @@
 
 #include "eckit/config/LocalConfiguration.h"
 
+#include "ioda/ObsDataVector.h"
+
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
 #include "oops/util/Printable.h"
@@ -45,7 +47,7 @@ class ObsBias : public util::Printable,
  public:
   static const std::string classname() {return "ufo::ObsBias";}
 
-  ObsBias(const ioda::ObsSpace &, const eckit::Configuration &);
+  ObsBias(ioda::ObsSpace &, const eckit::Configuration &);
   ObsBias(const ObsBias &, const bool);
   ~ObsBias() {}
 
@@ -62,10 +64,11 @@ class ObsBias : public util::Printable,
   const double & operator[](const unsigned int ii) const {return biascoeffs_[ii];}
 
   // Obs bias model
-  void computeObsBias(ioda::ObsVector &, ObsDiagnostics &, const Eigen::MatrixXd &) const;
+  void computeObsBias(ioda::ObsVector &, ObsDiagnostics &,
+                      const ioda::ObsDataVector<double> &) const;
 
   // Obs Bias Predictors
-  Eigen::MatrixXd computePredictors(const GeoVaLs &, const ObsDiagnostics &) const;
+  ioda::ObsDataVector<double> computePredictors(const GeoVaLs &, const ObsDiagnostics &) const;
 
   // Required variables
   const oops::Variables & requiredVars() const {return geovars_;}
@@ -77,10 +80,7 @@ class ObsBias : public util::Printable,
  private:
   void print(std::ostream &) const;
 
-  // save Bias Terms for QC
-  void saveObsBiasTerms(ObsDiagnostics &, const Eigen::MatrixXd &) const;
-
-  const ioda::ObsSpace & odb_;
+  ioda::ObsSpace & odb_;
   eckit::LocalConfiguration conf_;
 
   std::vector<double> biascoeffs_;
