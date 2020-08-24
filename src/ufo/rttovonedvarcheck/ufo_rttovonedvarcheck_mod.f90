@@ -136,9 +136,12 @@ subroutine ufo_rttovonedvarcheck_apply(self, vars, retrieval_vars, geovals, appl
   ! ------------------------------------------
   missing = missing_value(missing)
 
+  ! Setup IR emissivity - if needed
+  if (len(trim(self % EmisEigVecPath)) > 4) &
+    call IR_pcemis % setup(self % EmisEigVecPath)
+
   ! Read in observation data from obsspace
-  call obs % setup(self % obsdb, self % nchans, vars, self % ReadMWemiss, &
-                   self % ReadIRemiss)
+  call obs % setup(self, geovals, vars, IR_pcemis)
 
   ! Setup full B matrix object
   call full_bmatrix % setup(self % retrieval_variables, self % b_matrix_path, &
@@ -157,10 +160,6 @@ subroutine ufo_rttovonedvarcheck_apply(self, vars, retrieval_vars, geovals, appl
 
   ! Create profile index for mapping 1d-var profile to b-matrix
   call prof_index % setup(full_bmatrix)
-
-  ! Setup IR PC emissivity if needed
-  !if (self % ReadIRemiss) call IR_pcemis % setup(self % EmisEigVecPath)
-  if (len(trim(self % EmisEigVecPath)) > 4) call IR_pcemis % setup(self % EmisEigVecPath)
 
   ! Initialize data arrays
   allocate(b_matrix(prof_index % nprofelements,prof_index % nprofelements))
@@ -208,7 +207,7 @@ subroutine ufo_rttovonedvarcheck_apply(self, vars, retrieval_vars, geovals, appl
       end do
       if (nchans_used == 0) then
         write(message, *) "No channels selected for observation number ", &
-                    jobs, " : skipping"
+               jobs, " : skipping"
         call fckit_log % info(message)
         cycle obs_loop
       end if
@@ -226,6 +225,7 @@ subroutine ufo_rttovonedvarcheck_apply(self, vars, retrieval_vars, geovals, appl
       ob % solar_azimuth_angle = obs % sol_azi(jobs)
       ob % retrievecloud = cloud_retrieval
       ob % pcemis => IR_pcemis
+      ob % calc_emiss = obs % calc_emiss(jobs)
       if(self % RTTOV_mwscattSwitch) ob % mwscatt = .true.
       if(self % RTTOV_usetotalice) ob % mwscatt_totalice = .true.
 
@@ -236,16 +236,8 @@ subroutine ufo_rttovonedvarcheck_apply(self, vars, retrieval_vars, geovals, appl
         if( obs % QCflags(jvar,jobs) == 0 ) then
           jchans_used = jchans_used + 1
           ob % yobs(jchans_used) = obs % yobs(jvar, jobs)
-          ob % channels_used(jchans_used) = self%channels(jvar)
-          if (self % ReadMWemiss .OR. self % ReadIRemiss) then
-            write(*,*) "Copying emissivity from db"
-            ob % emiss(jchans_used) = obs % emissivity(jvar, jobs)
-            where(ob % emiss == 0.0_kind_real) 
-              ob % calc_emiss = .true.
-            else where
-              ob % calc_emiss = .false.
-            end where
-          end if
+          ob % channels_used(jchans_used) = self % channels(jvar)
+          ob % emiss(jchans_used) = obs % emiss(jvar, jobs)
         end if
       end do
       call r_submatrix % setup(nchans_used, ob % channels_used, full_rmatrix=full_rmatrix)
@@ -318,7 +310,7 @@ subroutine ufo_rttovonedvarcheck_apply(self, vars, retrieval_vars, geovals, appl
   call full_rmatrix % delete()
   call obs % delete()
   call ufo_geovals_delete(hofxdiags)
-  if (self % ReadIRemiss) call IR_pcemis % delete()
+  if (self % IRemiss) call IR_pcemis % delete()
   if (allocated(b_matrix))   deallocate(b_matrix)
   if (allocated(b_inverse))  deallocate(b_inverse)
   if (allocated(b_sigma))    deallocate(b_sigma)

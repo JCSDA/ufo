@@ -59,7 +59,7 @@ contains
 !! \date 09/06/2020: Created
 !!
 subroutine ufo_rttovonedvarcheck_InitOb(self, & ! out
-                                            nchans)    ! in 
+                                        nchans) ! in 
 
 implicit none
 

@@ -470,8 +470,8 @@ type(rttov_conf), intent(in) :: conf
 
 self % opts % rt_ir % addsolar            = .FALSE. ! Do not include solar radiation
 self % opts % interpolation % addinterp   = .TRUE.  ! Allow interpolation of input profile
-!self % opts % interpolation % interp_mode = 4       ! Set interpolation method
-self % opts % interpolation % interp_mode = 1       ! Set interpolation method
+self % opts % interpolation % interp_mode = 4       ! Set interpolation method
+!self % opts % interpolation % interp_mode = 1       ! Set interpolation method
 self % opts % interpolation % reg_limit_extrap = .TRUE. ! Set interpolation methodreg_limit_extrap
 self % opts % rt_all % addrefrac          = .TRUE.  ! Include refraction in path calc
 self % opts % rt_all % switchrad          = .TRUE.  ! Include refraction in path calc
@@ -488,8 +488,8 @@ self % opts % rt_mw % clw_data            = .FALSE. !
 
 self % opts % config % verbose            = .TRUE.  ! Enable printing of warnings
 self % opts % config % apply_reg_limits   = .TRUE.
-!self % opts % config % do_checkinput      = .FALSE.
-self % opts % config % do_checkinput      = .TRUE.
+self % opts % config % do_checkinput      = .FALSE.
+!self % opts % config % do_checkinput      = .TRUE.
 
 ! Update based on rttov conf input
 if (conf % mw_clw) self % opts % rt_mw % clw_data = .TRUE.

@@ -54,8 +54,8 @@ type, public :: ufo_rttovonedvarcheck
   real(kind_real)                  :: MaxMLIterations !< maximum number of iterations for internal Marquardt-Levenberg loop
   real(kind_real)                  :: EmissLandDefault !< default emissivity value to use over land
   real(kind_real)                  :: EmissSeaIceDefault !< default emissivity value to use over sea ice
-  logical                          :: ReadMWemiss !< flag to specify if read microwave emissivity from db
-  logical                          :: ReadIRemiss !< flag to specify if read infrared emissivity from db
+  logical                          :: MWemiss !< flag to specify if microwave emissivity used
+  logical                          :: IRemiss !< flag to specify if infrared emissivity used
   character(len=max_string)        :: EmisEigVecPath !< path to eigen vector file for IR PC emissivity
 end type ufo_rttovonedvarcheck
 
@@ -120,8 +120,8 @@ self % Cost_ConvergenceFactor = 0.01
 self % MaxMLIterations = 7
 self % EmissLandDefault = 0.95    ! default land surface emissivity
 self % EmissSeaIceDefault = 0.92  ! default seaice surface emissivity
-self % ReadMWemiss = .false.
-self % ReadIRemiss = .false.
+self % MWemiss = .false.
+self % IRemiss = .false.
 self % EmisEigVecPath = ""
 
 ! Flag for total humidity
@@ -194,14 +194,14 @@ if (self % conf % has("EmissSeaIceDefault")) then
   call self % conf % get_or_die("EmissSeaIceDefault", self % EmissSeaIceDefault)
 end if
 
-! Flag to specify if read microwave emissivity from db
-if (self % conf % has("ReadMWemiss")) then
-  call self % conf % get_or_die("ReadMWemiss", self % ReadMWemiss)
+! Flag to specify if microwave emissivity used
+if (self % conf % has("MWemiss")) then
+  call self % conf % get_or_die("MWemiss", self % MWemiss)
 end if
 
-! Flag to specify if read infrared emissivity from db
-if (self % conf % has("ReadIRemiss")) then
-  call self % conf % get_or_die("ReadIRemiss", self % ReadIRemiss)
+! Flag to specify if infrared emissivity used
+if (self % conf % has("IRemiss")) then
+  call self % conf % get_or_die("IRemiss", self % IRemiss)
 end if
 
 if (self % conf % has("EmisEigVecPath")) then
@@ -257,8 +257,8 @@ write(*,*) "Cost_ConvergenceFactor = ",self % Cost_ConvergenceFactor
 write(*,*) "MaxMLIterations = ",self % MaxMLIterations
 write(*,*) "EmissLandDefault = ",self % EmissLandDefault
 write(*,*) "EmissSeaIceDefault = ",self % EmissSeaIceDefault
-write(*,*) "ReadMWemiss = ",self % ReadMWemiss
-write(*,*) "ReadIRemiss = ",self % ReadIRemiss
+write(*,*) "MWemiss = ",self % MWemiss
+write(*,*) "IRemiss = ",self % IRemiss
 
 end subroutine ufo_rttovonedvarcheck_print
 

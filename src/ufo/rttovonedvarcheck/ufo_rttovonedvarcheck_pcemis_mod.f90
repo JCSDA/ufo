@@ -20,7 +20,7 @@ implicit none
 private
 
 !< Emissivity eigen vector type definition
-type, private :: ufo_rttovonedvarcheck_EmisEigenvec
+type, public :: ufo_rttovonedvarcheck_EmisEigenvec
    integer          :: NChans
    integer          :: NumEV
    integer, pointer :: Channels(:) => null()
@@ -36,6 +36,7 @@ end type ufo_rttovonedvarcheck_EmisEigenvec
 type, public :: ufo_rttovonedvarcheck_pcemis
 
   type(ufo_rttovonedvarcheck_EmisEigenvec) :: emis_eigen
+  logical :: initialised = .false.
 
 contains
   procedure :: setup  => ufo_rttovonedvarcheck_InitPCemis
@@ -79,6 +80,8 @@ if (file_exists) then
 else
   call abor1_ftn("rttovonedvarcheck EmisEigenVec file not found: aborting")
 end if
+
+self % initialised = .true.
 
 call self % info()
 

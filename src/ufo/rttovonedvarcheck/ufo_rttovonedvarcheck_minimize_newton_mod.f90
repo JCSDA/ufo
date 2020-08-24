@@ -174,6 +174,8 @@ Iterations: do iter = 1, self % max1DVarIterations
     call ufo_rttovonedvarcheck_GeoVaLs2ProfVec(geovals, profile_index, &
                                                ob, GuessProfile(:))
 
+    write(*,*) "Humidity GuessProfile 1st iteration = ",GuessProfile(profile_index % qt(1):profile_index % qt(2))
+
   end if
 
   ! Save current profile
@@ -207,9 +209,9 @@ Iterations: do iter = 1, self % max1DVarIterations
   Diffprofile(:) = GuessProfile(:) - BackProfile(:)
 
   write(*,*) "Ob BT = "
-  write(*,'(10F8.3)') ob % yobs(:)
+  write(*,'(10F10.3)') ob % yobs(:)
   write(*,*) "HofX BT = "
-  write(*,'(10F8.3)') Y(:)
+  write(*,'(10F10.3)') Y(:)
 
   if (self % UseJForConvergence) then
 

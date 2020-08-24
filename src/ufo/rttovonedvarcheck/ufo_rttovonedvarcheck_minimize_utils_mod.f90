@@ -333,6 +333,7 @@ end if
 ! surface air temperature - K
 if (profindex % t2 > 0) then
   varname = "air_temperature_at_two_meters_above_surface"
+  write(*,*) varname
   gv_index = 0
   do i=1,geovals%nvar
     if (varname == trim(geovals%variables(i))) gv_index = i
@@ -343,6 +344,7 @@ end if
 ! surface specific humidity - kg/kg - for retrieval is ln(g/kg)
 if (profindex % q2 > 0) then
   varname = "specific_humidity_at_two_meters_above_surface"
+  write(*,*) varname
   gv_index = 0
   do i=1,geovals%nvar
     if (varname == trim(geovals%variables(i))) gv_index = i
@@ -353,6 +355,7 @@ end if
 ! surface pressure
 if (profindex % pstar > 0) then
   varname = "air_pressure_at_two_meters_above_surface"
+  write(*,*) varname
   gv_index = 0
   do i=1,geovals%nvar
     if (varname == trim(geovals%variables(i))) gv_index = i
@@ -363,6 +366,7 @@ end if
 ! surface skin temperature - K
 if (profindex % tstar > 0) then
   varname = "skin_temperature"
+  write(*,*) varname
   gv_index = 0
   do i=1,geovals%nvar
     if (varname == trim(geovals%variables(i))) gv_index = i
@@ -480,6 +484,9 @@ if (profindex % qt(1) > 0) then
   humidity_total(:) = humidity_total(:) + geoval%vals(:, 1)
   call ufo_geovals_get_var(geovals, "mass_content_of_cloud_liquid_water_in_atmosphere_layer", geoval)
   humidity_total(:) = humidity_total(:) + geoval%vals(:, 1)
+
+  ! Max sure theres a minimum humidity
+  humidity_total(:) = MAX(humidity_total(:), Min_q)
 
   ! Split qtotal to q(water_vapour), q(liquid), q(ice)
   call ufo_rttovonedvarcheck_Qsplit (1,      & ! in

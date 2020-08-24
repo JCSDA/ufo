@@ -14,6 +14,7 @@ use obsspace_mod
 use oops_variables_mod
 use ufo_geovals_mod
 use ufo_rttovonedvarcheck_constants_mod
+use ufo_rttovonedvarcheck_pcemis_mod
 use ufo_rttovonedvarcheck_utils_mod
 
 implicit none
@@ -33,7 +34,9 @@ real(kind_real), allocatable :: sat_zen(:)      ! observation satellite zenith a
 real(kind_real), allocatable :: sat_azi(:)      ! observation satellite azimuth angle
 real(kind_real), allocatable :: sol_zen(:)      ! observation solar zenith angle
 real(kind_real), allocatable :: sol_azi(:)      ! observation solar azimuth angle
-real(kind_real), allocatable :: emissivity(:,:) ! initial surface emissivity
+real(kind_real), allocatable :: surface_type(:) ! surface type
+real(kind_real), allocatable :: emiss(:,:)      ! initial surface emissivity
+logical, allocatable         :: calc_emiss(:)   ! flag to request RTTOV calculate first guess emissivity
 
 contains
   procedure :: setup  => ufo_rttovonedvarcheck_obs_setup
@@ -51,21 +54,19 @@ contains
 !! \date 09/06/2020: Created
 !!
 subroutine ufo_rttovonedvarcheck_obs_setup(self,     & ! out
-                                           obsspace, & ! in
-                                           nchans,   & ! in
+                                           config,   & ! in
+                                           geovals,  & ! in
                                            vars,     & ! in
-                                           mwemiss,  & ! in
-                                           iremiss)    ! in
+                                           ir_pcemis )
 
 implicit none
 
 ! subroutine arguments:
 class(ufo_rttovonedvarcheck_obs), intent(out) :: self !< observation metadata type
-type(c_ptr), value, intent(in)   :: obsspace !< observation database pointer
-integer, intent(in)              :: nchans   !< total number of channels
-type(oops_variables), intent(in) :: vars     !< channels for 1D-Var
-logical                          :: mwemiss  !< flag for reading in microwave emissivity
-logical                          :: iremiss  !< flag for reading in infrared emissivity
+type(ufo_rttovonedvarcheck), intent(in)       :: config !< observation metadata type
+type(ufo_geovals), intent(in)                 :: geovals  !< model data at obs location
+type(oops_variables), intent(in)              :: vars     !< channels for 1D-Var
+type(ufo_rttovonedvarcheck_pcemis)            :: ir_pcemis  !< Infrared principal components object
 
 character(len=*), parameter :: routinename = "ufo_rttovonedvarcheck_obs_init"
 real(kind_real)             :: missing
@@ -74,14 +75,15 @@ character(len=max_string)   :: var
 character(len=max_string)   :: varname
 logical                     :: variable_present = .false.
 logical                     :: model_surface_present = .false.
+type(ufo_geoval), pointer   :: geoval
 
 missing = missing_value(missing)
-self % iloc = obsspace_get_nlocs(obsspace)
+self % iloc = obsspace_get_nlocs(config % obsdb)
 
 ! allocate arrays
-allocate(self % yobs(nchans, self % iloc))
-allocate(self % ybias(nchans, self % iloc))
-allocate(self % QCflags(nchans, self % iloc))
+allocate(self % yobs(config % nchans, self % iloc))
+allocate(self % ybias(config % nchans, self % iloc))
+allocate(self % QCflags(config % nchans, self % iloc))
 allocate(self % lat(self % iloc))
 allocate(self % lon(self % iloc))
 allocate(self % elevation(self % iloc))
@@ -89,6 +91,9 @@ allocate(self % sat_zen(self % iloc))
 allocate(self % sat_azi(self % iloc))
 allocate(self % sol_zen(self % iloc))
 allocate(self % sol_azi(self % iloc))
+allocate(self % surface_type(self % iloc))
+allocate(self % emiss(config % nchans, self % iloc))
+allocate(self % calc_emiss(self % iloc))
 
 ! initialize arrays
 self % yobs(:,:) = 0.0
@@ -101,31 +106,21 @@ self % sat_zen(:) = 0.0
 self % sat_azi(:) = 0.0
 self % sol_zen(:) = 0.0
 self % sol_azi(:) = 0.0
-
-! Setup optional arrays
-if (mwemiss .or. iremiss) then
-  allocate(self % emissivity(nchans, self % iloc))
-  self % emissivity(:,:) = 0.0
-end if
+self % surface_type = RTSea
+self % emiss(:,:) = 0.0
+self % calc_emiss(:) = .true.
 
 ! read in observations and associated errors / biases for full ObsSpace
-do jvar = 1, nchans
+do jvar = 1, config % nchans
 
   var = vars % variable(jvar)
-  call obsspace_get_db(obsspace, "FortranQC", trim(var), self % QCflags(jvar,:))
-  call obsspace_get_db(obsspace, "ObsValue",  trim(var), self % yobs(jvar,:))
+  call obsspace_get_db(config % obsdb, "FortranQC", trim(var), self % QCflags(jvar,:))
+  call obsspace_get_db(config % obsdb, "ObsValue",  trim(var), self % yobs(jvar,:))
 
   ! Optionally get the observation bias
-  variable_present = obsspace_has(obsspace, "ObsBias", trim(var))
+  variable_present = obsspace_has(config % obsdb, "ObsBias", trim(var))
   if (variable_present) then
-    call obsspace_get_db(obsspace, "ObsBias",   trim(var), self % ybias(jvar,:))
-  end if
-
-  ! If emissivity part of the state vector read it from the first guess from the db
-  if (mwemiss) then
-    call obsspace_get_db(obsspace, "MwEmiss",   trim(var), self % emissivity(jvar,:))
-  else if (iremiss) then
-    call obsspace_get_db(obsspace, "IREmiss",   trim(var), self % emissivity(jvar,:))
+    call obsspace_get_db(config % obsdb, "ObsBias",   trim(var), self % ybias(jvar,:))
   end if
 
 end do
@@ -136,37 +131,50 @@ if (.not. variable_present) write(*,*) "Using uncorrected brightness temperature
 self % yobs = self % yobs + self % ybias
 
 ! Read in prerequisites
-call obsspace_get_db(obsspace, "MetaData", "latitude", self % lat(:))
-call obsspace_get_db(obsspace, "MetaData", "longitude", self % lon(:))
-call obsspace_get_db(obsspace, "MetaData", "sensor_zenith_angle", self % sat_zen(:))
+call obsspace_get_db(config % obsdb, "MetaData", "latitude", self % lat(:))
+call obsspace_get_db(config % obsdb, "MetaData", "longitude", self % lon(:))
+call obsspace_get_db(config % obsdb, "MetaData", "sensor_zenith_angle", self % sat_zen(:))
 
 ! Read in optional angles
-variable_present = obsspace_has(obsspace, "MetaData", "sensor_azimuth_angle")
+variable_present = obsspace_has(config % obsdb, "MetaData", "sensor_azimuth_angle")
 if (variable_present) then
-  call obsspace_get_db(obsspace, "MetaData", "sensor_azimuth_angle", self % sat_azi(:))
+  call obsspace_get_db(config % obsdb, "MetaData", "sensor_azimuth_angle", self % sat_azi(:))
 end if
 
-variable_present = obsspace_has(obsspace, "MetaData", "solar_zenith_angle")
+variable_present = obsspace_has(config % obsdb, "MetaData", "solar_zenith_angle")
 if (variable_present) then
-  call obsspace_get_db(obsspace, "MetaData", "solar_zenith_angle", self % sol_zen(:))
+  call obsspace_get_db(config % obsdb, "MetaData", "solar_zenith_angle", self % sol_zen(:))
 end if
 
-variable_present = obsspace_has(obsspace, "MetaData", "solar_azimuth_angle")
+variable_present = obsspace_has(config % obsdb, "MetaData", "solar_azimuth_angle")
 if (variable_present) then
-  call obsspace_get_db(obsspace, "MetaData", "solar_azimuth_angle", self % sol_azi(:))
+  call obsspace_get_db(config % obsdb, "MetaData", "solar_azimuth_angle", self % sol_azi(:))
 end if
 
 ! Read in elevation for all obs
-variable_present = obsspace_has(obsspace, "MetaData", "elevation")
+variable_present = obsspace_has(config % obsdb, "MetaData", "elevation")
 if (variable_present) then
-  call obsspace_get_db(obsspace, "MetaData", "elevation", self % elevation(:))
+  call obsspace_get_db(config % obsdb, "MetaData", "elevation", self % elevation(:))
 else
-  model_surface_present = obsspace_has(obsspace, "MetaData", "model_surface")
+  model_surface_present = obsspace_has(config % obsdb, "MetaData", "model_surface")
   if (model_surface_present) then
-    call obsspace_get_db(obsspace, "MetaData", "model_surface", self % elevation(:))
+    call obsspace_get_db(config % obsdb, "MetaData", "model_surface", self % elevation(:))
   else
     self % elevation(:) = 0.0
   end if
+end if
+
+! Read in surface type from model data
+call ufo_geovals_get_var(geovals, "surface_type", geoval)
+self % surface_type(:) = geoval%vals(1,:)
+
+! Setup emissivity
+if (config % MWemiss .and. (.not. config % IRemiss)) then
+  call ufo_rttovonedvarcheck_obs_InitMWEmiss(self, config)
+else if (config % IRemiss .and. (.not. config % MWemiss)) then
+  call ufo_rttovonedvarcheck_obs_InitIREmiss(self, config % nchans, ir_pcemis)
+else
+  call abor1_ftn("rttovonedvarcheck setup obs: undecided type of emissivity, IR or MW?")
 end if
 
 end subroutine ufo_rttovonedvarcheck_obs_setup
@@ -198,9 +206,142 @@ if (allocated(self % sat_zen))    deallocate(self % sat_zen)
 if (allocated(self % sat_azi))    deallocate(self % sat_azi)
 if (allocated(self % sol_zen))    deallocate(self % sol_zen)
 if (allocated(self % sol_azi))    deallocate(self % sol_azi)
-if (allocated(self % emissivity)) deallocate(self % emissivity)
+if (allocated(self % surface_type)) deallocate(self % surface_type)
+if (allocated(self % emiss))      deallocate(self % emiss)
+if (allocated(self % calc_emiss)) deallocate(self % calc_emiss)
 
 end subroutine ufo_rttovonedvarcheck_obs_delete
+
+!------------------------------------------------------------------------------
+!> Initialize the microwave emissivity array
+!!
+!! \details Heritage: Ops_SatRad_InitEmissivity.f90 - the MW part only
+!!
+!! \author Met Office
+!!
+!! \date 06/08/2020: Created
+!!
+subroutine ufo_rttovonedvarcheck_obs_InitMWEmiss(self, config)
+
+implicit none
+
+! subroutine arguments:
+type(ufo_rttovonedvarcheck_obs), intent(inout) :: self !< observation metadata type
+type(ufo_rttovonedvarcheck), intent(in) :: config !< main rttovonedvarcheck type
+
+integer :: i
+
+!-------------
+! 2.1 Defaults
+!-------------
+
+do i = 1, self % iloc
+
+  ! Only calculate in RTTOV over sea
+  if (self % surface_type(i) == RTSea) then
+    self % calc_emiss(i) = .true.
+  else
+    self % calc_emiss(i) = .false.
+  end if
+
+  ! The default emissivity for land is a very crude estimate - the same
+  ! for all surface types and all frequencies. However, we do not use
+  ! channels which see the surface over land where we rely on this default.
+  self % emiss(:,i) = 0.0
+  if (self % surface_type(i) == RTLand) then
+    self % emiss(:,i) = config % EmissLandDefault
+  else if (self % surface_type(i) == RTIce) then
+    self % emiss(:,i) = config % EmissSeaIceDefault
+  end if
+
+end do
+
+end subroutine
+
+!------------------------------------------------------------------------------
+!> Initialize the infrared emissivity array
+!!
+!! \details Heritage: Ops_SatRad_InitEmissivity.f90 - the IR part only
+!!
+!! \author Met Office
+!!
+!! \date 06/08/2020: Created
+!!
+subroutine ufo_rttovonedvarcheck_obs_InitIREmiss(self, nchans, ir_pcemis)
+
+implicit none
+
+! subroutine arguments:
+class(ufo_rttovonedvarcheck_obs), intent(inout) :: self !< observation metadata type
+integer, intent(in) :: nchans   !< total number of channels
+type(ufo_rttovonedvarcheck_pcemis) :: ir_pcemis  !< Infrared principal components object
+
+! local variables
+real(kind_real), allocatable :: EmissPC(:,:)
+integer :: i
+integer :: nemisspc = 5
+
+! Allocate and setup defaults - get RTTOV to calculate
+self % emiss(:,:) = 0.0
+self % calc_emiss(:) = .true.
+
+allocate(EmissPC(self % iloc,nemisspc))
+
+!-------------------------
+! 1.2 Principal components
+!-------------------------
+
+! Initialise emissivity using principal components
+if (ir_pcemis % initialised) then
+
+  ! Don't do this if the RTTOV CAMEL atlas is being used.
+  ! Defaults above will let the RTTOV camel atlas be used.
+  !if (associated (ir_pcemiss % emis_eigen % PCGuess) .and. (.not. RTTOV_UseAtlas)) then
+  if (associated (ir_pcemis % emis_eigen % PCGuess)) then
+
+    do i = 1, self % iloc
+
+      ! Skip obs that may have invalid geographical coordinates
+      !IF (BTEST (Obs % QCflags(i), QC_ModelDomain)) CYCLE
+
+!      ! If there's an atlas available, try to use it.
+!      if (associated (EmisAtlas % EmisPC)) then
+!
+!        ! Find the nearest lat/lon
+!        emis_y = nint((self % lat(i) + 90.0) / EmisAtlas % gridstep + 1)
+!        emis_x = nint((self % lon(i) + 180.0) / EmisAtlas % gridstep + 1)
+!        if (emis_x > EmisAtlas % nlon) then
+!          emis_x = emis_x - EmisAtlas % nlon
+!        end if
+!
+!        ! If the atlas is valid at this point, then use it,
+!        ! otherwise use PCGuess. NB: missing or sea points are
+!        ! flagged as -9.99 in the atlas.
+!
+!        IF (ANY (EmisAtlas % EmisPC(emis_x,emis_y,:) > -9.99)) THEN
+!          Obs % EmissPC(i,:) = EmisAtlas % EmisPC(emis_x,emis_y,1:nemisspc)
+!        ELSE
+!          Obs % EmissPC(i,:) = EmisEigenvec % PCGuess(1:nemisspc)
+!
+!          !! Flag invalid atlas points over land as bad surface
+!          !IF (Obs % surface(i) == RTland) THEN
+!          !  Obs % QCflags(i) = IBSET (Obs % QCflags(i), QC_BadSurface)
+!          !END IF
+!        END IF
+!
+!      ELSE ! If no atlas present, use PCGuess.
+        EmissPC(i,:) = ir_pcemis % emis_eigen % PCGuess(1:nemisspc)
+!      END IF
+
+    end do
+
+  end if
+
+end if
+
+if (allocated(EmissPC)) deallocate(EmissPC)
+
+end subroutine
 
 !-------------------------------------------------------------------------------
 
