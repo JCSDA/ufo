@@ -15,8 +15,6 @@
 
 #define ECKIT_TESTING_SELF_REGISTER_CASES 0
 
-#include <boost/shared_ptr.hpp>
-
 #include "eckit/config/LocalConfiguration.h"
 #include "eckit/testing/Test.h"
 #include "oops/base/ObsFilters.h"
@@ -238,10 +236,10 @@ void testFilters() {
 
   for (std::size_t jj = 0; jj < Test_::obspace().size(); ++jj) {
 /// init QC and error
-    boost::shared_ptr<oops::ObsDataVector<ufo::ObsTraits, float> > obserr
+    std::shared_ptr<oops::ObsDataVector<ufo::ObsTraits, float> > obserr
       (new oops::ObsDataVector<ufo::ObsTraits, float>(Test_::obspace()[jj],
                Test_::obspace()[jj].obsvariables(), "ObsError"));
-    boost::shared_ptr<oops::ObsDataVector<ufo::ObsTraits, int> >
+    std::shared_ptr<oops::ObsDataVector<ufo::ObsTraits, int> >
       qcflags(new oops::ObsDataVector<ufo::ObsTraits, int>  (Test_::obspace()[jj],
                Test_::obspace()[jj].obsvariables()));
 
@@ -296,6 +294,7 @@ void testFilters() {
                                     diagvars);
       filters.priorFilter(gval);
       hop.simulateObs(gval, hofx, ybias, diags);
+      hofx.save("hofx");
       filters.postFilter(hofx, diags);
     } else if (geovars.size() > 0) {
 ///   Only call priorFilter

@@ -75,9 +75,9 @@ subroutine ufo_gnssro_2d_locs_init(self, locs, obss, t1, t2)
   do i = 1, tw_nlocs
     locs%lon( (i-1)*n_horiz+1 : i*n_horiz) =  lon(tw_indx(i))
     locs%lat( (i-1)*n_horiz+1 : i*n_horiz) =  lat(tw_indx(i))
-    locs%time((i-1)*n_horiz+1 : i*n_horiz) =  date_time(tw_indx(i))
     do j = 1, n_horiz
       locs%indx((i-1)*n_horiz+j) =  (tw_indx(i)-1)*n_horiz+j
+      locs%time((i-1)*n_horiz+j) =  date_time(tw_indx(i))
     end do
   end do
 

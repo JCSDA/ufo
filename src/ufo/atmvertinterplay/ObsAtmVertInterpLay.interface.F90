@@ -45,13 +45,16 @@ type(c_ptr), value, intent(in) :: c_obsvars ! variables to be simulated
 type(c_ptr), value, intent(in) :: c_geovars ! variables requested from the model
 
 type(ufo_atmvertinterplay), pointer :: self
+type(fckit_configuration) :: f_conf
 
 call ufo_atmvertinterplay_registry%setup(c_key_self, self)
+
+f_conf = fckit_configuration(c_conf)
 
 self%obsvars = oops_variables(c_obsvars)
 self%geovars = oops_variables(c_geovars)
 
-call self%setup()
+call self%setup(f_conf)
 
 end subroutine ufo_atmvertinterplay_setup_c
 

@@ -1,4 +1,7 @@
 real function pindex(nx, press, obspressure)
+! This routine handles press (pressure) in decendent order (bottom2top)
+! press(1): highest pressure value
+! press(nx): lowerest pressure value
 
 use kinds
 implicit none

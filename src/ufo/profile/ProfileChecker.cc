@@ -27,13 +27,11 @@
 namespace ufo {
   ProfileChecker::ProfileChecker(const ProfileConsistencyCheckParameters &options,
                                  const ProfileIndices &profileIndices,
-                                 const ProfileData &profileData,
-                                 ProfileFlags &profileFlags,
+                                 ProfileDataHandler &profileDataHandler,
                                  ProfileCheckValidator &profileCheckValidator)
     : options_(options),
       profileIndices_(profileIndices),
-      profileData_(profileData),
-      profileFlags_(profileFlags),
+      profileDataHandler_(profileDataHandler),
       profileCheckValidator_(profileCheckValidator),
       checks_(options.Checks.value())
   {
@@ -48,16 +46,15 @@ namespace ufo {
     }
   }
 
-  void ProfileChecker::runChecks() const
+  void ProfileChecker::runChecks()
   {
     // Run all checks requested
-    for (auto check : checks_) {
+    for (const auto& check : checks_) {
       std::unique_ptr<ProfileCheckBase> profileCheck =
         ProfileCheckFactory::create(check,
                                     options_,
                                     profileIndices_,
-                                    profileData_,
-                                    profileFlags_,
+                                    profileDataHandler_,
                                     profileCheckValidator_);
       if (profileCheck) {
         profileCheck->runCheck();
@@ -66,9 +63,9 @@ namespace ufo {
           profileCheck->fillValidator();
         }
         // Do not proceed if basic checks failed
-        if (check == "Basic" && !profileCheck->getResult()) {
+        if (!profileCheck->getResult() && check == "Basic") {
           oops::Log::debug() << "Basic checks failed" << std::endl;
-          profileFlags_.setBasicCheckResult(false);
+          setBasicCheckResult(false);
           break;
         }
       } else {

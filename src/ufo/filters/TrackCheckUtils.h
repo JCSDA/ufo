@@ -9,9 +9,8 @@
 #define UFO_FILTERS_TRACKCHECKUTILS_H_
 
 #include <array>
+#include <memory>
 #include <vector>
-
-#include <boost/shared_ptr.hpp>
 
 #include "eckit/config/Configuration.h"
 #include "oops/util/DateTime.h"
@@ -81,7 +80,7 @@ class CheckCounter {
 
 std::vector<size_t> getValidObservationIds(
     const std::vector<bool> &apply,
-    const boost::shared_ptr<ioda::ObsDataVector<int>> &flags);
+    const std::shared_ptr<ioda::ObsDataVector<int>> &flags);
 
 void groupObservationsByStation(const std::vector<size_t> &validObsIds,
                                 RecursiveSplitter &splitter,

@@ -25,7 +25,7 @@ namespace ufo {
 
 // -----------------------------------------------------------------------------
 
-ObsBias::ObsBias(const ioda::ObsSpace & odb, const eckit::Configuration & conf)
+ObsBias::ObsBias(ioda::ObsSpace & odb, const eckit::Configuration & conf)
   : predbases_(0), jobs_(0), odb_(odb), conf_(conf) {
   oops::Log::trace() << "ObsBias::create starting." << std::endl;
 
@@ -212,7 +212,7 @@ void ObsBias::write(const eckit::Configuration & conf) const {
 
 void ObsBias::computeObsBias(ioda::ObsVector & ybias,
                              ObsDiagnostics & ydiags,
-                             const Eigen::MatrixXd & predData) const {
+                             const ioda::ObsDataVector<double> & predData) const {
   oops::Log::trace() << "ObsBias::computeObsBias starting" << std::endl;
 
   if (this->size() > 0) {
@@ -221,18 +221,18 @@ void ObsBias::computeObsBias(ioda::ObsVector & ybias,
     const std::size_t njobs  = jobs_.size();
 
     ASSERT(biascoeffs_.size() == npreds*njobs);
-    ASSERT(predData.rows() == npreds*njobs);
-    ASSERT(predData.cols() == nlocs);
+    ASSERT(predData.nlocs() == nlocs);
+    ASSERT(predData.nvars() == njobs*npreds);
     ASSERT(ybias.nvars() == njobs);
 
     /* predData memory layout (njobs*npreds X nlocs)
      *     Loc     0      1      2       3
      *           --------------------------
-     * ch1 pred1 | 0      1      2       4
-     *     pred2 | 5      6      7       8
-     *     pred3 | 9     10     11      12 
-     * ch2 pred1 |13     14     15      16
-     *     pred2 |17     18     19      20
+     * ch1 pred1 | 0      1      2       3
+     *     pred2 | 4      5      6       7
+     *     pred3 | 8      9     10      11 
+     * ch2 pred1 |12     13     14      15
+     *     pred2 |16     17     18      19
      *     ....  |
      */
 
@@ -253,91 +253,52 @@ void ObsBias::computeObsBias(ioda::ObsVector & ybias,
      * bias coeff memory layout (npreds X njobs)
      *        ch1    ch2    ch3     ch4
      *       --------------------------
-     * pred1 | 0      1      2       4
-     * pred2 | 5      6      7       8
-     * pred3 | 9     10     11      12 
+     * pred1 | 0      1      2       3
+     * pred2 | 4      5      6       7
+     * pred3 | 8      9     10      11 
      * ....  |
      */
     Eigen::Map<const Eigen::MatrixXd> coeffs(biascoeffs_.data(), npreds, njobs);
 
-    Eigen::VectorXd tmp;  // nlocs X 1
+    std::vector<double> biasTerm(nlocs, 0.0);
+    //  ( nlocs X 1 ) =  ( nlocs X npreds ) * (  npreds X 1 )
     for (std::size_t jch = 0; jch < njobs; ++jch) {
-      //  ( nlocs X 1 ) =  ( nlocs X npreds ) * (  npreds X 1 )
-      tmp = predData.transpose().block(0, jch*npreds , nlocs, npreds) *
-            coeffs.block(0, jch, npreds, 1);
-      for (std::size_t jrow = 0; jrow < nlocs; ++jrow) {
-        ybias[jrow*njobs+jch] = tmp(jrow);
+      for (std::size_t jp = 0; jp < npreds; ++jp) {
+        const std::string varname = predbases_[jp]->name() + "_" + std::to_string(jobs_[jch]);
+        for (std::size_t jl = 0; jl < nlocs; ++jl) {
+          biasTerm[jl] = predData[varname][jl] * coeffs(jp, jch);
+          ybias[jl*njobs+jch] += biasTerm[jl];
+        }
+        /// Save ObsBiasTerms (bias_coeff x predictor) for QC
+        if (ydiags.has(varname)) {
+          ydiags.save(biasTerm, varname, 1);
+        } else {
+          oops::Log::error() << varname << " is not reserved in ydiags !" << std::endl;
+          ABORT("ObsBiasTerm variable is not reserved in ydiags");
+        }
       }
     }
-
-    this->saveObsBiasTerms(ydiags, predData);
   }
 
   oops::Log::trace() << "ObsBias::computeObsBias done." << std::endl;
 }
 
 // -----------------------------------------------------------------------------
-Eigen::MatrixXd ObsBias::computePredictors(const GeoVaLs & geovals,
-                                           const ObsDiagnostics & ydiags) const {
+ioda::ObsDataVector<double> ObsBias::computePredictors(const GeoVaLs & geovals,
+                                                       const ObsDiagnostics & ydiags) const {
   const std::size_t nlocs  = odb_.nlocs();
   const std::size_t npreds = predbases_.size();
   const std::size_t njobs  = jobs_.size();
 
-  Eigen::MatrixXd predData(npreds*njobs, nlocs);
-  if (this->size() > 0) {
-    /// Temporary workspace
-    Eigen::MatrixXd tmp(njobs, nlocs);
+  const oops::Variables vars(prednames_, jobs_);
+  ioda::ObsDataVector<double> predData(odb_, vars);
 
-    for (std::size_t r = 0; r < npreds; ++r) {
-      /// Initialize with zero
-      tmp.setConstant(0.0);
-
-      /// Calculate the predictor
-      predbases_[r]->compute(odb_, geovals, ydiags, tmp);
-
-      /// Save
-      for (std::size_t i = 0; i < njobs; ++i) {
-        predData.row(r+i*npreds) = tmp.row(i);
-      }
-    }
+  for (std::size_t r = 0; r < npreds; ++r) {
+    predbases_[r]->compute(odb_, geovals, ydiags, predData);
   }
 
   oops::Log::trace() << "ObsBias::computePredictors done." << std::endl;
   return predData;
-}
-
-// -----------------------------------------------------------------------------
-
-void ObsBias::saveObsBiasTerms(ObsDiagnostics & ydiags,
-                               const Eigen::MatrixXd & predData) const {
-  oops::Log::trace() << "ObsBias::saveObsBiasTerms startng." << std::endl;
-  // const std::size_t nlocs = odb.nlocs();
-  const std::size_t nlocs = predData.cols();
-  const std::size_t npreds = prednames_.size();
-  const std::size_t njobs = jobs_.size();
-
-  ASSERT(predData.rows() == npreds*njobs && predData.cols() == nlocs);
-
-  /// Map bias coeff to eigen matrix npreds X njobs (read only)
-  Eigen::Map<const Eigen::MatrixXd> coeffs(biascoeffs_.data(), npreds, njobs);
-
-  /// Save ObsBiasTerms (bias_coeff x predictor) for QC
-  std::string varname;
-  std::vector<double> vec(nlocs, 0.0);
-  for (std::size_t jch = 0; jch < njobs; ++jch) {
-    for (std::size_t jpred = 0; jpred < npreds; ++jpred) {
-      varname = prednames_[jpred] + "_" + std::to_string(jobs_[jch]);
-      if (ydiags.has(varname)) {
-        Eigen::VectorXd::Map(&vec[0], nlocs) = predData.row(jpred+jch*npreds) * coeffs(jpred, jch);
-        ydiags.save(vec, varname, 1);
-      } else {
-        oops::Log::error() << varname << " is not reserved in ydiags !" << std::endl;
-        ABORT("ObsBiasTerm variable is not reserved in ydiags");
-      }
-    }
-  }
-
-  oops::Log::trace() << "ObsBias::saveObsBiasTerms done." << std::endl;
 }
 
 // -----------------------------------------------------------------------------

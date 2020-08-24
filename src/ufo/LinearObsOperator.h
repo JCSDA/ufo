@@ -59,7 +59,7 @@ class LinearObsOperator : public util::Printable,
   void print(std::ostream &) const;
   std::unique_ptr<LinearObsOperatorBase> oper_;
   ioda::ObsSpace & odb_;
-  std::unique_ptr<Eigen::MatrixXd> biaspreds_;
+  std::unique_ptr<ioda::ObsDataVector<double>> biaspreds_;
 };
 
 // -----------------------------------------------------------------------------

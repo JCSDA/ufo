@@ -270,7 +270,8 @@ real(kind_real), allocatable :: Wfunc(:)
 
    ! Create output K-MATRIX structure (atm)
    ! --------------------------------------
-   call CRTM_Atmosphere_Create( self%atm_K, self%n_Layers, self%conf_traj%n_Absorbers, self%conf_traj%n_Clouds, self%conf_traj%n_Aerosols )
+   call CRTM_Atmosphere_Create( self%atm_K, self%n_Layers, self%conf_traj%n_Absorbers, &
+                                self%conf_traj%n_Clouds, self%conf_traj%n_Aerosols )
    if ( ANY(.NOT. CRTM_Atmosphere_Associated(self%atm_K)) ) THEN
       message = 'Error allocating CRTM K-matrix Atmosphere structure (setTraj)'
       CALL Display_Message( PROGRAM_NAME, message, FAILURE )

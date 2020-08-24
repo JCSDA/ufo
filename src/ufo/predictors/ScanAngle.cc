@@ -38,19 +38,21 @@ ScanAngle::ScanAngle(const eckit::Configuration & conf, const std::vector<int> &
 void ScanAngle::compute(const ioda::ObsSpace & odb,
                         const GeoVaLs &,
                         const ObsDiagnostics &,
-                        Eigen::MatrixXd & out) const {
-  const std::size_t njobs = jobs_.size();
+                        ioda::ObsDataVector<double> & out) const {
   const std::size_t nlocs = odb.nlocs();
 
   // assure shape of out
-  ASSERT(out.rows() == njobs && out.cols() == nlocs);
+  ASSERT(out.nlocs() == nlocs);
 
   // retrieve the sensor view angle
   std::vector<float> view_angle(nlocs, 0.0);
   odb.get_db("MetaData", "sensor_view_angle", view_angle);
 
-  for (std::size_t jl = 0; jl < nlocs; ++jl) {
-    out.col(jl).setConstant(pow(view_angle[jl]*Constants::deg2rad, order_));
+  for (auto & job : jobs_) {
+    const std::string varname = name() + "_" + std::to_string(job);
+    for (std::size_t jl = 0; jl < nlocs; ++jl) {
+      out[varname][jl] = pow(view_angle[jl]*Constants::deg2rad, order_);
+    }
   }
 }
 

@@ -161,6 +161,29 @@ end subroutine ufo_geovals_zero_c
 
 ! ------------------------------------------------------------------------------
 
+subroutine ufo_geovals_reorderzdir_c(c_key_self, lvar, c_var, lvar1, c_var1) bind(c,name='ufo_geovals_reorderzdir_f90')
+use ufo_vars_mod, only: MAXVARLEN
+use string_f_c_mod
+implicit none
+integer(c_int), intent(in) :: c_key_self
+integer(c_int), intent(in) :: lvar
+character(kind=c_char, len=1), intent(in) :: c_var(lvar+1)
+integer(c_int), intent(in) :: lvar1
+character(kind=c_char, len=1), intent(in) :: c_var1(lvar1+1)
+character(len=MAXVARLEN) :: varname
+character(len=MAXVARLEN) :: vardir
+type(ufo_geovals), pointer :: self
+
+call c_f_string(c_var, varname)
+call c_f_string(c_var1, vardir)
+call ufo_geovals_registry%get(c_key_self, self)
+
+call ufo_geovals_reorderzdir(self, varname, vardir)
+
+end subroutine ufo_geovals_reorderzdir_c
+
+! ------------------------------------------------------------------------------
+
 subroutine ufo_geovals_abs_c(c_key_self) bind(c,name='ufo_geovals_abs_f90')
 implicit none
 integer(c_int), intent(in) :: c_key_self

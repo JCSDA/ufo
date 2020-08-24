@@ -13,8 +13,6 @@
 #include <string>
 #include <vector>
 
-#include <boost/make_shared.hpp>
-
 #define ECKIT_TESTING_SELF_REGISTER_CASES 0
 
 #include "eckit/config/LocalConfiguration.h"
@@ -57,10 +55,10 @@ void testMetOfficeBuddyCheck(const eckit::LocalConfiguration &conf) {
     obsSpace.put_db(varGroup, varName, values);
   }
 
-  auto obserr = boost::make_shared<ioda::ObsDataVector<float>>(
-      obsSpace, obsSpace.obsvariables(), "ObsError");
-  auto qcflags = boost::make_shared<ioda::ObsDataVector<int>>(
-      obsSpace, obsSpace.obsvariables());
+  std::shared_ptr<ioda::ObsDataVector<float>> obserr(new ioda::ObsDataVector<float>(
+      obsSpace, obsSpace.obsvariables(), "ObsError"));
+  std::shared_ptr<ioda::ObsDataVector<int>> qcflags(new ioda::ObsDataVector<int>(
+      obsSpace, obsSpace.obsvariables()));
 
   const eckit::LocalConfiguration filterConf(conf, "Met Office Buddy Check");
   ufo::MetOfficeBuddyCheck filter(obsSpace, filterConf, qcflags, obserr);

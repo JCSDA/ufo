@@ -9,6 +9,8 @@
 #define TEST_UFO_GEOVALS_H_
 
 #include <cmath>
+#include <iomanip>
+#include <iostream>
 #include <memory>
 #include <string>
 #include <vector>
@@ -79,11 +81,37 @@ void testGeoVaLs() {
       GeoVaLs gv_one(gval, index);
     }
 
+    GeoVaLs gv(gval);
+    if (gconf.has("reorderzdir check")) {
+      const eckit::LocalConfiguration gconfchk(gconf, "reorderzdir check");
+      const std::string flipto = gconfchk.getString("direction");
+      std::string flipback = (flipto == "bottom2top") ? "top2bottom" : "bottom2top";
+      std::size_t nobs = ospace.nlocs();
+      gv.reorderzdir("air_pressure_levels", flipto);
+      std::vector<float> gvar(nobs);
+      std::vector<float> gvarref(nobs);
+      float sum;
+      for (size_t i = 0; i < ingeovars.size(); ++i) {
+        size_t nlevs = gv.nlevs(ingeovars[i]);
+        sum = 0;
+        for (size_t k = 0; k < nlevs; ++k) {
+          size_t kk = nlevs - k;
+          gv.get(gvar, ingeovars[i], k+1);
+          gval.get(gvarref, ingeovars[i], kk);
+          for (size_t  j = 0; j < nobs; ++j) {
+            gvar[j] = gvar[j] - gvarref[j];
+            sum += sum + gvar[j];
+          }
+        }
+      }
+      gv.reorderzdir("air_pressure_levels", flipback);
+      const double tol = gconfchk.getDouble("tolerance");
+      EXPECT(abs(sum) < tol);
+    }
+
 /// Check that GeoVaLs merge followed by a split gives back the original geovals
     oops::Log::trace() <<
       "GeoVaLs merge followed by a split gives back the original geovals" << std::endl;
-
-    GeoVaLs gv(gval);
 
     double dp_gval = gval.dot_product_with(gval);
     oops::Log::debug()<< "initial gval dot product with itself " << dp_gval << std::endl;

@@ -28,7 +28,31 @@ namespace ufo {
 
   /// \brief Options controlling the operation of the ProfileConsistencyChecks filter.
   class ProfileConsistencyCheckParameters : public oops::Parameters {
-   public:
+   public:  // functions
+    /// Determine whether a variable group is optional or not.
+    bool getOptional(const std::string &groupname) const
+    {
+      bool optional = false;
+      if (std::find(groups_optional.value().begin(), groups_optional.value().end(), groupname)
+          != groups_optional.value().end())
+        optional = true;
+      return optional;
+    }
+
+    /// Determine number of entries per profile for a variable group.
+    size_t getEntriesPerProfile(const std::string &groupname) const
+    {
+      size_t entriesPerProfile = -1;
+      if (std::find(groups_singlevalue.value().begin(), groups_singlevalue.value().end(), groupname)
+          != groups_singlevalue.value().end())
+        entriesPerProfile = 1;
+      if (std::find(groups_modellevels.value().begin(), groups_modellevels.value().end(), groupname)
+          != groups_modellevels.value().end())
+        entriesPerProfile = static_cast<size_t> (num_modellevels);
+      return entriesPerProfile;
+    }
+
+   public:  // variables
     //=== Generic parameters ===//
 
     /// Maximum number of profile levels to be processed (a legacy of the OPS code).
@@ -40,6 +64,9 @@ namespace ufo {
 
     /// If not sorting observations, ensure number of profiles is consistent
     oops::Parameter<bool> ValidateTotalNumProf {"ValidateTotalNumProf", true, this};
+
+    /// Print station ID
+    oops::Parameter<bool> PrintStationID {"PrintStationID", false, this};
 
     //=== Parameters relating to the combination of multiple check results ===//
 
@@ -180,37 +207,37 @@ namespace ufo {
     //=== RH check parameters ===//
 
     /// Initial value of minimum temperature (K)
-    oops::Parameter<float> RHCheck_TminInit {"RHCheck_TminInit", 400.0};
+    oops::Parameter<float> RHCheck_TminInit {"RHCheck_TminInit", 400.0, this};
 
     /// Tolerance for high level check of relative humidity (%)
-    oops::Parameter<float> RHCheck_SondeRHHiTol {"RHCheck_SondeRHHiTol", 20.0};
+    oops::Parameter<float> RHCheck_SondeRHHiTol {"RHCheck_SondeRHHiTol", 20.0, this};
 
     /// Threshold for pressure when setting up arrays (Pa)
-    oops::Parameter<float> RHCheck_PressInitThresh {"RHCheck_PressInitThresh", 100.0};
+    oops::Parameter<float> RHCheck_PressInitThresh {"RHCheck_PressInitThresh", 100.0, this};
 
     /// Threshold for pressure (Pa)
-    oops::Parameter<float> RHCheck_PressThresh {"RHCheck_PressThresh", 400.0};
+    oops::Parameter<float> RHCheck_PressThresh {"RHCheck_PressThresh", 400.0, this};
 
     /// Threshold for pressure difference relative to level 0 (Pa)
-    oops::Parameter<float> RHCheck_PressDiff0Thresh {"RHCheck_PressDiff0Thresh", 100.0};
+    oops::Parameter<float> RHCheck_PressDiff0Thresh {"RHCheck_PressDiff0Thresh", 100.0, this};
 
     /// Threshold for dew point temperature difference (K)
-    oops::Parameter<float> RHCheck_tdDiffThresh {"RHCheck_tdDiffThresh", 2.0};
+    oops::Parameter<float> RHCheck_tdDiffThresh {"RHCheck_tdDiffThresh", 2.0, this};
 
     /// Threshold for relative humidity (%)
-    oops::Parameter<float> RHCheck_RHThresh {"RHCheck_RHThresh", 90.0};
+    oops::Parameter<float> RHCheck_RHThresh {"RHCheck_RHThresh", 90.0, this};
 
     /// Threshold for pressure difference between adjacent levels (Pa)
-    oops::Parameter<float> RHCheck_PressDiffAdjThresh {"RHCheck_PressDiffAdjThresh", 20.0};
+    oops::Parameter<float> RHCheck_PressDiffAdjThresh {"RHCheck_PressDiffAdjThresh", 20.0, this};
 
     /// Threshold for minimum relative humidity (%)
-    oops::Parameter<float> RHCheck_MinRHThresh {"RHCheck_MinRHThresh", 85.0};
+    oops::Parameter<float> RHCheck_MinRHThresh {"RHCheck_MinRHThresh", 85.0, this};
 
     /// Upper threshold for Tmin in moisture check
-    oops::Parameter<float> RHCheck_TminThresh {"RHCheck_TminThresh", 223.15};
+    oops::Parameter<float> RHCheck_TminThresh {"RHCheck_TminThresh", 223.15, this};
 
     /// Lower threshold for temperature in moisture check
-    oops::Parameter<float> RHCheck_TempThresh {"RHCheck_TempThresh", 233.15};
+    oops::Parameter<float> RHCheck_TempThresh {"RHCheck_TempThresh", 233.15, this};
 
     //=== OPS comparison parameters ===//
 
@@ -219,6 +246,22 @@ namespace ufo {
 
     /// Compare with OPS values?
     oops::Parameter<bool> compareWithOPS {"compareWithOPS", false, this};
+
+    /// Groups of variables whose presence in the input sample is optional
+    /// (if not present, all variables are initially set to zero)
+    oops::Parameter<std::vector<std::string>> groups_optional
+      {"groups_optional", {"Corrections", "Counters"}, this};
+
+    /// Groups of variables which have one value per profile
+    oops::Parameter<std::vector<std::string>> groups_singlevalue
+      {"groups_singlevalue", {"Counters"}, this};
+
+    /// Groups of variables with values on model levels
+    oops::Parameter<std::vector<std::string>> groups_modellevels
+      {"groups_modellevels", {}, this};
+
+    /// Number of model levels
+    oops::Parameter<int> num_modellevels {"num_modellevels", 70, this};
   };
 }  // namespace ufo
 

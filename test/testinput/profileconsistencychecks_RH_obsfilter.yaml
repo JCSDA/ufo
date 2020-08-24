@@ -24,6 +24,7 @@ observations:
     compareWithOPS: false
     flagBasicChecksFail: true
     nErrorsFail: 8
+    PrintStationID: true
     BChecks_Skip: true
     RHCheck_TminInit: 400.0
     RHCheck_SondeRHHiTol: 20.0

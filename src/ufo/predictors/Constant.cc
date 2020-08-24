@@ -5,6 +5,8 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
+#include <string>
+
 #include "ufo/predictors/Constant.h"
 
 #include "ioda/ObsSpace.h"
@@ -24,14 +26,18 @@ Constant::Constant(const eckit::Configuration & conf, const std::vector<int> & j
 void Constant::compute(const ioda::ObsSpace & odb,
                        const GeoVaLs &,
                        const ObsDiagnostics &,
-                       Eigen::MatrixXd & out) const {
-  const std::size_t njobs = jobs_.size();
+                       ioda::ObsDataVector<double> & out) const {
   const std::size_t nlocs = odb.nlocs();
 
   // assure shape of out
-  ASSERT(out.rows() == njobs && out.cols() == nlocs);
+  ASSERT(out.nlocs() == nlocs);
 
-  out.setConstant(1.0);
+  for (auto & job : jobs_) {
+    const std::string varname = name() + "_" + std::to_string(job);
+    for (auto & item : out[varname]) {
+      item = 1.0;
+    }
+  }
 }
 
 // -----------------------------------------------------------------------------

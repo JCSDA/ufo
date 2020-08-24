@@ -10,6 +10,10 @@ set ( filters_files
       TrackCheck.cc
       TrackCheck.h
       TrackCheckParameters.h
+      TrackCheckShip.cc
+      TrackCheckShip.h
+      TrackCheckShipDiagnostics.h
+      TrackCheckShipParameters.h
       BackgroundCheck.cc
       BackgroundCheck.h
       BlackList.cc

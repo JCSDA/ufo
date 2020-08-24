@@ -29,8 +29,7 @@
 namespace ufo {
   class ProfileConsistencyCheckParameters;
   class ProfileCheckValidator;
-  class ProfileData;
-  class ProfileFlags;
+  class ProfileDataHandler;
   class ProfileIndices;
 }
 
@@ -41,8 +40,7 @@ namespace ufo {
    public:
     ProfileCheckBase(const ProfileConsistencyCheckParameters &options,
                      const ProfileIndices &profileIndices,
-                     const ProfileData &profileData,
-                     ProfileFlags &profileFlags,
+                     ProfileDataHandler &profileDataHandler,
                      ProfileCheckValidator &profileCheckValidator);
     virtual ~ProfileCheckBase() {}
 
@@ -67,18 +65,15 @@ namespace ufo {
         std::transform(v1.begin(), v1.end(), v2.begin(), vout.begin(), std::plus<T>());
       }
 
-   protected:  // members
+   protected:  // variables
     /// Configurable parameters
     const ProfileConsistencyCheckParameters &options_;
 
     /// Indices of profile's observations in the entire sample
     const ProfileIndices &profileIndices_;
 
-    /// Profile data
-    const ProfileData &profileData_;
-
-    /// Profile flags
-    ProfileFlags &profileFlags_;
+    /// Profile data handler
+    ProfileDataHandler &profileDataHandler_;
 
     /// Profile check validator
     ProfileCheckValidator &profileCheckValidator_;
@@ -94,8 +89,7 @@ namespace ufo {
     static std::unique_ptr<ProfileCheckBase> create(const std::string&,
                                                     const ProfileConsistencyCheckParameters&,
                                                     const ProfileIndices&,
-                                                    const ProfileData&,
-                                                    ProfileFlags&,
+                                                    ProfileDataHandler&,
                                                     ProfileCheckValidator&);
     virtual ~ProfileCheckFactory() = default;
    protected:
@@ -103,8 +97,7 @@ namespace ufo {
    private:
     virtual std::unique_ptr<ProfileCheckBase> make(const ProfileConsistencyCheckParameters&,
                                                    const ProfileIndices&,
-                                                   const ProfileData&,
-                                                   ProfileFlags&,
+                                                   ProfileDataHandler&,
                                                    ProfileCheckValidator&) = 0;
 
     static std::map <std::string, ProfileCheckFactory*> & getMakers()
@@ -120,14 +113,12 @@ namespace ufo {
       virtual std::unique_ptr<ProfileCheckBase>
         make(const ProfileConsistencyCheckParameters &options,
              const ProfileIndices &profileIndices,
-             const ProfileData &profileData,
-             ProfileFlags &profileFlags,
+             ProfileDataHandler &profileDataHandler,
              ProfileCheckValidator &profileCheckValidator)
       {
         return std::unique_ptr<ProfileCheckBase>(new T(options,
                                                        profileIndices,
-                                                       profileData,
-                                                       profileFlags,
+                                                       profileDataHandler,
                                                        profileCheckValidator));
       }
      public:

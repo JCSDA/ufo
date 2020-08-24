@@ -1,0 +1,461 @@
+Normal ship track:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Ship
+    simulated variables: [air_temperature]
+    generate:
+      list:
+        lats: [ -2, -1, 0, 1, 2 ]
+        lons: [ 178, 179, 180, 181, 182 ]
+        datetimes: [ '2010-01-01T00:00:00Z', '2010-01-01T01:00:00Z', '2010-01-01T02:00:00Z',
+                     '2010-01-01T03:00:00Z', '2010-01-01T04:00:00Z' ]
+      obs errors: [1.0]
+  station_ids: [ 1, 1, 1, 1, 1]
+  Ship Track Check:
+    testing mode: true
+    variables: [air_temperature]
+    temporal resolution: PT10M
+    spatial resolution: 1 # km
+    station_id_variable:
+      name: station_id@MetaData
+  expected distance: [0, 157, 157, 157, 157]
+  expected speed: [0.0, .0435, .0435, .0435, .0435]
+  expected distance averaged: [0, 314, 314, 314, 0]
+  expected speed averaged: [0.0, .0435, .0435, .0435, 0.0]
+  expected angle: [0.0, 0.0, 0.0, 0.0, 0.0]
+  expected short: [0]
+  expected fast: [0]
+  expected bends: [0]
+  expected dist0: [0]
+  expected simultaneous: [0]
+  expected sum speed: [.174]
+  expected mean speed: [.0435]
+  expected early breaks: [0]
+Bending ship track:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Ship
+    simulated variables: [air_temperature]
+    generate:
+      list:
+        lats: [ 0, 1, 1, 1, 0 ]
+        lons: [ 0, 0, 1, 0, -1 ]
+        datetimes: [ '2010-01-01T00:00:00Z', '2010-01-01T01:00:00Z', '2010-01-01T02:00:00Z',
+                     '2010-01-01T03:00:00Z', '2010-01-01T04:00:00Z' ]
+      obs errors: [1.0]
+  station_ids: [ 1, 1, 1, 1, 1]
+  Ship Track Check:
+    testing mode: true
+    variables: [air_temperature]
+    temporal resolution: PT10M
+    spatial resolution: 1 # km
+    station_id_variable:
+      name: station_id@MetaData
+  expected distance: [0, 111, 111, 111, 157]
+  expected speed: [0.0, .0308, .0308, .0308, .0435]
+  expected distance averaged: [0, 157, 0, 248, 0]
+  expected speed averaged: [0, .0218, 0, .0344, 0]
+  expected angle: [0.0, 90.0, 180.0, 45.0, 0.0]
+  expected short: [0]
+  expected fast: [0]
+  expected bends: [2]
+  expected dist0: [0]
+  expected simultaneous: [0]
+  expected sum speed: [.135]
+  expected mean speed: [.0339]
+  expected early breaks: [0]
+Fast ship track:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Ship
+    simulated variables: [air_temperature]
+    generate:
+      list:
+        lats: [ 0, 1, 2]
+        lons: [ 0, 0, 0]
+        datetimes: [ '2010-01-01T00:00:00Z', '2010-01-01T01:00:00Z',
+                     '2010-01-01T02:00:00Z']
+      obs errors: [1.0]
+  station_ids: [ 1, 1, 1]
+  Ship Track Check:
+    testing mode: true
+    variables: [air_temperature]
+    temporal resolution: PT10M
+    spatial resolution: 1 # km
+    max speed: .01 #km/s (change from default)
+    station_id_variable:
+      name: station_id@MetaData
+  expected distance: [0, 111, 111]
+  expected speed: [0.0, .0308, .0308]
+  expected distance averaged: [0, 222, 0]
+  expected speed averaged: [0, .0308, 0]
+  expected angle: [0.0, 0.0, 0.0]
+  expected short: [0]
+  expected fast: [2]
+  expected bends: [0]
+  expected dist0: [0]
+  expected simultaneous: [0]
+  expected sum speed: [0.0]
+  expected mean speed: [0.0]
+  expected early breaks: [1]
+Short ship track:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Ship
+    simulated variables: [air_temperature]
+    generate:
+      list:
+        lats: [ 0, 1, 2]
+        lons: [ 0, 0, 0]
+        datetimes: [ '2010-01-01T00:00:00Z', '2010-01-01T00:30:00Z',
+                     '2010-01-01T01:00:00Z']
+      obs errors: [1.0]
+  station_ids: [ 1, 1, 1, 1, 1]
+  Ship Track Check:
+    input category: 2
+    testing mode: true
+    variables: [air_temperature]
+    temporal resolution: PT10M
+    spatial resolution: 1 # km
+    max speed: 1 #km/s (default value)
+    station_id_variable:
+      name: station_id@MetaData
+  expected distance: [0, 111, 111]
+  expected speed: [0.0, .0617, .0617]
+  expected distance averaged: [0, 222, 0]
+  expected speed averaged: [0, .0617, 0]
+  expected angle: [0.0, 0.0, 0.0]
+  expected short: [2]
+  expected fast: [0]
+  expected bends: [0]
+  expected dist0: [0]
+  expected simultaneous: [0]
+  expected sum speed: [0.0]
+  expected mean speed: [0.0]
+  expected early breaks: [1]
+Short buoy track:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Ship
+    simulated variables: [air_temperature]
+    generate:
+      list:
+        lats: [ 0, 1, 2]
+        lons: [ 0, 0, 0]
+        datetimes: [ '2010-01-01T00:00:00Z', '2010-01-01T00:30:00Z',
+                     '2010-01-01T01:00:00Z']
+      obs errors: [1.0]
+  station_ids: [ 1, 1, 1, 1, 1]
+  Ship Track Check:
+    input category: 1
+    testing mode: true
+    variables: [air_temperature]
+    temporal resolution: PT10M
+    spatial resolution: 1 # km
+    max speed: 1 #km/s (default value)
+    station_id_variable:
+      name: station_id@MetaData
+  expected distance: [0, 111, 111]
+  expected speed: [0.0, .0617, .0617]
+  expected distance averaged: [0, 222, 0]
+  expected speed averaged: [0, .0617, 0]
+  expected angle: [0.0, 0.0, 0.0]
+  expected short: [2]
+  expected fast: [0]
+  expected bends: [0]
+  expected dist0: [0]
+  expected simultaneous: [0]
+  expected sum speed: [0.0]
+  expected mean speed: [0.0]
+  expected early breaks: [0]
+Fast/short ship track:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Ship
+    simulated variables: [air_temperature]
+    generate:
+      list:
+        lats: [ 0, 1, 2]
+        lons: [ 0, 0, 0]
+        datetimes: [ '2010-01-01T00:00:00Z',
+                     '2010-01-01T00:10:00Z', '2010-01-01T00:20:00Z']
+      obs errors: [1.0]
+  station_ids: [ 1, 1, 1, 1, 1]
+  Ship Track Check:
+    testing mode: true
+    variables: [air_temperature]
+    temporal resolution: PT10M
+    spatial resolution: 1 # km
+    max speed: .01 #km/s (default value)
+    station_id_variable:
+      name: station_id@MetaData
+  expected distance: [0, 111, 111]
+  expected speed: [0.0, .185, .185]
+  expected distance averaged: [0, 222, 0]
+  expected speed averaged: [0, .185, 0]
+  expected angle: [0.0, 0.0, 0.0]
+  expected short: [2]
+  expected fast: [0]
+  expected bends: [0]
+  expected dist0: [0]
+  expected simultaneous: [0]
+  expected sum speed: [0.0]
+  expected mean speed: [0.0]
+  expected early breaks: [1]
+Ship Track Dist0:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Ship
+    simulated variables: [air_temperature]
+    generate:
+      list:
+        lats: [ 0, 0, 0]
+        lons: [ 0, 0, 0]
+        datetimes: [ '2010-01-01T00:00:00Z', '2010-01-01T01:00:00Z', '2010-01-01T02:00:00Z']
+      obs errors: [1.0]
+  station_ids: [ 1, 1, 1, 1, 1]
+  Ship Track Check:
+    testing mode: true
+    variables: [air_temperature]
+    temporal resolution: PT10M
+    spatial resolution: 1 # km
+    station_id_variable:
+      name: station_id@MetaData
+  expected distance: [0, 0, 0]
+  expected speed: [0.0, 0.0, 0.0]
+  expected distance averaged: [0, 0, 0]
+  expected speed averaged: [0, 0, 0]
+  expected angle: [0.0, 0.0, 0.0]
+  expected short: [0]
+  expected fast: [0]
+  expected bends: [0]
+  expected dist0: [2]
+  expected simultaneous: [0]
+  expected sum speed: [0.0]
+  expected mean speed: [0.0]
+  expected early breaks: [0]
+Ship Track Simultaneous Same Location:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Ship
+    simulated variables: [air_temperature]
+    generate:
+      list:
+        lats: [ 0, 0, 0]
+        lons: [ 0, 0, 0]
+        datetimes: [ '2010-01-01T00:00:00Z', '2010-01-01T00:00:00Z', '2010-01-01T00:00:00Z']
+      obs errors: [1.0]
+  station_ids: [ 1, 1, 1]
+  Ship Track Check:
+    testing mode: true
+    variables: [air_temperature]
+    temporal resolution: PT10M
+    spatial resolution: 1 # km
+    station_id_variable:
+      name: station_id@MetaData
+  expected distance: [0, 0, 0]
+  expected speed: [0.0, 0.0, 0.0]
+  expected distance averaged: [0, 0, 0]
+  expected speed averaged: [0, 0, 0]
+  expected angle: [0.0, 0.0, 0.0]
+  expected short: [2]
+  expected fast: [0]
+  expected bends: [0]
+  expected dist0: [2]
+  expected simultaneous: [2]
+  expected sum speed: [0]
+  expected mean speed: [0]
+  expected early breaks: [1]
+Ship Track Simultaneous Same Location Deferred Simultaneous:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Ship
+    simulated variables: [air_temperature]
+    generate:
+      list:
+        lats: [ 0, 0, 0]
+        lons: [ 0, 0, 0]
+        datetimes: [ '2010-01-01T00:00:00Z', '2010-01-01T00:00:00Z', '2010-01-01T00:00:00Z']
+      obs errors: [1.0]
+  station_ids: [ 1, 1, 1]
+  Ship Track Check:
+    testing mode: true
+    early break check: false
+    deferred check simultaneous: true
+    variables: [air_temperature]
+    temporal resolution: PT10M
+    spatial resolution: 1 # km
+    station_id_variable:
+      name: station_id@MetaData
+  expected distance: [0, 0, 0]
+  expected speed: [0.0, 0.0, 0.0]
+  expected distance averaged: [0, 0, 0]
+  expected speed averaged: [0, 0, 0]
+  expected angle: [0.0, 0.0, 0.0]
+  expected short: [2]
+  expected fast: [0]
+  expected bends: [0]
+  expected dist0: [2]
+  expected simultaneous: [2]
+  expected deferred distance: [0]
+  expected deferred speed: [0]
+  expected deferred distance averaged: [0]
+  expected deferred speed averaged: [0]
+  expected deferred angle: [0]
+  expected sum speed: [0]
+  expected mean speed: [0]
+  expected early breaks: [0]
+Ship Track Simultaneous Different Location:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Ship
+    simulated variables: [air_temperature]
+    generate:
+      list:
+        lats: [ 0, 1, 2]
+        lons: [ 0, 0, 0]
+        datetimes: [ '2010-01-01T00:00:00Z', '2010-01-01T00:00:00Z', '2010-01-01T00:00:00Z']
+      obs errors: [1.0]
+  station_ids: [ 1, 1, 1]
+  Ship Track Check:
+    testing mode: true
+    variables: [air_temperature]
+    temporal resolution: PT10M
+    spatial resolution: 1 # km
+    station_id_variable:
+      name: station_id@MetaData
+  expected distance: [0, 111, 111]
+  expected speed: [0.0, .185, .185] #because assumes a time difference of 10 mins btwn each obs
+  expected distance averaged: [0, 222, 0]
+  expected speed averaged: [0, .370, 0] # because assumes a time difference of 10 mins btwn 1st/last obs
+  expected angle: [0.0, 0.0, 0.0]
+  expected short: [2]
+  expected fast: [0]
+  expected bends: [0]
+  expected dist0: [0]
+  expected simultaneous: [3]
+  expected sum speed: [0]
+  expected mean speed: [0]
+  expected early breaks: [1]
+Ship Track Simultaneous Different Location Deferred Simultaneous:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Ship
+    simulated variables: [air_temperature]
+    generate:
+      list:
+        lats: [ 0, 1, 2, 3, 4, 5]
+        lons: [ 0, 0, 0, 0, 0, 0]
+        datetimes: ['2010-01-01T00:00:00Z', '2010-01-01T01:00:00Z', '2010-01-01T01:00:00Z', '2010-01-01T01:00:00Z', '2010-01-01T02:00:00Z', '2010-01-01T03:00:00Z']
+      obs errors: [1.0]
+  station_ids: [ 1, 1, 1, 1, 1, 1]
+  Ship Track Check:
+    testing mode: true
+    early break check: false
+    deferred check simultaneous: true
+    variables: [air_temperature]
+    temporal resolution: PT10M
+    spatial resolution: 1 # km
+    station_id_variable:
+      name: station_id@MetaData
+  expected distance: [0, 111, 111, 111, 111, 111]
+  expected speed: [0.0, .0308, .185, .185, .0308, .0308] #because assumes a time difference of 10 mins btwn each obs
+  expected distance averaged: [0, 222, 222, 222, 222, 0]
+  expected speed averaged: [0, .0616, .370, .0616, .0308, 0] # because assumes a time difference of 10 mins btwn any simultaneous obs
+  expected angle: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+  expected short: [2]
+  expected fast: [0]
+  expected bends: [0]
+  expected dist0: [0]
+  expected simultaneous: [3]
+  expected sum speed: [0.0924]
+  expected mean speed: [0.0308]
+  expected deferred distance: [0, 444, 111]
+  expected deferred speed: [0.0, .0616, .0308]
+  expected deferred distance averaged: [0, 555, 0]
+  expected deferred speed averaged: [0, .0513, 0]
+  expected deferred angle: [0.0, 0.0, 0.0]
+  expected early breaks: [0]
+Ship Tracks Different Station IDs:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Ship
+    simulated variables: [air_temperature]
+    generate:
+      list:
+        lats: [ 0, 1, 1, 1, 0, 0, 1, 2 ]
+        lons: [ 0, 0, 1, 0, -1, 0, 0, 0 ]
+        datetimes: [ '2010-01-01T00:00:00Z', '2010-01-01T01:00:00Z', '2010-01-01T02:00:00Z',
+                     '2010-01-01T03:00:00Z', '2010-01-01T04:00:00Z', '2010-01-01T00:00:00Z',
+                     '2010-01-01T00:30:00Z', '2010-01-01T01:00:00Z']
+      obs errors: [1.0]
+  station_ids: [ 1, 1, 1, 1, 1, 2, 2, 2]
+  Ship Track Check:
+    testing mode: true
+    variables: [air_temperature]
+    temporal resolution: PT10M
+    spatial resolution: 1 # km
+    max speed: 1 #km/s (default value)
+    station_id_variable:
+      name: station_id@MetaData
+  expected distance: [0, 111, 111, 111, 157, 0, 111, 111]
+  expected speed: [0.0, .0308, .0308, .0308, .0435, 0, .0617, .0617]
+  expected distance averaged: [0, 157, 0, 248, 0, 0, 222, 0]
+  expected speed averaged: [0, .0218, 0, .0344, 0, 0, .0617, 0]
+  expected angle: [0.0, 90.0, 180.0, 45.0, 0.0, 0.0, 0.0, 0.0]
+  expected short: [0, 2]
+  expected fast: [0, 0]
+  expected bends: [2, 0]
+  expected dist0: [0, 0]
+  expected simultaneous: [0, 0]
+  expected sum speed: [.135, 0.0]
+  expected mean speed: [.0339, 0.0]
+  expected early breaks: [0, 1]
+Ship Tracks Different Station IDs Shuffled:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Ship
+    simulated variables: [air_temperature]
+    generate:
+      list:
+        lats: [ 1, 1, 1, 0, 0, 1, 0, 2 ]
+        lons: [ 0, 0, 1, -1, 0, 0, 0, 0 ]
+        datetimes: [ '2010-01-01T01:00:00Z', '2010-01-01T03:00:00Z', '2010-01-01T02:00:00Z',
+                     '2010-01-01T04:00:00Z', '2010-01-01T00:00:00Z',
+                     '2010-01-01T00:30:00Z', '2010-01-01T00:00:00Z', '2010-01-01T01:00:00Z']
+      obs errors: [1.0]
+  station_ids: [ 1, 1, 1, 1, 2, 2, 1, 2]
+  Ship Track Check:
+    testing mode: true
+    variables: [air_temperature]
+    temporal resolution: PT10M
+    spatial resolution: 1 # km
+    max speed: 1 #km/s (default value)
+    station_id_variable:
+      name: station_id@MetaData
+  expected distance: [0, 111, 111, 111, 157, 0, 111, 111]
+  expected speed: [0.0, .0308, .0308, .0308, .0435, 0, .0617, .0617]
+  expected distance averaged: [0, 157, 0, 248, 0, 0, 222, 0]
+  expected speed averaged: [0, .0218, 0, .0344, 0, 0, .0617, 0]
+  expected angle: [0.0, 90.0, 180.0, 45.0, 0.0, 0.0, 0.0, 0.0]
+  expected short: [0, 2]
+  expected fast: [0, 0]
+  expected bends: [2, 0]
+  expected dist0: [0, 0]
+  expected simultaneous: [0, 0]
+  expected sum speed: [.135, 0.0]
+  expected mean speed: [.0339, 0.0]
+  expected early breaks: [0, 1]

@@ -61,6 +61,8 @@ struct Constants {
     static constexpr double von_karman     = 0.41;         // Von Karman Constant
     static constexpr double es_w_0         = 611.2;        // saturation vapor pressure of water at
                                                        //    0degC
+    static constexpr double euzc_0         = 34.0;         // constant for estimating euphotic layer
+    static constexpr double euzc_1         = -0.39;        // constant for estimating euphotic layer
 };
 //------------------------------------------------------------------------------------------------------
 }  // namespace ufo
