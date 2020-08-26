@@ -27,6 +27,8 @@ namespace ufo {
 /// \brief Options applying to inter-channel consistency check
 ///
 class InterChannelConsistencyCheckParameters : public oops::Parameters {
+  OOPS_CONCRETE_PARAMETERS(InterChannelConsistencyCheckParameters, Parameters)
+
  public:
   /// List of channels available for assimilation
   oops::RequiredParameter<std::string> channelList{"channels", this};

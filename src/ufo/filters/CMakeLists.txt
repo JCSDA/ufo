@@ -69,9 +69,11 @@ set ( filters_files
       Variables.h
       Gaussian_Thinning.cc
       Gaussian_Thinning.h
+      GaussianThinningParameters.cc
       GaussianThinningParameters.h
       PoissonDiskThinning.cc
       PoissonDiskThinning.h
+      PoissonDiskThinningParameters.cc
       PoissonDiskThinningParameters.h
       processWhere.cc
       processWhere.h

@@ -26,6 +26,8 @@ namespace ufo {
 /// channel, and surface-to-space transmittance
 ///
 class ObsErrorFactorTopoRadParameters : public oops::Parameters {
+  OOPS_CONCRETE_PARAMETERS(ObsErrorFactorTopoRadParameters, Parameters)
+
  public:
   /// List of channels to which the observation error factor applies
   oops::RequiredParameter<std::string> channelList{"channels", this};
