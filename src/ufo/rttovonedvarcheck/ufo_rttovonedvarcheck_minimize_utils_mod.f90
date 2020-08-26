@@ -69,6 +69,7 @@ type(ufo_geoval), pointer    :: geoval
 integer                      :: nlevels
 integer                      :: ii
 real(kind_real), allocatable :: humidity_total(:)
+real(kind_real), allocatable :: emiss_pc(:)
 
 !-------------------------------------------------------------------------------
 
@@ -184,9 +185,11 @@ end if
 
 ! Retrieval of emissivity principal components
 IF (profindex % emisspc(1) > 0) THEN
-  ! convert ob % emiss to emiss pc using
-  ! Ops_SatRad_PCToEmis
-  ! Prof(profindex % emisspc(1):profindex % emisspc(2)) = emiss_pc
+  ! convert ob % emiss to emiss pc
+  allocate(emiss_pc(profindex % emisspc(2)-profindex % emisspc(1)+1))
+  call ob % pcemis % emistoPC(ob % channels_used(:), ob % emiss(:), emiss_pc(:))
+  prof_x(profindex % emisspc(1):profindex % emisspc(2)) = emiss_pc
+  deallocate(emiss_pc)
 END IF
 
 write(*,*) trim(RoutineName)," end"
@@ -231,6 +234,7 @@ real(kind_real), allocatable :: humidity_total(:)
 real(kind_real), allocatable :: q(:)
 real(kind_real), allocatable :: ql(:)
 real(kind_real), allocatable :: qi(:)
+real(kind_real), allocatable :: emiss_pc(:)
 
 !-------------------------------------------------------------------------------
 
@@ -409,11 +413,14 @@ if (profindex % mwemiss(1) > 0) THEN
 end if
 
 ! Retrieval of emissivity principal components
-IF (profindex % emisspc(1) > 0) THEN
-  ! emiss_pc = prof_x(profindex % emisspc(1):profindex % emisspc(2)) 
+if (profindex % emisspc(1) > 0) THEN
+  allocate(emiss_pc(profindex % emisspc(2)-profindex % emisspc(1)+1))
+  emiss_pc = prof_x(profindex % emisspc(1):profindex % emisspc(2))
   ! convert emiss_pc to ob % emissivity using
-  ! Ops_SatRad_EmisToPC
-END IF
+  call ob % pcemis % pctoemis(size(ob % channels_used), ob % channels_used, &
+                              size(emiss_pc), emiss_pc(:), ob % emiss(:))
+  deallocate(emiss_pc)
+end if
 
 write(*,*) trim(RoutineName)," end"
 
