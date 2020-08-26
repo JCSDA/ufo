@@ -25,8 +25,6 @@ namespace ufo {
 /// \brief Options applying to channel useflag check
 ///
 class ChannelUseflagCheckRadParameters : public oops::Parameters {
-  OOPS_CONCRETE_PARAMETERS(ChannelUseflagCheckRadParameters, Parameters)
-
  public:
   /// List of channels available for assimilation
   oops::RequiredParameter<std::string> channelList{"channels", this};

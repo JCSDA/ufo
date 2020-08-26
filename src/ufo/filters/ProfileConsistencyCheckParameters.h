@@ -28,8 +28,6 @@ namespace ufo {
 
   /// \brief Options controlling the operation of the ProfileConsistencyChecks filter.
   class ProfileConsistencyCheckParameters : public oops::Parameters {
-    OOPS_CONCRETE_PARAMETERS(ProfileConsistencyCheckParameters, Parameters)
-
    public:  // functions
     /// Determine whether a variable group is optional or not.
     bool getOptional(const std::string &groupname) const

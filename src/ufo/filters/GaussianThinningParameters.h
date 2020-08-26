@@ -9,7 +9,6 @@
 #define UFO_FILTERS_GAUSSIANTHINNINGPARAMETERS_H_
 
 #include <string>
-#include <utility>
 
 #include "eckit/exception/Exceptions.h"
 #include "oops/util/parameters/OptionalParameter.h"
@@ -28,23 +27,27 @@ enum class DistanceNorm {
   GEODESIC, MAXIMUM
 };
 
-struct DistanceNormParameterTraitsHelper {
-  typedef DistanceNorm EnumType;
-  static constexpr char enumTypeName[] = "DistanceNorm";
-  static constexpr std::pair<DistanceNorm, const char*> valuesAndNames[] = {
-    { DistanceNorm::GEODESIC, "geodesic" },
-    { DistanceNorm::MAXIMUM, "maximum" }
-  };
-};
-
 }  // namespace ufo
 
 namespace oops {
 
 template <>
-struct ParameterTraits<ufo::DistanceNorm> :
-    public EnumParameterTraits<ufo::DistanceNormParameterTraitsHelper>
-{};
+struct ParameterTraits<ufo::DistanceNorm> {
+  static boost::optional<ufo::DistanceNorm> get(const eckit::Configuration &config,
+                                                const std::string& name) {
+    std::string value;
+    if (config.get(name, value)) {
+      if (value == "geodesic")
+        return ufo::DistanceNorm::GEODESIC;
+      if (value == "maximum")
+        return ufo::DistanceNorm::MAXIMUM;
+      throw eckit::BadParameter("Bad conversion from std::string '" + value + "' to DistanceNorm",
+                                Here());
+    } else {
+      return boost::none;
+    }
+  }
+};
 
 }  // namespace oops
 
@@ -52,8 +55,6 @@ namespace ufo {
 
 /// \brief Options controlling the operation of the Gaussian_Thinning filter.
 class GaussianThinningParameters : public oops::Parameters {
-  OOPS_CONCRETE_PARAMETERS(GaussianThinningParameters, Parameters)
-
  public:
   // Horizontal grid
 

@@ -26,8 +26,6 @@ namespace ufo {
 /// temperature (NSST) for Infrared sensors
 ///
 class NearSSTRetCheckIRParameters : public oops::Parameters {
-  OOPS_CONCRETE_PARAMETERS(NearSSTRetCheckIRParameters, Parameters)
-
  public:
   /// List of channels available for assimilation
   oops::RequiredParameter<std::string> channelList{"channels", this};

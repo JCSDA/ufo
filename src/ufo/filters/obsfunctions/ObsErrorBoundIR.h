@@ -27,8 +27,6 @@ namespace ufo {
 /// transmittance at model top and latitude
 ///
 class ObsErrorBoundIRParameters : public oops::Parameters {
-  OOPS_CONCRETE_PARAMETERS(ObsErrorBoundIRParameters, Parameters)
-
  public:
   /// List of channels available for assimilation
   oops::RequiredParameter<std::string> channelList{"channels", this};

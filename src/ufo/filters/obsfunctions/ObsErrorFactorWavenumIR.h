@@ -26,8 +26,6 @@ namespace ufo {
 /// solar zenith angle and surface type for Infrared sensors
 ///
 class ObsErrorFactorWavenumIRParameters : public oops::Parameters {
-  OOPS_CONCRETE_PARAMETERS(ObsErrorFactorWavenumIRParameters, Parameters)
-
  public:
   /// List of channels to which the observation error factor applies
   oops::RequiredParameter<std::string> channelList{"channels", this};

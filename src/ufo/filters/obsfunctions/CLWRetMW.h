@@ -26,8 +26,6 @@ namespace ufo {
 //  31.4 GHz channels.
 ///
 class CLWRetMWParameters : public oops::Parameters {
-  OOPS_CONCRETE_PARAMETERS(CLWRetMWParameters, Parameters)
-
  public:
   /// channel number corresponding to 23.8 GHz to which the retrieval
   /// of cloud liquid water applies

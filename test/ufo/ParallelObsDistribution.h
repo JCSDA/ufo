@@ -42,8 +42,6 @@ namespace test {
 
 template <typename T>
 class TestParameters : public oops::Parameters {
-  OOPS_CONCRETE_PARAMETERS(TestParameters, Parameters)
-
  public:
   oops::RequiredParameter<Variable> variable{"variable", this};
   oops::RequiredParameter<std::vector<T>> expectedValues{"expectedValues", this};

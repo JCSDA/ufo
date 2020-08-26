@@ -26,8 +26,6 @@ namespace ufo {
 /// for Infrared sensors
 ///
 class CloudDetectMinResidualIRParameters : public oops::Parameters {
-  OOPS_CONCRETE_PARAMETERS(CloudDetectMinResidualIRParameters, Parameters)
-
  public:
   /// List of channels available for assimilation
   oops::RequiredParameter<std::string> channelList{"channels", this};

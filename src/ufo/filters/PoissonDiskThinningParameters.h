@@ -9,7 +9,6 @@
 #define UFO_FILTERS_POISSONDISKTHINNINGPARAMETERS_H_
 
 #include <string>
-#include <utility>
 
 #include "eckit/exception/Exceptions.h"
 #include "oops/util/Duration.h"
@@ -29,23 +28,27 @@ enum class ExclusionVolumeShape {
   CYLINDER, ELLIPSOID
 };
 
-struct ExclusionVolumeShapeParameterTraitsHelper {
-  typedef ExclusionVolumeShape EnumType;
-  static constexpr char enumTypeName[] = "ExclusionVolumeShape";
-  static constexpr std::pair<ExclusionVolumeShape, const char*> valuesAndNames[] = {
-    { ExclusionVolumeShape::CYLINDER, "cylinder" },
-    { ExclusionVolumeShape::ELLIPSOID, "ellipsoid" }
-  };
-};
-
 }  // namespace ufo
 
 namespace oops {
 
 template <>
-struct ParameterTraits<ufo::ExclusionVolumeShape> :
-    public EnumParameterTraits<ufo::ExclusionVolumeShapeParameterTraitsHelper>
-{};
+struct ParameterTraits<ufo::ExclusionVolumeShape> {
+  static boost::optional<ufo::ExclusionVolumeShape> get(const eckit::Configuration &config,
+                                                        const std::string& name) {
+    std::string value;
+    if (config.get(name, value)) {
+      if (value == "cylinder")
+        return ufo::ExclusionVolumeShape::CYLINDER;
+      if (value == "ellipsoid")
+        return ufo::ExclusionVolumeShape::ELLIPSOID;
+      throw eckit::BadParameter("Bad conversion from std::string '" + value +
+                                "' to ExclusionVolumeShape", Here());
+    } else {
+      return boost::none;
+    }
+  }
+};
 
 }  // namespace oops
 
@@ -57,8 +60,6 @@ namespace ufo {
 /// surrounding the location of each observation. If an observation is retained, then no other
 /// observations lying in the interior of its exclusion volume may be retained at the same time.
 class PoissonDiskThinningParameters : public oops::Parameters {
-  OOPS_CONCRETE_PARAMETERS(PoissonDiskThinningParameters, Parameters)
-
  public:
   typedef int Priority;
 

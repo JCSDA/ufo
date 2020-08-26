@@ -23,8 +23,6 @@ namespace ufo {
 
 /// \brief A box covering a specified (closed) interval of latitudes and longitudes.
 class LatLonBoxParameters : public oops::Parameters {
-  OOPS_CONCRETE_PARAMETERS(LatLonBoxParameters, Parameters)
-
  public:
   bool contains(float latitude, float longitude) const {
     return minLatitude <= latitude && latitude <= maxLatitude &&
@@ -39,8 +37,6 @@ class LatLonBoxParameters : public oops::Parameters {
 
 /// \brief Options controlling the operation of the MetOfficeBuddyCheck filter.
 class MetOfficeBuddyCheckParameters : public oops::Parameters {
-  OOPS_CONCRETE_PARAMETERS(MetOfficeBuddyCheckParameters, Parameters)
-
  public:
   /// \name Parameters controlling buddy pair identification
   /// @{
