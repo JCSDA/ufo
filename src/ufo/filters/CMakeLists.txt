@@ -131,6 +131,8 @@ set ( filters_files
       obsfunctions/ObsFunctionVelocity.h
       obsfunctions/SCATRetMW.cc
       obsfunctions/SCATRetMW.h
+      obsfunctions/SymmCldImpactIR.cc
+      obsfunctions/SymmCldImpactIR.h
 )
 
 PREPEND( _p_filters_files       "filters"       ${filters_files} )
