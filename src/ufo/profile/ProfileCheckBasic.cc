@@ -29,23 +29,26 @@ namespace ufo {
     // Skip this routine if specifically requested
     if (options_.BChecks_Skip.value())
       {
-        oops::Log::warning() << "Skipping basic checks" << std::endl;
+        oops::Log::debug() << "Skipping basic checks" << std::endl;
         return;
       }
 
     const int numLevelsToCheck = profileIndices_.getNumLevelsToCheck();
     const std::vector <float> &pressures =
-      profileDataHandler_.get<float>(ufo::VariableNames::name_air_pressure);
+      profileDataHandler_.get<float>(ufo::VariableNames::obs_air_pressure);
     // All QC flags are retrieved for the basic checks.
     // (Some might be empty; that is checked before they are used.)
-    std::vector <int> &tFlags = profileDataHandler_.get<int>(ufo::VariableNames::name_qc_tFlags);
-    std::vector <int> &zFlags = profileDataHandler_.get<int>(ufo::VariableNames::name_qc_zFlags);
-    std::vector <int> &uFlags = profileDataHandler_.get<int>(ufo::VariableNames::name_qc_uFlags);
+    std::vector <int> &tFlags = profileDataHandler_.get<int>
+      (ufo::VariableNames::qcflags_air_temperature);
+    std::vector <int> &zFlags = profileDataHandler_.get<int>
+      (ufo::VariableNames::qcflags_geopotential_height);
+    std::vector <int> &uFlags = profileDataHandler_.get<int>
+      (ufo::VariableNames::qcflags_eastward_wind);
 
     // Warn and exit if pressures vector is empty
     if (pressures.empty()) {
       result_ = false;
-      oops::Log::warning() << "Pressures vector is empty" << std::endl;
+      oops::Log::debug() << "Pressures vector is empty" << std::endl;
       return;
      }
 

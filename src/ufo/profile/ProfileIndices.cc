@@ -45,7 +45,7 @@ namespace ufo {
 
     // If there are no profiles in the sample, warn and exit
     if (profileNums_.size() == 0) {
-      oops::Log::warning() << "No profiles found in the sample" << std::endl;
+      oops::Log::debug() << "No profiles found in the sample" << std::endl;
       return;
     }
 

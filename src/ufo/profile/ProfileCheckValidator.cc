@@ -26,12 +26,12 @@ namespace ufo {
       profileDataHandler_(profileDataHandler)
   {
     // Set offsets due to C++ and Fortran array index starting values
-    comparison_offsets_[ufo::VariableNames::name_StdLev] = 1;
-    comparison_offsets_[ufo::VariableNames::name_SigBelow] = 1;
-    comparison_offsets_[ufo::VariableNames::name_SigAbove] = 1;
-    comparison_offsets_[ufo::VariableNames::name_IndStd] = 1;
-    comparison_offsets_[ufo::VariableNames::name_LevErrors] = 1;
-    comparison_offsets_[ufo::VariableNames::name_Indx] = 1;
+    comparison_offsets_[ufo::VariableNames::StdLev] = 1;
+    comparison_offsets_[ufo::VariableNames::SigBelow] = 1;
+    comparison_offsets_[ufo::VariableNames::SigAbove] = 1;
+    comparison_offsets_[ufo::VariableNames::IndStd] = 1;
+    comparison_offsets_[ufo::VariableNames::LevErrors] = 1;
+    comparison_offsets_[ufo::VariableNames::Indx] = 1;
 
     // List of checks performed
     std::vector <std::string> checks = options_.Checks.value();
@@ -40,74 +40,74 @@ namespace ufo {
     for (const auto& check : checks) {
       if (check == "Basic") {
       } else if (check == "SamePDiffT") {
-        valuesToCompare_int_.insert(ufo::VariableNames::name_counter_NumAnyErrors);
-        valuesToCompare_int_.insert(ufo::VariableNames::name_counter_NumSamePErrObs);
-        valuesToCompare_int_.insert(ufo::VariableNames::name_qc_tFlags);
+        valuesToCompare_int_.insert(ufo::VariableNames::counter_NumAnyErrors);
+        valuesToCompare_int_.insert(ufo::VariableNames::counter_NumSamePErrObs);
+        valuesToCompare_int_.insert(ufo::VariableNames::qcflags_air_temperature);
       } else if (check == "Sign") {
-        valuesToCompare_int_.insert(ufo::VariableNames::name_counter_NumAnyErrors);
-        valuesToCompare_int_.insert(ufo::VariableNames::name_counter_NumSignChange);
-        valuesToCompare_int_.insert(ufo::VariableNames::name_qc_tFlags);
+        valuesToCompare_int_.insert(ufo::VariableNames::counter_NumAnyErrors);
+        valuesToCompare_int_.insert(ufo::VariableNames::counter_NumSignChange);
+        valuesToCompare_int_.insert(ufo::VariableNames::qcflags_air_temperature);
       } else if (check == "UnstableLayer") {
-        valuesToCompare_int_.insert(ufo::VariableNames::name_qc_tFlags);
-        valuesToCompare_int_.insert(ufo::VariableNames::name_counter_NumAnyErrors);
-        valuesToCompare_int_.insert(ufo::VariableNames::name_counter_NumSuperadiabat);
-        valuesToCompare_float_.insert(ufo::VariableNames::name_PBottom);
+        valuesToCompare_int_.insert(ufo::VariableNames::qcflags_air_temperature);
+        valuesToCompare_int_.insert(ufo::VariableNames::counter_NumAnyErrors);
+        valuesToCompare_int_.insert(ufo::VariableNames::counter_NumSuperadiabat);
+        valuesToCompare_float_.insert(ufo::VariableNames::PBottom);
       } else if (check == "Interpolation") {
-        valuesToCompare_int_.insert(ufo::VariableNames::name_counter_NumAnyErrors);
-        valuesToCompare_int_.insert(ufo::VariableNames::name_counter_NumInterpErrors);
-        valuesToCompare_int_.insert(ufo::VariableNames::name_counter_NumInterpErrObs);
-        valuesToCompare_int_.insert(ufo::VariableNames::name_qc_tFlags);
-        valuesToCompare_int_.insert(ufo::VariableNames::name_NumStd);
-        valuesToCompare_int_.insert(ufo::VariableNames::name_NumSig);
-        valuesToCompare_int_.insert(ufo::VariableNames::name_StdLev);
-        valuesToCompare_int_.insert(ufo::VariableNames::name_SigBelow);
-        valuesToCompare_int_.insert(ufo::VariableNames::name_SigAbove);
-        valuesToCompare_int_.insert(ufo::VariableNames::name_IndStd);
-        valuesToCompare_int_.insert(ufo::VariableNames::name_LevErrors);
-        valuesToCompare_float_.insert(ufo::VariableNames::name_tInterp);
-        valuesToCompare_float_.insert(ufo::VariableNames::name_LogP);
+        valuesToCompare_int_.insert(ufo::VariableNames::counter_NumAnyErrors);
+        valuesToCompare_int_.insert(ufo::VariableNames::counter_NumInterpErrors);
+        valuesToCompare_int_.insert(ufo::VariableNames::counter_NumInterpErrObs);
+        valuesToCompare_int_.insert(ufo::VariableNames::qcflags_air_temperature);
+        valuesToCompare_int_.insert(ufo::VariableNames::NumStd);
+        valuesToCompare_int_.insert(ufo::VariableNames::NumSig);
+        valuesToCompare_int_.insert(ufo::VariableNames::StdLev);
+        valuesToCompare_int_.insert(ufo::VariableNames::SigBelow);
+        valuesToCompare_int_.insert(ufo::VariableNames::SigAbove);
+        valuesToCompare_int_.insert(ufo::VariableNames::IndStd);
+        valuesToCompare_int_.insert(ufo::VariableNames::LevErrors);
+        valuesToCompare_float_.insert(ufo::VariableNames::tInterp);
+        valuesToCompare_float_.insert(ufo::VariableNames::LogP);
       } else if (check == "Hydrostatic") {
-        valuesToCompare_int_.insert(ufo::VariableNames::name_counter_NumAnyErrors);
-        valuesToCompare_int_.insert(ufo::VariableNames::name_counter_Num925Miss);
-        valuesToCompare_int_.insert(ufo::VariableNames::name_counter_Num100Miss);
-        valuesToCompare_int_.insert(ufo::VariableNames::name_counter_NumStdMiss);
-        valuesToCompare_int_.insert(ufo::VariableNames::name_counter_NumHydErrObs);
-        valuesToCompare_int_.insert(ufo::VariableNames::name_counter_NumIntHydErrors);
-        valuesToCompare_int_.insert(ufo::VariableNames::name_qc_tFlags);
-        valuesToCompare_int_.insert(ufo::VariableNames::name_qc_zFlags);
-        valuesToCompare_float_.insert(ufo::VariableNames::name_DC);
-        valuesToCompare_float_.insert(ufo::VariableNames::name_ETol);
-        valuesToCompare_float_.insert(ufo::VariableNames::name_D);
-        valuesToCompare_float_.insert(ufo::VariableNames::name_E);
-        valuesToCompare_int_.insert(ufo::VariableNames::name_HydError);
+        valuesToCompare_int_.insert(ufo::VariableNames::counter_NumAnyErrors);
+        valuesToCompare_int_.insert(ufo::VariableNames::counter_Num925Miss);
+        valuesToCompare_int_.insert(ufo::VariableNames::counter_Num100Miss);
+        valuesToCompare_int_.insert(ufo::VariableNames::counter_NumStdMiss);
+        valuesToCompare_int_.insert(ufo::VariableNames::counter_NumHydErrObs);
+        valuesToCompare_int_.insert(ufo::VariableNames::counter_NumIntHydErrors);
+        valuesToCompare_int_.insert(ufo::VariableNames::qcflags_air_temperature);
+        valuesToCompare_int_.insert(ufo::VariableNames::qcflags_geopotential_height);
+        valuesToCompare_float_.insert(ufo::VariableNames::DC);
+        valuesToCompare_float_.insert(ufo::VariableNames::ETol);
+        valuesToCompare_float_.insert(ufo::VariableNames::D);
+        valuesToCompare_float_.insert(ufo::VariableNames::E);
+        valuesToCompare_int_.insert(ufo::VariableNames::HydError);
       } else if (check == "UInterp") {
-        valuesToCompare_int_.insert(ufo::VariableNames::name_counter_NumSamePErrObs);
-        valuesToCompare_int_.insert(ufo::VariableNames::name_counter_NumInterpErrObs);
-        valuesToCompare_int_.insert(ufo::VariableNames::name_qc_uFlags);
-        valuesToCompare_float_.insert(ufo::VariableNames::name_uInterp);
-        valuesToCompare_float_.insert(ufo::VariableNames::name_vInterp);
-        valuesToCompare_int_.insert(ufo::VariableNames::name_NumStd);
-        valuesToCompare_int_.insert(ufo::VariableNames::name_NumSig);
-        valuesToCompare_int_.insert(ufo::VariableNames::name_StdLev);
-        valuesToCompare_int_.insert(ufo::VariableNames::name_SigBelow);
-        valuesToCompare_int_.insert(ufo::VariableNames::name_SigAbove);
-        valuesToCompare_int_.insert(ufo::VariableNames::name_LevErrors);
-        valuesToCompare_float_.insert(ufo::VariableNames::name_LogP);
+        valuesToCompare_int_.insert(ufo::VariableNames::counter_NumSamePErrObs);
+        valuesToCompare_int_.insert(ufo::VariableNames::counter_NumInterpErrObs);
+        valuesToCompare_int_.insert(ufo::VariableNames::qcflags_eastward_wind);
+        valuesToCompare_float_.insert(ufo::VariableNames::uInterp);
+        valuesToCompare_float_.insert(ufo::VariableNames::vInterp);
+        valuesToCompare_int_.insert(ufo::VariableNames::NumStd);
+        valuesToCompare_int_.insert(ufo::VariableNames::NumSig);
+        valuesToCompare_int_.insert(ufo::VariableNames::StdLev);
+        valuesToCompare_int_.insert(ufo::VariableNames::SigBelow);
+        valuesToCompare_int_.insert(ufo::VariableNames::SigAbove);
+        valuesToCompare_int_.insert(ufo::VariableNames::LevErrors);
+        valuesToCompare_float_.insert(ufo::VariableNames::LogP);
       } else if (check == "RH") {
-        valuesToCompare_int_.insert(ufo::VariableNames::name_qc_RHFlags);
-        valuesToCompare_int_.insert(ufo::VariableNames::name_counter_TotCProfs);
-        valuesToCompare_int_.insert(ufo::VariableNames::name_counter_TotHProfs);
-        valuesToCompare_int_.insert(ufo::VariableNames::name_counter_TotCFlags);
-        valuesToCompare_int_.insert(ufo::VariableNames::name_counter_TotHFlags);
-        valuesToCompare_int_.insert(ufo::VariableNames::name_counter_TotLFlags);
-        valuesToCompare_float_.insert(ufo::VariableNames::name_Press);
-        valuesToCompare_float_.insert(ufo::VariableNames::name_Temp);
-        valuesToCompare_float_.insert(ufo::VariableNames::name_rh);
-        valuesToCompare_float_.insert(ufo::VariableNames::name_td);
-        valuesToCompare_float_.insert(ufo::VariableNames::name_tbk);
-        valuesToCompare_float_.insert(ufo::VariableNames::name_rhbk);
-        valuesToCompare_int_.insert(ufo::VariableNames::name_FlagH);
-        valuesToCompare_int_.insert(ufo::VariableNames::name_Indx);
+        valuesToCompare_int_.insert(ufo::VariableNames::qcflags_relative_humidity);
+        valuesToCompare_int_.insert(ufo::VariableNames::counter_TotCProfs);
+        valuesToCompare_int_.insert(ufo::VariableNames::counter_TotHProfs);
+        valuesToCompare_int_.insert(ufo::VariableNames::counter_TotCFlags);
+        valuesToCompare_int_.insert(ufo::VariableNames::counter_TotHFlags);
+        valuesToCompare_int_.insert(ufo::VariableNames::counter_TotLFlags);
+        valuesToCompare_float_.insert(ufo::VariableNames::Press);
+        valuesToCompare_float_.insert(ufo::VariableNames::Temp);
+        valuesToCompare_float_.insert(ufo::VariableNames::rh);
+        valuesToCompare_float_.insert(ufo::VariableNames::td);
+        valuesToCompare_float_.insert(ufo::VariableNames::tbk);
+        valuesToCompare_float_.insert(ufo::VariableNames::rhbk);
+        valuesToCompare_int_.insert(ufo::VariableNames::FlagH);
+        valuesToCompare_int_.insert(ufo::VariableNames::Indx);
       }
     }
   }
@@ -141,15 +141,15 @@ namespace ufo {
     if (oops::anyVectorEmpty(vec1, vec2))
       {
         if (vec1.empty())
-          oops::Log::warning() << "Vector of " << desc << " in OPS output is empty" << std::endl;
+          oops::Log::debug() << "Vector of " << desc << " in OPS output is empty" << std::endl;
         if (vec2.empty())
-          oops::Log::warning() << "Vector of " << desc << " in this code is empty" << std::endl;
+          oops::Log::debug() << "Vector of " << desc << " in this code is empty" << std::endl;
         return;
       }
     // Warn if vectors are different size but allow to continue
     if (!oops::allVectorsSameSize(vec1, vec2))
       {
-        oops::Log::warning() << "Vectors to be compared for "
+        oops::Log::debug() << "Vectors to be compared for "
                              << desc << " are of different size (" << vec1.size()
                              << " and " << vec2.size() << "). "
                              << "Will compare entries until reaching the end of the shorter "

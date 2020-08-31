@@ -26,44 +26,44 @@ namespace ufo {
 
     const int numLevelsToCheck = profileIndices_.getNumLevelsToCheck();
     const std::vector <float> &pressures =
-       profileDataHandler_.get<float>(ufo::VariableNames::name_air_pressure);
+       profileDataHandler_.get<float>(ufo::VariableNames::obs_air_pressure);
     const std::vector <float> &tObs =
-       profileDataHandler_.get<float>(ufo::VariableNames::name_obs_air_temperature);
+       profileDataHandler_.get<float>(ufo::VariableNames::obs_air_temperature);
     const std::vector <float> &tBkg =
-       profileDataHandler_.get<float>(ufo::VariableNames::name_hofx_air_temperature);
+       profileDataHandler_.get<float>(ufo::VariableNames::hofx_air_temperature);
     const std::vector <float> &RHObs =
-       profileDataHandler_.get<float>(ufo::VariableNames::name_obs_relative_humidity);
+       profileDataHandler_.get<float>(ufo::VariableNames::obs_relative_humidity);
     const std::vector <float> &RHBkg =
-       profileDataHandler_.get<float>(ufo::VariableNames::name_hofx_relative_humidity);
+       profileDataHandler_.get<float>(ufo::VariableNames::hofx_relative_humidity);
     const std::vector <float> &tdObs =
-       profileDataHandler_.get<float>(ufo::VariableNames::name_obs_dew_point_temperature);
+       profileDataHandler_.get<float>(ufo::VariableNames::obs_dew_point_temperature);
     const std::vector <int> &tFlags =
-       profileDataHandler_.get<int>(ufo::VariableNames::name_qc_tFlags);
+       profileDataHandler_.get<int>(ufo::VariableNames::qcflags_air_temperature);
     std::vector <int> &RHFlags =
-       profileDataHandler_.get<int>(ufo::VariableNames::name_qc_RHFlags);
+       profileDataHandler_.get<int>(ufo::VariableNames::qcflags_relative_humidity);
     const std::vector <float> &tObsCorrection =
-       profileDataHandler_.get<float>(ufo::VariableNames::name_tObsCorrection);
+       profileDataHandler_.get<float>(ufo::VariableNames::obscorrection_air_temperature);
 
     std::vector <int> &TotCProfs =
-       profileDataHandler_.get<int>(ufo::VariableNames::name_counter_TotCProfs);
+       profileDataHandler_.get<int>(ufo::VariableNames::counter_TotCProfs);
     std::vector <int> &TotHProfs =
-       profileDataHandler_.get<int>(ufo::VariableNames::name_counter_TotHProfs);
+       profileDataHandler_.get<int>(ufo::VariableNames::counter_TotHProfs);
     std::vector <int> &TotCFlags =
-       profileDataHandler_.get<int>(ufo::VariableNames::name_counter_TotCFlags);
+       profileDataHandler_.get<int>(ufo::VariableNames::counter_TotCFlags);
     std::vector <int> &TotHFlags =
-       profileDataHandler_.get<int>(ufo::VariableNames::name_counter_TotHFlags);
+       profileDataHandler_.get<int>(ufo::VariableNames::counter_TotHFlags);
     std::vector <int> &TotLFlags =
-       profileDataHandler_.get<int>(ufo::VariableNames::name_counter_TotLFlags);
+       profileDataHandler_.get<int>(ufo::VariableNames::counter_TotLFlags);
 
     if (oops::anyVectorEmpty(pressures, tObs, tBkg, RHObs, RHBkg,
                              tdObs, tFlags, RHFlags, tObsCorrection)) {
-      oops::Log::warning() << "At least one vector is empty. "
+      oops::Log::debug() << "At least one vector is empty. "
                            << "Check will not be performed." << std::endl;
       return;
     }
     if (!oops::allVectorsSameSize(pressures, tObs, tBkg, RHObs, RHBkg,
                                   tdObs, tFlags, RHFlags, tObsCorrection)) {
-      oops::Log::warning() << "Not all vectors have the same size. "
+      oops::Log::debug() << "Not all vectors have the same size. "
                            << "Check will not be performed." << std::endl;
       return;
     }
@@ -194,13 +194,13 @@ namespace ufo {
 
   void ProfileCheckRH::fillValidator()
   {
-    profileDataHandler_.set(ufo::VariableNames::name_Press, std::move(Press_));
-    profileDataHandler_.set(ufo::VariableNames::name_Temp, std::move(Temp_));
-    profileDataHandler_.set(ufo::VariableNames::name_rh, std::move(rh_));
-    profileDataHandler_.set(ufo::VariableNames::name_td, std::move(td_));
-    profileDataHandler_.set(ufo::VariableNames::name_tbk, std::move(tbk_));
-    profileDataHandler_.set(ufo::VariableNames::name_rhbk, std::move(rhbk_));
-    profileDataHandler_.set(ufo::VariableNames::name_FlagH, std::move(FlagH_));
-    profileDataHandler_.set(ufo::VariableNames::name_Indx, std::move(Indx_));
+    profileDataHandler_.set(ufo::VariableNames::Press, std::move(Press_));
+    profileDataHandler_.set(ufo::VariableNames::Temp, std::move(Temp_));
+    profileDataHandler_.set(ufo::VariableNames::rh, std::move(rh_));
+    profileDataHandler_.set(ufo::VariableNames::td, std::move(td_));
+    profileDataHandler_.set(ufo::VariableNames::tbk, std::move(tbk_));
+    profileDataHandler_.set(ufo::VariableNames::rhbk, std::move(rhbk_));
+    profileDataHandler_.set(ufo::VariableNames::FlagH, std::move(FlagH_));
+    profileDataHandler_.set(ufo::VariableNames::Indx, std::move(Indx_));
   }
 }  // namespace ufo

@@ -110,7 +110,7 @@ namespace ufo {
       // Print station ID if requested
       if (options_->PrintStationID.value()) {
         const std::vector <std::string> &station_ID =
-          profileDataHandler.get<std::string>(ufo::VariableNames::name_station_ID);
+          profileDataHandler.get<std::string>(ufo::VariableNames::station_ID);
         if (!station_ID.empty())
           oops::Log::debug() << "Station ID: " << station_ID[0] << std::endl;
       }

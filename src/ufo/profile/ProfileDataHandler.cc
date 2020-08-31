@@ -52,7 +52,7 @@ namespace ufo {
         }
       }
 
-      if (fullname == ufo::VariableNames::name_counter_NumAnyErrors) {
+      if (fullname == ufo::VariableNames::counter_NumAnyErrors) {
         const std::vector <int>& profileData = get<int>(fullname);
         std::vector <int>& entireSampleData = entireSampleDataHandler_.get<int>(fullname);
         const size_t profileNumCurrent = profileIndices_.getProfileNumCurrent();
@@ -69,8 +69,8 @@ namespace ufo {
 
   void ProfileDataHandler::setFinalReportFlags()
   {
-    std::vector <int> &ReportFlags = get<int>(ufo::VariableNames::name_qc_ReportFlags);
-    const std::vector <int> &NumAnyErrors = get<int>(ufo::VariableNames::name_counter_NumAnyErrors);
+    std::vector <int> &ReportFlags = get<int>(ufo::VariableNames::qcflags_observation_report);
+    const std::vector <int> &NumAnyErrors = get<int>(ufo::VariableNames::counter_NumAnyErrors);
     if (NumAnyErrors[0] > options_.nErrorsFail.value()) {
       oops::Log::debug() << " " << NumAnyErrors[0]
                          << " errors detected, whole profile rejected" << std::endl;

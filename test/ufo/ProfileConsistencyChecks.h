@@ -109,9 +109,9 @@ void testProfileConsistencyChecks(const eckit::LocalConfiguration &conf) {
     EntireSampleDataHandler entireSampleDataHandler(obsspace,
                                                     *options_);
     // Load data from obsspace
-    entireSampleDataHandler.get<float>(ufo::VariableNames::name_air_pressure);
+    entireSampleDataHandler.get<float>(ufo::VariableNames::obs_air_pressure);
     // Attempt to access data with incorrect type
-    EXPECT_THROWS(entireSampleDataHandler.get<int>(ufo::VariableNames::name_air_pressure));
+    EXPECT_THROWS(entireSampleDataHandler.get<int>(ufo::VariableNames::obs_air_pressure));
     std::vector<bool> apply(obsspace.nlocs(), true);
     ProfileIndices profileIndices(obsspace,
                                   *options_,
@@ -121,9 +121,9 @@ void testProfileConsistencyChecks(const eckit::LocalConfiguration &conf) {
                                           entireSampleDataHandler,
                                           profileIndices);
     // Obtain profile data
-    profileDataHandler.get<float>(ufo::VariableNames::name_air_pressure);
+    profileDataHandler.get<float>(ufo::VariableNames::obs_air_pressure);
     // Attempt to access data with incorrect type
-    EXPECT_THROWS(profileDataHandler.get<int>(ufo::VariableNames::name_air_pressure));
+    EXPECT_THROWS(profileDataHandler.get<int>(ufo::VariableNames::obs_air_pressure));
   }
 }
 

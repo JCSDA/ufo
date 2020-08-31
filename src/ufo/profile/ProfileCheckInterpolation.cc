@@ -29,29 +29,29 @@ namespace ufo {
     const int numLevelsToCheck = profileIndices_.getNumLevelsToCheck();
 
     const std::vector <float> &pressures =
-       profileDataHandler_.get<float>(ufo::VariableNames::name_air_pressure);
+       profileDataHandler_.get<float>(ufo::VariableNames::obs_air_pressure);
     const std::vector <float> &tObs =
-       profileDataHandler_.get<float>(ufo::VariableNames::name_obs_air_temperature);
+       profileDataHandler_.get<float>(ufo::VariableNames::obs_air_temperature);
     const std::vector <float> &tBkg =
-       profileDataHandler_.get<float>(ufo::VariableNames::name_hofx_air_temperature);
+       profileDataHandler_.get<float>(ufo::VariableNames::hofx_air_temperature);
     std::vector <int> &tFlags =
-       profileDataHandler_.get<int>(ufo::VariableNames::name_qc_tFlags);
+       profileDataHandler_.get<int>(ufo::VariableNames::qcflags_air_temperature);
     std::vector <int> &NumAnyErrors =
-       profileDataHandler_.get<int>(ufo::VariableNames::name_counter_NumAnyErrors);
+       profileDataHandler_.get<int>(ufo::VariableNames::counter_NumAnyErrors);
     std::vector <int> &NumInterpErrors =
-       profileDataHandler_.get<int>(ufo::VariableNames::name_counter_NumInterpErrors);
+       profileDataHandler_.get<int>(ufo::VariableNames::counter_NumInterpErrors);
     std::vector <int> &NumInterpErrObs =
-       profileDataHandler_.get<int>(ufo::VariableNames::name_counter_NumInterpErrObs);
+       profileDataHandler_.get<int>(ufo::VariableNames::counter_NumInterpErrObs);
     const std::vector <float> &tObsCorrection =
-       profileDataHandler_.get<float>(ufo::VariableNames::name_tObsCorrection);
+       profileDataHandler_.get<float>(ufo::VariableNames::obscorrection_air_temperature);
 
     if (oops::anyVectorEmpty(pressures, tObs, tBkg, tFlags, tObsCorrection)) {
-      oops::Log::warning() << "At least one vector is empty. "
+      oops::Log::debug() << "At least one vector is empty. "
                            << "Check will not be performed." << std::endl;
       return;
     }
     if (!oops::allVectorsSameSize(pressures, tObs, tBkg, tFlags, tObsCorrection)) {
-      oops::Log::warning() << "Not all vectors have the same size. "
+      oops::Log::debug() << "Not all vectors have the same size. "
                            << "Check will not be performed." << std::endl;
       return;
     }
@@ -142,17 +142,17 @@ namespace ufo {
 
   void ProfileCheckInterpolation::fillValidator()
   {
-    profileDataHandler_.set(ufo::VariableNames::name_StdLev, std::move(StdLev_));
-    profileDataHandler_.set(ufo::VariableNames::name_SigAbove, std::move(SigAbove_));
-    profileDataHandler_.set(ufo::VariableNames::name_SigBelow, std::move(SigBelow_));
-    profileDataHandler_.set(ufo::VariableNames::name_IndStd, std::move(IndStd_));
-    profileDataHandler_.set(ufo::VariableNames::name_LevErrors, std::move(LevErrors_));
-    profileDataHandler_.set(ufo::VariableNames::name_tInterp, std::move(tInterp_));
-    profileDataHandler_.set(ufo::VariableNames::name_LogP, std::move(LogP_));
+    profileDataHandler_.set(ufo::VariableNames::StdLev, std::move(StdLev_));
+    profileDataHandler_.set(ufo::VariableNames::SigAbove, std::move(SigAbove_));
+    profileDataHandler_.set(ufo::VariableNames::SigBelow, std::move(SigBelow_));
+    profileDataHandler_.set(ufo::VariableNames::IndStd, std::move(IndStd_));
+    profileDataHandler_.set(ufo::VariableNames::LevErrors, std::move(LevErrors_));
+    profileDataHandler_.set(ufo::VariableNames::tInterp, std::move(tInterp_));
+    profileDataHandler_.set(ufo::VariableNames::LogP, std::move(LogP_));
     std::vector <int> NumStd(profileIndices_.getNumLevelsToCheck(), std::move(NumStd_));
     std::vector <int> NumSig(profileIndices_.getNumLevelsToCheck(), std::move(NumSig_));
-    profileDataHandler_.set(ufo::VariableNames::name_NumStd, std::move(NumStd));
-    profileDataHandler_.set(ufo::VariableNames::name_NumSig, std::move(NumSig));
+    profileDataHandler_.set(ufo::VariableNames::NumStd, std::move(NumStd));
+    profileDataHandler_.set(ufo::VariableNames::NumSig, std::move(NumSig));
   }
 }  // namespace ufo
 
