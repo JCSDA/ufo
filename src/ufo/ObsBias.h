@@ -62,6 +62,7 @@ class ObsBias : public util::Printable,
 
   // Bias parameters interface
   const double & operator[](const unsigned int ii) const {return biascoeffs_[ii];}
+  double & operator[](const unsigned int ii) {return biascoeffs_[ii];}
 
   // Obs bias model
   void computeObsBias(ioda::ObsVector &, ObsDiagnostics &,

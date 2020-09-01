@@ -29,13 +29,13 @@ ObsBias::ObsBias(ioda::ObsSpace & odb, const eckit::Configuration & conf)
   : predbases_(0), jobs_(0), odb_(odb), conf_(conf) {
   oops::Log::trace() << "ObsBias::create starting." << std::endl;
 
-  /// Get the jobs(channels)
+  // Get the jobs(channels)
   if (conf_.has("obs bias.jobs")) {
     const std::set<int> jobs = oops::parseIntSet(conf_.getString("obs bias.jobs"));
     jobs_.assign(jobs.begin(), jobs.end());
   }
 
-  /// Predictor factory
+  // Predictor factory
   if (conf_.has("obs bias.predictors")) {
     std::vector<eckit::LocalConfiguration> confs;
     conf_.get("obs bias.predictors", confs);
@@ -46,7 +46,7 @@ ObsBias::ObsBias(ioda::ObsSpace & odb, const eckit::Configuration & conf)
       geovars_ += pred->requiredGeovars();
       hdiags_ += pred->requiredHdiagnostics();
 
-      /// Reserve the space for ObsBiasTerm for predictor
+      // Reserve the space for ObsBiasTerm for predictor
       if (jobs_.size() > 0) {
         for (auto & job : jobs_) {
           hdiags_ += oops::Variables({prednames_.back() + "_" + std::to_string(job)});
@@ -58,10 +58,10 @@ ObsBias::ObsBias(ioda::ObsSpace & odb, const eckit::Configuration & conf)
   }
 
   if (prednames_.size() * jobs_.size() > 0) {
-    /// Initialize the biascoeffs to ZERO
+    // Initialize the biascoeffs to ZERO
     biascoeffs_.resize(prednames_.size() * jobs_.size(), 0.0);
 
-    /// Read or initialize bias coefficients
+    // Read or initialize bias coefficients
     this->read(conf);
   }
 
@@ -76,10 +76,10 @@ ObsBias::ObsBias(const ObsBias & other, const bool copy)
     geovars_(other.geovars_), hdiags_(other.hdiags_) {
   oops::Log::trace() << "ObsBias::copy ctor starting." << std::endl;
 
-  /// Initialize the biascoeffs
+  // Initialize the biascoeffs
   biascoeffs_.resize(prednames_.size() * jobs_.size(), 0.0);
 
-  /// Copy the bias coeff data
+  // Copy the bias coeff data
   if (copy && biascoeffs_.size() > 0) *this = other;
 
   oops::Log::trace() << "ObsBias::copy ctor done." << std::endl;
@@ -113,15 +113,15 @@ ObsBias & ObsBias::operator=(const ObsBias & rhs) {
 void ObsBias::read(const eckit::Configuration & conf) {
   oops::Log::trace() << "ObsBias::read and initialize from file, starting "<< std::endl;
 
-  /// Bias coefficients input file name
+  // Bias coefficients input file name
   std::string input_filename;
   if (conf.has("obs bias.abias_in")) {
     input_filename = conf.getString("obs bias.abias_in");
     oops::Log::debug() << "ObsBias::initialize coefficients from file: "
                        << input_filename <<  std::endl;
 
-    /// Default predictor names from GSI
-    /// temporary solution, we should have a self-explanatory obsbias file
+    // Default predictor names from GSI
+    // temporary solution, we should have a self-explanatory obsbias file
     const std::vector<std::string> gsi_predictors = {"constant",
                                                      "zenith_angle",
                                                      "cloud_liquid_water",
@@ -137,7 +137,7 @@ void ObsBias::read(const eckit::Configuration & conf) {
                                                      };
     std::ifstream infile(input_filename);
 
-    /// get the sensor id
+    // get the sensor id
     std::string sensor = conf.getString("obs bias.sensor");
     oops::Log::debug() << "ObsBias::initialize coefficients for sensor: "
                        << sensor <<  std::endl;
@@ -199,7 +199,7 @@ void ObsBias::read(const eckit::Configuration & conf) {
 void ObsBias::write(const eckit::Configuration & conf) const {
   oops::Log::trace() << "ObsBias::write to file not implemented" << std::endl;
 
-  /// Bias coefficients output file name
+  // Bias coefficients output file name
   std::string output_filename;
   if (conf.has("ObsBias.abias_out")) {
     output_filename = conf.getString("ObsBias.abias_out");
@@ -269,7 +269,7 @@ void ObsBias::computeObsBias(ioda::ObsVector & ybias,
           biasTerm[jl] = predData[varname][jl] * coeffs(jp, jch);
           ybias[jl*njobs+jch] += biasTerm[jl];
         }
-        /// Save ObsBiasTerms (bias_coeff x predictor) for QC
+        // Save ObsBiasTerms (bias_coeff x predictor) for QC
         if (ydiags.has(varname)) {
           ydiags.save(biasTerm, varname, 1);
         } else {

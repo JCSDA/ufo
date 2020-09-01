@@ -262,7 +262,7 @@ list( APPEND ufo_test_data
   atmosphere/radar_rw_geoval_2019052222.nc4
   atmosphere/smap_geoval_2018041500_m.nc4
   atmosphere/satbias_crtm_in
-  atmosphere/satbias_crtm_in_test
+  atmosphere/satbias_crtm_pc
   atmosphere/satwind_geoval_2018041500_m.nc4
   atmosphere/satwind_geoval_2018041500_s.nc4
   atmosphere/sbuv2_n19_geoval_2018041500_m.nc4
@@ -1745,6 +1745,13 @@ ecbuild_add_test( TARGET  test_ufo_bias_increment_amsua
 
 ecbuild_add_test( TARGET  test_ufo_bias_covariance_amsua
                   SOURCES mains/TestObsBiasCovariance.cc
+                  ARGS    "testinput/amsua_crtm_bc.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  LIBS    ufo
+                  TEST_DEPENDS ufo_get_ioda_test_data )
+
+ecbuild_add_test( TARGET  test_ufo_bias_covariance_details
+                  SOURCES mains/TestObsBiasCovarianceDetails.cc
                   ARGS    "testinput/amsua_crtm_bc.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   LIBS    ufo

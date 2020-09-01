@@ -29,13 +29,13 @@ ObsBiasIncrement::ObsBiasIncrement(const ioda::ObsSpace & odb, const eckit::Conf
   : predbases_(0), jobs_(0), odb_(odb), conf_(conf) {
   oops::Log::trace() << "ObsBiasIncrement::create starting." << std::endl;
 
-  /// Get the jobs(channels)
+  // Get the jobs(channels)
   if (conf_.has("obs bias.jobs")) {
     const std::set<int> jobs = oops::parseIntSet(conf_.getString("obs bias.jobs"));
     jobs_.assign(jobs.begin(), jobs.end());
   }
 
-  /// Predictor factory
+  // Predictor factory
   if (conf_.has("obs bias.predictors")) {
     std::vector<eckit::LocalConfiguration> confs;
     conf_.get("obs bias.predictors", confs);
@@ -46,7 +46,7 @@ ObsBiasIncrement::ObsBiasIncrement(const ioda::ObsSpace & odb, const eckit::Conf
     }
   }
 
-  /// initialize bias coefficient perturbations
+  // initialize bias coefficient perturbations
   biascoeffsinc_.resize(prednames_.size()*jobs_.size(), 0.0);
 
   oops::Log::trace() << "ObsBiasIncrement::create done." << std::endl;
@@ -59,10 +59,10 @@ ObsBiasIncrement::ObsBiasIncrement(const ObsBiasIncrement & other, const bool co
     prednames_(other.prednames_), jobs_(other.jobs_) {
   oops::Log::trace() << "ObsBiasIncrement::copy ctor starting" << std::endl;
 
-  /// initialize bias coefficient perturbations
+  // initialize bias coefficient perturbations
   biascoeffsinc_.resize(prednames_.size()*jobs_.size(), 0.0);
 
-  /// Copy the bias model coeff data
+  // Copy the bias model coeff data
   if (biascoeffsinc_.size() > 0) *this = other;
 
   oops::Log::trace() << "ObsBiasIncrement::copy ctor done." << std::endl;
@@ -74,13 +74,13 @@ ObsBiasIncrement::ObsBiasIncrement(const ObsBiasIncrement & other,
                                    const eckit::Configuration & conf)
   : odb_(other.odb_), conf_(conf), predbases_(), prednames_(), jobs_() {
   oops::Log::trace() << "ObsBiasIncrement::copy ctor starting." << std::endl;
-  /// Get the jobs(channels)
+  // Get the jobs(channels)
   if (conf_.has("obs bias.jobs")) {
     const std::set<int> jobs = oops::parseIntSet(conf_.getString("obs bias.jobs"));
     jobs_.assign(jobs.begin(), jobs.end());
   }
 
-  /// Predictor factory
+  // Predictor factory
   if (conf_.has("obs bias.predictors")) {
     std::vector<eckit::LocalConfiguration> confs;
     conf_.get("obs bias.predictors", confs);
@@ -91,10 +91,10 @@ ObsBiasIncrement::ObsBiasIncrement(const ObsBiasIncrement & other,
     }
   }
 
-  /// initialize bias coefficient perturbations
+  // initialize bias coefficient perturbations
   biascoeffsinc_.resize(prednames_.size()*jobs_.size(), 0.0);
 
-  /// Copy the data
+  // Copy the data
   if (biascoeffsinc_.size() > 0) *this = other;
 
   oops::Log::trace() << "ObsBiasIncrement::copy ctor done." << std::endl;

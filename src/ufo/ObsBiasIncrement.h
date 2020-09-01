@@ -38,13 +38,13 @@ namespace ufo {
 
 class ObsBiasIncrement : public util::Printable {
  public:
-/// Constructor, destructor
+// Constructor, destructor
   ObsBiasIncrement(const ioda::ObsSpace &, const eckit::Configuration &);
   ObsBiasIncrement(const ObsBiasIncrement &, const bool = true);
   ObsBiasIncrement(const ObsBiasIncrement &, const eckit::Configuration &);
   ~ObsBiasIncrement() {}
 
-/// Linear algebra operators
+// Linear algebra operators
   void diff(const ObsBias &, const ObsBias &);
   void zero();
   ObsBiasIncrement & operator=(const ObsBiasIncrement &);
@@ -54,7 +54,7 @@ class ObsBiasIncrement : public util::Printable {
   void axpy(const double, const ObsBiasIncrement &);
   double dot_product_with(const ObsBiasIncrement &) const;
 
-/// I/O and diagnostics
+// I/O and diagnostics
   void read(const eckit::Configuration &) {}
   void write(const eckit::Configuration &) const {}
   double norm() const;
@@ -62,7 +62,7 @@ class ObsBiasIncrement : public util::Printable {
   double & operator[](const unsigned int ii) {return biascoeffsinc_[ii];}
   const double & operator[](const unsigned int ii) const {return biascoeffsinc_[ii];}
 
-/// Linear obs bias model
+// Linear obs bias model
   void computeObsBiasTL(const GeoVaLs &,
                         const ioda::ObsDataVector<double> &,
                         ioda::ObsVector &) const;
@@ -71,12 +71,12 @@ class ObsBiasIncrement : public util::Printable {
                         const ioda::ObsDataVector<double> &,
                         const ioda::ObsVector &);
 
-/// Serialize and deserialize
+// Serialize and deserialize
   std::size_t serialSize() const {return biascoeffsinc_.size();}
   void serialize(std::vector<double> &) const {}
   void deserialize(const std::vector<double> &, std::size_t &) {}
 
-/// Operator
+// Operator
   operator bool() const {return biascoeffsinc_.size() > 0;}
 
  private:
