@@ -319,7 +319,7 @@ Iterations: do iter = 1, self % max1DVarIterations
   ! Update RT-format guess profile
   call ufo_rttovonedvarcheck_ProfVec2GeoVaLs(geovals, profile_index, &
                                              ob, GuessProfile)
-  
+
   ! if qtotal in retrieval vector check cloud
   ! variables for current iteration
 
@@ -373,6 +373,13 @@ end do Iterations
 
 ! Pass convergence flag out
 onedvar_success = converged
+
+! Pass output profile, final BTs and final cost out
+if (converged) then
+  ob % output_profile(:) = GuessProfile(:)
+  ob % output_BT(:) = Y(:)
+  ob % final_cost = Jcost
+end if
 
 !---------------------
 ! 4. output diagnostics

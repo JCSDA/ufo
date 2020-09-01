@@ -115,7 +115,7 @@ subroutine ufo_rttovonedvarcheck_apply(self, vars, retrieval_vars, geovals, appl
   character(len=max_string)          :: var
   character(len=max_string)          :: varname
   character(len=max_string)          :: message
-  integer                            :: jvar, jobs, band, ii ! counters
+  integer                            :: jvar, ivar, jobs, band, ii ! counters
   integer                            :: nchans_used      ! counter for number of channels used for an ob
   integer                            :: jchans_used
   integer                            :: fileunit        ! unit number for reading in files
@@ -140,9 +140,6 @@ subroutine ufo_rttovonedvarcheck_apply(self, vars, retrieval_vars, geovals, appl
   if (len(trim(self % EmisEigVecPath)) > 4) &
     call IR_pcemis % setup(self % EmisEigVecPath)
 
-  ! Read in observation data from obsspace
-  call obs % setup(self, geovals, vars, IR_pcemis)
-
   ! Setup full B matrix object
   call full_bmatrix % setup(self % retrieval_variables, self % b_matrix_path, &
                             self % qtotal)
@@ -161,6 +158,9 @@ subroutine ufo_rttovonedvarcheck_apply(self, vars, retrieval_vars, geovals, appl
   ! Create profile index for mapping 1d-var profile to b-matrix
   call prof_index % setup(full_bmatrix)
 
+  ! Read in observation data from obsspace
+  call obs % setup(self, prof_index % nprofelements, geovals, vars, IR_pcemis)
+
   ! Initialize data arrays
   allocate(b_matrix(prof_index % nprofelements,prof_index % nprofelements))
   allocate(b_inverse(prof_index % nprofelements,prof_index % nprofelements))
@@ -172,6 +172,7 @@ subroutine ufo_rttovonedvarcheck_apply(self, vars, retrieval_vars, geovals, appl
   write(*,*) "Beginning observations loop: ",self%qcname
   apply_count = 0
   obs_loop: do jobs = 1, obs % iloc
+!  obs_loop: do jobs = 1, 1
     if (apply(jobs)) then
 
       apply_count = apply_count + 1
@@ -213,7 +214,7 @@ subroutine ufo_rttovonedvarcheck_apply(self, vars, retrieval_vars, geovals, appl
       end if
 
       ! setup ob data for this observation
-      call ob % setup(nchans_used)
+      call ob % setup(nchans_used, prof_index % nprofelements)
       call ob % init_emiss(self, local_geovals)
       ob % forward_mod_name = self % forward_mod_name
       ob % latitude = obs % lat(jobs)
@@ -270,6 +271,18 @@ subroutine ufo_rttovonedvarcheck_apply(self, vars, retrieval_vars, geovals, appl
                                       onedvar_success)
       end if
 
+      ! Output data to obs for output to the observation space
+      all_chans: do jvar = 1, self % nchans
+        do ivar = 1, jchans_used
+          if (ob % channels_used(ivar) == self % channels(jvar)) then
+            obs % output_BT(jvar, jobs) = ob % output_profile(ivar)
+            cycle all_chans
+          end if
+        end do
+      end do all_chans
+      obs % output_profile(:,jobs) = ob % output_profile(:)
+      obs % final_cost(jobs) = ob % final_cost
+
       ! Set QCflags based on output from minimization
       if (.NOT. onedvar_success) then
         do jvar = 1, self%nchans
@@ -303,7 +316,12 @@ subroutine ufo_rttovonedvarcheck_apply(self, vars, retrieval_vars, geovals, appl
   do jvar = 1, self%nchans
     var = vars%variable(jvar)
     call obsspace_put_db(self%obsdb, "FortranQC", trim(var), obs % QCflags(jvar,:))
+    call obsspace_put_db(self%obsdb, "OneDVar", trim(var), obs % output_BT(jvar,:))
   end do
+  call obsspace_put_db(self%obsdb, "OneDVar", "FinalCost", obs % final_cost(:))
+
+  ! Put retrieved profile, final cost function,
+  ! final BTs, surface-space transmittance back into database
 
   ! Tidy up memory used for all observations
   call full_bmatrix % delete()
@@ -311,9 +329,9 @@ subroutine ufo_rttovonedvarcheck_apply(self, vars, retrieval_vars, geovals, appl
   call obs % delete()
   call ufo_geovals_delete(hofxdiags)
   if (self % IRemiss) call IR_pcemis % delete()
-  if (allocated(b_matrix))   deallocate(b_matrix)
-  if (allocated(b_inverse))  deallocate(b_inverse)
-  if (allocated(b_sigma))    deallocate(b_sigma)
+  if (allocated(b_matrix))  deallocate(b_matrix)
+  if (allocated(b_inverse)) deallocate(b_inverse)
+  if (allocated(b_sigma))   deallocate(b_sigma)
 
 end subroutine ufo_rttovonedvarcheck_apply
 

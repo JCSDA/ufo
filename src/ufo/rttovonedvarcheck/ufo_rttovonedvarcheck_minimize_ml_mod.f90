@@ -89,8 +89,8 @@ subroutine ufo_rttovonedvarcheck_minimize_ml(self,      &
 
 implicit none
 
-type(ufo_rttovonedvarcheck), intent(inout) :: self  !< structure containing settings
-type(ufo_rttovonedvarcheck_ob), intent(inout) :: ob !< satellite metadata
+type(ufo_rttovonedvarcheck), intent(inout) :: self   !< structure containing settings
+type(ufo_rttovonedvarcheck_ob), intent(inout) :: ob  !< satellite metadata
 type(ufo_rttovonedvarcheck_rsubmatrix), intent(in) :: r_matrix !< observation error covariance
 real(kind_real), intent(in)       :: b_matrix(:,:)   !< state error covariance
 real(kind_real), intent(in)       :: b_inv(:,:)      !< inverse state error covariance
@@ -334,6 +334,13 @@ end do Iterations
 
 ! Pass convergence flag out
 onedvar_success = converged
+
+! Pass profile, final BT and final cost out
+if (converged) then
+  ob % output_profile(:) = GuessProfile(:)
+  ob % output_BT(:) = Y(:)
+  ob % final_cost = Jcost
+end if
 
 if (self % FullDiagnostics) then
   write(*,*) "----------------------------"

@@ -35,7 +35,10 @@ real(kind_real), allocatable :: sat_azi(:)      ! observation satellite azimuth 
 real(kind_real), allocatable :: sol_zen(:)      ! observation solar zenith angle
 real(kind_real), allocatable :: sol_azi(:)      ! observation solar azimuth angle
 real(kind_real), allocatable :: surface_type(:) ! surface type
+real(kind_real), allocatable :: final_cost(:)   ! final cost at solution
 real(kind_real), allocatable :: emiss(:,:)      ! initial surface emissivity
+real(kind_real), allocatable :: output_profile(:,:) ! output profile
+real(kind_real), allocatable :: output_BT(:,:)  ! output brightness temperature
 logical, allocatable         :: calc_emiss(:)   ! flag to request RTTOV calculate first guess emissivity
 
 contains
@@ -55,6 +58,7 @@ contains
 !!
 subroutine ufo_rttovonedvarcheck_obs_setup(self,     & ! out
                                            config,   & ! in
+                                           nprofelements, & ! in
                                            geovals,  & ! in
                                            vars,     & ! in
                                            ir_pcemis )
@@ -64,6 +68,7 @@ implicit none
 ! subroutine arguments:
 class(ufo_rttovonedvarcheck_obs), intent(out) :: self !< observation metadata type
 type(ufo_rttovonedvarcheck), intent(in)       :: config !< observation metadata type
+integer, intent(in)                           :: nprofelements !< number of profile elements
 type(ufo_geovals), intent(in)                 :: geovals  !< model data at obs location
 type(oops_variables), intent(in)              :: vars     !< channels for 1D-Var
 type(ufo_rttovonedvarcheck_pcemis)            :: ir_pcemis  !< Infrared principal components object
@@ -92,22 +97,28 @@ allocate(self % sat_azi(self % iloc))
 allocate(self % sol_zen(self % iloc))
 allocate(self % sol_azi(self % iloc))
 allocate(self % surface_type(self % iloc))
+allocate(self % final_cost(self % iloc))
 allocate(self % emiss(config % nchans, self % iloc))
+allocate(self % output_profile(nprofelements, self % iloc))
+allocate(self % output_BT(config % nchans, self % iloc))
 allocate(self % calc_emiss(self % iloc))
 
 ! initialize arrays
-self % yobs(:,:) = 0.0
+self % yobs(:,:) = missing
 self % ybias(:,:) = 0.0
 self % QCflags(:,:) = 0
-self % lat(:) = 0.0
-self % lon(:) = 0.0
-self % elevation(:) = 0.0
-self % sat_zen(:) = 0.0
-self % sat_azi(:) = 0.0
-self % sol_zen(:) = 0.0
-self % sol_azi(:) = 0.0
+self % lat(:) = missing
+self % lon(:) = missing
+self % elevation(:) = missing
+self % sat_zen(:) = missing
+self % sat_azi(:) = missing
+self % sol_zen(:) = missing
+self % sol_azi(:) = missing
 self % surface_type = RTSea
+self % final_cost = missing
 self % emiss(:,:) = 0.0
+self % output_profile(:,:) = missing
+self % output_BT(:,:) = missing
 self % calc_emiss(:) = .true.
 
 ! read in observations and associated errors / biases for full ObsSpace
@@ -207,7 +218,10 @@ if (allocated(self % sat_azi))    deallocate(self % sat_azi)
 if (allocated(self % sol_zen))    deallocate(self % sol_zen)
 if (allocated(self % sol_azi))    deallocate(self % sol_azi)
 if (allocated(self % surface_type)) deallocate(self % surface_type)
-if (allocated(self % emiss))      deallocate(self % emiss)
+if (allocated(self % final_cost))   deallocate(self % final_cost)
+if (allocated(self % emiss))        deallocate(self % emiss)
+if (allocated(self % output_profile)) deallocate(self % output_profile)
+if (allocated(self % output_BT))  deallocate(self % output_BT)
 if (allocated(self % calc_emiss)) deallocate(self % calc_emiss)
 
 end subroutine ufo_rttovonedvarcheck_obs_delete

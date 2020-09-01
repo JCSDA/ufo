@@ -37,7 +37,7 @@ type, public :: ufo_rttovonedvarcheck
   type(fckit_configuration)        :: conf  !< contents of the yaml file
   integer(c_int)                   :: onedvarflag !< flag uased by the qc manager for a 1D-var check
   integer                          :: nlevels ! number 1D-Var model levels
-  integer                          :: nmvars !< number of variables being used in the retrieval 
+  integer                          :: nmvars !< number of variables being used in the retrieval
   integer                          :: nchans !< maximum number of channels (channels can be removed by previous qc checks)
   integer(c_int), allocatable      :: channels(:) !< integer list of channels
   logical                          :: qtotal !< flag to enable total humidity retrievals

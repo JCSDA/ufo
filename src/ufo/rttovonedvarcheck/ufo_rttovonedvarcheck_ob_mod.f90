@@ -33,8 +33,11 @@ type, public :: ufo_rttovonedvarcheck_ob
   real(kind_real)      :: solar_azimuth_angle  !< solar azimuth of observation
   real(kind_real)      :: cloudtopp !< cloud top pressure (used in if cloudy retrieval used)
   real(kind_real)      :: cloudfrac !< cloud fraction (used in if cloudy retrieval used)
+  real(kind_real)      :: final_cost !< final cost at solution
   real(kind_real), allocatable :: yobs(:) !< satellite BTs
   real(kind_real), allocatable :: emiss(:) !< surface emissivity
+  real(kind_real), allocatable :: output_profile(:) !< retrieved state at converge as profile vector
+  real(kind_real), allocatable :: output_BT(:) !< Brightness temperatures using retrieved state
   logical              :: retrievecloud  !< flag to turn on retrieve cloud
   logical              :: mwscatt !< flag to use rttov-scatt model through the interface
   logical              :: mwscatt_totalice !< flag to use total ice (rather then ciw) for rttov-scatt simulations
@@ -59,13 +62,15 @@ contains
 !! \date 09/06/2020: Created
 !!
 subroutine ufo_rttovonedvarcheck_InitOb(self, & ! out
-                                        nchans) ! in 
+                                        nchans, &  ! in
+                                        nprofelements ) ! in
 
 implicit none
 
 ! subroutine arguments:
 class(ufo_rttovonedvarcheck_ob), intent(out) :: self !< observation metadata type
 integer, intent(in) :: nchans !< number of channels used for this particular observation
+integer, intent(in) :: nprofelements !< number of profile elements used
 
 character(len=*), parameter :: routinename = "ufo_rttovonedvarcheck_InitOb"
 real(kind_real) :: missing
@@ -77,10 +82,14 @@ call self % delete()
 allocate(self % yobs(nchans))
 allocate(self % channels_used(nchans))
 allocate(self % emiss(nchans))
+allocate(self % output_profile(nprofelements))
+allocate(self % output_BT(nchans))
 allocate(self % calc_emiss(nchans))
 
-self % yobs(nchans) = missing
+self % yobs(:) = missing
 self % emiss(:) = 0.0
+self % output_profile(:) = missing
+self % output_BT(:) = missing
 self % calc_emiss(:) = .false.
 
 end subroutine ufo_rttovonedvarcheck_InitOb
@@ -147,26 +156,32 @@ implicit none
 class(ufo_rttovonedvarcheck_ob), intent(inout) :: self !< observation metadata type
 
 character(len=*), parameter :: routinename = "ufo_rttovonedvarcheck_DeleteOb"
+real(kind_real) :: missing
+
+missing = missing_value(missing)
 
 self % nlocs = 1
-self % latitude = 0.0
-self % longitude = 0.0
-self % elevation = 0.0
+self % latitude = missing
+self % longitude = missing
+self % elevation = missing
 self % surface_type = 0
-self % sensor_zenith_angle = 0.0
-self % sensor_azimuth_angle = 0.0
-self % solar_zenith_angle = 0.0
-self % solar_azimuth_angle = 0.0
+self % sensor_zenith_angle = missing
+self % sensor_azimuth_angle = missing
+self % solar_zenith_angle = missing
+self % solar_azimuth_angle = missing
 self % cloudtopp = 500.0
 self % cloudfrac = 0.0
+self % final_cost = missing
 self % retrievecloud = .false.
 self % mwscatt = .false.
 self % mwscatt_totalice = .false.
 
-if (allocated(self % yobs))          deallocate(self % yobs)
-if (allocated(self % channels_used)) deallocate(self % channels_used)
-if (allocated(self % emiss))         deallocate(self % emiss)
-if (allocated(self % calc_emiss))    deallocate(self % calc_emiss)
+if (allocated(self % yobs))           deallocate(self % yobs)
+if (allocated(self % channels_used))  deallocate(self % channels_used)
+if (allocated(self % emiss))          deallocate(self % emiss)
+if (allocated(self % output_profile)) deallocate(self % output_profile)
+if (allocated(self % output_BT))      deallocate(self % output_BT)
+if (allocated(self % calc_emiss))     deallocate(self % calc_emiss)
 
 self % pcemis => null()
 
@@ -203,6 +218,8 @@ write(*,*) "Surface type for RTTOV: ",surface_type
 write(*,"(A,F8.2)") "Surface height:",self % elevation
 write(*,"(A,F8.2)") "Satellite zenith angle: ",self % sensor_zenith_angle
 write(*,"(A,F8.2)") "Solar zenith angle: ",self % solar_zenith_angle
+
+write(*,"(A,F8.2)") "Output Profile: ",self % output_profile
 
 end subroutine
 
