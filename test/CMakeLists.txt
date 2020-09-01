@@ -74,6 +74,7 @@ list( APPEND ufo_test_input
   testinput/function_hydrometeorchk_atms.yaml
   testinput/function_nsstret.yaml
   testinput/function_obserrmean.yaml
+  testinput/function_obserrmean_abi.yaml
   testinput/function_obserrmean_atms.yaml
   testinput/function_scatret.yaml
   testinput/function_scatret_atms.yaml
@@ -191,7 +192,9 @@ ecbuild_add_resources( TARGET ufo_test_scripts
 
 # Create Data directory for test data and symlink files
 list( APPEND ufo_test_data
+  atmosphere/abi_g16_geoval_2018041500_m_qc.nc4
   atmosphere/abi_g16_geoval_2019042306_m.nc4
+  atmosphere/abi_g16_obsdiag_2018041500_m_qc.nc4
   atmosphere/ahi_himawari8_geoval_2019042306_m.nc4
   atmosphere/aircraft_geoval_2018041500_m.nc4
   atmosphere/aircraft_geoval_2018041500_s.nc4
@@ -1411,6 +1414,13 @@ ecbuild_add_test( TARGET  test_ufo_function_nsstret
 ecbuild_add_test( TARGET  test_ufo_function_obserrmean
                   SOURCES mains/TestObsFunction.cc
                   ARGS    "testinput/function_obserrmean.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  LIBS    ufo
+                  TEST_DEPENDS ufo_get_ioda_test_data )
+
+ecbuild_add_test( TARGET  test_ufo_function_obserrmean_abi
+                  SOURCES mains/TestObsFunction.cc
+                  ARGS    "testinput/function_obserrmean_abi.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   LIBS    ufo
                   TEST_DEPENDS ufo_get_ioda_test_data )

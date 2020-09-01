@@ -35,7 +35,7 @@ namespace ufo {
 
     // Write out the NumAnyErrors counter, which is used in multiple QC checks.
     const std::vector <int> &NumAnyErrors =
-      get<int>(ufo::VariableNames::name_counter_NumAnyErrors);
-    putDataVector(ufo::VariableNames::name_counter_NumAnyErrors, NumAnyErrors);
+      get<int>(ufo::VariableNames::counter_NumAnyErrors);
+    putDataVector(ufo::VariableNames::counter_NumAnyErrors, NumAnyErrors);
   }
 }  // namespace ufo

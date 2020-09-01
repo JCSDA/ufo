@@ -27,45 +27,45 @@ namespace ufo {
     const int numLevelsToCheck = profileIndices_.getNumLevelsToCheck();
 
     const std::vector <float> &pressures =
-       profileDataHandler_.get<float>(ufo::VariableNames::name_air_pressure);
+       profileDataHandler_.get<float>(ufo::VariableNames::obs_air_pressure);
     const std::vector <float> &tObs =
-       profileDataHandler_.get<float>(ufo::VariableNames::name_obs_air_temperature);
+       profileDataHandler_.get<float>(ufo::VariableNames::obs_air_temperature);
     const std::vector <float> &tBkg =
-       profileDataHandler_.get<float>(ufo::VariableNames::name_hofx_air_temperature);
+       profileDataHandler_.get<float>(ufo::VariableNames::hofx_air_temperature);
     const std::vector <float> &zObs =
-       profileDataHandler_.get<float>(ufo::VariableNames::name_obs_geopotential_height);
+       profileDataHandler_.get<float>(ufo::VariableNames::obs_geopotential_height);
     const std::vector <float> &zBkg =
-       profileDataHandler_.get<float>(ufo::VariableNames::name_hofx_geopotential_height);
+       profileDataHandler_.get<float>(ufo::VariableNames::hofx_geopotential_height);
     std::vector <int> &tFlags =
-       profileDataHandler_.get<int>(ufo::VariableNames::name_qc_tFlags);
+       profileDataHandler_.get<int>(ufo::VariableNames::qcflags_air_temperature);
     std::vector <int> &zFlags =
-       profileDataHandler_.get<int>(ufo::VariableNames::name_qc_zFlags);
+       profileDataHandler_.get<int>(ufo::VariableNames::qcflags_geopotential_height);
     std::vector <int> &NumAnyErrors =
-       profileDataHandler_.get<int>(ufo::VariableNames::name_counter_NumAnyErrors);
+       profileDataHandler_.get<int>(ufo::VariableNames::counter_NumAnyErrors);
     std::vector <int> &Num925Miss =
-       profileDataHandler_.get<int>(ufo::VariableNames::name_counter_Num925Miss);
+       profileDataHandler_.get<int>(ufo::VariableNames::counter_Num925Miss);
     std::vector <int> &Num100Miss =
-       profileDataHandler_.get<int>(ufo::VariableNames::name_counter_Num100Miss);
+       profileDataHandler_.get<int>(ufo::VariableNames::counter_Num100Miss);
     std::vector <int> &NumStdMiss =
-       profileDataHandler_.get<int>(ufo::VariableNames::name_counter_NumStdMiss);
+       profileDataHandler_.get<int>(ufo::VariableNames::counter_NumStdMiss);
     std::vector <int> &NumHydErrObs =
-       profileDataHandler_.get<int>(ufo::VariableNames::name_counter_NumHydErrObs);
+       profileDataHandler_.get<int>(ufo::VariableNames::counter_NumHydErrObs);
     std::vector <int> &NumIntHydErrors =
-       profileDataHandler_.get<int>(ufo::VariableNames::name_counter_NumIntHydErrors);
+       profileDataHandler_.get<int>(ufo::VariableNames::counter_NumIntHydErrors);
     const std::vector <float> &tObsCorrection =
-       profileDataHandler_.get<float>(ufo::VariableNames::name_tObsCorrection);
+       profileDataHandler_.get<float>(ufo::VariableNames::obscorrection_air_temperature);
     std::vector <float> &zObsCorrection =
-       profileDataHandler_.get<float>(ufo::VariableNames::name_zObsCorrection);
+       profileDataHandler_.get<float>(ufo::VariableNames::obscorrection_geopotential_height);
 
     if (oops::anyVectorEmpty(pressures, tObs, tBkg, zObs, zBkg, tFlags, zFlags,
                              tObsCorrection, zObsCorrection)) {
-      oops::Log::warning() << "At least one vector is empty. "
+      oops::Log::debug() << "At least one vector is empty. "
                            << "Check will not be performed." << std::endl;
       return;
     }
     if (!oops::allVectorsSameSize(pressures, tObs, tBkg, zObs, zBkg, tFlags, zFlags,
                                   tObsCorrection, zObsCorrection)) {
-      oops::Log::warning() << "Not all vectors have the same size. "
+      oops::Log::debug() << "Not all vectors have the same size. "
                            << "Check will not be performed." << std::endl;
       return;
     }
@@ -362,11 +362,11 @@ namespace ufo {
 
   void ProfileCheckHydrostatic::fillValidator()
   {
-    profileDataHandler_.set(ufo::VariableNames::name_DC, std::move(DC_));
-    profileDataHandler_.set(ufo::VariableNames::name_ETol, std::move(ETol_));
-    profileDataHandler_.set(ufo::VariableNames::name_D, std::move(D_));
-    profileDataHandler_.set(ufo::VariableNames::name_E, std::move(E_));
-    profileDataHandler_.set(ufo::VariableNames::name_HydError, std::move(HydError_));
+    profileDataHandler_.set(ufo::VariableNames::DC, std::move(DC_));
+    profileDataHandler_.set(ufo::VariableNames::ETol, std::move(ETol_));
+    profileDataHandler_.set(ufo::VariableNames::D, std::move(D_));
+    profileDataHandler_.set(ufo::VariableNames::E, std::move(E_));
+    profileDataHandler_.set(ufo::VariableNames::HydError, std::move(HydError_));
   }
 }  // namespace ufo
 

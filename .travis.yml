@@ -150,7 +150,7 @@ script:
   - docker exec jcsda_container bash -c 'cd /build_container && cmake -DCMAKE_MODULE_PATH=/usr/local/share/ecbuild/cmake/ -DCMAKE_BUILD_TYPE=Debug -DENABLE_GPROF=ON  /jcsda/src_repo' 
   - docker exec jcsda_container bash -c 'cd /build_container/ufo && make -j4'
   - date
-  - docker exec jcsda_container bash -c 'cd /build_container/ufo && ctest'
+  - docker exec jcsda_container bash -c 'cd /build_container/ufo && ctest --output-on-failure'
   - date
 
   - docker exec jcsda_container bash -c 'cd /build_container/ufo && bash <(curl -s https://codecov.io/bash) -t e23dfd1d-85be-4e0f-aaf3-81911fec7178 -R /jcsda/src_repo/ufo/'

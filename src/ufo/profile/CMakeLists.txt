@@ -35,7 +35,6 @@ set ( profile_files
       ProfileStandardLevels.cc
       ProfileStandardLevels.h
       VariableNames.h
-      VariableNames.cc
 )
 
 PREPEND( _p_profile_files       "profile"       ${profile_files} )

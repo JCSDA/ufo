@@ -26,28 +26,28 @@ namespace ufo {
     const int numLevelsToCheck = profileIndices_.getNumLevelsToCheck();
 
     const std::vector <float> &pressures =
-       profileDataHandler_.get<float>(ufo::VariableNames::name_air_pressure);
+       profileDataHandler_.get<float>(ufo::VariableNames::obs_air_pressure);
     const std::vector <float> &tObs =
-       profileDataHandler_.get<float>(ufo::VariableNames::name_obs_air_temperature);
+       profileDataHandler_.get<float>(ufo::VariableNames::obs_air_temperature);
     const std::vector <float> &tBkg =
-       profileDataHandler_.get<float>(ufo::VariableNames::name_hofx_air_temperature);
+       profileDataHandler_.get<float>(ufo::VariableNames::hofx_air_temperature);
     const std::vector <float> &PstarBackgr =
-       profileDataHandler_.get<float>(ufo::VariableNames::name_PstarBackgr);
+       profileDataHandler_.get<float>(ufo::VariableNames::PstarBackgr);
     std::vector <int> &tFlags =
-       profileDataHandler_.get<int>(ufo::VariableNames::name_qc_tFlags);
+       profileDataHandler_.get<int>(ufo::VariableNames::qcflags_air_temperature);
     std::vector <int> &NumAnyErrors =
-       profileDataHandler_.get<int>(ufo::VariableNames::name_counter_NumAnyErrors);
+       profileDataHandler_.get<int>(ufo::VariableNames::counter_NumAnyErrors);
     std::vector <int> &NumSignChange =
-       profileDataHandler_.get<int>(ufo::VariableNames::name_counter_NumSignChange);
+       profileDataHandler_.get<int>(ufo::VariableNames::counter_NumSignChange);
     std::vector <float> &tObsCorrection =
-       profileDataHandler_.get<float>(ufo::VariableNames::name_tObsCorrection);
+       profileDataHandler_.get<float>(ufo::VariableNames::obscorrection_air_temperature);
     if (oops::anyVectorEmpty(pressures, tObs, tBkg, PstarBackgr, tFlags, tObsCorrection)) {
-      oops::Log::warning() << "At least one vector is empty. "
+      oops::Log::debug() << "At least one vector is empty. "
                            << "Check will not be performed." << std::endl;
       return;
     }
     if (!oops::allVectorsSameSize(pressures, tObs, tBkg, PstarBackgr, tFlags, tObsCorrection)) {
-      oops::Log::warning() << "Not all vectors have the same size. "
+      oops::Log::debug() << "Not all vectors have the same size. "
                            << "Check will not be performed." << std::endl;
       return;
     }
