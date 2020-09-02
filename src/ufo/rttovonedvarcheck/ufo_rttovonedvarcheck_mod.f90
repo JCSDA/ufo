@@ -312,16 +312,8 @@ subroutine ufo_rttovonedvarcheck_apply(self, vars, retrieval_vars, geovals, appl
   write(message, *) "Number tested by 1dvar = ", apply_count
   call fckit_log % info(message)
 
-  ! Put QC flags back in database
-  do jvar = 1, self%nchans
-    var = vars%variable(jvar)
-    call obsspace_put_db(self%obsdb, "FortranQC", trim(var), obs % QCflags(jvar,:))
-    call obsspace_put_db(self%obsdb, "OneDVar", trim(var), obs % output_BT(jvar,:))
-  end do
-  call obsspace_put_db(self%obsdb, "OneDVar", "FinalCost", obs % final_cost(:))
-
-  ! Put retrieved profile, final cost function,
-  ! final BTs, surface-space transmittance back into database
+  ! Put qcflags and output variables into observation space
+  call obs % output(self % obsdb, prof_index, vars, self % nchans)
 
   ! Tidy up memory used for all observations
   call full_bmatrix % delete()

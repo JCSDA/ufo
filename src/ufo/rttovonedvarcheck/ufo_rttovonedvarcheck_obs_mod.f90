@@ -15,7 +15,9 @@ use oops_variables_mod
 use ufo_geovals_mod
 use ufo_rttovonedvarcheck_constants_mod
 use ufo_rttovonedvarcheck_pcemis_mod
+use ufo_rttovonedvarcheck_profindex_mod
 use ufo_rttovonedvarcheck_utils_mod
+use ufo_vars_mod
 
 implicit none
 private
@@ -44,6 +46,7 @@ logical, allocatable         :: calc_emiss(:)   ! flag to request RTTOV calculat
 contains
   procedure :: setup  => ufo_rttovonedvarcheck_obs_setup
   procedure :: delete => ufo_rttovonedvarcheck_obs_delete
+  procedure :: output => ufo_rttovonedvarcheck_obs_output
 
 end type
 
@@ -354,6 +357,50 @@ if (ir_pcemis % initialised) then
 end if
 
 if (allocated(EmissPC)) deallocate(EmissPC)
+
+end subroutine
+
+!------------------------------------------------------------------------------
+!> Initialize the infrared emissivity array
+!!
+!! \details Heritage: Ops_SatRad_SetOutput_RTTOV12
+!!
+!! \author Met Office
+!!
+!! \date 02/09/2020: Created
+!!
+subroutine ufo_rttovonedvarcheck_obs_output(self, obsdb, prof_index, vars, nchans)
+
+implicit none
+
+! subroutine arguments:
+class(ufo_rttovonedvarcheck_obs), intent(inout) :: self !< observation metadata type
+type(c_ptr), value, intent(in)        :: obsdb          !< pointer to the observation space
+type(ufo_rttovonedvarcheck_profindex), intent(in) :: prof_index !< index to elements in the profile
+type(oops_variables), intent(in)      :: vars           !< channels for 1D-Var
+integer, intent(in)                   :: nchans         ! number of channels in the obsspace
+
+! local variables
+integer :: jvar ! counter
+character(len=max_string)          :: var
+
+! Put QC flags and retrieved BT's back in database
+do jvar = 1, nchans
+  var = vars % variable(jvar)
+  call obsspace_put_db(obsdb, "FortranQC", trim(var), self % QCflags(jvar,:))
+  call obsspace_put_db(obsdb, "OneDVar", trim(var), self % output_BT(jvar,:))
+end do
+
+! Output final cost at solution
+call obsspace_put_db(obsdb, "OneDVar", "FinalCost", self % final_cost(:))
+
+!--
+! 9) Skin temperature
+!--
+
+if (prof_index % tstar > 0) then
+  call obsspace_put_db(obsdb, "OneDVar", var_sfc_t, self % output_profile(prof_index % tstar, :))
+end if
 
 end subroutine
 

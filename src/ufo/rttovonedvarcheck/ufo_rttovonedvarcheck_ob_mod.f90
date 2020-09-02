@@ -219,8 +219,6 @@ write(*,"(A,F8.2)") "Surface height:",self % elevation
 write(*,"(A,F8.2)") "Satellite zenith angle: ",self % sensor_zenith_angle
 write(*,"(A,F8.2)") "Solar zenith angle: ",self % solar_zenith_angle
 
-write(*,"(A,F8.2)") "Output Profile: ",self % output_profile
-
 end subroutine
 
 !-------------------------------------------------------------------------------

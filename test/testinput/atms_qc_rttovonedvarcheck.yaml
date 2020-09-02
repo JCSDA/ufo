@@ -133,7 +133,6 @@ observations:
     ObsOptions:
       Sensor_ID: noaa_20_atms
       CoefficientPath: *rttov_coeff
-    variables: [brightness_temperature]
     channels: *ops_channels
     retrieval variables:
     - air_temperature
@@ -162,4 +161,4 @@ observations:
     EmissLandDefault: 0.95
     EmissSeaIceDefault: 0.92
 #    EmisEigVecPath: /data/users/mcooke/OPS/ops_data/trunk/SatRad_coeffs/default/IASI_EmisEigenVec
-  passedBenchmark: 879      # number of passed obs
+  passedBenchmark: 12176      # number of passed obs

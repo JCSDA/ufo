@@ -311,12 +311,13 @@ end if
 !                             H_matrix(1:nchans,profindex % emisspc(1):profindex % emisspc(2)))   ! out
 !END IF
 
-call ufo_rttovonedvarcheck_PrintHmatrix( &
-  nchans,   &           ! in
-  size(prof_x),  &      ! in
-  ob % channels_used, & ! in
-  H_matrix, &           ! in
-  profindex )           ! in
+! Here for diagnostics
+!call ufo_rttovonedvarcheck_PrintHmatrix( &
+!  nchans,   &           ! in
+!  size(prof_x),  &      ! in
+!  ob % channels_used, & ! in
+!  H_matrix, &           ! in
+!  profindex )           ! in
 
 end  subroutine ufo_rttovonedvarcheck_GetHmatrixRTTOV
 
