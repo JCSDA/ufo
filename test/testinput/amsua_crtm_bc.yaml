@@ -27,11 +27,18 @@ observations:
   geovals:
     filename: Data/amsua_n19_geoval_2018041500_m_qc.nc4
   obs bias:
-    name: LinearCombination
     abias_in: Data/satbias_crtm_in
     abias_out: Data/satbias_crtm_out
     sensor: *Sensor_ID
     jobs: *channels
+    covariance:
+      minimal required obs number: 20
+      variance range: [1.0e-6, 10.]
+      prior:
+        datain: Data/satbias_crtm_pc
+        inflation:
+          ratio: 1.1
+          ratio for small dataset: 2.0
     predictors:
     - predictor:
         name: constant
@@ -66,6 +73,7 @@ observations:
           order: 2
     - predictor:
         name: scan_angle
+    tolerance: 1.e-5
   vector ref: GsiHofXBc
   tolerance: 1.e-7
   linear obs operator test:
@@ -73,3 +81,4 @@ observations:
     coef TL: 1.e-3
     tolerance TL: 1.0e-3
     tolerance AD: 1.0e-11
+
