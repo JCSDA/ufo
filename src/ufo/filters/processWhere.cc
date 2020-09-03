@@ -16,13 +16,14 @@
 #include "oops/util/IntSetParser.h"
 #include "oops/util/Logger.h"
 #include "oops/util/missingValues.h"
+#include "oops/util/PartialDateTime.h"
 #include "ufo/filters/ObsFilterData.h"
 #include "ufo/filters/Variables.h"
 
 namespace ufo {
 
-// -----------------------------------------------------------------------------
 
+// -----------------------------------------------------------------------------
 ufo::Variables getAllWhereVariables(const eckit::Configuration & config) {
   std::vector<eckit::LocalConfiguration> masks;
   config.get("where", masks);
@@ -36,22 +37,39 @@ ufo::Variables getAllWhereVariables(const eckit::Configuration & config) {
 }
 
 // -----------------------------------------------------------------------------
-
 void processWhereMinMax(const std::vector<float> & data,
-            const float & vmin, const float & vmax, std::vector<bool> & mask) {
-  const float missing = util::missingValue(missing);
+                        const float & vmin, const float & vmax,
+                        std::vector<bool> & mask) {
+  const float not_set_value = util::missingValue(not_set_value);
   const size_t n = data.size();
 
-  if (vmin != missing || vmax != missing) {
+  if (vmin != not_set_value || vmax != not_set_value) {
     for (size_t jj = 0; jj < n; ++jj) {
-      if (vmin != missing && data[jj] < vmin) mask[jj] = false;
-      if (vmax != missing && data[jj] > vmax) mask[jj] = false;
+      if (vmin != not_set_value && data[jj] < vmin) mask[jj] = false;
+      if (vmax != not_set_value && data[jj] > vmax) mask[jj] = false;
     }
   }
 }
 
-// -----------------------------------------------------------------------------
 
+// -----------------------------------------------------------------------------
+void processWhereMinMax(const std::vector<util::DateTime> & data,
+                        const std::string & vmin, const std::string & vmax,
+                        std::vector<bool> & mask) {
+  const std::string not_set_value = "0000-00-00T00:00:00Z";
+
+  if (vmin != not_set_value || vmax != not_set_value) {
+    util::PartialDateTime pdt_vmin(vmin), pdt_vmax(vmax);
+
+    for (size_t jj = 0; jj < data.size(); ++jj) {
+      if (vmin != not_set_value && pdt_vmin > data[jj]) mask[jj] = false;
+      if (vmax != not_set_value && pdt_vmax < data[jj]) mask[jj] = false;
+    }
+  }
+}
+
+
+// -----------------------------------------------------------------------------
 void processWhereIsDefined(const std::vector<float> & data,
                            std::vector<bool> & mask) {
   const float missing = util::missingValue(missing);
@@ -103,6 +121,34 @@ void processWhereIsNotIn(const std::vector<std::string> & data,
 }
 
 // -----------------------------------------------------------------------------
+void applyMinMaxFloat(std::vector<bool> & where, eckit::LocalConfiguration const & mask,
+                      ObsFilterData const & filterdata, Variable const & varname) {
+  const float not_set_value = util::missingValue(not_set_value);
+  const float vmin = mask.getFloat("minvalue", not_set_value);
+  const float vmax = mask.getFloat("maxvalue", not_set_value);
+  // Apply mask min/max
+  if (vmin != not_set_value || vmax != not_set_value) {
+    std::vector<float> data;
+    filterdata.get(varname, data);
+    processWhereMinMax(data, vmin, vmax, where);
+  }
+}
+
+void applyMinMaxDatetime(std::vector<bool> & where, eckit::LocalConfiguration const & mask,
+                         ObsFilterData const & filterdata, Variable const & varname) {
+  const std::string not_set_value("0000-00-00T00:00:00Z");
+  const std::string vmin = mask.getString("minvalue", not_set_value);
+  const std::string vmax = mask.getString("maxvalue", not_set_value);
+
+  // Apply mask min/max
+  if (vmin != not_set_value || vmax != not_set_value) {
+    std::vector<util::DateTime> data;
+    filterdata.get(varname, data);
+    processWhereMinMax(data, vmin, vmax, where);
+  }
+}
+
+// -----------------------------------------------------------------------------
 void processWhereBitSet(const std::vector<int> & data,
                         const std::set<int> & flags,
                         std::vector<bool> & mask) {
@@ -116,10 +162,46 @@ void processWhereBitSet(const std::vector<int> & data,
 }
 
 // -----------------------------------------------------------------------------
+void isInString(std::vector<bool> & where, eckit::LocalConfiguration const & mask,
+                ObsFilterData const & filterdata, Variable const & varname) {
+  std::vector<std::string> data;
+  std::vector<std::string> whitelistvec = mask.getStringVector("is_in");
+  std::set<std::string> whitelist(whitelistvec.begin(), whitelistvec.end());
+  filterdata.get(varname, data);
+  processWhereIsIn(data, whitelist, where);
+}
 
+// -----------------------------------------------------------------------------
+void isInInteger(std::vector<bool> & where, eckit::LocalConfiguration const & mask,
+                 ObsFilterData const & filterdata, Variable const & varname) {
+  std::vector<int> data;
+  std::set<int> whitelist = oops::parseIntSet(mask.getString("is_in"));
+  filterdata.get(varname, data);
+  processWhereIsIn(data, whitelist, where);
+}
+
+// -----------------------------------------------------------------------------
+void isNotInString(std::vector<bool> & where, eckit::LocalConfiguration const & mask,
+                   ObsFilterData const & filterdata, Variable const & varname) {
+  std::vector<std::string> data;
+  std::vector<std::string> blacklistvec = mask.getStringVector("is_not_in");
+  std::set<std::string> blacklist(blacklistvec.begin(), blacklistvec.end());
+  filterdata.get(varname, data);
+  processWhereIsNotIn(data, blacklist, where);
+}
+
+// -----------------------------------------------------------------------------
+void isNotInInteger(std::vector<bool> & where, eckit::LocalConfiguration const & mask,
+                    ObsFilterData const & filterdata, Variable const & varname) {
+  std::vector<int> data;
+  filterdata.get(varname, data);
+  std::set<int> blacklist = oops::parseIntSet(mask.getString("is_not_in"));
+  processWhereIsNotIn(data, blacklist, where);
+}
+
+// -----------------------------------------------------------------------------
 std::vector<bool> processWhere(const eckit::Configuration & config,
                                const ObsFilterData & filterdata) {
-  const float missing = util::missingValue(missing);
   const size_t nlocs = filterdata.nlocs();
 
 // Everywhere by default if no mask
@@ -136,15 +218,10 @@ std::vector<bool> processWhere(const eckit::Configuration & config,
         const Variable varname = var[jvar];
         ioda::ObsDtype dtype = filterdata.dtype(varname);
 
-//      Process masks on float values
-        const float vmin = masks[jm].getFloat("minvalue", missing);
-        const float vmax = masks[jm].getFloat("maxvalue", missing);
-
-//      Apply mask min/max
-        if (vmin != missing || vmax != missing) {
-          std::vector<float> data;
-          filterdata.get(varname, data);
-          processWhereMinMax(data, vmin, vmax, where);
+        if (dtype == ioda::ObsDtype::DateTime) {
+          applyMinMaxDatetime(where, masks[jm], filterdata, varname);
+        } else {
+          applyMinMaxFloat(where, masks[jm], filterdata, varname);
         }
 
 //      Apply mask is_defined
@@ -168,16 +245,9 @@ std::vector<bool> processWhere(const eckit::Configuration & config,
 //      Apply mask is_in
         if (masks[jm].has("is_in")) {
           if (dtype == ioda::ObsDtype::String) {
-            std::vector<std::string> data;
-            std::vector<std::string> whitelistvec = masks[jm].getStringVector("is_in");
-            std::set<std::string> whitelist(whitelistvec.begin(), whitelistvec.end());
-            filterdata.get(varname, data);
-            processWhereIsIn(data, whitelist, where);
+            isInString(where, masks[jm], filterdata, varname);
           } else if (dtype == ioda::ObsDtype::Integer) {
-            std::vector<int> data;
-            std::set<int> whitelist = oops::parseIntSet(masks[jm].getString("is_in"));
-            filterdata.get(varname, data);
-            processWhereIsIn(data, whitelist, where);
+            isInInteger(where, masks[jm], filterdata, varname);
           } else {
             throw eckit::UserError(
               "Only integer and string variables may be used for processWhere 'is_in'",
@@ -188,16 +258,9 @@ std::vector<bool> processWhere(const eckit::Configuration & config,
 //      Apply mask is_not_in
         if (masks[jm].has("is_not_in")) {
           if (dtype == ioda::ObsDtype::String) {
-            std::vector<std::string> data;
-            std::vector<std::string> blacklistvec = masks[jm].getStringVector("is_not_in");
-            std::set<std::string> blacklist(blacklistvec.begin(), blacklistvec.end());
-            filterdata.get(varname, data);
-            processWhereIsNotIn(data, blacklist, where);
+            isNotInString(where, masks[jm], filterdata, varname);
           } else if (dtype == ioda::ObsDtype::Integer) {
-            std::vector<int> data;
-            filterdata.get(varname, data);
-            std::set<int> blacklist = oops::parseIntSet(masks[jm].getString("is_not_in"));
-            processWhereIsNotIn(data, blacklist, where);
+            isNotInInteger(where, masks[jm], filterdata, varname);
           } else {
             throw eckit::UserError(
               "Only integer and string variables may be used for processWhere 'is_not_in'",

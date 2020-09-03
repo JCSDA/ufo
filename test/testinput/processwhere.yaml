@@ -1,6 +1,6 @@
 successful:
-  window begin: 2018-04-14T20:00:00Z
-  window end: 2018-04-15T03:00:00Z
+  window begin: 2018-01-01T00:00:00Z
+  window end: 2019-01-01T00:00:00Z
   obs space:
     name: ProcessWhere Test Data
     obsdatain:
@@ -86,6 +86,46 @@ successful:
         minvalue: 100
   # var5@MetaData = 1, _, 2, _, 3, _, 4, _, 5, 0
       size where true: 0
+    - where:                      # test min & max for datetime hours
+      - variable:
+          name:  datetime@MetaData
+        minvalue: 0000-00-00T14:00:00Z
+        maxvalue: 0000-00-00T18:00:00Z 
+  # datetime1@MetaData = [2018-04-15T06:00:00Z, 2018-04-16T15:00:00Z, 2018-04-17T06:00:00Z, 2018-04-18T15:00:00Z, 2018-04-19T06:00:00Z, 2018-04-20T15:00:00Z, 2018-04-21T06:00:00Z, 2018-04-22T15:00:00Z, 2018-04-23T06:00:00Z, 2018-04-24T15:00:00Z]
+      size where true: 5
+    - where:                      # test minvalue for datetime hours
+      - variable:
+          name:  datetime@MetaData
+        minvalue: 0000-00-00T14:00:00Z
+  # datetime1@MetaData = [2018-04-15T06:00:00Z, 2018-04-16T15:00:00Z, 2018-04-17T06:00:00Z, 2018-04-18T15:00:00Z, 2018-04-19T06:00:00Z, 2018-04-20T15:00:00Z, 2018-04-21T06:00:00Z, 2018-04-22T15:00:00Z, 2018-04-23T06:00:00Z, 2018-04-24T15:00:00Z]
+      size where true: 5
+    - where:                      # test minvalue for datetime hours unconstrained maxvalue
+      - variable:
+          name:  datetime@MetaData
+        minvalue: 0000-00-00T14:00:00Z
+        maxvalue: 0000-00-00T00:00:00Z
+  # datetime1@MetaData = [2018-04-15T06:00:00Z, 2018-04-16T15:00:00Z, 2018-04-17T06:00:00Z, 2018-04-18T15:00:00Z, 2018-04-19T06:00:00Z, 2018-04-20T15:00:00Z, 2018-04-21T06:00:00Z, 2018-04-22T15:00:00Z, 2018-04-23T06:00:00Z, 2018-04-24T15:00:00Z]
+      size where true: 5
+    - where:                      # test maxvalue for datetime hours
+      - variable:
+          name:  datetime@MetaData
+        maxvalue: 0000-00-00T14:00:00Z
+  # datetime1@MetaData = [2018-04-15T06:00:00Z, 2018-04-16T15:00:00Z, 2018-04-17T06:00:00Z, 2018-04-18T15:00:00Z, 2018-04-19T06:00:00Z, 2018-04-20T15:00:00Z, 2018-04-21T06:00:00Z, 2018-04-22T15:00:00Z, 2018-04-23T06:00:00Z, 2018-04-24T15:00:00Z]
+      size where true: 5
+    - where:                      # test maxvalue for datetime hours with unconstrained minvalue
+      - variable:
+          name:  datetime@MetaData
+        minvalue: 0000-00-00T00:00:00Z
+        maxvalue: 0000-00-00T14:00:00Z
+  # datetime1@MetaData = [2018-04-15T06:00:00Z, 2018-04-16T15:00:00Z, 2018-04-17T06:00:00Z, 2018-04-18T15:00:00Z, 2018-04-19T06:00:00Z, 2018-04-20T15:00:00Z, 2018-04-21T06:00:00Z, 2018-04-22T15:00:00Z, 2018-04-23T06:00:00Z, 2018-04-24T15:00:00Z]
+      size where true: 5
+    - where:                      # test unconstrained minvalue and maxvalue for datetime hours
+      - variable:
+          name:  datetime@MetaData
+        minvalue: 0000-00-00T00:00:00Z
+        maxvalue: 0000-00-00T00:00:00Z
+  # datetime1@MetaData = [2018-04-15T06:00:00Z, 2018-04-16T15:00:00Z, 2018-04-17T06:00:00Z, 2018-04-18T15:00:00Z, 2018-04-19T06:00:00Z, 2018-04-20T15:00:00Z, 2018-04-21T06:00:00Z, 2018-04-22T15:00:00Z, 2018-04-23T06:00:00Z, 2018-04-24T15:00:00Z]
+      size where true: 10
     - where:                      # test that AND for 2 conditions works as expected
       - variable:
           name:  var1@MetaData
@@ -228,8 +268,8 @@ successful:
       size where true: 7
 
 user_error_type_handling_is_in:
-  window begin: 2018-04-14T20:00:00Z
-  window end: 2018-04-15T03:00:00Z
+  window begin: 2018-01-01T00:00:00Z
+  window end: 2019-01-01T00:00:00Z
   obs space:
     name: ProcessWhere Test Data
     obsdatain:

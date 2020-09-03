@@ -64,6 +64,8 @@ class ObsFilterData : public util::Printable,
   void get(const Variable &, std::vector<std::string> &) const;
   //! Gets requested data from ObsFilterData
   void get(const Variable &, std::vector<int> &) const;
+  //! Gets requested data from ObsFilterData
+  void get(const Variable &, std::vector<util::DateTime> &) const;
   //! Gets requested data from ObsFilterData (ObsDataVector has to be allocated)
   void get(const Variable &, ioda::ObsDataVector<float> &) const;
   //! Gets requested data from ObsFilterData (ObsDataVector has to be allocated)
