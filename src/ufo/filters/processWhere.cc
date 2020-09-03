@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2018-2019 UCAR
+ * (C) Copyright 2018-2020 UCAR
  *
  * This software is licensed under the terms of the Apache Licence Version 2.0
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
@@ -7,6 +7,7 @@
 
 #include "ufo/filters/processWhere.h"
 
+#include <bitset>
 #include <set>
 #include <string>
 #include <vector>
@@ -102,6 +103,19 @@ void processWhereIsNotIn(const std::vector<std::string> & data,
 }
 
 // -----------------------------------------------------------------------------
+void processWhereBitSet(const std::vector<int> & data,
+                        const std::set<int> & flags,
+                        std::vector<bool> & mask) {
+  std::bitset<32> flags_bs;
+  for (const int &elem : flags) {
+    flags_bs[elem] = 1;
+  }
+  for (size_t jj = 0; jj < data.size(); ++jj) {
+    if ((data[jj] & flags_bs.to_ulong()) != 0) mask[jj] = false;
+  }
+}
+
+// -----------------------------------------------------------------------------
 
 std::vector<bool> processWhere(const eckit::Configuration & config,
                                const ObsFilterData & filterdata) {
@@ -187,6 +201,20 @@ std::vector<bool> processWhere(const eckit::Configuration & config,
           } else {
             throw eckit::UserError(
               "Only integer and string variables may be used for processWhere 'is_not_in'",
+              Here());
+          }
+        }
+
+//      Apply mask any_bit_set_of
+        if (masks[jm].has("any_bit_set_of")) {
+          if (dtype == ioda::ObsDtype::Integer) {
+            std::vector<int> data;
+            std::set<int> flags = oops::parseIntSet(masks[jm].getString("any_bit_set_of"));
+            filterdata.get(varname, data);
+            processWhereBitSet(data, flags, where);
+          } else {
+            throw eckit::UserError(
+              "Only integer variables may be used for processWhere 'any_bit_set_of'",
               Here());
           }
         }
