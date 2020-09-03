@@ -183,12 +183,12 @@ call ufo_geovals_get_var(geovals, "surface_type", geoval)
 self % surface_type(:) = geoval%vals(1,:)
 
 ! Setup emissivity
-if (config % MWemiss .and. (.not. config % IRemiss)) then
-  call ufo_rttovonedvarcheck_obs_InitMWEmiss(self, config)
-else if (config % IRemiss .and. (.not. config % MWemiss)) then
+if (config % pcemiss) then
+  write(*,*) "PC emissivity being used"
   call ufo_rttovonedvarcheck_obs_InitIREmiss(self, config % nchans, ir_pcemis)
 else
-  call abor1_ftn("rttovonedvarcheck setup obs: undecided type of emissivity, IR or MW?")
+  write(*,*) "Conventional emissivity being used"
+  call ufo_rttovonedvarcheck_obs_InitMWEmiss(self, config)
 end if
 
 end subroutine ufo_rttovonedvarcheck_obs_setup

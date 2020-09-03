@@ -137,8 +137,10 @@ subroutine ufo_rttovonedvarcheck_apply(self, vars, retrieval_vars, geovals, appl
   missing = missing_value(missing)
 
   ! Setup IR emissivity - if needed
-  if (len(trim(self % EmisEigVecPath)) > 4) &
+  if (self % pcemiss) then
     call IR_pcemis % setup(self % EmisEigVecPath)
+  end if
+
 
   ! Setup full B matrix object
   call full_bmatrix % setup(self % retrieval_variables, self % b_matrix_path, &
@@ -320,7 +322,7 @@ subroutine ufo_rttovonedvarcheck_apply(self, vars, retrieval_vars, geovals, appl
   call full_rmatrix % delete()
   call obs % delete()
   call ufo_geovals_delete(hofxdiags)
-  if (self % IRemiss) call IR_pcemis % delete()
+  if (self % pcemiss) call IR_pcemis % delete()
   if (allocated(b_matrix))  deallocate(b_matrix)
   if (allocated(b_inverse)) deallocate(b_inverse)
   if (allocated(b_sigma))   deallocate(b_sigma)

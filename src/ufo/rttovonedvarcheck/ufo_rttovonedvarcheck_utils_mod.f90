@@ -46,6 +46,7 @@ type, public :: ufo_rttovonedvarcheck
   logical                          :: UseMLMinimization !< flag to turn on marquardt-levenberg minimizer
   logical                          :: UseJforConvergence !< flag to Use J for convergence
   logical                          :: FullDiagnostics !< flag to turn on full diagnostics
+  logical                          :: pcemiss !< flag gets turned off in emissivity eigen vector file is present
   integer                          :: Max1DVarIterations !< maximum number of iterations
   integer                          :: JConvergenceOption !< integer to select convergence option
   integer                          :: IterNumForLWPCheck !< choose which iteration to start checking LWP
@@ -54,8 +55,6 @@ type, public :: ufo_rttovonedvarcheck
   real(kind_real)                  :: MaxMLIterations !< maximum number of iterations for internal Marquardt-Levenberg loop
   real(kind_real)                  :: EmissLandDefault !< default emissivity value to use over land
   real(kind_real)                  :: EmissSeaIceDefault !< default emissivity value to use over sea ice
-  logical                          :: MWemiss !< flag to specify if microwave emissivity used
-  logical                          :: IRemiss !< flag to specify if infrared emissivity used
   character(len=max_string)        :: EmisEigVecPath !< path to eigen vector file for IR PC emissivity
 end type ufo_rttovonedvarcheck
 
@@ -112,6 +111,7 @@ self % RTTOV_usetotalice = .false.
 self % UseMLMinimization = .false.
 self % UseJforConvergence = .false.
 self % FullDiagnostics = .false.
+self % pcemiss = .false.
 self % Max1DVarIterations = 7
 self % JConvergenceOption = 1
 self % IterNumForLWPCheck = 2
@@ -120,8 +120,6 @@ self % Cost_ConvergenceFactor = 0.01
 self % MaxMLIterations = 7
 self % EmissLandDefault = 0.95    ! default land surface emissivity
 self % EmissSeaIceDefault = 0.92  ! default seaice surface emissivity
-self % MWemiss = .false.
-self % IRemiss = .false.
 self % EmisEigVecPath = ""
 
 ! Flag for total humidity
@@ -194,19 +192,11 @@ if (self % conf % has("EmissSeaIceDefault")) then
   call self % conf % get_or_die("EmissSeaIceDefault", self % EmissSeaIceDefault)
 end if
 
-! Flag to specify if microwave emissivity used
-if (self % conf % has("MWemiss")) then
-  call self % conf % get_or_die("MWemiss", self % MWemiss)
-end if
-
-! Flag to specify if infrared emissivity used
-if (self % conf % has("IRemiss")) then
-  call self % conf % get_or_die("IRemiss", self % IRemiss)
-end if
-
+! Default eigen value path is blank but needs to be present if using PC emiss
 if (self % conf % has("EmisEigVecPath")) then
   call self % conf % get_or_die("EmisEigVecPath",str)
   self % EmisEigVecPath = str
+  self % pcemiss = .true.
 end if
 
 ! Print self
@@ -257,8 +247,6 @@ write(*,*) "Cost_ConvergenceFactor = ",self % Cost_ConvergenceFactor
 write(*,*) "MaxMLIterations = ",self % MaxMLIterations
 write(*,*) "EmissLandDefault = ",self % EmissLandDefault
 write(*,*) "EmissSeaIceDefault = ",self % EmissSeaIceDefault
-write(*,*) "MWemiss = ",self % MWemiss
-write(*,*) "IRemiss = ",self % IRemiss
 
 end subroutine ufo_rttovonedvarcheck_print
 

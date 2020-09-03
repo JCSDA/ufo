@@ -128,11 +128,12 @@ observations:
       is_in: 1
   # Do 1D-Var check
   - filter: RTTOV OneDVar Check
-    defer to post: true
     ModName: RTTOV
     ObsOptions:
       Sensor_ID: noaa_20_atms
       CoefficientPath: *rttov_coeff
+    BMatrix: Data/atms_bmatrix_70.dat
+    RMatrix: Data/atms_noaa_20_rmatrix.nc4
     channels: *ops_channels
     retrieval variables:
     - air_temperature
@@ -143,9 +144,8 @@ observations:
     - specific_humidity_at_two_meters_above_surface
     - skin_temperature
     - surface_air_pressure
-    BMatrix: Data/atms_bmatrix_70.dat
-    RMatrix: Data/atms_noaa_20_rmatrix.nc4
     nlevels: 70
+    defer to post: true
     qtotal: true
     RTTOV_mwscattSwitch: false
     RTTOV_usetotalice: false
