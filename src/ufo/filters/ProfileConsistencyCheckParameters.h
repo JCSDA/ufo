@@ -149,7 +149,7 @@ namespace ufo {
     /// Big gaps (hPa) used in interpolation check
     oops::Parameter<std::vector<float>> BigGaps{"ICheck_BigGaps",
         {150, 150, 150, 150, 100, 100, 100, 75,
-            75, 50, 50, 20, 20, 20, 10, 10, 10, 10, 10, 10}};
+            75, 50, 50, 20, 20, 20, 10, 10, 10, 10, 10, 10}, this};
 
     //=== Hydrostatic check parameters ===//
 
@@ -198,11 +198,11 @@ namespace ufo {
 
     /// Big gaps (Pa) used in wind speed interpolation check
     oops::Parameter<std::vector<float>> UICheck_BigGaps{"UICheck_BigGaps",
-        {15000.0, 10000.0, 7500.0, 5000.0, 2000.0}};
+        {15000.0, 10000.0, 7500.0, 5000.0, 2000.0}, this};
 
     /// Big gap thresholds (Pa) used in wind speed interpolation check
     oops::Parameter<std::vector<float>> UICheck_BigGapsPThresh{"UICheck_BigGapsPThresh",
-        {65000.0, 27500.0, 17500.0, 8500.0, 2500.0}};
+        {65000.0, 27500.0, 17500.0, 8500.0, 2500.0}, this};
 
     //=== RH check parameters ===//
 
