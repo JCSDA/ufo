@@ -19,9 +19,9 @@
 #include "ioda/ObsSpace.h"
 
 #include "oops/util/CompareNVectors.h"
+#include "oops/util/missingValues.h"
 
-#include "ufo/filters/ProfileConsistencyCheckParameters.h"
-
+#include "ufo/profile/DataHandlerParameters.h"
 #include "ufo/profile/EntireSampleDataHandler.h"
 #include "ufo/profile/ProfileIndices.h"
 
@@ -40,7 +40,7 @@ namespace ufo {
   class ProfileDataHandler {
    public:
     ProfileDataHandler(ioda::ObsSpace &obsdb,
-                       const ProfileConsistencyCheckParameters &options,
+                       const DataHandlerParameters &options,
                        EntireSampleDataHandler &entireSampleDataHandler,
                        const ProfileIndices &profileIndices);
 
@@ -56,14 +56,13 @@ namespace ufo {
         std::string varname;
         std::string groupname;
         ufo::splitVarGroup(fullname, varname, groupname);
-        bool optional = options_.getOptional(groupname);
-        size_t entriesPerProfile = options_.getEntriesPerProfile(groupname);
+        const bool optional = options_.getOptional(groupname);
+        const size_t entriesPerProfile = options_.getEntriesPerProfile(groupname);
 
-        std::vector <T> vec_prof;  // Vector storing data for current profile.
         if (profileData_.find(fullname) != profileData_.end()) {
           // If the vector is already present, return it.
-          // If the type T is incorrect then boost::get will return an exception.
-          // Provide additional information if that occurs.
+          // If the type T is incorrect then boost::get will return an exception;
+          // provide additional information if that occurs.
           try {
             return boost::get<std::vector<T>> (profileData_[fullname]);
           } catch (boost::bad_get) {
@@ -71,30 +70,19 @@ namespace ufo {
                                       " probably has the wrong type", Here());
           }
         } else {
+          std::vector <T> vec_prof;  // Vector storing data for current profile.
           // Retrieve variable vector from entire sample.
           const std::vector <T> &vec_all = entireSampleDataHandler_.get<T>(fullname);
           // Only proceed if the vector is not empty.
-          if (vec_all.size() > 0) {
-            // If the number of entries per profile was not specified use the indices
-            // that were obtained by sorting and grouping the record numbers.
-            if (entriesPerProfile == -1) {
-              for (const auto& profileIndex : profileIndices_.getProfileIndices()) {
-                vec_prof.emplace_back(vec_all[profileIndex]);
-              }
-            } else {
-              // Otherwise, loop over the relevant portion of the entire sample.
-              size_t profileNumCurrent = profileIndices_.getProfileNumCurrent();
-              for (size_t profileIndex = profileNumCurrent * entriesPerProfile;
-                   profileIndex < (profileNumCurrent + 1) * entriesPerProfile;
-                   ++profileIndex) {
-                vec_prof.emplace_back(vec_all[profileIndex]);
-              }
-            }
+          if (!vec_all.empty()) {
+            getProfileIndicesInEntireSample(groupname);
+            for (const auto& profileIndex : profileIndicesInEntireSample_)
+              vec_prof.emplace_back(vec_all[profileIndex]);
           }
+          // Add vector to map (even if it is empty).
+          profileData_.emplace(fullname, std::move(vec_prof));
+          return boost::get<std::vector<T>> (profileData_[fullname]);
         }
-        // Add vector to map (even if it is empty).
-        profileData_.emplace(fullname, std::move(vec_prof));
-        return boost::get <std::vector<T>> (profileData_[fullname]);
       }
 
     /// Directly set a vector for the current profile.
@@ -141,6 +129,9 @@ namespace ufo {
     /// a configurable value if required.
     void setFlagged(const size_t nvars, std::vector<std::vector<bool>> &flagged);
 
+    /// Get indices in entire sample corresponding to current profile.
+    void getProfileIndicesInEntireSample(const std::string& groupname);
+
    private:
     /// Container of each variable in the current profile.
     std::unordered_map <std::string, boost::variant
@@ -150,13 +141,16 @@ namespace ufo {
     ioda::ObsSpace &obsdb_;
 
     /// Configurable parameters.
-    const ProfileConsistencyCheckParameters &options_;
+    const DataHandlerParameters &options_;
 
     /// Class that handles the entire data sample.
     EntireSampleDataHandler &entireSampleDataHandler_;
 
-    /// Indices in entire sample of observations in a particular profile.
+    /// Class that handles profile indices.
     const ProfileIndices &profileIndices_;
+
+    /// Indices in the entire data sample that correspond to the current profile.
+    std::vector <size_t> profileIndicesInEntireSample_;
   };
 }  // namespace ufo
 
