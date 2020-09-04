@@ -27,7 +27,7 @@ CosineOfLatitudeTimesOrbitNode::CosineOfLatitudeTimesOrbitNode(
 void CosineOfLatitudeTimesOrbitNode::compute(const ioda::ObsSpace & odb,
                                              const GeoVaLs &,
                                              const ObsDiagnostics &,
-                                             ioda::ObsDataVector<double> & out) const {
+                                             ioda::ObsVector & out) const {
   const std::size_t nlocs = odb.nlocs();
 
   // assure shape of out
@@ -42,10 +42,10 @@ void CosineOfLatitudeTimesOrbitNode::compute(const ioda::ObsSpace & odb,
   odb.get_db("MetaData", "latitude", cenlat);
   odb.get_db("MetaData", "sensor_azimuth_angle", node);
 
-  for (const auto & job : jobs_) {
-    const std::string varname = name() + "_" + std::to_string(job);
-    for (std::size_t jl = 0; jl < nlocs; ++jl) {
-      out[varname][jl] = node[jl]*cos(cenlat[jl]*Constants::deg2rad);
+  const std::size_t njobs = jobs_.size();
+  for (std::size_t jl = 0; jl < nlocs; ++jl) {
+    for (std::size_t jb = 0; jb < njobs; ++jb) {
+      out[jl*njobs+jb] = node[jl] * cos(cenlat[jl] * Constants::deg2rad);
     }
   }
 }

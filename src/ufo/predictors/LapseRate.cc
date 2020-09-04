@@ -80,7 +80,7 @@ LapseRate::LapseRate(const eckit::Configuration & conf, const std::vector<int> &
 void LapseRate::compute(const ioda::ObsSpace & odb,
                         const GeoVaLs & geovals,
                         const ObsDiagnostics & ydiags,
-                        ioda::ObsDataVector<double> & out) const {
+                        ioda::ObsVector & out) const {
   const std::size_t njobs = jobs_.size();
   const std::size_t nlocs = odb.nlocs();
 
@@ -131,15 +131,14 @@ void LapseRate::compute(const ioda::ObsSpace & odb,
     }
   }
 
-  for (std::size_t jb = 0; jb < njobs; ++jb) {
-    const std::string varname = name() + "_" + std::to_string(jobs_[jb]);
-    for (std::size_t jl = 0; jl < nlocs; ++jl) {
+  for (std::size_t jl = 0; jl < nlocs; ++jl) {
+    for (std::size_t jb = 0; jb < njobs; ++jb) {
         tlapchn = (ptau5[jb][nlevs-2][jl]-ptau5[jb][nlevs-1][jl])*(tsavg5[jl]-tvp[nlevs-2][jl]);
         for (std::size_t k = 1; k < nlevs-1; ++k) {
           tlapchn = tlapchn+(ptau5[jb][nlevs-k-2][jl]-ptau5[jb][nlevs-k-1][jl])*
                     (tvp[nlevs-k][jl]-tvp[nlevs-k-2][jl]);
         }
-        out[varname][jl] = pow((tlapchn - tlap[jb]), order_);
+        out[jl*njobs+jb] = pow((tlapchn - tlap[jb]), order_);
     }
   }
 }

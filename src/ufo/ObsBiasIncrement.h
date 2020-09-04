@@ -64,11 +64,11 @@ class ObsBiasIncrement : public util::Printable {
 
 // Linear obs bias model
   void computeObsBiasTL(const GeoVaLs &,
-                        const ioda::ObsDataVector<double> &,
+                        const std::vector<ioda::ObsVector> &,
                         ioda::ObsVector &) const;
 
   void computeObsBiasAD(GeoVaLs &,
-                        const ioda::ObsDataVector<double> &,
+                        const std::vector<ioda::ObsVector> &,
                         const ioda::ObsVector &);
 
 // Serialize and deserialize

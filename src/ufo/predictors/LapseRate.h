@@ -35,7 +35,7 @@ class LapseRate : public PredictorBase {
   void compute(const ioda::ObsSpace &,
                const GeoVaLs &,
                const ObsDiagnostics &,
-               ioda::ObsDataVector<double> &) const override;
+               ioda::ObsVector &) const override;
 
  private:
   std::map<int, float> tlapmean_;  // <channel, tlaps>

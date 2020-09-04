@@ -212,7 +212,7 @@ void ObsBias::write(const eckit::Configuration & conf) const {
 
 void ObsBias::computeObsBias(ioda::ObsVector & ybias,
                              ObsDiagnostics & ydiags,
-                             const ioda::ObsDataVector<double> & predData) const {
+                             const std::vector<ioda::ObsVector> & predData) const {
   oops::Log::trace() << "ObsBias::computeObsBias starting" << std::endl;
 
   if (this->size() > 0) {
@@ -221,19 +221,19 @@ void ObsBias::computeObsBias(ioda::ObsVector & ybias,
     const std::size_t njobs  = jobs_.size();
 
     ASSERT(biascoeffs_.size() == npreds*njobs);
-    ASSERT(predData.nlocs() == nlocs);
-    ASSERT(predData.nvars() == njobs*npreds);
+    ASSERT(predData.size() == npreds);
     ASSERT(ybias.nvars() == njobs);
 
-    /* predData memory layout (njobs*npreds X nlocs)
-     *     Loc     0      1      2       3
-     *           --------------------------
-     * ch1 pred1 | 0      1      2       3
-     *     pred2 | 4      5      6       7
-     *     pred3 | 8      9     10      11 
-     * ch2 pred1 |12     13     14      15
-     *     pred2 |16     17     18      19
-     *     ....  |
+    /* predData memory layout (npreds X nlocs X njobs)
+     *       Loc     0      1      2       3
+     *             --------------------------
+     * pred1 Chan1 | 0      3      6       9
+     *       Chan2 | 1      4      7      10
+     *       ....  | 2      5      8      11 
+     *
+     * pred2 Chan1 |12     15     18      21
+     *       Chan2 |13     16     19      22
+     *       ....  |14     17     20      23
      */
 
     ybias.zero();
@@ -261,15 +261,17 @@ void ObsBias::computeObsBias(ioda::ObsVector & ybias,
     Eigen::Map<const Eigen::MatrixXd> coeffs(biascoeffs_.data(), npreds, njobs);
 
     std::vector<double> biasTerm(nlocs, 0.0);
-    //  ( nlocs X 1 ) =  ( nlocs X npreds ) * (  npreds X 1 )
+    //  For each channel: ( nlocs X 1 ) =  ( nlocs X npreds ) * (  npreds X 1 )
     for (std::size_t jch = 0; jch < njobs; ++jch) {
       for (std::size_t jp = 0; jp < npreds; ++jp) {
-        const std::string varname = predbases_[jp]->name() + "_" + std::to_string(jobs_[jch]);
+        // axpy
+        const double beta = coeffs(jp, jch);
         for (std::size_t jl = 0; jl < nlocs; ++jl) {
-          biasTerm[jl] = predData[varname][jl] * coeffs(jp, jch);
+          biasTerm[jl] = predData[jp][jl*njobs+jch] * beta;
           ybias[jl*njobs+jch] += biasTerm[jl];
         }
-        // Save ObsBiasTerms (bias_coeff x predictor) for QC
+        // Save ObsBiasTerms (bias_coeff * predictor) for QC
+        const std::string varname = predbases_[jp]->name() + "_" + std::to_string(jobs_[jch]);
         if (ydiags.has(varname)) {
           ydiags.save(biasTerm, varname, 1);
         } else {
@@ -284,17 +286,16 @@ void ObsBias::computeObsBias(ioda::ObsVector & ybias,
 }
 
 // -----------------------------------------------------------------------------
-ioda::ObsDataVector<double> ObsBias::computePredictors(const GeoVaLs & geovals,
-                                                       const ObsDiagnostics & ydiags) const {
+std::vector<ioda::ObsVector> ObsBias::computePredictors(const GeoVaLs & geovals,
+                                                        const ObsDiagnostics & ydiags) const {
   const std::size_t nlocs  = odb_.nlocs();
   const std::size_t npreds = predbases_.size();
   const std::size_t njobs  = jobs_.size();
 
-  const oops::Variables vars(prednames_, jobs_);
-  ioda::ObsDataVector<double> predData(odb_, vars);
+  std::vector<ioda::ObsVector> predData(npreds, ioda::ObsVector(odb_));
 
-  for (std::size_t r = 0; r < npreds; ++r) {
-    predbases_[r]->compute(odb_, geovals, ydiags, predData);
+  for (std::size_t p = 0; p < npreds; ++p) {
+    predbases_[p]->compute(odb_, geovals, ydiags, predData[p]);
   }
 
   oops::Log::trace() << "ObsBias::computePredictors done." << std::endl;

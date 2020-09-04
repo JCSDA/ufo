@@ -32,7 +32,7 @@ class Constant : public PredictorBase {
   void compute(const ioda::ObsSpace &,
                const GeoVaLs &,
                const ObsDiagnostics &,
-               ioda::ObsDataVector<double> &) const override;
+               ioda::ObsVector &) const override;
 };
 
 // -----------------------------------------------------------------------------

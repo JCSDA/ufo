@@ -29,7 +29,7 @@ SineOfLatitude::SineOfLatitude(const eckit::Configuration & conf, const std::vec
 void SineOfLatitude::compute(const ioda::ObsSpace & odb,
                              const GeoVaLs &,
                              const ObsDiagnostics &,
-                             ioda::ObsDataVector<double> & out) const {
+                             ioda::ObsVector & out) const {
   const std::size_t nlocs = odb.nlocs();
 
   // assure shape of out
@@ -39,10 +39,10 @@ void SineOfLatitude::compute(const ioda::ObsSpace & odb,
   std::vector<float> cenlat(nlocs, 0.0);
   odb.get_db("MetaData", "latitude", cenlat);
 
-  for (const auto & job : jobs_) {
-    const std::string varname = name() + "_" + std::to_string(job);
-    for (std::size_t jl = 0; jl < nlocs; ++jl) {
-      out[varname][jl] = sin(cenlat[jl]*Constants::deg2rad);
+  const std::size_t njobs = jobs_.size();
+  for (std::size_t jl = 0; jl < nlocs; ++jl) {
+    for (std::size_t jb = 0; jb < njobs; ++jb) {
+      out[jl*njobs+jb] = sin(cenlat[jl] * Constants::deg2rad);
     }
   }
 }

@@ -15,8 +15,6 @@
 
 #include <boost/noncopyable.hpp>
 
-#include "ioda/ObsDataVector.h"
-
 #include "oops/util/Printable.h"
 
 // Forward declarations
@@ -59,7 +57,7 @@ class LinearObsOperator : public util::Printable,
   void print(std::ostream &) const;
   std::unique_ptr<LinearObsOperatorBase> oper_;
   ioda::ObsSpace & odb_;
-  std::unique_ptr<ioda::ObsDataVector<double>> biaspreds_;
+  std::vector<ioda::ObsVector> biaspreds_;
 };
 
 // -----------------------------------------------------------------------------
