@@ -378,7 +378,10 @@ onedvar_success = converged
 if (converged) then
   ob % output_profile(:) = GuessProfile(:)
   ob % output_BT(:) = Y(:)
-  ob % final_cost = Jcost
+
+  ! Recalculate final cost - to make sure output when using profile convergence
+  call ufo_rttovonedvarcheck_CostFunction(Diffprofile, b_inv, Ydiff, r_matrix, Jout)
+  ob % final_cost = Jout(1)
 end if
 
 !---------------------
@@ -389,19 +392,9 @@ if (self % UseJForConvergence) then
   write(*,'(A45,3F10.3,I5,L5)') "J initial, final, lowest, iter, converged = ", &
                                  JCostorig, Jcost,  Jcost, iter, onedvar_success
   write(*,*) "Final 1Dvar cost = ",Jcost
+else
+  write(*,*) "Final 1Dvar cost = ",Jcost
 end if
-
-!Ob % Niter = iter
-!if (RTerrorcode /= 0 .OR. .NOT. Converged .OR. outOfRange .OR. &
-!    inversionStatus /= 0) then
-!  Error = .true.
-!end if
-
-!if (.NOT. Error .and. self % UseJForConvergence) then
-!  ! store final cost function and retrieved bts
-!  Ob % Jcost = Jcost
-!  Ob % Britemp(Channels_1dvar(:)) = Britemp(:)
-!end if
 
 ! ----------
 ! Tidy up
