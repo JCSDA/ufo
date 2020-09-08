@@ -141,7 +141,6 @@ subroutine ufo_rttovonedvarcheck_apply(self, vars, retrieval_vars, geovals, appl
     call IR_pcemis % setup(self % EmisEigVecPath)
   end if
 
-
   ! Setup full B matrix object
   call full_bmatrix % setup(self % retrieval_variables, self % b_matrix_path, &
                             self % qtotal)
@@ -171,10 +170,9 @@ subroutine ufo_rttovonedvarcheck_apply(self, vars, retrieval_vars, geovals, appl
   ! ------------------------------------------
   ! 2. Beginning main observation loop
   ! ------------------------------------------
-  write(*,*) "Beginning observations loop: ",self%qcname
+  write(*,*) "Beginning loop over observations: ",self%qcname
   apply_count = 0
   obs_loop: do jobs = 1, obs % iloc
-!  obs_loop: do jobs = 1, 1
     if (apply(jobs)) then
 
       apply_count = apply_count + 1
@@ -186,22 +184,14 @@ subroutine ufo_rttovonedvarcheck_apply(self, vars, retrieval_vars, geovals, appl
       call ufo_geovals_copy_one(local_geovals, geovals, jobs)
       call ufo_rttovonedvarcheck_check_geovals(local_geovals, prof_index)
 
-      ! select appropriate b matrix for latitude of observation
-      b_matrix(:,:) = 0.0
-      b_inverse(:,:) = 0.0
-      b_sigma(:) = 0.0
-      do band = 1, full_bmatrix % nbands
-        if (obs % lat(jobs) <  full_bmatrix % north(band)) exit
-      end do
-      ! Heritage: Ops_SatRad_ResetCovariances
-      b_matrix(:,:) = full_bmatrix % store(:,:,band)
-      b_inverse(:,:) = full_bmatrix % inverse(:,:,band)
-      b_sigma(:) = full_bmatrix % sigma(:,band)
+      ! create b matrix arrays for this single observation location
+      call full_bmatrix % reset( obs % lat(jobs), & ! in
+                    b_matrix, b_inverse, b_sigma  ) ! out
 
       !---------------------------------------------------
       ! 2.2 Setup Jo terms
       !---------------------------------------------------
-      ! Channel selection based on previous filter flags
+      ! Channel selection based on previous filters flags
       nchans_used = 0
       do jvar = 1, self%nchans
         if( obs % QCflags(jvar,jobs) == 0 ) then
@@ -217,7 +207,6 @@ subroutine ufo_rttovonedvarcheck_apply(self, vars, retrieval_vars, geovals, appl
 
       ! setup ob data for this observation
       call ob % setup(nchans_used, prof_index % nprofelements)
-      call ob % init_emiss(self, local_geovals)
       ob % forward_mod_name = self % forward_mod_name
       ob % latitude = obs % lat(jobs)
       ob % longitude = obs % lon(jobs)
@@ -232,8 +221,7 @@ subroutine ufo_rttovonedvarcheck_apply(self, vars, retrieval_vars, geovals, appl
       if(self % RTTOV_mwscattSwitch) ob % mwscatt = .true.
       if(self % RTTOV_usetotalice) ob % mwscatt_totalice = .true.
 
-      ! create obs vector and r matrix
-      ! if emissivity read in use that
+      ! Create obs vector and r matrix
       jchans_used = 0
       do jvar = 1, self%nchans
         if( obs % QCflags(jvar,jobs) == 0 ) then
@@ -296,6 +284,7 @@ subroutine ufo_rttovonedvarcheck_apply(self, vars, retrieval_vars, geovals, appl
 
       ! Tidy up memory specific to a single observation
       call ufo_geovals_delete(local_geovals)
+      call ufo_geovals_delete(hofxdiags)
       call ob % delete()
       call r_submatrix % delete()
 
@@ -321,7 +310,6 @@ subroutine ufo_rttovonedvarcheck_apply(self, vars, retrieval_vars, geovals, appl
   call full_bmatrix % delete()
   call full_rmatrix % delete()
   call obs % delete()
-  call ufo_geovals_delete(hofxdiags)
   if (self % pcemiss) call IR_pcemis % delete()
   if (allocated(b_matrix))  deallocate(b_matrix)
   if (allocated(b_inverse)) deallocate(b_inverse)

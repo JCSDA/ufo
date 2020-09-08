@@ -399,7 +399,7 @@ call obsspace_put_db(obsdb, "OneDVar", "FinalCost", self % final_cost(:))
 !--
 
 if (prof_index % tstar > 0) then
-  call obsspace_put_db(obsdb, "OneDVar", var_sfc_t, self % output_profile(prof_index % tstar, :))
+  call obsspace_put_db(obsdb, "OneDVar", "skin_temperature", self % output_profile(prof_index % tstar, :))
 end if
 
 end subroutine

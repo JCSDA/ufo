@@ -46,7 +46,6 @@ type, public :: ufo_rttovonedvarcheck_ob
 
 contains
   procedure :: setup  => ufo_rttovonedvarcheck_InitOb
-  procedure :: init_emiss  => ufo_rttovonedvarcheck_InitEmiss
   procedure :: delete => ufo_rttovonedvarcheck_DeleteOb
   procedure :: info => ufo_rttovonedvarcheck_PrintOb
 
@@ -90,56 +89,9 @@ self % yobs(:) = missing
 self % emiss(:) = 0.0
 self % output_profile(:) = missing
 self % output_BT(:) = missing
-self % calc_emiss(:) = .false.
+self % calc_emiss(:) = .true.
 
 end subroutine ufo_rttovonedvarcheck_InitOb
-
-!------------------------------------------------------------------------------
-!> Initialize the emissivity arrays within the single obs structure
-!!
-!! \author Met Office
-!!
-!! \date 09/06/2020: Created
-!!
-subroutine ufo_rttovonedvarcheck_InitEmiss(self, config, geovals)
-
-implicit none
-
-! subroutine arguments:
-class(ufo_rttovonedvarcheck_ob), intent(inout) :: self !< observation metadata type
-type(ufo_rttovonedvarcheck), intent(in) :: config !< main rttovonedvarcheck type
-type(ufo_geovals), intent(in)           :: geovals !< model data at obs location
-
-type(ufo_geoval), pointer    :: geoval
-
-! ----------------------------------
-! 1.0 Get surface type from geovals
-!-----------------------------------
-call ufo_geovals_get_var(geovals, "surface_type", geoval)
-self % surface_type = geoval%vals(1, 1)
-
-!-------------
-! 2.1 Defaults
-!-------------
-
-! Only calculate in RTTOV over sea
-if (self % surface_type == RTSea) then
-  self % calc_emiss(:) = .true.
-else
-  self % calc_emiss(:) = .false.
-end if
-
-! The default emissivity for land is a very crude estimate - the same
-! for all surface types and all frequencies. However, we do not use
-! channels which see the surface over land where we rely on this default.
-self % emiss(:) = 0.0
-if (self % surface_type == RTLand) then
-  self % emiss(:) = config % EmissLandDefault
-else if (self % surface_type == RTIce) then
-  self % emiss(:) = config % EmissSeaIceDefault
-end if
-
-end subroutine ufo_rttovonedvarcheck_InitEmiss
 
 !------------------------------------------------------------------------------
 !> Delete the single observation object

@@ -33,6 +33,7 @@ type, public :: ufo_rttovonedvarcheck_bmatrix
 contains
   procedure :: setup  => ufo_rttovonedvarcheck_bmatrix_setup
   procedure :: delete => ufo_rttovonedvarcheck_bmatrix_delete
+  procedure :: reset  => ufo_rttovonedvarcheck_reset_covariances
 end type ufo_rttovonedvarcheck_bmatrix
 
 contains
@@ -70,8 +71,8 @@ if (file_exists) then
   call ufo_rttovonedvarcheck_iogetfreeunit(fileunit)
   open(unit = fileunit, file = trim(filepath))
   call rttovonedvarcheck_covariance_InitBmatrix(self)
+  call rttovonedvarcheck_create_fields_in(fields_in, variables, qtotal_flag)
   if (testing) then
-    call rttovonedvarcheck_create_fields_in(fields_in, variables, qtotal_flag)
     call rttovonedvarcheck_covariance_GetBmatrix(self, fileunit, fieldlist=fields_in)
   else
     call rttovonedvarcheck_covariance_GetBmatrix(self, fileunit)
@@ -496,6 +497,78 @@ end if
 end subroutine rttovonedvarcheck_covariance_GetBmatrix
 
 ! ------------------------------------------------------------------------------------------------
+!> Routine to create error covariances for a single observation
+!!
+!! \details Met Office OPS Heritage: Ops_SatRad_ResetCovariances.f90
+!!
+!! \author Met Office
+!!
+!! \date 08/09/2020: Created
+!!
+subroutine ufo_rttovonedvarcheck_reset_covariances(self, latitude, & ! in
+                                      b_matrix, b_inverse, b_sigma ) ! out
+
+implicit none
+
+! Subroutine arguments
+class(ufo_rttovonedvarcheck_bmatrix), intent(in) :: self !< B-matrix covariance
+real(kind_real), intent(in)  :: latitude
+real(kind_real), intent(out) :: b_matrix(:,:)
+real(kind_real), intent(out) :: b_inverse(:,:)
+real(kind_real), intent(out) :: b_sigma(:)
+
+! Local Variables
+integer :: band, i
+
+! select appropriate b matrix for latitude of observation
+b_matrix(:,:) = 0.0
+b_inverse(:,:) = 0.0
+b_sigma(:) = 0.0
+do band = 1, self % nbands
+  if (latitude < self % north(band)) exit
+end do
+b_matrix(:,:) = self % store(:,:,band)
+b_inverse(:,:) = self % inverse(:,:,band)
+b_sigma(:) = self % sigma(:,band)
+
+!! Use errors associated with microwave emissivity atlas
+!if (profindex % mwemiss(1) > 0) then
+!
+!  ! Atlas uncertainty stored in Ob % MwEmErrAtlas, use this to scale each
+!  ! row/column of the B matrix block.
+!  ! The default B matrix, see e.g. file ATOVS_Bmatrix_43, contains error
+!  ! covariances representing a global average. Here, those elements are scaled
+!  ! by a factor MwEmissError/SQRT(diag(B_matrix)) for each channel.
+!
+!  do i = profindex % mwemiss(1), profindex % mwemiss(2)
+!    MwEmissError = Ob % MwEmErrAtlas(i - profindex % mwemiss(1) + 1)
+!    if (MwEmissError > 1.0E-4 .and. MwEmissError < 1.0) then
+!      bscale = MwEmissError / sqrt (B_matrix(i,i))
+!      B_matrix(:,i) = B_matrix(:,i) * bscale
+!      B_matrix(i,:) = B_matrix(i,:) * bscale
+!      B_inverse(:,i) = B_inverse(:,i) / bscale
+!      B_inverse(i,:) = B_inverse(i,:) / bscale
+!      B_sigma(i) = B_sigma(i) * bscale
+!    end if
+!  end do
+!
+!end if
+!
+!! Scale the background skin temperature error covariances over land
+!if (Ob % Surface == RTland .and. SkinTempErrorLand >= 0.0) then
+!
+!  bscale = SkinTempErrorLand / sqrt (B_matrix(profindex % tstar,profindex % tstar))
+!  B_matrix(:,profindex % tstar) = B_matrix(:,profindex % tstar) * bscale
+!  B_matrix(profindex % tstar,:) = B_matrix(profindex % tstar,:) * bscale
+!  B_inverse(:,profindex % tstar) = B_inverse(:,profindex % tstar) / bscale
+!  B_inverse(profindex % tstar,:) = B_inverse(profindex % tstar,:) / bscale
+!  B_sigma(profindex % tstar) = B_sigma(profindex % tstar) * bscale
+!
+!end if
+
+end subroutine ufo_rttovonedvarcheck_reset_covariances
+
+! ------------------------------------------------------------------------------------------------
 !> Routine to invert the 1D-Var B-matrix
 !!
 !! \details Met Office OPS Heritage: Ops_SatRad_InvertMatrix.f90
@@ -668,6 +741,7 @@ logical, intent(in)                 :: qtotal_flag  !< Flag for qtotal
 character(len=max_string) :: varname
 integer                   :: jvar
 integer                   :: nmvars
+character(len=max_string) :: message
 
 call fckit_log % info("rttovonedvarcheck_create_fields_in: starting")
 
@@ -708,7 +782,10 @@ do jvar = 1, nmvars
     ! 8 - not used is not implmented yet
 
     case ("mass_content_of_cloud_liquid_water_in_atmosphere_layer")
-      if (.NOT. qtotal_flag) fields_in(9) = 9  ! liquid water profile
+      if (.NOT. qtotal_flag) then 
+        fields_in(9) = 9  ! liquid water profile
+        call abor1_ftn("rttovonedvarcheck not setup for independent clw")
+      end if
 
     case ("surface_wind_speed") ! surface wind speed
       fields_in(11) = 11
@@ -718,23 +795,31 @@ do jvar = 1, nmvars
 
     case ("surface_emissivity") ! microwave emissivity
       fields_in(14) = 14
+      call abor1_ftn("rttovonedvarcheck not setup for retrieving surface_emissivity")
 
     case ("mass_content_of_cloud_ice_in_atmosphere_layer")
-      if (.NOT. qtotal_flag) fields_in(15) = 15 ! ice profile
+      if (.NOT. qtotal_flag) then
+        fields_in(15) = 15 ! ice profile
+        call abor1_ftn("rttovonedvarcheck not setup for independent ciw")
+      end if
 
     case ("cloud_top_pressure")
       fields_in(16) = 16
+      call abor1_ftn("rttovonedvarcheck not setup for cloud retrievals")
 
     case ("effective_cloud_fraction") ! effective cloud fraction
       fields_in(17) = 17
+      call abor1_ftn("rttovonedvarcheck not setup for cloud retrievals")
 
     case ("emissivity_pc") ! emissivity prinipal components
       fields_in(18) = 18
+      call abor1_ftn("rttovonedvarcheck not setup for pc emissivity")
 
     ! 19 cloud fraction profile - not currently used
 
     case default
-      call abor1_ftn("Variable not implemented yet in rttovonedvarcheck Covariance")
+      write(message,*) trim(varname)," not implemented yet in rttovonedvarcheck Covariance"
+      call abor1_ftn(message)
 
   end select
 
