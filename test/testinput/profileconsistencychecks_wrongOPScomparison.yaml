@@ -140,9 +140,7 @@ Wrong number of entries per profile, RH:
     flagBasicChecksFail: true
     nErrorsFail: 8
     Comparison_Tol: 0.1
-    groups_singlevalue: ["Counters"]
-    groups_modellevels: ["ObsValue"]
-    num_modellevels: 3
+    groups_singlevalue: ["Counters", "ObsValue"]
   BypassMismatchComparison: true
 
 #A group variable is not chosen, throwing an exception
@@ -163,7 +161,6 @@ No group variable chosen:
     flagBasicChecksFail: true
     nErrorsFail: 8
     Comparison_Tol: 0.1
-    num_modellevels: 3
   BypassMismatchComparison: true
   ExpectThrowOnInstantiation: true
 
@@ -189,7 +186,6 @@ Ascending sort order:
     flagBasicChecksFail: true
     nErrorsFail: 8
     Comparison_Tol: 0.1
-    num_modellevels: 3
   BypassMismatchComparison: true
   ExpectThrowDuringOperation: true
 
@@ -213,7 +209,6 @@ Invalid check requested:
     flagBasicChecksFail: true
     nErrorsFail: 8
     Comparison_Tol: 0.1
-    num_modellevels: 3
   BypassMismatchComparison: true
   ExpectThrowDuringOperation: true
 
@@ -237,7 +232,6 @@ Duplicate check requested:
     flagBasicChecksFail: true
     nErrorsFail: 8
     Comparison_Tol: 0.1
-    num_modellevels: 3
   BypassMismatchComparison: true
   AddDuplicateCheck: true
 
@@ -261,7 +255,6 @@ Incorrect type in get:
     flagBasicChecksFail: true
     nErrorsFail: 8
     Comparison_Tol: 0.1
-    num_modellevels: 3
   BypassMismatchComparison: true
   GetWrongType: true
 
@@ -287,7 +280,6 @@ Standard levels out of order:
     flagBasicChecksFail: true
     nErrorsFail: 8
     Comparison_Tol: 0.1
-    num_modellevels: 3
     StandardLevels: [1, 1000]
   BypassMismatchComparison: true
   ExpectThrowDuringOperation: true

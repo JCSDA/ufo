@@ -17,6 +17,8 @@
 #include "oops/util/parameters/Parameter.h"
 #include "oops/util/parameters/Parameters.h"
 
+#include "ufo/profile/DataHandlerParameters.h"
+
 #include "ufo/utils/Constants.h"
 #include "ufo/utils/parameters/ParameterTraitsVariable.h"
 
@@ -27,31 +29,7 @@ namespace eckit {
 namespace ufo {
 
   /// \brief Options controlling the operation of the ProfileConsistencyChecks filter.
-  class ProfileConsistencyCheckParameters : public oops::Parameters {
-   public:  // functions
-    /// Determine whether a variable group is optional or not.
-    bool getOptional(const std::string &groupname) const
-    {
-      bool optional = false;
-      if (std::find(groups_optional.value().begin(), groups_optional.value().end(), groupname)
-          != groups_optional.value().end())
-        optional = true;
-      return optional;
-    }
-
-    /// Determine number of entries per profile for a variable group.
-    size_t getEntriesPerProfile(const std::string &groupname) const
-    {
-      size_t entriesPerProfile = -1;
-      if (std::find(groups_singlevalue.value().begin(), groups_singlevalue.value().end(), groupname)
-          != groups_singlevalue.value().end())
-        entriesPerProfile = 1;
-      if (std::find(groups_modellevels.value().begin(), groups_modellevels.value().end(), groupname)
-          != groups_modellevels.value().end())
-        entriesPerProfile = static_cast<size_t> (num_modellevels);
-      return entriesPerProfile;
-    }
-
+  class ProfileConsistencyCheckParameters : public DataHandlerParameters {
    public:  // variables
     //=== Generic parameters ===//
 
@@ -67,11 +45,6 @@ namespace ufo {
 
     /// Print station ID
     oops::Parameter<bool> PrintStationID {"PrintStationID", false, this};
-
-    //=== Parameters relating to the combination of multiple check results ===//
-
-    /// Number of errors that cause the observation to have failed
-    oops::Parameter<int> nErrorsFail {"nErrorsFail", 8, this};
 
     ///=== Standard level-related parameters ===//
 
@@ -149,7 +122,7 @@ namespace ufo {
     /// Big gaps (hPa) used in interpolation check
     oops::Parameter<std::vector<float>> BigGaps{"ICheck_BigGaps",
         {150, 150, 150, 150, 100, 100, 100, 75,
-            75, 50, 50, 20, 20, 20, 10, 10, 10, 10, 10, 10}};
+            75, 50, 50, 20, 20, 20, 10, 10, 10, 10, 10, 10}, this};
 
     //=== Hydrostatic check parameters ===//
 
@@ -198,11 +171,11 @@ namespace ufo {
 
     /// Big gaps (Pa) used in wind speed interpolation check
     oops::Parameter<std::vector<float>> UICheck_BigGaps{"UICheck_BigGaps",
-        {15000.0, 10000.0, 7500.0, 5000.0, 2000.0}};
+        {15000.0, 10000.0, 7500.0, 5000.0, 2000.0}, this};
 
     /// Big gap thresholds (Pa) used in wind speed interpolation check
     oops::Parameter<std::vector<float>> UICheck_BigGapsPThresh{"UICheck_BigGapsPThresh",
-        {65000.0, 27500.0, 17500.0, 8500.0, 2500.0}};
+        {65000.0, 27500.0, 17500.0, 8500.0, 2500.0}, this};
 
     //=== RH check parameters ===//
 
@@ -241,27 +214,11 @@ namespace ufo {
 
     //=== OPS comparison parameters ===//
 
-    /// Tolerance for absolute difference comparisions
-    oops::Parameter<float> Comparison_Tol {"Comparison_Tol", 0.1, this};
-
     /// Compare with OPS values?
     oops::Parameter<bool> compareWithOPS {"compareWithOPS", false, this};
 
-    /// Groups of variables whose presence in the input sample is optional
-    /// (if not present, all variables are initially set to zero)
-    oops::Parameter<std::vector<std::string>> groups_optional
-      {"groups_optional", {"Corrections", "Counters"}, this};
-
-    /// Groups of variables which have one value per profile
-    oops::Parameter<std::vector<std::string>> groups_singlevalue
-      {"groups_singlevalue", {"Counters"}, this};
-
-    /// Groups of variables with values on model levels
-    oops::Parameter<std::vector<std::string>> groups_modellevels
-      {"groups_modellevels", {}, this};
-
-    /// Number of model levels
-    oops::Parameter<int> num_modellevels {"num_modellevels", 70, this};
+    /// Tolerance for absolute difference comparisions
+    oops::Parameter<float> Comparison_Tol {"Comparison_Tol", 0.1, this};
   };
 }  // namespace ufo
 

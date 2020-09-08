@@ -24,7 +24,7 @@
 #include "ioda/ObsDataVector.h"
 #include "ioda/ObsSpace.h"
 
-#include "ufo/filters/ProfileConsistencyCheckParameters.h"
+#include "ufo/profile/DataHandlerParameters.h"
 
 #include "ufo/utils/Flags.h"
 #include "ufo/utils/StringUtils.h"
@@ -42,7 +42,7 @@ namespace ufo {
   class EntireSampleDataHandler {
    public:
     EntireSampleDataHandler(ioda::ObsSpace &obsdb,
-                            const ProfileConsistencyCheckParameters &options);
+                            const DataHandlerParameters &options);
 
     /// Retrieve a vector containing the requested variable for the entire data sample.
     ///    -# If the variable has previously been placed in a vector, return the vector.
@@ -75,7 +75,7 @@ namespace ufo {
           }
         } else if (obsdb_.has(groupname, varname) || optional) {
           // Initially fill the vector with the default value for the type T.
-          if (entriesPerProfile == -1) {
+          if (entriesPerProfile == 0) {
             vec_all.assign(obsdb_.nlocs(), defaultValue(vec_all));
           } else {
             vec_all.assign(entriesPerProfile * obsdb_.nrecs(), defaultValue(vec_all));
@@ -83,6 +83,21 @@ namespace ufo {
           // Retrieve variable from the obsdb if present, overwriting the default value.
           if (obsdb_.has(groupname, varname)) obsdb_.get_db(groupname, varname, vec_all);
         }
+
+        // If the vector contains entirely missing values, clear it.
+        T missingValue;  // Missing value for type T.
+        if (std::is_same<T, int>::value)
+          missingValue = util::missingValue(1);
+        else if (std::is_same<T, float>::value)
+          missingValue = util::missingValue(1.0f);
+        bool allMissing = true;  // Signifies all elements in the vector are missing.
+        for (size_t idx = 0; allMissing && idx < vec_all.size(); ++idx)
+          allMissing = vec_all[idx] == missingValue;
+        if (allMissing) {
+          oops::Log::debug() << "All elements of " << fullname << " are missing" << std::endl;
+          vec_all.clear();
+        }
+
         // Add vector to map (even if it is empty).
         entireSampleData_.emplace(fullname, std::move(vec_all));
         return boost::get<std::vector<T>> (entireSampleData_[fullname]);
@@ -112,7 +127,7 @@ namespace ufo {
     ioda::ObsSpace &obsdb_;
 
     /// Configurable parameters.
-    const ProfileConsistencyCheckParameters &options_;
+    const DataHandlerParameters &options_;
 
     /// Default value used to fill vector of integers.
     int defaultValue(const std::vector <int> &vec) {return 0;}

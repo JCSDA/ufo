@@ -16,8 +16,6 @@
 
 #include "eckit/config/LocalConfiguration.h"
 
-#include "ioda/ObsDataVector.h"
-
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
 #include "oops/util/Printable.h"
@@ -66,10 +64,10 @@ class ObsBias : public util::Printable,
 
   // Obs bias model
   void computeObsBias(ioda::ObsVector &, ObsDiagnostics &,
-                      const ioda::ObsDataVector<double> &) const;
+                      const std::vector<ioda::ObsVector> &) const;
 
   // Obs Bias Predictors
-  ioda::ObsDataVector<double> computePredictors(const GeoVaLs &, const ObsDiagnostics &) const;
+  std::vector<ioda::ObsVector> computePredictors(const GeoVaLs &, const ObsDiagnostics &) const;
 
   // Required variables
   const oops::Variables & requiredVars() const {return geovars_;}

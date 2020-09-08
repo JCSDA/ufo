@@ -12,7 +12,7 @@
 
 namespace ufo {
   EntireSampleDataHandler::EntireSampleDataHandler(ioda::ObsSpace &obsdb,
-                                                   const ProfileConsistencyCheckParameters &options)
+                                                   const DataHandlerParameters &options)
     : obsdb_(obsdb),
       options_(options)
   {}

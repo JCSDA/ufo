@@ -16,7 +16,7 @@
 
 #include "eckit/config/LocalConfiguration.h"
 
-#include "ioda/ObsDataVector.h"
+#include "ioda/ObsVector.h"
 
 #include "oops/base/Variables.h"
 
@@ -44,7 +44,7 @@ class PredictorBase : private boost::noncopyable {
   virtual void compute(const ioda::ObsSpace &,
                        const GeoVaLs &,
                        const ObsDiagnostics &,
-                       ioda::ObsDataVector<double> &) const = 0;
+                       ioda::ObsVector &) const = 0;
 
   /// geovars names required to compute the predictor
   const oops::Variables & requiredGeovars() const {return geovars_;}

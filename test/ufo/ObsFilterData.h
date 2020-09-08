@@ -109,6 +109,18 @@ void testObsFilterData() {
       EXPECT(vec == ref);
     }
 
+    ///  Check that get() works on datetime variables in ObsSpace:
+    varconfs.clear();
+    obsconf.get("datetime variables", varconfs);
+    ufo::Variables dtvars(varconfs);
+    for (size_t jvar = 0; jvar < dtvars.nvars(); ++jvar) {
+      std::vector<util::DateTime> vec;
+      data.get(dtvars.variable(jvar), vec);
+      std::vector<util::DateTime> ref(ospace.nlocs());
+      ospace.get_db(dtvars.variable(jvar).group(), dtvars.variable(jvar).variable(), ref);
+      EXPECT(vec == ref);
+    }
+
 ///  Check that associate(), has(), get() and dtype() work on ObsVector:
 ///  H(x) not associated yet
 ///  The important aspect of dtype handling here is it not being in ObsSpace so we

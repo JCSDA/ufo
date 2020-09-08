@@ -1,4 +1,4 @@
-# (C) Copyright 2017-2018 UCAR.
+# (C) Copyright 2017-2020 UCAR.
 #
 # This software is licensed under the terms of the Apache Licence Version 2.0
 # which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
@@ -143,6 +143,7 @@ list( APPEND ufo_test_input
   testinput/qc_met_office_buddy_check_unittests.yaml
   testinput/qc_met_office_buddy_pair_finder.yaml
   testinput/qc_recursive_splitter.yaml
+  testinput/qc_oceancolor_preqc.yaml
   testinput/qc_poisson_disk_thinning.yaml
   testinput/qc_poisson_disk_thinning_unittests.yaml
   testinput/qc_preqc.yaml
@@ -1115,6 +1116,12 @@ ecbuild_add_test( TARGET  test_ufo_qc_met_office_buddy_check
                   ARGS    "testinput/qc_met_office_buddy_check.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsFilters.x )
+
+ecbuild_add_test( TARGET  test_ufo_qc_oceancolor_preqc
+                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                   ARGS    "testinput/qc_oceancolor_preqc.yaml"
+                   ENVIRONMENT OOPS_TRAPFPE=1
+                   DEPENDS test_ObsFilters.x )
 
 ecbuild_add_test( TARGET  test_ufo_qc_poisson_disk_thinning
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x

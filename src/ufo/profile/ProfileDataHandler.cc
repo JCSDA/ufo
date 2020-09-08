@@ -10,7 +10,7 @@
 
 namespace ufo {
   ProfileDataHandler::ProfileDataHandler(ioda::ObsSpace &obsdb,
-                                         const ProfileConsistencyCheckParameters &options,
+                                         const DataHandlerParameters &options,
                                          EntireSampleDataHandler &entireSampleDataHandler,
                                          const ProfileIndices &profileIndices)
     : obsdb_(obsdb),
@@ -24,6 +24,23 @@ namespace ufo {
     profileData_.clear();
   }
 
+  void ProfileDataHandler::getProfileIndicesInEntireSample(const std::string& groupname)
+  {
+    profileIndicesInEntireSample_.clear();
+    const size_t entriesPerProfile = options_.getEntriesPerProfile(groupname);
+    // If the number of entries per profile was not specified, use the indices
+    // that were obtained by sorting and grouping the record numbers.
+    if (entriesPerProfile == 0) {
+      profileIndicesInEntireSample_ = profileIndices_.getProfileIndices();
+    } else {
+      // Otherwise increment the indices sequentially, starting at the
+      // relevant position.
+      profileIndicesInEntireSample_.resize(entriesPerProfile);
+      std::iota(profileIndicesInEntireSample_.begin(),
+                profileIndicesInEntireSample_.end(),
+                profileIndices_.getProfileNumCurrent() * entriesPerProfile);
+    }
+  }
   void ProfileDataHandler::updateEntireSampleData()
   {
     for (const auto &it_profile : profileData_) {
@@ -32,36 +49,23 @@ namespace ufo {
       std::string groupname;
       ufo::splitVarGroup(fullname, varname, groupname);
 
-      if (groupname == "QCFlags") {
+      if (groupname == "QCFlags" || fullname == ufo::VariableNames::counter_NumAnyErrors) {
+        getProfileIndicesInEntireSample(groupname);
         const std::vector <int>& profileData = get<int>(fullname);
         std::vector <int>& entireSampleData = entireSampleDataHandler_.get<int>(fullname);
         size_t idx = 0;
-        for (const auto& profileIndex : profileIndices_.getProfileIndices()) {
+        for (const auto& profileIndex : profileIndicesInEntireSample_) {
           updateValueIfPresent(profileData, idx, entireSampleData, profileIndex);
           idx++;
         }
-      }
-
-      if (groupname == "Corrections") {
+      } else if (groupname == "Corrections") {
+        getProfileIndicesInEntireSample(groupname);
         const std::vector <float>& profileData = get<float>(fullname);
         std::vector <float>& entireSampleData = entireSampleDataHandler_.get<float>(fullname);
         size_t idx = 0;
-        for (const auto& profileIndex : profileIndices_.getProfileIndices()) {
+        for (const auto& profileIndex : profileIndicesInEntireSample_) {
           updateValueIfPresent(profileData, idx, entireSampleData, profileIndex);
           idx++;
-        }
-      }
-
-      if (fullname == ufo::VariableNames::counter_NumAnyErrors) {
-        const std::vector <int>& profileData = get<int>(fullname);
-        std::vector <int>& entireSampleData = entireSampleDataHandler_.get<int>(fullname);
-        const size_t profileNumCurrent = profileIndices_.getProfileNumCurrent();
-        const size_t entriesPerProfile = profileData.size();
-        size_t idx = 0;
-        for (size_t profileIndex = profileNumCurrent * entriesPerProfile;
-             profileIndex < (profileNumCurrent + 1) * entriesPerProfile;
-             ++profileIndex) {
-          updateValueIfPresent(profileData, idx, entireSampleData, profileIndex);
         }
       }
     }
@@ -71,7 +75,7 @@ namespace ufo {
   {
     std::vector <int> &ReportFlags = get<int>(ufo::VariableNames::qcflags_observation_report);
     const std::vector <int> &NumAnyErrors = get<int>(ufo::VariableNames::counter_NumAnyErrors);
-    if (NumAnyErrors[0] > options_.nErrorsFail.value()) {
+    if (!NumAnyErrors.empty() && NumAnyErrors[0] > options_.nErrorsFail.value()) {
       oops::Log::debug() << " " << NumAnyErrors[0]
                          << " errors detected, whole profile rejected" << std::endl;
       for (size_t jlev = 0; jlev < ReportFlags.size(); ++jlev) {
@@ -92,9 +96,13 @@ namespace ufo {
       ufo::splitVarGroup(fullname, varname, groupname);
 
       if (groupname == "QCFlags") {
+        oops::Log::debug() << " " << fullname << std::endl;
+
         const std::vector <int> &Flags = get<int>(fullname);
+        getProfileIndicesInEntireSample(groupname);
+
         size_t idx = 0;
-        for (const auto& jloc : profileIndices_.getProfileIndices()) {
+        for (const auto& profileIndex : profileIndicesInEntireSample_) {
           // Please note this concise code relies on both FlagsElem::FinalRejectFlag
           // and FlagsWholeObReport::FinalRejectReport being equal to the same value
           // (as is the case in OPS).
@@ -103,11 +111,10 @@ namespace ufo {
           if (!Flags.empty() &&
               (Flags[idx] & ufo::FlagsElem::FinalRejectFlag ||
                Flags[idx] & ufo::FlagsWholeObReport::FinalRejectReport)) {
-            oops::Log::debug() << " " << jloc << std::endl;
+            oops::Log::debug() << "  " << profileIndex << std::endl;
             // Flag all variables
-            for (size_t jv = 0; jv < nvars; ++jv) {
-              flagged[jv][jloc] = true;
-            }
+            for (size_t jv = 0; jv < nvars; ++jv)
+              flagged[jv][profileIndex] = true;
           }
           idx++;
         }

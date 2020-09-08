@@ -183,7 +183,7 @@ double ObsBiasIncrement::norm() const {
 // -----------------------------------------------------------------------------
 
 void ObsBiasIncrement::computeObsBiasTL(const GeoVaLs & geovals,
-                                        const ioda::ObsDataVector<double> & predData,
+                                        const std::vector<ioda::ObsVector> & predData,
                                         ioda::ObsVector & ybiasinc) const {
   oops::Log::trace() << "ObsBiasIncrement::computeObsBiasTL starts." << std::endl;
 
@@ -193,20 +193,20 @@ void ObsBiasIncrement::computeObsBiasTL(const GeoVaLs & geovals,
     const std::size_t njobs  = jobs_.size();
 
     ASSERT(biascoeffsinc_.size() == npreds*njobs);
-    ASSERT(predData.nvars() == njobs*npreds);
-    ASSERT(predData.nlocs() == nlocs);
+    ASSERT(predData.size() == npreds);
     ASSERT(ybiasinc.nvars() == njobs);
 
-    /* predData memory layout (njobs*npreds X nlocs)
-     *     Loc     0      1      2       3
-     *           --------------------------
-     * ch1 pred1 | 0      1      2       3
-     *     pred2 | 4      5      7       8
-     *     pred3 | 8      9     10      11 
-     * ch2 pred1 |12     13     14      15
-     *     pred2 |16     17     18      19
-     *     ....  |
-    */
+    /* predData memory layout (npreds X nlocs X njobs)
+     *       Loc     0      1      2       3
+     *             --------------------------
+     * pred1 Chan1 | 0      3      6       9
+     *       Chan2 | 1      4      7      10
+     *       ....  | 2      5      8      11
+     *
+     * pred2 Chan1 |12     15     18      21
+     *       Chan2 |13     16     19      22
+     *       ....  |14     17     20      23
+     */
 
     /* ybiasinc memory layout (nlocs X njobs)
      *     ch1    ch2    ch3     ch4
@@ -224,12 +224,13 @@ void ObsBiasIncrement::computeObsBiasTL(const GeoVaLs & geovals,
     // map bias coeffs to eigen matrix (read only)
     Eigen::Map<const Eigen::MatrixXd> coeffs(biascoeffsinc_.data(), npreds, njobs);
 
-    // ( nlocs X 1 ) = ( nlocs X npreds ) * ( npreds X 1 )
+    // For each channel: ( nlocs X 1 ) = ( nlocs X npreds ) * ( npreds X 1 )
     for (std::size_t jch = 0; jch < njobs; ++jch) {
       for (std::size_t jp = 0; jp < npreds; ++jp) {
-        const std::string varname = predbases_[jp]->name() + "_" + std::to_string(jobs_[jch]);
+        const double beta = coeffs(jp, jch);
+        /// axpy
         for (std::size_t jl = 0; jl < nlocs; ++jl) {
-          ybiasinc[jl*njobs+jch] += predData[varname][jl] * coeffs(jp, jch);
+          ybiasinc[jl*njobs+jch] += predData[jp][jl*njobs+jch] * beta;
         }
       }
     }
@@ -241,7 +242,7 @@ void ObsBiasIncrement::computeObsBiasTL(const GeoVaLs & geovals,
 // -----------------------------------------------------------------------------
 
 void ObsBiasIncrement::computeObsBiasAD(GeoVaLs & geovals,
-                                        const ioda::ObsDataVector<double> & predData,
+                                        const std::vector<ioda::ObsVector> & predData,
                                         const ioda::ObsVector & ybiasinc) {
   oops::Log::trace() << "ObsBiasIncrement::computeObsBiasAD starts." << std::endl;
 
@@ -251,8 +252,7 @@ void ObsBiasIncrement::computeObsBiasAD(GeoVaLs & geovals,
     const std::size_t njobs  = jobs_.size();
 
     ASSERT(biascoeffsinc_.size() == npreds*njobs);
-    ASSERT(predData.nvars() == njobs*npreds);
-    ASSERT(predData.nlocs() == nlocs);
+    ASSERT(predData.size() == npreds);
     ASSERT(ybiasinc.nvars() == njobs);
 
     // map bias coeffs to eigen matrix (writable)
@@ -267,11 +267,10 @@ void ObsBiasIncrement::computeObsBiasAD(GeoVaLs & geovals,
           tmp(jl) = ybiasinc[indx];
         }
       }
-      // ( npreds X 1 ) = ( npreds X nlocs ) * ( nlocs X 1 )
+      // For each channel: ( npreds X 1 ) = ( npreds X nlocs ) * ( nlocs X 1 )
       for (std::size_t jp = 0; jp < npreds; ++jp) {
-        const std::string varname = predbases_[jp]->name() + "_" + std::to_string(jobs_[jch]);
         for (std::size_t jl = 0; jl < nlocs; ++jl) {
-          coeffs(jp, jch) += predData[varname][jl] * tmp(jl);
+          coeffs(jp, jch) += predData[jp][jl*njobs+jch] * tmp(jl);
         }
       }
 

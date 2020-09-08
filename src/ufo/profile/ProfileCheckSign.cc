@@ -43,12 +43,12 @@ namespace ufo {
        profileDataHandler_.get<float>(ufo::VariableNames::obscorrection_air_temperature);
     if (oops::anyVectorEmpty(pressures, tObs, tBkg, PstarBackgr, tFlags, tObsCorrection)) {
       oops::Log::debug() << "At least one vector is empty. "
-                           << "Check will not be performed." << std::endl;
+                         << "Check will not be performed." << std::endl;
       return;
     }
     if (!oops::allVectorsSameSize(pressures, tObs, tBkg, PstarBackgr, tFlags, tObsCorrection)) {
       oops::Log::debug() << "Not all vectors have the same size. "
-                           << "Check will not be performed." << std::endl;
+                         << "Check will not be performed." << std::endl;
       return;
     }
 

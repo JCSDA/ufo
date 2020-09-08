@@ -41,12 +41,12 @@ namespace ufo {
 
     if (oops::anyVectorEmpty(pressures, uObs, vObs, uFlags)) {
       oops::Log::debug() << "At least one vector is empty. "
-                           << "Check will not be performed." << std::endl;
+                         << "Check will not be performed." << std::endl;
       return;
     }
     if (!oops::allVectorsSameSize(pressures, uObs, vObs, uFlags)) {
       oops::Log::debug() << "Not all vectors have the same size. "
-                           << "Check will not be performed." << std::endl;
+                         << "Check will not be performed." << std::endl;
       return;
     }
 
