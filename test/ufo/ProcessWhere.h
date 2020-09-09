@@ -16,7 +16,7 @@
 #include "eckit/config/LocalConfiguration.h"
 #include "eckit/testing/Test.h"
 #include "ioda/ObsSpace.h"
-#include "oops/parallel/mpi/mpi.h"
+#include "oops/mpi/mpi.h"
 #include "oops/runs/Test.h"
 #include "oops/util/Logger.h"
 #include "test/TestEnvironment.h"
@@ -37,7 +37,7 @@ void testProcessWhere(const eckit::LocalConfiguration &conf,
 
   eckit::LocalConfiguration obsconf(conf, "obs space");
 
-  ioda::ObsSpace ospace(obsconf, oops::mpi::comm(), bgn, end);
+  ioda::ObsSpace ospace(obsconf, oops::mpi::world(), bgn, end);
   ObsFilterData data(ospace);
 
   const int nlocs = obsconf.getInt("nlocs");

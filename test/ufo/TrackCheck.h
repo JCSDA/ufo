@@ -19,7 +19,7 @@
 #include "eckit/testing/Test.h"
 #include "ioda/ObsSpace.h"
 #include "ioda/ObsVector.h"
-#include "oops/parallel/mpi/mpi.h"
+#include "oops/mpi/mpi.h"
 #include "oops/runs/Test.h"
 #include "oops/util/Expect.h"
 #include "test/TestEnvironment.h"
@@ -34,7 +34,7 @@ void testTrackCheck(const eckit::LocalConfiguration &conf) {
   util::DateTime end(conf.getString("window end"));
 
   const eckit::LocalConfiguration obsSpaceConf(conf, "obs space");
-  ioda::ObsSpace obsspace(obsSpaceConf, oops::mpi::comm(), bgn, end);
+  ioda::ObsSpace obsspace(obsSpaceConf, oops::mpi::world(), bgn, end);
 
   if (conf.has("air_pressures")) {
     const std::vector<float> airPressures = conf.getFloatVector("air_pressures");
