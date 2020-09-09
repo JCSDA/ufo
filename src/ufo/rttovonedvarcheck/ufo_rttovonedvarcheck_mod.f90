@@ -173,6 +173,7 @@ subroutine ufo_rttovonedvarcheck_apply(self, vars, retrieval_vars, geovals, appl
   write(*,*) "Beginning loop over observations: ",self%qcname
   apply_count = 0
   obs_loop: do jobs = 1, obs % iloc
+!  obs_loop: do jobs = 900, 900
     if (apply(jobs)) then
 
       apply_count = apply_count + 1
@@ -215,6 +216,7 @@ subroutine ufo_rttovonedvarcheck_apply(self, vars, retrieval_vars, geovals, appl
       ob % sensor_azimuth_angle = obs % sat_azi(jobs)
       ob % solar_zenith_angle = obs % sol_zen(jobs)
       ob % solar_azimuth_angle = obs % sol_azi(jobs)
+      ob % surface_type = obs % surface_type(jobs)
       ob % retrievecloud = cloud_retrieval
       ob % pcemis => IR_pcemis
       ob % calc_emiss = obs % calc_emiss(jobs)
