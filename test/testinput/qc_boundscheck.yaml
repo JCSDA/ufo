@@ -138,3 +138,38 @@ observations:
 #  var1@MetaData =  1, 2, 3, 4, 5, 6, 7, 8, 9, 10
 #  var2@MetaData = 10, 9, 8, 7, 6, 5, 4, 3, 2,  1
   passedBenchmark: 16
+- obs space:
+    name: test data
+    obsdatain:
+      obsfile: Data/filters_testdata.nc4
+    simulated variables: [variable1, variable2, variable3]
+  obs filters:
+  - filter: Bounds Check       # test min/max value of a single test var, but filter 2 or more vars
+    filter variables:
+    - name: variable2
+    - name: variable3
+    test variables:
+    - name: var1@MetaData
+    minvalue: 4
+# Filter variable2 AND variable3 based only on single test var: var1@MetaData values
+# Note: variable1 is not specified in filtered variables, all obs for variable1 will pass
+#  var1@MetaData =  1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+#  var2@MetaData = 10, 9, 8, 7, 6, 5, 4, 3, 2,  1
+  passedBenchmark: 24
+- obs space:
+    name: test data
+    obsdatain:
+      obsfile: Data/filters_testdata.nc4
+    simulated variables: [variable1, variable2, variable3]
+  obs filters:
+  - filter: Bounds Check       # test min/max value of a single test var, but filter 2 or more vars
+    filter variables:
+    - name: variable2
+    - name: variable3
+    test variables:
+    - name: variable1@ObsValue
+    maxvalue: 16
+# Filter variable2 AND variable3 based only on single test var of variable1 (@ObsValue)
+# Note: variable1 is not specified in filtered variables, all obs for variable1 will pass
+#  variable1@ObsValue = 10, 11, 12, 13, 14, 15, 16, 17, 18, 19
+  passedBenchmark: 24

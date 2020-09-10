@@ -16,7 +16,7 @@
 #include "eckit/config/LocalConfiguration.h"
 #include "eckit/testing/Test.h"
 #include "ioda/ObsSpace.h"
-#include "oops/parallel/mpi/mpi.h"
+#include "oops/mpi/mpi.h"
 #include "oops/runs/Test.h"
 #include "oops/util/DateTime.h"
 #include "oops/util/Duration.h"
@@ -40,7 +40,7 @@ void testObsBiasCovarianceDetails() {
     = conf.getSubConfigurations("observations");
 
   for (auto & oconf : obsconfs) {
-    ioda::ObsSpace odb(oconf.getSubConfiguration("obs space"), oops::mpi::comm(), bgn, end);
+    ioda::ObsSpace odb(oconf.getSubConfiguration("obs space"), oops::mpi::world(), bgn, end);
 
     // Setup ObsBias
     ObsBias ybias(odb, oconf);

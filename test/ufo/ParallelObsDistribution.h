@@ -17,7 +17,7 @@
 #include "eckit/testing/Test.h"
 #include "ioda/ObsSpace.h"
 #include "ioda/ObsVector.h"
-#include "oops/parallel/mpi/mpi.h"
+#include "oops/mpi/mpi.h"
 #include "oops/runs/Test.h"
 #include "oops/util/Expect.h"
 #include "oops/util/parameters/Parameters.h"
@@ -65,7 +65,7 @@ void testVariable(const std::string &section) {
   util::DateTime end(topConf.getString("window end"));
 
   const eckit::LocalConfiguration obsSpaceConf(topConf, "obs space");
-  ioda::ObsSpace obsSpace(obsSpaceConf, oops::mpi::comm(), bgn, end);
+  ioda::ObsSpace obsSpace(obsSpaceConf, oops::mpi::world(), bgn, end);
 
   TestParameters<T> parameters;
   parameters.deserialize(topConf.getSubConfiguration(section));
@@ -106,7 +106,7 @@ CASE("ufo/ParallelObsDistribution/members") {
   util::DateTime end(topConf.getString("window end"));
 
   const eckit::LocalConfiguration obsSpaceConf(topConf, "obs space");
-  ioda::ObsSpace obsSpace(obsSpaceConf, oops::mpi::comm(), bgn, end);
+  ioda::ObsSpace obsSpace(obsSpaceConf, oops::mpi::world(), bgn, end);
 
   ParallelObsDistribution obsDistribution(obsSpace);
   const size_t gnlocs = obsSpace.gnlocs();

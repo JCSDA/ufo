@@ -19,7 +19,7 @@
 #include "eckit/testing/Test.h"
 #include "ioda/ObsSpace.h"
 #include "ioda/ObsVector.h"
-#include "oops/parallel/mpi/mpi.h"
+#include "oops/mpi/mpi.h"
 #include "oops/runs/Test.h"
 #include "oops/util/Expect.h"
 #include "oops/util/FloatCompare.h"
@@ -36,7 +36,7 @@ const ufo::TrackCheckShipDiagnostics setupRunFilter(const eckit::LocalConfigurat
   util::DateTime end(conf.getString("window end"));
 
   const eckit::LocalConfiguration obsSpaceConf(conf, "obs space");
-  ioda::ObsSpace obsspace(obsSpaceConf, oops::mpi::comm(), bgn, end);
+  ioda::ObsSpace obsspace(obsSpaceConf, oops::mpi::world(), bgn, end);
 
   if (conf.has("station_ids")) {
     const std::vector<int> stationIds = conf.getIntVector("station_ids");

@@ -21,7 +21,7 @@
 #include "eckit/testing/Test.h"
 #include "ioda/ObsSpace.h"
 #include "ioda/ObsVector.h"
-#include "oops/parallel/mpi/mpi.h"
+#include "oops/mpi/mpi.h"
 #include "oops/runs/Test.h"
 #include "oops/util/Expect.h"
 #include "test/TestEnvironment.h"
@@ -96,7 +96,7 @@ void testDuplicatesAndBuddyCountConstraints(const eckit::LocalConfiguration &con
   util::DateTime end(conf.getString("window end"));
 
   const eckit::LocalConfiguration obsSpaceConf(conf, "obs space");
-  ioda::ObsSpace obsSpace(obsSpaceConf, oops::mpi::comm(), bgn, end);
+  ioda::ObsSpace obsSpace(obsSpaceConf, oops::mpi::world(), bgn, end);
 
   boost::optional<std::vector<float>> airPressures;
   if (obsSpace.has("MetaData", "air_pressure")) {

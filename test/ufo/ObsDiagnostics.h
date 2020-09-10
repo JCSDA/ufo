@@ -19,7 +19,7 @@
 #include "ioda/ObsSpace.h"
 #include "ioda/ObsVector.h"
 #include "oops/base/Variables.h"
-#include "oops/parallel/mpi/mpi.h"
+#include "oops/mpi/mpi.h"
 #include "oops/runs/Test.h"
 #include "test/TestEnvironment.h"
 #include "ufo/GeoVaLs.h"
@@ -40,7 +40,7 @@ void testObsDiagnostics() {
   util::DateTime bgn(conf.getString("window begin"));
   util::DateTime end(conf.getString("window end"));
   const eckit::LocalConfiguration obsconf(conf, "obs space");
-  ioda::ObsSpace ospace(obsconf, oops::mpi::comm(), bgn, end);
+  ioda::ObsSpace ospace(obsconf, oops::mpi::world(), bgn, end);
   const size_t nlocs = ospace.nlocs();
 
   // initialize observation operator (set variables requested from the model,

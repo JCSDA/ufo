@@ -6,7 +6,7 @@
  */
 
 #include "ufo/utils/ParallelObsDistribution.h"
-#include "oops/parallel/mpi/mpi.h"
+#include "oops/mpi/mpi.h"
 
 namespace ufo {
 

@@ -17,7 +17,7 @@
 #include "eckit/testing/Test.h"
 #include "ioda/ObsSpace.h"
 #include "ioda/ObsVector.h"
-#include "oops/parallel/mpi/mpi.h"
+#include "oops/mpi/mpi.h"
 #include "oops/runs/Test.h"
 #include "test/TestEnvironment.h"
 #include "ufo/filters/ObsFilterData.h"
@@ -41,7 +41,7 @@ void testObsFilterData() {
   for (size_t jconf = 0; jconf < confs.size(); ++jconf) {
 ///  Setup ObsSpace
     const eckit::LocalConfiguration obsconf(confs[jconf], "obs space");
-    ioda::ObsSpace ospace(obsconf, oops::mpi::comm(), bgn, end);
+    ioda::ObsSpace ospace(obsconf, oops::mpi::world(), bgn, end);
 
 ///  Setup GeoVaLs
     const eckit::LocalConfiguration gconf(confs[jconf], "geovals");
