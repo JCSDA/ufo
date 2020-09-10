@@ -47,7 +47,7 @@ class WindComponents : public FilterBase,
   void print(std::ostream &) const override;
   void applyFilter(const std::vector<bool> &, const Variables &,
                    std::vector<std::vector<bool>> &) const override;
-  int qcFlag() const override {return QCflags::bounds;}
+  int qcFlag() const override {return QCflags::preQC;}
 };
 
 }  // namespace ufo

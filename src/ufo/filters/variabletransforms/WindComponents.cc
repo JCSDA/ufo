@@ -45,10 +45,14 @@ void WindComponents::applyFilter(const std::vector<bool> & apply,
   oops::Log::trace() << "WindComponents priorFilter" << std::endl;
 
   const float missing = util::missingValue(missing);
+  const float rad = static_cast<float>(Constants::deg2rad);
   const size_t nlocs = obsdb_.nlocs();
 
   std::vector<float> u(nlocs), v(nlocs);
   std::vector<float> Zfff(nlocs), Zddd(nlocs);
+
+  // check present: obsdb.has
+  // warning message or error?
 
   obsdb_.get_db("ObsValue", "wind_speed", Zfff);
   obsdb_.get_db("ObsValue", "wind_from_direction", Zddd);
@@ -58,16 +62,18 @@ void WindComponents::applyFilter(const std::vector<bool> & apply,
 
 // Loop over all obs
   for (size_t jobs = 0; jobs < nlocs; ++jobs) {
-      // Have removed 'apply' here: 'where' not applicable for a unit transformation
-      // Calculate wind components
-      // OPS checks for extremevalueflag (speed < 0, direction > 360 or < 0).
-      if (Zddd[jobs] != missing && Zfff[jobs] != missing) {
-        u[jobs] = -Zfff[jobs] * sin(Zddd[jobs] * static_cast<float>(Constants::deg2rad));
-        v[jobs] = -Zfff[jobs] * cos(Zddd[jobs] * static_cast<float>(Constants::deg2rad));
+    if (apply[jobs]) {
+      // Check for missing or extreme values
+      if (Zddd[jobs] != missing && Zfff[jobs] != missing && Zfff[jobs] >= 0
+              && Zddd[jobs] <=360 && Zfff[jobs] >= 0) {
+        // Calculate wind components
+        u[jobs] = -Zfff[jobs] * sin(Zddd[jobs] * rad);
+        v[jobs] = -Zfff[jobs] * cos(Zddd[jobs] * rad);
         oops::Log::debug() << "wind_speed, wind_from_direction: " << Zfff[jobs] << ", "
                            << Zddd[jobs] << ", eastward_wind=" << u[jobs] << ", northward_wind=" << v[jobs]
                            << std::endl;
       }
+    }
   }
   // put new variable at existing locations
   obsdb_.put_db("ObsValue", "eastward_wind", u);

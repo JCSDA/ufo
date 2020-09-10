@@ -45,6 +45,7 @@ void WindVector::applyFilter(const std::vector<bool> & apply,
   oops::Log::trace() << "WindVector priorFilter" << std::endl;
 
   const float missing = util::missingValue(missing);
+  const float deg = static_cast<float>(Constants::rad2deg);
   const size_t nlocs = obsdb_.nlocs();
 
   std::vector<float> Zfff(nlocs), Zddd(nlocs);
@@ -58,20 +59,22 @@ void WindVector::applyFilter(const std::vector<bool> & apply,
 
 // Loop over all obs
   for (size_t jobs = 0; jobs < nlocs; ++jobs) {
-      // Have removed 'apply' here: 'where' not applicable for a unit transformation
+    if (apply[jobs]) {
       oops::Log::trace() << "WindVector priorFilter -jobs = " << jobs << std::endl;
       // Calculate wind vector
       if (u[jobs] != missing && v[jobs] != missing) {
         Zfff[jobs] = sqrt(pow(u[jobs], 2) + pow(v[jobs], 2));
         if (u[jobs] == 0 && v[jobs] ==0) {
             Zddd[jobs] = 0;
-        } else {
-            Zddd[jobs] = fmod((270.0 - atan2 (v[jobs], u[jobs]) * static_cast<float>(Constants::rad2deg)), 360.0);
+        }
+        else {
+            Zddd[jobs] = fmod((270.0 - atan2 (v[jobs], u[jobs]) * deg), 360.0);
         }
         oops::Log::debug() << "eastward_wind, northward_wind:" << u[jobs] << ", " << v[jobs]
                            << " wind_speed=" << Zfff[jobs] << " wind_from_direction=" << Zddd[jobs]
                            << std::endl;
       }
+    }
   }
 
   // put new variable at existing locations

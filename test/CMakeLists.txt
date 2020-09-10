@@ -162,6 +162,8 @@ list( APPEND ufo_test_input
   testinput/timeoper.yaml
   testinput/tprof.yaml
   testinput/variables.yaml
+  testinput/variabletransform_windcomponents.yaml
+  testinput/variabletransform_windvector.yaml
   testinput/windprof.yaml
 )
 
@@ -256,6 +258,7 @@ list( APPEND ufo_test_data
   atmosphere/sondes_geoval_2018041500_vs.nc4
   atmosphere/ssmis_f18_geoval_2018041500_m.nc4
   atmosphere/windprof_geoval_2018041500_m.nc4
+  atmosphere/wind_unit_transforms_2018041500.nc4
   marine/coolskin_fake_geovals_2018041500.nc
   marine/cryosat2-2018-04-15_geovals.nc
   marine/icec-2018-04-15_geovals.nc
@@ -1055,6 +1058,20 @@ ecbuild_add_test( TARGET  test_ufo_qc_met_office_buddy_pair_finder
                   ARGS    "testinput/qc_met_office_buddy_pair_finder.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   LIBS    ufo)
+
+# Test Variable Transforms
+
+ecbuild_add_test( TARGET  test_ufo_variabletransform_windcomponents
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                  ARGS    "testinput/variabletransform_windcomponents.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsFilters.x )
+
+ecbuild_add_test( TARGET  test_ufo_variabletransform_windvector
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                  ARGS    "testinput/variabletransform_windvector.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsFilters.x )
 
 # Test Functions
 
