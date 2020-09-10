@@ -44,6 +44,7 @@ class GeoVaLs : public util::Printable,
   GeoVaLs(const Locations &, const oops::Variables &);
   GeoVaLs(const eckit::Configuration &, const ioda::ObsSpace &,
           const oops::Variables &);
+  GeoVaLs(const GeoVaLs &, const int &);
   GeoVaLs(const GeoVaLs &);
 
   ~GeoVaLs();
@@ -59,6 +60,7 @@ class GeoVaLs : public util::Printable,
   void merge(const GeoVaLs &, const GeoVaLs &);
 
   void zero();
+  void reorderzdir(const std::string &, const std::string &);
   void random();
   double rms() const;
   double normalizedrms(const GeoVaLs &) const;
@@ -73,7 +75,6 @@ class GeoVaLs : public util::Printable,
   void put(const std::vector<double> &, const std::string &, const int) const;
 
   void read(const eckit::Configuration &, const ioda::ObsSpace &);
-  void analytic_init(const Locations &, const eckit::Configuration &);
   void write(const eckit::Configuration &) const;
 
   int & toFortran() {return keyGVL_;}

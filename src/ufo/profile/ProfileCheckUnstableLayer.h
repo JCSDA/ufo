@@ -8,12 +8,12 @@
 #ifndef UFO_PROFILE_PROFILECHECKUNSTABLELAYER_H_
 #define UFO_PROFILE_PROFILECHECKUNSTABLELAYER_H_
 
+#include <utility>
 #include <vector>
 
 #include "ufo/profile/ProfileCheckBase.h"
 #include "ufo/profile/ProfileCheckValidator.h"
-#include "ufo/profile/ProfileData.h"
-#include "ufo/profile/ProfileFlags.h"
+#include "ufo/profile/ProfileDataHandler.h"
 #include "ufo/profile/ProfileIndices.h"
 
 namespace ufo {
@@ -27,8 +27,7 @@ namespace ufo {
    public:
     ProfileCheckUnstableLayer(const ProfileConsistencyCheckParameters &options,
                               const ProfileIndices &profileIndices,
-                              const ProfileData &profileData,
-                              ProfileFlags &profileFlags,
+                              ProfileDataHandler &profileDataHandler,
                               ProfileCheckValidator &profileCheckValidator);
 
     /// Run check

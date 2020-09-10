@@ -14,376 +14,363 @@
 #Therefore using the benchmark flag either 0 or 69 observations will pass the test.
 #
 
-window_begin: 2018-04-14T20:30:00Z
-window_end: 2018-04-15T03:30:00Z
+window begin: 2018-04-14T20:30:00Z
+window end: 2018-04-15T03:30:00Z
 
-Observations:
-  ObsTypes:
-  #=== Standard sonde profile (test_id = 0) ===#
-  #69 individual observations pass the basic checks
-  - ObsSpace:
-      name: Radiosonde
-      ObsDataIn:
-        obsfile: Data/met_office_profile_consistency_checks_unittests.nc4
-        obsgrouping:
-          group_variable: "station_id"
-          sort_variable: "air_pressure"
-          sort_order: "descending"
-      simulate:
-        variables: [air_temperature, geopotential_height]
-    ObsFilters:
-    - Filter: ProfileConsistencyChecks
-      filter variables:
-      - name: air_temperature
-      - name: geopotential_height
-      Checks: ["Basic"]
-      compareWithOPS: false
-      flagBasicChecksFail: true
-      nErrorsFail: 8
-      BChecks_minValidP: 0.0
-      BChecks_maxValidP: 110.0e3
-      where:
-      - variable:
-          name: test_id@MetaData
-        is_in: 0
-    HofX: HofX
-    ObsDiag:
-    benchmarkFlag: 15
-    flaggedBenchmark: 0
-  #=== Standard sonde profile (test_id = 0), no sorting ===#
-  #Should be identical to the case with sorting because the indices are already in the correct order
-  - ObsSpace:
-      name: Radiosonde
-      ObsDataIn:
-        obsfile: Data/met_office_profile_consistency_checks_unittests.nc4
-        obsgrouping:
-          group_variable: "station_id"
-      simulate:
-        variables: [air_temperature, geopotential_height]
-    ObsFilters:
-    - Filter: ProfileConsistencyChecks
-      filter variables:
-      - name: air_temperature
-      - name: geopotential_height
-      Checks: ["Basic"]
-      compareWithOPS: false
-      flagBasicChecksFail: true
-      nErrorsFail: 8
-      BChecks_minValidP: 0.0
-      BChecks_maxValidP: 110.0e3
-      where:
-      - variable:
-          name: test_id@MetaData
-        is_in: 0
-    HofX: HofX
-    ObsDiag:
-    benchmarkFlag: 15
-    flaggedBenchmark: 0
-  #=== Standard sonde profile (test_id = 0), no checks defined ===#
-  #Basic checks should be added automatically
-  - ObsSpace:
-      name: Radiosonde
-      ObsDataIn:
-        obsfile: Data/met_office_profile_consistency_checks_unittests.nc4
-        obsgrouping:
-          group_variable: "station_id"
-          sort_variable: "air_pressure"
-          sort_order: "descending"
-      simulate:
-        variables: [air_temperature, geopotential_height]
-    ObsFilters:
-    - Filter: ProfileConsistencyChecks
-      filter variables:
-      - name: air_temperature
-      - name: geopotential_height
-      Checks: []
-      compareWithOPS: false
-      flagBasicChecksFail: true
-      nErrorsFail: 8
-      BChecks_minValidP: 0.0
-      BChecks_maxValidP: 110.0e3
-      where:
-      - variable:
-          name: test_id@MetaData
-        is_in: 0
-    HofX: HofX
-    ObsDiag:
-    benchmarkFlag: 15
-    flaggedBenchmark: 0
-  #=== Sonde with highest pressure > 110e3 Pa (test_id = 1), reject if failed basic checks ===#
-  #This profile is rejected by the basic checks so none of its observations pass
-  - ObsSpace:
-      name: Radiosonde
-      ObsDataIn:
-        obsfile: Data/met_office_profile_consistency_checks_unittests.nc4
-        obsgrouping:
-          group_variable: "station_id"
-          sort_variable: "air_pressure"
-          sort_order: "descending"
-      simulate:
-        variables: [air_temperature, geopotential_height]
-    ObsFilters:
-    - Filter: ProfileConsistencyChecks
-      filter variables:
-      - name: air_temperature
-      - name: geopotential_height
-      Checks: ["Basic"]
-      compareWithOPS: false
-      flagBasicChecksFail: true
-      nErrorsFail: 8
-      BChecks_minValidP: 0.0
-      BChecks_maxValidP: 110.0e3
-      where:
-      - variable:
-          name: test_id@MetaData
-        is_in: 1
-    HofX: HofX
-    ObsDiag:
-    benchmarkFlag: 15
-    flaggedBenchmark: 69
-  #=== Sonde with highest pressure > 110e3 Pa (test_id = 1), don't reject if failed basic checks ===#
-  #The sonde with a pressure too large (test_id = 1) is selected by the where clause but it fails the basic checks
-  #However, its invididual observations are not subsequently flagged so all 69 pass
-  #This shows why the flagBasicChecksFail option should usually be set to true
-  - ObsSpace:
-      name: Radiosonde
-      ObsDataIn:
-        obsfile: Data/met_office_profile_consistency_checks_unittests.nc4
-        obsgrouping:
-          group_variable: "station_id"
-          sort_variable: "air_pressure"
-          sort_order: "descending"
-      simulate:
-        variables: [air_temperature, geopotential_height]
-    ObsFilters:
-    - Filter: ProfileConsistencyChecks
-      filter variables:
-      - name: air_temperature
-      - name: geopotential_height
-      Checks: ["Basic"]
-      compareWithOPS: false
-      flagBasicChecksFail: false
-      nErrorsFail: 8
-      BChecks_minValidP: 0.0
-      BChecks_maxValidP: 110.0e3
-      where:
-      - variable:
-          name: test_id@MetaData
-        is_in: 1
-    HofX: HofX
-    ObsDiag:
-    benchmarkFlag: 15
-    flaggedBenchmark: 0
-  #=== Sonde with negative pressure reading (test_id = 2) ===#
-  #This profile is rejected by the basic checks so none of its observations pass
-  - ObsSpace:
-      name: Radiosonde
-      ObsDataIn:
-        obsfile: Data/met_office_profile_consistency_checks_unittests.nc4
-        obsgrouping:
-          group_variable: "station_id"
-          sort_variable: "air_pressure"
-          sort_order: "descending"
-      simulate:
-        variables: [air_temperature, geopotential_height]
-    ObsFilters:
-    - Filter: ProfileConsistencyChecks
-      filter variables:
-      - name: air_temperature
-      - name: geopotential_height
-      Checks: ["Basic"]
-      compareWithOPS: false
-      flagBasicChecksFail: true
-      nErrorsFail: 8
-      BChecks_minValidP: 0.0
-      BChecks_maxValidP: 110.0e3
-      where:
-      - variable:
-          name: test_id@MetaData
-        is_in: 2
-    HofX: HofX
-    ObsDiag:
-    benchmarkFlag: 15
-    flaggedBenchmark: 69
-  #=== No data (invalid test_id) ===#
-  #No observations are expected to be processed by the filter so the number expected is the
-  #number of observations with non-missing data
-  - ObsSpace:
-      name: Radiosonde
-      ObsDataIn:
-        obsfile: Data/met_office_profile_consistency_checks_unittests.nc4
-        obsgrouping:
-          group_variable: "station_id"
-          sort_variable: "air_pressure"
-          sort_order: "descending"
-      simulate:
-        variables: [air_temperature, geopotential_height]
-    ObsFilters:
-    - Filter: ProfileConsistencyChecks
-      filter variables:
-      - name: air_temperature
-      - name: geopotential_height
-      Checks: ["Basic"]
-      compareWithOPS: false
-      flagBasicChecksFail: true
-      nErrorsFail: 8
-      BChecks_minValidP: 0.0
-      BChecks_maxValidP: 110.0e3
-      where:
-      - variable:
-          name: test_id@MetaData
-        is_in: 999
-    HofX: HofX
-    ObsDiag:
-    benchmarkFlag: 15
-    flaggedBenchmark: 0
-  #=== Sonde with pressures out of order (test_id = 3), sorting by pressure ===#
-  #After sorting this profile should be the same as the original sonde (test_id = 0), so expect the same observations to pass
-  - ObsSpace:
-      name: Radiosonde
-      ObsDataIn:
-        obsfile: Data/met_office_profile_consistency_checks_unittests.nc4
-        obsgrouping:
-          group_variable: "station_id"
-          sort_variable: "air_pressure"
-          sort_order: "descending"
-      simulate:
-        variables: [air_temperature, geopotential_height]
-    ObsFilters:
-    - Filter: ProfileConsistencyChecks
-      filter variables:
-      - name: air_temperature
-      - name: geopotential_height
-      Checks: ["Basic"]
-      compareWithOPS: false
-      flagBasicChecksFail: true
-      nErrorsFail: 8
-      BChecks_minValidP: 0.0
-      BChecks_maxValidP: 110.0e3
-      where:
-      - variable:
-          name: test_id@MetaData
-        is_in: 3
-    HofX: HofX
-    ObsDiag:
-    benchmarkFlag: 15
-    flaggedBenchmark: 0
-  #=== Sonde with pressures out of order (test_id = 3), not sorting by pressure ===#
-  #The lack of sorting will mean this sonde fails the basic checks
-  - ObsSpace:
-      name: Radiosonde
-      ObsDataIn:
-        obsfile: Data/met_office_profile_consistency_checks_unittests.nc4
-        obsgrouping:
-          group_variable: "station_id"
-      simulate:
-        variables: [air_temperature, geopotential_height]
-    ObsFilters:
-    - Filter: ProfileConsistencyChecks
-      filter variables:
-      - name: air_temperature
-      - name: geopotential_height
-      Checks: ["Basic"]
-      compareWithOPS: false
-      flagBasicChecksFail: true
-      nErrorsFail: 8
-      BChecks_minValidP: 0.0
-      BChecks_maxValidP: 110.0e3
-      where:
-      - variable:
-          name: test_id@MetaData
-        is_in: 3
-    HofX: HofX
-    ObsDiag:
-    benchmarkFlag: 15
-    flaggedBenchmark: 69
-  #=== Sonde with all pressures missing (test_id = 4) ===#
-  #Expect this sonde to fail the basic checks
-  - ObsSpace:
-      name: Radiosonde
-      ObsDataIn:
-        obsfile: Data/met_office_profile_consistency_checks_unittests.nc4
-        obsgrouping:
-          group_variable: "station_id"
-      simulate:
-        variables: [air_temperature, geopotential_height]
-    ObsFilters:
-    - Filter: ProfileConsistencyChecks
-      filter variables:
-      - name: air_temperature
-      - name: geopotential_height
-      Checks: ["Basic"]
-      compareWithOPS: false
-      flagBasicChecksFail: true
-      nErrorsFail: 8
-      BChecks_minValidP: 0.0
-      BChecks_maxValidP: 110.0e3
-      where:
-      - variable:
-          name: test_id@MetaData
-        is_in: 4
-    HofX: HofX
-    ObsDiag:
-    benchmarkFlag: 15
-    flaggedBenchmark: 69
-  #=== Sonde with all temperatures missing (test_id = 5) ===#
-  #Basic checks still passed since they only depend on pressure
-  #The missing values are not dealt with any differently so the same number
-  #of observations is expected to pass
-  - ObsSpace:
-      name: Radiosonde
-      ObsDataIn:
-        obsfile: Data/met_office_profile_consistency_checks_unittests.nc4
-        obsgrouping:
-          group_variable: "station_id"
-      simulate:
-        variables: [air_temperature, geopotential_height]
-    ObsFilters:
-    - Filter: ProfileConsistencyChecks
-      filter variables:
-      - name: air_temperature
-      - name: geopotential_height
-      Checks: ["Basic"]
-      compareWithOPS: false
-      flagBasicChecksFail: true
-      nErrorsFail: 8
-      BChecks_minValidP: 0.0
-      BChecks_maxValidP: 110.0e3
-      where:
-      - variable:
-          name: test_id@MetaData
-        is_in: 5
-    HofX: HofX
-    ObsDiag:
-    benchmarkFlag: 15
-    flaggedBenchmark: 0
-  #=== Sonde with all temperatures missing (test_id = 5), all checks ===#
-  #Basic checks still passed since they only depend on pressure
-  #All other checks pass so the number of expected observations is unchanged
-  - ObsSpace:
-      name: Radiosonde
-      ObsDataIn:
-        obsfile: Data/met_office_profile_consistency_checks_unittests.nc4
-        obsgrouping:
-          group_variable: "station_id"
-      simulate:
-        variables: [air_temperature, geopotential_height]
-    ObsFilters:
-    - Filter: ProfileConsistencyChecks
-      filter variables:
-      - name: air_temperature
-      - name: geopotential_height
-      Checks: ["Basic", "SamePDiffT", "Sign", "UnstableLayer", "Interpolation", "Hydrostatic"]
-      compareWithOPS: false
-      flagBasicChecksFail: true
-      nErrorsFail: 8
-      BChecks_minValidP: 0.0
-      BChecks_maxValidP: 110.0e3
-      where:
-      - variable:
-          name: test_id@MetaData
-        is_in: 5
-    HofX: HofX
-    ObsDiag:
-    benchmarkFlag: 15
-    flaggedBenchmark: 0
+observations:
+#=== Standard sonde profile (test_id = 0) ===#
+#69 individual observations pass the basic checks
+- obs space:
+    name: Radiosonde
+    obsdatain:
+      obsfile: Data/met_office_profile_consistency_checks_unittests.nc4
+      obsgrouping:
+        group variable: "station_id"
+        sort variable: "air_pressure"
+        sort order: "descending"
+    simulated variables: [air_temperature, geopotential_height]
+  obs filters:
+  - filter: ProfileConsistencyChecks
+    filter variables:
+    - name: air_temperature
+    - name: geopotential_height
+    Checks: ["Basic"]
+    compareWithOPS: false
+    flagBasicChecksFail: true
+    nErrorsFail: 8
+    BChecks_minValidP: 0.0
+    BChecks_maxValidP: 110.0e3
+    where:
+    - variable:
+        name: test_id@MetaData
+      is_in: 0
+  HofX: HofX
+  obs diagnostics:
+  benchmarkFlag: 15
+  flaggedBenchmark: 0
+#=== Standard sonde profile (test_id = 0), no sorting ===#
+#Should be identical to the case with sorting because the indices are already in the correct order
+- obs space:
+    name: Radiosonde
+    obsdatain:
+      obsfile: Data/met_office_profile_consistency_checks_unittests.nc4
+      obsgrouping:
+        group variable: "station_id"
+    simulated variables: [air_temperature, geopotential_height]
+  obs filters:
+  - filter: ProfileConsistencyChecks
+    filter variables:
+    - name: air_temperature
+    - name: geopotential_height
+    Checks: ["Basic"]
+    compareWithOPS: false
+    flagBasicChecksFail: true
+    nErrorsFail: 8
+    BChecks_minValidP: 0.0
+    BChecks_maxValidP: 110.0e3
+    where:
+    - variable:
+        name: test_id@MetaData
+      is_in: 0
+  HofX: HofX
+  obs diagnostics:
+  benchmarkFlag: 15
+  flaggedBenchmark: 0
+#=== Standard sonde profile (test_id = 0), no checks defined ===#
+#Basic checks should be added automatically
+- obs space:
+    name: Radiosonde
+    obsdatain:
+      obsfile: Data/met_office_profile_consistency_checks_unittests.nc4
+      obsgrouping:
+        group variable: "station_id"
+        sort variable: "air_pressure"
+        sort order: "descending"
+    simulated variables: [air_temperature, geopotential_height]
+  obs filters:
+  - filter: ProfileConsistencyChecks
+    filter variables:
+    - name: air_temperature
+    - name: geopotential_height
+    Checks: []
+    compareWithOPS: false
+    flagBasicChecksFail: true
+    nErrorsFail: 8
+    BChecks_minValidP: 0.0
+    BChecks_maxValidP: 110.0e3
+    where:
+    - variable:
+        name: test_id@MetaData
+      is_in: 0
+  HofX: HofX
+  obs diagnostics:
+  benchmarkFlag: 15
+  flaggedBenchmark: 0
+#=== Sonde with highest pressure > 110e3 Pa (test_id = 1), reject if failed basic checks ===#
+#This profile is rejected by the basic checks so none of its observations pass
+- obs space:
+    name: Radiosonde
+    obsdatain:
+      obsfile: Data/met_office_profile_consistency_checks_unittests.nc4
+      obsgrouping:
+        group variable: "station_id"
+        sort variable: "air_pressure"
+        sort order: "descending"
+    simulated variables: [air_temperature, geopotential_height]
+  obs filters:
+  - filter: ProfileConsistencyChecks
+    filter variables:
+    - name: air_temperature
+    - name: geopotential_height
+    Checks: ["Basic"]
+    compareWithOPS: false
+    flagBasicChecksFail: true
+    nErrorsFail: 8
+    BChecks_minValidP: 0.0
+    BChecks_maxValidP: 110.0e3
+    where:
+    - variable:
+        name: test_id@MetaData
+      is_in: 1
+  HofX: HofX
+  obs diagnostics:
+  benchmarkFlag: 15
+  flaggedBenchmark: 69
+#=== Sonde with highest pressure > 110e3 Pa (test_id = 1), don't reject if failed basic checks ===#
+#The sonde with a pressure too large (test_id = 1) is selected by the where clause but it fails the basic checks
+#However, its invididual observations are not subsequently flagged so all 69 pass
+#This shows why the flagBasicChecksFail option should usually be set to true
+- obs space:
+    name: Radiosonde
+    obsdatain:
+      obsfile: Data/met_office_profile_consistency_checks_unittests.nc4
+      obsgrouping:
+        group variable: "station_id"
+        sort variable: "air_pressure"
+        sort order: "descending"
+    simulated variables: [air_temperature, geopotential_height]
+  obs filters:
+  - filter: ProfileConsistencyChecks
+    filter variables:
+    - name: air_temperature
+    - name: geopotential_height
+    Checks: ["Basic"]
+    compareWithOPS: false
+    flagBasicChecksFail: false
+    nErrorsFail: 8
+    BChecks_minValidP: 0.0
+    BChecks_maxValidP: 110.0e3
+    where:
+    - variable:
+        name: test_id@MetaData
+      is_in: 1
+  HofX: HofX
+  obs diagnostics:
+  benchmarkFlag: 15
+  flaggedBenchmark: 0
+#=== Sonde with negative pressure reading (test_id = 2) ===#
+#This profile is rejected by the basic checks so none of its observations pass
+- obs space:
+    name: Radiosonde
+    obsdatain:
+      obsfile: Data/met_office_profile_consistency_checks_unittests.nc4
+      obsgrouping:
+        group variable: "station_id"
+        sort variable: "air_pressure"
+        sort order: "descending"
+    simulated variables: [air_temperature, geopotential_height]
+  obs filters:
+  - filter: ProfileConsistencyChecks
+    filter variables:
+    - name: air_temperature
+    - name: geopotential_height
+    Checks: ["Basic"]
+    compareWithOPS: false
+    flagBasicChecksFail: true
+    nErrorsFail: 8
+    BChecks_minValidP: 0.0
+    BChecks_maxValidP: 110.0e3
+    where:
+    - variable:
+        name: test_id@MetaData
+      is_in: 2
+  HofX: HofX
+  obs diagnostics:
+  benchmarkFlag: 15
+  flaggedBenchmark: 69
+#=== No data (invalid test_id) ===#
+#No observations are expected to be processed by the filter so the number expected is the
+#number of observations with non-missing data
+- obs space:
+    name: Radiosonde
+    obsdatain:
+      obsfile: Data/met_office_profile_consistency_checks_unittests.nc4
+      obsgrouping:
+        group variable: "station_id"
+        sort variable: "air_pressure"
+        sort order: "descending"
+    simulated variables: [air_temperature, geopotential_height]
+  obs filters:
+  - filter: ProfileConsistencyChecks
+    filter variables:
+    - name: air_temperature
+    - name: geopotential_height
+    Checks: ["Basic"]
+    compareWithOPS: false
+    flagBasicChecksFail: true
+    nErrorsFail: 8
+    BChecks_minValidP: 0.0
+    BChecks_maxValidP: 110.0e3
+    where:
+    - variable:
+        name: test_id@MetaData
+      is_in: 999
+  HofX: HofX
+  obs diagnostics:
+  benchmarkFlag: 15
+  flaggedBenchmark: 0
+#=== Sonde with pressures out of order (test_id = 3), sorting by pressure ===#
+#After sorting this profile should be the same as the original sonde (test_id = 0), so expect the same observations to pass
+- obs space:
+    name: Radiosonde
+    obsdatain:
+      obsfile: Data/met_office_profile_consistency_checks_unittests.nc4
+      obsgrouping:
+        group variable: "station_id"
+        sort variable: "air_pressure"
+        sort order: "descending"
+    simulated variables: [air_temperature, geopotential_height]
+  obs filters:
+  - filter: ProfileConsistencyChecks
+    filter variables:
+    - name: air_temperature
+    - name: geopotential_height
+    Checks: ["Basic"]
+    compareWithOPS: false
+    flagBasicChecksFail: true
+    nErrorsFail: 8
+    BChecks_minValidP: 0.0
+    BChecks_maxValidP: 110.0e3
+    where:
+    - variable:
+        name: test_id@MetaData
+      is_in: 3
+  HofX: HofX
+  obs diagnostics:
+  benchmarkFlag: 15
+  flaggedBenchmark: 0
+#=== Sonde with pressures out of order (test_id = 3), not sorting by pressure ===#
+#The lack of sorting will mean this sonde fails the basic checks
+- obs space:
+    name: Radiosonde
+    obsdatain:
+      obsfile: Data/met_office_profile_consistency_checks_unittests.nc4
+      obsgrouping:
+        group variable: "station_id"
+    simulated variables: [air_temperature, geopotential_height]
+  obs filters:
+  - filter: ProfileConsistencyChecks
+    filter variables:
+    - name: air_temperature
+    - name: geopotential_height
+    Checks: ["Basic"]
+    compareWithOPS: false
+    flagBasicChecksFail: true
+    nErrorsFail: 8
+    BChecks_minValidP: 0.0
+    BChecks_maxValidP: 110.0e3
+    where:
+    - variable:
+        name: test_id@MetaData
+      is_in: 3
+  HofX: HofX
+  obs diagnostics:
+  benchmarkFlag: 15
+  flaggedBenchmark: 69
+#=== Sonde with all pressures missing (test_id = 4) ===#
+#Expect this sonde to fail the basic checks
+- obs space:
+    name: Radiosonde
+    obsdatain:
+      obsfile: Data/met_office_profile_consistency_checks_unittests.nc4
+      obsgrouping:
+        group variable: "station_id"
+    simulated variables: [air_temperature, geopotential_height]
+  obs filters:
+  - filter: ProfileConsistencyChecks
+    filter variables:
+    - name: air_temperature
+    - name: geopotential_height
+    Checks: ["Basic"]
+    compareWithOPS: false
+    flagBasicChecksFail: true
+    nErrorsFail: 8
+    BChecks_minValidP: 0.0
+    BChecks_maxValidP: 110.0e3
+    where:
+    - variable:
+        name: test_id@MetaData
+      is_in: 4
+  HofX: HofX
+  obs diagnostics:
+  benchmarkFlag: 15
+  flaggedBenchmark: 69
+#=== Sonde with all temperatures missing (test_id = 5) ===#
+#Basic checks still passed since they only depend on pressure
+#The missing values are not dealt with any differently so the same number
+#of observations is expected to pass
+- obs space:
+    name: Radiosonde
+    obsdatain:
+      obsfile: Data/met_office_profile_consistency_checks_unittests.nc4
+      obsgrouping:
+        group variable: "station_id"
+    simulated variables: [air_temperature, geopotential_height]
+  obs filters:
+  - filter: ProfileConsistencyChecks
+    filter variables:
+    - name: air_temperature
+    - name: geopotential_height
+    Checks: ["Basic"]
+    compareWithOPS: false
+    flagBasicChecksFail: true
+    nErrorsFail: 8
+    BChecks_minValidP: 0.0
+    BChecks_maxValidP: 110.0e3
+    where:
+    - variable:
+        name: test_id@MetaData
+      is_in: 5
+  HofX: HofX
+  obs diagnostics:
+  benchmarkFlag: 15
+  flaggedBenchmark: 0
+#=== Sonde with all temperatures missing (test_id = 5), all checks ===#
+#Basic checks still passed since they only depend on pressure
+#All other checks pass so the number of expected observations is unchanged
+- obs space:
+    name: Radiosonde
+    obsdatain:
+      obsfile: Data/met_office_profile_consistency_checks_unittests.nc4
+      obsgrouping:
+        group variable: "station_id"
+    simulated variables: [air_temperature, geopotential_height]
+  obs filters:
+  - filter: ProfileConsistencyChecks
+    filter variables:
+    - name: air_temperature
+    - name: geopotential_height
+    Checks: ["Basic", "SamePDiffT", "Sign", "UnstableLayer", "Interpolation", "Hydrostatic"]
+    compareWithOPS: false
+    flagBasicChecksFail: true
+    nErrorsFail: 8
+    BChecks_minValidP: 0.0
+    BChecks_maxValidP: 110.0e3
+    where:
+    - variable:
+        name: test_id@MetaData
+      is_in: 5
+  HofX: HofX
+  obs diagnostics:
+  benchmarkFlag: 15
+  flaggedBenchmark: 0

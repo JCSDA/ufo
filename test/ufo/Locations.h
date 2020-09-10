@@ -17,12 +17,12 @@
 #include "eckit/config/LocalConfiguration.h"
 #include "eckit/testing/Test.h"
 #include "ioda/ObsSpace.h"
-#include "oops/../test/TestEnvironment.h"
-#include "oops/parallel/mpi/mpi.h"
+#include "oops/mpi/mpi.h"
 #include "oops/runs/Test.h"
 #include "oops/util/DateTime.h"
 #include "oops/util/Duration.h"
 #include "oops/util/Logger.h"
+#include "test/TestEnvironment.h"
 #include "ufo/Locations.h"
 
 namespace ufo {
@@ -33,19 +33,19 @@ void testLocations() {
   const eckit::LocalConfiguration conf(::test::TestEnvironment::config());
 
   //  Setup ObsSpace
-  util::DateTime bgn(conf.getString("window_begin"));
-  util::DateTime end(conf.getString("window_end"));
-  const eckit::LocalConfiguration obsconf(conf, "ObsSpace");
-  ioda::ObsSpace odb(obsconf, oops::mpi::comm(), bgn, end);
+  util::DateTime bgn(conf.getString("window begin"));
+  util::DateTime end(conf.getString("window end"));
+  const eckit::LocalConfiguration obsconf(conf, "obs space");
+  ioda::ObsSpace odb(obsconf, oops::mpi::world(), bgn, end);
   const size_t nlocs = odb.nlocs();
 
   // testConstructor:: Locations():
-  Locations locs(oops::mpi::comm());
+  Locations locs(oops::mpi::world());
   EXPECT(locs.nobs() == 0);
   oops::Log::test() << "Locs(eckit mpi communicator): " << locs << std::endl;
 
   // testConstructor:: Locations(const eckit::Configuration &)
-  Locations locs1(conf, oops::mpi::comm());
+  Locations locs1(conf, oops::mpi::world());
   EXPECT(locs1.nobs() == nlocs);
   oops::Log::test() << "Locs(eckit constructor, eckit mpi communicator): " << locs1 << std::endl;
 

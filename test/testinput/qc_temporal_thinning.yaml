@@ -1,185 +1,182 @@
-window_begin: 2000-01-01T00:00:00Z
-window_end: 2030-01-01T00:00:00Z
+window begin: 2000-01-01T00:00:00Z
+window end: 2030-01-01T00:00:00Z
 
-Observations:
-  ObsTypes:
-  - ObsSpace:
-      name: Aircraft
-      ObsDataIn:
-        obsfile: Data/met_office_temporal_thinning_surface.nc4
-      simulate:
-        variables: [air_temperature]
-    ObsFilters:
-    - Filter: TemporalThinning
-      min_spacing: PT01H03M00S
-      seed_time: 2018-04-15T00:00:00Z
-      category_variable:
-        name: call_sign@MetaData
-      where:
-      - variable:
-          name: obs_type@MetaData
-        is_in: 10101
-    - Filter: TemporalThinning
-      min_spacing: PT01H02M00S
-      seed_time: 2018-04-15T00:00:00Z
-      category_variable:
-        name: call_sign@MetaData
-      where:
-      - variable:
-          name: obs_type@MetaData
-        is_in: 10201, 10202
-    - Filter: TemporalThinning
-      min_spacing: PT01H04M00S
-      seed_time: 2018-04-15T00:00:00Z
-      category_variable:
-        name: call_sign@MetaData
-      where:
-      - variable:
-          name: obs_type@MetaData
-        is_in: 10900
-    - Filter: TemporalThinning
-      min_spacing: PT10H00M00S
-      seed_time: 2018-04-15T00:00:00Z
-      category_variable:
-        name: call_sign@MetaData
-      where:
-      - variable:
-          name: obs_type@MetaData
-        is_not_in: 10101, 10201, 10202, 10900
-    passedObservationsBenchmark:
-        - 462
-        - 463
-        - 994
-        - 1002
-        - 1003
-        - 1011
-        - 1542
-        - 1543
-        - 2082
-        - 2083
-        - 2092
-        - 2607
-        - 2622
-        - 2623
-        - 4629
-        - 6616
-        - 6651
-        - 7714
-        - 7715
-        - 8247
-        - 8812
-    passedBenchmark: 21
-  - ObsSpace:
-      name: Aircraft
-      ObsDataIn:
-        obsfile: Data/met_office_temporal_thinning_sonde.nc4
-      simulate:
-        variables: [air_temperature]
-    ObsFilters:
-    - Filter: TemporalThinning
-      min_spacing: PT00H56M00S
-      tolerance: PT00H02M00S
-      category_variable:
-        name: call_sign@MetaData
-      priority_variable:
-        name: num_levels@MetaData
-      where:
-      - variable:
-          name: obs_type@MetaData
-        is_not_in: 50400
-    passedObservationsBenchmark:
-        - 2
-        - 3
-        - 4
-        - 5
-        - 6
-        - 7
-        - 8
-        - 9
-        - 14
-        - 15
-        - 17
-        - 19
-        - 20
-        - 21
-        - 22
-        - 23
-        - 24
-        - 27
-        - 29
-        - 31
-        - 32
-        - 34
-        - 36
-        - 37
-        - 38
-        - 39
-        - 41
-        - 43
-        - 44
-        - 47
-        - 49
-        - 51
-        - 52
-        - 53
-        - 54
-        - 55
-        - 56
-        - 59
-        - 62
-        - 63
-        - 64
-        - 67
-        - 68
-        - 69
-        - 70
-        - 71
-        - 74
-        - 75
-        - 77
-        - 79
-        - 80
-        - 83
-        - 84
-        - 85
-        - 86
-        - 87
-        - 89
-        - 91
-        - 92
-        - 94
-        - 98
-        - 99
-        - 100
-        - 101
-        - 102
-        - 103
-        - 104
-        - 107
-        - 109
-        - 111
-        - 113
-        - 114
-        - 116
-        - 117
-        - 118
-        - 119
-        - 122
-        - 123
-        - 124
-        - 127
-        - 128
-        - 129
-        - 132
-        - 133
-        - 134
-        - 135
-        - 137
-        - 139
-        - 140
-        - 143
-        - 144
-        - 147
-        - 148
-        - 149
-    passedBenchmark: 94
+observations:
+- obs space:
+    name: Aircraft
+    obsdatain:
+      obsfile: Data/met_office_temporal_thinning_surface.nc4
+    simulated variables: [air_temperature]
+  obs filters:
+  - filter: TemporalThinning
+    min_spacing: PT01H03M00S
+    seed_time: 2018-04-15T00:00:00Z
+    category_variable:
+      name: call_sign@MetaData
+    where:
+    - variable:
+        name: obs_type@MetaData
+      is_in: 10101
+  - filter: TemporalThinning
+    min_spacing: PT01H02M00S
+    seed_time: 2018-04-15T00:00:00Z
+    category_variable:
+      name: call_sign@MetaData
+    where:
+    - variable:
+        name: obs_type@MetaData
+      is_in: 10201, 10202
+  - filter: TemporalThinning
+    min_spacing: PT01H04M00S
+    seed_time: 2018-04-15T00:00:00Z
+    category_variable:
+      name: call_sign@MetaData
+    where:
+    - variable:
+        name: obs_type@MetaData
+      is_in: 10900
+  - filter: TemporalThinning
+    min_spacing: PT10H00M00S
+    seed_time: 2018-04-15T00:00:00Z
+    category_variable:
+      name: call_sign@MetaData
+    where:
+    - variable:
+        name: obs_type@MetaData
+      is_not_in: 10101, 10201, 10202, 10900
+  passedObservationsBenchmark:
+      - 462
+      - 463
+      - 994
+      - 1002
+      - 1003
+      - 1011
+      - 1542
+      - 1543
+      - 2082
+      - 2083
+      - 2092
+      - 2607
+      - 2622
+      - 2623
+      - 4629
+      - 6616
+      - 6651
+      - 7714
+      - 7715
+      - 8247
+      - 8812
+  passedBenchmark: 21
+- obs space:
+    name: Aircraft
+    obsdatain:
+      obsfile: Data/met_office_temporal_thinning_sonde.nc4
+    simulated variables: [air_temperature]
+  obs filters:
+  - filter: TemporalThinning
+    min_spacing: PT00H56M00S
+    tolerance: PT00H02M00S
+    category_variable:
+      name: call_sign@MetaData
+    priority_variable:
+      name: num_levels@MetaData
+    where:
+    - variable:
+        name: obs_type@MetaData
+      is_not_in: 50400
+  passedObservationsBenchmark:
+      - 2
+      - 3
+      - 4
+      - 5
+      - 6
+      - 7
+      - 8
+      - 9
+      - 14
+      - 15
+      - 17
+      - 19
+      - 20
+      - 21
+      - 22
+      - 23
+      - 24
+      - 27
+      - 29
+      - 31
+      - 32
+      - 34
+      - 36
+      - 37
+      - 38
+      - 39
+      - 41
+      - 43
+      - 44
+      - 47
+      - 49
+      - 51
+      - 52
+      - 53
+      - 54
+      - 55
+      - 56
+      - 59
+      - 62
+      - 63
+      - 64
+      - 67
+      - 68
+      - 69
+      - 70
+      - 71
+      - 74
+      - 75
+      - 77
+      - 79
+      - 80
+      - 83
+      - 84
+      - 85
+      - 86
+      - 87
+      - 89
+      - 91
+      - 92
+      - 94
+      - 98
+      - 99
+      - 100
+      - 101
+      - 102
+      - 103
+      - 104
+      - 107
+      - 109
+      - 111
+      - 113
+      - 114
+      - 116
+      - 117
+      - 118
+      - 119
+      - 122
+      - 123
+      - 124
+      - 127
+      - 128
+      - 129
+      - 132
+      - 133
+      - 134
+      - 135
+      - 137
+      - 139
+      - 140
+      - 143
+      - 144
+      - 147
+      - 148
+      - 149
+  passedBenchmark: 94

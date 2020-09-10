@@ -28,6 +28,7 @@
 #include "ufo/filters/TemporalThinning.h"
 #include "ufo/filters/Thinning.h"
 #include "ufo/filters/TrackCheck.h"
+#include "ufo/filters/TrackCheckShip.h"
 #include "ufo/filters/variabletransforms/WindComponents.h"
 #include "ufo/filters/variabletransforms/WindVector.h"
 #include "ufo/gnssro/QC/BackgroundCheckRONBAM.h"
@@ -76,6 +77,8 @@ template<typename MODEL> void instantiateObsFilterFactory() {
            makerChk18_("Met Office Buddy Check");
   static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::ObsDerivativeCheck> >
            makerChk19_("Derivative Check");
+  static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::TrackCheckShip> >
+           makerChk20_("Ship Track Check");
   static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::WindComponents> >
            makerChk20_("Wind components");
   static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::WindVector> >

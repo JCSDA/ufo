@@ -65,11 +65,11 @@ integer :: nvars_in
 integer :: ind, jspec
 type(fckit_configuration) :: f_confOpts,f_confLinOper
 
- call f_confOper%get_or_die("ObsOptions",f_confOpts)
+ call f_confOper%get_or_die("obs options",f_confOpts)
  call crtm_conf_setup(self%conf_traj, f_confOpts, f_confOper)
 
- if ( f_confOper%has("LinearObsOperator") ) then
-    call f_confOper%get_or_die("LinearObsOperator",f_confLinOper)
+ if ( f_confOper%has("linear obs operator") ) then
+    call f_confOper%get_or_die("linear obs operator",f_confLinOper)
     call crtm_conf_setup(self%conf, f_confOpts, f_confLinOper)
  else
     call crtm_conf_setup(self%conf, f_confOpts, f_confOper)
@@ -270,7 +270,8 @@ real(kind_real), allocatable :: Wfunc(:)
 
    ! Create output K-MATRIX structure (atm)
    ! --------------------------------------
-   call CRTM_Atmosphere_Create( self%atm_K, self%n_Layers, self%conf_traj%n_Absorbers, self%conf_traj%n_Clouds, self%conf_traj%n_Aerosols )
+   call CRTM_Atmosphere_Create( self%atm_K, self%n_Layers, self%conf_traj%n_Absorbers, &
+                                self%conf_traj%n_Clouds, self%conf_traj%n_Aerosols )
    if ( ANY(.NOT. CRTM_Atmosphere_Associated(self%atm_K)) ) THEN
       message = 'Error allocating CRTM K-matrix Atmosphere structure (setTraj)'
       CALL Display_Message( PROGRAM_NAME, message, FAILURE )
@@ -366,7 +367,7 @@ real(kind_real), allocatable :: Wfunc(:)
          ystr_diags(jvar)(1:str_pos(3)-1) = varstr(1:str_pos(3)-1)
          ystr_diags(jvar)(str_pos(3):) = ""
          if (ch_diags(jvar) < 0) ystr_diags(jvar) = varstr
-      end if 
+      end if
    end do
 
    ! Set missing value
@@ -425,7 +426,7 @@ real(kind_real), allocatable :: Wfunc(:)
                do jprofile = 1, self%n_Profiles
                   if (.not.self%Skip_Profiles(jprofile)) then
                      hofxdiags%geovals(jvar)%vals(1,jprofile) = &
-                        rts(jchannel,jprofile) % Brightness_Temperature 
+                        rts(jchannel,jprofile) % Brightness_Temperature
                   end if
                end do
 
@@ -466,7 +467,7 @@ real(kind_real), allocatable :: Wfunc(:)
                         total_od = total_od + rts(jchannel,jprofile) % layer_optical_depth(jlevel)
                         Tao(jlevel) = exp(-min(limit_exp,total_od*secant_term))
                      end do
-                     ! get weighting function 
+                     ! get weighting function
                      do jlevel = self%n_Layers-1, 1, -1
                         hofxdiags%geovals(jvar)%vals(jlevel,jprofile) = &
                            abs( (Tao(jlevel+1)-Tao(jlevel))/ &
@@ -498,7 +499,7 @@ real(kind_real), allocatable :: Wfunc(:)
                         total_od = total_od + rts(jchannel,jprofile) % layer_optical_depth(jlevel)
                         Tao(jlevel) = exp(-min(limit_exp,total_od*secant_term))
                      end do
-                     ! get weighting function 
+                     ! get weighting function
                      do jlevel = self%n_Layers-1, 1, -1
                         Wfunc(jlevel) = &
                            abs( (Tao(jlevel+1)-Tao(jlevel))/ &
@@ -723,7 +724,7 @@ type(ufo_geoval), pointer :: geoval_d
                do jchannel = 1, size(self%channels)
                   jlevel = 1
                   hofx(jchannel, jprofile) = hofx(jchannel, jprofile) + &
-                        self%sfc_K(jchannel,jprofile)%wind_speed * & 
+                        self%sfc_K(jchannel,jprofile)%wind_speed * &
                         geoval_d%vals(jlevel,jprofile)
                enddo
             end if
@@ -735,7 +736,7 @@ type(ufo_geoval), pointer :: geoval_d
                do jchannel = 1, size(self%channels)
                   jlevel = 1
                   hofx(jchannel, jprofile) = hofx(jchannel, jprofile) + &
-                        self%sfc_K(jchannel,jprofile)%wind_direction * & 
+                        self%sfc_K(jchannel,jprofile)%wind_direction * &
                         geoval_d%vals(jlevel,jprofile)
                enddo
             end if
@@ -747,7 +748,7 @@ type(ufo_geoval), pointer :: geoval_d
                do jchannel = 1, size(self%channels)
                   jlevel = 1
                   hofx(jchannel, jprofile) = hofx(jchannel, jprofile) + &
-                        self%sfc_K(jchannel,jprofile)%salinity * & 
+                        self%sfc_K(jchannel,jprofile)%salinity * &
                         geoval_d%vals(jlevel,jprofile)
                enddo
             end if
@@ -907,7 +908,7 @@ real(c_double) :: missing
    endif
 
    select case(self%conf%Surfaces(jspec))
-     
+
       case(var_sfc_wtmp)
          ! Multiply by Jacobian and add to hofx
          do jprofile = 1, self%n_Profiles
@@ -916,7 +917,7 @@ real(c_double) :: missing
                   if (hofx(jchannel, jprofile) /= missing) then
                      jlevel = 1
                      geoval_d%vals(jlevel, jprofile) = geoval_d%vals(jlevel,jprofile) + &
-                          self%sfc_K(jchannel,jprofile)%water_temperature * & 
+                          self%sfc_K(jchannel,jprofile)%water_temperature * &
                           hofx(jchannel,jprofile)
                   endif
                enddo
@@ -927,10 +928,10 @@ real(c_double) :: missing
          do jprofile = 1, self%n_Profiles
             if (.not.self%Skip_Profiles(jprofile)) then
                do jchannel = 1, size(self%channels)
-                  if (hofx(jchannel, jprofile) /= missing) then                  
+                  if (hofx(jchannel, jprofile) /= missing) then
                      jlevel = 1
                      geoval_d%vals(jlevel, jprofile) = geoval_d%vals(jlevel,jprofile) + &
-                          self%sfc_K(jchannel,jprofile)%wind_speed * & 
+                          self%sfc_K(jchannel,jprofile)%wind_speed * &
                           hofx(jchannel,jprofile)
                   endif
                enddo
@@ -941,10 +942,10 @@ real(c_double) :: missing
          do jprofile = 1, self%n_Profiles
             if (.not.self%Skip_Profiles(jprofile)) then
                do jchannel = 1, size(self%channels)
-                  if (hofx(jchannel, jprofile) /= missing) then                 
+                  if (hofx(jchannel, jprofile) /= missing) then
                      jlevel = 1
                      geoval_d%vals(jlevel, jprofile) = geoval_d%vals(jlevel,jprofile) + &
-                          self%sfc_K(jchannel,jprofile)%wind_direction * & 
+                          self%sfc_K(jchannel,jprofile)%wind_direction * &
                           hofx(jchannel,jprofile)
                   endif
                enddo
@@ -958,7 +959,7 @@ real(c_double) :: missing
                   if (hofx(jchannel, jprofile) /= missing) then
                      jlevel = 1
                      geoval_d%vals(jlevel, jprofile) = geoval_d%vals(jlevel,jprofile) + &
-                          self%sfc_K(jchannel,jprofile)%salinity * & 
+                          self%sfc_K(jchannel,jprofile)%salinity * &
                           hofx(jchannel,jprofile)
                   endif
                enddo

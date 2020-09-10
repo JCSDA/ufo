@@ -1,14 +1,13 @@
 Duplicates, constraints on buddy counts, legacy pair collector:
-  window_begin: 2000-01-01T00:00:00Z
-  window_end: 2030-01-01T00:00:00Z
-  ObsSpace:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
     name: Aircraft
-    simulate:
-      variables: [air_temperature]
-    ObsDataIn:
+    simulated variables: [air_temperature]
+    obsdatain:
       obsfile: Data/met_office_buddy_check.nc4
       obsgrouping:
-        group_variable: "station_id"
+        group variable: "station_id"
   Met Office Buddy Check, modern:
     use_legacy_buddy_collector: false
     num_zonal_bands: 12

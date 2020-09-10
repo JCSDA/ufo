@@ -1,36 +1,33 @@
-window_begin: 2018-04-14T21:00:00Z
-window_end: 2018-04-15T03:00:00Z
+window begin: 2018-04-14T21:00:00Z
+window end: 2018-04-15T03:00:00Z
 
-LinearObsOpTest: 
- coefTL: 1.e-3
- toleranceTL: 1.0e-3
- toleranceAD: 1.0e-11
-
-Observations: 
- ObsTypes: 
- - ObsOperator:
-     name: CRTM
-     Absorbers: [H2O,O3,CO2]
-     Clouds: [Water, Ice]
-     Cloud_Fraction: 1.0
-     LinearObsOperator:
-       Absorbers: [H2O,O3,CO2]
-       Clouds: [Water, Ice]
-     ObsOptions:
-       inspectProfile: 1
-       Sensor_ID: amsua_n19
-       EndianType: little_endian
-       CoefficientPath: Data/
-   ObsSpace:
-     name: amsua_n19
-     ObsDataIn: 
-       obsfile: Data/ioda/testinput_tier_1/amsua_n19_obs_2018041500_m_qc.nc4
-     ObsDataOut:
-       obsfile: Data/amsua_n19_obs_2018041500_m_qc_out.nc4
-     simulate:
-       variables: [brightness_temperature]
-       channels: 1-15 
-   GeoVaLs: 
-     filename: Data/amsua_n19_geoval_2018041500_m_qc.nc4
-   vecequiv: GsiHofX
-   tolerance: 1.e-7
+observations:
+- obs operator:
+    name: CRTM
+    Absorbers: [H2O,O3,CO2]
+    Clouds: [Water, Ice]
+    Cloud_Fraction: 1.0
+    linear obs operator:
+      Absorbers: [H2O,O3,CO2]
+      Clouds: [Water, Ice]
+    obs options:
+      inspectProfile: 1
+      Sensor_ID: amsua_n19
+      EndianType: little_endian
+      CoefficientPath: Data/
+  obs space:
+    name: amsua_n19
+    obsdatain:
+      obsfile: Data/ioda/testinput_tier_1/amsua_n19_obs_2018041500_m_qc.nc4
+    obsdataout:
+      obsfile: Data/amsua_n19_obs_2018041500_m_qc_crtm_out.nc4
+    simulated variables: [brightness_temperature]
+    channels: 1-15
+  geovals:
+    filename: Data/amsua_n19_geoval_2018041500_m_qc.nc4
+  vector ref: GsiHofX
+  tolerance: 1.e-7
+  linear obs operator test:
+    coef TL: 1.e-3
+    tolerance TL: 1.0e-3
+    tolerance AD: 1.0e-11

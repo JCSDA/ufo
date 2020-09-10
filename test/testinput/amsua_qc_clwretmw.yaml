@@ -1,42 +1,40 @@
-window_begin: 2018-04-14T21:00:00Z
-window_end: 2018-04-15T03:00:00Z
+window begin: 2018-04-14T21:00:00Z
+window end: 2018-04-15T03:00:00Z
 
-Observations: 
- ObsTypes: 
- - ObsOperator:
-     name: CRTM
-     Absorbers: [H2O,O3,CO2]
-     Clouds: [Water, Ice]
-     Cloud_Fraction: 1.0
-     ObsOptions:
-       Sensor_ID: amsua_n19 
-       EndianType: little_endian
-       CoefficientPath: Data/
-   ObsSpace:
-     name: amsua_n19 
-     ObsDataIn: 
-       obsfile: Data/ioda/testinput_tier_1/amsua_n19_obs_2018041500_m_qc.nc4 
-     ObsDataOut:
-       obsfile: Data/amsua_n19_obs_2018041500_m_qc_out.nc4
-     simulate:
-       variables: [brightness_temperature]
-       channels: &all_channels 1-15 
-   GeoVaLs: 
-     filename: Data/amsua_n19_geoval_2018041500_m_qc.nc4
-   ObsFilters:
-#  CLW Retrieval Check
-   - Filter: Bounds Check
-     filter variables:
-     - name: brightness_temperature
-       channels: 1-6, 15 
-     test variables:
-     - name: CLWRetMW@ObsFunction
-       options:
-         clwret_ch238: 1
-         clwret_ch314: 2
-         clwret_types: [ObsValue]
-         test_group: GsiObsBias
-     maxvalue: 999.0 
-     action:
-       name: reject 
-   passedBenchmark: 1472 
+observations:
+- obs operator:
+    name: CRTM
+    Absorbers: [H2O,O3,CO2]
+    Clouds: [Water, Ice]
+    Cloud_Fraction: 1.0
+    obs options:
+      Sensor_ID: amsua_n19
+      EndianType: little_endian
+      CoefficientPath: Data/
+  obs space:
+    name: amsua_n19
+    obsdatain:
+      obsfile: Data/ioda/testinput_tier_1/amsua_n19_obs_2018041500_m_qc.nc4
+    obsdataout:
+      obsfile: Data/amsua_n19_obs_2018041500_m_qc_clwretmw_out.nc4
+    simulated variables: [brightness_temperature]
+    channels: &all_channels 1-15
+  geovals:
+    filename: Data/amsua_n19_geoval_2018041500_m_qc.nc4
+  obs filters:
+  #  CLW Retrieval Check
+  - filter: Bounds Check
+    filter variables:
+    - name: brightness_temperature
+      channels: 1-6, 15
+    test variables:
+    - name: CLWRetMW@ObsFunction
+      options:
+        clwret_ch238: 1
+        clwret_ch314: 2
+        clwret_types: [ObsValue]
+        test_group: GsiObsBias
+    maxvalue: 999.0
+    action:
+      name: reject
+  passedBenchmark: 1472

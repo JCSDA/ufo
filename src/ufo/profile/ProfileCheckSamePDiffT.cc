@@ -6,6 +6,7 @@
  */
 
 #include "ufo/profile/ProfileCheckSamePDiffT.h"
+#include "ufo/profile/VariableNames.h"
 
 namespace ufo {
 
@@ -13,10 +14,9 @@ namespace ufo {
 
   ProfileCheckSamePDiffT::ProfileCheckSamePDiffT(const ProfileConsistencyCheckParameters &options,
                                                  const ProfileIndices &profileIndices,
-                                                 const ProfileData &profileData,
-                                                 ProfileFlags &profileFlags,
+                                                 ProfileDataHandler &profileDataHandler,
                                                  ProfileCheckValidator &profileCheckValidator)
-    : ProfileCheckBase(options, profileIndices, profileData, profileFlags, profileCheckValidator)
+    : ProfileCheckBase(options, profileIndices, profileDataHandler, profileCheckValidator)
   {}
 
   void ProfileCheckSamePDiffT::runCheck()
@@ -26,20 +26,30 @@ namespace ufo {
     int NumErrors = 0;
 
     const int numLevelsToCheck = profileIndices_.getNumLevelsToCheck();
-    const std::vector <float> &pressures = profileData_.getPressures();
-    const std::vector <float> &tObs = profileData_.gettObs();
-    const std::vector <float> &tBkg = profileData_.gettBkg();
-    std::vector <int> &tFlags = profileFlags_.gettFlags();
-    const std::vector <float> &tObsCorrection = profileFlags_.gettObsCorrection();
+
+    const std::vector <float> &pressures =
+      profileDataHandler_.get<float>(ufo::VariableNames::obs_air_pressure);
+    const std::vector <float> &tObs =
+      profileDataHandler_.get<float>(ufo::VariableNames::obs_air_temperature);
+    const std::vector <float> &tBkg =
+      profileDataHandler_.get<float>(ufo::VariableNames::hofx_air_temperature);
+    std::vector <int> &tFlags =
+      profileDataHandler_.get<int>(ufo::VariableNames::qcflags_air_temperature);
+    std::vector <int> &NumAnyErrors =
+      profileDataHandler_.get<int>(ufo::VariableNames::counter_NumAnyErrors);
+    std::vector <int> &NumSamePErrObs =
+      profileDataHandler_.get<int>(ufo::VariableNames::counter_NumSamePErrObs);
+    const std::vector <float> &tObsCorrection =
+      profileDataHandler_.get<float>(ufo::VariableNames::obscorrection_air_temperature);
 
     if (oops::anyVectorEmpty(pressures, tObs, tBkg, tFlags, tObsCorrection)) {
-      oops::Log::warning() << "At least one vector is empty. "
-                           << "Check will not be performed." << std::endl;
+      oops::Log::debug() << "At least one vector is empty. "
+                         << "Check will not be performed." << std::endl;
       return;
     }
     if (!oops::allVectorsSameSize(pressures, tObs, tBkg, tFlags, tObsCorrection)) {
-      oops::Log::warning() << "Not all vectors have the same size. "
-                           << "Check will not be performed." << std::endl;
+      oops::Log::debug() << "Not all vectors have the same size. "
+                         << "Check will not be performed." << std::endl;
       return;
     }
 
@@ -58,7 +68,7 @@ namespace ufo {
         int jlevuse = jlevprev;
         if (std::abs(tObsFinal[jlev] - tObsFinal[jlevprev]) > options_.SPDTCheck_TThresh.value()) {
           NumErrors++;
-          profileFlags_.incrementCounter("NumAnyErrors");
+          NumAnyErrors[0]++;
 
           // Choose which level to flag
           if (std::abs(tObsFinal[jlev] - tBkg[jlev]) <=
@@ -92,14 +102,7 @@ namespace ufo {
         jlevprev = jlev;
       }
     }
-    if (NumErrors > 0) profileFlags_.incrementCounterCumul("NumSamePErrObs");
-  }
-
-  void ProfileCheckSamePDiffT::fillValidator()
-  {
-    profileCheckValidator_.settFlags(profileFlags_.gettFlags());
-    profileCheckValidator_.setNumAnyErrors(profileFlags_.getCounter("NumAnyErrors"));
-    profileCheckValidator_.setNumSamePErrObs(profileFlags_.getCounter("NumSamePErrObs"));
+    if (NumErrors > 0) NumSamePErrObs[0]++;
   }
 }  // namespace ufo
 

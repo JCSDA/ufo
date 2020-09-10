@@ -33,7 +33,7 @@ ObsGnssroBendMetOffice::ObsGnssroBendMetOffice(const ioda::ObsSpace & odb,
                                     "geopotential_height", "geopotential_height_levels"};
   varin_.reset(new oops::Variables(vv));
 
-  const eckit::LocalConfiguration obsOptions(config, "ObsOptions");
+  const eckit::LocalConfiguration obsOptions(config, "obs options");
   const eckit::Configuration *configc = &obsOptions;
   ufo_gnssro_bendmetoffice_setup_f90(keyOperGnssroBendMetOffice_, &configc);
 

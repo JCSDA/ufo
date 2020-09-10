@@ -1,35 +1,32 @@
-window_begin: 2018-04-14T21:00:00Z
-window_end: 2018-04-15T03:00:00Z
+window begin: 2018-04-14T21:00:00Z
+window end: 2018-04-15T03:00:00Z
 
-LinearObsOpTest:
- testiterTL: 5
- toleranceTL: 2.0e-5
- toleranceAD: 1.0e-11
-
-Observations:
- ObsTypes:
- - ObsOperator:
-     name: CRTM
-     Absorbers: [H2O,O3,CO2]
-     Clouds: [Water, Ice]
-     Cloud_Fraction: 1.0
-     LinearObsOperator:
-       Absorbers: [H2O,O3,CO2]
-       Clouds: [Water, Ice]
-     ObsOptions:
-       Sensor_ID: atms_npp
-       EndianType: little_endian
-       CoefficientPath: Data/
-   ObsSpace:
-     name: Radiance
-     ObsDataIn:
-       obsfile: Data/ioda/testinput_tier_1/atms_npp_obs_2018041500_m_qc.nc4
-     ObsDataOut:
-       obsfile: Data/atms_npp_obs_2018041500_m_qc_out.nc4
-     simulate:
-       variables: [brightness_temperature]
-       channels: 1-22 
-   GeoVaLs:
-     filename: Data/atms_npp_geoval_2018041500_m_qc.nc4
-   vecequiv: GsiHofX
-   tolerance: 1.e-7
+observations:
+- obs operator:
+    name: CRTM
+    Absorbers: [H2O,O3,CO2]
+    Clouds: [Water, Ice]
+    Cloud_Fraction: 1.0
+    linear obs operator:
+      Absorbers: [H2O,O3,CO2]
+      Clouds: [Water, Ice]
+    obs options:
+      Sensor_ID: atms_npp
+      EndianType: little_endian
+      CoefficientPath: Data/
+  obs space:
+    name: Radiance
+    obsdatain:
+      obsfile: Data/ioda/testinput_tier_1/atms_npp_obs_2018041500_m_qc.nc4
+    obsdataout:
+      obsfile: Data/atms_npp_obs_2018041500_m_qc_atms_crtm_out.nc4
+    simulated variables: [brightness_temperature]
+    channels: 1-22
+  geovals:
+    filename: Data/atms_npp_geoval_2018041500_m_qc.nc4
+  vector ref: GsiHofX
+  tolerance: 1.e-7
+  linear obs operator test:
+    iterations TL: 5
+    tolerance TL: 2.0e-5
+    tolerance AD: 1.0e-11

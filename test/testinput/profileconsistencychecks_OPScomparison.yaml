@@ -3,24 +3,24 @@
 #
 
 Sondes:
-  window_begin: 2000-01-01T00:00:00Z
-  window_end: 2030-01-01T00:00:00Z
-  ObsSpace:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
     name: Radiosonde
-    ObsDataIn:
+    obsdatain:
       obsfile: Data/met_office_profile_consistency_checks.nc4
       obsgrouping:
-        group_variable: "station_id"
+        group variable: "station_id"
         #Sorting is not performed for this test in order to ensure exact correspondence with OPS
-    simulate:
-      variables: [air_temperature, geopotential_height]
-  ObsDiag:
+    simulated variables: [air_temperature, geopotential_height]
+  obs diagnostics:
   ProfileConsistencyChecks:
     Checks: ["Basic", "SamePDiffT", "Sign", "UnstableLayer", "Interpolation", "Hydrostatic"]
     maxlev: 10000
     compareWithOPS: true
     flagBasicChecksFail: true
     nErrorsFail: 8
+    PrintStationID: true
     BChecks_minValidP: 0.0
     BChecks_maxValidP: 110.0e3
     SPDTCheck_TThresh: 1.0

@@ -1,33 +1,30 @@
-window_begin: 2018-04-14T21:00:00Z
-window_end: 2018-04-15T03:00:00Z
+window begin: 2018-04-14T21:00:00Z
+window end: 2018-04-15T03:00:00Z
 
-LinearObsOpTest: 
- coefTL: 1.e-3
- toleranceTL: 1.0e-3
- toleranceAD: 1.0e-11
-
-Observations: 
- ObsTypes: 
- - ObsOperator:
-     name: CRTM
-     Absorbers: [H2O,O3,CO2]
-     Clouds: [Water, Ice]
-     Cloud_Fraction: 1.0
-     LinearObsOperator:
-       Absorbers: [H2O,O3,CO2]
-       Clouds: [Water]
-     ObsOptions:
-       Sensor_ID: gmi_gpm
-       EndianType: little_endian
-       CoefficientPath: Data/
-   ObsSpace:
-     name: gmi_gpm
-     ObsDataIn: 
-       obsfile: Data/ioda/testinput_tier_1/gmi_gpm_obs_2018041500_m.nc4
-     simulate:
-       variables: [brightness_temperature]
-       channels: 1-13
-   GeoVaLs: 
-     filename: Data/gmi_gpm_geoval_2018041500_m.nc4
-   rmsequiv: 202.54607667010302
-   tolerance: 1.e-6
+observations:
+- obs operator:
+    name: CRTM
+    Absorbers: [H2O,O3,CO2]
+    Clouds: [Water, Ice]
+    Cloud_Fraction: 1.0
+    linear obs operator:
+      Absorbers: [H2O,O3,CO2]
+      Clouds: [Water]
+    obs options:
+      Sensor_ID: gmi_gpm
+      EndianType: little_endian
+      CoefficientPath: Data/
+  obs space:
+    name: gmi_gpm
+    obsdatain:
+      obsfile: Data/ioda/testinput_tier_1/gmi_gpm_obs_2018041500_m.nc4
+    simulated variables: [brightness_temperature]
+    channels: 1-13
+  geovals:
+    filename: Data/gmi_gpm_geoval_2018041500_m.nc4
+  rms ref: 202.54607667010302
+  tolerance: 1.e-6
+  linear obs operator test:
+    coef TL: 1.e-3
+    tolerance TL: 1.0e-3
+    tolerance AD: 1.0e-11

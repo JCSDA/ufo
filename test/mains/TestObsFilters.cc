@@ -8,11 +8,11 @@
 #include "../ufo/ObsFilters.h"
 #include "oops/runs/Run.h"
 #include "ufo/instantiateObsFilterFactory.h"
-#include "ufo/UfoTrait.h"
+#include "ufo/ObsTraits.h"
 
 int main(int argc,  char ** argv) {
   oops::Run run(argc, argv);
-  ufo::instantiateObsFilterFactory<ufo::UfoTrait>();
+  ufo::instantiateObsFilterFactory<ufo::ObsTraits>();
   ufo::test::ObsFilters tests;
   return run.execute(tests);
 }

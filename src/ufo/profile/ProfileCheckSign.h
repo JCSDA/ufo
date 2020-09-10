@@ -12,8 +12,7 @@
 
 #include "ufo/profile/ProfileCheckBase.h"
 #include "ufo/profile/ProfileCheckValidator.h"
-#include "ufo/profile/ProfileData.h"
-#include "ufo/profile/ProfileFlags.h"
+#include "ufo/profile/ProfileDataHandler.h"
 #include "ufo/profile/ProfileIndices.h"
 
 namespace ufo {
@@ -27,15 +26,14 @@ namespace ufo {
    public:
     ProfileCheckSign(const ProfileConsistencyCheckParameters &options,
                      const ProfileIndices &profileIndices,
-                     const ProfileData &profileData,
-                     ProfileFlags &profileFlags,
+                     ProfileDataHandler &profileDataHandler,
                      ProfileCheckValidator &profileCheckValidator);
 
     /// Run check
     void runCheck() override;
 
     /// Fill variables in validator
-    void fillValidator() override;
+    void fillValidator() override {}
   };
 }  // namespace ufo
 

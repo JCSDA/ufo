@@ -8,10 +8,9 @@
 #ifndef UFO_FILTERS_OBSDIAGNOSTICSWRITER_H_
 #define UFO_FILTERS_OBSDIAGNOSTICSWRITER_H_
 
+#include <memory>
 #include <ostream>
 #include <string>
-
-#include "boost/shared_ptr.hpp"
 
 #include "ioda/ObsDataVector.h"
 #include "oops/base/Variables.h"
@@ -39,8 +38,8 @@ class ObsDiagnosticsWriter : public util::Printable,
   static const std::string classname() {return "ufo::ObsDiagnosticsWriter";}
 
   ObsDiagnosticsWriter(ioda::ObsSpace &, const eckit::Configuration &,
-                       boost::shared_ptr<ioda::ObsDataVector<int> >,
-                       boost::shared_ptr<ioda::ObsDataVector<float> >);
+                       std::shared_ptr<ioda::ObsDataVector<int> >,
+                       std::shared_ptr<ioda::ObsDataVector<float> >);
   ~ObsDiagnosticsWriter() {}
 
   void preProcess() const {}

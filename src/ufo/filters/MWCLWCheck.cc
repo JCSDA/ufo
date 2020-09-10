@@ -1,8 +1,8 @@
 /*
  * (C) Copyright 2018-2019 UCAR
- * 
+ *
  * This software is licensed under the terms of the Apache Licence Version 2.0
- * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
 #include "ufo/filters/MWCLWCheck.h"
@@ -26,10 +26,9 @@ namespace ufo {
 // -----------------------------------------------------------------------------
 
 MWCLWCheck::MWCLWCheck(ioda::ObsSpace & obsdb, const eckit::Configuration & config,
-                       boost::shared_ptr<ioda::ObsDataVector<int> > flags,
-                       boost::shared_ptr<ioda::ObsDataVector<float> > obserr)
-  : FilterBase(obsdb, config, flags, obserr),
-    invars_(eckit::LocalConfiguration(config_, "inputs")) {
+                       std::shared_ptr<ioda::ObsDataVector<int> > flags,
+                       std::shared_ptr<ioda::ObsDataVector<float> > obserr)
+  : FilterBase(obsdb, config, flags, obserr), invars_(config_, "clw variables") {
   oops::Log::debug() << "MWCLWCheck: config = " << config_ << std::endl;
   const Variable var0(invars_[0] + "@HofX");
   const Variable var1(invars_[1] + "@HofX");

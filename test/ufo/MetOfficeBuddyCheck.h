@@ -13,18 +13,16 @@
 #include <string>
 #include <vector>
 
-#include <boost/make_shared.hpp>
-
 #define ECKIT_TESTING_SELF_REGISTER_CASES 0
 
 #include "eckit/config/LocalConfiguration.h"
 #include "eckit/testing/Test.h"
 #include "ioda/ObsSpace.h"
 #include "ioda/ObsVector.h"
-#include "oops/../test/TestEnvironment.h"
-#include "oops/parallel/mpi/mpi.h"
+#include "oops/mpi/mpi.h"
 #include "oops/runs/Test.h"
 #include "oops/util/Expect.h"
+#include "test/TestEnvironment.h"
 #include "ufo/filters/MetOfficeBuddyCheck.h"
 #include "ufo/filters/Variables.h"
 #include "ufo/Locations.h"
@@ -35,11 +33,11 @@ namespace ufo {
 namespace test {
 
 void testMetOfficeBuddyCheck(const eckit::LocalConfiguration &conf) {
-  util::DateTime bgn(conf.getString("window_begin"));
-  util::DateTime end(conf.getString("window_end"));
+  util::DateTime bgn(conf.getString("window begin"));
+  util::DateTime end(conf.getString("window end"));
 
-  const eckit::LocalConfiguration obsSpaceConf(conf, "ObsSpace");
-  ioda::ObsSpace obsSpace(obsSpaceConf, oops::mpi::comm(), bgn, end);
+  const eckit::LocalConfiguration obsSpaceConf(conf, "obs space");
+  ioda::ObsSpace obsSpace(obsSpaceConf, oops::mpi::world(), bgn, end);
 
   const eckit::LocalConfiguration floatVarInitConf(conf, "FloatVariables");
   for (const std::string & varNameGroup : floatVarInitConf.keys()) {
@@ -57,10 +55,10 @@ void testMetOfficeBuddyCheck(const eckit::LocalConfiguration &conf) {
     obsSpace.put_db(varGroup, varName, values);
   }
 
-  auto obserr = boost::make_shared<ioda::ObsDataVector<float>>(
-      obsSpace, obsSpace.obsvariables(), "ObsError");
-  auto qcflags = boost::make_shared<ioda::ObsDataVector<int>>(
-      obsSpace, obsSpace.obsvariables());
+  std::shared_ptr<ioda::ObsDataVector<float>> obserr(new ioda::ObsDataVector<float>(
+      obsSpace, obsSpace.obsvariables(), "ObsError"));
+  std::shared_ptr<ioda::ObsDataVector<int>> qcflags(new ioda::ObsDataVector<int>(
+      obsSpace, obsSpace.obsvariables()));
 
   const eckit::LocalConfiguration filterConf(conf, "Met Office Buddy Check");
   ufo::MetOfficeBuddyCheck filter(obsSpace, filterConf, qcflags, obserr);

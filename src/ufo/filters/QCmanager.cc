@@ -14,12 +14,12 @@
 
 #include "ioda/ObsDataVector.h"
 #include "ioda/ObsSpace.h"
+#include "ioda/ObsVector.h"
 #include "oops/base/Variables.h"
 #include "oops/interface/ObsFilter.h"
 #include "oops/util/Logger.h"
 #include "oops/util/missingValues.h"
 #include "ufo/filters/QCflags.h"
-#include "ufo/UfoTrait.h"
 
 namespace ufo {
 
@@ -30,8 +30,8 @@ namespace ufo {
 // -----------------------------------------------------------------------------
 
 QCmanager::QCmanager(ioda::ObsSpace & obsdb, const eckit::Configuration & config,
-                     boost::shared_ptr<ioda::ObsDataVector<int> > qcflags,
-                     boost::shared_ptr<ioda::ObsDataVector<float> > obserr)
+                     std::shared_ptr<ioda::ObsDataVector<int> > qcflags,
+                     std::shared_ptr<ioda::ObsDataVector<float> > obserr)
   : obsdb_(obsdb), config_(config), nogeovals_(), nodiags_(), flags_(qcflags),
     observed_(obsdb.obsvariables())
 {
@@ -130,25 +130,26 @@ void QCmanager::print(std::ostream & os) const {
       if ((*flags_)[jj][jobs] == QCflags::derivative) ++idydx;
     }
 
-    obsdb_.comm().allReduceInPlace(iobs, eckit::mpi::sum());
-    obsdb_.comm().allReduceInPlace(ipass, eckit::mpi::sum());
-    obsdb_.comm().allReduceInPlace(imiss, eckit::mpi::sum());
-    obsdb_.comm().allReduceInPlace(ipreq, eckit::mpi::sum());
-    obsdb_.comm().allReduceInPlace(ibnds, eckit::mpi::sum());
-    obsdb_.comm().allReduceInPlace(iwhit, eckit::mpi::sum());
-    obsdb_.comm().allReduceInPlace(iblck, eckit::mpi::sum());
-    obsdb_.comm().allReduceInPlace(iherr, eckit::mpi::sum());
-    obsdb_.comm().allReduceInPlace(ifgss, eckit::mpi::sum());
-    obsdb_.comm().allReduceInPlace(iclw,  eckit::mpi::sum());
-    obsdb_.comm().allReduceInPlace(iprof, eckit::mpi::sum());
-    obsdb_.comm().allReduceInPlace(ignss, eckit::mpi::sum());
-    obsdb_.comm().allReduceInPlace(ithin, eckit::mpi::sum());
-    obsdb_.comm().allReduceInPlace(idiffref, eckit::mpi::sum());
-    obsdb_.comm().allReduceInPlace(iseaice,  eckit::mpi::sum());
-    obsdb_.comm().allReduceInPlace(itrack,  eckit::mpi::sum());
-    obsdb_.comm().allReduceInPlace(ibuddy,  eckit::mpi::sum());
-    obsdb_.comm().allReduceInPlace(idydx,   eckit::mpi::sum());
-
+    if (obsdb_.isDistributed()) {
+      obsdb_.comm().allReduceInPlace(iobs, eckit::mpi::sum());
+      obsdb_.comm().allReduceInPlace(ipass, eckit::mpi::sum());
+      obsdb_.comm().allReduceInPlace(imiss, eckit::mpi::sum());
+      obsdb_.comm().allReduceInPlace(ipreq, eckit::mpi::sum());
+      obsdb_.comm().allReduceInPlace(ibnds, eckit::mpi::sum());
+      obsdb_.comm().allReduceInPlace(iwhit, eckit::mpi::sum());
+      obsdb_.comm().allReduceInPlace(iblck, eckit::mpi::sum());
+      obsdb_.comm().allReduceInPlace(iherr, eckit::mpi::sum());
+      obsdb_.comm().allReduceInPlace(ifgss, eckit::mpi::sum());
+      obsdb_.comm().allReduceInPlace(iclw,  eckit::mpi::sum());
+      obsdb_.comm().allReduceInPlace(iprof, eckit::mpi::sum());
+      obsdb_.comm().allReduceInPlace(ignss, eckit::mpi::sum());
+      obsdb_.comm().allReduceInPlace(ithin, eckit::mpi::sum());
+      obsdb_.comm().allReduceInPlace(idiffref, eckit::mpi::sum());
+      obsdb_.comm().allReduceInPlace(iseaice,  eckit::mpi::sum());
+      obsdb_.comm().allReduceInPlace(itrack,  eckit::mpi::sum());
+      obsdb_.comm().allReduceInPlace(ibuddy,  eckit::mpi::sum());
+      obsdb_.comm().allReduceInPlace(idydx,   eckit::mpi::sum());
+    }
 
     if (obsdb_.comm().rank() == 0) {
       const std::string info = "QC " + flags_->obstype() + " " + observed_[jj] + ": ";

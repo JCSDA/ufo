@@ -1,12 +1,13 @@
-window_begin: 2018-04-14T20:00:00Z
-window_end: 2018-04-15T03:00:00Z
-ObsFilterData:
-- ObsSpace:
+window begin: 2018-04-14T20:00:00Z
+window end: 2018-04-15T03:00:00Z
+obs filter data:
+- obs space:
     name: Satwind
-    ObsDataIn:
+    obsdatain:
       obsfile: Data/ioda/testinput_tier_1/satwind_obs_2018041500_m.nc4
-    simulate:
-      variables: [eastward_wind, northward_wind]
+    simulated variables: [eastward_wind, northward_wind]
+    datetime variables:
+    - name: datetime@MetaData
     float variables:
     - name: eastward_wind@ObsValue
     - name: northward_wind@ObsError
@@ -14,13 +15,15 @@ ObsFilterData:
     integer variables:
     - name: eastward_wind@ObsType
     - name: northward_wind@ObsType
-  GeoVaLs:
+    string variables:
+    - name: station_id@MetaData
+  geovals:
     filename: Data/satwind_geoval_2018041500_m.nc4
-    variables:
+    state variables:
     - name: eastward_wind@GeoVaLs
     - name: northward_wind@GeoVaLs
     - name: air_pressure@GeoVaLs
-  ObsDiag:
+  obs diagnostics:
     filename: Data/satwind_geoval_2018041500_m.nc4
     variables:
     - name: surface_roughness_length@ObsDiag
@@ -29,21 +32,22 @@ ObsFilterData:
     variables:
     - name: eastward_wind@HofX
     - name: northward_wind@HofX
-- ObsSpace:
+- obs space:
     name: amsua_n19
-    ObsDataIn:
+    obsdatain:
       obsfile: Data/ioda/testinput_tier_1/amsua_n19_obs_2018041500_m.nc4
-    simulate:
-      variables: [brightness_temperature]
-      channels: 1-10,15
+    simulated variables: [brightness_temperature]
+    channels: 1-10,15
+    datetime variables:
+    - name: datetime@MetaData
     float variables:
     - name: brightness_temperature_1@ObsValue
     - name: longitude@MetaData
     integer variables:
     - name: brightness_temperature_12@PreQC
-  GeoVaLs:
+  geovals:
     filename: Data/amsua_n19_geoval_2018041500_m.nc4
-    variables:
+    state variables:
     - name: surface_temperature_where_snow@GeoVaLs
     - name: soil_temperature@GeoVaLs
     - name: volume_fraction_of_condensed_water_in_soil@GeoVaLs
@@ -54,7 +58,7 @@ ObsFilterData:
     - name: air_pressure@GeoVaLs
     - name: air_pressure_levels@GeoVaLs
     - name: humidity_mixing_ratio@GeoVaLs
-  ObsDiag:
+  obs diagnostics:
     filename: Data/amsua_n19_geoval_2018041500_m.nc4
     variables:
     - name: surface_snow_thickness@ObsDiag

@@ -1,27 +1,24 @@
-window_begin: 2018-04-14T21:00:00Z
-window_end: 2018-04-15T03:00:00Z
+window begin: 2018-04-14T21:00:00Z
+window end: 2018-04-15T03:00:00Z
 
-LinearObsOpTest: 
- testiterTL:  10
- toleranceTL: 1.0e-12
- toleranceAD: 1.0e-11
-
-Observations: 
- ObsTypes: 
- - ObsOperator:
-    name: GnssroBndROPP2D
-    ObsOptions: 
-     n_horiz: 3
-     res: 40.0
-     top_2d: 50.0
-   ObsSpace: 
-     name: GnssroBnd
-     ObsDataIn: 
-       obsfile: Data/ioda/testinput_tier_1/gnssro_obs_2018041500_s.nc4
-     simulate: 
-       variables: [bending_angle]
-   GeoVaLs: 
-    filename: Data/gnssro_geoval_2018041500_s_2d.nc4
-    loc_multiplier: 3
-   rmsequiv: 0.009216235643012125
-   tolerance: 1.0e-12
+observations:
+- obs operator:
+   name: GnssroBndROPP2D
+   obs options:
+    n_horiz: 3
+    res: 40.0
+    top_2d: 50.0
+  obs space:
+    name: GnssroBnd
+    obsdatain:
+      obsfile: Data/ioda/testinput_tier_1/gnssro_obs_2018041500_s.nc4
+    simulated variables: [bending_angle]
+  geovals:
+   filename: Data/gnssro_geoval_2018041500_s_2d.nc4
+   loc_multiplier: 3
+  rms ref: 0.009216235643012125
+  tolerance: 1.0e-12
+  linear obs operator test:
+    iterations TL:  10
+    tolerance TL: 1.0e-12
+    tolerance AD: 1.0e-11

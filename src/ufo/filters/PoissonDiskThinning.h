@@ -15,7 +15,6 @@
 #include <vector>
 
 #include <boost/optional.hpp>
-#include <boost/shared_ptr.hpp>
 
 #include "ioda/ObsDataVector.h"
 #include "oops/util/ObjectCounter.h"
@@ -55,8 +54,8 @@ class PoissonDiskThinning : public FilterBase,
   static const std::string classname() {return "ufo::PoissonDiskThinning";}
 
   PoissonDiskThinning(ioda::ObsSpace &obsdb, const eckit::Configuration &config,
-                      boost::shared_ptr<ioda::ObsDataVector<int> > flags,
-                      boost::shared_ptr<ioda::ObsDataVector<float> > obserr);
+                      std::shared_ptr<ioda::ObsDataVector<int> > flags,
+                      std::shared_ptr<ioda::ObsDataVector<float> > obserr);
 
   ~PoissonDiskThinning() override;
 

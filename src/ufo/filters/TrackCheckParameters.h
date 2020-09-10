@@ -12,21 +12,23 @@
 #include <string>
 
 #include "eckit/exception/Exceptions.h"
+#include "oops/util/Duration.h"
 #include "oops/util/parameters/OptionalParameter.h"
 #include "oops/util/parameters/Parameter.h"
 #include "oops/util/parameters/Parameters.h"
 #include "oops/util/parameters/ParameterTraits.h"
+#include "ufo/filters/TrackCheckUtilsParameters.h"
 #include "ufo/utils/Constants.h"
 #include "ufo/utils/parameters/ParameterTraitsVariable.h"
 
 namespace eckit {
-  class Configuration;
+class Configuration;
 }
 
 namespace ufo {
 
 /// \brief Options controlling the operation of the track check filter.
-class TrackCheckParameters : public oops::Parameters {
+class TrackCheckParameters : public TrackCheckUtilsParameters {
  public:
   /// Assumed temporal resolution of the observations, i.e. absolute accuracy of the reported
   /// observation times.
@@ -41,7 +43,6 @@ class TrackCheckParameters : public oops::Parameters {
   ///                  (reported_time + temporal_resolution).
   oops::Parameter<float> spatialResolution{
     "spatial_resolution", 1.0f, this};
-
   /// Controls the size of the set of observations against which each observation is compared.
   ///
   /// Each observation O(x, t) (taken at time t and location x) is compared against the smallest
@@ -77,21 +78,8 @@ class TrackCheckParameters : public oops::Parameters {
   /// Maximum fraction of climb rate or speed estimates obtained by comparison with other
   /// observations that are allowed to fall outside the allowed ranges before an observation is
   /// rejected.
-  oops::Parameter<float> rejectionThreshold{
+  oops::Parameter<float> rejectionThreshold {
     "rejection_threshold", 0.5f, this};
-
-  /// Variable storing integer-valued station IDs. Observations taken by each station are
-  /// checked separately.
-  ///
-  /// If not set and observations were grouped into records when the observation space was
-  /// constructed, each record is assumed to consist of observations taken by a separate
-  /// station. If not set and observations were not grouped into records, all observations are
-  /// assumed to have been taken by a single station.
-  ///
-  /// Note: the variable used to group observations into records can be set with the
-  /// \c ObsSpace.ObsDataIn.obsgrouping.group_variable YAML option.
-  oops::OptionalParameter<Variable> stationIdVariable{
-    "station_id_variable", this};
 };
 
 }  // namespace ufo

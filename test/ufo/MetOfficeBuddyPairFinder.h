@@ -21,10 +21,10 @@
 #include "eckit/testing/Test.h"
 #include "ioda/ObsSpace.h"
 #include "ioda/ObsVector.h"
-#include "oops/../test/TestEnvironment.h"
-#include "oops/parallel/mpi/mpi.h"
+#include "oops/mpi/mpi.h"
 #include "oops/runs/Test.h"
 #include "oops/util/Expect.h"
+#include "test/TestEnvironment.h"
 #include "ufo/filters/MetOfficeBuddyCheckParameters.h"
 #include "ufo/filters/MetOfficeBuddyPairFinder.h"
 #include "ufo/utils/StringUtils.h"
@@ -92,11 +92,11 @@ int maxNumBuddiesWithSameStationId(const std::vector<ObsPair> &pairs,
 }
 
 void testDuplicatesAndBuddyCountConstraints(const eckit::LocalConfiguration &conf) {
-  util::DateTime bgn(conf.getString("window_begin"));
-  util::DateTime end(conf.getString("window_end"));
+  util::DateTime bgn(conf.getString("window begin"));
+  util::DateTime end(conf.getString("window end"));
 
-  const eckit::LocalConfiguration obsSpaceConf(conf, "ObsSpace");
-  ioda::ObsSpace obsSpace(obsSpaceConf, oops::mpi::comm(), bgn, end);
+  const eckit::LocalConfiguration obsSpaceConf(conf, "obs space");
+  ioda::ObsSpace obsSpace(obsSpaceConf, oops::mpi::world(), bgn, end);
 
   boost::optional<std::vector<float>> airPressures;
   if (obsSpace.has("MetaData", "air_pressure")) {

@@ -1,38 +1,35 @@
-window_begin: 2018-04-14T21:00:00Z
-window_end: 2018-04-15T03:00:00Z
+window begin: 2018-04-14T21:00:00Z
+window end: 2018-04-15T03:00:00Z
 
-LinearObsOpTest: 
- coefTL: 1.e-3
- toleranceTL: 1.0e-3
- toleranceAD: 1.0e-11
-
-Observations: 
- ObsTypes: 
- - ObsOperator:
-     name: CRTM
-     Absorbers: [H2O,O3,CO2]
-     Clouds: [Water, Ice]
-     Cloud_Fraction: 1.0
-     Salinity: on 
-     LinearObsOperator:
-       Absorbers: [H2O,O3,CO2]
-       Clouds: [Water, Ice]
-       Surfaces: [Water_Temperature, Wind_Speed, Wind_Direction, Salinity]
-     ObsOptions:
-       inspectProfile: 1
-       Sensor_ID: radiometer_smap
-       EndianType: little_endian
-       CoefficientPath: Data/
-   ObsSpace:
-     name: radiometer_smap
-     ObsDataIn: 
-       obsfile: Data/ioda/testinput_tier_1/smap_obs_2018041500_m.nc4
-     ObsDataOut:
-       obsfile: Data/smap_obs_2018041500_m_out.nc4
-     simulate:
-       variables: [brightness_temperature]
-       channels: 1-4
-   GeoVaLs: 
-     filename: Data/smap_geoval_2018041500_m.nc4
-   rmsequiv: 153.40487259580365
-   tolerance: 1.e-6
+observations:
+- obs operator:
+    name: CRTM
+    Absorbers: [H2O,O3,CO2]
+    Clouds: [Water, Ice]
+    Cloud_Fraction: 1.0
+    Salinity: on
+    linear obs operator:
+      Absorbers: [H2O,O3,CO2]
+      Clouds: [Water, Ice]
+      Surfaces: [Water_Temperature, Wind_Speed, Wind_Direction, Salinity]
+    obs options:
+      inspectProfile: 1
+      Sensor_ID: radiometer_smap
+      EndianType: little_endian
+      CoefficientPath: Data/
+  obs space:
+    name: radiometer_smap
+    obsdatain:
+      obsfile: Data/ioda/testinput_tier_1/smap_obs_2018041500_m.nc4
+    obsdataout:
+      obsfile: Data/smap_obs_2018041500_m_out.nc4
+    simulated variables: [brightness_temperature]
+    channels: 1-4
+  geovals:
+    filename: Data/smap_geoval_2018041500_m.nc4
+  rms ref: 153.40487259580365
+  tolerance: 1.e-6
+  linear obs operator test:
+    coef TL: 1.e-3
+    tolerance TL: 1.0e-3
+    tolerance AD: 1.0e-11

@@ -1,66 +1,62 @@
-window_begin: 2018-04-14T21:00:00Z
-window_end: 2018-04-15T03:00:00Z
+window begin: 2018-04-14T21:00:00Z
+window end: 2018-04-15T03:00:00Z
 
-Observations: 
- ObsTypes: 
- - ObsOperator: 
-     name: GnssroBndNBAM
-     ObsOptions:
-       use_compress: 1
-       vertlayer: full
-   ObsSpace: 
-     name: GnssroBnd
-     ObsDataIn: 
-       obsfile: Data/ioda/testinput_tier_1/gnssro_obs_2018041500_m.nc4
-     ObsDataOut:
-       obsfile: Data/gnssro_bndnbam_2018041500_m_errNBAM.nc4
-     simulate:
-       variables: [bending_angle]
-   GeoVaLs: 
-     filename: Data/gnssro_geoval_2018041500_m.nc4
-   ObsFilters:
-   - Filter: ROobserror
-     filter variables:
-     - name: bending_angle
-     errmodel: NBAM
-   passedBenchmark: 150
- - ObsOperator:
-     name: GnssroBndNBAM
-     ObsOptions:
-   ObsSpace:
-     name: GnssroBnd
-     ObsDataIn:
-       obsfile: Data/ioda/testinput_tier_1/gnssro_obs_2018041500_m.nc4
-     ObsDataOut:
-       obsfile: Data/gnssro_bndnbam_2018041500_m_errECMWF.nc4
-     simulate:
-       variables: [bending_angle]
-   GeoVaLs:
-     filename: Data/gnssro_geoval_2018041500_m.nc4
-   ObsFilters:
-   - Filter: ROobserror
-     filter variables:
-     - name: bending_angle
-     errmodel: ECMWF
-   passedBenchmark: 150
- - ObsOperator:
-     name: GnssroBndNBAM
-     ObsOptions:
-       use_compress: 1
-       vertlayer: full
-   ObsSpace:
-     name: GnssroBnd
-     ObsDataIn:
-       obsfile: Data/ioda/testinput_tier_1/gnssro_obs_2018041500_m.nc4
-     ObsDataOut:
-       obsfile: Data/gnssro_bndnbam_2018041500_m_errNRL.nc4
-     simulate:
-       variables: [bending_angle]
-   GeoVaLs:
-     filename: Data/gnssro_geoval_2018041500_m.nc4
-   ObsFilters:
-   - Filter: ROobserror
-     filter variables:
-     - name: bending_angle
-     errmodel: NRL
-   passedBenchmark: 150
+observations:
+- obs operator:
+    name: GnssroBndNBAM
+    obs options:
+      use_compress: 1
+      vertlayer: full
+  obs space:
+    name: GnssroBnd
+    obsdatain:
+      obsfile: Data/ioda/testinput_tier_1/gnssro_obs_2018041500_m.nc4
+    obsdataout:
+      obsfile: Data/gnssro_bndnbam_2018041500_m_errNBAM.nc4
+    simulated variables: [bending_angle]
+  geovals:
+    filename: Data/gnssro_geoval_2018041500_m.nc4
+  obs filters:
+  - filter: ROobserror
+    filter variables:
+    - name: bending_angle
+    errmodel: NBAM
+  passedBenchmark: 150
+- obs operator:
+    name: GnssroBndNBAM
+    obs options:
+  obs space:
+    name: GnssroBnd
+    obsdatain:
+      obsfile: Data/ioda/testinput_tier_1/gnssro_obs_2018041500_m.nc4
+    obsdataout:
+      obsfile: Data/gnssro_bndnbam_2018041500_m_errECMWF.nc4
+    simulated variables: [bending_angle]
+  geovals:
+    filename: Data/gnssro_geoval_2018041500_m.nc4
+  obs filters:
+  - filter: ROobserror
+    filter variables:
+    - name: bending_angle
+    errmodel: ECMWF
+  passedBenchmark: 150
+- obs operator:
+    name: GnssroBndNBAM
+    obs options:
+      use_compress: 1
+      vertlayer: full
+  obs space:
+    name: GnssroBnd
+    obsdatain:
+      obsfile: Data/ioda/testinput_tier_1/gnssro_obs_2018041500_m.nc4
+    obsdataout:
+      obsfile: Data/gnssro_bndnbam_2018041500_m_errNRL.nc4
+    simulated variables: [bending_angle]
+  geovals:
+    filename: Data/gnssro_geoval_2018041500_m.nc4
+  obs filters:
+  - filter: ROobserror
+    filter variables:
+    - name: bending_angle
+    errmodel: NRL
+  passedBenchmark: 150

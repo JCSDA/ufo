@@ -15,11 +15,9 @@
 
 #include "ufo/filters/ProfileConsistencyCheckParameters.h"
 
-#include "ufo/profile/ProfileFlags.h"
-
 namespace ufo {
   class ProfileCheckValidator;
-  class ProfileData;
+  class ProfileDataHandler;
   class ProfileIndices;
 }
 
@@ -32,12 +30,17 @@ namespace ufo {
    public:
     ProfileChecker(const ProfileConsistencyCheckParameters &options,
                    const ProfileIndices &profileIndices,
-                   const ProfileData &profileData,
-                   ProfileFlags &profileFlags,
+                   ProfileDataHandler &profileDataHandler,
                    ProfileCheckValidator &profileCheckValidator);
 
     /// Run all checks requested
-    void runChecks() const;
+    void runChecks();
+
+    /// Get basic check result
+    bool getBasicCheckResult() {return basicCheckResult_;}
+
+    /// Set basic check result
+    void setBasicCheckResult(bool result) {basicCheckResult_ = result;}
 
    private:
     /// Configurable parameters
@@ -47,16 +50,16 @@ namespace ufo {
     const ProfileIndices &profileIndices_;
 
     /// Profile data
-    const ProfileData &profileData_;
-
-    /// Profile flags
-    ProfileFlags &profileFlags_;
+    ProfileDataHandler &profileDataHandler_;
 
     /// Profile check validator
     ProfileCheckValidator &profileCheckValidator_;
 
     /// Checks to perform
     std::vector <std::string> checks_;
+
+    /// Basic check result
+    bool basicCheckResult_ = true;
   };
 }  // namespace ufo
 

@@ -43,6 +43,9 @@ phases:
       # ufo-bundle
       - ./clone.sh $GIT_USER $GIT_PASS ufo-bundle $CODEBUILD_GIT_BRANCH ufo-bundle /jcsda develop
 
+      # jedi-cmake
+      - ./clone.sh $GIT_USER $GIT_PASS jedi-cmake $CODEBUILD_GIT_BRANCH jedicmake /jcsda/ufo-bundle develop
+
       # ufo
       - ./clone.sh $GIT_USER $GIT_PASS ufo $CODEBUILD_GIT_BRANCH ufo /jcsda/ufo-bundle develop
 

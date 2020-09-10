@@ -34,7 +34,8 @@ contains
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_radarradialvelocity_setup_c(c_key_self, c_conf, c_obsvars, c_geovars) bind(c,name='ufo_radarradialvelocity_setup_f90')
+subroutine ufo_radarradialvelocity_setup_c(c_key_self, c_conf, c_obsvars, c_geovars) &
+    bind(c,name='ufo_radarradialvelocity_setup_f90')
 use fckit_configuration_module, only: fckit_configuration
 use oops_variables_mod
 implicit none

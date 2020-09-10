@@ -7,10 +7,10 @@
 
 #include "oops/runs/Run.h"
 #include "test/interface/ObsAuxControl.h"
-#include "ufo/UfoTrait.h"
+#include "ufo/ObsTraits.h"
 
 int main(int argc,  char ** argv) {
   oops::Run run(argc, argv);
-  test::ObsAuxControl<ufo::UfoTrait> tests;
+  test::ObsAuxControl<ufo::ObsTraits> tests;
   return run.execute(tests);
 }

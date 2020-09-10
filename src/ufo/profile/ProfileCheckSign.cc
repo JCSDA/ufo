@@ -6,6 +6,7 @@
  */
 
 #include "ufo/profile/ProfileCheckSign.h"
+#include "ufo/profile/VariableNames.h"
 
 namespace ufo {
 
@@ -13,10 +14,9 @@ namespace ufo {
 
   ProfileCheckSign::ProfileCheckSign(const ProfileConsistencyCheckParameters &options,
                                      const ProfileIndices &profileIndices,
-                                     const ProfileData &profileData,
-                                     ProfileFlags &profileFlags,
+                                     ProfileDataHandler &profileDataHandler,
                                      ProfileCheckValidator &profileCheckValidator)
-    : ProfileCheckBase(options, profileIndices, profileData, profileFlags, profileCheckValidator)
+    : ProfileCheckBase(options, profileIndices, profileDataHandler, profileCheckValidator)
   {}
 
   void ProfileCheckSign::runCheck()
@@ -24,22 +24,31 @@ namespace ufo {
     oops::Log::debug() << " Sign check/correction" << std::endl;
 
     const int numLevelsToCheck = profileIndices_.getNumLevelsToCheck();
-    const std::vector <float> &pressures = profileData_.getPressures();
-    const std::vector <float> &tObs = profileData_.gettObs();
-    const std::vector <float> &tBkg = profileData_.gettBkg();
-    const std::vector <float> &PstarBackgr = profileData_.getPstarBackgr();
-    std::vector <int> &tFlags = profileFlags_.gettFlags();
-    std::vector <float> &tObsCorrection =
-      profileFlags_.gettObsCorrection();  // Potentially modified here
 
+    const std::vector <float> &pressures =
+       profileDataHandler_.get<float>(ufo::VariableNames::obs_air_pressure);
+    const std::vector <float> &tObs =
+       profileDataHandler_.get<float>(ufo::VariableNames::obs_air_temperature);
+    const std::vector <float> &tBkg =
+       profileDataHandler_.get<float>(ufo::VariableNames::hofx_air_temperature);
+    const std::vector <float> &PstarBackgr =
+       profileDataHandler_.get<float>(ufo::VariableNames::PstarBackgr);
+    std::vector <int> &tFlags =
+       profileDataHandler_.get<int>(ufo::VariableNames::qcflags_air_temperature);
+    std::vector <int> &NumAnyErrors =
+       profileDataHandler_.get<int>(ufo::VariableNames::counter_NumAnyErrors);
+    std::vector <int> &NumSignChange =
+       profileDataHandler_.get<int>(ufo::VariableNames::counter_NumSignChange);
+    std::vector <float> &tObsCorrection =
+       profileDataHandler_.get<float>(ufo::VariableNames::obscorrection_air_temperature);
     if (oops::anyVectorEmpty(pressures, tObs, tBkg, PstarBackgr, tFlags, tObsCorrection)) {
-      oops::Log::warning() << "At least one vector is empty. "
-                           << "Check will not be performed." << std::endl;
+      oops::Log::debug() << "At least one vector is empty. "
+                         << "Check will not be performed." << std::endl;
       return;
     }
     if (!oops::allVectorsSameSize(pressures, tObs, tBkg, PstarBackgr, tFlags, tObsCorrection)) {
-      oops::Log::warning() << "Not all vectors have the same size. "
-                           << "Check will not be performed." << std::endl;
+      oops::Log::debug() << "Not all vectors have the same size. "
+                         << "Check will not be performed." << std::endl;
       return;
     }
 
@@ -51,8 +60,8 @@ namespace ufo {
         // Change sign of tObs in C and compare to tBkg (also in C)
         if (std::abs(2.0 * ufo::Constants::t0c - tObs[jlev] - tBkg[jlev]) <
             options_.SCheck_ProfileSignTol.value()) {
-          profileFlags_.incrementCounter("NumAnyErrors");
-          profileFlags_.incrementCounterCumul("NumSignChange");
+          NumAnyErrors[0]++;
+          NumSignChange[0]++;
 
           tFlags[jlev] |= ufo::FlagsElem::DataCorrectFlag;
 
@@ -85,13 +94,6 @@ namespace ufo {
         }
       }
     }
-  }
-
-  void ProfileCheckSign::fillValidator()
-  {
-    profileCheckValidator_.settFlags(profileFlags_.gettFlags());
-    profileCheckValidator_.setNumAnyErrors(profileFlags_.getCounter("NumAnyErrors"));
-    profileCheckValidator_.setNumSignChange(profileFlags_.getCounter("NumSignChange"));
   }
 }  // namespace ufo
 

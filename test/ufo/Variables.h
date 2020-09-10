@@ -1,8 +1,8 @@
 /*
  * (C) Copyright 2019 UCAR
- * 
+ *
  * This software is licensed under the terms of the Apache Licence Version 2.0
- * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
 #ifndef TEST_UFO_VARIABLES_H_
@@ -17,9 +17,9 @@
 
 #include "eckit/config/LocalConfiguration.h"
 #include "eckit/testing/Test.h"
-#include "oops/../test/TestEnvironment.h"
 #include "oops/base/Variables.h"
 #include "oops/runs/Test.h"
+#include "test/TestEnvironment.h"
 #include "ufo/filters/Variable.h"
 #include "ufo/filters/Variables.h"
 
@@ -30,7 +30,7 @@ namespace test {
 
 void testVariable() {
   std::vector<eckit::LocalConfiguration> conf;
-  ::test::TestEnvironment::config().get("Variables", conf);
+  ::test::TestEnvironment::config().get("test variables", conf);
   for (std::size_t jj = 0; jj < conf.size(); ++jj) {
     // read variable from config
     Variable var(conf[jj]);
@@ -52,7 +52,7 @@ void testConstructor() {
   ::test::TestEnvironment::config().get("oops variables", conf);
   for (std::size_t jj = 0; jj < conf.size(); ++jj) {
     // read variable from config
-    oops::Variables oopsvars(conf[jj]);
+    oops::Variables oopsvars(conf[jj], "variables");
     // read reference vector of strings
     std::vector<std::string> refvars(conf[jj].getStringVector("reference names"));
     // init ufo::Variables

@@ -6,6 +6,7 @@
  */
 
 #include "ioda/ObsVector.h"
+
 #include "ufo/LinearObsOperator.h"
 #include "ufo/LinearObsOperatorBase.h"
 #include "ufo/Locations.h"
@@ -32,7 +33,8 @@ void LinearObsOperator::setTrajectory(const GeoVaLs & gvals, const ObsBias & bia
   vars += bias.requiredHdiagnostics();
   ObsDiagnostics ydiags(odb_, Locations(odb_, odb_.windowStart(), odb_.windowEnd()), vars);
   oper_->setTrajectory(gvals, bias, ydiags);
-  biaspreds_.reset(new Eigen::MatrixXd(bias.computePredictors(gvals, ydiags)));
+  biaspreds_.clear();
+  biaspreds_ = bias.computePredictors(gvals, ydiags);
 }
 
 // -----------------------------------------------------------------------------
@@ -42,7 +44,7 @@ void LinearObsOperator::simulateObsTL(const GeoVaLs & gvals, ioda::ObsVector & y
   oper_->simulateObsTL(gvals, yy);
   if (bias) {
     ioda::ObsVector ybiasinc(odb_);
-    bias.computeObsBiasTL(gvals, *biaspreds_, ybiasinc);
+    bias.computeObsBiasTL(gvals, biaspreds_, ybiasinc);
     yy += ybiasinc;
   }
 }
@@ -54,7 +56,7 @@ void LinearObsOperator::simulateObsAD(GeoVaLs & gvals, const ioda::ObsVector & y
   oper_->simulateObsAD(gvals, yy);
   if (bias) {
     ioda::ObsVector ybiasinc(yy);
-    bias.computeObsBiasAD(gvals, *biaspreds_, ybiasinc);
+    bias.computeObsBiasAD(gvals, biaspreds_, ybiasinc);
   }
 }
 

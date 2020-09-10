@@ -123,9 +123,8 @@ bool ObsFilterData::hasDataVectorInt(const std::string & grp, const std::string 
 
 // -----------------------------------------------------------------------------
 /*! Gets requested data from ObsFilterData
- *  \param varname is a name of a variable requested
- *  \param values on output is data from varname (undefined on input)
- *  \return data associated with varname, in std::vector<float>
+ *  \param[in] varname is a name of a variable requested
+ *  \param[out] values on output is data from varname (undefined on input)
  *  \warning if data are unavailable, assertions would fail and method abort
  */
 void ObsFilterData::get(const Variable & varname, std::vector<float> & values) const {
@@ -145,11 +144,59 @@ void ObsFilterData::get(const Variable & varname, std::vector<float> & values) c
   }
 }
 
+
+// -----------------------------------------------------------------------------
+/*! Gets requested data from ObsFilterData
+ *  \param[in] varname is a name of a variable requested
+ *  \param[out] values on output is data from varname (undefined on input)
+ *  \warning if data are unavailable, assertions would fail and method abort
+ */
+void ObsFilterData::get(const Variable & varname, std::vector<std::string> & values) const {
+  const std::string var = varname.variable();
+  const std::string grp = varname.group();
+
+  if (grp == "GeoVaLs" || grp == "HofX" || grp == "ObsDiag" ||
+    grp == "ObsBiasTerm" || grp == "ObsFunction") {
+      oops::Log::error() << "ObsFilterData::get std::string and int values only "
+                         << "supported for ObsSpace"
+                         << std::endl;
+    ABORT("ObsFilterData::get std::string, int and util::DateTime values only supported for "
+          "ObsSpace");
+  } else {
+    values.resize(obsdb_.nlocs());
+    obsdb_.get_db(grp, var, values);
+  }
+}
+
+
+// -----------------------------------------------------------------------------
+/*! Gets requested data from ObsFilterData
+ *  \param[in] varname is a name of a variable requested
+ *  \param[out] values on output is data from varname (undefined on input)
+ *  \warning if data are unavailable, assertions would fail and method abort
+ */
+void ObsFilterData::get(const Variable & varname, std::vector<util::DateTime> & values) const {
+  const std::string var = varname.variable();
+  const std::string grp = varname.group();
+
+  if (grp == "GeoVaLs" || grp == "HofX" || grp == "ObsDiag" ||
+    grp == "ObsBiasTerm" || grp == "ObsFunction") {
+      oops::Log::error() << "ObsFilterData::get std::string and int values only "
+                         << "supported for ObsSpace"
+                         << std::endl;
+    ABORT("ObsFilterData::get std::string, int and util::DateTime values only supported for "
+          "ObsSpace");
+  } else {
+    values.resize(obsdb_.nlocs());
+    obsdb_.get_db(grp, var, values);
+  }
+}
+
+
 // -----------------------------------------------------------------------------
 /*! Gets requested integer data from ObsFilterData
- *  \param varname is a name of a variable requested
- *  \param values on output is data from varname (undefined on input)
- *  \return data associated with varname, in std::vector<int>
+ *  \param[in] varname is a name of a variable requested
+ *  \param[out] values on output is data from varname (undefined on input)
  *  \warning if data are unavailable, assertions would fail and method abort
  *           only ObsSpace int data are supported currently
  */
@@ -163,9 +210,10 @@ void ObsFilterData::get(const Variable & varname, std::vector<int> & values) con
   } else {
     if (grp == "GeoVaLs" || grp == "HofX" || grp == "ObsDiag" ||
         grp == "ObsBiasTerm" || grp == "ObsFunction") {
-      oops::Log::error() << "ObsFilterData::get int values only supported for ObsSpace"
+      oops::Log::error() << "ObsFilterData::get std::string and int values only "
+                         << "supported for ObsSpace"
                          << std::endl;
-      ABORT("ObsFilterData::get int values only supported for ObsSpace");
+      ABORT("ObsFilterData::get std::string and int values only supported for ObsSpace");
     } else {
       ioda::ObsDataVector<int> vec(obsdb_, varname.toOopsVariables(), grp, false);
       this->get(varname, vec);
@@ -180,11 +228,10 @@ void ObsFilterData::get(const Variable & varname, std::vector<int> & values) con
 
 // -----------------------------------------------------------------------------
 /*! Gets requested data at requested level from ObsFilterData
- *  \param varname is a name of a variable requested
+ *  \param[in] varname is a name of a variable requested
  *         group must be either GeoVaLs or ObsDiag
- *  \param level is a level variable is requested at
- *  \param values on output is data from varname (undefined on input)
- *  \return data associated with varname, in std::vector<float>
+ *  \param[in] level is a level variable is requested at
+ *  \param[out] values on output is data from varname (undefined on input)
  *  \warning if data are unavailable, assertions would fail and method abort
  */
 void ObsFilterData::get(const Variable & varname, const int level,
@@ -207,9 +254,8 @@ void ObsFilterData::get(const Variable & varname, const int level,
 
 // -----------------------------------------------------------------------------
 /*! Gets requested data from ObsFilterData into ObsDataVector
- *  \param varname is a name of a variable requested
- *  \param values on output is data from varname (should be allocated on input)
- *  \return data associated with varname, in ioda::ObsDataVector<float>
+ *  \param[in] varname is a name of a variable requested
+ *  \param[out] values on output is data from varname (should be allocated on input)
  *  \warning only works for ObsFunction;
  *           if data are unavailable, assertions would fail and method abort
  */
@@ -255,8 +301,8 @@ void ObsFilterData::get(const Variable & varname, ioda::ObsDataVector<float> & v
 
 // -----------------------------------------------------------------------------
 /*! Gets requested data from ObsFilterData into ObsDataVector
- *  \param varname is a name of a variable requested
- *  \param values on output is data from varname (should be allocated on input)
+ *  \param[in] varname is a name of a variable requested
+ *  \param[out] values on output is data from varname (should be allocated on input)
  *  \return data associated with varname, in ioda::ObsDataVector<int>
 */
 void ObsFilterData::get(const Variable & varname, ioda::ObsDataVector<int> & values) const {
@@ -311,6 +357,28 @@ void ObsFilterData::print(std::ostream & os) const {
     os << ", diags";
   }
   os << std::endl;
+}
+
+// -----------------------------------------------------------------------------
+/*! \brief dtype of the provided variable
+ *  \details This method returns the data type of the variable stored in the
+ *           ObsFilterData.
+ *  \param varname is a name of a variable requested
+ *  \return data type (ioda::ObsDtype) associated with varname
+ */
+ioda::ObsDtype ObsFilterData::dtype(const Variable & varname) const {
+  const std::string var = varname.variable();
+  const std::string grp = varname.group();
+  // Default to float
+  ioda::ObsDtype res = ioda::ObsDtype::Float;
+  if (obsdb_.has(grp, var)) {
+    res = obsdb_.dtype(grp, var);
+  } else if (!this->has(varname)) {
+    oops::Log::error() << "ObsFilterData::dtype unable to find provided variable."
+                       << std::endl;
+    ABORT("ObsFilterData::dtype unable to find provided variable.");
+  }
+  return res;
 }
 
 // -----------------------------------------------------------------------------

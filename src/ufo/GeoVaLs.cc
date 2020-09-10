@@ -69,6 +69,21 @@ GeoVaLs::GeoVaLs(const eckit::Configuration & config,
   oops::Log::trace() << "GeoVaLs contructor config key = " << keyGVL_ << std::endl;
 }
 // -----------------------------------------------------------------------------
+/*! \brief Construct a new GeoVaLs with just one location
+*
+* \details This ufo::GeoVaLs constructor takes a GeoVaLs object and an index to
+* create a new GeoVaLs with just one location
+*/
+GeoVaLs::GeoVaLs(const GeoVaLs & other, const int & index)
+  : keyGVL_(-1), vars_(other.vars_), comm_(other.comm_)
+{
+  oops::Log::trace() << "GeoVaLs copy one GeoVaLs constructor starting" << std::endl;
+  ufo_geovals_setup_f90(keyGVL_, 1, vars_);
+  int fort_index = index + 1;  // Fortran numbers from 1
+  ufo_geovals_copy_one_f90(keyGVL_, other.keyGVL_, fort_index);
+  oops::Log::trace() << "GeoVaLs copy one GeoVaLs constructor key = " << keyGVL_ << std::endl;
+}
+// -----------------------------------------------------------------------------
 /*! \brief Copy constructor */
 
 GeoVaLs::GeoVaLs(const GeoVaLs & other)
@@ -87,33 +102,19 @@ GeoVaLs::~GeoVaLs() {
   oops::Log::trace() << "GeoVaLs destructor done" << std::endl;
 }
 // -----------------------------------------------------------------------------
-/*! \brief Analytic initialization for GeoVaLs
- *
- * \details This ufo::GeoVaLs constructor was introduced in May, 2018 for use with
- * the interpolation test.   If "analytic_init" is not specified in the
- * configuration then this does nothing.  If "analytic_init" **is** specified, then
- * the values are replaced by values computed directly from one of several idealized
- * analytic states.
- *
- * \date May, 2018: Created (M. Miesch, JCSDA)
- * \date June, 2018: Split off from constructor into independent method
- *                   (M. Miesch, JCSDA)
- */
-void GeoVaLs::analytic_init(const Locations & locs,
-                            const eckit::Configuration & config)
-{
-  oops::Log::trace() << "GeoVaLs::analytic_init starting" << std::endl;
-  if (config.has("analytic_init")) {
-      ufo_geovals_analytic_init_f90(keyGVL_, locs.toFortran(), config);
-  }
-  oops::Log::trace() << "GeoVaLs::analytic_init done" << std::endl;
-}
-// -----------------------------------------------------------------------------
 /*! \brief Zero out the GeoVaLs */
 void GeoVaLs::zero() {
   oops::Log::trace() << "GeoVaLs::zero starting" << std::endl;
   ufo_geovals_zero_f90(keyGVL_);
   oops::Log::trace() << "GeoVaLs::zero done" << std::endl;
+}
+// -----------------------------------------------------------------------------
+/*! \brief Reorder GeoVaLs in vertical dimension based on vertical coordinate variable */
+void GeoVaLs::reorderzdir(const std::string & varname, const std::string & vardir) {
+  oops::Log::trace() << "GeoVaLs::reorderzdir starting" << std::endl;
+  ufo_geovals_reorderzdir_f90(keyGVL_, varname.size(), varname.c_str(),
+                              vardir.size(), vardir.c_str());
+  oops::Log::trace() << "GeoVaLs::reorderzdir done" << std::endl;
 }
 // -----------------------------------------------------------------------------
 /*! \brief Calculate rms */

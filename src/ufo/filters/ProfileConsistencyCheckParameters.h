@@ -17,6 +17,8 @@
 #include "oops/util/parameters/Parameter.h"
 #include "oops/util/parameters/Parameters.h"
 
+#include "ufo/profile/DataHandlerParameters.h"
+
 #include "ufo/utils/Constants.h"
 #include "ufo/utils/parameters/ParameterTraitsVariable.h"
 
@@ -27,8 +29,8 @@ namespace eckit {
 namespace ufo {
 
   /// \brief Options controlling the operation of the ProfileConsistencyChecks filter.
-  class ProfileConsistencyCheckParameters : public oops::Parameters {
-   public:
+  class ProfileConsistencyCheckParameters : public DataHandlerParameters {
+   public:  // variables
     //=== Generic parameters ===//
 
     /// Maximum number of profile levels to be processed (a legacy of the OPS code).
@@ -41,10 +43,8 @@ namespace ufo {
     /// If not sorting observations, ensure number of profiles is consistent
     oops::Parameter<bool> ValidateTotalNumProf {"ValidateTotalNumProf", true, this};
 
-    //=== Parameters relating to the combination of multiple check results ===//
-
-    /// Number of errors that cause the observation to have failed
-    oops::Parameter<int> nErrorsFail {"nErrorsFail", 8, this};
+    /// Print station ID
+    oops::Parameter<bool> PrintStationID {"PrintStationID", false, this};
 
     ///=== Standard level-related parameters ===//
 
@@ -122,7 +122,7 @@ namespace ufo {
     /// Big gaps (hPa) used in interpolation check
     oops::Parameter<std::vector<float>> BigGaps{"ICheck_BigGaps",
         {150, 150, 150, 150, 100, 100, 100, 75,
-            75, 50, 50, 20, 20, 20, 10, 10, 10, 10, 10, 10}};
+            75, 50, 50, 20, 20, 20, 10, 10, 10, 10, 10, 10}, this};
 
     //=== Hydrostatic check parameters ===//
 
@@ -171,54 +171,54 @@ namespace ufo {
 
     /// Big gaps (Pa) used in wind speed interpolation check
     oops::Parameter<std::vector<float>> UICheck_BigGaps{"UICheck_BigGaps",
-        {15000.0, 10000.0, 7500.0, 5000.0, 2000.0}};
+        {15000.0, 10000.0, 7500.0, 5000.0, 2000.0}, this};
 
     /// Big gap thresholds (Pa) used in wind speed interpolation check
     oops::Parameter<std::vector<float>> UICheck_BigGapsPThresh{"UICheck_BigGapsPThresh",
-        {65000.0, 27500.0, 17500.0, 8500.0, 2500.0}};
+        {65000.0, 27500.0, 17500.0, 8500.0, 2500.0}, this};
 
     //=== RH check parameters ===//
 
     /// Initial value of minimum temperature (K)
-    oops::Parameter<float> RHCheck_TminInit {"RHCheck_TminInit", 400.0};
+    oops::Parameter<float> RHCheck_TminInit {"RHCheck_TminInit", 400.0, this};
 
     /// Tolerance for high level check of relative humidity (%)
-    oops::Parameter<float> RHCheck_SondeRHHiTol {"RHCheck_SondeRHHiTol", 20.0};
+    oops::Parameter<float> RHCheck_SondeRHHiTol {"RHCheck_SondeRHHiTol", 20.0, this};
 
     /// Threshold for pressure when setting up arrays (Pa)
-    oops::Parameter<float> RHCheck_PressInitThresh {"RHCheck_PressInitThresh", 100.0};
+    oops::Parameter<float> RHCheck_PressInitThresh {"RHCheck_PressInitThresh", 100.0, this};
 
     /// Threshold for pressure (Pa)
-    oops::Parameter<float> RHCheck_PressThresh {"RHCheck_PressThresh", 400.0};
+    oops::Parameter<float> RHCheck_PressThresh {"RHCheck_PressThresh", 400.0, this};
 
     /// Threshold for pressure difference relative to level 0 (Pa)
-    oops::Parameter<float> RHCheck_PressDiff0Thresh {"RHCheck_PressDiff0Thresh", 100.0};
+    oops::Parameter<float> RHCheck_PressDiff0Thresh {"RHCheck_PressDiff0Thresh", 100.0, this};
 
     /// Threshold for dew point temperature difference (K)
-    oops::Parameter<float> RHCheck_tdDiffThresh {"RHCheck_tdDiffThresh", 2.0};
+    oops::Parameter<float> RHCheck_tdDiffThresh {"RHCheck_tdDiffThresh", 2.0, this};
 
     /// Threshold for relative humidity (%)
-    oops::Parameter<float> RHCheck_RHThresh {"RHCheck_RHThresh", 90.0};
+    oops::Parameter<float> RHCheck_RHThresh {"RHCheck_RHThresh", 90.0, this};
 
     /// Threshold for pressure difference between adjacent levels (Pa)
-    oops::Parameter<float> RHCheck_PressDiffAdjThresh {"RHCheck_PressDiffAdjThresh", 20.0};
+    oops::Parameter<float> RHCheck_PressDiffAdjThresh {"RHCheck_PressDiffAdjThresh", 20.0, this};
 
     /// Threshold for minimum relative humidity (%)
-    oops::Parameter<float> RHCheck_MinRHThresh {"RHCheck_MinRHThresh", 85.0};
+    oops::Parameter<float> RHCheck_MinRHThresh {"RHCheck_MinRHThresh", 85.0, this};
 
     /// Upper threshold for Tmin in moisture check
-    oops::Parameter<float> RHCheck_TminThresh {"RHCheck_TminThresh", 223.15};
+    oops::Parameter<float> RHCheck_TminThresh {"RHCheck_TminThresh", 223.15, this};
 
     /// Lower threshold for temperature in moisture check
-    oops::Parameter<float> RHCheck_TempThresh {"RHCheck_TempThresh", 233.15};
+    oops::Parameter<float> RHCheck_TempThresh {"RHCheck_TempThresh", 233.15, this};
 
     //=== OPS comparison parameters ===//
 
-    /// Tolerance for absolute difference comparisions
-    oops::Parameter<float> Comparison_Tol {"Comparison_Tol", 0.1, this};
-
     /// Compare with OPS values?
     oops::Parameter<bool> compareWithOPS {"compareWithOPS", false, this};
+
+    /// Tolerance for absolute difference comparisions
+    oops::Parameter<float> Comparison_Tol {"Comparison_Tol", 0.1, this};
   };
 }  // namespace ufo
 

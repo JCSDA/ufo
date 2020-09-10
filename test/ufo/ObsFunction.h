@@ -19,9 +19,9 @@
 #include "eckit/testing/Test.h"
 #include "ioda/ObsSpace.h"
 #include "ioda/ObsVector.h"
-#include "oops/../test/TestEnvironment.h"
-#include "oops/parallel/mpi/mpi.h"
+#include "oops/mpi/mpi.h"
 #include "oops/runs/Test.h"
+#include "test/TestEnvironment.h"
 #include "ufo/filters/ObsFilterData.h"
 #include "ufo/filters/obsfunctions/ObsFunction.h"
 #include "ufo/filters/Variables.h"
@@ -56,16 +56,16 @@ void dataVectorDiff(const ioda::ObsSpace & ospace, ioda::ObsDataVector<float> & 
 void testFunction() {
   const eckit::LocalConfiguration conf(::test::TestEnvironment::config());
 ///  Setup ObsSpace
-  util::DateTime bgn(conf.getString("window_begin"));
-  util::DateTime end(conf.getString("window_end"));
-  const eckit::LocalConfiguration obsconf(conf, "ObsSpace");
-  ioda::ObsSpace ospace(obsconf, oops::mpi::comm(), bgn, end);
+  util::DateTime bgn(conf.getString("window begin"));
+  util::DateTime end(conf.getString("window end"));
+  const eckit::LocalConfiguration obsconf(conf, "obs space");
+  ioda::ObsSpace ospace(obsconf, oops::mpi::world(), bgn, end);
 
 ///  Setup ObsFilterData
   ObsFilterData inputs(ospace);
 
 ///  Get function name and which group to use for H(x)
-  const eckit::LocalConfiguration obsfuncconf(conf, "ObsFunction");
+  const eckit::LocalConfiguration obsfuncconf(conf, "obs function");
   Variable funcname(obsfuncconf);
 
 ///  Setup function
@@ -76,7 +76,7 @@ void testFunction() {
   const oops::Variables geovars = allfuncvars.allFromGroup("GeoVaLs").toOopsVariables();
   std::unique_ptr<GeoVaLs> gval;
   if (geovars.size() > 0) {
-    const eckit::LocalConfiguration gconf(conf, "GeoVaLs");
+    const eckit::LocalConfiguration gconf(conf, "geovals");
     gval.reset(new GeoVaLs(gconf, ospace, geovars));
     inputs.associate(*gval);
   }
@@ -85,13 +85,13 @@ void testFunction() {
   const oops::Variables diagvars = allfuncvars.allFromGroup("ObsDiag").toOopsVariables();
   std::unique_ptr<ObsDiagnostics> diags;
   if (diagvars.size() > 0) {
-    const eckit::LocalConfiguration diagconf(conf, "ObsDiag");
+    const eckit::LocalConfiguration diagconf(conf, "obs diagnostics");
     diags.reset(new ObsDiagnostics(diagconf, ospace, diagvars));
     inputs.associate(*diags);
   }
 
 ///  Get output variable names
-  const oops::Variables outputvars(obsfuncconf);
+  const oops::Variables outputvars(obsfuncconf, "variables");
 ///  Compute function result
   ioda::ObsDataVector<float> vals(ospace, outputvars, "ObsFunction", false);
   obsfunc.compute(inputs, vals);

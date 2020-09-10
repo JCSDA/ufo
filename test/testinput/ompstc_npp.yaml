@@ -1,0 +1,24 @@
+window begin: 2019-10-16T20:30:00Z
+window end: 2019-10-17T03:30:00Z
+
+observations:
+- obs operator:
+    name: AtmVertInterpLay
+    geovals: [mole_fraction_of_ozone_in_air]
+    coefficients: [0.007886131] # convert from ppmv to DU
+    nlevels: [1]
+  obs space:
+    name: OzoneLayer
+    obsdatain:
+      obsfile: Data/ioda/testinput_tier_1/ompstc8_npp_obs_2019101700_m.nc4
+    obsdataout:
+      obsfile: Data/ompstc8_npp_obs_2019101700_m_out.nc4
+    simulated variables: [integrated_layer_ozone_in_air]
+  geovals:
+    filename: Data/ompstc8_npp_geoval_2019101700_m.nc4
+  vector ref: GsiHofX
+  tolerance: 1.0e-04  # in % so that corresponds to 10^-3
+  linear obs operator test:
+    coef TL: 0.1
+    tolerance TL: 1.0e-9
+    tolerance AD: 1.0e-11

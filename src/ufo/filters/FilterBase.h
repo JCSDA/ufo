@@ -8,11 +8,10 @@
 #ifndef UFO_FILTERS_FILTERBASE_H_
 #define UFO_FILTERS_FILTERBASE_H_
 
+#include <memory>
 #include <ostream>
 #include <string>
 #include <vector>
-
-#include "boost/shared_ptr.hpp"
 
 #include "ioda/ObsDataVector.h"
 #include "oops/base/Variables.h"
@@ -43,8 +42,8 @@ namespace ufo {
 class FilterBase : public util::Printable {
  public:
   FilterBase(ioda::ObsSpace &, const eckit::Configuration &,
-             boost::shared_ptr<ioda::ObsDataVector<int> >,
-             boost::shared_ptr<ioda::ObsDataVector<float> >);
+             std::shared_ptr<ioda::ObsDataVector<int> >,
+             std::shared_ptr<ioda::ObsDataVector<float> >);
   ~FilterBase();
 
   void preProcess();
@@ -59,8 +58,8 @@ class FilterBase : public util::Printable {
  protected:
   ioda::ObsSpace & obsdb_;
   const eckit::LocalConfiguration config_;
-  boost::shared_ptr<ioda::ObsDataVector<int>> flags_;
-  boost::shared_ptr<ioda::ObsDataVector<float>> obserr_;
+  std::shared_ptr<ioda::ObsDataVector<int>> flags_;
+  std::shared_ptr<ioda::ObsDataVector<float>> obserr_;
   ufo::Variables allvars_;
   ufo::Variables filtervars_;
   ObsFilterData data_;
@@ -73,6 +72,7 @@ class FilterBase : public util::Printable {
   virtual int qcFlag() const = 0;
   bool prior_;
   bool post_;
+  bool defer_to_post_;
 };
 
 }  // namespace ufo

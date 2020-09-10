@@ -124,6 +124,8 @@ set ( filters_files
       obsfunctions/ObsFunctionVelocity.h
       obsfunctions/SCATRetMW.cc
       obsfunctions/SCATRetMW.h
+      obsfunctions/SymmCldImpactIR.cc
+      obsfunctions/SymmCldImpactIR.h
       variabletransforms/WindComponents.cc
       variabletransforms/WindComponents.h
       variabletransforms/WindVector.cc

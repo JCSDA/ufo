@@ -42,9 +42,9 @@ LinearObsBiasBase * LinearObsBiasFactory::create(const ioda::ObsSpace & os,
                                                  const std::vector<std::string> & preds,
                                                  const std::vector<int> & jobs) {
   oops::Log::trace() << "LinearObsBiasBase::create starting" << std::endl;
-  if (conf.has("ObsBias")) {
+  if (conf.has("obs bias")) {
     std::string id = "";
-    id = conf.getString("ObsBias.name");
+    id = conf.getString("obs bias.name");
     typename std::map<std::string, LinearObsBiasFactory*>::iterator jloc = getMakers().find(id);
     if (jloc == getMakers().end()) {
       oops::Log::error() << id << " does not exist in ufo::LinearObsBiasFactory." << std::endl;

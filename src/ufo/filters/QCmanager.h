@@ -8,9 +8,8 @@
 #ifndef UFO_FILTERS_QCMANAGER_H_
 #define UFO_FILTERS_QCMANAGER_H_
 
+#include <memory>
 #include <ostream>
-
-#include "boost/shared_ptr.hpp"
 
 #include "eckit/config/LocalConfiguration.h"
 #include "ioda/ObsDataVector.h"
@@ -30,8 +29,8 @@ class ObsDiagnostics;
 class QCmanager : public util::Printable {
  public:
   QCmanager(ioda::ObsSpace &, const eckit::Configuration &,
-            boost::shared_ptr<ioda::ObsDataVector<int> >,
-            boost::shared_ptr<ioda::ObsDataVector<float> >);
+            std::shared_ptr<ioda::ObsDataVector<int> >,
+            std::shared_ptr<ioda::ObsDataVector<float> >);
   ~QCmanager();
 
   void preProcess() const {}
@@ -48,8 +47,8 @@ class QCmanager : public util::Printable {
   const eckit::LocalConfiguration config_;
   const oops::Variables nogeovals_;
   const oops::Variables nodiags_;
-  boost::shared_ptr<ioda::ObsDataVector<int>> flags_;
-  boost::shared_ptr<ioda::ObsDataVector<float>> obserr_;
+  std::shared_ptr<ioda::ObsDataVector<int>> flags_;
+  std::shared_ptr<ioda::ObsDataVector<float>> obserr_;
   const oops::Variables & observed_;
 };
 

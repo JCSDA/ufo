@@ -3,24 +3,24 @@
 #
 
 Sondes:
-  window_begin: 2000-01-01T00:00:00Z
-  window_end: 2030-01-01T00:00:00Z
-  ObsSpace:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
     name: Radiosonde
-    ObsDataIn:
+    obsdatain:
       obsfile: Data/met_office_profile_consistency_checks_rh.nc4
       obsgrouping:
-        group_variable: "station_id"
+        group variable: "station_id"
         #Sorting is not performed for this test in order to ensure exact correspondence with OPS
-    simulate:
-      variables: [air_temperature, relative_humidity, dew_point_temperature]
-  ObsDiag:
+    simulated variables: [air_temperature, relative_humidity, dew_point_temperature]
+  obs diagnostics:
   ProfileConsistencyChecks:
     Checks: ["Basic", "RH"]
     maxlev: 10000
     compareWithOPS: true
     flagBasicChecksFail: true
     nErrorsFail: 8
+    PrintStationID: true
     BChecks_Skip: true
     RHCheck_TminInit: 400.0
     RHCheck_SondeRHHiTol: 20.0

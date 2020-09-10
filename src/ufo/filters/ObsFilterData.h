@@ -61,13 +61,20 @@ class ObsFilterData : public util::Printable,
   //! Gets requested data at requested level from ObsFilterData
   void get(const Variable &, const int, std::vector<float> &) const;
   //! Gets requested data from ObsFilterData
+  void get(const Variable &, std::vector<std::string> &) const;
+  //! Gets requested data from ObsFilterData
   void get(const Variable &, std::vector<int> &) const;
+  //! Gets requested data from ObsFilterData
+  void get(const Variable &, std::vector<util::DateTime> &) const;
   //! Gets requested data from ObsFilterData (ObsDataVector has to be allocated)
   void get(const Variable &, ioda::ObsDataVector<float> &) const;
   //! Gets requested data from ObsFilterData (ObsDataVector has to be allocated)
   void get(const Variable &, ioda::ObsDataVector<int> &) const;
   //! Checks if requested data exists in ObsFilterData
   bool has(const Variable &) const;
+
+  //! Determines dtype of the provided variable
+  ioda::ObsDtype dtype(const Variable &) const;
 
   //! Returns number of locations
   size_t nlocs() const;

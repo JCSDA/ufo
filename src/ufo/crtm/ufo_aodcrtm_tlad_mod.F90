@@ -58,7 +58,7 @@ integer(c_int),               intent(in)    :: channels(:)  !List of channels to
 type(fckit_configuration) :: f_confOpts
 integer :: nvars_in
 
- call f_confOper%get_or_die("ObsOptions",f_confOpts)
+ call f_confOper%get_or_die("obs options",f_confOpts)
 
  call crtm_conf_setup(self%conf, f_confOpts, f_confOper)
 
@@ -405,7 +405,8 @@ INTEGER :: jaero
        ENDDO
     ENDDO
 
-    FORALL (jlevel=1:var_p%nval,jprofile=1:self%n_profiles) var_p%vals(jlevel,jprofile)=var_p%vals(jlevel,jprofile)*self%scaling_factor(jlevel,jprofile)
+    FORALL (jlevel=1:var_p%nval,jprofile=1:self%n_profiles) &
+        var_p%vals(jlevel,jprofile)=var_p%vals(jlevel,jprofile)*self%scaling_factor(jlevel,jprofile)
 
  ENDDO
 

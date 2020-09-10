@@ -18,8 +18,7 @@
 
 #include "oops/util/Printable.h"
 
-#include "ufo/obsbias/LinearObsBiasBase.h"
-#include "ufo/obsbias/predictors/PredictorBase.h"
+#include "ufo/predictors/PredictorBase.h"
 
 namespace ioda {
   class ObsSpace;
@@ -39,13 +38,13 @@ namespace ufo {
 
 class ObsBiasIncrement : public util::Printable {
  public:
-/// Constructor, destructor
+// Constructor, destructor
   ObsBiasIncrement(const ioda::ObsSpace &, const eckit::Configuration &);
   ObsBiasIncrement(const ObsBiasIncrement &, const bool = true);
   ObsBiasIncrement(const ObsBiasIncrement &, const eckit::Configuration &);
   ~ObsBiasIncrement() {}
 
-/// Linear algebra operators
+// Linear algebra operators
   void diff(const ObsBias &, const ObsBias &);
   void zero();
   ObsBiasIncrement & operator=(const ObsBiasIncrement &);
@@ -55,30 +54,30 @@ class ObsBiasIncrement : public util::Printable {
   void axpy(const double, const ObsBiasIncrement &);
   double dot_product_with(const ObsBiasIncrement &) const;
 
-/// I/O and diagnostics
+// I/O and diagnostics
   void read(const eckit::Configuration &) {}
   void write(const eckit::Configuration &) const {}
   double norm() const;
 
-  double & operator[](const unsigned int ii) {return (*biasbase_)[ii];}
-  const double & operator[](const unsigned int ii) const {return (*biasbase_)[ii];}
+  double & operator[](const unsigned int ii) {return biascoeffsinc_[ii];}
+  const double & operator[](const unsigned int ii) const {return biascoeffsinc_[ii];}
 
-/// Linear obs bias model
+// Linear obs bias model
   void computeObsBiasTL(const GeoVaLs &,
-                        const Eigen::MatrixXd &,
+                        const std::vector<ioda::ObsVector> &,
                         ioda::ObsVector &) const;
 
   void computeObsBiasAD(GeoVaLs &,
-                        const Eigen::MatrixXd &,
+                        const std::vector<ioda::ObsVector> &,
                         const ioda::ObsVector &);
 
-/// Serialize and deserialize
-  std::size_t serialSize() const {return 0;}
+// Serialize and deserialize
+  std::size_t serialSize() const {return biascoeffsinc_.size();}
   void serialize(std::vector<double> &) const {}
   void deserialize(const std::vector<double> &, std::size_t &) {}
 
-/// Operator
-  operator bool() const {return biasbase_.get();}
+// Operator
+  operator bool() const {return biascoeffsinc_.size() > 0;}
 
  private:
   void print(std::ostream &) const;
@@ -86,7 +85,7 @@ class ObsBiasIncrement : public util::Printable {
   const ioda::ObsSpace & odb_;
   const eckit::LocalConfiguration conf_;
 
-  std::unique_ptr<LinearObsBiasBase> biasbase_;
+  std::vector<double> biascoeffsinc_;
   std::vector<std::shared_ptr<PredictorBase>> predbases_;
   std::vector<std::string> prednames_;
   std::vector<int> jobs_;

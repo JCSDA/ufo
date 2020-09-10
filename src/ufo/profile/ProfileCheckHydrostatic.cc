@@ -6,6 +6,7 @@
  */
 
 #include "ufo/profile/ProfileCheckHydrostatic.h"
+#include "ufo/profile/VariableNames.h"
 
 namespace ufo {
 
@@ -13,10 +14,9 @@ namespace ufo {
 
   ProfileCheckHydrostatic::ProfileCheckHydrostatic(const ProfileConsistencyCheckParameters &options,
                                                    const ProfileIndices &profileIndices,
-                                                   const ProfileData &profileData,
-                                                   ProfileFlags &profileFlags,
+                                                   ProfileDataHandler &profileDataHandler,
                                                    ProfileCheckValidator &profileCheckValidator)
-    : ProfileCheckBase(options, profileIndices, profileData, profileFlags, profileCheckValidator),
+    : ProfileCheckBase(options, profileIndices, profileDataHandler, profileCheckValidator),
     ProfileStandardLevels(options)
   {}
 
@@ -25,27 +25,48 @@ namespace ufo {
     oops::Log::debug() << " Hydrostatic check" << std::endl;
 
     const int numLevelsToCheck = profileIndices_.getNumLevelsToCheck();
-    const std::vector <float> &pressures = profileData_.getPressures();
-    const std::vector <float> &tObs = profileData_.gettObs();
-    const std::vector <float> &tBkg = profileData_.gettBkg();
-    const std::vector <float> &zObs = profileData_.getzObs();
-    const std::vector <float> &zBkg = profileData_.getzBkg();
-    std::vector <int> &tFlags = profileFlags_.gettFlags();
-    std::vector <int> &zFlags = profileFlags_.getzFlags();
-    const std::vector <float> &tObsCorrection = profileFlags_.gettObsCorrection();
+
+    const std::vector <float> &pressures =
+       profileDataHandler_.get<float>(ufo::VariableNames::obs_air_pressure);
+    const std::vector <float> &tObs =
+       profileDataHandler_.get<float>(ufo::VariableNames::obs_air_temperature);
+    const std::vector <float> &tBkg =
+       profileDataHandler_.get<float>(ufo::VariableNames::hofx_air_temperature);
+    const std::vector <float> &zObs =
+       profileDataHandler_.get<float>(ufo::VariableNames::obs_geopotential_height);
+    const std::vector <float> &zBkg =
+       profileDataHandler_.get<float>(ufo::VariableNames::hofx_geopotential_height);
+    std::vector <int> &tFlags =
+       profileDataHandler_.get<int>(ufo::VariableNames::qcflags_air_temperature);
+    std::vector <int> &zFlags =
+       profileDataHandler_.get<int>(ufo::VariableNames::qcflags_geopotential_height);
+    std::vector <int> &NumAnyErrors =
+       profileDataHandler_.get<int>(ufo::VariableNames::counter_NumAnyErrors);
+    std::vector <int> &Num925Miss =
+       profileDataHandler_.get<int>(ufo::VariableNames::counter_Num925Miss);
+    std::vector <int> &Num100Miss =
+       profileDataHandler_.get<int>(ufo::VariableNames::counter_Num100Miss);
+    std::vector <int> &NumStdMiss =
+       profileDataHandler_.get<int>(ufo::VariableNames::counter_NumStdMiss);
+    std::vector <int> &NumHydErrObs =
+       profileDataHandler_.get<int>(ufo::VariableNames::counter_NumHydErrObs);
+    std::vector <int> &NumIntHydErrors =
+       profileDataHandler_.get<int>(ufo::VariableNames::counter_NumIntHydErrors);
+    const std::vector <float> &tObsCorrection =
+       profileDataHandler_.get<float>(ufo::VariableNames::obscorrection_air_temperature);
     std::vector <float> &zObsCorrection =
-      profileFlags_.getzObsCorrection();  // Potentially modified here
+       profileDataHandler_.get<float>(ufo::VariableNames::obscorrection_geopotential_height);
 
     if (oops::anyVectorEmpty(pressures, tObs, tBkg, zObs, zBkg, tFlags, zFlags,
                              tObsCorrection, zObsCorrection)) {
-      oops::Log::warning() << "At least one vector is empty. "
-                           << "Check will not be performed." << std::endl;
+      oops::Log::debug() << "At least one vector is empty. "
+                         << "Check will not be performed." << std::endl;
       return;
     }
     if (!oops::allVectorsSameSize(pressures, tObs, tBkg, zObs, zBkg, tFlags, zFlags,
                                   tObsCorrection, zObsCorrection)) {
-      oops::Log::warning() << "Not all vectors have the same size. "
-                           << "Check will not be performed." << std::endl;
+      oops::Log::debug() << "Not all vectors have the same size. "
+                         << "Check will not be performed." << std::endl;
       return;
     }
 
@@ -74,16 +95,16 @@ namespace ufo {
             options_.HCheck_SurfacePThresh.value()) continue;
       } else if (IndStd_[jlevstd] == Ind925_ + 1 &&
                  IndStd_[jlevstd - 1] == Ind925_ - 1) {  // Missed 925 hPa
-        profileFlags_.incrementCounterCumul("Num925Miss");
+        Num925Miss[0]++;
       } else if (IndStd_[jlevstd] - IndStd_[jlevstd - 1] != 1) {
         if (IndStd_[jlevstd - 1] < Ind925_ &&
             IndStd_[jlevstd] > Ind925_) {  // Allow for bigger gaps than two standard levels
-          profileFlags_.incrementCounterCumul("Num925Miss");
+          Num925Miss[0]++;
         } else if (IndStd_[jlevstd - 1] < Ind100_ &&
                    IndStd_[jlevstd] > Ind100_) {  // Missed 100 hPa
-          profileFlags_.incrementCounterCumul("Num100Miss");
-        } else {
-          profileFlags_.incrementCounterCumul("NumStdMiss");  // Missed any other standard level
+          Num100Miss[0]++;
+        } else {  // Missed any other standard level
+          NumStdMiss[0]++;
         }
 
         oops::Log::debug() << " Gap in standard levels" << std::endl;
@@ -122,7 +143,7 @@ namespace ufo {
       E_[jlevstd] = zObs[jlev] - zObs[jlevB] - D_[jlevstd];
       if (std::fabs(E_[jlevstd]) > ETol_[jlevstd]) {
         NumErrors++;
-        profileFlags_.incrementCounter("NumAnyErrors");
+        NumAnyErrors[0]++;
         HydError_[jlevstd] = 3;  // T or Z error
       } else {
         HydError_[jlevstd] = 0;  // Probably OK
@@ -137,7 +158,7 @@ namespace ufo {
 
     // Hydrostatic decision making algorithm
     if (NumErrors > 0) {
-      profileFlags_.incrementCounterCumul("NumHydErrObs");
+      NumHydErrObs[0]++;
 
       for (int jlevstd = 2; jlevstd < NumStd_; ++jlevstd) {
         // Check for duplicate std levels
@@ -268,7 +289,7 @@ namespace ufo {
               tFlags[SigB] &= ~ufo::FlagsProfile::InterpolationFlag;
               tFlags[SigA] &= ~ufo::FlagsProfile::InterpolationFlag;
 
-              profileFlags_.incrementCounterCumul("NumIntHydErrors");
+              NumIntHydErrors[0]++;
               oops::Log::debug() << " -> Hyd: remove interpolation flags on levels "
                                  << SigB << " " << SigA << std::endl;
             }
@@ -341,19 +362,11 @@ namespace ufo {
 
   void ProfileCheckHydrostatic::fillValidator()
   {
-    profileCheckValidator_.settFlags(profileFlags_.gettFlags());
-    profileCheckValidator_.setzFlags(profileFlags_.getzFlags());
-    profileCheckValidator_.setNumAnyErrors(profileFlags_.getCounter("NumAnyErrors"));
-    profileCheckValidator_.setNum925Miss(profileFlags_.getCounter("Num925Miss"));
-    profileCheckValidator_.setNum100Miss(profileFlags_.getCounter("Num100Miss"));
-    profileCheckValidator_.setNumStdMiss(profileFlags_.getCounter("NumStdMiss"));
-    profileCheckValidator_.setNumHydErrObs(profileFlags_.getCounter("NumHydErrObs"));
-    profileCheckValidator_.setNumIntHydErrors(profileFlags_.getCounter("NumIntHydErrors"));
-    profileCheckValidator_.setDC(DC_);
-    profileCheckValidator_.setETol(ETol_);
-    profileCheckValidator_.setD(D_);
-    profileCheckValidator_.setE(E_);
-    profileCheckValidator_.setHydError(HydError_);
+    profileDataHandler_.set(ufo::VariableNames::DC, std::move(DC_));
+    profileDataHandler_.set(ufo::VariableNames::ETol, std::move(ETol_));
+    profileDataHandler_.set(ufo::VariableNames::D, std::move(D_));
+    profileDataHandler_.set(ufo::VariableNames::E, std::move(E_));
+    profileDataHandler_.set(ufo::VariableNames::HydError, std::move(HydError_));
   }
 }  // namespace ufo
 

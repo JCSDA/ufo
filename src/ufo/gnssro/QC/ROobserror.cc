@@ -16,7 +16,6 @@
 #include "oops/interface/ObsFilter.h"
 #include "oops/util/Logger.h"
 #include "ufo/GeoVaLs.h"
-#include "ufo/UfoTrait.h"
 
 namespace ufo {
 
@@ -24,8 +23,8 @@ namespace ufo {
 
 ROobserror::ROobserror(ioda::ObsSpace & obsdb,
                        const eckit::Configuration & config,
-                       boost::shared_ptr<ioda::ObsDataVector<int> > qc,
-                       boost::shared_ptr<ioda::ObsDataVector<float> > oberr)
+                       std::shared_ptr<ioda::ObsDataVector<int> > qc,
+                       std::shared_ptr<ioda::ObsDataVector<float> > oberr)
   : FilterBase(obsdb, config, qc, oberr)
 {
   oops::Log::trace() << "ROobserror contructor starting" << std::endl;

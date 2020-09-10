@@ -6,6 +6,7 @@
  */
 
 #include "ufo/profile/ProfileCheckUnstableLayer.h"
+#include "ufo/profile/VariableNames.h"
 
 namespace ufo {
 
@@ -15,10 +16,9 @@ namespace ufo {
   ProfileCheckUnstableLayer::ProfileCheckUnstableLayer
   (const ProfileConsistencyCheckParameters &options,
    const ProfileIndices &profileIndices,
-   const ProfileData &profileData,
-   ProfileFlags &profileFlags,
+   ProfileDataHandler &profileDataHandler,
    ProfileCheckValidator &profileCheckValidator)
-    : ProfileCheckBase(options, profileIndices, profileData, profileFlags, profileCheckValidator)
+    : ProfileCheckBase(options, profileIndices, profileDataHandler, profileCheckValidator)
   {}
 
   void ProfileCheckUnstableLayer::runCheck()
@@ -26,20 +26,30 @@ namespace ufo {
     oops::Log::debug() << " Unstable layer/superadiabat check" << std::endl;
 
     const int numLevelsToCheck = profileIndices_.getNumLevelsToCheck();
-    const std::vector <float> &pressures = profileData_.getPressures();
-    const std::vector <float> &tObs = profileData_.gettObs();
-    const std::vector <float> &tBkg = profileData_.gettBkg();
-    std::vector <int> &tFlags = profileFlags_.gettFlags();
-    const std::vector <float> &tObsCorrection = profileFlags_.gettObsCorrection();
+
+    const std::vector <float> &pressures =
+       profileDataHandler_.get<float>(ufo::VariableNames::obs_air_pressure);
+    const std::vector <float> &tObs =
+       profileDataHandler_.get<float>(ufo::VariableNames::obs_air_temperature);
+    const std::vector <float> &tBkg =
+       profileDataHandler_.get<float>(ufo::VariableNames::hofx_air_temperature);
+    std::vector <int> &tFlags =
+       profileDataHandler_.get<int>(ufo::VariableNames::qcflags_air_temperature);
+    std::vector <int> &NumAnyErrors =
+       profileDataHandler_.get<int>(ufo::VariableNames::counter_NumAnyErrors);
+    std::vector <int> &NumSuperadiabat =
+       profileDataHandler_.get<int>(ufo::VariableNames::counter_NumSuperadiabat);
+    const std::vector <float> &tObsCorrection =
+       profileDataHandler_.get<float>(ufo::VariableNames::obscorrection_air_temperature);
 
     if (oops::anyVectorEmpty(pressures, tObs, tBkg, tFlags, tObsCorrection)) {
-      oops::Log::warning() << "At least one vector is empty. "
-                           << "Check will not be performed." << std::endl;
+      oops::Log::debug() << "At least one vector is empty. "
+                         << "Check will not be performed." << std::endl;
       return;
     }
     if (!oops::allVectorsSameSize(pressures, tObs, tBkg, tFlags, tObsCorrection)) {
-      oops::Log::warning() << "Not all vectors have the same size. "
-                           << "Check will not be performed." << std::endl;
+      oops::Log::debug() << "Not all vectors have the same size. "
+                         << "Check will not be performed." << std::endl;
       return;
     }
 
@@ -61,8 +71,8 @@ namespace ufo {
             std::pow(pressures[jlev] / pressures[jlevprev], ufo::Constants::rd_over_cp);
           if (tObsFinal[jlev] - Tadiabat <= options_.ULCheck_SuperadiabatTol.value() &&
               pressures[jlevprev] <= PBottom_ - options_.ULCheck_PBThresh.value()) {
-            profileFlags_.incrementCounter("NumAnyErrors");
-            profileFlags_.incrementCounterCumul("NumSuperadiabat");
+            NumAnyErrors[0]++;
+            NumSuperadiabat[0]++;
             tFlags[jlevprev] |= ufo::FlagsProfile::SuperadiabatFlag;
             tFlags[jlev]     |= ufo::FlagsProfile::SuperadiabatFlag;
 
@@ -89,9 +99,7 @@ namespace ufo {
 
   void ProfileCheckUnstableLayer::fillValidator()
   {
-    profileCheckValidator_.settFlags(profileFlags_.gettFlags());
-    profileCheckValidator_.setNumAnyErrors(profileFlags_.getCounter("NumAnyErrors"));
-    profileCheckValidator_.setNumSuperadiabat(profileFlags_.getCounter("NumSuperadiabat"));
-    profileCheckValidator_.setPBottom(PBottom_);
+    std::vector <float> PBottom(profileIndices_.getNumLevelsToCheck(), PBottom_);
+    profileDataHandler_.set(ufo::VariableNames::PBottom, std::move(PBottom));
   }
 }  // namespace ufo

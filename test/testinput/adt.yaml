@@ -1,22 +1,19 @@
-window_begin: 2018-04-14T21:00:00Z
-window_end: 2018-04-15T03:00:00Z
+window begin: 2018-04-14T21:00:00Z
+window end: 2018-04-15T03:00:00Z
 
-LinearObsOpTest:
-  coefTL: 0.1
-  toleranceTL: 1.0e-10
-  toleranceAD: 1.0e-12
-
-Observations:
-  ObsTypes:
-  - ObsSpace:
-      name: ADT
-      ObsDataIn:
-        obsfile: Data/ioda/testinput_tier_1/Jason-2-2018-04-15.nc
-      simulate:
-        variables: [obs_absolute_dynamic_topography]
-    ObsOperator:
-      name: ADT
-    GeoVaLs:
-      filename: Data/Jason-2-2018-04-15_geovals.nc
-    rmsequiv: 0.20601693262068568  # for testing with bogus geoval data
-    tolerance: 1.0e-10
+observations:
+- obs space:
+    name: ADT
+    obsdatain:
+      obsfile: Data/ioda/testinput_tier_1/Jason-2-2018-04-15.nc
+    simulated variables: [obs_absolute_dynamic_topography]
+  obs operator:
+    name: ADT
+  linear obs operator test:
+    coef TL: 0.1
+    tolerance TL: 1.0e-10
+    tolerance AD: 1.0e-12
+  geovals:
+    filename: Data/Jason-2-2018-04-15_geovals.nc
+  rms ref: 0.20601693262068568  # for testing with bogus geoval data
+  tolerance: 1.0e-10

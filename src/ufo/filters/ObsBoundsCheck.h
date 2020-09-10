@@ -8,11 +8,10 @@
 #ifndef UFO_FILTERS_OBSBOUNDSCHECK_H_
 #define UFO_FILTERS_OBSBOUNDSCHECK_H_
 
+#include <memory>
 #include <ostream>
 #include <string>
 #include <vector>
-
-#include "boost/shared_ptr.hpp"
 
 #include "oops/util/ObjectCounter.h"
 #include "ufo/filters/FilterBase.h"
@@ -39,8 +38,8 @@ class ObsBoundsCheck : public FilterBase,
   static const std::string classname() {return "ufo::ObsBoundsCheck";}
 
   ObsBoundsCheck(ioda::ObsSpace &, const eckit::Configuration &,
-                 boost::shared_ptr<ioda::ObsDataVector<int> >,
-                 boost::shared_ptr<ioda::ObsDataVector<float> >);
+                 std::shared_ptr<ioda::ObsDataVector<int> >,
+                 std::shared_ptr<ioda::ObsDataVector<float> >);
   ~ObsBoundsCheck();
 
  private:

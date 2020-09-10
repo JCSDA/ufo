@@ -13,8 +13,6 @@
 #include <string>
 #include <vector>
 
-#include "boost/shared_ptr.hpp"
-
 #include "oops/util/ObjectCounter.h"
 #include "oops/util/Printable.h"
 
@@ -87,8 +85,8 @@ namespace ufo {
       static const std::string classname() {return "ufo::ProfileConsistencyChecks";}
 
       ProfileConsistencyChecks(ioda::ObsSpace &, const eckit::Configuration &,
-                               boost::shared_ptr<ioda::ObsDataVector<int> >,
-                               boost::shared_ptr<ioda::ObsDataVector<float> >);
+                               std::shared_ptr<ioda::ObsDataVector<int> >,
+                               std::shared_ptr<ioda::ObsDataVector<float> >);
       ~ProfileConsistencyChecks();
 
       /// Return the number of mismatches between values produced by the checking routines

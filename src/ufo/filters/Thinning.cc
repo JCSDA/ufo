@@ -23,8 +23,8 @@ namespace ufo {
 // -----------------------------------------------------------------------------
 
 Thinning::Thinning(ioda::ObsSpace & obsdb, const eckit::Configuration & config,
-                   boost::shared_ptr<ioda::ObsDataVector<int> > flags,
-                   boost::shared_ptr<ioda::ObsDataVector<float> > obserr)
+                   std::shared_ptr<ioda::ObsDataVector<int> > flags,
+                   std::shared_ptr<ioda::ObsDataVector<float> > obserr)
   : FilterBase(obsdb, config, flags, obserr)
 {
   oops::Log::debug() << "Thinning: config = " << config_ << std::endl;
@@ -49,7 +49,7 @@ void Thinning::applyFilter(const std::vector<bool> & apply,
   const float thinning = config_.getFloat("amount");
 
   // create random numbers for each observation based on some seed
-  unsigned int random_seed = config_.getInt("random_seed", std::time(0));
+  unsigned int random_seed = config_.getInt("random seed", std::time(0));
   util::UniformDistribution<float> rand(gnlocs, 0.0, 1.0, random_seed);
 
   for (size_t jv = 0; jv < filtervars.nvars(); ++jv) {

@@ -53,7 +53,7 @@ integer :: nvars_in
 character(len=max_string) :: err_msg
 type(fckit_configuration) :: f_confOpts
 
- call f_confOper%get_or_die("ObsOptions",f_confOpts)
+ call f_confOper%get_or_die("obs options",f_confOpts)
 
  call crtm_conf_setup(self%conf, f_confOpts, f_confOper)
  if ( ufo_vars_getindex(self%conf%Absorbers, var_mixr) /= 1 ) then

@@ -13,18 +13,16 @@
 #include <string>
 #include <vector>
 
-#include <boost/make_shared.hpp>
-
 #include "eckit/config/LocalConfiguration.h"
 #include "eckit/testing/Test.h"
 #include "ioda/ObsSpace.h"
 #include "ioda/ObsVector.h"
-#include "oops/../test/TestEnvironment.h"
-#include "oops/parallel/mpi/mpi.h"
+#include "oops/mpi/mpi.h"
 #include "oops/runs/Test.h"
 #include "oops/util/Expect.h"
 #include "oops/util/parameters/Parameters.h"
 #include "oops/util/parameters/RequiredParameter.h"
+#include "test/TestEnvironment.h"
 #include "ufo/filters/Variable.h"
 #include "ufo/utils/ParallelObsDistribution.h"
 #include "ufo/utils/parameters/ParameterTraitsVariable.h"
@@ -63,11 +61,11 @@ template <typename T>
 void testVariable(const std::string &section) {
   const eckit::Configuration &topConf = ::test::TestEnvironment::config();
 
-  util::DateTime bgn(topConf.getString("window_begin"));
-  util::DateTime end(topConf.getString("window_end"));
+  util::DateTime bgn(topConf.getString("window begin"));
+  util::DateTime end(topConf.getString("window end"));
 
-  const eckit::LocalConfiguration obsSpaceConf(topConf, "ObsSpace");
-  ioda::ObsSpace obsSpace(obsSpaceConf, oops::mpi::comm(), bgn, end);
+  const eckit::LocalConfiguration obsSpaceConf(topConf, "obs space");
+  ioda::ObsSpace obsSpace(obsSpaceConf, oops::mpi::world(), bgn, end);
 
   TestParameters<T> parameters;
   parameters.deserialize(topConf.getSubConfiguration(section));
@@ -104,11 +102,11 @@ CASE("ufo/ParallelObsDistribution/getGlobalDateTimeVariableValues") {
 CASE("ufo/ParallelObsDistribution/members") {
   const eckit::Configuration &topConf = ::test::TestEnvironment::config();
 
-  util::DateTime bgn(topConf.getString("window_begin"));
-  util::DateTime end(topConf.getString("window_end"));
+  util::DateTime bgn(topConf.getString("window begin"));
+  util::DateTime end(topConf.getString("window end"));
 
-  const eckit::LocalConfiguration obsSpaceConf(topConf, "ObsSpace");
-  ioda::ObsSpace obsSpace(obsSpaceConf, oops::mpi::comm(), bgn, end);
+  const eckit::LocalConfiguration obsSpaceConf(topConf, "obs space");
+  ioda::ObsSpace obsSpace(obsSpaceConf, oops::mpi::world(), bgn, end);
 
   ParallelObsDistribution obsDistribution(obsSpace);
   const size_t gnlocs = obsSpace.gnlocs();

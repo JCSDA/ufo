@@ -7,6 +7,7 @@ use iso_c_binding
 
 implicit none
 real(kind_real), parameter, public :: grav    = 9.80665e+0_kind_real
+real(kind_real), parameter, public :: constoz = 604229.0_kind_real
 real(kind_real), parameter, public :: t0c     = 2.7315e+2_kind_real ! temperature at zero celsius     (K)
 real(kind_real), parameter, public :: rd     = 2.8705e2_kind_real
 real(kind_real), parameter, public :: rv     = 4.6150e2_kind_real

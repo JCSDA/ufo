@@ -24,7 +24,6 @@
 #include "ufo/filters/processWhere.h"
 #include "ufo/filters/QCflags.h"
 #include "ufo/GeoVaLs.h"
-#include "ufo/UfoTrait.h"
 
 namespace ufo {
 
@@ -32,8 +31,8 @@ namespace ufo {
 
 BackgroundCheckRONBAM::BackgroundCheckRONBAM(ioda::ObsSpace & obsdb,
                                            const eckit::Configuration & config,
-                                           boost::shared_ptr<ioda::ObsDataVector<int> > flags,
-                                           boost::shared_ptr<ioda::ObsDataVector<float> > obserr)
+                                           std::shared_ptr<ioda::ObsDataVector<int> > flags,
+                                           std::shared_ptr<ioda::ObsDataVector<float> > obserr)
   : FilterBase(obsdb, config, flags, obserr)
 {
   oops::Log::trace() << "BackgroundCheckRONBAM contructor: "

@@ -15,9 +15,6 @@
 #include <vector>
 
 #include "eckit/config/Configuration.h"
-#include "eckit/geometry/Point2.h"
-#include "eckit/geometry/Point3.h"
-#include "eckit/geometry/Sphere.h"
 #include "ioda/ObsDataVector.h"
 #include "ioda/ObsSpace.h"
 #include "oops/base/Variables.h"
@@ -26,173 +23,37 @@
 #include "oops/util/Logger.h"
 #include "oops/util/sqr.h"
 #include "ufo/filters/TrackCheckParameters.h"
+#include "ufo/filters/TrackCheckUtils.h"
 #include "ufo/utils/Constants.h"
 #include "ufo/utils/PiecewiseLinearInterpolation.h"
 #include "ufo/utils/RecursiveSplitter.h"
 
-namespace util {
-inline Duration abs(const Duration &duration) {
-  return duration.toSeconds() >= 0 ? duration : -duration;
-}
-}  // namespace util
-
 namespace ufo {
 
-namespace {
+TrackCheck::TrackObservation::TrackObservation(float latitude, float longitude,
+                                               const util::DateTime &time, float pressure)
+  : obsLocationTime_(latitude, longitude, time),  pressure_(pressure),
+    rejectedInPreviousSweep_(false), rejectedBeforePreviousSweep_(false),
+    numNeighborsVisitedInPreviousSweep_{NO_PREVIOUS_SWEEP, NO_PREVIOUS_SWEEP}
+{}
 
-const int worldDim = 3;
-typedef std::array<float, worldDim> Point;
-
-float distance2(const Point &a, const Point &b) {
-  float sum = 0;
-  for (size_t i = 0; i < a.size(); ++i)
-    sum += util::sqr(a[i] - b[i]);
-  return sum;
-}
-
-float distance(const Point &a, const Point &b) {
-  return std::sqrt(distance2(a, b));
-}
-
-Point pointFromLatLon(float latitude, float longitude) {
-  // This local copy is needed because convertSphericalToCartesian takes the first parameter by
-  // reference, but Constants::mean_earth_rad has no out-of-line definition.
-  const double meanEarthRadius = Constants::mean_earth_rad;
-  eckit::geometry::Point3 eckitPoint;
-  eckit::geometry::Sphere::convertSphericalToCartesian(
-        meanEarthRadius, eckit::geometry::Point2(longitude, latitude), eckitPoint);
-  Point Point;
-  std::copy(eckitPoint.begin(), eckitPoint.end(), Point.begin());
-  return Point;
-}
-
-/// Return the vector of elements of \p categories with indices \p validObsIds.
-template <typename T>
-std::vector<T> getValidObservationCategories(const std::vector<T> &categories,
-                                             const std::vector<size_t> validObsIds)  {
-  std::vector<T> validObsCategories(validObsIds.size());
-  for (size_t validObsIndex = 0; validObsIndex < validObsIds.size(); ++validObsIndex) {
-    validObsCategories[validObsIndex] = categories[validObsIds[validObsIndex]];
-  }
-  return validObsCategories;
-}
-
-enum Direction { FORWARD, BACKWARD, NUM_DIRECTIONS };
-
-enum class CheckResult : char {
-  FAILED = false,
-  PASSED = true,
-  SKIPPED
-};
-
-/// \brief Results of cross-checking an observation with another (a "buddy").
-struct CheckResults {
-  CheckResults() :
-    isBuddyDistinct(false),
-    speedCheckResult(CheckResult::SKIPPED),
-    climbRateCheckResult(CheckResult::SKIPPED) {}
-
-  bool isBuddyDistinct;
-  CheckResult speedCheckResult;
-  CheckResult climbRateCheckResult;
-};
-
-static const int NO_PREVIOUS_SWEEP = -1;
-
-}  // namespace
-
-
-/// \brief Locations of all observations processed by the track checking filter.
-struct TrackCheck::ObsData {
-  std::vector<float> latitudes;
-  std::vector<float> longitudes;
-  std::vector<util::DateTime> datetimes;
-  std::vector<float> pressures;
-};
-
-
-/// \brief Attributes of an observation belonging to a track.
-class TrackCheck::TrackObservation {
- public:
-  TrackObservation(float latitude, float longitude, const util::DateTime &time, float pressure)
-    : location_(pointFromLatLon(latitude, longitude)), time_(time), pressure_(pressure),
-      rejectedInPreviousSweep_(false), rejectedBeforePreviousSweep_(false),
-      numNeighborsVisitedInPreviousSweep_{NO_PREVIOUS_SWEEP, NO_PREVIOUS_SWEEP},
-      numFailedChecks_(0), numChecks_(0)
-  {}
-
-  const Point &location() const { return location_; }
-  const util::DateTime &time() const { return time_; }
-  float pressure() const { return pressure_; }
-
-  bool rejectedInPreviousSweep() const { return rejectedInPreviousSweep_; }
-  bool rejectedBeforePreviousSweep() const { return rejectedBeforePreviousSweep_; }
-  bool rejected() const { return rejectedInPreviousSweep_ || rejectedBeforePreviousSweep_; }
-
-  float failedChecksFraction() const {
-    return numChecks_ != 0 ? static_cast<float>(numFailedChecks_) / numChecks_ : 0.0f;
-  }
-
-  int numNeighborsVisitedInPreviousSweep(Direction dir) const {
-    return numNeighborsVisitedInPreviousSweep_[dir];
-  }
-
-  void setNumNeighborsVisitedInPreviousSweep(Direction dir, int num) {
-    numNeighborsVisitedInPreviousSweep_[dir] = num;
-  }
-
-  /// Estimates the instantaneous speed and climb rate by comparing this observation against
-  /// \p buddyObs. Checks if these estimates are in the accepted ranges and if the two observations
-  /// are far enough from each other to be considered "distinct".
-  ///
-  /// \param buddyObs Observation to compare against.
-  /// \param options Track check options.
-  /// \param maxValidSpeedAtPressure
-  ///   Function mapping air pressure (in Pa) to the maximum realistic speed (in m/s).
-  /// \param referencePressure
-  ///   Pressure at which the maximum speed should be evaluated.
-  ///
-  /// \returns An object enapsulating the check results.
-  CheckResults checkAgainstBuddy(const TrackObservation &buddyObs,
-                                 const TrackCheckParameters &options,
-                                 const PiecewiseLinearInterpolation &maxValidSpeedAtPressure,
-                                 float referencePressure) const;
-
-  void registerCheckResults(const CheckResults &result);
-  void unregisterCheckResults(const CheckResults &result);
-
-  void registerCheckResult(const CheckResult &result);
-  void unregisterCheckResult(const CheckResult &result);
-
-  void registerSweepOutcome(bool rejectedInSweep);
-
- private:
-  Point location_;
-  util::DateTime time_;
-  float pressure_;
-  bool rejectedInPreviousSweep_;
-  bool rejectedBeforePreviousSweep_;
-  int numNeighborsVisitedInPreviousSweep_[NUM_DIRECTIONS];
-  int numFailedChecks_;
-  int numChecks_;
-};
-
-CheckResults TrackCheck::TrackObservation::checkAgainstBuddy(
+TrackCheck::CheckResults TrackCheck::TrackObservation::checkAgainstBuddy(
     const TrackObservation &buddyObs,
     const TrackCheckParameters &options,
     const PiecewiseLinearInterpolation &maxValidSpeedAtPressure,
     float referencePressure) const {
   CheckResults results;
-
-  util::Duration temporalDistance = abs(buddyObs.time_ - time_);
-  const float spatialDistance = distance(location_, buddyObs.location_);
+  util::Duration temporalDistance = abs(buddyObs.obsLocationTime_.time() -
+                                        this->obsLocationTime_.time());
+  const float spatialDistance = TrackCheckUtils::distance(this->obsLocationTime_.location(),
+                                                          buddyObs.obsLocationTime_.location());
 
   // Estimate the speed and check if it is within the allowed range
   const float conservativeSpeedEstimate =
       (spatialDistance - options.spatialResolution) /
       (temporalDistance + options.temporalResolution).toSeconds();
   const float maxSpeed = maxValidSpeedAtPressure(referencePressure);
-  results.speedCheckResult = CheckResult(conservativeSpeedEstimate <= maxSpeed);
+  results.speedCheckResult = TrackCheckUtils::CheckResult(conservativeSpeedEstimate <= maxSpeed);
 
   // Estimate the climb rate and check if it is within the allowed range
   if (options.maxClimbRate.value() != boost::none) {
@@ -200,7 +61,8 @@ CheckResults TrackCheck::TrackObservation::checkAgainstBuddy(
     const float conservativeClimbRateEstimate =
         pressureDiff / (temporalDistance + options.temporalResolution).toSeconds();
     results.climbRateCheckResult =
-        CheckResult(conservativeClimbRateEstimate <= *options.maxClimbRate.value());
+        TrackCheckUtils::CheckResult
+        (conservativeClimbRateEstimate <= *options.maxClimbRate.value());
   }
 
   const int resolutionMultiplier = options.distinctBuddyResolutionMultiplier;
@@ -212,33 +74,13 @@ CheckResults TrackCheck::TrackObservation::checkAgainstBuddy(
 }
 
 void TrackCheck::TrackObservation::registerCheckResults(const CheckResults &results) {
-  registerCheckResult(results.speedCheckResult);
-  registerCheckResult(results.climbRateCheckResult);
-  assert(numChecks_ >= 0);
-  assert(numFailedChecks_ >= 0);
-  assert(numFailedChecks_ <= numChecks_);
+  checkCounter_.registerCheckResult(results.speedCheckResult);
+  checkCounter_.registerCheckResult(results.climbRateCheckResult);
 }
 
 void TrackCheck::TrackObservation::unregisterCheckResults(const CheckResults &results) {
-  unregisterCheckResult(results.speedCheckResult);
-  unregisterCheckResult(results.climbRateCheckResult);
-  assert(numChecks_ >= 0);
-  assert(numFailedChecks_ >= 0);
-  assert(numFailedChecks_ <= numChecks_);
-}
-
-void TrackCheck::TrackObservation::registerCheckResult(const CheckResult &result) {
-  if (result != CheckResult::SKIPPED)
-    ++numChecks_;
-  if (result == CheckResult::FAILED)
-    ++numFailedChecks_;
-}
-
-void TrackCheck::TrackObservation::unregisterCheckResult(const CheckResult &result) {
-  if (result != CheckResult::SKIPPED)
-    --numChecks_;
-  if (result == CheckResult::FAILED)
-    --numFailedChecks_;
+  checkCounter_.unregisterCheckResult(results.speedCheckResult);
+  checkCounter_.unregisterCheckResult(results.climbRateCheckResult);
 }
 
 void TrackCheck::TrackObservation::registerSweepOutcome(bool rejectedInSweep) {
@@ -246,10 +88,14 @@ void TrackCheck::TrackObservation::registerSweepOutcome(bool rejectedInSweep) {
   rejectedInPreviousSweep_ = rejectedInSweep;
 }
 
+float TrackCheck::TrackObservation::getFailedChecksFraction() {
+  return this->checkCounter_.failedChecksFraction();
+}
+
 
 TrackCheck::TrackCheck(ioda::ObsSpace & obsdb, const eckit::Configuration & config,
-                       boost::shared_ptr<ioda::ObsDataVector<int> > flags,
-                       boost::shared_ptr<ioda::ObsDataVector<float> > obserr)
+                       std::shared_ptr<ioda::ObsDataVector<int> > flags,
+                       std::shared_ptr<ioda::ObsDataVector<float> > obserr)
   : FilterBase(obsdb, config, flags, obserr)
 {
   oops::Log::debug() << "TrackCheck: config = " << config_ << std::endl;
@@ -265,116 +111,33 @@ TrackCheck::~TrackCheck()
 void TrackCheck::applyFilter(const std::vector<bool> & apply,
                              const Variables & filtervars,
                              std::vector<std::vector<bool>> & flagged) const {
-  const std::vector<size_t> validObsIds = getValidObservationIds(apply);
+  const std::vector<size_t> validObsIds = TrackCheckUtils::getValidObservationIds(apply, flags_);
 
   RecursiveSplitter splitter(validObsIds.size());
-  groupObservationsByStation(validObsIds, splitter);
-  sortTracksChronologically(validObsIds, splitter);
+  TrackCheckUtils::groupObservationsByStation(validObsIds, splitter, config_, obsdb_);
+  TrackCheckUtils::sortTracksChronologically(validObsIds, splitter, obsdb_);
 
-  ObsData obsData = collectObsData();
+  ObsGroupPressureLocationTime obsPressureLoc = collectObsPressuresLocationsTimes();
   PiecewiseLinearInterpolation maxSpeedByPressure = makeMaxSpeedByPressureInterpolation();
 
   std::vector<bool> isRejected(apply.size(), false);
   for (auto track : splitter.multiElementGroups()) {
     identifyRejectedObservationsInTrack(track.begin(), track.end(), validObsIds,
-                                        obsData, maxSpeedByPressure, isRejected);
+                                        obsPressureLoc, maxSpeedByPressure, isRejected);
   }
-  flagRejectedObservations(isRejected, flagged);
+  TrackCheckUtils::flagRejectedObservations(isRejected, flagged);
 
   if (filtervars.size() != 0) {
     oops::Log::trace() << "TrackCheck: flagged? = " << flagged[0] << std::endl;
   }
 }
 
-std::vector<size_t> TrackCheck::getValidObservationIds(
-    const std::vector<bool> & apply) const {
-  std::vector<size_t> validObsIds;
-  for (size_t obsId = 0; obsId < apply.size(); ++obsId)
-    if (apply[obsId] && (*flags_)[0][obsId] == QCflags::pass)
-      validObsIds.push_back(obsId);
-  return validObsIds;
-}
-
-void TrackCheck::groupObservationsByStation(
-    const std::vector<size_t> &validObsIds,
-    RecursiveSplitter &splitter) const {
-  if (options_->stationIdVariable.value() == boost::none) {
-    if (obsdb_.obs_group_var().empty()) {
-      // Observations were not grouped into records.
-      // Assume all observations were taken during the same station.
-      return;
-    } else {
-      groupObservationsByRecordNumber(validObsIds, splitter);
-    }
-  } else {
-    groupObservationsByVariable(*options_->stationIdVariable.value(), validObsIds, splitter);
-  }
-}
-
-void TrackCheck::groupObservationsByRecordNumber(
-    const std::vector<size_t> &validObsIds,
-    RecursiveSplitter &splitter) const {
-  const std::vector<size_t> &obsCategories = obsdb_.recnum();
-  std::vector<size_t> validObsCategories = getValidObservationCategories(
-        obsCategories, validObsIds);
-  splitter.groupBy(validObsCategories);
-}
-
-void TrackCheck::groupObservationsByVariable(
-    const Variable &variable,
-    const std::vector<size_t> &validObsIds,
-    RecursiveSplitter &splitter) const {
-  switch (obsdb_.dtype(variable.group(), variable.variable())) {
-  case ioda::ObsDtype::Integer:
-    groupObservationsByTypedVariable<int>(variable, validObsIds, splitter);
-    break;
-
-  case ioda::ObsDtype::String:
-    groupObservationsByTypedVariable<std::string>(variable, validObsIds, splitter);
-    break;
-
-  default:
-    throw eckit::UserError("Only integer and string variables may be used as station IDs", Here());
-  }
-}
-
-template <typename VariableType>
-void TrackCheck::groupObservationsByTypedVariable(
-    const Variable &variable,
-    const std::vector<size_t> &validObsIds,
-    RecursiveSplitter &splitter) const {
-  std::vector<VariableType> obsCategories(obsdb_.nlocs());
-  obsdb_.get_db(variable.group(), variable.variable(), obsCategories);
-  std::vector<VariableType> validObsCategories = getValidObservationCategories(
-        obsCategories, validObsIds);
-
-  splitter.groupBy(validObsCategories);
-}
-
-void TrackCheck::sortTracksChronologically(const std::vector<size_t> &validObsIds,
-                                           RecursiveSplitter &splitter) const {
-  std::vector<util::DateTime> times(obsdb_.nlocs());
-  obsdb_.get_db("MetaData", "datetime", times);
-  splitter.sortGroupsBy([&times, &validObsIds](size_t obsIndexA, size_t obsIndexB)
-  { return times[validObsIds[obsIndexA]] < times[validObsIds[obsIndexB]]; });
-}
-
-TrackCheck::ObsData TrackCheck::collectObsData() const {
-  ObsData obsData;
-
-  obsData.latitudes.resize(obsdb_.nlocs());
-  obsdb_.get_db("MetaData", "latitude", obsData.latitudes);
-
-  obsData.longitudes.resize(obsdb_.nlocs());
-  obsdb_.get_db("MetaData", "longitude", obsData.longitudes);
-
-  obsData.datetimes.resize(obsdb_.nlocs());
-  obsdb_.get_db("MetaData", "datetime", obsData.datetimes);
-
-  obsData.pressures.resize(obsdb_.nlocs());
-  obsdb_.get_db("MetaData", "air_pressure", obsData.pressures);
-
-  return obsData;
+TrackCheck::ObsGroupPressureLocationTime TrackCheck::collectObsPressuresLocationsTimes() const {
+  ObsGroupPressureLocationTime obsPressureLoc;
+  obsPressureLoc.locationTimes = TrackCheckUtils::collectObservationsLocations(obsdb_);
+  obsPressureLoc.pressures.resize(obsdb_.nlocs());
+  obsdb_.get_db("MetaData", "air_pressure", obsPressureLoc.pressures);
+  return obsPressureLoc;
 }
 
 PiecewiseLinearInterpolation TrackCheck::makeMaxSpeedByPressureInterpolation() const {
@@ -385,11 +148,11 @@ PiecewiseLinearInterpolation TrackCheck::makeMaxSpeedByPressureInterpolation() c
   pressures.reserve(maxSpeedInterpolationPoints.size());
   maxSpeeds.reserve(maxSpeedInterpolationPoints.size());
 
-  for (const auto &pressureAndMaxSpeed : maxSpeedInterpolationPoints) {
-    pressures.push_back(pressureAndMaxSpeed.first);
     // The interpolator needs to produce speeds in km/s rather than m/s because observation
     // locations are expressed in kilometers.
     const int metersPerKm = 1000;
+  for (const auto &pressureAndMaxSpeed : maxSpeedInterpolationPoints) {
+    pressures.push_back(pressureAndMaxSpeed.first);
     maxSpeeds.push_back(pressureAndMaxSpeed.second / metersPerKm);
   }
 
@@ -400,16 +163,16 @@ void TrackCheck::identifyRejectedObservationsInTrack(
     std::vector<size_t>::const_iterator trackObsIndicesBegin,
     std::vector<size_t>::const_iterator trackObsIndicesEnd,
     const std::vector<size_t> &validObsIds,
-    const ObsData &obsData,
+    const ObsGroupPressureLocationTime &obsPressureLoc,
     const PiecewiseLinearInterpolation &maxValidSpeedAtPressure,
     std::vector<bool> &isRejected) const {
 
   std::vector<TrackObservation> trackObservations = collectTrackObservations(
-        trackObsIndicesBegin, trackObsIndicesEnd, validObsIds, obsData);
+        trackObsIndicesBegin, trackObsIndicesEnd, validObsIds, obsPressureLoc);
   std::vector<float> workspace;
 
   while (sweepOverObservations(trackObservations, maxValidSpeedAtPressure, workspace) ==
-         SweepResult::ANOTHER_SWEEP_REQUIRED) {
+         TrackCheckUtils::SweepResult::ANOTHER_SWEEP_REQUIRED) {
     // can't exit the loop yet
   }
 
@@ -421,21 +184,21 @@ std::vector<TrackCheck::TrackObservation> TrackCheck::collectTrackObservations(
     std::vector<size_t>::const_iterator trackObsIndicesBegin,
     std::vector<size_t>::const_iterator trackObsIndicesEnd,
     const std::vector<size_t> &validObsIds,
-    const ObsData &obsData) const {
+    const ObsGroupPressureLocationTime &obsPressureLoc) const {
   std::vector<TrackObservation> trackObservations;
   trackObservations.reserve(trackObsIndicesEnd - trackObsIndicesBegin);
   for (std::vector<size_t>::const_iterator it = trackObsIndicesBegin;
        it != trackObsIndicesEnd; ++it) {
     const size_t obsId = validObsIds[*it];
-    trackObservations.push_back(TrackObservation(obsData.latitudes[obsId],
-                                                 obsData.longitudes[obsId],
-                                                 obsData.datetimes[obsId],
-                                                 obsData.pressures[obsId]));
+    trackObservations.push_back(TrackObservation(obsPressureLoc.locationTimes.latitudes[obsId],
+                                                 obsPressureLoc.locationTimes.longitudes[obsId],
+                                                 obsPressureLoc.locationTimes.datetimes[obsId],
+                                                 obsPressureLoc.pressures[obsId]));
   }
   return trackObservations;
 }
 
-TrackCheck::SweepResult TrackCheck::sweepOverObservations(
+TrackCheckUtils::SweepResult TrackCheck::sweepOverObservations(
     std::vector<TrackObservation> &trackObservations,
     const PiecewiseLinearInterpolation &maxValidSpeedAtPressure,
     std::vector<float> &workspace) const {
@@ -500,21 +263,21 @@ TrackCheck::SweepResult TrackCheck::sweepOverObservations(
       obs.setNumNeighborsVisitedInPreviousSweep(dir, numNeighborsVisitedInThisSweep);
     }  // end of loop over directions
 
-    failedChecksFraction[obsIdx] = obs.failedChecksFraction();
+    failedChecksFraction[obsIdx] = obs.getFailedChecksFraction();
   }
 
   const float maxFailedChecksFraction = *std::max_element(failedChecksFraction.begin(),
                                                           failedChecksFraction.end());
   const float failedChecksThreshold = options_->rejectionThreshold * maxFailedChecksFraction;
   if (failedChecksThreshold <= 0)
-    return SweepResult::NO_MORE_SWEEPS_REQUIRED;
+    return TrackCheckUtils::SweepResult::NO_MORE_SWEEPS_REQUIRED;
 
   for (int obsIdx = 0; obsIdx < trackObservations.size(); ++obsIdx) {
     const bool rejected = failedChecksFraction[obsIdx] > failedChecksThreshold;
     trackObservations[obsIdx].registerSweepOutcome(rejected);
   }
 
-  return SweepResult::ANOTHER_SWEEP_REQUIRED;
+  return TrackCheckUtils::SweepResult::ANOTHER_SWEEP_REQUIRED;
 }
 
 void TrackCheck::flagRejectedTrackObservations(
@@ -528,14 +291,6 @@ void TrackCheck::flagRejectedTrackObservations(
   for (; trackObsIndexIt != trackObsIndicesEnd; ++trackObsIndexIt, ++trackObsIt)
     if (trackObsIt->rejected())
       isRejected[validObsIds[*trackObsIndexIt]] = true;
-}
-
-void TrackCheck::flagRejectedObservations(const std::vector<bool> &isRejected,
-                                          std::vector<std::vector<bool> > &flagged) const {
-  for (std::vector<bool> & variableFlagged : flagged)
-    for (size_t obsId = 0; obsId < isRejected.size(); ++obsId)
-      if (isRejected[obsId])
-        variableFlagged[obsId] = true;
 }
 
 void TrackCheck::print(std::ostream & os) const {

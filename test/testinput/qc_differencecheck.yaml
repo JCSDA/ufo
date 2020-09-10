@@ -1,87 +1,80 @@
-window_begin: 2018-04-14T21:00:00Z
-window_end: 2018-04-15T03:00:00Z
+window begin: 2018-01-01T00:00:00Z
+window end: 2019-01-01T00:00:00Z
 
-Observations:
-  ObsTypes:
-  - ObsSpace:
-      name: test data
-      ObsDataIn:
-        obsfile: Data/filters_testdata.nc4
-      simulate:
-        variables: [variable1]
-    ObsFilters:
-    - Filter: Difference Check    # test minvalue with one var (compare var3-var4 with min)
-      value: var3@MetaData        # var3@MetaData = 1, 1, 1, 1, 1, 0, 0, 0, 0, 0
-      reference: var4@MetaData    # var4@MetaData = 0, 0, 0, 0, 0, 1, 2, 3, 4, 5
-      minvalue: 0.0
-    passedBenchmark: 5
-  - ObsSpace:
-      name: test data
-      ObsDataIn:
-        obsfile: Data/filters_testdata.nc4
-      simulate:
-        variables: [variable1, variable2, variable3]
-    ObsFilters:
-    - Filter: Difference Check     # test same minvalue with three vars (compare var3-var4 with min)
-      value: var3@MetaData         # var3@MetaData = 1, 1, 1, 1, 1, 0, 0, 0, 0, 0
-      reference: var4@MetaData     # var4@MetaData = 0, 0, 0, 0, 0, 1, 2, 3, 4, 5
-      minvalue: 1.0
-    passedBenchmark: 15
-  - ObsSpace:
-      name: test data
-      ObsDataIn:
-        obsfile: Data/filters_testdata.nc4
-      simulate:
-        variables: [variable1]
-    ObsFilters:
-    - Filter: Difference Check     # test maxvalue (compare var3-var4 with max)
-      filter variables:
-      - name: variable1
-      value: var3@MetaData         # var3@MetaData = 1, 1, 1, 1, 1, 0, 0, 0, 0, 0
-      reference: var4@MetaData     # var4@MetaData = 0, 0, 0, 0, 0, 1, 2, 3, 4, 5
-      maxvalue: -3.0
-    passedBenchmark: 3
-  - ObsSpace:
-      name: test data
-      ObsDataIn:
-        obsfile: Data/filters_testdata.nc4
-      simulate:
-        variables: [variable1]
-    ObsFilters:
-    - Filter: Difference Check        # test min and maxvalue (compare var3-var4 with min and max)
-      filter variables:
-      - name: variable1
-      value: variable2@ObsValue       # variable2@ObsValue = 10, 12, 14, 16, 18, 20, 22, 24, 26, 28
-      reference: variable1@ObsValue   # variable1@ObsValue = 10, 11, 12, 13, 14, 15, 16, 17, 18, 19
-      minvalue: 2.0
-      maxvalue: 6.0
-    passedBenchmark: 5
-  - ObsSpace:
-      name: test data
-      ObsDataIn:
-        obsfile: Data/filters_testdata.nc4
-      simulate:
-        variables: [variable1]
-    ObsFilters:
-    - Filter: Difference Check         # test threshold (compare abs(variable2 - variable1) with threshold)
-      filter variables:
-      - name: variable1
-      value: variable2@ObsValue        # variable2@ObsValue = 10, 12, 14, 16, 18, 20, 22, 24, 26, 28
-      reference: variable1@ObsValue    # variable1@ObsValue = 10, 11, 12, 13, 14, 15, 16, 17, 18, 19
-      threshold: 3
-    passedBenchmark: 4
-  - ObsSpace:
-      name: test data
-      ObsDataIn:
-        obsfile: Data/filters_testdata.nc4
-      simulate:
-        variables: [variable1]
-    ObsFilters:
-    - Filter: Difference Check        # test min and maxvalue (equal), equivalent to previous test
-      filter variables:
-      - name: variable1
-      value: variable2@ObsValue       # variable2@ObsValue = 10, 12, 14, 16, 18, 20, 22, 24, 26, 28
-      reference: variable1@ObsValue   # variable1@ObsValue = 10, 11, 12, 13, 14, 15, 16, 17, 18, 19
-      minvalue: -3
-      maxvalue: 3
-    passedBenchmark: 4
+observations:
+- obs space:
+    name: test data
+    obsdatain:
+      obsfile: Data/filters_testdata.nc4
+    simulated variables: [variable1]
+  obs filters:
+  - filter: Difference Check    # test minvalue with one var (compare var3-var4 with min)
+    value: var3@MetaData        # var3@MetaData = 1, 1, 1, 1, 1, 0, 0, 0, 0, 0
+    reference: var4@MetaData    # var4@MetaData = 0, 0, 0, 0, 0, 1, 2, 3, 4, 5
+    minvalue: 0.0
+  passedBenchmark: 5
+- obs space:
+    name: test data
+    obsdatain:
+      obsfile: Data/filters_testdata.nc4
+    simulated variables: [variable1, variable2, variable3]
+  obs filters:
+  - filter: Difference Check     # test same minvalue with three vars (compare var3-var4 with min)
+    value: var3@MetaData         # var3@MetaData = 1, 1, 1, 1, 1, 0, 0, 0, 0, 0
+    reference: var4@MetaData     # var4@MetaData = 0, 0, 0, 0, 0, 1, 2, 3, 4, 5
+    minvalue: 1.0
+  passedBenchmark: 15
+- obs space:
+    name: test data
+    obsdatain:
+      obsfile: Data/filters_testdata.nc4
+    simulated variables: [variable1]
+  obs filters:
+  - filter: Difference Check     # test maxvalue (compare var3-var4 with max)
+    filter variables:
+    - name: variable1
+    value: var3@MetaData         # var3@MetaData = 1, 1, 1, 1, 1, 0, 0, 0, 0, 0
+    reference: var4@MetaData     # var4@MetaData = 0, 0, 0, 0, 0, 1, 2, 3, 4, 5
+    maxvalue: -3.0
+  passedBenchmark: 3
+- obs space:
+    name: test data
+    obsdatain:
+      obsfile: Data/filters_testdata.nc4
+    simulated variables: [variable1]
+  obs filters:
+  - filter: Difference Check        # test min and maxvalue (compare var3-var4 with min and max)
+    filter variables:
+    - name: variable1
+    value: variable2@ObsValue       # variable2@ObsValue = 10, 12, 14, 16, 18, 20, 22, 24, 26, 28
+    reference: variable1@ObsValue   # variable1@ObsValue = 10, 11, 12, 13, 14, 15, 16, 17, 18, 19
+    minvalue: 2.0
+    maxvalue: 6.0
+  passedBenchmark: 5
+- obs space:
+    name: test data
+    obsdatain:
+      obsfile: Data/filters_testdata.nc4
+    simulated variables: [variable1]
+  obs filters:
+  - filter: Difference Check         # test threshold (compare abs(variable2 - variable1) with threshold)
+    filter variables:
+    - name: variable1
+    value: variable2@ObsValue        # variable2@ObsValue = 10, 12, 14, 16, 18, 20, 22, 24, 26, 28
+    reference: variable1@ObsValue    # variable1@ObsValue = 10, 11, 12, 13, 14, 15, 16, 17, 18, 19
+    threshold: 3
+  passedBenchmark: 4
+- obs space:
+    name: test data
+    obsdatain:
+      obsfile: Data/filters_testdata.nc4
+    simulated variables: [variable1]
+  obs filters:
+  - filter: Difference Check        # test min and maxvalue (equal), equivalent to previous test
+    filter variables:
+    - name: variable1
+    value: variable2@ObsValue       # variable2@ObsValue = 10, 12, 14, 16, 18, 20, 22, 24, 26, 28
+    reference: variable1@ObsValue   # variable1@ObsValue = 10, 11, 12, 13, 14, 15, 16, 17, 18, 19
+    minvalue: -3
+    maxvalue: 3
+  passedBenchmark: 4

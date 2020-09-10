@@ -1,43 +1,29 @@
-window_begin: 2018-04-14T20:30:00Z
-window_end: 2018-04-15T03:30:00Z
+window begin: 2018-04-14T20:30:00Z
+window end: 2018-04-15T03:30:00Z
 
-Observations:
-  ObsTypes:
-  - ObsOperator:
-      name: VertInterp
-      VertCoord: air_pressure
-    ObsSpace:
-      name: Radiosonde
-      ObsDataIn:
-        obsfile: Data/ioda/testinput_tier_1/sondes_obs_2018041500_m.nc4
-      simulate:
-        variables: [air_temperature]
-    GeoVaLs:
-      filename: Data/sondes_geoval_2018041500_m.nc4
-    ObsFilters:
-    - Filter: PreQC
-      maxvalue: 3
-    passedBenchmark: 155
-  - ObsOperator:
-      name: CRTM
-      Absorbers: [H2O,O3,CO2]
-      Clouds: [Water, Ice]
-      Cloud_Fraction: 1.0
-      ObsOptions:
-        Sensor_ID: amsua_n19
-        EndianType: little_endian
-        CoefficientPath: Data/
-    ObsSpace:
-      name: amsua_n19
-      ObsDataIn: 
-        obsfile: Data/ioda/testinput_tier_1/amsua_n19_obs_2018041500_m.nc4
-      simulate:
-        variables: [brightness_temperature]
-        channels: 4-8
-    GeoVaLs: 
-      filename: Data/amsua_n19_geoval_2018041500_m.nc4
-    ObsFilters:
-    - Filter: PreQC
-      minvalue: -2
-      maxvalue:  8
-    passedBenchmark: 377 
+observations:
+- obs operator:
+    name: VertInterp
+    VertCoord: air_pressure
+  obs space:
+    name: Radiosonde
+    obsdatain:
+      obsfile: Data/ioda/testinput_tier_1/sondes_obs_2018041500_m.nc4
+    simulated variables: [air_temperature]
+  geovals:
+    filename: Data/sondes_geoval_2018041500_m.nc4
+  obs filters:
+  - filter: PreQC
+    maxvalue: 3
+  passedBenchmark: 155
+- obs space:
+    name: amsua_n19
+    obsdatain:
+      obsfile: Data/ioda/testinput_tier_1/amsua_n19_obs_2018041500_m.nc4
+    simulated variables: [brightness_temperature]
+    channels: 4-8
+  obs filters:
+  - filter: PreQC
+    minvalue: -2
+    maxvalue:  8
+  passedBenchmark: 377

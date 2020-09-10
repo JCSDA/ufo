@@ -82,9 +82,9 @@ subroutine ufo_gnssro_bndropp2d_simobs(self, geovals, hofx, obss)
   integer                       :: nlev, nlocs, iobs, nvprof
   integer                       :: iflip
   type(ufo_geoval), pointer     :: t, q, prs, gph, gph_sfc
-  real(kind_real), allocatable  :: obsImpP(:),obsLocR(:),obsGeoid(:)  !nlocs
-  real(kind_real), allocatable  :: obsLat(:),obsLon(:)                !nlocs
-  real(kind_real), allocatable  :: obsLonnh(:),obsLatnh(:)            ! n_horiz
+  real(kind_real), allocatable  :: obsImpP(:),obsLocR(:),obsGeoid(:),obsAzim(:) !nlocs
+  real(kind_real), allocatable  :: obsLat(:),obsLon(:)                          !nlocs
+  real(kind_real), allocatable  :: obsLonnh(:),obsLatnh(:)                      !n_horiz
   integer                       :: n_horiz
   real(kind_real)               :: dtheta
   real(kind_real)                    :: ob_time
@@ -107,7 +107,7 @@ subroutine ufo_gnssro_bndropp2d_simobs(self, geovals, hofx, obss)
   call ufo_geovals_get_var(geovals, var_q,     q)         ! specific humidity
   call ufo_geovals_get_var(geovals, var_prs,   prs)       ! pressure
   call ufo_geovals_get_var(geovals, var_z,     gph)       ! geopotential height
-  call ufo_geovals_get_var(geovals, var_sfc_z, gph_sfc)   ! surface geopotential height
+  call ufo_geovals_get_var(geovals, var_sfc_geomz, gph_sfc)   ! surface geopotential height
 
   missing = missing_value(missing)
   nlev    = t%nval ! number of model levels
@@ -128,6 +128,7 @@ subroutine ufo_gnssro_bndropp2d_simobs(self, geovals, hofx, obss)
   allocate(obsImpP(nlocs))
   allocate(obsLocR(nlocs))
   allocate(obsGeoid(nlocs))
+  allocate(obsAzim(nlocs))
   allocate(obsLatnh(n_horiz))
   allocate(obsLonnh(n_horiz))
 
@@ -136,6 +137,7 @@ subroutine ufo_gnssro_bndropp2d_simobs(self, geovals, hofx, obss)
   call obsspace_get_db(obss, "MetaData", "impact_parameter", obsImpP)
   call obsspace_get_db(obss, "MetaData", "earth_radius_of_curvature", obsLocR)
   call obsspace_get_db(obss, "MetaData", "geoid_height_above_reference_ellipsoid", obsGeoid)
+  call obsspace_get_db(obss, "MetaData", "sensor_azimuth_angle", obsAzim)
 
   nvprof  = 1  ! no. of bending angles in profile
   ob_time = 0.0
@@ -147,7 +149,8 @@ subroutine ufo_gnssro_bndropp2d_simobs(self, geovals, hofx, obss)
 ! loop through the obs
   obs_loop: do iobs = 1, nlocs  
 
-    if ( ( obsImpP(iobs)-obsLocR(iobs)-obsGeoid(iobs) ) <= self%roconf%top_2d ) then
+    if ( ( obsImpP(iobs)-obsLocR(iobs)-obsGeoid(iobs) ) <= self%roconf%top_2d .and. &
+           obsAzim(iobs) /= missing ) then
 
       obsLatnh = self%obsLat2d( (iobs-1)*n_horiz+1:iobs*n_horiz )
       obsLonnh = self%obsLon2d( (iobs-1)*n_horiz+1:iobs*n_horiz )
@@ -217,6 +220,7 @@ subroutine ufo_gnssro_bndropp2d_simobs(self, geovals, hofx, obss)
   deallocate(obsImpP)
   deallocate(obsLocR)
   deallocate(obsGeoid)
+  deallocate(obsAzim)
   deallocate(obsLatnh)
   deallocate(obsLonnh)
   deallocate(ichk)

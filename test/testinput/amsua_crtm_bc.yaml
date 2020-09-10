@@ -1,78 +1,84 @@
-window_begin: 2018-04-14T21:00:00Z
-window_end: 2018-04-15T03:00:00Z
+window begin: 2018-04-14T21:00:00Z
+window end: 2018-04-15T03:00:00Z
 
-LinearObsOpTest:
- testiterTL: 2
- coefTL: 1.e-3
- toleranceTL: 1.0e-3
- toleranceAD: 1.0e-11
 
-Observations: 
- ObsTypes: 
- - ObsOperator:
-     name: CRTM
-     Absorbers: [H2O,O3,CO2]
-     Clouds: [Water, Ice]
-     Cloud_Fraction: 1.0
-     LinearObsOperator:
-       Absorbers: [H2O,O3,CO2]
-       Clouds: [Water, Ice]
-     ObsOptions:
-       inspectProfile: 1
-       Sensor_ID: &Sensor_ID amsua_n19
-       EndianType: little_endian
-       CoefficientPath: Data/
-   ObsSpace:
-     name: amsua_n19
-     ObsDataIn: 
-       obsfile: Data/ioda/testinput_tier_1/amsua_n19_obs_2018041500_m_qc.nc4
-     ObsDataOut: 
-       obsfile: Data/amsua_n19_obs_2018041500_m_qc_out.nc4
-     simulate:
-       variables: [brightness_temperature]
-       channels: &channels
-         1-15
-   GeoVaLs: 
-     filename: Data/amsua_n19_geoval_2018041500_m_qc.nc4
-   ObsBias:
-     name: LinearCombination
-     abias_in: Data/satbias_crtm_in
-     abias_out: Data/satbias_crtm_out
-     sensor: *Sensor_ID
-     jobs: *channels
-     predictors:
-     - predictor:
-         name: constant
+observations:
+- obs operator:
+    name: CRTM
+    Absorbers: [H2O,O3,CO2]
+    Clouds: [Water, Ice]
+    Cloud_Fraction: 1.0
+    linear obs operator:
+      Absorbers: [H2O,O3,CO2]
+      Clouds: [Water, Ice]
+    obs options:
+      inspectProfile: 1
+      Sensor_ID: &Sensor_ID amsua_n19
+      EndianType: little_endian
+      CoefficientPath: Data/
+  obs space:
+    name: amsua_n19
+    obsdatain:
+      obsfile: Data/ioda/testinput_tier_1/amsua_n19_obs_2018041500_m_qc.nc4
+    obsdataout:
+      obsfile: Data/amsua_n19_obs_2018041500_m_qc_crtm_bc_out.nc4
+    simulated variables: [brightness_temperature]
+    channels: &channels 1-15
+  geovals:
+    filename: Data/amsua_n19_geoval_2018041500_m_qc.nc4
+  obs bias:
+    abias_in: Data/satbias_crtm_in
+    abias_out: Data/satbias_crtm_out
+    sensor: *Sensor_ID
+    jobs: *channels
+    covariance:
+      minimal required obs number: 20
+      variance range: [1.0e-6, 10.]
+      prior:
+        datain: Data/satbias_crtm_pc
+        inflation:
+          ratio: 1.1
+          ratio for small dataset: 2.0
+    predictors:
+    - predictor:
+        name: constant
 #     - predictor:
 #         name: cloud_liquid_water
 #         options:
 #           clwret_ch238: 1
 #           clwret_ch314: 2
 #           clwret_types: [GsiHofX]
-     - predictor:
-         name: lapse_rate
-         options:
-           order: 2
-           tlapse: &amsua19tlap Data/amsua_n19_tlapmean.txt
-     - predictor:
-         name: lapse_rate
-         options:
-           tlapse: *amsua19tlap
-     - predictor:
-         name: emissivity
-     - predictor:
-         name: scan_angle
-         options:
-           order: 4
-     - predictor:
-         name: scan_angle
-         options:
-           order: 3
-     - predictor:
-         name: scan_angle
-         options:
-           order: 2
-     - predictor:
-         name: scan_angle
-   vecequiv: GsiHofXBc
-   tolerance: 1.e-7
+    - predictor:
+        name: lapse_rate
+        options:
+          order: 2
+          tlapse: &amsua19tlap Data/amsua_n19_tlapmean.txt
+    - predictor:
+        name: lapse_rate
+        options:
+          tlapse: *amsua19tlap
+    - predictor:
+        name: emissivity
+    - predictor:
+        name: scan_angle
+        options:
+          order: 4
+    - predictor:
+        name: scan_angle
+        options:
+          order: 3
+    - predictor:
+        name: scan_angle
+        options:
+          order: 2
+    - predictor:
+        name: scan_angle
+    tolerance: 1.e-5
+  vector ref: GsiHofXBc
+  tolerance: 1.e-7
+  linear obs operator test:
+    iterations TL: 2
+    coef TL: 1.e-3
+    tolerance TL: 1.0e-3
+    tolerance AD: 1.0e-11
+

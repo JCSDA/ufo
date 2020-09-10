@@ -1,72 +1,84 @@
-window_begin: 2018-04-14T21:00:00Z
-window_end: 2018-04-15T03:00:00Z
+window begin: 2018-04-14T21:00:00Z
+window end: 2018-04-15T03:00:00Z
 
-LinearObsOpTest: 
- coefTL: 1.e-3
- toleranceTL: 2.0e-3
- toleranceAD: 1.0e-11
-
-Observations: 
- ObsTypes: 
- - ObsOperator: &obsoper
-     name: CRTM
-     Absorbers: [H2O,O3,CO2]
-     LinearObsOperator:
-       Absorbers: [H2O,O3,CO2]
-     ObsOptions: &obsopts
-       EndianType: little_endian
-       CoefficientPath: Data/
-       Sensor_ID: sndrD1_g15
-   ObsSpace: 
-     name: sndrD1_g15
-     ObsDataIn: 
-       obsfile: "Data/ioda/testinput_tier_1/sndrd1_g15_obs_2018041500_m.nc4"
-     simulate: &simobs
-       variables: [brightness_temperature]
-       channels: 1-15
-   GeoVaLs: 
-     filename: "Data/sndrd1_g15_geoval_2018041500_m.nc4"
-   vecequiv: GsiHofX
-   tolerance: 1.1e-5
- - ObsOperator:
-     <<: *obsoper
-     ObsOptions:
-       <<: *obsopts
-       Sensor_ID: sndrD2_g15
-   ObsSpace: 
-     name: sndrD2_g15
-     ObsDataIn: 
-       obsfile: Data/ioda/testinput_tier_1/sndrd2_g15_obs_2018041500_m.nc4
-     simulate: *simobs
-   GeoVaLs: 
-     filename: Data/sndrd2_g15_geoval_2018041500_m.nc4
-   vecequiv: GsiHofX
-   tolerance: 1.1e-5
- - ObsOperator:
-     <<: *obsoper
-     ObsOptions:
-       <<: *obsopts
-       Sensor_ID: sndrD3_g15
-   ObsSpace: 
-     name: sndrD3_g15
-     ObsDataIn: 
-       obsfile: Data/ioda/testinput_tier_1/sndrd3_g15_obs_2018041500_m.nc4
-     simulate: *simobs
-   GeoVaLs: 
-     filename: Data/sndrd3_g15_geoval_2018041500_m.nc4
-   vecequiv: GsiHofX
-   tolerance: 1.1e-5
- - ObsOperator:
-     <<: *obsoper
-     ObsOptions:
-       <<: *obsopts
-       Sensor_ID: sndrD4_g15
-   ObsSpace: 
-     name: sndrD4_g15
-     ObsDataIn: 
-       obsfile: Data/ioda/testinput_tier_1/sndrd4_g15_obs_2018041500_m.nc4
-     simulate: *simobs
-   GeoVaLs: 
-     filename: Data/sndrd4_g15_geoval_2018041500_m.nc4
-   vecequiv: GsiHofX
-   tolerance: 1.1e-5
+observations:
+- obs operator: &obsoper
+    name: CRTM
+    Absorbers: [H2O,O3,CO2]
+    linear obs operator:
+      Absorbers: [H2O,O3,CO2]
+    obs options: &obsopts
+      EndianType: little_endian
+      CoefficientPath: Data/
+      Sensor_ID: sndrD1_g15
+  obs space:
+    name: sndrD1_g15
+    obsdatain:
+      obsfile: "Data/ioda/testinput_tier_1/sndrd1_g15_obs_2018041500_m.nc4"
+    simulated variables: [brightness_temperature]
+    channels: 1-15
+  geovals:
+    filename: "Data/sndrd1_g15_geoval_2018041500_m.nc4"
+  vector ref: GsiHofX
+  tolerance: 1.1e-5
+  linear obs operator test:
+    coef TL: 1.e-3
+    tolerance TL: 2.0e-3
+    tolerance AD: 1.0e-11
+- obs operator:
+    <<: *obsoper
+    obs options:
+      <<: *obsopts
+      Sensor_ID: sndrD2_g15
+  obs space:
+    name: sndrD2_g15
+    obsdatain:
+      obsfile: Data/ioda/testinput_tier_1/sndrd2_g15_obs_2018041500_m.nc4
+    simulated variables: [brightness_temperature]
+    channels: 1-15
+  geovals:
+    filename: Data/sndrd2_g15_geoval_2018041500_m.nc4
+  vector ref: GsiHofX
+  tolerance: 1.1e-5
+  linear obs operator test:
+    coef TL: 1.e-3
+    tolerance TL: 2.0e-3
+    tolerance AD: 1.0e-11
+- obs operator:
+    <<: *obsoper
+    obs options:
+      <<: *obsopts
+      Sensor_ID: sndrD3_g15
+  obs space:
+    name: sndrD3_g15
+    obsdatain:
+      obsfile: Data/ioda/testinput_tier_1/sndrd3_g15_obs_2018041500_m.nc4
+    simulated variables: [brightness_temperature]
+    channels: 1-15
+  geovals:
+    filename: Data/sndrd3_g15_geoval_2018041500_m.nc4
+  vector ref: GsiHofX
+  tolerance: 1.1e-5
+  linear obs operator test:
+    coef TL: 1.e-3
+    tolerance TL: 2.0e-3
+    tolerance AD: 1.0e-11
+- obs operator:
+    <<: *obsoper
+    obs options:
+      <<: *obsopts
+      Sensor_ID: sndrD4_g15
+  obs space:
+    name: sndrD4_g15
+    obsdatain:
+      obsfile: Data/ioda/testinput_tier_1/sndrd4_g15_obs_2018041500_m.nc4
+    simulated variables: [brightness_temperature]
+    channels: 1-15
+  geovals:
+    filename: Data/sndrd4_g15_geoval_2018041500_m.nc4
+  vector ref: GsiHofX
+  tolerance: 1.1e-5
+  linear obs operator test:
+    coef TL: 1.e-3
+    tolerance TL: 2.0e-3
+    tolerance AD: 1.0e-11

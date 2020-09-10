@@ -24,11 +24,12 @@ public :: ufo_geovals_get_var, ufo_geovals_put_var
 public :: ufo_geovals_default_constr, ufo_geovals_setup, ufo_geovals_delete, ufo_geovals_print
 public :: ufo_geovals_zero, ufo_geovals_random, ufo_geovals_dotprod, ufo_geovals_scalmult
 public :: ufo_geovals_profmult
+public :: ufo_geovals_reorderzdir
 public :: ufo_geovals_assign, ufo_geovals_add, ufo_geovals_diff, ufo_geovals_abs
 public :: ufo_geovals_split, ufo_geovals_merge
 public :: ufo_geovals_minmaxavg, ufo_geovals_normalize, ufo_geovals_maxloc, ufo_geovals_schurmult
 public :: ufo_geovals_read_netcdf, ufo_geovals_write_netcdf
-public :: ufo_geovals_rms, ufo_geovals_copy
+public :: ufo_geovals_rms, ufo_geovals_copy, ufo_geovals_copy_one
 public :: ufo_geovals_analytic_init
 
 private :: ufo_geovals_reset_sec_arg
@@ -329,6 +330,58 @@ enddo
 end subroutine ufo_geovals_assign
 
 ! ------------------------------------------------------------------------------
+subroutine ufo_geovals_reorderzdir(self, varname, zdir)
+implicit none
+type(ufo_geovals),intent(inout) :: self
+character(len=*), intent(in) :: varname
+character(len=*), intent(in) :: zdir
+
+type(ufo_geovals) :: selfclone
+type(ufo_geoval), pointer :: geoval
+character(max_string) :: err_msg
+integer:: iobs, ivar, ival, kval
+logical :: do_flip = .false.     !< .true. if all the ufo_geoval arrays inside geovals
+
+if (.not. self%linit) then
+  call abor1_ftn("ufo_geovals_reorderzdir: geovals not allocated")
+endif
+
+! Get vertical coordinate variable
+call ufo_geovals_get_var(self, varname, geoval)
+if (associated(geoval)) then
+  print *, 'ufo_geovals_reorderzdir: geoval vertical coordinate variable ', trim(varname), geoval%nval, geoval%nlocs
+else
+  write(err_msg, *) 'ufo_geovals_reorderzdir: geoval vertical coordinate variable ', trim(varname), ' doesnt exist'
+endif
+
+! Check if reorder variables is necessary based on the direction defined by zdir
+if ((zdir == "bottom2top" .and. geoval%vals(1,1) < geoval%vals(geoval%nval,1)) .or. &
+    (zdir == "top2bottom" .and. geoval%vals(1,1) > geoval%vals(geoval%nval,1))) then
+   do_flip = .true.
+   print *, 'ufo_geovals_reorderzdir: do_flip ', do_flip
+else if (zdir /= "bottom2top" .or. zdir /= "top2bottom") then
+  write(err_msg, *) 'ufo_geovals_reorderzdir: z-coordinate direction ', trim(zdir), ' not defined'
+else
+   print *, 'no need to reorder variables in vertical direction (zdir) do_flip ', do_flip
+   return
+endif
+
+call ufo_geovals_copy(self, selfclone)
+
+if (do_flip) then
+  do ivar = 1, self%nvar
+    do ival = 1, self%geovals(ivar)%nval
+      kval = self%geovals(ivar)%nval - ival + 1
+      self%geovals(ivar)%vals(ival,:) = selfclone%geovals(ivar)%vals(kval,:)
+    enddo
+  enddo
+endif
+
+call ufo_geovals_delete(selfclone)
+
+end subroutine ufo_geovals_reorderzdir
+
+! ------------------------------------------------------------------------------
 !> Sum of two GeoVaLs objects
 
 subroutine ufo_geovals_add(self, other)
@@ -478,6 +531,41 @@ other%missing_value = self%missing_value
 other%linit = .true.
 
 end subroutine ufo_geovals_copy
+
+! ------------------------------------------------------------------------------
+!> Copy one location from GeoVaLs into a new object
+!!
+
+subroutine ufo_geovals_copy_one(self, other, loc_index)
+implicit none
+type(ufo_geovals), intent(inout) :: self !> GeoVaLs for one location
+type(ufo_geovals), intent(in) :: other   !> GeoVaLs for many location
+integer, intent(in) :: loc_index !> Index of the location in the "other" geoval
+integer :: jv
+
+if (.not. other%linit) then
+  call abor1_ftn("ufo_geovals_copy_one: geovals not defined")
+endif
+
+call ufo_geovals_delete(self)
+
+self%nlocs = 1
+self%nvar = other%nvar
+allocate(self%variables(self%nvar))
+self%variables(:) = other%variables(:)
+
+allocate(self%geovals(self%nvar))
+do jv = 1, self%nvar
+  self%geovals(jv)%nval = other%geovals(jv)%nval
+  self%geovals(jv)%nlocs = 1
+  allocate(self%geovals(jv)%vals(self%geovals(jv)%nval, self%geovals(jv)%nlocs))
+  self%geovals(jv)%vals(:,self%nlocs) = other%geovals(jv)%vals(:,loc_index)
+enddo
+
+self%missing_value = other%missing_value
+self%linit = .true.
+
+end subroutine ufo_geovals_copy_one
 
 ! ------------------------------------------------------------------------------
 !> Initialize a GeoVaLs object based on an analytic state

@@ -57,7 +57,7 @@ subroutine ufo_gnssro_bndropp1d_tlad_settraj(self, geovals, obss)
   call ufo_geovals_get_var(geovals, var_q,     q)         ! specific humidity
   call ufo_geovals_get_var(geovals, var_prs,   prs)       ! pressure
   call ufo_geovals_get_var(geovals, var_z,     gph)       ! geopotential height
-  call ufo_geovals_get_var(geovals, var_sfc_z, gph_sfc)   ! surface geopotential height
+  call ufo_geovals_get_var(geovals, var_sfc_geomz, gph_sfc)   ! surface geopotential height
       
   call self%delete()   
 

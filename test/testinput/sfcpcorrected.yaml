@@ -1,40 +1,40 @@
-window_begin: 2018-04-14T20:30:00Z
-window_end: 2018-04-15T03:30:00Z
+window begin: 2018-04-14T20:30:00Z
+window end: 2018-04-15T03:30:00Z
 
-LinearObsOpTest:
-  coefTL: 0.1
-  toleranceTL: 1.0e-13
-  toleranceAD: 1.0e-11
-
-Observations:
-  ObsTypes:
-  - ObsOperator:
-      name: SfcPCorrected
-      da_psfc_scheme: UKMO
-    ObsSpace:
-      name: SfcPCorrected
-      ObsDataIn:
-        obsfile: Data/ioda/testinput_tier_1/sfc_obs_2018041500_m.nc4
-      ObsDataOut:
-        obsfile: Data/sfc_2018041500_m_out.nc4
-      simulate:
-        variables: [surface_pressure]
-    GeoVaLs:
-      filename: Data/ps_geovals_2018041500_0000.nc4
-    rmsequiv: 98239.27356140
-    tolerance: 1.e-08
-  - ObsOperator:
-      name: SfcPCorrected
-      da_psfc_scheme: WRFDA
-    ObsSpace:
-      name: SfcPCorrected
-      ObsDataIn:
-        obsfile: Data/ioda/testinput_tier_1/sfc_obs_2018041500_m.nc4
-      ObsDataOut:
-        obsfile: Data/sfc_2018041500_m_out.nc4
-      simulate:
-        variables: [surface_pressure]
-    GeoVaLs:
-      filename: Data/ps_geovals_2018041500_0000.nc4
-    rmsequiv: 98212.01952172
-    tolerance: 1.e-08
+observations:
+- obs operator:
+    name: SfcPCorrected
+    da_psfc_scheme: UKMO
+  obs space:
+    name: SfcPCorrected
+    obsdatain:
+      obsfile: Data/ioda/testinput_tier_1/sfc_obs_2018041500_m.nc4
+    obsdataout:
+      obsfile: Data/sfc_2018041500_m_UKMOS_out.nc4
+    simulated variables: [surface_pressure]
+  geovals:
+    filename: Data/ps_geovals_2018041500_0000.nc4
+  rms ref: 98239.27356140
+  tolerance: 1.e-08
+  linear obs operator test:
+    coef TL: 0.1
+    tolerance TL: 1.0e-13
+    tolerance AD: 1.0e-11
+- obs operator:
+    name: SfcPCorrected
+    da_psfc_scheme: WRFDA
+  obs space:
+    name: SfcPCorrected
+    obsdatain:
+      obsfile: Data/ioda/testinput_tier_1/sfc_obs_2018041500_m.nc4
+    obsdataout:
+      obsfile: Data/sfc_2018041500_m_WRFDA_out.nc4
+    simulated variables: [surface_pressure]
+  geovals:
+    filename: Data/ps_geovals_2018041500_0000.nc4
+  rms ref: 98212.01952172
+  tolerance: 1.e-08
+  linear obs operator test:
+    coef TL: 0.1
+    tolerance TL: 1.0e-13
+    tolerance AD: 1.0e-11

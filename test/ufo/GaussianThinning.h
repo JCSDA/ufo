@@ -13,18 +13,16 @@
 #include <string>
 #include <vector>
 
-#include <boost/make_shared.hpp>
-
 #define ECKIT_TESTING_SELF_REGISTER_CASES 0
 
 #include "eckit/config/LocalConfiguration.h"
 #include "eckit/testing/Test.h"
 #include "ioda/ObsSpace.h"
 #include "ioda/ObsVector.h"
-#include "oops/../test/TestEnvironment.h"
-#include "oops/parallel/mpi/mpi.h"
+#include "oops/mpi/mpi.h"
 #include "oops/runs/Test.h"
 #include "oops/util/Expect.h"
+#include "test/TestEnvironment.h"
 #include "ufo/filters/Gaussian_Thinning.h"
 #include "ufo/filters/Variables.h"
 
@@ -32,11 +30,11 @@ namespace ufo {
 namespace test {
 
 void testGaussianThinning(const eckit::LocalConfiguration &conf) {
-  util::DateTime bgn(conf.getString("window_begin"));
-  util::DateTime end(conf.getString("window_end"));
+  util::DateTime bgn(conf.getString("window begin"));
+  util::DateTime end(conf.getString("window end"));
 
-  const eckit::LocalConfiguration obsSpaceConf(conf, "ObsSpace");
-  ioda::ObsSpace obsspace(obsSpaceConf, oops::mpi::comm(), bgn, end);
+  const eckit::LocalConfiguration obsSpaceConf(conf, "obs space");
+  ioda::ObsSpace obsspace(obsSpaceConf, oops::mpi::world(), bgn, end);
 
   if (conf.has("air_pressures")) {
     const std::vector<float> air_pressures = conf.getFloatVector("air_pressures");
@@ -55,10 +53,10 @@ void testGaussianThinning(const eckit::LocalConfiguration &conf) {
     obsspace.put_db("MetaData", "priority", priorities);
   }
 
-  auto obserr = boost::make_shared<ioda::ObsDataVector<float>>(
-      obsspace, obsspace.obsvariables(), "ObsError");
-  auto qcflags = boost::make_shared<ioda::ObsDataVector<int>>(
-      obsspace, obsspace.obsvariables());
+  std::shared_ptr<ioda::ObsDataVector<float>> obserr(new ioda::ObsDataVector<float>(
+      obsspace, obsspace.obsvariables(), "ObsError"));
+  std::shared_ptr<ioda::ObsDataVector<int>> qcflags(new ioda::ObsDataVector<int>(
+      obsspace, obsspace.obsvariables()));
 
   const eckit::LocalConfiguration filterConf(conf, "GaussianThinning");
   ufo::Gaussian_Thinning filter(obsspace, filterConf, qcflags, obserr);

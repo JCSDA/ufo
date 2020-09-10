@@ -137,12 +137,12 @@ endif
 ! Perturbation coolskin obs operator
 hofx = 0.0
 do iobs = 1, self%nlocs
-   hofx(iobs) = self%jac(1,iobs)* S_ns%vals(1,iobs)+\
-                self%jac(2,iobs)* H_I%vals(1,iobs)+ \
-                self%jac(3,iobs)* H_s%vals(1,iobs)+\
-                self%jac(4,iobs)* R_nl%vals(1,iobs)+\
-                self%jac(5,iobs)* Td%vals(1,iobs)+\
-                self%jac(6,iobs)* u%vals(1,iobs)
+   hofx(iobs) = self%jac(1,iobs)*S_ns%vals(1,iobs) + &
+                self%jac(2,iobs)*H_I%vals(1,iobs) + &
+                self%jac(3,iobs)*H_s%vals(1,iobs) + &
+                self%jac(4,iobs)*R_nl%vals(1,iobs) + &
+                self%jac(5,iobs)*Td%vals(1,iobs) + &
+                self%jac(6,iobs)*u%vals(1,iobs)
 enddo
 
 end subroutine ufo_coolskin_simobs_tl

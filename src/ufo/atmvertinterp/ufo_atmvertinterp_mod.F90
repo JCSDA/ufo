@@ -42,8 +42,8 @@ subroutine atmvertinterp_setup_(self, grid_conf)
   enddo
   !> grab what vertical coordinate/variable to use from the config
   self%use_ln = .false.
-  if( grid_conf%has("VertCoord") ) then
-      call grid_conf%get_or_die("VertCoord",coord_name)
+  if( grid_conf%has("vertical coordinate") ) then
+      call grid_conf%get_or_die("vertical coordinate",coord_name)
       self%v_coord = coord_name
       if( trim(self%v_coord) .eq. var_prs ) self%use_ln = .true.
   else  ! default

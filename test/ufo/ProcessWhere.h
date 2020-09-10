@@ -16,10 +16,10 @@
 #include "eckit/config/LocalConfiguration.h"
 #include "eckit/testing/Test.h"
 #include "ioda/ObsSpace.h"
-#include "oops/../test/TestEnvironment.h"
-#include "oops/parallel/mpi/mpi.h"
+#include "oops/mpi/mpi.h"
 #include "oops/runs/Test.h"
 #include "oops/util/Logger.h"
+#include "test/TestEnvironment.h"
 #include "ufo/filters/ObsFilterData.h"
 #include "ufo/filters/processWhere.h"
 #include "ufo/filters/Variables.h"
@@ -27,17 +27,17 @@
 namespace ufo {
 namespace test {
 
+
 // -----------------------------------------------------------------------------
 
-void testProcessWhere() {
-  const eckit::LocalConfiguration conf(::test::TestEnvironment::config());
+void testProcessWhere(const eckit::LocalConfiguration &conf,
+                      bool is_in_usererror = false) {
+  util::DateTime bgn(conf.getString("window begin"));
+  util::DateTime end(conf.getString("window end"));
 
-  util::DateTime bgn(conf.getString("window_begin"));
-  util::DateTime end(conf.getString("window_end"));
+  eckit::LocalConfiguration obsconf(conf, "obs space");
 
-  eckit::LocalConfiguration obsconf(conf, "ObsSpace");
-
-  ioda::ObsSpace ospace(obsconf, oops::mpi::comm(), bgn, end);
+  ioda::ObsSpace ospace(obsconf, oops::mpi::world(), bgn, end);
   ObsFilterData data(ospace);
 
   const int nlocs = obsconf.getInt("nlocs");
@@ -46,11 +46,16 @@ void testProcessWhere() {
   std::vector<eckit::LocalConfiguration> confs;
   conf.get("ProcessWhere", confs);
   for (size_t jconf = 0; jconf < confs.size(); ++jconf) {
-    std::vector<bool> result = processWhere(confs[jconf], data);
-    const int size_ref = confs[jconf].getInt("size where true");
-    const int size = std::count(result.begin(), result.end(), true);
-    oops::Log::info() << "reference: " << size_ref << ", compare with " << size << std::endl;
-    EXPECT(size == size_ref);
+    eckit::LocalConfiguration config = confs[jconf];
+    if (is_in_usererror) {
+      EXPECT_THROWS(processWhere(config, data));
+    } else {
+      std::vector<bool> result = processWhere(config, data);
+      const int size_ref = config.getInt("size where true");
+      const int size = std::count(result.begin(), result.end(), true);
+      oops::Log::info() << "reference: " << size_ref << ", compare with " << size << std::endl;
+      EXPECT(size == size_ref);
+    }
   }
 }
 
@@ -66,8 +71,16 @@ class ProcessWhere : public oops::Test {
   void register_tests() const {
     std::vector<eckit::testing::Test>& ts = eckit::testing::specification();
 
-    ts.emplace_back(CASE("ufo/ProcessWhere/testProcessWhere")
-      { testProcessWhere(); });
+    ts.emplace_back(CASE("ufo/ProcessWhere/testProcessWhere_successful") {
+      testProcessWhere(eckit::LocalConfiguration(::test::TestEnvironment::config(),
+                                                "successful"));
+    });
+
+    ts.emplace_back(CASE("ufo/ProcessWhere/testProcessWhere_isin_usererror") {
+      testProcessWhere(eckit::LocalConfiguration(::test::TestEnvironment::config(),
+                                                 "user_error_type_handling_is_in"),
+                       true);
+    });
   }
 };
 

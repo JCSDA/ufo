@@ -32,10 +32,10 @@ ObsGnssroBndROPP2D::ObsGnssroBndROPP2D(const ioda::ObsSpace & odb,
   : ObsOperatorBase(odb, config), keyOperGnssroBndROPP2D_(0), odb_(odb), varin_()
 {
   const std::vector<std::string> vv{"air_temperature", "specific_humidity", "air_pressure",
-                                    "geopotential_height", "surface_geopotential_height"};
+                                    "geopotential_height", "surface_altitude"};
   varin_.reset(new oops::Variables(vv));
 
-  const eckit::LocalConfiguration obsOptions(config, "ObsOptions");
+  const eckit::LocalConfiguration obsOptions(config, "obs options");
 
   ufo_gnssro_bndropp2d_setup_f90(keyOperGnssroBndROPP2D_, obsOptions, odb_.nlocs());
   oops::Log::trace() << "ObsGnssroBndROPP2D created." << std::endl;
