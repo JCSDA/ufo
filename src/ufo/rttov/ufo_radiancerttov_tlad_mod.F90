@@ -300,8 +300,8 @@ Sensor_Loop:do i_inst = 1, self % conf % nSensors
 
     idbg = idbg + 1
 
-    write(*,*) "Rttov options before call to k code"
-    call rttov_print_opts(config_rttov % opts)
+    !write(*,*) "Rttov options before call to k code"
+    !call rttov_print_opts(config_rttov % opts)
 
     ! --------------------------------------------------------------------------
     ! 7. Call RTTOV forward model

@@ -267,7 +267,7 @@ subroutine ufo_rttovonedvarcheck_apply(self, vars, retrieval_vars, geovals, appl
       all_chans: do jvar = 1, self % nchans
         do ivar = 1, jchans_used
           if (ob % channels_used(ivar) == self % channels(jvar)) then
-            obs % output_BT(jvar, jobs) = ob % output_profile(ivar)
+            obs % output_BT(jvar, jobs) = ob % output_BT(ivar)
             cycle all_chans
           end if
         end do

@@ -382,7 +382,12 @@ integer, intent(in)                   :: nchans         ! number of channels in 
 
 ! local variables
 integer :: jvar ! counter
-character(len=max_string)          :: var
+integer :: nobs ! number of observations to be written to database
+character(len=max_string)    :: var
+real(kind_real), allocatable :: surface_pressure(:)
+real(kind_real) :: missing
+
+missing = missing_value(missing)
 
 ! Put QC flags and retrieved BT's back in database
 do jvar = 1, nchans
@@ -393,14 +398,72 @@ end do
 
 ! Output final cost at solution
 call obsspace_put_db(obsdb, "OneDVar", "FinalCost", self % final_cost(:))
+nobs = size(self % final_cost(:))
+
+!--
+! Output Retrieved profiles into ObsSpace
+!--
+! 1) Temperature levels
+! 2) Humidity levels: convert q to rh (%)
+! 3) Ozone levels - no planned implementation
+! 4) Cloud Liquid Water from qtotal
+! 4b) Cloud Ice Water if rttovscat is activated from qtotal
+
+!--
+! 5) Surface pressure
+!--
+if (prof_index % pstar > 0) THEN
+  allocate(surface_pressure(nobs))
+  surface_pressure(:) = self % output_profile(prof_index % pstar, :)
+  where (surface_pressure /= missing)
+    surface_pressure = surface_pressure * 100 ! Pa to hPa
+  end where
+  call obsspace_put_db(obsdb, "OneDVar", "surface_pressure", surface_pressure)
+  deallocate(surface_pressure)
+end if
+
+!--
+! 6) Surface temperature
+!--
+if (prof_index % t2 > 0) THEN
+  call obsspace_put_db(obsdb, "OneDVar", "air_temperature_at_two_meters_above_surface", &
+                       self % output_profile(prof_index % t2, :))
+end if
+
+!--
+! 7) Surface humidity
+!--
+
+!--
+! 8) Surface Windspeed
+!--
+! Windspeed retrieval is directionless, i.e., there are no separate u and v
+! components.
+if (prof_index % windspeed > 0) then
+  call obsspace_put_db(obsdb, "OneDVar", "surface_wind_speed", &
+                       self % output_profile(prof_index % windspeed, :))
+end if
 
 !--
 ! 9) Skin temperature
 !--
-
 if (prof_index % tstar > 0) then
-  call obsspace_put_db(obsdb, "OneDVar", "skin_temperature", self % output_profile(prof_index % tstar, :))
+  call obsspace_put_db(obsdb, "OneDVar", "skin_temperature", &
+                       self % output_profile(prof_index % tstar, :))
 end if
+
+!--
+! 10) Total ozone - no planned implementation
+! 11) Cloud top pressure
+! 12) Cloud fraction
+! 13) LWP
+! 14) IWP only meaningful is mwscattswitch is activated which means model levels too....
+! 15) Microwave emissivity
+! 16/17) QC related not being ported.
+! 18) Cloud type
+! 19) Channel information
+! 20) RTTOVSCATT cloud profiles
+! 21) IR cloud profiles
 
 end subroutine
 
