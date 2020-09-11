@@ -8,6 +8,7 @@
 #ifndef UFO_FILTERS_VARIABLETRANSFORMS_WINDCOMPONENTS_H_
 #define UFO_FILTERS_VARIABLETRANSFORMS_WINDCOMPONENTS_H_
 
+#include <memory>
 #include <ostream>
 #include <string>
 #include <vector>
@@ -52,4 +53,4 @@ class WindComponents : public FilterBase,
 
 }  // namespace ufo
 
-#endif  // UFO_FILTERS_WINDCOMPONENTS_H_
+#endif  // UFO_FILTERS_VARIABLETRANSFORMS_WINDCOMPONENTS_H_

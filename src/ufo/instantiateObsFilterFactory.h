@@ -80,9 +80,9 @@ template<typename MODEL> void instantiateObsFilterFactory() {
   static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::TrackCheckShip> >
            makerChk20_("Ship Track Check");
   static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::WindComponents> >
-           makerChk20_("Wind components");
+           makerChk21_("Wind components");
   static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::WindVector> >
-           makerChk21_("Wind vector");
+           makerChk22_("Wind vector");
 }
 
 }  // namespace ufo

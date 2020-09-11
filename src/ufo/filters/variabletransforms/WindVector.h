@@ -9,6 +9,7 @@
 #define UFO_FILTERS_VARIABLETRANSFORMS_WINDVECTOR_H_
 
 #include <math.h>
+#include <memory>
 #include <ostream>
 #include <string>
 #include <vector>

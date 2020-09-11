@@ -69,8 +69,10 @@ void WindComponents::applyFilter(const std::vector<bool> & apply,
         // Calculate wind components
         u[jobs] = -Zfff[jobs] * sin(Zddd[jobs] * rad);
         v[jobs] = -Zfff[jobs] * cos(Zddd[jobs] * rad);
-        oops::Log::debug() << "wind_speed, wind_from_direction: " << Zfff[jobs] << ", "
-                           << Zddd[jobs] << ", eastward_wind=" << u[jobs] << ", northward_wind=" << v[jobs]
+        oops::Log::debug() << "wind_speed, wind_from_direction: "
+                           << Zfff[jobs] << ", "
+                           << Zddd[jobs] << ", eastward_wind="
+                           << u[jobs] << ", northward_wind=" << v[jobs]
                            << std::endl;
       }
     }
