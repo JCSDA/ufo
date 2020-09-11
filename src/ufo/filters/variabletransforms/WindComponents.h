@@ -5,8 +5,8 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#ifndef UFO_FILTERS_WINDCOMPONENTS_H_
-#define UFO_FILTERS_WINDCOMPONENTS_H_
+#ifndef UFO_FILTERS_VARIABLETRANSFORMS_WINDCOMPONENTS_H_
+#define UFO_FILTERS_VARIABLETRANSFORMS_WINDCOMPONENTS_H_
 
 #include <ostream>
 #include <string>
@@ -39,8 +39,8 @@ class WindComponents : public FilterBase,
   static const std::string classname() {return "ufo::WindComponents";}
 
   WindComponents(ioda::ObsSpace &, const eckit::Configuration &,
-                  boost::shared_ptr<ioda::ObsDataVector<int> >,
-                  boost::shared_ptr<ioda::ObsDataVector<float> >);
+                  std::shared_ptr<ioda::ObsDataVector<int> >,
+                  std::shared_ptr<ioda::ObsDataVector<float> >);
   ~WindComponents();
 
  private:

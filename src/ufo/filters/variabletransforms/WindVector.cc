@@ -22,8 +22,8 @@ namespace ufo {
 // -----------------------------------------------------------------------------
 
 WindVector::WindVector(ioda::ObsSpace & obsdb, const eckit::Configuration & config,
-                                 boost::shared_ptr<ioda::ObsDataVector<int> > flags,
-                                 boost::shared_ptr<ioda::ObsDataVector<float> > obserr)
+                                 std::shared_ptr<ioda::ObsDataVector<int> > flags,
+                                 std::shared_ptr<ioda::ObsDataVector<float> > obserr)
   : FilterBase(obsdb, config, flags, obserr)
 
 {
@@ -66,12 +66,13 @@ void WindVector::applyFilter(const std::vector<bool> & apply,
         Zfff[jobs] = sqrt(pow(u[jobs], 2) + pow(v[jobs], 2));
         if (u[jobs] == 0 && v[jobs] ==0) {
             Zddd[jobs] = 0;
+        } else {
+            Zddd[jobs] = fmod((270.0 - atan2(v[jobs], u[jobs]) * deg), 360.0);
         }
-        else {
-            Zddd[jobs] = fmod((270.0 - atan2 (v[jobs], u[jobs]) * deg), 360.0);
-        }
-        oops::Log::debug() << "eastward_wind, northward_wind:" << u[jobs] << ", " << v[jobs]
-                           << " wind_speed=" << Zfff[jobs] << " wind_from_direction=" << Zddd[jobs]
+        oops::Log::debug() << "eastward_wind, northward_wind:"
+                           << u[jobs] << ", " << v[jobs]
+                           << " wind_speed=" << Zfff[jobs]
+                           << " wind_from_direction=" << Zddd[jobs]
                            << std::endl;
       }
     }
