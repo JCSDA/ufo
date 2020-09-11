@@ -1,33 +1,26 @@
 window begin: 2018-04-14T20:00:00Z
 window end: 2018-04-15T03:00:00Z
 
-Observations:
- ObsTypes:
- - ObsSpace:
-     name: Satwind
-     #  Ioda file we want to apply the filter to
-     ObsDataIn:
-       # obsfile: Data/ioda/testinput_tier_1/satwind_obs_2018041500_m.nc4
-       obsfile: Data/wind_unit_transforms_2018041500.nc4
-     ObsDataOut:
+observations:
+- obs space:
+    name: Satwind
+    obsdatain:
+      obsfile: Data/wind_unit_transforms_2018041500.nc4
+    obsdataout:
        obsfile: Data/windvector_2018041500_output.nc4
-     simulate:
-       variables: [eastward_wind, northward_wind]
-   ObsFilters:
-   #  name of the filter. List of filter names are in
-   #  ufo/src/ufo/instantiateObsFilterFactory.h
-   - Filter: Wind vector        # calculate wind components from speed and direction
-   #  how many data points will pass the filter? Should pass for all present obs
-   passedBenchmark: 150
-   #  test output matches precalculated values
-   compareVariables:
-     - reference:
-         name: wind_speed@TestReference
-       test:
-         name: wind_speed@ObsValue
-       absTol: 5e-5
-     - reference:
-         name: wind_from_direction@TestReference
-       test:
-         name: wind_from_direction@ObsValue
-       absTol: 5e-5
+    simulated variables: [eastward_wind, northward_wind]
+  obs filters:
+  - filter: Wind vector        # calculate wind components from speed and direction
+  # how many data points will pass the filter? Should pass for all present obs
+  passedBenchmark: 150
+  compareVariables:           #  test output matches precalculated values
+    - reference:
+        name: wind_speed@TestReference
+      test:
+        name: wind_speed@ObsValue
+      absTol: 5e-5
+    - reference:
+        name: wind_from_direction@TestReference
+      test:
+        name: wind_from_direction@ObsValue
+      absTol: 5e-5

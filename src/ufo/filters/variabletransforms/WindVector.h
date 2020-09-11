@@ -14,8 +14,6 @@
 #include <string>
 #include <vector>
 
-#include "boost/shared_ptr.hpp"
-
 #include "oops/util/ObjectCounter.h"
 #include "ufo/filters/FilterBase.h"
 #include "ufo/filters/QCflags.h"
