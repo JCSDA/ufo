@@ -13,7 +13,7 @@ observations:
   - filter: Wind vector        # calculate wind components from speed and direction
   # how many data points will pass the filter? Should pass for all present obs
   passedBenchmark: 150
-  compareVariables:           #  test output matches precalculated values
+  compareVariables:            #  test output matches precalculated values
     - reference:
         name: wind_speed@TestReference
       test:
