@@ -8,7 +8,13 @@ set (  bendmetoffice_src_files
        ObsGnssroBendMetOffice.cc
        ObsGnssroBendMetOffice.interface.h
        ObsGnssroBendMetOffice.interface.F90
+       ObsGnssroBendMetOfficeTLAD.h
+       ObsGnssroBendMetOfficeTLAD.cc
+       ObsGnssroBendMetOfficeTLAD.interface.h
+       ObsGnssroBendMetOfficeTLAD.interface.F90
        ufo_gnssro_bendmetoffice_mod.F90
        ufo_gnssro_bendmetoffice_utils_mod.F90
+       ufo_gnssro_bendmetoffice_tlad_mod.F90
+       ufo_gnssro_bendmetoffice_tlad_utils_mod.F90
 PARENT_SCOPE
 )
