@@ -130,6 +130,7 @@ list( APPEND ufo_test_input
   testinput/qc_trackcheck.yaml
   testinput/qc_trackcheck_unittests.yaml
   testinput/qc_trackcheckship_unittests.yaml
+  testinput/qc_trackcheckship_mainloop_unittests.yaml
   testinput/qc_backgroundcheck.yaml
   testinput/qc_boundscheck.yaml
   testinput/qc_velocitycheck.yaml
@@ -1219,6 +1220,12 @@ ecbuild_add_test( TARGET  test_ufo_qc_trackcheck_unittests
 ecbuild_add_test( TARGET  test_ufo_qc_trackcheckship_unittests
                   SOURCES mains/TestTrackCheckShip.cc
                   ARGS    "testinput/qc_trackcheckship_unittests.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  LIBS    ufo)
+
+ecbuild_add_test( TARGET  test_ufo_qc_trackcheckship_mainloop_unittests
+                  SOURCES mains/TestTrackCheckShipMainLoop.cc
+                  ARGS    "testinput/qc_trackcheckship_mainloop_unittests.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   LIBS    ufo)
 

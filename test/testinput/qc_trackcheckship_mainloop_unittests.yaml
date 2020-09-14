@@ -1,0 +1,490 @@
+Normal ship track:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Ship
+    simulated variables: [air_temperature]
+    generate:
+      list:
+        lats: [ 0, 1, 2 ]
+        lons: [ 0, 0, 0 ]
+        datetimes: [ '2010-01-01T00:00:00Z', '2010-01-01T01:00:00Z', '2010-01-01T02:00:00Z' ]
+      obs errors: [1.0]
+  station_ids: [ 1, 1, 1 ]
+  Ship Track Check:
+    testing mode: true
+    early break check: false
+    variables: [air_temperature]
+    temporal resolution: PT10M
+    spatial resolution: 1 # km
+    max speed: 1 #km/s (1 lat/lon unit diff/hr ~ .0308)
+    station_id_variable:
+      name: station_id@MetaData
+  expected first rejection index: []
+  expected error category: []
+Ship track error first segment category 2:
+#first of at least two segments;
+#if speedAveraged of observation after fast seg. is
+#low and either speed of segment after fast or angle between
+#segment after fastest and fastest is small
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Ship
+    simulated variables: [air_temperature]
+    generate:
+      list:
+        lats: [ 0, 1, 1.1, 1.1 ]
+        lons: [ 0, 0, 0, .1 ]
+        datetimes: [ '2010-01-01T00:00:00Z', '2010-01-01T01:00:00Z',
+        '2010-01-01T02:00:00Z', '2010-01-01T03:00:00Z' ]
+      obs errors: [1.0]
+  station_ids: [ 1, 1, 1, 1 ]
+  Ship Track Check:
+    testing mode: true
+    early break check: false
+    variables: [air_temperature]
+    temporal resolution: PT10M
+    spatial resolution: 1 # km
+    max speed: .03
+    station_id_variable:
+      name: station_id@MetaData
+  expected first rejection index: [1]
+  expected error category: [2]
+Ship track error first segment category 1:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Ship
+    simulated variables: [air_temperature]
+    generate:
+      list:
+        lats: [ 0, 1, 1.5]
+        lons: [ 0, 0, 0]
+        datetimes: [ '2010-01-01T00:00:00Z', '2010-01-01T01:00:00Z',
+                     '2010-01-01T02:00:00Z']
+      obs errors: [1.0]
+  station_ids: [ 1, 1, 1]
+  Ship Track Check:
+    testing mode: true
+    early break check: false
+    variables: [air_temperature]
+    temporal resolution: PT10M
+    spatial resolution: 1 # km
+    max speed: .03
+    station_id_variable:
+      name: station_id@MetaData
+  expected first rejection index: [0]
+  expected error category: [1]
+Ship track error last segment category 2:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Ship
+    simulated variables: [air_temperature]
+    generate:
+      list:
+        lats: [ 0, .5, 0, 1 ]
+        lons: [ 0, 0, 0, 0 ]
+        datetimes: [ '2010-01-01T00:00:00Z', '2010-01-01T01:00:00Z',
+                     '2010-01-01T02:00:00Z', '2010-01-01T03:00:00Z']
+      obs errors: [1.0]
+  station_ids: [ 1, 1, 1, 1 ]
+  Ship Track Check:
+    testing mode: true
+    early break check: false
+    variables: [air_temperature]
+    temporal resolution: PT10M
+    spatial resolution: 1 # km
+    max speed: .03
+    station_id_variable:
+      name: station_id@MetaData
+  expected first rejection index: [2]
+  expected error category: [2]
+Ship track error last segment category 1:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Ship
+    simulated variables: [air_temperature]
+    generate:
+      list:
+        lats: [ 0, 0, 1 ]
+        lons: [ 0, 0, 0 ]
+        datetimes: [ '2010-01-01T00:00:00Z', '2010-01-01T01:00:00Z',
+                     '2010-01-01T02:00:00Z']
+      obs errors: [1.0]
+  station_ids: [ 1, 1, 1 ]
+  Ship Track Check:
+    testing mode: true
+    early break check: false
+    variables: [air_temperature]
+    temporal resolution: PT10M
+    spatial resolution: 1 # km
+    max speed: .03
+    station_id_variable:
+      name: station_id@MetaData
+  expected first rejection index: [2]
+  expected error category: [1]
+Ship track error middle segment prev fast category 4:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Ship
+    simulated variables: [air_temperature]
+    generate:
+      list:
+        lats: [ 0, .999, -.001, -.002]
+        lons: [ 0, 0, 0, 0]
+        datetimes: [ '2010-01-01T00:00:00Z', '2010-01-01T01:00:00Z',
+                     '2010-01-01T02:00:00Z', '2010-01-01T03:00:00Z']
+      obs errors: [1.0]
+  station_ids: [ 1, 1, 1, 1]
+  Ship Track Check:
+    testing mode: true
+    early break check: false
+    variables: [air_temperature]
+    temporal resolution: PT10M
+    spatial resolution: 1 # km
+    max speed: .03
+    station_id_variable:
+      name: station_id@MetaData
+  expected first rejection index: [1]
+  expected error category: [4]
+Ship track error middle segment prev fast category 104:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Ship
+    simulated variables: [air_temperature]
+    generate:
+      list:
+        lats: [ 0, .999, 1.999, 2.5 ]
+        lons: [ 0, 0, 0, 0 ]
+        datetimes: [ '2010-01-01T00:00:00Z', '2010-01-01T01:00:00Z',
+                     '2010-01-01T02:00:00Z', '2010-01-01T03:00:00Z' ]
+      obs errors: [ 1.0 ]
+  station_ids: [ 1, 1, 1, 1 ]
+  Ship Track Check:
+    testing mode: true
+    early break check: false
+    variables: [air_temperature]
+    temporal resolution: PT10M
+    spatial resolution: 1 # km
+    max speed: .03
+    station_id_variable:
+      name: station_id@MetaData
+  expected first rejection index: [ 1, 2 ]
+  expected error category: [ 104 ]
+Ship track error middle segment next fast category 4:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Ship
+    simulated variables: [air_temperature]
+    generate:
+      list:
+        lats: [ 0, .5, 1.5, .501]
+        lons: [ 0, 0, 0, 0]
+        datetimes: [ '2010-01-01T00:00:00Z', '2010-01-01T01:00:00Z',
+                     '2010-01-01T02:00:00Z', '2010-01-01T03:00:00Z']
+      obs errors: [1.0]
+  station_ids: [ 1, 1, 1, 1]
+  Ship Track Check:
+    testing mode: true
+    early break check: false
+    variables: [air_temperature]
+    temporal resolution: PT10M
+    spatial resolution: 1 # km
+    max speed: .03
+    station_id_variable:
+      name: station_id@MetaData
+  expected first rejection index: [2]
+  expected error category: [4]
+Ship track error middle segment next fast category 104:
+# If speedAveraged of rejected observation is greater than max,
+# 100 will be added to category and both will be rejected.
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Ship
+    simulated variables: [air_temperature]
+    generate:
+      list:
+        lats: [ 0, .5, 1.5, 2.499]
+        lons: [ 0, 0, 0, 0]
+        datetimes: [ '2010-01-01T00:00:00Z', '2010-01-01T01:00:00Z',
+                     '2010-01-01T02:00:00Z', '2010-01-01T03:00:00Z']
+      obs errors: [1.0]
+  station_ids: [ 1, 1, 1, 1]
+  Ship Track Check:
+    testing mode: true
+    early break check: false
+    variables: [air_temperature]
+    temporal resolution: PT10M
+    spatial resolution: 1 # km
+    max speed: .03
+    station_id_variable:
+      name: station_id@MetaData
+  expected first rejection index: [1,2]
+  expected error category: [104]
+Ship track error middle segment average fast category 5: #uses time res to control speedAveraged more predictably
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Ship
+    simulated variables: [air_temperature]
+    generate:
+      list:
+        lats: [ 0, .1, 1.1, 1.1]
+        lons: [ 0, 0, 0, .5]
+        datetimes: [ '2010-01-01T00:00:00Z', '2010-01-01T01:00:00Z',
+                     '2010-01-01T02:00:00Z', '2010-01-01T02:00:00Z']
+      obs errors: [1.0]
+  station_ids: [ 1, 1, 1, 1]
+  Ship Track Check:
+    testing mode: true
+    early break check: false
+    variables: [air_temperature]
+    temporal resolution: PT1H
+    spatial resolution: 1 # km
+    max speed: .03
+    station_id_variable:
+      name: station_id@MetaData
+  expected first rejection index: [1]
+  expected error category: [5]
+Ship track error middle segment prev average fast category 5:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Ship
+    simulated variables: [air_temperature]
+    generate:
+      list:
+        lats: [ 0, .5, 1.5, .6 ]
+        lons: [ 0, 0, 0, 0]
+        datetimes: [ '2010-01-01T00:00:00Z', '2010-01-01T01:00:00Z',
+                     '2010-01-01T01:00:00Z', '2010-01-01T02:00:00Z']
+      obs errors: [1.0]
+  station_ids: [ 1, 1, 1, 1]
+  Ship Track Check:
+    testing mode: true
+    early break check: false
+    variables: [air_temperature]
+    temporal resolution: PT1H
+    spatial resolution: 1 # km
+    max speed: .03
+    station_id_variable:
+      name: station_id@MetaData
+  expected first rejection index: [ 2 ]
+  expected error category: [ 5 ]
+Ship track error middle segment prev average fast category 105:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Ship
+    simulated variables: [air_temperature]
+    generate:
+      list:
+        lats: [ 0, .5, 1.5, 2.0 ]
+        lons: [ 0, 0, 0, 0 ]
+        datetimes: [ '2010-01-01T00:00:00Z', '2010-01-01T01:00:00Z',
+                     '2010-01-01T01:00:00Z', '2010-01-01T02:00:00Z' ]
+      obs errors: [ 1.0 ]
+  station_ids: [ 1, 1, 1, 1 ]
+  Ship Track Check:
+    testing mode: true
+    early break check: false
+    variables: [air_temperature]
+    temporal resolution: PT1H
+    spatial resolution: 1 # km
+    max speed: .03
+    station_id_variable:
+      name: station_id@MetaData
+  expected first rejection index: [ 1, 2 ]
+  expected error category: [ 105 ]
+Ship track error middle segment prev angle large category 6:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Ship
+    simulated variables: [air_temperature]
+    generate:
+      list:
+        lats: [ 0, .1, .1, .1]
+        lons: [ 0, 0, 1, 1.5]
+        datetimes: [ '2010-01-01T00:00:00Z', '2010-01-01T01:00:00Z',
+                     '2010-01-01T02:00:00Z', '2010-01-01T03:00:00Z']
+      obs errors: [1.0]
+  station_ids: [ 1, 1, 1, 1]
+  Ship Track Check:
+    testing mode: true
+    early break check: false
+    variables: [air_temperature]
+    temporal resolution: PT1H
+    spatial resolution: 1 # km
+    max speed: .03
+    station_id_variable:
+      name: station_id@MetaData
+  expected first rejection index: [1]
+  expected error category: [6]
+Ship track error middle segment angle large category 6:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Ship
+    simulated variables: [air_temperature]
+    generate:
+      list:
+        lats: [ 0, .1, 1.1, 1.1]
+        lons: [ 0, 0, 0, .1]
+        datetimes: [ '2010-01-01T00:00:00Z', '2010-01-01T01:00:00Z',
+                     '2010-01-01T02:00:00Z', '2010-01-01T03:00:00Z']
+      obs errors: [1.0]
+  station_ids: [ 1, 1, 1, 1]
+  Ship Track Check:
+    testing mode: true
+    early break check: false
+    variables: [air_temperature]
+    temporal resolution: PT1H
+    spatial resolution: 1 # km
+    max speed: .03
+    station_id_variable:
+      name: station_id@MetaData
+  expected first rejection index: [2]
+  expected error category: [6]
+Ship track error middle segment previous previous angle large category 7:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Ship
+    simulated variables: [air_temperature]
+    generate:
+      list:
+        lats: [ 0, 0, .1, 1.1, 1.1]
+        lons: [ 0, .1, .1, .1, .1]
+        datetimes: [ '2010-01-01T00:00:00Z', '2010-01-01T01:00:00Z',
+                     '2010-01-01T02:00:00Z', '2010-01-01T03:00:00Z',
+                     '2010-01-01T04:00:00Z']
+      obs errors: [1.0]
+  station_ids: [ 1, 1, 1, 1, 1]
+  Ship Track Check:
+    testing mode: true
+    early break check: false
+    variables: [air_temperature]
+    temporal resolution: PT1H
+    spatial resolution: 1 # km
+    max speed: .03
+    station_id_variable:
+      name: station_id@MetaData
+  expected first rejection index: [2]
+  expected error category: [7]
+Ship track error middle segment next angle large category 7:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Ship
+    simulated variables: [air_temperature]
+    generate:
+      list:
+        lats: [ 0, .1, 1.1, 1.2, 1.2]
+        lons: [ 0, 0, 0, 0, .1]
+        datetimes: [ '2010-01-01T00:00:00Z', '2010-01-01T01:00:00Z',
+                     '2010-01-01T02:00:00Z', '2010-01-01T03:00:00Z',
+                     '2010-01-01T04:00:00Z']
+      obs errors: [1.0]
+  station_ids: [ 1, 1, 1, 1, 1]
+  Ship Track Check:
+    testing mode: true
+    early break check: false
+    variables: [air_temperature]
+    temporal resolution: PT1H
+    spatial resolution: 1 # km
+    max speed: .03
+    station_id_variable:
+      name: station_id@MetaData
+  expected first rejection index: [2]
+  expected error category: [7]
+Ship track error middle segment prev speed < half next speed category 8:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Ship
+    simulated variables: [air_temperature]
+    generate:
+      list:
+        lats: [ 0, 0, 1.0, 1.2]
+        lons: [ 0, 0, 0, 0]
+        datetimes: [ '2010-01-01T00:00:00Z', '2010-01-01T01:00:00Z',
+                     '2010-01-01T02:00:00Z', '2010-01-01T03:00:00Z' ]
+      obs errors: [1.0]
+  station_ids: [ 1, 1, 1, 1]
+  Ship Track Check:
+    testing mode: true
+    early break check: false
+    variables: [air_temperature]
+    temporal resolution: PT1H
+    spatial resolution: 1 # km
+    max speed: .03
+    station_id_variable:
+      name: station_id@MetaData
+  expected first rejection index: [1]
+  expected error category: [8]
+Ship track error middle segment next speed < half prev speed category 8:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Ship
+    simulated variables: [air_temperature]
+    generate:
+      list:
+        lats: [ 0, .2, 1.2, 1.2]
+        lons: [ 0, 0, 0, 0]
+        datetimes: [ '2010-01-01T00:00:00Z', '2010-01-01T01:00:00Z',
+                     '2010-01-01T02:00:00Z', '2010-01-01T03:00:00Z' ]
+      obs errors: [1.0]
+  station_ids: [ 1, 1, 1, 1]
+  Ship Track Check:
+    testing mode: true
+    early break check: false
+    variables: [air_temperature]
+    temporal resolution: PT1H
+    spatial resolution: 1 # km
+    max speed: .03
+    station_id_variable:
+      name: station_id@MetaData
+  expected first rejection index: [2]
+  expected error category: [8]
+Ship track error middle segment category 100:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Ship
+    simulated variables: [air_temperature]
+    generate:
+      list:
+        lats: [ 0, .1, 1.1, 1.2 ]
+        lons: [ 0, 0, 0, 0 ]
+        datetimes: [ '2010-01-01T00:00:00Z', '2010-01-01T01:00:00Z',
+                     '2010-01-01T02:00:00Z', '2010-01-01T03:00:00Z' ]
+      obs errors: [1.0]
+  station_ids: [ 1, 1, 1, 1]
+  Ship Track Check:
+    testing mode: true
+    early break check: false
+    variables: [air_temperature]
+    temporal resolution: PT1H
+    spatial resolution: 1 # km
+    max speed: .03
+    station_id_variable:
+      name: station_id@MetaData
+  expected first rejection index: [ 1, 2 ]
+  expected error category: [100]
+  expected distance sum: [133.2] #111 for 1 unit of lat
+  expected distance previous observation omitted: [133.2]
+  expected distance current observation omitted: [133.2]
+  expected time sum: [10800] #seconds
+  expected previous segment distance proportion: [0.0833]
+  expected previous observation distance averaged proportion: [0.91667]
+  expected previous segment time proportion: [0.333]
+  expected previous and fastest segment time proportion: [0.667]

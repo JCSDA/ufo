@@ -22,7 +22,7 @@
 
 namespace ufo {
 
-/// \brief Options controlling the operation of the ship track check filter. TODO: edit
+/// \brief Options controlling the operation of the ship track check filter.
 class TrackCheckShipParameters : public TrackCheckUtilsParameters {
  public:
   /// Assumed temporal resolution of the observations, i.e. absolute accuracy of the reported
@@ -30,6 +30,7 @@ class TrackCheckShipParameters : public TrackCheckUtilsParameters {
   oops::Parameter<util::Duration> temporalResolution{
     "temporal resolution", util::Duration("PT10M"), this
   };
+
   /// Assumed spatial resolution of the observations (in km), i.e. absolute accuracy of the
   /// reported positions.
   ///
@@ -42,19 +43,24 @@ class TrackCheckShipParameters : public TrackCheckUtilsParameters {
   };
 
   /// Maximum speed (before marking as fast) in km/s
-  /// \attention: please let me know what a better default value for ships might be.
   oops::Parameter<double> maxSpeed {
     "max speed", 1.0, this
   };
 
+  /// The start of an observation window where trace output should be produced. If blank,
+  /// the start of the track will be treated as the start of this window.
   oops::OptionalParameter<float> debugWindowStart {
     "debug window start", this
   };
 
+  /// The end of an observation window where trace output should be produced. If blank,
+  /// the end of the track will be treated as the end of this window.
   oops::OptionalParameter<float> debugWindowEnd {
     "debug window end", this
   };
 
+  /// The type of input source. This affects the treatment of tracks
+  /// with large numbers of simultaneous observations.
   oops::Parameter<int> inputCategory {
     "input category", 2, this  // 1 for buoy/other fixed input; 2 for ship; 3 for ship_auto
   };
@@ -72,7 +78,7 @@ class TrackCheckShipParameters : public TrackCheckUtilsParameters {
     "early break check", true, this
   };
 
-  /// To be set to \p true if the filter's tests are being run
+  /// \brief To be set to \p true if the filter's unit tests are being run
   oops::Parameter<bool> testingMode {
     "testing mode", false, this
   };

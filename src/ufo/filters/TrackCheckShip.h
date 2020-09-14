@@ -13,6 +13,7 @@
 #include <array>
 #include <cmath>
 #include <cstdlib>
+#include <functional>
 #include <list>
 #include <memory>
 #include <ostream>
@@ -128,7 +129,9 @@ class TrackCheckShip: public FilterBase,
    public:
     TrackObservation(double latitude, double longitude,
                      const util::DateTime &time,
-                     const std::shared_ptr<TrackStatistics> & trackStatistics);
+                     const std::shared_ptr<TrackStatistics> & trackStatistics,
+                     const std::shared_ptr<TrackCheckUtils::CheckCounter> & checkCounter,
+                     size_t observationNumber);
     const TrackCheckUtils::Point& getLocation() const {
       return obsLocationTime_.location();
     }
@@ -156,10 +159,24 @@ class TrackCheckShip: public FilterBase,
 
     const ObservationStatistics &getObservationStatistics() const;
 
+    void registerCheckResult(const TrackCheckUtils::CheckResult &result);
+    void registerSweepOutcome(bool rejectedInSweep) {
+      rejected_ = rejectedInSweep;
+    }
+
+    size_t getObservationNumber() const;
+
+    bool rejected() const {
+      return rejected_;
+    }
+
    private:
     std::shared_ptr<TrackStatistics> fullTrackStatistics_;
+    std::shared_ptr<TrackCheckUtils::CheckCounter> checkCounter_;
     ObservationStatistics observationStatistics_;
     TrackCheckUtils::ObsLocationTime obsLocationTime_;
+    size_t observationNumber_;
+    bool rejected_;
   };
 
  public:
@@ -174,12 +191,21 @@ class TrackCheckShip: public FilterBase,
       const TrackCheckShipParameters& options);
 
   static float angle(const TrackCheckShip::TrackObservation &a,
-                               const TrackCheckShip::TrackObservation &b,
-                               const TrackCheckShip::TrackObservation &c);
+                     const TrackCheckShip::TrackObservation &b,
+                     const TrackCheckShip::TrackObservation &c);
   const TrackCheckShipDiagnostics* diagnostics() const;
 
  private:
+  std::unique_ptr<TrackCheckShipParameters> options_;
   std::unique_ptr<TrackCheckShipDiagnostics> diagnostics_;
+
+  void flagRejectedTrackObservations(
+      std::vector<size_t>::const_iterator trackObsIndicesBegin,
+      std::vector<size_t>::const_iterator trackObsIndicesEnd,
+      const std::vector<size_t> &validObsIds,
+      const std::vector<TrackObservation> &trackObservations,
+      std::vector<bool> &isRejected) const;
+
   void print(std::ostream &) const override;
   void applyFilter(const std::vector<bool> &, const Variables &,
                    std::vector<std::vector<bool>> &) const override;
@@ -201,7 +227,10 @@ class TrackCheckShip: public FilterBase,
       const std::vector<std::reference_wrapper<TrackObservation>> &trackObs) const;
   bool earlyBreak(const std::vector<std::reference_wrapper<TrackObservation>> &trackObs) const;
 
-  std::unique_ptr<TrackCheckShipParameters> options_;
+  void removeFaultyObservation(
+      std::vector<std::reference_wrapper<TrackObservation> > &track,
+      const std::vector<std::reference_wrapper<TrackObservation> >::iterator &it,
+      bool firstIterativeRemoval = false) const;
 };
 
 }  // namespace ufo
