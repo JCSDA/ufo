@@ -141,9 +141,8 @@ void ObsBiasCovariance::read(const eckit::Configuration & conf) {
 
       float par;
       std::map<std::string, double> elem;
-      while (!infile.eof())
+      while (infile >> ich)
       {
-        infile >> ich;
         infile >> nusis;
         infile >> nuchan;
         infile >> number;
@@ -161,11 +160,13 @@ void ObsBiasCovariance::read(const eckit::Configuration & conf) {
                 variances_prior_.at(j*prednames_.size() + p) = static_cast<double>(par);
               }
             }
+          } else {
+            for (auto & item : gsi_predictors)
+              infile >> par;
           }
         } else {
-          for (auto item : gsi_predictors) {
+          for (auto & item : gsi_predictors)
             infile >> par;
-          }
         }
       }
       infile.close();
