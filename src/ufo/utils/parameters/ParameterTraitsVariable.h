@@ -9,10 +9,12 @@
 #define UFO_UTILS_PARAMETERS_PARAMETERTRAITSVARIABLE_H_
 
 #include <string>
+#include <vector>
 
 #include "eckit/exception/Exceptions.h"
 #include "oops/util/CompositePath.h"
 #include "oops/util/parameters/ParameterTraits.h"
+#include "oops/util/stringFunctions.h"
 #include "ufo/filters/Variable.h"
 
 /// \file ParameterTraitsVariable.h
@@ -37,6 +39,22 @@ struct ParameterTraits<ufo::Variable> {
     } else {
       return boost::none;
     }
+  }
+
+  static void set(eckit::LocalConfiguration &config,
+                  const std::string &name,
+                  const ufo::Variable &value) {
+    eckit::LocalConfiguration subConfig;
+    subConfig.set("name", value.variable() + "@" + value.group());
+    const std::vector<int> &channels = value.channels();
+    if (!channels.empty()) {
+      const std::string channelsAsString = util::stringfunctions::join(
+            ",", channels.begin(), channels.end(), [](int n) { return std::to_string(n); });
+      subConfig.set("channels", channelsAsString);
+    }
+    if (!value.options().keys().empty())
+      subConfig.set("options", value.options());
+    config.set(name, subConfig);
   }
 };
 
