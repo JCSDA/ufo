@@ -26,6 +26,7 @@ namespace ufo {
 namespace test {
 
 class MyParameters : public oops::Parameters {
+  OOPS_CONCRETE_PARAMETERS(MyParameters, Parameters)
  public:
   oops::OptionalParameter<ufo::Variable> optVariableParameter{"opt_variable_parameter", this};
 };
@@ -51,6 +52,7 @@ void testCorrectValue() {
   EXPECT_EQUAL(params.optVariableParameter.value().get().group(), "MetaData");
   EXPECT_EQUAL(params.optVariableParameter.value().get().variable(), "latitude");
 }
+
 void testIncorrectValue() {
   MyParameters params;
   const eckit::LocalConfiguration conf(::test::TestEnvironment::config(),

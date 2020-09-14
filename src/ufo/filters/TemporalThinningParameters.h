@@ -25,6 +25,8 @@ namespace ufo {
 
 /// \brief Options controlling the operation of the TemporalThinning filter.
 class TemporalThinningParameters : public oops::Parameters {
+  OOPS_CONCRETE_PARAMETERS(TemporalThinningParameters, Parameters)
+
  public:
   /// Minimum spacing between two successive retained observations.
   oops::Parameter<util::Duration> minSpacing{"min_spacing", util::Duration("PT1H"), this};

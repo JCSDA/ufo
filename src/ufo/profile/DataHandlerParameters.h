@@ -23,6 +23,8 @@ namespace ufo {
   /// \brief Options controlling the operation of the EntireSampleDataHandler
   /// and ProfileDataHandler classes.
   class DataHandlerParameters : public oops::Parameters {
+     OOPS_ABSTRACT_PARAMETERS(DataHandlerParameters, Parameters)
+
    public:  // functions
     /// Determine whether a variable group is optional or not.
     bool getOptional(const std::string &groupname) const

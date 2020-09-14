@@ -27,6 +27,8 @@ namespace ufo {
 /// latitude, terrain height, and transmittance at the model top
 ///
 class ObsErrorBoundMWParameters : public oops::Parameters {
+  OOPS_CONCRETE_PARAMETERS(ObsErrorBoundMWParameters, Parameters)
+
  public:
   /// List of channels available for assimilation
   oops::RequiredParameter<std::string> channelList{"channels", this};

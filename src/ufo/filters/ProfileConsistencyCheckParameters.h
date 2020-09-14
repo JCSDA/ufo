@@ -30,6 +30,8 @@ namespace ufo {
 
   /// \brief Options controlling the operation of the ProfileConsistencyChecks filter.
   class ProfileConsistencyCheckParameters : public DataHandlerParameters {
+    OOPS_CONCRETE_PARAMETERS(ProfileConsistencyCheckParameters, DataHandlerParameters)
+
    public:  // variables
     //=== Generic parameters ===//
 

@@ -11,6 +11,7 @@
 #include <string>
 
 #include "eckit/exception/Exceptions.h"
+#include "oops/util/CompositePath.h"
 #include "oops/util/parameters/ParameterTraits.h"
 #include "ufo/filters/Variable.h"
 
@@ -22,14 +23,15 @@ namespace oops {
 
 template <>
 struct ParameterTraits<ufo::Variable> {
-  static boost::optional<ufo::Variable> get(const eckit::Configuration &config,
+  static boost::optional<ufo::Variable> get(util::CompositePath &path,
+                                            const eckit::Configuration &config,
                                             const std::string& name) {
     if (config.has(name)) {
       eckit::LocalConfiguration varConf(config, name);
       if (!varConf.has("name")) {
         // TODO(wsmigaj): shouldn't ufo::Variable itself throw an exception if
         // the 'name' property is not specified?
-        throw eckit::BadParameter("No variable name specified", Here());
+        throw eckit::BadParameter(path.path() + ": No variable name specified", Here());
       }
       return ufo::Variable(varConf);
     } else {
