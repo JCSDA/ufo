@@ -131,6 +131,7 @@ list( APPEND ufo_test_input
   testinput/qc_trackcheck.yaml
   testinput/qc_trackcheck_unittests.yaml
   testinput/qc_trackcheckship_unittests.yaml
+  testinput/qc_trackcheckship_mainloop_unittests.yaml
   testinput/qc_backgroundcheck.yaml
   testinput/qc_boundscheck.yaml
   testinput/qc_velocitycheck.yaml
@@ -895,6 +896,12 @@ ecbuild_add_test( TARGET  test_ufo_opr_gnssroBendMetOffice
                   DEPENDS test_ObsOperator.x 
                   TEST_DEPENDS ufo_get_ioda_test_data )
 
+ecbuild_add_test( TARGET  test_ufo_linopr_gnssroBendMetOffice
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
+                  ARGS    "testinput/gnssrobendmetoffice.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsOperatorTLAD.x )
+
 if( ${ROPP-UFO_FOUND} )
 ecbuild_add_test( TARGET  test_ufo_opr_gnssroBndROPP1D
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
@@ -1224,6 +1231,12 @@ ecbuild_add_test( TARGET  test_ufo_qc_trackcheck_unittests
 ecbuild_add_test( TARGET  test_ufo_qc_trackcheckship_unittests
                   SOURCES mains/TestTrackCheckShip.cc
                   ARGS    "testinput/qc_trackcheckship_unittests.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  LIBS    ufo)
+
+ecbuild_add_test( TARGET  test_ufo_qc_trackcheckship_mainloop_unittests
+                  SOURCES mains/TestTrackCheckShipMainLoop.cc
+                  ARGS    "testinput/qc_trackcheckship_mainloop_unittests.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   LIBS    ufo)
 

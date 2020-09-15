@@ -2,6 +2,14 @@ empty:
   # Nothing to see here
 full:
   opt_variable_parameter:
+    channels: 1,5
     name: latitude@MetaData
+    options:
+      some_option: true
+no_channels:
+  opt_variable_parameter:
+    name: latitude@MetaData
+    options:
+      some_option: true
 error_in_opt_variable_parameter:
   opt_variable_parameter:

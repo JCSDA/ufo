@@ -36,6 +36,7 @@ class Variable: public util::Printable {
   const std::string & variable() const;
   std::string variable(const size_t) const;
   const std::string & group() const;
+  const std::vector<int> & channels() const;
 
   oops::Variables toOopsVariables() const;
 

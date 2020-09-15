@@ -28,8 +28,8 @@ private
 
   !> Fortran derived type for gnssro trajectory
 type, extends(ufo_basis) :: ufo_gnssro_BendMetOffice
-logical :: vert_interp_ops
-logical :: pseudo_ops
+  logical :: vert_interp_ops
+  logical :: pseudo_ops
   contains
     procedure :: setup     => ufo_gnssro_bendmetoffice_setup
     procedure :: simobs    => ufo_gnssro_bendmetoffice_simobs
@@ -72,6 +72,7 @@ subroutine ufo_gnssro_bendmetoffice_simobs(self, geovals, hofx, obss)
   character(max_string)              :: err_msg         ! Error message for output
   character(max_string)              :: message         ! General message for output
   integer                            :: nobs            ! Number of observations
+  integer                            :: ilev            ! Loop variable, level number
   integer                            :: iobs            ! Loop variable, observation number
   type(ufo_geoval), pointer          :: q               ! Model background values of specific humidity
   type(ufo_geoval), pointer          :: prs             ! Model background values of air pressure
@@ -135,10 +136,11 @@ subroutine ufo_gnssro_bendmetoffice_simobs(self, geovals, hofx, obss)
   call obsspace_get_db(obss, "MetaData", "earth_radius_of_curvature", radius_curv)
   call obsspace_get_db(obss, "MetaData", "geoid_height_above_reference_ellipsoid", undulation)
 
-  write(err_msg,*) "TRACE: ufo_gnssro_bendmetoffice_simobs: begin observation loop, nobs =  ", nobs
   call fckit_log%info(err_msg)
 
   obs_loop: do iobs = 1, nobs 
+
+    call fckit_log%info(err_msg)
 
     if (flip_data) then
         call Ops_GPSRO_ForwardModel(prs % nval, &

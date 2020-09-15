@@ -29,6 +29,8 @@ namespace ufo {
 /// \brief Options controling the cloud and precipitation checks for WM sensors
 ///
 class HydrometeorCheckATMSParameters : public oops::Parameters {
+  OOPS_CONCRETE_PARAMETERS(HydrometeorCheckATMSParameters, Parameters)
+
  public:
   /// List of channels available for assimilation
   oops::RequiredParameter<std::string> channelList{"channels", this};

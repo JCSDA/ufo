@@ -38,12 +38,12 @@ type(c_ptr),    intent(in)    :: c_conf
 type(ufo_gnssro_BendMetOffice), pointer :: self
 type(fckit_configuration) :: f_conf
 
-call ufo_gnssro_BendMetOffice_registry%setup(c_key_self, self)
+call ufo_gnssro_bendmetoffice_registry%setup(c_key_self, self)
 f_conf = fckit_configuration(c_conf)
 
 call self%setup(f_conf)
 
-end subroutine ufo_gnssro_BendMetOffice_setup_c
+end subroutine ufo_gnssro_bendmetoffice_setup_c
   
 ! ------------------------------------------------------------------------------
   

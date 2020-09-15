@@ -23,6 +23,8 @@ namespace ufo {
 
 /// \brief Options controlling Symmetric Cloud Impact for IR instruments
 class SymmCldImpactIRParameters : public oops::Parameters {
+  OOPS_CONCRETE_PARAMETERS(SymmCldImpactIRParameters, Parameters)
+
  public:
   /// channels for which SCI will be calculated
   oops::RequiredParameter<std::string> chlist{"channels", this};

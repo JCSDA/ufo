@@ -27,6 +27,8 @@ namespace ufo {
 /// \brief Options applying to the situation-dependent error inflation factor
 ///
 class ObsErrorFactorSituDependMWParameters : public oops::Parameters {
+  OOPS_CONCRETE_PARAMETERS(ObsErrorFactorSituDependMWParameters, Parameters)
+
  public:
   /// List of channels available for assimilation
   oops::RequiredParameter<std::string> channelList{"channels", this};

@@ -26,6 +26,8 @@ namespace ufo {
 //  of surface temperature jacobian and surface emissivity jacobian
 ///
 class ObsErrorFactorSurfJacobianRadParameters : public oops::Parameters {
+  OOPS_CONCRETE_PARAMETERS(ObsErrorFactorSurfJacobianRadParameters, Parameters)
+
  public:
   /// List of channels to which the observation error factor applies
   oops::RequiredParameter<std::string> channelList{"channels", this};

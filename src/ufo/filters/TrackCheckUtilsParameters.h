@@ -20,6 +20,11 @@ namespace ufo {
 
 /// \brief Options controlling the operation of the track check filter.
 class TrackCheckUtilsParameters : public oops::Parameters {
+  // TODO(wsmigaj/aweinbren): Refactor TrackCheckUtils::groupObservationsByStation to avoid creating
+  // a TrackCheckUtilsParameters object and then replace OOPS_CONCRETE_PARAMETERS with
+  // OOPS_ABSTRACT_PARAMETERS.
+  OOPS_CONCRETE_PARAMETERS(TrackCheckUtilsParameters, Parameters)
+
  public:
   /// Variable storing integer-valued or string-valued station IDs.
   /// Observations taken by each station are checked separately.
