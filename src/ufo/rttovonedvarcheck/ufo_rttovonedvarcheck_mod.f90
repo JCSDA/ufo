@@ -207,7 +207,7 @@ subroutine ufo_rttovonedvarcheck_apply(self, vars, retrieval_vars, geovals, appl
       end if
 
       ! setup ob data for this observation
-      call ob % setup(nchans_used, prof_index % nprofelements)
+      call ob % setup(nchans_used, prof_index % nprofelements, self % nchans)
       ob % forward_mod_name = self % forward_mod_name
       ob % latitude = obs % lat(jobs)
       ob % longitude = obs % lon(jobs)
@@ -216,6 +216,7 @@ subroutine ufo_rttovonedvarcheck_apply(self, vars, retrieval_vars, geovals, appl
       ob % sensor_azimuth_angle = obs % sat_azi(jobs)
       ob % solar_zenith_angle = obs % sol_zen(jobs)
       ob % solar_azimuth_angle = obs % sol_azi(jobs)
+      ob % channels_all = self % channels
       ob % surface_type = obs % surface_type(jobs)
       ob % retrievecloud = cloud_retrieval
       ob % pcemis => IR_pcemis
@@ -246,6 +247,8 @@ subroutine ufo_rttovonedvarcheck_apply(self, vars, retrieval_vars, geovals, appl
         write(*,*) "ob % calc_emiss = ",ob % calc_emiss
         write(*,*) "Channel selection = "
         write(*,'(15I5)') ob % channels_used
+        write(*,*) "All Channels = "
+        write(*,'(15I5)') ob % channels_all
       end if
 
       !---------------------------------------------------
@@ -263,15 +266,7 @@ subroutine ufo_rttovonedvarcheck_apply(self, vars, retrieval_vars, geovals, appl
                                       onedvar_success)
       end if
 
-      ! Output data to obs for output to the observation space
-      all_chans: do jvar = 1, self % nchans
-        do ivar = 1, jchans_used
-          if (ob % channels_used(ivar) == self % channels(jvar)) then
-            obs % output_BT(jvar, jobs) = ob % output_BT(ivar)
-            cycle all_chans
-          end if
-        end do
-      end do all_chans
+      obs % output_BT(:, jobs) = ob % output_BT(:)
       obs % output_profile(:,jobs) = ob % output_profile(:)
       obs % final_cost(jobs) = ob % final_cost
 

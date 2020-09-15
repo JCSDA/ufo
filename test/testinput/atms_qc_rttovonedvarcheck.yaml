@@ -20,8 +20,13 @@ observations:
     obsdataout:
       obsfile: Data/atms_allsats_obs_2019112800-out.nc4
     simulated variables: [brightness_temperature]
-    channels: &ops_channels 6-15, 18-22
+    channels: &ops_channels 1-22
   obs filters:
+  # BlackList these channels but still want hofx for monitoring
+  - filter: BlackList
+    filter variables:
+    - name: brightness_temperature
+      channels: 1-5, 16-17
   # Bounds check observations - check for missing values
   - filter: Bounds Check
     filter variables:

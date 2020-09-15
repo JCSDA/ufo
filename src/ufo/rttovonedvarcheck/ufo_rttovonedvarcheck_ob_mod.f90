@@ -24,6 +24,7 @@ type, public :: ufo_rttovonedvarcheck_ob
   integer              :: nlocs !< number of locations = 1
   integer              :: surface_type  !< surface type of observation
   integer, allocatable :: channels_used(:) !< channels used for this observation
+  integer, allocatable :: channels_all(:) !< all channels used for output
   real(kind_real)      :: latitude !< latitude of observation
   real(kind_real)      :: longitude !< longitude of observation
   real(kind_real)      :: elevation  !< elevation above sea level of observation
@@ -62,7 +63,8 @@ contains
 !!
 subroutine ufo_rttovonedvarcheck_InitOb(self, & ! out
                                         nchans, &  ! in
-                                        nprofelements ) ! in
+                                        nprofelements, & ! in
+                                        nchans_all ) ! in
 
 implicit none
 
@@ -70,6 +72,7 @@ implicit none
 class(ufo_rttovonedvarcheck_ob), intent(out) :: self !< observation metadata type
 integer, intent(in) :: nchans !< number of channels used for this particular observation
 integer, intent(in) :: nprofelements !< number of profile elements used
+integer :: nchans_all !< Size of all channels in ObsSpace
 
 character(len=*), parameter :: routinename = "ufo_rttovonedvarcheck_InitOb"
 real(kind_real) :: missing
@@ -80,9 +83,10 @@ call self % delete()
 
 allocate(self % yobs(nchans))
 allocate(self % channels_used(nchans))
+allocate(self % channels_all(nchans_all))
 allocate(self % emiss(nchans))
 allocate(self % output_profile(nprofelements))
-allocate(self % output_BT(nchans))
+allocate(self % output_BT(nchans_all))
 allocate(self % calc_emiss(nchans))
 
 self % yobs(:) = missing
@@ -130,6 +134,7 @@ self % mwscatt_totalice = .false.
 
 if (allocated(self % yobs))           deallocate(self % yobs)
 if (allocated(self % channels_used))  deallocate(self % channels_used)
+if (allocated(self % channels_all))   deallocate(self % channels_all)
 if (allocated(self % emiss))          deallocate(self % emiss)
 if (allocated(self % output_profile)) deallocate(self % output_profile)
 if (allocated(self % output_BT))      deallocate(self % output_BT)

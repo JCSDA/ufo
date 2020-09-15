@@ -34,16 +34,17 @@ contains
 !!
 !! \date 09/06/2020: Created
 !!
-subroutine ufo_rttovonedvarcheck_get_jacobian(geovals, ob, obsdb, &
-                                           conf, profindex, prof_x, &
-                                           hofxdiags, &
-                                           hofx, H_matrix)
+subroutine ufo_rttovonedvarcheck_get_jacobian(geovals, ob, channels, &
+                                              obsdb, conf, profindex, &
+                                              prof_x, hofxdiags, &
+                                              hofx, H_matrix)
 
 implicit none
 
 ! subroutine arguments
 type(ufo_geovals), intent(in)                     :: geovals       !< model data at obs location
 type(ufo_rttovonedvarcheck_ob), intent(in)        :: ob            !< satellite metadata
+integer, intent(in)                               :: channels(:)   !< channels used for this calculation
 type(c_ptr), value, intent(in)                    :: obsdb         !< observation database
 type(fckit_configuration), intent(in)             :: conf          !< configuration
 type(ufo_rttovonedvarcheck_profindex), intent(in) :: profindex     !< index array for x vector
@@ -59,7 +60,7 @@ type(ufo_radiancerttov)      :: rttov_simobs ! structure for holding rttov data
 select case (trim(ob % forward_mod_name))
   case ("RTTOV")
     call rttov_tlad % setup(conf)
-    call ufo_rttovonedvarcheck_GetHmatrixRTTOV(geovals, ob, obsdb, &
+    call ufo_rttovonedvarcheck_GetHmatrixRTTOV(geovals, ob, channels, obsdb, &
                                                rttov_tlad, &
                                                profindex, prof_x(:), hofxdiags, &
                                                hofx(:), H_matrix) ! out
@@ -94,7 +95,7 @@ end  subroutine ufo_rttovonedvarcheck_get_jacobian
 !!
 !! \date 09/06/2020: Created
 !!
-subroutine ufo_rttovonedvarcheck_GetHmatrixRTTOV(geovals, ob, obsdb, &
+subroutine ufo_rttovonedvarcheck_GetHmatrixRTTOV(geovals, ob, channels, obsdb, &
                                        rttov_data, profindex, prof_x, &
                                        hofxdiags, hofx, H_matrix)
 
@@ -103,6 +104,7 @@ implicit none
 ! subroutine arguments
 type(ufo_geovals), intent(in)                     :: geovals     !< model data at obs location
 type(ufo_rttovonedvarcheck_ob), intent(in)        :: ob          !< satellite metadata
+integer, intent(in)                               :: channels(:) !< channels used for this calculation
 type(c_ptr), value, intent(in)                    :: obsdb       !< observation database
 type(ufo_radiancerttov_tlad), intent(inout)       :: rttov_data  !< structure for running rttov_k
 type(ufo_rttovonedvarcheck_profindex), intent(in) :: profindex   !< index array for x vector
@@ -126,9 +128,9 @@ real(kind_real), allocatable :: dql_dqt(:)
 real(kind_real), allocatable :: dqi_dqt(:)
 
 ! call rttov k code
-call rttov_data % settraj(geovals, obsdb, ob % channels_used, ob_info=ob, BT=hofx)
+call rttov_data % settraj(geovals, obsdb, channels, ob_info=ob, BT=hofx)
 
-nchans = size(ob % channels_used)
+nchans = size(channels)
 nlevels = size(rttov_data % profiles_k(1) % t)
 
 !----------------------------------------------------------------
@@ -193,7 +195,7 @@ if (profindex % qt(1) > 0) then
   pressure(:) = geoval%vals(:, 1)    ! Pa
 
   ! Calculate the gradients with respect to qtotal
-  call ufo_rttovonedvarcheck_Qsplit (0,               & ! in
+  call ufo_rttovonedvarcheck_Qsplit (0,    & ! in
                           temperature,     & ! in
                           pressure,        & ! in
                           nlevels,         & ! in
@@ -328,7 +330,7 @@ end if
 !call ufo_rttovonedvarcheck_PrintHmatrix( &
 !  nchans,   &           ! in
 !  size(prof_x),  &      ! in
-!  ob % channels_used, & ! in
+!  channels, & ! in
 !  H_matrix, &           ! in
 !  profindex )           ! in
 
@@ -381,7 +383,7 @@ end  subroutine ufo_rttovonedvarcheck_GetHmatrixRTTOV
 !character(len=max_string)    :: varname
 !real(c_double)               :: BT(size(hofx))
 !
-!nchans = size(ob % channels_used)
+!nchans = size(channels)
 !
 !! call rttov simobs code
 !call rttov_data % simobs(geovals, obsdb, nchans, 1, BT, hofxdiags)

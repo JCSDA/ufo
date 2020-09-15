@@ -128,6 +128,8 @@ real(kind_real), allocatable    :: AbsDiffProfile(:)
 real(kind_real), allocatable    :: Ydiff(:)
 real(kind_real), allocatable    :: Y(:)
 real(kind_real), allocatable    :: Y0(:)
+real(kind_real), allocatable    :: out_H_matrix(:,:)
+real(kind_real), allocatable    :: out_Y(:)
 real(kind_real)                 :: Jout(3)
 type(ufo_geovals)               :: geovals
 
@@ -169,8 +171,8 @@ Iterations: do iter = 1, self % max1DVarIterations
   OldProfile(:) = GuessProfile(:)
 
   ! Get jacobian and new hofx
-  call ufo_rttovonedvarcheck_get_jacobian(geovals, ob, self % obsdb, &
-                                       self % conf, &
+  call ufo_rttovonedvarcheck_get_jacobian(geovals, ob, ob % channels_used, &
+                                       self % obsdb, self % conf, &
                                        profile_index, GuessProfile(:), &
                                        hofxdiags, Y(:), H_matrix)
 
@@ -338,11 +340,21 @@ onedvar_success = converged
 ! Pass output profile, final BTs and final cost out
 if (converged) then
   ob % output_profile(:) = GuessProfile(:)
-  ob % output_BT(:) = Y(:)
 
   ! Recalculate final cost - to make sure output when using profile convergence
   call ufo_rttovonedvarcheck_CostFunction(Diffprofile, b_inv, Ydiff, r_matrix, Jout)
   ob % final_cost = Jout(1)
+
+  ! Recalculate final BTs for all channels
+  allocate(out_H_matrix(size(ob % channels_all),nprofelements))
+  allocate(out_Y(size(ob % channels_all)))
+  call ufo_rttovonedvarcheck_get_jacobian(geovals, ob, ob % channels_all, &
+                                       self % obsdb, self % conf, &
+                                       profile_index, GuessProfile(:), &
+                                       hofxdiags, out_Y(:), out_H_matrix)
+  ob % output_BT(:) = out_Y(:)
+  deallocate(out_Y)
+  deallocate(out_H_matrix)
 end if
 
 !----------------------
@@ -571,8 +583,8 @@ DescentLoop : do while (JCost > JOld .and.              &
     !CalcEmiss(1:nchans) = RTprof_Guess % CalcEmiss(Channels(1:nchans))
 
    ! Get Jabobian and new hofx
-   call ufo_rttovonedvarcheck_get_jacobian(geovals, ob, self % obsdb, &
-                                           self % conf, &
+   call ufo_rttovonedvarcheck_get_jacobian(geovals, ob, ob % channels_used, &
+                                           self % obsdb, self % conf, &
                                            profile_index, GuessProfile(:), &
                                            hofxdiags, BriTemp(:), H_matrix_tmp)
 
