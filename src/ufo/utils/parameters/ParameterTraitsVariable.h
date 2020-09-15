@@ -56,6 +56,13 @@ struct ParameterTraits<ufo::Variable> {
       subConfig.set("options", value.options());
     config.set(name, subConfig);
   }
+
+  static ObjectJsonSchema jsonSchema(const std::string &name) {
+    ObjectJsonSchema nestedSchema({{"name", {{"type", "\"string\""}}},
+                                   {"options", {{"type", "\"object\""}}},
+                                   {"channels", {{"type", "[\"string\", \"integer\"]"}}}});
+    return ObjectJsonSchema({{name, nestedSchema.toPropertyJsonSchema()}});
+  }
 };
 
 }  // namespace oops
