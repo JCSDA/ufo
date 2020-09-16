@@ -56,6 +56,7 @@ type, public :: ufo_rttovonedvarcheck
   real(kind_real)                  :: EmissLandDefault !< default emissivity value to use over land
   real(kind_real)                  :: EmissSeaIceDefault !< default emissivity value to use over sea ice
   character(len=max_string)        :: EmisEigVecPath !< path to eigen vector file for IR PC emissivity
+  character(len=max_string)        :: EmisAtlas !< path to the emissivity atlas for IR PC emissivity
 end type ufo_rttovonedvarcheck
 
 contains
@@ -121,6 +122,7 @@ self % MaxMLIterations = 7
 self % EmissLandDefault = 0.95    ! default land surface emissivity
 self % EmissSeaIceDefault = 0.92  ! default seaice surface emissivity
 self % EmisEigVecPath = ""
+self % EmisAtlas = ""
 
 ! Flag for total humidity
 if (self % conf % has("qtotal")) then
@@ -197,6 +199,12 @@ if (self % conf % has("EmisEigVecPath")) then
   call self % conf % get_or_die("EmisEigVecPath",str)
   self % EmisEigVecPath = str
   self % pcemiss = .true.
+end if
+
+! Default emis atlas path is blank
+if (self % conf % has("EmisAtlas")) then
+  call self % conf % get_or_die("EmisAtlas",str)
+  self % EmisAtlas = str
 end if
 
 ! Print self

@@ -138,7 +138,11 @@ subroutine ufo_rttovonedvarcheck_apply(self, vars, retrieval_vars, geovals, appl
 
   ! Setup IR emissivity - if needed
   if (self % pcemiss) then
-    call IR_pcemis % setup(self % EmisEigVecPath)
+    if (len(self % EmisAtlas) > 4) then
+      call IR_pcemis % setup(self % EmisEigVecPath, self % EmisAtlas)
+    else
+      call IR_pcemis % setup(self % EmisEigVecPath)
+    end if
   end if
 
   ! Setup full B matrix object

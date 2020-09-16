@@ -297,6 +297,8 @@ type(ufo_rttovonedvarcheck_pcemis) :: ir_pcemis  !< Infrared principal component
 real(kind_real), allocatable :: EmissPC(:,:)
 integer :: i
 integer :: nemisspc = 5
+integer :: emis_x
+integer :: emis_y
 
 ! Allocate and setup defaults - get RTTOV to calculate
 self % emiss(:,:) = 0.0
@@ -321,34 +323,32 @@ if (ir_pcemis % initialised) then
       ! Skip obs that may have invalid geographical coordinates
       !IF (BTEST (Obs % QCflags(i), QC_ModelDomain)) CYCLE
 
-!      ! If there's an atlas available, try to use it.
-!      if (associated (EmisAtlas % EmisPC)) then
-!
-!        ! Find the nearest lat/lon
-!        emis_y = nint((self % lat(i) + 90.0) / EmisAtlas % gridstep + 1)
-!        emis_x = nint((self % lon(i) + 180.0) / EmisAtlas % gridstep + 1)
-!        if (emis_x > EmisAtlas % nlon) then
-!          emis_x = emis_x - EmisAtlas % nlon
-!        end if
-!
-!        ! If the atlas is valid at this point, then use it,
-!        ! otherwise use PCGuess. NB: missing or sea points are
-!        ! flagged as -9.99 in the atlas.
-!
-!        IF (ANY (EmisAtlas % EmisPC(emis_x,emis_y,:) > -9.99)) THEN
-!          Obs % EmissPC(i,:) = EmisAtlas % EmisPC(emis_x,emis_y,1:nemisspc)
-!        ELSE
-!          Obs % EmissPC(i,:) = EmisEigenvec % PCGuess(1:nemisspc)
-!
-!          !! Flag invalid atlas points over land as bad surface
-!          !IF (Obs % surface(i) == RTland) THEN
-!          !  Obs % QCflags(i) = IBSET (Obs % QCflags(i), QC_BadSurface)
-!          !END IF
-!        END IF
-!
-!      ELSE ! If no atlas present, use PCGuess.
+      ! If there's an atlas available, try to use it.
+      if (associated (ir_pcemis % emis_atlas % EmisPC)) then
+
+        ! Find the nearest lat/lon
+        emis_y = nint((self % lat(i) + 90.0) / ir_pcemis % emis_atlas % gridstep + 1)
+        emis_x = nint((self % lon(i) + 180.0) / ir_pcemis % emis_atlas % gridstep + 1)
+        if (emis_x > ir_pcemis % emis_atlas % nlon) then
+          emis_x = emis_x - ir_pcemis % emis_atlas % nlon
+        end if
+
+        ! If the atlas is valid at this point, then use it,
+        ! otherwise use PCGuess. NB: missing or sea points are
+        ! flagged as -9.99 in the atlas.
+        if (any (ir_pcemis % emis_atlas % EmisPC(emis_x,emis_y,:) > -9.99)) then
+          EmissPC(i,:) = ir_pcemis % emis_atlas % EmisPC(emis_x,emis_y,1:nemisspc)
+        else
+          EmissPC(i,:) = ir_pcemis % emis_eigen % PCGuess(1:nemisspc)
+          !! Flag invalid atlas points over land as bad surface
+          !IF (Obs % surface(i) == RTland) THEN
+          !  Obs % QCflags(i) = IBSET (Obs % QCflags(i), QC_BadSurface)
+          !END IF
+        END IF
+
+      ELSE ! If no atlas present, use PCGuess.
         EmissPC(i,:) = ir_pcemis % emis_eigen % PCGuess(1:nemisspc)
-!      END IF
+      END IF
 
     end do
 

@@ -32,10 +32,20 @@ type, public :: ufo_rttovonedvarcheck_EmisEigenvec
    real, pointer    :: EV_Inverse(:,:) => null()
 end type ufo_rttovonedvarcheck_EmisEigenvec
 
+!< Emissivity eigen vector atlas type definition
+TYPE ufo_rttovonedvarcheck_EmisAtlas
+   INTEGER          :: Nlat
+   INTEGER          :: Nlon
+   INTEGER          :: Npc
+   REAL             :: gridstep
+   REAL, POINTER    :: EmisPC(:,:,:)
+END TYPE ufo_rttovonedvarcheck_EmisAtlas
+
 !< Principal component emissivity type definition
 type, public :: ufo_rttovonedvarcheck_pcemis
 
   type(ufo_rttovonedvarcheck_EmisEigenvec) :: emis_eigen
+  type(ufo_rttovonedvarcheck_EmisAtlas)    :: emis_atlas
   logical :: initialised = .false.
 
 contains
@@ -57,13 +67,14 @@ contains
 !!
 !! \date 04/08/2020: Created
 !!
-subroutine ufo_rttovonedvarcheck_InitPCEmis(self, filepath)
+subroutine ufo_rttovonedvarcheck_InitPCEmis(self, filepath, atlaspath)
 
 implicit none
 
 ! subroutine arguments:
 class(ufo_rttovonedvarcheck_pcemis), intent(out) :: self !< PC emissivity type
 character(len=*), intent(in) :: filepath
+character(len=*), intent(in), optional :: atlaspath
 
 character(len=*), parameter :: routinename = "ufo_rttovonedvarcheck_InitPCEmis"
 logical                     :: file_exists  ! Check if a file exists logical
@@ -82,6 +93,21 @@ else
 end if
 
 self % initialised = .true.
+
+! Read in emissivity atlas if file path present - 
+! if not a first guess will be used from eigenvector file
+if (present(atlaspath)) then
+  inquire(file=trim(atlaspath), exist=file_exists)
+  if (file_exists) then
+    call ufo_rttovonedvarcheck_iogetfreeunit(fileunit)
+    open(unit = fileunit, file = trim(filepath))
+    call ufo_rttovonedvarcheck_GetEmisAtlas(self, fileunit)
+    close(unit = fileunit)
+    call fckit_log % info("rttovonedvarcheck Emis Atlas file exists and read in")
+  else
+    call abor1_ftn("rttovonedvarcheck Emis Atlas file not found but requested: aborting")
+  end if
+end if
 
 call self % info()
 
@@ -166,6 +192,65 @@ write(*, '(A,I0,A,I0,A)') 'Finished reading ',self % emis_eigen % NumEV, &
                            self % emis_eigen % Nchans,' channels.'
 
 end subroutine ufo_rttovonedvarcheck_GetEmisEigenVec
+
+!-------------------------------------------------------------------------------
+!> Read the emissivity eigen atlas from file
+!!
+!! Heritage: Ops_SatRad_GetEmisAtlas
+!!
+!! \author Met Office
+!!
+!! \date 16/09/2020: Created
+!!
+subroutine ufo_rttovonedvarcheck_GetEmisAtlas (self, fileunit)
+
+implicit none
+
+! Subroutine arguments:
+type(ufo_rttovonedvarcheck_pcemis), intent(out) :: self !< PC emissivity type
+integer, intent(in) :: fileunit
+
+! Local declarations:
+character(len=*), parameter          :: RoutineName = "ufo_rttovonedvarcheck_GetEmisAtlas"
+character(len=max_string)            :: message
+integer                              :: readstatus
+integer                              :: i
+integer                              :: j
+
+!----------------------------------------------
+! 1. Read header information and allocate arrays
+!----------------------------------------------
+
+read (fileunit, *, iostat = readstatus) self % emis_atlas % Nlat, &
+                                        self % emis_atlas % Nlon, &
+                                        self % emis_atlas % Npc, &
+                                        self % emis_atlas % gridstep
+
+allocate (self % emis_atlas % EmisPC(self % emis_atlas % Nlon, &
+                                     self % emis_atlas % Nlat, &
+                                     self % emis_atlas % Npc))
+
+!--------------------------------------------------------
+! 2. Read the emissivity PCs
+!--------------------------------------------------------
+
+do i = 1, self % emis_atlas % nlon
+  do j = 1, self % emis_atlas % nlat
+    read (fileunit, '(12F10.6)', iostat = readstatus) self % emis_atlas % EmisPC(i,j,:)
+  end do
+end do
+
+! Has there been an error in the read?
+if (readstatus /= 0) then
+  write(message,*) RoutineName,  &
+       'Problem reading in EmisAtlas - please check the file'
+  call abor1_ftn(message)
+else
+  write (*, '(A,I0,A)') 'Finished reading IR emissivity atlas with ', &
+                         self % emis_atlas % Npc, ' principal components.'
+end if
+
+end subroutine ufo_rttovonedvarcheck_GetEmisAtlas
 
 !------------------------------------------------------------------------------
 !> Delete the PC emissivity object
