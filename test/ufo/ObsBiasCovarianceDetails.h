@@ -102,14 +102,16 @@ class ObsBiasCovarianceDetails : public oops::Test {
   ObsBiasCovarianceDetails() {}
   virtual ~ObsBiasCovarianceDetails() {}
  private:
-  std::string testid() const {return "ufo::test::ObsBiasCovarianceDetails";}
+  std::string testid() const override {return "ufo::test::ObsBiasCovarianceDetails";}
 
-  void register_tests() const {
+  void register_tests() const override {
     std::vector<eckit::testing::Test>& ts = eckit::testing::specification();
 
     ts.emplace_back(CASE("ufo/ObsBias/testObsBiasCovarianceDetails")
       { testObsBiasCovarianceDetails(); });
   }
+
+  void clear() const override {}
 };
 
 // -----------------------------------------------------------------------------

@@ -104,14 +104,16 @@ class ObsDiagnostics : public oops::Test {
   ObsDiagnostics() {}
   virtual ~ObsDiagnostics() {}
  private:
-  std::string testid() const {return "ufo::test::ObsDiagnostics";}
+  std::string testid() const override {return "ufo::test::ObsDiagnostics";}
 
-  void register_tests() const {
+  void register_tests() const override {
     std::vector<eckit::testing::Test>& ts = eckit::testing::specification();
 
     ts.emplace_back(CASE("ufo/ObsDiagnostics/testObsDiagnostics")
       { testObsDiagnostics(); });
   }
+
+  void clear() const override {}
 };
 
 // -----------------------------------------------------------------------------

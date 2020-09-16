@@ -171,6 +171,8 @@ class Parameters : public oops::Test {
                       testSerializationWithoutChannels();
                     });
   }
+
+  void clear() const override {}
 };
 
 }  // namespace test

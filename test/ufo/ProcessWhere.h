@@ -66,9 +66,9 @@ class ProcessWhere : public oops::Test {
   ProcessWhere() {}
   virtual ~ProcessWhere() {}
  private:
-  std::string testid() const {return "ufo::test::ProcessWhere";}
+  std::string testid() const override {return "ufo::test::ProcessWhere";}
 
-  void register_tests() const {
+  void register_tests() const override {
     std::vector<eckit::testing::Test>& ts = eckit::testing::specification();
 
     ts.emplace_back(CASE("ufo/ProcessWhere/testProcessWhere_successful") {
@@ -82,6 +82,8 @@ class ProcessWhere : public oops::Test {
                        true);
     });
   }
+
+  void clear() const override {}
 };
 
 // -----------------------------------------------------------------------------

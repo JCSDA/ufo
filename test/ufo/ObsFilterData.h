@@ -214,14 +214,16 @@ class ObsFilterData : public oops::Test {
   ObsFilterData() {}
   virtual ~ObsFilterData() {}
  private:
-  std::string testid() const {return "ufo::test::ObsFilterData";}
+  std::string testid() const override {return "ufo::test::ObsFilterData";}
 
-  void register_tests() const {
+  void register_tests() const override {
     std::vector<eckit::testing::Test>& ts = eckit::testing::specification();
 
     ts.emplace_back(CASE("ufo/ObsFilterData/testObsFilterData")
       { testObsFilterData(); });
   }
+
+  void clear() const override {}
 };
 
 // -----------------------------------------------------------------------------

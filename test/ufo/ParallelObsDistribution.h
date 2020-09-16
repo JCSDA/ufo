@@ -124,6 +124,8 @@ class ParallelObsDistribution : public oops::Test {
   std::string testid() const override {return "ufo::test::ParallelObsDistribution";}
 
   void register_tests() const override {}
+
+  void clear() const override {}
 };
 
 }  // namespace test

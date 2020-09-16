@@ -147,6 +147,8 @@ class TrackCheckShipMainLoop : public oops::Test {
                       });
     }
   }
+
+  void clear() const override {}
 };
 
 }  // namespace test

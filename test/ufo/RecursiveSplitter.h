@@ -198,6 +198,8 @@ class RecursiveSplitter : public oops::Test {
   std::string testid() const override {return "ufo::test::RecursiveSplitter";}
 
   void register_tests() const override {}
+
+  void clear() const override {}
 };
 
 }  // namespace test
