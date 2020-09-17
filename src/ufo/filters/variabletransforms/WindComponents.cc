@@ -17,6 +17,9 @@
 
 #include "oops/util/Logger.h"
 
+#include "ufo/filters/Variable.h"
+#include "ufo/utils/Constants.h"
+
 namespace ufo {
 
 // -----------------------------------------------------------------------------
@@ -27,7 +30,7 @@ WindComponents::WindComponents(ioda::ObsSpace & obsdb, const eckit::Configuratio
   : FilterBase(obsdb, config, flags, obserr)
 
 {
-  oops::Log::trace() << "WindComponents contructor starting" << std::endl;
+  oops::Log::trace() << "WindComponents constructor starting" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
@@ -38,24 +41,20 @@ WindComponents::~WindComponents() {
 
 // -----------------------------------------------------------------------------
 
-// currently none of the filter arguments are used
 void WindComponents::applyFilter(const std::vector<bool> & apply,
                                   const Variables & filtervars,
                                   std::vector<std::vector<bool>> & flagged) const {
-  oops::Log::trace() << "WindComponents priorFilter" << std::endl;
+  oops::Log::trace() << "WindComponents applyFilter" << std::endl;
 
   const float missing = util::missingValue(missing);
   const float rad = static_cast<float>(Constants::deg2rad);
   const size_t nlocs = obsdb_.nlocs();
 
   std::vector<float> u(nlocs), v(nlocs);
-  std::vector<float> Zfff(nlocs), Zddd(nlocs);
+  std::vector<float> windSpeed(nlocs), windFromDirection(nlocs);
 
-  // check present: obsdb.has
-  // warning message or error?
-
-  obsdb_.get_db("ObsValue", "wind_speed", Zfff);
-  obsdb_.get_db("ObsValue", "wind_from_direction", Zddd);
+  obsdb_.get_db("ObsValue", "wind_speed", windSpeed);
+  obsdb_.get_db("ObsValue", "wind_from_direction", windFromDirection);
   // wind components are missing unless a valid value calculated below
   u.assign(nlocs, missing);
   v.assign(nlocs, missing);
@@ -63,15 +62,15 @@ void WindComponents::applyFilter(const std::vector<bool> & apply,
 // Loop over all obs
   for (size_t jobs = 0; jobs < nlocs; ++jobs) {
     if (apply[jobs]) {
-      // Check for missing or extreme values
-      if (Zddd[jobs] != missing && Zfff[jobs] != missing && Zfff[jobs] >= 0
-              && Zddd[jobs] <=360 && Zfff[jobs] >= 0) {
+      // Check for missing or extreme values.
+      if (windFromDirection[jobs] != missing
+              && windSpeed[jobs] != missing && windSpeed[jobs] >= 0) {
         // Calculate wind components
-        u[jobs] = -Zfff[jobs] * sin(Zddd[jobs] * rad);
-        v[jobs] = -Zfff[jobs] * cos(Zddd[jobs] * rad);
+        u[jobs] = -windSpeed[jobs] * sin(windFromDirection[jobs] * rad);
+        v[jobs] = -windSpeed[jobs] * cos(windFromDirection[jobs] * rad);
         oops::Log::debug() << "wind_speed, wind_from_direction: "
-                           << Zfff[jobs] << ", "
-                           << Zddd[jobs] << ", eastward_wind="
+                           << windSpeed[jobs] << ", "
+                           << windFromDirection[jobs] << ", eastward_wind="
                            << u[jobs] << ", northward_wind=" << v[jobs]
                            << std::endl;
       }
@@ -85,7 +84,7 @@ void WindComponents::applyFilter(const std::vector<bool> & apply,
 // -----------------------------------------------------------------------------
 
 void WindComponents::print(std::ostream & os) const {
-  os << "WindComponents::print not yet implemented ";
+  os << "WindComponents";
 }
 
 // -----------------------------------------------------------------------------

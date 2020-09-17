@@ -30,7 +30,7 @@
 #include "ufo/filters/TrackCheck.h"
 #include "ufo/filters/TrackCheckShip.h"
 #include "ufo/filters/variabletransforms/WindComponents.h"
-#include "ufo/filters/variabletransforms/WindVector.h"
+#include "ufo/filters/variabletransforms/WindSpeedAndDirection.h"
 #include "ufo/gnssro/QC/BackgroundCheckRONBAM.h"
 #include "ufo/gnssro/QC/ROobserror.h"
 
@@ -80,9 +80,9 @@ template<typename MODEL> void instantiateObsFilterFactory() {
   static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::TrackCheckShip> >
            makerChk20_("Ship Track Check");
   static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::WindComponents> >
-           makerChk21_("Wind components");
-  static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::WindVector> >
-           makerChk22_("Wind vector");
+           makerChk21_("Wind Components");
+  static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::WindSpeedAndDirection> >
+           makerChk22_("Wind Speed And Direction");
 }
 
 }  // namespace ufo

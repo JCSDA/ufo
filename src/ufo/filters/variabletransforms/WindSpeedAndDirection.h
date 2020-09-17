@@ -5,16 +5,16 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#ifndef UFO_FILTERS_VARIABLETRANSFORMS_WINDCOMPONENTS_H_
-#define UFO_FILTERS_VARIABLETRANSFORMS_WINDCOMPONENTS_H_
+#ifndef UFO_FILTERS_VARIABLETRANSFORMS_WINDSPEEDANDDIRECTION_H_
+#define UFO_FILTERS_VARIABLETRANSFORMS_WINDSPEEDANDDIRECTION_H_
 
+#include <math.h>
 #include <memory>
 #include <ostream>
 #include <string>
 #include <vector>
 
 #include "oops/util/ObjectCounter.h"
-
 #include "ufo/filters/FilterBase.h"
 #include "ufo/filters/QCflags.h"
 
@@ -29,28 +29,28 @@ namespace ioda {
 
 namespace ufo {
 
-/// \brief Wind Components filter
+/// \brief Wind Speed And Direction filter
 ///
-/// The filter performs a variable conversion from wind_speed and wind_from_direction to
-/// the wind components, eastward_wind and northward_wind. The newly calculated variables
+/// The filter performs a variable conversion from the wind components, eastward_wind and
+/// northward_wind, to wind_speed and wind_from_direction. The newly calculated variables
 /// are included in the same obs space. The filter does not have any configuration options.
 ///
 /// Example:
 ///
 /// \code{.yaml}
 /// obs filters:
-/// - filter: Wind Components
+/// - filter: Wind Speed And Direction
 /// \endcode
 
-class WindComponents : public FilterBase,
-                        private util::ObjectCounter<WindComponents> {
+class WindSpeedAndDirection : public FilterBase,
+                        private util::ObjectCounter<WindSpeedAndDirection> {
  public:
-  static const std::string classname() {return "ufo::WindComponents";}
+  static const std::string classname() {return "ufo::WindSpeedAndDirection";}
 
-  WindComponents(ioda::ObsSpace &, const eckit::Configuration &,
+  WindSpeedAndDirection(ioda::ObsSpace &, const eckit::Configuration &,
                   std::shared_ptr<ioda::ObsDataVector<int> >,
                   std::shared_ptr<ioda::ObsDataVector<float> >);
-  ~WindComponents();
+  ~WindSpeedAndDirection();
 
  private:
   void print(std::ostream &) const override;
@@ -61,4 +61,4 @@ class WindComponents : public FilterBase,
 
 }  // namespace ufo
 
-#endif  // UFO_FILTERS_VARIABLETRANSFORMS_WINDCOMPONENTS_H_
+#endif  // UFO_FILTERS_VARIABLETRANSFORMS_WINDSPEEDANDDIRECTION_H_

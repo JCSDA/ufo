@@ -7,10 +7,10 @@ observations:
     obsdatain:
       obsfile: Data/wind_unit_transforms_2018041500.nc4
     obsdataout:
-       obsfile: Data/windvector_2018041500_output.nc4
+       obsfile: Data/windspeedanddirection_2018041500_output.nc4
     simulated variables: [eastward_wind, northward_wind]
   obs filters:
-  - filter: Wind vector        # calculate wind components from speed and direction
+  - filter: Wind Speed And Direction        # calculate speed and direction from wind components
   # how many data points will pass the filter? Should pass for all present obs
   passedBenchmark: 150
   compareVariables:            #  test output matches precalculated values

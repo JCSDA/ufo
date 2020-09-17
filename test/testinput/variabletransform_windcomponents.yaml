@@ -11,7 +11,7 @@ observations:
       obsfile: Data/windcomponents_2018041500_output.nc4
     simulated variables: [eastward_wind, northward_wind]
   obs filters:
-  - filter: Wind components        # calculate wind components from speed and direction
+  - filter: Wind Components        # calculate wind components from speed and direction
   passedBenchmark: 150
   compareVariables:                #  test output matches precalculated values
     - reference:

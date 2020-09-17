@@ -178,7 +178,7 @@ list( APPEND ufo_test_input
   testinput/tprof.yaml
   testinput/variables.yaml
   testinput/variabletransform_windcomponents.yaml
-  testinput/variabletransform_windvector.yaml
+  testinput/variabletransform_windspeedanddirection.yaml
   testinput/windprof.yaml
 )
 
@@ -1269,9 +1269,9 @@ ecbuild_add_test( TARGET  test_ufo_variabletransform_windcomponents
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsFilters.x )
 
-ecbuild_add_test( TARGET  test_ufo_variabletransform_windvector
+ecbuild_add_test( TARGET  test_ufo_variabletransform_windspeedanddirection
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-                  ARGS    "testinput/variabletransform_windvector.yaml"
+                  ARGS    "testinput/variabletransform_windspeedanddirection.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsFilters.x )
 
