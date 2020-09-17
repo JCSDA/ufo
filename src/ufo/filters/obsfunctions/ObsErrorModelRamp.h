@@ -29,6 +29,8 @@ namespace ufo {
 
 /// \brief Options controlling the ObsErrorModelRamp ObsFunction
 class ObsErrorModelRampParameters : public oops::Parameters {
+  OOPS_CONCRETE_PARAMETERS(ObsErrorModelRampParameters, Parameters)
+
  public:
   /// x variable of the piece-wise function
   oops::RequiredParameter<Variable> xvar{"xvar", this};

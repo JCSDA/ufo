@@ -24,6 +24,8 @@ namespace ufo {
 /// \brief Options controlling the observation error bound reduction in Tropical regions
 ///
 class ObsErrorFactorLatRadParameters : public oops::Parameters {
+  OOPS_CONCRETE_PARAMETERS(ObsErrorFactorLatRadParameters, Parameters)
+
  public:
   /// Parameters for reducing observation error bounds within latitude band in Tropics
   /// params[0] defines the latitude bound for which the observation error function applies.

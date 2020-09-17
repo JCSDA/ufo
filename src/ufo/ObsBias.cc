@@ -152,9 +152,8 @@ void ObsBias::read(const eckit::Configuration & conf) {
     {
       oops::Log::debug() << "ObsBias:: prior file is opened" << std::endl;
       float par;
-      while (!infile.eof())
+      while (infile >> ich)
       {
-        infile >> ich;
         infile >> nusis;
         infile >> nuchan;
         infile >> tlap;
@@ -173,11 +172,13 @@ void ObsBias::read(const eckit::Configuration & conf) {
                 biascoeffs_.at(j*prednames_.size() + p) = static_cast<double>(par);
               }
             }
+          } else {
+            for (auto & item : gsi_predictors)
+              infile >> par;
           }
         } else {
-          for (auto item : gsi_predictors) {
+          for (auto & item : gsi_predictors)
             infile >> par;
-          }
         }
       }
       infile.close();

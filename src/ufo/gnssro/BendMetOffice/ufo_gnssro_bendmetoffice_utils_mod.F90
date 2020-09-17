@@ -34,7 +34,7 @@ implicit none
 public             :: Ops_GPSROcalc_alpha
 public             :: Ops_GPSROcalc_nr
 public             :: Ops_GPSRO_refrac
-private            :: Ops_GPSRO_geop_geom
+public             :: Ops_GPSRO_geop_geom
 private
 
 contains
@@ -397,6 +397,7 @@ refrac(:) = missing_value(refrac(1))
 T(:) = missing_value(T(1))
 nonmon = .FALSE.
 unphys = .FALSE.
+refracerr = .FALSE.
 
 DO i = 1, nlevP
   IF (P(i) == missing_value(P(i))) THEN  !pressure missing

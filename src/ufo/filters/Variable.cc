@@ -120,6 +120,12 @@ const std::string & Variable::group() const {
 
 // -----------------------------------------------------------------------------
 
+const std::vector<int> & Variable::channels() const {
+  return channels_;
+}
+
+// -----------------------------------------------------------------------------
+
 oops::Variables Variable::toOopsVariables() const {
   oops::Variables vars;
   for (size_t jj = 0; jj < this->size(); ++jj) {

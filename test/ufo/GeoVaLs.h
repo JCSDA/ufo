@@ -170,14 +170,16 @@ class GeoVaLs : public oops::Test {
   GeoVaLs() {}
   virtual ~GeoVaLs() {}
  private:
-  std::string testid() const {return "ufo::test::GeoVaLs";}
+  std::string testid() const override {return "ufo::test::GeoVaLs";}
 
-  void register_tests() const {
+  void register_tests() const override {
     std::vector<eckit::testing::Test>& ts = eckit::testing::specification();
 
     ts.emplace_back(CASE("ufo/GeoVaLs/testGeoVaLs")
       { testGeoVaLs(); });
   }
+
+  void clear() const override {}
 };
 
 // ----------;

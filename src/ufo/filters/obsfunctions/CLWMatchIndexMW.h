@@ -29,6 +29,8 @@ namespace ufo {
 /// retrieved CLW from observation and background
 ///
 class CLWMatchIndexMWParameters : public oops::Parameters {
+  OOPS_CONCRETE_PARAMETERS(CLWMatchIndexMWParameters, Parameters)
+
  public:
   /// List of channels available for assimilation
   oops::RequiredParameter<std::string> channelList{"channels", this};

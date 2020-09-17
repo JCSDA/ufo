@@ -2,6 +2,22 @@ empty:
   # Nothing to see here
 full:
   opt_variable_parameter:
+    channels: 1,5
     name: latitude@MetaData
-error_in_opt_variable_parameter:
+    options:
+      some_option: true
+no_channels:
   opt_variable_parameter:
+    name: latitude@MetaData
+    options:
+      some_option: true
+complex_channels:
+  opt_variable_parameter:
+    channels: 1,5,10-15
+    name: latitude@MetaData
+missing_name:
+  opt_variable_parameter:
+misspelled_property:
+  opt_variable_parameter:
+    name: latitude@MetaData
+    canali: 1,5

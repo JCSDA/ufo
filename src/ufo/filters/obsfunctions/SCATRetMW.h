@@ -28,6 +28,8 @@ namespace ufo {
 //  and 89 GHz channels.
 ///
 class SCATRetMWParameters : public oops::Parameters {
+  OOPS_CONCRETE_PARAMETERS(SCATRetMWParameters, Parameters)
+
  public:
   /// channel number corresponding to 23.8 GHz to which the retrieval
   /// of scattering index applies

@@ -144,6 +144,8 @@ class ProfileConsistencyChecks : public oops::Test {
                       });
     }
   }
+
+  void clear() const override {}
 };
 
 }  // namespace test
