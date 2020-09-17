@@ -69,8 +69,8 @@ namespace ufo {
               std::pow(vObs[jlev] - vObs[jlevprev], 2);
             if (VectDiffSq > options_.UICheck_TInterpIdenticalPTolSq.value()) {
               NumErrors++;
-              uFlags[jlevprev] |= ufo::FlagsProfile::InterpolationFlag;
-              uFlags[jlev]     |= ufo::FlagsProfile::InterpolationFlag;
+              uFlags[jlevprev] |= ufo::MetOfficeQCFlags::Profile::InterpolationFlag;
+              uFlags[jlev]     |= ufo::MetOfficeQCFlags::Profile::InterpolationFlag;
               oops::Log::debug() << " -> Wind speed interpolation check: identical P for "
                                  << "levels " << jlevprev << " and " << jlev << std::endl;
               oops::Log::debug() << " -> Level " << jlevprev << ": "
@@ -134,9 +134,9 @@ namespace ufo {
         LevErrors_[SigB]++;
         LevErrors_[SigA]++;
         // Simplest form of flagging
-        uFlags[jlev] |= ufo::FlagsProfile::InterpolationFlag;
-        uFlags[SigB] |= ufo::FlagsProfile::InterpolationFlag;
-        uFlags[SigA] |= ufo::FlagsProfile::InterpolationFlag;
+        uFlags[jlev] |= ufo::MetOfficeQCFlags::Profile::InterpolationFlag;
+        uFlags[SigB] |= ufo::MetOfficeQCFlags::Profile::InterpolationFlag;
+        uFlags[SigA] |= ufo::MetOfficeQCFlags::Profile::InterpolationFlag;
 
         oops::Log::debug() << " -> Failed wind speed interpolation check for levels " << jlev
                            << " (central), " << SigB << " (lower) and "

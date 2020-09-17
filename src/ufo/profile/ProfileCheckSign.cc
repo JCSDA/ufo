@@ -53,7 +53,8 @@ namespace ufo {
     }
 
     for (int jlev = 0; jlev < numLevelsToCheck; ++jlev) {
-      if (tFlags[jlev] & ufo::FlagsElem::FinalRejectFlag) continue;  // Ignore this level
+      // Ignore this level if it has been flagged as rejected.
+      if (tFlags[jlev] & ufo::MetOfficeQCFlags::Elem::FinalRejectFlag) continue;
       if (pressures[jlev] <= PstarBackgr[jlev] - options_.SCheck_PstarThresh.value() &&
           tObs[jlev] != missingValueFloat &&
           std::abs(tObs[jlev] - tBkg[jlev]) >= options_.SCheck_tObstBkgThresh.value()) {
@@ -63,7 +64,7 @@ namespace ufo {
           NumAnyErrors[0]++;
           NumSignChange[0]++;
 
-          tFlags[jlev] |= ufo::FlagsElem::DataCorrectFlag;
+          tFlags[jlev] |= ufo::MetOfficeQCFlags::Elem::DataCorrectFlag;
 
           oops::Log::debug() << " -> Failed sign check for level " << jlev << std::endl;
           oops::Log::debug() << " -> P = " << pressures[jlev] * 0.01 << "hPa, tObs = "
@@ -82,7 +83,7 @@ namespace ufo {
                                << tObs[jlev] + tObsCorrection[jlev] << "C" << std::endl;
           } else {
             // Observation is rejected
-            tFlags[jlev] |= ufo::FlagsElem::FinalRejectFlag;
+            tFlags[jlev] |= ufo::MetOfficeQCFlags::Elem::FinalRejectFlag;
           }
         } else if (pressures[jlev] > options_.SCheck_PrintLargeTThresh.value()) {
           // Print out information on other large T differences

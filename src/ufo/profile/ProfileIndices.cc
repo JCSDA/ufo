@@ -10,8 +10,6 @@
 
 #include "ufo/profile/ProfileIndices.h"
 
-#include "ufo/utils/Flags.h"
-
 namespace ufo {
   ProfileIndices::ProfileIndices(ioda::ObsSpace &obsdb,
                                  const ProfileConsistencyCheckParameters &options,

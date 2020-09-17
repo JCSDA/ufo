@@ -25,7 +25,7 @@
 #include "ufo/profile/EntireSampleDataHandler.h"
 #include "ufo/profile/ProfileIndices.h"
 
-#include "ufo/utils/Flags.h"
+#include "ufo/utils/metoffice/MetOfficeQCFlags.h"
 #include "ufo/utils/StringUtils.h"
 
 namespace ioda {
@@ -131,6 +131,9 @@ namespace ufo {
 
     /// Get indices in entire sample corresponding to current profile.
     void getProfileIndicesInEntireSample(const std::string& groupname);
+
+    /// Return obsdb
+    ioda::ObsSpace &getObsdb() {return obsdb_;}
 
    private:
     /// Container of each variable in the current profile.

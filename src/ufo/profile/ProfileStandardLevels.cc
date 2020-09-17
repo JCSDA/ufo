@@ -37,14 +37,17 @@ namespace ufo {
     int SigPrev = -1;  // Previous significant level
     int jlevStdA = 0;  // Standard level below previous significant level
     for (int jlev = 0; jlev < numLevelsToCheck; ++jlev) {
-      if (tFlags[jlev] & ufo::FlagsElem::FinalRejectFlag) continue;  // Ignore this level
+      // Ignore this level if it has been flagged as rejected.
+      if (tFlags[jlev] & ufo::MetOfficeQCFlags::Elem::FinalRejectFlag) continue;
       if (tObs[jlev] != missingValueFloat &&
           pressures[jlev] > optionsSL_.FS_MinP.value()) {
         LogP_[jlev] = (pressures[jlev] > 0 ? std::log(pressures[jlev]) : 0.0);
-        if (tFlags[jlev] & ufo::FlagsProfile::SurfaceLevelFlag) {  // Surface
+        if (tFlags[jlev] & ufo::MetOfficeQCFlags::Profile::SurfaceLevelFlag) {
+          // Surface
           NumStd_++;
           StdLev_[NumStd_ - 1] = jlev;
-        } else if (tFlags[jlev] & ufo::FlagsProfile::StandardLevelFlag) {  // Standard level
+        } else if (tFlags[jlev] & ufo::MetOfficeQCFlags::Profile::StandardLevelFlag) {
+          // Standard level
           NumStd_++;
           StdLev_[NumStd_ - 1] = jlev;
           SigBelow_[NumStd_ - 1] = SigPrev;
@@ -62,7 +65,7 @@ namespace ufo {
     // Calculate IndStd_ (standard level indices)
     for (int jlevstd = 0; jlevstd < NumStd_; ++jlevstd) {
       int jlev = StdLev_[jlevstd];  // Standard level
-      if (tFlags[jlev] & ufo::FlagsProfile::SurfaceLevelFlag) continue;
+      if (tFlags[jlev] & ufo::MetOfficeQCFlags::Profile::SurfaceLevelFlag) continue;
       int IPStd = std::round(pressures[jlev] * 0.01);  // Pressure rounded to nearest hPa
       for (size_t i = 0; i < StandardLevels_.size(); ++i) {
         if (IPStd == StandardLevels_[i])
@@ -116,7 +119,7 @@ namespace ufo {
     for (int jlev = 0; jlev < numLevelsToCheck; ++jlev) {
       if (uObs[jlev] != missingValueFloat && vObs[jlev] != missingValueFloat) {
         LogP_[jlev] = std::log(pressures[jlev]);
-        if (uFlags[jlev] & ufo::FlagsProfile::StandardLevelFlag) {  // Standard level
+        if (uFlags[jlev] & ufo::MetOfficeQCFlags::Profile::StandardLevelFlag) {  // Standard level
           NumStd_++;
           StdLev_[NumStd_ - 1] = jlev;
           SigBelow_[NumStd_ - 1] = SigPrev;

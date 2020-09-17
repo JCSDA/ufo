@@ -60,7 +60,8 @@ namespace ufo {
 
     int jlevprev = 0;
     for (int jlev = 0; jlev < numLevelsToCheck; ++jlev) {
-      if (tFlags[jlev] & ufo::FlagsElem::FinalRejectFlag) continue;  // Ignore this level
+      // Ignore this level if it has been flagged as rejected.
+      if (tFlags[jlev] & ufo::MetOfficeQCFlags::Elem::FinalRejectFlag) continue;
       if (tObsFinal[jlev] != missingValueFloat &&
           pressures[jlev] > options_.ULCheck_MinP.value()) {
         if (PBottom_ == 0.0) {
@@ -73,8 +74,8 @@ namespace ufo {
               pressures[jlevprev] <= PBottom_ - options_.ULCheck_PBThresh.value()) {
             NumAnyErrors[0]++;
             NumSuperadiabat[0]++;
-            tFlags[jlevprev] |= ufo::FlagsProfile::SuperadiabatFlag;
-            tFlags[jlev]     |= ufo::FlagsProfile::SuperadiabatFlag;
+            tFlags[jlevprev] |= ufo::MetOfficeQCFlags::Profile::SuperadiabatFlag;
+            tFlags[jlev]     |= ufo::MetOfficeQCFlags::Profile::SuperadiabatFlag;
 
             oops::Log::debug() << " -> Failed unstable layer/superadiabat check for levels "
                                << jlevprev << " and " << jlev << std::endl;

@@ -175,6 +175,10 @@ list( APPEND ufo_test_input
   testinput/profileconsistencychecks_RH_OPScomparison.yaml
   testinput/profileconsistencychecks_UInterp_obsfilter.yaml
   testinput/profileconsistencychecks_UInterp_OPScomparison.yaml
+  testinput/profileconsistencychecks_bkgqc_modobs_obsfilter.yaml
+  testinput/profileconsistencychecks_bkgqc_repobs_obsfilter.yaml
+  testinput/profileconsistencychecks_bkgqc_modobs_OPScomparison.yaml
+  testinput/profileconsistencychecks_bkgqc_repobs_OPScomparison.yaml
   testinput/timeoper.yaml
   testinput/tprof.yaml
   testinput/variables.yaml
@@ -295,6 +299,8 @@ list( APPEND ufo_test_data
   filters/met_office_buddy_check.nc4
   filters/poisson_disk_thinning_3x3x3x3_regular_grid.nc4
   filters/met_office_profile_consistency_checks.nc4
+  filters/met_office_profile_consistency_checks_bkgqc_modobs.nc4
+  filters/met_office_profile_consistency_checks_bkgqc_repobs.nc4
   filters/met_office_profile_consistency_checks_rh.nc4
   filters/met_office_profile_consistency_checks_rh_wrong.nc4
   filters/met_office_profile_consistency_checks_unittests.nc4
@@ -1189,6 +1195,18 @@ ecbuild_add_test( TARGET  test_ufo_profileconsistencychecks_UInterp_obsfilter
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsFilters.x )
 
+ecbuild_add_test( TARGET  test_ufo_profileconsistencychecks_bkgqc_repobs_obsfilter
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                  ARGS    "testinput/profileconsistencychecks_bkgqc_repobs_obsfilter.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsFilters.x )
+
+ecbuild_add_test( TARGET  test_ufo_profileconsistencychecks_bkgqc_modobs_obsfilter
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                  ARGS    "testinput/profileconsistencychecks_bkgqc_modobs_obsfilter.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsFilters.x )
+
 # Test UFO ObsFilters (specific)
 
 ecbuild_add_test( TARGET  test_ufo_gaussianthinning
@@ -1238,6 +1256,18 @@ ecbuild_add_test( TARGET  test_ufo_qc_poisson_disk_thinning_unittests
 ecbuild_add_test( TARGET  test_ufo_profileconsistencychecks_OPScomparison
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ProfileConsistencyChecks.x
                   ARGS    "testinput/profileconsistencychecks_OPScomparison.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ProfileConsistencyChecks.x )
+
+ecbuild_add_test( TARGET  test_ufo_profileconsistencychecks_bkgqc_modobs_OPScomparison
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ProfileConsistencyChecks.x
+                  ARGS    "testinput/profileconsistencychecks_bkgqc_modobs_OPScomparison.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ProfileConsistencyChecks.x )
+
+ecbuild_add_test( TARGET  test_ufo_profileconsistencychecks_bkgqc_repobs_OPScomparison
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ProfileConsistencyChecks.x
+                  ARGS    "testinput/profileconsistencychecks_bkgqc_repobs_OPScomparison.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ProfileConsistencyChecks.x )
 
