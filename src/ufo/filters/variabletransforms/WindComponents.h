@@ -43,7 +43,7 @@ namespace ufo {
 /// \endcode
 
 class WindComponents : public FilterBase,
-                        private util::ObjectCounter<WindComponents> {
+                       private util::ObjectCounter<WindComponents> {
  public:
   static const std::string classname() {return "ufo::WindComponents";}
 

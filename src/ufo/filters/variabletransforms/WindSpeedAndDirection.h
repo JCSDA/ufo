@@ -8,7 +8,6 @@
 #ifndef UFO_FILTERS_VARIABLETRANSFORMS_WINDSPEEDANDDIRECTION_H_
 #define UFO_FILTERS_VARIABLETRANSFORMS_WINDSPEEDANDDIRECTION_H_
 
-#include <math.h>
 #include <memory>
 #include <ostream>
 #include <string>
@@ -43,13 +42,13 @@ namespace ufo {
 /// \endcode
 
 class WindSpeedAndDirection : public FilterBase,
-                        private util::ObjectCounter<WindSpeedAndDirection> {
+                              private util::ObjectCounter<WindSpeedAndDirection> {
  public:
   static const std::string classname() {return "ufo::WindSpeedAndDirection";}
 
   WindSpeedAndDirection(ioda::ObsSpace &, const eckit::Configuration &,
-                  std::shared_ptr<ioda::ObsDataVector<int> >,
-                  std::shared_ptr<ioda::ObsDataVector<float> >);
+                        std::shared_ptr<ioda::ObsDataVector<int> >,
+                        std::shared_ptr<ioda::ObsDataVector<float> >);
   ~WindSpeedAndDirection();
 
  private:

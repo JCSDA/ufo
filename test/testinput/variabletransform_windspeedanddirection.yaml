@@ -12,7 +12,7 @@ observations:
   obs filters:
   - filter: Wind Speed And Direction        # calculate speed and direction from wind components
   # how many data points will pass the filter? Should pass for all present obs
-  passedBenchmark: 150
+  passedBenchmark: 148
   compareVariables:            #  test output matches precalculated values
     - reference:
         name: wind_speed@TestReference

@@ -26,8 +26,8 @@ namespace ufo {
 
 WindSpeedAndDirection::WindSpeedAndDirection(ioda::ObsSpace & obsdb,
                                              const eckit::Configuration & config,
-                                 std::shared_ptr<ioda::ObsDataVector<int> > flags,
-                                 std::shared_ptr<ioda::ObsDataVector<float> > obserr)
+                                             std::shared_ptr<ioda::ObsDataVector<int> > flags,
+                                             std::shared_ptr<ioda::ObsDataVector<float> > obserr)
   : FilterBase(obsdb, config, flags, obserr)
 
 {
@@ -42,10 +42,9 @@ WindSpeedAndDirection::~WindSpeedAndDirection() {
 
 // -----------------------------------------------------------------------------
 
-// currently none of the filter arguments are used
 void WindSpeedAndDirection::applyFilter(const std::vector<bool> & apply,
-                                  const Variables & filtervars,
-                                  std::vector<std::vector<bool>> & flagged) const {
+                                        const Variables & filtervars,
+                                        std::vector<std::vector<bool>> & flagged) const {
   oops::Log::trace() << "WindSpeedAndDirection applyFilter" << std::endl;
 
   const float missing = util::missingValue(missing);
