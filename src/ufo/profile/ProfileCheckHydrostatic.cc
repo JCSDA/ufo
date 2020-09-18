@@ -149,8 +149,8 @@ namespace ufo {
         HydError_[jlevstd] = 0;  // Probably OK
         if (std::fabs(E_[jlevstd]) <= options_.HCheck_EThresh.value() &&
             std::fabs(E_[jlevstd - 1]) <= options_.HCheck_EThreshB.value() &&
-            tFlags[jlevB] & ufo::FlagsProfile::InterpolationFlag) {  // use 0.5*ETol(jlevstd) ?
-          tFlags[jlevB] &= ~ufo::FlagsProfile::InterpolationFlag;
+            tFlags[jlevB] & ufo::MetOfficeQCFlags::Profile::InterpolationFlag) {
+          tFlags[jlevB] &= ~ufo::MetOfficeQCFlags::Profile::InterpolationFlag;
           oops::Log::debug() << " -> removed interpolation flag on level " << jlevB << std::endl;
         }
       }
@@ -173,10 +173,10 @@ namespace ufo {
           }
           if (E_[jlevstd - 1] == missingValueFloat) {
             if (E_[jlevstd + 1] == missingValueFloat) {
-              zFlags[jlevB] |= ufo::FlagsProfile::HydrostaticFlag;
-              tFlags[jlevB] |= ufo::FlagsProfile::HydrostaticFlag;
-              zFlags[jlev]  |= ufo::FlagsProfile::HydrostaticFlag;
-              tFlags[jlev]  |= ufo::FlagsProfile::HydrostaticFlag;
+              zFlags[jlevB] |= ufo::MetOfficeQCFlags::Profile::HydrostaticFlag;
+              tFlags[jlevB] |= ufo::MetOfficeQCFlags::Profile::HydrostaticFlag;
+              zFlags[jlev]  |= ufo::MetOfficeQCFlags::Profile::HydrostaticFlag;
+              tFlags[jlev]  |= ufo::MetOfficeQCFlags::Profile::HydrostaticFlag;
               oops::Log::debug() << " -> Isolated large residual on levels "
                                  << jlev << " and " << jlevB << std::endl;
             }
@@ -211,7 +211,7 @@ namespace ufo {
               (std::fabs(E_[jlevstd - 1] + E_[jlevstd]) <=
                options_.HCheck_ESumThreshLarger.value() &&
                MinAbsE >= options_.HCheck_MinAbsEThreshLarger.value())) {
-            zFlags[jlevB] |= ufo::FlagsProfile::HydrostaticFlag;
+            zFlags[jlevB] |= ufo::MetOfficeQCFlags::Profile::HydrostaticFlag;
             oops::Log::debug() << " -> Failed hydrostatic check (height error) on level "
                                << jlevB << std::endl;
             HydError_[jlevstd - 1] = 1;
@@ -224,7 +224,7 @@ namespace ufo {
                                << "Z Correction? " << Corr << "m"
                                << ", rounded = " << CorrApp << "m" << std::endl;
             if (CorrApp != 0.0) {
-              zFlags[jlevB] |= ufo::FlagsElem::DataCorrectFlag;
+              zFlags[jlevB] |= ufo::MetOfficeQCFlags::Elem::DataCorrectFlag;
               if (options_.HCheck_CorrectZ.value()) {
                 zObsCorrection[jlevB] = CorrApp;
                 oops::Log::debug() << " -> Uncorrected zObs: " << zObs[jlevB] << "m" << std::endl;
@@ -233,7 +233,7 @@ namespace ufo {
                                    << zObs[jlevB] + zObsCorrection[jlevB] << "m" << std::endl;
               } else {
                 // Observation is rejected
-                zFlags[jlevB] |= ufo::FlagsElem::FinalRejectFlag;
+                zFlags[jlevB] |= ufo::MetOfficeQCFlags::Elem::FinalRejectFlag;
               }
             }
             // Height errors in two adjacent levels
@@ -241,8 +241,8 @@ namespace ufo {
                      std::fabs(E_[jlevstd - 1] + E_[jlevstd] + ENext) <=
                      options_.HCheck_ESumNextThresh.value() &&
                      MinAbsE >= options_.HCheck_MinAbsEThresh.value()) {
-            zFlags[jlevB] |= ufo::FlagsProfile::HydrostaticFlag;
-            zFlags[jlev]  |= ufo::FlagsProfile::HydrostaticFlag;
+            zFlags[jlevB] |= ufo::MetOfficeQCFlags::Profile::HydrostaticFlag;
+            zFlags[jlev]  |= ufo::MetOfficeQCFlags::Profile::HydrostaticFlag;
             HydError_[jlevstd - 1] = 1;
             HydError_[jlevstd] = 1;
 
@@ -262,7 +262,7 @@ namespace ufo {
           } else if (MinAbsE >= options_.HCheck_MinAbsEThreshT.value() &&
                      AbsEDCDiff <= CorrDiffThreshDC &&
                      MinAbsEDC >= CorrMinThreshDC) {
-            tFlags[jlevB] |= ufo::FlagsProfile::HydrostaticFlag;
+            tFlags[jlevB] |= ufo::MetOfficeQCFlags::Profile::HydrostaticFlag;
             HydError_[jlevstd - 1] = 2;
             HydError_[jlevstd] = 0;
 
@@ -282,12 +282,12 @@ namespace ufo {
                                << DC_[jlevstd - 1] << ", " << DC_[jlevstd]
                                << std::endl;
 
-            if (tFlags[jlevB] & ufo::FlagsProfile::InterpolationFlag) {
+            if (tFlags[jlevB] & ufo::MetOfficeQCFlags::Profile::InterpolationFlag) {
               int SigB = SigBelow_[jlevstd - 1];
               int SigA = SigAbove_[jlevstd - 1];
 
-              tFlags[SigB] &= ~ufo::FlagsProfile::InterpolationFlag;
-              tFlags[SigA] &= ~ufo::FlagsProfile::InterpolationFlag;
+              tFlags[SigB] &= ~ufo::MetOfficeQCFlags::Profile::InterpolationFlag;
+              tFlags[SigA] &= ~ufo::MetOfficeQCFlags::Profile::InterpolationFlag;
 
               NumIntHydErrors[0]++;
               oops::Log::debug() << " -> Hyd: remove interpolation flags on levels "
@@ -299,8 +299,8 @@ namespace ufo {
             if (E_[jlevstd - 2] == missingValueFloat) {
               int L1 = StdLev_[jlevstd - 2];
 
-              zFlags[L1] |= ufo::FlagsProfile::HydrostaticFlag;
-              tFlags[L1] |= ufo::FlagsProfile::HydrostaticFlag;
+              zFlags[L1] |= ufo::MetOfficeQCFlags::Profile::HydrostaticFlag;
+              tFlags[L1] |= ufo::MetOfficeQCFlags::Profile::HydrostaticFlag;
 
               oops::Log::debug() << " -> Failed hydrostatic check "
                                  << "(bottom level error in T or Z) on level " << L1 << std::endl;
@@ -308,7 +308,7 @@ namespace ufo {
               HydError_[jlevstd - 2] = 4;
               HydError_[jlevstd - 1] = 0;
 
-              if (tFlags[L1] & ufo::FlagsProfile::SurfaceLevelFlag) {
+              if (tFlags[L1] & ufo::MetOfficeQCFlags::Profile::SurfaceLevelFlag) {
                 oops::Log::debug() << " -> Baseline error for level " << L1
                                    << "? P = " << pressures[L1] * 0.01 << "hPa, zObs = "
                                    << zObs[L1] << "m, zBkg = " << zBkg[L1]
@@ -318,15 +318,15 @@ namespace ufo {
             } else {
               // Error in all subsequent heights?
               HydError_[jlevstd - 1] = 6;
-              zFlags[jlevB] |= ufo::FlagsProfile::HydrostaticFlag;
+              zFlags[jlevB] |= ufo::MetOfficeQCFlags::Profile::HydrostaticFlag;
 
               oops::Log::debug() << " -> Failed hydrostatic check "
                                  << "(error in all subsequent heights) on level "
                                  << jlevB << std::endl;
             }
           } else if (HydError_[jlevstd - 1] == 3) {  // T and/or Z error
-            zFlags[jlevB] |= ufo::FlagsProfile::HydrostaticFlag;
-            tFlags[jlevB] |= ufo::FlagsProfile::HydrostaticFlag;
+            zFlags[jlevB] |= ufo::MetOfficeQCFlags::Profile::HydrostaticFlag;
+            tFlags[jlevB] |= ufo::MetOfficeQCFlags::Profile::HydrostaticFlag;
 
             oops::Log::debug() << " -> Failed hydrostatic check "
                                << "(T and/or Z error) on level " << jlevB << std::endl;
@@ -334,8 +334,8 @@ namespace ufo {
 
           // Top level error in T or Z
           if (HydError_[jlevstd] == 3 && E_[jlevstd + 1] == missingValueFloat) {
-            zFlags[jlev] |= ufo::FlagsProfile::HydrostaticFlag;
-            tFlags[jlev] |= ufo::FlagsProfile::HydrostaticFlag;
+            zFlags[jlev] |= ufo::MetOfficeQCFlags::Profile::HydrostaticFlag;
+            tFlags[jlev] |= ufo::MetOfficeQCFlags::Profile::HydrostaticFlag;
             HydError_[jlevstd] = 5;
 
             oops::Log::debug() << " -> Failed hydrostatic check "

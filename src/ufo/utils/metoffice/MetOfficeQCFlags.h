@@ -5,14 +5,15 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
  */
 
-#ifndef UFO_UTILS_FLAGS_H_
-#define UFO_UTILS_FLAGS_H_
+#ifndef UFO_UTILS_METOFFICE_METOFFICEQCFLAGS_H_
+#define UFO_UTILS_METOFFICE_METOFFICEQCFLAGS_H_
 
 namespace ufo {
   /// \file QC flags used in OPS
   /// A variety of flags are defined for entire observations,
   /// particular elements within (generic) observations, and specific observations
 
+namespace MetOfficeQCFlags {
   // Report flags for whole observations
   // Notes:
   //  PermRejectReport   = used for station list rejections
@@ -21,7 +22,7 @@ namespace ufo {
   //  OutOfAreaReport    = used for data outside model area
   //                       (outside ocean mask for ocean/sst/wave analysis)
   //                       used for data outside time window of analysis
-  enum FlagsWholeObReport {
+  enum WholeObReport {
     FinalRejectReport     = 1 << 0,  ///< One of flags 1-6 set
     PermRejectReport      = 1 << 1,  ///< Blacklisted data
     SurplusReport         = 1 << 2,  ///< (Near) duplicate data
@@ -42,13 +43,13 @@ namespace ufo {
   };
 
   // Assim flags for whole observations
-  enum FlagsWholeObAssim {
+  enum WholeObAssim {
     NewReport          = 1 << 0,  ///< Ob not yet assimilated
     AssimilatedReport  = 1 << 1,  ///< Ob already assimilated
   };
 
   // Flags for individual (generic) observation elements
-  enum FlagsElem {
+  enum Elem {
     NoAssimFlag        = 1 << 23,  ///< Do not use in analysis
     FinalRejectFlag    = 1 << 0,   ///< Final QC flag
     BuddyRejectFlag    = 1 << 1,   ///< PGE>0.5 after buddy check
@@ -65,7 +66,7 @@ namespace ufo {
   };
 
   // Flags for surface data
-  enum FlagsSurface {
+  enum Surface {
     TendencyFlag       = 1 << 12,  ///< Pressure tendency check.
     PstdRepFlag        = 1 << 13,  ///< Pstd reported not Pmsl.
     PstnPrefFlag       = 1 << 14,  ///< Use Pstn if reported.
@@ -81,7 +82,7 @@ namespace ufo {
   };
 
   // Flags for profiles
-  enum FlagsProfile {
+  enum Profile {
     HydrostaticFlag    = 1 << 12,  ///< Hydrostatic check flag
     InterpolationFlag  = 1 << 13,  ///< Interpolation check flag
     SuperadiabatFlag   = 1 << 14,  ///< Superadiabatic check flag
@@ -95,7 +96,7 @@ namespace ufo {
   };
 
   // Flags for satellite winds
-  enum FlagsSatWind {
+  enum SatWind {
     SatwindConfFlag       = 1 << 12,  ///< Satwind product confidence
     SatwindInversionFlag  = 1 << 13,  ///< Inversion height corrected
     SatwindDryLayerFlag   = 1 << 14,  ///< Model dry layer QC
@@ -103,7 +104,7 @@ namespace ufo {
   };
 
   // Flags for scatterometers
-  enum FlagsScatt {
+  enum Scatt {
     ScatConfidenceFlag  = 1 << 12,  ///< Wind product confidence
     ScatAmbigRemov1Flag = 1 << 13,  ///< Wind ambiguity removal
     ScatAmbigRemov2Flag = 1 << 14,  ///< Wind ambiguity removal
@@ -112,17 +113,19 @@ namespace ufo {
   };
 
   // Flags for aircraft relative humidity
-  enum FlagsAircraftRH {
+  enum AircraftRH {
     DerivedFromMixRatioFlag    = 1 << 12,  ///< Relative humidity derived from mixing ratio
     DerivedFromFlightLevelFlag = 1 << 13,  ///< Pressure derived from flight level
   };
 
   // Flags for satellite SST
-  enum FlagsSatSST {
+  enum SatSST {
     DaytimeFlag     = 1 << 12,  ///< Observation recorded in daytime
     DiurnalWarmFlag = 1 << 13   ///< Indicates a likely diurnal warming component in signal
   };
 
+}  // namespace MetOfficeQCFlags
+
 }  // namespace ufo
 
-#endif  // UFO_UTILS_FLAGS_H_
+#endif  // UFO_UTILS_METOFFICE_METOFFICEQCFLAGS_H_

@@ -19,7 +19,7 @@
 
 #include "ufo/filters/ProfileConsistencyCheckParameters.h"
 
-#include "ufo/utils/Flags.h"
+#include "ufo/utils/metoffice/MetOfficeQCFlags.h"
 
 namespace ioda {
   class ObsSpace;

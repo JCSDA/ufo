@@ -69,7 +69,7 @@ namespace ufo {
     for (int jlevstd = 0; jlevstd < NumStd_; ++jlevstd) {
       int jlev = StdLev_[jlevstd];  // Standard level
 
-      if (tFlags[jlev] & ufo::FlagsProfile::SurfaceLevelFlag) continue;
+      if (tFlags[jlev] & ufo::MetOfficeQCFlags::Profile::SurfaceLevelFlag) continue;
       int SigB = SigBelow_[jlevstd];
       int SigA = SigAbove_[jlevstd];
       float PStd = pressures[jlev];
@@ -109,9 +109,9 @@ namespace ufo {
         NumErrors++;
 
         // Simplest form of flagging - sig or std flags may be unset in other routines
-        tFlags[jlev] |= ufo::FlagsProfile::InterpolationFlag;
-        tFlags[SigB] |= ufo::FlagsProfile::InterpolationFlag;
-        tFlags[SigA] |= ufo::FlagsProfile::InterpolationFlag;
+        tFlags[jlev] |= ufo::MetOfficeQCFlags::Profile::InterpolationFlag;
+        tFlags[SigB] |= ufo::MetOfficeQCFlags::Profile::InterpolationFlag;
+        tFlags[SigA] |= ufo::MetOfficeQCFlags::Profile::InterpolationFlag;
 
         LevErrors_[jlev]++;
         LevErrors_[SigB]++;

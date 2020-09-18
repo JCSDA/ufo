@@ -73,12 +73,12 @@ namespace ufo {
           // Choose which level to flag
           if (std::abs(tObsFinal[jlev] - tBkg[jlev]) <=
               std::abs(tObsFinal[jlevprev] - tBkg[jlevprev])) {
-            tFlags[jlevprev] |= ufo::FlagsElem::FinalRejectFlag;
-            tFlags[jlev]     |= ufo::FlagsProfile::InterpolationFlag;
+            tFlags[jlevprev] |= ufo::MetOfficeQCFlags::Elem::FinalRejectFlag;
+            tFlags[jlev]     |= ufo::MetOfficeQCFlags::Profile::InterpolationFlag;
             jlevuse = jlev;
           } else {
-            tFlags[jlevprev] |= ufo::FlagsProfile::InterpolationFlag;
-            tFlags[jlev]     |= ufo::FlagsElem::FinalRejectFlag;
+            tFlags[jlevprev] |= ufo::MetOfficeQCFlags::Profile::InterpolationFlag;
+            tFlags[jlev]     |= ufo::MetOfficeQCFlags::Elem::FinalRejectFlag;
           }
 
           oops::Log::debug() << " -> Failed same P/different T check for levels "

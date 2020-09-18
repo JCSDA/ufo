@@ -88,7 +88,7 @@ namespace ufo {
 
     float Tmin = options_.RHCheck_TminInit.value();
     for (int jlev = 0; jlev < numLevelsToCheck; ++jlev) {
-      if (tFlags[jlev] & ufo::FlagsProfile::TropopauseFlag) {
+      if (tFlags[jlev] & ufo::MetOfficeQCFlags::Profile::TropopauseFlag) {
         PTrop = pressures[jlev] * 0.01;
       }
       if (pressures[jlev] > 0.0 &&
@@ -185,8 +185,8 @@ namespace ufo {
       for (int jlev = 0; jlev < NumLev; ++jlev) {
         if (FlagH_[jlev] > 0) {
           int ilev = Indx_[jlev];
-          RHFlags[ilev] |= ufo::FlagsProfile::InterpolationFlag;
-          RHFlags[ilev] |= ufo::FlagsElem::FinalRejectFlag;
+          RHFlags[ilev] |= ufo::MetOfficeQCFlags::Profile::InterpolationFlag;
+          RHFlags[ilev] |= ufo::MetOfficeQCFlags::Elem::FinalRejectFlag;
         }
       }
     }

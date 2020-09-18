@@ -21,6 +21,7 @@
 
 #include "ufo/utils/Constants.h"
 #include "ufo/utils/parameters/ParameterTraitsVariable.h"
+#include "ufo/utils/ProbabilityOfGrossErrorParameters.h"
 
 namespace eckit {
   class Configuration;
@@ -33,7 +34,8 @@ namespace ufo {
     OOPS_CONCRETE_PARAMETERS(ProfileConsistencyCheckParameters, DataHandlerParameters)
 
    public:  // variables
-    //=== Generic parameters ===//
+    /// @name Generic parameters
+    /// @{
 
     /// Maximum number of profile levels to be processed (a legacy of the OPS code).
     /// No maximum is assigned if this parameter is not specified.
@@ -48,7 +50,13 @@ namespace ufo {
     /// Print station ID
     oops::Parameter<bool> PrintStationID {"PrintStationID", false, this};
 
-    ///=== Standard level-related parameters ===//
+    /// Have the observation and model values been averaged onto model levels?
+    oops::Parameter<bool> modellevels {"ModelLevels", false, this};
+
+    /// @}
+
+    /// @name Standard level-related parameters
+    /// @{
 
     /// Min P for finding standard levels (Pa)
     oops::Parameter<float> FS_MinP {"FS_MinP", 0.0, this};
@@ -58,7 +66,10 @@ namespace ufo {
         {1000, 925, 850, 700, 500, 400, 300, 250, 200, 150, 100, 70, 50, 30, 20, 10, 7, 3, 2, 1},
         this};
 
-    //=== Basic check parameters ===//
+    /// @}
+
+    /// @name Basic check parameters
+    /// @{
 
     /// Skip basic checks. Should only be set to true in specific circumstances
     /// (e.g. for the relative humidity QC check;
@@ -74,12 +85,18 @@ namespace ufo {
     /// Set flags for failed basic checks?
     oops::Parameter<bool> flagBasicChecksFail {"flagBasicChecksFail", true, this};
 
-    //=== Same P/different T check parameters ===//
+    /// @}
+
+    /// @name Same P/different T check parameters
+    /// @{
 
     /// Threshold used for same P/different T check (K)
     oops::Parameter<float> SPDTCheck_TThresh {"SPDTCheck_TThresh", 1.0, this};
 
-    //=== Sign check parameters ===//
+    /// @}
+
+    /// @name Sign check parameters
+    /// @{
 
     /// Threshold used for Pstar difference in sign check (Pa)
     oops::Parameter<float> SCheck_PstarThresh {"SCheck_PstarThresh", 5000.0, this};
@@ -96,7 +113,10 @@ namespace ufo {
     /// Correct tObs in the sign check?
     oops::Parameter<bool> SCheck_CorrectT {"SCheck_CorrectT", true, this};
 
-    //=== Unstable layer check parameters ===//
+    /// @}
+
+    /// @name Unstable layer check parameters
+    /// @{
 
     /// Min P for unstable layer/superadiabat check (Pa)
     oops::Parameter<float> ULCheck_MinP {"ULCheck_MinP", 0.0, this};
@@ -107,7 +127,10 @@ namespace ufo {
     /// Tolerance for unstable layer/superadiabat check (K)
     oops::Parameter<float> ULCheck_SuperadiabatTol {"ULCheck_SuperadiabatTol", -2.0, this};
 
-    //=== Interpolation check parameters ===//
+    /// @}
+
+    /// @name Interpolation check parameters
+    /// @{
 
     /// Initial 'big gap' for interpolation check (hPa)
     oops::Parameter<float> ICheck_BigGapInit {"ICheck_BigGapInit", 1000.0, this};
@@ -126,7 +149,11 @@ namespace ufo {
         {150, 150, 150, 150, 100, 100, 100, 75,
             75, 50, 50, 20, 20, 20, 10, 10, 10, 10, 10, 10}, this};
 
-    //=== Hydrostatic check parameters ===//
+    /// @}
+
+    /// @name Hydrostatic check parameters
+
+    /// @{
 
     /// Surface P threshold for hydrostatic check (Pa)
     oops::Parameter<float> HCheck_SurfacePThresh {"HCheck_SurfacePThresh", 15100.0, this};
@@ -159,7 +186,10 @@ namespace ufo {
             "Hyd: T/Z Top", "Hyd: Z upward", "Hyd: ?????"},
         this};
 
-    //=== Wind speed interpolation check parameters ===//
+    /// @}
+
+    /// @name Wind speed interpolation check parameters
+    /// @{
 
     /// Squared tolerance for identical pressure in wind speed interpolation check (m^2 s^-2)
     oops::Parameter<float> UICheck_TInterpIdenticalPTolSq
@@ -171,15 +201,20 @@ namespace ufo {
     /// Big gap (Pa) used at lowest pressures in wind speed interpolation check
     oops::Parameter<float> UICheck_BigGapLowP {"UICheck_BigGapLowP", 1000.0, this};
 
-    /// Big gaps (Pa) used in wind speed interpolation check
+    /// Big gaps (Pa) used in wind speed interpolation check.
+    /// This vector must be the same length as UICheck_BigGapsPThresh.
     oops::Parameter<std::vector<float>> UICheck_BigGaps{"UICheck_BigGaps",
         {15000.0, 10000.0, 7500.0, 5000.0, 2000.0}, this};
 
-    /// Big gap thresholds (Pa) used in wind speed interpolation check
+    /// Big gap thresholds (Pa) used in wind speed interpolation check.
+    /// This vector must be the same length as UICheck_BigGaps.
     oops::Parameter<std::vector<float>> UICheck_BigGapsPThresh{"UICheck_BigGapsPThresh",
         {65000.0, 27500.0, 17500.0, 8500.0, 2500.0}, this};
 
-    //=== RH check parameters ===//
+    /// @}
+
+    /// @name RH check parameters
+    /// @{
 
     /// Initial value of minimum temperature (K)
     oops::Parameter<float> RHCheck_TminInit {"RHCheck_TminInit", 400.0, this};
@@ -214,13 +249,87 @@ namespace ufo {
     /// Lower threshold for temperature in moisture check
     oops::Parameter<float> RHCheck_TempThresh {"RHCheck_TempThresh", 233.15, this};
 
-    //=== OPS comparison parameters ===//
+    /// @}
+
+    /// @name Time check parameters
+    /// @{
+
+    /// Threshold relative to surface pressure for rejecting levels (hPa)
+    oops::Parameter<float> TimeCheck_SondeLaunchWindRej {"TimeCheck_SondeLaunchWindRej", 0.0, this};
+
+    /// @}
+
+    /// @name Background check (T, RH, UV) parameters
+    /// @{
+
+    /// Prior probability of 'bad' observations for T
+    oops::Parameter<float> BkCheck_PdBad_t {"BkCheck_PdBad_t", 0.01, this};
+
+    /// Prior probability of 'bad' observations for RH
+    oops::Parameter<float> BkCheck_PdBad_rh {"BkCheck_PdBad_rh", 0.01, this};
+
+    /// Prior probability of 'bad' observations for u and v
+    oops::Parameter<float> BkCheck_PdBad_uv {"BkCheck_PdBad_uv", 0.00005, this};
+
+    /// Observations with a latitude smaller than this value (both N and S)
+    /// are taken to be in the tropics.
+    oops::Parameter<float> BkCheck_Psplit_latitude_tropics
+      {"BkCheck_Psplit_latitude_tropics", 30.0, this};
+
+    /// Pressure threshold above which extra representivity error occurs in extratropics (Pa).
+    oops::Parameter<float> BkCheck_Psplit_extratropics
+      {"BkCheck_Psplit_extratropics", 30000.0, this};
+
+    /// Pressure threshold above which extra representivity error occurs in tropics (Pa).
+    oops::Parameter<float> BkCheck_Psplit_tropics {"BkCheck_Psplit_tropics", 20000.0, this};
+
+    /// Error inflation factor below Psplit
+    oops::Parameter<float> BkCheck_ErrorInflationBelowPsplit
+      {"BkCheck_ErrorInflationBelowPsplit", 1.5, this};
+
+    /// Error inflation factor above Psplit
+    oops::Parameter<float> BkCheck_ErrorInflationAbovePsplit
+      {"BkCheck_ErrorInflationAbovePsplit", 1.2, this};
+
+    /// Maximum error variance for RH
+    oops::Parameter<float> BkCheck_ErrVarMax_rh {"BkCheck_ErrVarMax_rh", 625.0, this};
+
+    /// Pressure thresholds for setting z background errors and 'bad' observation PGE.
+    /// This vector must be the same length as BkCheck_zBkgErrs and BkCheck_zBadPGEs.
+    oops::Parameter<std::vector<float>> BkCheck_PlevelThresholds {"BkCheck_PlevelThresholds",
+        {900.0, 775.0, 600.0, 450.0, 350.0, 275.0, 225.0, 175.0, 125.0, 80.0, 60.0,
+            40.0, 25.0, 15.0, 0.0},
+        this};
+
+    /// List of z background errors that are assigned based on pressure.
+    /// This vector must be the same length as BkCheck_PlevelThresholds and BkCheck_zBadPGEs.
+    oops::Parameter<std::vector<float>> BkCheck_zBkgErrs {"BkCheck_zBkgErrs",
+        {8.0, 7.9, 9.1, 12.6, 14.8, 16.7, 17.2, 17.2, 16.5, 15.3, 15.5, 17.9, 26.5,
+            36.6, 50.0},
+        this};
+
+    /// List of z PGEs for 'bad' observations that are assigned based on pressure.
+    /// This vector must be the same length as BkCheck_PlevelThresholds and BkCheck_zBkgErrs.
+    oops::Parameter<std::vector<float>> BkCheck_zBadPGEs {"BkCheck_zBadPGEs",
+        {0.01, 0.01, 0.01, 0.01, 0.005, 0.005, 0.005, 0.005, 0.005, 0.005, 0.002,
+            0.002, 0.002, 0.002, 0.001},
+        this};
+
+    /// @}
+
+    /// @name OPS comparison parameters
+    /// @{
 
     /// Compare with OPS values?
     oops::Parameter<bool> compareWithOPS {"compareWithOPS", false, this};
 
     /// Tolerance for absolute difference comparisions
     oops::Parameter<float> Comparison_Tol {"Comparison_Tol", 0.1, this};
+
+    /// @}
+
+    /// Parameters related to PGE calculations
+    ProbabilityOfGrossErrorParameters PGEParameters{this};
   };
 }  // namespace ufo
 

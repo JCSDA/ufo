@@ -8,14 +8,18 @@ set ( utils_files
       Constants.h
       DistanceCalculator.h
       EquispacedBinSelector.h
-      Flags.h
       GeodesicDistanceCalculator.h
       MaxNormDistanceCalculator.h
+      metoffice/MetOfficeQCFlags.h
+      metoffice/MetOfficeObservationIDs.h
       parameters/ParameterTraitsVariable.h
       PiecewiseLinearInterpolation.cc
       PiecewiseLinearInterpolation.h
       ParallelObsDistribution.cc
       ParallelObsDistribution.h
+      ProbabilityOfGrossError.cc
+      ProbabilityOfGrossError.h
+      ProbabilityOfGrossErrorParameters.h
       RecursiveSplitter.cc
       RecursiveSplitter.h
       SpatialBinSelector.h

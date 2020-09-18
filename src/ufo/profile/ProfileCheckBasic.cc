@@ -84,9 +84,9 @@ namespace ufo {
     // This is not done in the OPS sonde consistency checks, but is done in Ops_SondeAverage.inc
     if (options_.flagBasicChecksFail.value() && !result_) {
       for (int jlev = 0; jlev < numLevelsToCheck; ++jlev) {
-        if (!tFlags.empty()) tFlags[jlev] |= ufo::FlagsElem::FinalRejectFlag;
-        if (!zFlags.empty()) zFlags[jlev] |= ufo::FlagsElem::FinalRejectFlag;
-        if (!uFlags.empty()) uFlags[jlev] |= ufo::FlagsElem::FinalRejectFlag;
+        if (!tFlags.empty()) tFlags[jlev] |= ufo::MetOfficeQCFlags::Elem::FinalRejectFlag;
+        if (!zFlags.empty()) zFlags[jlev] |= ufo::MetOfficeQCFlags::Elem::FinalRejectFlag;
+        if (!uFlags.empty()) uFlags[jlev] |= ufo::MetOfficeQCFlags::Elem::FinalRejectFlag;
       }
     }
   }

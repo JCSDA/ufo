@@ -24,7 +24,7 @@
 #include "oops/util/Logger.h"
 #include "oops/util/missingValues.h"
 
-#include "ufo/utils/Flags.h"
+#include "ufo/utils/metoffice/MetOfficeQCFlags.h"
 
 namespace ufo {
   class ProfileConsistencyCheckParameters;
