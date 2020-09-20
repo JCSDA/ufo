@@ -233,6 +233,7 @@ void testFilters() {
 
   std::vector<eckit::LocalConfiguration> typeconfs;
   ::test::TestEnvironment::config().get("observations", typeconfs);
+  for (eckit::LocalConfiguration & conf : typeconfs) conf.set("iteration", 0);
 
   for (std::size_t jj = 0; jj < Test_::obspace().size(); ++jj) {
 /// init QC and error
