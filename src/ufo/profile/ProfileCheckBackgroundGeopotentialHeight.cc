@@ -51,20 +51,18 @@ namespace ufo {
     const std::vector <int> &timeFlags =
       profileDataHandler_.get<int>(ufo::VariableNames::qcflags_time);
 
-    if (oops::anyVectorEmpty(Zstation, pressures,
-                             zObs, zObsErr, zBkg,
-                             zPGE, zFlags, zObsCorrection,
-                             tFlags, timeFlags)) {
-      oops::Log::debug() << "At least one vector is empty. "
-                         << "Check will not be performed." << std::endl;
-      return;
-    }
-    if (!oops::allVectorsSameSize(Zstation, pressures,
-                                  zObs, zObsErr, zBkg,
-                                  zPGE, zFlags, zObsCorrection,
-                                  tFlags, timeFlags)) {
-      oops::Log::debug() << "Not all vectors have the same size. "
-                         << "Check will not be performed." << std::endl;
+    if (!oops::allVectorsSameNonZeroSize(Zstation, pressures,
+                                         zObs, zObsErr, zBkg,
+                                         zPGE, zFlags, zObsCorrection,
+                                         tFlags, timeFlags)) {
+      oops::Log::warning() << "At least one vector is the wrong size. "
+                           << "Check will not be performed." << std::endl;
+      oops::Log::warning() << "Vector sizes: "
+                           << oops::listOfVectorSizes(Zstation, pressures,
+                                                      zObs, zObsErr, zBkg,
+                                                      zPGE, zFlags, zObsCorrection,
+                                                      tFlags, timeFlags)
+                           << std::endl;
       return;
     }
 

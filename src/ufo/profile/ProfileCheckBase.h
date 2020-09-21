@@ -23,6 +23,7 @@
 #include "oops/util/CompareNVectors.h"
 #include "oops/util/Logger.h"
 #include "oops/util/missingValues.h"
+#include "oops/util/PropertiesOfNVectors.h"
 
 #include "ufo/utils/metoffice/MetOfficeQCFlags.h"
 
