@@ -123,6 +123,7 @@ list( APPEND ufo_test_input
   testinput/omi_aura_flipz.yaml
   testinput/ompsnp_npp.yaml
   testinput/ompsnp_npp_flipz.yaml
+  testinput/ompsnp_npp_L127.yaml
   testinput/ompstc_npp.yaml
   testinput/ompstc_npp_flipz.yaml
   testinput/processwhere.yaml
@@ -158,6 +159,7 @@ list( APPEND ufo_test_input
   testinput/satwind.yaml
   testinput/sbuv2_n19.yaml
   testinput/sbuv2_n19_flipz.yaml
+  testinput/sbuv2_n19_L127.yaml
   testinput/seaicefrac.yaml
   testinput/seaicethick.yaml
   testinput/chleuzintegr.yaml
@@ -264,6 +266,7 @@ list( APPEND ufo_test_data
   atmosphere/omi_aura_geoval_flipz_2019101700_m.nc4
   atmosphere/ompsnp_npp_geoval_2019101700_m.nc4
   atmosphere/ompsnp_npp_geoval_flipz_2019101700_m.nc4
+  atmosphere/ompsnp_npp_geoval_2020051712_m.nc4
   atmosphere/ompstc8_npp_geoval_2019101700_m.nc4
   atmosphere/ompstc8_npp_geoval_flipz_2019101700_m.nc4
   atmosphere/ps_geovals_2018041500_0000.nc4
@@ -278,6 +281,7 @@ list( APPEND ufo_test_data
   atmosphere/sbuv2_n19_geoval_flipz_2018041500_m.nc4
   atmosphere/sbuv2_n19_geoval_2019101700_m.nc4
   atmosphere/sbuv2_n19_geoval_flipz_2019101700_m.nc4
+  atmosphere/sbuv2_n19_geoval_2020051712_m.nc4
   atmosphere/seviri_m08_geoval_2018041500_m.nc4
   atmosphere/sfc_geoval_2018041500_m.nc4
   atmosphere/sndrd1_g15_geoval_2018041500_m.nc4
@@ -727,6 +731,13 @@ ecbuild_add_test( TARGET  test_ufo_opr_atminterplay_ompsnp_npp_flipz
                   DEPENDS test_ObsOperator.x
                   TEST_DEPENDS ufo_get_ioda_test_data )
 
+ecbuild_add_test( TARGET  test_ufo_opr_atminterplay_ompsnp_npp_L127
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
+                  ARGS    "testinput/ompsnp_npp_L127.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsOperator.x
+                  TEST_DEPENDS ufo_get_ioda_test_data )
+
 ecbuild_add_test( TARGET  test_ufo_opr_atminterplay_ompstc_npp
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
                   ARGS    "testinput/ompstc_npp.yaml"
@@ -751,6 +762,13 @@ ecbuild_add_test( TARGET  test_ufo_opr_atminterplay_sbuv2_n19
 ecbuild_add_test( TARGET  test_ufo_opr_atminterplay_sbuv2_n19_flipz
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
                   ARGS    "testinput/sbuv2_n19_flipz.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsOperator.x
+                  TEST_DEPENDS ufo_get_ioda_test_data )
+
+ecbuild_add_test( TARGET  test_ufo_opr_atminterplay_sbuv2_n19_L127
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
+                  ARGS    "testinput/sbuv2_n19_L127.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsOperator.x
                   TEST_DEPENDS ufo_get_ioda_test_data )
