@@ -49,18 +49,16 @@ namespace ufo {
     const std::vector <float> &tObsCorrection =
        profileDataHandler_.get<float>(ufo::VariableNames::obscorrection_air_temperature);
 
-    if (oops::anyVectorEmpty(Latitude, pressures,
-                             tObs, tObsErr, tBkg, tBkgErr,
-                             tPGE, tFlags, timeFlags, tObsCorrection)) {
-      oops::Log::debug() << "At least one vector is empty. "
-                         << "Check will not be performed." << std::endl;
-      return;
-    }
-    if (!oops::allVectorsSameSize(Latitude, pressures,
-                                  tObs, tObsErr, tBkg, tBkgErr,
-                                  tPGE, tFlags, timeFlags, tObsCorrection)) {
-      oops::Log::debug() << "Not all vectors have the same size. "
-                         << "Check will not be performed." << std::endl;
+    if (!oops::allVectorsSameNonZeroSize(Latitude, pressures,
+                                         tObs, tObsErr, tBkg, tBkgErr,
+                                         tPGE, tFlags, timeFlags, tObsCorrection)) {
+      oops::Log::warning() << "At least one vector is the wrong size. "
+                           << "Check will not be performed." << std::endl;
+      oops::Log::warning() << "Vector sizes: "
+                           << oops::listOfVectorSizes(Latitude, pressures,
+                                                      tObs, tObsErr, tBkg, tBkgErr,
+                                                      tPGE, tFlags, timeFlags, tObsCorrection)
+                           << std::endl;
       return;
     }
 

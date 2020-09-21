@@ -57,20 +57,18 @@ namespace ufo {
     const std::vector <int> &timeFlags =
       profileDataHandler_.get<int>(ufo::VariableNames::qcflags_time);
 
-    if (oops::anyVectorEmpty(uObs, uObsErr, uBkg, uBkgErr,
-                             uPGE, uFlags,
-                             vObs, vObsErr, vBkg, vBkgErr,
-                             vPGE, vFlags, timeFlags)) {
-      oops::Log::debug() << "At least one vector is empty. "
-                         << "Check will not be performed." << std::endl;
-      return;
-    }
-    if (!oops::allVectorsSameSize(uObs, uObsErr, uBkg, uBkgErr,
-                                  uPGE, uFlags,
-                                  vObs, vObsErr, vBkg, vBkgErr,
-                                  vPGE, vFlags, timeFlags)) {
-      oops::Log::debug() << "Not all vectors have the same size. "
-                         << "Check will not be performed." << std::endl;
+    if (!oops::allVectorsSameNonZeroSize(uObs, uObsErr, uBkg, uBkgErr,
+                                         uPGE, uFlags,
+                                         vObs, vObsErr, vBkg, vBkgErr,
+                                         vPGE, vFlags, timeFlags)) {
+      oops::Log::warning() << "At least one vector is the wrong size. "
+                           << "Check will not be performed." << std::endl;
+      oops::Log::warning() << "Vector sizes: "
+                           << oops::listOfVectorSizes(uObs, uObsErr, uBkg, uBkgErr,
+                                                      uPGE, uFlags,
+                                                      vObs, vObsErr, vBkg, vBkgErr,
+                                                      vPGE, vFlags, timeFlags)
+                           << std::endl;
       return;
     }
 
