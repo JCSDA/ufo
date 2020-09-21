@@ -57,6 +57,7 @@ add_subdirectory( identity )
 add_subdirectory( atmvertinterp )
 add_subdirectory( atmvertinterplay )
 add_subdirectory( atmsfcinterp )
+add_subdirectory( avgkernel )
 if( ${CRTM_FOUND} )
     add_subdirectory( crtm )
 endif( ${CRTM_FOUND} )
@@ -83,6 +84,7 @@ list( APPEND ufo_src_files
     ${atmvertinterp_src_files}
     ${atmvertinterplay_src_files}
     ${atmsfcinterp_src_files}
+    ${avgkernel_src_files}
     ${crtm_src_files}
     ${rttov_src_files}
     ${gnssro_src_files}

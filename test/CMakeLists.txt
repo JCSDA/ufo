@@ -184,6 +184,7 @@ list( APPEND ufo_test_input
   testinput/profileconsistencychecks_bkgqc_repobs_OPScomparison.yaml
   testinput/timeoper.yaml
   testinput/tprof.yaml
+  testinput/tropomi_no2.yaml
   testinput/variables.yaml
   testinput/windprof.yaml
 )
@@ -292,6 +293,7 @@ list( APPEND ufo_test_data
   atmosphere/sondes_geoval_2018041500_s.nc4
   atmosphere/sondes_geoval_2018041500_vs.nc4
   atmosphere/ssmis_f18_geoval_2018041500_m.nc4
+  atmosphere/tropomi_no2_geoval_2020090318_m.nc4
   atmosphere/windprof_geoval_2018041500_m.nc4
   marine/coolskin_fake_geovals_2018041500.nc
   marine/cryosat2-2018-04-15_geovals.nc
@@ -777,6 +779,13 @@ ecbuild_add_test( TARGET  test_ufo_opr_vertinterp_radiosonde
                   MPI     4
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
                   ARGS    "testinput/radiosonde.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsOperator.x
+                  TEST_DEPENDS ufo_get_ioda_test_data )
+
+ecbuild_add_test( TARGET  test_ufo_opr_avgkernel_tropomi_no2
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
+                  ARGS    "testinput/tropomi_no2.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsOperator.x
                   TEST_DEPENDS ufo_get_ioda_test_data )
