@@ -89,10 +89,15 @@ void CLWRetMW::compute(const ObsFilterData & in,
     // Get bias based on group type
     if (options_.addBias.value() == vargrp[igrp]) {
       std::vector<float> bias238(nlocs), bias314(nlocs);
+      if (in.has(Variable("brightness_temperature@" + options_.testBias.value(), channels_)[0])) {
       in.get(Variable("brightness_temperature@" + options_.testBias.value(), channels_)
                       [channels_[0]-1], bias238);
       in.get(Variable("brightness_temperature@" + options_.testBias.value(), channels_)
                       [channels_[1]-1], bias314);
+      } else {
+      bias238.assign(nlocs, 0.0f);
+      bias314.assign(nlocs, 0.0f);
+      }
       // Add bias correction to the assigned group
       if (options_.addBias.value() == "ObsValue") {
         for (size_t iloc = 0; iloc < nlocs; ++iloc) {

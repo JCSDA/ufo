@@ -74,6 +74,7 @@ list( APPEND ufo_test_input
   testinput/function_nsstret.yaml
   testinput/function_obserrmean.yaml
   testinput/function_obserrmean_abi.yaml
+  testinput/function_obserrmean_mhs.yaml
   testinput/function_obserrmean_atms.yaml
   testinput/function_scatret.yaml
   testinput/function_scatret_atms.yaml
@@ -262,7 +263,9 @@ list( APPEND ufo_test_data
   atmosphere/met_office_thinning.nc4
   atmosphere/met_office_temporal_thinning_surface.nc4
   atmosphere/met_office_temporal_thinning_sonde.nc4
+  atmosphere/mhs_n19_geoval_2018041500_m_qc.nc4
   atmosphere/mhs_n19_geoval_2018041500_m.nc4
+  atmosphere/mhs_n19_obsdiag_2018041500_m_qc.nc4
   atmosphere/omi_aura_geoval_2019101700_m.nc4
   atmosphere/omi_aura_geoval_flipz_2019101700_m.nc4
   atmosphere/ompsnp_npp_geoval_2019101700_m.nc4
@@ -1509,6 +1512,13 @@ ecbuild_add_test( TARGET  test_ufo_function_obserrmean
 ecbuild_add_test( TARGET  test_ufo_function_obserrmean_abi
                   SOURCES mains/TestObsFunction.cc
                   ARGS    "testinput/function_obserrmean_abi.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  LIBS    ufo
+                  TEST_DEPENDS ufo_get_ioda_test_data )
+
+ecbuild_add_test( TARGET  test_ufo_function_obserrmean_mhs
+                  SOURCES mains/TestObsFunction.cc
+                  ARGS    "testinput/function_obserrmean_mhs.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   LIBS    ufo
                   TEST_DEPENDS ufo_get_ioda_test_data )
