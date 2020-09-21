@@ -86,6 +86,7 @@ list( APPEND ufo_test_input
   testinput/geos_aod.yaml
   testinput/geovals_spec.yaml
   testinput/gnssrobendmetoffice.yaml
+  testinput/gnssrobendmetoffice_nopseudo.yaml
   testinput/gnssrobndropp1d.yaml
   testinput/gnssrobndropp2d.yaml
   testinput/gnssrobndnbam.yaml
@@ -242,6 +243,7 @@ list( APPEND ufo_test_data
   atmosphere/gnssro_geoval_2018041500_m.nc4
   atmosphere/gnssro_geoval_2018041500_l.nc4
   atmosphere/gnssro_geoval_2019050700_1obs.nc4
+  atmosphere/gnssro_geoval_2020050106_nopseudo.nc4
   atmosphere/gome_metop-a_geoval_2019101700_m.nc4
   atmosphere/gome_metop-a_geoval_flipz_2019101700_m.nc4
   atmosphere/gsisfc_tsen_geoval_2018041500_m.nc4
@@ -884,16 +886,29 @@ ecbuild_add_test( TARGET  test_ufo_linopr_gnssroBndNBAM
                   DEPENDS test_ObsOperatorTLAD.x
                   TEST_DEPENDS ufo_get_ioda_test_data )
 
-ecbuild_add_test( TARGET  test_ufo_opr_gnssroBendMetOffice
+ecbuild_add_test( TARGET  test_ufo_opr_gnssroBendMetOffice_pseudo
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
                   ARGS    "testinput/gnssrobendmetoffice.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsOperator.x 
                   TEST_DEPENDS ufo_get_ioda_test_data )
 
-ecbuild_add_test( TARGET  test_ufo_linopr_gnssroBendMetOffice
+ecbuild_add_test( TARGET  test_ufo_linopr_gnssroBendMetOffice_pseudo
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
                   ARGS    "testinput/gnssrobendmetoffice.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsOperatorTLAD.x )
+
+ecbuild_add_test( TARGET  test_ufo_opr_gnssroBendMetOffice_nopseudo
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
+                  ARGS    "testinput/gnssrobendmetoffice_nopseudo.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsOperator.x 
+                  TEST_DEPENDS ufo_get_ioda_test_data )
+
+ecbuild_add_test( TARGET  test_ufo_linopr_gnssroBendMetOffice_nopseudo
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
+                  ARGS    "testinput/gnssrobendmetoffice_nopseudo.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsOperatorTLAD.x )
 
