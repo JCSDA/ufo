@@ -139,7 +139,9 @@ observations:
       CoefficientPath: *rttov_coeff
     BMatrix: Data/atms_bmatrix_70.dat
     RMatrix: Data/atms_noaa_20_rmatrix.nc4
-    channels: *ops_channels
+    filter variables:
+    - name: brightness_temperature
+      channels: *ops_channels
     retrieval variables:
     - air_temperature
     - specific_humidity
@@ -150,7 +152,6 @@ observations:
     - skin_temperature
     - surface_air_pressure
     nlevels: 70
-    defer to post: true
     qtotal: true
     RTTOV_mwscattSwitch: false
     RTTOV_usetotalice: false
@@ -165,5 +166,4 @@ observations:
     IRemiss: false
     EmissLandDefault: 0.95
     EmissSeaIceDefault: 0.92
-#    EmisEigVecPath: /data/users/mcooke/OPS/ops_data/trunk/SatRad_coeffs/default/IASI_EmisEigenVec
   passedBenchmark: 12176      # number of passed obs

@@ -44,6 +44,9 @@ RTTOVOneDVarCheck::RTTOVOneDVarCheck(ioda::ObsSpace & obsdb, const eckit::Config
   ufo_rttovonedvarcheck_create_f90(key_, obsdb, conf, channels_.size(), channels_[0],
                                    retrieved_vars_, RTTOVOneDVarCheck::qcFlag());
 
+  // Populate variables list - which makes sure this runs as a post filter
+  allvars_ += Variables(filtervars_, "HofX");
+
   oops::Log::debug() << "RTTOVOneDVarCheck contructor complete. " << std::endl;
 }
 
