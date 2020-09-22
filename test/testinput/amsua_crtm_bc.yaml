@@ -1,7 +1,6 @@
 window begin: 2018-04-14T21:00:00Z
 window end: 2018-04-15T03:00:00Z
 
-
 observations:
 - obs operator:
     name: CRTM
@@ -34,6 +33,8 @@ observations:
     covariance:
       minimal required obs number: 20
       variance range: [1.0e-6, 10.]
+      step size: 1.0e-4
+      largest analysis variance: 10000.0 
       prior:
         datain: Data/satbias_crtm_pc
         inflation:

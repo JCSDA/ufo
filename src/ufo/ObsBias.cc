@@ -289,14 +289,13 @@ void ObsBias::computeObsBias(ioda::ObsVector & ybias,
 // -----------------------------------------------------------------------------
 std::vector<ioda::ObsVector> ObsBias::computePredictors(const GeoVaLs & geovals,
                                                         const ObsDiagnostics & ydiags) const {
-  const std::size_t nlocs  = odb_.nlocs();
   const std::size_t npreds = predbases_.size();
-  const std::size_t njobs  = jobs_.size();
 
   std::vector<ioda::ObsVector> predData(npreds, ioda::ObsVector(odb_));
 
   for (std::size_t p = 0; p < npreds; ++p) {
     predbases_[p]->compute(odb_, geovals, ydiags, predData[p]);
+    predData[p].save(predbases_[p]->name() + "Predictor");
   }
 
   oops::Log::trace() << "ObsBias::computePredictors done." << std::endl;

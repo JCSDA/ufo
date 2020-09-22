@@ -72,6 +72,19 @@ void testObsBiasCovarianceDetails() {
     for ( const auto & var : vars)
      odb.put_db("EffectiveQC0", var , qc_flags);
 
+    // mimic effective errors
+    const std::vector<float> errs(odb.nlocs(), 1.0);
+    for ( const auto & var : vars)
+     odb.put_db("EffectiveError", var , errs);
+
+    // mimic predictors
+    ioda::ObsVector predx(odb);
+    for (std::size_t jj = 0; jj < predx.size(); ++jj)
+      predx[jj] = 1.0;
+    for (const auto & pred : ybias_cov.predictorNames()) {
+      predx.save(pred + "Predictor");
+    }
+
     // Randomize increments again
     ybias_cov.randomize(ybias_inc);
 
