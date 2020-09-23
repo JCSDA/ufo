@@ -25,7 +25,7 @@ observations:
     filter variables:
     - name: bending_angle
     threshold: 3
-  passedBenchmark: 383
+  passedBenchmark: 382
 - obs operator:
     name: GnssroBndNBAM
     obs options:
