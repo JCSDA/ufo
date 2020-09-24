@@ -59,7 +59,8 @@ ObsBias::ObsBias(ioda::ObsSpace & odb, const eckit::Configuration & conf)
 
   if (prednames_.size() * jobs_.size() > 0) {
     // Initialize the biascoeffs to ZERO
-    biascoeffs_.resize(prednames_.size() * jobs_.size(), 0.0);
+    biascoeffs_.resize(prednames_.size() * jobs_.size());
+    std::fill(biascoeffs_.begin(), biascoeffs_.end(), 0.0);
 
     // Read or initialize bias coefficients
     this->read(conf);
@@ -77,7 +78,8 @@ ObsBias::ObsBias(const ObsBias & other, const bool copy)
   oops::Log::trace() << "ObsBias::copy ctor starting." << std::endl;
 
   // Initialize the biascoeffs
-  biascoeffs_.resize(prednames_.size() * jobs_.size(), 0.0);
+  biascoeffs_.resize(prednames_.size() * jobs_.size());
+  std::fill(biascoeffs_.begin(), biascoeffs_.end(), 0.0);
 
   // Copy the bias coeff data
   if (copy && biascoeffs_.size() > 0) *this = other;

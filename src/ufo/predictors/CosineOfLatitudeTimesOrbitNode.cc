@@ -21,6 +21,9 @@ static PredictorMaker<CosineOfLatitudeTimesOrbitNode>
 CosineOfLatitudeTimesOrbitNode::CosineOfLatitudeTimesOrbitNode(
                                 const eckit::Configuration & conf, const std::vector<int> & jobs)
   : PredictorBase(conf, jobs) {
+  // override the preconditioner from options
+  if (conf.has("predictor.options"))
+    precond_ = conf.getDouble("predictor.options.preconditioner");
 }
 
 // -----------------------------------------------------------------------------
@@ -32,9 +35,6 @@ void CosineOfLatitudeTimesOrbitNode::compute(const ioda::ObsSpace & odb,
 
   // assure shape of out
   ASSERT(out.nlocs() == nlocs);
-
-  // Following variables should be moved to yaml file ?
-  const double ssmis_precond = 0.01;  //  default preconditioner for ssmis bias terms
 
   // retrieve the sensor view angle
   std::vector<float> cenlat(nlocs, 0.0);

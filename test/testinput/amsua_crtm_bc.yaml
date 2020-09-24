@@ -43,12 +43,12 @@ observations:
     predictors:
     - predictor:
         name: constant
-#     - predictor:
-#         name: cloud_liquid_water
-#         options:
-#           clwret_ch238: 1
-#           clwret_ch314: 2
-#           clwret_types: [GsiHofX]
+    - predictor:
+        name: cosine_of_latitude_times_orbit_node
+        options:
+          preconditioner: 0.01
+    - predictor:
+        name: sine_of_latitude
     - predictor:
         name: lapse_rate
         options:
