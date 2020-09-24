@@ -927,7 +927,8 @@ ecbuild_add_test( TARGET  test_ufo_linopr_gnssroBendMetOffice_pseudo
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
                   ARGS    "testinput/gnssrobendmetoffice.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
-                  DEPENDS test_ObsOperatorTLAD.x )
+                  DEPENDS test_ObsOperatorTLAD.x
+                  TEST_DEPENDS ufo_get_ioda_test_data )
 
 ecbuild_add_test( TARGET  test_ufo_opr_gnssroBendMetOffice_nopseudo
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
@@ -940,7 +941,8 @@ ecbuild_add_test( TARGET  test_ufo_linopr_gnssroBendMetOffice_nopseudo
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
                   ARGS    "testinput/gnssrobendmetoffice_nopseudo.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
-                  DEPENDS test_ObsOperatorTLAD.x )
+                  DEPENDS test_ObsOperatorTLAD.x
+                  TEST_DEPENDS ufo_get_ioda_test_data )
 
 if( ${ROPP-UFO_FOUND} )
 ecbuild_add_test( TARGET  test_ufo_opr_gnssroBndROPP1D
@@ -1007,7 +1009,8 @@ ecbuild_add_test( TARGET  test_ufo_opr_chleuzintegr
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
                   ARGS    "testinput/chleuzintegr.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
-                  DEPENDS test_ObsOperator.x )
+                  DEPENDS test_ObsOperator.x
+                  TEST_DEPENDS ufo_get_ioda_test_data )
 
 ecbuild_add_test( TARGET  test_ufo_opr_identity_sst
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
@@ -1136,7 +1139,8 @@ ecbuild_add_test( TARGET  test_ufo_qc_velocitybounds
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
                   ARGS    "testinput/qc_velocitycheck.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
-                  DEPENDS test_ObsFilters.x )
+                  DEPENDS test_ObsFilters.x
+                  TEST_DEPENDS ufo_get_ioda_test_data )
 
 ecbuild_add_test( TARGET  test_ufo_qc_gen_defer_to_post
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
@@ -1172,10 +1176,11 @@ ecbuild_add_test( TARGET  test_ufo_qc_met_office_buddy_check
                   DEPENDS test_ObsFilters.x )
 
 ecbuild_add_test( TARGET  test_ufo_qc_oceancolor_preqc
-                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-                   ARGS    "testinput/qc_oceancolor_preqc.yaml"
-                   ENVIRONMENT OOPS_TRAPFPE=1
-                   DEPENDS test_ObsFilters.x )
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                  ARGS    "testinput/qc_oceancolor_preqc.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsFilters.x
+                  TEST_DEPENDS ufo_get_ioda_test_data )
 
 ecbuild_add_test( TARGET  test_ufo_qc_poisson_disk_thinning
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x

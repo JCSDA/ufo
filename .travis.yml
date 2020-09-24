@@ -20,7 +20,7 @@ before_install:
   - cd CI
   - REPO_SOURCE_DIR=${TRAVIS_BUILD_DIR}/jcsda/src_repo
   # should use develop after issue with parallel ufo testing is solved
-  - git clone -b feature/parallel-testing https://${GH_TOKEN}@github.com/jcsda/jedi-build-package.git ${REPO_SOURCE_DIR}/jedi_build_package
+  - git clone https://${GH_TOKEN}@github.com/jcsda/jedi-build-package.git ${REPO_SOURCE_DIR}/jedi_build_package
 
   - docker pull jcsda/docker-clang-mpich-dev
   - docker images
