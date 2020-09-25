@@ -23,6 +23,8 @@ module ufo_atmvertinterplay_tlad_mod
     integer :: nval, nlocs
     real(kind_real), allocatable :: wf(:)
     integer, allocatable :: wi(:)
+    integer, public, allocatable :: nlevels(:)
+    real, public, allocatable :: coefficients(:) ! unit conversion from geoval to obs
     character(len=MAXVARLEN), public :: v_coord ! GeoVaL to use to interplayolate in vertical
     logical, public :: use_ln ! if T, use ln(v_coord) not v_coord
   contains
@@ -37,7 +39,6 @@ module ufo_atmvertinterplay_tlad_mod
 ! ------------------------------------------------------------------------------
 contains
 ! ------------------------------------------------------------------------------
-
 subroutine atmvertinterplay_tlad_setup_(self, grid_conf)
   use fckit_configuration_module, only: fckit_configuration
   implicit none
@@ -45,24 +46,43 @@ subroutine atmvertinterplay_tlad_setup_(self, grid_conf)
   type(fckit_configuration), intent(in) :: grid_conf
 
   character(kind=c_char,len=:), allocatable :: coord_name
-  integer :: ivar, nvars
-
-  !> Fill in variables requested from the model
-  nvars = self%obsvars%nvars()
-  do ivar = 1, nvars
-    call self%geovars%push_back(self%obsvars%variable(ivar))
-  enddo
-  !> grab what vertical coordinate/variable to use from the config
-  self%use_ln = .false.
-
-  if( grid_conf%has("vertical coordinate") ) then
-      call grid_conf%get_or_die("vertical coordinate",coord_name)
-      self%v_coord = coord_name
-      if( trim(self%v_coord) .eq. var_prs ) self%use_ln = .true.
-  else  ! default
-      self%v_coord = var_prs
-      self%use_ln  = .true.
+  character(kind=c_char,len=:), allocatable :: gvars(:)
+  real(kind=c_double), allocatable :: coefficients(:)
+  integer(kind=c_int), allocatable :: nlevels(:)
+  !Local Variables
+  integer :: ivar, nlevs=0, nvars=0, ngvars=0, ncoefs=0
+  ! Check configurations
+  if (grid_conf%has("geovals")) then
+    ngvars = grid_conf%get_size("geovals")
+    call grid_conf%get_or_die("geovals", gvars)
+    ! add to geovars list
+    do ivar = 1, ngvars
+      call self%geovars%push_back(gvars(ivar))
+    enddo
   endif
+  nvars = self%obsvars%nvars()
+  if (ngvars == 0 .and. nvars > 0) then
+    allocate(self%coefficients(nvars))
+    do ivar = 1, nvars
+      call self%geovars%push_back(self%obsvars%variable(ivar))
+      self%coefficients(ivar) = 1.0
+    enddo
+  endif
+  if (grid_conf%has("coefficients")) then
+    ncoefs = grid_conf%get_size("coefficients")
+    call grid_conf%get_or_die("coefficients", coefficients)
+    allocate(self%coefficients(ncoefs))
+    self%coefficients(1:ncoefs) = coefficients(1:ncoefs)
+  endif
+  if (grid_conf%has("nlevels")) then
+    nlevs = grid_conf%get_size("nlevels")
+    call grid_conf%get_or_die("nlevels", nlevels)
+    allocate(self%nlevels(nlevs))
+    self%nlevels(1:nlevs) = nlevels(1:nlevs)
+  endif
+
+  ! Put pressure to the geovars (vars from the model) list
+  call self%geovars%push_back(var_prsi)
 
 end subroutine atmvertinterplay_tlad_setup_
 
