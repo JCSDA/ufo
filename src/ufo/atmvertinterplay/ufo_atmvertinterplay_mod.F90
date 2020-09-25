@@ -177,8 +177,6 @@ real :: pindex
       iz1 = topozp
       if (iz1>nsig) iz1=nsig
       iz2 = pob
-      !For total column ozone
-      if(iz1 .eq. nsig .and. iz2 .lt.7)iz2 = 1
       g = 0.
       dz1 = topozp
       do kk=iz1,iz2,-1
