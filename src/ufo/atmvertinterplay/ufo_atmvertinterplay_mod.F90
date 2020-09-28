@@ -79,6 +79,84 @@ call self%geovars%push_back(var_prsi)
 
 end subroutine ufo_atmvertinterplay_setup
 
+subroutine get_integral_limits(airpressure, botpressure, toppressure, modelpressure, nlevs, nlocs, nsig) 
+use ufo_constants_mod
+use obsspace_mod
+implicit none
+integer :: nlevs, nlocs, nsig
+real(kind_real), dimension(:) :: toppressure, botpressure, airpressure
+real(kind_real), dimension(:,:) :: modelpressure
+! local
+integer :: nprofs, iobs, iprof, kk, k1, k2
+
+if (nlevs == 1) then ! total column ozone
+  do iobs = 1, nlocs
+    toppressure(iobs) = modelpressure(nsig+1,iobs)
+    botpressure(iobs) = modelpressure(1,iobs)
+  enddo
+else
+  !Obs pressures read in as Pa
+  nprofs = nlocs/nlevs
+  iobs = 0
+  do iprof = 1, nprofs
+    do kk = 1, nlevs
+      k1 = kk
+      k2 = kk - 1
+      if (k2 == 0) k2 = 1
+      if (kk == nlevs) then
+        k1 = nlevs - 1
+        k2 = 1
+      endif
+      iobs = iobs+1
+      toppressure(iobs) = airpressure(k2)
+      botpressure(iobs) = airpressure(k1)
+      if( kk == 1 ) then
+        toppressure(iobs) = modelpressure(nsig+1, iobs)
+        botpressure(iobs) = airpressure(1)
+      else if( kk == nlevs) then
+        toppressure(iobs) = modelpressure(nsig+1, iobs)
+        botpressure(iobs) = modelpressure(1, iobs)
+      endif
+    enddo
+  enddo
+endif
+end subroutine get_integral_limits
+
+subroutine apply_layer_integral(coefficient, modelozone, modelpressure, botpressure, toppressure, nsig, layer_oz)
+use ufo_constants_mod
+use obsspace_mod
+implicit none
+integer :: nsig
+real :: coefficient
+real(kind_real) :: botpressure, toppressure
+real(kind_real), dimension(:) :: modelpressure, modelozone
+real(kind_real) :: layer_oz
+real :: pindex
+! local
+integer :: kk, iz1, iz2
+real(kind_real) :: pob,delz,g,delp4,dz1
+real(kind_real) :: topozp, botozp
+
+topozp = pindex(nsig+1, modelpressure, toppressure)
+botozp = pindex(nsig+1, modelpressure, botpressure)
+
+pob = botozp
+iz1 = topozp
+if (iz1>nsig) iz1=nsig
+iz2 = pob
+layer_oz = 0._kind_real
+dz1 = topozp
+do kk=iz1,iz2,-1
+  delz = 1.0_kind_real
+  if(kk == iz1) delz = dz1 - iz1
+  if (kk == iz2) delz = delz - pob + iz2
+  delp4 = modelpressure(kk)-modelpressure(kk+1)  ! [Pa]
+  layer_oz = layer_oz + modelozone(kk)*coefficient*(delz*delp4)
+enddo
+
+end subroutine apply_layer_integral
+
+
 ! ------------------------------------------------------------------------------
 subroutine ufo_atmvertinterplay_simobs(self, geovals_in, obss, nvars, nlocs, hofx)
 use ufo_geovals_mod, only: ufo_geovals, ufo_geoval, ufo_geovals_get_var
@@ -96,16 +174,14 @@ type(c_ptr), value, intent(in)    :: obss
 integer :: iobs, ivar, iprof
 integer :: iz1, iz2, kk
 integer :: k1, k2
-integer :: nsig, nprof, nlev
+integer :: nsig, nprof, nlevs
 real(kind_real), dimension(:), allocatable :: toppressure,botpressure,airpressure
 type(ufo_geovals) :: geovals
 type(ufo_geoval), pointer :: modelpressures, modelozone
 character(len=MAXVARLEN) :: geovar
 character(len=MAXVARLEN) :: var_zdir
 real :: pob,delp4,delz,dz1
-real(kind_real) :: rozcon, g
-real(kind_real) :: topozp, botozp
-real :: pindex
+real(kind_real) :: rozcon, layer_oz
 
   ! Notes:
   ! (1) Set desired vertical coordinate direction (top2bottom or bottom2top) based
@@ -122,46 +198,17 @@ real :: pindex
   ! Get pressure profiles from geovals [Pa]
   call ufo_geovals_get_var(geovals, var_prsi, modelpressures)
   nsig = modelpressures%nval - 1
-
+  ! Allocate pressure limits and get air_pressure metadata from obs
   allocate(toppressure(nlocs))
   allocate(botpressure(nlocs))
   allocate(airpressure(nlocs))
+  call obsspace_get_db(obss, "MetaData", "air_pressure", airpressure)  
+  nlevs = self%nlevels(ivar)
 
   do ivar = 1, nvars
     write(6,*) 'ufo_atmvertinterplay_simobs: self%nlevels = ', self%nlevels
-    if (self%nlevels(ivar) == 1) then ! total column ozone
-       do iobs = 1, nlocs
-          toppressure(iobs) = modelpressures%vals(nsig+1, iobs)
-          botpressure(iobs) = modelpressures%vals(1, iobs)
-       enddo
-    else
-      !Obs pressures read in as Pa
-      call obsspace_get_db(obss, "MetaData", "air_pressure", airpressure)
-      nlev = self%nlevels(ivar)
-      nprof = nlocs/nlev
-      iobs = 0
-      do iprof = 1, nprof
-        do kk = 1, nlev
-          k1 = kk
-          k2 = kk - 1
-          if (k2 == 0) k2 = 1
-          if (kk == nlev) then
-            k1 = nlev - 1
-            k2 = 1
-          endif
-          iobs = iobs+1
-          toppressure(iobs) = airpressure(k2)
-          botpressure(iobs) = airpressure(k1)
-          if( kk== 1 ) then
-             toppressure(iobs) =modelpressures%vals(nsig+1, iobs)
-             botpressure(iobs) = airpressure(1)
-          else if( kk == nlev) then
-             toppressure(iobs) = modelpressures%vals(nsig+1, iobs)
-             botpressure(iobs) = modelpressures%vals(1, iobs)
-          endif
-        enddo
-      enddo
-    endif
+    nlevs = self%nlevels(ivar) 
+    call get_integral_limits(airpressure, botpressure, toppressure, modelpressures%vals(:,:), nlevs, nlocs, nsig) 
 
     !Get the name of input variable in geovals
     geovar = self%geovars%variable(ivar)
@@ -170,27 +217,8 @@ real :: pindex
     call ufo_geovals_get_var(geovals, geovar, modelozone)
 
     do iobs = 1, nlocs
-      topozp = pindex(nsig+1, modelpressures%vals(1, iobs), toppressure(iobs))
-      botozp = pindex(nsig+1, modelpressures%vals(1, iobs), botpressure(iobs))
-
-      pob = botozp
-      iz1 = topozp
-      if (iz1>nsig) iz1=nsig
-      iz2 = pob
-      g = 0.
-      dz1 = topozp
-      do kk=iz1,iz2,-1
-        delz = 1.
-        if(kk==iz1)delz=dz1-iz1
-        if (kk==iz2) delz=delz-pob+iz2
-        !For total column ozone
-        if(iz1 .eq. nsig .and. iz2 .eq. 1)delz = 1
-        !Interpolate in cbars
-        delp4 = (modelpressures%vals(kk,iobs)-modelpressures%vals(kk+1,iobs))  ! [Pa]
-        g = g + modelozone%vals(kk,iobs)*self%coefficients(ivar)*(delz*delp4)
-      enddo
-      hofx(ivar,iobs) = g
-      dz1 = pob
+      call apply_layer_integral(self%coefficients(ivar), modelozone%vals(:,iobs), modelpressures%vals(:,iobs), botpressure(iobs), toppressure(iobs), nsig, layer_oz)
+      hofx(ivar,iobs) = layer_oz
     enddo
   enddo
   deallocate(toppressure)
