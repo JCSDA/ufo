@@ -13,7 +13,7 @@ set ( atmvertinterplay_files
     ObsAtmVertInterpLayTLAD.cc
     ObsAtmVertInterpLayTLAD.interface.F90
     ufo_atmvertinterplay_tlad_mod.F90
-    pindex.f90
+    vert_interp_lay_mod.F90
 )
 
 PREPEND( _p_atmvertinterplay_files     "atmvertinterplay"     ${atmvertinterplay_files} )

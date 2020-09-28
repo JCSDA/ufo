@@ -9,7 +9,7 @@ module ufo_atmvertinterplay_mod
 
  use oops_variables_mod
  use ufo_vars_mod
-
+ use vert_interp_lay_mod
  implicit none
  private
 
@@ -78,83 +78,6 @@ endif
 call self%geovars%push_back(var_prsi)
 
 end subroutine ufo_atmvertinterplay_setup
-
-subroutine get_integral_limits(airpressure, botpressure, toppressure, modelpressure, nlevs, nlocs, nsig) 
-use ufo_constants_mod
-use obsspace_mod
-implicit none
-integer :: nlevs, nlocs, nsig
-real(kind_real), dimension(:) :: toppressure, botpressure, airpressure
-real(kind_real), dimension(:,:) :: modelpressure
-! local
-integer :: nprofs, iobs, iprof, kk, k1, k2
-
-if (nlevs == 1) then ! total column ozone
-  do iobs = 1, nlocs
-    toppressure(iobs) = modelpressure(nsig+1,iobs)
-    botpressure(iobs) = modelpressure(1,iobs)
-  enddo
-else
-  !Obs pressures read in as Pa
-  nprofs = nlocs/nlevs
-  iobs = 0
-  do iprof = 1, nprofs
-    do kk = 1, nlevs
-      k1 = kk
-      k2 = kk - 1
-      if (k2 == 0) k2 = 1
-      if (kk == nlevs) then
-        k1 = nlevs - 1
-        k2 = 1
-      endif
-      iobs = iobs+1
-      toppressure(iobs) = airpressure(k2)
-      botpressure(iobs) = airpressure(k1)
-      if( kk == 1 ) then
-        toppressure(iobs) = modelpressure(nsig+1, iobs)
-        botpressure(iobs) = airpressure(1)
-      else if( kk == nlevs) then
-        toppressure(iobs) = modelpressure(nsig+1, iobs)
-        botpressure(iobs) = modelpressure(1, iobs)
-      endif
-    enddo
-  enddo
-endif
-end subroutine get_integral_limits
-
-subroutine apply_layer_integral(coefficient, modelozone, modelpressure, botpressure, toppressure, nsig, layer_oz)
-use ufo_constants_mod
-use obsspace_mod
-implicit none
-integer :: nsig
-real :: coefficient
-real(kind_real) :: botpressure, toppressure
-real(kind_real), dimension(:) :: modelpressure, modelozone
-real(kind_real) :: layer_oz
-real :: pindex
-! local
-integer :: kk, iz1, iz2
-real(kind_real) :: pob,delz,g,delp4,dz1
-real(kind_real) :: topozp, botozp
-
-topozp = pindex(nsig+1, modelpressure, toppressure)
-botozp = pindex(nsig+1, modelpressure, botpressure)
-
-pob = botozp
-iz1 = topozp
-if (iz1>nsig) iz1=nsig
-iz2 = pob
-layer_oz = 0._kind_real
-dz1 = topozp
-do kk=iz1,iz2,-1
-  delz = 1.0_kind_real
-  if(kk == iz1) delz = dz1 - iz1
-  if (kk == iz2) delz = delz - pob + iz2
-  delp4 = modelpressure(kk)-modelpressure(kk+1)  ! [Pa]
-  layer_oz = layer_oz + modelozone(kk)*coefficient*(delz*delp4)
-enddo
-
-end subroutine apply_layer_integral
 
 
 ! ------------------------------------------------------------------------------
