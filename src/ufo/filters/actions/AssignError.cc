@@ -15,6 +15,7 @@
 #include "oops/util/IntSetParser.h"
 #include "oops/util/missingValues.h"
 #include "ufo/filters/ObsFilterData.h"
+#include "ufo/filters/QCflags.h"
 #include "ufo/utils/StringUtils.h"
 
 namespace ufo {
@@ -36,18 +37,20 @@ AssignError::AssignError(const eckit::Configuration & conf)
 // -----------------------------------------------------------------------------
 
 void AssignError::apply(const Variables & vars,
-                         const std::vector<std::vector<bool>> & flagged,
+                         const std::vector<std::vector<bool>> &,
                          const ObsFilterData & data,
-                         ioda::ObsDataVector<int> &,
+                         ioda::ObsDataVector<int> & flags,
                          ioda::ObsDataVector<float> & obserr) const {
   oops::Log::debug() << " AssignError input obserr: " << obserr << std::endl;
+  const float missing = util::missingValue(missing);
   // If float error is specified
   if (conf_.has("error parameter")) {
     float error = conf_.getFloat("error parameter");
     for (size_t jv = 0; jv < vars.nvars(); ++jv) {
       size_t iv = obserr.varnames().find(vars.variable(jv).variable());
+      size_t kv = flags.varnames().find(vars.variable(jv).variable());
       for (size_t jobs = 0; jobs < obserr.nlocs(); ++jobs) {
-        if (flagged[iv][jobs]) obserr[iv][jobs] = error;
+        if (flags[kv][jobs] == QCflags::pass) obserr[iv][jobs] = error;
       }
     }
   // If variable is specified
@@ -57,7 +60,6 @@ void AssignError::apply(const Variables & vars,
     ioda::ObsDataVector<float> errors(data.obsspace(), errorvar.toOopsVariables(),
                                        errorvar.group(), false);
     data.get(errorvar, errors);
-    const float missing = util::missingValue(missing);
 
     // if assigned error function is 1D variable, apply the same error to all variables
     // error_jv = {0, 0, 0, ..., 0} for all nvars
@@ -73,8 +75,9 @@ void AssignError::apply(const Variables & vars,
     for (size_t jv = 0; jv < vars.nvars(); ++jv) {
       // find current variable index in obserr
       size_t iv = obserr.varnames().find(vars.variable(jv).variable());
+      size_t kv = flags.varnames().find(vars.variable(jv).variable());
       for (size_t jobs = 0; jobs < obserr.nlocs(); ++jobs) {
-        if (flagged[iv][jobs] && errors[error_jv[jv]][jobs] != missing)
+        if (flags[kv][jobs] == QCflags::pass && errors[error_jv[jv]][jobs] != missing)
           obserr[iv][jobs] = errors[error_jv[jv]][jobs];
       }
     }

@@ -108,6 +108,7 @@ list( APPEND ufo_test_input
   testinput/iasi_qc.yaml
   testinput/iasi_qc_filters.yaml
   testinput/locations.yaml
+  testinput/metar_qc_filters.yaml
   testinput/mhs_crtm.yaml
   testinput/obsdiag_crtm_airs_jacobian.yaml
   testinput/obsdiag_crtm_airs_optics.yaml
@@ -1052,6 +1053,14 @@ ecbuild_add_test( TARGET  test_ufo_linopr_coolskin
                   ARGS    "testinput/coolskin.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsOperatorTLAD.x
+                  TEST_DEPENDS ufo_get_ioda_test_data )
+
+# METAR (sfc. obs) UFO tests
+ecbuild_add_test( TARGET  test_ufo_metar_QC
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                  ARGS    "testinput/metar_qc_filters.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsFilters.x
                   TEST_DEPENDS ufo_get_ioda_test_data )
 
 if( ${GSW_FOUND} )
