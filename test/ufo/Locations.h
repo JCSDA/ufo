@@ -51,35 +51,9 @@ void testLocations() {
 
   // testConstructor::Locations(const ioda::ObsSpace &, const util::DateTime &,
   //                            const util::DateTime &);
-  Locations locs_t(odb, bgn, end);
+  Locations locs_t(odb);
   EXPECT(locs_t.nobs() == nlocs);
   oops::Log::test() << "Locs(odb,t1,t2) constructor): " << locs_t << std::endl;
-
-  // test operator+=(const Locations & other)
-  util::Duration twin = end - bgn;
-  util::DateTime stateTime = bgn + twin/2;
-
-  Locations locs_b(odb, stateTime, end);
-  const size_t nlocs_b = locs_b.nobs();
-  oops::Log::test() << "Locs(odb,t1+(t2-t1)/2,t2) constructor): " << locs_b << std::endl;
-
-  {
-    Locations locs_a(odb, bgn, stateTime);
-    const size_t nlocs_a = locs_a.nobs();
-    oops::Log::test() << "Locs(odb,t1,t1+(t2-t1)/2) constructor): " << locs_a << std::endl;
-
-    EXPECT(locs_t.nobs() == nlocs_a + nlocs_b);
-
-    locs_a += locs_b;
-    EXPECT(locs_t.nobs() == locs_a.nobs());
-    oops::Log::test() << "Locs(odb,t1,t1+(t2-t1)/2) + "
-                      << "Locs(odb,t1+(t2-t1)/2,t2) concatenated: " << locs_a << std::endl;
-  }
-  Locations locs_a(odb, bgn, stateTime);
-  locs_b += locs_a;
-  EXPECT(locs_t.nobs() == locs_b.nobs());
-  oops::Log::test() << "Locs(odb,t1+(t2-t1)/2,t2) + "
-                    << "Locs(odb,t1,t1+(t2-t1)/2) concatenated: " << locs_b << std::endl;
 }
 
 // -----------------------------------------------------------------------------
