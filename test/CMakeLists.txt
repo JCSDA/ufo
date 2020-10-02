@@ -91,7 +91,7 @@ list( APPEND ufo_test_input
   testinput/gnssrobndropp1d.yaml
   testinput/gnssrobndropp2d.yaml
   testinput/gnssrobndnbam.yaml
-  testinput/gnssrobndnbam_obs_error.yaml
+  testinput/gnssro_obs_error.yaml
   testinput/gnssrobndnbam_backgroundcheck_qc.yaml
   testinput/gnssrobndnbam_super_refraction.yaml
   testinput/gnssrobndnbam_qc_action_obserr_inflation.yaml
@@ -247,6 +247,7 @@ list( APPEND ufo_test_data
   atmosphere/gnssro_geoval_2018041500_s_2d.nc4
   atmosphere/gnssro_geoval_2018041500_m.nc4
   atmosphere/gnssro_geoval_2018041500_l.nc4
+  atmosphere/gnssro_geoval_2018041500_3prof.nc4
   atmosphere/gnssro_geoval_2019050700_1obs.nc4
   atmosphere/gnssro_geoval_2020050106_nopseudo.nc4
   atmosphere/gome_metop-a_geoval_2019101700_m.nc4
@@ -1794,9 +1795,9 @@ ecbuild_add_test( TARGET  test_ufo_qc_amsua_seaice
                   DEPENDS test_ObsFilters.x
                   TEST_DEPENDS ufo_get_ioda_test_data )
 
-ecbuild_add_test( TARGET  test_ufo_qc_gnssroBndNBAM_obs_error
+ecbuild_add_test( TARGET  test_ufo_qc_gnssro_obs_error
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-                  ARGS    "testinput/gnssrobndnbam_obs_error.yaml"
+                  ARGS    "testinput/gnssro_obs_error.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsFilters.x
                   TEST_DEPENDS ufo_get_ioda_test_data )
