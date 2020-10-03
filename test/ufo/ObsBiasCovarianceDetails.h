@@ -40,7 +40,8 @@ void testObsBiasCovarianceDetails() {
     = conf.getSubConfigurations("observations");
 
   for (auto & oconf : obsconfs) {
-    ioda::ObsSpace odb(oconf.getSubConfiguration("obs space"), oops::mpi::world(), bgn, end);
+    ioda::ObsSpace odb(oconf.getSubConfiguration("obs space"), oops::mpi::world(),
+                       bgn, end, oops::mpi::myself());
 
     // Setup ObsBias
     ObsBias ybias(odb, oconf);
