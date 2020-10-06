@@ -714,6 +714,12 @@ ecbuild_add_test( TARGET  test_ufo_opr_atminterplay_omi_aura
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsOperator.x
                   TEST_DEPENDS ufo_get_ioda_test_data )
+ecbuild_add_test( TARGET  test_ufo_linopr_atminterplay_omi_aura
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
+                  ARGS    "testinput/omi_aura.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsOperator.x
+                  TEST_DEPENDS ufo_get_ioda_test_data )
 
 ecbuild_add_test( TARGET  test_ufo_opr_atminterplay_omi_aura_flipz
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x

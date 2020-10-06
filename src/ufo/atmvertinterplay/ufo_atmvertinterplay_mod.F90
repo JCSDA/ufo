@@ -140,14 +140,19 @@ real(kind_real) :: rozcon, layer_oz
     call ufo_geovals_get_var(geovals, geovar, modelozone)
 
     do iobs = 1, nlocs
-      call apply_layer_integral(self%coefficients(ivar), modelozone%vals(:,iobs), modelpressures%vals(:,iobs), botpressure(iobs), toppressure(iobs), nsig, layer_oz)
+      call apply_layer_integral(self%coefficients(ivar), modelozone%vals(:,iobs), modelpressures%vals(:,iobs), botpressure(iobs), toppressure(iobs), nsig, layer_oz )
       hofx(ivar,iobs) = layer_oz
+       if(iobs>1 .and. iobs < 23) then 
+         print *,'iobs,bot,top,h(x)',iobs,botpressure(iobs), toppressure(iobs), hofx(ivar,iobs)
+!         print *, 'modelpres h(x)', modelpressures%vals(1,iobs)
+!         print *, 'end modelpres'
+       endif
     enddo
   enddo
   deallocate(toppressure)
   deallocate(botpressure)
   call ufo_geovals_delete(geovals)
-
+  print *, 'done h(x) simobs'
 end subroutine ufo_atmvertinterplay_simobs
 
 

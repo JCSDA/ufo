@@ -18,12 +18,13 @@ contains
 
 subroutine get_integral_limits(airpressure, botpressure, toppressure, modelpressure, nlevs, nlocs, nsig) 
 implicit none
-integer :: nlevs, nlocs, nsig
-real(kind_real), dimension(:) :: toppressure, botpressure, airpressure
-real(kind_real), dimension(:,:) :: modelpressure
+integer,intent(in)  :: nlevs, nlocs, nsig
+real(kind_real) , dimension(nlocs),intent(in) ::  airpressure
+real(kind_real), dimension(nlocs),intent(inout)  ::  botpressure,toppressure
+real(kind_real), dimension(nsig+1,nlocs),intent(in) :: modelpressure
 ! local
 integer :: nprofs, iobs, iprof, kk, k1, k2
-
+print *, 'get integral limits: nlevs,nlocs,nsig',nlevs,nlocs,nsig, modelpressure(1,1)
 if (nlevs == 1) then ! total column ozone
   do iobs = 1, nlocs
     toppressure(iobs) = modelpressure(nsig+1,iobs)
@@ -46,15 +47,17 @@ else
       toppressure(iobs) = airpressure(k2)
       botpressure(iobs) = airpressure(k1)
       if( kk == 1 ) then
-        toppressure(iobs) = modelpressure(nsig+1, iobs)
-        botpressure(iobs) = airpressure(1)
+        toppressure(iobs) = modelpressure(nsig+1, iobs) 
+        botpressure(iobs) = airpressure(k1)
+        if(botpressure(iobs) < toppressure(iobs)) botpressure(iobs) = toppressure(iobs)
       else if( kk == nlevs) then
-        toppressure(iobs) = modelpressure(nsig+1, iobs)
-        botpressure(iobs) = modelpressure(1, iobs)
+        toppressure(iobs) = modelpressure(nsig+1, iobs)  
+        botpressure(iobs) = modelpressure(1, iobs) 
       endif
     enddo
   enddo
 endif
+
 end subroutine get_integral_limits
 
 real function pindex(nx, press, obspressure)
@@ -104,10 +107,8 @@ real(kind_real) :: layer_oz
 integer :: kk, iz1, iz2
 real(kind_real) :: pob,delz,g,delp4,dz1
 real(kind_real) :: topozp, botozp
-
 topozp = pindex(nsig+1, modelpressure, toppressure)
 botozp = pindex(nsig+1, modelpressure, botpressure)
-
 pob = botozp
 iz1 = topozp
 if (iz1>nsig) iz1=nsig
@@ -124,7 +125,15 @@ enddo
 
 end subroutine apply_layer_integral
 
-
+subroutine vert_interp_lay_apply_tl(modelozoned, layer_ozd, coefficient,  modelpressure, botpressure, toppressure, nsig)
+real(kind_real), intent(in)  ::modelozoned(:)
+real(kind_real),intent(in):: botpressure, toppressure
+real(kind_real), intent(in), dimension(nsig+1) :: modelpressure 
+real(kind_real), intent(out) :: layer_ozd
+integer,intent(in) :: nsig
+real,intent(in) :: coefficient
+call apply_layer_integral(coefficient, modelozoned, modelpressure, botpressure, toppressure, nsig, layer_ozd)
+end subroutine vert_interp_lay_apply_tl 
 
 
 
