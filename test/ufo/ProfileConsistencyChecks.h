@@ -49,7 +49,7 @@ void testProfileConsistencyChecks(const eckit::LocalConfiguration &conf) {
   util::DateTime end(conf.getString("window end"));
 
   const eckit::LocalConfiguration obsSpaceConf(conf, "obs space");
-  ioda::ObsSpace obsspace(obsSpaceConf, oops::mpi::world(), bgn, end);
+  ioda::ObsSpace obsspace(obsSpaceConf, oops::mpi::world(), bgn, end, oops::mpi::myself());
 
   ioda::ObsVector hofx(obsspace);
 

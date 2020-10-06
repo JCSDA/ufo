@@ -91,7 +91,7 @@ list( APPEND ufo_test_input
   testinput/gnssrobndropp1d.yaml
   testinput/gnssrobndropp2d.yaml
   testinput/gnssrobndnbam.yaml
-  testinput/gnssrobndnbam_obs_error.yaml
+  testinput/gnssro_obs_error.yaml
   testinput/gnssrobndnbam_backgroundcheck_qc.yaml
   testinput/gnssrobndnbam_super_refraction.yaml
   testinput/gnssrobndnbam_qc_action_obserr_inflation.yaml
@@ -108,6 +108,7 @@ list( APPEND ufo_test_input
   testinput/iasi_qc.yaml
   testinput/iasi_qc_filters.yaml
   testinput/locations.yaml
+  testinput/metar_qc_filters.yaml
   testinput/mhs_crtm.yaml
   testinput/obsdiag_crtm_airs_jacobian.yaml
   testinput/obsdiag_crtm_airs_optics.yaml
@@ -246,6 +247,7 @@ list( APPEND ufo_test_data
   atmosphere/gnssro_geoval_2018041500_s_2d.nc4
   atmosphere/gnssro_geoval_2018041500_m.nc4
   atmosphere/gnssro_geoval_2018041500_l.nc4
+  atmosphere/gnssro_geoval_2018041500_3prof.nc4
   atmosphere/gnssro_geoval_2019050700_1obs.nc4
   atmosphere/gnssro_geoval_2020050106_nopseudo.nc4
   atmosphere/gome_metop-a_geoval_2019101700_m.nc4
@@ -940,7 +942,8 @@ ecbuild_add_test( TARGET  test_ufo_linopr_gnssroBendMetOffice_pseudo
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
                   ARGS    "testinput/gnssrobendmetoffice.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
-                  DEPENDS test_ObsOperatorTLAD.x )
+                  DEPENDS test_ObsOperatorTLAD.x
+                  TEST_DEPENDS ufo_get_ioda_test_data )
 
 ecbuild_add_test( TARGET  test_ufo_opr_gnssroBendMetOffice_nopseudo
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
@@ -953,7 +956,8 @@ ecbuild_add_test( TARGET  test_ufo_linopr_gnssroBendMetOffice_nopseudo
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
                   ARGS    "testinput/gnssrobendmetoffice_nopseudo.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
-                  DEPENDS test_ObsOperatorTLAD.x )
+                  DEPENDS test_ObsOperatorTLAD.x
+                  TEST_DEPENDS ufo_get_ioda_test_data )
 
 if( ${ROPP-UFO_FOUND} )
 ecbuild_add_test( TARGET  test_ufo_opr_gnssroBndROPP1D
@@ -1020,7 +1024,8 @@ ecbuild_add_test( TARGET  test_ufo_opr_chleuzintegr
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
                   ARGS    "testinput/chleuzintegr.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
-                  DEPENDS test_ObsOperator.x )
+                  DEPENDS test_ObsOperator.x
+                  TEST_DEPENDS ufo_get_ioda_test_data )
 
 ecbuild_add_test( TARGET  test_ufo_opr_identity_sst
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
@@ -1062,6 +1067,14 @@ ecbuild_add_test( TARGET  test_ufo_linopr_coolskin
                   ARGS    "testinput/coolskin.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsOperatorTLAD.x
+                  TEST_DEPENDS ufo_get_ioda_test_data )
+
+# METAR (sfc. obs) UFO tests
+ecbuild_add_test( TARGET  test_ufo_metar_QC
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                  ARGS    "testinput/metar_qc_filters.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsFilters.x
                   TEST_DEPENDS ufo_get_ioda_test_data )
 
 if( ${GSW_FOUND} )
@@ -1149,7 +1162,8 @@ ecbuild_add_test( TARGET  test_ufo_qc_velocitybounds
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
                   ARGS    "testinput/qc_velocitycheck.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
-                  DEPENDS test_ObsFilters.x )
+                  DEPENDS test_ObsFilters.x
+                  TEST_DEPENDS ufo_get_ioda_test_data )
 
 ecbuild_add_test( TARGET  test_ufo_qc_gen_defer_to_post
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
@@ -1185,10 +1199,11 @@ ecbuild_add_test( TARGET  test_ufo_qc_met_office_buddy_check
                   DEPENDS test_ObsFilters.x )
 
 ecbuild_add_test( TARGET  test_ufo_qc_oceancolor_preqc
-                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-                   ARGS    "testinput/qc_oceancolor_preqc.yaml"
-                   ENVIRONMENT OOPS_TRAPFPE=1
-                   DEPENDS test_ObsFilters.x )
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                  ARGS    "testinput/qc_oceancolor_preqc.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsFilters.x
+                  TEST_DEPENDS ufo_get_ioda_test_data )
 
 ecbuild_add_test( TARGET  test_ufo_qc_poisson_disk_thinning
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
@@ -1793,9 +1808,9 @@ ecbuild_add_test( TARGET  test_ufo_qc_amsua_seaice
                   DEPENDS test_ObsFilters.x
                   TEST_DEPENDS ufo_get_ioda_test_data )
 
-ecbuild_add_test( TARGET  test_ufo_qc_gnssroBndNBAM_obs_error
+ecbuild_add_test( TARGET  test_ufo_qc_gnssro_obs_error
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-                  ARGS    "testinput/gnssrobndnbam_obs_error.yaml"
+                  ARGS    "testinput/gnssro_obs_error.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsFilters.x
                   TEST_DEPENDS ufo_get_ioda_test_data )

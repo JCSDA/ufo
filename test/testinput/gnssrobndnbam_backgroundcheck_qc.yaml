@@ -10,12 +10,12 @@ observations:
   obs space:
     name: GnssroBndNBAM
     obsdatain:
-      obsfile: Data/ioda/testinput_tier_1/gnssro_obs_2018041500_l.nc4
+      obsfile: Data/ioda/testinput_tier_1/gnssro_obs_2018041500_3prof.nc4
     obsdataout:
-      obsfile: Data/gnssro_bndnbam_2018041500_l_backgroundcheck.nc4
+      obsfile: Data/gnssro_bndnbam_2018041500_3prof_backgroundcheck.nc4
     simulated variables: [bending_angle]
   geovals:
-    filename: Data/gnssro_geoval_2018041500_l.nc4
+    filename: Data/gnssro_geoval_2018041500_3prof.nc4
   obs filters:
   - filter: ROobserror
     filter variables:
@@ -25,7 +25,7 @@ observations:
     filter variables:
     - name: bending_angle
     threshold: 3
-  passedBenchmark: 383
+  passedBenchmark: 661
 - obs operator:
     name: GnssroBndNBAM
     obs options:
@@ -34,14 +34,14 @@ observations:
   obs space:
     name: GnssroBndNBAM
     obsdatain:
-      obsfile: Data/ioda/testinput_tier_1/gnssro_obs_2018041500_l.nc4
+      obsfile: Data/ioda/testinput_tier_1/gnssro_obs_2018041500_3prof.nc4
     obsdataout:
-      obsfile: Data/gnssro_bndnbam_2018041500_l_backgroundcheckronbam.nc4
+      obsfile: Data/gnssro_bndnbam_2018041500_3prof_backgroundcheckronbam.nc4
     simulated variables: [bending_angle]
   geovals:
-    filename: Data/gnssro_geoval_2018041500_l.nc4
+    filename: Data/gnssro_geoval_2018041500_3prof.nc4
   obs filters:
   - filter: Background Check RONBAM
     filter variables:
     - name: bending_angle
-  passedBenchmark: 386
+  passedBenchmark: 664

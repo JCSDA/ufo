@@ -35,6 +35,10 @@ class CosineOfLatitudeTimesOrbitNode : public PredictorBase {
                const GeoVaLs &,
                const ObsDiagnostics &,
                ioda::ObsVector &) const override;
+
+ private:
+  // default preconditioner for bias terms
+  double precond_ = 0.01;
 };
 
 // -----------------------------------------------------------------------------

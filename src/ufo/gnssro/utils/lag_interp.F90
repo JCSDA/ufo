@@ -13,14 +13,10 @@ private
 ! set subroutines to public
 public :: lag_interp_const
 public :: lag_interp_const_TL
-public :: lag_interp_const_AD
 public :: lag_interp_weights
 public :: lag_interp_weights_TL
-public :: lag_interp_weights_AD
 public :: lag_interp_smthWeights
 public :: lag_interp_smthweights_TL
-public :: lag_interp_smthweights_AD
-
 
 contains
 
@@ -75,34 +71,6 @@ DO i=1,n
    ENDDO
 ENDDO
 end subroutine lag_interp_const_TL
-
-
-!============================================================================
-subroutine lag_interp_const_AD(q_AD,x,x_AD,n)
-!============================================================================
-IMPLICIT NONE
-
-INTEGER          ,INTENT(in   ) :: n
-REAL(kind_real),DIMENSION(n),INTENT(in   ) :: x
-REAL(kind_real),DIMENSION(n),INTENT(inout) :: x_AD
-REAL(kind_real),DIMENSION(n),INTENT(inout) :: q_AD
-!-----------------------------------------------------------------------------
-INTEGER                      :: i,j
-REAL(kind_real),DIMENSION(n)            :: q
-REAL(kind_real),DIMENSION(n,n)          :: jac
-!=============================================================================
-call lag_interp_const(q,x,n)
-jac=zero
-DO i=1,n
-   DO j=1,n
-      IF(j /= i) THEN
-         jac(j,i)=q(i)/(x(i)-x(j))
-         jac(i,i)=jac(i,i)-jac(j,i)
-      ENDIF
-   ENDDO
-ENDDO
-x_AD=x_AD+matmul(jac,q_AD)
-end subroutine lag_interp_const_AD
 
 !============================================================================
 subroutine lag_interp_weights(x,xt,q,w,dw,n)
@@ -201,76 +169,6 @@ do j=1,n
 enddo
 end subroutine lag_interp_weights_TL
 
-
-!============================================================================
-subroutine lag_interp_weights_AD(x,x_AD,xt,q,q_AD,w_AD,dw_AD,n)
-
-!============================================================================
-IMPLICIT NONE
-
-INTEGER          ,INTENT(IN   ) :: n
-REAL(kind_real)             ,INTENT(IN   ) :: xt
-REAL(kind_real),DIMENSION(n),INTENT(IN   ) :: x,q
-REAL(kind_real),DIMENSION(n),INTENT(INOUT) :: q_AD,x_AD,w_AD,dw_AD
-!-----------------------------------------------------------------------------
-REAL(kind_real),DIMENSION(n)            :: d,pa,pb,dpa,dpb
-REAL(kind_real),DIMENSION(n)            :: d_AD,pa_AD,pb_AD,dpa_AD,dpb_AD
-INTEGER                      :: j
-!============================================================================
-
-pa_AD=zero; dpb_AD=zero; dpa_AD=zero; pb_AD=zero
-d_AD=zero
-
-! passive variables
-pa(1)=one
-dpa(1)=zero
-do j=1,n-1
-   d(j)=xt-x(j)
-   pa (j+1)=pa (j)*d(j)
-   dpa(j+1)=dpa(j)*d(j)+pa(j)
-enddo
-d(n)=xt-x(n)
-pb(n)=one
-dpb(n)=zero
-do j=n,2,-1
-   pb (j-1)=pb (j)*d(j)
-   dpb(j-1)=dpb(j)*d(j)+pb(j)
-enddo
-!
-do j=n,1,-1
-   pa_AD (j)=pa_AD (j)+ dpb(j)*q  (j)*dw_AD(j)
-   dpb_AD(j)=dpb_AD(j)+ pa (j)*q  (j)*dw_AD(j)
-   dpa_AD(j)=dpa_AD(j)+ pb (j)*q  (j)*dw_AD(j)
-   pb_AD (j)=pb_AD (j)+ dpa(j)*q  (j)*dw_AD(j)
-   q_AD  (j)=q_AD  (j)+(pa (j)*dpb(j)+dpa  (j)*pb(j))*dw_AD(j)
-   pa_AD (j)=pa_AD (j)+ pb (j)*q  (j)*w_AD (j)
-   pb_AD (j)=pb_AD (j)+ pa (j)*q  (j)*w_AD (j)
-   q_AD  (j)=q_AD  (j)+ pa (j)*pb (j)*w_AD (j)
-end do
-do j=2,n
-   dpb_AD(j)=dpb_AD(j)+d  (j)*dpb_AD(j-1)
-   d_AD  (j)=d_AD  (j)+dpb(j)*dpb_AD(j-1)
-   pb_AD (j)=pb_AD (j)       +dpb_AD(j-1)
-   pb_AD (j)=pb_AD (j)+d  (j)*pb_AD (j-1)
-   d_AD  (j)=d_AD  (j)+pb (j)*pb_AD (j-1)
-enddo
-
-dpb_AD(n)=zero ! not sure about it
-pb_AD(n) =zero ! not sure about it
-
-x_AD(n)=x_AD(n)-d_AD(n)
-do j=n-1,1,-1
-   dpa_AD(j)=dpa_AD(j)+d  (j)*dpa_AD(j+1)
-   d_AD  (j)=d_AD  (j)+dpa(j)*dpa_AD(j+1)
-   pa_AD (j)=pa_AD (j)       +dpa_AD(j+1)
-   pa_AD (j)=pa_AD (j)+d  (j)*pa_AD (j+1)
-   d_AD  (j)=d_AD  (j)+pa (j)*pa_AD (j+1)
-   x_AD  (j)=x_AD  (j)       -d_AD  (j  )
-enddo
-
-end subroutine lag_interp_weights_AD
-
-
 !============================================================================
 subroutine lag_interp_smthWeights(x,xt,aq,bq,w,dw,n)
 ! Construct weights and their derivatives for interpolation 
@@ -308,20 +206,20 @@ xa =x(na     )
 xb =x(na+1)
 dwb=one/(xb-xa)
 wb =(xt-xa)*dwb
-IF    (wb>one )THEN
+IF(wb>one )THEN
    wb =one
    dwb=zero
 ELSEIF(wb<zero)THEN
    wb =zero
    dwb=zero
 ENDIF
+
 bw =bw -aw
 dbw=dbw-daw
 
 w =aw +wb*bw
 dw=daw+wb*dbw+dwb*bw
 end subroutine lag_interp_smthWeights
-
 
 !============================================================================
 subroutine lag_interp_smthWeights_TL(x,x_TL,xt,aq,aq_TL,bq,bq_TL,dw,dw_TL,n)
@@ -363,7 +261,7 @@ dwb   = one          /(xb-xa)
 dwb_TL=-(xb_TL-xa_TL)/(xb-xa)**2
 wb   =             (xt-xa)*dwb
 wb_TL=(-xa_TL)*dwb+(xt-xa)*dwb_TL
-IF    (wb > one)THEN
+IF(wb > one)THEN
    wb    =one
    dwb   =zero
    wb_TL =zero
@@ -373,7 +271,6 @@ ELSEIF(wb < zero)THEN
    dwb   =zero
    wb_TL =zero
    dwb_TL=zero
-
 ENDIF
 
 bw    =bw    -aw
@@ -386,92 +283,5 @@ dw   =daw   + wb   *dbw           + dwb   *bw
 dw_TL=daw_TL+(wb_TL*dbw+wb*dbw_TL)+(dwb_TL*bw+dwb*bw_TL)
 end subroutine lag_interp_smthWeights_TL
 
-
-!============================================================================
-SUBROUTINE lag_interp_smthWeights_AD(x,x_AD,xt,aq,aq_AD,bq,bq_AD,w_AD,dw,dw_AD,n)
-!============================================================================
-INTEGER            ,INTENT(IN   ) :: n
-REAL(kind_real)               ,INTENT(IN   ) :: xt
-REAL(kind_real)  ,INTENT(IN   ) :: x(n)
-REAL(kind_real), INTENT(IN   ) :: aq(n-1),bq(n-1)
-REAL(kind_real),INTENT(INOUT) :: aq_AD(n-1),bq_AD(n-1)
-REAL(kind_real),INTENT(  OUT) :: dw(n)
-REAL(kind_real),INTENT(INOUT) :: x_AD(n),dw_AD(n),w_AD(n)
-!-----------------------------------------------------------------------------
-REAL(kind_real)                 :: aw(n),bw(n),daw(n),dbw(n)
-REAL(kind_real)                 :: aw_AD(n),bw_AD(n),daw_AD(n),dbw_AD(n)
-REAL(kind_real)                              :: xa,xb,dwb,wb
-REAL(kind_real)                              :: xa_AD,xb_AD,wb_AD,dwb_AD
-INTEGER                           :: na
-!============================================================================
-daw_AD=zero;wb_AD=zero;dbw_AD=zero;dwb_AD=zero;bw_AD=zero
-aw_AD =zero;xb_AD=zero;xa_AD =zero
-
-! passive variables needed (from forward code)
-CALL lag_interp_weights(x(1:n-1),xt,aq,aw(1:n-1),daw(1:n-1),n-1)
-CALL lag_interp_weights(x(2:n  ),xt,bq,bw(2:n  ),dbw(2:n  ),n-1)
-
-aw(n) =zero
-daw(n)=zero
-bw(1) =zero
-dbw(1)=zero
-na=n/2
-IF(na*2 /= n)STOP 'In lag_interp_smthWeights; n must be even'
-xa =x(na     )
-xb =x(na+1)
-dwb=one/(xb-xa)
-wb =(xt-xa)*dwb
-IF    (wb>one)THEN
-   wb =one
-   dwb=zero
-ELSEIF(wb<zero)THEN
-   wb =zero
-   dwb=zero
-ENDIF
-bw =bw -aw
-dbw=dbw-daw
-!w=aw+wb*bw ! not needed
-dw=daw+wb*dbw+dwb*bw ! not needed
-!
-!
-daw_AD=daw_AD+dw_AD
-wb_AD =wb_AD +dot_product(dbw,dw_AD)
-dbw_AD=dbw_AD+wb*dw_AD
-dwb_AD=dwb_AD+dot_product(bw,dw_AD)
-bw_AD =bw_AD +dwb*dw_AD
-
-aw_AD=aw_AD+w_AD
-wb_AD=wb_AD+dot_product(bw,w_AD)
-bw_AD=bw_AD+wb*w_AD
-
-daw_AD=daw_AD-dbw_AD
-aw_AD =aw_AD -bw_AD
-
-IF(wb>one)THEN
-   wb_AD =zero
-   dwb_AD=zero
-ELSEIF(wb<zero)THEN
-   wb_AD =zero
-   dwb_AD=zero
-ENDIF
-
-xa_AD        =xa_AD-wb_AD*dwb
-dwb_AD       =dwb_AD+(xt-xa)*wb_AD
-xb_AD        =xb_AD-(dwb_AD/(xb-xa)**2)
-xa_AD        =xa_AD+(dwb_AD/(xb-xa)**2)
-x_AD(na+1)=x_AD(na+1)+xb_AD
-x_AD(na  )=x_AD(na  )+xa_AD
-
-dbw_AD(1)=zero;bw_AD(1)=zero
-daw_AD(n)=zero;aw_AD(n)=zero
-
-CALL lag_interp_weights_AD(x(2:n     ),x_AD(2:n     ),xt,bq,bq_AD,bw_AD(2:n     ),&
-             dbw_AD(2:n     ),n-1)
-
-CALL lag_interp_weights_AD(x(1:n-1),x_AD(1:n-1),xt,aq,aq_AD,aw_AD(1:n-1),&
-             daw_AD(1:n-1),n-1)
-
-end subroutine lag_interp_smthWeights_AD
-!============================================================================
 end module lag_interp_mod
 

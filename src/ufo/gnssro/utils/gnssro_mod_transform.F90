@@ -29,7 +29,7 @@ real(kind_real), intent(in)  :: Latitude,   geometricZ
 real(kind_real), intent(out) :: geopotentialH
 real(kind_real)              :: sino, termg, termr ! local variables
 
-sino          = sin(deg2rad*Latitude)
+sino          = sin(deg2rad*Latitude)**2
 termg         = grav_equator*( (one+somigliana*sino)/sqrt(one-eccentricity*eccentricity*sino) )
 termr         = semi_major_axis / (one + flattening + grav_ratio - two*flattening*sino)
 geopotentialH = (termg/grav) * ((termr*geometricZ)/(termr+geometricZ))  ! meter
@@ -46,7 +46,7 @@ real(kind_real),intent(out), optional   ::dzdh_jac !dzdh's jacobian
 real(kind_real)            :: sino
 real(kind_real)            :: termg, termr, termrg
 
-sino          = sin(deg2rad*latitude)
+sino          = sin(deg2rad*latitude)**2
 termg         = grav_equator*( (one+somigliana*sino)/sqrt(one-eccentricity*eccentricity*sino) )
 termr         = semi_major_axis / (one + flattening + grav_ratio - two*flattening*sino)
 termrg        = termg/grav*termr

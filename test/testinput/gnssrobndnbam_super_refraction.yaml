@@ -10,16 +10,16 @@ observations:
   obs space:
     name: GnssroBnd
     obsdatain:
-      obsfile: Data/ioda/testinput_tier_1/gnssro_obs_2018041500_l.nc4
+      obsfile: Data/ioda/testinput_tier_1/gnssro_obs_2018041500_3prof.nc4
       obsgrouping:
         group variable: "record_number"
         sort variable: "impact_height"
         sort order: "descending"
     obsdataout:
-      obsfile: Data/gnssro_bndnbam_2018041500_l_super_refraction_11.nc4
+      obsfile: Data/gnssro_bndnbam_2018041500_3prof_super_refraction_11.nc4
     simulated variables: [bending_angle]
   geovals:
-    filename: Data/gnssro_geoval_2018041500_l.nc4
+    filename: Data/gnssro_geoval_2018041500_3prof.nc4
   vector ref: GsiHofX
   tolerance: 1.0e-7
 - obs operator:
@@ -30,16 +30,16 @@ observations:
   obs space:
     name: GnssroBnd
     obsdatain:
-      obsfile: Data/ioda/testinput_tier_1/gnssro_obs_2018041500_l.nc4
+      obsfile: Data/ioda/testinput_tier_1/gnssro_obs_2018041500_3prof.nc4
       obsgrouping:
         group variable: "record_number"
         sort variable: "impact_height"
         sort order: "descending"
     obsdataout:
-      obsfile: Data/gnssro_bndnbam_2018041500_l_super_refraction_12.nc4
+      obsfile: Data/gnssro_bndnbam_2018041500_3prof_super_refraction_12.nc4
     simulated variables: [bending_angle]
   geovals:
-    filename: Data/gnssro_geoval_2018041500_l.nc4
+    filename: Data/gnssro_geoval_2018041500_3prof.nc4
   vector ref: GsiHofX
   tolerance: 1.0e-7
 - obs operator:
@@ -49,15 +49,15 @@ observations:
   obs space:
     name: GnssroBnd
     obsdatain:
-      obsfile: Data/ioda/testinput_tier_1/gnssro_obs_2018041500_l.nc4
+      obsfile: Data/ioda/testinput_tier_1/gnssro_obs_2018041500_3prof.nc4
       obsgrouping:
         group variable: "record_number"
         sort variable: "impact_height"
         sort order: "descending"
     obsdataout:
-      obsfile: Data/gnssro_bndnbam_2018041500_l_super_refraction_2.nc4
+      obsfile: Data/gnssro_bndnbam_2018041500_3prof_super_refraction_2.nc4
     simulated variables: [bending_angle]
   geovals:
-    filename: Data/gnssro_geoval_2018041500_l.nc4
+    filename: Data/gnssro_geoval_2018041500_3prof.nc4
   vector ref: GsiHofX
   tolerance: 1.0e-7

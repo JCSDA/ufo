@@ -36,7 +36,7 @@ void testLocations() {
   util::DateTime bgn(conf.getString("window begin"));
   util::DateTime end(conf.getString("window end"));
   const eckit::LocalConfiguration obsconf(conf, "obs space");
-  ioda::ObsSpace odb(obsconf, oops::mpi::world(), bgn, end);
+  ioda::ObsSpace odb(obsconf, oops::mpi::world(), bgn, end, oops::mpi::myself());
   const size_t nlocs = odb.nlocs();
 
   // testConstructor:: Locations():
