@@ -98,11 +98,11 @@ end function pindex
 
 subroutine apply_layer_integral(coefficient, modelozone, modelpressure, botpressure, toppressure, nsig, layer_oz)
 implicit none
-integer  :: nsig
-real  :: coefficient
-real(kind_real)  :: botpressure, toppressure
-real(kind_real), dimension(:) :: modelpressure, modelozone
-real(kind_real) :: layer_oz
+integer,intent(in)  :: nsig
+real, intent(in)  :: coefficient
+real(kind_real),intent(in)  :: botpressure, toppressure
+real(kind_real), dimension(:), intent(in) :: modelpressure, modelozone
+real(kind_real), intent(out) :: layer_oz
 ! local
 integer :: kk, iz1, iz2
 real(kind_real) :: pob,delz,g,delp4,dz1
@@ -127,12 +127,12 @@ end subroutine apply_layer_integral
 
 subroutine undo_layer_integral(coefficient, modelozone, modelpressure, botpressure, toppressure, nsig, layer_oz)
 implicit none
-integer  :: nsig
-real :: coefficient
-real(kind_real) :: botpressure, toppressure
-real(kind_real), dimension(:) :: modelpressure
-real(kind_real), dimension(:) :: modelozone
-real(kind_real)  :: layer_oz
+integer,intent(in) :: nsig
+real,intent(in) :: coefficient
+real(kind_real),intent(in) :: botpressure, toppressure
+real(kind_real), dimension(:),intent(in) :: modelpressure
+real(kind_real), dimension(:),intent(out):: modelozone
+real(kind_real), intent(in)  :: layer_oz
 ! local
 integer :: kk, iz1, iz2
 real(kind_real) :: pob,delz,g,delp4,dz1
