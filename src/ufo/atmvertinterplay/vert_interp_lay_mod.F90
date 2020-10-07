@@ -98,9 +98,9 @@ end function pindex
 
 subroutine apply_layer_integral(coefficient, modelozone, modelpressure, botpressure, toppressure, nsig, layer_oz)
 implicit none
-integer :: nsig
-real :: coefficient
-real(kind_real) :: botpressure, toppressure
+integer  :: nsig
+real  :: coefficient
+real(kind_real)  :: botpressure, toppressure
 real(kind_real), dimension(:) :: modelpressure, modelozone
 real(kind_real) :: layer_oz
 ! local
@@ -124,6 +124,36 @@ do kk=iz1,iz2,-1
 enddo
 
 end subroutine apply_layer_integral
+subroutine undo_layer_integral(coefficient, modelozone, modelpressure, botpressure, toppressure, nsig, layer_oz)
+implicit none
+integer  :: nsig
+real :: coefficient
+real(kind_real) :: botpressure, toppressure
+real(kind_real), dimension(:) :: modelpressure
+real(kind_real), dimension(:) :: modelozone
+real(kind_real)  :: layer_oz
+! local
+integer :: kk, iz1, iz2
+real(kind_real) :: pob,delz,g,delp4,dz1
+real(kind_real) :: topozp, botozp
+topozp = pindex(nsig+1, modelpressure, toppressure)
+botozp = pindex(nsig+1, modelpressure, botpressure)
+pob = botozp
+iz1 = topozp
+if (iz1>nsig) iz1=nsig
+iz2 = pob
+dz1 = topozp
+modelozone = 0.0_kind_real
+do kk=iz1,iz2,-1
+  delz = 1.0_kind_real
+  if(kk == iz1) delz = dz1 - iz1
+  if (kk == iz2) delz = delz - pob + iz2
+  delp4 = modelpressure(kk)-modelpressure(kk+1)  ! [Pa]
+  modelozone(kk) = layer_oz*coefficient*(delz*delp4)
+enddo
+
+end subroutine undo_layer_integral
+
 
 subroutine vert_interp_lay_apply_tl(modelozoned, layer_ozd, coefficient,  modelpressure, botpressure, toppressure, nsig)
 real(kind_real), intent(in)  ::modelozoned(:)
@@ -134,6 +164,18 @@ integer,intent(in) :: nsig
 real,intent(in) :: coefficient
 call apply_layer_integral(coefficient, modelozoned, modelpressure, botpressure, toppressure, nsig, layer_ozd)
 end subroutine vert_interp_lay_apply_tl 
+
+subroutine vert_interp_lay_apply_ad(modelozoneb, layer_ozb, coefficient,  modelpressure, botpressure, toppressure, nsig)
+real(kind_real), intent(out)  ::modelozoneb(:)
+real(kind_real),intent(in):: botpressure, toppressure
+real(kind_real), intent(in), dimension(nsig+1) :: modelpressure 
+real(kind_real), intent(in) :: layer_ozb
+integer,intent(in) :: nsig
+real,intent(in) :: coefficient
+call undo_layer_integral(coefficient, modelozoneb, modelpressure, botpressure, toppressure, nsig, layer_ozb)
+end subroutine vert_interp_lay_apply_ad
+
+
 
 
 
