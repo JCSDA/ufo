@@ -124,6 +124,7 @@ do kk=iz1,iz2,-1
 enddo
 
 end subroutine apply_layer_integral
+
 subroutine undo_layer_integral(coefficient, modelozone, modelpressure, botpressure, toppressure, nsig, layer_oz)
 implicit none
 integer  :: nsig
@@ -174,9 +175,6 @@ integer,intent(in) :: nsig
 real,intent(in) :: coefficient
 call undo_layer_integral(coefficient, modelozoneb, modelpressure, botpressure, toppressure, nsig, layer_ozb)
 end subroutine vert_interp_lay_apply_ad
-
-
-
 
 
 end module vert_interp_lay_mod

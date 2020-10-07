@@ -21,6 +21,7 @@ module ufo_atmvertinterplay_tlad_mod
     type(oops_variables), public :: obsvars
     type(oops_variables), public :: geovars
     integer :: nval, nlocs
+    logical :: flip_it
     real(kind_real), dimension(:), allocatable :: toppressure, botpressure
     integer, allocatable :: nlevels(:)
     real, allocatable :: coefficients(:) ! unit conversion from geoval to obs
@@ -84,15 +85,16 @@ end subroutine atmvertinterplay_tlad_setup_
 
 ! ------------------------------------------------------------------------------
 
-subroutine atmvertinterplay_tlad_settraj_(self, geovals, obss)
+subroutine atmvertinterplay_tlad_settraj_(self, geovals_in, obss)
   use obsspace_mod
   implicit none
   class(ufo_atmvertinterplay_tlad), intent(inout) :: self
-  type(ufo_geovals),         intent(in)    :: geovals
+  type(ufo_geovals),         intent(in)    :: geovals_in
   type(c_ptr), value,        intent(in)    :: obss
   integer :: iobs,nlevs,nsig,ilev
-!  type(ufo_geovals) :: geovals
+  type(ufo_geovals) :: geovals
   type(ufo_geoval),pointer :: modelpres
+  type(ufo_geoval),pointer :: p_temp
   type(ufo_geoval),pointer :: profile
   character(len=MAXVARLEN) :: var_zdir
   character(len=MAXVARLEN) :: geovar
@@ -106,9 +108,17 @@ subroutine atmvertinterplay_tlad_settraj_(self, geovals, obss)
   allocate(self%toppressure(self%nlocs))
   allocate(self%botpressure(self%nlocs))
   allocate(airpressure(self%nlocs))
-  !call ufo_geovals_copy(geovals_in, geovals)  ! dont want to change geovals_in
-  !var_zdir = var_prsi                         ! vertical coordinate variable
-  !call ufo_geovals_reorderzdir(geovals, var_zdir, "bottom2top")
+  call ufo_geovals_copy(geovals_in, geovals)  ! dont want to change geovals_in
+
+  call ufo_geovals_get_var(geovals, var_prsi, p_temp)
+  var_zdir = var_prsi                         ! vertical coordinate variable
+  !if profile direction is top2bottom flip geovals, and make sure tlm and adj follow suit with self%flip_it
+  if( p_temp%vals(1,1) < p_temp%vals(p_temp%nval,1) ) then 
+    call ufo_geovals_reorderzdir(geovals, var_zdir, "bottom2top")
+    self%flip_it = .true.
+  else
+    self%flip_it = .false.
+  endif
 
   ! Get pressure profiles from geovals [Pa]
   call ufo_geovals_get_var(geovals, var_prsi, modelpres)
@@ -123,15 +133,15 @@ subroutine atmvertinterplay_tlad_settraj_(self, geovals, obss)
 
   ! Cleanup memory
   deallocate(airpressure)
-  !call ufo_geovals_delete(geovals)
+  call ufo_geovals_delete(geovals)
 end subroutine atmvertinterplay_tlad_settraj_
 
 ! ------------------------------------------------------------------------------
 
-subroutine atmvertinterplay_simobs_tl_(self, geovals, obss, nvars, nlocs, hofx)
+subroutine atmvertinterplay_simobs_tl_(self, geovals_in, obss, nvars, nlocs, hofx)
   implicit none
   class(ufo_atmvertinterplay_tlad), intent(in) :: self
-  type(ufo_geovals),         intent(in) :: geovals
+  type(ufo_geovals),         intent(in) :: geovals_in
   integer,                   intent(in) :: nvars, nlocs
   real(c_double),         intent(inout) :: hofx(nvars, nlocs)
   type(c_ptr), value,        intent(in) :: obss
@@ -141,29 +151,28 @@ subroutine atmvertinterplay_simobs_tl_(self, geovals, obss, nvars, nlocs, hofx)
   type(ufo_geoval), pointer :: pressure
   character(len=MAXVARLEN) :: geovar
   character(len=MAXVARLEN) :: var_zdir
-  !type(ufo_geovals) :: geovals
+  type(ufo_geovals) :: geovals
   integer :: nsig
-  !call ufo_geovals_copy(geovals_in, geovals)  ! dont want to change geovals_in
+  call ufo_geovals_copy(geovals_in, geovals)  ! dont want to change geovals_in
   do ivar = 1, nvars
     ! Get the name of input variable in geovals
     geovar = self%geovars%variable(ivar)
-    ! interplayolate from geovals to observational location into hofx
-    !var_zdir = var_prsi                         ! vertical coordinate variable
-    !call ufo_geovals_reorderzdir(geovals, var_zdir, "bottom2top")
     call ufo_geovals_get_var(geovals, geovar, profile)
     nsig = profile%nval
     do iobs = 1, nlocs
+       if(self%flip_it) profile%vals(1:profile%nval,iobs) = profile%vals(profile%nval:1:-1,iobs)
        call vert_interp_lay_apply_tl(profile%vals(:,iobs), hofx(ivar,iobs), self%coefficients(ivar),  self%modelpressures(:,iobs), self%botpressure(iobs), self%toppressure(iobs), nsig)
     enddo
   enddo
+  call ufo_geovals_delete(geovals)
 end subroutine atmvertinterplay_simobs_tl_
 
 ! ------------------------------------------------------------------------------
 
-subroutine atmvertinterplay_simobs_ad_(self, geovals, obss, nvars, nlocs, hofx)
+subroutine atmvertinterplay_simobs_ad_(self, geovals_in, obss, nvars, nlocs, hofx)
   implicit none
   class(ufo_atmvertinterplay_tlad), intent(in) :: self
-  type(ufo_geovals),         intent(in) :: geovals
+  type(ufo_geovals),         intent(inout) :: geovals_in
   integer,                   intent(in) :: nvars, nlocs
   real(c_double),         intent(in) :: hofx(nvars, nlocs)
   type(c_ptr), value,        intent(in) :: obss
@@ -173,21 +182,28 @@ subroutine atmvertinterplay_simobs_ad_(self, geovals, obss, nvars, nlocs, hofx)
   type(ufo_geoval), pointer :: pressure
   character(len=MAXVARLEN) :: geovar
   character(len=MAXVARLEN) :: var_zdir
-  !type(ufo_geovals) :: geovals
+  type(ufo_geovals) :: geovals
   integer :: nsig
-  !call ufo_geovals_copy(geovals_in, geovals)  ! dont want to change geovals_in
+
+
+  call ufo_geovals_copy(geovals_in, geovals)  ! dont want to change geovals_in
+
   do ivar = 1, nvars
     ! Get the name of input variable in geovals
     geovar = self%geovars%variable(ivar)
-    ! interplayolate from geovals to observational location into hofx
-    !var_zdir = var_prsi                         ! vertical coordinate variable
-    !call ufo_geovals_reorderzdir(geovals, var_zdir, "bottom2top")
     call ufo_geovals_get_var(geovals, geovar, profile)
+
     nsig = profile%nval
     do iobs = 1, nlocs
        call vert_interp_lay_apply_ad(profile%vals(:,iobs), hofx(ivar,iobs), self%coefficients(ivar),  self%modelpressures(:,iobs), self%botpressure(iobs), self%toppressure(iobs), nsig)
+       ! if the geovals come in as top2bottom (logic in traj part of code), make sure to output the adj in the same direction!
+       if(self%flip_it) profile%vals(1:profile%nval,iobs) = profile%vals(profile%nval:1:-1,iobs)
     enddo
   enddo
+
+  call ufo_geovals_copy(geovals, geovals_in)
+
+  call ufo_geovals_delete(geovals)
 end subroutine atmvertinterplay_simobs_ad_
 
 ! ------------------------------------------------------------------------------
