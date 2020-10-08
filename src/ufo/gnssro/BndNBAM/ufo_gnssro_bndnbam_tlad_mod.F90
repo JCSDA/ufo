@@ -63,7 +63,7 @@ subroutine ufo_gnssro_bndnbam_tlad_settraj(self, geovals, obss)
   integer, parameter              :: nlevAdd = 13 !num of additional levels on top of exsiting model levels
   integer, parameter              :: newAdd  = 20 !num of additional levels on top of extended levels
   integer, parameter              :: ngrd    = 80 !num of new veritcal grids for bending angle computation
-  type(ufo_geoval), pointer       :: t, q, gph, prs
+  type(ufo_geoval), pointer       :: t, q, gph, prs, zs
   integer                         :: iobs,k,j, klev, irec, icount
   integer                         :: nrecs
   integer                         :: nlev, nlev1, nlocs, nlevExt, nlevCheck
@@ -80,7 +80,8 @@ subroutine ufo_gnssro_bndnbam_tlad_settraj(self, geovals, obss)
   real(kind_real)                 :: fv, pw
   real(kind_real)                 :: dbetaxi, dbetan
   real(kind_real), allocatable    :: lagConst(:,:), lagConst_tl(:,:)
-  real(kind_real), allocatable    :: gesT(:,:), gesQ(:,:), gesP(:,:), gesH(:,:)
+  real(kind_real), allocatable    :: gesT(:,:), gesQ(:,:), gesP(:,:), gesH(:,:), gesZs(:)                     
+
   real(kind_real),allocatable     :: radius(:), dzdh(:), refIndex(:)
   real(kind_real), allocatable    :: dhdp(:), dhdt(:)
   real(kind_real), allocatable    :: ref(:)
@@ -110,6 +111,7 @@ if (nlocs > 0 ) then
 ! get variables from geovals
   call ufo_geovals_get_var(geovals, var_ts,  t)         ! air temperature
   call ufo_geovals_get_var(geovals, var_q,   q)         ! specific humidity
+  call ufo_geovals_get_var(geovals, var_sfc_geomz, zs)  ! surface geopotential height/surface altitude
 
   if (self%roconf%vertlayer .eq. "mass") then
     call ufo_geovals_get_var(geovals, var_prs,   prs)       ! pressure
@@ -133,6 +135,7 @@ if (nlocs > 0 ) then
   allocate(gesQ(nlev,nlocs))
   allocate(gesP(nlev1,nlocs))
   allocate(gesH(nlev1,nlocs))
+  allocate(gesZs(nlocs))
 
 ! copy geovals to local background arrays
   self%iflip = 0
@@ -171,6 +174,8 @@ if (nlocs > 0 ) then
         gesQ(k,:) = half* (gesQ(k,:) + gesQ(k-1,:))
      enddo
   end if
+        gesZs(:) = zs%vals(1,:)
+
 ! set obs space struture
   allocate(obsLat(nlocs))
   allocate(obsImpP(nlocs))
@@ -265,9 +270,9 @@ if (nlocs > 0 ) then
 
       do k = 1, nlev
 !        geometric height nad dzdh jacobian
-         call geop2geometric( obsLat(iobs), gesH(k,iobs), geomzi, dzdh(k))
+         call geop2geometric( obsLat(iobs), gesH(k,iobs)-gesZs(iobs), geomzi, dzdh(k))
 !        guess radius 
-         radius(k) = geomzi + obsGeoid(iobs) + obsLocR(iobs)   ! radius r
+         radius(k) = geomzi + gesZs(iobs) + obsGeoid(iobs) + obsLocR(iobs)   ! radius r
 !        guess refactivity, refactivity index,  and impact parameter
          call compute_refractivity(gesT(k,iobs), gesQ(k,iobs), gesP(k,iobs), &
                                  ref(k),self%roconf%use_compress) 
@@ -417,6 +422,7 @@ if (nlocs > 0 ) then
   deallocate(gesQ)
   deallocate(gesP)
   deallocate(gesH)
+  deallocate(gesZs)
   deallocate(dhdp)
   deallocate(dhdt)
   deallocate(radius)

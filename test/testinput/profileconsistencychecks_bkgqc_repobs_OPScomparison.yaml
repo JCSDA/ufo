@@ -17,10 +17,8 @@ Sondes:
   obs diagnostics:
   ProfileConsistencyChecks:
     Checks: ["Basic", "Time", "PermanentReject", "BackgroundTemperature", "BackgroundRelativeHumidity", "BackgroundWindSpeed", "BackgroundGeopotentialHeight"]
-    maxlev: 10000
     compareWithOPS: true
     flagBasicChecksFail: true
-    nErrorsFail: 8
     PrintStationID: true
     BChecks_Skip: true
     ModelLevels: false

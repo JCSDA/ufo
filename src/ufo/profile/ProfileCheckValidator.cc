@@ -85,9 +85,7 @@ namespace ufo {
             ufo::VariableNames::HydError});
         valuesToCompare_float_.insert({
             ufo::VariableNames::DC,
-            ufo::VariableNames::ETol,
-            ufo::VariableNames::D,
-            ufo::VariableNames::E});
+            ufo::VariableNames::ETol});
       } else if (check == "UInterp") {
         valuesToCompare_int_.insert({
             ufo::VariableNames::counter_NumSamePErrObs,
@@ -187,16 +185,6 @@ namespace ufo {
           oops::Log::debug() << "Vector of " << desc << " in this code is empty" << std::endl;
         return;
       }
-    // Warn if vectors are different size but allow to continue
-    if (!oops::allVectorsSameSize(vec1, vec2))
-      {
-        oops::Log::debug() << "Vectors to be compared for "
-                             << desc << " are of different size (" << vec1.size()
-                             << " and " << vec2.size() << "). "
-                             << "Will compare entries until reaching the end of the shorter "
-                             << "of the two." << std::endl;
-      }
-
     // Compare vector elements up to the smaller of the two sizes.
     const size_t vecsize = std::min(vec1.size(), vec2.size());
     for (size_t jvec = 0; jvec < vecsize; ++jvec) {

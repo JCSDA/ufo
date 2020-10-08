@@ -7,9 +7,9 @@
 
 #include "ufo/rttov/ObsRadianceRTTOVTLAD.h"
 
+#include <algorithm>
 #include <ostream>
 #include <set>
-#include <string>
 #include <vector>
 
 #include "ioda/ObsSpace.h"
@@ -19,6 +19,7 @@
 #include "oops/util/Logger.h"
 #include "ufo/GeoVaLs.h"
 #include "ufo/ObsBias.h"
+#include "ufo/ObsDiagnostics.h"
 
 namespace ufo {
 
@@ -27,17 +28,17 @@ static LinearObsOperatorMaker<ObsRadianceRTTOVTLAD> makerRTTOVTL_("RTTOV");
 // -----------------------------------------------------------------------------
 
 ObsRadianceRTTOVTLAD::ObsRadianceRTTOVTLAD(const ioda::ObsSpace & odb,
-                                           const eckit::Configuration & config)
+                                         const eckit::Configuration & config)
   : keyOperRadianceRTTOV_(0), odb_(odb), varin_()
 {
-  const std::vector<std::string> vv{"air_temperature"};
-  varin_.reset(new oops::Variables(vv));
-
-  // get channels
+  // parse channels from the config and create variable names
   const oops::Variables & observed = odb.obsvariables();
-  channels_ = observed.channels();
+  std::vector<int> channels_list = observed.channels();
 
-  ufo_radiancerttov_tlad_setup_f90(keyOperRadianceRTTOV_, config);
+  // call Fortran setup routine
+  ufo_radiancerttov_tlad_setup_f90(keyOperRadianceRTTOV_, config,
+                                  channels_list.size(), channels_list[0], varin_);
+
   oops::Log::trace() << "ObsRadianceRTTOVTLAD created" << std::endl;
 }
 
@@ -51,28 +52,26 @@ ObsRadianceRTTOVTLAD::~ObsRadianceRTTOVTLAD() {
 // -----------------------------------------------------------------------------
 
 void ObsRadianceRTTOVTLAD::setTrajectory(const GeoVaLs & geovals, const ObsBias & bias,
-                                         ObsDiagnostics &) {
+                                        ObsDiagnostics & ydiags) {
   ufo_radiancerttov_tlad_settraj_f90(keyOperRadianceRTTOV_, geovals.toFortran(), odb_,
-                                channels_.size(), channels_[0]);
-  oops::Log::trace() << "ObsRadianceRTTOVTLAD: trajectory set" << std::endl;
+                                    ydiags.toFortran());
+  oops::Log::trace() << "ObsRadianceRTTOVTLAD::setTrajectory done" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
 void ObsRadianceRTTOVTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec) const {
   ufo_radiancerttov_simobs_tl_f90(keyOperRadianceRTTOV_, geovals.toFortran(), odb_,
-                                  ovec.size(), ovec.toFortran(),
-                                  channels_.size(), channels_[0]);
-  oops::Log::trace() << "ObsRadianceRTTOVTLAD: TL observation operator run" << std::endl;
+                             ovec.nvars(), ovec.nlocs(), ovec.toFortran());
+  oops::Log::trace() << "ObsRadianceRTTOVTLAD::simulateObsTL done" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
 void ObsRadianceRTTOVTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec) const {
   ufo_radiancerttov_simobs_ad_f90(keyOperRadianceRTTOV_, geovals.toFortran(), odb_,
-                                  ovec.size(), ovec.toFortran(),
-                                  channels_.size(), channels_[0]);
-  oops::Log::trace() << "ObsRadianceRTTOVTLAD: adjoint observation operator run" << std::endl;
+                             ovec.nvars(), ovec.nlocs(), ovec.toFortran());
+  oops::Log::trace() << "ObsRadianceRTTOVTLAD::simulateObsAD done" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
