@@ -23,9 +23,6 @@ observations:
     Checks: ["Basic", "SamePDiffT", "Sign", "UnstableLayer", "Interpolation", "Hydrostatic"]
     compareWithOPS: false
     flagBasicChecksFail: true
-    nErrorsFail: 8
-    BChecks_minValidP: 0.0
-    BChecks_maxValidP: 110.0e3
     where:
     - variable:
         name: test_id@MetaData
@@ -33,4 +30,4 @@ observations:
   HofX: HofX
   obs diagnostics:
   benchmarkFlag: 15
-  flaggedBenchmark: 0
+  flaggedBenchmark: 69

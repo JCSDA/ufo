@@ -21,11 +21,9 @@ Incorrect and missing values, RH:
   obs diagnostics:
   ProfileConsistencyChecks:
     Checks: ["Basic", "SamePDiffT", "Sign", "UnstableLayer", "Interpolation", "Hydrostatic", "RH", "UInterp", "Time", "PermanentReject", "BackgroundTemperature", "BackgroundRelativeHumidity", "BackgroundWindSpeed", "BackgroundGeopotentialHeight"]
-    maxlev: 10000
     compareWithOPS: true
     BChecks_Skip: true
     flagBasicChecksFail: true
-    nErrorsFail: 8
     Comparison_Tol: 0.1
   BypassMismatchComparison: true
 
@@ -43,11 +41,9 @@ Incorrect and missing values:
   obs diagnostics:
   ProfileConsistencyChecks:
     Checks: ["Basic", "SamePDiffT", "Sign", "UnstableLayer", "Interpolation", "Hydrostatic", "RH", "UInterp", "Time", "PermanentReject", "BackgroundTemperature", "BackgroundRelativeHumidity", "BackgroundWindSpeed", "BackgroundGeopotentialHeight"]
-    maxlev: 10000
     compareWithOPS: true
     BChecks_Skip: true
     flagBasicChecksFail: true
-    nErrorsFail: 8
     Comparison_Tol: 0.1
   BypassMismatchComparison: true
 
@@ -65,10 +61,8 @@ Incorrect and missing values, Basic:
   obs diagnostics:
   ProfileConsistencyChecks:
     Checks: ["Basic"]
-    maxlev: 10000
     compareWithOPS: true
     flagBasicChecksFail: true
-    nErrorsFail: 8
     Comparison_Tol: 0.1
   BypassMismatchComparison: true
 
@@ -87,11 +81,9 @@ Wrong number of entries per profile:
   obs diagnostics:
   ProfileConsistencyChecks:
     Checks: ["SamePDiffT", "Basic", "Sign", "UnstableLayer", "Interpolation", "Hydrostatic"]
-    maxlev: 10000
     compareWithOPS: true
     BChecks_Skip: true
     flagBasicChecksFail: true
-    nErrorsFail: 8
     Comparison_Tol: 0.1
     groups_singlevalue: ["Counters", "ObsValue"]
   BypassMismatchComparison: true
@@ -111,11 +103,9 @@ Wrong number of entries per profile, UInterp:
   obs diagnostics:
   ProfileConsistencyChecks:
     Checks: ["UInterp"]
-    maxlev: 10000
     compareWithOPS: true
     BChecks_Skip: true
     flagBasicChecksFail: true
-    nErrorsFail: 8
     Comparison_Tol: 0.1
     groups_singlevalue: ["Counters", "ObsValue"]
   BypassMismatchComparison: true
@@ -135,11 +125,9 @@ Wrong number of entries per profile, RH:
   obs diagnostics:
   ProfileConsistencyChecks:
     Checks: ["RH"]
-    maxlev: 10000
     compareWithOPS: true
     BChecks_Skip: true
     flagBasicChecksFail: true
-    nErrorsFail: 8
     Comparison_Tol: 0.1
     groups_singlevalue: ["Counters", "ObsValue"]
   BypassMismatchComparison: true
@@ -159,11 +147,9 @@ Wrong number of entries per profile, background:
   obs diagnostics:
   ProfileConsistencyChecks:
     Checks: ["Time", "PermanentReject", "BackgroundTemperature", "BackgroundRelativeHumidity", "BackgroundWindSpeed", "BackgroundGeopotentialHeight"]
-    maxlev: 10000
     compareWithOPS: true
     BChecks_Skip: true
     flagBasicChecksFail: true
-    nErrorsFail: 8
     Comparison_Tol: 0.1
     groups_singlevalue: ["Counters", "ObsValue", "MetaData"]
   BypassMismatchComparison: true
@@ -180,11 +166,9 @@ No group variable chosen:
   obs diagnostics:
   ProfileConsistencyChecks:
     Checks: ["RH"]
-    maxlev: 10000
     compareWithOPS: true
     BChecks_Skip: true
     flagBasicChecksFail: true
-    nErrorsFail: 8
     Comparison_Tol: 0.1
   BypassMismatchComparison: true
   ExpectThrowOnInstantiation: true
@@ -205,11 +189,9 @@ Ascending sort order:
   obs diagnostics:
   ProfileConsistencyChecks:
     Checks: ["RH"]
-    maxlev: 10000
     compareWithOPS: true
     BChecks_Skip: true
     flagBasicChecksFail: true
-    nErrorsFail: 8
     Comparison_Tol: 0.1
   BypassMismatchComparison: true
   ExpectThrowDuringOperation: true
@@ -228,11 +210,9 @@ Invalid check requested:
   obs diagnostics:
   ProfileConsistencyChecks:
     Checks: ["WrongCheck"]
-    maxlev: 10000
     compareWithOPS: true
     BChecks_Skip: true
     flagBasicChecksFail: true
-    nErrorsFail: 8
     Comparison_Tol: 0.1
   BypassMismatchComparison: true
   ExpectThrowDuringOperation: true
@@ -251,11 +231,9 @@ Duplicate check requested:
   obs diagnostics:
   ProfileConsistencyChecks:
     Checks: ["Sign"]
-    maxlev: 10000
     compareWithOPS: true
     BChecks_Skip: true
     flagBasicChecksFail: true
-    nErrorsFail: 8
     Comparison_Tol: 0.1
   BypassMismatchComparison: true
   AddDuplicateCheck: true
@@ -274,11 +252,9 @@ Incorrect type in get:
   obs diagnostics:
   ProfileConsistencyChecks:
     Checks: ["Sign"]
-    maxlev: 10000
     compareWithOPS: true
     BChecks_Skip: true
     flagBasicChecksFail: true
-    nErrorsFail: 8
     Comparison_Tol: 0.1
   BypassMismatchComparison: true
   GetWrongType: true
@@ -299,11 +275,9 @@ Standard levels out of order:
   obs diagnostics:
   ProfileConsistencyChecks:
     Checks: ["Hydrostatic"]
-    maxlev: 10000
     compareWithOPS: true
     BChecks_Skip: true
     flagBasicChecksFail: true
-    nErrorsFail: 8
     Comparison_Tol: 0.1
     StandardLevels: [1, 1000]
   BypassMismatchComparison: true
@@ -323,11 +297,9 @@ Background SondeLaunchWindRej:
   obs diagnostics:
   ProfileConsistencyChecks:
     Checks: ["Time"]
-    maxlev: 10000
     compareWithOPS: true
     BChecks_Skip: true
     flagBasicChecksFail: true
-    nErrorsFail: 8
     Comparison_Tol: 0.1
     TimeCheck_SondeLaunchWindRej: 100.0
   BypassMismatchComparison: true
@@ -346,11 +318,9 @@ Background manual QC flags:
   obs diagnostics:
   ProfileConsistencyChecks:
     Checks: ["Time"]
-    maxlev: 10000
     compareWithOPS: true
     BChecks_Skip: true
     flagBasicChecksFail: true
-    nErrorsFail: 8
     Comparison_Tol: 0.1
   BypassMismatchComparison: true
   ManualFlagModification: true
