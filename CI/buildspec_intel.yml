@@ -98,6 +98,9 @@ phases:
       # ioda
       - ./clone.sh $GIT_USER $GIT_PASS ioda $CODEBUILD_GIT_BRANCH ioda /jcsda/ufo-bundle develop
 
+      # rttov
+      - ./clone.sh $GIT_USER $GIT_PASS rttov $CODEBUILD_GIT_BRANCH rttov /jcsda/ufo-bundle develop
+
       # disable git-lfs
       - git lfs install --skip-smudge
 
@@ -155,7 +158,7 @@ phases:
         && . /opt/intel/compilers_and_libraries/linux/bin/compilervars.sh
         && cd /build_container
         && ls
-        && ecbuild /jcsda/ufo-bundle/
+        && ecbuild -DBUILD_RTTOV=1 /jcsda/ufo-bundle/
         && cd ufo
         && make -j4"
 

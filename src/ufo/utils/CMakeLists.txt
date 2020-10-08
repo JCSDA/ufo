@@ -26,6 +26,7 @@ set ( utils_files
       SpatialBinSelector.cc
       StringUtils.cc
       StringUtils.h
+      ufo_utils_mod.F90
       VertInterp.interface.F90
       VertInterp.interface.h
       vert_interp.F90
