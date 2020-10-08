@@ -126,7 +126,6 @@ real(kind_real) :: rozcon, layer_oz
   allocate(botpressure(nlocs))
   allocate(airpressure(nlocs))
   call obsspace_get_db(obss, "MetaData", "air_pressure", airpressure)  
-  nlevs = self%nlevels(ivar)
 
   do ivar = 1, nvars
     write(6,*) 'ufo_atmvertinterplay_simobs: self%nlevels = ', self%nlevels
