@@ -95,6 +95,9 @@ phases:
       # crtm
       - ./clone.sh $GIT_USER $GIT_PASS crtm $CODEBUILD_GIT_BRANCH crtm /jcsda/ufo-bundle develop
 
+      # ioda-engines
+      - ./clone.sh $GIT_USER $GIT_PASS ioda-engines $CODEBUILD_GIT_BRANCH ioda_engines /jcsda/ufo-bundle develop
+
       # ioda
       - ./clone.sh $GIT_USER $GIT_PASS ioda $CODEBUILD_GIT_BRANCH ioda /jcsda/ufo-bundle develop
 
