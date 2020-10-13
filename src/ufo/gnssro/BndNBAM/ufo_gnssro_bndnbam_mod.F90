@@ -261,7 +261,7 @@ subroutine ufo_gnssro_bndnbam_simobs(self, geovals, hofx, obss)
       wi2=max(1,min(indx+1,nlev))
       wf=sIndx-float(wi)
       wf=max(zero,min(wf,one))
-      temperature(iobs)=gesT(wi,iobs)*(one-wf)+gesT(wi2,iobs)*wf
+      temperature(iobs)=gesTv(wi,iobs)*(one-wf)+gesTv(wi2,iobs)*wf
 
 !     (2) super-refaction
 !     (2.1) GSI style super refraction check
