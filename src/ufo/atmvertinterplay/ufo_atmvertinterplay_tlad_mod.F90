@@ -124,6 +124,7 @@ subroutine atmvertinterplay_tlad_settraj_(self, geovals_in, obss)
   call ufo_geovals_get_var(geovals, var_prsi, modelpres)
   nlevs = self%nlevels(1)
   nsig = modelpres%nval - 1
+  self%nval = modelpres%nval
   call obsspace_get_db(obss, "MetaData", "air_pressure", airpressure)  
 
   allocate(self%modelpressures(modelpres%nval,self%nlocs))
@@ -169,10 +170,10 @@ end subroutine atmvertinterplay_simobs_tl_
 
 ! ------------------------------------------------------------------------------
 
-subroutine atmvertinterplay_simobs_ad_(self, geovals_in, obss, nvars, nlocs, hofx)
+subroutine atmvertinterplay_simobs_ad_(self, geovals, obss, nvars, nlocs, hofx)
   implicit none
   class(ufo_atmvertinterplay_tlad), intent(in) :: self
-  type(ufo_geovals),         intent(inout) :: geovals_in
+  type(ufo_geovals),         intent(inout) :: geovals
   integer,                   intent(in) :: nvars, nlocs
   real(c_double),         intent(in) :: hofx(nvars, nlocs)
   type(c_ptr), value,        intent(in) :: obss
@@ -182,16 +183,22 @@ subroutine atmvertinterplay_simobs_ad_(self, geovals_in, obss, nvars, nlocs, hof
   type(ufo_geoval), pointer :: pressure
   character(len=MAXVARLEN) :: geovar
   character(len=MAXVARLEN) :: var_zdir
-  type(ufo_geovals) :: geovals
   integer :: nsig
 
-
-  call ufo_geovals_copy(geovals_in, geovals)  ! dont want to change geovals_in
 
   do ivar = 1, nvars
     ! Get the name of input variable in geovals
     geovar = self%geovars%variable(ivar)
     call ufo_geovals_get_var(geovals, geovar, profile)
+    ! Allocate geovals profile if not yet allocated
+    if (.not. allocated(profile%vals)) then
+       profile%nlocs = self%nlocs
+       profile%nval  = self%nval
+       allocate(profile%vals(profile%nval, profile%nlocs))
+       profile%vals(:,:) = 0.0_kind_real
+    endif
+    if (.not. geovals%linit ) geovals%linit=.true.
+
 
     nsig = profile%nval
     do iobs = 1, nlocs
@@ -201,9 +208,7 @@ subroutine atmvertinterplay_simobs_ad_(self, geovals_in, obss, nvars, nlocs, hof
     enddo
   enddo
 
-  call ufo_geovals_copy(geovals, geovals_in)
 
-  call ufo_geovals_delete(geovals)
 end subroutine atmvertinterplay_simobs_ad_
 
 ! ------------------------------------------------------------------------------
