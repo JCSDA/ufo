@@ -259,7 +259,7 @@ subroutine ufo_gnssro_bndnbam_simobs(self, geovals, hofx, obss)
       indx=sIndx
       wi=min(max(1,indx),nlev)
       wi2=max(1,min(indx+1,nlev))
-      wf=indx-float(wi)
+      wf=sIndx-float(wi)
       wf=max(zero,min(wf,one))
       temperature(iobs)=gesT(wi,iobs)*(one-wf)+gesT(wi2,iobs)*wf
 
