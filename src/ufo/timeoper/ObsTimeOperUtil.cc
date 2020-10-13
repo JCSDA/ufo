@@ -27,7 +27,7 @@ std::vector<std::vector<float>> timeWeightCreate(const ioda::ObsSpace & odb_,
   util::DateTime windowBegin(odb_.windowStart());
   util::Duration windowSub;
   windowSub = util::Duration(config.getString("windowSub"));
-  long windowSubSec = windowSub.toSeconds();
+  int64_t windowSubSec = windowSub.toSeconds();
 
   std::size_t nlocs = odb_.nlocs();
 
@@ -42,8 +42,8 @@ std::vector<std::vector<float>> timeWeightCreate(const ioda::ObsSpace & odb_,
 
   for (std::size_t i = 0; i < nlocs; ++i) {
     util::Duration timeFromStart = dateTimeIn[i] - windowBegin;
-    long timeFromStartSec = timeFromStart.toSeconds();
-    long StateTimeFromStartSec =
+    int64_t timeFromStartSec = timeFromStart.toSeconds();
+    int64_t StateTimeFromStartSec =
       (timeFromStartSec / windowSubSec) * windowSubSec;
     if ((timeFromStartSec - StateTimeFromStartSec) == 0) {
       TimeWeightObsAfterState[i] = 1.0f;
