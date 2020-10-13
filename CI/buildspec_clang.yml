@@ -52,8 +52,14 @@ phases:
       # crtm
       - ./clone.sh $GIT_USER $GIT_PASS crtm $CODEBUILD_GIT_BRANCH crtm /jcsda/ufo-bundle develop
 
+      # ioda-engines
+      - ./clone.sh $GIT_USER $GIT_PASS ioda-engines $CODEBUILD_GIT_BRANCH ioda_engines /jcsda/ufo-bundle develop
+
       # ioda
       - ./clone.sh $GIT_USER $GIT_PASS ioda $CODEBUILD_GIT_BRANCH ioda /jcsda/ufo-bundle develop
+
+      # rttov
+      - ./clone.sh $GIT_USER $GIT_PASS rttov $CODEBUILD_GIT_BRANCH rttov /jcsda/ufo-bundle develop
 
       # disable git-lfs
       - git lfs install --skip-smudge
@@ -98,7 +104,7 @@ phases:
       - echo $BUILD_STATUS
 
       - cd /build_container
-      - ecbuild /jcsda/ufo-bundle/
+      - ecbuild -DBUILD_RTTOV=1 /jcsda/ufo-bundle/
       - cd ufo
       - make -j4
 

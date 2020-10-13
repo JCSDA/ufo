@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2017-2018 UCAR
+ * (C) Copyright 2017 UCAR
  *
  * This software is licensed under the terms of the Apache Licence Version 2.0
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
@@ -9,7 +9,7 @@
 #define UFO_RTTOV_OBSRADIANCERTTOVTLAD_INTERFACE_H_
 
 #include "ioda/ObsSpace.h"
-
+#include "oops/base/Variables.h"
 #include "ufo/Fortran.h"
 
 namespace ufo {
@@ -26,14 +26,16 @@ extern "C" {
 //  Radiance observation operator and its tl/ad
 // -----------------------------------------------------------------------------
 
-  void ufo_radiancerttov_tlad_setup_f90(F90hop &, const eckit::Configuration &);
+  void ufo_radiancerttov_tlad_setup_f90(F90hop &, const eckit::Configuration &,
+                                       const int &, const int &,
+                                       oops::Variables &);
   void ufo_radiancerttov_tlad_delete_f90(F90hop &);
   void ufo_radiancerttov_tlad_settraj_f90(const F90hop &, const F90goms &, const ioda::ObsSpace &,
-                                     const int &, const int &);
+                                         const F90goms &);
   void ufo_radiancerttov_simobs_tl_f90(const F90hop &, const F90goms &, const ioda::ObsSpace &,
-                                  const int &, double &, const int &, const int &);
+                                  const int &, const int &, double &);
   void ufo_radiancerttov_simobs_ad_f90(const F90hop &, const F90goms &, const ioda::ObsSpace &,
-                                  const int &, const double &, const int &, const int &);
+                                  const int &, const int &, const double &);
 // -----------------------------------------------------------------------------
 
 }  // extern C

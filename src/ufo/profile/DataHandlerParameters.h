@@ -59,7 +59,7 @@ namespace ufo {
       {"groups_singlevalue", {"Counters"}, this};
 
     /// Number of errors, accumulated over checks, that cause the observation to have failed.
-    oops::Parameter<int> nErrorsFail {"nErrorsFail", 8, this};
+    oops::Parameter<int> nErrorsFail {"nErrorsFail", 1, this};
   };
 }  // namespace ufo
 

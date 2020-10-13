@@ -30,7 +30,7 @@ namespace ufo {
     oops::Parameter<float> PGE_ExpArgMax{"PGE_ExpArgMax", 80.0, this};
 
     /// PGE rejection limit.
-    oops::Parameter<float> PGE_PGECrit{"PGE_PGECrit", 0.5, this};
+    oops::Parameter<float> PGE_PGECrit{"PGE_PGECrit", 0.1, this};
 
     /// Multiplication factor for observation errors.
     oops::Parameter<float> PGE_ObErrMult{"PGE_ObErrMult", 1.0, this};
@@ -39,7 +39,7 @@ namespace ufo {
     oops::Parameter<float> PGE_BkgErrMult{"PGE_BkgErrMult", 1.0, this};
 
     /// Critical value for squared difference from background / ErrVar.
-    oops::Parameter<float> PGE_SDiffCrit{"PGE_SDiffCrit", 225.0, this};
+    oops::Parameter<float> PGE_SDiffCrit{"PGE_SDiffCrit", 100.0, this};
   };
 }  // namespace ufo
 

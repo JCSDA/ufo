@@ -60,5 +60,13 @@ real(kind_real), parameter, public :: m_ratio= 0.003449787      ! gravity ratio
 ! Refractivity constants
 real(kind_real), parameter, public :: n_alpha = 0.776           ! Refractivity constant a
 real(kind_real), parameter, public :: n_beta  = 3.73E3          ! Refractivity constant b
+! constants for use with RTTOV interface
+real(kind_real), parameter, public :: g_to_kg = 0.001_kind_real
+real(kind_real), parameter, public :: m_to_km = 0.001_kind_real
+real(kind_real), parameter, public :: Pa_to_hPa = 0.01_kind_real
+real(kind_real), parameter, public :: min_q = 3e-6
+real(kind_real), parameter, public :: ZeroDegC = 273.15
+real(kind_real), parameter, public :: epsilon = 0.622 ! DARFIX probably!
+
 end module ufo_constants_mod
 

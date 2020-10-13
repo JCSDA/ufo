@@ -11,15 +11,15 @@ implicit none
 private
 public :: ufo_vars_read, ufo_vars_getindex
 
-INTEGER, PARAMETER, PUBLIC :: n_aerosols_gocart_default=14,&
-     &n_aerosols_gocart_esrl=15,n_aerosols_other=1
+integer, parameter, public :: n_aerosols_gocart_default=14,&
+     &n_aerosols_gocart_merra_2=15,n_aerosols_other=1
 
 integer, parameter, public :: MAXVARLEN=60
 character(len=MAXVARLEN), public, parameter :: var_tv   = "virtual_temperature"
 character(len=MAXVARLEN), public, parameter :: var_ts   = "air_temperature"
 character(len=MAXVARLEN), public, parameter :: var_t    = "temperature"
-character(len=MAXVARLEN), public, parameter :: var_mixr = "humidity_mixing_ratio"
-character(len=MAXVARLEN), public, parameter :: var_q    = "specific_humidity"
+character(len=MAXVARLEN), public, parameter :: var_mixr = "humidity_mixing_ratio" ! g/kg
+character(len=MAXVARLEN), public, parameter :: var_q    = "specific_humidity"     ! kg/kg
 character(len=MAXVARLEN), public, parameter :: var_u    = "eastward_wind"
 character(len=MAXVARLEN), public, parameter :: var_v    = "northward_wind"
 character(len=MAXVARLEN), public, parameter :: var_prs  = "air_pressure"
@@ -44,6 +44,10 @@ character(len=MAXVARLEN), public, parameter :: var_clsefr = "effective_radius_of
 character(len=MAXVARLEN), public, parameter :: var_clgefr = "effective_radius_of_graupel_particle"
 character(len=MAXVARLEN), public, parameter :: var_clhefr = "effective_radius_of_hail_particle"
 character(len=MAXVARLEN), public, parameter :: var_cldfrac= "cloud_area_fraction_in_atmosphere_layer"
+character(len=MAXVARLEN), public, parameter :: var_sfc_p2m = "air_pressure_at_two_meters_above_surface"      ! (Pa)
+character(len=MAXVARLEN), public, parameter :: var_sfc_q2m = "specific_humidity_at_two_meters_above_surface" ! (kg/kg)
+character(len=MAXVARLEN), public, parameter :: var_sfc_t2m = "surface_temperature" ! (K)
+character(len=MAXVARLEN), public, parameter :: var_sfc_tskin = "skin_temperature"  ! (K)
 character(len=MAXVARLEN), public, parameter :: var_sfc_wfrac = "water_area_fraction"
 character(len=MAXVARLEN), public, parameter :: var_sfc_lfrac = "land_area_fraction"
 character(len=MAXVARLEN), public, parameter :: var_sfc_ifrac = "ice_area_fraction"
@@ -83,9 +87,12 @@ character(len=MAXVARLEN), public, parameter :: var_refl        = "equivalent_ref
 character(len=MAXVARLEN), public, parameter :: var_w           = "upward_air_velocity"
 
 !@mzp strings have to be same MAXVARLEN length for array constructor
-CHARACTER(len=MAXVARLEN), public, parameter :: var_rh          = "relative_humidity"
+character(len=MAXVARLEN), public, parameter :: var_rh          = "relative_humidity" ! dimensionless (0 <= RH <= 1)
+character(len=MAXVARLEN), public, parameter :: var_water_type_rttov = "water_type"   ! 0 (fresh), 1 (sea)
+character(len=MAXVARLEN), public, parameter :: var_surf_type_rttov = "surface_type"  ! 0 (land), 1 (water), 2 (sea-ice)
 
-CHARACTER(len=MAXVARLEN), DIMENSION(n_aerosols_gocart_default), PUBLIC, PARAMETER  :: &
+
+character(len=MAXVARLEN), dimension(n_aerosols_gocart_default), public, parameter  :: &
      &var_aerosols_gocart_default = [&
      &"sulf                                                    ",&
      &"bc1                                                     ",&
@@ -101,12 +108,12 @@ CHARACTER(len=MAXVARLEN), DIMENSION(n_aerosols_gocart_default), PUBLIC, PARAMETE
      &"seas2                                                   ",&
      &"seas3                                                   ",&
      &"seas4                                                   "]
-!@mzp var_aerosols_gocart_esrl =[&
+!@mzp var_aerosols_gocart_merra_2 =[&
 !    &var_aerosols_gocart_default,&
 !    &"p25                                                     "]
 ! won't compile
-CHARACTER(len=MAXVARLEN), DIMENSION(n_aerosols_gocart_esrl), PUBLIC, PARAMETER :: &
-     &var_aerosols_gocart_esrl = [&
+character(len=maxvarlen), dimension(n_aerosols_gocart_merra_2), public, parameter :: &
+     &var_aerosols_gocart_merra_2 = [&
      &"sulf                                                    ",&
      &"bc1                                                     ",&
      &"bc2                                                     ",&
@@ -121,9 +128,9 @@ CHARACTER(len=MAXVARLEN), DIMENSION(n_aerosols_gocart_esrl), PUBLIC, PARAMETER :
      &"seas2                                                   ",&
      &"seas3                                                   ",&
      &"seas4                                                   ",&
-     &"p25                                                     "]
+     &"seas5                                                   "]
 
-CHARACTER(len=MAXVARLEN), DIMENSION(n_aerosols_other), PUBLIC, PARAMETER :: &
+character(len=MAXVARLEN), dimension(n_aerosols_other), public, parameter :: &
      &var_aerosols_other = [&
      &"other                                                   "]
 

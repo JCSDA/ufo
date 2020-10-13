@@ -32,7 +32,6 @@ list( APPEND ufo_test_input
   testinput/airs_qc_filters.yaml
   testinput/amsua_crtm.yaml
   testinput/amsua_crtm_bc.yaml
-  testinput/amsua_rttov.yaml
   testinput/amsua_qc.yaml
   testinput/amsua_qc_clwretmw.yaml
   testinput/amsua_qc_filters.yaml
@@ -40,9 +39,11 @@ list( APPEND ufo_test_input
   testinput/amsua_allsky_gsi_qc.yaml
   testinput/amsua_seaice_qc.yaml
   testinput/aod_crtm.yaml
+  testinput/aod_luts.yaml
   testinput/atms_crtm.yaml
   testinput/atms_crtm_bc.yaml
   testinput/atms_qc_filters.yaml
+  testinput/atms_rttov_ops.yaml
   testinput/coolskin.yaml
   testinput/cris_crtm.yaml
   testinput/cris_crtm_bc.yaml
@@ -238,8 +239,8 @@ list( APPEND ufo_test_data
   atmosphere/cris-fsr_npp_obsdiag_2018041500_m_qc.nc4
   atmosphere/cris-fsr_npp_obsdiag_2018041500_m_unittest.nc4
   atmosphere/cris-fsr_npp_tlapmean.txt
-  atmosphere/geovals_rttov.nc4
   atmosphere/geos_aod_geoval_2018041500_m.nc4
+  atmosphere/geovals_atms_20191230T0000Z_benchmark.nc4
   atmosphere/gmi_gpm_geoval_2018041500_m.nc4
   atmosphere/gnssro_geoval_2018041500_1obs.nc4
   atmosphere/gnssro_geoval_2018041500_1obs_bending_angle.nc4
@@ -666,33 +667,57 @@ if( crtm_FOUND )
                       DEPENDS test_ObsOperatorTLAD.x
                       TEST_DEPENDS ufo_get_ioda_test_data )
 
-    ecbuild_add_test( TARGET  test_ufo_opr_aod
+    ecbuild_add_test( TARGET  test_ufo_opr_aod_crtm
                       COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
                       ARGS    "testinput/aod_crtm.yaml"
                       ENVIRONMENT OOPS_TRAPFPE=1
                       DEPENDS test_ObsOperator.x
                       TEST_DEPENDS ufo_get_ioda_test_data )
 
-    ecbuild_add_test( TARGET  test_ufo_linopr_aod
+    ecbuild_add_test( TARGET  test_ufo_linopr_aod_crtm
                       COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
                       ARGS    "testinput/aod_crtm.yaml"
                       ENVIRONMENT OOPS_TRAPFPE=1
                       DEPENDS test_ObsOperatorTLAD.x 
                       TEST_DEPENDS ufo_get_ioda_test_data )
+
+    if( ${GEOS-AERO_FOUND} )
+
+      ecbuild_add_test( TARGET  test_ufo_opr_aod_luts
+                      COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
+                      ARGS    "testinput/aod_luts.yaml"
+                      ENVIRONMENT OOPS_TRAPFPE=1
+                      DEPENDS test_ObsOperator.x
+                      TEST_DEPENDS ufo_get_ioda_test_data )
+
+      ecbuild_add_test( TARGET  test_ufo_linopr_aod_luts
+                      COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
+                      ARGS    "testinput/aod_luts.yaml"
+                      ENVIRONMENT OOPS_TRAPFPE=1
+                      DEPENDS test_ObsOperatorTLAD.x 
+                      TEST_DEPENDS ufo_get_ioda_test_data )
+
+   endif( ${GEOS-AERO_FOUND} )
+
+
 endif( crtm_FOUND )
 
-if( ${RTTOV_FOUND} )
-  ecbuild_add_test( TARGET  test_ufo_opr_rttov_amsua
-                    COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
-                    ARGS    "testinput/amsua_rttov.yaml"
-                    ENVIRONMENT OOPS_TRAPFPE=1
-                    DEPENDS test_ObsOperator.x )
 
-  ecbuild_add_test( TARGET  test_ufo_linopr_rttov_amsua
-                    COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
-                    ARGS    "testinput/amsua_rttov.yaml"
+
+if( ${RTTOV_FOUND} )
+  ecbuild_add_test( TARGET  test_ufo_opr_rttov_atms
+                    COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
+                    ARGS    "testinput/atms_rttov_ops.yaml"
                     ENVIRONMENT OOPS_TRAPFPE=1
-                    DEPENDS test_ObsOperatorTLAD.x )
+                    DEPENDS test_ObsOperator.x
+                    TEST_DEPENDS ufo_get_ioda_test_data )
+
+  ecbuild_add_test( TARGET  test_ufo_linopr_rttov_atms
+                    COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
+                    ARGS    "testinput/atms_rttov_ops.yaml"
+                    ENVIRONMENT OOPS_TRAPFPE=1
+                    DEPENDS test_ObsOperatorTLAD.x 
+                    TEST_DEPENDS ufo_get_ioda_test_data )
 endif( ${RTTOV_FOUND} )
 
 
@@ -1949,6 +1974,7 @@ endif()
 if( ${RTTOV_FOUND} )
 list( APPEND rttov_test_input
 rttov7pred54L/rtcoef_noaa_19_amsua.dat
+rttov7pred54L/rtcoef_noaa_20_atms.dat
 )
 
 # Symlink all CRTM files
