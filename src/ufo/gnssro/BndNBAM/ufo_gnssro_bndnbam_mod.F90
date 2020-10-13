@@ -74,9 +74,9 @@ subroutine ufo_gnssro_bndnbam_simobs(self, geovals, hofx, obss)
   integer,allocatable                     :: nlocs_begin(:)
   integer,allocatable                     :: nlocs_end(:)
   real(c_double)                          :: missing
-  integer,          allocatable           :: super_refraction_flag(:)
-  integer,          allocatable           :: super(:)
-  integer                                 :: sr_hgt_idx
+  integer,          allocatable           :: super_refraction_flag(:), super(:), obs_max(:)
+  real(kind_real),  allocatable           :: toss_max(:)
+  integer                                 :: sr_hgt_idx, check
   real(kind_real)                         :: gradRef, obsImpH
   integer,          allocatable           :: LayerIdx(:)
 
@@ -219,8 +219,6 @@ subroutine ufo_gnssro_bndnbam_simobs(self, geovals, hofx, obss)
      grids(igrd+1) = igrd * ds
   end do 
 
-  allocate(super(nrecs))
-
 ! bending angle forward model starts
   allocate(geomz(nlev))    ! geometric height
   allocate(radius(nlev))   ! tangent point radisu to earth center
@@ -228,11 +226,19 @@ subroutine ufo_gnssro_bndnbam_simobs(self, geovals, hofx, obss)
   allocate(refIndex(nlev))              !refactivity index n
   allocate(refXrad(0:nlevExt+1))        !x=nr, model conuterpart impact parameter
 
+  allocate(super(nrecs))
+  allocate(toss_max(nrecs))
+  allocate(obs_max(nrecs))
+
   iobs = 0
   hofx =  missing
-  super= 0
+  super    = 0
+  obs_max  = 0
+  toss_max = 0
 
   rec_loop: do irec = 1, nrecs
+
+    check = 0
     obs_loop: do icount = nlocs_begin(irec), nlocs_end(irec)
 
       iobs = icount
@@ -281,20 +287,22 @@ subroutine ufo_gnssro_bndnbam_simobs(self, geovals, hofx, obss)
               endif
 !             relax to close-to-SR conditions, and check if obs is inside model SR layer
               if(self%roconf%sr_steps > 1                 &
-                 .and. super(irec) == 0                   &
+                 .and. super(iobs) == 0                   &
                  .and. abs(gradRef) >= half*crit_gradRefr &
-                 .and. maxval(obsValue(nlocs_begin(irec):nlocs_end(irec))) >= 0.03 ) then
-                 sr_hgt_idx = maxloc(obsValue(nlocs_begin(irec):nlocs_end(irec)), dim=1)
-                 do kk = nlocs_begin(irec), nlocs_end(irec)
-                     if (obsImpP(kk) <= obsImpP(nlocs_begin(irec)-1+sr_hgt_idx))  &
-                        super_refraction_flag(kk)=2
-                 end do 
-                 super(irec) = 1
-
+                 .and. obsValue(iobs) >= 0.03 ) then
+                 if (toss_max(irec) <= obsValue(iobs)) obs_max(irec) = iobs
+                 toss_max(irec)= max(toss_max(irec), obsValue(iobs))
+                 super(iobs) = 1
               end if
+
            end do ! k
 
         end if ! obsImpH <= six
+
+        if (obsImpH > six .and. toss_max(irec) > 0 .and. check == 0) then
+            super_refraction_flag(nlocs_begin(irec):obs_max(irec)) = 2
+            check = 1
+        end if
 
 !    ROPP style super refraction check
      else if(trim(self%roconf%super_ref_qc) == "ECMWF") then
@@ -348,6 +356,8 @@ subroutine ufo_gnssro_bndnbam_simobs(self, geovals, hofx, obss)
   deallocate(nlocs_begin)
   deallocate(nlocs_end)
   deallocate(super)
+  deallocate(toss_max)
+  deallocate(obs_max)
 
   write(err_msg,*) myname, ": complete"
   call fckit_log%info(err_msg)
