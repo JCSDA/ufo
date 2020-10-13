@@ -3,13 +3,13 @@ window end: 2018-04-15T03:00:00Z
 
 observations:
 - obs operator:
-    name: AodCRTM
-    Absorbers: [H2O,O3]
+    name: AodLUTs
     obs options:
+      AerosolOption: aerosols_gocart_merra_2
+      RCFile: [geosaod.rc]
       Sensor_ID: v.viirs-m_npp
       EndianType: little_endian
       CoefficientPath: Data/
-      AerosolOption: aerosols_gocart_default
   obs space:
     name: Aod
     obsdatain:
@@ -18,8 +18,9 @@ observations:
     channels: 4
   geovals:
     filename: Data/aod_geoval_2018041500_m.nc4
+  #temporary to replace with NasaBench
   vector ref: GsiHofX
-  tolerance: 1.0e-06
+  tolerance: 1.0e-02
   linear obs operator test:
     coef TL: 1.0e-3
     tolerance TL: 1.0e-5

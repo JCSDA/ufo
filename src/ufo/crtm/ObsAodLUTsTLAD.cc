@@ -5,7 +5,7 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#include "ufo/crtm/ObsAodCRTMTLAD.h"
+#include "ufo/crtm/ObsAodLUTsTLAD.h"
 
 #include <ostream>
 #include <set>
@@ -23,56 +23,56 @@
 namespace ufo {
 
 // -----------------------------------------------------------------------------
-static LinearObsOperatorMaker<ObsAodCRTMTLAD> makerAodTL_("AodCRTM");
+static LinearObsOperatorMaker<ObsAodLUTsTLAD> makerAodTL_("AodLUTs");
 // -----------------------------------------------------------------------------
 
-ObsAodCRTMTLAD::ObsAodCRTMTLAD(const ioda::ObsSpace & odb,
+ObsAodLUTsTLAD::ObsAodLUTsTLAD(const ioda::ObsSpace & odb,
                                const eckit::Configuration & config)
-  : keyOperAodCRTM_(0), odb_(odb), varin_()
+  : keyOperAodLUTs_(0), odb_(odb), varin_()
 {
   // parse channels from the config and create variable names
   const oops::Variables & observed = odb.obsvariables();
   std::vector<int> channels_list = observed.channels();
 
-  ufo_aodcrtm_tlad_setup_f90(keyOperAodCRTM_, config,
+  ufo_aodluts_tlad_setup_f90(keyOperAodLUTs_, config,
                              channels_list.size(), channels_list[0], varin_);
-  oops::Log::info() << "ObsAodCRTMTLAD variables: " << varin_ << std::endl;
-  oops::Log::info() << "ObsAodCRTMTLAD channels: " << channels_list << std::endl;
-  oops::Log::trace() << "ObsAodCRTMTLAD created" << std::endl;
+  oops::Log::info() << "ObsAodLUTsTLAD variables: " << varin_ << std::endl;
+  oops::Log::info() << "ObsAodLUTsTLAD channels: " << channels_list << std::endl;
+  oops::Log::trace() << "ObsAodLUTsTLAD created" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
-ObsAodCRTMTLAD::~ObsAodCRTMTLAD() {
-  ufo_aodcrtm_tlad_delete_f90(keyOperAodCRTM_);
-  oops::Log::trace() << "ObsAodCRTMTLAD destructed" << std::endl;
+ObsAodLUTsTLAD::~ObsAodLUTsTLAD() {
+  ufo_aodluts_tlad_delete_f90(keyOperAodLUTs_);
+  oops::Log::trace() << "ObsAodLUTsTLAD destructed" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
-void ObsAodCRTMTLAD::setTrajectory(const GeoVaLs & geovals, const ObsBias & bias,
+void ObsAodLUTsTLAD::setTrajectory(const GeoVaLs & geovals, const ObsBias & bias,
                                    ObsDiagnostics &) {
-  ufo_aodcrtm_tlad_settraj_f90(keyOperAodCRTM_, geovals.toFortran(), odb_);
+  ufo_aodluts_tlad_settraj_f90(keyOperAodLUTs_, geovals.toFortran(), odb_);
 }
 
 // -----------------------------------------------------------------------------
 
-void ObsAodCRTMTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec) const {
-  ufo_aodcrtm_simobs_tl_f90(keyOperAodCRTM_, geovals.toFortran(), odb_,
+void ObsAodLUTsTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec) const {
+  ufo_aodluts_simobs_tl_f90(keyOperAodLUTs_, geovals.toFortran(), odb_,
                              ovec.nvars(), ovec.nlocs(), ovec.toFortran());
 }
 
 // -----------------------------------------------------------------------------
 
-void ObsAodCRTMTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec) const {
-  ufo_aodcrtm_simobs_ad_f90(keyOperAodCRTM_, geovals.toFortran(), odb_,
+void ObsAodLUTsTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec) const {
+  ufo_aodluts_simobs_ad_f90(keyOperAodLUTs_, geovals.toFortran(), odb_,
                              ovec.nvars(), ovec.nlocs(), ovec.toFortran());
 }
 
 // -----------------------------------------------------------------------------
 
-void ObsAodCRTMTLAD::print(std::ostream & os) const {
-  os << "ObsAodCRTMTLAD::print not implemented" << std::endl;
+void ObsAodLUTsTLAD::print(std::ostream & os) const {
+  os << "ObsAodLUTsTLAD::print not implemented" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

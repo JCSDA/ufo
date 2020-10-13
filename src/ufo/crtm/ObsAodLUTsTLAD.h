@@ -5,8 +5,8 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#ifndef UFO_CRTM_OBSAODCRTMTLAD_H_
-#define UFO_CRTM_OBSAODCRTMTLAD_H_
+#ifndef UFO_CRTM_OBSAODLUTSTLAD_H_
+#define UFO_CRTM_OBSAODLUTSTLAD_H_
 
 #include <memory>
 #include <ostream>
@@ -15,7 +15,7 @@
 
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
-#include "ufo/crtm/ObsAodCRTMTLAD.interface.h"
+#include "ufo/crtm/ObsAodLUTsTLAD.interface.h"
 #include "ufo/LinearObsOperatorBase.h"
 
 // Forward declarations
@@ -34,13 +34,13 @@ namespace ufo {
   class ObsDiagnostics;
 
 // -----------------------------------------------------------------------------
-class ObsAodCRTMTLAD : public LinearObsOperatorBase,
-                        private util::ObjectCounter<ObsAodCRTMTLAD> {
+class ObsAodLUTsTLAD : public LinearObsOperatorBase,
+                        private util::ObjectCounter<ObsAodLUTsTLAD> {
  public:
-  static const std::string classname() {return "ufo::ObsAodCRTMTLAD";}
+  static const std::string classname() {return "ufo::ObsAodLUTsTLAD";}
 
-  ObsAodCRTMTLAD(const ioda::ObsSpace &, const eckit::Configuration &);
-  virtual ~ObsAodCRTMTLAD();
+  ObsAodLUTsTLAD(const ioda::ObsSpace &, const eckit::Configuration &);
+  virtual ~ObsAodLUTsTLAD();
 
   // Obs Operators
   void setTrajectory(const GeoVaLs &, const ObsBias &, ObsDiagnostics &) override;
@@ -50,12 +50,12 @@ class ObsAodCRTMTLAD : public LinearObsOperatorBase,
   // Other
   const oops::Variables & requiredVars() const override {return varin_;}
 
-  int & toFortran() {return keyOperAodCRTM_;}
-  const int & toFortran() const {return keyOperAodCRTM_;}
+  int & toFortran() {return keyOperAodLUTs_;}
+  const int & toFortran() const {return keyOperAodLUTs_;}
 
  private:
   void print(std::ostream &) const override;
-  F90hop keyOperAodCRTM_;
+  F90hop keyOperAodLUTs_;
   const ioda::ObsSpace& odb_;
   oops::Variables varin_;
 };
@@ -63,4 +63,4 @@ class ObsAodCRTMTLAD : public LinearObsOperatorBase,
 // -----------------------------------------------------------------------------
 
 }  // namespace ufo
-#endif  // UFO_CRTM_OBSAODCRTMTLAD_H_
+#endif  // UFO_CRTM_OBSAODLUTSTLAD_H_
