@@ -159,7 +159,7 @@ subroutine atmvertinterplay_simobs_tl_(self, geovals_in, obss, nvars, nlocs, hof
     ! Get the name of input variable in geovals
     geovar = self%geovars%variable(ivar)
     call ufo_geovals_get_var(geovals, geovar, profile)
-    nsig = profile%nval
+    nsig = self%nval-1
     do iobs = 1, nlocs
        if(self%flip_it) profile%vals(1:profile%nval,iobs) = profile%vals(profile%nval:1:-1,iobs)
        call vert_interp_lay_apply_tl(profile%vals(:,iobs), hofx(ivar,iobs), self%coefficients(ivar),  self%modelpressures(:,iobs), self%botpressure(iobs), self%toppressure(iobs), nsig)
@@ -200,7 +200,7 @@ subroutine atmvertinterplay_simobs_ad_(self, geovals, obss, nvars, nlocs, hofx)
     if (.not. geovals%linit ) geovals%linit=.true.
 
 
-    nsig = profile%nval
+    nsig = self%nval-1
     do iobs = 1, nlocs
        call vert_interp_lay_apply_ad(profile%vals(:,iobs), hofx(ivar,iobs), self%coefficients(ivar),  self%modelpressures(:,iobs), self%botpressure(iobs), self%toppressure(iobs), nsig)
        ! if the geovals come in as top2bottom (logic in traj part of code), make sure to output the adj in the same direction!
