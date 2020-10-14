@@ -130,26 +130,24 @@ void QCmanager::print(std::ostream & os) const {
       if ((*flags_)[jj][jobs] == QCflags::derivative) ++idydx;
     }
 
-    if (obsdb_.isDistributed()) {
-      obsdb_.comm().allReduceInPlace(iobs, eckit::mpi::sum());
-      obsdb_.comm().allReduceInPlace(ipass, eckit::mpi::sum());
-      obsdb_.comm().allReduceInPlace(imiss, eckit::mpi::sum());
-      obsdb_.comm().allReduceInPlace(ipreq, eckit::mpi::sum());
-      obsdb_.comm().allReduceInPlace(ibnds, eckit::mpi::sum());
-      obsdb_.comm().allReduceInPlace(iwhit, eckit::mpi::sum());
-      obsdb_.comm().allReduceInPlace(iblck, eckit::mpi::sum());
-      obsdb_.comm().allReduceInPlace(iherr, eckit::mpi::sum());
-      obsdb_.comm().allReduceInPlace(ifgss, eckit::mpi::sum());
-      obsdb_.comm().allReduceInPlace(iclw,  eckit::mpi::sum());
-      obsdb_.comm().allReduceInPlace(iprof, eckit::mpi::sum());
-      obsdb_.comm().allReduceInPlace(ignss, eckit::mpi::sum());
-      obsdb_.comm().allReduceInPlace(ithin, eckit::mpi::sum());
-      obsdb_.comm().allReduceInPlace(idiffref, eckit::mpi::sum());
-      obsdb_.comm().allReduceInPlace(iseaice,  eckit::mpi::sum());
-      obsdb_.comm().allReduceInPlace(itrack,  eckit::mpi::sum());
-      obsdb_.comm().allReduceInPlace(ibuddy,  eckit::mpi::sum());
-      obsdb_.comm().allReduceInPlace(idydx,   eckit::mpi::sum());
-    }
+    obsdb_.sum(iobs);
+    obsdb_.sum(ipass);
+    obsdb_.sum(imiss);
+    obsdb_.sum(ipreq);
+    obsdb_.sum(ibnds);
+    obsdb_.sum(iwhit);
+    obsdb_.sum(iblck);
+    obsdb_.sum(iherr);
+    obsdb_.sum(ifgss);
+    obsdb_.sum(iclw);
+    obsdb_.sum(iprof);
+    obsdb_.sum(ignss);
+    obsdb_.sum(ithin);
+    obsdb_.sum(idiffref);
+    obsdb_.sum(iseaice);
+    obsdb_.sum(itrack);
+    obsdb_.sum(ibuddy);
+    obsdb_.sum(idydx);
 
     if (obsdb_.comm().rank() == 0) {
       const std::string info = "QC " + flags_->obstype() + " " + observed_[jj] + ": ";
