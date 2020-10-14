@@ -226,7 +226,7 @@ subroutine ufo_gnssro_bndnbam_simobs(self, geovals, hofx, obss)
   allocate(refIndex(nlev))              !refactivity index n
   allocate(refXrad(0:nlevExt+1))        !x=nr, model conuterpart impact parameter
 
-  allocate(super(nrecs))
+  allocate(super(nlocs))
   allocate(toss_max(nrecs))
   allocate(obs_max(nrecs))
 
