@@ -44,4 +44,4 @@ observations:
   - filter: Background Check RONBAM
     filter variables:
     - name: bending_angle
-  passedBenchmark: 664
+  passedBenchmark: 663
