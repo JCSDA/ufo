@@ -86,53 +86,10 @@ character(len=MAXVARLEN), public, parameter :: var_tsavg5      = "average_surfac
 character(len=MAXVARLEN), public, parameter :: var_refl        = "equivalent_reflectivity_factor"
 character(len=MAXVARLEN), public, parameter :: var_w           = "upward_air_velocity"
 
-!@mzp strings have to be same MAXVARLEN length for array constructor
 character(len=MAXVARLEN), public, parameter :: var_rh          = "relative_humidity" ! dimensionless (0 <= RH <= 1)
 character(len=MAXVARLEN), public, parameter :: var_water_type_rttov = "water_type"   ! 0 (fresh), 1 (sea)
 character(len=MAXVARLEN), public, parameter :: var_surf_type_rttov = "surface_type"  ! 0 (land), 1 (water), 2 (sea-ice)
 
-
-character(len=MAXVARLEN), dimension(n_aerosols_gocart_default), public, parameter  :: &
-     &var_aerosols_gocart_default = [&
-     &"sulf                                                    ",&
-     &"bc1                                                     ",&
-     &"bc2                                                     ",&
-     &"oc1                                                     ",&
-     &"oc2                                                     ",&
-     &"dust1                                                   ",&
-     &"dust2                                                   ",&
-     &"dust3                                                   ",&
-     &"dust4                                                   ",&
-     &"dust5                                                   ",&
-     &"seas1                                                   ",&
-     &"seas2                                                   ",&
-     &"seas3                                                   ",&
-     &"seas4                                                   "]
-!@mzp var_aerosols_gocart_merra_2 =[&
-!    &var_aerosols_gocart_default,&
-!    &"p25                                                     "]
-! won't compile
-character(len=maxvarlen), dimension(n_aerosols_gocart_merra_2), public, parameter :: &
-     &var_aerosols_gocart_merra_2 = [&
-     &"sulf                                                    ",&
-     &"bc1                                                     ",&
-     &"bc2                                                     ",&
-     &"oc1                                                     ",&
-     &"oc2                                                     ",&
-     &"dust1                                                   ",&
-     &"dust2                                                   ",&
-     &"dust3                                                   ",&
-     &"dust4                                                   ",&
-     &"dust5                                                   ",&
-     &"seas1                                                   ",&
-     &"seas2                                                   ",&
-     &"seas3                                                   ",&
-     &"seas4                                                   ",&
-     &"seas5                                                   "]
-
-character(len=MAXVARLEN), dimension(n_aerosols_other), public, parameter :: &
-     &var_aerosols_other = [&
-     &"other                                                   "]
 
 character(len=MAXVARLEN), public :: var_seaicefrac      = "sea_ice_category_area_fraction"
 character(len=MAXVARLEN), public :: var_seaicethick     = "sea_ice_category_thickness"
@@ -173,6 +130,23 @@ character(len=MAXVARLEN), public, parameter :: var_no3an1 = "mass_fraction_of_ni
 character(len=MAXVARLEN), public, parameter :: var_no3an2 = "mass_fraction_of_nitrate002_in_air"
 character(len=MAXVARLEN), public, parameter :: var_no3an3 = "mass_fraction_of_nitrate003_in_air"
 
+character(len=MAXVARLEN), dimension(n_aerosols_gocart_default), public, parameter  :: &
+     &var_aerosols_gocart_default = [&
+     &var_sulfate,&
+     &var_bcphobic, var_bcphilic, var_ocphobic, var_ocphilic,&
+     &var_du001, var_du002, var_du003, var_du004, var_du005,&
+     &var_ss001, var_ss002, var_ss003, var_ss004]
+
+character(len=maxvarlen), dimension(n_aerosols_gocart_merra_2), public, parameter :: &
+     &var_aerosols_gocart_merra_2 = [&
+     &var_sulfate,&
+     &var_bcphobic, var_bcphilic, var_ocphobic, var_ocphilic,&
+     &var_du001, var_du002, var_du003, var_du004, var_du005,&
+     &var_ss001, var_ss002, var_ss003, var_ss004, var_ss005]
+
+character(len=MAXVARLEN), dimension(n_aerosols_other), public, parameter :: &
+     &var_aerosols_other = [&
+     &"other                                                   "]
 
 ! ------------------------------------------------------------------------------
 contains
