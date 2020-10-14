@@ -152,6 +152,13 @@ real :: pindex
           iobs = iobs+1
           toppressure(iobs) = airpressure(k2)
           botpressure(iobs) = airpressure(k1)
+          if( kk== 1 ) then
+             toppressure(iobs) =modelpressures%vals(nsig+1, iobs)
+             botpressure(iobs) = airpressure(1)
+          else if( kk == nlev) then
+             toppressure(iobs) = modelpressures%vals(nsig+1, iobs)
+             botpressure(iobs) = modelpressures%vals(1, iobs)
+          endif
         enddo
       enddo
     endif

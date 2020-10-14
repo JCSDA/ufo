@@ -47,7 +47,8 @@ ObsBiasIncrement::ObsBiasIncrement(const ioda::ObsSpace & odb, const eckit::Conf
   }
 
   // initialize bias coefficient perturbations
-  biascoeffsinc_.resize(prednames_.size()*jobs_.size(), 0.0);
+  biascoeffsinc_.resize(prednames_.size()*jobs_.size());
+  std::fill(biascoeffsinc_.begin(), biascoeffsinc_.end(), 0.0);
 
   oops::Log::trace() << "ObsBiasIncrement::create done." << std::endl;
 }
@@ -60,7 +61,8 @@ ObsBiasIncrement::ObsBiasIncrement(const ObsBiasIncrement & other, const bool co
   oops::Log::trace() << "ObsBiasIncrement::copy ctor starting" << std::endl;
 
   // initialize bias coefficient perturbations
-  biascoeffsinc_.resize(prednames_.size()*jobs_.size(), 0.0);
+  biascoeffsinc_.resize(prednames_.size()*jobs_.size());
+  std::fill(biascoeffsinc_.begin(), biascoeffsinc_.end(), 0.0);
 
   // Copy the bias model coeff data
   if (biascoeffsinc_.size() > 0) *this = other;
@@ -92,7 +94,8 @@ ObsBiasIncrement::ObsBiasIncrement(const ObsBiasIncrement & other,
   }
 
   // initialize bias coefficient perturbations
-  biascoeffsinc_.resize(prednames_.size()*jobs_.size(), 0.0);
+  biascoeffsinc_.resize(prednames_.size()*jobs_.size());
+  std::fill(biascoeffsinc_.begin(), biascoeffsinc_.end(), 0.0);
 
   // Copy the data
   if (biascoeffsinc_.size() > 0) *this = other;

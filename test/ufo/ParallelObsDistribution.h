@@ -67,7 +67,7 @@ void testVariable(const std::string &section) {
   util::DateTime end(topConf.getString("window end"));
 
   const eckit::LocalConfiguration obsSpaceConf(topConf, "obs space");
-  ioda::ObsSpace obsSpace(obsSpaceConf, oops::mpi::world(), bgn, end);
+  ioda::ObsSpace obsSpace(obsSpaceConf, oops::mpi::world(), bgn, end, oops::mpi::myself());
 
   TestParameters<T> parameters;
   parameters.deserialize(topConf.getSubConfiguration(section));
@@ -108,7 +108,7 @@ CASE("ufo/ParallelObsDistribution/members") {
   util::DateTime end(topConf.getString("window end"));
 
   const eckit::LocalConfiguration obsSpaceConf(topConf, "obs space");
-  ioda::ObsSpace obsSpace(obsSpaceConf, oops::mpi::world(), bgn, end);
+  ioda::ObsSpace obsSpace(obsSpaceConf, oops::mpi::world(), bgn, end, oops::mpi::myself());
 
   ParallelObsDistribution obsDistribution(obsSpace);
   const size_t gnlocs = obsSpace.gnlocs();

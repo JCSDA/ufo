@@ -23,7 +23,7 @@
 namespace ufo {
 
 // -----------------------------------------------------------------------------
-static LinearObsOperatorMaker<ObsAodCRTMTLAD> makerAodTL_("Aod");
+static LinearObsOperatorMaker<ObsAodCRTMTLAD> makerAodTL_("AodCRTM");
 // -----------------------------------------------------------------------------
 
 ObsAodCRTMTLAD::ObsAodCRTMTLAD(const ioda::ObsSpace & odb,

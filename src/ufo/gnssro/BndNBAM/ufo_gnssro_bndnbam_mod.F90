@@ -58,8 +58,8 @@ subroutine ufo_gnssro_bndnbam_simobs(self, geovals, hofx, obss)
   integer, parameter                      :: ngrd    = 80 !num of new veritcal grids for bending angle computation
   integer                                 :: iobs, k, igrd, irec, icount, kk
   integer                                 :: nlev, nlev1, nlevExt, nlevCheck
-  type(ufo_geoval), pointer               :: t, q, gph, prs
-  real(kind_real), allocatable            :: gesT(:,:), gesZ(:,:), gesP(:,:), gesQ(:,:), gesTv(:,:)
+  type(ufo_geoval), pointer               :: t, q, gph, prs, zs
+  real(kind_real), allocatable            :: gesT(:,:), gesZ(:,:), gesP(:,:), gesQ(:,:), gesTv(:,:), gesZs(:)
   real(kind_real), allocatable            :: obsLat(:), obsImpP(:),obsLocR(:), obsGeoid(:), obsValue(:)
   integer(c_size_t), allocatable          :: obsRecnum(:)
   real(kind_real), allocatable            :: temperature(:)
@@ -107,6 +107,8 @@ subroutine ufo_gnssro_bndnbam_simobs(self, geovals, hofx, obss)
 ! get variables from geovals
   call ufo_geovals_get_var(geovals, var_ts,  t)         ! air temperature
   call ufo_geovals_get_var(geovals, var_q,   q)         ! specific humidity
+  call ufo_geovals_get_var(geovals, var_sfc_geomz, zs)      ! surface geopotential height/surface altitude
+
   if (self%roconf%vertlayer .eq. "mass") then
     call ufo_geovals_get_var(geovals, var_prs,   prs)       ! pressure
     call ufo_geovals_get_var(geovals, var_z,     gph)       ! geopotential height
@@ -129,6 +131,7 @@ subroutine ufo_gnssro_bndnbam_simobs(self, geovals, hofx, obss)
   allocate(gesT(nlev,nlocs)) 
   allocate(gesTv(nlev,nlocs))
   allocate(gesQ(nlev,nlocs)) 
+  allocate(gesZs(nlocs))
 
 ! copy geovals to local background arrays
   iflip = 0
@@ -159,6 +162,7 @@ subroutine ufo_gnssro_bndnbam_simobs(self, geovals, hofx, obss)
        gesZ(k,:) = gph%vals(k,:)
     enddo
   end if
+       gesZs(:) = zs%vals(1,:)
 
 ! if background t and q are on mass layers, 
 !    while p and z are on interface layers, take the mean of t and q
@@ -171,7 +175,6 @@ subroutine ufo_gnssro_bndnbam_simobs(self, geovals, hofx, obss)
 !       to exactly reproduce nbam, t is converted to tv, tv mean is calcualted,
 !       then tv mean is converted to t mean
         gesT(k,:) = gesTv(k,:)/(1+ gesQ(k,:)*(rv_over_rd-1))
-!       gesT(k,:) = half* (gesT(k,:) + gesT(k-1,:))
      enddo
   end if
 
@@ -235,8 +238,8 @@ subroutine ufo_gnssro_bndnbam_simobs(self, geovals, hofx, obss)
       iobs = icount
       do k = 1, nlev
 !        compute guess geometric height from geopotential height
-         call geop2geometric(obsLat(iobs), gesZ(k,iobs), geomz(k))
-         radius(k) = geomz(k) + obsGeoid(iobs) + obsLocR(iobs)   ! radius r
+         call geop2geometric(obsLat(iobs), gesZ(k,iobs)-gesZs(iobs), geomz(k))
+         radius(k) = geomz(k) + gesZs(iobs) + obsGeoid(iobs) + obsLocR(iobs)   ! radius r
 !        guess refactivity, refactivity index,  and impact parameter
          call compute_refractivity(gesT(k,iobs), gesQ(k,iobs), gesP(k,iobs),   &
                                 ref(k), self%roconf%use_compress)
@@ -334,7 +337,8 @@ subroutine ufo_gnssro_bndnbam_simobs(self, geovals, hofx, obss)
   deallocate(gesZ) 
   deallocate(gesT) 
   deallocate(gesTv) 
-  deallocate(gesQ) 
+  deallocate(gesQ)
+  deallocate(gesZs) 
   deallocate(ref)
   deallocate(refIndex)
   deallocate(refXrad)

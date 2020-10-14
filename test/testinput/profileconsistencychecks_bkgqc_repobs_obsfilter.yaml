@@ -26,13 +26,11 @@ observations:
     Checks: ["Basic", "Time", "PermanentReject", "BackgroundTemperature", "BackgroundRelativeHumidity", "BackgroundWindSpeed", "BackgroundGeopotentialHeight"]
     compareWithOPS: false
     flagBasicChecksFail: true
-    nErrorsFail: 8
     PrintStationID: true
     BChecks_Skip: true
     ModelLevels: false
-    Comparison_Tol: 0.1
   HofX: HofX
   obs diagnostics:
-  passedBenchmark: 419
+  passedBenchmark: 449
   benchmarkFlag: 15
   flaggedBenchmark: 5

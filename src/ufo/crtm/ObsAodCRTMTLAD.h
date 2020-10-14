@@ -34,7 +34,6 @@ namespace ufo {
   class ObsDiagnostics;
 
 // -----------------------------------------------------------------------------
-/// AodCRTM (currently only temperature) observation for UFO.
 class ObsAodCRTMTLAD : public LinearObsOperatorBase,
                         private util::ObjectCounter<ObsAodCRTMTLAD> {
  public:

@@ -37,7 +37,7 @@ void testMetOfficeBuddyCheck(const eckit::LocalConfiguration &conf) {
   util::DateTime end(conf.getString("window end"));
 
   const eckit::LocalConfiguration obsSpaceConf(conf, "obs space");
-  ioda::ObsSpace obsSpace(obsSpaceConf, oops::mpi::world(), bgn, end);
+  ioda::ObsSpace obsSpace(obsSpaceConf, oops::mpi::world(), bgn, end, oops::mpi::myself());
 
   const eckit::LocalConfiguration floatVarInitConf(conf, "FloatVariables");
   for (const std::string & varNameGroup : floatVarInitConf.keys()) {

@@ -32,9 +32,7 @@ module ufo_aodcrtm_mod
    procedure :: delete => ufo_aodcrtm_delete
    procedure :: simobs => ufo_aodcrtm_simobs
  end type ufo_aodcrtm
- character(len=maxvarlen), dimension(19), parameter :: varin_default = &
-                                (/var_ts, var_mixr, var_rh, var_prs, var_prsi, &
-                                  var_aerosols_gocart_default/)
+ CHARACTER(len=maxvarlen), DIMENSION(5), PARAMETER :: varin_default = (/var_ts, var_mixr, var_rh, var_prs, var_prsi/) 
 
  CHARACTER(MAXVARLEN), PARAMETER :: varname_tmplate="aerosol_optical_depth"
 
@@ -53,6 +51,8 @@ integer :: nvars_in
 character(len=max_string) :: err_msg
 type(fckit_configuration) :: f_confOpts
 
+CHARACTER(len=MAXVARLEN), ALLOCATABLE :: var_aerosols(:)
+
  call f_confOper%get_or_die("obs options",f_confOpts)
 
  call crtm_conf_setup(self%conf, f_confOpts, f_confOper)
@@ -65,9 +65,12 @@ type(fckit_configuration) :: f_confOpts
    call abor1_ftn(err_msg)
  end if
 
- nvars_in = size(varin_default)
+ CALL assign_aerosol_names(self%conf%aerosol_option,var_aerosols)
+
+ nvars_in = SIZE(varin_default)+SIZE(var_aerosols)
  allocate(self%varin(nvars_in))
  self%varin(1:size(varin_default)) = varin_default
+ self%varin(SIZE(varin_default)+1:) = var_aerosols
 
  ! save channels
  allocate(self%channels(size(channels)))
@@ -129,7 +132,6 @@ TYPE(CRTM_RTSolution_type), ALLOCATABLE :: rts_K(:,:)
  call ufo_geovals_get_var(geovals, var_ts, temp)
  n_Layers = temp%nval
  nullify(temp)
-
 
  ! Program header
  ! --------------

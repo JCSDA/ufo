@@ -10,19 +10,43 @@ observations:
   obs space:
     name: GnssroBnd
     obsdatain:
-      obsfile: Data/ioda/testinput_tier_1/gnssro_obs_2018041500_l.nc4
+      obsfile: Data/ioda/testinput_tier_1/gnssro_obs_2018041500_3prof.nc4
       obsgrouping:
         group variable: "record_number"
         sort variable: "impact_height"
         sort order: "ascending"
     obsdataout:
-      obsfile: Data/gnssro_bndnbam_2018041500_l_output.nc4
+      obsfile: Data/gnssro_bndnbam_compress1_2018041500_3prof_output.nc4
     simulated variables: [bending_angle]
   geovals:
-    filename: Data/gnssro_geoval_2018041500_l.nc4
+    filename: Data/gnssro_geoval_2018041500_3prof.nc4
   vector ref: GsiHofX
   tolerance: 1.0e-7
   linear obs operator test:
     iterations TL:  11
-    tolerance TL: 1.0e-12
+    tolerance TL: 1.0e-11
+    tolerance AD: 1.0e-13
+- obs operator:
+    name: GnssroBndNBAM
+    obs options:
+      use_compress: 0
+      vertlayer: full
+  obs space:
+    name: GnssroBnd
+    obsdatain:
+      obsfile: Data/ioda/testinput_tier_1/gnssro_obs_2018041500_3prof.nc4
+      obsgrouping:
+        group variable: "record_number"
+        sort variable: "impact_height"
+        sort order: "ascending"
+    obsdataout:
+      obsfile: Data/gnssro_bndnbam_compress0_2018041500_3prof_output.nc4
+    simulated variables: [bending_angle]
+  geovals:
+    filename: Data/gnssro_geoval_2018041500_3prof.nc4
+  vector ref: GsiHofX
+  tolerance: 1.0e-6
+  linear obs operator test:
+    iterations TL:  11
+    tolerance TL: 1.0e-11
     tolerance AD: 1.0e-13

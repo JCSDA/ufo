@@ -7,6 +7,7 @@
 
 #include "ufo/rttov/ObsRadianceRTTOV.h"
 
+#include <algorithm>
 #include <ostream>
 #include <set>
 #include <string>
@@ -18,38 +19,30 @@
 #include "oops/util/IntSetParser.h"
 
 #include "ufo/GeoVaLs.h"
+#include "ufo/ObsBias.h"
 #include "ufo/ObsDiagnostics.h"
 
 namespace ufo {
 
 // -----------------------------------------------------------------------------
 static ObsOperatorMaker<ObsRadianceRTTOV> makerRTTOV_("RTTOV");
+
 // -----------------------------------------------------------------------------
 
-ObsRadianceRTTOV::ObsRadianceRTTOV(const ioda::ObsSpace & odb, const eckit::Configuration & config)
-  : ObsOperatorBase(odb, config), keyOperRadianceRTTOV_(0), odb_(odb), varin_()
+ObsRadianceRTTOV::ObsRadianceRTTOV(const ioda::ObsSpace & odb,
+                                 const eckit::Configuration & config)
+  : ObsOperatorBase(odb, config), keyOperRadianceRTTOV_(0),
+    odb_(odb), varin_()
 {
-  const std::vector<std::string> vv{
-    "air_pressure", "air_pressure_at_two_meters_above_surface",
-    "air_temperature", "air_temperature_at_two_meters_above_surface",
-    "eastward_wind", "northward_wind",
-    "skin_temperature",
-    "specific_humidity", "specific_humidity_at_two_meters_above_surface",
-    "surface_air_pressure", "surface_temperature",
-    "surface_type", "water_type"};
-
-  varin_.reset(new oops::Variables(vv));
-
-  // get channels
+  // parse channels from the config and create variable names
   const oops::Variables & observed = odb.obsvariables();
-  channels_ = observed.channels();
+  std::vector<int> channels_list = observed.channels();
 
   // call Fortran setup routine
-//  const eckit::LocalConfiguration obsOptions(config, "obs options");
-//  const eckit::Configuration * configc = &obsOptions;
-  ufo_radiancerttov_setup_f90(keyOperRadianceRTTOV_, config);
-  oops::Log::info() << "ObsRadianceRTTOV channels: " << channels_ << std::endl;
+  ufo_radiancerttov_setup_f90(keyOperRadianceRTTOV_, config,
+                             channels_list.size(), channels_list[0], varin_);
 
+  oops::Log::info() << "ObsRadianceRTTOV channels: " << channels_list << std::endl;
   oops::Log::trace() << "ObsRadianceRTTOV created." << std::endl;
 }
 
@@ -63,14 +56,11 @@ ObsRadianceRTTOV::~ObsRadianceRTTOV() {
 // -----------------------------------------------------------------------------
 
 void ObsRadianceRTTOV::simulateObs(const GeoVaLs & gom, ioda::ObsVector & ovec,
-                                   ObsDiagnostics &) const {
-  oops::Log::trace() << "ObsRadianceRTTOV:: simulateObs started" << std::endl;
-
+                                  ObsDiagnostics & dvec) const {
   ufo_radiancerttov_simobs_f90(keyOperRadianceRTTOV_, gom.toFortran(), odb_,
-                          ovec.size(), ovec.toFortran(),
-                          channels_.size(), channels_[0]);
-
-  oops::Log::trace() << "ObsRadianceRTTOV:: simulateObs completed" << std::endl;
+                          ovec.nvars(), ovec.nlocs(), ovec.toFortran(),
+                          dvec.toFortran());
+  oops::Log::trace() << "ObsRadianceRTTOV simulateObs done." << std::endl;
 }
 
 // -----------------------------------------------------------------------------

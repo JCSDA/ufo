@@ -59,7 +59,8 @@ ObsBias::ObsBias(ioda::ObsSpace & odb, const eckit::Configuration & conf)
 
   if (prednames_.size() * jobs_.size() > 0) {
     // Initialize the biascoeffs to ZERO
-    biascoeffs_.resize(prednames_.size() * jobs_.size(), 0.0);
+    biascoeffs_.resize(prednames_.size() * jobs_.size());
+    std::fill(biascoeffs_.begin(), biascoeffs_.end(), 0.0);
 
     // Read or initialize bias coefficients
     this->read(conf);
@@ -77,7 +78,8 @@ ObsBias::ObsBias(const ObsBias & other, const bool copy)
   oops::Log::trace() << "ObsBias::copy ctor starting." << std::endl;
 
   // Initialize the biascoeffs
-  biascoeffs_.resize(prednames_.size() * jobs_.size(), 0.0);
+  biascoeffs_.resize(prednames_.size() * jobs_.size());
+  std::fill(biascoeffs_.begin(), biascoeffs_.end(), 0.0);
 
   // Copy the bias coeff data
   if (copy && biascoeffs_.size() > 0) *this = other;
@@ -289,14 +291,13 @@ void ObsBias::computeObsBias(ioda::ObsVector & ybias,
 // -----------------------------------------------------------------------------
 std::vector<ioda::ObsVector> ObsBias::computePredictors(const GeoVaLs & geovals,
                                                         const ObsDiagnostics & ydiags) const {
-  const std::size_t nlocs  = odb_.nlocs();
   const std::size_t npreds = predbases_.size();
-  const std::size_t njobs  = jobs_.size();
 
   std::vector<ioda::ObsVector> predData(npreds, ioda::ObsVector(odb_));
 
   for (std::size_t p = 0; p < npreds; ++p) {
     predbases_[p]->compute(odb_, geovals, ydiags, predData[p]);
+    predData[p].save(predbases_[p]->name() + "Predictor");
   }
 
   oops::Log::trace() << "ObsBias::computePredictors done." << std::endl;

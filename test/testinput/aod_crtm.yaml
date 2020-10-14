@@ -3,7 +3,7 @@ window end: 2018-04-15T03:00:00Z
 
 observations:
 - obs operator:
-    name: Aod
+    name: AodCRTM
     Absorbers: [H2O,O3]
     obs options:
       Sensor_ID: v.viirs-m_npp
