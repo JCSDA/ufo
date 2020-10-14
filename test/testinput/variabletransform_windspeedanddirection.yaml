@@ -5,7 +5,7 @@ observations:
 - obs space:
     name: Satwind
     obsdatain:
-      obsfile: Data/wind_unit_transforms_2018041500.nc4
+      obsfile: Data/ioda/testinput_tier_1/wind_unit_transforms_2018041500.nc4
     obsdataout:
        obsfile: Data/windspeedanddirection_2018041500_output.nc4
     simulated variables: [eastward_wind, northward_wind]

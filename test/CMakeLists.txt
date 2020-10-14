@@ -303,7 +303,6 @@ list( APPEND ufo_test_data
   atmosphere/ssmis_f18_geoval_2018041500_m.nc4
   atmosphere/tropomi_no2_geoval_2020090318_m.nc4
   atmosphere/windprof_geoval_2018041500_m.nc4
-  atmosphere/wind_unit_transforms_2018041500.nc4
   marine/coolskin_fake_geovals_2018041500.nc
   marine/cryosat2-2018-04-15_geovals.nc
   marine/icec-2018-04-15_geovals.nc
