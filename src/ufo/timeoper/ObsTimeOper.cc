@@ -61,60 +61,14 @@ ObsTimeOper::~ObsTimeOper() {
 
 // -----------------------------------------------------------------------------
 
-std::unique_ptr<Locations> ObsTimeOper::locations(const util::DateTime & t1,
-                                                  const util::DateTime & t2) const {
+std::unique_ptr<Locations> ObsTimeOper::locations() const {
   oops::Log::trace() << "entered ObsOperatorTime::locations" << std::endl;
 
-  util::DateTime t0, t3, stateTime;
-  util::Duration initial_dt, windowSub;
-
-  util::DateTime windowBegin(odb_.windowStart());
-  util::DateTime windowEnd(odb_.windowEnd());
-
-  initial_dt = t2 - t1;
-
   std::unique_ptr<Locations> locs;
-  std::unique_ptr<Locations> locs2;
-  if ((t1 == windowBegin) && (t2 == windowEnd)) {
-    oops::Log::debug() << "locs: full window to concatenate"  << std::endl;
-    locs = std::unique_ptr<Locations>(new Locations(odb_, t1, t2));
-    *locs += *locs;
-  } else {
-// define t0, t3, stateTime
-    if ((t1 == windowBegin) || (t2 == windowEnd))
-      windowSub = initial_dt * 2;
-    else
-      windowSub = initial_dt;
 
-    t0 = t1 - (windowSub/2);
-    t3 = t2 + (windowSub/2);
-    stateTime = t1 + initial_dt/2;
+  locs = std::unique_ptr<Locations>(new Locations(odb_));
+  *locs += *locs;
 
-    if (t1 == windowBegin) {
-      t0 = windowBegin;
-      stateTime = windowBegin;
-    }
-    if (t2 == windowEnd) {
-      t3 = windowEnd;
-      stateTime = windowEnd;
-    }
-
-    if ((t1 == windowBegin) && (t2 != windowEnd)) {
-      oops::Log::debug() << "locs: locsObsAfterState only"  << std::endl;
-      locs = std::unique_ptr<Locations>(new Locations(odb_, stateTime, t3));
-    } else if ((t1 != windowBegin) && (t2 == windowEnd)) {
-      oops::Log::debug() << " locs: locsObsBeforeState only "  << std::endl;
-      locs = std::unique_ptr<Locations>(new Locations(odb_, stateTime, stateTime));
-      // the above locs is mainly empty except for self%max_indx = obsspace_get_gnlocs(obss)
-      locs2 = std::unique_ptr<Locations>(new Locations(odb_, t0, stateTime));
-      *locs += *locs2;
-    } else {
-      oops::Log::debug() << "locs: internal window concatenate"  << std::endl;
-      locs = std::unique_ptr<Locations>(new Locations(odb_, stateTime, t3));
-      locs2 = std::unique_ptr<Locations>(new Locations(odb_, t0, stateTime));
-      *locs += *locs2;
-    }
-  }
   // create concatenation of Locations class
   return locs;
 }

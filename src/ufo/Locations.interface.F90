@@ -168,24 +168,17 @@ call ufo_locs_concatenate(self, other)
 end subroutine ufo_locs_concatenate_c
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_locs_init_c(c_key_self, c_obsspace, c_t1, c_t2) bind(c,name='ufo_locs_init_f90')
-use datetime_mod
+subroutine ufo_locs_init_c(c_key_self, c_obsspace) bind(c,name='ufo_locs_init_f90')
 implicit none
 integer(c_int), intent(inout)  :: c_key_self
 type(c_ptr), value, intent(in) :: c_obsspace
-type(c_ptr), value, intent(in) :: c_t1, c_t2
 
 type(ufo_locs), pointer :: self
 
-type(datetime) :: t1, t2
-
 call ufo_locs_registry%setup(c_key_self, self)
 
-call c_f_datetime(c_t1, t1)
-call c_f_datetime(c_t2, t2)
-
 call ufo_locs_registry%get(c_key_self, self)
-call ufo_locs_init(self, c_obsspace, t1, t2)
+call ufo_locs_init(self, c_obsspace)
 
 end subroutine ufo_locs_init_c
 
