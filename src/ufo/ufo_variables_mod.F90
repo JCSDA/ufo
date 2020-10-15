@@ -125,7 +125,7 @@ character(len=MAXVARLEN), public, parameter :: var_bcphobic = "mass_fraction_of_
 character(len=MAXVARLEN), public, parameter :: var_bcphilic = "mass_fraction_of_hydrophilic_black_carbon_in_air"
 character(len=MAXVARLEN), public, parameter :: var_ocphobic = "mass_fraction_of_hydrophobic_organic_carbon_in_air"
 character(len=MAXVARLEN), public, parameter :: var_ocphilic = "mass_fraction_of_hydrophilic_organic_carbon_in_air"
-character(len=MAXVARLEN), public, parameter :: var_sulfate = "mass_fraction_of_sulfate_aerosols_in_air"
+character(len=MAXVARLEN), public, parameter :: var_sulfate = "mass_fraction_of_sulfate_in_air"
 character(len=MAXVARLEN), public, parameter :: var_no3an1 = "mass_fraction_of_nitrate001_in_air"
 character(len=MAXVARLEN), public, parameter :: var_no3an2 = "mass_fraction_of_nitrate002_in_air"
 character(len=MAXVARLEN), public, parameter :: var_no3an3 = "mass_fraction_of_nitrate003_in_air"
