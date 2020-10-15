@@ -31,9 +31,8 @@ Locations::Locations(const eckit::mpi::Comm & comm) : comm_(comm) {
 
 // -------------------------------------------------------------------------------------------------
 
-Locations::Locations(const ioda::ObsSpace & odb,
-                     const util::DateTime & t1, const util::DateTime & t2) : comm_(odb.comm()) {
-  ufo_locs_init_f90(keyLoc_, odb, t1, t2);
+Locations::Locations(const ioda::ObsSpace & odb) : comm_(odb.comm()) {
+  ufo_locs_init_f90(keyLoc_, odb);
 }
 
 // -------------------------------------------------------------------------------------------------
