@@ -21,7 +21,7 @@ MODULE ufo_aodluts_tlad_mod
   USE crtm_spccoeff, ONLY: sc
   USE obsspace_mod
 
-  USE fv3_mieobs_mod, ONLY: get_fv3_aod
+  USE cf_mieobs_mod, ONLY: get_cf_aod
   USE geos_mieobs_mod, ONLY: get_geos_aod_tl, get_geos_aod_ad
 
   IMPLICIT NONE
@@ -175,13 +175,13 @@ CONTAINS
 
        ALLOCATE(self%bext(self%n_layers, nvars, self%n_aerosols, self%n_profiles))
 
-       CALL get_fv3_aod(self%n_layers, self%n_profiles, nvars, &
+       CALL get_cf_aod(self%n_layers, self%n_profiles, nvars, &
             &self%n_aerosols, self%conf%rcfile,  &
             &self%wavelengths, var_aerosols, aero_layers, rh, &
             &ext=self%bext, rc = rc)
 
        IF (rc /= 0) THEN
-          message = 'error on exit from get_fv3_aod'
+          message = 'error on exit from get_cf_aod'
           CALL display_message( program_name, message, failure )
           STOP
        END IF
