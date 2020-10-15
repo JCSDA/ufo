@@ -61,9 +61,9 @@ void BackgroundCheckRONBAM::applyFilter(const std::vector<bool> & apply,
 
   ioda::ObsDataVector<float> obs(obsdb_, filtervars.toOopsVariables(), "ObsValue");
   ioda::ObsDataVector<float> bias(obsdb_, filtervars.toOopsVariables(), "ObsBias", false);
-  ioda::ObsDataVector<float> impactheight(obsdb_, "impact_height", "MetaData");
+  ioda::ObsDataVector<float> impactparameter(obsdb_, "impact_parameter", "MetaData");
   ioda::ObsDataVector<float> latitude(obsdb_, "latitude", "MetaData");
-  ioda::ObsDataVector<float> geoidheight(obsdb_, "geoid_height_above_reference_ellipsoid",
+  ioda::ObsDataVector<float> earthradius(obsdb_, "earth_radius_of_curvature",
                                          "MetaData");
   ioda::ObsDataVector<float> temperature(obsdb_, "temperature",
                                          "MetaData");  // background temperature at obs location
@@ -82,9 +82,9 @@ void BackgroundCheckRONBAM::applyFilter(const std::vector<bool> & apply,
         size_t iobs = observed.size() * jobs + iv;
         ASSERT(obs[jv][jobs] != util::missingValue(obs[jv][jobs]));
         ASSERT(hofx[jobs] != util::missingValue(hofx[jobs]));
-        ASSERT(impactheight[0][iobs] != util::missingValue(impactheight[0][iobs]));
+        ASSERT(impactparameter[0][iobs] != util::missingValue(impactparameter[0][iobs]));
 
-        float imp = impactheight[0][jobs]/1000.0 + geoidheight[0][jobs]/1000.0;
+        float imp = impactparameter[0][jobs]/1000.0 - earthradius[0][jobs]/1000.0;
         float lat = latitude[0][jobs]*0.01745329251;  // deg2rad
         float tmp = temperature[0][jobs];
 
