@@ -11,4 +11,5 @@ observations:
   - filter: Thinning
     amount: 0.75
     random seed: 0
-  passedBenchmark: 268
+    member: 1
+  passedBenchmark: 282
