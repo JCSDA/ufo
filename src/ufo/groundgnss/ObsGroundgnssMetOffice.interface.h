@@ -5,12 +5,11 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#ifndef UFO_GNSSRO_BNDROPP2D_OBSGNSSROBNDROPP2D_INTERFACE_H_
-#define UFO_GNSSRO_BNDROPP2D_OBSGNSSROBNDROPP2D_INTERFACE_H_
+#ifndef UFO_GROUNDGNSS_OBSGROUNDGNSSMETOFFICE_INTERFACE_H_
+#define UFO_GROUNDGNSS_OBSGROUNDGNSSMETOFFICE_INTERFACE_H_
 
 #include "ioda/ObsSpace.h"
 #include "ufo/Fortran.h"
-#include "ufo/Locations.h"
 
 namespace ufo {
 
@@ -22,17 +21,15 @@ namespace ufo {
 
 extern "C" {
 // -----------------------------------------------------------------------------
-// Gnssro bending angle observation operators - (ROPP2D)
+// Ground Based GNSS Observation Operator - (Met Office)
 // -----------------------------------------------------------------------------
-  void ufo_gnssro_2d_locs_init_f90(const F90hop &, F90locs &, const ioda::ObsSpace &,
-                                   const util::DateTime &, const util::DateTime &);
-  void ufo_gnssro_bndropp2d_setup_f90(F90hop &, const eckit::Configuration &, const int &);
-  void ufo_gnssro_bndropp2d_delete_f90(F90hop &);
-  void ufo_gnssro_bndropp2d_simobs_f90(const F90hop &, const F90goms &, const ioda::ObsSpace &,
+  void ufo_groundgnss_metoffice_setup_f90(F90hop &, const eckit::Configuration * const *);
+  void ufo_groundgnss_metoffice_delete_f90(F90hop &);
+  void ufo_groundgnss_metoffice_simobs_f90(const F90hop &, const F90goms &, const ioda::ObsSpace &,
                                        const int &, double &);
 // -----------------------------------------------------------------------------
 
 }  // extern C
 
 }  // namespace ufo
-#endif  // UFO_GNSSRO_BNDROPP2D_OBSGNSSROBNDROPP2D_INTERFACE_H_
+#endif  // UFO_GROUNDGNSS_OBSGROUNDGNSSMETOFFICE_INTERFACE_H_
