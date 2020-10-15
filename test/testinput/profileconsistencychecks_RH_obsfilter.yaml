@@ -16,7 +16,7 @@ observations:
         sort order: "descending"
     simulated variables: [air_temperature, relative_humidity]
   obs filters:
-  - filter: ProfileConsistencyChecks
+  - filter: Profile Consistency Checks
     filter variables:
     - name: air_temperature
     - name: relative_humidity

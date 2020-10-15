@@ -413,7 +413,12 @@ execute_process( COMMAND ${CMAKE_COMMAND} -E create_symlink
                  ${CMAKE_CURRENT_BINARY_DIR}/Data/ioda)
 
 #####################################################################
+# Install headers used in tests of interfaces that may be implemented by clients.
 
+install( FILES ufo/ObsDiagnostics.h ufo/ObsFilters.h ufo/ObsFunction.h
+         DESTINATION ${INSTALL_INCLUDE_DIR}/ufo/test/ufo)
+
+#####################################################################
 ecbuild_add_executable( TARGET  test_ObsOperator.x
                         SOURCES mains/TestObsOperator.cc
                         LIBS    ufo
