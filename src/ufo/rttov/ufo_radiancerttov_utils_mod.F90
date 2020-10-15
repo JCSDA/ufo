@@ -1552,6 +1552,8 @@ contains
     integer                      :: nlayers, nchanprof, nlevels, nprofiles
     real(kind_real), allocatable :: od_level(:), wfunc(:)
 
+    include 'rttov_calc_weighting_fn.interface'
+
     allocate(od_level(size(RTProf % transmission%tau_levels(:,1))))
     allocate(wfunc(size(RTProf % transmission%tau_levels(:,1))))
 

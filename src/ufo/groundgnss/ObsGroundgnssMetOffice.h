@@ -5,8 +5,8 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
  */
 
-#ifndef UFO_GNSSRO_BNDROPP2D_OBSGNSSROBNDROPP2D_H_
-#define UFO_GNSSRO_BNDROPP2D_OBSGNSSROBNDROPP2D_H_
+#ifndef UFO_GROUNDGNSS_OBSGROUNDGNSSMETOFFICE_H_
+#define UFO_GROUNDGNSS_OBSGROUNDGNSSMETOFFICE_H_
 
 #include <memory>
 #include <ostream>
@@ -14,7 +14,7 @@
 
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
-#include "ufo/gnssro/BndROPP2D/ObsGnssroBndROPP2D.interface.h"
+#include "ufo/groundgnss/ObsGroundgnssMetOffice.interface.h"
 #include "ufo/ObsOperatorBase.h"
 
 namespace eckit {
@@ -28,19 +28,18 @@ namespace ioda {
 
 namespace ufo {
   class GeoVaLs;
-  class Locations;
   class ObsDiagnostics;
 
 // -----------------------------------------------------------------------------
 
-/// GnssroBndROPP2D observation operator
-class ObsGnssroBndROPP2D : public ObsOperatorBase,
-                        private util::ObjectCounter<ObsGnssroBndROPP2D> {
+/// GroundgnssMetOffice observation operator
+class ObsGroundgnssMetOffice : public ObsOperatorBase,
+                        private util::ObjectCounter<ObsGroundgnssMetOffice> {
  public:
-  static const std::string classname() {return "ufo::ObsGnssroBndROPP2D";}
+  static const std::string classname() {return "ufo::ObsGroundgnssMetOffice";}
 
-  ObsGnssroBndROPP2D(const ioda::ObsSpace &, const eckit::Configuration &);
-  virtual ~ObsGnssroBndROPP2D();
+  ObsGroundgnssMetOffice(const ioda::ObsSpace &, const eckit::Configuration &);
+  virtual ~ObsGroundgnssMetOffice();
 
 // Obs Operator
   void simulateObs(const GeoVaLs &, ioda::ObsVector &, ObsDiagnostics &) const override;
@@ -48,14 +47,12 @@ class ObsGnssroBndROPP2D : public ObsOperatorBase,
 // Other
   const oops::Variables & requiredVars() const override {return *varin_;}
 
-  std::unique_ptr<Locations> locations() const override;
-
-  int & toFortran() {return keyOperGnssroBndROPP2D_;}
-  const int & toFortran() const {return keyOperGnssroBndROPP2D_;}
+  int & toFortran() {return keyOperGroundgnssMetOffice_;}
+  const int & toFortran() const {return keyOperGroundgnssMetOffice_;}
 
  private:
   void print(std::ostream &) const override;
-  F90hop keyOperGnssroBndROPP2D_;
+  F90hop keyOperGroundgnssMetOffice_;
   const ioda::ObsSpace& odb_;
   std::unique_ptr<const oops::Variables> varin_;
 };
@@ -64,4 +61,4 @@ class ObsGnssroBndROPP2D : public ObsOperatorBase,
 
 }  // namespace ufo
 
-#endif  // UFO_GNSSRO_BNDROPP2D_OBSGNSSROBNDROPP2D_H_
+#endif  // UFO_GROUNDGNSS_OBSGROUNDGNSSMETOFFICE_H_

@@ -18,7 +18,6 @@
 #include "ioda/ObsSpace.h"
 #include "oops/base/Variables.h"
 #include "oops/util/abor1_cpp.h"
-#include "oops/util/DateTime.h"
 #include "oops/util/Printable.h"
 
 namespace ioda {
@@ -47,8 +46,7 @@ class ObsOperatorBase : public util::Printable,
   virtual const oops::Variables & requiredVars() const = 0;
 
 /// Locations for GeoVaLs
-  virtual std::unique_ptr<Locations> locations(const util::DateTime &,
-                                               const util::DateTime &) const;
+  virtual std::unique_ptr<Locations> locations() const;
 
  private:
   virtual void print(std::ostream &) const = 0;
