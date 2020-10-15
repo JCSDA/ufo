@@ -177,16 +177,11 @@ CONTAINS
             &n_aerosols, n_profiles, n_layers,&
             &geovals, aero_layers=aero_layers, rh=rh)
  
-       WRITE(120,*)n_aerosols,n_profiles,MINVAL(aero_layers),MAXVAL(aero_layers),MINVAL(rh),MAXVAL(rh)
-
-
        CALL get_cf_aod(n_layers, n_profiles, nvars, n_aerosols, &
             &self%conf%rcfile,  &
             &self%wavelengths, var_aerosols, aero_layers, rh,       &
             &aod_tot = hofx, rc = rc)  
        
-
-       WRITE(120,'(100f10.7)')hofx
 
        DEALLOCATE(aero_layers,rh,wavelengths_all)
        
