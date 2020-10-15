@@ -27,6 +27,27 @@ set ( crtm_files
   ufo_aodcrtm_tlad_mod.F90
 )
 
+if( ${GEOS-AERO_FOUND} )
+  set ( lut_files
+    ObsAodLUTs.h
+    ObsAodLUTs.cc
+    ObsAodLUTsTLAD.h
+    ObsAodLUTsTLAD.cc
+    ObsAodLUTs.interface.F90
+    ObsAodLUTs.interface.h
+    ObsAodLUTsTLAD.interface.F90
+    ObsAodLUTsTLAD.interface.h
+    ufo_aodluts_mod.F90
+    ufo_aodluts_tlad_mod.F90
+    ufo_luts_utils_mod.F90
+  )
+  set ( crtm_files 
+    ${crtm_files} 
+    ${lut_files}
+  )
+endif( ${GEOS-AERO_FOUND} )
+
+
 PREPEND( _p_crtm_files       "crtm"       ${crtm_files} )
 
 set ( crtm_src_files

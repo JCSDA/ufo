@@ -12,7 +12,7 @@ private
 public :: ufo_vars_read, ufo_vars_getindex
 
 integer, parameter, public :: n_aerosols_gocart_default=14,&
-     &n_aerosols_gocart_esrl=15,n_aerosols_other=1
+     &n_aerosols_gocart_merra_2=15,n_aerosols_other=1
 
 integer, parameter, public :: MAXVARLEN=60
 character(len=MAXVARLEN), public, parameter :: var_tv   = "virtual_temperature"
@@ -108,12 +108,12 @@ character(len=MAXVARLEN), dimension(n_aerosols_gocart_default), public, paramete
      &"seas2                                                   ",&
      &"seas3                                                   ",&
      &"seas4                                                   "]
-!@mzp var_aerosols_gocart_esrl =[&
+!@mzp var_aerosols_gocart_merra_2 =[&
 !    &var_aerosols_gocart_default,&
 !    &"p25                                                     "]
 ! won't compile
-character(len=MAXVARLEN), dimension(n_aerosols_gocart_esrl), public, parameter :: &
-     &var_aerosols_gocart_esrl = [&
+character(len=maxvarlen), dimension(n_aerosols_gocart_merra_2), public, parameter :: &
+     &var_aerosols_gocart_merra_2 = [&
      &"sulf                                                    ",&
      &"bc1                                                     ",&
      &"bc2                                                     ",&
@@ -128,7 +128,7 @@ character(len=MAXVARLEN), dimension(n_aerosols_gocart_esrl), public, parameter :
      &"seas2                                                   ",&
      &"seas3                                                   ",&
      &"seas4                                                   ",&
-     &"p25                                                     "]
+     &"seas5                                                   "]
 
 character(len=MAXVARLEN), dimension(n_aerosols_other), public, parameter :: &
      &var_aerosols_other = [&

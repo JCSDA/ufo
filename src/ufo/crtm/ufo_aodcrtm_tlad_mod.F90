@@ -42,8 +42,6 @@ module ufo_aodcrtm_tlad_mod
   procedure :: simobs_ad  => ufo_aodcrtm_simobs_ad
  end type ufo_aodcrtm_tlad
 
- character(len=maxvarlen), dimension(14), parameter :: varin_default = (/var_aerosols_gocart_default/)
-
 contains
 
 ! ------------------------------------------------------------------------------
@@ -58,13 +56,17 @@ integer(c_int),               intent(in)    :: channels(:)  !List of channels to
 type(fckit_configuration) :: f_confOpts
 integer :: nvars_in
 
+CHARACTER(len=MAXVARLEN), ALLOCATABLE :: var_aerosols(:)
+
  call f_confOper%get_or_die("obs options",f_confOpts)
 
  call crtm_conf_setup(self%conf, f_confOpts, f_confOper)
 
- nvars_in = size(varin_default)
+ CALL assign_aerosol_names(self%conf%aerosol_option,var_aerosols)
+
+ nvars_in = size(var_aerosols)
  allocate(self%varin(nvars_in))
- self%varin(1:size(varin_default)) = varin_default
+ self%varin(1:nvars_in) = var_aerosols
 
  ! save channels
  allocate(self%channels(size(channels)))
@@ -295,7 +297,8 @@ character(max_string) :: err_msg
 integer :: jprofile, jchannel, jlevel, jaero
 type(ufo_geoval), pointer :: var_p
 
-CHARACTER(MAXVARLEN), DIMENSION(self%conf%n_aerosols) :: var_aerosols
+CHARACTER(len=MAXVARLEN), ALLOCATABLE :: var_aerosols(:)
+
 
  ! Initial checks
  ! --------------
@@ -313,6 +316,12 @@ CHARACTER(MAXVARLEN), DIMENSION(self%conf%n_aerosols) :: var_aerosols
  endif
 
  CALL assign_aerosol_names(self%conf%aerosol_option,var_aerosols)
+
+ IF (SIZE(var_aerosols) /= self%conf%n_aerosols) THEN
+    WRITE(err_msg,*) myname_, ' error: n_aerosols inconsistent!'
+    call abor1_ftn(err_msg)
+ ENDIF
+
 
  call ufo_geovals_get_var(geovals, var_aerosols(1), var_p)
 
@@ -361,7 +370,8 @@ integer :: jprofile, jchannel, jlevel
 type(ufo_geoval), pointer :: var_p
 real(c_double) :: missing
 
-CHARACTER(MAXVARLEN), DIMENSION(self%conf%n_aerosols) :: var_aerosols
+CHARACTER(len=MAXVARLEN), ALLOCATABLE :: var_aerosols(:)
+
 INTEGER :: jaero
 
  ! Initial checks

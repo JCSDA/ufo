@@ -39,6 +39,7 @@ list( APPEND ufo_test_input
   testinput/amsua_allsky_gsi_qc.yaml
   testinput/amsua_seaice_qc.yaml
   testinput/aod_crtm.yaml
+  testinput/aod_luts.yaml
   testinput/atms_crtm.yaml
   testinput/atms_crtm_bc.yaml
   testinput/atms_qc_filters.yaml
@@ -412,7 +413,12 @@ execute_process( COMMAND ${CMAKE_COMMAND} -E create_symlink
                  ${CMAKE_CURRENT_BINARY_DIR}/Data/ioda)
 
 #####################################################################
+# Install headers used in tests of interfaces that may be implemented by clients.
 
+install( FILES ufo/ObsDiagnostics.h ufo/ObsFilters.h ufo/ObsFunction.h
+         DESTINATION ${INSTALL_INCLUDE_DIR}/ufo/test/ufo)
+
+#####################################################################
 ecbuild_add_executable( TARGET  test_ObsOperator.x
                         SOURCES mains/TestObsOperator.cc
                         LIBS    ufo
@@ -666,20 +672,42 @@ if( crtm_FOUND )
                       DEPENDS test_ObsOperatorTLAD.x
                       TEST_DEPENDS ufo_get_ioda_test_data )
 
-    ecbuild_add_test( TARGET  test_ufo_opr_aod
+    ecbuild_add_test( TARGET  test_ufo_opr_aod_crtm
                       COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
                       ARGS    "testinput/aod_crtm.yaml"
                       ENVIRONMENT OOPS_TRAPFPE=1
                       DEPENDS test_ObsOperator.x
                       TEST_DEPENDS ufo_get_ioda_test_data )
 
-    ecbuild_add_test( TARGET  test_ufo_linopr_aod
+    ecbuild_add_test( TARGET  test_ufo_linopr_aod_crtm
                       COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
                       ARGS    "testinput/aod_crtm.yaml"
                       ENVIRONMENT OOPS_TRAPFPE=1
                       DEPENDS test_ObsOperatorTLAD.x 
                       TEST_DEPENDS ufo_get_ioda_test_data )
+
+    if( ${GEOS-AERO_FOUND} )
+
+      ecbuild_add_test( TARGET  test_ufo_opr_aod_luts
+                      COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
+                      ARGS    "testinput/aod_luts.yaml"
+                      ENVIRONMENT OOPS_TRAPFPE=1
+                      DEPENDS test_ObsOperator.x
+                      TEST_DEPENDS ufo_get_ioda_test_data )
+
+      ecbuild_add_test( TARGET  test_ufo_linopr_aod_luts
+                      COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
+                      ARGS    "testinput/aod_luts.yaml"
+                      ENVIRONMENT OOPS_TRAPFPE=1
+                      DEPENDS test_ObsOperatorTLAD.x 
+                      TEST_DEPENDS ufo_get_ioda_test_data )
+
+   endif( ${GEOS-AERO_FOUND} )
+
+
 endif( crtm_FOUND )
+
+
 
 if( ${RTTOV_FOUND} )
   ecbuild_add_test( TARGET  test_ufo_opr_rttov_atms
