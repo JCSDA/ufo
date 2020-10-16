@@ -135,6 +135,7 @@ list( APPEND ufo_test_input
   testinput/parameters.yaml
   testinput/qc_trackcheck.yaml
   testinput/qc_trackcheck_unittests.yaml
+  testinput/qc_trackcheckship.yaml
   testinput/qc_trackcheckship_unittests.yaml
   testinput/qc_trackcheckship_mainloop_unittests.yaml
   testinput/qc_backgroundcheck.yaml
@@ -1249,6 +1250,12 @@ ecbuild_add_test( TARGET  test_ufo_qc_trackcheck
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsFilters.x
                   TEST_DEPENDS ufo_get_ioda_test_data )
+
+ecbuild_add_test( TARGET  test_ufo_qc_trackcheckship
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                  ARGS    "testinput/qc_trackcheckship.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsFilters.x )
 
 ecbuild_add_test( TARGET  test_ufo_profileconsistencychecks_monolithicfilter
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x

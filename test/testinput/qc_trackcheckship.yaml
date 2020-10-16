@@ -1,0 +1,63 @@
+# These tests compare the output of the Track Check filter against reference
+# results obtained with the Met Office OPS code (Ops_AirTrackCheck). The first test case is used as
+# a baseline; in subsequent test cases the filter's configuration contains one parameter
+# whose value differs from the first case. The last case is identical to the first one except that
+# observations are grouped explicitly by the station_id variable rather than the record number.
+
+window begin: 2000-01-01T00:00:00Z
+window end: 2029-12-12T23:59:59Z
+
+observations:
+- obs space:
+    name: Ship
+    obsdatain:
+      obsfile: Data/ioda/testinput_tier_1/medium_ship_data.nc4
+      obsgrouping:
+        group variable: "station_id"
+    simulated variables: [air_temperature] #was air_temperature
+  obs filters:
+  - filter: Ship Track Check
+    testing mode: false
+    early break check: false
+    variables: [air_temperature] #was air_temperature
+    temporal resolution: PT00H00M1S
+    spatial resolution: 0.0000001 #km
+    max speed: .00001 #km/s
+  flaggedObservationsBenchmark:
+      - 0
+      - 1
+      - 2
+      - 3
+      - 4
+      - 87
+      - 88
+      - 89
+      - 90
+      - 91
+      - 92
+      - 165
+      - 166
+      - 167
+      - 168
+      - 169
+      - 170
+      - 171
+      - 172
+      - 173
+      - 174
+      - 175
+      - 176
+      - 237
+      - 238
+      - 239
+      - 240
+      - 241
+      - 242
+      - 243
+      - 244
+      - 245
+      - 246
+      - 247
+      - 248
+  flaggedBenchmark: 35
+  benchmarkFlag: 12 # track

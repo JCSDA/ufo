@@ -47,6 +47,10 @@ class TrackCheckShipParameters : public TrackCheckUtilsParameters {
     "max speed", 1.0, this
   };
 
+  oops::Parameter<float> rejectionThreshold {
+    "rejection threshold", 0.5f, this
+  };
+
   /// The start of an observation window where trace output should be produced. If blank,
   /// the start of the track will be treated as the start of this window.
   oops::OptionalParameter<float> debugWindowStart {
