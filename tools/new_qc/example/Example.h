@@ -8,10 +8,9 @@
 #ifndef TOOLS_NEW_QC_EXAMPLE_EXAMPLE_H_
 #define TOOLS_NEW_QC_EXAMPLE_EXAMPLE_H_
 
+#include <memory>
 #include <ostream>
 #include <string>
-
-#include "boost/shared_ptr.hpp"
 
 #include "ioda/ObsDataVector.h"
 #include "oops/base/Variables.h"
@@ -30,6 +29,7 @@ namespace ioda {
 
 namespace ufo {
   class GeoVaLs;
+  class ObsDiagnostics;
 
 /// Example filter
 
@@ -39,15 +39,16 @@ class Example : public util::Printable,
   static const std::string classname() {return "ufo::Example";}
 
   Example(ioda::ObsSpace &, const eckit::Configuration &,
-            boost::shared_ptr<ioda::ObsDataVector<int> >,
-            boost::shared_ptr<ioda::ObsDataVector<float> >);
+          std::shared_ptr<ioda::ObsDataVector<int> >,
+          std::shared_ptr<ioda::ObsDataVector<float> >);
   ~Example();
 
   void preProcess() const {}
   void priorFilter(const GeoVaLs &) const;
-  void postFilter(const ioda::ObsVector &) const;
+  void postFilter(const ioda::ObsVector &, const ObsDiagnostics &) const;
 
-  const oops::Variables & requiredGeoVaLs() const {return geovars_;}
+  const oops::Variables & requiredVars() const {return geovars_;}
+  const oops::Variables & requiredHdiagnostics() const {return diagnostics_;}
 
  private:
   void print(std::ostream &) const;
@@ -55,6 +56,7 @@ class Example : public util::Printable,
 
   ioda::ObsSpace & obsdb_;
   oops::Variables geovars_;
+  oops::Variables diagnostics_;
   ioda::ObsDataVector<int> & flags_;
 };
 

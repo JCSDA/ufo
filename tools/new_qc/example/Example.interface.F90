@@ -10,6 +10,7 @@ use iso_c_binding
 use ufo_example_mod
 use ufo_geovals_mod
 use ufo_geovals_mod_c,   only: ufo_geovals_registry
+use fckit_configuration_module, only: fckit_configuration
 implicit none
 private
 
@@ -30,20 +31,26 @@ contains
 
 subroutine ufo_example_create_c(c_self, c_conf, c_varlist) bind(c,name='ufo_example_create_f90')
 use string_f_c_mod
+use oops_variables_mod
 implicit none
 integer(c_int), intent(inout)  :: c_self
 type(c_ptr), value, intent(in) :: c_conf
 type(c_ptr), intent(in), value :: c_varlist ! list of geovals variables to be requested
 
-type(ufo_example), pointer :: self
+type(ufo_example), pointer     :: self
+type(fckit_configuration)      :: f_conf
+type(oops_variables)           :: oops_vars
 
 call ufo_example_registry%setup(c_self, self)
-call ufo_example_create(self, c_conf)
+
+f_conf = fckit_configuration(c_conf)
+call ufo_example_create(self, f_conf)
 
 !> Update C++ ObsFilter with geovals variables list
+oops_vars = oops_variables(c_varlist)
 if (allocated(self%geovars)) then
-  call f_c_push_string_varlist(c_varlist, self%geovars)
-endif
+  call oops_vars%push_back(self%geovars)
+end if
 
 end subroutine ufo_example_create_c
 
@@ -81,18 +88,21 @@ end subroutine ufo_example_prior_c
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_example_post_c(c_self, c_obspace, c_nvars, c_nlocs, c_hofx) bind(c,name='ufo_example_post_f90')
+subroutine ufo_example_post_c(c_self, c_obspace, c_nvars, c_nlocs, c_hofx, c_key_hofxdiags) bind(c,name='ufo_example_post_f90')
 implicit none
 integer(c_int), intent(in) :: c_self
 type(c_ptr), value, intent(in) :: c_obspace
 integer(c_int), intent(in) :: c_nvars, c_nlocs
 real(c_double), intent(in) :: c_hofx(c_nvars, c_nlocs)
+integer(c_int), intent(in) :: c_key_hofxdiags
 
 type(ufo_example), pointer :: self
+type(ufo_geovals), pointer :: hofxdiags
 
 call ufo_example_registry%get(c_self, self)
+call ufo_geovals_registry%get(c_key_hofxdiags, hofxdiags)
 
-call ufo_example_post(self, c_obspace, c_nvars, c_nlocs, c_hofx)
+call ufo_example_post(self, c_obspace, c_nvars, c_nlocs, c_hofx, hofxdiags)
 
 end subroutine ufo_example_post_c
 
