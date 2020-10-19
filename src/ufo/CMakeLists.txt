@@ -74,6 +74,7 @@ if( ${GEOS-AERO_FOUND} )
 endif( ${GEOS-AERO_FOUND} )
 add_subdirectory( timeoper )
 add_subdirectory( profile )
+add_subdirectory( groundgnss )
 
 list( APPEND ufo_src_files
     ${utils_src_files}
@@ -94,6 +95,7 @@ list( APPEND ufo_src_files
     ${radarradialvelocity_src_files}
     ${timeoper_src_files}
     ${profile_src_files}
+    ${groundgnss_src_files}
 )
 list( APPEND ufo_src_files ${marine_src_files} )
 list( APPEND UFO_LIBS_DEP oops ioda ${LAPACK_LIBRARIES} ${NETCDF_LIBRARIES} )

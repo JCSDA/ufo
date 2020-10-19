@@ -1,8 +1,8 @@
 /*
  * (C) Copyright 2019 UCAR
- * 
+ *
  * This software is licensed under the terms of the Apache Licence Version 2.0
- * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
 #ifndef UFO_FILTERS_THINNING_H_
@@ -29,7 +29,7 @@ namespace ioda {
 
 namespace ufo {
 
-/// Thinning: randonly thin a given percentage of observations
+/// Thinning: randomly thin a given percentage of observations
 
 class Thinning : public FilterBase,
                  private util::ObjectCounter<Thinning> {
