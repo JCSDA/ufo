@@ -57,6 +57,7 @@ add_subdirectory( identity )
 add_subdirectory( atmvertinterp )
 add_subdirectory( atmvertinterplay )
 add_subdirectory( atmsfcinterp )
+add_subdirectory( avgkernel )
 if( ${CRTM_FOUND} )
     add_subdirectory( crtm )
 endif( ${CRTM_FOUND} )
@@ -74,6 +75,7 @@ endif( ${GEOS-AERO_FOUND} )
 add_subdirectory( timeoper )
 add_subdirectory( profile )
 add_subdirectory( rttovonedvarcheck )
+add_subdirectory( groundgnss )
 
 list( APPEND ufo_src_files
     ${utils_src_files}
@@ -84,6 +86,7 @@ list( APPEND ufo_src_files
     ${atmvertinterp_src_files}
     ${atmvertinterplay_src_files}
     ${atmsfcinterp_src_files}
+    ${avgkernel_src_files}
     ${crtm_src_files}
     ${rttov_src_files}
     ${gnssro_src_files}
@@ -94,6 +97,7 @@ list( APPEND ufo_src_files
     ${timeoper_src_files}
     ${profile_src_files}
     ${rttovonedvarcheck_src_files}
+    ${groundgnss_src_files}
 )
 list( APPEND ufo_src_files ${marine_src_files} )
 list( APPEND UFO_LIBS_DEP oops ioda ${LAPACK_LIBRARIES} ${NETCDF_LIBRARIES} )

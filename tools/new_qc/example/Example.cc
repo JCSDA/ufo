@@ -11,17 +11,20 @@
 
 #include "ioda/ObsDataVector.h"
 #include "ioda/ObsSpace.h"
+#include "ioda/ObsVector.h"
 #include "oops/base/Variables.h"
 #include "oops/interface/ObsFilter.h"
 #include "oops/util/Logger.h"
+#include "ufo/GeoVaLs.h"
+#include "ufo/ObsDiagnostics.h"
 
 namespace ufo {
 
 // -----------------------------------------------------------------------------
 
 Example::Example(ioda::ObsSpace & obsdb, const eckit::Configuration & config,
-                     boost::shared_ptr<ioda::ObsDataVector<int> > flags,
-                     boost::shared_ptr<ioda::ObsDataVector<float> >)
+                 std::shared_ptr<ioda::ObsDataVector<int> > flags,
+                 std::shared_ptr<ioda::ObsDataVector<float> >)
   : obsdb_(obsdb), geovars_(), flags_(*flags) {
   oops::Log::trace() << "Example contructor starting" << std::endl;
   const eckit::Configuration * conf = &config;
@@ -45,9 +48,10 @@ void Example::priorFilter(const GeoVaLs & gv) const {
 
 // -----------------------------------------------------------------------------
 
-void Example::postFilter(const ioda::ObsVector & hofxb) const {
+void Example::postFilter(const ioda::ObsVector & hofxb, const ObsDiagnostics & diags) const {
   oops::Log::trace() << "Example postFilter" << std::endl;
-  ufo_example_post_f90(key_, obsdb_, hofxb.nvars(), hofxb.nlocs(), hofxb.toFortran());
+  ufo_example_post_f90(key_, obsdb_, hofxb.nvars(), hofxb.nlocs(), hofxb.toFortran(),
+                       diags.toFortran());
 }
 
 // -----------------------------------------------------------------------------

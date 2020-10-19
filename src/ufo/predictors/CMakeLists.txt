@@ -6,8 +6,6 @@
 set ( predictor_files
   PredictorBase.h
   PredictorBase.cc
-  CloudLiquidWater.h
-  CloudLiquidWater.cc
   Constant.h
   Constant.cc
   CosineOfLatitudeTimesOrbitNode.h

@@ -2,6 +2,7 @@
 #=== Profile consistency checks: OPS comparison with deliberately wrong values ===#
 #
 #This is used to cover code paths that would otherwise be missed.
+#It is recommended to run this test with OOPS_DEBUG=0 due to the large amount of output generated.
 
 #Some of the OPS variables have been given wrong values, and
 #one of the variables is missing. These changes are designed to fail
@@ -19,12 +20,10 @@ Incorrect and missing values, RH:
     simulated variables: [air_temperature, relative_humidity, dew_point_temperature]
   obs diagnostics:
   ProfileConsistencyChecks:
-    Checks: ["Basic", "SamePDiffT", "Sign", "UnstableLayer", "Interpolation", "Hydrostatic", "RH", "UInterp"]
-    maxlev: 10000
+    Checks: ["Basic", "SamePDiffT", "Sign", "UnstableLayer", "Interpolation", "Hydrostatic", "RH", "UInterp", "Time", "PermanentReject", "BackgroundTemperature", "BackgroundRelativeHumidity", "BackgroundWindSpeed", "BackgroundGeopotentialHeight"]
     compareWithOPS: true
     BChecks_Skip: true
     flagBasicChecksFail: true
-    nErrorsFail: 8
     Comparison_Tol: 0.1
   BypassMismatchComparison: true
 
@@ -41,12 +40,10 @@ Incorrect and missing values:
     simulated variables: [air_temperature, geopotential_height]
   obs diagnostics:
   ProfileConsistencyChecks:
-    Checks: ["Basic", "SamePDiffT", "Sign", "UnstableLayer", "Interpolation", "Hydrostatic", "RH", "UInterp"]
-    maxlev: 10000
+    Checks: ["Basic", "SamePDiffT", "Sign", "UnstableLayer", "Interpolation", "Hydrostatic", "RH", "UInterp", "Time", "PermanentReject", "BackgroundTemperature", "BackgroundRelativeHumidity", "BackgroundWindSpeed", "BackgroundGeopotentialHeight"]
     compareWithOPS: true
     BChecks_Skip: true
     flagBasicChecksFail: true
-    nErrorsFail: 8
     Comparison_Tol: 0.1
   BypassMismatchComparison: true
 
@@ -64,10 +61,8 @@ Incorrect and missing values, Basic:
   obs diagnostics:
   ProfileConsistencyChecks:
     Checks: ["Basic"]
-    maxlev: 10000
     compareWithOPS: true
     flagBasicChecksFail: true
-    nErrorsFail: 8
     Comparison_Tol: 0.1
   BypassMismatchComparison: true
 
@@ -86,11 +81,9 @@ Wrong number of entries per profile:
   obs diagnostics:
   ProfileConsistencyChecks:
     Checks: ["SamePDiffT", "Basic", "Sign", "UnstableLayer", "Interpolation", "Hydrostatic"]
-    maxlev: 10000
     compareWithOPS: true
     BChecks_Skip: true
     flagBasicChecksFail: true
-    nErrorsFail: 8
     Comparison_Tol: 0.1
     groups_singlevalue: ["Counters", "ObsValue"]
   BypassMismatchComparison: true
@@ -110,11 +103,9 @@ Wrong number of entries per profile, UInterp:
   obs diagnostics:
   ProfileConsistencyChecks:
     Checks: ["UInterp"]
-    maxlev: 10000
     compareWithOPS: true
     BChecks_Skip: true
     flagBasicChecksFail: true
-    nErrorsFail: 8
     Comparison_Tol: 0.1
     groups_singlevalue: ["Counters", "ObsValue"]
   BypassMismatchComparison: true
@@ -134,13 +125,33 @@ Wrong number of entries per profile, RH:
   obs diagnostics:
   ProfileConsistencyChecks:
     Checks: ["RH"]
-    maxlev: 10000
     compareWithOPS: true
     BChecks_Skip: true
     flagBasicChecksFail: true
-    nErrorsFail: 8
     Comparison_Tol: 0.1
     groups_singlevalue: ["Counters", "ObsValue"]
+  BypassMismatchComparison: true
+
+#Background: all ObsValue variables are given one value per profile.
+#This is designed to fail the check that all variables are the same size.
+Wrong number of entries per profile, background:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Radiosonde
+    obsdatain:
+      obsfile: Data/met_office_profile_consistency_checks_bkgqc_repobs.nc4
+      obsgrouping:
+        group variable: "station_id"
+    simulated variables: [eastward_wind, northward_wind]
+  obs diagnostics:
+  ProfileConsistencyChecks:
+    Checks: ["Time", "PermanentReject", "BackgroundTemperature", "BackgroundRelativeHumidity", "BackgroundWindSpeed", "BackgroundGeopotentialHeight"]
+    compareWithOPS: true
+    BChecks_Skip: true
+    flagBasicChecksFail: true
+    Comparison_Tol: 0.1
+    groups_singlevalue: ["Counters", "ObsValue", "MetaData"]
   BypassMismatchComparison: true
 
 #A group variable is not chosen, throwing an exception
@@ -155,11 +166,9 @@ No group variable chosen:
   obs diagnostics:
   ProfileConsistencyChecks:
     Checks: ["RH"]
-    maxlev: 10000
     compareWithOPS: true
     BChecks_Skip: true
     flagBasicChecksFail: true
-    nErrorsFail: 8
     Comparison_Tol: 0.1
   BypassMismatchComparison: true
   ExpectThrowOnInstantiation: true
@@ -180,11 +189,9 @@ Ascending sort order:
   obs diagnostics:
   ProfileConsistencyChecks:
     Checks: ["RH"]
-    maxlev: 10000
     compareWithOPS: true
     BChecks_Skip: true
     flagBasicChecksFail: true
-    nErrorsFail: 8
     Comparison_Tol: 0.1
   BypassMismatchComparison: true
   ExpectThrowDuringOperation: true
@@ -203,11 +210,9 @@ Invalid check requested:
   obs diagnostics:
   ProfileConsistencyChecks:
     Checks: ["WrongCheck"]
-    maxlev: 10000
     compareWithOPS: true
     BChecks_Skip: true
     flagBasicChecksFail: true
-    nErrorsFail: 8
     Comparison_Tol: 0.1
   BypassMismatchComparison: true
   ExpectThrowDuringOperation: true
@@ -226,11 +231,9 @@ Duplicate check requested:
   obs diagnostics:
   ProfileConsistencyChecks:
     Checks: ["Sign"]
-    maxlev: 10000
     compareWithOPS: true
     BChecks_Skip: true
     flagBasicChecksFail: true
-    nErrorsFail: 8
     Comparison_Tol: 0.1
   BypassMismatchComparison: true
   AddDuplicateCheck: true
@@ -249,11 +252,9 @@ Incorrect type in get:
   obs diagnostics:
   ProfileConsistencyChecks:
     Checks: ["Sign"]
-    maxlev: 10000
     compareWithOPS: true
     BChecks_Skip: true
     flagBasicChecksFail: true
-    nErrorsFail: 8
     Comparison_Tol: 0.1
   BypassMismatchComparison: true
   GetWrongType: true
@@ -274,12 +275,52 @@ Standard levels out of order:
   obs diagnostics:
   ProfileConsistencyChecks:
     Checks: ["Hydrostatic"]
-    maxlev: 10000
     compareWithOPS: true
     BChecks_Skip: true
     flagBasicChecksFail: true
-    nErrorsFail: 8
     Comparison_Tol: 0.1
     StandardLevels: [1, 1000]
   BypassMismatchComparison: true
   ExpectThrowDuringOperation: true
+
+#Time: set SondeLaunchWindRej to a nonzero value
+Background SondeLaunchWindRej:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Radiosonde
+    obsdatain:
+      obsfile: Data/met_office_profile_consistency_checks_bkgqc_repobs.nc4
+      obsgrouping:
+        group variable: "station_id"
+    simulated variables: [eastward_wind, northward_wind]
+  obs diagnostics:
+  ProfileConsistencyChecks:
+    Checks: ["Time"]
+    compareWithOPS: true
+    BChecks_Skip: true
+    flagBasicChecksFail: true
+    Comparison_Tol: 0.1
+    TimeCheck_SondeLaunchWindRej: 100.0
+  BypassMismatchComparison: true
+
+#Manually set QC flags
+Background manual QC flags:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Radiosonde
+    obsdatain:
+      obsfile: Data/met_office_profile_consistency_checks_bkgqc_repobs.nc4
+      obsgrouping:
+        group variable: "station_id"
+    simulated variables: [air_temperature, relative_humidity, eastward_wind, northward_wind, geopotential_height]
+  obs diagnostics:
+  ProfileConsistencyChecks:
+    Checks: ["Time"]
+    compareWithOPS: true
+    BChecks_Skip: true
+    flagBasicChecksFail: true
+    Comparison_Tol: 0.1
+  BypassMismatchComparison: true
+  ManualFlagModification: true

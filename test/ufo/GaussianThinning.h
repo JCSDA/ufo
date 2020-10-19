@@ -34,7 +34,7 @@ void testGaussianThinning(const eckit::LocalConfiguration &conf) {
   util::DateTime end(conf.getString("window end"));
 
   const eckit::LocalConfiguration obsSpaceConf(conf, "obs space");
-  ioda::ObsSpace obsspace(obsSpaceConf, oops::mpi::world(), bgn, end);
+  ioda::ObsSpace obsspace(obsSpaceConf, oops::mpi::world(), bgn, end, oops::mpi::myself());
 
   if (conf.has("air_pressures")) {
     const std::vector<float> air_pressures = conf.getFloatVector("air_pressures");
@@ -91,6 +91,8 @@ class GaussianThinning : public oops::Test {
                       });
     }
   }
+
+  void clear() const override {}
 };
 
 }  // namespace test

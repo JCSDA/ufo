@@ -120,9 +120,9 @@ class Variables : public oops::Test {
   Variables() {}
   virtual ~Variables() {}
  private:
-  std::string testid() const {return "ufo::test::Variables";}
+  std::string testid() const override {return "ufo::test::Variables";}
 
-  void register_tests() const {
+  void register_tests() const override {
     std::vector<eckit::testing::Test>& ts = eckit::testing::specification();
 
     ts.emplace_back(CASE("ufo/Variables/testVariable")
@@ -137,6 +137,8 @@ class Variables : public oops::Test {
     ts.emplace_back(CASE("ufo/Variables/testHasGroup")
       { testHasGroup(); });
   }
+
+  void clear() const override {}
 };
 
 // -----------------------------------------------------------------------------

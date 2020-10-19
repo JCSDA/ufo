@@ -24,7 +24,7 @@
 namespace ufo {
 
 // -----------------------------------------------------------------------------
-static ObsOperatorMaker<ObsAodCRTM> makerAOD_("Aod");
+static ObsOperatorMaker<ObsAodCRTM> makerAOD_("AodCRTM");
 
 // -----------------------------------------------------------------------------
 

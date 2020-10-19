@@ -30,16 +30,13 @@ observations:
         sort order: "descending"
     simulated variables: [air_temperature, geopotential_height]
   obs filters:
-  - filter: ProfileConsistencyChecks
+  - filter: Profile Consistency Checks
     filter variables:
     - name: air_temperature
     - name: geopotential_height
     Checks: ["Basic"]
     compareWithOPS: false
     flagBasicChecksFail: true
-    nErrorsFail: 8
-    BChecks_minValidP: 0.0
-    BChecks_maxValidP: 110.0e3
     where:
     - variable:
         name: test_id@MetaData
@@ -58,16 +55,13 @@ observations:
         group variable: "station_id"
     simulated variables: [air_temperature, geopotential_height]
   obs filters:
-  - filter: ProfileConsistencyChecks
+  - filter: Profile Consistency Checks
     filter variables:
     - name: air_temperature
     - name: geopotential_height
     Checks: ["Basic"]
     compareWithOPS: false
     flagBasicChecksFail: true
-    nErrorsFail: 8
-    BChecks_minValidP: 0.0
-    BChecks_maxValidP: 110.0e3
     where:
     - variable:
         name: test_id@MetaData
@@ -88,16 +82,13 @@ observations:
         sort order: "descending"
     simulated variables: [air_temperature, geopotential_height]
   obs filters:
-  - filter: ProfileConsistencyChecks
+  - filter: Profile Consistency Checks
     filter variables:
     - name: air_temperature
     - name: geopotential_height
     Checks: []
     compareWithOPS: false
     flagBasicChecksFail: true
-    nErrorsFail: 8
-    BChecks_minValidP: 0.0
-    BChecks_maxValidP: 110.0e3
     where:
     - variable:
         name: test_id@MetaData
@@ -118,16 +109,13 @@ observations:
         sort order: "descending"
     simulated variables: [air_temperature, geopotential_height]
   obs filters:
-  - filter: ProfileConsistencyChecks
+  - filter: Profile Consistency Checks
     filter variables:
     - name: air_temperature
     - name: geopotential_height
     Checks: ["Basic"]
     compareWithOPS: false
     flagBasicChecksFail: true
-    nErrorsFail: 8
-    BChecks_minValidP: 0.0
-    BChecks_maxValidP: 110.0e3
     where:
     - variable:
         name: test_id@MetaData
@@ -150,16 +138,13 @@ observations:
         sort order: "descending"
     simulated variables: [air_temperature, geopotential_height]
   obs filters:
-  - filter: ProfileConsistencyChecks
+  - filter: Profile Consistency Checks
     filter variables:
     - name: air_temperature
     - name: geopotential_height
     Checks: ["Basic"]
     compareWithOPS: false
     flagBasicChecksFail: false
-    nErrorsFail: 8
-    BChecks_minValidP: 0.0
-    BChecks_maxValidP: 110.0e3
     where:
     - variable:
         name: test_id@MetaData
@@ -180,16 +165,13 @@ observations:
         sort order: "descending"
     simulated variables: [air_temperature, geopotential_height]
   obs filters:
-  - filter: ProfileConsistencyChecks
+  - filter: Profile Consistency Checks
     filter variables:
     - name: air_temperature
     - name: geopotential_height
     Checks: ["Basic"]
     compareWithOPS: false
     flagBasicChecksFail: true
-    nErrorsFail: 8
-    BChecks_minValidP: 0.0
-    BChecks_maxValidP: 110.0e3
     where:
     - variable:
         name: test_id@MetaData
@@ -211,16 +193,13 @@ observations:
         sort order: "descending"
     simulated variables: [air_temperature, geopotential_height]
   obs filters:
-  - filter: ProfileConsistencyChecks
+  - filter: Profile Consistency Checks
     filter variables:
     - name: air_temperature
     - name: geopotential_height
     Checks: ["Basic"]
     compareWithOPS: false
     flagBasicChecksFail: true
-    nErrorsFail: 8
-    BChecks_minValidP: 0.0
-    BChecks_maxValidP: 110.0e3
     where:
     - variable:
         name: test_id@MetaData
@@ -241,16 +220,13 @@ observations:
         sort order: "descending"
     simulated variables: [air_temperature, geopotential_height]
   obs filters:
-  - filter: ProfileConsistencyChecks
+  - filter: Profile Consistency Checks
     filter variables:
     - name: air_temperature
     - name: geopotential_height
     Checks: ["Basic"]
     compareWithOPS: false
     flagBasicChecksFail: true
-    nErrorsFail: 8
-    BChecks_minValidP: 0.0
-    BChecks_maxValidP: 110.0e3
     where:
     - variable:
         name: test_id@MetaData
@@ -269,16 +245,13 @@ observations:
         group variable: "station_id"
     simulated variables: [air_temperature, geopotential_height]
   obs filters:
-  - filter: ProfileConsistencyChecks
+  - filter: Profile Consistency Checks
     filter variables:
     - name: air_temperature
     - name: geopotential_height
     Checks: ["Basic"]
     compareWithOPS: false
     flagBasicChecksFail: true
-    nErrorsFail: 8
-    BChecks_minValidP: 0.0
-    BChecks_maxValidP: 110.0e3
     where:
     - variable:
         name: test_id@MetaData
@@ -297,16 +270,13 @@ observations:
         group variable: "station_id"
     simulated variables: [air_temperature, geopotential_height]
   obs filters:
-  - filter: ProfileConsistencyChecks
+  - filter: Profile Consistency Checks
     filter variables:
     - name: air_temperature
     - name: geopotential_height
     Checks: ["Basic"]
     compareWithOPS: false
     flagBasicChecksFail: true
-    nErrorsFail: 8
-    BChecks_minValidP: 0.0
-    BChecks_maxValidP: 110.0e3
     where:
     - variable:
         name: test_id@MetaData
@@ -327,16 +297,13 @@ observations:
         group variable: "station_id"
     simulated variables: [air_temperature, geopotential_height]
   obs filters:
-  - filter: ProfileConsistencyChecks
+  - filter: Profile Consistency Checks
     filter variables:
     - name: air_temperature
     - name: geopotential_height
     Checks: ["Basic"]
     compareWithOPS: false
     flagBasicChecksFail: true
-    nErrorsFail: 8
-    BChecks_minValidP: 0.0
-    BChecks_maxValidP: 110.0e3
     where:
     - variable:
         name: test_id@MetaData
@@ -356,16 +323,13 @@ observations:
         group variable: "station_id"
     simulated variables: [air_temperature, geopotential_height]
   obs filters:
-  - filter: ProfileConsistencyChecks
+  - filter: Profile Consistency Checks
     filter variables:
     - name: air_temperature
     - name: geopotential_height
     Checks: ["Basic", "SamePDiffT", "Sign", "UnstableLayer", "Interpolation", "Hydrostatic"]
     compareWithOPS: false
     flagBasicChecksFail: true
-    nErrorsFail: 8
-    BChecks_minValidP: 0.0
-    BChecks_maxValidP: 110.0e3
     where:
     - variable:
         name: test_id@MetaData

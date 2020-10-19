@@ -40,74 +40,113 @@ namespace ufo {
     for (const auto& check : checks) {
       if (check == "Basic") {
       } else if (check == "SamePDiffT") {
-        valuesToCompare_int_.insert(ufo::VariableNames::counter_NumAnyErrors);
-        valuesToCompare_int_.insert(ufo::VariableNames::counter_NumSamePErrObs);
-        valuesToCompare_int_.insert(ufo::VariableNames::qcflags_air_temperature);
+        valuesToCompare_int_.insert({
+            ufo::VariableNames::counter_NumAnyErrors,
+            ufo::VariableNames::counter_NumSamePErrObs,
+            ufo::VariableNames::qcflags_air_temperature});
       } else if (check == "Sign") {
-        valuesToCompare_int_.insert(ufo::VariableNames::counter_NumAnyErrors);
-        valuesToCompare_int_.insert(ufo::VariableNames::counter_NumSignChange);
-        valuesToCompare_int_.insert(ufo::VariableNames::qcflags_air_temperature);
+        valuesToCompare_int_.insert({
+            ufo::VariableNames::counter_NumAnyErrors,
+            ufo::VariableNames::counter_NumSignChange,
+            ufo::VariableNames::qcflags_air_temperature});
       } else if (check == "UnstableLayer") {
-        valuesToCompare_int_.insert(ufo::VariableNames::qcflags_air_temperature);
-        valuesToCompare_int_.insert(ufo::VariableNames::counter_NumAnyErrors);
-        valuesToCompare_int_.insert(ufo::VariableNames::counter_NumSuperadiabat);
-        valuesToCompare_float_.insert(ufo::VariableNames::PBottom);
+        valuesToCompare_int_.insert({
+            ufo::VariableNames::qcflags_air_temperature,
+            ufo::VariableNames::counter_NumAnyErrors,
+            ufo::VariableNames::counter_NumSuperadiabat});
+        valuesToCompare_float_.insert({
+            ufo::VariableNames::PBottom});
       } else if (check == "Interpolation") {
-        valuesToCompare_int_.insert(ufo::VariableNames::counter_NumAnyErrors);
-        valuesToCompare_int_.insert(ufo::VariableNames::counter_NumInterpErrors);
-        valuesToCompare_int_.insert(ufo::VariableNames::counter_NumInterpErrObs);
-        valuesToCompare_int_.insert(ufo::VariableNames::qcflags_air_temperature);
-        valuesToCompare_int_.insert(ufo::VariableNames::NumStd);
-        valuesToCompare_int_.insert(ufo::VariableNames::NumSig);
-        valuesToCompare_int_.insert(ufo::VariableNames::StdLev);
-        valuesToCompare_int_.insert(ufo::VariableNames::SigBelow);
-        valuesToCompare_int_.insert(ufo::VariableNames::SigAbove);
-        valuesToCompare_int_.insert(ufo::VariableNames::IndStd);
-        valuesToCompare_int_.insert(ufo::VariableNames::LevErrors);
-        valuesToCompare_float_.insert(ufo::VariableNames::tInterp);
-        valuesToCompare_float_.insert(ufo::VariableNames::LogP);
+        valuesToCompare_int_.insert({
+            ufo::VariableNames::counter_NumAnyErrors,
+            ufo::VariableNames::counter_NumInterpErrors,
+            ufo::VariableNames::counter_NumInterpErrObs,
+            ufo::VariableNames::qcflags_air_temperature,
+            ufo::VariableNames::NumStd,
+            ufo::VariableNames::NumSig,
+            ufo::VariableNames::StdLev,
+            ufo::VariableNames::SigBelow,
+            ufo::VariableNames::SigAbove,
+            ufo::VariableNames::IndStd,
+            ufo::VariableNames::LevErrors});
+        valuesToCompare_float_.insert({
+            ufo::VariableNames::tInterp,
+            ufo::VariableNames::LogP});
       } else if (check == "Hydrostatic") {
-        valuesToCompare_int_.insert(ufo::VariableNames::counter_NumAnyErrors);
-        valuesToCompare_int_.insert(ufo::VariableNames::counter_Num925Miss);
-        valuesToCompare_int_.insert(ufo::VariableNames::counter_Num100Miss);
-        valuesToCompare_int_.insert(ufo::VariableNames::counter_NumStdMiss);
-        valuesToCompare_int_.insert(ufo::VariableNames::counter_NumHydErrObs);
-        valuesToCompare_int_.insert(ufo::VariableNames::counter_NumIntHydErrors);
-        valuesToCompare_int_.insert(ufo::VariableNames::qcflags_air_temperature);
-        valuesToCompare_int_.insert(ufo::VariableNames::qcflags_geopotential_height);
-        valuesToCompare_float_.insert(ufo::VariableNames::DC);
-        valuesToCompare_float_.insert(ufo::VariableNames::ETol);
-        valuesToCompare_float_.insert(ufo::VariableNames::D);
-        valuesToCompare_float_.insert(ufo::VariableNames::E);
-        valuesToCompare_int_.insert(ufo::VariableNames::HydError);
+        valuesToCompare_int_.insert({
+            ufo::VariableNames::counter_NumAnyErrors,
+            ufo::VariableNames::counter_Num925Miss,
+            ufo::VariableNames::counter_Num100Miss,
+            ufo::VariableNames::counter_NumStdMiss,
+            ufo::VariableNames::counter_NumHydErrObs,
+            ufo::VariableNames::counter_NumIntHydErrors,
+            ufo::VariableNames::qcflags_air_temperature,
+            ufo::VariableNames::qcflags_geopotential_height,
+            ufo::VariableNames::HydError});
+        valuesToCompare_float_.insert({
+            ufo::VariableNames::DC,
+            ufo::VariableNames::ETol});
       } else if (check == "UInterp") {
-        valuesToCompare_int_.insert(ufo::VariableNames::counter_NumSamePErrObs);
-        valuesToCompare_int_.insert(ufo::VariableNames::counter_NumInterpErrObs);
-        valuesToCompare_int_.insert(ufo::VariableNames::qcflags_eastward_wind);
-        valuesToCompare_float_.insert(ufo::VariableNames::uInterp);
-        valuesToCompare_float_.insert(ufo::VariableNames::vInterp);
-        valuesToCompare_int_.insert(ufo::VariableNames::NumStd);
-        valuesToCompare_int_.insert(ufo::VariableNames::NumSig);
-        valuesToCompare_int_.insert(ufo::VariableNames::StdLev);
-        valuesToCompare_int_.insert(ufo::VariableNames::SigBelow);
-        valuesToCompare_int_.insert(ufo::VariableNames::SigAbove);
-        valuesToCompare_int_.insert(ufo::VariableNames::LevErrors);
-        valuesToCompare_float_.insert(ufo::VariableNames::LogP);
+        valuesToCompare_int_.insert({
+            ufo::VariableNames::counter_NumSamePErrObs,
+            ufo::VariableNames::counter_NumInterpErrObs,
+            ufo::VariableNames::qcflags_eastward_wind,
+            ufo::VariableNames::NumStd,
+            ufo::VariableNames::NumSig,
+            ufo::VariableNames::StdLev,
+            ufo::VariableNames::SigBelow,
+            ufo::VariableNames::SigAbove,
+            ufo::VariableNames::LevErrors});
+        valuesToCompare_float_.insert({
+            ufo::VariableNames::uInterp,
+            ufo::VariableNames::vInterp,
+            ufo::VariableNames::LogP});
       } else if (check == "RH") {
-        valuesToCompare_int_.insert(ufo::VariableNames::qcflags_relative_humidity);
-        valuesToCompare_int_.insert(ufo::VariableNames::counter_TotCProfs);
-        valuesToCompare_int_.insert(ufo::VariableNames::counter_TotHProfs);
-        valuesToCompare_int_.insert(ufo::VariableNames::counter_TotCFlags);
-        valuesToCompare_int_.insert(ufo::VariableNames::counter_TotHFlags);
-        valuesToCompare_int_.insert(ufo::VariableNames::counter_TotLFlags);
-        valuesToCompare_float_.insert(ufo::VariableNames::Press);
-        valuesToCompare_float_.insert(ufo::VariableNames::Temp);
-        valuesToCompare_float_.insert(ufo::VariableNames::rh);
-        valuesToCompare_float_.insert(ufo::VariableNames::td);
-        valuesToCompare_float_.insert(ufo::VariableNames::tbk);
-        valuesToCompare_float_.insert(ufo::VariableNames::rhbk);
-        valuesToCompare_int_.insert(ufo::VariableNames::FlagH);
-        valuesToCompare_int_.insert(ufo::VariableNames::Indx);
+        valuesToCompare_int_.insert({
+            ufo::VariableNames::qcflags_relative_humidity,
+            ufo::VariableNames::counter_TotCProfs,
+            ufo::VariableNames::counter_TotHProfs,
+            ufo::VariableNames::counter_TotCFlags,
+            ufo::VariableNames::counter_TotHFlags,
+            ufo::VariableNames::counter_TotLFlags,
+            ufo::VariableNames::FlagH,
+            ufo::VariableNames::Indx});
+        valuesToCompare_float_.insert({
+            ufo::VariableNames::Press,
+            ufo::VariableNames::Temp,
+            ufo::VariableNames::rh,
+            ufo::VariableNames::td,
+            ufo::VariableNames::tbk,
+            ufo::VariableNames::rhbk});
+      } else if (check == "Time") {
+        valuesToCompare_int_.insert({
+            ufo::VariableNames::qcflags_eastward_wind,
+            ufo::VariableNames::qcflags_northward_wind});
+      } else if (check == "PermanentReject") {
+        valuesToCompare_int_.insert({
+            ufo::VariableNames::qcflags_air_temperature,
+            ufo::VariableNames::qcflags_relative_humidity,
+            ufo::VariableNames::qcflags_eastward_wind,
+            ufo::VariableNames::qcflags_northward_wind,
+            ufo::VariableNames::qcflags_geopotential_height});
+      } else if (check.find("Background") != std::string::npos) {
+        valuesToCompare_int_.insert({
+            ufo::VariableNames::qcflags_air_temperature,
+            ufo::VariableNames::qcflags_relative_humidity,
+            ufo::VariableNames::qcflags_eastward_wind,
+            ufo::VariableNames::qcflags_northward_wind,
+            ufo::VariableNames::qcflags_geopotential_height});
+        valuesToCompare_float_.insert({
+            ufo::VariableNames::pge_air_temperature,
+            ufo::VariableNames::pge_relative_humidity,
+            ufo::VariableNames::pge_eastward_wind,
+            ufo::VariableNames::pge_northward_wind,
+            ufo::VariableNames::pge_geopotential_height,
+            ufo::VariableNames::pgebd_air_temperature,
+            ufo::VariableNames::pgebd_relative_humidity,
+            ufo::VariableNames::pgebd_eastward_wind,
+            ufo::VariableNames::pgebd_northward_wind,
+            ufo::VariableNames::pgebd_geopotential_height});
       }
     }
   }
@@ -146,16 +185,6 @@ namespace ufo {
           oops::Log::debug() << "Vector of " << desc << " in this code is empty" << std::endl;
         return;
       }
-    // Warn if vectors are different size but allow to continue
-    if (!oops::allVectorsSameSize(vec1, vec2))
-      {
-        oops::Log::debug() << "Vectors to be compared for "
-                             << desc << " are of different size (" << vec1.size()
-                             << " and " << vec2.size() << "). "
-                             << "Will compare entries until reaching the end of the shorter "
-                             << "of the two." << std::endl;
-      }
-
     // Compare vector elements up to the smaller of the two sizes.
     const size_t vecsize = std::min(vec1.size(), vec2.size());
     for (size_t jvec = 0; jvec < vecsize; ++jvec) {

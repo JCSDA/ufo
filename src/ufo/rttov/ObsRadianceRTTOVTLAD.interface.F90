@@ -32,18 +32,28 @@ contains
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_radiancerttov_tlad_setup_c(c_key_self, c_conf) bind(c,name='ufo_radiancerttov_tlad_setup_f90')
+subroutine ufo_radiancerttov_tlad_setup_c(c_key_self, c_conf, c_nchan, c_channels, c_varlist) &
+                                    bind(c,name='ufo_radiancerttov_tlad_setup_f90')
+use oops_variables_mod
 implicit none
 integer(c_int), intent(inout)  :: c_key_self
 type(c_ptr), value, intent(in) :: c_conf
-    
+integer(c_int), intent(in) :: c_nchan
+integer(c_int), intent(in) :: c_channels(c_nchan)
+type(c_ptr), intent(in), value :: c_varlist
+
+type(oops_variables) :: oops_vars
 type(ufo_radiancerttov_tlad), pointer :: self
 type(fckit_configuration) :: f_conf
 
 call ufo_radiancerttov_tlad_registry%setup(c_key_self, self)
 f_conf = fckit_configuration(c_conf)
 
-call self%setup(f_conf)
+call self%setup(f_conf, c_channels)
+
+!> Update C++ ObsOperator with input variable list
+oops_vars = oops_variables(c_varlist)
+call oops_vars%push_back( self%varin )
 
 end subroutine ufo_radiancerttov_tlad_setup_c
 
@@ -63,39 +73,40 @@ end subroutine ufo_radiancerttov_tlad_delete_c
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_radiancerttov_tlad_settraj_c(c_key_self, c_key_geovals, c_obsspace, c_nchan, c_channels) &
+subroutine ufo_radiancerttov_tlad_settraj_c(c_key_self, c_key_geovals, c_obsspace, c_key_hofxdiags) &
                                        bind(c,name='ufo_radiancerttov_tlad_settraj_f90')
 
 implicit none
 integer(c_int),     intent(in) :: c_key_self
 integer(c_int),     intent(in) :: c_key_geovals
 type(c_ptr), value, intent(in) :: c_obsspace
-integer(c_int),     intent(in) :: c_nchan
-integer(c_int),     intent(in) :: c_channels(c_nchan)
+integer(c_int),     intent(in) :: c_key_hofxdiags
 
 type(ufo_radiancerttov_tlad), pointer :: self
 type(ufo_geovals),       pointer :: geovals
+type(ufo_geovals),       pointer :: hofxdiags
+
+character(len=*), parameter :: myname_="ufo_radiancerttov_tlad_settraj_c"
 
 call ufo_radiancerttov_tlad_registry%get(c_key_self, self)
 call ufo_geovals_registry%get(c_key_geovals,geovals)
+call ufo_geovals_registry%get(c_key_hofxdiags,hofxdiags)
 
-call self%settraj(geovals, c_obsspace, c_channels)
+call self%settraj(geovals, c_obsspace, hofxdiags)
 
 end subroutine ufo_radiancerttov_tlad_settraj_c
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_radiancerttov_simobs_tl_c(c_key_self, c_key_geovals, c_obsspace, c_nobs, c_hofx, c_nchan, c_channels) &
+subroutine ufo_radiancerttov_simobs_tl_c(c_key_self, c_key_geovals, c_obsspace, c_nvars, c_nlocs, c_hofx) &
                                     bind(c,name='ufo_radiancerttov_simobs_tl_f90')
 
 implicit none
 integer(c_int),     intent(in)    :: c_key_self
 integer(c_int),     intent(in)    :: c_key_geovals
 type(c_ptr), value, intent(in)    :: c_obsspace
-integer(c_int),     intent(in)    :: c_nobs
-real(c_double),     intent(inout) :: c_hofx(c_nobs)
-integer(c_int),     intent(in)    :: c_nchan
-integer(c_int),     intent(in)    :: c_channels(c_nchan)
+integer(c_int),     intent(in)    :: c_nvars, c_nlocs
+real(c_double),     intent(inout) :: c_hofx(c_nvars, c_nlocs)
 
 type(ufo_radiancerttov_tlad), pointer :: self
 type(ufo_geovals),       pointer :: geovals
@@ -105,23 +116,21 @@ character(len=*), parameter :: myname_="ufo_radiancerttov_simobs_tl_c"
 call ufo_radiancerttov_tlad_registry%get(c_key_self, self)
 call ufo_geovals_registry%get(c_key_geovals,geovals)
 
-call self%simobs_tl(geovals, c_obsspace, c_hofx, c_channels)
+call self%simobs_tl(geovals, c_obsspace, c_nvars, c_nlocs, c_hofx)
 
 end subroutine ufo_radiancerttov_simobs_tl_c
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_radiancerttov_simobs_ad_c(c_key_self, c_key_geovals, c_obsspace, c_nobs, c_hofx, c_nchan, c_channels) &
+subroutine ufo_radiancerttov_simobs_ad_c(c_key_self, c_key_geovals, c_obsspace, c_nvars, c_nlocs, c_hofx) &
                                     bind(c,name='ufo_radiancerttov_simobs_ad_f90')
 
 implicit none
-integer(c_int), intent(in) :: c_key_self
-integer(c_int), intent(in) :: c_key_geovals
+integer(c_int),     intent(in) :: c_key_self
+integer(c_int),     intent(in) :: c_key_geovals
 type(c_ptr), value, intent(in) :: c_obsspace
-integer(c_int),     intent(in) :: c_nobs
-real(c_double),     intent(in) :: c_hofx(c_nobs)
-integer(c_int),     intent(in) :: c_nchan
-integer(c_int),     intent(in) :: c_channels(c_nchan)
+integer(c_int),     intent(in) :: c_nvars, c_nlocs
+real(c_double),     intent(in) :: c_hofx(c_nvars, c_nlocs)
 
 type(ufo_radiancerttov_tlad), pointer :: self
 type(ufo_geovals),       pointer :: geovals
@@ -131,7 +140,7 @@ character(len=*), parameter :: myname_="ufo_radiancerttov_simobs_ad_c"
 call ufo_radiancerttov_tlad_registry%get(c_key_self, self)
 call ufo_geovals_registry%get(c_key_geovals,geovals)
 
-call self%simobs_ad(geovals, c_obsspace, c_hofx, c_channels)
+call self%simobs_ad(geovals, c_obsspace, c_nvars, c_nlocs, c_hofx)
 
 end subroutine ufo_radiancerttov_simobs_ad_c
 

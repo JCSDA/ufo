@@ -16,85 +16,42 @@ observations:
         sort order: "descending"
     simulated variables: [air_temperature, geopotential_height]
   obs filters:
-  - filter: ProfileConsistencyChecks
+  - filter: Profile Consistency Checks
     filter variables:
     - name: air_temperature
     - name: geopotential_height
     Checks: ["Basic"]
     flagBasicChecksFail: true
-    nErrorsFail: 8
-    BChecks_minValidP: 0.0
-    BChecks_maxValidP: 110.0e3
-  - filter: ProfileConsistencyChecks
+  - filter: Profile Consistency Checks
     filter variables:
     - name: air_temperature
     - name: geopotential_height
     Checks: ["SamePDiffT"]
-    nErrorsFail: 8
-    SPDTCheck_TThresh: 1.0
-  - filter: ProfileConsistencyChecks
+  - filter: Profile Consistency Checks
     filter variables:
     - name: air_temperature
     - name: geopotential_height
     Checks: ["Sign"]
-    nErrorsFail: 8
-    SCheck_PstarThresh: 5000.0
-    SCheck_tObstBkgThresh: 20.0
-    SCheck_ProfileSignTol: 5.0
-    SCheck_PrintLargeTThresh: 1000.0
     SCheck_CorrectT: true
-  - filter: ProfileConsistencyChecks
+  - filter: Profile Consistency Checks
     filter variables:
     - name: air_temperature
     - name: geopotential_height
     Checks: ["UnstableLayer"]
-    nErrorsFail: 8
-    ULCheck_MinP: 0.0
-    ULCheck_PBThresh: 5000.0
-    ULCheck_SuperadiabatTol: -2.0
-  - filter: ProfileConsistencyChecks
+  - filter: Profile Consistency Checks
     filter variables:
     - name: air_temperature
     - name: geopotential_height
     Checks: ["Interpolation"]
-    nErrorsFail: 8
-    FS_MinP: 0.0
-    StandardLevels: [1000, 925, 850, 700, 500, 400, 300, 250, 200, 150, 100, 70, 50, 30, 20, 10, 7, 3, 2, 1]
-    ICheck_BigGaps: [150, 150, 150, 150, 100, 100, 100, 75, 75, 50, 50, 20, 20, 20, 10, 10, 10, 10, 10, 10]
-    ICheck_BigGapInit: 1000.0
-    ICheck_TolRelaxPThresh: 30000.0
-    ICheck_TolRelax: 1.5
-    ICheck_TInterpTol: 2.0
-  - filter: ProfileConsistencyChecks
+  - filter: Profile Consistency Checks
     filter variables:
     - name: air_temperature
     - name: geopotential_height
     Checks: ["Hydrostatic"]
-    nErrorsFail: 8
-    FS_MinP: 0.0
-    StandardLevels: [1000, 925, 850, 700, 500, 400, 300, 250, 200, 150, 100, 70, 50, 30, 20, 10, 7, 3, 2, 1]
-    ICheck_BigGaps: [150, 150, 150, 150, 100, 100, 100, 75, 75, 50, 50, 20, 20, 20, 10, 10, 10, 10, 10, 10]
-    HCheck_SurfacePThresh: 15100.0
-    HCheck_ETolMult: 0.375
-    HCheck_ETolMax: 50.0
-    HCheck_ETolMaxPThresh: 40100.0
-    HCheck_ETolMaxLarger: 80.0
-    HCheck_ETolMin: 30.0
-    HCheck_EThresh: 15.0
-    HCheck_EThreshB: 15.0
-    HCheck_ESumThresh: 30.0
-    HCheck_MinAbsEThresh: 20.0
-    HCheck_ESumThreshLarger: 60.0
-    HCheck_MinAbsEThreshLarger: 200.0
-    HCheck_CorrThresh: 10.0
-    HCheck_ESumNextThresh: 30.0
-    HCheck_MinAbsEThreshT: 15.0
-    HCheck_CorrDiffThresh: 5.0
-    HCheck_CorrMinThresh: 4.0
     HCheck_CorrectZ: true
     HydDesc: ["Hyd: OK", "Hyd: Z err", "Hyd: T err", "Hyd: T/Z err", "Hyd: T/Z Bot", "Hyd: T/Z Top", "Hyd: Z upward", "Hyd: ?????"]
   HofX: HofX
   obs diagnostics:
-  passedBenchmark: 79434
+  passedBenchmark: 901
   benchmarkFlag: 15
-  flaggedBenchmark: 510
+  flaggedBenchmark: 10057

@@ -41,7 +41,7 @@ void testObsFilterData() {
   for (size_t jconf = 0; jconf < confs.size(); ++jconf) {
 ///  Setup ObsSpace
     const eckit::LocalConfiguration obsconf(confs[jconf], "obs space");
-    ioda::ObsSpace ospace(obsconf, oops::mpi::world(), bgn, end);
+    ioda::ObsSpace ospace(obsconf, oops::mpi::world(), bgn, end, oops::mpi::myself());
 
 ///  Setup GeoVaLs
     const eckit::LocalConfiguration gconf(confs[jconf], "geovals");
@@ -214,14 +214,16 @@ class ObsFilterData : public oops::Test {
   ObsFilterData() {}
   virtual ~ObsFilterData() {}
  private:
-  std::string testid() const {return "ufo::test::ObsFilterData";}
+  std::string testid() const override {return "ufo::test::ObsFilterData";}
 
-  void register_tests() const {
+  void register_tests() const override {
     std::vector<eckit::testing::Test>& ts = eckit::testing::specification();
 
     ts.emplace_back(CASE("ufo/ObsFilterData/testObsFilterData")
       { testObsFilterData(); });
   }
+
+  void clear() const override {}
 };
 
 // -----------------------------------------------------------------------------

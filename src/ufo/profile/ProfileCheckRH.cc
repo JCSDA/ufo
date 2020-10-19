@@ -55,16 +55,14 @@ namespace ufo {
     std::vector <int> &TotLFlags =
        profileDataHandler_.get<int>(ufo::VariableNames::counter_TotLFlags);
 
-    if (oops::anyVectorEmpty(pressures, tObs, tBkg, RHObs, RHBkg,
-                             tdObs, tFlags, RHFlags, tObsCorrection)) {
-      oops::Log::debug() << "At least one vector is empty. "
-                         << "Check will not be performed." << std::endl;
-      return;
-    }
-    if (!oops::allVectorsSameSize(pressures, tObs, tBkg, RHObs, RHBkg,
-                                  tdObs, tFlags, RHFlags, tObsCorrection)) {
-      oops::Log::debug() << "Not all vectors have the same size. "
-                         << "Check will not be performed." << std::endl;
+    if (!oops::allVectorsSameNonZeroSize(pressures, tObs, tBkg, RHObs, RHBkg,
+                                         tdObs, tFlags, RHFlags, tObsCorrection)) {
+      oops::Log::warning() << "At least one vector is the wrong size. "
+                           << "Check will not be performed." << std::endl;
+      oops::Log::warning() << "Vector sizes: "
+                           << oops::listOfVectorSizes(pressures, tObs, tBkg, RHObs, RHBkg,
+                                                      tdObs, tFlags, RHFlags, tObsCorrection)
+                           << std::endl;
       return;
     }
 
@@ -88,7 +86,7 @@ namespace ufo {
 
     float Tmin = options_.RHCheck_TminInit.value();
     for (int jlev = 0; jlev < numLevelsToCheck; ++jlev) {
-      if (tFlags[jlev] & ufo::FlagsProfile::TropopauseFlag) {
+      if (tFlags[jlev] & ufo::MetOfficeQCFlags::Profile::TropopauseFlag) {
         PTrop = pressures[jlev] * 0.01;
       }
       if (pressures[jlev] > 0.0 &&
@@ -185,8 +183,8 @@ namespace ufo {
       for (int jlev = 0; jlev < NumLev; ++jlev) {
         if (FlagH_[jlev] > 0) {
           int ilev = Indx_[jlev];
-          RHFlags[ilev] |= ufo::FlagsProfile::InterpolationFlag;
-          RHFlags[ilev] |= ufo::FlagsElem::FinalRejectFlag;
+          RHFlags[ilev] |= ufo::MetOfficeQCFlags::Profile::InterpolationFlag;
+          RHFlags[ilev] |= ufo::MetOfficeQCFlags::Elem::FinalRejectFlag;
         }
       }
     }

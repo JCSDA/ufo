@@ -10,8 +10,10 @@ use fckit_configuration_module, only: fckit_configuration
 use kinds
 use ufo_geovals_mod
 use obsspace_mod
+use oops_variables_mod
 use missing_values_mod
 use gnssro_mod_obserror
+use fckit_log_module, only : fckit_log
 
 implicit none
 public :: ufo_roobserror, ufo_roobserror_create, ufo_roobserror_delete
@@ -21,9 +23,10 @@ private
 
 ! ------------------------------------------------------------------------------
 type :: ufo_roobserror
-  character(len=max_string) :: variable
-  character(len=max_string) :: errmodel
-  type(c_ptr)               :: obsdb
+  character(len=max_string)    :: variable
+  character(len=max_string)    :: errmodel
+  type(oops_variables), public :: obsvar
+  type(c_ptr)                  :: obsdb
 end type ufo_roobserror
 
 ! ------------------------------------------------------------------------------
@@ -32,18 +35,13 @@ contains
 
 subroutine ufo_roobserror_create(self, obspace, f_conf)
 use iso_c_binding
+use oops_variables_mod
 implicit none
 type(ufo_roobserror), intent(inout)   :: self
 type(c_ptr),  value,       intent(in) :: obspace
 type(fckit_configuration), intent(in) :: f_conf
+character(len=:), allocatable         :: str
 
-character(len=:), allocatable :: str
-
-self%variable = "bending_angle"
-if (f_conf%has("variable")) then
-   call f_conf%get_or_die("variable",str)
-   self%variable = str
-end if
 self%errmodel = "NBAM"
 if (f_conf%has("errmodel")) then
    call f_conf%get_or_die("errmodel",str)
@@ -108,9 +106,10 @@ case ("bending_angle")
     call obsspace_get_db(self%obsdb, "MetaData", "latitude", obsLat)
     call bending_angle_obserr_NBAM(obsLat, obsImpH, obsSaid, nobs, obsErr, QCflags, missing)
     write(err_msg,*) "ufo_roobserror_mod: setting up bending_angle obs error with NBAM method"
+    call fckit_log%info(err_msg)
     deallocate(obsSaid)
     deallocate(obsLat)
-    ! up date obs error
+    ! update obs error
     call obsspace_put_db(self%obsdb, "FortranERR", trim(self%variable), obsErr)
 
   case ("ECMWF")
@@ -118,10 +117,10 @@ case ("bending_angle")
     call obsspace_get_db(self%obsdb, "ObsValue", "bending_angle", obsValue)
     call bending_angle_obserr_ECMWF(obsImpH, obsValue, nobs, obsErr, QCflags, missing)
     write(err_msg,*) "ufo_roobserror_mod: setting up bending_angle obs error with ECMWF method"
+    call fckit_log%info(err_msg)
     deallocate(obsValue)
-    ! up date obs error
+    ! update obs error
     call obsspace_put_db(self%obsdb, "FortranERR", trim(self%variable), obsErr)
-
   case ("NRL")
     allocate(obsValue(nobs))
     allocate(obsLat(nobs))
@@ -129,15 +128,16 @@ case ("bending_angle")
     call obsspace_get_db(self%obsdb, "MetaData", "latitude", obsLat)
     call bending_angle_obserr_NRL(obsLat, obsImpH, obsValue, nobs, obsErr, QCflags, missing)
     write(err_msg,*) "ufo_roobserror_mod: setting up bending_angle obs error with NRL method"
+    call fckit_log%info(err_msg)
     deallocate(obsValue)
     deallocate(obsLat)
-    ! up date obs error
+    ! update obs error
     call obsspace_put_db(self%obsdb, "FortranERR", trim(self%variable), obsErr)
 
   case default
     write(err_msg,*) "ufo_roobserror_mod: bending_angle error model must be NBAM, ECMWF, or NRL"
     call fckit_log%info(err_msg) 
-
+    call fckit_log%info(err_msg)
   end select
   deallocate(obsImpP)
   deallocate(obsGeoid)
@@ -150,6 +150,7 @@ case ("refractivity")
   select case (trim(self%errmodel))
 
   case ("NBAM")
+
     allocate(obsZ(nobs))
     allocate(obsLat(nobs))
     call obsspace_get_db(self%obsdb, "MetaData", "altitude",  obsZ) 

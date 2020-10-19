@@ -7,486 +7,699 @@
 
 module ufo_radiancerttov_tlad_mod
 
-use fckit_configuration_module, only: fckit_configuration
-use iso_c_binding
-use kinds
+  use fckit_configuration_module, only: fckit_configuration
+  use fckit_log_module, only : fckit_log
+  use iso_c_binding
+  use kinds
+  use missing_values_mod
 
-use ufo_geovals_mod, only: ufo_geovals, ufo_geoval, ufo_geovals_get_var
-use ufo_basis_tlad_mod, only: ufo_basis_tlad
-use ufo_vars_mod
-use ufo_radiancerttov_utils_mod
+  use obsspace_mod
 
-use rttov_types
-use rttov_const, only : errorstatus_success, deg2rad
-use rttov_unix_env
+  use ufo_geovals_mod, only: ufo_geovals, ufo_geoval, ufo_geovals_get_var
+  use ufo_vars_mod
+  use ufo_radiancerttov_utils_mod
 
-implicit none
-private
-
-!> Fortran derived type for radiancerttov trajectory
-type, public :: ufo_radiancerttov_tlad
-private
-integer :: nprofiles
-! integer :: nlayers
-integer :: nlevels
-integer :: nchannels
-
-type(rttov_conf) :: conf
-type(rttov_profile), pointer, public :: profiles_k(:) => NULL()
-type(rttov_chanprof), pointer :: chanprof(:) => NULL()
-logical :: ltraj
-contains
-  procedure :: setup  => ufo_radiancerttov_tlad_setup
-  procedure :: delete  => ufo_radiancerttov_tlad_delete
-  procedure :: settraj => ufo_radiancerttov_tlad_settraj
-  procedure :: simobs_tl  => ufo_radiancerttov_simobs_tl
-  procedure :: simobs_ad  => ufo_radiancerttov_simobs_ad
-end type ufo_radiancerttov_tlad
-
-contains
-
-! ------------------------------------------------------------------------------
-subroutine ufo_radiancerttov_tlad_setup(self, f_conf)
-implicit none
-class(ufo_radiancerttov_tlad), intent(inout) :: self
-type(fckit_configuration),     intent(in)    :: f_conf
-
-! Local variables
-type(fckit_configuration) :: f_confOpts
-
-! Setup conf
-call f_conf % get_or_die("ObsOptions", f_confOpts)
-call rttov_conf_setup(self % conf, f_confOpts)
-
-end subroutine ufo_radiancerttov_tlad_setup
-
-! ------------------------------------------------------------------------------
-subroutine ufo_radiancerttov_tlad_delete(self)
-  use ufo_radiancerttov_utils_mod , ONLY : config_rttov
+  use rttov_types
+  use rttov_const, only : errorstatus_success
+  use rttov_unix_env
 
   implicit none
-  class(ufo_radiancerttov_tlad), intent(inout) :: self
+  private
 
-  integer(kind=jpim) :: errorstatus
+  !> Fortran derived type for radiancerttov trajectory
+  type, public :: ufo_radiancerttov_tlad
+    private
+    character(len=MAXVARLEN), public, allocatable :: varin(:)  ! variables requested from the model
+    integer, allocatable                          :: channels(:)
+    type(rttov_conf)                              :: conf
+    type(rttov_conf)                              :: conf_traj
+    type(ufo_rttov_io)                            :: RTProf_K
 
-  include 'rttov_alloc_prof.interface'
+    integer                                       :: nprofiles
+    integer                                       :: nchan_total
+    integer                                       :: nlevels
 
-  if (ASSOCIATED(self % profiles_k)) then
-    call rttov_alloc_prof(errorstatus, & 
-                               SIZE(self % profiles_k), &
-                               self % profiles_k, &
-                               -1, & ! doesn't matter what nlevels is
-                               config_rttov % opts, & 
-                               asw = 0)!, &
-    deallocate(self % profiles_k)
-    deallocate(self % chanprof)
-    WRITE(*,*) 'Killing profiles_k and chanprof'
-    nullify( self % profiles_k, self % chanprof)
-  end if
+    logical                                       :: ltraj
+    logical, allocatable                          :: Skip_Profiles(:)
 
-  self % ltraj = .FALSE.
+  contains
+    procedure :: setup  => ufo_radiancerttov_tlad_setup
+    procedure :: delete  => ufo_radiancerttov_tlad_delete
+    procedure :: settraj => ufo_radiancerttov_tlad_settraj
+    procedure :: simobs_tl  => ufo_radiancerttov_simobs_tl
+    procedure :: simobs_ad  => ufo_radiancerttov_simobs_ad
+  end type ufo_radiancerttov_tlad
 
-  call rttov_conf_delete(self % conf)
+  character(len=maxvarlen), dimension(1), parameter :: varin_default_tlad = &
+    (/var_ts/)
 
-end subroutine ufo_radiancerttov_tlad_delete
+contains
 
-! ------------------------------------------------------------------------------
-subroutine ufo_radiancerttov_tlad_settraj(self, geovals, obss, channels, ob_info, BT)
+  ! ------------------------------------------------------------------------------
+  subroutine ufo_radiancerttov_tlad_setup(self, f_confOper, channels)
+    implicit none
 
-use ufo_radiancerttov_utils_mod , ONLY : config_rttov
-use ufo_rttovonedvarcheck_ob_mod
+    class(ufo_radiancerttov_tlad), intent(inout) :: self
+    type(fckit_configuration), intent(in)        :: f_confOper
+    integer(c_int),            intent(in)        :: channels(:)  !List of channels to use
 
-implicit none
+    type(fckit_configuration)                    :: f_confOpts ! RTcontrol
+    type(fckit_configuration)                    :: f_confLinOper
+    integer                                      :: nvars_in
+    integer                                      :: ind, jspec
 
-class(ufo_radiancerttov_tlad), intent(inout) :: self
-type(ufo_geovals),             intent(in)    :: geovals
-type(c_ptr), value,            intent(in)    :: obss
-integer(c_int),                intent(in)    :: channels(:) ! List of channels to use
-type(ufo_rttovonedvarcheck_ob), optional, intent(in) :: ob_info ! Used for rttovonedvarcheck
-real(kind_real), optional,     intent(out)   :: BT(:)       ! Used for rttovonedvarcheck
+    call f_confOper % get_or_die("obs options",f_confOpts)
 
-! Local Variables
-character(*), parameter                      :: PROGRAM_NAME = 'ufo_radiancerttov_tlad_settraj'
-character(255)                               :: message, version
-integer                                      :: err_stat, alloc_stat
-integer                                      :: i_inst,j , jch,nlevels, nch, nchannels, nchans_total, nchans_inst, asw, ierr
-type(ufo_geoval), pointer                    :: temp
+    call rttov_conf_setup(self % conf_traj, f_confOpts,f_confOper)
 
-logical(kind=jplm),      pointer             :: calcemis(:)    => NULL()   ! Flag to indicate calculation of emissivity within RTTOV
+    if ( f_confOper%has("linear obs operator") ) then
+      call f_confOper%get_or_die("linear obs operator",f_confLinOper)
+      call rttov_conf_setup(self%conf, f_confOpts, f_confLinOper)
+    else
+      call rttov_conf_setup(self%conf, f_confOpts, f_confOper)
+    end if
 
-type(rttov_emissivity),  pointer             :: emissivity(:)  => NULL()   ! Input/output surface emissivity
-type(rttov_profile),     pointer             :: profiles(:)    => NULL()   ! Input profiles
-type(rttov_profile),     pointer             :: profiles_k(:)  => NULL()   ! Input profiles
-type(rttov_chanprof),    pointer             :: chanprof(:)    => NULL()   ! Input profiles
-type(rttov_transmission)                     :: transmission               ! Output transmittances
-type(rttov_radiance)                         :: radiance                   ! Output radiances
+    !DAR what is the RTTOV equivalant of making sure that humidity and ozone data are present
+    if ( ufo_vars_getindex(self%conf%Absorbers, var_mixr) < 1 .and. &
+      ufo_vars_getindex(self%conf%Absorbers, var_q)    < 1 ) then
+      write(message,*) 'ufo_radiancerttov_setup error: H2O must be included in RTTOV Absorbers'
+      call abor1_ftn(message)
+    end if
 
-type(rttov_emissivity),  pointer             :: emissivity_k(:)  => NULL() ! Input/output surface emissivity
-type(rttov_transmission)                     :: transmission_k             ! Output transmittances
-type(rttov_radiance)                         :: radiance_k                 ! Output radiances
+    nvars_in = size(varin_default_tlad) + self%conf%ngas + 5 ! 5 near-surface parameters
 
-integer(kind=jpim)                           :: errorstatus                ! Return error status of RTTOV subroutine calls
+    allocate(self%varin(nvars_in))
+    self%varin(1:size(varin_default_tlad)) = varin_default_tlad
+    ind = size(varin_default_tlad) + 1
 
-integer                                      :: nprof_sim, nchan_sim, nchan_max_sim, nprof_max_sim, nchan_count
-integer                                      :: prof_start, prof_end
-
-character(MAXVARLEN)                         :: varname
-
-integer :: idbg = 1
-
-character(MAXVARLEN) :: label
-
-include 'rttov_k.interface'
-include 'rttov_alloc_k.interface'
-include 'rttov_alloc_prof.interface'
-include 'rttov_print_profile.interface'
-include 'rttov_print_opts.interface'
-include 'rttov_user_profile_checkinput.interface'
-
-! Get number of profile and layers from geovals
-! ---------------------------------------------
-self % nprofiles = geovals % nlocs
-varname = 'air_pressure' ! var_prsi
-call ufo_geovals_get_var(geovals, varname, temp)
-self % nlevels = temp % nval
-! nlayers = self % nlevels - 1
-
-nullify(temp)
-
-errorstatus = 0_jpim
-nchan_count = 0
-
-asw = 1
-
-nchan_max_sim = 2500 ! Maximum number of channels to pass to RTTOV to simulate
-
-if( .NOT. config_rttov % rttov_is_setup) then
-  call config_rttov % setup(self % conf, asw)
-else
-  write(*,*) "Config rttov TLAD already setup"
-end if
-
-Sensor_Loop:do i_inst = 1, self % conf % nSensors
-
-!  nchans_inst = config_rttov % rttov_coef_array(i_inst) % coef % fmv_chn
-  nchans_inst = SIZE(channels)
-  self % nchannels = nchans_inst
-  nchans_total = self % nchannels * self % nprofiles
-
-  if( .NOT. ASSOCIATED(self % profiles_k)) then
-    ! one channel will be ~ 3-15 fields * 8 bytes * ~100 levels = approx 10kB
-    ! so 15 million channels * 1e4 bytes / channel will be 1.5e11 bytes (150 GB - too big!!)
-    allocate(self % chanprof(nchans_total))
-    allocate(self % profiles_k(nchans_total))
-
-    call rttov_alloc_prof(errorstatus, &
-                             nchans_total, &
-                             self % profiles_k, &
-                             self % nlevels, &
-                             config_rttov % opts, & 
-                             asw,&!, &
-!                            coefs = config_rttov % rttov_coef_array(i_inst) ! cld/aer only
-                             init = .TRUE.)
-  end if
-
-  ! Ensure the options and coefficients are consistent
-  call rttov_user_options_checkinput(errorstatus, &
-                                     config_rttov % opts, &
-                                     config_rttov % rttov_coef_array(i_inst))
-  if (errorstatus /= errorstatus_success) then
-    WRITE(*,*) 'error in rttov options'
-    call rttov_exit(errorstatus)
-  end if
-
-  ! --------------------------------------------------------------------------
-  ! 3. Allocate RTTOV input and output structures
-  ! --------------------------------------------------------------------------
-
-  ! Determine the total number of radiances to simulate (nchanprof).
-  ! In this example we simulate all specified channels for each profile, but
-  ! in general one can simulate a different number of channels for each profile.
-
-  nprof_max_sim = nchan_max_sim / nchans_inst
-  nprof_sim = MIN(nprof_max_sim, self % nprofiles)
-  nchan_sim = nprof_sim * nchans_inst
-
-  idbg = idbg + 1
-
-  ! Allocate temporary structures for rttov_k
-  call rttov_alloc_k(                            &
-        errorstatus,                             &
-        1_jpim,                                  &  ! 1 => allocate
-        nprof_sim,                               &
-        nchan_sim,                               &
-        self % NLEVELS,                          &
-        chanprof,                                &
-        config_rttov % opts,                     &
-        profiles,                                &
-        profiles_k,                              &
-        config_rttov % rttov_coef_array(i_inst), &
-        transmission,                            &
-        transmission_k,                          &
-        radiance,                                &
-        radiance_k,                              &
-        calcemis=calcemis,                       &
-        emissivity=emissivity,                   &
-        emissivity_k=emissivity_k,               &
-        init=.TRUE._jplm)
-
-  if (errorstatus /= errorstatus_success) then
-    WRITE(*,*) 'allocation error for rttov_k structures'
-    call rttov_exit(errorstatus)
-  end if
-
-  idbg = idbg + 1
-
-  emissivity_k % emis_out = 0
-  emissivity_k % emis_in = 0
-  emissivity % emis_out = 0
-  
-  ! Inintialize the K-matrix INPUT so that the results are dTb/dx
-  ! -------------------------------------------------------------
-
-  radiance_k % bt(:) = 1
-  radiance_k % total(:) = 1
-
-  ! --------------------------------------------------------------------------
-  ! 4. Build the list of profile/channel indices in chanprof
-  ! --------------------------------------------------------------------------
-
-  prof_start = 1
-  prof_end = self % nprofiles
-
-  idbg = idbg + 1
-
-  do while ( prof_start <= prof_end)
-    nch = 0_jpim
-    do j = 1, MIN(nprof_sim, prof_end - prof_start + 1)
-      do jch = 1, nchans_inst
-        nch = nch + 1_jpim
-        self % chanprof(nchan_count + nch) % prof = j
-        self % chanprof(nchan_count + nch) % chan = channels(jch) 
-        ! only all channels for now. Look at OPS for better implementation.
-        !local
-        chanprof(nch) % prof = j
-        chanprof(nch) % chan = channels(jch)
-      end do
+    do jspec = 1, self%conf%ngas
+      self%varin(ind) = self%conf%Absorbers(jspec)
+      ind = ind + 1
     end do
 
-    idbg = idbg + 1
+    self%varin(ind) = var_sfc_t2m
+    ind = ind + 1
+    self%varin(ind) = var_sfc_q2m
+    ind = ind + 1
+    self%varin(ind) = var_sfc_tskin
+    ind = ind + 1
+    self%varin(ind) = var_u
+    ind = ind + 1
+    self%varin(ind) = var_v
 
-    ! --------------------------------------------------------------------------
-    ! 6. Specify surface emissivity and reflectance
-    ! --------------------------------------------------------------------------
+    ! save channels
+    allocate(self%channels(size(channels)))
+    self%channels(:) = channels(:)
 
-    ! In this example we have no values for input emissivities
-    emissivity(:) % emis_in = 0._jprb
+  end subroutine ufo_radiancerttov_tlad_setup
 
-    ! Calculate emissivity within RTTOV where the input emissivity value is
-    ! zero or less (all channels in this case)
-    calcemis(:) = (emissivity(:) % emis_in <= 0._jprb)
+  ! ------------------------------------------------------------------------------
+  subroutine ufo_radiancerttov_tlad_delete(self)
+    implicit none
 
-    !Assign the data from the GeoVaLs
-    !--------------------------------
-    if (present(ob_info)) then
-      call load_atm_data_rttov(geovals,obss,profiles,prof_start,ob_info=ob_info)
-      call load_geom_data_rttov(obss,profiles,prof_start,ob_info=ob_info)
-      emissivity(:) % emis_in = ob_info % emiss(:)
-      calcemis(:) = ob_info % calc_emiss(:)
-    else
-      call load_atm_data_rttov(geovals,obss,profiles,prof_start)
-      call load_geom_data_rttov(obss,profiles,prof_start)
+    class(ufo_radiancerttov_tlad), intent(inout) :: self
+    integer(kind=jpim)                           :: errorstatus
+
+    self % ltraj = .false.
+
+    call rttov_conf_delete(self % conf)
+    call rttov_conf_delete(self % conf_traj)
+
+    if (allocated(self%Skip_Profiles)) deallocate(self%Skip_Profiles)
+
+  end subroutine ufo_radiancerttov_tlad_delete
+
+  ! ------------------------------------------------------------------------------
+  subroutine ufo_radiancerttov_tlad_settraj(self, geovals, obss, hofxdiags)
+
+    use fckit_mpi_module,   only: fckit_mpi_comm
+
+    implicit none
+
+    class(ufo_radiancerttov_tlad), intent(inout) :: self
+    type(ufo_geovals),             intent(in)    :: geovals
+    type(c_ptr), value,            intent(in)    :: obss
+    type(ufo_geovals),             intent(inout) :: hofxdiags    !non-h(x) diagnostics
+
+    type(fckit_mpi_comm)                         :: f_comm
+
+    ! Local Variables
+    character(*), parameter                      :: ROUTINE_NAME = 'ufo_radiancerttov_tlad_settraj'
+    type(ufo_geoval), pointer                    :: temp
+
+    integer(kind=jpim)                           :: errorstatus ! Return error status of RTTOV subroutine calls
+
+    integer                                      :: nchan_max_sim, nchan_count, nchan_total
+    integer                                      :: nprof_sim, nprof_max_sim
+
+    integer                                      :: iprof, ichan, i_inst
+    integer                                      :: prof_start, prof_end
+
+    logical                                      :: layer_quantities
+    logical                                      :: jacobian_needed
+
+    include 'rttov_k.interface'
+    include 'rttov_print_profile.interface'
+    include 'rttov_user_profile_checkinput.interface'
+
+    !DAR: What is this?
+    call obsspace_get_comm(obss, f_comm)
+
+    ! Get number of profile and layers from geovals
+    ! ---------------------------------------------
+    self % nprofiles = geovals % nlocs
+    if (ufo_vars_getindex(geovals%variables, var_ts) > 0) then
+      call ufo_geovals_get_var(geovals, var_ts, temp)
+      self % nlevels = temp % nval ! lfric passing nlevels
+      layer_quantities = .false.
+    endif
+
+    nullify(temp)
+
+    errorstatus = 0_jpim
+    nchan_count = 0
+    nchan_total = 0
+
+    nchan_inst = size(self % channels)
+
+    nchan_max_sim = self % nprofiles * nchan_inst ! Maximum number of channels to pass to RTTOV to simulate
+
+    !! Parse hofxdiags%variables into independent/dependent variables and channel
+    !! assumed formats:
+    !!   jacobian var -->     <ystr>_jacobian_<xstr>_<chstr>
+    !!   non-jacobian var --> <ystr>_<chstr>
+    call parse_hofxdiags(hofxdiags, jacobian_needed)
+
+    Sensor_Loop:do i_inst = 1, self % conf % nSensors
+
+      ! Ensure the options and coefficients are consistent
+      call rttov_user_options_checkinput(errorstatus, self % conf % rttov_opts, &
+        self % conf % rttov_coef_array(i_inst))
+
+      if (errorstatus /= errorstatus_success) then
+        write(message,'(A, A,I6)') trim(ROUTINE_NAME), 'after rttov_user_options_checkinput: error = ',&
+          errorstatus
+        call fckit_log%info(message)
+      end if
+
+      ! keep journal of which profiles have no obs data these will be skipped
+      allocate(self % Skip_Profiles(self % nprofiles))
+      call ufo_rttov_skip_profiles(self%nProfiles,nchan_inst,self%channels,obss,self%Skip_Profiles)
+
+      ! Determine the total number of radiances to simulate (nchanprof).
+      ! In this example we simulate all specified channels for each profile, but
+      ! in general one can simulate a different number of channels for each profile.
+
+      nprof_max_sim = nchan_max_sim / nchan_inst
+      nprof_sim = min(nprof_max_sim, self % nprofiles)
+
+      prof_start = 1
+      prof_end = self % nprofiles
+
+      !DARFIX should actually be packed count of skip_profiles * SIZE(channels)
+      nprof_sim = min(nprof_sim, prof_end - prof_start + 1)
+      nchan_sim = nprof_sim * size(self%channels)
+
+      ! --------------------------------------------------------------------------
+      ! Allocate RTTOV input and output structures
+      ! --------------------------------------------------------------------------
+
+      call self % RTprof_K % alloc(errorstatus, self % conf, nprof_sim, nchan_sim, self % nlevels, init=.true., asw=2)
+
+      do while ( prof_start <= prof_end)
+
+        ! --------------------------------------------------------------------------
+        ! Build the list of profile/channel indices in chanprof
+        ! --------------------------------------------------------------------------
+
+        nchan_sim = 0_jpim
+        nprof_sim = min(nprof_sim, prof_end - prof_start + 1)
+
+        do iprof = 1, min(nprof_sim, prof_end - prof_start + 1)
+          if(.not. self % Skip_Profiles(prof_start + iprof - 1)) then
+            do ichan = 1, nchan_inst
+              nchan_sim = nchan_sim + 1_jpim
+
+              self % RTProf_K % chanprof(nchan_total + nchan_sim) % prof = iprof
+              self % RTprof_K % chanprof(nchan_total + nchan_sim) % chan = self % channels(ichan) 
+            end do
+          endif
+        end do
+
+        !Assign the data from the GeoVaLs
+        !--------------------------------
+
+        call load_atm_data_rttov(geovals,obss,self % RTprof_K % profiles,prof_start,self % conf,layer_quantities)
+        call load_geom_data_rttov(obss,self % RTprof_K % profiles,prof_start)
+
+        ! --------------------------------------------------------------------------
+        ! Set surface emissivity
+        ! --------------------------------------------------------------------------
+        call self % RTProf_K % init_emissivity(self % conf)
+
+        ! Inintialize the K-matrix INPUT so that the results are dTb/dx
+        ! -------------------------------------------------------------
+
+        self % RTprof_K % emissivity_k(:) % emis_out = 0
+        self % RTprof_K % emissivity_k(:) % emis_in = 0
+        self % RTprof_K % emissivity(:) % emis_out = 0
+        self % RTprof_K % radiance_k % bt(:) = 1
+        self % RTprof_K % radiance_k % total(:) = 1
+
+        if(self % conf % RTTOV_profile_checkinput) then
+          if (self % conf % inspect > 0) then
+            ! no error checking, could check multiple profiles in loop but what would be the point
+            call rttov_print_profile(self % RTprof_K % profiles(self % conf % inspect))
+
+            call rttov_user_profile_checkinput(rttov_errorstatus, &
+              self % conf % rttov_opts, &
+              self % conf % rttov_coef_array(i_inst), &
+              self % RTprof_K % profiles(self % conf % inspect))
+          endif
+        endif
+
+        ! --------------------------------------------------------------------------
+        ! Call RTTOV K model
+        ! --------------------------------------------------------------------------
+
+        call rttov_k(                              &
+          errorstatus,                             &! out   error flag
+          self % RTprof_K % chanprof(nchan_total + 1:nchan_total + nchan_sim), &! in channel and profile index structure
+          self % conf % rttov_opts,                     &! in    options structure
+          self % RTprof_K % profiles,                                &! in    profile array
+          self % RTprof_K % profiles_k(nchan_total + 1 : nchan_total + nchan_sim), &! in    profile array
+          self % conf % rttov_coef_array(i_inst), &! in    coefficients structure
+          self % RTprof_K % transmission,                            &! inout computed transmittances
+          self % RTprof_K % transmission_k,                          &! inout computed transmittances
+          self % RTprof_K % radiance,                                &! inout computed radiances
+          self % RTprof_K % radiance_k,                              &! inout computed radiances
+          calcemis    = self % RTprof_K % calcemis,                  &! in    flag for internal emissivity calcs
+          emissivity  = self % RTprof_K % emissivity,                &!, &! inout input/output emissivities per channel
+          emissivity_k = self % RTprof_K % emissivity_k)!,           &! inout input/output emissivities per channel      
+
+        if (self % conf % inspect > 0) then
+          ! no error checking, could check multiple channels here using inspect_k array (NOT IMPLEMENTED)
+          call rttov_print_profile(self % RTprof_K % profiles_k(self % conf % inspect))
+        endif
+
+        if ( errorstatus /= errorstatus_success ) then
+          write(message,'(A, A, 2I6)') trim(ROUTINE_NAME), 'after rttov_k: error ', errorstatus, i_inst
+          call abor1_ftn(message)
+        end if
+
+        write(*,'(A1, i0, A, i0)',ADVANCE="NO") achar(13), prof_start+nprof_sim-1, ' locations processed out of ', geovals%nlocs
+
+        ! Put simulated diagnostics into hofxdiags
+        ! ----------------------------------------------
+        if(hofxdiags%nvar > 0)     call populate_hofxdiags(self % RTprof_K, self % RTprof_K % chanprof, hofxdiags)
+
+        prof_start = prof_start + nprof_sim
+        nchan_total = nchan_total + nchan_sim
+
+        self % nchan_total = nchan_total
+      end do
+      ! Deallocate structures for rttov_direct
+    end do Sensor_Loop
+
+    write(*,*)
+
+    ! Set flag that the tracectory was set
+    ! ------------------------------------
+    self % ltraj = .true.
+
+  end subroutine ufo_radiancerttov_tlad_settraj
+
+  ! ------------------------------------------------------------------------------
+  subroutine ufo_radiancerttov_simobs_tl(self, geovals, obss, nvars, nlocs, hofx)
+    
+    use ufo_constants_mod, only : zero, g_to_kg
+
+    implicit none
+  
+  class(ufo_radiancerttov_tlad), intent(in)    :: self
+    type(ufo_geovals),           intent(in)    :: geovals
+    type(c_ptr), value,          intent(in)    :: obss
+    integer,                     intent(in)    :: nvars, nlocs
+    real(c_double),              intent(inout) :: hofx(nvars, nlocs)
+
+    character(len=*), parameter                :: myname_="ufo_radiancerttov_simobs_tl"
+    integer                                    :: ichan, jchan, prof, jspec
+
+    type(ufo_geoval), pointer                  :: geoval_d, geoval_d2
+
+    ! Initial checks
+    ! --------------
+
+    ! Check if trajectory was set
+    if (.not. self % ltraj) then
+      write(message,*) myname_, ' trajectory wasnt set!'
+      call abor1_ftn(message)
     end if
 
-    idbg = idbg + 1
-
-    !write(*,*) "Rttov options before call to k code"
-    !call rttov_print_opts(config_rttov % opts)
-
-    ! --------------------------------------------------------------------------
-    ! 7. Call RTTOV forward model
-    ! --------------------------------------------------------------------------
-    call rttov_k(                              &
-      errorstatus,                             &! out   error flag
-      self % chanprof(nchan_count + 1:nchan_count + nch), &! in LOCAL channel and profile index structure
-      config_rttov % opts,                     &! in    options structure
-      profiles,                                &! in    profile array
-      self % profiles_k(nchan_count + 1 : nchan_count + nch), &! inout    profile array
-      config_rttov % rttov_coef_array(i_inst), &! in    coefficients structure
-      transmission,                            &! inout computed transmittances
-      transmission_k,                          &! inout computed transmittances
-      radiance,                                &! inout computed radiances
-      radiance_k,                              &! inout computed radiances
-      calcemis    = calcemis,                  &! in    flag for internal emissivity calcs
-      emissivity  = emissivity,                &!, &! inout input/output emissivities per channel
-      emissivity_k = emissivity_k)!,           &! inout input/output emissivities per channel
-
-    idbg = idbg + 1
-
-    if ( errorstatus /= errorstatus_success ) then
-      message = 'Error calling RTTOV K Model for amsua'!//TRIM(SENSOR_ID(n))
-      WRITE(*,*) message
-!     STOP
+    ! Check if nlocs is consistent in geovals & hofx
+    if (geovals % nlocs /= self % nprofiles) then
+      write(message,*) myname_, ' error: nlocs inconsistent!'
+      call abor1_ftn(message)
     end if
 
-    write(*,*) "emissivity_k(1) % emis_in = ",emissivity_k(1) % emis_in
-    write(*,*) "emissivity_k(1) % emis_out = ",emissivity_k(1) % emis_out
+    ! Initialize hofx
+    ! ---------------
+    hofx(:,:) = zero
 
-    prof_start = prof_start + nprof_sim
-    nchan_count = nchan_count + nch
-  end do
+    ! Temperature
+    ! -----------
+    call ufo_geovals_get_var(geovals, var_ts, geoval_d) ! var_ts = air_temperature
 
-  if (present(BT)) BT(:) = radiance % bt(:)
+    ! Check model levels is consistent in geovals
+    if (geoval_d % nval /= self % nlevels) then
+      write(message,*) myname_, ' error: layers inconsistent!'
+      call abor1_ftn(message)
 
-  ! Allocate structures for rttov_k
-  call rttov_alloc_k(                        &
-    errorstatus,                             &
-    0_jpim,                                  &  ! 1 => allocate, 0=> deallocate
-    nprof_sim,                               &
-    nchan_sim,                               &
-    self % NLEVELS,                          &
-    chanprof,                                &
-    config_rttov % opts,                     &
-    profiles,                                &
-    profiles_k,                              &
-    config_rttov % rttov_coef_array(i_inst), &
-    transmission,                            &
-    transmission_k,                          &
-    radiance,                                &
-    radiance_k,                              &
-    calcemis=calcemis,                       &
-    emissivity=emissivity,                   &
-    emissivity_k=emissivity_k,               &
-    init=.TRUE._jplm)
+    end if
 
-    idbg = idbg + 1
+    do ichan = 1, self % nchan_total, size(self%channels)
+      prof = self % RTprof_K % chanprof(ichan) % prof
+      if (.not. self % Skip_Profiles(prof)) then
+        do jchan = 1, size(self%channels)
+          hofx(jchan,prof) = hofx(jchan,prof) + &
+            sum(self % RTprof_K % profiles_k(ichan+jchan-1) % t(self % nlevels:1:-1) * geoval_d % vals(1:geoval_d % nval,prof))
+        enddo
+      endif
+    end do
 
-end do Sensor_Loop
+    do jspec = 1, self%conf%ngas
+      call ufo_geovals_get_var(geovals, self%conf%Absorbers(jspec), geoval_d)
 
-! Set flag that the tracectory was set
-! ------------------------------------
-self % ltraj = .true.
+      ! Check model levels is consistent in geovals
+      if (geoval_d % nval /= self % nlevels) then
+        write(message,*) myname_, ' error: layers inconsistent!'
+        call abor1_ftn(message)
+      end if
 
-end subroutine ufo_radiancerttov_tlad_settraj
+      ! Absorbers
+      ! ---------
+      ! This is where CO2 and friends will live as well as CLW
+      do ichan = 1, self % nchan_total, size(self%channels)
+        prof = self % RTprof_K % chanprof(ichan) % prof
+        if (.not. self % Skip_Profiles(prof)) then
+          do jchan = 1, size(self%channels)
+            if(self%conf%Absorbers(jspec) == var_q) then
+              hofx(jchan,prof) = hofx(jchan,prof) + &
+                sum(self % RTprof_K % profiles_k(ichan+jchan-1) % q(self % nlevels:1:-1) * geoval_d % vals(1:geoval_d % nval,prof))
+            elseif(self%conf%Absorbers(jspec) == var_mixr) then
+              hofx(jchan,prof) = hofx(jchan,prof) + &
+                sum(self % RTprof_K % profiles_k(ichan+jchan-1) % q(self % nlevels:1:-1) * geoval_d % vals(1:geoval_d % nval,prof)) / &
+                g_to_kg
+            elseif(self%conf%Absorbers(jspec) == var_clw) then
+              hofx(jchan,prof) = hofx(jchan,prof) + &
+                sum(self % RTprof_K % profiles_k(ichan+jchan-1) % clw(self % nlevels:1:-1) * geoval_d % vals(1:geoval_d % nval,prof))
+            endif
+          enddo
+        endif
+      end do
+    enddo
 
-! ------------------------------------------------------------------------------
-subroutine ufo_radiancerttov_simobs_tl(self, geovals, obss, hofx, channels)
-implicit none
-class(ufo_radiancerttov_tlad), intent(in) :: self
-type(ufo_geovals), intent(in) :: geovals
-type(c_ptr), value, intent(in) :: obss
-real(c_double), intent(inout) :: hofx(:)
-integer(c_int), intent(in) :: channels(:)  !List of channels to use
-
-character(len=*), parameter :: myname_="ufo_radiancerttov_simobs_tl"
-character(max_string) :: err_msg
-integer :: job, jprofile, jchannel, jlevel, ierr, ichan, prof, nlevels, lev
-type(ufo_geoval), pointer :: tv_d
-
-character(MAXVARLEN) :: varname
-
-! Initial checks
-! --------------
-
-! Check if trajectory was set
-if (.not. self % ltraj) then
-  write(err_msg,*) myname_, ' trajectory wasnt set!'
-  call abor1_ftn(err_msg)
-end if
-
-! Check if nlocs is consistent in geovals & hofx
-if (geovals % nlocs /= self % nprofiles) then
-  write(err_msg,*) myname_, ' error: nlocs inconsistent!'
-  call abor1_ftn(err_msg)
-end if
-
-! Initialize hofx
-! ---------------
-hofx(:) = 0.0_kind_real
-
-! Temperature
-! -----------
-call ufo_geovals_get_var(geovals, var_ts, tv_d) ! var_ts = air_temperature
-
-! Check model levels is consistent in geovals
-if (tv_d % nval /= self % nlevels) then
-  write(err_msg,*) myname_, ' error: layers inconsistent!'
-  call abor1_ftn(err_msg)
-end if
-
-nlevels = SIZE(self % profiles_k(1) % t)
-
-do ichan = 1, self % nprofiles * self % nchannels
-  prof = self % chanprof(ichan) % prof
-
-  hofx(ichan) = hofx(ichan) + &
-    SUM(self % profiles_k(ichan) % t(nlevels:1:-1) * tv_d % vals(:,prof))
-
-end do
-
-end subroutine ufo_radiancerttov_simobs_tl
-
-! ------------------------------------------------------------------------------
-subroutine ufo_radiancerttov_simobs_ad(self, geovals, obss, hofx, channels)
-implicit none
-class(ufo_radiancerttov_tlad), intent(in)    :: self
-type(ufo_geovals),       intent(inout) :: geovals
-type(c_ptr), value,      intent(in)    :: obss
-real(c_double),          intent(in)    :: hofx(:)
-integer(c_int),           intent(in)    :: channels(:)  !List of channels to use
-
-character(len=*), parameter :: myname_="ufo_radiancerttov_simobs_ad"
-character(max_string) :: err_msg
-integer :: job, jprofile, jchannel, jlevel, ierr, ichan, prof, nlevels, lev
-type(ufo_geoval), pointer :: tv_d
-
-character(MAXVARLEN) :: varname
-
-! Initial checks
-! --------------
-
-! Check if trajectory was set
-if (.not. self % ltraj) then
-  write(err_msg,*) myname_, ' trajectory wasnt set!'
-  call abor1_ftn(err_msg)
-end if
-
-! Check if nlocs is consistent in geovals & hofx
-if (geovals % nlocs /= self % nprofiles) then
-  write(err_msg,*) myname_, ' error: nlocs inconsistent!'
-  call abor1_ftn(err_msg)
-end if
+    ! Cloud
+    ! --------------------------
+    !IR 
 
 
-! Temperature
-! -----------
-call ufo_geovals_get_var(geovals, var_ts, tv_d) ! var_ts = air_temperature
+    ! Surface + Single-valued Variables
+    ! --------------------------
+    !CTP/cloudfrac
+    !O3total
+    !LWP
 
+    !T2m
+    call ufo_geovals_get_var(geovals, var_sfc_t2m, geoval_d)
 
-! allocate if not yet allocated
-if (.not. allocated(tv_d % vals)) then
-  tv_d % nlocs = self % nprofiles
-  tv_d % nval = self % nlevels
-  allocate(tv_d % vals(tv_d % nval,tv_d % nlocs))
-  tv_d % vals = 0.0_kind_real
-end if
+    do ichan = 1, self % nchan_total, size(self%channels)
+      prof = self % RTprof_K % chanprof(ichan) % prof
+      if (.not. self % Skip_Profiles(prof)) then
+        do jchan = 1, size(self%channels)
+          hofx(jchan,prof) = hofx(jchan,prof) + &
+            self % RTprof_K % profiles_k(ichan+jchan-1) % s2m % t * geoval_d % vals(1,prof)
+        enddo
+      endif
+    end do
 
-nlevels = SIZE(self % profiles_k(1) % t)
+    !q2m
+    call ufo_geovals_get_var(geovals, var_sfc_q2m, geoval_d)
 
+    do ichan = 1, self % nchan_total, size(self%channels)
+      prof = self % RTprof_K % chanprof(ichan) % prof
+      if (.not. self % Skip_Profiles(prof)) then
+        do jchan = 1, size(self%channels)
+          hofx(jchan,prof) = hofx(jchan,prof) + &
+            self % RTprof_K % profiles_k(ichan+jchan-1) % s2m % q * geoval_d % vals(1,prof)
+        enddo
+      endif
+    end do
 
-do ichan = 1, self % nprofiles * self % nchannels
-  prof = self % chanprof(ichan) % prof
+    !windspeed
+    call ufo_geovals_get_var(geovals, var_u, geoval_d)
+    call ufo_geovals_get_var(geovals, var_v, geoval_d2)
 
-  tv_d % vals(:,prof) = tv_d % vals(:,prof) + &
-    self % profiles_k(ichan) % t(nlevels:1:-1) * hofx(ichan)
-end do
+    do ichan = 1, self % nchan_total, size(self%channels)
+      prof = self % RTprof_K % chanprof(ichan) % prof
+      if (.not. self % Skip_Profiles(prof)) then
+        do jchan = 1, size(self%channels)
+          hofx(jchan,prof) = hofx(jchan,prof) + &
+            self % RTprof_K % profiles_k(ichan+jchan-1) % s2m % u * geoval_d % vals(1,prof) + &
+            self % RTprof_K % profiles_k(ichan+jchan-1) % s2m % v * geoval_d2 % vals(1,prof)
+        enddo
+      endif
+    end do
 
-! Once all geovals set replace flag
-! ---------------------------------
-if (.not. geovals % linit ) geovals % linit=.true.
+    !Tskin
+    call ufo_geovals_get_var(geovals, var_sfc_tskin, geoval_d)
 
-end subroutine ufo_radiancerttov_simobs_ad
+    do ichan = 1, self % nchan_total, size(self%channels)
+      prof = self % RTprof_K % chanprof(ichan) % prof
+      if (.not. self % Skip_Profiles(prof)) then
+        do jchan = 1, size(self%channels)
+          hofx(jchan,prof) = hofx(jchan,prof) + &
+            self % RTprof_K % profiles_k(ichan+jchan-1) % skin % t * geoval_d % vals(1,prof)
+        enddo
+      endif
+    end do
 
-! ------------------------------------------------------------------------------
+  end subroutine ufo_radiancerttov_simobs_tl
+
+  ! ------------------------------------------------------------------------------
+  subroutine ufo_radiancerttov_simobs_ad(self, geovals, obss, nvars, nlocs, hofx)
+
+    use ufo_constants_mod, only : zero, g_to_kg
+
+    implicit none
+
+    class(ufo_radiancerttov_tlad), intent(in)    :: self
+    type(ufo_geovals),             intent(inout) :: geovals
+    type(c_ptr), value,            intent(in)    :: obss
+    integer,                       intent(in)    :: nvars, nlocs
+    real(c_double),                intent(in)    :: hofx(nvars, nlocs)
+
+    type(ufo_geoval), pointer                    :: geoval_d, geoval_d2
+
+    real(c_double)                               :: missing
+    integer                                      :: ichan, jchan, prof, jspec
+
+    character(len=*), parameter                  :: myname_ = "ufo_radiancerttov_simobs_ad"
+
+    ! Set missing value
+    missing = missing_value(missing)
+
+    ! Initial checks
+    ! --------------
+
+    ! Check if trajectory was set
+    if (.not. self % ltraj) then
+      write(message,*) myname_, ' trajectory wasnt set!'
+      call abor1_ftn(message)
+    end if
+
+    ! Check if nlocs is consistent in geovals & hofx
+    if (geovals % nlocs /= self % nprofiles) then
+      write(message,*) myname_, ' error: nlocs inconsistent!'
+      call abor1_ftn(message)
+    end if
+
+    ! Temperature
+    ! -----------
+    call ufo_geovals_get_var(geovals, var_ts, geoval_d) ! var_ts = air_temperature
+
+    ! allocate if not yet allocated
+    if (.not. allocated(geoval_d % vals)) then
+      geoval_d % nlocs = self % nprofiles
+      geoval_d % nval = self % nlevels
+      allocate(geoval_d % vals(geoval_d % nval,geoval_d % nlocs))
+      geoval_d % vals = zero
+    end if
+
+    do ichan = 1, self % nchan_total, size(self%channels)
+      prof = self % RTprof_K % chanprof(ichan) % prof
+      if (.not. self % Skip_Profiles(prof)) then
+        do jchan = 1, size(self%channels)
+          if (hofx(jchan, prof) /= missing) then
+            geoval_d % vals(:,prof) = geoval_d % vals(:,prof) + &
+              self % RTprof_K % profiles_k(ichan+jchan-1) % t(self % nlevels:1:-1) * hofx(jchan,prof)
+          endif
+        enddo
+      endif
+    end do
+    
+    ! Absorbers
+    ! ---------
+    ! This is where CO2 and friends will live as well as CLW
+
+    do jspec = 1, self%conf%ngas
+      call ufo_geovals_get_var(geovals, self%conf%Absorbers(jspec), geoval_d)
+
+      ! allocate if not yet allocated
+      if (.not. allocated(geoval_d % vals)) then
+        geoval_d % nlocs = self % nprofiles
+        geoval_d % nval = self % nlevels
+        allocate(geoval_d % vals(geoval_d % nval,geoval_d % nlocs))
+        geoval_d % vals = zero
+      end if
+
+      do ichan = 1, self % nchan_total, size(self%channels)
+        prof = self % RTprof_K % chanprof(ichan) % prof
+        if (.not. self % Skip_Profiles(prof)) then
+          do jchan = 1, size(self%channels)
+            if (hofx(jchan, prof) /= missing) then
+              
+              if(self%conf%Absorbers(jspec) == var_q) then
+                geoval_d % vals(:,prof) = geoval_d % vals(:,prof) + &
+                  self % RTprof_K % profiles_k(ichan+jchan-1) % q(self % nlevels:1:-1) * hofx(jchan,prof)
+              elseif(self%conf%Absorbers(jspec) == var_mixr) then
+                geoval_d % vals(:,prof) = geoval_d % vals(:,prof) + &
+                  (self % RTprof_K % profiles_k(ichan+jchan-1) % q(self % nlevels:1:-1) / g_to_kg) * hofx(jchan,prof)
+              elseif(self%conf%Absorbers(jspec) == var_clw) then
+                geoval_d % vals(:,prof) = geoval_d % vals(:,prof) + &
+                  self % RTprof_K % profiles_k(ichan+jchan-1) % clw(self % nlevels:1:-1) * hofx(jchan,prof)
+              endif
+            endif
+          enddo
+        endif
+      enddo
+    enddo
+
+    ! Cloud
+    ! --------------------------
+    !IR 
+
+    ! Surface + Single-valued Variables
+    ! --------------------------
+    !CTP/cloudfrac
+    !O3total
+    !LWP
+    !T2m
+
+    call ufo_geovals_get_var(geovals, var_sfc_t2m, geoval_d) 
+
+    ! allocate if not yet allocated
+    if (.not. allocated(geoval_d % vals)) then
+      geoval_d % nlocs = self % nprofiles
+      geoval_d % nval = self % nlevels
+      allocate(geoval_d % vals(geoval_d % nval,geoval_d % nlocs)) ! DARFIX try setting to 1?
+      geoval_d % vals = zero
+    end if
+
+    do ichan = 1, self % nchan_total, size(self%channels)
+      prof = self % RTprof_K % chanprof(ichan) % prof
+      if (.not. self % Skip_Profiles(prof)) then
+        do jchan = 1, size(self%channels)
+          if (hofx(jchan, prof) /= missing) then
+            geoval_d % vals(1,prof) = geoval_d % vals(1,prof) + &
+              self % RTprof_K % profiles_k(ichan+jchan-1) % s2m % t * hofx(jchan,prof)
+          endif
+        enddo
+      endif
+    end do
+
+    !q2m
+    call ufo_geovals_get_var(geovals, var_sfc_q2m, geoval_d) 
+    ! allocate if not yet allocated
+    if (.not. allocated(geoval_d % vals)) then
+      geoval_d % nlocs = self % nprofiles
+      geoval_d % nval = self % nlevels
+      allocate(geoval_d % vals(geoval_d % nval,geoval_d % nlocs)) ! DARFIX try setting to 1?
+      geoval_d % vals = zero
+    end if
+
+    do ichan = 1, self % nchan_total, size(self%channels)
+      prof = self % RTprof_K % chanprof(ichan) % prof
+      if (.not. self % Skip_Profiles(prof)) then
+        do jchan = 1, size(self%channels)
+          if (hofx(jchan, prof) /= missing) then
+            geoval_d % vals(1,prof) = geoval_d % vals(1,prof) + &
+              self % RTprof_K % profiles_k(ichan+jchan-1) % s2m % q * hofx(jchan,prof)
+          endif
+        enddo
+      endif
+    end do
+      
+    !windspeed
+    call ufo_geovals_get_var(geovals, var_u, geoval_d)
+    call ufo_geovals_get_var(geovals, var_v, geoval_d2)
+
+    ! allocate if not yet allocated
+    if (.not. allocated(geoval_d % vals)) then
+      geoval_d % nlocs = self % nprofiles
+      geoval_d % nval = self % nlevels
+      geoval_d2 % nlocs = self % nprofiles
+      geoval_d2 % nval = self % nlevels
+      allocate(geoval_d % vals(geoval_d % nval,geoval_d % nlocs), &
+        geoval_d2 % vals(geoval_d % nval,geoval_d % nlocs)) ! DARFIX try setting to 1?
+      geoval_d % vals = zero
+      geoval_d2 % vals = zero
+    end if
+
+    do ichan = 1, self % nchan_total, size(self%channels)
+      prof = self % RTprof_K % chanprof(ichan) % prof
+      if (.not. self % Skip_Profiles(prof)) then
+        do jchan = 1, size(self%channels)
+          if (hofx(jchan, prof) /= missing) then
+            geoval_d % vals(1,prof) = geoval_d % vals(1,prof) + &
+              self % RTprof_K % profiles_k(ichan+jchan-1) % s2m % u * hofx(jchan,prof)
+            
+            geoval_d2 % vals(1,prof) = geoval_d2 % vals(1,prof) + &
+              self % RTprof_K % profiles_k(ichan+jchan-1) % s2m % v * hofx(jchan,prof)
+          endif
+        enddo
+      endif
+    end do
+
+    !Tskin
+    call ufo_geovals_get_var(geovals, var_sfc_tskin, geoval_d)
+
+    ! allocate if not yet allocated
+    if (.not. allocated(geoval_d % vals)) then
+      geoval_d % nlocs = self % nprofiles
+      geoval_d % nval = self % nlevels
+      allocate(geoval_d % vals(geoval_d % nval,geoval_d % nlocs)) ! DARFIX try setting to 1?
+      geoval_d % vals = zero
+    end if
+
+    do ichan = 1, self % nchan_total, size(self%channels)
+      prof = self % RTprof_K % chanprof(ichan) % prof
+      if (.not. self % Skip_Profiles(prof)) then
+        do jchan = 1, size(self%channels)
+          if (hofx(jchan, prof) /= missing) then
+            geoval_d % vals(1,prof) = geoval_d % vals(1,prof) + &
+              self % RTprof_K % profiles_k(ichan+jchan-1) % skin % t * hofx(jchan,prof)
+          endif
+        enddo
+      endif
+    end do
+      
+    ! Once all geovals set replace flag
+    ! ---------------------------------
+    if (.not. geovals % linit ) geovals % linit=.true.
+
+  end subroutine ufo_radiancerttov_simobs_ad
+
+  ! ------------------------------------------------------------------------------
 
 end module ufo_radiancerttov_tlad_mod

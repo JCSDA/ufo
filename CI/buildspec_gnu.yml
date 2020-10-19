@@ -83,8 +83,15 @@ phases:
       # crtm
       - ./clone.sh $GIT_USER $GIT_PASS crtm $CODEBUILD_GIT_BRANCH crtm /jcsda/ufo-bundle develop
 
+      # ioda-engines
+      - ./clone.sh $GIT_USER $GIT_PASS ioda-engines $CODEBUILD_GIT_BRANCH ioda_engines /jcsda/ufo-bundle develop
+
       # ioda
       - ./clone.sh $GIT_USER $GIT_PASS ioda $CODEBUILD_GIT_BRANCH ioda /jcsda/ufo-bundle develop
+
+      # rttov
+      - ./clone.sh $GIT_USER $GIT_PASS rttov $CODEBUILD_GIT_BRANCH rttov /jcsda/ufo-bundle develop
+
 
       # disable git-lfs
       - git lfs install --skip-smudge
@@ -124,6 +131,9 @@ phases:
       - sed -i -e '/ecbuild_bundle( PROJECT ufo/i\
         ecbuild_bundle( PROJECT geos-aero  GIT "https://github.com/JCSDA/geos-aero.git" )' CMakeLists.txt
       - cat CMakeLists.txt
+
+      - chmod -R 777 /jcsda/ufo-bundle
+      - ls -lt /jcsda/ufo-bundle
   build:
     commands:
       - echo Executing build phase
@@ -144,7 +154,8 @@ phases:
         && echo $CC
         && echo $CXX
         && echo $FC
-        && CC=mpicc CXX=mpicxx FC=mpifort ecbuild -DCMAKE_CXX_COMPILER=$(which g++) -DCMAKE_C_COMPILER=$(which gcc) -DCMAKE_Fortran_COMPILER=$(which gfortran) /jcsda/ufo-bundle/
+        && CC=mpicc CXX=mpicxx FC=mpifort 
+        && cmake  -DCMAKE_MODULE_PATH=/usr/local/share/ecbuild/cmake/ -DBUILD_RTTOV=1 -DCMAKE_BUILD_TYPE=Debug -DENABLE_GPROF=ON -DCMAKE_CXX_COMPILER=$(which g++) -DCMAKE_C_COMPILER=$(which gcc) -DCMAKE_Fortran_COMPILER=$(which gfortran) /jcsda/ufo-bundle/
         && cd ufo
         && make -j4"
 
@@ -168,3 +179,8 @@ phases:
         && ctest -VV --rerun-failed";
         else echo "Build failed";
         fi
+      - echo 'Connect to CodeCov'
+      - cd /build_container/ufo
+      - pwd
+      - ls
+      - bash /jcsda/ufo-bundle/ufo/CI/codecov_script.sh

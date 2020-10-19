@@ -36,7 +36,7 @@ void testLocations() {
   util::DateTime bgn(conf.getString("window begin"));
   util::DateTime end(conf.getString("window end"));
   const eckit::LocalConfiguration obsconf(conf, "obs space");
-  ioda::ObsSpace odb(obsconf, oops::mpi::world(), bgn, end);
+  ioda::ObsSpace odb(obsconf, oops::mpi::world(), bgn, end, oops::mpi::myself());
   const size_t nlocs = odb.nlocs();
 
   // testConstructor:: Locations():
@@ -89,14 +89,16 @@ class Locations : public oops::Test {
   Locations() {}
   virtual ~Locations() {}
  private:
-  std::string testid() const {return "ufo::test::Locations";}
+  std::string testid() const override {return "ufo::test::Locations";}
 
-  void register_tests() const {
+  void register_tests() const override {
     std::vector<eckit::testing::Test>& ts = eckit::testing::specification();
 
     ts.emplace_back(CASE("ufo/Locations/testLocations")
       { testLocations(); });
   }
+
+  void clear() const override {}
 };
 
 // -----------------------------------------------------------------------------

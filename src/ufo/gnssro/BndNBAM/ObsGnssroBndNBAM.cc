@@ -28,7 +28,8 @@ static ObsOperatorMaker<ObsGnssroBndNBAM> makerGnssroBndNBAM_("GnssroBndNBAM");
 ObsGnssroBndNBAM::ObsGnssroBndNBAM(const ioda::ObsSpace & odb, const eckit::Configuration & config)
   : ObsOperatorBase(odb, config), keyOperGnssroBndNBAM_(0), odb_(odb), varin_()
 {
-  std::vector<std::string> vv{"air_temperature", "specific_humidity"};
+  std::vector<std::string> vv{"air_temperature", "specific_humidity",
+                              "surface_altitude"};
 
   const eckit::LocalConfiguration obsOptions(config, "obs options");
 

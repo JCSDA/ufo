@@ -544,14 +544,25 @@ SUBROUTINE Ops_GPSRO_GetK(nstate, &
                             dref_dp,  &         !out
                             dref_dq)            !out
 
-    !  2.  Calculate the gradient of nr wrt ref
-    CALL Ops_GPSROcalc_nrK (zb_pseudo,    &           ! geopotential heights of model/pseudo levels
-                            nb,           &           ! number of levels in zb
-                            RO_Rad_Curv,  &           ! radius of curvature of earth at observation
-                            Latitude,     &           ! latitude at observation
-                            RO_geoid_und, &           ! geoid undulation above WGS-84
-                            ref_model,    &           ! refractivity of model on model levels
-                            dnr_dref)                 ! out
+    IF (pseudo_ops) THEN
+      !  2.  Calculate the gradient of nr wrt ref
+      CALL Ops_GPSROcalc_nrK (zb_pseudo,    &           ! geopotential heights of pseudo levels
+                              nb,           &           ! number of levels in zb
+                              RO_Rad_Curv,  &           ! radius of curvature of earth at observation
+                              Latitude,     &           ! latitude at observation
+                              RO_geoid_und, &           ! geoid undulation above WGS-84
+                              ref_model,    &           ! refractivity of model on model levels
+                              dnr_dref)                 ! out
+    ELSE
+      !  2.  Calculate the gradient of nr wrt ref
+      CALL Ops_GPSROcalc_nrK (zb,           &           ! geopotential heights of model levels
+                              nb,           &           ! number of levels in zb
+                              RO_Rad_Curv,  &           ! radius of curvature of earth at observation
+                              Latitude,     &           ! latitude at observation
+                              RO_geoid_und, &           ! geoid undulation above WGS-84
+                              ref_model,    &           ! refractivity of model on model levels
+                              dnr_dref)                 ! out
+    END IF
 
     !  3.  Calculate the gradient of bending angle wrt ref and nr
     CALL Ops_GPSROcalc_alphaK (nobs,        &      ! size of ob. vector

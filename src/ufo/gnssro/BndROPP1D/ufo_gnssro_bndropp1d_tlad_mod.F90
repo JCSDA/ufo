@@ -65,28 +65,27 @@ subroutine ufo_gnssro_bndropp1d_tlad_settraj(self, geovals, obss)
   self%nval = prs%nval
   self%nlocs = obsspace_get_nlocs(obss)
   
-  self%iflip = 0
-  if (prs%vals(1,1) .lt. prs%vals(prs%nval,1) ) then
-    self%iflip = 1
-    write(err_msg,'(a)') '  ufo_gnssro_bndropp1d_tlad_settraj:'//new_line('a')//                   &
-                         '  Model vertical height profile is in descending order,'//new_line('a')// &
-                         '  but ROPP requires it to be ascending order, need flip'
-    call fckit_log%info(err_msg)
+  if (self%nlocs > 0) then
+     self%iflip = 0
+     if (prs%vals(1,1) .lt. prs%vals(prs%nval,1) ) then
+       self%iflip = 1
+       write(err_msg,'(a)') '  ufo_gnssro_bndropp1d_tlad_settraj:'//new_line('a')//                   &
+                            '  Model vertical height profile is in descending order,'//new_line('a')// &
+                            '  but ROPP requires it to be ascending order, need flip'
+       call fckit_log%info(err_msg)
+     end if
+
+     allocate(self%t(self%nval,self%nlocs))
+     allocate(self%q(self%nval,self%nlocs))
+     allocate(self%prs(self%nval,self%nlocs))
+     allocate(self%gph(self%nval,self%nlocs))
+     allocate(self%gph_sfc(1,self%nlocs))
+     self%gph     = gph%vals
+     self%t       = t%vals
+     self%q       = q%vals
+     self%prs     = prs%vals
+     self%gph_sfc = gph_sfc%vals
   end if
-
-  allocate(self%t(self%nval,self%nlocs))
-  allocate(self%q(self%nval,self%nlocs))
-  allocate(self%prs(self%nval,self%nlocs))
-  allocate(self%gph(self%nval,self%nlocs))
-  allocate(self%gph_sfc(1,self%nlocs))
-
-! allocate  
-  self%gph     = gph%vals
-  self%t       = t%vals
-  self%q       = q%vals
-  self%prs     = prs%vals
-  self%gph_sfc = gph_sfc%vals
-
   self%ltraj   = .true.
        
 end subroutine ufo_gnssro_bndropp1d_tlad_settraj
@@ -143,78 +142,79 @@ subroutine ufo_gnssro_bndropp1d_simobs_tl(self, geovals, hofx, obss)
 
   nlev  = self%nval 
   nlocs  = self%nlocs ! number of observations
+  if (nlocs > 0) then
+     allocate(gph_d_zero(nlev))
+     gph_d_zero     = 0.0
+     gph_sfc_d_zero = 0.0
 
-  allocate(gph_d_zero(nlev))
-  gph_d_zero     = 0.0
-  gph_sfc_d_zero = 0.0
+   ! set obs space struture
+     allocate(obsLon(nlocs))
+     allocate(obsLat(nlocs))
+     allocate(obsImpP(nlocs))
+     allocate(obsLocR(nlocs))
+     allocate(obsGeoid(nlocs))
+     call obsspace_get_db(obss, "MetaData", "longitude",        obsLon)
+     call obsspace_get_db(obss, "MetaData", "latitude",         obsLat)
+     call obsspace_get_db(obss, "MetaData", "impact_parameter", obsImpP)
+     call obsspace_get_db(obss, "MetaData", "earth_radius_of_curvature", obsLocR)
+     call obsspace_get_db(obss, "MetaData", "geoid_height_above_reference_ellipsoid", obsGeoid) 
 
-! set obs space struture
-  allocate(obsLon(nlocs))
-  allocate(obsLat(nlocs))
-  allocate(obsImpP(nlocs))
-  allocate(obsLocR(nlocs))
-  allocate(obsGeoid(nlocs))
-  call obsspace_get_db(obss, "MetaData", "longitude",        obsLon)
-  call obsspace_get_db(obss, "MetaData", "latitude",         obsLat)
-  call obsspace_get_db(obss, "MetaData", "impact_parameter", obsImpP)
-  call obsspace_get_db(obss, "MetaData", "earth_radius_of_curvature", obsLocR)
-  call obsspace_get_db(obss, "MetaData", "geoid_height_above_reference_ellipsoid", obsGeoid) 
+     nvprof = 1  ! no. of bending angles in profile 
 
-  nvprof = 1  ! no. of bending angles in profile 
+   ! loop through the obs
+     obs_loop: do iobs = 1, nlocs   ! order of loop doesn't matter
 
-! loop through the obs
-  obs_loop: do iobs = 1, nlocs   ! order of loop doesn't matter
+       ob_time = 0.0
+   !   map the trajectory to ROPP structure x
+       call init_ropp_1d_statevec( ob_time,       &
+                           obsLon(iobs),          &
+                           obsLat(iobs),          &
+                           self%t(:,iobs),        &
+                           self%q(:,iobs),        &
+                           self%prs(:,iobs),      &
+                           self%gph(:,iobs),      &
+                                      nlev,       &
+                           self%gph_sfc(1,iobs),  &
+                                 x, self%iflip)
+   !  hack -- make non zero humidity to avoid zero denominator in tangent linear
+   !          see  ropp_fm/bangle_1d/ropp_fm_bangle_1d_tl.f90
+       where(x%shum .le. 1e-8)        x%shum = 1e-8
+   !  hack -- make non zero humidity to avoid zero denominator in tangent linear
 
-    ob_time = 0.0
-!   map the trajectory to ROPP structure x
-    call init_ropp_1d_statevec( ob_time,       &
-                        obsLon(iobs),          &
-                        obsLat(iobs),          &
-                        self%t(:,iobs),        &
-                        self%q(:,iobs),        &
-                        self%prs(:,iobs),      &
-                        self%gph(:,iobs),      &
-                                   nlev,       &
-                        self%gph_sfc(1,iobs),  &
-                              x, self%iflip)
-!  hack -- make non zero humidity to avoid zero denominator in tangent linear
-!          see  ropp_fm/bangle_1d/ropp_fm_bangle_1d_tl.f90
-    where(x%shum .le. 1e-8)        x%shum = 1e-8
-!  hack -- make non zero humidity to avoid zero denominator in tangent linear
+       call init_ropp_1d_statevec( ob_time,        &
+                           obsLon(iobs),           &
+                           obsLat(iobs),           &
+                           t_d%vals(:,iobs),       &
+                           q_d%vals(:,iobs),       &
+                           prs_d%vals(:,iobs),     &
+                           gph_d_zero(:),          &
+                                      nlev,        &
+                           gph_sfc_d_zero,         &
+                           x_tl, self%iflip)
+   !   set both y and y_tl structures    
+       call init_ropp_1d_obvec_tlad(iobs, nvprof, &
+                         obsImpP(iobs),           &
+                         obsLat(iobs),            &
+                         obsLon(iobs),            &
+                         obsLocR(iobs),           &
+                         obsGeoid(iobs),          &
+                                y,y_tl)
 
-    call init_ropp_1d_statevec( ob_time,        &
-                        obsLon(iobs),           &
-                        obsLat(iobs),           &
-                        t_d%vals(:,iobs),       &
-                        q_d%vals(:,iobs),       &
-                        prs_d%vals(:,iobs),     &
-                        gph_d_zero(:),          &
-                                   nlev,        &
-                        gph_sfc_d_zero,         &
-                        x_tl, self%iflip)
-!   set both y and y_tl structures    
-    call init_ropp_1d_obvec_tlad(iobs, nvprof, &
-                      obsImpP(iobs),           &
-                      obsLat(iobs),            &
-                      obsLon(iobs),            &
-                      obsLocR(iobs),           &
-                      obsGeoid(iobs),          &
-                             y,y_tl)
+   !   now call TL of forward model
+       call ropp_fm_bangle_1d_tl(x,x_tl,y, y_tl%bangle(nvprof))
+       hofx(iobs) = y_tl%bangle(nvprof) ! this will need to change if profile is passed
 
-!   now call TL of forward model
-    call ropp_fm_bangle_1d_tl(x,x_tl,y, y_tl%bangle(nvprof))
-    hofx(iobs) = y_tl%bangle(nvprof) ! this will need to change if profile is passed
-
-!   tidy up -deallocate ropp structures 
-    call ropp_tidy_up_tlad_1d(x,x_tl,y,y_tl)
-  end do obs_loop
-
-! tidy up - deallocate obsspace structures
-  deallocate(obsLat) 
-  deallocate(obsLon)
-  deallocate(obsImpP)
-  deallocate(obsLocR)
-  deallocate(obsGeoid)
+   !   tidy up -deallocate ropp structures 
+       call ropp_tidy_up_tlad_1d(x,x_tl,y,y_tl)
+     end do obs_loop
+ 
+   ! tidy up - deallocate obsspace structures
+     deallocate(obsLat) 
+     deallocate(obsLon)
+     deallocate(obsImpP)
+     deallocate(obsLocR)
+     deallocate(obsGeoid)
+  end if ! nlocs > 0
 
   write(err_msg,*) "TRACE: ufo_gnssro_bndropp1d_simobs_tl: complete"
   call fckit_log%info(err_msg)
@@ -255,142 +255,141 @@ subroutine ufo_gnssro_bndropp1d_simobs_ad(self, geovals, hofx, obss)
 
   write(err_msg,*) "TRACE: ufo_gnssro_bndropp1d_simobs_ad: begin"
   call fckit_log%info(err_msg)
-
-! check if trajectory was set
-  if (.not. self%ltraj) then
-     write(err_msg,*) myname_, ' trajectory wasnt set!'
-     call abor1_ftn(err_msg)
-  endif
-! check if nlocs is consistent in geovals & hofx
-  if (geovals%nlocs /= size(hofx)) then
-     write(err_msg,*) myname_, ' error: nlocs inconsistent!'
-     call abor1_ftn(err_msg)
-  endif
-     
-! get variables from geovals
-  call ufo_geovals_get_var(geovals, var_ts,    t_d)         ! temperature
-  call ufo_geovals_get_var(geovals, var_q,     q_d)         ! specific humidity
-  call ufo_geovals_get_var(geovals, var_prs,   prs_d)       ! pressure
-
-! allocate if not yet allocated   
-  if (.not. allocated(t_d%vals)) then
-      t_d%nlocs = self%nlocs
-      t_d%nval = self%nval
-      allocate(t_d%vals(t_d%nval,t_d%nlocs))
-      t_d%vals = 0.0_kind_real
-  endif
-
-  if (.not. allocated(prs_d%vals)) then
-      prs_d%nlocs = self%nlocs
-      prs_d%nval = self%nval
-      allocate(prs_d%vals(prs_d%nval,prs_d%nlocs))
-      prs_d%vals = 0.0_kind_real
-  endif
-
-  if (.not. allocated(q_d%vals)) then
-      q_d%nlocs = self%nlocs
-      q_d%nval = self%nval
-      allocate(q_d%vals(q_d%nval,q_d%nlocs))
-      q_d%vals = 0.0_kind_real
-  endif
-
-  if (.not. geovals%linit ) geovals%linit=.true.
-
-  nlev  = self%nval 
-  nlocs  = self%nlocs
-
-  allocate(gph_d_zero(nlev))
-  gph_d_zero = 0.0
-
-! set obs space struture
-  allocate(obsLon(nlocs))
-  allocate(obsLat(nlocs))
-  allocate(obsImpP(nlocs))
-  allocate(obsLocR(nlocs))
-  allocate(obsGeoid(nlocs))
-
-  call obsspace_get_db(obss, "MetaData", "longitude", obsLon)
-  call obsspace_get_db(obss, "MetaData", "latitude", obsLat) 
-  call obsspace_get_db(obss, "MetaData", "impact_parameter", obsImpP)
-  call obsspace_get_db(obss, "MetaData", "earth_radius_of_curvature", obsLocR)
-  call obsspace_get_db(obss, "MetaData", "geoid_height_above_reference_ellipsoid", obsGeoid)
-  
-  missing = missing_value(missing)
-
-! loop through the obs
-  nvprof=1  ! no. of bending angles in profile 
-  obs_loop: do iobs = 1, nlocs 
-
-    if (hofx(iobs) .gt. missing) then
-        ob_time = 0.0
-
-!       map the trajectory to ROPP structure x
-        call init_ropp_1d_statevec( ob_time,   &
-                          obsLon(iobs),        &
-                          obsLat(iobs),        &
-                          self%t(:,iobs),      &
-                          self%q(:,iobs),      &
-                          self%prs(:,iobs),    &
-                          self%gph(:,iobs),    &
-                                     nlev,     &
-                          self%gph_sfc(1,iobs),&
-                                x, self%iflip)
-
-        call init_ropp_1d_statevec( ob_time,  &
-                            obsLon(iobs),     &
-                            obsLat(iobs),     &
-                        t_d%vals(:,iobs),     &
-                        q_d%vals(:,iobs),     &
-                       prs_d%vals(:,iobs),    &
-                            gph_d_zero(:),    &
-                                     nlev,    &
-                           gph_sfc_d_zero,    &
-                          x_ad, self%iflip)
-
-
- !      x_ad is local so initialise to 0.0
-        x_ad%temp(:) = 0.0_wp
-        x_ad%pres(:) = 0.0_wp
-        x_ad%shum(:) = 0.0_wp
-        x_ad%geop(:) = 0.0_wp
+  if (self%nlocs > 0) then
+   ! check if trajectory was set
+     if (.not. self%ltraj) then
+        write(err_msg,*) myname_, ' trajectory wasnt set!'
+        call abor1_ftn(err_msg)
+     endif
+   ! check if nlocs is consistent in geovals & hofx
+     if (geovals%nlocs /= size(hofx)) then
+        write(err_msg,*) myname_, ' error: nlocs inconsistent!'
+        call abor1_ftn(err_msg)
+     endif
  
- !      set both y and y_ad structures    
-        call init_ropp_1d_obvec_tlad(iobs,  nvprof,  &
-                         obsImpP(iobs),              &
-                         obsLat(iobs),               &
-                         obsLon(iobs),               &
-                         obsLocR(iobs),              &
-                         obsGeoid(iobs),             &
-                                y,y_ad)
+   ! get variables from geovals
+     call ufo_geovals_get_var(geovals, var_ts,    t_d)         ! temperature
+     call ufo_geovals_get_var(geovals, var_q,     q_d)         ! specific humidity
+     call ufo_geovals_get_var(geovals, var_prs,   prs_d)       ! pressure
 
+   ! allocate if not yet allocated   
+     if (.not. allocated(t_d%vals)) then
+         t_d%nlocs = self%nlocs
+         t_d%nval = self%nval
+         allocate(t_d%vals(t_d%nval,t_d%nlocs))
+         t_d%vals = 0.0_kind_real
+     endif
 
-!       local variable initialise
-        y_ad%bangle(:) = 0.0_wp
+     if (.not. allocated(prs_d%vals)) then
+         prs_d%nlocs = self%nlocs
+         prs_d%nval = self%nval
+         allocate(prs_d%vals(prs_d%nval,prs_d%nlocs))
+         prs_d%vals = 0.0_kind_real
+     endif
 
-!       now call AD of forward model
-        y_ad%bangle(nvprof)  = y_ad%bangle(nvprof) + hofx(iobs)
-        call ropp_fm_bangle_1d_ad(x,x_ad,y,y_ad)
-        call init_ropp_1d_statevec_ad(           &
-                          t_d%vals(:,iobs),      &
-                          q_d%vals(:,iobs),      &
-                        prs_d%vals(:,iobs),      &
-                        gph_d_zero(:),           &
-                        nlev, x_ad, self%iflip) 
+     if (.not. allocated(q_d%vals)) then
+         q_d%nlocs = self%nlocs
+         q_d%nval = self%nval
+         allocate(q_d%vals(q_d%nval,q_d%nlocs))
+         q_d%vals = 0.0_kind_real
+     endif
 
-!     tidy up - deallocate ropp structures  
-      call ropp_tidy_up_tlad_1d(x,x_ad,y,y_ad)
+     if (.not. geovals%linit ) geovals%linit=.true.
 
-    end if  ! end missing value check
+     nlev  = self%nval 
+     nlocs  = self%nlocs
 
-  end do obs_loop
+     allocate(gph_d_zero(nlev))
+     gph_d_zero = 0.0
 
-! tidy up - deallocate obsspace structures
-  deallocate(obsLat) 
-  deallocate(obsLon)
-  deallocate(obsImpP)
-  deallocate(obsLocR)
-  deallocate(obsGeoid)
-  deallocate(gph_d_zero)
+   ! set obs space struture
+     allocate(obsLon(nlocs))
+     allocate(obsLat(nlocs))
+     allocate(obsImpP(nlocs))
+     allocate(obsLocR(nlocs))
+     allocate(obsGeoid(nlocs))
+
+     call obsspace_get_db(obss, "MetaData", "longitude", obsLon)
+     call obsspace_get_db(obss, "MetaData", "latitude", obsLat) 
+     call obsspace_get_db(obss, "MetaData", "impact_parameter", obsImpP)
+     call obsspace_get_db(obss, "MetaData", "earth_radius_of_curvature", obsLocR)
+     call obsspace_get_db(obss, "MetaData", "geoid_height_above_reference_ellipsoid", obsGeoid)
+
+     missing = missing_value(missing)
+
+   ! loop through the obs
+     nvprof=1  ! no. of bending angles in profile 
+     obs_loop: do iobs = 1, nlocs 
+
+       if (hofx(iobs) .gt. missing) then
+           ob_time = 0.0
+
+   !       map the trajectory to ROPP structure x
+           call init_ropp_1d_statevec( ob_time,   &
+                             obsLon(iobs),        &
+                             obsLat(iobs),        &
+                             self%t(:,iobs),      &
+                             self%q(:,iobs),      &
+                             self%prs(:,iobs),    &
+                             self%gph(:,iobs),    &
+                                        nlev,     &
+                             self%gph_sfc(1,iobs),&
+                                   x, self%iflip)
+
+           call init_ropp_1d_statevec( ob_time,  &
+                               obsLon(iobs),     &
+                               obsLat(iobs),     &
+                           t_d%vals(:,iobs),     &
+                           q_d%vals(:,iobs),     &
+                          prs_d%vals(:,iobs),    &
+                               gph_d_zero(:),    &
+                                        nlev,    &
+                              gph_sfc_d_zero,    &
+                             x_ad, self%iflip)
+
+    !      x_ad is local so initialise to 0.0
+           x_ad%temp(:) = 0.0_wp
+           x_ad%pres(:) = 0.0_wp
+           x_ad%shum(:) = 0.0_wp
+           x_ad%geop(:) = 0.0_wp
+ 
+    !      set both y and y_ad structures    
+           call init_ropp_1d_obvec_tlad(iobs,  nvprof,  &
+                            obsImpP(iobs),              &
+                            obsLat(iobs),               &
+                            obsLon(iobs),               &
+                            obsLocR(iobs),              &
+                            obsGeoid(iobs),             &
+                                   y,y_ad)
+
+   !       local variable initialise
+           y_ad%bangle(:) = 0.0_wp
+ 
+   !       now call AD of forward model
+           y_ad%bangle(nvprof)  = y_ad%bangle(nvprof) + hofx(iobs)
+           call ropp_fm_bangle_1d_ad(x,x_ad,y,y_ad)
+           call init_ropp_1d_statevec_ad(           &
+                             t_d%vals(:,iobs),      &
+                             q_d%vals(:,iobs),      &
+                           prs_d%vals(:,iobs),      &
+                           gph_d_zero(:),           &
+                           nlev, x_ad, self%iflip) 
+
+   !     tidy up - deallocate ropp structures  
+         call ropp_tidy_up_tlad_1d(x,x_ad,y,y_ad)
+
+       end if  ! end missing value check
+
+     end do obs_loop
+
+   ! tidy up - deallocate obsspace structures
+     deallocate(obsLat) 
+     deallocate(obsLon)
+     deallocate(obsImpP)
+     deallocate(obsLocR)
+     deallocate(obsGeoid)
+     deallocate(gph_d_zero)
+  end if ! nlocs > 0
 
   write(err_msg,*) "TRACE: ufo_gnssro_bndropp1d_simobs_ad: complete"
   call fckit_log%info(err_msg)

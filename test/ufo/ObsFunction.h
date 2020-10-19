@@ -59,7 +59,7 @@ void testFunction() {
   util::DateTime bgn(conf.getString("window begin"));
   util::DateTime end(conf.getString("window end"));
   const eckit::LocalConfiguration obsconf(conf, "obs space");
-  ioda::ObsSpace ospace(obsconf, oops::mpi::world(), bgn, end);
+  ioda::ObsSpace ospace(obsconf, oops::mpi::world(), bgn, end, oops::mpi::myself());
 
 ///  Setup ObsFilterData
   ObsFilterData inputs(ospace);
@@ -134,14 +134,16 @@ class ObsFunction : public oops::Test {
   ObsFunction() {}
   virtual ~ObsFunction() {}
  private:
-  std::string testid() const {return "ufo::test::ObsFunction";}
+  std::string testid() const override {return "ufo::test::ObsFunction";}
 
-  void register_tests() const {
+  void register_tests() const override {
     std::vector<eckit::testing::Test>& ts = eckit::testing::specification();
 
     ts.emplace_back(CASE("ufo/ObsFunction/testFunction")
       { testFunction(); });
   }
+
+  void clear() const override {}
 };
 
 // -----------------------------------------------------------------------------

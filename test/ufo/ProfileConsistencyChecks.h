@@ -29,10 +29,17 @@
 #include "ufo/ObsDiagnostics.h"
 
 #include "ufo/profile/EntireSampleDataHandler.h"
+#include "ufo/profile/ProfileCheckBackgroundGeopotentialHeight.h"
+#include "ufo/profile/ProfileCheckBackgroundRelativeHumidity.h"
+#include "ufo/profile/ProfileCheckBackgroundTemperature.h"
+#include "ufo/profile/ProfileCheckBackgroundWindSpeed.h"
 #include "ufo/profile/ProfileCheckBase.h"
+#include "ufo/profile/ProfileCheckTime.h"
 #include "ufo/profile/ProfileCheckUInterp.h"
 #include "ufo/profile/ProfileDataHandler.h"
 #include "ufo/profile/VariableNames.h"
+
+#include "ufo/utils/metoffice/MetOfficeQCFlags.h"
 
 namespace ufo {
 namespace test {
@@ -42,7 +49,7 @@ void testProfileConsistencyChecks(const eckit::LocalConfiguration &conf) {
   util::DateTime end(conf.getString("window end"));
 
   const eckit::LocalConfiguration obsSpaceConf(conf, "obs space");
-  ioda::ObsSpace obsspace(obsSpaceConf, oops::mpi::world(), bgn, end);
+  ioda::ObsSpace obsspace(obsSpaceConf, oops::mpi::world(), bgn, end, oops::mpi::myself());
 
   ioda::ObsVector hofx(obsspace);
 
@@ -125,6 +132,92 @@ void testProfileConsistencyChecks(const eckit::LocalConfiguration &conf) {
     // Attempt to access data with incorrect type
     EXPECT_THROWS(profileDataHandler.get<int>(ufo::VariableNames::obs_air_pressure));
   }
+
+  // Manually modify QC flags in order to cover rare code paths.
+  bool ManualFlagModification = conf.getBool("ManualFlagModification", false);
+  if (ManualFlagModification) {
+    std::unique_ptr <ProfileConsistencyCheckParameters> options_;
+    options_.reset(new ProfileConsistencyCheckParameters());
+    options_->deserialize(conf);
+    EntireSampleDataHandler entireSampleDataHandler(obsspace,
+                                                    *options_);
+    // Load data from obsspace
+    entireSampleDataHandler.get<float>(ufo::VariableNames::obs_air_pressure);
+    entireSampleDataHandler.get<int>(ufo::VariableNames::qcflags_air_temperature);
+    std::vector<bool> apply(obsspace.nlocs(), true);
+    ProfileIndices profileIndices(obsspace,
+                                  *options_,
+                                  apply);
+    ProfileDataHandler profileDataHandler(obsspace,
+                                          *options_,
+                                          entireSampleDataHandler,
+                                          profileIndices);
+    ProfileCheckValidator profileCheckValidator(*options_,
+                                                profileDataHandler);
+
+    profileIndices.determineProfileIndices();
+    profileDataHandler.reset();
+
+    // Obtain profile data
+    profileDataHandler.get<float>(ufo::VariableNames::obs_air_pressure);
+
+    // Modify flags
+    std::vector <int> &ReportFlags =
+      profileDataHandler.get<int>(ufo::VariableNames::qcflags_observation_report);
+    std::vector <int> &tFlags =
+      profileDataHandler.get<int>(ufo::VariableNames::qcflags_air_temperature);
+    std::vector <int> &rhFlags =
+      profileDataHandler.get<int>(ufo::VariableNames::qcflags_relative_humidity);
+    std::vector <int> &uFlags =
+      profileDataHandler.get<int>(ufo::VariableNames::qcflags_eastward_wind);
+    std::vector <int> &zFlags =
+      profileDataHandler.get<int>(ufo::VariableNames::qcflags_geopotential_height);
+    std::vector <int> &timeFlags =
+      profileDataHandler.get<int>(ufo::VariableNames::qcflags_time);
+
+    ReportFlags[0] |= ufo::MetOfficeQCFlags::WholeObReport::PermRejectReport;
+    tFlags[0] |= ufo::MetOfficeQCFlags::Profile::SuperadiabatFlag;
+    tFlags[0] |= ufo::MetOfficeQCFlags::Profile::InterpolationFlag;
+    tFlags[0] |= ufo::MetOfficeQCFlags::Profile::HydrostaticFlag;
+    rhFlags[0] |= ufo::MetOfficeQCFlags::Elem::PermRejectFlag;
+    uFlags[0] |= ufo::MetOfficeQCFlags::Profile::InterpolationFlag;
+    zFlags[0] |= ufo::MetOfficeQCFlags::Profile::InterpolationFlag;
+    zFlags[0] |= ufo::MetOfficeQCFlags::Profile::HydrostaticFlag;
+
+    // Create checks
+    ProfileCheckTime profileCheckTime(*options_,
+                                      profileIndices,
+                                      profileDataHandler,
+                                      profileCheckValidator);
+    ProfileCheckBackgroundTemperature profileCheckBackgroundT(*options_,
+                                                              profileIndices,
+                                                              profileDataHandler,
+                                                              profileCheckValidator);
+    ProfileCheckBackgroundRelativeHumidity profileCheckBackgroundRH(*options_,
+                                                                    profileIndices,
+                                                                    profileDataHandler,
+                                                                    profileCheckValidator);
+    ProfileCheckBackgroundWindSpeed profileCheckBackgroundUV(*options_,
+                                                             profileIndices,
+                                                             profileDataHandler,
+                                                             profileCheckValidator);
+    ProfileCheckBackgroundGeopotentialHeight profileCheckBackgroundZ(*options_,
+                                                                     profileIndices,
+                                                                     profileDataHandler,
+                                                                     profileCheckValidator);
+
+    // Run time check
+    profileCheckTime.runCheck();
+
+    // Modify time flag
+    timeFlags[0] = true;
+
+    // Run remaining checks
+    profileCheckBackgroundT.runCheck();
+    profileCheckBackgroundRH.runCheck();
+    profileCheckBackgroundUV.runCheck();
+    profileCheckBackgroundZ.runCheck();
+  }
 }
 
 class ProfileConsistencyChecks : public oops::Test {
@@ -144,6 +237,8 @@ class ProfileConsistencyChecks : public oops::Test {
                       });
     }
   }
+
+  void clear() const override {}
 };
 
 }  // namespace test

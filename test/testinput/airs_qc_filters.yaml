@@ -45,7 +45,6 @@ observations:
 #    filename: Data/airs_aqua_geoval_2018041500_m_qc.nc4
     filename: Data/airs_aqua_geoval_2018041500_m_unittest.nc4
   obs bias:
-    name: LinearCombination
     abias_in: Data/satbias_crtm_in
     sensor: *Sensor_ID
     jobs: *all_channels

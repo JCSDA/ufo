@@ -39,14 +39,12 @@ namespace ufo {
     std::vector <int> &NumInterpErrObs =
       profileDataHandler_.get<int>(ufo::VariableNames::counter_NumInterpErrObs);
 
-    if (oops::anyVectorEmpty(pressures, uObs, vObs, uFlags)) {
-      oops::Log::debug() << "At least one vector is empty. "
-                         << "Check will not be performed." << std::endl;
-      return;
-    }
-    if (!oops::allVectorsSameSize(pressures, uObs, vObs, uFlags)) {
-      oops::Log::debug() << "Not all vectors have the same size. "
-                         << "Check will not be performed." << std::endl;
+    if (!oops::allVectorsSameNonZeroSize(pressures, uObs, vObs, uFlags)) {
+      oops::Log::warning() << "At least one vector is the wrong size. "
+                           << "Check will not be performed." << std::endl;
+      oops::Log::warning() << "Vector sizes: "
+                           << oops::listOfVectorSizes(pressures, uObs, vObs, uFlags)
+                           << std::endl;
       return;
     }
 
@@ -69,8 +67,8 @@ namespace ufo {
               std::pow(vObs[jlev] - vObs[jlevprev], 2);
             if (VectDiffSq > options_.UICheck_TInterpIdenticalPTolSq.value()) {
               NumErrors++;
-              uFlags[jlevprev] |= ufo::FlagsProfile::InterpolationFlag;
-              uFlags[jlev]     |= ufo::FlagsProfile::InterpolationFlag;
+              uFlags[jlevprev] |= ufo::MetOfficeQCFlags::Profile::InterpolationFlag;
+              uFlags[jlev]     |= ufo::MetOfficeQCFlags::Profile::InterpolationFlag;
               oops::Log::debug() << " -> Wind speed interpolation check: identical P for "
                                  << "levels " << jlevprev << " and " << jlev << std::endl;
               oops::Log::debug() << " -> Level " << jlevprev << ": "
@@ -134,9 +132,9 @@ namespace ufo {
         LevErrors_[SigB]++;
         LevErrors_[SigA]++;
         // Simplest form of flagging
-        uFlags[jlev] |= ufo::FlagsProfile::InterpolationFlag;
-        uFlags[SigB] |= ufo::FlagsProfile::InterpolationFlag;
-        uFlags[SigA] |= ufo::FlagsProfile::InterpolationFlag;
+        uFlags[jlev] |= ufo::MetOfficeQCFlags::Profile::InterpolationFlag;
+        uFlags[SigB] |= ufo::MetOfficeQCFlags::Profile::InterpolationFlag;
+        uFlags[SigA] |= ufo::MetOfficeQCFlags::Profile::InterpolationFlag;
 
         oops::Log::debug() << " -> Failed wind speed interpolation check for levels " << jlev
                            << " (central), " << SigB << " (lower) and "

@@ -36,7 +36,7 @@ const ufo::TrackCheckShipDiagnostics setupRunFilter(const eckit::LocalConfigurat
   util::DateTime end(conf.getString("window end"));
 
   const eckit::LocalConfiguration obsSpaceConf(conf, "obs space");
-  ioda::ObsSpace obsspace(obsSpaceConf, oops::mpi::world(), bgn, end);
+  ioda::ObsSpace obsspace(obsSpaceConf, oops::mpi::world(), bgn, end, oops::mpi::myself());
 
   if (conf.has("station_ids")) {
     const std::vector<int> stationIds = conf.getIntVector("station_ids");
@@ -198,6 +198,8 @@ class TrackCheckShip : public oops::Test {
                       });
     }
   }
+
+  void clear() const override {}
 };
 
 }  // namespace test

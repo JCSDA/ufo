@@ -20,7 +20,6 @@
 #include "ufo/filters/QCflags.h"
 
 #include "ufo/utils/Constants.h"
-#include "ufo/utils/Flags.h"
 
 namespace eckit {
   class Configuration;
@@ -39,7 +38,6 @@ namespace ufo {
 
   /// \brief Profile QC checks.
   ///
-  /// See OSDP 5 section 3.
   /// The temperature consistency checks available are as follows:
   ///    -# Basic checks of pressure
   ///    -# Check for different temperatures at the same pressure

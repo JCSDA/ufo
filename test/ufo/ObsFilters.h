@@ -233,6 +233,7 @@ void testFilters() {
 
   std::vector<eckit::LocalConfiguration> typeconfs;
   ::test::TestEnvironment::config().get("observations", typeconfs);
+  for (eckit::LocalConfiguration & conf : typeconfs) conf.set("iteration", 0);
 
   for (std::size_t jj = 0; jj < Test_::obspace().size(); ++jj) {
 /// init QC and error
@@ -411,17 +412,22 @@ void testFilters() {
 // -----------------------------------------------------------------------------
 
 class ObsFilters : public oops::Test {
+  typedef ::test::ObsTestsFixture<ObsTraits> Test_;
  public:
   ObsFilters() {}
   virtual ~ObsFilters() {}
  private:
-  std::string testid() const {return "test::ObsFilters";}
+  std::string testid() const override {return "test::ObsFilters";}
 
-  void register_tests() const {
+  void register_tests() const override {
     std::vector<eckit::testing::Test>& ts = eckit::testing::specification();
 
     ts.emplace_back(CASE("ufo/ObsFilters/testFilters")
       { testFilters(); });
+  }
+
+  void clear() const override {
+    Test_::reset();
   }
 };
 

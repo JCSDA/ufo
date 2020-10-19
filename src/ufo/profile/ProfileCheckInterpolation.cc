@@ -45,14 +45,14 @@ namespace ufo {
     const std::vector <float> &tObsCorrection =
        profileDataHandler_.get<float>(ufo::VariableNames::obscorrection_air_temperature);
 
-    if (oops::anyVectorEmpty(pressures, tObs, tBkg, tFlags, tObsCorrection)) {
-      oops::Log::debug() << "At least one vector is empty. "
-                         << "Check will not be performed." << std::endl;
-      return;
-    }
-    if (!oops::allVectorsSameSize(pressures, tObs, tBkg, tFlags, tObsCorrection)) {
-      oops::Log::debug() << "Not all vectors have the same size. "
-                         << "Check will not be performed." << std::endl;
+    if (!oops::allVectorsSameNonZeroSize(pressures, tObs, tBkg, tFlags,
+                                         tObsCorrection)) {
+      oops::Log::warning() << "At least one vector is the wrong size. "
+                           << "Check will not be performed." << std::endl;
+      oops::Log::warning() << "Vector sizes: "
+                           << oops::listOfVectorSizes(pressures, tObs, tBkg, tFlags,
+                                                      tObsCorrection)
+                           << std::endl;
       return;
     }
 
@@ -69,7 +69,7 @@ namespace ufo {
     for (int jlevstd = 0; jlevstd < NumStd_; ++jlevstd) {
       int jlev = StdLev_[jlevstd];  // Standard level
 
-      if (tFlags[jlev] & ufo::FlagsProfile::SurfaceLevelFlag) continue;
+      if (tFlags[jlev] & ufo::MetOfficeQCFlags::Profile::SurfaceLevelFlag) continue;
       int SigB = SigBelow_[jlevstd];
       int SigA = SigAbove_[jlevstd];
       float PStd = pressures[jlev];
@@ -109,9 +109,9 @@ namespace ufo {
         NumErrors++;
 
         // Simplest form of flagging - sig or std flags may be unset in other routines
-        tFlags[jlev] |= ufo::FlagsProfile::InterpolationFlag;
-        tFlags[SigB] |= ufo::FlagsProfile::InterpolationFlag;
-        tFlags[SigA] |= ufo::FlagsProfile::InterpolationFlag;
+        tFlags[jlev] |= ufo::MetOfficeQCFlags::Profile::InterpolationFlag;
+        tFlags[SigB] |= ufo::MetOfficeQCFlags::Profile::InterpolationFlag;
+        tFlags[SigA] |= ufo::MetOfficeQCFlags::Profile::InterpolationFlag;
 
         LevErrors_[jlev]++;
         LevErrors_[SigB]++;

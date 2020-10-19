@@ -96,7 +96,7 @@ void testDuplicatesAndBuddyCountConstraints(const eckit::LocalConfiguration &con
   util::DateTime end(conf.getString("window end"));
 
   const eckit::LocalConfiguration obsSpaceConf(conf, "obs space");
-  ioda::ObsSpace obsSpace(obsSpaceConf, oops::mpi::world(), bgn, end);
+  ioda::ObsSpace obsSpace(obsSpaceConf, oops::mpi::world(), bgn, end, oops::mpi::myself());
 
   boost::optional<std::vector<float>> airPressures;
   if (obsSpace.has("MetaData", "air_pressure")) {
@@ -350,6 +350,8 @@ class MetOfficeBuddyPairFinder : public oops::Test {
   std::string testid() const override {return "ufo::test::MetOfficeBuddyPairFinder";}
 
   void register_tests() const override {}
+
+  void clear() const override {}
 };
 
 }  // namespace test

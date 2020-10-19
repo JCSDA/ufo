@@ -42,14 +42,12 @@ namespace ufo {
     const std::vector <float> &tObsCorrection =
        profileDataHandler_.get<float>(ufo::VariableNames::obscorrection_air_temperature);
 
-    if (oops::anyVectorEmpty(pressures, tObs, tBkg, tFlags, tObsCorrection)) {
-      oops::Log::debug() << "At least one vector is empty. "
-                         << "Check will not be performed." << std::endl;
-      return;
-    }
-    if (!oops::allVectorsSameSize(pressures, tObs, tBkg, tFlags, tObsCorrection)) {
-      oops::Log::debug() << "Not all vectors have the same size. "
-                         << "Check will not be performed." << std::endl;
+    if (!oops::allVectorsSameNonZeroSize(pressures, tObs, tBkg, tFlags, tObsCorrection)) {
+      oops::Log::warning() << "At least one vector is the wrong size. "
+                           << "Check will not be performed." << std::endl;
+      oops::Log::warning() << "Vector sizes: "
+                           << oops::listOfVectorSizes(pressures, tObs, tBkg, tFlags, tObsCorrection)
+                           << std::endl;
       return;
     }
 
@@ -60,7 +58,8 @@ namespace ufo {
 
     int jlevprev = 0;
     for (int jlev = 0; jlev < numLevelsToCheck; ++jlev) {
-      if (tFlags[jlev] & ufo::FlagsElem::FinalRejectFlag) continue;  // Ignore this level
+      // Ignore this level if it has been flagged as rejected.
+      if (tFlags[jlev] & ufo::MetOfficeQCFlags::Elem::FinalRejectFlag) continue;
       if (tObsFinal[jlev] != missingValueFloat &&
           pressures[jlev] > options_.ULCheck_MinP.value()) {
         if (PBottom_ == 0.0) {
@@ -73,8 +72,8 @@ namespace ufo {
               pressures[jlevprev] <= PBottom_ - options_.ULCheck_PBThresh.value()) {
             NumAnyErrors[0]++;
             NumSuperadiabat[0]++;
-            tFlags[jlevprev] |= ufo::FlagsProfile::SuperadiabatFlag;
-            tFlags[jlev]     |= ufo::FlagsProfile::SuperadiabatFlag;
+            tFlags[jlevprev] |= ufo::MetOfficeQCFlags::Profile::SuperadiabatFlag;
+            tFlags[jlev]     |= ufo::MetOfficeQCFlags::Profile::SuperadiabatFlag;
 
             oops::Log::debug() << " -> Failed unstable layer/superadiabat check for levels "
                                << jlevprev << " and " << jlev << std::endl;

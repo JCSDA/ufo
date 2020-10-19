@@ -8,10 +8,8 @@
 #ifndef UFO_RTTOV_OBSRADIANCERTTOVTLAD_H_
 #define UFO_RTTOV_OBSRADIANCERTTOVTLAD_H_
 
-#include <memory>
 #include <ostream>
 #include <string>
-#include <vector>
 
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
@@ -22,6 +20,7 @@
 // Forward declarations
 namespace eckit {
   class Configuration;
+  class LocalConfiguration;
 }
 
 namespace ioda {
@@ -35,9 +34,9 @@ namespace ufo {
   class ObsDiagnostics;
 
 // -----------------------------------------------------------------------------
-/// RadianceRTTOV TL/AD observation operator class
+/// RadianceRTTOV (currently only temperature) observation for UFO.
 class ObsRadianceRTTOVTLAD : public LinearObsOperatorBase,
-                       private util::ObjectCounter<ObsRadianceRTTOVTLAD> {
+                        private util::ObjectCounter<ObsRadianceRTTOVTLAD> {
  public:
   static const std::string classname() {return "ufo::ObsRadianceRTTOVTLAD";}
 
@@ -50,7 +49,7 @@ class ObsRadianceRTTOVTLAD : public LinearObsOperatorBase,
   void simulateObsAD(GeoVaLs &, const ioda::ObsVector &) const override;
 
   // Other
-  const oops::Variables & requiredVars() const override {return *varin_;}
+  const oops::Variables & requiredVars() const override {return varin_;}
 
   int & toFortran() {return keyOperRadianceRTTOV_;}
   const int & toFortran() const {return keyOperRadianceRTTOV_;}
@@ -59,8 +58,7 @@ class ObsRadianceRTTOVTLAD : public LinearObsOperatorBase,
   void print(std::ostream &) const override;
   F90hop keyOperRadianceRTTOV_;
   const ioda::ObsSpace& odb_;
-  std::unique_ptr<const oops::Variables> varin_;
-  std::vector<int> channels_;
+  oops::Variables varin_;
 };
 
 // -----------------------------------------------------------------------------

@@ -22,7 +22,7 @@
 #include "ufo/profile/ProfileCheckUInterp.h"
 #include "ufo/profile/ProfileCheckUnstableLayer.h"
 
-#include "ufo/utils/Flags.h"
+#include "ufo/utils/metoffice/MetOfficeQCFlags.h"
 
 namespace ufo {
   ProfileChecker::ProfileChecker(const ProfileConsistencyCheckParameters &options,
