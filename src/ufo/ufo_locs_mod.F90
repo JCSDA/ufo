@@ -238,11 +238,10 @@ subroutine ufo_locs_init(self, obss)
   !> index is left for back-compatibility; should be removed in the next
   !refactoring
   do i = 1, nlocs
-    self%indx = i
+    self%indx(i) = i
   enddo
 
   self%max_indx = obsspace_get_gnlocs(obss)
-
 
 end subroutine ufo_locs_init
 
