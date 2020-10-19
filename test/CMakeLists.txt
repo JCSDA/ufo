@@ -553,12 +553,12 @@ if( crtm_FOUND )
                       DEPENDS test_ObsOperator.x
                       TEST_DEPENDS ufo_get_ioda_test_data )
 
-    #ecbuild_add_test( TARGET  test_ufo_linopr_crtm_smap
-    #                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
-    #                  ARGS    "testinput/smap_crtm.yaml"
-    #                  ENVIRONMENT OOPS_TRAPFPE=1
-    #                  DEPENDS test_ObsOperatorTLAD.x
-    #                  TEST_DEPENDS ufo_get_ioda_test_data )
+    ecbuild_add_test( TARGET  test_ufo_linopr_crtm_smap
+                      COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
+                      ARGS    "testinput/smap_crtm.yaml"
+                      ENVIRONMENT OOPS_TRAPFPE=1
+                      DEPENDS test_ObsOperatorTLAD.x
+                      TEST_DEPENDS ufo_get_ioda_test_data )
 
     ecbuild_add_test( TARGET  test_ufo_opr_crtm_seviri
                       COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
