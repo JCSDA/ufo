@@ -94,17 +94,15 @@ real(c_double),     intent(inout) :: hofx(nvars, nlocs)
 type(c_ptr), value, intent(in)    :: obss
 
 ! Local variables
-integer :: iobs, ivar, iprof
-integer :: iz1, iz2, kk
-integer :: k1, k2
-integer :: nsig, nprof, nlevs
+integer :: iobs, ivar 
+integer :: nsig, nlevs
 real(kind_real), dimension(:), allocatable :: toppressure,botpressure,airpressure
 type(ufo_geovals) :: geovals
 type(ufo_geoval), pointer :: modelpressures, modelozone
 character(len=MAXVARLEN) :: geovar
 character(len=MAXVARLEN) :: var_zdir
 real :: pob,delp4,delz,dz1
-real(kind_real) :: rozcon, layer_oz
+real(kind_real) :: layer_oz
 
   ! Notes:
   ! (1) Set desired vertical coordinate direction (top2bottom or bottom2top) based

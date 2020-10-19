@@ -24,7 +24,6 @@ real(kind_real), dimension(nlocs),intent(inout)  ::  botpressure,toppressure
 real(kind_real), dimension(nsig+1,nlocs),intent(in) :: modelpressure
 ! local
 integer :: nprofs, iobs, iprof, kk, k1, k2
-print *, 'get integral limits: nlevs,nlocs,nsig',nlevs,nlocs,nsig, modelpressure(1,1)
 if (nlevs == 1) then ! total column ozone
   do iobs = 1, nlocs
     toppressure(iobs) = modelpressure(nsig+1,iobs)
@@ -49,7 +48,9 @@ else
       if( kk == 1 ) then
         toppressure(iobs) = modelpressure(nsig+1, iobs) 
         botpressure(iobs) = airpressure(k1)
-        if(botpressure(iobs) < toppressure(iobs)) botpressure(iobs) = toppressure(iobs)
+        if(botpressure(iobs) < modelpressure(nsig+1, iobs)) then 
+          botpressure(iobs) = modelpressure(nsig+1, iobs)
+        endif
       else if( kk == nlevs) then
         toppressure(iobs) = modelpressure(nsig+1, iobs)  
         botpressure(iobs) = modelpressure(1, iobs) 
@@ -150,7 +151,7 @@ do kk=iz1,iz2,-1
   if(kk == iz1) delz = dz1 - iz1
   if (kk == iz2) delz = delz - pob + iz2
   delp4 = modelpressure(kk)-modelpressure(kk+1)  ! [Pa]
-  modelozone(kk) = layer_oz*coefficient*(delz*delp4)
+  modelozone(kk) = modelozone(kk) + layer_oz*coefficient*(delz*delp4)
 enddo
 
 end subroutine undo_layer_integral
