@@ -102,6 +102,7 @@ list( APPEND ufo_test_input
   testinput/gnssro_domain_check.yaml
   testinput/gome_metop-a.yaml
   testinput/gome_metop-a_flipz.yaml
+  testinput/groundgnssmetoffice.yaml
   testinput/gsisfcmodel.yaml
   testinput/hirs4_crtm.yaml
   testinput/iasi_crtm.yaml
@@ -253,6 +254,7 @@ list( APPEND ufo_test_data
   atmosphere/gnssro_geoval_2020050106_nopseudo.nc4
   atmosphere/gome_metop-a_geoval_2019101700_m.nc4
   atmosphere/gome_metop-a_geoval_flipz_2019101700_m.nc4
+  atmosphere/groundgnss_geovals_20191230T0600Z.nc4
   atmosphere/gsisfc_tsen_geoval_2018041500_m.nc4
   atmosphere/gsisfc_uv_geoval_2018041500_m.nc4
   atmosphere/hirs4_metop-a_geoval_2018041500_m.nc4
@@ -551,12 +553,12 @@ if( crtm_FOUND )
                       DEPENDS test_ObsOperator.x
                       TEST_DEPENDS ufo_get_ioda_test_data )
 
-    #ecbuild_add_test( TARGET  test_ufo_linopr_crtm_smap
-    #                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
-    #                  ARGS    "testinput/smap_crtm.yaml"
-    #                  ENVIRONMENT OOPS_TRAPFPE=1
-    #                  DEPENDS test_ObsOperatorTLAD.x
-    #                  TEST_DEPENDS ufo_get_ioda_test_data )
+    ecbuild_add_test( TARGET  test_ufo_linopr_crtm_smap
+                      COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
+                      ARGS    "testinput/smap_crtm.yaml"
+                      ENVIRONMENT OOPS_TRAPFPE=1
+                      DEPENDS test_ObsOperatorTLAD.x
+                      TEST_DEPENDS ufo_get_ioda_test_data )
 
     ecbuild_add_test( TARGET  test_ufo_opr_crtm_seviri
                       COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
@@ -1911,6 +1913,11 @@ ecbuild_add_test( TARGET  test_ufo_bias_covariance_details
                   LIBS    ufo
                   TEST_DEPENDS ufo_get_ioda_test_data )
 
+ecbuild_add_test( TARGET test_ufo_opr_groundgnssMetOffice
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
+                  ARGS "testinput/groundgnssmetoffice.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsOperator.x )
 #####################################################################
 # Files for CRTM tests
 #####################################################################

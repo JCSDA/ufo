@@ -65,20 +65,24 @@ end subroutine ufo_example_tlad_delete_c
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_example_tlad_settraj_c(c_key_self, c_key_geovals, c_obsspace) bind(c,name='ufo_example_tlad_settraj_f90')
+subroutine ufo_example_tlad_settraj_c(c_key_self, c_key_geovals, c_obsspace, c_key_hofxdiags) bind(c,name='ufo_example_tlad_settraj_f90')
 use ufo_geovals_mod_c, only: ufo_geovals_registry
 use ufo_geovals_mod,   only: ufo_geovals
 implicit none
 integer(c_int),     intent(in) :: c_key_self
 integer(c_int),     intent(in) :: c_key_geovals
 type(c_ptr), value, intent(in) :: c_obsspace
+integer(c_int),     intent(in) :: c_key_hofxdiags
 
 type(ufo_example_tlad), pointer :: self
 type(ufo_geovals),      pointer :: geovals
+type(ufo_geovals),      pointer :: hofxdiags
 
 call ufo_example_tlad_registry%get(c_key_self, self)
 call ufo_geovals_registry%get(c_key_geovals, geovals)
-call self%settraj(geovals, c_obsspace)
+call ufo_geovals_registry%get(c_key_hofxdiags, hofxdiags)
+
+call self%settraj(geovals, c_obsspace, hofxdiags)
 
 end subroutine ufo_example_tlad_settraj_c
 

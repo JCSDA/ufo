@@ -16,7 +16,7 @@ observations:
         sort order: "descending"
     simulated variables: [air_temperature, geopotential_height]
   obs filters:
-  - filter: ProfileConsistencyChecks
+  - filter: Profile Consistency Checks
     filter variables:
     - name: air_temperature
     - name: geopotential_height
