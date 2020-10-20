@@ -31,7 +31,8 @@ namespace ufo {
 RTTOVOneDVarCheck::RTTOVOneDVarCheck(ioda::ObsSpace & obsdb, const eckit::Configuration & config,
                                  std::shared_ptr<ioda::ObsDataVector<int> > flags,
                                  std::shared_ptr<ioda::ObsDataVector<float> > obserr)
-  : FilterBase(obsdb, config, flags, obserr), config_(config), channels_(), retrieved_vars_()
+  : FilterBase(obsdb, config, flags, obserr), config_(config), channels_(), retrieved_vars_(),
+    hoxdiags_retrieved_vars_()
 {
   oops::Log::debug() << "RTTOVOneDVarCheck contructor starting" << std::endl;
 
@@ -43,6 +44,16 @@ RTTOVOneDVarCheck::RTTOVOneDVarCheck(ioda::ObsSpace & obsdb, const eckit::Config
   const eckit::Configuration * conf = &config_;
   ufo_rttovonedvarcheck_create_f90(key_, obsdb, conf, channels_.size(), channels_[0],
                                    retrieved_vars_, RTTOVOneDVarCheck::qcFlag());
+
+  // Create hofxdiags
+  for (size_t jvar = 0; jvar < retrieved_vars_.size(); ++jvar) {
+    for (size_t jch = 0; jch < channels_.size(); ++jch) {
+      hoxdiags_retrieved_vars_.push_back("brightness_temperature_jacobian_"+retrieved_vars_[jvar]+"_"+std::to_string(channels_[jch]));
+    }
+  }
+
+  oops::Log::debug() << "RTTOVOneDVarCheck contructor hoxdiags_retrieved_vars_" 
+                     << hoxdiags_retrieved_vars_ << std::endl;
 
   // Populate variables list - which makes sure this runs as a post filter
   allvars_ += Variables(filtervars_, "HofX");
@@ -82,7 +93,7 @@ void RTTOVOneDVarCheck::applyFilter(const std::vector<bool> & apply,
 
 // Pass it all to fortran
   const eckit::Configuration * conf = &config_;
-  ufo_rttovonedvarcheck_apply_f90(key_, variables, retrieved_vars_,
+  ufo_rttovonedvarcheck_apply_f90(key_, variables, hoxdiags_retrieved_vars_,
                                   gvals->toFortran(),
                                   apply_char.size(), apply_char[0]);
 

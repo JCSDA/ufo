@@ -11,6 +11,7 @@ use fckit_log_module, only : fckit_log
 use kinds
 use ufo_rttovonedvarcheck_constants_mod
 use ufo_rttovonedvarcheck_utils_mod
+use ufo_vars_mod
 
 implicit none
 private
@@ -766,7 +767,7 @@ do jvar = 1, nmvars
         fields_in(2) = 2 ! water profile
       end if
 
-    case("air_temperature_at_two_meters_above_surface")
+    case("surface_temperature")
       fields_in(3) = 3 ! 2m air_temperature
 
     case("specific_humidity_at_two_meters_above_surface")
@@ -775,7 +776,7 @@ do jvar = 1, nmvars
     case("skin_temperature")
       fields_in(5) = 5 ! surface skin temperature
 
-    case("surface_air_pressure")
+    case(var_sfc_p2m)
       fields_in(6) = 6 ! surface air pressure
 
     ! 7 - o3total is not implmented yet

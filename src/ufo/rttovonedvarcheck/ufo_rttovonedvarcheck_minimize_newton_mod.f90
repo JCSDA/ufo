@@ -422,6 +422,8 @@ if (allocated(Ydiff))              deallocate(Ydiff)
 if (allocated(Y))                  deallocate(Y)
 if (allocated(Y0))                 deallocate(Y0)
 
+write(*,*) "finished with ufo_rttovonedvarcheck_minimize_newton"
+
 end subroutine ufo_rttovonedvarcheck_minimize_newton
 
 !------------------------------------------------------------------------------

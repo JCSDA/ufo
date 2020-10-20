@@ -4,13 +4,16 @@ window end: &win_end 2019-11-28T03:00:00Z
 observations:
 - obs operator:
     name: RTTOV
-    ObsOptions:
+    GeoVal_type: MetO
+    Absorbers: &rttov_absobers [Water_vapour, CLW, CIW]
+    linear obs operator:
+      Absorbers: [Water_vapour]
+    obs options: &rttov_options
+      RTTOV_default_opts: OPS
+      SatRad_compatibility: true
       Sensor_ID: noaa_20_atms
-      CoefficientPath: &rttov_coeff Data/
-      mw_clw: true
-    ExtraVars:
-      - mass_content_of_cloud_liquid_water_in_atmosphere_layer
-      - mass_content_of_cloud_ice_in_atmosphere_layer
+      CoefficientPath: Data/
+      InspectProfileNumber: 1
   geovals:
     filename: Data/atms_allsats_geoval_2019112800.nc4
   obs space:
@@ -133,10 +136,10 @@ observations:
       is_in: 1
   # Do 1D-Var check
   - filter: RTTOV OneDVar Check
+    defer to post: true
     ModName: RTTOV
-    ObsOptions:
-      Sensor_ID: noaa_20_atms
-      CoefficientPath: *rttov_coeff
+    Absorbers: *rttov_absobers
+    obs options: *rttov_options
     BMatrix: Data/atms_bmatrix_70.dat
     RMatrix: Data/atms_noaa_20_rmatrix.nc4
     filter variables:
@@ -147,10 +150,10 @@ observations:
     - specific_humidity
     - mass_content_of_cloud_liquid_water_in_atmosphere_layer
     - mass_content_of_cloud_ice_in_atmosphere_layer
-    - air_temperature_at_two_meters_above_surface
+    - surface_temperature
     - specific_humidity_at_two_meters_above_surface
     - skin_temperature
-    - surface_air_pressure
+    - air_pressure_at_two_meters_above_surface
     nlevels: 70
     qtotal: true
     RTTOV_mwscattSwitch: false

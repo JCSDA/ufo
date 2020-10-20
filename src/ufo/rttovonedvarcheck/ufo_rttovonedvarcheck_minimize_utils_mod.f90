@@ -10,11 +10,11 @@ module ufo_rttovonedvarcheck_minimize_utils_mod
 use kinds
 use ufo_constants_mod, only: grav, zero, t0c, half, one, two
 use ufo_geovals_mod
-use ufo_radiancerttov_tlad_mod
 use ufo_rttovonedvarcheck_constants_mod
 use ufo_rttovonedvarcheck_ob_mod
 use ufo_rttovonedvarcheck_profindex_mod
 use ufo_rttovonedvarcheck_rsubmatrix_mod
+use ufo_vars_mod
 
 implicit none
 private
@@ -125,7 +125,8 @@ end if
 
 ! surface air temperature - K
 if (profindex % t2 > 0) then
-  varname = "air_temperature_at_two_meters_above_surface"
+  !varname = "air_temperature_at_two_meters_above_surface"
+  varname = var_sfc_t2m
   call ufo_geovals_get_var(geovals, varname, geoval)
   prof_x(profindex % t2) = geoval%vals(1, 1)
 end if
@@ -336,7 +337,8 @@ end if
 
 ! surface air temperature - K
 if (profindex % t2 > 0) then
-  varname = "air_temperature_at_two_meters_above_surface"
+  !varname = "air_temperature_at_two_meters_above_surface"
+  varname = var_sfc_t2m
   write(*,*) varname
   gv_index = 0
   do i=1,geovals%nvar
@@ -469,7 +471,9 @@ write(*,*) routinename, " : started"
 ! 1. Specific humidity total
 !-------------------------
 
+write(*,*) "profindex % qt(1) = ",profindex % qt(1)
 if (profindex % qt(1) > 0) then
+write(*,*) "Do qt"
 
   nlevels = profindex % qt(2) - profindex % qt(1) + 1
   allocate(temperature(nlevels))
@@ -479,23 +483,23 @@ if (profindex % qt(1) > 0) then
   allocate(ql(nlevels))
   allocate(qi(nlevels))
 
-  ! Get temperature and pressure from geovals
+  write(*,*) "Get temperature and pressure from geovals"
   call ufo_geovals_get_var(geovals, "air_temperature", geoval)
   temperature(:) = geoval%vals(:, 1) ! K
   call ufo_geovals_get_var(geovals, "air_pressure", geoval)
   pressure(:) = geoval%vals(:, 1)    ! Pa
 
-  ! Get humidity data from geovals
+  write(*,*) "Get humidity data from geovals"
   humidity_total(:) = 0.0
   call ufo_geovals_get_var(geovals, "specific_humidity", geoval)
   humidity_total(:) = humidity_total(:) + geoval%vals(:, 1)
   call ufo_geovals_get_var(geovals, "mass_content_of_cloud_liquid_water_in_atmosphere_layer", geoval)
   humidity_total(:) = humidity_total(:) + geoval%vals(:, 1)
 
-  ! Max sure theres a minimum humidity
+  write(*,*) "Max sure theres a minimum humidity"
   humidity_total(:) = MAX(humidity_total(:), Min_q)
 
-  ! Split qtotal to q(water_vapour), q(liquid), q(ice)
+  write(*,*) "Split qtotal to q(water_vapour), q(liquid), q(ice)"
   call ufo_rttovonedvarcheck_Qsplit (1,      & ! in
                           temperature(:),    & ! in
                           pressure(:),       & ! in
@@ -505,7 +509,7 @@ if (profindex % qt(1) > 0) then
                           ql(:),             & ! out
                           qi(:))               ! out
 
-  ! Assign values to geovals
+  write(*,*) "Assign values to geovals q"
   varname = "specific_humidity"  ! kg/kg
   gv_index = 0
   do i=1,geovals%nvar
@@ -513,6 +517,7 @@ if (profindex % qt(1) > 0) then
   end do
   geovals%geovals(gv_index) % vals(:,1) = q(:)
 
+  write(*,*) "Assign values to geovals q clw"
   varname = "mass_content_of_cloud_liquid_water_in_atmosphere_layer"  ! kg/kg
   gv_index = 0
   do i=1,geovals%nvar
@@ -520,6 +525,7 @@ if (profindex % qt(1) > 0) then
   end do
   geovals%geovals(gv_index) % vals(:,1) = ql(:)
 
+  write(*,*) "Assign values to geovals ciw"
   varname = "mass_content_of_cloud_ice_in_atmosphere_layer"  ! kg/kg
   gv_index = 0
   do i=1,geovals%nvar
@@ -545,7 +551,9 @@ end if
 ! zero. If we are not retrieving windspeed, we just leave u and v separate to
 ! avoid confusion.
 
+write(*,*) "profindex % windspeed = ",profindex % windspeed
 if (profindex % windspeed > 0) THEN
+  write(*,*) "Do windspeed"
   ! Get winds from geovals
   varname = "eastward_wind"  ! m/s
   call ufo_geovals_get_var(geovals, varname, geoval)
@@ -1827,7 +1835,8 @@ if (profindex % t2 > 0) then
     OutOfRange = .true.
   end if
 else
-  varname = "air_temperature_at_two_meters_above_surface"
+  !varname = "air_temperature_at_two_meters_above_surface"
+  varname = var_sfc_t2m
   call ufo_geovals_get_var(geovals, varname, geoval)
   Temp2 = geoval%vals(1, 1) ! K
 end if

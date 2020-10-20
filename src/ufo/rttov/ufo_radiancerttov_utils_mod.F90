@@ -75,7 +75,7 @@ module ufo_radiancerttov_utils_mod
      'CIW']
 
   integer, parameter :: &
-    RTTOV_Absorber_Id(ngases_max+1) = &
+    RTTOV_Absorber_Id(ngases_max+2) = &
     [gas_id_mixed, &
     gas_id_watervapour, &
     gas_id_ozone,  &
@@ -84,7 +84,7 @@ module ufo_radiancerttov_utils_mod
     gas_id_n2o,  &
     gas_id_co, &
     gas_id_ch4,  &
-    gas_id_so2, 99]
+    gas_id_so2, 99, 999]
 
   character(len=MAXVARLEN), parameter :: null_str = ''
 
@@ -166,7 +166,7 @@ contains
     type(fckit_configuration), intent(in) :: f_confOper ! what is this
 
     character(*), parameter               :: routine_name = 'rttov_conf_setup'
-    integer                               :: ivar, jspec, i
+    integer                               :: ivar, jspec
     character(len=:), allocatable         :: str
     character(len=:), allocatable         :: str_array(:)
     logical                               :: varin_satrad = .false.
@@ -218,16 +218,6 @@ contains
         write(message,*) trim(ROUTINE_NAME),' error: ',trim(conf%Absorbers(jspec)),' is duplicated in Absorbers'
         call abor1_ftn(message)
       end if
-    end do
-
-    write(*,*) "RTTOV_Absorbers = "
-    do i=1,size(RTTOV_Absorbers)
-      write(*,*) trim(RTTOV_Absorbers(i))
-    end do
-
-    write(*,*) "conf%Absorbers = "
-    do i=1,size(conf%Absorbers)
-      write(*,*) trim(conf%Absorbers(i))
     end do
 
     ! convert from CRTM names to UFO CF names and define Id and Units
@@ -742,8 +732,6 @@ contains
        if (ob_info % retrievecloud) then
          profiles(1) % ctp = ob_info % cloudtopp
          profiles(1) % cfraction = ob_info % cloudfrac
-         write(*,*) "rttov input cloud top pressure and fraction = "
-         write(*,*) profiles(1) % ctp, profiles(1) % cfraction
        end if
 
     else
@@ -1576,6 +1564,8 @@ contains
     integer                      :: nlayers, nchanprof, nlevels, nprofiles
     real(kind_real), allocatable :: od_level(:), wfunc(:)
 
+    include 'rttov_calc_weighting_fn.interface'
+
     allocate(od_level(size(RTProf % transmission%tau_levels(:,1))))
     allocate(wfunc(size(RTProf % transmission%tau_levels(:,1))))
 
@@ -1592,9 +1582,6 @@ contains
       ! Diagnostics used for QC and bias correction
       !============================================
 
-      write(*,*) "xstr_diags = ",trim(xstr_diags(jvar))
-      write(*,*) "ystr_diags = ",trim(ystr_diags(jvar))
-
       if (trim(xstr_diags(jvar)) == "") then
         ! forward h(x) diags
         select case(trim(ystr_diags(jvar)))
@@ -1605,8 +1592,9 @@ contains
         case (var_opt_depth, var_lvl_transmit,var_lvl_weightfunc)
 
           nlayers = nlevels - 1
-          hofxdiags%geovals(jvar)%nval = nlayers
-          allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,nprofiles))
+          hofxdiags%geovals(jvar)%nval = nlevels
+          if(.not. allocated(hofxdiags%geovals(jvar)%vals)) &
+             allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,nprofiles))
           hofxdiags%geovals(jvar)%vals = missing
           ! get channel/profile
           do ichan = 1, nchanprof
@@ -1636,7 +1624,8 @@ contains
         case (var_radiance, var_tb_clr, var_tb, var_pmaxlev_weightfunc)
           ! always returned
           hofxdiags%geovals(jvar)%nval = 1
-          allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,nprofiles))
+          if(.not. allocated(hofxdiags%geovals(jvar)%vals)) &
+             allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,nprofiles))
           hofxdiags%geovals(jvar)%vals = missing
 
           do ichan = 1, nchanprof
@@ -1666,15 +1655,14 @@ contains
         end select
 
       else if (trim(ystr_diags(jvar)) == var_tb) then
-        write(*,*) "xstr_diags in populate hofxdiags = ",trim(xstr_diags(jvar))
-        write(*,*) "var_clw in populate hofxdiags  = ",var_clw
         ! var_tb jacobians
         select case (trim(xstr_diags(jvar)))
 
         case (var_ts,var_mixr,var_q,var_clw)
           nlayers = nlevels - 1
-          hofxdiags%geovals(jvar)%nval = nlayers
-          allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,nprofiles))
+          hofxdiags%geovals(jvar)%nval = nlevels
+          if(.not. allocated(hofxdiags%geovals(jvar)%vals)) &
+            allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,nprofiles))
           hofxdiags%geovals(jvar)%vals = missing
 
           do ichan = 1, nchanprof
@@ -1682,16 +1670,16 @@ contains
             prof = chanprof(ichan)%prof
 
             if(chan == ch_diags(jvar)) then
-              if(ystr_diags(jvar) == var_ts) then
+              if(xstr_diags(jvar) == var_ts) then
                 hofxdiags%geovals(jvar)%vals(:,prof) = &
                   RTProf % profiles_k(ichan) % t(:)
-              else if(ystr_diags(jvar) == var_mixr) then
+              else if(xstr_diags(jvar) == var_mixr) then
                 hofxdiags%geovals(jvar)%vals(:,prof) = &
                   RTProf % profiles_k(ichan) % q(:) / g_to_kg
-              else if(ystr_diags(jvar) == var_q) then
+              else if(xstr_diags(jvar) == var_q) then
                 hofxdiags%geovals(jvar)%vals(:,prof) = &
                   RTProf % profiles_k(ichan) % q(:)
-              else if(ystr_diags(jvar) == var_clw) then
+              else if(xstr_diags(jvar) == var_clw) then
                 hofxdiags%geovals(jvar)%vals(:,prof) = &
                   RTProf % profiles_k(ichan) % clw(:)
               endif
@@ -1700,7 +1688,8 @@ contains
 
         case (var_sfc_t2m, var_sfc_tskin, var_sfc_emiss, var_sfc_q2m, var_sfc_p2m, var_u, var_v)
           hofxdiags%geovals(jvar)%nval = 1
-          allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,nprofiles))
+          if(.not. allocated(hofxdiags%geovals(jvar)%vals)) &
+            allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,nprofiles))
           hofxdiags%geovals(jvar)%vals = missing
 
           do ichan = 1, nchanprof
@@ -1708,27 +1697,27 @@ contains
             prof = chanprof(ichan)%prof
 
             if(chan == ch_diags(jvar)) then
-              if(ystr_diags(jvar) == var_sfc_tskin) then
+              if(xstr_diags(jvar) == var_sfc_tskin) then
                 hofxdiags%geovals(jvar)%vals(1,prof) = &
                   RTProf % profiles_k(ichan) % skin % t
-              else if (ystr_diags(jvar) == var_sfc_t2m) then
+              else if (xstr_diags(jvar) == var_sfc_t2m) then
                 hofxdiags%geovals(jvar)%vals(1,prof) = &
                   RTProf % profiles_k(ichan) % s2m % t
-              else if (ystr_diags(jvar) == var_sfc_p2m) then
+              else if (xstr_diags(jvar) == var_sfc_p2m) then
                 hofxdiags%geovals(jvar)%vals(1,prof) = &
                   RTProf % profiles_k(ichan) % s2m % p
-              else if (ystr_diags(jvar) == var_sfc_q2m) then
+              else if (xstr_diags(jvar) == var_sfc_q2m) then
                 hofxdiags%geovals(jvar)%vals(1,prof) = &
                   RTProf % profiles_k(ichan) % s2m % q
-              else if (ystr_diags(jvar) == var_u) then
+              else if (xstr_diags(jvar) == var_u) then
                 hofxdiags%geovals(jvar)%vals(1,prof) = &
                   RTProf % profiles_k(ichan) % s2m % u
-              else if (ystr_diags(jvar) == var_v) then
+              else if (xstr_diags(jvar) == var_v) then
                 hofxdiags%geovals(jvar)%vals(1,prof) = &
                   RTProf % profiles_k(ichan) % s2m % v
-              else if (ystr_diags(jvar) == var_sfc_emiss) then
+              else if (xstr_diags(jvar) == var_sfc_emiss) then
                 hofxdiags%geovals(jvar)%vals(1,prof) = &
-                  RTProf % emissivity_k(ichan) % emis_in          
+                  RTProf % emissivity_k(ichan) % emis_in
               end if
             end if
           end do
@@ -1767,15 +1756,14 @@ contains
     jacobian_needed = .false.
 
      if(hofxdiags%nvar > 0) then
-       allocate (ystr_diags(hofxdiags%nvar), &
-                 xstr_diags(hofxdiags%nvar), &
-                 ch_diags(hofxdiags%nvar))
+       if (.not. allocated(ystr_diags)) allocate (ystr_diags(hofxdiags%nvar))
+       if (.not. allocated(xstr_diags)) allocate (xstr_diags(hofxdiags%nvar))
+       if (.not. allocated(ch_diags)) allocate (ch_diags(hofxdiags%nvar))
 
-    ch_diags = -9999
+       ch_diags = -9999
 
        do jvar = 1, hofxdiags%nvar
          varstr = hofxdiags%variables(jvar)
-         write(*,*) "parse hofxdiags varstr = ",trim(varstr)
 
          str_pos(4) = len_trim(varstr)
          if (str_pos(4) < 1) cycle
@@ -1803,8 +1791,6 @@ contains
            ystr_diags(jvar)(str_pos(3):) = ""
            if (ch_diags(jvar) < 0) ystr_diags(jvar) = varstr
          end if
-         write(*,*) "parse hofxdiags xstr_diags = ",xstr_diags(jvar)
-         write(*,*) "parse hofxdiags ystr_diags = ",ystr_diags(jvar)
        end do
      end if
 

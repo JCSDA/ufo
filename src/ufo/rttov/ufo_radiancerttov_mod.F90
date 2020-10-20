@@ -133,12 +133,10 @@ contains
     include 'rttov_print_profile.interface'
     include 'rttov_user_profile_checkinput.interface'
 
-    write(*,*) "Starting simobs"
-
     !DAR: What is this?
     call obsspace_get_comm(obss, f_comm)
 
-    write(*,*) "Get number of profile and layers from geovals"
+    ! Get number of profile and layers from geovals
     ! ---------------------------------------------
 
     nprofiles = geovals % nlocs
@@ -156,7 +154,7 @@ contains
     errorstatus = 0_jpim
     nchan_total = 0
 
-    write(*,*) "!DARFIX: This isn't ideal because it's not going to work for multiple instruments but we'll deal with that later"
+    !DARFIX: This isn't ideal because it's not going to work for multiple instruments but we'll deal with that later
     nchan_inst = size(self % channels)
 
     !! Parse hofxdiags%variables into independent/dependent variables and channel
@@ -164,11 +162,11 @@ contains
     ! Note this sets jacobian_needed
     !!   jacobian var -->     <ystr>_jacobian_<xstr>_<chstr>
     !!   non-jacobian var --> <ystr>_<chstr>
-    call parse_hofxdiags(hofxdiags, jacobian_needed) 
+    call parse_hofxdiags(hofxdiags, jacobian_needed)
 
     Sensor_Loop:do i_inst = 1, self % conf % nSensors
 
-      write(*,*) "! Ensure the options and coefficients are consistent"
+      ! Ensure the options and coefficients are consistent
       call rttov_user_options_checkinput(errorstatus, self % conf % rttov_opts, &
         self % conf % rttov_coef_array(i_inst))
 
@@ -182,12 +180,12 @@ contains
       if (present(ob_info)) then
         Skip_Profiles(:) = .false.
       else
-        write(*,*) "! keep journal of which profiles have no obs data these will be skipped"
+        ! keep journal of which profiles have no obs data these will be skipped
         Skip_Profiles(:) = .false.
         call ufo_rttov_skip_profiles(nProfiles,nchan_inst,self%channels,obss,Skip_Profiles)
       end if
 
-      write(*,*) "! Determine the total number of radiances to simulate (nchan_sim)."
+      ! Determine the total number of radiances to simulate (nchan_sim).
       ! In this example we simulate all specified channels for each profile, but
       ! in general one can simulate a different number of channels for each profile.
 
@@ -197,12 +195,12 @@ contains
       prof_start = 1
       prof_end = nprofiles
 
-      write(*,*) "!DARFIX should actually be packed count of skip_profiles * SIZE(channels)"
+      !DARFIX should actually be packed count of skip_profiles * SIZE(channels)
       nprof_sim = min(nprof_sim, prof_end - prof_start + 1)
       nchan_sim = nprof_sim * size(self%channels)
 
       ! --------------------------------------------------------------------------
-      write(*,*) "! Allocate RTTOV input and output structures"
+      ! Allocate RTTOV input and output structures
       ! --------------------------------------------------------------------------
       if (.not. jacobian_needed) then
         ! allocate RTTOV resources
@@ -256,6 +254,7 @@ contains
 
         if(self % conf % RTTOV_profile_checkinput) then
           if (self % conf % inspect > 0) then
+            write(*,*) "rttov_print_profile"
             call rttov_print_profile(self % RTprof % profiles(self % conf % inspect))
           endif
 
@@ -272,6 +271,14 @@ contains
         ! --------------------------------------------------------------------------
 
         if (jacobian_needed) then
+
+          ! Inintialize the K-matrix INPUT so that the results are dTb/dx
+          ! -------------------------------------------------------------
+          self % RTprof % emissivity_k(:) % emis_out = 0
+          self % RTprof % emissivity_k(:) % emis_in = 0
+          self % RTprof % emissivity(:) % emis_out = 0
+          self % RTprof % radiance_k % bt(:) = 1
+          self % RTprof % radiance_k % total(:) = 1
 
           call rttov_k(                              &
             errorstatus,                             &! out   error flag

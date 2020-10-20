@@ -114,7 +114,7 @@ if (allocated(self%geovals)) then
     if (allocated(self%geovals(ivar)%vals)) deallocate(self%geovals(ivar)%vals)
   enddo
   deallocate(self%geovals)
- endif
+endif
 if (allocated(self%variables)) deallocate(self%variables)
 self%nvar = 0
 self%nlocs = 0
