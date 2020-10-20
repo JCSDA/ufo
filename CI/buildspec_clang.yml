@@ -35,7 +35,7 @@ phases:
       - git lfs install # creates .gitconfig
 
       # get jedi-build-package
-      - git clone https://$GIT_USER:$GIT_PASS@github.com/jcsda/jedi-build-package
+      - git clone https://$GIT_USER:$GIT_PASS@github.com/jcsda-internal/jedi-build-package
       - cd jedi-build-package
       - pip install --user -e .
   build:
