@@ -14,6 +14,7 @@
 #include <vector>
 
 #include "oops/base/Variables.h"
+#include "oops/util/DateTime.h"
 #include "oops/util/Duration.h"
 #include "oops/util/ObjectCounter.h"
 
@@ -50,7 +51,8 @@ class ObsTimeOper : public ObsOperatorBase,
 // Obs Operator
   void simulateObs(const GeoVaLs &, ioda::ObsVector &, ObsDiagnostics &) const override;
 
-  std::unique_ptr<Locations> locations() const override;
+  std::unique_ptr<Locations> locations(const util::DateTime &,
+                                       const util::DateTime &) const override;
 
 // Other
   const oops::Variables & requiredVars() const override {return actualoperator_->requiredVars();}

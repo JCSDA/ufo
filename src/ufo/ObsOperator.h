@@ -24,6 +24,10 @@ namespace oops {
   class Variables;
 }
 
+namespace util {
+  class DateTime;
+}
+
 namespace ioda {
   class ObsSpace;
   class ObsVector;
@@ -51,7 +55,7 @@ class ObsOperator : public util::Printable,
   const oops::Variables & requiredVars() const;
 
 /// Operator locations
-  std::unique_ptr<Locations> locations() const;
+  std::unique_ptr<Locations> locations(const util::DateTime &, const util::DateTime &) const;
 
  private:
   void print(std::ostream &) const;

@@ -289,7 +289,10 @@ void testFilters() {
       oops::Variables diagvars;
       diagvars += filters.requiredHdiagnostics();
       if (typeconfs[jj].has("obs bias")) diagvars += ybias.requiredHdiagnostics();
-      ObsDiags_ diags(Test_::obspace()[jj], hop.locations(), diagvars);
+      ObsDiags_ diags(Test_::obspace()[jj],
+                      hop.locations(Test_::obspace()[jj].windowStart(),
+                                    Test_::obspace()[jj].windowEnd()),
+                                    diagvars);
       filters.priorFilter(gval);
       hop.simulateObs(gval, hofx, ybias, diags);
       hofx.save("hofx");

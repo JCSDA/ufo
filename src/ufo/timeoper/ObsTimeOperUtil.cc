@@ -27,7 +27,7 @@ std::vector<std::vector<float>> timeWeightCreate(const ioda::ObsSpace & odb_,
   util::DateTime windowBegin(odb_.windowStart());
   util::Duration windowSub;
   windowSub = util::Duration(config.getString("windowSub"));
-  int64_t windowSubSec = windowSub.toSeconds();
+  int windowSubSec = windowSub.toSeconds();
 
   std::size_t nlocs = odb_.nlocs();
 
@@ -42,13 +42,13 @@ std::vector<std::vector<float>> timeWeightCreate(const ioda::ObsSpace & odb_,
 
   for (std::size_t i = 0; i < nlocs; ++i) {
     util::Duration timeFromStart = dateTimeIn[i] - windowBegin;
-    int64_t timeFromStartSec = timeFromStart.toSeconds();
-    int64_t StateTimeFromStartSec =
+    int timeFromStartSec = timeFromStart.toSeconds();
+    int StateTimeFromStartSec =
       (timeFromStartSec / windowSubSec) * windowSubSec;
     if ((timeFromStartSec - StateTimeFromStartSec) == 0) {
-      TimeWeightObsAfterState[i] = 1.0f;
+      TimeWeightObsAfterState[i] = 1.0;
     } else {
-      TimeWeightObsAfterState[i] = 1.0f - static_cast<float>(timeFromStartSec -
+      TimeWeightObsAfterState[i] = 1.0 - static_cast<float>(timeFromStartSec -
                                                        StateTimeFromStartSec)/
                                          static_cast<float>(windowSubSec);
     }
@@ -57,7 +57,7 @@ std::vector<std::vector<float>> timeWeightCreate(const ioda::ObsSpace & odb_,
                        << " StateTimeFromStartSec = " << StateTimeFromStartSec
                        << std::endl;
   }
-  for (std::size_t i=0; i < TimeWeightObsAfterState.size(); ++i) {
+  for (int i=0; i < TimeWeightObsAfterState.size(); ++i) {
     oops::Log::debug() << "timeweights [" << i << "] = "
                        << TimeWeightObsAfterState[i] << std::endl;
   }
@@ -65,7 +65,7 @@ std::vector<std::vector<float>> timeWeightCreate(const ioda::ObsSpace & odb_,
   std::vector<float> TimeWeightObsBeforeState(nlocs, 0.0);
   transform(TimeWeightObsAfterState.cbegin(), TimeWeightObsAfterState.cend(),
             TimeWeightObsBeforeState.begin(),
-            [] (float element) {return 1.0f - element;});
+            [] (float element) {return 1.0 - element;});
 
   std::vector<std::vector<float>> timeWeights;
   timeWeights.push_back(TimeWeightObsAfterState);
