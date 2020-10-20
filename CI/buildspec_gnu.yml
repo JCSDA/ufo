@@ -71,57 +71,53 @@ phases:
         echo "CODEBUILD_GIT_BRANCH_FORK=${CODEBUILD_GIT_BRANCH_FORK}";
         fi
 
-      # ufo-bundle
-      - ./clone.sh $GIT_USER $GIT_PASS ufo-bundle $CODEBUILD_GIT_BRANCH ufo-bundle /jcsda develop
-
       # jedi-cmake
-      - ./clone.sh $GIT_USER $GIT_PASS jedi-cmake $CODEBUILD_GIT_BRANCH jedicmake /jcsda/ufo-bundle develop
+      - ./clone.sh $GIT_USER $GIT_PASS jedi-cmake $CODEBUILD_GIT_BRANCH jcsda-internal/jedicmake /jcsda/ufo-bundle develop
 
       # ufo
-      - ./clone.sh $GIT_USER $GIT_PASS ufo $CODEBUILD_GIT_BRANCH ufo /jcsda/ufo-bundle develop
+      - ./clone.sh $GIT_USER $GIT_PASS ufo $CODEBUILD_GIT_BRANCH jcsda/ufo /jcsda/ufo-bundle develop
 
       # crtm
-      - ./clone.sh $GIT_USER $GIT_PASS crtm $CODEBUILD_GIT_BRANCH crtm /jcsda/ufo-bundle develop
+      - ./clone.sh $GIT_USER $GIT_PASS crtm $CODEBUILD_GIT_BRANCH jcsda/crtm /jcsda/ufo-bundle release/crtm_jedi
 
       # ioda-engines
-      - ./clone.sh $GIT_USER $GIT_PASS ioda-engines $CODEBUILD_GIT_BRANCH ioda_engines /jcsda/ufo-bundle develop
+      - ./clone.sh $GIT_USER $GIT_PASS ioda-engines $CODEBUILD_GIT_BRANCH jcsda/ioda_engines /jcsda/ufo-bundle develop
 
       # ioda
-      - ./clone.sh $GIT_USER $GIT_PASS ioda $CODEBUILD_GIT_BRANCH ioda /jcsda/ufo-bundle develop
+      - ./clone.sh $GIT_USER $GIT_PASS ioda $CODEBUILD_GIT_BRANCH jcsda/ioda /jcsda/ufo-bundle develop
 
       # rttov
-      - ./clone.sh $GIT_USER $GIT_PASS rttov $CODEBUILD_GIT_BRANCH rttov /jcsda/ufo-bundle develop
-
+      - ./clone.sh $GIT_USER $GIT_PASS rttov $CODEBUILD_GIT_BRANCH jcsda-internal/rttov /jcsda/ufo-bundle develop
 
       # disable git-lfs
       - git lfs install --skip-smudge
 
       # atlas
-      - ./clone.sh $GIT_USER $GIT_PASS atlas $CODEBUILD_GIT_BRANCH_FORK atlas /jcsda/ufo-bundle release-stable
+      - ./clone.sh $GIT_USER $GIT_PASS atlas $CODEBUILD_GIT_BRANCH_FORK jcsda-internal/atlas /jcsda/ufo-bundle release-stable
 
       # saber
-      - ./clone.sh $GIT_USER $GIT_PASS saber $CODEBUILD_GIT_BRANCH saber /jcsda/ufo-bundle develop
+      - ./clone.sh $GIT_USER $GIT_PASS saber $CODEBUILD_GIT_BRANCH jcsda/saber /jcsda/ufo-bundle develop
 
       # oops
-      - ./clone.sh $GIT_USER $GIT_PASS oops $CODEBUILD_GIT_BRANCH oops /jcsda/ufo-bundle develop
+      - ./clone.sh $GIT_USER $GIT_PASS oops $CODEBUILD_GIT_BRANCH jcsda/oops /jcsda/ufo-bundle develop
 
       # ropp
-      - ./clone.sh $GIT_USER $GIT_PASS ropp-test $CODEBUILD_GIT_BRANCH ropp-ufo /jcsda/ufo-bundle develop
+      - ./clone.sh $GIT_USER $GIT_PASS ropp-test $CODEBUILD_GIT_BRANCH jcsda-internal/ropp-ufo /jcsda/ufo-bundle develop
 
       # geos-aero
-      - ./clone.sh $GIT_USER $GIT_PASS geos-aero $CODEBUILD_GIT_BRANCH geos-aero /jcsda/ufo-bundle develop
+      - ./clone.sh $GIT_USER $GIT_PASS geos-aero $CODEBUILD_GIT_BRANCH jcsda-internal/geos-aero /jcsda/ufo-bundle develop
 
       #fckit
-      - ./clone.sh $GIT_USER $GIT_PASS fckit $CODEBUILD_GIT_BRANCH_FORK fckit /jcsda/ufo-bundle release-stable
+      - ./clone.sh $GIT_USER $GIT_PASS fckit $CODEBUILD_GIT_BRANCH_FORK jcsda-internal/fckit /jcsda/ufo-bundle release-stable
 
       #gsw
-      - ./clone.sh $GIT_USER $GIT_PASS GSW-Fortran $CODEBUILD_GIT_BRANCH gsw /jcsda/ufo-bundle develop
+      - ./clone.sh $GIT_USER $GIT_PASS GSW-Fortran $CODEBUILD_GIT_BRANCH jcsda-internal/gsw /jcsda/ufo-bundle develop
 
-      - ls
-      - pwd
+      # move CMakeLists.txt
+      - cp CMakeLists.txt /jcsda/ufo-bundle
+      - cp -r cmake /jcsda/ufo-bundle/
       - cd /jcsda/ufo-bundle
-      - pwd
-      - ls
+
       - ls -lt /jcsda/ufo-bundle/ufo
       - sed -i 's/BRANCH develop  UPDATE//' CMakeLists.txt
       - sed -i 's/BRANCH develop //' CMakeLists.txt

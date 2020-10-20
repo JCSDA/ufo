@@ -35,4 +35,4 @@ script:
   - docker exec clang_container bash -c 'ls /jcsda/src_repo'
   - docker exec clang_container bash -c 'cd /jcsda/src_repo && pip install --user -e .'
 
-  - docker exec clang_container bash -c 'cd /jcsda/src_repo && ~/.local/bin/jedi-build --gh-token=$GH_TOKEN -j 4 --env-id=travis-clang --branch-map atlas:release-stable fckit:release-stable -br $GH_BRANCH -p ufo -vvv -3 -u --submit-dashboard --site TravisCI --abort-on-build-errors --abort-on-test-errors'
+  - docker exec clang_container bash -c 'cd /jcsda/src_repo && ~/.local/bin/jedi-build --gh-token=$GH_TOKEN -j 4 --env-id=travis-clang --branch-map atlas:release-stable fckit:release-stable crtm:release/crtm_jedi -br $GH_BRANCH -p ufo -vvv -3 -u --submit-dashboard --site TravisCI --abort-on-build-errors --abort-on-test-errors'
