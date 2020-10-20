@@ -172,7 +172,7 @@ void TrackCheckShip::applyFilter(const std::vector<bool> & apply,
                                     CalculationMethod::FIRSTITERATION);
     if (!trackObservationsReferences.empty() &&
         this->options_->earlyBreakCheck &&
-        TrackCheckShip::earlyBreak(trackObservationsReferences)) {
+        TrackCheckShip::earlyBreak(trackObservationsReferences, trackNumber)) {
       continue;
     }
     if (options_->deferredCheckSimultaneous.value()) {
@@ -257,7 +257,7 @@ std::vector<TrackCheckShip::TrackObservation> TrackCheckShip::collectTrackObserv
 /// the check gives up. This is particularly a problem with WOD01 data - case studies
 /// suggest that most suspect data is reasonable.
 bool TrackCheckShip::earlyBreak(const std::vector<std::reference_wrapper<TrackObservation>>
-                                &trackObs) const {
+                                &trackObs, const size_t trackNumber) const {
   bool breakResult = false;
   const auto& trackStats = *(trackObs[0].get().getFullTrackStatistics());
   // if at least half of the track segments have a time difference of less than an hour
@@ -269,6 +269,8 @@ bool TrackCheckShip::earlyBreak(const std::vector<std::reference_wrapper<TrackOb
     std::string stationId = "no station id provided";
     if (options_->stationIdVariable.value() != boost::none) {
       stationId = (options_->stationIdVariable.value().get()).variable();
+    } else {
+      stationId = std::to_string(trackNumber);
     }
     oops::Log::trace() << "ShipTrackCheck: " << stationId << "\n" <<
                             "Time difference < 1 hour: " << trackStats.numShort_ << "\n" <<

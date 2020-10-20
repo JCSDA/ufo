@@ -225,7 +225,8 @@ class TrackCheckShip: public FilterBase,
 
   std::vector<std::reference_wrapper<TrackObservation>> removeSimultaneousObservations(
       const std::vector<std::reference_wrapper<TrackObservation>> &trackObs) const;
-  bool earlyBreak(const std::vector<std::reference_wrapper<TrackObservation>> &trackObs) const;
+  bool earlyBreak(const std::vector<std::reference_wrapper<TrackObservation>> &trackObs,
+                  const size_t trackNumber) const;
 
   void removeFaultyObservation(
       std::vector<std::reference_wrapper<TrackObservation> > &track,
