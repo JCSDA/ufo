@@ -3,6 +3,8 @@
 # This software is licensed under the terms of the Apache Licence Version 2.0
 # which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 
+# This is a test
+
 # macro to create a symlink from src to dst
 function(CREATE_SYMLINK src dst)
     foreach (FILENAME ${ARGN})
