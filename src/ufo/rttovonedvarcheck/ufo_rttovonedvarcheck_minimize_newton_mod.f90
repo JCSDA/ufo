@@ -8,7 +8,7 @@ module ufo_rttovonedvarcheck_minimize_newton_mod
 
 use kinds
 use ufo_geovals_mod
-use ufo_radiancerttov_tlad_mod
+use ufo_radiancerttov_mod
 use ufo_rttovonedvarcheck_constants_mod
 use ufo_rttovonedvarcheck_minimize_jacobian_mod
 use ufo_rttovonedvarcheck_minimize_utils_mod
@@ -82,6 +82,7 @@ subroutine ufo_rttovonedvarcheck_minimize_newton(self,  &
                                          b_sigma,       &
                                          local_geovals, &
                                          hofxdiags,     &
+                                         rttov_simobs,  &
                                          profile_index, &
                                          onedvar_success)
 
@@ -95,6 +96,7 @@ real(kind_real), intent(in)       :: b_inv(:,:)      !< inverse of the state err
 real(kind_real), intent(in)       :: b_sigma(:)      !< standard deviations of the state error covariance diagonal
 type(ufo_geovals), intent(inout)  :: local_geovals   !< model data at obs location
 type(ufo_geovals), intent(inout)  :: hofxdiags       !< model data containing the jacobian
+type(ufo_radiancerttov), intent(inout) :: rttov_simobs
 type(ufo_rttovonedvarcheck_profindex), intent(in) :: profile_index !< index array for x vector
 logical, intent(out)              :: onedvar_success !< convergence flag
 
@@ -152,7 +154,7 @@ allocate(Y(nchans))
 allocate(Y0(nchans))
 geovals = local_geovals
 
-call ufo_geovals_print(geovals,1)
+if (self % FullDiagnostics) call ufo_geovals_print(geovals,1)
 write(*,*) "Using Newton solver"
 
 Iterations: do iter = 1, self % max1DVarIterations
@@ -176,7 +178,8 @@ Iterations: do iter = 1, self % max1DVarIterations
     call ufo_rttovonedvarcheck_GeoVaLs2ProfVec(geovals, profile_index, &
                                                ob, GuessProfile(:))
 
-    write(*,*) "Humidity GuessProfile 1st iteration = ",GuessProfile(profile_index % qt(1):profile_index % qt(2))
+    if (self % FullDiagnostics) &
+      write(*,*) "Humidity GuessProfile 1st iteration = ",GuessProfile(profile_index % qt(1):profile_index % qt(2))
 
   end if
 
@@ -187,7 +190,7 @@ Iterations: do iter = 1, self % max1DVarIterations
   call ufo_rttovonedvarcheck_get_jacobian(geovals, ob, ob % channels_used, &
                                        self % obsdb, self % conf, &
                                        profile_index, GuessProfile(:), &
-                                       hofxdiags, Y(:), H_matrix)
+                                       hofxdiags, rttov_simobs, Y(:), H_matrix)
 
   if (iter == 1) then
     BackProfile(:) = GuessProfile(:)
@@ -210,10 +213,12 @@ Iterations: do iter = 1, self % max1DVarIterations
   Ydiff(:) = ob % yobs(:) - Y(:)
   Diffprofile(:) = GuessProfile(:) - BackProfile(:)
 
-  write(*,*) "Ob BT = "
-  write(*,'(10F10.3)') ob % yobs(:)
-  write(*,*) "HofX BT = "
-  write(*,'(10F10.3)') Y(:)
+  if (self % FullDiagnostics) then
+    write(*,*) "Ob BT = "
+    write(*,'(10F10.3)') ob % yobs(:)
+    write(*,*) "HofX BT = "
+    write(*,'(10F10.3)') Y(:)
+  end if
 
   if (self % UseJForConvergence) then
 
@@ -390,7 +395,7 @@ if (converged) then
   call ufo_rttovonedvarcheck_get_jacobian(geovals, ob, ob % channels_all, &
                                        self % obsdb, self % conf, &
                                        profile_index, GuessProfile(:), &
-                                       hofxdiags, out_Y(:), out_H_matrix)
+                                       hofxdiags, rttov_simobs, out_Y(:), out_H_matrix)
   ob % output_BT(:) = out_Y(:)
   deallocate(out_Y)
   deallocate(out_H_matrix)
@@ -516,12 +521,6 @@ Status = 0
 ! 1. Calculate the U and V vectors for the three forms of R matrix allowed
 !    for.
 !---------------------------------------------------------------------------
-
-write(*,*) "B_matrix shape = ",shape(B_matrix)
-write(*,*) "H_matrix shape = ",shape(H_matrix)
-write(*,*) "H_matrix_T shape = ",shape(H_matrix_T)
-write(*,*) "HB shape = ",shape(HB)
-
 HB = matmul(H_matrix, B_matrix)
 U = matmul(HB, H_matrix_T)
 

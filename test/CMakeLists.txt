@@ -45,6 +45,7 @@ list( APPEND ufo_test_input
   testinput/atms_crtm_bc.yaml
   testinput/atms_qc_filters.yaml
   testinput/atms_rttov_ops.yaml
+  testinput/atms_rttov_ops_qc_rttovonedvarcheck.yaml
   testinput/coolskin.yaml
   testinput/cris_crtm.yaml
   testinput/cris_crtm_bc.yaml
@@ -729,6 +730,12 @@ if( ${RTTOV_FOUND} )
                     ARGS    "testinput/atms_rttov_ops.yaml"
                     ENVIRONMENT OOPS_TRAPFPE=1
                     DEPENDS test_ObsOperatorTLAD.x 
+                    TEST_DEPENDS ufo_get_ioda_test_data )
+
+  ecbuild_add_test( TARGET  test_ufo_atms_ops_qc_rttovonedvarcheck
+                    COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                    ARGS    "testinput/atms_rttov_ops_qc_rttovonedvarcheck.yaml"
+                    ENVIRONMENT OOPS_TRAPFPE=1
                     TEST_DEPENDS ufo_get_ioda_test_data )
 
   ecbuild_add_test( TARGET  test_ufo_atms_qc_rttovonedvarcheck

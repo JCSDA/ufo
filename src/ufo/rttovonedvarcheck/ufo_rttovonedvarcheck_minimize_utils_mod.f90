@@ -85,32 +85,34 @@ prof_x(:) = zero
 ! we assume the levels are from the surface upwards (remember that RTTOV levels
 ! are upside-down)
 
-! temperature - K
+! var_ts - air_temperature - K
 if (profindex % t(1) > 0) then
-  varname = "air_temperature" ! K
-  call ufo_geovals_get_var(geovals, varname, geoval)
+  call ufo_geovals_get_var(geovals, var_ts, geoval)
   prof_x(profindex % t(1):profindex % t(2)) = geoval%vals(:, 1) ! K
 end if
 
-! specific_humidity - kg/kg - for retrieval is ln(g/kg)
+! var_q - specific_humidity - kg/kg
+! for retrieval is ln(g/kg)
 if (profindex % q(1) > 0) then
-  varname = "specific_humidity"  ! kg/kg
-  call ufo_geovals_get_var(geovals, varname, geoval)
+  call ufo_geovals_get_var(geovals, var_q, geoval)
   prof_x(profindex % q(1):profindex % q(2)) = log (geoval%vals(:, 1) * 1000.0_kind_real) ! ln(g/kg)
 end if
 
-! specific_humidity - kg/kg - for retrieval is ln(g/kg)
+! var_q - specific_humidity - kg/kg
+! var_clw  = "mass_content_of_cloud_liquid_water_in_atmosphere_layer" - kg/kg
+! var_cli  = "mass_content_of_cloud_ice_in_atmosphere_layer" - kg/kg
+! for retrieval is ln(g/kg)
 if (profindex % qt(1) > 0) then
-  nlevels = profindex%qt(2) - profindex%qt(1) + 1
+  nlevels = profindex % qt(2) - profindex % qt(1) + 1
   allocate(humidity_total(nlevels))
   humidity_total(:) = zero
   
   ! Get humidity data from geovals
-  call ufo_geovals_get_var(geovals, "specific_humidity", geoval)
+  call ufo_geovals_get_var(geovals, var_q, geoval)
   humidity_total(:) = humidity_total(:) + geoval%vals(:, 1)
-  call ufo_geovals_get_var(geovals, "mass_content_of_cloud_liquid_water_in_atmosphere_layer", geoval)
+  call ufo_geovals_get_var(geovals, var_clw, geoval)
   humidity_total(:) = humidity_total(:) + geoval%vals(:, 1)
-  call ufo_geovals_get_var(geovals, "mass_content_of_cloud_ice_in_atmosphere_layer", geoval)
+  call ufo_geovals_get_var(geovals, var_cli, geoval)
   humidity_total(:) = humidity_total(:) + geoval%vals(:, 1)
   
   ! Convert from kg/kg to ln(g/kg)
@@ -123,52 +125,48 @@ end if
 ! 3. Single-valued variables
 !----------------------------
 
-! surface air temperature - K
+! var_sfc_t2m = "surface_temperature"
 if (profindex % t2 > 0) then
-  !varname = "air_temperature_at_two_meters_above_surface"
-  varname = var_sfc_t2m
-  call ufo_geovals_get_var(geovals, varname, geoval)
+  call ufo_geovals_get_var(geovals, var_sfc_t2m, geoval)
   prof_x(profindex % t2) = geoval%vals(1, 1)
 end if
 
-! surface specific humidity - kg/kg - for retrieval is ln(g/kg)
+! var_sfc_q2m = "specific_humidity_at_two_meters_above_surface" (kg/kg)
+! for retrieval is ln(g/kg)
 if (profindex % q2 > 0) then
-  varname = "specific_humidity_at_two_meters_above_surface"
-  call ufo_geovals_get_var(geovals, varname, geoval)
+  call ufo_geovals_get_var(geovals, var_sfc_q2m, geoval)
   prof_x(profindex % q2) = log (geoval%vals(1, 1) * 1000.0_kind_real) ! ln(g/kg)
 end if
 
-! surface pressure
+! var_sfc_p2m = "air_pressure_at_two_meters_above_surface" ! (Pa)
 if (profindex % pstar > 0) then
-  varname = "air_pressure_at_two_meters_above_surface"
-  call ufo_geovals_get_var(geovals, varname, geoval)
+  call ufo_geovals_get_var(geovals, var_sfc_p2m, geoval)
   prof_x(profindex % pstar) = geoval%vals(1, 1) / 100.0_kind_real  ! Pa to hPa
 end if
 
-! surface skin temperature - K
+! var_sfc_tskin = "skin_temperature"  ! (K)
 if (profindex % tstar > 0) then
-  varname = "skin_temperature"
-  call ufo_geovals_get_var(geovals, varname, geoval)
+  call ufo_geovals_get_var(geovals, var_sfc_tskin, geoval)
   prof_x(profindex % tstar) = geoval%vals(1, 1)
 end if
 
 ! cloud top pressure
-if (profindex % cloudtopp > 0) then
-  prof_x(profindex % cloudtopp) = ob % cloudtopp ! carried around as hPa
-end if
+!if (profindex % cloudtopp > 0) then
+!  prof_x(profindex % cloudtopp) = ob % cloudtopp ! carried around as hPa
+!end if
 
 ! cloud fraction
-if (profindex % cloudfrac > 0) then
-  prof_x(profindex % cloudfrac) = ob % cloudfrac
-end if
+!if (profindex % cloudfrac > 0) then
+!  prof_x(profindex % cloudfrac) = ob % cloudfrac
+!end if
 
 ! windspeed. Remember that all wind have been transferred to u and v is set to zero
 ! for windspeed retrievals
-if (profindex % windspeed > 0) then
-  varname = "eastward_wind"
-  call ufo_geovals_get_var(geovals, varname, geoval)
-  prof_x(profindex % windspeed) = geoval%vals(1, 1)
-end if
+! var_u = "eastward_wind"
+!if (profindex % windspeed > 0) then
+!  call ufo_geovals_get_var(geovals, var_u, geoval)
+!  prof_x(profindex % windspeed) = geoval%vals(1, 1)
+!end if
 
 !----------------------------
 ! 4. Emissivities
@@ -185,13 +183,13 @@ if (profindex % mwemiss(1) > 0) then
 end if
 
 ! Retrieval of emissivity principal components
-IF (profindex % emisspc(1) > 0) THEN
-  ! convert ob % emiss to emiss pc
-  allocate(emiss_pc(profindex % emisspc(2)-profindex % emisspc(1)+1))
-  call ob % pcemis % emistoPC(ob % channels_used(:), ob % emiss(:), emiss_pc(:))
-  prof_x(profindex % emisspc(1):profindex % emisspc(2)) = emiss_pc
-  deallocate(emiss_pc)
-END IF
+!if (profindex % emisspc(1) > 0) THEN
+!  ! convert ob % emiss to emiss pc
+!  allocate(emiss_pc(profindex % emisspc(2)-profindex % emisspc(1)+1))
+!  call ob % pcemis % emistoPC(ob % channels_used(:), ob % emiss(:), emiss_pc(:))
+!  prof_x(profindex % emisspc(1):profindex % emisspc(2)) = emiss_pc
+!  deallocate(emiss_pc)
+!end if
 
 write(*,*) trim(RoutineName)," end"
 
@@ -249,28 +247,30 @@ write(*,*) trim(RoutineName)," start"
 ! we assume the levels are from the surface upwards (remember that RTTOV levels
 ! are upside-down)
 
-! temperature - K
+! var_ts - air_temperature - K
 if (profindex % t(1) > 0) then
-  varname = "air_temperature" ! K
   gv_index = 0
   do i=1,geovals%nvar
-    if (varname == trim(geovals%variables(i))) gv_index = i
+    if (trim(var_ts) == trim(geovals%variables(i))) gv_index = i
   end do
   geovals%geovals(gv_index)%vals(:,1) = prof_x(profindex % t(1):profindex % t(2)) ! K
 end if
 
-! specific_humidity - kg/kg - for retrieval is ln(g/kg)
+! var_q = "specific_humidity" ! kg/kg
+! for retrieval is ln(g/kg)
 if (profindex % q(1) > 0) then
-  varname = "specific_humidity"  ! kg/kg
   gv_index = 0
   do i=1,geovals%nvar
-    if (varname == trim(geovals%variables(i))) gv_index = i
+    if (trim(var_q) == trim(geovals%variables(i))) gv_index = i
   end do
   geovals%geovals(gv_index)%vals(:,1) = EXP (prof_x(profindex % q(1):profindex % q(2))) / &
                                                   1000.0_kind_real ! ln(g/kg) => kg/kg
 end if
 
-! specific_humidity - kg/kg - for retrieval is ln(g/kg)
+! var_q = "specific_humidity" ! kg/kg
+! var_clw  = "mass_content_of_cloud_liquid_water_in_atmosphere_layer" - kg/kg
+! var_cli  = "mass_content_of_cloud_ice_in_atmosphere_layer" - kg/kg
+! for retrieval is ln(g/kg)
 if (profindex % qt(1) > 0) then
   nlevels = profindex%qt(2) - profindex%qt(1) + 1
   allocate(temperature(nlevels))
@@ -285,9 +285,11 @@ if (profindex % qt(1) > 0) then
                                 1000.0_kind_real ! ln(g/kg) => kg/kg
 
   ! Get temperature and pressure from geovals
-  call ufo_geovals_get_var(geovals, "air_temperature", geoval)
+  ! var_ts   = "air_temperature" K
+  call ufo_geovals_get_var(geovals, var_ts, geoval)
   temperature(:) = geoval%vals(:, 1) ! K
-  call ufo_geovals_get_var(geovals, "air_pressure", geoval)
+  ! var_prs  = "air_pressure" Pa
+  call ufo_geovals_get_var(geovals, var_prs, geoval)
   pressure(:) = geoval%vals(:, 1)    ! Pa
 
   ! Split qtotal to q(water_vapour), q(liquid), q(ice)
@@ -301,24 +303,21 @@ if (profindex % qt(1) > 0) then
                           qi(:))               ! out
 
   ! Assign values to geovals
-  varname = "specific_humidity"  ! kg/kg
   gv_index = 0
   do i=1,geovals%nvar
-    if (varname == trim(geovals%variables(i))) gv_index = i
+    if (trim(var_q) == trim(geovals%variables(i))) gv_index = i
   end do
   geovals%geovals(gv_index)%vals(:,1) = q(:)
 
-  varname = "mass_content_of_cloud_liquid_water_in_atmosphere_layer"  ! kg/kg
   gv_index = 0
   do i=1,geovals%nvar
-    if (varname == trim(geovals%variables(i))) gv_index = i
+    if (trim(var_clw) == trim(geovals%variables(i))) gv_index = i
   end do
   geovals%geovals(gv_index)%vals(:,1) = ql(:)
 
-  varname = "mass_content_of_cloud_ice_in_atmosphere_layer"  ! kg/kg
   gv_index = 0
   do i=1,geovals%nvar
-    if (varname == trim(geovals%variables(i))) gv_index = i
+    if (trim(var_cli) == trim(geovals%variables(i))) gv_index = i
   end do
   geovals%geovals(gv_index)%vals(:,1) = qi(:)
 
@@ -335,72 +334,64 @@ end if
 ! 3. Single-valued variables
 !----------------------------
 
-! surface air temperature - K
+! var_sfc_t2m = "surface_temperature"
 if (profindex % t2 > 0) then
-  !varname = "air_temperature_at_two_meters_above_surface"
-  varname = var_sfc_t2m
-  write(*,*) varname
   gv_index = 0
   do i=1,geovals%nvar
-    if (varname == trim(geovals%variables(i))) gv_index = i
+    if (trim(var_sfc_t2m) == trim(geovals%variables(i))) gv_index = i
   end do
   geovals%geovals(gv_index)%vals(1,1) = prof_x(profindex % t2) ! K
 end if
 
-! surface specific humidity - kg/kg - for retrieval is ln(g/kg)
+! var_sfc_q2m = "specific_humidity_at_two_meters_above_surface" ! (kg/kg)
+! for retrieval is ln(g/kg)
 if (profindex % q2 > 0) then
-  varname = "specific_humidity_at_two_meters_above_surface"
-  write(*,*) varname
   gv_index = 0
   do i=1,geovals%nvar
-    if (varname == trim(geovals%variables(i))) gv_index = i
+    if (trim(var_sfc_q2m) == trim(geovals%variables(i))) gv_index = i
   end do
   geovals%geovals(gv_index)%vals(1,1) = EXP (prof_x(profindex % q2)) / 1000.0_kind_real ! ln(g/kg) => kg/kg
 end if
 
-! surface pressure
+! var_sfc_p2m = "air_pressure_at_two_meters_above_surface" ! (Pa)
 if (profindex % pstar > 0) then
-  varname = "air_pressure_at_two_meters_above_surface"
-  write(*,*) varname
   gv_index = 0
   do i=1,geovals%nvar
-    if (varname == trim(geovals%variables(i))) gv_index = i
+    if (trim(var_sfc_p2m) == trim(geovals%variables(i))) gv_index = i
   end do
   geovals%geovals(gv_index)%vals(1,1) = prof_x(profindex % pstar) * 100.0_kind_real
 end if
 
-! surface skin temperature - K
+! var_sfc_tskin = "skin_temperature"  ! (K)
 if (profindex % tstar > 0) then
-  varname = "skin_temperature"
-  write(*,*) varname
   gv_index = 0
   do i=1,geovals%nvar
-    if (varname == trim(geovals%variables(i))) gv_index = i
+    if (trim(var_sfc_tskin) == trim(geovals%variables(i))) gv_index = i
   end do
   geovals%geovals(gv_index)%vals(1,1) = prof_x(profindex % tstar)
 end if
 
 ! cloud top pressure - passed through via the ob
-if (profindex % cloudtopp > 0) then
-  ob % cloudtopp = prof_x(profindex % cloudtopp) ! stored in ob as hPa
-end if
+!if (profindex % cloudtopp > 0) then
+!  ob % cloudtopp = prof_x(profindex % cloudtopp) ! stored in ob as hPa
+!end if
 
 ! cloud fraction - passed through via the ob
-if (profindex % cloudfrac > 0) then
-  ob % cloudfrac = prof_x(profindex % cloudfrac)
-end if
+!if (profindex % cloudfrac > 0) then
+!  ob % cloudfrac = prof_x(profindex % cloudfrac)
+!end if
 
 ! windspeed
-IF (profindex % windspeed > 0) THEN
-  ! Remember that we transfer all wind to u and set v to zero for
-  ! windspeed retrieval.
-  varname = "eastward_wind"
-  gv_index = 0
-  do i=1,geovals%nvar
-    if (varname == trim(geovals%variables(i))) gv_index = i
-  end do
-  geovals%geovals(gv_index)%vals(1,1) = prof_x(profindex % windspeed)
-END IF
+!if (profindex % windspeed > 0) THEN
+!  ! Remember that we transfer all wind to u and set v to zero for
+!  ! windspeed retrieval.
+!  varname = "eastward_wind"
+!  gv_index = 0
+!  do i=1,geovals%nvar
+!    if (varname == trim(geovals%variables(i))) gv_index = i
+!  end do
+!  geovals%geovals(gv_index)%vals(1,1) = prof_x(profindex % windspeed)
+!end if
 
 !----------------------------
 ! 4. Emissivities
@@ -415,14 +406,14 @@ if (profindex % mwemiss(1) > 0) THEN
 end if
 
 ! Retrieval of emissivity principal components
-if (profindex % emisspc(1) > 0) THEN
-  allocate(emiss_pc(profindex % emisspc(2)-profindex % emisspc(1)+1))
-  emiss_pc = prof_x(profindex % emisspc(1):profindex % emisspc(2))
-  ! convert emiss_pc to ob % emissivity using
-  call ob % pcemis % pctoemis(size(ob % channels_used), ob % channels_used, &
-                              size(emiss_pc), emiss_pc(:), ob % emiss(:))
-  deallocate(emiss_pc)
-end if
+!if (profindex % emisspc(1) > 0) THEN
+!  allocate(emiss_pc(profindex % emisspc(2)-profindex % emisspc(1)+1))
+!  emiss_pc = prof_x(profindex % emisspc(1):profindex % emisspc(2))
+!  ! convert emiss_pc to ob % emissivity using
+!  call ob % pcemis % pctoemis(size(ob % channels_used), ob % channels_used, &
+!                              size(emiss_pc), emiss_pc(:), ob % emiss(:))
+!  deallocate(emiss_pc)
+!end if
 
 write(*,*) trim(RoutineName)," end"
 
@@ -471,7 +462,6 @@ write(*,*) routinename, " : started"
 ! 1. Specific humidity total
 !-------------------------
 
-write(*,*) "profindex % qt(1) = ",profindex % qt(1)
 if (profindex % qt(1) > 0) then
 write(*,*) "Do qt"
 
@@ -483,23 +473,21 @@ write(*,*) "Do qt"
   allocate(ql(nlevels))
   allocate(qi(nlevels))
 
-  write(*,*) "Get temperature and pressure from geovals"
   call ufo_geovals_get_var(geovals, "air_temperature", geoval)
   temperature(:) = geoval%vals(:, 1) ! K
   call ufo_geovals_get_var(geovals, "air_pressure", geoval)
   pressure(:) = geoval%vals(:, 1)    ! Pa
 
-  write(*,*) "Get humidity data from geovals"
   humidity_total(:) = 0.0
   call ufo_geovals_get_var(geovals, "specific_humidity", geoval)
   humidity_total(:) = humidity_total(:) + geoval%vals(:, 1)
   call ufo_geovals_get_var(geovals, "mass_content_of_cloud_liquid_water_in_atmosphere_layer", geoval)
   humidity_total(:) = humidity_total(:) + geoval%vals(:, 1)
 
-  write(*,*) "Max sure theres a minimum humidity"
+  ! Max sure theres a minimum humidity
   humidity_total(:) = MAX(humidity_total(:), Min_q)
 
-  write(*,*) "Split qtotal to q(water_vapour), q(liquid), q(ice)"
+  ! Split qtotal to q(water_vapour), q(liquid), q(ice)
   call ufo_rttovonedvarcheck_Qsplit (1,      & ! in
                           temperature(:),    & ! in
                           pressure(:),       & ! in
@@ -509,7 +497,7 @@ write(*,*) "Do qt"
                           ql(:),             & ! out
                           qi(:))               ! out
 
-  write(*,*) "Assign values to geovals q"
+  ! Assign values to geovals q
   varname = "specific_humidity"  ! kg/kg
   gv_index = 0
   do i=1,geovals%nvar
@@ -517,7 +505,7 @@ write(*,*) "Do qt"
   end do
   geovals%geovals(gv_index) % vals(:,1) = q(:)
 
-  write(*,*) "Assign values to geovals q clw"
+  ! Assign values to geovals q clw
   varname = "mass_content_of_cloud_liquid_water_in_atmosphere_layer"  ! kg/kg
   gv_index = 0
   do i=1,geovals%nvar
@@ -525,7 +513,7 @@ write(*,*) "Do qt"
   end do
   geovals%geovals(gv_index) % vals(:,1) = ql(:)
 
-  write(*,*) "Assign values to geovals ciw"
+  ! Assign values to geovals ciw
   varname = "mass_content_of_cloud_ice_in_atmosphere_layer"  ! kg/kg
   gv_index = 0
   do i=1,geovals%nvar
@@ -551,9 +539,7 @@ end if
 ! zero. If we are not retrieving windspeed, we just leave u and v separate to
 ! avoid confusion.
 
-write(*,*) "profindex % windspeed = ",profindex % windspeed
 if (profindex % windspeed > 0) THEN
-  write(*,*) "Do windspeed"
   ! Get winds from geovals
   varname = "eastward_wind"  ! m/s
   call ufo_geovals_get_var(geovals, varname, geoval)
@@ -1945,8 +1931,6 @@ Constrain: if (.not. OutOfRange) then
                                  1)                   ! in
     end if
     q2_sat(1) = log (q2_sat(1) * 1000.0)
-    write(*,*) "profile(profindex % q2) = ",profile(profindex % q2)
-    write(*,*) "q2_sat = ",q2_sat(1)
     if (profile(profindex % q2) > q2_sat(1)) then
       profile(profindex % q2) = q2_sat(1)
     end if

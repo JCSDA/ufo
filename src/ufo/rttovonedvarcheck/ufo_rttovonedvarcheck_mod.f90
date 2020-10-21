@@ -15,6 +15,7 @@ use missing_values_mod
 use obsspace_mod
 use oops_variables_mod
 use ufo_geovals_mod
+use ufo_radiancerttov_mod
 use ufo_rttovonedvarcheck_bmatrix_mod
 use ufo_rttovonedvarcheck_constants_mod
 use ufo_rttovonedvarcheck_minimize_utils_mod
@@ -130,11 +131,15 @@ subroutine ufo_rttovonedvarcheck_apply(self, vars, retrieval_vars, geovals, appl
   logical                            :: file_exists     ! check if a file exists logical
   logical                            :: onedvar_success
   logical                            :: cloud_retrieval = .false.
+  type(ufo_radiancerttov)            :: rttov_simobs
 
   ! ------------------------------------------
   ! 1. Setup
   ! ------------------------------------------
   missing = missing_value(missing)
+
+  ! Setup rttov simobs
+  call rttov_simobs % setup(self % conf, self % channels)
 
   ! Setup IR emissivity - if needed
   if (self % pcemiss) then
@@ -261,13 +266,13 @@ subroutine ufo_rttovonedvarcheck_apply(self, vars, retrieval_vars, geovals, appl
       if (self % UseMLMinimization) then
         call ufo_rttovonedvarcheck_minimize_ml(self, ob, &
                                       r_submatrix, b_matrix, b_inverse, b_sigma, &
-                                      local_geovals, hofxdiags, prof_index, &
-                                      onedvar_success)
+                                      local_geovals, hofxdiags, rttov_simobs, &
+                                      prof_index, onedvar_success)
       else
         call ufo_rttovonedvarcheck_minimize_newton(self, ob, &
                                       r_submatrix, b_matrix, b_inverse, b_sigma, &
-                                      local_geovals, hofxdiags, prof_index, &
-                                      onedvar_success)
+                                      local_geovals, hofxdiags, rttov_simobs, &
+                                      prof_index, onedvar_success)
       end if
 
       obs % output_BT(:, jobs) = ob % output_BT(:)
@@ -315,6 +320,7 @@ subroutine ufo_rttovonedvarcheck_apply(self, vars, retrieval_vars, geovals, appl
   if (allocated(b_matrix))  deallocate(b_matrix)
   if (allocated(b_inverse)) deallocate(b_inverse)
   if (allocated(b_sigma))   deallocate(b_sigma)
+  call rttov_simobs % delete()
 
 end subroutine ufo_rttovonedvarcheck_apply
 

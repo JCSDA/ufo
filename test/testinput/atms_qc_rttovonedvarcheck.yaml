@@ -13,7 +13,7 @@ observations:
       SatRad_compatibility: true
       Sensor_ID: noaa_20_atms
       CoefficientPath: Data/
-      InspectProfileNumber: 1
+#      InspectProfileNumber: 1
   geovals:
     filename: Data/atms_allsats_geoval_2019112800.nc4
   obs space:
@@ -160,7 +160,7 @@ observations:
     RTTOV_usetotalice: false
     UseMLMinimization: false
     UseJforConvergence: true
-    FullDiagnostics: true
+    FullDiagnostics: false
     JConvergenceOption: 1
     ConvergenceFactor: 0.40
     Cost_ConvergenceFactor: 0.01

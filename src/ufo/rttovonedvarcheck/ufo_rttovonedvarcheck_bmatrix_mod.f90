@@ -790,13 +790,13 @@ do jvar = 1, nmvars
 
     case ("surface_wind_speed") ! surface wind speed
       fields_in(11) = 11
+      call abor1_ftn("rttovonedvarcheck not setup for surface windspeed yet")
 
     ! 12 - o3profile is not implmented yet
     ! 13 - lwp (liquid water path) is not implmented yet
 
     case ("surface_emissivity") ! microwave emissivity
       fields_in(14) = 14
-      call abor1_ftn("rttovonedvarcheck not setup for retrieving surface_emissivity")
 
     case ("mass_content_of_cloud_ice_in_atmosphere_layer")
       if (.NOT. qtotal_flag) then

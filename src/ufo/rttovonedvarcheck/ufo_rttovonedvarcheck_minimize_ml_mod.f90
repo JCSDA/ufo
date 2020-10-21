@@ -9,7 +9,7 @@ module ufo_rttovonedvarcheck_minimize_ml_mod
 
 use kinds
 use ufo_geovals_mod
-use ufo_radiancerttov_tlad_mod
+use ufo_radiancerttov_mod
 use ufo_rttovonedvarcheck_constants_mod
 use ufo_rttovonedvarcheck_minimize_jacobian_mod
 use ufo_rttovonedvarcheck_minimize_utils_mod
@@ -84,6 +84,7 @@ subroutine ufo_rttovonedvarcheck_minimize_ml(self,      &
                                          b_sigma,       &
                                          local_geovals, &
                                          hofxdiags,     &
+                                         rttov_simobs,  &
                                          profile_index, &
                                          onedvar_success)
 
@@ -97,6 +98,7 @@ real(kind_real), intent(in)       :: b_inv(:,:)      !< inverse state error cova
 real(kind_real), intent(in)       :: b_sigma(:)      !< standard deviations of the state error covariance diagonal
 type(ufo_geovals), intent(inout)  :: local_geovals   !< model data at obs location
 type(ufo_geovals), intent(inout)  :: hofxdiags       !< model data containing the jacobian
+type(ufo_radiancerttov), intent(inout) :: rttov_simobs !< rttov simulated obs object
 type(ufo_rttovonedvarcheck_profindex), intent(in) :: profile_index !< index array for x vector
 logical, intent(out)              :: onedvar_success !< convergence flag
 
@@ -174,7 +176,7 @@ Iterations: do iter = 1, self % max1DVarIterations
   call ufo_rttovonedvarcheck_get_jacobian(geovals, ob, ob % channels_used, &
                                        self % obsdb, self % conf, &
                                        profile_index, GuessProfile(:), &
-                                       hofxdiags, Y(:), H_matrix)
+                                       hofxdiags, rttov_simobs, Y(:), H_matrix)
 
   if (iter == 1) then
     RTerrorcode = 0
@@ -259,6 +261,7 @@ Iterations: do iter = 1, self % max1DVarIterations
                                       r_matrix,            &
                                       geovals,             &
                                       hofxdiags,           &
+                                      rttov_simobs,        &
                                       gamma,               &
                                       Jcost,               &
                                       inversionStatus)
@@ -351,7 +354,7 @@ if (converged) then
   call ufo_rttovonedvarcheck_get_jacobian(geovals, ob, ob % channels_all, &
                                        self % obsdb, self % conf, &
                                        profile_index, GuessProfile(:), &
-                                       hofxdiags, out_Y(:), out_H_matrix)
+                                       hofxdiags, rttov_simobs, out_Y(:), out_H_matrix)
   ob % output_BT(:) = out_Y(:)
   deallocate(out_Y)
   deallocate(out_H_matrix)
@@ -450,6 +453,7 @@ subroutine ufo_rttovonedvarcheck_ML_RTTOV12 ( self,  &
                                       r_matrix,      &
                                       geovals,       &
                                       hofxdiags,     &
+                                      rttov_simobs,  &
                                       gamma,         &
                                       Jold,          &
                                       Status)
@@ -472,6 +476,7 @@ real(kind_real), intent(in)             :: b_inv(:,:)      !< inverse of the sta
 type(ufo_rttovonedvarcheck_rsubmatrix), intent(in) :: r_matrix !< observation error covariance
 type(ufo_geovals), intent(inout)        :: geovals         !< model data at obs location
 type(ufo_geovals), intent(inout)        :: hofxdiags       !< model data containing the jacobian
+type(ufo_radiancerttov), intent(inout)  :: rttov_simobs
 real(kind_real), intent(inout)          :: gamma           !< steepness of descent parameter
 real(kind_real), intent(inout)          :: Jold            !< previous steps cost which gets update by good step
 integer, intent(out)                    :: Status          !< code to capture failed Cholesky decomposition
@@ -586,7 +591,7 @@ DescentLoop : do while (JCost > JOld .and.              &
    call ufo_rttovonedvarcheck_get_jacobian(geovals, ob, ob % channels_used, &
                                            self % obsdb, self % conf, &
                                            profile_index, GuessProfile(:), &
-                                           hofxdiags, BriTemp(:), H_matrix_tmp)
+                                           hofxdiags, rttov_simobs, BriTemp(:), H_matrix_tmp)
 
     !------------------------------------------------------------------------
     ! 5.6. Calculate the new cost function.
