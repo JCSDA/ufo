@@ -317,12 +317,7 @@ void TrackCheckShip::removeFaultyObservation(
   };
   auto neighborObservationStatistics = [&observationAfterFastestSegment](int index) ->
       const ObservationStatistics & {
-    if (index >= 0) {
-      return (observationAfterFastestSegment + index)->get().getObservationStatistics();
-    } else {
-      index *= -1;
-      return (observationAfterFastestSegment - index)->get().getObservationStatistics();
-    }
+    return (observationAfterFastestSegment + index)->get().getObservationStatistics();
   };
   auto meanSpeed = observationAfterFastestSegment->get().getFullTrackStatistics()->meanSpeed_;
   if (observationAfterFastestSegment == track.begin() + 1) {
