@@ -11,7 +11,7 @@ observations:
 - obs space:
     name: Ship
     obsdatain:
-      obsfile: Data/ioda/testinput_tier_1/medium_ship_data.nc4
+      obsfile: Data/ioda/testinput_tier_1/sfcship_synthetic_airtemp_m.nc4
       obsgrouping:
         group variable: "station_id"
     simulated variables: [air_temperature] #was air_temperature
