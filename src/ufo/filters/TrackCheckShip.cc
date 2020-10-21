@@ -210,9 +210,8 @@ void TrackCheckShip::applyFilter(const std::vector<bool> & apply,
         oops::Log::trace() << "CheckShipTrack: track " << trackNumber << " NumRej " <<
                               rejectedCount << " out of " << trackObservations.size() <<
                               " reports rejected. *** Reject whole track ***\n";
-        std::for_each(trackObservations.begin(), trackObservations.end(), [](TrackObservation& a) {
-          a.setRejected(true);
-        });
+        for (TrackObservation &obs : trackObservations)
+          obs.setRejected(true);
       }
       flagRejectedTrackObservations(track.begin(), track.end(),
                                     validObsIds, trackObservations, isRejected);
