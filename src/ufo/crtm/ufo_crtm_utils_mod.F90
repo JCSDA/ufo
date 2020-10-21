@@ -1038,7 +1038,7 @@ SUBROUTINE load_aerosol_data(n_profiles,n_layers,geovals,&
 !correct for mixing ratio factor layer_factors 
 !being calculated from dry pressure, cotton eq. (2.4)
 !p_dry=p_total/(1+1.61*mixing_ratio)
-        layer_factors(k)=(atm%Level_Pressure(k)-&
+        layer_factors(k)=1e-9_kind_real*(atm%Level_Pressure(k)-&
              &atm%Level_Pressure(k-1))*100_kind_real/grav/&
              &(1_kind_real+rv_rd*atm%Absorber(k,1)*1e-3_kind_real)
      ENDDO
@@ -1057,7 +1057,7 @@ SUBROUTINE load_aerosol_data(n_profiles,n_layers,geovals,&
 !correct for mixing ratio factor layer_factors 
 !being calculated from dry pressure, cotton eq. (2.4)
 !p_dry=p_total/(1+1.61*mixing_ratio)
-           layer_factors(k,m)=(atm(m)%Level_Pressure(k)-&
+           layer_factors(k,m)=1e-9_kind_real*(atm(m)%Level_Pressure(k)-&
                 &atm(m)%Level_Pressure(k-1))*100_kind_real/grav/&
                 &(1_kind_real+rv_rd*atm(m)%Absorber(k,1)*1.e-3_kind_real)
         ENDDO
