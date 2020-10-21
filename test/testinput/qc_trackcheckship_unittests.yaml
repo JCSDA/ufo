@@ -17,6 +17,10 @@ Normal ship track:
     variables: [air_temperature]
     temporal resolution: PT10M
     spatial resolution: 1 # km
+    max speed: 1.0
+    rejection threshold: 1.0
+    deferred check simultaneous: false
+    early break check: false
     station_id_variable:
       name: station_id@MetaData
   expected distance: [0, 157, 157, 157, 157]
@@ -51,6 +55,10 @@ Bending ship track:
     variables: [air_temperature]
     temporal resolution: PT10M
     spatial resolution: 1 # km
+    max speed: 1.0
+    rejection threshold: 1.0
+    deferred check simultaneous: false
+    early break check: false
     station_id_variable:
       name: station_id@MetaData
   expected distance: [0, 111, 111, 111, 157]
@@ -85,7 +93,10 @@ Fast ship track:
     variables: [air_temperature]
     temporal resolution: PT10M
     spatial resolution: 1 # km
-    max speed: .01 #km/s (change from default)
+    max speed: .01 #km/s
+    rejection threshold: 1.0
+    deferred check simultaneous: false
+    early break check: false
     station_id_variable:
       name: station_id@MetaData
   expected distance: [0, 111, 111]
@@ -121,7 +132,10 @@ Short ship track:
     variables: [air_temperature]
     temporal resolution: PT10M
     spatial resolution: 1 # km
-    max speed: 1 #km/s (default value)
+    max speed: 1 #km/s
+    rejection threshold: 1.0
+    deferred check simultaneous: false
+    early break check: false
     station_id_variable:
       name: station_id@MetaData
   expected distance: [0, 111, 111]
@@ -157,7 +171,10 @@ Short buoy track:
     variables: [air_temperature]
     temporal resolution: PT10M
     spatial resolution: 1 # km
-    max speed: 1 #km/s (default value)
+    max speed: 1 #km/s
+    rejection threshold: 1.0
+    deferred check simultaneous: false
+    early break check: false
     station_id_variable:
       name: station_id@MetaData
   expected distance: [0, 111, 111]
@@ -192,7 +209,10 @@ Fast/short ship track:
     variables: [air_temperature]
     temporal resolution: PT10M
     spatial resolution: 1 # km
-    max speed: .01 #km/s (default value)
+    max speed: .01 #km/s
+    rejection threshold: 1.0
+    deferred check simultaneous: false
+    early break check: false
     station_id_variable:
       name: station_id@MetaData
   expected distance: [0, 111, 111]
@@ -226,6 +246,10 @@ Ship Track Dist0:
     variables: [air_temperature]
     temporal resolution: PT10M
     spatial resolution: 1 # km
+    max speed: 1.0
+    rejection threshold: 1.0
+    deferred check simultaneous: false
+    early break check: false
     station_id_variable:
       name: station_id@MetaData
   expected distance: [0, 0, 0]
@@ -259,6 +283,10 @@ Ship Track Simultaneous Same Location:
     variables: [air_temperature]
     temporal resolution: PT10M
     spatial resolution: 1 # km
+    max speed: .01 #km/s
+    rejection threshold: 1.0
+    deferred check simultaneous: false
+    early break check: false
     station_id_variable:
       name: station_id@MetaData
   expected distance: [0, 0, 0]
@@ -294,6 +322,8 @@ Ship Track Simultaneous Same Location Deferred Simultaneous:
     variables: [air_temperature]
     temporal resolution: PT10M
     spatial resolution: 1 # km
+    max speed: 1.0 #km/s
+    rejection threshold: 1.0
     station_id_variable:
       name: station_id@MetaData
   expected distance: [0, 0, 0]
@@ -332,6 +362,10 @@ Ship Track Simultaneous Different Location:
     variables: [air_temperature]
     temporal resolution: PT10M
     spatial resolution: 1 # km
+    max speed: .01 #km/s
+    rejection threshold: 1.0
+    deferred check simultaneous: false
+    early break check: false
     station_id_variable:
       name: station_id@MetaData
   expected distance: [0, 111, 111]
@@ -362,11 +396,13 @@ Ship Track Simultaneous Different Location Deferred Simultaneous:
   station_ids: [ 1, 1, 1, 1, 1, 1]
   Ship Track Check:
     testing mode: true
-    early break check: false
-    deferred check simultaneous: true
     variables: [air_temperature]
     temporal resolution: PT10M
     spatial resolution: 1 # km
+    max speed: 1.0 #km/s
+    rejection threshold: 1.0
+    deferred check simultaneous: true
+    early break check: false
     station_id_variable:
       name: station_id@MetaData
   expected distance: [0, 111, 111, 111, 111, 111]
@@ -407,7 +443,10 @@ Ship Tracks Different Station IDs:
     variables: [air_temperature]
     temporal resolution: PT10M
     spatial resolution: 1 # km
-    max speed: 1 #km/s (default value)
+    max speed: 1 #km/s
+    rejection threshold: 1.0
+    deferred check simultaneous: false
+    early break check: false
     station_id_variable:
       name: station_id@MetaData
   expected distance: [0, 111, 111, 111, 157, 0, 111, 111]
@@ -443,7 +482,10 @@ Ship Tracks Different Station IDs Shuffled:
     variables: [air_temperature]
     temporal resolution: PT10M
     spatial resolution: 1 # km
-    max speed: 1 #km/s (default value)
+    max speed: 1 #km/s
+    rejection threshold: 1.0
+    deferred check simultaneous: false
+    early break check: false
     station_id_variable:
       name: station_id@MetaData
   expected distance: [0, 111, 111, 111, 157, 0, 111, 111]
