@@ -1,8 +1,5 @@
-# These tests compare the output of the Track Check filter against reference
-# results obtained with the Met Office OPS code (Ops_AirTrackCheck). The first test case is used as
-# a baseline; in subsequent test cases the filter's configuration contains one parameter
-# whose value differs from the first case. The last case is identical to the first one except that
-# observations are grouped explicitly by the station_id variable rather than the record number.
+# This test compares the output of the Track Check Ship filter against reference
+# results obtained with the Met Office OPS code (Ops_CheckShipTrack/Ops_OceanTrackCheck).
 
 window begin: 2000-01-01T00:00:00Z
 window end: 2029-12-12T23:59:59Z
