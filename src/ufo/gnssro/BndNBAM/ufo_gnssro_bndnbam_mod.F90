@@ -288,20 +288,23 @@ subroutine ufo_gnssro_bndnbam_simobs(self, geovals, hofx, obss)
               endif
            end do
 
-           do k = nlevCheck, 1, -1
-              gradRef = 1000.0 * (ref(k+1)-ref(k))/(radius(k+1)-radius(k))
-!             relax to close-to-SR conditions, and check if obs is inside model SR layer
-              if(self%roconf%sr_steps > 1                 &
-                 .and. super(iobs) == 0                   &
-                 .and. abs(gradRef) >= half*crit_gradRefr &
-                 .and. obsValue(iobs) >= 0.03 ) then
-                 if (toss_max(irec) <= obsValue(iobs)) obs_max(irec) = iobs
-                 toss_max(irec)= max(toss_max(irec), obsValue(iobs))
-                 super(iobs) = 1
-              end if
+!          relax to close-to-SR conditions, and check if obs is inside model SR layer
+           
+           if (self%roconf%sr_steps > 1                 &
+              .and. obsValue(iobs) >= 0.03 ) then
 
-           end do ! k
-
+               do k = nlevCheck, 1, -1
+                  gradRef = 1000.0 * (ref(k+1)-ref(k))/(radius(k+1)-radius(k))
+                  if (abs(gradRef) >= half*crit_gradRefr & 
+                     .and. super(iobs) == 0                   &
+                     .and. toss_max(irec) <= obsValue(iobs)) then
+                      obs_max(irec) = iobs
+                      toss_max(irec)= max(toss_max(irec), obsValue(iobs))
+                      super(iobs) = 1
+                  end if
+              end do ! k
+ 
+           end if   ! end if(self%roconf%sr_steps > 1 
         end if ! obsImpH <= six
 
 !    ROPP style super refraction check
@@ -340,13 +343,13 @@ subroutine ufo_gnssro_bndnbam_simobs(self, geovals, hofx, obss)
   if (trim(self%roconf%super_ref_qc) == "NBAM" .and. self%roconf%sr_steps > 1 ) then
      rec_loop2: do irec = 1, nrecs
 
-       if (toss_max(irec) > 0 ) then
+       if (obs_max(irec) > 0 ) then
 
           obs_loop2: do k = nlocs_begin(irec), nlocs_end(irec)
             obsImpH = (obsImpP(k) - obsLocR(k)) * r1em3
             if (obsImpH <= six .and.  obsImpP(k) <= obsImpP(obs_max(irec)).and.  &
                 hofx(k) .ne. missing .and. super_refraction_flag(k) .eq. 0) then
-                super_refraction_flag(k) =2
+                super_refraction_flag(k)=2
             end if
           end do obs_loop2
 
