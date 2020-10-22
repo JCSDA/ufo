@@ -227,7 +227,7 @@ else()
   if ( NOT DEFINED UFO_TESTFILES_BRANCH)
     # Get the current git branch of ufo repo
     execute_process(
-      COMMAND git rev-parse --abbrev-ref HEAD
+      COMMAND bash "-c" "git symbolic-ref -q --short HEAD || git describe --tags --exact-match"
       WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
       OUTPUT_VARIABLE GIT_BRANCH_UFO
       OUTPUT_STRIP_TRAILING_WHITESPACE)
