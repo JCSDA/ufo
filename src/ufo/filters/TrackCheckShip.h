@@ -160,7 +160,6 @@ class TrackCheckShip: public FilterBase,
 
     const ObservationStatistics &getObservationStatistics() const;
 
-    void registerCheckResult(const TrackCheckUtils::CheckResult &result);
     void setRejected(bool rejectedInSweep) {
       rejected_ = rejectedInSweep;
     }
