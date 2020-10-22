@@ -205,184 +205,73 @@ ecbuild_add_resources( TARGET ufo_test_scripts
                      )
 
 # Create Data directory for test data and symlink files
-list( APPEND ufo_test_data
-  atmosphere/abi_g16_geoval_2018041500_m_qc.nc4
-  atmosphere/abi_g16_geoval_2019042306_m.nc4
-  atmosphere/abi_g16_obsdiag_2018041500_m_qc.nc4
-  atmosphere/ahi_himawari8_geoval_2019042306_m.nc4
-  atmosphere/aircraft_geoval_2018041500_m.nc4
-  atmosphere/aircraft_geoval_2018041500_s.nc4
-  atmosphere/airs_aqua_geoval_2018041500_m.nc4
-  atmosphere/airs_aqua_geoval_2018041500_m_qc.nc4
-  atmosphere/airs_aqua_geoval_2018041500_m_unittest.nc4
-  atmosphere/airs_aqua_obsdiag_2018041500_m_qc.nc4
-  atmosphere/airs_aqua_obsdiag_2018041500_m_unittest.nc4
-  atmosphere/airs_aqua_tlapmean.txt
-  atmosphere/amsua_n19_geoval_2018041500_m_qc.nc4
-  atmosphere/amsua_n19_geoval_2018041500_s_qc.nc4
-  atmosphere/amsua_n19_geoval_2018041500_m.nc4
-  atmosphere/amsua_n19_geoval_2018041500_s.nc4
-  atmosphere/amsua_n19_obsdiag_2018041500_m_qc.nc4
-  atmosphere/amsua_n19_obsdiag_2018041500_s_qc.nc4
-  atmosphere/amsua_n19_tlapmean.txt
-  atmosphere/aod_geoval_2018041500_m.nc4
-  atmosphere/aod_geoval_2018041500_s.nc4
-  atmosphere/atms_npp_geoval_2018041500_m.nc4
-  atmosphere/atms_npp_geoval_2018041500_m_qc.nc4
-  atmosphere/atms_npp_geoval_2018041500_s.nc4
-  atmosphere/atms_npp_geoval_2018041500_s_qc.nc4
-  atmosphere/atms_npp_obsdiag_2018041500_m_qc.nc4
-  atmosphere/atms_npp_obsdiag_2018041500_s_qc.nc4
-  atmosphere/atms_npp_tlapmean.txt
-  atmosphere/cris-fsr_npp_geoval_2018041500_m.nc4
-  atmosphere/cris-fsr_npp_geoval_2018041500_m_qc.nc4
-  atmosphere/cris-fsr_npp_geoval_2018041500_m_unittest.nc4
-  atmosphere/cris-fsr_npp_obsdiag_2018041500_m_qc.nc4
-  atmosphere/cris-fsr_npp_obsdiag_2018041500_m_unittest.nc4
-  atmosphere/cris-fsr_npp_tlapmean.txt
-  atmosphere/geos_aod_geoval_2018041500_m.nc4
-  atmosphere/geovals_atms_20191230T0000Z_benchmark.nc4
-  atmosphere/gmi_gpm_geoval_2018041500_m.nc4
-  atmosphere/gnssro_geoval_2018041500_1obs.nc4
-  atmosphere/gnssro_geoval_2018041500_1obs_bending_angle.nc4
-  atmosphere/gnssro_geoval_2018041500_s.nc4
-  atmosphere/gnssro_geoval_2018041500_s_2d.nc4
-  atmosphere/gnssro_geoval_2018041500_m.nc4
-  atmosphere/gnssro_geoval_2018041500_l.nc4
-  atmosphere/gnssro_geoval_2018041500_3prof.nc4
-  atmosphere/gnssro_geoval_2019050700_1obs.nc4
-  atmosphere/gnssro_geoval_2020050106_nopseudo.nc4
-  atmosphere/gome_metop-a_geoval_2019101700_m.nc4
-  atmosphere/gome_metop-a_geoval_flipz_2019101700_m.nc4
-  atmosphere/groundgnss_geovals_20191230T0600Z.nc4
-  atmosphere/gsisfc_tsen_geoval_2018041500_m.nc4
-  atmosphere/gsisfc_uv_geoval_2018041500_m.nc4
-  atmosphere/hirs4_metop-a_geoval_2018041500_m.nc4
-  atmosphere/iasi_metop-a_obsdiag_2018041500_m.nc4
-  atmosphere/iasi_metop-a_obsdiag_2018041500_m_qc.nc4
-  atmosphere/iasi_metop-a_obsdiag_2018041500_m_unittest.nc4
-  atmosphere/iasi_metop-a_geoval_2018041500_m.nc4
-  atmosphere/iasi_metop-a_geoval_2018041500_m_qc.nc4
-  atmosphere/iasi_metop-a_geoval_2018041500_m_unittest.nc4
-  atmosphere/iasi_metop-a_tlapmean.txt
-  atmosphere/met_office_thinning.nc4
-  atmosphere/met_office_temporal_thinning_surface.nc4
-  atmosphere/met_office_temporal_thinning_sonde.nc4
-  atmosphere/mhs_n19_geoval_2018041500_m_qc.nc4
-  atmosphere/mhs_n19_geoval_2018041500_m.nc4
-  atmosphere/mhs_n19_obsdiag_2018041500_m_qc.nc4
-  atmosphere/omi_aura_geoval_2019101700_m.nc4
-  atmosphere/omi_aura_geoval_flipz_2019101700_m.nc4
-  atmosphere/ompsnp_npp_geoval_2019101700_m.nc4
-  atmosphere/ompsnp_npp_geoval_flipz_2019101700_m.nc4
-  atmosphere/ompsnp_npp_geoval_2020051712_m.nc4
-  atmosphere/ompstc8_npp_geoval_2019101700_m.nc4
-  atmosphere/ompstc8_npp_geoval_flipz_2019101700_m.nc4
-  atmosphere/ps_geovals_2018041500_0000.nc4
-  atmosphere/radar_dbz_geoval_2019052222.nc4
-  atmosphere/radar_rw_geoval_2019052222.nc4
-  atmosphere/smap_geoval_2018041500_m.nc4
-  atmosphere/satbias_crtm_in
-  atmosphere/satbias_crtm_pc
-  atmosphere/satwind_geoval_2018041500_m.nc4
-  atmosphere/satwind_geoval_2018041500_s.nc4
-  atmosphere/sbuv2_n19_geoval_2018041500_m.nc4
-  atmosphere/sbuv2_n19_geoval_flipz_2018041500_m.nc4
-  atmosphere/sbuv2_n19_geoval_2019101700_m.nc4
-  atmosphere/sbuv2_n19_geoval_flipz_2019101700_m.nc4
-  atmosphere/sbuv2_n19_geoval_2020051712_m.nc4
-  atmosphere/seviri_m08_geoval_2018041500_m.nc4
-  atmosphere/sfc_geoval_2018041500_m.nc4
-  atmosphere/sndrd1_g15_geoval_2018041500_m.nc4
-  atmosphere/sndrd2_g15_geoval_2018041500_m.nc4
-  atmosphere/sndrd3_g15_geoval_2018041500_m.nc4
-  atmosphere/sndrd4_g15_geoval_2018041500_m.nc4
-  atmosphere/sondes_geoval_2018041500_m.nc4
-  atmosphere/sondes_geoval_2018041500_s.nc4
-  atmosphere/sondes_geoval_2018041500_vs.nc4
-  atmosphere/ssmis_f18_geoval_2018041500_m.nc4
-  atmosphere/tropomi_no2_geoval_2020090318_m.nc4
-  atmosphere/windprof_geoval_2018041500_m.nc4
-  marine/coolskin_fake_geovals_2018041500.nc
-  marine/cryosat2-2018-04-15_geovals.nc
-  marine/icec-2018-04-15_geovals.nc
-  marine/Jason-2-2018-04-15_geovals.nc
-  marine/profile_2018-04-15_geovals.nc
-  marine/sst_obs-2018-04-15_geovals.nc
-  marine/viirs_jpss1_oc_l2_2018-04-15_geovals.nc
-  filters/filters_testdata.nc4
-  filters/met_office_poisson_disk_thinning.nc4
-  filters/met_office_buddy_check.nc4
-  filters/poisson_disk_thinning_3x3x3x3_regular_grid.nc4
-  filters/met_office_profile_consistency_checks.nc4
-  filters/met_office_profile_consistency_checks_bkgqc_modobs.nc4
-  filters/met_office_profile_consistency_checks_bkgqc_repobs.nc4
-  filters/met_office_profile_consistency_checks_rh.nc4
-  filters/met_office_profile_consistency_checks_rh_wrong.nc4
-  filters/met_office_profile_consistency_checks_unittests.nc4
-  filters/met_office_profile_consistency_checks_oneprofile.nc4
-  filters/met_office_profile_consistency_checks_oneprofile_wrong.nc4
-  filters/met_office_profile_consistency_checks_uinterp.nc4
-)
-
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Data)
-CREATE_SYMLINK_FILENAME( ${CMAKE_CURRENT_SOURCE_DIR}/testinput ${CMAKE_CURRENT_BINARY_DIR}/Data ${ufo_test_data} )	
 
-# IODA observation files 
-list( APPEND ufo_ioda_test_data
-      testinput_tier_1.tar.gz)
+list( APPEND ioda_test_data testinput_tier_1.tar.gz )
+list( APPEND ufo_test_data testinput_tier_1.tar.gz )
 
-# Set URL for IODA test files
-set(UFO_IODA_DOWNLOAD_BASE_URL https://jedi-test-files.s3.amazonaws.com)
-
-# If local path to testfiles is defined don't download
-if (DEFINED ENV{LOCAL_PATH_TESTFILES_IODA})
-        set(LOCAL_PATH_TESTFILES_IODA "$ENV{LOCAL_PATH_TESTFILES_IODA}")
+if( DEFINED ENV{LOCAL_PATH_TESTFILES})
+    set(LOCAL_PATH_TESTFILES "$ENV{LOCAL_PATH_TESTFILES}")
 endif()
 
-if( NOT DEFINED LOCAL_PATH_TESTFILES_IODA )
+# Set URL for IODA test files
+set(DOWNLOAD_BASE_URL https://jedi-test-files.s3.amazonaws.com)
 
-  message(STATUS "LOCAL_PATH_TESTFILES_IODA is not defined, download test files")
-  if ( NOT DEFINED UFO_IODA_TESTFILES_BRANCH)
-
-    # Get the current git branch of ioda repo
+# If local path to testfiles is defined don't download
+if( DEFINED LOCAL_PATH_TESTFILES )
+  set(UFO_IODA_TESTFILES_PATH ${LOCAL_PATH_TESTFILES}/ioda)
+  set(UFO_UFO_TESTFILES_PATH ${LOCAL_PATH_TESTFILES}/ufo)
+  message(STATUS "use LOCAL_PATH_TESTFILES: ${LOCAL_PATH_TESTFILES}")
+else()
+  message(STATUS "LOCAL_PATH_TESTFILES is not defined, download test files")
+  if ( NOT DEFINED UFO_TESTFILES_BRANCH)
+    # Get the current git branch of ufo repo
     execute_process(
       COMMAND git rev-parse --abbrev-ref HEAD
       WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
       OUTPUT_VARIABLE GIT_BRANCH_UFO
       OUTPUT_STRIP_TRAILING_WHITESPACE)
     message(STATUS "UFO is in branch: ${GIT_BRANCH_UFO}")
-
   else()
     message(STATUS "Branch name provided by user")
-    set(GIT_BRANCH_UFO ${UFO_IODA_TESTFILES_BRANCH})
+    set(GIT_BRANCH_UFO ${UFO_TESTFILES_BRANCH})
   endif()
 
-  # Check whether the URL exists or not
-  set(ECBUILD_DOWNLOAD_BASE_URL ${UFO_IODA_DOWNLOAD_BASE_URL}/ioda)
-
-  ecbuild_check_urls(NAMES ${GIT_BRANCH_UFO}/${ufo_ioda_test_data}
+  # Check whether the URL exists or not for ioda
+  set(ECBUILD_DOWNLOAD_BASE_URL ${DOWNLOAD_BASE_URL}/ioda)
+  ecbuild_check_urls(NAMES ${GIT_BRANCH_UFO}/${ioda_test_data}
                      RESULT UFO_SPECIFIC_TEST_FILES)
-
   # Set distant directory
   if(${UFO_SPECIFIC_TEST_FILES} MATCHES 0)
     # Download and extract new test files (distant directory = git branch)
-    set(DIRNAME ${GIT_BRANCH_UFO})
-    message(STATUS "GIT_BRANCH_UFO found, will download: ${GIT_BRANCH_UFO}")
+    set(ioda_data_branch ${GIT_BRANCH_UFO})
+    message(STATUS "GIT_BRANCH_UFO found, will download: ${GIT_BRANCH_UFO} for ioda test data")
   else()
     # Download and extract develop test files (distant directory = develop)
-    set(DIRNAME "develop")
-    message(STATUS "GIT_BRANCH_UFO not found, will download develop")
+    set(ioda_data_branch "develop")
+    message(STATUS "GIT_BRANCH_UFO not found, will download develop for ioda test data")
   endif()
-
-  message(STATUS "Test data will be download from: ${UFO_IODA_DOWNLOAD_BASE_URL}/${DIRNAME}")
-
-  set(UFO_IODA_REP_NAME ioda)
-  set(UFO_IODA_TESTFILES_NAME ${ufo_ioda_test_data})
-  set(UFO_IODA_BRANCH_NAME ${DIRNAME})
-  set(UFO_IODA_TESTFILES_PATH ${CMAKE_BINARY_DIR}/test_data/ioda/${DIRNAME})
-  message(STATUS "Save data to: ${TESTFILE_DIR_IODA}")
+  message(STATUS "ioda test data will be download from: ${DOWNLOAD_BASE_URL}/ioda/${ioda_data_branch}")
+  set(UFO_IODA_TESTFILES_PATH ${CMAKE_BINARY_DIR}/test_data/ioda/${ioda_data_branch} CACHE PATH "path for ioda test data")
   file(MAKE_DIRECTORY ${UFO_IODA_TESTFILES_PATH})
+
+  # Check whether the URL exists or not for ufo
+  set(ECBUILD_DOWNLOAD_BASE_URL ${DOWNLOAD_BASE_URL}/ufo)
+  ecbuild_check_urls(NAMES ${GIT_BRANCH_UFO}/${ufo_test_data}
+                     RESULT UFO_SPECIFIC_TEST_FILES)
+  # Set distant directory
+  if(${UFO_SPECIFIC_TEST_FILES} MATCHES 0)
+    # Download and extract new test files (distant directory = git branch)
+    set(ufo_data_branch ${GIT_BRANCH_UFO})
+    message(STATUS "GIT_BRANCH_UFO found, will download: ${GIT_BRANCH_UFO} for ufo test data")
+  else()
+    # Download and extract develop test files (distant directory = develop)
+    set(ufo_data_branch "develop")
+    message(STATUS "GIT_BRANCH_UFO not found, will download develop for ufo test data")
+  endif()
+  message(STATUS "ufo test data will be download from: ${DOWNLOAD_BASE_URL}/ufo/${ufo_data_branch}")
+  set(UFO_UFO_TESTFILES_PATH ${CMAKE_BINARY_DIR}/test_data/ufo/${ufo_data_branch} CACHE PATH "path for ufo test data")
+  file(MAKE_DIRECTORY ${UFO_UFO_TESTFILES_PATH})
 
   # Create download script for get_ioda_test_data test
   set ( FILENAME ufo_ioda_data_downloader.py)
@@ -403,16 +292,23 @@ if( NOT DEFINED LOCAL_PATH_TESTFILES_IODA )
   ecbuild_add_test( TARGET    ufo_get_ioda_test_data
                     TYPE      SCRIPT
                     COMMAND    ${CMAKE_BINARY_DIR}/bin/ufo_ioda_data_downloader.py
-                    ARGS      testoutput/download_test_ufo.log)
+                    ARGS      ioda ${ioda_test_data} ${ioda_data_branch} ${UFO_IODA_TESTFILES_PATH} ${DOWNLOAD_BASE_URL} )
 
-else()
-  set(UFO_IODA_TESTFILES_PATH ${LOCAL_PATH_TESTFILES_IODA})
-  message(STATUS "use LOCAL_PATH_TESTFILES_IODA: ${LOCAL_PATH_TESTFILES_IODA}")
+  ecbuild_add_test( TARGET    ufo_get_ufo_test_data
+                    TYPE      SCRIPT
+                    COMMAND    ${CMAKE_BINARY_DIR}/bin/ufo_ioda_data_downloader.py
+                    ARGS      ufo ${ufo_test_data} ${ufo_data_branch} ${UFO_UFO_TESTFILES_PATH} ${DOWNLOAD_BASE_URL} )
+
 endif()
 
 execute_process( COMMAND ${CMAKE_COMMAND} -E create_symlink
                  ${UFO_IODA_TESTFILES_PATH}
                  ${CMAKE_CURRENT_BINARY_DIR}/Data/ioda)
+
+execute_process( COMMAND ${CMAKE_COMMAND} -E create_symlink
+                 ${UFO_UFO_TESTFILES_PATH}
+                 ${CMAKE_CURRENT_BINARY_DIR}/Data/ufo)
+
 
 #####################################################################
 # Install headers used in tests of interfaces that may be implemented by clients.
