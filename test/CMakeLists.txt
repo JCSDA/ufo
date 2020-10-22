@@ -221,6 +221,8 @@ set(DOWNLOAD_BASE_URL https://jedi-test-files.s3.amazonaws.com)
 if( DEFINED LOCAL_PATH_TESTFILES )
   set(UFO_IODA_TESTFILES_PATH ${LOCAL_PATH_TESTFILES}/ioda)
   set(UFO_UFO_TESTFILES_PATH ${LOCAL_PATH_TESTFILES}/ufo)
+  set(UFO_CRTM_COEFFS_PATH ${LOCAL_PATH_TESTFILES}/crtm)
+
   message(STATUS "use LOCAL_PATH_TESTFILES: ${LOCAL_PATH_TESTFILES}")
 else()
   message(STATUS "LOCAL_PATH_TESTFILES is not defined, download test files")
@@ -299,6 +301,14 @@ else()
                     COMMAND    ${CMAKE_BINARY_DIR}/bin/ufo_ioda_data_downloader.py
                     ARGS      ufo ${ufo_test_data} ${ufo_data_branch} ${UFO_UFO_TESTFILES_PATH} ${DOWNLOAD_BASE_URL} )
 
+  # download CRTM coefficients
+  if( crtm_FOUND )
+    set(UFO_CRTM_COEFFS_PATH ${CMAKE_BINARY_DIR}/test_data/crtm/2.3.0 CACHE PATH "path for CRTM coefficients")
+    ecbuild_add_test( TARGET    ufo_get_crtm_test_data
+                      TYPE      SCRIPT
+                      COMMAND   ${CMAKE_BINARY_DIR}/bin/ufo_ioda_data_downloader.py
+                      ARGS      crtm crtm_coefficients.tar.gz 2.3.0 ${UFO_CRTM_COEFFS_PATH} ${DOWNLOAD_BASE_URL} )
+  endif( crtm_FOUND )
 endif()
 
 execute_process( COMMAND ${CMAKE_COMMAND} -E create_symlink
@@ -1902,8 +1912,7 @@ TauCoeff/ODPS/Little_Endian/radiometer_smap.TauCoeff.bin
 
 if( crtm_FOUND )
     # symlink to selected CRTM coefficient files.
-    # crtm_COEFFICIENT_DIR is exported by crtm-config.cmake
-    create_symlink_filename( ${crtm_COEFFICIENT_DIR}
+    create_symlink_filename( ${UFO_CRTM_COEFFS_PATH}
                              ${CMAKE_CURRENT_BINARY_DIR}/Data
                              ${crtm_test_input} )
 endif()
