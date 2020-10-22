@@ -273,11 +273,11 @@ bool TrackCheckShip::earlyBreak(const std::vector<std::reference_wrapper<TrackOb
             * trackStats.numShort_ + trackStats.numFast_) + trackStats.numBends_)
       >= (trackObs.size() - 1)) {
     oops::Log::trace() << "ShipTrackCheck: " << trackId << "\n" <<
-                            "Time difference < 1 hour: " << trackStats.numShort_ << "\n" <<
-                            "Fast: " << trackStats.numFast_ << "\n" <<
-                            "Bends: " << trackStats.numBends_ << "\n" <<
-                            "Total observations: " << trackObs.size() << "\n" <<
-                            "Track was not checked." << std::endl;
+                          "Time difference < 1 hour: " << trackStats.numShort_ << "\n" <<
+                          "Fast: " << trackStats.numFast_ << "\n" <<
+                          "Bends: " << trackStats.numBends_ << "\n" <<
+                          "Total observations: " << trackObs.size() << "\n" <<
+                          "Track was not checked." << std::endl;
 
     breakResult = true;
   }
