@@ -606,7 +606,7 @@ void TrackCheckShip::calculateTrackSegmentProperties(
     const std::vector<std::reference_wrapper<TrackObservation>> &trackObservations,
     CalculationMethod calculationMethod) const {
   if (trackObservations.size()) {
-    if (calculationMethod == MAINLOOP)
+    if (calculationMethod == MAINLOOP || calculationMethod == SIMULTANEOUSDEFERRAL)
       trackObservations[0].get().resetObservationCalculations();
     for (size_t obsIdx = 1; obsIdx < trackObservations.size(); obsIdx++) {
       TrackObservation &obs = trackObservations[obsIdx].get();
