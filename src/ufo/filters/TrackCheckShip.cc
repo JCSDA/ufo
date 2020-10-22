@@ -126,9 +126,7 @@ void TrackCheckShip::flagRejectedTrackObservations(
   auto trackObsIndexIt = trackObsIndicesBegin;
   auto trackObsIt = trackObservations.begin();
   for (; trackObsIndexIt != trackObsIndicesEnd; ++trackObsIndexIt, ++trackObsIt)
-    if (trackObsIt->rejected()) {
-      isRejected[validObsIds[*trackObsIndexIt]] = true;
-    }
+    isRejected[validObsIds[*trackObsIndexIt]] = trackObsIt->rejected();
 }
 
 void TrackCheckShip::print(std::ostream & os) const {
