@@ -14,7 +14,7 @@ Incorrect and missing values, RH:
   obs space:
     name: Radiosonde
     obsdatain:
-      obsfile: Data/met_office_profile_consistency_checks_rh_wrong.nc4
+      obsfile: Data/ufo/testinput_tier_1/met_office_profile_consistency_checks_rh_wrong.nc4
       obsgrouping:
         group variable: "station_id"
     simulated variables: [air_temperature, relative_humidity, dew_point_temperature]
@@ -34,7 +34,7 @@ Incorrect and missing values:
   obs space:
     name: Radiosonde
     obsdatain:
-      obsfile: Data/met_office_profile_consistency_checks_oneprofile_wrong.nc4
+      obsfile: Data/ufo/testinput_tier_1/met_office_profile_consistency_checks_oneprofile_wrong.nc4
       obsgrouping:
         group variable: "station_id"
     simulated variables: [air_temperature, geopotential_height]
@@ -54,7 +54,7 @@ Incorrect and missing values, Basic:
   obs space:
     name: Radiosonde
     obsdatain:
-      obsfile: Data/met_office_profile_consistency_checks_oneprofile_wrong.nc4
+      obsfile: Data/ufo/testinput_tier_1/met_office_profile_consistency_checks_oneprofile_wrong.nc4
       obsgrouping:
         group variable: "station_id"
     simulated variables: [air_temperature, geopotential_height]
@@ -74,7 +74,7 @@ Wrong number of entries per profile:
   obs space:
     name: Radiosonde
     obsdatain:
-      obsfile: Data/met_office_profile_consistency_checks_oneprofile.nc4
+      obsfile: Data/ufo/testinput_tier_1/met_office_profile_consistency_checks_oneprofile.nc4
       obsgrouping:
         group variable: "station_id"
     simulated variables: [air_temperature, geopotential_height]
@@ -96,7 +96,7 @@ Wrong number of entries per profile, UInterp:
   obs space:
     name: Radiosonde
     obsdatain:
-      obsfile: Data/met_office_profile_consistency_checks_uinterp.nc4
+      obsfile: Data/ufo/testinput_tier_1/met_office_profile_consistency_checks_uinterp.nc4
       obsgrouping:
         group variable: "station_id"
     simulated variables: [eastward_wind, northward_wind]
@@ -118,7 +118,7 @@ Wrong number of entries per profile, RH:
   obs space:
     name: Radiosonde
     obsdatain:
-      obsfile: Data/met_office_profile_consistency_checks_rh.nc4
+      obsfile: Data/ufo/testinput_tier_1/met_office_profile_consistency_checks_rh.nc4
       obsgrouping:
         group variable: "station_id"
     simulated variables: [air_temperature, relative_humidity, dew_point_temperature]
@@ -140,7 +140,7 @@ Wrong number of entries per profile, background:
   obs space:
     name: Radiosonde
     obsdatain:
-      obsfile: Data/met_office_profile_consistency_checks_bkgqc_repobs.nc4
+      obsfile: Data/ufo/testinput_tier_1/met_office_profile_consistency_checks_bkgqc_repobs.nc4
       obsgrouping:
         group variable: "station_id"
     simulated variables: [eastward_wind, northward_wind]
@@ -161,7 +161,7 @@ No group variable chosen:
   obs space:
     name: Radiosonde
     obsdatain:
-      obsfile: Data/met_office_profile_consistency_checks_rh.nc4
+      obsfile: Data/ufo/testinput_tier_1/met_office_profile_consistency_checks_rh.nc4
     simulated variables: [air_temperature, relative_humidity, dew_point_temperature]
   obs diagnostics:
   ProfileConsistencyChecks:
@@ -180,7 +180,7 @@ Ascending sort order:
   obs space:
     name: Radiosonde
     obsdatain:
-      obsfile: Data/met_office_profile_consistency_checks_rh.nc4
+      obsfile: Data/ufo/testinput_tier_1/met_office_profile_consistency_checks_rh.nc4
       obsgrouping:
         group variable: "station_id"
         sort variable: "air_pressure"
@@ -203,7 +203,7 @@ Invalid check requested:
   obs space:
     name: Radiosonde
     obsdatain:
-      obsfile: Data/met_office_profile_consistency_checks_rh.nc4
+      obsfile: Data/ufo/testinput_tier_1/met_office_profile_consistency_checks_rh.nc4
       obsgrouping:
         group variable: "station_id"
     simulated variables: [air_temperature, relative_humidity, dew_point_temperature]
@@ -224,7 +224,7 @@ Duplicate check requested:
   obs space:
     name: Radiosonde
     obsdatain:
-      obsfile: Data/met_office_profile_consistency_checks_oneprofile.nc4
+      obsfile: Data/ufo/testinput_tier_1/met_office_profile_consistency_checks_oneprofile.nc4
       obsgrouping:
         group variable: "station_id"
     simulated variables: [air_temperature, geopotential_height]
@@ -245,7 +245,7 @@ Incorrect type in get:
   obs space:
     name: Radiosonde
     obsdatain:
-      obsfile: Data/met_office_profile_consistency_checks_oneprofile.nc4
+      obsfile: Data/ufo/testinput_tier_1/met_office_profile_consistency_checks_oneprofile.nc4
       obsgrouping:
         group variable: "station_id"
     simulated variables: [air_temperature, geopotential_height]
@@ -266,7 +266,7 @@ Standard levels out of order:
   obs space:
     name: Radiosonde
     obsdatain:
-      obsfile: Data/met_office_profile_consistency_checks_oneprofile.nc4
+      obsfile: Data/ufo/testinput_tier_1/met_office_profile_consistency_checks_oneprofile.nc4
       obsgrouping:
         group variable: "station_id"
         sort variable: "air_pressure"
@@ -290,7 +290,7 @@ Background SondeLaunchWindRej:
   obs space:
     name: Radiosonde
     obsdatain:
-      obsfile: Data/met_office_profile_consistency_checks_bkgqc_repobs.nc4
+      obsfile: Data/ufo/testinput_tier_1/met_office_profile_consistency_checks_bkgqc_repobs.nc4
       obsgrouping:
         group variable: "station_id"
     simulated variables: [eastward_wind, northward_wind]
@@ -311,7 +311,7 @@ Background manual QC flags:
   obs space:
     name: Radiosonde
     obsdatain:
-      obsfile: Data/met_office_profile_consistency_checks_bkgqc_repobs.nc4
+      obsfile: Data/ufo/testinput_tier_1/met_office_profile_consistency_checks_bkgqc_repobs.nc4
       obsgrouping:
         group variable: "station_id"
     simulated variables: [air_temperature, relative_humidity, eastward_wind, northward_wind, geopotential_height]

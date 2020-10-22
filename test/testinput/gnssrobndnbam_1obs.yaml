@@ -11,6 +11,6 @@ observations:
     obsfile: Data/ioda/testinput_tier_1/gnssro_obs_2018041500_1obs_bending_angle.nc4
    simulated variables: [bending_angle]
   geovals:
-   filename: Data/gnssro_geoval_2018041500_1obs_bending_angle.nc4
+   filename: Data/ufo/testinput_tier_1/gnssro_geoval_2018041500_1obs_bending_angle.nc4
   vector ref: GsiHofX
   tolerance: 1.0e-7

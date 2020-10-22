@@ -13,7 +13,7 @@ observations:
       obsfile: Data/ioda/testinput_tier_1/sondes_obs_2018041500_vs.nc4
     simulated variables: [air_temperature]
   geovals:
-    filename: Data/sondes_geoval_2018041500_vs.nc4
+    filename: Data/ufo/testinput_tier_1/sondes_geoval_2018041500_vs.nc4
     loc_multiplier: -2
   vector ref: GsiHofX
   tolerance: 1.0e-06

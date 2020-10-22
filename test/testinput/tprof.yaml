@@ -10,7 +10,7 @@ observations:
       obsfile: Data/ioda/testinput_tier_1/profile_2018-04-15.nc
     simulated variables: [sea_water_temperature]
   geovals:
-    filename: Data/profile_2018-04-15_geovals.nc
+    filename: Data/ufo/testinput_tier_1/profile_2018-04-15_geovals.nc
   rms ref: 15.020734025831988
   tolerance: 1.0e-10
   linear obs operator test:
