@@ -161,6 +161,12 @@ void TrackCheckShip::applyFilter(const std::vector<bool> & apply,
   size_t trackNumber = 0;
   for (auto track : splitter.multiElementGroups()) {
     trackNumber++;
+    std::string stationId;
+    if (options_->stationIdVariable.value() != boost::none) {
+      stationId = (options_->stationIdVariable.value().get()).variable();
+    } else {
+      stationId = std::to_string(trackNumber);
+    }
     std::vector<TrackObservation> trackObservations = collectTrackObservations(
           track.begin(), track.end(), validObsIds, obsLocTime);
     std::vector<std::reference_wrapper<TrackObservation>> trackObservationsReferences;
@@ -173,7 +179,7 @@ void TrackCheckShip::applyFilter(const std::vector<bool> & apply,
                                     CalculationMethod::FIRSTITERATION);
     if (!trackObservationsReferences.empty() &&
         this->options_->earlyBreakCheck &&
-        TrackCheckShip::earlyBreak(trackObservationsReferences, trackNumber)) {
+        TrackCheckShip::earlyBreak(trackObservationsReferences, stationId)) {
       continue;
     }
     if (options_->deferredCheckSimultaneous.value()) {
@@ -201,14 +207,14 @@ void TrackCheckShip::applyFilter(const std::vector<bool> & apply,
         }
         removeFaultyObservation(
               trackObservationsReferences, maxSpeedReferenceIterator, firstIterativeRemoval,
-              trackNumber);
+              stationId);
         firstIterativeRemoval = false;
         calculateTrackSegmentProperties(trackObservationsReferences, CalculationMethod::MAINLOOP);
       }
       auto rejectedCount = std::count_if(trackObservations.begin(), trackObservations.end(),
                     [](const TrackObservation& a) {return a.rejected();});
       if (rejectedCount >= options_->rejectionThreshold.value() * trackObservations.size()) {
-        oops::Log::trace() << "CheckShipTrack: track " << trackNumber << " NumRej " <<
+        oops::Log::trace() << "CheckShipTrack: track " << stationId << " NumRej " <<
                               rejectedCount << " out of " << trackObservations.size() <<
                               " reports rejected. *** Reject whole track ***\n";
         for (TrackObservation &obs : trackObservations)
@@ -257,7 +263,7 @@ std::vector<TrackCheckShip::TrackObservation> TrackCheckShip::collectTrackObserv
 /// the check gives up. This is particularly a problem with WOD01 data - case studies
 /// suggest that most suspect data is reasonable.
 bool TrackCheckShip::earlyBreak(const std::vector<std::reference_wrapper<TrackObservation>>
-                                &trackObs, const size_t trackNumber) const {
+                                &trackObs, const std::string trackId) const {
   bool breakResult = false;
   const auto& trackStats = *(trackObs[0].get().getFullTrackStatistics());
   // if at least half of the track segments have a time difference of less than an hour
@@ -266,13 +272,7 @@ bool TrackCheckShip::earlyBreak(const std::vector<std::reference_wrapper<TrackOb
   if ((2 * ((options_->inputCategory.value() != 1)  // 1 is input category of buoy
             * trackStats.numShort_ + trackStats.numFast_) + trackStats.numBends_)
       >= (trackObs.size() - 1)) {
-    std::string stationId = "no station id provided";
-    if (options_->stationIdVariable.value() != boost::none) {
-      stationId = (options_->stationIdVariable.value().get()).variable();
-    } else {
-      stationId = std::to_string(trackNumber);
-    }
-    oops::Log::trace() << "ShipTrackCheck: " << stationId << "\n" <<
+    oops::Log::trace() << "ShipTrackCheck: " << trackId << "\n" <<
                             "Time difference < 1 hour: " << trackStats.numShort_ << "\n" <<
                             "Fast: " << trackStats.numFast_ << "\n" <<
                             "Bends: " << trackStats.numBends_ << "\n" <<
@@ -305,7 +305,7 @@ void TrackCheckShip::removeFaultyObservation(
     std::vector<std::reference_wrapper<TrackObservation>> &track,
     const std::vector<std::reference_wrapper<TrackObservation>>::iterator
     &observationAfterFastestSegment,
-    bool firstIterativeRemoval, size_t trackNumber) const {
+    bool firstIterativeRemoval, const std::string trackId) const {
   int errorCategory = 0;
   util::Duration four_days{"P4D"};
   auto rejectedObservation = observationAfterFastestSegment;
@@ -478,7 +478,7 @@ void TrackCheckShip::removeFaultyObservation(
     }
     if (errorCategory == 9 || std::min(distancePrevObsOmitted, distanceCurrentObsOmitted) == 0.0) {
       oops::Log::trace() << "CheckShipTrack: Dist check, station id: " <<
-                            trackNumber << std::endl <<
+                            trackId << std::endl <<
                             " error category: " << errorCategory << std::endl <<
                             " distances: " << distanceSum * 0.001 << " " <<
                             distancePrevObsOmitted * 0.001 << " " <<
@@ -493,7 +493,7 @@ void TrackCheckShip::removeFaultyObservation(
                               speedAveraged) >
                              options_->maxSpeed.value())) {
     oops::Log::trace() << "CheckShipTrack: cannot decide between station id " <<
-                          trackNumber << " observations " <<
+                          trackId << " observations " <<
                           (observationAfterFastestSegment - 1)->get().getObservationNumber() <<
                           " " << observationAfterFastestSegment->get().getObservationNumber() <<
                           " rejecting both." << std::endl;
@@ -519,7 +519,7 @@ void TrackCheckShip::removeFaultyObservation(
             std::make_pair(rejectedObservationNumber,
                            errorCategory));
     }
-    oops::Log::trace() << "CheckShipTrack: rejecting station " << trackNumber << " observation " <<
+    oops::Log::trace() << "CheckShipTrack: rejecting station " << trackId << " observation " <<
                           rejectedObservation->get().getObservationNumber() << "\n" <<
                           "Error category: " << errorCategory << "\n" <<
                           "rejection candidates: " <<
