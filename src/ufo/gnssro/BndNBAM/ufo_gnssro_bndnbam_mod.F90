@@ -76,7 +76,7 @@ subroutine ufo_gnssro_bndnbam_simobs(self, geovals, hofx, obss)
   real(c_double)                          :: missing
   integer,          allocatable           :: super_refraction_flag(:), super(:), obs_max(:)
   real(kind_real),  allocatable           :: toss_max(:)
-  integer                                 :: sr_hgt_idx, check
+  integer                                 :: sr_hgt_idx
   real(kind_real)                         :: gradRef, obsImpH
   integer,          allocatable           :: LayerIdx(:)
 
@@ -233,12 +233,10 @@ subroutine ufo_gnssro_bndnbam_simobs(self, geovals, hofx, obss)
   iobs = 0
   hofx =  missing
   super = 0
+  obs_max  = 0
+  toss_max = 0
 
   rec_loop: do irec = 1, nrecs
-
-    obs_max(irec)  = 0
-    toss_max(irec) = 0
-    check = 0
 
     obs_loop: do icount = nlocs_begin(irec), nlocs_end(irec)
 
@@ -347,8 +345,8 @@ subroutine ufo_gnssro_bndnbam_simobs(self, geovals, hofx, obss)
 
           obs_loop2: do k = nlocs_begin(irec), nlocs_end(irec)
             obsImpH = (obsImpP(k) - obsLocR(k)) * r1em3
-            if (obsImpH <= six .and.  obsImpP(k) <= obsImpP(obs_max(irec)).and.  &
-                hofx(k) .ne. missing .and. super_refraction_flag(k) .eq. 0) then
+            if (obsImpH<=six .and. obsImpP(k)<=obsImpP(obs_max(irec)) .and.  &
+                hofx(k)/=missing .and. super_refraction_flag(k)==0) then
                 super_refraction_flag(k)=2
             end if
           end do obs_loop2
