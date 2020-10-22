@@ -142,6 +142,8 @@ phases:
         ecbuild_bundle( PROJECT geos-aero  GIT "https://github.com/JCSDA/geos-aero.git" )' CMakeLists.txt
       - cat CMakeLists.txt
 
+      - chmod -R 777 /jcsda/ufo-bundle
+      - ls -lt /jcsda/ufo-bundle
   build:
     commands:
       - echo Executing build phase

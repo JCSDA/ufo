@@ -8,3 +8,6 @@ foreach(FILENAME ${test_files})
      ${PROJECT_SOURCE_DIR}/tools/${FILENAME}
      ${CMAKE_BINARY_DIR}/bin/${PROJECT_NAME}_${FILENAME} )
 endforeach(FILENAME)
+
+add_subdirectory(new_obsop)
+add_subdirectory(new_qc)

@@ -50,6 +50,9 @@ void Thinning::applyFilter(const std::vector<bool> & apply,
 
   // create random numbers for each observation based on some seed
   unsigned int random_seed = config_.getInt("random seed", std::time(0));
+  int mymember = config_.getInt("member", 0);
+  random_seed += mymember;
+
   util::UniformDistribution<float> rand(gnlocs, 0.0, 1.0, random_seed);
 
   for (size_t jv = 0; jv < filtervars.nvars(); ++jv) {
