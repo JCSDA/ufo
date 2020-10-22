@@ -48,12 +48,10 @@ RTTOVOneDVarCheck::RTTOVOneDVarCheck(ioda::ObsSpace & obsdb, const eckit::Config
   // Create hofxdiags
   for (size_t jvar = 0; jvar < retrieved_vars_.size(); ++jvar) {
     for (size_t jch = 0; jch < channels_.size(); ++jch) {
-      hoxdiags_retrieved_vars_.push_back("brightness_temperature_jacobian_"+retrieved_vars_[jvar]+"_"+std::to_string(channels_[jch]));
+      hoxdiags_retrieved_vars_.push_back("brightness_temperature_jacobian_"+
+                   retrieved_vars_[jvar]+"_"+std::to_string(channels_[jch]));
     }
   }
-
-  oops::Log::debug() << "RTTOVOneDVarCheck contructor hoxdiags_retrieved_vars_" 
-                     << hoxdiags_retrieved_vars_ << std::endl;
 
   // Populate variables list - which makes sure this runs as a post filter
   allvars_ += Variables(filtervars_, "HofX");

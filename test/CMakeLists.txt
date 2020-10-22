@@ -229,7 +229,7 @@ list( APPEND ufo_test_data
   atmosphere/amsua_n19_tlapmean.txt
   atmosphere/aod_geoval_2018041500_m.nc4
   atmosphere/aod_geoval_2018041500_s.nc4
-  atmosphere/atms_bmatrix_70.dat
+  atmosphere/atms_bmatrix_70_test.dat
   atmosphere/atms_npp_geoval_2018041500_m.nc4
   atmosphere/atms_npp_geoval_2018041500_m_qc.nc4
   atmosphere/atms_npp_geoval_2018041500_s.nc4
