@@ -8,11 +8,11 @@ import urllib.request
 
 bucket_name = "jedi-test-files"
 
-repository_name = "@UFO_IODA_REP_NAME@"
-testfiles_name = "@UFO_IODA_TESTFILES_NAME@"
-branch_name = "@UFO_IODA_BRANCH_NAME@"
-testfiles_path = "@UFO_IODA_TESTFILES_PATH@"
-download_base_url="@UFO_IODA_DOWNLOAD_BASE_URL@"
+repository_name = sys.argv[1]
+testfiles_name = sys.argv[2]
+branch_name = sys.argv[3]
+testfiles_path = sys.argv[4]
+download_base_url = sys.argv[5]
 
 s3_file_name = repository_name+"/"+branch_name+"/"+testfiles_name
 

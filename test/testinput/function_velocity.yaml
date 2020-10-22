@@ -10,11 +10,11 @@ obs space:
   simulated variables: [eastward_wind, northward_wind]
 # can have GeoVaLs section like below
 #geovals:
-#  filename: Data/satwind_geoval_2018041500_m.nc4
+#  filename: Data/ufo/testinput_tier_1/satwind_geoval_2018041500_m.nc4
 #
 # can have ObsDiag section like below
 #obs diagnostics:
-#  filename: Data/satwind_obsdiag_2018041500_m.nc4
+#  filename: Data/ufo/testinput_tier_1/satwind_obsdiag_2018041500_m.nc4
 obs function:
   name: Velocity@ObsFunction
   options:

@@ -25,11 +25,11 @@ observations:
     channels: &channels
         1-22
   geovals:
-    filename: Data/atms_npp_geoval_2018041500_m_qc.nc4
+    filename: Data/ufo/testinput_tier_1/atms_npp_geoval_2018041500_m_qc.nc4
   obs bias:
     name: LinearCombination
-    abias_in: Data/satbias_crtm_in
-    abias_out: Data/satbias_crtm_out
+    abias_in: Data/ufo/testinput_tier_1/satbias_crtm_in
+    abias_out: Data/ufo/testinput_tier_1/satbias_crtm_out
     sensor: *Sensor_ID
     jobs: *channels
     predictors:
@@ -45,7 +45,7 @@ observations:
         name: lapse_rate
         options:
           order: 2
-          tlapse: &atms_npp_tlap Data/atms_npp_tlapmean.txt
+          tlapse: &atms_npp_tlap Data/ufo/testinput_tier_1/atms_npp_tlapmean.txt
     - predictor:
         name: lapse_rate
         options:

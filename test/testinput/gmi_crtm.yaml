@@ -21,7 +21,7 @@ observations:
     simulated variables: [brightness_temperature]
     channels: 1-13
   geovals:
-    filename: Data/gmi_gpm_geoval_2018041500_m.nc4
+    filename: Data/ufo/testinput_tier_1/gmi_gpm_geoval_2018041500_m.nc4
   rms ref: 202.54607667010302
   tolerance: 1.e-6
   linear obs operator test:

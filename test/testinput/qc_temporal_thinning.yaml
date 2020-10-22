@@ -5,7 +5,7 @@ observations:
 - obs space:
     name: Aircraft
     obsdatain:
-      obsfile: Data/met_office_temporal_thinning_surface.nc4
+      obsfile: Data/ufo/testinput_tier_1/met_office_temporal_thinning_surface.nc4
     simulated variables: [air_temperature]
   obs filters:
   - filter: Temporal Thinning
@@ -70,7 +70,7 @@ observations:
 - obs space:
     name: Aircraft
     obsdatain:
-      obsfile: Data/met_office_temporal_thinning_sonde.nc4
+      obsfile: Data/ufo/testinput_tier_1/met_office_temporal_thinning_sonde.nc4
     simulated variables: [air_temperature]
   obs filters:
   - filter: Temporal Thinning
