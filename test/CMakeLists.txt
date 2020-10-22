@@ -304,6 +304,7 @@ else()
   # download CRTM coefficients
   if( crtm_FOUND )
     set(UFO_CRTM_COEFFS_PATH ${CMAKE_BINARY_DIR}/test_data/crtm/2.3.0 CACHE PATH "path for CRTM coefficients")
+    file(MAKE_DIRECTORY ${UFO_CRTM_COEFFS_PATH})
     ecbuild_add_test( TARGET    ufo_get_crtm_test_data
                       TYPE      SCRIPT
                       COMMAND   ${CMAKE_BINARY_DIR}/bin/ufo_ioda_data_downloader.py
