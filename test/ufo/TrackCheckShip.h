@@ -13,6 +13,9 @@
 #include <string>
 #include <vector>
 
+#include <boost/optional.hpp>
+#include <boost/none.hpp>
+
 #define ECKIT_TESTING_SELF_REGISTER_CASES 0
 
 #include "eckit/config/LocalConfiguration.h"
@@ -31,7 +34,8 @@
 namespace ufo {
 namespace test {
 
-const ufo::TrackCheckShipDiagnostics setupRunFilter(const eckit::LocalConfiguration &conf) {
+const boost::optional<ufo::TrackCheckShipDiagnostics> setupRunFilter(const eckit::LocalConfiguration &conf,
+                                                                     std::vector<size_t> *rejectedObsIndices = nullptr) {
   util::DateTime bgn(conf.getString("window begin"));
   util::DateTime end(conf.getString("window end"));
 
@@ -51,11 +55,21 @@ const ufo::TrackCheckShipDiagnostics setupRunFilter(const eckit::LocalConfigurat
   const eckit::LocalConfiguration filterConf(conf, "Ship Track Check");
   ufo::TrackCheckShip filter(obsspace, filterConf, qcflags, obserr);
   filter.preProcess();
-  return *filter.diagnostics();
+  if (filterConf.getBool("comparison test", false) && rejectedObsIndices) {
+    for (size_t i = 0; i < qcflags->nlocs(); ++i)
+      if((*qcflags)[0][i] == ufo::QCflags::track)
+        rejectedObsIndices->push_back(i);
+    return boost::none;
+  } else if (filterConf.getBool("testing mode", false)) {
+    return *filter.diagnostics();
+  }
+  return boost::none;
 }
 
 void testTrackCheckShipInitialCalculations(const eckit::LocalConfiguration &conf) {
   auto diagnostics = setupRunFilter(conf);
+  if (!diagnostics)
+    return;
   const std::vector<double> expectedDistances = conf.getDoubleVector("expected distance");
   const std::vector<double> expectedSpeeds = conf.getDoubleVector("expected speed");
   const std::vector<double> expectedDistancesAveraged =
@@ -75,7 +89,7 @@ void testTrackCheckShipInitialCalculations(const eckit::LocalConfiguration &conf
   std::vector<float> calculatedAngles;
   std::vector<int> calculatedShort, calculatedFast, calculatedBends,
       calculatedDist0, calculatedSimultaneous;
-  for (auto const& tracks : diagnostics.getInitialCalculationResults()) {
+  for (auto const& tracks : diagnostics->getInitialCalculationResults()) {
     for (auto const& obsStats : tracks.first) {
       calculatedDistances.push_back(obsStats.distance);
       calculatedSpeeds.push_back(obsStats.speed);
@@ -92,9 +106,9 @@ void testTrackCheckShipInitialCalculations(const eckit::LocalConfiguration &conf
     calculatedMeanSpeeds.push_back(tracks.second.meanSpeed_);
   }
   EXPECT(oops::are_all_close_relative(calculatedDistances, expectedDistances,
-                                                .05));
+                                      .05));
   EXPECT(oops::are_all_close_relative(calculatedSpeeds, expectedSpeeds,
-                                                .05));
+                                      .05));
   EXPECT(oops::are_all_close_relative(
            calculatedDistancesAveraged, expectedDistancesAveraged,
            .05));
@@ -124,11 +138,13 @@ void testEarlyBreakCondition(const eckit::LocalConfiguration &conf) {
   }
 
   auto diagnostics = setupRunFilter(conf);
+  if (!diagnostics)
+    return;
 
   std::vector<int> expectedEarlyBreaks(conf.getIntVector("expected early breaks"));
   std::vector<int> calculatedEarlyBreaks;
 
-  for (auto const& earlyBreakResults : diagnostics.getEarlyBreaks()) {
+  for (auto const& earlyBreakResults : diagnostics->getEarlyBreaks()) {
     calculatedEarlyBreaks.push_back(earlyBreakResults);
   }
   EXPECT_EQUAL(expectedEarlyBreaks, calculatedEarlyBreaks);
@@ -141,6 +157,8 @@ void testDeferSimultaneous(const eckit::LocalConfiguration &conf) {
   }
 
   auto diagnostics = setupRunFilter(conf);
+  if (!diagnostics)
+    return;
 
   const std::vector<double> expectedDistancesDeferred = conf.getDoubleVector(
         "expected deferred distance");
@@ -155,7 +173,7 @@ void testDeferSimultaneous(const eckit::LocalConfiguration &conf) {
       calculatedDistancesAveragedDeferred,
       calculatedSpeedsAveragedDeferred;
   std::vector<float> calculatedAnglesDeferred;
-  for (auto const& recalcIteration : (diagnostics.getCalculatedResultsSimultaneousDeferred())) {
+  for (auto const& recalcIteration : (diagnostics->getCalculatedResultsSimultaneousDeferred())) {
     for (auto const& obs : recalcIteration) {
       calculatedAnglesDeferred.push_back(obs.angle);
       calculatedDistancesDeferred.push_back(obs.distance);
@@ -179,6 +197,16 @@ void testDeferSimultaneous(const eckit::LocalConfiguration &conf) {
            5.0f));
 }
 
+void testRejectedObservations(const eckit::LocalConfiguration &conf) {
+  std::vector<size_t> rejectedObsIndices;
+  if (setupRunFilter(conf, &rejectedObsIndices))
+    return;
+
+  const std::vector<size_t> expectedRejectedObsIndices =
+      conf.getUnsignedVector("expected rejected obs indices");
+  EXPECT_EQUAL(rejectedObsIndices, expectedRejectedObsIndices);
+}
+
 class TrackCheckShip : public oops::Test {
  private:
   std::string testid() const override {return "ufo::test::TrackCheckShip";}
@@ -195,6 +223,7 @@ class TrackCheckShip : public oops::Test {
                         testTrackCheckShipInitialCalculations(testCaseConf);
                         testEarlyBreakCondition(testCaseConf);
                         testDeferSimultaneous(testCaseConf);
+                        testRejectedObservations(testCaseConf);
                       });
     }
   }
