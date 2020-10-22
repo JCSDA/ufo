@@ -210,20 +210,20 @@ file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Data)
 list( APPEND ioda_test_data testinput_tier_1.tar.gz )
 list( APPEND ufo_test_data testinput_tier_1.tar.gz )
 
-if( DEFINED ENV{LOCAL_PATH_TESTFILES})
-    set(LOCAL_PATH_TESTFILES "$ENV{LOCAL_PATH_TESTFILES}")
+if( DEFINED ENV{LOCAL_PATH_JEDI_TESTFILES})
+    set(LOCAL_PATH_JEDI_TESTFILES "$ENV{LOCAL_PATH_JEDI_TESTFILES}")
 endif()
 
 # Set URL for IODA test files
 set(DOWNLOAD_BASE_URL https://jedi-test-files.s3.amazonaws.com)
 
 # If local path to testfiles is defined don't download
-if( DEFINED LOCAL_PATH_TESTFILES )
-  set(UFO_IODA_TESTFILES_PATH ${LOCAL_PATH_TESTFILES}/ioda)
-  set(UFO_UFO_TESTFILES_PATH ${LOCAL_PATH_TESTFILES}/ufo)
-  message(STATUS "use LOCAL_PATH_TESTFILES: ${LOCAL_PATH_TESTFILES}")
+if( DEFINED LOCAL_PATH_JEDI_TESTFILES )
+  set(UFO_IODA_TESTFILES_PATH ${LOCAL_PATH_JEDI_TESTFILES}/ioda)
+  set(UFO_UFO_TESTFILES_PATH ${LOCAL_PATH_JEDI_TESTFILES}/ufo)
+  message(STATUS "use LOCAL_PATH_JEDI_TESTFILES: ${LOCAL_PATH_JEDI_TESTFILES}")
 else()
-  message(STATUS "LOCAL_PATH_TESTFILES is not defined, download test files")
+  message(STATUS "LOCAL_PATH_JEDI_TESTFILES is not defined, download test files")
   if ( NOT DEFINED UFO_TESTFILES_BRANCH)
     # Get the current git branch of ufo repo
     execute_process(
@@ -352,7 +352,7 @@ ecbuild_add_test( TARGET  test_ufo_locations
                   ARGS    "testinput/locations.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   LIBS    ufo
-                  TEST_DEPENDS ufo_get_ioda_test_data )
+                  TEST_DEPENDS ufo_get_ioda_test_data ufo_get_ufo_test_data )
 
 # Test UFO-specific classes:
 
@@ -1152,7 +1152,7 @@ ecbuild_add_test( TARGET  test_ufo_qc_trackcheck
                   ARGS    "testinput/qc_trackcheck.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsFilters.x
-                  TEST_DEPENDS ufo_get_ioda_test_data )
+                  TEST_DEPENDS ufo_get_ioda_test_data ufo_get_ufo_test_data )
 
 ecbuild_add_test( TARGET  test_ufo_profileconsistencychecks_monolithicfilter
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
@@ -1634,7 +1634,7 @@ ecbuild_add_test( TARGET  test_ufo_parallel_obs_distribution
                   ARGS    "testinput/parallel_obs_distribution.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   LIBS    ufo
-                  TEST_DEPENDS ufo_get_ioda_test_data )
+                  TEST_DEPENDS ufo_get_ioda_test_data ufo_get_ufo_test_data )
 
 # Test QC for specific instruments
 
