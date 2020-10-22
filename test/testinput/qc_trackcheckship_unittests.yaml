@@ -17,24 +17,24 @@ Normal ship track:
     variables: [air_temperature]
     temporal resolution: PT10M
     spatial resolution: 1 # km
-    max speed: 1.0
+    max speed: 1000.0
     rejection threshold: 1.0
     deferred check simultaneous: false
     early break check: false
     station_id_variable:
       name: station_id@MetaData
   expected distance: [0, 157, 157, 157, 157]
-  expected speed: [0.0, .0435, .0435, .0435, .0435]
+  expected speed: [0.0, 43.5, 43.5, 43.5, 43.5]
   expected distance averaged: [0, 314, 314, 314, 0]
-  expected speed averaged: [0.0, .0435, .0435, .0435, 0.0]
+  expected speed averaged: [0.0, 43.5, 43.5, 43.5, 0.0]
   expected angle: [0.0, 0.0, 0.0, 0.0, 0.0]
   expected short: [0]
   expected fast: [0]
   expected bends: [0]
   expected dist0: [0]
   expected simultaneous: [0]
-  expected sum speed: [.174]
-  expected mean speed: [.0435]
+  expected sum speed: [174.0]
+  expected mean speed: [43.5]
   expected early breaks: [0]
 Bending ship track:
   window begin: 2000-01-01T00:00:00Z
@@ -55,24 +55,24 @@ Bending ship track:
     variables: [air_temperature]
     temporal resolution: PT10M
     spatial resolution: 1 # km
-    max speed: 1.0
+    max speed: 1000.0
     rejection threshold: 1.0
     deferred check simultaneous: false
     early break check: false
     station_id_variable:
       name: station_id@MetaData
   expected distance: [0, 111, 111, 111, 157]
-  expected speed: [0.0, .0308, .0308, .0308, .0435]
+  expected speed: [0.0, 30.8, 30.8, 30.8, 43.5]
   expected distance averaged: [0, 157, 0, 248, 0]
-  expected speed averaged: [0, .0218, 0, .0344, 0]
+  expected speed averaged: [0, 21.8, 0, 34.4, 0]
   expected angle: [0.0, 90.0, 180.0, 45.0, 0.0]
   expected short: [0]
   expected fast: [0]
   expected bends: [2]
   expected dist0: [0]
   expected simultaneous: [0]
-  expected sum speed: [.135]
-  expected mean speed: [.0339]
+  expected sum speed: [135.0]
+  expected mean speed: [33.9]
   expected early breaks: [0]
 Fast ship track:
   window begin: 2000-01-01T00:00:00Z
@@ -93,16 +93,16 @@ Fast ship track:
     variables: [air_temperature]
     temporal resolution: PT10M
     spatial resolution: 1 # km
-    max speed: .01 #km/s
+    max speed: 10 #m/s
     rejection threshold: 1.0
     deferred check simultaneous: false
     early break check: false
     station_id_variable:
       name: station_id@MetaData
   expected distance: [0, 111, 111]
-  expected speed: [0.0, .0308, .0308]
+  expected speed: [0.0, 30.8, 30.8]
   expected distance averaged: [0, 222, 0]
-  expected speed averaged: [0, .0308, 0]
+  expected speed averaged: [0, 30.8, 0]
   expected angle: [0.0, 0.0, 0.0]
   expected short: [0]
   expected fast: [2]
@@ -132,16 +132,16 @@ Short ship track:
     variables: [air_temperature]
     temporal resolution: PT10M
     spatial resolution: 1 # km
-    max speed: 1 #km/s
+    max speed: 1000.0 #m/s
     rejection threshold: 1.0
     deferred check simultaneous: false
     early break check: false
     station_id_variable:
       name: station_id@MetaData
   expected distance: [0, 111, 111]
-  expected speed: [0.0, .0617, .0617]
+  expected speed: [0.0, 61.7, 61.7]
   expected distance averaged: [0, 222, 0]
-  expected speed averaged: [0, .0617, 0]
+  expected speed averaged: [0, 61.7, 0]
   expected angle: [0.0, 0.0, 0.0]
   expected short: [2]
   expected fast: [0]
@@ -171,16 +171,16 @@ Short buoy track:
     variables: [air_temperature]
     temporal resolution: PT10M
     spatial resolution: 1 # km
-    max speed: 1 #km/s
+    max speed: 1000 #m/s
     rejection threshold: 1.0
     deferred check simultaneous: false
     early break check: false
     station_id_variable:
       name: station_id@MetaData
   expected distance: [0, 111, 111]
-  expected speed: [0.0, .0617, .0617]
+  expected speed: [0.0, 61.7, 61.7]
   expected distance averaged: [0, 222, 0]
-  expected speed averaged: [0, .0617, 0]
+  expected speed averaged: [0, 61.7, 0]
   expected angle: [0.0, 0.0, 0.0]
   expected short: [2]
   expected fast: [0]
@@ -209,16 +209,16 @@ Fast/short ship track:
     variables: [air_temperature]
     temporal resolution: PT10M
     spatial resolution: 1 # km
-    max speed: .01 #km/s
+    max speed: 10 #m/s
     rejection threshold: 1.0
     deferred check simultaneous: false
     early break check: false
     station_id_variable:
       name: station_id@MetaData
   expected distance: [0, 111, 111]
-  expected speed: [0.0, .185, .185]
+  expected speed: [0.0, 185.0, 185.0]
   expected distance averaged: [0, 222, 0]
-  expected speed averaged: [0, .185, 0]
+  expected speed averaged: [0, 185.0, 0]
   expected angle: [0.0, 0.0, 0.0]
   expected short: [2]
   expected fast: [0]
@@ -246,7 +246,7 @@ Ship Track Dist0:
     variables: [air_temperature]
     temporal resolution: PT10M
     spatial resolution: 1 # km
-    max speed: 1.0
+    max speed: 1000.0
     rejection threshold: 1.0
     deferred check simultaneous: false
     early break check: false
@@ -283,7 +283,7 @@ Ship Track Simultaneous Same Location:
     variables: [air_temperature]
     temporal resolution: PT10M
     spatial resolution: 1 # km
-    max speed: .01 #km/s
+    max speed: 10 #m/s
     rejection threshold: 1.0
     deferred check simultaneous: false
     early break check: false
@@ -322,7 +322,7 @@ Ship Track Simultaneous Same Location Deferred Simultaneous:
     variables: [air_temperature]
     temporal resolution: PT10M
     spatial resolution: 1 # km
-    max speed: 1.0 #km/s
+    max speed: 1000.0 #m/s
     rejection threshold: 1.0
     station_id_variable:
       name: station_id@MetaData
@@ -362,16 +362,16 @@ Ship Track Simultaneous Different Location:
     variables: [air_temperature]
     temporal resolution: PT10M
     spatial resolution: 1 # km
-    max speed: .01 #km/s
+    max speed: 10 #m/s
     rejection threshold: 1.0
     deferred check simultaneous: false
     early break check: false
     station_id_variable:
       name: station_id@MetaData
   expected distance: [0, 111, 111]
-  expected speed: [0.0, .185, .185] #because assumes a time difference of 10 mins btwn each obs
+  expected speed: [0.0, 185.0, 185.0] #because assumes a time difference of 10 mins btwn each obs
   expected distance averaged: [0, 222, 0]
-  expected speed averaged: [0, .370, 0] # because assumes a time difference of 10 mins btwn 1st/last obs
+  expected speed averaged: [0, 370.0, 0] # because assumes a time difference of 10 mins btwn 1st/last obs
   expected angle: [0.0, 0.0, 0.0]
   expected short: [2]
   expected fast: [0]
@@ -399,28 +399,28 @@ Ship Track Simultaneous Different Location Deferred Simultaneous:
     variables: [air_temperature]
     temporal resolution: PT10M
     spatial resolution: 1 # km
-    max speed: 1.0 #km/s
+    max speed: 1000.0 #m/s
     rejection threshold: 1.0
     deferred check simultaneous: true
     early break check: false
     station_id_variable:
       name: station_id@MetaData
   expected distance: [0, 111, 111, 111, 111, 111]
-  expected speed: [0.0, .0308, .185, .185, .0308, .0308] #because assumes a time difference of 10 mins btwn each obs
+  expected speed: [0.0, 30.8, 185.0, 185.0, 30.8, 30.8] #because assumes a time difference of 10 mins btwn each obs
   expected distance averaged: [0, 222, 222, 222, 222, 0]
-  expected speed averaged: [0, .0616, .370, .0616, .0308, 0] # because assumes a time difference of 10 mins btwn any simultaneous obs
+  expected speed averaged: [0, 61.6, 370.0, 61.6, 30.8, 0] # because assumes a time difference of 10 mins btwn any simultaneous obs
   expected angle: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
   expected short: [2]
   expected fast: [0]
   expected bends: [0]
   expected dist0: [0]
   expected simultaneous: [3]
-  expected sum speed: [0.0924]
-  expected mean speed: [0.0308]
+  expected sum speed: [92.4]
+  expected mean speed: [30.8]
   expected deferred distance: [0, 444, 111]
-  expected deferred speed: [0.0, .0616, .0308]
+  expected deferred speed: [0.0, 61.6, 30.8]
   expected deferred distance averaged: [0, 555, 0]
-  expected deferred speed averaged: [0, .0513, 0]
+  expected deferred speed averaged: [0, 51.3, 0]
   expected deferred angle: [0.0, 0.0, 0.0]
   expected early breaks: [0]
 Ship Tracks Different Station IDs:
@@ -443,24 +443,24 @@ Ship Tracks Different Station IDs:
     variables: [air_temperature]
     temporal resolution: PT10M
     spatial resolution: 1 # km
-    max speed: 1 #km/s
+    max speed: 1000 #m/s
     rejection threshold: 1.0
     deferred check simultaneous: false
     early break check: false
     station_id_variable:
       name: station_id@MetaData
   expected distance: [0, 111, 111, 111, 157, 0, 111, 111]
-  expected speed: [0.0, .0308, .0308, .0308, .0435, 0, .0617, .0617]
+  expected speed: [0.0, 30.8, 30.8, 30.8, 43.5, 0, 61.7, 61.7]
   expected distance averaged: [0, 157, 0, 248, 0, 0, 222, 0]
-  expected speed averaged: [0, .0218, 0, .0344, 0, 0, .0617, 0]
+  expected speed averaged: [0, 21.8, 0, 34.4, 0, 0, 61.7, 0]
   expected angle: [0.0, 90.0, 180.0, 45.0, 0.0, 0.0, 0.0, 0.0]
   expected short: [0, 2]
   expected fast: [0, 0]
   expected bends: [2, 0]
   expected dist0: [0, 0]
   expected simultaneous: [0, 0]
-  expected sum speed: [.135, 0.0]
-  expected mean speed: [.0339, 0.0]
+  expected sum speed: [135.0, 0.0]
+  expected mean speed: [33.9, 0.0]
   expected early breaks: [0, 1]
 Ship Tracks Different Station IDs Shuffled:
   window begin: 2000-01-01T00:00:00Z
@@ -482,22 +482,22 @@ Ship Tracks Different Station IDs Shuffled:
     variables: [air_temperature]
     temporal resolution: PT10M
     spatial resolution: 1 # km
-    max speed: 1 #km/s
+    max speed: 1000 #m/s
     rejection threshold: 1.0
     deferred check simultaneous: false
     early break check: false
     station_id_variable:
       name: station_id@MetaData
   expected distance: [0, 111, 111, 111, 157, 0, 111, 111]
-  expected speed: [0.0, .0308, .0308, .0308, .0435, 0, .0617, .0617]
+  expected speed: [0.0, 30.8, 30.8, 30.8, 43.5, 0, 61.7, 61.7]
   expected distance averaged: [0, 157, 0, 248, 0, 0, 222, 0]
-  expected speed averaged: [0, .0218, 0, .0344, 0, 0, .0617, 0]
+  expected speed averaged: [0, 21.8, 0, 34.4, 0, 0, 61.7, 0]
   expected angle: [0.0, 90.0, 180.0, 45.0, 0.0, 0.0, 0.0, 0.0]
   expected short: [0, 2]
   expected fast: [0, 0]
   expected bends: [2, 0]
   expected dist0: [0, 0]
   expected simultaneous: [0, 0]
-  expected sum speed: [.135, 0.0]
-  expected mean speed: [.0339, 0.0]
+  expected sum speed: [135.0, 0.0]
+  expected mean speed: [33.9, 0.0]
   expected early breaks: [0, 1]

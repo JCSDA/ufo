@@ -43,7 +43,7 @@ class TrackCheckShipParameters : public TrackCheckUtilsParameters {
     "spatial resolution", this
   };
 
-  /// Maximum speed (before marking as fast) in km/s
+  /// Maximum speed (before marking as fast) in m/s
   oops::RequiredParameter<double> maxSpeed {
     "max speed", this
   };
