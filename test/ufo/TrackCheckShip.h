@@ -13,8 +13,8 @@
 #include <string>
 #include <vector>
 
-#include <boost/optional.hpp>
 #include <boost/none.hpp>
+#include <boost/optional.hpp>
 
 #define ECKIT_TESTING_SELF_REGISTER_CASES 0
 
@@ -34,8 +34,8 @@
 namespace ufo {
 namespace test {
 
-const boost::optional<ufo::TrackCheckShipDiagnostics> setupRunFilter(const eckit::LocalConfiguration &conf,
-                                                                     std::vector<size_t> *rejectedObsIndices = nullptr) {
+const boost::optional<ufo::TrackCheckShipDiagnostics> setupRunFilter(
+    const eckit::LocalConfiguration &conf, std::vector<size_t> *rejectedObsIndices = nullptr) {
   util::DateTime bgn(conf.getString("window begin"));
   util::DateTime end(conf.getString("window end"));
 
@@ -57,7 +57,7 @@ const boost::optional<ufo::TrackCheckShipDiagnostics> setupRunFilter(const eckit
   filter.preProcess();
   if (filterConf.getBool("comparison test", false) && rejectedObsIndices) {
     for (size_t i = 0; i < qcflags->nlocs(); ++i)
-      if((*qcflags)[0][i] == ufo::QCflags::track)
+      if ((*qcflags)[0][i] == ufo::QCflags::track)
         rejectedObsIndices->push_back(i);
     return boost::none;
   } else if (filterConf.getBool("unit testing mode", false)) {

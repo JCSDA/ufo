@@ -64,7 +64,7 @@ double TrackCheckShip::speedEstimate(
     speedEst = (dist - 0.5 * spatialRes) /
         std::max(temporalDistance.toSeconds(),
                  (tempRes.toSeconds()));
-    speedEst *= 1000.0; //convert units from km/s to m/s
+    speedEst *= 1000.0;  // convert units from km/s to m/s
   }
   return speedEst;
 }
