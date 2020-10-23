@@ -217,26 +217,28 @@ endif()
 # Set URL for IODA test files
 set(DOWNLOAD_BASE_URL https://jedi-test-files.s3.amazonaws.com)
 
+# Determine the branch name
+set( UFO_TESTFILES_BRANCH "$ENV{UFO_TESTFILES_BRANCH}")
+if ( UFO_TESTFILES_BRANCH STREQUAL "" )
+  # Get the current git branch of ufo repo
+  execute_process(
+    COMMAND bash "-c" "git symbolic-ref -q --short HEAD || git describe --tags --exact-match"
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    OUTPUT_VARIABLE GIT_BRANCH_UFO
+    OUTPUT_STRIP_TRAILING_WHITESPACE)
+  message(STATUS "UFO is in branch: ${GIT_BRANCH_UFO}")
+else()
+  message(STATUS "Branch name provided by user: ${UFO_TESTFILES_BRANCH}")
+  set(GIT_BRANCH_UFO "${UFO_TESTFILES_BRANCH}")
+endif()
+
 # If local path to testfiles is defined don't download
 if( DEFINED LOCAL_PATH_JEDI_TESTFILES )
-  set(UFO_IODA_TESTFILES_PATH ${LOCAL_PATH_JEDI_TESTFILES}/ioda)
-  set(UFO_UFO_TESTFILES_PATH ${LOCAL_PATH_JEDI_TESTFILES}/ufo)
+  set(UFO_IODA_TESTFILES_PATH ${LOCAL_PATH_JEDI_TESTFILES}/ioda/${GIT_BRANCH_UFO})
+  set(UFO_UFO_TESTFILES_PATH ${LOCAL_PATH_JEDI_TESTFILES}/ufo/${GIT_BRANCH_UFO})
   message(STATUS "use LOCAL_PATH_JEDI_TESTFILES: ${LOCAL_PATH_JEDI_TESTFILES}")
 else()
   message(STATUS "LOCAL_PATH_JEDI_TESTFILES is not defined, download test files")
-  set( UFO_TESTFILES_BRANCH "$ENV{UFO_TESTFILES_BRANCH}")
-  if ( NOT DEFINED UFO_TESTFILES_BRANCH)
-    # Get the current git branch of ufo repo
-    execute_process(
-      COMMAND bash "-c" "git symbolic-ref -q --short HEAD || git describe --tags --exact-match"
-      WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-      OUTPUT_VARIABLE GIT_BRANCH_UFO
-      OUTPUT_STRIP_TRAILING_WHITESPACE)
-    message(STATUS "UFO is in branch: ${GIT_BRANCH_UFO}")
-  else()
-    message(STATUS "Branch name provided by user: ${UFO_TESTFILES_BRANCH}")
-    set(GIT_BRANCH_UFO "${UFO_TESTFILES_BRANCH}")
-  endif()
 
   # Check whether the URL exists or not for ioda
   set(ECBUILD_DOWNLOAD_BASE_URL ${DOWNLOAD_BASE_URL}/ioda)
