@@ -12,6 +12,6 @@ observations:
       obsfile: Data/ioda/testinput_tier_1/viirs_jpss1_oc_l2_2018-04-15.nc
     simulated variables: [mass_concentration_of_chlorophyll_in_sea_water]
   geovals:
-    filename: Data/viirs_jpss1_oc_l2_2018-04-15_geovals.nc
+    filename: Data/ufo/testinput_tier_1/viirs_jpss1_oc_l2_2018-04-15_geovals.nc
   rms ref: 0.52075816248228946
   tolerance: 1.0e-10

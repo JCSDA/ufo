@@ -17,7 +17,7 @@ observations:
     simulated variables: [aerosol_optical_depth]
     channels: 4
   geovals:
-    filename: Data/aod_geoval_2018041500_m.nc4
+    filename: Data/ufo/testinput_tier_1/aod_geoval_2018041500_m.nc4
   vector ref: GsiHofX
   tolerance: 1.0e-06
   linear obs operator test:

@@ -15,7 +15,7 @@ echo "==========================================================================
 echo "Clone " $repo_name
 echo "==============================================================================="
 
-git ls-remote --heads --exit-code https://$git_user:$git_token@github.com/jcsda/$repo_name $branch_name
+git ls-remote --heads --exit-code https://$git_user:$git_token@github.com/$repo_name $branch_name
 exit_code=$?
 
 if test "${exit_code}" == "0"; then
@@ -27,6 +27,6 @@ else
   echo "clone " ${branch_name_clone}
 fi
 
-git clone -b $branch_name_clone https://$git_user:$git_token@github.com/jcsda/$repo_name $save_dir/$save_name
+git clone -b $branch_name_clone https://$git_user:$git_token@github.com/$repo_name $save_dir/$save_name
 
 

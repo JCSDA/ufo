@@ -31,10 +31,10 @@ obs space:
             2357, 2363, 2370, 2371, 2377
 # can have GeoVaLs section like below
 geovals:
-  filename: Data/airs_aqua_geoval_2018041500_m_unittest.nc4
+  filename: Data/ufo/testinput_tier_1/airs_aqua_geoval_2018041500_m_unittest.nc4
 # can have ObsDiag section like below
 obs diagnostics:
-  filename: Data/airs_aqua_obsdiag_2018041500_m_unittest.nc4
+  filename: Data/ufo/testinput_tier_1/airs_aqua_obsdiag_2018041500_m_unittest.nc4
 obs function:
   name: CloudDetectMinResidualIR@ObsFunction
   options:
