@@ -224,7 +224,7 @@ if( DEFINED LOCAL_PATH_JEDI_TESTFILES )
   message(STATUS "use LOCAL_PATH_JEDI_TESTFILES: ${LOCAL_PATH_JEDI_TESTFILES}")
 else()
   message(STATUS "LOCAL_PATH_JEDI_TESTFILES is not defined, download test files")
-  if ( NOT DEFINED UFO_TESTFILES_BRANCH)
+  if ( NOT DEFINED $ENV{UFO_TESTFILES_BRANCH})
     # Get the current git branch of ufo repo
     execute_process(
       COMMAND bash "-c" "git symbolic-ref -q --short HEAD || git describe --tags --exact-match"
@@ -234,7 +234,7 @@ else()
     message(STATUS "UFO is in branch: ${GIT_BRANCH_UFO}")
   else()
     message(STATUS "Branch name provided by user")
-    set(GIT_BRANCH_UFO ${UFO_TESTFILES_BRANCH})
+    set(GIT_BRANCH_UFO "$ENV{UFO_TESTFILES_BRANCH}")
   endif()
 
   # Check whether the URL exists or not for ioda
