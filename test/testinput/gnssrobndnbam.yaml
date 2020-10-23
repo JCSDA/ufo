@@ -19,7 +19,7 @@ observations:
       obsfile: Data/gnssro_bndnbam_compress1_2018041500_3prof_output.nc4
     simulated variables: [bending_angle]
   geovals:
-    filename: Data/gnssro_geoval_2018041500_3prof.nc4
+    filename: Data/ufo/testinput_tier_1/gnssro_geoval_2018041500_3prof.nc4
   vector ref: GsiHofX
   tolerance: 1.0e-7
   linear obs operator test:
@@ -43,7 +43,7 @@ observations:
       obsfile: Data/gnssro_bndnbam_compress0_2018041500_3prof_output.nc4
     simulated variables: [bending_angle]
   geovals:
-    filename: Data/gnssro_geoval_2018041500_3prof.nc4
+    filename: Data/ufo/testinput_tier_1/gnssro_geoval_2018041500_3prof.nc4
   vector ref: GsiHofX
   tolerance: 1.0e-6
   linear obs operator test:

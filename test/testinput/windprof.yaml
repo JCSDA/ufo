@@ -17,6 +17,6 @@ observations:
       obsfile: Data/windprof_obs_2018041500_m_out.nc4
     simulated variables: [eastward_wind, northward_wind]
   geovals:
-    filename: Data/windprof_geoval_2018041500_m.nc4
+    filename: Data/ufo/testinput_tier_1/windprof_geoval_2018041500_m.nc4
   vector ref: GsiHofX
   tolerance: 1.0e-05

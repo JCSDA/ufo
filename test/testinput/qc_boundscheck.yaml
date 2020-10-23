@@ -5,7 +5,7 @@ observations:
 - obs space:
     name: test data
     obsdatain:
-      obsfile: Data/filters_testdata.nc4
+      obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
     simulated variables: [variable1, variable2, variable3]
   obs filters:
   - filter: Bounds Check        # test min/max value with all variables
@@ -23,7 +23,7 @@ observations:
 - obs space:
     name: test data
     obsdatain:
-      obsfile: Data/filters_testdata.nc4
+      obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
     simulated variables: [variable1, variable2, variable3]
   obs filters:
   - filter: Bounds Check        # test min/max value with subset of variables
@@ -40,7 +40,7 @@ observations:
 - obs space:
     name: test data
     obsdatain:
-      obsfile: Data/filters_testdata.nc4
+      obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
     simulated variables: [variable1, variable2, variable3]
   obs filters:
   - filter: Bounds Check       # test min/max value with subset of variables, ordered different from simulate vars
@@ -57,7 +57,7 @@ observations:
 - obs space:
     name: test data
     obsdatain:
-      obsfile: Data/filters_testdata.nc4
+      obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
     simulated variables: [variable1, variable2, variable3]
   obs filters:
   - filter: Bounds Check       # test min/max value with different test vars
@@ -79,7 +79,7 @@ observations:
 - obs space:
     name: test data
     obsdatain:
-      obsfile: Data/filters_testdata.nc4
+      obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
     simulated variables: [variable1, variable2, variable3]
   obs filters:
   - filter: Bounds Check       # test min/max value with different test vars
@@ -101,7 +101,7 @@ observations:
 - obs space:
     name: test data
     obsdatain:
-      obsfile: Data/filters_testdata.nc4
+      obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
     simulated variables: [variable1, variable2, variable3]
   obs filters:
   - filter: Bounds Check       # test min/max value with different test vars and subset of vars
@@ -121,7 +121,7 @@ observations:
 - obs space:
     name: test data
     obsdatain:
-      obsfile: Data/filters_testdata.nc4
+      obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
     simulated variables: [variable1, variable2, variable3]
   obs filters:
   - filter: Bounds Check       # test min/max value with different test vars and subset of vars
@@ -141,7 +141,7 @@ observations:
 - obs space:
     name: test data
     obsdatain:
-      obsfile: Data/filters_testdata.nc4
+      obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
     simulated variables: [variable1, variable2, variable3]
   obs filters:
   - filter: Bounds Check       # test min/max value of a single test var, but filter 2 or more vars
@@ -159,7 +159,7 @@ observations:
 - obs space:
     name: test data
     obsdatain:
-      obsfile: Data/filters_testdata.nc4
+      obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
     simulated variables: [variable1, variable2, variable3]
   obs filters:
   - filter: Bounds Check       # test min/max value of a single test var, but filter 2 or more vars

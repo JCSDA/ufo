@@ -11,7 +11,7 @@ observations:
       obsfile: Data/ioda/testinput_tier_1/gnssro_obs_2018041500_m.nc4
     simulated variables: [bending_angle]
   geovals:
-    filename: Data/gnssro_geoval_2018041500_m.nc4
+    filename: Data/ufo/testinput_tier_1/gnssro_geoval_2018041500_m.nc4
   obs filters:
   - filter: Background Check
     filter variables:
