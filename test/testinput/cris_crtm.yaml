@@ -48,7 +48,7 @@ observations:
               1981, 1982, 1983, 1984, 1985, 1986, 1987, 2119, 2140, 2143, 2147, 2153,
               2158, 2161, 2168, 2171, 2175, 2182
   geovals:
-    filename: Data/cris-fsr_npp_geoval_2018041500_m_unittest.nc4
+    filename: Data/ufo/testinput_tier_1/cris-fsr_npp_geoval_2018041500_m_unittest.nc4
   vector ref: GsiHofX
   tolerance: 1.e-7
   linear obs operator test:
