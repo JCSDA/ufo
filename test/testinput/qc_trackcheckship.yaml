@@ -14,7 +14,7 @@ observations:
     simulated variables: [air_temperature]
   obs filters:
   - filter: Ship Track Check
-    testing mode: false
+    unit testing mode: false
     early break check: false
     deferred check simultaneous: false
     variables: [air_temperature]
@@ -69,7 +69,7 @@ observations:
     simulated variables: [air_temperature]
   obs filters:
   - filter: Ship Track Check
-    testing mode: false
+    unit testing mode: false
     early break check: true
     deferred check simultaneous: false
     variables: [air_temperature]

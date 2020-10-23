@@ -60,7 +60,7 @@ const boost::optional<ufo::TrackCheckShipDiagnostics> setupRunFilter(const eckit
       if((*qcflags)[0][i] == ufo::QCflags::track)
         rejectedObsIndices->push_back(i);
     return boost::none;
-  } else if (filterConf.getBool("testing mode", false)) {
+  } else if (filterConf.getBool("unit testing mode", false)) {
     return *filter.diagnostics();
   }
   return boost::none;

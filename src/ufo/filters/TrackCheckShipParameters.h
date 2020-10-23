@@ -87,7 +87,7 @@ class TrackCheckShipParameters : public TrackCheckUtilsParameters {
 
   /// \brief To be set to \p true if the filter's unit tests are being run
   oops::Parameter<bool> testingMode {
-    "testing mode", false, this
+    "unit testing mode", false, this
   };
 
   /// \brief To be set to \p true if the filter's single-segment comparison test is being run.
