@@ -60,3 +60,29 @@ observations:
       - 248
   flaggedBenchmark: 35
   benchmarkFlag: 12 # track
+- obs space:
+    name: Ship
+    obsdatain:
+      obsfile: Data/ioda/testinput_tier_1/sfcship_synthetic_airtemp_m.nc4
+      obsgrouping:
+        group variable: "station_id"
+    simulated variables: [air_temperature]
+  obs filters:
+  - filter: Ship Track Check
+    testing mode: false
+    early break check: true
+    deferred check simultaneous: false
+    variables: [air_temperature]
+    temporal resolution: PT00H00M1S
+    spatial resolution: 0.0000001 #km
+    max speed: .01 #m/s
+    rejection threshold: 0.5
+  flaggedObservationsBenchmark:
+    - 87
+    - 88
+    - 89
+    - 90
+    - 91
+    - 92
+  flaggedBenchmark: 6
+  benchmarkFlag: 12 # track

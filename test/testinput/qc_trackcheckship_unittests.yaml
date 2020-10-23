@@ -501,7 +501,7 @@ Ship Tracks Different Station IDs Shuffled:
   expected sum speed: [135.0, 0.0]
   expected mean speed: [33.9, 0.0]
   expected early breaks: [0, 1]
-Ship Track Segment from Comparison Test:
+Ship Track Segment from Comparison Test TrackOptions both false:
   window begin: 2000-01-01T00:00:00Z
   window end: 2030-01-01T00:00:00Z
   obs space:
@@ -528,4 +528,31 @@ Ship Track Segment from Comparison Test:
     station_id_variable:
       name: station_id@MetaData
   expected rejected obs indices: [0, 1, 2, 3, 4]
+Ship Track Segment from Comparison Test TrackOptions early break true:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Ship
+    simulated variables: [air_temperature]
+    generate:
+      list:
+        lats: [ -4.94999981, -4.94999981, -4.94999981, -4.96000004, -4.96000004, -4.96000004]
+        lons: [ 94.98000336,  94.98000336,  94.98000336,  94.98000336, 94.98000336,  94.98000336 ]
+        datetimes: [ '2010-01-01T00:00:00Z', '2010-01-01T01:00:00Z', '2010-01-01T02:00:00Z',
+                     '2010-01-01T03:00:00Z', '2010-01-01T04:00:00Z', '2010-01-01T05:00:00Z']
+      obs errors: [1.0]
+  station_ids: [ 1, 1, 1, 1, 1, 1]
+  Ship Track Check:
+    comparison test: true
+    testing mode: false
+    variables: [air_temperature]
+    temporal resolution: PT1S
+    spatial resolution: .0000001 # km
+    max speed: .01 #m/s
+    rejection threshold: 0.5
+    deferred check simultaneous: false
+    early break check: false
+    station_id_variable:
+      name: station_id@MetaData
+  expected rejected obs indices: [0, 1, 2, 3, 4, 5]
 
