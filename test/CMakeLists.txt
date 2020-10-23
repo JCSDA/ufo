@@ -1483,12 +1483,12 @@ ecbuild_add_test( TARGET  test_ufo_function_obserrmean
                   LIBS    ufo
                   TEST_DEPENDS ufo_get_ioda_test_data ufo_get_ufo_test_data)
 
-ecbuild_add_test( TARGET  test_ufo_function_obserrmean_abi
-                  SOURCES mains/TestObsFunction.cc
-                  ARGS    "testinput/function_obserrmean_abi.yaml"
-                  ENVIRONMENT OOPS_TRAPFPE=1
-                  LIBS    ufo
-                  TEST_DEPENDS ufo_get_ioda_test_data ufo_get_ufo_test_data)
+#ecbuild_add_test( TARGET  test_ufo_function_obserrmean_abi
+#                  SOURCES mains/TestObsFunction.cc
+#                  ARGS    "testinput/function_obserrmean_abi.yaml"
+#                  ENVIRONMENT OOPS_TRAPFPE=1
+#                  LIBS    ufo
+#                  TEST_DEPENDS ufo_get_ioda_test_data ufo_get_ufo_test_data)
 
 ecbuild_add_test( TARGET  test_ufo_function_obserrmean_mhs
                   SOURCES mains/TestObsFunction.cc
