@@ -210,34 +210,37 @@ file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Data)
 list( APPEND ioda_test_data testinput_tier_1.tar.gz )
 list( APPEND ufo_test_data testinput_tier_1.tar.gz )
 
-if( DEFINED ENV{LOCAL_PATH_TESTFILES})
-    set(LOCAL_PATH_TESTFILES "$ENV{LOCAL_PATH_TESTFILES}")
+if( DEFINED ENV{LOCAL_PATH_JEDI_TESTFILES})
+    set(LOCAL_PATH_JEDI_TESTFILES "$ENV{LOCAL_PATH_JEDI_TESTFILES}")
 endif()
 
 # Set URL for IODA test files
 set(DOWNLOAD_BASE_URL https://jedi-test-files.s3.amazonaws.com)
 
-# If local path to testfiles is defined don't download
-if( DEFINED LOCAL_PATH_TESTFILES )
-  set(UFO_IODA_TESTFILES_PATH ${LOCAL_PATH_TESTFILES}/ioda)
-  set(UFO_UFO_TESTFILES_PATH ${LOCAL_PATH_TESTFILES}/ufo)
-  set(UFO_CRTM_COEFFS_PATH ${LOCAL_PATH_TESTFILES}/crtm)
-
-  message(STATUS "use LOCAL_PATH_TESTFILES: ${LOCAL_PATH_TESTFILES}")
+# Determine the branch name
+set( UFO_TESTFILES_BRANCH "$ENV{UFO_TESTFILES_BRANCH}")
+set( CRTM_COEFFS_BRANCH "2.3.0" )
+if ( UFO_TESTFILES_BRANCH STREQUAL "" )
+  # Get the current git branch of ufo repo
+  execute_process(
+    COMMAND bash "-c" "git symbolic-ref -q --short HEAD || git describe --tags --exact-match"
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    OUTPUT_VARIABLE GIT_BRANCH_UFO
+    OUTPUT_STRIP_TRAILING_WHITESPACE)
+  message(STATUS "UFO is in branch: ${GIT_BRANCH_UFO}")
 else()
-  message(STATUS "LOCAL_PATH_TESTFILES is not defined, download test files")
-  if ( NOT DEFINED UFO_TESTFILES_BRANCH)
-    # Get the current git branch of ufo repo
-    execute_process(
-      COMMAND git rev-parse --abbrev-ref HEAD
-      WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-      OUTPUT_VARIABLE GIT_BRANCH_UFO
-      OUTPUT_STRIP_TRAILING_WHITESPACE)
-    message(STATUS "UFO is in branch: ${GIT_BRANCH_UFO}")
-  else()
-    message(STATUS "Branch name provided by user")
-    set(GIT_BRANCH_UFO ${UFO_TESTFILES_BRANCH})
-  endif()
+  message(STATUS "Branch name provided by user: ${UFO_TESTFILES_BRANCH}")
+  set(GIT_BRANCH_UFO "${UFO_TESTFILES_BRANCH}")
+endif()
+
+# If local path to testfiles is defined don't download
+if( DEFINED LOCAL_PATH_JEDI_TESTFILES )
+  set(UFO_IODA_TESTFILES_PATH ${LOCAL_PATH_JEDI_TESTFILES}/ioda/${GIT_BRANCH_UFO})
+  set(UFO_UFO_TESTFILES_PATH ${LOCAL_PATH_JEDI_TESTFILES}/ufo/${GIT_BRANCH_UFO})
+  set(UFO_CRTM_COEFFS_PATH ${LOCAL_PATH_JEDI_TESTFILES}/crtm/${CRTM_COEFFS_BRANCH})
+  message(STATUS "use LOCAL_PATH_JEDI_TESTFILES: ${LOCAL_PATH_JEDI_TESTFILES}")
+else()
+  message(STATUS "LOCAL_PATH_JEDI_TESTFILES is not defined, download test files")
 
   # Check whether the URL exists or not for ioda
   set(ECBUILD_DOWNLOAD_BASE_URL ${DOWNLOAD_BASE_URL}/ioda)
@@ -303,12 +306,12 @@ else()
 
   # download CRTM coefficients
   if( crtm_FOUND )
-    set(UFO_CRTM_COEFFS_PATH ${CMAKE_BINARY_DIR}/test_data/crtm/2.3.0 CACHE PATH "path for CRTM coefficients")
+    set(UFO_CRTM_COEFFS_PATH ${CMAKE_BINARY_DIR}/test_data/crtm/${CRTM_COEFFS_BRANCH} CACHE PATH "path for CRTM coefficients")
     file(MAKE_DIRECTORY ${UFO_CRTM_COEFFS_PATH})
     ecbuild_add_test( TARGET    ufo_get_crtm_test_data
                       TYPE      SCRIPT
                       COMMAND   ${CMAKE_BINARY_DIR}/bin/ufo_ioda_data_downloader.py
-                      ARGS      crtm crtm_coefficients.tar.gz 2.3.0 ${UFO_CRTM_COEFFS_PATH} ${DOWNLOAD_BASE_URL} )
+                      ARGS      crtm crtm_coefficients.tar.gz ${CRTM_COEFFS_BRANCH} ${UFO_CRTM_COEFFS_PATH} ${DOWNLOAD_BASE_URL} )
   endif( crtm_FOUND )
 endif()
 
@@ -363,7 +366,7 @@ ecbuild_add_test( TARGET  test_ufo_locations
                   ARGS    "testinput/locations.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   LIBS    ufo
-                  TEST_DEPENDS ufo_get_ioda_test_data )
+                  TEST_DEPENDS ufo_get_ioda_test_data ufo_get_ufo_test_data )
 
 # Test UFO-specific classes:
 
@@ -1163,7 +1166,7 @@ ecbuild_add_test( TARGET  test_ufo_qc_trackcheck
                   ARGS    "testinput/qc_trackcheck.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsFilters.x
-                  TEST_DEPENDS ufo_get_ioda_test_data )
+                  TEST_DEPENDS ufo_get_ioda_test_data ufo_get_ufo_test_data )
 
 ecbuild_add_test( TARGET  test_ufo_profileconsistencychecks_monolithicfilter
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
@@ -1645,7 +1648,7 @@ ecbuild_add_test( TARGET  test_ufo_parallel_obs_distribution
                   ARGS    "testinput/parallel_obs_distribution.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   LIBS    ufo
-                  TEST_DEPENDS ufo_get_ioda_test_data )
+                  TEST_DEPENDS ufo_get_ioda_test_data ufo_get_ufo_test_data )
 
 # Test QC for specific instruments
 
