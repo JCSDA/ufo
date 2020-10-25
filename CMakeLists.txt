@@ -161,7 +161,7 @@ add_subdirectory( test )
 add_subdirectory( tools )
 
 if( ENABLE_UFO_DOC )
-    add_subdirectory( Documents )
+    add_subdirectory( documents )
 endif()
 
 if(ECBUILD_INSTALL_FORTRAN_MODULES)
