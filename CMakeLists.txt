@@ -29,6 +29,8 @@ ecbuild_requires_macro_version( 2.7 )
 
 ecbuild_declare_project()
 
+option( ENABLE_UFO_DOC "Build UFO documentation" OFF )
+
 ecbuild_enable_fortran( REQUIRED )
 ecbuild_add_cxx11_flags()
 
@@ -158,6 +160,10 @@ add_subdirectory( src )
 add_subdirectory( test )
 add_subdirectory( tools )
 
+if( ENABLE_UFO_DOC )
+    add_subdirectory( Documents )
+endif()
+
 if(ECBUILD_INSTALL_FORTRAN_MODULES)
   install(DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}/${CMAKE_CFG_INTDIR} DESTINATION ${INSTALL_INCLUDE_DIR} )
 endif()
@@ -177,4 +183,3 @@ ecbuild_add_test( TARGET ufo_coding_norms
                   COMMAND ${CMAKE_BINARY_DIR}/bin/${PROJECT_NAME}_cpplint.py
                   ARGS --quiet --recursive ${CMAKE_CURRENT_SOURCE_DIR}/src ${CMAKE_CURRENT_SOURCE_DIR}/test
                   WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/bin )
-
