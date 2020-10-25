@@ -257,7 +257,7 @@ else()
     message(STATUS "GIT_BRANCH_UFO not found, will download develop for ioda test data")
   endif()
   message(STATUS "ioda test data will be download from: ${DOWNLOAD_BASE_URL}/ioda/${ioda_data_branch}")
-  set(UFO_IODA_TESTFILES_PATH ${CMAKE_BINARY_DIR}/test_data/ioda/${ioda_data_branch} CACHE PATH "path for ioda test data")
+  set(UFO_IODA_TESTFILES_PATH ${CMAKE_BINARY_DIR}/test_data/ioda/${ioda_data_branch})
   file(MAKE_DIRECTORY ${UFO_IODA_TESTFILES_PATH})
 
   # Check whether the URL exists or not for ufo
@@ -275,7 +275,7 @@ else()
     message(STATUS "GIT_BRANCH_UFO not found, will download develop for ufo test data")
   endif()
   message(STATUS "ufo test data will be download from: ${DOWNLOAD_BASE_URL}/ufo/${ufo_data_branch}")
-  set(UFO_UFO_TESTFILES_PATH ${CMAKE_BINARY_DIR}/test_data/ufo/${ufo_data_branch} CACHE PATH "path for ufo test data")
+  set(UFO_UFO_TESTFILES_PATH ${CMAKE_BINARY_DIR}/test_data/ufo/${ufo_data_branch})
   file(MAKE_DIRECTORY ${UFO_UFO_TESTFILES_PATH})
 
   # Create download script for get_ioda_test_data test
@@ -306,7 +306,7 @@ else()
 
   # download CRTM coefficients
   if( crtm_FOUND )
-    set(UFO_CRTM_COEFFS_PATH ${CMAKE_BINARY_DIR}/test_data/crtm/${CRTM_COEFFS_BRANCH} CACHE PATH "path for CRTM coefficients")
+    set(UFO_CRTM_COEFFS_PATH ${CMAKE_BINARY_DIR}/test_data/crtm/${CRTM_COEFFS_BRANCH})
     file(MAKE_DIRECTORY ${UFO_CRTM_COEFFS_PATH})
     ecbuild_add_test( TARGET    ufo_get_crtm_test_data
                       TYPE      SCRIPT
