@@ -133,7 +133,7 @@ void ObsBias::read(const eckit::Configuration & conf) {
 
       for (std::size_t i = 0; i< jobs_.size(); ++i) {
         const auto results =
-          biasIO.readByPredictors(sensor_, jobs_[i], prednames_);
+          biasIO.readByChannel(sensor_, jobs_[i], prednames_);
         std::copy(results.begin(), results.end(),
                   biascoeffs_.begin() + i*prednames_.size());
       }
@@ -162,7 +162,7 @@ void ObsBias::write(const eckit::Configuration & conf) const {
       std::copy(biascoeffs_.begin() + i*prednames_.size(),
                 biascoeffs_.begin() + (i + 1)*prednames_.size(),
                 data.begin());
-      biasIO.addByPredictors(sensor_, jobs_[i], prednames_, data);
+      biasIO.addByChannel(sensor_, jobs_[i], prednames_, data);
     }
 
     for (auto & pred : predbases_) {

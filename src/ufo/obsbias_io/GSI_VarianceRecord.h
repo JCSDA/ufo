@@ -23,20 +23,20 @@ class VarianceRecord: public Record {
   VarianceRecord();
   virtual ~VarianceRecord();
 
-  void setPredictors(const std::vector< std::string > &,
-                     const std::vector< double > &);
+  void fillVector(const std::vector< std::string > &,
+                  const std::vector< double > &);
 
-  void setValue(const std::string &, const double);
+  void setValueByVarName(const std::string &, const double);
 
-  std::vector< double > readByChannels(std::fstream &,
-                                       const std::string &,
-                                       const std::vector< int > &,
-                                       const std::string &);
+  std::vector< double > readByVarName(std::fstream &,
+                                      const std::string &,
+                                      const std::vector< int > &,
+                                      const std::string &);
 
-  std::vector< double > readByPredictors(std::fstream &,
-                                         const std::string &,
-                                         const int,
-                                         const std::vector< std::string > &);
+  std::vector< double > readByChannel(std::fstream &,
+                                      const std::string &,
+                                      const int,
+                                      const std::vector< std::string > &);
 
   void writeTo(std::fstream &);
 

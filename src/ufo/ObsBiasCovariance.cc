@@ -163,13 +163,13 @@ void ObsBiasCovariance::read(const eckit::Configuration & conf) {
 
       for (std::size_t i = 0; i< jobs_.size(); ++i) {
         const auto results =
-          varIO.readByPredictors(sensor_, jobs_[i], prednames_);
+          varIO.readByChannel(sensor_, jobs_[i], prednames_);
         std::copy(results.begin(), results.end(),
                   analysis_variances_.begin() + i*prednames_.size());
       }
 
       const auto results =
-        varIO.readByChannels(sensor_, jobs_, "countOfQCedObs");
+        varIO.readByVarName(sensor_, jobs_, "countOfQCedObs");
       std::transform(results.begin(), results.end(),
                      obs_num_.begin(),
                      [](double x){return static_cast<int>(x);});
@@ -201,14 +201,14 @@ void ObsBiasCovariance::write(const eckit::Configuration & conf) {
       std::copy(analysis_variances_.begin() + i*prednames_.size(),
                 analysis_variances_.begin() + (i + 1)*prednames_.size(),
                 data.begin());
-      varIO.addByPredictors(sensor_, jobs_[i], prednames_, data);
+      varIO.addByChannel(sensor_, jobs_[i], prednames_, data);
     }
 
     std::vector< double > results(jobs_.size(), 0.0);
     std::transform(obs_num_.begin(), obs_num_.end(),
                    results.begin(),
                    [](int x){return static_cast<double>(x);});
-    varIO.addByChannels(sensor_, jobs_, "countOfQCedObs", results);
+    varIO.addByVarName(sensor_, jobs_, "countOfQCedObs", results);
 
     varIO.commit();
   }

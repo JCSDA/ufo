@@ -31,10 +31,10 @@ VarianceRecord::~VarianceRecord() {}
 
 // -----------------------------------------------------------------------------
 
-void VarianceRecord::setPredictors(const std::vector< std::string > & names,
-                                   const std::vector< double > & data) {
-  for (std::size_t i = 0; i < names.size(); ++i) {
-    const auto iter = std::find(gsi_predictors.begin(), gsi_predictors.end(), names[i]);
+void VarianceRecord::fillVector(const std::vector< std::string > & predictors,
+                                const std::vector< double > & data) {
+  for (std::size_t i = 0; i < predictors.size(); ++i) {
+    const auto iter = std::find(gsi_predictors.begin(), gsi_predictors.end(), predictors[i]);
     if (iter != gsi_predictors.end()) {
       variances_.at(std::distance(gsi_predictors.begin(), iter)) = data[i];
     }
@@ -43,8 +43,8 @@ void VarianceRecord::setPredictors(const std::vector< std::string > & names,
 
 // -----------------------------------------------------------------------------
 
-void VarianceRecord::setValue(const std::string & name,
-                              const double value) {
+void VarianceRecord::setValueByVarName(const std::string & name,
+                                       const double value) {
   if (name == std::string("countOfQCedObs")) {
     countOfQCedObs_ = value;
   } else {
@@ -72,10 +72,10 @@ bool VarianceRecord::readNext(std::fstream & inFile) {
 // -----------------------------------------------------------------------------
 
 std::vector< double >
-VarianceRecord::readByChannels(std::fstream & inFile,
-               const std::string & sensor,
-               const std::vector< int > & channels,
-               const std::string & name) {
+VarianceRecord::readByVarName(std::fstream & inFile,
+                              const std::string & sensor,
+                              const std::vector< int > & channels,
+                              const std::string & name) {
   inFile.clear();
   inFile.seekg(0, std::ios::beg);
 
@@ -99,10 +99,10 @@ VarianceRecord::readByChannels(std::fstream & inFile,
 // -----------------------------------------------------------------------------
 
 std::vector< double >
-VarianceRecord::readByPredictors(std::fstream & inFile,
-                 const std::string & sensor,
-                 const int channel,
-                 const std::vector< std::string > & predictors) {
+VarianceRecord::readByChannel(std::fstream & inFile,
+                              const std::string & sensor,
+                              const int channel,
+                              const std::vector< std::string > & predictors) {
   inFile.clear();
   inFile.seekg(0, std::ios::beg);
 

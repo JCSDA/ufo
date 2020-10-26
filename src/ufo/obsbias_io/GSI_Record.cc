@@ -34,8 +34,8 @@ Record::~Record() {}
 // -----------------------------------------------------------------------------
 
 void Record::setID(const std::size_t seq,
-           const std::string & sensor,
-           const std::size_t channel) {
+                   const std::string & sensor,
+                   const std::size_t channel) {
   seq_ = seq;
   sensor_ = sensor;
   channel_ = channel;
@@ -43,10 +43,10 @@ void Record::setID(const std::size_t seq,
 
 // -----------------------------------------------------------------------------
 
-void Record::setPredictors(const std::vector< std::string > & names,
-                   const std::vector< double > & data) {
-  for (std::size_t i = 0; i < names.size(); ++i) {
-    const auto iter = std::find(gsi_predictors.begin(), gsi_predictors.end(), names[i]);
+void Record::fillVector(const std::vector< std::string > & predictors,
+                           const std::vector< double > & data) {
+  for (std::size_t i = 0; i < predictors.size(); ++i) {
+    const auto iter = std::find(gsi_predictors.begin(), gsi_predictors.end(), predictors[i]);
     if (iter != gsi_predictors.end()) {
       biasCoeffs_.at(std::distance(gsi_predictors.begin(), iter)) = data[i];
     }
@@ -55,8 +55,8 @@ void Record::setPredictors(const std::vector< std::string > & names,
 
 // -----------------------------------------------------------------------------
 
-void Record::setValue(const std::string & name,
-              const double value) {
+void Record::setValueByVarName(const std::string & name,
+                               const double value) {
   if (name == std::string("tlap")) {
     tlap_ = value;
   } else if (name == std::string("tsum")) {
@@ -90,10 +90,10 @@ bool Record::readNext(std::fstream & inFile) {
 // -----------------------------------------------------------------------------
 
 std::vector< double >
-Record::readByChannels(std::fstream & inFile,
-               const std::string & sensor,
-               const std::vector< int > & channels,
-               const std::string & name) {
+Record::readByVarName(std::fstream & inFile,
+                      const std::string & sensor,
+                      const std::vector< int > & channels,
+                      const std::string & name) {
   inFile.clear();
   inFile.seekg(0, std::ios::beg);
 
@@ -121,10 +121,10 @@ Record::readByChannels(std::fstream & inFile,
 // -----------------------------------------------------------------------------
 
 std::vector< double >
-Record::readByPredictors(std::fstream & inFile,
-                 const std::string & sensor,
-                 const int channel,
-                 const std::vector< std::string > & predictors) {
+Record::readByChannel(std::fstream & inFile,
+                      const std::string & sensor,
+                      const int channel,
+                      const std::vector< std::string > & predictors) {
   inFile.clear();
   inFile.seekg(0, std::ios::beg);
 

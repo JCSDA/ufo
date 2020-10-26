@@ -44,34 +44,34 @@ class ObsBiasIO {
 // -----------------------------------------------------------------------------
 
   std::vector< double >
-  readByChannels(const std::string & sensor,
-                 const std::vector< int > & channels,
-                 const std::string & name) {
+  readByVarName(const std::string & sensor,
+                const std::vector< int > & channels,
+                const std::string & name) {
     T record;
-    return (record.readByChannels(fileIO_, sensor, channels, name));
+    return (record.readByVarName(fileIO_, sensor, channels, name));
   }
 
 // -----------------------------------------------------------------------------
 
   std::vector< double >
-  readByPredictors(const std::string & sensor,
-                   const int channel,
-                   const std::vector< std::string > & predictors) {
+  readByChannel(const std::string & sensor,
+                const int channel,
+                const std::vector< std::string > & predictors) {
     T record;
-    return (record.readByPredictors(fileIO_, sensor, channel, predictors));
+    return (record.readByChannel(fileIO_, sensor, channel, predictors));
   }
 
-  void addByChannels(const std::string & sensor,
-                     const std::vector< int > & channels,
-                     const std::string & name,
-                     const std::vector< double > & data) {
+  void addByVarName(const std::string & sensor,
+                    const std::vector< int > & channels,
+                    const std::string & name,
+                    const std::vector< double > & data) {
     assert(data.size() == channels.size());
 
     bool notFound = true;
     for (std::size_t i = 0; i < channels.size(); ++i) {
       for (auto & record : records_) {
         if (sensor == record.getSensorID() && channels[i] == record.getChannel()) {
-          record.setValue(name, data[i]);
+          record.setValueByVarName(name, data[i]);
           notFound = false;
           break;
         }
@@ -79,21 +79,21 @@ class ObsBiasIO {
       if (notFound) {
         records_.emplace_back();
         records_.back().setID(records_.size(), sensor, channels[i]);
-        records_.back().setValue(name, data[i]);
+        records_.back().setValueByVarName(name, data[i]);
       }
     }
   }
 
 // -----------------------------------------------------------------------------
 
-  void addByPredictors(const std::string & sensor,
-                       const int channel,
-                       const std::vector< std::string > & predictors,
-                       const std::vector< double > & data) {
+  void addByChannel(const std::string & sensor,
+                    const int channel,
+                    const std::vector< std::string > & predictors,
+                    const std::vector< double > & data) {
     bool notFound = true;
     for (auto & record : records_) {
       if (sensor == record.getSensorID() && channel == record.getChannel()) {
-        record.setPredictors(predictors, data);
+        record.fillVector(predictors, data);
         notFound = false;
         break;
       }
@@ -102,7 +102,7 @@ class ObsBiasIO {
     if (notFound) {
       records_.emplace_back();
       records_.back().setID(records_.size(), sensor, channel);
-      records_.back().setPredictors(predictors, data);
+      records_.back().fillVector(predictors, data);
     }
   }
 

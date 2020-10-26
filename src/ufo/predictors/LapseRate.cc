@@ -60,13 +60,13 @@ LapseRate::LapseRate(const eckit::Configuration & conf,
       ObsBiasIO< Record > tlapseIO(tlapse_file, std::ios::in);
       const auto tlapName = conf.getString("predictor.options.tlapse.name", "tlap");
       tlaps_ =
-        tlapseIO.readByChannels(sensor_, jobs_, tlapName);
+        tlapseIO.readByVarName(sensor_, jobs_, tlapName);
 
       tsum_ =
-        tlapseIO.readByChannels(sensor_, jobs_, "tsum");
+        tlapseIO.readByVarName(sensor_, jobs_, "tsum");
 
       ntlapupdate_ =
-        tlapseIO.readByChannels(sensor_, jobs_, "ntlapupdate");
+        tlapseIO.readByVarName(sensor_, jobs_, "ntlapupdate");
     }
 
     comm_.broadcast(tlaps_, root);
@@ -81,9 +81,9 @@ LapseRate::LapseRate(const eckit::Configuration & conf,
 void LapseRate::write(const eckit::Configuration & conf,
                       ObsBiasIO< Record > & fileOut) {
   const auto tlapName = conf.getString("predictor.options.tlapse.name", "tlap");
-  fileOut.addByChannels(sensor_, jobs_, tlapName, tlaps_);
-  fileOut.addByChannels(sensor_, jobs_, "tsum", tsum_);
-  fileOut.addByChannels(sensor_, jobs_, "ntlapupdate", ntlapupdate_);
+  fileOut.addByVarName(sensor_, jobs_, tlapName, tlaps_);
+  fileOut.addByVarName(sensor_, jobs_, "tsum", tsum_);
+  fileOut.addByVarName(sensor_, jobs_, "ntlapupdate", ntlapupdate_);
 }
 
 // -----------------------------------------------------------------------------
