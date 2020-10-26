@@ -17,7 +17,7 @@ Normal ship track:
     deferred check simultaneous: false
     variables: [air_temperature]
     temporal resolution: PT10M
-    spatial resolution: 1 # km
+    spatial resolution (km): 1
     max speed (m/s): 1000 # (1 lat/lon unit diff/hr ~ 30.8)
     rejection threshold: 1.0
     station_id_variable:
@@ -48,7 +48,7 @@ Ship track error first segment category 2:
     deferred check simultaneous: false
     variables: [air_temperature]
     temporal resolution: PT10M
-    spatial resolution: 1 # km
+    spatial resolution (km): 1
     max speed (m/s): 30.0
     rejection threshold: 1.0
     station_id_variable:
@@ -75,7 +75,7 @@ Ship track error first segment category 1:
     deferred check simultaneous: false
     variables: [air_temperature]
     temporal resolution: PT10M
-    spatial resolution: 1 # km
+    spatial resolution (km): 1
     max speed (m/s): 30.0
     rejection threshold: 1.0
     station_id_variable:
@@ -102,7 +102,7 @@ Ship track error last segment category 2:
     deferred check simultaneous: false
     variables: [air_temperature]
     temporal resolution: PT10M
-    spatial resolution: 1 # km
+    spatial resolution (km): 1
     max speed (m/s): 30.0
     rejection threshold: 1.0
     station_id_variable:
@@ -129,7 +129,7 @@ Ship track error last segment category 1:
     deferred check simultaneous: false
     variables: [air_temperature]
     temporal resolution: PT10M
-    spatial resolution: 1 # km
+    spatial resolution (km): 1
     max speed (m/s): 30.0
     rejection threshold: 1.0
     station_id_variable:
@@ -156,7 +156,7 @@ Ship track error middle segment prev fast category 4:
     deferred check simultaneous: false
     variables: [air_temperature]
     temporal resolution: PT10M
-    spatial resolution: 1 # km
+    spatial resolution (km): 1
     max speed (m/s): 30.0
     rejection threshold: 1.0
     station_id_variable:
@@ -183,7 +183,7 @@ Ship track error middle segment prev fast category 104:
     deferred check simultaneous: false
     variables: [air_temperature]
     temporal resolution: PT10M
-    spatial resolution: 1 # km
+    spatial resolution (km): 1
     max speed (m/s): 30.0
     rejection threshold: 1.0
     station_id_variable:
@@ -210,7 +210,7 @@ Ship track error middle segment next fast category 4:
     deferred check simultaneous: false
     variables: [air_temperature]
     temporal resolution: PT10M
-    spatial resolution: 1 # km
+    spatial resolution (km): 1
     max speed (m/s): 30.0
     rejection threshold: 1.0
     station_id_variable:
@@ -239,7 +239,7 @@ Ship track error middle segment next fast category 104:
     deferred check simultaneous: false
     variables: [air_temperature]
     temporal resolution: PT10M
-    spatial resolution: 1 # km
+    spatial resolution (km): 1
     max speed (m/s): 30.0
     rejection threshold: 1.0
     station_id_variable:
@@ -266,7 +266,7 @@ Ship track error middle segment average fast category 5: #uses time res to contr
     deferred check simultaneous: false
     variables: [air_temperature]
     temporal resolution: PT1H
-    spatial resolution: 1 # km
+    spatial resolution (km): 1
     max speed (m/s): 30.0
     rejection threshold: 1.0
     station_id_variable:
@@ -293,7 +293,7 @@ Ship track error middle segment prev average fast category 5:
     deferred check simultaneous: false
     variables: [air_temperature]
     temporal resolution: PT1H
-    spatial resolution: 1 # km
+    spatial resolution (km): 1
     max speed (m/s): 30.0
     rejection threshold: 1.0
     station_id_variable:
@@ -320,7 +320,7 @@ Ship track error middle segment prev average fast category 105:
     deferred check simultaneous: false
     variables: [air_temperature]
     temporal resolution: PT1H
-    spatial resolution: 1 # km
+    spatial resolution (km): 1
     max speed (m/s): 30.0
     rejection threshold: 1.0
     station_id_variable:
@@ -347,7 +347,7 @@ Ship track error middle segment prev angle large category 6:
     deferred check simultaneous: false
     variables: [air_temperature]
     temporal resolution: PT1H
-    spatial resolution: 1 # km
+    spatial resolution (km): 1
     max speed (m/s): 30.0
     rejection threshold: 1.0
     station_id_variable:
@@ -374,7 +374,7 @@ Ship track error middle segment angle large category 6:
     deferred check simultaneous: false
     variables: [air_temperature]
     temporal resolution: PT1H
-    spatial resolution: 1 # km
+    spatial resolution (km): 1
     max speed (m/s): 30.0
     rejection threshold: 1.0
     station_id_variable:
@@ -402,7 +402,7 @@ Ship track error middle segment previous previous angle large category 7:
     deferred check simultaneous: false
     variables: [air_temperature]
     temporal resolution: PT1H
-    spatial resolution: 1 # km
+    spatial resolution (km): 1
     max speed (m/s): 30.0
     rejection threshold: 1.0
     station_id_variable:
@@ -430,7 +430,7 @@ Ship track error middle segment next angle large category 7:
     deferred check simultaneous: false
     variables: [air_temperature]
     temporal resolution: PT1H
-    spatial resolution: 1 # km
+    spatial resolution (km): 1
     max speed (m/s): 30.0
     rejection threshold: 1.0
     station_id_variable:
@@ -457,7 +457,7 @@ Ship track error middle segment prev speed < half next speed category 8:
     deferred check simultaneous: false
     variables: [air_temperature]
     temporal resolution: PT1H
-    spatial resolution: 1 # km
+    spatial resolution (km): 1
     max speed (m/s): 30.0
     rejection threshold: 1.0
     station_id_variable:
@@ -484,7 +484,7 @@ Ship track error middle segment next speed < half prev speed category 8:
     deferred check simultaneous: false
     variables: [air_temperature]
     temporal resolution: PT1H
-    spatial resolution: 1 # km
+    spatial resolution (km): 1
     max speed (m/s): 30.0
     rejection threshold: 1.0
     station_id_variable:
@@ -511,7 +511,7 @@ Ship track error middle segment category 100:
     deferred check simultaneous: false
     variables: [air_temperature]
     temporal resolution: PT1H
-    spatial resolution: 1 # km
+    spatial resolution (km): 1
     max speed (m/s): 30.0
     rejection threshold: 1.0
     station_id_variable:

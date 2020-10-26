@@ -32,7 +32,7 @@ class TrackCheckShipParameters : public TrackCheckUtilsParameters {
     "temporal resolution", this
   };
 
-  /// Assumed spatial resolution of the observations (in km), i.e. absolute accuracy of the
+  /// Assumed spatial resolution (km) of the observations, i.e. absolute accuracy of the
   /// reported positions.
   ///
   /// Instantaneous speeds are estimated conservatively with the formula
@@ -40,7 +40,7 @@ class TrackCheckShipParameters : public TrackCheckUtilsParameters {
   /// speed_estimate = (reported_distance - spatial resolution) /
   ///                  (reported_time + temporal resolution).
   oops::RequiredParameter<double> spatialResolution {
-    "spatial resolution", this
+    "spatial resolution (km)", this
   };
 
   /// Maximum speed (before marking as fast) in m/s

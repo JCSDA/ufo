@@ -16,7 +16,7 @@ Normal ship track:
     unit testing mode: true
     variables: [air_temperature]
     temporal resolution: PT10M
-    spatial resolution: 1 # km
+    spatial resolution (km): 1
     max speed (m/s): 1000.0
     rejection threshold: 1.0
     deferred check simultaneous: false
@@ -54,7 +54,7 @@ Bending ship track:
     unit testing mode: true
     variables: [air_temperature]
     temporal resolution: PT10M
-    spatial resolution: 1 # km
+    spatial resolution (km): 1
     max speed (m/s): 1000.0
     rejection threshold: 1.0
     deferred check simultaneous: false
@@ -92,7 +92,7 @@ Fast ship track:
     unit testing mode: true
     variables: [air_temperature]
     temporal resolution: PT10M
-    spatial resolution: 1 # km
+    spatial resolution (km): 1
     max speed (m/s): 10 
     rejection threshold: 1.0
     deferred check simultaneous: false
@@ -131,7 +131,7 @@ Short ship track:
     unit testing mode: true
     variables: [air_temperature]
     temporal resolution: PT10M
-    spatial resolution: 1 # km
+    spatial resolution (km): 1
     max speed (m/s): 1000.0 
     rejection threshold: 1.0
     deferred check simultaneous: false
@@ -170,7 +170,7 @@ Short buoy track:
     unit testing mode: true
     variables: [air_temperature]
     temporal resolution: PT10M
-    spatial resolution: 1 # km
+    spatial resolution (km): 1
     max speed (m/s): 1000 
     rejection threshold: 1.0
     deferred check simultaneous: false
@@ -208,7 +208,7 @@ Fast/short ship track:
     unit testing mode: true
     variables: [air_temperature]
     temporal resolution: PT10M
-    spatial resolution: 1 # km
+    spatial resolution (km): 1
     max speed (m/s): 10 
     rejection threshold: 1.0
     deferred check simultaneous: false
@@ -245,7 +245,7 @@ Ship Track Dist0:
     unit testing mode: true
     variables: [air_temperature]
     temporal resolution: PT10M
-    spatial resolution: 1 # km
+    spatial resolution (km): 1
     max speed (m/s): 1000.0
     rejection threshold: 1.0
     deferred check simultaneous: false
@@ -282,7 +282,7 @@ Ship Track Simultaneous Same Location:
     unit testing mode: true
     variables: [air_temperature]
     temporal resolution: PT10M
-    spatial resolution: 1 # km
+    spatial resolution (km): 1
     max speed (m/s): 10 
     rejection threshold: 1.0
     deferred check simultaneous: false
@@ -321,7 +321,7 @@ Ship Track Simultaneous Same Location Deferred Simultaneous:
     deferred check simultaneous: true
     variables: [air_temperature]
     temporal resolution: PT10M
-    spatial resolution: 1 # km
+    spatial resolution (km): 1
     max speed (m/s): 1000.0 
     rejection threshold: 1.0
     station_id_variable:
@@ -361,7 +361,7 @@ Ship Track Simultaneous Different Location:
     unit testing mode: true
     variables: [air_temperature]
     temporal resolution: PT10M
-    spatial resolution: 1 # km
+    spatial resolution (km): 1
     max speed (m/s): 10 
     rejection threshold: 1.0
     deferred check simultaneous: false
@@ -398,7 +398,7 @@ Ship Track Simultaneous Different Location Deferred Simultaneous:
     unit testing mode: true
     variables: [air_temperature]
     temporal resolution: PT10M
-    spatial resolution: 1 # km
+    spatial resolution (km): 1
     max speed (m/s): 1000.0 
     rejection threshold: 1.0
     deferred check simultaneous: true
@@ -442,7 +442,7 @@ Ship Tracks Different Station IDs:
     unit testing mode: true
     variables: [air_temperature]
     temporal resolution: PT10M
-    spatial resolution: 1 # km
+    spatial resolution (km): 1
     max speed (m/s): 1000 
     rejection threshold: 1.0
     deferred check simultaneous: false
@@ -481,7 +481,7 @@ Ship Tracks Different Station IDs Shuffled:
     unit testing mode: true
     variables: [air_temperature]
     temporal resolution: PT10M
-    spatial resolution: 1 # km
+    spatial resolution (km): 1
     max speed (m/s): 1000 
     rejection threshold: 1.0
     deferred check simultaneous: false
@@ -520,7 +520,7 @@ Ship Track Segment from Comparison Test TrackOptions both false:
     unit testing mode: false
     variables: [air_temperature]
     temporal resolution: PT1S
-    spatial resolution: .0000001 # km
+    spatial resolution (km): .0000001
     max speed (m/s): .01 
     rejection threshold: 0.5
     deferred check simultaneous: false
@@ -547,7 +547,7 @@ Ship Track Segment from Comparison Test TrackOptions early break true:
     unit testing mode: false
     variables: [air_temperature]
     temporal resolution: PT1S
-    spatial resolution: .0000001 # km
+    spatial resolution (km): .0000001
     max speed (m/s): .01 
     rejection threshold: 0.5
     deferred check simultaneous: false
