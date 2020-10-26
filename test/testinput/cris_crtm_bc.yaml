@@ -54,7 +54,7 @@ observations:
     filename: Data/ufo/testinput_tier_1/cris-fsr_npp_geoval_2018041500_m_unittest.nc4
   obs bias:
     prior:
-      datain: &datain Data/satbias_crtm_in
+      datain: &datain Data/ufo/testinput_tier_1/satbias_crtm_in
     analysis:
       dataout: Data/satbias_crtm_out
     sensor: *Sensor_ID

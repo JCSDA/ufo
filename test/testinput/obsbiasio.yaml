@@ -8,15 +8,15 @@ obs space:
   channels: &channels 1-15
 obs bias:
   prior:
-    datain: &datain Data/satbias_crtm_in
+    datain: &datain Data/ufo/testinput_tier_1/satbias_crtm_in
   analysis:
     dataout: Data/satbias_crtm_out
   covariance:
     minimal required obs number: 20
     variance range: [1.0e-6, 10.]
     variance:
-      datain: Data/satbias_crtm_pc_in_amsua_n19.nc4
-      dataout: Data/satbias_crtm_pc_out_amsua_n19.nc4
+      datain: Data/ufo/testinput_tier_1/satbias_crtm_pc_in
+      dataout: Data/satbias_crtm_pc_out
       group: ObsBiasCovariance
       inflation:
         ratio: 1.1
