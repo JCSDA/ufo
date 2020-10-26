@@ -4,7 +4,7 @@ successful:
   obs space:
     name: ProcessWhere Test Data
     obsdatain:
-      obsfile: Data/filters_testdata.nc4
+      obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
     simulated variables: [var1]
     nlocs: 10
   ProcessWhere:
@@ -273,7 +273,7 @@ user_error_type_handling_is_in:
   obs space:
     name: ProcessWhere Test Data
     obsdatain:
-      obsfile: Data/filters_testdata.nc4
+      obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
     simulated variables: [var1]
     nlocs: 10
   ProcessWhere:

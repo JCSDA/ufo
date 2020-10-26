@@ -7,7 +7,7 @@ observations:
 - obs space:
     name: Aircraft
     obsdatain:
-      obsfile: Data/met_office_poisson_disk_thinning.nc4
+      obsfile: Data/ufo/testinput_tier_1/met_office_poisson_disk_thinning.nc4
     simulated variables: [air_temperature]
   obs filters:
   - filter: Domain Check

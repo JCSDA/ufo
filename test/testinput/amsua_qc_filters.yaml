@@ -20,10 +20,10 @@ observations:
     simulated variables: [brightness_temperature]
     channels: &all_channels 1-15
   geovals:
-    filename: Data/amsua_n19_geoval_2018041500_m_qc.nc4
+    filename: Data/ufo/testinput_tier_1/amsua_n19_geoval_2018041500_m_qc.nc4
   obs bias:
-    abias_in: Data/satbias_crtm_in
-    abias_out: Data/satbias_crtm_out
+    abias_in: Data/ufo/testinput_tier_1/satbias_crtm_in
+    abias_out: Data/ufo/testinput_tier_1/satbias_crtm_out
     sensor: *Sensor_ID
     jobs: *all_channels
     predictors:
@@ -39,7 +39,7 @@ observations:
         name: lapse_rate
         options:
           order: 2
-          tlapse: &amsua19tlap Data/amsua_n19_tlapmean.txt
+          tlapse: &amsua19tlap Data/ufo/testinput_tier_1/amsua_n19_tlapmean.txt
     - predictor:
         name: lapse_rate
         options:

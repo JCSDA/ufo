@@ -5,7 +5,7 @@ observations:
 - obs space: # Basic comparison against results produced by the Met Office OPS system
     name: Aircraft
     obsdatain:
-      obsfile: Data/met_office_buddy_check.nc4
+      obsfile: Data/ufo/testinput_tier_1/met_office_buddy_check.nc4
       obsgrouping:
         group variable: "station_id"
     simulated variables: [air_temperature, eastward_wind, northward_wind]
@@ -52,7 +52,7 @@ observations:
 - obs space: # Test of the sort_by_pressure option
     name: Aircraft
     obsdatain:
-      obsfile: Data/met_office_buddy_check.nc4
+      obsfile: Data/ufo/testinput_tier_1/met_office_buddy_check.nc4
       obsgrouping:
         group variable: "station_id"
     simulated variables: [air_temperature, eastward_wind, northward_wind]
@@ -100,7 +100,7 @@ observations:
 - obs space: # Test of the 'where' clause handler
     name: Aircraft
     obsdatain:
-      obsfile: Data/met_office_buddy_check.nc4
+      obsfile: Data/ufo/testinput_tier_1/met_office_buddy_check.nc4
       obsgrouping:
         group variable: "station_id"
     simulated variables: [air_temperature, eastward_wind, northward_wind]
@@ -152,7 +152,7 @@ observations:
             # (rather than record numbers)
     name: Aircraft
     obsdatain:
-      obsfile: Data/met_office_buddy_check.nc4
+      obsfile: Data/ufo/testinput_tier_1/met_office_buddy_check.nc4
     simulated variables: [air_temperature, eastward_wind, northward_wind]
   obs filters:
   - filter: Met Office Buddy Check

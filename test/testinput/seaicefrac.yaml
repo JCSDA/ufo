@@ -12,7 +12,7 @@ observations:
       obsfile: Data/ioda/testinput_tier_1/icec-2018-04-15.nc
     simulated variables: [sea_ice_area_fraction]
   geovals:
-    filename: Data/icec-2018-04-15_geovals.nc
+    filename: Data/ufo/testinput_tier_1/icec-2018-04-15_geovals.nc
   rms ref: 2.5
   tolerance: 1.0e-8
   linear obs operator test:

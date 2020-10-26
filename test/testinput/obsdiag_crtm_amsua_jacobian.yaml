@@ -16,10 +16,10 @@ obs operator:
     EndianType: little_endian
     CoefficientPath: Data/
 geovals:
-  filename: Data/amsua_n19_geoval_2018041500_m_qc.nc4
+  filename: Data/ufo/testinput_tier_1/amsua_n19_geoval_2018041500_m_qc.nc4
 obs diagnostics:
   variables: [brightness_temperature_jacobian_surface_emissivity, brightness_temperature_jacobian_surface_temperature, brightness_temperature_jacobian_air_temperature, brightness_temperature_jacobian_humidity_mixing_ratio]
   channels: *all_channels
 reference obs diagnostics:
-  filename: Data/amsua_n19_obsdiag_2018041500_m_qc.nc4
+  filename: Data/ufo/testinput_tier_1/amsua_n19_obsdiag_2018041500_m_qc.nc4
 tolerance: 1.e-6

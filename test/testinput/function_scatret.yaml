@@ -8,7 +8,7 @@ obs space:
   simulated variables: [brightness_temperature]
   channels: 1, 2, 15 
 geovals:
-  filename: Data/amsua_n19_geoval_2018041500_m_qc.nc4
+  filename: Data/ufo/testinput_tier_1/amsua_n19_geoval_2018041500_m_qc.nc4
 obs function:
   name: SCATRetMW@ObsFunction
   options:
