@@ -22,7 +22,7 @@ observations:
     simulated variables: [brightness_temperature]
     channels: &ops_channels 1-22
   geovals:
-    filename: Data/geovals_atms_20191230T0000Z_benchmark.nc4
+    filename: Data/ufo/testinput_tier_1/geovals_atms_20191230T0000Z_benchmark.nc4
   obs filters:
   # BlackList these channels but still want hofx for monitoring
   - filter: BlackList
@@ -36,7 +36,7 @@ observations:
     Absorbers: *rttov_absobers
     obs options: *rttov_options
     BMatrix: Data/atms_bmatrix_70_test.dat
-    RMatrix: Data/atms_noaa_20_rmatrix.nc4
+    RMatrix: Data/atms_noaa_20_rmatrix_test.nc4
     filter variables:
     - name: brightness_temperature
       channels: *ops_channels
@@ -64,4 +64,4 @@ observations:
     IRemiss: false
     EmissLandDefault: 0.95
     EmissSeaIceDefault: 0.92
-  passedBenchmark: 1500      # number of passed obs
+  passedBenchmark: 1410      # number of passed obs
