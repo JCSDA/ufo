@@ -8,7 +8,9 @@
 #ifndef UFO_PREDICTORS_LAPSERATE_H_
 #define UFO_PREDICTORS_LAPSERATE_H_
 
+#include <fstream>
 #include <map>
+#include <string>
 #include <vector>
 
 #include "eckit/config/LocalConfiguration.h"
@@ -17,6 +19,7 @@
 
 namespace eckit {
   class Configuration;
+  class Comm;
 }
 
 namespace ioda {
@@ -29,8 +32,14 @@ namespace ufo {
 
 class LapseRate : public PredictorBase {
  public:
-  LapseRate(const eckit::Configuration &, const std::vector<int> &);
+  LapseRate(const eckit::Configuration &,
+            const std::vector<int> &,
+            const std::string &,
+            const eckit::mpi::Comm &);
   ~LapseRate() {}
+
+  void write(const eckit::Configuration &,
+             ObsBiasIO< Record > &) override;
 
   void compute(const ioda::ObsSpace &,
                const GeoVaLs &,
@@ -38,7 +47,9 @@ class LapseRate : public PredictorBase {
                ioda::ObsVector &) const override;
 
  private:
-  std::map<int, float> tlapmean_;  // <channel, tlaps>
+  std::vector< double > tlaps_;
+  std::vector< double > tsum_;
+  std::vector< double > ntlapupdate_;
   int order_;
 };
 

@@ -24,8 +24,11 @@ static PredictorMaker<Emissivity> makerFuncEmissivity_("emissivity");
 
 // -----------------------------------------------------------------------------
 
-Emissivity::Emissivity(const eckit::Configuration & conf, const std::vector<int> & jobs)
-  : PredictorBase(conf, jobs) {
+Emissivity::Emissivity(const eckit::Configuration & conf,
+                       const std::vector<int> & jobs,
+                       const std::string & sensor,
+                       const eckit::mpi::Comm & comm)
+  : PredictorBase(conf, jobs, sensor, comm) {
   // required variables
   geovars_ += oops::Variables({"water_area_fraction"});
   if (jobs.size() > 0) {

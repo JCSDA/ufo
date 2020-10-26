@@ -19,8 +19,11 @@ static PredictorMaker<CosineOfLatitudeTimesOrbitNode>
 // -----------------------------------------------------------------------------
 
 CosineOfLatitudeTimesOrbitNode::CosineOfLatitudeTimesOrbitNode(
-                                const eckit::Configuration & conf, const std::vector<int> & jobs)
-  : PredictorBase(conf, jobs) {
+                                const eckit::Configuration & conf,
+                                const std::vector<int> & jobs,
+                                const std::string & sensor,
+                                const eckit::mpi::Comm & comm)
+  : PredictorBase(conf, jobs, sensor, comm) {
   // override the preconditioner from options
   if (conf.has("predictor.options"))
     precond_ = conf.getDouble("predictor.options.preconditioner");

@@ -72,9 +72,10 @@ observations:
   geovals:
     filename: Data/ufo/testinput_tier_1/iasi_metop-a_geoval_2018041500_m_unittest.nc4
   obs bias:
-    name: LinearCombination
-    abias_in: Data/ufo/testinput_tier_1/satbias_crtm_in
-    abias_out: Data/ufo/testinput_tier_1/satbias_crtm_out
+    prior:
+      datain: &datain Data/satbias_crtm_in
+    analysis:
+      dataout: Data/satbias_crtm_out
     sensor: *Sensor_ID
     jobs: *channels
     predictors:
@@ -84,11 +85,13 @@ observations:
         name: lapse_rate
         options:
           order: 2
-          tlapse: &iasi_metop-a_tlap Data/ufo/testinput_tier_1/iasi_metop-a_tlapmean.txt
+          name: tlap
+          datain: *datain
     - predictor:
         name: lapse_rate
         options:
-          tlapse: *iasi_metop-a_tlap
+          name: tlap
+          datain: *datain
     - predictor:
         name: emissivity
     - predictor:

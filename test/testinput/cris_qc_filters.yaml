@@ -55,7 +55,8 @@ observations:
 #    filename: Data/ufo/testinput_tier_1/cris-fsr_npp_geoval_2018041500_m_qc.nc4
     filename: Data/ufo/testinput_tier_1/cris-fsr_npp_geoval_2018041500_m_unittest.nc4
   obs bias:
-    abias_in: Data/ufo/testinput_tier_1/satbias_crtm_in
+    prior:
+      datain: &datain Data/satbias_crtm_in
     sensor: *Sensor_ID
     jobs: *all_channels
     predictors:
@@ -65,11 +66,13 @@ observations:
         name: lapse_rate
         options:
           order: 2
-          tlapse: &cris-fsr_npp-atlap Data/ufo/testinput_tier_1/cris-fsr_npp_tlapmean.txt
+          name: tlap
+          datain: *datain
     - predictor:
         name: lapse_rate
         options:
-          tlapse: *cris-fsr_npp-atlap
+          name: tlap
+          datain: *datain
     - predictor:
         name: emissivity
     - predictor:

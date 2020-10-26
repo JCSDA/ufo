@@ -8,6 +8,7 @@
 #ifndef UFO_PREDICTORS_SCANANGLE_H_
 #define UFO_PREDICTORS_SCANANGLE_H_
 
+#include <string>
 #include <vector>
 
 #include "ufo/predictors/PredictorBase.h"
@@ -26,8 +27,14 @@ namespace ufo {
 
 class ScanAngle : public PredictorBase {
  public:
-  ScanAngle(const eckit::Configuration &, const std::vector<int> &);
+  ScanAngle(const eckit::Configuration &,
+            const std::vector<int> &,
+            const std::string &,
+            const eckit::mpi::Comm &);
   ~ScanAngle() {}
+
+  void write(const eckit::Configuration &,
+             ObsBiasIO< Record > &) override {}
 
   void compute(const ioda::ObsSpace &,
                const GeoVaLs &,

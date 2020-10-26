@@ -52,6 +52,7 @@ endfunction(PREPEND)
 add_subdirectory( utils )
 add_subdirectory( basis )
 add_subdirectory( predictors )
+add_subdirectory( obsbias_io )
 add_subdirectory( filters )
 add_subdirectory( identity )
 add_subdirectory( atmvertinterp )
@@ -80,6 +81,7 @@ list( APPEND ufo_src_files
     ${utils_src_files}
     ${basis_src_files}
     ${predictor_src_files}
+    ${obsbias_io_src_files}
     ${filters_src_files}
     ${identity_src_files}
     ${atmvertinterp_src_files}

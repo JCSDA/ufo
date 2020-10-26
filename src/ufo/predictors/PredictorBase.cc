@@ -18,9 +18,12 @@ namespace ufo {
 
 // -----------------------------------------------------------------------------
 
-PredictorBase::PredictorBase(const eckit::Configuration & conf, const std::vector<int> & jobs)
+PredictorBase::PredictorBase(const eckit::Configuration & conf,
+                             const std::vector<int> & jobs,
+                             const std::string & sensor,
+                             const eckit::mpi::Comm & comm)
   : func_name_(conf.getString("predictor.name")),
-    geovars_(), hdiags_(), jobs_(jobs) {
+    geovars_(), hdiags_(), jobs_(jobs), sensor_(sensor), comm_(comm) {
 }
 
 // -----------------------------------------------------------------------------
@@ -37,7 +40,9 @@ PredictorFactory::PredictorFactory(const std::string & name) {
 // -----------------------------------------------------------------------------
 
 PredictorBase * PredictorFactory::create(const eckit::Configuration & conf,
-                                         const std::vector<int> & jobs) {
+                                         const std::vector<int> & jobs,
+                                         const std::string & sensor,
+                                         const eckit::mpi::Comm & comm) {
   oops::Log::trace() << "PredictorBase::create starting" << std::endl;
   const std::string name = conf.getString("predictor.name");
   if (!predictorExists(name)) {
@@ -47,7 +52,7 @@ PredictorBase * PredictorFactory::create(const eckit::Configuration & conf,
   }
   typename std::map<std::string, PredictorFactory*>::iterator jloc =
            getMakers().find(name);
-  PredictorBase * ptr = jloc->second->make(conf, jobs);
+  PredictorBase * ptr = jloc->second->make(conf, jobs, sensor, comm);
   oops::Log::trace() << "PredictorBase::create done" << std::endl;
   return ptr;
 }

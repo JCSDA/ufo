@@ -22,13 +22,16 @@ static PredictorMaker<ScanAngle> makerFuncScanAngle_("scan_angle");
 
 // -----------------------------------------------------------------------------
 
-ScanAngle::ScanAngle(const eckit::Configuration & conf, const std::vector<int> & jobs)
-  : PredictorBase(conf, jobs), order_(1) {
+ScanAngle::ScanAngle(const eckit::Configuration & conf,
+                     const std::vector<int> & jobs,
+                     const std::string & sensor,
+                     const eckit::mpi::Comm & comm)
+  : PredictorBase(conf, jobs, sensor, comm), order_(1) {
   // get the order if it is provided in options
-  if (conf.has("predictor.options.order")) {
-    conf.get("predictor.options.order", order_);
+  order_ = conf.getInt("predictor.options.order", 1);
 
-    // override the predictor name for differentiable
+  // override the predictor name for differentiable
+  if (order_ > 1) {
     name() = name() + "_order_" + std::to_string(order_);
   }
 }

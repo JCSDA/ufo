@@ -8,12 +8,14 @@
 #ifndef UFO_PREDICTORS_CONSTANT_H_
 #define UFO_PREDICTORS_CONSTANT_H_
 
+#include <string>
 #include <vector>
 
 #include "ufo/predictors/PredictorBase.h"
 
 namespace eckit {
   class Configuration;
+  class Comm;
 }
 
 namespace ioda {
@@ -26,8 +28,14 @@ namespace ufo {
 
 class Constant : public PredictorBase {
  public:
-  Constant(const eckit::Configuration &, const std::vector<int> &);
+  Constant(const eckit::Configuration &,
+           const std::vector<int> &,
+           const std::string &,
+           const eckit::mpi::Comm &);
   ~Constant() {}
+
+  void write(const eckit::Configuration &,
+             ObsBiasIO< Record > &) override {}
 
   void compute(const ioda::ObsSpace &,
                const GeoVaLs &,

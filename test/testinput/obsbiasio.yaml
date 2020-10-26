@@ -1,0 +1,57 @@
+window begin: 2018-04-14T21:00:00Z
+window end: 2018-04-15T03:00:00Z
+obs space:
+  name: amsua_n19
+  obsdatain:
+    obsfile: Data/ioda/testinput_tier_1/amsua_n19_obs_2018041500_m_qc.nc4
+  simulated variables: [brightness_temperature]
+  channels: &channels 1-15
+obs bias:
+  prior:
+    datain: &datain Data/satbias_crtm_in
+  analysis:
+    dataout: Data/satbias_crtm_out
+  covariance:
+    minimal required obs number: 20
+    variance range: [1.0e-6, 10.]
+    variance:
+      datain: Data/satbias_crtm_pc_in_amsua_n19.nc4
+      dataout: Data/satbias_crtm_pc_out_amsua_n19.nc4
+      group: ObsBiasCovariance
+      inflation:
+        ratio: 1.1
+        ratio for small dataset: 2.0
+  jobs: *channels
+  sensor: amsua_n19
+  predictors:
+  - predictor:
+      name: constant
+  - predictor:
+      name: lapse_rate
+      options:
+        order: 2
+        name: tlap
+        datain: *datain
+  - predictor:
+      name: lapse_rate
+      options:
+        name: tlap
+        datain: *datain
+  - predictor:
+      name: emissivity
+  - predictor:
+      name: scan_angle
+      options:
+        order: 4
+  - predictor:
+      name: scan_angle
+      options:
+        order: 3
+  - predictor:
+      name: scan_angle
+      options:
+        order: 2
+  - predictor:
+      name: scan_angle
+  norm ref: 35.381148
+  tolerance: 1.e-5

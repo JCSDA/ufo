@@ -26,8 +26,10 @@ observations:
   geovals:
     filename: Data/ufo/testinput_tier_1/amsua_n19_geoval_2018041500_m_qc.nc4
   obs bias:
-    abias_in: Data/ufo/testinput_tier_1/satbias_crtm_in
-    abias_out: Data/ufo/testinput_tier_1/satbias_crtm_out
+    prior:
+      datain: &datain Data/satbias_crtm_in
+    analysis:
+      dataout: Data/ufo/testinput_tier_1/satbias_crtm_out
     sensor: *Sensor_ID
     jobs: *channels
     covariance:
@@ -35,8 +37,9 @@ observations:
       variance range: [1.0e-6, 10.]
       step size: 1.0e-4
       largest analysis variance: 10000.0 
-      prior:
-        datain: Data/ufo/testinput_tier_1/satbias_crtm_pc
+      variance:
+        datain: Data/satbias_crtm_pc
+        dataout: Data/satbias_crtm_pc_out
         inflation:
           ratio: 1.1
           ratio for small dataset: 2.0
@@ -53,11 +56,13 @@ observations:
         name: lapse_rate
         options:
           order: 2
-          tlapse: &amsua19tlap Data/ufo/testinput_tier_1/amsua_n19_tlapmean.txt
+          name: tlap
+          datain: *datain
     - predictor:
         name: lapse_rate
         options:
-          tlapse: *amsua19tlap
+          name: tlap
+          datain: *datain
     - predictor:
         name: emissivity
     - predictor:

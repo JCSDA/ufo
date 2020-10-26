@@ -9,7 +9,6 @@
 #define UFO_PREDICTORS_COSINEOFLATITUDETIMESORBITNODE_H_
 
 #include <string>
-
 #include <vector>
 
 #include "ufo/predictors/PredictorBase.h"
@@ -28,13 +27,19 @@ namespace ufo {
 
 class CosineOfLatitudeTimesOrbitNode : public PredictorBase {
  public:
-  CosineOfLatitudeTimesOrbitNode(const eckit::Configuration &, const std::vector<int> &);
+  CosineOfLatitudeTimesOrbitNode(const eckit::Configuration &,
+                                 const std::vector<int> &,
+                                 const std::string &,
+                                 const eckit::mpi::Comm &);
   ~CosineOfLatitudeTimesOrbitNode() {}
 
   void compute(const ioda::ObsSpace &,
                const GeoVaLs &,
                const ObsDiagnostics &,
                ioda::ObsVector &) const override;
+
+  void write(const eckit::Configuration &,
+             ObsBiasIO< Record > &) override {}
 
  private:
   // default preconditioner for bias terms

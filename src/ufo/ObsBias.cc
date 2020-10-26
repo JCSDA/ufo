@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2017-2019 UCAR
+ * (C) Copyright 2017-2020 UCAR
  *
  * This software is licensed under the terms of the Apache Licence Version 2.0
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
@@ -8,7 +8,10 @@
 #include "ufo/ObsBias.h"
 
 #include <Eigen/Core>
+
+#include <algorithm>
 #include <fstream>
+#include <functional>
 #include <iomanip>
 #include <set>
 
@@ -18,6 +21,7 @@
 #include "oops/util/IntSetParser.h"
 #include "oops/util/Logger.h"
 
+#include "ufo/obsbias_io/ObsBiasIO.h"
 #include "ufo/ObsBiasIncrement.h"
 #include "ufo/ObsDiagnostics.h"
 
@@ -26,8 +30,12 @@ namespace ufo {
 // -----------------------------------------------------------------------------
 
 ObsBias::ObsBias(ioda::ObsSpace & odb, const eckit::Configuration & conf)
-  : predbases_(0), jobs_(0), odb_(odb), conf_(conf) {
+  : predbases_(0), jobs_(0), odb_(odb), conf_(conf), sensor_() {
   oops::Log::trace() << "ObsBias::create starting." << std::endl;
+
+  if (conf_.has("obs bias.sensor")) {
+    sensor_ = conf_.getString("obs bias.sensor");
+  }
 
   // Get the jobs(channels)
   if (conf_.has("obs bias.jobs")) {
@@ -37,14 +45,14 @@ ObsBias::ObsBias(ioda::ObsSpace & odb, const eckit::Configuration & conf)
 
   // Predictor factory
   if (conf_.has("obs bias.predictors")) {
-    std::vector<eckit::LocalConfiguration> confs;
-    conf_.get("obs bias.predictors", confs);
+    auto confs = conf_.getSubConfigurations("obs bias.predictors");
+    predbases_.reserve(confs.size());
+    prednames_.reserve(confs.size());
     for (std::size_t j = 0; j < confs.size(); ++j) {
-      std::shared_ptr<PredictorBase> pred(PredictorFactory::create(confs[j], jobs_));
-      predbases_.push_back(pred);
-      prednames_.push_back(pred->name());
-      geovars_ += pred->requiredGeovars();
-      hdiags_ += pred->requiredHdiagnostics();
+      predbases_.emplace_back(PredictorFactory::create(confs[j], jobs_, sensor_, odb_.comm()));
+      prednames_.emplace_back(predbases_.back()->name());
+      geovars_ += predbases_.back()->requiredGeovars();
+      hdiags_ += predbases_.back()->requiredHdiagnostics();
 
       // Reserve the space for ObsBiasTerm for predictor
       if (jobs_.size() > 0) {
@@ -74,24 +82,23 @@ ObsBias::ObsBias(ioda::ObsSpace & odb, const eckit::Configuration & conf)
 ObsBias::ObsBias(const ObsBias & other, const bool copy)
   : odb_(other.odb_), conf_(other.conf_), predbases_(other.predbases_),
     prednames_(other.prednames_), jobs_(other.jobs_),
-    geovars_(other.geovars_), hdiags_(other.hdiags_) {
-  oops::Log::trace() << "ObsBias::copy ctor starting." << std::endl;
-
-  // Initialize the biascoeffs
-  biascoeffs_.resize(prednames_.size() * jobs_.size());
-  std::fill(biascoeffs_.begin(), biascoeffs_.end(), 0.0);
-
-  // Copy the bias coeff data
-  if (copy && biascoeffs_.size() > 0) *this = other;
-
-  oops::Log::trace() << "ObsBias::copy ctor done." << std::endl;
+    geovars_(other.geovars_), hdiags_(other.hdiags_),
+    biascoeffs_(other.biascoeffs_), sensor_(other.sensor_) {
+  oops::Log::trace() << "ObsBias::copy ctor starting" << std::endl;
+  oops::Log::trace() << "ObsBias::copy ctor done" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
 ObsBias & ObsBias::operator+=(const ObsBiasIncrement & dx) {
-  for (std::size_t jj = 0; jj < biascoeffs_.size(); ++jj)
-      biascoeffs_[jj] += dx[jj];
+  oops::Log::trace() << "ObsBias::operator+= starting" << std::endl;
+
+  std::transform(biascoeffs_.cbegin(), biascoeffs_.cend(),
+                 dx.cbegin(),
+                 biascoeffs_.begin(),
+                 std::plus<double>());
+
+  oops::Log::trace() << "ObsBias::operator+= done" << std::endl;
   return *this;
 }
 
@@ -104,6 +111,7 @@ ObsBias & ObsBias::operator=(const ObsBias & rhs) {
     predbases_  = rhs.predbases_;
     prednames_  = rhs.prednames_;
     jobs_       = rhs.jobs_;
+    sensor_     = rhs.sensor_;
     geovars_    = rhs.geovars_;
     hdiags_     = rhs.hdiags_;
   }
@@ -115,83 +123,25 @@ ObsBias & ObsBias::operator=(const ObsBias & rhs) {
 void ObsBias::read(const eckit::Configuration & conf) {
   oops::Log::trace() << "ObsBias::read and initialize from file, starting "<< std::endl;
 
-  // Bias coefficients input file name
-  std::string input_filename;
-  if (conf.has("obs bias.abias_in")) {
-    input_filename = conf.getString("obs bias.abias_in");
-    oops::Log::debug() << "ObsBias::initialize coefficients from file: "
-                       << input_filename <<  std::endl;
+  const auto fileName = conf.getString("obs bias.prior.datain", "");
 
-    // Default predictor names from GSI
-    // temporary solution, we should have a self-explanatory obsbias file
-    const std::vector<std::string> gsi_predictors = {"constant",
-                                                     "zenith_angle",
-                                                     "cloud_liquid_water",
-                                                     "lapse_rate_order_2",
-                                                     "lapse_rate",
-                                                     "cosine_of_latitude_times_orbit_node",
-                                                     "sine_of_latitude",
-                                                     "emissivity",
-                                                     "scan_angle_order_4",
-                                                     "scan_angle_order_3",
-                                                     "scan_angle_order_2",
-                                                     "scan_angle"
-                                                     };
-    std::ifstream infile(input_filename);
+  const auto root = 0;
 
-    // get the sensor id
-    std::string sensor = conf.getString("obs bias.sensor");
-    oops::Log::debug() << "ObsBias::initialize coefficients for sensor: "
-                       << sensor <<  std::endl;
+  if (!fileName.empty()) {
+    if (odb_.comm().rank() == root) {
+      ObsBiasIO< Record > biasIO(fileName, std::ios::in);
 
-    std::size_t ich;     //  sequential number
-    std::string nusis;   //  sensor/instrument/satellite
-    std::size_t nuchan;  //  channel number
-    float tlap, tsum;
-    std::size_t ntlapupdate;
-
-    if (infile.is_open())
-    {
-      oops::Log::debug() << "ObsBias:: prior file is opened" << std::endl;
-      float par;
-      while (infile >> ich)
-      {
-        infile >> nusis;
-        infile >> nuchan;
-        infile >> tlap;
-        infile >> tsum;
-        infile >> ntlapupdate;
-        if (nusis == sensor) {
-          auto ijob = std::find(jobs_.begin(), jobs_.end(), nuchan);
-          if (ijob != jobs_.end()) {
-            int j = std::distance(jobs_.begin(), ijob);
-
-            for (auto & item : gsi_predictors) {
-              infile >> par;
-              auto ipred = std::find(prednames_.begin(), prednames_.end(), item);
-              if (ipred != prednames_.end()) {
-                int p = std::distance(prednames_.begin(), ipred);
-                biascoeffs_.at(j*prednames_.size() + p) = static_cast<double>(par);
-              }
-            }
-          } else {
-            for (auto & item : gsi_predictors)
-              infile >> par;
-          }
-        } else {
-          for (auto & item : gsi_predictors)
-            infile >> par;
-        }
+      for (std::size_t i = 0; i< jobs_.size(); ++i) {
+        const auto results =
+          biasIO.readByPredictors(sensor_, jobs_[i], prednames_);
+        std::copy(results.begin(), results.end(),
+                  biascoeffs_.begin() + i*prednames_.size());
       }
-      infile.close();
-      oops::Log::debug() << "ObsBias:: read prior from " << input_filename << std::endl;
-    } else {
-      oops::Log::error() << "Unable to open file : " << input_filename << std::endl;
-      ABORT("Unable to open bias prior file ");
     }
-  } else {
-    oops::Log::warning() << "ObsBias::prior file is NOT available, starting from ZERO"
-                         << std::endl;
+
+    if (odb_.isDistributed()) {
+      odb_.comm().broadcast(biascoeffs_, root);
+    }
   }
 
   oops::Log::trace() << "ObsBias::read and initilization done " << std::endl;
@@ -200,12 +150,26 @@ void ObsBias::read(const eckit::Configuration & conf) {
 // -----------------------------------------------------------------------------
 
 void ObsBias::write(const eckit::Configuration & conf) const {
-  oops::Log::trace() << "ObsBias::write to file not implemented" << std::endl;
+  oops::Log::trace() << "ObsBias::write to file starting" << std::endl;
 
-  // Bias coefficients output file name
-  std::string output_filename;
-  if (conf.has("ObsBias.abias_out")) {
-    output_filename = conf.getString("ObsBias.abias_out");
+  const auto fileName = conf.getString("obs bias.analysis.dataout", "");
+
+  if (!fileName.empty() && odb_.comm().rank() == 0) {
+    ObsBiasIO< Record > biasIO(fileName, std::ios::out);
+
+    std::vector< double > data(prednames_.size());
+    for (std::size_t i = 0; i< jobs_.size(); ++i) {
+      std::copy(biascoeffs_.begin() + i*prednames_.size(),
+                biascoeffs_.begin() + (i + 1)*prednames_.size(),
+                data.begin());
+      biasIO.addByPredictors(sensor_, jobs_[i], prednames_, data);
+    }
+
+    for (auto & pred : predbases_) {
+      pred->write(conf, biasIO);
+    }
+
+    biasIO.commit();
   }
 
   oops::Log::trace() << "ObsBias::write to file done" << std::endl;
@@ -307,13 +271,10 @@ std::vector<ioda::ObsVector> ObsBias::computePredictors(const GeoVaLs & geovals,
 // -----------------------------------------------------------------------------
 
 double ObsBias::norm() const {
-  oops::Log::trace() << "ObsBias::norm starting." << std::endl;
-  double zz = 0.0;
-  for (std::size_t jj = 0; jj < biascoeffs_.size(); ++jj) {
-    zz += biascoeffs_[jj] * biascoeffs_[jj];
-  }
-  if (biascoeffs_.size() > 0) zz = std::sqrt(zz/biascoeffs_.size());
-  oops::Log::trace() << "ObsBias::norm done." << std::endl;
+  oops::Log::trace() << "ObsBias::norm starting" << std::endl;
+  auto zz = std::sqrt(std::inner_product(biascoeffs_.begin(), biascoeffs_.end(),
+                                         biascoeffs_.begin(), 0.0));
+  oops::Log::trace() << "ObsBias::norm done" << std::endl;
   return zz;
 }
 
@@ -325,6 +286,7 @@ void ObsBias::print(std::ostream & os) const {
     Eigen::Map<const Eigen::MatrixXd>
       coeffs(biascoeffs_.data(), prednames_.size(), jobs_.size());
 
+    os << std::endl;
     os << "ObsBias::print " << std::endl;
     os << "---------------------------------------------------------------" << std::endl;
     auto njobs = jobs_.size();

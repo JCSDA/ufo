@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2017-2018 UCAR
+ * (C) Copyright 2017-2020 UCAR
  * 
  * This software is licensed under the terms of the Apache Licence Version 2.0
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
@@ -14,6 +14,7 @@
 #include <boost/noncopyable.hpp>
 
 #include "eckit/config/LocalConfiguration.h"
+#include "eckit/mpi/Comm.h"
 
 #include "oops/util/ObjectCounter.h"
 #include "oops/util/Printable.h"
@@ -40,7 +41,7 @@ class ObsBiasCovariance : public util::Printable,
 
 // Constructor, destructor
   ObsBiasCovariance(ioda::ObsSpace &, const eckit::Configuration &);
-  ~ObsBiasCovariance() {}
+  ~ObsBiasCovariance();
 
 // Linear algebra operators
   void linearize(const ObsBias &, const eckit::Configuration &);
@@ -91,6 +92,8 @@ class ObsBiasCovariance : public util::Printable,
 
   std::vector<std::string> prednames_;
   std::vector<int> jobs_;
+  std::string sensor_;
+  const eckit::mpi::Comm & comm_;
 };
 
 // -----------------------------------------------------------------------------

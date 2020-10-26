@@ -20,8 +20,11 @@
 
 #include "oops/base/Variables.h"
 
+#include "ufo/obsbias_io/ObsBiasIO.h"
+
 namespace eckit {
   class Configuration;
+  class Comm;
 }
 
 namespace ioda {
@@ -31,14 +34,22 @@ namespace ioda {
 namespace ufo {
   class GeoVaLs;
   class ObsDiagnostics;
+  class Record;
 
 // -----------------------------------------------------------------------------
 /// Base class for computing predictors
 
 class PredictorBase : private boost::noncopyable {
  public:
-  explicit PredictorBase(const eckit::Configuration &, const std::vector<int> &);
+  PredictorBase(const eckit::Configuration &,
+                const std::vector<int> &,
+                const std::string &,
+                const eckit::mpi::Comm &);
   virtual ~PredictorBase() {}
+
+  /// Write out for saving
+  virtual void write(const eckit::Configuration &,
+                     ObsBiasIO< Record > &) = 0;
 
   /// compute the predictor
   virtual void compute(const ioda::ObsSpace &,
@@ -57,12 +68,14 @@ class PredictorBase : private boost::noncopyable {
   const std::string & name() const {return func_name_;}
 
  protected:
-  const std::vector<int> jobs_;  ///<  jobs(channels)
-  oops::Variables geovars_;      ///<  required GeoVaLs
-  oops::Variables hdiags_;       ///<  required ObsDiagnostics
+  const std::vector<int> jobs_;
+  const std::string sensor_;
+  oops::Variables geovars_;
+  oops::Variables hdiags_;
+  const eckit::mpi::Comm & comm_;
 
  private:
-  std::string func_name_;        ///<  predictor name
+  std::string func_name_;
 };
 
 // -----------------------------------------------------------------------------
@@ -70,13 +83,19 @@ class PredictorBase : private boost::noncopyable {
 /// Predictor Factory
 class PredictorFactory {
  public:
-  static PredictorBase * create(const eckit::Configuration &, const std::vector<int> &);
+  static PredictorBase * create(const eckit::Configuration &,
+                                const std::vector<int> &,
+                                const std::string &,
+                                const eckit::mpi::Comm &);
   virtual ~PredictorFactory() = default;
   static bool predictorExists(const std::string &);
  protected:
   explicit PredictorFactory(const std::string &);
  private:
-  virtual PredictorBase * make(const eckit::Configuration &, const std::vector<int> &) = 0;
+  virtual PredictorBase * make(const eckit::Configuration &,
+                               const std::vector<int> &,
+                               const std::string &,
+                               const eckit::mpi::Comm &) = 0;
   static std::map < std::string, PredictorFactory * > & getMakers() {
     static std::map < std::string, PredictorFactory * > makers_;
     return makers_;
@@ -87,8 +106,11 @@ class PredictorFactory {
 
 template<class T>
 class PredictorMaker : public PredictorFactory {
-  virtual PredictorBase * make(const eckit::Configuration & conf, const std::vector<int> & jobs)
-    { return new T(conf, jobs); }
+  virtual PredictorBase * make(const eckit::Configuration & conf,
+                               const std::vector<int> & jobs,
+                               const std::string & sensor,
+                               const eckit::mpi::Comm & comm)
+    { return new T(conf, jobs, sensor, comm); }
  public:
   explicit PredictorMaker(const std::string & name)
     : PredictorFactory(name) {}

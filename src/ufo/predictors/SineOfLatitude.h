@@ -8,12 +8,14 @@
 #ifndef UFO_PREDICTORS_SINEOFLATITUDE_H_
 #define UFO_PREDICTORS_SINEOFLATITUDE_H_
 
+#include <string>
 #include <vector>
 
 #include "ufo/predictors/PredictorBase.h"
 
 namespace eckit {
   class Configuration;
+  class Comm;
 }
 
 namespace ioda {
@@ -26,8 +28,14 @@ namespace ufo {
 
 class SineOfLatitude : public PredictorBase {
  public:
-  SineOfLatitude(const eckit::Configuration &, const std::vector<int> &);
+  SineOfLatitude(const eckit::Configuration &,
+                 const std::vector<int> &,
+                 const std::string &,
+                 const eckit::mpi::Comm &);
   ~SineOfLatitude() {}
+
+  void write(const eckit::Configuration &,
+             ObsBiasIO< Record > &) override {}
 
   void compute(const ioda::ObsSpace &,
                const GeoVaLs &,

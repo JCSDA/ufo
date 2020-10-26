@@ -20,8 +20,11 @@ static PredictorMaker<SineOfLatitude>
 
 // -----------------------------------------------------------------------------
 
-SineOfLatitude::SineOfLatitude(const eckit::Configuration & conf, const std::vector<int> & jobs)
-  : PredictorBase(conf, jobs) {
+SineOfLatitude::SineOfLatitude(const eckit::Configuration & conf,
+                               const std::vector<int> & jobs,
+                               const std::string & sensor,
+                               const eckit::mpi::Comm & comm)
+  : PredictorBase(conf, jobs, sensor, comm) {
 }
 
 // -----------------------------------------------------------------------------

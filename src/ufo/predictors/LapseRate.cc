@@ -4,7 +4,7 @@
  * This software is licensed under the terms of the Apache Licence Version 2.0
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
-#include <fstream>
+
 #include <iterator>
 #include <string>
 
@@ -25,14 +25,18 @@ static PredictorMaker<LapseRate> makerFuncLapseRate_("lapse_rate");
 
 // -----------------------------------------------------------------------------
 
-LapseRate::LapseRate(const eckit::Configuration & conf, const std::vector<int> & jobs)
-  : PredictorBase(conf, jobs), order_(1)
+LapseRate::LapseRate(const eckit::Configuration & conf,
+                     const std::vector<int> & jobs,
+                     const std::string & sensor,
+                     const eckit::mpi::Comm & comm)
+  : PredictorBase(conf, jobs, sensor, comm), order_(1),
+    tlaps_(), tsum_(), ntlapupdate_()
 {
   // get the order if it is provided in options
-  if (conf.has("predictor.options.order")) {
-    conf.get("predictor.options.order", order_);
+  order_ = conf.getInt("predictor.options.order", 1);
 
     // override the predictor name for differentiable
+  if (order_ > 1) {
     name() = name() + "_order_" + std::to_string(order_);
   }
 
@@ -40,39 +44,46 @@ LapseRate::LapseRate(const eckit::Configuration & conf, const std::vector<int> &
   geovars_ += oops::Variables({"air_temperature",
                                "air_pressure",
                                "average_surface_temperature_within_field_of_view"});
-  if (jobs.size() > 0) {
+  if (jobs_.size() > 0) {
     hdiags_ += oops::Variables({"transmittances_of_atmosphere_layer"}, jobs);
   } else {
     oops::Log::error() << "Channels size is ZERO !" << std::endl;
     ABORT("Channels size is ZERO !");
   }
 
-  // This is a very preliminary method, please revisit
-  // more flexibilites are needed
-  if (conf.has("predictor.options.tlapse")) {
-    const std::string tlapse_file = conf.getString("predictor.options.tlapse");
-    std::ifstream infile(tlapse_file);
-    std::string nusis;   //  sensor/instrument/satellite
-    int nuchan;  //  channel number
-    float tlapse;
+  const auto tlapse_file = conf.getString("predictor.options.datain", "");
 
-    if (infile.is_open()) {
-      while (!infile.eof()) {
-        infile >> nusis;
-        infile >> nuchan;
-        infile >> tlapse;
-        tlapmean_[nuchan] = tlapse;
-      }
-      infile.close();
-    } else {
-      oops::Log::error() << "Unable to open file : "
-                         << tlapse_file << std::endl;
-      ABORT("Unable to open tlap file ");
+  const auto root = 0;
+
+  if (!tlapse_file.empty()) {
+    if (comm_.rank() == root) {
+      ObsBiasIO< Record > tlapseIO(tlapse_file, std::ios::in);
+      const auto tlapName = conf.getString("predictor.options.tlapse.name", "tlap");
+      tlaps_ =
+        tlapseIO.readByChannels(sensor_, jobs_, tlapName);
+
+      tsum_ =
+        tlapseIO.readByChannels(sensor_, jobs_, "tsum");
+
+      ntlapupdate_ =
+        tlapseIO.readByChannels(sensor_, jobs_, "ntlapupdate");
     }
+
+    comm_.broadcast(tlaps_, root);
   } else {
     oops::Log::error() << "tlapse file is not provided !" << std::endl;
     ABORT("tlapse file is not provided !");
   }
+}
+
+// -----------------------------------------------------------------------------
+
+void LapseRate::write(const eckit::Configuration & conf,
+                      ObsBiasIO< Record > & fileOut) {
+  const auto tlapName = conf.getString("predictor.options.tlapse.name", "tlap");
+  fileOut.addByChannels(sensor_, jobs_, tlapName, tlaps_);
+  fileOut.addByChannels(sensor_, jobs_, "tsum", tsum_);
+  fileOut.addByChannels(sensor_, jobs_, "ntlapupdate", ntlapupdate_);
 }
 
 // -----------------------------------------------------------------------------
@@ -119,18 +130,6 @@ void LapseRate::compute(const ioda::ObsSpace & odb,
   nlevs = geovals.nlevs("air_pressure");
   float tlapchn;
 
-  // sort out the tlapmean based on jobs
-  std::vector<float> tlap;
-  for (std::size_t jb = 0; jb < njobs; ++jb) {
-    auto it = tlapmean_.find(jobs_[jb]);
-    if (it != tlapmean_.end()) {
-      tlap.push_back(it->second);
-    } else {
-      oops::Log::error() << "Could not locate tlapemean for channel: " << jobs_[jb] << std::endl;
-      ABORT("Could not locate tlapemean value");
-    }
-  }
-
   for (std::size_t jl = 0; jl < nlocs; ++jl) {
     for (std::size_t jb = 0; jb < njobs; ++jb) {
         tlapchn = (ptau5[jb][nlevs-2][jl]-ptau5[jb][nlevs-1][jl])*(tsavg5[jl]-tvp[nlevs-2][jl]);
@@ -138,7 +137,7 @@ void LapseRate::compute(const ioda::ObsSpace & odb,
           tlapchn = tlapchn+(ptau5[jb][nlevs-k-2][jl]-ptau5[jb][nlevs-k-1][jl])*
                     (tvp[nlevs-k][jl]-tvp[nlevs-k-2][jl]);
         }
-        out[jl*njobs+jb] = pow((tlapchn - tlap[jb]), order_);
+        out[jl*njobs+jb] = pow((tlapchn - tlaps_[jb]), order_);
     }
   }
 }

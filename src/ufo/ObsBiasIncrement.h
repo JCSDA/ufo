@@ -10,6 +10,7 @@
 
 #include <Eigen/Core>
 
+#include <functional>
 #include <memory>
 #include <string>
 #include <vector>
@@ -79,6 +80,14 @@ class ObsBiasIncrement : public util::Printable {
 // Operator
   operator bool() const {return biascoeffsinc_.size() > 0;}
 
+// Iterator
+  typedef std::vector<double>::iterator iterator;
+  typedef std::vector<double>::const_iterator const_iterator;
+  iterator begin() {return biascoeffsinc_.begin();}
+  iterator end() {return biascoeffsinc_.end();}
+  const_iterator cbegin() const {return biascoeffsinc_.cbegin();}
+  const_iterator cend() const {return biascoeffsinc_.cend();}
+
  private:
   void print(std::ostream &) const;
 
@@ -89,6 +98,7 @@ class ObsBiasIncrement : public util::Printable {
   std::vector<std::shared_ptr<PredictorBase>> predbases_;
   std::vector<std::string> prednames_;
   std::vector<int> jobs_;
+  std::string sensor_;
 };
 
 // -----------------------------------------------------------------------------

@@ -17,8 +17,11 @@ static PredictorMaker<Constant> makerFuncConstant_("constant");
 
 // -----------------------------------------------------------------------------
 
-Constant::Constant(const eckit::Configuration & conf, const std::vector<int> & jobs)
-  : PredictorBase(conf, jobs) {
+Constant::Constant(const eckit::Configuration & conf,
+                   const std::vector<int> & jobs,
+                   const std::string & sensor,
+                   const eckit::mpi::Comm & comm)
+  : PredictorBase(conf, jobs, sensor, comm) {
 }
 
 // -----------------------------------------------------------------------------

@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2017-2018 UCAR
+ * (C) Copyright 2017-2020 UCAR
  * 
  * This software is licensed under the terms of the Apache Licence Version 2.0
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
@@ -76,6 +76,14 @@ class ObsBias : public util::Printable,
   // Operator
   operator bool() const {return biascoeffs_.size() > 0;}
 
+  // Iterators
+  typedef std::vector<double>::iterator iterator;
+  typedef std::vector<double>::const_iterator const_iterator;
+  iterator begin() {return biascoeffs_.begin();}
+  iterator end() {return biascoeffs_.end();}
+  const_iterator cbegin() const {return biascoeffs_.cbegin();}
+  const_iterator cend() const {return biascoeffs_.cend();}
+
  private:
   void print(std::ostream &) const;
 
@@ -86,6 +94,7 @@ class ObsBias : public util::Printable,
   std::vector<std::shared_ptr<PredictorBase>> predbases_;
   std::vector<std::string> prednames_;
   std::vector<int> jobs_;
+  std::string sensor_;
   oops::Variables geovars_;
   oops::Variables hdiags_;
 };

@@ -1,11 +1,13 @@
 /*
- * (C) Copyright 2018-2019 UCAR
+ * (C) Copyright 2018-2020 UCAR
  *
  * This software is licensed under the terms of the Apache Licence Version 2.0
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
 #include <Eigen/Core>
+
+#include <algorithm>
 #include <cmath>
 #include <fstream>
 #include <memory>
@@ -22,8 +24,9 @@
 #include "oops/util/Random.h"
 
 #include "ufo/ObsBias.h"
+#include "ufo/obsbias_io/GSI_VarianceRecord.h"
+#include "ufo/obsbias_io/ObsBiasIO.h"
 #include "ufo/ObsBiasIncrement.h"
-#include "ufo/predictors/PredictorBase.h"
 
 namespace ufo {
 
@@ -31,8 +34,13 @@ namespace ufo {
 
 ObsBiasCovariance::ObsBiasCovariance(ioda::ObsSpace & odb, const eckit::Configuration & conf)
   : conf_(conf), odb_(odb), prednames_(0), jobs_(0), variances_(0), preconditioner_(0),
-    ht_rinv_h_(0), obs_num_(0), analysis_variances_(0), minimal_required_obs_number_(0) {
+    ht_rinv_h_(0), obs_num_(0), analysis_variances_(0), minimal_required_obs_number_(0),
+    sensor_(), comm_(odb_.comm()) {
   oops::Log::trace() << "ObsBiasCovariance::Constructor starting" << std::endl;
+
+  if (conf_.has("obs bias.sensor")) {
+    sensor_ = conf_.getString("obs bias.sensor");
+  }
 
   // Get the jobs(channels)
   if (conf_.has("obs bias.jobs")) {
@@ -45,7 +53,8 @@ ObsBiasCovariance::ObsBiasCovariance(ioda::ObsSpace & odb, const eckit::Configur
     std::vector<eckit::LocalConfiguration> confs;
     conf_.get("obs bias.predictors", confs);
     for (std::size_t j = 0; j < confs.size(); ++j) {
-      std::shared_ptr<PredictorBase> pred(PredictorFactory::create(confs[j], jobs_));
+      std::shared_ptr<PredictorBase>
+        pred(PredictorFactory::create(confs[j], jobs_, sensor_, comm_));
       prednames_.push_back(pred->name());
     }
   }
@@ -96,14 +105,14 @@ ObsBiasCovariance::ObsBiasCovariance(ioda::ObsSpace & odb, const eckit::Configur
     std::fill(analysis_variances_.begin(), analysis_variances_.end(), largest_variance_);
 
     // Initializes from given prior
-    if (conf_.has("obs bias.covariance.prior")) {
+    if (conf_.has("obs bias.covariance.variance")) {
       // Get default inflation ratio
       const double inflation_ratio =
-        conf.getDouble("obs bias.covariance.prior.inflation.ratio");
+        conf.getDouble("obs bias.covariance.variance.inflation.ratio");
 
       // Check the large inflation ratio when obs number < minimal_required_obs_number
       const double large_inflation_ratio =
-        conf.getDouble("obs bias.covariance.prior.inflation.ratio for small dataset");
+        conf.getDouble("obs bias.covariance.variance.inflation.ratio for small dataset");
 
       // read in Variances prior (analysis_variances_) and number of obs. (obs_num_)
       // from previous cycle
@@ -133,72 +142,42 @@ ObsBiasCovariance::ObsBiasCovariance(ioda::ObsSpace & odb, const eckit::Configur
 
 // -----------------------------------------------------------------------------
 
+ObsBiasCovariance::~ObsBiasCovariance() {
+  oops::Log::trace() << "ObsBiasCovariance::Destructor starting" << std::endl;
+  this->write(conf_);
+  oops::Log::trace() << "ObsBiasCovariance::Destructor done" << std::endl;
+}
+
+// -----------------------------------------------------------------------------
+
 void ObsBiasCovariance::read(const eckit::Configuration & conf) {
   oops::Log::trace() << "ObsBiasCovariance::read from file " << std::endl;
 
-  // Default predictor names from GSI
-  const std::vector<std::string> gsi_predictors = {"constant",
-                                                   "zenith_angle",
-                                                   "cloud_liquid_water",
-                                                   "lapse_rate_order_2",
-                                                   "lapse_rate",
-                                                   "cosine_of_latitude_times_orbit_node",
-                                                   "sine_of_latitude",
-                                                   "emissivity",
-                                                   "scan_angle_order_4",
-                                                   "scan_angle_order_3",
-                                                   "scan_angle_order_2",
-                                                   "scan_angle"
-                                                   };
+  const auto fileName = conf.getString("obs bias.covariance.variance.datain", "");
 
-  const std::string sensor = conf.getString("obs bias.sensor");
+  const auto root = 0;
 
-  if (conf.has("obs bias.covariance.prior.datain")) {
-    const std::string filename = conf.getString("obs bias.covariance.prior.datain");
-    std::ifstream infile(filename);
+  if (!fileName.empty()) {
+    if (comm_.rank() == root) {
+      ObsBiasIO< VarianceRecord > varIO(fileName, std::ios::in);
 
-    if (infile.is_open())
-    {
-      int ich;            //  sequential number
-      std::string nusis;  //  sensor/instrument/satellite
-      int nuchan;         //  channel number
-      float number;       //  QCed obs number from previous cycle
-
-      float par;
-      while (infile >> ich)
-      {
-        infile >> nusis;
-        infile >> nuchan;
-        infile >> number;
-        if (nusis == sensor) {
-          auto ijob = std::find(jobs_.begin(), jobs_.end(), nuchan);
-          if (ijob != jobs_.end()) {
-            int j = std::distance(jobs_.begin(), ijob);
-            obs_num_[j] = static_cast<int>(number);
-
-            for (auto & item : gsi_predictors) {
-              infile >> par;
-              auto ipred = std::find(prednames_.begin(), prednames_.end(), item);
-              if (ipred != prednames_.end()) {
-                int p = std::distance(prednames_.begin(), ipred);
-                analysis_variances_.at(j*prednames_.size() + p) = static_cast<double>(par);
-              }
-            }
-          } else {
-            for (auto & item : gsi_predictors)
-              infile >> par;
-          }
-        } else {
-          for (auto & item : gsi_predictors)
-            infile >> par;
-        }
+      for (std::size_t i = 0; i< jobs_.size(); ++i) {
+        const auto results =
+          varIO.readByPredictors(sensor_, jobs_[i], prednames_);
+        std::copy(results.begin(), results.end(),
+                  analysis_variances_.begin() + i*prednames_.size());
       }
-      infile.close();
-      oops::Log::trace() << "ObsBiasCovariance::read from prior file: "
-                         << filename << " Done " << std::endl;
-    } else {
-      oops::Log::error() << "Unable to open file : " << filename << std::endl;
-      ABORT("Unable to open bias correction coeffs variance prior file ");
+
+      const auto results =
+        varIO.readByChannels(sensor_, jobs_, "countOfQCedObs");
+      std::transform(results.begin(), results.end(),
+                     obs_num_.begin(),
+                     [](double x){return static_cast<int>(x);});
+    }
+
+    if (odb_.isDistributed()) {
+      comm_.broadcast(analysis_variances_, root);
+      comm_.broadcast(obs_num_, root);
     }
   }
 
@@ -208,8 +187,32 @@ void ObsBiasCovariance::read(const eckit::Configuration & conf) {
 // -----------------------------------------------------------------------------
 
 void ObsBiasCovariance::write(const eckit::Configuration & conf) {
-  oops::Log::trace() << "ObsBiasCovariance::write to file " << std::endl;
-  oops::Log::trace() << "ObsBiasCovariance::write is not implemented " << std::endl;
+  oops::Log::trace() << "ObsBiasCovariance::write to file startig " << std::endl;
+
+  const auto fileName = conf.getString("obs bias.covariance.variance.dataout", "");
+
+  const auto root = 0;
+
+  if (!fileName.empty() && comm_.rank() == root) {
+    ObsBiasIO< VarianceRecord > varIO(fileName, std::ios::out);
+
+    std::vector< double > data(prednames_.size());
+    for (std::size_t i = 0; i< jobs_.size(); ++i) {
+      std::copy(analysis_variances_.begin() + i*prednames_.size(),
+                analysis_variances_.begin() + (i + 1)*prednames_.size(),
+                data.begin());
+      varIO.addByPredictors(sensor_, jobs_[i], prednames_, data);
+    }
+
+    std::vector< double > results(jobs_.size(), 0.0);
+    std::transform(obs_num_.begin(), obs_num_.end(),
+                   results.begin(),
+                   [](int x){return static_cast<double>(x);});
+    varIO.addByChannels(sensor_, jobs_, "countOfQCedObs", results);
+
+    varIO.commit();
+  }
+
   oops::Log::trace() << "ObsBiasCovariance::write is done " << std::endl;
 }
 
@@ -239,8 +242,8 @@ void ObsBiasCovariance::linearize(const ObsBias & bias, const eckit::Configurati
 
       // Sum across the processros
       if (odb_.isDistributed())
-        odb_.comm().allReduceInPlace(obs_num_.begin(), obs_num_.end(),
-                                     eckit::mpi::sum());
+        comm_.allReduceInPlace(obs_num_.begin(), obs_num_.end(),
+                               eckit::mpi::sum());
 
       const float missing = util::missingValue(missing);
 
@@ -262,7 +265,7 @@ void ObsBiasCovariance::linearize(const ObsBias & bias, const eckit::Configurati
 
       // Sum the total number of effective obs. across tasks
       if (odb_.isDistributed())
-        odb_.comm().allReduceInPlace(obs_num_.begin(), obs_num_.end(), eckit::mpi::sum());
+        comm_.allReduceInPlace(obs_num_.begin(), obs_num_.end(), eckit::mpi::sum());
 
       // compute \mathrm{H}_\beta^\intercal \mathrm{R}^{-1} \mathrm{H}_\beta
       // -----------------------------------------
@@ -284,7 +287,7 @@ void ObsBiasCovariance::linearize(const ObsBias & bias, const eckit::Configurati
 
       // Sum the hessian contributions across the tasks
       if (odb_.isDistributed())
-        odb_.comm().allReduceInPlace(ht_rinv_h_.begin(), ht_rinv_h_.end(), eckit::mpi::sum());
+        comm_.allReduceInPlace(ht_rinv_h_.begin(), ht_rinv_h_.end(), eckit::mpi::sum());
     }
 
     // reset variances for bias predictor coeff. based on current data count
