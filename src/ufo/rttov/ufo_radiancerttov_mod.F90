@@ -254,7 +254,6 @@ contains
 
         if(self % conf % RTTOV_profile_checkinput) then
           if (self % conf % inspect > 0) then
-            write(*,*) "rttov_print_profile"
             call rttov_print_profile(self % RTprof % profiles(self % conf % inspect))
           endif
 
