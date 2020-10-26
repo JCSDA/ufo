@@ -51,11 +51,11 @@ observations:
               1981, 1982, 1983, 1984, 1985, 1986, 1987, 2119, 2140, 2143, 2147, 2153,
               2158, 2161, 2168, 2171, 2175, 2182
   geovals:
-    filename: Data/cris-fsr_npp_geoval_2018041500_m_unittest.nc4
+    filename: Data/ufo/testinput_tier_1/cris-fsr_npp_geoval_2018041500_m_unittest.nc4
   obs bias:
     name: LinearCombination
-    abias_in: Data/satbias_crtm_in
-    abias_out: Data/satbias_crtm_out
+    abias_in: Data/ufo/testinput_tier_1/satbias_crtm_in
+    abias_out: Data/ufo/testinput_tier_1/satbias_crtm_out
     sensor: *Sensor_ID
     jobs: *channels
     predictors:
@@ -65,7 +65,7 @@ observations:
         name: lapse_rate
         options:
           order: 2
-          tlapse: &cris-fsr_npp_tlap Data/cris-fsr_npp_tlapmean.txt
+          tlapse: &cris-fsr_npp_tlap Data/ufo/testinput_tier_1/cris-fsr_npp_tlapmean.txt
     - predictor:
         name: lapse_rate
         options:

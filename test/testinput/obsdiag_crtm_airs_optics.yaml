@@ -36,10 +36,10 @@ obs operator:
     EndianType: little_endian
     CoefficientPath: Data/
 geovals:
-  filename: Data/airs_aqua_geoval_2018041500_m_unittest.nc4
+  filename: Data/ufo/testinput_tier_1/airs_aqua_geoval_2018041500_m_unittest.nc4
 obs diagnostics:
   variables: [optical_thickness_of_atmosphere_layer, transmittances_of_atmosphere_layer, weightingfunction_of_atmosphere_layer]
   channels: *all_channels
 reference obs diagnostics:
-  filename: Data/airs_aqua_obsdiag_2018041500_m_unittest.nc4
+  filename: Data/ufo/testinput_tier_1/airs_aqua_obsdiag_2018041500_m_unittest.nc4
 tolerance: 1.e-6
