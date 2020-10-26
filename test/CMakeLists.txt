@@ -249,7 +249,7 @@ function(ADD_DOWNLOAD_TEST repo test_data output_data_path)
   else()
     set(ECBUILD_DOWNLOAD_BASE_URL https://jedi-test-files.s3.amazonaws.com)
     # if branch-specific files exist, download them
-    ecbuild_check_urls(NAMES ${GIT_BRANCH_UFO}/${repo}/${test_data}
+    ecbuild_check_urls(NAMES ${repo}/${GIT_BRANCH_UFO}/${test_data}
                        RESULT UFO_SPECIFIC_TEST_FILES)
     if(${UFO_SPECIFIC_TEST_FILES} MATCHES 0)
       set(download_data_name ${repo}/${GIT_BRANCH_UFO}/${test_data})
