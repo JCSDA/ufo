@@ -15,7 +15,7 @@ observations:
       obsfile: Data/gnssro_bndnbam_2018041500_3prof_errNBAM.nc4
     simulated variables: [bending_angle]
   geovals:
-    filename: Data/gnssro_geoval_2018041500_3prof.nc4
+    filename: Data/ufo/testinput_tier_1/gnssro_geoval_2018041500_3prof.nc4
   obs filters:
   - filter: ROobserror
     filter variables:
@@ -33,7 +33,7 @@ observations:
       obsfile: Data/gnssro_bndnbam_2018041500_3prof_errECMWF.nc4
     simulated variables: [bending_angle]
   geovals:
-    filename: Data/gnssro_geoval_2018041500_3prof.nc4
+    filename: Data/ufo/testinput_tier_1/gnssro_geoval_2018041500_3prof.nc4
   obs filters:
   - filter: ROobserror
     filter variables:
@@ -53,7 +53,7 @@ observations:
       obsfile: Data/gnssro_bndnbam_2018041500_3prof_errNRL.nc4
     simulated variables: [bending_angle]
   geovals:
-    filename: Data/gnssro_geoval_2018041500_3prof.nc4
+    filename: Data/ufo/testinput_tier_1/gnssro_geoval_2018041500_3prof.nc4
   obs filters:
   - filter: ROobserror
     filter variables:
@@ -71,7 +71,7 @@ observations:
      obsfile: Data/gnssro_ref_2018041500_s_errNBAM.nc4
    simulated variables: [refractivity]
   geovals:
-   filename: Data/gnssro_geoval_2018041500_s.nc4
+   filename: Data/ufo/testinput_tier_1/gnssro_geoval_2018041500_s.nc4
   obs filters:
   - filter: ROobserror
     filter variables:

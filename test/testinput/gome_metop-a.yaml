@@ -15,7 +15,7 @@ observations:
       obsfile: Data/gome_metop-a_obs_2019101700_m_out.nc4
     simulated variables: [integrated_layer_ozone_in_air]
   geovals:
-    filename: Data/gome_metop-a_geoval_2019101700_m.nc4
+    filename: Data/ufo/testinput_tier_1/gome_metop-a_geoval_2019101700_m.nc4
   vector ref: GsiHofX
   tolerance: 1.0e-04  # in % so that corresponds to 10^-3
   linear obs operator test:
