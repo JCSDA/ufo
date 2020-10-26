@@ -159,12 +159,7 @@ void TrackCheckShip::applyFilter(const std::vector<bool> & apply,
   size_t trackNumber = 0;
   for (auto track : splitter.multiElementGroups()) {
     trackNumber++;
-    std::string stationId;
-    if (options_->stationIdVariable.value() != boost::none) {
-      stationId = (options_->stationIdVariable.value().get()).variable();
-    } else {
-      stationId = std::to_string(trackNumber);
-    }
+    std::string stationId = std::to_string(trackNumber);
     std::vector<TrackObservation> trackObservations = collectTrackObservations(
           track.begin(), track.end(), validObsIds, obsLocTime);
     std::vector<std::reference_wrapper<TrackObservation>> trackObservationsReferences;

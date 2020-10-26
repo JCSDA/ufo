@@ -45,7 +45,7 @@ class TrackCheckShipParameters : public TrackCheckUtilsParameters {
 
   /// Maximum speed (before marking as fast) in m/s
   oops::RequiredParameter<double> maxSpeed {
-    "max speed", this
+    "max speed (m/s)", this
   };
 
   /// The fraction of track observations that must be flagged in the track filter
