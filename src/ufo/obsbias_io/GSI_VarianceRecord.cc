@@ -22,24 +22,12 @@ namespace ufo {
 // -----------------------------------------------------------------------------
 
 VarianceRecord::VarianceRecord()
-  : variances_(gsi_predictors.size(), 0.0),
+  : AbstractRecord(),
     countOfQCedObs_(util::missingValue(0.0)) {}
 
 // -----------------------------------------------------------------------------
 
 VarianceRecord::~VarianceRecord() {}
-
-// -----------------------------------------------------------------------------
-
-void VarianceRecord::fillVector(const std::vector< std::string > & predictors,
-                                const std::vector< double > & data) {
-  for (std::size_t i = 0; i < predictors.size(); ++i) {
-    const auto iter = std::find(gsi_predictors.begin(), gsi_predictors.end(), predictors[i]);
-    if (iter != gsi_predictors.end()) {
-      variances_.at(std::distance(gsi_predictors.begin(), iter)) = data[i];
-    }
-  }
-}
 
 // -----------------------------------------------------------------------------
 
@@ -62,7 +50,7 @@ bool VarianceRecord::readNext(std::fstream & inFile) {
       inFile >> channel_ &&
       inFile >> countOfQCedObs_) {
     for (std::size_t i = 0; i < gsi_predictors.size(); ++i) {
-      inFile >> variances_.at(i);
+      inFile >> vector_.at(i);
     }
     return true;
   }
@@ -98,34 +86,6 @@ VarianceRecord::readByVarName(std::fstream & inFile,
 
 // -----------------------------------------------------------------------------
 
-std::vector< double >
-VarianceRecord::readByChannel(std::fstream & inFile,
-                              const std::string & sensor,
-                              const int channel,
-                              const std::vector< std::string > & predictors) {
-  inFile.clear();
-  inFile.seekg(0, std::ios::beg);
-
-  while (readNext(inFile)) {
-    if (sensor == sensor_ && channel == channel_) {
-      break;
-    }
-  }
-
-  std::vector< double > data(predictors.size(), 0.0);
-
-  for (std::size_t i = 0; i < gsi_predictors.size(); ++i) {
-    const auto iter = std::find(predictors.begin(), predictors.end(), gsi_predictors[i]);
-    if (iter != predictors.end()) {
-      data.at(std::distance(predictors.begin(), iter)) = variances_[i];
-    }
-  }
-
-  return data;
-}
-
-// -----------------------------------------------------------------------------
-
 void VarianceRecord::writeTo(std::fstream & outFile) {
   outFile << seq_ << " ";
   outFile << sensor_ << " ";
@@ -133,7 +93,7 @@ void VarianceRecord::writeTo(std::fstream & outFile) {
   outFile << countOfQCedObs_;
   outFile << std::endl;
 
-  for (const auto & item : variances_) {
+  for (const auto & item : vector_) {
     outFile << item << "  ";
   }
   outFile << std::endl;

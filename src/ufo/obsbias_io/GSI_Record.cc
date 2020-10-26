@@ -22,7 +22,7 @@ namespace ufo {
 // -----------------------------------------------------------------------------
 
 Record::Record()
-  : biasCoeffs_(gsi_predictors.size(), 0.0),
+  : AbstractRecord(),
     tlap_(util::missingValue(0.0)),
     tsum_(util::missingValue(0.0)),
     ntlapupdate_(util::missingValue(1)) {}
@@ -30,28 +30,6 @@ Record::Record()
 // -----------------------------------------------------------------------------
 
 Record::~Record() {}
-
-// -----------------------------------------------------------------------------
-
-void Record::setID(const std::size_t seq,
-                   const std::string & sensor,
-                   const std::size_t channel) {
-  seq_ = seq;
-  sensor_ = sensor;
-  channel_ = channel;
-}
-
-// -----------------------------------------------------------------------------
-
-void Record::fillVector(const std::vector< std::string > & predictors,
-                           const std::vector< double > & data) {
-  for (std::size_t i = 0; i < predictors.size(); ++i) {
-    const auto iter = std::find(gsi_predictors.begin(), gsi_predictors.end(), predictors[i]);
-    if (iter != gsi_predictors.end()) {
-      biasCoeffs_.at(std::distance(gsi_predictors.begin(), iter)) = data[i];
-    }
-  }
-}
 
 // -----------------------------------------------------------------------------
 
@@ -80,7 +58,7 @@ bool Record::readNext(std::fstream & inFile) {
       inFile >> tsum_ &&
       inFile >> ntlapupdate_) {
     for (std::size_t i = 0; i < gsi_predictors.size(); ++i) {
-      inFile >> biasCoeffs_.at(i);
+      inFile >> vector_.at(i);
     }
     return true;
   }
@@ -120,46 +98,6 @@ Record::readByVarName(std::fstream & inFile,
 
 // -----------------------------------------------------------------------------
 
-std::vector< double >
-Record::readByChannel(std::fstream & inFile,
-                      const std::string & sensor,
-                      const int channel,
-                      const std::vector< std::string > & predictors) {
-  inFile.clear();
-  inFile.seekg(0, std::ios::beg);
-
-  while (readNext(inFile)) {
-    if (sensor == sensor_ && channel == channel_) {
-      break;
-    }
-  }
-
-  std::vector< double > data(predictors.size(), 0.0);
-
-  for (std::size_t i = 0; i < gsi_predictors.size(); ++i) {
-    const auto iter = std::find(predictors.begin(), predictors.end(), gsi_predictors[i]);
-    if (iter != predictors.end()) {
-      data.at(std::distance(predictors.begin(), iter)) = biasCoeffs_[i];
-    }
-  }
-
-  return data;
-}
-
-// -----------------------------------------------------------------------------
-
-const std::string & Record::getSensorID() const {
-  return sensor_;
-}
-
-// -----------------------------------------------------------------------------
-
-const std::size_t Record::getChannel() const {
-  return channel_;
-}
-
-// -----------------------------------------------------------------------------
-
 void Record::writeTo(std::fstream & outFile) {
   outFile << seq_ << " ";
   outFile << sensor_ << " ";
@@ -169,7 +107,7 @@ void Record::writeTo(std::fstream & outFile) {
   outFile << ntlapupdate_;
   outFile << std::endl;
 
-  for (const auto & item : biasCoeffs_) {
+  for (const auto & item : vector_) {
     outFile << item << "  ";
   }
   outFile << std::endl;

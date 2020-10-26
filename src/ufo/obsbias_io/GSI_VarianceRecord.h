@@ -12,38 +12,29 @@
 #include <string>
 #include <vector>
 
-#include "ufo/obsbias_io/GSI_Record.h"
+#include "ufo/obsbias_io/GSI_AbstractRecord.h"
 
 namespace ufo {
 
 // -----------------------------------------------------------------------------
 
-class VarianceRecord: public Record {
+class VarianceRecord: public AbstractRecord {
  public:
   VarianceRecord();
   virtual ~VarianceRecord();
 
-  void fillVector(const std::vector< std::string > &,
-                  const std::vector< double > &);
-
-  void setValueByVarName(const std::string &, const double);
+  void setValueByVarName(const std::string &, const double) override;
 
   std::vector< double > readByVarName(std::fstream &,
                                       const std::string &,
                                       const std::vector< int > &,
-                                      const std::string &);
+                                      const std::string &) override;
 
-  std::vector< double > readByChannel(std::fstream &,
-                                      const std::string &,
-                                      const int,
-                                      const std::vector< std::string > &);
-
-  void writeTo(std::fstream &);
+  void writeTo(std::fstream &) override;
 
  private:
-  bool readNext(std::fstream &);
+  bool readNext(std::fstream &) override;
   double countOfQCedObs_;
-  std::vector< double > variances_;
 };
 
 // -----------------------------------------------------------------------------

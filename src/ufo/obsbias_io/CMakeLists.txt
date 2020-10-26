@@ -5,6 +5,8 @@
 
 set ( obsbias_io_files
   ObsBiasIO.h
+  GSI_AbstractRecord.cc
+  GSI_AbstractRecord.h
   GSI_Record.cc
   GSI_Record.h
   GSI_VarianceRecord.cc

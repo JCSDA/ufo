@@ -13,72 +13,31 @@
 #include <string>
 #include <vector>
 
+#include "ufo/obsbias_io/GSI_AbstractRecord.h"
+
 namespace ufo {
 
 // -----------------------------------------------------------------------------
 
-// Default predictor names from GSI
-// temporary solution, we should have a self-explanatory obsbias file
-static const std::vector<std::string> gsi_predictors =
-  {"constant",
-   "zenith_angle",
-   "cloud_liquid_water",
-   "lapse_rate_order_2",
-   "lapse_rate",
-   "cosine_of_latitude_times_orbit_node",
-   "sine_of_latitude",
-   "emissivity",
-   "scan_angle_order_4",
-   "scan_angle_order_3",
-   "scan_angle_order_2",
-   "scan_angle"
-  };
-
-// -----------------------------------------------------------------------------
-
-class Record {
+class Record : public AbstractRecord {
  public:
   Record();
   virtual ~Record();
 
-  void setID(const std::size_t,
-             const std::string &,
-             const std::size_t);
-
-  void fillVector(const std::vector< std::string > &,
-                  const std::vector< double > &);
-
   void setValueByVarName(const std::string &,
-                         const double);
+                         const double) override;
 
-  std::vector< double >
-  readByVarName(std::fstream &,
-                const std::string &,
-                const std::vector< int > &,
-                const std::string &);
+  std::vector< double > readByVarName(std::fstream &,
+                                      const std::string &,
+                                      const std::vector< int > &,
+                                      const std::string &) override;
 
-  std::vector< double >
-  readByChannel(std::fstream &,
-                const std::string &,
-                const int,
-                const std::vector< std::string > &);
-
-  const std::string & getSensorID() const;
-
-  const std::size_t getChannel() const;
-
-  void writeTo(std::fstream &);
-
- protected:
-  std::size_t seq_;
-  std::string sensor_;
-  int channel_;
+  void writeTo(std::fstream &) override;
 
  private:
-  bool readNext(std::fstream &);
+  bool readNext(std::fstream &) override;
   double tlap_, tsum_;
   std::size_t ntlapupdate_;
-  std::vector< double > biasCoeffs_;
 };
 
 // -----------------------------------------------------------------------------
