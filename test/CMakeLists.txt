@@ -208,8 +208,8 @@ ecbuild_add_resources( TARGET ufo_test_scripts
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Data)
 
 # Test data filenames
-set(ioda_test_data testinput_tier_1.tar.gz)
-set(ufo_test_data  testinput_tier_1.tar.gz)
+set(ioda_test_data ioda_testinput_tier_1.tar.gz)
+set(ufo_test_data  ufo_testinput_tier_1.tar.gz)
 set(crtm_test_data crtm_coefficients.tar.gz)
 
 # Determine the branch name
