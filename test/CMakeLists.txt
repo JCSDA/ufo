@@ -245,6 +245,7 @@ function(ADD_DOWNLOAD_TEST repo test_data output_data_path)
     set(ECBUILD_DOWNLOAD_BASE_URL https://dashrepo.ucar.edu/dataset/147_miesch/file/)
     set(download_data_name ${test_data})
     set(data_path ${CMAKE_BINARY_DIR}/test_data/${repo}/1.0.0)
+    set(checksum "0")
   # for all other branches/tags download from AWS
   else()
     set(ECBUILD_DOWNLOAD_BASE_URL https://jedi-test-files.s3.amazonaws.com)
@@ -260,6 +261,7 @@ function(ADD_DOWNLOAD_TEST repo test_data output_data_path)
       set(data_path ${CMAKE_BINARY_DIR}/test_data/${repo}/develop)
     endif()
   endif()
+  set(checksum "1")
   message(STATUS "${repo} test data will be downloaded from ${ECBUILD_DOWNLOAD_BASE_URL}/${download_data_name}")
   file(MAKE_DIRECTORY ${data_path})
 
@@ -268,7 +270,7 @@ function(ADD_DOWNLOAD_TEST repo test_data output_data_path)
   ecbuild_add_test( TARGET    ${testname}
                     TYPE      SCRIPT
                     COMMAND   ${CMAKE_BINARY_DIR}/bin/ufo_ioda_data_downloader.py
-                    ARGS      ${download_data_name} ${test_data} ${data_path} ${ECBUILD_DOWNLOAD_BASE_URL} )
+                    ARGS      ${download_data_name} ${test_data} ${data_path} ${ECBUILD_DOWNLOAD_BASE_URL} ${checksum})
 
   # pass output data path back to calling code
   set(${output_data_path} ${data_path} PARENT_SCOPE)
@@ -326,15 +328,17 @@ else()
     if(${GIT_BRANCH_UFO} STREQUAL "1.0.0")
       set(ECBUILD_DOWNLOAD_BASE_URL https://dashrepo.ucar.edu/dataset/147_miesch/file/)
       set(crtm_download_data_name ${crtm_test_data})
+      set(checksum_crtm "0")
     # set filenames for downloading: use directories and branch names for everything else (AWS)
     else()
       set(ECBUILD_DOWNLOAD_BASE_URL https://jedi-test-files.s3.amazonaws.com)
       set(crtm_download_data_name crtm/${CRTM_COEFFS_BRANCH}/${crtm_test_data})
+      set(checksum_crtm "1")
     endif()
     ecbuild_add_test( TARGET    ufo_get_crtm_test_data
                       TYPE      SCRIPT
                       COMMAND   ${CMAKE_BINARY_DIR}/bin/ufo_ioda_data_downloader.py
-                      ARGS      ${crtm_download_data_name} ${crtm_test_data}  ${UFO_CRTM_COEFFS_PATH} ${ECBUILD_DOWNLOAD_BASE_URL} )
+                      ARGS      ${crtm_download_data_name} ${crtm_test_data}  ${UFO_CRTM_COEFFS_PATH} ${ECBUILD_DOWNLOAD_BASE_URL} ${checksum_crtm})
   endif( crtm_FOUND )
 endif()
 
