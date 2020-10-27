@@ -9,7 +9,7 @@ observations:
 - obs space:
     name: Radiosonde
     obsdatain:
-      obsfile: Data/met_office_profile_consistency_checks_rh.nc4
+      obsfile: Data/ufo/testinput_tier_1/met_office_profile_consistency_checks_rh.nc4
       obsgrouping:
         group variable: "station_id"
         sort variable: "air_pressure"

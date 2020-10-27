@@ -5,7 +5,7 @@ Duplicates, constraints on buddy counts, legacy pair collector:
     name: Aircraft
     simulated variables: [air_temperature]
     obsdatain:
-      obsfile: Data/met_office_buddy_check.nc4
+      obsfile: Data/ufo/testinput_tier_1/met_office_buddy_check.nc4
       obsgrouping:
         group variable: "station_id"
   Met Office Buddy Check, modern:

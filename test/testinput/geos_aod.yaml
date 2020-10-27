@@ -22,7 +22,7 @@ observations:
     simulated variables: [Total_Aerosol_Optical_Depth_550]
     obs bias: {}
   geovals:
-    filename: Data/geos_aod_geoval_2018041500_m.nc4
+    filename: Data/ufo/testinput_tier_1/geos_aod_geoval_2018041500_m.nc4
   vector ref: HofX
   tolerance: 1.0e-03
   linear obs operator test:

@@ -42,10 +42,10 @@ observations:
               2226, 2234, 2280, 2318, 2321, 2325, 2328, 2333, 2339, 2348, 2353, 2355,
               2357, 2363, 2370, 2371, 2377
   geovals:
-#    filename: Data/airs_aqua_geoval_2018041500_m_qc.nc4
-    filename: Data/airs_aqua_geoval_2018041500_m_unittest.nc4
+#    filename: Data/ufo/testinput_tier_1/airs_aqua_geoval_2018041500_m_qc.nc4
+    filename: Data/ufo/testinput_tier_1/airs_aqua_geoval_2018041500_m_unittest.nc4
   obs bias:
-    abias_in: Data/satbias_crtm_in
+    abias_in: Data/ufo/testinput_tier_1/satbias_crtm_in
     sensor: *Sensor_ID
     jobs: *all_channels
     predictors:
@@ -55,7 +55,7 @@ observations:
         name: lapse_rate
         options:
           order: 2
-          tlapse: &airs_aqua-atlap Data/airs_aqua_tlapmean.txt
+          tlapse: &airs_aqua-atlap Data/ufo/testinput_tier_1/airs_aqua_tlapmean.txt
     - predictor:
         name: lapse_rate
         options:
