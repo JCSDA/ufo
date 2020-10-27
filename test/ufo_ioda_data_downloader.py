@@ -14,13 +14,11 @@ testfiles_path = sys.argv[3]
 download_base_url = sys.argv[4]
 md5check = sys.argv[5]
 
-def DownloadUntar(download_base_url, download_file_name, testfiles_path, testfiles_name, untar):
+def DownloadUntar(download_base_url, download_file_name, testfiles_path, testfiles_name):
   urllib.request.urlretrieve( download_base_url+"/"+download_file_name, testfiles_path+"/"+testfiles_name)
-  if untar:
-    tar_file = tarfile.open(testfiles_path+"/"+testfiles_name)
-    tar_file.extractall(testfiles_path)
-    tar_file.close()
-
+  tar_file = tarfile.open(testfiles_path+"/"+testfiles_name)
+  tar_file.extractall(testfiles_path)
+  tar_file.close()
 
 if md5check == "1" :
   #  if .tar.gz and .tar.gz.md5 exist
@@ -42,13 +40,13 @@ if md5check == "1" :
       print("no update in dataset")
     else:
       print("update found; download new dataset")
-      DownloadUntar(download_base_url, download_file_name, testfiles_path, testfiles_name, "True")
-      DownloadUntar(download_base_url, download_file_name, testfiles_path, testfiles_name+".md5", "False")
+      DownloadUntar(download_base_url, download_file_name, testfiles_path, testfiles_name)
+      urllib.request.urlretrieve( download_base_url+"/"+download_file_name+".md5", testfiles_path+"/"+testfiles_name+".md5")
   else:
     print("local file not found; download from S3")
     print("downloading "+ download_base_url+"/"+download_file_name)
-    DownloadUntar(download_base_url, download_file_name, testfiles_path, testfiles_name, "True")
-    DownloadUntar(download_base_url, download_file_name, testfiles_path, testfiles_name+".md5", "Flase")
+    DownloadUntar(download_base_url, download_file_name, testfiles_path, testfiles_name)
+    urllib.request.urlretrieve( download_base_url+"/"+download_file_name+".md5", testfiles_path+"/"+testfiles_name+".md5")
 
 else:
   # downloading release data from DASH
@@ -56,4 +54,4 @@ else:
     print("local RELEASE file found")
   else:
     print ("dowloading RELEASE data from "+download_base_url+"/"+download_file_name)
-    DownloadUntar(download_base_url, download_file_name, testfiles_path, testfiles_name, "True")
+    DownloadUntar(download_base_url, download_file_name, testfiles_path, testfiles_name)
