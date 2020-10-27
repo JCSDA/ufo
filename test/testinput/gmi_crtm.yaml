@@ -28,3 +28,19 @@ observations:
     coef TL: 1.e-3
     tolerance TL: 1.0e-3
     tolerance AD: 1.0e-11
+  obs filters:
+  #  CLW Retrieval Check
+  - filter: Bounds Check
+    filter variables:
+    - name: brightness_temperature
+      channels: 1-13
+    test variables:
+    - name: CLWRetMW@ObsFunction
+      options:
+        clwret_ch37v: 6
+        clwret_ch37h: 7
+        clwret_types: [ObsValue]
+    maxvalue: 999.0
+    action:
+      name: reject
+
