@@ -10,6 +10,7 @@
 
 #include <algorithm>
 #include <fstream>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -47,8 +48,8 @@ class ObsBiasIO {
   readByVarName(const std::string & sensor,
                 const std::vector< int > & channels,
                 const std::string & name) {
-    T record;
-    return (record.readByVarName(fileIO_, sensor, channels, name));
+    auto record = std::unique_ptr< T >(new T());
+    return (record->readByVarName(fileIO_, sensor, channels, name));
   }
 
 // -----------------------------------------------------------------------------
@@ -57,8 +58,8 @@ class ObsBiasIO {
   readByChannel(const std::string & sensor,
                 const int channel,
                 const std::vector< std::string > & predictors) {
-    T record;
-    return (record.readByChannel(fileIO_, sensor, channel, predictors));
+    auto record = std::unique_ptr< T >(new T());
+    return (record->readByChannel(fileIO_, sensor, channel, predictors));
   }
 
   void addByVarName(const std::string & sensor,
