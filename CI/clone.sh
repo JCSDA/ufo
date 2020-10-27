@@ -58,7 +58,7 @@ else
   echo "==============================================================================="
   echo "Clone " $org_repo_name_clone "/" $repo_name " branch " $branch_name_clone
   echo "==============================================================================="
-  git clone -b $branch_name_clone https://$git_user:$git_token@github.com/$org_repo_name_clone/$repo_name $save_dir/$save_name
+  git clone --depth 1 -b $branch_name_clone https://$git_user:$git_token@github.com/$org_repo_name_clone/$repo_name $save_dir/$save_name
 
 fi
 
