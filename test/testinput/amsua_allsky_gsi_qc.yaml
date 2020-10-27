@@ -20,7 +20,7 @@ observations:
     simulated variables: [brightness_temperature]
     channels: 1-15
   geovals:
-    filename: Data/amsua_n19_geoval_2018041500_m.nc4
+    filename: Data/ufo/testinput_tier_1/amsua_n19_geoval_2018041500_m.nc4
   obs filters:
   - filter: Bounds Check
     filter variables:

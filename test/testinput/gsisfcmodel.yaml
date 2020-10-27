@@ -13,7 +13,7 @@ observations:
         obsfile: Data/gsisfc_tsen_2018041500_m_out.nc4
       simulated variables: [air_temperature]
     geovals:
-      filename: Data/gsisfc_tsen_geoval_2018041500_m.nc4
+      filename: Data/ufo/testinput_tier_1/gsisfc_tsen_geoval_2018041500_m.nc4
     vector ref: GsiHofX
     tolerance: 1.0e-05
   - obs operator:
@@ -27,7 +27,7 @@ observations:
         obsfile: Data/gsisfc_uv_fact10_2018041500_m_out.nc4
       simulated variables: [eastward_wind, northward_wind]
     geovals:
-      filename: Data/gsisfc_uv_geoval_2018041500_m.nc4
+      filename: Data/ufo/testinput_tier_1/gsisfc_uv_geoval_2018041500_m.nc4
     vector ref: GsiHofX
     tolerance: 1.0e-03
   - obs operator:
@@ -41,6 +41,6 @@ observations:
         obsfile: Data/gsisfc_uv_2018041500_m_out.nc4
       simulated variables: [eastward_wind, northward_wind]
     geovals:
-      filename: Data/gsisfc_uv_geoval_2018041500_m.nc4
+      filename: Data/ufo/testinput_tier_1/gsisfc_uv_geoval_2018041500_m.nc4
     vector ref: GsiHofX
     tolerance: 1.0e-07

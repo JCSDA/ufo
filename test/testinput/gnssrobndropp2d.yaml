@@ -14,7 +14,7 @@ observations:
       obsfile: Data/ioda/testinput_tier_1/gnssro_obs_2018041500_s.nc4
     simulated variables: [bending_angle]
   geovals:
-   filename: Data/gnssro_geoval_2018041500_s_2d.nc4
+   filename: Data/ufo/testinput_tier_1/gnssro_geoval_2018041500_s_2d.nc4
    loc_multiplier: 3
   rms ref: 0.009216235643012125
   tolerance: 1.0e-12
