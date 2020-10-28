@@ -8,7 +8,7 @@ observations:
       obsfile: Data/ioda/testinput_tier_1/aircraft_obs_2018041500_m.nc4
     simulated variables: [air_temperature]
   obs filters:
-  - filter: Gaussian_Thinning
+  - filter: Gaussian Thinning
     horizontal_mesh:   1111.949266 #km = 10 deg at equator
   passedBenchmark: 10
 - obs space:
@@ -17,7 +17,7 @@ observations:
       obsfile: Data/ioda/testinput_tier_1/aircraft_obs_2018041500_m.nc4
     simulated variables: [air_temperature]
   obs filters:
-  - filter: Gaussian_Thinning
+  - filter: Gaussian Thinning
     horizontal_mesh:   1111.949266 #km = 10 deg at equator
     vertical_mesh:      10000 #Pa
     vertical_max:      110100 #Pa
@@ -28,17 +28,17 @@ observations:
       obsfile: Data/ioda/testinput_tier_1/aircraft_obs_2018041500_m.nc4
     simulated variables: [air_temperature]
   obs filters:
-  - filter: Gaussian_Thinning
+  - filter: Gaussian Thinning
     horizontal_mesh: -1
     vertical_mesh: -1
   passedBenchmark: 1 # Only one observation should be preserved
 - obs space:
     name: Aircraft
     obsdatain:
-      obsfile: Data/met_office_thinning.nc4
+      obsfile: Data/ufo/testinput_tier_1/met_office_thinning.nc4
     simulated variables: [air_temperature]
   obs filters:
-  - filter: Gaussian_Thinning
+  - filter: Gaussian Thinning
     distance_norm: maximum
     round_horizontal_bin_count_to_nearest: true
     horizontal_mesh:  5000.000000
@@ -149,10 +149,10 @@ observations:
 - obs space:
     name: Aircraft
     obsdatain:
-      obsfile: Data/met_office_thinning.nc4
+      obsfile: Data/ufo/testinput_tier_1/met_office_thinning.nc4
     simulated variables: [air_temperature]
   obs filters:
-  - filter: Gaussian_Thinning
+  - filter: Gaussian Thinning
     distance_norm: maximum
     round_horizontal_bin_count_to_nearest: true
     horizontal_mesh:  5000.000000
@@ -623,10 +623,10 @@ observations:
 - obs space:
     name: Aircraft
     obsdatain:
-      obsfile: Data/met_office_thinning.nc4
+      obsfile: Data/ufo/testinput_tier_1/met_office_thinning.nc4
     simulated variables: [air_temperature]
   obs filters:
-  - filter: Gaussian_Thinning
+  - filter: Gaussian Thinning
     distance_norm: maximum
     round_horizontal_bin_count_to_nearest: true
     use_reduced_horizontal_grid: false

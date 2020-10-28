@@ -38,51 +38,56 @@ namespace ufo {
 template<typename MODEL> void instantiateObsFilterFactory() {
   oops::instantiateObsFilterFactory<MODEL>();
   static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::QCmanager> >
-           makerChk0_("QCmanager");
+           qcManagerMaker("QCmanager");
   static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::PreQC> >
-           makerChk1_("PreQC");
+           preQCMaker("PreQC");
   static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::ObsDomainCheck> >
-           makerChk2_("Domain Check");
+           domainCheckMaker("Domain Check");
   static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::ObsBoundsCheck> >
-           makerChk3_("Bounds Check");
+           boundsCheckMaker("Bounds Check");
   static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::BlackList> >
-           makerChk4_("BlackList");
+           blackListMaker("BlackList");
   static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::BackgroundCheck> >
-           makerChk5_("Background Check");
+           backgroundCheckMaker("Background Check");
   static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::DifferenceCheck> >
-           makerChk6_("Difference Check");
+           differenceCheckMaker("Difference Check");
   static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::ROobserror> >
-           makerChk7_("ROobserror");
+           ROobserrorMaker("ROobserror");
   static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::Thinning> >
-           makerChk8_("Thinning");
+           thinningMaker("Thinning");
   static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::Gaussian_Thinning> >
-           makerChk9_("Gaussian_Thinning");
+           gaussianThinningMaker("Gaussian Thinning");
   static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::MWCLWCheck> >
-           makerChk10_("MWCLW Check");
+           MWCLWCheckMaker("MWCLW Check");
   static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::ObsDomainErrCheck> >
-           makerChk11_("DomainErr Check");
+           domainErrCheckMaker("DomainErr Check");
   static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::ProfileConsistencyChecks> >
-           makerChk12_("ProfileConsistencyChecks");
+           profileConsistencyChecksMaker("Profile Consistency Checks");
   static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::BackgroundCheckRONBAM> >
-           makerChk13_("Background Check RONBAM");
+           backgroundCheckRONBAMMaker("Background Check RONBAM");
   static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::TemporalThinning> >
-           makerChk14_("TemporalThinning");
+           temporalThinningMaker("Temporal Thinning");
   static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::PoissonDiskThinning> >
-           makerChk15_("Poisson Disk Thinning");
+           poissonDiskThinningMaker("Poisson Disk Thinning");
   static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::ObsDiagnosticsWriter> >
-           makerChk16_("YDIAGsaver");
+           YDIAGsaverMaker("YDIAGsaver");
   static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::TrackCheck> >
-           makerChk17_("Track Check");
+           TrackCheckMaker("Track Check");
   static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::MetOfficeBuddyCheck> >
-           makerChk18_("Met Office Buddy Check");
+           MetOfficeBuddyCheckMaker("Met Office Buddy Check");
   static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::ObsDerivativeCheck> >
-           makerChk19_("Derivative Check");
+           DerivativeCheckMaker("Derivative Check");
   static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::TrackCheckShip> >
-           makerChk20_("Ship Track Check");
+           ShipTrackCheckMaker("Ship Track Check");
   static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::WindComponents> >
-           makerChk21_("Wind Components");
+           WindComponentsMaker("Wind Components");
   static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::WindSpeedAndDirection> >
-           makerChk22_("Wind Speed And Direction");
+           WindSpeedAndDirectionMaker("Wind Speed And Direction");
+  // For backward compatibility, register some filters under legacy names used in the past
+  static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::Gaussian_Thinning> >
+           legacyGaussianThinningMaker("Gaussian_Thinning");
+  static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::TemporalThinning> >
+           legacyTemporalThinningMaker("TemporalThinning");
 }
 
 }  // namespace ufo

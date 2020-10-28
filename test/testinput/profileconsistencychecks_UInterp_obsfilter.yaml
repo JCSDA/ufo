@@ -9,14 +9,14 @@ observations:
 - obs space:
     name: Radiosonde
     obsdatain:
-      obsfile: Data/met_office_profile_consistency_checks_uinterp.nc4
+      obsfile: Data/ufo/testinput_tier_1/met_office_profile_consistency_checks_uinterp.nc4
       obsgrouping:
         group variable: "station_id"
         sort variable: "air_pressure"
         sort order: "descending"
     simulated variables: [eastward_wind, northward_wind]
   obs filters:
-  - filter: ProfileConsistencyChecks
+  - filter: Profile Consistency Checks
     filter variables:
     - name: eastward_wind
     - name: northward_wind

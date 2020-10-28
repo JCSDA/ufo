@@ -5,7 +5,7 @@ observations:
 - obs space:
     name: test data
     obsdatain:
-      obsfile: Data/filters_testdata.nc4
+      obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
     simulated variables: [variable1, variable2, variable3]
   HofX: HofX
   obs filters:
@@ -26,7 +26,7 @@ observations:
 - obs space:
     name: test data
     obsdatain:
-      obsfile: Data/filters_testdata.nc4
+      obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
     simulated variables: [variable1, variable2, variable3]
   HofX: HofX
   obs filters:
@@ -45,7 +45,7 @@ observations:
 - obs space:
     name: test data
     obsdatain:
-      obsfile: Data/filters_testdata.nc4
+      obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
     simulated variables: [variable1, variable2, variable3]
   HofX: HofX
   obs filters:
@@ -69,7 +69,7 @@ observations:
 - obs space:
     name: test data
     obsdatain:
-      obsfile: Data/filters_testdata.nc4
+      obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
     simulated variables: [variable1, variable2, variable3]
   HofX: HofX
   obs filters:
@@ -90,7 +90,7 @@ observations:
 - obs space:
     name: test data
     obsdatain:
-      obsfile: Data/filters_testdata.nc4
+      obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
     simulated variables: [variable1, variable2, variable3]
   HofX: HofX
   obs filters:
@@ -115,7 +115,7 @@ observations:
 - obs space:
     name: test data
     obsdatain:
-      obsfile: Data/filters_testdata.nc4
+      obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
     simulated variables: [variable1, variable2, variable3]
   HofX: HofX
   obs filters:

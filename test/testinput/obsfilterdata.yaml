@@ -18,13 +18,13 @@ obs filter data:
     string variables:
     - name: station_id@MetaData
   geovals:
-    filename: Data/satwind_geoval_2018041500_m.nc4
+    filename: Data/ufo/testinput_tier_1/satwind_geoval_2018041500_m.nc4
     state variables:
     - name: eastward_wind@GeoVaLs
     - name: northward_wind@GeoVaLs
     - name: air_pressure@GeoVaLs
   obs diagnostics:
-    filename: Data/satwind_geoval_2018041500_m.nc4
+    filename: Data/ufo/testinput_tier_1/satwind_geoval_2018041500_m.nc4
     variables:
     - name: surface_roughness_length@ObsDiag
   HofX:
@@ -46,7 +46,7 @@ obs filter data:
     integer variables:
     - name: brightness_temperature_12@PreQC
   geovals:
-    filename: Data/amsua_n19_geoval_2018041500_m.nc4
+    filename: Data/ufo/testinput_tier_1/amsua_n19_geoval_2018041500_m.nc4
     state variables:
     - name: surface_temperature_where_snow@GeoVaLs
     - name: soil_temperature@GeoVaLs
@@ -59,7 +59,7 @@ obs filter data:
     - name: air_pressure_levels@GeoVaLs
     - name: humidity_mixing_ratio@GeoVaLs
   obs diagnostics:
-    filename: Data/amsua_n19_geoval_2018041500_m.nc4
+    filename: Data/ufo/testinput_tier_1/amsua_n19_geoval_2018041500_m.nc4
     variables:
     - name: surface_snow_thickness@ObsDiag
     - name: vegetation_type_index@ObsDiag

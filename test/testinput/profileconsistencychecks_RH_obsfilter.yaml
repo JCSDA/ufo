@@ -9,14 +9,14 @@ observations:
 - obs space:
     name: Radiosonde
     obsdatain:
-      obsfile: Data/met_office_profile_consistency_checks_rh.nc4
+      obsfile: Data/ufo/testinput_tier_1/met_office_profile_consistency_checks_rh.nc4
       obsgrouping:
         group variable: "station_id"
         sort variable: "air_pressure"
         sort order: "descending"
     simulated variables: [air_temperature, relative_humidity]
   obs filters:
-  - filter: ProfileConsistencyChecks
+  - filter: Profile Consistency Checks
     filter variables:
     - name: air_temperature
     - name: relative_humidity

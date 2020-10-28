@@ -41,10 +41,10 @@ obs space:
                2158, 2161, 2168, 2171, 2175, 2182
 # can have GeoVaLs section like below
 geovals:
-  filename: Data/cris-fsr_npp_geoval_2018041500_m_unittest.nc4
+  filename: Data/ufo/testinput_tier_1/cris-fsr_npp_geoval_2018041500_m_unittest.nc4
 # can have obs diagnostics section like below
 obs diagnostics:
-  filename: Data/cris-fsr_npp_obsdiag_2018041500_m_unittest.nc4
+  filename: Data/ufo/testinput_tier_1/cris-fsr_npp_obsdiag_2018041500_m_unittest.nc4
 obs function:
   name: CloudDetectMinResidualIR@ObsFunction
   options:
