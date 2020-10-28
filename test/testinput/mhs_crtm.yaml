@@ -18,7 +18,7 @@ observations:
     simulated variables: [brightness_temperature]
     channels: 1-5
   geovals:
-    filename: Data/mhs_n19_geoval_2018041500_m.nc4
+    filename: Data/ufo/testinput_tier_1/mhs_n19_geoval_2018041500_m.nc4
   vector ref: GsiHofX
   tolerance: 1.5e-5
   linear obs operator test:

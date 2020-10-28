@@ -18,7 +18,7 @@ observations:
     simulated variables: [brightness_temperature]
     channels: 1-15
   geovals:
-    filename: Data/amsua_n19_geoval_2018041500_m.nc4
+    filename: Data/ufo/testinput_tier_1/amsua_n19_geoval_2018041500_m.nc4
   obs filters:
   - filter: Bounds Check
     filter variables:
@@ -47,7 +47,7 @@ observations:
       channels: 1
     threshold: 2.0
   - filter: YDIAGsaver
-    filename: Data/amsua_n19_ydiag_2018041500_m_out.nc4
+    filename: Data/ufo/testinput_tier_1/amsua_n19_ydiag_2018041500_m_out.nc4
     filter variables:
     - name: brightness_temperature_assuming_clear_sky
       channels: 1-3
