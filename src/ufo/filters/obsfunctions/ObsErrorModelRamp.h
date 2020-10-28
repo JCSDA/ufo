@@ -43,10 +43,12 @@ class ObsErrorModelRampParameters : public oops::Parameters {
   oops::RequiredParameter<std::vector<float>> x0{"x0", this};
   /// x-coordinate of the upper ramp inflection point
   oops::RequiredParameter<std::vector<float>> x1{"x1", this};
+  oops::OptionalParameter<std::vector<float>> x2{"x2", this};
   /// y-coordinate of the lower ramp inflection point
   oops::RequiredParameter<std::vector<float>> err0{"err0", this};
   /// y-coordinate of the upper ramp inflection point
   oops::RequiredParameter<std::vector<float>> err1{"err1", this};
+  oops::OptionalParameter<std::vector<float>> err2{"err2", this};
   /// whether to save xvar values to the ObsSpace
   oops::Parameter<bool> save{"save", false, this};
 };
