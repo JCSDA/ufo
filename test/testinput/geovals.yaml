@@ -1,0 +1,50 @@
+window begin: 2018-04-14T21:00:00Z
+window end: 2018-04-15T03:00:00Z
+
+observations:
+- obs space:
+    name: Satwind
+    obsdatain:
+      obsfile: Data/ioda/testinput_tier_1/satwind_obs_2018041500_m.nc4
+    simulated variables: [eastward_wind, northward_wind]
+  geovals:
+    filename: Data/ufo/testinput_tier_1/satwind_geoval_2018041500_m.nc4
+    state variables: [eastward_wind, northward_wind, air_pressure]
+    norm: 4307792.01444180
+- obs space:
+    name: amsua_n19
+    obsdatain:
+      obsfile: Data/ioda/testinput_tier_1/amsua_n19_obs_2018041500_m.nc4
+    simulated variables: [brightness_temperature]
+    channels: 1-10,15
+  geovals:
+    filename: Data/ufo/testinput_tier_1/amsua_n19_geoval_2018041500_m.nc4
+    state variables:
+    - air_temperature
+    - air_pressure
+    - air_pressure_levels
+    - humidity_mixing_ratio
+    - mole_fraction_of_ozone_in_air
+    - mole_fraction_of_carbon_dioxide_in_air
+    - mass_content_of_cloud_liquid_water_in_atmosphere_layer
+    - mass_content_of_cloud_ice_in_atmosphere_layer
+    - effective_radius_of_cloud_liquid_water_particle
+    - effective_radius_of_cloud_ice_particle
+    - water_area_fraction
+    - land_area_fraction
+    - ice_area_fraction
+    - surface_snow_area_fraction
+    - surface_temperature_where_sea
+    - surface_temperature_where_land
+    - surface_temperature_where_ice
+    - surface_temperature_where_snow
+    - surface_snow_thickness
+    - vegetation_area_fraction
+    - surface_wind_speed
+    - surface_wind_from_direction
+    - leaf_area_index
+    - soil_temperature
+    - volume_fraction_of_condensed_water_in_soil
+    - land_type_index
+    - soil_type
+    norm: 5948559.5381

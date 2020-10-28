@@ -1,0 +1,25 @@
+#
+#=== Profile consistency checks for background QC: comparison with OPS values on reported levels ===#
+#
+
+Sondes:
+  window begin: 2019-06-14T21:00:00Z
+  window end: 2019-06-15T02:59:59Z
+  obs space:
+    name: Radiosonde
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/met_office_profile_consistency_checks_bkgqc_repobs.nc4
+      obsgrouping:
+        group variable: "station_id"
+        sort variable: "air_pressure"
+        sort order: "descending"
+    simulated variables: ["air_temperature", "relative_humidity", "eastward_wind", "northward_wind", "geopotential_height"]
+  obs diagnostics:
+  ProfileConsistencyChecks:
+    Checks: ["Basic", "Time", "PermanentReject", "BackgroundTemperature", "BackgroundRelativeHumidity", "BackgroundWindSpeed", "BackgroundGeopotentialHeight"]
+    compareWithOPS: true
+    flagBasicChecksFail: true
+    PrintStationID: true
+    BChecks_Skip: true
+    ModelLevels: false
+    Comparison_Tol: 0.001

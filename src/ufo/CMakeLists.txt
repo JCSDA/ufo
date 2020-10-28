@@ -1,90 +1,127 @@
-file( GLOB gsw_src_files ./marine/gsw/*.f90 )
-list( APPEND ufo_src_files ${gsw_src_files} )
+# (C) Copyright 2017-2018 UCAR.
+#
+# This software is licensed under the terms of the Apache Licence Version 2.0
+# which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 
 list( APPEND ufo_src_files
-Fortran.h
-GeoVaLs.cc
-GeoVaLs.h
-Locations.cc
-Locations.h
-ObsBias.h
-ObsBiasCovariance.h
-ObsBiasIncrement.h
-ObsCheck.cc
-ObsCheck.h
-ObsSpace.cc
-ObsSpace.h
-ObsVector.cc
-ObsVector.h
-UfoTrait.h
-instantiateObsOperatorFactory.h
-instantiateLinearObsOpFactory.h
-random_f.cc
-random_f.h
-random_vectors_mod.F90
-ufo_obscheck_mod.F90
-GeoVaLs.interface.F90
-ufo_geovals_mod.F90
-Locations.interface.F90
-ufo_locs_mod.F90
-ufo_obs_vectors.F90
-ufo_variables_mod.F90
-ufo_obs_data_basis_mod.F90
-ufo_obs_data.F90
-ufo_obs_data_mod.F90
-# Atmos: utils
-atmosphere/utils/vert_interp.F90
-# Atmos: Radiosondes
-atmosphere/radiosonde/ObsRadiosonde.h
-atmosphere/radiosonde/ObsRadiosondeTLAD.h
-atmosphere/radiosonde/ObsSpace.Radiosonde.interface.F90
-atmosphere/radiosonde/ObsRadiosonde.interface.F90
-atmosphere/radiosonde/ufo_obs_radiosonde_mod.F90
-atmosphere/radiosonde/ufo_radiosonde_mod.F90
-# Atmos: Radiances
-atmosphere/radiance/ObsRadiance.h
-atmosphere/radiance/ObsRadianceTLAD.h
-atmosphere/radiance/ObsSpace.Radiance.interface.F90
-atmosphere/radiance/ObsRadiance.interface.F90
-atmosphere/radiance/ufo_obs_radiance_mod.F90
-atmosphere/radiance/ufo_radiance_mod.F90
-# Marine: Sea-ice fraction
-./marine/seaicefraction/ObsSeaIceFraction.h
-./marine/seaicefraction/ObsSeaIceFractionTLAD.h
-./marine/seaicefraction/ObsSpace.SeaIceFraction.interface.F90
-./marine/seaicefraction/ObsSeaIceFraction.interface.F90
-./marine/seaicefraction/ufo_obs_seaicefrac_mod.F90
-./marine/seaicefraction/ufo_seaicefrac_mod.F90
-# Marine: Sea-ice thickness
-./marine/seaicethickness/ObsSeaIceThickness.h
-./marine/seaicethickness/ObsSeaIceThicknessTLAD.h
-./marine/seaicethickness/ObsSpace.SeaIceThickness.interface.F90
-./marine/seaicethickness/ObsSeaIceThickness.interface.F90
-./marine/seaicethickness/ufo_obs_seaicethick_mod.F90
-./marine/seaicethickness/ufo_seaicethick_mod.F90
-# Marine: Steric height
-./marine/stericheight/ObsStericHeight.h
-./marine/stericheight/ObsStericHeightTLAD.h
-./marine/stericheight/ObsSpace.StericHeight.interface.F90
-./marine/stericheight/ObsStericHeight.interface.F90
-./marine/stericheight/ufo_obs_stericheight_mod.F90
-./marine/stericheight/ufo_stericheight_mod.F90
-./marine/obsop/ufo_steric.F90
-# Constituents: AOD
-constituents/aod/ObsAod.h
-constituents/aod/ObsAodTLAD.h
-constituents/aod/ObsAod.interface.F90
-constituents/aod/ObsSpace.Aod.interface.F90
-constituents/aod/ufo_aod_mod.F90
-constituents/aod/ufo_obs_aod_mod.F90
-constituents/aod/ufo_aod_misc.F90
+    Fortran.h
+    AnalyticInit.cc
+    AnalyticInit.h
+    GeoVaLs.cc
+    GeoVaLs.h
+    GeoVaLs.interface.F90
+    GeoVaLs.interface.h
+    instantiateObsFilterFactory.h
+    LinearObsOperator.cc
+    LinearObsOperator.h
+    LinearObsOperatorBase.cc
+    LinearObsOperatorBase.h
+    Locations.cc
+    Locations.h
+    Locations.interface.F90
+    Locations.interface.h
+    ObsBias.cc
+    ObsBias.h
+    ObsBiasCovariance.cc
+    ObsBiasCovariance.h
+    ObsBiasIncrement.cc
+    ObsBiasIncrement.h
+    ObsDiagnostics.cc
+    ObsDiagnostics.h
+    ObsOperator.cc
+    ObsOperator.h
+    ObsOperatorBase.cc
+    ObsOperatorBase.h
+    ObsTraits.h
+    ufo_geovals_mod.F90
+    ufo_locs_mod.F90
+    ufo_variables_mod.F90
+    ufo_constants_mod.F90
 )
 
-message(STATUS ${ufo_src_files})
+# macro to prepend a prefix with relative path
+# can this be added to ecbuild for use elsewhere?
+function(PREPEND var prefix )
+    set ( listVar "" )
+    foreach (f ${ARGN})
+        list (APPEND listVar "${prefix}/${f}")
+    endforeach(f)
+    set ( ${var} "${listVar}" PARENT_SCOPE )
+endfunction(PREPEND)
+
+add_subdirectory( utils )
+add_subdirectory( basis )
+add_subdirectory( predictors )
+add_subdirectory( filters )
+add_subdirectory( identity )
+add_subdirectory( atmvertinterp )
+add_subdirectory( atmvertinterplay )
+add_subdirectory( atmsfcinterp )
+add_subdirectory( avgkernel )
+if( ${CRTM_FOUND} )
+    add_subdirectory( crtm )
+endif( ${CRTM_FOUND} )
+add_subdirectory( radarreflectivity )
+add_subdirectory( radarradialvelocity )
+if( ${RTTOV_FOUND} )
+    add_subdirectory( rttov )
+endif( ${RTTOV_FOUND} )
+add_subdirectory( gnssro )
+add_subdirectory( sfcpcorrected )
+add_subdirectory( marine )
+if( ${GEOS-AERO_FOUND} )
+    add_subdirectory( geos_aero )
+endif( ${GEOS-AERO_FOUND} )
+add_subdirectory( timeoper )
+add_subdirectory( profile )
+add_subdirectory( groundgnss )
+
+list( APPEND ufo_src_files
+    ${utils_src_files}
+    ${basis_src_files}
+    ${predictor_src_files}
+    ${filters_src_files}
+    ${identity_src_files}
+    ${atmvertinterp_src_files}
+    ${atmvertinterplay_src_files}
+    ${atmsfcinterp_src_files}
+    ${avgkernel_src_files}
+    ${crtm_src_files}
+    ${rttov_src_files}
+    ${gnssro_src_files}
+    ${geosaod_src_files}
+    ${sfcpcorrected_src_files}
+    ${radarreflectivity_src_files}
+    ${radarradialvelocity_src_files}
+    ${timeoper_src_files}
+    ${profile_src_files}
+    ${groundgnss_src_files}
+)
+list( APPEND ufo_src_files ${marine_src_files} )
+list( APPEND UFO_LIBS_DEP oops ioda ${LAPACK_LIBRARIES} ${NETCDF_LIBRARIES} )
+if( ${CRTM_FOUND} )
+    list( APPEND UFO_LIBS_DEP crtm )
+endif( ${CRTM_FOUND} )
+if( ${GSW_FOUND} )
+    list( APPEND UFO_LIBS_DEP gsw )
+endif( ${GSW_FOUND} )
+if( ${RTTOV_FOUND} )
+    list( APPEND UFO_LIBS_DEP rttov )
+endif( ${RTTOV_FOUND} )
+
+if( ${ROPP-UFO_FOUND} )
+    list( APPEND UFO_LIBS_DEP ropp-ufo )
+endif( ${ROPP-UFO_FOUND} )
+
+if( ${GEOS-AERO_FOUND} )
+    list( APPEND UFO_LIBS_DEP geos-aero )
+endif( ${GEOS-AERO_FOUND} )
+
+
 ecbuild_add_library( TARGET   ufo
                      SOURCES  ${ufo_src_files}
-                     LIBS     oops ioda ${LAPACK_LIBRARIES} ${NETCDF_LIBRARIES} ${CRTM_LIBRARIES}
+                     LIBS     ${UFO_LIBS_DEP}
                      INSTALL_HEADERS LISTED
+                     HEADER_DESTINATION ${INSTALL_INCLUDE_DIR}/ufo
                      LINKER_LANGUAGE ${OOPS_LINKER_LANGUAGE}
                     )
-

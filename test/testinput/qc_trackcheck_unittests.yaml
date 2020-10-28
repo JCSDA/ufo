@@ -1,0 +1,268 @@
+Only valid observations:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Aircraft
+    simulated variables: [air_temperature]
+    generate:
+      list:
+        lats: [ -2, -1, 0, 1, 2 ]
+        lons: [ 178, 179, 180, 181, 182 ]
+        datetimes: [ '2010-01-01T00:00:00Z', '2010-01-01T01:00:00Z', '2010-01-01T02:00:00Z',
+                     '2010-01-01T03:00:00Z', '2010-01-01T04:00:00Z' ]
+      obs errors: [1.0]
+  air_pressures: [ 100000, 90000, 80000, 90000, 100000]
+  station_ids: [ 1, 1, 1, 1, 1]
+  Track Check:
+    variables: [air_temperature]
+    temporal_resolution: PT4S
+    spatial_resolution: 1 # km
+    distinct_buddy_resolution_multiplier: 3
+    num_distinct_buddies_per_direction: 2
+    max_climb_rate: 2000 # Pa/s
+    max_speed_interpolation_points: {"0": 500, "101000": 500} # Pa -> m/s
+    rejection_threshold: 0.5
+    station_id_variable:
+      name: station_id@MetaData
+  expected_rejected_obs_indices: []
+
+One observation with excessive speed:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Aircraft
+    simulated variables: [air_temperature]
+    generate:
+      list:
+        lats: [ -2, -1, 0, 1, 2 ]
+        lons: [ 178, 179, 359, 181, 182 ]
+        datetimes: [ '2010-01-01T00:00:00Z', '2010-01-01T01:00:00Z', '2010-01-01T02:00:00Z',
+                     '2010-01-01T03:00:00Z', '2010-01-01T04:00:00Z' ]
+      obs errors: [1.0]
+  air_pressures: [ 100000, 90000, 80000, 90000, 100000]
+  station_ids: [ 1, 1, 1, 1, 1]
+  Track Check:
+    variables: [air_temperature]
+    temporal_resolution: PT4S
+    spatial_resolution: 1 # km
+    distinct_buddy_resolution_multiplier: 3
+    num_distinct_buddies_per_direction: 2
+    max_climb_rate: 2000 # Pa/s
+    max_speed_interpolation_points: {"0": 500, "101000": 500} # Pa -> m/s
+    rejection_threshold: 0.5
+    station_id_variable:
+      name: station_id@MetaData
+  expected_rejected_obs_indices: [2]
+
+One observation with excessive climb rate:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Aircraft
+    simulated variables: [air_temperature]
+    generate:
+      list:
+        lats: [ -2, -1, 0, 1, 2 ]
+        lons: [ 178, 179, 180, 181, 182 ]
+        datetimes: [ '2010-01-01T00:00:00Z', '2010-01-01T01:00:00Z', '2010-01-01T02:00:00Z',
+                     '2010-01-01T03:00:00Z', '2010-01-01T04:00:00Z' ]
+      obs errors: [1.0]
+  air_pressures: [ 100000, 90000, 1e20, 90000, 100000]
+  station_ids: [ 1, 1, 1, 1, 1]
+  Track Check:
+    variables: [air_temperature]
+    temporal_resolution: PT4S
+    spatial_resolution: 1 # km
+    distinct_buddy_resolution_multiplier: 3
+    num_distinct_buddies_per_direction: 2
+    max_climb_rate: 2000 # Pa/s
+    max_speed_interpolation_points: {"0": 500, "101000": 500} # Pa -> m/s
+    rejection_threshold: 0.5
+    station_id_variable:
+      name: station_id@MetaData
+  expected_rejected_obs_indices: [2]
+
+Climb rate checks disabled:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Aircraft
+    simulated variables: [air_temperature]
+    generate:
+      list:
+        lats: [ -2, -1, 0, 1, 2 ]
+        lons: [ 178, 179, 180, 181, 182 ]
+        datetimes: [ '2010-01-01T00:00:00Z', '2010-01-01T01:00:00Z', '2010-01-01T02:00:00Z',
+                     '2010-01-01T03:00:00Z', '2010-01-01T04:00:00Z' ]
+      obs errors: [1.0]
+  air_pressures: [ 100000, 90000, 1e20, 90000, 100000]
+  station_ids: [ 1, 1, 1, 1, 1]
+  Track Check:
+    variables: [air_temperature]
+    temporal_resolution: PT4S
+    spatial_resolution: 1 # km
+    distinct_buddy_resolution_multiplier: 3
+    num_distinct_buddies_per_direction: 2
+    max_speed_interpolation_points: {"0": 500, "101000": 500} # Pa -> m/s
+    rejection_threshold: 0.5
+    station_id_variable:
+      name: station_id@MetaData
+  expected_rejected_obs_indices: []
+
+Where clause:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Aircraft
+    simulated variables: [air_temperature]
+    generate:
+      list:
+        lats: [ -2, -1, 0, 1, 2 ]
+        lons: [ 178, 179, 180, 181, 182 ]
+        datetimes: [ '2010-01-01T00:00:00Z', '2010-01-01T01:00:00Z', '2010-01-01T02:00:00Z',
+                     '2010-01-01T03:00:00Z', '2010-01-01T04:00:00Z' ]
+      obs errors: [1.0]
+  air_pressures: [ 1e20, 90000, 1e20, 90000, 100000]
+  station_ids: [ 1, 1, 1, 1, 1]
+  Track Check:
+    variables: [air_temperature]
+    temporal_resolution: PT4S
+    spatial_resolution: 1 # km
+    distinct_buddy_resolution_multiplier: 3
+    num_distinct_buddies_per_direction: 2
+    max_climb_rate: 2000 # Pa/s
+    max_speed_interpolation_points: {"0": 500, "101000": 500} # Pa -> m/s
+    rejection_threshold: 0.5
+    station_id_variable:
+      name: station_id@MetaData
+    where:
+    - variable:
+        name: latitude@MetaData
+      minvalue: -1
+  expected_rejected_obs_indices: [2]
+
+Multiple clusters of observations with excessive speed:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Aircraft
+    simulated variables: [air_temperature]
+    generate:
+      list:
+        lats: [ 90, 0, 0, 0, 0, 0, 0, 0, 0, -90,
+                90, 0, 0, 0, 0, 0, 0, 0, 45, -90,
+                90, 0, 0, 0, 0, 0, 0, 0, 0, -90,
+                90]
+        lons: [  0,  1,  2,  3,  4,  5,  6,  7,  8,  9,
+                10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
+                20, 21, 22, 23, 24, 25, 26, 27, 28, 29,
+                30 ]
+        datetimes:
+          - '2010-01-01T00:00:00Z'
+          - '2010-01-01T00:02:00Z'
+          - '2010-01-01T00:04:00Z'
+          - '2010-01-01T00:06:00Z'
+          - '2010-01-01T00:08:00Z'
+          - '2010-01-01T00:10:00Z'
+          - '2010-01-01T00:12:00Z'
+          - '2010-01-01T00:14:00Z'
+          - '2010-01-01T00:16:00Z'
+          - '2010-01-01T00:18:00Z'
+          - '2010-01-01T00:20:00Z'
+          - '2010-01-01T00:22:00Z'
+          - '2010-01-01T00:24:00Z'
+          - '2010-01-01T00:26:00Z'
+          - '2010-01-01T00:28:00Z'
+          - '2010-01-01T00:30:00Z'
+          - '2010-01-01T00:32:00Z'
+          - '2010-01-01T00:34:00Z'
+          - '2010-01-01T00:36:00Z'
+          - '2010-01-01T00:38:00Z'
+          - '2010-01-01T00:40:00Z'
+          - '2010-01-01T00:42:00Z'
+          - '2010-01-01T00:44:00Z'
+          - '2010-01-01T00:46:00Z'
+          - '2010-01-01T00:48:00Z'
+          - '2010-01-01T00:50:00Z'
+          - '2010-01-01T00:52:00Z'
+          - '2010-01-01T00:54:00Z'
+          - '2010-01-01T00:56:00Z'
+          - '2010-01-01T00:58:00Z'
+          - '2010-01-01T01:00:00Z'
+      obs errors: [ 1.0]
+  air_pressures: [ 50000, 50000, 50000, 50000, 50000, 50000, 50000, 50000, 50000, 50000,
+                   50000, 50000, 50000, 50000, 50000, 50000, 50000, 50000, 50000, 50000,
+                   50000, 50000, 50000, 50000, 50000, 50000, 50000, 50000, 50000, 50000,
+                   50000]
+  station_ids: [ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+                1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+                1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+                1]
+  Track Check:
+    variables: [air_temperature]
+    temporal_resolution: PT1M
+    spatial_resolution: 112 # km
+    distinct_buddy_resolution_multiplier: 3
+    num_distinct_buddies_per_direction: 6
+    max_climb_rate: 2000 # Pa/s
+    max_speed_interpolation_points: {"0": 1000, "101000": 1000} # Pa -> m/s
+    rejection_threshold: 0.5
+    station_id_variable:
+      name: station_id@MetaData
+  expected_rejected_obs_indices: [0, 9, 10, 18, 19, 20, 29, 30]
+
+Multiple station ids:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Aircraft
+    simulated variables: [air_temperature]
+    generate:
+      list:
+        lats: [ -2, -2, -1, -1, 0, 0, 1, 1, 2, 2 ]
+        lons: [ 178, 88, 179, 89, 359, 269, 181, 91, 182, 92 ]
+        datetimes: [ '2010-01-01T00:00:00Z', '2010-01-01T00:00:00Z',
+                     '2010-01-01T01:00:00Z', '2010-01-01T01:00:00Z',
+                     '2010-01-01T02:00:00Z', '2010-01-01T02:00:00Z',
+                     '2010-01-01T03:00:00Z', '2010-01-01T03:00:00Z',
+                     '2010-01-01T04:00:00Z', '2010-01-01T04:00:00Z' ]
+      obs errors: [1.0]
+  air_pressures: [ 100000, 100000, 90000, 90000, 80000, 80000, 90000, 90000, 100000, 100000]
+  station_ids: [ 1, 2, 1, 2, 1, 2, 1, 2, 1, 2]
+  Track Check:
+    variables: [air_temperature]
+    temporal_resolution: PT4S
+    spatial_resolution: 1 # km
+    distinct_buddy_resolution_multiplier: 3
+    num_distinct_buddies_per_direction: 2
+    max_climb_rate: 2000 # Pa/s
+    max_speed_interpolation_points: {"0": 500, "101000": 500} # Pa -> m/s
+    rejection_threshold: 0.5
+    station_id_variable:
+      name: station_id@MetaData
+  expected_rejected_obs_indices: [4, 5]
+
+No station id variable, no observation grouping:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Aircraft
+    simulated variables: [air_temperature]
+    generate:
+      list:
+        lats: [ -2, -1, 0, 1, 2 ]
+        lons: [ 178, 179, 359, 181, 182 ]
+        datetimes: [ '2010-01-01T00:00:00Z', '2010-01-01T01:00:00Z', '2010-01-01T02:00:00Z',
+                     '2010-01-01T03:00:00Z', '2010-01-01T04:00:00Z' ]
+      obs errors: [1.0]
+  air_pressures: [ 100000, 90000, 80000, 90000, 100000]
+  Track Check:
+    variables: [air_temperature]
+    temporal_resolution: PT4S
+    spatial_resolution: 1 # km
+    distinct_buddy_resolution_multiplier: 3
+    num_distinct_buddies_per_direction: 2
+    max_climb_rate: 2000 # Pa/s
+    max_speed_interpolation_points: {"0": 500, "101000": 500} # Pa -> m/s
+    rejection_threshold: 0.5
+  expected_rejected_obs_indices: [2]

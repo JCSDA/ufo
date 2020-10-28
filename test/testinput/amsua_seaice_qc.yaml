@@ -1,0 +1,35 @@
+window begin: 2018-04-14T21:00:00Z
+window end: 2018-04-15T03:00:00Z
+
+observations:
+- obs space:
+    name: amsua_n19
+    obsdatain:
+      obsfile: Data/ioda/testinput_tier_1/amsua_n19_obs_2018041500_m.nc4
+    obsdataout:
+      obsfile: Data/amsua_n19_obs_2018041500_out.nc4
+    simulated variables: [brightness_temperature]
+    channels: 1-15
+  geovals:
+    filename: Data/ufo/testinput_tier_1/amsua_n19_geoval_2018041500_m.nc4
+  obs filters:
+  - filter: Bounds Check
+    filter variables:
+    - name: brightness_temperature
+      channels: 1-2,15
+    minvalue: 100.0
+    maxvalue: 500.0
+  - filter: BlackList
+    filter variables:
+    - name: brightness_temperature
+      channels: 1-6,15
+    where:
+    - variable:
+        name:  land_area_fraction@GeoVaLs
+      maxvalue: 0.05
+    # check is specific to AMSU-A requires ch1, ch2 and ch15
+    # flags land along with sea-ice
+    - variable:
+        name: Scattering@ObsFunction
+      minvalue: 10.0
+  passedBenchmark: 1360      # number of passed obs

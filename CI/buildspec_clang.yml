@@ -1,0 +1,149 @@
+version: 0.2
+
+env:
+  parameter-store:
+    GIT_USER: "/CodeBuild/Git_USER"
+    GIT_PASS: "/CodeBuild/Git_PASS"
+
+phases:
+  install:
+    commands:
+      - echo Executing install phase
+      - echo Executing install phase
+      - echo $CODEBUILD_RESOLVED_SOURCE_VERSION
+      - echo $CODEBUILD_SOURCE_REPO_URL
+      - echo $CODEBUILD_SOURCE_VERSION
+
+      - echo $CODEBUILD_WEBHOOK_MERGE_COMMIT
+      - echo $CODEBUILD_WEBHOOK_PREV_COMMIT
+      - echo $CODEBUILD_WEBHOOK_HEAD_REF
+      - echo $CODEBUILD_WEBHOOK_ACTOR_ACCOUNT_ID
+      - echo $CODEBUILD_WEBHOOK_EVENT
+      - echo $CODEBUILD_WEBHOOK_TRIGGER
+      - echo $CODEBUILD_WEBHOOK_BASE_REF
+
+      # Codebuild only runs on PUSH events if HEAD_REF
+      # is refs/heads/develop (merge to develop). In this
+      # case CODEBUILD_GIT_BRANCH="develop"
+
+      - if [ "$CODEBUILD_WEBHOOK_EVENT" = "PUSH" ];
+        then export CODEBUILD_GIT_BRANCH="develop";
+        echo "Merging to develop";
+        else export CODEBUILD_GIT_BRANCH=${CODEBUILD_WEBHOOK_HEAD_REF#refs/heads/};
+        fi
+
+      - echo "CODEBUILD_GIT_BRANCH=${CODEBUILD_GIT_BRANCH}"
+      - echo "CODEBUILD_SOURCE_VERSION=${CODEBUILD_SOURCE_VERSION}"
+
+  pre_build:
+    commands:
+      - echo Executing pre_build phase
+      - mkdir /build_container
+      - mkdir /jcsda
+      - cd CI
+
+      - git lfs install # creates .gitconfig
+
+      #  Set crtm branch name
+      - export CRTM_JEDI_BRANCH="v2.3-jedi"
+
+      - if [ "$CODEBUILD_GIT_BRANCH" = "develop" ];
+        then export CODEBUILD_GIT_BRANCH_FORK="release-stable";
+        export CODEBUILD_GIT_BRANCH_CRTM=${CRTM_JEDI_BRANCH};
+        else export CODEBUILD_GIT_BRANCH_FORK=${CODEBUILD_GIT_BRANCH};
+        export CODEBUILD_GIT_BRANCH_CRTM=${CODEBUILD_GIT_BRANCH};
+        echo "CODEBUILD_GIT_BRANCH_FORK=${CODEBUILD_GIT_BRANCH_FORK}";
+        fi
+
+      ##  public repos
+      # ufo
+      - ./clone.sh $GIT_USER $GIT_PASS jcsda/ufo $CODEBUILD_GIT_BRANCH ufo /jcsda/ufo-bundle develop
+
+      # crtm
+      - ./clone.sh $GIT_USER $GIT_PASS jcsda/crtm $CODEBUILD_GIT_BRANCH_CRTM crtm /jcsda/ufo-bundle $CRTM_JEDI_BRANCH
+
+      # ioda
+      - ./clone.sh $GIT_USER $GIT_PASS jcsda/ioda $CODEBUILD_GIT_BRANCH ioda /jcsda/ufo-bundle develop
+
+      # saber
+      - ./clone.sh $GIT_USER $GIT_PASS jcsda/saber $CODEBUILD_GIT_BRANCH saber /jcsda/ufo-bundle develop
+
+      # oops
+      - ./clone.sh $GIT_USER $GIT_PASS jcsda/oops $CODEBUILD_GIT_BRANCH oops /jcsda/ufo-bundle develop
+
+
+      ##  ecmwf repos
+      # atlas
+      - ./clone.sh $GIT_USER $GIT_PASS jcsda-internal/atlas $CODEBUILD_GIT_BRANCH_FORK atlas /jcsda/ufo-bundle release-stable
+
+      #fckit
+      - ./clone.sh $GIT_USER $GIT_PASS jcsda-internal/fckit $CODEBUILD_GIT_BRANCH_FORK fckit /jcsda/ufo-bundle release-stable
+
+
+      ##  internal repos
+      # jedi-cmake
+      - ./clone.sh $GIT_USER $GIT_PASS jcsda-internal/jedi-cmake $CODEBUILD_GIT_BRANCH jedicmake /jcsda/ufo-bundle develop
+
+      # ioda-engines
+      - ./clone.sh $GIT_USER $GIT_PASS jcsda-internal/ioda-engines $CODEBUILD_GIT_BRANCH ioda_engines /jcsda/ufo-bundle develop
+
+      # rttov
+      - ./clone.sh $GIT_USER $GIT_PASS jcsda-internal/rttov $CODEBUILD_GIT_BRANCH rttov /jcsda/ufo-bundle develop
+
+      # ropp
+      - ./clone.sh $GIT_USER $GIT_PASS jcsda-internal/ropp-test $CODEBUILD_GIT_BRANCH ropp-ufo /jcsda/ufo-bundle develop
+
+      # geos-aero
+      - ./clone.sh $GIT_USER $GIT_PASS jcsda-internal/geos-aero $CODEBUILD_GIT_BRANCH geos-aero /jcsda/ufo-bundle develop
+
+      #gsw
+      - ./clone.sh $GIT_USER $GIT_PASS jcsda-internal/GSW-Fortran $CODEBUILD_GIT_BRANCH gsw /jcsda/ufo-bundle develop
+
+      # move CMakeLists.txt
+      - cp CMakeLists.txt /jcsda/ufo-bundle
+      - cp -r cmake /jcsda/ufo-bundle/
+      - cd /jcsda/ufo-bundle
+
+      - ls
+      - cd /jcsda/ufo-bundle
+      - ls
+
+      - sed -i 's/BRANCH develop  UPDATE//' CMakeLists.txt
+      - sed -i 's/BRANCH develop //' CMakeLists.txt
+      - sed -i 's/BRANCH release-stable UPDATE//' CMakeLists.txt
+      - sed -i -e '/ecbuild_bundle( PROJECT ufo/i\
+        ecbuild_bundle( PROJECT ropp-ufo  GIT "https://github.com/JCSDA/ropp-test.git" )' CMakeLists.txt
+      - sed -i -e '/ecbuild_bundle( PROJECT ufo/i\
+        ecbuild_bundle( PROJECT geos-aero  GIT "https://github.com/JCSDA/geos-aero.git" )' CMakeLists.txt
+
+  build:
+    commands:
+      - echo Executing build phase
+      - echo $CODEBUILD_BUILD_SUCCEEDING
+      - export BUILD_STATUS="0"
+      - echo $BUILD_STATUS
+
+      - cd /build_container
+      - ecbuild -DBUILD_RTTOV=1 /jcsda/ufo-bundle/
+      - cd ufo
+      - make -j4
+
+      - if [ "$CODEBUILD_BUILD_SUCCEEDING" = "1" ];
+        then export BUILD_STATUS="1";
+        echo "Build passed";
+        fi
+      - echo $BUILD_STATUS
+
+      - cd /build_container/ufo
+      - ctest
+
+  post_build:
+    commands:
+      - echo Executing post_build phase
+      - echo $CODEBUILD_BUILD_SUCCEEDING
+      - if [ "$BUILD_STATUS" = "1" ] && [ "$CODEBUILD_BUILD_SUCCEEDING" = "0" ];
+        then echo "Build passed, rerunning failed tests";
+        cd /build_container/ufo;
+        ctest -VV --rerun-failed;
+        else echo "Build failed";
+        fi
