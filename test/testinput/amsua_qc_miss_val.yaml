@@ -1,0 +1,29 @@
+window begin: 2018-04-14T21:00:00Z
+window end: 2018-04-15T03:00:00Z
+
+observations:
+- obs operator:
+    name: CRTM
+    Absorbers: [H2O,O3,CO2]
+    Clouds: [Water, Ice]
+    Cloud_Fraction: 1.0
+    obs options:
+      Sensor_ID: amsua_n19
+      EndianType: little_endian
+      CoefficientPath: Data/
+  obs space:
+    name: amsua_n19
+    obsdatain:
+      obsfile: Data/ioda/testinput_tier_1/amsua_n19_obs_2018041500_m_miss_val.nc4
+    simulated variables: [brightness_temperature]
+    channels: 1
+  geovals:
+    filename: Data/ufo/testinput_tier_1/amsua_n19_geoval_2018041500_m.nc4
+  obs filters:
+  - filter: Bounds Check
+    filter variables:
+    - name: brightness_temperature
+      channels: 1
+    minvalue:  50.0
+    maxvalue: 400.0
+  passedBenchmark: 99      # number of passed obs

@@ -1,0 +1,42 @@
+window begin: 2018-04-14T21:00:00Z
+window end: 2018-04-15T03:00:00Z
+
+observations:
+- obs operator:
+    name: CRTM
+    Absorbers: [H2O,O3,CO2]
+    obs options:
+      Sensor_ID: cris-fsr_npp
+      EndianType: little_endian
+      CoefficientPath: Data/
+  obs space:
+    name: cris-fsr_npp
+    obsdatain:
+      obsfile: Data/ioda/testinput_tier_1/cris-fsr_npp_obs_2018041500_m_unittest.nc4
+#      obsfile: Data/ioda/testinput_tier_1/cris-fsr_npp_obs_2018041500_m_qc.nc4
+#      obsfile: Data/ioda/testinput_tier_1/cris-fsr_npp_obs_2018041500_m.nc4
+    simulated variables: [brightness_temperature]
+    channels: &all_channels
+              24,26,28,32,37,39,42,44,47,49,51,53,55,57,59,61,63,
+              65,67,69,71,73,75,77,79,81,83,85,87,89,91,93,95,97,
+              99,103,105,107,109,111,113,115,117,119,121,123,125,
+              127,129,131,133,135,137,139,141,143,145,147,149,151,
+              153,155,157,159,163,167,171,175,179,183,187,190,194,
+              197,200,211,224,275,279,291,311,332,342,389,410,427,
+              464,501,529,710,713,742,882,890,937,995,1008,1022,1058
+  obs filters:
+  - filter: Bounds Check
+    filter variables:
+    - name: brightness_temperature
+      channels: *all_channels
+    test variables:
+    - name: brightness_temperature_jacobian_surface_temperature@ObsDiag
+      channels: *all_channels
+    maxvalue: 0.2
+  passedBenchmark: 754       # number of passed obs #(m_unittest)
+#  passedBenchmark: 7252      # number of passed obs #(m_qc)
+#  passedBenchmark: 7123      # number of passed obs #(m)
+  geovals:
+#    filename: Data/ufo/testinput_tier_1/cris-fsr_npp_geoval_2018041500_m.nc4
+#    filename: Data/ufo/testinput_tier_1/cris-fsr_npp_geoval_2018041500_m_qc.nc4
+    filename: Data/ufo/testinput_tier_1/cris-fsr_npp_geoval_2018041500_m_unittest.nc4

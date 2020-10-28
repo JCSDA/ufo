@@ -1,0 +1,23 @@
+window begin: 2018-04-14T21:00:00Z
+window end: 2018-04-15T03:00:00Z
+
+observations:
+- obs operator:
+    name: TimeOperLinInterp
+    windowSub: PT3H
+    obs operator:
+      name: VertInterp
+  obs space:
+    name: Radiosonde
+    obsdatain:
+      obsfile: Data/ioda/testinput_tier_1/sondes_obs_2018041500_vs.nc4
+    simulated variables: [air_temperature]
+  geovals:
+    filename: Data/ufo/testinput_tier_1/sondes_geoval_2018041500_vs.nc4
+    loc_multiplier: -2
+  vector ref: GsiHofX
+  tolerance: 1.0e-06
+  linear obs operator test:
+    coef TL: 0.1
+    tolerance TL: 1.0e-13
+    tolerance AD: 1.0e-11

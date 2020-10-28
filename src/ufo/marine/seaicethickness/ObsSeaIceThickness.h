@@ -1,91 +1,64 @@
 /*
- * (C) Copyright 2017 UCAR
+ * (C) Copyright 2017-2018 UCAR
  * 
  * This software is licensed under the terms of the Apache Licence Version 2.0
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
  */
 
-#ifndef UFO_OBSSEAICETHICKNESS_H_
-#define UFO_OBSSEAICETHICKNESS_H_
+#ifndef UFO_MARINE_SEAICETHICKNESS_OBSSEAICETHICKNESS_H_
+#define UFO_MARINE_SEAICETHICKNESS_OBSSEAICETHICKNESS_H_
 
+#include <memory>
 #include <ostream>
 #include <string>
 
-#include <boost/scoped_ptr.hpp>
-
-#include "eckit/config/Configuration.h"
 #include "oops/base/Variables.h"
-#include "oops/interface/ObsOperatorBase.h"
-#include "ufo/ObsSpace.h"
-#include "ufo/GeoVaLs.h"
-#include "ufo/Locations.h"
-#include "ufo/ObsBias.h"
-#include "ufo/ObsBiasIncrement.h"
-#include "ufo/ObsVector.h"
-#include "util/ObjectCounter.h"
+#include "oops/util/ObjectCounter.h"
+
+#include "ufo/marine/seaicethickness/ObsSeaIceThickness.interface.h"
+#include "ufo/ObsOperatorBase.h"
+
+/// Forward declarations
+namespace eckit {
+  class Configuration;
+}
+
+namespace ioda {
+  class ObsSpace;
+  class ObsVector;
+}
 
 namespace ufo {
+  class GeoVaLs;
+  class ObsDiagnostics;
 
 // -----------------------------------------------------------------------------
-/// Total ice concentration observation for UFO.
-template <typename MODEL>
-class ObsSeaIceThickness : public oops::ObsOperatorBase<MODEL>,
-                  private util::ObjectCounter<ObsSeaIceThickness<MODEL>> {
+/// Sea ice thickness observation operator class
+class ObsSeaIceThickness : public ObsOperatorBase,
+                           private util::ObjectCounter<ObsSeaIceThickness> {
  public:
   static const std::string classname() {return "ufo::ObsSeaIceThickness";}
 
-  ObsSeaIceThickness(const ObsSpace &, const eckit::Configuration &);
+  ObsSeaIceThickness(const ioda::ObsSpace &, const eckit::Configuration &);
   virtual ~ObsSeaIceThickness();
 
 // Obs Operator
-  void obsEquiv(const GeoVaLs &, ObsVector &, const ObsBias &) const;
+  void simulateObs(const GeoVaLs &, ioda::ObsVector &, ObsDiagnostics &) const override;
 
 // Other
-  const oops::Variables & variables() const {return *varin_;}
+  const oops::Variables & requiredVars() const override {return *varin_;}
 
-  int & toFortran() {return keyOperSeaIceThickness_;}
-  const int & toFortran() const {return keyOperSeaIceThickness_;}
+  int & toFortran() {return keyOper_;}
+  const int & toFortran() const {return keyOper_;}
 
  private:
-  void print(std::ostream &) const;
-  F90hop keyOperSeaIceThickness_;
-  const ObsSpace& odb_;
-  boost::scoped_ptr<const oops::Variables> varin_;
+  void print(std::ostream &) const override;
+  F90hop keyOper_;
+  const ioda::ObsSpace& odb_;
+  std::unique_ptr<const oops::Variables> varin_;
 };
-
-// -----------------------------------------------------------------------------
-template <typename MODEL>
-ObsSeaIceThickness<MODEL>::ObsSeaIceThickness(const ObsSpace & odb, const eckit::Configuration & config)
-  : keyOperSeaIceThickness_(0), varin_(), odb_(odb)
-{
-  const eckit::Configuration * configc = &config;
-  ufo_seaicethick_setup_f90(keyOperSeaIceThickness_, &configc);
-  const std::vector<std::string> vv{"ice_concentration", "ice_thickness"};
-  varin_.reset(new oops::Variables(vv));
-  oops::Log::trace() << "ObsSeaIceThickness created." << std::endl;
-}
-
-// -----------------------------------------------------------------------------
-template <typename MODEL>
-ObsSeaIceThickness<MODEL>::~ObsSeaIceThickness() {
-  ufo_seaicethick_delete_f90(keyOperSeaIceThickness_);
-  oops::Log::trace() << "ObsSeaIceThickness destructed" << std::endl;
-}
-
-// -----------------------------------------------------------------------------
-template <typename MODEL>
-void ObsSeaIceThickness<MODEL>::obsEquiv(const GeoVaLs & gom, ObsVector & ovec,
-                             const ObsBias & bias) const {
-  ufo_seaicethick_eqv_f90(keyOperSeaIceThickness_, gom.toFortran(), odb_.toFortran(), ovec.toFortran(), bias.toFortran());
-}
-
-// -----------------------------------------------------------------------------
-template <typename MODEL>
-void ObsSeaIceThickness<MODEL>::print(std::ostream & os) const {
-  os << "ObsSeaIceThickness::print not implemented";
-}
 
 // -----------------------------------------------------------------------------
 
 }  // namespace ufo
-#endif  // UFO_OBSSEAICETHICKNESS_H_
+#endif  // UFO_MARINE_SEAICETHICKNESS_OBSSEAICETHICKNESS_H_

@@ -1,0 +1,99 @@
+window begin: 2018-04-14T21:00:00Z
+window end: 2018-04-15T03:00:00Z
+
+observations:
+- obs space:
+    name: surface_METAR
+    obsdatain: 
+      obsfile: Data/ioda/testinput_tier_1/sfc_obs_2018041500_metars_small.nc
+    obsdataout:
+      obsfile: Data/sfc_obs_2018041500_metars_small_out.nc
+    simulated variables: [air_temperature, surface_pressure, specific_humidity, eastward_wind, northward_wind]
+  obs filters:
+# Observation Range Sanity Check
+  - filter: Bounds Check
+    filter variables:
+    - name: air_temperature
+    minvalue: 195
+    maxvalue: 327
+    action:
+      name: reject 
+# passedBenchmark: 165 = 33 locs x 5 variables, all data pass this stage.
+  - filter: Bounds Check
+    filter variables:
+    - name: surface_pressure
+    minvalue: 37499
+    maxvalue: 106999
+    action:
+      name: reject 
+# passedBenchmark: 165 (nothing outside the range)
+  - filter: Bounds Check
+    filter variables:
+    - name: specific_humidity
+    minvalue: 1.E-7
+    maxvalue: 0.34999999 
+    action:
+      name: reject 
+# passedBenchmark: 165 (nothing outside the range)
+  - filter: Bounds Check
+    filter variables:
+    - name: eastward_wind
+    - name: northward_wind
+    minvalue: -130
+    maxvalue: 130
+    action:
+      name: reject 
+# passedBenchmark: 161 (2 east and 2 north winds are missing)
+  - filter: Bounds Check      #  Possibly throw out all other variables if surface pressure means too high altitude
+    filter variables:
+    - name: eastward_wind
+    - name: northward_wind
+    - name: specific_humidity
+    - name: air_temperature
+    test variables:
+    - name: surface_pressure@ObsValue
+    minvalue: 45000.0
+    action:
+      name: reject 
+# passedBenchmark: 161
+  - filter: Bounds Check      #  Observation Range Sanity Check
+    filter variables:
+    - name: eastward_wind
+    - name: northward_wind
+    test variables:
+    - name: Velocity@ObsFunction
+    maxvalue: 130.0
+    action:
+      name: reject 
+# passedBenchmark: 161
+# Assign obsError to different variables.
+# Note: Bounds Check, BlackList, or maybe other filters could be used
+  - filter: Bounds Check
+    filter variables:
+    - name: air_temperature
+    action:
+      name: assign error
+      error parameter: 1.2             # 1.2 K
+#
+  - filter: Bounds Check
+    filter variables:
+    - name: surface_pressure
+    action:
+      name: assign error
+      error parameter: 120             # 120 Pa = 1.2 mb
+#
+  - filter: Bounds Check
+    filter variables:
+    - name: eastward_wind
+    - name: northward_wind
+    action:
+      name: assign error
+      error parameter: 1.4             # 1.4 m/s
+#
+  - filter: Bounds Check
+    filter variables:
+    - name: specific_humidity
+    action:
+      name: assign error
+      error parameter: 0.0001          # 0.1 g/kg
+  passedBenchmark: 161

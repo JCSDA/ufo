@@ -1,0 +1,38 @@
+window begin: 2018-04-14T21:00:00Z
+window end: 2018-04-15T03:00:00Z
+
+observations:
+- obs space:
+    name: SeaIceThickness
+    obsdatain:
+      obsfile: Data/ioda/testinput_tier_1/cryosat2-2018-04-15.nc
+    simulated variables: [sea_ice_thickness]
+  obs operator:
+    name: SeaIceThickness
+  linear obs operator:
+    name: SeaIceThickness
+  geovals:
+    filename: Data/ufo/testinput_tier_1/cryosat2-2018-04-15_geovals.nc
+  rms ref: 1.25
+  tolerance: 1.0e-8
+  linear obs operator test:
+    coef TL: 1.0e-4
+    tolerance TL: 1.0e-5
+    tolerance AD: 1.0e-12
+- obs space:
+    name: SeaIceThickness
+    obsdatain:
+      obsfile: Data/ioda/testinput_tier_1/cryosat2-2018-04-15.nc
+    simulated variables: [sea_ice_freeboard]
+  obs operator:
+    name: SeaIceThickness
+  linear obs operator:
+    name: SeaIceThickness
+  geovals:
+    filename: Data/ufo/testinput_tier_1/cryosat2-2018-04-15_geovals.nc
+  rms ref: 0.16062500062397761
+  tolerance: 1.0e-8
+  linear obs operator test:
+    coef TL: 1.0e-4
+    tolerance TL: 1.0e-5
+    tolerance AD: 1.0e-12
