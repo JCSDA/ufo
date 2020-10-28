@@ -1658,7 +1658,7 @@ contains
         ! var_tb jacobians
         select case (trim(xstr_diags(jvar)))
 
-        case (var_ts,var_mixr,var_q,var_clw)
+        case (var_ts,var_mixr,var_q,var_clw,var_cli)
           nlayers = nlevels - 1
           hofxdiags%geovals(jvar)%nval = nlevels
           if(.not. allocated(hofxdiags%geovals(jvar)%vals)) &
@@ -1682,6 +1682,8 @@ contains
               else if(xstr_diags(jvar) == var_clw) then
                 hofxdiags%geovals(jvar)%vals(:,prof) = &
                   RTProf % profiles_k(ichan) % clw(:)
+              else if(xstr_diags(jvar) == var_cli) then
+                ! not in use yet
               endif
             endif
           enddo

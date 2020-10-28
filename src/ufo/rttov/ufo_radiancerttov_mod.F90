@@ -176,6 +176,7 @@ contains
         call fckit_log%info(message)
       end if
 
+      ! keep journal of which profiles have no obs data these will be skipped
       allocate(Skip_Profiles(nprofiles))
       if (present(ob_info)) then
         Skip_Profiles(:) = .false.
