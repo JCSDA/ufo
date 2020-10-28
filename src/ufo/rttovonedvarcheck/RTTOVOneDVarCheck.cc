@@ -43,7 +43,7 @@ RTTOVOneDVarCheck::RTTOVOneDVarCheck(ioda::ObsSpace & obsdb, const eckit::Config
   // Setup fortran object
   const eckit::Configuration * conf = &config_;
   ufo_rttovonedvarcheck_create_f90(key_, obsdb, conf, channels_.size(), channels_[0],
-                                   retrieved_vars_, RTTOVOneDVarCheck::qcFlag());
+                                   retrieved_vars_, QCflags::onedvar, QCflags::pass);
 
   // Create hofxdiags
   for (size_t jvar = 0; jvar < retrieved_vars_.size(); ++jvar) {

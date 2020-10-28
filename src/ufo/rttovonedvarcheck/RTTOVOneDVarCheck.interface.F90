@@ -33,7 +33,8 @@ contains
 ! ------------------------------------------------------------------------------------------------
 
 subroutine ufo_rttovonedvarcheck_create_c(c_self, c_obspace, c_conf, c_nchan, &
-                                          c_channels, c_varlist, c_onedvarflag) &
+                                          c_channels, c_varlist, c_onedvarflag, &
+                                          c_passflag) &
                         bind(c,name='ufo_rttovonedvarcheck_create_f90')
 
 !> \brief Interface to the Fortran create method
@@ -44,12 +45,13 @@ subroutine ufo_rttovonedvarcheck_create_c(c_self, c_obspace, c_conf, c_nchan, &
 !!
 implicit none
 integer(c_int), intent(inout)  :: c_self     !< self - inout
-type(c_ptr), value, intent(in) :: c_obspace  !< obsspace - input
-type(c_ptr), value, intent(in) :: c_conf     !< yaml configuration - input
-integer(c_int), intent(in) :: c_nchan        !< number of channels - input
-integer(c_int), intent(in) :: c_channels(c_nchan) !< channel numbers - input
+type(c_ptr), value, intent(in) :: c_obspace  !< obsspace - in
+type(c_ptr), value, intent(in) :: c_conf     !< yaml configuration - in
+integer(c_int), intent(in) :: c_nchan        !< number of channels - in
+integer(c_int), intent(in) :: c_channels(c_nchan) !< channel numbers - in
 type(c_ptr), intent(in), value :: c_varlist  !< retrieved variables pointer - in
-integer(c_int), intent(in) :: c_onedvarflag  !< flag for qc manager logging - input
+integer(c_int), intent(in) :: c_onedvarflag  !< flag for qc manager logging - in
+integer(c_int), intent(in) :: c_passflag     !< flag for good data from qc manager - in
 
 type(ufo_rttovonedvarcheck), pointer :: self
 type(fckit_configuration) :: f_conf
@@ -59,7 +61,7 @@ call ufo_rttovonedvarcheck_registry%setup(c_self, self)
 f_conf = fckit_configuration(c_conf)
 
 call ufo_rttovonedvarcheck_create(self, c_obspace, f_conf, c_channels, &
-                                  c_onedvarflag)
+                                  c_onedvarflag, c_passflag)
 
 !> Update C++ ObsFilter with input variable list
 oops_vars = oops_variables(c_varlist)

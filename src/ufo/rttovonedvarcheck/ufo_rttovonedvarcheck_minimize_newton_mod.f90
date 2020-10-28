@@ -16,6 +16,7 @@ use ufo_rttovonedvarcheck_ob_mod
 use ufo_rttovonedvarcheck_profindex_mod
 use ufo_rttovonedvarcheck_rsubmatrix_mod
 use ufo_rttovonedvarcheck_utils_mod
+use ufo_utils_mod, only: Ops_Cholesky
 
 implicit none
 private
@@ -538,11 +539,11 @@ call r_matrix % add_to_matrix(U, U)
 ! Calculate Q=(U^-1).V
 !------
 
-call ufo_rttovonedvarcheck_Cholesky (U,      &
-                                     V,      &
-                                     nChans, &
-                                     Q,      &
-                                     Status)
+call Ops_Cholesky (U,      &
+                   V,      &
+                   nChans, &
+                   Q,      &
+                   Status)
 if (Status /= 0) goto 9999
 
 ! Delta profile is (HB)^T.Q
@@ -657,11 +658,11 @@ U = U + B_inverse
 ! 5. Calculate new profile increment.
 !---------------------------------------------------------------------------
 
-call ufo_rttovonedvarcheck_Cholesky (U,             &
-                                     V,             &
-                                     nprofelements, &
-                                     DeltaProfile, &
-                                     Status)
+call Ops_Cholesky (U,             &
+                   V,             &
+                   nprofelements, &
+                   DeltaProfile, &
+                   Status)
 
 end subroutine ufo_rttovonedvarcheck_NewtonManyChans
 

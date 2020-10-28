@@ -17,6 +17,7 @@ use ufo_rttovonedvarcheck_profindex_mod
 use ufo_rttovonedvarcheck_rsubmatrix_mod
 use ufo_rttovonedvarcheck_ob_mod
 use ufo_rttovonedvarcheck_utils_mod
+use ufo_utils_mod, only: Ops_Cholesky
 
 implicit none
 private
@@ -560,11 +561,11 @@ DescentLoop : do while (JCost > JOld .and.              &
   ! 5.2 Calculate new profile increment.
   !------------------------------------------------------------------------
 
-  call ufo_rttovonedvarcheck_Cholesky (U,                &
-                                       V,                &
-                                       nprofelements,    &
-                                       New_DeltaProfile, &
-                                       Status)
+  call Ops_Cholesky (U,                &
+                     V,                &
+                     nprofelements,    &
+                     New_DeltaProfile, &
+                     Status)
   if (Status /= 0) then
      write(*,*) 'Error in Cholesky decomposition'
   end if

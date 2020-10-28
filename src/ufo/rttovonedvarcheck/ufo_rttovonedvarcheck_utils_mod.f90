@@ -36,6 +36,7 @@ type, public :: ufo_rttovonedvarcheck
   type(c_ptr)                      :: obsdb !< pointer to the observation space
   type(fckit_configuration)        :: conf  !< contents of the yaml file
   integer(c_int)                   :: onedvarflag !< flag uased by the qc manager for a 1D-var check
+  integer(c_int)                   :: passflag !< flag uased by the qc manager to flag good data
   integer                          :: nlevels ! number 1D-Var model levels
   integer                          :: nmvars !< number of variables being used in the retrieval
   integer                          :: nchans !< maximum number of channels (channels can be removed by previous qc checks)
@@ -102,8 +103,6 @@ self % retrieval_variables(1:self % nmvars) = str_array
 self % nchans = size(channels)
 allocate(self % channels(self % nchans))
 self % channels(:) = channels(:)
-write(*,*) "nchans setup = ",self%nchans
-write(*,*) "channels setup = ",self%channels
 
 ! Set defaults for 1D-var
 self % qtotal = .false.

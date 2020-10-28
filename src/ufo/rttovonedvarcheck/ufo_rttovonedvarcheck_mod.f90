@@ -48,18 +48,20 @@ contains
 !! \date 09/06/2020: Created
 !!
 subroutine ufo_rttovonedvarcheck_create(self, obsspace, f_conf, channels, &
-                                        onedvarflag)
+                                        onedvarflag, passflag)
 
   implicit none
   type(ufo_rttovonedvarcheck), intent(inout) :: self         !< rttovonedvarcheck main object
   type(c_ptr), value, intent(in)             :: obsspace     !< observation database pointer
   type(fckit_configuration), intent(in)      :: f_conf       !< yaml file contents
   integer(c_int), intent(in)                 :: channels(:)  !< all channels that can be used in 1D-Var
-  integer(c_int), intent(in)                 :: onedvarflag  !< flag for qc manager
+  integer(c_int), intent(in)                 :: onedvarflag  !< flag from qc flags
+  integer(c_int), intent(in)                 :: passflag     !< pass flag from qc flags
 
   self % obsdb = obsspace
   self % conf = f_conf
   self % onedvarflag = onedvarflag
+  self % passflag = passflag
 
   call ufo_rttovonedvarcheck_setup(self, channels) ! from init
 
@@ -204,7 +206,7 @@ subroutine ufo_rttovonedvarcheck_apply(self, vars, retrieval_vars, geovals, appl
       ! Channel selection based on previous filters flags
       nchans_used = 0
       do jvar = 1, self%nchans
-        if( obs % QCflags(jvar,jobs) == 0 ) then
+        if( obs % QCflags(jvar,jobs) == self % passflag ) then
           nchans_used = nchans_used + 1
         end if
       end do
@@ -236,7 +238,7 @@ subroutine ufo_rttovonedvarcheck_apply(self, vars, retrieval_vars, geovals, appl
       ! Create obs vector and r matrix
       jchans_used = 0
       do jvar = 1, self%nchans
-        if( obs % QCflags(jvar,jobs) == 0 ) then
+        if( obs % QCflags(jvar,jobs) == self % passflag ) then
           jchans_used = jchans_used + 1
           ob % yobs(jchans_used) = obs % yobs(jvar, jobs)
           ob % channels_used(jchans_used) = self % channels(jvar)

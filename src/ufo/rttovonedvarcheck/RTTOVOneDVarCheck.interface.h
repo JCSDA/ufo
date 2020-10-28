@@ -28,7 +28,7 @@ typedef int F90onedvarcheck;
 extern "C" {
   void ufo_rttovonedvarcheck_create_f90(F90onedvarcheck &, const ioda::ObsSpace &,
                       const eckit::Configuration *, const int &, const int &,
-                      oops::Variables &, const int &);
+                      oops::Variables &, const int &, const int &);
   void ufo_rttovonedvarcheck_delete_f90(F90onedvarcheck &);
   void ufo_rttovonedvarcheck_apply_f90(const F90onedvarcheck &, const oops::Variables &,
                                        const oops::Variables &, const F90goms &, const int &,
