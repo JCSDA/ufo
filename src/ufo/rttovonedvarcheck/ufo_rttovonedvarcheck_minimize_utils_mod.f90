@@ -146,16 +146,19 @@ if (profindex % tstar > 0) then
   prof_x(profindex % tstar) = geoval%vals(1, 1)
 end if
 
+! This has been left in for future development
 ! cloud top pressure
 !if (profindex % cloudtopp > 0) then
 !  prof_x(profindex % cloudtopp) = ob % cloudtopp ! carried around as hPa
 !end if
 
+! This has been left in for future development
 ! cloud fraction
 !if (profindex % cloudfrac > 0) then
 !  prof_x(profindex % cloudfrac) = ob % cloudfrac
 !end if
 
+! This has been left in for future development
 ! windspeed. Remember that all wind have been transferred to u and v is set to zero
 ! for windspeed retrievals
 ! var_u = "eastward_wind"
@@ -166,17 +169,18 @@ end if
 
 !----------------------------
 ! 4. Emissivities
+! This has been left in for future development
 !----------------------------
 
 ! Microwave Emissivity
-if (profindex % mwemiss(1) > 0) then
-  ! Check that emissivity map is the correct size for the profile
-  if ((profindex % mwemiss(2) - profindex % mwemiss(1) + 1) /= size(EmissMap)) then
-    call abor1_ftn("mwemiss size differs from emissivity map")
-  end if
-  ! Copy microwave emissivity to profile
-    prof_x(profindex % mwemiss(1):profindex % mwemiss(2)) = ob % emiss(EmissMap)
-end if
+!if (profindex % mwemiss(1) > 0) then
+!  ! Check that emissivity map is the correct size for the profile
+!  if ((profindex % mwemiss(2) - profindex % mwemiss(1) + 1) /= size(EmissMap)) then
+!    call abor1_ftn("mwemiss size differs from emissivity map")
+!  end if
+!  ! Copy microwave emissivity to profile
+!    prof_x(profindex % mwemiss(1):profindex % mwemiss(2)) = ob % emiss(EmissMap)
+!end if
 
 ! Retrieval of emissivity principal components
 !if (profindex % emisspc(1) > 0) THEN
@@ -367,16 +371,19 @@ if (profindex % tstar > 0) then
   geovals%geovals(gv_index)%vals(1,1) = prof_x(profindex % tstar)
 end if
 
+! This has been left in for future development
 ! cloud top pressure - passed through via the ob
 !if (profindex % cloudtopp > 0) then
 !  ob % cloudtopp = prof_x(profindex % cloudtopp) ! stored in ob as hPa
 !end if
 
+! This has been left in for future development
 ! cloud fraction - passed through via the ob
 !if (profindex % cloudfrac > 0) then
 !  ob % cloudfrac = prof_x(profindex % cloudfrac)
 !end if
 
+! This has been left in for future development
 ! windspeed
 !if (profindex % windspeed > 0) THEN
 !  ! Remember that we transfer all wind to u and set v to zero for
@@ -391,15 +398,16 @@ end if
 
 !----------------------------
 ! 4. Emissivities
+! This has been left in for future development
 !------------------------
 
 ! Retrieval of microwave emissivity directly
-if (profindex % mwemiss(1) > 0) THEN
-  do ii = 1, size(ob % channels_used)
-    EmissElement = EmissElements(ob % channels_used(ii))
-    ob % emiss(ii) = prof_x(profindex % mwemiss(1) + EmissElement - 1)
-  end do
-end if
+!if (profindex % mwemiss(1) > 0) THEN
+!  do ii = 1, size(ob % channels_used)
+!    EmissElement = EmissElements(ob % channels_used(ii))
+!    ob % emiss(ii) = prof_x(profindex % mwemiss(1) + EmissElement - 1)
+!  end do
+!end if
 
 ! Retrieval of emissivity principal components
 !if (profindex % emisspc(1) > 0) THEN
@@ -469,15 +477,15 @@ write(*,*) "Do qt"
   allocate(ql(nlevels))
   allocate(qi(nlevels))
 
-  call ufo_geovals_get_var(geovals, "air_temperature", geoval)
+  call ufo_geovals_get_var(geovals, trim(var_ts), geoval)
   temperature(:) = geoval%vals(:, 1) ! K
-  call ufo_geovals_get_var(geovals, "air_pressure", geoval)
+  call ufo_geovals_get_var(geovals, trim(var_prs), geoval)
   pressure(:) = geoval%vals(:, 1)    ! Pa
 
   humidity_total(:) = 0.0
-  call ufo_geovals_get_var(geovals, "specific_humidity", geoval)
+  call ufo_geovals_get_var(geovals, trim(var_q), geoval)
   humidity_total(:) = humidity_total(:) + geoval%vals(:, 1)
-  call ufo_geovals_get_var(geovals, "mass_content_of_cloud_liquid_water_in_atmosphere_layer", geoval)
+  call ufo_geovals_get_var(geovals, trim(var_clw), geoval)
   humidity_total(:) = humidity_total(:) + geoval%vals(:, 1)
 
   ! Max sure theres a minimum humidity
@@ -494,7 +502,7 @@ write(*,*) "Do qt"
                           qi(:))               ! out
 
   ! Assign values to geovals q
-  varname = "specific_humidity"  ! kg/kg
+  varname = trim(var_q)  ! kg/kg
   gv_index = 0
   do i=1,geovals%nvar
     if (varname == trim(geovals%variables(i))) gv_index = i
@@ -502,7 +510,7 @@ write(*,*) "Do qt"
   geovals%geovals(gv_index) % vals(:,1) = q(:)
 
   ! Assign values to geovals q clw
-  varname = "mass_content_of_cloud_liquid_water_in_atmosphere_layer"  ! kg/kg
+  varname = trim(var_clw)  ! kg/kg
   gv_index = 0
   do i=1,geovals%nvar
     if (varname == trim(geovals%variables(i))) gv_index = i
@@ -510,7 +518,7 @@ write(*,*) "Do qt"
   geovals%geovals(gv_index) % vals(:,1) = ql(:)
 
   ! Assign values to geovals ciw
-  varname = "mass_content_of_cloud_ice_in_atmosphere_layer"  ! kg/kg
+  varname = trim(var_cli)  ! kg/kg
   gv_index = 0
   do i=1,geovals%nvar
     if (varname == trim(geovals%variables(i))) gv_index = i
@@ -528,6 +536,7 @@ end if
 
 !-------
 ! 2. Wind
+! This has been left in for future development
 !-------
 
 ! RTTOV is isotropic, therefore if we only want to retrieve a "total" windspeed,
@@ -535,36 +544,36 @@ end if
 ! zero. If we are not retrieving windspeed, we just leave u and v separate to
 ! avoid confusion.
 
-if (profindex % windspeed > 0) THEN
-  ! Get winds from geovals
-  varname = "eastward_wind"  ! m/s
-  call ufo_geovals_get_var(geovals, varname, geoval)
-  u_wind = geoval%vals(1,1)
-
-  varname = "northward_wind"  ! m/s
-  call ufo_geovals_get_var(geovals, varname, geoval)
-  v_wind = geoval%vals(1,1)
-
-  ! Convert to "total" windspeed
-  new_u_wind = sqrt(u_wind * u_wind + v_wind * v_wind)
-  new_v_wind = zero
-
-  ! Write back to geovals
-  varname = "eastward_wind"  ! m/s
-  gv_index = 0
-  do i=1,geovals%nvar
-    if (varname == trim(geovals%variables(i))) gv_index = i
-  end do
-  geovals%geovals(gv_index)%vals(1,1) = new_u_wind
-
-  varname = "northward_wind"  ! m/s
-  gv_index = 0
-  do i=1,geovals%nvar
-    if (varname == trim(geovals%variables(i))) gv_index = i
-  end do
-  geovals%geovals(gv_index)%vals(1,1) = new_v_wind
-
-end if
+!if (profindex % windspeed > 0) THEN
+!  ! Get winds from geovals
+!  varname = trim(var_u)  ! m/s
+!  call ufo_geovals_get_var(geovals, varname, geoval)
+!  u_wind = geoval%vals(1,1)
+!
+!  varname = trim(var_v)  ! m/s
+!  call ufo_geovals_get_var(geovals, varname, geoval)
+!  v_wind = geoval%vals(1,1)
+!
+!  ! Convert to "total" windspeed
+!  new_u_wind = sqrt(u_wind * u_wind + v_wind * v_wind)
+!  new_v_wind = zero
+!
+!  ! Write back to geovals
+!  varname = trim(var_u)  ! m/s
+!  gv_index = 0
+!  do i=1,geovals%nvar
+!    if (varname == trim(geovals%variables(i))) gv_index = i
+!  end do
+!  geovals%geovals(gv_index)%vals(1,1) = new_u_wind
+!
+!  varname = trim(var_v)  ! m/s
+!  gv_index = 0
+!  do i=1,geovals%nvar
+!    if (varname == trim(geovals%variables(i))) gv_index = i
+!  end do
+!  geovals%geovals(gv_index)%vals(1,1) = new_v_wind
+!
+!end if
 
 ! Tidy up
 if (allocated(temperature))    deallocate(temperature)
@@ -950,7 +959,7 @@ if (profindex % t(1) > 0) then
     OutOfRange = .true.
   end if
 else
-  varname = "air_temperature"
+  varname = var_ts
   call ufo_geovals_get_var(geovals, varname, geoval)
   Temp = geoval%vals(:, 1) ! K
 end if
@@ -965,7 +974,6 @@ if (profindex % t2 > 0) then
     OutOfRange = .true.
   end if
 else
-  !varname = "air_temperature_at_two_meters_above_surface"
   varname = var_sfc_t2m
   call ufo_geovals_get_var(geovals, varname, geoval)
   Temp2 = geoval%vals(1, 1) ! K
@@ -1003,7 +1011,7 @@ Constrain: if (.not. OutOfRange) then
 
 
   ! Get pressure
-  varname = "air_pressure"
+  varname = var_prs
   call ufo_geovals_get_var(geovals, varname, geoval)
   if (.not. allocated(Plevels_1DVar)) allocate(Plevels_1DVar(nlevels_q))
   Plevels_1DVar(:) = geoval%vals(:, 1) ! K
@@ -1060,7 +1068,7 @@ Constrain: if (.not. OutOfRange) then
   !----
 
   if (profindex % q2 > 0) then
-    varname = "air_pressure_at_two_meters_above_surface"
+    varname = var_sfc_p2m
     call ufo_geovals_get_var(geovals, varname, geoval)
     Pstar_Pa(1) = geoval%vals(1, 1)
     if (useRHwaterForQC) then
@@ -1080,6 +1088,7 @@ Constrain: if (.not. OutOfRange) then
     end if
   end if
 
+! This has been left in for future development
 !  !----
 !  ! 2.3) Grey cloud
 !  !----
@@ -1096,6 +1105,7 @@ Constrain: if (.not. OutOfRange) then
 !    end if
 !  end if
 !
+! This has been left in for future development
 !  !----
 !  ! 2.4) Surface emissivity PCs
 !  !----
@@ -1109,6 +1119,7 @@ Constrain: if (.not. OutOfRange) then
 !    end where
 !  end if
 !
+! This has been left in for future development
 !  !--------
 !  ! 2.5) Cloud profiles
 !  !--------
@@ -1197,17 +1208,17 @@ IWP = 0.0
 LWP = 0.0
 
 ! Get pressure from geovals
-varname = "air_pressure"
+varname = var_prs
 call ufo_geovals_get_var(geovals, varname, geoval)
 Plevels_1DVar(:) = geoval%vals(:, 1) ! K
 
 ! Get clw from geovals
-varname = "mass_content_of_cloud_liquid_water_in_atmosphere_layer"
+varname = var_clw
 call ufo_geovals_get_var(geovals, varname, geoval)
 clw = geoval%vals(:, 1)
 
 ! Get ciw from geovals
-varname = "mass_content_of_cloud_ice_in_atmosphere_layer"
+varname = var_cli
 call ufo_geovals_get_var(geovals, varname, geoval)
 ciw = geoval%vals(:, 1)
 

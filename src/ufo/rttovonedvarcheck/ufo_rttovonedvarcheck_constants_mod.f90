@@ -91,11 +91,11 @@ real(kind_real), parameter, public :: &
   MinTemperature  =    70.0,    & !< Minimum temperature ( K )
   IceShelfLimit   =   -72.0,    & !< Assumed limit of SH seaice
   WetLevelLid     =   115.0,    & !< Uppermost wet pressure level
-  MWCloudLevelLid =   310.0,    & !< Uppermost clw pressure lvl for mwcalcs (hpa)
-  Epsilon         =     0.62198   !< Epsilon is the ratio of molecular weights of water and dry air
+  MWCloudLevelLid =   310.0
 
 !-----------------------------------------------------------------------------
 ! 4. Information for emissivity retrieval
+! This is not currently available but has been left in for future development
 !-----------------------------------------------------------------------------
 
 !< Mapping for each of the 20 ATOVS channels (1-15 AMSU-A; 6-20 AMSU-B)

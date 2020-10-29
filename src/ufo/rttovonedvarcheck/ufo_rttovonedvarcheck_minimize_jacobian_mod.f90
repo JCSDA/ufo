@@ -278,6 +278,7 @@ if (profindex % pstar > 0) then
   end do
 end if
 
+! This has been left in for future development
 ! 2.4) Windspeed - var_u = "eastward_wind"
 ! Remember that all wind has been transferred to u and v is set to zero for
 ! windspeed retrieval.
@@ -300,6 +301,7 @@ if (profindex % tstar > 0) then
   end do
 end if
 
+! This has been left in for future development
 ! 2.5) Cloud top pressure
 ! This is not in rttov interface yet
 !if (profindex % cloudtopp > 0) then
@@ -311,6 +313,7 @@ end if
 !  end do
 !end if
 
+! This has been left in for future development
 ! 2.6) Effective cloud fraction
 ! This is not in rttov interface yet
 !if (profindex % cloudfrac > 0) then
@@ -323,29 +326,30 @@ end if
 
 !----
 ! 3.) Emissivities
+! This has been left in for future development
 !----
 
 ! 3.1 Microwave Emissivity - var_sfc_emiss = "surface_emissivity"
 
-if (profindex % mwemiss(1) > 0) then
-  ! The emissivity matrix needs to be "unpacked" as it is only one
-  ! dimensional over channels - implying you want to retrieve a
-  ! single emissivity value. It is unpacked here so that each emissivity
-  ! has a corresponding entry for the relevant channel. Note that this is
-  ! a bit physically dubious as several channels have the same frequency, etc.
-  ! This complexity is dealt with in the B Matrix.
-  ! Check that we want only the diagonal elements to be non-zero
-  do j = 1, size(EmissMap)
-      chan = EmissMap(j)
-    do i = 1, nchans
-      if (channels(i) == chan) then
-        write(varname,"(3a,i0)") "brightness_temperature_jacobian_",trim(var_sfc_emiss),"_",channels(i)
-        call ufo_geovals_get_var(hofxdiags, varname, geoval)
-        H_matrix(i,profindex % mwemiss(1) + j - 1) = geoval % vals(1,1)
-      end if
-    end do
-  end do
-end if
+!if (profindex % mwemiss(1) > 0) then
+!  ! The emissivity matrix needs to be "unpacked" as it is only one
+!  ! dimensional over channels - implying you want to retrieve a
+!  ! single emissivity value. It is unpacked here so that each emissivity
+!  ! has a corresponding entry for the relevant channel. Note that this is
+!  ! a bit physically dubious as several channels have the same frequency, etc.
+!  ! This complexity is dealt with in the B Matrix.
+!  ! Check that we want only the diagonal elements to be non-zero
+!  do j = 1, size(EmissMap)
+!      chan = EmissMap(j)
+!    do i = 1, nchans
+!      if (channels(i) == chan) then
+!        write(varname,"(3a,i0)") "brightness_temperature_jacobian_",trim(var_sfc_emiss),"_",channels(i)
+!        call ufo_geovals_get_var(hofxdiags, varname, geoval)
+!        H_matrix(i,profindex % mwemiss(1) + j - 1) = geoval % vals(1,1)
+!      end if
+!    end do
+!  end do
+!end if
 
 !! 3.2. Infrared Emissivity - work in progress
 !

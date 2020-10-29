@@ -418,7 +418,7 @@ if (prof_index % pstar > 0) THEN
   where (surface_pressure /= missing)
     surface_pressure = surface_pressure * 100 ! Pa to hPa
   end where
-  call obsspace_put_db(obsdb, "OneDVar", "surface_pressure", surface_pressure)
+  call obsspace_put_db(obsdb, "OneDVar", trim(var_ps), surface_pressure)
   deallocate(surface_pressure)
 end if
 
@@ -426,7 +426,7 @@ end if
 ! 6) Surface temperature
 !--
 if (prof_index % t2 > 0) THEN
-  call obsspace_put_db(obsdb, "OneDVar", "air_temperature_at_two_meters_above_surface", &
+  call obsspace_put_db(obsdb, "OneDVar", trim(var_sfc_t2m), &
                        self % output_profile(prof_index % t2, :))
 end if
 
@@ -448,7 +448,7 @@ end if
 ! 9) Skin temperature
 !--
 if (prof_index % tstar > 0) then
-  call obsspace_put_db(obsdb, "OneDVar", "skin_temperature", &
+  call obsspace_put_db(obsdb, "OneDVar", trim(var_sfc_tskin), &
                        self % output_profile(prof_index % tstar, :))
 end if
 

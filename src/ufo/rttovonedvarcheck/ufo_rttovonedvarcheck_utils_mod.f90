@@ -254,6 +254,8 @@ write(*,*) "Cost_ConvergenceFactor = ",self % Cost_ConvergenceFactor
 write(*,*) "MaxMLIterations = ",self % MaxMLIterations
 write(*,*) "EmissLandDefault = ",self % EmissLandDefault
 write(*,*) "EmissSeaIceDefault = ",self % EmissSeaIceDefault
+write(*,*) "EmisEigVecPath = ",self % EmisEigVecPath
+write(*,*) "EmisAtlas = ",self % EmisAtlas
 
 end subroutine ufo_rttovonedvarcheck_print
 

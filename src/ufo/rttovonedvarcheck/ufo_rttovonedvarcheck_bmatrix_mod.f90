@@ -532,6 +532,7 @@ b_matrix(:,:) = self % store(:,:,band)
 b_inverse(:,:) = self % inverse(:,:,band)
 b_sigma(:) = self % sigma(:,band)
 
+! This has been left in for future development
 !! Use errors associated with microwave emissivity atlas
 !if (profindex % mwemiss(1) > 0) then
 !
@@ -757,23 +758,23 @@ do jvar = 1, nmvars
 
   select case (trim(varname))
 
-    case ("air_temperature")
+    case (var_ts)
       fields_in(1) = 1 ! air_temperature
 
-    case ("specific_humidity")
+    case (var_q)
       if (qtotal_flag) then
         fields_in(10) = 10 ! total water profile
       else
         fields_in(2) = 2 ! water profile
       end if
 
-    case("surface_temperature")
+    case(var_sfc_t2m)
       fields_in(3) = 3 ! 2m air_temperature
 
-    case("specific_humidity_at_two_meters_above_surface")
+    case(var_sfc_q2m)
       fields_in(4) = 4 ! 2m specific_humidity
 
-    case("skin_temperature")
+    case(var_sfc_tskin)
       fields_in(5) = 5 ! surface skin temperature
 
     case(var_sfc_p2m)
@@ -782,10 +783,10 @@ do jvar = 1, nmvars
     ! 7 - o3total is not implmented yet
     ! 8 - not used is not implmented yet
 
-    case ("mass_content_of_cloud_liquid_water_in_atmosphere_layer")
+    case (var_clw)
       if (.NOT. qtotal_flag) then 
         fields_in(9) = 9  ! liquid water profile
-        call abor1_ftn("rttovonedvarcheck not setup for independent clw")
+        call abor1_ftn("rttovonedvarcheck not setup for independent clw yet")
       end if
 
     case ("surface_wind_speed") ! surface wind speed
@@ -798,23 +799,23 @@ do jvar = 1, nmvars
     case ("surface_emissivity") ! microwave emissivity
       fields_in(14) = 14
 
-    case ("mass_content_of_cloud_ice_in_atmosphere_layer")
+    case (var_cli)
       if (.NOT. qtotal_flag) then
         fields_in(15) = 15 ! ice profile
-        call abor1_ftn("rttovonedvarcheck not setup for independent ciw")
+        call abor1_ftn("rttovonedvarcheck not setup for independent ciw yet")
       end if
 
     case ("cloud_top_pressure")
       fields_in(16) = 16
-      call abor1_ftn("rttovonedvarcheck not setup for cloud retrievals")
+      call abor1_ftn("rttovonedvarcheck not setup for cloud retrievals yet")
 
     case ("effective_cloud_fraction") ! effective cloud fraction
       fields_in(17) = 17
-      call abor1_ftn("rttovonedvarcheck not setup for cloud retrievals")
+      call abor1_ftn("rttovonedvarcheck not setup for cloud retrievals yet")
 
     case ("emissivity_pc") ! emissivity prinipal components
       fields_in(18) = 18
-      call abor1_ftn("rttovonedvarcheck not setup for pc emissivity")
+      call abor1_ftn("rttovonedvarcheck not setup for pc emissivity yet")
 
     ! 19 cloud fraction profile - not currently used
 
