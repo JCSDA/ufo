@@ -159,6 +159,7 @@ include_directories( ${UFO_INCLUDE_DIRS} ${UFO_EXTRA_INCLUDE_DIRS} )
 add_subdirectory( src )
 add_subdirectory( test )
 add_subdirectory( tools )
+add_subdirectory( resources )
 
 if( ENABLE_UFO_DOC )
     add_subdirectory( docs )

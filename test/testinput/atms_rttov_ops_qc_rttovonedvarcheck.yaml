@@ -35,8 +35,8 @@ observations:
     ModName: RTTOV
     Absorbers: *rttov_absobers
     obs options: *rttov_options
-    BMatrix: /home/h06/mcooke/JEDI/files_not_on_aws/atms_bmatrix_70_test.dat
-    RMatrix: /home/h06/mcooke/JEDI/files_not_on_aws/atms_noaa_20_rmatrix_test.nc4
+    BMatrix: ../resources/bmatrix/rttov/atms_bmatrix_70_test.dat
+    RMatrix: ../resources/rmatrix/rttov/atms_noaa_20_rmatrix_test.nc4
     filter variables:
     - name: brightness_temperature
       channels: *ops_channels
