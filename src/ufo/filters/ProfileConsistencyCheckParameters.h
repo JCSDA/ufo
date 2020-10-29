@@ -13,11 +13,8 @@
 
 #include "eckit/exception/Exceptions.h"
 
-#include "oops/util/parameters/OptionalParameter.h"
 #include "oops/util/parameters/Parameter.h"
 #include "oops/util/parameters/Parameters.h"
-
-#include "ufo/profile/DataHandlerParameters.h"
 
 #include "ufo/utils/Constants.h"
 #include "ufo/utils/parameters/ParameterTraitsVariable.h"
@@ -30,22 +27,15 @@ namespace eckit {
 namespace ufo {
 
   /// \brief Options controlling the operation of the ProfileConsistencyChecks filter.
-  class ProfileConsistencyCheckParameters : public DataHandlerParameters {
-    OOPS_CONCRETE_PARAMETERS(ProfileConsistencyCheckParameters, DataHandlerParameters)
+  class ProfileConsistencyCheckParameters : public oops::Parameters {
+    OOPS_CONCRETE_PARAMETERS(ProfileConsistencyCheckParameters, Parameters)
 
    public:  // variables
     /// @name Generic parameters
     /// @{
 
-    /// Maximum number of profile levels to be processed (a legacy of the OPS code).
-    /// No maximum is assigned if this parameter is not specified.
-    oops::OptionalParameter<int> maxlev {"maxlev", this};
-
     /// List of checks to perform
     oops::Parameter<std::vector<std::string>> Checks {"Checks", {}, this};
-
-    /// If not sorting observations, ensure number of profiles is consistent
-    oops::Parameter<bool> ValidateTotalNumProf {"ValidateTotalNumProf", true, this};
 
     /// Print station ID
     oops::Parameter<bool> PrintStationID {"PrintStationID", false, this};

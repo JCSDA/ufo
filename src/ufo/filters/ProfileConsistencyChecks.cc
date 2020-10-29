@@ -46,6 +46,9 @@ namespace ufo {
     options_.reset(new ProfileConsistencyCheckParameters());
     options_->deserialize(config);
 
+    dhoptions_.reset(new DataHandlerParameters());
+    dhoptions_->deserialize(config);
+
     allvars_ += Variables(filtervars_, "HofX");
 
     // Throw exception if expected configuration option is missing.
@@ -72,16 +75,16 @@ namespace ufo {
 
     // Handles data in entire sample
     EntireSampleDataHandler entireSampleDataHandler(obsdb_,
-                                                    *options_);
+                                                    *dhoptions_);
 
     // Determines indices of profile's observations in entire sample
     ProfileIndices profileIndices(obsdb_,
-                                  *options_,
+                                  *dhoptions_,
                                   apply);
 
     // Handles individual profile data
     ProfileDataHandler profileDataHandler(obsdb_,
-                                          *options_,
+                                          *dhoptions_,
                                           entireSampleDataHandler,
                                           profileIndices);
 

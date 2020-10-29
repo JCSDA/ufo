@@ -12,7 +12,7 @@
 
 namespace ufo {
   ProfileIndices::ProfileIndices(ioda::ObsSpace &obsdb,
-                                 const ProfileConsistencyCheckParameters &options,
+                                 const DataHandlerParameters &options,
                                  const std::vector <bool> &apply)
     : obsdb_(obsdb),
       options_(options),

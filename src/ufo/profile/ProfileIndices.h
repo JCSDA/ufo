@@ -18,7 +18,7 @@
 #include "ioda/ObsDataVector.h"
 #include "ioda/ObsSpace.h"
 
-#include "ufo/filters/ProfileConsistencyCheckParameters.h"
+#include "ufo/profile/DataHandlerParameters.h"
 
 namespace ioda {
   class ObsSpace;
@@ -39,7 +39,7 @@ namespace ufo {
   class ProfileIndices {
    public:
     ProfileIndices(ioda::ObsSpace &obsdb,
-                   const ProfileConsistencyCheckParameters &options,
+                   const DataHandlerParameters &options,
                    const std::vector <bool> &apply);
 
     /// Determine indices in entire sample for this profile.
@@ -69,7 +69,7 @@ namespace ufo {
     ioda::ObsSpace &obsdb_;
 
     /// Configurable parameters.
-    const ProfileConsistencyCheckParameters &options_;
+    const DataHandlerParameters &options_;
 
     /// Observations to apply the filter to.
     const std::vector <bool> &apply_;

@@ -28,6 +28,7 @@
 #include "ufo/filters/Variables.h"
 #include "ufo/ObsDiagnostics.h"
 
+#include "ufo/profile/DataHandlerParameters.h"
 #include "ufo/profile/EntireSampleDataHandler.h"
 #include "ufo/profile/ProfileCheckBackgroundGeopotentialHeight.h"
 #include "ufo/profile/ProfileCheckBackgroundRelativeHumidity.h"
@@ -110,8 +111,8 @@ void testProfileConsistencyChecks(const eckit::LocalConfiguration &conf) {
   // Test whether using the get function with the wrong type throws an exception.
   bool getWrongType = conf.getBool("GetWrongType", false);
   if (getWrongType) {
-    std::unique_ptr <ProfileConsistencyCheckParameters> options_;
-    options_.reset(new ProfileConsistencyCheckParameters());
+    std::unique_ptr <DataHandlerParameters> options_;
+    options_.reset(new DataHandlerParameters());
     options_->deserialize(conf);
     EntireSampleDataHandler entireSampleDataHandler(obsspace,
                                                     *options_);
@@ -136,20 +137,24 @@ void testProfileConsistencyChecks(const eckit::LocalConfiguration &conf) {
   // Manually modify QC flags in order to cover rare code paths.
   bool ManualFlagModification = conf.getBool("ManualFlagModification", false);
   if (ManualFlagModification) {
+    std::unique_ptr <DataHandlerParameters> dhoptions_;
+    dhoptions_.reset(new DataHandlerParameters());
+    dhoptions_->deserialize(conf);
+
     std::unique_ptr <ProfileConsistencyCheckParameters> options_;
     options_.reset(new ProfileConsistencyCheckParameters());
     options_->deserialize(conf);
     EntireSampleDataHandler entireSampleDataHandler(obsspace,
-                                                    *options_);
+                                                    *dhoptions_);
     // Load data from obsspace
     entireSampleDataHandler.get<float>(ufo::VariableNames::obs_air_pressure);
     entireSampleDataHandler.get<int>(ufo::VariableNames::qcflags_air_temperature);
     std::vector<bool> apply(obsspace.nlocs(), true);
     ProfileIndices profileIndices(obsspace,
-                                  *options_,
+                                  *dhoptions_,
                                   apply);
     ProfileDataHandler profileDataHandler(obsspace,
-                                          *options_,
+                                          *dhoptions_,
                                           entireSampleDataHandler,
                                           profileIndices);
     ProfileCheckValidator profileCheckValidator(*options_,

@@ -18,6 +18,7 @@
 
 #include "ufo/filters/FilterBase.h"
 #include "ufo/filters/QCflags.h"
+#include "ufo/profile/DataHandlerParameters.h"
 
 #include "ufo/utils/Constants.h"
 
@@ -102,6 +103,7 @@ namespace ufo {
 
       /// Configurable options
       std::unique_ptr <ProfileConsistencyCheckParameters> options_;
+      std::unique_ptr <DataHandlerParameters> dhoptions_;
 
       /// Number of mismatches between values produced in this code
       /// and their OPS equivalents (used for validation)
