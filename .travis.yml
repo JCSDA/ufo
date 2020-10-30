@@ -1,0 +1,38 @@
+env:
+  global:
+  - secure: CUp08dHssPh8u2769hB+YbH7tkZ3ScFZ1N3lPkaFVhUWSv/76UTgUHJEsKgEXiyxbGbP6QEWPug9nVBD/hdf+8ApodoJSL/Ji34/8N0xMs4eRFYBKZ5S6PONJiRLIRKBBIYk6P7zHUGlFN9TpSIUQyBK9kM6/VGSVofBPuxDmRQKIMcsvKVkCsJQn6/fNzIe7bpM8FPaBIKLsCTQWyNx1qOsH489VVl9JfP/ujoM/qNzTDK0dGEPaGr+uTCkikPNvKVCQR26i5Wt/+Lp8Ho5uu2ymdjJh5amjovhVBKYAnYVCrlR5BsB3ZQeSlDJ6/VcuEPpwwiLMDLLl2FEBhnrcei9IVebKCMQ289O4Nz3RRQaN9NZudtI2lHMAP3NBR97EzOITNxJcCDXAksWAlmYsYckaogn7qqQc78Zb17fgKNU40FNnRHMTotDmShfee4VYcqsGXuapaDhABDJsXa/bhmknCavojSS9Zm4YykSJtUpBHR1mNuv9ksZQgY0pN161f/sOv8V0EgcyAgAhuJd+E5fAke+K0Pt+kfeDc2AxsuMRkOcFzFREExB0Eer4Qn4K9hwaRB/g5o4A7tazWGxS3slMt94runWdc93DiUn3SrMpAeZZ5G3F/29kmYrnW7sRvy3mIn397x8uHzkbzhA4qUyjmy+aIeC7fzbY4VGI/Q=
+  - secure: e77U8py8WxUqSRmJ2UTG9Av+s3+GvMW3OKPhr/YQqfsT89mbkU4qlNZO3hYBVg5AdQMSS/bnTZ3v9nm1gdD8TZl5XFZqCgkH+8o0+c9hjG8SSAKlg2NPkcn1nFPJzf/8BY0HpIGm+RVjcH9tyaaWCYhCcpjEt/L5EfN3SSLHKSyb1BMkmq4Cgp9SDJ+pvXFK6IVgWTJ6L+G6nbWcqMNUKcMM8AzYMNkddgleeNmLBVEMqz4UF4cNBnPA1CDLCk1Jmlc5pluu7O5loBTEIGfsTaTTgYYQ7QgVb1d0aSXBxzK6wCkHWkjxav/zYaRsBlpKkkd4NBmc5lFDNC2ia9hb0KpSBSYM9TNfZ48EqlyaCE4wxaPBJoshHzXMj4sAm5aM8JOt7A26NFgxm7ounJlwHY8O2qC2O3mmsEMvbx4FMjNccL8bPA3u7/cAgpFYsCAfBtNYdeJkSB/q8BDYd9PKl9fIrZPlcjoRkFBZbB0+2Tl4XCiQdgpGqgrFY4CZEb0n8Gp8xaXeR17VWQrfsAW7Fpl5BEVRJDIEZmhkWDgQH3kc7ei7NNxUhGVxOmpYaXuSo8SU8IZR5E5G8BCX4gl20mpx+XgEH76BDnZGNQ2j3WGFZ/f+s7YggHaRNWLwInmrRLWoqk+y6qQ6qDI3GSiNAYlJLgMzKfFYF38+gtVZHrg=
+  - secure: YJRRxB8C5bPo/RVOv7oG0+LnuCXwPovQ9I0tP5a9/2e5rbgWJ5DTbqz6fE+lsyF2PFo/wEhmk49wZnhovluR+rwhra2iOtmcu7QKRTgWwmkvfgGmCxq8oMzUYk9j03lYZQhZBitObNp2MYBIDayzUpHhk1hMR8c4ifWqmVKqvE1EcMcY88Su7Tr+DZ6bzQvzDEDQjtpjuPPby/utWRwynsOajeNR7Mo6chvvvlA90sEXWjQ9xJJ+44Xmncjqzhbzng6TaNMZzUoIxmUl8f7nVXVRLbLvB/f8icD4HgObfVf0BmDHW6WXSpyerfLa1lxXaXqungatLkwpHJeGi/LSbZZEFPBN5zjv/Uo93sq5NFfY6MKyZqGgugz/JXNULHuQSr87y/kPSTQUQ3EKuOZxV/VMFCKy9hrOdnmkxpA4CzFBgomuqMXJvP22Oqwdlx2PHr2MdTKiuZDndGLdSoAgtFjg7BoNlkBGcJ5Z6I4jaa3zLAKc29HSGL75sfRDmAHTtYva59oMDpRIlNBu62CamUyB/hDqE9B/wtVLsgOfEwxsV2of07lZnoC/G9RPh+tjn3P4DH5wiO9zMWCTIyvEKo3swg8dXwoX0M4NtWgH5gkbfCz9vHebUsiqDuckFKs4R+mRY3AE7KRqIfY+5a1Tda3soIYSi63ewbTF0lGkaNA=
+branches:
+  only:
+  - develop
+language: cpp
+services:
+  - docker
+before_install:
+  - echo $TRAVIS_PULL_REQUEST
+  - echo $TRAVIS_PULL_REQUEST_BRANCH
+  - echo $TRAVIS_BRANCH
+  - export BRANCH=$(if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then echo $TRAVIS_BRANCH; else echo $TRAVIS_PULL_REQUEST_BRANCH; fi)
+  - echo "TRAVIS_BRANCH=$TRAVIS_BRANCH, PR=$PR, BRANCH=$BRANCH"
+  - pwd
+  - ls 
+  - cd CI
+  - REPO_SOURCE_DIR=${TRAVIS_BUILD_DIR}/jcsda/src_repo
+  # should use develop after issue with parallel ufo testing is solved
+  - git clone https://${GH_TOKEN}@github.com/jcsda-internal/jedi-build-package.git ${REPO_SOURCE_DIR}/jedi_build_package
+
+  - docker pull jcsda/docker-clang-mpich-dev
+  - docker images
+
+script:
+  - docker run -d -t --env GH_TOKEN=$GH_TOKEN --env AWS_ACCESS_KEY_ID=$aws_access_key_id --env GH_BRANCH=$BRANCH --env AWS_SECRET_ACCESS_KEY=$aws_secret_access_key --name clang_container -v ${REPO_SOURCE_DIR}/jedi_build_package:/jcsda/src_repo jcsda/docker-clang-mpich-dev
+
+  - docker exec clang_container bash -c 'mkdir ~/.aws'  
+  - docker exec clang_container bash -c 'echo [default] >> ~/.aws/credentials '  
+  - docker exec clang_container bash -c 'echo aws_access_key_id = $aws_access_key_id >> ~/.aws/credentials'  
+  - docker exec clang_container bash -c 'echo aws_secret_access_key = $aws_secret_access_key >> ~/.aws/credentials'
+  - docker exec clang_container bash -c 'ls /jcsda/src_repo'
+  - docker exec clang_container bash -c 'cd /jcsda/src_repo && pip install --user -e .'
+
+  - docker exec clang_container bash -c 'cd /jcsda/src_repo && ~/.local/bin/jedi-build --gh-token=$GH_TOKEN -j 4 --env-id=travis-clang --branch-map atlas:release-stable fckit:release-stable crtm:release/crtm_jedi -br $GH_BRANCH -p ufo -vvv -3 -u --submit-dashboard --site TravisCI --abort-on-build-errors --abort-on-test-errors'

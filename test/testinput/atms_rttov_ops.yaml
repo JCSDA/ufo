@@ -1,0 +1,31 @@
+window begin: 2019-12-29T21:00:00Z
+window end: 2019-12-30T03:00:00Z
+
+observations:
+- obs operator:
+     name: RTTOV
+     GeoVal_type: MetO
+     Absorbers: [Water_vapour]
+     linear obs operator:
+       Absorbers: [Water_vapour]
+     obs options:
+       RTTOV_default_opts: OPS
+       SatRad_compatibility: true
+       Sensor_ID: noaa_20_atms
+       CoefficientPath: Data/
+  obs space:
+    name: atms_n20
+    obsdatain:
+      obsfile: Data/ioda/testinput_tier_1/atms_n20_obs_20191230T0000_rttov.nc4
+    obsdataout:
+      obsfile: Data/atms_npp_obs_2019123000_m_rttov_out.nc4
+    simulated variables: [brightness_temperature]
+    channels: 1-22 
+  geovals:
+    filename: Data/ufo/testinput_tier_1/geovals_atms_20191230T0000Z_benchmark.nc4
+  rms ref: 228.50280967174939
+  tolerance: 1.e-7
+  linear obs operator test:
+    coef TL: 1.e-4
+    tolerance TL: 2.0e-2
+    tolerance AD: 1.0e-11

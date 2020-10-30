@@ -1,0 +1,34 @@
+#
+#=== Profile consistency checks using one monolithic filter ===#
+#
+
+window begin: 2018-04-14T20:30:00Z
+window end: 2018-04-15T03:30:00Z
+
+observations:
+- obs space:
+    name: Radiosonde
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/met_office_profile_consistency_checks.nc4
+      obsgrouping:
+        group variable: "station_id"
+        sort variable: "air_pressure"
+        sort order: "descending"
+    simulated variables: [air_temperature, geopotential_height]
+  obs filters:
+  - filter: Profile Consistency Checks
+    filter variables:
+    - name: air_temperature
+    - name: geopotential_height
+    Checks: ["Basic", "SamePDiffT", "Sign", "UnstableLayer", "Interpolation", "Hydrostatic"]
+    maxlev: 10000
+    compareWithOPS: false
+    flagBasicChecksFail: true
+    PrintStationID: true
+    SCheck_CorrectT: true
+    HCheck_CorrectZ: true
+  HofX: HofX
+  obs diagnostics:
+  passedBenchmark: 901
+  benchmarkFlag: 15
+  flaggedBenchmark: 10057

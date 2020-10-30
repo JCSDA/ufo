@@ -1,0 +1,16 @@
+window begin: 2019-12-30T03:00:00Z
+window end: 2019-12-30T09:00:00Z
+
+observations: 
+- obs operator: 
+    name: GroundgnssMetOffice
+    obs options:
+  obs space: 
+    name: Groundgnss
+    obsdatain: 
+      obsfile: Data/ioda/testinput_tier_1/groundgnss_obs_2019123006_obs.nc
+    simulated variables: [ZTD] 
+  geovals: 
+    filename: Data/ufo/testinput_tier_1/groundgnss_geovals_20191230T0600Z.nc4
+  norm ref: HofX
+  tolerance: 1.0e-5

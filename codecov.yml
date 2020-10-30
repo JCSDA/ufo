@@ -1,0 +1,13 @@
+codecov:
+  notify:
+    require_ci_to_pass: yes
+
+coverage:
+  precision: 2
+  round: down
+  range: "70...100"
+
+ignore:
+  - "jcsda/src_repo/oops"
+  - "jcsda/src_repo/ioda"
+  - "jcsda/src_repo/ufo/test"

@@ -1,0 +1,175 @@
+window begin: 2018-01-01T00:00:00Z
+window end: 2019-01-01T00:00:00Z
+
+observations:
+- obs space:
+    name: test data
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
+    simulated variables: [variable1, variable2, variable3]
+  obs filters:
+  - filter: Bounds Check        # test min/max value with all variables
+    filter variables:
+    - name: variable1
+    - name: variable2
+    - name: variable3
+    minvalue: 14.0
+    maxvalue: 19.0
+# Compare variables with minvalue/maxvalue
+#  variable1@ObsValue = 10, 11, 12, 13, 14, 15, 16, 17, 18, 19
+#  variable2@ObsValue = 10, 12, 14, 16, 18, 20, 22, 24, 26, 28
+#  variable3@ObsValue = 25, 24, 23, 22, 21, 20, 19, 18, 17, 16
+  passedBenchmark: 13
+- obs space:
+    name: test data
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
+    simulated variables: [variable1, variable2, variable3]
+  obs filters:
+  - filter: Bounds Check        # test min/max value with subset of variables
+    filter variables:
+    - name: variable2
+    - name: variable3
+    minvalue: 14.0
+    maxvalue: 19.0
+# Compare variables with minvalue/maxvalue
+# Note: variable1 is not specified in filtered variables, all obs for variable1 will pass
+#  variable2@ObsValue = 10, 12, 14, 16, 18, 20, 22, 24, 26, 28
+#  variable3@ObsValue = 25, 24, 23, 22, 21, 20, 19, 18, 17, 16
+  passedBenchmark: 17
+- obs space:
+    name: test data
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
+    simulated variables: [variable1, variable2, variable3]
+  obs filters:
+  - filter: Bounds Check       # test min/max value with subset of variables, ordered different from simulate vars
+    filter variables:
+    - name: variable3
+    - name: variable1
+    minvalue: 14.0
+    maxvalue: 19.0
+# Compare variables with minvalue/maxvalue
+# Note: variable2 is not specified in filtered variables, all obs for variable2 will pass
+#  variable3@ObsValue = 25, 24, 23, 22, 21, 20, 19, 18, 17, 16
+#  variable1@ObsValue = 10, 11, 12, 13, 14, 15, 16, 17, 18, 19
+  passedBenchmark: 20
+- obs space:
+    name: test data
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
+    simulated variables: [variable1, variable2, variable3]
+  obs filters:
+  - filter: Bounds Check       # test min/max value with different test vars
+    filter variables:
+    - name: variable1
+    - name: variable2
+    - name: variable3
+    test variables:
+    - name: var1@MetaData
+    - name: var2@MetaData
+    - name: var3@MetaData
+    minvalue: 14.0
+    maxvalue: 19.0
+# Filter variable1, variable2, variable3 based on var1@MetaData, var2@MetaData, var3@MetaData values
+#  var1@MetaData =  1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+#  var2@MetaData = 10, 9, 8, 7, 6, 5, 4, 3, 2,  1
+#  var3@MetaData =  1, 1, 1, 1, 1, 0, 0, 0, 0,  0
+  passedBenchmark: 0
+- obs space:
+    name: test data
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
+    simulated variables: [variable1, variable2, variable3]
+  obs filters:
+  - filter: Bounds Check       # test min/max value with different test vars
+    filter variables:
+    - name: variable1
+    - name: variable2
+    - name: variable3
+    test variables:
+    - name: var1@MetaData
+    - name: var2@MetaData
+    - name: var3@MetaData
+    minvalue: 1
+    maxvalue: 3
+# Filter variable1, variable2, variable3 based on var1@MetaData, var2@MetaData, var3@MetaData values
+#  var1@MetaData =  1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+#  var2@MetaData = 10, 9, 8, 7, 6, 5, 4, 3, 2,  1
+#  var3@MetaData =  1, 1, 1, 1, 1, 0, 0, 0, 0,  0
+  passedBenchmark: 11
+- obs space:
+    name: test data
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
+    simulated variables: [variable1, variable2, variable3]
+  obs filters:
+  - filter: Bounds Check       # test min/max value with different test vars and subset of vars
+    filter variables:
+    - name: variable2
+    - name: variable3
+    test variables:
+    - name: var1@MetaData
+    - name: var2@MetaData
+# Filter variable2, variable3 based on var1@MetaData, var2@MetaData values
+# Note: variable1 is not specified in filtered variables, all obs for variable1 will pass
+#  var1@MetaData =  1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+#  var2@MetaData = 10, 9, 8, 7, 6, 5, 4, 3, 2,  1
+    minvalue: 14.0
+    maxvalue: 19.0
+  passedBenchmark: 10
+- obs space:
+    name: test data
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
+    simulated variables: [variable1, variable2, variable3]
+  obs filters:
+  - filter: Bounds Check       # test min/max value with different test vars and subset of vars
+    filter variables:
+    - name: variable2
+    - name: variable3
+    test variables:
+    - name: var1@MetaData
+    - name: var2@MetaData
+    minvalue: 1
+    maxvalue: 3
+# Filter variable2, variable3 based on var1@MetaData, var2@MetaData values
+# Note: variable1 is not specified in filtered variables, all obs for variable1 will pass
+#  var1@MetaData =  1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+#  var2@MetaData = 10, 9, 8, 7, 6, 5, 4, 3, 2,  1
+  passedBenchmark: 16
+- obs space:
+    name: test data
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
+    simulated variables: [variable1, variable2, variable3]
+  obs filters:
+  - filter: Bounds Check       # test min/max value of a single test var, but filter 2 or more vars
+    filter variables:
+    - name: variable2
+    - name: variable3
+    test variables:
+    - name: var1@MetaData
+    minvalue: 4
+# Filter variable2 AND variable3 based only on single test var: var1@MetaData values
+# Note: variable1 is not specified in filtered variables, all obs for variable1 will pass
+#  var1@MetaData =  1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+#  var2@MetaData = 10, 9, 8, 7, 6, 5, 4, 3, 2,  1
+  passedBenchmark: 24
+- obs space:
+    name: test data
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
+    simulated variables: [variable1, variable2, variable3]
+  obs filters:
+  - filter: Bounds Check       # test min/max value of a single test var, but filter 2 or more vars
+    filter variables:
+    - name: variable2
+    - name: variable3
+    test variables:
+    - name: variable1@ObsValue
+    maxvalue: 16
+# Filter variable2 AND variable3 based only on single test var of variable1 (@ObsValue)
+# Note: variable1 is not specified in filtered variables, all obs for variable1 will pass
+#  variable1@ObsValue = 10, 11, 12, 13, 14, 15, 16, 17, 18, 19
+  passedBenchmark: 24

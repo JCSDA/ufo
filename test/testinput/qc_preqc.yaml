@@ -1,0 +1,29 @@
+window begin: 2018-04-14T20:30:00Z
+window end: 2018-04-15T03:30:00Z
+
+observations:
+- obs operator:
+    name: VertInterp
+    VertCoord: air_pressure
+  obs space:
+    name: Radiosonde
+    obsdatain:
+      obsfile: Data/ioda/testinput_tier_1/sondes_obs_2018041500_m.nc4
+    simulated variables: [air_temperature]
+  geovals:
+    filename: Data/ufo/testinput_tier_1/sondes_geoval_2018041500_m.nc4
+  obs filters:
+  - filter: PreQC
+    maxvalue: 3
+  passedBenchmark: 155
+- obs space:
+    name: amsua_n19
+    obsdatain:
+      obsfile: Data/ioda/testinput_tier_1/amsua_n19_obs_2018041500_m.nc4
+    simulated variables: [brightness_temperature]
+    channels: 4-8
+  obs filters:
+  - filter: PreQC
+    minvalue: -2
+    maxvalue:  8
+  passedBenchmark: 377
