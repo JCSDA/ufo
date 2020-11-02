@@ -11,7 +11,7 @@ observations:
       obsfile: Data/ioda/testinput_tier_1/sondes_obs_2018041500_m.nc4
     simulated variables: [air_temperature]
   geovals:
-    filename: Data/sondes_geoval_2018041500_m.nc4
+    filename: Data/ufo/testinput_tier_1/sondes_geoval_2018041500_m.nc4
   obs filters:
   - filter: PreQC
     maxvalue: 3

@@ -62,10 +62,10 @@ obs operator:
     EndianType: little_endian
     CoefficientPath: Data/
 geovals:
-  filename: Data/iasi_metop-a_geoval_2018041500_m_unittest.nc4
+  filename: Data/ufo/testinput_tier_1/iasi_metop-a_geoval_2018041500_m_unittest.nc4
 obs diagnostics:
   variables: [brightness_temperature_jacobian_surface_emissivity, brightness_temperature_jacobian_surface_temperature, brightness_temperature_jacobian_air_temperature, brightness_temperature_jacobian_humidity_mixing_ratio]
   channels: *all_channels
 reference obs diagnostics:
-  filename: Data/iasi_metop-a_obsdiag_2018041500_m_unittest.nc4
+  filename: Data/ufo/testinput_tier_1/iasi_metop-a_obsdiag_2018041500_m_unittest.nc4
 tolerance: 1.e-6

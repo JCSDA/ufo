@@ -11,7 +11,7 @@ observations:
       obsfile: Data/ioda/testinput_tier_1/radar_dbz_obs_2019052222.nc4
     simulated variables: [equivalent_reflectivity_factor]
   geovals:
-    filename: Data/radar_dbz_geoval_2019052222.nc4
+    filename: Data/ufo/testinput_tier_1/radar_dbz_geoval_2019052222.nc4
   vector ref: GsiHofX
   tolerance: 1.0e-05
   linear obs operator test:

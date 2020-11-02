@@ -57,10 +57,10 @@ obs space:
                           7950, 7972, 7980, 7995, 8007, 8015, 8055, 8078
 # can have GeoVaLs section like below
 geovals:
-  filename: Data/iasi_metop-a_geoval_2018041500_m_unittest.nc4
+  filename: Data/ufo/testinput_tier_1/iasi_metop-a_geoval_2018041500_m_unittest.nc4
 # can have ObsDiag section like below
 obs diagnostics:
-  filename: Data/iasi_metop-a_obsdiag_2018041500_m_unittest.nc4
+  filename: Data/ufo/testinput_tier_1/iasi_metop-a_obsdiag_2018041500_m_unittest.nc4
 obs function:
   name: ObsErrorFactorSurfJacobianRad@ObsFunction
   options:

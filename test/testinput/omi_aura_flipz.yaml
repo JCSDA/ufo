@@ -15,7 +15,7 @@ observations:
       obsfile: Data/omi_aura_obs_flipz_2019101700_m_out.nc4
     simulated variables: [integrated_layer_ozone_in_air]
   geovals:
-    filename: Data/omi_aura_geoval_flipz_2019101700_m.nc4
+    filename: Data/ufo/testinput_tier_1/omi_aura_geoval_flipz_2019101700_m.nc4
   vector ref: GsiHofX
   tolerance: 1.0e-03  # in % so that corresponds to 10^-3
   linear obs operator test:
