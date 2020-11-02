@@ -45,7 +45,7 @@ phases:
       - git lfs install # creates .gitconfig
 
       #  Set crtm branch name
-      - export CRTM_JEDI_BRANCH="release/crtm_jedi"
+      - export CRTM_JEDI_BRANCH="v2.3-jedi"
 
       - if [ "$CODEBUILD_GIT_BRANCH" = "develop" ];
         then export CODEBUILD_GIT_BRANCH_FORK="release-stable";

@@ -209,19 +209,13 @@ ecbuild_add_resources( TARGET ufo_test_scripts
 # Create Data directory for test data and symlink files
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Data)
 
-list( APPEND ioda_test_data testinput_tier_1.tar.gz )
-list( APPEND ufo_test_data testinput_tier_1.tar.gz )
-
-if( DEFINED ENV{LOCAL_PATH_JEDI_TESTFILES})
-    set(LOCAL_PATH_JEDI_TESTFILES "$ENV{LOCAL_PATH_JEDI_TESTFILES}")
-endif()
-
-# Set URL for IODA test files
-set(DOWNLOAD_BASE_URL https://jedi-test-files.s3.amazonaws.com)
+# Test data filenames
+set(ioda_test_data ioda_testinput_tier_1.tar.gz)
+set(ufo_test_data  ufo_testinput_tier_1.tar.gz)
+set(crtm_test_data crtm_coefficients.tar.gz)
 
 # Determine the branch name
 set( UFO_TESTFILES_BRANCH "$ENV{UFO_TESTFILES_BRANCH}")
-set( CRTM_COEFFS_BRANCH "2.3.0" )
 if ( UFO_TESTFILES_BRANCH STREQUAL "" )
   # Get the current git branch of ufo repo
   execute_process(
@@ -233,6 +227,59 @@ if ( UFO_TESTFILES_BRANCH STREQUAL "" )
 else()
   message(STATUS "Branch name provided by user: ${UFO_TESTFILES_BRANCH}")
   set(GIT_BRANCH_UFO "${UFO_TESTFILES_BRANCH}")
+endif()
+# Currently only use 2.3.0 CRTM coefficients
+set( CRTM_COEFFS_BRANCH "2.3.0" )
+
+# macro for downloading test data
+# options:
+# - tag 1.0.0: download from UCAR ftp, flat directory
+#   Note: when we change the tag, this will have to be updated somehow.
+# - anything else: download from AWS, either from branch directory
+#   if available, or from develop directory
+# input: repo (e.g. ioda or ufo)
+#        test_data: test data filename (archive)
+# output: output_data_path: path to data on local machine after download
+# uses ${GIT_BRANCH_UFO}
+function(ADD_DOWNLOAD_TEST repo test_data output_data_path)
+  # for 1.0.0 release always download from UCAR ftp, flat directory
+  if(${GIT_BRANCH_UFO} STREQUAL "1.0.0")
+    set(ECBUILD_DOWNLOAD_BASE_URL https://dashrepo.ucar.edu/dataset/147_miesch/file)
+    set(download_data_name ${test_data})
+    set(data_path ${CMAKE_BINARY_DIR}/test_data/${repo}/1.0.0)
+    set(checksum "0")
+  # for all other branches/tags download from AWS
+  else()
+    set(ECBUILD_DOWNLOAD_BASE_URL https://jedi-test-files.s3.amazonaws.com)
+    # if branch-specific files exist, download them
+    ecbuild_check_urls(NAMES ${repo}/${GIT_BRANCH_UFO}/${test_data}
+                       RESULT UFO_SPECIFIC_TEST_FILES)
+    if(${UFO_SPECIFIC_TEST_FILES} MATCHES 0)
+      set(download_data_name ${repo}/${GIT_BRANCH_UFO}/${test_data})
+      set(data_path ${CMAKE_BINARY_DIR}/test_data/${repo}/${GIT_BRANCH_UFO})
+    # if there are no branch-specific files, download develop files by default
+    else()
+      set(download_data_name ${repo}/develop/${test_data})
+      set(data_path ${CMAKE_BINARY_DIR}/test_data/${repo}/develop)
+    endif()
+    set(checksum "1")
+  endif()
+  message(STATUS "${repo} test data will be downloaded from ${ECBUILD_DOWNLOAD_BASE_URL}/${download_data_name}")
+  file(MAKE_DIRECTORY ${data_path})
+
+  # add test for downloading data
+  set(testname "ufo_get_${repo}_test_data")
+  ecbuild_add_test( TARGET    ${testname}
+                    TYPE      SCRIPT
+                    COMMAND   ${CMAKE_BINARY_DIR}/bin/ufo_ioda_data_downloader.py
+                    ARGS      ${download_data_name} ${test_data} ${data_path} ${ECBUILD_DOWNLOAD_BASE_URL} ${checksum})
+
+  # pass output data path back to calling code
+  set(${output_data_path} ${data_path} PARENT_SCOPE)
+endfunction()
+
+if( DEFINED ENV{LOCAL_PATH_JEDI_TESTFILES})
+    set(LOCAL_PATH_JEDI_TESTFILES "$ENV{LOCAL_PATH_JEDI_TESTFILES}")
 endif()
 
 # If local path to testfiles is defined don't download
@@ -251,44 +298,9 @@ if( DEFINED LOCAL_PATH_JEDI_TESTFILES )
   message(STATUS "use LOCAL_PATH_JEDI_TESTFILES, ufo files path: ${UFO_UFO_TESTFILES_PATH}")
   set(UFO_CRTM_COEFFS_PATH ${LOCAL_PATH_JEDI_TESTFILES}/crtm/${CRTM_COEFFS_BRANCH})
   message(STATUS "use LOCAL_PATH_JEDI_TESTFILES, crtm coeffs path: ${UFO_CRTM_COEFFS_PATH}")
+# otherwise download the data
 else()
   message(STATUS "LOCAL_PATH_JEDI_TESTFILES is not defined, download test files")
-
-  # Check whether the URL exists or not for ioda
-  set(ECBUILD_DOWNLOAD_BASE_URL ${DOWNLOAD_BASE_URL}/ioda)
-  ecbuild_check_urls(NAMES ${GIT_BRANCH_UFO}/${ioda_test_data}
-                     RESULT UFO_SPECIFIC_TEST_FILES)
-  # Set distant directory
-  if(${UFO_SPECIFIC_TEST_FILES} MATCHES 0)
-    # Download and extract new test files (distant directory = git branch)
-    set(ioda_data_branch ${GIT_BRANCH_UFO})
-    message(STATUS "GIT_BRANCH_UFO found, will download: ${GIT_BRANCH_UFO} for ioda test data")
-  else()
-    # Download and extract develop test files (distant directory = develop)
-    set(ioda_data_branch "develop")
-    message(STATUS "GIT_BRANCH_UFO not found, will download develop for ioda test data")
-  endif()
-  message(STATUS "ioda test data will be download from: ${DOWNLOAD_BASE_URL}/ioda/${ioda_data_branch}")
-  set(UFO_IODA_TESTFILES_PATH ${CMAKE_BINARY_DIR}/test_data/ioda/${ioda_data_branch})
-  file(MAKE_DIRECTORY ${UFO_IODA_TESTFILES_PATH})
-
-  # Check whether the URL exists or not for ufo
-  set(ECBUILD_DOWNLOAD_BASE_URL ${DOWNLOAD_BASE_URL}/ufo)
-  ecbuild_check_urls(NAMES ${GIT_BRANCH_UFO}/${ufo_test_data}
-                     RESULT UFO_SPECIFIC_TEST_FILES)
-  # Set distant directory
-  if(${UFO_SPECIFIC_TEST_FILES} MATCHES 0)
-    # Download and extract new test files (distant directory = git branch)
-    set(ufo_data_branch ${GIT_BRANCH_UFO})
-    message(STATUS "GIT_BRANCH_UFO found, will download: ${GIT_BRANCH_UFO} for ufo test data")
-  else()
-    # Download and extract develop test files (distant directory = develop)
-    set(ufo_data_branch "develop")
-    message(STATUS "GIT_BRANCH_UFO not found, will download develop for ufo test data")
-  endif()
-  message(STATUS "ufo test data will be download from: ${DOWNLOAD_BASE_URL}/ufo/${ufo_data_branch}")
-  set(UFO_UFO_TESTFILES_PATH ${CMAKE_BINARY_DIR}/test_data/ufo/${ufo_data_branch})
-  file(MAKE_DIRECTORY ${UFO_UFO_TESTFILES_PATH})
 
   # Create download script for get_ioda_test_data test
   set ( FILENAME ufo_ioda_data_downloader.py)
@@ -306,24 +318,29 @@ else()
       COMMAND chmod +x ${bin_ufo_ioda_test_download_scripts_deps}
       DEPENDS ${bin_ufo_ioda_test_download_scripts_deps})
 
-  ecbuild_add_test( TARGET    ufo_get_ioda_test_data
-                    TYPE      SCRIPT
-                    COMMAND    ${CMAKE_BINARY_DIR}/bin/ufo_ioda_data_downloader.py
-                    ARGS      ioda ${ioda_test_data} ${ioda_data_branch} ${UFO_IODA_TESTFILES_PATH} ${DOWNLOAD_BASE_URL} )
-
-  ecbuild_add_test( TARGET    ufo_get_ufo_test_data
-                    TYPE      SCRIPT
-                    COMMAND    ${CMAKE_BINARY_DIR}/bin/ufo_ioda_data_downloader.py
-                    ARGS      ufo ${ufo_test_data} ${ufo_data_branch} ${UFO_UFO_TESTFILES_PATH} ${DOWNLOAD_BASE_URL} )
+  # add tests to download ioda & ufo data
+  ADD_DOWNLOAD_TEST( "ioda" ${ioda_test_data} UFO_IODA_TESTFILES_PATH )
+  ADD_DOWNLOAD_TEST( "ufo" ${ufo_test_data} UFO_UFO_TESTFILES_PATH )
 
   # download CRTM coefficients
   if( crtm_FOUND )
     set(UFO_CRTM_COEFFS_PATH ${CMAKE_BINARY_DIR}/test_data/crtm/${CRTM_COEFFS_BRANCH})
     file(MAKE_DIRECTORY ${UFO_CRTM_COEFFS_PATH})
+    # set filenames for downloading: flat directory for release (from UCAR ftp)
+    if(${GIT_BRANCH_UFO} STREQUAL "1.0.0")
+      set(ECBUILD_DOWNLOAD_BASE_URL https://dashrepo.ucar.edu/dataset/147_miesch/file)
+      set(crtm_download_data_name ${crtm_test_data})
+      set(checksum_crtm "0")
+    # set filenames for downloading: use directories and branch names for everything else (AWS)
+    else()
+      set(ECBUILD_DOWNLOAD_BASE_URL https://jedi-test-files.s3.amazonaws.com)
+      set(crtm_download_data_name crtm/${CRTM_COEFFS_BRANCH}/${crtm_test_data})
+      set(checksum_crtm "1")
+    endif()
     ecbuild_add_test( TARGET    ufo_get_crtm_test_data
                       TYPE      SCRIPT
                       COMMAND   ${CMAKE_BINARY_DIR}/bin/ufo_ioda_data_downloader.py
-                      ARGS      crtm crtm_coefficients.tar.gz ${CRTM_COEFFS_BRANCH} ${UFO_CRTM_COEFFS_PATH} ${DOWNLOAD_BASE_URL} )
+                      ARGS      ${crtm_download_data_name} ${crtm_test_data}  ${UFO_CRTM_COEFFS_PATH} ${ECBUILD_DOWNLOAD_BASE_URL} ${checksum_crtm})
   endif( crtm_FOUND )
 endif()
 
