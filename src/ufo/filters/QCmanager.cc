@@ -130,24 +130,25 @@ void QCmanager::print(std::ostream & os) const {
       if ((*flags_)[jj][jobs] == QCflags::derivative) ++idydx;
     }
 
-    obsdb_.sum(iobs);
-    obsdb_.sum(ipass);
-    obsdb_.sum(imiss);
-    obsdb_.sum(ipreq);
-    obsdb_.sum(ibnds);
-    obsdb_.sum(iwhit);
-    obsdb_.sum(iblck);
-    obsdb_.sum(iherr);
-    obsdb_.sum(ifgss);
-    obsdb_.sum(iclw);
-    obsdb_.sum(iprof);
-    obsdb_.sum(ignss);
-    obsdb_.sum(ithin);
-    obsdb_.sum(idiffref);
-    obsdb_.sum(iseaice);
-    obsdb_.sum(itrack);
-    obsdb_.sum(ibuddy);
-    obsdb_.sum(idydx);
+    const ioda::Distribution & distribution = obsdb_.distribution();
+    distribution.sum(iobs);
+    distribution.sum(ipass);
+    distribution.sum(imiss);
+    distribution.sum(ipreq);
+    distribution.sum(ibnds);
+    distribution.sum(iwhit);
+    distribution.sum(iblck);
+    distribution.sum(iherr);
+    distribution.sum(ifgss);
+    distribution.sum(iclw);
+    distribution.sum(iprof);
+    distribution.sum(ignss);
+    distribution.sum(ithin);
+    distribution.sum(idiffref);
+    distribution.sum(iseaice);
+    distribution.sum(itrack);
+    distribution.sum(ibuddy);
+    distribution.sum(idydx);
 
     if (obsdb_.comm().rank() == 0) {
       const std::string info = "QC " + flags_->obstype() + " " + observed_[jj] + ": ";
