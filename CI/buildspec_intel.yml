@@ -178,7 +178,7 @@ phases:
         && . /opt/intel/compilers_and_libraries/linux/bin/compilervars.sh
         && cd /build_container
         && ls
-        && ecbuild -DBUILD_RTTOV=1 /jcsda/ufo-bundle/
+        && ecbuild /jcsda/ufo-bundle/
         && cd ufo
         && make -j4"
 
