@@ -32,6 +32,7 @@ ecbuild_bundle( PROJECT saber GIT "https://github.com/JCSDA/saber.git" )
 ecbuild_bundle( PROJECT crtm GIT "https://github.com/JCSDA/crtm.git" )
 ecbuild_bundle( PROJECT ioda GIT "https://github.com/JCSDA/ioda.git" )
 ecbuild_bundle( PROJECT ufo  GIT "https://github.com/JCSDA/ufo.git" )
+ecbuild_bundle( PROJECT rttov  GIT "https://github.com/JCSDA-internal/rttov.git" )
 
 
 # Build Doxygen documentation

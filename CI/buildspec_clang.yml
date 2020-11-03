@@ -124,7 +124,7 @@ phases:
       - echo $BUILD_STATUS
 
       - cd /build_container
-      - ecbuild -DBUILD_RTTOV=1 /jcsda/ufo-bundle/
+      - ecbuild /jcsda/ufo-bundle/
       - cd ufo
       - make -j4
 
