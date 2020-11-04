@@ -1,2 +1,2 @@
 #/bin/bash
-bash <(curl -s https://codecov.io/bash) -t e23dfd1d-85be-4e0f-aaf3-81911fec7178 -R /jcsda/ufo-bundle/ufo
+bash <(curl -s https://codecov.io/bash) -t a4993d5f-9a3d-43b4-a7c6-14a03e571cdf -R /jcsda/ufo-bundle/ufo

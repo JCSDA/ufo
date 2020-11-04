@@ -19,19 +19,20 @@ include( ecbuild_bundle )
 set( ENABLE_MPI ON CACHE BOOL "Compile with MPI" )
 
 ecbuild_bundle_initialize()
-ecbuild_bundle( PROJECT jedicmake GIT "https://github.com/JCSDA/jedi-cmake.git" BRANCH develop UPDATE )
+ecbuild_bundle( PROJECT jedicmake GIT "https://github.com/JCSDA/jedi-cmake.git" )
 
 option("BUNDLE_SKIP_ECKIT" "Don't build eckit" "ON") #Skip eckit build unless user passes -DBUNDLE_SKIP_ECKIT=OFF
-ecbuild_bundle( PROJECT eckit GIT "https://github.com/JCSDA/eckit.git" BRANCH release-stable UPDATE )
-ecbuild_bundle( PROJECT fckit GIT "https://github.com/JCSDA/fckit.git" BRANCH release-stable UPDATE )
-ecbuild_bundle( PROJECT atlas GIT "https://github.com/JCSDA/atlas.git" BRANCH release-stable UPDATE )
+ecbuild_bundle( PROJECT eckit GIT "https://github.com/JCSDA/eckit.git" )
+ecbuild_bundle( PROJECT fckit GIT "https://github.com/JCSDA/fckit.git" )
+ecbuild_bundle( PROJECT atlas GIT "https://github.com/JCSDA/atlas.git" )
 
-ecbuild_bundle( PROJECT oops GIT "https://github.com/JCSDA/oops.git"        BRANCH develop  UPDATE )
-ecbuild_bundle( PROJECT saber GIT "https://github.com/JCSDA/saber.git"      BRANCH develop  UPDATE )
+ecbuild_bundle( PROJECT oops GIT "https://github.com/JCSDA/oops.git" )
+ecbuild_bundle( PROJECT saber GIT "https://github.com/JCSDA/saber.git" )
 #ecbuild_bundle( PROJECT gsw  GIT "https://github.com/JCSDA/GSW-Fortran.git" BRANCH develop  UPDATE )
-ecbuild_bundle( PROJECT crtm GIT "https://github.com/JCSDA/crtm.git"        BRANCH develop  UPDATE )
-ecbuild_bundle( PROJECT ioda GIT "https://github.com/JCSDA/ioda.git"        BRANCH develop  UPDATE )
-ecbuild_bundle( PROJECT ufo  GIT "https://github.com/JCSDA/ufo.git"        BRANCH develop  UPDATE )
+ecbuild_bundle( PROJECT crtm GIT "https://github.com/JCSDA/crtm.git" )
+ecbuild_bundle( PROJECT ioda GIT "https://github.com/JCSDA/ioda.git" )
+ecbuild_bundle( PROJECT rttov  GIT "https://github.com/JCSDA-internal/rttov.git" )
+ecbuild_bundle( PROJECT ufo  GIT "https://github.com/JCSDA/ufo.git" )
 
 
 # Build Doxygen documentation

@@ -4,9 +4,7 @@ INTEL:[![AWS-intel](https://codebuild.us-east-1.amazonaws.com/badges?uuid=eyJlbm
 
 CLANG: [![AWS_clang](https://codebuild.us-east-1.amazonaws.com/badges?uuid=eyJlbmNyeXB0ZWREYXRhIjoiVU1vbVR2Y0twa3NpWHRoMUhraGlreU9Da2t5RVpZQk9kV3NrL2hTc0szdXRlaCszVzhHRndrd0VqcnpSb2lyL2VCRXNtK1Y4WG5LRHVxbldteFArU2IwPSIsIml2UGFyYW1ldGVyU3BlYyI6IkpQUTRlaThyRWVkWEJjNEwiLCJtYXRlcmlhbFNldFNlcmlhbCI6MX0%3D&branch=develop)](https://us-east-1.console.aws.amazon.com/codesuite/codebuild/projects/automated-testing-ufo-clang/history?region=us-east-1)
 
-
-[![travis_develop](https://travis-ci.com/JCSDA/ufo.svg?token=zswWHqwVimHTBAygfenZ&branch=develop)](https://travis-ci.com/JCSDA/ufo)
-[![codecov](https://codecov.io/gh/JCSDA/ufo/branch/develop/graph/badge.svg?token=kTqYXNeF6h)](https://codecov.io/gh/JCSDA/ufo)
+[![codecov](https://codecov.io/gh/JCSDA/ufo/branch/develop/graph/badge.svg?token=nxhUKP82Pd)](https://codecov.io/gh/JCSDA/ufo)
 
 Unified Forward Operators for Joint Effort for Data assimilation Integration (JEDI) project.
 
