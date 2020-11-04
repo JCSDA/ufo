@@ -10,7 +10,7 @@ contains
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
-subroutine ufo_gnssro_2d_locs_init(self, locs, obss, t1, t2)
+subroutine ufo_gnssro_2d_locs_init(self, locs, obss)
   use kinds
   use datetime_mod
   use fckit_log_module, only : fckit_log
@@ -22,14 +22,12 @@ subroutine ufo_gnssro_2d_locs_init(self, locs, obss, t1, t2)
   type(ufo_locs),              intent(inout) :: locs
   class(ufo_gnssro_BndROPP2D), intent(inout) :: self
   type(c_ptr),  value, intent(in)    :: obss
-  type(datetime),      intent(in)    :: t1, t2
 
   character(len=*),parameter    :: myname = "ufo_gnssro_2d_locs_init"
   integer,         parameter    :: max_string = 800
   character(max_string)         :: err_msg
 
-  integer :: i, j, tw_nlocs,nlocs
-  integer,         dimension(:), allocatable :: tw_indx
+  integer :: i, j, nlocs
   real(kind_real), dimension(:), allocatable :: lon, lat
   type(datetime),  dimension(:), allocatable :: date_time
 
@@ -50,16 +48,6 @@ subroutine ufo_gnssro_2d_locs_init(self, locs, obss, t1, t2)
   call obsspace_get_db(obss, "MetaData", "longitude", lon)
   call obsspace_get_db(obss, "MetaData", "latitude", lat)
 
-  ! Generate the timing window indices
-  allocate(tw_indx(nlocs))
-  tw_nlocs = 0
-  do i = 1, nlocs
-    if (date_time(i) > t1 .and. date_time(i) <= t2) then
-      tw_nlocs = tw_nlocs + 1
-      tw_indx(tw_nlocs) = i
-    endif
-  enddo
-
   allocate(obsAzim(nlocs))
   if (obsspace_has(obss,"ObsValue","bending_angle")) then
      if (obsspace_has(obss, "MetaData", "sensor_azimuth_angle")) then
@@ -71,13 +59,13 @@ subroutine ufo_gnssro_2d_locs_init(self, locs, obss, t1, t2)
   endif
 
   !Setup ufo 2d locations 
-  call ufo_locs_setup(locs, tw_nlocs*n_horiz)
-  do i = 1, tw_nlocs
-    locs%lon( (i-1)*n_horiz+1 : i*n_horiz) =  lon(tw_indx(i))
-    locs%lat( (i-1)*n_horiz+1 : i*n_horiz) =  lat(tw_indx(i))
+  call ufo_locs_setup(locs, nlocs*n_horiz)
+  do i = 1, nlocs
+    locs%lon( (i-1)*n_horiz+1 : i*n_horiz) =  lon(i)
+    locs%lat( (i-1)*n_horiz+1 : i*n_horiz) =  lat(i)
     do j = 1, n_horiz
-      locs%indx((i-1)*n_horiz+j) =  (tw_indx(i)-1)*n_horiz+j
-      locs%time((i-1)*n_horiz+j) =  date_time(tw_indx(i))
+      locs%indx((i-1)*n_horiz+j) =  (i-1)*n_horiz+j
+      locs%time((i-1)*n_horiz+j) =  date_time(i)
     end do
   end do
 
@@ -88,7 +76,7 @@ subroutine ufo_gnssro_2d_locs_init(self, locs, obss, t1, t2)
   do i = 1, nlocs
     call datetime_delete(date_time(i))
   enddo
-  deallocate(date_time, lon, lat, tw_indx, obsAzim)
+  deallocate(date_time, lon, lat, obsAzim)
 
 end subroutine ufo_gnssro_2d_locs_init
 
