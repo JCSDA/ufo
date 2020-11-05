@@ -149,6 +149,7 @@ class TrackCheckShip: public FilterBase,
     void calculateTwoObservationValues(
         TrackObservation& prevObs, bool firstIteration,
         const TrackCheckShipParameters& options);
+    void resetObservationCalculations();
     void calculateThreeObservationValues(
         const TrackObservation& prevObs, const TrackObservation& nextObs,
         bool firstIteration, const TrackCheckShipParameters& options);
@@ -159,8 +160,7 @@ class TrackCheckShip: public FilterBase,
 
     const ObservationStatistics &getObservationStatistics() const;
 
-    void registerCheckResult(const TrackCheckUtils::CheckResult &result);
-    void registerSweepOutcome(bool rejectedInSweep) {
+    void setRejected(bool rejectedInSweep) {
       rejected_ = rejectedInSweep;
     }
 
@@ -172,7 +172,6 @@ class TrackCheckShip: public FilterBase,
 
    private:
     std::shared_ptr<TrackStatistics> fullTrackStatistics_;
-    std::shared_ptr<TrackCheckUtils::CheckCounter> checkCounter_;
     ObservationStatistics observationStatistics_;
     TrackCheckUtils::ObsLocationTime obsLocationTime_;
     size_t observationNumber_;
@@ -225,12 +224,13 @@ class TrackCheckShip: public FilterBase,
 
   std::vector<std::reference_wrapper<TrackObservation>> removeSimultaneousObservations(
       const std::vector<std::reference_wrapper<TrackObservation>> &trackObs) const;
-  bool earlyBreak(const std::vector<std::reference_wrapper<TrackObservation>> &trackObs) const;
+  bool earlyBreak(const std::vector<std::reference_wrapper<TrackObservation>> &trackObs,
+                  const std::string trackId) const;
 
   void removeFaultyObservation(
       std::vector<std::reference_wrapper<TrackObservation> > &track,
       const std::vector<std::reference_wrapper<TrackObservation> >::iterator &it,
-      bool firstIterativeRemoval = false) const;
+      bool firstIterativeRemoval, const std::string trackId) const;
 };
 
 }  // namespace ufo

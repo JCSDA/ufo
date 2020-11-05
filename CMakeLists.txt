@@ -1,4 +1,4 @@
-# (C) Copyright 2017-2018 UCAR.
+# (C) Copyright 2017-2020 UCAR.
 #
 # This software is licensed under the terms of the Apache Licence Version 2.0
 # which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
@@ -9,7 +9,7 @@
 
 cmake_minimum_required( VERSION 3.3.2 FATAL_ERROR )
 
-project( ufo C CXX Fortran )
+project( ufo VERSION 1.0.0 LANGUAGES C CXX Fortran )
 
 set( CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake;${CMAKE_MODULE_PATH})
 
@@ -55,23 +55,23 @@ find_package( Eigen3 REQUIRED NO_MODULE HINTS
 include_directories( ${EIGEN3_INCLUDE_DIRS} )
 
 # eckit
-ecbuild_use_package( PROJECT eckit VERSION 0.18.0 REQUIRED )
+ecbuild_use_package( PROJECT eckit VERSION 1.11.6 REQUIRED )
 include_directories( ${ECKIT_INCLUDE_DIRS} )
 
 # fckit
-ecbuild_use_package( PROJECT fckit VERSION 0.4.1 REQUIRED )
+ecbuild_use_package( PROJECT fckit VERSION 0.7.0 REQUIRED )
 include_directories( ${FCKIT_INCLUDE_DIRS} )
 
 # ioda
-ecbuild_use_package( PROJECT ioda VERSION 0.1.0 REQUIRED )
+ecbuild_use_package( PROJECT ioda VERSION 1.0.0 REQUIRED )
 include_directories( ${IODA_INCLUDE_DIRS} )
 
 # oops
-ecbuild_use_package( PROJECT oops VERSION 0.2.1 REQUIRED )
+ecbuild_use_package( PROJECT oops VERSION 1.0.0 REQUIRED )
 include_directories( ${OOPS_INCLUDE_DIRS} )
 
 # crtm
-ecbuild_use_package( PROJECT crtm VERSION 2.2.3 QUIET )
+ecbuild_use_package( PROJECT crtm VERSION 2.3 QUIET )
 if( ${CRTM_FOUND} )
   message(STATUS "CRTM FOUND; Including CRTM Observation Operator")
   include_directories( ${CRTM_INCLUDE_DIRS} )
