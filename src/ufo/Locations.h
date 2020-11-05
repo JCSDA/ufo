@@ -12,7 +12,6 @@
 #include <string>
 
 #include "eckit/mpi/Comm.h"
-#include "oops/util/DateTime.h"
 #include "oops/util/ObjectCounter.h"
 #include "oops/util/Printable.h"
 
@@ -34,7 +33,7 @@ class Locations : public util::Printable,
   static const std::string classname() {return "ufo::Locations";}
 
   explicit Locations(const eckit::mpi::Comm &);
-  Locations(const ioda::ObsSpace &, const util::DateTime &, const util::DateTime &);
+  explicit Locations(const ioda::ObsSpace &);
   Locations(const eckit::Configuration &, const eckit::mpi::Comm &);
   explicit Locations(const ufo::Locations &);
   ~Locations();
