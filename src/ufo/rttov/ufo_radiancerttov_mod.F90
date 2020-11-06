@@ -161,7 +161,7 @@ contains
     ! Note this sets jacobian_needed
     !!   jacobian var -->     <ystr>_jacobian_<xstr>_<chstr>
     !!   non-jacobian var --> <ystr>_<chstr>
-   call parse_hofxdiags(hofxdiags, jacobian_needed) 
+    call parse_hofxdiags(hofxdiags, jacobian_needed)
 
     Sensor_Loop:do i_inst = 1, self % conf % nSensors
 
@@ -266,6 +266,14 @@ contains
         ! --------------------------------------------------------------------------
 
         if (jacobian_needed) then
+
+          ! Inintialize the K-matrix INPUT so that the results are dTb/dx
+          ! -------------------------------------------------------------
+          self % RTprof % emissivity_k(:) % emis_out = 0
+          self % RTprof % emissivity_k(:) % emis_in = 0
+          self % RTprof % emissivity(:) % emis_out = 0
+          self % RTprof % radiance_k % bt(:) = 1
+          self % RTprof % radiance_k % total(:) = 1
 
           call rttov_k(                              &
             errorstatus,                             &! out   error flag
