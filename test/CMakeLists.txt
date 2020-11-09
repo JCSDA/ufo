@@ -191,6 +191,8 @@ list( APPEND ufo_test_input
   testinput/tprof.yaml
   testinput/tropomi_no2.yaml
   testinput/variables.yaml
+  testinput/variabletransform_windcomponents.yaml
+  testinput/variabletransform_windspeedanddirection.yaml
   testinput/windprof.yaml
 )
 
@@ -1384,6 +1386,22 @@ ecbuild_add_test( TARGET  test_ufo_qc_met_office_buddy_pair_finder
                   ENVIRONMENT OOPS_TRAPFPE=1
                   LIBS    ufo
                   TEST_DEPENDS ufo_get_ufo_test_data)
+
+# Test Variable Transforms
+
+ecbuild_add_test( TARGET  test_ufo_variabletransform_windcomponents
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                  ARGS    "testinput/variabletransform_windcomponents.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsFilters.x
+                  TEST_DEPENDS ufo_get_ioda_test_data )
+
+ecbuild_add_test( TARGET  test_ufo_variabletransform_windspeedanddirection
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                  ARGS    "testinput/variabletransform_windspeedanddirection.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsFilters.x
+                  TEST_DEPENDS ufo_get_ioda_test_data )
 
 # Test Functions
 

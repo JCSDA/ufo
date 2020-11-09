@@ -29,6 +29,8 @@
 #include "ufo/filters/Thinning.h"
 #include "ufo/filters/TrackCheck.h"
 #include "ufo/filters/TrackCheckShip.h"
+#include "ufo/filters/variabletransforms/WindComponents.h"
+#include "ufo/filters/variabletransforms/WindSpeedAndDirection.h"
 #include "ufo/gnssro/QC/BackgroundCheckRONBAM.h"
 #include "ufo/gnssro/QC/ROobserror.h"
 
@@ -77,7 +79,10 @@ template<typename MODEL> void instantiateObsFilterFactory() {
            DerivativeCheckMaker("Derivative Check");
   static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::TrackCheckShip> >
            ShipTrackCheckMaker("Ship Track Check");
-
+  static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::WindComponents> >
+           WindComponentsMaker("Wind Components");
+  static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::WindSpeedAndDirection> >
+           WindSpeedAndDirectionMaker("Wind Speed And Direction");
   // For backward compatibility, register some filters under legacy names used in the past
   static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::Gaussian_Thinning> >
            legacyGaussianThinningMaker("Gaussian_Thinning");

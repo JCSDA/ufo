@@ -141,6 +141,10 @@ set ( filters_files
       obsfunctions/SCATRetMW.h
       obsfunctions/SymmCldImpactIR.cc
       obsfunctions/SymmCldImpactIR.h
+      variabletransforms/WindComponents.cc
+      variabletransforms/WindComponents.h
+      variabletransforms/WindSpeedAndDirection.cc
+      variabletransforms/WindSpeedAndDirection.h
 )
 
 PREPEND( _p_filters_files       "filters"       ${filters_files} )
