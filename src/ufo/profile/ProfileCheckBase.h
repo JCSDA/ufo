@@ -31,7 +31,6 @@ namespace ufo {
   class ProfileConsistencyCheckParameters;
   class ProfileCheckValidator;
   class ProfileDataHandler;
-  class ProfileIndices;
 }
 
 namespace ufo {
@@ -40,7 +39,6 @@ namespace ufo {
   class ProfileCheckBase {
    public:
     ProfileCheckBase(const ProfileConsistencyCheckParameters &options,
-                     const ProfileIndices &profileIndices,
                      ProfileDataHandler &profileDataHandler,
                      ProfileCheckValidator &profileCheckValidator);
     virtual ~ProfileCheckBase() {}
@@ -70,9 +68,6 @@ namespace ufo {
     /// Configurable parameters
     const ProfileConsistencyCheckParameters &options_;
 
-    /// Indices of profile's observations in the entire sample
-    const ProfileIndices &profileIndices_;
-
     /// Profile data handler
     ProfileDataHandler &profileDataHandler_;
 
@@ -89,7 +84,6 @@ namespace ufo {
    public:
     static std::unique_ptr<ProfileCheckBase> create(const std::string&,
                                                     const ProfileConsistencyCheckParameters&,
-                                                    const ProfileIndices&,
                                                     ProfileDataHandler&,
                                                     ProfileCheckValidator&);
     virtual ~ProfileCheckFactory() = default;
@@ -97,7 +91,6 @@ namespace ufo {
     explicit ProfileCheckFactory(const std::string &);
    private:
     virtual std::unique_ptr<ProfileCheckBase> make(const ProfileConsistencyCheckParameters&,
-                                                   const ProfileIndices&,
                                                    ProfileDataHandler&,
                                                    ProfileCheckValidator&) = 0;
 
@@ -113,12 +106,10 @@ namespace ufo {
     {
       virtual std::unique_ptr<ProfileCheckBase>
         make(const ProfileConsistencyCheckParameters &options,
-             const ProfileIndices &profileIndices,
              ProfileDataHandler &profileDataHandler,
              ProfileCheckValidator &profileCheckValidator)
       {
         return std::unique_ptr<ProfileCheckBase>(new T(options,
-                                                       profileIndices,
                                                        profileDataHandler,
                                                        profileCheckValidator));
       }

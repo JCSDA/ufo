@@ -18,7 +18,7 @@
 #include "ioda/ObsDataVector.h"
 #include "ioda/ObsSpace.h"
 
-#include "ufo/filters/ProfileConsistencyCheckParameters.h"
+#include "ufo/profile/DataHandlerParameters.h"
 
 namespace ioda {
   class ObsSpace;
@@ -39,26 +39,20 @@ namespace ufo {
   class ProfileIndices {
    public:
     ProfileIndices(ioda::ObsSpace &obsdb,
-                   const ProfileConsistencyCheckParameters &options,
+                   const DataHandlerParameters &options,
                    const std::vector <bool> &apply);
 
-    /// Determine indices in entire sample for this profile.
-    void determineProfileIndices();
+    /// Determine indices in entire sample for the next profile.
+    void updateNextProfileIndices();
 
     /// Return indices for the current profile.
     const std::vector <size_t> &getProfileIndices() const {return profileIndices_;}
 
     /// Return number of levels to which QC checks should be applied.
-    int getNumLevelsToCheck() const {return numLevelsToCheck_;}
+    int getNumProfileLevels() const {return numProfileLevels_;}
 
     /// Get number of current profile.
     size_t getProfileNumCurrent() const {return profileNumCurrent_;}
-
-    /// Profile index map.
-    typedef std::map<std::size_t, std::vector<std::size_t>> ProfIdxMap;
-
-    /// Profile index map iterator.
-    typedef ProfIdxMap::const_iterator ProfIdxIter;
 
    private:  // functions
     // Ensure number of profiles is consistent with quantity reported by obsdb.
@@ -69,13 +63,19 @@ namespace ufo {
     ioda::ObsSpace &obsdb_;
 
     /// Configurable parameters.
-    const ProfileConsistencyCheckParameters &options_;
+    const DataHandlerParameters &options_;
 
     /// Observations to apply the filter to.
     const std::vector <bool> &apply_;
 
     /// Profile numbers for the entire sample.
     const std::vector <size_t> profileNums_;
+
+    /// Profile index map.
+    typedef std::map<std::size_t, std::vector<std::size_t>> ProfIdxMap;
+
+    /// Profile index map iterator.
+    typedef ProfIdxMap::const_iterator ProfIdxIter;
 
     /// Iterator over profile indices (used for sorting).
     ProfIdxMap profidx_;
@@ -87,7 +87,7 @@ namespace ufo {
     std::vector <size_t> profileIndices_;
 
     /// Number of profile levels to which QC checks should be applied.
-    int numLevelsToCheck_;
+    int numProfileLevels_;
 
     /// Current profile number in the sample.
     size_t profileNumCurrent_;

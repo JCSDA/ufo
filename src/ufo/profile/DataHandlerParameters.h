@@ -11,6 +11,7 @@
 #include <string>
 #include <vector>
 
+#include "oops/util/parameters/OptionalParameter.h"
 #include "oops/util/parameters/Parameter.h"
 #include "oops/util/parameters/Parameters.h"
 
@@ -23,7 +24,7 @@ namespace ufo {
   /// \brief Options controlling the operation of the EntireSampleDataHandler
   /// and ProfileDataHandler classes.
   class DataHandlerParameters : public oops::Parameters {
-     OOPS_ABSTRACT_PARAMETERS(DataHandlerParameters, Parameters)
+     OOPS_CONCRETE_PARAMETERS(DataHandlerParameters, Parameters)
 
    public:  // functions
     /// Determine whether a variable group is optional or not.
@@ -60,6 +61,13 @@ namespace ufo {
 
     /// Number of errors, accumulated over checks, that cause the observation to have failed.
     oops::Parameter<int> nErrorsFail {"nErrorsFail", 1, this};
+
+    /// Maximum number of profile levels to be processed (a legacy of the OPS code).
+    /// No maximum is assigned if this parameter is not specified.
+    oops::OptionalParameter<int> maxlev {"maxlev", this};
+
+    /// If not sorting observations, ensure number of profiles is consistent
+    oops::Parameter<bool> ValidateTotalNumProf {"ValidateTotalNumProf", true, this};
   };
 }  // namespace ufo
 

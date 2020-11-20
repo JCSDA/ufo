@@ -40,7 +40,7 @@ namespace ufo {
       options.PGE_SDiffCrit.value() * 2.0 :
       options.PGE_SDiffCrit.value();
     // Number of levels in profile.
-    const size_t numLevelsToCheck = obsVal.size();
+    const size_t numProfileLevels = obsVal.size();
 
     // Initialise buddy check PGE to missing data indicator.
     PGEBd.assign(obsVal.size(), PGEMDI);
@@ -57,7 +57,7 @@ namespace ufo {
     const bool obsErrEmpty = obsErr.empty();
     const bool bkgErrEmpty = bkgErr.empty();
 
-    for (size_t jlev = 0; jlev < numLevelsToCheck; ++jlev) {
+    for (size_t jlev = 0; jlev < numProfileLevels; ++jlev) {
       // Calculate combined error variance.
       if (!obsErrEmpty && !bkgErrEmpty &&
           obsErr[jlev] >= 0 && bkgErr[jlev] >= 0) {

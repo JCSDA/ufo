@@ -14,17 +14,16 @@ namespace ufo {
 
   ProfileCheckPermanentReject::ProfileCheckPermanentReject
   (const ProfileConsistencyCheckParameters &options,
-   const ProfileIndices &profileIndices,
    ProfileDataHandler &profileDataHandler,
    ProfileCheckValidator &profileCheckValidator)
-    : ProfileCheckBase(options, profileIndices, profileDataHandler, profileCheckValidator)
+    : ProfileCheckBase(options, profileDataHandler, profileCheckValidator)
   {}
 
   void ProfileCheckPermanentReject::runCheck()
   {
     oops::Log::debug() << " Permanent rejection check" << std::endl;
 
-    const size_t numLevelsToCheck = profileIndices_.getNumLevelsToCheck();
+    const size_t numProfileLevels = profileDataHandler_.getNumProfileLevels();
     const bool ModelLevels = options_.modellevels.value();
     std::vector <int> &tFlags =
       profileDataHandler_.get<int>(ufo::VariableNames::qcflags_air_temperature);
@@ -46,7 +45,7 @@ namespace ufo {
     }
 
     // Set PermRejectFlag on individual elements if whole report has PermReject.
-    for (int jlev = 0; jlev < numLevelsToCheck; ++jlev) {
+    for (int jlev = 0; jlev < numProfileLevels; ++jlev) {
       if (ReportFlags[jlev] & ufo::MetOfficeQCFlags::WholeObReport::PermRejectReport) {
         for (auto flags : {&tFlags, &rhFlags, &uFlags, &vFlags, &zFlags})
           if (!flags->empty()) (*flags)[jlev] |= ufo::MetOfficeQCFlags::Elem::PermRejectFlag;
@@ -56,7 +55,7 @@ namespace ufo {
     // Set FinalRejectFlag on individual elements if a variety of criteria
     // are met on model-level data.
     if (ModelLevels) {
-      for (int jlev = 0; jlev < numLevelsToCheck; ++jlev) {
+      for (int jlev = 0; jlev < numProfileLevels; ++jlev) {
         if ((ReportFlags[jlev] & ufo::MetOfficeQCFlags::WholeObReport::PermRejectReport) ||
             (ReportFlags[jlev] & ufo::MetOfficeQCFlags::WholeObReport::TrackRejectReport) ||
             (ReportFlags[jlev] & ufo::MetOfficeQCFlags::WholeObReport::SurplusReport) ||

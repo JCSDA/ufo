@@ -15,7 +15,6 @@
 #include "ufo/profile/ProfileCheckBase.h"
 #include "ufo/profile/ProfileCheckValidator.h"
 #include "ufo/profile/ProfileDataHandler.h"
-#include "ufo/profile/ProfileIndices.h"
 
 namespace ioda {
   class ObsSpace;
@@ -31,7 +30,6 @@ namespace ufo {
   class ProfileCheckPermanentReject : public ProfileCheckBase {
    public:
     ProfileCheckPermanentReject(const ProfileConsistencyCheckParameters &options,
-                                const ProfileIndices &profileIndices,
                                 ProfileDataHandler &profileDataHandler,
                                 ProfileCheckValidator &profileCheckValidator);
 

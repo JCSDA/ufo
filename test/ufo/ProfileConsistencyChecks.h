@@ -36,6 +36,8 @@
 #include "ufo/profile/ProfileCheckBase.h"
 #include "ufo/profile/ProfileCheckTime.h"
 #include "ufo/profile/ProfileCheckUInterp.h"
+
+#include "ufo/profile/ProfileCheckValidator.h"
 #include "ufo/profile/ProfileDataHandler.h"
 #include "ufo/profile/VariableNames.h"
 
@@ -114,19 +116,15 @@ void testProfileConsistencyChecks(const eckit::LocalConfiguration &conf) {
     options_.reset(new ProfileConsistencyCheckParameters());
     options_->deserialize(conf);
     EntireSampleDataHandler entireSampleDataHandler(obsspace,
-                                                    *options_);
+                                                    options_->DHParameters);
     // Load data from obsspace
     entireSampleDataHandler.get<float>(ufo::VariableNames::obs_air_pressure);
     // Attempt to access data with incorrect type
     EXPECT_THROWS(entireSampleDataHandler.get<int>(ufo::VariableNames::obs_air_pressure));
     std::vector<bool> apply(obsspace.nlocs(), true);
-    ProfileIndices profileIndices(obsspace,
-                                  *options_,
-                                  apply);
     ProfileDataHandler profileDataHandler(obsspace,
-                                          *options_,
-                                          entireSampleDataHandler,
-                                          profileIndices);
+                                          options_->DHParameters,
+                                          apply);
     // Obtain profile data
     profileDataHandler.get<float>(ufo::VariableNames::obs_air_pressure);
     // Attempt to access data with incorrect type
@@ -140,23 +138,18 @@ void testProfileConsistencyChecks(const eckit::LocalConfiguration &conf) {
     options_.reset(new ProfileConsistencyCheckParameters());
     options_->deserialize(conf);
     EntireSampleDataHandler entireSampleDataHandler(obsspace,
-                                                    *options_);
+                                                    options_->DHParameters);
     // Load data from obsspace
     entireSampleDataHandler.get<float>(ufo::VariableNames::obs_air_pressure);
     entireSampleDataHandler.get<int>(ufo::VariableNames::qcflags_air_temperature);
     std::vector<bool> apply(obsspace.nlocs(), true);
-    ProfileIndices profileIndices(obsspace,
-                                  *options_,
-                                  apply);
     ProfileDataHandler profileDataHandler(obsspace,
-                                          *options_,
-                                          entireSampleDataHandler,
-                                          profileIndices);
+                                          options_->DHParameters,
+                                          apply);
     ProfileCheckValidator profileCheckValidator(*options_,
                                                 profileDataHandler);
 
-    profileIndices.determineProfileIndices();
-    profileDataHandler.reset();
+    profileDataHandler.initialiseNextProfile();
 
     // Obtain profile data
     profileDataHandler.get<float>(ufo::VariableNames::obs_air_pressure);
@@ -186,23 +179,18 @@ void testProfileConsistencyChecks(const eckit::LocalConfiguration &conf) {
 
     // Create checks
     ProfileCheckTime profileCheckTime(*options_,
-                                      profileIndices,
                                       profileDataHandler,
                                       profileCheckValidator);
     ProfileCheckBackgroundTemperature profileCheckBackgroundT(*options_,
-                                                              profileIndices,
                                                               profileDataHandler,
                                                               profileCheckValidator);
     ProfileCheckBackgroundRelativeHumidity profileCheckBackgroundRH(*options_,
-                                                                    profileIndices,
                                                                     profileDataHandler,
                                                                     profileCheckValidator);
     ProfileCheckBackgroundWindSpeed profileCheckBackgroundUV(*options_,
-                                                             profileIndices,
                                                              profileDataHandler,
                                                              profileCheckValidator);
     ProfileCheckBackgroundGeopotentialHeight profileCheckBackgroundZ(*options_,
-                                                                     profileIndices,
                                                                      profileDataHandler,
                                                                      profileCheckValidator);
 
