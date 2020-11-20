@@ -56,6 +56,7 @@ subroutine avgkernel_tlad_setup_(self, f_conf)
   integer :: nlevs_yaml
   integer :: ivar, nvars
   character(len=max_string) :: err_msg
+  character(len=:), allocatable :: str_array(:)
 
   ! get configuration for the averaging kernel operator
   call f_conf%get_or_die("obs options",f_confOpts)
@@ -85,7 +86,8 @@ subroutine avgkernel_tlad_setup_(self, f_conf)
 
   ! get name of geoval/tracer to use from the model
   nvars = self%obsvars%nvars()
-  call f_confOpts%get_or_die("tracer variables", self%tracervars)
+  call f_confOpts%get_or_die("tracer variables", str_array)
+  self%tracervars = str_array
 
   ! determine if this is a total column or troposphere calculation
   ! support stratosphere, etc. later?
