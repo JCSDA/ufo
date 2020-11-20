@@ -53,41 +53,19 @@ namespace test {
 //!
 //! \brief Convert indices of observations held by this process to global observation indices.
 //!
-//! It is assumed that observations are distributed to processes in a round-robin fashion.
-//! For example, 8 observations are mapped to 3 processes in the following way:
+//! \param[inout] indices
+//!   On input: local indices of observations held by this process. On output: corresponding
+//!   global observation indices.
+//! \param globalIdxFromLocalIdx
+//!   A vector whose ith element is the global index of ith observation held by this process.
 //!
-//! Global obs. index | Process index | Local obs. index
-//! ----------------- | ------------- | ----------------
-//! 0                 | 0             | 0
-//! 1                 | 1             | 0
-//! 2                 | 2             | 0
-//! 3                 | 0             | 1
-//! 4                 | 1             | 1
-//! 5                 | 2             | 1
-//! 6                 | 0             | 2
-//! 7                 | 1             | 2
-//!
-void convertLocalObsIndicesToGlobal(const eckit::mpi::Comm &comm, std::vector<size_t> &indices) {
-  const size_t rank = comm.rank();
-  const size_t size = comm.size();
+void convertLocalObsIndicesToGlobal(std::vector<size_t> &indices,
+                                    const std::vector<size_t> &globalIdxFromLocalIdx) {
   for (size_t &index : indices)
-    index = index * size + rank;
+    index = globalIdxFromLocalIdx[index];
 }
 
 // -----------------------------------------------------------------------------
-
-///
-/// \brief Gather data from all tasks and deliver the combined data to all tasks.
-///
-/// \returns A vector that contains the elements of \p v from process 0 followed by the elements
-/// of \p v from process 1 etc.
-///
-template <typename T>
-std::vector<T> allGatherv(const eckit::mpi::Comm &comm, const std::vector<T> &v) {
-  eckit::mpi::Buffer<T> buffer(comm.size());
-  comm.allGatherv(v.begin(), v.end(), buffer);
-  return buffer.buffer;
-}
 
 //!
 //! Return the indices of observations whose quality control flags satisfy the
@@ -95,15 +73,18 @@ std::vector<T> allGatherv(const eckit::mpi::Comm &comm, const std::vector<T> &v)
 //!
 //! \param qcFlags
 //!   Vector of quality control flags for all observations.
-//! \param predicate
-//!   A function object taking an argument of type int and returning bool.
 //! \param comm
 //!   The MPI communicator used by the ObsSpace.
+//! \param globalIdxFromLocalIdx
+//!   A vector whose ith element is the global index of ith observation held by this process.
+//! \param predicate
+//!   A function object taking an argument of type int and returning bool.
 //!
 template <typename Predicate>
 std::vector<size_t> getObservationIndicesWhere(
-    const eckit::mpi::Comm &comm,
     const ObsTraits::ObsDataVector<int> &qcFlags,
+    const ioda::Distribution &obsDistribution,
+    const std::vector<size_t> &globalIdxFromLocalIdx,
     const Predicate &predicate) {
   std::vector<size_t> indices;
   for (size_t locIndex = 0; locIndex < qcFlags.nlocs(); ++locIndex) {
@@ -119,8 +100,8 @@ std::vector<size_t> getObservationIndicesWhere(
     }
   }
 
-  convertLocalObsIndicesToGlobal(comm, indices);
-  indices = allGatherv(comm, indices);
+  convertLocalObsIndicesToGlobal(indices, globalIdxFromLocalIdx);
+  obsDistribution.allGatherv(indices);
   std::sort(indices.begin(), indices.end());
   return indices;
 }
@@ -131,9 +112,11 @@ std::vector<size_t> getObservationIndicesWhere(
 //! Return the indices of observations that have passed quality control in
 //! at least one variable.
 //!
-std::vector<size_t> getPassedObservationIndices(const eckit::mpi::Comm &comm,
-                                                const ObsTraits::ObsDataVector<int> &qcFlags) {
-  return getObservationIndicesWhere(comm, qcFlags, [](int qcFlag) { return qcFlag == 0; });
+std::vector<size_t> getPassedObservationIndices(const ObsTraits::ObsDataVector<int> &qcFlags,
+                                                const ioda::Distribution &obsDistribution,
+                                                const std::vector<size_t> &globalIdxFromLocalIdx) {
+  return getObservationIndicesWhere(qcFlags, obsDistribution, globalIdxFromLocalIdx,
+                                    [](int qcFlag) { return qcFlag == 0; });
 }
 
 // -----------------------------------------------------------------------------
@@ -142,9 +125,11 @@ std::vector<size_t> getPassedObservationIndices(const eckit::mpi::Comm &comm,
 //! Return the indices of observations that have failed quality control in
 //! at least one variable.
 //!
-std::vector<size_t> getFailedObservationIndices(const eckit::mpi::Comm &comm,
-                                                const ObsTraits::ObsDataVector<int> &qcFlags) {
-  return getObservationIndicesWhere(comm, qcFlags, [](int qcFlag) { return qcFlag != 0; });
+std::vector<size_t> getFailedObservationIndices(const ObsTraits::ObsDataVector<int> &qcFlags,
+                                                const ioda::Distribution &obsDistribution,
+                                                const std::vector<size_t> &globalIdxFromLocalIdx) {
+  return getObservationIndicesWhere(qcFlags, obsDistribution, globalIdxFromLocalIdx,
+                                    [](int qcFlag) { return qcFlag != 0; });
 }
 
 // -----------------------------------------------------------------------------
@@ -153,10 +138,12 @@ std::vector<size_t> getFailedObservationIndices(const eckit::mpi::Comm &comm,
 //! Return the indices of observations whose quality control flag is set to \p flag in
 //! at least one variable.
 //!
-std::vector<size_t> getFlaggedObservationIndices(const eckit::mpi::Comm &comm,
-                                                 const ObsTraits::ObsDataVector<int> &qcFlags,
+std::vector<size_t> getFlaggedObservationIndices(const ObsTraits::ObsDataVector<int> &qcFlags,
+                                                 const ioda::Distribution &obsDistribution,
+                                                 const std::vector<size_t> &globalIdxFromLocalIdx,
                                                  int flag) {
-  return getObservationIndicesWhere(comm, qcFlags, [flag](int qcFlag) { return qcFlag == flag; });
+  return getObservationIndicesWhere(qcFlags, obsDistribution, globalIdxFromLocalIdx,
+                                    [flag](int qcFlag) { return qcFlag == flag; });
 }
 
 // -----------------------------------------------------------------------------
@@ -320,7 +307,7 @@ void testFilters() {
       const std::vector<size_t> passedObsBenchmark =
           typeconfs[jj].getUnsignedVector("passedObservationsBenchmark");
       const std::vector<size_t> passedObs = getPassedObservationIndices(
-            obsspace.comm(), qcflags->obsdatavector());
+            qcflags->obsdatavector(), obsspace.distribution(), obsspace.index());
       EXPECT_EQUAL(passedObs, passedObsBenchmark);
     }
 
@@ -328,7 +315,7 @@ void testFilters() {
       atLeastOneBenchmarkFound = true;
       const int passedBenchmark = typeconfs[jj].getInt("passedBenchmark");
       int passed = numEqualTo(qcflags->obsdatavector(), ufo::QCflags::pass);
-      obsspace.comm().allReduceInPlace(passed, eckit::mpi::Operation::SUM);
+      obsspace.distribution().sum(passed);
       EXPECT_EQUAL(passed, passedBenchmark);
     }
 
@@ -337,7 +324,7 @@ void testFilters() {
       const std::vector<size_t> failedObsBenchmark =
           typeconfs[jj].getUnsignedVector("failedObservationsBenchmark");
       const std::vector<size_t> failedObs = getFailedObservationIndices(
-            obsspace.comm(), qcflags->obsdatavector());
+            qcflags->obsdatavector(), obsspace.distribution(), obsspace.index());
       EXPECT_EQUAL(failedObs, failedObsBenchmark);
     }
 
@@ -345,7 +332,7 @@ void testFilters() {
       atLeastOneBenchmarkFound = true;
       const int failedBenchmark = typeconfs[jj].getInt("failedBenchmark");
       int failed = numNonzero(qcflags->obsdatavector());
-      obsspace.comm().allReduceInPlace(failed, eckit::mpi::Operation::SUM);
+      obsspace.distribution().sum(failed);
       EXPECT_EQUAL(failed, failedBenchmark);
     }
 
@@ -357,7 +344,8 @@ void testFilters() {
         const std::vector<size_t> flaggedObsBenchmark =
             typeconfs[jj].getUnsignedVector("flaggedObservationsBenchmark");
         const std::vector<size_t> flaggedObs =
-            getFlaggedObservationIndices(obsspace.comm(), qcflags->obsdatavector(), flag);
+            getFlaggedObservationIndices(qcflags->obsdatavector(), obsspace.distribution(),
+                                         obsspace.index(), flag);
         EXPECT_EQUAL(flaggedObsBenchmark, flaggedObsBenchmark);
       }
 
@@ -365,7 +353,7 @@ void testFilters() {
         atLeastOneBenchmarkFound = true;
         const int flaggedBenchmark = typeconfs[jj].getInt("flaggedBenchmark");
         int flagged = numEqualTo(qcflags->obsdatavector(), flag);
-        obsspace.comm().allReduceInPlace(flagged, eckit::mpi::Operation::SUM);
+        obsspace.distribution().sum(flagged);
         EXPECT_EQUAL(flagged, flaggedBenchmark);
       }
     }

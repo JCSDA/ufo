@@ -145,7 +145,7 @@ observations:
     - 9645
     - 9652
     - 9999
-# Category variable combining satellite IDs and thinning rounds
+# Category variable combining station IDs and thinning rounds
 - obs space:
     name: Aircraft
     obsdatain:
@@ -642,7 +642,7 @@ observations:
     priority_variable:
       name: priority@MetaData
   passedBenchmark: 145
-  passedObservationsBenchmark:
+  passedObservationsBenchmark: &regularSpatialGridPassedObsIds
     - 223
     - 230
     - 237
@@ -788,3 +788,80 @@ observations:
     - 9771
     - 9778
     - 9999
+# Same as above; category variable used to group observations into records
+- obs space:
+    name: Aircraft
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/met_office_thinning.nc4
+      obsgrouping:
+        group variable: "round"
+    simulated variables: [air_temperature]
+  obs filters:
+  - filter: Gaussian Thinning
+    distance_norm: maximum
+    round_horizontal_bin_count_to_nearest: true
+    use_reduced_horizontal_grid: false
+    horizontal_mesh:  3333.333333
+    vertical_mesh:  1000.000000
+    vertical_min:   -500.000000
+    vertical_max:  10500.000000
+    time_mesh: PT01H15M00S
+    time_min: 2018-04-14T20:52:30Z
+    time_max: 2018-04-15T03:07:30Z
+    category_variable:
+      name: round@MetaData
+    priority_variable:
+      name: priority@MetaData
+  passedBenchmark: 145
+  passedObservationsBenchmark: *regularSpatialGridPassedObsIds
+# Same as above; a variable other than the category variable used to group observations into records
+- obs space:
+    name: Aircraft
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/met_office_thinning.nc4
+      obsgrouping:
+        group variable: "priority"
+    simulated variables: [air_temperature]
+  obs filters:
+  - filter: Gaussian Thinning
+    distance_norm: maximum
+    round_horizontal_bin_count_to_nearest: true
+    use_reduced_horizontal_grid: false
+    horizontal_mesh:  3333.333333
+    vertical_mesh:  1000.000000
+    vertical_min:   -500.000000
+    vertical_max:  10500.000000
+    time_mesh: PT01H15M00S
+    time_min: 2018-04-14T20:52:30Z
+    time_max: 2018-04-15T03:07:30Z
+    category_variable:
+      name: round@MetaData
+    priority_variable:
+      name: priority@MetaData
+  passedBenchmark: 145
+  passedObservationsBenchmark: *regularSpatialGridPassedObsIds
+# No category variable; inefficient distribution
+- obs space:
+    name: Aircraft
+    distribution: InefficientDistribution
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/met_office_thinning.nc4
+    simulated variables: [air_temperature]
+  obs filters:
+  - filter: Gaussian Thinning
+    distance_norm: maximum
+    round_horizontal_bin_count_to_nearest: true
+    use_reduced_horizontal_grid: false
+    horizontal_mesh:  3333.333333
+    vertical_mesh:  1000.000000
+    vertical_min:   -500.000000
+    vertical_max:  10500.000000
+    time_mesh: PT01H15M00S
+    time_min: 2018-04-14T20:52:30Z
+    time_max: 2018-04-15T03:07:30Z
+    category_variable:
+      name: round@MetaData
+    priority_variable:
+      name: priority@MetaData
+  passedBenchmark: 145
+  passedObservationsBenchmark: *regularSpatialGridPassedObsIds

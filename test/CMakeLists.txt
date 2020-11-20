@@ -132,7 +132,6 @@ list( APPEND ufo_test_input
   testinput/ompstc_npp.yaml
   testinput/ompstc_npp_flipz.yaml
   testinput/processwhere.yaml
-  testinput/parallel_obs_distribution.yaml
   testinput/parameters.yaml
   testinput/qc_trackcheck.yaml
   testinput/qc_trackcheck_unittests.yaml
@@ -1812,15 +1811,6 @@ ecbuild_add_test( TARGET  test_ufo_piecewise_linear_interpolation
                   ARGS    "testinput/empty.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   LIBS    ufo)
-
-# Test parallel observation distribution
-ecbuild_add_test( TARGET  test_ufo_parallel_obs_distribution
-                  MPI     4
-                  SOURCES mains/TestParallelObsDistribution.cc
-                  ARGS    "testinput/parallel_obs_distribution.yaml"
-                  ENVIRONMENT OOPS_TRAPFPE=1
-                  LIBS    ufo
-                  TEST_DEPENDS ufo_get_ioda_test_data ufo_get_ufo_test_data )
 
 # Test QC for specific instruments
 

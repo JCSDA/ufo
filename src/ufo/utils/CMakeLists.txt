@@ -15,8 +15,6 @@ set ( utils_files
       parameters/ParameterTraitsVariable.h
       PiecewiseLinearInterpolation.cc
       PiecewiseLinearInterpolation.h
-      ParallelObsDistribution.cc
-      ParallelObsDistribution.h
       ProbabilityOfGrossError.cc
       ProbabilityOfGrossError.h
       ProbabilityOfGrossErrorParameters.h

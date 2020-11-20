@@ -77,6 +77,8 @@ set ( filters_files
       PoissonDiskThinningParameters.h
       processWhere.cc
       processWhere.h
+      ObsAccessor.cc
+      ObsAccessor.h
       actions/AssignError.cc
       actions/AssignError.h
       actions/FilterAction.cc
