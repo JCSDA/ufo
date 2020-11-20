@@ -43,15 +43,18 @@ class TrackCheckShipDiagnostics;
 class TrackCheckShipParameters;
 class RecursiveSplitter;
 /// \brief Checks tracks of ships and buoys, rejecting observations whose locations
-/// and timestamps make them inconsistent with the rest of the track.
+/// and timestamps make them inconsistent with the rest of the track. The full track is rejected
+/// if there are too many inconsistent observations.
 ///
 /// Each track is checked separately. The algorithm will first calculate speeds and distances
 /// between every two adjacent and alternating observations, and angles between any three adjacent
 /// observations. Based on these values, it will increment a set of "error counters" that reflect
-/// how many errors exist within the track. By default, if the "error counters" sum up to a value
-/// greater than or equal to half of the segments, the filter will be stopped.
-///
-/// \todo the implementation of the remainder of the filter is still in progress.
+/// how many errors exist within the track. If the "early break check" parameter is set to true and
+/// the "error counters" sum up to a value greater than or equal to half of the segments, the
+/// filter will ignore the current track and move on to the next one. Otherwise, observations will
+/// be iteratively removed based on the location of the fastest segment until all segments between
+/// observations are slower than the speed set by the "max speed" parameter (or 80% of it if angles
+/// between segments are large).
 ///
 /// See TrackCheckShipsParameters for the documentation of this filter's parameters.
 ///
@@ -69,11 +72,6 @@ class TrackCheckShip: public FilterBase,
   /// \brief Relevant calculated values that are specific to each pair or triplet
   /// of adjacent/alternating observations
   struct ObservationStatistics {
-    /// Simultaneous holds \p true if the same-index observation is
-    /// occurring at the same time-stamp as either
-    /// the previous-index observation or the next-index observation
-    /// (if the observations are at different locations)
-    bool simultaneous{};
     /// \brief \p timeDifference between the same-index observation and the
     /// previous one.
     util::Duration timeDifference{};
@@ -112,11 +110,6 @@ class TrackCheckShip: public FilterBase,
     /// \p numBends_ is a count of 3-consecutive-observation track segments
     /// in which the track shows a 90-degree or greater turn.
     int numBends_{};
-    /// \p numDist0_ is the count of consecutive observations with a
-    /// cartesian distance that measures 0.0 metres.
-    int numDist0_{};
-    /// \p numSimultaneous_ is the count of observations deemed simultaneous.
-    int numSimultaneous_{};
     /// \p sumSpeed_ is the sum of all speed values recorded for observations
     /// that have neither been deemed "fast" or "short"
     double sumSpeed_{};
@@ -138,7 +131,6 @@ class TrackCheckShip: public FilterBase,
     const util::DateTime& getTime() const {
       return obsLocationTime_.time();
     }
-    void setSimultaneous(bool simul);
     void setDistance(double dist);
     void setTimeDifference(util::Duration tDiff);
     void setSpeed(double speed);
@@ -210,7 +202,7 @@ class TrackCheckShip: public FilterBase,
                    std::vector<std::vector<bool>> &) const override;
   int qcFlag() const override {return QCflags::track;}
 
-  enum CalculationMethod { FIRSTITERATION, SIMULTANEOUSDEFERRAL, MAINLOOP };
+  enum CalculationMethod { FIRSTITERATION, MAINLOOP };
 
   void calculateTrackSegmentProperties(
       const std::vector<std::reference_wrapper<TrackObservation>> &trackObservations,
@@ -222,8 +214,6 @@ class TrackCheckShip: public FilterBase,
       const std::vector<size_t> &validObsIds,
       const TrackCheckUtils::ObsGroupLocationTimes &obsLoc) const;
 
-  std::vector<std::reference_wrapper<TrackObservation>> removeSimultaneousObservations(
-      const std::vector<std::reference_wrapper<TrackObservation>> &trackObs) const;
   bool earlyBreak(const std::vector<std::reference_wrapper<TrackObservation>> &trackObs,
                   const std::string trackId) const;
 

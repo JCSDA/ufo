@@ -67,16 +67,9 @@ class TrackCheckShipParameters : public TrackCheckUtilsParameters {
   };
 
   /// The type of input source. This affects the treatment of tracks
-  /// with large numbers of simultaneous observations.
+  /// with large numbers of short segments between observations.
   oops::Parameter<int> inputCategory {
-    "input category", 2, this  // 1 for buoy/other fixed input; 2 for ship; 3 for ship_auto
-  };
-
-  /// \brief If \p deferredCheckSimultaneous set to true, check of simultaneous
-  /// observations will be deferred until the end, at which point flagged observations
-  /// may be reinstated.
-  oops::RequiredParameter<bool> deferredCheckSimultaneous {
-    "deferred check simultaneous", this
+    "input category", 2, this  // 1 for buoy/other fixed input; 2 for ship
   };
 
   /// \brief If \p earlyBreakCheck set to true, check will stop early based on the number

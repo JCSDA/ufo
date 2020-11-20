@@ -70,7 +70,8 @@ double TrackCheckShip::speedEstimate(
 }
 
 /// \brief Returns the angle in degrees (rounded to the nearest .1 degree)
-/// formed by the track segment going from observation \p a to \p b to \p c.
+/// between displacement vectors going from observations \p a to \p b
+/// and \p b to \p c.
 float TrackCheckShip::angle(const TrackCheckShip::TrackObservation &a,
                             const TrackCheckShip::TrackObservation &b,
                             const TrackCheckShip::TrackObservation &c) {
@@ -134,14 +135,23 @@ void TrackCheckShip::print(std::ostream & os) const {
 }
 
 
-/// \todo This section is not yet fully implemented. Current implementation includes separating
-/// observations into tracks based on \p Station_Id, calculating distances, speeds, and
-/// angles between observations, and incrementing track-specific counters should the
-/// calculations produce unexpected values. Based on the counter values, the filter
-/// may be stopped early. Simultaneous observations are then optionally ignored for later
-/// re-inclusion or rejection. Using the above calculations and additional ones if necessary,
-/// the observation directly before and/or after the fastest segment is chosen for rejection.
-/// Re-checking of simultaneous observations is not yet implemented.
+/// The filter begins with separating observations into tracks based on \p Station_Id. Various
+/// calculations are then performed between consecutive observations: distances/speeds between
+/// observation pairs, and angles between the displacement vectors formed by triplets of
+/// consecutive observations. Track-specific counters are incremented for various metrics that
+/// indicate an unexpected track path.
+///
+/// Based on these counter values, the filter may ignore the current track and move on to the next
+/// one. Using the described calculations and additional ones if necessary, the observation
+/// directly before and/or after the fastest segment is chosen for rejection. This will continue
+/// until all remaining segments that link accepted observations are either:
+/// 1. slower than a user-defined "max speed (m/s)" where the angles between the fastest accepted
+/// segment's displacement vector and its two neighbouring segments' displacement vectors are
+/// both less than 90 degrees.
+/// 2. slower than 80 percent of this user-defined speed.
+///
+/// The full track will be rejected if the number of observations removed is more than the
+/// user-defined "rejection threshold".
 
 void TrackCheckShip::applyFilter(const std::vector<bool> & apply,
                                  const Variables & filtervars,
@@ -175,9 +185,6 @@ void TrackCheckShip::applyFilter(const std::vector<bool> & apply,
         TrackCheckShip::earlyBreak(trackObservationsReferences, stationId)) {
       continue;
     }
-    if (options_->deferredCheckSimultaneous.value()) {
-      trackObservationsReferences = removeSimultaneousObservations(trackObservationsReferences);
-    } else {  // reinstating deferred observation is not yet implemented
       bool firstIterativeRemoval = true;
       while (trackObservationsReferences.size() >= 3) {
         // Initial loop: fastest (as determined by set of comparisons) observation removed
@@ -215,7 +222,6 @@ void TrackCheckShip::applyFilter(const std::vector<bool> & apply,
       }
       flagRejectedTrackObservations(track.begin(), track.end(),
                                     validObsIds, trackObservations, isRejected);
-    }
   }
   TrackCheckUtils::flagRejectedObservations(isRejected, flagged);
 }
@@ -277,19 +283,6 @@ bool TrackCheckShip::earlyBreak(const std::vector<std::reference_wrapper<TrackOb
   if (options_->testingMode)
     diagnostics_->storeEarlyBreakResult(breakResult);
   return breakResult;
-}
-
-/// \brief Filters out all observations that have been marked simultaneous for
-/// rechecking at the end.
-std::vector<std::reference_wrapper<TrackCheckShip::TrackObservation>>
-TrackCheckShip::removeSimultaneousObservations(
-    const std::vector<std::reference_wrapper<TrackObservation>> &trackObs) const {
-  std::vector<std::reference_wrapper<TrackObservation>> reducedTrackObs;
-  std::copy_if(trackObs.begin(), trackObs.end(), std::back_inserter(reducedTrackObs),
-               [](const TrackObservation &obs){
-    return !(obs.getObservationStatistics().simultaneous);});
-  calculateTrackSegmentProperties(reducedTrackObs, CalculationMethod::SIMULTANEOUSDEFERRAL);
-  return reducedTrackObs;
 }
 
 /// \brief Chooses which of the observations surrounding the speediest segment to remove,
@@ -548,13 +541,6 @@ void TrackCheckShip::TrackObservation::calculateTwoObservationValues(
         this->setSpeed(TrackCheckShip::speedEstimate(*this, prevObs, options)) :
         this->setSpeed(0.0);
   this->setTimeDifference(getTime() - prevObs.getTime());
-  if (!(this->observationStatistics_.timeDifference.toSeconds())) {
-    if (this->observationStatistics_.distance >
-        options.spatialResolution) {
-      prevObs.setSimultaneous(true);
-    }
-    setSimultaneous(true);
-  }
   if (firstIteration) {
     adjustTwoObservationStatistics(options);
   }
@@ -569,7 +555,7 @@ void TrackCheckShip::TrackObservation::resetObservationCalculations() {
 }
 
 /// Calculates all of the statistics that require three
-/// adjacent \p TrackObservations,
+/// consecutive \p TrackObservations,
 /// storing within the middle observation. This includes
 /// distance between two alternating observations,
 /// speed between these alternating observations (if the middle
@@ -599,7 +585,7 @@ void TrackCheckShip::calculateTrackSegmentProperties(
     const std::vector<std::reference_wrapper<TrackObservation>> &trackObservations,
     CalculationMethod calculationMethod) const {
   if (trackObservations.size()) {
-    if (calculationMethod == MAINLOOP || calculationMethod == SIMULTANEOUSDEFERRAL)
+    if (calculationMethod == MAINLOOP)
       trackObservations[0].get().resetObservationCalculations();
     for (size_t obsIdx = 1; obsIdx < trackObservations.size(); obsIdx++) {
       TrackObservation &obs = trackObservations[obsIdx].get();
@@ -625,8 +611,6 @@ void TrackCheckShip::calculateTrackSegmentProperties(
       auto trackStats = *(trackObservations[0].get().getFullTrackStatistics());
       if (calculationMethod == FIRSTITERATION)
         diagnostics_->storeInitialCalculationResults(std::make_pair(obsStats, trackStats));
-      else if (calculationMethod == SIMULTANEOUSDEFERRAL)
-        diagnostics_->storeCalculatedResultsSimultaneousDeferred(obsStats);
     }
   }
 }
@@ -636,8 +620,6 @@ void TrackCheckShip::calculateTrackSegmentProperties(
 void TrackCheckShip::TrackObservation::adjustTwoObservationStatistics
 (const TrackCheckShipParameters &options) const {
   util::Duration hour{"PT1H"};
-  if (getObservationStatistics().distance == 0.0)
-    getFullTrackStatistics()->numDist0_++;
   if (getObservationStatistics().timeDifference < hour) {
     getFullTrackStatistics()->numShort_++;
   } else if (getObservationStatistics().speed >= options.maxSpeed) {
@@ -665,14 +647,6 @@ TrackCheckShip::TrackObservation::getFullTrackStatistics() const
   return fullTrackStatistics_;
 }
 
-/// Sets the calling observation as simultaneous and increments the track-wise
-/// \p numSimultaneous_ counter.
-void TrackCheckShip::TrackObservation::setSimultaneous(bool simul) {
-  assert(simul);  // reverting a simultaneous obs to normal is not yet implemented
-  if (!this->observationStatistics_.simultaneous)
-    this->fullTrackStatistics_->numSimultaneous_++;
-  this->observationStatistics_.simultaneous = simul;
-}
 void TrackCheckShip::TrackObservation::setDistance(double dist) {
   this->observationStatistics_.distance = dist;
 }

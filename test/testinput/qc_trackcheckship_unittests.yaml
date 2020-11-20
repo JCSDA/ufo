@@ -19,7 +19,6 @@ Normal ship track:
     spatial resolution (km): 1
     max speed (m/s): 1000.0
     rejection threshold: 1.0
-    deferred check simultaneous: false
     early break check: false
     station_id_variable:
       name: station_id@MetaData
@@ -31,8 +30,6 @@ Normal ship track:
   expected short: [0]
   expected fast: [0]
   expected bends: [0]
-  expected dist0: [0]
-  expected simultaneous: [0]
   expected sum speed: [174.0]
   expected mean speed: [43.5]
   expected early breaks: [0]
@@ -57,7 +54,6 @@ Bending ship track:
     spatial resolution (km): 1
     max speed (m/s): 1000.0
     rejection threshold: 1.0
-    deferred check simultaneous: false
     early break check: false
     station_id_variable:
       name: station_id@MetaData
@@ -69,8 +65,6 @@ Bending ship track:
   expected short: [0]
   expected fast: [0]
   expected bends: [2]
-  expected dist0: [0]
-  expected simultaneous: [0]
   expected sum speed: [135.0]
   expected mean speed: [33.9]
   expected early breaks: [0]
@@ -95,7 +89,6 @@ Fast ship track:
     spatial resolution (km): 1
     max speed (m/s): 10 
     rejection threshold: 1.0
-    deferred check simultaneous: false
     early break check: false
     station_id_variable:
       name: station_id@MetaData
@@ -107,8 +100,6 @@ Fast ship track:
   expected short: [0]
   expected fast: [2]
   expected bends: [0]
-  expected dist0: [0]
-  expected simultaneous: [0]
   expected sum speed: [0.0]
   expected mean speed: [0.0]
   expected early breaks: [1]
@@ -134,7 +125,6 @@ Short ship track:
     spatial resolution (km): 1
     max speed (m/s): 1000.0 
     rejection threshold: 1.0
-    deferred check simultaneous: false
     early break check: false
     station_id_variable:
       name: station_id@MetaData
@@ -146,8 +136,6 @@ Short ship track:
   expected short: [2]
   expected fast: [0]
   expected bends: [0]
-  expected dist0: [0]
-  expected simultaneous: [0]
   expected sum speed: [0.0]
   expected mean speed: [0.0]
   expected early breaks: [1]
@@ -173,7 +161,6 @@ Short buoy track:
     spatial resolution (km): 1
     max speed (m/s): 1000 
     rejection threshold: 1.0
-    deferred check simultaneous: false
     early break check: false
     station_id_variable:
       name: station_id@MetaData
@@ -185,8 +172,6 @@ Short buoy track:
   expected short: [2]
   expected fast: [0]
   expected bends: [0]
-  expected dist0: [0]
-  expected simultaneous: [0]
   expected sum speed: [0.0]
   expected mean speed: [0.0]
   expected early breaks: [0]
@@ -211,7 +196,6 @@ Fast/short ship track:
     spatial resolution (km): 1
     max speed (m/s): 10 
     rejection threshold: 1.0
-    deferred check simultaneous: false
     early break check: false
     station_id_variable:
       name: station_id@MetaData
@@ -223,8 +207,6 @@ Fast/short ship track:
   expected short: [2]
   expected fast: [0]
   expected bends: [0]
-  expected dist0: [0]
-  expected simultaneous: [0]
   expected sum speed: [0.0]
   expected mean speed: [0.0]
   expected early breaks: [1]
@@ -248,7 +230,6 @@ Ship Track Dist0:
     spatial resolution (km): 1
     max speed (m/s): 1000.0
     rejection threshold: 1.0
-    deferred check simultaneous: false
     early break check: false
     station_id_variable:
       name: station_id@MetaData
@@ -260,8 +241,6 @@ Ship Track Dist0:
   expected short: [0]
   expected fast: [0]
   expected bends: [0]
-  expected dist0: [2]
-  expected simultaneous: [0]
   expected sum speed: [0.0]
   expected mean speed: [0.0]
   expected early breaks: [0]
@@ -285,7 +264,6 @@ Ship Track Simultaneous Same Location:
     spatial resolution (km): 1
     max speed (m/s): 10 
     rejection threshold: 1.0
-    deferred check simultaneous: false
     early break check: false
     station_id_variable:
       name: station_id@MetaData
@@ -297,53 +275,9 @@ Ship Track Simultaneous Same Location:
   expected short: [2]
   expected fast: [0]
   expected bends: [0]
-  expected dist0: [2]
-  expected simultaneous: [2]
   expected sum speed: [0]
   expected mean speed: [0]
   expected early breaks: [1]
-Ship Track Simultaneous Same Location Deferred Simultaneous:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
-  obs space:
-    name: Ship
-    simulated variables: [air_temperature]
-    generate:
-      list:
-        lats: [ 0, 0, 0]
-        lons: [ 0, 0, 0]
-        datetimes: [ '2010-01-01T00:00:00Z', '2010-01-01T00:00:00Z', '2010-01-01T00:00:00Z']
-      obs errors: [1.0]
-  station_ids: [ 1, 1, 1]
-  Ship Track Check:
-    unit testing mode: true
-    early break check: false
-    deferred check simultaneous: true
-    variables: [air_temperature]
-    temporal resolution: PT10M
-    spatial resolution (km): 1
-    max speed (m/s): 1000.0 
-    rejection threshold: 1.0
-    station_id_variable:
-      name: station_id@MetaData
-  expected distance: [0, 0, 0]
-  expected speed: [0.0, 0.0, 0.0]
-  expected distance averaged: [0, 0, 0]
-  expected speed averaged: [0, 0, 0]
-  expected angle: [0.0, 0.0, 0.0]
-  expected short: [2]
-  expected fast: [0]
-  expected bends: [0]
-  expected dist0: [2]
-  expected simultaneous: [2]
-  expected deferred distance: [0]
-  expected deferred speed: [0]
-  expected deferred distance averaged: [0]
-  expected deferred speed averaged: [0]
-  expected deferred angle: [0]
-  expected sum speed: [0]
-  expected mean speed: [0]
-  expected early breaks: [0]
 Ship Track Simultaneous Different Location:
   window begin: 2000-01-01T00:00:00Z
   window end: 2030-01-01T00:00:00Z
@@ -364,7 +298,6 @@ Ship Track Simultaneous Different Location:
     spatial resolution (km): 1
     max speed (m/s): 10 
     rejection threshold: 1.0
-    deferred check simultaneous: false
     early break check: false
     station_id_variable:
       name: station_id@MetaData
@@ -376,53 +309,9 @@ Ship Track Simultaneous Different Location:
   expected short: [2]
   expected fast: [0]
   expected bends: [0]
-  expected dist0: [0]
-  expected simultaneous: [3]
   expected sum speed: [0]
   expected mean speed: [0]
   expected early breaks: [1]
-Ship Track Simultaneous Different Location Deferred Simultaneous:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
-  obs space:
-    name: Ship
-    simulated variables: [air_temperature]
-    generate:
-      list:
-        lats: [ 0, 1, 2, 3, 4, 5]
-        lons: [ 0, 0, 0, 0, 0, 0]
-        datetimes: ['2010-01-01T00:00:00Z', '2010-01-01T01:00:00Z', '2010-01-01T01:00:00Z', '2010-01-01T01:00:00Z', '2010-01-01T02:00:00Z', '2010-01-01T03:00:00Z']
-      obs errors: [1.0]
-  station_ids: [ 1, 1, 1, 1, 1, 1]
-  Ship Track Check:
-    unit testing mode: true
-    variables: [air_temperature]
-    temporal resolution: PT10M
-    spatial resolution (km): 1
-    max speed (m/s): 1000.0 
-    rejection threshold: 1.0
-    deferred check simultaneous: true
-    early break check: false
-    station_id_variable:
-      name: station_id@MetaData
-  expected distance: [0, 111, 111, 111, 111, 111]
-  expected speed: [0.0, 30.8, 185.0, 185.0, 30.8, 30.8] #because assumes a time difference of 10 mins btwn each obs
-  expected distance averaged: [0, 222, 222, 222, 222, 0]
-  expected speed averaged: [0, 61.6, 370.0, 61.6, 30.8, 0] # because assumes a time difference of 10 mins btwn any simultaneous obs
-  expected angle: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
-  expected short: [2]
-  expected fast: [0]
-  expected bends: [0]
-  expected dist0: [0]
-  expected simultaneous: [3]
-  expected sum speed: [92.4]
-  expected mean speed: [30.8]
-  expected deferred distance: [0, 444, 111]
-  expected deferred speed: [0.0, 61.6, 30.8]
-  expected deferred distance averaged: [0, 555, 0]
-  expected deferred speed averaged: [0, 51.3, 0]
-  expected deferred angle: [0.0, 0.0, 0.0]
-  expected early breaks: [0]
 Ship Tracks Different Station IDs:
   window begin: 2000-01-01T00:00:00Z
   window end: 2030-01-01T00:00:00Z
@@ -445,7 +334,6 @@ Ship Tracks Different Station IDs:
     spatial resolution (km): 1
     max speed (m/s): 1000 
     rejection threshold: 1.0
-    deferred check simultaneous: false
     early break check: false
     station_id_variable:
       name: station_id@MetaData
@@ -457,8 +345,6 @@ Ship Tracks Different Station IDs:
   expected short: [0, 2]
   expected fast: [0, 0]
   expected bends: [2, 0]
-  expected dist0: [0, 0]
-  expected simultaneous: [0, 0]
   expected sum speed: [135.0, 0.0]
   expected mean speed: [33.9, 0.0]
   expected early breaks: [0, 1]
@@ -484,7 +370,6 @@ Ship Tracks Different Station IDs Shuffled:
     spatial resolution (km): 1
     max speed (m/s): 1000 
     rejection threshold: 1.0
-    deferred check simultaneous: false
     early break check: false
     station_id_variable:
       name: station_id@MetaData
@@ -496,12 +381,10 @@ Ship Tracks Different Station IDs Shuffled:
   expected short: [0, 2]
   expected fast: [0, 0]
   expected bends: [2, 0]
-  expected dist0: [0, 0]
-  expected simultaneous: [0, 0]
   expected sum speed: [135.0, 0.0]
   expected mean speed: [33.9, 0.0]
   expected early breaks: [0, 1]
-Ship Track Segment from Comparison Test TrackOptions both false:
+Ship Track Segment from Comparison Test early break false:
   window begin: 2000-01-01T00:00:00Z
   window end: 2030-01-01T00:00:00Z
   obs space:
@@ -523,12 +406,11 @@ Ship Track Segment from Comparison Test TrackOptions both false:
     spatial resolution (km): .0000001
     max speed (m/s): .01 
     rejection threshold: 0.5
-    deferred check simultaneous: false
     early break check: false
     station_id_variable:
       name: station_id@MetaData
   expected rejected obs indices: [0, 1, 2, 3, 4]
-Ship Track Segment from Comparison Test TrackOptions early break true:
+Ship Track Segment from Comparison Test early break true:
   window begin: 2000-01-01T00:00:00Z
   window end: 2030-01-01T00:00:00Z
   obs space:
@@ -550,9 +432,7 @@ Ship Track Segment from Comparison Test TrackOptions early break true:
     spatial resolution (km): .0000001
     max speed (m/s): .01 
     rejection threshold: 0.5
-    deferred check simultaneous: false
     early break check: false
     station_id_variable:
       name: station_id@MetaData
   expected rejected obs indices: [0, 1, 2, 3, 4, 5]
-

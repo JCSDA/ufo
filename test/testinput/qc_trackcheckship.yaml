@@ -16,7 +16,6 @@ observations:
   - filter: Ship Track Check
     unit testing mode: false
     early break check: false
-    deferred check simultaneous: false
     variables: [air_temperature]
     temporal resolution: PT00H00M1S
     spatial resolution (km): 0.0000001 
@@ -71,7 +70,6 @@ observations:
   - filter: Ship Track Check
     unit testing mode: false
     early break check: true
-    deferred check simultaneous: false
     variables: [air_temperature]
     temporal resolution: PT00H00M1S
     spatial resolution (km): 0.0000001 
