@@ -154,6 +154,7 @@ list( APPEND ufo_test_input
   testinput/qc_oceancolor_preqc.yaml
   testinput/qc_poisson_disk_thinning.yaml
   testinput/qc_poisson_disk_thinning_unittests.yaml
+  testinput/qc_poisson_disk_thinning_parallel.yaml
   testinput/qc_preqc.yaml
   testinput/qc_thinning.yaml
   testinput/qc_temporal_thinning.yaml
@@ -1290,6 +1291,7 @@ ecbuild_add_test( TARGET  test_ufo_qc_oceancolor_preqc
                   TEST_DEPENDS ufo_get_ioda_test_data ufo_get_ufo_test_data )
 
 ecbuild_add_test( TARGET  test_ufo_qc_poisson_disk_thinning
+                  MPI     2
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
                   ARGS    "testinput/qc_poisson_disk_thinning.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
@@ -1429,6 +1431,14 @@ ecbuild_add_test( TARGET  test_ufo_qc_trackcheckship_mainloop_unittests
 ecbuild_add_test( TARGET  test_ufo_qc_poisson_disk_thinning_unittests
                   SOURCES mains/TestPoissonDiskThinning.cc
                   ARGS    "testinput/qc_poisson_disk_thinning_unittests.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  LIBS    ufo
+                  TEST_DEPENDS ufo_get_ufo_test_data)
+
+ecbuild_add_test( TARGET  test_ufo_qc_poisson_disk_thinning_parallel
+                  MPI     2
+                  SOURCES mains/TestParallelPoissonDiskThinning.cc
+                  ARGS    "testinput/qc_poisson_disk_thinning_parallel.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   LIBS    ufo
                   TEST_DEPENDS ufo_get_ufo_test_data)

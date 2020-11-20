@@ -78,8 +78,9 @@ class ObsAccessor {
   /// \brief Return the IDs of observation locations that should be treated as valid by a filter.
   ///
   /// \param apply
-  ///   Boolean vector indicating which observations on the current MPI rank were selected by the
-  ///   \c where clause in the filter's configuration.
+  ///   Vector whose ith element is set to true if ith observation location held on the current
+  ///   MPI rank was selected by the \c where clause in the filter's configuration.
+  ///
   /// \param flags
   ///   An ObsDataVector holding the QC flags (set by any filters run previously)
   ///   of observations held on the current MPI rank.
