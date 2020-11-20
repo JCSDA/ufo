@@ -22,6 +22,7 @@ module ufo_radiancerttov_utils_mod
   use ufo_vars_mod
   use ufo_geovals_mod, only: ufo_geovals, ufo_geoval, ufo_geovals_get_var
   use ufo_basis_mod, only: ufo_basis
+  use ufo_utils_mod, only: Ops_SatRad_Qsplit
   use obsspace_mod
 
   implicit none
@@ -144,6 +145,7 @@ module ufo_radiancerttov_utils_mod
     logical                               :: rttov_is_setup = .false.
 
     logical                               :: SatRad_compatibility = .true.
+    logical                               :: qtotal = .true.
     logical                               :: UseQtsplitRain, SplitQtotal = .false. ! true for MW, false otherwise
     logical                               :: RTTOV_profile_checkinput = .false.
 
@@ -264,6 +266,10 @@ contains
       call f_confOpts % get_or_die("SatRad_compatibility",conf % SatRad_compatibility)
     endif
 
+    if(f_confOpts % has("qtotal")) then
+      call f_confOpts % get_or_die("qtotal",conf % qtotal)
+    endif
+
     if(f_confOpts % has("max_channels_per_batch")) then
       call f_confOpts % get_or_die("max_channels_per_batch",conf % nchan_max_sim)
     else
@@ -275,14 +281,14 @@ contains
     end if
 
     !DARFIX THIS ONLY WORKS FOR ONE INSTRUMENT
-    !
     if (conf % rttov_coef_array(1) % coef % id_sensor == sensor_id_mw) then
-      if(conf % rttov_opts % rt_mw % clw_data .and. conf % SatRad_compatibility) then
+      if(conf % rttov_opts % rt_mw % clw_data .and. &
+         conf % SatRad_compatibility .and. conf % qtotal) then
         conf % UseQtsplitRain = .true.
         conf % splitQtotal = .true.
       endif
 
-      conf % rttov_opts % rt_ir % ozone_data = .false.    
+      conf % rttov_opts % rt_ir % ozone_data = .false.
       conf % rttov_opts % rt_ir % co2_data = .false.
       conf % rttov_opts % rt_ir % n2o_data = .false.
       conf % rttov_opts % rt_ir % ch4_data = .false.
@@ -699,15 +705,18 @@ contains
         ! compute bg qtotal using q and clw only
         ! currently ice is ignored
         Qtotal(:) = profiles(iprof) % q(:) + profiles(iprof) % clw(:)
+        
+        ! Make sure there is a minimum humidity
+        Qtotal(:) = max(Qtotal(:), Min_q)
 
         ! generate first guess cloud and q based on the qtotal physics
-        call Ops_SatRad_Qsplit (1,                                                  & ! in
-          profiles(iprof) % p(:),                             & ! in
-          profiles(iprof) % t(:),                             & ! in
-          Qtotal(:),                                          & ! in
-          q_temp(:),                                          & ! out
-          clw_temp(:),                                        & ! out
-          ciw_temp(:),                                        & ! out
+        call Ops_SatRad_Qsplit (1,                     & ! in
+          profiles(iprof) % p(:) / Pa_to_hPa,          & ! in convert hPa to Pa
+          profiles(iprof) % t(:),                      & ! in
+          Qtotal(:),                                   & ! in
+          q_temp(:),                                   & ! out
+          clw_temp(:),                                 & ! out
+          ciw_temp(:),                                 & ! out
           UseQtSplitRain = conf % UseQtSplitRain)
 
         ! store in the profile
@@ -727,9 +736,9 @@ contains
     end if
 
     if(present(obs_info)) then
-      ! profiles(1)%elevation = obs_info%elevation / 1000.0_kind_real ! m -> km
-      ! profiles(1)%latitude = obs_info%latitude
-      ! profiles(1)%longitude = obs_info%longitude
+      ! profiles(1) % elevation = obs_info % elevation / 1000.0_kind_real ! m -> km
+      ! profiles(1) % latitude = obs_info % latitude
+      ! profiles(1) % longitude = obs_info % longitude
 
     else
 
@@ -806,12 +815,12 @@ contains
     if(present(obs_info)) then
 
       ! nprofiles = 1
-      ! nlevels = SIZE(profiles(1)%p)
+      ! nlevels = SIZE(profiles(1) % p)
 
-      ! profiles(1)%zenangle    = obs_info%sensor_zenith_angle
-      ! profiles(1)%azangle     = obs_info%sensor_azimuth_angle
-      ! profiles(1)%sunzenangle = obs_info%solar_zenith_angle
-      ! profiles(1)%sunazangle  = obs_info%solar_azimuth_angle
+      ! profiles(1) % zenangle    = obs_info % sensor_zenith_angle
+      ! profiles(1) % azangle     = obs_info % sensor_azimuth_angle
+      ! profiles(1) % sunzenangle = obs_info % solar_zenith_angle
+      ! profiles(1) % sunazangle  = obs_info % solar_azimuth_angle
 
     else
 
@@ -1792,209 +1801,5 @@ contains
      end if
 
   end subroutine parse_hofxdiags
-
-  !-------------------------------------------------------------------------------
-  ! (C) Crown copyright Met Office. All rights reserved.
-  !     Refer to COPYRIGHT.txt of this distribution for details.
-  !-------------------------------------------------------------------------------
-  ! IF output_type=1 : Split total water content (qtotal) into
-  !   water vapor content (q) and
-  !   cloud liquid water content (ql) and
-  !   cloud ice water content (qi)
-  ! If output_type ne 1 : Compute derivatives: (q) =dq/dqtotal
-  !                                            (ql)=dql/dqtotal
-  !                                            (qi)=dqi/dqtotal
-  !
-  !  WARNING: The derivatives are not valid if LtemperatureVar=.TRUE. since
-  !     qsaturated depends on temperature.
-  !
-  ! The partitioning of the excess moisture between ice and clw uses a temperature
-  ! based parametrization based on aircraft data Ref: Jones DC Reading phdthesis
-  ! p126
-  !-------------------------------------------------------------------------------
-
-  subroutine Ops_SatRad_Qsplit ( &
-    output_type, &
-    p,           &
-    t,           &
-    qtotal,      &
-    q,           &
-    ql,          &
-    qi,          &
-    UseQtSplitRain)
-
-    use ufo_utils_mod, only : Ops_Qsat
-    use ufo_constants_mod, only : zero, zerodegc, min_q
-
-    implicit none
-
-    ! Subroutine arguments:
-    integer, intent(in)                    :: output_type
-    real(kind_real), intent(in)            :: p(:)
-    real(kind_real), intent(in)            :: t(:)
-    real(kind_real), intent(in)            :: qtotal(:)
-    real(kind_real), intent(out)           :: q(size(qtotal))      ! humidity component q
-    real(kind_real), intent(out)           :: ql(size(qtotal))     ! liquid component ql
-    real(kind_real), intent(out)           :: qi(size(qtotal))     ! ice component qi
-    logical,         intent(in)            :: UseQtSplitRain
-
-    ! Local declarations:
-    integer                                :: i
-    real(kind_real), parameter             :: lower_rh = 0.95
-    real(kind_real), parameter             :: upper_rh = 1.05
-    real(kind_real), parameter             :: Split_Factor = 0.5
-    real(kind_real), parameter             :: MinTempQl = 233.15   ! temperature (K) below which all cloud is ice
-    real(kind_real)                        :: qsaturated(size(qtotal))
-    real(kind_real)                        :: RH_qtotal(size(qtotal))
-    real(kind_real)                        :: qnv(size(qtotal))        ! non vapour component
-    real(kind_real)                        :: qc(size(qtotal))         ! cloud component
-    real(kind_real)                        :: V1(size(qtotal))
-    real(kind_real)                        :: V2(size(qtotal))
-    real(kind_real)                        :: V1zero
-    real(kind_real)                        :: V2zero
-    real(kind_real)                        :: W(size(qtotal))
-    real(kind_real)                        :: Y1,Y2,Y3,Y4
-    real(kind_real)                        :: IntConst
-    real(kind_real)                        :: Aconst
-    real(kind_real)                        :: Bconst
-    real(kind_real)                        :: Cconst
-    real(kind_real)                        :: Dconst
-    real(kind_real)                        :: Denom
-    real(kind_real)                        :: SmallValue
-    real(kind_real)                        :: LF(size(qtotal))          ! fraction of ql to ql+qi
-    character(len=*), parameter :: RoutineName = "Ops_SatRad_Qsplit"
-
-    real(kind_real)    :: QsplitRainParamA       !Parameters used to define proportion of
-    real(kind_real)    :: QsplitRainParamB       !qt that is partitioned into a rain compnenent
-    real(kind_real)    :: QsplitRainParamC       !
-
-    !Qsplit_MixPhaseParam = 1 !Jones' method as default
-    QsplitRainParamA = 0.15_kind_real
-    QsplitRainParamB = 0.09_kind_real
-    QsplitRainParamC = 50.0_kind_real
-
-    ! Compute saturated water vapor profile for nlevels_q only
-
-    call Ops_Qsat (qsaturated(:),    & ! out
-      t(:),             & ! in
-      p(:), & ! in
-      size(qtotal))                    ! in
-
-    SmallValue = 1.0_kind_real / 8.5_kind_real
-    Denom = SmallValue * (upper_rh - lower_rh)
-
-    ! don't let rh exceed 2.0 to avoid cosh function blowing up
-    RH_qtotal(:) = min (qtotal(:) / qsaturated(:), 2.0_kind_real)
-
-    V1(:) = (RH_qtotal(:) - lower_rh) / Denom
-    V2(:) = (RH_qtotal(:) - upper_rh) / Denom
-
-    Y1 = 1.0_kind_real
-    Y2 = Split_Factor
-    Y3 = 0.0_kind_real
-    Y4 = Split_Factor
-
-    Aconst = (Y2 - Y1) / 2.0_kind_real
-    Bconst = -(Y4 - Y3) / 2.0_kind_real
-    Cconst = (Y2 + Y1) / 2.0_kind_real
-    Dconst = -(Y4 + Y3) / 2.0_kind_real
-
-    ! Compute fraction of ql to ql+qi based on temperature profile
-
-    where (t(:) - ZeroDegC >= -0.01_kind_real) ! -0.01degc and above
-
-      ! all ql
-      LF(:) = 1.0_kind_real
-
-    end where
-
-    where (t(:) <= MinTempql)
-
-      ! all qi
-      LF(:) = 0.0_kind_real
-
-    end where
-
-    where (t(:) > MinTempql .and. t(:) - ZeroDegC < -0.01_kind_real)
-
-      ! Jones' parametrization
-      LF(:) = sqrt (-1.0_kind_real * log (-0.025_kind_real * (t(:) - ZeroDegC)) / 70.0_kind_real)
-
-    end where
-
-    ! finally set LF to 0.0_kind_real for the rttov levels on which clw jacobians are not
-    ! calculated since nlevels_mwclw < nlevels_q
-
-    V1zero = -1.0_kind_real * lower_rh / Denom
-    V2zero = -1.0_kind_real * upper_rh / Denom
-    IntConst = -(Aconst * Denom * log (cosh (V1zero)) + Bconst * Denom * log (cosh (V2zero)))
-    W(:) = Aconst * Denom * log (cosh (V1(:))) + Bconst * Denom * log (cosh (V2(:))) + &
-      (Cconst + Dconst) * RH_qtotal(:) + IntConst
-
-    ! store the components of qtotal
-    ! ensuring that they are above lower limits
-
-    if (UseQtsplitRain) then
-
-      ! Split qtotal into q and qnv (non-vapour part - includes
-      ! ql, qi, qr)
-
-      ! Split qtotal into q, ql ,qi
-
-      do i = 1, size(qtotal)
-
-        q(i) = max (W(i) * qsaturated(i), min_q)
-        qnv(i) = max (qtotal(i) - q(i), 0.0_kind_real)
-
-        ! Split qnv into a cloud and precipitation part
-
-        qc(i) = max (QsplitRainParamA * (QsplitRainParamB - (QsplitRainParamB / ((QsplitRainParamC * qnv(i)) + 1))), 0.0_kind_real)
-
-        ! Finally split non-precip part into liquid and ice
-
-        ql(i) = max (LF(i) * qc(i), 0.0_kind_real)
-        qi(i) = max ((1.0_kind_real - LF(i)) * (qc(i)), 0.0_kind_real)
-
-      end do
-
-    else
-      do i = 1, size(qtotal)
-
-        q(i) = max (W(i) * qsaturated(i), min_q)
-        ql(i) = max (LF(i) * (qtotal(i) - q(i)), 0.0_kind_real)
-        qi(i) = max ((1.0_kind_real - LF(i)) * (qtotal(i) - q(i)), 0.0_kind_real)
-
-      end do
-
-    end if
-
-    ! Values of q, ql and qi are overwritten if output_type /= 1
-    ! and replaced with the derivatives
-
-    if (output_type /= 1) then
-
-      ! Compute derivates
-      ! q = dq/dqtotal, ql = dql/dqtotal, qi=dqi/dqtotal
-
-      q(:) = Aconst * tanh (V1(:)) + Cconst + Bconst * tanh (V2(:)) + Dconst
-
-      if (UseQtsplitRain) then
-
-        ql(:) = LF(:) * QsplitRainParamA * QsplitRainParamB * QsplitRainParamC * (1.0_kind_real - q(:)) /  &
-          ((QsplitRainParamC * qnv(:)) + 1.0_kind_real) ** 2
-        qi(:) = (1.0_kind_real - LF(:)) * QsplitRainParamA * QsplitRainParamB * QsplitRainParamC * (1.0_kind_real - q(:)) / &
-          ((QsplitRainParamC * qnv(:)) + 1.0_kind_real) ** 2
-
-      else
-
-        ql(:) = LF(:) * (1.0_kind_real - q(:))
-        qi(:) = (1.0_kind_real - LF(:)) * (1.0_kind_real - q(:))
-
-      end if
-
-    end if
-
-  end subroutine Ops_SatRad_Qsplit
-
 
 end module ufo_radiancerttov_utils_mod
