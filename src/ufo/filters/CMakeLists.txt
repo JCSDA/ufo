@@ -103,6 +103,8 @@ set ( filters_files
       obsfunctions/HydrometeorCheckAMSUA.h
       obsfunctions/HydrometeorCheckATMS.cc
       obsfunctions/HydrometeorCheckATMS.h
+      obsfunctions/ImpactHeight.cc
+      obsfunctions/ImpactHeight.h
       obsfunctions/InterChannelConsistencyCheck.cc
       obsfunctions/InterChannelConsistencyCheck.h
       obsfunctions/ObsErrorModelRamp.cc
