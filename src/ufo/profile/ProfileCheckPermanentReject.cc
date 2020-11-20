@@ -47,8 +47,8 @@ namespace ufo {
     // Set PermRejectFlag on individual elements if whole report has PermReject.
     for (int jlev = 0; jlev < numProfileLevels; ++jlev) {
       if (ReportFlags[jlev] & ufo::MetOfficeQCFlags::WholeObReport::PermRejectReport) {
-        for (auto flags : {&tFlags, &rhFlags, &uFlags, &vFlags, &zFlags})
-          if (!flags->empty()) (*flags)[jlev] |= ufo::MetOfficeQCFlags::Elem::PermRejectFlag;
+        SetQCFlag(ufo::MetOfficeQCFlags::Elem::PermRejectFlag, jlev,
+                  tFlags, rhFlags, uFlags, vFlags, zFlags);
       }
     }
 
@@ -61,8 +61,8 @@ namespace ufo {
             (ReportFlags[jlev] & ufo::MetOfficeQCFlags::WholeObReport::SurplusReport) ||
             (ReportFlags[jlev] & ufo::MetOfficeQCFlags::WholeObReport::OutOfAreaReport)) {
           ReportFlags[jlev] |= ufo::MetOfficeQCFlags::WholeObReport::FinalRejectReport;
-          for (auto flags : {&tFlags, &rhFlags, &uFlags, &vFlags, &zFlags})
-            if (!flags->empty()) (*flags)[jlev] |= ufo::MetOfficeQCFlags::Elem::FinalRejectFlag;
+          SetQCFlag(ufo::MetOfficeQCFlags::Elem::FinalRejectFlag, jlev,
+                    tFlags, rhFlags, uFlags, vFlags, zFlags);
         }
       }
     }

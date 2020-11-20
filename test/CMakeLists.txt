@@ -188,6 +188,8 @@ list( APPEND ufo_test_input
   testinput/profileconsistencychecks_bkgqc_repobs_obsfilter.yaml
   testinput/profileconsistencychecks_bkgqc_modobs_OPScomparison.yaml
   testinput/profileconsistencychecks_bkgqc_repobs_OPScomparison.yaml
+  testinput/profileconsistencychecks_sondeflags_obsfilter.yaml
+  testinput/profileconsistencychecks_sondeflags_OPScomparison.yaml
   testinput/timeoper.yaml
   testinput/tprof.yaml
   testinput/tropomi_no2.yaml
@@ -1383,6 +1385,14 @@ ecbuild_add_test( TARGET  test_ufo_profileconsistencychecks_bkgqc_modobs_obsfilt
                   DEPENDS test_ObsFilters.x
                   TEST_DEPENDS ufo_get_ufo_test_data )
 
+ecbuild_add_test( TARGET  test_ufo_profileconsistencychecks_sondeflags_obsfilter
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                  ARGS    "testinput/profileconsistencychecks_sondeflags_obsfilter.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsFilters.x
+                  TEST_DEPENDS ufo_get_ufo_test_data )
+
+
 # Test UFO ObsFilters (specific)
 
 ecbuild_add_test( TARGET  test_ufo_gaussianthinning
@@ -1486,6 +1496,13 @@ ecbuild_add_test( TARGET  test_ufo_profileconsistencychecks_UInterp_OPScompariso
                   DEPENDS test_ProfileConsistencyChecks.x
                   TEST_DEPENDS ufo_get_ufo_test_data )
 
+ecbuild_add_test( TARGET  test_ufo_profileconsistencychecks_sondeflags_OPScomparison
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ProfileConsistencyChecks.x
+                  ARGS    "testinput/profileconsistencychecks_sondeflags_OPScomparison.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ProfileConsistencyChecks.x
+                  TEST_DEPENDS ufo_get_ufo_test_data )
+
 ecbuild_add_test( TARGET  test_ufo_qc_met_office_buddy_check_unittests
                   SOURCES mains/TestMetOfficeBuddyCheck.cc
                   ARGS    "testinput/qc_met_office_buddy_check_unittests.yaml"
@@ -1499,6 +1516,7 @@ ecbuild_add_test( TARGET  test_ufo_qc_met_office_buddy_pair_finder
                   ENVIRONMENT OOPS_TRAPFPE=1
                   LIBS    ufo
                   TEST_DEPENDS ufo_get_ufo_test_data)
+
 
 # Test Variable Transforms
 

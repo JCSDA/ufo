@@ -64,6 +64,29 @@ namespace ufo {
         std::transform(v1.begin(), v1.end(), v2.begin(), vout.begin(), std::plus<T>());
       }
 
+    /// Set a QC flag on one profile level.
+    /// This is the base case for one vector.
+    template <typename T>
+      void SetQCFlag(const int& flag,
+                     const size_t& jlev,
+                     std::vector <T> &vec)
+      {
+        if (vec.size() > jlev) vec[jlev] |= flag;
+      }
+
+    /// Set a QC flag on one profile level.
+    /// This is the recursive case that accepts an arbitrary number of vectors
+    /// using a variadic template.
+    template <typename T, typename... Args>
+      void SetQCFlag(const int& flag,
+                     const size_t& jlev,
+                     std::vector <T> &vec1,
+                     Args&... vecs)
+    {
+      if (vec1.size() > jlev) vec1[jlev] |= flag;
+      SetQCFlag(flag, jlev, vecs...);
+    }
+
    protected:  // variables
     /// Configurable parameters
     const ProfileConsistencyCheckParameters &options_;
@@ -73,6 +96,9 @@ namespace ufo {
 
     /// Profile check validator
     ProfileCheckValidator &profileCheckValidator_;
+
+    /// Missing value (int)
+    const int missingValueInt = util::missingValue(1);
 
     /// Missing value (float)
     const float missingValueFloat = util::missingValue(1.0f);

@@ -85,6 +85,7 @@ struct VariableNames
   static constexpr const char* const Longitude = "longitude@MetaData";
   static constexpr const char* const Time = "time@MetaData";
   static constexpr const char* const Zstation = "Zstation@MetaData";
+  static constexpr const char* const LevelType = "LevelType@MetaData";
 
   // Variable names: QC flags
 
