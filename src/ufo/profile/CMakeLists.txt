@@ -50,6 +50,8 @@ set ( profile_files
       ProfileSondeFlags.h
       ProfileStandardLevels.cc
       ProfileStandardLevels.h
+      ProfileWindProfilerFlags.cc
+      ProfileWindProfilerFlags.h
       VariableNames.h
 )
 

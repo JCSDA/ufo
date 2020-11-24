@@ -96,6 +96,7 @@ struct VariableNames
   static constexpr const char* const qcflags_eastward_wind = "eastward_wind@QCFlags";
   static constexpr const char* const qcflags_northward_wind = "northward_wind@QCFlags";
   static constexpr const char* const qcflags_time = "time@QCFlags";
+  static constexpr const char* const qcflags_wind_profiler = "wind_profiler@QCFlags";
 
   // Variable names: counters
 
