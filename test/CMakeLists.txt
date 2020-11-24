@@ -1316,6 +1316,7 @@ ecbuild_add_test( TARGET  test_ufo_qc_temporalthinning
                   TEST_DEPENDS ufo_get_ufo_test_data )
 
 ecbuild_add_test( TARGET  test_ufo_qc_trackcheck
+                  MPI     4
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
                   ARGS    "testinput/qc_trackcheck.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
@@ -1323,6 +1324,7 @@ ecbuild_add_test( TARGET  test_ufo_qc_trackcheck
                   TEST_DEPENDS ufo_get_ioda_test_data ufo_get_ufo_test_data )
 
 ecbuild_add_test( TARGET  test_ufo_qc_trackcheckship
+                  MPI     4
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
                   ARGS    "testinput/qc_trackcheckship.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1

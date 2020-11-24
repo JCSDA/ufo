@@ -21,7 +21,7 @@ observations:
     spatial resolution (km): 0.0000001 
     max speed (m/s): .01 
     rejection threshold: 0.5
-  flaggedObservationsBenchmark:
+  flaggedObservationsBenchmark: &referenceFlaggedObsIds
       - 0
       - 1
       - 2
@@ -83,4 +83,49 @@ observations:
     - 91
     - 92
   flaggedBenchmark: 6
+  benchmarkFlag: 12 # track
+# Like in the first test, but without grouping observations into records
+- obs space:
+    name: Ship
+    obsdatain:
+      obsfile: Data/ioda/testinput_tier_1/sfcship_synthetic_airtemp_m.nc4
+    simulated variables: [air_temperature]
+  obs filters:
+  - filter: Ship Track Check
+    unit testing mode: false
+    early break check: false
+    deferred check simultaneous: false
+    variables: [air_temperature]
+    temporal resolution: PT00H00M1S
+    spatial resolution (km): 0.0000001
+    max speed (m/s): .01
+    rejection threshold: 0.5
+    station_id_variable:
+      name: station_id@MetaData
+  flaggedObservationsBenchmark: *referenceFlaggedObsIds
+  flaggedBenchmark: 35
+  benchmarkFlag: 12 # track
+# Like in the first test, but with observations grouped into records (perversely) by
+# a variable other than station_id
+- obs space:
+    name: Ship
+    obsdatain:
+      obsfile: Data/ioda/testinput_tier_1/sfcship_synthetic_airtemp_m.nc4
+      obsgrouping:
+        group variable: "latitude"
+    simulated variables: [air_temperature]
+  obs filters:
+  - filter: Ship Track Check
+    unit testing mode: false
+    early break check: false
+    deferred check simultaneous: false
+    variables: [air_temperature]
+    temporal resolution: PT00H00M1S
+    spatial resolution (km): 0.0000001
+    max speed (m/s): .01
+    rejection threshold: 0.5
+    station_id_variable:
+      name: station_id@MetaData
+  flaggedObservationsBenchmark: *referenceFlaggedObsIds
+  flaggedBenchmark: 35
   benchmarkFlag: 12 # track

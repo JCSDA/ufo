@@ -26,6 +26,7 @@
 #include "oops/util/DateTime.h"
 #include "oops/util/Duration.h"
 #include "oops/util/Logger.h"
+#include "ufo/filters/ObsAccessor.h"
 #include "ufo/filters/TrackCheckShipDiagnostics.h"
 #include "ufo/filters/TrackCheckShipParameters.h"
 #include "ufo/utils/Constants.h"
@@ -156,16 +157,17 @@ void TrackCheckShip::print(std::ostream & os) const {
 void TrackCheckShip::applyFilter(const std::vector<bool> & apply,
                                  const Variables & filtervars,
                                  std::vector<std::vector<bool>> & flagged) const {
-  const std::vector<size_t> validObsIds = TrackCheckUtils::getValidObservationIds(apply, flags_);
+  ObsAccessor obsAccessor = TrackCheckUtils::createObsAccessor(options_->stationIdVariable, obsdb_);
 
-  RecursiveSplitter splitter(validObsIds.size());
-  TrackCheckUtils::groupObservationsByStation(validObsIds, splitter, config_, obsdb_);
-  TrackCheckUtils::sortTracksChronologically(validObsIds, splitter, obsdb_);
+  const std::vector<size_t> validObsIds = obsAccessor.getValidObservationIds(apply, *flags_);
+
+  RecursiveSplitter splitter = obsAccessor.splitObservationsIntoIndependentGroups(validObsIds);
+  TrackCheckUtils::sortTracksChronologically(validObsIds, obsAccessor, splitter);
 
   TrackCheckUtils::ObsGroupLocationTimes obsLocTime =
-      TrackCheckUtils::collectObservationsLocations(obsdb_);
+      TrackCheckUtils::collectObservationsLocations(obsAccessor);
 
-  std::vector<bool> isRejected(apply.size(), false);
+  std::vector<bool> isRejected(obsLocTime.latitudes.size(), false);
   size_t trackNumber = 0;
   for (auto track : splitter.multiElementGroups()) {
     trackNumber++;
@@ -223,7 +225,7 @@ void TrackCheckShip::applyFilter(const std::vector<bool> & apply,
       flagRejectedTrackObservations(track.begin(), track.end(),
                                     validObsIds, trackObservations, isRejected);
   }
-  TrackCheckUtils::flagRejectedObservations(isRejected, flagged);
+  obsAccessor.flagRejectedObservations(isRejected, flagged);
 }
 
 /// \returns a \p vector of \p TrackObservations that all hold a \p shared_ptr to an instance
