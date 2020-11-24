@@ -3,24 +3,8 @@
 # This software is licensed under the terms of the Apache Licence Version 2.0
 # which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 
-# macro to create a symlink from src to dst
-function(CREATE_SYMLINK src dst)
-    foreach (FILENAME ${ARGN})
-        execute_process( COMMAND ${CMAKE_COMMAND} -E create_symlink
-            ${src}/${FILENAME}
-            ${dst}/${FILENAME} )
-        endforeach(FILENAME)
-endfunction(CREATE_SYMLINK)
-
-# macro to create a symlink from src to dst with just filename
-function(CREATE_SYMLINK_FILENAME src dst)
-    foreach (FILENAME ${ARGN})
-        get_filename_component(filename ${FILENAME} NAME )
-        execute_process( COMMAND ${CMAKE_COMMAND} -E create_symlink
-            ${src}/${FILENAME}
-            ${dst}/${filename} )
-        endforeach(FILENAME)
-endfunction(CREATE_SYMLINK_FILENAME)
+# Include macros for creating links and symlinks
+include( ufo_functions )
 
 # Create Data directory for test input config and symlink all files
 list( APPEND ufo_test_input
@@ -43,6 +27,7 @@ list( APPEND ufo_test_input
   testinput/atms_crtm.yaml
   testinput/atms_crtm_bc.yaml
   testinput/atms_qc_filters.yaml
+  testinput/atms_rttov_ops_qc_rttovonedvarcheck.yaml
   testinput/atms_rttov_ops.yaml
   testinput/coolskin.yaml
   testinput/cris_crtm.yaml
@@ -686,6 +671,12 @@ if( ${RTTOV_FOUND} )
                     ARGS    "testinput/atms_rttov_ops.yaml"
                     ENVIRONMENT OOPS_TRAPFPE=1
                     DEPENDS test_ObsOperatorTLAD.x 
+                    TEST_DEPENDS ufo_get_ioda_test_data ufo_get_ufo_test_data )
+
+  ecbuild_add_test( TARGET  test_ufo_atms_ops_qc_rttovonedvarcheck
+                    COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                    ARGS    "testinput/atms_rttov_ops_qc_rttovonedvarcheck.yaml"
+                    ENVIRONMENT OOPS_TRAPFPE=1
                     TEST_DEPENDS ufo_get_ioda_test_data ufo_get_ufo_test_data )
 endif( ${RTTOV_FOUND} )
 

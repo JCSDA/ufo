@@ -151,6 +151,11 @@ set ( filters_files
       variabletransforms/WindSpeedAndDirection.h
 )
 
+if( ${RTTOV_FOUND} )
+  add_subdirectory( rttovonedvarcheck )
+  list( APPEND filters_files ${rttovonedvarcheck_src_files} )
+endif( ${RTTOV_FOUND} )
+
 PREPEND( _p_filters_files       "filters"       ${filters_files} )
 
 set ( filters_src_files

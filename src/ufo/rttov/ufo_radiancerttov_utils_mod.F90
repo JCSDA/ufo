@@ -76,11 +76,12 @@ module ufo_radiancerttov_utils_mod
 
   ! copy of ABSORBER_ID_NAME defined in rttov_const
   character(len=*), parameter :: &
-    RTTOV_Absorbers(ngases_max+1) = &
-    [gas_name(1:ngases_max),'CLW']
+    RTTOV_Absorbers(ngases_max+2) = &
+    [gas_name(1:ngases_max),'CLW', &
+     'CIW']
 
   integer, parameter :: &
-    RTTOV_Absorber_Id(ngases_max+1) = &
+    RTTOV_Absorber_Id(ngases_max+2) = &
     [gas_id_mixed, &
     gas_id_watervapour, &
     gas_id_ozone,  &
@@ -89,16 +90,16 @@ module ufo_radiancerttov_utils_mod
     gas_id_n2o,  &
     gas_id_co, &
     gas_id_ch4,  &
-    gas_id_so2, 99]
+    gas_id_so2, 99, 999]
 
   character(len=MAXVARLEN), parameter :: null_str = ''
 
   !DARFIX: need to get correct names (correct units for RTTOV) in ufo_vars_mod
   character(len=MAXVARLEN), parameter :: &
-    UFO_Absorbers(ngases_max+1) = &
+    UFO_Absorbers(ngases_max+2) = &
     [ null_str, var_mixr, var_oz, null_str, var_co2, 'mole_fraction_of_nitrous_oxide_in_air', &
     'mole_fraction_of_carbon_monoxide_in_air', 'mole_fraction_of_methane_in_air', &
-    'mole_fraction_of_sulfur_dioxide_in_air', var_clw]
+    'mole_fraction_of_sulfur_dioxide_in_air', var_clw, var_cli]
 
   integer, public :: nchan_inst ! number of channels being simulated (may be less than full instrument)
   integer, public :: nchan_sim  ! total number of 'obs' = nprofiles * nchannels
@@ -325,9 +326,10 @@ contains
 
   ! -----------------------------------------------------------------------------
 
-  subroutine load_atm_data_rttov(geovals,obss,profiles,prof_start,conf,layer_quantities,obs_info)
+  subroutine load_atm_data_rttov(geovals,obss,profiles,prof_start,conf,layer_quantities,ob_info)
 
     use ufo_constants_mod, only : half, deg2rad, min_q, m_to_km, g_to_kg, pa_to_hpa
+    use ufo_rttovonedvarcheck_ob_mod
 
     implicit none
 
@@ -337,7 +339,7 @@ contains
     integer,                      intent(in)    :: prof_start
     type(rttov_conf),             intent(in)    :: conf
     logical,                      intent(inout) :: layer_quantities
-    logical, optional,            intent(in)    :: obs_info
+    type(ufo_rttovonedvarcheck_ob), optional, intent(inout) :: ob_info
 
     ! Local variables
     integer                      :: jspec
@@ -354,12 +356,12 @@ contains
     logical                      :: variable_present
 
     integer                      :: top_level, bottom_level, stride
-    real(kind_real)              :: Tstar, NewT
+    real(kind_real)              :: NewT
     integer                      :: level_1000hPa, level_950hpa
 
     real(kind_real), allocatable :: q_temp(:), clw_temp(:), ciw_temp(:), Qtotal(:)
 
-    if(present(obs_info)) then
+    if(present(ob_info)) then
       nlocs_total = 1
     else
       nlocs_total = obsspace_get_nlocs(obss)
@@ -651,7 +653,6 @@ contains
 
             profiles(iprof)%t(level_1000hPa) = max(profiles(iprof)%t(level_1000hPa), NewT)
             profiles(iprof)%s2m%t = max(profiles(iprof)%s2m%t, NewT)
-            Tstar = profiles(iprof)%skin%t
             profiles(iprof)%skin%t = max(profiles(iprof)%skin%t, NewT)
           endif
         endif
@@ -709,6 +710,9 @@ contains
         ! Make sure there is a minimum humidity
         Qtotal(:) = max(Qtotal(:), Min_q)
 
+        ! Make sure there is a minimum humidity
+        Qtotal(:) = max(Qtotal(:), Min_q)
+
         ! generate first guess cloud and q based on the qtotal physics
         call Ops_SatRad_Qsplit (1,                     & ! in
           profiles(iprof) % p(:) / Pa_to_hPa,          & ! in convert hPa to Pa
@@ -735,10 +739,16 @@ contains
 
     end if
 
-    if(present(obs_info)) then
-      ! profiles(1) % elevation = obs_info % elevation / 1000.0_kind_real ! m -> km
-      ! profiles(1) % latitude = obs_info % latitude
-      ! profiles(1) % longitude = obs_info % longitude
+    if(present(ob_info)) then
+
+       write(*,*) "load_atm_data_rttov: getting from ob info"
+       profiles(1) % elevation = ob_info % elevation / 1000.0 ! m -> km
+       profiles(1) % latitude = ob_info % latitude
+       profiles(1) % longitude = ob_info % longitude
+       if (ob_info % retrievecloud) then
+         profiles(1) % ctp = ob_info % cloudtopp
+         profiles(1) % cfraction = ob_info % cloudfrac
+       end if
 
     else
 
@@ -789,16 +799,17 @@ contains
   end subroutine load_atm_data_rttov
 
   ! Internal subprogam to load some test geometry data
-  subroutine load_geom_data_rttov(obss,profiles,prof_start1,obs_info)
+  subroutine load_geom_data_rttov(obss,profiles,prof_start1,ob_info)
 
     use obsspace_mod, only :  obsspace_get_nlocs, obsspace_get_db
+    use ufo_rttovonedvarcheck_ob_mod
 
     implicit none
 
     type(c_ptr), value,           intent(in)    :: obss
     type(rttov_profile),          intent(inout) :: profiles(:)
     integer, optional,            intent(in)    :: prof_start1
-    logical, optional,            intent(in)    :: obs_info ! DAR temporary
+    type(ufo_rttovonedvarcheck_ob), optional, intent(inout) :: ob_info
 
     real(kind_real), allocatable                :: TmpVar(:)
 
@@ -812,15 +823,16 @@ contains
       prof_start = 1
     end if
 
-    if(present(obs_info)) then
+    if(present(ob_info)) then
 
-      ! nprofiles = 1
-      ! nlevels = SIZE(profiles(1) % p)
+      nlocs_total = 1
+      nprofiles = 1
+      nlevels = SIZE(profiles(1) % p)
 
-      ! profiles(1) % zenangle    = obs_info % sensor_zenith_angle
-      ! profiles(1) % azangle     = obs_info % sensor_azimuth_angle
-      ! profiles(1) % sunzenangle = obs_info % solar_zenith_angle
-      ! profiles(1) % sunazangle  = obs_info % solar_azimuth_angle
+      profiles(1) % zenangle    = ob_info % sensor_zenith_angle
+      profiles(1) % azangle     = ob_info % sensor_azimuth_angle
+      profiles(1) % sunzenangle = ob_info % solar_zenith_angle
+      profiles(1) % sunazangle  = ob_info % solar_azimuth_angle
 
     else
 

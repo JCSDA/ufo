@@ -109,6 +109,7 @@ void QCmanager::print(std::ostream & os) const {
     size_t iseaice  = 0;
     size_t itrack   = 0;
     size_t ibuddy   = 0;
+    size_t ionedvar  = 0;
 
     for (size_t jobs = 0; jobs < iobs; ++jobs) {
       if ((*flags_)[jj][jobs] == QCflags::pass)    ++ipass;
@@ -128,6 +129,7 @@ void QCmanager::print(std::ostream & os) const {
       if ((*flags_)[jj][jobs] == QCflags::track)  ++itrack;
       if ((*flags_)[jj][jobs] == QCflags::buddy)  ++ibuddy;
       if ((*flags_)[jj][jobs] == QCflags::derivative) ++idydx;
+      if ((*flags_)[jj][jobs] == QCflags::onedvar) ++ionedvar;
     }
 
     const ioda::Distribution & distribution = obsdb_.distribution();
@@ -149,6 +151,7 @@ void QCmanager::print(std::ostream & os) const {
     distribution.sum(itrack);
     distribution.sum(ibuddy);
     distribution.sum(idydx);
+    distribution.sum(ionedvar);
 
     if (obsdb_.comm().rank() == 0) {
       const std::string info = "QC " + flags_->obstype() + " " + observed_[jj] + ": ";
@@ -168,12 +171,13 @@ void QCmanager::print(std::ostream & os) const {
       if (iseaice  > 0) os << info << iseaice  << " removed by sea ice check." << std::endl;
       if (itrack   > 0) os << info << itrack  << " removed by track check." << std::endl;
       if (ibuddy   > 0) os << info << ibuddy  << " removed by buddy check." << std::endl;
+      if (ionedvar  > 0) os << info << ionedvar  << " removed by 1D Var check." << std::endl;
 
       os << info << ipass << " passed out of " << iobs << " observations." << std::endl;
     }
 
     ASSERT(ipass + imiss + ipreq + ibnds + iwhit + iblck + iherr + ithin + iclw + iprof + ifgss + \
-           ignss + idiffref + iseaice + itrack + ibuddy + idydx == iobs);
+           ignss + idiffref + iseaice + itrack + ibuddy + idydx  + ionedvar == iobs);
   }
 }
 
