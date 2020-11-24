@@ -1,25 +1,26 @@
 window begin: 2018-04-14T20:00:00Z
 window end: 2018-04-15T03:00:00Z
 
-obs space:
-  name: amsua_n19
-  obsdatain:
-    obsfile: Data/ioda/testinput_tier_1/amsua_n19_obs_2018041500_m_qc.nc4
-  simulated variables: [brightness_temperature]
-  channels: 1, 2, 15 
-geovals:
-  filename: Data/ufo/testinput_tier_1/amsua_n19_geoval_2018041500_m_qc.nc4
-obs function:
-  name: SCATRetMW@ObsFunction
-  options:
-    scatret_ch238: 1
-    scatret_ch314: 2
-    scatret_ch890: 15 
-    scatret_types: [ObsValue]
-    test_bias: GsiObsBias
-    bias_application: GsiHofX
-  variables: [scat_retrieved_from_observation]
-  tolerance: 1.0e-7
+observations:
+- obs space:
+    name: amsua_n19
+    obsdatain:
+      obsfile: Data/ioda/testinput_tier_1/amsua_n19_obs_2018041500_m_qc.nc4
+    simulated variables: [brightness_temperature]
+    channels: 1, 2, 15 
+  geovals:
+    filename: Data/ufo/testinput_tier_1/amsua_n19_geoval_2018041500_m_qc.nc4
+  obs function:
+    name: SCATRetMW@ObsFunction
+    options:
+      scatret_ch238: 1
+      scatret_ch314: 2
+      scatret_ch890: 15 
+      scatret_types: [ObsValue]
+      test_bias: GsiObsBias
+      bias_application: GsiHofX
+    variables: [scat_retrieved_from_observation]
+    tolerance: 1.0e-7
 
 
 

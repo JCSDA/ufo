@@ -1,23 +1,24 @@
 window begin: 2018-04-14T20:00:00Z
 window end: 2018-04-15T03:00:00Z
 
-obs space:
-  name: Satwind
-  obsdatain:
-    obsfile: Data/ioda/testinput_tier_1/satwind_obs_2018041500_m.nc4
-  obsdataout:
-    obsfile: Data/satwind_obs_2018041500_function_output.nc4
-  simulated variables: [eastward_wind, northward_wind]
-# can have GeoVaLs section like below
-#geovals:
-#  filename: Data/ufo/testinput_tier_1/satwind_geoval_2018041500_m.nc4
-#
-# can have ObsDiag section like below
-#obs diagnostics:
-#  filename: Data/ufo/testinput_tier_1/satwind_obsdiag_2018041500_m.nc4
-obs function:
-  name: Velocity@ObsFunction
-  options:
-    type: ObsValue
-  variables: [wind_speed]
-  tolerance: 1.e-7
+observations:
+- obs space:
+    name: Satwind
+    obsdatain:
+      obsfile: Data/ioda/testinput_tier_1/satwind_obs_2018041500_m.nc4
+    obsdataout:
+      obsfile: Data/satwind_obs_2018041500_function_output.nc4
+    simulated variables: [eastward_wind, northward_wind]
+  # can have GeoVaLs section like below
+  #geovals:
+  #  filename: Data/ufo/testinput_tier_1/satwind_geoval_2018041500_m.nc4
+  #
+  # can have ObsDiag section like below
+  #obs diagnostics:
+  #  filename: Data/ufo/testinput_tier_1/satwind_obsdiag_2018041500_m.nc4
+  obs function:
+    name: Velocity@ObsFunction
+    options:
+      type: ObsValue
+    variables: [wind_speed]
+    tolerance: 1.e-7

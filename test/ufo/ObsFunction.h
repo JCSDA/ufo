@@ -21,12 +21,14 @@
 #include "ioda/ObsVector.h"
 #include "oops/mpi/mpi.h"
 #include "oops/runs/Test.h"
+#include "test/interface/ObsTestsFixture.h"
 #include "test/TestEnvironment.h"
 #include "ufo/filters/ObsFilterData.h"
 #include "ufo/filters/obsfunctions/ObsFunction.h"
 #include "ufo/filters/Variables.h"
 #include "ufo/GeoVaLs.h"
 #include "ufo/ObsDiagnostics.h"
+#include "ufo/ObsTraits.h"
 
 namespace ufo {
 namespace test {
@@ -54,76 +56,79 @@ void dataVectorDiff(const ioda::ObsSpace & ospace, ioda::ObsDataVector<float> & 
 // -----------------------------------------------------------------------------
 
 void testFunction() {
-  const eckit::LocalConfiguration conf(::test::TestEnvironment::config());
-///  Setup ObsSpace
-  util::DateTime bgn(conf.getString("window begin"));
-  util::DateTime end(conf.getString("window end"));
-  const eckit::LocalConfiguration obsconf(conf, "obs space");
-  ioda::ObsSpace ospace(obsconf, oops::mpi::world(), bgn, end, oops::mpi::myself());
+  typedef ::test::ObsTestsFixture<ObsTraits> Test_;
+
+  std::vector<eckit::LocalConfiguration> typeconfs;
+  ::test::TestEnvironment::config().get("observations", typeconfs);
+
+  for (std::size_t jj = 0; jj < Test_::obspace().size(); ++jj) {
+    ioda::ObsSpace &ospace = Test_::obspace()[jj].obsspace();
+    const eckit::Configuration &conf = typeconfs[jj];
 
 ///  Setup ObsFilterData
-  ObsFilterData inputs(ospace);
+    ObsFilterData inputs(ospace);
 
 ///  Get function name and which group to use for H(x)
-  const eckit::LocalConfiguration obsfuncconf(conf, "obs function");
-  Variable funcname(obsfuncconf);
+    const eckit::LocalConfiguration obsfuncconf(conf, "obs function");
+    Variable funcname(obsfuncconf);
 
 ///  Setup function
-  ObsFunction obsfunc(funcname);
-  ufo::Variables allfuncvars = obsfunc.requiredVariables();
+    ObsFunction obsfunc(funcname);
+    ufo::Variables allfuncvars = obsfunc.requiredVariables();
 
 ///  Setup GeoVaLs
-  const oops::Variables geovars = allfuncvars.allFromGroup("GeoVaLs").toOopsVariables();
-  std::unique_ptr<GeoVaLs> gval;
-  if (geovars.size() > 0) {
-    const eckit::LocalConfiguration gconf(conf, "geovals");
-    gval.reset(new GeoVaLs(gconf, ospace, geovars));
-    inputs.associate(*gval);
-  }
+    const oops::Variables geovars = allfuncvars.allFromGroup("GeoVaLs").toOopsVariables();
+    std::unique_ptr<GeoVaLs> gval;
+    if (geovars.size() > 0) {
+      const eckit::LocalConfiguration gconf(conf, "geovals");
+      gval.reset(new GeoVaLs(gconf, ospace, geovars));
+      inputs.associate(*gval);
+    }
 
 ///  Setup ObsDiags
-  const oops::Variables diagvars = allfuncvars.allFromGroup("ObsDiag").toOopsVariables();
-  std::unique_ptr<ObsDiagnostics> diags;
-  if (diagvars.size() > 0) {
-    const eckit::LocalConfiguration diagconf(conf, "obs diagnostics");
-    diags.reset(new ObsDiagnostics(diagconf, ospace, diagvars));
-    inputs.associate(*diags);
-  }
+    const oops::Variables diagvars = allfuncvars.allFromGroup("ObsDiag").toOopsVariables();
+    std::unique_ptr<ObsDiagnostics> diags;
+    if (diagvars.size() > 0) {
+      const eckit::LocalConfiguration diagconf(conf, "obs diagnostics");
+      diags.reset(new ObsDiagnostics(diagconf, ospace, diagvars));
+      inputs.associate(*diags);
+    }
 
 ///  Get output variable names
-  const oops::Variables outputvars(obsfuncconf, "variables");
+    const oops::Variables outputvars(obsfuncconf, "variables");
 ///  Compute function result
-  ioda::ObsDataVector<float> vals(ospace, outputvars, "ObsFunction", false);
-  obsfunc.compute(inputs, vals);
-  vals.save("TestResult");
-  int nvars = vals.nvars();
+    ioda::ObsDataVector<float> vals(ospace, outputvars, "ObsFunction", false);
+    obsfunc.compute(inputs, vals);
+    vals.save("TestResult");
+    int nvars = vals.nvars();
 
 ///  Compute function result through ObsFilterData
-  ioda::ObsDataVector<float> vals_ofd(ospace, outputvars, "ObsFunction", false);
-  inputs.get(funcname, vals_ofd);
+    ioda::ObsDataVector<float> vals_ofd(ospace, outputvars, "ObsFunction", false);
+    inputs.get(funcname, vals_ofd);
 
 ///  Read reference values from ObsSpace
-  ioda::ObsDataVector<float> ref(ospace, outputvars, "TestReference");
+    ioda::ObsDataVector<float> ref(ospace, outputvars, "TestReference");
 
 
-  const double tol = obsfuncconf.getDouble("tolerance");
+    const double tol = obsfuncconf.getDouble("tolerance");
 
 ///  Calculate rms(f(x) - ref) and compare to tolerance
-  std::vector<float> rms_out(nvars);
-  dataVectorDiff(ospace, vals, ref, rms_out);
+    std::vector<float> rms_out(nvars);
+    dataVectorDiff(ospace, vals, ref, rms_out);
 
-  oops::Log::info() << "Vector difference between reference and computed: " << std::endl;
-  oops::Log::info() << vals << std::endl;
-  for (size_t ivar = 0; ivar < nvars; ivar++) {
-    EXPECT(rms_out[ivar] < 100*tol);  //  change tol from percent to actual value.
-  }
+    oops::Log::info() << "Vector difference between reference and computed: " << std::endl;
+    oops::Log::info() << vals << std::endl;
+    for (size_t ivar = 0; ivar < nvars; ivar++) {
+      EXPECT(rms_out[ivar] < 100*tol);  //  change tol from percent to actual value.
+    }
 
-  dataVectorDiff(ospace, vals_ofd, ref, rms_out);
-  oops::Log::info() << "Vector difference between reference and computed via ObsFilterData: "
-                    << std::endl;
-  oops::Log::info() << vals_ofd << std::endl;
-  for (size_t ivar = 0; ivar < nvars; ivar++) {
-    EXPECT(rms_out[ivar] < 100*tol);  //  change tol from percent to actual value.
+    dataVectorDiff(ospace, vals_ofd, ref, rms_out);
+    oops::Log::info() << "Vector difference between reference and computed via ObsFilterData: "
+                      << std::endl;
+    oops::Log::info() << vals_ofd << std::endl;
+    for (size_t ivar = 0; ivar < nvars; ivar++) {
+      EXPECT(rms_out[ivar] < 100*tol);  //  change tol from percent to actual value.
+    }
   }
 }
 
