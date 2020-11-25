@@ -73,6 +73,7 @@ list( APPEND ufo_test_input
   testinput/geos_aod.yaml
   testinput/geovals_spec.yaml
   testinput/gnssrobendmetoffice.yaml
+  testinput/gnssrobendmetoffice_obserror.yaml
   testinput/gnssrobendmetoffice_nopseudo.yaml
   testinput/gnssrobendmetoffice_qc.yaml
   testinput/gnssrobndropp1d.yaml
@@ -1973,6 +1974,13 @@ ecbuild_add_test( TARGET  test_ufo_qc_gnssro_obs_error
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsFilters.x
                   TEST_DEPENDS ufo_get_ioda_test_data ufo_get_ufo_test_data)
+
+ecbuild_add_test( TARGET  test_ufo_qc_gnssroBendMetOffice_obs_error
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                  ARGS    "testinput/gnssrobendmetoffice_obserror.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsFilters.x
+                  TEST_DEPENDS ufo_get_ioda_test_data )
 
 ecbuild_add_test( TARGET  test_ufo_qc_gnssro_domain_check
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
