@@ -51,7 +51,7 @@ subroutine atmvertinterp_setup_(self, grid_conf)
       self%use_ln  = .true.
   endif
   call self%geovars%push_back(self%v_coord)
-
+ 
 end subroutine atmvertinterp_setup_
 
 ! ------------------------------------------------------------------------------
