@@ -109,6 +109,8 @@ set ( filters_files
       obsfunctions/ImpactHeight.h
       obsfunctions/InterChannelConsistencyCheck.cc
       obsfunctions/InterChannelConsistencyCheck.h
+      obsfunctions/ObsErrorModelStepwiseLinear.cc
+      obsfunctions/ObsErrorModelStepwiseLinear.h
       obsfunctions/ObsErrorModelRamp.cc
       obsfunctions/ObsErrorModelRamp.h
       obsfunctions/ObsErrorModelQuad.cc

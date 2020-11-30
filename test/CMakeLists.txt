@@ -67,6 +67,7 @@ list( APPEND ufo_test_input
   testinput/function_errfsdoei.yaml
   testinput/function_errfsdoei_atms.yaml
   testinput/function_velocity.yaml
+  testinput/function_obserrorstepwiselinear.yaml
   testinput/gmi_crtm.yaml
   testinput/genericprof.yaml
   testinput/geovals.yaml
@@ -1776,6 +1777,13 @@ ecbuild_add_test( TARGET  test_ufo_function_velocity
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsFunction.x
                   TEST_DEPENDS ufo_get_ioda_test_data ufo_get_ufo_test_data)
+
+ecbuild_add_test( TARGET  test_ufo_function_obserrormodelstepwiselinear
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFunction.x
+                  ARGS    "testinput/function_obserrorstepwiselinear.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsFunction.x
+                  TEST_DEPENDS ufo_get_ioda_test_data)
 
 # Test Diagnostics
 
