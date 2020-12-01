@@ -18,9 +18,9 @@ observations:
         name: wind_speed@TestReference
       test:
         name: wind_speed@ObsValue
-      absTol: 5e-5
+      absTol: 5.0e-5
     - reference:
         name: wind_from_direction@TestReference
       test:
         name: wind_from_direction@ObsValue
-      absTol: 5e-5
+      absTol: 5.0e-5

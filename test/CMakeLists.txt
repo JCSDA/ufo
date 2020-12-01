@@ -77,6 +77,7 @@ list( APPEND ufo_test_input
   testinput/gnssrobendmetoffice_nopseudo.yaml
   testinput/gnssrobendmetoffice_qc.yaml
   testinput/gnssrobndropp1d.yaml
+  testinput/gnssrobndropp1d_qc.yaml
   testinput/gnssrobndropp2d.yaml
   testinput/gnssrobndnbam.yaml
   testinput/gnssro_obs_error.yaml
@@ -1971,7 +1972,7 @@ endif( crtm_FOUND )
 if( ${ROPP-UFO_FOUND} )
 ecbuild_add_test( TARGET  test_ufo_qc_gnssroBndROPP1D
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-                  ARGS    "testinput/gnssrobndropp1d.yaml"
+                  ARGS    "testinput/gnssrobndropp1d_qc.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsFilters.x )
 endif( ${ROPP-UFO_FOUND} )

@@ -43,12 +43,12 @@ observations:
         name: air_temperature@GrossErrorProbabilityAfterOpsBuddyCheck1
       test:
         name: air_temperature@GrossErrorProbability
-      absTol: 5e-5 # The relative difference in Earth radius assumed by OPS and JEDI is ~4e-5
+      absTol: 5.0e-5 # The relative difference in Earth radius assumed by OPS and JEDI is ~4e-5
     - reference:
         name: eastward_wind@GrossErrorProbabilityAfterOpsBuddyCheck1
       test:
         name: eastward_wind@GrossErrorProbability
-      absTol: 5e-5
+      absTol: 5.0e-5
 - obs space: # Test of the sort_by_pressure option
     name: Aircraft
     obsdatain:
@@ -91,12 +91,12 @@ observations:
         name: air_temperature@GrossErrorProbabilityAfterOpsBuddyCheck2
       test:
         name: air_temperature@GrossErrorProbability
-      absTol: 5e-5 # The relative difference in Earth radius assumed by OPS and JEDI is ~4e-5
+      absTol: 5.0e-5 # The relative difference in Earth radius assumed by OPS and JEDI is ~4e-5
     - reference:
         name: eastward_wind@GrossErrorProbabilityAfterOpsBuddyCheck2
       test:
         name: eastward_wind@GrossErrorProbability
-      absTol: 5e-5
+      absTol: 5.0e-5
 - obs space: # Test of the 'where' clause handler
     name: Aircraft
     obsdatain:
@@ -142,12 +142,12 @@ observations:
         name: air_temperature@GrossErrorProbabilityAfterOpsBuddyCheck3
       test:
         name: air_temperature@GrossErrorProbability
-      absTol: 5e-5 # The relative difference in Earth radius assumed by OPS and JEDI is ~4e-5
+      absTol: 5.0e-5 # The relative difference in Earth radius assumed by OPS and JEDI is ~4e-5
     - reference:
         name: eastward_wind@GrossErrorProbabilityAfterOpsBuddyCheck3
       test:
         name: eastward_wind@GrossErrorProbability
-      absTol: 5e-5
+      absTol: 5.0e-5
 - obs space: # Test of station ID assignment directly from a string-valued variable
             # (rather than record numbers)
     name: Aircraft
@@ -190,9 +190,9 @@ observations:
         name: air_temperature@GrossErrorProbabilityAfterOpsBuddyCheck1
       test:
         name: air_temperature@GrossErrorProbability
-      absTol: 5e-5 # The relative difference in Earth radius assumed by OPS and JEDI is ~4e-5
+      absTol: 5.0e-5 # The relative difference in Earth radius assumed by OPS and JEDI is ~4e-5
     - reference:
         name: eastward_wind@GrossErrorProbabilityAfterOpsBuddyCheck1
       test:
         name: eastward_wind@GrossErrorProbability
-      absTol: 5e-5
+      absTol: 5.0e-5
