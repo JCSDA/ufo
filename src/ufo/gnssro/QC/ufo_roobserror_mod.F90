@@ -25,8 +25,6 @@ private
 type :: ufo_roobserror
   character(len=max_string)    :: variable
   character(len=max_string)    :: errmodel
-  character(len=max_string)    :: rmatrix_filename
-  character(len=max_string)    :: err_variable
   type(oops_variables), public :: obsvar
   type(c_ptr)                  :: obsdb
 end type ufo_roobserror
@@ -49,19 +47,6 @@ if (f_conf%has("errmodel")) then
    call f_conf%get_or_die("errmodel",str)
    self%errmodel = str
 end if
-
-self % rmatrix_filename = ""
-if (f_conf % has("rmatrix_filename")) then
-   call f_conf % get_or_die("rmatrix_filename", str)
-   self % rmatrix_filename = str
-end if
-
-self % err_variable = ""
-if (f_conf % has("err_variable")) then
-   call f_conf % get_or_die("err_variable", str)
-   self % err_variable = str
-end if
-
 self%obsdb      = obspace
 
 end subroutine ufo_roobserror_create
@@ -75,45 +60,25 @@ end subroutine ufo_roobserror_delete
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_roobserror_prior(self, model_nobs, model_nlevs, air_temperature, &
-    geopotential_height)
-
+subroutine ufo_roobserror_prior(self)
 use fckit_log_module, only : fckit_log
-
 implicit none
-
 type(ufo_roobserror), intent(in) :: self
-integer, intent(in)              :: model_nobs
-integer, intent(in)              :: model_nlevs
-real, intent(in)                 :: air_temperature(:,:)
-real, intent(in)                 :: geopotential_height(:,:)
-
-integer                        :: nobs
-real(kind_real), allocatable   :: obsZ(:), obsLat(:)
-integer,         allocatable   :: obsSatid(:)             ! Satellite identifier
-integer,         allocatable   :: obsOrigC(:)             ! Originating centre number for each ob
-real(kind_real), allocatable   :: obsImpA(:)              ! The observation impact alitude
-real(kind_real), allocatable   :: obsImpH(:)              ! The observation impact height
-real(kind_real), allocatable   :: obsImpP(:)              ! The observation impact parameter
-real(kind_real), allocatable   :: obsGeoid(:)             ! The geoid undulation at the observation location
-real(kind_real), allocatable   :: obsLocR(:)              ! The local radius of curvature at the observation location
-real(kind_real), allocatable   :: obsValue(:)
-real(kind_real), allocatable   :: obsErr(:)
-integer(c_int),  allocatable   :: obsSaid(:)
-integer(c_int),  allocatable   :: QCflags(:)
-real(kind_real)                :: missing
-character(max_string)          :: err_msg
+integer                          :: nobs
+real(kind_real),    allocatable   :: obsZ(:), obsLat(:)
+real(kind_real),    allocatable   :: obsImpH(:),obsImpP(:),obsGeoid(:),obsLocR(:)
+real(kind_real),    allocatable   :: obsValue(:)
+real(kind_real),    allocatable   :: obsErr(:)
+integer(c_int), allocatable   :: obsSaid(:)
+integer(c_int), allocatable   :: QCflags(:)
+real(kind_real)                   :: missing
+character(max_string)             :: err_msg
 
 missing = missing_value(missing)
 nobs    = obsspace_get_nlocs(self%obsdb)
 allocate(QCflags(nobs))
 allocate(obsErr(nobs))
 QCflags(:)  = 0
-
-if (model_nobs /= nobs) then
-  write(err_msg, '(A,2I8)') 'nobs from model and observations must be equal', nobs, model_nobs
-  call abor1_ftn(err_msg)
-end if
 
 ! read QC flags
 call obsspace_get_db(self%obsdb, "FortranQC", trim(self%variable),QCflags )
@@ -128,12 +93,10 @@ case ("bending_angle")
   allocate(obsGeoid(nobs))
   allocate(obsLocR(nobs))
   allocate(obsImpH(nobs))
-  allocate(obsImpA(nobs))
   call obsspace_get_db(self%obsdb, "MetaData", "impact_parameter", obsImpP)
   call obsspace_get_db(self%obsdb, "MetaData", "geoid_height_above_reference_ellipsoid",obsGeoid)
   call obsspace_get_db(self%obsdb, "MetaData", "earth_radius_of_curvature", obsLocR)
-  obsImpH(:) = obsImpP(:) - obsLocR(:)
-  obsImpA(:) = obsImpP(:) - obsGeoid(:) - obsLocR(:)
+  obsImpH(:) = obsImpP(:) - obsGeoid(:) - obsLocR(:)
 
   select case (trim(self%errmodel))
   case ("NBAM")
@@ -141,7 +104,7 @@ case ("bending_angle")
     allocate(obsLat(nobs))
     call obsspace_get_db(self%obsdb, "MetaData", "occulting_sat_id", obsSaid)
     call obsspace_get_db(self%obsdb, "MetaData", "latitude", obsLat)
-    call bending_angle_obserr_NBAM(obsLat, obsImpA, obsSaid, nobs, obsErr, QCflags, missing)
+    call bending_angle_obserr_NBAM(obsLat, obsImpH, obsSaid, nobs, obsErr, QCflags, missing)
     write(err_msg,*) "ufo_roobserror_mod: setting up bending_angle obs error with NBAM method"
     call fckit_log%info(err_msg)
     deallocate(obsSaid)
@@ -152,7 +115,7 @@ case ("bending_angle")
   case ("ECMWF")
     allocate(obsValue(nobs))
     call obsspace_get_db(self%obsdb, "ObsValue", "bending_angle", obsValue)
-    call bending_angle_obserr_ECMWF(obsImpA, obsValue, nobs, obsErr, QCflags, missing)
+    call bending_angle_obserr_ECMWF(obsImpH, obsValue, nobs, obsErr, QCflags, missing)
     write(err_msg,*) "ufo_roobserror_mod: setting up bending_angle obs error with ECMWF method"
     call fckit_log%info(err_msg)
     deallocate(obsValue)
@@ -163,7 +126,7 @@ case ("bending_angle")
     allocate(obsLat(nobs))
     call obsspace_get_db(self%obsdb, "ObsValue", "bending_angle", obsValue)
     call obsspace_get_db(self%obsdb, "MetaData", "latitude", obsLat)
-    call bending_angle_obserr_NRL(obsLat, obsImpA, obsValue, nobs, obsErr, QCflags, missing)
+    call bending_angle_obserr_NRL(obsLat, obsImpH, obsValue, nobs, obsErr, QCflags, missing)
     write(err_msg,*) "ufo_roobserror_mod: setting up bending_angle obs error with NRL method"
     call fckit_log%info(err_msg)
     deallocate(obsValue)
@@ -171,47 +134,15 @@ case ("bending_angle")
     ! update obs error
     call obsspace_put_db(self%obsdb, "FortranERR", trim(self%variable), obsErr)
 
-  case ("MetOffice")
-    write(err_msg,*) "ufo_roobserror_mod: setting up bending_angle obs error with the Met Office method"
-    if (trim(self % rmatrix_filename) == "") then
-      err_msg = "If you choose the Met Office method, then you must specify rmatrix_filename"
-      call abor1_ftn(err_msg)
-    end if
-    allocate(obsSatid(nobs))
-    allocate(obsOrigC(nobs))
-    allocate(obsValue(nobs))
-    call obsspace_get_db(self%obsdb, "MetaData", "occulting_sat_id", obsSatid)
-    call obsspace_get_db(self%obsdb, "MetaData", "originating_center", obsOrigC)
-    call obsspace_get_db(self%obsdb, "ObsValue", "bending_angle", obsValue)
-    call obsspace_get_db(self%obsdb, "ObsError", trim(self%variable), obsErr)
-    if (self % err_variable == "latitude") then
-      allocate(obsLat(nobs))
-      call obsspace_get_db(self%obsdb, "MetaData", "latitude", obsLat)
-      call gnssro_obserr_latitude(nobs, self % rmatrix_filename, obsSatid, obsOrigC, obsLat, obsImpH, &
-                                  obsValue, obsErr, QCflags, missing)
-      deallocate(obsLat)
-    else if (self % err_variable == "average_temperature") then
-      call gnssro_obserr_avtemp(nobs, self % rmatrix_filename, obsSatid, obsOrigC, model_nlevs, air_temperature, &
-                                geopotential_height, obsImpH, obsValue, obsErr, QCflags, missing)
-    else
-      err_msg = "The error variable should be either 'latitude' or 'average_temperature', but you gave " // &
-                trim(self % err_variable)
-    end if
-    deallocate(obsValue)
-    deallocate(obsSatid)
-    deallocate(obsOrigC)
-    ! up date obs error
-    call obsspace_put_db(self%obsdb, "FortranERR", trim(self%variable), obsErr)
-
   case default
-    write(err_msg,*) "ufo_roobserror_mod: bending_angle error model must be NBAM, ECMWF, NRL or MetOffice"
+    write(err_msg,*) "ufo_roobserror_mod: bending_angle error model must be NBAM, ECMWF, or NRL"
+    call fckit_log%info(err_msg) 
     call fckit_log%info(err_msg)
   end select
   deallocate(obsImpP)
   deallocate(obsGeoid)
   deallocate(obsLocR)
   deallocate(obsImpH)
-  deallocate(obsImpA)
 
 !-------------------------------
 case ("refractivity")

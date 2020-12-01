@@ -136,7 +136,11 @@ subroutine ufo_gnssro_bendmetoffice_simobs(self, geovals, hofx, obss)
   call obsspace_get_db(obss, "MetaData", "earth_radius_of_curvature", radius_curv)
   call obsspace_get_db(obss, "MetaData", "geoid_height_above_reference_ellipsoid", undulation)
 
+  call fckit_log%info(err_msg)
+
   obs_loop: do iobs = 1, nobs 
+
+    call fckit_log%info(err_msg)
 
     if (flip_data) then
         call Ops_GPSRO_ForwardModel(prs % nval, &

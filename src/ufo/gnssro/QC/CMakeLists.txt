@@ -9,7 +9,6 @@ set (  qc_src_files
        ROobserror.interface.F90  
        ROobserror.interface.h
        ufo_roobserror_mod.F90
-       ufo_roobserror_utils_mod.F90
        BackgroundCheckRONBAM.h
        BackgroundCheckRONBAM.cc
        actions/ROobserrInflation.cc
