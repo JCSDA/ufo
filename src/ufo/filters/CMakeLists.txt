@@ -143,6 +143,8 @@ set ( filters_files
       obsfunctions/ObsFunctionScattering.h
       obsfunctions/ObsFunctionVelocity.cc
       obsfunctions/ObsFunctionVelocity.h
+      obsfunctions/SatWindsLNVDCheck.cc
+      obsfunctions/SatWindsLNVDCheck.h
       obsfunctions/SCATRetMW.cc
       obsfunctions/SCATRetMW.h
       obsfunctions/SymmCldImpactIR.cc

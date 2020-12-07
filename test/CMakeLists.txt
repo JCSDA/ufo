@@ -62,6 +62,7 @@ list( APPEND ufo_test_input
   testinput/function_obserrmean_abi.yaml
   testinput/function_obserrmean_mhs.yaml
   testinput/function_obserrmean_atms.yaml
+  testinput/function_satwindsLNVDcheck.yaml
   testinput/function_scatret.yaml
   testinput/function_scatret_atms.yaml
   testinput/function_errfsdoei.yaml
@@ -1410,6 +1411,13 @@ ecbuild_add_test( TARGET  test_ufo_profileconsistencychecks_winproflags_obsfilte
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsFilters.x
                   TEST_DEPENDS ufo_get_ufo_test_data )
+
+ecbuild_add_test( TARGET  test_ufo_function_satwindsLNVDcheck
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                  ARGS    "testinput/function_satwindsLNVDcheck.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsFilters.x
+                  TEST_DEPENDS ufo_get_ioda_test_data )
 
 # Test UFO ObsFilters (specific)
 
