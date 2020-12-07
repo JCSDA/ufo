@@ -11,6 +11,8 @@ phases:
       - echo Executing install phase
       - echo $CODEBUILD_RESOLVED_SOURCE_VERSION
       - echo $CODEBUILD_SOURCE_REPO_URL
+      - org_name=$(echo $CODEBUILD_SOURCE_REPO_URL | awk '{split($0,org,"/"); print org[4]}')
+      - echo $org_name
       - echo $CODEBUILD_SOURCE_VERSION
 
       - echo $CODEBUILD_WEBHOOK_MERGE_COMMIT
@@ -193,4 +195,4 @@ phases:
       - cd /build_container/ufo
       - pwd
       - ls
-      - bash /jcsda/ufo-bundle/ufo/CI/codecov_script.sh
+      - bash /jcsda/ufo-bundle/ufo/CI/codecov_script_$org_name.sh
