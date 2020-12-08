@@ -1,0 +1,23 @@
+window begin: 2020-10-01T03:00:00Z
+window end: 2020-10-01T09:00:00Z
+
+observations:
+- obs space:
+    name: test_sfcp_inflation
+    obsdatain:
+      obsfile: Data/ioda/testinput_tier_1/2020100106_metars_small.nc
+    simulated variables: [surface_pressure]
+  geovals:
+    filename: Data/ufo/testinput_tier_1/sfcobs_geovals_gfsC48_2020100106_small.nc
+  obs operator:
+    name: SfcPCorrected
+    da_psfc_scheme: UKMO
+  obs function:
+    name: ObsErrorFactorSfcPressure@ObsFunction
+    options:
+      original_obserr: ObsError
+      error_min: 100         # 1 mb
+      error_max: 300         # 3 mb
+      error_gross: 360       # 3.6 mb
+    variables: [surface_pressure_obserr]
+    tolerance: 1.e-4

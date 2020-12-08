@@ -58,6 +58,7 @@ list( APPEND ufo_test_input
   testinput/function_hydrometeorchk.yaml
   testinput/function_hydrometeorchk_atms.yaml
   testinput/function_nsstret.yaml
+  testinput/function_obserrorinflatesfcp.yaml
   testinput/function_obserrmean.yaml
   testinput/function_obserrmean_abi.yaml
   testinput/function_obserrmean_mhs.yaml
@@ -1792,6 +1793,13 @@ ecbuild_add_test( TARGET  test_ufo_function_obserrormodelstepwiselinear
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsFunction.x
                   TEST_DEPENDS ufo_get_ioda_test_data)
+
+ecbuild_add_test( TARGET  test_ufo_function_obserrorinflatesfcp
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFunction.x
+                  ARGS    "testinput/function_obserrorinflatesfcp.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsFunction.x
+                  TEST_DEPENDS ufo_get_ioda_test_data ufo_get_ufo_test_data )
 
 # Test Diagnostics
 

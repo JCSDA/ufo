@@ -137,6 +137,8 @@ set ( filters_files
       obsfunctions/ObsErrorFactorTransmitTopRad.h
       obsfunctions/ObsErrorFactorWavenumIR.cc
       obsfunctions/ObsErrorFactorWavenumIR.h
+      obsfunctions/ObsErrorFactorSfcPressure.cc
+      obsfunctions/ObsErrorFactorSfcPressure.h
       obsfunctions/NearSSTRetCheckIR.cc
       obsfunctions/NearSSTRetCheckIR.h
       obsfunctions/ObsFunctionScattering.cc
