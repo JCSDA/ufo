@@ -1,6 +1,6 @@
 ---
-name: Basic issue
-about: Describe this issue template's purpose here.
+name: Regular issue
+about: This is a blank issue.
 title: ''
 labels: ''
 assignees: ''
