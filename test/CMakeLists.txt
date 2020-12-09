@@ -153,6 +153,7 @@ list( APPEND ufo_test_input
   testinput/radialvelocity.yaml
   testinput/reflectivity.yaml
   testinput/satwind.yaml
+  testinput/satwind_metoffice.yaml
   testinput/sbuv2_n19.yaml
   testinput/sbuv2_n19_flipz.yaml
   testinput/sbuv2_n19_L127.yaml
@@ -926,6 +927,14 @@ ecbuild_add_test( TARGET  test_ufo_linopr_vertinterp_satwind
                   MPI     4
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
                   ARGS    "testinput/satwind.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsOperator.x
+                  TEST_DEPENDS ufo_get_ioda_test_data ufo_get_ufo_test_data )
+
+ecbuild_add_test( TARGET  test_ufo_linopr_vertinterp_satwind_metoffice
+                  MPI     4
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
+                  ARGS    "testinput/satwind_metoffice.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsOperator.x
                   TEST_DEPENDS ufo_get_ioda_test_data ufo_get_ufo_test_data )
