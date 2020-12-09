@@ -63,8 +63,10 @@ void testGaussianThinning(const eckit::LocalConfiguration &conf) {
   std::shared_ptr<ioda::ObsDataVector<int>> qcflags(new ioda::ObsDataVector<int>(
       obsspace, obsspace.obsvariables()));
 
-  const eckit::LocalConfiguration filterConf(conf, "GaussianThinning");
-  ufo::Gaussian_Thinning filter(obsspace, filterConf, qcflags, obserr);
+  eckit::LocalConfiguration filterConf(conf, "GaussianThinning");
+  ufo::GaussianThinningParameters filterParameters;
+  filterParameters.validateAndDeserialize(filterConf);
+  ufo::Gaussian_Thinning filter(obsspace, filterParameters, qcflags, obserr);
   filter.preProcess();
 
   const std::vector<size_t> expectedThinnedObsIndices =

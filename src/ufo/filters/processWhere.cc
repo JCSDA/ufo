@@ -25,8 +25,7 @@ namespace ufo {
 
 // -----------------------------------------------------------------------------
 ufo::Variables getAllWhereVariables(const eckit::Configuration & config) {
-  std::vector<eckit::LocalConfiguration> masks;
-  config.get("where", masks);
+  std::vector<eckit::LocalConfiguration> masks = config.getSubConfigurations();
 
   ufo::Variables vars;
   for (size_t jm = 0; jm < masks.size(); ++jm) {
@@ -252,8 +251,7 @@ std::vector<bool> processWhere(const eckit::Configuration & config,
 // Everywhere by default if no mask
   std::vector<bool> where(nlocs, true);
 
-  std::vector<eckit::LocalConfiguration> masks;
-  config.get("where", masks);
+  std::vector<eckit::LocalConfiguration> masks = config.getSubConfigurations();
 
   for (size_t jm = 0; jm < masks.size(); ++jm) {
     eckit::LocalConfiguration varconf(masks[jm], "variable");

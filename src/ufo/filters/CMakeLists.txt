@@ -22,6 +22,8 @@ set ( filters_files
       DifferenceCheck.h
       FilterBase.cc
       FilterBase.h
+      FilterParametersBase.h
+      GenericFilterParameters.h
       getScalarOrFilterData.cc
       getScalarOrFilterData.h
       ObsBoundsCheck.cc

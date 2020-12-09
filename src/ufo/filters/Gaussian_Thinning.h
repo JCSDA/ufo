@@ -18,6 +18,7 @@
 #include "ioda/ObsDataVector.h"
 #include "oops/util/ObjectCounter.h"
 #include "ufo/filters/FilterBase.h"
+#include "ufo/filters/GaussianThinningParameters.h"
 #include "ufo/filters/QCflags.h"
 
 namespace eckit {
@@ -58,13 +59,15 @@ class SpatialBinSelector;
 class Gaussian_Thinning : public FilterBase,
                           private util::ObjectCounter<Gaussian_Thinning> {
  public:
+  /// The type of parameters accepted by the constructor of this filter.
+  /// This typedef is used by the FilterFactory.
+  typedef GaussianThinningParameters Parameters_;
+
   static const std::string classname() {return "ufo::Gaussian_Thinning";}
 
-  Gaussian_Thinning(ioda::ObsSpace &obsdb, const eckit::Configuration &config,
+  Gaussian_Thinning(ioda::ObsSpace &obsdb, const GaussianThinningParameters &params,
                     std::shared_ptr<ioda::ObsDataVector<int> > flags,
                     std::shared_ptr<ioda::ObsDataVector<float> > obserr);
-
-  ~Gaussian_Thinning() override;
 
  private:
   void print(std::ostream &) const override;
@@ -116,7 +119,7 @@ class Gaussian_Thinning : public FilterBase,
       const GaussianThinningParameters &options);
 
  private:
-  std::unique_ptr<GaussianThinningParameters> options_;
+  GaussianThinningParameters options_;
 };
 
 }  // namespace ufo
