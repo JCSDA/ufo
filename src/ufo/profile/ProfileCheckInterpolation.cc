@@ -15,10 +15,9 @@ namespace ufo {
 
   ProfileCheckInterpolation::ProfileCheckInterpolation
   (const ProfileConsistencyCheckParameters &options,
-   const ProfileIndices &profileIndices,
    ProfileDataHandler &profileDataHandler,
    ProfileCheckValidator &profileCheckValidator)
-    : ProfileCheckBase(options, profileIndices, profileDataHandler, profileCheckValidator),
+    : ProfileCheckBase(options, profileDataHandler, profileCheckValidator),
     ProfileStandardLevels(options)
   {}
 
@@ -26,7 +25,7 @@ namespace ufo {
   {
     oops::Log::debug() << " Interpolation check" << std::endl;
 
-    const int numLevelsToCheck = profileIndices_.getNumLevelsToCheck();
+    const int numProfileLevels = profileDataHandler_.getNumProfileLevels();
 
     const std::vector <float> &pressures =
        profileDataHandler_.get<float>(ufo::VariableNames::obs_air_pressure);
@@ -59,10 +58,10 @@ namespace ufo {
     std::vector <float> tObsFinal;
     correctVector(tObs, tObsCorrection, tObsFinal);
 
-    calcStdLevels(numLevelsToCheck, pressures, tObsFinal, tFlags);
+    calcStdLevels(numProfileLevels, pressures, tObsFinal, tFlags);
 
-    LevErrors_.assign(numLevelsToCheck, -1);
-    tInterp_.assign(numLevelsToCheck, missingValueFloat);
+    LevErrors_.assign(numProfileLevels, -1);
+    tInterp_.assign(numProfileLevels, missingValueFloat);
 
     int NumErrors = 0;
 
@@ -149,8 +148,8 @@ namespace ufo {
     profileDataHandler_.set(ufo::VariableNames::LevErrors, std::move(LevErrors_));
     profileDataHandler_.set(ufo::VariableNames::tInterp, std::move(tInterp_));
     profileDataHandler_.set(ufo::VariableNames::LogP, std::move(LogP_));
-    std::vector <int> NumStd(profileIndices_.getNumLevelsToCheck(), std::move(NumStd_));
-    std::vector <int> NumSig(profileIndices_.getNumLevelsToCheck(), std::move(NumSig_));
+    std::vector <int> NumStd(profileDataHandler_.getNumProfileLevels(), std::move(NumStd_));
+    std::vector <int> NumSig(profileDataHandler_.getNumProfileLevels(), std::move(NumSig_));
     profileDataHandler_.set(ufo::VariableNames::NumStd, std::move(NumStd));
     profileDataHandler_.set(ufo::VariableNames::NumSig, std::move(NumSig));
   }

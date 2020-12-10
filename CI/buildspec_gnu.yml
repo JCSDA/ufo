@@ -11,6 +11,8 @@ phases:
       - echo Executing install phase
       - echo $CODEBUILD_RESOLVED_SOURCE_VERSION
       - echo $CODEBUILD_SOURCE_REPO_URL
+      - org_name=$(echo $CODEBUILD_SOURCE_REPO_URL | awk '{split($0,org,"/"); print org[4]}')
+      - echo $org_name
       - echo $CODEBUILD_SOURCE_VERSION
 
       - echo $CODEBUILD_WEBHOOK_MERGE_COMMIT
@@ -85,19 +87,19 @@ phases:
 
       ##  public repos
       # ufo
-      - ./clone.sh $GIT_USER $GIT_PASS jcsda/ufo $CODEBUILD_GIT_BRANCH ufo /jcsda/ufo-bundle develop
+      - ./clone.sh $GIT_USER $GIT_PASS jcsda-internal/ufo $CODEBUILD_GIT_BRANCH ufo /jcsda/ufo-bundle develop
 
       # crtm
-      - ./clone.sh $GIT_USER $GIT_PASS jcsda/crtm $CODEBUILD_GIT_BRANCH_CRTM crtm /jcsda/ufo-bundle $CRTM_JEDI_BRANCH
+      - ./clone.sh $GIT_USER $GIT_PASS jcsda-internal/crtm $CODEBUILD_GIT_BRANCH_CRTM crtm /jcsda/ufo-bundle $CRTM_JEDI_BRANCH
 
       # ioda
-      - ./clone.sh $GIT_USER $GIT_PASS jcsda/ioda $CODEBUILD_GIT_BRANCH ioda /jcsda/ufo-bundle develop
+      - ./clone.sh $GIT_USER $GIT_PASS jcsda-internal/ioda $CODEBUILD_GIT_BRANCH ioda /jcsda/ufo-bundle develop
 
       # saber
-      - ./clone.sh $GIT_USER $GIT_PASS jcsda/saber $CODEBUILD_GIT_BRANCH saber /jcsda/ufo-bundle develop
+      - ./clone.sh $GIT_USER $GIT_PASS jcsda-internal/saber $CODEBUILD_GIT_BRANCH saber /jcsda/ufo-bundle develop
 
       # oops
-      - ./clone.sh $GIT_USER $GIT_PASS jcsda/oops $CODEBUILD_GIT_BRANCH oops /jcsda/ufo-bundle develop
+      - ./clone.sh $GIT_USER $GIT_PASS jcsda-internal/oops $CODEBUILD_GIT_BRANCH oops /jcsda/ufo-bundle develop
 
 
       ##  ecmwf repos
@@ -165,7 +167,7 @@ phases:
         && echo $CXX
         && echo $FC
         && CC=mpicc CXX=mpicxx FC=mpifort 
-        && cmake  -DCMAKE_MODULE_PATH=/usr/local/share/ecbuild/cmake/ -DBUILD_RTTOV=1 -DCMAKE_BUILD_TYPE=Debug -DENABLE_GPROF=ON -DCMAKE_CXX_COMPILER=$(which g++) -DCMAKE_C_COMPILER=$(which gcc) -DCMAKE_Fortran_COMPILER=$(which gfortran) /jcsda/ufo-bundle/
+        && cmake  -DCMAKE_MODULE_PATH=/usr/local/share/ecbuild/cmake/ -DCMAKE_BUILD_TYPE=Debug -DENABLE_GPROF=ON -DCMAKE_CXX_COMPILER=$(which g++) -DCMAKE_C_COMPILER=$(which gcc) -DCMAKE_Fortran_COMPILER=$(which gfortran) /jcsda/ufo-bundle/
         && cd ufo
         && make -j4"
 
@@ -193,4 +195,4 @@ phases:
       - cd /build_container/ufo
       - pwd
       - ls
-      - bash /jcsda/ufo-bundle/ufo/CI/codecov_script.sh
+      - bash /jcsda/ufo-bundle/ufo/CI/codecov_script_$org_name.sh

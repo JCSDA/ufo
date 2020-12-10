@@ -15,7 +15,6 @@
 #include "ioda/ObsVector.h"
 
 #include "oops/base/Variables.h"
-#include "oops/util/DateTime.h"
 
 #include "ufo/GeoVaLs.h"
 #include "ufo/Locations.h"
@@ -55,9 +54,8 @@ const oops::Variables & ObsOperator::requiredVars() const {
 
 // -----------------------------------------------------------------------------
 
-std::unique_ptr<Locations> ObsOperator::locations(const util::DateTime & t1,
-                                                  const util::DateTime & t2) const {
-  return oper_->locations(t1, t2);
+std::unique_ptr<Locations> ObsOperator::locations() const {
+  return oper_->locations();
 }
 
 // -----------------------------------------------------------------------------

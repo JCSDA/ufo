@@ -31,7 +31,6 @@ namespace ufo {
   class ProfileConsistencyCheckParameters;
   class ProfileCheckValidator;
   class ProfileDataHandler;
-  class ProfileIndices;
 }
 
 namespace ufo {
@@ -40,7 +39,6 @@ namespace ufo {
   class ProfileCheckBase {
    public:
     ProfileCheckBase(const ProfileConsistencyCheckParameters &options,
-                     const ProfileIndices &profileIndices,
                      ProfileDataHandler &profileDataHandler,
                      ProfileCheckValidator &profileCheckValidator);
     virtual ~ProfileCheckBase() {}
@@ -66,18 +64,41 @@ namespace ufo {
         std::transform(v1.begin(), v1.end(), v2.begin(), vout.begin(), std::plus<T>());
       }
 
+    /// Set a QC flag on one profile level.
+    /// This is the base case for one vector.
+    template <typename T>
+      void SetQCFlag(const int& flag,
+                     const size_t& jlev,
+                     std::vector <T> &vec)
+      {
+        if (vec.size() > jlev) vec[jlev] |= flag;
+      }
+
+    /// Set a QC flag on one profile level.
+    /// This is the recursive case that accepts an arbitrary number of vectors
+    /// using a variadic template.
+    template <typename T, typename... Args>
+      void SetQCFlag(const int& flag,
+                     const size_t& jlev,
+                     std::vector <T> &vec1,
+                     Args&... vecs)
+    {
+      if (vec1.size() > jlev) vec1[jlev] |= flag;
+      SetQCFlag(flag, jlev, vecs...);
+    }
+
    protected:  // variables
     /// Configurable parameters
     const ProfileConsistencyCheckParameters &options_;
-
-    /// Indices of profile's observations in the entire sample
-    const ProfileIndices &profileIndices_;
 
     /// Profile data handler
     ProfileDataHandler &profileDataHandler_;
 
     /// Profile check validator
     ProfileCheckValidator &profileCheckValidator_;
+
+    /// Missing value (int)
+    const int missingValueInt = util::missingValue(1);
 
     /// Missing value (float)
     const float missingValueFloat = util::missingValue(1.0f);
@@ -89,7 +110,6 @@ namespace ufo {
    public:
     static std::unique_ptr<ProfileCheckBase> create(const std::string&,
                                                     const ProfileConsistencyCheckParameters&,
-                                                    const ProfileIndices&,
                                                     ProfileDataHandler&,
                                                     ProfileCheckValidator&);
     virtual ~ProfileCheckFactory() = default;
@@ -97,7 +117,6 @@ namespace ufo {
     explicit ProfileCheckFactory(const std::string &);
    private:
     virtual std::unique_ptr<ProfileCheckBase> make(const ProfileConsistencyCheckParameters&,
-                                                   const ProfileIndices&,
                                                    ProfileDataHandler&,
                                                    ProfileCheckValidator&) = 0;
 
@@ -113,12 +132,10 @@ namespace ufo {
     {
       virtual std::unique_ptr<ProfileCheckBase>
         make(const ProfileConsistencyCheckParameters &options,
-             const ProfileIndices &profileIndices,
              ProfileDataHandler &profileDataHandler,
              ProfileCheckValidator &profileCheckValidator)
       {
         return std::unique_ptr<ProfileCheckBase>(new T(options,
-                                                       profileIndices,
                                                        profileDataHandler,
                                                        profileCheckValidator));
       }

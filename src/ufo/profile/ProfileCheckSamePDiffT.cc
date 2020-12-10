@@ -13,10 +13,9 @@ namespace ufo {
   static ProfileCheckMaker<ProfileCheckSamePDiffT> makerProfileCheckSamePDiffT_("SamePDiffT");
 
   ProfileCheckSamePDiffT::ProfileCheckSamePDiffT(const ProfileConsistencyCheckParameters &options,
-                                                 const ProfileIndices &profileIndices,
                                                  ProfileDataHandler &profileDataHandler,
                                                  ProfileCheckValidator &profileCheckValidator)
-    : ProfileCheckBase(options, profileIndices, profileDataHandler, profileCheckValidator)
+    : ProfileCheckBase(options, profileDataHandler, profileCheckValidator)
   {}
 
   void ProfileCheckSamePDiffT::runCheck()
@@ -25,7 +24,7 @@ namespace ufo {
     int jlevprev = -1;
     int NumErrors = 0;
 
-    const int numLevelsToCheck = profileIndices_.getNumLevelsToCheck();
+    const int numProfileLevels = profileDataHandler_.getNumProfileLevels();
 
     const std::vector <float> &pressures =
       profileDataHandler_.get<float>(ufo::VariableNames::obs_air_pressure);
@@ -54,7 +53,7 @@ namespace ufo {
     std::vector <float> tObsFinal;
     correctVector(tObs, tObsCorrection, tObsFinal);
 
-    for (int jlev = 0; jlev < numLevelsToCheck; ++jlev) {
+    for (int jlev = 0; jlev < numProfileLevels; ++jlev) {
       if (tObs[jlev] == missingValueFloat) continue;
 
       if (jlevprev == -1) {

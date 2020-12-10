@@ -219,60 +219,29 @@ end subroutine ufo_locs_concatenate
 
 ! --------------------------------------------------------------------------------------------------
 
-subroutine ufo_locs_init(self, obss, t1, t2)
+subroutine ufo_locs_init(self, obss)
 
   implicit none
 
-  type(ufo_locs), intent(inout) :: self
-  type(c_ptr), value, intent(in)              :: obss
-  type(datetime), intent(in)                  :: t1, t2
+  type(ufo_locs), intent(inout)   :: self
+  type(c_ptr), value, intent(in)  :: obss
 
-  integer :: nlocs
+  integer :: nlocs, i
 
-  character(len=*),parameter:: &
-     myname = "ufo_locs_init"
-  integer :: i
-  integer :: tw_nlocs
-  integer, dimension(:), allocatable :: tw_indx
-  real(kind_real), dimension(:), allocatable :: lon, lat
-  type(datetime), dimension(:), allocatable :: date_time
-
-  ! Local copies pre binning
   nlocs = obsspace_get_nlocs(obss)
+  call ufo_locs_setup(self, nlocs)
 
-  allocate(date_time(nlocs), lon(nlocs), lat(nlocs))
+  call obsspace_get_db(obss, "MetaData", "datetime", self%time)
+  call obsspace_get_db(obss, "MetaData", "longitude", self%lon)
+  call obsspace_get_db(obss, "MetaData", "latitude", self%lat)
 
-  call obsspace_get_db(obss, "MetaData", "datetime", date_time)
-
-  ! Generate the timing window indices
-  allocate(tw_indx(nlocs))
-  tw_nlocs = 0
+  !> index is left for back-compatibility; should be removed in the next
+  !refactoring
   do i = 1, nlocs
-    if (date_time(i) > t1 .and. date_time(i) <= t2) then
-      tw_nlocs = tw_nlocs + 1
-      tw_indx(tw_nlocs) = i
-    endif
+    self%indx(i) = i
   enddo
-
-  call obsspace_get_db(obss, "MetaData", "longitude", lon)
-  call obsspace_get_db(obss, "MetaData", "latitude", lat)
-
-  !Setup ufo locations
-  call ufo_locs_setup(self, tw_nlocs)
-  do i = 1, tw_nlocs
-    self%lon(i)  = lon(tw_indx(i))
-    self%lat(i)  = lat(tw_indx(i))
-    self%time(i) = date_time(tw_indx(i))
-  enddo
-  self%indx = tw_indx(1:tw_nlocs)
-
-  do i = 1, nlocs
-    call datetime_delete(date_time(i))
-  enddo
-  deallocate(date_time, lon, lat, tw_indx)
 
   self%max_indx = obsspace_get_gnlocs(obss)
-
 
 end subroutine ufo_locs_init
 

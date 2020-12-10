@@ -12,12 +12,13 @@ Normal ship track:
       obs errors: [1.0]
   station_ids: [ 1, 1, 1 ]
   Ship Track Check:
-    testing mode: true
+    unit testing mode: true
     early break check: false
     variables: [air_temperature]
     temporal resolution: PT10M
-    spatial resolution: 1 # km
-    max speed: 1 #km/s (1 lat/lon unit diff/hr ~ .0308)
+    spatial resolution (km): 1
+    max speed (m/s): 1000 # (1 lat/lon unit diff/hr ~ 30.8)
+    rejection threshold: 1.0
     station_id_variable:
       name: station_id@MetaData
   expected first rejection index: []
@@ -41,12 +42,13 @@ Ship track error first segment category 2:
       obs errors: [1.0]
   station_ids: [ 1, 1, 1, 1 ]
   Ship Track Check:
-    testing mode: true
+    unit testing mode: true
     early break check: false
     variables: [air_temperature]
     temporal resolution: PT10M
-    spatial resolution: 1 # km
-    max speed: .03
+    spatial resolution (km): 1
+    max speed (m/s): 30.0
+    rejection threshold: 1.0
     station_id_variable:
       name: station_id@MetaData
   expected first rejection index: [1]
@@ -66,12 +68,13 @@ Ship track error first segment category 1:
       obs errors: [1.0]
   station_ids: [ 1, 1, 1]
   Ship Track Check:
-    testing mode: true
+    unit testing mode: true
     early break check: false
     variables: [air_temperature]
     temporal resolution: PT10M
-    spatial resolution: 1 # km
-    max speed: .03
+    spatial resolution (km): 1
+    max speed (m/s): 30.0
+    rejection threshold: 1.0
     station_id_variable:
       name: station_id@MetaData
   expected first rejection index: [0]
@@ -91,12 +94,13 @@ Ship track error last segment category 2:
       obs errors: [1.0]
   station_ids: [ 1, 1, 1, 1 ]
   Ship Track Check:
-    testing mode: true
+    unit testing mode: true
     early break check: false
     variables: [air_temperature]
     temporal resolution: PT10M
-    spatial resolution: 1 # km
-    max speed: .03
+    spatial resolution (km): 1
+    max speed (m/s): 30.0
+    rejection threshold: 1.0
     station_id_variable:
       name: station_id@MetaData
   expected first rejection index: [2]
@@ -116,12 +120,13 @@ Ship track error last segment category 1:
       obs errors: [1.0]
   station_ids: [ 1, 1, 1 ]
   Ship Track Check:
-    testing mode: true
+    unit testing mode: true
     early break check: false
     variables: [air_temperature]
     temporal resolution: PT10M
-    spatial resolution: 1 # km
-    max speed: .03
+    spatial resolution (km): 1
+    max speed (m/s): 30.0
+    rejection threshold: 1.0
     station_id_variable:
       name: station_id@MetaData
   expected first rejection index: [2]
@@ -141,12 +146,13 @@ Ship track error middle segment prev fast category 4:
       obs errors: [1.0]
   station_ids: [ 1, 1, 1, 1]
   Ship Track Check:
-    testing mode: true
+    unit testing mode: true
     early break check: false
     variables: [air_temperature]
     temporal resolution: PT10M
-    spatial resolution: 1 # km
-    max speed: .03
+    spatial resolution (km): 1
+    max speed (m/s): 30.0
+    rejection threshold: 1.0
     station_id_variable:
       name: station_id@MetaData
   expected first rejection index: [1]
@@ -166,12 +172,13 @@ Ship track error middle segment prev fast category 104:
       obs errors: [ 1.0 ]
   station_ids: [ 1, 1, 1, 1 ]
   Ship Track Check:
-    testing mode: true
+    unit testing mode: true
     early break check: false
     variables: [air_temperature]
     temporal resolution: PT10M
-    spatial resolution: 1 # km
-    max speed: .03
+    spatial resolution (km): 1
+    max speed (m/s): 30.0
+    rejection threshold: 1.0
     station_id_variable:
       name: station_id@MetaData
   expected first rejection index: [ 1, 2 ]
@@ -191,12 +198,13 @@ Ship track error middle segment next fast category 4:
       obs errors: [1.0]
   station_ids: [ 1, 1, 1, 1]
   Ship Track Check:
-    testing mode: true
+    unit testing mode: true
     early break check: false
     variables: [air_temperature]
     temporal resolution: PT10M
-    spatial resolution: 1 # km
-    max speed: .03
+    spatial resolution (km): 1
+    max speed (m/s): 30.0
+    rejection threshold: 1.0
     station_id_variable:
       name: station_id@MetaData
   expected first rejection index: [2]
@@ -218,12 +226,13 @@ Ship track error middle segment next fast category 104:
       obs errors: [1.0]
   station_ids: [ 1, 1, 1, 1]
   Ship Track Check:
-    testing mode: true
+    unit testing mode: true
     early break check: false
     variables: [air_temperature]
     temporal resolution: PT10M
-    spatial resolution: 1 # km
-    max speed: .03
+    spatial resolution (km): 1
+    max speed (m/s): 30.0
+    rejection threshold: 1.0
     station_id_variable:
       name: station_id@MetaData
   expected first rejection index: [1,2]
@@ -243,12 +252,13 @@ Ship track error middle segment average fast category 5: #uses time res to contr
       obs errors: [1.0]
   station_ids: [ 1, 1, 1, 1]
   Ship Track Check:
-    testing mode: true
+    unit testing mode: true
     early break check: false
     variables: [air_temperature]
     temporal resolution: PT1H
-    spatial resolution: 1 # km
-    max speed: .03
+    spatial resolution (km): 1
+    max speed (m/s): 30.0
+    rejection threshold: 1.0
     station_id_variable:
       name: station_id@MetaData
   expected first rejection index: [1]
@@ -268,12 +278,13 @@ Ship track error middle segment prev average fast category 5:
       obs errors: [1.0]
   station_ids: [ 1, 1, 1, 1]
   Ship Track Check:
-    testing mode: true
+    unit testing mode: true
     early break check: false
     variables: [air_temperature]
     temporal resolution: PT1H
-    spatial resolution: 1 # km
-    max speed: .03
+    spatial resolution (km): 1
+    max speed (m/s): 30.0
+    rejection threshold: 1.0
     station_id_variable:
       name: station_id@MetaData
   expected first rejection index: [ 2 ]
@@ -293,12 +304,13 @@ Ship track error middle segment prev average fast category 105:
       obs errors: [ 1.0 ]
   station_ids: [ 1, 1, 1, 1 ]
   Ship Track Check:
-    testing mode: true
+    unit testing mode: true
     early break check: false
     variables: [air_temperature]
     temporal resolution: PT1H
-    spatial resolution: 1 # km
-    max speed: .03
+    spatial resolution (km): 1
+    max speed (m/s): 30.0
+    rejection threshold: 1.0
     station_id_variable:
       name: station_id@MetaData
   expected first rejection index: [ 1, 2 ]
@@ -318,12 +330,13 @@ Ship track error middle segment prev angle large category 6:
       obs errors: [1.0]
   station_ids: [ 1, 1, 1, 1]
   Ship Track Check:
-    testing mode: true
+    unit testing mode: true
     early break check: false
     variables: [air_temperature]
     temporal resolution: PT1H
-    spatial resolution: 1 # km
-    max speed: .03
+    spatial resolution (km): 1
+    max speed (m/s): 30.0
+    rejection threshold: 1.0
     station_id_variable:
       name: station_id@MetaData
   expected first rejection index: [1]
@@ -343,12 +356,13 @@ Ship track error middle segment angle large category 6:
       obs errors: [1.0]
   station_ids: [ 1, 1, 1, 1]
   Ship Track Check:
-    testing mode: true
+    unit testing mode: true
     early break check: false
     variables: [air_temperature]
     temporal resolution: PT1H
-    spatial resolution: 1 # km
-    max speed: .03
+    spatial resolution (km): 1
+    max speed (m/s): 30.0
+    rejection threshold: 1.0
     station_id_variable:
       name: station_id@MetaData
   expected first rejection index: [2]
@@ -369,12 +383,13 @@ Ship track error middle segment previous previous angle large category 7:
       obs errors: [1.0]
   station_ids: [ 1, 1, 1, 1, 1]
   Ship Track Check:
-    testing mode: true
+    unit testing mode: true
     early break check: false
     variables: [air_temperature]
     temporal resolution: PT1H
-    spatial resolution: 1 # km
-    max speed: .03
+    spatial resolution (km): 1
+    max speed (m/s): 30.0
+    rejection threshold: 1.0
     station_id_variable:
       name: station_id@MetaData
   expected first rejection index: [2]
@@ -395,12 +410,13 @@ Ship track error middle segment next angle large category 7:
       obs errors: [1.0]
   station_ids: [ 1, 1, 1, 1, 1]
   Ship Track Check:
-    testing mode: true
+    unit testing mode: true
     early break check: false
     variables: [air_temperature]
     temporal resolution: PT1H
-    spatial resolution: 1 # km
-    max speed: .03
+    spatial resolution (km): 1
+    max speed (m/s): 30.0
+    rejection threshold: 1.0
     station_id_variable:
       name: station_id@MetaData
   expected first rejection index: [2]
@@ -420,12 +436,13 @@ Ship track error middle segment prev speed < half next speed category 8:
       obs errors: [1.0]
   station_ids: [ 1, 1, 1, 1]
   Ship Track Check:
-    testing mode: true
+    unit testing mode: true
     early break check: false
     variables: [air_temperature]
     temporal resolution: PT1H
-    spatial resolution: 1 # km
-    max speed: .03
+    spatial resolution (km): 1
+    max speed (m/s): 30.0
+    rejection threshold: 1.0
     station_id_variable:
       name: station_id@MetaData
   expected first rejection index: [1]
@@ -445,12 +462,13 @@ Ship track error middle segment next speed < half prev speed category 8:
       obs errors: [1.0]
   station_ids: [ 1, 1, 1, 1]
   Ship Track Check:
-    testing mode: true
+    unit testing mode: true
     early break check: false
     variables: [air_temperature]
     temporal resolution: PT1H
-    spatial resolution: 1 # km
-    max speed: .03
+    spatial resolution (km): 1
+    max speed (m/s): 30.0
+    rejection threshold: 1.0
     station_id_variable:
       name: station_id@MetaData
   expected first rejection index: [2]
@@ -470,12 +488,13 @@ Ship track error middle segment category 100:
       obs errors: [1.0]
   station_ids: [ 1, 1, 1, 1]
   Ship Track Check:
-    testing mode: true
+    unit testing mode: true
     early break check: false
     variables: [air_temperature]
     temporal resolution: PT1H
-    spatial resolution: 1 # km
-    max speed: .03
+    spatial resolution (km): 1
+    max speed (m/s): 30.0
+    rejection threshold: 1.0
     station_id_variable:
       name: station_id@MetaData
   expected first rejection index: [ 1, 2 ]

@@ -15,6 +15,7 @@
 #include "oops/util/parameters/OptionalParameter.h"
 #include "oops/util/parameters/Parameter.h"
 #include "oops/util/parameters/Parameters.h"
+#include "ufo/filters/FilterParametersBase.h"
 #include "ufo/utils/Constants.h"
 #include "ufo/utils/parameters/ParameterTraitsVariable.h"
 
@@ -51,8 +52,8 @@ struct ParameterTraits<ufo::DistanceNorm> :
 namespace ufo {
 
 /// \brief Options controlling the operation of the Gaussian_Thinning filter.
-class GaussianThinningParameters : public oops::Parameters {
-  OOPS_CONCRETE_PARAMETERS(GaussianThinningParameters, Parameters)
+class GaussianThinningParameters : public FilterParametersBase {
+  OOPS_CONCRETE_PARAMETERS(GaussianThinningParameters, FilterParametersBase)
 
  public:
   // Horizontal grid
@@ -103,8 +104,16 @@ class GaussianThinningParameters : public oops::Parameters {
 
   // Observation categories
 
-  /// Variable storing integer-valued IDs associated with observations. Observations belonging
-  /// to different categories are thinned separately.
+  /// A string-valued or integer-valued variable. Observations with different values of that
+  /// variable are thinned separately.
+  ///
+  /// Note: The filter will automatically detect if the chosen variable was also used to group
+  /// observations into records when the ObsSpace was constructed, and if so, avoid exchanging
+  /// data with other MPI processes, since in these circumstances each process can thin its
+  /// observations independently from others.
+  ///
+  /// The variable used to group observations into records can be set with the
+  /// `obs space.obsdatain.obsgrouping.group variable` YAML option.
   oops::OptionalParameter<Variable> categoryVariable{"category_variable", this};
 
   // Selection of observations to retain

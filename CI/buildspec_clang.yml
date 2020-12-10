@@ -57,19 +57,19 @@ phases:
 
       ##  public repos
       # ufo
-      - ./clone.sh $GIT_USER $GIT_PASS jcsda/ufo $CODEBUILD_GIT_BRANCH ufo /jcsda/ufo-bundle develop
+      - ./clone.sh $GIT_USER $GIT_PASS jcsda-internal/ufo $CODEBUILD_GIT_BRANCH ufo /jcsda/ufo-bundle develop
 
       # crtm
-      - ./clone.sh $GIT_USER $GIT_PASS jcsda/crtm $CODEBUILD_GIT_BRANCH_CRTM crtm /jcsda/ufo-bundle $CRTM_JEDI_BRANCH
+      - ./clone.sh $GIT_USER $GIT_PASS jcsda-internal/crtm $CODEBUILD_GIT_BRANCH_CRTM crtm /jcsda/ufo-bundle $CRTM_JEDI_BRANCH
 
       # ioda
-      - ./clone.sh $GIT_USER $GIT_PASS jcsda/ioda $CODEBUILD_GIT_BRANCH ioda /jcsda/ufo-bundle develop
+      - ./clone.sh $GIT_USER $GIT_PASS jcsda-internal/ioda $CODEBUILD_GIT_BRANCH ioda /jcsda/ufo-bundle develop
 
       # saber
-      - ./clone.sh $GIT_USER $GIT_PASS jcsda/saber $CODEBUILD_GIT_BRANCH saber /jcsda/ufo-bundle develop
+      - ./clone.sh $GIT_USER $GIT_PASS jcsda-internal/saber $CODEBUILD_GIT_BRANCH saber /jcsda/ufo-bundle develop
 
       # oops
-      - ./clone.sh $GIT_USER $GIT_PASS jcsda/oops $CODEBUILD_GIT_BRANCH oops /jcsda/ufo-bundle develop
+      - ./clone.sh $GIT_USER $GIT_PASS jcsda-internal/oops $CODEBUILD_GIT_BRANCH oops /jcsda/ufo-bundle develop
 
 
       ##  ecmwf repos
@@ -112,9 +112,9 @@ phases:
       - sed -i 's/BRANCH develop //' CMakeLists.txt
       - sed -i 's/BRANCH release-stable UPDATE//' CMakeLists.txt
       - sed -i -e '/ecbuild_bundle( PROJECT ufo/i\
-        ecbuild_bundle( PROJECT ropp-ufo  GIT "https://github.com/JCSDA/ropp-test.git" )' CMakeLists.txt
+        ecbuild_bundle( PROJECT ropp-ufo  GIT "https://github.com/JCSDA-internal/ropp-test.git" )' CMakeLists.txt
       - sed -i -e '/ecbuild_bundle( PROJECT ufo/i\
-        ecbuild_bundle( PROJECT geos-aero  GIT "https://github.com/JCSDA/geos-aero.git" )' CMakeLists.txt
+        ecbuild_bundle( PROJECT geos-aero  GIT "https://github.com/JCSDA-internal/geos-aero.git" )' CMakeLists.txt
 
   build:
     commands:
@@ -124,7 +124,7 @@ phases:
       - echo $BUILD_STATUS
 
       - cd /build_container
-      - ecbuild -DBUILD_RTTOV=1 /jcsda/ufo-bundle/
+      - ecbuild /jcsda/ufo-bundle/
       - cd ufo
       - make -j4
 

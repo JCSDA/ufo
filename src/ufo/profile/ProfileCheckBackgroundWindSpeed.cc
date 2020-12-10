@@ -14,17 +14,16 @@ namespace ufo {
 
   ProfileCheckBackgroundWindSpeed::ProfileCheckBackgroundWindSpeed
   (const ProfileConsistencyCheckParameters &options,
-   const ProfileIndices &profileIndices,
    ProfileDataHandler &profileDataHandler,
    ProfileCheckValidator &profileCheckValidator)
-    : ProfileCheckBase(options, profileIndices, profileDataHandler, profileCheckValidator)
+    : ProfileCheckBase(options, profileDataHandler, profileCheckValidator)
   {}
 
   void ProfileCheckBackgroundWindSpeed::runCheck()
   {
     oops::Log::debug() << " Background check for wind velocity" << std::endl;
 
-    const size_t numLevelsToCheck = profileIndices_.getNumLevelsToCheck();
+    const size_t numProfileLevels = profileDataHandler_.getNumProfileLevels();
     const bool ModelLevels = options_.modellevels.value();
     const std::vector <float> &uObs =
        profileDataHandler_.get<float>(ufo::VariableNames::obs_eastward_wind);
@@ -73,10 +72,10 @@ namespace ufo {
     }
 
     // Probability density of 'bad' observations.
-    std::vector <float> PdBad(numLevelsToCheck, options_.BkCheck_PdBad_uv.value());
+    std::vector <float> PdBad(numProfileLevels, options_.BkCheck_PdBad_uv.value());
 
     // Modify observation PGE if certain flags have been set.
-    for (int jlev = 0; jlev < numLevelsToCheck; ++jlev) {
+    for (int jlev = 0; jlev < numProfileLevels; ++jlev) {
       if (uFlags[jlev] & ufo::MetOfficeQCFlags::Profile::InterpolationFlag)
         uPGE[jlev] = 0.5 + 0.5 * uPGE[jlev];
       if (timeFlags[jlev])

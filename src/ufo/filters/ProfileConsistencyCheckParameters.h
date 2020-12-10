@@ -30,22 +30,15 @@ namespace eckit {
 namespace ufo {
 
   /// \brief Options controlling the operation of the ProfileConsistencyChecks filter.
-  class ProfileConsistencyCheckParameters : public DataHandlerParameters {
-    OOPS_CONCRETE_PARAMETERS(ProfileConsistencyCheckParameters, DataHandlerParameters)
+  class ProfileConsistencyCheckParameters : public oops::Parameters {
+    OOPS_CONCRETE_PARAMETERS(ProfileConsistencyCheckParameters, Parameters)
 
    public:  // variables
     /// @name Generic parameters
     /// @{
 
-    /// Maximum number of profile levels to be processed (a legacy of the OPS code).
-    /// No maximum is assigned if this parameter is not specified.
-    oops::OptionalParameter<int> maxlev {"maxlev", this};
-
     /// List of checks to perform
     oops::Parameter<std::vector<std::string>> Checks {"Checks", {}, this};
-
-    /// If not sorting observations, ensure number of profiles is consistent
-    oops::Parameter<bool> ValidateTotalNumProf {"ValidateTotalNumProf", true, this};
 
     /// Print station ID
     oops::Parameter<bool> PrintStationID {"PrintStationID", false, this};
@@ -325,8 +318,16 @@ namespace ufo {
 
     /// @}
 
+    /// @name Parameters classes
+    /// @{
+
+    /// Parameters related to profile data handler
+    DataHandlerParameters DHParameters{this};
+
     /// Parameters related to PGE calculations
     ProbabilityOfGrossErrorParameters PGEParameters{this};
+
+    /// @}
   };
 }  // namespace ufo
 

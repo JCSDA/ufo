@@ -12,13 +12,7 @@ observations:
     simulated variables: [bending_angle]
   geovals:
     filename: Data/ufo/testinput_tier_1/gnssro_geoval_2018041500_m.nc4
-  obs filters:
-  - filter: Background Check
-    filter variables:
-    - name: bending_angle
-    threshold: 3.0
   rms ref: 0.008096593619323458
-  passedBenchmark: 149
   tolerance: 1.0e-13
   linear obs operator test:
     iterations TL:  10

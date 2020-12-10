@@ -15,7 +15,7 @@ namespace ufo {
     BigGaps_ = optionsSL_.BigGaps.value();
   }
 
-  void ProfileStandardLevels::calcStdLevels(const int numLevelsToCheck,
+  void ProfileStandardLevels::calcStdLevels(const int numProfileLevels,
                                             const std::vector <float> &pressures,
                                             const std::vector <float> &tObs,
                                             const std::vector <int> &tFlags)
@@ -25,18 +25,18 @@ namespace ufo {
     // Reset calculated values
     NumSig_ = 0;
     NumStd_ = 0;
-    StdLev_.assign(numLevelsToCheck, -1);
-    SigBelow_.assign(numLevelsToCheck, -1);
-    SigAbove_.assign(numLevelsToCheck, -1);
-    LogP_.assign(numLevelsToCheck, 0.0);
-    IndStd_.assign(numLevelsToCheck, -1);
+    StdLev_.assign(numProfileLevels, -1);
+    SigBelow_.assign(numProfileLevels, -1);
+    SigAbove_.assign(numProfileLevels, -1);
+    LogP_.assign(numProfileLevels, 0.0);
+    IndStd_.assign(numProfileLevels, -1);
 
     /// Missing value (float)
     const float missingValueFloat = util::missingValue(1.0f);
 
     int SigPrev = -1;  // Previous significant level
     int jlevStdA = 0;  // Standard level below previous significant level
-    for (int jlev = 0; jlev < numLevelsToCheck; ++jlev) {
+    for (int jlev = 0; jlev < numProfileLevels; ++jlev) {
       // Ignore this level if it has been flagged as rejected.
       if (tFlags[jlev] & ufo::MetOfficeQCFlags::Elem::FinalRejectFlag) continue;
       if (tObs[jlev] != missingValueFloat &&
@@ -94,7 +94,7 @@ namespace ufo {
     Ind100_ = std::distance(StandardLevels_.begin(), it100.base()) - 1;
   }
 
-  void ProfileStandardLevels::calcStdLevelsUV(const int numLevelsToCheck,
+  void ProfileStandardLevels::calcStdLevelsUV(const int numProfileLevels,
                                               const std::vector <float> &pressures,
                                               const std::vector <float> &uObs,
                                               const std::vector <float> &vObs,
@@ -105,10 +105,10 @@ namespace ufo {
     // Reset calculated values
     NumSig_ = 0;
     NumStd_ = 0;
-    StdLev_.assign(numLevelsToCheck, -1);
-    SigBelow_.assign(numLevelsToCheck, -1);
-    SigAbove_.assign(numLevelsToCheck, -1);
-    LogP_.assign(numLevelsToCheck, 0.0);
+    StdLev_.assign(numProfileLevels, -1);
+    SigBelow_.assign(numProfileLevels, -1);
+    SigAbove_.assign(numProfileLevels, -1);
+    LogP_.assign(numProfileLevels, 0.0);
 
     /// Missing value (float)
     const float missingValueFloat = util::missingValue(1.0f);
@@ -116,7 +116,7 @@ namespace ufo {
     int SigPrev = -1;  // Previous significant level
     int jlevStdA = 0;  // Standard level below previous significant level
 
-    for (int jlev = 0; jlev < numLevelsToCheck; ++jlev) {
+    for (int jlev = 0; jlev < numProfileLevels; ++jlev) {
       if (uObs[jlev] != missingValueFloat && vObs[jlev] != missingValueFloat) {
         LogP_[jlev] = std::log(pressures[jlev]);
         if (uFlags[jlev] & ufo::MetOfficeQCFlags::Profile::StandardLevelFlag) {  // Standard level

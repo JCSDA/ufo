@@ -114,7 +114,7 @@ if (allocated(self%geovals)) then
     if (allocated(self%geovals(ivar)%vals)) deallocate(self%geovals(ivar)%vals)
   enddo
   deallocate(self%geovals)
- endif
+endif
 if (allocated(self%variables)) deallocate(self%variables)
 self%nvar = 0
 self%nlocs = 0
@@ -348,9 +348,7 @@ endif
 
 ! Get vertical coordinate variable
 call ufo_geovals_get_var(self, varname, geoval)
-if (associated(geoval)) then
-  print *, 'ufo_geovals_reorderzdir: geoval vertical coordinate variable ', trim(varname), geoval%nval, geoval%nlocs
-else
+if (.not. associated(geoval)) then
   write(err_msg, *) 'ufo_geovals_reorderzdir: geoval vertical coordinate variable ', trim(varname), ' doesnt exist'
 endif
 
@@ -358,11 +356,9 @@ endif
 if ((zdir == "bottom2top" .and. geoval%vals(1,1) < geoval%vals(geoval%nval,1)) .or. &
     (zdir == "top2bottom" .and. geoval%vals(1,1) > geoval%vals(geoval%nval,1))) then
    do_flip = .true.
-   print *, 'ufo_geovals_reorderzdir: do_flip ', do_flip
 else if (zdir /= "bottom2top" .or. zdir /= "top2bottom") then
   write(err_msg, *) 'ufo_geovals_reorderzdir: z-coordinate direction ', trim(zdir), ' not defined'
 else
-   print *, 'no need to reorder variables in vertical direction (zdir) do_flip ', do_flip
    return
 endif
 

@@ -14,10 +14,9 @@ namespace ufo {
 
   ProfileCheckUInterp::ProfileCheckUInterp
   (const ProfileConsistencyCheckParameters &options,
-   const ProfileIndices &profileIndices,
    ProfileDataHandler &profileDataHandler,
    ProfileCheckValidator &profileCheckValidator)
-    : ProfileCheckBase(options, profileIndices, profileDataHandler, profileCheckValidator),
+    : ProfileCheckBase(options, profileDataHandler, profileCheckValidator),
     ProfileStandardLevels(options)
   {}
 
@@ -25,7 +24,7 @@ namespace ufo {
   {
     oops::Log::debug() << " U interpolation check" << std::endl;
 
-    const int numLevelsToCheck = profileIndices_.getNumLevelsToCheck();
+    const int numProfileLevels = profileDataHandler_.getNumProfileLevels();
     const std::vector <float> &pressures =
       profileDataHandler_.get<float>(ufo::VariableNames::obs_air_pressure);
     const std::vector <float> &uObs =
@@ -48,17 +47,17 @@ namespace ufo {
       return;
     }
 
-    calcStdLevelsUV(numLevelsToCheck, pressures, uObs, vObs, uFlags);
+    calcStdLevelsUV(numProfileLevels, pressures, uObs, vObs, uFlags);
 
-    LevErrors_.assign(numLevelsToCheck, -1);
-    uInterp_.assign(numLevelsToCheck, 0.0);
-    vInterp_.assign(numLevelsToCheck, 0.0);
+    LevErrors_.assign(numProfileLevels, -1);
+    uInterp_.assign(numProfileLevels, 0.0);
+    vInterp_.assign(numProfileLevels, 0.0);
 
     int NumErrors = 0;
 
     // Check levels with identical pressures
     int jlevprev = -1;
-    for (int jlev = 0; jlev < numLevelsToCheck; ++jlev) {
+    for (int jlev = 0; jlev < numProfileLevels; ++jlev) {
       if (uObs[jlev] != missingValueFloat && vObs[jlev] != missingValueFloat) {
         if (jlevprev != -1) {
           if (pressures[jlev] == pressures[jlevprev] &&
@@ -160,8 +159,8 @@ namespace ufo {
     profileDataHandler_.set(ufo::VariableNames::uInterp, std::move(uInterp_));
     profileDataHandler_.set(ufo::VariableNames::vInterp, std::move(vInterp_));
     profileDataHandler_.set(ufo::VariableNames::LogP, std::move(LogP_));
-    std::vector <int> NumStd(profileIndices_.getNumLevelsToCheck(), std::move(NumStd_));
-    std::vector <int> NumSig(profileIndices_.getNumLevelsToCheck(), std::move(NumSig_));
+    std::vector <int> NumStd(profileDataHandler_.getNumProfileLevels(), std::move(NumStd_));
+    std::vector <int> NumSig(profileDataHandler_.getNumProfileLevels(), std::move(NumSig_));
     profileDataHandler_.set(ufo::VariableNames::NumStd, std::move(NumStd));
     profileDataHandler_.set(ufo::VariableNames::NumSig, std::move(NumSig));
   }

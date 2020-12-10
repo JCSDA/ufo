@@ -13,10 +13,9 @@ namespace ufo {
   static ProfileCheckMaker<ProfileCheckHydrostatic> makerProfileCheckHydrostatic_("Hydrostatic");
 
   ProfileCheckHydrostatic::ProfileCheckHydrostatic(const ProfileConsistencyCheckParameters &options,
-                                                   const ProfileIndices &profileIndices,
                                                    ProfileDataHandler &profileDataHandler,
                                                    ProfileCheckValidator &profileCheckValidator)
-    : ProfileCheckBase(options, profileIndices, profileDataHandler, profileCheckValidator),
+    : ProfileCheckBase(options, profileDataHandler, profileCheckValidator),
     ProfileStandardLevels(options)
   {}
 
@@ -24,7 +23,7 @@ namespace ufo {
   {
     oops::Log::debug() << " Hydrostatic check" << std::endl;
 
-    const int numLevelsToCheck = profileIndices_.getNumLevelsToCheck();
+    const int numProfileLevels = profileDataHandler_.getNumProfileLevels();
 
     const std::vector <float> &pressures =
        profileDataHandler_.get<float>(ufo::VariableNames::obs_air_pressure);
@@ -71,15 +70,15 @@ namespace ufo {
     std::vector <float> tObsFinal;
     correctVector(tObs, tObsCorrection, tObsFinal);
 
-    calcStdLevels(numLevelsToCheck, pressures, tObsFinal, tFlags);
+    calcStdLevels(numProfileLevels, pressures, tObsFinal, tFlags);
     findHCheckStdLevs();
 
     HydDesc_ = options_.HydDesc.value();
-    DC_.assign(numLevelsToCheck, missingValueFloat);
-    ETol_.assign(numLevelsToCheck, missingValueFloat);
-    D_.assign(numLevelsToCheck, missingValueFloat);
-    E_.assign(numLevelsToCheck + 1, missingValueFloat);
-    HydError_.assign(numLevelsToCheck, 0);
+    DC_.assign(numProfileLevels, missingValueFloat);
+    ETol_.assign(numProfileLevels, missingValueFloat);
+    D_.assign(numProfileLevels, missingValueFloat);
+    E_.assign(numProfileLevels + 1, missingValueFloat);
+    HydError_.assign(numProfileLevels, 0);
 
     int NumErrors = 0;
     // Find large thickness residuals

@@ -18,7 +18,6 @@
 namespace ufo {
   class ProfileCheckValidator;
   class ProfileDataHandler;
-  class ProfileIndices;
 }
 
 namespace ufo {
@@ -29,7 +28,6 @@ namespace ufo {
   class ProfileChecker {
    public:
     ProfileChecker(const ProfileConsistencyCheckParameters &options,
-                   const ProfileIndices &profileIndices,
                    ProfileDataHandler &profileDataHandler,
                    ProfileCheckValidator &profileCheckValidator);
 
@@ -45,9 +43,6 @@ namespace ufo {
    private:
     /// Configurable parameters
     const ProfileConsistencyCheckParameters &options_;
-
-    /// Indices of profile's observations in the entire sample
-    const ProfileIndices &profileIndices_;
 
     /// Profile data
     ProfileDataHandler &profileDataHandler_;

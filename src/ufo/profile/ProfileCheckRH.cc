@@ -14,17 +14,16 @@ namespace ufo {
 
   ProfileCheckRH::ProfileCheckRH
   (const ProfileConsistencyCheckParameters &options,
-   const ProfileIndices &profileIndices,
    ProfileDataHandler &profileDataHandler,
    ProfileCheckValidator &profileCheckValidator)
-    : ProfileCheckBase(options, profileIndices, profileDataHandler, profileCheckValidator)
+    : ProfileCheckBase(options, profileDataHandler, profileCheckValidator)
   {}
 
   void ProfileCheckRH::runCheck()
   {
     oops::Log::debug() << " Relative humidity check" << std::endl;
 
-    const int numLevelsToCheck = profileIndices_.getNumLevelsToCheck();
+    const int numProfileLevels = profileDataHandler_.getNumProfileLevels();
     const std::vector <float> &pressures =
        profileDataHandler_.get<float>(ufo::VariableNames::obs_air_pressure);
     const std::vector <float> &tObs =
@@ -75,17 +74,17 @@ namespace ufo {
     float PTrop = 0.0;  // Tropopause pressure level
     int NLowP = 0;  // Number of RH reports above 100 hPa
     float RHDLowP = 0.0;  // Mean RH O-B above 100 hPa
-    Press_.assign(numLevelsToCheck, 0.0);
-    Temp_.assign(numLevelsToCheck, 0.0);
-    rh_.assign(numLevelsToCheck, 0.0);
-    td_.assign(numLevelsToCheck, 0.0);
-    tbk_.assign(numLevelsToCheck, 0.0);
-    rhbk_.assign(numLevelsToCheck, 0.0);
-    FlagH_.assign(numLevelsToCheck, 0);
-    Indx_.assign(numLevelsToCheck, -1);
+    Press_.assign(numProfileLevels, 0.0);
+    Temp_.assign(numProfileLevels, 0.0);
+    rh_.assign(numProfileLevels, 0.0);
+    td_.assign(numProfileLevels, 0.0);
+    tbk_.assign(numProfileLevels, 0.0);
+    rhbk_.assign(numProfileLevels, 0.0);
+    FlagH_.assign(numProfileLevels, 0);
+    Indx_.assign(numProfileLevels, -1);
 
     float Tmin = options_.RHCheck_TminInit.value();
-    for (int jlev = 0; jlev < numLevelsToCheck; ++jlev) {
+    for (int jlev = 0; jlev < numProfileLevels; ++jlev) {
       if (tFlags[jlev] & ufo::MetOfficeQCFlags::Profile::TropopauseFlag) {
         PTrop = pressures[jlev] * 0.01;
       }

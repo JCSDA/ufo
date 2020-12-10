@@ -127,8 +127,15 @@ class PoissonDiskThinningParameters : public oops::Parameters {
 
   // Observation categories
 
-  /// Variable storing integer-valued IDs associated with observations. Observations belonging
-  /// to different categories are thinned separately.
+  /// A string-valued or integer-valued variable. Observations with different values of that
+  /// variable will be thinned separately.
+  ///
+  /// If not set and observations were grouped into records when the observation space was
+  /// constructed, observations from each record will be thinned separately. If not set and
+  /// observations were not grouped into records, all observations will be thinned together.
+  ///
+  /// Note: the variable used to group observations into records can be set with the
+  /// \c obs space.obsdatain.obsgrouping.group variable YAML option.
   oops::OptionalParameter<Variable> categoryVariable{"category_variable", this};
 
   // Selection of observations to retain

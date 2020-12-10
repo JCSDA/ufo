@@ -1,60 +1,61 @@
 window begin: 2018-04-14T20:00:00Z
 window end: 2018-04-15T03:00:00Z
 
-obs space:
-  name: amsua_n19
-  obsdatain:
-    obsfile: Data/ioda/testinput_tier_1/amsua_n19_obs_2018041500_m_qc.nc4
-  simulated variables: [brightness_temperature]
-  channels: &all_channels 1-15 
-# can have GeoVaLs section like below
-geovals:
-  filename: Data/ufo/testinput_tier_1/amsua_n19_geoval_2018041500_m_qc.nc4
-# can have ObsDiag section like below
-obs diagnostics:
-  filename: Data/ufo/testinput_tier_1/amsua_n19_obsdiag_2018041500_m_qc.nc4
-obs function:
-  name: HydrometeorCheckAMSUA@ObsFunction 
-  channels: *all_channels
-  options:
+observations:
+- obs space:
+    name: amsua_n19
+    obsdatain:
+      obsfile: Data/ioda/testinput_tier_1/amsua_n19_obs_2018041500_m_qc.nc4
+    simulated variables: [brightness_temperature]
+    channels: &all_channels 1-15 
+  # can have GeoVaLs section like below
+  geovals:
+    filename: Data/ufo/testinput_tier_1/amsua_n19_geoval_2018041500_m_qc.nc4
+  # can have ObsDiag section like below
+  obs diagnostics:
+    filename: Data/ufo/testinput_tier_1/amsua_n19_obsdiag_2018041500_m_qc.nc4
+  obs function:
+    name: HydrometeorCheckAMSUA@ObsFunction 
     channels: *all_channels
-    test_biasterm: GsiObsBiasTerm
-    test_bias: GsiObsBias
-    test_hofx: GsiHofX
-    obserr_clearsky: [ 2.500, 2.200, 2.000, 0.550, 0.300,
-                       0.230, 0.230, 0.250, 0.250, 0.350,
-                       0.400, 0.550, 0.800, 3.000, 3.500]
-    clwret_function:
-      name: CLWRetMW@ObsFunction
-      options:
-        clwret_ch238: 1
-        clwret_ch314: 2
-        clwret_types: [ObsValue]
-        test_bias: GsiObsBias
-    obserr_function:
-      name: ObsErrorModelRamp@ObsFunction
+    options:
       channels: *all_channels
-      options:
+      test_biasterm: GsiObsBiasTerm
+      test_bias: GsiObsBias
+      test_hofx: GsiHofX
+      obserr_clearsky: [ 2.500, 2.200, 2.000, 0.550, 0.300,
+                         0.230, 0.230, 0.250, 0.250, 0.350,
+                         0.400, 0.550, 0.800, 3.000, 3.500]
+      clwret_function:
+        name: CLWRetMW@ObsFunction
+        options:
+          clwret_ch238: 1
+          clwret_ch314: 2
+          clwret_types: [ObsValue]
+          test_bias: GsiObsBias
+      obserr_function:
+        name: ObsErrorModelRamp@ObsFunction
         channels: *all_channels
-        xvar:
-          name: CLWRetSymmetricMW@ObsFunction
-          options:
-            clwret_ch238: 1
-            clwret_ch314: 2
-            clwret_types: [ObsValue, GsiHofX]
-            test_bias: GsiObsBias
-            bias_application: GsiHofX
-        x0:    [ 0.050,  0.030,  0.030,  0.020,  0.000,
-                 0.100,  0.000,  0.000,  0.000,  0.000,
-                 0.000,  0.000,  0.000,  0.000,  0.030]
-        x1:    [ 0.600,  0.450,  0.400,  0.450,  1.000,
-                 1.500,  0.000,  0.000,  0.000,  0.000,
-                 0.000,  0.000,  0.000,  0.000,  0.200]
-        err0:  [ 2.500,  2.200,  2.000,  0.550,  0.300,
-                 0.230,  0.230,  0.250,  0.250,  0.350,
-                 0.400,  0.550,  0.800,  3.000,  3.500]
-        err1:  [20.000, 18.000, 12.000,  3.000,  0.500,
-                 0.300,  0.230,  0.250,  0.250,  0.350,
-                 0.400,  0.550,  0.800,  3.000, 18.000]
-  variables: [Hydrometeor_Affected_Channels]
-  tolerance: 1.0e-6
+        options:
+          channels: *all_channels
+          xvar:
+            name: CLWRetSymmetricMW@ObsFunction
+            options:
+              clwret_ch238: 1
+              clwret_ch314: 2
+              clwret_types: [ObsValue, GsiHofX]
+              test_bias: GsiObsBias
+              bias_application: GsiHofX
+          x0:    [ 0.050,  0.030,  0.030,  0.020,  0.000,
+                   0.100,  0.000,  0.000,  0.000,  0.000,
+                   0.000,  0.000,  0.000,  0.000,  0.030]
+          x1:    [ 0.600,  0.450,  0.400,  0.450,  1.000,
+                   1.500,  0.000,  0.000,  0.000,  0.000,
+                   0.000,  0.000,  0.000,  0.000,  0.200]
+          err0:  [ 2.500,  2.200,  2.000,  0.550,  0.300,
+                   0.230,  0.230,  0.250,  0.250,  0.350,
+                   0.400,  0.550,  0.800,  3.000,  3.500]
+          err1:  [20.000, 18.000, 12.000,  3.000,  0.500,
+                   0.300,  0.230,  0.250,  0.250,  0.350,
+                   0.400,  0.550,  0.800,  3.000, 18.000]
+    variables: [Hydrometeor_Affected_Channels]
+    tolerance: 1.0e-6

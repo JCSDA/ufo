@@ -24,6 +24,7 @@
 #include "oops/util/IsAnyPointInVolumeInterior.h"
 #include "oops/util/Logger.h"
 #include "ufo/filters/getScalarOrFilterData.h"
+#include "ufo/filters/ObsAccessor.h"
 #include "ufo/filters/PoissonDiskThinningParameters.h"
 #include "ufo/utils/Constants.h"
 #include "ufo/utils/RecursiveSplitter.h"
@@ -137,6 +138,9 @@ struct PoissonDiskThinning::ObsData
   boost::optional<std::vector<util::DateTime>> times;
 
   boost::optional<std::vector<int>> priorities;
+
+  // Total number of observations held by all MPI tasks
+  size_t totalNumObs = 0;
 };
 
 PoissonDiskThinning::PoissonDiskThinning(ioda::ObsSpace & obsdb,
@@ -158,20 +162,36 @@ PoissonDiskThinning::~PoissonDiskThinning()
 void PoissonDiskThinning::applyFilter(const std::vector<bool> & apply,
                                       const Variables & filtervars,
                                       std::vector<std::vector<bool>> & flagged) const {
-  const std::vector<size_t> validObsIds = getValidObservationIds(apply);
+  ObsAccessor obsAccessor = createObsAccessor();
 
-  if (validObsIds.empty()) {
-    return;
-  }
+  const std::vector<size_t> validObsIds = getValidObservationIds(apply, obsAccessor);
 
   int numSpatialDims, numNonspatialDims;
-  ObsData obsData = getObsData(numSpatialDims, numNonspatialDims);
+  ObsData obsData = getObsData(obsAccessor, numSpatialDims, numNonspatialDims);
 
-  std::vector<bool> isThinned(apply.size(), false);
+  std::vector<bool> isThinned(obsData.totalNumObs, false);
+
+  if (options_->shuffle) {
+    // If the same observations will be processed on multiple ranks, they must use random number
+    // generators seeded with the same value because they need to reject the same observations. If
+    // all ranks process disjoint sets of observations, synchronisation of random number generators
+    // isn't necessary (and in fact somewhat undesirable). The sets of observations processed by
+    // different ranks will be disjoint if both of the following conditions are met:
+    // * the category_variable option is set to the variable used previously to split the
+    //   observation space into records
+    // * each record is held on a single rank only (i.e. the observation space isn't using the
+    //   InefficientDistribution).
+    // Unfortunately the second condition can't be checked without breaking the encapsulation
+    // of ioda::Distribution (and reintroducing the isDistributed() method).
+    //
+    // So to stay on the safe side we synchronise the random number generators whenever the shuffle
+    // option is selected.
+    synchroniseRandomNumberGenerators(obsdb_.comm());
+  }
 
   // Thin points from each category separately.
-  RecursiveSplitter categorySplitter(validObsIds.size());
-  groupObservationsByCategory(validObsIds, categorySplitter);
+  RecursiveSplitter categorySplitter =
+      obsAccessor.splitObservationsIntoIndependentGroups(validObsIds);
   for (auto categoryGroup : categorySplitter.multiElementGroups()) {
     std::vector<size_t> obsIdsInCategory;
     for (size_t validObsIndex : categoryGroup) {
@@ -181,74 +201,68 @@ void PoissonDiskThinning::applyFilter(const std::vector<bool> & apply,
     // Within each category, sort points by descending priority and then (if requested)
     // randomly shuffle points of equal priority.
     RecursiveSplitter prioritySplitter(obsIdsInCategory.size());
-    groupObservationsByPriority(obsIdsInCategory, prioritySplitter);
-    if (options_->shuffle) {
-      if (options_->randomSeed.value() != boost::none)
-        prioritySplitter.shuffleGroups(*options_->randomSeed.value());
-      else
-        prioritySplitter.shuffleGroups();
-    }
+    groupObservationsByPriority(obsIdsInCategory, obsAccessor, prioritySplitter);
+    if (options_->shuffle)
+      prioritySplitter.shuffleGroups();
 
     // Select points to retain within the category.
     thinCategory(obsData, obsIdsInCategory, prioritySplitter, numSpatialDims, numNonspatialDims,
                  isThinned);
   }
 
-  flagThinnedObservations(isThinned, flagged);
+  obsAccessor.flagRejectedObservations(isThinned, flagged);
 
   if (filtervars.size() != 0) {
     oops::Log::trace() << "PoissonDiskThinning: flagged? = " << flagged[0] << std::endl;
   }
 }
 
-PoissonDiskThinning::ObsData PoissonDiskThinning::getObsData(int &numSpatialDims,
-                                                             int &numNonspatialDims) const
+ObsAccessor PoissonDiskThinning::createObsAccessor() const {
+  if (options_->categoryVariable.value() != boost::none) {
+    return ObsAccessor::toObservationsSplitIntoIndependentGroupsByVariable(
+          obsdb_, *options_->categoryVariable.value());
+  } else {
+    return ObsAccessor::toAllObservations(obsdb_);
+  }
+}
+
+PoissonDiskThinning::ObsData PoissonDiskThinning::getObsData(
+    const ObsAccessor &obsAccessor, int &numSpatialDims, int &numNonspatialDims) const
 {
   ObsData obsData;
 
   numSpatialDims = 0;
   numNonspatialDims = 0;
 
-  {
-    obsData.minHorizontalSpacings = options_->minHorizontalSpacing.value();
-    if (obsData.minHorizontalSpacings != boost::none) {
-      validateSpacings(*obsData.minHorizontalSpacings, "min_horizontal_spacing");
-      obsData.latitudes.emplace(obsdb_.nlocs());
-      obsData.longitudes.emplace(obsdb_.nlocs());
-      obsdb_.get_db("MetaData", "latitude", *obsData.latitudes);
-      obsdb_.get_db("MetaData", "longitude", *obsData.longitudes);
-      numSpatialDims = 3;
-    }
+  obsData.minHorizontalSpacings = options_->minHorizontalSpacing.value();
+  if (obsData.minHorizontalSpacings != boost::none) {
+    validateSpacings(*obsData.minHorizontalSpacings, "min_horizontal_spacing");
+    obsData.latitudes = obsAccessor.getFloatVariableFromObsSpace("MetaData", "latitude");
+    obsData.longitudes = obsAccessor.getFloatVariableFromObsSpace("MetaData", "longitude");
+    numSpatialDims = 3;
   }
 
-  {
-    obsData.minVerticalSpacings = options_->minVerticalSpacing.value();
-    if (obsData.minVerticalSpacings != boost::none) {
-      validateSpacings(*obsData.minVerticalSpacings, "min_vertical_spacing");
-      obsData.pressures.emplace(obsdb_.nlocs());
-      obsdb_.get_db("MetaData", "air_pressure", *obsData.pressures);
-      ++numNonspatialDims;
-    }
+  obsData.minVerticalSpacings = options_->minVerticalSpacing.value();
+  if (obsData.minVerticalSpacings != boost::none) {
+    validateSpacings(*obsData.minVerticalSpacings, "min_vertical_spacing");
+    obsData.pressures = obsAccessor.getFloatVariableFromObsSpace("MetaData", "air_pressure");
+    ++numNonspatialDims;
   }
 
-  {
-    obsData.minTimeSpacings = options_->minTimeSpacing.value();
-    if (obsData.minTimeSpacings != boost::none) {
-      validateSpacings(*obsData.minTimeSpacings, "min_time_spacing");
-      obsData.times.emplace(obsdb_.nlocs());
-      obsdb_.get_db("MetaData", "datetime", *obsData.times);
-      ++numNonspatialDims;
-    }
+  obsData.minTimeSpacings = options_->minTimeSpacing.value();
+  if (obsData.minTimeSpacings != boost::none) {
+    validateSpacings(*obsData.minTimeSpacings, "min_time_spacing");
+    obsData.times = obsAccessor.getDateTimeVariableFromObsSpace("MetaData", "datetime");
+    ++numNonspatialDims;
   }
 
-  {
-    const boost::optional<Variable> priorityVariable = options_->priorityVariable;
-    if (priorityVariable != boost::none) {
-      obsData.priorities.emplace(obsdb_.nlocs());
-      obsdb_.get_db(priorityVariable.get().group(), priorityVariable.get().variable(),
-                    *obsData.priorities);
-    }
+  const boost::optional<Variable> priorityVariable = options_->priorityVariable;
+  if (priorityVariable != boost::none) {
+    obsData.priorities = obsAccessor.getIntVariableFromObsSpace(
+          priorityVariable.get().group(), priorityVariable.get().variable());
   }
+
+  obsData.totalNumObs = obsAccessor.totalNumObservations();
 
   return obsData;
 }
@@ -276,41 +290,52 @@ void PoissonDiskThinning::validateSpacings(
 }
 
 std::vector<size_t> PoissonDiskThinning::getValidObservationIds(
-    const std::vector<bool> & apply) const {
-  std::vector<size_t> validObsIds;
-  for (size_t obsId = 0; obsId < apply.size(); ++obsId)
-    if (apply[obsId] && (*flags_)[0][obsId] == QCflags::pass)
-      validObsIds.push_back(obsId);
+    const std::vector<bool> & apply,
+    const ObsAccessor &obsAccessor) const {
+  std::vector<size_t> validObsIds = obsAccessor.getValidObservationIds(apply, *flags_);
+
+  if (!options_->shuffle) {
+    // The user wants to process observations in fixed (non-random) order. Ensure the filter
+    // produces the same results regardless of the number of MPI ranks by ordering the observations
+    // to be processed as if we were running in serial: by record ID.
+    const std::vector<size_t> recordIds = obsAccessor.getRecordIds();
+    std::stable_sort(validObsIds.begin(), validObsIds.end(),
+                     [&recordIds](size_t obsIdA, size_t obsIdB)
+                     { return recordIds[obsIdA] < recordIds[obsIdB]; });
+  }
+
   return validObsIds;
 }
 
-void PoissonDiskThinning::groupObservationsByCategory(
-    const std::vector<size_t> &validObsIds,
-    RecursiveSplitter &splitter) const {
-  boost::optional<Variable> categoryVariable = options_->categoryVariable;
-  if (categoryVariable == boost::none)
-    return;
+void PoissonDiskThinning::synchroniseRandomNumberGenerators(const eckit::mpi::Comm &comm) const
+{
+  const size_t rootRank = 0;
 
-  ioda::ObsDataVector<int> obsDataVector(obsdb_, categoryVariable.get().variable(),
-                                         categoryVariable.get().group());
-  const ioda::ObsDataRow<int> &category = obsDataVector[0];
+  size_t seed;
+  if (options_->randomSeed.value() != boost::none) {
+    seed = *options_->randomSeed.value();
+  } else {
+    if (comm.rank() == rootRank)
+      // Perhaps oops could provide a function returning this default seed.
+      seed = static_cast<std::uint32_t>(std::time(nullptr));
+    comm.broadcast(seed, rootRank);
+  }
 
-  std::vector<int> validObsCategories(validObsIds.size());
-  for (size_t validObsIndex = 0; validObsIndex < validObsIds.size(); ++validObsIndex)
-    validObsCategories[validObsIndex] = category[validObsIds[validObsIndex]];
-  splitter.groupBy(validObsCategories);
+  RecursiveSplitter splitter(1);
+  splitter.setSeed(seed, true /* force? */);
 }
 
 void PoissonDiskThinning::groupObservationsByPriority(
     const std::vector<size_t> &validObsIds,
+    const ObsAccessor &obsAccessor,
     RecursiveSplitter &splitter) const {
   boost::optional<Variable> priorityVariable = options_->priorityVariable;
   if (priorityVariable == boost::none)
     return;
 
-  ioda::ObsDataVector<int> obsDataVector(obsdb_, priorityVariable.get().variable(),
-                                         priorityVariable.get().group());
-  const ioda::ObsDataRow<int> &priority = obsDataVector[0];
+  // TODO(wsmigaj): reuse the priority vector from obsData.
+  std::vector<int> priority = obsAccessor.getIntVariableFromObsSpace(
+        priorityVariable.get().group(), priorityVariable.get().variable());
 
   auto reverse = [](int i) {
       return -i - std::numeric_limits<int>::lowest() + std::numeric_limits<int>::max();
@@ -440,15 +465,6 @@ std::array<float, numDims> PoissonDiskThinning::getExclusionVolumeSemiAxes(
   }
 
   return semiAxes;
-}
-
-void PoissonDiskThinning::flagThinnedObservations(
-    const std::vector<bool> & isThinned,
-    std::vector<std::vector<bool>> & flagged) const {
-  for (std::vector<bool> & variableFlagged : flagged)
-    for (size_t obsId = 0; obsId < isThinned.size(); ++obsId)
-      if (isThinned[obsId])
-        variableFlagged[obsId] = true;
 }
 
 void PoissonDiskThinning::print(std::ostream & os) const {
