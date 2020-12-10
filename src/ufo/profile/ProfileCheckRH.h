@@ -15,7 +15,6 @@
 #include "ufo/profile/ProfileCheckBase.h"
 #include "ufo/profile/ProfileCheckValidator.h"
 #include "ufo/profile/ProfileDataHandler.h"
-#include "ufo/profile/ProfileIndices.h"
 
 namespace ufo {
   class ProfileConsistencyCheckParameters;
@@ -30,7 +29,6 @@ namespace ufo {
   class ProfileCheckRH : public ProfileCheckBase {
    public:
       ProfileCheckRH(const ProfileConsistencyCheckParameters &options,
-                     const ProfileIndices &profileIndices,
                      ProfileDataHandler &profileDataHandler,
                      ProfileCheckValidator &profileCheckValidator);
 

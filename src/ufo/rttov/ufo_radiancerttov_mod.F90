@@ -93,8 +93,10 @@ contains
   end subroutine ufo_radiancerttov_delete
 
   ! ------------------------------------------------------------------------------
-  subroutine ufo_radiancerttov_simobs(self, geovals, obss, nvars, nlocs, hofx, hofxdiags)
+  subroutine ufo_radiancerttov_simobs(self, geovals, obss, nvars, nlocs, &
+                                      hofx, hofxdiags, ob_info)
     use fckit_mpi_module,   only: fckit_mpi_comm
+    use ufo_rttovonedvarcheck_ob_mod
 
     implicit none
 
@@ -105,6 +107,7 @@ contains
 
     real(c_double),        intent(inout)    :: hofx(nvars,nlocs)
     type(ufo_geovals),     intent(inout)    :: hofxdiags    !non-h(x) diagnostics
+    type(ufo_rttovonedvarcheck_ob), optional, intent(inout) :: ob_info
 
     real(c_double)                          :: missing
     type(fckit_mpi_comm)                    :: f_comm
@@ -122,8 +125,6 @@ contains
 
     logical                                 :: jacobian_needed
     logical, allocatable                    :: skip_profiles(:)
-
-    logical                                 :: obs_info
 
     logical                                 :: layer_quantities
 
@@ -161,7 +162,7 @@ contains
     ! Note this sets jacobian_needed
     !!   jacobian var -->     <ystr>_jacobian_<xstr>_<chstr>
     !!   non-jacobian var --> <ystr>_<chstr>
-   call parse_hofxdiags(hofxdiags, jacobian_needed) 
+    call parse_hofxdiags(hofxdiags, jacobian_needed)
 
     Sensor_Loop:do i_inst = 1, self % conf % nSensors
 
@@ -177,8 +178,13 @@ contains
 
       ! keep journal of which profiles have no obs data these will be skipped
       allocate(Skip_Profiles(nprofiles))
-      Skip_Profiles(:) = .false.
-      call ufo_rttov_skip_profiles(nProfiles,nchan_inst,self%channels,obss,Skip_Profiles)
+      if (present(ob_info)) then
+        Skip_Profiles(:) = .false.
+      else
+        ! keep journal of which profiles have no obs data these will be skipped
+        Skip_Profiles(:) = .false.
+        call ufo_rttov_skip_profiles(nProfiles,nchan_inst,self%channels,obss,Skip_Profiles)
+      end if
 
       ! Determine the total number of radiances to simulate (nchan_sim).
       ! In this example we simulate all specified channels for each profile, but
@@ -233,10 +239,9 @@ contains
         !Assign the data from the GeoVaLs
         !--------------------------------
         
-        obs_info = .false. ! this will be replaced by an optional structure coming from 1DVar
-        if(obs_info) then
-          call load_atm_data_rttov(geovals,obss,self % RTprof % profiles,prof_start,self % conf,layer_quantities,obs_info=obs_info)
-          call load_geom_data_rttov(obss,self % RTprof % profiles,prof_start,obs_info=obs_info)
+        if(present(ob_info)) then
+          call load_atm_data_rttov(geovals,obss,self % RTprof % profiles,prof_start,self % conf,layer_quantities,ob_info=ob_info)
+          call load_geom_data_rttov(obss,self % RTprof % profiles,prof_start,ob_info=ob_info)
         else
           call load_atm_data_rttov(geovals,obss,self % RTprof % profiles,prof_start,self%conf,layer_quantities)
           call load_geom_data_rttov(obss,self % RTprof % profiles,prof_start)
@@ -266,6 +271,14 @@ contains
         ! --------------------------------------------------------------------------
 
         if (jacobian_needed) then
+
+          ! Inintialize the K-matrix INPUT so that the results are dTb/dx
+          ! -------------------------------------------------------------
+          self % RTprof % emissivity_k(:) % emis_out = 0
+          self % RTprof % emissivity_k(:) % emis_in = 0
+          self % RTprof % emissivity(:) % emis_out = 0
+          self % RTprof % radiance_k % bt(:) = 1
+          self % RTprof % radiance_k % total(:) = 1
 
           call rttov_k(                              &
             errorstatus,                             &! out   error flag

@@ -1,0 +1,20 @@
+window begin: 2018-04-14T21:00:00Z
+window end: 2018-04-15T03:00:00Z
+
+observations:
+- obs operator:
+    name: GnssroBndROPP1D
+    obs options:
+  obs space:
+    name: GnssroBnd
+    obsdatain:
+      obsfile: Data/ioda/testinput_tier_1/gnssro_obs_2018041500_m.nc4
+    simulated variables: [bending_angle]
+  geovals:
+    filename: Data/ufo/testinput_tier_1/gnssro_geoval_2018041500_m.nc4
+  obs filters:
+  - filter: Background Check
+    filter variables:
+    - name: bending_angle
+    threshold: 3.0
+  passedBenchmark: 149

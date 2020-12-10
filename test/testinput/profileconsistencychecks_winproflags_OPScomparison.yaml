@@ -1,0 +1,22 @@
+#
+#=== Checking wind profiler flags: comparison with OPS values ===#
+#
+
+Sondes:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Radiosonde
+    obsdatain:
+      obsfile: Data/ioda/testinput_tier_1/met_office_profile_consistency_checks_winproflags.nc4
+      obsgrouping:
+        group variable: "station_id"
+        #Sorting is not performed for this test in order to ensure exact correspondence with OPS
+    simulated variables: [eastward_wind]
+  obs diagnostics:
+  ProfileConsistencyChecks:
+    Checks: ["Basic", "WinProFlags"]
+    compareWithOPS: true
+    flagBasicChecksFail: true
+    PrintStationID: true
+    Comparison_Tol: 0.1

@@ -882,7 +882,7 @@ SUBROUTINE load_aerosol_data(n_profiles,n_layers,geovals,&
       INTEGER, DIMENSION(nseas_bins), PARAMETER  :: seas_types=[&
            SEASALT_SSAM_AEROSOL,SEASALT_SSCM1_AEROSOL,SEASALT_SSCM2_AEROSOL,SEASALT_SSCM3_AEROSOL]
 
-      REAL(kind_real), DIMENSION(n_layers) :: ugkg_kgm2
+      REAL(kind_real), DIMENSION(n_layers) :: layer_factors
       
       INTEGER :: i,k,m
 
@@ -890,7 +890,7 @@ SUBROUTINE load_aerosol_data(n_profiles,n_layers,geovals,&
 
       DO m=1,n_profiles
 
-         CALL calculate_aero_layer_factor(atm(m),ugkg_kgm2)
+         CALL calculate_aero_layer_factor(atm(m),layer_factors)
  
          DO i=1,n_aerosols_gocart_default
 
@@ -898,10 +898,10 @@ SUBROUTINE load_aerosol_data(n_profiles,n_layers,geovals,&
             CALL ufo_geovals_get_var(geovals,varname, geoval)
 
             atm(m)%aerosol(i)%Concentration(1:n_layers)=&
-                 &MAX(geoval%vals(:,m)*ugkg_kgm2,aerosol_concentration_minvalue_layer)
+                 &MAX(geoval%vals(:,m)*layer_factors,aerosol_concentration_minvalue_layer)
 
-            SELECT CASE ( TRIM(varname))
-            CASE ('sulf')
+            SELECT CASE (TRIM(varname))
+            CASE (var_sulfate)
                atm(m)%aerosol(i)%type  = SULFATE_AEROSOL
                DO k=1,n_layers
                   atm(m)%aerosol(i)%effective_radius(k)=&
@@ -909,11 +909,11 @@ SUBROUTINE load_aerosol_data(n_profiles,n_layers,geovals,&
                        &rh(k,m))
                ENDDO
 
-            CASE ('bc1')
+            CASE (var_bcphobic)
                atm(m)%aerosol(i)%type  = BLACK_CARBON_AEROSOL
                atm(m)%aerosol(i)%effective_radius(:)=&
                     &AeroC%Reff(1,atm(m)%aerosol(i)%type)
-            CASE ('bc2')
+            CASE (var_bcphilic)
                atm(m)%aerosol(i)%type  = BLACK_CARBON_AEROSOL
                DO k=1,n_layers
                   atm(m)%aerosol(i)%effective_radius(k)=&
@@ -921,11 +921,11 @@ SUBROUTINE load_aerosol_data(n_profiles,n_layers,geovals,&
                        &rh(k,m))
                ENDDO
 
-            CASE ('oc1')
+            CASE (var_ocphobic)
                atm(m)%aerosol(i)%type  = ORGANIC_CARBON_AEROSOL
                atm(m)%aerosol(i)%effective_radius(:)=&
                     &AeroC%Reff(1,atm(m)%aerosol(i)%type)
-            CASE ('oc2')
+            CASE (var_ocphilic)
                atm(m)%aerosol(i)%type  = ORGANIC_CARBON_AEROSOL
                DO k=1,n_layers
                   atm(m)%aerosol(i)%effective_radius(k)=&
@@ -933,44 +933,44 @@ SUBROUTINE load_aerosol_data(n_profiles,n_layers,geovals,&
                        &rh(k,m))
                ENDDO
 
-            CASE ('dust1')
+            CASE (var_du001)
                atm(m)%aerosol(i)%type  = DUST_AEROSOL
                atm(m)%aerosol(i)%effective_radius(:)=dust_radii(1)
-            CASE ('dust2')
+            CASE (var_du002)
                atm(m)%aerosol(i)%type  = DUST_AEROSOL
                atm(m)%aerosol(i)%effective_radius(:)=dust_radii(2)
-            CASE ('dust3')
+            CASE (var_du003)
                atm(m)%aerosol(i)%type  = DUST_AEROSOL
                atm(m)%aerosol(i)%effective_radius(:)=dust_radii(3)
-            CASE ('dust4')
+            CASE (var_du004)
                atm(m)%aerosol(i)%type  = DUST_AEROSOL
                atm(m)%aerosol(i)%effective_radius(:)=dust_radii(4)
-            CASE ('dust5')
+            CASE (var_du005)
                atm(m)%aerosol(i)%type  = DUST_AEROSOL
                atm(m)%aerosol(i)%effective_radius(:)=dust_radii(5)
 
-            CASE ('seas1')
+            CASE (var_ss001)
                atm(m)%aerosol(i)%type  = seas_types(1)
                DO k=1,n_layers
                   atm(m)%aerosol(i)%effective_radius(k)=&
                        &gocart_aerosol_size(atm(m)%aerosol(i)%type, &
                        &rh(k,m))
                ENDDO
-            CASE ('seas2')
+            CASE (var_ss002)
                atm(m)%aerosol(i)%type  = seas_types(2)
                DO k=1,n_layers
                   atm(m)%aerosol(i)%effective_radius(k)=&
                        &gocart_aerosol_size(atm(m)%aerosol(i)%type, &
                        &rh(k,m))
                ENDDO
-            CASE ('seas3')
+            CASE (var_ss003)
                atm(m)%aerosol(i)%type  = seas_types(3)
                DO k=1,n_layers
                   atm(m)%aerosol(i)%effective_radius(k)=&
                        &gocart_aerosol_size(atm(m)%aerosol(i)%type, &
                        &rh(k,m))
                ENDDO
-            CASE ('seas4')
+            CASE (var_ss004)
                atm(m)%aerosol(i)%type  = seas_types(4)
                DO k=1,n_layers
                   atm(m)%aerosol(i)%effective_radius(k)=&
@@ -1027,41 +1027,37 @@ SUBROUTINE load_aerosol_data(n_profiles,n_layers,geovals,&
 
    END SUBROUTINE assign_aerosol_names
 
-   SUBROUTINE calculate_aero_layer_factor_atm_profile(atm,ugkg_kgm2)
+   SUBROUTINE calculate_aero_layer_factor_atm_profile(atm,layer_factors)
 
      TYPE(CRTM_atmosphere_type), INTENT(in) :: atm
-     REAL(kind_real), INTENT(out) :: ugkg_kgm2(:)
+     REAL(kind_real), INTENT(out) :: layer_factors(:)
 
      INTEGER :: k
 
-!rh, ug2kg need to be from top to bottom    
-!ug2kg && hPa2Pa
-     DO k=1,SIZE(ugkg_kgm2)
-!correct for mixing ratio factor ugkg_kgm2 
+     DO k=1,SIZE(layer_factors)
+!correct for mixing ratio factor layer_factors 
 !being calculated from dry pressure, cotton eq. (2.4)
 !p_dry=p_total/(1+1.61*mixing_ratio)
-        ugkg_kgm2(k)=1.0e-9_kind_real*(atm%Level_Pressure(k)-&
+        layer_factors(k)=1e-9_kind_real*(atm%Level_Pressure(k)-&
              &atm%Level_Pressure(k-1))*100_kind_real/grav/&
              &(1_kind_real+rv_rd*atm%Absorber(k,1)*1e-3_kind_real)
      ENDDO
 
    END SUBROUTINE calculate_aero_layer_factor_atm_profile
 
-   SUBROUTINE calculate_aero_layer_factor_atm(atm,ugkg_kgm2)
+   SUBROUTINE calculate_aero_layer_factor_atm(atm,layer_factors)
 
      TYPE(CRTM_atmosphere_type), INTENT(in) :: atm(:)
-     REAL(kind_real), INTENT(out) :: ugkg_kgm2(:,:)
+     REAL(kind_real), INTENT(out) :: layer_factors(:,:)
 
      INTEGER :: k,m
 
-!rh, ug2kg need to be from top to bottom    
-!ug2kg && hPa2Pa
-     DO k=1,SIZE(ugkg_kgm2,1)
-        DO m=1,SIZE(ugkg_kgm2,2)
-!correct for mixing ratio factor ugkg_kgm2 
+     DO k=1,SIZE(layer_factors,1)
+        DO m=1,SIZE(layer_factors,2)
+!correct for mixing ratio factor layer_factors 
 !being calculated from dry pressure, cotton eq. (2.4)
 !p_dry=p_total/(1+1.61*mixing_ratio)
-           ugkg_kgm2(k,m)=1.0e-9_kind_real*(atm(m)%Level_Pressure(k)-&
+           layer_factors(k,m)=1e-9_kind_real*(atm(m)%Level_Pressure(k)-&
                 &atm(m)%Level_Pressure(k-1))*100_kind_real/grav/&
                 &(1_kind_real+rv_rd*atm(m)%Absorber(k,1)*1.e-3_kind_real)
         ENDDO

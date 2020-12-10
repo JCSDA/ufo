@@ -1,21 +1,22 @@
 window begin: 2018-04-14T20:00:00Z
 window end: 2018-04-15T03:00:00Z
 
-obs space:
-  name: atms_npp 
-  obsdatain:
-    obsfile: Data/ioda/testinput_tier_1/atms_npp_obs_2018041500_m_qc.nc4
-  simulated variables: [brightness_temperature]
-  channels: 1, 2
-geovals:
-  filename: Data/ufo/testinput_tier_1/atms_npp_geoval_2018041500_m_qc.nc4
-obs function:
-  name: CLWRetSymmetricMW@ObsFunction 
-  options:
-    clwret_ch238: 1
-    clwret_ch314: 2
-    clwret_types: [ObsValue, GsiHofX]
-    test_bias: GsiObsBias 
-    bias_application: GsiHofX
-  variables: [clw_symmetric_amount]
-  tolerance: 1.0e-8
+observations:
+- obs space:
+    name: atms_npp 
+    obsdatain:
+      obsfile: Data/ioda/testinput_tier_1/atms_npp_obs_2018041500_m_qc.nc4
+    simulated variables: [brightness_temperature]
+    channels: 1, 2
+  geovals:
+    filename: Data/ufo/testinput_tier_1/atms_npp_geoval_2018041500_m_qc.nc4
+  obs function:
+    name: CLWRetSymmetricMW@ObsFunction 
+    options:
+      clwret_ch238: 1
+      clwret_ch314: 2
+      clwret_types: [ObsValue, GsiHofX]
+      test_bias: GsiObsBias 
+      bias_application: GsiHofX
+    variables: [clw_symmetric_amount]
+    tolerance: 1.0e-8

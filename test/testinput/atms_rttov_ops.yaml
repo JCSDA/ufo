@@ -23,7 +23,7 @@ observations:
     channels: 1-22 
   geovals:
     filename: Data/ufo/testinput_tier_1/geovals_atms_20191230T0000Z_benchmark.nc4
-  rms ref: 228.50280967174939
+  rms ref: 228.54196297632672
   tolerance: 1.e-7
   linear obs operator test:
     coef TL: 1.e-4

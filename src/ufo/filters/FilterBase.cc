@@ -7,6 +7,7 @@
 
 #include "ufo/filters/FilterBase.h"
 
+#include <utility>
 #include <vector>
 
 #include "eckit/config/Configuration.h"
@@ -19,6 +20,7 @@
 #include "oops/util/Logger.h"
 
 #include "ufo/filters/actions/FilterAction.h"
+#include "ufo/filters/GenericFilterParameters.h"
 #include "ufo/filters/processWhere.h"
 #include "ufo/GeoVaLs.h"
 #include "ufo/ObsDiagnostics.h"
@@ -27,33 +29,44 @@ namespace ufo {
 
 // -----------------------------------------------------------------------------
 
-FilterBase::FilterBase(ioda::ObsSpace & os, const eckit::Configuration & config,
+FilterBase::FilterBase(ioda::ObsSpace & os, const FilterParametersBase & parameters,
                        std::shared_ptr<ioda::ObsDataVector<int> > flags,
                        std::shared_ptr<ioda::ObsDataVector<float> > obserr)
-  : obsdb_(os), config_(config), flags_(flags), obserr_(obserr),
-    allvars_(getAllWhereVariables(config_)),
+  : obsdb_(os), config_(parameters.toConfiguration()),
+    flags_(flags), obserr_(obserr),
+    allvars_(getAllWhereVariables(parameters.where)),
     filtervars_(), data_(obsdb_), prior_(false), post_(false),
-    defer_to_post_(false)
+    deferToPost_(parameters.deferToPost),
+    whereConfig_(parameters.where),
+    actionConfig_(parameters.action)
 {
   oops::Log::trace() << "FilterBase contructor" << std::endl;
   ASSERT(flags);
   ASSERT(obserr);
   data_.associate(*flags_, "QCflagsData");
   data_.associate(*obserr_, "ObsErrorData");
-  if (config_.has("filter variables")) {
+  if (parameters.filterVariables.value() != boost::none) {
   // read filter variables
-    filtervars_ += Variables(config_.getSubConfigurations("filter variables"));
+    for (const Variable &var : *parameters.filterVariables.value())
+      filtervars_ += var;
   } else {
   // if no filter variables explicitly specified, filter out all variables
     filtervars_ += Variables(obsdb_.obsvariables());
   }
-  // Defer filter to run as a post filter even if hofx not needed.
-  defer_to_post_ = config_.getBool("defer to post", false);
-  eckit::LocalConfiguration aconf;
-  config_.get("action", aconf);
-  FilterAction action(aconf);
+  FilterAction action(parameters.action);
   allvars_ += action.requiredVariables();
 }
+
+// -----------------------------------------------------------------------------
+
+FilterBase::FilterBase(ioda::ObsSpace & os, const eckit::Configuration & config,
+                       std::shared_ptr<ioda::ObsDataVector<int> > flags,
+                       std::shared_ptr<ioda::ObsDataVector<float> > obserr)
+  : FilterBase(os,
+               oops::validateAndDeserialize<GenericFilterParameters>(config),
+               std::move(flags),
+               std::move(obserr))
+{}
 
 // -----------------------------------------------------------------------------
 
@@ -67,8 +80,7 @@ void FilterBase::preProcess() {
   oops::Log::trace() << "FilterBase preProcess begin" << std::endl;
 // Cannot determine earlier when to apply filter because subclass
 // constructors add to allvars
-  if (allvars_.hasGroup("HofX") || allvars_.hasGroup("ObsDiag") ||
-      defer_to_post_ ) {
+  if (allvars_.hasGroup("HofX") || allvars_.hasGroup("ObsDiag") || deferToPost_) {
     post_ = true;
   } else {
     if (allvars_.hasGroup("GeoVaLs")) {
@@ -107,7 +119,7 @@ void FilterBase::doFilter() const {
   oops::Log::trace() << "FilterBase doFilter begin" << std::endl;
 
 // Select where the background check will apply
-  std::vector<bool> apply = processWhere(config_, data_);
+  std::vector<bool> apply = processWhere(whereConfig_, data_);
 
 // Allocate flagged obs indicator (false by default)
   const size_t nvars = filtervars_.nvars();
@@ -118,8 +130,7 @@ void FilterBase::doFilter() const {
   this->applyFilter(apply, filtervars_, flagged);
 
 // Take action
-  eckit::LocalConfiguration aconf;
-  config_.get("action", aconf);
+  eckit::LocalConfiguration aconf = actionConfig_;
   aconf.set("flag", this->qcFlag());
   FilterAction action(aconf);
   action.apply(filtervars_, flagged, data_, *flags_, *obserr_);

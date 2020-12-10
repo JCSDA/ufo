@@ -1,0 +1,35 @@
+window begin: 2020-05-01T03:00:00Z
+window end: 2020-05-01T09:00:00Z
+
+observations: 
+- obs operator:
+    name: GnssroBendMetOffice
+    obs options:
+      vert_interp_ops: true
+      pseudo_ops: true
+  obs space:
+    name: GnssroBnd
+    obsdatain:
+      obsfile: Data/ioda/testinput_tier_1/gnssro_obs_2020050106_1dvar.nc4
+    simulated variables: [bending_angle]
+  geovals:
+    filename: Data/ufo/testinput_tier_1/gnssro_geoval_2020050106_1dvar.nc4
+  obs filters:
+  - filter: Domain Check
+    where:
+    - variable:
+        name: occulting_sat_id@MetaData
+      is_in: 3, 4, 5, 42, 43, 44, 522, 523, 750, 751, 752, 753, 754, 755, 825
+    - variable:
+        name: ImpactHeight@ObsFunction
+      minvalue: 0
+      maxvalue: 60000
+  - filter: BlackList
+    where:
+    - variable:
+        name: occulting_sat_id@MetaData
+      is_in: 523
+    - variable:
+        name: ImpactHeight@ObsFunction
+      minvalue: 40000
+  passedBenchmark: 471

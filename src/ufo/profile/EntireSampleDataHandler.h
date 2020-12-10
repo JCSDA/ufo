@@ -24,6 +24,8 @@
 #include "ioda/ObsDataVector.h"
 #include "ioda/ObsSpace.h"
 
+#include "oops/util/missingValues.h"
+
 #include "ufo/profile/DataHandlerParameters.h"
 
 #include "ufo/utils/metoffice/MetOfficeQCFlags.h"
@@ -85,11 +87,7 @@ namespace ufo {
         }
 
         // If the vector contains entirely missing values, clear it.
-        T missingValue;  // Missing value for type T.
-        if (std::is_same<T, int>::value)
-          missingValue = util::missingValue(1);
-        else if (std::is_same<T, float>::value)
-          missingValue = util::missingValue(1.0f);
+        const T missingValue = util::missingValue(missingValue);  // Missing value for type T.
         bool allMissing = true;  // Signifies all elements in the vector are missing.
         for (size_t idx = 0; allMissing && idx < vec_all.size(); ++idx)
           allMissing = vec_all[idx] == missingValue;
