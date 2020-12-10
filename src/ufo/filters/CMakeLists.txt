@@ -18,8 +18,10 @@ set ( filters_files
       BackgroundCheck.h
       BlackList.cc
       BlackList.h
-      DifferenceCheck.cc
+      RatioCheck.h
+      RatioCheck.cc
       DifferenceCheck.h
+      DifferenceCheck.cc
       FilterBase.cc
       FilterBase.h
       getScalarOrFilterData.cc
