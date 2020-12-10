@@ -1,33 +1,34 @@
 window begin: 2018-04-14T20:00:00Z
 window end: 2018-04-15T03:00:00Z
 
-obs space:
-  name: mhs_n19
-  obsdatain:
-    obsfile: Data/ioda/testinput_tier_1/mhs_n19_obs_2018041500_m_qc.nc4
-  simulated variables: [brightness_temperature]
-  channels: &all_channels 1-5
-# can have GeoVaLs section like below
-geovals:
-  filename: Data/ufo/testinput_tier_1/mhs_n19_geoval_2018041500_m_qc.nc4
-# can have ObsDiag section like below
-obs diagnostics:
-  filename: Data/ufo/testinput_tier_1/mhs_n19_obsdiag_2018041500_m_qc.nc4
-obs function:
-  name: ObsErrorModelQuad@ObsFunction
-  options:
-    channels: *all_channels 
-    xvar:
-      name: SIRetSymmetricMW@ObsFunction
-      options:
-        siret_ch90: 1
-        siret_ch150: 2
-        siret_types: [ObsValue, HofX]
-        bias_application: ObsValue
-    a:    [ -1.50, -1.50, -1.50, -1.50, -1.50 ]
-    b:    [ 0.03,   0.05,  0.01,  0.03,  0.04 ]
-    err0:  [ 5.38, 4.52, 5.10, 3.42, 3.45]
-    err1:  [ 15.15, 22.62, 7.64, 10.08, 15.85]
-  variables: [ObsError]
-  channels: *all_channels
-  tolerance: 1.0e-6
+observations:
+- obs space:
+    name: mhs_n19
+    obsdatain:
+      obsfile: Data/ioda/testinput_tier_1/mhs_n19_obs_2018041500_m_qc.nc4
+    simulated variables: [brightness_temperature]
+    channels: &all_channels 1-5
+  # can have GeoVaLs section like below
+  geovals:
+    filename: Data/ufo/testinput_tier_1/mhs_n19_geoval_2018041500_m_qc.nc4
+  # can have ObsDiag section like below
+  obs diagnostics:
+    filename: Data/ufo/testinput_tier_1/mhs_n19_obsdiag_2018041500_m_qc.nc4
+  obs function:
+    name: ObsErrorModelQuad@ObsFunction
+    options:
+      channels: *all_channels 
+      xvar:
+        name: SIRetSymmetricMW@ObsFunction
+        options:
+          siret_ch90: 1
+          siret_ch150: 2
+          siret_types: [ObsValue, HofX]
+          bias_application: ObsValue
+      a:    [ -1.50, -1.50, -1.50, -1.50, -1.50 ]
+      b:    [ 0.03,   0.05,  0.01,  0.03,  0.04 ]
+      err0:  [ 5.38, 4.52, 5.10, 3.42, 3.45]
+      err1:  [ 15.15, 22.62, 7.64, 10.08, 15.85]
+    variables: [ObsError]
+    channels: *all_channels
+    tolerance: 1.0e-6

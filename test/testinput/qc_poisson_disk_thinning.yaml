@@ -27,7 +27,7 @@ observations:
     priority_variable:
       name: priority@MetaData
   passedBenchmark: 34
-  passedObservationsBenchmark:
+  passedObservationsBenchmark: &referencePassedObsIds
       - 2500
       - 2501
       - 2502
@@ -62,3 +62,57 @@ observations:
       - 7597
       - 7603
       - 7635
+# Same as above, but with records grouped by the category variable
+- obs space:
+    name: Aircraft
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/met_office_poisson_disk_thinning.nc4
+      obsgrouping:
+        group variable: "scan_index"
+    simulated variables: [air_temperature]
+  obs filters:
+  - filter: Domain Check
+    filter variables:
+    - name: air_temperature
+    where:
+    - variable:
+        name: is_superob@MetaData
+      is_in: 1
+  - filter: Poisson Disk Thinning
+    variables: [air_temperature]
+    min_horizontal_spacing: { "0": 2000, "1": 1000 }
+    exclusion_volume_shape: ellipsoid
+    shuffle: false # visit observations in the same order as the Met Office function did
+    category_variable:
+      name: scan_index@MetaData
+    priority_variable:
+      name: priority@MetaData
+  passedBenchmark: 34
+  passedObservationsBenchmark: *referencePassedObsIds
+# Same as above, but with records grouped by something else than the category variable
+- obs space:
+    name: Aircraft
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/met_office_poisson_disk_thinning.nc4
+      obsgrouping:
+        group variable: "priority"
+    simulated variables: [air_temperature]
+  obs filters:
+  - filter: Domain Check
+    filter variables:
+    - name: air_temperature
+    where:
+    - variable:
+        name: is_superob@MetaData
+      is_in: 1
+  - filter: Poisson Disk Thinning
+    variables: [air_temperature]
+    min_horizontal_spacing: { "0": 2000, "1": 1000 }
+    exclusion_volume_shape: ellipsoid
+    shuffle: false # visit observations in the same order as the Met Office function did
+    category_variable:
+      name: scan_index@MetaData
+    priority_variable:
+      name: priority@MetaData
+  passedBenchmark: 34
+  passedObservationsBenchmark: *referencePassedObsIds

@@ -141,7 +141,7 @@ CONTAINS
 !correct for mixing ratio factor ugkg_kgm2
 !being calculated from dry pressure, cotton eq. (2.4)
 !p_dry=p_total/(1+r_v/r_d*mixing_ratio)
-          factors(k,m)=1.e-9_kind_real*(pint(k+1,m)-pint(k,m))/grav/&
+          factors(k,m)=1e-9_kind_real*(pint(k+1,m)-pint(k,m))/grav/&
                &(1_kind_real+rv_rd*sphum(k,m)/(1_kind_real-sphum(k,m)))
        ENDDO
     ENDDO

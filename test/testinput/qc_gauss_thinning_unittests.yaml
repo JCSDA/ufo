@@ -13,7 +13,6 @@ Horizontal mesh 20000:
       obs errors: [1.0]
   air_pressures: [ 100000, 100000, 100000, 100000, 100000]
   GaussianThinning:
-    variables: [air_temperature]
     horizontal_mesh: 20000
     round_horizontal_bin_count_to_nearest: true
   expected_thinned_obs_indices: [1, 2, 3]
@@ -33,7 +32,6 @@ Horizontal mesh 20000, extreme longitudes, 0 to 360 degrees:
       obs errors: [1.0]
   air_pressures: [ 100000, 100000, 100000, 100000, 100000, 100000]
   GaussianThinning:
-    variables: [air_temperature]
     horizontal_mesh: 20000
     round_horizontal_bin_count_to_nearest: true
   expected_thinned_obs_indices: [0, 2, 3, 5]
@@ -53,7 +51,6 @@ Horizontal mesh 20000, extreme longitudes, -180 to 180 degrees:
       obs errors: [1.0]
   air_pressures: [ 100000, 100000, 100000, 100000, 100000, 100000]
   GaussianThinning:
-    variables: [air_temperature]
     horizontal_mesh: 20000
     round_horizontal_bin_count_to_nearest: true
   expected_thinned_obs_indices: [0, 2, 3, 5]
@@ -73,7 +70,6 @@ Horizontal mesh 20000, extreme latitudes:
       obs errors: [1.0]
   air_pressures: [ 100000, 100000, 100000, 100000, 100000]
   GaussianThinning:
-    variables: [air_temperature]
     horizontal_mesh: 20000
     round_horizontal_bin_count_to_nearest: true
   expected_thinned_obs_indices: [0, 1, 3, 4]
@@ -94,7 +90,6 @@ Horizontal mesh 10000:
       obs errors: [1.0]
   air_pressures: [1, 1, 1,  1, 1, 1,  1, 1, 1]
   GaussianThinning:
-    variables: [air_temperature]
     horizontal_mesh: 10000
     round_horizontal_bin_count_to_nearest: true
   expected_thinned_obs_indices: [0, 1, 4, 5, 7, 8]
@@ -115,7 +110,6 @@ Vertical mesh, single bin:
       obs errors: [1.0]
   air_pressures: [8, 7, 6, 5, 4, 3, 2, 1]
   GaussianThinning:
-    variables: [air_temperature]
     horizontal_mesh: -1
     vertical_mesh: 2
     vertical_min: 3
@@ -139,7 +133,6 @@ Vertical mesh, two bins:
       obs errors: [1.0]
   air_pressures: [8, 7, 6, 5, 4, 3, 2, 1]
   GaussianThinning:
-    variables: [air_temperature]
     horizontal_mesh: -1
     vertical_mesh: 2
     vertical_min: 1
@@ -163,7 +156,6 @@ Vertical mesh, two bins, all observations in single bin:
       obs errors: [1.0]
   air_pressures: [8, 7, 6, 5, 4, 3, 2, 1]
   GaussianThinning:
-    variables: [air_temperature]
     horizontal_mesh: -1
     vertical_mesh: 2
     vertical_min: 7
@@ -187,7 +179,6 @@ Thinning in time, single bin:
       obs errors: [1.0]
   air_pressures: [0, 1, 2, 3, 4, 5, 6, 7]
   GaussianThinning:
-    variables: [air_temperature]
     horizontal_mesh: -1
     vertical_mesh: -1
     time_mesh: 'PT02S'
@@ -212,7 +203,6 @@ Thinning in time, two bins:
       obs errors: [1.0]
   air_pressures: [0, 1, 2, 3, 4, 5, 6, 7]
   GaussianThinning:
-    variables: [air_temperature]
     horizontal_mesh: -1
     vertical_mesh: -1
     time_mesh: 'PT02S'
@@ -237,7 +227,6 @@ Thinning in time, two bins, all observations in single bin:
       obs errors: [1.0]
   air_pressures: [0, 1, 2, 3, 4, 5, 6, 7]
   GaussianThinning:
-    variables: [air_temperature]
     horizontal_mesh: -1
     time_mesh: 'PT02S'
     time_min:  '2010-01-01T00:04:07Z'
@@ -262,15 +251,12 @@ Vertical mesh, two bins, single category:
   air_pressures: [8, 7, 6, 5, 4, 3, 2, 1]
   category: [0, 0, 0, 0, 0, 0, 0, 0]
   GaussianThinning:
-    variables: [air_temperature]
     horizontal_mesh: -1
     vertical_mesh: 2
     vertical_min: 1
     vertical_max: 5
     category_variable:
       name: category@MetaData
-      group: MetaData
-      type: int
     distance_norm: maximum
   expected_thinned_obs_indices: [0, 1, 2, 3, 5, 7]
 
@@ -291,15 +277,12 @@ Vertical mesh, two bins, two categories:
   air_pressures: [4, 3, 4, 3, 2, 1, 2, 1]
   category: [1, 1, 0, 0, 0, 0, 1, 1]
   GaussianThinning:
-    variables: [air_temperature]
     horizontal_mesh: -1
     vertical_mesh: 2
     vertical_min: 1
     vertical_max: 5
     category_variable:
       name: category@MetaData
-      group: MetaData
-      type: int
     distance_norm: maximum
   expected_thinned_obs_indices: [1, 3, 5, 7]
 
@@ -320,15 +303,42 @@ Vertical mesh, two bins, two categories, where clause:
   air_pressures: [4, 4.4, 4, 4.3, 4.2, 4, 4.1, 4]
   category: [1, 1, 0, 0, 0, 0, 1, 1]
   GaussianThinning:
-    variables: [air_temperature]
     horizontal_mesh: -1
     vertical_mesh: 2
     vertical_min: 1
     vertical_max: 5
     category_variable:
       name: category@MetaData
-      group: MetaData
-      type: int
+    distance_norm: maximum
+    where:
+    - variable:
+        name: latitude@MetaData
+      maxvalue: 0
+  expected_thinned_obs_indices: [1, 3]
+
+Vertical mesh, two bins, two string-valued categories, where clause:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Aircraft
+    simulated variables: [air_temperature]
+    generate:
+      list:
+        lats: [1, 0, 1, 0, 0, 1, 0, 1]
+        lons: [0, 1, 2, 3, 4, 5, 6, 7]
+        datetimes: [ '2010-01-01T00:04:01Z', '2010-01-01T00:04:02Z', '2010-01-01T00:04:03Z',
+                     '2010-01-01T00:04:04Z', '2010-01-01T00:04:05Z', '2010-01-01T00:04:06Z',
+                     '2010-01-01T00:04:07Z', '2010-01-01T00:04:08Z']
+      obs errors: [1.0]
+  air_pressures: [4, 4.4, 4, 4.3, 4.2, 4, 4.1, 4]
+  string_category: ["1", "1", "0", "0", "0", "0", "1", "1"]
+  GaussianThinning:
+    horizontal_mesh: -1
+    vertical_mesh: 2
+    vertical_min: 1
+    vertical_max: 5
+    category_variable:
+      name: string_category@MetaData
     distance_norm: maximum
     where:
     - variable:
@@ -353,15 +363,12 @@ Vertical mesh, two bins, equal priorities:
   air_pressures: [8, 7, 6, 5, 4, 3, 2, 1]
   priority: [0, 0, 0, 0, 0, 0, 0, 0]
   GaussianThinning:
-    variables: [air_temperature]
     horizontal_mesh: -1
     vertical_mesh: 2
     vertical_min: 1
     vertical_max: 5
     priority_variable:
       name: priority@MetaData
-      group: MetaData
-      type: int
     distance_norm: maximum
   expected_thinned_obs_indices: [0, 1, 2, 3, 5, 7]
 
@@ -382,15 +389,12 @@ Vertical mesh, two bins, nonequal priorities:
   air_pressures: [4, 3, 4, 3, 2, 1, 2, 1]
   priority: [1, 1, 0, 0, 0, 0, 1, 1]
   GaussianThinning:
-    variables: [air_temperature]
     horizontal_mesh: -1
     vertical_mesh: 2
     vertical_min: 1
     vertical_max: 5
     priority_variable:
       name: priority@MetaData
-      group: MetaData
-      type: int
     distance_norm: maximum
   expected_thinned_obs_indices: [1, 2, 3, 4, 5, 7]
 
@@ -411,15 +415,12 @@ Vertical mesh, single bin, nonequal priorities, where clause:
   air_pressures: [4, 4.4, 4, 4.3, 4.2, 4, 4.1, 4]
   priority: [0, 0, 0, 1, 1, 0, 0, 0]
   GaussianThinning:
-    variables: [air_temperature]
     horizontal_mesh: -1
     vertical_mesh: 2
     vertical_min: 3
     vertical_max: 5
     priority_variable:
       name: priority@MetaData
-      group: MetaData
-      type: int
     distance_norm: maximum
     where:
     - variable:
@@ -448,19 +449,14 @@ Vertical mesh, single bin, two categories, nonequal priorities, where clause:
   category: [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1]
   priority: [0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0]
   GaussianThinning:
-    variables: [air_temperature]
     horizontal_mesh: -1
     vertical_mesh: 2
     vertical_min: 3
     vertical_max: 5
     category_variable:
       name: category@MetaData
-      group: MetaData
-      type: int
     priority_variable:
       name: priority@MetaData
-      group: MetaData
-      type: int
     distance_norm: maximum
     where:
     - variable:

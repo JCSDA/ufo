@@ -20,7 +20,6 @@ class TrackCheckShipDiagnostics
   typedef std::pair<ObsStatsVec, TrkStats> SingleTrackInitialCalculationResults;
   typedef std::pair<std::vector<size_t>, int> FirstIterativeRemovalInfo;
   std::vector<SingleTrackInitialCalculationResults> multipleTrackInitialCalculationResults_;
-  std::vector<ObsStatsVec> calculatedResultsSimultaneousDeferred_;
   std::vector<bool> earlyBreaks_;
   std::vector<FirstIterativeRemovalInfo> firstIterativeRemovalInfo_;
   std::vector<double> distanceSum_, distancePrevObsOmitted_, distanceCurrentObsOmitted_,
@@ -50,19 +49,6 @@ class TrackCheckShipDiagnostics
   /// deemed not worth checking.
   const std::vector<bool> &getEarlyBreaks() const {
     return earlyBreaks_;
-  }
-
-  /// \brief Stores the recalculations of values after deferring simultaneous observations.
-  ///
-  /// Does not store counter values, because those are not updated after the first iteration.
-  void storeCalculatedResultsSimultaneousDeferred(ObsStatsVec obsStatsVec) {
-    calculatedResultsSimultaneousDeferred_.push_back(obsStatsVec);
-  }
-
-  /// \brief Returns the recalculated values calculated after deferring simultaneous
-  /// observations
-  const std::vector<ObsStatsVec> &getCalculatedResultsSimultaneousDeferred() const {
-    return calculatedResultsSimultaneousDeferred_;
   }
 
   /// \brief Stores the observation(s) removed on the first iteration of the main removal loop.

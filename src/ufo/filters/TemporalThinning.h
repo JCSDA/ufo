@@ -35,6 +35,7 @@ namespace util {
 
 namespace ufo {
 
+class ObsAccessor;
 class RecursiveSplitter;
 class TemporalThinningParameters;
 
@@ -58,17 +59,13 @@ class TemporalThinning : public FilterBase,
                    std::vector<std::vector<bool>> &) const override;
   int qcFlag() const override { return QCflags::thinned; }
 
-  std::vector<bool> identifyThinnedObservations(const std::vector<bool> &apply) const;
+  ObsAccessor createObsAccessor() const;
 
-  std::vector<size_t> getValidObservationIds(const std::vector<bool> &apply) const;
+  std::vector<bool> identifyThinnedObservations(const std::vector<bool> &apply,
+                                                const ObsAccessor &obsAccessor) const;
 
-  std::unique_ptr<ioda::ObsDataVector<int>> getObservationPriorities() const;
-
-  void groupObservationsByCategory(const std::vector<size_t> &validObsIds,
-                                   RecursiveSplitter &splitter) const;
-
-  void flagThinnedObservations(const std::vector<bool> &isThinned,
-                               std::vector<std::vector<bool>> &flagged) const;
+  boost::optional<std::vector<int>> getObservationPriorities(
+      const ObsAccessor &obsAccessor) const;
 
  private:
   std::unique_ptr<TemporalThinningParameters> options_;

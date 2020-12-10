@@ -300,17 +300,16 @@ class RecursiveSplitter
   void sortGroupsBy(Compare comp);
 
   /// \brief Randomly shuffle the elements of each equivalence class.
+  void shuffleGroups();
+
+  /// \brief Initialise the random number generator used by shuffleGroups() with a seed.
   ///
   /// \param seed
-  ///   Seed with which to initialise the random number generator used by the shuffling algorithm
-  ///   if this hasn't been done before (in a previous call to shuffleGroups() or another function
-  ///   calling util::shuffle()).
-  void shuffleGroups(unsigned int seed);
-
-  /// \brief Randomly shuffle the elements of each equivalence class.
-  ///
-  /// This overload uses the defaul seed.
-  void shuffleGroups();
+  ///   Seed with which to initialise the generator.
+  /// \param force
+  ///   If false, the seed will only be reset if the program has not made any calls to
+  ///   util::shuffle() yet.
+  void setSeed(unsigned int seed, bool force);
 
  private:
   void initializeEncodedGroups();

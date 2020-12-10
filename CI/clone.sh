@@ -18,7 +18,7 @@ org_name="$(cut -d'/' -f1 <<<$org_repo_name)"
 if [ "${branch_name}" = "develop" ] || [ "${branch_name}" = "master" ]; then
 
   echo "merging into develop or master"
-  branch_name_clone=${branch_name}
+  branch_name_clone=${branch_name_default}
   org_repo_name_clone=${org_name}
   echo "==============================================================================="
   echo "  Merge into develop or master"

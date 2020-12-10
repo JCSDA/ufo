@@ -13,17 +13,16 @@ namespace ufo {
   static ProfileCheckMaker<ProfileCheckSign> makerProfileCheckSign_("Sign");
 
   ProfileCheckSign::ProfileCheckSign(const ProfileConsistencyCheckParameters &options,
-                                     const ProfileIndices &profileIndices,
                                      ProfileDataHandler &profileDataHandler,
                                      ProfileCheckValidator &profileCheckValidator)
-    : ProfileCheckBase(options, profileIndices, profileDataHandler, profileCheckValidator)
+    : ProfileCheckBase(options, profileDataHandler, profileCheckValidator)
   {}
 
   void ProfileCheckSign::runCheck()
   {
     oops::Log::debug() << " Sign check/correction" << std::endl;
 
-    const int numLevelsToCheck = profileIndices_.getNumLevelsToCheck();
+    const int numProfileLevels = profileDataHandler_.getNumProfileLevels();
 
     const std::vector <float> &pressures =
        profileDataHandler_.get<float>(ufo::VariableNames::obs_air_pressure);
@@ -53,7 +52,7 @@ namespace ufo {
       return;
     }
 
-    for (int jlev = 0; jlev < numLevelsToCheck; ++jlev) {
+    for (int jlev = 0; jlev < numProfileLevels; ++jlev) {
       // Ignore this level if it has been flagged as rejected.
       if (tFlags[jlev] & ufo::MetOfficeQCFlags::Elem::FinalRejectFlag) continue;
       if (pressures[jlev] <= PstarBackgr[jlev] - options_.SCheck_PstarThresh.value() &&

@@ -21,6 +21,7 @@
 #include "oops/util/DateTime.h"
 #include "oops/util/Duration.h"
 #include "oops/util/Logger.h"
+#include "ufo/filters/ObsAccessor.h"
 #include "ufo/filters/TemporalThinningParameters.h"
 #include "ufo/utils/RecursiveSplitter.h"
 
@@ -320,77 +321,57 @@ TemporalThinning::~TemporalThinning()
 void TemporalThinning::applyFilter(const std::vector<bool> & apply,
                                    const Variables & filtervars,
                                    std::vector<std::vector<bool>> & flagged) const {
-  const std::vector<bool> isThinned = identifyThinnedObservations(apply);
+  ObsAccessor obsAccessor = createObsAccessor();
 
-  flagThinnedObservations(isThinned, flagged);
+  const std::vector<bool> isThinned = identifyThinnedObservations(apply, obsAccessor);
+
+  obsAccessor.flagRejectedObservations(isThinned, flagged);
 
   if (filtervars.size() != 0) {
     oops::Log::trace() << "TemporalThinning: flagged? = " << flagged[0] << std::endl;
   }
 }
 
+ObsAccessor TemporalThinning::createObsAccessor() const {
+  if (options_->categoryVariable.value() != boost::none) {
+    return ObsAccessor::toObservationsSplitIntoIndependentGroupsByVariable(
+          obsdb_, *options_->categoryVariable.value() );
+  } else if (!obsdb_.obs_group_var().empty()) {
+    // Records exist. Thin each record separately.
+    return ObsAccessor::toObservationsSplitIntoIndependentGroupsByRecordId(obsdb_);
+  } else {
+    // Records don't exist. Thin all observations together.
+    return ObsAccessor::toAllObservations(obsdb_);
+  }
+}
+
 std::vector<bool> TemporalThinning::identifyThinnedObservations(
-    const std::vector<bool> & apply) const {
-  std::vector<size_t> validObsIds = getValidObservationIds(apply);
+    const std::vector<bool> & apply,
+    const ObsAccessor &obsAccessor) const {
+  const std::vector<size_t> validObsIds = obsAccessor.getValidObservationIds(apply, *flags_);
 
-  RecursiveSplitter splitter(validObsIds.size());
-  groupObservationsByCategory(validObsIds, splitter);
+  RecursiveSplitter splitter = obsAccessor.splitObservationsIntoIndependentGroups(validObsIds);
 
-  std::vector<util::DateTime> times(obsdb_.nlocs());
-  obsdb_.get_db("MetaData", "datetime", times);
+  std::vector<util::DateTime> times = obsAccessor.getDateTimeVariableFromObsSpace(
+        "MetaData", "datetime");
   splitter.sortGroupsBy([&times, &validObsIds](size_t obsIndexA, size_t obsIndexB)
                         { return times[validObsIds[obsIndexA]] < times[validObsIds[obsIndexB]]; });
 
-  std::unique_ptr<ioda::ObsDataVector<int>> prioritiesDataVector = getObservationPriorities();
-  const ioda::ObsDataRow<int> *priorities =
-      prioritiesDataVector ? &(*prioritiesDataVector)[0] : nullptr;
+  boost::optional<std::vector<int>> priorities = getObservationPriorities(obsAccessor);
 
-  TemporalThinner thinner(validObsIds, times, priorities, splitter, *options_);
-  return thinner.identifyThinnedObservations(apply.size());
+  TemporalThinner thinner(validObsIds, times, priorities.get_ptr(), splitter, *options_);
+  return thinner.identifyThinnedObservations(times.size());
 }
 
-std::vector<size_t> TemporalThinning::getValidObservationIds(
-    const std::vector<bool> & apply) const {
-  std::vector<size_t> validObsIds;
-  for (size_t obsId = 0; obsId < apply.size(); ++obsId)
-    if (apply[obsId] && (*flags_)[0][obsId] == QCflags::pass)
-      validObsIds.push_back(obsId);
-  return validObsIds;
-}
-
-void TemporalThinning::groupObservationsByCategory(const std::vector<size_t> &validObsIds,
-                                                   RecursiveSplitter &splitter) const {
-  boost::optional<Variable> categoryVariable = options_->categoryVariable;
-  if (categoryVariable == boost::none)
-    return;
-
-  ioda::ObsDataVector<int> obsDataVector(obsdb_, categoryVariable.get().variable(),
-                                         categoryVariable.get().group());
-  ioda::ObsDataRow<int> &category = obsDataVector[0];
-
-  std::vector<int> validObsCategories(validObsIds.size());
-  for (size_t validObsIndex = 0; validObsIndex < validObsIds.size(); ++validObsIndex)
-    validObsCategories[validObsIndex] = category[validObsIds[validObsIndex]];
-  splitter.groupBy(validObsCategories);
-}
-
-std::unique_ptr<ioda::ObsDataVector<int>> TemporalThinning::getObservationPriorities() const {
-  std::unique_ptr<ioda::ObsDataVector<int>> priorities;
+boost::optional<std::vector<int>> TemporalThinning::getObservationPriorities(
+    const ObsAccessor &obsAccessor) const {
+  boost::optional<std::vector<int>> priorities;
   if (options_->priorityVariable.value() != boost::none) {
     const ufo::Variable priorityVariable = options_->priorityVariable.value().get();
-    priorities.reset(new ioda::ObsDataVector<int>(
-                       obsdb_, priorityVariable.variable(), priorityVariable.group()));
+    priorities = obsAccessor.getIntVariableFromObsSpace(priorityVariable.group(),
+                                                        priorityVariable.variable());
   }
   return priorities;
-}
-
-void TemporalThinning::flagThinnedObservations(
-    const std::vector<bool> & isThinned,
-    std::vector<std::vector<bool>> & flagged) const {
-  for (std::vector<bool> & variableFlagged : flagged)
-    for (size_t obsId = 0; obsId < isThinned.size(); ++obsId)
-       if (isThinned[obsId])
-        variableFlagged[obsId] = true;
 }
 
 void TemporalThinning::print(std::ostream & os) const {
