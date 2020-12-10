@@ -21,15 +21,8 @@
 #include "oops/util/abor1_cpp.h"
 #include "oops/util/Logger.h"
 
-#include "ufo/filters/getScalarOrFilterData.h"
 #include "ufo/filters/ProfileConsistencyCheckParameters.h"
 #include "ufo/filters/ProfileConsistencyChecks.h"
-
-#include "ufo/profile/EntireSampleDataHandler.h"
-#include "ufo/profile/ProfileChecker.h"
-#include "ufo/profile/ProfileCheckValidator.h"
-#include "ufo/profile/ProfileDataHandler.h"
-#include "ufo/profile/VariableNames.h"
 
 namespace ufo {
 
@@ -60,28 +53,16 @@ namespace ufo {
 
   // -----------------------------------------------------------------------------
 
-  void ProfileConsistencyChecks::applyFilter(const std::vector<bool> & apply,
-                                             const Variables & filtervars,
-                                             std::vector<std::vector<bool>> & flagged) const
+  void ProfileConsistencyChecks::individualProfileChecks
+  (ProfileDataHandler &profileDataHandler,
+   ProfileCheckValidator &profileCheckValidator,
+   ProfileChecker &profileChecker,
+   const CheckSubgroup &subGroupChecks) const
   {
-    print(oops::Log::trace());
-
-    const int nlocs = static_cast <int> (obsdb_.nlocs());
     const int nprofs = static_cast <int> (obsdb_.nrecs());
 
-    // Handles individual profile data
-    ProfileDataHandler profileDataHandler(obsdb_,
-                                          options_->DHParameters,
-                                          apply);
-
-    // (Optionally) validates check results against OPS values
-    ProfileCheckValidator profileCheckValidator(*options_,
-                                                profileDataHandler);
-
-    // Applies checks to each profile
-    ProfileChecker profileChecker(*options_,
-                                  profileDataHandler,
-                                  profileCheckValidator);
+    // Reset profile indices prior to looping through entire sample.
+    profileDataHandler.resetProfileIndices();
 
     // Loop over profiles
     oops::Log::debug() << "Starting loop over profiles..." << std::endl;
@@ -89,7 +70,7 @@ namespace ufo {
     for (int jprof = 0; jprof < nprofs; ++jprof) {
       oops::Log::debug() << "Profile " << (jprof + 1) << " / " << nprofs << std::endl;
 
-      /// Initialise the next profile prior to applying checks.
+      // Initialise the next profile prior to applying checks.
       profileDataHandler.initialiseNextProfile();
 
       // Print station ID if requested
@@ -101,10 +82,10 @@ namespace ufo {
       }
 
       // Run checks
-      profileChecker.runChecks();
+      profileChecker.runChecks(subGroupChecks);
 
       // Update information, including the 'flagged' vector, for this profile.
-      profileDataHandler.updateProfileInformation(filtervars.nvars(), flagged);
+      profileDataHandler.updateProfileInformation();
 
       // Optionally compare check results with OPS values
       if (options_->compareWithOPS.value() && profileChecker.getBasicCheckResult()) {
@@ -118,6 +99,62 @@ namespace ufo {
 
     oops::Log::debug() << "... Finished loop over profiles" << std::endl;
     oops::Log::debug() << std::endl;
+  }
+
+  // -----------------------------------------------------------------------------
+
+  void ProfileConsistencyChecks::entireSampleChecks
+  (ProfileDataHandler &profileDataHandler,
+   ProfileCheckValidator &profileCheckValidator,
+   ProfileChecker &profileChecker,
+   const CheckSubgroup &subGroupChecks) const
+  {
+    // Run checks
+    profileChecker.runChecks(subGroupChecks);
+
+    // todo: add remaining routines
+  }
+
+  // -----------------------------------------------------------------------------
+
+  void ProfileConsistencyChecks::applyFilter(const std::vector<bool> & apply,
+                                             const Variables & filtervars,
+                                             std::vector<std::vector<bool>> & flagged) const
+  {
+    print(oops::Log::trace());
+
+    // Handles individual profile data
+    ProfileDataHandler profileDataHandler(obsdb_,
+                                          options_->DHParameters,
+                                          apply,
+                                          flagged);
+
+    // (Optionally) validates check results against OPS values
+    ProfileCheckValidator profileCheckValidator(*options_,
+                                                profileDataHandler);
+
+    // Applies checks to each profile
+    ProfileChecker profileChecker(*options_,
+                                  profileDataHandler,
+                                  profileCheckValidator);
+
+    // Loop over each check subgroup in turn.
+    const auto checkSubgroups = profileChecker.getCheckSubgroups();
+    for (const auto& checkSubgroup : checkSubgroups) {
+      if (checkSubgroup.runOnEntireSample) {
+        // Run checks that use all of the profiles at once.
+        entireSampleChecks(profileDataHandler,
+                           profileCheckValidator,
+                           profileChecker,
+                           checkSubgroup);
+      } else {
+        // Run checks on individual profiles sequentially.
+        individualProfileChecks(profileDataHandler,
+                                profileCheckValidator,
+                                profileChecker,
+                                checkSubgroup);
+      }
+    }
   }
 
   // -----------------------------------------------------------------------------

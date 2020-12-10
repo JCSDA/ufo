@@ -22,6 +22,8 @@
 #include "oops/util/CompareNVectors.h"
 #include "oops/util/missingValues.h"
 
+#include "ufo/filters/Variables.h"
+
 #include "ufo/profile/DataHandlerParameters.h"
 #include "ufo/profile/EntireSampleDataHandler.h"
 #include "ufo/profile/ProfileIndices.h"
@@ -42,7 +44,8 @@ namespace ufo {
    public:
     ProfileDataHandler(ioda::ObsSpace &obsdb,
                        const DataHandlerParameters &options,
-                       const std::vector <bool> &apply);
+                       const std::vector <bool> &apply,
+                       std::vector<std::vector<bool>> &flagged);
 
     /// Retrieve a vector containing the requested variable for the current profile.
     ///    -# If the variable has previously been placed in a vector, return the vector.
@@ -52,12 +55,10 @@ namespace ufo {
     template <typename T>
       std::vector<T>& get(const std::string &fullname)
       {
-        // Determine variable and group names, optional, and number of entries per profile.
+        // Determine variable and group names
         std::string varname;
         std::string groupname;
         ufo::splitVarGroup(fullname, varname, groupname);
-        const bool optional = options_.getOptional(groupname);
-        const size_t entriesPerProfile = options_.getEntriesPerProfile(groupname);
 
         if (profileData_.find(fullname) != profileData_.end()) {
           // If the vector is already present, return it.
@@ -88,9 +89,15 @@ namespace ufo {
     /// Directly set a vector for the current profile.
     /// Typically used to store variables that are used locally in checks
     /// (e.g. intermediate values).
+    /// Also initialise a vector in the entire sample, allowing the data to
+    /// be stored between checks.
     template <typename T>
       void set(const std::string &fullname, std::vector<T> &&vec_in)
       {
+        // Determine variable and group names
+        std::string varname;
+        std::string groupname;
+        ufo::splitVarGroup(fullname, varname, groupname);
         // Check whether vector is already in map.
         if (profileData_.find(fullname) != profileData_.end()) {
           // Replace vector in map.
@@ -98,6 +105,15 @@ namespace ufo {
         } else {
           // Add vector to map.
           profileData_.emplace(fullname, vec_in);
+        }
+        entireSampleDataHandler_->initialiseVector<T>(fullname);
+        // Transfer this profile's data into the entire sample.
+        getProfileIndicesInEntireSample(groupname);
+        std::vector <T>& entireSampleData = entireSampleDataHandler_->get<T>(fullname);
+        size_t idx = 0;
+        for (const auto& profileIndex : profileIndicesInEntireSample_) {
+          updateValueIfPresent(vec_in, idx, entireSampleData, profileIndex);
+          idx++;
         }
       }
 
@@ -111,7 +127,7 @@ namespace ufo {
     /// 2. Modify 'flagged' vector for each filter variable based on check results,
     /// 3. If any variables in the current profile were modified by the checks,
     ///    the equivalent variables in the entire sample are set to the modified values.
-    void updateProfileInformation(const size_t nvars, std::vector<std::vector<bool>> &flagged);
+    void updateProfileInformation();
 
     /// Write various quantities to the obsdb so they can be used in future QC checks.
     /// Use the method in EntireSampleDataHandler to do this.
@@ -122,6 +138,10 @@ namespace ufo {
 
     /// Return number of levels to which QC checks should be applied.
     int getNumProfileLevels() const {return profileIndices_->getNumProfileLevels();}
+
+    /// Reset profile indices (required if it is desired to loop through
+    /// the entire sample again).
+    void resetProfileIndices() {profileIndices_->reset();}
 
    private:  // functions
     /// Reset profile information (vectors and corresponding names).
@@ -140,7 +160,7 @@ namespace ufo {
     /// Update the 'flagged' vector based on any flags that may have changed during the checks.
     /// The QC flag group is hardocded but this could be changed to
     /// a configurable value if required.
-    void setFlagged(const size_t nvars, std::vector<std::vector<bool>> &flagged);
+    void setFlagged();
 
     /// Transfer values from one vector to another (as long as neither is empty).
     template <typename T>
@@ -165,6 +185,9 @@ namespace ufo {
 
     /// Configurable parameters.
     const DataHandlerParameters &options_;
+
+    /// Flagged values
+    std::vector<std::vector<bool>> &flagged_;
 
     /// Class that handles the entire data sample.
     std::unique_ptr <EntireSampleDataHandler> entireSampleDataHandler_;

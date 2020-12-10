@@ -54,8 +54,11 @@ namespace ufo {
     /// Get number of current profile.
     size_t getProfileNumCurrent() const {return profileNumCurrent_;}
 
+    /// Reset profile indices to point to the beginning of the sample.
+    void reset();
+
    private:  // functions
-    // Ensure number of profiles is consistent with quantity reported by obsdb.
+    /// Ensure number of profiles is consistent with quantity reported by obsdb.
     void validateTotalNumProf();
 
    private:  // variables

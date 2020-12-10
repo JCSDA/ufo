@@ -8,6 +8,7 @@ set ( profile_files
       DataHandlerParameters.h
       EntireSampleDataHandler.cc
       EntireSampleDataHandler.h
+      ProfileCheckBasic.cc
       ProfileChecker.cc
       ProfileChecker.h
       ProfileCheckBackgroundGeopotentialHeight.cc
@@ -22,6 +23,8 @@ set ( profile_files
       ProfileCheckBase.h
       ProfileCheckBasic.cc
       ProfileCheckBasic.h
+      ProfileCheckHistory.cc
+      ProfileCheckHistory.h
       ProfileCheckHydrostatic.cc
       ProfileCheckHydrostatic.h
       ProfileCheckInterpolation.cc
@@ -42,8 +45,12 @@ set ( profile_files
       ProfileCheckUnstableLayer.h
       ProfileCheckValidator.cc
       ProfileCheckValidator.h
+      ProfileDataBase.cc
+      ProfileDataBase.h
       ProfileDataHandler.cc
       ProfileDataHandler.h
+      ProfileDataHistory.cc
+      ProfileDataHistory.h
       ProfileIndices.cc
       ProfileIndices.h
       ProfileSondeFlags.cc
@@ -52,6 +59,7 @@ set ( profile_files
       ProfileStandardLevels.h
       ProfileWindProfilerFlags.cc
       ProfileWindProfilerFlags.h
+      VariableNames.cc
       VariableNames.h
 )
 

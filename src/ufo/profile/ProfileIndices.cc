@@ -37,6 +37,19 @@ namespace ufo {
     }
   }
 
+  void ProfileIndices::reset()
+  {
+    profileNumCurrent_ = 0;
+    profileNumToFind_ = 0;
+    profIndex_ = 0;
+
+    // If sorting observations, point to beginning of record index iterator
+    if (!obsdb_.obs_sort_var().empty() &&
+        obsdb_.obs_sort_order() == "descending") {
+      profidx_current_ = obsdb_.recidx_begin();
+    }
+  }
+
   void ProfileIndices::updateNextProfileIndices()
   {
     profileIndices_.clear();

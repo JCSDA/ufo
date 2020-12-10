@@ -61,8 +61,8 @@ namespace ufo {
         std::string varname;
         std::string groupname;
         ufo::splitVarGroup(fullname, varname, groupname);
-        bool optional = options_.getOptional(groupname);
-        size_t entriesPerProfile = options_.getEntriesPerProfile(groupname);
+        const bool optional = options_.getOptional(groupname);
+        const size_t entriesPerProfile = options_.getEntriesPerProfile(groupname);
 
         std::vector <T> vec_all;  // Vector storing data for entire sample.
         if (entireSampleData_.find(fullname) != entireSampleData_.end()) {
@@ -105,6 +105,28 @@ namespace ufo {
     /// The particular variables written out are hardcoded but this could be changed to a
     /// configurable list if requred.
     void writeQuantitiesToObsdb();
+
+    /// Initialise vector in the entire sample for a variable that is not currently
+    /// stored. Fill the vector with the default value for the data type.
+    template <typename T>
+      void initialiseVector(const std::string fullname)
+      {
+        if (entireSampleData_.find(fullname) == entireSampleData_.end() ||
+            (entireSampleData_.find(fullname) != entireSampleData_.end() &&
+             get<T>(fullname).size() == 0)) {
+          std::string varname;
+          std::string groupname;
+          ufo::splitVarGroup(fullname, varname, groupname);
+          const size_t entriesPerProfile = options_.getEntriesPerProfile(groupname);
+          std::vector <T> vec_all;  // Vector storing data for entire sample.
+          if (entriesPerProfile == 0) {
+            vec_all.assign(obsdb_.nlocs(), defaultValue(vec_all));
+          } else {
+            vec_all.assign(entriesPerProfile * obsdb_.nrecs(), defaultValue(vec_all));
+          }
+          entireSampleData_[fullname] = vec_all;
+        }
+      }
 
    private:
     /// Put entire data vector on obsdb.

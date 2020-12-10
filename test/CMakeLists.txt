@@ -176,13 +176,16 @@ list( APPEND ufo_test_input
   testinput/profileconsistencychecks_UInterp_obsfilter.yaml
   testinput/profileconsistencychecks_UInterp_OPScomparison.yaml
   testinput/profileconsistencychecks_bkgqc_modobs_obsfilter.yaml
+  testinput/profileconsistencychecks_bkgqc_modobs_separatefilters_obsfilter.yaml
   testinput/profileconsistencychecks_bkgqc_repobs_obsfilter.yaml
+  testinput/profileconsistencychecks_bkgqc_repobs_separatefilters_obsfilter.yaml
   testinput/profileconsistencychecks_bkgqc_modobs_OPScomparison.yaml
   testinput/profileconsistencychecks_bkgqc_repobs_OPScomparison.yaml
   testinput/profileconsistencychecks_sondeflags_obsfilter.yaml
   testinput/profileconsistencychecks_sondeflags_OPScomparison.yaml
   testinput/profileconsistencychecks_winproflags_obsfilter.yaml
   testinput/profileconsistencychecks_winproflags_OPScomparison.yaml
+  testinput/profileconsistencychecks_history_obsfilter.yaml
   testinput/timeoper.yaml
   testinput/tprof.yaml
   testinput/tropomi_no2.yaml
@@ -1401,9 +1404,23 @@ ecbuild_add_test( TARGET  test_ufo_profileconsistencychecks_bkgqc_repobs_obsfilt
                   DEPENDS test_ObsFilters.x
                   TEST_DEPENDS ufo_get_ufo_test_data )
 
+ecbuild_add_test( TARGET  test_ufo_profileconsistencychecks_bkgqc_repobs_separatefilters_obsfilter
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                  ARGS    "testinput/profileconsistencychecks_bkgqc_repobs_separatefilters_obsfilter.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsFilters.x
+                  TEST_DEPENDS ufo_get_ufo_test_data )
+
 ecbuild_add_test( TARGET  test_ufo_profileconsistencychecks_bkgqc_modobs_obsfilter
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
                   ARGS    "testinput/profileconsistencychecks_bkgqc_modobs_obsfilter.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsFilters.x
+                  TEST_DEPENDS ufo_get_ufo_test_data )
+
+ecbuild_add_test( TARGET  test_ufo_profileconsistencychecks_bkgqc_modobs_separatefilters_obsfilter
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                  ARGS    "testinput/profileconsistencychecks_bkgqc_modobs_separatefilters_obsfilter.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsFilters.x
                   TEST_DEPENDS ufo_get_ufo_test_data )
@@ -1418,6 +1435,13 @@ ecbuild_add_test( TARGET  test_ufo_profileconsistencychecks_sondeflags_obsfilter
 ecbuild_add_test( TARGET  test_ufo_profileconsistencychecks_winproflags_obsfilter
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
                   ARGS    "testinput/profileconsistencychecks_winproflags_obsfilter.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsFilters.x
+                  TEST_DEPENDS ufo_get_ufo_test_data )
+
+ecbuild_add_test( TARGET  test_ufo_profileconsistencychecks_history_obsfilter
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                  ARGS    "testinput/profileconsistencychecks_history_obsfilter.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsFilters.x
                   TEST_DEPENDS ufo_get_ufo_test_data )

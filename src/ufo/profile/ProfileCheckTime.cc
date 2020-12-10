@@ -5,6 +5,9 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
+#include <set>
+#include <utility>
+
 #include "ufo/profile/ProfileCheckTime.h"
 
 namespace ufo {
@@ -35,8 +38,6 @@ namespace ufo {
       profileDataHandler_.get<int>(ufo::VariableNames::qcflags_eastward_wind);
     std::vector <int> &vFlags =
       profileDataHandler_.get<int>(ufo::VariableNames::qcflags_northward_wind);
-    std::vector <int> &timeFlags =
-      profileDataHandler_.get<int>(ufo::VariableNames::qcflags_time);
 
     if (!oops::allVectorsSameNonZeroSize(ObsType, pressures)) {
       oops::Log::warning() << "At least one vector is the wrong size. "
@@ -53,7 +54,10 @@ namespace ufo {
     // assimilation window length.
     const float halfWindowLength = 0.5 * (profileDataHandler_.getObsdb().windowEnd() -
                                           profileDataHandler_.getObsdb().windowStart()).toSeconds();
-    timeFlags.assign(numProfileLevels, false);
+    // Time QC flags. A value of true indicates an observation
+    // lies outside the time window.
+    // These flags are used in subsequent background checks.
+    std::vector <int> timeFlags(numProfileLevels, false);
     if (!level_time.empty() && !ModelLevels) {
       for (size_t jlev = 0; jlev < numProfileLevels; ++jlev) {
         const float leveltime = level_time[jlev];
@@ -95,5 +99,8 @@ namespace ufo {
                          << "Psurf = " << PSurf * 0.01 << " hPa, "
                          << "NWindRej = " << NWindRej << std::endl;
     }
+
+    // Store the time flags for use in later checks.
+    profileDataHandler_.set<int>(ufo::VariableNames::qcflags_time, std::move(timeFlags));
   }
 }  // namespace ufo

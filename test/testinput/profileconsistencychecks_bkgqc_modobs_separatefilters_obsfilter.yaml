@@ -1,0 +1,101 @@
+#
+#=== Profile consistency checks for background QC on model levels using sequential separate filters ==#
+#
+
+window begin: 2019-06-14T21:00:00Z
+window end: 2019-06-15T02:59:59Z
+
+observations:
+- obs space:
+    name: Radiosonde
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/met_office_profile_consistency_checks_bkgqc_modobs.nc4
+      obsgrouping:
+        group variable: "station_id"
+        sort variable: "air_pressure"
+        sort order: "descending"
+    simulated variables: [air_temperature, relative_humidity, eastward_wind, northward_wind, geopotential_height]
+  obs filters:
+  - filter: Profile Consistency Checks
+    filter variables:
+    - name: air_temperature
+    - name: relative_humidity
+    - name: eastward_wind
+    - name: northward_wind
+    - name: geopotential_height
+    Checks: ["Basic", "Time"]
+    compareWithOPS: false
+    flagBasicChecksFail: true
+    PrintStationID: true
+    BChecks_Skip: true
+    ModelLevels: true
+  - filter: Profile Consistency Checks
+    filter variables:
+    - name: air_temperature
+    - name: relative_humidity
+    - name: eastward_wind
+    - name: northward_wind
+    - name: geopotential_height
+    Checks: ["Basic", "PermanentReject"]
+    compareWithOPS: false
+    flagBasicChecksFail: true
+    PrintStationID: true
+    BChecks_Skip: true
+    ModelLevels: true
+  - filter: Profile Consistency Checks
+    filter variables:
+    - name: air_temperature
+    - name: relative_humidity
+    - name: eastward_wind
+    - name: northward_wind
+    - name: geopotential_height
+    Checks: ["Basic", "BackgroundTemperature"]
+    compareWithOPS: false
+    flagBasicChecksFail: true
+    PrintStationID: true
+    BChecks_Skip: true
+    ModelLevels: true
+  - filter: Profile Consistency Checks
+    filter variables:
+    - name: air_temperature
+    - name: relative_humidity
+    - name: eastward_wind
+    - name: northward_wind
+    - name: geopotential_height
+    Checks: ["Basic", "BackgroundRelativeHumidity"]
+    compareWithOPS: false
+    flagBasicChecksFail: true
+    PrintStationID: true
+    BChecks_Skip: true
+    ModelLevels: true
+  - filter: Profile Consistency Checks
+    filter variables:
+    - name: air_temperature
+    - name: relative_humidity
+    - name: eastward_wind
+    - name: northward_wind
+    - name: geopotential_height
+    Checks: ["Basic", "BackgroundWindSpeed"]
+    compareWithOPS: false
+    flagBasicChecksFail: true
+    PrintStationID: true
+    BChecks_Skip: true
+    ModelLevels: true
+  - filter: Profile Consistency Checks
+    filter variables:
+    - name: air_temperature
+    - name: relative_humidity
+    - name: eastward_wind
+    - name: northward_wind
+    - name: geopotential_height
+    Checks: ["Basic", "BackgroundGeopotentialHeight"]
+    compareWithOPS: false
+    flagBasicChecksFail: true
+    PrintStationID: true
+    BChecks_Skip: true
+    ModelLevels: true
+  HofX: HofX
+  obs diagnostics:
+  passedBenchmark: 140
+  benchmarkFlag: 15
+  flaggedBenchmark: 212

@@ -52,6 +52,9 @@ namespace ufo {
     /// Get result of check (default fail)
     virtual bool getResult() {return false;}
 
+    /// Run this check on the entire sample?
+    virtual bool runOnEntireSample() {return false;}
+
    protected:  // functions
     /// Apply correction to vector of values
     template <typename T>

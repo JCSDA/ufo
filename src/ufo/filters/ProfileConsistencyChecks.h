@@ -19,6 +19,12 @@
 #include "ufo/filters/FilterBase.h"
 #include "ufo/filters/QCflags.h"
 
+#include "ufo/profile/EntireSampleDataHandler.h"
+#include "ufo/profile/ProfileChecker.h"
+#include "ufo/profile/ProfileCheckValidator.h"
+#include "ufo/profile/ProfileDataHandler.h"
+#include "ufo/profile/VariableNames.h"
+
 #include "ufo/utils/Constants.h"
 
 namespace eckit {
@@ -98,6 +104,19 @@ namespace ufo {
       void print(std::ostream &) const override;
       void applyFilter(const std::vector<bool> &, const Variables &,
                        std::vector<std::vector<bool>> &) const override;
+
+      /// Run checks on individual profiles sequentially.
+      void individualProfileChecks(ProfileDataHandler &profileDataHandler,
+                                   ProfileCheckValidator &profileCheckValidator,
+                                   ProfileChecker &profileChecker,
+                                   const CheckSubgroup &subGroupChecks) const;
+
+      /// Run checks that use all of the profiles at once.
+      void entireSampleChecks(ProfileDataHandler &profileDataHandler,
+                              ProfileCheckValidator &profileCheckValidator,
+                              ProfileChecker &profileChecker,
+                              const CheckSubgroup &subGroupChecks) const;
+
       int qcFlag() const override {return QCflags::profile;}
 
       /// Configurable options

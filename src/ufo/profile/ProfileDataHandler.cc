@@ -11,9 +11,11 @@
 namespace ufo {
   ProfileDataHandler::ProfileDataHandler(ioda::ObsSpace &obsdb,
                                          const DataHandlerParameters &options,
-                                         const std::vector <bool> &apply)
+                                         const std::vector <bool> &apply,
+                                         std::vector<std::vector<bool>> &flagged)
     : obsdb_(obsdb),
-      options_(options)
+      options_(options),
+      flagged_(flagged)
   {
     profileIndices_.reset(new ProfileIndices(obsdb, options, apply));
     entireSampleDataHandler_.reset(new EntireSampleDataHandler(obsdb, options));
@@ -30,14 +32,13 @@ namespace ufo {
     profileIndices_->updateNextProfileIndices();
   }
 
-  void ProfileDataHandler::updateProfileInformation(const size_t nvars,
-                                                    std::vector<std::vector<bool>> &flagged)
+  void ProfileDataHandler::updateProfileInformation()
   {
     // Set final report flags in this profile.
     setFinalReportFlags();
 
     // Modify 'flagged' vector for each filter variable based on check results.
-    setFlagged(nvars, flagged);
+    setFlagged();
 
     // If any variables in the current profile were modified by the checks,
     // the equivalent variables in the entire sample are set to the modified values.
@@ -110,8 +111,7 @@ namespace ufo {
     }
   }
 
-  void ProfileDataHandler::setFlagged(const size_t nvars,
-                                      std::vector<std::vector<bool>> &flagged)
+  void ProfileDataHandler::setFlagged()
   {
     oops::Log::debug() << "Flagging observations" << std::endl;
 
@@ -139,8 +139,8 @@ namespace ufo {
                Flags[idx] & ufo::MetOfficeQCFlags::WholeObReport::FinalRejectReport)) {
             oops::Log::debug() << "  " << profileIndex << std::endl;
             // Flag all variables
-            for (size_t jv = 0; jv < nvars; ++jv)
-              flagged[jv][profileIndex] = true;
+            for (size_t jv = 0; jv < flagged_.size(); ++jv)
+              flagged_[jv][profileIndex] = true;
           }
           idx++;
         }

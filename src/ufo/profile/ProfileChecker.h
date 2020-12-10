@@ -11,6 +11,7 @@
 #include <memory>
 #include <ostream>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "ufo/filters/ProfileConsistencyCheckParameters.h"
@@ -22,6 +23,15 @@ namespace ufo {
 
 namespace ufo {
 
+  /// Information on each subgroup of checks.
+  struct CheckSubgroup {
+    /// \p runOnEntireSample specifies whether the checks in this subgroup run on all
+    /// profiles at once.
+    bool runOnEntireSample;
+    /// \p checkNames contains the names of the checks in this subgroup.
+    std::vector<std::string> checkNames;
+  };
+
   /// \brief Profile QC checker
   ///
   /// Runs the various QC checks on individual profiles and modifies flags accordingly.
@@ -31,14 +41,20 @@ namespace ufo {
                    ProfileDataHandler &profileDataHandler,
                    ProfileCheckValidator &profileCheckValidator);
 
+    /// Type for container of check subgroups.
+    typedef std::vector <CheckSubgroup> CheckSubgroupList;
+
     /// Run all checks requested
-    void runChecks();
+    void runChecks(const CheckSubgroup &subGroupChecks);
 
     /// Get basic check result
     bool getBasicCheckResult() {return basicCheckResult_;}
 
     /// Set basic check result
     void setBasicCheckResult(bool result) {basicCheckResult_ = result;}
+
+    /// Get container of check subgroups
+    CheckSubgroupList getCheckSubgroups() {return checkSubgroups_;}
 
    private:
     /// Configurable parameters
@@ -55,6 +71,9 @@ namespace ufo {
 
     /// Basic check result
     bool basicCheckResult_ = true;
+
+    /// Subgroups of checks with the same mode of operation.
+    CheckSubgroupList checkSubgroups_;
   };
 }  // namespace ufo
 
