@@ -1,0 +1,80 @@
+window begin: 2018-01-01T00:00:00Z
+window end: 2019-01-01T00:00:00Z
+
+observations:
+- obs space:
+    name: test data
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
+    simulated variables: [variable1]
+  obs filters:
+  - filter: Ratio Check    # test minvalue with one var (compare var3-var4 with min)
+    value: var3@MetaData        # var3@MetaData = 1, 1, 1, 1, 1, 0, 0, 0, 0, 0
+    reference: var4@MetaData    # var4@MetaData = 0, 0, 0, 0, 0, 1, 2, 3, 4, 5
+    minvalue: 0.0
+  passedBenchmark: 5
+- obs space:
+    name: test data
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
+    simulated variables: [variable1, variable2, variable3]
+  obs filters:
+  - filter: Ratio Check     # test same minvalue with three vars (compare var3-var4 with min)
+    value: var3@MetaData         # var3@MetaData = 1, 1, 1, 1, 1, 0, 0, 0, 0, 0
+    reference: var4@MetaData     # var4@MetaData = 0, 0, 0, 0, 0, 1, 2, 3, 4, 5
+    minvalue: 1.0
+  passedBenchmark: 15
+- obs space:
+    name: test data
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
+    simulated variables: [variable1]
+  obs filters:
+  - filter: Difference Check     # test maxvalue (compare var3-var4 with max)
+    filter variables:
+    - name: variable1
+    value: var3@MetaData         # var3@MetaData = 1, 1, 1, 1, 1, 0, 0, 0, 0, 0
+    reference: var4@MetaData     # var4@MetaData = 0, 0, 0, 0, 0, 1, 2, 3, 4, 5
+    maxvalue: -3.0
+  passedBenchmark: 3
+- obs space:
+    name: test data
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
+    simulated variables: [variable1]
+  obs filters:
+  - filter: Ratio Check        # test min and maxvalue (compare var3-var4 with min and max)
+    filter variables:
+    - name: variable1
+    value: variable2@ObsValue       # variable2@ObsValue = 10, 12, 14, 16, 18, 20, 22, 24, 26, 28
+    reference: variable1@ObsValue   # variable1@ObsValue = 10, 11, 12, 13, 14, 15, 16, 17, 18, 19
+    minvalue: 2.0
+    maxvalue: 6.0
+  passedBenchmark: 5
+- obs space:
+    name: test data
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
+    simulated variables: [variable1]
+  obs filters:
+  - filter: Ratio Check         # test threshold (compare abs(variable2 - variable1) with threshold)
+    filter variables:
+    - name: variable1
+    value: variable2@ObsValue        # variable2@ObsValue = 10, 12, 14, 16, 18, 20, 22, 24, 26, 28
+    reference: variable1@ObsValue    # variable1@ObsValue = 10, 11, 12, 13, 14, 15, 16, 17, 18, 19
+    threshold: 3
+  passedBenchmark: 4
+- obs space:
+    name: test data
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
+    simulated variables: [variable1]
+  obs filters:
+  - filter: Ratio Check        # test min and maxvalue (equal), equivalent to previous test
+    filter variables:
+    - name: variable1
+    value: variable2@ObsValue       # variable2@ObsValue = 10, 12, 14, 16, 18, 20, 22, 24, 26, 28
+    reference: variable1@ObsValue   # variable1@ObsValue = 10, 11, 12, 13, 14, 15, 16, 17, 18, 19
+    minvalue: -3
+    maxvalue: 3
+  passedBenchmark: 4
