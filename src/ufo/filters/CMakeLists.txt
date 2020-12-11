@@ -149,6 +149,8 @@ set ( filters_files
       obsfunctions/ObsFunctionVelocity.h
       obsfunctions/SatWindsLNVDCheck.cc
       obsfunctions/SatWindsLNVDCheck.h
+      obsfunctions/SatWindsSPDBCheck.cc
+      obsfunctions/SatWindsSPDBCheck.h
       obsfunctions/SCATRetMW.cc
       obsfunctions/SCATRetMW.h
       obsfunctions/SymmCldImpactIR.cc
