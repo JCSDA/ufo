@@ -5,12 +5,11 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#include "../ufo/ParallelObsDistribution.h"
+#include "../ufo/ParallelPoissonDiskThinning.h"
 #include "oops/runs/Run.h"
 
-int main(int argc,  char ** argv) {
+int main(int argc, char ** argv) {
   oops::Run run(argc, argv);
-  ufo::test::ParallelObsDistribution tests;
-  run.execute(tests);
-  return 0;
+  ufo::test::ParallelPoissonDiskThinning tests;
+  return run.execute(tests);
 }

@@ -70,7 +70,7 @@ Min spacing above observation spacing:
     min_spacing: PT11S
   expected_thinned_obs_indices: [1, 3, 5]
 
-Categories:
+Int-valued categories:
   window begin: 2000-01-01T00:00:00Z
   window end: 2030-01-01T00:00:00Z
   obs space:
@@ -95,6 +95,33 @@ Categories:
     min_spacing: PT15S
     category_variable:
       name: category@MetaData
+  expected_thinned_obs_indices: [1, 4, 6]
+
+String-valued categories:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Aircraft
+    simulated variables: [air_temperature]
+    generate:
+      list:
+        lats: [ 0, 0, 0, 0, 0, 0, 0 ]
+        lons: [ 0, 0, 0, 0, 0, 0, 0 ]
+        datetimes:
+          - 2010-01-01T00:04:00Z
+          - 2010-01-01T00:04:10Z
+          - 2010-01-01T00:04:20Z
+          - 2010-01-01T00:04:30Z
+          - 2010-01-01T00:04:40Z
+          - 2010-01-01T00:04:50Z
+          - 2010-01-01T00:05:00Z
+      obs errors: [1.0]
+  string_category: [a, a, a, b, b, b, b]
+  TemporalThinning:
+    variables: [air_temperature]
+    min_spacing: PT15S
+    category_variable:
+      name: string_category@MetaData
   expected_thinned_obs_indices: [1, 4, 6]
 
 Categories, observations sorted in descending order:

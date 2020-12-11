@@ -266,6 +266,34 @@ successful:
         is_not_in: [WARUBAJH, MTLGWTHE, XKEHXQSD, XKEHXQSD]
   # station_id@MetaData = WARUBAJH, HUAVFIBU, DKPAIDZX, MTLGWTHE, LESDCYOD, UGCMFXFK, HSMHFHQI, JALVYAAR, MOYSUYWB, XKEHXQSD
       size where true: 7
+    - where:                      # test any_bit_set_of with a single bit specified
+      - variable:
+          name:  intvar1@MetaData
+        any_bit_set_of: 3
+  # intvar1@MetaData =    1,    2,    3,    4,    5,    6,    7,    8,    9,   10,
+  # i.e. binary        0001, 0010, 0011, 0100, 0101, 0110, 0111, 1000, 1001, 1010
+      size where true: 3  # "where" should select the following values of intvar1: 8, 9, 10
+    - where:                      # test any_bit_set_of with multiple bits specified
+      - variable:
+          name:  intvar1@MetaData
+        any_bit_set_of: 0, 1
+  # intvar1@MetaData =    1,    2,    3,    4,    5,    6,    7,    8,    9,   10,
+  # i.e. binary        0001, 0010, 0011, 0100, 0101, 0110, 0111, 1000, 1001, 1010
+      size where true: 8  # "where" should select all values of intvar1 except for 4 and 8
+    - where:                      # test any_bit_unset_of with a single bit specified
+      - variable:
+          name:  intvar1@MetaData
+        any_bit_unset_of: 3
+  # intvar1@MetaData =    1,    2,    3,    4,    5,    6,    7,    8,    9,   10,
+  # i.e. binary        0001, 0010, 0011, 0100, 0101, 0110, 0111, 1000, 1001, 1010
+      size where true: 7  # "where" should select all values of intvar1 except for 8, 9, 10
+    - where:                      # test any_bit_unset_of with multiple bits specified
+      - variable:
+          name:  intvar1@MetaData
+        any_bit_unset_of: 0, 1
+  # intvar1@MetaData =    1,    2,    3,    4,    5,    6,    7,    8,    9,   10,
+  # i.e. binary        0001, 0010, 0011, 0100, 0101, 0110, 0111, 1000, 1001, 1010
+      size where true: 8  # "where" should select the following values of intvar1: 3 and 7
 
 user_error_type_handling_is_in:
   window begin: 2018-01-01T00:00:00Z

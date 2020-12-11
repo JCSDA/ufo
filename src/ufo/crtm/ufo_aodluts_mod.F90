@@ -21,7 +21,7 @@ MODULE ufo_aodluts_mod
   USE crtm_spccoeff, ONLY: sc
   USE obsspace_mod
 
-  USE fv3_mieobs_mod, ONLY: get_fv3_aod
+  USE cf_mieobs_mod, ONLY: get_cf_aod
 
   IMPLICIT NONE
   PRIVATE
@@ -31,7 +31,7 @@ MODULE ufo_aodluts_mod
      PRIVATE
      CHARACTER(len=maxvarlen), PUBLIC, ALLOCATABLE :: varin(:)  ! variablesrequested from the model
      INTEGER, ALLOCATABLE                          :: channels(:)
-     REAL(kind_real), ALLOCATABLE                  :: wavelenghts(:)
+     REAL(kind_real), ALLOCATABLE                  :: wavelengths(:)
      INTEGER :: n_aerosols
      TYPE(luts_conf) :: conf
    CONTAINS
@@ -75,7 +75,7 @@ CONTAINS
     self%varin(SIZE(varin_default)+1:) = var_aerosols
 
     ALLOCATE(self%channels(SIZE(channels)))
-    ALLOCATE(self%wavelenghts(SIZE(channels)))
+    ALLOCATE(self%wavelengths(SIZE(channels)))
 
     self%channels(:) = channels(:)
 
@@ -94,7 +94,7 @@ CONTAINS
 
     IF (ALLOCATED(self%varin)) DEALLOCATE(self%varin)
     IF (ALLOCATED(self%channels)) DEALLOCATE(self%channels)
-    IF (ALLOCATED(self%wavelenghts)) DEALLOCATE(self%wavelenghts)
+    IF (ALLOCATED(self%wavelengths)) DEALLOCATE(self%wavelengths)
 
   END SUBROUTINE ufo_aodluts_delete
 
@@ -125,7 +125,7 @@ CONTAINS
 ! define the "non-demoninational" arguments
     TYPE(crtm_channelinfo_type)             :: chinfo(self%conf%n_sensors)
 
-    REAL(kind_real), ALLOCATABLE :: wavelenghts_all(:)
+    REAL(kind_real), ALLOCATABLE :: wavelengths_all(:)
     REAL(kind_real), ALLOCATABLE :: aero_layers(:,:,:),rh(:,:)
     
     CHARACTER(len=maxvarlen), ALLOCATABLE :: var_aerosols(:)
@@ -159,33 +159,34 @@ CONTAINS
        
        n_channels = crtm_channelinfo_n_channels(chinfo(n))
        
-       IF (ALLOCATED(wavelenghts_all)) DEALLOCATE(wavelenghts_all)
+       IF (ALLOCATED(wavelengths_all)) DEALLOCATE(wavelengths_all)
        
-       ALLOCATE(wavelenghts_all(n_channels), stat = alloc_stat)
+       ALLOCATE(wavelengths_all(n_channels), stat = alloc_stat)
        
        IF ( alloc_stat /= 0 ) THEN
-          message = 'error allocating wavelenghts_all'
+          message = 'error allocating wavelengths_all'
           CALL display_message( program_name, message, failure )
           STOP
        END IF
        
-       wavelenghts_all=1.e7/sc(chinfo(n)%sensor_index)%wavenumber(:)
+       wavelengths_all=1.e7/sc(chinfo(n)%sensor_index)%wavenumber(:)
           
-       self%wavelenghts=wavelenghts_all(self%channels)
+       self%wavelengths=wavelengths_all(self%channels)
 
        CALL calculate_aero_layers(self%conf%aerosol_option,&
             &n_aerosols, n_profiles, n_layers,&
             &geovals, aero_layers=aero_layers, rh=rh)
  
-       CALL get_fv3_aod(n_layers, n_profiles, nvars, n_aerosols, &
+       CALL get_cf_aod(n_layers, n_profiles, nvars, n_aerosols, &
             &self%conf%rcfile,  &
-            &self%wavelenghts, var_aerosols, aero_layers, rh,       &
+            &self%wavelengths, var_aerosols, aero_layers, rh,       &
             &aod_tot = hofx, rc = rc)  
        
-       DEALLOCATE(aero_layers,rh,wavelenghts_all)
+
+       DEALLOCATE(aero_layers,rh,wavelengths_all)
        
        IF (rc /= 0) THEN
-          message = 'error on exit from get_fv3_aod'
+          message = 'error on exit from get_cf_aod'
           CALL display_message( program_name, message, failure )
           STOP
        END IF

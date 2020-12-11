@@ -1,0 +1,25 @@
+window begin: 2020-10-01T03:00:00Z
+window end: 2020-10-01T09:00:00Z
+
+observations:
+- obs operator:
+    name: VertInterp
+    vertical coordinate: air_pressure_levels
+  linear obs operator:
+    name: VertInterp
+    vertical coordinate: air_pressure_levels
+  obs space:
+    name: Satwind
+    obsdatain:
+      obsfile: Data/ioda/testinput_tier_1/satwind_obs_1d_2020100106_noinv.nc4
+    obsdataout:
+      obsfile: Data/satwind_obs_1d_2020100106_noinv_linopr_test_out.nc4
+    simulated variables: [eastward_wind, northward_wind]
+  geovals:
+    filename: Data/ufo/testinput_tier_1/satwind_geoval_20201001T0600Z_noinv.nc4
+  vector ref: MetOfficeHofX
+  tolerance: 1.0e-04
+  linear obs operator test:
+    coef TL: 0.1
+    tolerance TL: 1.0e-9
+    tolerance AD: 1.0e-11

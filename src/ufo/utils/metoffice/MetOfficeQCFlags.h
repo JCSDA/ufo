@@ -124,6 +124,25 @@ namespace MetOfficeQCFlags {
     DiurnalWarmFlag = 1 << 13   ///< Indicates a likely diurnal warming component in signal
   };
 
+  // Profile flags which depend on sounding data type
+  enum Sounding {
+    // TEMP and PILOT
+    TEMPSigWind    = 1 << 1,   ///< Significant wind level
+    TEMPSigTemp    = 1 << 2,   ///< Significant temperature level
+    TEMPMaxWind    = 1 << 3,   ///< Maximum wind level
+    TEMPTropopause = 1 << 4,   ///< Tropopause level
+    TEMPStandard   = 1 << 5,   ///< Standard level
+    TEMPSurface    = 1 << 6,   ///< Surface level
+    TEMPStandardX  = 1 << 7,   ///< Semi-standard level
+    // BUFR
+    BUFRSigWind    = 1 << 11,  ///< Significant wind level
+    BUFRSigTemp    = 1 << 13,  ///< Significant temperature level
+    BUFRMaxWind    = 1 << 14,  ///< Maximum wind level
+    BUFRTropopause = 1 << 15,  ///< Tropopause level
+    BUFRStandard   = 1 << 16,  ///< Standard level
+    BUFRSurface    = 1 << 17,  ///< Surface level
+    BUFRStandardX  = 1 << 16   ///< Semi-standard level, grouped with standard levels in this case
+  };
 }  // namespace MetOfficeQCFlags
 
 }  // namespace ufo

@@ -3,7 +3,7 @@ window end: 2030-01-01T00:00:00Z
 
 observations:
 - obs space:
-    name: Aircraft
+    name: Ship
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/met_office_temporal_thinning_surface.nc4
     simulated variables: [air_temperature]
@@ -67,8 +67,9 @@ observations:
       - 8247
       - 8812
   passedBenchmark: 21
+# Observations not grouped into records
 - obs space:
-    name: Aircraft
+    name: Radiosonde
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/met_office_temporal_thinning_sonde.nc4
     simulated variables: [air_temperature]
@@ -84,7 +85,7 @@ observations:
     - variable:
         name: obs_type@MetaData
       is_not_in: 50400
-  passedObservationsBenchmark:
+  passedObservationsBenchmark: &sondePassedObsIds
       - 2
       - 3
       - 4
@@ -179,4 +180,50 @@ observations:
       - 147
       - 148
       - 149
+  passedBenchmark: 94
+# Observations grouped into records by the category variable
+- obs space:
+    name: Radiosonde
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/met_office_temporal_thinning_sonde.nc4
+      obsgrouping:
+        group variable: "call_sign"
+    simulated variables: [air_temperature]
+  obs filters:
+  - filter: Temporal Thinning
+    min_spacing: PT00H56M00S
+    tolerance: PT00H02M00S
+    category_variable:
+      name: call_sign@MetaData
+    priority_variable:
+      name: num_levels@MetaData
+    where:
+    - variable:
+        name: obs_type@MetaData
+      is_not_in: 50400
+  passedObservationsBenchmark:
+    *sondePassedObsIds
+  passedBenchmark: 94
+# Observations grouped into records by a variable different from the category variable
+- obs space:
+    name: Radiosonde
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/met_office_temporal_thinning_sonde.nc4
+      obsgrouping:
+        group variable: "num_levels"
+    simulated variables: [air_temperature]
+  obs filters:
+  - filter: Temporal Thinning
+    min_spacing: PT00H56M00S
+    tolerance: PT00H02M00S
+    category_variable:
+      name: call_sign@MetaData
+    priority_variable:
+      name: num_levels@MetaData
+    where:
+    - variable:
+        name: obs_type@MetaData
+      is_not_in: 50400
+  passedObservationsBenchmark:
+    *sondePassedObsIds
   passedBenchmark: 94

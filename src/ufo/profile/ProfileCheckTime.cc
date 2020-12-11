@@ -14,17 +14,16 @@ namespace ufo {
 
   ProfileCheckTime::ProfileCheckTime
   (const ProfileConsistencyCheckParameters &options,
-   const ProfileIndices &profileIndices,
    ProfileDataHandler &profileDataHandler,
    ProfileCheckValidator &profileCheckValidator)
-    : ProfileCheckBase(options, profileIndices, profileDataHandler, profileCheckValidator)
+    : ProfileCheckBase(options, profileDataHandler, profileCheckValidator)
   {}
 
   void ProfileCheckTime::runCheck()
   {
     oops::Log::debug() << " Time check" << std::endl;
 
-    const size_t numLevelsToCheck = profileIndices_.getNumLevelsToCheck();
+    const size_t numProfileLevels = profileDataHandler_.getNumProfileLevels();
     const bool ModelLevels = options_.modellevels.value();
     const std::vector <int> &ObsType =
       profileDataHandler_.get<int>(ufo::VariableNames::ObsType);
@@ -54,9 +53,9 @@ namespace ufo {
     // assimilation window length.
     const float halfWindowLength = 0.5 * (profileDataHandler_.getObsdb().windowEnd() -
                                           profileDataHandler_.getObsdb().windowStart()).toSeconds();
-    timeFlags.assign(numLevelsToCheck, false);
+    timeFlags.assign(numProfileLevels, false);
     if (!level_time.empty() && !ModelLevels) {
-      for (size_t jlev = 0; jlev < numLevelsToCheck; ++jlev) {
+      for (size_t jlev = 0; jlev < numProfileLevels; ++jlev) {
         const float leveltime = level_time[jlev];
         if (leveltime == missingValueFloat) continue;
         timeFlags[jlev] = (leveltime < (-halfWindowLength - 0.5) ||
@@ -73,7 +72,7 @@ namespace ufo {
         (ObsType[0] != ufo::MetOfficeObsIDs::AtmosphericProfile::WindProf)) {
       PSurf = pressures[0];
       for (size_t jlev = 0;
-           jlev < std::min(static_cast<int>(numLevelsToCheck), 10);
+           jlev < std::min(static_cast<int>(numProfileLevels), 10);
            ++jlev) {
         if (uFlags[jlev] & ufo::MetOfficeQCFlags::Profile::SurfaceLevelFlag) {
           PSurf = pressures[jlev];
@@ -86,7 +85,7 @@ namespace ufo {
     if (PSurf > 0.0) {
       int NWindRej = 0;  // Number of wind levels rejected
       const float PLimit = PSurf - SondeLaunchWindRej * 100.0;  // Convert from hPa to Pa
-      for (size_t jlev = 0; jlev < numLevelsToCheck; ++jlev) {
+      for (size_t jlev = 0; jlev < numProfileLevels; ++jlev) {
         if (pressures[jlev] > 0.0 && pressures[jlev] < PLimit) break;
         if (!uFlags.empty()) uFlags[jlev] |= ufo::MetOfficeQCFlags::Elem::PermRejectFlag;
         if (!vFlags.empty()) vFlags[jlev] |= ufo::MetOfficeQCFlags::Elem::PermRejectFlag;

@@ -1,0 +1,23 @@
+window begin: 2018-04-14T21:00:00Z
+window end: 2018-04-15T03:00:00Z
+
+observations:
+- obs space:
+    name: satwindsLNVDtest
+    obsdatain:
+      obsfile: Data/ioda/testinput_tier_1/satwind_obs_2018041500_m.nc4
+    simulated variables: [eastward_wind, northward_wind]
+  obs filters:
+  - filter: Bounds Check       # test min/max value of a single test var, but filter 2 or more vars
+    filter variables:
+    - name: eastward_wind
+    - name: northward_wind
+    test variables:
+    - name: SatWindsLNVDCheck@ObsFunction
+      options:
+        testHofX: GsiHofX
+    maxvalue: 3
+  passedBenchmark: 122
+#  In the test data set of 100 possible values, 1 ob is 2100UTC exactly and time test is (2100-0300].
+#  There are 74 valid (non-missing) observed winds (times 2 wind components making 148 possible).
+#  There are 13 locations where the calculated LNVD is greater than 3 so 148-26=122.

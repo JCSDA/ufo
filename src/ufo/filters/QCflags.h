@@ -27,7 +27,8 @@ namespace QCflags {
   constexpr int buddy   = 13;  // observation rejected by the buddy check
   constexpr int derivative = 14;  // observation removed due to metadata derivative value
   constexpr int profile = 15;  // observation rejected by at least one profile QC check
-  constexpr int ratioref = 16;  // ratio of 2 values outside of range
+  constexpr int onedvar = 16;  // observation failed to converge in 1dvar check
+  constexpr int onedvar = 17;  // observation failed to converge in 1dvar check
 };  // namespace QCflags
 
 }  // namespace ufo

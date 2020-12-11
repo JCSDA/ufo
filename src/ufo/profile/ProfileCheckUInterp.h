@@ -15,7 +15,6 @@
 #include "ufo/profile/ProfileCheckBase.h"
 #include "ufo/profile/ProfileCheckValidator.h"
 #include "ufo/profile/ProfileDataHandler.h"
-#include "ufo/profile/ProfileIndices.h"
 #include "ufo/profile/ProfileStandardLevels.h"
 
 namespace ufo {
@@ -29,7 +28,6 @@ namespace ufo {
     private ProfileStandardLevels {
    public:
     ProfileCheckUInterp(const ProfileConsistencyCheckParameters &options,
-                        const ProfileIndices &profileIndices,
                         ProfileDataHandler &profileDataHandler,
                         ProfileCheckValidator &profileCheckValidator);
 

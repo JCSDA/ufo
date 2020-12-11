@@ -24,6 +24,8 @@ set ( filters_files
       RatioCheck.h
       FilterBase.cc
       FilterBase.h
+      FilterParametersBase.h
+      GenericFilterParameters.h
       getScalarOrFilterData.cc
       getScalarOrFilterData.h
       ObsBoundsCheck.cc
@@ -79,6 +81,8 @@ set ( filters_files
       PoissonDiskThinningParameters.h
       processWhere.cc
       processWhere.h
+      ObsAccessor.cc
+      ObsAccessor.h
       actions/AssignError.cc
       actions/AssignError.h
       actions/FilterAction.cc
@@ -105,8 +109,12 @@ set ( filters_files
       obsfunctions/HydrometeorCheckAMSUA.h
       obsfunctions/HydrometeorCheckATMS.cc
       obsfunctions/HydrometeorCheckATMS.h
+      obsfunctions/ImpactHeight.cc
+      obsfunctions/ImpactHeight.h
       obsfunctions/InterChannelConsistencyCheck.cc
       obsfunctions/InterChannelConsistencyCheck.h
+      obsfunctions/ObsErrorModelStepwiseLinear.cc
+      obsfunctions/ObsErrorModelStepwiseLinear.h
       obsfunctions/ObsErrorModelRamp.cc
       obsfunctions/ObsErrorModelRamp.h
       obsfunctions/ObsErrorModelQuad.cc
@@ -133,17 +141,30 @@ set ( filters_files
       obsfunctions/ObsErrorFactorTransmitTopRad.h
       obsfunctions/ObsErrorFactorWavenumIR.cc
       obsfunctions/ObsErrorFactorWavenumIR.h
+      obsfunctions/ObsErrorFactorSfcPressure.cc
+      obsfunctions/ObsErrorFactorSfcPressure.h
       obsfunctions/NearSSTRetCheckIR.cc
       obsfunctions/NearSSTRetCheckIR.h
       obsfunctions/ObsFunctionScattering.cc
       obsfunctions/ObsFunctionScattering.h
       obsfunctions/ObsFunctionVelocity.cc
       obsfunctions/ObsFunctionVelocity.h
+      obsfunctions/SatWindsLNVDCheck.cc
+      obsfunctions/SatWindsLNVDCheck.h
       obsfunctions/SCATRetMW.cc
       obsfunctions/SCATRetMW.h
       obsfunctions/SymmCldImpactIR.cc
       obsfunctions/SymmCldImpactIR.h
+      variabletransforms/WindComponents.cc
+      variabletransforms/WindComponents.h
+      variabletransforms/WindSpeedAndDirection.cc
+      variabletransforms/WindSpeedAndDirection.h
 )
+
+if( ${RTTOV_FOUND} )
+  add_subdirectory( rttovonedvarcheck )
+  list( APPEND filters_files ${rttovonedvarcheck_src_files} )
+endif( ${RTTOV_FOUND} )
 
 PREPEND( _p_filters_files       "filters"       ${filters_files} )
 

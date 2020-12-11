@@ -17,6 +17,7 @@
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
 #include "oops/util/Printable.h"
+#include "ufo/filters/FilterParametersBase.h"
 #include "ufo/filters/ObsFilterData.h"
 #include "ufo/filters/Variables.h"
 
@@ -41,6 +42,9 @@ namespace ufo {
 
 class FilterBase : public util::Printable {
  public:
+  FilterBase(ioda::ObsSpace &, const FilterParametersBase &parameters,
+             std::shared_ptr<ioda::ObsDataVector<int> >,
+             std::shared_ptr<ioda::ObsDataVector<float> >);
   FilterBase(ioda::ObsSpace &, const eckit::Configuration &,
              std::shared_ptr<ioda::ObsDataVector<int> >,
              std::shared_ptr<ioda::ObsDataVector<float> >);
@@ -57,6 +61,9 @@ class FilterBase : public util::Printable {
 
  protected:
   ioda::ObsSpace & obsdb_;
+  /// For backward compatibility, the full set of filter options (including those required only by
+  /// the concrete subclass, not by FilterBase) is stored in this LocalConfiguration object.
+  /// It will be removed once all filters have been converted to use Parameters.
   const eckit::LocalConfiguration config_;
   std::shared_ptr<ioda::ObsDataVector<int>> flags_;
   std::shared_ptr<ioda::ObsDataVector<float>> obserr_;
@@ -72,7 +79,12 @@ class FilterBase : public util::Printable {
   virtual int qcFlag() const = 0;
   bool prior_;
   bool post_;
-  bool defer_to_post_;
+
+  // Variables extracted from the filter parameters.
+  bool deferToPost_;
+  // These Configuration objects will be replaced by appropriate Parameters subclasses later.
+  eckit::LocalConfiguration whereConfig_;
+  eckit::LocalConfiguration actionConfig_;
 };
 
 }  // namespace ufo

@@ -26,6 +26,7 @@
 #include "oops/util/DateTime.h"
 #include "oops/util/Duration.h"
 #include "oops/util/Logger.h"
+#include "ufo/filters/ObsAccessor.h"
 #include "ufo/filters/TrackCheckShipDiagnostics.h"
 #include "ufo/filters/TrackCheckShipParameters.h"
 #include "ufo/utils/Constants.h"
@@ -64,12 +65,14 @@ double TrackCheckShip::speedEstimate(
     speedEst = (dist - 0.5 * spatialRes) /
         std::max(temporalDistance.toSeconds(),
                  (tempRes.toSeconds()));
+    speedEst *= 1000.0;  // convert units from km/s to m/s
   }
   return speedEst;
 }
 
 /// \brief Returns the angle in degrees (rounded to the nearest .1 degree)
-/// formed by the track segment going from observation \p a to \p b to \p c.
+/// between displacement vectors going from observations \p a to \p b
+/// and \p b to \p c.
 float TrackCheckShip::angle(const TrackCheckShip::TrackObservation &a,
                             const TrackCheckShip::TrackObservation &b,
                             const TrackCheckShip::TrackObservation &c) {
@@ -95,12 +98,7 @@ TrackCheckShip::TrackObservation::TrackObservation(
     std::shared_ptr<TrackCheckUtils::CheckCounter> const &checkCounter,
     size_t observationNumber)
   : obsLocationTime_(latitude, longitude, time), fullTrackStatistics_(ts),
-    checkCounter_(checkCounter), observationNumber_(observationNumber) {}
-
-void TrackCheckShip::TrackObservation::registerCheckResult(
-    const TrackCheckUtils::CheckResult &result) {
-  checkCounter_->registerCheckResult(result);
-}
+    observationNumber_(observationNumber), rejected_(false) {}
 
 size_t TrackCheckShip::TrackObservation::getObservationNumber() const
 {
@@ -130,8 +128,7 @@ void TrackCheckShip::flagRejectedTrackObservations(
   auto trackObsIndexIt = trackObsIndicesBegin;
   auto trackObsIt = trackObservations.begin();
   for (; trackObsIndexIt != trackObsIndicesEnd; ++trackObsIndexIt, ++trackObsIt)
-    if (trackObsIt->rejected())
-      isRejected[validObsIds[*trackObsIndexIt]] = true;
+    isRejected[validObsIds[*trackObsIndexIt]] = trackObsIt->rejected();
 }
 
 void TrackCheckShip::print(std::ostream & os) const {
@@ -139,29 +136,42 @@ void TrackCheckShip::print(std::ostream & os) const {
 }
 
 
-/// \todo This section is not yet fully implemented. Current implementation includes separating
-/// observations into tracks based on \p Station_Id, calculating distances, speeds, and
-/// angles between observations, and incrementing track-specific counters should the
-/// calculations produce unexpected values. Based on the counter values, the filter
-/// may be stopped early. Simultaneous observations are then optionally ignored for later
-/// re-inclusion or rejection. Using the above calculations and additional ones if necessary,
-/// the observation directly before and/or after the fastest segment is chosen for rejection.
-/// Re-checking of simultaneous observations is not yet implemented.
+/// The filter begins with separating observations into tracks based on \p Station_Id. Various
+/// calculations are then performed between consecutive observations: distances/speeds between
+/// observation pairs, and angles between the displacement vectors formed by triplets of
+/// consecutive observations. Track-specific counters are incremented for various metrics that
+/// indicate an unexpected track path.
+///
+/// Based on these counter values, the filter may ignore the current track and move on to the next
+/// one. Using the described calculations and additional ones if necessary, the observation
+/// directly before and/or after the fastest segment is chosen for rejection. This will continue
+/// until all remaining segments that link accepted observations are either:
+/// 1. slower than a user-defined "max speed (m/s)" where the angles between the fastest accepted
+/// segment's displacement vector and its two neighbouring segments' displacement vectors are
+/// both less than 90 degrees.
+/// 2. slower than 80 percent of this user-defined speed.
+///
+/// The full track will be rejected if the number of observations removed is more than the
+/// user-defined "rejection threshold".
 
 void TrackCheckShip::applyFilter(const std::vector<bool> & apply,
                                  const Variables & filtervars,
                                  std::vector<std::vector<bool>> & flagged) const {
-  const std::vector<size_t> validObsIds = TrackCheckUtils::getValidObservationIds(apply, flags_);
+  ObsAccessor obsAccessor = TrackCheckUtils::createObsAccessor(options_->stationIdVariable, obsdb_);
 
-  RecursiveSplitter splitter(validObsIds.size());
-  TrackCheckUtils::groupObservationsByStation(validObsIds, splitter, config_, obsdb_);
-  TrackCheckUtils::sortTracksChronologically(validObsIds, splitter, obsdb_);
+  const std::vector<size_t> validObsIds = obsAccessor.getValidObservationIds(apply, *flags_);
+
+  RecursiveSplitter splitter = obsAccessor.splitObservationsIntoIndependentGroups(validObsIds);
+  TrackCheckUtils::sortTracksChronologically(validObsIds, obsAccessor, splitter);
 
   TrackCheckUtils::ObsGroupLocationTimes obsLocTime =
-      TrackCheckUtils::collectObservationsLocations(obsdb_);
+      TrackCheckUtils::collectObservationsLocations(obsAccessor);
 
-  std::vector<bool> isRejected(apply.size(), false);
+  std::vector<bool> isRejected(obsLocTime.latitudes.size(), false);
+  size_t trackNumber = 0;
   for (auto track : splitter.multiElementGroups()) {
+    trackNumber++;
+    std::string stationId = std::to_string(trackNumber);
     std::vector<TrackObservation> trackObservations = collectTrackObservations(
           track.begin(), track.end(), validObsIds, obsLocTime);
     std::vector<std::reference_wrapper<TrackObservation>> trackObservationsReferences;
@@ -174,12 +184,9 @@ void TrackCheckShip::applyFilter(const std::vector<bool> & apply,
                                     CalculationMethod::FIRSTITERATION);
     if (!trackObservationsReferences.empty() &&
         this->options_->earlyBreakCheck &&
-        TrackCheckShip::earlyBreak(trackObservationsReferences)) {
+        TrackCheckShip::earlyBreak(trackObservationsReferences, stationId)) {
       continue;
     }
-    if (options_->deferredCheckSimultaneous.value()) {
-      trackObservationsReferences = removeSimultaneousObservations(trackObservationsReferences);
-    } else {  // reinstating deferred observation is not yet implemented
       bool firstIterativeRemoval = true;
       while (trackObservationsReferences.size() >= 3) {
         // Initial loop: fastest (as determined by set of comparisons) observation removed
@@ -201,15 +208,24 @@ void TrackCheckShip::applyFilter(const std::vector<bool> & apply,
           }
         }
         removeFaultyObservation(
-              trackObservationsReferences, maxSpeedReferenceIterator, firstIterativeRemoval);
+              trackObservationsReferences, maxSpeedReferenceIterator, firstIterativeRemoval,
+              stationId);
         firstIterativeRemoval = false;
         calculateTrackSegmentProperties(trackObservationsReferences, CalculationMethod::MAINLOOP);
       }
+      auto rejectedCount = std::count_if(trackObservations.begin(), trackObservations.end(),
+                    [](const TrackObservation& a) {return a.rejected();});
+      if (rejectedCount >= options_->rejectionThreshold.value() * trackObservations.size()) {
+        oops::Log::trace() << "CheckShipTrack: track " << stationId << " NumRej " <<
+                              rejectedCount << " out of " << trackObservations.size() <<
+                              " reports rejected. *** Reject whole track ***\n";
+        for (TrackObservation &obs : trackObservations)
+          obs.setRejected(true);
+      }
       flagRejectedTrackObservations(track.begin(), track.end(),
                                     validObsIds, trackObservations, isRejected);
-    }
   }
-  TrackCheckUtils::flagRejectedObservations(isRejected, flagged);
+  obsAccessor.flagRejectedObservations(isRejected, flagged);
 }
 
 /// \returns a \p vector of \p TrackObservations that all hold a \p shared_ptr to an instance
@@ -243,8 +259,12 @@ std::vector<TrackCheckShip::TrackObservation> TrackCheckShip::collectTrackObserv
 /// This filter is best for mostly-accurate observation tracks. If the track has
 /// many "errors" (as indicated by the counters that are incremented before
 /// any observations are removed), it will stop early by default.
+///
+/// Sometimes caused by two ships with same callsign or various reports with wrong time,
+/// the check gives up. This is particularly a problem with WOD01 data - case studies
+/// suggest that most suspect data is reasonable.
 bool TrackCheckShip::earlyBreak(const std::vector<std::reference_wrapper<TrackObservation>>
-                                &trackObs) const {
+                                &trackObs, const std::string trackId) const {
   bool breakResult = false;
   const auto& trackStats = *(trackObs[0].get().getFullTrackStatistics());
   // if at least half of the track segments have a time difference of less than an hour
@@ -253,15 +273,12 @@ bool TrackCheckShip::earlyBreak(const std::vector<std::reference_wrapper<TrackOb
   if ((2 * ((options_->inputCategory.value() != 1)  // 1 is input category of buoy
             * trackStats.numShort_ + trackStats.numFast_) + trackStats.numBends_)
       >= (trackObs.size() - 1)) {
-    std::string stationId = "no station id provided";
-    if (options_->stationIdVariable.value() != boost::none) {
-      stationId = (options_->stationIdVariable.value().get()).variable();
-    }
-    oops::Log::warning() << "ShipTrackCheck: " << stationId << "\n" <<
-                            "Time difference < 1 hour: " << trackStats.numShort_ << "\n" <<
-                            "Fast: " << trackStats.numFast_ << "\n" <<
-                            "Bends: " << trackStats.numBends_ << "\n" <<
-                            "Track was not checked." << std::endl;
+    oops::Log::trace() << "ShipTrackCheck: " << trackId << "\n" <<
+                          "Time difference < 1 hour: " << trackStats.numShort_ << "\n" <<
+                          "Fast: " << trackStats.numFast_ << "\n" <<
+                          "Bends: " << trackStats.numBends_ << "\n" <<
+                          "Total observations: " << trackObs.size() << "\n" <<
+                          "Track was not checked." << std::endl;
 
     breakResult = true;
   }
@@ -270,34 +287,20 @@ bool TrackCheckShip::earlyBreak(const std::vector<std::reference_wrapper<TrackOb
   return breakResult;
 }
 
-/// \brief Filters out all observations that have been marked simultaneous for
-/// rechecking at the end.
-std::vector<std::reference_wrapper<TrackCheckShip::TrackObservation>>
-TrackCheckShip::removeSimultaneousObservations(
-    const std::vector<std::reference_wrapper<TrackObservation>> &trackObs) const {
-  std::vector<std::reference_wrapper<TrackObservation>> reducedTrackObs;
-  std::copy_if(trackObs.begin(), trackObs.end(), std::back_inserter(reducedTrackObs),
-               [](const TrackObservation &obs){
-    return !(obs.getObservationStatistics().simultaneous);});
-  calculateTrackSegmentProperties(reducedTrackObs, CalculationMethod::SIMULTANEOUSDEFERRAL);
-  return reducedTrackObs;
-}
-
 /// \brief Chooses which of the observations surrounding the speediest segment to remove,
 /// flagging it accordingly.
 void TrackCheckShip::removeFaultyObservation(
     std::vector<std::reference_wrapper<TrackObservation>> &track,
     const std::vector<std::reference_wrapper<TrackObservation>>::iterator
     &observationAfterFastestSegment,
-    bool firstIterativeRemoval) const {
+    bool firstIterativeRemoval, const std::string trackId) const {
   int errorCategory = 0;
   util::Duration four_days{"P4D"};
   auto rejectedObservation = observationAfterFastestSegment;
   // lambda function to "fail" an observation that should be rejected
   auto fail = [&rejectedObservation](
       const std::vector<std::reference_wrapper<TrackObservation>>::iterator &iter) {
-    iter->get().registerCheckResult(TrackCheckUtils::CheckResult::FAILED);
-    iter->get().registerSweepOutcome(true);
+    iter->get().setRejected(true);
     rejectedObservation = iter;
   };
   auto neighborObservationStatistics = [&observationAfterFastestSegment](int index) ->
@@ -463,7 +466,7 @@ void TrackCheckShip::removeFaultyObservation(
     }
     if (errorCategory == 9 || std::min(distancePrevObsOmitted, distanceCurrentObsOmitted) == 0.0) {
       oops::Log::trace() << "CheckShipTrack: Dist check, station id: " <<
-                            options_->stationIdVariable.value().get().variable() << std::endl <<
+                            trackId << std::endl <<
                             " error category: " << errorCategory << std::endl <<
                             " distances: " << distanceSum * 0.001 << " " <<
                             distancePrevObsOmitted * 0.001 << " " <<
@@ -477,8 +480,11 @@ void TrackCheckShip::removeFaultyObservation(
   if (errorCategory == 0 || ((rejectedObservation->get().getObservationStatistics().
                               speedAveraged) >
                              options_->maxSpeed.value())) {
-    oops::Log::trace() << "CheckShipTrack: cannot decide between observation and previous, " <<
-                          "rejecting both." << std::endl;
+    oops::Log::trace() << "CheckShipTrack: cannot decide between station id " <<
+                          trackId << " observations " <<
+                          (observationAfterFastestSegment - 1)->get().getObservationNumber() <<
+                          " " << observationAfterFastestSegment->get().getObservationNumber() <<
+                          " rejecting both." << std::endl;
     errorCategory += 100;
     if (options_->testingMode.value() && firstIterativeRemoval) {
       std::vector<size_t> observationNumbersAroundFastest{
@@ -501,9 +507,21 @@ void TrackCheckShip::removeFaultyObservation(
             std::make_pair(rejectedObservationNumber,
                            errorCategory));
     }
+    oops::Log::trace() << "CheckShipTrack: rejecting station " << trackId << " observation " <<
+                          rejectedObservation->get().getObservationNumber() << "\n" <<
+                          "Error category: " << errorCategory << "\n" <<
+                          "rejection candidates: " <<
+                          (observationAfterFastestSegment - 1)->get().getObservationNumber() <<
+                          " " << observationAfterFastestSegment->get().getObservationNumber() <<
+                          "\n" << "speeds: " << (observationAfterFastestSegment - 1)->get().
+                          getObservationStatistics().speed << " " <<
+                          observationAfterFastestSegment->get().getObservationStatistics().speed <<
+                          "\n" << (observationAfterFastestSegment - 1)->get().
+                          getObservationStatistics().angle << " " <<
+                          observationAfterFastestSegment->get().
+                          getObservationStatistics().angle << "\n";
     track.erase(rejectedObservation);
   }
-  oops::Log::trace() << "Error category: " << errorCategory << std::endl;
 }
 /// \todo Trace output will need to be changed to match that of OPS (indices, LWin)
 
@@ -525,20 +543,21 @@ void TrackCheckShip::TrackObservation::calculateTwoObservationValues(
         this->setSpeed(TrackCheckShip::speedEstimate(*this, prevObs, options)) :
         this->setSpeed(0.0);
   this->setTimeDifference(getTime() - prevObs.getTime());
-  if (!(this->observationStatistics_.timeDifference.toSeconds())) {
-    if (this->observationStatistics_.distance >
-        options.spatialResolution) {
-      prevObs.setSimultaneous(true);
-    }
-    setSimultaneous(true);
-  }
   if (firstIteration) {
     adjustTwoObservationStatistics(options);
   }
 }
 
+void TrackCheckShip::TrackObservation::resetObservationCalculations() {
+  this->setDistance(0.0);
+  this->setSpeed(0.0);
+  this->setDistanceAveraged(0.0);
+  this->setSpeedAveraged(0.0);
+  this->setAngle(0.0);
+}
+
 /// Calculates all of the statistics that require three
-/// adjacent \p TrackObservations,
+/// consecutive \p TrackObservations,
 /// storing within the middle observation. This includes
 /// distance between two alternating observations,
 /// speed between these alternating observations (if the middle
@@ -568,6 +587,8 @@ void TrackCheckShip::calculateTrackSegmentProperties(
     const std::vector<std::reference_wrapper<TrackObservation>> &trackObservations,
     CalculationMethod calculationMethod) const {
   if (trackObservations.size()) {
+    if (calculationMethod == MAINLOOP)
+      trackObservations[0].get().resetObservationCalculations();
     for (size_t obsIdx = 1; obsIdx < trackObservations.size(); obsIdx++) {
       TrackObservation &obs = trackObservations[obsIdx].get();
       TrackObservation &prevObs = trackObservations[obsIdx - 1].get();
@@ -592,8 +613,6 @@ void TrackCheckShip::calculateTrackSegmentProperties(
       auto trackStats = *(trackObservations[0].get().getFullTrackStatistics());
       if (calculationMethod == FIRSTITERATION)
         diagnostics_->storeInitialCalculationResults(std::make_pair(obsStats, trackStats));
-      else if (calculationMethod == SIMULTANEOUSDEFERRAL)
-        diagnostics_->storeCalculatedResultsSimultaneousDeferred(obsStats);
     }
   }
 }
@@ -603,8 +622,6 @@ void TrackCheckShip::calculateTrackSegmentProperties(
 void TrackCheckShip::TrackObservation::adjustTwoObservationStatistics
 (const TrackCheckShipParameters &options) const {
   util::Duration hour{"PT1H"};
-  if (getObservationStatistics().distance == 0.0)
-    getFullTrackStatistics()->numDist0_++;
   if (getObservationStatistics().timeDifference < hour) {
     getFullTrackStatistics()->numShort_++;
   } else if (getObservationStatistics().speed >= options.maxSpeed) {
@@ -632,14 +649,6 @@ TrackCheckShip::TrackObservation::getFullTrackStatistics() const
   return fullTrackStatistics_;
 }
 
-/// Sets the calling observation as simultaneous and increments the track-wise
-/// \p numSimultaneous_ counter.
-void TrackCheckShip::TrackObservation::setSimultaneous(bool simul) {
-  assert(simul);  // reverting a simultaneous obs to normal is not yet implemented
-  if (!this->observationStatistics_.simultaneous)
-    this->fullTrackStatistics_->numSimultaneous_++;
-  this->observationStatistics_.simultaneous = simul;
-}
 void TrackCheckShip::TrackObservation::setDistance(double dist) {
   this->observationStatistics_.distance = dist;
 }

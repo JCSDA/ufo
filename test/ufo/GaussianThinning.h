@@ -48,6 +48,11 @@ void testGaussianThinning(const eckit::LocalConfiguration &conf) {
     obsspace.put_db("MetaData", "category", categories);
   }
 
+  if (conf.has("string_category")) {
+    const std::vector<std::string> categories = conf.getStringVector("string_category");
+    obsspace.put_db("MetaData", "string_category", categories);
+  }
+
   if (conf.has("priority")) {
     const std::vector<int> priorities = conf.getIntVector("priority");
     obsspace.put_db("MetaData", "priority", priorities);
@@ -58,8 +63,10 @@ void testGaussianThinning(const eckit::LocalConfiguration &conf) {
   std::shared_ptr<ioda::ObsDataVector<int>> qcflags(new ioda::ObsDataVector<int>(
       obsspace, obsspace.obsvariables()));
 
-  const eckit::LocalConfiguration filterConf(conf, "GaussianThinning");
-  ufo::Gaussian_Thinning filter(obsspace, filterConf, qcflags, obserr);
+  eckit::LocalConfiguration filterConf(conf, "GaussianThinning");
+  ufo::GaussianThinningParameters filterParameters;
+  filterParameters.validateAndDeserialize(filterConf);
+  ufo::Gaussian_Thinning filter(obsspace, filterParameters, qcflags, obserr);
   filter.preProcess();
 
   const std::vector<size_t> expectedThinnedObsIndices =

@@ -1,0 +1,26 @@
+window begin: 2018-04-14T20:00:00Z
+window end: 2018-04-15T03:00:00Z
+
+observations:
+- obs space:
+    name: Satwind
+    obsdatain:
+      obsfile: Data/ioda/testinput_tier_1/wind_unit_transforms_2018041500.nc4
+    obsdataout:
+       obsfile: Data/windspeedanddirection_2018041500_output.nc4
+    simulated variables: [eastward_wind, northward_wind]
+  obs filters:
+  - filter: Wind Speed And Direction        # calculate speed and direction from wind components
+  # how many data points will pass the filter? Should pass for all present obs
+  passedBenchmark: 148
+  compareVariables:            #  test output matches precalculated values
+    - reference:
+        name: wind_speed@TestReference
+      test:
+        name: wind_speed@ObsValue
+      absTol: 5.0e-5
+    - reference:
+        name: wind_from_direction@TestReference
+      test:
+        name: wind_from_direction@ObsValue
+      absTol: 5.0e-5

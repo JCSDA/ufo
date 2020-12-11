@@ -15,17 +15,16 @@ namespace ufo {
 
   ProfileCheckUnstableLayer::ProfileCheckUnstableLayer
   (const ProfileConsistencyCheckParameters &options,
-   const ProfileIndices &profileIndices,
    ProfileDataHandler &profileDataHandler,
    ProfileCheckValidator &profileCheckValidator)
-    : ProfileCheckBase(options, profileIndices, profileDataHandler, profileCheckValidator)
+    : ProfileCheckBase(options, profileDataHandler, profileCheckValidator)
   {}
 
   void ProfileCheckUnstableLayer::runCheck()
   {
     oops::Log::debug() << " Unstable layer/superadiabat check" << std::endl;
 
-    const int numLevelsToCheck = profileIndices_.getNumLevelsToCheck();
+    const int numProfileLevels = profileDataHandler_.getNumProfileLevels();
 
     const std::vector <float> &pressures =
        profileDataHandler_.get<float>(ufo::VariableNames::obs_air_pressure);
@@ -57,7 +56,7 @@ namespace ufo {
     PBottom_ = 0.0;
 
     int jlevprev = 0;
-    for (int jlev = 0; jlev < numLevelsToCheck; ++jlev) {
+    for (int jlev = 0; jlev < numProfileLevels; ++jlev) {
       // Ignore this level if it has been flagged as rejected.
       if (tFlags[jlev] & ufo::MetOfficeQCFlags::Elem::FinalRejectFlag) continue;
       if (tObsFinal[jlev] != missingValueFloat &&
@@ -98,7 +97,7 @@ namespace ufo {
 
   void ProfileCheckUnstableLayer::fillValidator()
   {
-    std::vector <float> PBottom(profileIndices_.getNumLevelsToCheck(), PBottom_);
+    std::vector <float> PBottom(profileDataHandler_.getNumProfileLevels(), PBottom_);
     profileDataHandler_.set(ufo::VariableNames::PBottom, std::move(PBottom));
   }
 }  // namespace ufo

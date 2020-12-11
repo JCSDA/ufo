@@ -66,9 +66,7 @@ template <typename MODEL> class RunCRTM : public oops::Application {
       const ObsAuxCtrl_ ybias(obsdb[jj], conf[jj]);
 
       ObsVector_ hofx(obsdb[jj]);
-      ObsDiags_ diag(obsdb[jj],
-                     hop.locations(obsdb[jj].windowStart(), obsdb[jj].windowEnd()),
-                     diagvars);
+      ObsDiags_ diag(obsdb[jj], hop.locations(), diagvars);
 
       hop.simulateObs(gval, hofx, ybias, diag);
 
