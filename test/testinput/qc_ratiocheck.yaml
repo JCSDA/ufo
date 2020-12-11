@@ -1,0 +1,29 @@
+window begin: 2018-01-01T00:00:00Z
+window end: 2019-01-01T00:00:00Z
+observations:
+- obs space:
+    name: test data
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
+    simulated variables: [variable1]
+  obs filters:
+  - filter: Ratio Check   # test min and maxvalue of ratio of var2/var1
+    filter variables:
+    - name: variable1
+    value: variable2@ObsValue       # 10, 12, 14, 16, 18, 20, 22, 24, 26, 28
+    reference: variable1@ObsValue   # 10, 11, 12, 13, 14, 15, 16, 17, 18, 19
+    minvalue: 1.1
+    maxvalue: 1.45
+    absolute: true    # does not matter here but showing for syntax
+  passedBenchmark: 7
+- obs space:
+    name: test data
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
+    simulated variables: [variable1]
+  obs filters:
+  - filter: Ratio Check    # compare var3/var4 with min
+    value: var3@MetaData        # var3@MetaData = 1, 1, 1, 1, 1, 0, 0, 0, 0, 0
+    reference: var4@MetaData    # var4@MetaData = 0, 0, 0, 0, 0, 1, 2, 3, 4, 5
+    minvalue: 0.5
+  passedBenchmark: 0
