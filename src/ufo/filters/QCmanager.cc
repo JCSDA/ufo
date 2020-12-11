@@ -109,6 +109,7 @@ void QCmanager::print(std::ostream & os) const {
     size_t iseaice  = 0;
     size_t itrack   = 0;
     size_t ibuddy   = 0;
+    size_t iratioref = 0;
     size_t ionedvar  = 0;
 
     for (size_t jobs = 0; jobs < iobs; ++jobs) {
@@ -129,9 +130,33 @@ void QCmanager::print(std::ostream & os) const {
       if ((*flags_)[jj][jobs] == QCflags::track)  ++itrack;
       if ((*flags_)[jj][jobs] == QCflags::buddy)  ++ibuddy;
       if ((*flags_)[jj][jobs] == QCflags::derivative) ++idydx;
+      if ((*flags_)[jj][jobs] == QCflags::ratioref) ++iratioref;
       if ((*flags_)[jj][jobs] == QCflags::onedvar) ++ionedvar;
     }
 
+    if (obsdb_.isDistributed()) {
+      obsdb_.comm().allReduceInPlace(iobs, eckit::mpi::sum());
+      obsdb_.comm().allReduceInPlace(ipass, eckit::mpi::sum());
+      obsdb_.comm().allReduceInPlace(imiss, eckit::mpi::sum());
+      obsdb_.comm().allReduceInPlace(ipreq, eckit::mpi::sum());
+      obsdb_.comm().allReduceInPlace(ibnds, eckit::mpi::sum());
+      obsdb_.comm().allReduceInPlace(iwhit, eckit::mpi::sum());
+      obsdb_.comm().allReduceInPlace(iblck, eckit::mpi::sum());
+      obsdb_.comm().allReduceInPlace(iherr, eckit::mpi::sum());
+      obsdb_.comm().allReduceInPlace(ifgss, eckit::mpi::sum());
+      obsdb_.comm().allReduceInPlace(iclw,  eckit::mpi::sum());
+      obsdb_.comm().allReduceInPlace(iprof, eckit::mpi::sum());
+      obsdb_.comm().allReduceInPlace(ignss, eckit::mpi::sum());
+      obsdb_.comm().allReduceInPlace(ithin, eckit::mpi::sum());
+      obsdb_.comm().allReduceInPlace(idiffref, eckit::mpi::sum());
+      obsdb_.comm().allReduceInPlace(iseaice,  eckit::mpi::sum());
+      obsdb_.comm().allReduceInPlace(itrack,  eckit::mpi::sum());
+      obsdb_.comm().allReduceInPlace(ibuddy,  eckit::mpi::sum());
+      obsdb_.comm().allReduceInPlace(idydx,   eckit::mpi::sum());
+      obsdb_.comm().allReduceInPlace(iratioref, eckit::mpi::sum());
+      obsdb_.comm().allReduceInPlace(ionedvar, eckit::mpi::sum());
+    }
+      
     const ioda::Distribution & distribution = obsdb_.distribution();
     distribution.sum(iobs);
     distribution.sum(ipass);
@@ -152,6 +177,7 @@ void QCmanager::print(std::ostream & os) const {
     distribution.sum(ibuddy);
     distribution.sum(idydx);
     distribution.sum(ionedvar);
+    distribution.sum(iratioref);
 
     if (obsdb_.comm().rank() == 0) {
       const std::string info = "QC " + flags_->obstype() + " " + observed_[jj] + ": ";
@@ -171,13 +197,15 @@ void QCmanager::print(std::ostream & os) const {
       if (iseaice  > 0) os << info << iseaice  << " removed by sea ice check." << std::endl;
       if (itrack   > 0) os << info << itrack  << " removed by track check." << std::endl;
       if (ibuddy   > 0) os << info << ibuddy  << " removed by buddy check." << std::endl;
+      if (iratioref > 0) os << info << iratioref << " rejected by ratio check." << std::endl;
       if (ionedvar  > 0) os << info << ionedvar  << " removed by 1D Var check." << std::endl;
 
       os << info << ipass << " passed out of " << iobs << " observations." << std::endl;
     }
 
     ASSERT(ipass + imiss + ipreq + ibnds + iwhit + iblck + iherr + ithin + iclw + iprof + ifgss + \
-           ignss + idiffref + iseaice + itrack + ibuddy + idydx  + ionedvar == iobs);
+           ignss + idiffref + iseaice + itrack + ibuddy + idydx + ionedvar + iratioref == iobs);
+
   }
 }
 
