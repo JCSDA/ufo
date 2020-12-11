@@ -25,6 +25,7 @@
 #include "ufo/filters/PreQC.h"
 #include "ufo/filters/ProfileConsistencyChecks.h"
 #include "ufo/filters/QCmanager.h"
+#include "ufo/filters/RatioCheck.h"
 #include "ufo/filters/TemporalThinning.h"
 #include "ufo/filters/Thinning.h"
 #include "ufo/filters/TrackCheck.h"
@@ -47,6 +48,8 @@ template<typename MODEL> void instantiateObsFilterFactory() {
            blackListMaker("BlackList");
   static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::BackgroundCheck> >
            backgroundCheckMaker("Background Check");
+  static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::RatioCheck> >
+           ratioCheckMaker("Ratio Check");
   static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::DifferenceCheck> >
            differenceCheckMaker("Difference Check");
   static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::ROobserror> >
