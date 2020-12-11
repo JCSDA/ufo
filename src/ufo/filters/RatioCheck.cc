@@ -65,7 +65,7 @@ void RatioCheck::applyFilter(const std::vector<bool> & apply,
   for (size_t jobs = 0; jobs < nlocs; ++jobs) {
     if (apply[jobs]) {
       // check to see if one of the reference or value is missing
-      if (val[jobs] == missing || ref[jobs] == missing || ref[jobs] == 0) {
+      if (val[jobs] == missing || ref[jobs] == missing || ref[jobs] == 0.0) {
         for (size_t jv = 0; jv < filtervars.nvars(); ++jv) {
           flagged[jv][jobs] = true;
         }
