@@ -20,8 +20,6 @@ set ( filters_files
       BlackList.h
       DifferenceCheck.cc
       DifferenceCheck.h
-      RatioCheck.cc
-      RatioCheck.h 
       FilterBase.cc
       FilterBase.h
       FilterParametersBase.h
