@@ -8,6 +8,7 @@
 #ifndef UFO_PROFILE_PROFILEDATAHANDLER_H_
 #define UFO_PROFILE_PROFILEDATAHANDLER_H_
 
+#include <memory>
 #include <string>
 #include <unordered_map>
 #include <utility>
@@ -41,8 +42,7 @@ namespace ufo {
    public:
     ProfileDataHandler(ioda::ObsSpace &obsdb,
                        const DataHandlerParameters &options,
-                       EntireSampleDataHandler &entireSampleDataHandler,
-                       const ProfileIndices &profileIndices);
+                       const std::vector <bool> &apply);
 
     /// Retrieve a vector containing the requested variable for the current profile.
     ///    -# If the variable has previously been placed in a vector, return the vector.
@@ -72,7 +72,7 @@ namespace ufo {
         } else {
           std::vector <T> vec_prof;  // Vector storing data for current profile.
           // Retrieve variable vector from entire sample.
-          const std::vector <T> &vec_all = entireSampleDataHandler_.get<T>(fullname);
+          const std::vector <T> &vec_all = entireSampleDataHandler_->get<T>(fullname);
           // Only proceed if the vector is not empty.
           if (!vec_all.empty()) {
             getProfileIndicesInEntireSample(groupname);
@@ -101,19 +101,32 @@ namespace ufo {
         }
       }
 
+    /// Initialise the next profile prior to applying checks.
+    /// Clears \p profileData_ and determines the \p profileIndices_ for the next profile.
+    void initialiseNextProfile();
+
+    /// Update information for this profile.
+    /// This function calls three other functions which take the following actions:
+    /// 1. Set final report flags in this profile,
+    /// 2. Modify 'flagged' vector for each filter variable based on check results,
+    /// 3. If any variables in the current profile were modified by the checks,
+    ///    the equivalent variables in the entire sample are set to the modified values.
+    void updateProfileInformation(const size_t nvars, std::vector<std::vector<bool>> &flagged);
+
+    /// Write various quantities to the obsdb so they can be used in future QC checks.
+    /// Use the method in EntireSampleDataHandler to do this.
+    void writeQuantitiesToObsdb();
+
+    /// Return obsdb
+    ioda::ObsSpace &getObsdb() {return obsdb_;}
+
+    /// Return number of levels to which QC checks should be applied.
+    int getNumProfileLevels() const {return profileIndices_->getNumProfileLevels();}
+
+   private:  // functions
     /// Reset profile information (vectors and corresponding names).
     /// This should be called every time a new profile will be retrieved.
-    void reset();
-
-    /// Transfer values from one vector to another (as long as neither is empty).
-    template <typename T>
-      void updateValueIfPresent(const std::vector <T> &vecIn, const size_t &idxIn,
-                                std::vector <T> &vecOut, const size_t &idxOut)
-      {
-        // Ensure neither vector is empty.
-        if (oops::anyVectorEmpty(vecIn, vecOut)) return;
-        vecOut[idxOut] = vecIn[idxIn];
-      }
+    void resetProfileInformation();
 
     /// If any variables in the current profile were modified by the checks,
     /// the equivalent variables in the entire sample are set to the modified values.
@@ -129,13 +142,20 @@ namespace ufo {
     /// a configurable value if required.
     void setFlagged(const size_t nvars, std::vector<std::vector<bool>> &flagged);
 
+    /// Transfer values from one vector to another (as long as neither is empty).
+    template <typename T>
+      void updateValueIfPresent(const std::vector <T> &vecIn, const size_t &idxIn,
+                                std::vector <T> &vecOut, const size_t &idxOut)
+      {
+        // Ensure neither vector is empty.
+        if (oops::anyVectorEmpty(vecIn, vecOut)) return;
+        vecOut[idxOut] = vecIn[idxIn];
+      }
+
     /// Get indices in entire sample corresponding to current profile.
     void getProfileIndicesInEntireSample(const std::string& groupname);
 
-    /// Return obsdb
-    ioda::ObsSpace &getObsdb() {return obsdb_;}
-
-   private:
+   private:  // members
     /// Container of each variable in the current profile.
     std::unordered_map <std::string, boost::variant
       <std::vector <int>, std::vector <float>, std::vector <std::string>>> profileData_;
@@ -147,10 +167,10 @@ namespace ufo {
     const DataHandlerParameters &options_;
 
     /// Class that handles the entire data sample.
-    EntireSampleDataHandler &entireSampleDataHandler_;
+    std::unique_ptr <EntireSampleDataHandler> entireSampleDataHandler_;
 
     /// Class that handles profile indices.
-    const ProfileIndices &profileIndices_;
+    std::unique_ptr <ProfileIndices> profileIndices_;
 
     /// Indices in the entire data sample that correspond to the current profile.
     std::vector <size_t> profileIndicesInEntireSample_;

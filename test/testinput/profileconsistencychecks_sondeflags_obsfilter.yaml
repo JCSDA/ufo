@@ -1,0 +1,30 @@
+#
+#=== Setting a variety of sonde flags ===#
+#
+
+window begin: 2019-06-14T20:30:00Z
+window end: 2019-06-15T03:30:00Z
+
+observations:
+- obs space:
+    name: Radiosonde
+    obsdatain:
+      obsfile: Data/ioda/testinput_tier_1/met_office_profile_consistency_checks_sondeflags.nc4
+      obsgrouping:
+        group variable: "station_id"
+        sort variable: "air_pressure"
+        sort order: "descending"
+    simulated variables: [eastward_wind]
+  obs filters:
+  - filter: Profile Consistency Checks
+    filter variables:
+    - name: eastward_wind
+    Checks: ["Basic", "SondeFlags"]
+    compareWithOPS: false
+    flagBasicChecksFail: true
+    PrintStationID: true
+  HofX: HofX
+  obs diagnostics:
+  passedBenchmark: 1714
+  benchmarkFlag: 15
+  flaggedBenchmark: 77

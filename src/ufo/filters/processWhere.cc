@@ -25,8 +25,7 @@ namespace ufo {
 
 // -----------------------------------------------------------------------------
 ufo::Variables getAllWhereVariables(const eckit::Configuration & config) {
-  std::vector<eckit::LocalConfiguration> masks;
-  config.get("where", masks);
+  std::vector<eckit::LocalConfiguration> masks = config.getSubConfigurations();
 
   ufo::Variables vars;
   for (size_t jm = 0; jm < masks.size(); ++jm) {
@@ -149,15 +148,60 @@ void applyMinMaxDatetime(std::vector<bool> & where, eckit::LocalConfiguration co
 }
 
 // -----------------------------------------------------------------------------
-void processWhereBitSet(const std::vector<int> & data,
-                        const std::set<int> & flags,
-                        std::vector<bool> & mask) {
-  std::bitset<32> flags_bs;
-  for (const int &elem : flags) {
-    flags_bs[elem] = 1;
+/// \brief Process an `any_bit_set_of` keyword in a `where` clause.
+///
+/// This function sets to `false` all elements of `where` corresponding to elements of `data` in
+/// which all bits with indices `bitIndices` are zero. Bits are numbered from 0 starting from the
+/// least significant bit.
+///
+/// The vectors `data` and `where` must be of the same length.
+///
+/// Example: Suppose `data` is set to [1, 3, 4, 8] and bitIndices to [0, 2]. Then this function will
+/// set only the last element of `where` to false, since 8 is the only integer from `data` in whose
+/// binary representation both bits 0 and 2 are zero.
+void processWhereAnyBitSetOf(const std::vector<int> & data,
+                             const std::set<int> & bitIndices,
+                             std::vector<bool> & where) {
+  std::bitset<32> mask_bs;
+  for (const int &bitIndex : bitIndices) {
+    mask_bs[bitIndex] = 1;
   }
+  const int mask = mask_bs.to_ulong();
+
   for (size_t jj = 0; jj < data.size(); ++jj) {
-    if ((data[jj] & flags_bs.to_ulong()) != 0) mask[jj] = false;
+    if ((data[jj] & mask) == 0) {
+      // None of the specified bits is set
+      where[jj] = false;
+    }
+  }
+}
+
+// -----------------------------------------------------------------------------
+/// \brief Process an `any_bit_unset_of` keyword in a `where` clause.
+///
+/// This function sets to `false` all elements of `where` corresponding to elements of `data` in
+/// which all bits with indices `bitIndices` are non-zero. Bits are numbered from 0 starting from
+/// the least significant bit.
+///
+/// The vectors `data` and `where` must be of the same length.
+///
+/// Example: Suppose `data` is set to [1, 3, 4, 5] and bitIndices to [0, 2]. Then this function will
+/// set only the last element of `where` to false, since 5 is the only integer from `data` in whose
+/// binary representation both bits 0 and 2 are non-zero.
+void processWhereAnyBitUnsetOf(const std::vector<int> & data,
+                               const std::set<int> & bitIndices,
+                               std::vector<bool> & where) {
+  std::bitset<32> mask_bs;
+  for (const int &bitIndex : bitIndices) {
+    mask_bs[bitIndex] = 1;
+  }
+  const int mask = mask_bs.to_ulong();
+
+  for (size_t jj = 0; jj < data.size(); ++jj) {
+    if ((data[jj] & mask) == mask) {
+      // None of the specified bits is unset
+      where[jj] = false;
+    }
   }
 }
 
@@ -207,8 +251,7 @@ std::vector<bool> processWhere(const eckit::Configuration & config,
 // Everywhere by default if no mask
   std::vector<bool> where(nlocs, true);
 
-  std::vector<eckit::LocalConfiguration> masks;
-  config.get("where", masks);
+  std::vector<eckit::LocalConfiguration> masks = config.getSubConfigurations();
 
   for (size_t jm = 0; jm < masks.size(); ++jm) {
     eckit::LocalConfiguration varconf(masks[jm], "variable");
@@ -272,12 +315,26 @@ std::vector<bool> processWhere(const eckit::Configuration & config,
         if (masks[jm].has("any_bit_set_of")) {
           if (dtype == ioda::ObsDtype::Integer) {
             std::vector<int> data;
-            std::set<int> flags = oops::parseIntSet(masks[jm].getString("any_bit_set_of"));
+            std::set<int> bitIndices = oops::parseIntSet(masks[jm].getString("any_bit_set_of"));
             filterdata.get(varname, data);
-            processWhereBitSet(data, flags, where);
+            processWhereAnyBitSetOf(data, bitIndices, where);
           } else {
             throw eckit::UserError(
               "Only integer variables may be used for processWhere 'any_bit_set_of'",
+              Here());
+          }
+        }
+
+//      Apply mask any_bit_unset_of
+        if (masks[jm].has("any_bit_unset_of")) {
+          if (dtype == ioda::ObsDtype::Integer) {
+            std::vector<int> data;
+            std::set<int> bitIndices = oops::parseIntSet(masks[jm].getString("any_bit_unset_of"));
+            filterdata.get(varname, data);
+            processWhereAnyBitUnsetOf(data, bitIndices, where);
+          } else {
+            throw eckit::UserError(
+              "Only integer variables may be used for processWhere 'any_bit_unset_of'",
               Here());
           }
         }

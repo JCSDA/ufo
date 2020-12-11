@@ -39,6 +39,7 @@ namespace ufo {
 
 class DistanceCalculator;
 class EquispacedBinSelector;
+class ObsAccessor;
 class PoissonDiskThinningParameters;
 class RecursiveSplitter;
 class SpatialBinSelector;
@@ -67,6 +68,8 @@ class PoissonDiskThinning : public FilterBase,
                    std::vector<std::vector<bool>> &) const override;
   int qcFlag() const override {return QCflags::thinned;}
 
+  ObsAccessor createObsAccessor() const;
+
   /// \brief Collect all observation data components used for thinning.
   ///
   /// \param[out] numSpatialDims
@@ -74,22 +77,23 @@ class PoissonDiskThinning : public FilterBase,
   ///   0 otherwise).
   /// \param[out] numNonspatialDims
   ///   Number of non-spatial dimensions used for thinning.
-  ObsData getObsData(int &numSpatialDims, int &numNonspatialDims) const;
+  ObsData getObsData(const ObsAccessor &obsAccessor,
+                     int &numSpatialDims, int &numNonspatialDims) const;
 
   template <typename ValueType>
   void validateSpacings(const util::ScalarOrMap<int, ValueType> &spacingsByPriority,
       const std::string &parameterName) const;
 
-  std::vector<size_t> getValidObservationIds(const std::vector<bool> &apply) const;
+  std::vector<size_t> getValidObservationIds(const std::vector<bool> &apply,
+                                             const ObsAccessor &obsAccessor) const;
 
-  void groupObservationsByCategory(const std::vector<size_t> &validObsIds,
-                                   RecursiveSplitter &splitter) const;
+  /// Initialise random number generators used for shuffling with the same seed on
+  /// all processes belonging to the given communicator.
+  void synchroniseRandomNumberGenerators(const eckit::mpi::Comm &comm) const;
 
   void groupObservationsByPriority(const std::vector<size_t> &validObsIds,
+                                   const ObsAccessor &obsAccessor,
                                    RecursiveSplitter &splitter) const;
-
-  void flagThinnedObservations(const std::vector<bool> &isThinned,
-                               std::vector<std::vector<bool> > &flagged) const;
 
   void thinCategory(const ObsData &obsData,
                     const std::vector<size_t> &obsIdsInCategory,

@@ -29,7 +29,6 @@
 #include "ufo/profile/ProfileChecker.h"
 #include "ufo/profile/ProfileCheckValidator.h"
 #include "ufo/profile/ProfileDataHandler.h"
-#include "ufo/profile/ProfileIndices.h"
 #include "ufo/profile/VariableNames.h"
 
 namespace ufo {
@@ -70,20 +69,10 @@ namespace ufo {
     const int nlocs = static_cast <int> (obsdb_.nlocs());
     const int nprofs = static_cast <int> (obsdb_.nrecs());
 
-    // Handles data in entire sample
-    EntireSampleDataHandler entireSampleDataHandler(obsdb_,
-                                                    *options_);
-
-    // Determines indices of profile's observations in entire sample
-    ProfileIndices profileIndices(obsdb_,
-                                  *options_,
-                                  apply);
-
     // Handles individual profile data
     ProfileDataHandler profileDataHandler(obsdb_,
-                                          *options_,
-                                          entireSampleDataHandler,
-                                          profileIndices);
+                                          options_->DHParameters,
+                                          apply);
 
     // (Optionally) validates check results against OPS values
     ProfileCheckValidator profileCheckValidator(*options_,
@@ -91,7 +80,6 @@ namespace ufo {
 
     // Applies checks to each profile
     ProfileChecker profileChecker(*options_,
-                                  profileIndices,
                                   profileDataHandler,
                                   profileCheckValidator);
 
@@ -101,11 +89,8 @@ namespace ufo {
     for (int jprof = 0; jprof < nprofs; ++jprof) {
       oops::Log::debug() << "Profile " << (jprof + 1) << " / " << nprofs << std::endl;
 
-      // Determine indices in entire sample that correspond to this profile
-      profileIndices.determineProfileIndices();
-
-      // Reset contents of profile data handler
-      profileDataHandler.reset();
+      /// Initialise the next profile prior to applying checks.
+      profileDataHandler.initialiseNextProfile();
 
       // Print station ID if requested
       if (options_->PrintStationID.value()) {
@@ -118,15 +103,8 @@ namespace ufo {
       // Run checks
       profileChecker.runChecks();
 
-      // After all checks have run, set final report flags in this profile
-      profileDataHandler.setFinalReportFlags();
-
-      // Modify 'flagged' vector for each filter variable based on check results
-      profileDataHandler.setFlagged(filtervars.nvars(), flagged);
-
-      // If any variables in the current profile were modified by the checks,
-      // the equivalent variables in the entire sample are set to the modified values.
-      profileDataHandler.updateEntireSampleData();
+      // Update information, including the 'flagged' vector, for this profile.
+      profileDataHandler.updateProfileInformation(filtervars.nvars(), flagged);
 
       // Optionally compare check results with OPS values
       if (options_->compareWithOPS.value() && profileChecker.getBasicCheckResult()) {
@@ -136,7 +114,7 @@ namespace ufo {
     }
 
     // Write out any quantities that may have changed to obsdb
-    entireSampleDataHandler.writeQuantitiesToObsdb();
+    profileDataHandler.writeQuantitiesToObsdb();
 
     oops::Log::debug() << "... Finished loop over profiles" << std::endl;
     oops::Log::debug() << std::endl;

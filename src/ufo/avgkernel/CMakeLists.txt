@@ -10,6 +10,11 @@ set ( avgkernel_files
     ObsAvgKernel.interface.h
     ufo_avgkernel_mod.F90
     ufo_satcolumn_mod.F90
+    ObsAvgKernelTLAD.h
+    ObsAvgKernelTLAD.cc
+    ObsAvgKernelTLAD.interface.F90
+    ObsAvgKernelTLAD.interface.h
+    ufo_avgkernel_tlad_mod.F90
 )
 
 PREPEND( _p_avgkernel_files     "avgkernel"     ${avgkernel_files} )

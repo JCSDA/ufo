@@ -30,9 +30,10 @@ class ObsSpace;
 
 namespace ufo {
 
-class TrackCheckParameters;
+class ObsAccessor;
 class PiecewiseLinearInterpolation;
 class RecursiveSplitter;
+class TrackCheckParameters;
 
 /// \brief Checks tracks of mobile weather stations, rejecting observations inconsistent with the
 /// rest of the track.
@@ -73,7 +74,9 @@ class TrackCheck : public FilterBase,
     std::vector<float> pressures;
   };
 
-  ObsGroupPressureLocationTime collectObsPressuresLocationsTimes() const;
+  ObsGroupPressureLocationTime collectObsPressuresLocationsTimes(
+      const ObsAccessor &obsAccessor) const;
+
  public:
   static const std::string classname() { return "ufo::TrackCheck"; }
 
@@ -82,6 +85,7 @@ class TrackCheck : public FilterBase,
              std::shared_ptr<ioda::ObsDataVector<float> > obserr);
 
   ~TrackCheck() override;
+
  private:
   /// \brief Attributes of an observation belonging to a track.
   class TrackObservation {
@@ -143,6 +147,7 @@ class TrackCheck : public FilterBase,
                    std::vector<std::vector<bool>> &) const override;
   int qcFlag() const override {return QCflags::track;}
 
+  ObsAccessor createObsAccessor() const;
 
   /// Returns an interpolator mapping pressures (in Pa) to maximum accepted speeds (in km/s).
   PiecewiseLinearInterpolation makeMaxSpeedByPressureInterpolation() const;

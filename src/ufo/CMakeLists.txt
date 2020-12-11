@@ -125,3 +125,7 @@ ecbuild_add_library( TARGET   ufo
                      HEADER_DESTINATION ${INSTALL_INCLUDE_DIR}/ufo
                      LINKER_LANGUAGE ${OOPS_LINKER_LANGUAGE}
                     )
+
+if (${RTTOV_FOUND})
+  target_compile_definitions(ufo PUBLIC RTTOV_FOUND)
+endif()

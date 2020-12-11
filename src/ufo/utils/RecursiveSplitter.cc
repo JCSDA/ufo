@@ -74,16 +74,6 @@ void RecursiveSplitter::groupByImpl(const std::vector<T> &categories) {
     encodedGroups_[lastIndexInLastGroup + 1] = numIds;
 }
 
-void RecursiveSplitter::shuffleGroups(unsigned int seed) {
-  for (Group group : multiElementGroups()) {
-    std::vector<size_t>::iterator nonConstGroupBegin =
-        orderedIds_.begin() + (group.begin() - orderedIds_.cbegin());
-    std::vector<size_t>::iterator nonConstGroupEnd =
-        orderedIds_.begin() + (group.end() - orderedIds_.cbegin());
-    util::shuffle(nonConstGroupBegin, nonConstGroupEnd, seed);
-  }
-}
-
 void RecursiveSplitter::shuffleGroups() {
   for (Group group : multiElementGroups()) {
     std::vector<size_t>::iterator nonConstGroupBegin =
@@ -92,6 +82,11 @@ void RecursiveSplitter::shuffleGroups() {
         orderedIds_.begin() + (group.end() - orderedIds_.cbegin());
     util::shuffle(nonConstGroupBegin, nonConstGroupEnd);
   }
+}
+
+void RecursiveSplitter::setSeed(unsigned int seed, bool force) {
+  std::vector<size_t> dummy;
+  util::shuffle(dummy.begin(), dummy.end(), seed, force);
 }
 
 template void RecursiveSplitter::groupByImpl(const std::vector<int> &);

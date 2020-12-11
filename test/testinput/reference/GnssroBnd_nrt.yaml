@@ -1,0 +1,131 @@
+window begin: '2020-10-01T03:00:00Z'
+window length: PT6H
+forecast length: PT6H
+geometry:
+  nml_file_mpp: config/fv3files/fmsmpp.nml
+  trc_file: config/fv3files/field_table
+  akbk: config/fv3files/akbk64.nc4
+  layout: [2, 2]
+  io_layout: [1,1]
+  npx: 769
+  npy: 769
+  npz: 64
+  ntiles: 6
+  fieldsets:
+    - fieldset: config/fieldsets/dynamics.yaml
+    - fieldset: config/fieldsets/ufo.yaml
+  interp_method: barycent
+forecasts:
+  filetype: gfs
+  datapath: input/bg/window_center/
+  filename_core: 20201001.060000.fv_core.res.nc
+  filename_trcr: 20201001.060000.fv_tracer.res.nc
+  filename_sfcd: 20201001.060000.sfc_data.nc
+  filename_sfcw: 20201001.060000.fv_srf_wnd.res.nc
+  filename_cplr: 20201001.060000.coupler.res
+  state variables: [u,v,ua,va,T,DELP,sphum,ice_wat,liq_wat,o3mr,phis,
+                    slmsk,sheleg,tsea,vtype,stype,vfrac,stc,smc,snwdph,
+                    u_srf,v_srf,f10m]
+observations:
+- obs space:
+    name: GnssroBndNBAM
+    obsdatain:
+      obsfile: input/obs/ioda_nomads_gnssro_PT6H_20201001_0300Z.nc4
+      obsgrouping:
+        group variable: record_number
+        sort variable: impact_height
+        sort order: ascending
+    obsdataout:
+      obsfile: output/hofx/3dhofx_GnssroBndNBAM_2020100106.nc4
+    simulated variables: [bending_angle]
+  obs operator:
+    name: GnssroBndNBAM
+    obs options:
+      sr_steps: 2   
+      vertlayer: full
+      use_compress: 1
+      super_ref_qc: NBAM
+  obs filters:
+  - filter: Domain Check 
+    filter variables:
+    - name: [bending_angle]
+    where:
+    - variable:
+        name: impact_height@MetaData
+      minvalue: 0
+      maxvalue: 50000
+  - filter: ROobserror
+    filter variables:
+    - name: bending_angle
+    errmodel: NRL
+  - filter: Background Check
+    filter variables:
+    - name: [bending_angle]
+    threshold: 3
+- obs space:
+    name: GnssroBndROPP1D
+    obsdatain:
+      obsfile: input/obs/ioda_nomads_gnssro_PT6H_20201001_0300Z.nc4
+      obsgrouping: 
+        group variable: record_number
+        sort variable: impact_height
+        sort order: ascending
+    obsdataout:
+      obsfile: output/hofx/3dhofx_GnssroBndROPP1D_2020100106.nc4
+    simulated variables: [bending_angle]
+  obs operator:
+    name: GnssroBndROPP1D
+    obs options:
+  obs filters:
+  - filter: Domain Check
+    filter variables:
+    - name: [bending_angle]
+    where:
+    - variable:
+        name: impact_height@MetaData
+      minvalue: 0
+      maxvalue: 50000
+  - filter: ROobserror
+    filter variables:
+    - name: bending_angle
+    errmodel: NRL
+  - filter: Background Check
+    filter variables:
+    - name: [bending_angle]
+    threshold: 3
+- obs space:
+    name: GnssroBndROPP2D
+    obsdatain:
+      obsfile: input/obs/ioda_nomads_gnssro_PT6H_20201001_0300Z.nc4
+      obsgrouping:
+        group variable: record_number
+        sort variable: impact_height
+        sort order: ascending
+    obsdataout:
+      obsfile: output/hofx/3dhofx_GnssroBndROPP2D_2020100106.nc4
+    simulated variables: [bending_angle]
+  obs operator:
+    name: GnssroBndROPP2D
+    obs options:
+      n_horiz: 31
+      res: 40.0
+      top_2d: 10.0
+  obs filters:
+  - filter: Domain Check
+    filter variables:
+    - name: [bending_angle]
+    where:
+    - variable:
+        name: impact_height@MetaData
+      minvalue: 0
+      maxvalue: 50000
+  - filter: ROobserror
+    filter variables:
+    - name: bending_angle
+    errmodel: NRL
+  - filter: Background Check
+    filter variables:
+    - name: [bending_angle]
+    threshold: 3
+Prints:
+  frequency: PT3H

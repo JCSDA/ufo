@@ -296,7 +296,7 @@ Priorities:
       name: priority@MetaData
   expected_thinned_obs_indices: [ 0, 2, 4 ]
 
-Categories:
+Int-valued categories:
   window begin: 2000-01-01T00:00:00Z
   window end: 2030-01-01T00:00:00Z
   obs space:
@@ -318,6 +318,30 @@ Categories:
     exclusion_volume_shape: ellipsoid
     category_variable:
       name: category@MetaData
+  expected_thinned_obs_indices: [ 2, 3 ]
+
+String-valued categories:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Aircraft
+    simulated variables: [air_temperature]
+    generate:
+      list:
+        lats: [ 0,  0,  0,  0,  0,  0 ]
+        lons: [ 0,  0,  0,  0,  0,  0 ]
+        datetimes: [ '2010-01-01T00:04:00Z', '2010-01-01T00:04:12Z', '2010-01-01T00:04:24Z',
+                     '2010-01-01T00:04:36Z', '2010-01-01T00:04:48Z', '2010-01-01T00:05:00Z' ]
+      obs errors: [1.0]
+  air_pressures: [ 10000, 10000, 20000, 20000, 30000, 30000 ]
+  string_category: ["a", "b", "a", "b", "a", "b"]
+  Poisson Disk Thinning:
+    variables: [air_temperature]
+    min_vertical_spacing: 10001
+    shuffle: false
+    exclusion_volume_shape: ellipsoid
+    category_variable:
+      name: string_category@MetaData
   expected_thinned_obs_indices: [ 2, 3 ]
 
 Variable min spacings:

@@ -30,8 +30,14 @@
 #include "ufo/filters/Thinning.h"
 #include "ufo/filters/TrackCheck.h"
 #include "ufo/filters/TrackCheckShip.h"
+#include "ufo/filters/variabletransforms/WindComponents.h"
+#include "ufo/filters/variabletransforms/WindSpeedAndDirection.h"
 #include "ufo/gnssro/QC/BackgroundCheckRONBAM.h"
 #include "ufo/gnssro/QC/ROobserror.h"
+
+#if defined(RTTOV_FOUND)
+  #include "ufo/filters/rttovonedvarcheck/RTTOVOneDVarCheck.h"
+#endif
 
 namespace ufo {
 template<typename MODEL> void instantiateObsFilterFactory() {
@@ -80,6 +86,16 @@ template<typename MODEL> void instantiateObsFilterFactory() {
            DerivativeCheckMaker("Derivative Check");
   static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::TrackCheckShip> >
            ShipTrackCheckMaker("Ship Track Check");
+  static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::WindComponents> >
+           WindComponentsMaker("Wind Components");
+  static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::WindSpeedAndDirection> >
+           WindSpeedAndDirectionMaker("Wind Speed And Direction");
+
+  // Only include this filter if rttov is present
+  #if defined(RTTOV_FOUND)
+    static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::RTTOVOneDVarCheck> >
+             RTTOVOneDVarCheckMaker("RTTOV OneDVar Check");
+  #endif
 
   // For backward compatibility, register some filters under legacy names used in the past
   static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::Gaussian_Thinning> >

@@ -1,8 +1,9 @@
 # These tests compare the output of the Track Check filter against reference
 # results obtained with the Met Office OPS code (Ops_AirTrackCheck). The first test case is used as
 # a baseline; in subsequent test cases the filter's configuration contains one parameter
-# whose value differs from the first case. The last case is identical to the first one except that
-# observations are grouped explicitly by the station_id variable rather than the record number.
+# whose value differs from the first case. The last two cases are identical to the first one
+# except that observations are grouped explicitly by the station_id variable rather than the
+# record number.
 
 window begin: 2000-01-01T00:00:00Z
 window end: 2029-12-12T23:59:59Z
@@ -25,7 +26,7 @@ observations:
     max_climb_rate:   200.000000
     max_speed_interpolation_points: {"0":  1000.000000, "20000":   400.000000, "100000":   200.000000, "110000":   200.000000}
     rejection_threshold:     0.500000
-  flaggedObservationsBenchmark:
+  flaggedObservationsBenchmark: &referenceCaseFlaggedObsIds
       - 184
       - 187
       - 188
@@ -485,7 +486,7 @@ observations:
       - 2098
   flaggedBenchmark: 32
   benchmarkFlag: 12 # track
-- obs space:
+- obs space: # No grouping into records
     name: Aircraft
     obsdatain:
       obsfile: Data/ioda/testinput_tier_1/aircraft_obs_2018041500_m.nc4
@@ -502,42 +503,28 @@ observations:
     rejection_threshold:     0.500000
     station_id_variable:
       name: station_id@MetaData
-  flaggedObservationsBenchmark:
-      - 184
-      - 187
-      - 188
-      - 193
-      - 268
-      - 270
-      - 307
-      - 312
-      - 370
-      - 377
-      - 466
-      - 467
-      - 700
-      - 712
-      - 751
-      - 753
-      - 755
-      - 762
-      - 788
-      - 795
-      - 806
-      - 808
-      - 990
-      - 991
-      - 996
-      - 998
-      - 1005
-      - 1013
-      - 1018
-      - 1023
-      - 1029
-      - 1030
-      - 1809
-      - 1810
-      - 2089
-      - 2098
+  flaggedObservationsBenchmark: *referenceCaseFlaggedObsIds
+  flaggedBenchmark: 36
+  benchmarkFlag: 12 # track
+- obs space: # Group into records (perversely) by something else than the station ID
+    name: Aircraft
+    obsdatain:
+      obsfile: Data/ioda/testinput_tier_1/aircraft_obs_2018041500_m.nc4
+      obsgrouping:
+        group variable: "latitude"
+    simulated variables: [specific_humidity]
+  obs filters:
+  - filter: Track Check
+    variables: [specific_humidity]
+    temporal_resolution: PT00H00M30S
+    spatial_resolution:    20.000000
+    distinct_buddy_resolution_multiplier: 3
+    num_distinct_buddies_per_direction: 3
+    max_climb_rate:   200.000000
+    max_speed_interpolation_points: {"0":  1000.000000, "20000":   400.000000, "100000":   200.000000, "110000":   200.000000}
+    rejection_threshold:     0.500000
+    station_id_variable:
+      name: station_id@MetaData
+  flaggedObservationsBenchmark: *referenceCaseFlaggedObsIds
   flaggedBenchmark: 36
   benchmarkFlag: 12 # track

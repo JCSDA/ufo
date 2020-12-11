@@ -14,11 +14,9 @@
 
 namespace ufo {
   ProfileCheckBase::ProfileCheckBase(const ProfileConsistencyCheckParameters &options,
-                                     const ProfileIndices &profileIndices,
                                      ProfileDataHandler &profileDataHandler,
                                      ProfileCheckValidator &profileCheckValidator)
     : options_(options),
-      profileIndices_(profileIndices),
       profileDataHandler_(profileDataHandler),
       profileCheckValidator_(profileCheckValidator)
   {}
@@ -33,7 +31,6 @@ namespace ufo {
   std::unique_ptr<ProfileCheckBase>
   ProfileCheckFactory::create(const std::string& name,
                               const ProfileConsistencyCheckParameters &options,
-                              const ProfileIndices &profileIndices,
                               ProfileDataHandler &profileDataHandler,
                               ProfileCheckValidator &profileCheckValidator)
   {
@@ -47,7 +44,6 @@ namespace ufo {
                                 "Possible values:" + makerNameList, Here());
     }
     std::unique_ptr<ProfileCheckBase> ptr = jloc->second->make(options,
-                                                               profileIndices,
                                                                profileDataHandler,
                                                                profileCheckValidator);
     oops::Log::trace() << "ProfileCheckBase::create done" << std::endl;

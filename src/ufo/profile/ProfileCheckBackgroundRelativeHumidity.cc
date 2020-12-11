@@ -14,17 +14,16 @@ namespace ufo {
 
   ProfileCheckBackgroundRelativeHumidity::ProfileCheckBackgroundRelativeHumidity
   (const ProfileConsistencyCheckParameters &options,
-   const ProfileIndices &profileIndices,
    ProfileDataHandler &profileDataHandler,
    ProfileCheckValidator &profileCheckValidator)
-    : ProfileCheckBase(options, profileIndices, profileDataHandler, profileCheckValidator)
+    : ProfileCheckBase(options, profileDataHandler, profileCheckValidator)
   {}
 
   void ProfileCheckBackgroundRelativeHumidity::runCheck()
   {
     oops::Log::debug() << " Background check for relative humidity" << std::endl;
 
-    const size_t numLevelsToCheck = profileIndices_.getNumLevelsToCheck();
+    const size_t numProfileLevels = profileDataHandler_.getNumProfileLevels();
     const bool ModelLevels = options_.modellevels.value();
     const std::vector <float> &rhObs =
        profileDataHandler_.get<float>(ufo::VariableNames::obs_relative_humidity);
@@ -55,15 +54,15 @@ namespace ufo {
     }
 
     // Probability density of 'bad' observations.
-    std::vector <float> PdBad(numLevelsToCheck, options_.BkCheck_PdBad_rh.value());
+    std::vector <float> PdBad(numProfileLevels, options_.BkCheck_PdBad_rh.value());
     // Local version of relative humidity background error.
-    std::vector <float> BackgrErrRH(numLevelsToCheck, 0.0);
+    std::vector <float> BackgrErrRH(numProfileLevels, 0.0);
     // Local version of relative humidity observation error.
-    std::vector <float> ObErrRH(numLevelsToCheck, 0.0);
+    std::vector <float> ObErrRH(numProfileLevels, 0.0);
 
     // Relax QC to take account of long-tailed error distributions.
     const float sqrt2 = std::sqrt(2.0);
-    for (int jlev = 0; jlev < numLevelsToCheck; ++jlev) {
+    for (int jlev = 0; jlev < numProfileLevels; ++jlev) {
       BackgrErrRH[jlev] = missingValueFloat;
       ObErrRH[jlev] = missingValueFloat;
       if (rhBkgErr[jlev] != missingValueFloat)

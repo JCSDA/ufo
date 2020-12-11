@@ -18,6 +18,7 @@
 #include "ioda/ObsDataVector.h"
 #include "oops/util/ObjectCounter.h"
 #include "ufo/filters/FilterBase.h"
+#include "ufo/filters/GaussianThinningParameters.h"
 #include "ufo/filters/QCflags.h"
 
 namespace eckit {
@@ -38,9 +39,9 @@ namespace ufo {
 class DistanceCalculator;
 class EquispacedBinSelector;
 class GaussianThinningParameters;
+class ObsAccessor;
 class RecursiveSplitter;
 class SpatialBinSelector;
-class ParallelObsDistribution;
 
 /// \brief Group observations into grid cells and preserve only one observation in each cell.
 ///
@@ -58,13 +59,15 @@ class ParallelObsDistribution;
 class Gaussian_Thinning : public FilterBase,
                           private util::ObjectCounter<Gaussian_Thinning> {
  public:
+  /// The type of parameters accepted by the constructor of this filter.
+  /// This typedef is used by the FilterFactory.
+  typedef GaussianThinningParameters Parameters_;
+
   static const std::string classname() {return "ufo::Gaussian_Thinning";}
 
-  Gaussian_Thinning(ioda::ObsSpace &obsdb, const eckit::Configuration &config,
+  Gaussian_Thinning(ioda::ObsSpace &obsdb, const GaussianThinningParameters &params,
                     std::shared_ptr<ioda::ObsDataVector<int> > flags,
                     std::shared_ptr<ioda::ObsDataVector<float> > obserr);
-
-  ~Gaussian_Thinning() override;
 
  private:
   void print(std::ostream &) const override;
@@ -72,45 +75,36 @@ class Gaussian_Thinning : public FilterBase,
                    std::vector<std::vector<bool>> &) const override;
   int qcFlag() const override {return QCflags::thinned;}
 
-  std::vector<size_t> getValidObservationIds(const std::vector<bool> &apply,
-                                             const ParallelObsDistribution &obsDistribution) const;
-
-  void groupObservationsByCategory(const std::vector<size_t> &validObsIds,
-                                   const ParallelObsDistribution &obsDistribution,
-                                   RecursiveSplitter &splitter) const;
+  ObsAccessor createObsAccessor() const;
 
   void groupObservationsBySpatialLocation(const std::vector<size_t> &validObsIds,
                                           const DistanceCalculator &distanceCalculator,
-                                          const ParallelObsDistribution &obsDistribution,
+                                          const ObsAccessor &obsAccessor,
                                           RecursiveSplitter &splitter,
                                           std::vector<float> &distancesToBinCenter) const;
 
   void groupObservationsByPressure(const std::vector<size_t> &validObsIds,
                                    const DistanceCalculator &distanceCalculator,
-                                   const ParallelObsDistribution &obsDistribution,
+                                   const ObsAccessor &obsAccessor,
                                    RecursiveSplitter &splitter,
                                    std::vector<float> &distancesToBinCenter) const;
 
   void groupObservationsByTime(const std::vector<size_t> &validObsIds,
                                const DistanceCalculator &distanceCalculator,
-                               const ParallelObsDistribution &obsDistribution,
+                               const ObsAccessor &obsAccessor,
                                RecursiveSplitter &splitter,
                                std::vector<float> &distancesToBinCenter) const;
 
   std::vector<bool> identifyThinnedObservations(
       const std::vector<size_t> &validObsIds,
-      const ParallelObsDistribution &obsDistribution,
+      const ObsAccessor &obsAccessor,
       const RecursiveSplitter &splitter,
       const std::vector<float> &distancesToBinCenter) const;
 
   std::function<bool(size_t, size_t)> makeObservationComparator(
       const std::vector<size_t> &validObsIds,
       const std::vector<float> &distancesToBinCenter,
-      const ParallelObsDistribution &obsDistribution) const;
-
-  void flagThinnedObservations(const std::vector<bool> &isThinned,
-                               const ParallelObsDistribution &obsDistribution,
-                               std::vector<std::vector<bool> > &flagged) const;
+      const ObsAccessor &obsAccessor) const;
 
   static boost::optional<SpatialBinSelector> makeSpatialBinSelector(
       const GaussianThinningParameters &options);
@@ -125,7 +119,7 @@ class Gaussian_Thinning : public FilterBase,
       const GaussianThinningParameters &options);
 
  private:
-  std::unique_ptr<GaussianThinningParameters> options_;
+  GaussianThinningParameters options_;
 };
 
 }  // namespace ufo

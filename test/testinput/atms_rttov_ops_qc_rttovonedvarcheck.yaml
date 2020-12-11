@@ -1,0 +1,71 @@
+window begin: 2019-12-29T21:00:00Z
+window end: 2019-12-30T03:00:00Z
+
+observations:
+- obs operator:
+    name: RTTOV
+    GeoVal_type: MetO
+    Absorbers: &rttov_absobers [Water_vapour, CLW, CIW]
+    linear obs operator:
+      Absorbers: [Water_vapour]
+    obs options: &rttov_options
+      RTTOV_default_opts: OPS
+      SatRad_compatibility: true
+      Sensor_ID: noaa_20_atms
+      CoefficientPath: Data/
+  obs space:
+    name: atms_n20
+    obsdatain:
+      obsfile: Data/ioda/testinput_tier_1/atms_n20_obs_20191230T0000_rttov.nc4
+    obsdataout:
+      obsfile: Data/atms_n20_obs_20191230T0000_rttov_out.nc4
+    simulated variables: [brightness_temperature]
+    channels: &ops_channels 1-22
+  geovals:
+    filename: Data/ufo/testinput_tier_1/geovals_atms_20191230T0000Z_benchmark.nc4
+  obs filters:
+  # BlackList these channels but still want hofx for monitoring
+  - filter: BlackList
+    filter variables:
+    - name: brightness_temperature
+      channels: 1-5, 16-17
+  # Do 1D-Var check
+  - filter: RTTOV OneDVar Check
+    ModName: RTTOV
+    Absorbers: *rttov_absobers
+    obs options: 
+      RTTOV_default_opts: OPS
+      SatRad_compatibility: true
+      Sensor_ID: noaa_20_atms
+      CoefficientPath: Data/
+      qtotal: false # this is done in the filter not by rttov interface
+    BMatrix: ../resources/bmatrix/rttov/atms_bmatrix_70_test.dat
+    RMatrix: ../resources/rmatrix/rttov/atms_noaa_20_rmatrix_test.nc4
+    filter variables:
+    - name: brightness_temperature
+      channels: *ops_channels
+    retrieval variables:
+    - air_temperature
+    - specific_humidity
+    - mass_content_of_cloud_liquid_water_in_atmosphere_layer
+    - mass_content_of_cloud_ice_in_atmosphere_layer
+    - surface_temperature
+    - specific_humidity_at_two_meters_above_surface
+    - skin_temperature
+    - air_pressure_at_two_meters_above_surface
+    nlevels: 70
+    qtotal: true
+    RTTOV_mwscattSwitch: false
+    RTTOV_usetotalice: false
+    UseMLMinimization: false
+    UseJforConvergence: true
+    FullDiagnostics: false
+    JConvergenceOption: 1
+    ConvergenceFactor: 0.40
+    Cost_ConvergenceFactor: 0.01
+    Max1DVarIterations: 7
+    MWemiss: true
+    IRemiss: false
+    EmissLandDefault: 0.95
+    EmissSeaIceDefault: 0.92
+  passedBenchmark: 1410      # number of passed obs

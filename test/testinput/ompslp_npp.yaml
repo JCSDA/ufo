@@ -1,0 +1,22 @@
+window begin: 2019-10-16T20:30:00Z
+window end: 2019-10-17T03:30:00Z
+
+observations:
+- obs operator:
+    name: VertInterp
+    vertical coordinate: ["air_pressure"]
+  obs space:
+    name: OzoneLevel
+    obsdatain:
+      obsfile: Data/ioda/testinput_tier_1/ompslp_npp_obs_2019101700_m.nc4
+    obsdataout:
+      obsfile: Data/ompslp_npp_obs_2019101700_m_out.nc4
+    simulated variables: [mole_fraction_of_ozone_in_air]
+  geovals:
+    filename: Data/ufo/testinput_tier_1/ompslp_npp_geoval_2019101700_m.nc4
+  vector ref: GsiHofX
+  tolerance: 1.0e-04  # in % so that corresponds to 10^-3
+  linear obs operator test:
+    coef TL: 0.1
+    tolerance TL: 1.0e-9
+    tolerance AD: 1.0e-11

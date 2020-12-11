@@ -14,17 +14,16 @@ namespace ufo {
 
   ProfileCheckBackgroundTemperature::ProfileCheckBackgroundTemperature
   (const ProfileConsistencyCheckParameters &options,
-   const ProfileIndices &profileIndices,
    ProfileDataHandler &profileDataHandler,
    ProfileCheckValidator &profileCheckValidator)
-    : ProfileCheckBase(options, profileIndices, profileDataHandler, profileCheckValidator)
+    : ProfileCheckBase(options, profileDataHandler, profileCheckValidator)
   {}
 
   void ProfileCheckBackgroundTemperature::runCheck()
   {
     oops::Log::debug() << " Background check for temperature" << std::endl;
 
-    const size_t numLevelsToCheck = profileIndices_.getNumLevelsToCheck();
+    const size_t numProfileLevels = profileDataHandler_.getNumProfileLevels();
     const bool ModelLevels = options_.modellevels.value();
     const std::vector <float> &Latitude =
       profileDataHandler_.get<float>(ufo::VariableNames::Latitude);
@@ -66,10 +65,10 @@ namespace ufo {
     correctVector(tObs, tObsCorrection, tObsFinal);
 
     // Probability density of 'bad' observations.
-    std::vector <float> PdBad(numLevelsToCheck, options_.BkCheck_PdBad_t.value());
+    std::vector <float> PdBad(numProfileLevels, options_.BkCheck_PdBad_t.value());
     // Local version of temperature background error.
-    std::vector <float> BackgrErrT(numLevelsToCheck, 0);
-    for (int jlev = 0; jlev < numLevelsToCheck; ++jlev) {
+    std::vector <float> BackgrErrT(numProfileLevels, 0);
+    for (int jlev = 0; jlev < numProfileLevels; ++jlev) {
       BackgrErrT[jlev] = tBkgErr[jlev];
     }
     // Extra representivity error for data on reported levels.
@@ -78,7 +77,7 @@ namespace ufo {
         std::fabs(Latitude[0]) < options_.BkCheck_Psplit_latitude_tropics ?
                                  options_.BkCheck_Psplit_tropics.value() :
                                  options_.BkCheck_Psplit_extratropics.value();
-      for (int jlev = 0; jlev < numLevelsToCheck; ++jlev) {
+      for (int jlev = 0; jlev < numProfileLevels; ++jlev) {
         if (pressures[jlev] <= Psplit) {
           BackgrErrT[jlev] = tBkgErr[jlev] == missingValueFloat ?
             missingValueFloat :
@@ -92,7 +91,7 @@ namespace ufo {
     }
 
     // Modify observation PGE if certain flags have been set.
-    for (int jlev = 0; jlev < numLevelsToCheck; ++jlev) {
+    for (int jlev = 0; jlev < numProfileLevels; ++jlev) {
       if (tFlags[jlev] & ufo::MetOfficeQCFlags::Profile::SuperadiabatFlag)
         tPGE[jlev] = 0.5 + 0.5 * tPGE[jlev];
       if (tFlags[jlev] & ufo::MetOfficeQCFlags::Profile::InterpolationFlag)

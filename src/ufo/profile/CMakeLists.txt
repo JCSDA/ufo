@@ -46,8 +46,12 @@ set ( profile_files
       ProfileDataHandler.h
       ProfileIndices.cc
       ProfileIndices.h
+      ProfileSondeFlags.cc
+      ProfileSondeFlags.h
       ProfileStandardLevels.cc
       ProfileStandardLevels.h
+      ProfileWindProfilerFlags.cc
+      ProfileWindProfilerFlags.h
       VariableNames.h
 )
 

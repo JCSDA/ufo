@@ -13,10 +13,9 @@ namespace ufo {
   static ProfileCheckMaker<ProfileCheckBasic> makerProfileCheckBasic_("Basic");
 
   ProfileCheckBasic::ProfileCheckBasic(const ProfileConsistencyCheckParameters &options,
-                                       const ProfileIndices &profileIndices,
                                        ProfileDataHandler &profileDataHandler,
                                        ProfileCheckValidator &profileCheckValidator)
-    : ProfileCheckBase(options, profileIndices, profileDataHandler, profileCheckValidator)
+    : ProfileCheckBase(options, profileDataHandler, profileCheckValidator)
   {}
 
   void ProfileCheckBasic::runCheck()
@@ -33,7 +32,7 @@ namespace ufo {
         return;
       }
 
-    const int numLevelsToCheck = profileIndices_.getNumLevelsToCheck();
+    const int numProfileLevels = profileDataHandler_.getNumProfileLevels();
     const std::vector <float> &pressures =
       profileDataHandler_.get<float>(ufo::VariableNames::obs_air_pressure);
     // All QC flags are retrieved for the basic checks.
@@ -53,11 +52,11 @@ namespace ufo {
      }
 
     // Is the number of levels to check OK?
-    bool numLevelsToCheckOK = (numLevelsToCheck > 0);
+    bool numProfileLevelsOK = (numProfileLevels > 0);
 
     // Are any levels in the wrong order?
     bool pressOrderOK = true;
-    for (int jlev = 0; jlev < numLevelsToCheck - 1; ++jlev) {
+    for (int jlev = 0; jlev < numProfileLevels - 1; ++jlev) {
       pressOrderOK = pressOrderOK && (pressures[jlev] >= pressures[jlev + 1]);
       if (!pressOrderOK) break;
     }
@@ -72,18 +71,18 @@ namespace ufo {
                        pressures.back() > options_.BChecks_minValidP.value() :
                        false);
 
-    oops::Log::debug() << " -> numLevelsToCheckOK: " << numLevelsToCheckOK << std::endl;
+    oops::Log::debug() << " -> numProfileLevelsOK: " << numProfileLevelsOK << std::endl;
     oops::Log::debug() << " -> pressOrderOK: " << pressOrderOK << std::endl;
     oops::Log::debug() << " -> maxPressOK: " << maxPressOK << std::endl;
     oops::Log::debug() << " -> minPressOK: " << minPressOK << std::endl;
 
-    result_ = numLevelsToCheckOK && pressOrderOK && maxPressOK && minPressOK;
+    result_ = numProfileLevelsOK && pressOrderOK && maxPressOK && minPressOK;
     oops::Log::debug() << " -> basicResult: " << result_ << std::endl;
 
     // If the basic checks are failed, set reject flags
     // This is not done in the OPS sonde consistency checks, but is done in Ops_SondeAverage.inc
     if (options_.flagBasicChecksFail.value() && !result_) {
-      for (int jlev = 0; jlev < numLevelsToCheck; ++jlev) {
+      for (int jlev = 0; jlev < numProfileLevels; ++jlev) {
         if (!tFlags.empty()) tFlags[jlev] |= ufo::MetOfficeQCFlags::Elem::FinalRejectFlag;
         if (!zFlags.empty()) zFlags[jlev] |= ufo::MetOfficeQCFlags::Elem::FinalRejectFlag;
         if (!uFlags.empty()) uFlags[jlev] |= ufo::MetOfficeQCFlags::Elem::FinalRejectFlag;

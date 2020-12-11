@@ -26,11 +26,9 @@
 
 namespace ufo {
   ProfileChecker::ProfileChecker(const ProfileConsistencyCheckParameters &options,
-                                 const ProfileIndices &profileIndices,
                                  ProfileDataHandler &profileDataHandler,
                                  ProfileCheckValidator &profileCheckValidator)
     : options_(options),
-      profileIndices_(profileIndices),
       profileDataHandler_(profileDataHandler),
       profileCheckValidator_(profileCheckValidator),
       checks_(options.Checks.value())
@@ -53,7 +51,6 @@ namespace ufo {
       std::unique_ptr<ProfileCheckBase> profileCheck =
         ProfileCheckFactory::create(check,
                                     options_,
-                                    profileIndices_,
                                     profileDataHandler_,
                                     profileCheckValidator_);
       if (profileCheck) {

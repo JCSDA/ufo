@@ -14,17 +14,16 @@ namespace ufo {
 
   ProfileCheckBackgroundGeopotentialHeight::ProfileCheckBackgroundGeopotentialHeight
   (const ProfileConsistencyCheckParameters &options,
-   const ProfileIndices &profileIndices,
    ProfileDataHandler &profileDataHandler,
    ProfileCheckValidator &profileCheckValidator)
-    : ProfileCheckBase(options, profileIndices, profileDataHandler, profileCheckValidator)
+    : ProfileCheckBase(options, profileDataHandler, profileCheckValidator)
   {}
 
   void ProfileCheckBackgroundGeopotentialHeight::runCheck()
   {
     oops::Log::debug() << " Background check for geopotential height" << std::endl;
 
-    const size_t numLevelsToCheck = profileIndices_.getNumLevelsToCheck();
+    const size_t numProfileLevels = profileDataHandler_.getNumProfileLevels();
     const bool ModelLevels = options_.modellevels.value();
     const std::vector <float> &Zstation =
       profileDataHandler_.get<float>(ufo::VariableNames::Zstation);
@@ -70,14 +69,14 @@ namespace ufo {
     correctVector(zObs, zObsCorrection, zObsFinal);
 
     // Probability density of 'bad' observations.
-    std::vector <float> PdBad(numLevelsToCheck, 0);
+    std::vector <float> PdBad(numProfileLevels, 0);
     // The z background error may not have been set before this point.
     if (zBkgErr.empty())
-      zBkgErr.assign(numLevelsToCheck, missingValueFloat);
+      zBkgErr.assign(numProfileLevels, missingValueFloat);
     // Background error estimates are taken from ECMWF Research Manual 1
     // (ECMWF Data Assimilation Scientific Documentation, 3/92, 3rd edition), table 2.1.
     // They are then multiplied by 1.2.
-    for (int jlev = 0; jlev < numLevelsToCheck; ++jlev) {
+    for (int jlev = 0; jlev < numProfileLevels; ++jlev) {
       if (zObsFinal[jlev] != missingValueFloat) {
         // Permanently reject any levels at/below surface
         if (tFlags[jlev] & ufo::MetOfficeQCFlags::Profile::SurfaceLevelFlag ||
@@ -100,7 +99,7 @@ namespace ufo {
     }
 
     // Modify observation PGE if certain flags have been set.
-    for (int jlev = 0; jlev < numLevelsToCheck; ++jlev) {
+    for (int jlev = 0; jlev < numProfileLevels; ++jlev) {
       if (zFlags[jlev] & ufo::MetOfficeQCFlags::Profile::InterpolationFlag)
         zPGE[jlev] = 0.5 + 0.5 * zPGE[jlev];
       if (zFlags[jlev] & ufo::MetOfficeQCFlags::Profile::HydrostaticFlag)

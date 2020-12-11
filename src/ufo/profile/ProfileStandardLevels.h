@@ -35,7 +35,7 @@ namespace ufo {
 
    protected:  // functions
     /// Calculate standard levels
-    void calcStdLevels(const int numLevelsToCheck,
+    void calcStdLevels(const int numProfileLevels,
                        const std::vector <float> &pressures,
                        const std::vector <float> &tObs,
                        const std::vector <int> &tFlags);
@@ -44,7 +44,7 @@ namespace ufo {
     void findHCheckStdLevs();
 
     /// Calculate standard levels for U and V data
-    void calcStdLevelsUV(const int numLevelsToCheck,
+    void calcStdLevelsUV(const int numProfileLevels,
                          const std::vector <float> &pressures,
                          const std::vector <float> &uObs,
                          const std::vector <float> &vObs,
