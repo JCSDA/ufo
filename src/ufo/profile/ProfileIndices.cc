@@ -12,7 +12,7 @@
 
 namespace ufo {
   ProfileIndices::ProfileIndices(ioda::ObsSpace &obsdb,
-                                 const ProfileConsistencyCheckParameters &options,
+                                 const DataHandlerParameters &options,
                                  const std::vector <bool> &apply)
     : obsdb_(obsdb),
       options_(options),
@@ -37,7 +37,7 @@ namespace ufo {
     }
   }
 
-  void ProfileIndices::determineProfileIndices()
+  void ProfileIndices::updateNextProfileIndices()
   {
     profileIndices_.clear();
 
@@ -78,16 +78,16 @@ namespace ufo {
     }
 
     // Number of levels to which QC checks should be applied
-    numLevelsToCheck_ = static_cast<int> (profileIndices_.size());
+    numProfileLevels_ = static_cast<int> (profileIndices_.size());
 
-    if (numLevelsToCheck_ > 0) {
+    if (numProfileLevels_ > 0) {
       oops::Log::debug() << "First and last profile indices: " << profileIndices_.front()
                          << ", " << profileIndices_.back() << std::endl;
     }
 
     // Replace with maxlev if defined (a legacy of the OPS code)
     if (options_.maxlev.value() != boost::none) {
-      numLevelsToCheck_ = std::min(options_.maxlev.value().get(), numLevelsToCheck_);
+      numProfileLevels_ = std::min(options_.maxlev.value().get(), numProfileLevels_);
     }
 
     // Update counters and iterators (if used)

@@ -1,38 +1,39 @@
 window begin: 2018-04-14T20:00:00Z
 window end: 2018-04-15T03:00:00Z
 
-obs space:
-  name: atms_npp
-  obsdatain:
-    obsfile: Data/ioda/testinput_tier_1/atms_npp_obs_2018041500_m_qc.nc4
-  simulated variables: [brightness_temperature]
-  channels: &all_channels 1-22
-geovals:
-  filename: Data/ufo/testinput_tier_1/atms_npp_geoval_2018041500_m_qc.nc4
-obs function:
-  name: CLWMatchIndexMW@ObsFunction
-  options:
+observations:
+- obs space:
+    name: atms_npp
+    obsdatain:
+      obsfile: Data/ioda/testinput_tier_1/atms_npp_obs_2018041500_m_qc.nc4
+    simulated variables: [brightness_temperature]
+    channels: &all_channels 1-22
+  geovals:
+    filename: Data/ufo/testinput_tier_1/atms_npp_geoval_2018041500_m_qc.nc4
+  obs function:
+    name: CLWMatchIndexMW@ObsFunction
+    options:
+      channels: *all_channels
+      clwobs_function:
+        name: CLWRetMW@ObsFunction
+        options:
+          clwret_ch238: 1
+          clwret_ch314: 2
+          clwret_types: [ObsValue]
+          test_bias: GsiObsBias
+      clwbkg_function:
+        name: CLWRetMW@ObsFunction
+        options:
+          clwret_ch238: 1
+          clwret_ch314: 2
+          clwret_types: [GsiHofX]
+          test_bias: GsiObsBias
+          bias_application: GsiHofX
+      clwret_clearsky: [ 0.030,  0.030,  0.030,  0.020,  0.030,
+                         0.080,  0.150,  0.000,  0.000,  0.000,
+                         0.000,  0.000,  0.000,  0.000,  0.000,
+                         0.020,  0.030,  0.030,  0.030,  0.030,
+                         0.050,  0.100]
+    variables: [Cloud_Match_Index]
     channels: *all_channels
-    clwobs_function:
-      name: CLWRetMW@ObsFunction
-      options:
-        clwret_ch238: 1
-        clwret_ch314: 2
-        clwret_types: [ObsValue]
-        test_bias: GsiObsBias
-    clwbkg_function:
-      name: CLWRetMW@ObsFunction
-      options:
-        clwret_ch238: 1
-        clwret_ch314: 2
-        clwret_types: [GsiHofX]
-        test_bias: GsiObsBias
-        bias_application: GsiHofX
-    clwret_clearsky: [ 0.030,  0.030,  0.030,  0.020,  0.030,
-                       0.080,  0.150,  0.000,  0.000,  0.000,
-                       0.000,  0.000,  0.000,  0.000,  0.000,
-                       0.020,  0.030,  0.030,  0.030,  0.030,
-                       0.050,  0.100]
-  variables: [Cloud_Match_Index]
-  channels: *all_channels
-  tolerance: 1.0e-8
+    tolerance: 1.0e-8

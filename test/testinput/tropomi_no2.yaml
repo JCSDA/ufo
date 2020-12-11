@@ -29,7 +29,11 @@ observations:
       total column: false
       model units coeff: 1e-6 # ppmv to 1/1
       hofx units coeff: 1.6605392e-20 # molec/cm2 to mol/m2
+  linear obs operator test:
+    coef TL: 1.0e-5
+    tolerance TL: 1.0e-12
+    tolerance AD: 1.0e-14
   geovals:
     filename: Data/ufo/testinput_tier_1/tropomi_no2_geoval_2020090318_m.nc4
-  rms ref: 2.2154632172314298e-05
+  rms ref: 2.1272229395313009e-05
   tolerance: 1.0e-7

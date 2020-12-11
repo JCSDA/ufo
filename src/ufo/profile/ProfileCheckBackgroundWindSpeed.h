@@ -15,7 +15,6 @@
 #include "ufo/profile/ProfileCheckBase.h"
 #include "ufo/profile/ProfileCheckValidator.h"
 #include "ufo/profile/ProfileDataHandler.h"
-#include "ufo/profile/ProfileIndices.h"
 
 #include "ufo/utils/ProbabilityOfGrossError.h"
 
@@ -38,7 +37,6 @@ namespace ufo {
   class ProfileCheckBackgroundWindSpeed : public ProfileCheckBase {
    public:
     ProfileCheckBackgroundWindSpeed(const ProfileConsistencyCheckParameters &options,
-                                    const ProfileIndices &profileIndices,
                                     ProfileDataHandler &profileDataHandler,
                                     ProfileCheckValidator &profileCheckValidator);
 

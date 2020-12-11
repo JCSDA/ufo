@@ -52,6 +52,11 @@ void testPoissonDiskThinning(const eckit::LocalConfiguration &conf,
     obsspace.put_db("MetaData", "category", categories);
   }
 
+  if (conf.has("string_category")) {
+    const std::vector<std::string> categories = conf.getStringVector("string_category");
+    obsspace.put_db("MetaData", "string_category", categories);
+  }
+
   if (conf.has("priority")) {
     const std::vector<int> priorities = conf.getIntVector("priority");
     obsspace.put_db("MetaData", "priority", priorities);
@@ -165,9 +170,14 @@ CASE("ufo/PoissonDiskThinning/Priorities") {
                                                  "Priorities"));
 }
 
-CASE("ufo/PoissonDiskThinning/Categories") {
+CASE("ufo/PoissonDiskThinning/Int-valued categories") {
   testPoissonDiskThinning(eckit::LocalConfiguration(::test::TestEnvironment::config(),
-                                                 "Categories"));
+                                                 "Int-valued categories"));
+}
+
+CASE("ufo/PoissonDiskThinning/String-valued categories") {
+  testPoissonDiskThinning(eckit::LocalConfiguration(::test::TestEnvironment::config(),
+                                                 "String-valued categories"));
 }
 
 CASE("ufo/PoissonDiskThinning/Variable min spacings") {

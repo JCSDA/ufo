@@ -9,7 +9,11 @@ set ( atmvertinterplay_files
     ObsAtmVertInterpLay.interface.F90
     ObsAtmVertInterpLay.interface.h
     ufo_atmvertinterplay_mod.F90
-    pindex.f90
+    ObsAtmVertInterpLayTLAD.h
+    ObsAtmVertInterpLayTLAD.cc
+    ObsAtmVertInterpLayTLAD.interface.F90
+    ufo_atmvertinterplay_tlad_mod.F90
+    vert_interp_lay_mod.F90
 )
 
 PREPEND( _p_atmvertinterplay_files     "atmvertinterplay"     ${atmvertinterplay_files} )

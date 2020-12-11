@@ -22,11 +22,11 @@
 #include "oops/util/Logger.h"
 #include "oops/util/missingValues.h"
 #include "ufo/filters/GaussianThinningParameters.h"
+#include "ufo/filters/ObsAccessor.h"
 #include "ufo/utils/Constants.h"
 #include "ufo/utils/EquispacedBinSelector.h"
 #include "ufo/utils/GeodesicDistanceCalculator.h"
 #include "ufo/utils/MaxNormDistanceCalculator.h"
-#include "ufo/utils/ParallelObsDistribution.h"
 #include "ufo/utils/RecursiveSplitter.h"
 #include "ufo/utils/SpatialBinSelector.h"
 
@@ -51,47 +51,38 @@ std::vector<T> allGatherv(const eckit::mpi::Comm &comm, const std::vector<T> &v)
 
 // -----------------------------------------------------------------------------
 
-Gaussian_Thinning::Gaussian_Thinning(ioda::ObsSpace & obsdb, const eckit::Configuration & config,
+Gaussian_Thinning::Gaussian_Thinning(ioda::ObsSpace & obsdb,
+                                     const GaussianThinningParameters & params,
                                      std::shared_ptr<ioda::ObsDataVector<int> > flags,
                                      std::shared_ptr<ioda::ObsDataVector<float> > obserr)
-  : FilterBase(obsdb, config, flags, obserr)
+  : FilterBase(obsdb, params, flags, obserr), options_(params)
 {
-  oops::Log::debug() << "Gaussian_Thinning: config = " << config_ << std::endl;
-
-  options_.reset(new GaussianThinningParameters());
-  options_->deserialize(config);
+  oops::Log::debug() << "Gaussian_Thinning: config = " << options_ << std::endl;
 }
-
-// -----------------------------------------------------------------------------
-
-// Required for the correct destruction of options_.
-Gaussian_Thinning::~Gaussian_Thinning()
-{}
 
 // -----------------------------------------------------------------------------
 
 void Gaussian_Thinning::applyFilter(const std::vector<bool> & apply,
                                     const Variables & filtervars,
                                     std::vector<std::vector<bool>> & flagged) const {
-  ParallelObsDistribution obsDistribution(obsdb_);
+  ObsAccessor obsAccessor = createObsAccessor();
 
-  std::vector<size_t> validObsIds = getValidObservationIds(apply, obsDistribution);
+  const std::vector<size_t> validObsIds = obsAccessor.getValidObservationIds(apply, *flags_);
 
-  RecursiveSplitter splitter(validObsIds.size());
   std::vector<float> distancesToBinCenter(validObsIds.size(), 0.f);
-  std::unique_ptr<DistanceCalculator> distanceCalculator = makeDistanceCalculator(*options_);
+  std::unique_ptr<DistanceCalculator> distanceCalculator = makeDistanceCalculator(options_);
 
-  groupObservationsByCategory(validObsIds, obsDistribution, splitter);
-  groupObservationsByPressure(validObsIds, *distanceCalculator, obsDistribution,
+  RecursiveSplitter splitter = obsAccessor.splitObservationsIntoIndependentGroups(validObsIds);
+  groupObservationsByPressure(validObsIds, *distanceCalculator, obsAccessor,
                               splitter, distancesToBinCenter);
-  groupObservationsByTime(validObsIds, *distanceCalculator, obsDistribution,
+  groupObservationsByTime(validObsIds, *distanceCalculator, obsAccessor,
                           splitter, distancesToBinCenter);
-  groupObservationsBySpatialLocation(validObsIds, *distanceCalculator, obsDistribution,
+  groupObservationsBySpatialLocation(validObsIds, *distanceCalculator, obsAccessor,
                                      splitter, distancesToBinCenter);
 
   const std::vector<bool> isThinned = identifyThinnedObservations(
-        validObsIds, obsDistribution, splitter, distancesToBinCenter);
-  flagThinnedObservations(isThinned, obsDistribution, flagged);
+        validObsIds, obsAccessor, splitter, distancesToBinCenter);
+  obsAccessor.flagRejectedObservations(isThinned, flagged);
 
   if (filtervars.size() != 0) {
     oops::Log::trace() << "Gaussian_Thinning: flagged? = " << flagged[0] << std::endl;
@@ -100,16 +91,13 @@ void Gaussian_Thinning::applyFilter(const std::vector<bool> & apply,
 
 // -----------------------------------------------------------------------------
 
-std::vector<size_t> Gaussian_Thinning::getValidObservationIds(
-    const std::vector<bool> & apply, const ParallelObsDistribution &obsDistribution) const {
-  const size_t rank = obsdb_.comm().rank();
-  const size_t obsIdDisplacement = obsDistribution.localObsIdDisplacements()[rank];
-  std::vector<size_t> validObsIds;
-  for (size_t obsId = 0; obsId < apply.size(); ++obsId)
-    if (apply[obsId] && (*flags_)[0][obsId] == QCflags::pass)
-      validObsIds.push_back(obsIdDisplacement + obsId);
-
-  return allGatherv(obsdb_.comm(), validObsIds);
+ObsAccessor Gaussian_Thinning::createObsAccessor() const {
+  if (options_.categoryVariable.value() != boost::none) {
+    return ObsAccessor::toObservationsSplitIntoIndependentGroupsByVariable(
+          obsdb_, *options_.categoryVariable.value());
+  } else {
+    return ObsAccessor::toAllObservations(obsdb_);
+  }
 }
 
 // -----------------------------------------------------------------------------
@@ -130,10 +118,10 @@ std::unique_ptr<DistanceCalculator> Gaussian_Thinning::makeDistanceCalculator(
 void Gaussian_Thinning::groupObservationsBySpatialLocation(
     const std::vector<size_t> &validObsIds,
     const DistanceCalculator &distanceCalculator,
-    const ParallelObsDistribution &obsDistribution,
+    const ObsAccessor &obsAccessor,
     RecursiveSplitter &splitter,
     std::vector<float> &distancesToBinCenter) const {
-  boost::optional<SpatialBinSelector> binSelector = makeSpatialBinSelector(*options_);
+  boost::optional<SpatialBinSelector> binSelector = makeSpatialBinSelector(options_);
   if (binSelector == boost::none)
     return;
 
@@ -142,10 +130,8 @@ void Gaussian_Thinning::groupObservationsBySpatialLocation(
   oops::Log::debug() << "Gaussian_Thinning: number of horizontal bins = "
                      << binSelector->totalNumBins() << std::endl;
 
-  const std::vector<float> lat = getGlobalVariableValues<float>(
-        obsdb_, obsDistribution, "latitude", "MetaData");
-  std::vector<float> lon = getGlobalVariableValues<float>(
-        obsdb_, obsDistribution, "longitude", "MetaData");
+  std::vector<float> lat = obsAccessor.getFloatVariableFromObsSpace("MetaData", "latitude");
+  std::vector<float> lon = obsAccessor.getFloatVariableFromObsSpace("MetaData", "longitude");
   // Longitudes will typically be either in the [-180, 180] degree range or in the [0, 360]
   // degree range. The spatial bin selector is written with the latter convention in mind,
   // so let's shift any negative longitudes up by 360 degrees.
@@ -213,40 +199,20 @@ boost::optional<SpatialBinSelector> Gaussian_Thinning::makeSpatialBinSelector(
 
 // -----------------------------------------------------------------------------
 
-void Gaussian_Thinning::groupObservationsByCategory(
-    const std::vector<size_t> &validObsIds,
-    const ParallelObsDistribution &obsDistribution,
-    RecursiveSplitter &splitter) const {
-  boost::optional<Variable> categoryVariable = options_->categoryVariable;
-  if (categoryVariable == boost::none)
-    return;
-
-  const std::vector<int> category = getGlobalVariableValues<int>(
-        obsdb_, obsDistribution, categoryVariable.get().variable(), categoryVariable.get().group());
-
-  std::vector<int> validObsCategories(validObsIds.size());
-  for (size_t validObsIndex = 0; validObsIndex < validObsIds.size(); ++validObsIndex)
-    validObsCategories[validObsIndex] = category[validObsIds[validObsIndex]];
-  splitter.groupBy(validObsCategories);
-}
-
-// -----------------------------------------------------------------------------
-
 void Gaussian_Thinning::groupObservationsByPressure(
     const std::vector<size_t> &validObsIds,
     const DistanceCalculator &distanceCalculator,
-    const ParallelObsDistribution &obsDistribution,
+    const ObsAccessor &obsAccessor,
     RecursiveSplitter &splitter,
     std::vector<float> &distancesToBinCenter) const {
-  boost::optional<EquispacedBinSelector> binSelector = makePressureBinSelector(*options_);
+  boost::optional<EquispacedBinSelector> binSelector = makePressureBinSelector(options_);
   if (binSelector == boost::none)
     return;
 
   oops::Log::debug() << "Gaussian_Thinning: number of vertical bins = "
                      << binSelector->numBins() << std::endl;
 
-  const std::vector<float> pres = getGlobalVariableValues<float>(
-        obsdb_, obsDistribution, "air_pressure", "MetaData");
+  std::vector<float> pres = obsAccessor.getFloatVariableFromObsSpace("MetaData", "air_pressure");
 
   std::vector<size_t> bins;
   bins.reserve(validObsIds.size());
@@ -294,19 +260,19 @@ boost::optional<EquispacedBinSelector> Gaussian_Thinning::makePressureBinSelecto
 void Gaussian_Thinning::groupObservationsByTime(
     const std::vector<size_t> &validObsIds,
     const DistanceCalculator &distanceCalculator,
-    const ParallelObsDistribution &obsDistribution,
+    const ObsAccessor &obsAccessor,
     RecursiveSplitter &splitter,
     std::vector<float> &distancesToBinCenter) const {
   util::DateTime timeOffset;
-  boost::optional<EquispacedBinSelector> binSelector = makeTimeBinSelector(*options_, timeOffset);
+  boost::optional<EquispacedBinSelector> binSelector = makeTimeBinSelector(options_, timeOffset);
   if (binSelector == boost::none)
     return;
 
   oops::Log::debug() << "Gaussian_Thinning: number of time bins = "
                      << binSelector->numBins() << std::endl;
 
-  const std::vector<util::DateTime> times = getGlobalVariableValues<util::DateTime>(
-        obsdb_, obsDistribution, "datetime", "MetaData");
+  std::vector<util::DateTime> times = obsAccessor.getDateTimeVariableFromObsSpace(
+        "MetaData", "datetime");
 
   std::vector<size_t> bins;
   bins.reserve(validObsIds.size());
@@ -368,14 +334,16 @@ boost::optional<EquispacedBinSelector> Gaussian_Thinning::makeTimeBinSelector(
 
 std::vector<bool> Gaussian_Thinning::identifyThinnedObservations(
     const std::vector<size_t> &validObsIds,
-    const ParallelObsDistribution &obsDistribution,
+    const ObsAccessor &obsAccessor,
     const RecursiveSplitter &splitter,
     const std::vector<float> &distancesToBinCenter) const {
 
   std::function<bool(size_t, size_t)> comparator = makeObservationComparator(
-        validObsIds, distancesToBinCenter, obsDistribution);
+        validObsIds, distancesToBinCenter, obsAccessor);
 
-  std::vector<bool> isThinned(obsDistribution.globalObsCount(), false);
+  size_t totalNumObs = obsAccessor.totalNumObservations();
+
+  std::vector<bool> isThinned(totalNumObs, false);
   for (auto group : splitter.multiElementGroups()) {
     const size_t bestValidObsIndex = *std::min_element(
           std::begin(group), std::end(group), comparator);
@@ -392,19 +360,19 @@ std::vector<bool> Gaussian_Thinning::identifyThinnedObservations(
 std::function<bool(size_t, size_t)> Gaussian_Thinning::makeObservationComparator(
     const std::vector<size_t> &validObsIds,
     const std::vector<float> &distancesToBinCenter,
-    const ParallelObsDistribution &obsDistribution) const
+    const ObsAccessor &obsAccessor) const
 {
-  if (options_->priorityVariable.value() == boost::none) {
+  if (options_.priorityVariable.value() == boost::none) {
     oops::Log::debug() << "priority_variable not found" << std::endl;
     return [&distancesToBinCenter](size_t validObsIndexA, size_t validObsIndexB) {
       return distancesToBinCenter[validObsIndexA] < distancesToBinCenter[validObsIndexB];
     };
   }
 
-  const ufo::Variable priorityVariable = options_->priorityVariable.value().get();
+  const ufo::Variable priorityVariable = options_.priorityVariable.value().get();
 
-  const std::vector<int> priorities = getGlobalVariableValues<int>(
-        obsdb_, obsDistribution, priorityVariable.variable(), priorityVariable.group());
+  std::vector<int> priorities = obsAccessor.getIntVariableFromObsSpace(
+        priorityVariable.group(), priorityVariable.variable());
 
   oops::Log::debug() << "priorities = " << priorities << std::endl;
 
@@ -421,26 +389,8 @@ std::function<bool(size_t, size_t)> Gaussian_Thinning::makeObservationComparator
 
 // -----------------------------------------------------------------------------
 
-void Gaussian_Thinning::flagThinnedObservations(
-    const std::vector<bool> & isThinned,
-    const ParallelObsDistribution &obsDistribution,
-    std::vector<std::vector<bool>> & flagged) const {
-  const size_t rank = obsdb_.comm().rank();
-  const size_t displacement = obsDistribution.localObsIdDisplacements()[rank];
-  for (std::vector<bool> & variableFlagged : flagged) {
-    ASSERT(obsDistribution.localObsCounts()[rank] == variableFlagged.size());
-    for (size_t localObsId = 0; localObsId < variableFlagged.size(); ++localObsId) {
-      const size_t globalObsId = displacement + localObsId;
-       if (isThinned[globalObsId])
-        variableFlagged[localObsId] = true;
-    }
-  }
-}
-
-// -----------------------------------------------------------------------------
-
 void Gaussian_Thinning::print(std::ostream & os) const {
-  os << "Gaussian_Thinning: config = " << config_ << std::endl;
+  os << "Gaussian_Thinning: config = " << options_ << std::endl;
 }
 
 // -----------------------------------------------------------------------------

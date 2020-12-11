@@ -15,7 +15,6 @@
 #include "ufo/profile/ProfileCheckBase.h"
 #include "ufo/profile/ProfileCheckValidator.h"
 #include "ufo/profile/ProfileDataHandler.h"
-#include "ufo/profile/ProfileIndices.h"
 
 #include "ufo/utils/metoffice/MetOfficeObservationIDs.h"
 
@@ -34,7 +33,6 @@ namespace ufo {
   class ProfileCheckTime : public ProfileCheckBase {
    public:
     ProfileCheckTime(const ProfileConsistencyCheckParameters &options,
-                     const ProfileIndices &profileIndices,
                      ProfileDataHandler &profileDataHandler,
                      ProfileCheckValidator &profileCheckValidator);
 

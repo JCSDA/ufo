@@ -47,10 +47,11 @@ void testProcessWhere(const eckit::LocalConfiguration &conf,
   conf.get("ProcessWhere", confs);
   for (size_t jconf = 0; jconf < confs.size(); ++jconf) {
     eckit::LocalConfiguration config = confs[jconf];
+    eckit::LocalConfiguration whereConfig(config, "where");
     if (is_in_usererror) {
-      EXPECT_THROWS(processWhere(config, data));
+      EXPECT_THROWS(processWhere(whereConfig, data));
     } else {
-      std::vector<bool> result = processWhere(config, data);
+      std::vector<bool> result = processWhere(whereConfig, data);
       const int size_ref = config.getInt("size where true");
       const int size = std::count(result.begin(), result.end(), true);
       oops::Log::info() << "reference: " << size_ref << ", compare with " << size << std::endl;

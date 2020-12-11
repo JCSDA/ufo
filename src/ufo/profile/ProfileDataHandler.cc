@@ -11,17 +11,42 @@
 namespace ufo {
   ProfileDataHandler::ProfileDataHandler(ioda::ObsSpace &obsdb,
                                          const DataHandlerParameters &options,
-                                         EntireSampleDataHandler &entireSampleDataHandler,
-                                         const ProfileIndices &profileIndices)
+                                         const std::vector <bool> &apply)
     : obsdb_(obsdb),
-      options_(options),
-      entireSampleDataHandler_(entireSampleDataHandler),
-      profileIndices_(profileIndices)
-  {}
+      options_(options)
+  {
+    profileIndices_.reset(new ProfileIndices(obsdb, options, apply));
+    entireSampleDataHandler_.reset(new EntireSampleDataHandler(obsdb, options));
+  }
 
-  void ProfileDataHandler::reset()
+  void ProfileDataHandler::resetProfileInformation()
   {
     profileData_.clear();
+  }
+
+  void ProfileDataHandler::initialiseNextProfile()
+  {
+    resetProfileInformation();
+    profileIndices_->updateNextProfileIndices();
+  }
+
+  void ProfileDataHandler::updateProfileInformation(const size_t nvars,
+                                                    std::vector<std::vector<bool>> &flagged)
+  {
+    // Set final report flags in this profile.
+    setFinalReportFlags();
+
+    // Modify 'flagged' vector for each filter variable based on check results.
+    setFlagged(nvars, flagged);
+
+    // If any variables in the current profile were modified by the checks,
+    // the equivalent variables in the entire sample are set to the modified values.
+    updateEntireSampleData();
+  }
+
+  void ProfileDataHandler::writeQuantitiesToObsdb()
+  {
+    entireSampleDataHandler_->writeQuantitiesToObsdb();
   }
 
   void ProfileDataHandler::getProfileIndicesInEntireSample(const std::string& groupname)
@@ -31,16 +56,17 @@ namespace ufo {
     // If the number of entries per profile was not specified, use the indices
     // that were obtained by sorting and grouping the record numbers.
     if (entriesPerProfile == 0) {
-      profileIndicesInEntireSample_ = profileIndices_.getProfileIndices();
+      profileIndicesInEntireSample_ = profileIndices_->getProfileIndices();
     } else {
       // Otherwise increment the indices sequentially, starting at the
       // relevant position.
       profileIndicesInEntireSample_.resize(entriesPerProfile);
       std::iota(profileIndicesInEntireSample_.begin(),
                 profileIndicesInEntireSample_.end(),
-                profileIndices_.getProfileNumCurrent() * entriesPerProfile);
+                profileIndices_->getProfileNumCurrent() * entriesPerProfile);
     }
   }
+
   void ProfileDataHandler::updateEntireSampleData()
   {
     for (const auto &it_profile : profileData_) {
@@ -52,7 +78,7 @@ namespace ufo {
       if (groupname == "QCFlags" || fullname == ufo::VariableNames::counter_NumAnyErrors) {
         getProfileIndicesInEntireSample(groupname);
         const std::vector <int>& profileData = get<int>(fullname);
-        std::vector <int>& entireSampleData = entireSampleDataHandler_.get<int>(fullname);
+        std::vector <int>& entireSampleData = entireSampleDataHandler_->get<int>(fullname);
         size_t idx = 0;
         for (const auto& profileIndex : profileIndicesInEntireSample_) {
           updateValueIfPresent(profileData, idx, entireSampleData, profileIndex);
@@ -61,7 +87,7 @@ namespace ufo {
       } else if (groupname == "Corrections") {
         getProfileIndicesInEntireSample(groupname);
         const std::vector <float>& profileData = get<float>(fullname);
-        std::vector <float>& entireSampleData = entireSampleDataHandler_.get<float>(fullname);
+        std::vector <float>& entireSampleData = entireSampleDataHandler_->get<float>(fullname);
         size_t idx = 0;
         for (const auto& profileIndex : profileIndicesInEntireSample_) {
           updateValueIfPresent(profileData, idx, entireSampleData, profileIndex);
