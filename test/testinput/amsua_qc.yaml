@@ -30,7 +30,7 @@ observations:
     filter variables:
     - name: brightness_temperature
       channels: 2-15
-    minvalue: 100.0
+    minvalue: 250.0
     maxvalue: 500.0
   - filter: DomainErr Check
     filter variables:
@@ -45,7 +45,8 @@ observations:
     filter variables:
     - name: brightness_temperature
       channels: 1
-    threshold: 2.0
+   #threshold: 2.0
+    threshold: 1.5
   - filter: YDIAGsaver
     filename: Data/amsua_n19_ydiag_2018041500_m_out.nc4
     filter variables:
@@ -55,4 +56,5 @@ observations:
       channels: 5,6
     - name: weightingfunction_of_atmosphere_layer
       channels: 10
-  passedBenchmark: 1496      # number of passed obs
+  #passedBenchmark: 1496      # number of passed obs
+  passedBenchmark: 300      # number of passed obs

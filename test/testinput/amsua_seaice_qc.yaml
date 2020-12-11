@@ -18,6 +18,7 @@ observations:
     - name: brightness_temperature
       channels: 1-2,15
     minvalue: 100.0
+   #minvalue: 300.0
     maxvalue: 500.0
   - filter: BlackList
     filter variables:
