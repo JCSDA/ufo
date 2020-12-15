@@ -46,6 +46,7 @@ type, public :: ufo_rttovonedvarcheck
   logical                          :: RTTOV_usetotalice !< flag for use of total ice in RTTOV MW scatt
   logical                          :: UseMLMinimization !< flag to turn on marquardt-levenberg minimizer
   logical                          :: UseJforConvergence !< flag to Use J for convergence
+  logical                          :: UseRHwaterForQC !< flag to use water in relative humidity check
   logical                          :: FullDiagnostics !< flag to turn on full diagnostics
   logical                          :: pcemiss !< flag gets turned off in emissivity eigen vector file is present
   integer                          :: Max1DVarIterations !< maximum number of iterations
@@ -110,6 +111,7 @@ self % RTTOV_mwscattSwitch = .false.
 self % RTTOV_usetotalice = .false.
 self % UseMLMinimization = .false.
 self % UseJforConvergence = .false.
+self % UseRHwaterForQC = .true.
 self % FullDiagnostics = .false.
 self % pcemiss = .false.
 self % Max1DVarIterations = 7
@@ -146,6 +148,11 @@ end if
 ! Flag to Use J for convergence
 if (self % conf % has("UseJforConvergence")) then
   call self % conf % get_or_die("UseJforConvergence", self % UseJforConvergence)
+end if
+
+! Flag to use water in relative humidity check
+if (self % conf % has("UseRHwaterForQC")) then
+  call self % conf % get_or_die("UseRHwaterForQC", self % UseRHwaterForQC)
 end if
 
 ! Flag to turn on full diagnostics

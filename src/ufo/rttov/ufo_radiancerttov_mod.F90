@@ -213,8 +213,8 @@ contains
       self % RTProf % profiles(:) % skin % surftype = -1_jpim
 
       do while (prof_start <= prof_end)
-        self % RTprof % chanprof(:) % prof = 0 
-        self % RTprof % chanprof(:) % chan = 0 
+        self % RTprof % chanprof(:) % prof = 0
+        self % RTprof % chanprof(:) % chan = 0
 
         nchan_sim = 0_jpim
         nprof_sim = min(nprof_sim, prof_end - prof_start + 1)

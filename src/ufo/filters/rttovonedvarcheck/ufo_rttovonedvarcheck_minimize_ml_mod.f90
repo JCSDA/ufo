@@ -366,11 +366,11 @@ end if
 !----------------------
 
 if (self % UseJForConvergence) then
-  write(*,'(A45,3F10.3,I5,L5)') "J initial, final, lowest, iter, converged = ", &
+  write(*,'(A45,3F10.3,I5,L5)') "ML J initial, final, lowest, iter, converged = ", &
                                  JCostorig, Jcost,  Jcost, iter, onedvar_success
-  write(*,*) "Final 1Dvar cost = ",Jcost
+  write(*,*) "ML Final 1Dvar cost (pass) = ",Jcost
 else
-  write(*,*) "Final 1Dvar cost = ",Jcost
+  write(*,*) "ML Final 1Dvar cost (fail) = ",Jcost
 end if
 
 ! ----------

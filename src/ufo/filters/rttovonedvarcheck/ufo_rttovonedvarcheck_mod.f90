@@ -194,7 +194,7 @@ subroutine ufo_rttovonedvarcheck_apply(self, vars, retrieval_vars, geovals, appl
       ! create one ob geovals from full all obs geovals
       call ufo_geovals_copy_one(local_geovals, geovals, jobs)
       call ufo_rttovonedvarcheck_check_geovals(local_geovals, &
-                          prof_index, obs % surface_type(jobs))
+              prof_index, obs % surface_type(jobs), self % UseRHwaterForQC)
 
       ! create b matrix arrays for this single observation location
       call full_bmatrix % reset( obs % lat(jobs), & ! in

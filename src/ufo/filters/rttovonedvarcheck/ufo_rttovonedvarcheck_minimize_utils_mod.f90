@@ -442,14 +442,15 @@ end subroutine ufo_rttovonedvarcheck_ProfVec2GeoVaLs
 !!
 !! \date 09/06/2020: Created
 !!
-subroutine ufo_rttovonedvarcheck_check_geovals(geovals, profindex, surface_type)
+subroutine ufo_rttovonedvarcheck_check_geovals(geovals, profindex, surface_type, UseRHwaterForQC)
 
 implicit none
 
 ! subroutine arguments:
 type(ufo_geovals), intent(inout) :: geovals   !< model data at obs location
 type(ufo_rttovonedvarcheck_profindex), intent(in) :: profindex !< index array for x vector
-integer :: surface_type
+integer, intent(in) :: surface_type  !< surface type for cold surface check
+logical, intent(in) :: UseRHwaterForQC  !< flag to enable humidity saturation check
 
 character(len=*), parameter  :: routinename = "ufo_rttovonedvarcheck_check_geovals"
 character(len=max_string)    :: varname
@@ -458,6 +459,7 @@ integer                      :: gv_index, i     ! counters
 integer                      :: nlevels
 real(kind_real), allocatable :: temperature(:)  ! temperature (K)
 real(kind_real), allocatable :: pressure(:)     ! pressure (Pa)
+real(kind_real), allocatable :: qsaturated(:)
 real(kind_real), allocatable :: humidity_total(:)
 real(kind_real), allocatable :: q(:)            ! specific humidity (kg/kg)
 real(kind_real), allocatable :: ql(:)
@@ -483,8 +485,89 @@ temperature(:) = geoval%vals(:, 1) ! K
 call ufo_geovals_get_var(geovals, trim(var_prs), geoval)
 pressure(:) = geoval%vals(:, 1)    ! Pa
 
+!---------------------------------------------------
+! 1. Make sure q and q2m does not exceed saturation
+!---------------------------------------------------
+if (profindex % q(1) > 0 .or. profindex % qt(1) > 0) then
+  allocate(q(nlevels))
+  allocate(qsaturated(nlevels))
+
+  ! Get humidity - kg/kg
+  varname = trim(var_q)
+  call ufo_geovals_get_var(geovals, varname, geoval)
+  q(:) = geoval%vals(:, 1)
+
+  ! Calculated saturation humidity
+  if (UseRHwaterForQC) then
+    call Ops_QsatWat (qsaturated(:),   & ! out
+                      temperature(:),  & ! in
+                      pressure(:),     & ! in
+                      nlevels)           ! in
+  else
+    call Ops_Qsat (qsaturated(:),   & ! out
+                   temperature(:),  & ! in
+                   pressure(:),     & ! in
+                   nlevels)           ! in  
+  end if
+
+  ! Limit q
+  where (q > qsaturated)
+    q = qsaturated
+  end where
+  where (q < min_q)
+    q = min_q
+  end where
+
+  ! Assign values to geovals q
+  gv_index = 0
+  do i=1,geovals%nvar
+    if (varname == trim(geovals%variables(i))) gv_index = i
+  end do
+  geovals%geovals(gv_index) % vals(:,1) = q(:)
+
+  deallocate(q)
+  deallocate(qsaturated)
+end if
+
+if (profindex % q2 > 0) then
+  allocate(q(1))
+  allocate(qsaturated(1))
+
+  ! Get humidity - kg/kg
+  varname = trim(var_sfc_q2m)
+  call ufo_geovals_get_var(geovals, varname, geoval)
+  q(1) = geoval%vals(1, 1)
+
+  ! Calculated saturation humidity
+  if (UseRHwaterForQC) then
+    call Ops_QsatWat (qsaturated(1:1),   & ! out
+                      temperature(1:1),  & ! in
+                      pressure(1:1),     & ! in
+                      1)                   ! in
+  else
+    call Ops_Qsat (qsaturated(1:1),   & ! out
+                   temperature(1:1),  & ! in
+                   pressure(1:1),     & ! in
+                   1)                   ! in
+  end if
+
+  ! Limit q
+  if (q(1) > qsaturated(1)) q(1) = qsaturated(1)
+  if (q(1) < min_q) q(1) = min_q
+
+  ! Assign values to geovals q
+  gv_index = 0
+  do i=1,geovals%nvar
+    if (varname == trim(geovals%variables(i))) gv_index = i
+  end do
+  geovals%geovals(gv_index) % vals(1,1) = q(1)
+
+  deallocate(q)
+  deallocate(qsaturated)
+end if
+
 !-------------------------
-! 1. Specific humidity total
+! 2. Specific humidity total
 !-------------------------
 
 if (profindex % qt(1) > 0) then
@@ -657,6 +740,7 @@ endif
 ! Tidy up
 if (allocated(temperature))    deallocate(temperature)
 if (allocated(pressure))       deallocate(pressure)
+if (allocated(qsaturated))     deallocate(qsaturated)
 if (allocated(humidity_total)) deallocate(humidity_total)
 if (allocated(q))              deallocate(q)
 if (allocated(ql))             deallocate(ql)

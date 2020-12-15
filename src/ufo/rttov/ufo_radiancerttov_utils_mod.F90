@@ -22,7 +22,7 @@ module ufo_radiancerttov_utils_mod
   use ufo_vars_mod
   use ufo_geovals_mod, only: ufo_geovals, ufo_geoval, ufo_geovals_get_var
   use ufo_basis_mod, only: ufo_basis
-  use ufo_utils_mod, only: Ops_SatRad_Qsplit
+  use ufo_utils_mod, only: Ops_SatRad_Qsplit, Ops_Qsat, Ops_QsatWat
   use obsspace_mod
 
   implicit none
@@ -146,8 +146,10 @@ module ufo_radiancerttov_utils_mod
     logical                               :: rttov_is_setup = .false.
 
     logical                               :: SatRad_compatibility = .true.
-    logical                               :: qtotal = .true.
-    logical                               :: UseQtsplitRain, SplitQtotal = .false. ! true for MW, false otherwise
+    logical                               :: UseRHwaterForQC = .true. ! only used with SatRad compatibility
+    logical                               :: UseColdSurfaceCheck = .true. ! only used with SatRad compatibility
+    logical                               :: SplitQtotal = .false. ! true for SatRad compatibility with MW
+    logical                               :: UseQtsplitRain = .false.
     logical                               :: RTTOV_profile_checkinput = .false.
 
     integer                               :: inspect
@@ -267,8 +269,12 @@ contains
       call f_confOpts % get_or_die("SatRad_compatibility",conf % SatRad_compatibility)
     endif
 
-    if(f_confOpts % has("qtotal")) then
-      call f_confOpts % get_or_die("qtotal",conf % qtotal)
+    if(f_confOpts % has("UseRHwaterForQC")) then
+      call f_confOpts % get_or_die("UseRHwaterForQC",conf % UseRHwaterForQC)
+    endif
+
+    if(f_confOpts % has("UseColdSurfaceCheck")) then
+      call f_confOpts % get_or_die("UseColdSurfaceCheck",conf % UseColdSurfaceCheck)
     endif
 
     if(f_confOpts % has("max_channels_per_batch")) then
@@ -284,9 +290,9 @@ contains
     !DARFIX THIS ONLY WORKS FOR ONE INSTRUMENT
     if (conf % rttov_coef_array(1) % coef % id_sensor == sensor_id_mw) then
       if(conf % rttov_opts % rt_mw % clw_data .and. &
-         conf % SatRad_compatibility .and. conf % qtotal) then
+         conf % SatRad_compatibility) then
+        conf % SplitQtotal = .true.
         conf % UseQtsplitRain = .true.
-        conf % splitQtotal = .true.
       endif
 
       conf % rttov_opts % rt_ir % ozone_data = .false.
@@ -295,8 +301,8 @@ contains
       conf % rttov_opts % rt_ir % ch4_data = .false.
       conf % rttov_opts % rt_ir % so2_data = .false.
     else
+      conf % SplitQtotal = .false.
       conf % UseQtsplitRain = .false.
-      conf % splitQtotal = .false.
     endif
 
     if(f_confOpts % has("RTTOV_profile_checkinput")) then
@@ -351,6 +357,7 @@ contains
 
     real(kind_real)              :: ifrac, sfrac, lfrac, wfrac
     real(kind_real)              :: itmp, stmp, ltmp
+    real(kind_real)              :: s2m_t(1), s2m_p(1)
 
     real(kind_real), allocatable :: TmpVar(:), windsp(:), p(:)
     logical                      :: variable_present
@@ -359,7 +366,7 @@ contains
     real(kind_real)              :: NewT
     integer                      :: level_1000hPa, level_950hpa
 
-    real(kind_real), allocatable :: q_temp(:), clw_temp(:), ciw_temp(:), Qtotal(:)
+    real(kind_real), allocatable :: q_temp(:), clw_temp(:), ciw_temp(:), Qtotal(:), qsaturated(:)
 
     if(present(ob_info)) then
       nlocs_total = 1
@@ -563,9 +570,10 @@ contains
       call ufo_geovals_get_var(geovals, varname, geoval)
       profiles(1:nprofiles)%skin%surftype = int(geoval%vals(1,prof_start:prof_start + nprofiles - 1),kind=jpim)
 
-      varname = var_water_type_rttov ! RTTOV water type: 0 (fresh), 1 (sea)
-      call ufo_geovals_get_var(geovals, varname, geoval)
-      profiles(1:nprofiles)%skin%watertype = int(geoval%vals(1,prof_start:prof_start + nprofiles - 1),kind=jpim)
+      !varname = var_water_type_rttov ! RTTOV water type: 0 (fresh), 1 (sea)
+      !call ufo_geovals_get_var(geovals, varname, geoval)
+      !profiles(1:nprofiles)%skin%watertype = int(geoval%vals(1,prof_start:prof_start + nprofiles - 1),kind=jpim)
+      profiles(1:nprofiles) % skin % watertype = 1             ! always assume ocean
 
       varname = var_sfc_tskin !Skin (surface) temperature (K)
       call ufo_geovals_get_var(geovals, varname, geoval)
@@ -618,6 +626,10 @@ contains
       endif
     endif
 
+    !MCC: wind fetch fixed for now too
+    profiles(1:nprofiles) % s2m % wfetc = 100000.0_kind_real ! wind fetch (m) taken
+                                                             ! from users guide
+
     !DAR: Salinity fixed for now too
     profiles(1:nprofiles)%skin%salinity = 35.0_kind_real
 
@@ -639,7 +651,8 @@ contains
         ! N.B. I think this should be flagged so it's clear that the background has been modified
         !----
         
-        if(profiles(iprof)%skin%surftype /= surftype_sea) then
+        if(profiles(iprof)%skin%surftype /= surftype_sea .and. &
+            conf % UseColdSurfaceCheck) then
           if(profiles(iprof)%skin%t < 271.4_kind_real .and. &
             profiles(iprof)%s2m%p  > 950.0_kind_real) then
 
@@ -657,10 +670,52 @@ contains
           endif
         endif
 
-        !min_q fix
+        ! -----------------------------------------------
+        ! Make sure q does not exceed saturation
+        ! -----------------------------------------------
+        allocate(qsaturated(nlevels))
+        if (conf % UseRHwaterForQC) then
+          call Ops_QsatWat (qsaturated(:),    & ! out
+                            profiles(iprof) % t(:),  & ! in
+                            profiles(iprof) % p(:) / Pa_to_hPa, & ! in convert hPa to Pa
+                            nlevels)           ! in
+        else
+          call Ops_Qsat (qsaturated(:),    & ! out
+                         profiles(iprof) % t(:),  & ! in
+                         profiles(iprof) % p(:) / Pa_to_hPa, & ! in convert hPa to Pa
+                         nlevels)           ! in
+        end if
+
+        where (profiles(iprof)%q > qsaturated)
+          profiles(iprof)%q = qsaturated
+        end where
+        deallocate(qsaturated)
+
+        ! -----------------------------------------------
+        ! Make sure q2m does not exceed saturation
+        ! -----------------------------------------------
+        allocate(qsaturated(1))
+        s2m_t(1) = profiles(iprof)%s2m%t
+        s2m_p(1) = profiles(iprof)%s2m%p
+        if (conf % UseRHwaterForQC) then
+          call Ops_QsatWat (qsaturated(1:1),  & ! out
+                            s2m_t(1:1), & ! in
+                            s2m_p(1:1), & ! in
+                            1)            ! in
+        else
+          call Ops_Qsat (qsaturated(1:1),  & ! out
+                         s2m_t(1:1), & ! in
+                         s2m_p(1:1), & ! in
+                         1)            ! in
+        end if
+
+        if (profiles(iprof)%s2m%q > qsaturated(1)) profiles(iprof)%s2m%q = qsaturated(1)
+        deallocate(qsaturated)
+
+        ! Constrain small values to min_q fix
         where(profiles(iprof)%q < min_q) profiles(iprof)%q = min_q
         if(profiles(iprof)%s2m%q < min_q) profiles(iprof)%s2m%q = min_q
-        
+
       endif
 
     enddo
@@ -696,7 +751,6 @@ contains
       enddo
     endif
 
-
     !non mwscatt only at the moment
     if(conf % SplitQtotal) then
 
@@ -705,13 +759,9 @@ contains
       do iprof = 1, nprofiles
         ! compute bg qtotal using q and clw only
         ! currently ice is ignored
-        Qtotal(:) = profiles(iprof) % q(:) + profiles(iprof) % clw(:)
-        
-        ! Make sure there is a minimum humidity
-        Qtotal(:) = max(Qtotal(:), Min_q)
-
-        ! Make sure there is a minimum humidity
-        Qtotal(:) = max(Qtotal(:), Min_q)
+        Qtotal(:) = profiles(iprof) % q(:)
+        Qtotal(:) = max(Qtotal(:), min_q)
+        Qtotal(:) = Qtotal(:) + profiles(iprof) % clw(:)
 
         ! generate first guess cloud and q based on the qtotal physics
         call Ops_SatRad_Qsplit (1,                     & ! in
@@ -1329,7 +1379,8 @@ contains
 
     !Loop over all n_Profiles, i.e. number of locations
     do jprofile = 1, nprofiles
-      Skip_Profiles(jprofile) = all(ObsVal(jprofile,:) == missing) .or. all(ObsVal(jprofile,:) > 400)
+      Skip_Profiles(jprofile) = all(ObsVal(jprofile,:) == missing) .or. &
+                                all(ObsVal(jprofile,:) > 400.0_kind_real)
       !            .OR. all(EffObsErr(jprofile,:) == missing) &
       !            .OR. all(EffQC(jprofile,:) /= 0)
     end do
@@ -1393,7 +1444,7 @@ contains
         endif
       enddo
     endif
-      
+
   end subroutine ufo_rttov_init_emissivity
 
   subroutine set_defaults_rttov(self, default_opts_set)
