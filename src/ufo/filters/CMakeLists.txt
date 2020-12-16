@@ -157,6 +157,8 @@ set ( filters_files
       obsfunctions/SCATRetMW.h
       obsfunctions/SymmCldImpactIR.cc
       obsfunctions/SymmCldImpactIR.h
+      obsfunctions/TropopauseEstimate.cc
+      obsfunctions/TropopauseEstimate.h
       obsfunctions/WindDirAngleDiff.cc
       obsfunctions/WindDirAngleDiff.h
       variabletransforms/WindComponents.cc
