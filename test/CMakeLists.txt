@@ -29,6 +29,7 @@ list( APPEND ufo_test_input
   testinput/atms_qc_filters.yaml
   testinput/atms_rttov_ops_qc_rttovonedvarcheck.yaml
   testinput/atms_rttov_ops.yaml
+  testinput/atms_rttov_qc.yaml
   testinput/coolskin.yaml
   testinput/cris_crtm.yaml
   testinput/cris_crtm_bc.yaml
@@ -36,6 +37,7 @@ list( APPEND ufo_test_input
   testinput/cris_qc_filters.yaml
   testinput/cris_qc_land.yaml
   testinput/empty.yaml
+  testinput/function_bennartzscatindex.yaml
   testinput/function_clouddetect_iasi.yaml
   testinput/function_clouddetect_airs.yaml
   testinput/function_clouddetect_cris.yaml
@@ -683,6 +685,13 @@ if( ${RTTOV_FOUND} )
                     ARGS    "testinput/atms_rttov_ops.yaml"
                     ENVIRONMENT OOPS_TRAPFPE=1
                     DEPENDS test_ObsOperatorTLAD.x 
+                    TEST_DEPENDS ufo_get_ioda_test_data ufo_get_ufo_test_data )
+
+  ecbuild_add_test( TARGET  test_ufo_qc_atms_rttov
+                    COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                    ARGS    "testinput/atms_rttov_qc.yaml"
+                    ENVIRONMENT OOPS_TRAPFPE=1
+                    DEPENDS test_ObsFilters.x
                     TEST_DEPENDS ufo_get_ioda_test_data ufo_get_ufo_test_data )
 
   ecbuild_add_test( TARGET  test_ufo_atms_ops_qc_rttovonedvarcheck
@@ -1619,6 +1628,13 @@ ecbuild_add_test( TARGET  test_ufo_variabletransform_windspeedanddirection
                   TEST_DEPENDS ufo_get_ioda_test_data )
 
 # Test Functions
+
+ecbuild_add_test( TARGET  test_ufo_function_bennartzscatindex
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFunction.x
+                  ARGS    "testinput/function_bennartzscatindex.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsFunction.x
+                  TEST_DEPENDS ufo_get_ioda_test_data )
 
 ecbuild_add_test( TARGET  test_ufo_function_clouddetect_iasi
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFunction.x

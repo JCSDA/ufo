@@ -141,8 +141,8 @@ end do
 
 if (.not. variable_present) write(*,*) "Using uncorrected brightness temperature"
 
-! Add bias correction to the observations
-self % yobs = self % yobs + self % ybias
+! Subtract bias from the observations (apply bias correction)
+self % yobs = self % yobs - self % ybias
 
 ! Read in prerequisites
 call obsspace_get_db(config % obsdb, "MetaData", "latitude", self % lat(:))

@@ -91,6 +91,8 @@ set ( filters_files
       actions/InflateError.h
       actions/RejectObs.cc
       actions/RejectObs.h
+      obsfunctions/BennartzScatIndex.cc
+      obsfunctions/BennartzScatIndex.h
       obsfunctions/ChannelUseflagCheckRad.cc
       obsfunctions/ChannelUseflagCheckRad.h
       obsfunctions/CLWMatchIndexMW.cc

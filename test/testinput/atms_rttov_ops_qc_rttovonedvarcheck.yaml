@@ -137,4 +137,4 @@ observations:
     IRemiss: false
     EmissLandDefault: 0.95
     EmissSeaIceDefault: 0.92
-  passedBenchmark: 1395      # number of passed obs
+  passedBenchmark: 1410      # number of passed obs

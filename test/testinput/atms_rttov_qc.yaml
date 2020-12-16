@@ -1,0 +1,45 @@
+window begin: 2019-12-29T21:00:00Z
+window end: 2019-12-30T03:00:00Z
+
+observations:
+- obs operator:
+    name: RTTOV
+    GeoVal_type: MetO
+    Absorbers: &rttov_absobers [Water_vapour]
+    linear obs operator:
+      Absorbers: [Water_vapour]
+    obs options: &rttov_options
+      RTTOV_default_opts: OPS
+      SatRad_compatibility: true
+      Sensor_ID: noaa_20_atms
+      CoefficientPath: Data/
+  obs space:
+    name: atms_n20
+    obsdatain: 
+      obsfile: Data/ioda/testinput_tier_1/atms_n20_obs_20191230T0000_rttov.nc4
+    simulated variables: [brightness_temperature]
+    channels: 1-22
+  geovals: 
+    filename: Data/ufo/testinput_tier_1/geovals_atms_20191230T0000Z_benchmark.nc4
+  obs filters:
+### Bennartz scattering test [over land] ###
+  - filter: Bounds Check
+    filter variables:
+    - name: brightness_temperature
+      channels: 1-7, 16-22
+    where:
+    - variable: 
+        name: land_sea@MetaData
+      is_in: 0  # land=0, sea=1, ice=2
+    test variables:
+    - name: BennartzScatIndex@ObsFunction
+      options:
+        channel_89ghz: 16
+        channel_150ghz: 17
+        bennartz_coeff_1: 0.158
+        bennartz_coeff_2: 0.0163
+        apply_bias: ObsBias
+    maxvalue: -1.0
+    action:
+      name: reject
+  passedBenchmark: 2172      # number of obs passing QC
