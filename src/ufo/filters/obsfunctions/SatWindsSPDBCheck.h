@@ -24,7 +24,7 @@ namespace ufo {
 ///        which are bounding the ObsError variable following a GSI fix file.
 ///        The specification of group name for ObsError is optional but assigned
 ///        ObsErrorData by default.  The HofX group name is also optional to override
-///        using testHofX for testing purposes (set to GsiHofX, for example).
+///        using test_hofx for testing purposes (set to GsiHofX, for example).
 ///
 class SatWindsSPDBCheckParameters : public oops::Parameters {
   OOPS_CONCRETE_PARAMETERS(SatWindsSPDBCheckParameters, Parameters)
@@ -34,7 +34,7 @@ class SatWindsSPDBCheckParameters : public oops::Parameters {
   oops::RequiredParameter<float> error_min{"error_min", this};
   oops::RequiredParameter<float> error_max{"error_max", this};
   /// Name of the HofX group used to replace the default (HofX) group
-  oops::Parameter<std::string> testHofX{"testHofX", "HofX", this};
+  oops::Parameter<std::string> test_hofx{"test_hofx", "HofX", this};
   /// Name of the ObsError group used to replace the default (ObsErrorData) group
   oops::Parameter<std::string> original_obserr{"original_obserr", "ObsErrorData", this};
 };
@@ -45,7 +45,7 @@ class SatWindsSPDBCheckParameters : public oops::Parameters {
 ///        SatWinds.  If the SPDB is less than zero, then compute a final value
 ///        of residual over ObsError.  That calculation is then used versus a
 ///        threshold value in Bounds Check filter to flag obs locations as bad.
-///        In regular usage, the testHofX option would be omitted in order than HofX
+///        In regular usage, the test_hofx option would be omitted in order than HofX
 ///        values are used for model wind components.  Also, an optional group
 ///        name for the ObsError variable can be supplied if different from ObsErrorData,
 ///        and its value is bounded by parameters error_min and error_max.

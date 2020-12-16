@@ -37,9 +37,9 @@ SatWindsSPDBCheck::SatWindsSPDBCheck(const eckit::LocalConfiguration & conf)
   invars_ += Variable("northward_wind@ObsValue");
 
   // Typical use would be HofX group, but during testing, we include option for GsiHofX
-  std::string testHofX = options_.testHofX.value();
-  invars_ += Variable("eastward_wind@" + testHofX);
-  invars_ += Variable("northward_wind@" + testHofX);
+  std::string test_hofx = options_.test_hofx.value();
+  invars_ += Variable("eastward_wind@" + test_hofx);
+  invars_ += Variable("northward_wind@" + test_hofx);
 
   // The starting (un-inflated) value of obserror. If running in sequence of filters,
   // then it is probably found in ObsErrorData, otherwise, it is probably ObsError.
@@ -75,10 +75,10 @@ void SatWindsSPDBCheck::compute(const ObsFilterData & in,
   in.get(Variable("eastward_wind@ObsValue"), u);
   in.get(Variable("northward_wind@ObsValue"), v);
   // Retrieve Model HofX wind components
-  std::string testHofX = options_.testHofX.value();
+  std::string test_hofx = options_.test_hofx.value();
   std::vector<float> um, vm;
-  in.get(Variable("eastward_wind@" + testHofX), um);
-  in.get(Variable("northward_wind@" + testHofX), vm);
+  in.get(Variable("eastward_wind@" + test_hofx), um);
+  in.get(Variable("northward_wind@" + test_hofx), vm);
 
   // Get original ObsError of eastward_wind (would make little sense if diff from northward)
   std::vector<float> currentObserr(nlocs);

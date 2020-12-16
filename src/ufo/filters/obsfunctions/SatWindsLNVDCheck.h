@@ -26,14 +26,14 @@ class SatWindsLNVDCheckParameters : public oops::Parameters {
 
  public:
   /// Name of the HofX group used to replace the default group (default is HofX)
-  oops::Parameter<std::string> testHofX{"testHofX", "HofX", this};
+  oops::Parameter<std::string> test_hofx{"test_hofx", "HofX", this};
 };
 
 // -----------------------------------------------------------------------------
 
 /// \brief Compute the log-normal vector difference (LNVD) of observation-model
 ///        SatWinds.  If the LNVD is greater than a threshold (usually 3.0), then
-///        flag the location as bad.  In regular usage, the testHofX option would
+///        flag the location as bad.  In regular usage, the test_hofx option would
 ///        be omitted in order that HofX is used for the model wind components.
 ///
 /// ~~~
@@ -46,7 +46,7 @@ class SatWindsLNVDCheckParameters : public oops::Parameters {
 ///       test variables:
 ///       - name: SatWindsLNVDCheck@ObsFunction
 ///         options:
-///           testHofX: GsiHofX
+///           test_hofx: GsiHofX
 ///       maxvalue: 3
 ///
 class SatWindsLNVDCheck : public ObsFunctionBase {

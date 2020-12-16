@@ -17,7 +17,7 @@ observations:
       options:
         error_min: 1.4
         error_max: 20.0
-        testHofX: GsiHofX
+        test_hofx: GsiHofX
     maxvalue: 1.75
   passedBenchmark: 144
 #  In the test data set of 100 possible values, 1 ob is 2100UTC exactly since time test is (2100-0300].

@@ -15,7 +15,7 @@ observations:
     test variables:
     - name: SatWindsLNVDCheck@ObsFunction
       options:
-        testHofX: GsiHofX
+        test_hofx: GsiHofX
     maxvalue: 3
   passedBenchmark: 122
 #  In the test data set of 100 possible values, 1 ob is 2100UTC exactly and time test is (2100-0300].

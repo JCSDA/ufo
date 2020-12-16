@@ -31,9 +31,9 @@ SatWindsLNVDCheck::SatWindsLNVDCheck(const eckit::LocalConfiguration & conf)
   invars_ += Variable("northward_wind@ObsValue");
 
   // Typical use would be HofX group, but during testing, we include option for GsiHofX
-  std::string testHofX = options_.testHofX.value();
-  invars_ += Variable("eastward_wind@" + testHofX);
-  invars_ += Variable("northward_wind@" + testHofX);
+  std::string test_hofx = options_.test_hofx.value();
+  invars_ += Variable("eastward_wind@" + test_hofx);
+  invars_ += Variable("northward_wind@" + test_hofx);
 
   // TODO(gthompsn): Need to include a check that whatever HofX group name used actually exists.
 }
@@ -57,10 +57,10 @@ void SatWindsLNVDCheck::compute(const ObsFilterData & in,
   in.get(Variable("eastward_wind@ObsValue"), u);
   in.get(Variable("northward_wind@ObsValue"), v);
   // Retrieve Model HofX wind components
-  std::string testHofX = options_.testHofX.value();
+  std::string test_hofx = options_.test_hofx.value();
   std::vector<float> um, vm;
-  in.get(Variable("eastward_wind@" + testHofX), um);
-  in.get(Variable("northward_wind@" + testHofX), vm);
+  in.get(Variable("eastward_wind@" + test_hofx), um);
+  in.get(Variable("northward_wind@" + test_hofx), vm);
 
   for (size_t jj = 0; jj < nlocs; ++jj) {
     if (u[jj] != missing && v[jj] != missing) {
