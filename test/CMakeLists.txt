@@ -84,6 +84,7 @@ list( APPEND ufo_test_input
   testinput/gnssrobndropp2d.yaml
   testinput/gnssrobndnbam.yaml
   testinput/gnssro_obs_error.yaml
+  testinput/gnssro_obs_error_ropp.yaml
   testinput/gnssrobndnbam_backgroundcheck_qc.yaml
   testinput/gnssrobndnbam_super_refraction.yaml
   testinput/gnssrobndnbam_qc_action_obserr_inflation.yaml
@@ -2087,6 +2088,14 @@ ecbuild_add_test( TARGET  test_ufo_qc_gnssro_obs_error
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsFilters.x
                   TEST_DEPENDS ufo_get_ioda_test_data ufo_get_ufo_test_data)
+
+if( ${ROPP-UFO_FOUND} )
+ecbuild_add_test( TARGET  test_ufo_qc_gnssro_obs_error_ROPP
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                  ARGS    "testinput/gnssro_obs_error_ropp.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsFilters.x )
+endif( ${ROPP-UFO_FOUND} )
 
 ecbuild_add_test( TARGET  test_ufo_qc_gnssro_domain_check
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
