@@ -28,6 +28,12 @@ namespace ioda {
 
 namespace ufo {
 
+class ObsDomainCheckParameters : public FilterParametersBase {
+  OOPS_CONCRETE_PARAMETERS(ObsDomainCheckParameters, FilterParametersBase)
+
+  // This filter doesn't take any extra parameters.
+};
+
 /// Domain check: generic check that obs are within domain
 
 // Domain is defined by metadata criteria regardless of obs value.
@@ -39,9 +45,13 @@ namespace ufo {
 class ObsDomainCheck : public FilterBase,
                        private util::ObjectCounter<ObsDomainCheck> {
  public:
+  /// The type of parameters accepted by the constructor of this filter.
+  /// This typedef is used by the FilterFactory.
+  typedef ObsDomainCheckParameters Parameters_;
+
   static const std::string classname() {return "ufo::ObsDomainCheck";}
 
-  ObsDomainCheck(ioda::ObsSpace &, const eckit::Configuration &,
+  ObsDomainCheck(ioda::ObsSpace &, const Parameters_ &,
                  std::shared_ptr<ioda::ObsDataVector<int> >,
                  std::shared_ptr<ioda::ObsDataVector<float> >);
   ~ObsDomainCheck();
@@ -51,6 +61,8 @@ class ObsDomainCheck : public FilterBase,
   void applyFilter(const std::vector<bool> &, const Variables &,
                    std::vector<std::vector<bool>> &) const override;
   int qcFlag() const override {return QCflags::domain;}
+
+  Parameters_ parameters_;
 };
 
 }  // namespace ufo

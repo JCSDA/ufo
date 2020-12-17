@@ -32,24 +32,26 @@ namespace ufo {
 
 // -----------------------------------------------------------------------------
 
-BackgroundCheck::BackgroundCheck(ioda::ObsSpace & obsdb, const eckit::Configuration & config,
+BackgroundCheck::BackgroundCheck(ioda::ObsSpace & obsdb, const Parameters_ & parameters,
                                  std::shared_ptr<ioda::ObsDataVector<int> > flags,
                                  std::shared_ptr<ioda::ObsDataVector<float> > obserr)
-  : FilterBase(obsdb, config, flags, obserr),
-    abs_threshold_(config_.getString("absolute threshold", "")),
-    threshold_(config_.getString("threshold", "")),
-    function_abs_threshold_()
+  : FilterBase(obsdb, parameters, flags, obserr), parameters_(parameters)
 {
   oops::Log::trace() << "BackgroundCheck constructor" << std::endl;
 
-  if (config_.has("function absolute threshold")) {
-    std::vector<eckit::LocalConfiguration> threshconfs;
-    config_.get("function absolute threshold", threshconfs);
-    function_abs_threshold_ = threshconfs[0].getString("name");
-    allvars_ += ufo::Variables(threshconfs);
+  if (parameters_.functionAbsoluteThreshold.value()) {
+    for (const Variable & var : *(parameters_.functionAbsoluteThreshold.value()))
+      allvars_ += var;
   }
   allvars_ += Variables(filtervars_, "HofX");
-  ASSERT(abs_threshold_ != "" || threshold_ != "" || function_abs_threshold_ != "");
+  ASSERT(parameters_.threshold.value() ||
+         parameters_.absoluteThreshold.value() ||
+         parameters_.functionAbsoluteThreshold.value());
+  if (parameters_.functionAbsoluteThreshold.value()) {
+    ASSERT(!parameters_.threshold.value() &&
+           !parameters_.absoluteThreshold.value());
+    ASSERT(!parameters_.functionAbsoluteThreshold.value()->empty());
+  }
 }
 
 // -----------------------------------------------------------------------------
@@ -73,12 +75,9 @@ void BackgroundCheck::applyFilter(const std::vector<bool> & apply,
   ioda::ObsDataVector<float> bias(obsdb_, filtervars.toOopsVariables(), "ObsBias", false);
 
 // Get function absolute threshold
-  if (function_abs_threshold_ != "") {
-    ASSERT(abs_threshold_ == "" && threshold_ == "");
+  if (parameters_.functionAbsoluteThreshold.value()) {
 //  Get function absolute threshold info from configuration
-    std::vector<eckit::LocalConfiguration> threshconfs;
-    config_.get("function absolute threshold", threshconfs);
-    Variable rtvar(threshconfs[0]);
+    const Variable &rtvar = parameters_.functionAbsoluteThreshold.value()->front();
     ioda::ObsDataVector<float> function_abs_threshold(obsdb_, rtvar.toOopsVariables());
     data_.get(rtvar, function_abs_threshold);
 
@@ -106,7 +105,6 @@ void BackgroundCheck::applyFilter(const std::vector<bool> & apply,
       }
     }
   } else {
-    ASSERT(function_abs_threshold_ == "");
     Variables varhofx(filtervars_, "HofX");
     for (size_t jv = 0; jv < filtervars.nvars(); ++jv) {
       size_t iv = observed.find(filtervars.variable(jv).variable());
@@ -117,12 +115,13 @@ void BackgroundCheck::applyFilter(const std::vector<bool> & apply,
 //    Threshold for current variable
       std::vector<float> abs_thr(obsdb_.nlocs(), std::numeric_limits<float>::max());
       std::vector<float> thr(obsdb_.nlocs(), std::numeric_limits<float>::max());
-      if (abs_threshold_ != "") abs_thr = getScalarOrFilterData(abs_threshold_, data_);
-      if (threshold_ != "")     thr     = getScalarOrFilterData(threshold_, data_);
+      if (parameters_.absoluteThreshold.value())
+        abs_thr = getScalarOrFilterData(*parameters_.absoluteThreshold.value(), data_);
+      if (parameters_.threshold.value())
+        thr = getScalarOrFilterData(*parameters_.threshold.value(), data_);
 
       for (size_t jobs = 0; jobs < obsdb_.nlocs(); ++jobs) {
         if (apply[jobs] && (*flags_)[iv][jobs] == QCflags::pass) {
-          size_t iobs = observed.size() * jobs + iv;
           ASSERT((*obserr_)[iv][jobs] != util::missingValue((*obserr_)[iv][jobs]));
           ASSERT(obs[jv][jobs] != util::missingValue(obs[jv][jobs]));
           ASSERT(hofx[jobs] != util::missingValue(hofx[jobs]));

@@ -27,17 +27,16 @@ namespace ufo {
 
 // -----------------------------------------------------------------------------
 
-ObsBoundsCheck::ObsBoundsCheck(ioda::ObsSpace & obsdb, const eckit::Configuration & config,
+ObsBoundsCheck::ObsBoundsCheck(ioda::ObsSpace & obsdb, const Parameters_ & parameters,
                                std::shared_ptr<ioda::ObsDataVector<int> > flags,
                                std::shared_ptr<ioda::ObsDataVector<float> > obserr)
-  : FilterBase(obsdb, config, flags, obserr)
+  : FilterBase(obsdb, parameters, flags, obserr), parameters_(parameters)
 {
-  if (config_.has("test variables")) {
-    std::vector<eckit::LocalConfiguration> testvarconf;
-    config_.get("test variables", testvarconf);
-    allvars_ += ufo::Variables(testvarconf);
+  if (parameters_.testVariables.value() != boost::none) {
+    for (const Variable & var : *parameters_.testVariables.value())
+      allvars_ += var;
   }
-  oops::Log::debug() << "ObsBoundsCheck: config (constructor) = " << config_ << std::endl;
+  oops::Log::debug() << "ObsBoundsCheck: config (constructor) = " << parameters_ << std::endl;
 }
 
 // -----------------------------------------------------------------------------
@@ -55,20 +54,19 @@ void ObsBoundsCheck::applyFilter(const std::vector<bool> & apply,
 // Find which variables are tested and the conditions
   ufo::Variables testvars;
 // Use variables specified in test variables/functions for testing, otherwise filter variables
-  if (config_.has("test variables")) {
-    std::vector<eckit::LocalConfiguration> varconfs;
-    config_.get("test variables", varconfs);
-    testvars += ufo::Variables(varconfs);
+  if (parameters_.testVariables.value() != boost::none) {
+    for (const Variable & var : *parameters_.testVariables.value())
+      testvars += var;
   } else {
     testvars += ufo::Variables(filtervars, "ObsValue");
   }
-  const float vmin = config_.getFloat("minvalue", missing);
-  const float vmax = config_.getFloat("maxvalue", missing);
+  const float vmin = parameters_.minvalue.value().value_or(missing);
+  const float vmax = parameters_.maxvalue.value().value_or(missing);
 
 // Sanity checks
   if (filtervars.nvars() == 0) {
     oops::Log::error() << "No variables will be filtered out in filter "
-                       << config_ << std::endl;
+                       << parameters_ << std::endl;
     ABORT("No variables specified to be filtered out in filter");
   }
 
@@ -119,7 +117,7 @@ void ObsBoundsCheck::applyFilter(const std::vector<bool> & apply,
     int iv = 0;
     if (testvars.size() != 1) {
       oops::Log::error() << "When number filtervars not equal number of test vars, "
-                         << "the latter can only be one." << config_ << std::endl;
+                         << "the latter can only be one." << parameters_ << std::endl;
       ABORT("ONLY one testvar when filtervars>1 because its usage is ambiguous otherwise");
     }
 
@@ -154,7 +152,7 @@ void ObsBoundsCheck::applyFilter(const std::vector<bool> & apply,
 // -----------------------------------------------------------------------------
 
 void ObsBoundsCheck::print(std::ostream & os) const {
-  os << "ObsBoundsCheck: config = " << config_ << std::endl;
+  os << "ObsBoundsCheck: config = " << parameters_ << std::endl;
 }
 
 // -----------------------------------------------------------------------------

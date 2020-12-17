@@ -20,12 +20,12 @@ namespace ufo {
 
 // -----------------------------------------------------------------------------
 
-ObsDomainCheck::ObsDomainCheck(ioda::ObsSpace & obsdb, const eckit::Configuration & config,
+ObsDomainCheck::ObsDomainCheck(ioda::ObsSpace & obsdb, const Parameters_ & parameters,
                                std::shared_ptr<ioda::ObsDataVector<int> > flags,
                                std::shared_ptr<ioda::ObsDataVector<float> > obserr)
-  : FilterBase(obsdb, config, flags, obserr)
+  : FilterBase(obsdb, parameters, flags, obserr), parameters_(parameters)
 {
-  oops::Log::debug() << "ObsDomainCheck: config = " << config_ << std::endl;
+  oops::Log::debug() << "ObsDomainCheck: config = " << parameters_ << std::endl;
 }
 
 // -----------------------------------------------------------------------------
@@ -47,7 +47,7 @@ void ObsDomainCheck::applyFilter(const std::vector<bool> & inside,
 // -----------------------------------------------------------------------------
 
 void ObsDomainCheck::print(std::ostream & os) const {
-  os << "ObsDomainCheck: config = " << config_ << std::endl;
+  os << "ObsDomainCheck: config = " << parameters_ << std::endl;
 }
 
 // -----------------------------------------------------------------------------

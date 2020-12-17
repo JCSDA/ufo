@@ -25,12 +25,12 @@ namespace ufo {
 
 // -----------------------------------------------------------------------------
 
-BlackList::BlackList(ioda::ObsSpace & obsdb, const eckit::Configuration & config,
+BlackList::BlackList(ioda::ObsSpace & obsdb, const Parameters_ & parameters,
                      std::shared_ptr<ioda::ObsDataVector<int> > flags,
                      std::shared_ptr<ioda::ObsDataVector<float> > obserr)
-  : FilterBase(obsdb, config, flags, obserr)
+  : FilterBase(obsdb, parameters, flags, obserr), parameters_(parameters)
 {
-  oops::Log::debug() << "BlackList: config = " << config_ << std::endl;
+  oops::Log::debug() << "BlackList: config = " << parameters_ << std::endl;
 }
 
 // -----------------------------------------------------------------------------
@@ -59,7 +59,7 @@ void BlackList::applyFilter(const std::vector<bool> & apply,
 // -----------------------------------------------------------------------------
 
 void BlackList::print(std::ostream & os) const {
-  os << "BlackList: config = " << config_ << std::endl;
+  os << "BlackList: config = " << parameters_ << std::endl;
 }
 
 // -----------------------------------------------------------------------------

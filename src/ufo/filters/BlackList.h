@@ -28,18 +28,28 @@ namespace ioda {
 
 namespace ufo {
 
-/// BlackList: generic black listing of observations
+class BlackListParameters : public FilterParametersBase {
+  OOPS_CONCRETE_PARAMETERS(BlackListParameters, FilterParametersBase)
 
-// Filters observations out regardless of obs value
-// The same effect can be achieved with opposite criteria through the "Domain Check",
-// the choice is a matter of convenience or which seems more natural.
+  // This filter doesn't take any extra parameters.
+};
+
+/// \brief Generic black listing of observations.
+///
+/// Filters observations out regardless of obs value
+/// The same effect can be achieved with opposite criteria through the "Domain Check",
+/// the choice is a matter of convenience or which seems more natural.
 
 class BlackList : public FilterBase,
                   private util::ObjectCounter<BlackList> {
  public:
+  /// The type of parameters accepted by the constructor of this filter.
+  /// This typedef is used by the FilterFactory.
+  typedef BlackListParameters Parameters_;
+
   static const std::string classname() {return "ufo::BlackList";}
 
-  BlackList(ioda::ObsSpace &, const eckit::Configuration &,
+  BlackList(ioda::ObsSpace &, const Parameters_ &,
             std::shared_ptr<ioda::ObsDataVector<int> >,
             std::shared_ptr<ioda::ObsDataVector<float> >);
   ~BlackList();
@@ -49,6 +59,8 @@ class BlackList : public FilterBase,
   void applyFilter(const std::vector<bool> &, const Variables &,
                    std::vector<std::vector<bool>> &) const override;
   int qcFlag() const override {return QCflags::black;}
+
+  Parameters_ parameters_;
 };
 
 }  // namespace ufo

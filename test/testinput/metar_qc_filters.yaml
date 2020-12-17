@@ -30,7 +30,7 @@ observations:
   - filter: Bounds Check
     filter variables:
     - name: specific_humidity
-    minvalue: 1.E-7
+    minvalue: 1.0E-7
     maxvalue: 0.34999999 
     action:
       name: reject 

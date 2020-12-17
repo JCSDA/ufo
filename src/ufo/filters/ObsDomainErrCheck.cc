@@ -25,18 +25,14 @@ namespace ufo {
 
 // -----------------------------------------------------------------------------
 
-ObsDomainErrCheck::ObsDomainErrCheck(ioda::ObsSpace & obsdb, const eckit::Configuration & config,
+ObsDomainErrCheck::ObsDomainErrCheck(ioda::ObsSpace & obsdb, const Parameters_ & parameters,
                                std::shared_ptr<ioda::ObsDataVector<int> > flags,
                                std::shared_ptr<ioda::ObsDataVector<float> > obserr)
-  : FilterBase(obsdb, config, flags, obserr),
-    parameter_(0.0)
+  : FilterBase(obsdb, parameters, flags, obserr),
+    parameters_(parameters)
 {
-  oops::Log::debug() << "ObsDomainErrCheck: config = " << config_ << std::endl;
+  oops::Log::debug() << "ObsDomainErrCheck: config = " << parameters_ << std::endl;
   ASSERT(obserr);
-
-  const float missing = util::missingValue(missing);
-  float parameter_ = config.getFloat("infltparameter", missing);
-  ASSERT(parameter_ != missing);
 }
 
 // -----------------------------------------------------------------------------
@@ -63,6 +59,7 @@ void ObsDomainErrCheck::applyFilter(const std::vector<bool> & inside,
   }
 
   size_t count = 0;
+  const float parameter = parameters_.infltparameter;
   for (size_t jv = 0; jv < filtervars.nvars(); ++jv) {
     size_t iv = observed.find(filtervars.variable(jv).variable());
     for (size_t jobs = 0; jobs < obsdb_.nlocs(); ++jobs) {
@@ -72,7 +69,7 @@ void ObsDomainErrCheck::applyFilter(const std::vector<bool> & inside,
         ASSERT((*obserr_)[iv][jobs] != util::missingValue((*obserr_)[iv][jobs]));
         ASSERT(obs[jv][jobs] != util::missingValue(obs[jv][jobs]));
         float bound = 2.5 * (*obserr_)[iv][jobs];
-        float obserrinc = parameter_ * std::max((values[jobs]-9.0), 0.0) * (*obserr_)[iv][jobs];
+        float obserrinc = parameter * std::max((values[jobs]-9.0), 0.0) * (*obserr_)[iv][jobs];
         obserrinc = std::max((*obserr_)[iv][jobs], bound);
         (*obserr_)[iv][jobs] = sqrt(pow((*obserr_)[iv][jobs], 2) + pow(obserrinc, 2));
         ++count;
@@ -85,7 +82,7 @@ void ObsDomainErrCheck::applyFilter(const std::vector<bool> & inside,
 // -----------------------------------------------------------------------------
 
 void ObsDomainErrCheck::print(std::ostream & os) const {
-  os << "ObsDomainErrCheck: config = " << config_ << std::endl;
+  os << "ObsDomainErrCheck: config = " << parameters_ << std::endl;
 }
 
 // -----------------------------------------------------------------------------
