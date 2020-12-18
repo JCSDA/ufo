@@ -34,15 +34,10 @@ ObsErrorFactorSfcPressure::ObsErrorFactorSfcPressure(const eckit::Configuration 
   options_.reset(new ObsErrorFactorSfcPressureParameters());
   options_->deserialize(config);
 
-  // Initialize error_min, max, and gross from options. Make sure they are sane.
+  // Initialize error_min, max from options. Make sure they are sane.
   const float error_min = options_->error_min.value();
   const float error_max = options_->error_max.value();
-  const float error_gross = options_->error_gross.value();
-  ASSERT(error_min > tiny_float && error_min < huge_float);
-  ASSERT(error_max > tiny_float && error_max < huge_float);
-  ASSERT(error_gross > tiny_float && error_gross < huge_float);
   ASSERT(error_min < error_max);
-  ASSERT(error_gross >= error_max);
 
   // The starting (un-inflated) value of obserror. If running in sequence of filters,
   // then it is probably found in ObsErrorData, otherwise, it is probably ObsError.
@@ -82,10 +77,9 @@ void ObsErrorFactorSfcPressure::compute(const ObsFilterData & data,
   size_t nlocs = data.nlocs();
   size_t nlevs = data.nlevs(Variable("air_pressure@GeoVaLs"));
 
-  // Get min, max, gross error values
+  // Get min, max error values
   const float error_min = options_->error_min.value();
   const float error_max = options_->error_max.value();
-  const float error_gross = options_->error_gross.value();
 
   // Get MetaData of station elevation
   std::vector<float> ob_elevation(nlocs);
@@ -131,11 +125,6 @@ void ObsErrorFactorSfcPressure::compute(const ObsFilterData & data,
   int iv = 0;
 
   for (size_t iloc = 0; iloc < nlocs; ++iloc) {
-    oops::Log::debug() << "   with obs Z,T,P:  " << ob_elevation[iloc] << ", "
-                       << ob_temperature_sfc[iloc] << ", " << ob_pressure_sfc[iloc]
-                       << "   and model Z,T,P:  " << model_elevation[iloc] << ", "
-                       << model_temp_sfc[iloc] << ", " << model_pres_sfc[iloc] << std::endl;
-
     rdelz = ob_elevation[iloc]-model_elevation[iloc];
     pgesorig = model_pres_sfc[iloc]*0.001;             // Converting Pascals to cb
     psges = log(pgesorig);
@@ -169,10 +158,6 @@ void ObsErrorFactorSfcPressure::compute(const ObsFilterData & data,
     drdp = pges*(g_over_rd*abs(rdelz)*drbx/(tges*tges));
     ddiff = ob_pressure_sfc[iloc]*0.001f - pges;        // innovation in cb
 
-    oops::Log::debug() << "  ErrorFactorSfcPressure: rdp,drbx,drdp,ddiff,tges,pges "
-                       << rdp << ", " << drbx << ", " << drdp << ", "
-                       << ddiff*10 << ", " << tges << ", " << pges << std::endl;
-
     // make adjustment to observational error (also convert to cb)
     obserror = currentObserr[iloc]*0.001f;
     // TODO(gthompsn): Consider reducing obserror by 0.7 for data near sea-level and small delta-Z.
@@ -183,16 +168,7 @@ void ObsErrorFactorSfcPressure::compute(const ObsFilterData & data,
     new_error = std::max(error_min*0.001f, std::min(new_error, error_max*0.001f));
     error_factor = std::max(0.7f, new_error/obserror);
 
-    // Double-check that new final error is not larger than gross_error.
-    if (error_factor*obserror > error_gross*0.001f) {
-      error_factor = error_gross*0.001f/obserror;
-    }
-
     obserr[iv][iloc] = error_factor;
-
-    oops::Log::debug() << "  ErrorFactorSfcPressure: currentObserr: " << currentObserr[iloc]
-                       << ", new_error=" << new_error*1000.f
-                       << ", error_factor=" << error_factor << std::endl;
   }
 }
 

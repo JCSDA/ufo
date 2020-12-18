@@ -28,10 +28,9 @@ class ObsErrorFactorSfcPressureParameters : public oops::Parameters {
   OOPS_CONCRETE_PARAMETERS(ObsErrorFactorSfcPressureParameters, Parameters)
 
  public:
-  /// the existence of min,max,gross error values are required
+  /// the existence of min,max error values are required
   oops::RequiredParameter<float> error_min{"error_min", this};
   oops::RequiredParameter<float> error_max{"error_max", this};
-  oops::RequiredParameter<float> error_gross{"error_gross", this};
   oops::Parameter<std::string> original_obserr{"original_obserr", "ObsErrorData", this};
 };
 
@@ -44,11 +43,9 @@ class ObsErrorFactorSfcPressureParameters : public oops::Parameters {
 ///   Observed surface pressure, station height, and temperature (possibly missing).
 ///   Model first-guess fields interpolated to the observation location.
 /// The starting obserror is then altered by this code with the "inflate error" action,
-/// constrained by the values given for error_min and error_max (Pa).  The error_gross
-/// option is allowed to be larger than error_max for future expansion but is currently
-/// ineffectual. For testing purposes, the optional parameter of original_obserr group
-/// name such as ObsError to override the default ObsErrorData can be used for tolerance
-/// check of reference results.
+/// constrained by the values given for error_min and error_max (Pa).  For testing
+/// purposes, the optional parameter of original_obserr group name such as ObsError to
+/// override the default ObsErrorData can be used for tolerance check of reference results.
 ///
 /// ~~~~
 ///
@@ -64,7 +61,6 @@ class ObsErrorFactorSfcPressureParameters : public oops::Parameters {
 ///           options:
 ///             error_min: 100         # 1 mb
 ///             error_max: 300         # 3 mb
-///             error_gross: 360       # 3.6 mb
 ///
 class ObsErrorFactorSfcPressure : public ObsFunctionBase {
  public:
