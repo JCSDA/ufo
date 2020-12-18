@@ -87,6 +87,17 @@ void testCorrectValue() {
   EXPECT_EQUAL(params.optVariableParameter.value().get().channels(), (std::vector<int>{1, 5}));
 }
 
+void testSimpleString() {
+  MyParameters params;
+  const eckit::LocalConfiguration fullConf(::test::TestEnvironment::config(), "simple_string");
+  EXPECT_NO_THROW(params.validate(fullConf));
+  params.deserialize(fullConf);
+
+  EXPECT(params.optVariableParameter.value() != boost::none);
+  EXPECT_EQUAL(params.optVariableParameter.value().get().group(), "MetaData");
+  EXPECT_EQUAL(params.optVariableParameter.value().get().variable(), "latitude");
+}
+
 void testNoChannels() {
   MyParameters params;
   const eckit::LocalConfiguration fullConf(::test::TestEnvironment::config(), "no_channels");
@@ -117,7 +128,7 @@ void testMissingName() {
   const eckit::LocalConfiguration conf(::test::TestEnvironment::config(), "missing_name");
   if (validationSupported)
     EXPECT_THROWS(params.validate(conf));
-  EXPECT_THROWS_AS(params.deserialize(conf), eckit::BadParameter);
+  EXPECT_THROWS_MSG(params.deserialize(conf), "ConfigurationNotFound: [name]");
 }
 
 void testMisspelledProperty() {
@@ -151,6 +162,9 @@ class Parameters : public oops::Test {
                     });
     ts.emplace_back(CASE("ufo/Parameters/correctValue") {
                       testCorrectValue();
+                    });
+    ts.emplace_back(CASE("ufo/Parameters/testSimpleString") {
+                      testSimpleString();
                     });
     ts.emplace_back(CASE("ufo/Parameters/noChannels") {
                       testNoChannels();

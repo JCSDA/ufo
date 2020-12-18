@@ -32,8 +32,7 @@ Variable::Variable(const eckit::Configuration & conf)
   : varname_(), grpname_(), channels_(),
     options_(conf.getSubConfiguration("options")) {
   oops::Log::trace() << "ufo::Variable(config) start " << conf << std::endl;
-  std::string fullname;
-  conf.get("name", fullname);
+  std::string fullname = conf.getString("name");
   splitVarGroup(fullname, varname_, grpname_);
   // read channels if available
   if (conf.has("channels")) {

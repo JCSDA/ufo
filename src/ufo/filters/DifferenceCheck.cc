@@ -25,13 +25,11 @@ DifferenceCheck::DifferenceCheck(ioda::ObsSpace & obsdb, const Parameters_ & par
                                  std::shared_ptr<ioda::ObsDataVector<int> > flags,
                                  std::shared_ptr<ioda::ObsDataVector<float> > obserr)
   : FilterBase(obsdb, parameters, flags, obserr),
-    parameters_(parameters),
-    ref_(parameters.ref),
-    val_(parameters.val)
+    parameters_(parameters)
 {
   oops::Log::trace() << "DifferenceCheck contructor starting" << std::endl;
-  allvars_ += ref_;
-  allvars_ += val_;
+  allvars_ += parameters_.ref;
+  allvars_ += parameters_.val;
 }
 
 // -----------------------------------------------------------------------------
@@ -63,8 +61,8 @@ void DifferenceCheck::applyFilter(const std::vector<bool> & apply,
 
 // Get reference values and values to compare (as floats)
   std::vector<float> ref, val;
-  data_.get(ref_, ref);
-  data_.get(val_, val);
+  data_.get(parameters_.ref, ref);
+  data_.get(parameters_.val, val);
   ASSERT(ref.size() == val.size());
 
 // Loop over all obs

@@ -78,3 +78,33 @@ observations:
     minvalue: -3
     maxvalue: 3
   passedBenchmark: 4
+- obs space:
+    name: test data
+    obsdatain:
+      obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
+    simulated variables: [variable1]
+  obs filters:
+  - filter: Difference Check        # test min and maxvalue (equal), equivalent to previous test
+    filter variables:
+    - name: variable1
+    value:
+      name: ObsErrorModelRamp@ObsFunction
+      options:
+        xvar:
+          name: variable2@ObsValue  # variable2@ObsValue = 10, 12, 14, 16, 18, 20, 22, 24, 26, 28
+        x0: [10]
+        x1: [30]
+        err0: [20]
+        err1: [40]                  # obsfunction produces 20, 22, 24, 26, 28, 30, 32, 34, 36, 38
+    reference:
+      name: ObsErrorModelRamp@ObsFunction
+      options:
+        xvar:
+          name: variable1@ObsValue  # variable1@ObsValue = 10, 11, 12, 13, 14, 15, 16, 17, 18, 19
+        x0: [10]
+        x1: [20]
+        err0: [20]
+        err1: [10]                  # obsfunction produces 20, 19, 18, 17, 16, 15, 14, 13, 12, 11
+    minvalue: -4
+    maxvalue: 4
+  passedBenchmark: 2                # only the first two observations should pass

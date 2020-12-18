@@ -6,6 +6,8 @@ full:
     name: latitude@MetaData
     options:
       some_option: true
+simple_string:
+  opt_variable_parameter: latitude@MetaData
 no_channels:
   opt_variable_parameter:
     name: latitude@MetaData

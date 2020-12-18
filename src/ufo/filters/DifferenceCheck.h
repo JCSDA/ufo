@@ -19,6 +19,7 @@
 #include "ufo/filters/FilterBase.h"
 #include "ufo/filters/QCflags.h"
 #include "ufo/filters/Variable.h"
+#include "ufo/utils/parameters/ParameterTraitsVariable.h"
 
 namespace eckit {
   class Configuration;
@@ -37,9 +38,9 @@ class DifferenceCheckParameters : public FilterParametersBase {
 
  public:
   /// Name of the reference variable.
-  oops::RequiredParameter<std::string> ref{"reference", this};
+  oops::RequiredParameter<Variable> ref{"reference", this};
   /// Name of the test variable.
-  oops::RequiredParameter<std::string> val{"value", this};
+  oops::RequiredParameter<Variable> val{"value", this};
 
   /// The filter will flag observations for which the difference `test - reference` is below
   /// `minvalue`.
@@ -79,8 +80,6 @@ class DifferenceCheck : public FilterBase,
   int qcFlag() const override {return QCflags::diffref;}
 
   Parameters_ parameters_;
-  const Variable ref_;
-  const Variable val_;
 };
 
 }  // namespace ufo

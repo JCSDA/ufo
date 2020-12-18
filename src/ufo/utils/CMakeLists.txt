@@ -12,6 +12,7 @@ set ( utils_files
       MaxNormDistanceCalculator.h
       metoffice/MetOfficeQCFlags.h
       metoffice/MetOfficeObservationIDs.h
+      parameters/ParameterTraitsVariable.cc
       parameters/ParameterTraitsVariable.h
       PiecewiseLinearInterpolation.cc
       PiecewiseLinearInterpolation.h
