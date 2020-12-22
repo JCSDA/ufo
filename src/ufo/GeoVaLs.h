@@ -76,6 +76,7 @@ class GeoVaLs : public util::Printable,
 
   void read(const eckit::Configuration &, const ioda::ObsSpace &);
   void write(const eckit::Configuration &) const;
+  size_t nlocs() const;
 
   int & toFortran() {return keyGVL_;}
   const int & toFortran() const {return keyGVL_;}

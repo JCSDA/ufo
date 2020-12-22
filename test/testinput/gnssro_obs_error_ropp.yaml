@@ -38,5 +38,6 @@ observations:
     filter variables:
     - name: bending_angle
     errmodel: NRL
+    n_horiz: 3
     variable: bending_angle
   passedBenchmark: 18

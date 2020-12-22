@@ -10,8 +10,13 @@ include( ufo_functions )
 list( APPEND ufo_resources
   bmatrix/rttov/atms_bmatrix_70_test.dat
   rmatrix/rttov/atms_noaa_20_rmatrix_test.nc4
+  rmatrix/gnssro/gnssro_ba_rmatrix_latitude.nl
+  rmatrix/gnssro/gnssro_ba_rmatrix_avtemp.nl
+  bmatrix/gnssro/gnssro_bmatrix.txt
 )
 
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/bmatrix/rttov)
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/rmatrix/rttov)
+file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/bmatrix/gnssro)
+file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/rmatrix/gnssro)
 CREATE_SYMLINK( ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR} ${ufo_resources} )

@@ -319,4 +319,13 @@ void GeoVaLs::write(const eckit::Configuration & config) const {
   oops::Log::trace() << "GeoVaLs::write done" << std::endl;
 }
 // -----------------------------------------------------------------------------
+/*! \brief Return the number of geovals */
+size_t GeoVaLs::nlocs() const {
+  oops::Log::trace() << "GeoVaLs::nlocs starting" << std::endl;
+  size_t nlocs;
+  ufo_geovals_nlocs_f90(keyGVL_, nlocs);
+  oops::Log::trace() << "GeoVaLs::nlocs done" << std::endl;
+  return nlocs;
+}
+// -----------------------------------------------------------------------------
 }  // namespace ufo

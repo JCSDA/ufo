@@ -1,11 +1,25 @@
+!-------------------------------------------------------------------------------
+! (C) British Crown Copyright 2020 Met Office
+!
+! This software is licensed under the terms of the Apache Licence Version 2.0
+! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+!-------------------------------------------------------------------------------
+
+!> Fortran module with various useful routines
+
 module ufo_utils_mod
 
 use ufo_constants_mod
+use kinds, only: kind_real
+use missing_values_mod, only: missing_value
+use fckit_log_module, only : fckit_log
 
+private
 public Ops_Qsat
 public Ops_QsatWat
 public Ops_SatRad_Qsplit
 public Ops_Cholesky
+public ufo_utils_iogetfreeunit
 
 contains
 
@@ -1147,6 +1161,37 @@ end do
 9999 continue
 
 end subroutine Ops_Cholesky
+
+!-------------------------------------------------------------------------------
+!> Find a free file unit.
+!!
+!! \author Met Office
+!!
+!! \date 09/06/2020: Created
+!!
+function ufo_utils_iogetfreeunit() result(unit)
+
+implicit none
+
+integer            :: unit
+
+integer, parameter :: unit_min=10
+integer, parameter :: unit_max=1000
+logical            :: opened
+integer            :: lun
+integer            :: newunit
+
+newunit=-1
+do lun=unit_min,unit_max
+  inquire(unit=lun,opened=opened)
+  if (.not. opened) then
+      newunit=lun
+    exit
+  end if
+end do
+unit=newunit
+
+end function ufo_utils_iogetfreeunit
 
 !-------------------------------------------------------------------------------
 
