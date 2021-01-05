@@ -64,12 +64,12 @@ subroutine avgkernel_tlad_setup_(self, f_conf)
   call f_confOpts%get_or_die("nlayers_kernel", self%nlayers_kernel)
   nlevs_yaml = f_confOpts%get_size("ak")
   if (nlevs_yaml /= self%nlayers_kernel+1) then
-    write(err_msg, *) "ufo_avgkernel_setup error: YAML nlayers_kernel != size of ak array"
+    write(err_msg, *) "ufo_avgkernel_tlad_setup error: YAML nlayers_kernel != size of ak array"
     call abor1_ftn(err_msg)
   end if
   nlevs_yaml = f_confOpts%get_size("bk")
   if (nlevs_yaml /= self%nlayers_kernel+1) then
-    write(err_msg, *) "ufo_avgkernel_setup error: YAML nlayers_kernel != size of bk array"
+    write(err_msg, *) "ufo_avgkernel_tlad_setup error: YAML nlayers_kernel != size of bk array"
     call abor1_ftn(err_msg)
   end if
 
@@ -90,9 +90,14 @@ subroutine avgkernel_tlad_setup_(self, f_conf)
   self%tracervars = str_array
 
   ! determine if this is a total column or troposphere calculation
-  ! support stratosphere, etc. later?
   if (.not. f_confOpts%get("tropospheric column", self%troposphere)) self%troposphere = .false.
   if (.not. f_confOpts%get("total column", self%totalcolumn)) self%totalcolumn = .false.
+
+  ! both of these cannot be true
+  if (self%troposphere .and. self%totalcolumn) then
+    write(err_msg, *) "ufo_avgkernel_tlad_setup error: both tropospheric and total column set to TRUE, only one can be TRUE"
+    call abor1_ftn(err_msg)
+  end if
 
   ! do we need a conversion factor, say between ppmv and unity?
   if (.not. f_confOpts%get("model units coeff", self%convert_factor_model)) self%convert_factor_model = one
@@ -220,6 +225,9 @@ subroutine avgkernel_simobs_tl_(self, geovals_in, obss, nvars, nlocs, hofx)
   character(len=MAXVARLEN) :: geovar
   real(kind_real) :: hofx_tmp
   type(ufo_geovals) :: geovals
+  real(c_double) :: missing
+
+  missing = missing_value(missing)
 
   call ufo_geovals_copy(geovals_in, geovals)  ! dont want to change geovals_in
 
@@ -228,6 +236,7 @@ subroutine avgkernel_simobs_tl_(self, geovals_in, obss, nvars, nlocs, hofx)
     geovar = self%tracervars(ivar)
     call ufo_geovals_get_var(geovals, geovar, tracer)
     do iobs = 1, nlocs
+      if (self%avgkernel_obs(1,iobs) /= missing) then ! take care of missing obs
         if(self%flip_it) tracer%vals(1:tracer%nval,iobs) = tracer%vals(tracer%nval:1:-1,iobs)
         if (self%troposphere) then
           call simulate_column_ob_tl(self%nlayers_kernel, tracer%nval, self%avgkernel_obs(:,iobs), &
@@ -235,7 +244,16 @@ subroutine avgkernel_simobs_tl_(self, geovals_in, obss, nvars, nlocs, hofx)
                                      self%phii(:,iobs), tracer%vals(:,iobs)*self%convert_factor_model, &
                                      hofx_tmp, self%troplev_obs(iobs), self%airmass_tot(iobs), self%airmass_trop(iobs))
           hofx(ivar,iobs) = hofx_tmp * self%convert_factor_hofx
+        else if (self%totalcolumn) then
+          call simulate_column_ob_tl(self%nlayers_kernel, tracer%nval, self%avgkernel_obs(:,iobs), &
+                                     self%prsl_obs(:,iobs), self%prsl(:,iobs), self%temp(:,iobs),&
+                                     self%phii(:,iobs), tracer%vals(:,iobs)*self%convert_factor_model, &
+                                     hofx_tmp)
+          hofx(ivar,iobs) = hofx_tmp * self%convert_factor_hofx
         end if
+      else
+        hofx(ivar,iobs) = missing
+      end if
     end do
   end do
   call ufo_geovals_delete(geovals)
@@ -286,6 +304,12 @@ subroutine avgkernel_simobs_ad_(self, geovals_in, obss, nvars, nlocs, hofx)
                                      self%prsl_obs(:,iobs), self%prsl(:,iobs), self%temp(:,iobs),&
                                      self%phii(:,iobs), tracer%vals(:,iobs), &
                                      hofx_tmp, self%troplev_obs(iobs), self%airmass_tot(iobs), self%airmass_trop(iobs))
+          tracer%vals(:,iobs) = tracer%vals(:,iobs) * self%convert_factor_model
+        else if (self%totalcolumn) then
+          hofx_tmp = hofx(ivar,iobs) * self%convert_factor_hofx
+          call simulate_column_ob_ad(self%nlayers_kernel, tracer%nval, self%avgkernel_obs(:,iobs), &
+                                     self%prsl_obs(:,iobs), self%prsl(:,iobs), self%temp(:,iobs),&
+                                     self%phii(:,iobs), tracer%vals(:,iobs), hofx_tmp)
           tracer%vals(:,iobs) = tracer%vals(:,iobs) * self%convert_factor_model
         end if
       end if

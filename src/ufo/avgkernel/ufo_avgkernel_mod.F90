@@ -80,9 +80,14 @@ subroutine ufo_avgkernel_setup(self, f_conf)
   self%tracervars = str_array
 
   ! determine if this is a total column or troposphere calculation
-  ! support stratosphere, etc. later?
   if (.not. f_confOpts%get("tropospheric column", self%troposphere)) self%troposphere = .false.
   if (.not. f_confOpts%get("total column", self%totalcolumn)) self%totalcolumn = .false.
+
+  ! both of these cannot be true
+  if (self%troposphere .and. self%totalcolumn) then
+    write(err_msg, *) "ufo_avgkernel_setup error: both tropospheric and total column set to TRUE, only one can be TRUE"
+    call abor1_ftn(err_msg)
+  end if
 
   ! do we need a conversion factor, say between ppmv and unity?
   if (.not. f_confOpts%get("model units coeff", self%convert_factor_model)) self%convert_factor_model = one
@@ -195,6 +200,12 @@ subroutine ufo_avgkernel_simobs(self, geovals_in, obss, nvars, nlocs, hofx)
                                   prsl_obs(:,iobs), prsl%vals(:,iobs), temp%vals(:,iobs),&
                                   phii%vals(:,iobs), tracer%vals(:,iobs)*self%convert_factor_model, &
                                   hofx_tmp, troplev_obs(iobs), airmass_tot(iobs), airmass_trop(iobs))
+          hofx(ivar,iobs) = hofx_tmp * self%convert_factor_hofx
+        else if (self%totalcolumn) then
+          call simulate_column_ob(self%nlayers_kernel, tracer%nval, avgkernel_obs(:,iobs), &
+                                  prsl_obs(:,iobs), prsl%vals(:,iobs), temp%vals(:,iobs),&
+                                  phii%vals(:,iobs), tracer%vals(:,iobs)*self%convert_factor_model, &
+                                  hofx_tmp)
           hofx(ivar,iobs) = hofx_tmp * self%convert_factor_hofx
         end if
       else
