@@ -15,12 +15,12 @@ Fill this in. Please indicate what you want to do and why you want to do it.
 ## ZenHub organization
 
 Please make sure that you have properly set:
-- The pipeline: Dec 2020 OBS code sprint - UFO: Sprint Backlog
+- The pipeline: Jan 2021 OBS code sprint - UFO: Sprint Backlog
 - Labels: OBS1
-- Milestone: OBS - December 2020
+- Milestone: OBS - January 2021
 - Estimate
 - Epics: OBS1.14
-- Releases: OBS 2020 UFO Code Sprint
+- Releases: OBS 2021 Jan UFO Code Sprint
 - Assignees: Anyone **working** on this issue. Anyone who is not working directly on the issue, but
   who should receive notifications, should be listed below.
 
