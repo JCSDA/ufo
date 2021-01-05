@@ -160,6 +160,7 @@ list( APPEND ufo_test_input
   testinput/sbuv2_n19.yaml
   testinput/sbuv2_n19_flipz.yaml
   testinput/sbuv2_n19_L127.yaml
+  testinput/scatwind_neutral_metoffice.yaml
   testinput/seaicefrac.yaml
   testinput/seaicethick.yaml
   testinput/chleuzintegr.yaml
@@ -953,6 +954,14 @@ ecbuild_add_test( TARGET  test_ufo_linopr_vertinterp_satwind_metoffice
                   MPI     4
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
                   ARGS    "testinput/satwind_metoffice.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsOperator.x
+                  TEST_DEPENDS ufo_get_ioda_test_data ufo_get_ufo_test_data )
+
+ecbuild_add_test( TARGET  test_ufo_opr_scatwindNeutralMetOffice
+                  MPI     4
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
+                  ARGS    "testinput/scatwind_neutral_metoffice.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsOperator.x
                   TEST_DEPENDS ufo_get_ioda_test_data ufo_get_ufo_test_data )

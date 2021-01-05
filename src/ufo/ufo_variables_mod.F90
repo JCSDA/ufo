@@ -81,6 +81,8 @@ character(len=MAXVARLEN), public, parameter :: var_lvl_transmit= "transmittances
 character(len=MAXVARLEN), public, parameter :: var_lvl_weightfunc= "weightingfunction_of_atmosphere_layer"
 character(len=MAXVARLEN), public, parameter :: var_pmaxlev_weightfunc= "pressure_level_at_peak_of_weightingfunction"
 character(len=MAXVARLEN), public, parameter :: var_tsavg5      = "average_surface_temperature_within_field_of_view"
+character(len=MAXVARLEN), public, parameter :: var_sea_fric_vel    = "friction_velocity_over_water"
+character(len=MAXVARLEN), public, parameter :: var_obk_length      = "obukhov_length"
 
 
 character(len=MAXVARLEN), public, parameter :: var_refl        = "equivalent_reflectivity_factor"
@@ -109,7 +111,6 @@ character(len=MAXVARLEN), public :: var_sw_rad          = "net_downwelling_short
 character(len=MAXVARLEN), public :: var_latent_heat     = "upward_latent_heat_flux_in_air"
 character(len=MAXVARLEN), public :: var_sens_heat       = "upward_sensible_heat_flux_in_air"
 character(len=MAXVARLEN), public :: var_lw_rad          = "net_downwelling_longwave_radiation"
-character(len=MAXVARLEN), public :: var_sea_fric_vel    = "friction_velocity_over_water"
 
 character(len=MAXVARLEN), public, parameter :: var_du001 = "mass_fraction_of_dust001_in_air"
 character(len=MAXVARLEN), public, parameter :: var_du002 = "mass_fraction_of_dust002_in_air"
