@@ -82,7 +82,7 @@ type(c_ptr), value, intent(in)    :: obss
 
     if (trim(self%obsvars%variable(1)) == "sea_ice_freeboard") then
        rho_wiw = (self%rho_water-self%rho_ice)/self%rho_water
-       rho_wsw = (self%rho_water-self%rho_snow)/self%rho_water
+       rho_wsw = (-self%rho_snow)/self%rho_water  
     endif
 
     ! check if sea ice fraction variable is in geovals and get it

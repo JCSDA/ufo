@@ -137,7 +137,7 @@ call ufo_geovals_get_var(geovals, var_seaicethick, icethick_d)
 
 if (trim(self%obsvars%variable(1)) == "sea_ice_freeboard") then
    rho_wiw = (self%rho_water-self%rho_ice)/self%rho_water
-   rho_wsw = (self%rho_water-self%rho_snow)/self%rho_water
+   rho_wsw = (-self%rho_snow)/self%rho_water  
 endif
 
 ! sea ice thickness obs operator
@@ -202,7 +202,7 @@ endif
 
 if (trim(self%obsvars%variable(1)) == "sea_ice_freeboard") then
    rho_wiw = (self%rho_water-self%rho_ice)/self%rho_water
-   rho_wsw = (self%rho_water-self%rho_snow)/self%rho_water
+   rho_wsw = (-self%rho_snow)/self%rho_water   
 endif
 
 if (.not. geovals%linit ) geovals%linit=.true.

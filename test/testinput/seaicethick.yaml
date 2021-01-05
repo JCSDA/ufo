@@ -30,7 +30,7 @@ observations:
     name: SeaIceThickness
   geovals:
     filename: Data/ufo/testinput_tier_1/cryosat2-2018-04-15_geovals.nc
-  rms ref: 0.16062500062397761
+  rms ref: 0.098124999692664222
   tolerance: 1.0e-8
   linear obs operator test:
     coef TL: 1.0e-4
