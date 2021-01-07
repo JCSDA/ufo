@@ -1688,7 +1688,8 @@ contains
           ! variable: toa_outgoing_radiance_per_unit_wavenumber_CH [mW / (m^2 sr cm^-1)] (nval=1)
           ! variable: brightness_temperature_assuming_clear_sky_CH
           ! variable: pressure_level_at_peak_of_weightingfunction_CH
-        case (var_radiance, var_tb_clr, var_tb, var_pmaxlev_weightfunc)
+          ! variable: toa_total_transmittance_CH
+        case (var_radiance, var_tb_clr, var_tb, var_pmaxlev_weightfunc, var_total_transmit)
           ! always returned
           hofxdiags%geovals(jvar)%nval = 1
           if(.not. allocated(hofxdiags%geovals(jvar)%vals)) &
@@ -1710,6 +1711,8 @@ contains
                 call rttov_calc_weighting_fn(rttov_errorstatus, RTProf % profiles(prof)%p, od_level(:), &
                   Wfunc(:))
                 hofxdiags%geovals(jvar)%vals(1,prof) = maxloc(Wfunc(:), DIM=1) ! scalar not array(1)
+              else if(ystr_diags(jvar) == var_total_transmit) then
+                hofxdiags%geovals(jvar)%vals(1,prof) = RTProf % transmission % tau_total(ichan)
               end if
             endif
           end do

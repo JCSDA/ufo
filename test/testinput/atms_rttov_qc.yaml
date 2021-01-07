@@ -15,11 +15,11 @@ observations:
       CoefficientPath: Data/
   obs space:
     name: atms_n20
-    obsdatain: 
+    obsdatain:
       obsfile: Data/ioda/testinput_tier_1/atms_n20_obs_20191230T0000_rttov.nc4
     simulated variables: [brightness_temperature]
     channels: 1-22
-  geovals: 
+  geovals:
     filename: Data/ufo/testinput_tier_1/geovals_atms_20191230T0000Z_benchmark.nc4
   obs filters:
 ### Bennartz scattering test [over land] ###
@@ -28,7 +28,7 @@ observations:
     - name: brightness_temperature
       channels: 1-7, 16-22
     where:
-    - variable: 
+    - variable:
         name: land_sea@MetaData
       is_in: 0  # land=0, sea=1, ice=2
     test variables:
@@ -42,4 +42,15 @@ observations:
     maxvalue: -1.0
     action:
       name: reject
-  passedBenchmark: 2172      # number of obs passing QC
+### Surface-to-space transmittance check ###
+  - filter: Bounds Check
+    filter variables:
+    - name: brightness_temperature
+      channels: &humidity_chans 18-22
+    test variables:
+    - name: toa_total_transmittance@ObsDiag
+      channels: *humidity_chans
+    maxvalue: 0.7         # (example) apply to each channel
+    action:
+      name: reject        # obs rejected per channel if transmittance exceeded
+  passedBenchmark: 2167   # number passing QC after all filters
