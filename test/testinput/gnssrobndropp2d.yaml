@@ -17,7 +17,7 @@ observations:
    filename: Data/ufo/testinput_tier_1/gnssro_geoval_2018041500_s_2d.nc4
    loc_multiplier: 3
   rms ref: 0.009216235643012125
-  tolerance: 1.0e-12
+  tolerance: 1.0e-11
   linear obs operator test:
     iterations TL:  10
     tolerance TL: 1.0e-12

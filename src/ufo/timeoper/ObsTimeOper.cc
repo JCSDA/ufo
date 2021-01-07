@@ -64,15 +64,14 @@ ObsTimeOper::~ObsTimeOper() {
 std::unique_ptr<Locations> ObsTimeOper::locations() const {
   oops::Log::trace() << "entered ObsOperatorTime::locations" << std::endl;
 
-  std::unique_ptr<Locations> locs;
-
-  locs = std::unique_ptr<Locations>(new Locations(odb_));
+  std::unique_ptr<Locations> locs = actualoperator_->locations();
+  // concatenate locations with itself (double the size)
   *locs += *locs;
 
-  // create concatenation of Locations class
   return locs;
 }
 
+// -----------------------------------------------------------------------------
 
 void ObsTimeOper::simulateObs(const GeoVaLs & gv, ioda::ObsVector & ovec,
                               ObsDiagnostics & ydiags) const {

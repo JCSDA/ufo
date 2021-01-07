@@ -31,7 +31,13 @@ LinearObsOperator::~LinearObsOperator() {}
 void LinearObsOperator::setTrajectory(const GeoVaLs & gvals, const ObsBias & bias) {
   oops::Variables vars;
   vars += bias.requiredHdiagnostics();
-  ObsDiagnostics ydiags(odb_, Locations(odb_), vars);
+  std::vector<float> lons(odb_.nlocs());
+  std::vector<float> lats(odb_.nlocs());
+  std::vector<util::DateTime> times(odb_.nlocs());
+  odb_.get_db("MetaData", "latitude", lats);
+  odb_.get_db("MetaData", "longitude", lons);
+  odb_.get_db("MetaData", "datetime", times);
+  ObsDiagnostics ydiags(odb_, Locations(lons, lats, times, odb_.comm()), vars);
   oper_->setTrajectory(gvals, bias, ydiags);
   biaspreds_.clear();
   biaspreds_ = bias.computePredictors(gvals, ydiags);

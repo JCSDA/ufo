@@ -10,8 +10,6 @@ use fckit_configuration_module, only: fckit_configuration
 use fckit_mpi_module, only: fckit_mpi_comm
 use iso_c_binding
 use ufo_geovals_mod
-use ufo_locs_mod
-use ufo_locs_mod_c, only : ufo_locs_registry
 use kinds
 
 implicit none
@@ -106,25 +104,25 @@ end subroutine ufo_geovals_copy_one_c
 ! ------------------------------------------------------------------------------
 !> Analytic init
 
-subroutine ufo_geovals_analytic_init_c(c_key_self, c_key_locs, c_conf) bind(c,name='ufo_geovals_analytic_init_f90')
-
+subroutine ufo_geovals_analytic_init_c(c_key_self, c_locs, c_conf) bind(c,name='ufo_geovals_analytic_init_f90')
+use ufo_locations_mod
 implicit none
 integer(c_int), intent(in) :: c_key_self
-integer(c_int), intent(in) :: c_key_locs
+type(c_ptr), value, intent(in) :: c_locs
 type(c_ptr), value, intent(in) :: c_conf
 
 type(ufo_geovals), pointer :: self
-type(ufo_locs), pointer :: locs
+type(ufo_locations) ::locs
 character(len=30) :: ic
 character(len=:), allocatable :: str
 type(fckit_configuration) :: f_conf
 
 call ufo_geovals_registry%get(c_key_self, self)
-call ufo_locs_registry%get(c_key_locs,locs)
 
 f_conf = fckit_configuration(c_conf)
 call f_conf%get_or_die("analytic_init",str)
 ic = str
+locs = ufo_locations(c_locs)
 call ufo_geovals_analytic_init(self,locs,ic)
 
 end subroutine ufo_geovals_analytic_init_c

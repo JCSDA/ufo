@@ -21,6 +21,7 @@ namespace ioda {
 }
 
 namespace ufo {
+  class Locations;
 
 /// Interface to Fortran UFO GeoVals routines
 /*!
@@ -30,7 +31,7 @@ namespace ufo {
 
 extern "C" {
   void ufo_geovals_default_constr_f90(F90goms &);
-  void ufo_geovals_setup_f90(F90goms &, const F90locs &, const oops::Variables &);
+  void ufo_geovals_setup_f90(F90goms &, const size_t &, const oops::Variables &);
   void ufo_geovals_delete_f90(F90goms &);
   void ufo_geovals_copy_f90(const F90goms &, F90goms &);
   void ufo_geovals_copy_one_f90(F90goms &, const F90goms &, int &);
@@ -39,7 +40,7 @@ extern "C" {
                                    const int &, const char *);
   void ufo_geovals_abs_f90(const F90goms &);
   void ufo_geovals_rms_f90(const F90goms &, double &);
-  void ufo_geovals_analytic_init_f90(F90goms &, const F90locs &,
+  void ufo_geovals_analytic_init_f90(F90goms &, const Locations &,
                                      const eckit::Configuration &);
   void ufo_geovals_random_f90(const F90goms &);
   void ufo_geovals_scalmult_f90(const F90goms &, const double &);

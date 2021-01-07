@@ -29,7 +29,8 @@ static ObsOperatorMaker<ObsGnssroBndROPP2D> makerGnssroBndROPP2D_("GnssroBndROPP
 
 ObsGnssroBndROPP2D::ObsGnssroBndROPP2D(const ioda::ObsSpace & odb,
                                        const eckit::Configuration & config)
-  : ObsOperatorBase(odb, config), keyOperGnssroBndROPP2D_(0), odb_(odb), varin_()
+  : ObsOperatorBase(odb, config), keyOperGnssroBndROPP2D_(0), odb_(odb), varin_(),
+    nhoriz_(config.getInt("obs options.n_horiz"))
 {
   const std::vector<std::string> vv{"air_temperature", "specific_humidity", "air_pressure",
                                     "geopotential_height", "surface_altitude"};
@@ -58,11 +59,19 @@ void ObsGnssroBndROPP2D::simulateObs(const GeoVaLs & gom, ioda::ObsVector & ovec
 
 // -----------------------------------------------------------------------------
 std::unique_ptr<Locations> ObsGnssroBndROPP2D::locations() const {
-  std::unique_ptr<Locations> locs(new Locations(odb_.comm()));
+  std::vector<float> lons(odb_.nlocs()*nhoriz_);
+  std::vector<float> lats(odb_.nlocs()*nhoriz_);
+  std::vector<util::DateTime> times(odb_.nlocs()*nhoriz_);
 
-  int keylocs = locs->toFortran();
-
-  ufo_gnssro_2d_locs_init_f90(keyOperGnssroBndROPP2D_, keylocs, odb_);
+  std::vector<util::DateTime> times_notduplicated(odb_.nlocs());
+  odb_.get_db("MetaData", "datetime", times_notduplicated);
+  for (size_t jloc = 0; jloc < odb_.nlocs(); ++jloc) {
+    for (size_t jhoriz = 0; jhoriz < nhoriz_; ++jhoriz) {
+      times[jloc*nhoriz_ + jhoriz] = times_notduplicated[jloc];
+    }
+  }
+  ufo_gnssro_2d_locs_init_f90(keyOperGnssroBndROPP2D_, odb_, lons.size(), lons[0], lats[0]);
+  std::unique_ptr<Locations> locs(new Locations(lons, lats, times, odb_.comm()));
 
   return locs;
 }

@@ -58,6 +58,7 @@ class ObsGnssroBndROPP2D : public ObsOperatorBase,
   F90hop keyOperGnssroBndROPP2D_;
   const ioda::ObsSpace& odb_;
   std::unique_ptr<const oops::Variables> varin_;
+  const size_t nhoriz_;
 };
 
 // -----------------------------------------------------------------------------

@@ -23,7 +23,6 @@ use ufo_gnssro_ropp2d_utils_mod
 use ufo_gnssro_ropp1d_utils_mod
 
 use gnssro_mod_conf
-use ufo_locs_mod
 use fckit_log_module,  only : fckit_log
 
 implicit none

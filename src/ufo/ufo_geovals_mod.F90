@@ -592,21 +592,22 @@ end subroutine ufo_geovals_copy_one
 !!
 
 subroutine ufo_geovals_analytic_init(self, locs, ic)
-use ufo_locs_mod, only : ufo_locs
 use dcmip_initial_conditions_test_1_2_3, only : test1_advection_deformation, &
                                   test1_advection_hadley, test3_gravity_wave
 use dcmip_initial_conditions_test_4, only : test4_baroclinic_wave
+use ufo_locations_mod
 
 implicit none
 type(ufo_geovals), intent(inout) :: self
-type(ufo_locs), intent(in)       :: locs
+type(ufo_locations), intent(in)  :: locs
 character(*), intent(in)         :: ic
 
 real(kind_real) :: pi = acos(-1.0_kind_real)
 real(kind_real) :: deg_to_rad,rlat, rlon
 real(kind_real) :: p0, kz, u0, v0, w0, t0, phis0, ps0, rho0, hum0
 real(kind_real) :: q1, q2, q3, q4
-integer :: ivar, iloc, ival
+real(kind_real), allocatable, dimension(:) :: lons, lats
+integer :: nlocs, ivar, iloc, ival
 
 if (.not. self%linit) then
   call abor1_ftn("ufo_geovals_analytic_init: geovals not defined")
@@ -620,13 +621,18 @@ endif
 
 deg_to_rad = pi/180.0_kind_real
 
+nlocs = locs%nlocs()
+allocate(lons(nlocs), lats(nlocs))
+call locs%get_lons(lons)
+call locs%get_lats(lats)
+
 do ivar = 1, self%nvar-1
 
    do iloc = 1, self%geovals(ivar)%nlocs
 
       ! convert lat and lon to radians
-      rlat = deg_to_rad * locs%lat(iloc)
-      rlon = deg_to_rad*modulo(locs%lon(iloc)+180.0_kind_real,360.0_kind_real) - pi
+      rlat = deg_to_rad * lats(iloc)
+      rlon = deg_to_rad*modulo(lons(iloc)+180.0_kind_real,360.0_kind_real) - pi
 
       do ival = 1, self%geovals(ivar)%nval
 
@@ -673,6 +679,8 @@ do ivar = 1, self%nvar-1
       enddo
    enddo
 enddo
+
+deallocate(lons, lats)
 
 end subroutine ufo_geovals_analytic_init
 

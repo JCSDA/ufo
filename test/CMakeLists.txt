@@ -417,7 +417,7 @@ ecbuild_add_test( TARGET  test_ufo_geovals
                   TEST_DEPENDS ufo_get_ioda_test_data ufo_get_ufo_test_data )
 
 ecbuild_add_test( TARGET  test_ufo_locations
-                  SOURCES mains/TestLocations.cc
+                  SOURCES mains/TestLocations.cc ufo/Locations.h ufo/locations_test.F90
                   ARGS    "testinput/locations.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   LIBS    ufo

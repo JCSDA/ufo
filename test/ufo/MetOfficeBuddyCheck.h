@@ -65,7 +65,7 @@ void testMetOfficeBuddyCheck(const eckit::LocalConfiguration &conf) {
   filter.preProcess();
 
   ioda::ObsVector hofx(obsSpace, "HofX");
-  ufo::Locations locations(obsSpace);
+  ufo::Locations locations(conf, obsSpace.comm());
   ufo::ObsDiagnostics obsDiags(obsSpace, locations, oops::Variables());
   filter.postFilter(hofx, obsDiags);
 

@@ -1,7 +1,41 @@
 window begin: 2018-04-14T21:00:00Z
 window end: 2018-04-15T03:00:00Z
 obs space:
-  name: Radiosonde
-  obsdatain:
-    obsfile: Data/ioda/testinput_tier_1/sondes_obs_2018041500_s.nc4
-  simulated variables: [air_temperature]
+  name: test data
+  simulated variables: [test]
+  generate:
+    list:
+      lons: [ 0.0, 10.0, 20.0, 50.0, 90.0, 100.0, 200.0, 300.0, 359.0, 0.0 ]
+      lats: [ 0.0, 10.0, 20.0, 80.0, 90.0, -10.0, -20.0, -80.0, -90.0, 0.0 ]
+      datetimes:
+      - 2018-04-14T21:50:00Z
+      - 2018-04-14T22:04:00Z
+      - 2018-04-14T21:10:00Z
+      - 2018-04-14T23:00:00Z
+      - 2018-04-15T00:00:00Z
+      - 2018-04-15T01:00:00Z
+      - 2018-04-15T02:00:00Z
+      - 2018-04-15T03:00:00Z
+      - 2018-04-15T02:30:00Z
+      - 2018-04-14T23:59:00Z
+    obs errors: [1.0]
+
+locations test:
+  reference lons: [ 0.0, 10.0, 20.0, 50.0, 90.0, 100.0, 200.0, 300.0, 359.0, 0.0 ]
+  reference lats: [ 0.0, 10.0, 20.0, 80.0, 90.0, -10.0, -20.0, -80.0, -90.0, 0.0 ]
+  time mask tests:
+  - t1: 2018-04-14T21:00:00Z
+    t2: 2018-04-15T03:00:00Z
+    reference mask: [  true,  true,  true,  true,  true,  true,  true,  true,  true,  true ]
+  - t1: 2018-04-14T00:00:00Z
+    t2: 2018-04-14T03:00:00Z
+    reference mask: [ false, false, false, false, false, false, false, false, false, false ]
+  - t1: 2018-04-15T01:00:00Z
+    t2: 2018-04-15T01:00:59Z
+    reference mask: [ false, false, false, false, false, false, false, false, false, false ]
+  - t1: 2018-04-14T21:00:00Z
+    t2: 2018-04-15T00:00:00Z
+    reference mask: [  true,  true,  true,  true,  true, false, false, false, false,  true ]
+  - t1: 2018-04-15T00:00:00Z
+    t2: 2018-04-15T03:00:00Z
+    reference mask: [ false, false, false, false, false,  true,  true,  true,  true, false ]

@@ -37,7 +37,7 @@ void AnalyticInit::fillGeoVaLs(const Locations & locs, GeoVaLs & geovals) const
 {
   oops::Log::trace() << "AnalyticInit::analytic_init starting" << std::endl;
   if (config_.has("analytic_init")) {
-      ufo_geovals_analytic_init_f90(geovals.toFortran(), locs.toFortran(), config_);
+      ufo_geovals_analytic_init_f90(geovals.toFortran(), locs, config_);
   }
   oops::Log::trace() << "AnalyticInit::analytic_init done" << std::endl;
 }

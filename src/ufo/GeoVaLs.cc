@@ -13,6 +13,8 @@
 #include "eckit/config/Configuration.h"
 #include "eckit/exception/Exceptions.h"
 
+#include "ioda/ObsSpace.h"
+
 #include "oops/base/Variables.h"
 #include "oops/util/Logger.h"
 
@@ -47,7 +49,7 @@ GeoVaLs::GeoVaLs(const Locations & locs, const oops::Variables & vars)
   : keyGVL_(-1), vars_(vars), comm_(locs.getComm())
 {
   oops::Log::trace() << "GeoVaLs contructor starting" << std::endl;
-  ufo_geovals_setup_f90(keyGVL_, locs.nobs(), vars_);
+  ufo_geovals_setup_f90(keyGVL_, locs.size(), vars_);
   oops::Log::trace() << "GeoVaLs contructor key = " << keyGVL_ << std::endl;
 }
 
