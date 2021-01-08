@@ -175,6 +175,7 @@ list( APPEND ufo_test_input
   testinput/profileconsistencychecks_separatefilters.yaml
   testinput/profileconsistencychecks_unittests.yaml
   testinput/profileconsistencychecks_unittest_oneprofileMPI.yaml
+  testinput/profileconsistencychecks_unittests_vertinterp.yaml
   testinput/profileconsistencychecks_RH_obsfilter.yaml
   testinput/profileconsistencychecks_RH_OPScomparison.yaml
   testinput/profileconsistencychecks_UInterp_obsfilter.yaml
@@ -189,6 +190,8 @@ list( APPEND ufo_test_input
   testinput/profileconsistencychecks_sondeflags_OPScomparison.yaml
   testinput/profileconsistencychecks_winproflags_obsfilter.yaml
   testinput/profileconsistencychecks_winproflags_OPScomparison.yaml
+  testinput/profileconsistencychecks_pressure_obsfilter.yaml
+  testinput/profileconsistencychecks_pressure_OPScomparison.yaml
   testinput/profileconsistencychecks_history_obsfilter.yaml
   testinput/timeoper.yaml
   testinput/tprof.yaml
@@ -1477,6 +1480,13 @@ ecbuild_add_test( TARGET  test_ufo_profileconsistencychecks_winproflags_obsfilte
                   DEPENDS test_ObsFilters.x
                   TEST_DEPENDS ufo_get_ufo_test_data )
 
+ecbuild_add_test( TARGET  test_ufo_profileconsistencychecks_pressure_obsfilter
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                  ARGS    "testinput/profileconsistencychecks_pressure_obsfilter.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsFilters.x
+                  TEST_DEPENDS ufo_get_ufo_test_data )
+
 ecbuild_add_test( TARGET  test_ufo_profileconsistencychecks_history_obsfilter
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
                   ARGS    "testinput/profileconsistencychecks_history_obsfilter.yaml"
@@ -1611,6 +1621,20 @@ ecbuild_add_test( TARGET  test_ufo_profileconsistencychecks_sondeflags_OPScompar
 ecbuild_add_test( TARGET  test_ufo_profileconsistencychecks_winproflags_OPScomparison
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ProfileConsistencyChecks.x
                   ARGS    "testinput/profileconsistencychecks_winproflags_OPScomparison.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ProfileConsistencyChecks.x
+                  TEST_DEPENDS ufo_get_ufo_test_data )
+
+ecbuild_add_test( TARGET  test_ufo_profileconsistencychecks_pressure_OPScomparison
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ProfileConsistencyChecks.x
+                  ARGS    "testinput/profileconsistencychecks_pressure_OPScomparison.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ProfileConsistencyChecks.x
+                  TEST_DEPENDS ufo_get_ufo_test_data )
+
+ecbuild_add_test( TARGET  test_ufo_profileconsistencychecks_unittests_vertinterp
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ProfileConsistencyChecks.x
+                  ARGS    "testinput/profileconsistencychecks_unittests_vertinterp.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ProfileConsistencyChecks.x
                   TEST_DEPENDS ufo_get_ufo_test_data )

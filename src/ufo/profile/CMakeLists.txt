@@ -8,6 +8,9 @@ set ( profile_files
       DataHandlerParameters.h
       EntireSampleDataHandler.cc
       EntireSampleDataHandler.h
+      ModelHeightCalculator.cc
+      ModelHeightCalculator.h
+      ModelParameters.h
       ProfileCheckBasic.cc
       ProfileChecker.cc
       ProfileChecker.h
@@ -53,10 +56,14 @@ set ( profile_files
       ProfileDataHistory.h
       ProfileIndices.cc
       ProfileIndices.h
+      ProfilePressure.cc
+      ProfilePressure.h
       ProfileSondeFlags.cc
       ProfileSondeFlags.h
       ProfileStandardLevels.cc
       ProfileStandardLevels.h
+      ProfileVerticalInterpolation.cc
+      ProfileVerticalInterpolation.h
       ProfileWindProfilerFlags.cc
       ProfileWindProfilerFlags.h
       VariableNames.cc

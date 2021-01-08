@@ -5,15 +5,19 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
+#include "ufo/GeoVaLs.h"
+
 #include "ufo/profile/ProfileDataHandler.h"
 #include "ufo/profile/VariableNames.h"
 
 namespace ufo {
   ProfileDataHandler::ProfileDataHandler(ioda::ObsSpace &obsdb,
+                                         const GeoVaLs* const geovals,
                                          const DataHandlerParameters &options,
                                          const std::vector <bool> &apply,
                                          std::vector<std::vector<bool>> &flagged)
     : obsdb_(obsdb),
+      geovals_(geovals),
       options_(options),
       flagged_(flagged)
   {
@@ -24,6 +28,7 @@ namespace ufo {
   void ProfileDataHandler::resetProfileInformation()
   {
     profileData_.clear();
+    GeoVaLData_.clear();
   }
 
   void ProfileDataHandler::initialiseNextProfile()
@@ -145,6 +150,47 @@ namespace ufo {
           idx++;
         }
       }
+    }
+  }
+
+  std::vector <float>& ProfileDataHandler::getGeoVaLVector(const std::string &variableName)
+  {
+    // The GeoVaL to be retrieved must be listed in the requiredGeoVals configuration parameter.
+    // The GeoVaLs in that list are loaded before the applyFiter routine runs,
+    // so cannot be retrieved on-demand.
+    const std::vector <std::string> requiredGeoVaLs = options_.requiredGeoVaLs.value();
+    if (std::find(requiredGeoVaLs.begin(), requiredGeoVaLs.end(), variableName) ==
+        requiredGeoVaLs.end()) {
+      throw eckit::BadParameter("The GeoVaL named " +
+                                variableName +
+                                " is not in the requiredGeoVaLs section of the configuration file.",
+                                Here());
+    }
+
+    if (GeoVaLData_.find(variableName) != GeoVaLData_.end()) {
+      // If the GeoVaL vector is already present, return it.
+      return GeoVaLData_[variableName];
+    } else {
+      std::vector <float> vec_GeoVaL_column;
+      // Only fill the GeoVaL vector if the required GeoVaLs are present
+      // and there is at least one observation location.
+      if (geovals_ &&
+          obsdb_.nlocs() > 0 &&
+          geovals_->has(variableName)) {
+        // Vector storing GeoVaL data for current profile.
+        std::vector <float> vec_GeoVaL(obsdb_.nlocs(), 0.0);
+        const size_t gvnlevs = geovals_->nlevs(variableName);
+        // This assumes each model column for each observation is identical
+        // so takes the first entry in each case.
+        // NB This uses array indices that start at 1 rather than 0.
+        for (int jlev = 1; jlev < gvnlevs + 1; ++jlev) {
+          geovals_->get(vec_GeoVaL, variableName, jlev);
+          vec_GeoVaL_column.push_back(vec_GeoVaL[profileIndices_->getProfileIndices()[0]]);
+        }
+      }
+      // Add GeoVaL vector to map (even if it is empty).
+      GeoVaLData_.emplace(variableName, std::move(vec_GeoVaL_column));
+      return GeoVaLData_[variableName];
     }
   }
 }  // namespace ufo

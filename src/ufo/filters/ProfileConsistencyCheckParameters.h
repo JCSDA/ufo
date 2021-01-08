@@ -18,6 +18,7 @@
 #include "oops/util/parameters/Parameters.h"
 
 #include "ufo/profile/DataHandlerParameters.h"
+#include "ufo/profile/ModelParameters.h"
 
 #include "ufo/utils/Constants.h"
 #include "ufo/utils/parameters/ParameterTraitsVariable.h"
@@ -326,6 +327,9 @@ namespace ufo {
 
     /// Parameters related to PGE calculations
     ProbabilityOfGrossErrorParameters PGEParameters{this};
+
+    /// Parameters related to the model
+    ModelParameters ModParameters{this};
 
     /// @}
   };

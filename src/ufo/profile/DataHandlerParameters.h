@@ -68,6 +68,9 @@ namespace ufo {
 
     /// If not sorting observations, ensure number of profiles is consistent
     oops::Parameter<bool> ValidateTotalNumProf {"ValidateTotalNumProf", true, this};
+
+    /// GeoVaLs required by the filter.
+    oops::Parameter<std::vector <std::string>> requiredGeoVaLs{"requiredGeoVaLs", {}, this};
   };
 }  // namespace ufo
 

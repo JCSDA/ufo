@@ -24,6 +24,8 @@
 #include "ufo/filters/ProfileConsistencyCheckParameters.h"
 #include "ufo/filters/ProfileConsistencyChecks.h"
 
+#include "ufo/GeoVaLs.h"
+
 namespace ufo {
 
   // -----------------------------------------------------------------------------
@@ -40,9 +42,20 @@ namespace ufo {
 
     allvars_ += Variables(filtervars_, "HofX");
 
-    // Throw exception if expected configuration option is missing.
+    // Add the names of any required GeoVaLs to \c allvars_.
+    // This is performed here because \c allvars_ must be filled prior to the filter being run.
+    // If they have not been loaded here, but are required later,
+    // an exception will be thrown.
+    const auto &requiredGeoVaLNames = options_->DHParameters.requiredGeoVaLs.value();
+    if (requiredGeoVaLNames.size() > 0) {
+      oops::Variables requiredGeoVaLs(requiredGeoVaLNames);
+      ufo::Variables reqGeoVaLs(requiredGeoVaLs);
+      allvars_ += Variables(reqGeoVaLs, "GeoVaLs");
+    }
+
     // It is essential for observations to be grouped according to (e.g.) station ID
-    // (unless there is only one profile in the sample, which would be very unusual)
+    // (unless there is only one profile in the sample, which would be very unusual).
+    // Throw an exception if the "group variable" configuration option is missing.
     if (obsdb.obs_group_var().empty())
       throw eckit::BadParameter("group variable is empty.", Here());
   }
@@ -125,6 +138,7 @@ namespace ufo {
 
     // Handles individual profile data
     ProfileDataHandler profileDataHandler(obsdb_,
+                                          data_.getGeoVaLs(),
                                           options_->DHParameters,
                                           apply,
                                           flagged);

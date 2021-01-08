@@ -132,3 +132,9 @@ constexpr const char* const ufo::VariableNames::tbk;
 constexpr const char* const ufo::VariableNames::rhbk;
 constexpr const char* const ufo::VariableNames::FlagH;
 constexpr const char* const ufo::VariableNames::Indx;
+
+// GeoVaLs
+
+constexpr const char* const ufo::VariableNames::geovals_orog;
+constexpr const char* const ufo::VariableNames::geovals_pressure;
+constexpr const char* const ufo::VariableNames::geovals_height;

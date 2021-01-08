@@ -150,6 +150,12 @@ struct VariableNames
   static constexpr const char* const rhbk = "rhbk@MetaData";
   static constexpr const char* const FlagH = "FlagH@MetaData";
   static constexpr const char* const Indx = "Indx@MetaData";
+
+  // GeoVaLs
+
+  static constexpr const char* const geovals_orog = "orography";
+  static constexpr const char* const geovals_pressure = "air_pressure";
+  static constexpr const char* const geovals_height = "height";
 };
 
 }  // namespace ufo

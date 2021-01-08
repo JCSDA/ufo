@@ -22,13 +22,16 @@
 #include "oops/mpi/mpi.h"
 #include "oops/runs/Test.h"
 #include "oops/util/Expect.h"
+#include "oops/util/FloatCompare.h"
 #include "test/TestEnvironment.h"
 #include "ufo/filters/ProfileConsistencyCheckParameters.h"
 #include "ufo/filters/ProfileConsistencyChecks.h"
 #include "ufo/filters/Variables.h"
+#include "ufo/GeoVaLs.h"
 #include "ufo/ObsDiagnostics.h"
 
 #include "ufo/profile/EntireSampleDataHandler.h"
+#include "ufo/profile/ModelHeightCalculator.h"
 #include "ufo/profile/ProfileCheckBackgroundGeopotentialHeight.h"
 #include "ufo/profile/ProfileCheckBackgroundRelativeHumidity.h"
 #include "ufo/profile/ProfileCheckBackgroundTemperature.h"
@@ -39,6 +42,7 @@
 
 #include "ufo/profile/ProfileCheckValidator.h"
 #include "ufo/profile/ProfileDataHandler.h"
+#include "ufo/profile/ProfileVerticalInterpolation.h"
 #include "ufo/profile/VariableNames.h"
 
 #include "ufo/utils/metoffice/MetOfficeQCFlags.h"
@@ -69,6 +73,17 @@ void testProfileConsistencyChecks(const eckit::LocalConfiguration &conf) {
 
   const eckit::LocalConfiguration filterConf(conf, "ProfileConsistencyChecks");
 
+  std::unique_ptr <GeoVaLs> geovals;
+  const std::vector <std::string> geovalnames = filterConf.getStringVector("requiredGeoVaLs", {});
+  if (geovalnames.size() > 0) {
+    oops::Variables requiredGeoVaLs(geovalnames);
+    const eckit::LocalConfiguration geovalsConf(conf, "geovals");
+    geovals.reset(new GeoVaLs(geovalsConf, obsspace, requiredGeoVaLs));
+  } else {
+    const Variables geovars;
+    geovals.reset(new GeoVaLs(obsSpaceConf, obsspace, geovars.toOopsVariables()));
+  }
+
   // Determine whether an exception is expected to be thrown.
   // Exceptions can be thrown in two places: on instantiation of the filter,
   // and during the operation of the filter.
@@ -84,10 +99,12 @@ void testProfileConsistencyChecks(const eckit::LocalConfiguration &conf) {
   ufo::ProfileConsistencyChecks filter(obsspace, filterConf, qcflags, obserr);
   filter.preProcess();
 
-  if (expectThrowDuringOperation)
+  if (expectThrowDuringOperation) {
     EXPECT_THROWS(filter.postFilter(hofx, obsdiags));
-  else
+  } else {
+    filter.priorFilter(*geovals);
     filter.postFilter(hofx, obsdiags);
+  }
 
   // Determine whether the mismatch check should be bypassed or not.
   // It might be necessary to disable the mismatch check in tests which are
@@ -124,6 +141,7 @@ void testProfileConsistencyChecks(const eckit::LocalConfiguration &conf) {
     std::vector<bool> apply(obsspace.nlocs(), true);
     std::vector<std::vector<bool>> flagged;
     ProfileDataHandler profileDataHandler(obsspace,
+                                          geovals.get(),
                                           options_->DHParameters,
                                           apply,
                                           flagged);
@@ -147,6 +165,7 @@ void testProfileConsistencyChecks(const eckit::LocalConfiguration &conf) {
     std::vector<bool> apply(obsspace.nlocs(), true);
     std::vector<std::vector<bool>> flagged;
     ProfileDataHandler profileDataHandler(obsspace,
+                                          geovals.get(),
                                           options_->DHParameters,
                                           apply,
                                           flagged);
@@ -209,6 +228,92 @@ void testProfileConsistencyChecks(const eckit::LocalConfiguration &conf) {
     profileCheckBackgroundRH.runCheck();
     profileCheckBackgroundUV.runCheck();
     profileCheckBackgroundZ.runCheck();
+  }
+
+  // Test the profile vertical interpolation
+  bool testProfileVerticalInterpolation = conf.getBool("testProfileVerticalInterpolation", false);
+  if (testProfileVerticalInterpolation) {
+    std::unique_ptr <ProfileConsistencyCheckParameters> options;
+    options.reset(new ProfileConsistencyCheckParameters());
+    options->deserialize(conf);
+    EntireSampleDataHandler entireSampleDataHandler(obsspace,
+                                                    options->DHParameters);
+
+    std::vector<bool> apply(obsspace.nlocs(), true);
+    std::vector<std::vector<bool>> flagged;
+    ProfileDataHandler profileDataHandler(obsspace,
+                                          geovals.get(),
+                                          options->DHParameters,
+                                          apply,
+                                          flagged);
+
+    // Get interpolation options for each profile.
+    const auto interpMethodNames = conf.getStringVector("interpMethodNames");
+    const auto coordOrderNames = conf.getStringVector("coordOrderNames");
+    const auto outOfBoundsNames = conf.getStringVector("outOfBoundsNames");
+
+    for (size_t jprof = 0; jprof < obsspace.nrecs(); ++jprof) {
+      profileDataHandler.initialiseNextProfile();
+
+      const std::string interpMethodName = interpMethodNames[jprof];
+      const std::string coordOrderName = coordOrderNames[jprof];
+      const std::string outOfBoundsName = outOfBoundsNames[jprof];
+
+      // Calculate level heights for GeoVaLs.
+      std::vector <float> orogGeoVaLs(obsspace.nlocs(), 0.0);
+      geovals->get(orogGeoVaLs, ufo::VariableNames::geovals_orog, 1);
+      std::vector <float> zRhoGeoVaLs;
+      std::vector <float> zThetaGeoVaLs;
+      ufo::CalculateModelHeight(options->ModParameters,
+                                orogGeoVaLs[0],
+                                zRhoGeoVaLs,
+                                zThetaGeoVaLs);
+
+      // Reverse coordinate order if required.
+      if (coordOrderName == "Descending")
+        std::reverse(zRhoGeoVaLs.begin(), zRhoGeoVaLs.end());
+
+      // Create column of pressure GeoVaLs.
+      std::vector <float> pressureGeoVaLs(obsspace.nlocs(), 0.0);
+      const size_t gvnlevs = geovals->nlevs(ufo::VariableNames::geovals_pressure);
+      std::vector <float> pressureGeoVaLs_column;
+      for (int jlev = 1; jlev < gvnlevs + 1; ++jlev) {
+        geovals->get(pressureGeoVaLs, ufo::VariableNames::geovals_pressure, jlev);
+        pressureGeoVaLs_column.push_back(pressureGeoVaLs[0]);
+      }
+
+      // Get observed geopotential height and (empty) pressure vector.
+      const auto &zObs = profileDataHandler.get<float>(ufo::VariableNames::obs_geopotential_height);
+      auto &pressures = profileDataHandler.get<float>(ufo::VariableNames::obs_air_pressure);
+
+      auto interpMethod = ProfileInterpolation::InterpolationMethod::Linear;
+      if (interpMethodName == "LogLinear")
+        interpMethod = ProfileInterpolation::InterpolationMethod::LogLinear;
+      auto coordOrder = ProfileInterpolation::CoordinateOrder::Ascending;
+      if (coordOrderName == "Descending")
+        coordOrder = ProfileInterpolation::CoordinateOrder::Descending;
+      auto outOfBounds = ProfileInterpolation::OutOfBoundsTreatment::SetToBound;
+      if (outOfBoundsName == "SetMissing")
+        outOfBounds = ProfileInterpolation::OutOfBoundsTreatment::SetMissing;
+      if (outOfBoundsName == "Extrapolate")
+        outOfBounds = ProfileInterpolation::OutOfBoundsTreatment::Extrapolate;
+
+      // Interpolate to determine pressure.
+      profileVerticalInterpolation(zRhoGeoVaLs,
+                                   pressureGeoVaLs_column,
+                                   zObs,
+                                   pressures,
+                                   interpMethod,
+                                   coordOrder,
+                                   outOfBounds);
+
+      // Compare each value of pressure.
+      const std::string expectedPressureName = "OPS_" +
+        static_cast<std::string>(ufo::VariableNames::obs_air_pressure);
+      const auto &expected_pressures = profileDataHandler.get<float>(expectedPressureName);
+      for (size_t jlev = 0; jlev < pressures.size(); ++jlev)
+        EXPECT(oops::is_close_relative(pressures[jlev], expected_pressures[jlev], 1e-5f));
+    }
   }
 }
 

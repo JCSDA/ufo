@@ -36,6 +36,10 @@ namespace ioda {
 }
 
 namespace ufo {
+  class GeoVaLs;
+}
+
+namespace ufo {
 
   /// \brief Retrieve and store data for individual profiles.
   /// To do this, first the vector of values in the entire data sample is retrieved
@@ -43,6 +47,7 @@ namespace ufo {
   class ProfileDataHandler {
    public:
     ProfileDataHandler(ioda::ObsSpace &obsdb,
+                       const GeoVaLs* const geovals,
                        const DataHandlerParameters &options,
                        const std::vector <bool> &apply,
                        std::vector<std::vector<bool>> &flagged);
@@ -139,6 +144,9 @@ namespace ufo {
     /// Return number of levels to which QC checks should be applied.
     int getNumProfileLevels() const {return profileIndices_->getNumProfileLevels();}
 
+    /// Get GeoVaLs for a particular profile.
+    std::vector <float>& getGeoVaLVector(const std::string &variableName);
+
     /// Reset profile indices (required if it is desired to loop through
     /// the entire sample again).
     void resetProfileIndices() {profileIndices_->reset();}
@@ -180,8 +188,14 @@ namespace ufo {
     std::unordered_map <std::string, boost::variant
       <std::vector <int>, std::vector <float>, std::vector <std::string>>> profileData_;
 
+    /// Container of GeoVaLs in the current profile.
+    std::unordered_map <std::string, std::vector <float>> GeoVaLData_;
+
     /// Observation database.
     ioda::ObsSpace &obsdb_;
+
+    /// GeoVaLs loaded by the filter.
+    const GeoVaLs* const geovals_;
 
     /// Configurable parameters.
     const DataHandlerParameters &options_;

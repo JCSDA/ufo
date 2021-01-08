@@ -20,7 +20,7 @@ Incorrect and missing values, RH:
     simulated variables: [air_temperature, relative_humidity, dew_point_temperature]
   obs diagnostics:
   ProfileConsistencyChecks:
-    Checks: ["Basic", "SamePDiffT", "Sign", "UnstableLayer", "Interpolation", "Hydrostatic", "RH", "UInterp", "Time", "PermanentReject", "BackgroundTemperature", "BackgroundRelativeHumidity", "BackgroundWindSpeed", "BackgroundGeopotentialHeight"]
+    Checks: ["Basic", "SamePDiffT", "Sign", "UnstableLayer", "Interpolation", "Hydrostatic", "RH", "UInterp", "Time", "PermanentReject", "BackgroundTemperature", "BackgroundRelativeHumidity", "BackgroundWindSpeed", "BackgroundGeopotentialHeight", "Pressure"]
     compareWithOPS: true
     BChecks_Skip: true
     flagBasicChecksFail: true
@@ -40,7 +40,7 @@ Incorrect and missing values:
     simulated variables: [air_temperature, geopotential_height]
   obs diagnostics:
   ProfileConsistencyChecks:
-    Checks: ["Basic", "SamePDiffT", "Sign", "UnstableLayer", "Interpolation", "Hydrostatic", "RH", "UInterp", "Time", "PermanentReject", "BackgroundTemperature", "BackgroundRelativeHumidity", "BackgroundWindSpeed", "BackgroundGeopotentialHeight"]
+    Checks: ["Basic", "SamePDiffT", "Sign", "UnstableLayer", "Interpolation", "Hydrostatic", "RH", "UInterp", "Time", "PermanentReject", "BackgroundTemperature", "BackgroundRelativeHumidity", "BackgroundWindSpeed", "BackgroundGeopotentialHeight", "Pressure"]
     compareWithOPS: true
     BChecks_Skip: true
     flagBasicChecksFail: true
