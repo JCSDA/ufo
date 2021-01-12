@@ -39,11 +39,14 @@ BackgroundCheck::BackgroundCheck(ioda::ObsSpace & obsdb, const Parameters_ & par
 {
   oops::Log::trace() << "BackgroundCheck constructor" << std::endl;
 
+  // Typical use would be HofX group, but during testing, we include option for GsiHofX
+  std::string test_hofx = parameters_.test_hofx.value();
+
   if (parameters_.functionAbsoluteThreshold.value()) {
     for (const Variable & var : *(parameters_.functionAbsoluteThreshold.value()))
       allvars_ += var;
   }
-  allvars_ += Variables(filtervars_, "HofX");
+  allvars_ += Variables(filtervars_, test_hofx);
   ASSERT(parameters_.threshold.value() ||
          parameters_.absoluteThreshold.value() ||
          parameters_.functionAbsoluteThreshold.value());
@@ -73,6 +76,7 @@ void BackgroundCheck::applyFilter(const std::vector<bool> & apply,
 
   ioda::ObsDataVector<float> obs(obsdb_, filtervars.toOopsVariables(), "ObsValue");
   ioda::ObsDataVector<float> bias(obsdb_, filtervars.toOopsVariables(), "ObsBias", false);
+  std::string test_hofx = parameters_.test_hofx.value();
 
 // Get function absolute threshold
   if (parameters_.functionAbsoluteThreshold.value()) {
@@ -81,7 +85,7 @@ void BackgroundCheck::applyFilter(const std::vector<bool> & apply,
     ioda::ObsDataVector<float> function_abs_threshold(obsdb_, rtvar.toOopsVariables());
     data_.get(rtvar, function_abs_threshold);
 
-    Variables varhofx(filtervars_, "HofX");
+    Variables varhofx(filtervars_, test_hofx);
     for (size_t jv = 0; jv < filtervars.nvars(); ++jv) {
       size_t iv = observed.find(filtervars.variable(jv).variable());
 //    H(x)
@@ -105,7 +109,7 @@ void BackgroundCheck::applyFilter(const std::vector<bool> & apply,
       }
     }
   } else {
-    Variables varhofx(filtervars_, "HofX");
+    Variables varhofx(filtervars_, test_hofx);
     for (size_t jv = 0; jv < filtervars.nvars(); ++jv) {
       size_t iv = observed.find(filtervars.variable(jv).variable());
 //    H(x)

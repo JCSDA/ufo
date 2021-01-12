@@ -60,6 +60,9 @@ class BackgroundCheckParameters : public FilterParametersBase {
   /// be set.
   oops::OptionalParameter<std::vector<Variable>> functionAbsoluteThreshold{
     "function absolute threshold", this};
+
+  /// Name of the HofX group used to replace the default group (default is HofX)
+  oops::Parameter<std::string> test_hofx{"test_hofx", "HofX", this};
 };
 
 /// BackgroundCheck: check observation closeness to background.
