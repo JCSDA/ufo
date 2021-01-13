@@ -75,7 +75,9 @@ ObsAccessor::ObsAccessor(const ioda::ObsSpace &obsdb,
     // Each record is held by a single process, so there's no need to exchange data between
     // processes and we can use an InefficientDistribution rather than the distribution taken from
     // obsdb_. Which in this case is *efficient*!
-    inefficientDistribution_ = boost::make_unique<ioda::InefficientDistribution>(obsdb_->comm());
+    eckit::LocalConfiguration emptyConfig;
+    inefficientDistribution_ = boost::make_unique<ioda::InefficientDistribution>(obsdb_->comm(),
+                                                        emptyConfig);
     obsDistribution_ = inefficientDistribution_.get();
     oops::Log::trace() << "ObservationAccessor: no MPI communication necessary" << std::endl;
   } else {

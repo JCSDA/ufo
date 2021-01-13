@@ -35,26 +35,6 @@ namespace test {
 
 // -----------------------------------------------------------------------------
 
-void dataVectorDiff(const ioda::ObsSpace & ospace, ioda::ObsDataVector<float> & vals,
-                    const ioda::ObsDataVector<float> & ref, std::vector<float> & rms_out) {
-  /// Loop through variables and calculate rms for each variable
-  for (size_t ivar = 0; ivar < vals.nvars() ; ++ivar) {
-    float rms = 0.0;
-    int nobs = 0;
-    for (size_t jj = 0; jj < ref.nlocs() ; ++jj) {
-      vals[ivar][jj] -= ref[ivar][jj];
-      rms += vals[ivar][jj] * vals[ivar][jj];
-      nobs++;
-    }
-    ospace.comm().allReduceInPlace(rms, eckit::mpi::sum());
-    ospace.comm().allReduceInPlace(nobs, eckit::mpi::sum());
-    if (nobs > 0) rms = sqrt(rms / static_cast<float>(nobs));
-    rms_out[ivar] = rms;
-  }
-}
-
-// -----------------------------------------------------------------------------
-
 void testFunction() {
   typedef ::test::ObsTestsFixture<ObsTraits> Test_;
 
@@ -114,7 +94,7 @@ void testFunction() {
 
 ///  Calculate rms(f(x) - ref) and compare to tolerance
     std::vector<float> rms_out(nvars);
-    dataVectorDiff(ospace, vals, ref, rms_out);
+    vals.rmse_with(ref, rms_out);
 
     oops::Log::info() << "Vector difference between reference and computed: " << std::endl;
     oops::Log::info() << vals << std::endl;
@@ -122,7 +102,7 @@ void testFunction() {
       EXPECT(rms_out[ivar] < 100*tol);  //  change tol from percent to actual value.
     }
 
-    dataVectorDiff(ospace, vals_ofd, ref, rms_out);
+    vals_ofd.rmse_with(ref, rms_out);
     oops::Log::info() << "Vector difference between reference and computed via ObsFilterData: "
                       << std::endl;
     oops::Log::info() << vals_ofd << std::endl;
