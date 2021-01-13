@@ -1,0 +1,36 @@
+window begin: 2018-04-14T20:00:00Z
+window end: 2018-04-15T03:00:00Z
+
+observations:
+- obs space:
+    name: regional_domain_check
+    obsdatain:
+      obsfile: Data/ioda/testinput_tier_1/sondes_tv_obs_2018041500_m.nc4
+    obsdataout:
+      obsfile: Data/lam_domaincheck_sondes_tv_obs_2018041500_m.nc4
+    simulated variables: [virtual_temperature]
+  obs filters:
+  # this obs function will compute, based off of input parameters,
+  # if an observation is inside of a specified limited area domain
+  # the result is then stored as a value 1 if yes, 0 no
+  # and can be filtered out by the bounds check.
+  - filter: Bounds Check
+    filter variables:
+    - name: virtual_temperature
+    test variables:
+    - name: LAMDomainCheck@ObsFunction
+      options:
+        map_projection: gnomonic_ed # only option currently supported
+        save: true # will save the DerivedValue to IODA output file
+        # the size of the FV3-LAM grid (mass, not staggered)
+        npx: 200
+        npy: 110
+        # below comes from the global attributes in the FV3-LAM grid netCDF file
+        plat: 38.5
+        plon: -97.5
+        a: 0.21423
+        k: -0.23209
+        dx: 0.1124152007
+        dy: 0.1124152007
+    minvalue: 1.0 # will filter all obs outside of the specified limited area domain
+  passedBenchmark: 42 # only a couple radiosonde profiles are within the domain

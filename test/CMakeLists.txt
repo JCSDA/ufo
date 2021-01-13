@@ -201,6 +201,7 @@ list( APPEND ufo_test_input
   testinput/variabletransform_windspeedanddirection.yaml
   testinput/windprof.yaml
   testinput/unit_tests/function_tropo_estimate.yaml
+  testinput/unit_tests/function_lam_domaincheck.yaml
   testinput/unit_tests/function_satwindsLNVDcheck.yaml
   testinput/unit_tests/function_satwindsSPDBcheck.yaml
   testinput/unit_tests/function_wdirdiff.yaml
@@ -1313,6 +1314,13 @@ ecbuild_add_test( TARGET  test_ufo_qc_wdircheck
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsFilters.x
                   TEST_DEPENDS ufo_get_ioda_test_data ufo_get_ufo_test_data )
+
+ecbuild_add_test( TARGET  test_ufo_qc_lam_domaincheck
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                  ARGS    "testinput/unit_tests/function_lam_domaincheck.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsFilters.x
+                  TEST_DEPENDS ufo_get_ioda_test_data )
 
 ecbuild_add_test( TARGET  test_ufo_qc_gen_defer_to_post
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x

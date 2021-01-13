@@ -161,6 +161,11 @@ set ( filters_files
       obsfunctions/TropopauseEstimate.h
       obsfunctions/WindDirAngleDiff.cc
       obsfunctions/WindDirAngleDiff.h
+      obsfunctions/LAMDomainCheck/LAMDomainCheck.cc
+      obsfunctions/LAMDomainCheck/LAMDomainCheck.h
+      obsfunctions/LAMDomainCheck/LAMDomainCheck.interface.h
+      obsfunctions/LAMDomainCheck/LAMDomainCheck.interface.F90
+      obsfunctions/LAMDomainCheck/esg_grid_mod.F90
       variabletransforms/WindComponents.cc
       variabletransforms/WindComponents.h
       variabletransforms/WindSpeedAndDirection.cc
