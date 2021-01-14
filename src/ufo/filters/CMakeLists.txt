@@ -4,16 +4,6 @@
 # which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 
 set ( filters_files
-      TrackCheckUtils.cc
-      TrackCheckUtils.h
-      TrackCheckUtilsParameters.h
-      TrackCheck.cc
-      TrackCheck.h
-      TrackCheckParameters.h
-      TrackCheckShip.cc
-      TrackCheckShip.h
-      TrackCheckShipDiagnostics.h
-      TrackCheckShipParameters.h
       BackgroundCheck.cc
       BackgroundCheck.h
       BlackList.cc
@@ -60,11 +50,24 @@ set ( filters_files
       ProfileConsistencyChecks.cc
       ProfileConsistencyChecks.h
       ProfileConsistencyCheckParameters.h
+      StuckCheck.cc
+      StuckCheck.h
+      StuckCheckParameters.h
       Thinning.cc
       Thinning.h
       TemporalThinning.cc
       TemporalThinning.h
       TemporalThinningParameters.h
+      TrackCheck.cc
+      TrackCheck.h
+      TrackCheckParameters.h
+      TrackCheckShip.cc
+      TrackCheckShip.h
+      TrackCheckShipDiagnostics.h
+      TrackCheckShipParameters.h
+      TrackCheckUtils.cc
+      TrackCheckUtils.h
+      TrackCheckUtilsParameters.h
       Variable.cc
       Variable.h
       Variables.cc

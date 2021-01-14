@@ -1,0 +1,161 @@
+All observations' number and time stuck tolerated:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Ship
+    simulated variables: [air_temperature]
+    generate:
+      list:
+        lats: [ 0, 1, 2, 3, 4, 5 ]
+        lons: [ 0, 1, 2, 3, 4, 5 ]
+        datetimes: [ '2010-01-01T00:00:00Z', '2010-01-01T02:00:00Z', '2010-01-01T03:00:00Z',
+                     '2010-01-01T05:00:00Z', '2010-01-01T06:00:00Z', '2010-01-01T08:00:00Z' ]
+      obs errors: [1.0]
+  air_temperatures: [ 281.0, 281.0, 282.0, 282.0, 283.0, 283.0]
+  Stuck Check: &referenceFilterArguments
+    filter variables: [air_temperature]
+    number stuck tolerance: 2
+    time stuck tolerance: PT2H
+  expected_rejected_obs_indices: []
+
+Time stuck tolerated, number stuck untolerated, more than 1 value:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Ship
+    simulated variables: [air_temperature]
+    generate:
+      list:
+        lats: [ 0, 1, 2, 3, 4, 5 ]
+        lons: [ 0, 1, 2, 3, 4, 5 ]
+        datetimes: [ '2010-01-01T00:00:00Z', '2010-01-01T00:30:00Z', '2010-01-01T00:31:00Z',
+                     '2010-01-01T03:00:00Z', '2010-01-01T03:01:00Z', '2010-01-01T03:02:00Z' ]
+      obs errors: [1.0]
+  air_temperatures: [ 282.0, 282.0, 282.0, 283.0, 283.0, 283.0]
+  Stuck Check: *referenceFilterArguments
+  expected_rejected_obs_indices: []
+
+Time stuck tolerated, number stuck untolerated, 1 value:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Ship
+    simulated variables: [air_temperature]
+    generate:
+      list:
+        lats: [ 0, 1, 2, 3, 4, 5 ]
+        lons: [ 0, 1, 2, 3, 4, 5 ]
+        datetimes: [ '2010-01-01T00:00:00Z', '2010-01-01T00:00:01Z', '2010-01-01T00:00:02Z',
+                     '2010-01-01T00:00:03Z', '2010-01-01T00:00:04Z', '2010-01-01T00:00:05Z' ]
+      obs errors: [1.0]
+  air_temperatures: [ 282.0, 282.0, 282.0, 282.0, 282.0, 282.0 ]
+  Stuck Check: *referenceFilterArguments
+  expected_rejected_obs_indices: [ 0, 1, 2, 3, 4, 5 ]
+
+Time stuck tolerated, number stuck tolerated, 1 value:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Ship
+    simulated variables: [air_temperature]
+    generate:
+      list:
+        lats: [ 0, 1 ]
+        lons: [ 0, 1 ]
+        datetimes: [ '2010-01-01T00:00:00Z', '2010-01-01T00:00:01Z' ]
+      obs errors: [1.0]
+  air_temperatures: [ 282.0, 282.0 ]
+  Stuck Check: *referenceFilterArguments
+  expected_rejected_obs_indices: []
+
+Time stuck untolerated for both streaks, number stuck tolerated for second streak (but not first):
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Ship
+    simulated variables: [air_temperature]
+    generate:
+      list:
+        lats: [ 0, 1, 2, 3, 4, 5 ]
+        lons: [ 0, 1, 2, 3, 4, 5 ]
+        datetimes: [ '2010-01-01T00:00:00Z', '2010-01-01T02:00:00Z', '2010-01-01T04:00:00Z',
+                     '2010-01-01T06:00:00Z', '2010-01-01T08:00:00Z', '2010-01-01T12:00:00Z' ]
+      obs errors: [1.0]
+  air_temperatures: [ 282.0, 282.0, 282.0, 282.0, 283.0, 283.0 ]
+  Stuck Check: *referenceFilterArguments
+  expected_rejected_obs_indices: [ 0, 1, 2, 3 ]
+
+Time stuck tolerated for first streak (but not second), number stuck untolerated for both streaks:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Ship
+    simulated variables: [air_temperature]
+    generate:
+      list:
+        lats: [ 0, 1, 2, 3, 4, 5 ]
+        lons: [ 0, 1, 2, 3, 4, 5 ]
+        datetimes: [ '2010-01-01T00:00:00Z', '2010-01-01T00:00:01Z', '2010-01-01T00:00:02Z',
+                     '2010-01-01T06:00:00Z', '2010-01-01T08:00:00Z', '2010-01-01T12:00:00Z' ]
+      obs errors: [1.0]
+  air_temperatures: [ 282.0, 282.0, 282.0, 283.0, 283.0, 283.0 ]
+  Stuck Check: *referenceFilterArguments
+  expected_rejected_obs_indices: [ 3, 4, 5 ]
+
+All temperatures different:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Ship
+    simulated variables: [air_temperature]
+    generate:
+      list:
+        lats: [ 0, 1, 2, 3, 4, 5 ]
+        lons: [ 0, 1, 2, 3, 4, 5 ]
+        datetimes: [ '2010-01-01T00:00:00Z', '2010-01-01T00:00:01Z', '2010-01-01T00:00:02Z',
+                     '2010-01-01T06:00:00Z', '2010-01-01T08:00:00Z', '2010-01-01T12:00:00Z' ]
+      obs errors: [1.0]
+  air_temperatures: [ 280.0, 281.0, 282.0, 283.0, 284.0, 285.0]
+  Stuck Check: *referenceFilterArguments
+  expected_rejected_obs_indices: []
+
+Different variable streaks:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Ship
+    simulated variables: [ air_temperature, air_pressure ]
+    generate:
+      list:
+        lats: [ 0, 1, 2, 3, 4, 5 ]
+        lons: [ 0, 1, 2, 3, 4, 5 ]
+        datetimes: [ '2010-01-01T00:00:00Z', '2010-01-01T02:00:00Z', '2010-01-01T04:00:00Z',
+                     '2010-01-01T06:00:00Z', '2010-01-01T08:00:00Z', '2010-01-01T10:00:00Z' ]
+      obs errors: [1.0, 1.0]
+  air_temperatures: [ 280.0, 281.0, 282.0, 283.0, 283.0, 283.0 ]
+  air_pressures: [ 1.0, 1.5, 1.5, 1.5, 1.2, 1.1 ]
+  Stuck Check:
+    filter variables: [ air_temperature, air_pressure ]
+    number stuck tolerance: 2
+    time stuck tolerance: PT2H
+  expected_rejected_obs_indices: [ 1, 2, 3, 4, 5 ]
+Different variable streaks, 1 filter variable considered:
+  window begin: 2000-01-01T00:00:00Z
+  window end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Ship
+    simulated variables: [ air_temperature, air_pressure ]
+    generate:
+      list:
+        lats: [ 0, 1, 2, 3, 4, 5 ]
+        lons: [ 0, 1, 2, 3, 4, 5 ]
+        datetimes: [ '2010-01-01T00:00:00Z', '2010-01-01T02:00:00Z', '2010-01-01T04:00:00Z',
+                     '2010-01-01T06:00:00Z', '2010-01-01T08:00:00Z', '2010-01-01T10:00:00Z' ]
+      obs errors: [1.0, 1.0]
+  air_temperatures: [ 280.0, 281.0, 282.0, 283.0, 283.0, 283.0 ]
+  air_pressures: [ 1.0, 1.5, 1.5, 1.5, 1.2, 1.1 ]
+  Stuck Check:
+    filter variables: [ air_temperature ]
+    number stuck tolerance: 2
+    time stuck tolerance: PT2H
+  expected_rejected_obs_indices: [ 3, 4, 5 ]

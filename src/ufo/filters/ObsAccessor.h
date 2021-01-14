@@ -106,6 +106,24 @@ class ObsAccessor {
   std::vector<size_t> getValidObservationIds(const std::vector<bool> &apply,
                                              const ioda::ObsDataVector<int> &flags) const;
 
+  /// \brief Return the IDs of both flagged and unflagged observation locations selected by the
+  /// where clause.
+  ///
+  /// \param apply
+  ///   Vector whose ith element is set to true if ith observation location held on the current
+  ///   MPI rank was selected by the \c where clause in the filter's configuration.
+  ///
+  /// An observation location is treated as valid if it has been selected by the \c where
+  /// clause.
+  ///
+  /// If each independent group of observations is stored entirely on a single MPI rank, the
+  /// returned vector contains local IDs of valid observation locations held on the current rank
+  /// only. Otherwise the vector contains global IDs of valid locations held on all ranks, with IDs
+  /// from 0 to nlocs(0) - 1 corresponding to locations held on rank 0, IDs from nlocs(0) to
+  /// nlocs(0) + nlocs(1) - 1 corresponding to locations held on rank 1 and so on, where nlocs(i)
+  /// denotes the number of locations held on ith rank.
+  std::vector<size_t> getValidObservationIds(const std::vector<bool> &apply) const;
+
   /// \brief Return the values of the specified variable at successive observation locations.
   ///
   /// If each independent group of observations is stored entirely on a single MPI rank, the

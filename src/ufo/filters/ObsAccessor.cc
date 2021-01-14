@@ -120,6 +120,21 @@ std::vector<size_t> ObsAccessor::getValidObservationIds(
   return validObsIds;
 }
 
+std::vector<size_t> ObsAccessor::getValidObservationIds(
+    const std::vector<bool> &apply) const {
+  size_t obsIdDisplacement = obsdb_->nlocs();
+  obsDistribution_->exclusiveScan(obsIdDisplacement);
+
+  std::vector<size_t> validObsIds;
+  for (size_t obsId = 0; obsId < apply.size(); ++obsId)
+    if (apply[obsId])
+      validObsIds.push_back(obsIdDisplacement + obsId);
+
+  obsDistribution_->allGatherv(validObsIds);
+
+  return validObsIds;
+}
+
 std::vector<int> ObsAccessor::getIntVariableFromObsSpace(
     const std::string &group, const std::string &variable) const {
   return getVariableFromObsSpaceImpl<int>(group, variable, *obsdb_, *obsDistribution_);
