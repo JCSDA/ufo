@@ -476,7 +476,7 @@ void testFilters() {
         const std::vector<size_t> flaggedObs =
             getFlaggedObservationIndices(qcflags->obsdatavector(), obsspace.distribution(),
                                          obsspace.index(), flag);
-        EXPECT_EQUAL(flaggedObsBenchmark, flaggedObsBenchmark);
+        EXPECT_EQUAL(flaggedObs, flaggedObsBenchmark);
       }
 
       if (typeParams.flaggedBenchmark.value() != boost::none) {
