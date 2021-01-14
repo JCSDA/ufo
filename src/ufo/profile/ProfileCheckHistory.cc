@@ -13,23 +13,21 @@ namespace ufo {
   makerProfileCheckHistory_("History");
 
   ProfileCheckHistory::ProfileCheckHistory
-  (const ProfileConsistencyCheckParameters &options,
-   ProfileDataHandler &profileDataHandler,
-   ProfileCheckValidator &profileCheckValidator)
-    : ProfileCheckBase(options, profileDataHandler, profileCheckValidator)
+  (const ProfileConsistencyCheckParameters &options)
+    : ProfileCheckBase(options)
   {}
 
-  void ProfileCheckHistory::runCheck()
+  void ProfileCheckHistory::runCheck(ProfileDataHandler &profileDataHandler)
   {
     oops::Log::debug() << " History check" << std::endl;
 
-    const size_t nprofs = profileDataHandler_.getObsdb().nrecs();
+    const size_t nprofs = profileDataHandler.getObsdb().nrecs();
 
     // Vector of profiles containing data for the history check.
     std::vector <ProfileDataHistory> profiles;
     for (size_t jprof = 0; jprof < nprofs; ++jprof) {
-      profileDataHandler_.initialiseNextProfile();
-      ProfileDataHistory profile(profileDataHandler_);
+      profileDataHandler.initialiseNextProfile();
+      ProfileDataHistory profile(profileDataHandler);
       profile.fill();
       profiles.emplace_back(profile);
     }

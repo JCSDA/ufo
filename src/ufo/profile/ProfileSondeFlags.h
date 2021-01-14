@@ -40,15 +40,13 @@ namespace ufo {
   ///      11             800.0         missing      50.0 knots, 270 degs
   class ProfileSondeFlags : public ProfileCheckBase {
    public:
-    ProfileSondeFlags(const ProfileConsistencyCheckParameters &options,
-                      ProfileDataHandler &profileDataHandler,
-                      ProfileCheckValidator &profileCheckValidator);
+    explicit ProfileSondeFlags(const ProfileConsistencyCheckParameters &options);
 
     /// Run check
-    void runCheck() override;
+    void runCheck(ProfileDataHandler &profileDataHandler) override;
 
     /// Fill variables in validator
-    void fillValidator() override {}
+    void fillValidationData(ProfileDataHandler &profileDataHandler) override {}
   };
 }  // namespace ufo
 

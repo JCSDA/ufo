@@ -16,28 +16,26 @@ namespace ufo {
   makerProfileCheckTime_("Time");
 
   ProfileCheckTime::ProfileCheckTime
-  (const ProfileConsistencyCheckParameters &options,
-   ProfileDataHandler &profileDataHandler,
-   ProfileCheckValidator &profileCheckValidator)
-    : ProfileCheckBase(options, profileDataHandler, profileCheckValidator)
+  (const ProfileConsistencyCheckParameters &options)
+    : ProfileCheckBase(options)
   {}
 
-  void ProfileCheckTime::runCheck()
+  void ProfileCheckTime::runCheck(ProfileDataHandler &profileDataHandler)
   {
     oops::Log::debug() << " Time check" << std::endl;
 
-    const size_t numProfileLevels = profileDataHandler_.getNumProfileLevels();
+    const size_t numProfileLevels = profileDataHandler.getNumProfileLevels();
     const bool ModelLevels = options_.modellevels.value();
     const std::vector <int> &ObsType =
-      profileDataHandler_.get<int>(ufo::VariableNames::ObsType);
+      profileDataHandler.get<int>(ufo::VariableNames::ObsType);
     const std::vector <float> &level_time =
-       profileDataHandler_.get<float>(ufo::VariableNames::obs_level_time);
+       profileDataHandler.get<float>(ufo::VariableNames::obs_level_time);
     const std::vector <float> &pressures =
-       profileDataHandler_.get<float>(ufo::VariableNames::obs_air_pressure);
+       profileDataHandler.get<float>(ufo::VariableNames::obs_air_pressure);
     std::vector <int> &uFlags =
-      profileDataHandler_.get<int>(ufo::VariableNames::qcflags_eastward_wind);
+      profileDataHandler.get<int>(ufo::VariableNames::qcflags_eastward_wind);
     std::vector <int> &vFlags =
-      profileDataHandler_.get<int>(ufo::VariableNames::qcflags_northward_wind);
+      profileDataHandler.get<int>(ufo::VariableNames::qcflags_northward_wind);
 
     if (!oops::allVectorsSameNonZeroSize(ObsType, pressures)) {
       oops::Log::warning() << "At least one vector is the wrong size. "
@@ -52,8 +50,8 @@ namespace ufo {
     // The variable level_time is equal to the number of seconds relative to
     // the middle of the time window. level_time is compared to half of the
     // assimilation window length.
-    const float halfWindowLength = 0.5 * (profileDataHandler_.getObsdb().windowEnd() -
-                                          profileDataHandler_.getObsdb().windowStart()).toSeconds();
+    const float halfWindowLength = 0.5 * (profileDataHandler.getObsdb().windowEnd() -
+                                          profileDataHandler.getObsdb().windowStart()).toSeconds();
     // Time QC flags. A value of true indicates an observation
     // lies outside the time window.
     // These flags are used in subsequent background checks.
@@ -101,6 +99,6 @@ namespace ufo {
     }
 
     // Store the time flags for use in later checks.
-    profileDataHandler_.set<int>(ufo::VariableNames::qcflags_time, std::move(timeFlags));
+    profileDataHandler.set<int>(ufo::VariableNames::qcflags_time, std::move(timeFlags));
   }
 }  // namespace ufo

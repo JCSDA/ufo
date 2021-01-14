@@ -13,30 +13,28 @@ namespace ufo {
   makerProfileCheckPermanentReject_("PermanentReject");
 
   ProfileCheckPermanentReject::ProfileCheckPermanentReject
-  (const ProfileConsistencyCheckParameters &options,
-   ProfileDataHandler &profileDataHandler,
-   ProfileCheckValidator &profileCheckValidator)
-    : ProfileCheckBase(options, profileDataHandler, profileCheckValidator)
+  (const ProfileConsistencyCheckParameters &options)
+    : ProfileCheckBase(options)
   {}
 
-  void ProfileCheckPermanentReject::runCheck()
+  void ProfileCheckPermanentReject::runCheck(ProfileDataHandler &profileDataHandler)
   {
     oops::Log::debug() << " Permanent rejection check" << std::endl;
 
-    const size_t numProfileLevels = profileDataHandler_.getNumProfileLevels();
+    const size_t numProfileLevels = profileDataHandler.getNumProfileLevels();
     const bool ModelLevels = options_.modellevels.value();
     std::vector <int> &tFlags =
-      profileDataHandler_.get<int>(ufo::VariableNames::qcflags_air_temperature);
+      profileDataHandler.get<int>(ufo::VariableNames::qcflags_air_temperature);
     std::vector <int> &rhFlags =
-      profileDataHandler_.get<int>(ufo::VariableNames::qcflags_relative_humidity);
+      profileDataHandler.get<int>(ufo::VariableNames::qcflags_relative_humidity);
     std::vector <int> &uFlags =
-      profileDataHandler_.get<int>(ufo::VariableNames::qcflags_eastward_wind);
+      profileDataHandler.get<int>(ufo::VariableNames::qcflags_eastward_wind);
     std::vector <int> &vFlags =
-      profileDataHandler_.get<int>(ufo::VariableNames::qcflags_northward_wind);
+      profileDataHandler.get<int>(ufo::VariableNames::qcflags_northward_wind);
     std::vector <int> &zFlags =
-      profileDataHandler_.get<int>(ufo::VariableNames::qcflags_geopotential_height);
+      profileDataHandler.get<int>(ufo::VariableNames::qcflags_geopotential_height);
     std::vector <int> &ReportFlags =
-      profileDataHandler_.get<int>(ufo::VariableNames::qcflags_observation_report);
+      profileDataHandler.get<int>(ufo::VariableNames::qcflags_observation_report);
 
     if (ReportFlags.empty()) {
       oops::Log::debug() << "ReportFlags vector is empty. "

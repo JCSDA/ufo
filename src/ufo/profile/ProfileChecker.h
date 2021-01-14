@@ -17,7 +17,6 @@
 #include "ufo/filters/ProfileConsistencyCheckParameters.h"
 
 namespace ufo {
-  class ProfileCheckValidator;
   class ProfileDataHandler;
 }
 
@@ -37,15 +36,14 @@ namespace ufo {
   /// Runs the various QC checks on individual profiles and modifies flags accordingly.
   class ProfileChecker {
    public:
-    ProfileChecker(const ProfileConsistencyCheckParameters &options,
-                   ProfileDataHandler &profileDataHandler,
-                   ProfileCheckValidator &profileCheckValidator);
+    explicit ProfileChecker(const ProfileConsistencyCheckParameters &options);
 
     /// Type for container of check subgroups.
     typedef std::vector <CheckSubgroup> CheckSubgroupList;
 
     /// Run all checks requested
-    void runChecks(const CheckSubgroup &subGroupChecks);
+    void runChecks(ProfileDataHandler &profileDataHandler,
+                   const CheckSubgroup &subGroupChecks);
 
     /// Get basic check result
     bool getBasicCheckResult() {return basicCheckResult_;}
@@ -56,15 +54,12 @@ namespace ufo {
     /// Get container of check subgroups
     CheckSubgroupList getCheckSubgroups() {return checkSubgroups_;}
 
+    /// Get vector of GeoVaL names for all checks.
+    oops::Variables getGeoVaLNames() const {return GeoVaLNames_;}
+
    private:
     /// Configurable parameters
     const ProfileConsistencyCheckParameters &options_;
-
-    /// Profile data
-    ProfileDataHandler &profileDataHandler_;
-
-    /// Profile check validator
-    ProfileCheckValidator &profileCheckValidator_;
 
     /// Checks to perform
     std::vector <std::string> checks_;
@@ -74,6 +69,9 @@ namespace ufo {
 
     /// Subgroups of checks with the same mode of operation.
     CheckSubgroupList checkSubgroups_;
+
+    /// Names of all required GeoVaLs.
+    oops::Variables GeoVaLNames_;
   };
 }  // namespace ufo
 

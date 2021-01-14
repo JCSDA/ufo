@@ -20,10 +20,8 @@
 #include "ufo/utils/StringUtils.h"
 
 namespace ufo {
-  ProfileCheckValidator::ProfileCheckValidator(const ProfileConsistencyCheckParameters &options,
-                                               ProfileDataHandler &profileDataHandler)
-    : options_(options),
-      profileDataHandler_(profileDataHandler)
+  ProfileCheckValidator::ProfileCheckValidator(const ProfileConsistencyCheckParameters &options)
+    : options_(options)
   {
     // Set offsets due to C++ and Fortran array index starting values
     comparison_offsets_[ufo::VariableNames::StdLev] = 1;
@@ -202,7 +200,7 @@ namespace ufo {
     }
   }
 
-  void ProfileCheckValidator::validate()
+  void ProfileCheckValidator::validate(ProfileDataHandler &profileDataHandler)
   {
     oops::Log::debug() << " Comparing values against OPS equivalents..." << std::endl;
 
@@ -227,9 +225,9 @@ namespace ufo {
 
       // Obtain values for comparison
       const std::vector <int> &values_thiscode =
-        profileDataHandler_.get<int>(valueToCompare_int);
+        profileDataHandler.get<int>(valueToCompare_int);
       const std::vector <int> &values_OPS =
-        profileDataHandler_.get<int>(varname_OPS);
+        profileDataHandler.get<int>(varname_OPS);
 
       // Account for potential offset between values in this code and OPS
       int offset = 0;
@@ -263,9 +261,9 @@ namespace ufo {
     // Compare float values obtained in this code and OPS
     for (const auto& valueToCompare_float : valuesToCompare_float_) {
       const std::vector <float> &values_thiscode =
-        profileDataHandler_.get<float>(valueToCompare_float);
+        profileDataHandler.get<float>(valueToCompare_float);
       const std::vector <float> &values_OPS =
-        profileDataHandler_.get<float>("OPS_" + valueToCompare_float);
+        profileDataHandler.get<float>("OPS_" + valueToCompare_float);
       compareOutput(valueToCompare_float, values_OPS, values_thiscode,
                     0, tol, nMismatches_);
     }

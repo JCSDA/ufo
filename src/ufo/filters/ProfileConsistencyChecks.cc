@@ -44,12 +44,13 @@ namespace ufo {
 
     // Add the names of any required GeoVaLs to \c allvars_.
     // This is performed here because \c allvars_ must be filled prior to the filter being run.
-    // If they have not been loaded here, but are required later,
-    // an exception will be thrown.
-    const auto &requiredGeoVaLNames = options_->DHParameters.requiredGeoVaLs.value();
+    // The names of the required GeoVaLs are listed in the \c getGeoVaLNames() function
+    // of each check (which returns an empty set by default).
+    // The \c profileChecker class must be instantiated in order to do this.
+    const ProfileChecker profileChecker(*options_);
+    const auto &requiredGeoVaLNames = profileChecker.getGeoVaLNames();
     if (requiredGeoVaLNames.size() > 0) {
-      oops::Variables requiredGeoVaLs(requiredGeoVaLNames);
-      ufo::Variables reqGeoVaLs(requiredGeoVaLs);
+      ufo::Variables reqGeoVaLs(requiredGeoVaLNames);
       allvars_ += Variables(reqGeoVaLs, "GeoVaLs");
     }
 
@@ -95,14 +96,15 @@ namespace ufo {
       }
 
       // Run checks
-      profileChecker.runChecks(subGroupChecks);
+      profileChecker.runChecks(profileDataHandler,
+                               subGroupChecks);
 
       // Update information, including the 'flagged' vector, for this profile.
       profileDataHandler.updateProfileInformation();
 
       // Optionally compare check results with OPS values
       if (options_->compareWithOPS.value() && profileChecker.getBasicCheckResult()) {
-        profileCheckValidator.validate();
+        profileCheckValidator.validate(profileDataHandler);
         nMismatches_.emplace_back(profileCheckValidator.getMismatches());
       }
     }
@@ -123,7 +125,8 @@ namespace ufo {
    const CheckSubgroup &subGroupChecks) const
   {
     // Run checks
-    profileChecker.runChecks(subGroupChecks);
+    profileChecker.runChecks(profileDataHandler,
+                             subGroupChecks);
 
     // todo: add remaining routines
   }
@@ -144,13 +147,10 @@ namespace ufo {
                                           flagged);
 
     // (Optionally) validates check results against OPS values
-    ProfileCheckValidator profileCheckValidator(*options_,
-                                                profileDataHandler);
+    ProfileCheckValidator profileCheckValidator(*options_);
 
     // Applies checks to each profile
-    ProfileChecker profileChecker(*options_,
-                                  profileDataHandler,
-                                  profileCheckValidator);
+    ProfileChecker profileChecker(*options_);
 
     // Loop over each check subgroup in turn.
     const auto checkSubgroups = profileChecker.getCheckSubgroups();

@@ -12,34 +12,32 @@ namespace ufo {
 
   static ProfileCheckMaker<ProfileCheckSign> makerProfileCheckSign_("Sign");
 
-  ProfileCheckSign::ProfileCheckSign(const ProfileConsistencyCheckParameters &options,
-                                     ProfileDataHandler &profileDataHandler,
-                                     ProfileCheckValidator &profileCheckValidator)
-    : ProfileCheckBase(options, profileDataHandler, profileCheckValidator)
+  ProfileCheckSign::ProfileCheckSign(const ProfileConsistencyCheckParameters &options)
+    : ProfileCheckBase(options)
   {}
 
-  void ProfileCheckSign::runCheck()
+  void ProfileCheckSign::runCheck(ProfileDataHandler &profileDataHandler)
   {
     oops::Log::debug() << " Sign check/correction" << std::endl;
 
-    const int numProfileLevels = profileDataHandler_.getNumProfileLevels();
+    const int numProfileLevels = profileDataHandler.getNumProfileLevels();
 
     const std::vector <float> &pressures =
-       profileDataHandler_.get<float>(ufo::VariableNames::obs_air_pressure);
+       profileDataHandler.get<float>(ufo::VariableNames::obs_air_pressure);
     const std::vector <float> &tObs =
-       profileDataHandler_.get<float>(ufo::VariableNames::obs_air_temperature);
+       profileDataHandler.get<float>(ufo::VariableNames::obs_air_temperature);
     const std::vector <float> &tBkg =
-       profileDataHandler_.get<float>(ufo::VariableNames::hofx_air_temperature);
+       profileDataHandler.get<float>(ufo::VariableNames::hofx_air_temperature);
     const std::vector <float> &PstarBackgr =
-       profileDataHandler_.get<float>(ufo::VariableNames::PstarBackgr);
+       profileDataHandler.get<float>(ufo::VariableNames::PstarBackgr);
     std::vector <int> &tFlags =
-       profileDataHandler_.get<int>(ufo::VariableNames::qcflags_air_temperature);
+       profileDataHandler.get<int>(ufo::VariableNames::qcflags_air_temperature);
     std::vector <int> &NumAnyErrors =
-       profileDataHandler_.get<int>(ufo::VariableNames::counter_NumAnyErrors);
+       profileDataHandler.get<int>(ufo::VariableNames::counter_NumAnyErrors);
     std::vector <int> &NumSignChange =
-       profileDataHandler_.get<int>(ufo::VariableNames::counter_NumSignChange);
+       profileDataHandler.get<int>(ufo::VariableNames::counter_NumSignChange);
     std::vector <float> &tObsCorrection =
-       profileDataHandler_.get<float>(ufo::VariableNames::obscorrection_air_temperature);
+       profileDataHandler.get<float>(ufo::VariableNames::obscorrection_air_temperature);
 
     if (!oops::allVectorsSameNonZeroSize(pressures, tObs, tBkg, PstarBackgr,
                                          tFlags, tObsCorrection)) {

@@ -13,30 +13,28 @@ namespace ufo {
   makerProfileSondeFlags_("SondeFlags");
 
   ProfileSondeFlags::ProfileSondeFlags
-  (const ProfileConsistencyCheckParameters &options,
-   ProfileDataHandler &profileDataHandler,
-   ProfileCheckValidator &profileCheckValidator)
-    : ProfileCheckBase(options, profileDataHandler, profileCheckValidator)
+  (const ProfileConsistencyCheckParameters &options)
+    : ProfileCheckBase(options)
   {}
 
-  void ProfileSondeFlags::runCheck()
+  void ProfileSondeFlags::runCheck(ProfileDataHandler &profileDataHandler)
   {
     oops::Log::debug() << " Set sonde QC Flags" << std::endl;
 
-    const int numProfileLevels = profileDataHandler_.getNumProfileLevels();
+    const int numProfileLevels = profileDataHandler.getNumProfileLevels();
 
     std::vector <int> &tFlags =
-      profileDataHandler_.get<int>(ufo::VariableNames::qcflags_air_temperature);
+      profileDataHandler.get<int>(ufo::VariableNames::qcflags_air_temperature);
     std::vector <int> &rhFlags =
-      profileDataHandler_.get<int>(ufo::VariableNames::qcflags_relative_humidity);
+      profileDataHandler.get<int>(ufo::VariableNames::qcflags_relative_humidity);
     std::vector <int> &uFlags =
-      profileDataHandler_.get<int>(ufo::VariableNames::qcflags_eastward_wind);
+      profileDataHandler.get<int>(ufo::VariableNames::qcflags_eastward_wind);
     std::vector <int> &vFlags =
-      profileDataHandler_.get<int>(ufo::VariableNames::qcflags_northward_wind);
+      profileDataHandler.get<int>(ufo::VariableNames::qcflags_northward_wind);
     const std::vector <int> &ObsType =
-      profileDataHandler_.get<int>(ufo::VariableNames::ObsType);
+      profileDataHandler.get<int>(ufo::VariableNames::ObsType);
     const std::vector <int> &LevelType =
-      profileDataHandler_.get<int>(ufo::VariableNames::LevelType);
+      profileDataHandler.get<int>(ufo::VariableNames::LevelType);
 
     if (!oops::allVectorsSameNonZeroSize(tFlags, rhFlags, uFlags, vFlags,
                                          ObsType, LevelType)) {

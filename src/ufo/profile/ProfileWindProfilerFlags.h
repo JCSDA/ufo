@@ -13,7 +13,6 @@
 #include <vector>
 
 #include "ufo/profile/ProfileCheckBase.h"
-#include "ufo/profile/ProfileCheckValidator.h"
 #include "ufo/profile/ProfileDataHandler.h"
 
 #include "ufo/utils/metoffice/MetOfficeObservationIDs.h"
@@ -32,15 +31,13 @@ namespace ufo {
   /// Rejects levels of wind-profiler observations for which reported QC flags indicate bad obs.
   class ProfileWindProfilerFlags : public ProfileCheckBase {
    public:
-    ProfileWindProfilerFlags(const ProfileConsistencyCheckParameters &options,
-                             ProfileDataHandler &profileDataHandler,
-                             ProfileCheckValidator &profileCheckValidator);
+    explicit ProfileWindProfilerFlags(const ProfileConsistencyCheckParameters &options);
 
     /// Run check
-    void runCheck() override;
+    void runCheck(ProfileDataHandler &profileDataHandler) override;
 
     /// Fill variables in validator
-    void fillValidator() override {}
+    void fillValidationData(ProfileDataHandler &profileDataHandler) override {}
   };
 }  // namespace ufo
 

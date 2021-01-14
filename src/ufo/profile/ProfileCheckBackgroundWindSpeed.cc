@@ -13,48 +13,46 @@ namespace ufo {
   makerProfileCheckBackgroundWindSpeed_("BackgroundWindSpeed");
 
   ProfileCheckBackgroundWindSpeed::ProfileCheckBackgroundWindSpeed
-  (const ProfileConsistencyCheckParameters &options,
-   ProfileDataHandler &profileDataHandler,
-   ProfileCheckValidator &profileCheckValidator)
-    : ProfileCheckBase(options, profileDataHandler, profileCheckValidator)
+  (const ProfileConsistencyCheckParameters &options)
+    : ProfileCheckBase(options)
   {}
 
-  void ProfileCheckBackgroundWindSpeed::runCheck()
+  void ProfileCheckBackgroundWindSpeed::runCheck(ProfileDataHandler &profileDataHandler)
   {
     oops::Log::debug() << " Background check for wind velocity" << std::endl;
 
-    const size_t numProfileLevels = profileDataHandler_.getNumProfileLevels();
+    const size_t numProfileLevels = profileDataHandler.getNumProfileLevels();
     const bool ModelLevels = options_.modellevels.value();
     const std::vector <float> &uObs =
-       profileDataHandler_.get<float>(ufo::VariableNames::obs_eastward_wind);
+       profileDataHandler.get<float>(ufo::VariableNames::obs_eastward_wind);
     const std::vector <float> &uObsErr =
-       profileDataHandler_.get<float>(ufo::VariableNames::obserr_eastward_wind);
+       profileDataHandler.get<float>(ufo::VariableNames::obserr_eastward_wind);
     const std::vector <float> &uBkg =
-      profileDataHandler_.get<float>(ufo::VariableNames::hofx_eastward_wind);
+      profileDataHandler.get<float>(ufo::VariableNames::hofx_eastward_wind);
     const std::vector <float> &uBkgErr =
-      profileDataHandler_.get<float>(ufo::VariableNames::bkgerr_eastward_wind);
+      profileDataHandler.get<float>(ufo::VariableNames::bkgerr_eastward_wind);
     std::vector <float> &uPGE =
-      profileDataHandler_.get<float>(ufo::VariableNames::pge_eastward_wind);
+      profileDataHandler.get<float>(ufo::VariableNames::pge_eastward_wind);
     std::vector <float> &uPGEBd =
-      profileDataHandler_.get<float>(ufo::VariableNames::pgebd_eastward_wind);
+      profileDataHandler.get<float>(ufo::VariableNames::pgebd_eastward_wind);
     std::vector <int> &uFlags =
-      profileDataHandler_.get<int>(ufo::VariableNames::qcflags_eastward_wind);
+      profileDataHandler.get<int>(ufo::VariableNames::qcflags_eastward_wind);
     const std::vector <float> &vObs =
-       profileDataHandler_.get<float>(ufo::VariableNames::obs_northward_wind);
+       profileDataHandler.get<float>(ufo::VariableNames::obs_northward_wind);
     const std::vector <float> &vObsErr =
-       profileDataHandler_.get<float>(ufo::VariableNames::obserr_northward_wind);
+       profileDataHandler.get<float>(ufo::VariableNames::obserr_northward_wind);
     const std::vector <float> &vBkg =
-      profileDataHandler_.get<float>(ufo::VariableNames::hofx_northward_wind);
+      profileDataHandler.get<float>(ufo::VariableNames::hofx_northward_wind);
     const std::vector <float> &vBkgErr =
-      profileDataHandler_.get<float>(ufo::VariableNames::bkgerr_northward_wind);
+      profileDataHandler.get<float>(ufo::VariableNames::bkgerr_northward_wind);
     std::vector <float> &vPGE =
-      profileDataHandler_.get<float>(ufo::VariableNames::pge_northward_wind);
+      profileDataHandler.get<float>(ufo::VariableNames::pge_northward_wind);
     std::vector <float> &vPGEBd =
-      profileDataHandler_.get<float>(ufo::VariableNames::pgebd_northward_wind);
+      profileDataHandler.get<float>(ufo::VariableNames::pgebd_northward_wind);
     std::vector <int> &vFlags =
-      profileDataHandler_.get<int>(ufo::VariableNames::qcflags_northward_wind);
+      profileDataHandler.get<int>(ufo::VariableNames::qcflags_northward_wind);
     const std::vector <int> &timeFlags =
-      profileDataHandler_.get<int>(ufo::VariableNames::qcflags_time);
+      profileDataHandler.get<int>(ufo::VariableNames::qcflags_time);
 
     if (!oops::allVectorsSameNonZeroSize(uObs, uObsErr, uBkg, uBkgErr,
                                          uPGE, uFlags,

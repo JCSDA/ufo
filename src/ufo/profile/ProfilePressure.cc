@@ -13,25 +13,23 @@ namespace ufo {
   makerProfilePressure_("Pressure");
 
   ProfilePressure::ProfilePressure
-  (const ProfileConsistencyCheckParameters &options,
-   ProfileDataHandler &profileDataHandler,
-   ProfileCheckValidator &profileCheckValidator)
-    : ProfileCheckBase(options, profileDataHandler, profileCheckValidator)
+  (const ProfileConsistencyCheckParameters &options)
+    : ProfileCheckBase(options)
   {}
 
-  void ProfilePressure::runCheck()
+  void ProfilePressure::runCheck(ProfileDataHandler &profileDataHandler)
   {
     oops::Log::debug() << " Pressure calculations" << std::endl;
 
-    const int numProfileLevels = profileDataHandler_.getNumProfileLevels();
+    const int numProfileLevels = profileDataHandler.getNumProfileLevels();
 
     // Retrieve the observed geopotential height and associated metadata.
     std::vector <float> &zObs =
-      profileDataHandler_.get<float>(ufo::VariableNames::obs_geopotential_height);
+      profileDataHandler.get<float>(ufo::VariableNames::obs_geopotential_height);
     const std::vector <int> &ObsType =
-      profileDataHandler_.get<int>(ufo::VariableNames::ObsType);
+      profileDataHandler.get<int>(ufo::VariableNames::ObsType);
     std::vector <int> &ReportFlags =
-      profileDataHandler_.get<int>(ufo::VariableNames::qcflags_observation_report);
+      profileDataHandler.get<int>(ufo::VariableNames::qcflags_observation_report);
 
     if (!oops::allVectorsSameNonZeroSize(zObs, ObsType, ReportFlags)) {
       oops::Log::warning() << "At least one vector is the wrong size. "
@@ -44,9 +42,9 @@ namespace ufo {
 
     // Retrieve the model background fields.
     const std::vector <float> &orogGeoVaLs =
-      profileDataHandler_.getGeoVaLVector(ufo::VariableNames::geovals_orog);
+      profileDataHandler.getGeoVaLVector(ufo::VariableNames::geovals_orog);
     const std::vector <float> &pressureGeoVaLs =
-      profileDataHandler_.getGeoVaLVector(ufo::VariableNames::geovals_pressure);
+      profileDataHandler.getGeoVaLVector(ufo::VariableNames::geovals_pressure);
 
     if (!oops::allVectorsSameNonZeroSize(orogGeoVaLs, pressureGeoVaLs)) {
       oops::Log::warning() << "At least one GeoVaLs vector is the wrong size. "
@@ -59,7 +57,7 @@ namespace ufo {
 
     // Retrive the vector of observed pressures.
     std::vector <float> &pressures =
-      profileDataHandler_.get<float>(ufo::VariableNames::obs_air_pressure);
+      profileDataHandler.get<float>(ufo::VariableNames::obs_air_pressure);
     // If pressures have not been recorded, initialise the vector with missing values.
     if (pressures.empty())
       pressures.assign(numProfileLevels, missingValueFloat);

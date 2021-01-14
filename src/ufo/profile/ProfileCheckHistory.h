@@ -13,7 +13,6 @@
 #include <vector>
 
 #include "ufo/profile/ProfileCheckBase.h"
-#include "ufo/profile/ProfileCheckValidator.h"
 #include "ufo/profile/ProfileDataHandler.h"
 #include "ufo/profile/ProfileDataHistory.h"
 
@@ -32,15 +31,13 @@ namespace ufo {
   /// \brief Profile QC: history check.
   class ProfileCheckHistory : public ProfileCheckBase {
    public:
-    ProfileCheckHistory(const ProfileConsistencyCheckParameters &options,
-                     ProfileDataHandler &profileDataHandler,
-                     ProfileCheckValidator &profileCheckValidator);
+    explicit ProfileCheckHistory(const ProfileConsistencyCheckParameters &options);
 
     /// Run check
-    void runCheck() override;
+    void runCheck(ProfileDataHandler &profileDataHandler) override;
 
     /// Fill variables in validator
-    void fillValidator() override {}
+    void fillValidationData(ProfileDataHandler &profileDataHandler) override {}
 
     /// Run this check on the entire sample?
     bool runOnEntireSample() override {return true;}

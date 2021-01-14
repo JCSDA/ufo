@@ -24,15 +24,13 @@ namespace ufo {
   /// \brief Profile QC: unstable layer check
   class ProfileCheckUnstableLayer : public ProfileCheckBase {
    public:
-    ProfileCheckUnstableLayer(const ProfileConsistencyCheckParameters &options,
-                              ProfileDataHandler &profileDataHandler,
-                              ProfileCheckValidator &profileCheckValidator);
+    explicit ProfileCheckUnstableLayer(const ProfileConsistencyCheckParameters &options);
 
     /// Run check
-    void runCheck() override;
+    void runCheck(ProfileDataHandler &profileDataHandler) override;
 
     /// Fill variables in validator
-    void fillValidator() override;
+    void fillValidationData(ProfileDataHandler &profileDataHandler) override;
 
    private:
     /// PBottom

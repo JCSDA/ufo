@@ -11,27 +11,20 @@
 #include <vector>
 
 #include "ufo/profile/ProfileCheckBase.h"
-#include "ufo/profile/ProfileCheckValidator.h"
 #include "ufo/profile/ProfileDataHandler.h"
-
-namespace ufo {
-  class ProfileConsistencyCheckParameters;
-}
 
 namespace ufo {
 
   /// \brief Profile QC: basic checks on pressure
   class ProfileCheckBasic : public ProfileCheckBase {
    public:
-    ProfileCheckBasic(const ProfileConsistencyCheckParameters &options,
-                      ProfileDataHandler &profileDataHandler,
-                      ProfileCheckValidator &profileCheckValidator);
+    explicit ProfileCheckBasic(const ProfileConsistencyCheckParameters &options);
 
     /// Run check
-    void runCheck() override;
+    void runCheck(ProfileDataHandler &profileDataHandler) override;
 
     /// Fill variables in validator
-    void fillValidator() override {}
+    void fillValidationData(ProfileDataHandler &profileDataHandler) override {}
 
     /// Return result of basic checks
     bool getResult() override {return result_;}

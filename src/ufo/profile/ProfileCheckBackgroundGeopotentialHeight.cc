@@ -13,42 +13,40 @@ namespace ufo {
   makerProfileCheckBackgroundGeopotentialHeight_("BackgroundGeopotentialHeight");
 
   ProfileCheckBackgroundGeopotentialHeight::ProfileCheckBackgroundGeopotentialHeight
-  (const ProfileConsistencyCheckParameters &options,
-   ProfileDataHandler &profileDataHandler,
-   ProfileCheckValidator &profileCheckValidator)
-    : ProfileCheckBase(options, profileDataHandler, profileCheckValidator)
+  (const ProfileConsistencyCheckParameters &options)
+    : ProfileCheckBase(options)
   {}
 
-  void ProfileCheckBackgroundGeopotentialHeight::runCheck()
+  void ProfileCheckBackgroundGeopotentialHeight::runCheck(ProfileDataHandler &profileDataHandler)
   {
     oops::Log::debug() << " Background check for geopotential height" << std::endl;
 
-    const size_t numProfileLevels = profileDataHandler_.getNumProfileLevels();
+    const size_t numProfileLevels = profileDataHandler.getNumProfileLevels();
     const bool ModelLevels = options_.modellevels.value();
     const std::vector <float> &Zstation =
-      profileDataHandler_.get<float>(ufo::VariableNames::Zstation);
+      profileDataHandler.get<float>(ufo::VariableNames::Zstation);
     const std::vector <float> &pressures =
-       profileDataHandler_.get<float>(ufo::VariableNames::obs_air_pressure);
+       profileDataHandler.get<float>(ufo::VariableNames::obs_air_pressure);
     const std::vector <float> &zObs =
-       profileDataHandler_.get<float>(ufo::VariableNames::obs_geopotential_height);
+       profileDataHandler.get<float>(ufo::VariableNames::obs_geopotential_height);
     const std::vector <float> &zObsErr =
-       profileDataHandler_.get<float>(ufo::VariableNames::obserr_geopotential_height);
+       profileDataHandler.get<float>(ufo::VariableNames::obserr_geopotential_height);
     const std::vector <float> &zBkg =
-      profileDataHandler_.get<float>(ufo::VariableNames::hofx_geopotential_height);
+      profileDataHandler.get<float>(ufo::VariableNames::hofx_geopotential_height);
     std::vector <float> &zBkgErr =
-      profileDataHandler_.get<float>(ufo::VariableNames::bkgerr_geopotential_height);
+      profileDataHandler.get<float>(ufo::VariableNames::bkgerr_geopotential_height);
     std::vector <float> &zPGE =
-      profileDataHandler_.get<float>(ufo::VariableNames::pge_geopotential_height);
+      profileDataHandler.get<float>(ufo::VariableNames::pge_geopotential_height);
     std::vector <float> &zPGEBd =
-      profileDataHandler_.get<float>(ufo::VariableNames::pgebd_geopotential_height);
+      profileDataHandler.get<float>(ufo::VariableNames::pgebd_geopotential_height);
     std::vector <int> &zFlags =
-      profileDataHandler_.get<int>(ufo::VariableNames::qcflags_geopotential_height);
+      profileDataHandler.get<int>(ufo::VariableNames::qcflags_geopotential_height);
     const std::vector <int> &tFlags =
-      profileDataHandler_.get<int>(ufo::VariableNames::qcflags_air_temperature);
+      profileDataHandler.get<int>(ufo::VariableNames::qcflags_air_temperature);
     const std::vector <float> &zObsCorrection =
-       profileDataHandler_.get<float>(ufo::VariableNames::obscorrection_geopotential_height);
+       profileDataHandler.get<float>(ufo::VariableNames::obscorrection_geopotential_height);
     const std::vector <int> &timeFlags =
-      profileDataHandler_.get<int>(ufo::VariableNames::qcflags_time);
+      profileDataHandler.get<int>(ufo::VariableNames::qcflags_time);
 
     if (!oops::allVectorsSameNonZeroSize(Zstation, pressures,
                                          zObs, zObsErr, zBkg,

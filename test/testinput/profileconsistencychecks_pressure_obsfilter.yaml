@@ -19,7 +19,6 @@ observations:
   - filter: Profile Consistency Checks
     filter variables:
     - name: geopotential_height
-    requiredGeoVaLs: ["air_pressure", "orography"]
     Checks: ["Basic", "Pressure"]
     compareWithOPS: false
     BChecks_Skip: true

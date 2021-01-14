@@ -13,7 +13,6 @@
 #include <vector>
 
 #include "ufo/profile/ProfileCheckBase.h"
-#include "ufo/profile/ProfileCheckValidator.h"
 #include "ufo/profile/ProfileDataHandler.h"
 
 #include "ufo/utils/ProbabilityOfGrossError.h"
@@ -36,15 +35,14 @@ namespace ufo {
   /// (except those with PGE > 0.999) will be used in vertical averaging.
   class ProfileCheckBackgroundRelativeHumidity : public ProfileCheckBase {
    public:
-    ProfileCheckBackgroundRelativeHumidity(const ProfileConsistencyCheckParameters &options,
-                                           ProfileDataHandler &profileDataHandler,
-                                           ProfileCheckValidator &profileCheckValidator);
+    explicit ProfileCheckBackgroundRelativeHumidity
+      (const ProfileConsistencyCheckParameters &options);
 
     /// Run check
-    void runCheck() override;
+    void runCheck(ProfileDataHandler &profileDataHandler) override;
 
     /// Fill variables in validator
-    void fillValidator() override {}
+    void fillValidationData(ProfileDataHandler &profileDataHandler) override {}
   };
 }  // namespace ufo
 

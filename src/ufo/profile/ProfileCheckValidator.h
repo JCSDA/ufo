@@ -26,11 +26,10 @@ namespace ufo {
   /// the equivalent values produced in the OPS code.
   class ProfileCheckValidator {
    public:
-    ProfileCheckValidator(const ProfileConsistencyCheckParameters &options,
-                          ProfileDataHandler &profileDataHandler);
+    explicit ProfileCheckValidator(const ProfileConsistencyCheckParameters &options);
 
     /// Validate check results against OPS values.
-    void validate();
+    void validate(ProfileDataHandler &profileDataHandler);
 
     /// Get number of mismatches between values produced in this code and the OPS equivalents.
     int getMismatches() const {return nMismatches_;}
@@ -62,9 +61,6 @@ namespace ufo {
    private:  // variables
     /// Configurable parameters.
     const ProfileConsistencyCheckParameters &options_;
-
-    /// Profile data handler.
-    ProfileDataHandler &profileDataHandler_;
 
     /// Counters that are accumulated across profiles.
     std::map <std::string, int> cumulativeCounters_;

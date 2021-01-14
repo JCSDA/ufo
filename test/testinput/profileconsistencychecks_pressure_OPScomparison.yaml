@@ -17,7 +17,6 @@ Sondes:
     filename: Data/ufo/testinput_tier_1/met_office_profile_consistency_checks_pressure_geovals.nc4
   obs diagnostics:
   ProfileConsistencyChecks:
-    requiredGeoVaLs: ["air_pressure", "orography"]
     Checks: ["Basic", "Pressure"]
     compareWithOPS: true
     BChecks_Skip: true

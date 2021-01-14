@@ -13,40 +13,38 @@ namespace ufo {
   makerProfileCheckBackgroundTemperature_("BackgroundTemperature");
 
   ProfileCheckBackgroundTemperature::ProfileCheckBackgroundTemperature
-  (const ProfileConsistencyCheckParameters &options,
-   ProfileDataHandler &profileDataHandler,
-   ProfileCheckValidator &profileCheckValidator)
-    : ProfileCheckBase(options, profileDataHandler, profileCheckValidator)
+  (const ProfileConsistencyCheckParameters &options)
+    : ProfileCheckBase(options)
   {}
 
-  void ProfileCheckBackgroundTemperature::runCheck()
+  void ProfileCheckBackgroundTemperature::runCheck(ProfileDataHandler &profileDataHandler)
   {
     oops::Log::debug() << " Background check for temperature" << std::endl;
 
-    const size_t numProfileLevels = profileDataHandler_.getNumProfileLevels();
+    const size_t numProfileLevels = profileDataHandler.getNumProfileLevels();
     const bool ModelLevels = options_.modellevels.value();
     const std::vector <float> &Latitude =
-      profileDataHandler_.get<float>(ufo::VariableNames::Latitude);
+      profileDataHandler.get<float>(ufo::VariableNames::Latitude);
     const std::vector <float> &pressures =
-       profileDataHandler_.get<float>(ufo::VariableNames::obs_air_pressure);
+       profileDataHandler.get<float>(ufo::VariableNames::obs_air_pressure);
     const std::vector <float> &tObs =
-       profileDataHandler_.get<float>(ufo::VariableNames::obs_air_temperature);
+       profileDataHandler.get<float>(ufo::VariableNames::obs_air_temperature);
     const std::vector <float> &tObsErr =
-       profileDataHandler_.get<float>(ufo::VariableNames::obserr_air_temperature);
+       profileDataHandler.get<float>(ufo::VariableNames::obserr_air_temperature);
     const std::vector <float> &tBkg =
-      profileDataHandler_.get<float>(ufo::VariableNames::hofx_air_temperature);
+      profileDataHandler.get<float>(ufo::VariableNames::hofx_air_temperature);
     const std::vector <float> &tBkgErr =
-      profileDataHandler_.get<float>(ufo::VariableNames::bkgerr_air_temperature);
+      profileDataHandler.get<float>(ufo::VariableNames::bkgerr_air_temperature);
     std::vector <float> &tPGE =
-      profileDataHandler_.get<float>(ufo::VariableNames::pge_air_temperature);
+      profileDataHandler.get<float>(ufo::VariableNames::pge_air_temperature);
     std::vector <float> &tPGEBd =
-      profileDataHandler_.get<float>(ufo::VariableNames::pgebd_air_temperature);
+      profileDataHandler.get<float>(ufo::VariableNames::pgebd_air_temperature);
     std::vector <int> &tFlags =
-      profileDataHandler_.get<int>(ufo::VariableNames::qcflags_air_temperature);
+      profileDataHandler.get<int>(ufo::VariableNames::qcflags_air_temperature);
     const std::vector <int> &timeFlags =
-      profileDataHandler_.get<int>(ufo::VariableNames::qcflags_time);
+      profileDataHandler.get<int>(ufo::VariableNames::qcflags_time);
     const std::vector <float> &tObsCorrection =
-       profileDataHandler_.get<float>(ufo::VariableNames::obscorrection_air_temperature);
+       profileDataHandler.get<float>(ufo::VariableNames::obscorrection_air_temperature);
 
     if (!oops::allVectorsSameNonZeroSize(Latitude, pressures,
                                          tObs, tObsErr, tBkg, tBkgErr,

@@ -12,13 +12,11 @@ namespace ufo {
 
   static ProfileCheckMaker<ProfileCheckBasic> makerProfileCheckBasic_("Basic");
 
-  ProfileCheckBasic::ProfileCheckBasic(const ProfileConsistencyCheckParameters &options,
-                                       ProfileDataHandler &profileDataHandler,
-                                       ProfileCheckValidator &profileCheckValidator)
-    : ProfileCheckBase(options, profileDataHandler, profileCheckValidator)
+  ProfileCheckBasic::ProfileCheckBasic(const ProfileConsistencyCheckParameters &options)
+    : ProfileCheckBase(options)
   {}
 
-  void ProfileCheckBasic::runCheck()
+  void ProfileCheckBasic::runCheck(ProfileDataHandler &profileDataHandler)
   {
     oops::Log::debug() << " Basic checks" << std::endl;
 
@@ -32,16 +30,16 @@ namespace ufo {
         return;
       }
 
-    const int numProfileLevels = profileDataHandler_.getNumProfileLevels();
+    const int numProfileLevels = profileDataHandler.getNumProfileLevels();
     const std::vector <float> &pressures =
-      profileDataHandler_.get<float>(ufo::VariableNames::obs_air_pressure);
+      profileDataHandler.get<float>(ufo::VariableNames::obs_air_pressure);
     // All QC flags are retrieved for the basic checks.
     // (Some might be empty; that is checked before they are used.)
-    std::vector <int> &tFlags = profileDataHandler_.get<int>
+    std::vector <int> &tFlags = profileDataHandler.get<int>
       (ufo::VariableNames::qcflags_air_temperature);
-    std::vector <int> &zFlags = profileDataHandler_.get<int>
+    std::vector <int> &zFlags = profileDataHandler.get<int>
       (ufo::VariableNames::qcflags_geopotential_height);
-    std::vector <int> &uFlags = profileDataHandler_.get<int>
+    std::vector <int> &uFlags = profileDataHandler.get<int>
       (ufo::VariableNames::qcflags_eastward_wind);
 
     // Warn and exit if pressures vector is empty

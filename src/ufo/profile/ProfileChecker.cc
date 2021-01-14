@@ -6,6 +6,7 @@
  */
 
 #include <algorithm>
+#include <set>
 #include <utility>
 
 #include "eckit/exception/Exceptions.h"
@@ -26,12 +27,8 @@
 #include "ufo/utils/metoffice/MetOfficeQCFlags.h"
 
 namespace ufo {
-  ProfileChecker::ProfileChecker(const ProfileConsistencyCheckParameters &options,
-                                 ProfileDataHandler &profileDataHandler,
-                                 ProfileCheckValidator &profileCheckValidator)
+  ProfileChecker::ProfileChecker(const ProfileConsistencyCheckParameters &options)
     : options_(options),
-      profileDataHandler_(profileDataHandler),
-      profileCheckValidator_(profileCheckValidator),
       checks_(options.Checks.value())
   {
     // Ensure basic checks are always performed first
@@ -50,13 +47,12 @@ namespace ufo {
     bool isFirst = true;  // First check considered; used to initialise checkMode.
     bool checkMode = true;  // Mode of operation of the current check.
     std::vector <std::string> checkNames;  // Filled anew for each subgroup.
+    // Also fill a set of any required GeoVaL names.
     for (const auto& check : checks_) {
       // Instantiate each check and check its mode of operation.
       std::unique_ptr<ProfileCheckBase> profileCheck =
         ProfileCheckFactory::create(check,
-                                    options_,
-                                    profileDataHandler_,
-                                    profileCheckValidator_);
+                                    options_);
       if (profileCheck) {
         if (isFirst) {
           checkMode = profileCheck->runOnEntireSample();
@@ -71,6 +67,7 @@ namespace ufo {
           // Invert checkMode whenever a check with a different mode is reached.
           checkMode = !checkMode;
         }
+        GeoVaLNames_ += profileCheck->getGeoVaLNames();
       } else {
         throw eckit::NotImplemented("Have not implemented a check for " + check, Here());
       }
@@ -79,27 +76,26 @@ namespace ufo {
     checkSubgroups_.push_back({checkMode, checkNames});
   }
 
-  void ProfileChecker::runChecks(const CheckSubgroup &subGroupChecks)
+  void ProfileChecker::runChecks(ProfileDataHandler &profileDataHandler,
+                                 const CheckSubgroup &subGroupChecks)
   {
     // Run all checks requested
     for (const auto& check : subGroupChecks.checkNames) {
       std::unique_ptr<ProfileCheckBase> profileCheck =
         ProfileCheckFactory::create(check,
-                                    options_,
-                                    profileDataHandler_,
-                                    profileCheckValidator_);
+                                    options_);
       if (profileCheck) {
         // Ensure correct type of check has been requested.
         if (profileCheck->runOnEntireSample() == subGroupChecks.runOnEntireSample) {
           // For checks on the entire sample, reset profile indices
           // prior to looping through the profiles
           if (profileCheck->runOnEntireSample())
-            profileDataHandler_.resetProfileIndices();
+            profileDataHandler.resetProfileIndices();
           // Run check
-          profileCheck->runCheck();
+          profileCheck->runCheck(profileDataHandler);
           // Fill validation information if required
           if (options_.compareWithOPS.value()) {
-            profileCheck->fillValidator();
+            profileCheck->fillValidationData(profileDataHandler);
           }
           // Do not proceed if basic checks failed
           if (!profileCheck->getResult() && check == "Basic") {

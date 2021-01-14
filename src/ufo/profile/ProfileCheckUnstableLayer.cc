@@ -14,32 +14,30 @@ namespace ufo {
   makerProfileCheckUnstableLayer_("UnstableLayer");
 
   ProfileCheckUnstableLayer::ProfileCheckUnstableLayer
-  (const ProfileConsistencyCheckParameters &options,
-   ProfileDataHandler &profileDataHandler,
-   ProfileCheckValidator &profileCheckValidator)
-    : ProfileCheckBase(options, profileDataHandler, profileCheckValidator)
+  (const ProfileConsistencyCheckParameters &options)
+    : ProfileCheckBase(options)
   {}
 
-  void ProfileCheckUnstableLayer::runCheck()
+  void ProfileCheckUnstableLayer::runCheck(ProfileDataHandler &profileDataHandler)
   {
     oops::Log::debug() << " Unstable layer/superadiabat check" << std::endl;
 
-    const int numProfileLevels = profileDataHandler_.getNumProfileLevels();
+    const int numProfileLevels = profileDataHandler.getNumProfileLevels();
 
     const std::vector <float> &pressures =
-       profileDataHandler_.get<float>(ufo::VariableNames::obs_air_pressure);
+       profileDataHandler.get<float>(ufo::VariableNames::obs_air_pressure);
     const std::vector <float> &tObs =
-       profileDataHandler_.get<float>(ufo::VariableNames::obs_air_temperature);
+       profileDataHandler.get<float>(ufo::VariableNames::obs_air_temperature);
     const std::vector <float> &tBkg =
-       profileDataHandler_.get<float>(ufo::VariableNames::hofx_air_temperature);
+       profileDataHandler.get<float>(ufo::VariableNames::hofx_air_temperature);
     std::vector <int> &tFlags =
-       profileDataHandler_.get<int>(ufo::VariableNames::qcflags_air_temperature);
+       profileDataHandler.get<int>(ufo::VariableNames::qcflags_air_temperature);
     std::vector <int> &NumAnyErrors =
-       profileDataHandler_.get<int>(ufo::VariableNames::counter_NumAnyErrors);
+       profileDataHandler.get<int>(ufo::VariableNames::counter_NumAnyErrors);
     std::vector <int> &NumSuperadiabat =
-       profileDataHandler_.get<int>(ufo::VariableNames::counter_NumSuperadiabat);
+       profileDataHandler.get<int>(ufo::VariableNames::counter_NumSuperadiabat);
     const std::vector <float> &tObsCorrection =
-       profileDataHandler_.get<float>(ufo::VariableNames::obscorrection_air_temperature);
+       profileDataHandler.get<float>(ufo::VariableNames::obscorrection_air_temperature);
 
     if (!oops::allVectorsSameNonZeroSize(pressures, tObs, tBkg, tFlags, tObsCorrection)) {
       oops::Log::warning() << "At least one vector is the wrong size. "
@@ -95,9 +93,9 @@ namespace ufo {
     }
   }
 
-  void ProfileCheckUnstableLayer::fillValidator()
+  void ProfileCheckUnstableLayer::fillValidationData(ProfileDataHandler &profileDataHandler)
   {
-    std::vector <float> PBottom(profileDataHandler_.getNumProfileLevels(), PBottom_);
-    profileDataHandler_.set(ufo::VariableNames::PBottom, std::move(PBottom));
+    std::vector <float> PBottom(profileDataHandler.getNumProfileLevels(), PBottom_);
+    profileDataHandler.set(ufo::VariableNames::PBottom, std::move(PBottom));
   }
 }  // namespace ufo

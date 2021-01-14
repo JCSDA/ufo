@@ -73,20 +73,10 @@ void testProfileConsistencyChecks(const eckit::LocalConfiguration &conf) {
 
   const eckit::LocalConfiguration filterConf(conf, "ProfileConsistencyChecks");
 
-  std::unique_ptr <GeoVaLs> geovals;
-  const std::vector <std::string> geovalnames = filterConf.getStringVector("requiredGeoVaLs", {});
-  if (geovalnames.size() > 0) {
-    oops::Variables requiredGeoVaLs(geovalnames);
-    const eckit::LocalConfiguration geovalsConf(conf, "geovals");
-    geovals.reset(new GeoVaLs(geovalsConf, obsspace, requiredGeoVaLs));
-  } else {
-    const Variables geovars;
-    geovals.reset(new GeoVaLs(obsSpaceConf, obsspace, geovars.toOopsVariables()));
-  }
-
   // Determine whether an exception is expected to be thrown.
-  // Exceptions can be thrown in two places: on instantiation of the filter,
-  // and during the operation of the filter.
+  // Exceptions can be thrown in the following places:
+  // - on instantiation of the filter,
+  // - during the operation of the filter,
   bool expectThrowOnInstantiation = conf.getBool("ExpectThrowOnInstantiation", false);
   bool expectThrowDuringOperation = conf.getBool("ExpectThrowDuringOperation", false);
 
@@ -96,9 +86,19 @@ void testProfileConsistencyChecks(const eckit::LocalConfiguration &conf) {
     return;
   }
 
+  // Instantiate filter.
   ufo::ProfileConsistencyChecks filter(obsspace, filterConf, qcflags, obserr);
-  filter.preProcess();
 
+  // Obtain GeoVaLs.
+  const bool ignoreGeoVaLs = conf.getBool("IgnoreGeoVaLs", false);
+  const auto geovars = filter.requiredVars();
+  std::unique_ptr <GeoVaLs> geovals;
+  if (!ignoreGeoVaLs && geovars.size() > 0) {
+    const eckit::LocalConfiguration geovalsConf(conf, "geovals");
+    geovals.reset(new GeoVaLs(geovalsConf, obsspace, geovars));
+  }
+
+  filter.preProcess();
   if (expectThrowDuringOperation) {
     EXPECT_THROWS(filter.postFilter(hofx, obsdiags));
   } else {
@@ -109,7 +109,7 @@ void testProfileConsistencyChecks(const eckit::LocalConfiguration &conf) {
   // Determine whether the mismatch check should be bypassed or not.
   // It might be necessary to disable the mismatch check in tests which are
   // designed to reach code paths that would normally result in failure.
-  bool bypassMismatchComparison = conf.getBool("BypassMismatchComparison", false);
+  const bool bypassMismatchComparison = conf.getBool("BypassMismatchComparison", false);
 
   // Check there are no mismatches between the values produced by this code and the OPS equivalents
   if (!bypassMismatchComparison) {
@@ -120,14 +120,14 @@ void testProfileConsistencyChecks(const eckit::LocalConfiguration &conf) {
   // === Additional tests of exceptions === //
 
   // Test whether adding the same check twice throws an exception.
-  bool addDuplicateCheck = conf.getBool("AddDuplicateCheck", false);
+  const bool addDuplicateCheck = conf.getBool("AddDuplicateCheck", false);
   if (addDuplicateCheck) {
     static ProfileCheckMaker<ProfileCheckUInterp> makerDuplicate1_("duplicate");
     EXPECT_THROWS(static ProfileCheckMaker<ProfileCheckUInterp> makerDuplicate2_("duplicate"));
   }
 
   // Test whether using the get function with the wrong type throws an exception.
-  bool getWrongType = conf.getBool("GetWrongType", false);
+  const bool getWrongType = conf.getBool("GetWrongType", false);
   if (getWrongType) {
     std::unique_ptr <ProfileConsistencyCheckParameters> options_;
     options_.reset(new ProfileConsistencyCheckParameters());
@@ -152,7 +152,7 @@ void testProfileConsistencyChecks(const eckit::LocalConfiguration &conf) {
   }
 
   // Manually modify QC flags in order to cover rare code paths.
-  bool ManualFlagModification = conf.getBool("ManualFlagModification", false);
+  const bool ManualFlagModification = conf.getBool("ManualFlagModification", false);
   if (ManualFlagModification) {
     std::unique_ptr <ProfileConsistencyCheckParameters> options_;
     options_.reset(new ProfileConsistencyCheckParameters());
@@ -169,8 +169,7 @@ void testProfileConsistencyChecks(const eckit::LocalConfiguration &conf) {
                                           options_->DHParameters,
                                           apply,
                                           flagged);
-    ProfileCheckValidator profileCheckValidator(*options_,
-                                                profileDataHandler);
+    ProfileCheckValidator profileCheckValidator(*options_);
 
     profileDataHandler.initialiseNextProfile();
 
@@ -201,37 +200,28 @@ void testProfileConsistencyChecks(const eckit::LocalConfiguration &conf) {
     zFlags[0] |= ufo::MetOfficeQCFlags::Profile::HydrostaticFlag;
 
     // Create checks
-    ProfileCheckTime profileCheckTime(*options_,
-                                      profileDataHandler,
-                                      profileCheckValidator);
-    ProfileCheckBackgroundTemperature profileCheckBackgroundT(*options_,
-                                                              profileDataHandler,
-                                                              profileCheckValidator);
-    ProfileCheckBackgroundRelativeHumidity profileCheckBackgroundRH(*options_,
-                                                                    profileDataHandler,
-                                                                    profileCheckValidator);
-    ProfileCheckBackgroundWindSpeed profileCheckBackgroundUV(*options_,
-                                                             profileDataHandler,
-                                                             profileCheckValidator);
-    ProfileCheckBackgroundGeopotentialHeight profileCheckBackgroundZ(*options_,
-                                                                     profileDataHandler,
-                                                                     profileCheckValidator);
+    ProfileCheckTime profileCheckTime(*options_);
+    ProfileCheckBackgroundTemperature profileCheckBackgroundT(*options_);
+    ProfileCheckBackgroundRelativeHumidity profileCheckBackgroundRH(*options_);
+    ProfileCheckBackgroundWindSpeed profileCheckBackgroundUV(*options_);
+    ProfileCheckBackgroundGeopotentialHeight profileCheckBackgroundZ(*options_);
 
     // Run time check
-    profileCheckTime.runCheck();
+    profileCheckTime.runCheck(profileDataHandler);
 
     // Modify time flag
     timeFlags[0] = true;
 
     // Run remaining checks
-    profileCheckBackgroundT.runCheck();
-    profileCheckBackgroundRH.runCheck();
-    profileCheckBackgroundUV.runCheck();
-    profileCheckBackgroundZ.runCheck();
+    profileCheckBackgroundT.runCheck(profileDataHandler);
+    profileCheckBackgroundRH.runCheck(profileDataHandler);
+    profileCheckBackgroundUV.runCheck(profileDataHandler);
+    profileCheckBackgroundZ.runCheck(profileDataHandler);
   }
 
   // Test the profile vertical interpolation
-  bool testProfileVerticalInterpolation = conf.getBool("testProfileVerticalInterpolation", false);
+  const bool testProfileVerticalInterpolation =
+    conf.getBool("testProfileVerticalInterpolation", false);
   if (testProfileVerticalInterpolation) {
     std::unique_ptr <ProfileConsistencyCheckParameters> options;
     options.reset(new ProfileConsistencyCheckParameters());

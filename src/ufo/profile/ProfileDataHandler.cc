@@ -155,18 +155,6 @@ namespace ufo {
 
   std::vector <float>& ProfileDataHandler::getGeoVaLVector(const std::string &variableName)
   {
-    // The GeoVaL to be retrieved must be listed in the requiredGeoVals configuration parameter.
-    // The GeoVaLs in that list are loaded before the applyFiter routine runs,
-    // so cannot be retrieved on-demand.
-    const std::vector <std::string> requiredGeoVaLs = options_.requiredGeoVaLs.value();
-    if (std::find(requiredGeoVaLs.begin(), requiredGeoVaLs.end(), variableName) ==
-        requiredGeoVaLs.end()) {
-      throw eckit::BadParameter("The GeoVaL named " +
-                                variableName +
-                                " is not in the requiredGeoVaLs section of the configuration file.",
-                                Here());
-    }
-
     if (GeoVaLData_.find(variableName) != GeoVaLData_.end()) {
       // If the GeoVaL vector is already present, return it.
       return GeoVaLData_[variableName];

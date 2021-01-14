@@ -13,7 +13,6 @@
 #include <vector>
 
 #include "ufo/profile/ProfileCheckBase.h"
-#include "ufo/profile/ProfileCheckValidator.h"
 #include "ufo/profile/ProfileDataHandler.h"
 
 namespace ioda {
@@ -29,15 +28,13 @@ namespace ufo {
   /// \brief Profile QC: reject observations which are flagged to be permanently rejected.
   class ProfileCheckPermanentReject : public ProfileCheckBase {
    public:
-    ProfileCheckPermanentReject(const ProfileConsistencyCheckParameters &options,
-                                ProfileDataHandler &profileDataHandler,
-                                ProfileCheckValidator &profileCheckValidator);
+    explicit ProfileCheckPermanentReject(const ProfileConsistencyCheckParameters &options);
 
     /// Run check
-    void runCheck() override;
+    void runCheck(ProfileDataHandler &profileDataHandler) override;
 
     /// Fill variables in validator
-    void fillValidator() override {}
+    void fillValidationData(ProfileDataHandler &profileDataHandler) override {}
   };
 }  // namespace ufo
 

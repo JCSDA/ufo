@@ -17,9 +17,8 @@ Vertical interpolation:
   HofX: HofX
   obs diagnostics:
   ProfileConsistencyChecks:
-    checks: ["Basic", "Pressure"]
+    Checks: ["Basic", "Pressure"]
     compareWithOPS: true
-    requiredGeoVaLs: ["air_pressure", "orography"]
   BypassMismatchComparison: true
   testProfileVerticalInterpolation: true
   interpMethodNames: [Linear, Linear, LogLinear, Linear, Linear, Linear, Linear, Linear, Linear, Linear, Linear, Linear, Linear, Linear, Linear, Linear, Linear, Linear, Linear, Linear]

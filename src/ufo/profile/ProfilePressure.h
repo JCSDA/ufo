@@ -10,6 +10,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <string>
 #include <vector>
 
 #include "ufo/profile/ModelHeightCalculator.h"
@@ -38,15 +39,19 @@ namespace ufo {
   /// Profiles without a pressure sensor are flagged.
   class ProfilePressure : public ProfileCheckBase {
    public:
-    ProfilePressure(const ProfileConsistencyCheckParameters &options,
-                    ProfileDataHandler &profileDataHandler,
-                    ProfileCheckValidator &profileCheckValidator);
+    explicit ProfilePressure(const ProfileConsistencyCheckParameters &options);
 
     /// Run check
-    void runCheck() override;
+    void runCheck(ProfileDataHandler &profileDataHandler) override;
 
     /// Fill variables in validator
-    void fillValidator() override {}
+    void fillValidationData(ProfileDataHandler &profileDataHandler) override {}
+
+    /// List of names of required GeoVaLs.
+    oops::Variables getGeoVaLNames() override {
+      return oops::Variables({ufo::VariableNames::geovals_orog,
+            ufo::VariableNames::geovals_pressure});
+    }
   };
 }  // namespace ufo
 

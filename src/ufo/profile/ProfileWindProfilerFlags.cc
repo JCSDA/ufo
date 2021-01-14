@@ -13,26 +13,24 @@ namespace ufo {
   static ProfileCheckMaker<ProfileWindProfilerFlags> makerProfileWindProfilerFlags_("WinProFlags");
 
   ProfileWindProfilerFlags::ProfileWindProfilerFlags
-  (const ProfileConsistencyCheckParameters &options,
-   ProfileDataHandler &profileDataHandler,
-   ProfileCheckValidator &profileCheckValidator)
-    : ProfileCheckBase(options, profileDataHandler, profileCheckValidator)
+  (const ProfileConsistencyCheckParameters &options)
+    : ProfileCheckBase(options)
   {}
 
-  void ProfileWindProfilerFlags::runCheck()
+  void ProfileWindProfilerFlags::runCheck(ProfileDataHandler &profileDataHandler)
   {
     oops::Log::debug() << " Wind profiler flag check" << std::endl;
 
-    const int numProfileLevels = profileDataHandler_.getNumProfileLevels();
+    const int numProfileLevels = profileDataHandler.getNumProfileLevels();
 
     std::vector <int> &uFlags =
-      profileDataHandler_.get<int>(ufo::VariableNames::qcflags_eastward_wind);
+      profileDataHandler.get<int>(ufo::VariableNames::qcflags_eastward_wind);
     std::vector <int> &vFlags =
-      profileDataHandler_.get<int>(ufo::VariableNames::qcflags_northward_wind);
+      profileDataHandler.get<int>(ufo::VariableNames::qcflags_northward_wind);
     const std::vector <int> &WinProQCFlags =
-      profileDataHandler_.get<int>(ufo::VariableNames::qcflags_wind_profiler);
+      profileDataHandler.get<int>(ufo::VariableNames::qcflags_wind_profiler);
     const std::vector <int> &ObsType =
-      profileDataHandler_.get<int>(ufo::VariableNames::ObsType);
+      profileDataHandler.get<int>(ufo::VariableNames::ObsType);
 
     if (!oops::allVectorsSameNonZeroSize(uFlags, vFlags, WinProQCFlags, ObsType)) {
       oops::Log::warning() << "At least one vector is the wrong size. "

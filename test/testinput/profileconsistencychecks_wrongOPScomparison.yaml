@@ -26,6 +26,7 @@ Incorrect and missing values, RH:
     flagBasicChecksFail: true
     Comparison_Tol: 0.1
   BypassMismatchComparison: true
+  IgnoreGeoVaLs: true
 
 #One of the variables is missing in a different sample (for completeness).
 Incorrect and missing values:
@@ -46,6 +47,7 @@ Incorrect and missing values:
     flagBasicChecksFail: true
     Comparison_Tol: 0.1
   BypassMismatchComparison: true
+  IgnoreGeoVaLs: true
 
 #One of the variables is missing, basic check is run.
 Incorrect and missing values, Basic:
@@ -215,7 +217,7 @@ Invalid check requested:
     flagBasicChecksFail: true
     Comparison_Tol: 0.1
   BypassMismatchComparison: true
-  ExpectThrowDuringOperation: true
+  ExpectThrowOnInstantiation: true
 
 #A duplicate check is requested, throwing an exception
 Duplicate check requested:
