@@ -2251,18 +2251,42 @@ EmisCoeff/IR_Land/SEcategory/Little_Endian/USGS.IRland.EmisCoeff.bin
 EmisCoeff/VIS_Land/SEcategory/Little_Endian/USGS.VISland.EmisCoeff.bin
 SpcCoeff/Little_Endian/hirs4_metop-a.SpcCoeff.bin
 TauCoeff/ODPS/Little_Endian/hirs4_metop-a.TauCoeff.bin
+SpcCoeff/Little_Endian/amsua_aqua.SpcCoeff.bin
+TauCoeff/ODPS/Little_Endian/amsua_aqua.TauCoeff.bin
+SpcCoeff/Little_Endian/amsua_metop-a.SpcCoeff.bin
+TauCoeff/ODPS/Little_Endian/amsua_metop-a.TauCoeff.bin
+SpcCoeff/Little_Endian/amsua_metop-b.SpcCoeff.bin
+TauCoeff/ODPS/Little_Endian/amsua_metop-b.TauCoeff.bin
+SpcCoeff/Little_Endian/amsua_metop-c.SpcCoeff.bin
+TauCoeff/ODPS/Little_Endian/amsua_metop-c.TauCoeff.bin
+SpcCoeff/Little_Endian/amsua_n15.SpcCoeff.bin
+TauCoeff/ODPS/Little_Endian/amsua_n15.TauCoeff.bin
+SpcCoeff/Little_Endian/amsua_n18.SpcCoeff.bin
+TauCoeff/ODPS/Little_Endian/amsua_n18.TauCoeff.bin
 SpcCoeff/Little_Endian/amsua_n19.SpcCoeff.bin
 TauCoeff/ODPS/Little_Endian/amsua_n19.TauCoeff.bin
 SpcCoeff/Little_Endian/atms_npp.SpcCoeff.bin
 TauCoeff/ODPS/Little_Endian/atms_npp.TauCoeff.bin
+SpcCoeff/Little_Endian/atms_n20.SpcCoeff.bin
+TauCoeff/ODPS/Little_Endian/atms_n20.TauCoeff.bin
 SpcCoeff/Little_Endian/gmi_gpm.SpcCoeff.bin
 TauCoeff/ODPS/Little_Endian/gmi_gpm.TauCoeff.bin
 SpcCoeff/Little_Endian/seviri_m08.SpcCoeff.bin
 TauCoeff/ODAS/Little_Endian/seviri_m08.TauCoeff.bin
+SpcCoeff/Little_Endian/seviri_m11.SpcCoeff.bin
+TauCoeff/ODPS/Little_Endian/seviri_m11.TauCoeff.bin
 SpcCoeff/Little_Endian/cris-fsr_npp.SpcCoeff.bin
 TauCoeff/ODPS/Little_Endian/cris-fsr_npp.TauCoeff.bin
 SpcCoeff/Little_Endian/iasi_metop-a.SpcCoeff.bin
 TauCoeff/ODPS/Little_Endian/iasi_metop-a.TauCoeff.bin
+SpcCoeff/Little_Endian/iasi_metop-b.SpcCoeff.bin
+TauCoeff/ODPS/Little_Endian/iasi_metop-b.TauCoeff.bin
+SpcCoeff/Little_Endian/mhs_metop-a.SpcCoeff.bin
+TauCoeff/ODPS/Little_Endian/mhs_metop-a.TauCoeff.bin
+SpcCoeff/Little_Endian/mhs_metop-b.SpcCoeff.bin
+TauCoeff/ODPS/Little_Endian/mhs_metop-b.TauCoeff.bin
+SpcCoeff/Little_Endian/mhs_metop-c.SpcCoeff.bin
+TauCoeff/ODPS/Little_Endian/mhs_metop-c.TauCoeff.bin
 SpcCoeff/Little_Endian/mhs_n19.SpcCoeff.bin
 TauCoeff/ODPS/Little_Endian/mhs_n19.TauCoeff.bin
 SpcCoeff/Little_Endian/sndrD1_g15.SpcCoeff.bin
@@ -2283,6 +2307,12 @@ SpcCoeff/Little_Endian/ahi_himawari8.SpcCoeff.bin
 TauCoeff/ODPS/Little_Endian/ahi_himawari8.TauCoeff.bin
 SpcCoeff/Little_Endian/radiometer_smap.SpcCoeff.bin
 TauCoeff/ODPS/Little_Endian/radiometer_smap.TauCoeff.bin
+SpcCoeff/Little_Endian/avhrr3_metop-a.SpcCoeff.bin
+TauCoeff/ODPS/Little_Endian/avhrr3_metop-a.TauCoeff.bin
+SpcCoeff/Little_Endian/avhrr3_n18.SpcCoeff.bin
+TauCoeff/ODPS/Little_Endian/avhrr3_n18.TauCoeff.bin
+SpcCoeff/Little_Endian/cris-fsr_n20.SpcCoeff.bin
+TauCoeff/ODPS/Little_Endian/cris-fsr_n20.TauCoeff.bin
 )
 
 if( crtm_FOUND )
@@ -2335,3 +2365,6 @@ CREATE_SYMLINK_FILENAME( ${geos-aero_SOURCE_DIR}/test/
                          ${geos-aero_test_input} )
 
 endif( ${GEOS-AERO_FOUND} )
+
+add_subdirectory(testinput/instrumentTests)
+
