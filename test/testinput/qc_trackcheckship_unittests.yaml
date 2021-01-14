@@ -14,7 +14,6 @@ Normal ship track:
   station_ids: [ 1, 1, 1, 1, 1]
   Ship Track Check:
     unit testing mode: true
-    variables: [air_temperature]
     temporal resolution: PT10M
     spatial resolution (km): 1
     max speed (m/s): 1000.0
@@ -49,7 +48,6 @@ Bending ship track:
   station_ids: [ 1, 1, 1, 1, 1]
   Ship Track Check:
     unit testing mode: true
-    variables: [air_temperature]
     temporal resolution: PT10M
     spatial resolution (km): 1
     max speed (m/s): 1000.0
@@ -84,7 +82,6 @@ Fast ship track:
   station_ids: [ 1, 1, 1]
   Ship Track Check:
     unit testing mode: true
-    variables: [air_temperature]
     temporal resolution: PT10M
     spatial resolution (km): 1
     max speed (m/s): 10 
@@ -120,7 +117,6 @@ Short ship track:
   Ship Track Check:
     input category: 2
     unit testing mode: true
-    variables: [air_temperature]
     temporal resolution: PT10M
     spatial resolution (km): 1
     max speed (m/s): 1000.0 
@@ -156,7 +152,6 @@ Short buoy track:
   Ship Track Check:
     input category: 1
     unit testing mode: true
-    variables: [air_temperature]
     temporal resolution: PT10M
     spatial resolution (km): 1
     max speed (m/s): 1000 
@@ -191,7 +186,6 @@ Fast/short ship track:
   station_ids: [ 1, 1, 1 ]
   Ship Track Check:
     unit testing mode: true
-    variables: [air_temperature]
     temporal resolution: PT10M
     spatial resolution (km): 1
     max speed (m/s): 10 
@@ -225,7 +219,6 @@ Ship Track Dist0:
   station_ids: [ 1, 1, 1 ]
   Ship Track Check:
     unit testing mode: true
-    variables: [air_temperature]
     temporal resolution: PT10M
     spatial resolution (km): 1
     max speed (m/s): 1000.0
@@ -259,7 +252,6 @@ Ship Track Simultaneous Same Location:
   station_ids: [ 1, 1, 1]
   Ship Track Check:
     unit testing mode: true
-    variables: [air_temperature]
     temporal resolution: PT10M
     spatial resolution (km): 1
     max speed (m/s): 10 
@@ -293,7 +285,6 @@ Ship Track Simultaneous Different Location:
   station_ids: [ 1, 1, 1]
   Ship Track Check:
     unit testing mode: true
-    variables: [air_temperature]
     temporal resolution: PT10M
     spatial resolution (km): 1
     max speed (m/s): 10 
@@ -329,7 +320,6 @@ Ship Tracks Different Station IDs:
   station_ids: [ 1, 1, 1, 1, 1, 2, 2, 2]
   Ship Track Check:
     unit testing mode: true
-    variables: [air_temperature]
     temporal resolution: PT10M
     spatial resolution (km): 1
     max speed (m/s): 1000 
@@ -365,7 +355,6 @@ Ship Tracks Different Station IDs Shuffled:
   station_ids: [ 1, 1, 1, 1, 2, 2, 1, 2]
   Ship Track Check:
     unit testing mode: true
-    variables: [air_temperature]
     temporal resolution: PT10M
     spatial resolution (km): 1
     max speed (m/s): 1000 
@@ -401,10 +390,9 @@ Ship Track Segment from Comparison Test early break false:
   Ship Track Check:
     comparison test: true
     unit testing mode: false
-    variables: [air_temperature]
     temporal resolution: PT1S
-    spatial resolution (km): .0000001
-    max speed (m/s): .01 
+    spatial resolution (km): 0.0000001
+    max speed (m/s): 0.01
     rejection threshold: 0.5
     early break check: false
     station_id_variable:
@@ -427,10 +415,9 @@ Ship Track Segment from Comparison Test early break true:
   Ship Track Check:
     comparison test: true
     unit testing mode: false
-    variables: [air_temperature]
     temporal resolution: PT1S
-    spatial resolution (km): .0000001
-    max speed (m/s): .01 
+    spatial resolution (km): 0.0000001
+    max speed (m/s): 0.01
     rejection threshold: 0.5
     early break check: false
     station_id_variable:

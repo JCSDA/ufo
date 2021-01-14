@@ -25,6 +25,8 @@ namespace ufo {
 
 /// \brief Options controlling the operation of the ship track check filter.
 class TrackCheckShipParameters : public TrackCheckUtilsParameters {
+  OOPS_CONCRETE_PARAMETERS(TrackCheckShipParameters, TrackCheckUtilsParameters)
+
  public:
   /// Assumed temporal resolution of the observations, i.e. absolute accuracy of the reported
   /// observation times.

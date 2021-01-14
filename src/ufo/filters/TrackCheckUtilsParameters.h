@@ -10,6 +10,7 @@
 
 #include "oops/util/parameters/OptionalParameter.h"
 #include "oops/util/parameters/Parameters.h"
+#include "ufo/filters/FilterParametersBase.h"
 #include "ufo/utils/parameters/ParameterTraitsVariable.h"
 
 namespace eckit {
@@ -19,11 +20,8 @@ class Configuration;
 namespace ufo {
 
 /// \brief Options controlling the operation of the track check filter.
-class TrackCheckUtilsParameters : public oops::Parameters {
-  // TODO(wsmigaj/aweinbren): Refactor TrackCheckUtils::groupObservationsByStation to avoid creating
-  // a TrackCheckUtilsParameters object and then replace OOPS_CONCRETE_PARAMETERS with
-  // OOPS_ABSTRACT_PARAMETERS.
-  OOPS_CONCRETE_PARAMETERS(TrackCheckUtilsParameters, Parameters)
+class TrackCheckUtilsParameters : public FilterParametersBase {
+  OOPS_ABSTRACT_PARAMETERS(TrackCheckUtilsParameters, FilterParametersBase)
 
  public:
   /// Variable storing integer-valued or string-valued station IDs.

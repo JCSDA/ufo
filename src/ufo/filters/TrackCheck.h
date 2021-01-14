@@ -17,6 +17,7 @@
 #include "oops/util/ObjectCounter.h"
 #include "ufo/filters/FilterBase.h"
 #include "ufo/filters/QCflags.h"
+#include "ufo/filters/TrackCheckParameters.h"
 #include "ufo/filters/TrackCheckUtils.h"
 
 namespace eckit {
@@ -33,7 +34,6 @@ namespace ufo {
 class ObsAccessor;
 class PiecewiseLinearInterpolation;
 class RecursiveSplitter;
-class TrackCheckParameters;
 
 /// \brief Checks tracks of mobile weather stations, rejecting observations inconsistent with the
 /// rest of the track.
@@ -78,9 +78,11 @@ class TrackCheck : public FilterBase,
       const ObsAccessor &obsAccessor) const;
 
  public:
+  typedef TrackCheckParameters Parameters_;
+
   static const std::string classname() { return "ufo::TrackCheck"; }
 
-  TrackCheck(ioda::ObsSpace &obsdb, const eckit::Configuration &config,
+  TrackCheck(ioda::ObsSpace &obsdb, const Parameters_ &parameters,
              std::shared_ptr<ioda::ObsDataVector<int> > flags,
              std::shared_ptr<ioda::ObsDataVector<float> > obserr);
 
@@ -182,7 +184,7 @@ class TrackCheck : public FilterBase,
       std::vector<float> &workspace) const;
 
  private:
-  std::unique_ptr<TrackCheckParameters> options_;
+  Parameters_ options_;
 };
 
 }  // namespace ufo

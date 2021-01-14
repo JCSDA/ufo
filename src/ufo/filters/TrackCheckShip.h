@@ -26,6 +26,7 @@
 #include "oops/util/ObjectCounter.h"
 #include "ufo/filters/FilterBase.h"
 #include "ufo/filters/QCflags.h"
+#include "ufo/filters/TrackCheckShipParameters.h"
 #include "ufo/filters/TrackCheckUtils.h"
 
 namespace eckit {
@@ -40,8 +41,8 @@ class ObsSpace;
 namespace ufo {
 
 class TrackCheckShipDiagnostics;
-class TrackCheckShipParameters;
 class RecursiveSplitter;
+
 /// \brief Checks tracks of ships and buoys, rejecting observations whose locations
 /// and timestamps make them inconsistent with the rest of the track. The full track is rejected
 /// if there are too many inconsistent observations.
@@ -61,9 +62,11 @@ class RecursiveSplitter;
 class TrackCheckShip: public FilterBase,
     private util::ObjectCounter<TrackCheckShip> {
  public:
+  typedef TrackCheckShipParameters Parameters_;
+
   static const std::string classname() {return "ufo::TrackCheckShip";}
 
-  TrackCheckShip(ioda::ObsSpace &obsdb, const eckit::Configuration &config,
+  TrackCheckShip(ioda::ObsSpace &obsdb, const Parameters_ &parameters,
                  std::shared_ptr<ioda::ObsDataVector<int> > flags,
                  std::shared_ptr<ioda::ObsDataVector<float> > obserr);
 
@@ -187,7 +190,7 @@ class TrackCheckShip: public FilterBase,
   const TrackCheckShipDiagnostics* diagnostics() const;
 
  private:
-  std::unique_ptr<TrackCheckShipParameters> options_;
+  Parameters_ options_;
   std::unique_ptr<TrackCheckShipDiagnostics> diagnostics_;
 
   void flagRejectedTrackObservations(

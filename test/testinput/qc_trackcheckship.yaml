@@ -16,10 +16,9 @@ observations:
   - filter: Ship Track Check
     unit testing mode: false
     early break check: false
-    variables: [air_temperature]
     temporal resolution: PT00H00M1S
     spatial resolution (km): 0.0000001 
-    max speed (m/s): .01 
+    max speed (m/s): 0.01
     rejection threshold: 0.5
   flaggedObservationsBenchmark: &referenceFlaggedObsIds
       - 0
@@ -70,10 +69,9 @@ observations:
   - filter: Ship Track Check
     unit testing mode: false
     early break check: true
-    variables: [air_temperature]
     temporal resolution: PT00H00M1S
     spatial resolution (km): 0.0000001 
-    max speed (m/s): .01 
+    max speed (m/s): 0.01
     rejection threshold: 0.5
   flaggedObservationsBenchmark:
     - 87
@@ -94,11 +92,9 @@ observations:
   - filter: Ship Track Check
     unit testing mode: false
     early break check: false
-    deferred check simultaneous: false
-    variables: [air_temperature]
     temporal resolution: PT00H00M1S
     spatial resolution (km): 0.0000001
-    max speed (m/s): .01
+    max speed (m/s): 0.01
     rejection threshold: 0.5
     station_id_variable:
       name: station_id@MetaData
@@ -118,11 +114,9 @@ observations:
   - filter: Ship Track Check
     unit testing mode: false
     early break check: false
-    deferred check simultaneous: false
-    variables: [air_temperature]
     temporal resolution: PT00H00M1S
     spatial resolution (km): 0.0000001
-    max speed (m/s): .01
+    max speed (m/s): 0.01
     rejection threshold: 0.5
     station_id_variable:
       name: station_id@MetaData

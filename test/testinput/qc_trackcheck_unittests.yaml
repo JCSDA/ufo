@@ -14,7 +14,6 @@ Only valid observations:
   air_pressures: [ 100000, 90000, 80000, 90000, 100000]
   station_ids: [ 1, 1, 1, 1, 1]
   Track Check:
-    variables: [air_temperature]
     temporal_resolution: PT4S
     spatial_resolution: 1 # km
     distinct_buddy_resolution_multiplier: 3
@@ -42,7 +41,6 @@ One observation with excessive speed:
   air_pressures: [ 100000, 90000, 80000, 90000, 100000]
   station_ids: [ 1, 1, 1, 1, 1]
   Track Check:
-    variables: [air_temperature]
     temporal_resolution: PT4S
     spatial_resolution: 1 # km
     distinct_buddy_resolution_multiplier: 3
@@ -70,7 +68,6 @@ One observation with excessive climb rate:
   air_pressures: [ 100000, 90000, 1e20, 90000, 100000]
   station_ids: [ 1, 1, 1, 1, 1]
   Track Check:
-    variables: [air_temperature]
     temporal_resolution: PT4S
     spatial_resolution: 1 # km
     distinct_buddy_resolution_multiplier: 3
@@ -98,7 +95,6 @@ Climb rate checks disabled:
   air_pressures: [ 100000, 90000, 1e20, 90000, 100000]
   station_ids: [ 1, 1, 1, 1, 1]
   Track Check:
-    variables: [air_temperature]
     temporal_resolution: PT4S
     spatial_resolution: 1 # km
     distinct_buddy_resolution_multiplier: 3
@@ -125,7 +121,6 @@ Where clause:
   air_pressures: [ 1e20, 90000, 1e20, 90000, 100000]
   station_ids: [ 1, 1, 1, 1, 1]
   Track Check:
-    variables: [air_temperature]
     temporal_resolution: PT4S
     spatial_resolution: 1 # km
     distinct_buddy_resolution_multiplier: 3
@@ -199,7 +194,6 @@ Multiple clusters of observations with excessive speed:
                 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
                 1]
   Track Check:
-    variables: [air_temperature]
     temporal_resolution: PT1M
     spatial_resolution: 112 # km
     distinct_buddy_resolution_multiplier: 3
@@ -230,7 +224,6 @@ Multiple station ids:
   air_pressures: [ 100000, 100000, 90000, 90000, 80000, 80000, 90000, 90000, 100000, 100000]
   station_ids: [ 1, 2, 1, 2, 1, 2, 1, 2, 1, 2]
   Track Check:
-    variables: [air_temperature]
     temporal_resolution: PT4S
     spatial_resolution: 1 # km
     distinct_buddy_resolution_multiplier: 3
@@ -257,7 +250,6 @@ No station id variable, no observation grouping:
       obs errors: [1.0]
   air_pressures: [ 100000, 90000, 80000, 90000, 100000]
   Track Check:
-    variables: [air_temperature]
     temporal_resolution: PT4S
     spatial_resolution: 1 # km
     distinct_buddy_resolution_multiplier: 3

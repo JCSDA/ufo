@@ -52,8 +52,10 @@ const boost::optional<ufo::TrackCheckShipDiagnostics> setupRunFilter(
   std::shared_ptr<ioda::ObsDataVector<int>> qcflags(new ioda::ObsDataVector<int>(
       obsspace, obsspace.obsvariables()));
 
-  const eckit::LocalConfiguration filterConf(conf, "Ship Track Check");
-  ufo::TrackCheckShip filter(obsspace, filterConf, qcflags, obserr);
+  eckit::LocalConfiguration filterConf(conf, "Ship Track Check");
+  ufo::TrackCheckShipParameters filterParameters;
+  filterParameters.validateAndDeserialize(filterConf);
+  ufo::TrackCheckShip filter(obsspace, filterParameters, qcflags, obserr);
   filter.preProcess();
   if (filterConf.getBool("comparison test", false) && rejectedObsIndices) {
     for (size_t i = 0; i < qcflags->nlocs(); ++i)
