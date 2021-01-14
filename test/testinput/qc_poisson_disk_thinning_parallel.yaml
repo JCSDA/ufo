@@ -9,7 +9,6 @@
       obsfile: Data/ufo/testinput_tier_1/met_office_thinning.nc4
     simulated variables: [air_temperature]
   Poisson Disk Thinning:
-    variables: [air_temperature]
     min_vertical_spacing: 1000
     shuffle: true
 
@@ -23,7 +22,6 @@
       obsfile: Data/ufo/testinput_tier_1/met_office_thinning.nc4
     simulated variables: [air_temperature]
   Poisson Disk Thinning:
-    variables: [air_temperature]
     min_vertical_spacing: 1000
     category_variable:
       name: round@MetaData
@@ -41,7 +39,6 @@
         group variable: round
     simulated variables: [air_temperature]
   Poisson Disk Thinning:
-    variables: [air_temperature]
     min_vertical_spacing: 1000
     category_variable:
       name: round@MetaData
@@ -56,7 +53,6 @@
       obsfile: Data/ufo/testinput_tier_1/met_office_thinning.nc4
     simulated variables: [air_temperature]
   Poisson Disk Thinning:
-    variables: [air_temperature]
     min_vertical_spacing: 1000
     shuffle: true
 
@@ -69,7 +65,6 @@
       obsfile: Data/ufo/testinput_tier_1/met_office_thinning.nc4
     simulated variables: [air_temperature]
   Poisson Disk Thinning:
-    variables: [air_temperature]
     min_vertical_spacing: 1000
     category_variable:
       name: round@MetaData
@@ -86,7 +81,6 @@
         group variable: round
     simulated variables: [air_temperature]
   Poisson Disk Thinning:
-    variables: [air_temperature]
     min_vertical_spacing: 1000
     category_variable:
       name: round@MetaData
@@ -101,7 +95,6 @@
       obsfile: Data/ufo/testinput_tier_1/met_office_thinning.nc4
     simulated variables: [air_temperature]
   Poisson Disk Thinning:
-    variables: [air_temperature]
     min_vertical_spacing: 1000
     category_variable:
       name: round@MetaData

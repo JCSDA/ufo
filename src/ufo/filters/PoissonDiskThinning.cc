@@ -144,15 +144,12 @@ struct PoissonDiskThinning::ObsData
 };
 
 PoissonDiskThinning::PoissonDiskThinning(ioda::ObsSpace & obsdb,
-                                         const eckit::Configuration & config,
+                                         const Parameters_ &parameters,
                                          std::shared_ptr<ioda::ObsDataVector<int> > flags,
                                          std::shared_ptr<ioda::ObsDataVector<float> > obserr)
-  : FilterBase(obsdb, config, flags, obserr)
+  : FilterBase(obsdb, parameters, flags, obserr), options_(parameters)
 {
-  oops::Log::debug() << "PoissonDiskThinning: config = " << config_ << std::endl;
-
-  options_.reset(new PoissonDiskThinningParameters());
-  options_->deserialize(config);
+  oops::Log::debug() << "PoissonDiskThinning: config = " << options_ << std::endl;
 }
 
 // Required for the correct destruction of options_.
@@ -171,7 +168,7 @@ void PoissonDiskThinning::applyFilter(const std::vector<bool> & apply,
 
   std::vector<bool> isThinned(obsData.totalNumObs, false);
 
-  if (options_->shuffle) {
+  if (options_.shuffle) {
     // If the same observations will be processed on multiple ranks, they must use random number
     // generators seeded with the same value because they need to reject the same observations. If
     // all ranks process disjoint sets of observations, synchronisation of random number generators
@@ -202,7 +199,7 @@ void PoissonDiskThinning::applyFilter(const std::vector<bool> & apply,
     // randomly shuffle points of equal priority.
     RecursiveSplitter prioritySplitter(obsIdsInCategory.size());
     groupObservationsByPriority(obsIdsInCategory, obsAccessor, prioritySplitter);
-    if (options_->shuffle)
+    if (options_.shuffle)
       prioritySplitter.shuffleGroups();
 
     // Select points to retain within the category.
@@ -218,9 +215,9 @@ void PoissonDiskThinning::applyFilter(const std::vector<bool> & apply,
 }
 
 ObsAccessor PoissonDiskThinning::createObsAccessor() const {
-  if (options_->categoryVariable.value() != boost::none) {
+  if (options_.categoryVariable.value() != boost::none) {
     return ObsAccessor::toObservationsSplitIntoIndependentGroupsByVariable(
-          obsdb_, *options_->categoryVariable.value());
+          obsdb_, *options_.categoryVariable.value());
   } else {
     return ObsAccessor::toAllObservations(obsdb_);
   }
@@ -234,7 +231,7 @@ PoissonDiskThinning::ObsData PoissonDiskThinning::getObsData(
   numSpatialDims = 0;
   numNonspatialDims = 0;
 
-  obsData.minHorizontalSpacings = options_->minHorizontalSpacing.value();
+  obsData.minHorizontalSpacings = options_.minHorizontalSpacing.value();
   if (obsData.minHorizontalSpacings != boost::none) {
     validateSpacings(*obsData.minHorizontalSpacings, "min_horizontal_spacing");
     obsData.latitudes = obsAccessor.getFloatVariableFromObsSpace("MetaData", "latitude");
@@ -242,21 +239,21 @@ PoissonDiskThinning::ObsData PoissonDiskThinning::getObsData(
     numSpatialDims = 3;
   }
 
-  obsData.minVerticalSpacings = options_->minVerticalSpacing.value();
+  obsData.minVerticalSpacings = options_.minVerticalSpacing.value();
   if (obsData.minVerticalSpacings != boost::none) {
     validateSpacings(*obsData.minVerticalSpacings, "min_vertical_spacing");
     obsData.pressures = obsAccessor.getFloatVariableFromObsSpace("MetaData", "air_pressure");
     ++numNonspatialDims;
   }
 
-  obsData.minTimeSpacings = options_->minTimeSpacing.value();
+  obsData.minTimeSpacings = options_.minTimeSpacing.value();
   if (obsData.minTimeSpacings != boost::none) {
     validateSpacings(*obsData.minTimeSpacings, "min_time_spacing");
     obsData.times = obsAccessor.getDateTimeVariableFromObsSpace("MetaData", "datetime");
     ++numNonspatialDims;
   }
 
-  const boost::optional<Variable> priorityVariable = options_->priorityVariable;
+  const boost::optional<Variable> priorityVariable = options_.priorityVariable;
   if (priorityVariable != boost::none) {
     obsData.priorities = obsAccessor.getIntVariableFromObsSpace(
           priorityVariable.get().group(), priorityVariable.get().variable());
@@ -294,7 +291,7 @@ std::vector<size_t> PoissonDiskThinning::getValidObservationIds(
     const ObsAccessor &obsAccessor) const {
   std::vector<size_t> validObsIds = obsAccessor.getValidObservationIds(apply, *flags_);
 
-  if (!options_->shuffle) {
+  if (!options_.shuffle) {
     // The user wants to process observations in fixed (non-random) order. Ensure the filter
     // produces the same results regardless of the number of MPI ranks by ordering the observations
     // to be processed as if we were running in serial: by record ID.
@@ -312,8 +309,8 @@ void PoissonDiskThinning::synchroniseRandomNumberGenerators(const eckit::mpi::Co
   const size_t rootRank = 0;
 
   size_t seed;
-  if (options_->randomSeed.value() != boost::none) {
-    seed = *options_->randomSeed.value();
+  if (options_.randomSeed.value() != boost::none) {
+    seed = *options_.randomSeed.value();
   } else {
     if (comm.rank() == rootRank)
       // Perhaps oops could provide a function returning this default seed.
@@ -329,7 +326,7 @@ void PoissonDiskThinning::groupObservationsByPriority(
     const std::vector<size_t> &validObsIds,
     const ObsAccessor &obsAccessor,
     RecursiveSplitter &splitter) const {
-  boost::optional<Variable> priorityVariable = options_->priorityVariable;
+  boost::optional<Variable> priorityVariable = options_.priorityVariable;
   if (priorityVariable == boost::none)
     return;
 
@@ -385,9 +382,9 @@ void PoissonDiskThinning::thinCategory(const ObsData &obsData,
       const size_t obsId = obsIdsInCategory[obsIndex];
       std::array<float, numDims> point = getObservationPosition<numDims>(obsId, obsData);
       std::array<float, numDims> semiAxes = getExclusionVolumeSemiAxes<numDims>(obsId, obsData);
-      if ((options_->exclusionVolumeShape == ExclusionVolumeShape::CYLINDER &&
+      if ((options_.exclusionVolumeShape == ExclusionVolumeShape::CYLINDER &&
            pointIndex.isAnyPointInCylinderInterior(point, semiAxes, numSpatialDims)) ||
-          (options_->exclusionVolumeShape == ExclusionVolumeShape::ELLIPSOID &&
+          (options_.exclusionVolumeShape == ExclusionVolumeShape::ELLIPSOID &&
            pointIndex.isAnyPointInEllipsoidInterior(point, semiAxes))) {
         isThinned[obsId] = true;
       } else {
@@ -468,7 +465,7 @@ std::array<float, numDims> PoissonDiskThinning::getExclusionVolumeSemiAxes(
 }
 
 void PoissonDiskThinning::print(std::ostream & os) const {
-  os << "PoissonDiskThinning: config = " << config_ << std::endl;
+  os << "PoissonDiskThinning: config = " << options_ << std::endl;
 }
 
 // -----------------------------------------------------------------------------

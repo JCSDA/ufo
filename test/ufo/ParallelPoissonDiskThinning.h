@@ -54,8 +54,10 @@ void testPoissonDiskThinning(const eckit::LocalConfiguration &conf,
   std::shared_ptr<ioda::ObsDataVector<int>> qcflags(new ioda::ObsDataVector<int>(
       obsspace, obsspace.obsvariables()));
 
-  const eckit::LocalConfiguration filterConf(conf, "Poisson Disk Thinning");
-  ufo::PoissonDiskThinning filter(obsspace, filterConf, qcflags, obserr);
+  eckit::LocalConfiguration filterConf(conf, "Poisson Disk Thinning");
+  ufo::PoissonDiskThinningParameters filterParameters;
+  filterParameters.validateAndDeserialize(filterConf);
+  ufo::PoissonDiskThinning filter(obsspace, filterParameters, qcflags, obserr);
 
   // Stagger the start of the thinning process on different ranks to detect problems related to
   // initialisation of the random generator seed from system time.

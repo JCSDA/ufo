@@ -17,6 +17,7 @@
 #include "oops/util/parameters/Parameter.h"
 #include "oops/util/parameters/Parameters.h"
 #include "oops/util/parameters/ParameterTraitsScalarOrMap.h"
+#include "ufo/filters/FilterParametersBase.h"
 #include "ufo/utils/parameters/ParameterTraitsVariable.h"
 
 namespace eckit {
@@ -56,8 +57,8 @@ namespace ufo {
 /// \note The descriptions of several options refer to the _exclusion volume_, which is a domain
 /// surrounding the location of each observation. If an observation is retained, then no other
 /// observations lying in the interior of its exclusion volume may be retained at the same time.
-class PoissonDiskThinningParameters : public oops::Parameters {
-  OOPS_CONCRETE_PARAMETERS(PoissonDiskThinningParameters, Parameters)
+class PoissonDiskThinningParameters : public FilterParametersBase {
+  OOPS_CONCRETE_PARAMETERS(PoissonDiskThinningParameters, FilterParametersBase)
 
  public:
   typedef int Priority;

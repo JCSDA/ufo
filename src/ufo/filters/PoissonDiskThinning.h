@@ -19,6 +19,7 @@
 #include "ioda/ObsDataVector.h"
 #include "oops/util/ObjectCounter.h"
 #include "ufo/filters/FilterBase.h"
+#include "ufo/filters/PoissonDiskThinningParameters.h"
 #include "ufo/filters/QCflags.h"
 
 namespace eckit {
@@ -40,7 +41,6 @@ namespace ufo {
 class DistanceCalculator;
 class EquispacedBinSelector;
 class ObsAccessor;
-class PoissonDiskThinningParameters;
 class RecursiveSplitter;
 class SpatialBinSelector;
 
@@ -52,9 +52,11 @@ class SpatialBinSelector;
 class PoissonDiskThinning : public FilterBase,
                           private util::ObjectCounter<PoissonDiskThinning> {
  public:
+  typedef PoissonDiskThinningParameters Parameters_;
+
   static const std::string classname() {return "ufo::PoissonDiskThinning";}
 
-  PoissonDiskThinning(ioda::ObsSpace &obsdb, const eckit::Configuration &config,
+  PoissonDiskThinning(ioda::ObsSpace &obsdb, const Parameters_ &parameters,
                       std::shared_ptr<ioda::ObsDataVector<int> > flags,
                       std::shared_ptr<ioda::ObsDataVector<float> > obserr);
 
@@ -119,7 +121,7 @@ class PoissonDiskThinning : public FilterBase,
       size_t obsId, const ObsData &obsData) const;
 
  private:
-  std::unique_ptr<PoissonDiskThinningParameters> options_;
+  Parameters_ options_;
 };
 
 }  // namespace ufo

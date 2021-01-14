@@ -9,7 +9,6 @@ No thinning:
       obsfile: Data/ufo/testinput_tier_1/poisson_disk_thinning_3x3x3x3_regular_grid.nc4
     simulated variables: [air_temperature]
   Poisson Disk Thinning:
-    variables: [air_temperature]
     exclusion_volume_shape: ellipsoid
     shuffle: false
   expected_thinned_obs_indices: []
@@ -23,7 +22,6 @@ Horizontal thinning, min spacing smaller than nearest neighbor spacing:
       obsfile: Data/ufo/testinput_tier_1/poisson_disk_thinning_3x3x3x3_regular_grid.nc4
     simulated variables: [air_temperature]
   Poisson Disk Thinning:
-    variables: [air_temperature]
     min_horizontal_spacing: 999
     exclusion_volume_shape: ellipsoid
     shuffle: false
@@ -45,7 +43,6 @@ Horizontal thinning, min spacing larger than nearest neighbor spacing:
       obsfile: Data/ufo/testinput_tier_1/poisson_disk_thinning_3x3x3x3_regular_grid.nc4
     simulated variables: [air_temperature]
   Poisson Disk Thinning:
-    variables: [air_temperature]
     min_horizontal_spacing: 1100
     exclusion_volume_shape: ellipsoid
     shuffle: false
@@ -68,7 +65,6 @@ Vertical thinning, min spacing smaller than nearest neighbor spacing:
       obsfile: Data/ufo/testinput_tier_1/poisson_disk_thinning_3x3x3x3_regular_grid.nc4
     simulated variables: [air_temperature]
   Poisson Disk Thinning:
-    variables: [air_temperature]
     min_vertical_spacing: 9999
     exclusion_volume_shape: ellipsoid
     shuffle: false
@@ -91,7 +87,6 @@ Vertical thinning, min spacing larger than nearest neighbor spacing:
       obsfile: Data/ufo/testinput_tier_1/poisson_disk_thinning_3x3x3x3_regular_grid.nc4
     simulated variables: [air_temperature]
   Poisson Disk Thinning:
-    variables: [air_temperature]
     min_vertical_spacing: 10001
     exclusion_volume_shape: ellipsoid
     shuffle: false
@@ -114,7 +109,6 @@ Vertical thinning, where clause:
       obsfile: Data/ufo/testinput_tier_1/poisson_disk_thinning_3x3x3x3_regular_grid.nc4
     simulated variables: [air_temperature]
   Poisson Disk Thinning:
-    variables: [air_temperature]
     min_vertical_spacing: 10001
     exclusion_volume_shape: ellipsoid
     shuffle: false
@@ -138,7 +132,6 @@ Time thinning, min spacing equal to nearest neighbor spacing:
       obsfile: Data/ufo/testinput_tier_1/poisson_disk_thinning_3x3x3x3_regular_grid.nc4
     simulated variables: [air_temperature]
   Poisson Disk Thinning:
-    variables: [air_temperature]
     min_time_spacing: PT01H
     exclusion_volume_shape: ellipsoid
     shuffle: false
@@ -161,7 +154,6 @@ Time thinning, min spacing larger than nearest neighbor spacing:
       obsfile: Data/ufo/testinput_tier_1/poisson_disk_thinning_3x3x3x3_regular_grid.nc4
     simulated variables: [air_temperature]
   Poisson Disk Thinning:
-    variables: [air_temperature]
     min_time_spacing: PT01H01S
     exclusion_volume_shape: ellipsoid
     shuffle: false
@@ -184,7 +176,6 @@ Horizontal and vertical thinning, min spacing larger than nearest neighbor spaci
       obsfile: Data/ufo/testinput_tier_1/poisson_disk_thinning_3x3x3x3_regular_grid.nc4
     simulated variables: [air_temperature]
   Poisson Disk Thinning:
-    variables: [air_temperature]
     min_horizontal_spacing: 1100
     min_vertical_spacing: 10001
     exclusion_volume_shape: ellipsoid
@@ -208,7 +199,6 @@ Horizontal and time thinning, min spacing larger than nearest neighbor spacing:
       obsfile: Data/ufo/testinput_tier_1/poisson_disk_thinning_3x3x3x3_regular_grid.nc4
     simulated variables: [air_temperature]
   Poisson Disk Thinning:
-    variables: [air_temperature]
     min_horizontal_spacing: 1100
     min_time_spacing: PT01H01S
     exclusion_volume_shape: ellipsoid
@@ -232,7 +222,6 @@ Vertical and time thinning, min spacing larger than nearest neighbor spacing:
       obsfile: Data/ufo/testinput_tier_1/poisson_disk_thinning_3x3x3x3_regular_grid.nc4
     simulated variables: [air_temperature]
   Poisson Disk Thinning:
-    variables: [air_temperature]
     min_vertical_spacing: 10001
     min_time_spacing: PT01H01S
     exclusion_volume_shape: cylinder
@@ -256,7 +245,6 @@ Horizontal, vertical and time thinning, min spacing larger than nearest neighbor
       obsfile: Data/ufo/testinput_tier_1/poisson_disk_thinning_3x3x3x3_regular_grid.nc4
     simulated variables: [air_temperature]
   Poisson Disk Thinning:
-    variables: [air_temperature]
     min_horizontal_spacing: 1100
     min_vertical_spacing: 10001
     min_time_spacing: PT01H01S
@@ -288,7 +276,6 @@ Priorities:
   air_pressures: [ 10000, 20000, 30000, 40000, 50000 ]
   priority: [0, 1, 1, 0, 0]
   Poisson Disk Thinning:
-    variables: [air_temperature]
     min_vertical_spacing: 10001
     shuffle: false
     exclusion_volume_shape: ellipsoid
@@ -312,7 +299,6 @@ Int-valued categories:
   air_pressures: [ 10000, 10000, 20000, 20000, 30000, 30000 ]
   category: [0, 1, 0, 1, 0, 1]
   Poisson Disk Thinning:
-    variables: [air_temperature]
     min_vertical_spacing: 10001
     shuffle: false
     exclusion_volume_shape: ellipsoid
@@ -336,7 +322,6 @@ String-valued categories:
   air_pressures: [ 10000, 10000, 20000, 20000, 30000, 30000 ]
   string_category: ["a", "b", "a", "b", "a", "b"]
   Poisson Disk Thinning:
-    variables: [air_temperature]
     min_vertical_spacing: 10001
     shuffle: false
     exclusion_volume_shape: ellipsoid
@@ -362,7 +347,6 @@ Variable min spacings:
   air_pressures:        [ 5, 6, 7, 8, 9, 10, 0, 1, 2, 3, 4 ]
   priority:             [  1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2 ]
   Poisson Disk Thinning:
-    variables: [air_temperature]
     min_vertical_spacing: { "1": 2.1, "2": 1.1 }
     exclusion_volume_shape: ellipsoid
     shuffle: false
@@ -388,7 +372,6 @@ Variable min spacings, shuffling:
   air_pressures:        [ 5, 6, 7, 8, 9, 10, 0, 1, 2, 3, 4 ]
   priority:             [  1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2 ]
   Poisson Disk Thinning:
-    variables: [air_temperature]
     min_vertical_spacing: { "1": 2.1, "2": 1.1 }
     exclusion_volume_shape: ellipsoid
     shuffle: true
@@ -412,7 +395,6 @@ Cylindrical exclusion volumes:
       obs errors: [1.0]
   air_pressures: [ 0, 10, 20, 30, 40 ]
   Poisson Disk Thinning:
-    variables: [air_temperature]
     min_vertical_spacing: 21
     min_time_spacing: PT25S
     exclusion_volume_shape: cylinder
@@ -434,7 +416,6 @@ Ellipsoidal exclusion volumes:
       obs errors: [1.0]
   air_pressures: [ 0, 10, 20, 30, 40 ]
   Poisson Disk Thinning:
-    variables: [air_temperature]
     min_vertical_spacing: 21
     min_time_spacing: PT25S
     exclusion_volume_shape: ellipsoid
@@ -456,7 +437,6 @@ Incorrectly ordered min horizontal spacings:
   air_pressures:        [ 0, 0, 0 ]
   priority:             [ 1, 2, 3 ]
   Poisson Disk Thinning:
-    variables: [air_temperature]
     min_horizontal_spacing: { "1": 1, "2": 2, "3": 3 }
     exclusion_volume_shape: ellipsoid
     shuffle: false
@@ -479,7 +459,6 @@ Incorrectly ordered min vertical spacings:
   air_pressures:        [ 0, 0, 0 ]
   priority:             [ 1, 2, 3 ]
   Poisson Disk Thinning:
-    variables: [air_temperature]
     min_vertical_spacing: { "1": 1, "2": 2, "3": 3 }
     exclusion_volume_shape: ellipsoid
     shuffle: false
@@ -502,7 +481,6 @@ Incorrectly ordered min time spacings:
   air_pressures:        [ 0, 0, 0 ]
   priority:             [ 1, 2, 3 ]
   Poisson Disk Thinning:
-    variables: [air_temperature]
     min_time_spacing: { "1": PT1H, "2": PT2H, "3": PT3H }
     exclusion_volume_shape: ellipsoid
     shuffle: false
