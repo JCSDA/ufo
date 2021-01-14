@@ -43,7 +43,6 @@ Pair of observations:
     - name: air_temperature
     horizontal_correlation_scale: {"90": 150, "30": 150, "20": 200,
                                    "-20": 200, "-30": 250, "-90": 250}
-    vertical_correlation_scale: 10
     temporal_correlation_scale: PT1H
     num_zonal_bands: 12
     search_radius: 500 # km

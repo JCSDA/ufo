@@ -16,6 +16,7 @@
 #include "oops/util/parameters/OptionalParameter.h"
 #include "oops/util/parameters/Parameter.h"
 #include "oops/util/parameters/Parameters.h"
+#include "ufo/filters/FilterParametersBase.h"
 #include "ufo/utils/Constants.h"
 #include "ufo/utils/parameters/ParameterTraitsVariable.h"
 
@@ -38,8 +39,8 @@ class LatLonBoxParameters : public oops::Parameters {
 };
 
 /// \brief Options controlling the operation of the MetOfficeBuddyCheck filter.
-class MetOfficeBuddyCheckParameters : public oops::Parameters {
-  OOPS_CONCRETE_PARAMETERS(MetOfficeBuddyCheckParameters, Parameters)
+class MetOfficeBuddyCheckParameters : public FilterParametersBase {
+  OOPS_CONCRETE_PARAMETERS(MetOfficeBuddyCheckParameters, FilterParametersBase)
 
  public:
   /// \name Parameters controlling buddy pair identification

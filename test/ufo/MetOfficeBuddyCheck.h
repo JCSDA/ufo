@@ -60,8 +60,11 @@ void testMetOfficeBuddyCheck(const eckit::LocalConfiguration &conf) {
   std::shared_ptr<ioda::ObsDataVector<int>> qcflags(new ioda::ObsDataVector<int>(
       obsSpace, obsSpace.obsvariables()));
 
-  const eckit::LocalConfiguration filterConf(conf, "Met Office Buddy Check");
-  ufo::MetOfficeBuddyCheck filter(obsSpace, filterConf, qcflags, obserr);
+
+  eckit::LocalConfiguration filterConf(conf, "Met Office Buddy Check");
+  ufo::MetOfficeBuddyCheckParameters filterParameters;
+  filterParameters.validateAndDeserialize(filterConf);
+  ufo::MetOfficeBuddyCheck filter(obsSpace, filterParameters, qcflags, obserr);
   filter.preProcess();
 
   ioda::ObsVector hofx(obsSpace, "HofX");

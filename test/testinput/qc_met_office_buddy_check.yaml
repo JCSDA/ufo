@@ -20,7 +20,6 @@ observations:
     # Maps latitudes to kms
     horizontal_correlation_scale: {"90": 7200, "30": 7200, "20": 8400,
                                    "-20": 8400, "-30": 9600, "-90": 9600}
-    vertical_correlation_scale: 6
     temporal_correlation_scale: PT6H
     num_zonal_bands: 36
     search_radius: 3000 # km
@@ -68,7 +67,6 @@ observations:
     sort_by_pressure: true
     horizontal_correlation_scale: {"90": 7200, "30": 7200, "20": 8400,
                                    "-20": 8400, "-30": 9600, "-90": 9600}
-    vertical_correlation_scale: 6
     temporal_correlation_scale: PT6H
     num_zonal_bands: 36
     search_radius: 3000 # km
@@ -119,7 +117,6 @@ observations:
     # Maps latitudes to kms
     horizontal_correlation_scale: {"90": 7200, "30": 7200, "20": 8400,
                                    "-20": 8400, "-30": 9600, "-90": 9600}
-    vertical_correlation_scale: 6
     temporal_correlation_scale: PT6H
     num_zonal_bands: 36
     search_radius: 3000 # km
@@ -165,7 +162,6 @@ observations:
     # Maps latitudes to kms
     horizontal_correlation_scale: {"90": 7200, "30": 7200, "20": 8400,
                                    "-20": 8400, "-30": 9600, "-90": 9600}
-    vertical_correlation_scale: 6
     temporal_correlation_scale: PT6H
     num_zonal_bands: 36
     search_radius: 3000 # km

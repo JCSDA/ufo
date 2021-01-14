@@ -95,16 +95,12 @@ struct MetOfficeBuddyCheck::MetaData {
   std::vector<int> stationIds;
 };
 
-MetOfficeBuddyCheck::MetOfficeBuddyCheck(ioda::ObsSpace& obsdb, const eckit::Configuration& config,
+MetOfficeBuddyCheck::MetOfficeBuddyCheck(ioda::ObsSpace& obsdb, const Parameters_& parameters,
                                          std::shared_ptr<ioda::ObsDataVector<int> > flags,
                                          std::shared_ptr<ioda::ObsDataVector<float> > obserr)
-  : FilterBase(obsdb, config, std::move(flags), std::move(obserr))
+  : FilterBase(obsdb, parameters, std::move(flags), std::move(obserr)), options_(parameters)
 {
-  oops::Log::debug() << "MetOfficeBuddyCheck: config = " << config_ << std::endl;
-
-  options_.reset(new MetOfficeBuddyCheckParameters());
-  options_->deserialize(config);
-
+  oops::Log::debug() << "MetOfficeBuddyCheck: config = " << options_ << std::endl;
   allvars_ += Variables(filtervars_, "HofX");
 }
 
@@ -154,8 +150,8 @@ void MetOfficeBuddyCheck::applyFilter(const std::vector<bool> & apply,
   // Identify buddy pairs
 
   const std::vector<float> *pressures =
-      options_->sortByPressure ? obsData.pressures.get_ptr() : nullptr;
-  MetOfficeBuddyPairFinder buddyPairFinder(*options_, obsData.latitudes, obsData.longitudes,
+      options_.sortByPressure ? obsData.pressures.get_ptr() : nullptr;
+  MetOfficeBuddyPairFinder buddyPairFinder(options_, obsData.latitudes, obsData.longitudes,
                                            obsData.datetimes, pressures,
                                            obsData.stationIds);
   const std::vector<MetOfficeBuddyPair> buddyPairs = buddyPairFinder.findBuddyPairs(validObsIds);
@@ -257,7 +253,7 @@ MetOfficeBuddyCheck::MetaData MetOfficeBuddyCheck::collectMetaData() const {
 }
 
 std::vector<int> MetOfficeBuddyCheck::getStationIds() const {
-  const boost::optional<Variable> &stationIdVariable = options_->stationIdVariable.value();
+  const boost::optional<Variable> &stationIdVariable = options_.stationIdVariable.value();
   if (stationIdVariable == boost::none) {
     if (obsdb_.obs_group_var().empty()) {
       // Observations were not grouped into records.
@@ -295,7 +291,7 @@ std::vector<float> MetOfficeBuddyCheck::calcBackgroundErrorHorizontalCorrelation
 
   std::vector<double> abscissas, ordinates;
   for (const std::pair<const float, float> &xy :
-       options_->horizontalCorrelationScaleInterpolationPoints.value()) {
+       options_.horizontalCorrelationScaleInterpolationPoints.value()) {
     abscissas.push_back(xy.first);
     ordinates.push_back(xy.second);
   }
@@ -324,8 +320,8 @@ std::vector<bool> MetOfficeBuddyCheck::flagAndPrintVerboseObservations(
 
   for (size_t obsId : validObsIds) {
     verbose[obsId] = std::any_of(
-          options_->tracedBoxes.value().begin(),
-          options_->tracedBoxes.value().end(),
+          options_.tracedBoxes.value().begin(),
+          options_.tracedBoxes.value().end(),
           [&](const LatLonBoxParameters &box)
           { return box.contains(latitudes[obsId], longitudes[obsId]); });
 
@@ -365,13 +361,13 @@ void MetOfficeBuddyCheck::checkScalarSurfaceData(const std::vector<MetOfficeBudd
   const bool isMaster = obsdb_.comm().rank() == 0;
   if (isMaster) {
     oops::Log::trace() << __func__ << " "
-                       << " dampingFactor1 = " << options_->dampingFactor1
-                       << ", dampingFactor2 = " << options_->dampingFactor2 << '\n';
+                       << " dampingFactor1 = " << options_.dampingFactor1
+                       << ", dampingFactor2 = " << options_.dampingFactor2 << '\n';
     oops::Log::trace() << "ObsA  ObsB  StatIdA  StatIdB  DiffA DiffB "
                           "Dist   Corr  Agree   PgeA   PgeB   Mult\n";
   }
 
-  const double invTemporalCorrScale = 1.0 / options_->temporalCorrelationScale.value().toSeconds();
+  const double invTemporalCorrScale = 1.0 / options_.temporalCorrelationScale.value().toSeconds();
 
   for (const MetOfficeBuddyPair &pair : pairs) {
     const size_t jA = pair.obsIdA;
@@ -409,13 +405,13 @@ void MetOfficeBuddyCheck::checkScalarSurfaceData(const std::vector<MetOfficeBudd
     // Argument for exponents
     double expArg = -(0.5 * rho2 / (1.0 - rho2)) *
         (sqr(diffA) / errVarA + sqr(diffB) / errVarB - 2.0 * diffA * diffB / covar);
-    expArg = options_->dampingFactor1 * (-0.5 * std::log(1.0 - rho2) + expArg);  // exponent of
+    expArg = options_.dampingFactor1 * (-0.5 * std::log(1.0 - rho2) + expArg);  // exponent of
     expArg = std::min(expArgMax, std::max(-expArgMax, expArg));                 // eqn 3.18
     // Z = P(OA)*P(OB)/P(OA and OB)
     double z = 1.0 / (1.0 - (1.0 - pges[jA]) * (1.0 - pges[jB]) * (1.0 - std::exp(expArg)));
     if (z <= 0.0)
       z = 1.0;  // rounding error control
-    z = std::pow(z, options_->dampingFactor2);  // eqn 3.16
+    z = std::pow(z, options_.dampingFactor2);  // eqn 3.16
     pges[jA] *= z;                              // eqn 3.17
     pges[jB] *= z;                              // eqn 3.17
     if (isMaster && (verbose[jA] || verbose[jB])) {
@@ -449,13 +445,13 @@ void MetOfficeBuddyCheck::checkVectorSurfaceData(const std::vector<MetOfficeBudd
   const bool isMaster = obsdb_.comm().rank() == 0;
   if (isMaster) {
     oops::Log::trace() << __func__ << " "
-                       << " dampingFactor1 = " << options_->dampingFactor1
-                       << ", dampingFactor2 = " << options_->dampingFactor2 << '\n';
+                       << " dampingFactor1 = " << options_.dampingFactor1
+                       << ", dampingFactor2 = " << options_.dampingFactor2 << '\n';
     oops::Log::trace() << "ObsA  ObsB  StatIdA  StatIdB  LDiffA LDiffB TDiffA TDiffB "
                           "Dist   Corr  Agree   PgeA   PgeB   Mult\n";
   }
 
-  const double invTemporalCorrScale = 1.0 / options_->temporalCorrelationScale.value().toSeconds();
+  const double invTemporalCorrScale = 1.0 / options_.temporalCorrelationScale.value().toSeconds();
 
   for (const MetOfficeBuddyPair &pair : pairs) {
     const size_t jA = pair.obsIdA;
@@ -502,7 +498,7 @@ void MetOfficeBuddyCheck::checkVectorSurfaceData(const std::vector<MetOfficeBudd
 
     // Calculate covariances and probabilities
     double lCovar = lCorr * bgErrors[jA] * bgErrors[jB];                    // eqn 3.13
-    double tCovar = (1.0 - options_->nonDivergenceConstraint * scaleDist) * lCovar;  // eqn 3.12, 13
+    double tCovar = (1.0 - options_.nonDivergenceConstraint * scaleDist) * lCovar;  // eqn 3.12, 13
     // rho2 = (total error correlation between ob positions)**2
     double lRho2 = sqr(lCovar) / (errVarA * errVarB);                       // eqn 3.14
     double tRho2 = sqr(tCovar) / (errVarA * errVarB);                       // eqn 3.14
@@ -515,13 +511,13 @@ void MetOfficeBuddyCheck::checkVectorSurfaceData(const std::vector<MetOfficeBudd
           (sqr(tDiffA) / errVarA + sqr(tDiffB) / errVarB - 2.0 * tDiffA * tDiffB / tCovar);
     expArg = expArg - (0.5 * lRho2 / (1.0 - lRho2)) *
         (sqr(lDiffA) / errVarA + sqr(lDiffB) / errVarB - 2.0 * lDiffA * lDiffB / lCovar);
-    expArg = options_->dampingFactor1 * (-0.5 * std::log((1.0 - lRho2) * (1.0 - lRho2)) + expArg);
+    expArg = options_.dampingFactor1 * (-0.5 * std::log((1.0 - lRho2) * (1.0 - lRho2)) + expArg);
     expArg = std::min(expArgMax, std::max(-expArgMax, expArg));           // eqn 3.22
     // Z = P(OA)*P(OB)/P(OA and OB)
     double z = 1.0 / (1.0 - (1.0 - pges[jA]) * (1.0 - pges[jB]) * (1.0 - std::exp(expArg)));
     if (z <= 0.0)
       z = 1.0;  // rounding error control
-    z = std::pow(z, options_->dampingFactor2);         // eqn 3.16
+    z = std::pow(z, options_.dampingFactor2);         // eqn 3.16
     pges[jA] *= z;                                     // eqn 3.17
     pges[jB] *= z;                                     // eqn 3.17
 
@@ -561,13 +557,13 @@ void MetOfficeBuddyCheck::flagRejectedObservations(
     ASSERT(grossErrProbs.size() == variableFlagged.size());
 
     for (size_t obsId = 0; obsId < grossErrProbs.size(); ++obsId)
-      if (grossErrProbs[obsId] >= options_->rejectionThreshold)
+      if (grossErrProbs[obsId] >= options_.rejectionThreshold)
         variableFlagged[obsId] = true;
   }
 }
 
 void MetOfficeBuddyCheck::print(std::ostream & os) const {
-  os << "MetOfficeBuddyCheck: config = " << config_ << std::endl;
+  os << "MetOfficeBuddyCheck: config = " << options_ << std::endl;
 }
 
 }  // namespace ufo

@@ -19,6 +19,7 @@
 #include "ioda/ObsDataVector.h"
 #include "oops/util/ObjectCounter.h"
 #include "ufo/filters/FilterBase.h"
+#include "ufo/filters/MetOfficeBuddyCheckParameters.h"
 #include "ufo/filters/QCflags.h"
 
 namespace eckit {
@@ -37,7 +38,6 @@ class DateTime;
 namespace ufo {
 
 class RecursiveSplitter;
-class MetOfficeBuddyCheckParameters;
 class MetOfficeBuddyPair;
 
 /// \brief Met Office's implementation of the buddy check.
@@ -66,9 +66,10 @@ class MetOfficeBuddyPair;
 class MetOfficeBuddyCheck : public FilterBase,
                             private util::ObjectCounter<MetOfficeBuddyCheck> {
  public:
+  typedef MetOfficeBuddyCheckParameters Parameters_;
   static const std::string classname() {return "ufo::MetOfficeBuddyCheck";}
 
-  MetOfficeBuddyCheck(ioda::ObsSpace &obsdb, const eckit::Configuration &config,
+  MetOfficeBuddyCheck(ioda::ObsSpace &obsdb, const Parameters_ &parameters,
                       std::shared_ptr<ioda::ObsDataVector<int> > flags,
                       std::shared_ptr<ioda::ObsDataVector<float> > obserr);
 
@@ -214,7 +215,7 @@ class MetOfficeBuddyCheck : public FilterBase,
       std::vector<std::vector<bool>> &flagged) const;
 
  private:
-  std::unique_ptr<MetOfficeBuddyCheckParameters> options_;
+  Parameters_ options_;
 };
 
 }  // namespace ufo
