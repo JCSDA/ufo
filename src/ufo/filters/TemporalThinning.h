@@ -19,6 +19,7 @@
 #include "oops/util/ObjectCounter.h"
 #include "ufo/filters/FilterBase.h"
 #include "ufo/filters/QCflags.h"
+#include "ufo/filters/TemporalThinningParameters.h"
 
 namespace eckit {
   class Configuration;
@@ -37,7 +38,6 @@ namespace ufo {
 
 class ObsAccessor;
 class RecursiveSplitter;
-class TemporalThinningParameters;
 
 /// \brief Thin observations so that the retained ones are sufficiently separated in time.
 ///
@@ -45,9 +45,11 @@ class TemporalThinningParameters;
 class TemporalThinning : public FilterBase,
                          private util::ObjectCounter<TemporalThinning> {
  public:
+  typedef TemporalThinningParameters Parameters_;
+
   static const std::string classname() {return "ufo::TemporalThinning";}
 
-  TemporalThinning(ioda::ObsSpace &obsdb, const eckit::Configuration &config,
+  TemporalThinning(ioda::ObsSpace &obsdb, const Parameters_ &parameters,
                    std::shared_ptr<ioda::ObsDataVector<int> > flags,
                    std::shared_ptr<ioda::ObsDataVector<float> > obserr);
 
@@ -68,7 +70,7 @@ class TemporalThinning : public FilterBase,
       const ObsAccessor &obsAccessor) const;
 
  private:
-  std::unique_ptr<TemporalThinningParameters> options_;
+  Parameters_ options_;
 };
 
 }  // namespace ufo

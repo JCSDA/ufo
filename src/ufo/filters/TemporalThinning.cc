@@ -303,15 +303,12 @@ typename TemporalThinner::ForwardValidObsIndexIterator TemporalThinner::findNear
 
 }  // namespace
 
-TemporalThinning::TemporalThinning(ioda::ObsSpace & obsdb, const eckit::Configuration & config,
+TemporalThinning::TemporalThinning(ioda::ObsSpace & obsdb, const Parameters_ & parameters,
                                    std::shared_ptr<ioda::ObsDataVector<int> > flags,
                                    std::shared_ptr<ioda::ObsDataVector<float> > obserr)
-  : FilterBase(obsdb, config, flags, obserr)
+  : FilterBase(obsdb, parameters, flags, obserr), options_(parameters)
 {
-  oops::Log::debug() << "TemporalThinning: config = " << config_ << std::endl;
-
-  options_.reset(new TemporalThinningParameters());
-  options_->deserialize(config);
+  oops::Log::debug() << "TemporalThinning: config = " << options_ << std::endl;
 }
 
 // Required for the correct destruction of options_.
@@ -333,9 +330,9 @@ void TemporalThinning::applyFilter(const std::vector<bool> & apply,
 }
 
 ObsAccessor TemporalThinning::createObsAccessor() const {
-  if (options_->categoryVariable.value() != boost::none) {
+  if (options_.categoryVariable.value() != boost::none) {
     return ObsAccessor::toObservationsSplitIntoIndependentGroupsByVariable(
-          obsdb_, *options_->categoryVariable.value() );
+          obsdb_, *options_.categoryVariable.value() );
   } else if (!obsdb_.obs_group_var().empty()) {
     // Records exist. Thin each record separately.
     return ObsAccessor::toObservationsSplitIntoIndependentGroupsByRecordId(obsdb_);
@@ -359,15 +356,15 @@ std::vector<bool> TemporalThinning::identifyThinnedObservations(
 
   boost::optional<std::vector<int>> priorities = getObservationPriorities(obsAccessor);
 
-  TemporalThinner thinner(validObsIds, times, priorities.get_ptr(), splitter, *options_);
+  TemporalThinner thinner(validObsIds, times, priorities.get_ptr(), splitter, options_);
   return thinner.identifyThinnedObservations(times.size());
 }
 
 boost::optional<std::vector<int>> TemporalThinning::getObservationPriorities(
     const ObsAccessor &obsAccessor) const {
   boost::optional<std::vector<int>> priorities;
-  if (options_->priorityVariable.value() != boost::none) {
-    const ufo::Variable priorityVariable = options_->priorityVariable.value().get();
+  if (options_.priorityVariable.value() != boost::none) {
+    const ufo::Variable priorityVariable = options_.priorityVariable.value().get();
     priorities = obsAccessor.getIntVariableFromObsSpace(priorityVariable.group(),
                                                         priorityVariable.variable());
   }
@@ -375,7 +372,7 @@ boost::optional<std::vector<int>> TemporalThinning::getObservationPriorities(
 }
 
 void TemporalThinning::print(std::ostream & os) const {
-  os << "TemporalThinning: config = " << config_ << std::endl;
+  os << "TemporalThinning: config = " << options_ << std::endl;
 }
 
 }  // namespace ufo

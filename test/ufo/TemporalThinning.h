@@ -56,8 +56,10 @@ void testTemporalThinning(const eckit::LocalConfiguration &conf) {
   std::shared_ptr<ioda::ObsDataVector<int>> qcflags(new ioda::ObsDataVector<int>(
       obsspace, obsspace.obsvariables()));
 
-  const eckit::LocalConfiguration filterConf(conf, "TemporalThinning");
-  ufo::TemporalThinning filter(obsspace, filterConf, qcflags, obserr);
+  eckit::LocalConfiguration filterConf(conf, "TemporalThinning");
+  ufo::TemporalThinningParameters filterParameters;
+  filterParameters.validateAndDeserialize(filterConf);
+  ufo::TemporalThinning filter(obsspace, filterParameters, qcflags, obserr);
   filter.preProcess();
 
   const std::vector<size_t> expectedThinnedObsIndices =

@@ -14,6 +14,7 @@
 #include "oops/util/parameters/OptionalParameter.h"
 #include "oops/util/parameters/Parameter.h"
 #include "oops/util/parameters/Parameters.h"
+#include "ufo/filters/FilterParametersBase.h"
 #include "ufo/utils/Constants.h"
 #include "ufo/utils/parameters/ParameterTraitsVariable.h"
 
@@ -24,8 +25,8 @@ namespace eckit {
 namespace ufo {
 
 /// \brief Options controlling the operation of the TemporalThinning filter.
-class TemporalThinningParameters : public oops::Parameters {
-  OOPS_CONCRETE_PARAMETERS(TemporalThinningParameters, Parameters)
+class TemporalThinningParameters : public FilterParametersBase {
+  OOPS_CONCRETE_PARAMETERS(TemporalThinningParameters, FilterParametersBase)
 
  public:
   /// Minimum spacing between two successive retained observations.
