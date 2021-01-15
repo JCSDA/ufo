@@ -32,14 +32,11 @@ namespace ufo {
 
   ProfileConsistencyChecks::ProfileConsistencyChecks
   (ioda::ObsSpace & obsdb,
-   const eckit::Configuration & config,
+   const Parameters_ & parameters,
    std::shared_ptr<ioda::ObsDataVector<int> > flags,
    std::shared_ptr<ioda::ObsDataVector<float> > obserr)
-    : FilterBase(obsdb, config, flags, obserr)
+    : FilterBase(obsdb, parameters, flags, obserr), options_(parameters)
   {
-    options_.reset(new ProfileConsistencyCheckParameters());
-    options_->deserialize(config);
-
     allvars_ += Variables(filtervars_, "HofX");
 
     // Add the names of any required GeoVaLs to \c allvars_.
@@ -47,7 +44,7 @@ namespace ufo {
     // The names of the required GeoVaLs are listed in the \c getGeoVaLNames() function
     // of each check (which returns an empty set by default).
     // The \c profileChecker class must be instantiated in order to do this.
-    const ProfileChecker profileChecker(*options_);
+    const ProfileChecker profileChecker(options_);
     const auto &requiredGeoVaLNames = profileChecker.getGeoVaLNames();
     if (requiredGeoVaLNames.size() > 0) {
       ufo::Variables reqGeoVaLs(requiredGeoVaLNames);
@@ -88,7 +85,7 @@ namespace ufo {
       profileDataHandler.initialiseNextProfile();
 
       // Print station ID if requested
-      if (options_->PrintStationID.value()) {
+      if (options_.PrintStationID.value()) {
         const std::vector <std::string> &station_ID =
           profileDataHandler.get<std::string>(ufo::VariableNames::station_ID);
         if (!station_ID.empty())
@@ -103,7 +100,7 @@ namespace ufo {
       profileDataHandler.updateProfileInformation();
 
       // Optionally compare check results with OPS values
-      if (options_->compareWithOPS.value() && profileChecker.getBasicCheckResult()) {
+      if (options_.compareWithOPS.value() && profileChecker.getBasicCheckResult()) {
         profileCheckValidator.validate(profileDataHandler);
         nMismatches_.emplace_back(profileCheckValidator.getMismatches());
       }
@@ -142,15 +139,15 @@ namespace ufo {
     // Handles individual profile data
     ProfileDataHandler profileDataHandler(obsdb_,
                                           data_.getGeoVaLs(),
-                                          options_->DHParameters,
+                                          options_.DHParameters,
                                           apply,
                                           flagged);
 
     // (Optionally) validates check results against OPS values
-    ProfileCheckValidator profileCheckValidator(*options_);
+    ProfileCheckValidator profileCheckValidator(options_);
 
     // Applies checks to each profile
-    ProfileChecker profileChecker(*options_);
+    ProfileChecker profileChecker(options_);
 
     // Loop over each check subgroup in turn.
     const auto checkSubgroups = profileChecker.getCheckSubgroups();
@@ -174,7 +171,7 @@ namespace ufo {
   // -----------------------------------------------------------------------------
 
   void ProfileConsistencyChecks::print(std::ostream & os) const {
-    os << "ProfileConsistencyChecks: config = " << config_ << std::endl;
+    os << "ProfileConsistencyChecks: config = " << options_ << std::endl;
   }
 
   // -----------------------------------------------------------------------------

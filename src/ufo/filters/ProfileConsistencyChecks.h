@@ -17,6 +17,7 @@
 #include "oops/util/Printable.h"
 
 #include "ufo/filters/FilterBase.h"
+#include "ufo/filters/ProfileConsistencyCheckParameters.h"
 #include "ufo/filters/QCflags.h"
 
 #include "ufo/profile/EntireSampleDataHandler.h"
@@ -34,10 +35,6 @@ namespace eckit {
 namespace ioda {
   template <typename DATATYPE> class ObsDataVector;
   class ObsSpace;
-}
-
-namespace ufo {
-  class ProfileConsistencyCheckParameters;
 }
 
 namespace ufo {
@@ -86,9 +83,11 @@ namespace ufo {
   class ProfileConsistencyChecks : public FilterBase,
     private util::ObjectCounter<ProfileConsistencyChecks> {
    public:
+      typedef ProfileConsistencyCheckParameters Parameters_;
+
       static const std::string classname() {return "ufo::ProfileConsistencyChecks";}
 
-      ProfileConsistencyChecks(ioda::ObsSpace &, const eckit::Configuration &,
+      ProfileConsistencyChecks(ioda::ObsSpace &, const Parameters_ &,
                                std::shared_ptr<ioda::ObsDataVector<int> >,
                                std::shared_ptr<ioda::ObsDataVector<float> >);
       ~ProfileConsistencyChecks();
@@ -120,7 +119,7 @@ namespace ufo {
       int qcFlag() const override {return QCflags::profile;}
 
       /// Configurable options
-      std::unique_ptr <ProfileConsistencyCheckParameters> options_;
+      ProfileConsistencyCheckParameters options_;
 
       /// Number of mismatches between values produced in this code
       /// and their OPS equivalents (used for validation)

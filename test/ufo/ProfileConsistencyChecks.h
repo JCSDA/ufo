@@ -72,6 +72,8 @@ void testProfileConsistencyChecks(const eckit::LocalConfiguration &conf) {
       obsspace, obsspace.obsvariables()));
 
   const eckit::LocalConfiguration filterConf(conf, "ProfileConsistencyChecks");
+  ufo::ProfileConsistencyCheckParameters filterParameters;
+  filterParameters.validateAndDeserialize(filterConf);
 
   // Determine whether an exception is expected to be thrown.
   // Exceptions can be thrown in the following places:
@@ -81,13 +83,14 @@ void testProfileConsistencyChecks(const eckit::LocalConfiguration &conf) {
   bool expectThrowDuringOperation = conf.getBool("ExpectThrowDuringOperation", false);
 
   if (expectThrowOnInstantiation) {
-    EXPECT_THROWS(ufo::ProfileConsistencyChecks filterThrow(obsspace, filterConf, qcflags, obserr));
+    EXPECT_THROWS(ufo::ProfileConsistencyChecks filterThrow(obsspace, filterParameters,
+                                                            qcflags, obserr));
     // Do not proceed further in this case.
     return;
   }
 
   // Instantiate filter.
-  ufo::ProfileConsistencyChecks filter(obsspace, filterConf, qcflags, obserr);
+  ufo::ProfileConsistencyChecks filter(obsspace, filterParameters, qcflags, obserr);
 
   // Obtain GeoVaLs.
   const bool ignoreGeoVaLs = conf.getBool("IgnoreGeoVaLs", false);

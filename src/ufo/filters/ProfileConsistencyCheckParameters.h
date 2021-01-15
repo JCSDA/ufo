@@ -17,6 +17,8 @@
 #include "oops/util/parameters/Parameter.h"
 #include "oops/util/parameters/Parameters.h"
 
+#include "ufo/filters/FilterParametersBase.h"
+
 #include "ufo/profile/DataHandlerParameters.h"
 #include "ufo/profile/ModelParameters.h"
 
@@ -31,8 +33,8 @@ namespace eckit {
 namespace ufo {
 
   /// \brief Options controlling the operation of the ProfileConsistencyChecks filter.
-  class ProfileConsistencyCheckParameters : public oops::Parameters {
-    OOPS_CONCRETE_PARAMETERS(ProfileConsistencyCheckParameters, Parameters)
+  class ProfileConsistencyCheckParameters : public FilterParametersBase {
+    OOPS_CONCRETE_PARAMETERS(ProfileConsistencyCheckParameters, FilterParametersBase)
 
    public:  // variables
     /// @name Generic parameters
