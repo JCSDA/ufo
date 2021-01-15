@@ -17,6 +17,7 @@
 
 #include "ioda/ObsDataVector.h"
 #include "oops/util/IntSetParser.h"
+#include "oops/util/missingValues.h"
 #include "ufo/filters/Variable.h"
 #include "ufo/utils/Constants.h"
 
@@ -98,9 +99,11 @@ void SCATRetMW::compute(const ObsFilterData & in,
         }
       }
     }
+    const float missing = util::missingValue(missing);
     // Retrieve scattering index
     for (size_t iloc = 0; iloc < nlocs; ++iloc) {
-      if (water_frac[iloc] >= 0.99) {
+      if (water_frac[iloc] >= 0.99 &&
+          bt238[iloc] != missing && bt314[iloc] != missing && bt890[iloc] != missing) {
         out[igrp][iloc] = -113.2 + (2.41 - 0.0049 * bt238[iloc]) * bt238[iloc]
                                + 0.454 * bt314[iloc] - bt890[iloc];
         out[igrp][iloc] = std::max(0.f, out[igrp][iloc]);
