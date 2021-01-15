@@ -1865,12 +1865,12 @@ ecbuild_add_test( TARGET  test_ufo_function_obserrmean
                   DEPENDS test_ObsFunction.x
                   TEST_DEPENDS ufo_get_ioda_test_data ufo_get_ufo_test_data)
 
-#ecbuild_add_test( TARGET  test_ufo_function_obserrmean_abi
-#                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFunction.x
-#                  ARGS    "testinput/function_obserrmean_abi.yaml"
-#                  ENVIRONMENT OOPS_TRAPFPE=1
-#                  DEPENDS test_ObsFunction.x
-#                  TEST_DEPENDS ufo_get_ioda_test_data ufo_get_ufo_test_data)
+ecbuild_add_test( TARGET  test_ufo_function_obserrmean_abi
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFunction.x
+                  ARGS    "testinput/function_obserrmean_abi.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsFunction.x
+                  TEST_DEPENDS ufo_get_ioda_test_data ufo_get_ufo_test_data)
 
 ecbuild_add_test( TARGET  test_ufo_function_obserrmean_mhs
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFunction.x
