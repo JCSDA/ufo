@@ -65,6 +65,7 @@ list( APPEND ufo_test_input
   testinput/function_obserrmean_abi.yaml
   testinput/function_obserrmean_mhs.yaml
   testinput/function_obserrmean_atms.yaml
+  testinput/function_satwind_indiv_errors.yaml
   testinput/function_scatret.yaml
   testinput/function_scatret_atms.yaml
   testinput/function_errfsdoei.yaml
@@ -1893,6 +1894,13 @@ ecbuild_add_test( TARGET  test_ufo_function_obserrmean_atms
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsFunction.x
                   TEST_DEPENDS ufo_get_ioda_test_data ufo_get_ufo_test_data)
+
+ecbuild_add_test( TARGET  test_ufo_function_satwind_indiv_errors
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                  ARGS    "testinput/function_satwind_indiv_errors.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsFilters.x
+                  TEST_DEPENDS ufo_get_ioda_test_data ufo_get_ufo_test_data )
 
 ecbuild_add_test( TARGET  test_ufo_function_scatret
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFunction.x

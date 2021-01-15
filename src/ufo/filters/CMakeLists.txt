@@ -154,6 +154,8 @@ set ( filters_files
       obsfunctions/ObsFunctionScattering.h
       obsfunctions/ObsFunctionVelocity.cc
       obsfunctions/ObsFunctionVelocity.h
+      obsfunctions/SatwindIndivErrors.cc
+      obsfunctions/SatwindIndivErrors.h
       obsfunctions/SatWindsLNVDCheck.cc
       obsfunctions/SatWindsLNVDCheck.h
       obsfunctions/SatWindsSPDBCheck.cc
