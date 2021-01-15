@@ -13,6 +13,7 @@
 
 #include "ioda/ObsDataVector.h"
 
+#include "oops/util/parameters/OptionalParameter.h"
 #include "oops/util/parameters/Parameter.h"
 #include "oops/util/parameters/Parameters.h"
 #include "oops/util/parameters/RequiredParameter.h"
@@ -35,6 +36,8 @@ class ObsErrorModelStepwiseLinearParameters : public oops::Parameters {
   oops::RequiredParameter<std::vector<float>> xvals{"xvals", this};
   /// vector of error values corresponding to vector of X-steps
   oops::RequiredParameter<std::vector<float>> errors{"errors", this};
+  /// When final answer is a multiplication factor, we need to know which variable to multiply
+  oops::OptionalParameter<Variable> scale_factor_var{"scale_factor_var", this};
 };
 
 // -----------------------------------------------------------------------------
@@ -46,6 +49,10 @@ class ObsErrorModelStepwiseLinearParameters : public oops::Parameters {
 /// Input is a vector of x-values (e.g. pressures) and corresponding vector of obserrors.
 /// Interpolation in X-coordinate requires the value of X for which the output, Y, is
 /// calculated using linear interp of obserrors between the steps.
+/// If the optional "scale_factor_var" exists, then the final output obserr is
+/// calculated as a result of linear interpolation of errors times the scale_factor_var.
+/// An example of such usage is RH obserror values between zero and one multiplied by
+/// specific_humidity@ObsValue for final ObsError.
 /// ~~~~
 ///
 ///          + err_n                             o
@@ -97,6 +104,7 @@ class ObsErrorModelStepwiseLinear : public ObsFunctionBase {
   ufo::Variables invars_;
   ObsErrorModelStepwiseLinearParameters options_;
   bool isAscending_ = true;
+  bool multiplicative_ = false;
 };
 
 // -----------------------------------------------------------------------------

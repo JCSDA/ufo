@@ -5,6 +5,9 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
+#include <memory>
+#include <boost/optional/optional_io.hpp>
+
 #include "ufo/filters/obsfunctions/ObsErrorModelStepwiseLinear.h"
 
 #include "eckit/exception/Exceptions.h"
@@ -46,6 +49,14 @@ ObsErrorModelStepwiseLinear::ObsErrorModelStepwiseLinear(const eckit::LocalConfi
   const Variable &xvar = options_.xvar.value();
   ASSERT(xvar.size() == 1);
   invars_ += xvar;
+
+  // In the case of using a multiply operator, load it into invars as well.
+  if (options_.scale_factor_var.value() != boost::none) {
+    multiplicative_ = true;
+    const boost::optional<Variable> &scale_factor_var = options_.scale_factor_var.value();
+    invars_ += *scale_factor_var;
+    oops::Log::debug() << " StepwiseLinear, scale_factor_var: " << *scale_factor_var << std::endl;
+  }
 
   // Check that all errors >= 0
   for (size_t i = 0; i < errors.size(); ++i) {
@@ -97,6 +108,20 @@ void ObsErrorModelStepwiseLinear::compute(const ObsFilterData & data,
   ioda::ObsDataVector<float> testdata(data.obsspace(), xvar.toOopsVariables());
   data.get(xvar, testdata);
 
+  // Declare a unique_ptr, but keep it empty for now (don’t assign anything to it).
+  std::unique_ptr<ioda::ObsDataVector<float>> obvalues;
+
+  // If using the multiply operator, load up the variable (scale_factor_var) to multiply by.
+  if (multiplicative_) {
+    const boost::optional<Variable> &scale_factor_var = options_.scale_factor_var.value();
+    oops::Log::debug() << "  ObsErrorModelStepwiseLinear, scale_factor_var name: "
+                       << (*scale_factor_var).variable() << "  and group: "
+                       << (*scale_factor_var).group() << std::endl;
+    obvalues.reset(new ioda::ObsDataVector<float>(data.obsspace(),
+                                 (*scale_factor_var).toOopsVariables()));
+    data.get(*scale_factor_var, *obvalues);
+  }
+
   // The 1st index of data should have size 1 and 2nd index should be size nlocs.
   int iv = 0;
   if (testdata[iv].size() != obserr[iv].size()) {
@@ -134,7 +159,11 @@ void ObsErrorModelStepwiseLinear::compute(const ObsFilterData & data,
     }
     // TODO(gthompsn):  probably need this next line for when filtervariable is flagged missing
     // if (!flagged_[jv][jobs]) obserr[jv][jobs] = error;
-    obserr[iv][jobs] = error;
+    if (multiplicative_) {
+      obserr[iv][jobs] = error*(*obvalues)[iv][jobs];
+    } else {
+      obserr[iv][jobs] = error;
+    }
   }
 }
 
