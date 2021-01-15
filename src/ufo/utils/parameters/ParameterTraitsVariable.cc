@@ -14,6 +14,7 @@
 #include "eckit/exception/Exceptions.h"
 #include "eckit/utils/StringTools.h"
 #include "oops/util/CompositePath.h"
+#include "oops/util/LocalEnvironment.h"
 #include "oops/util/parameters/ParameterTraits.h"
 #include "oops/util/stringFunctions.h"
 #include "ufo/filters/Variable.h"
@@ -25,31 +26,42 @@ boost::optional<ufo::Variable> ParameterTraits<ufo::Variable>::get(
   if (config.has(name)) {
     std::list<std::string> messages;
 
-    // Handle the following YAML structure:
-    //
-    // <name>:
-    //   name: somevar@SomeGroup
-    //   channels: ... # optional
-    //   options:      # optional
-    //     ...
-    try {
-      eckit::LocalConfiguration varConf(config, name);
-      return ufo::Variable(varConf);
-    } catch (eckit::Exception &e) {
-      // The YAML doesn't have this structure.
-      messages.emplace_back(e.what());
-    }
+    {
+      // Within this block, set the ECKIT_EXCEPTION_IS_SILENT environment variable to 1
+      // to prevent eckit exceptions (which will be caught) from printing unnerving messages
+      // to the error log.
+      util::LocalEnvironment localEnv;
+      localEnv.set("ECKIT_EXCEPTION_IS_SILENT", "1");
 
-    // Handle the following YAML structure:
-    //
-    // <name>: somevar@SomeGroup
+      // Handle the following YAML structure:
+      //
+      // <name>:
+      //   name: somevar@SomeGroup
+      //   channels: ... # optional
+      //   options:      # optional
+      //     ...
+      try {
+        eckit::LocalConfiguration varConf(config, name);
+        return ufo::Variable(varConf);
+      } catch (eckit::Exception &e) {
+        // The YAML doesn't have this structure.
+        messages.emplace_back(e.what());
+      }
 
-    try {
-      std::string varAndGroup = config.getString(name);
-      return ufo::Variable(varAndGroup);
-    } catch (eckit::Exception &e) {
-      // The YAML doesn't have this structure.
-      messages.emplace_back(e.what());
+      // Handle the following YAML structure:
+      //
+      // <name>: somevar@SomeGroup
+
+      try {
+        std::string varAndGroup = config.getString(name);
+        return ufo::Variable(varAndGroup);
+      } catch (eckit::Exception &e) {
+        // The YAML doesn't have this structure.
+        messages.emplace_back(e.what());
+      }
+
+      // ECKIT_EXCEPTION_IS_SILENT will be unset or restored to its previous value
+      // when localEnv goes of of scope at the end of this block.
     }
 
     messages.push_front("The key '" + name +
