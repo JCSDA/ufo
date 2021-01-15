@@ -52,10 +52,12 @@ ObsErrorFactorSfcPressure::ObsErrorFactorSfcPressure(const eckit::Configuration 
   invars_ += Variable("station_elevation@MetaData");
 
   // Include list of required data from GeoVaLs
-  invars_ += Variable("surface_altitude@GeoVaLs");
   invars_ += Variable("surface_pressure@GeoVaLs");
-  invars_ += Variable("virtual_temperature@GeoVaLs");
   invars_ += Variable("air_pressure@GeoVaLs");
+  const std::string geovar_temp = options_->geovar_temp.value();
+  invars_ += Variable(geovar_temp + "@GeoVaLs");
+  const std::string geovar_sfc_geomz = options_->geovar_sfc_geomz.value();
+  invars_ += Variable(geovar_sfc_geomz + "@GeoVaLs");
 }
 
 // -----------------------------------------------------------------------------
@@ -96,9 +98,10 @@ void ObsErrorFactorSfcPressure::compute(const ObsFilterData & data,
   const std::string errgrp = options_->original_obserr.value();
   data.get(Variable("surface_pressure@"+errgrp), currentObserr);
 
-  // Get GeoVals of surface geopotential height, pressure, and temperature.
+  // Get GeoVals of surface altitude, pressure, and temperature.
   std::vector<float> model_elevation(nlocs);
-  data.get(Variable("surface_altitude@GeoVaLs"), model_elevation);
+  const std::string geovar_sfc_geomz = options_->geovar_sfc_geomz.value();
+  data.get(Variable(geovar_sfc_geomz + "@GeoVaLs"), model_elevation);
   std::vector<float> model_pres_sfc(nlocs);
   data.get(Variable("surface_pressure@GeoVaLs"), model_pres_sfc);
 
@@ -109,9 +112,10 @@ void ObsErrorFactorSfcPressure::compute(const ObsFilterData & data,
     data.get(Variable("air_pressure@GeoVaLs"), level, prsl[ilev]);
   }
   std::vector<std::vector<float>> tair(nlevs, std::vector<float>(nlocs));
+  const std::string geovar_temp = options_->geovar_temp.value();
   for (size_t ilev = 0; ilev < nlevs; ++ilev) {
     size_t level = nlevs - ilev;
-    data.get(Variable("virtual_temperature@GeoVaLs"), level, tair[ilev]);
+    data.get(Variable(geovar_temp + "@GeoVaLs"), level, tair[ilev]);
   }
 
   // TODO(gthompsn): model temp is virtual_temp whereas obs is sensible temp.
