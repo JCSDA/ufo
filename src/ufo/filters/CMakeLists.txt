@@ -138,6 +138,8 @@ set ( filters_files
       obsfunctions/ObsErrorFactorSurfJacobianRad.h
       obsfunctions/ObsErrorFactorLatRad.cc
       obsfunctions/ObsErrorFactorLatRad.h
+      obsfunctions/ObsErrorFactorQuotient.cc
+      obsfunctions/ObsErrorFactorQuotient.h
       obsfunctions/ObsErrorFactorTopoRad.cc
       obsfunctions/ObsErrorFactorTopoRad.h
       obsfunctions/ObsErrorFactorTransmitTopRad.cc
