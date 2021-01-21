@@ -30,6 +30,7 @@
 #include "ufo/filters/Thinning.h"
 #include "ufo/filters/TrackCheck.h"
 #include "ufo/filters/TrackCheckShip.h"
+#include "ufo/filters/VariableAssignment.h"
 #include "ufo/filters/variabletransforms/WindComponents.h"
 #include "ufo/filters/variabletransforms/WindSpeedAndDirection.h"
 #include "ufo/gnssro/QC/BackgroundCheckRONBAM.h"
@@ -90,6 +91,8 @@ template<typename MODEL> void instantiateObsFilterFactory() {
            WindComponentsMaker("Wind Components");
   static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::WindSpeedAndDirection> >
            WindSpeedAndDirectionMaker("Wind Speed And Direction");
+  static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::VariableAssignment> >
+           variableAssignmentMaker("Variable Assignment");
 
   // Only include this filter if rttov is present
   #if defined(RTTOV_FOUND)

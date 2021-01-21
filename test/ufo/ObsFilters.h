@@ -145,6 +145,11 @@ class ObsTypeParameters : public oops::Parameters {
   /// values loaded from the input IODA file.
   oops::OptionalParameter<std::vector<CompareVariablesParameters>> compareVariables{
     "compareVariables", this};
+
+  /// If set to a string, the test will pass only if the filters produce an exception whose message
+  /// contains that string.
+  oops::OptionalParameter<std::string> expectExceptionWithMessage{
+    "expectExceptionWithMessage", this};
 };
 
 // -----------------------------------------------------------------------------
@@ -323,8 +328,8 @@ void expectVariablesApproximatelyEqual(const ObsTraits::ObsSpace &obsspace,
 
 // -----------------------------------------------------------------------------
 
-void testFilters() {
-  typedef ::test::ObsTestsFixture<ObsTraits> Test_;
+void testFilters(size_t obsSpaceIndex, oops::ObsSpace<ufo::ObsTraits> &obspace,
+                 const ObsTypeParameters &params) {
   typedef oops::GeoVaLs<ufo::ObsTraits>           GeoVaLs_;
   typedef oops::ObsDiagnostics<ufo::ObsTraits>    ObsDiags_;
   typedef oops::ObsAuxControl<ufo::ObsTraits>     ObsAuxCtrl_;
@@ -333,6 +338,201 @@ void testFilters() {
   typedef oops::ObsVector<ufo::ObsTraits>         ObsVector_;
   typedef oops::ObsSpace<ufo::ObsTraits>          ObsSpace_;
 
+/// init QC and error
+  std::shared_ptr<oops::ObsDataVector<ufo::ObsTraits, float> > obserr
+    (new oops::ObsDataVector<ufo::ObsTraits, float>(obspace,
+             obspace.obsvariables(), "ObsError"));
+  std::shared_ptr<oops::ObsDataVector<ufo::ObsTraits, int> >
+    qcflags(new oops::ObsDataVector<ufo::ObsTraits, int>  (obspace,
+             obspace.obsvariables()));
+
+//  Create filters and run preProcess
+  ObsFilters_ filters(obspace, params.obsFilters, qcflags, obserr);
+  filters.preProcess();
+
+/// call priorFilter and postFilter if hofx is available
+  oops::Variables geovars = filters.requiredVars();
+  oops::Variables diagvars = filters.requiredHdiagnostics();
+  if (params.hofx.value() != boost::none) {
+///   read GeoVaLs from file if required
+    std::unique_ptr<const GeoVaLs_> gval;
+    if (geovars.size() > 0) {
+      if (params.geovals.value() == boost::none)
+        throw eckit::UserError("Element #" + std::to_string(obsSpaceIndex) +
+                               " of the 'observations' list requires a 'geovals' section", Here());
+      gval.reset(new GeoVaLs_(*params.geovals.value(), obspace, geovars));
+      filters.priorFilter(*gval);
+    } else {
+      oops::Log::info() << "Filters don't require geovals, priorFilter not called" << std::endl;
+    }
+///   read H(x) and ObsDiags from file
+    oops::Log::info() << "HofX section specified, reading HofX from file" << std::endl;
+    const std::string &hofxgroup = *params.hofx.value();
+    ObsVector_ hofx(obspace, hofxgroup);
+    eckit::LocalConfiguration obsdiagconf;
+    if (diagvars.size() > 0) {
+      if (params.obsDiagnostics.value() == boost::none)
+        throw eckit::UserError("Element #" + std::to_string(obsSpaceIndex) +
+                               " of the 'observations' list requires an 'obs diagnostics' section",
+                               Here());
+      obsdiagconf = *params.obsDiagnostics.value();
+      oops::Log::info() << "Obs diagnostics section specified, reading obs diagnostics from file"
+                        << std::endl;
+    }
+    const ObsDiags_ diags(obsdiagconf, obspace, diagvars);
+    filters.postFilter(hofx, diags);
+  } else if (params.obsOperator.value() != boost::none) {
+///   read GeoVaLs, compute H(x) and ObsDiags
+    oops::Log::info() << "ObsOperator section specified, computing HofX" << std::endl;
+    ObsOperator_ hop(obspace, *params.obsOperator.value());
+    // TODO(wsmigaj): ObsAuxCtrl currently expects to receive the top-level configuration
+    // even though the implementations I've seen only reference elements of the "obs bias"
+    // subconfiguration. If that's universally true, ObsAuxCtrl should be refactored so that
+    // it can be passed just the contents of the "obs bias" section.
+    const ObsAuxCtrl_ ybias(obspace, params.toConfiguration());
+    ObsVector_ hofx(obspace);
+    oops::Variables vars;
+    vars += hop.requiredVars();
+    vars += filters.requiredVars();
+    if (params.obsBias.value() != boost::none) vars += ybias.requiredVars();
+    if (params.geovals.value() == boost::none)
+      throw eckit::UserError("Element #" + std::to_string(obsSpaceIndex) +
+                             " of the 'observations' list requires a 'geovals' section", Here());
+    const GeoVaLs_ gval(*params.geovals.value(), obspace, vars);
+    oops::Variables diagvars;
+    diagvars += filters.requiredHdiagnostics();
+    if (params.obsBias.value() != boost::none) diagvars += ybias.requiredHdiagnostics();
+    ObsDiags_ diags(obspace, hop.locations(), diagvars);
+    filters.priorFilter(gval);
+    hop.simulateObs(gval, hofx, ybias, diags);
+    hofx.save("hofx");
+    filters.postFilter(hofx, diags);
+  } else if (geovars.size() > 0) {
+///   Only call priorFilter
+    if (params.geovals.value() == boost::none)
+      throw eckit::UserError("Element #" + std::to_string(obsSpaceIndex) +
+                             " of the 'observations' list requires a 'geovals' section", Here());
+    const GeoVaLs_ gval(*params.geovals.value(), obspace, geovars);
+    filters.priorFilter(gval);
+    oops::Log::info() << "HofX or ObsOperator sections not provided for filters, " <<
+                         "postFilter not called" << std::endl;
+  } else {
+///   no need to run priorFilter or postFilter
+    oops::Log::info() << "GeoVaLs not required, HofX or ObsOperator sections not " <<
+                         "provided for filters, only preProcess was called" << std::endl;
+  }
+
+  qcflags->save("EffectiveQC");
+  const std::string errname = "EffectiveError";
+  obserr->save(errname);
+
+//  Compare with known results
+  bool atLeastOneBenchmarkFound = false;
+  const ObsTraits::ObsSpace &ufoObsSpace = obspace.obsspace();
+
+  if (params.passedObservationsBenchmark.value() != boost::none) {
+    atLeastOneBenchmarkFound = true;
+    const std::vector<size_t> &passedObsBenchmark =
+        *params.passedObservationsBenchmark.value();
+    const std::vector<size_t> passedObs = getPassedObservationIndices(
+          qcflags->obsdatavector(), ufoObsSpace.distribution(), ufoObsSpace.index());
+    EXPECT_EQUAL(passedObs, passedObsBenchmark);
+  }
+
+  if (params.passedBenchmark.value() != boost::none) {
+    atLeastOneBenchmarkFound = true;
+    const size_t passedBenchmark = *params.passedBenchmark.value();
+    size_t passed = numEqualTo(qcflags->obsdatavector(), ufo::QCflags::pass);
+    ufoObsSpace.distribution().sum(passed);
+    EXPECT_EQUAL(passed, passedBenchmark);
+  }
+
+  if (params.failedObservationsBenchmark.value() != boost::none) {
+    atLeastOneBenchmarkFound = true;
+    const std::vector<size_t> &failedObsBenchmark =
+        *params.failedObservationsBenchmark.value();
+    const std::vector<size_t> failedObs = getFailedObservationIndices(
+          qcflags->obsdatavector(), ufoObsSpace.distribution(), ufoObsSpace.index());
+    EXPECT_EQUAL(failedObs, failedObsBenchmark);
+  }
+
+  if (params.failedBenchmark.value() != boost::none) {
+    atLeastOneBenchmarkFound = true;
+    const size_t failedBenchmark = *params.failedBenchmark.value();
+    size_t failed = numNonzero(qcflags->obsdatavector());
+    ufoObsSpace.distribution().sum(failed);
+    EXPECT_EQUAL(failed, failedBenchmark);
+  }
+
+  if (params.benchmarkFlag.value() != boost::none) {
+    const int flag = *params.benchmarkFlag.value();
+
+    if (params.flaggedObservationsBenchmark.value() != boost::none) {
+      atLeastOneBenchmarkFound = true;
+      const std::vector<size_t> &flaggedObsBenchmark =
+          *params.flaggedObservationsBenchmark.value();
+      const std::vector<size_t> flaggedObs =
+          getFlaggedObservationIndices(qcflags->obsdatavector(), ufoObsSpace.distribution(),
+                                       ufoObsSpace.index(), flag);
+      EXPECT_EQUAL(flaggedObs, flaggedObsBenchmark);
+    }
+
+    if (params.flaggedBenchmark.value() != boost::none) {
+      atLeastOneBenchmarkFound = true;
+      const size_t flaggedBenchmark = *params.flaggedBenchmark.value();
+      size_t flagged = numEqualTo(qcflags->obsdatavector(), flag);
+      ufoObsSpace.distribution().sum(flagged);
+      EXPECT_EQUAL(flagged, flaggedBenchmark);
+    }
+  }
+
+  if (params.compareVariables.value() != boost::none) {
+    for (const CompareVariablesParameters &compareVariablesParams :
+         *params.compareVariables.value()) {
+      atLeastOneBenchmarkFound = true;
+
+      const ufo::Variable &referenceVariable = compareVariablesParams.reference;
+      const ufo::Variable &testVariable = compareVariablesParams.test;
+
+      switch (ufoObsSpace.dtype(referenceVariable.group(), referenceVariable.variable())) {
+      case ioda::ObsDtype::Integer:
+        expectVariablesEqual<int>(ufoObsSpace, referenceVariable, testVariable);
+        break;
+      case ioda::ObsDtype::String:
+        expectVariablesEqual<std::string>(ufoObsSpace, referenceVariable, testVariable);
+        break;
+      case ioda::ObsDtype::DateTime:
+        expectVariablesEqual<util::DateTime>(ufoObsSpace, referenceVariable, testVariable);
+        break;
+      case ioda::ObsDtype::Float:
+        if (compareVariablesParams.absTol.value() == boost::none) {
+          expectVariablesEqual<float>(ufoObsSpace, referenceVariable, testVariable);
+        } else {
+          const float tol = *compareVariablesParams.absTol.value();
+          expectVariablesApproximatelyEqual(ufoObsSpace, referenceVariable, testVariable, tol);
+        }
+        break;
+      case ioda::ObsDtype::None:
+        ASSERT_MSG(false, "Reference variable not found in observation space");
+      }
+    }
+  }
+
+  if (params.expectExceptionWithMessage.value() != boost::none) {
+    // We shouldn't get here, but if we do, we want the test to fail with a message that an
+    // expected exception hasn't been thrown rather than that no benchmarks have been found.
+    atLeastOneBenchmarkFound = true;
+  }
+
+  EXPECT(atLeastOneBenchmarkFound);
+}
+
+// -----------------------------------------------------------------------------
+
+void runTest() {
+  typedef ::test::ObsTestsFixture<ObsTraits> Test_;
+  typedef oops::ObsSpace<ufo::ObsTraits>     ObsSpace_;
+
   ObsFiltersParameters params;
   params.validateAndDeserialize(::test::TestEnvironment::config());
 
@@ -340,187 +540,13 @@ void testFilters() {
 /// identify parameters used for this group of observations
     const ObsTypeParameters &typeParams = params.observations.value()[jj];
 
-/// init QC and error
-    std::shared_ptr<oops::ObsDataVector<ufo::ObsTraits, float> > obserr
-      (new oops::ObsDataVector<ufo::ObsTraits, float>(Test_::obspace()[jj],
-               Test_::obspace()[jj].obsvariables(), "ObsError"));
-    std::shared_ptr<oops::ObsDataVector<ufo::ObsTraits, int> >
-      qcflags(new oops::ObsDataVector<ufo::ObsTraits, int>  (Test_::obspace()[jj],
-               Test_::obspace()[jj].obsvariables()));
-
-//  Create filters and run preProcess
-    ObsFilters_ filters(Test_::obspace()[jj], typeParams.obsFilters, qcflags, obserr);
-    filters.preProcess();
-
-/// call priorFilter and postFilter if hofx is available
-    oops::Variables geovars = filters.requiredVars();
-    oops::Variables diagvars = filters.requiredHdiagnostics();
-    if (typeParams.hofx.value() != boost::none) {
-///   read GeoVaLs from file if required
-      std::unique_ptr<const GeoVaLs_> gval;
-      if (geovars.size() > 0) {
-        if (typeParams.geovals.value() == boost::none)
-          throw eckit::UserError(std::to_string(jj) + "th element of the 'observations' list "
-                                                      "requires a 'geovals' section", Here());
-        gval.reset(new GeoVaLs_(*typeParams.geovals.value(), Test_::obspace()[jj], geovars));
-        filters.priorFilter(*gval);
-      } else {
-        oops::Log::info() << "Filters don't require geovals, priorFilter not called" << std::endl;
-      }
-///   read H(x) and ObsDiags from file
-      oops::Log::info() << "HofX section specified, reading HofX from file" << std::endl;
-      const std::string &hofxgroup = *typeParams.hofx.value();
-      ObsVector_ hofx(Test_::obspace()[jj], hofxgroup);
-      eckit::LocalConfiguration obsdiagconf;
-      if (diagvars.size() > 0) {
-        if (typeParams.obsDiagnostics.value() == boost::none)
-          throw eckit::UserError(std::to_string(jj) + "th element of the 'observations' list "
-                                                      "requires an 'obs diagnostics' section",
-                                 Here());
-        obsdiagconf = *typeParams.obsDiagnostics.value();
-        oops::Log::info() << "Obs diagnostics section specified, reading obs diagnostics from file"
-                          << std::endl;
-      }
-      const ObsDiags_ diags(obsdiagconf, Test_::obspace()[jj], diagvars);
-      filters.postFilter(hofx, diags);
-    } else if (typeParams.obsOperator.value() != boost::none) {
-///   read GeoVaLs, compute H(x) and ObsDiags
-      oops::Log::info() << "ObsOperator section specified, computing HofX" << std::endl;
-      ObsOperator_ hop(Test_::obspace()[jj], *typeParams.obsOperator.value());
-      // TODO(wsmigaj): ObsAuxCtrl currently expects to receive the top-level configuration
-      // even though the implementations I've seen only reference elements of the "obs bias"
-      // subconfiguration. If that's universally true, ObsAuxCtrl should be refactored so that
-      // it can be passed just the contents of the "obs bias" section.
-      const ObsAuxCtrl_ ybias(Test_::obspace()[jj], typeParams.toConfiguration());
-      ObsVector_ hofx(Test_::obspace()[jj]);
-      oops::Variables vars;
-      vars += hop.requiredVars();
-      vars += filters.requiredVars();
-      if (typeParams.obsBias.value() != boost::none) vars += ybias.requiredVars();
-      if (typeParams.geovals.value() == boost::none)
-        throw eckit::UserError(std::to_string(jj) + "th element of the 'observations' list "
-                                                    "requires a 'geovals' section", Here());
-      const GeoVaLs_ gval(*typeParams.geovals.value(), Test_::obspace()[jj], vars);
-      oops::Variables diagvars;
-      diagvars += filters.requiredHdiagnostics();
-      if (typeParams.obsBias.value() != boost::none) diagvars += ybias.requiredHdiagnostics();
-      ObsDiags_ diags(Test_::obspace()[jj], hop.locations(), diagvars);
-      filters.priorFilter(gval);
-      hop.simulateObs(gval, hofx, ybias, diags);
-      hofx.save("hofx");
-      filters.postFilter(hofx, diags);
-    } else if (geovars.size() > 0) {
-///   Only call priorFilter
-      if (typeParams.geovals.value() == boost::none)
-        throw eckit::UserError(std::to_string(jj) + "th element of the 'observations' list "
-                                                    "requires a 'geovals' section", Here());
-      const GeoVaLs_ gval(*typeParams.geovals.value(), Test_::obspace()[jj], geovars);
-      filters.priorFilter(gval);
-      oops::Log::info() << "HofX or ObsOperator sections not provided for filters, " <<
-                           "postFilter not called" << std::endl;
+    if (typeParams.expectExceptionWithMessage.value() != boost::none) {
+      const char *expectedMessage = typeParams.expectExceptionWithMessage.value()->c_str();
+      EXPECT_THROWS_MSG(testFilters(jj, Test_::obspace()[jj], typeParams),
+                        expectedMessage);
     } else {
-///   no need to run priorFilter or postFilter
-      oops::Log::info() << "GeoVaLs not required, HofX or ObsOperator sections not " <<
-                           "provided for filters, only preProcess was called" << std::endl;
+      testFilters(jj, Test_::obspace()[jj], typeParams);
     }
-
-    qcflags->save("EffectiveQC");
-    const std::string errname = "EffectiveError";
-    obserr->save(errname);
-
-//  Compare with known results
-    bool atLeastOneBenchmarkFound = false;
-    const ObsTraits::ObsSpace &obsspace = Test_::obspace()[jj].obsspace();
-
-    if (typeParams.passedObservationsBenchmark.value() != boost::none) {
-      atLeastOneBenchmarkFound = true;
-      const std::vector<size_t> &passedObsBenchmark =
-          *typeParams.passedObservationsBenchmark.value();
-      const std::vector<size_t> passedObs = getPassedObservationIndices(
-            qcflags->obsdatavector(), obsspace.distribution(), obsspace.index());
-      EXPECT_EQUAL(passedObs, passedObsBenchmark);
-    }
-
-    if (typeParams.passedBenchmark.value() != boost::none) {
-      atLeastOneBenchmarkFound = true;
-      const size_t passedBenchmark = *typeParams.passedBenchmark.value();
-      size_t passed = numEqualTo(qcflags->obsdatavector(), ufo::QCflags::pass);
-      obsspace.distribution().sum(passed);
-      EXPECT_EQUAL(passed, passedBenchmark);
-    }
-
-    if (typeParams.failedObservationsBenchmark.value() != boost::none) {
-      atLeastOneBenchmarkFound = true;
-      const std::vector<size_t> &failedObsBenchmark =
-          *typeParams.failedObservationsBenchmark.value();
-      const std::vector<size_t> failedObs = getFailedObservationIndices(
-            qcflags->obsdatavector(), obsspace.distribution(), obsspace.index());
-      EXPECT_EQUAL(failedObs, failedObsBenchmark);
-    }
-
-    if (typeParams.failedBenchmark.value() != boost::none) {
-      atLeastOneBenchmarkFound = true;
-      const size_t failedBenchmark = *typeParams.failedBenchmark.value();
-      size_t failed = numNonzero(qcflags->obsdatavector());
-      obsspace.distribution().sum(failed);
-      EXPECT_EQUAL(failed, failedBenchmark);
-    }
-
-    if (typeParams.benchmarkFlag.value() != boost::none) {
-      const int flag = *typeParams.benchmarkFlag.value();
-
-      if (typeParams.flaggedObservationsBenchmark.value() != boost::none) {
-        atLeastOneBenchmarkFound = true;
-        const std::vector<size_t> &flaggedObsBenchmark =
-            *typeParams.flaggedObservationsBenchmark.value();
-        const std::vector<size_t> flaggedObs =
-            getFlaggedObservationIndices(qcflags->obsdatavector(), obsspace.distribution(),
-                                         obsspace.index(), flag);
-        EXPECT_EQUAL(flaggedObs, flaggedObsBenchmark);
-      }
-
-      if (typeParams.flaggedBenchmark.value() != boost::none) {
-        atLeastOneBenchmarkFound = true;
-        const size_t flaggedBenchmark = *typeParams.flaggedBenchmark.value();
-        size_t flagged = numEqualTo(qcflags->obsdatavector(), flag);
-        obsspace.distribution().sum(flagged);
-        EXPECT_EQUAL(flagged, flaggedBenchmark);
-      }
-    }
-
-    if (typeParams.compareVariables.value() != boost::none) {
-      for (const CompareVariablesParameters &compareVariablesParams :
-           *typeParams.compareVariables.value()) {
-        atLeastOneBenchmarkFound = true;
-
-        const ufo::Variable &referenceVariable = compareVariablesParams.reference;
-        const ufo::Variable &testVariable = compareVariablesParams.test;
-
-        switch (obsspace.dtype(referenceVariable.group(), referenceVariable.variable())) {
-        case ioda::ObsDtype::Integer:
-          expectVariablesEqual<int>(obsspace, referenceVariable, testVariable);
-          break;
-        case ioda::ObsDtype::String:
-          expectVariablesEqual<std::string>(obsspace, referenceVariable, testVariable);
-          break;
-        case ioda::ObsDtype::DateTime:
-          expectVariablesEqual<util::DateTime>(obsspace, referenceVariable, testVariable);
-          break;
-        case ioda::ObsDtype::Float:
-          if (compareVariablesParams.absTol.value() == boost::none) {
-            expectVariablesEqual<float>(obsspace, referenceVariable, testVariable);
-          } else {
-            const float tol = *compareVariablesParams.absTol.value();
-            expectVariablesApproximatelyEqual(obsspace, referenceVariable, testVariable, tol);
-          }
-          break;
-        case ioda::ObsDtype::None:
-          ASSERT_MSG(false, "Reference variable not found in observation space");
-        }
-      }
-    }
-
-    EXPECT(atLeastOneBenchmarkFound);
   }
 }
 
@@ -538,7 +564,7 @@ class ObsFilters : public oops::Test {
     std::vector<eckit::testing::Test>& ts = eckit::testing::specification();
 
     ts.emplace_back(CASE("ufo/ObsFilters/testFilters")
-      { testFilters(); });
+      { runTest(); });
   }
 
   void clear() const override {

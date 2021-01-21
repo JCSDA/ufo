@@ -18,6 +18,8 @@ set ( filters_files
       getScalarOrFilterData.h
       ObsBoundsCheck.cc
       ObsBoundsCheck.h
+      ObsProcessorBase.cc
+      ObsProcessorBase.h
       MetOfficeBuddyCheck.cc
       MetOfficeBuddyCheck.h
       MetOfficeBuddyCheckParameters.h
@@ -72,6 +74,8 @@ set ( filters_files
       Variable.h
       Variables.cc
       Variables.h
+      VariableAssignment.cc
+      VariableAssignment.h
       Gaussian_Thinning.cc
       Gaussian_Thinning.h
       GaussianThinningParameters.cc

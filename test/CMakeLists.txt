@@ -156,6 +156,7 @@ list( APPEND ufo_test_input
   testinput/qc_trackcheckship.yaml
   testinput/qc_trackcheckship_mainloop_unittests.yaml
   testinput/qc_trackcheckship_unittests.yaml
+  testinput/qc_variableassignment.yaml
   testinput/radiosonde.yaml
   testinput/radialvelocity.yaml
   testinput/reflectivity.yaml
@@ -1539,6 +1540,13 @@ ecbuild_add_test( TARGET  test_ufo_function_satwindsLNVDcheck
 ecbuild_add_test( TARGET  test_ufo_function_satwindsSPDBcheck
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
                   ARGS    "testinput/unit_tests/function_satwindsSPDBcheck.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsFilters.x
+                  TEST_DEPENDS ufo_get_ioda_test_data )
+
+ecbuild_add_test( TARGET  test_ufo_qc_variableassignment
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                  ARGS    "testinput/qc_variableassignment.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsFilters.x
                   TEST_DEPENDS ufo_get_ioda_test_data )

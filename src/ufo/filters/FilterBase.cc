@@ -32,19 +32,15 @@ namespace ufo {
 FilterBase::FilterBase(ioda::ObsSpace & os, const FilterParametersBase & parameters,
                        std::shared_ptr<ioda::ObsDataVector<int> > flags,
                        std::shared_ptr<ioda::ObsDataVector<float> > obserr)
-  : obsdb_(os), config_(parameters.toConfiguration()),
-    flags_(flags), obserr_(obserr),
-    allvars_(getAllWhereVariables(parameters.where)),
-    filtervars_(), data_(obsdb_), prior_(false), post_(false),
-    deferToPost_(parameters.deferToPost),
+  : ObsProcessorBase(os, parameters.deferToPost, std::move(flags), std::move(obserr)),
+    config_(parameters.toConfiguration()),
+    filtervars_(),
     whereConfig_(parameters.where),
     actionConfig_(parameters.action)
 {
-  oops::Log::trace() << "FilterBase contructor" << std::endl;
-  ASSERT(flags);
-  ASSERT(obserr);
-  data_.associate(*flags_, "QCflagsData");
-  data_.associate(*obserr_, "ObsErrorData");
+  oops::Log::trace() << "FilterBase constructor" << std::endl;
+  allvars_ += getAllWhereVariables(parameters.where);
+
   if (parameters.filterVariables.value() != boost::none) {
   // read filter variables
     for (const Variable &var : *parameters.filterVariables.value())
@@ -53,6 +49,7 @@ FilterBase::FilterBase(ioda::ObsSpace & os, const FilterParametersBase & paramet
   // if no filter variables explicitly specified, filter out all variables
     filtervars_ += Variables(obsdb_.obsvariables());
   }
+
   FilterAction action(parameters.action);
   allvars_ += action.requiredVariables();
 }
@@ -76,49 +73,10 @@ FilterBase::~FilterBase() {
 
 // -----------------------------------------------------------------------------
 
-void FilterBase::preProcess() {
-  oops::Log::trace() << "FilterBase preProcess begin" << std::endl;
-// Cannot determine earlier when to apply filter because subclass
-// constructors add to allvars
-  if (allvars_.hasGroup("HofX") || allvars_.hasGroup("ObsDiag") || deferToPost_) {
-    post_ = true;
-  } else {
-    if (allvars_.hasGroup("GeoVaLs")) {
-      prior_ = true;
-    } else {
-      this->doFilter();
-    }
-  }
-  oops::Log::trace() << "FilterBase preProcess end" << std::endl;
-}
-
-// -----------------------------------------------------------------------------
-
-void FilterBase::priorFilter(const GeoVaLs & gv) {
-  oops::Log::trace() << "FilterBase priorFilter begin" << std::endl;
-  if (prior_ || post_) data_.associate(gv);
-  if (prior_) this->doFilter();
-  oops::Log::trace() << "FilterBase priorFilter end" << std::endl;
-}
-
-// -----------------------------------------------------------------------------
-
-void FilterBase::postFilter(const ioda::ObsVector & hofx, const ObsDiagnostics & diags) {
-  oops::Log::trace() << "FilterBase postFilter begin" << std::endl;
-  if (post_) {
-    data_.associate(hofx, "HofX");
-    data_.associate(diags);
-    this->doFilter();
-  }
-  oops::Log::trace() << "FilterBase postFilter end" << std::endl;
-}
-
-// -----------------------------------------------------------------------------
-
 void FilterBase::doFilter() const {
   oops::Log::trace() << "FilterBase doFilter begin" << std::endl;
 
-// Select where the background check will apply
+// Select locations to which the filter will be applied
   std::vector<bool> apply = processWhere(whereConfig_, data_);
 
 // Allocate flagged obs indicator (false by default)

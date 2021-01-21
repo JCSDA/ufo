@@ -1,0 +1,494 @@
+window begin: 2000-01-01T00:00:00Z
+window end: 2030-01-01T00:00:00Z
+
+observations:
+- obs space: &ObsSpace
+    name: Assign a fixed value to a pre-existing float variable, without a where clause
+    obsdatain:
+      obsfile: Data/ioda/testinput_tier_1/variable_assignment_testdata.nc
+    simulated variables: [air_temperature]
+  obs filters:
+  - filter: Variable Assignment
+    assignments:
+    - name: float_variable_1@MetaData
+      value: 75.5
+  compareVariables:
+  - test:
+      name: float_variable_1@MetaData
+    reference:
+      name: assigned_float_variable_0@TestReference
+
+- obs space:
+    <<: *ObsSpace
+    name: Assign a fixed value to a pre-existing float variable
+  obs filters:
+  - filter: Variable Assignment
+    where: &Where
+    - variable: # select observations 1, 2 and 3
+        name: float_variable_1@MetaData
+      minvalue: 4
+      maxvalue: 8
+    assignments:
+    - name: float_variable_1@MetaData
+      value: 75.5
+  compareVariables:
+  - test:
+      name: float_variable_1@MetaData
+    reference:
+      name: assigned_float_variable_1@TestReference
+
+- obs space:
+    <<: *ObsSpace
+    name: Assign a fixed value to a new float variable
+  obs filters:
+  - filter: Variable Assignment
+    where: *Where
+    assignments:
+    - name: new_variable@MetaData
+      value: 75.5
+      type: float
+  compareVariables:
+  - test:
+      name: new_variable@MetaData
+    reference:
+      name: assigned_float_variable_2@TestReference
+
+- obs space:
+    <<: *ObsSpace
+    name: Assign a fixed value to a pre-existing integer variable
+  obs filters:
+  - filter: Variable Assignment
+    where: *Where
+    assignments:
+    - name: int_variable_1@MetaData
+      value: 75
+  compareVariables:
+  - test:
+      name: int_variable_1@MetaData
+    reference:
+      name: assigned_int_variable_1@TestReference
+
+- obs space:
+    <<: *ObsSpace
+    name: Assign a fixed value to a new integer variable
+  obs filters:
+  - filter: Variable Assignment
+    where: *Where
+    assignments:
+    - name: new_variable@MetaData
+      value: 75
+      type: int
+  compareVariables:
+  - test:
+      name: new_variable@MetaData
+    reference:
+      name: assigned_int_variable_2@TestReference
+
+- obs space:
+    <<: *ObsSpace
+    name: Assign a fixed value to a pre-existing string variable
+  obs filters:
+  - filter: Variable Assignment
+    where: *Where
+    assignments:
+    - name: string_variable_1@MetaData
+      value: XYZ
+  compareVariables:
+  - test:
+      name: string_variable_1@MetaData
+    reference:
+      name: assigned_string_variable_1@TestReference
+
+- obs space:
+    <<: *ObsSpace
+    name: Assign a fixed value to a new string variable
+  obs filters:
+  - filter: Variable Assignment
+    where: *Where
+    assignments:
+    - name: new_variable@MetaData
+      value: XYZ
+      type: string
+  compareVariables:
+  - test:
+      name: new_variable@MetaData
+    reference:
+      name: assigned_string_variable_2@TestReference
+
+# We can't test datetime variables yet because there's no way to store reference data in the
+# ObsSpace: the loader recognizes only a single variable of type DateTime: datetime@MetaData.
+#
+#- obs space:
+#    <<: *ObsSpace
+#    name: Assign a fixed value to a pre-existing datetime variable
+#  obs filters:
+#  - filter: Variable Assignment
+#    where: *Where
+#    assignments:
+#    - name: datetime@MetaData
+#      value: 2000-01-02T03:04:05Z
+#  compareVariables:
+#  - test:
+#      name: datetime@MetaData
+#    reference:
+#      name: assigned_datetime_variable_1@TestReference
+#
+#- obs space:
+#    <<: *ObsSpace
+#    name: Assign a fixed value to a new datetime variable
+#  obs filters:
+#  - filter: Variable Assignment
+#    where: *Where
+#    assignments:
+#    - name: new_variable@MetaData
+#      value: 2000-01-02T03:04:05Z
+#      type: string
+#  compareVariables:
+#  - test:
+#      name: new_variable@MetaData
+#    reference:
+#      name: assigned_datetime_variable_2@TestReference
+
+- obs space:
+    <<: *ObsSpace
+    name: Assign a fixed value to two variables, one new and the other pre-existing
+  obs filters:
+  - filter: Variable Assignment
+    where: *Where
+    assignments:
+    - name: new_variable_1@MetaData
+      value: 75.5
+      type: float
+    - name: int_variable_1@MetaData
+      value: 75
+  compareVariables:
+  - test:
+      name: new_variable_1@MetaData
+    reference:
+      name: assigned_float_variable_2@TestReference
+  - test:
+      name: int_variable_1@MetaData
+    reference:
+      name: assigned_int_variable_1@TestReference
+
+- obs space:
+    <<: *ObsSpace
+    name: Assign values produced by an ObsFunction to a pre-existing float variable
+  obs filters:
+  - filter: Variable Assignment
+    where: *Where
+    assignments:
+    - name: float_variable_1@MetaData
+      function: # will produce 0.5 * float_variable_1@MetaData
+        name: ObsErrorModelRamp@ObsFunction
+        options:
+          xvar:
+            name: float_variable_1@MetaData
+          x0: [0.5]
+          x1: [10]
+          err0: [0.25]
+          err1: [5]
+  compareVariables:
+  - test:
+      name: float_variable_1@MetaData
+    reference:
+      name: assigned_float_variable_3@TestReference
+
+- obs space:
+    <<: *ObsSpace
+    name: Assign values produced by an ObsFunction to a new float variable
+  obs filters:
+  - filter: Variable Assignment
+    where: *Where
+    assignments:
+    - name: new_variable@MetaData
+      type: float
+      function: # will produce 0.5 * float_variable_1@MetaData
+        name: ObsErrorModelRamp@ObsFunction
+        options:
+          xvar:
+            name: float_variable_1@MetaData
+          x0: [0.5]
+          x1: [10]
+          err0: [0.25]
+          err1: [5]
+  compareVariables:
+  - test:
+      name: new_variable@MetaData
+    reference:
+      name: assigned_float_variable_4@TestReference
+
+- obs space:
+    <<: *ObsSpace
+    name: Assign values produced by an ObsFunction to a pre-existing int variable
+  obs filters:
+  - filter: Variable Assignment
+    where: *Where
+    assignments:
+    - name: int_variable_1@MetaData
+      function: # will produce 0.5 * float_variable_1@MetaData (then truncated to int during assignment)
+        name: ObsErrorModelRamp@ObsFunction
+        options:
+          xvar:
+            name: float_variable_1@MetaData
+          x0: [0.5]
+          x1: [10]
+          err0: [0.25]
+          err1: [5]
+  compareVariables:
+  - test:
+      name: int_variable_1@MetaData
+    reference:
+      name: assigned_int_variable_3@TestReference
+
+- obs space:
+    <<: *ObsSpace
+    name: Assign values produced by an ObsFunction to a new int variable
+  obs filters:
+  - filter: Variable Assignment
+    where: *Where
+    assignments:
+    - name: new_variable@MetaData
+      type: int
+      function: # will produce 0.5 * float_variable_1@MetaData (then truncated to int during assignment)
+        name: ObsErrorModelRamp@ObsFunction
+        options:
+          xvar:
+            name: float_variable_1@MetaData
+          x0: [0.5]
+          x1: [10]
+          err0: [0.25]
+          err1: [5]
+  compareVariables:
+  - test:
+      name: new_variable@MetaData
+    reference:
+      name: assigned_int_variable_4@TestReference
+
+## Tests on the obsspace with multiple channels
+
+- obs space: &MultichannelObsSpace
+    name: Assign a fixed value to a pre-existing multichannel float variable
+    obsdatain:
+      obsfile: Data/ioda/testinput_tier_1/multichannel_variable_assignment_testdata.nc
+    simulated variables: [air_temperature]
+    channels: 1, 2, 4
+  obs filters:
+  - filter: Variable Assignment
+    where: &MultichannelWhere
+    - variable: # select observations 1, 2 and 3
+        name: float_variable_1@MetaData
+      minvalue: 4
+      maxvalue: 8
+    assignments:
+    - name: float_variable@MetaData
+      channels: 1, 4
+      value: 75.5
+  compareVariables:
+  - test:
+      name: float_variable_1@MetaData
+    reference:
+      name: assigned_float_variable_1@TestReference
+  - test:
+      name: float_variable_2@MetaData # shouldn't be modified
+    reference:
+      name: float_variable_2@TestReference
+  - test:
+      name: float_variable_4@MetaData
+    reference:
+      name: assigned_float_variable_2@TestReference
+
+- obs space:
+    <<: *MultichannelObsSpace
+    name: Assign a fixed value to a new multichannel float variable
+  obs filters:
+  - filter: Variable Assignment
+    where: *MultichannelWhere
+    assignments:
+    - name: new_variable@MetaData
+      channels: 1, 4
+      value: 75.5
+      type: float
+  compareVariables:
+  - test:
+      name: new_variable_1@MetaData
+    reference:
+      name: assigned_float_variable_3@TestReference
+  - test:
+      name: new_variable_4@MetaData
+    reference:
+      name: assigned_float_variable_3@TestReference
+
+- obs space:
+    <<: *MultichannelObsSpace
+    name: Assign a fixed value to a pre-existing multichannel string variable
+  obs filters:
+  - filter: Variable Assignment
+    where: *MultichannelWhere
+    assignments:
+    - name: string_variable@MetaData
+      channels: 1, 4
+      value: XYZ
+  compareVariables:
+  - test:
+      name: string_variable_1@MetaData
+    reference:
+      name: assigned_string_variable_1@TestReference
+  - test:
+      name: string_variable_4@MetaData
+    reference:
+      name: assigned_string_variable_2@TestReference
+
+- obs space:
+    <<: *MultichannelObsSpace
+    name: Assign a fixed value to a new multichannel string variable
+  obs filters:
+  - filter: Variable Assignment
+    where: *MultichannelWhere
+    assignments:
+    - name: new_variable@MetaData
+      channels: 1, 4
+      value: XYZ
+      type: string
+  compareVariables:
+  - test:
+      name: new_variable_1@MetaData
+    reference:
+      name: assigned_string_variable_3@TestReference
+  - test:
+      name: new_variable_4@MetaData
+    reference:
+      name: assigned_string_variable_3@TestReference
+
+- obs space:
+    <<: *MultichannelObsSpace
+    name: Assign values produced by an ObsFunction to a pre-existing multichannel float variables
+  obs filters:
+  - filter: Variable Assignment
+    where: *MultichannelWhere
+    assignments:
+    - name: float_variable@MetaData
+      channels: 1, 4
+      function: # will produce 0.5 * float_variable_1@MetaData and 0.25 * float_variable_1@MetaData
+        name: ObsErrorModelRamp@ObsFunction
+        options:
+          xvar:
+            name: float_variable_1@MetaData
+          channels: 1, 4
+          x0: [0.5, 0.5]
+          x1: [10, 10]
+          err0: [0.25, 0.125]
+          err1: [5, 2.5]
+  compareVariables:
+  - test:
+      name: float_variable_1@MetaData
+    reference:
+      name: assigned_float_variable_4@TestReference
+  - test:
+      name: float_variable_2@MetaData # shouldn't be modified
+    reference:
+      name: float_variable_2@TestReference
+  - test:
+      name: float_variable_4@MetaData
+    reference:
+      name: assigned_float_variable_5@TestReference
+
+- obs space:
+    <<: *MultichannelObsSpace
+    name: Assign values produced by an ObsFunction to a new multichannel float variables
+  obs filters:
+  - filter: Variable Assignment
+    where: *MultichannelWhere
+    assignments:
+    - name: new_variable@MetaData
+      channels: 1, 4
+      type: float
+      function: # will produce 0.5 * float_variable_1@MetaData and 0.25 * float_variable_1@MetaData
+        name: ObsErrorModelRamp@ObsFunction
+        options:
+          xvar:
+            name: float_variable_1@MetaData
+          channels: 1, 4
+          x0: [0.5, 0.5]
+          x1: [10, 10]
+          err0: [0.25, 0.125]
+          err1: [5, 2.5]
+  compareVariables:
+  - test:
+      name: new_variable_1@MetaData
+    reference:
+      name: assigned_float_variable_6@TestReference
+  - test:
+      name: new_variable_4@MetaData
+    reference:
+      name: assigned_float_variable_7@TestReference
+
+- obs space: &ObsSpace
+    name: Try to assign a string to a float variable
+    obsdatain:
+      obsfile: Data/ioda/testinput_tier_1/variable_assignment_testdata.nc
+    simulated variables: [air_temperature]
+  obs filters:
+  - filter: Variable Assignment
+    assignments:
+    - name: float_variable_1@MetaData
+      value: ABCDEF
+  expectExceptionWithMessage: could not be converted to the required type
+
+- obs space: &ObsSpace
+    name: Try to assign values produced by an ObsFunction to a string variable
+    obsdatain:
+      obsfile: Data/ioda/testinput_tier_1/variable_assignment_testdata.nc
+    simulated variables: [air_temperature]
+  obs filters:
+  - filter: Variable Assignment
+    where: *Where
+    assignments:
+    - name: string_variable_1@MetaData
+      function: # will produce 0.5 * float_variable_1@MetaData
+        name: ObsErrorModelRamp@ObsFunction
+        options:
+          xvar:
+            name: float_variable_1@MetaData
+          x0: [0.5]
+          x1: [10]
+          err0: [0.25]
+          err1: [5]
+  expectExceptionWithMessage: ObsFunction values cannot be assigned to non-numeric variables
+
+- obs space: &ObsSpace
+    name: Try to assign values to an existing variable from the ObsValue group
+    obsdatain:
+      obsfile: Data/ioda/testinput_tier_1/variable_assignment_testdata.nc
+    simulated variables: [air_temperature]
+  obs filters:
+  - filter: Variable Assignment
+    assignments:
+    - name: air_temperature@ObsValue
+      value: 75.5
+  expectExceptionWithMessage: Assignment to variables from the ObsValue group is not allowed
+
+- obs space: &ObsSpace
+    name: Try to assign values to a new variable from the ObsValue group
+    obsdatain:
+      obsfile: Data/ioda/testinput_tier_1/variable_assignment_testdata.nc
+    simulated variables: [air_temperature]
+  obs filters:
+  - filter: Variable Assignment
+    assignments:
+    - name: new_variable@ObsValue
+      value: 75.5
+      type: float
+  expectExceptionWithMessage: Assignment to variables from the ObsValue group is not allowed
+
+- obs space: &ObsSpace
+    name: Try to assign values to a new variable without specifying its type
+    obsdatain:
+      obsfile: Data/ioda/testinput_tier_1/variable_assignment_testdata.nc
+    simulated variables: [air_temperature]
+  obs filters:
+  - filter: Variable Assignment
+    assignments:
+    - name: new_variable@MetaData
+      value: ABCDEF
+  expectExceptionWithMessage: You need to specify the type of the variable to be created

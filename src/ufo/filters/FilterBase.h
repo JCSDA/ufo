@@ -19,6 +19,7 @@
 #include "oops/util/Printable.h"
 #include "ufo/filters/FilterParametersBase.h"
 #include "ufo/filters/ObsFilterData.h"
+#include "ufo/filters/ObsProcessorBase.h"
 #include "ufo/filters/Variables.h"
 
 namespace eckit {
@@ -35,12 +36,12 @@ namespace ufo {
   class GeoVaLs;
   class ObsDiagnostics;
 
-/// FilterBase: Base class for UFO QC filters
+/// \brief Base class for UFO QC filters
+///
+/// Filters only need to implement the constructor and the applyFilter, print and qcFlag methods;
+/// the base class takes care of applying the filter at the pre, prior or post stage.
 
-// Filters only need to implement the constructor and the applyFilter method,
-// the base class takes care of applying the filter at the pre, prior or post stage.
-
-class FilterBase : public util::Printable {
+class FilterBase : public ObsProcessorBase {
  public:
   FilterBase(ioda::ObsSpace &, const FilterParametersBase &parameters,
              std::shared_ptr<ioda::ObsDataVector<int> >,
@@ -50,38 +51,20 @@ class FilterBase : public util::Printable {
              std::shared_ptr<ioda::ObsDataVector<float> >);
   ~FilterBase();
 
-  void preProcess();
-  void priorFilter(const GeoVaLs &);
-  void postFilter(const ioda::ObsVector &, const ObsDiagnostics &);
-
-  oops::Variables requiredVars() const {
-    return allvars_.allFromGroup("GeoVaLs").toOopsVariables();}
-  oops::Variables requiredHdiagnostics() const {
-    return allvars_.allFromGroup("ObsDiag").toOopsVariables();}
-
  protected:
-  ioda::ObsSpace & obsdb_;
   /// For backward compatibility, the full set of filter options (including those required only by
   /// the concrete subclass, not by FilterBase) is stored in this LocalConfiguration object.
   /// It will be removed once all filters have been converted to use Parameters.
   const eckit::LocalConfiguration config_;
-  std::shared_ptr<ioda::ObsDataVector<int>> flags_;
-  std::shared_ptr<ioda::ObsDataVector<float>> obserr_;
-  ufo::Variables allvars_;
   ufo::Variables filtervars_;
-  ObsFilterData data_;
 
  private:
-  void doFilter() const;
+  void doFilter() const override;
   virtual void print(std::ostream &) const = 0;
   virtual void applyFilter(const std::vector<bool> &, const Variables &,
                            std::vector<std::vector<bool>> &) const = 0;
   virtual int qcFlag() const = 0;
-  bool prior_;
-  bool post_;
 
-  // Variables extracted from the filter parameters.
-  bool deferToPost_;
   // These Configuration objects will be replaced by appropriate Parameters subclasses later.
   eckit::LocalConfiguration whereConfig_;
   eckit::LocalConfiguration actionConfig_;
