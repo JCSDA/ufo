@@ -32,22 +32,45 @@ CLWRetMW::CLWRetMW(const eckit::LocalConfiguration & conf)
   // Check required parameters
   // Get variable group types for CLW retrieval from option
   ASSERT(options_.varGroup.value().size() == 1 || options_.varGroup.value().size() == 2);
+  ASSERT((options_.ch238.value() != boost::none && options_.ch314.value() != boost::none) ||
+         (options_.ch37v.value() != boost::none && options_.ch37h.value() != boost::none));
 
-  // Get channels for CLW retrieval from options
-  const std::vector<int> channels_ = {options_.ch238.value(), options_.ch314.value()};
-  ASSERT(options_.ch238 != 0 && options_.ch314 != 0 && channels_.size() == 2);
+  if (options_.ch238.value() != boost::none && options_.ch314.value() != boost::none) {
+    // For AMSUA and ATMS retrievals
+    // Get channels for CLW retrieval from options
+    const std::vector<int> channels = {options_.ch238.value().get(), options_.ch314.value().get()};
+    ASSERT(options_.ch238.value().get() != 0 && options_.ch314.value().get() != 0
+           && channels.size() == 2);
+    // Include list of required data from ObsSpace
+    for (size_t igrp = 0; igrp < options_.varGroup.value().size(); ++igrp) {
+      invars_ += Variable("brightness_temperature@" + options_.varGroup.value()[igrp], channels);
+    }
+    invars_ += Variable("brightness_temperature@" + options_.testBias.value(), channels);
+    invars_ += Variable("sensor_zenith_angle@MetaData");
 
-  // Include list of required data from ObsSpace
-  for (size_t igrp = 0; igrp < options_.varGroup.value().size(); ++igrp) {
-    invars_ += Variable("brightness_temperature@" + options_.varGroup.value()[igrp], channels_);
+    // Include list of required data from GeoVaLs
+    invars_ += Variable("average_surface_temperature_within_field_of_view@GeoVaLs");
+    invars_ += Variable("water_area_fraction@GeoVaLs");
+    invars_ += Variable("surface_temperature_where_sea@GeoVaLs");
+
+  } else if (options_.ch37v.value() != boost::none && options_.ch37h.value() != boost::none) {
+    // For cloud index like GMI's.
+    // Get channels for CLW retrieval from options
+    const std::vector<int> channels = {options_.ch37v.value().get(), options_.ch37h.value().get()};
+
+    ASSERT(options_.ch37v.value().get() != 0 && options_.ch37h.value().get() != 0 &&
+           channels.size() == 2);
+    // Include list of required data from ObsSpace
+    for (size_t igrp = 0; igrp < options_.varGroup.value().size(); ++igrp) {
+      invars_ += Variable("brightness_temperature@" + options_.varGroup.value()[igrp], channels);
+    }
+    invars_ += Variable("brightness_temperature@" + options_.testBias.value(), channels);
+    // Include list of required data from ObsDiag
+    invars_ += Variable("brightness_temperature_assuming_clear_sky@ObsDiag" , channels);
+
+    // Include list of required data from GeoVaLs
+    invars_ += Variable("water_area_fraction@GeoVaLs");
   }
-  invars_ += Variable("brightness_temperature@" + options_.testBias.value(), channels_);
-  invars_ += Variable("sensor_zenith_angle@MetaData");
-
-  // Include list of required data from GeoVaLs
-  invars_ += Variable("average_surface_temperature_within_field_of_view@GeoVaLs");
-  invars_ += Variable("water_area_fraction@GeoVaLs");
-  invars_ += Variable("surface_temperature_where_sea@GeoVaLs");
 }
 
 // -----------------------------------------------------------------------------
@@ -60,60 +83,112 @@ void CLWRetMW::compute(const ObsFilterData & in,
                                     ioda::ObsDataVector<float> & out) const {
   // Get required parameters
   const std::vector<std::string> &vargrp = options_.varGroup.value();
-  const std::vector<int> channels_ = {options_.ch238.value(), options_.ch314.value()};
 
   // Get dimension
   const size_t nlocs = in.nlocs();
   const size_t ngrps = vargrp.size();
 
-  // Get variables from ObsSpace
-  // Get sensor zenith angle
-  std::vector<float> szas(nlocs);
-  in.get(Variable("sensor_zenith_angle@MetaData"), szas);
-
-  // Get variables from GeoVaLs
-  // Get average surface temperature in FOV
-  std::vector<float> tsavg(nlocs);
-  in.get(Variable("average_surface_temperature_within_field_of_view@GeoVaLs"), tsavg);
-
   // Get area fraction of each surface type
   std::vector<float> water_frac(nlocs);
   in.get(Variable("water_area_fraction@GeoVaLs"), water_frac);
 
-  // Calculate retrieved cloud liquid water
-  std::vector<float> bt238(nlocs), bt314(nlocs);
-  for (size_t igrp = 0; igrp < ngrps; ++igrp) {
-    // Get data based on group type
-    in.get(Variable("brightness_temperature@" + vargrp[igrp], channels_)[channels_[0]-1], bt238);
-    in.get(Variable("brightness_temperature@" + vargrp[igrp], channels_)[channels_[1]-1], bt314);
-    // Get bias based on group type
-    if (options_.addBias.value() == vargrp[igrp]) {
-      std::vector<float> bias238(nlocs), bias314(nlocs);
-      if (in.has(Variable("brightness_temperature@" + options_.testBias.value(), channels_)[0])) {
-      in.get(Variable("brightness_temperature@" + options_.testBias.value(), channels_)
-                      [channels_[0]-1], bias238);
-      in.get(Variable("brightness_temperature@" + options_.testBias.value(), channels_)
-                      [channels_[1]-1], bias314);
-      } else {
-      bias238.assign(nlocs, 0.0f);
-      bias314.assign(nlocs, 0.0f);
-      }
-      // Add bias correction to the assigned group
-      if (options_.addBias.value() == "ObsValue") {
-        for (size_t iloc = 0; iloc < nlocs; ++iloc) {
-          bt238[iloc] = bt238[iloc] - bias238[iloc];
-          bt314[iloc] = bt314[iloc] - bias314[iloc];
-        }
-      } else {
-        for (size_t iloc = 0; iloc < nlocs; ++iloc) {
-          bt238[iloc] = bt238[iloc] + bias238[iloc];
-          bt314[iloc] = bt314[iloc] + bias314[iloc];
-        }
-      }
-    }
+  // --------------- amsua or atms --------------------------
+  if (options_.ch238.value() != boost::none && options_.ch314.value() != boost::none) {
+    const std::vector<int> channels = {options_.ch238.value().get(), options_.ch314.value().get()};
 
-    // Compute the cloud liquid qater
-    cloudLiquidWater(szas, tsavg, water_frac, bt238, bt314, out[igrp], nlocs);
+    // Get variables from ObsSpace
+    // Get sensor zenith angle
+    std::vector<float> szas(nlocs);
+    in.get(Variable("sensor_zenith_angle@MetaData"), szas);
+
+    // Get variables from GeoVaLs
+    // Get average surface temperature in FOV
+    std::vector<float> tsavg(nlocs);
+    in.get(Variable("average_surface_temperature_within_field_of_view@GeoVaLs"), tsavg);
+
+    // Calculate retrieved cloud liquid water
+    std::vector<float> bt238(nlocs), bt314(nlocs);
+    for (size_t igrp = 0; igrp < ngrps; ++igrp) {
+      // Get data based on group type
+      in.get(Variable("brightness_temperature@" + vargrp[igrp], channels)[0], bt238);
+      in.get(Variable("brightness_temperature@" + vargrp[igrp], channels)[1], bt314);
+      // Get bias based on group type
+      if (options_.addBias.value() == vargrp[igrp]) {
+        std::vector<float> bias238(nlocs), bias314(nlocs);
+        if (in.has(Variable("brightness_temperature@" + options_.testBias.value(), channels)[0])) {
+        in.get(Variable("brightness_temperature@" + options_.testBias.value(), channels)[0],
+                        bias238);
+        in.get(Variable("brightness_temperature@" + options_.testBias.value(), channels)[1],
+                        bias314);
+        } else {
+        bias238.assign(nlocs, 0.0f);
+        bias314.assign(nlocs, 0.0f);
+        }
+        // Add bias correction to the assigned group
+        if (options_.addBias.value() == "ObsValue") {
+          for (size_t iloc = 0; iloc < nlocs; ++iloc) {
+            bt238[iloc] = bt238[iloc] - bias238[iloc];
+            bt314[iloc] = bt314[iloc] - bias314[iloc];
+          }
+        } else {
+          for (size_t iloc = 0; iloc < nlocs; ++iloc) {
+            bt238[iloc] = bt238[iloc] + bias238[iloc];
+            bt314[iloc] = bt314[iloc] + bias314[iloc];
+          }
+        }
+      }
+
+      // Compute the cloud liquid water
+      cloudLiquidWater(szas, tsavg, water_frac, bt238, bt314, out[igrp]);
+    }
+  // -------------------- GMI ---------------------------
+  } else if (options_.ch37v.value() != boost::none && options_.ch37h.value() != boost::none) {
+    const std::vector<int> channels = {options_.ch37v.value().get(), options_.ch37h.value().get()};
+    // Indices of data at channeles 37v and 37h in the above array "channels"
+    const int jch37v = 0;
+    const int jch37h = 1;
+    std::vector<float> bt_clr_37v(nlocs), bt_clr_37h(nlocs);
+    in.get(Variable("brightness_temperature_assuming_clear_sky@ObsDiag" , channels)
+           [jch37v], bt_clr_37v);
+    in.get(Variable("brightness_temperature_assuming_clear_sky@ObsDiag" , channels)
+           [jch37h], bt_clr_37h);
+    // Calculate retrieved cloud liquid water
+    std::vector<float> bt37v(nlocs), bt37h(nlocs);
+    for (size_t igrp = 0; igrp < ngrps; ++igrp) {
+      // Get data based on group type
+      in.get(Variable("brightness_temperature@" + vargrp[igrp], channels) [jch37v], bt37v);
+      in.get(Variable("brightness_temperature@" + vargrp[igrp], channels) [jch37h], bt37h);
+      // Get bias based on group type
+      if (options_.addBias.value() == vargrp[igrp]) {
+        std::vector<float> bias37v(nlocs), bias37h(nlocs);
+        if (in.has(Variable("brightness_temperature@" + options_.testBias.value(), channels)
+            [jch37v])) {
+          in.get(Variable("brightness_temperature@" + options_.testBias.value(), channels)
+                 [jch37v], bias37v);
+          in.get(Variable("brightness_temperature@" + options_.testBias.value(), channels)
+                 [jch37h], bias37h);
+        } else {
+        bias37v.assign(nlocs, 0.0f);
+        bias37h.assign(nlocs, 0.0f);
+        }
+        // Add bias correction to the assigned group
+        if (options_.addBias.value() == "ObsValue") {
+          for (size_t iloc = 0; iloc < nlocs; ++iloc) {
+            bt37v[iloc] = bt37v[iloc] - bias37v[iloc];
+            bt37h[iloc] = bt37h[iloc] - bias37h[iloc];
+          }
+        } else {
+          for (size_t iloc = 0; iloc < nlocs; ++iloc) {
+            bt37v[iloc] = bt37v[iloc] + bias37v[iloc];
+            bt37h[iloc] = bt37h[iloc] + bias37h[iloc];
+          }
+        }
+      }
+
+
+      // Compute cloud index
+      CIret_37v37h_diff(bt_clr_37v, bt_clr_37h, water_frac, bt37v, bt37h, out[igrp]);
+    }
   }
 }
 
@@ -124,8 +199,7 @@ void CLWRetMW::cloudLiquidWater(const std::vector<float> & szas,
                                          const std::vector<float> & water_frac,
                                          const std::vector<float> & bt238,
                                          const std::vector<float> & bt314,
-                                         std::vector<float> & out,
-                                         const std::size_t nlocs) {
+                                         std::vector<float> & out) {
   ///
   /// \brief Retrieve cloud liquid water from AMSU-A 23.8 GHz and 31.4 GHz channels.
   ///
@@ -136,7 +210,7 @@ void CLWRetMW::cloudLiquidWater(const std::vector<float> & szas,
   const float t0c = Constants::t0c;
   const float d1 = 0.754, d2 = -2.265;
   const float c1 = 8.240, c2 = 2.622, c3 = 1.846;
-  for (size_t iloc = 0; iloc < nlocs; ++iloc) {
+  for (size_t iloc = 0; iloc < water_frac.size(); ++iloc) {
     if (water_frac[iloc] >= 0.99) {
       float cossza = cos(Constants::deg2rad * szas[iloc]);
       float d0 = c1 - (c2 - c3 * cossza) * cossza;
@@ -154,6 +228,36 @@ void CLWRetMW::cloudLiquidWater(const std::vector<float> & szas,
 
 // -----------------------------------------------------------------------------
 
+// -----------------------------------------------------------------------------
+
+void CLWRetMW::CIret_37v37h_diff(const std::vector<float> & bt_clr_37v,
+                                         const std::vector<float> & bt_clr_37h,
+                                         const std::vector<float> & water_frac,
+                                         const std::vector<float> & bt37v,
+                                         const std::vector<float> & bt37h,
+                                         std::vector<float> & out) {
+  ///
+  /// \brief Retrieve cloud index from GMI 37V and 37H channels.
+  ///
+  /// GMI cloud index: 1.0 - (Tb_37v - Tb_37h)/(Tb_37v_clr - Tb_37h_clr), in which
+  /// Tb_37v_clr and Tb_37h_clr for calculated Tb at 37 V and 37H GHz from module values
+  /// assuming in clear-sky condition. Tb_37v and Tb_37h are Tb observations at 37 V and 37H GHz.
+  ///
+  for (size_t iloc = 0; iloc < water_frac.size(); ++iloc) {
+    if (water_frac[iloc] >= 0.99) {
+      if (bt37h[iloc] <= bt37v[iloc]) {
+        out[iloc] = 1.0 - (bt37v[iloc] - bt37h[iloc])/(bt_clr_37v[iloc] - bt_clr_37h[iloc]);
+        out[iloc] = std::max(0.f, out[iloc]);
+      } else {
+        out[iloc] = getBadValue();
+      }
+    } else {
+      out[iloc] = getBadValue();
+    }
+  }
+}
+
+// -----------------------------------------------------------------------------
 const ufo::Variables & CLWRetMW::requiredVariables() const {
   return invars_;
 }

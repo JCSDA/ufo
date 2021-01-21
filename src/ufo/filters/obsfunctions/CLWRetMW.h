@@ -11,6 +11,7 @@
 #include <string>
 #include <vector>
 
+#include "oops/util/parameters/OptionalParameter.h"
 #include "oops/util/parameters/Parameter.h"
 #include "oops/util/parameters/Parameters.h"
 #include "oops/util/parameters/RequiredParameter.h"
@@ -33,13 +34,13 @@ class CLWRetMWParameters : public oops::Parameters {
   /// of cloud liquid water applies
   /// Example: AMSU-A channel numbers used in cloud liquid water retrieval
   ///          clwret_channels: 1
-  oops::RequiredParameter<int> ch238{"clwret_ch238", this};
+  oops::OptionalParameter<int> ch238{"clwret_ch238", this};
 
   /// channel number corresponding to 31.4 GHz to which the retrieval
   /// of cloud liquid water applies
   /// Example: AMSU-A channel numbers used in cloud liquid water retrieval
   ///          clwret_channels: 2
-  oops::RequiredParameter<int> ch314{"clwret_ch314", this};
+  oops::OptionalParameter<int> ch314{"clwret_ch314", this};
 
   /// Names of the data group used to retrieve the cloud liquid water
   /// Example: get retrieved CLW from observation and simulated observation respectively
@@ -60,6 +61,13 @@ class CLWRetMWParameters : public oops::Parameters {
   /// Example: use observation bias correction values from GSI
   ///          test_bias: GsiObsBias
   oops::Parameter<std::string> testBias{"test_bias", "ObsBias", this};
+
+  /// Cloud index CIret_37v37h_diff:
+  /// 1.0 - (Tb_37v - Tb_37h)/(Tb_37v_clr - Tb_37h_clr), which is used in
+  /// all-sky DA. Tb_37v_clr and Tb_37h_clr for calculated Tb at 37V and 37H GHz from model values
+  /// assuming in clear-sky condition. Tb_37v and Tb_37h are Tb observations at 37 V and 37H GHz.
+  oops::OptionalParameter<int> ch37h{"clwret_ch37h", this};
+  oops::OptionalParameter<int> ch37v{"clwret_ch37v", this};
 };
 
 ///
@@ -87,9 +95,15 @@ class CLWRetMW : public ObsFunctionBase {
                                const std::vector<float> &,
                                const std::vector<float> &,
                                const std::vector<float> &,
-                               std::vector<float> &,
-                               const std::size_t);
+                               std::vector<float> &);
+  static void CIret_37v37h_diff(const std::vector<float> &,
+                               const std::vector<float> &,
+                               const std::vector<float> &,
+                               const std::vector<float> &,
+                               const std::vector<float> &,
+                               std::vector<float> &);
   inline static float getBadValue() {return bad_clwret_value_;}
+
  private:
   ufo::Variables invars_;
   CLWRetMWParameters options_;
