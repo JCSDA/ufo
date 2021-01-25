@@ -34,7 +34,7 @@ contains
 
 
 SUBROUTINE ufo_refractivity(nlevq,     &
-                            nlevP,     &
+                            nlevp,     &
                             za,        &
                             zb,        &
                             x,         &
@@ -47,7 +47,7 @@ IMPLICIT NONE
 ! Subroutine arguments:
 
 INTEGER, INTENT(IN)                    :: nlevq        ! no. of levels of wet refractivity required
-INTEGER, INTENT(IN)                    :: nlevP        ! no. of levels of dry refractivity required
+INTEGER, INTENT(IN)                    :: nlevp        ! no. of levels of dry refractivity required
 REAL(kind_real), INTENT(IN)            :: za(:)    ! heights of pressure levels
 
 REAL(kind_real), INTENT(IN)            :: zb(:)             ! Heights of theta levels
@@ -76,7 +76,7 @@ LOGICAL                     :: levelerr    ! nlevq greater than nlevp error
 integer, parameter          :: max_string = 800
 CHARACTER(len=max_string)   :: message
 
-REAL(kind_real)             :: P(nlevP)
+REAL(kind_real)             :: P(nlevp)
 REAL(kind_real)             :: q(nlevq)
 REAL(kind_real)             :: pwt1
 REAL(kind_real)             :: pwt2
@@ -85,12 +85,12 @@ INTEGER                     :: nstate
 
 ! Get constants into right units
 
-nstate = nlevP + nlevq
-P(:) = x(1:nlevP)
-q(:) = x(nlevP + 1:nstate)
+nstate = nlevp + nlevq
+P(:) = x(1:nlevp)
+q(:) = x(nlevp + 1:nstate)
 
 ALLOCATE (ExnerN(nlevq))
-ALLOCATE (Exner(nlevP))
+ALLOCATE (Exner(nlevp))
 
 refrac(:) = missing_value(refrac(1))
 T(:) = missing_value(T(1))
@@ -99,7 +99,7 @@ unphys = .FALSE.
 levelerr = .FALSE.
 refracerr = .FALSE.
 
-DO i = 1, nlevP
+DO i = 1, nlevp
   IF (P(i) == missing_value(P(i))) THEN  !pressure missing
     refracerr = .TRUE.
     WRITE(message, *) RoutineName, "Missing value P", i
@@ -109,7 +109,7 @@ DO i = 1, nlevP
 END DO
 
 
-DO i = 1, nlevP-1
+DO i = 1, nlevp-1
   IF (P(i) - P(i + 1) < 0.0) THEN       !or non-monotonic pressure
     refracerr = .TRUE.
     nonmon = .TRUE.
@@ -124,7 +124,7 @@ IF (ANY (P(:) <= 0.0)) THEN           !pressure zero or negative
   unphys = .TRUE.
 END IF
 
-IF (nlevq >= nlevP) THEN  ! nlevq must be < than nlevP
+IF (nlevq >= nlevp) THEN  ! nlevq must be < than nlevp
   refracerr = .TRUE.
   levelerr = .TRUE.
 END IF
@@ -151,7 +151,7 @@ ELSE
   ! Calculate the refractivity on the b levels
 
 
-  DO Level = 1, nlevP - 1
+  DO Level = 1, nlevp - 1
 	
     pwt1 = (za(Level + 1) - zb(Level)) / (za(Level + 1) - za(Level))
     pwt2 = 1.0 - pwt1

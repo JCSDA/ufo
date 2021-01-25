@@ -14,6 +14,7 @@
 #include "ufo/filters/BlackList.h"
 #include "ufo/filters/DifferenceCheck.h"
 #include "ufo/filters/Gaussian_Thinning.h"
+#include "ufo/filters/gnssroonedvarcheck/GNSSROOneDVarCheck.h"
 #include "ufo/filters/MetOfficeBuddyCheck.h"
 #include "ufo/filters/MWCLWCheck.h"
 #include "ufo/filters/ObsBoundsCheck.h"
@@ -91,6 +92,8 @@ template<typename MODEL> void instantiateObsFilterFactory() {
            WindComponentsMaker("Wind Components");
   static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::WindSpeedAndDirection> >
            WindSpeedAndDirectionMaker("Wind Speed And Direction");
+  static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::GNSSROOneDVarCheck> >
+           GNSSROOneDVarCheckMaker("GNSS-RO 1DVar Check");
   static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::VariableAssignment> >
            variableAssignmentMaker("Variable Assignment");
 

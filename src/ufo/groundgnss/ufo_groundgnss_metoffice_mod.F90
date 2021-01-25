@@ -124,7 +124,7 @@ end subroutine ufo_groundgnss_metoffice_simobs
 ! ------------------------------------------------------------------------------
 
 
-SUBROUTINE Ops_Groundgnss_ForwardModel(nlevP, &
+SUBROUTINE Ops_Groundgnss_ForwardModel(nlevp, &
                                        nlevq, &
                                        za, &
                                        zb, &
@@ -134,11 +134,11 @@ SUBROUTINE Ops_Groundgnss_ForwardModel(nlevP, &
                                        zStation, &
                                        Model_ZTD)
 
-INTEGER, INTENT(IN)            :: nlevP                  ! no. of p levels in state vec.
+INTEGER, INTENT(IN)            :: nlevp                  ! no. of p levels in state vec.
 INTEGER, INTENT(IN)            :: nlevq                  ! no. of theta levels
-REAL(kind_real), INTENT(IN)    :: za(1:nlevP)            ! heights of rho levs
+REAL(kind_real), INTENT(IN)    :: za(1:nlevp)            ! heights of rho levs
 REAL(kind_real), INTENT(IN)    :: zb(1:nlevq)            ! heights of theta levs
-REAL(kind_real), INTENT(IN)    :: pressure(1:nlevP)      ! Model background pressure
+REAL(kind_real), INTENT(IN)    :: pressure(1:nlevp)      ! Model background pressure
 REAL(kind_real), INTENT(IN)    :: humidity(1:nlevq)      ! Model background specific humidity
 INTEGER, INTENT(IN)            :: nobs                   ! Number of observations
 
@@ -163,24 +163,24 @@ character(len=*), parameter  :: myname_ = "Ops_Groundgnss_ForwardModel"
 ! Local variables
 ! 
 INTEGER                      :: nstate            ! no. of levels in state vec.
-REAL(kind_real)              :: x(1:nlevP+nlevQ)  ! state vector
+REAL(kind_real)              :: x(1:nlevp+nlevq)  ! state vector
 character(max_string)        :: err_msg           ! Error message to be output
 character(max_string)        :: message         ! General message for output
 
 ! The model data must be on a staggered grid, with nlevp = nlevq+1
-IF (nlevP /= nlevQ + 1) THEN
+IF (nlevp /= nlevq + 1) THEN
     write(err_msg,*) myname_ // ':' // ' Data must be on a staggered grid nlevp, nlevq = ', nlevp, nlevq
     call fckit_log % warning(err_msg)
     write(err_msg,*) myname_ // ':' // ' error: number of levels inconsistent!'
     call abor1_ftn(err_msg)
 END IF
 
-nstate = nlevP + nlevq
-x(1:nlevP) = pressure
-x(nlevP+1:nstate) = humidity
+nstate = nlevp + nlevq
+x(1:nlevp) = pressure
+x(nlevp+1:nstate) = humidity
 
 CALL ufo_refractivity(nlevq,     &
-                      nlevP,     &
+                      nlevp,     &
                       za,        &
                       zb,        &
                       x,         &

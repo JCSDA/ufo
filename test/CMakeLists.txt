@@ -79,6 +79,7 @@ list( APPEND ufo_test_input
   testinput/geos_aod.yaml
   testinput/geovals_spec.yaml
   testinput/gnssrobendmetoffice.yaml
+  testinput/gnssrobendmetoffice_qc.yaml
   testinput/gnssrobendmetoffice_obserror.yaml
   testinput/gnssrobendmetoffice_nopseudo.yaml
   testinput/gnssrobendmetoffice_qc.yaml
@@ -1083,6 +1084,12 @@ ecbuild_add_test( TARGET  test_ufo_linopr_gnssroBendMetOffice_pseudo
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsOperatorTLAD.x
                   TEST_DEPENDS ufo_get_ioda_test_data ufo_get_ufo_test_data )
+
+ecbuild_add_test( TARGET  test_ufo_qc_gnssroBendMetOffice
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                  ARGS    "testinput/gnssrobendmetoffice_qc.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsFilters.x )
 
 ecbuild_add_test( TARGET  test_ufo_opr_gnssroBendMetOffice_nopseudo
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x

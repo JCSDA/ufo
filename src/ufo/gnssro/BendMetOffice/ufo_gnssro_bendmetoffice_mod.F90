@@ -192,7 +192,7 @@ end subroutine ufo_gnssro_bendmetoffice_simobs
 ! ------------------------------------------------------------------------------
 
 
-SUBROUTINE Ops_GPSRO_ForwardModel(nlevP, &
+SUBROUTINE Ops_GPSRO_ForwardModel(nlevp, &
                                   nlevq, &
                                   za, &
                                   zb, &
@@ -208,12 +208,12 @@ SUBROUTINE Ops_GPSRO_ForwardModel(nlevP, &
                                   ycalc, &
                                   BAErr)
 
-INTEGER, INTENT(IN)            :: nlevP                  ! no. of p levels in state vec.
+INTEGER, INTENT(IN)            :: nlevp                  ! no. of p levels in state vec.
 INTEGER, INTENT(IN)            :: nlevq                  ! no. of theta levels
-REAL(kind_real), INTENT(IN)    :: za(1:nlevP)            ! heights of rho levs
-REAL(kind_real), INTENT(IN)    :: zb(1:nlevQ)            ! heights of theta levs
-REAL(kind_real), INTENT(IN)    :: pressure(1:nlevP)      ! Model background pressure
-REAL(kind_real), INTENT(IN)    :: humidity(1:nlevQ)      ! Model background specific humidity
+REAL(kind_real), INTENT(IN)    :: za(1:nlevp)            ! heights of rho levs
+REAL(kind_real), INTENT(IN)    :: zb(1:nlevq)            ! heights of theta levs
+REAL(kind_real), INTENT(IN)    :: pressure(1:nlevp)      ! Model background pressure
+REAL(kind_real), INTENT(IN)    :: humidity(1:nlevq)      ! Model background specific humidity
 LOGICAL, INTENT(IN)            :: GPSRO_pseudo_ops       ! Option: Use pseudo-levels in vertical interpolation?
 LOGICAL, INTENT(IN)            :: GPSRO_vert_interp_ops  ! Option: Use ln(p) for vertical interpolation? (rather than exner)
 INTEGER, INTENT(IN)            :: nobs                   ! Number of observations in the profile
@@ -240,24 +240,20 @@ character(len=*), parameter  :: myname_ = "Ops_GPSRO_ForwardModel"
 !
 ! Local variables
 ! 
-INTEGER                      :: nstate            ! no. of levels in state vec.
 INTEGER                      :: num_pseudo        ! Number of levels, including pseudo levels
-INTEGER                      :: nb                ! no. of non-pseudo levs
-REAL(kind_real)              :: x(1:nlevP+nlevQ)  ! state vector
+REAL(kind_real)              :: x(1:nlevp+nlevq)  ! state vector
 character(max_string)        :: err_msg           ! Error message to be output
 
 ! The model data must be on a staggered grid, with nlevp = nlevq+1
-IF (nlevP /= nlevQ + 1) THEN
+IF (nlevp /= nlevq + 1) THEN
     write(err_msg,*) myname_ // ':' // ' Data must be on a staggered grid nlevp, nlevq = ', nlevp, nlevq
     call fckit_log % warning(err_msg)
     write(err_msg,*) myname_ // ':' // ' error: number of levels inconsistent!'
     call abor1_ftn(err_msg)
 END IF
 
-nstate = nlevP + nlevq
-nb = nlevq
-x(1:nlevP) = pressure
-x(nlevP+1:nstate) = humidity
+x(1:nlevp) = pressure
+x(nlevp+1:nlevp+nlevq) = humidity
 
 IF (GPSRO_pseudo_ops) THEN
     num_pseudo = 2 * nlevq - 1
@@ -268,9 +264,7 @@ ALLOCATE(nr(1:num_pseudo))
 
 BAErr = .FALSE.
 
-CALL Ops_GPSRO_refrac (nstate,   &
-                       nlevP,    &
-                       nb,       &
+CALL Ops_GPSRO_refrac (nlevp,    &
                        nlevq,    &
                        za,       &
                        zb,       &
@@ -308,7 +302,7 @@ IF (.NOT. BAerr) THEN
     ELSE
         !  2.  Calculate the refractive index * radius on theta model levels (or model impact parameter)
         CALL Ops_GPSROcalc_nr (zb,           &           ! geopotential heights of model levels
-                               nb,           &           ! number of levels in zb
+                               nlevq,        &           ! number of levels in zb
                                RO_Rad_Curv,  &           ! radius of curvature of earth at observation
                                Latitude,     &           ! latitude at observation
                                RO_geoid_und, &           ! geoid undulation above WGS-84
@@ -317,7 +311,7 @@ IF (.NOT. BAerr) THEN
 
         !  3.  Calculate model bending angle on observation impact parameters
         CALL Ops_GPSROcalc_alpha (nobs,     &      ! size of ob. vector
-                                  nb,       &      ! no. of refractivity levels
+                                  nlevq,    &      ! no. of refractivity levels
                                   zobs,     &      ! obs impact parameters
                                   Refmodel, &      ! refractivity values on model levels
                                   nr,       &      ! index * radius product

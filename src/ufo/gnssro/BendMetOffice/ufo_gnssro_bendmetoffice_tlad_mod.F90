@@ -79,7 +79,6 @@ subroutine ufo_gnssro_bendmetoffice_tlad_settraj(self, geovals, obss)
   type(ufo_geoval), pointer   :: prs                           ! The model geovals - atmospheric pressure
   type(ufo_geoval), pointer   :: rho_heights                   ! The model geovals - heights of the pressure-levels
   type(ufo_geoval), pointer   :: theta_heights                 ! The model geovals - heights of the theta-levels (stores q)
-  integer                     :: nstate                        ! The size of the state vector
   integer                     :: iobs                          ! Loop variable, observation number
 
   real(kind_real), allocatable       :: obsLat(:)              ! Latitude of the observation
@@ -123,8 +122,7 @@ subroutine ufo_gnssro_bendmetoffice_tlad_settraj(self, geovals, obss)
   call obsspace_get_db(obss, "MetaData", "impact_parameter", impact_param)
   call obsspace_get_db(obss, "MetaData", "earth_radius_of_curvature", obsLocR)
   call obsspace_get_db(obss, "MetaData", "geoid_height_above_reference_ellipsoid", obsGeoid)
-  nstate = prs % nval + q % nval
-  ALLOCATE(self % K(1:self%nlocs, 1:nstate))
+  ALLOCATE(self % K(1:self%nlocs, 1:prs%nval + q%nval))
 
 ! For each observation, calculate the K-matrix
   obs_loop: do iobs = 1, self % nlocs
@@ -142,7 +140,7 @@ subroutine ufo_gnssro_bendmetoffice_tlad_settraj(self, geovals, obss)
                               obsGeoid(iobs), &                 ! Geoid undulation at the tangent point
                               1, &                              ! Number of observations in the profile
                               impact_param(iobs:iobs), &        ! Impact parameter for this observation
-                              self % K(iobs:iobs,1:nstate))     ! K-matrix (Jacobian of the observation with respect to the inputs)
+                              self % K(iobs:iobs,1:prs%nval+q%nval))     ! K-matrix (Jacobian of the observation with respect to the inputs)
     else
       CALL jacobian_interface(prs % nval, &                     ! Number of pressure levels
                               q % nval, &                       ! Number of specific humidity levels
@@ -157,7 +155,7 @@ subroutine ufo_gnssro_bendmetoffice_tlad_settraj(self, geovals, obss)
                               obsGeoid(iobs), &                 ! Geoid undulation at the tangent point
                               1, &                              ! Number of observations in the profile
                               impact_param(iobs:iobs), &        ! Impact parameter for this observation
-                              self % K(iobs:iobs,1:nstate))     ! K-matrix (Jacobian of the observation with respect to the inputs)
+                              self % K(iobs:iobs,1:prs%nval+q%nval))     ! K-matrix (Jacobian of the observation with respect to the inputs)
     end if
   end do obs_loop
 
@@ -341,7 +339,7 @@ end subroutine ufo_gnssro_bendmetoffice_tlad_delete
 !-------------------------------------------------------------------------
 ! Interface for calculating the K-matrix for calculating TL/AD
 !-------------------------------------------------------------------------
-SUBROUTINE jacobian_interface(nlevP, &
+SUBROUTINE jacobian_interface(nlevp, &
                               nlevq, &
                               za, &
                               zb, &
@@ -358,7 +356,7 @@ SUBROUTINE jacobian_interface(nlevP, &
 
 IMPLICIT NONE
 
-INTEGER, INTENT(IN)            :: nlevP            ! The number of model pressure levels
+INTEGER, INTENT(IN)            :: nlevp            ! The number of model pressure levels
 INTEGER, INTENT(IN)            :: nlevq            ! The number of model theta levels
 REAL(kind_real), INTENT(IN)    :: za(:)            ! The geometric height of the model pressure levels
 REAL(kind_real), INTENT(IN)    :: zb(:)            ! The geometric height of the model theta levels
@@ -384,18 +382,14 @@ REAL(kind_real)              :: ref_model(1:nlevq) ! model refractivity on theta
 !
 ! Local variables
 !
-INTEGER                      :: nstate            ! Number of levels in state vector
 INTEGER                      :: num_pseudo        ! Number of levels, including pseudo levels
-INTEGER                      :: nb                ! Number of non-pseudo levs
-REAL(kind_real)              :: x(1:nlevP+nlevQ)  ! state vector
+REAL(kind_real)              :: x(1:nlevp+nlevq)  ! state vector
 LOGICAL                      :: BAErr             ! Whether we encountered an error in calculating the refractivity
 CHARACTER(LEN=200)           :: err_msg           ! Output message
 
 ! Set up the size of the state
-nstate = nlevP + nlevq
-nb = nlevq
-x(1:nlevP) = prs
-x(nlevP+1:nstate) = q
+x(1:nlevp) = prs
+x(nlevp+1:nlevp+nlevq) = q
 
 ! If we are using pseudo-levels for the vertical interpolation, then calculate
 ! the number of vertical levels
@@ -409,9 +403,7 @@ ALLOCATE(nr(1:num_pseudo))
 BAErr = .FALSE.
 
 ! Calculate the refractivity
-CALL Ops_GPSRO_refrac (nstate,   &
-                       nlevP,    &
-                       nb,       &
+CALL Ops_GPSRO_refrac (nlevp,    &
                        nlevq,    &
                        za,       &
                        zb,       &
@@ -439,7 +431,7 @@ IF (.NOT. BAErr) THEN
     ELSE
         !  2.  Calculate the refractive index * radius on theta model levels (or model impact parameter)
         CALL Ops_GPSROcalc_nr (zb,           &           ! geopotential heights of model levels
-                               nb,           &           ! number of levels in zb
+                               nlevq,        &           ! number of levels in zb
                                RO_Rad_Curv,  &           ! radius of curvature of earth at observation
                                Latitude,     &           ! latitude at observation
                                RO_geoid_und, &           ! geoid undulation above WGS-84
@@ -448,9 +440,8 @@ IF (.NOT. BAErr) THEN
     END IF
 
     ! Calculate the K-matrix (Jacobian)
-    CALL Ops_GPSRO_GetK(nstate, &
-                        nlevp, &
-                        nb, &
+    CALL Ops_GPSRO_GetK(nlevp, &
+                        nlevq, &
                         nlevq, &
                         za, &
                         zb, &
@@ -482,8 +473,7 @@ END SUBROUTINE jacobian_interface
 !-------------------------------------------------------------------------
 ! Calculate the K-matrix (Jacobian)
 !-------------------------------------------------------------------------
-SUBROUTINE Ops_GPSRO_GetK(nstate, &
-                          nlevP, &
+SUBROUTINE Ops_GPSRO_GetK(nlevp, &
                           nb, &
                           nlevq, &
                           za, &
@@ -505,8 +495,7 @@ SUBROUTINE Ops_GPSRO_GetK(nstate, &
 !
     IMPLICIT NONE
 
-    INTEGER, INTENT(IN)          :: nstate
-    INTEGER, INTENT(IN)          :: nlevP            ! The number of model pressure levels
+    INTEGER, INTENT(IN)          :: nlevp            ! The number of model pressure levels
     INTEGER, INTENT(IN)          :: nb
     INTEGER, INTENT(IN)          :: nlevq         ! The number of model theta levels
     REAL(kind_real), INTENT(IN)  :: za(:)            ! The geometric height of the model pressure levels
@@ -522,7 +511,7 @@ SUBROUTINE Ops_GPSRO_GetK(nstate, &
     INTEGER, INTENT(IN)          :: nobs             ! The number of observations in this column
     REAL(kind_real), INTENT(IN)  :: zobs(:)          ! The impact parameters of the column of observations
     REAL(kind_real), INTENT(IN)  :: nr(nb)           ! The impact parameters of the model data
-    REAL(kind_real), INTENT(OUT) :: K(nobs,nstate)   ! The calculated K matrix
+    REAL(kind_real), INTENT(OUT) :: K(nobs,nlevp+nlevq)   ! The calculated K matrix
 
     REAL(kind_real)              :: m1(nobs, nb)           ! Intermediate term in the K-matrix calculation
     REAL(kind_real), ALLOCATABLE :: dref_dp(:, :)          ! Partial derivative of refractivity wrt. pressure
@@ -532,8 +521,7 @@ SUBROUTINE Ops_GPSRO_GetK(nstate, &
     REAL(kind_real)              :: dalpha_dnr(nobs, nb)   ! Partial derivative of bending angle wrt. impact parameter
 
     !  1.  Calculate the gradient of ref wrt p (on rho levels) and q (on theta levels)
-    CALL Ops_GPSRO_refracK (nstate,   &
-                            nlevP,    &
+    CALL Ops_GPSRO_refracK (nlevp,    &
                             nb,       &
                             nlevq,    &
                             za,       &
@@ -575,8 +563,8 @@ SUBROUTINE Ops_GPSRO_GetK(nstate, &
 
     ! Calculate overall gradient of bending angle wrt p and q
     m1 = MATMUL (dalpha_dnr,dnr_dref)
-    K(1:nobs, 1:nlevP) = MATMUL (dalpha_dref,dref_dp) + MATMUL (m1,dref_dp)    !P part
-    K(1:nobs, nlevP + 1:nstate) = MATMUL (dalpha_dref,dref_dq) + MATMUL (m1,dref_dq) !q part
+    K(1:nobs, 1:nlevp) = MATMUL (dalpha_dref,dref_dp) + MATMUL (m1,dref_dp)    !P part
+    K(1:nobs, nlevp+1:nlevp+nlevq) = MATMUL (dalpha_dref,dref_dq) + MATMUL (m1,dref_dq) !q part
 
     IF (ALLOCATED(dref_dp)) DEALLOCATE(dref_dp)
     IF (ALLOCATED(dref_dq)) DEALLOCATE(dref_dq)

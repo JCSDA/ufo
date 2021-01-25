@@ -45,10 +45,9 @@ contains
 ! Calculate GPSRO refractivity K matrix.
 !-------------------------------------------------------------------------------
 
-SUBROUTINE Ops_GPSRO_refracK (nstate,  &
-                              nlevP,   &
-                              nb,      &
+SUBROUTINE Ops_GPSRO_refracK (nlevp,   &
                               nlevq,   &
+                              nb,      &
                               za,      &
                               zb,      &
                               x,       &
@@ -60,10 +59,9 @@ SUBROUTINE Ops_GPSRO_refracK (nstate,  &
 IMPLICIT NONE
 
 ! Subroutine arguments:
-INTEGER, INTENT(IN)                       :: nstate         ! Number of variables in full model state
-INTEGER, INTENT(IN)                       :: nlevP          ! Number of p levels in state vector
-INTEGER, INTENT(IN)                       :: nb             ! Number of theta levels
-INTEGER, INTENT(IN)                       :: nlevq          ! Number of specific humidity levels (=nb)
+INTEGER, INTENT(IN)                       :: nlevp          ! Number of p levels in state vector
+INTEGER, INTENT(IN)                       :: nlevq          ! Number of specific humidity levels
+INTEGER, INTENT(IN)                       :: nb             ! Number of q levels (including pseudo levels)
 REAL(kind_real), INTENT(IN)               :: za(:)          ! Heights of the pressure levels
 REAL(kind_real), INTENT(IN)               :: zb(:)          ! Heights of the theta (specific humidity) levels
 REAL(kind_real), INTENT(IN)               :: x(:)           ! Input model state
@@ -76,8 +74,8 @@ REAL(kind_real), ALLOCATABLE, INTENT(OUT) :: dref_dq(:,:)   ! K-matrix for q
 CHARACTER(len=*), PARAMETER  :: RoutineName = "Ops_GPSRO_refracK"
 INTEGER                      :: i
 INTEGER                      :: counter
-REAL(kind_real)              :: P(nlevP)
-REAL(kind_real)              :: Exner(nlevP)
+REAL(kind_real)              :: P(nlevp)
+REAL(kind_real)              :: Exner(nlevp)
 REAL(kind_real)              :: q(nlevq)
 REAL(kind_real)              :: Pb(nlevq)
 REAL(kind_real)              :: Tv(nlevq)
@@ -88,17 +86,17 @@ REAL(kind_real)              :: pwt2
 REAL(kind_real)              :: Ndry
 REAL(kind_real)              :: Nwet
 REAL(kind_real)              :: refrac(nlevq)
-REAL(kind_real)              :: dEx_dP(nlevP,nlevP)
-REAL(kind_real)              :: dPb_dP(nlevq,nlevP)
+REAL(kind_real)              :: dEx_dP(nlevp,nlevp)
+REAL(kind_real)              :: dPb_dP(nlevq,nlevp)
 REAL(kind_real)              :: dExtheta_dPb(nlevq,nlevq)
 REAL(kind_real)              :: dTv_dExtheta(nlevq,nlevq)
-REAL(kind_real)              :: dTv_dEx(nlevq,nlevP)
+REAL(kind_real)              :: dTv_dEx(nlevq,nlevp)
 REAL(kind_real)              :: dT_dTv(nlevq,nlevq)
 REAL(kind_real)              :: dT_dq(nlevq,nlevq)
 REAL(kind_real)              :: dref_dPb(nlevq,nlevq)
 REAL(kind_real)              :: dref_dT(nlevq,nlevq)
 REAL(kind_real)              :: m1(nb,nlevq)
-REAL(kind_real)              :: m2(nb,nlevP)
+REAL(kind_real)              :: m2(nb,nlevp)
 REAL(kind_real)              :: m3(nb,nlevq)
 REAL(kind_real)              :: m4(nb,nlevq)
 REAL(kind_real), ALLOCATABLE :: P_pseudo(:)
@@ -137,7 +135,7 @@ REAL(kind_real), ALLOCATABLE :: dPpseudo_dP(:,:)
 REAL(kind_real), ALLOCATABLE :: dTpseudo_dP(:,:)
 
 IF (GPSRO_pseudo_ops) THEN
-  ALLOCATE (dref_dP(nb,nlevP))
+  ALLOCATE (dref_dP(nb,nlevp))
   ALLOCATE (dref_dq(nb,nlevq))
 
   ALLOCATE (P_pseudo(nb))
@@ -154,9 +152,9 @@ IF (GPSRO_pseudo_ops) THEN
   ALLOCATE (dTpseudo_dTb(nb,nlevq))
   ALLOCATE (dqpseudo_dqb(nb,nlevq))
 
-  ALLOCATE (dTb_dP(nlevq,nlevP))
-  ALLOCATE (dPpseudo_dP(nb,nlevP))
-  ALLOCATE (dTpseudo_dP(nb,nlevP))
+  ALLOCATE (dTb_dP(nlevq,nlevp))
+  ALLOCATE (dPpseudo_dP(nb,nlevp))
+  ALLOCATE (dTpseudo_dP(nb,nlevp))
 
   dref_dPpseudo(:,:) = 0.0
   dref_dTpseudo(:,:) = 0.0
@@ -168,7 +166,7 @@ IF (GPSRO_pseudo_ops) THEN
   dPpseudo_dP(:,:) = 0.0
   dTpseudo_dP(:,:) = 0.0
 ELSE
-  ALLOCATE (dref_dP(nlevq,nlevP))
+  ALLOCATE (dref_dP(nlevq,nlevp))
   ALLOCATE (dref_dq(nlevq,nlevq))
 END IF
 
@@ -190,8 +188,8 @@ dref_dp(:,:) = 0.0
 
 ! Set up the P and q vectors from x
 
-P(:) = 1.0E2 * x(1:nlevP)
-q(:) = 1.0E-3 * x(nlevP + 1:nstate)
+P(:) = 1.0E2 * x(1:nlevp)
+q(:) = 1.0E-3 * x(nlevp+1:nlevp+nlevq)
 
 ! Calculate exner on rho levels.
 

@@ -315,9 +315,7 @@ END SUBROUTINE Ops_GPSRO_geop_geom
 ! GPSRO refractivity forward operator
 !-------------------------------------------------------------------------------
 
-SUBROUTINE Ops_GPSRO_refrac (nstate,    &
-                             nlevP,     &
-                             nb,        &
+SUBROUTINE Ops_GPSRO_refrac (nlevp,     &
                              nlevq,     &
                              za,        &
                              zb,        &
@@ -334,21 +332,19 @@ SUBROUTINE Ops_GPSRO_refrac (nstate,    &
 IMPLICIT NONE
 
 ! Subroutine arguments:
-INTEGER, INTENT(IN)                      :: nstate      ! no. of levels in state vec.
-INTEGER, INTENT(IN)                      :: nlevP       ! no. of p levels in state vec.
-INTEGER, INTENT(IN)                      :: nb          ! no. of non-pseudo levs (=nlevq)
-INTEGER, INTENT(IN)                      :: nlevq       ! no. of theta levels
-REAL(kind_real), INTENT(IN)              :: za(:)       ! heights of rho levs
-REAL(kind_real), INTENT(IN)              :: zb(:)       ! heights of theta levs
-REAL(kind_real), INTENT(IN)              :: x(:)        ! state vector
-LOGICAL, INTENT(IN)                      :: GPSRO_pseudo_ops
-LOGICAL, INTENT(IN)                      :: GPSRO_vert_interp_ops
-LOGICAL, INTENT(OUT)                     :: refracerr   ! refractivity error
-REAL(kind_real), INTENT(OUT)             :: refrac(nb)  ! refrac on theta levs
-REAL(kind_real), INTENT(OUT)             :: T(nb)       ! Temp. on theta levs
+INTEGER, INTENT(IN)                      :: nlevp                  ! no. of p levels in state vec.
+INTEGER, INTENT(IN)                      :: nlevq                  ! no. of theta levels
+REAL(kind_real), INTENT(IN)              :: za(:)                  ! heights of rho levs
+REAL(kind_real), INTENT(IN)              :: zb(:)                  ! heights of theta levs
+REAL(kind_real), INTENT(IN)              :: x(:)                   ! state vector
+LOGICAL, INTENT(IN)                      :: GPSRO_pseudo_ops       ! Use pseudo levels?
+LOGICAL, INTENT(IN)                      :: GPSRO_vert_interp_ops  ! Interpolate using ln(p)
+LOGICAL, INTENT(OUT)                     :: refracerr              ! refractivity error
+REAL(kind_real), INTENT(OUT)             :: refrac(nlevq)          ! refrac on theta levs
+REAL(kind_real), INTENT(OUT)             :: T(nlevq)               ! Temp. on theta levs
 REAL(kind_real), ALLOCATABLE, INTENT(OUT), OPTIONAL :: z_pseudo(:) ! height of pseudo levs
 REAL(kind_real), ALLOCATABLE, INTENT(OUT), OPTIONAL :: N_pseudo(:) ! Ref. on pseudo levs
-INTEGER, INTENT(OUT), OPTIONAL           :: nb_pseudo   ! no. of pseudo levs
+INTEGER, INTENT(OUT), OPTIONAL           :: nb_pseudo              ! no. of pseudo levs
 
 ! Local declarations:
 integer, parameter           :: max_string = 800
@@ -359,10 +355,10 @@ INTEGER                      :: counter
 INTEGER                      :: search_lev    ! The vertical level to start searching from to
                                               ! find matching temperature-level heights
 INTEGER                      :: this_lev      ! Matching level to temperature-level height
-REAL(kind_real)              :: P(nlevP)
-REAL(kind_real)              :: Exner(nlevP)
+REAL(kind_real)              :: P(nlevp)
+REAL(kind_real)              :: Exner(nlevp)
 REAL(kind_real)              :: q(nlevq)
-REAL(kind_real)              :: Pb(nb)
+REAL(kind_real)              :: Pb(nlevq)
 REAL(kind_real)              :: Tv
 REAL(kind_real)              :: Ex_theta
 REAL(kind_real)              :: pwt1
@@ -380,7 +376,7 @@ LOGICAL                      :: unphys
 
 ! Allocate arrays for pseudo-level processing
 IF (GPSRO_pseudo_ops) THEN
-  nb_pseudo = 2 * nb - 1
+  nb_pseudo = 2 * nlevq - 1
   ALLOCATE (P_pseudo(nb_pseudo))
   ALLOCATE (q_pseudo(nb_pseudo))
   ALLOCATE (T_pseudo(nb_pseudo))
@@ -389,8 +385,8 @@ IF (GPSRO_pseudo_ops) THEN
 END IF
 
 ! Set up the P and q vectors from x
-P(:) = x(1:nlevP)
-q(:) = x(nlevP + 1:nstate)
+P(:) = x(1:nlevp)
+q(:) = x(nlevp+1:nlevp+nlevq)
 
 ! Initialise refractivity arrays to missing Data
 refrac(:) = missing_value(refrac(1))
@@ -399,7 +395,7 @@ nonmon = .FALSE.
 unphys = .FALSE.
 refracerr = .FALSE.
 
-DO i = 1, nlevP
+DO i = 1, nlevp
   IF (P(i) == missing_value(P(i))) THEN  !pressure missing
     refracerr = .TRUE.
     WRITE(message, *) RoutineName, "Missing value P", i
@@ -408,7 +404,7 @@ DO i = 1, nlevP
   END IF
 END DO
 
-DO i = 1, nlevP-1
+DO i = 1, nlevp-1
   IF (P(i) - P(i + 1) < 0.0) THEN       !or non-monotonic pressure
     refracerr = .TRUE.
     nonmon = .TRUE.
@@ -447,11 +443,11 @@ ELSE
 
   ! Calculate the refractivity on the b levels
   search_lev = 1
-  DO i = 1, nb
+  DO i = 1, nlevq
     ! Search for the first pressure (rho) level which has a height greater than
     ! the temperature (theta) level being considered.  Interpolate the pressure
     ! to the temperature levels using the level which has been found.
-    DO this_lev = search_lev, nlevP
+    DO this_lev = search_lev, nlevp
       IF (za(this_lev) > zb(i)) THEN
         EXIT
       END IF

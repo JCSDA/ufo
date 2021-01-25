@@ -188,6 +188,9 @@ if( ${RTTOV_FOUND} )
   list( APPEND filters_files ${rttovonedvarcheck_src_files} )
 endif( ${RTTOV_FOUND} )
 
+add_subdirectory( gnssroonedvarcheck )
+list( APPEND filters_files ${gnssroonedvarcheck_src_files} )
+
 PREPEND( _p_filters_files       "filters"       ${filters_files} )
 
 set ( filters_src_files
