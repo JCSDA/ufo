@@ -59,11 +59,10 @@ subroutine ufo_rttovonedvarcheck_create(self, obsspace, f_conf, channels, &
   integer(c_int), intent(in)                 :: passflag     !< pass flag from qc flags
 
   self % obsdb = obsspace
-  self % conf = f_conf
   self % onedvarflag = onedvarflag
   self % passflag = passflag
 
-  call ufo_rttovonedvarcheck_setup(self, channels) ! from init
+  call ufo_rttovonedvarcheck_setup(self, f_conf, channels) ! from init
 
 end subroutine ufo_rttovonedvarcheck_create
 
@@ -96,10 +95,11 @@ end subroutine ufo_rttovonedvarcheck_delete
 !!
 !! \date 09/06/2020: Created
 !!
-subroutine ufo_rttovonedvarcheck_apply(self, vars, retrieval_vars, geovals, apply)
+subroutine ufo_rttovonedvarcheck_apply(self, f_conf, vars, retrieval_vars, geovals, apply)
 
   implicit none
   type(ufo_rttovonedvarcheck), intent(inout) :: self     !< rttovonedvarcheck main object
+  type(fckit_configuration), intent(in)      :: f_conf       !< yaml file contents
   type(oops_variables), intent(in)           :: vars     !< channels for 1D-Var
   type(oops_variables), intent(in)           :: retrieval_vars !< retrieval variables for 1D-Var
   type(ufo_geovals), intent(in)              :: geovals  !< model values at observation space
@@ -141,7 +141,7 @@ subroutine ufo_rttovonedvarcheck_apply(self, vars, retrieval_vars, geovals, appl
   missing = missing_value(missing)
 
   ! Setup rttov simobs
-  call rttov_simobs % setup(self % conf, self % channels)
+  call rttov_simobs % setup(f_conf, self % channels)
 
   ! Setup IR emissivity - if needed
   if (self % pcemiss) then

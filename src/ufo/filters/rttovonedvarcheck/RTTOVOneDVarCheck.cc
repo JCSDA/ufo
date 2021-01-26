@@ -20,26 +20,27 @@
 #include "ufo/filters/rttovonedvarcheck/RTTOVOneDVarCheck.interface.h"
 #include "ufo/GeoVaLs.h"
 
-#include "eckit/config/Configuration.h"
 #include "eckit/exception/Exceptions.h"
-
-#include "oops/util/IntSetParser.h"
 
 namespace ufo {
 
 // -----------------------------------------------------------------------------
 
-RTTOVOneDVarCheck::RTTOVOneDVarCheck(ioda::ObsSpace & obsdb, const eckit::Configuration & config,
+RTTOVOneDVarCheck::RTTOVOneDVarCheck(ioda::ObsSpace & obsdb, const Parameters_ & parameters,
                                  std::shared_ptr<ioda::ObsDataVector<int> > flags,
                                  std::shared_ptr<ioda::ObsDataVector<float> > obserr)
-  : FilterBase(obsdb, config, flags, obserr), config_(config), channels_(), retrieved_vars_(),
-    hoxdiags_retrieved_vars_()
+  : FilterBase(obsdb, parameters, flags, obserr), channels_(), retrieved_vars_(),
+    hoxdiags_retrieved_vars_(), parameters_(parameters)
 {
   oops::Log::trace() << "RTTOVOneDVarCheck contructor starting" << std::endl;
 
-  // Get channels from the obs database
-  const oops::Variables & variables = obsdb.obsvariables();
-  channels_ = variables.channels();
+  // Check only one variable has been defined - BT
+  // Get channels from filter variables
+  if (filtervars_.size() != 1) {
+     throw eckit::UserError("RTTOVOneDVarCheck contructor:"
+                            " only one variable allowed, aborting.");
+  }
+  channels_ = filtervars_[0].channels();
 
   // Check at least one channel has been defined
   if (channels_.empty()) {
@@ -47,9 +48,8 @@ RTTOVOneDVarCheck::RTTOVOneDVarCheck(ioda::ObsSpace & obsdb, const eckit::Config
   }
 
   // Setup Fortran object
-  const eckit::Configuration * conf = &config_;
-  ufo_rttovonedvarcheck_create_f90(key_, obsdb, conf, channels_.size(), channels_[0],
-                                   retrieved_vars_, QCflags::onedvar, QCflags::pass);
+  ufo_rttovonedvarcheck_create_f90(key_, obsdb, parameters_.toConfiguration(), channels_.size(),
+                                   channels_[0], retrieved_vars_, QCflags::onedvar, QCflags::pass);
 
   // Create hofxdiags
   for (size_t jvar = 0; jvar < retrieved_vars_.size(); ++jvar) {
@@ -98,8 +98,8 @@ void RTTOVOneDVarCheck::applyFilter(const std::vector<bool> & apply,
   flags_->save("FortranQC");    // temporary measure as per ROobserror qc
 
 // Pass it all to fortran
-  const eckit::Configuration * conf = &config_;
-  ufo_rttovonedvarcheck_apply_f90(key_, variables, hoxdiags_retrieved_vars_,
+  ufo_rttovonedvarcheck_apply_f90(key_, parameters_.ModOptions.value(),
+                                  variables, hoxdiags_retrieved_vars_,
                                   gvals->toFortran(),
                                   apply_char.size(), apply_char[0]);
 
@@ -112,7 +112,7 @@ void RTTOVOneDVarCheck::applyFilter(const std::vector<bool> & apply,
 // -----------------------------------------------------------------------------
 
 void RTTOVOneDVarCheck::print(std::ostream & os) const {
-  os << "RTTOVOneDVarCheck: config =  " << config_ << std::endl;
+  os << "RTTOVOneDVarCheck: config =  " << parameters_ << std::endl;
 }
 
 // -----------------------------------------------------------------------------

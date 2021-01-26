@@ -34,7 +34,6 @@ type, public :: ufo_rttovonedvarcheck
   character(len=max_string)        :: forward_mod_name !< forward model name (only RTTOV at the moment)
   character(len=max_string), allocatable :: retrieval_variables(:) !< list of variables which form the 1D-var retrieval vector
   type(c_ptr)                      :: obsdb !< pointer to the observation space
-  type(fckit_configuration)        :: conf  !< contents of the yaml file
   integer(c_int)                   :: onedvarflag !< flag uased by the qc manager for a 1D-var check
   integer(c_int)                   :: passflag !< flag uased by the qc manager to flag good data
   integer                          :: nlevels ! number 1D-Var model levels
@@ -52,9 +51,9 @@ type, public :: ufo_rttovonedvarcheck
   integer                          :: Max1DVarIterations !< maximum number of iterations
   integer                          :: JConvergenceOption !< integer to select convergence option
   integer                          :: IterNumForLWPCheck !< choose which iteration to start checking LWP
+  integer                          :: MaxMLIterations !< maximum number of iterations for internal Marquardt-Levenberg loop
   real(kind_real)                  :: ConvergenceFactor !< 1d-var convergence if using change in profile
   real(kind_real)                  :: Cost_ConvergenceFactor !< 1d-var convergence if using % change in cost
-  real(kind_real)                  :: MaxMLIterations !< maximum number of iterations for internal Marquardt-Levenberg loop
   real(kind_real)                  :: EmissLandDefault !< default emissivity value to use over land
   real(kind_real)                  :: EmissSeaIceDefault !< default emissivity value to use over sea ice
   character(len=max_string)        :: EmisEigVecPath !< path to eigen vector file for IR PC emissivity
@@ -71,12 +70,13 @@ contains
 !!
 !! \date 09/06/2020: Created
 !!
-subroutine ufo_rttovonedvarcheck_setup(self, channels)
+subroutine ufo_rttovonedvarcheck_setup(self, f_conf, channels)
 
 implicit none
 
 ! subroutine arguments
 type(ufo_rttovonedvarcheck), intent(inout) :: self
+type(fckit_configuration), intent(in)      :: f_conf       !< yaml file contents
 integer(c_int), intent(in)                 :: channels(:)
 
 ! local variables
@@ -86,18 +86,18 @@ character(len=:), allocatable :: str_array(:)
 
 ! Setup core paths and names
 self % qcname = "rttovonedvarcheck"
-call self % conf % get_or_die("BMatrix",str)
+call f_conf % get_or_die("BMatrix",str)
 self % b_matrix_path = str
-call self % conf % get_or_die("RMatrix",str)
+call f_conf % get_or_die("RMatrix",str)
 self % r_matrix_path = str
-call self % conf % get_or_die("ModName",str)
+call f_conf % get_or_die("ModName",str)
 self % forward_mod_name = str
-call self % conf % get_or_die("nlevels",self % nlevels)
+call f_conf % get_or_die("nlevels",self % nlevels)
 
 ! Variables for profile (x,xb)
-self % nmvars = self % conf % get_size("retrieval variables")
+self % nmvars = f_conf % get_size("retrieval variables")
 allocate(self % retrieval_variables(self % nmvars))
-call self % conf % get_or_die("retrieval variables", str_array)
+call f_conf % get_or_die("retrieval variables", str_array)
 self % retrieval_variables(1:self % nmvars) = str_array
 
 ! Satellite channels
@@ -105,113 +105,65 @@ self % nchans = size(channels)
 allocate(self % channels(self % nchans))
 self % channels(:) = channels(:)
 
-! Set defaults for 1D-var
-self % qtotal = .false.
-self % RTTOV_mwscattSwitch = .false.
-self % RTTOV_usetotalice = .false.
-self % UseMLMinimization = .false.
-self % UseJforConvergence = .false.
-self % UseRHwaterForQC = .true.
-self % FullDiagnostics = .false.
-self % pcemiss = .false.
-self % Max1DVarIterations = 7
-self % JConvergenceOption = 1
-self % IterNumForLWPCheck = 2
-self % ConvergenceFactor = 0.40
-self % Cost_ConvergenceFactor = 0.01
-self % MaxMLIterations = 7
-self % EmissLandDefault = 0.95    ! default land surface emissivity
-self % EmissSeaIceDefault = 0.92  ! default seaice surface emissivity
-self % EmisEigVecPath = ""
-self % EmisAtlas = ""
-
 ! Flag for total humidity
-if (self % conf % has("qtotal")) then
-  call self % conf % get_or_die("qtotal", self % qtotal)
-end if
+call f_conf % get_or_die("qtotal", self % qtotal)
 
 ! Flag for RTTOV MW scatt
-if (self % conf % has("RTTOV_mwscattSwitch")) then
-  call self % conf % get_or_die("RTTOV_mwscattSwitch", self % RTTOV_mwscattSwitch)
-end if
+call f_conf % get_or_die("RTTOVMWScattSwitch", self % RTTOV_mwscattSwitch)
 
 ! Flag for use of total ice in RTTOV MW scatt
-if (self % conf % has("RTTOV_usetotalice")) then
-  call self % conf % get_or_die("RTTOV_usetotalice", self % RTTOV_usetotalice)
-end if
+call f_conf % get_or_die("RTTOVUseTotalIce", self % RTTOV_usetotalice)
 
 ! Flag to turn on marquardt-levenberg minimiser
-if (self % conf % has("UseMLMinimization")) then
-  call self % conf % get_or_die("UseMLMinimization", self % UseMLMinimization)
-end if
+call f_conf % get_or_die("UseMLMinimization", self % UseMLMinimization)
 
 ! Flag to Use J for convergence
-if (self % conf % has("UseJforConvergence")) then
-  call self % conf % get_or_die("UseJforConvergence", self % UseJforConvergence)
-end if
+call f_conf % get_or_die("UseJforConvergence", self % UseJforConvergence)
 
 ! Flag to use water in relative humidity check
-if (self % conf % has("UseRHwaterForQC")) then
-  call self % conf % get_or_die("UseRHwaterForQC", self % UseRHwaterForQC)
-end if
+call f_conf % get_or_die("UseRHwaterForQC", self % UseRHwaterForQC)
 
 ! Flag to turn on full diagnostics
-if (self % conf % has("FullDiagnostics")) then
-  call self % conf % get_or_die("FullDiagnostics", self % FullDiagnostics)
-end if
+call f_conf % get_or_die("FullDiagnostics", self % FullDiagnostics)
 
-! maximum number of iterations
-if (self % conf % has("Max1DVarIterations")) then
-  call self % conf % get_or_die("Max1DVarIterations", self % Max1DVarIterations)
-end if
+! maximum number of iterations allowed
+call f_conf % get_or_die("Max1DVarIterations", self % Max1DVarIterations)
 
 ! integer to select convergence option
-if (self % conf % has("JConvergenceOption")) then
-  call self % conf % get_or_die("JConvergenceOption", self % JConvergenceOption)
-end if
+! 1= percentage change in cost tested between iterations
+! otherwise = absolute change in cost tested between iterations
+call f_conf % get_or_die("JConvergenceOption", self % JConvergenceOption)
 
-! Choose which iteration to start checking LWP
-if (self % conf % has("IterNumForLWPCheck")) then
-  call self % conf % get_or_die("IterNumForLWPCheck", self % IterNumForLWPCheck)
-end if
+! Choose which iteration to start checking the liquid water path
+call f_conf % get_or_die("IterNumForLWPCheck", self % IterNumForLWPCheck)
 
-! Cost threhsold for convergence check
-if (self % conf % has("ConvergenceFactor")) then
-  call self % conf % get_or_die("ConvergenceFactor", self % ConvergenceFactor)
-end if
+! Convergence factor used when the absolute difference in the profile is used
+! to determine convergence.
+call f_conf % get_or_die("ConvergenceFactor", self % ConvergenceFactor)
 
-! Flag to specify if delta_x has to be negative for converg. to be true
-if (self % conf % has("Cost_ConvergenceFactor")) then
-  call self % conf % get_or_die("Cost_ConvergenceFactor", self % Cost_ConvergenceFactor)
-end if
+! Cost threshold for convergence check when cost function value is used for convergence
+call f_conf % get_or_die("CostConvergenceFactor", self % Cost_ConvergenceFactor)
 
 ! Maximum number of iterations for internal Marquardt-Levenberg loop
-if (self % conf % has("MaxMLIterations")) then
-  call self % conf % get_or_die("MaxMLIterations", self % MaxMLIterations)
-end if
+call f_conf % get_or_die("MaxMLIterations", self % MaxMLIterations)
 
 ! Default emissivity value to use over land
-if (self % conf % has("EmissLandDefault")) then
-  call self % conf % get_or_die("EmissLandDefault", self % EmissLandDefault)
-end if
+call f_conf % get_or_die("EmissLandDefault", self % EmissLandDefault)
 
 ! Default emissivity value to use over seaice
-if (self % conf % has("EmissSeaIceDefault")) then
-  call self % conf % get_or_die("EmissSeaIceDefault", self % EmissSeaIceDefault)
-end if
+call f_conf % get_or_die("EmissSeaIceDefault", self % EmissSeaIceDefault)
 
 ! Default eigen value path is blank but needs to be present if using PC emiss
-if (self % conf % has("EmisEigVecPath")) then
-  call self % conf % get_or_die("EmisEigVecPath",str)
-  self % EmisEigVecPath = str
+call f_conf % get_or_die("EmisEigVecPath",str)
+self % EmisEigVecPath = str
+self % pcemiss = .false. 
+if (len(trim(self % EmisEigVecPath)) > 4) then
   self % pcemiss = .true.
 end if
 
 ! Default emis atlas path is blank
-if (self % conf % has("EmisAtlas")) then
-  call self % conf % get_or_die("EmisAtlas",str)
-  self % EmisAtlas = str
-end if
+call f_conf % get_or_die("EmisAtlas",str)
+self % EmisAtlas = str
 
 ! Print self
 if (self % FullDiagnostics) then
@@ -235,34 +187,35 @@ type(ufo_rttovonedvarcheck), intent(in) :: self
 
 integer :: ii
 
-write(*,*) "qcname = ",trim(self % qcname)
-write(*,*) "b_matrix_path = ",trim(self % b_matrix_path)
-write(*,*) "r_matrix_path = ",trim(self % r_matrix_path)
-write(*,*) "forward_mod_name = ",trim(self % forward_mod_name)
+write(*,*) "qcname = ", trim(self % qcname)
+write(*,*) "b_matrix_path = ", trim(self % b_matrix_path)
+write(*,*) "r_matrix_path = ", trim(self % r_matrix_path)
+write(*,*) "forward_mod_name = ", trim(self % forward_mod_name)
 write(*,*) "retrieval_variables = "
 do ii = 1, self % nmvars
   write(*,*) trim(self % retrieval_variables(ii))," "
 end do
-write(*,*) "nlevels = ",self %  nlevels
-write(*,*) "nmvars = ",self % nmvars
-write(*,*) "nchans = ",self % nchans
-write(*,*) "channels(:) = ",self % channels(:)
-write(*,*) "qtotal = ",self % qtotal
-write(*,*) "RTTOV_mwscattSwitch = ",self % RTTOV_mwscattSwitch
-write(*,*) "RTTOV_usetotalice = ",self % RTTOV_usetotalice
-write(*,*) "UseMLMinimization = ",self % UseMLMinimization
-write(*,*) "UseJforConvergence = ",self % UseJforConvergence
-write(*,*) "FullDiagnostics = ",self % FullDiagnostics
-write(*,*) "Max1DVarIterations = ",self % Max1DVarIterations
-write(*,*) "JConvergenceOption = ",self % JConvergenceOption
-write(*,*) "IterNumForLWPCheck = ",self % IterNumForLWPCheck
-write(*,*) "ConvergenceFactor = ",self % ConvergenceFactor
-write(*,*) "Cost_ConvergenceFactor = ",self % Cost_ConvergenceFactor
-write(*,*) "MaxMLIterations = ",self % MaxMLIterations
-write(*,*) "EmissLandDefault = ",self % EmissLandDefault
-write(*,*) "EmissSeaIceDefault = ",self % EmissSeaIceDefault
-write(*,*) "EmisEigVecPath = ",self % EmisEigVecPath
-write(*,*) "EmisAtlas = ",self % EmisAtlas
+write(*,*) "nlevels = ", self %  nlevels
+write(*,*) "nmvars = ", self % nmvars
+write(*,*) "nchans = ", self % nchans
+write(*,*) "channels(:) = ", self % channels(:)
+write(*,*) "qtotal = ", self % qtotal
+write(*,*) "RTTOV_mwscattSwitch = ", self % RTTOV_mwscattSwitch
+write(*,*) "RTTOV_usetotalice = ", self % RTTOV_usetotalice
+write(*,*) "UseMLMinimization = ", self % UseMLMinimization
+write(*,*) "UseJforConvergence = ", self % UseJforConvergence
+write(*,*) "FullDiagnostics = ", self % FullDiagnostics
+write(*,*) "Max1DVarIterations = ", self % Max1DVarIterations
+write(*,*) "JConvergenceOption = ", self % JConvergenceOption
+write(*,*) "IterNumForLWPCheck = ", self % IterNumForLWPCheck
+write(*,*) "ConvergenceFactor = ", self % ConvergenceFactor
+write(*,*) "Cost_ConvergenceFactor = ", self % Cost_ConvergenceFactor
+write(*,*) "MaxMLIterations = ", self % MaxMLIterations
+write(*,*) "EmissLandDefault = ", self % EmissLandDefault
+write(*,*) "EmissSeaIceDefault = ", self % EmissSeaIceDefault
+write(*,*) "Use PC for Emissivity = ", self % pcemiss
+write(*,*) "EmisEigVecPath = ", trim(self % EmisEigVecPath)
+write(*,*) "EmisAtlas = ", trim(self % EmisAtlas)
 
 end subroutine ufo_rttovonedvarcheck_print
 

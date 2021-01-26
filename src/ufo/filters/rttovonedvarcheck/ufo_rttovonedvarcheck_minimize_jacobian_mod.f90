@@ -7,7 +7,6 @@
 
 module ufo_rttovonedvarcheck_minimize_jacobian_mod
 
-use fckit_configuration_module, only: fckit_configuration
 use iso_c_binding
 use kinds
 use ufo_geovals_mod
@@ -34,7 +33,7 @@ contains
 !! \date 09/06/2020: Created
 !!
 subroutine ufo_rttovonedvarcheck_get_jacobian(geovals, ob, channels, &
-                                              obsdb, conf, profindex, &
+                                              obsdb, profindex, &
                                               prof_x, hofxdiags, rttov_simobs, &
                                               hofx, H_matrix)
 
@@ -45,7 +44,6 @@ type(ufo_geovals), intent(in)                     :: geovals       !< model data
 type(ufo_rttovonedvarcheck_ob), intent(inout)     :: ob            !< satellite metadata
 integer, intent(in)                               :: channels(:)   !< channels used for this calculation
 type(c_ptr), value, intent(in)                    :: obsdb         !< observation database
-type(fckit_configuration), intent(in)             :: conf          !< configuration
 type(ufo_rttovonedvarcheck_profindex), intent(in) :: profindex     !< index array for x vector
 real(kind_real), intent(in)                       :: prof_x(:)     !< x vector
 type(ufo_geovals), intent(inout)                  :: hofxdiags     !< model data to pass the jacobian

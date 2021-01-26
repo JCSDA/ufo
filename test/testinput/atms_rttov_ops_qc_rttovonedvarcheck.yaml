@@ -9,10 +9,10 @@ observations:
     Absorbers: &rttov_absobers [Water_vapour, CLW, CIW]
     linear obs operator:
       Absorbers: [Water_vapour]
-    obs options: &rttov_options
+    obs options:
       RTTOV_default_opts: OPS
       SatRad_compatibility: true
-      Sensor_ID: noaa_20_atms
+      Sensor_ID: &sensor_id noaa_20_atms
       CoefficientPath: Data/
   obs space:
     name: atms_n20
@@ -33,12 +33,13 @@ observations:
   # Do 1D-Var check
   - filter: RTTOV OneDVar Check
     ModName: RTTOV
-    Absorbers: *rttov_absobers
-    obs options: 
-      RTTOV_default_opts: OPS
-      SatRad_compatibility: false # done in filter
-      Sensor_ID: noaa_20_atms
-      CoefficientPath: Data/
+    ModOptions:
+      Absorbers: *rttov_absobers
+      obs options: 
+        RTTOV_default_opts: OPS
+        SatRad_compatibility: false # done in filter
+        Sensor_ID: *sensor_id
+        CoefficientPath: Data/
     BMatrix: ../resources/bmatrix/rttov/atms_bmatrix_70_test.dat
     RMatrix: ../resources/rmatrix/rttov/atms_noaa_20_rmatrix_test.nc4
     filter variables:
@@ -55,18 +56,16 @@ observations:
     - air_pressure_at_two_meters_above_surface
     nlevels: 70
     qtotal: true
-    RTTOV_mwscattSwitch: false
-    RTTOV_usetotalice: false
+    RTTOVMWScattSwitch: false
+    RTTOVUseTotalIce: false
     UseMLMinimization: false
     UseJforConvergence: true
     UseRHwaterForQC: true
     FullDiagnostics: false
     JConvergenceOption: 1
     ConvergenceFactor: 0.40
-    Cost_ConvergenceFactor: 0.01
+    CostConvergenceFactor: 0.01
     Max1DVarIterations: 7
-    MWemiss: true
-    IRemiss: false
     EmissLandDefault: 0.95
     EmissSeaIceDefault: 0.92
   passedBenchmark: 1395      # number of passed obs
@@ -80,7 +79,7 @@ observations:
     obs options: &rttov_options
       RTTOV_default_opts: OPS
       SatRad_compatibility: true
-      Sensor_ID: noaa_20_atms
+      Sensor_ID: *sensor_id
       CoefficientPath: Data/
   obs space:
     name: atms_n20
@@ -101,12 +100,13 @@ observations:
   # Do 1D-Var check
   - filter: RTTOV OneDVar Check
     ModName: RTTOV
-    Absorbers: *rttov_absobers
-    obs options: 
-      RTTOV_default_opts: OPS
-      SatRad_compatibility: false # done in filter
-      Sensor_ID: noaa_20_atms
-      CoefficientPath: Data/
+    ModOptions:
+      Absorbers: *rttov_absobers
+      obs options: 
+        RTTOV_default_opts: OPS
+        SatRad_compatibility: false # done in filter
+        Sensor_ID: *sensor_id
+        CoefficientPath: Data/
     BMatrix: ../resources/bmatrix/rttov/atms_bmatrix_70_test.dat
     RMatrix: ../resources/rmatrix/rttov/atms_noaa_20_rmatrix_test.nc4
     filter variables:
@@ -123,18 +123,16 @@ observations:
     - air_pressure_at_two_meters_above_surface
     nlevels: 70
     qtotal: true
-    RTTOV_mwscattSwitch: false
-    RTTOV_usetotalice: false
+    RTTOVMWScattSwitch: false
+    RTTOVUseTotalIce: false
     UseMLMinimization: true
     UseJforConvergence: true
     UseRHwaterForQC: false
-    FullDiagnostics: false
+    FullDiagnostics: true
     JConvergenceOption: 1
     ConvergenceFactor: 0.40
-    Cost_ConvergenceFactor: 0.01
+    CostConvergenceFactor: 0.01
     Max1DVarIterations: 7
-    MWemiss: true
-    IRemiss: false
     EmissLandDefault: 0.95
     EmissSeaIceDefault: 0.92
   passedBenchmark: 1410      # number of passed obs

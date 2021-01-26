@@ -1,4 +1,3 @@
-
 ! (C) Copyright 2017-2020 Met Office
 ! 
 ! This software is licensed under the terms of the Apache Licence Version 2.0
@@ -94,7 +93,7 @@ end subroutine ufo_rttovonedvarcheck_delete_c
 
 ! ------------------------------------------------------------------------------------------------
 
-subroutine ufo_rttovonedvarcheck_apply_c(c_self, c_vars, c_retvars, c_geovals, c_nobs, c_apply) &
+subroutine ufo_rttovonedvarcheck_apply_c(c_self, c_conf, c_vars, c_retvars, c_geovals, c_nobs, c_apply) &
                bind(c,name='ufo_rttovonedvarcheck_apply_f90')
 
 !> \brief Interface to filter apply method
@@ -106,6 +105,7 @@ subroutine ufo_rttovonedvarcheck_apply_c(c_self, c_vars, c_retvars, c_geovals, c
 
 implicit none
 integer(c_int), intent(in)     :: c_self          !< self - input
+type(c_ptr), value, intent(in) :: c_conf          !< yaml configuration - in
 type(c_ptr), value, intent(in) :: c_vars          !< list of variables - input
 type(c_ptr), value, intent(in) :: c_retvars       !< list of retrieval variables - input
 integer(c_int), intent(in)     :: c_geovals       !< Geovals - input
@@ -113,6 +113,7 @@ integer(c_int), intent(in)     :: c_nobs          !< number of observations - in
 character(c_char), intent(in)  :: c_apply(c_nobs) !< apply flag (converted to logical) - input
 
 type(ufo_rttovonedvarcheck), pointer :: self
+type(fckit_configuration)            :: f_conf
 type(oops_variables)                 :: vars
 type(oops_variables)                 :: retrieval_vars
 type(ufo_geovals), pointer           :: geovals
@@ -121,6 +122,7 @@ logical                              :: apply(c_nobs)
 
 call ufo_rttovonedvarcheck_registry%get(c_self, self)
 call ufo_geovals_registry%get(c_geovals, geovals)
+f_conf = fckit_configuration(c_conf)
 
 vars = oops_variables(c_vars)
 retrieval_vars = oops_variables(c_retvars)
@@ -131,7 +133,7 @@ where (c_apply == 'T')
   apply = .true.
 end where
 
-call ufo_rttovonedvarcheck_apply(self, vars, retrieval_vars, geovals, apply)
+call ufo_rttovonedvarcheck_apply(self, f_conf, vars, retrieval_vars, geovals, apply)
 
 end subroutine ufo_rttovonedvarcheck_apply_c
 

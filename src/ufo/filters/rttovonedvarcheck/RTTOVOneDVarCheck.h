@@ -19,6 +19,7 @@
 #include "ufo/filters/FilterBase.h"
 #include "ufo/filters/QCflags.h"
 #include "ufo/filters/rttovonedvarcheck/RTTOVOneDVarCheck.interface.h"
+#include "ufo/filters/rttovonedvarcheck/RTTOVOneDVarCheckParameters.h"
 
 namespace eckit {
   class Configuration;
@@ -30,7 +31,6 @@ namespace ioda {
 }
 
 namespace ufo {
-
 //! \brief RTTOVOneDVarCheck
 //!
 //! \details RTTOVOneDVarCheck performs a 1D-Var minimization for satellite using the rttov
@@ -45,11 +45,15 @@ namespace ufo {
 //!
 
 class RTTOVOneDVarCheck : public FilterBase,
-                     private util::ObjectCounter<RTTOVOneDVarCheck> {
+                          private util::ObjectCounter<RTTOVOneDVarCheck> {
  public:
+  /// The type of parameters accepted by the constructor of this filter.
+  /// This typedef is used by the FilterFactory.
+  typedef RTTOVOneDVarCheckParameters Parameters_;
+
   static const std::string classname() {return "ufo::RTTOVOneDVarCheck";}
 
-  RTTOVOneDVarCheck(ioda::ObsSpace &, const eckit::Configuration &,
+  RTTOVOneDVarCheck(ioda::ObsSpace &, const Parameters_ &,
                   std::shared_ptr<ioda::ObsDataVector<int> >,
                   std::shared_ptr<ioda::ObsDataVector<float> >);
   ~RTTOVOneDVarCheck();
@@ -65,6 +69,7 @@ class RTTOVOneDVarCheck : public FilterBase,
   std::vector<int> channels_;
   oops::Variables retrieved_vars_;
   oops::Variables hoxdiags_retrieved_vars_;
+  Parameters_ parameters_;
 };
 
 }  // namespace ufo

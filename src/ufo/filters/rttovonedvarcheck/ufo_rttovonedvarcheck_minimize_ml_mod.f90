@@ -175,8 +175,7 @@ Iterations: do iter = 1, self % max1DVarIterations
 
   ! Get jacobian and new hofx
   call ufo_rttovonedvarcheck_get_jacobian(geovals, ob, ob % channels_used, &
-                                       self % obsdb, self % conf, &
-                                       profile_index, GuessProfile(:), &
+                                       self % obsdb, profile_index, GuessProfile(:), &
                                        hofxdiags, rttov_simobs, Y(:), H_matrix)
 
   if (iter == 1) then
@@ -353,8 +352,7 @@ if (converged) then
   allocate(out_H_matrix(size(ob % channels_all),nprofelements))
   allocate(out_Y(size(ob % channels_all)))
   call ufo_rttovonedvarcheck_get_jacobian(geovals, ob, ob % channels_all, &
-                                       self % obsdb, self % conf, &
-                                       profile_index, GuessProfile(:), &
+                                       self % obsdb, profile_index, GuessProfile(:), &
                                        hofxdiags, rttov_simobs, out_Y(:), out_H_matrix)
   ob % output_BT(:) = out_Y(:)
   deallocate(out_Y)
@@ -590,8 +588,7 @@ DescentLoop : do while (JCost > JOld .and.              &
 
    ! Get Jabobian and new hofx
    call ufo_rttovonedvarcheck_get_jacobian(geovals, ob, ob % channels_used, &
-                                           self % obsdb, self % conf, &
-                                           profile_index, GuessProfile(:), &
+                                           self % obsdb, profile_index, GuessProfile(:), &
                                            hofxdiags, rttov_simobs, BriTemp(:), H_matrix_tmp)
 
     !------------------------------------------------------------------------
