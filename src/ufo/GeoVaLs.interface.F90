@@ -549,7 +549,6 @@ integer :: nlev
 
 call c_f_string(c_var, varname)
 call ufo_geovals_registry%get(c_key_self, self)
-self%geovals(1)%nval=5
 geoval%nval=self%geovals(1)%nval
 geoval%nlocs=nlocs
 allocate(geoval%vals(geoval%nval,geoval%nlocs))
