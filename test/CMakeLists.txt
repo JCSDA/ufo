@@ -129,6 +129,7 @@ list( APPEND ufo_test_input
   testinput/ompslp_npp.yaml
   testinput/processwhere.yaml
   testinput/parameters.yaml
+  testinput/qc_actions.yaml
   testinput/qc_backgroundcheck.yaml
   testinput/qc_boundscheck.yaml
   testinput/qc_velocitycheck.yaml
@@ -1298,6 +1299,13 @@ ecbuild_add_test( TARGET  test_ufo_qc_gen_processwhere
                   ARGS    "testinput/processwhere.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   LIBS    ufo
+                  TEST_DEPENDS ufo_get_ufo_test_data )
+
+ecbuild_add_test( TARGET  test_ufo_qc_actions
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                  ARGS    "testinput/qc_actions.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsFilters.x
                   TEST_DEPENDS ufo_get_ufo_test_data )
 
 ecbuild_add_test( TARGET  test_ufo_qc_gen_backgroundcheck

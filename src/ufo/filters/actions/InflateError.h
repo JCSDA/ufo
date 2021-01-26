@@ -19,19 +19,27 @@ namespace ufo {
 class ObsFilterData;
 
 // -----------------------------------------------------------------------------
-
+/// \brief Observation error inflation action.
+/// \details Inflates Observation error for filter variables by:
+/// - constant (if "inflation factor" is specified in yaml)
+/// - spatially varying filter data (if "inflation variable" is specified in yaml).
+///   If inflation variable is the same size as filter variables, inflation is done
+///   variable by variable (e.g. inflation variable 1 is used to inflate filter
+///   variable 1; inflation variable 2 is used to inflate filter variable 2, etc).
+///   If inflation variable is of size 1, the same inflation variable is used for
+///   updating all filter variables.
 class InflateError : public FilterActionBase {
  public:
   explicit InflateError(const eckit::Configuration &);
-  ~InflateError() {}
 
   void apply(const Variables &, const std::vector<std::vector<bool>> &,
              const ObsFilterData &,
              ioda::ObsDataVector<int> &, ioda::ObsDataVector<float> &) const override;
+
   const ufo::Variables & requiredVariables() const override {return allvars_;}
+
  private:
-  Variables allvars_;
-  const std::string strfactor_;
+  Variables allvars_;            /// variables required to compute inflation
   const eckit::LocalConfiguration conf_;
 };
 
