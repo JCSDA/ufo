@@ -57,7 +57,7 @@ ObsAccessor TrackCheckUtils::createObsAccessor(const boost::optional<Variable> &
   if (stationIdVariable != boost::none) {
     return ObsAccessor::toObservationsSplitIntoIndependentGroupsByVariable(
           obsdb, *stationIdVariable);
-  } else if (!obsdb.obs_group_var().empty()) {
+  } else if (!obsdb.obs_group_vars().empty()) {
     // Assume observations were grouped into records by station IDs
     return ObsAccessor::toObservationsSplitIntoIndependentGroupsByRecordId(obsdb);
   } else {

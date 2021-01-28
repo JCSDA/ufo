@@ -235,8 +235,13 @@ void ObsAccessor::flagRejectedObservations(
 }
 
 bool ObsAccessor::wereRecordsGroupedByCategoryVariable() const {
+  std::vector<std::string> groupingVars = obsdb_->obs_group_vars();
+  std::string groupingVar;
+  if (groupingVars.size() > 0) {
+    groupingVar = groupingVars[0];
+  }
   return categoryVariable_ != boost::none &&
-         categoryVariable_->variable() == obsdb_->obs_group_var() &&
+         categoryVariable_->variable() == groupingVar &&
          categoryVariable_->group() == "MetaData";
 }
 

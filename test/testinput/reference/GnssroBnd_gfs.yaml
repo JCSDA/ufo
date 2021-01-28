@@ -14,7 +14,7 @@ observations:
     obsdatain:
       obsfile: ${obsdir}/gnssro_obs_2020070100_f.nc4
       obsgrouping:
-        group variable: "record_number"
+        group variables: [ "record_number" ]
         sort variable: "impact_height"
         sort order: "ascending"
     obsdataout: 

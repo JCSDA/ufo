@@ -10,7 +10,7 @@ Vertical interpolation:
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/met_office_profile_consistency_checks_unittests_vertinterp_obs.nc4
       obsgrouping:
-        group variable: "station_id"
+        group variables: [ "station_id" ]
     simulated variables: [geopotential_height]
   geovals:
     filename: Data/ufo/testinput_tier_1/met_office_profile_consistency_checks_unittests_vertinterp_geovals.nc4

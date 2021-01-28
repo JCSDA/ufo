@@ -333,7 +333,7 @@ ObsAccessor TemporalThinning::createObsAccessor() const {
   if (options_.categoryVariable.value() != boost::none) {
     return ObsAccessor::toObservationsSplitIntoIndependentGroupsByVariable(
           obsdb_, *options_.categoryVariable.value() );
-  } else if (!obsdb_.obs_group_var().empty()) {
+  } else if (!obsdb_.obs_group_vars().empty()) {
     // Records exist. Thin each record separately.
     return ObsAccessor::toObservationsSplitIntoIndependentGroupsByRecordId(obsdb_);
   } else {

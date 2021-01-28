@@ -13,7 +13,7 @@ observations:
     obsdatain:
       obsfile: Data/ioda/testinput_tier_1/met_office_profile_consistency_checks_winproflags.nc4
       obsgrouping:
-        group variable: "station_id"
+        group variables: [ "station_id" ]
         sort variable: "air_pressure"
         sort order: "descending"
     simulated variables: [eastward_wind]

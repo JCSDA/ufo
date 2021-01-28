@@ -25,7 +25,7 @@ observations:
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/met_office_profile_consistency_checks_unittests.nc4
       obsgrouping:
-        group variable: "station_id"
+        group variables: [ "station_id" ]
         sort variable: "air_pressure"
         sort order: "descending"
     simulated variables: [air_temperature, geopotential_height]
@@ -52,7 +52,7 @@ observations:
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/met_office_profile_consistency_checks_unittests.nc4
       obsgrouping:
-        group variable: "station_id"
+        group variables: [ "station_id" ]
     simulated variables: [air_temperature, geopotential_height]
   obs filters:
   - filter: Profile Consistency Checks
@@ -77,7 +77,7 @@ observations:
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/met_office_profile_consistency_checks_unittests.nc4
       obsgrouping:
-        group variable: "station_id"
+        group variables: [ "station_id" ]
         sort variable: "air_pressure"
         sort order: "descending"
     simulated variables: [air_temperature, geopotential_height]
@@ -104,7 +104,7 @@ observations:
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/met_office_profile_consistency_checks_unittests.nc4
       obsgrouping:
-        group variable: "station_id"
+        group variables: [ "station_id" ]
         sort variable: "air_pressure"
         sort order: "descending"
     simulated variables: [air_temperature, geopotential_height]
@@ -133,7 +133,7 @@ observations:
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/met_office_profile_consistency_checks_unittests.nc4
       obsgrouping:
-        group variable: "station_id"
+        group variables: [ "station_id" ]
         sort variable: "air_pressure"
         sort order: "descending"
     simulated variables: [air_temperature, geopotential_height]
@@ -160,7 +160,7 @@ observations:
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/met_office_profile_consistency_checks_unittests.nc4
       obsgrouping:
-        group variable: "station_id"
+        group variables: [ "station_id" ]
         sort variable: "air_pressure"
         sort order: "descending"
     simulated variables: [air_temperature, geopotential_height]
@@ -188,7 +188,7 @@ observations:
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/met_office_profile_consistency_checks_unittests.nc4
       obsgrouping:
-        group variable: "station_id"
+        group variables: [ "station_id" ]
         sort variable: "air_pressure"
         sort order: "descending"
     simulated variables: [air_temperature, geopotential_height]
@@ -215,7 +215,7 @@ observations:
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/met_office_profile_consistency_checks_unittests.nc4
       obsgrouping:
-        group variable: "station_id"
+        group variables: [ "station_id" ]
         sort variable: "air_pressure"
         sort order: "descending"
     simulated variables: [air_temperature, geopotential_height]
@@ -242,7 +242,7 @@ observations:
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/met_office_profile_consistency_checks_unittests.nc4
       obsgrouping:
-        group variable: "station_id"
+        group variables: [ "station_id" ]
     simulated variables: [air_temperature, geopotential_height]
   obs filters:
   - filter: Profile Consistency Checks
@@ -267,7 +267,7 @@ observations:
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/met_office_profile_consistency_checks_unittests.nc4
       obsgrouping:
-        group variable: "station_id"
+        group variables: [ "station_id" ]
     simulated variables: [air_temperature, geopotential_height]
   obs filters:
   - filter: Profile Consistency Checks
@@ -294,7 +294,7 @@ observations:
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/met_office_profile_consistency_checks_unittests.nc4
       obsgrouping:
-        group variable: "station_id"
+        group variables: [ "station_id" ]
     simulated variables: [air_temperature, geopotential_height]
   obs filters:
   - filter: Profile Consistency Checks
@@ -320,7 +320,7 @@ observations:
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/met_office_profile_consistency_checks_unittests.nc4
       obsgrouping:
-        group variable: "station_id"
+        group variables: [ "station_id" ]
     simulated variables: [air_temperature, geopotential_height]
   obs filters:
   - filter: Profile Consistency Checks

@@ -54,8 +54,8 @@ namespace ufo {
     // It is essential for observations to be grouped according to (e.g.) station ID
     // (unless there is only one profile in the sample, which would be very unusual).
     // Throw an exception if the "group variable" configuration option is missing.
-    if (obsdb.obs_group_var().empty())
-      throw eckit::BadParameter("group variable is empty.", Here());
+    if (obsdb.obs_group_vars().empty())
+      throw eckit::BadParameter("group variables configuration is empty.", Here());
   }
 
   // -----------------------------------------------------------------------------

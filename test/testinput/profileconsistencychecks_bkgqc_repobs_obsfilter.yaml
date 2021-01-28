@@ -11,7 +11,7 @@ observations:
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/met_office_profile_consistency_checks_bkgqc_repobs.nc4
       obsgrouping:
-        group variable: "station_id"
+        group variables: [ "station_id" ]
         sort variable: "air_pressure"
         sort order: "descending"
     simulated variables: [air_temperature, relative_humidity, eastward_wind, northward_wind, geopotential_height]

@@ -14,7 +14,7 @@ observations:
     obsdatain:
       obsfile: Data/ioda/testinput_tier_1/aircraft_obs_2018041500_m.nc4
       obsgrouping:
-        group variable: "station_id"
+        group variables: [ "station_id" ]
     simulated variables: [specific_humidity]
   obs filters:
   - filter: Track Check
@@ -69,7 +69,7 @@ observations:
     obsdatain:
       obsfile: Data/ioda/testinput_tier_1/aircraft_obs_2018041500_m.nc4
       obsgrouping:
-        group variable: "station_id"
+        group variables: [ "station_id" ]
     simulated variables: [specific_humidity]
   obs filters:
   - filter: Track Check
@@ -135,7 +135,7 @@ observations:
     obsdatain:
       obsfile: Data/ioda/testinput_tier_1/aircraft_obs_2018041500_m.nc4
       obsgrouping:
-        group variable: "station_id"
+        group variables: [ "station_id" ]
     simulated variables: [specific_humidity]
   obs filters:
   - filter: Track Check
@@ -204,7 +204,7 @@ observations:
     obsdatain:
       obsfile: Data/ioda/testinput_tier_1/aircraft_obs_2018041500_m.nc4
       obsgrouping:
-        group variable: "station_id"
+        group variables: [ "station_id" ]
     simulated variables: [specific_humidity]
   obs filters:
   - filter: Track Check
@@ -305,7 +305,7 @@ observations:
     obsdatain:
       obsfile: Data/ioda/testinput_tier_1/aircraft_obs_2018041500_m.nc4
       obsgrouping:
-        group variable: "station_id"
+        group variables: [ "station_id" ]
     simulated variables: [specific_humidity]
   obs filters:
   - filter: Track Check
@@ -358,7 +358,7 @@ observations:
     obsdatain:
       obsfile: Data/ioda/testinput_tier_1/aircraft_obs_2018041500_m.nc4
       obsgrouping:
-        group variable: "station_id"
+        group variables: [ "station_id" ]
     simulated variables: [specific_humidity]
   obs filters:
   - filter: Track Check
@@ -379,7 +379,7 @@ observations:
     obsdatain:
       obsfile: Data/ioda/testinput_tier_1/aircraft_obs_2018041500_m.nc4
       obsgrouping:
-        group variable: "station_id"
+        group variables: [ "station_id" ]
     simulated variables: [specific_humidity]
   obs filters:
   - filter: Track Check
@@ -432,7 +432,7 @@ observations:
     obsdatain:
       obsfile: Data/ioda/testinput_tier_1/aircraft_obs_2018041500_m.nc4
       obsgrouping:
-        group variable: "station_id"
+        group variables: [ "station_id" ]
     simulated variables: [specific_humidity]
   obs filters:
   - filter: Track Check
@@ -502,7 +502,7 @@ observations:
     obsdatain:
       obsfile: Data/ioda/testinput_tier_1/aircraft_obs_2018041500_m.nc4
       obsgrouping:
-        group variable: "latitude"
+        group variables: [ "latitude" ]
     simulated variables: [specific_humidity]
   obs filters:
   - filter: Track Check

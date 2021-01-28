@@ -794,7 +794,7 @@ observations:
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/met_office_thinning.nc4
       obsgrouping:
-        group variable: "round"
+        group variables: [ "round" ]
     simulated variables: [air_temperature]
   obs filters:
   - filter: Gaussian Thinning
@@ -820,7 +820,7 @@ observations:
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/met_office_thinning.nc4
       obsgrouping:
-        group variable: "priority"
+        group variables: [ "priority" ]
     simulated variables: [air_temperature]
   obs filters:
   - filter: Gaussian Thinning

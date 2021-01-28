@@ -187,7 +187,7 @@ observations:
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/met_office_temporal_thinning_sonde.nc4
       obsgrouping:
-        group variable: "call_sign"
+        group variables: [ "call_sign" ]
     simulated variables: [air_temperature]
   obs filters:
   - filter: Temporal Thinning
@@ -210,7 +210,7 @@ observations:
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/met_office_temporal_thinning_sonde.nc4
       obsgrouping:
-        group variable: "num_levels"
+        group variables: [ "num_levels" ]
     simulated variables: [air_temperature]
   obs filters:
   - filter: Temporal Thinning

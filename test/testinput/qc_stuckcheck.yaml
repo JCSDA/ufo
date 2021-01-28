@@ -9,7 +9,7 @@ observations:
     obsdatain:
       obsfile: Data/ioda/testinput_tier_1/sfcship_obs_2018041500_m.nc4
       obsgrouping:
-        group variable: "station_id"
+        group variables: [ "station_id" ]
     simulated variables: [northward_wind]
   obs filters:
   - filter: Stuck Check
@@ -32,7 +32,7 @@ observations:
     obsdatain:
       obsfile: Data/ioda/testinput_tier_1/sfcship_obs_2018041500_m.nc4
       obsgrouping:
-        group variable: "station_id"
+        group variables: [ "station_id" ]
     simulated variables: [northward_wind]
   obs filters:
   - filter: Stuck Check
@@ -46,7 +46,7 @@ observations:
     obsdatain:
       obsfile: Data/ioda/testinput_tier_1/sfcship_obs_2018041500_m.nc4
       obsgrouping:
-        group variable: "station_id"
+        group variables: [ "station_id" ]
     simulated variables: [northward_wind]
   obs filters:
   - filter: Stuck Check
@@ -59,7 +59,7 @@ observations:
     obsdatain:
       obsfile: Data/ioda/testinput_tier_1/sfcship_obs_2018041500_m.nc4
       obsgrouping:
-        group variable: "station_id"
+        group variables: [ "station_id" ]
     simulated variables: [northward_wind]
   obs filters:
   - filter: Stuck Check

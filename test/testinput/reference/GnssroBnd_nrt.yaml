@@ -32,7 +32,7 @@ observations:
     obsdatain:
       obsfile: input/obs/ioda_nomads_gnssro_PT6H_20201001_0300Z.nc4
       obsgrouping:
-        group variable: record_number
+        group variables: [ record_number ]
         sort variable: impact_height
         sort order: ascending
     obsdataout:
@@ -67,7 +67,7 @@ observations:
     obsdatain:
       obsfile: input/obs/ioda_nomads_gnssro_PT6H_20201001_0300Z.nc4
       obsgrouping: 
-        group variable: record_number
+        group variables: [ record_number ]
         sort variable: impact_height
         sort order: ascending
     obsdataout:
@@ -98,7 +98,7 @@ observations:
     obsdatain:
       obsfile: input/obs/ioda_nomads_gnssro_PT6H_20201001_0300Z.nc4
       obsgrouping:
-        group variable: record_number
+        group variables: [ record_number ]
         sort variable: impact_height
         sort order: ascending
     obsdataout:

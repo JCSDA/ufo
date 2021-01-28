@@ -7,7 +7,7 @@ observations:
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/met_office_buddy_check.nc4
       obsgrouping:
-        group variable: "station_id"
+        group variables: [ "station_id" ]
     simulated variables: [air_temperature, eastward_wind, northward_wind]
   obs filters:
   - filter: Met Office Buddy Check
@@ -53,7 +53,7 @@ observations:
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/met_office_buddy_check.nc4
       obsgrouping:
-        group variable: "station_id"
+        group variables: [ "station_id" ]
     simulated variables: [air_temperature, eastward_wind, northward_wind]
   obs filters:
   - filter: Met Office Buddy Check
@@ -100,7 +100,7 @@ observations:
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/met_office_buddy_check.nc4
       obsgrouping:
-        group variable: "station_id"
+        group variables: [ "station_id" ]
     simulated variables: [air_temperature, eastward_wind, northward_wind]
   obs filters:
   - filter: Met Office Buddy Check

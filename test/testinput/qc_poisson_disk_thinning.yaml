@@ -67,7 +67,7 @@ observations:
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/met_office_poisson_disk_thinning.nc4
       obsgrouping:
-        group variable: "scan_index"
+        group variables: [ "scan_index" ]
     simulated variables: [air_temperature]
   obs filters:
   - filter: Domain Check
@@ -93,7 +93,7 @@ observations:
     obsdatain:
       obsfile: Data/ufo/testinput_tier_1/met_office_poisson_disk_thinning.nc4
       obsgrouping:
-        group variable: "priority"
+        group variables: [ "priority" ]
     simulated variables: [air_temperature]
   obs filters:
   - filter: Domain Check

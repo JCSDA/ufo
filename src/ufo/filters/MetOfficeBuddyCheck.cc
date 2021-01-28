@@ -255,7 +255,7 @@ MetOfficeBuddyCheck::MetaData MetOfficeBuddyCheck::collectMetaData() const {
 std::vector<int> MetOfficeBuddyCheck::getStationIds() const {
   const boost::optional<Variable> &stationIdVariable = options_.stationIdVariable.value();
   if (stationIdVariable == boost::none) {
-    if (obsdb_.obs_group_var().empty()) {
+    if (obsdb_.obs_group_vars().empty()) {
       // Observations were not grouped into records.
       // Assume all observations were taken by the same station.
       return std::vector<int>(obsdb_.nlocs(), 0);
