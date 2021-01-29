@@ -33,10 +33,6 @@ class AssignmentParameters : public oops::Parameters {
 
  public:
   /// Name of the variable to which new values should be assigned.
-  ///
-  /// Set this parameter (and optionally also `channels`) to assign the scalar `value` or the
-  /// vector(s) produced by the ObsFunction `function` to a single (possibly multichannel)
-  /// variable.
   oops::RequiredParameter<std::string> name{"name", this};
 
   /// Set of channels to which new values should be assigned.
@@ -48,17 +44,16 @@ class AssignmentParameters : public oops::Parameters {
   /// Exactly one of the `value` and `function` options must be given.
   oops::OptionalParameter<std::string> value_{"value", this};
 
-  /// Variable (typically an ObsFunction) that should be evaluated and assigned to the variable(s)
-  /// selected using the `name` or `variables` options (at all locations selected be the `where`
-  /// statement, if present).
+  /// Variable (typically an ObsFunction) that should be evaluated and assigned to the specified
+  /// variable (at all locations selected be the `where` statement, if present).
   ///
   /// Exactly one of the `value` and `function` options must be given.
   oops::OptionalParameter<ufo::Variable> function{"function", this};
 
-  /// Type (int, float, string or datetime) of the variable(s) to which new values be assigned.
+  /// Type (int, float, string or datetime) of the variable to which new values should be assigned.
   ///
-  /// This option must be provided if none of these variables exist yet. If this option is provided
-  /// and any of these variables already exist, their type must match the value of this option,
+  /// This option must be provided if the variable doesn't exist yet. If this option is provided
+  /// and the variable already exists, its type must match the value of this option,
   /// otherwise an exception will be thrown.
   oops::OptionalParameter<ioda::ObsDtype> type{"type", this};
 
