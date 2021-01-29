@@ -5,8 +5,8 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#ifndef UFO_GEOS_AERO_OBSGEOSAODTLAD_H_
-#define UFO_GEOS_AERO_OBSGEOSAODTLAD_H_
+#ifndef UFO_AEROSOLS_MR_OBSAODGEOSTLAD_H_
+#define UFO_AEROSOLS_MR_OBSAODGEOSTLAD_H_
 
 #include <ostream>
 #include <string>
@@ -14,7 +14,7 @@
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
 
-#include "ufo/geos_aero/ObsGeosAodTLAD.interface.h"
+#include "ufo/aerosols/MR/ObsAodGeosTLAD.interface.h"
 #include "ufo/LinearObsOperatorBase.h"
 
 // Forward declarations
@@ -33,14 +33,14 @@ namespace ufo {
   class ObsBiasIncrement;
 
 // -----------------------------------------------------------------------------
-/// GeosAod TL/AD observation operator class
-class ObsGeosAodTLAD : public LinearObsOperatorBase,
-                       private util::ObjectCounter<ObsGeosAodTLAD> {
+/// AodGeos TL/AD observation operator class
+class ObsAodGeosTLAD : public LinearObsOperatorBase,
+                       private util::ObjectCounter<ObsAodGeosTLAD> {
  public:
-  static const std::string classname() {return "ufo::ObsGeosAodTLAD";}
+  static const std::string classname() {return "ufo::ObsAodGeosTLAD";}
 
-  ObsGeosAodTLAD(const ioda::ObsSpace &, const eckit::Configuration &);
-  virtual ~ObsGeosAodTLAD();
+  ObsAodGeosTLAD(const ioda::ObsSpace &, const eckit::Configuration &);
+  virtual ~ObsAodGeosTLAD();
 
   // Obs Operators
   void setTrajectory(const GeoVaLs &, const ObsBias &, ObsDiagnostics &) override;
@@ -63,4 +63,4 @@ class ObsGeosAodTLAD : public LinearObsOperatorBase,
 // -----------------------------------------------------------------------------
 
 }  // namespace ufo
-#endif  // UFO_GEOS_AERO_OBSGEOSAODTLAD_H_
+#endif  // UFO_AEROSOLS_MR_OBSAODGEOSTLAD_H_

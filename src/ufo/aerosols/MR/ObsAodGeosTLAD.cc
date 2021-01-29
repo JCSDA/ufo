@@ -5,7 +5,7 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#include "ufo/geos_aero/ObsGeosAodTLAD.h"
+#include "ufo/aerosols/MR/ObsAodGeosTLAD.h"
 
 #include <ostream>
 
@@ -20,54 +20,54 @@
 namespace ufo {
 
 // -----------------------------------------------------------------------------
-static LinearObsOperatorMaker<ObsGeosAodTLAD> makerGeosAodTL_("GeosAod");
+static LinearObsOperatorMaker<ObsAodGeosTLAD> makerAodGeosTL_("AodGeos");
 // -----------------------------------------------------------------------------
 
-ObsGeosAodTLAD::ObsGeosAodTLAD(const ioda::ObsSpace & odb,
+ObsAodGeosTLAD::ObsAodGeosTLAD(const ioda::ObsSpace & odb,
                                const eckit::Configuration & config)
   : keyOper_(0), odb_(odb), varin_()
 {
-  ufo_geosaod_tlad_setup_f90(keyOper_, config, odb.obsvariables(), varin_);
+  ufo_aodgeos_tlad_setup_f90(keyOper_, config, odb.obsvariables(), varin_);
 
-  oops::Log::trace() << "ObsGeosAodTLAD created" << std::endl;
+  oops::Log::trace() << "ObsAodGeosTLAD created" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
-ObsGeosAodTLAD::~ObsGeosAodTLAD() {
-  ufo_geosaod_tlad_delete_f90(keyOper_);
-  oops::Log::trace() << "ObsGeosAodTLAD destructed" << std::endl;
+ObsAodGeosTLAD::~ObsAodGeosTLAD() {
+  ufo_aodgeos_tlad_delete_f90(keyOper_);
+  oops::Log::trace() << "ObsAodGeosTLAD destructed" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
-void ObsGeosAodTLAD::setTrajectory(const GeoVaLs & geovals,
+void ObsAodGeosTLAD::setTrajectory(const GeoVaLs & geovals,
                                    const ObsBias & bias, ObsDiagnostics &) {
-  oops::Log::trace() << "ObsGeosAodTLAD: trajectory entering" << std::endl;
-  ufo_geosaod_tlad_settraj_f90(keyOper_, geovals.toFortran(), odb_);
-  oops::Log::trace() << "ObsGeosAodTLAD: set trajectory exiting" << std::endl;
+  oops::Log::trace() << "ObsAodGeosTLAD: trajectory entering" << std::endl;
+  ufo_aodgeos_tlad_settraj_f90(keyOper_, geovals.toFortran(), odb_);
+  oops::Log::trace() << "ObsAodGeosTLAD: set trajectory exiting" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
-void ObsGeosAodTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec) const {
-  ufo_geosaod_simobs_tl_f90(keyOper_, geovals.toFortran(), odb_,
+void ObsAodGeosTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec) const {
+  ufo_aodgeos_simobs_tl_f90(keyOper_, geovals.toFortran(), odb_,
                             ovec.nvars(), ovec.nlocs(), ovec.toFortran());
-  oops::Log::trace() << "ObsGeosAodTLAD: TL observation operator run" << std::endl;
+  oops::Log::trace() << "ObsAodGeosTLAD: TL observation operator run" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
-void ObsGeosAodTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec) const {
-  ufo_geosaod_simobs_ad_f90(keyOper_, geovals.toFortran(), odb_,
+void ObsAodGeosTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec) const {
+  ufo_aodgeos_simobs_ad_f90(keyOper_, geovals.toFortran(), odb_,
                             ovec.nvars(), ovec.nlocs(), ovec.toFortran());
-  oops::Log::trace() << "ObsGeosAodTLAD: adjoint observation operator run" << std::endl;
+  oops::Log::trace() << "ObsAodGeosTLAD: adjoint observation operator run" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
-void ObsGeosAodTLAD::print(std::ostream & os) const {
-  os << "ObsGeosAodTLAD::print not implemented" << std::endl;
+void ObsAodGeosTLAD::print(std::ostream & os) const {
+  os << "ObsAodGeosTLAD::print not implemented" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

@@ -3,9 +3,9 @@
 ! This software is licensed under the terms of the Apache Licence Version 2.0
 ! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 
-!> Fortran module for geosaod observation operator
+!> Fortran module for aodgeos observation operator
 
-module ufo_geosaod_mod
+module ufo_aodgeos_mod
  
  use iso_c_binding
  use kinds
@@ -19,17 +19,17 @@ module ufo_geosaod_mod
  integer, parameter :: max_string=800
 
 !> Fortran derived type for the observation type
- type, public :: ufo_geosaod
+ type, public :: ufo_aodgeos
    type(oops_variables), public :: geovars
    type(oops_variables), public :: obsvars
    integer, public              :: ntracers
    real(kind_real), public, allocatable :: wavelength(:)
    character(len=maxvarlen),public :: rcfile
  contains
-   procedure :: setup  => ufo_geosaod_setup
-   procedure :: simobs => ufo_geosaod_simobs
+   procedure :: setup  => ufo_aodgeos_setup
+   procedure :: simobs => ufo_aodgeos_simobs
    final :: destructor
- end type ufo_geosaod
+ end type ufo_aodgeos
 
 !> Default variables required from model
  character(len=maxvarlen), dimension(2), parameter :: varindefault = (/var_delp, var_rh/)
@@ -38,11 +38,11 @@ contains
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_geosaod_setup(self, f_conf)
+subroutine ufo_aodgeos_setup(self, f_conf)
 use fckit_configuration_module, only: fckit_configuration
 implicit none
 
-class(ufo_geosaod), intent(inout) :: self
+class(ufo_aodgeos), intent(inout) :: self
 type(fckit_configuration), intent(in) :: f_conf
 
 !Locals
@@ -75,13 +75,13 @@ character(len=:), allocatable :: str
   self%rcfile = str
   deallocate(str)
   
-end subroutine ufo_geosaod_setup
+end subroutine ufo_aodgeos_setup
 
 ! ------------------------------------------------------------------------------
 
 subroutine destructor(self)
 implicit none
-type(ufo_geosaod), intent(inout) :: self
+type(ufo_aodgeos), intent(inout) :: self
 
   if (allocated(self%wavelength)) deallocate(self%wavelength)
  
@@ -89,14 +89,14 @@ end subroutine destructor
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_geosaod_simobs(self, geovals, obss, nvars, nlocs, hofx)
+subroutine ufo_aodgeos_simobs(self, geovals, obss, nvars, nlocs, hofx)
 use kinds
 use ufo_constants_mod, only: grav
 use ufo_geovals_mod
 use iso_c_binding
 
 implicit none
-class(ufo_geosaod), intent(in)    :: self
+class(ufo_aodgeos), intent(in)    :: self
 integer, intent(in)               :: nvars, nlocs
 type(ufo_geovals),  intent(in)    :: geovals
 real(c_double),    intent(inout) :: hofx(nvars, nlocs)
@@ -150,8 +150,8 @@ character(len=MAXVARLEN), dimension(:), allocatable:: tracer_name
   ! --------
   deallocate(qm, rh, delp, tracer_name)
 
-end subroutine ufo_geosaod_simobs
+end subroutine ufo_aodgeos_simobs
 
 ! ------------------------------------------------------------------------------
 
-end module ufo_geosaod_mod
+end module ufo_aodgeos_mod

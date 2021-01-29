@@ -3,9 +3,9 @@
 ! This software is licensed under the terms of the Apache Licence Version 2.0
 ! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 
-!> Fortran module for geosaod tl/ad observation operator
+!> Fortran module for aodgeos tl/ad observation operator
 
-module ufo_geosaod_tlad_mod
+module ufo_aodgeos_tlad_mod
 
  use iso_c_binding
 
@@ -24,7 +24,7 @@ module ufo_geosaod_tlad_mod
  integer, parameter :: max_string=800
 
  !> Fortran derived type for the tl/ad observation operator
- type, public :: ufo_geosaod_tlad
+ type, public :: ufo_aodgeos_tlad
   integer :: nlocs, nlayers, ntracers, nvars
   type(oops_variables), public :: obsvars
   type(oops_variables), public :: geovars
@@ -33,21 +33,21 @@ module ufo_geosaod_tlad_mod
   character(len=maxvarlen),public:: rcfile
   real(kind=kind_real), dimension(:,:), allocatable :: delp(:,:)
  contains
-  procedure :: setup  => ufo_geosaod_tlad_setup
-  procedure :: delete => ufo_geosaod_tlad_delete
-  procedure :: settraj => ufo_geosaod_tlad_settraj
-  procedure :: simobs_tl  => ufo_geosaod_simobs_tl
-  procedure :: simobs_ad  => ufo_geosaod_simobs_ad
- end type ufo_geosaod_tlad
+  procedure :: setup  => ufo_aodgeos_tlad_setup
+  procedure :: delete => ufo_aodgeos_tlad_delete
+  procedure :: settraj => ufo_aodgeos_tlad_settraj
+  procedure :: simobs_tl  => ufo_aodgeos_simobs_tl
+  procedure :: simobs_ad  => ufo_aodgeos_simobs_ad
+ end type ufo_aodgeos_tlad
 
 contains
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_geosaod_tlad_setup(self, f_conf)
+subroutine ufo_aodgeos_tlad_setup(self, f_conf)
 use fckit_configuration_module, only: fckit_configuration
 implicit none
-class(ufo_geosaod_tlad),  intent(inout) :: self
+class(ufo_aodgeos_tlad),  intent(inout) :: self
 type(fckit_configuration), intent(in)   :: f_conf
 
 !Locals
@@ -74,25 +74,25 @@ character(len=:), allocatable :: str
  self%rcfile = str
  deallocate(str)
 
-end subroutine ufo_geosaod_tlad_setup
+end subroutine ufo_aodgeos_tlad_setup
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_geosaod_tlad_delete(self)
+subroutine ufo_aodgeos_tlad_delete(self)
 
 implicit none
-class(ufo_geosaod_tlad), intent(inout) :: self
+class(ufo_aodgeos_tlad), intent(inout) :: self
  if (allocated(self%bext))    deallocate(self%bext)
  if (allocated(self%delp))    deallocate(self%delp)
  if (allocated(self%wavelength)) deallocate(self%wavelength)
-end subroutine ufo_geosaod_tlad_delete
+end subroutine ufo_aodgeos_tlad_delete
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_geosaod_tlad_settraj(self, geovals, obss)
+subroutine ufo_aodgeos_tlad_settraj(self, geovals, obss)
 use obsspace_mod
 implicit none
-class(ufo_geosaod_tlad), intent(inout) :: self
+class(ufo_aodgeos_tlad), intent(inout) :: self
 
 type(ufo_geovals),       intent(in)    :: geovals
 type(c_ptr), value,      intent(in)    :: obss
@@ -142,14 +142,14 @@ real(kind=kind_real), dimension(:,:,:), allocatable :: qm    ! aer concentration
  deallocate(self%wavelength)
  deallocate(tracer_name)
 
-end subroutine ufo_geosaod_tlad_settraj
+end subroutine ufo_aodgeos_tlad_settraj
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_geosaod_simobs_tl(self, geovals, obss, nvars, nlocs, hofx)
+subroutine ufo_aodgeos_simobs_tl(self, geovals, obss, nvars, nlocs, hofx)
 
 implicit none
-class(ufo_geosaod_tlad), intent(in)    :: self
+class(ufo_aodgeos_tlad), intent(in)    :: self
 type(ufo_geovals),       intent(in)    :: geovals
 type(c_ptr), value,      intent(in)    :: obss
 integer,                 intent(in)    :: nvars, nlocs
@@ -175,14 +175,14 @@ character(len=MAXVARLEN) :: geovar
  deallocate(qm_tl)
 
 
-end subroutine ufo_geosaod_simobs_tl
+end subroutine ufo_aodgeos_simobs_tl
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_geosaod_simobs_ad(self, geovals, obss, nvars, nlocs, hofx)
+subroutine ufo_aodgeos_simobs_ad(self, geovals, obss, nvars, nlocs, hofx)
 
 implicit none
-class(ufo_geosaod_tlad), intent(in)    :: self
+class(ufo_aodgeos_tlad), intent(in)    :: self
 type(ufo_geovals),       intent(inout) :: geovals
 type(c_ptr), value,      intent(in)    :: obss
 integer,                 intent(in)    :: nvars, nlocs
@@ -215,9 +215,9 @@ character(len=MAXVARLEN) :: geovar
  
  deallocate(qm_ad)
 
-end subroutine ufo_geosaod_simobs_ad
+end subroutine ufo_aodgeos_simobs_ad
 
 ! ------------------------------------------------------------------------------
 
 
-end module ufo_geosaod_tlad_mod
+end module ufo_aodgeos_tlad_mod

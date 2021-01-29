@@ -5,7 +5,7 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
  */
 
-#include "ufo/geos_aero/ObsGeosAod.h"
+#include "ufo/aerosols/MR/ObsAodGeos.h"
 
 #include <ostream>
 #include <set>
@@ -24,37 +24,37 @@
 namespace ufo {
 
 // -----------------------------------------------------------------------------
-static ObsOperatorMaker<ObsGeosAod> makerGeosAod_("GeosAod");
+static ObsOperatorMaker<ObsAodGeos> makerAodGeos_("AodGeos");
 // -----------------------------------------------------------------------------
 
-ObsGeosAod::ObsGeosAod(const ioda::ObsSpace & odb,
+ObsAodGeos::ObsAodGeos(const ioda::ObsSpace & odb,
                        const eckit::Configuration & config)
   : ObsOperatorBase(odb, config), keyOper_(0), odb_(odb), varin_()
 {
-  ufo_geosaod_setup_f90(keyOper_, config, odb.obsvariables(), varin_);
+  ufo_aodgeos_setup_f90(keyOper_, config, odb.obsvariables(), varin_);
 
-  oops::Log::trace() << "ObsGeosAod created." << std::endl;
+  oops::Log::trace() << "ObsAodGeos created." << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
-ObsGeosAod::~ObsGeosAod() {
-  ufo_geosaod_delete_f90(keyOper_);
-  oops::Log::trace() << "ObsGeosAod destructed" << std::endl;
+ObsAodGeos::~ObsAodGeos() {
+  ufo_aodgeos_delete_f90(keyOper_);
+  oops::Log::trace() << "ObsAodGeos destructed" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
-void ObsGeosAod::simulateObs(const GeoVaLs & gv, ioda::ObsVector & ovec, ObsDiagnostics &) const {
-  ufo_geosaod_simobs_f90(keyOper_, gv.toFortran(), odb_, ovec.nvars(), ovec.nlocs(),
+void ObsAodGeos::simulateObs(const GeoVaLs & gv, ioda::ObsVector & ovec, ObsDiagnostics &) const {
+  ufo_aodgeos_simobs_f90(keyOper_, gv.toFortran(), odb_, ovec.nvars(), ovec.nlocs(),
                          ovec.toFortran());
-  oops::Log::trace() << "ObsGeosAod: observation operator run" << std::endl;
+  oops::Log::trace() << "ObsAodGeos: observation operator run" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
-void ObsGeosAod::print(std::ostream & os) const {
-  os << "ObsGeosAod::print not implemented";
+void ObsAodGeos::print(std::ostream & os) const {
+  os << "ObsAodGeos::print not implemented";
 }
 
 // -----------------------------------------------------------------------------

@@ -77,6 +77,7 @@ list( APPEND ufo_test_input
   testinput/genericprof.yaml
   testinput/geovals.yaml
   testinput/geos_aod.yaml
+  testinput/aod_extinction.yaml
   testinput/geovals_spec.yaml
   testinput/gnssrobendmetoffice.yaml
   testinput/gnssrobendmetoffice_qc.yaml
@@ -1264,19 +1265,36 @@ endif( ${GSW_FOUND} )
 
 if( ${GEOS-AERO_FOUND} )
 
-ecbuild_add_test( TARGET  test_ufo_geos_aero_opr
+ecbuild_add_test( TARGET  test_ufo_opr_geos_aero
                   MPI     4
-                  SOURCES mains/TestObsOperator.cc
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
                   ARGS    "testinput/geos_aod.yaml"
-                  LIBS    ufo )
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsOperator.x
+                  TEST_DEPENDS ufo_get_ioda_test_data ufo_get_ufo_test_data )
 
-ecbuild_add_test( TARGET  test_ufo_geos_aero_tlad
-                  SOURCES mains/TestObsOperatorTLAD.cc
+ecbuild_add_test( TARGET  test_ufo_linopr_geos_aero
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
                   ARGS    "testinput/geos_aod.yaml"
-                  LIBS    ufo )
-
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS    test_ObsOperatorTLAD.x
+                  TEST_DEPENDS ufo_get_ioda_test_data ufo_get_ufo_test_data )
 endif( ${GEOS-AERO_FOUND} )
 
+ecbuild_add_test( TARGET  test_ufo_opr_aod_ext
+                  MPI     4
+                  COMMAND  ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
+                  ARGS    "testinput/aod_extinction.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS    test_ObsOperator.x
+                  TEST_DEPENDS ufo_get_ioda_test_data ufo_get_ufo_test_data )
+
+ecbuild_add_test( TARGET  test_ufo_linopr_aod_ext
+                  COMMAND  ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
+                  ARGS    "testinput/aod_extinction.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS    test_ObsOperatorTLAD.x
+                  TEST_DEPENDS ufo_get_ioda_test_data ufo_get_ufo_test_data )
 
 ecbuild_add_test( TARGET  test_ufo_opr_radarreflectivity
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x

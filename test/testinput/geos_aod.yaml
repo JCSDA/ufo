@@ -3,7 +3,7 @@ window end: 2018-04-15T03:00:00Z
 
 observations:
 - obs operator:
-    name: GeosAod
+    name: AodGeos
     tracer_geovals: [ "mass_fraction_of_dust001_in_air", "mass_fraction_of_dust002_in_air",
                       "mass_fraction_of_dust003_in_air", "mass_fraction_of_dust004_in_air",
                       "mass_fraction_of_dust005_in_air", "mass_fraction_of_sea_salt001_in_air",
@@ -16,7 +16,7 @@ observations:
     RCFile: ["geosaod.rc"]
     wavelengths: [550.0]
   obs space:
-    name: GeosAod
+    name: AodGeos
     obsdatain:
       obsfile: Data/ioda/testinput_tier_1/geos_aod_obs_2018041500_m.nc4
     simulated variables: [Total_Aerosol_Optical_Depth_550]

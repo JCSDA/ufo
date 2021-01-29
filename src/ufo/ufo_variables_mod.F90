@@ -131,6 +131,10 @@ character(len=MAXVARLEN), public, parameter :: var_sulfate = "mass_fraction_of_s
 character(len=MAXVARLEN), public, parameter :: var_no3an1 = "mass_fraction_of_nitrate001_in_air"
 character(len=MAXVARLEN), public, parameter :: var_no3an2 = "mass_fraction_of_nitrate002_in_air"
 character(len=MAXVARLEN), public, parameter :: var_no3an3 = "mass_fraction_of_nitrate003_in_air"
+character(len=MAXVARLEN), public, parameter :: var_ext1 = "volume_extinction_in_air_due_to_aerosol_particles_lambda1"
+character(len=MAXVARLEN), public, parameter :: var_ext2 = "volume_extinction_in_air_due_to_aerosol_particles_lambda2"
+character(len=MAXVARLEN), public, parameter :: var_ext3 = "volume_extinction_in_air_due_to_aerosol_particles_lambda3"
+character(len=MAXVARLEN), public, parameter :: var_airdens = "moist_air_density"
 
 character(len=MAXVARLEN), dimension(n_aerosols_gocart_default), public, parameter  :: &
      &var_aerosols_gocart_default = [&
