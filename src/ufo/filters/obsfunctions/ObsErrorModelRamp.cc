@@ -62,6 +62,16 @@ ObsErrorModelRamp::ObsErrorModelRamp(const eckit::LocalConfiguration config)
     ASSERT(err0[i] > 0.0);
     ASSERT(err1[i] > 0.0);
   }
+  if (options_.x2.value() != boost::none && options_.err2.value() != boost::none) {
+    const std::vector<float> &x2 = options_.x2.value().get();
+    const std::vector<float> &err2 = options_.err2.value().get();
+    ASSERT(x2.size() == yvar.size());
+    ASSERT(err2.size() == yvar.size());
+    for (size_t i = 0; i < yvar.size(); ++i) {
+      ASSERT(x2[i] >= x1[i]);
+      ASSERT(err2[i] > 0.0);
+    }
+  }
 }
 
 // -----------------------------------------------------------------------------
@@ -93,6 +103,16 @@ void ObsErrorModelRamp::compute(const ObsFilterData & in,
 
   float slope;
 
+  // Optional extra ramp function
+  std::vector<float> x2;
+  std::vector<float> err2;
+  bool cal_err2_x2 = false;
+  float slope2 = missing;
+  if (options_.x2.value() != boost::none && options_.err2.value() != boost::none) {
+    x2 = options_.x2.value().get();
+    err2 = options_.x2.value().get();
+    cal_err2_x2 = true;
+  }
   // Loop over selected variables
   for (size_t jvar = 0; jvar < out.nvars(); ++jvar) {
     size_t ivar = std::min(jvar, xvar.size() - 1);
@@ -103,6 +123,13 @@ void ObsErrorModelRamp::compute(const ObsFilterData & in,
     } else {
       slope = missing;
     }
+    if (cal_err2_x2) {
+      if (x2[jvar] > x1[jvar]) {
+        slope2 = (err2[jvar] - err1[jvar]) / (x2[jvar] - x1[jvar]);
+      } else {
+        slope2 = missing;
+      }
+    }
 
     // Calculate piece-wise function value across locations
     for (size_t iloc = 0; iloc < in.nlocs(); ++iloc) {
@@ -112,6 +139,12 @@ void ObsErrorModelRamp::compute(const ObsFilterData & in,
           out[jvar][iloc] = err0[jvar];
         } else if (xvals[ivar][iloc] < x1[jvar] && slope != missing) {
           out[jvar][iloc] = err0[jvar] + slope * (xvals[ivar][iloc] - x0[jvar]);
+        } else if (cal_err2_x2) {
+            if (xvals[ivar][iloc] < x2[jvar] && slope2 != missing) {
+              out[jvar][iloc] = err1[jvar] + slope2 * (xvals[ivar][iloc] - x1[jvar]);
+            } else {
+              out[jvar][iloc] = err2[jvar];
+            }
         } else {
           out[jvar][iloc] = err1[jvar];
         }
