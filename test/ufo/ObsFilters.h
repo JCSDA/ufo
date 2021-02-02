@@ -66,10 +66,15 @@ class CompareVariablesParameters : public oops::Parameters {
   /// Variable containing the reference values.
   oops::RequiredParameter<ufo::Variable> reference{"reference", this};
 
-  /// If set, the comparison will succeed if all corresponding elements of the test and reference
-  /// variables differ by at most `absTol`. Otherwise the comparison will succeed only if all
-  /// corresponding elements match exactly.
+  /// If set, the comparison will fail if any corresponding elements of the test and reference
+  /// variables differ by more than `absTol`. If neither `absTol` nor `relTol` is set, the
+  /// comparison will fail if any corresponding elements do not match exactly.
   oops::OptionalParameter<float> absTol{"absTol", this};
+
+  /// If set, the comparison will fail if the relative difference of any pair of corresponding
+  /// elements of the test and reference variables exceeds `relTol`. If neither `absTol` nor
+  /// `relTol` is set, the comparison will fail if any corresponding elements do not match exactly.
+  oops::OptionalParameter<float> relTol{"relTol", this};
 };
 
 // -----------------------------------------------------------------------------
@@ -328,6 +333,20 @@ void expectVariablesApproximatelyEqual(const ObsTraits::ObsSpace &obsspace,
 
 // -----------------------------------------------------------------------------
 
+void expectVariablesRelativelyEqual(const ObsTraits::ObsSpace &obsspace,
+                                    const ufo::Variable &referenceVariable,
+                                    const ufo::Variable &testVariable,
+                                    float relTol)
+{
+  std::vector<float> reference(obsspace.nlocs());
+  obsspace.get_db(referenceVariable.group(), referenceVariable.variable(), reference);
+  std::vector<float> test(obsspace.nlocs());
+  obsspace.get_db(testVariable.group(), testVariable.variable(), test);
+  EXPECT(oops::are_all_close_relative(reference, test, relTol));
+}
+
+// -----------------------------------------------------------------------------
+
 void testFilters(size_t obsSpaceIndex, oops::ObsSpace<ufo::ObsTraits> &obspace,
                  const ObsTypeParameters &params) {
   typedef oops::GeoVaLs<ufo::ObsTraits>           GeoVaLs_;
@@ -505,11 +524,17 @@ void testFilters(size_t obsSpaceIndex, oops::ObsSpace<ufo::ObsTraits> &obspace,
         expectVariablesEqual<util::DateTime>(ufoObsSpace, referenceVariable, testVariable);
         break;
       case ioda::ObsDtype::Float:
-        if (compareVariablesParams.absTol.value() == boost::none) {
+        if (compareVariablesParams.absTol.value() == boost::none &&
+            compareVariablesParams.relTol.value() == boost::none) {
           expectVariablesEqual<float>(ufoObsSpace, referenceVariable, testVariable);
         } else {
-          const float tol = *compareVariablesParams.absTol.value();
-          expectVariablesApproximatelyEqual(ufoObsSpace, referenceVariable, testVariable, tol);
+          if (compareVariablesParams.absTol.value() != boost::none) {
+            const float tol = *compareVariablesParams.absTol.value();
+            expectVariablesApproximatelyEqual(ufoObsSpace, referenceVariable, testVariable, tol);
+          } else if (compareVariablesParams.relTol.value() != boost::none) {
+            const float tol = *compareVariablesParams.relTol.value();
+            expectVariablesRelativelyEqual(ufoObsSpace, referenceVariable, testVariable, tol);
+          }
         }
         break;
       case ioda::ObsDtype::None:

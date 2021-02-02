@@ -32,6 +32,7 @@
 #include "ufo/filters/TrackCheck.h"
 #include "ufo/filters/TrackCheckShip.h"
 #include "ufo/filters/VariableAssignment.h"
+#include "ufo/filters/VariableConversion.h"
 #include "ufo/filters/variabletransforms/WindComponents.h"
 #include "ufo/filters/variabletransforms/WindSpeedAndDirection.h"
 #include "ufo/gnssro/QC/BackgroundCheckRONBAM.h"
@@ -96,6 +97,8 @@ template<typename MODEL> void instantiateObsFilterFactory() {
            GNSSROOneDVarCheckMaker("GNSS-RO 1DVar Check");
   static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::VariableAssignment> >
            variableAssignmentMaker("Variable Assignment");
+  static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::VariableConversion> >
+           VariableConversionMaker("Variable Conversion");
 
   // Only include this filter if rttov is present
   #if defined(RTTOV_FOUND)

@@ -72,6 +72,9 @@ set ( filters_files
       TrackCheckUtilsParameters.h
       Variable.cc
       Variable.h
+      VariableConversion.cc
+      VariableConversion.h
+      VariableConversionParameters.h
       Variables.cc
       Variables.h
       VariableAssignment.cc

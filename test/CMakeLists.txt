@@ -206,6 +206,8 @@ list( APPEND ufo_test_input
   testinput/tprof.yaml
   testinput/tropomi_no2.yaml
   testinput/variables.yaml
+  testinput/variableConversion_SondePressureFromHeight.yaml
+  testinput/variableConversion_SondePressureFromHeightICAO.yaml
   testinput/variabletransform_windcomponents.yaml
   testinput/variabletransform_windspeedanddirection.yaml
   testinput/windprof.yaml
@@ -1591,6 +1593,20 @@ ecbuild_add_test( TARGET  test_ufo_qc_variableassignment
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ObsFilters.x
                   TEST_DEPENDS ufo_get_ioda_test_data )
+
+ecbuild_add_test( TARGET  test_ufo_variableConversion_SondePressureFromHeight
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                  ARGS    "testinput/variableConversion_SondePressureFromHeight.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsFilters.x
+                  TEST_DEPENDS ufo_get_ufo_test_data )
+
+ecbuild_add_test( TARGET  test_ufo_variableConversion_SondePressureFromHeightICAO
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                  ARGS    "testinput/variableConversion_SondePressureFromHeightICAO.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ObsFilters.x
+                  TEST_DEPENDS ufo_get_ufo_test_data )
 
 # Test UFO ObsFilters (specific)
 
