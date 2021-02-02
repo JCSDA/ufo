@@ -136,30 +136,31 @@ void ObsErrorFactorSfcPressure::compute(const ObsFilterData & data,
     // Calculating drbx with observed temperature.
     // If ob temperature missing, then check if model ground is above or below actual ground.
     if (ob_temperature_sfc[iloc] != missing) {
-      drbx = 0.5f*abs(model_temp_sfc[iloc]-ob_temperature_sfc[iloc])+0.2f+0.005f*abs(rdelz);
+      drbx = 0.5f*std::abs(model_temp_sfc[iloc]-ob_temperature_sfc[iloc])
+             +0.2f+0.005f*std::abs(rdelz);
       tges = 0.5f*(model_temp_sfc[iloc]+ob_temperature_sfc[iloc]);
     } else {
       // TODO(gthompsn): If model terrain below real world, grab nearest Temp,Pres from a
       // vertical profile. Shortcut for now is assume lapse_rate and hydrostatic assumption
       // over rdelz. The 2.5 addition is **arbitrary** and lapse rate assumption is 5C/km.
-      if (abs(rdelz) < 5.0) {
+      if (std::abs(rdelz) < 5.0) {
         tges = model_temp_sfc[iloc];
         drbx = 0.1;
       } else if (rdelz > 0.0) {
         tges2 = model_temp_sfc[iloc] - lapse_rate*rdelz;
-        drbx = 0.5f*abs(model_temp_sfc[iloc]-tges2)+2.5f+0.005f*abs(rdelz);
+        drbx = 0.5f*std::abs(model_temp_sfc[iloc]-tges2)+2.5f+0.005f*std::abs(rdelz);
         tges = 0.5f*(model_temp_sfc[iloc]+tges2);
       } else {
         tges = model_temp_sfc[iloc] - 0.5f*lapse_rate*rdelz;
         tges2 = tges - lapse_rate*rdelz;
-        drbx = 0.5f*abs(model_temp_sfc[iloc]-tges2)+2.5f+0.005f*abs(rdelz);
+        drbx = 0.5f*std::abs(model_temp_sfc[iloc]-tges2)+2.5f+0.005f*std::abs(rdelz);
         drbx = drbx - 0.5f*lapse_rate*rdelz;
       }
     }
 
     rdp = g_over_rd*rdelz/tges;
     pges = exp(log(pgesorig) - rdp);
-    drdp = pges*(g_over_rd*abs(rdelz)*drbx/(tges*tges));
+    drdp = pges*(g_over_rd*std::abs(rdelz)*drbx/(tges*tges));
     ddiff = ob_pressure_sfc[iloc]*0.001f - pges;        // innovation in cb
 
     // make adjustment to observational error (also convert to cb)

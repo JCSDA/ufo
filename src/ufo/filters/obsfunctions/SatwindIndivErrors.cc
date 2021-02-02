@@ -193,7 +193,7 @@ void SatwindIndivErrors::compute(const ObsFilterData & in,
       if (err_p[iloc] > 0) {
         weight = exp(-0.5 * pow(cx_p[ilev][iloc] - ob_p[iloc], 2) /
                              pow(err_p[iloc], 2) )
-                 * abs(cx_p[ilev][iloc] - cx_p[ilev - 1][iloc]);
+                 * std::abs(cx_p[ilev][iloc] - cx_p[ilev - 1][iloc]);
       } else {
           weight = 0.0;
       }
