@@ -99,6 +99,8 @@ subroutine ufo_groundgnss_metoffice_simobs(self, geovals, hofx, obss)
   write(err_msg,*) "TRACE: ufo_groundgnss_metoffice_simobs: begin observation loop, nobs =  ", nobs
   call fckit_log%info(err_msg)
 
+  hofx(:) = 0
+
   obs_loop: do iobs = 1, nobs 
 
     call Ops_Groundgnss_ForwardModel(prs % nval, &
@@ -112,9 +114,10 @@ subroutine ufo_groundgnss_metoffice_simobs(self, geovals, hofx, obss)
                                      hofx(iobs))
 
     write(message,'(A,10I6)') "Size of hofx = ", shape(hofx)
-    call fckit_log%info(message)
+    call fckit_log%debug(message)
     write(message,'(A,1F2.4)') "hofx(iobs) = ", hofx(iobs)
-    call fckit_log%info(message)
+    call fckit_log%debug(message)
+
   end do obs_loop
 
   write(err_msg,*) "TRACE: ufo_groundgnss_metoffice_simobs: completed"
@@ -124,13 +127,13 @@ end subroutine ufo_groundgnss_metoffice_simobs
 ! ------------------------------------------------------------------------------
 
 
-SUBROUTINE Ops_Groundgnss_ForwardModel(nlevp, &
-                                       nlevq, &
-                                       za, &
-                                       zb, &
+SUBROUTINE Ops_Groundgnss_ForwardModel(nlevP,    &
+                                       nlevq,    &
+                                       za,       &
+                                       zb,       &
                                        pressure, &
                                        humidity, &
-                                       nobs, &
+                                       nobs,     &
                                        zStation, &
                                        Model_ZTD)
 
@@ -142,18 +145,18 @@ REAL(kind_real), INTENT(IN)    :: pressure(1:nlevp)      ! Model background pres
 REAL(kind_real), INTENT(IN)    :: humidity(1:nlevq)      ! Model background specific humidity
 INTEGER, INTENT(IN)            :: nobs                   ! Number of observations
 
-REAL(kind_real), INTENT(IN)    :: zStation
-REAL(kind_real), INTENT(INOUT) :: Model_ZTD          ! Model forecast of the observations
+REAL(kind_real), INTENT(IN)    :: zStation               ! Station heights
+REAL(kind_real), INTENT(INOUT) :: Model_ZTD              ! Model forecast of the observations
 
 ! 
 ! Things that may need to be output, as they are used by the TL/AD calculation
 ! 
 
-REAL(kind_real)                  :: pN(nlevq)              ! Presure on theta levels
-REAL(kind_real)                  :: refrac(nlevq)
-LOGICAL                          :: refracerr
+REAL(kind_real)                  :: pN(nlevq)            ! Presure on theta levels
+REAL(kind_real)                  :: refrac(nlevq)        ! Refraction
+LOGICAL                          :: refracerr            ! Refraction error
 
-REAL(kind_real)                  :: TopCorrection
+REAL(kind_real)                  :: TopCorrection        ! Zenith Total Delay Top of atmos correction
 ! 
 ! Local parameters
 ! 
@@ -165,7 +168,7 @@ character(len=*), parameter  :: myname_ = "Ops_Groundgnss_ForwardModel"
 INTEGER                      :: nstate            ! no. of levels in state vec.
 REAL(kind_real)              :: x(1:nlevp+nlevq)  ! state vector
 character(max_string)        :: err_msg           ! Error message to be output
-character(max_string)        :: message         ! General message for output
+character(max_string)        :: message           ! General message for output
 
 ! The model data must be on a staggered grid, with nlevp = nlevq+1
 IF (nlevp /= nlevq + 1) THEN
@@ -192,15 +195,16 @@ CALL Ops_groundgnss_TopCorrection(pN,    &
                                   nlevq, &
                                   TopCorrection)
 
-CALL Ops_Groundgnss_ZTD  (nlevq,  &
-                          refrac, &
-                          zb,     &
+
+CALL Ops_Groundgnss_ZTD  (nlevq,     &
+                          refrac,    &
+                          zb,        &
                           zStation,  &
                           Model_ZTD)
 
 Model_ZTD = Model_ZTD + TopCorrection
 
-write(message,'(A,F10.4)') "Model_ZTD = ", Model_ZTD
+write(message,'(A,F16.14)') "Model_ZTD = ", Model_ZTD
 call fckit_log%info(message)
 
 END SUBROUTINE ops_groundgnss_forwardmodel

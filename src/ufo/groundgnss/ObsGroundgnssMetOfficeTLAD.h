@@ -1,12 +1,12 @@
 /*
  * (C) Copyright 2021 Met Office
- * 
+ *
  * This software is licensed under the terms of the Apache Licence Version 2.0
- * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#ifndef UFO_GROUNDGNSS_OBSGROUNDGNSSMETOFFICE_H_
-#define UFO_GROUNDGNSS_OBSGROUNDGNSSMETOFFICE_H_
+#ifndef UFO_GROUNDGNSS_OBSGROUNDGNSSMETOFFICETLAD_H_
+#define UFO_GROUNDGNSS_OBSGROUNDGNSSMETOFFICETLAD_H_
 
 #include <memory>
 #include <ostream>
@@ -14,9 +14,10 @@
 
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
-#include "ufo/groundgnss/ObsGroundgnssMetOffice.interface.h"
-#include "ufo/ObsOperatorBase.h"
+#include "ufo/groundgnss/ObsGroundgnssMetOfficeTLAD.interface.h"
+#include "ufo/LinearObsOperatorBase.h"
 
+// Forward declarations
 namespace eckit {
   class Configuration;
 }
@@ -28,23 +29,25 @@ namespace ioda {
 
 namespace ufo {
   class GeoVaLs;
+  class ObsBias;
   class ObsDiagnostics;
 
 // -----------------------------------------------------------------------------
-
 /// GroundgnssMetOffice observation operator
-class ObsGroundgnssMetOffice : public ObsOperatorBase,
-                        private util::ObjectCounter<ObsGroundgnssMetOffice> {
+class ObsGroundgnssMetOfficeTLAD : public LinearObsOperatorBase,
+                          private util::ObjectCounter<ObsGroundgnssMetOfficeTLAD> {
  public:
-  static const std::string classname() {return "ufo::ObsGroundgnssMetOffice";}
+  static const std::string classname() {return "ufo::ObsGroundgnssMetOfficeTLAD";}
 
-  ObsGroundgnssMetOffice(const ioda::ObsSpace &, const eckit::Configuration &);
-  virtual ~ObsGroundgnssMetOffice();
+  ObsGroundgnssMetOfficeTLAD(const ioda::ObsSpace &, const eckit::Configuration &);
+  virtual ~ObsGroundgnssMetOfficeTLAD();
 
-// Obs Operator
-  void simulateObs(const GeoVaLs &, ioda::ObsVector &, ObsDiagnostics &) const override;
+  // Obs Operators
+  void setTrajectory(const GeoVaLs &, const ObsBias &, ObsDiagnostics &) override;
+  void simulateObsTL(const GeoVaLs &, ioda::ObsVector &) const override;
+  void simulateObsAD(GeoVaLs &, const ioda::ObsVector &) const override;
 
-// Other
+  // Other
   const oops::Variables & requiredVars() const override {return *varin_;}
 
   int & toFortran() {return keyOperGroundgnssMetOffice_;}
@@ -60,5 +63,4 @@ class ObsGroundgnssMetOffice : public ObsOperatorBase,
 // -----------------------------------------------------------------------------
 
 }  // namespace ufo
-
-#endif  // UFO_GROUNDGNSS_OBSGROUNDGNSSMETOFFICE_H_
+#endif  // UFO_GROUNDGNSS_OBSGROUNDGNSSMETOFFICETLAD_H_

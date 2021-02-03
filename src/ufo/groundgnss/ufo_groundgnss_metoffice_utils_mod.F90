@@ -14,9 +14,9 @@ use kinds,            only: kind_real
 ! Generic routines from elsewhere in jedi
 use missing_values_mod
 use ufo_constants_mod, only: &
-    rd,                     &    ! Gas constant for dry air
-    grav,                   &    ! Gravitational field strength
-    n_alpha,                &    ! Refractivity constant a
+    rd,                      &   ! Gas constant for dry air
+    grav,                    &   ! Gravitational field strength
+    n_alpha,                 &   ! Refractivity constant a
     n_beta                       ! Refractivity constant b
 
 implicit none
@@ -30,29 +30,29 @@ contains
 !-------------------------------------------------------------------------------
 ! Ground based GNSS Observation operator
 !-------------------------------------------------------------------------------
-SUBROUTINE Ops_Groundgnss_ZTD  (nlevq,  &
-                                refrac, &
-                                zb,     &
+SUBROUTINE Ops_Groundgnss_ZTD  (nlevq,    &
+                                refrac,   &
+                                zb,       &
                                 zStation, &
                                 Model_ZTD)
 
 IMPLICIT NONE
     
     INTEGER, INTENT(IN)               :: nlevq           ! no. of theta levels
-    REAL(kind_real), INTENT(IN)       :: refrac(:)
-    REAL(kind_real), INTENT(IN)       :: zb(:)
-    REAL(kind_real), INTENT(IN)       :: zStation
-    REAL(kind_real), INTENT(INOUT)    :: Model_ZTD
+    REAL(kind_real), INTENT(IN)       :: refrac(:)       ! refractivty
+    REAL(kind_real), INTENT(IN)       :: zb(:)           ! The geometric height of the model theta levels
+    REAL(kind_real), INTENT(IN)       :: zStation        ! Station heights
+    REAL(kind_real), INTENT(INOUT)    :: Model_ZTD       ! Model background ZTD
     
     
-    REAL(kind_real)             :: LocalZenithDelay
-    INTEGER                     :: Level
-    REAL(kind_real)             :: StationRefrac
-    REAL(kind_real)             :: c
-    REAL(kind_real)             :: const
-    REAL(kind_real)             :: term1
-    REAL(kind_real)             :: term2
-    INTEGER                     :: Lowest_Level
+    REAL(kind_real)             :: LocalZenithDelay      ! Zenith total delay
+    INTEGER                     :: Level                 ! level iterator
+    REAL(kind_real)             :: StationRefrac         ! refrac at station
+    REAL(kind_real)             :: c                     ! scale height
+    REAL(kind_real)             :: const                 ! refrac constant
+    REAL(kind_real)             :: term1                 ! refrac term1
+    REAL(kind_real)             :: term2                 ! refrac term2
+    INTEGER                     :: Lowest_Level          ! lowest height level
 
     !------------------------------------------------------------
     ! Calculate the zenith delay for each layer and add to total
@@ -91,7 +91,7 @@ IMPLICIT NONE
         ! calculated, then use c from the first full layer, but integrate down to height of
         ! station
 
-        c = (LOG (Refrac(Level + 1) / Refrac(Level))) / (zb(Level) - zb(Level + 1))
+        c = (LOG (refrac(Level + 1) / refrac(Level))) / (zb(Level) - zb(Level + 1))
         const = -refrac(Level) / c * EXP (c * (zb(Level)))
         term1 = EXP (-c * (zb(Level + 1)))
         term2 = EXP (-c * ZStation)
@@ -120,12 +120,12 @@ SUBROUTINE Ops_groundgnss_TopCorrection(pN,    &
 					
     IMPLICIT NONE
     
-    REAL(kind_real), INTENT(IN)      :: pN(:)
-    INTEGER, INTENT(IN)              :: nlevq
-    REAL(kind_real), INTENT(INOUT)   :: TopCorrection
+    REAL(kind_real), INTENT(IN)      :: pN(:)              ! Presure on theta levels
+    INTEGER, INTENT(IN)              :: nlevq              ! no. of theta levels
+    REAL(kind_real), INTENT(INOUT)   :: TopCorrection      ! ZTD Top of atmos correction
 
-    REAL(kind_real)                  :: TCconstant
-    REAL(kind_real), PARAMETER       :: hpa_to_pa = 100.0
+    REAL(kind_real)                  :: TCconstant         ! Top correction constant
+    REAL(kind_real), PARAMETER       :: hpa_to_pa = 100.0  ! hPa to Pascal conversion
 
     TCconstant = (refrac_scale * n_alpha * rd)/ (hpa_to_pa * grav)
     

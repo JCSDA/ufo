@@ -8,8 +8,13 @@ set (  groundgnss_files
        ObsGroundgnssMetOffice.cc
        ObsGroundgnssMetOffice.interface.h
        ObsGroundgnssMetOffice.interface.F90
+       ObsGroundgnssMetOfficeTLAD.h
+       ObsGroundgnssMetOfficeTLAD.cc
+       ObsGroundgnssMetOfficeTLAD.interface.h
+       ObsGroundgnssMetOfficeTLAD.interface.F90
        ufo_groundgnss_metoffice_mod.F90
        ufo_groundgnss_metoffice_utils_mod.F90
+       ufo_groundgnss_metoffice_tlad_mod.F90
        ufo_refractivity_utils_mod.F90
 )
 
