@@ -294,6 +294,52 @@ successful:
   # intvar1@MetaData =    1,    2,    3,    4,    5,    6,    7,    8,    9,   10,
   # i.e. binary        0001, 0010, 0011, 0100, 0101, 0110, 0111, 1000, 1001, 1010
       size where true: 8  # "where" should select the following values of intvar1: 3 and 7
+    - where:                       # test matches_regex on string variables
+      - variable:
+          name:  station_id@MetaData
+        matches_regex: ".*U.*A.*"
+  # station_id@MetaData = WARUBAJH, HUAVFIBU, DKPAIDZX, MTLGWTHE, LESDCYOD, UGCMFXFK, HSMHFHQI, JALVYAAR, MOYSUYWB, XKEHXQSD
+      size where true: 2
+    - where:                       # test matches_regex on int variables
+      - variable:
+          name:  intvar1@MetaData
+        matches_regex: "10?"
+  # intvar1@MetaData = 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+      size where true: 2
+    - where:                       # test matches_wildcard on string variables
+      - variable:
+          name:  station_id@MetaData
+        matches_wildcard: "*U*A*"
+  # station_id@MetaData = WARUBAJH, HUAVFIBU, DKPAIDZX, MTLGWTHE, LESDCYOD, UGCMFXFK, HSMHFHQI, JALVYAAR, MOYSUYWB, XKEHXQSD
+      size where true: 2
+    - where:                       # test matches_wildcard on int variables
+      - variable:
+          name:  intvar1@MetaData
+        matches_wildcard: "1*"
+  # intvar1@MetaData = 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+      size where true: 2
+    - where:                       # test matches_any_wildcard on string variables
+      - variable:
+          name:  station_id@MetaData
+        matches_any_wildcard: ["*U*A*", "H*"]
+  # station_id@MetaData = WARUBAJH, HUAVFIBU, DKPAIDZX, MTLGWTHE, LESDCYOD, UGCMFXFK, HSMHFHQI, JALVYAAR, MOYSUYWB, XKEHXQSD
+      size where true: 3
+    - where:                       # test matches_any_wildcard on int variables
+      - variable:
+          name:  intvar1@MetaData
+        matches_any_wildcard: ["1*", "6*"]
+  # intvar1@MetaData = 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+      size where true: 3
+    - where:                       # test matches_any_wildcard with an empty list of wildcards on string variables
+      - variable:
+          name:  station_id@MetaData
+        matches_any_wildcard: []
+      size where true: 0
+    - where:                       # test matches_any_wildcard with an empty list of wildcards on int variables
+      - variable:
+          name:  intvar1@MetaData
+        matches_any_wildcard: []
+      size where true: 0
 
 user_error_type_handling_is_in:
   window begin: 2018-01-01T00:00:00Z

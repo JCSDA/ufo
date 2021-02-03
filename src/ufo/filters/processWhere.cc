@@ -8,6 +8,7 @@
 #include "ufo/filters/processWhere.h"
 
 #include <bitset>
+#include <regex>
 #include <set>
 #include <string>
 #include <vector>
@@ -17,6 +18,7 @@
 #include "oops/util/Logger.h"
 #include "oops/util/missingValues.h"
 #include "oops/util/PartialDateTime.h"
+#include "oops/util/wildcard.h"
 #include "ufo/filters/ObsFilterData.h"
 #include "ufo/filters/Variables.h"
 
@@ -206,6 +208,77 @@ void processWhereAnyBitUnsetOf(const std::vector<int> & data,
 }
 
 // -----------------------------------------------------------------------------
+/// \brief Process a `matches_regex` keyword in a `where` clause.
+///
+/// This function sets to `false` all elements of `where` corresponding to elements of `data` that
+/// do not match the regular expression `pattern`. The vectors `data` and `where` must be of the
+/// same length.
+void processWhereMatchesRegex(const std::vector<std::string> & data,
+                              const std::string & pattern,
+                              std::vector<bool> & where) {
+  std::regex regex(pattern);
+  for (size_t jj = 0; jj < data.size(); ++jj) {
+    if (where[jj] && !std::regex_match(data[jj], regex))
+      where[jj] = false;
+  }
+}
+
+/// \brief Process a `matches_regex` keyword in a `where` clause.
+///
+/// This function sets to `false` all elements of `where` corresponding to elements of `data` whose
+/// string representations do not match the regular expression `pattern`. The vectors `data` and
+/// `where` must be of the same length.
+void processWhereMatchesRegex(const std::vector<int> & data,
+                              const std::string & pattern,
+                              std::vector<bool> & where) {
+  std::regex regex(pattern);
+  for (size_t jj = 0; jj < data.size(); ++jj) {
+    if (where[jj] && !std::regex_match(std::to_string(data[jj]), regex))
+      where[jj] = false;
+  }
+}
+
+// -----------------------------------------------------------------------------
+/// Returns true if `string` matches any of the patterns from the list `patterns`.
+///
+/// The patterns may contain wildcards `*` (matching any sequence of characters) and `?` (matching
+/// a single character).
+bool stringMatchesAnyWildcardPattern(const std::string &string,
+                                     const std::vector<std::string> & patterns) {
+  return std::any_of(patterns.begin(),
+                     patterns.end(),
+                     [&string] (const std::string &pattern)
+                     { return util::matchesWildcardPattern(string, pattern); });
+}
+
+/// \brief Function used to process a `matches_wildcard` or `matches_any_wildcard` keyword in a
+/// `where` clause.
+///
+/// This function sets to `false` all elements of `where` corresponding to elements of `data` that
+/// do not match any of the patterns from the list `patterns`. The patterns may contain wildcards
+/// `*` (matching any sequence of characters) and `?` (matching a single character). The vectors
+/// `data` and `where` must be of the same length.
+void processWhereMatchesAnyWildcardPattern(const std::vector<std::string> & data,
+                                           const std::vector<std::string> & patterns,
+                                           std::vector<bool> & where) {
+  for (size_t jj = 0; jj < data.size(); ++jj) {
+    if (where[jj] && !stringMatchesAnyWildcardPattern(data[jj], patterns))
+      where[jj] = false;
+  }
+}
+
+/// \overload Same as the function above, but taking a vector of integers rather than strings.
+/// The integers are converted to strings before pattern matching.
+void processWhereMatchesAnyWildcardPattern(const std::vector<int> & data,
+                                           const std::vector<std::string> & patterns,
+                                           std::vector<bool> & where) {
+  for (size_t jj = 0; jj < data.size(); ++jj) {
+    if (where[jj] && !stringMatchesAnyWildcardPattern(std::to_string(data[jj]), patterns))
+      where[jj] = false;
+  }
+}
+
+// -----------------------------------------------------------------------------
 void isInString(std::vector<bool> & where, eckit::LocalConfiguration const & mask,
                 ObsFilterData const & filterdata, Variable const & varname) {
   std::vector<std::string> data;
@@ -335,6 +408,68 @@ std::vector<bool> processWhere(const eckit::Configuration & config,
           } else {
             throw eckit::UserError(
               "Only integer variables may be used for processWhere 'any_bit_unset_of'",
+              Here());
+          }
+        }
+
+//      Apply mask matches_regex
+        if (masks[jm].has("matches_regex")) {
+          const std::string pattern = masks[jm].getString("matches_regex");
+          // Select observations for which the variable 'varname' matches the regular expression
+          // 'pattern'.
+          if (dtype == ioda::ObsDtype::Integer) {
+            std::vector<int> data;
+            filterdata.get(varname, data);
+            processWhereMatchesRegex(data, pattern, where);
+          } else if (dtype == ioda::ObsDtype::String) {
+            std::vector<std::string> data;
+            filterdata.get(varname, data);
+            processWhereMatchesRegex(data, pattern, where);
+          } else {
+            throw eckit::UserError(
+              "Only string and integer variables may be used for processWhere 'matches_regex'",
+              Here());
+          }
+        }
+
+//      Apply mask matches_wildcard
+        if (masks[jm].has("matches_wildcard")) {
+          const std::string pattern = masks[jm].getString("matches_wildcard");
+          // Select observations for which the variable 'varname' matches the pattern
+          // 'pattern', which may contain the * and ? wildcards.
+          if (dtype == ioda::ObsDtype::Integer) {
+            std::vector<int> data;
+            filterdata.get(varname, data);
+            processWhereMatchesAnyWildcardPattern(data, {pattern}, where);
+          } else if (dtype == ioda::ObsDtype::String) {
+            std::vector<std::string> data;
+            filterdata.get(varname, data);
+            processWhereMatchesAnyWildcardPattern(data, {pattern}, where);
+          } else {
+            throw eckit::UserError(
+              "Only string and integer variables may be used for processWhere 'matches_wildcard'",
+              Here());
+          }
+        }
+
+//      Apply mask matches_any_wildcard
+        if (masks[jm].has("matches_any_wildcard")) {
+          const std::vector<std::string> patterns =
+              masks[jm].getStringVector("matches_any_wildcard");
+          // Select observations for which the variable 'varname' matches any of the patterns
+          // 'patterns'; these may contain the * and ? wildcards.
+          if (dtype == ioda::ObsDtype::Integer) {
+            std::vector<int> data;
+            filterdata.get(varname, data);
+            processWhereMatchesAnyWildcardPattern(data, patterns, where);
+          } else if (dtype == ioda::ObsDtype::String) {
+            std::vector<std::string> data;
+            filterdata.get(varname, data);
+            processWhereMatchesAnyWildcardPattern(data, patterns, where);
+          } else {
+            throw eckit::UserError(
+              "Only string and integer variables may be used for processWhere "
+              "'matches_any_wildcard'",
               Here());
           }
         }
