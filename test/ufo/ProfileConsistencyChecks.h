@@ -257,7 +257,7 @@ void testProfileConsistencyChecks(const eckit::LocalConfiguration &conf) {
       geovals->get(orogGeoVaLs, ufo::VariableNames::geovals_orog, 1);
       std::vector <float> zRhoGeoVaLs;
       std::vector <float> zThetaGeoVaLs;
-      ufo::CalculateModelHeight(options->ModParameters,
+      ufo::CalculateModelHeight(options->DHParameters.ModParameters,
                                 orogGeoVaLs[0],
                                 zRhoGeoVaLs,
                                 zThetaGeoVaLs);

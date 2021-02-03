@@ -68,6 +68,7 @@ namespace ufo {
           checkMode = !checkMode;
         }
         GeoVaLNames_ += profileCheck->getGeoVaLNames();
+        validationGeoVaLNames_ += profileCheck->getValidationGeoVaLNames();
       } else {
         throw eckit::NotImplemented("Have not implemented a check for " + check, Here());
       }

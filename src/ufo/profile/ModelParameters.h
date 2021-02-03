@@ -63,6 +63,13 @@ namespace ufo {
             0.3906297, 0.4204658, 0.4542161, 0.4924589, 0.5358422, 0.5850902,
             0.6410096, 0.7044966, 0.7765451, 0.8582535, 0.9508334},
       this};
+
+    /// Number of model theta levels.
+    size_t numModelLevels() const {return etaTheta.value().size();}
+
+    /// Number of model rho levels.
+    /// Assume there is one more rho level than there are theta levels.
+    size_t numModelLevels_rho() const {return etaTheta.value().size() + 1;}
   };
 }  // namespace ufo
 

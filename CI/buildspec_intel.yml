@@ -180,7 +180,7 @@ phases:
         && ls
         && ecbuild /jcsda/ufo-bundle/
         && cd ufo
-        && make -j4"
+        && make -j3"
 
       - echo $CODEBUILD_BUILD_SUCCEEDING
       - if [ "$CODEBUILD_BUILD_SUCCEEDING" = "1" ];

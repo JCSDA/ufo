@@ -7,7 +7,7 @@
 
 #include "ufo/profile/VariableNames.h"
 
-// Variable names: observation values
+// Observation values
 
 constexpr const char* const ufo::VariableNames::obs_air_pressure;
 constexpr const char* const ufo::VariableNames::obs_air_temperature;
@@ -17,7 +17,7 @@ constexpr const char* const ufo::VariableNames::obs_northward_wind;
 constexpr const char* const ufo::VariableNames::obs_geopotential_height;
 constexpr const char* const ufo::VariableNames::obs_dew_point_temperature;
 
-// Variable names: observation errors
+// Observation errors
 
 constexpr const char* const ufo::VariableNames::obserr_air_temperature;
 constexpr const char* const ufo::VariableNames::obserr_relative_humidity;
@@ -26,7 +26,7 @@ constexpr const char* const ufo::VariableNames::obserr_northward_wind;
 constexpr const char* const ufo::VariableNames::obserr_geopotential_height;
 constexpr const char* const ufo::VariableNames::obserr_dew_point_temperature;
 
-// Variable names: HofX
+// HofX
 
 constexpr const char* const ufo::VariableNames::hofx_air_temperature;
 constexpr const char* const ufo::VariableNames::hofx_geopotential_height;
@@ -35,7 +35,7 @@ constexpr const char* const ufo::VariableNames::hofx_eastward_wind;
 constexpr const char* const ufo::VariableNames::hofx_northward_wind;
 constexpr const char* const ufo::VariableNames::hofx_dew_point_temperature;
 
-// Variable names: background errors
+// Background errors
 
 constexpr const char* const ufo::VariableNames::bkgerr_air_temperature;
 constexpr const char* const ufo::VariableNames::bkgerr_relative_humidity;
@@ -44,7 +44,7 @@ constexpr const char* const ufo::VariableNames::bkgerr_northward_wind;
 constexpr const char* const ufo::VariableNames::bkgerr_geopotential_height;
 constexpr const char* const ufo::VariableNames::bkgerr_dew_point_temperature;
 
-// Variable names: probability of gross error
+// Probability of gross error
 
 constexpr const char* const ufo::VariableNames::pge_air_temperature;
 constexpr const char* const ufo::VariableNames::pge_relative_humidity;
@@ -52,7 +52,7 @@ constexpr const char* const ufo::VariableNames::pge_eastward_wind;
 constexpr const char* const ufo::VariableNames::pge_northward_wind;
 constexpr const char* const ufo::VariableNames::pge_geopotential_height;
 
-// Variable names: probability of gross error used in buddy check
+// Probability of gross error used in buddy check
 
 constexpr const char* const ufo::VariableNames::pgebd_air_temperature;
 constexpr const char* const ufo::VariableNames::pgebd_relative_humidity;
@@ -60,7 +60,7 @@ constexpr const char* const ufo::VariableNames::pgebd_eastward_wind;
 constexpr const char* const ufo::VariableNames::pgebd_northward_wind;
 constexpr const char* const ufo::VariableNames::pgebd_geopotential_height;
 
-// Variable names: MetaData
+// MetaData
 
 constexpr const char* const ufo::VariableNames::station_ID;
 constexpr const char* const ufo::VariableNames::obs_level_time;
@@ -71,7 +71,7 @@ constexpr const char* const ufo::VariableNames::Longitude;
 constexpr const char* const ufo::VariableNames::Time;
 constexpr const char* const ufo::VariableNames::Zstation;
 
-// Variable names: QC flags
+// QC flags
 
 constexpr const char* const ufo::VariableNames::qcflags_observation_report;
 constexpr const char* const ufo::VariableNames::qcflags_air_temperature;
@@ -81,7 +81,7 @@ constexpr const char* const ufo::VariableNames::qcflags_eastward_wind;
 constexpr const char* const ufo::VariableNames::qcflags_northward_wind;
 constexpr const char* const ufo::VariableNames::qcflags_time;
 
-// Variable names: counters
+// Counters
 
 constexpr const char* const ufo::VariableNames::counter_NumAnyErrors;
 constexpr const char* const ufo::VariableNames::counter_NumSamePErrObs;
@@ -100,12 +100,12 @@ constexpr const char* const ufo::VariableNames::counter_TotCFlags;
 constexpr const char* const ufo::VariableNames::counter_TotHFlags;
 constexpr const char* const ufo::VariableNames::counter_TotLFlags;
 
-// Variable names: corrections
+// Corrections
 
 constexpr const char* const ufo::VariableNames::obscorrection_air_temperature;
 constexpr const char* const ufo::VariableNames::obscorrection_geopotential_height;
 
-// Variable names: intermediate values
+// Intermediate values
 
 constexpr const char* const ufo::VariableNames::DC;
 constexpr const char* const ufo::VariableNames::ETol;
@@ -133,8 +133,29 @@ constexpr const char* const ufo::VariableNames::rhbk;
 constexpr const char* const ufo::VariableNames::FlagH;
 constexpr const char* const ufo::VariableNames::Indx;
 
+// Derived values
+
+constexpr const char* const ufo::VariableNames::LogP_derived;
+constexpr const char* const ufo::VariableNames::bigPgaps_derived;
+
 // GeoVaLs
 
 constexpr const char* const ufo::VariableNames::geovals_orog;
 constexpr const char* const ufo::VariableNames::geovals_pressure;
+constexpr const char* const ufo::VariableNames::geovals_pressure_rho;
 constexpr const char* const ufo::VariableNames::geovals_height;
+
+
+// GeoVaLs used in validation
+
+constexpr const char* const ufo::VariableNames::geovals_logP;
+constexpr const char* const ufo::VariableNames::geovals_ExnerP;
+constexpr const char* const ufo::VariableNames::geovals_logP_rho;
+constexpr const char* const ufo::VariableNames::geovals_ExnerP_rho;
+
+// Derived values on model levels
+
+constexpr const char* const ufo::VariableNames::geovals_logP_derived;
+constexpr const char* const ufo::VariableNames::geovals_ExnerP_derived;
+constexpr const char* const ufo::VariableNames::geovals_logP_rho_derived;
+constexpr const char* const ufo::VariableNames::geovals_ExnerP_rho_derived;

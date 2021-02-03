@@ -20,7 +20,6 @@
 #include "ufo/filters/FilterParametersBase.h"
 
 #include "ufo/profile/DataHandlerParameters.h"
-#include "ufo/profile/ModelParameters.h"
 
 #include "ufo/utils/Constants.h"
 #include "ufo/utils/parameters/ParameterTraitsVariable.h"
@@ -310,6 +309,23 @@ namespace ufo {
 
     /// @}
 
+    /// @name Profile averaging parameters
+    /// @{
+
+    /// Factor used to determine big gaps for sondes
+    /// (dimensionless; multiplied by log(10)).
+    oops::Parameter<float> AvgP_SondeGapFactor {"AvgP_SondeGapFactor", 1.0, this};
+
+    /// Factor used to determine big gaps for wind profilers
+    /// (dimensionless; multiplied by log(10)).
+    oops::Parameter<float> AvgP_WinProGapFactor {"AvgP_WinProGapFactor", 1.0, this};
+
+    /// Minimum value of denominator used when computing big gaps
+    /// (dimensionless; equal to log (pressure threshold / hPa)).
+    oops::Parameter<float> AvgP_GapLogPDiffMin {"AvgP_GapLogPDiffMin", log(5.0), this};
+
+    /// @}
+
     /// @name OPS comparison parameters
     /// @{
 
@@ -329,9 +345,6 @@ namespace ufo {
 
     /// Parameters related to PGE calculations
     ProbabilityOfGrossErrorParameters PGEParameters{this};
-
-    /// Parameters related to the model
-    ModelParameters ModParameters{this};
 
     /// @}
   };

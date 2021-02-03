@@ -13,7 +13,7 @@ namespace ufo
 
 struct VariableNames
 {
-  // Variable names: observation values
+  // Observation values
 
   static constexpr const char* const obs_air_pressure = "air_pressure@MetaData";
   static constexpr const char* const obs_air_temperature = "air_temperature@ObsValue";
@@ -23,7 +23,7 @@ struct VariableNames
   static constexpr const char* const obs_geopotential_height = "geopotential_height@ObsValue";
   static constexpr const char* const obs_dew_point_temperature = "dew_point_temperature@ObsValue";
 
-  // Variable names: observation errors
+  // Observation errors
 
   static constexpr const char* const obserr_air_temperature = "air_temperature@ObsError";
   static constexpr const char* const obserr_relative_humidity = "relative_humidity@ObsError";
@@ -33,7 +33,7 @@ struct VariableNames
   static constexpr const char* const obserr_dew_point_temperature =
     "dew_point_temperature@ObsError";
 
-  // Variable names: HofX
+  // HofX
 
   static constexpr const char* const hofx_air_temperature = "air_temperature@HofX";
   static constexpr const char* const hofx_geopotential_height = "geopotential_height@HofX";
@@ -42,7 +42,7 @@ struct VariableNames
   static constexpr const char* const hofx_northward_wind = "northward_wind@HofX";
   static constexpr const char* const hofx_dew_point_temperature = "dew_point_temperature@HofX";
 
-  // Variable names: background errors
+  // Background errors
 
   static constexpr const char* const bkgerr_air_temperature = "air_temperature@BkgError";
   static constexpr const char* const bkgerr_relative_humidity = "relative_humidity@BkgError";
@@ -52,7 +52,7 @@ struct VariableNames
   static constexpr const char* const bkgerr_dew_point_temperature =
     "dew_point_temperature@BkgError";
 
-  // Variable names: probability of gross error
+  // Probability of gross error
 
   static constexpr const char* const pge_air_temperature = "air_temperature@GrossErrorProbability";
   static constexpr const char* const pge_relative_humidity =
@@ -62,7 +62,7 @@ struct VariableNames
   static constexpr const char* const pge_geopotential_height =
     "geopotential_height@GrossErrorProbability";
 
-  // Variable names: probability of gross error used in buddy check
+  // Probability of gross error used in buddy check
 
   static constexpr const char* const pgebd_air_temperature =
     "air_temperature@GrossErrorProbabilityBuddyCheck";
@@ -75,7 +75,7 @@ struct VariableNames
   static constexpr const char* const pgebd_geopotential_height =
     "geopotential_height@GrossErrorProbabilityBuddyCheck";
 
-  // Variable names: MetaData
+  // MetaData
 
   static constexpr const char* const station_ID = "station_id@MetaData";
   static constexpr const char* const obs_level_time = "level_time@MetaData";
@@ -87,7 +87,7 @@ struct VariableNames
   static constexpr const char* const Zstation = "Zstation@MetaData";
   static constexpr const char* const LevelType = "LevelType@MetaData";
 
-  // Variable names: QC flags
+  // QC flags
 
   static constexpr const char* const qcflags_observation_report = "observation_report@QCFlags";
   static constexpr const char* const qcflags_air_temperature = "air_temperature@QCFlags";
@@ -98,7 +98,7 @@ struct VariableNames
   static constexpr const char* const qcflags_time = "time@QCFlags";
   static constexpr const char* const qcflags_wind_profiler = "wind_profiler@QCFlags";
 
-  // Variable names: counters
+  // Counters
 
   static constexpr const char* const counter_NumAnyErrors = "NumAnyErrors@Counters";
   static constexpr const char* const counter_NumSamePErrObs = "NumSamePErrObs@Counters";
@@ -117,13 +117,13 @@ struct VariableNames
   static constexpr const char* const counter_TotHFlags = "TotHFlags@Counters";
   static constexpr const char* const counter_TotLFlags = "TotLFlags@Counters";
 
-  // Variable names: corrections
+  // Corrections
 
   static constexpr const char* const obscorrection_air_temperature = "air_temperature@Corrections";
   static constexpr const char* const obscorrection_geopotential_height =
     "geopotential_height@Corrections";
 
-  // Variable names: intermediate values
+  // Intermediate values
 
   static constexpr const char* const DC = "DC@MetaData";
   static constexpr const char* const ETol = "ETol@MetaData";
@@ -151,11 +151,32 @@ struct VariableNames
   static constexpr const char* const FlagH = "FlagH@MetaData";
   static constexpr const char* const Indx = "Indx@MetaData";
 
+  // Derived values
+
+  static constexpr const char* const LogP_derived = "logP@DerivedValue";
+  static constexpr const char* const bigPgaps_derived = "bigPgaps@DerivedValue";
+
   // GeoVaLs
 
   static constexpr const char* const geovals_orog = "orography";
   static constexpr const char* const geovals_pressure = "air_pressure";
+  static constexpr const char* const geovals_pressure_rho = "air_pressure_rho";
   static constexpr const char* const geovals_height = "height";
+
+  // GeoVaLs used in validation
+
+  static constexpr const char* const geovals_logP = "LogPB";
+  static constexpr const char* const geovals_ExnerP = "ExnerPB";
+  static constexpr const char* const geovals_logP_rho = "LogPA";
+  static constexpr const char* const geovals_ExnerP_rho = "ExnerPA";
+
+  // Derived values on model levels
+
+  static constexpr const char* const geovals_logP_derived = "LogPB@ModelLevelsDerivedValue";
+  static constexpr const char* const geovals_ExnerP_derived = "ExnerPB@ModelLevelsDerivedValue";
+  static constexpr const char* const geovals_logP_rho_derived = "LogPA@ModelRhoLevelsDerivedValue";
+  static constexpr const char* const geovals_ExnerP_rho_derived =
+    "ExnerPA@ModelRhoLevelsDerivedValue";
 };
 
 }  // namespace ufo

@@ -13,6 +13,7 @@
 #include <vector>
 
 #include "ufo/profile/ProfileCheckBase.h"
+#include "ufo/profile/ProfileCheckValidator.h"
 #include "ufo/profile/ProfileDataHandler.h"
 
 #include "ufo/utils/metoffice/MetOfficeObservationIDs.h"

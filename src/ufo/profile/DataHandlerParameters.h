@@ -15,6 +15,8 @@
 #include "oops/util/parameters/Parameter.h"
 #include "oops/util/parameters/Parameters.h"
 
+#include "ufo/profile/ModelParameters.h"
+
 namespace eckit {
   class Configuration;
 }
@@ -42,9 +44,18 @@ namespace ufo {
     {
       size_t entriesPerProfile = 0;
       // Variables with one entry per profile.
-      if (std::find(groups_singlevalue.value().begin(), groups_singlevalue.value().end(), groupname)
+      if (std::find(groups_singlevalue.value().begin(),
+                    groups_singlevalue.value().end(), groupname)
           != groups_singlevalue.value().end()) {
         entriesPerProfile = 1;
+      } else if (std::find(groups_modellevels.value().begin(),
+                           groups_modellevels.value().end(), groupname)
+          != groups_modellevels.value().end()) {
+        entriesPerProfile = ModParameters.numModelLevels();
+      } else if (std::find(groups_modelrholevels.value().begin(),
+                           groups_modelrholevels.value().end(), groupname)
+          != groups_modelrholevels.value().end()) {
+        entriesPerProfile = ModParameters.numModelLevels_rho();
       }
       return entriesPerProfile;
     }
@@ -59,6 +70,14 @@ namespace ufo {
     oops::Parameter<std::vector<std::string>> groups_singlevalue
       {"groups_singlevalue", {"Counters"}, this};
 
+    /// Groups of variables which are on model levels.
+    oops::Parameter<std::vector<std::string>> groups_modellevels
+      {"groups_modellevels", {"ModelLevelsDerivedValue"}, this};
+
+    /// Groups of variables which are on model rho levels.
+    oops::Parameter<std::vector<std::string>> groups_modelrholevels
+      {"groups_modelrholevels", {"ModelRhoLevelsDerivedValue"}, this};
+
     /// Number of errors, accumulated over checks, that cause the observation to have failed.
     oops::Parameter<int> nErrorsFail {"nErrorsFail", 1, this};
 
@@ -69,8 +88,12 @@ namespace ufo {
     /// If not sorting observations, ensure number of profiles is consistent
     oops::Parameter<bool> ValidateTotalNumProf {"ValidateTotalNumProf", true, this};
 
-    /// GeoVaLs required by the filter.
-    oops::Parameter<std::vector <std::string>> requiredGeoVaLs{"requiredGeoVaLs", {}, this};
+    /// Output filename for saving derived values on model levels.
+    oops::Parameter<std::string> ModelLevelsDerivedValuesFilename
+      {"ModelLevelsDerivedValuesFilename", "ModelLevelsDerivedValues.nc4", this};
+
+    /// Parameters related to the model.
+    ModelParameters ModParameters{this};
   };
 }  // namespace ufo
 

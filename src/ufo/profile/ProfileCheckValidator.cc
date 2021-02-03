@@ -150,6 +150,14 @@ namespace ufo {
             ufo::VariableNames::qcflags_observation_report});
         valuesToCompare_float_.insert({
             ufo::VariableNames::obs_air_pressure});
+      } else if (check == "AveragePressure") {
+        valuesToCompare_float_.insert({
+            ufo::VariableNames::LogP_derived,
+            ufo::VariableNames::bigPgaps_derived,
+            ufo::VariableNames::geovals_logP_derived,
+            ufo::VariableNames::geovals_ExnerP_derived,
+            ufo::VariableNames::geovals_logP_rho_derived,
+            ufo::VariableNames::geovals_ExnerP_rho_derived});
       }
     }
   }

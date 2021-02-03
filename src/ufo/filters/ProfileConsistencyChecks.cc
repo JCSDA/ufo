@@ -51,6 +51,14 @@ namespace ufo {
       allvars_ += Variables(reqGeoVaLs, "GeoVaLs");
     }
 
+    if (options_.compareWithOPS.value()) {
+      const auto &validationGeoVaLNames = profileChecker.getValidationGeoVaLNames();
+      if (validationGeoVaLNames.size() > 0) {
+        ufo::Variables valGeoVaLs(validationGeoVaLNames);
+        allvars_ += Variables(valGeoVaLs, "GeoVaLs");
+      }
+    }
+
     // It is essential for observations to be grouped according to (e.g.) station ID
     // (unless there is only one profile in the sample, which would be very unusual).
     // Throw an exception if the "group variable" configuration option is missing.
@@ -106,7 +114,7 @@ namespace ufo {
       }
     }
 
-    // Write out any quantities that may have changed to obsdb
+    // Write various quantities to the obsdb.
     profileDataHandler.writeQuantitiesToObsdb();
 
     oops::Log::debug() << "... Finished loop over profiles" << std::endl;

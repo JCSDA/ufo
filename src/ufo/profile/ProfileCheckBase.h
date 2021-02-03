@@ -56,6 +56,9 @@ namespace ufo {
     /// List of names of required GeoVaLs.
     virtual oops::Variables getGeoVaLNames() {return oops::Variables();}
 
+    /// List of names of GeoVaLs used in check validation.
+    virtual oops::Variables getValidationGeoVaLNames() {return oops::Variables();}
+
    protected:  // functions
     /// Apply correction to vector of values
     template <typename T>

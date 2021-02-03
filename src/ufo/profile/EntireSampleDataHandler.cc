@@ -19,7 +19,7 @@ namespace ufo {
 
   void EntireSampleDataHandler::writeQuantitiesToObsdb()
   {
-    // Write out all variables in the QCFlags and Corrections groups.
+    // Write out all variables in particular groups.
     for (const auto& it_data : entireSampleData_) {
       std::string fullname = it_data.first;
       std::string varname;
@@ -28,7 +28,10 @@ namespace ufo {
 
       if (groupname == "QCFlags") {
         putDataVector(fullname, get<int>(fullname));
-      } else if (groupname == "Corrections") {
+      } else if (groupname == "Corrections" ||
+                 groupname == "DerivedValue" ||
+                 groupname == "ModelLevelsDerivedValue" ||
+                 groupname == "ModelRhoLevelsDerivedValue") {
         putDataVector(fullname, get<float>(fullname));
       }
     }

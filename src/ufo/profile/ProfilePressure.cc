@@ -117,7 +117,7 @@ namespace ufo {
       // zThetaGeoVaLs are not used further in this routine but do appear elsewhere in the code.
       std::vector <float> zRhoGeoVaLs;
       std::vector <float> zThetaGeoVaLs;
-      ufo::CalculateModelHeight(options_.ModParameters,
+      ufo::CalculateModelHeight(options_.DHParameters.ModParameters,
                                 orogGeoVaLs[0],
                                 zRhoGeoVaLs,
                                 zThetaGeoVaLs);

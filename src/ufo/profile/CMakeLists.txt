@@ -11,6 +11,8 @@ set ( profile_files
       ModelHeightCalculator.cc
       ModelHeightCalculator.h
       ModelParameters.h
+      ProfileAveragePressure.cc
+      ProfileAveragePressure.h
       ProfileCheckBasic.cc
       ProfileChecker.cc
       ProfileChecker.h

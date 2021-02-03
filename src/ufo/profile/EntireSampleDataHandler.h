@@ -128,7 +128,7 @@ namespace ufo {
         }
       }
 
-   private:
+   private:  // functions
     /// Put entire data vector on obsdb.
     template <typename T>
       void putDataVector(const std::string &fullname,
@@ -143,6 +143,7 @@ namespace ufo {
         obsdb_.put_db(groupname, varname, datavec);
       }
 
+   private:  // variables
     /// Observation database.
     ioda::ObsSpace &obsdb_;
 

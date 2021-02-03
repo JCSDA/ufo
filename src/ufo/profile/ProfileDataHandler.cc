@@ -82,17 +82,20 @@ namespace ufo {
       ufo::splitVarGroup(fullname, varname, groupname);
 
       if (groupname == "QCFlags" || fullname == ufo::VariableNames::counter_NumAnyErrors) {
-        getProfileIndicesInEntireSample(groupname);
         const std::vector <int>& profileData = get<int>(fullname);
+        getProfileIndicesInEntireSample(groupname);
         std::vector <int>& entireSampleData = entireSampleDataHandler_->get<int>(fullname);
         size_t idx = 0;
         for (const auto& profileIndex : profileIndicesInEntireSample_) {
           updateValueIfPresent(profileData, idx, entireSampleData, profileIndex);
           idx++;
         }
-      } else if (groupname == "Corrections") {
-        getProfileIndicesInEntireSample(groupname);
+      } else if (groupname == "Corrections" ||
+                 groupname == "DerivedValue" ||
+                 groupname == "ModelLevelsDerivedValue" ||
+                 groupname == "ModelRhoLevelsDerivedValue") {
         const std::vector <float>& profileData = get<float>(fullname);
+        getProfileIndicesInEntireSample(groupname);
         std::vector <float>& entireSampleData = entireSampleDataHandler_->get<float>(fullname);
         size_t idx = 0;
         for (const auto& profileIndex : profileIndicesInEntireSample_) {
