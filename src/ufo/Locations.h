@@ -50,6 +50,9 @@ class Locations : public util::Printable,
   const std::vector<float> & lons() const {return lons_;}
   /// accessor to observation latitudes (on current MPI task)
   const std::vector<float> & lats() const {return lats_;}
+  /// accessor to DateTimes (on current MPI task)
+  const std::vector<util::DateTime> & times() const {return times_;}
+
 
  private:
   void print(std::ostream & os) const override;
