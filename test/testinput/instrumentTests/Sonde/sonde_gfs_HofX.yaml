@@ -1,0 +1,42 @@
+window begin: 2020-11-01T09:00:00Z
+window end: 2020-11-01T15:00:00Z
+
+observations:
+- obs operator:
+    name: VertInterp
+  obs space:
+    name: Sonde_hofx_tq_test
+    obsdatain:
+      obsfile: Data/ioda/testinput_tier_1/instruments/conventional/sondes_obs_2020110112_m.nc4
+    simulated variables: [air_temperature, specific_humidity]
+  geovals:
+    filename: Data/ufo/testinput_tier_1/instruments/conventional/sondes_geoval_2020110112_m.nc4
+  vector ref: GsiHofX
+  tolerance: 1.0e-05
+# Seperate test for winds that need to set a lower tolerance
+- obs operator:
+    name: VertInterp
+  obs space:
+    name: Sonde_hofx_uv_test
+    obsdatain:
+      obsfile: Data/ioda/testinput_tier_1/instruments/conventional/sondes_obs_2020110112_m.nc4
+    simulated variables: [eastward_wind, northward_wind]
+  geovals:
+    filename: Data/ufo/testinput_tier_1/instruments/conventional/sondes_geoval_2020110112_m.nc4
+  vector ref: GsiHofX
+  tolerance: 0.001
+# Surface pressure requires a different HofX obs operator
+- obs operator:
+    name: SfcPCorrected
+    da_psfc_scheme: UKMO
+    geovar_geomz: geopotential_height               # height (default, delete option)
+    geovar_sfc_geomz: surface_geopotential_height   # surface_altitude (default, delete option)
+  obs space:
+    name: Sonde_hofx_ps_test
+    obsdatain:
+      obsfile: Data/ioda/testinput_tier_1/instruments/conventional/sondes_obs_2020110112_m.nc4
+    simulated variables: [surface_pressure]
+  geovals:
+    filename: Data/ufo/testinput_tier_1/instruments/conventional/sondes_geoval_2020110112_m.nc4
+  rms ref: 97199.05489
+  tolerance: 1.0e-04

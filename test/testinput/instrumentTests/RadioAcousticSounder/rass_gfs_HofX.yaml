@@ -1,0 +1,15 @@
+window begin: 2020-11-01T09:00:00Z
+window end: 2020-11-01T15:00:00Z
+
+observations:
+- obs operator:
+    name: VertInterp
+  obs space:
+    name: RASS-tv
+    obsdatain:
+      obsfile: Data/ioda/testinput_tier_1/instruments/conventional/rass_obs_2020110112_m.nc4
+    simulated variables: [virtual_temperature]
+  geovals:
+    filename: Data/ufo/testinput_tier_1/instruments/conventional/rass_geoval_2020110112_m.nc4
+  vector ref: GsiHofX
+  tolerance: 1.0e-06
