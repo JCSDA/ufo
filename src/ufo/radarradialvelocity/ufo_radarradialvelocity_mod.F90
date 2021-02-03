@@ -50,7 +50,7 @@ character(kind=c_char,len=:), allocatable :: coord_name
         call abor1_ftn("ufo_radarradialvelocity: incorrect vertical coordinate specified")
       endif
   else  ! default
-      self%v_coord = var_z
+      self%v_coord = var_zm
   endif
 
   call self%geovars%push_back(self%v_coord)
@@ -74,7 +74,7 @@ subroutine ufo_radarradialvelocity_simobs(self, geovals, obss, nvars, nlocs, hof
   ! Local variables
   integer :: iobs, ivar, nvars_geovars
   real(kind_real),  dimension(:), allocatable :: obsvcoord
-  real(kind_real),  dimension(:), allocatable :: radarazim, radartilt, radardir, vterminal
+  real(kind_real),  dimension(:), allocatable :: cosazm_costilt, sinazm_costilt, sintilt, vterminal
   type(ufo_geoval), pointer :: vcoordprofile, profile
   real(kind_real),  allocatable :: wf(:)
   integer,          allocatable :: wi(:)
@@ -93,15 +93,15 @@ subroutine ufo_radarradialvelocity_simobs(self, geovals, obss, nvars, nlocs, hof
 
 ! Get the observation vertical coordinates
   allocate(obsvcoord(nlocs))
-  allocate(radarazim(nlocs))
-  allocate(radartilt(nlocs))
-  allocate(radardir(nlocs))
+  allocate(cosazm_costilt(nlocs))
+  allocate(sinazm_costilt(nlocs))
+  allocate(sintilt(nlocs))
   allocate(vterminal(nlocs))
-  call obsspace_get_db(obss, "MetaData", "height", obsvcoord)
-  call obsspace_get_db(obss, "MetaData", "radar_azimuth", radarazim)
-  call obsspace_get_db(obss, "MetaData", "radar_tilt", radartilt)
-  call obsspace_get_db(obss, "MetaData", "radar_dir3", radardir)
-  call obsspace_get_db(obss, "MetaData", "vterminal", vterminal)
+
+  call obsspace_get_db(obss, "MetaData", "geometric_height", obsvcoord)
+  call obsspace_get_db(obss, "MetaData", "cosazm_costilt", cosazm_costilt)
+  call obsspace_get_db(obss, "MetaData", "sinazm_costilt", sinazm_costilt)
+  call obsspace_get_db(obss, "MetaData", "sintilt", sintilt)
 
 ! put observation operator code here
 ! Allocate arrays for interpolation weights
@@ -136,19 +136,20 @@ subroutine ufo_radarradialvelocity_simobs(self, geovals, obss, nvars, nlocs, hof
     enddo
   enddo
 
+  vterminal=0.0
   do ivar = 1, nvars
     do iobs=1,nlocs
-      hofx(ivar,iobs) = vfields(1,iobs)*radarazim(iobs) &
-                      + vfields(2,iobs)*radartilt(iobs) &
-                      + (vfields(3,iobs)-vterminal(iobs))*radardir(iobs)
+      hofx(ivar,iobs) = vfields(1,iobs)*cosazm_costilt(iobs) &
+                      + vfields(2,iobs)*sinazm_costilt(iobs) &
+                      + (vfields(3,iobs)-vterminal(iobs))*sintilt(iobs)
     enddo
   end do
 
 ! Cleanup memory
   deallocate(obsvcoord)
-  deallocate(radarazim)
-  deallocate(radartilt)
-  deallocate(radardir )
+  deallocate(cosazm_costilt)
+  deallocate(sinazm_costilt)
+  deallocate(sintilt )
   deallocate(vterminal)
   deallocate(wi)
   deallocate(wf)
