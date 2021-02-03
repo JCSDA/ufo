@@ -65,9 +65,9 @@ class FilterBase : public ObsProcessorBase {
                            std::vector<std::vector<bool>> &) const = 0;
   virtual int qcFlag() const = 0;
 
-  // These Configuration objects will be replaced by appropriate Parameters subclasses later.
+  // This Configuration object will be replaced by an appropriate Parameters subclass later.
   eckit::LocalConfiguration whereConfig_;
-  eckit::LocalConfiguration actionConfig_;
+  std::unique_ptr<FilterActionParametersBase> actionParameters_;
 };
 
 }  // namespace ufo

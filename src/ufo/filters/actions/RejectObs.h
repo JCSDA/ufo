@@ -10,8 +10,9 @@
 
 #include <vector>
 
-#include "ioda/ObsDataVector.h"
+#include "oops/util/parameters/OptionalParameter.h"
 #include "ufo/filters/actions/FilterActionBase.h"
+#include "ufo/filters/Variables.h"
 
 namespace ufo {
 
@@ -19,18 +20,31 @@ class ObsFilterData;
 
 // -----------------------------------------------------------------------------
 
+class RejectObsParameters : public FilterActionParametersBase {
+  OOPS_CONCRETE_PARAMETERS(RejectObsParameters, FilterActionParametersBase);
+
+  // No extra parameters needed.
+};
+
+// -----------------------------------------------------------------------------
+
+/// The default action of a QC filter: reject observations flagged by the filter.
 class RejectObs : public FilterActionBase {
  public:
-  explicit RejectObs(const eckit::Configuration &);
+  /// The type of parameters accepted by the constructor of this action.
+  /// This typedef is used by the FilterActionFactory.
+  typedef RejectObsParameters Parameters_;
+
+  explicit RejectObs(const Parameters_ &);
   ~RejectObs() {}
 
   void apply(const Variables &, const std::vector<std::vector<bool>> &,
-             const ObsFilterData &,
+             const ObsFilterData &, int,
              ioda::ObsDataVector<int> &, ioda::ObsDataVector<float> &) const override;
   const ufo::Variables & requiredVariables() const override {return allvars_;}
  private:
   Variables allvars_;
-  const eckit::Configuration & conf_;
+  Parameters_ parameters_;
 };
 
 // -----------------------------------------------------------------------------

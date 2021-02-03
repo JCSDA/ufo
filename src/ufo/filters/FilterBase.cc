@@ -36,7 +36,7 @@ FilterBase::FilterBase(ioda::ObsSpace & os, const FilterParametersBase & paramet
     config_(parameters.toConfiguration()),
     filtervars_(),
     whereConfig_(parameters.where),
-    actionConfig_(parameters.action)
+    actionParameters_(parameters.action.value().actionParameters.value().clone())
 {
   oops::Log::trace() << "FilterBase constructor" << std::endl;
   allvars_ += getAllWhereVariables(parameters.where);
@@ -50,7 +50,7 @@ FilterBase::FilterBase(ioda::ObsSpace & os, const FilterParametersBase & paramet
     filtervars_ += Variables(obsdb_.obsvariables());
   }
 
-  FilterAction action(parameters.action);
+  FilterAction action(*actionParameters_);
   allvars_ += action.requiredVariables();
 }
 
@@ -88,10 +88,8 @@ void FilterBase::doFilter() const {
   this->applyFilter(apply, filtervars_, flagged);
 
 // Take action
-  eckit::LocalConfiguration aconf = actionConfig_;
-  aconf.set("flag", this->qcFlag());
-  FilterAction action(aconf);
-  action.apply(filtervars_, flagged, data_, *flags_, *obserr_);
+  FilterAction action(*actionParameters_);
+  action.apply(filtervars_, flagged, data_, this->qcFlag(), *flags_, *obserr_);
 
 // Done
   oops::Log::trace() << "FilterBase doFilter end" << std::endl;

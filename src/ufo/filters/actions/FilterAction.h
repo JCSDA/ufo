@@ -14,9 +14,7 @@
 
 #include <boost/noncopyable.hpp>
 
-#include "ioda/ObsDataVector.h"
 #include "ufo/filters/actions/FilterActionBase.h"
-#include "ufo/filters/Variables.h"
 
 namespace eckit {
   class Configuration;
@@ -30,13 +28,28 @@ class ObsFilterData;
 
 class FilterAction : private boost::noncopyable {
  public:
-  explicit FilterAction(const eckit::Configuration &);
+  explicit FilterAction(const FilterActionParametersBase &);
   ~FilterAction();
 
-  void apply(const ufo::Variables &, const std::vector<std::vector<bool>> &,
-             const ObsFilterData &,
-             ioda::ObsDataVector<int> &, ioda::ObsDataVector<float> &) const;
+  /// \param vars
+  ///   The list of filter variables.
+  /// \param flagged
+  ///   If flagged[i][j] is true, it means that the action should be performed on jth observation
+  ///   of ith filter variable.
+  /// \param data
+  ///   Accessor to obs filter data.
+  /// \param filterQCflag
+  ///   QC flag identifying observations rejected by the type of filter performing the action.
+  ///   (Relevant only for actions rejecting observations.)
+  /// \param flags
+  ///   QC flags of all "simulated variables".
+  /// \param obserr
+  ///   Obs error estimates of all "simulated variables".
+  void apply(const ufo::Variables &vars, const std::vector<std::vector<bool>> &flagged,
+             const ObsFilterData &data, int filterQCflag,
+             ioda::ObsDataVector<int> &flags, ioda::ObsDataVector<float> &obserr) const;
   virtual const ufo::Variables & requiredVariables() const;
+
  private:
   std::unique_ptr<FilterActionBase> action_;
 };

@@ -12,11 +12,29 @@
 #include <vector>
 
 #include "ioda/ObsDataVector.h"
+#include "oops/util/parameters/OptionalParameter.h"
 #include "ufo/filters/actions/FilterActionBase.h"
+#include "ufo/filters/Variable.h"
+#include "ufo/filters/Variables.h"
+#include "ufo/utils/parameters/ParameterTraitsVariable.h"
 
 namespace ufo {
 
 class ObsFilterData;
+
+// -----------------------------------------------------------------------------
+
+class InflateErrorParameters : public FilterActionParametersBase {
+  OOPS_CONCRETE_PARAMETERS(InflateErrorParameters, FilterActionParametersBase);
+
+ public:
+  oops::OptionalParameter<float> inflationFactor{"inflation factor", this};
+  oops::OptionalParameter<Variable> inflationVariable{"inflation variable", this};
+
+  /// This function is overridden to check that either `inflation factor` or `inflation variable`
+  /// is specified, but not both.
+  void deserialize(util::CompositePath &path, const eckit::Configuration &config) override;
+};
 
 // -----------------------------------------------------------------------------
 /// \brief Observation error inflation action.
@@ -30,17 +48,21 @@ class ObsFilterData;
 ///   updating all filter variables.
 class InflateError : public FilterActionBase {
  public:
-  explicit InflateError(const eckit::Configuration &);
+  /// The type of parameters accepted by the constructor of this action.
+  /// This typedef is used by the FilterActionFactory.
+  typedef InflateErrorParameters Parameters_;
+
+  explicit InflateError(const Parameters_ &);
 
   void apply(const Variables &, const std::vector<std::vector<bool>> &,
-             const ObsFilterData &,
+             const ObsFilterData &, int,
              ioda::ObsDataVector<int> &, ioda::ObsDataVector<float> &) const override;
 
   const ufo::Variables & requiredVariables() const override {return allvars_;}
 
  private:
   Variables allvars_;            /// variables required to compute inflation
-  const eckit::LocalConfiguration conf_;
+  Parameters_ parameters_;
 };
 
 // -----------------------------------------------------------------------------

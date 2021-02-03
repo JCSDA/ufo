@@ -14,10 +14,24 @@
 #include "oops/base/ObsFilterParametersBase.h"
 #include "oops/util/parameters/OptionalParameter.h"
 #include "oops/util/parameters/Parameter.h"
+#include "oops/util/parameters/PolymorphicParameter.h"
+#include "ufo/filters/actions/FilterActionBase.h"  // for FilterActionFactory
 #include "ufo/filters/Variable.h"
 #include "ufo/utils/parameters/ParameterTraitsVariable.h"
 
 namespace ufo {
+
+/// \brief Parameters controlling the action performed on observations flagged by a filter.
+class FilterActionParameters : public oops::Parameters {
+  OOPS_CONCRETE_PARAMETERS(FilterActionParameters, Parameters)
+ public:
+  /// After deserialization, holds an instance of a subclass of FilterActionParametersBase
+  /// controlling the behavior of a filter action. The type of the subclass is determined
+  /// by the value of the `name` key in the Configuration object from which this object
+  /// is deserialized. Omitting this key is equivalent to setting it to `reject`.
+  oops::PolymorphicParameter<FilterActionParametersBase, FilterActionFactory>
+    actionParameters{"name", "reject", this};
+};
 
 /// \brief Parameters shared by all filters derived from FilterBase.
 class FilterParametersBase : public oops::ObsFilterParametersBase {
@@ -40,8 +54,8 @@ class FilterParametersBase : public oops::ObsFilterParametersBase {
   /// `where` statement.
   oops::Parameter<eckit::LocalConfiguration> where{"where", eckit::LocalConfiguration(), this};
 
-  /// Operation performed on observations meeting the conditions specified in the `where` clause.
-  oops::Parameter<eckit::LocalConfiguration> action{"action", eckit::LocalConfiguration(), this};
+  /// Parameters controlling the action performed on observations flagged by the filter.
+  oops::Parameter<FilterActionParameters> action{"action", {}, this};
 
   /// If set to true, the filter will be executed only after the obs operator (even if it
   /// doesn't require any variables from the GeoVaLs or HofX groups).

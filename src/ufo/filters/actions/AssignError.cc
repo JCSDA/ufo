@@ -12,11 +12,9 @@
 
 #include "ioda/ObsDataVector.h"
 #include "oops/base/Variables.h"
-#include "oops/util/IntSetParser.h"
 #include "oops/util/missingValues.h"
 #include "ufo/filters/ObsFilterData.h"
 #include "ufo/filters/QCflags.h"
-#include "ufo/utils/StringUtils.h"
 
 namespace ufo {
 
@@ -26,26 +24,41 @@ static FilterActionMaker<AssignError> makerAssignErr_("assign error");
 
 // -----------------------------------------------------------------------------
 
-AssignError::AssignError(const eckit::Configuration & conf)
-  : allvars_(), conf_(conf) {
-  if (conf_.has("error function")) {
-    allvars_ += Variable(conf_.getSubConfiguration("error function"));
+void AssignErrorParameters::deserialize(util::CompositePath &path,
+                                        const eckit::Configuration &config) {
+  oops::Parameters::deserialize(path, config);
+
+  // These checks should really be done at the validation stage (using JSON Schema),
+  // but this isn't supported yet, so this is better than nothing.
+  if ((errorParameter.value() == boost::none && errorFunction.value() == boost::none) ||
+      (errorParameter.value() != boost::none && errorFunction.value() != boost::none))
+    throw eckit::UserError(path.path() +
+                           ": Exactly one of the 'error parameter' and 'error function' "
+                           "options must be present");
+}
+
+// -----------------------------------------------------------------------------
+
+AssignError::AssignError(const Parameters_ & parameters)
+  : allvars_(), parameters_(parameters) {
+  if (parameters_.errorFunction.value() != boost::none) {
+    allvars_ += *parameters_.errorFunction.value();
   }
-  ASSERT(conf_.has("error function") || conf_.has("error parameter"));
 }
 
 // -----------------------------------------------------------------------------
 
 void AssignError::apply(const Variables & vars,
-                         const std::vector<std::vector<bool>> &,
-                         const ObsFilterData & data,
-                         ioda::ObsDataVector<int> & flags,
-                         ioda::ObsDataVector<float> & obserr) const {
+                        const std::vector<std::vector<bool>> &,
+                        const ObsFilterData & data,
+                        int /*filterQCflag*/,
+                        ioda::ObsDataVector<int> & flags,
+                        ioda::ObsDataVector<float> & obserr) const {
   oops::Log::debug() << " AssignError input obserr: " << obserr << std::endl;
   const float missing = util::missingValue(missing);
   // If float error is specified
-  if (conf_.has("error parameter")) {
-    float error = conf_.getFloat("error parameter");
+  if (parameters_.errorParameter.value() != boost::none) {
+    float error = *parameters_.errorParameter.value();
     for (size_t jv = 0; jv < vars.nvars(); ++jv) {
       size_t iv = obserr.varnames().find(vars.variable(jv).variable());
       size_t kv = flags.varnames().find(vars.variable(jv).variable());
@@ -53,12 +66,12 @@ void AssignError::apply(const Variables & vars,
         if (flags[kv][jobs] == QCflags::pass) obserr[iv][jobs] = error;
       }
     }
-  // If variable is specified
-  } else if (conf_.has("error function")) {
-    Variable errorvar(conf_.getSubConfiguration("error function"));
+    // If variable is specified
+  } else if (parameters_.errorFunction.value() != boost::none) {
+    const Variable &errorvar = *parameters_.errorFunction.value();
     ASSERT(errorvar.size() == 1 || errorvar.size() == vars.nvars());
     ioda::ObsDataVector<float> errors(data.obsspace(), errorvar.toOopsVariables(),
-                                       errorvar.group(), false);
+                                      errorvar.group(), false);
     data.get(errorvar, errors);
 
     // if assigned error function is 1D variable, apply the same error to all variables

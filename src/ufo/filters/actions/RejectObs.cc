@@ -19,8 +19,8 @@ static FilterActionMaker<RejectObs> makerRejectObs_("reject");
 
 // -----------------------------------------------------------------------------
 
-RejectObs::RejectObs(const eckit::Configuration & conf)
-  : allvars_(), conf_(conf) {
+RejectObs::RejectObs(const RejectObsParameters &parameters)
+  : allvars_(), parameters_(parameters) {
 }
 
 // -----------------------------------------------------------------------------
@@ -28,13 +28,14 @@ RejectObs::RejectObs(const eckit::Configuration & conf)
 void RejectObs::apply(const Variables & vars,
                       const std::vector<std::vector<bool>> & flagged,
                       const ObsFilterData &,
+                      int filterQCflag,
                       ioda::ObsDataVector<int> & flags,
                       ioda::ObsDataVector<float> &) const {
-  int flag = conf_.getInt("flag");
   for (size_t jv = 0; jv < vars.nvars(); ++jv) {
     size_t iv = flags.varnames().find(vars.variable(jv).variable());
     for (size_t jobs = 0; jobs < flags.nlocs(); ++jobs) {
-      if (flagged[jv][jobs] && flags[iv][jobs] == QCflags::pass) flags[iv][jobs] = flag;
+      if (flagged[jv][jobs] && flags[iv][jobs] == QCflags::pass)
+        flags[iv][jobs] = filterQCflag;
     }
   }
 }
