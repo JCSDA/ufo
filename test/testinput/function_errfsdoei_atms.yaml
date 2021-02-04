@@ -25,15 +25,12 @@ observations:
           clwret_ch238: 1
           clwret_ch314: 2
           clwret_types: [ObsValue]
-          test_bias: GsiObsBias
       clwbkg_function:
         name: CLWRetMW@ObsFunction
         options:
           clwret_ch238: 1
           clwret_ch314: 2
-          clwret_types: [GsiHofX]
-          test_bias: GsiObsBias
-          bias_application: GsiHofX
+          clwret_types: [GsiHofXBc]
       scatobs_function:
         name: SCATRetMW@ObsFunction
         options:
@@ -41,7 +38,6 @@ observations:
           scatret_ch314: 2
           scatret_ch890: 16 
           scatret_types: [ObsValue]
-          test_bias: GsiObsBias
       clwmatchidx_function:
         name: CLWMatchIndexMW@ObsFunction
         channels: *all_channels
@@ -53,15 +49,12 @@ observations:
               clwret_ch238: 1
               clwret_ch314: 2
               clwret_types: [ObsValue]
-              test_bias: GsiObsBias
           clwbkg_function:
             name: CLWRetMW@ObsFunction
             options:
               clwret_ch238: 1
               clwret_ch314: 2
-              clwret_types: [GsiHofX]
-              test_bias: GsiObsBias
-              bias_application: GsiHofX
+              clwret_types: [GsiHofXBc]
           clwret_clearsky: [ 0.030,  0.030,  0.030,  0.020,  0.030,
                              0.080,  0.150,  0.000,  0.000,  0.000,
                              0.000,  0.000,  0.000,  0.000,  0.000,
@@ -73,8 +66,7 @@ observations:
                           4.000,  4.000,  3.500,  3.000,  3.000,
                           3.000,  3.000]
       test_obserr: GsiObsError_sdoei 
-      test_hofx: GsiHofX 
-      test_bias: GsiObsBias 
+      test_hofx: GsiHofXBc
       test_qcflag: PreQC
     variables: [error_inflation_factor_sdoei]
     channels: *all_channels

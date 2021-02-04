@@ -20,15 +20,12 @@ observations:
           clwret_ch238: 1
           clwret_ch314: 2
           clwret_types: [ObsValue]
-          test_bias: GsiObsBias
       clwbkg_function:
         name: CLWRetMW@ObsFunction
         options:
           clwret_ch238: 1
           clwret_ch314: 2
-          clwret_types: [GsiHofX]
-          test_bias: GsiObsBias
-          bias_application: GsiHofX
+          clwret_types: [GsiHofXBc]
       clwret_clearsky: [ 0.030,  0.030,  0.030,  0.020,  0.030,
                          0.080,  0.150,  0.000,  0.000,  0.000,
                          0.000,  0.000,  0.000,  0.000,  0.000,

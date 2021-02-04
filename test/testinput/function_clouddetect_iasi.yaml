@@ -68,8 +68,7 @@ observations:
       channels: *all_channels
       test_qcflag: PreQC
       test_obserr: GsiObsError_clddet
-      test_hofx: GsiHofX
-      test_bias: GsiObsBias
+      test_hofx: GsiHofXBc
       use_flag: [1, -1, -1, -1, 1, -1, -1, -1, 1, -1, 1, -1, 1,
                 -1, 1, 1, 1, -1, 1, 1, -1, 1, 1, 1, -1, -1, 1, 1, -1, 1, -1, 1, -1, 1,
                 -1, -1, -1, -1, -1, -1, -1, -1, 1, 1, 1, -1, 1, 1, 1, 1, 1, 1, 1, 1, 1,

@@ -244,7 +244,7 @@ void ObsBiasCovariance::linearize(const ObsBias & bias, const eckit::Configurati
 
       // compute the hessian contribution from Jo bias terms channel by channel
       // retrieve the effective error (after QC) for this channel
-      ioda::ObsVector r_inv(odb_, "EffectiveError", true);
+      ioda::ObsVector r_inv(odb_, "EffectiveError");
 
       // compute \mathrm{R}^{-1}
       std::size_t nvars = r_inv.nvars();
@@ -266,7 +266,7 @@ void ObsBiasCovariance::linearize(const ObsBias & bias, const eckit::Configurati
       std::fill(ht_rinv_h_.begin(), ht_rinv_h_.end(), 0.0);
       for (std::size_t p = 0; p < prednames_.size(); ++p) {
         // retrieve the predictors
-        const ioda::ObsVector predx(odb_, prednames_[p] + "Predictor", true);
+        const ioda::ObsVector predx(odb_, prednames_[p] + "Predictor");
 
         // for each variable
         ASSERT(r_inv.nlocs() == predx.nlocs());

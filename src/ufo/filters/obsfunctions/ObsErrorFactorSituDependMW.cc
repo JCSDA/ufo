@@ -54,13 +54,11 @@ ObsErrorFactorSituDependMW::ObsErrorFactorSituDependMW(const eckit::LocalConfigu
   // Get test groups from options
   const std::string &flaggrp = options_.testQCflag.value();
   const std::string &errgrp = options_.testObserr.value();
-  const std::string &biasgrp = options_.testBias.value();
   const std::string &hofxgrp = options_.testHofX.value();
 
   // Include list of required data from ObsSpace
   invars_ += Variable("brightness_temperature@ObsValue", channels_);
   invars_ += Variable("brightness_temperature@"+hofxgrp, channels_);
-  invars_ += Variable("brightness_temperature@"+biasgrp, channels_);
   invars_ += Variable("brightness_temperature@"+errgrp, channels_);
   invars_ += Variable("brightness_temperature@"+flaggrp, channels_);
 
@@ -104,7 +102,6 @@ void ObsErrorFactorSituDependMW::compute(const ObsFilterData & in,
   // Get test groups from options
   const std::string &errgrp = options_.testObserr.value();
   const std::string &flaggrp = options_.testQCflag.value();
-  const std::string &biasgrp = options_.testBias.value();
   const std::string &hofxgrp = options_.testHofX.value();
 
   // Get clear-sky observation error from options
@@ -152,17 +149,15 @@ void ObsErrorFactorSituDependMW::compute(const ObsFilterData & in,
     }
   }
 
-  // Calculate bias corrected innovation: ObsValue - HofX - ObsBias
+  // Calculate bias corrected innovation: ObsValue - HofX (HofX includes bias correction)
   std::vector<std::vector<float>> btobs(nchans, std::vector<float>(nlocs));
   std::vector<std::vector<float>> hofx(nchans, std::vector<float>(nlocs));
-  std::vector<std::vector<float>> bias(nchans, std::vector<float>(nlocs));
   std::vector<std::vector<float>> innov(nchans, std::vector<float>(nlocs));
   for (size_t ichan = 0; ichan < nchans; ++ichan) {
     in.get(Variable("brightness_temperature@ObsValue", channels_)[ichan], btobs[ichan]);
     in.get(Variable("brightness_temperature@"+hofxgrp, channels_)[ichan], hofx[ichan]);
-    in.get(Variable("brightness_temperature@"+biasgrp, channels_)[ichan], bias[ichan]);
     for (size_t iloc = 0; iloc < nlocs; ++iloc) {
-      innov[ichan][iloc] = btobs[ichan][iloc] - hofx[ichan][iloc] - bias[ichan][iloc];
+      innov[ichan][iloc] = btobs[ichan][iloc] - hofx[ichan][iloc];
     }
   }
 

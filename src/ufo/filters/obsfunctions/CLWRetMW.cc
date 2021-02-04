@@ -124,16 +124,12 @@ void CLWRetMW::compute(const ObsFilterData & in,
         bias238.assign(nlocs, 0.0f);
         bias314.assign(nlocs, 0.0f);
         }
-        // Add bias correction to the assigned group
+        // Add bias correction to the assigned group (only for ObsValue; H(x) already includes bias
+        // correction
         if (options_.addBias.value() == "ObsValue") {
           for (size_t iloc = 0; iloc < nlocs; ++iloc) {
             bt238[iloc] = bt238[iloc] - bias238[iloc];
             bt314[iloc] = bt314[iloc] - bias314[iloc];
-          }
-        } else {
-          for (size_t iloc = 0; iloc < nlocs; ++iloc) {
-            bt238[iloc] = bt238[iloc] + bias238[iloc];
-            bt314[iloc] = bt314[iloc] + bias314[iloc];
           }
         }
       }
@@ -171,16 +167,12 @@ void CLWRetMW::compute(const ObsFilterData & in,
         bias37v.assign(nlocs, 0.0f);
         bias37h.assign(nlocs, 0.0f);
         }
-        // Add bias correction to the assigned group
+        // Add bias correction to the assigned group (only for ObsValue; H(x) already includes bias
+        // correction
         if (options_.addBias.value() == "ObsValue") {
           for (size_t iloc = 0; iloc < nlocs; ++iloc) {
             bt37v[iloc] = bt37v[iloc] - bias37v[iloc];
             bt37h[iloc] = bt37h[iloc] - bias37h[iloc];
-          }
-        } else {
-          for (size_t iloc = 0; iloc < nlocs; ++iloc) {
-            bt37v[iloc] = bt37v[iloc] + bias37v[iloc];
-            bt37h[iloc] = bt37h[iloc] + bias37h[iloc];
           }
         }
       }

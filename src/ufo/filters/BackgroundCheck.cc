@@ -75,7 +75,6 @@ void BackgroundCheck::applyFilter(const std::vector<bool> & apply,
   oops::Log::debug() << "BackgroundCheck obserr: " << *obserr_;
 
   ioda::ObsDataVector<float> obs(obsdb_, filtervars.toOopsVariables(), "ObsValue");
-  ioda::ObsDataVector<float> bias(obsdb_, filtervars.toOopsVariables(), "ObsBias", false);
   std::string test_hofx = parameters_.test_hofx.value();
 
 // Get function absolute threshold
@@ -100,11 +99,10 @@ void BackgroundCheck::applyFilter(const std::vector<bool> & apply,
 //        Threshold for current observation
           float zz = function_abs_threshold[jv][jobs];
 
-//        Apply bias correction
-          float yy = obs[jv][jobs] - bias[jv][jobs];
-
 //        Check distance from background
-          if (std::abs(static_cast<float>(hofx[jobs]) - yy) > zz) flagged[jv][jobs] = true;
+          if (std::abs(static_cast<float>(hofx[jobs]) - obs[jv][jobs]) > zz) {
+            flagged[jv][jobs] = true;
+          }
         }
       }
     }
@@ -135,11 +133,10 @@ void BackgroundCheck::applyFilter(const std::vector<bool> & apply,
             std::min(abs_thr[jobs], thr[jobs] * (*obserr_)[iv][jobs]);
           ASSERT(zz < std::numeric_limits<float>::max() && zz > 0.0);
 
-//        Apply bias correction
-          float yy = obs[jv][jobs] - bias[jv][jobs];
-
 //        Check distance from background
-          if (std::abs(static_cast<float>(hofx[jobs]) - yy) > zz) flagged[jv][jobs] = true;
+          if (std::abs(static_cast<float>(hofx[jobs]) - obs[jv][jobs]) > zz) {
+            flagged[jv][jobs] = true;
+          }
         }
       }
     }

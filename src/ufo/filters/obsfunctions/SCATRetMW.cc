@@ -84,18 +84,13 @@ void SCATRetMW::compute(const ObsFilterData & in,
       in.get(Variable("brightness_temperature@"+options_.testBias.value(), channels_)[0], bias238);
       in.get(Variable("brightness_temperature@"+options_.testBias.value(), channels_)[1], bias314);
       in.get(Variable("brightness_temperature@"+options_.testBias.value(), channels_)[2], bias890);
-      // Add bias correction to the assigned group
+      // Add bias correction to the assigned group (only need to do it for ObsValue, since HofX
+      // includes bias correction
       if (options_.addBias.value() == "ObsValue") {
         for (size_t iloc = 0; iloc < nlocs; ++iloc) {
           bt238[iloc] = bt238[iloc] - bias238[iloc];
           bt314[iloc] = bt314[iloc] - bias314[iloc];
           bt890[iloc] = bt890[iloc] - bias890[iloc];
-        }
-      } else {
-        for (size_t iloc = 0; iloc < nlocs; ++iloc) {
-          bt238[iloc] = bt238[iloc] + bias238[iloc];
-          bt314[iloc] = bt314[iloc] + bias314[iloc];
-          bt890[iloc] = bt890[iloc] + bias890[iloc];
         }
       }
     }

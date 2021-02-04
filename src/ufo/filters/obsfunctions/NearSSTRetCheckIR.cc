@@ -41,7 +41,6 @@ NearSSTRetCheckIR::NearSSTRetCheckIR(const eckit::LocalConfiguration & conf)
   // Get test groups from options
   const std::string &flaggrp = options_.testQCflag.value();
   const std::string &errgrp = options_.testObserr.value();
-  const std::string &biasgrp = options_.testBias.value();
   const std::string &hofxgrp = options_.testHofX.value();
 
   // Include required variables from ObsDiag
@@ -53,7 +52,6 @@ NearSSTRetCheckIR::NearSSTRetCheckIR(const eckit::LocalConfiguration & conf)
   invars_ += Variable("brightness_temperature@"+flaggrp, channels_);
   invars_ += Variable("brightness_temperature@"+errgrp, channels_);
   invars_ += Variable("brightness_temperature@"+hofxgrp, channels_);
-  invars_ += Variable("brightness_temperature@"+biasgrp, channels_);
   invars_ += Variable("brightness_temperature@ObsValue", channels_);
   invars_ += Variable("brightness_temperature@ObsError", channels_);
   invars_ += Variable("sensor_band_central_radiation_wavenumber@VarMetaData");
@@ -83,7 +81,6 @@ void NearSSTRetCheckIR::compute(const ObsFilterData & in,
   // Get test groups from options
   const std::string &flaggrp = options_.testQCflag.value();
   const std::string &errgrp = options_.testObserr.value();
-  const std::string &biasgrp = options_.testBias.value();
   const std::string &hofxgrp = options_.testHofX.value();
 
   // Setup vectors to get 2D variables
@@ -138,15 +135,11 @@ void NearSSTRetCheckIR::compute(const ObsFilterData & in,
     }
   }
 
-  // Get bias corrected innovation (tbobs - hofx - bias)
+  // Get bias corrected innovation (tbobs - hofx) (hofx includes bias correction)
   std::vector<std::vector<float>> innovation(nchans, std::vector<float>(nlocs));
   for (size_t ichan = 0; ichan < nchans; ++ichan) {
     in.get(Variable("brightness_temperature@ObsValue", channels_)[ichan], innovation[ichan]);
     in.get(Variable("brightness_temperature@"+hofxgrp, channels_)[ichan], values);
-    for (size_t iloc = 0; iloc < nlocs; ++iloc) {
-      innovation[ichan][iloc] = innovation[ichan][iloc] - values[iloc];
-    }
-    in.get(Variable("brightness_temperature@"+biasgrp, channels_)[ichan], values);
     for (size_t iloc = 0; iloc < nlocs; ++iloc) {
       innovation[ichan][iloc] = innovation[ichan][iloc] - values[iloc];
     }

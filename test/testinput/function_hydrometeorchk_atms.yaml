@@ -21,7 +21,7 @@ observations:
       channels: *all_channels
       test_biasterm: GsiObsBiasTerm
       test_bias: GsiObsBias
-      test_hofx: GsiHofX
+      test_hofx: GsiHofXBc
       obserr_clearsky:  [ 4.500,  4.500,  4.500,  2.500,  0.550,
                           0.300,  0.300,  0.400,  0.400,  0.400,
                           0.450,  0.450,  0.550,  0.800,  3.000,
@@ -33,7 +33,6 @@ observations:
           clwret_ch238: 1
           clwret_ch314: 2
           clwret_types: [ObsValue]
-          test_bias: GsiObsBias
       obserr_function:
         name: ObsErrorModelRamp@ObsFunction
         channels: *all_channels
@@ -44,9 +43,7 @@ observations:
             options:
               clwret_ch238: 1
               clwret_ch314: 2
-              clwret_types: [ObsValue, GsiHofX]
-              test_bias: GsiObsBias
-              bias_application: GsiHofX
+              clwret_types: [ObsValue, GsiHofXBc]
           x0:    [ 0.030,  0.030,  0.030,  0.020,  0.030,
                    0.080,  0.150,  0.000,  0.000,  0.000,
                    0.000,  0.000,  0.000,  0.000,  0.000,

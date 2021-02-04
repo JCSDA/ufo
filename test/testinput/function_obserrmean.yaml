@@ -23,9 +23,7 @@ observations:
         options:
           clwret_ch238: 1
           clwret_ch314: 2
-          clwret_types: [ObsValue, GsiHofX]
-          test_bias: GsiObsBias
-          bias_application: GsiHofX
+          clwret_types: [ObsValue, GsiHofXBc]
       x0:    [ 0.050,  0.030,  0.030,  0.020,  0.000,
                0.100,  0.000,  0.000,  0.000,  0.000,
                0.000,  0.000,  0.000,  0.000,  0.030]
