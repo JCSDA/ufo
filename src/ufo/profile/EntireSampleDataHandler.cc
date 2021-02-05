@@ -31,7 +31,9 @@ namespace ufo {
       } else if (groupname == "Corrections" ||
                  groupname == "DerivedValue" ||
                  groupname == "ModelLevelsDerivedValue" ||
-                 groupname == "ModelRhoLevelsDerivedValue") {
+                 groupname == "ModelRhoLevelsDerivedValue" ||
+                 groupname == "ModelLevelsFlags" ||
+                 groupname == "ModelRhoLevelsFlags") {
         putDataVector(fullname, get<float>(fullname));
       }
     }

@@ -42,6 +42,7 @@
 
 #include "ufo/profile/ProfileCheckValidator.h"
 #include "ufo/profile/ProfileDataHandler.h"
+#include "ufo/profile/ProfileVerticalAveraging.h"
 #include "ufo/profile/ProfileVerticalInterpolation.h"
 #include "ufo/profile/VariableNames.h"
 
@@ -132,11 +133,10 @@ void testProfileConsistencyChecks(const eckit::LocalConfiguration &conf) {
   // Test whether using the get function with the wrong type throws an exception.
   const bool getWrongType = conf.getBool("GetWrongType", false);
   if (getWrongType) {
-    std::unique_ptr <ProfileConsistencyCheckParameters> options_;
-    options_.reset(new ProfileConsistencyCheckParameters());
-    options_->deserialize(conf);
+    ProfileConsistencyCheckParameters options;
+    options.deserialize(conf);
     EntireSampleDataHandler entireSampleDataHandler(obsspace,
-                                                    options_->DHParameters);
+                                                    options.DHParameters);
     // Load data from obsspace
     entireSampleDataHandler.get<float>(ufo::VariableNames::obs_air_pressure);
     // Attempt to access data with incorrect type
@@ -145,7 +145,7 @@ void testProfileConsistencyChecks(const eckit::LocalConfiguration &conf) {
     std::vector<std::vector<bool>> flagged;
     ProfileDataHandler profileDataHandler(obsspace,
                                           geovals.get(),
-                                          options_->DHParameters,
+                                          options.DHParameters,
                                           apply,
                                           flagged);
     // Obtain profile data
@@ -157,11 +157,10 @@ void testProfileConsistencyChecks(const eckit::LocalConfiguration &conf) {
   // Manually modify QC flags in order to cover rare code paths.
   const bool ManualFlagModification = conf.getBool("ManualFlagModification", false);
   if (ManualFlagModification) {
-    std::unique_ptr <ProfileConsistencyCheckParameters> options_;
-    options_.reset(new ProfileConsistencyCheckParameters());
-    options_->deserialize(conf);
+    ProfileConsistencyCheckParameters options;
+    options.deserialize(conf);
     EntireSampleDataHandler entireSampleDataHandler(obsspace,
-                                                    options_->DHParameters);
+                                                    options.DHParameters);
     // Load data from obsspace
     entireSampleDataHandler.get<float>(ufo::VariableNames::obs_air_pressure);
     entireSampleDataHandler.get<int>(ufo::VariableNames::qcflags_air_temperature);
@@ -169,10 +168,10 @@ void testProfileConsistencyChecks(const eckit::LocalConfiguration &conf) {
     std::vector<std::vector<bool>> flagged;
     ProfileDataHandler profileDataHandler(obsspace,
                                           geovals.get(),
-                                          options_->DHParameters,
+                                          options.DHParameters,
                                           apply,
                                           flagged);
-    ProfileCheckValidator profileCheckValidator(*options_);
+    ProfileCheckValidator profileCheckValidator(options);
 
     profileDataHandler.initialiseNextProfile();
 
@@ -203,11 +202,11 @@ void testProfileConsistencyChecks(const eckit::LocalConfiguration &conf) {
     zFlags[0] |= ufo::MetOfficeQCFlags::Profile::HydrostaticFlag;
 
     // Create checks
-    ProfileCheckTime profileCheckTime(*options_);
-    ProfileCheckBackgroundTemperature profileCheckBackgroundT(*options_);
-    ProfileCheckBackgroundRelativeHumidity profileCheckBackgroundRH(*options_);
-    ProfileCheckBackgroundWindSpeed profileCheckBackgroundUV(*options_);
-    ProfileCheckBackgroundGeopotentialHeight profileCheckBackgroundZ(*options_);
+    ProfileCheckTime profileCheckTime(options);
+    ProfileCheckBackgroundTemperature profileCheckBackgroundT(options);
+    ProfileCheckBackgroundRelativeHumidity profileCheckBackgroundRH(options);
+    ProfileCheckBackgroundWindSpeed profileCheckBackgroundUV(options);
+    ProfileCheckBackgroundGeopotentialHeight profileCheckBackgroundZ(options);
 
     // Run time check
     profileCheckTime.runCheck(profileDataHandler);
@@ -226,17 +225,14 @@ void testProfileConsistencyChecks(const eckit::LocalConfiguration &conf) {
   const bool testProfileVerticalInterpolation =
     conf.getBool("testProfileVerticalInterpolation", false);
   if (testProfileVerticalInterpolation) {
-    std::unique_ptr <ProfileConsistencyCheckParameters> options;
-    options.reset(new ProfileConsistencyCheckParameters());
-    options->deserialize(conf);
-    EntireSampleDataHandler entireSampleDataHandler(obsspace,
-                                                    options->DHParameters);
+    ProfileConsistencyCheckParameters options;
+    options.deserialize(conf);
 
     std::vector<bool> apply(obsspace.nlocs(), true);
     std::vector<std::vector<bool>> flagged;
     ProfileDataHandler profileDataHandler(obsspace,
                                           geovals.get(),
-                                          options->DHParameters,
+                                          options.DHParameters,
                                           apply,
                                           flagged);
 
@@ -257,7 +253,7 @@ void testProfileConsistencyChecks(const eckit::LocalConfiguration &conf) {
       geovals->get(orogGeoVaLs, ufo::VariableNames::geovals_orog, 1);
       std::vector <float> zRhoGeoVaLs;
       std::vector <float> zThetaGeoVaLs;
-      ufo::CalculateModelHeight(options->DHParameters.ModParameters,
+      ufo::CalculateModelHeight(options.DHParameters.ModParameters,
                                 orogGeoVaLs[0],
                                 zRhoGeoVaLs,
                                 zThetaGeoVaLs);
@@ -306,6 +302,74 @@ void testProfileConsistencyChecks(const eckit::LocalConfiguration &conf) {
       const auto &expected_pressures = profileDataHandler.get<float>(expectedPressureName);
       for (size_t jlev = 0; jlev < pressures.size(); ++jlev)
         EXPECT(oops::is_close_relative(pressures[jlev], expected_pressures[jlev], 1e-5f));
+    }
+  }
+
+  // Test the profile vertical averaging.
+  const bool testProfileVerticalAveraging =
+    conf.getBool("testProfileVerticalAveraging", false);
+  if (testProfileVerticalAveraging) {
+    ProfileConsistencyCheckParameters options;
+    options.deserialize(conf);
+
+    std::vector<bool> apply(obsspace.nlocs(), true);
+    std::vector<std::vector<bool>> flagged;
+    ProfileDataHandler profileDataHandler(obsspace,
+                                          geovals.get(),
+                                          options.DHParameters,
+                                          apply,
+                                          flagged);
+
+    for (size_t jprof = 0; jprof < obsspace.nrecs(); ++jprof) {
+      profileDataHandler.initialiseNextProfile();
+
+      const auto &flagsIn = profileDataHandler.get<int>(ufo::VariableNames::qcflags_eastward_wind);
+      const auto &valuesIn = profileDataHandler.get<float>(ufo::VariableNames::obs_eastward_wind);
+      const auto &coordIn = profileDataHandler.get<float>(ufo::VariableNames::LogP_derived);
+      const auto &bigGap = profileDataHandler.get<float>(ufo::VariableNames::bigPgaps_derived);
+      const auto &coordOut = profileDataHandler.get<float>
+        (ufo::VariableNames::geovals_logPWB_rho_derived);
+      const float DZFrac = 0.5;
+      const ProfileAveraging::Method method =
+        ProfileAveraging::Method::Averaging;
+
+      std::vector <int> flagsOut;
+      std::vector <float> valuesOut;
+      int numGaps = 0;
+      std::vector<float> ZMax;
+      std::vector<float> ZMin;
+      ufo::calculateVerticalAverage(flagsIn,
+                                    valuesIn,
+                                    coordIn,
+                                    bigGap,
+                                    coordOut,
+                                    DZFrac,
+                                    method,
+                                    flagsOut,
+                                    valuesOut,
+                                    numGaps,
+                                    &ZMax,
+                                    &ZMin);
+
+      // Compare output values with OPS equivalents.
+      // The name of the OPS variables are hardcoded because they are purely used for testing.
+      // todo(ctgh): check whether any hardcoded names can be substituted.
+      const auto &expected_flagsOut =
+        profileDataHandler.get<int>("OPS_eastward_wind@ModelLevelsFlags");
+      for (size_t jlev = 0; jlev < flagsOut.size(); ++jlev)
+        EXPECT(flagsOut[jlev] == expected_flagsOut[jlev]);
+      const auto &expected_valuesOut =
+        profileDataHandler.get<float>("OPS_eastward_wind@ModelLevelsDerivedValue");
+      for (size_t jlev = 0; jlev < flagsOut.size(); ++jlev)
+        EXPECT(oops::is_close_relative(valuesOut[jlev], expected_valuesOut[jlev], 1e-4f));
+      const auto &expected_ZMin =
+        profileDataHandler.get<float>("OPS_LogP_u_Min@ModelLevelsDerivedValue");
+      for (size_t jlev = 0; jlev < ZMin.size(); ++jlev)
+        EXPECT(oops::is_close_relative(ZMin[jlev], expected_ZMin[jlev], 1e-14f));
+      const auto &expected_ZMax =
+        profileDataHandler.get<float>("OPS_LogP_u_Max@ModelLevelsDerivedValue");
+      for (size_t jlev = 0; jlev < ZMax.size(); ++jlev)
+        EXPECT(oops::is_close_relative(ZMax[jlev], expected_ZMax[jlev], 1e-14f));
     }
   }
 }

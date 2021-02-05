@@ -81,7 +81,10 @@ namespace ufo {
       std::string groupname;
       ufo::splitVarGroup(fullname, varname, groupname);
 
-      if (groupname == "QCFlags" || fullname == ufo::VariableNames::counter_NumAnyErrors) {
+      if (groupname == "QCFlags" ||
+          groupname == "ModelLevelsFlags" ||
+          groupname == "ModelRhoLevelsFlags" ||
+          fullname == ufo::VariableNames::counter_NumAnyErrors) {
         const std::vector <int>& profileData = get<int>(fullname);
         getProfileIndicesInEntireSample(groupname);
         std::vector <int>& entireSampleData = entireSampleDataHandler_->get<int>(fullname);

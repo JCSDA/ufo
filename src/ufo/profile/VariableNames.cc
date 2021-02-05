@@ -157,5 +157,9 @@ constexpr const char* const ufo::VariableNames::geovals_ExnerP_rho;
 
 constexpr const char* const ufo::VariableNames::geovals_logP_derived;
 constexpr const char* const ufo::VariableNames::geovals_ExnerP_derived;
+
+// Derived values on model rho levels
+
 constexpr const char* const ufo::VariableNames::geovals_logP_rho_derived;
+constexpr const char* const ufo::VariableNames::geovals_logPWB_rho_derived;
 constexpr const char* const ufo::VariableNames::geovals_ExnerP_rho_derived;

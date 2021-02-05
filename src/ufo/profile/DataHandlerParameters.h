@@ -72,11 +72,13 @@ namespace ufo {
 
     /// Groups of variables which are on model levels.
     oops::Parameter<std::vector<std::string>> groups_modellevels
-      {"groups_modellevels", {"ModelLevelsDerivedValue"}, this};
+      {"groups_modellevels",
+          {"ModelLevelsDerivedValue", "ModelLevelsFlags"}, this};
 
     /// Groups of variables which are on model rho levels.
     oops::Parameter<std::vector<std::string>> groups_modelrholevels
-      {"groups_modelrholevels", {"ModelRhoLevelsDerivedValue"}, this};
+      {"groups_modelrholevels",
+          {"ModelRhoLevelsDerivedValue", "ModelRhoLevelsFlags"}, this};
 
     /// Number of errors, accumulated over checks, that cause the observation to have failed.
     oops::Parameter<int> nErrorsFail {"nErrorsFail", 1, this};

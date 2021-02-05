@@ -174,7 +174,12 @@ struct VariableNames
 
   static constexpr const char* const geovals_logP_derived = "LogPB@ModelLevelsDerivedValue";
   static constexpr const char* const geovals_ExnerP_derived = "ExnerPB@ModelLevelsDerivedValue";
+
+  // Derived values on model rho levels
+
   static constexpr const char* const geovals_logP_rho_derived = "LogPA@ModelRhoLevelsDerivedValue";
+  static constexpr const char* const geovals_logPWB_rho_derived =
+    "LogPWB@ModelRhoLevelsDerivedValue";
   static constexpr const char* const geovals_ExnerP_rho_derived =
     "ExnerPA@ModelRhoLevelsDerivedValue";
 };

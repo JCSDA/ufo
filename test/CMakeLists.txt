@@ -184,6 +184,8 @@ list( APPEND ufo_test_input
   testinput/profileconsistencychecks_separatefilters.yaml
   testinput/profileconsistencychecks_unittests.yaml
   testinput/profileconsistencychecks_unittest_oneprofileMPI.yaml
+  testinput/profileconsistencychecks_unittests_vertaverage.yaml
+  testinput/profileconsistencychecks_unittests_vertaverage_ascending.yaml
   testinput/profileconsistencychecks_unittests_vertinterp.yaml
   testinput/profileconsistencychecks_RH_obsfilter.yaml
   testinput/profileconsistencychecks_RH_OPScomparison.yaml
@@ -1744,6 +1746,20 @@ ecbuild_add_test( TARGET  test_ufo_profileconsistencychecks_winproflags_OPScompa
 ecbuild_add_test( TARGET  test_ufo_profileconsistencychecks_pressure_OPScomparison
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ProfileConsistencyChecks.x
                   ARGS    "testinput/profileconsistencychecks_pressure_OPScomparison.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ProfileConsistencyChecks.x
+                  TEST_DEPENDS ufo_get_ufo_test_data )
+
+ecbuild_add_test( TARGET  test_ufo_profileconsistencychecks_unittests_vertaverage
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ProfileConsistencyChecks.x
+                  ARGS    "testinput/profileconsistencychecks_unittests_vertaverage.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  DEPENDS test_ProfileConsistencyChecks.x
+                  TEST_DEPENDS ufo_get_ufo_test_data )
+
+ecbuild_add_test( TARGET  test_ufo_profileconsistencychecks_unittests_vertaverage_ascending
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ProfileConsistencyChecks.x
+                  ARGS    "testinput/profileconsistencychecks_unittests_vertaverage_ascending.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   DEPENDS test_ProfileConsistencyChecks.x
                   TEST_DEPENDS ufo_get_ufo_test_data )

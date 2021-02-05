@@ -64,6 +64,8 @@ set ( profile_files
       ProfileSondeFlags.h
       ProfileStandardLevels.cc
       ProfileStandardLevels.h
+      ProfileVerticalAveraging.cc
+      ProfileVerticalAveraging.h
       ProfileVerticalInterpolation.cc
       ProfileVerticalInterpolation.h
       ProfileWindProfilerFlags.cc
