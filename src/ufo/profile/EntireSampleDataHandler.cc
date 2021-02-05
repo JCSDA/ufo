@@ -29,11 +29,10 @@ namespace ufo {
       if (groupname == "QCFlags") {
         putDataVector(fullname, get<int>(fullname));
       } else if (groupname == "Corrections" ||
-                 groupname == "DerivedValue" ||
-                 groupname == "ModelLevelsDerivedValue" ||
-                 groupname == "ModelRhoLevelsDerivedValue" ||
-                 groupname == "ModelLevelsFlags" ||
-                 groupname == "ModelRhoLevelsFlags") {
+                 groupname == "DerivedValue") {
+        // todo(ctgh): Add ModelLevelsDerivedValue, ModelRhoLevelsDerivedValue,
+        // ModelLevelsFlags and ModelRhoLevelsFlags to this list when
+        // it is possible to save variables with different nlocs.
         putDataVector(fullname, get<float>(fullname));
       }
     }
