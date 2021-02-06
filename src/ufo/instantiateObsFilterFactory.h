@@ -33,6 +33,8 @@
 #include "ufo/filters/TrackCheckShip.h"
 #include "ufo/filters/VariableAssignment.h"
 #include "ufo/filters/VariableConversion.h"
+#include "ufo/filters/variabletransforms/HumidityRelative.h"
+#include "ufo/filters/variabletransforms/HumiditySpecific.h"
 #include "ufo/filters/variabletransforms/WindComponents.h"
 #include "ufo/filters/variabletransforms/WindSpeedAndDirection.h"
 #include "ufo/gnssro/QC/BackgroundCheckRONBAM.h"
@@ -87,6 +89,10 @@ template<typename MODEL> void instantiateObsFilterFactory() {
            DerivativeCheckMaker("Derivative Check");
   static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::TrackCheckShip> >
            ShipTrackCheckMaker("Ship Track Check");
+  static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::HumidityRelative> >
+           HumidityRelativeMaker("Relative Humidity");
+  static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::HumiditySpecific> >
+           HumiditySpecificMaker("Specific Humidity");
   static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::StuckCheck> >
            StuckCheckMaker("Stuck Check");
   static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::WindComponents> >

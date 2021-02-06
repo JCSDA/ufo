@@ -1,0 +1,71 @@
+window begin: 2018-04-14T21:00:00Z
+window end: 2018-04-15T03:00:00Z
+
+observations:
+- obs space:
+    name: test_relative_humidity1
+    obsdatain:
+      obsfile: Data/ioda/testinput_tier_1/sfc_obs_2018041500_metars_small.nc
+    simulated variables: [specific_humidity, air_temperature, surface_pressure]
+  obs filters:
+  - filter: Relative Humidity      # calculate relative humidity from specific humidity (also T, P)
+#   method_for_RH: NOAA            # option not needed, because default is NOAA
+    save: true                     # option is false by default, setting true saves the calculated output
+  compareVariables:                # test output matches precalculated values
+    - reference:
+        name: relative_humidity_NOAA@TestReference
+      test:
+        name: relative_humidity@DerivedValue
+      absTol: 1.0e-5
+  passedBenchmark: 99      # (33 sites with 3 vars listed in simulated variables)
+# Exercise the method using UKMO saturation vapor pressure method.
+- obs space:
+    name: test_relative_humidity2
+    obsdatain:
+      obsfile: Data/ioda/testinput_tier_1/sfc_obs_2018041500_metars_small.nc
+    simulated variables: [specific_humidity, air_temperature, surface_pressure]
+  obs filters:
+  - filter: Relative Humidity
+    method_for_RH: UKMO
+    save: true
+  compareVariables:                # test output matches precalculated values
+    - reference:
+        name: relative_humidity_UKMO@TestReference
+      test:
+        name: relative_humidity@DerivedValue
+      absTol: 1.0e-5
+  passedBenchmark: 99
+# Exercise the method using the Walko saturation vapor pressure method.
+- obs space:
+    name: test_relative_humidity3
+    obsdatain:
+      obsfile: Data/ioda/testinput_tier_1/sfc_obs_2018041500_metars_small.nc
+    simulated variables: [specific_humidity, air_temperature, surface_pressure]
+  obs filters:
+  - filter: Relative Humidity
+    method_for_RH: Walko
+    save: true
+  compareVariables:                # test output matches precalculated values
+    - reference:
+        name: relative_humidity_Walko@TestReference
+      test:
+        name: relative_humidity@DerivedValue
+      absTol: 1.0e-5
+  passedBenchmark: 99
+# Exercise the method using the Murphy saturation vapor pressure method.
+- obs space:
+    name: test_relative_humidity4
+    obsdatain:
+      obsfile: Data/ioda/testinput_tier_1/sfc_obs_2018041500_metars_small.nc
+    simulated variables: [specific_humidity, air_temperature, surface_pressure]
+  obs filters:
+  - filter: Relative Humidity
+    method_for_RH: Murphy
+    save: true
+  compareVariables:                # test output matches precalculated values
+    - reference:
+        name: relative_humidity_Murphy@TestReference
+      test:
+        name: relative_humidity@DerivedValue
+      absTol: 1.0e-5
+  passedBenchmark: 99

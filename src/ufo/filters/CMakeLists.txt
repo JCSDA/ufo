@@ -182,6 +182,10 @@ set ( filters_files
       obsfunctions/LAMDomainCheck/LAMDomainCheck.interface.h
       obsfunctions/LAMDomainCheck/LAMDomainCheck.interface.F90
       obsfunctions/LAMDomainCheck/esg_grid_mod.F90
+      variabletransforms/HumidityRelative.cc
+      variabletransforms/HumidityRelative.h
+      variabletransforms/HumiditySpecific.cc
+      variabletransforms/HumiditySpecific.h
       variabletransforms/WindComponents.cc
       variabletransforms/WindComponents.h
       variabletransforms/WindSpeedAndDirection.cc
