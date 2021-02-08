@@ -24,6 +24,7 @@
 #include "ufo/filters/ObsDomainErrCheck.h"
 #include "ufo/filters/PoissonDiskThinning.h"
 #include "ufo/filters/PreQC.h"
+#include "ufo/filters/ProfileBackgroundCheck.h"
 #include "ufo/filters/ProfileConsistencyChecks.h"
 #include "ufo/filters/QCmanager.h"
 #include "ufo/filters/StuckCheck.h"
@@ -105,6 +106,8 @@ template<typename MODEL> void instantiateObsFilterFactory() {
            variableAssignmentMaker("Variable Assignment");
   static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::VariableConversion> >
            VariableConversionMaker("Variable Conversion");
+  static oops::FilterMaker<MODEL, oops::ObsFilter<MODEL, ufo::ProfileBackgroundCheck> >
+           ProfileBackgroundCheckMaker("Profile Background Check");
 
   // Only include this filter if rttov is present
   #if defined(RTTOV_FOUND)
