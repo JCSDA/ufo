@@ -145,6 +145,7 @@ onedvar_success = .false.
 Error = .false.
 nchans = size(ob % channels_used)
 Gamma = 1.0E-4
+Jcost = 1.0e4
 JcostOld = 1.0e4
 nprofelements = profile_index % nprofelements
 allocate(OldProfile(nprofelements))

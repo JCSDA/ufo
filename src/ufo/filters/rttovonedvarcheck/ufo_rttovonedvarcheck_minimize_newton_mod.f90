@@ -156,6 +156,8 @@ geovals = local_geovals
 if (self % FullDiagnostics) call ufo_geovals_print(geovals,1)
 write(*,*) "Using Newton solver"
 
+JCost = 1.0e4
+
 Iterations: do iter = 1, self % max1DVarIterations
 
   !-------------------------
